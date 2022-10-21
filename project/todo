@@ -1,0 +1,3 @@
+
+- use zio-saga for transaction rollback?
+https://github.com/VladKopanev/zio-saga/blob/master/examples/src/main/scala/com/vladkopanev/zio/saga/example/dao/SagaLogDao.scala

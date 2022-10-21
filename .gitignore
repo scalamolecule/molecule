@@ -31,6 +31,6 @@ project/plugins/project/
 project/project/
 node_modules/
 *.json
-/molecule-tests/js/lib/
-/molecule-tests/jvm/lib/
-/molecule-tests/shared/lib/
+/coreTests/js/lib/
+/coreTests/jvm/lib/
+/coreTests/shared/lib/
