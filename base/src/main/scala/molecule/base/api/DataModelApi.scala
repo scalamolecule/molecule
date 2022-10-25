@@ -92,11 +92,6 @@ trait DataModelApi {
   object oneUUID extends uuid
   object oneURI extends uri
 
-  // Refs
-  object one extends one
-  object many extends many
-
-
   object setString extends string
   object setChar extends char
   object setByte extends byte
@@ -111,7 +106,6 @@ trait DataModelApi {
   object setDate extends date
   object setUUID extends uuid
   object setURI extends uri
-
 
   object arrayString extends string
   object arrayChar extends char
@@ -128,7 +122,6 @@ trait DataModelApi {
   object arrayUUID extends uuid
   object arrayURI extends uri
 
-
   object mapString extends string
   object mapChar extends char
   object mapByte extends byte
@@ -144,6 +137,10 @@ trait DataModelApi {
   object mapUUID extends uuid
   object mapURI extends uri
 
+
+  // Refs
+  object one extends one
+  object many extends many
 
   /** Card-one reference.
    *

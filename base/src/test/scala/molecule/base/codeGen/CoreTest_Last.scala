@@ -8,7 +8,7 @@ object CoreTest_Last extends CodeGenTesting {
 
   override def tests: Tests = Tests {
 
-    "NsArity 2" - nsArity(2,
+    "NsArity 2" - dslFirst(
       """package moleculeTests.dataModels.core.base.dataModel
         |
         |import molecule.DataModel

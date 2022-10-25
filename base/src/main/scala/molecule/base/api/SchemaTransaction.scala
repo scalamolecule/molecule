@@ -1,44 +1,23 @@
 package molecule.base.api
 
-import molecule.base.ast.schemaAST.{MetaNs, MetaSchema}
-import molecule.base.ast.schemaAST.{MetaNs, MetaSchema}
+import molecule.base.ast.SchemaAST._
 
 
-/** Generated schema transaction data interface
+/** Schema transaction data interface with data sources for various databases.
   * */
 trait SchemaTransaction {
 
-  /** Auto-generated edn data to transact Datomic Peer schema.
-    *
-    * One edn text string defines namespaces/attributes, two define partitions
-    * and namespaces/attributes.
-    * */
-  val datomicPeer: Seq[String]
-
-
-  /** Auto-generated edn data to transact Datomic Client schema.
-    *
-    * The `datomicClient` schema is a reduced Peer schema where attributes of
-    * type `bytes` are filtered out since this is not an available attribute type
-    * for Client. Likewise, index and fulltext options are also filtered out.
-    *
-    * One edn text string defines namespaces/attributes, two define partitions
-    * and namespaces/attributes.
-    * */
-  val datomicClient: Seq[String]
-
-
-  /** Auto-generated MetaSchema
-    * */
   val metaSchema: MetaSchema
 
-
-  /** Auto-generated map of Ns -> MetaNs
-    * */
+  /** Namespace name -> MetaNs */
   val nsMap: Map[String, MetaNs]
 
+  /** Attribute name -> (cardinality, Scala type) */
+  val attrMap: Map[String, (Cardinality, String)]
 
-  /** Auto-generated map of Attr -> (card, type)
-    * */
-  val attrMap: Map[String, (Int, String)]
+
+  /** Edn data strings to transact Datomic Peer schema. */
+  val datomicSchema    : String
+  val datomicPartitions: String
+  val datomicAliases   : String
 }

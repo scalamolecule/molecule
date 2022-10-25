@@ -1,9 +1,9 @@
 package molecule.core
 
 import java.util
-import molecule.boilerplate.api.keywords._
-import molecule.boilerplate.ast.moleculeModel._
-import molecule.boilerplate.markers.namespaceMarkers.Molecule_02
+import molecule.boilerplate.api.Keywords._
+import molecule.boilerplate.ast.MoleculeModel._
+import molecule.boilerplate.markers.NamespaceMarkers.Molecule_02
 import zio.{Chunk, ZIO}
 import scala.runtime.RichInt
 
@@ -40,10 +40,10 @@ object Adhoc extends App {
 
   val m0 = MoleculeModel(
     Seq(
-      AtomManString("Ns", "name"),
-      AtomManInt("Ns", "age"),
+      AtomOneManString("Ns", "name"),
+      AtomOneManInt("Ns", "age"),
       Bond("Ns", "home", "Address"),
-      AtomManString("Address", "street")
+      AtomOneManString("Address", "street")
     )
   )
 

@@ -1,21 +1,25 @@
 package molecule.core
 
-import molecule.boilerplate.api.expression._
-import molecule.boilerplate.api.keywords._
+import molecule.base.ast.SchemaAST._
 import molecule.boilerplate.api._
-import molecule.boilerplate.ast.moleculeModel._
-import molecule.boilerplate.markers.namespaceMarkers._
+import molecule.boilerplate.api.expression._
+import molecule.boilerplate.api.Keywords._
+import molecule.boilerplate.ast.MoleculeModel._
+import molecule.boilerplate.markers.NamespaceMarkers._
 
 
 trait Ns {
-  protected lazy val str_man: AtomManString = AtomManString("Ns", "str")
-  protected lazy val int_man: AtomManInt    = AtomManInt   ("Ns", "int")
+  protected lazy val str_man: AtomOneManString = AtomOneManString("Ns", "str")
+  protected lazy val int_man: AtomOneManInt    = AtomOneManInt   ("Ns", "int")
+  protected lazy val ref_man: AtomOneManLong   = AtomOneManLong  ("Ns", "ref")
 
-  protected lazy val str_opt: AtomOptString = AtomOptString("Ns", "str")
-  protected lazy val int_opt: AtomOptInt    = AtomOptInt   ("Ns", "int")
+  protected lazy val str_opt: AtomOneOptString = AtomOneOptString("Ns", "str")
+  protected lazy val int_opt: AtomOneOptInt    = AtomOneOptInt   ("Ns", "int")
+  protected lazy val ref_opt: AtomOneOptLong   = AtomOneOptLong  ("Ns", "ref")
 
-  protected lazy val str_tac: AtomTacString = AtomTacString("Ns", "str")
-  protected lazy val int_tac: AtomTacInt    = AtomTacInt   ("Ns", "int")
+  protected lazy val str_tac: AtomOneTacString = AtomOneTacString("Ns", "str")
+  protected lazy val int_tac: AtomOneTacInt    = AtomOneTacInt   ("Ns", "int")
+  protected lazy val ref_tac: AtomOneTacLong   = AtomOneTacLong  ("Ns", "ref")
 }
 
 object Ns extends Ns_0[Nothing](Nil)
@@ -24,6 +28,7 @@ object Ns extends Ns_0[Nothing](Nil)
 class Ns_0[t](override val elements: Seq[Element]) extends Ns with ModelOps_0[t, Ns_0] with Molecule_00 {
   lazy val str   = new Ns_1[String        , String](elements :+ str_man) with ExprOneMan_1[String        , String, Ns_1]
   lazy val int   = new Ns_1[Int           , Int   ](elements :+ int_man) with ExprOneMan_1[Int           , Int   , Ns_1]
+  lazy val ref   = new Ns_1[Int           , Int   ](elements :+ int_man) with ExprOneMan_1[Int           , Int   , Ns_1]
 
   lazy val str_? = new Ns_1[Option[String], String](elements :+ str_opt) with ExprOneOpt_1[Option[String], String, Ns_1]
   lazy val int_? = new Ns_1[Option[Int]   , Int   ](elements :+ int_opt) with ExprOneOpt_1[Option[Int]   , Int   , Ns_1]
@@ -54,7 +59,7 @@ class Ns_1[A, t](override val elements: Seq[Element]) extends Ns with ModelOps_1
   override protected def _exprTac   (op: Op, vs: Seq[t]        ) = new Ns_1[A      , t     ](addVs   (elements, op, vs))
   override protected def _addSort   (sort: String              ) = new Ns_1[A      , t     ](addSort (elements, sort  ))
 
-  object Ref1 extends Ref1_1[A, t](elements :+ Bond("Ns", "ref1", "Ref1", 1))
+  object Ref1 extends Ref1_1[A, t](elements :+ Bond("Ns", "ref1", "Ref1", one))
 }
 
 
@@ -71,7 +76,7 @@ class Ns_2[A, B, t](override val elements: Seq[Element]) extends Ns with ModelOp
   override protected def _exprTac   (op: Op, vs: Seq[t]        ) = new Ns_2[A, B      , t     ](addVs   (elements, op, vs))
   override protected def _addSort   (sort: String              ) = new Ns_2[A, B      , t     ](addSort (elements, sort  ))
 
-  object Ref1 extends Ref1_2[A, B, t](elements :+ Bond("Ns", "ref1", "Ref1", 1))
+  object Ref1 extends Ref1_2[A, B, t](elements :+ Bond("Ns", "ref1", "Ref1", one))
 }
 
 

@@ -11,43 +11,8 @@ object PrintBoilerplate extends CodeGenTesting {
     "boilerplate" - {
 
       //      dataModel.coreTest.nsBase("Ns")
-      //      dataModel.coreTest.nsArity("Ns", 0)
-      //      dataModel.coreTest.nsArity("Ns", 0)
-      //      dataModel.coreTest.nsArity("Ns", 0)
-      //      dataModel.coreTest.nsArity("Ns", 21)
-      //      dataModel.coreTest.nsArity("Ns", 22)
 
-      //      dataModel.coreTest.nsBase("Ref3")
-      dataModel.coreTest.nsBase("Ref2")
-      dataModel.coreTest.nsArity("Ref2", 0)
-      dataModel.coreTest.nsArity("Ref2", 1)
-      dataModel.coreTest.nsArity("Ref2", 2)
-      dataModel.coreTest.nsArity("Ref2", 3)
-      //            dataModel.coreTest.nsArity("Ref2", 4)
-
-      //      dataModel.coreTest.nsBase("Ref4")
-      //      dataModel.coreTest.nsArity("Ref4", 0)
-      //      dataModel.coreTest.nsArity("Ref4", 1)
-      //      dataModel.coreTest.nsArity("Ref4", 21)
-      //      dataModel.coreTest.nsArity("Ref4", 22)
-
-      //      dataModel.datom.nsBase
-      //      dataModel.datom.nsArity(0)
-      //      dataModel.datom.nsArity(1)
-      //      dataModel.datom.nsArity(21)
-      //      dataModel.datom.nsArity(22)
-
-      //      dataModel.schema.nsBase
-      //      dataModel.schema.nsArity(0)
-      //      dataModel.schema.nsArity(1)
-      //      dataModel.schema.nsArity(21)
-      //      dataModel.schema.nsArity(22)
-
-      //      dataModel.aevt.nsBase
-      //      dataModel.aevt.nsArity(0)
-      //      dataModel.aevt.nsArity(1)
-      //      dataModel.aevt.nsArity(6)
-      //      dataModel.aevt.nsArity(7)
+      dataModel.coreTest.dsl("Ref2")
 
 
       /*

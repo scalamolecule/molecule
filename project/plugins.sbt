@@ -7,4 +7,4 @@ addSbtPlugin("ch.epfl.scala"      % "sbt-bloop"                % "1.5.3")
 //addSbtPlugin("org.scalameta"      % "sbt-scalafmt"             % "2.4.6")
 //addSbtPlugin("ch.epfl.scala"      % "sbt-scalafix"             % "0.10.1")
 
-addSbtPlugin("org.scalamolecule"  % "sbt-molecule"             % "1.1.0-SNAPSHOT")
+addSbtPlugin("org.scalamolecule"  % "sbt-molecule"             % "1.2.0-SNAPSHOT")

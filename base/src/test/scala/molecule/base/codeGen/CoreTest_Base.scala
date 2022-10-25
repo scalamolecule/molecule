@@ -7,7 +7,7 @@ trait CoreTest_Base extends CodeGenTesting {
 
 
   override def tests: Tests = Tests {
-    "Base" - nsBase(
+    "Base" - dslFirst(
       """package moleculeTests.dataModels.core.base.dataModel
         |
         |import molecule.DataModel

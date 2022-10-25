@@ -27,6 +27,8 @@ trait BaseHelpers extends DateHandling {
   def thousands(i: Long): String =
     i.toString.reverse.grouped(3).mkString(" ").reverse
 
+  def indent(tabs: Int): String = "  " * tabs
+
 
   def escStr(s: String): String =
     s.replace("""\""", """\\""").replace(""""""", """\"""")
@@ -64,7 +66,8 @@ trait BaseHelpers extends DateHandling {
   final def oStr2(opt: Option[String]): String = if (opt.isEmpty) "None" else {
     val s = escStr(opt.get)
     if (s.contains("\n"))
-      s"Some(\n\"\"\"$s\"\"\")"
+//      s"Some(\n\"\"\"$s\"\"\")"
+      s"Some(\n" + "\"\"\"" + s + "\"\"\")"
     else
       s"""Some("$s")"""
   }
