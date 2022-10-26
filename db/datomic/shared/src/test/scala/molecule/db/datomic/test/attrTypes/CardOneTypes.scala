@@ -43,84 +43,84 @@ object CardOneTypes extends DatomicTestSuite {
     }
 
 
-//    "optional" - cardOneTypes { implicit conn =>
-//      val dataString = List((0, None), (1, Some(string1)))
-//      val dataInt = List((0, None), (1, Some(int1)))
-//      val dataLong = List((0, None), (1, Some(long1)))
-//      val dataFloat = List((0, None), (1, Some(float1)))
-//      val dataDouble = List((0, None), (1, Some(double1)))
-//      val dataBoolean = List((0, None), (1, Some(boolean1)))
-//      val dataBigInt = List((0, None), (1, Some(bigInt1)))
-//      val dataBigDecimal = List((0, None), (1, Some(bigDecimal1)))
-//      val dataDate = List((0, None), (1, Some(date1)))
-//      val dataUUID = List((0, None), (1, Some(uuid1)))
-//      val dataURI = List((0, None), (1, Some(uri1)))
-//      val dataChar = List((0, None), (1, Some(char1)))
-//      val dataByte = List((0, None), (1, Some(byte1)))
-//      val dataShort = List((0, None), (1, Some(short1)))
-//
-//      One.n.string_? insert dataString
-//      One.n.int_? insert dataInt
-//      One.n.long_? insert dataLong
-//      One.n.float_? insert dataFloat
-//      One.n.double_? insert dataDouble
-//      One.n.boolean_? insert dataBoolean
-//      One.n.bigInt_? insert dataBigInt
-//      One.n.bigDecimal_? insert dataBigDecimal
-//      One.n.date_? insert dataDate
-//      One.n.uuid_? insert dataUUID
-//      One.n.uri_? insert dataURI
-//      One.n.char_? insert dataChar
-//      One.n.byte_? insert dataByte
-//      One.n.short_? insert dataShort
-//
-//      One.n.string_?.query.get ==> dataString
-//      One.n.int_?.query.get ==> dataInt
-//      One.n.long_?.query.get ==> dataLong
-//      One.n.float_?.query.get ==> dataFloat
-//      One.n.double_?.query.get ==> dataDouble
-//      One.n.boolean_?.query.get ==> dataBoolean
-//      One.n.bigInt_?.query.get ==> dataBigInt
-//      One.n.bigDecimal_?.query.get ==> dataBigDecimal
-//      One.n.date_?.query.get ==> dataDate
-//      One.n.uuid_?.query.get ==> dataUUID
-//      One.n.uri_?.query.get ==> dataURI
-//      One.n.char_?.query.get ==> dataChar
-//      One.n.byte_?.query.get ==> dataByte
-//      One.n.short_?.query.get ==> dataShort
-//    }
+    "optional" - cardOneTypes { implicit conn =>
+      val dataString     = List((11, None), (11, Some(string1)))
+      val dataInt        = List((12, None), (12, Some(int1)))
+      val dataLong       = List((13, None), (13, Some(long1)))
+      val dataFloat      = List((14, None), (14, Some(float1)))
+      val dataDouble     = List((15, None), (15, Some(double1)))
+      val dataBoolean    = List((16, None), (16, Some(boolean1)))
+      val dataBigInt     = List((17, None), (17, Some(bigInt1)))
+      val dataBigDecimal = List((18, None), (18, Some(bigDecimal1)))
+      val dataDate       = List((19, None), (19, Some(date1)))
+      val dataUUID       = List((20, None), (20, Some(uuid1)))
+      val dataURI        = List((21, None), (21, Some(uri1)))
+      val dataChar       = List((22, None), (22, Some(char1)))
+      val dataByte       = List((23, None), (23, Some(byte1)))
+      val dataShort      = List((24, None), (24, Some(short1)))
+
+      One.n.string_?.insert(dataString).transact
+      One.n.int_?.insert(dataInt).transact
+      One.n.long_?.insert(dataLong).transact
+      One.n.float_?.insert(dataFloat).transact
+      One.n.double_?.insert(dataDouble).transact
+      One.n.boolean_?.insert(dataBoolean).transact
+      One.n.bigInt_?.insert(dataBigInt).transact
+      One.n.bigDecimal_?.insert(dataBigDecimal).transact
+      One.n.date_?.insert(dataDate).transact
+      One.n.uuid_?.insert(dataUUID).transact
+      One.n.uri_?.insert(dataURI).transact
+      One.n.char_?.insert(dataChar).transact
+      One.n.byte_?.insert(dataByte).transact
+      One.n.short_?.insert(dataShort).transact
+
+      One.n(11).string_?.query.get ==> dataString
+      One.n(12).int_?.query.get ==> dataInt
+      One.n(13).long_?.query.get ==> dataLong
+      One.n(14).float_?.query.get ==> dataFloat
+      One.n(15).double_?.query.get ==> dataDouble
+      One.n(16).boolean_?.query.get ==> dataBoolean
+      One.n(17).bigInt_?.query.get ==> dataBigInt
+      One.n(18).bigDecimal_?.query.get ==> dataBigDecimal
+      One.n(19).date_?.query.get ==> dataDate
+      One.n(20).uuid_?.query.get ==> dataUUID
+      One.n(21).uri_?.query.get ==> dataURI
+      One.n(22).char_?.query.get ==> dataChar
+      One.n(23).byte_?.query.get ==> dataByte
+      One.n(24).short_?.query.get ==> dataShort
+    }
 
 
     "tacit" - cardOneTypes { implicit conn =>
-      One.n.string.insert((1, string1)).transact
-      One.n.int.insert((1, int1)).transact
-      One.n.long.insert((1, long1)).transact
-      One.n.float.insert((1, float1)).transact
-      One.n.double.insert((1, double1)).transact
-      One.n.boolean.insert((1, boolean1)).transact
-      One.n.bigInt.insert((1, bigInt1)).transact
-      One.n.bigDecimal.insert((1, bigDecimal1)).transact
-      One.n.date.insert((1, date1)).transact
-      One.n.uuid.insert((1, uuid1)).transact
-      One.n.uri.insert((1, uri1)).transact
-      One.n.char.insert((1, char1)).transact
-      One.n.byte.insert((1, byte1)).transact
-      One.n.short.insert((1, short1)).transact
+      One.n.string.insert((11, string1)).transact
+      One.n.int.insert((12, int1)).transact
+      One.n.long.insert((13, long1)).transact
+      One.n.float.insert((14, float1)).transact
+      One.n.double.insert((15, double1)).transact
+      One.n.boolean.insert((16, boolean1)).transact
+      One.n.bigInt.insert((17, bigInt1)).transact
+      One.n.bigDecimal.insert((18, bigDecimal1)).transact
+      One.n.date.insert((19, date1)).transact
+      One.n.uuid.insert((20, uuid1)).transact
+      One.n.uri.insert((21, uri1)).transact
+      One.n.char.insert((22, char1)).transact
+      One.n.byte.insert((23, byte1)).transact
+      One.n.short.insert((24, short1)).transact
 
-      One.n.string_.query.get ==> List(1)
-      One.n.int_.query.get ==> List(1)
-      One.n.long_.query.get ==> List(1)
-      One.n.float_.query.get ==> List(1)
-      One.n.double_.query.get ==> List(1)
-      One.n.boolean_.query.get ==> List(1)
-      One.n.bigInt_.query.get ==> List(1)
-      One.n.bigDecimal_.query.get ==> List(1)
-      One.n.date_.query.get ==> List(1)
-      One.n.uuid_.query.get ==> List(1)
-      One.n.uri_.query.get ==> List(1)
-      One.n.char_.query.get ==> List(1)
-      One.n.byte_.query.get ==> List(1)
-      One.n.short_.query.get ==> List(1)
+      One.n.string_.query.get ==> List(11)
+      One.n.int_.query.get ==> List(12)
+      One.n.long_.query.get ==> List(13)
+      One.n.float_.query.get ==> List(14)
+      One.n.double_.query.get ==> List(15)
+      One.n.boolean_.query.get ==> List(16)
+      One.n.bigInt_.query.get ==> List(17)
+      One.n.bigDecimal_.query.get ==> List(18)
+      One.n.date_.query.get ==> List(19)
+      One.n.uuid_.query.get ==> List(20)
+      One.n.uri_.query.get ==> List(21)
+      One.n.char_.query.get ==> List(22)
+      One.n.byte_.query.get ==> List(23)
+      One.n.short_.query.get ==> List(24)
     }
   }
 }

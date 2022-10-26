@@ -5,7 +5,6 @@ import java.util.{Date, UUID}
 import molecule.base.util.exceptions.MoleculeException
 import molecule.boilerplate.api.Keywords.Kw
 import molecule.boilerplate.ast.MoleculeModel._
-import scala.collection.immutable.Seq
 
 trait ModelTransformations {
 

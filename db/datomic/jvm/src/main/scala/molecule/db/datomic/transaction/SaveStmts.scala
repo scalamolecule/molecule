@@ -16,6 +16,11 @@ class SaveStmts(elements: Seq[Element]) {
 
   def getStmts: jList[jList[_]] = {
     resolve(elements)
+
+    elements.foreach(println)
+    println("--- SAVE --------------")
+    stmts.forEach(stmt => println(stmt))
+
     Collections.unmodifiableList(stmts)
   }
 

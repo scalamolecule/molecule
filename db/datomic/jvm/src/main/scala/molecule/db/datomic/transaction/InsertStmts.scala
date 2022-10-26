@@ -21,13 +21,18 @@ class InsertStmts(elements: Seq[Element], tpls: Seq[Product], tempIdInit: Int = 
       e = newId
       tpl2stmts(tpl)
     }
+
+    elements.foreach(println)
+    println("--- INSERT --------------")
+    stmts.forEach(stmt => println(stmt))
+
     Collections.unmodifiableList(stmts)
   }
 
   @tailrec
   final override protected def resolve(
     elements: Seq[Element],
-    acc: List[Product => Unit],
+    resolvers: List[Product => Unit],
     n: Int = 0
   ): List[Product => Unit] = {
     elements match {
@@ -35,68 +40,67 @@ class InsertStmts(elements: Seq[Element], tpls: Seq[Product], tempIdInit: Int = 
         case atom: Atom =>
           val a = kw(atom.ns, atom.attr)
           atom match {
-            case atom: AtomOneMan =>
-              val (v, n1) = resolveAtomOneMan(atom, n, a)
-              resolve(tail, acc :+ v, n1)
-
-            // todo?
-            case atom: AtomOneOpt =>
-              val (v, n1) = resolveAtomOneOpt(atom, n, a)
-              resolve(tail, acc :+ v, n1)
+            case atom: AtomOneMan => resolve(tail, resolvers :+ resolveAtomOneMan(atom, n, a), n + 1)
+            case atom: AtomOneOpt => resolve(tail, resolvers :+ resolveAtomOneOpt(atom, n, a), n + 1)
           }
 
-        case Bond(ns, refAttr, refNs, one) => acc
+        case Bond(ns, refAttr, refNs, one) => resolvers
         case other                         =>
           throw MoleculeException("Unexpected element: " + other)
       }
-      case Nil             => acc
+      case Nil             => resolvers
     }
   }
 
   import clojure.lang.Keyword
 
-  protected def kw(ns: String, attr: String) = Keyword.intern(ns, attr)
+  private def kw(ns: String, attr: String) = Keyword.intern(ns, attr)
+  private lazy val add     = kw("db", "add")
+  private lazy val retract = kw("db", "retract")
 
-  protected lazy val add     = kw("db", "add")
-  protected lazy val retract = kw("db", "retract")
+  private lazy val bigInt2java = (v: Any) => v.asInstanceOf[BigInt].bigInteger
+  private lazy val bigDec2java = (v: Any) => v.asInstanceOf[BigDecimal].bigDecimal
+  private lazy val char2java   = (v: Any) => v.toString
+  private lazy val byte2java   = (v: Any) => v.asInstanceOf[Byte].toInt
+  private lazy val short2java  = (v: Any) => v.asInstanceOf[Short].toInt
 
-  def resolveAtomOneMan(atom: AtomOneMan, n: Int, a: Keyword): (Product => Unit, Int) = {
+  private def resolveAtomOneMan(atom: AtomOneMan, n: Int, a: Keyword): Product => Unit = {
     atom match {
-      case _: AtomOneManString     => (addV(a, n, identity), n + 1)
-      case _: AtomOneManInt        => (addV(a, n, identity), n + 1)
-      case _: AtomOneManLong       => (addV(a, n, identity), n + 1)
-      case _: AtomOneManFloat      => (addV(a, n, identity), n + 1)
-      case _: AtomOneManDouble     => (addV(a, n, identity), n + 1)
-      case _: AtomOneManBoolean    => (addV(a, n, identity), n + 1)
-      case _: AtomOneManBigInt     => (addV(a, n, (v: Any) => v.asInstanceOf[BigInt].bigInteger), n + 1)
-      case _: AtomOneManBigDecimal => (addV(a, n, (v: Any) => v.asInstanceOf[BigDecimal].bigDecimal), n + 1)
-      case _: AtomOneManDate       => (addV(a, n, identity), n + 1)
-      case _: AtomOneManUUID       => (addV(a, n, identity), n + 1)
-      case _: AtomOneManURI        => (addV(a, n, identity), n + 1)
-      case _: AtomOneManChar       => (addV(a, n, (v: Any) => v.toString), n + 1)
-      case _: AtomOneManByte       => (addV(a, n, (v: Any) => v.asInstanceOf[Byte].toInt), n + 1)
-      case _: AtomOneManShort      => (addV(a, n, (v: Any) => v.asInstanceOf[Short].toInt), n + 1)
+      case _: AtomOneManString     => addV(a, n, identity)
+      case _: AtomOneManInt        => addV(a, n, identity)
+      case _: AtomOneManLong       => addV(a, n, identity)
+      case _: AtomOneManFloat      => addV(a, n, identity)
+      case _: AtomOneManDouble     => addV(a, n, identity)
+      case _: AtomOneManBoolean    => addV(a, n, identity)
+      case _: AtomOneManBigInt     => addV(a, n, bigInt2java)
+      case _: AtomOneManBigDecimal => addV(a, n, bigDec2java)
+      case _: AtomOneManDate       => addV(a, n, identity)
+      case _: AtomOneManUUID       => addV(a, n, identity)
+      case _: AtomOneManURI        => addV(a, n, identity)
+      case _: AtomOneManChar       => addV(a, n, char2java)
+      case _: AtomOneManByte       => addV(a, n, byte2java)
+      case _: AtomOneManShort      => addV(a, n, short2java)
       case other                   => throw MoleculeException("Unexpected element: " + other)
     }
   }
 
   // todo
-  def resolveAtomOneOpt(atom: AtomOneOpt, n: Int, a: Keyword): (Product => Unit, Int) = {
+  private def resolveAtomOneOpt(atom: AtomOneOpt, n: Int, a: Keyword): Product => Unit = {
     atom match {
-      case _: AtomOneOptString     => (addV(a, n, identity), n + 1)
-      case _: AtomOneOptInt        => (addV(a, n, identity), n + 1)
-      case _: AtomOneOptLong       => (addV(a, n, identity), n + 1)
-      case _: AtomOneOptFloat      => (addV(a, n, identity), n + 1)
-      case _: AtomOneOptDouble     => (addV(a, n, identity), n + 1)
-      case _: AtomOneOptBoolean    => (addV(a, n, identity), n + 1)
-      case _: AtomOneOptBigInt     => (addV(a, n, identity), n + 1)
-      case _: AtomOneOptBigDecimal => (addV(a, n, identity), n + 1)
-      case _: AtomOneOptDate       => (addV(a, n, identity), n + 1)
-      case _: AtomOneOptUUID       => (addV(a, n, identity), n + 1)
-      case _: AtomOneOptURI        => (addV(a, n, identity), n + 1)
-      case _: AtomOneOptChar       => (addV(a, n, identity), n + 1)
-      case _: AtomOneOptByte       => (addV(a, n, identity), n + 1)
-      case _: AtomOneOptShort      => (addV(a, n, identity), n + 1)
+      case _: AtomOneOptString     => addOptV(a, n, identity)
+      case _: AtomOneOptInt        => addOptV(a, n, identity)
+      case _: AtomOneOptLong       => addOptV(a, n, identity)
+      case _: AtomOneOptFloat      => addOptV(a, n, identity)
+      case _: AtomOneOptDouble     => addOptV(a, n, identity)
+      case _: AtomOneOptBoolean    => addOptV(a, n, identity)
+      case _: AtomOneOptBigInt     => addOptV(a, n, bigInt2java)
+      case _: AtomOneOptBigDecimal => addOptV(a, n, bigDec2java)
+      case _: AtomOneOptDate       => addOptV(a, n, identity)
+      case _: AtomOneOptUUID       => addOptV(a, n, identity)
+      case _: AtomOneOptURI        => addOptV(a, n, identity)
+      case _: AtomOneOptChar       => addOptV(a, n, char2java)
+      case _: AtomOneOptByte       => addOptV(a, n, byte2java)
+      case _: AtomOneOptShort      => addOptV(a, n, short2java)
       case other                   => throw MoleculeException("Unexpected element: " + other)
     }
   }
@@ -110,27 +114,27 @@ class InsertStmts(elements: Seq[Element], tpls: Seq[Product], tempIdInit: Int = 
       throw MoleculeException("StmtsBuilder: Unexpected head element: " + other)
   }
 
-  private val nsFull  : String        = getNs(elements)
-  private val part    : String        = fns.partNs(nsFull).head
-  private   var tempId: Int           = tempIdInit
-  protected var lowest: Int           = tempIdInit
-  protected var e     : String        = ""
-  protected var stmt  : jList[AnyRef] = null
-  protected def stmtList = new java.util.ArrayList[AnyRef](4)
+  private val nsFull: String        = getNs(elements)
+  private val part  : String        = fns.partNs(nsFull).head
+  private var tempId: Int           = tempIdInit
+  private var lowest: Int           = tempIdInit
+  private var e     : String        = ""
+  private var stmt  : jList[AnyRef] = null
+  private def stmtList = new java.util.ArrayList[AnyRef](4)
 
 
-  protected def newId: String = {
+  private def newId: String = {
     tempId = lowest - 1
     lowest = tempId
     "#db/id[" + part + " " + tempId + "]"
   }
-  protected def prevId: String = {
+  private def prevId: String = {
     tempId += 1
     "#db/id[" + part + " " + tempId + "]"
   }
 
 
-  protected def addV(a: Keyword, n: Int, value: Any => Any): Product => Unit = {
+  private def addV(a: Keyword, n: Int, value: Any => Any): Product => Unit = {
     (tpl: Product) => {
       stmt = stmtList
       stmt.add(add)
@@ -140,17 +144,31 @@ class InsertStmts(elements: Seq[Element], tpls: Seq[Product], tempIdInit: Int = 
       stmts.add(stmt)
     }
   }
+  private def addOptV(a: Keyword, n: Int, value: Any => Any): Product => Unit = {
+    (tpl: Product) => {
+      tpl.productElement(n) match {
+        case Some(v) =>
+          stmt = stmtList
+          stmt.add(add)
+          stmt.add(e)
+          stmt.add(a)
+          stmt.add(value(v).asInstanceOf[AnyRef])
+          stmts.add(stmt)
+        case None    => // no statement to insert
+      }
+    }
+  }
 
 
 
-  //  protected def oneValue(tpe: String): Any => AnyRef = tpe match {
+  //  private def oneValue(tpe: String): Any => AnyRef = tpe match {
   //    case "Int"        => (v: Any) => v.toString.toLong.asInstanceOf[AnyRef]
   //    case "BigInt"     => (v: Any) => new java.math.BigInteger(v.toString)
   //    case "BigDecimal" => (v: Any) => new java.math.BigDecimal(v.toString)
   //    case _            => (v: Any) => v.asInstanceOf[AnyRef]
   //  }
 
-  protected def addSet(a: Keyword, value: Any => AnyRef): Iterable[Any] => Unit = {
+  private def addSet(a: Keyword, value: Any => AnyRef): Iterable[Any] => Unit = {
     (set: Iterable[Any]) => {
       set.foreach { v =>
         stmt = stmtList
@@ -163,11 +181,11 @@ class InsertStmts(elements: Seq[Element], tpls: Seq[Product], tempIdInit: Int = 
     }
   }
 
-  protected def addBond(refAttr: Keyword): () => Unit = {
+  private def addBond(refAttr: Keyword): () => Unit = {
     () => bond(refAttr)
   }
 
-  protected def addNested(a: Keyword): String => Unit = {
+  private def addNested(a: Keyword): String => Unit = {
     (nestedBaseId: String) => {
       e = nestedBaseId
       stmt = stmtList
@@ -183,7 +201,7 @@ class InsertStmts(elements: Seq[Element], tpls: Seq[Product], tempIdInit: Int = 
 
   // Tx meta data is already extracted in the query preparation process.
 
-  protected def vs[T](a: Keyword, array: Array[T]): Unit = {
+  private def vs[T](a: Keyword, array: Array[T]): Unit = {
     if (array.length != 1) {
       throw MoleculeException(
         "Only a single value can be applied to a tx meta attribute when inserting."
@@ -197,7 +215,7 @@ class InsertStmts(elements: Seq[Element], tpls: Seq[Product], tempIdInit: Int = 
     stmts.add(stmt)
   }
 
-  protected def cvs[T](a: Keyword, vs: Seq[T]): Unit = {
+  private def cvs[T](a: Keyword, vs: Seq[T]): Unit = {
     vs.foreach { v =>
       stmt = stmtList
       stmt.add(add)
@@ -208,7 +226,7 @@ class InsertStmts(elements: Seq[Element], tpls: Seq[Product], tempIdInit: Int = 
     }
   }
 
-  protected def ccs[T](a: Keyword, sets: Seq[Set[T]]): Unit = {
+  private def ccs[T](a: Keyword, sets: Seq[Set[T]]): Unit = {
     if (sets.length != 1) {
       throw MoleculeException(
         "Only a single set of values can be applied to a tx meta attribute when inserting."
@@ -224,7 +242,7 @@ class InsertStmts(elements: Seq[Element], tpls: Seq[Product], tempIdInit: Int = 
     }
   }
 
-  protected def bond(refAttr: Keyword): Unit = {
+  private def bond(refAttr: Keyword): Unit = {
     stmt = stmtList
     stmt.add(add)
     stmt.add(e)
