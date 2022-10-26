@@ -1,17 +1,17 @@
 package molecule.db.datomic.query
 
-import java.util
+import java.math.BigInteger
 import java.util.{List => jList}
 import molecule.base.util.exceptions.MoleculeException
 import molecule.boilerplate.ast.MoleculeModel._
-import molecule.core.util.fns
+import molecule.core.query.Model2Query
 import scala.annotation.tailrec
-import scala.collection.mutable.{ArrayBuffer, ListBuffer}
+import scala.collection.mutable.ArrayBuffer
 
 
-class Model2Query[Tpl](elements: Seq[Element]) {
+class DatomicModel2Query[Tpl](elements: Seq[Element]) extends Model2Query[Tpl] {
 
-  // Query optimization weights
+  // Query clause optimization weights
   final protected val wGround         = 1
   final protected val wEqOne          = 2
   final protected val wEqMany         = 3
@@ -35,15 +35,21 @@ class Model2Query[Tpl](elements: Seq[Element]) {
   final lazy protected val queryRaw: String      = renderQuery(false)
   final lazy protected val inputs  : Seq[AnyRef] = renderRules ++ ins
 
-  final lazy protected val row2tpl: jList[AnyRef] => Tpl = {
+  type Row = jList[AnyRef]
+
+  final override lazy protected val row2tpl: Row => Tpl = {
     resolvers.length match {
+      case 1 =>
+        val r1 = resolvers(0)
+        (row: Row) => r1(row.get(0)).asInstanceOf[Tpl]
+
       case 2 =>
-        val r0 = resolvers(0)
-        val r1 = resolvers.apply(1)
-        (row: jList[AnyRef]) => {
+        val r1 = resolvers(0)
+        val r2 = resolvers.apply(1)
+        (row: Row) => {
           (
-            r0(row.get(0)),
-            r1(row.get(1))
+            r1(row.get(0)),
+            r2(row.get(1))
             ).asInstanceOf[Tpl]
         }
 
@@ -65,7 +71,7 @@ class Model2Query[Tpl](elements: Seq[Element]) {
          | :where $where1]""".stripMargin
     }
     val q = query(clausePairs)
-        println("Query: ---------------------------------------\n" + q)
+    //    println("Query: ---------------------------------------\n" + q)
     q
   }
 
@@ -96,16 +102,13 @@ class Model2Query[Tpl](elements: Seq[Element]) {
     } else ""
   }
 
-//  def resolveQuery(model: Model): List[Var] = {
-//    resolve(List(vv), model.elements)
-//  }
-
 
   @tailrec
   final protected def resolve(es: List[Var], elements: Seq[Element]): List[Var] = elements match {
     case element :: tail => element match {
-      case a: AtomOneMan => resolve(atomMan(es, a), tail)
-      case a: AtomOneOpt => resolve(atomOpt(es, a), tail)
+      case a: AtomOneMan => resolve(resolveAtomOneMan(es, a), tail)
+      case a: AtomOneTac => resolve(resolveAtomOneTac(es, a), tail)
+      //      case a: AtomOneOpt => resolve(resolveAtomMan(es, a), tail)
 
       case other =>
         throw MoleculeException("StmtsBuilder.res: Unexpected element: " + other)
@@ -113,53 +116,51 @@ class Model2Query[Tpl](elements: Seq[Element]) {
     case Nil             => es
   }
 
-  private def atomMan(es: List[Var], atom: AtomOneMan): List[Var] = {
+  private def resolveAtomOneMan(es: List[Var], atom: AtomOneMan): List[Var] = {
     val (e, a) = (es.last, s":${atom.ns}/${atom.attr}")
     atom match {
-      case AtomOneManString(_, _, op, vs, _, _, sort) => atomMan(es, e, a, op, vs)
-      case AtomOneManInt(_, _, op, vs, _, _, sort)    => atomMan(es, e, a, op, vs)
-      case other                                      => throw MoleculeException("StmtsBuilder.res: Unexpected element: " + other)
+      case _: AtomOneManString     => atomMan(es, e, a, atom.op, identity)
+      case _: AtomOneManInt        => atomMan(es, e, a, atom.op, (v: AnyRef) => v.asInstanceOf[Integer].toInt.asInstanceOf[AnyRef])
+      case _: AtomOneManLong       => atomMan(es, e, a, atom.op, identity)
+      case _: AtomOneManFloat      => atomMan(es, e, a, atom.op, identity)
+      case _: AtomOneManDouble     => atomMan(es, e, a, atom.op, identity)
+      case _: AtomOneManBoolean    => atomMan(es, e, a, atom.op, identity)
+      case _: AtomOneManBigInt     => atomMan(es, e, a, atom.op, (v: AnyRef) => BigInt(v.asInstanceOf[BigInteger]).asInstanceOf[AnyRef])
+      case _: AtomOneManBigDecimal => atomMan(es, e, a, atom.op, (v: AnyRef) => BigDecimal(v.asInstanceOf[java.math.BigDecimal]).asInstanceOf[AnyRef])
+      case _: AtomOneManDate       => atomMan(es, e, a, atom.op, identity)
+      case _: AtomOneManUUID       => atomMan(es, e, a, atom.op, identity)
+      case _: AtomOneManURI        => atomMan(es, e, a, atom.op, identity)
+      case _: AtomOneManChar       => atomMan(es, e, a, atom.op, (v: AnyRef) => v.asInstanceOf[String].charAt(0).asInstanceOf[AnyRef])
+      case _: AtomOneManByte       => atomMan(es, e, a, atom.op, (v: AnyRef) => v.asInstanceOf[Integer].toByte.asInstanceOf[AnyRef])
+      case _: AtomOneManShort      => atomMan(es, e, a, atom.op, (v: AnyRef) => v.asInstanceOf[Integer].toShort.asInstanceOf[AnyRef])
+      case other                   => throw MoleculeException("StmtsBuilder.res: Unexpected element: " + other)
     }
   }
 
-  final protected def atomMan[T](es: List[Var], e: Var, a: String, op: Op, vs: Seq[T]): List[Var] = {
+  private def resolveAtomOneTac(es: List[Var], atom: AtomOneTac): List[Var] = {
+    atomTac(es, es.last, s":${atom.ns}/${atom.attr}", atom.op)
+  }
+
+  final protected def atomMan(es: List[Var], e: Var, a: String, op: Op, resolver: AnyRef => AnyRef): List[Var] = {
     op match {
       case V =>
         val v = vv
         find += v
         where += s"[$e $a $v$tx]" -> wClause
-        resolvers += identity
-
-      case other => throw MoleculeException("StmtsBuilder.res: Unexpected element: " + other)
-    }
-    es
-  }
-  final protected def atomManString(es: List[Var], e: Var, a: String, op: Op, vs: Seq[String]): List[Var] = {
-    op match {
-      case V =>
-        val v = vv
-        find += v
-        where += s"[$e $a $v$tx]" -> wClause
-        resolvers += ((v: AnyRef) => v)
-
-      case other => throw MoleculeException("StmtsBuilder.res: Unexpected element: " + other)
-    }
-    es
-  }
-
-  final protected def atomManInt(es: List[Var], e: Var, a: String, op: Op, vs: Seq[Int]): List[Var] = {
-    op match {
-      case V =>
-        val v = vv
-        find += v
-        where += s"[$e $a $v$tx]" -> wClause
-        resolvers += ((v: AnyRef) => v)
+        resolvers += resolver
 
       case other => throw MoleculeException("StmtsBuilder.res: Unexpected element: " + other)
     }
     es
   }
 
+  final protected def atomTac(es: List[Var], e: Var, a: String, op: Op): List[Var] = {
+    op match {
+      case V     => where += s"[$e $a _$tx]" -> wClause
+      case other => throw MoleculeException("StmtsBuilder.res: Unexpected element: " + other)
+    }
+    es
+  }
 
   private def atomOpt(es: List[Var], a: AtomOneOpt): List[Var] = a match {
     case _: AtomOneOptString => es

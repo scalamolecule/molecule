@@ -7,7 +7,7 @@ trait ModelBase extends Validations {
 
   trait Element
 
-  case class MoleculeModel(elements: Seq[Element]) //extends Element
+//  case class MoleculeModel(elements: Seq[Element]) //extends Element
 
   trait Atom extends Element {
     val ns  : String
@@ -16,6 +16,10 @@ trait ModelBase extends Validations {
     val sort: String
     def unapply(a: Atom): (String, String, Op) = (a.ns, a.attr, a.op)
   }
+  trait AtomOne extends Atom
+  trait AtomSet extends Atom
+  trait AtomArr extends Atom
+  trait AtomMap extends Atom
 
   case class Bond(
     ns: String,

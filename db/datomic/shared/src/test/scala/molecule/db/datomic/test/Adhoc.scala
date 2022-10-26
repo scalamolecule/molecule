@@ -12,9 +12,9 @@ object Adhoc extends DatomicTestSuite {
 
     "core" - cardOneTypes { implicit conn =>
 
-      One.str.int.insert(("Bob", 42), ("Liz", 35)).run
+//      One.str.int.insert(("Bob", 42), ("Liz", 35)).transact
 
-      One.str.int.query.get ==> List(("Liz", 35), ("Bob", 42))
+//      One.str.int.query.get ==> List(("Liz", 35), ("Bob", 42))
     }
   }
 

@@ -9,7 +9,7 @@ object _DatomicMoleculeImplicits extends DatomicGenBase( "package", "") {
     s"""// GENERATED CODE ********************************
        |package molecule.db
        |
-       |import molecule.boilerplate.markers.namespaceMarkers._
+       |import molecule.boilerplate.markers.NamespaceMarkers._
        |import molecule.core.MoleculeImplicits
        |import molecule.db.datomic.api.DatomicMoleculeApi._
        |import scala.language.implicitConversions

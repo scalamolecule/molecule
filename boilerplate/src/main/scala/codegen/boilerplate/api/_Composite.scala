@@ -8,7 +8,7 @@ object _Composite extends BoilerplateGenBase("Composite", "/api") {
     s"""// GENERATED CODE ********************************
        |molecule.boilerplate.api
        |
-       |import molecule.boilerplate.markers.namespaceMarkers._
+       |import molecule.boilerplate.markers.NamespaceMarkers._
        |import scala.language.higherKinds
        |
        |/** Add sub-molecule to composite molecule.

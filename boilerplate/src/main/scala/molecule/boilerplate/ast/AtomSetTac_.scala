@@ -6,7 +6,7 @@ import java.util.{Date, UUID}
 
 trait AtomSetTac_ { self: ModelBase =>
 
-  sealed trait AtomSetTac extends Atom
+  sealed trait AtomSetTac extends AtomSet
   
   case class AtomSetTacString(
     ns          : String,

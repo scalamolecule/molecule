@@ -1,10 +1,11 @@
 package molecule.db.datomic.api
 
 import molecule.boilerplate.ast.MoleculeModel._
-import molecule.core.api.Query
+import molecule.core.api.QueryOps
 
 
-class DatomicQuery[Tpl](elements: Seq[Element]) extends DatomicQueryImpl[Tpl](elements) with Query[Tpl] {
+class DatomicQueryOps[Tpl](elements: Seq[Element])
+  extends DatomicQueryOpsImpl[Tpl](elements) with QueryOps[Tpl] {
 
 //  type Raw = jList[AnyRef]
 

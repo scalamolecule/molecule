@@ -6,10 +6,7 @@ object CardOne extends DataModel(3) {
 
   trait One {
     val n          = oneInt
-    val str        = oneString.fulltext
-    val char       = oneChar
-    val byte       = oneByte
-    val short      = oneShort
+    val string     = oneString.fulltext
     val int        = oneInt
     val long       = oneLong
     val float      = oneFloat
@@ -20,5 +17,8 @@ object CardOne extends DataModel(3) {
     val date       = oneDate
     val uuid       = oneUUID
     val uri        = oneURI
+    val char       = oneChar
+    val byte       = oneByte
+    val short      = oneShort
   }
 }

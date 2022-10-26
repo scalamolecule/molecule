@@ -36,7 +36,7 @@ trait CoreTest_Base extends CodeGenTesting {
         |import molecule.boilerplate.markers.argKindMarkers._
         |import molecule.boilerplate.markers.attrMarkers._
         |import molecule.boilerplate.markers.bidirectionalMarkers._
-        |import molecule.boilerplate.markers.namespaceMarkers._
+        |import molecule.boilerplate.markers.NamespaceMarkers._
         |import molecule.boilerplate.markers.schemaOptionMarkers._
         |import scala.language.higherKinds
         |

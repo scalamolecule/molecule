@@ -29,8 +29,8 @@ object _Save extends CoreGenBase( "Save", "/api") {
       s"""
          |  trait Save_$arity[${`A..V`}] extends Save {
          |    def apply(${`a:A..v:V`})                : SaveOps = _saveOp(Seq((${`a..v`})))
-         |    def apply(tpl: (${`A..V`}), more: (${`A..V`})*): SaveOps = _saveOp(tpl +: more)
-         |    def apply(tpls: Seq[(${`A..V`})])$pad         : SaveOps = _saveOp(tpls)
+         |    def apply(tpl: ${`(A..V)`}, more: ${`(A..V)`}*): SaveOps = _saveOp(tpl +: more)
+         |    def apply(tpls: Seq[${`(A..V)`}])$pad         : SaveOps = _saveOp(tpls)
          |  }""".stripMargin
   }
 }

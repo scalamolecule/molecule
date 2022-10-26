@@ -9,7 +9,7 @@ object _CompositeInit extends BoilerplateGenBase("CompositeInit", "/api") {
        |molecule.boilerplate.api
        |
        |import molecule.boilerplate.api.composite._
-       |import molecule.boilerplate.markers.namespaceMarkers._
+       |import molecule.boilerplate.markers.NamespaceMarkers._
        |import scala.language.higherKinds
        |
        |/** Build composite molecule.

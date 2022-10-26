@@ -9,49 +9,6 @@ import scala.runtime.RichInt
 
 object Adhoc extends App {
 
-  trait Query1 {
-    type InputValues
-    def molecule2queryString(m: MoleculeModel): (String, InputValues)
-    def run = ???
-  }
-
-  class DatomicQuery extends Query1 {
-    type InputValues = List[Any]
-    override def molecule2queryString(
-      m: MoleculeModel
-    ): (String, InputValues) = {
-      val query       =
-        """[:find ?b ?c :where [?a :Ns/name ?b] [?a :Ns/age ?c]]""".stripMargin
-      val inputValues = List.empty[Any]
-      (query, inputValues)
-    }
-  }
-
-  class SqlQuery extends Query1 {
-    type InputValues = List[Any]
-    override def molecule2queryString(
-      m: MoleculeModel
-    ): (String, InputValues) = {
-      val query       = """SELECT Ns.str, Ns.int FROM Ns""".stripMargin
-      val inputValues = List.empty[Any]
-      (query, inputValues)
-    }
-  }
-
-  val m0 = MoleculeModel(
-    Seq(
-      AtomOneManString("Ns", "name"),
-      AtomOneManInt("Ns", "age"),
-      Bond("Ns", "home", "Address"),
-      AtomOneManString("Address", "street")
-    )
-  )
-
-  val raw = Array(
-    Array("Ben", 42),
-    Array("Liz", 35)
-  )
-
 
 //  trait TxReport
 //

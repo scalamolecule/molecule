@@ -12,8 +12,9 @@ abstract class CodeGenBase(val fileName: String, dir: String, basePath: String) 
     lazy val tpes       = (0 until arity) map (n => (n + 'A').toChar)
     lazy val tpesSmall  = (0 until arity) map (n => (n + 'a').toChar)
     lazy val `A..V`     = tpes.mkString(", ")
+    lazy val `(A..V)`   = if (arity == 1) "A" else tpes.mkString("(", ", ", ")")
     lazy val `a..v`     = tpesSmall.mkString(", ")
-    lazy val `a:A..v:V` = tpesSmall.zip(tpes).map{ case (a, aa) => s"$a: $aa"}.mkString(", ")
+    lazy val `a:A..v:V` = tpesSmall.zip(tpes).map { case (a, aa) => s"$a: $aa" }.mkString(", ")
     lazy val `A..V, `   = if (tpes.isEmpty) "" else tpes.mkString("", ", ", ", ")
     lazy val `, A..V`   = if (tpes.isEmpty) "" else tpes.mkString(", ", ", ", "")
     lazy val `A..U, `   = if (tpes.size <= 1) "" else tpes.init.mkString("", ", ", ", ")
@@ -22,12 +23,12 @@ abstract class CodeGenBase(val fileName: String, dir: String, basePath: String) 
     val `A..V,` = arity match {
       case 0 => ""
       case 1 => "A, "
-      case _ => s"(${`A..V`}), "
+      case _ => s"${`(A..V)`}, "
     }
     val `[A0]`  = arity match {
       case 0 => " " * 68
       case 1 => s"[A" + (" " * 68) + "]"
-      case _ => s"[(${`A..V`})" + (" " * 68) + "]"
+      case _ => s"[${`(A..V)`}" + (" " * 68) + "]"
     }
     lazy val `_, _`   = Seq.fill(arity + 1)("_").mkString(", ")
     lazy val `, _, _` = Seq.fill(arity + 1)("_").mkString(", ", ", ", "")
@@ -39,6 +40,9 @@ abstract class CodeGenBase(val fileName: String, dir: String, basePath: String) 
     def padN(n: Int) = if (n < 10) s"0$n" else n
     val n0 = padN(arity)
     val n1 = padN(arity + 1)
+
+    lazy val `..`  = " " * (if (arity == 1) 3 else 3 * (arity - 1) + 3)
+    lazy val `..N` = if (arity >= 10) `..` + " " else `..`
   }
 
   // Implement in sub classes

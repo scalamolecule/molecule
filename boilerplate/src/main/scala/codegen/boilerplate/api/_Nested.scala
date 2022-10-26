@@ -8,7 +8,7 @@ object _Nested extends BoilerplateGenBase("Nested", "/api") {
     s"""// GENERATED CODE ********************************
        |molecule.boilerplate.api
        |
-       |import molecule.boilerplate.markers.namespaceMarkers._
+       |import molecule.boilerplate.markers.NamespaceMarkers._
        |
        |/** Add nested molecule.
        |  * <br><br>

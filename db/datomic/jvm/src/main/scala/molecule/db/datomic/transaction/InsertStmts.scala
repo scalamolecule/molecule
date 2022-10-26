@@ -1,20 +1,19 @@
-package molecule.db.datomic.base
+package molecule.db.datomic.transaction
 
+import java.math.BigInteger
 import java.util
 import java.util.{Collections, List => jList}
 import molecule.base.util.exceptions.MoleculeException
 import molecule.boilerplate.ast.MoleculeModel._
 import molecule.core.util.fns
-
 import scala.annotation.tailrec
 
-/** Statements builder helper class for inserts
- *
- * @param elements
- * @param tempIdInit
- */
-class StmtsBuilder(elements: Seq[Element], tpls: Seq[Product], tempIdInit: Int = 0)
-  extends StmtsBuilderN(elements) {
+
+class InsertStmts(elements: Seq[Element], tpls: Seq[Product], tempIdInit: Int = 0)
+  extends InsertResolvers(elements) {
+
+  // Accumulate java insert data
+  final private val stmts: util.ArrayList[jList[AnyRef]] = new java.util.ArrayList[jList[AnyRef]]()
 
   def getStmts: jList[jList[_]] = {
     val tpl2stmts = getResolver
@@ -22,7 +21,6 @@ class StmtsBuilder(elements: Seq[Element], tpls: Seq[Product], tempIdInit: Int =
       e = newId
       tpl2stmts(tpl)
     }
-    stmts.forEach(s => println(s))
     Collections.unmodifiableList(stmts)
   }
 
@@ -34,23 +32,22 @@ class StmtsBuilder(elements: Seq[Element], tpls: Seq[Product], tempIdInit: Int =
   ): List[Product => Unit] = {
     elements match {
       case element :: tail => element match {
-        case atom: AtomOneMan =>
+        case atom: Atom =>
           val a = kw(atom.ns, atom.attr)
-          val (v, n1) = atom match {
-            case _: AtomOneManString => (addV(a, n, _.toString), n + 1)
-            case _: AtomOneManInt    => (addV(a, n, _.toString.toInt.asInstanceOf[AnyRef]), n + 1)
-            case other               => throw MoleculeException("StmtsBuilder.res: Unexpected element: " + other)
+          atom match {
+            case atom: AtomOneMan =>
+              val (v, n1) = resolveAtomOneMan(atom, n, a)
+              resolve(tail, acc :+ v, n1)
+
+            // todo?
+            case atom: AtomOneOpt =>
+              val (v, n1) = resolveAtomOneOpt(atom, n, a)
+              resolve(tail, acc :+ v, n1)
           }
-          resolve(tail, acc :+ v, n1)
-//          atom match {
-//            case _: AtomManString => res(tail, acc :+ addV(a, n, _.toString), n + 1)
-//            case _: AtomManInt    => res(tail, acc :+ addV(a, n, _.toString.toInt.asInstanceOf[AnyRef]), n + 1)
-//            case other            => throw MoleculeException("StmtsBuilder.res: Unexpected element: " + other)
-//          }
 
         case Bond(ns, refAttr, refNs, one) => acc
-        case other                       =>
-          throw MoleculeException("StmtsBuilder.res: Unexpected element: " + other)
+        case other                         =>
+          throw MoleculeException("Unexpected element: " + other)
       }
       case Nil             => acc
     }
@@ -63,9 +60,46 @@ class StmtsBuilder(elements: Seq[Element], tpls: Seq[Product], tempIdInit: Int =
   protected lazy val add     = kw("db", "add")
   protected lazy val retract = kw("db", "retract")
 
-  // Accumulate java insert data
-  val stmts: util.ArrayList[jList[AnyRef]] = new java.util.ArrayList[jList[AnyRef]]()
+  def resolveAtomOneMan(atom: AtomOneMan, n: Int, a: Keyword): (Product => Unit, Int) = {
+    atom match {
+      case _: AtomOneManString     => (addV(a, n, identity), n + 1)
+      case _: AtomOneManInt        => (addV(a, n, identity), n + 1)
+      case _: AtomOneManLong       => (addV(a, n, identity), n + 1)
+      case _: AtomOneManFloat      => (addV(a, n, identity), n + 1)
+      case _: AtomOneManDouble     => (addV(a, n, identity), n + 1)
+      case _: AtomOneManBoolean    => (addV(a, n, identity), n + 1)
+      case _: AtomOneManBigInt     => (addV(a, n, (v: Any) => v.asInstanceOf[BigInt].bigInteger), n + 1)
+      case _: AtomOneManBigDecimal => (addV(a, n, (v: Any) => v.asInstanceOf[BigDecimal].bigDecimal), n + 1)
+      case _: AtomOneManDate       => (addV(a, n, identity), n + 1)
+      case _: AtomOneManUUID       => (addV(a, n, identity), n + 1)
+      case _: AtomOneManURI        => (addV(a, n, identity), n + 1)
+      case _: AtomOneManChar       => (addV(a, n, (v: Any) => v.toString), n + 1)
+      case _: AtomOneManByte       => (addV(a, n, (v: Any) => v.asInstanceOf[Byte].toInt), n + 1)
+      case _: AtomOneManShort      => (addV(a, n, (v: Any) => v.asInstanceOf[Short].toInt), n + 1)
+      case other                   => throw MoleculeException("Unexpected element: " + other)
+    }
+  }
 
+  // todo
+  def resolveAtomOneOpt(atom: AtomOneOpt, n: Int, a: Keyword): (Product => Unit, Int) = {
+    atom match {
+      case _: AtomOneOptString     => (addV(a, n, identity), n + 1)
+      case _: AtomOneOptInt        => (addV(a, n, identity), n + 1)
+      case _: AtomOneOptLong       => (addV(a, n, identity), n + 1)
+      case _: AtomOneOptFloat      => (addV(a, n, identity), n + 1)
+      case _: AtomOneOptDouble     => (addV(a, n, identity), n + 1)
+      case _: AtomOneOptBoolean    => (addV(a, n, identity), n + 1)
+      case _: AtomOneOptBigInt     => (addV(a, n, identity), n + 1)
+      case _: AtomOneOptBigDecimal => (addV(a, n, identity), n + 1)
+      case _: AtomOneOptDate       => (addV(a, n, identity), n + 1)
+      case _: AtomOneOptUUID       => (addV(a, n, identity), n + 1)
+      case _: AtomOneOptURI        => (addV(a, n, identity), n + 1)
+      case _: AtomOneOptChar       => (addV(a, n, identity), n + 1)
+      case _: AtomOneOptByte       => (addV(a, n, identity), n + 1)
+      case _: AtomOneOptShort      => (addV(a, n, identity), n + 1)
+      case other                   => throw MoleculeException("Unexpected element: " + other)
+    }
+  }
 
   @tailrec
   private def getNs(elements: Seq[Element]): String = elements.head match {
@@ -96,24 +130,25 @@ class StmtsBuilder(elements: Seq[Element], tpls: Seq[Product], tempIdInit: Int =
   }
 
 
-  protected def oneValue(tpe: String): Any => AnyRef = tpe match {
-    case "Int"        => (v: Any) => v.toString.toLong.asInstanceOf[AnyRef]
-    case "BigInt"     => (v: Any) => new java.math.BigInteger(v.toString)
-    case "BigDecimal" => (v: Any) => new java.math.BigDecimal(v.toString)
-    case _            => (v: Any) => v.asInstanceOf[AnyRef]
-  }
-
-
-  protected def addV(a: Keyword, n: Int, value: Any => AnyRef): Product => Unit = {
+  protected def addV(a: Keyword, n: Int, value: Any => Any): Product => Unit = {
     (tpl: Product) => {
       stmt = stmtList
       stmt.add(add)
       stmt.add(e)
       stmt.add(a)
-      stmt.add(value(tpl.productElement(n)))
+      stmt.add(value(tpl.productElement(n)).asInstanceOf[AnyRef])
       stmts.add(stmt)
     }
   }
+
+
+
+  //  protected def oneValue(tpe: String): Any => AnyRef = tpe match {
+  //    case "Int"        => (v: Any) => v.toString.toLong.asInstanceOf[AnyRef]
+  //    case "BigInt"     => (v: Any) => new java.math.BigInteger(v.toString)
+  //    case "BigDecimal" => (v: Any) => new java.math.BigDecimal(v.toString)
+  //    case _            => (v: Any) => v.asInstanceOf[AnyRef]
+  //  }
 
   protected def addSet(a: Keyword, value: Any => AnyRef): Iterable[Any] => Unit = {
     (set: Iterable[Any]) => {

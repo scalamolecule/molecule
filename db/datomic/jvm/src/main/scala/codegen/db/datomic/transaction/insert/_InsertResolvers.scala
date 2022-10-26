@@ -1,16 +1,15 @@
-package codegen.db.datomic.api
+package codegen.db.datomic.transaction.insert
 
-import codegen.DatomicGenBase
+import codegen.DatomicGenBaseJVM
 
-object _DatomicInsert extends DatomicGenBase("DatomicInsert", "/api") {
+object _InsertResolvers extends DatomicGenBaseJVM( "InsertStmtsBuilder", "/transaction/insert") {
 
   val content = {
     val traits = (1 to 22).map(arity => Trait(arity).body).mkString("\n")
     s"""// GENERATED CODE ********************************
-       |package molecule.db.datomic.api
+       |package molecule.db.datomic.transaction.insert
        |
-       |import molecule.boilerplate.markers.NamespaceMarkers._
-       |import molecule.core.api.Insert._
+       |import molecule.boilerplate.ast.MoleculeModel._
        |
        |object DatomicInsert {
        |$traits

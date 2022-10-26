@@ -7,7 +7,7 @@ object _MoleculeImplicits extends CoreGenBase( "MoleculeImplicits", "") {
     s"""// GENERATED CODE ********************************
        |package molecule.core
        |
-       |import molecule.boilerplate.markers.namespaceMarkers._
+       |import molecule.boilerplate.markers.NamespaceMarkers._
        |import molecule.core.api.MoleculeApi._
        |import scala.language.implicitConversions
        |

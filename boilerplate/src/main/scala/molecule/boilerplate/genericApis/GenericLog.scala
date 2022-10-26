@@ -1,6 +1,6 @@
 //package molecule.boilerplate.genericApis
 //
-//import molecule.boilerplate.markers.namespaceMarkers._
+//import molecule.boilerplate.markers.NamespaceMarkers._
 //import molecule.boilerplate.api.generic.dsl.Log.{Log_, Log_0_0}
 //
 ///** Log interface.

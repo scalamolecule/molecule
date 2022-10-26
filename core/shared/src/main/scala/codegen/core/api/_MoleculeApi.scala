@@ -9,7 +9,7 @@ object _MoleculeApi extends CoreGenBase( "MoleculeApi", "/api") {
     s"""// GENERATED CODE ********************************
        |package molecule.core.api
        |
-       |import molecule.core.api.Save._
+       |import molecule.core.api.Insert._
        |
        |object MoleculeApi {
        |$traits
@@ -20,12 +20,11 @@ object _MoleculeApi extends CoreGenBase( "MoleculeApi", "/api") {
     val body =
       s"""
          |  trait MoleculeApi_$n0[${`A..V`}] {
-         |    def insert : Insert_$arity[${`A..V`}]
-         |    def save   : Insert_$arity[${`A..V`}]
-         |    def update : Insert_$arity[${`A..V`}]
-         |    def retract: Insert_$arity[${`A..V`}]
-         |    def delete : Insert_$arity[${`A..V`}]
-         |    def query  : Query[(${`A..V`})]
+         |    def insert: Insert_$arity[${`A..V`}]
+         |    def save  : SaveOps
+         |    def update: Insert_$arity[${`A..V`}]
+         |    def delete: Insert_$arity[${`A..V`}]
+         |    def query : QueryOps[${`(A..V)`}]
          |  }""".stripMargin
   }
 }

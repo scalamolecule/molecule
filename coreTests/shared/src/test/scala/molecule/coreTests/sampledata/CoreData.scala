@@ -14,46 +14,47 @@ trait CoreData extends DateHandling {
   }
   private def uu: UUID = randomUUID()
   private def ur(i: Int): URI = new URI("uri" + i)
+  private def bi(i: Int): BigInt = BigInt(i)
+  private def bd(d: Double): BigDecimal = BigDecimal(d)
   private def r(i: Int): Long = 17194139534365L + i // dummy ref/entity id
 
   // Sample data
 
-  lazy val (date0, date1, date2, date3, date4, date5, date6, date7, date8, date9, date10, date11, date12, date13, date14, date15, date16, date17, date18) =
-    (da(0), da(1), da(2), da(3), da(4), da(5), da(6), da(7), da(8), da(9), da(10), da(11), da(12), da(13), da(14), da(15), da(16), da(17), da(18))
+  lazy val (n0, n1, n2, n3, n4)                               = (0, 1, 2, 3, 4)
+  lazy val (string0, string1, string2, string3, string4)      = ("-", "a", "b", "c", "d")
+  lazy val (int0, int1, int2, int3, int4)                     = (0, 1, 2, 3, 4)
+  lazy val (long0, long1, long2, long3, long4)                = (0L, 1L, 2L, 3L, 4L)
+  lazy val (float0, float1, float2, float3, float4)           = (0.0f, 1.1f, 2.2f, 3.3f, 4.4f)
+  lazy val (double0, double1, double2, double3, double4)      = (0.0, 1.1, 2.2, 3.3, 4.4)
+  lazy val (boolean0, boolean1, boolean2, boolean3, boolean4) = (false, true, false, true, false)
+  lazy val (date0, date1, date2, date3, date4, date5)         = (da(0), da(1), da(2), da(3), da(4), da(5))
+  lazy val (uri0, uri1, uri2, uri3, uri4, uri5)               = (ur(0), ur(1), ur(2), ur(3), ur(4), ur(5))
+  lazy val (bigInt0, bigInt1, bigInt2, bigInt3, bigInt4)      = (bi(0), bi(1), bi(2), bi(3), bi(4))
+
+  lazy val (bigDecimal0, bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4) =
+    (bd(0.0), bd(1.1), bd(2.2), bd(3.3), bd(4.4))
+
+  lazy val List(uuid0, uuid1, uuid2, uuid3, uuid4) = List(uu, uu, uu, uu, uu).sortBy(_.toString)
+
+  lazy val (char0, char1, char2, char3, char4)     : (Char, Char, Char, Char, Char)      = ('a', 'b', 'c', 'd', 'e')
+  lazy val (byte0, byte1, byte2, byte3, byte4)     : (Byte, Byte, Byte, Byte, Byte)      = (1, 2, 3, 4, 5)
+  lazy val (short0, short1, short2, short3, short4): (Short, Short, Short, Short, Short) = (1, 2, 3, 4, 5)
+
+  lazy val List(r0, r1, r2, r3, r4) = List(r(0), r(1), r(2), r(3), r(4))
 
 
-  lazy val List(uuid0, uuid1, uuid2, uuid3, uuid4, uuid5, uuid6, uuid7, uuid8, uuid9, uuid10, uuid11, uuid12, uuid13, uuid14, uuid15, uuid16, uuid17, uuid18) =
-    List(uu, uu, uu, uu, uu, uu, uu, uu, uu, uu, uu, uu, uu, uu, uu, uu, uu, uu, uu).sortBy(_.toString)
-
-  lazy val List(uri0, uri1, uri2, uri3, uri4, uri5, uri6, uri7, uri8, uri9, uri10, uri11, uri12, uri13, uri14, uri15, uri16, uri17, uri18) =
-    List(ur(0), ur(1), ur(2), ur(3), ur(4), ur(5), ur(6), ur(7), ur(8), ur(9), ur(10), ur(11), ur(12), ur(13), ur(14), ur(15), ur(16), ur(17), ur(18))
-
-  lazy val (n0, str0, int0, long0, float0, double0, bigInt0, bigDec0, bool0, enum0, r0) = (0, "-", 0, 0L, 0.0f, 0.0, BigInt(0), BigDecimal(0.0), false, "enum0", r(0))
-  lazy val (n1, str1, int1, long1, float1, double1, bigInt1, bigDec1, bool1, enum1, r1) = (1, "a", 1, 1L, 1.1f, 1.1, BigInt(1), BigDecimal(1.1), true, "enum1", r(1))
-  lazy val (n2, str2, int2, long2, float2, double2, bigInt2, bigDec2, bool2, enum2, r2) = (2, "b", 2, 2L, 2.2f, 2.2, BigInt(2), BigDecimal(2.2), false, "enum2", r(2))
-  lazy val (n3, str3, int3, long3, float3, double3, bigInt3, bigDec3, bool3, enum3, r3) = (3, "c", 3, 3L, 3.3f, 3.3, BigInt(3), BigDecimal(3.3), true, "enum3", r(3))
-  lazy val (n4, str4, int4, long4, float4, double4, bigInt4, bigDec4, bool4, enum4, r4) = (4, "d", 4, 4L, 4.4f, 4.4, BigInt(4), BigDecimal(4.4), false, "enum4", r(4))
-  lazy val (n5, str5, int5, long5, float5, double5, bigInt5, bigDec5, bool5, enum5, r5) = (5, "e", 5, 5L, 5.5f, 5.5, BigInt(5), BigDecimal(5.5), true, "enum5", r(5))
-  lazy val (n6, str6, int6, long6, float6, double6, bigInt6, bigDec6, bool6, enum6, r6) = (6, "f", 6, 6L, 6.6f, 6.6, BigInt(6), BigDecimal(6.6), false, "enum6", r(6))
-  lazy val (n7, str7, int7, long7, float7, double7, bigInt7, bigDec7, bool7, enum7, r7) = (7, "g", 7, 7L, 7.7f, 7.7, BigInt(7), BigDecimal(7.7), true, "enum7", r(7))
-  lazy val (n8, str8, int8, long8, float8, double8, bigInt8, bigDec8, bool8, enum8, r8) = (8, "h", 8, 8L, 8.8f, 8.8, BigInt(8), BigDecimal(8.8), false, "enum8", r(8))
-  lazy val (n9, str9, int9, long9, float9, double9, bigInt9, bigDec9, bool9, enum9, r9) = (9, "i", 9, 9L, 9.9f, 9.9, BigInt(9), BigDecimal(9.9), true, "enum9", r(9))
-
-  lazy val (enum10, enum11, enum12) = ("enum10", "enum11", "enum12")
-  lazy val (enum20, enum21, enum22) = ("enum20", "enum21", "enum22")
-
-  lazy val (strs0, ints0, longs0, doubles0, bools0, dates0, uuids0, uris0, bigInts0, bigDecs0, enums0, rs0) = (
-    Set(str0), Set(int0), Set(long0), Set(double0), Set(bool0), Set(date0), Set(uuid0), Set(uri0), Set(bigInt0), Set(bigDec0), Set(enum0), Set(r0)
-  )
-
-  lazy val (strs1, ints1, longs1, doubles1, bools1, dates1, uuids1, uris1, bigInts1, bigDecs1, enums1, rs1) = (
-    Set(str1), Set(int1), Set(long1), Set(double1), Set(bool1), Set(date1), Set(uuid1), Set(uri1), Set(bigInt1), Set(bigDec1), Set(enum1), Set(r1)
-  )
-
-  lazy val (strs2, ints2, longs2, doubles2, bools2, dates2, uuids2, uris2, bigInts2, bigDecs2, enums2, rs2) = (
-    Set(str1, str2), Set(int1, int2), Set(long1, long2), Set(double1, double2),
-    Set(bool1, bool2), Set(date1, date2), Set(uuid1, uuid2), Set(uri1, uri2), Set(bigInt1, bigInt2), Set(bigDec1, bigDec2), Set(enum1, enum2), Set(r1, r2)
-  )
+  //  lazy val (strs0, ints0, longs0, doubles0, bools0, dates0, uuids0, uris0, bigInts0, bigDecs0, enums0, rs0) = (
+  //    Set(str0), Set(int0), Set(long0), Set(double0), Set(bool0), Set(date0), Set(uuid0), Set(uri0), Set(bigInt0), Set(bigDec0), Set(enum0), Set(r0)
+  //  )
+  //
+  //  lazy val (strs1, ints1, longs1, doubles1, bools1, dates1, uuids1, uris1, bigInts1, bigDecs1, enums1, rs1) = (
+  //    Set(str1), Set(int1), Set(long1), Set(double1), Set(bool1), Set(date1), Set(uuid1), Set(uri1), Set(bigInt1), Set(bigDec1), Set(enum1), Set(r1)
+  //  )
+  //
+  //  lazy val (strs2, ints2, longs2, doubles2, bools2, dates2, uuids2, uris2, bigInts2, bigDecs2, enums2, rs2) = (
+  //    Set(str1, str2), Set(int1, int2), Set(long1, long2), Set(double1, double2),
+  //    Set(bool1, bool2), Set(date1, date2), Set(uuid1, uuid2), Set(uri1, uri2), Set(bigInt1, bigInt2), Set(bigDec1, bigDec2), Set(enum1, enum2), Set(r1, r2)
+  //  )
 
 
   protected def round(value: Double, decimals: Int = 6): Double = {
