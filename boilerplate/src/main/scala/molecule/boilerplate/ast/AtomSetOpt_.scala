@@ -6,7 +6,7 @@ import java.util.{Date, UUID}
 
 trait AtomSetOpt_ { self: ModelBase =>
 
-  sealed trait AtomSetOpt extends AtomSet
+  sealed trait AtomSetOpt extends Atom
   
   case class AtomSetOptString(
     ns          : String,
@@ -15,7 +15,7 @@ trait AtomSetOpt_ { self: ModelBase =>
     vs          : Seq[Set[String]] = Nil,
     defaultValue: Option[Set[String]] = None,
     validation  : Option[ValidateString] = None,
-    sort        : String = ""
+    sort        : Option[String] = None
   ) extends AtomSetOpt
 
   case class AtomSetOptChar(
@@ -25,7 +25,7 @@ trait AtomSetOpt_ { self: ModelBase =>
     vs          : Seq[Set[Char]] = Nil,
     defaultValue: Option[Set[Char]] = None,
     validation  : Option[ValidateChar] = None,
-    sort        : String = ""
+    sort        : Option[String] = None
   ) extends AtomSetOpt
 
   case class AtomSetOptByte(
@@ -35,7 +35,7 @@ trait AtomSetOpt_ { self: ModelBase =>
     vs          : Seq[Set[Byte]] = Nil,
     defaultValue: Option[Set[Byte]] = None,
     validation  : Option[ValidateByte] = None,
-    sort        : String = ""
+    sort        : Option[String] = None
   ) extends AtomSetOpt
 
   case class AtomSetOptShort(
@@ -45,7 +45,7 @@ trait AtomSetOpt_ { self: ModelBase =>
     vs          : Seq[Set[Short]] = Nil,
     defaultValue: Option[Set[Short]] = None,
     validation  : Option[ValidateShort] = None,
-    sort        : String = ""
+    sort        : Option[String] = None
   ) extends AtomSetOpt
 
   case class AtomSetOptInt(
@@ -55,7 +55,7 @@ trait AtomSetOpt_ { self: ModelBase =>
     vs          : Seq[Set[Int]] = Nil,
     defaultValue: Option[Set[Int]] = None,
     validation  : Option[ValidateInt] = None,
-    sort        : String = ""
+    sort        : Option[String] = None
   ) extends AtomSetOpt
 
   case class AtomSetOptLong(
@@ -65,7 +65,7 @@ trait AtomSetOpt_ { self: ModelBase =>
     vs          : Seq[Set[Long]] = Nil,
     defaultValue: Option[Set[Long]] = None,
     validation  : Option[ValidateLong] = None,
-    sort        : String = ""
+    sort        : Option[String] = None
   ) extends AtomSetOpt
 
   case class AtomSetOptFloat(
@@ -75,7 +75,7 @@ trait AtomSetOpt_ { self: ModelBase =>
     vs          : Seq[Set[Float]] = Nil,
     defaultValue: Option[Set[Float]] = None,
     validation  : Option[ValidateFloat] = None,
-    sort        : String = ""
+    sort        : Option[String] = None
   ) extends AtomSetOpt
 
   case class AtomSetOptDouble(
@@ -85,7 +85,7 @@ trait AtomSetOpt_ { self: ModelBase =>
     vs          : Seq[Set[Double]] = Nil,
     defaultValue: Option[Set[Double]] = None,
     validation  : Option[ValidateDouble] = None,
-    sort        : String = ""
+    sort        : Option[String] = None
   ) extends AtomSetOpt
 
   case class AtomSetOptBoolean(
@@ -95,7 +95,7 @@ trait AtomSetOpt_ { self: ModelBase =>
     vs          : Seq[Set[Boolean]] = Nil,
     defaultValue: Option[Set[Boolean]] = None,
     validation  : Option[ValidateBoolean] = None,
-    sort        : String = ""
+    sort        : Option[String] = None
   ) extends AtomSetOpt
 
   case class AtomSetOptBigInt(
@@ -105,7 +105,7 @@ trait AtomSetOpt_ { self: ModelBase =>
     vs          : Seq[Set[BigInt]] = Nil,
     defaultValue: Option[Set[BigInt]] = None,
     validation  : Option[ValidateBigInt] = None,
-    sort        : String = ""
+    sort        : Option[String] = None
   ) extends AtomSetOpt
 
   case class AtomSetOptBigDecimal(
@@ -115,7 +115,7 @@ trait AtomSetOpt_ { self: ModelBase =>
     vs          : Seq[Set[BigDecimal]] = Nil,
     defaultValue: Option[Set[BigDecimal]] = None,
     validation  : Option[ValidateBigDecimal] = None,
-    sort        : String = ""
+    sort        : Option[String] = None
   ) extends AtomSetOpt
 
   case class AtomSetOptDate(
@@ -125,7 +125,7 @@ trait AtomSetOpt_ { self: ModelBase =>
     vs          : Seq[Set[Date]] = Nil,
     defaultValue: Option[Set[Date]] = None,
     validation  : Option[ValidateDate] = None,
-    sort        : String = ""
+    sort        : Option[String] = None
   ) extends AtomSetOpt
 
   case class AtomSetOptUUID(
@@ -135,7 +135,7 @@ trait AtomSetOpt_ { self: ModelBase =>
     vs          : Seq[Set[UUID]] = Nil,
     defaultValue: Option[Set[UUID]] = None,
     validation  : Option[ValidateUUID] = None,
-    sort        : String = ""
+    sort        : Option[String] = None
   ) extends AtomSetOpt
 
   case class AtomSetOptURI(
@@ -145,6 +145,6 @@ trait AtomSetOpt_ { self: ModelBase =>
     vs          : Seq[Set[URI]] = Nil,
     defaultValue: Option[Set[URI]] = None,
     validation  : Option[ValidateURI] = None,
-    sort        : String = ""
+    sort        : Option[String] = None
   ) extends AtomSetOpt
 }

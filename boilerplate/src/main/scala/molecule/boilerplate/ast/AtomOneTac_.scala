@@ -6,7 +6,7 @@ import java.util.{Date, UUID}
 
 trait AtomOneTac_ { self: ModelBase =>
 
-  sealed trait AtomOneTac extends AtomOne
+  sealed trait AtomOneTac extends Atom
   
   case class AtomOneTacString(
     ns          : String,
@@ -15,7 +15,7 @@ trait AtomOneTac_ { self: ModelBase =>
     vs          : Seq[String] = Nil,
     defaultValue: Option[String] = None,
     validation  : Option[ValidateString] = None,
-    sort        : String = ""
+    sort        : Option[String] = None
   ) extends AtomOneTac
 
   case class AtomOneTacChar(
@@ -25,7 +25,7 @@ trait AtomOneTac_ { self: ModelBase =>
     vs          : Seq[Char] = Nil,
     defaultValue: Option[Char] = None,
     validation  : Option[ValidateChar] = None,
-    sort        : String = ""
+    sort        : Option[String] = None
   ) extends AtomOneTac
 
   case class AtomOneTacByte(
@@ -35,7 +35,7 @@ trait AtomOneTac_ { self: ModelBase =>
     vs          : Seq[Byte] = Nil,
     defaultValue: Option[Byte] = None,
     validation  : Option[ValidateByte] = None,
-    sort        : String = ""
+    sort        : Option[String] = None
   ) extends AtomOneTac
 
   case class AtomOneTacShort(
@@ -45,7 +45,7 @@ trait AtomOneTac_ { self: ModelBase =>
     vs          : Seq[Short] = Nil,
     defaultValue: Option[Short] = None,
     validation  : Option[ValidateShort] = None,
-    sort        : String = ""
+    sort        : Option[String] = None
   ) extends AtomOneTac
 
   case class AtomOneTacInt(
@@ -55,7 +55,7 @@ trait AtomOneTac_ { self: ModelBase =>
     vs          : Seq[Int] = Nil,
     defaultValue: Option[Int] = None,
     validation  : Option[ValidateInt] = None,
-    sort        : String = ""
+    sort        : Option[String] = None
   ) extends AtomOneTac
 
   case class AtomOneTacLong(
@@ -65,7 +65,7 @@ trait AtomOneTac_ { self: ModelBase =>
     vs          : Seq[Long] = Nil,
     defaultValue: Option[Long] = None,
     validation  : Option[ValidateLong] = None,
-    sort        : String = ""
+    sort        : Option[String] = None
   ) extends AtomOneTac
 
   case class AtomOneTacFloat(
@@ -75,7 +75,7 @@ trait AtomOneTac_ { self: ModelBase =>
     vs          : Seq[Float] = Nil,
     defaultValue: Option[Float] = None,
     validation  : Option[ValidateFloat] = None,
-    sort        : String = ""
+    sort        : Option[String] = None
   ) extends AtomOneTac
 
   case class AtomOneTacDouble(
@@ -85,7 +85,7 @@ trait AtomOneTac_ { self: ModelBase =>
     vs          : Seq[Double] = Nil,
     defaultValue: Option[Double] = None,
     validation  : Option[ValidateDouble] = None,
-    sort        : String = ""
+    sort        : Option[String] = None
   ) extends AtomOneTac
 
   case class AtomOneTacBoolean(
@@ -95,7 +95,7 @@ trait AtomOneTac_ { self: ModelBase =>
     vs          : Seq[Boolean] = Nil,
     defaultValue: Option[Boolean] = None,
     validation  : Option[ValidateBoolean] = None,
-    sort        : String = ""
+    sort        : Option[String] = None
   ) extends AtomOneTac
 
   case class AtomOneTacBigInt(
@@ -105,7 +105,7 @@ trait AtomOneTac_ { self: ModelBase =>
     vs          : Seq[BigInt] = Nil,
     defaultValue: Option[BigInt] = None,
     validation  : Option[ValidateBigInt] = None,
-    sort        : String = ""
+    sort        : Option[String] = None
   ) extends AtomOneTac
 
   case class AtomOneTacBigDecimal(
@@ -115,7 +115,7 @@ trait AtomOneTac_ { self: ModelBase =>
     vs          : Seq[BigDecimal] = Nil,
     defaultValue: Option[BigDecimal] = None,
     validation  : Option[ValidateBigDecimal] = None,
-    sort        : String = ""
+    sort        : Option[String] = None
   ) extends AtomOneTac
 
   case class AtomOneTacDate(
@@ -125,7 +125,7 @@ trait AtomOneTac_ { self: ModelBase =>
     vs          : Seq[Date] = Nil,
     defaultValue: Option[Date] = None,
     validation  : Option[ValidateDate] = None,
-    sort        : String = ""
+    sort        : Option[String] = None
   ) extends AtomOneTac
 
   case class AtomOneTacUUID(
@@ -135,7 +135,7 @@ trait AtomOneTac_ { self: ModelBase =>
     vs          : Seq[UUID] = Nil,
     defaultValue: Option[UUID] = None,
     validation  : Option[ValidateUUID] = None,
-    sort        : String = ""
+    sort        : Option[String] = None
   ) extends AtomOneTac
 
   case class AtomOneTacURI(
@@ -145,6 +145,6 @@ trait AtomOneTac_ { self: ModelBase =>
     vs          : Seq[URI] = Nil,
     defaultValue: Option[URI] = None,
     validation  : Option[ValidateURI] = None,
-    sort        : String = ""
+    sort        : Option[String] = None
   ) extends AtomOneTac
 }

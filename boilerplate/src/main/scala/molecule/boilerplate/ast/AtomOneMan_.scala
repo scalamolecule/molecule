@@ -6,7 +6,7 @@ import java.util.{Date, UUID}
 
 trait AtomOneMan_ { self: ModelBase =>
 
-  sealed trait AtomOneMan extends AtomOne
+  sealed trait AtomOneMan extends Atom
   
   case class AtomOneManString(
     ns          : String,
@@ -15,7 +15,7 @@ trait AtomOneMan_ { self: ModelBase =>
     vs          : Seq[String] = Nil,
     defaultValue: Option[String] = None,
     validation  : Option[ValidateString] = None,
-    sort        : String = ""
+    sort        : Option[String] = None
   ) extends AtomOneMan
 
   case class AtomOneManChar(
@@ -25,7 +25,7 @@ trait AtomOneMan_ { self: ModelBase =>
     vs          : Seq[Char] = Nil,
     defaultValue: Option[Char] = None,
     validation  : Option[ValidateChar] = None,
-    sort        : String = ""
+    sort        : Option[String] = None
   ) extends AtomOneMan
 
   case class AtomOneManByte(
@@ -35,7 +35,7 @@ trait AtomOneMan_ { self: ModelBase =>
     vs          : Seq[Byte] = Nil,
     defaultValue: Option[Byte] = None,
     validation  : Option[ValidateByte] = None,
-    sort        : String = ""
+    sort        : Option[String] = None
   ) extends AtomOneMan
 
   case class AtomOneManShort(
@@ -45,7 +45,7 @@ trait AtomOneMan_ { self: ModelBase =>
     vs          : Seq[Short] = Nil,
     defaultValue: Option[Short] = None,
     validation  : Option[ValidateShort] = None,
-    sort        : String = ""
+    sort        : Option[String] = None
   ) extends AtomOneMan
 
   case class AtomOneManInt(
@@ -55,7 +55,7 @@ trait AtomOneMan_ { self: ModelBase =>
     vs          : Seq[Int] = Nil,
     defaultValue: Option[Int] = None,
     validation  : Option[ValidateInt] = None,
-    sort        : String = ""
+    sort        : Option[String] = None
   ) extends AtomOneMan
 
   case class AtomOneManLong(
@@ -65,7 +65,7 @@ trait AtomOneMan_ { self: ModelBase =>
     vs          : Seq[Long] = Nil,
     defaultValue: Option[Long] = None,
     validation  : Option[ValidateLong] = None,
-    sort        : String = ""
+    sort        : Option[String] = None
   ) extends AtomOneMan
 
   case class AtomOneManFloat(
@@ -75,7 +75,7 @@ trait AtomOneMan_ { self: ModelBase =>
     vs          : Seq[Float] = Nil,
     defaultValue: Option[Float] = None,
     validation  : Option[ValidateFloat] = None,
-    sort        : String = ""
+    sort        : Option[String] = None
   ) extends AtomOneMan
 
   case class AtomOneManDouble(
@@ -85,7 +85,7 @@ trait AtomOneMan_ { self: ModelBase =>
     vs          : Seq[Double] = Nil,
     defaultValue: Option[Double] = None,
     validation  : Option[ValidateDouble] = None,
-    sort        : String = ""
+    sort        : Option[String] = None
   ) extends AtomOneMan
 
   case class AtomOneManBoolean(
@@ -95,7 +95,7 @@ trait AtomOneMan_ { self: ModelBase =>
     vs          : Seq[Boolean] = Nil,
     defaultValue: Option[Boolean] = None,
     validation  : Option[ValidateBoolean] = None,
-    sort        : String = ""
+    sort        : Option[String] = None
   ) extends AtomOneMan
 
   case class AtomOneManBigInt(
@@ -105,7 +105,7 @@ trait AtomOneMan_ { self: ModelBase =>
     vs          : Seq[BigInt] = Nil,
     defaultValue: Option[BigInt] = None,
     validation  : Option[ValidateBigInt] = None,
-    sort        : String = ""
+    sort        : Option[String] = None
   ) extends AtomOneMan
 
   case class AtomOneManBigDecimal(
@@ -115,7 +115,7 @@ trait AtomOneMan_ { self: ModelBase =>
     vs          : Seq[BigDecimal] = Nil,
     defaultValue: Option[BigDecimal] = None,
     validation  : Option[ValidateBigDecimal] = None,
-    sort        : String = ""
+    sort        : Option[String] = None
   ) extends AtomOneMan
 
   case class AtomOneManDate(
@@ -125,7 +125,7 @@ trait AtomOneMan_ { self: ModelBase =>
     vs          : Seq[Date] = Nil,
     defaultValue: Option[Date] = None,
     validation  : Option[ValidateDate] = None,
-    sort        : String = ""
+    sort        : Option[String] = None
   ) extends AtomOneMan
 
   case class AtomOneManUUID(
@@ -135,7 +135,7 @@ trait AtomOneMan_ { self: ModelBase =>
     vs          : Seq[UUID] = Nil,
     defaultValue: Option[UUID] = None,
     validation  : Option[ValidateUUID] = None,
-    sort        : String = ""
+    sort        : Option[String] = None
   ) extends AtomOneMan
 
   case class AtomOneManURI(
@@ -145,6 +145,6 @@ trait AtomOneMan_ { self: ModelBase =>
     vs          : Seq[URI] = Nil,
     defaultValue: Option[URI] = None,
     validation  : Option[ValidateURI] = None,
-    sort        : String = ""
+    sort        : Option[String] = None
   ) extends AtomOneMan
 }

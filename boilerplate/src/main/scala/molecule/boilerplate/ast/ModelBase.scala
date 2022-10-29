@@ -13,7 +13,7 @@ trait ModelBase extends Validations {
     val ns  : String
     val attr: String
     val op  : Op
-    val sort: String
+    val sort: Option[String]
     def unapply(a: Atom): (String, String, Op) = (a.ns, a.attr, a.op)
   }
   trait AtomOne extends Atom

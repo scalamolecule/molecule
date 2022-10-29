@@ -41,7 +41,7 @@ trait DatomicTestSuiteImpl { self: DatomicTestSuite =>
   }
 
 //  def emptyImpl[T](test: Connection => T): T = inMem(test, EmptySchema, "")
-  def coreImpl[T](test: Connection => T): T = inMem(test, CardOneSchema, "m_coretests")
+  def cardOneImpl[T](test: Connection => T): T = inMem(test, CardOneSchema, "m_coretests")
 //  def corePeerOnlyImpl[T](test: Connection => T): T = if (system == SystemPeer) coreImpl(test) else ().asInstanceOf[T]
 //  def bidirectionalImpl[T](test: Connection => T): T = inMem(test, BidirectionalSchema, "m_bidirectional")
 //  def partitionImpl[T](test: Connection => T): T = inMem(test, PartitionTestSchema, "m_partitions")

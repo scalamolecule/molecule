@@ -4,18 +4,24 @@ import codegen.db.datomic.api._DatomicMoleculeApi
 
 object DatomicGenerator extends App {
 
-//  db.datomic._DatomicMoleculeImplicits.generate
+  // Coordinate overrides in multiple files --------------
+
+  //  core.api._MoleculeApi.generate
+  //  _DatomicMoleculeApi.generate
+
+  //  core.api._Insert.generate
+  //  db.datomic.api._DatomicInsert.generate
 
 
-  // Use tandems of interface/implementations to coordinate overrides
-
-  core.api._MoleculeApi.generate
-  _DatomicMoleculeApi.generate
-
-//  core.api._Insert.generate
-//  db.datomic.api._DatomicInsert.generate
+  //  core.api._MoleculeApi.generate
+  //  db.datomic.api._DatomicMoleculeApi.generate
 
 
-//  core.api._MoleculeApi.generate
-//  db.datomic.api._DatomicMoleculeApi.generate
+  // jvm specific only -----------------------------------
+
+  //  db.datomic._DatomicMoleculeImplicits.generate
+
+//    db.datomic.query._Base.generate
+//    db.datomic.query._Sorting.generate
+
 }

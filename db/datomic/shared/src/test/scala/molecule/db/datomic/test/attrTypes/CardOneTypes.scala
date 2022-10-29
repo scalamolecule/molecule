@@ -10,7 +10,7 @@ object CardOneTypes extends DatomicTestSuite {
 
   lazy val tests = Tests {
 
-    "mandatory" - cardOneTypes { implicit conn =>
+    "mandatory" - cardOne { implicit conn =>
       One.string(string1).save.transact
       One.int(int1).save.transact
       One.long.apply(long1).save.transact
@@ -43,7 +43,7 @@ object CardOneTypes extends DatomicTestSuite {
     }
 
 
-    "optional" - cardOneTypes { implicit conn =>
+    "optional" - cardOne { implicit conn =>
       val dataString     = List((11, None), (11, Some(string1)))
       val dataInt        = List((12, None), (12, Some(int1)))
       val dataLong       = List((13, None), (13, Some(long1)))
@@ -91,7 +91,7 @@ object CardOneTypes extends DatomicTestSuite {
     }
 
 
-    "tacit" - cardOneTypes { implicit conn =>
+    "tacit" - cardOne { implicit conn =>
       One.n.string.insert((11, string1)).transact
       One.n.int.insert((12, int1)).transact
       One.n.long.insert((13, long1)).transact

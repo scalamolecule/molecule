@@ -22,8 +22,9 @@ class InsertStmts(elements: Seq[Element], tpls: Seq[Product], tempIdInit: Int = 
       tpl2stmts(tpl)
     }
 
+    println("\n--- INSERT --------------------------------------------------------")
     elements.foreach(println)
-    println("--- INSERT --------------")
+    println("---")
     stmts.forEach(stmt => println(stmt))
 
     Collections.unmodifiableList(stmts)
@@ -84,7 +85,6 @@ class InsertStmts(elements: Seq[Element], tpls: Seq[Product], tempIdInit: Int = 
     }
   }
 
-  // todo
   private def resolveAtomOneOpt(atom: AtomOneOpt, n: Int, a: Keyword): Product => Unit = {
     atom match {
       case _: AtomOneOptString     => addOptV(a, n, identity)

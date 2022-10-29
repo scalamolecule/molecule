@@ -76,4 +76,20 @@ abstract class CodeGenBase(val fileName: String, dir: String, basePath: String) 
     "UUID",
     "URI",
   )
+  val javaTypes = Map(
+    "String" -> "String",
+    "Char" -> "String",
+    "Byte" -> "jInteger",
+    "Short" -> "jInteger",
+    "Int" -> "jInteger",
+    "Long" -> "jLong",
+    "Float" -> "jDouble",
+    "Double" -> "jDouble",
+    "Boolean" -> "jBoolean",
+    "BigInt" -> "jBigInt",
+    "BigDecimal" -> "jBigDecimal",
+    "Date" -> "Date",
+    "UUID" -> "UUID",
+    "URI" -> "URI",
+  )
 }

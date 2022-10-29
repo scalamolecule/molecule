@@ -47,7 +47,7 @@ object _Atoms {
          |    vs          : Seq[$tpe] = Nil,
          |    defaultValue: Option[$tpe] = None,
          |    validation  : Option[Validate$baseType] = None,
-         |    sort        : String = ""
+         |    sort        : Option[String] = None
          |  ) extends Atom$card$mode""".stripMargin
     }
   }

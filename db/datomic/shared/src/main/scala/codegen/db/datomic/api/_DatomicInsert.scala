@@ -1,6 +1,7 @@
 package codegen.db.datomic.api
 
 import codegen.DatomicGenBase
+import codegen.db.datomic.query._Base.fileName
 
 object _DatomicInsert extends DatomicGenBase("DatomicInsert", "/api") {
 
@@ -12,7 +13,7 @@ object _DatomicInsert extends DatomicGenBase("DatomicInsert", "/api") {
        |import molecule.boilerplate.markers.NamespaceMarkers._
        |import molecule.core.api.Insert._
        |
-       |object DatomicInsert {
+       |object $fileName {
        |$traits
        |}""".stripMargin
   }

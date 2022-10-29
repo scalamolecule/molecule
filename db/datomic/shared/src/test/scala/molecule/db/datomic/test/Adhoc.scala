@@ -10,11 +10,14 @@ object Adhoc extends DatomicTestSuite {
 
   lazy val tests = Tests {
 
-    "core" - cardOneTypes { implicit conn =>
+    "core" - cardOne { implicit conn =>
 
-//      One.str.int.insert(("Bob", 42), ("Liz", 35)).transact
+      One.int.insert(1, 2, 3).transact
+      One.int.d1.query.get ==> List(3, 2, 1)
+      One.int.a1.query.get ==> List(1, 2, 3)
 
-//      One.str.int.query.get ==> List(("Liz", 35), ("Bob", 42))
+      //      One.string.int.insert(("Bob", 42), ("Liz", 35)).transact
+      //      One.string.int.query.get ==> List(("Liz", 35), ("Bob", 42))
     }
   }
 

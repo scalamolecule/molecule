@@ -1,4 +1,4 @@
-package molecule.base.parseFiles
+package molecule.base.dataModel
 
 import molecule.DataModel
 
@@ -19,3 +19,4 @@ object A extends DataModel(3) {
     }
   }
 }
+

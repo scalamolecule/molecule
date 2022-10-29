@@ -9,54 +9,16 @@ import molecule.boilerplate.ast.MoleculeModel._
 import molecule.core.query.Model2Query
 import scala.annotation.tailrec
 import scala.collection.mutable.ArrayBuffer
+import java.lang.{Boolean => jBoolean, Double => jDouble, Integer => jInteger, Long => jLong}
+import molecule.base.util.BaseHelpers
+import scala.reflect.ClassTag;
 
 
-class DatomicModel2Query[Tpl](elements: Seq[Element]) extends Model2Query[Tpl] {
-
-  // Query clause optimization weights
-  final protected val wGround         = 1
-  final protected val wEqOne          = 2
-  final protected val wEqMany         = 3
-  final protected val wRange          = 4
-  final protected val wNeqOne         = 5
-  final protected val wFulltextSearch = 6
-  final protected val wClauseOne      = 7
-  final protected val wClauseMany     = 8
-  final protected val wClause         = 9
-
-  final protected val sortIds   = new ArrayBuffer[String]
-  final protected val find      = new ArrayBuffer[String]
-  final protected val widh      = new ArrayBuffer[String]
-  final protected val in        = new ArrayBuffer[String]
-  final protected val where     = new ArrayBuffer[(String, Int)]
-  final protected val rules     = new ArrayBuffer[String]
-  final protected val ins       = new ArrayBuffer[AnyRef]
-  final protected val resolvers = new ArrayBuffer[AnyRef => AnyRef]
+class DatomicModel2Query[Tpl](elements: Seq[Element]) extends Sort[Tpl] with BaseHelpers {
 
   final lazy protected val query   : String      = renderQuery(true)
   final lazy protected val queryRaw: String      = renderQuery(false)
   final lazy protected val inputs  : Seq[AnyRef] = renderRules ++ ins
-
-  type Row = jList[AnyRef]
-
-  final override lazy protected val row2tpl: Row => Tpl = {
-    resolvers.length match {
-      case 1 =>
-        val r1 = resolvers(0)
-        (row: Row) => r1(row.get(0)).asInstanceOf[Tpl]
-
-      case 2 =>
-        val r1 = resolvers(0)
-        val r2 = resolvers.apply(1)
-        (row: Row) => {
-          (
-            r1(row.get(0)),
-            r2(row.get(1))
-            ).asInstanceOf[Tpl]
-        }
-
-    }
-  }
 
   final protected def renderQuery(optimized: Boolean): String = {
     // Recursively resolve molecule
@@ -74,7 +36,19 @@ class DatomicModel2Query[Tpl](elements: Seq[Element]) extends Model2Query[Tpl] {
     val q           =
       s"""[:find  $find1 $widh1 $in1
          | :where $where2]""".stripMargin
-    println("--- QUERY --------------\n" + q)
+
+
+    println("\n--- QUERY ---------------------------------------------------------")
+    elements.foreach(println)
+    println("---")
+    println(q)
+    if (inputs.nonEmpty) {
+      println("---")
+      inputs.foreach {
+        case a: Array[_] => println(a.toList)
+        case other       => println(other)
+      }
+    }
     q
   }
 
@@ -86,95 +60,140 @@ class DatomicModel2Query[Tpl](elements: Seq[Element]) extends Model2Query[Tpl] {
     }
   }
 
-  // Datomic entity id variable
-  type Var = String
-
-  private val vars              = Array("?a", "?b", "?c", "?d", "?e", "?f", "?g", "?h", "?i", "?j", "?k", "?l", "?m", "?n", "?o", "?p", "?q", "?r", "?s", "?t", "?u", "?v", "?w", "?x", "?y", "?z", "?aa", "?ab", "?ac", "?ad", "?ae", "?af", "?ag", "?ah", "?ai", "?aj", "?ak", "?al", "?am", "?an", "?ao", "?ap", "?aq", "?ar", "?as", "?at", "?au", "?av", "?aw", "?ax", "?ay", "?az", "?ba", "?bb", "?bc", "?bd", "?be", "?bf", "?bg", "?bh", "?bi", "?bj", "?bk", "?bl", "?bm", "?bn", "?bo", "?bp", "?bq", "?br", "?bs", "?bt", "?bu", "?bv", "?bw", "?bx", "?by", "?bz", "?ca", "?cb", "?cc", "?cd", "?ce", "?cf", "?cg", "?ch", "?ci", "?cj", "?ck", "?cl", "?cm", "?cn", "?co", "?cp", "?cq", "?cr", "?cs", "?ct", "?cu", "?cv", "?cw", "?cx", "?cy", "?cz", "?da", "?db", "?dc", "?dd", "?de", "?df", "?dg", "?dh", "?di", "?dj", "?dk", "?dl", "?dm", "?dn", "?do", "?dp", "?dq", "?dr", "?ds", "?dt", "?du", "?dv", "?dw", "?dx", "?dy", "?dz", "?ea", "?eb", "?ec", "?ed", "?ee", "?ef", "?eg", "?eh", "?ei", "?ej", "?ek", "?el", "?em", "?en", "?eo", "?ep", "?eq", "?er", "?es", "?et", "?eu", "?ev", "?ew", "?ex", "?ey", "?ez", "?fa", "?fb", "?fc", "?fd", "?fe", "?ff", "?fg", "?fh", "?fi", "?fj", "?fk", "?fl", "?fm", "?fn", "?fo", "?fp", "?fq", "?fr", "?fs", "?ft", "?fu", "?fv", "?fw", "?fx", "?fy", "?fz", "?ga", "?gb", "?gc", "?gd", "?ge", "?gf", "?gg", "?gh", "?gi", "?gj", "?gk", "?gl", "?gm", "?gn", "?go", "?gp", "?gq", "?gr", "?gs", "?gt", "?gu", "?gv", "?gw", "?gx", "?gy", "?gz", "?ha", "?hb", "?hc", "?hd", "?he", "?hf", "?hg", "?hh", "?hi", "?hj", "?hk", "?hl", "?hm", "?hn", "?ho", "?hp", "?hq", "?hr", "?hs", "?ht", "?hu", "?hv", "?hw", "?hx", "?hy", "?hz", "?ia", "?ib", "?ic", "?id", "?ie", "?if", "?ig", "?ih", "?ii", "?ij", "?ik", "?il", "?im", "?in", "?io", "?ip", "?iq", "?ir", "?is", "?it", "?iu", "?iv", "?iw", "?ix", "?iy", "?iz", "?ja", "?jb", "?jc", "?jd", "?je", "?jf", "?jg", "?jh", "?ji", "?jj", "?jk", "?jl", "?jm", "?jn", "?jo", "?jp", "?jq", "?jr", "?js", "?jt", "?ju", "?jv", "?jw", "?jx", "?jy", "?jz", "?ka", "?kb", "?kc", "?kd", "?ke", "?kf", "?kg", "?kh", "?ki", "?kj", "?kk", "?kl", "?km", "?kn", "?ko", "?kp", "?kq", "?kr", "?ks", "?kt", "?ku", "?kv", "?kw", "?kx", "?ky", "?kz", "?la", "?lb", "?lc", "?ld", "?le", "?lf", "?lg", "?lh", "?li", "?lj", "?lk", "?ll", "?lm", "?ln", "?lo", "?lp", "?lq", "?lr", "?ls", "?lt", "?lu", "?lv", "?lw", "?lx", "?ly", "?lz", "?ma", "?mb", "?mc", "?md", "?me", "?mf", "?mg", "?mh", "?mi", "?mj", "?mk", "?ml", "?mm", "?mn", "?mo", "?mp", "?mq", "?mr", "?ms", "?mt", "?mu", "?mv", "?mw", "?mx", "?my", "?mz", "?na", "?nb", "?nc", "?nd", "?ne", "?nf", "?ng", "?nh", "?ni", "?nj", "?nk", "?nl", "?nm", "?nn", "?no", "?np", "?nq", "?nr", "?ns", "?nt", "?nu", "?nv", "?nw", "?nx", "?ny", "?nz", "?oa", "?ob", "?oc", "?od", "?oe", "?of", "?og", "?oh", "?oi", "?oj", "?ok", "?ol", "?om", "?on", "?oo", "?op", "?oq", "?or", "?os", "?ot", "?ou", "?ov", "?ow", "?ox", "?oy", "?oz", "?pa", "?pb", "?pc", "?pd", "?pe", "?pf", "?pg", "?ph", "?pi", "?pj", "?pk", "?pl", "?pm", "?pn", "?po", "?pp", "?pq", "?pr", "?ps", "?pt", "?pu", "?pv", "?pw", "?px", "?py", "?pz", "?qa", "?qb", "?qc", "?qd", "?qe", "?qf", "?qg", "?qh", "?qi", "?qj", "?qk", "?ql", "?qm", "?qn", "?qo", "?qp", "?qq", "?qr", "?qs", "?qt", "?qu", "?qv", "?qw", "?qx", "?qy", "?qz", "?ra", "?rb", "?rc", "?rd", "?re", "?rf", "?rg", "?rh", "?ri", "?rj", "?rk", "?rl", "?rm", "?rn", "?ro", "?rp", "?rq", "?rr", "?rs", "?rt", "?ru", "?rv", "?rw", "?rx", "?ry", "?rz", "?sa", "?sb", "?sc", "?sd", "?se", "?sf", "?sg", "?sh", "?si", "?sj", "?sk", "?sl", "?sm", "?sn", "?so", "?sp", "?sq", "?sr", "?ss", "?st", "?su", "?sv", "?sw", "?sx", "?sy", "?sz", "?ta", "?tb", "?tc", "?td", "?te", "?tf", "?tg", "?th", "?ti", "?tj", "?tk", "?tl", "?tm", "?tn", "?to", "?tp", "?tq", "?tr", "?ts", "?tt", "?tu", "?tv", "?tw", "?tx", "?ty", "?tz", "?ua", "?ub", "?uc", "?ud", "?ue", "?uf", "?ug", "?uh", "?ui", "?uj", "?uk", "?ul", "?um", "?un", "?uo", "?up", "?uq", "?ur", "?us", "?ut", "?uu", "?uv", "?uw", "?ux", "?uy", "?uz", "?va", "?vb", "?vc", "?vd", "?ve", "?vf", "?vg", "?vh", "?vi", "?vj", "?vk", "?vl", "?vm", "?vn", "?vo", "?vp", "?vq", "?vr", "?vs", "?vt", "?vu", "?vv", "?vw", "?vx", "?vy", "?vz", "?wa", "?wb", "?wc", "?wd", "?we", "?wf", "?wg", "?wh", "?wi", "?wj", "?wk", "?wl", "?wm", "?wn", "?wo", "?wp", "?wq", "?wr", "?ws", "?wt", "?wu", "?wv", "?ww", "?wx", "?wy", "?wz", "?xa", "?xb", "?xc", "?xd", "?xe", "?xf", "?xg", "?xh", "?xi", "?xj", "?xk", "?xl", "?xm", "?xn", "?xo", "?xp", "?xq", "?xr", "?xs", "?xt", "?xu", "?xv", "?xw", "?xx", "?xy", "?xz", "?ya", "?yb", "?yc", "?yd", "?ye", "?yf", "?yg", "?yh", "?yi", "?yj", "?yk", "?yl", "?ym", "?yn", "?yo", "?yp", "?yq", "?yr", "?ys", "?yt", "?yu", "?yv", "?yw", "?yx", "?yy", "?yz", "?za", "?zb", "?zc", "?zd", "?ze", "?zf", "?zg", "?zh", "?zi", "?zj", "?zk", "?zl", "?zm", "?zn", "?zo", "?zp", "?zq", "?zr", "?zs", "?zt", "?zu", "?zv", "?zw", "?zx", "?zy", "?zz")
-  private var varIndex: Int     = -1
-  private var addTxVar: Boolean = false
-
-  def vv: String = {
-    varIndex += 1
-    vars(varIndex)
-  }
-
-  def tx: String = {
-    if (addTxVar) {
-      addTxVar = false
-      " ?tx"
-    } else ""
-  }
+  private def unexpected(element: Element) = throw MoleculeException("Unexpected element: " + element)
+  private def unexpected(op: Op) = throw MoleculeException("Unexpected operation: " + op)
 
 
   @tailrec
   final protected def resolve(es: List[Var], elements: Seq[Element]): List[Var] = elements match {
     case element :: tail => element match {
-      case a: AtomOneMan => resolve(resolveAtomOneMan(es, a), tail)
-      case a: AtomOneTac => resolve(resolveAtomOneTac(es, a), tail)
-      case a: AtomOneOpt => resolve(resolveAtomOneOpt(es, a), tail)
-      case other         => throw MoleculeException("StmtsBuilder.res: Unexpected element: " + other)
+      case a: Atom =>
+        a match {
+          case a: AtomOneMan => attrIndex += 1; resolve(resolveAtomOneMan(es, a), tail)
+          case a: AtomOneOpt => attrIndex += 1; resolve(resolveAtomOneOpt(es, a), tail)
+          case a: AtomOneTac => resolve(resolveAtomOneTac(es, a), tail)
+          case other         => unexpected(other)
+        }
+      case b: Bond => es
+      case other   => unexpected(other)
     }
     case Nil             => es
   }
 
 
-  private lazy val javaInt2scala    = (v: AnyRef) => v.asInstanceOf[Integer].toInt.asInstanceOf[AnyRef]
-  private lazy val javaBigInt2scala = (v: AnyRef) => BigInt(v.asInstanceOf[jBigInt]).asInstanceOf[AnyRef]
-  private lazy val javaBigDec2scala = (v: AnyRef) => BigDecimal(v.asInstanceOf[jBigDecimal]).asInstanceOf[AnyRef]
-  private lazy val javaChar2scala   = (v: AnyRef) => v.asInstanceOf[String].charAt(0).asInstanceOf[AnyRef]
-  private lazy val javaByte2scala   = (v: AnyRef) => v.asInstanceOf[Integer].toByte.asInstanceOf[AnyRef]
-  private lazy val javaShort2scala  = (v: AnyRef) => v.asInstanceOf[Integer].toShort.asInstanceOf[AnyRef]
+  // Datomic Java to Scala typers
+  final private lazy val tInt    = (v: AnyRef) => v.asInstanceOf[Integer].toInt.asInstanceOf[AnyRef]
+  final private lazy val tBigInt = (v: AnyRef) => BigInt(v.asInstanceOf[jBigInt]).asInstanceOf[AnyRef]
+  final private lazy val tBigDec = (v: AnyRef) => BigDecimal(v.asInstanceOf[jBigDecimal]).asInstanceOf[AnyRef]
+  final private lazy val tChar   = (v: AnyRef) => v.asInstanceOf[String].charAt(0).asInstanceOf[AnyRef]
+  final private lazy val tByte   = (v: AnyRef) => v.asInstanceOf[Integer].toByte.asInstanceOf[AnyRef]
+  final private lazy val tShort  = (v: AnyRef) => v.asInstanceOf[Integer].toShort.asInstanceOf[AnyRef]
+
+  final private lazy val rString    : String => String     = (v: String) => "\"" + escStr(v) + "\""
+  final private lazy val rInt       : Int => String        = (v: Int) => v.toString
+  final private lazy val rLong      : Long => String       = (v: Long) => v.toString
+  final private lazy val rFloat     : Float => String      = (v: Float) => v.toString
+  final private lazy val rDouble    : Double => String     = (v: Double) => v.toString
+  final private lazy val rBoolean   : Boolean => String    = (v: Boolean) => v.toString
+  final private lazy val rBigInt    : BigInt => String     = (v: BigInt) => v.toString + "N"
+  final private lazy val rBigDecimal: BigDecimal => String = (v: BigDecimal) => v.toString + "M"
+  final private lazy val rDate      : Date => String       = (v: Date) => "#inst \"" + date2datomicStr2(v) + "\""
+  final private lazy val rUUID      : UUID => String       = (v: UUID) => "\"" + v.toString + "\""
+  final private lazy val rURI       : URI => String        = (v: URI) => v.toString
+  final private lazy val rChar      : Char => String       = (v: Char) => v.toString
+  final private lazy val rByte      : Byte => String       = (v: Byte) => v.toString
+  final private lazy val rShort     : Short => String      = (v: Short) => v.toString
+
 
   private def resolveAtomOneMan(es: List[Var], atom: AtomOneMan): List[Var] = {
     val (e, a) = (es.last, s":${atom.ns}/${atom.attr}")
     atom match {
-      case at: AtomOneManString     => atomMan(e, a, at.op, at.vs, identity)
-      case at: AtomOneManInt        => atomMan(e, a, at.op, at.vs, javaInt2scala)
-      case at: AtomOneManLong       => atomMan(e, a, at.op, at.vs, identity)
-      case at: AtomOneManFloat      => atomMan(e, a, at.op, at.vs, identity)
-      case at: AtomOneManDouble     => atomMan(e, a, at.op, at.vs, identity)
-      case at: AtomOneManBoolean    => atomMan(e, a, at.op, at.vs, identity)
-      case at: AtomOneManBigInt     => atomMan(e, a, at.op, at.vs, javaBigInt2scala)
-      case at: AtomOneManBigDecimal => atomMan(e, a, at.op, at.vs, javaBigDec2scala)
-      case at: AtomOneManDate       => atomMan(e, a, at.op, at.vs, identity)
-      case at: AtomOneManUUID       => atomMan(e, a, at.op, at.vs, identity)
-      case at: AtomOneManURI        => atomMan(e, a, at.op, at.vs, identity)
-      case at: AtomOneManChar       => atomMan(e, a, at.op, at.vs, javaChar2scala)
-      case at: AtomOneManByte       => atomMan(e, a, at.op, at.vs, javaByte2scala)
-      case at: AtomOneManShort      => atomMan(e, a, at.op, at.vs, javaShort2scala)
-      case other                    => throw MoleculeException("StmtsBuilder.res: Unexpected element: " + other)
+      case at: AtomOneManString     => atomMan(e, a, at.op, at.vs, "String", rString, identity, sortString(at))
+      case at: AtomOneManInt        => atomMan(e, a, at.op, at.vs, "Int", rInt, tInt, sortInt(at))
+      case at: AtomOneManLong       => atomMan(e, a, at.op, at.vs, "Long", rLong, identity, sortLong(at))
+      case at: AtomOneManFloat      => atomMan(e, a, at.op, at.vs, "Float", rFloat, identity, sortFloat(at))
+      case at: AtomOneManDouble     => atomMan(e, a, at.op, at.vs, "Double", rDouble, identity, sortDouble(at))
+      case at: AtomOneManBoolean    => atomMan(e, a, at.op, at.vs, "Boolean", rBoolean, identity, sortBoolean(at))
+      case at: AtomOneManBigInt     => atomMan(e, a, at.op, at.vs, "BigInt", rBigInt, tBigInt, sortBigInt(at))
+      case at: AtomOneManBigDecimal => atomMan(e, a, at.op, at.vs, "BigDecimal", rBigDecimal, tBigDec, sortBigDecimal(at))
+      case at: AtomOneManDate       => atomMan(e, a, at.op, at.vs, "Date", rDate, identity, sortDate(at))
+      case at: AtomOneManUUID       => atomMan(e, a, at.op, at.vs, "UUID", rUUID, identity, sortUUID(at))
+      case at: AtomOneManURI        => atomMan(e, a, at.op, at.vs, "URI", rURI, identity, sortURI(at))
+      case at: AtomOneManChar       => atomMan(e, a, at.op, at.vs, "Char", rChar, tChar, sortChar(at))
+      case at: AtomOneManByte       => atomMan(e, a, at.op, at.vs, "Byte", rByte, tByte, sortByte(at))
+      case at: AtomOneManShort      => atomMan(e, a, at.op, at.vs, "Short", rShort, tShort, sortShort(at))
+      case other                    => unexpected(other)
     }
     es
   }
 
-  final protected def atomMan(e: Var, a: String, op: Op, vs: Seq[Any], resolver: AnyRef => AnyRef): Unit = {
+  final protected def atomMan[T: ClassTag](
+    e: Var,
+    a: String,
+    op: Op,
+    args: Seq[T],
+    tpe: String,
+    render: T => String,
+    typer: AnyRef => AnyRef,
+    sorter: Option[(Int, (Row, Row) => Int)]
+  ): Unit = {
     val v = vv
     find += v
     where += s"[$e $a $v$tx]" -> wClause
+    typers += typer
+    sorter.foreach(sorts += _)
     op match {
-      case V  => resolvers += resolver
-      case Eq =>
-        in += s"[$v ...]"
-        ins += vs.toArray
-        resolvers += resolver
-
-      case other => throw MoleculeException("StmtsBuilder.res: Unexpected element: " + other)
+      case V     => // attribute value as is
+      case Eq    => equals(v, args)
+      case Neq   => neq(tpe, v, args, render)
+      case Lt    => compare(e, a, v, args.head, "<")
+      case Gt    => compare(e, a, v, args.head, ">")
+      case Le    => compare(e, a, v, args.head, "<=")
+      case Ge    => compare(e, a, v, args.head, ">=")
+      case other => unexpected(other)
     }
   }
+
+  private def equals[T: ClassTag](v: String, args: Seq[T]): Unit = {
+    in += s"[$v ...]"
+    ins += args.toArray
+  }
+
+  private def neq[T](tpe: String, v: String, args: Seq[T], render: T => String): Unit = {
+    if (tpe == "URI") {
+      args.foreach { arg =>
+        where += s"[(ground (new java.net.URI ${render(arg)})) ${v}1]" -> wNeqOne
+        where += s"[(!= $v ${v}1)]" -> wNeqOne
+      }
+    } else {
+      args.foreach { arg =>
+        where += s"[(!= $v ${render(arg)})]" -> wNeqOne
+      }
+    }
+  }
+
+  private def compare[T](e: String, a: String, v: String, arg: T, op: String): Unit = {
+    val v1 = v + 1
+    in += v1
+    ins += arg.asInstanceOf[AnyRef]
+    where += s"[$e $a $v$tx]" -> wClause
+    where += s"[($op $v $v1)]" -> wNeqOne
+  }
+
 
   private def resolveAtomOneTac(es: List[Var], atom: AtomOneTac): List[Var] = {
     atomTac(es.last, s":${atom.ns}/${atom.attr}", atom.op)
     es
   }
 
-  final protected def atomTac(e: Var, a: String, op: Op): Unit = {
+  private def atomTac(e: Var, a: String, op: Op): Unit = {
     op match {
       case V     => where += s"[$e $a _$tx]" -> wClause
       case Eq    =>
         val v = vv
         in += s"[$v ...]"
         where += s"[$e $a $v$tx]" -> wClause
-      case other => throw MoleculeException("StmtsBuilder.res: Unexpected element: " + other)
+      case other => unexpected(other)
     }
   }
 
@@ -251,20 +270,20 @@ class DatomicModel2Query[Tpl](elements: Seq[Element]) extends Model2Query[Tpl] {
         case v    => Some(v.asInstanceOf[PersistentArrayMap].values.iterator.next.asInstanceOf[Integer].toShort)
       }).asInstanceOf[AnyRef])
 
-      case other => throw MoleculeException("StmtsBuilder.res: Unexpected element: " + other)
+      case other => unexpected(other)
     }
     es
   }
 
-  final protected def atomOpt(e: Var, a: String, op: Op, resolver: AnyRef => AnyRef): Unit = {
+  private def atomOpt(e: Var, a: String, op: Op, typer: AnyRef => AnyRef): Unit = {
     op match {
       case V =>
         val v = vv
         find += s"(pull $e-$v [[$a :limit nil]]) "
         where += s"[(identity $e) $e-$v]" -> wGround
-        resolvers += resolver
+        typers += typer
 
-      case other => throw MoleculeException("StmtsBuilder.res: Unexpected element: " + other)
+      case other => unexpected(other)
     }
   }
 
