@@ -1,9 +1,9 @@
 package codegen
 
-import molecule.base.util.CodeGenBase
+import molecule.base.util.CodeGenTemplate
 
 abstract class CoreGenBase(fileName: String, dir: String)
-  extends CodeGenBase(
+  extends CodeGenTemplate(
     fileName,
     dir,
     "core/shared/src/main/scala/molecule/core"

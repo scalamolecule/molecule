@@ -1,9 +1,9 @@
 package codegen
 
-import molecule.base.util.CodeGenBase
+import molecule.base.util.CodeGenTemplate
 
 abstract class BoilerplateGenBase(fileName: String, dir: String)
-  extends CodeGenBase(
+  extends CodeGenTemplate(
     fileName,
     dir,
     "boilerplate/src/main/scala/molecule/boilerplate"

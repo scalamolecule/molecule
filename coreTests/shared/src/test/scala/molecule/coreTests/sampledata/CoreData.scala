@@ -34,7 +34,7 @@ trait CoreData extends DateHandling {
   lazy val (bigDecimal0, bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4) =
     (bd(0.0), bd(1.1), bd(2.2), bd(3.3), bd(4.4))
 
-  lazy val List(uuid0, uuid1, uuid2, uuid3, uuid4) = List(uu, uu, uu, uu, uu).sortBy(_.toString)
+  lazy val List(uuid0, uuid1, uuid2, uuid3, uuid4) = List(uu, uu, uu, uu, uu).sorted
 
   lazy val (char0, char1, char2, char3, char4)     : (Char, Char, Char, Char, Char)      = ('a', 'b', 'c', 'd', 'e')
   lazy val (byte0, byte1, byte2, byte3, byte4)     : (Byte, Byte, Byte, Byte, Byte)      = (1, 2, 3, 4, 5)

@@ -1,4 +1,4 @@
-package molecule.db.datomic.test.attrTypes
+package molecule.db.datomic.test.attr
 
 import molecule.coreTests.dataModels.core.types.dsl.CardOne._
 import molecule.db.datomic._

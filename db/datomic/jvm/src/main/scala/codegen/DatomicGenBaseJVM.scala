@@ -1,9 +1,9 @@
 package codegen
 
-import molecule.base.util.CodeGenBase
+import molecule.base.util.CodeGenTemplate
 
 abstract class DatomicGenBaseJVM(fileName: String, dir: String)
-  extends CodeGenBase(
+  extends CodeGenTemplate(
     fileName,
     dir,
     "db/datomic/jvm/src/main/scala/molecule/db/datomic"

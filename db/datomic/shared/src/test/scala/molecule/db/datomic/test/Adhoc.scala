@@ -5,6 +5,7 @@ import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
 
+
 object Adhoc extends DatomicTestSuite {
 
 

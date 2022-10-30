@@ -1,7 +1,7 @@
 package codegen.db.datomic.api
 
 import codegen.DatomicGenBase
-import codegen.db.datomic.query._Base.fileName
+import codegen.db.datomic.query._Cast.fileName
 
 object _DatomicMoleculeApi extends DatomicGenBase("DatomicMoleculeApi", "/api") {
 

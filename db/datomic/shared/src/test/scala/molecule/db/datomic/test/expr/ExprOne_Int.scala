@@ -1,12 +1,11 @@
-package molecule.db.datomic.test.expression
+package molecule.db.datomic.test.expr
 
 import molecule.coreTests.dataModels.core.types.dsl.CardOne._
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
 
-object CardOneExpr extends DatomicTestSuite {
-
+object ExprOne_Int extends DatomicTestSuite {
 
   lazy val tests = Tests {
 

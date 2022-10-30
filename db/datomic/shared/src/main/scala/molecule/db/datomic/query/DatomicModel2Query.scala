@@ -7,9 +7,10 @@ import scala.annotation.tailrec;
 
 class DatomicModel2Query[Tpl](elements: Seq[Element])
   extends Model2Query[Tpl]
-    with CardOne[Tpl]
+    with ExprOne[Tpl]
     with Sort[Tpl]
-    with Base[Tpl] {
+    with Base[Tpl]
+    with Cast_[Tpl] {
 
   final lazy protected val query         : String      = renderQuery(true)
   final lazy protected val queryRaw      : String      = renderQuery(false)
@@ -40,8 +41,12 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
     if (rulesAndInputs.nonEmpty) {
       println("---")
       rulesAndInputs.foreach {
-        case a: Array[_] => println(a.toList)
-        case other       => println(other)
+        case a: Array[_] =>
+          //          a.toList.headOption.foreach(_.getClass)
+          println(a.toList)
+        case other       =>
+          //          println(other.getClass)
+          println(other)
       }
     }
     q

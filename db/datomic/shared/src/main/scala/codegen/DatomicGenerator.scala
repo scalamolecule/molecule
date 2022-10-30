@@ -21,7 +21,7 @@ object DatomicGenerator extends App {
 
   //  db.datomic._DatomicMoleculeImplicits.generate
 
-//    db.datomic.query._Base.generate
-//    db.datomic.query._Sorting.generate
+    db.datomic.query._Cast.generate
+//    db.datomic.query._Sort.generate
 
 }

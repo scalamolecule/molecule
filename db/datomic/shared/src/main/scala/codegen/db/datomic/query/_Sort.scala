@@ -16,7 +16,7 @@ object _Sort extends DatomicGenBase("Sort", "/query") {
        |import molecule.boilerplate.ast.MoleculeModel._
        |
        |
-       |trait $fileName[Tpl] extends Base[Tpl] {
+       |trait $fileName[Tpl] { self: Base[Tpl] =>
        |$sorters
        |}""".stripMargin
   }
@@ -24,14 +24,37 @@ object _Sort extends DatomicGenBase("Sort", "/query") {
   def sorter(tpe: String): String = {
     val javaTpe = javaTypes(tpe)
     s"""
-       |  protected def sort$tpe(a: Atom): Option[(Int, (Row, Row) => Int)] = a.sort.map { sort =>
+       |  protected def sort$tpe(atom: Atom, attrIndex: Int): Option[(Int, (Row, Row) => Int)] = {
+       |    atom.sort.map { sort =>
+       |      (
+       |        sort.last.toInt,
+       |        sort.head match {
+       |          case 'a' => (a: Row, b: Row) =>
+       |            a.get(attrIndex).asInstanceOf[$javaTpe].compareTo(b.get(attrIndex).asInstanceOf[$javaTpe])
+       |          case 'd' => (a: Row, b: Row) =>
+       |            b.get(attrIndex).asInstanceOf[$javaTpe].compareTo(a.get(attrIndex).asInstanceOf[$javaTpe])
+       |        }
+       |      )
+       |    }
+       |  }""".stripMargin
+  }
+
+  def sorterInt: String = {
+    s"""
+       |  protected def sortInt(a: Atom): Option[(Int, (Row, Row) => Int)] = a.sort.map { sort =>
        |    (
        |      sort.last.toInt,
        |      sort.head match {
        |        case 'a' => (a: Row, b: Row) =>
-       |          a.get(attrIndex).asInstanceOf[$javaTpe].compareTo(b.get(attrIndex).asInstanceOf[$javaTpe])
+       |          a.get(attrIndex) match {
+       |            case a: jInteger => a.compareTo(b.get(attrIndex).asInstanceOf[jInteger])
+       |            case a: jLong    => a.compareTo(b.get(attrIndex).asInstanceOf[jLong])
+       |          }
        |        case 'd' => (a: Row, b: Row) =>
-       |          b.get(attrIndex).asInstanceOf[$javaTpe].compareTo(a.get(attrIndex).asInstanceOf[$javaTpe])
+       |          b.get(attrIndex) match {
+       |            case b: jInteger => b.compareTo(a.get(attrIndex).asInstanceOf[jInteger])
+       |            case b: jLong    => b.compareTo(a.get(attrIndex).asInstanceOf[jLong])
+       |          }
        |      }
        |    )
        |  }""".stripMargin
