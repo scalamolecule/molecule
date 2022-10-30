@@ -17,8 +17,8 @@ object CardOne extends DataModel(3) {
     val date       = oneDate
     val uuid       = oneUUID
     val uri        = oneURI
-    val char       = oneChar
     val byte       = oneByte
     val short      = oneShort
+    val char       = oneChar
   }
 }

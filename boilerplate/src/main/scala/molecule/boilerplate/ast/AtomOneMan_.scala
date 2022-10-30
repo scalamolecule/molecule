@@ -6,7 +6,7 @@ import java.util.{Date, UUID}
 
 trait AtomOneMan_ { self: ModelBase =>
 
-  sealed trait AtomOneMan extends Atom
+  sealed trait AtomOneMan extends AtomOne
   
   case class AtomOneManString(
     ns          : String,
@@ -15,36 +15,6 @@ trait AtomOneMan_ { self: ModelBase =>
     vs          : Seq[String] = Nil,
     defaultValue: Option[String] = None,
     validation  : Option[ValidateString] = None,
-    sort        : Option[String] = None
-  ) extends AtomOneMan
-
-  case class AtomOneManChar(
-    ns          : String,
-    attr        : String,
-    op          : Op = V,
-    vs          : Seq[Char] = Nil,
-    defaultValue: Option[Char] = None,
-    validation  : Option[ValidateChar] = None,
-    sort        : Option[String] = None
-  ) extends AtomOneMan
-
-  case class AtomOneManByte(
-    ns          : String,
-    attr        : String,
-    op          : Op = V,
-    vs          : Seq[Byte] = Nil,
-    defaultValue: Option[Byte] = None,
-    validation  : Option[ValidateByte] = None,
-    sort        : Option[String] = None
-  ) extends AtomOneMan
-
-  case class AtomOneManShort(
-    ns          : String,
-    attr        : String,
-    op          : Op = V,
-    vs          : Seq[Short] = Nil,
-    defaultValue: Option[Short] = None,
-    validation  : Option[ValidateShort] = None,
     sort        : Option[String] = None
   ) extends AtomOneMan
 
@@ -145,6 +115,36 @@ trait AtomOneMan_ { self: ModelBase =>
     vs          : Seq[URI] = Nil,
     defaultValue: Option[URI] = None,
     validation  : Option[ValidateURI] = None,
+    sort        : Option[String] = None
+  ) extends AtomOneMan
+
+  case class AtomOneManByte(
+    ns          : String,
+    attr        : String,
+    op          : Op = V,
+    vs          : Seq[Byte] = Nil,
+    defaultValue: Option[Byte] = None,
+    validation  : Option[ValidateByte] = None,
+    sort        : Option[String] = None
+  ) extends AtomOneMan
+
+  case class AtomOneManShort(
+    ns          : String,
+    attr        : String,
+    op          : Op = V,
+    vs          : Seq[Short] = Nil,
+    defaultValue: Option[Short] = None,
+    validation  : Option[ValidateShort] = None,
+    sort        : Option[String] = None
+  ) extends AtomOneMan
+
+  case class AtomOneManChar(
+    ns          : String,
+    attr        : String,
+    op          : Op = V,
+    vs          : Seq[Char] = Nil,
+    defaultValue: Option[Char] = None,
+    validation  : Option[ValidateChar] = None,
     sort        : Option[String] = None
   ) extends AtomOneMan
 }

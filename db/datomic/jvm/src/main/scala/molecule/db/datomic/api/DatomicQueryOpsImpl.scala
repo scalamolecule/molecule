@@ -32,7 +32,7 @@ class DatomicQueryOpsImpl[Tpl](elements: Seq[Element])
   // Synchronous
   override def get(implicit conn: Connection): List[Tpl] = {
     val db         = conn.asInstanceOf[Conn_Peer].peerConn.db()
-    val rows       = Peer.q(query, db +: inputs: _*)
+    val rows       = Peer.q(query, db +: rulesAndInputs: _*)
     val sortedRows = sortRows(rows)
     val tuples     = List.newBuilder[Tpl]
     sortedRows.forEach(row => tuples.addOne(row2tpl(row)))

@@ -2,9 +2,9 @@ package codegen
 
 object BoilerplateGenerator extends App {
 
-//    boilerplate.api.expression._ExprOneMan.generate
-//    boilerplate.api.expression._ExprOneOpt.generate
-//    boilerplate.api.expression._ExprOneTac.generate
+  //  boilerplate.api.expression._ExprOneMan.generate
+  //  boilerplate.api.expression._ExprOneOpt.generate
+  //  boilerplate.api.expression._ExprOneTac.generate
 
   //  boilerplate.api.expression._ExprSetMan.generate
   //  boilerplate.api.expression._ExprSetOpt.generate
@@ -19,5 +19,5 @@ object BoilerplateGenerator extends App {
   //  boilerplate.api._SortAttrs.generate
   //  boilerplate.api._ModelOps.generate
 
-    boilerplate.ast._Atoms.generate
+  //  boilerplate.ast._Atoms.generate
 }

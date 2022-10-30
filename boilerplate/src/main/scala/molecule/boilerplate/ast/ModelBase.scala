@@ -5,9 +5,9 @@ import molecule.base.ast.SchemaAST._
 
 trait ModelBase extends Validations {
 
-  trait Element
+  sealed trait Element
 
-//  case class MoleculeModel(elements: Seq[Element]) //extends Element
+  //  case class MoleculeModel(elements: Seq[Element]) //extends Element
 
   trait Atom extends Element {
     val ns  : String
@@ -18,7 +18,7 @@ trait ModelBase extends Validations {
   }
   trait AtomOne extends Atom
   trait AtomSet extends Atom
-  trait AtomArr extends Atom
+  trait AtomArray extends Atom
   trait AtomMap extends Atom
 
   case class Bond(
@@ -42,7 +42,7 @@ trait ModelBase extends Validations {
   case class Composite(elements: Seq[Element]) extends Element
   case object Self extends Element
 
-  trait Op
+  sealed trait Op
 
   // Value
   case object EntValue extends Op
@@ -98,6 +98,7 @@ trait ModelBase extends Validations {
   case object Gt extends Op
   case object Ge extends Op
 
+  case object NoValue extends Op
 
 
   //

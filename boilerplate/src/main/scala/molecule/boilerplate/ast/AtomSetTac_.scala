@@ -6,7 +6,7 @@ import java.util.{Date, UUID}
 
 trait AtomSetTac_ { self: ModelBase =>
 
-  sealed trait AtomSetTac extends Atom
+  sealed trait AtomSetTac extends AtomSet
   
   case class AtomSetTacString(
     ns          : String,
@@ -15,36 +15,6 @@ trait AtomSetTac_ { self: ModelBase =>
     vs          : Seq[Set[String]] = Nil,
     defaultValue: Option[Set[String]] = None,
     validation  : Option[ValidateString] = None,
-    sort        : Option[String] = None
-  ) extends AtomSetTac
-
-  case class AtomSetTacChar(
-    ns          : String,
-    attr        : String,
-    op          : Op = V,
-    vs          : Seq[Set[Char]] = Nil,
-    defaultValue: Option[Set[Char]] = None,
-    validation  : Option[ValidateChar] = None,
-    sort        : Option[String] = None
-  ) extends AtomSetTac
-
-  case class AtomSetTacByte(
-    ns          : String,
-    attr        : String,
-    op          : Op = V,
-    vs          : Seq[Set[Byte]] = Nil,
-    defaultValue: Option[Set[Byte]] = None,
-    validation  : Option[ValidateByte] = None,
-    sort        : Option[String] = None
-  ) extends AtomSetTac
-
-  case class AtomSetTacShort(
-    ns          : String,
-    attr        : String,
-    op          : Op = V,
-    vs          : Seq[Set[Short]] = Nil,
-    defaultValue: Option[Set[Short]] = None,
-    validation  : Option[ValidateShort] = None,
     sort        : Option[String] = None
   ) extends AtomSetTac
 
@@ -145,6 +115,36 @@ trait AtomSetTac_ { self: ModelBase =>
     vs          : Seq[Set[URI]] = Nil,
     defaultValue: Option[Set[URI]] = None,
     validation  : Option[ValidateURI] = None,
+    sort        : Option[String] = None
+  ) extends AtomSetTac
+
+  case class AtomSetTacByte(
+    ns          : String,
+    attr        : String,
+    op          : Op = V,
+    vs          : Seq[Set[Byte]] = Nil,
+    defaultValue: Option[Set[Byte]] = None,
+    validation  : Option[ValidateByte] = None,
+    sort        : Option[String] = None
+  ) extends AtomSetTac
+
+  case class AtomSetTacShort(
+    ns          : String,
+    attr        : String,
+    op          : Op = V,
+    vs          : Seq[Set[Short]] = Nil,
+    defaultValue: Option[Set[Short]] = None,
+    validation  : Option[ValidateShort] = None,
+    sort        : Option[String] = None
+  ) extends AtomSetTac
+
+  case class AtomSetTacChar(
+    ns          : String,
+    attr        : String,
+    op          : Op = V,
+    vs          : Seq[Set[Char]] = Nil,
+    defaultValue: Option[Set[Char]] = None,
+    validation  : Option[ValidateChar] = None,
     sort        : Option[String] = None
   ) extends AtomSetTac
 }

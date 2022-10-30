@@ -6,45 +6,15 @@ import java.util.{Date, UUID}
 
 trait AtomSetOpt_ { self: ModelBase =>
 
-  sealed trait AtomSetOpt extends Atom
+  sealed trait AtomSetOpt extends AtomSet
   
   case class AtomSetOptString(
     ns          : String,
     attr        : String,
     op          : Op = V,
-    vs          : Seq[Set[String]] = Nil,
+    vs          : Option[Seq[Set[String]]] = None,
     defaultValue: Option[Set[String]] = None,
     validation  : Option[ValidateString] = None,
-    sort        : Option[String] = None
-  ) extends AtomSetOpt
-
-  case class AtomSetOptChar(
-    ns          : String,
-    attr        : String,
-    op          : Op = V,
-    vs          : Seq[Set[Char]] = Nil,
-    defaultValue: Option[Set[Char]] = None,
-    validation  : Option[ValidateChar] = None,
-    sort        : Option[String] = None
-  ) extends AtomSetOpt
-
-  case class AtomSetOptByte(
-    ns          : String,
-    attr        : String,
-    op          : Op = V,
-    vs          : Seq[Set[Byte]] = Nil,
-    defaultValue: Option[Set[Byte]] = None,
-    validation  : Option[ValidateByte] = None,
-    sort        : Option[String] = None
-  ) extends AtomSetOpt
-
-  case class AtomSetOptShort(
-    ns          : String,
-    attr        : String,
-    op          : Op = V,
-    vs          : Seq[Set[Short]] = Nil,
-    defaultValue: Option[Set[Short]] = None,
-    validation  : Option[ValidateShort] = None,
     sort        : Option[String] = None
   ) extends AtomSetOpt
 
@@ -52,7 +22,7 @@ trait AtomSetOpt_ { self: ModelBase =>
     ns          : String,
     attr        : String,
     op          : Op = V,
-    vs          : Seq[Set[Int]] = Nil,
+    vs          : Option[Seq[Set[Int]]] = None,
     defaultValue: Option[Set[Int]] = None,
     validation  : Option[ValidateInt] = None,
     sort        : Option[String] = None
@@ -62,7 +32,7 @@ trait AtomSetOpt_ { self: ModelBase =>
     ns          : String,
     attr        : String,
     op          : Op = V,
-    vs          : Seq[Set[Long]] = Nil,
+    vs          : Option[Seq[Set[Long]]] = None,
     defaultValue: Option[Set[Long]] = None,
     validation  : Option[ValidateLong] = None,
     sort        : Option[String] = None
@@ -72,7 +42,7 @@ trait AtomSetOpt_ { self: ModelBase =>
     ns          : String,
     attr        : String,
     op          : Op = V,
-    vs          : Seq[Set[Float]] = Nil,
+    vs          : Option[Seq[Set[Float]]] = None,
     defaultValue: Option[Set[Float]] = None,
     validation  : Option[ValidateFloat] = None,
     sort        : Option[String] = None
@@ -82,7 +52,7 @@ trait AtomSetOpt_ { self: ModelBase =>
     ns          : String,
     attr        : String,
     op          : Op = V,
-    vs          : Seq[Set[Double]] = Nil,
+    vs          : Option[Seq[Set[Double]]] = None,
     defaultValue: Option[Set[Double]] = None,
     validation  : Option[ValidateDouble] = None,
     sort        : Option[String] = None
@@ -92,7 +62,7 @@ trait AtomSetOpt_ { self: ModelBase =>
     ns          : String,
     attr        : String,
     op          : Op = V,
-    vs          : Seq[Set[Boolean]] = Nil,
+    vs          : Option[Seq[Set[Boolean]]] = None,
     defaultValue: Option[Set[Boolean]] = None,
     validation  : Option[ValidateBoolean] = None,
     sort        : Option[String] = None
@@ -102,7 +72,7 @@ trait AtomSetOpt_ { self: ModelBase =>
     ns          : String,
     attr        : String,
     op          : Op = V,
-    vs          : Seq[Set[BigInt]] = Nil,
+    vs          : Option[Seq[Set[BigInt]]] = None,
     defaultValue: Option[Set[BigInt]] = None,
     validation  : Option[ValidateBigInt] = None,
     sort        : Option[String] = None
@@ -112,7 +82,7 @@ trait AtomSetOpt_ { self: ModelBase =>
     ns          : String,
     attr        : String,
     op          : Op = V,
-    vs          : Seq[Set[BigDecimal]] = Nil,
+    vs          : Option[Seq[Set[BigDecimal]]] = None,
     defaultValue: Option[Set[BigDecimal]] = None,
     validation  : Option[ValidateBigDecimal] = None,
     sort        : Option[String] = None
@@ -122,7 +92,7 @@ trait AtomSetOpt_ { self: ModelBase =>
     ns          : String,
     attr        : String,
     op          : Op = V,
-    vs          : Seq[Set[Date]] = Nil,
+    vs          : Option[Seq[Set[Date]]] = None,
     defaultValue: Option[Set[Date]] = None,
     validation  : Option[ValidateDate] = None,
     sort        : Option[String] = None
@@ -132,7 +102,7 @@ trait AtomSetOpt_ { self: ModelBase =>
     ns          : String,
     attr        : String,
     op          : Op = V,
-    vs          : Seq[Set[UUID]] = Nil,
+    vs          : Option[Seq[Set[UUID]]] = None,
     defaultValue: Option[Set[UUID]] = None,
     validation  : Option[ValidateUUID] = None,
     sort        : Option[String] = None
@@ -142,9 +112,39 @@ trait AtomSetOpt_ { self: ModelBase =>
     ns          : String,
     attr        : String,
     op          : Op = V,
-    vs          : Seq[Set[URI]] = Nil,
+    vs          : Option[Seq[Set[URI]]] = None,
     defaultValue: Option[Set[URI]] = None,
     validation  : Option[ValidateURI] = None,
+    sort        : Option[String] = None
+  ) extends AtomSetOpt
+
+  case class AtomSetOptByte(
+    ns          : String,
+    attr        : String,
+    op          : Op = V,
+    vs          : Option[Seq[Set[Byte]]] = None,
+    defaultValue: Option[Set[Byte]] = None,
+    validation  : Option[ValidateByte] = None,
+    sort        : Option[String] = None
+  ) extends AtomSetOpt
+
+  case class AtomSetOptShort(
+    ns          : String,
+    attr        : String,
+    op          : Op = V,
+    vs          : Option[Seq[Set[Short]]] = None,
+    defaultValue: Option[Set[Short]] = None,
+    validation  : Option[ValidateShort] = None,
+    sort        : Option[String] = None
+  ) extends AtomSetOpt
+
+  case class AtomSetOptChar(
+    ns          : String,
+    attr        : String,
+    op          : Op = V,
+    vs          : Option[Seq[Set[Char]]] = None,
+    defaultValue: Option[Set[Char]] = None,
+    validation  : Option[ValidateChar] = None,
     sort        : Option[String] = None
   ) extends AtomSetOpt
 }

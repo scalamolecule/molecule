@@ -1,11 +1,14 @@
 // GENERATED CODE ********************************
 package molecule.db.datomic.query
 
+import molecule.base.util.BaseHelpers
+import molecule.base.util.exceptions.MoleculeException
+import molecule.boilerplate.ast.MoleculeModel._
 import molecule.core.query.Model2Query
 import scala.collection.mutable.ArrayBuffer
 
 
-class Base[Tpl] extends Model2Query[Tpl] {
+trait Base[Tpl] extends BaseHelpers { self: Model2Query[Tpl] =>
 
   // Query clause optimization weights
   final protected val wGround         = 1
@@ -24,7 +27,7 @@ class Base[Tpl] extends Model2Query[Tpl] {
   final protected val in      = new ArrayBuffer[String]
   final protected val where   = new ArrayBuffer[(String, Int)]
   final protected val rules   = new ArrayBuffer[String]
-  final protected val ins     = new ArrayBuffer[AnyRef]
+  final protected val inputs  = new ArrayBuffer[AnyRef]
   final protected val typers  = new ArrayBuffer[AnyRef => AnyRef]
 
   type Row = java.util.List[AnyRef]
@@ -33,6 +36,8 @@ class Base[Tpl] extends Model2Query[Tpl] {
   protected var attrIndex: Int = -1
   final protected val sorts    = new ArrayBuffer[(Int, (Row, Row) => Int)]
 
+  protected def unexpected(element: Element) = throw MoleculeException("Unexpected element: " + element)
+  protected def unexpected(op: Op) = throw MoleculeException("Unexpected operation: " + op)
 
   // Datomic entity id variable
   type Var = String
@@ -55,15 +60,15 @@ class Base[Tpl] extends Model2Query[Tpl] {
 
   final override lazy protected val row2tpl: Row => Tpl = {
     typers.length match {
-      case 1 => resolve1
-      case 2 => resolve2
-      case 3 => resolve3
-      case 4 => resolve4
-      case 5 => resolve5
-      case 6 => resolve6
-      case 7 => resolve7
-      case 8 => resolve8
-      case 9 => resolve9
+      case 1  => resolve1
+      case 2  => resolve2
+      case 3  => resolve3
+      case 4  => resolve4
+      case 5  => resolve5
+      case 6  => resolve6
+      case 7  => resolve7
+      case 8  => resolve8
+      case 9  => resolve9
       case 10 => resolve10
       case 11 => resolve11
       case 12 => resolve12
@@ -225,15 +230,15 @@ class Base[Tpl] extends Model2Query[Tpl] {
   }
 
   final private def resolve10: Row => Tpl = {
-    val t1 = typers(0)
-    val t2 = typers(1)
-    val t3 = typers(2)
-    val t4 = typers(3)
-    val t5 = typers(4)
-    val t6 = typers(5)
-    val t7 = typers(6)
-    val t8 = typers(7)
-    val t9 = typers(8)
+    val t1  = typers(0)
+    val t2  = typers(1)
+    val t3  = typers(2)
+    val t4  = typers(3)
+    val t5  = typers(4)
+    val t6  = typers(5)
+    val t7  = typers(6)
+    val t8  = typers(7)
+    val t9  = typers(8)
     val t10 = typers(9)
     (row: Row) =>
       (
@@ -251,15 +256,15 @@ class Base[Tpl] extends Model2Query[Tpl] {
   }
 
   final private def resolve11: Row => Tpl = {
-    val t1 = typers(0)
-    val t2 = typers(1)
-    val t3 = typers(2)
-    val t4 = typers(3)
-    val t5 = typers(4)
-    val t6 = typers(5)
-    val t7 = typers(6)
-    val t8 = typers(7)
-    val t9 = typers(8)
+    val t1  = typers(0)
+    val t2  = typers(1)
+    val t3  = typers(2)
+    val t4  = typers(3)
+    val t5  = typers(4)
+    val t6  = typers(5)
+    val t7  = typers(6)
+    val t8  = typers(7)
+    val t9  = typers(8)
     val t10 = typers(9)
     val t11 = typers(10)
     (row: Row) =>
@@ -279,15 +284,15 @@ class Base[Tpl] extends Model2Query[Tpl] {
   }
 
   final private def resolve12: Row => Tpl = {
-    val t1 = typers(0)
-    val t2 = typers(1)
-    val t3 = typers(2)
-    val t4 = typers(3)
-    val t5 = typers(4)
-    val t6 = typers(5)
-    val t7 = typers(6)
-    val t8 = typers(7)
-    val t9 = typers(8)
+    val t1  = typers(0)
+    val t2  = typers(1)
+    val t3  = typers(2)
+    val t4  = typers(3)
+    val t5  = typers(4)
+    val t6  = typers(5)
+    val t7  = typers(6)
+    val t8  = typers(7)
+    val t9  = typers(8)
     val t10 = typers(9)
     val t11 = typers(10)
     val t12 = typers(11)
@@ -309,15 +314,15 @@ class Base[Tpl] extends Model2Query[Tpl] {
   }
 
   final private def resolve13: Row => Tpl = {
-    val t1 = typers(0)
-    val t2 = typers(1)
-    val t3 = typers(2)
-    val t4 = typers(3)
-    val t5 = typers(4)
-    val t6 = typers(5)
-    val t7 = typers(6)
-    val t8 = typers(7)
-    val t9 = typers(8)
+    val t1  = typers(0)
+    val t2  = typers(1)
+    val t3  = typers(2)
+    val t4  = typers(3)
+    val t5  = typers(4)
+    val t6  = typers(5)
+    val t7  = typers(6)
+    val t8  = typers(7)
+    val t9  = typers(8)
     val t10 = typers(9)
     val t11 = typers(10)
     val t12 = typers(11)
@@ -341,15 +346,15 @@ class Base[Tpl] extends Model2Query[Tpl] {
   }
 
   final private def resolve14: Row => Tpl = {
-    val t1 = typers(0)
-    val t2 = typers(1)
-    val t3 = typers(2)
-    val t4 = typers(3)
-    val t5 = typers(4)
-    val t6 = typers(5)
-    val t7 = typers(6)
-    val t8 = typers(7)
-    val t9 = typers(8)
+    val t1  = typers(0)
+    val t2  = typers(1)
+    val t3  = typers(2)
+    val t4  = typers(3)
+    val t5  = typers(4)
+    val t6  = typers(5)
+    val t7  = typers(6)
+    val t8  = typers(7)
+    val t9  = typers(8)
     val t10 = typers(9)
     val t11 = typers(10)
     val t12 = typers(11)
@@ -375,15 +380,15 @@ class Base[Tpl] extends Model2Query[Tpl] {
   }
 
   final private def resolve15: Row => Tpl = {
-    val t1 = typers(0)
-    val t2 = typers(1)
-    val t3 = typers(2)
-    val t4 = typers(3)
-    val t5 = typers(4)
-    val t6 = typers(5)
-    val t7 = typers(6)
-    val t8 = typers(7)
-    val t9 = typers(8)
+    val t1  = typers(0)
+    val t2  = typers(1)
+    val t3  = typers(2)
+    val t4  = typers(3)
+    val t5  = typers(4)
+    val t6  = typers(5)
+    val t7  = typers(6)
+    val t8  = typers(7)
+    val t9  = typers(8)
     val t10 = typers(9)
     val t11 = typers(10)
     val t12 = typers(11)
@@ -411,15 +416,15 @@ class Base[Tpl] extends Model2Query[Tpl] {
   }
 
   final private def resolve16: Row => Tpl = {
-    val t1 = typers(0)
-    val t2 = typers(1)
-    val t3 = typers(2)
-    val t4 = typers(3)
-    val t5 = typers(4)
-    val t6 = typers(5)
-    val t7 = typers(6)
-    val t8 = typers(7)
-    val t9 = typers(8)
+    val t1  = typers(0)
+    val t2  = typers(1)
+    val t3  = typers(2)
+    val t4  = typers(3)
+    val t5  = typers(4)
+    val t6  = typers(5)
+    val t7  = typers(6)
+    val t8  = typers(7)
+    val t9  = typers(8)
     val t10 = typers(9)
     val t11 = typers(10)
     val t12 = typers(11)
@@ -449,15 +454,15 @@ class Base[Tpl] extends Model2Query[Tpl] {
   }
 
   final private def resolve17: Row => Tpl = {
-    val t1 = typers(0)
-    val t2 = typers(1)
-    val t3 = typers(2)
-    val t4 = typers(3)
-    val t5 = typers(4)
-    val t6 = typers(5)
-    val t7 = typers(6)
-    val t8 = typers(7)
-    val t9 = typers(8)
+    val t1  = typers(0)
+    val t2  = typers(1)
+    val t3  = typers(2)
+    val t4  = typers(3)
+    val t5  = typers(4)
+    val t6  = typers(5)
+    val t7  = typers(6)
+    val t8  = typers(7)
+    val t9  = typers(8)
     val t10 = typers(9)
     val t11 = typers(10)
     val t12 = typers(11)
@@ -489,15 +494,15 @@ class Base[Tpl] extends Model2Query[Tpl] {
   }
 
   final private def resolve18: Row => Tpl = {
-    val t1 = typers(0)
-    val t2 = typers(1)
-    val t3 = typers(2)
-    val t4 = typers(3)
-    val t5 = typers(4)
-    val t6 = typers(5)
-    val t7 = typers(6)
-    val t8 = typers(7)
-    val t9 = typers(8)
+    val t1  = typers(0)
+    val t2  = typers(1)
+    val t3  = typers(2)
+    val t4  = typers(3)
+    val t5  = typers(4)
+    val t6  = typers(5)
+    val t7  = typers(6)
+    val t8  = typers(7)
+    val t9  = typers(8)
     val t10 = typers(9)
     val t11 = typers(10)
     val t12 = typers(11)
@@ -531,15 +536,15 @@ class Base[Tpl] extends Model2Query[Tpl] {
   }
 
   final private def resolve19: Row => Tpl = {
-    val t1 = typers(0)
-    val t2 = typers(1)
-    val t3 = typers(2)
-    val t4 = typers(3)
-    val t5 = typers(4)
-    val t6 = typers(5)
-    val t7 = typers(6)
-    val t8 = typers(7)
-    val t9 = typers(8)
+    val t1  = typers(0)
+    val t2  = typers(1)
+    val t3  = typers(2)
+    val t4  = typers(3)
+    val t5  = typers(4)
+    val t6  = typers(5)
+    val t7  = typers(6)
+    val t8  = typers(7)
+    val t9  = typers(8)
     val t10 = typers(9)
     val t11 = typers(10)
     val t12 = typers(11)
@@ -575,15 +580,15 @@ class Base[Tpl] extends Model2Query[Tpl] {
   }
 
   final private def resolve20: Row => Tpl = {
-    val t1 = typers(0)
-    val t2 = typers(1)
-    val t3 = typers(2)
-    val t4 = typers(3)
-    val t5 = typers(4)
-    val t6 = typers(5)
-    val t7 = typers(6)
-    val t8 = typers(7)
-    val t9 = typers(8)
+    val t1  = typers(0)
+    val t2  = typers(1)
+    val t3  = typers(2)
+    val t4  = typers(3)
+    val t5  = typers(4)
+    val t6  = typers(5)
+    val t7  = typers(6)
+    val t8  = typers(7)
+    val t9  = typers(8)
     val t10 = typers(9)
     val t11 = typers(10)
     val t12 = typers(11)
@@ -621,15 +626,15 @@ class Base[Tpl] extends Model2Query[Tpl] {
   }
 
   final private def resolve21: Row => Tpl = {
-    val t1 = typers(0)
-    val t2 = typers(1)
-    val t3 = typers(2)
-    val t4 = typers(3)
-    val t5 = typers(4)
-    val t6 = typers(5)
-    val t7 = typers(6)
-    val t8 = typers(7)
-    val t9 = typers(8)
+    val t1  = typers(0)
+    val t2  = typers(1)
+    val t3  = typers(2)
+    val t4  = typers(3)
+    val t5  = typers(4)
+    val t6  = typers(5)
+    val t7  = typers(6)
+    val t8  = typers(7)
+    val t9  = typers(8)
     val t10 = typers(9)
     val t11 = typers(10)
     val t12 = typers(11)
@@ -669,15 +674,15 @@ class Base[Tpl] extends Model2Query[Tpl] {
   }
 
   final private def resolve22: Row => Tpl = {
-    val t1 = typers(0)
-    val t2 = typers(1)
-    val t3 = typers(2)
-    val t4 = typers(3)
-    val t5 = typers(4)
-    val t6 = typers(5)
-    val t7 = typers(6)
-    val t8 = typers(7)
-    val t9 = typers(8)
+    val t1  = typers(0)
+    val t2  = typers(1)
+    val t3  = typers(2)
+    val t4  = typers(3)
+    val t5  = typers(4)
+    val t6  = typers(5)
+    val t7  = typers(6)
+    val t8  = typers(7)
+    val t9  = typers(8)
     val t10 = typers(9)
     val t11 = typers(10)
     val t12 = typers(11)

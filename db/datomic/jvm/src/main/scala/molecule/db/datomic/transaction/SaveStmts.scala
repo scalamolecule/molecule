@@ -78,21 +78,21 @@ class SaveStmts(elements: Seq[Element]) {
 
   def resolveAtomOneOpt(atom: AtomOneOpt, a: Keyword): Unit = {
     atom match {
-      case AtomOneOptString(_, _, Eq, Seq(v), _, _, _)     => addV(a, v)
-      case AtomOneOptInt(_, _, Eq, Seq(v), _, _, _)        => addV(a, v)
-      case AtomOneOptLong(_, _, Eq, Seq(v), _, _, _)       => addV(a, v)
-      case AtomOneOptFloat(_, _, Eq, Seq(v), _, _, _)      => addV(a, v)
-      case AtomOneOptDouble(_, _, Eq, Seq(v), _, _, _)     => addV(a, v)
-      case AtomOneOptBoolean(_, _, Eq, Seq(v), _, _, _)    => addV(a, v)
-      case AtomOneOptBigInt(_, _, Eq, Seq(v), _, _, _)     => addV(a, v.bigInteger)
-      case AtomOneOptBigDecimal(_, _, Eq, Seq(v), _, _, _) => addV(a, v.bigDecimal)
-      case AtomOneOptDate(_, _, Eq, Seq(v), _, _, _)       => addV(a, v)
-      case AtomOneOptUUID(_, _, Eq, Seq(v), _, _, _)       => addV(a, v)
-      case AtomOneOptURI(_, _, Eq, Seq(v), _, _, _)        => addV(a, v)
-      case AtomOneOptChar(_, _, Eq, Seq(v), _, _, _)       => addV(a, v.toString)
-      case AtomOneOptByte(_, _, Eq, Seq(v), _, _, _)       => addV(a, v.toInt)
-      case AtomOneOptShort(_, _, Eq, Seq(v), _, _, _)      => addV(a, v.toInt)
-      case _                                               =>
+      case AtomOneOptString(_, _, Eq, Some(Seq(v)), _, _, _)     => addV(a, v)
+      case AtomOneOptInt(_, _, Eq, Some(Seq(v)), _, _, _)        => addV(a, v)
+      case AtomOneOptLong(_, _, Eq, Some(Seq(v)), _, _, _)       => addV(a, v)
+      case AtomOneOptFloat(_, _, Eq, Some(Seq(v)), _, _, _)      => addV(a, v)
+      case AtomOneOptDouble(_, _, Eq, Some(Seq(v)), _, _, _)     => addV(a, v)
+      case AtomOneOptBoolean(_, _, Eq, Some(Seq(v)), _, _, _)    => addV(a, v)
+      case AtomOneOptBigInt(_, _, Eq, Some(Seq(v)), _, _, _)     => addV(a, v.bigInteger)
+      case AtomOneOptBigDecimal(_, _, Eq, Some(Seq(v)), _, _, _) => addV(a, v.bigDecimal)
+      case AtomOneOptDate(_, _, Eq, Some(Seq(v)), _, _, _)       => addV(a, v)
+      case AtomOneOptUUID(_, _, Eq, Some(Seq(v)), _, _, _)       => addV(a, v)
+      case AtomOneOptURI(_, _, Eq, Some(Seq(v)), _, _, _)        => addV(a, v)
+      case AtomOneOptChar(_, _, Eq, Some(Seq(v)), _, _, _)       => addV(a, v.toString)
+      case AtomOneOptByte(_, _, Eq, Some(Seq(v)), _, _, _)       => addV(a, v.toInt)
+      case AtomOneOptShort(_, _, Eq, Some(Seq(v)), _, _, _)      => addV(a, v.toInt)
+      case _                                                     =>
         if (atom.op != Eq)
           throw MoleculeException("Can only save one applied value for each attribute. " +
             s"Found other expression `${atom.op}` in: " + atom)

@@ -62,9 +62,6 @@ abstract class CodeGenBase(val fileName: String, dir: String, basePath: String) 
 
   val baseTypes = Seq(
     "String",
-    "Char",
-    "Byte",
-    "Short",
     "Int",
     "Long",
     "Float",
@@ -75,12 +72,12 @@ abstract class CodeGenBase(val fileName: String, dir: String, basePath: String) 
     "Date",
     "UUID",
     "URI",
+    "Byte",
+    "Short",
+    "Char",
   )
   val javaTypes = Map(
     "String" -> "String",
-    "Char" -> "String",
-    "Byte" -> "jInteger",
-    "Short" -> "jInteger",
     "Int" -> "jInteger",
     "Long" -> "jLong",
     "Float" -> "jDouble",
@@ -91,5 +88,8 @@ abstract class CodeGenBase(val fileName: String, dir: String, basePath: String) 
     "Date" -> "Date",
     "UUID" -> "UUID",
     "URI" -> "URI",
+    "Byte" -> "jInteger",
+    "Short" -> "jInteger",
+    "Char" -> "String",
   )
 }

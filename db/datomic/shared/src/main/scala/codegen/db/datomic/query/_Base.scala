@@ -14,7 +14,7 @@ object _Base extends DatomicGenBase("Base", "/query") {
        |import scala.collection.mutable.ArrayBuffer
        |
        |
-       |class $fileName[Tpl] extends Model2Query[Tpl] {
+       |class Base[Tpl] extends Model2Query[Tpl] {
        |
        |  // Query clause optimization weights
        |  final protected val wGround         = 1
@@ -33,7 +33,7 @@ object _Base extends DatomicGenBase("Base", "/query") {
        |  final protected val in      = new ArrayBuffer[String]
        |  final protected val where   = new ArrayBuffer[(String, Int)]
        |  final protected val rules   = new ArrayBuffer[String]
-       |  final protected val ins     = new ArrayBuffer[AnyRef]
+       |  final protected val inputs  = new ArrayBuffer[AnyRef]
        |  final protected val typers  = new ArrayBuffer[AnyRef => AnyRef]
        |
        |  type Row = java.util.List[AnyRef]

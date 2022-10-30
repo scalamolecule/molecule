@@ -8,8 +8,8 @@ import java.util.{Date, UUID}
 import molecule.boilerplate.ast.MoleculeModel._
 
 
-trait Sort[Tpl] extends Base[Tpl] {
-
+//trait Sort[Tpl] extends Base[Tpl] {
+trait Sort[Tpl] { self: Base[Tpl] =>
   protected def sortString(a: Atom): Option[(Int, (Row, Row) => Int)] = a.sort.map { sort =>
     (
       sort.last.toInt,
@@ -18,42 +18,6 @@ trait Sort[Tpl] extends Base[Tpl] {
           a.get(attrIndex).asInstanceOf[String].compareTo(b.get(attrIndex).asInstanceOf[String])
         case 'd' => (a: Row, b: Row) =>
           b.get(attrIndex).asInstanceOf[String].compareTo(a.get(attrIndex).asInstanceOf[String])
-      }
-    )
-  }
-
-  protected def sortChar(a: Atom): Option[(Int, (Row, Row) => Int)] = a.sort.map { sort =>
-    (
-      sort.last.toInt,
-      sort.head match {
-        case 'a' => (a: Row, b: Row) =>
-          a.get(attrIndex).asInstanceOf[String].compareTo(b.get(attrIndex).asInstanceOf[String])
-        case 'd' => (a: Row, b: Row) =>
-          b.get(attrIndex).asInstanceOf[String].compareTo(a.get(attrIndex).asInstanceOf[String])
-      }
-    )
-  }
-
-  protected def sortByte(a: Atom): Option[(Int, (Row, Row) => Int)] = a.sort.map { sort =>
-    (
-      sort.last.toInt,
-      sort.head match {
-        case 'a' => (a: Row, b: Row) =>
-          a.get(attrIndex).asInstanceOf[jInteger].compareTo(b.get(attrIndex).asInstanceOf[jInteger])
-        case 'd' => (a: Row, b: Row) =>
-          b.get(attrIndex).asInstanceOf[jInteger].compareTo(a.get(attrIndex).asInstanceOf[jInteger])
-      }
-    )
-  }
-
-  protected def sortShort(a: Atom): Option[(Int, (Row, Row) => Int)] = a.sort.map { sort =>
-    (
-      sort.last.toInt,
-      sort.head match {
-        case 'a' => (a: Row, b: Row) =>
-          a.get(attrIndex).asInstanceOf[jInteger].compareTo(b.get(attrIndex).asInstanceOf[jInteger])
-        case 'd' => (a: Row, b: Row) =>
-          b.get(attrIndex).asInstanceOf[jInteger].compareTo(a.get(attrIndex).asInstanceOf[jInteger])
       }
     )
   }
@@ -174,6 +138,42 @@ trait Sort[Tpl] extends Base[Tpl] {
           a.get(attrIndex).asInstanceOf[URI].compareTo(b.get(attrIndex).asInstanceOf[URI])
         case 'd' => (a: Row, b: Row) =>
           b.get(attrIndex).asInstanceOf[URI].compareTo(a.get(attrIndex).asInstanceOf[URI])
+      }
+    )
+  }
+
+  protected def sortByte(a: Atom): Option[(Int, (Row, Row) => Int)] = a.sort.map { sort =>
+    (
+      sort.last.toInt,
+      sort.head match {
+        case 'a' => (a: Row, b: Row) =>
+          a.get(attrIndex).asInstanceOf[jInteger].compareTo(b.get(attrIndex).asInstanceOf[jInteger])
+        case 'd' => (a: Row, b: Row) =>
+          b.get(attrIndex).asInstanceOf[jInteger].compareTo(a.get(attrIndex).asInstanceOf[jInteger])
+      }
+    )
+  }
+
+  protected def sortShort(a: Atom): Option[(Int, (Row, Row) => Int)] = a.sort.map { sort =>
+    (
+      sort.last.toInt,
+      sort.head match {
+        case 'a' => (a: Row, b: Row) =>
+          a.get(attrIndex).asInstanceOf[jInteger].compareTo(b.get(attrIndex).asInstanceOf[jInteger])
+        case 'd' => (a: Row, b: Row) =>
+          b.get(attrIndex).asInstanceOf[jInteger].compareTo(a.get(attrIndex).asInstanceOf[jInteger])
+      }
+    )
+  }
+
+  protected def sortChar(a: Atom): Option[(Int, (Row, Row) => Int)] = a.sort.map { sort =>
+    (
+      sort.last.toInt,
+      sort.head match {
+        case 'a' => (a: Row, b: Row) =>
+          a.get(attrIndex).asInstanceOf[String].compareTo(b.get(attrIndex).asInstanceOf[String])
+        case 'd' => (a: Row, b: Row) =>
+          b.get(attrIndex).asInstanceOf[String].compareTo(a.get(attrIndex).asInstanceOf[String])
       }
     )
   }

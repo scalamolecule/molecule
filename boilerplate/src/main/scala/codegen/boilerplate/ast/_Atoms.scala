@@ -32,19 +32,20 @@ object _Atoms {
          |
          |trait Atom$card${mode}_ { self: ModelBase =>
          |
-         |  sealed trait Atom$card$mode extends Atom
+         |  sealed trait Atom$card$mode extends Atom$card
          |  $atomClasses
          |}""".stripMargin
     }
 
     def body(baseType: String): String = {
       val tpe = cardTpe(baseType)
+      val vs  = if (mode == "Opt") s"Option[Seq[$tpe]] = None" else s"Seq[$tpe] = Nil"
       s"""
          |  case class Atom$card$mode$baseType(
          |    ns          : String,
          |    attr        : String,
          |    op          : Op = V,
-         |    vs          : Seq[$tpe] = Nil,
+         |    vs          : $vs,
          |    defaultValue: Option[$tpe] = None,
          |    validation  : Option[Validate$baseType] = None,
          |    sort        : Option[String] = None
