@@ -7,7 +7,7 @@ import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
 
-object ExprOne_Date_ extends DatomicTestSuite {
+object Expr_Date_ extends DatomicTestSuite {
 
   lazy val tests = Tests {
 

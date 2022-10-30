@@ -34,8 +34,7 @@ package molecule.boilerplate.api
  *            Keywords applied to number attributes that return aggregated value(s).
  * @groupprio aggrNumber 31
  */
-
-object Keywords {
+trait KeywordsStable {
 
   trait Kw
 
@@ -67,7 +66,7 @@ object Keywords {
    * List[attribute-type]
    * @group aggregates
    */
-  object distinct extends distinct
+  case object distinct extends distinct
   trait distinct extends AggrKw
 
   /** Minimum attribute value(s). <br><br> Apply `min` keyword to attribute to
@@ -152,7 +151,7 @@ object Keywords {
   }
 
   case class maxs(n: Int) extends Kw
-//  trait maxs extends AggrKw
+  //  trait maxs extends AggrKw
 
   /** Random attribute value(s). <br><br> Apply `random` keyword to attribute to
    * return a single random attribute of entities matching the molecule.
@@ -189,11 +188,11 @@ object Keywords {
      * List[attribute-type]
      * @group aggregates
      */
-    def apply(i: Int): rands = ???
+    def apply(n: Int): rands = rands(n)
   }
 
   case class rands(n: Int) extends Kw
-//  trait rands extends AggrKw
+  //  trait rands extends AggrKw
 
   /** Sample attribute value(s). <br><br> Apply `sample` keyword to attribute to
    * return a single sample (random) attribute value of entities matching the
@@ -234,11 +233,11 @@ object Keywords {
      * List[attribute-type]
      * @group aggregates
      */
-    def apply(i: Int): samples = ???
+    def apply(n: Int): samples = samples(n)
   }
 
   case class samples(n: Int) extends Kw
-//  trait samples extends AggrKw
+  //  trait samples extends AggrKw
 
   /** Count of attribute values. <br><br> Apply `count` keyword to attribute to
    * return count of attribute values of entities matching the molecule.
@@ -415,38 +414,26 @@ object Keywords {
   trait unify extends Kw
 }
 
-//trait Keywords {
-//  object distinct
-////  object min
-//  object max
-//  object rand
-//  object sample
-//  object count
-//  object countDistinct
-//  object sum
-//  object median
-//  object avg
-//  object variance
-//  object stddev
-//
-//  object unify
-//}
+object Keywords extends KeywordsStable
 
-//object Keywords extends KeywordsStable
-//
-//trait Keywords {
-//  object distinct      extends Keywords.distinct
-//  object min           extends Keywords.min
-//  object max           extends Keywords.max
-//  object rand          extends Keywords.rand
-//  object sample        extends Keywords.sample
-//  object count         extends Keywords.count
-//  object countDistinct extends Keywords.countDistinct
-//  object sum           extends Keywords.sum
-//  object median        extends Keywords.median
-//  object avg           extends Keywords.avg
-//  object variance      extends Keywords.variance
-//  object stddev        extends Keywords.stddev
-//
-//  object unify extends Keywords.unify
-//}
+
+trait Keywords {
+  // Common for all types
+  object distinct extends Keywords.distinct
+  object min extends Keywords.min
+  object max extends Keywords.max
+  object rand extends Keywords.rand
+  object sample extends Keywords.sample
+  object count extends Keywords.count
+  object countDistinct extends Keywords.countDistinct
+
+  // Number aggregators
+  object sum extends Keywords.sum
+  object median extends Keywords.median
+  object avg extends Keywords.avg
+  object variance extends Keywords.variance
+  object stddev extends Keywords.stddev
+
+  // Self reference unifying
+  object unify extends Keywords.unify
+}

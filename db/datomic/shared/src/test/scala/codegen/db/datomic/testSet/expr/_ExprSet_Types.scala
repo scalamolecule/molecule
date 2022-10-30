@@ -1,10 +1,10 @@
-package codegen.db.datomic.test.expr
+package codegen.db.datomic.testSet.expr
 
 import java.nio.file.{Files, Paths}
 import codegen.DatomicTestGenBase
 import molecule.base.util.{BaseHelpers, CodeGenBase}
 
-object _ExprOne_Types extends CodeGenBase with BaseHelpers {
+object _ExprSet_Types extends CodeGenBase with BaseHelpers {
 
 
   def generate: Unit = {
@@ -14,7 +14,7 @@ object _ExprOne_Types extends CodeGenBase with BaseHelpers {
   }
 
   case class TransformFile(card: String, tpe: String, v: String, imp: String = "")
-    extends DatomicTestGenBase(s"Expr${card}_${tpe}_", "/test/expr") {
+    extends DatomicTestGenBase(s"Expr${card}_${tpe}_", "/testSet/expr") {
     val cardTpe = card match {
       case "One"   => (baseType: String) => baseType
       case "Set"   => (baseType: String) => s"Set[$baseType]"
@@ -24,7 +24,7 @@ object _ExprOne_Types extends CodeGenBase with BaseHelpers {
 
     val content = {
       val src =
-        new String(Files.readAllBytes(Paths.get(path, "ExprOne_Int.scala")), "UTF-8")
+        new String(Files.readAllBytes(Paths.get(path, "ExprSet_Int.scala")), "UTF-8")
           .replace("package", "// GENERATED CODE ********************************\npackage")
           .replace("Int", tpe)
           .replace("int", v)

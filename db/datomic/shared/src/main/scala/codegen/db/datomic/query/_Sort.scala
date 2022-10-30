@@ -38,25 +38,4 @@ object _Sort extends DatomicGenBase("Sort", "/query") {
        |    }
        |  }""".stripMargin
   }
-
-  def sorterInt: String = {
-    s"""
-       |  protected def sortInt(a: Atom): Option[(Int, (Row, Row) => Int)] = a.sort.map { sort =>
-       |    (
-       |      sort.last.toInt,
-       |      sort.head match {
-       |        case 'a' => (a: Row, b: Row) =>
-       |          a.get(attrIndex) match {
-       |            case a: jInteger => a.compareTo(b.get(attrIndex).asInstanceOf[jInteger])
-       |            case a: jLong    => a.compareTo(b.get(attrIndex).asInstanceOf[jLong])
-       |          }
-       |        case 'd' => (a: Row, b: Row) =>
-       |          b.get(attrIndex) match {
-       |            case b: jInteger => b.compareTo(a.get(attrIndex).asInstanceOf[jInteger])
-       |            case b: jLong    => b.compareTo(a.get(attrIndex).asInstanceOf[jLong])
-       |          }
-       |      }
-       |    )
-       |  }""".stripMargin
-  }
 }

@@ -12,7 +12,7 @@ trait ModelTransformations {
 
   protected def toInt(es: Seq[Element], kw: Kw): Seq[Element] = {
     val last = es.last match {
-      case a: AtomOneMan => AtomOneManInt(a.ns, a.attr, Fn(kw.toString))
+      case a: AtomOneMan => AtomOneManInt(a.ns, a.attr, Fn(kw))
       case a             => unexpected(a)
     }
     es.init :+ last
@@ -20,7 +20,7 @@ trait ModelTransformations {
 
   protected def toDouble(es: Seq[Element], kw: Kw): Seq[Element] = {
     val last = es.last match {
-      case a: AtomOneMan => AtomOneManDouble(a.ns, a.attr, Fn(kw.toString))
+      case a: AtomOneMan => AtomOneManDouble(a.ns, a.attr, Fn(kw))
       case a             => unexpected(a)
     }
     es.init :+ last
@@ -29,21 +29,20 @@ trait ModelTransformations {
   protected def toList(es: Seq[Element], kw: Kw, n: Option[Int]): Seq[Element] = {
     val last = es.last match {
       case a: AtomOneMan => a match {
-        case a: AtomOneManString     => a.copy(op = Fn(kw.toString, n))
-        case a: AtomOneManInt        => a.copy(op = Fn(kw.toString, n))
-        case a: AtomOneManLong       => a.copy(op = Fn(kw.toString, n))
-        case a: AtomOneManDouble     => a.copy(op = Fn(kw.toString, n))
-        case a: AtomOneManBoolean    => a.copy(op = Fn(kw.toString, n))
-        case a: AtomOneManBigInt     => a.copy(op = Fn(kw.toString, n))
-        case a: AtomOneManBigDecimal => a.copy(op = Fn(kw.toString, n))
-        case a: AtomOneManDate       => a.copy(op = Fn(kw.toString, n))
-        case a: AtomOneManUUID       => a.copy(op = Fn(kw.toString, n))
-        case a: AtomOneManURI        => a.copy(op = Fn(kw.toString, n))
-        case a: AtomOneManByte       => a.copy(op = Fn(kw.toString, n))
-        case a: AtomOneManShort      => a.copy(op = Fn(kw.toString, n))
-        case a: AtomOneManFloat      => a.copy(op = Fn(kw.toString, n))
-        case a: AtomOneManChar       => a.copy(op = Fn(kw.toString, n))
-        case a                       => unexpected(a)
+        case a: AtomOneManString     => a.copy(op = Fn(kw, n))
+        case a: AtomOneManInt        => a.copy(op = Fn(kw, n))
+        case a: AtomOneManLong       => a.copy(op = Fn(kw, n))
+        case a: AtomOneManDouble     => a.copy(op = Fn(kw, n))
+        case a: AtomOneManBoolean    => a.copy(op = Fn(kw, n))
+        case a: AtomOneManBigInt     => a.copy(op = Fn(kw, n))
+        case a: AtomOneManBigDecimal => a.copy(op = Fn(kw, n))
+        case a: AtomOneManDate       => a.copy(op = Fn(kw, n))
+        case a: AtomOneManUUID       => a.copy(op = Fn(kw, n))
+        case a: AtomOneManURI        => a.copy(op = Fn(kw, n))
+        case a: AtomOneManByte       => a.copy(op = Fn(kw, n))
+        case a: AtomOneManShort      => a.copy(op = Fn(kw, n))
+        case a: AtomOneManFloat      => a.copy(op = Fn(kw, n))
+        case a: AtomOneManChar       => a.copy(op = Fn(kw, n))
       }
       case a             => unexpected(a)
     }
@@ -53,21 +52,20 @@ trait ModelTransformations {
   protected def asIs(es: Seq[Element], kw: Kw): Seq[Element] = {
     val last = es.last match {
       case a: AtomOneMan => a match {
-        case a: AtomOneManString     => a.copy(op = Fn(kw.toString))
-        case a: AtomOneManInt        => a.copy(op = Fn(kw.toString))
-        case a: AtomOneManLong       => a.copy(op = Fn(kw.toString))
-        case a: AtomOneManDouble     => a.copy(op = Fn(kw.toString))
-        case a: AtomOneManBoolean    => a.copy(op = Fn(kw.toString))
-        case a: AtomOneManBigInt     => a.copy(op = Fn(kw.toString))
-        case a: AtomOneManBigDecimal => a.copy(op = Fn(kw.toString))
-        case a: AtomOneManDate       => a.copy(op = Fn(kw.toString))
-        case a: AtomOneManUUID       => a.copy(op = Fn(kw.toString))
-        case a: AtomOneManURI        => a.copy(op = Fn(kw.toString))
-        case a: AtomOneManByte       => a.copy(op = Fn(kw.toString))
-        case a: AtomOneManShort      => a.copy(op = Fn(kw.toString))
-        case a: AtomOneManFloat      => a.copy(op = Fn(kw.toString))
-        case a: AtomOneManChar       => a.copy(op = Fn(kw.toString))
-        case a                       => unexpected(a)
+        case a: AtomOneManString     => a.copy(op = Fn(kw))
+        case a: AtomOneManInt        => a.copy(op = Fn(kw))
+        case a: AtomOneManLong       => a.copy(op = Fn(kw))
+        case a: AtomOneManDouble     => a.copy(op = Fn(kw))
+        case a: AtomOneManBoolean    => a.copy(op = Fn(kw))
+        case a: AtomOneManBigInt     => a.copy(op = Fn(kw))
+        case a: AtomOneManBigDecimal => a.copy(op = Fn(kw))
+        case a: AtomOneManDate       => a.copy(op = Fn(kw))
+        case a: AtomOneManUUID       => a.copy(op = Fn(kw))
+        case a: AtomOneManURI        => a.copy(op = Fn(kw))
+        case a: AtomOneManByte       => a.copy(op = Fn(kw))
+        case a: AtomOneManShort      => a.copy(op = Fn(kw))
+        case a: AtomOneManFloat      => a.copy(op = Fn(kw))
+        case a: AtomOneManChar       => a.copy(op = Fn(kw))
       }
       case a             => unexpected(a)
     }
@@ -91,7 +89,6 @@ trait ModelTransformations {
         case a: AtomOneManShort      => a.copy(op = op, vs = vs.asInstanceOf[Seq[Short]])
         case a: AtomOneManFloat      => a.copy(op = op, vs = vs.asInstanceOf[Seq[Float]])
         case a: AtomOneManChar       => a.copy(op = op, vs = vs.asInstanceOf[Seq[Char]])
-        case a                       => unexpected(a)
       }
       case a: AtomOneTac => a match {
         case a: AtomOneTacString     => a.copy(op = op, vs = vs.asInstanceOf[Seq[String]])
@@ -108,7 +105,6 @@ trait ModelTransformations {
         case a: AtomOneTacShort      => a.copy(op = op, vs = vs.asInstanceOf[Seq[Short]])
         case a: AtomOneTacFloat      => a.copy(op = op, vs = vs.asInstanceOf[Seq[Float]])
         case a: AtomOneTacChar       => a.copy(op = op, vs = vs.asInstanceOf[Seq[Char]])
-        case a                       => unexpected(a)
       }
       case a             => unexpected(a)
     }
@@ -132,7 +128,6 @@ trait ModelTransformations {
         case a: AtomOneOptShort      => a.copy(op = op, vs = vs.asInstanceOf[Option[Seq[Short]]])
         case a: AtomOneOptFloat      => a.copy(op = op, vs = vs.asInstanceOf[Option[Seq[Float]]])
         case a: AtomOneOptChar       => a.copy(op = op, vs = vs.asInstanceOf[Option[Seq[Char]]])
-        case a                       => unexpected(a)
       }
       case a             => unexpected(a)
     }
@@ -156,7 +151,6 @@ trait ModelTransformations {
         case a: AtomOneManShort      => a.copy(sort = Some(sort))
         case a: AtomOneManFloat      => a.copy(sort = Some(sort))
         case a: AtomOneManChar       => a.copy(sort = Some(sort))
-        case a                       => unexpected(a)
       }
       case a: AtomOneOpt => a match {
         case a: AtomOneOptString     => a.copy(sort = Some(sort))
@@ -173,7 +167,6 @@ trait ModelTransformations {
         case a: AtomOneOptShort      => a.copy(sort = Some(sort))
         case a: AtomOneOptFloat      => a.copy(sort = Some(sort))
         case a: AtomOneOptChar       => a.copy(sort = Some(sort))
-        case a                       => unexpected(a)
       }
       case a             => unexpected(a)
     }

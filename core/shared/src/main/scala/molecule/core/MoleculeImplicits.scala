@@ -1,11 +1,12 @@
 // GENERATED CODE ********************************
 package molecule.core
 
+import molecule.boilerplate.api.Keywords
 import molecule.boilerplate.markers.NamespaceMarkers._
 import molecule.core.api.MoleculeApi._
 import scala.language.implicitConversions
 
-trait MoleculeImplicits {
+trait MoleculeImplicits extends Keywords {
   implicit def m[A](molecule: Molecule_01[A]): MoleculeApi_01[A]
   implicit def m[A, B](molecule: Molecule_02[A, B]): MoleculeApi_02[A, B]
   implicit def m[A, B, C](molecule: Molecule_03[A, B, C]): MoleculeApi_03[A, B, C]

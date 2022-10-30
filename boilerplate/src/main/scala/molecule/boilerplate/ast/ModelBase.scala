@@ -1,13 +1,12 @@
 package molecule.boilerplate.ast
 
 import molecule.base.ast.SchemaAST._
+import molecule.boilerplate.api.Keywords.Kw
 
 
 trait ModelBase extends Validations {
 
   sealed trait Element
-
-  //  case class MoleculeModel(elements: Seq[Element]) //extends Element
 
   trait Atom extends Element {
     val ns  : String
@@ -26,13 +25,9 @@ trait ModelBase extends Validations {
     refAttr: String,
     refNs: String = "",
     card: Cardinality = one
-  ) extends Element {
-    //    override def toString: String = s"""Bond("$ns", "$refAttr", "$refNs", $card, ${sq(gvs)})"""
-  }
+  ) extends Element
 
-  case class ReBond(backRef: String) extends Element {
-    override def toString: String = s"""ReBond("$backRef")"""
-  }
+  case class ReBond(backRef: String) extends Element
 
   case class Nested(bond: Bond, elements: Seq[Element]) extends Element
   // todo?
@@ -44,61 +39,37 @@ trait ModelBase extends Validations {
 
   sealed trait Op
 
-  // Value
-  case object EntValue extends Op
   case object V extends Op
-
-  case class BackValue(backNs: String) extends Op {
-    override def toString: String = s"""BackValue("$backNs")"""
-  }
-  case object EnumVal extends Op
-  case object IndexVal extends Op
-  case object Unify extends Op
-
-  // Aggregate
-  case object Distinct extends Op
-
-  case class Aggr(kw: String) extends Op {
-    override def toString: String = s"""Aggr("$kw")"""
-  }
-
-  //  case class AggrN(kw: String, n: OneValue) extends ModelValue {
-  case class AggrN(kw: String) extends Op {
-    override def toString: String = s"""AggrN("$kw")"""
-    //    override def toString: String = s"""AggrN("$kw", $n)"""
-  }
-
-  case class AggrCoalesce(kw: String) extends Op {
-    override def toString: String = s"""AggrCoalesce("$kw")"""
-  }
-
-  //  // Function
-  case class Fn(name: String, value: Option[Int] = None) extends Op {
-    //    override def toString: String = s"""Fn("$name", ${o(value)})"""
-  }
-
-  // Exact matches. For card-many/map the whole Set/Map must match
   case object Eq extends Op
   case object Neq extends Op
-
-  // Card-many/map matches for subsets in Set/Map
-  // Misspelled to distinguish it from Scala Apply
-  case object Appply extends Op
-  case object Not extends Op
-
-  // Matchers taking Seqs of Set/Map as argument
-  case object Eq_ extends Op
-  case object Neq_ extends Op
-  case object Apply_ extends Op
-  case object Not_ extends Op
-
-  // Comparison
   case object Lt extends Op
   case object Le extends Op
   case object Gt extends Op
   case object Ge extends Op
-
   case object NoValue extends Op
+  case class Fn(fn: Kw, n: Option[Int] = None) extends Op
+  case object Unify extends Op
+
+
+  //  case class Aggr(kw: String) extends Op
+  //  case class AggrN(kw: String) extends Op
+  //  case class AggrCoalesce(kw: String) extends Op
+  //  case object Distinct extends Op
+
+  //  case object EntValue extends Op
+  //  case class BackValue(backNs: String) extends Op
+  //  case object EnumVal extends Op
+  //  case object IndexVal extends Op
+  //  // Card-many/map matches for subsets in Set/Map
+  //  // Misspelled to distinguish it from Scala Apply
+  //  case object Appply extends Op
+  //  case object Not extends Op
+  //
+  //  // Matchers taking Seqs of Set/Map as argument
+  //  case object Eq_ extends Op
+  //  case object Neq_ extends Op
+  //  case object Apply_ extends Op
+  //  case object Not_ extends Op
 
 
   //

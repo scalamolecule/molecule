@@ -6,7 +6,7 @@ import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
 
-object ExprOne_BigInt_ extends DatomicTestSuite {
+object Expr_BigInt_ extends DatomicTestSuite {
 
   lazy val tests = Tests {
 
