@@ -5,7 +5,7 @@ import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
 
-object AggrNumber_Int extends DatomicTestSuite {
+object AggrNum_Int extends DatomicTestSuite {
 
 
   lazy val tests = Tests {
@@ -17,11 +17,7 @@ object AggrNumber_Int extends DatomicTestSuite {
         (2, int3),
       )).transact
 
-      One.int(sum).query.get.head ==> (
-        int1 +
-          int2 +
-          int3
-        )
+      One.int(sum).query.get.head ==> (int1 + int2 + int3)
       One.n.int(sum).query.get ==> List(
         (1, int1),
         (2, int2 + int3),
@@ -36,7 +32,8 @@ object AggrNumber_Int extends DatomicTestSuite {
         (2, int4),
       )).transact
 
-      // OBS! Datomic rounds down to nearest whole number!
+      // OBS! Datomic rounds down to nearest whole number
+      // (when calculating the median for multiple numbers)!
       // This is another semantic than described on wikipedia:
       // https://en.wikipedia.org/wiki/Median
       // See also
@@ -46,10 +43,9 @@ object AggrNumber_Int extends DatomicTestSuite {
       One.int(median).query.get.head ==> int2
       One.n.int(median).query.get ==> List(
         (1, int1),
-        (2, int3),
+        (2, 3.0),
       )
     }
-
 
     "avg" - cardOne { implicit conn =>
       One.n.int.insert(List(

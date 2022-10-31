@@ -10,7 +10,7 @@ import scala.annotation.tailrec
 
 
 class InsertStmts(elements: Seq[Element], tpls: Seq[Product], tempIdInit: Int = 0)
-  extends InsertResolvers(elements) {
+  extends InsertResolvers_(elements) {
 
   // Accumulate java insert data
   final private val stmts: util.ArrayList[jList[AnyRef]] = new java.util.ArrayList[jList[AnyRef]]()

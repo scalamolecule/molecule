@@ -17,11 +17,24 @@ trait ExprOne[Tpl] { self: Sort[Tpl] with Base[Tpl] =>
   private lazy val fromShort  = (v: Any) => v.asInstanceOf[Short].toInt.asInstanceOf[Any]
 
   // Datomic Java to Scala type converters
-  private lazy val toBigInt = (v: AnyRef) => BigInt(v.asInstanceOf[jBigInt]).asInstanceOf[AnyRef]
+  private lazy val toBigInt = (v: AnyRef) => v match {
+    case v: jBigInt => BigInt(v).asInstanceOf[AnyRef]
+    // todo: can we avoid dependency on clojure here?
+    case v: clojure.lang.BigInt => BigInt(v.toBigInteger).asInstanceOf[AnyRef]
+    //
+    //      case v: Number => BigInt(v.longValue()).asInstanceOf[AnyRef]
+    //    BigInt(v.asInstanceOf[jBigInt]).asInstanceOf[AnyRef]
+  }
   private lazy val toBigDec = (v: AnyRef) => BigDecimal(v.asInstanceOf[jBigDecimal]).asInstanceOf[AnyRef]
   private lazy val toChar   = (v: AnyRef) => v.asInstanceOf[String].charAt(0).asInstanceOf[AnyRef]
-  private lazy val toByte   = (v: AnyRef) => v.asInstanceOf[Integer].toByte.asInstanceOf[AnyRef]
-  private lazy val toShort  = (v: AnyRef) => v.asInstanceOf[Integer].toShort.asInstanceOf[AnyRef]
+  private lazy val toByte   = (v: AnyRef) => v match {
+    case v: Integer => v.toByte.asInstanceOf[AnyRef]
+    case v: jLong   => v.toByte.asInstanceOf[AnyRef]
+  }
+  private lazy val toShort  = (v: AnyRef) => v match {
+    case v: Integer => v.toShort.asInstanceOf[AnyRef]
+    case v: jLong   => v.toShort.asInstanceOf[AnyRef]
+  }
 
   private lazy val dString : String => String     = (v: String) => "\"" + escStr(v) + "\""
   private lazy val dInt    : Int => String        = (v: Int) => v.toString

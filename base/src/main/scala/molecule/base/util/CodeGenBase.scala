@@ -19,6 +19,16 @@ trait CodeGenBase {
     "Short",
     "Char",
   )
+  val numTypes = Seq(
+    "Int",
+    "Long",
+    "Float",
+    "Double",
+    "BigInt",
+    "BigDecimal",
+    "Byte",
+    "Short",
+  )
   
   val javaTypes = Map(
     "String" -> "String",
@@ -52,5 +62,15 @@ trait CodeGenBase {
     "Byte" -> ("byte", ""),
     "Short" -> ("short", ""),
     "Char" -> ("char", ""),
+  )
+  val tpeVarImpNum = Map(
+    "Int" -> ("int", ""),
+    "Long" -> ("long", ""),
+    "Float" -> ("float", ""),
+    "Double" -> ("double", ""),
+    "BigInt" -> ("bigInt", ""),
+    "BigDecimal" -> ("bigDecimal", ""),
+    "Byte" -> ("byte", ""),
+    "Short" -> ("short", ""),
   )
 }
