@@ -8,7 +8,7 @@ import scala.annotation.tailrec;
 class DatomicModel2Query[Tpl](elements: Seq[Element])
   extends Model2Query[Tpl]
     with ExprOne[Tpl]
-    with ResolversOne
+    with TypeResolvers
     with Sort[Tpl]
     with Base[Tpl]
     with Cast_[Tpl] {

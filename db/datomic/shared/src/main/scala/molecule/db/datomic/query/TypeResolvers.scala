@@ -6,7 +6,7 @@ import java.net.URI
 import java.util.{Date, UUID, List => jList, Map => jMap, Set => jSet}
 import molecule.base.util.BaseHelpers
 
-trait ResolversOne extends BaseHelpers {
+trait TypeResolvers extends BaseHelpers {
 
   private lazy val fromBigInt = (v: Any) => v.asInstanceOf[BigInt].bigInteger.asInstanceOf[Any]
   private lazy val fromBigDec = (v: Any) => v.asInstanceOf[BigDecimal].bigDecimal.asInstanceOf[Any]
