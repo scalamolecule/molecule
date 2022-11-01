@@ -38,15 +38,15 @@ class InsertStmts(elements: Seq[Element], tpls: Seq[Product], tempIdInit: Int = 
   ): List[Product => Unit] = {
     elements match {
       case element :: tail => element match {
-        case atom: Atom =>
-          val a = kw(atom.ns, atom.attr)
-          atom match {
-            case atom: AtomOneMan => resolve(tail, resolvers :+ resolveAtomOneMan(atom, n, a), n + 1)
-            case atom: AtomOneOpt => resolve(tail, resolvers :+ resolveAtomOneOpt(atom, n, a), n + 1)
+        case attr: Attr =>
+          val a = kw(attr.ns, attr.attr)
+          attr match {
+            case attr: AttrOneMan => resolve(tail, resolvers :+ resolveAttrOneMan(attr, n, a), n + 1)
+            case attr: AttrOneOpt => resolve(tail, resolvers :+ resolveAttrOneOpt(attr, n, a), n + 1)
           }
 
-        case Bond(ns, refAttr, refNs, one) => resolvers
-        case other                         =>
+        case Ref(ns, refAttr, refNs, one) => resolvers
+        case other                        =>
           throw MoleculeException("Unexpected element: " + other)
       }
       case Nil             => resolvers
@@ -65,50 +65,50 @@ class InsertStmts(elements: Seq[Element], tpls: Seq[Product], tempIdInit: Int = 
   private lazy val byte2java   = (v: Any) => v.asInstanceOf[Byte].toInt
   private lazy val short2java  = (v: Any) => v.asInstanceOf[Short].toInt
 
-  private def resolveAtomOneMan(atom: AtomOneMan, n: Int, a: Keyword): Product => Unit = {
-    atom match {
-      case _: AtomOneManString     => addV(a, n, identity)
-      case _: AtomOneManInt        => addV(a, n, identity)
-      case _: AtomOneManLong       => addV(a, n, identity)
-      case _: AtomOneManFloat      => addV(a, n, identity)
-      case _: AtomOneManDouble     => addV(a, n, identity)
-      case _: AtomOneManBoolean    => addV(a, n, identity)
-      case _: AtomOneManBigInt     => addV(a, n, bigInt2java)
-      case _: AtomOneManBigDecimal => addV(a, n, bigDec2java)
-      case _: AtomOneManDate       => addV(a, n, identity)
-      case _: AtomOneManUUID       => addV(a, n, identity)
-      case _: AtomOneManURI        => addV(a, n, identity)
-      case _: AtomOneManChar       => addV(a, n, char2java)
-      case _: AtomOneManByte       => addV(a, n, byte2java)
-      case _: AtomOneManShort      => addV(a, n, short2java)
+  private def resolveAttrOneMan(attr: AttrOneMan, n: Int, a: Keyword): Product => Unit = {
+    attr match {
+      case _: AttrOneManString     => addV(a, n, identity)
+      case _: AttrOneManInt        => addV(a, n, identity)
+      case _: AttrOneManLong       => addV(a, n, identity)
+      case _: AttrOneManFloat      => addV(a, n, identity)
+      case _: AttrOneManDouble     => addV(a, n, identity)
+      case _: AttrOneManBoolean    => addV(a, n, identity)
+      case _: AttrOneManBigInt     => addV(a, n, bigInt2java)
+      case _: AttrOneManBigDecimal => addV(a, n, bigDec2java)
+      case _: AttrOneManDate       => addV(a, n, identity)
+      case _: AttrOneManUUID       => addV(a, n, identity)
+      case _: AttrOneManURI        => addV(a, n, identity)
+      case _: AttrOneManChar       => addV(a, n, char2java)
+      case _: AttrOneManByte       => addV(a, n, byte2java)
+      case _: AttrOneManShort      => addV(a, n, short2java)
       case other                   => throw MoleculeException("Unexpected element: " + other)
     }
   }
 
-  private def resolveAtomOneOpt(atom: AtomOneOpt, n: Int, a: Keyword): Product => Unit = {
-    atom match {
-      case _: AtomOneOptString     => addOptV(a, n, identity)
-      case _: AtomOneOptInt        => addOptV(a, n, identity)
-      case _: AtomOneOptLong       => addOptV(a, n, identity)
-      case _: AtomOneOptFloat      => addOptV(a, n, identity)
-      case _: AtomOneOptDouble     => addOptV(a, n, identity)
-      case _: AtomOneOptBoolean    => addOptV(a, n, identity)
-      case _: AtomOneOptBigInt     => addOptV(a, n, bigInt2java)
-      case _: AtomOneOptBigDecimal => addOptV(a, n, bigDec2java)
-      case _: AtomOneOptDate       => addOptV(a, n, identity)
-      case _: AtomOneOptUUID       => addOptV(a, n, identity)
-      case _: AtomOneOptURI        => addOptV(a, n, identity)
-      case _: AtomOneOptChar       => addOptV(a, n, char2java)
-      case _: AtomOneOptByte       => addOptV(a, n, byte2java)
-      case _: AtomOneOptShort      => addOptV(a, n, short2java)
+  private def resolveAttrOneOpt(attr: AttrOneOpt, n: Int, a: Keyword): Product => Unit = {
+    attr match {
+      case _: AttrOneOptString     => addOptV(a, n, identity)
+      case _: AttrOneOptInt        => addOptV(a, n, identity)
+      case _: AttrOneOptLong       => addOptV(a, n, identity)
+      case _: AttrOneOptFloat      => addOptV(a, n, identity)
+      case _: AttrOneOptDouble     => addOptV(a, n, identity)
+      case _: AttrOneOptBoolean    => addOptV(a, n, identity)
+      case _: AttrOneOptBigInt     => addOptV(a, n, bigInt2java)
+      case _: AttrOneOptBigDecimal => addOptV(a, n, bigDec2java)
+      case _: AttrOneOptDate       => addOptV(a, n, identity)
+      case _: AttrOneOptUUID       => addOptV(a, n, identity)
+      case _: AttrOneOptURI        => addOptV(a, n, identity)
+      case _: AttrOneOptChar       => addOptV(a, n, char2java)
+      case _: AttrOneOptByte       => addOptV(a, n, byte2java)
+      case _: AttrOneOptShort      => addOptV(a, n, short2java)
       case other                   => throw MoleculeException("Unexpected element: " + other)
     }
   }
 
   @tailrec
   private def getNs(elements: Seq[Element]): String = elements.head match {
-    case a: Atom       => a.ns
-    case b: Bond       => b.ns
+    case a: Attr       => a.ns
+    case b: Ref        => b.ns
     case Composite(es) => getNs(es)
     case other         =>
       throw MoleculeException("StmtsBuilder: Unexpected head element: " + other)
@@ -181,7 +181,7 @@ class InsertStmts(elements: Seq[Element], tpls: Seq[Product], tempIdInit: Int = 
     }
   }
 
-  private def addBond(refAttr: Keyword): () => Unit = {
+  private def addRef(refAttr: Keyword): () => Unit = {
     () => bond(refAttr)
   }
 

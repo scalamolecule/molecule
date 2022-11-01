@@ -2,7 +2,7 @@ package codegen.db.datomic.transaction.insert
 
 import codegen.DatomicGenBaseJVM
 
-object _InsertResolvers extends DatomicGenBaseJVM( "InsertResolvers_", "/transaction") {
+object _InsertResolvers extends DatomicGenBaseJVM( "InsertResolvers", "/transaction") {
 
   val content = {
     val resolveX       = (1 to 22).map(i => s"case $i => resolve$i(resolvers)").mkString("\n      ")
@@ -13,7 +13,7 @@ object _InsertResolvers extends DatomicGenBaseJVM( "InsertResolvers_", "/transac
        |import molecule.boilerplate.ast.MoleculeModel._
        |
        |
-       |abstract class $fileName(elements: Seq[Element]) {
+       |abstract class ${fileName}_(elements: Seq[Element]) {
        |
        |  protected def resolve(
        |    elements: Seq[Element],

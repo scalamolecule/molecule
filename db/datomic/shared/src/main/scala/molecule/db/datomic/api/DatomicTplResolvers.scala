@@ -2,8 +2,8 @@ package molecule.db.datomic.api
 
 import java.util
 import molecule.boilerplate.ast.MoleculeModel._
-import molecule.boilerplate.markers.NamespaceMarkers.Molecule_02
 import java.util.{Collections, Date, UUID, Iterator => jIterator, List => jList, Map => jMap, Set => jSet}
+import molecule.boilerplate.api._
 ;
 
 trait DatomicTplResolvers {
@@ -12,10 +12,10 @@ trait DatomicTplResolvers {
   def getResolvers(es: Seq[Element]): Seq[Any => AnyRef] = {
     es.foldLeft(Seq.empty[Any => AnyRef]) { case (acc, e) =>
       e match {
-        case _: AtomOneManString           => acc :+ (_.toString)
-        case _: AtomOneManInt              => acc :+ (_.toString.toInt.asInstanceOf[AnyRef])
-        case Bond(ns, refAttr, refNs, one) => acc
-        case _                           => acc
+        case _: AttrOneManString           => acc :+ (_.toString)
+        case _: AttrOneManInt             => acc :+ (_.toString.toInt.asInstanceOf[AnyRef])
+        case Ref(ns, refAttr, refNs, one) => acc
+        case _                            => acc
       }
     }
   }

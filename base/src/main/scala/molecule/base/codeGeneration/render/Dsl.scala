@@ -13,13 +13,12 @@ case class Dsl(schema: MetaSchema, namespace: MetaNs)
       "molecule.boilerplate.api.expression._",
       "molecule.boilerplate.api.Keywords._",
       "molecule.boilerplate.ast.MoleculeModel._",
-      "molecule.boilerplate.markers.NamespaceMarkers._",
     )
     val typeImports = attrs.collect {
       case MetaAttr(_, _, "Date", _, _, _, _, _) => "java.util.Date"
       case MetaAttr(_, _, "UUID", _, _, _, _, _) => "java.util.UUID"
       case MetaAttr(_, _, "URI", _, _, _, _, _)  => "java.net.URI"
-    }
+    }.distinct
     (baseImports ++ typeImports).sorted.mkString("import ", "\nimport ", "")
   }
 
@@ -31,12 +30,12 @@ case class Dsl(schema: MetaSchema, namespace: MetaNs)
       case MetaAttr(attr, card, tpe, refNs, options, descr, alias, validation) =>
         val padA = padAttr(attr)
         val padT = padType(tpe)
-        val atomMan = "Atom" + card.marker + "Man" + tpe
-        val atomOpt = "Atom" + card.marker + "Opt" + tpe
-        val atomTac = "Atom" + card.marker + "Tac" + tpe
-        man += s"""protected lazy val ${attr}_man$padA: $atomMan$padT = $atomMan$padT("$ns", "$attr"$padA)"""
-        opt += s"""protected lazy val ${attr}_opt$padA: $atomOpt$padT = $atomOpt$padT("$ns", "$attr"$padA)"""
-        tac += s"""protected lazy val ${attr}_tac$padA: $atomTac$padT = $atomTac$padT("$ns", "$attr"$padA)"""
+        val attrMan = "Attr" + card.marker + "Man" + tpe
+        val attrOpt = "Attr" + card.marker + "Opt" + tpe
+        val attrTac = "Attr" + card.marker + "Tac" + tpe
+        man += s"""protected lazy val ${attr}_man$padA: $attrMan$padT = $attrMan$padT("$ns", "$attr"$padA)"""
+        opt += s"""protected lazy val ${attr}_opt$padA: $attrOpt$padT = $attrOpt$padT("$ns", "$attr"$padA)"""
+        tac += s"""protected lazy val ${attr}_tac$padA: $attrTac$padT = $attrTac$padT("$ns", "$attr"$padA)"""
     }
     val attrDefs = (man.result() ++ Seq("") ++ opt.result() ++ Seq("") ++ tac.result()).mkString("\n  ")
     s"""trait $ns {

@@ -6,19 +6,24 @@ object SchemaAST extends BaseHelpers {
 
   sealed trait Cardinality {
     def marker: String
+    def tpe: String
   }
 
-  case object one extends Cardinality {
+  case object CardOne extends Cardinality {
     override def marker = "One"
+    override def tpe = ""
   }
-  case object set extends Cardinality {
+  case object CardSet extends Cardinality {
     override def marker = "Set"
+    override def tpe = "Set"
   }
-  case object array extends Cardinality {
-    override def marker = "Array"
+  case object CardArr extends Cardinality {
+    override def marker = "Arr"
+    override def tpe = "Array"
   }
-  case object map extends Cardinality {
+  case object CardMap extends Cardinality {
     override def marker = "Map"
+    override def tpe = "Map"
   }
 
   case class MetaSchema(

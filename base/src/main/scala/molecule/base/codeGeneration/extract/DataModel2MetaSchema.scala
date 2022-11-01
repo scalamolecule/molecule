@@ -44,7 +44,7 @@ class DataModel2MetaSchema(path: String, dataModel: String) {
   private def getAttrs(attrs: Seq[Stat]): Seq[MetaAttr] = attrs.map {
     case q"val $attr = $defs" =>
       val a = attr.toString
-      getAttr(a, defs, (Nil, None, None, None, MetaAttr(a, one, "")))._5
+      getAttr(a, defs, (Nil, None, None, None, MetaAttr(a, CardOne, "")))._5
     case other                => unexpectedCode(other)
   }
 
@@ -92,38 +92,38 @@ class DataModel2MetaSchema(path: String, dataModel: String) {
 
       case q"$prev.validation($lambda)" => getAttr(a, prev, (x._1, x._2, x._3, Some(lambda.toString()), x._5))
 
-      case q"oneString"     => attr(x, one, "String")
-      case q"oneChar"       => attr(x, one, "Char")
-      case q"oneByte"       => attr(x, one, "Byte")
-      case q"oneShort"      => attr(x, one, "Short")
-      case q"oneInt"        => attr(x, one, "Int")
-      case q"oneLong"       => attr(x, one, "Long")
-      case q"oneFloat"      => attr(x, one, "Float")
-      case q"oneDouble"     => attr(x, one, "Double")
-      case q"oneBoolean"    => attr(x, one, "Boolean")
-      case q"oneBigInt"     => attr(x, one, "BigInt")
-      case q"oneBigDecimal" => attr(x, one, "BigDecimal")
-      case q"oneDate"       => attr(x, one, "Date")
-      case q"oneUUID"       => attr(x, one, "UUID")
-      case q"oneURI"        => attr(x, one, "URI")
+      case q"oneString"     => attr(x, CardOne, "String")
+      case q"oneChar"       => attr(x, CardOne, "Char")
+      case q"oneByte"       => attr(x, CardOne, "Byte")
+      case q"oneShort"      => attr(x, CardOne, "Short")
+      case q"oneInt"        => attr(x, CardOne, "Int")
+      case q"oneLong"       => attr(x, CardOne, "Long")
+      case q"oneFloat"      => attr(x, CardOne, "Float")
+      case q"oneDouble"     => attr(x, CardOne, "Double")
+      case q"oneBoolean"    => attr(x, CardOne, "Boolean")
+      case q"oneBigInt"     => attr(x, CardOne, "BigInt")
+      case q"oneBigDecimal" => attr(x, CardOne, "BigDecimal")
+      case q"oneDate"       => attr(x, CardOne, "Date")
+      case q"oneUUID"       => attr(x, CardOne, "UUID")
+      case q"oneURI"        => attr(x, CardOne, "URI")
 
-      case q"one[$refNs]"  => attr(x, one, "Long", Some(refNs.toString.replace('.', '_')))
-      case q"many[$refNs]" => attr(x, set, "Long", Some(refNs.toString.replace('.', '_')))
+      case q"one[$refNs]"  => attr(x, CardOne, "Long", Some(refNs.toString.replace('.', '_')))
+      case q"many[$refNs]" => attr(x, CardSet, "Long", Some(refNs.toString.replace('.', '_')))
 
-      case q"setString"     => attr(x, set, "String")
-      case q"setChar"       => attr(x, set, "Char")
-      case q"setByte"       => attr(x, set, "Byte")
-      case q"setShort"      => attr(x, set, "Short")
-      case q"setInt"        => attr(x, set, "Int")
-      case q"setLong"       => attr(x, set, "Long")
-      case q"setFloat"      => attr(x, set, "Float")
-      case q"setDouble"     => attr(x, set, "Double")
-      case q"setBoolean"    => attr(x, set, "Boolean")
-      case q"setBigInt"     => attr(x, set, "BigInt")
-      case q"setBigDecimal" => attr(x, set, "BigDecimal")
-      case q"setDate"       => attr(x, set, "Date")
-      case q"setUUID"       => attr(x, set, "UUID")
-      case q"setURI"        => attr(x, set, "URI")
+      case q"setString"     => attr(x, CardSet, "String")
+      case q"setChar"       => attr(x, CardSet, "Char")
+      case q"setByte"       => attr(x, CardSet, "Byte")
+      case q"setShort"      => attr(x, CardSet, "Short")
+      case q"setInt"        => attr(x, CardSet, "Int")
+      case q"setLong"       => attr(x, CardSet, "Long")
+      case q"setFloat"      => attr(x, CardSet, "Float")
+      case q"setDouble"     => attr(x, CardSet, "Double")
+      case q"setBoolean"    => attr(x, CardSet, "Boolean")
+      case q"setBigInt"     => attr(x, CardSet, "BigInt")
+      case q"setBigDecimal" => attr(x, CardSet, "BigDecimal")
+      case q"setDate"       => attr(x, CardSet, "Date")
+      case q"setUUID"       => attr(x, CardSet, "UUID")
+      case q"setURI"        => attr(x, CardSet, "URI")
       case other            => unexpectedCode(other)
     }
   }

@@ -2,7 +2,7 @@ package codegen.db.datomic.query
 
 import codegen.DatomicGenBase
 
-object _Cast extends DatomicGenBase("Cast_", "/query") {
+object _Cast extends DatomicGenBase("Cast", "/query") {
 
   val content = {
     val resolveX = (1 to 22).map(i => s"case $i => resolve$i").mkString("\n      ")
@@ -13,7 +13,7 @@ object _Cast extends DatomicGenBase("Cast_", "/query") {
        |import molecule.core.query.Model2Query
        |
        |
-       |trait $fileName[Tpl] { self: Model2Query[Tpl] with Base[Tpl] =>
+       |trait ${fileName}_[Tpl] { self: Model2Query[Tpl] with Base[Tpl] =>
        |
        |  final override lazy protected val row2tpl: Row => Tpl = {
        |    castScala.length match {

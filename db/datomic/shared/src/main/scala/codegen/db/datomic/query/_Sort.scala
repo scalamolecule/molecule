@@ -16,7 +16,7 @@ object _Sort extends DatomicGenBase("Sort", "/query") {
        |import molecule.boilerplate.ast.MoleculeModel._
        |
        |
-       |trait $fileName[Tpl] { self: Base[Tpl] =>
+       |trait ${fileName}_[Tpl] { self: Base[Tpl] =>
        |$sorters
        |}""".stripMargin
   }
@@ -24,8 +24,8 @@ object _Sort extends DatomicGenBase("Sort", "/query") {
   def sorter(tpe: String): String = {
     val javaTpe = javaTypes(tpe)
     s"""
-       |  protected def sort$tpe(atom: Atom, attrIndex: Int): Option[(Int, (Row, Row) => Int)] = {
-       |    atom.sort.map { sort =>
+       |  protected def sort$tpe(attr: Attr, attrIndex: Int): Option[(Int, (Row, Row) => Int)] = {
+       |    attr.sort.map { sort =>
        |      (
        |        sort.last.toInt,
        |        sort.head match {

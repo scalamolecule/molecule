@@ -18,18 +18,18 @@ object ScalaMetaTest extends TestSuite {
 //      schema ==> MetaSchema("molecule.base.parseFiles", "A", 3, Seq(
 //        MetaPart("", Seq(
 //          MetaNs("Ns", Seq(
-//            MetaAttr("str", one, "String", None, Nil, Some("foo"), None, None),
-//            MetaAttr("int", one, "Int", None, Seq("unique"), Some("bar"), None, Some("_ > 7")),
-//            MetaAttr("ref", one, "Long", Some("Ref1"), Nil, None, None, None))),
+//            MetaAttr("str", CardOne, "String", None, Nil, Some("foo"), None, None),
+//            MetaAttr("int", CardOne, "Int", None, Seq("unique"), Some("bar"), None, Some("_ > 7")),
+//            MetaAttr("ref", CardOne, "Long", Some("Ref1"), Nil, None, None, None))),
 //
 //          MetaNs("Ref1", Seq(
-//            MetaAttr("str1", one, "String", None, Nil, Some("foo"), None, None),
-//            MetaAttr("int1", one, "Int", None, Seq("unique"), Some("bar"), None, None)))))))
+//            MetaAttr("str1", CardOne, "String", None, Nil, Some("foo"), None, None),
+//            MetaAttr("int1", CardOne, "Int", None, Seq("unique"), Some("bar"), None, None)))))))
 //    }
 
 
     "Dsl" - {
-      Dsl_Arities(schema, schema.parts.head.nss.head, 3).get ==> "hej"
+      Dsl_Arities(schema, schema.parts.head.nss.head, 2).get ==> "hej"
     }
 
 //    "Schema" - {

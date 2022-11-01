@@ -44,8 +44,8 @@ object CoreTest_0 extends CodeGenTesting {
         |import java.util.UUID
         |import molecule.boilerplate.markers.attrMarkers._
         |import molecule.boilerplate.markers.bidirectionalMarkers._
-        |import molecule.boilerplate.markers.NamespaceMarkers._
         |import molecule.boilerplate.markers.schemaOptionMarkers._
+        |import molecule.boilerplate.api._
         |import molecule.boilerplate.api.aggregates.aggr_0._
         |import molecule.boilerplate.api.compositeInit.CompositeInit_0
         |import molecule.boilerplate.api.generic.dsl.Datom._

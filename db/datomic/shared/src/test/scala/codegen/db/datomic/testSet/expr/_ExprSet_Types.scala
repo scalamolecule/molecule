@@ -14,7 +14,7 @@ object _ExprSet_Types extends CodeGenBase with BaseHelpers {
   }
 
   case class TransformFile(card: String, tpe: String, v: String, imp: String = "")
-    extends DatomicTestGenBase(s"Expr${card}_${tpe}_", "/testSet/expr") {
+    extends DatomicTestGenBase(s"Expr${card}_$tpe", "/testSet/expr") {
     val cardTpe = card match {
       case "One"   => (baseType: String) => baseType
       case "Set"   => (baseType: String) => s"Set[$baseType]"

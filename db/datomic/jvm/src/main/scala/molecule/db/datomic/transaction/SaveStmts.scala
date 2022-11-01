@@ -29,15 +29,15 @@ class SaveStmts(elements: Seq[Element]) {
     elements match {
       case element :: tail => element match {
         // Prepare java-compatible types
-        case atom: Atom =>
-          val a = kw(atom.ns, atom.attr)
-          atom match {
-            case atom: AtomOneMan => resolveAtomOneMan(atom, a); resolve(tail)
-            case atom: AtomOneOpt => resolveAtomOneOpt(atom, a); resolve(tail)
+        case attr: Attr =>
+          val a = kw(attr.ns, attr.attr)
+          attr match {
+            case attr: AttrOneMan => resolveAttrOneMan(attr, a); resolve(tail)
+            case attr: AttrOneOpt => resolveAttrOneOpt(attr, a); resolve(tail)
           }
 
-        case Bond(ns, refAttr, refNs, one) => ()
-        case element                       => unexpected(element)
+        case Ref(ns, refAttr, refNs, one) => ()
+        case element                      => unexpected(element)
       }
       case Nil             => ()
     }
@@ -52,58 +52,58 @@ class SaveStmts(elements: Seq[Element]) {
 
   private def unexpected(element: Element) = throw MoleculeException("Unexpected element: " + element)
 
-  def resolveAtomOneMan(atom: AtomOneMan, a: Keyword): Unit = {
-    atom match {
-      case AtomOneManString(_, _, Eq, Seq(v), _, _, _)     => addV(a, v)
-      case AtomOneManInt(_, _, Eq, Seq(v), _, _, _)        => addV(a, v)
-      case AtomOneManLong(_, _, Eq, Seq(v), _, _, _)       => addV(a, v)
-      case AtomOneManFloat(_, _, Eq, Seq(v), _, _, _)      => addV(a, v)
-      case AtomOneManDouble(_, _, Eq, Seq(v), _, _, _)     => addV(a, v)
-      case AtomOneManBoolean(_, _, Eq, Seq(v), _, _, _)    => addV(a, v)
-      case AtomOneManBigInt(_, _, Eq, Seq(v), _, _, _)     => addV(a, v.bigInteger)
-      case AtomOneManBigDecimal(_, _, Eq, Seq(v), _, _, _) => addV(a, v.bigDecimal)
-      case AtomOneManDate(_, _, Eq, Seq(v), _, _, _)       => addV(a, v)
-      case AtomOneManUUID(_, _, Eq, Seq(v), _, _, _)       => addV(a, v)
-      case AtomOneManURI(_, _, Eq, Seq(v), _, _, _)        => addV(a, v)
-      case AtomOneManChar(_, _, Eq, Seq(v), _, _, _)       => addV(a, v.toString)
-      case AtomOneManByte(_, _, Eq, Seq(v), _, _, _)       => addV(a, v.toInt)
-      case AtomOneManShort(_, _, Eq, Seq(v), _, _, _)      => addV(a, v.toInt)
-      case _                                               =>
-        if (atom.op != Eq)
+  def resolveAttrOneMan(attr: AttrOneMan, a: Keyword): Unit = {
+    attr match {
+      case AttrOneManString(_, _, Appl, Seq(v), _, _, _)     => addV(a, v)
+      case AttrOneManInt(_, _, Appl, Seq(v), _, _, _)        => addV(a, v)
+      case AttrOneManLong(_, _, Appl, Seq(v), _, _, _)       => addV(a, v)
+      case AttrOneManFloat(_, _, Appl, Seq(v), _, _, _)      => addV(a, v)
+      case AttrOneManDouble(_, _, Appl, Seq(v), _, _, _)     => addV(a, v)
+      case AttrOneManBoolean(_, _, Appl, Seq(v), _, _, _)    => addV(a, v)
+      case AttrOneManBigInt(_, _, Appl, Seq(v), _, _, _)     => addV(a, v.bigInteger)
+      case AttrOneManBigDecimal(_, _, Appl, Seq(v), _, _, _) => addV(a, v.bigDecimal)
+      case AttrOneManDate(_, _, Appl, Seq(v), _, _, _)       => addV(a, v)
+      case AttrOneManUUID(_, _, Appl, Seq(v), _, _, _)       => addV(a, v)
+      case AttrOneManURI(_, _, Appl, Seq(v), _, _, _)        => addV(a, v)
+      case AttrOneManChar(_, _, Appl, Seq(v), _, _, _)       => addV(a, v.toString)
+      case AttrOneManByte(_, _, Appl, Seq(v), _, _, _)       => addV(a, v.toInt)
+      case AttrOneManShort(_, _, Appl, Seq(v), _, _, _)      => addV(a, v.toInt)
+      case _                                                 =>
+        if (attr.op != Appl)
           throw MoleculeException("Can only save one applied value for each attribute. " +
-            s"Found other expression `${atom.op}` in: " + atom)
-        throw MoleculeException("Can only save one value per attribute. Found: " + atom)
+            s"Found other expression `${attr.op}` in: " + attr)
+        throw MoleculeException("Can only save one value per attribute. Found: " + attr)
     }
   }
 
-  def resolveAtomOneOpt(atom: AtomOneOpt, a: Keyword): Unit = {
-    atom match {
-      case AtomOneOptString(_, _, Eq, Some(Seq(v)), _, _, _)     => addV(a, v)
-      case AtomOneOptInt(_, _, Eq, Some(Seq(v)), _, _, _)        => addV(a, v)
-      case AtomOneOptLong(_, _, Eq, Some(Seq(v)), _, _, _)       => addV(a, v)
-      case AtomOneOptFloat(_, _, Eq, Some(Seq(v)), _, _, _)      => addV(a, v)
-      case AtomOneOptDouble(_, _, Eq, Some(Seq(v)), _, _, _)     => addV(a, v)
-      case AtomOneOptBoolean(_, _, Eq, Some(Seq(v)), _, _, _)    => addV(a, v)
-      case AtomOneOptBigInt(_, _, Eq, Some(Seq(v)), _, _, _)     => addV(a, v.bigInteger)
-      case AtomOneOptBigDecimal(_, _, Eq, Some(Seq(v)), _, _, _) => addV(a, v.bigDecimal)
-      case AtomOneOptDate(_, _, Eq, Some(Seq(v)), _, _, _)       => addV(a, v)
-      case AtomOneOptUUID(_, _, Eq, Some(Seq(v)), _, _, _)       => addV(a, v)
-      case AtomOneOptURI(_, _, Eq, Some(Seq(v)), _, _, _)        => addV(a, v)
-      case AtomOneOptChar(_, _, Eq, Some(Seq(v)), _, _, _)       => addV(a, v.toString)
-      case AtomOneOptByte(_, _, Eq, Some(Seq(v)), _, _, _)       => addV(a, v.toInt)
-      case AtomOneOptShort(_, _, Eq, Some(Seq(v)), _, _, _)      => addV(a, v.toInt)
-      case _                                                     =>
-        if (atom.op != Eq)
+  def resolveAttrOneOpt(attr: AttrOneOpt, a: Keyword): Unit = {
+    attr match {
+      case AttrOneOptString(_, _, Appl, Some(Seq(v)), _, _, _)     => addV(a, v)
+      case AttrOneOptInt(_, _, Appl, Some(Seq(v)), _, _, _)        => addV(a, v)
+      case AttrOneOptLong(_, _, Appl, Some(Seq(v)), _, _, _)       => addV(a, v)
+      case AttrOneOptFloat(_, _, Appl, Some(Seq(v)), _, _, _)      => addV(a, v)
+      case AttrOneOptDouble(_, _, Appl, Some(Seq(v)), _, _, _)     => addV(a, v)
+      case AttrOneOptBoolean(_, _, Appl, Some(Seq(v)), _, _, _)    => addV(a, v)
+      case AttrOneOptBigInt(_, _, Appl, Some(Seq(v)), _, _, _)     => addV(a, v.bigInteger)
+      case AttrOneOptBigDecimal(_, _, Appl, Some(Seq(v)), _, _, _) => addV(a, v.bigDecimal)
+      case AttrOneOptDate(_, _, Appl, Some(Seq(v)), _, _, _)       => addV(a, v)
+      case AttrOneOptUUID(_, _, Appl, Some(Seq(v)), _, _, _)       => addV(a, v)
+      case AttrOneOptURI(_, _, Appl, Some(Seq(v)), _, _, _)        => addV(a, v)
+      case AttrOneOptChar(_, _, Appl, Some(Seq(v)), _, _, _)       => addV(a, v.toString)
+      case AttrOneOptByte(_, _, Appl, Some(Seq(v)), _, _, _)       => addV(a, v.toInt)
+      case AttrOneOptShort(_, _, Appl, Some(Seq(v)), _, _, _)      => addV(a, v.toInt)
+      case _                                                       =>
+        if (attr.op != Appl)
           throw MoleculeException("Can only save one applied value for each attribute. " +
-            s"Found other expression `${atom.op}` in: " + atom)
-        throw MoleculeException("Can only save one value per attribute. Found: " + atom)
+            s"Found other expression `${attr.op}` in: " + attr)
+        throw MoleculeException("Can only save one value per attribute. Found: " + attr)
     }
   }
 
   @tailrec
   private def getNs(elements: Seq[Element]): String = elements.head match {
-    case a: Atom       => a.ns
-    case b: Bond       => b.ns
+    case a: Attr       => a.ns
+    case b: Ref        => b.ns
     case Composite(es) => getNs(es)
     case element       => unexpected(element)
   }
@@ -158,7 +158,7 @@ class SaveStmts(elements: Seq[Element]) {
     }
   }
 
-  protected def addBond(refAttr: Keyword): () => Unit = {
+  protected def addRef(refAttr: Keyword): () => Unit = {
     () => bond(refAttr)
   }
 

@@ -13,7 +13,7 @@ object _AggrNum_Types extends CodeGenBase with BaseHelpers {
   }
 
   case class TransformFile(tpe: String, v: String, imp: String = "")
-    extends DatomicTestGenBase(s"AggrNum_${tpe}_", "/test/aggr/number") {
+    extends DatomicTestGenBase(s"AggrNum_$tpe", "/test/aggr/number") {
 
     val content = {
       val src =

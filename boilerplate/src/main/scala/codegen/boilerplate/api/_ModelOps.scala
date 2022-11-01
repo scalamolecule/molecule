@@ -12,9 +12,10 @@ object _ModelOps extends BoilerplateGenBase("ModelOps", "/api") {
        |import molecule.boilerplate.ops.ModelTransformations
        |
        |
-       |trait ModelOps_0[t, Ns[_]]
-       |  extends ExprOneTacOps_0[t, Ns]
-       |    with ModelTransformations
+       |trait ${fileName}_0[t, Ns[_]]
+       |  extends ModelTransformations
+       |    with ExprOneTacOps_0[t, Ns]
+       |    with ExprSetTacOps_0[t, Ns]
        |$traits""".stripMargin
   }
 
@@ -22,11 +23,14 @@ object _ModelOps extends BoilerplateGenBase("ModelOps", "/api") {
     val body =
       s"""
          |trait ${fileName}_$arity[${`A..V`}, t, Ns[${`_, _`}]]
-         |  extends AggregatesOps_$arity[${`A..V`}, t, Ns]
+         |  extends ModelTransformations
+         |    with AggregatesOps_$arity[${`A..V`}, t, Ns]
          |    with ExprOneManOps_$arity[${`A..V`}, t, Ns]
          |    with ExprOneOptOps_$arity[${`A..V`}, t, Ns]
          |    with ExprOneTacOps_$arity[${`A..V`}, t, Ns]
-         |    with SortAttrsOps_$arity[${`A..V`}, t, Ns]
-         |    with ModelTransformations""".stripMargin
+         |    with ExprSetManOps_$arity[${`A..V`}, t, Ns]
+         |    with ExprSetOptOps_$arity[${`A..V`}, t, Ns]
+         |    with ExprSetTacOps_$arity[${`A..V`}, t, Ns]
+         |    with SortAttrsOps_$arity[${`A..V`}, t, Ns]""".stripMargin
   }
 }

@@ -3,11 +3,11 @@ package molecule.db.datomic.api
 //package molecule.datomic.api
 
 import molecule.boilerplate.ast.MoleculeModel.Element
-import molecule.core.api.Insert
+import molecule.core.api.Insert_
 
 
 
-abstract class DatomicInsertImpl(elements: Seq[Element]) extends Insert {
+abstract class DatomicInsertImpl(elements: Seq[Element]) extends Insert_ {
 
   override def _insertOp(tpls: Seq[Product]): DatomicInsertOps = {
 //    val tpl2stmts: Product => String = ??? //new StmtsBuilder(elements)

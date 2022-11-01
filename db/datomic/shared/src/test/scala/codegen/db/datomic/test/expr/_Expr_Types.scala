@@ -13,7 +13,7 @@ object _Expr_Types extends CodeGenBase with BaseHelpers {
   }
 
   case class TransformFile(tpe: String, v: String, imp: String = "")
-    extends DatomicTestGenBase(s"Expr_${tpe}_", "/test/expr") {
+    extends DatomicTestGenBase(s"Expr_$tpe", "/test/expr") {
 
     val content = {
       val src =

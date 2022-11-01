@@ -4,69 +4,69 @@ import molecule.boilerplate.api.Keywords._
 import molecule.boilerplate.ast.MoleculeModel._
 import scala.reflect.ClassTag
 
-trait ExprOne[Tpl] { self: TypeResolvers with Sort[Tpl] with Base[Tpl] =>
+trait ExprOne[Tpl] { self: TypeResolvers with Sort_[Tpl] with Base[Tpl] =>
 
-  protected def resolveAtomOneMan(es: List[Var], atom: AtomOneMan): List[Var] = {
+  protected def resolveAttrOneMan(es: List[Var], atom: AttrOneMan): List[Var] = {
     attrIndex += 1
     val (e, a) = (es.last, s":${atom.ns}/${atom.attr}")
     atom match {
-      case at: AtomOneManString     => atomMan(e, a, at.op, at.vs, resString, sortString(at, attrIndex))
-      case at: AtomOneManInt        => atomMan(e, a, at.op, at.vs, resInt, sortInt(at, attrIndex))
-      case at: AtomOneManLong       => atomMan(e, a, at.op, at.vs, resLong, sortLong(at, attrIndex))
-      case at: AtomOneManFloat      => atomMan(e, a, at.op, at.vs, resFloat, sortFloat(at, attrIndex))
-      case at: AtomOneManDouble     => atomMan(e, a, at.op, at.vs, resDouble, sortDouble(at, attrIndex))
-      case at: AtomOneManBoolean    => atomMan(e, a, at.op, at.vs, resBoolean, sortBoolean(at, attrIndex))
-      case at: AtomOneManBigInt     => atomMan(e, a, at.op, at.vs, resBigInt, sortBigInt(at, attrIndex))
-      case at: AtomOneManBigDecimal => atomMan(e, a, at.op, at.vs, resBigDecimal, sortBigDecimal(at, attrIndex))
-      case at: AtomOneManDate       => atomMan(e, a, at.op, at.vs, resDate, sortDate(at, attrIndex))
-      case at: AtomOneManUUID       => atomMan(e, a, at.op, at.vs, resUUID, sortUUID(at, attrIndex))
-      case at: AtomOneManURI        => atomMan(e, a, at.op, at.vs, resURI, sortURI(at, attrIndex))
-      case at: AtomOneManByte       => atomMan(e, a, at.op, at.vs, resByte, sortByte(at, attrIndex))
-      case at: AtomOneManShort      => atomMan(e, a, at.op, at.vs, resShort, sortShort(at, attrIndex))
-      case at: AtomOneManChar       => atomMan(e, a, at.op, at.vs, resChar, sortChar(at, attrIndex))
+      case at: AttrOneManString     => atomMan(e, a, at.op, at.vs, resString, sortString(at, attrIndex))
+      case at: AttrOneManInt        => atomMan(e, a, at.op, at.vs, resInt, sortInt(at, attrIndex))
+      case at: AttrOneManLong       => atomMan(e, a, at.op, at.vs, resLong, sortLong(at, attrIndex))
+      case at: AttrOneManFloat      => atomMan(e, a, at.op, at.vs, resFloat, sortFloat(at, attrIndex))
+      case at: AttrOneManDouble     => atomMan(e, a, at.op, at.vs, resDouble, sortDouble(at, attrIndex))
+      case at: AttrOneManBoolean    => atomMan(e, a, at.op, at.vs, resBoolean, sortBoolean(at, attrIndex))
+      case at: AttrOneManBigInt     => atomMan(e, a, at.op, at.vs, resBigInt, sortBigInt(at, attrIndex))
+      case at: AttrOneManBigDecimal => atomMan(e, a, at.op, at.vs, resBigDecimal, sortBigDecimal(at, attrIndex))
+      case at: AttrOneManDate       => atomMan(e, a, at.op, at.vs, resDate, sortDate(at, attrIndex))
+      case at: AttrOneManUUID       => atomMan(e, a, at.op, at.vs, resUUID, sortUUID(at, attrIndex))
+      case at: AttrOneManURI        => atomMan(e, a, at.op, at.vs, resURI, sortURI(at, attrIndex))
+      case at: AttrOneManByte       => atomMan(e, a, at.op, at.vs, resByte, sortByte(at, attrIndex))
+      case at: AttrOneManShort      => atomMan(e, a, at.op, at.vs, resShort, sortShort(at, attrIndex))
+      case at: AttrOneManChar       => atomMan(e, a, at.op, at.vs, resChar, sortChar(at, attrIndex))
     }
     es
   }
 
-  protected def resolveAtomOneTac(es: List[Var], atom: AtomOneTac): List[Var] = {
+  protected def resolveAttrOneTac(es: List[Var], atom: AttrOneTac): List[Var] = {
     val (e, a) = (es.last, s":${atom.ns}/${atom.attr}")
     atom match {
-      case at: AtomOneTacString     => atomTac(e, a, at.op, at.vs, resString)
-      case at: AtomOneTacInt        => atomTac(e, a, at.op, at.vs, resInt)
-      case at: AtomOneTacLong       => atomTac(e, a, at.op, at.vs, resLong)
-      case at: AtomOneTacFloat      => atomTac(e, a, at.op, at.vs, resFloat)
-      case at: AtomOneTacDouble     => atomTac(e, a, at.op, at.vs, resDouble)
-      case at: AtomOneTacBoolean    => atomTac(e, a, at.op, at.vs, resBoolean)
-      case at: AtomOneTacBigInt     => atomTac(e, a, at.op, at.vs, resBigInt)
-      case at: AtomOneTacBigDecimal => atomTac(e, a, at.op, at.vs, resBigDecimal)
-      case at: AtomOneTacDate       => atomTac(e, a, at.op, at.vs, resDate)
-      case at: AtomOneTacUUID       => atomTac(e, a, at.op, at.vs, resUUID)
-      case at: AtomOneTacURI        => atomTac(e, a, at.op, at.vs, resURI)
-      case at: AtomOneTacByte       => atomTac(e, a, at.op, at.vs, resByte)
-      case at: AtomOneTacShort      => atomTac(e, a, at.op, at.vs, resShort)
-      case at: AtomOneTacChar       => atomTac(e, a, at.op, at.vs, resChar)
+      case at: AttrOneTacString     => atomTac(e, a, at.op, at.vs, resString)
+      case at: AttrOneTacInt        => atomTac(e, a, at.op, at.vs, resInt)
+      case at: AttrOneTacLong       => atomTac(e, a, at.op, at.vs, resLong)
+      case at: AttrOneTacFloat      => atomTac(e, a, at.op, at.vs, resFloat)
+      case at: AttrOneTacDouble     => atomTac(e, a, at.op, at.vs, resDouble)
+      case at: AttrOneTacBoolean    => atomTac(e, a, at.op, at.vs, resBoolean)
+      case at: AttrOneTacBigInt     => atomTac(e, a, at.op, at.vs, resBigInt)
+      case at: AttrOneTacBigDecimal => atomTac(e, a, at.op, at.vs, resBigDecimal)
+      case at: AttrOneTacDate       => atomTac(e, a, at.op, at.vs, resDate)
+      case at: AttrOneTacUUID       => atomTac(e, a, at.op, at.vs, resUUID)
+      case at: AttrOneTacURI        => atomTac(e, a, at.op, at.vs, resURI)
+      case at: AttrOneTacByte       => atomTac(e, a, at.op, at.vs, resByte)
+      case at: AttrOneTacShort      => atomTac(e, a, at.op, at.vs, resShort)
+      case at: AttrOneTacChar       => atomTac(e, a, at.op, at.vs, resChar)
     }
     es
   }
 
-  protected def resolveAtomOneOpt(es: List[Var], atom: AtomOneOpt): List[Var] = {
+  protected def resolveAttrOneOpt(es: List[Var], atom: AttrOneOpt): List[Var] = {
     attrIndex += 1
     val (e, a) = (es.last, s":${atom.ns}/${atom.attr}")
     atom match {
-      case at: AtomOneOptString     => atomOpt(e, a, at.op, at.vs, optString, sortString(at, attrIndex))
-      case at: AtomOneOptInt        => atomOpt(e, a, at.op, at.vs, optInt, sortInt(at, attrIndex))
-      case at: AtomOneOptLong       => atomOpt(e, a, at.op, at.vs, optLong, sortLong(at, attrIndex))
-      case at: AtomOneOptFloat      => atomOpt(e, a, at.op, at.vs, optFloat, sortFloat(at, attrIndex))
-      case at: AtomOneOptDouble     => atomOpt(e, a, at.op, at.vs, optDouble, sortDouble(at, attrIndex))
-      case at: AtomOneOptBoolean    => atomOpt(e, a, at.op, at.vs, optBoolean, sortBoolean(at, attrIndex))
-      case at: AtomOneOptBigInt     => atomOpt(e, a, at.op, at.vs, optBigInt, sortBigInt(at, attrIndex))
-      case at: AtomOneOptBigDecimal => atomOpt(e, a, at.op, at.vs, optBigDecimal, sortBigDecimal(at, attrIndex))
-      case at: AtomOneOptDate       => atomOpt(e, a, at.op, at.vs, optDate, sortDate(at, attrIndex))
-      case at: AtomOneOptUUID       => atomOpt(e, a, at.op, at.vs, optUUID, sortUUID(at, attrIndex))
-      case at: AtomOneOptURI        => atomOpt(e, a, at.op, at.vs, optURI, sortURI(at, attrIndex))
-      case at: AtomOneOptByte       => atomOpt(e, a, at.op, at.vs, optByte, sortByte(at, attrIndex))
-      case at: AtomOneOptShort      => atomOpt(e, a, at.op, at.vs, optShort, sortShort(at, attrIndex))
-      case at: AtomOneOptChar       => atomOpt(e, a, at.op, at.vs, optChar, sortChar(at, attrIndex))
+      case at: AttrOneOptString     => atomOpt(e, a, at.op, at.vs, optString, sortString(at, attrIndex))
+      case at: AttrOneOptInt        => atomOpt(e, a, at.op, at.vs, optInt, sortInt(at, attrIndex))
+      case at: AttrOneOptLong       => atomOpt(e, a, at.op, at.vs, optLong, sortLong(at, attrIndex))
+      case at: AttrOneOptFloat      => atomOpt(e, a, at.op, at.vs, optFloat, sortFloat(at, attrIndex))
+      case at: AttrOneOptDouble     => atomOpt(e, a, at.op, at.vs, optDouble, sortDouble(at, attrIndex))
+      case at: AttrOneOptBoolean    => atomOpt(e, a, at.op, at.vs, optBoolean, sortBoolean(at, attrIndex))
+      case at: AttrOneOptBigInt     => atomOpt(e, a, at.op, at.vs, optBigInt, sortBigInt(at, attrIndex))
+      case at: AttrOneOptBigDecimal => atomOpt(e, a, at.op, at.vs, optBigDecimal, sortBigDecimal(at, attrIndex))
+      case at: AttrOneOptDate       => atomOpt(e, a, at.op, at.vs, optDate, sortDate(at, attrIndex))
+      case at: AttrOneOptUUID       => atomOpt(e, a, at.op, at.vs, optUUID, sortUUID(at, attrIndex))
+      case at: AttrOneOptURI        => atomOpt(e, a, at.op, at.vs, optURI, sortURI(at, attrIndex))
+      case at: AttrOneOptByte       => atomOpt(e, a, at.op, at.vs, optByte, sortByte(at, attrIndex))
+      case at: AttrOneOptShort      => atomOpt(e, a, at.op, at.vs, optShort, sortShort(at, attrIndex))
+      case at: AttrOneOptChar       => atomOpt(e, a, at.op, at.vs, optChar, sortChar(at, attrIndex))
     }
     es
   }
@@ -74,7 +74,7 @@ trait ExprOne[Tpl] { self: TypeResolvers with Sort[Tpl] with Base[Tpl] =>
 
   protected def atomMan[T: ClassTag](
     e: Var,
-    a: Attr,
+    a: Att,
     op: Op,
     args: Seq[T],
     res: Res[T],
@@ -89,7 +89,7 @@ trait ExprOne[Tpl] { self: TypeResolvers with Sort[Tpl] with Base[Tpl] =>
 
   private def atomTac[T: ClassTag](
     e: Var,
-    a: Attr,
+    a: Att,
     op: Op,
     args: Seq[T],
     res: Res[T],
@@ -100,7 +100,7 @@ trait ExprOne[Tpl] { self: TypeResolvers with Sort[Tpl] with Base[Tpl] =>
 
   private def atomOpt[T: ClassTag](
     e: Var,
-    a: Attr,
+    a: Att,
     op: Op,
     optArgs: Option[Seq[T]],
     res: OptRes[T],
@@ -110,10 +110,10 @@ trait ExprOne[Tpl] { self: TypeResolvers with Sort[Tpl] with Base[Tpl] =>
     castScala += res.toScala
     sorter.foreach(sorts += _)
     op match {
-      case V     => optV(e, a, v)
-      case Eq    => optEq(e, a, v, optArgs, res.fromScala)
-      case Neq   => optNeq(e, a, v, optArgs, res.tpe, res.toDatalog)
-      case Lt    => optCompare(e, a, v, optArgs, "<", res.fromScala)
+      case V    => optV(e, a, v)
+      case Appl => optEq(e, a, v, optArgs, res.fromScala)
+      case Not  => optNeq(e, a, v, optArgs, res.tpe, res.toDatalog)
+      case Lt   => optCompare(e, a, v, optArgs, "<", res.fromScala)
       case Gt    => optCompare(e, a, v, optArgs, ">", res.fromScala)
       case Le    => optCompare(e, a, v, optArgs, "<=", res.fromScala)
       case Ge    => optCompare(e, a, v, optArgs, ">=", res.fromScala)
@@ -124,17 +124,17 @@ trait ExprOne[Tpl] { self: TypeResolvers with Sort[Tpl] with Base[Tpl] =>
 
   private def expr[T: ClassTag](
     e: Var,
-    a: Attr,
+    a: Att,
     v: Var,
     op: Op,
     args: Seq[T],
     res: Res[T],
   ): Unit = {
     op match {
-      case V         => attr(e, a, v)
-      case Eq        => equal(e, a, v, args, res.fromScala)
-      case Neq       => neq(e, a, v, args, res.tpe, res.toDatalog)
-      case Lt        => compare(e, a, v, args.head, "<", res.fromScala)
+      case V    => attr(e, a, v)
+      case Appl => equal(e, a, v, args, res.fromScala)
+      case Not  => neq(e, a, v, args, res.tpe, res.toDatalog)
+      case Lt   => compare(e, a, v, args.head, "<", res.fromScala)
       case Gt        => compare(e, a, v, args.head, ">", res.fromScala)
       case Le        => compare(e, a, v, args.head, "<=", res.fromScala)
       case Ge        => compare(e, a, v, args.head, ">=", res.fromScala)
@@ -145,7 +145,7 @@ trait ExprOne[Tpl] { self: TypeResolvers with Sort[Tpl] with Base[Tpl] =>
   }
 
 
-  private def aggr[T](e: Var, a: Attr, v: Var, fn: Kw, res: Res[T]): Unit = {
+  private def aggr[T](e: Var, a: Att, v: Var, fn: Kw, res: Res[T]): Unit = {
     // Replace find/casting with aggregate function/cast
     find -= v
     fn match {
@@ -210,17 +210,17 @@ trait ExprOne[Tpl] { self: TypeResolvers with Sort[Tpl] with Base[Tpl] =>
     where += s"[$e $a $v$tx]" -> wClause
   }
 
-  private def attr(e: Var, a: Attr, v: Var): Unit = {
+  private def attr(e: Var, a: Att, v: Var): Unit = {
     where += s"[$e $a $v$tx]" -> wClause
   }
 
-  private def equal[T: ClassTag](e: Var, a: Attr, v: Var, args: Seq[T], fromScala: Any => Any): Unit = {
+  private def equal[T: ClassTag](e: Var, a: Att, v: Var, args: Seq[T], fromScala: Any => Any): Unit = {
     in += s"[$v ...]"
     where += s"[$e $a $v$tx]" -> wClause
     inputs += args.map(fromScala).toArray
   }
 
-  private def neq[T](e: Var, a: Attr, v: Var, args: Seq[T], tpe: String, toDatalog: T => String): Unit = {
+  private def neq[T](e: Var, a: Att, v: Var, args: Seq[T], tpe: String, toDatalog: T => String): Unit = {
     where += s"[$e $a $v$tx]" -> wClause
     if (tpe == "URI") {
       args.zipWithIndex.foreach { case (arg, i) =>
@@ -234,7 +234,7 @@ trait ExprOne[Tpl] { self: TypeResolvers with Sort[Tpl] with Base[Tpl] =>
     }
   }
 
-  private def compare[T](e: Var, a: Attr, v: Var, arg: T, op: String, fromScala: Any => Any): Unit = {
+  private def compare[T](e: Var, a: Att, v: Var, arg: T, op: String, fromScala: Any => Any): Unit = {
     val v1 = v + 1
     in += v1
     where += s"[$e $a $v$tx]" -> wClause
@@ -242,19 +242,19 @@ trait ExprOne[Tpl] { self: TypeResolvers with Sort[Tpl] with Base[Tpl] =>
     inputs += fromScala(arg).asInstanceOf[AnyRef]
   }
 
-  private def noValue(e: Var, a: Attr, v: String): Unit = {
+  private def noValue(e: Var, a: Att, v: String): Unit = {
     where += s"(not [$e $a])" -> wNeqOne
   }
 
 
-  private def optV(e: Var, a: Attr, v: Var) = {
+  private def optV(e: Var, a: Att, v: Var) = {
     find += s"(pull $e-$v [[$a :limit nil]]) "
     where += s"[(identity $e) $e-$v]" -> wGround
   }
 
   private def optEq[T: ClassTag](
     e: Var,
-    a: Attr,
+    a: Att,
     v: Var,
     optArgs: Option[Seq[T]],
     fromScala: Any => Any
@@ -275,7 +275,7 @@ trait ExprOne[Tpl] { self: TypeResolvers with Sort[Tpl] with Base[Tpl] =>
 
   private def optNeq[T](
     e: Var,
-    a: Attr,
+    a: Att,
     v: Var,
     optArgs: Option[Seq[T]],
     tpe: String,
@@ -299,7 +299,7 @@ trait ExprOne[Tpl] { self: TypeResolvers with Sort[Tpl] with Base[Tpl] =>
 
   private def optCompare[T](
     e: Var,
-    a: Attr,
+    a: Att,
     v: Var,
     optArgs: Option[Seq[T]],
     op: String,

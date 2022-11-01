@@ -31,9 +31,9 @@ case class Schema_Datomic(schema: MetaSchema) extends BaseHelpers with RegexMatc
   }
 
   def datomicCardinality(a: MetaAttr): String = a.card match {
-    case `one` => "one"
-    case `set` => "many"
-    case other => throw new Exception("Yet unsupported cardinality: " + other)
+    case CardOne => "one"
+    case CardSet => "many"
+    case other   => throw new Exception("Yet unsupported cardinality: " + other)
   }
 
   def datomicType(a: MetaAttr): String = a.tpe match {

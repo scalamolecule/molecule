@@ -6,7 +6,7 @@ object _ExprMapOpt extends BoilerplateGenBase( "exprMapO", "/api/expression") {
   val content = {
     val traits = (1 to 22).map(arity => Trait(arity).body).mkString("\n")
     s"""// GENERATED CODE ********************************
-       |molecule.boilerplate.api.expression
+       |package molecule.boilerplate.api.expression
        |
        |import molecule.boilerplate.api.sortAttrs._
        |

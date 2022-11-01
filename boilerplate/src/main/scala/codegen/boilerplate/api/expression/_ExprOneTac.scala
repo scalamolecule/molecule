@@ -19,21 +19,21 @@ object _ExprOneTac extends BoilerplateGenBase( "ExprOneTac", "/api/expression") 
       s"""
          |
          |trait ${fileName}Ops_$arity[${`A..V, `}t, Ns[${`_, _`}]] {
-         |  protected def _exprTac(op: Op, vs: Seq[t]): Ns[${`A..V, `}t]
+         |  protected def _exprOneTac(op: Op, vs: Seq[t]): Ns[${`A..V, `}t] = ???
          |}
          |
          |trait ${fileName}_$arity[${`A..V, `}t, $nsIn]
          |  extends ${fileName}Ops_$arity[${`A..V, `}t, Ns] {
-         |  def apply()                : Ns[${`A..V, `}t] = _exprTac(NoValue, Nil)
-         |  def apply(unify: unify)    : Ns[${`A..V, `}t] = _exprTac(Unify, Nil)
-         |  def apply(v    : t, vs: t*): Ns[${`A..V, `}t] = _exprTac(Eq, v +: vs)
-         |  def apply(vs   : Seq[t])   : Ns[${`A..V, `}t] = _exprTac(Eq, vs)
-         |  def not  (v    : t, vs: t*): Ns[${`A..V, `}t] = _exprTac(Neq, v +: vs)
-         |  def not  (vs   : Seq[t])   : Ns[${`A..V, `}t] = _exprTac(Neq, vs)
-         |  def <    (upper: t)        : Ns[${`A..V, `}t] = _exprTac(Lt, Seq(upper))
-         |  def <=   (upper: t)        : Ns[${`A..V, `}t] = _exprTac(Le, Seq(upper))
-         |  def >    (lower: t)        : Ns[${`A..V, `}t] = _exprTac(Gt, Seq(lower))
-         |  def >=   (lower: t)        : Ns[${`A..V, `}t] = _exprTac(Ge, Seq(lower))
+         |  def apply()                : Ns[${`A..V, `}t] = _exprOneTac(NoValue, Nil)
+         |  def apply(unify: unify    ): Ns[${`A..V, `}t] = _exprOneTac(Unify  , Nil)
+         |  def apply(v    : t, vs: t*): Ns[${`A..V, `}t] = _exprOneTac(Appl   , v +: vs)
+         |  def apply(vs   : Seq[t]   ): Ns[${`A..V, `}t] = _exprOneTac(Appl   , vs)
+         |  def not  (v    : t, vs: t*): Ns[${`A..V, `}t] = _exprOneTac(Not    , v +: vs)
+         |  def not  (vs   : Seq[t]   ): Ns[${`A..V, `}t] = _exprOneTac(Not    , vs)
+         |  def <    (upper: t        ): Ns[${`A..V, `}t] = _exprOneTac(Lt     , Seq(upper))
+         |  def <=   (upper: t        ): Ns[${`A..V, `}t] = _exprOneTac(Le     , Seq(upper))
+         |  def >    (lower: t        ): Ns[${`A..V, `}t] = _exprOneTac(Gt     , Seq(lower))
+         |  def >=   (lower: t        ): Ns[${`A..V, `}t] = _exprOneTac(Ge     , Seq(lower))
          |}""".stripMargin
   }
 }

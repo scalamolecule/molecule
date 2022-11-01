@@ -9,7 +9,7 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
   extends Model2Query[Tpl]
     with ExprOne[Tpl]
     with TypeResolvers
-    with Sort[Tpl]
+    with Sort_[Tpl]
     with Base[Tpl]
     with Cast_[Tpl] {
 
@@ -60,13 +60,13 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
   @tailrec
   final protected def resolve(es: List[Var], elements: Seq[Element]): List[Var] = elements match {
     case element :: tail => element match {
-      case a: AtomOne => a match {
-        case a: AtomOneMan => resolve(resolveAtomOneMan(es, a), tail)
-        case a: AtomOneOpt => resolve(resolveAtomOneOpt(es, a), tail)
-        case a: AtomOneTac => resolve(resolveAtomOneTac(es, a), tail)
+      case a: AttrOne => a match {
+        case a: AttrOneMan => resolve(resolveAttrOneMan(es, a), tail)
+        case a: AttrOneOpt => resolve(resolveAttrOneOpt(es, a), tail)
+        case a: AttrOneTac => resolve(resolveAttrOneTac(es, a), tail)
         case other         => unexpected(other)
       }
-      case b: Bond    => es
+      case b: Ref     => es
       case other      => unexpected(other)
     }
     case Nil             => es

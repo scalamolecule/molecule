@@ -8,38 +8,38 @@ trait ModelBase extends Validations {
 
   sealed trait Element
 
-  trait Atom extends Element {
+  trait Attr extends Element {
     val ns  : String
     val attr: String
     val op  : Op
     val sort: Option[String]
-    def unapply(a: Atom): (String, String, Op) = (a.ns, a.attr, a.op)
+    def unapply(a: Attr): (String, String, Op) = (a.ns, a.attr, a.op)
   }
-  trait AtomOne extends Atom
-  trait AtomSet extends Atom
-  trait AtomArray extends Atom
-  trait AtomMap extends Atom
+  trait AttrOne extends Attr
+  trait AttrSet extends Attr
+  trait AttrArray extends Attr
+  trait AttrMap extends Attr
 
-  case class Bond(
+  case class Ref(
     ns: String,
     refAttr: String,
     refNs: String = "",
-    card: Cardinality = one
+    card: Cardinality = CardOne
   ) extends Element
 
-  case class ReBond(backRef: String) extends Element
+  case class BackRef(backRef: String) extends Element
 
-  case class Nested(bond: Bond, elements: Seq[Element]) extends Element
-  // todo?
-  //  case class OptNested(bond: Bond, elements: Seq[Element]) extends Element
+  case class Nested(bond: Ref, elements: Seq[Element]) extends Element
+  case class OptNested(bond: Ref, elements: Seq[Element]) extends Element
 
   case class TxMetaData(elements: Seq[Element]) extends Element
   case class Composite(elements: Seq[Element]) extends Element
   case object Self extends Element
 
   sealed trait Op
-
   case object V extends Op
+  case object Appl extends Op
+  case object Not extends Op
   case object Eq extends Op
   case object Neq extends Op
   case object Lt extends Op
@@ -49,134 +49,7 @@ trait ModelBase extends Validations {
   case object NoValue extends Op
   case class Fn(fn: Kw, n: Option[Int] = None) extends Op
   case object Unify extends Op
-
-
-  //  case class Aggr(kw: String) extends Op
-  //  case class AggrN(kw: String) extends Op
-  //  case class AggrCoalesce(kw: String) extends Op
-  //  case object Distinct extends Op
-
-  //  case object EntValue extends Op
-  //  case class BackValue(backNs: String) extends Op
-  //  case object EnumVal extends Op
-  //  case object IndexVal extends Op
-  //  // Card-many/map matches for subsets in Set/Map
-  //  // Misspelled to distinguish it from Scala Apply
-  //  case object Appply extends Op
-  //  case object Not extends Op
-  //
-  //  // Matchers taking Seqs of Set/Map as argument
-  //  case object Eq_ extends Op
-  //  case object Neq_ extends Op
-  //  case object Apply_ extends Op
-  //  case object Not_ extends Op
-
-
-  //
-  //  case class Eq1(values: Values) extends ModelValue
-  //  case class Eq2(sets: ValueSets) extends ModelValue {
-  //    override def toString: String = s"Eq2($sets)"
-  //  }
-  //  case class Eq3(maps: ValueMaps) extends ModelValue {
-  //    override def toString: String = s"Eq3($maps)"
-  //  }
-  //
-  //  case class Neq1(values: Values) extends ModelValue
-  //  case class Neq2(sets: ValueSets) extends ModelValue {
-  //    override def toString: String = s"Neq2($sets)"
-  //  }
-  //  case class Neq3(maps: ValueMaps) extends ModelValue {
-  //    override def toString: String = s"Neq3($maps)"
-  //  }
-  //
-  //
-  //  case class LtX(value: OneValue) extends ModelValue {
-  //    override def toString: String = s"Lt($value)"
-  //  }
-  //  case class GtX(value: OneValue) extends ModelValue {
-  //    override def toString: String = s"Gt($value)"
-  //  }
-  //  case class LeX(value: OneValue) extends ModelValue {
-  //    override def toString: String = s"Le($value)"
-  //  }
-  //  case class GeX(value: OneValue) extends ModelValue {
-  //    override def toString: String = s"Ge($value)"
-  //  }
-  //
-  //  // Fulltext
-  //  case class Fulltext(search: Values) extends ModelValue
-  //
-  //  // Card-many attribute operations
-  //  case class AssertValue(values: Values) extends ModelValue {
-  //    override def toString: String = s"AssertValue($values)"
-  //  }
-  //  case class ReplaceValue(oldNew: ValuePairs) extends ModelValue {
-  //    override def toString: String = s"ReplaceValue($oldNew)"
-  //  }
-  //  case class RetractValue(values: Values) extends ModelValue {
-  //    override def toString: String = s"RetractValue($values)"
-  //  }
-  //
-  //  // Map attribute operations
-  //  case class AssertMapPairs(kvs: ValuePairs) extends ModelValue {
-  //    override def toString: String = s"AssertMapPairs($kvs)"
-  //  }
-  //  case class ReplaceMapPairs(kvs: ValuePairs) extends ModelValue {
-  //    override def toString: String = s"ReplaceMapPairs($kvs)"
-  //  }
-  //  case class RetractMapKeys(keys: Values) extends ModelValue {
-  //    override def toString: String = s"RetractMapKeys($keys)"
-  //  }
-  //  case class MapKeys(keys: Values) extends ModelValue {
-  //    override def toString: String = s"MapKeys($keys)"
-  //  }
-  //
-  //
-  //  sealed trait GenericValue extends ModelValue
-  //
-  //  case object NoValue extends GenericValue
-  //  case class Card(card: Int) extends GenericValue {
-  //    override def toString: String = s"Card($card)"
-  //  }
-  //
-  //  sealed trait Bidirectional extends GenericValue
-  //
-  //  case class BiSelfRef(card: Int) extends Bidirectional {
-  //    override def toString: String = s"BiSelfRef($card)"
-  //  }
-  //  case class BiSelfRefAttr(card: Int) extends Bidirectional {
-  //    override def toString: String = s"BiSelfRefAttr($card)"
-  //  }
-  //
-  //  case class BiOtherRef(card: Int, attr: String) extends Bidirectional {
-  //    override def toString: String = s"""BiOtherRef($card, "$attr")"""
-  //  }
-  //  case class BiOtherRefAttr(card: Int, attr: String) extends Bidirectional {
-  //    override def toString: String = s"""BiOtherRefAttr($card, "$attr")"""
-  //  }
-  //
-  //  case object BiEdge extends Bidirectional
-  //  case class BiEdgeRef(card: Int, attr: String) extends Bidirectional {
-  //    override def toString: String = s"""BiEdgeRef($card, "$attr")"""
-  //  }
-  //  case class BiEdgeRefAttr(card: Int, attr: String) extends Bidirectional {
-  //    override def toString: String = s"""BiEdgeRefAttr($card, "$attr")"""
-  //  }
-  //
-  //  case class BiEdgePropAttr(card: Int) extends Bidirectional {
-  //    override def toString: String = s"BiEdgePropAttr($card)"
-  //  }
-  //  case class BiEdgePropRefAttr(card: Int) extends Bidirectional {
-  //    override def toString: String = s"BiEdgePropRefAttr($card)"
-  //  }
-  //  case class BiEdgePropRef(card: Int) extends Bidirectional {
-  //    override def toString: String = s"BiEdgePropRef($card)"
-  //  }
-  //
-  //  case class BiTargetRef(card: Int, attr: String) extends Bidirectional {
-  //    override def toString: String = s"""BiTargetRef($card, "$attr")"""
-  //  }
-  //  case class BiTargetRefAttr(card: Int, attr: String) extends Bidirectional {
-  //    override def toString: String = s"""BiTargetRefAttr($card, "$attr")"""
-  //  }
+  case object Add extends Op
+  case object Replace extends Op
+  case object Delete extends Op
 }

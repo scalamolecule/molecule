@@ -2,11 +2,11 @@ package codegen.boilerplate.api
 
 import codegen.BoilerplateGenBase
 
-object _Aggregates extends BoilerplateGenBase("AggregatesX", "/api") {
+object _Aggregates extends BoilerplateGenBase("Aggregates", "/api") {
   val content = {
     val traits = (1 to 22).map(arity => Trait(arity).body).mkString("\n")
     s"""// GENERATED CODE ********************************
-       |molecule.boilerplate.api
+       |package molecule.boilerplate.api
        |
        |import molecule.boilerplate.api.Keywords._
        |$traits""".stripMargin

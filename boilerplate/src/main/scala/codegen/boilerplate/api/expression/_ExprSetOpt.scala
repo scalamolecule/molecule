@@ -2,15 +2,14 @@ package codegen.boilerplate.api.expression
 
 import codegen.BoilerplateGenBase
 
-object _ExprSetOpt extends BoilerplateGenBase( "exprSetO", "/api/expression") {
+object _ExprSetOpt extends BoilerplateGenBase( "ExprSetOpt", "/api/expression") {
   val content = {
     val traits = (1 to 22).map(arity => Trait(arity).body).mkString("\n")
     s"""// GENERATED CODE ********************************
-       |molecule.boilerplate.api.expression
+       |package molecule.boilerplate.api.expression
        |
-       |import molecule.boilerplate.api.sortAttrs._
-       |import molecule.boilerplate.markers.argKindMarkers._
-       |
+       |import molecule.boilerplate.api._
+       |import molecule.boilerplate.ast.MoleculeModel._
        |$traits
        |""".stripMargin
   }
@@ -18,24 +17,30 @@ object _ExprSetOpt extends BoilerplateGenBase( "exprSetO", "/api/expression") {
   case class Trait(arity: Int) extends TemplateVals(arity) {
     val body =
       s"""
-         |trait ${fileName}_$arity[Attr, t, ${`A..V`}, $nsIn]
-         |  extends SortAttrs_$arity[Attr, t, ${`A..V`}, Ns] {
-         |  def apply(v    : Option[t])          : $nsOut with Vs  = ???
-         |  def apply(vs   : Option[Seq[t]])     : $nsOut with CVs = ???
-         |  def apply(set  : Option[Set[t]])     : $nsOut with Cs  = ???
-         |  def apply(sets : Option[Seq[Set[t]]]): $nsOut with CCs = ???
-         |  def ==   (set  : Option[Set[t]])     : $nsOut with Cs  = ???
-         |  def ==   (sets : Option[Seq[Set[t]]]): $nsOut with CCs = ???
-         |  def not  (v    : Option[t])          : $nsOut with Vs  = ???
-         |  def not  (vs   : Option[Seq[t]])     : $nsOut with CVs = ???
-         |  def not  (set  : Option[Set[t]])     : $nsOut with Cs  = ???
-         |  def not  (sets : Option[Seq[Set[t]]]): $nsOut with CCs = ???
-         |  def !=   (set  : Option[Set[t]])     : $nsOut with Cs  = ???
-         |  def !=   (sets : Option[Seq[Set[t]]]): $nsOut with CCs = ???
-         |  def <    (upper: Option[t])          : $nsOut          = ???
-         |  def <=   (upper: Option[t])          : $nsOut          = ???
-         |  def >    (lower: Option[t])          : $nsOut          = ???
-         |  def >=   (lower: Option[t])          : $nsOut          = ???
+         |
+         |trait ${fileName}Ops_$arity[${`A..V`}, t, Ns[${`_, _`}]] extends ExprBase {
+         |  protected def _exprSetOpt(op: Op, optSets: Option[Seq[Set[t]]]): Ns[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns] = ???
+         |}
+         |
+         |trait ${fileName}_$arity[${`A..V`}, t, Ns[${`_, _`}]]
+         |  extends ${fileName}Ops_$arity[${`A..V`}, t, Ns]
+         |    with SortAttrs_$arity[${`A..V`}, t, Ns] { //self: Ns[${`_, _`}] =>
+         |  def apply(v    : Option[t]          )(implicit x: X)            : Ns[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns] = _exprSetOpt(Appl, v.map(v => Seq(Set(v))))
+         |  def apply(vs   : Option[Seq[t]]     )(implicit x: X, y: X)      : Ns[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns] = _exprSetOpt(Appl, vs.map(_.map(v => Set(v))))
+         |  def apply(set  : Option[Set[t]]     )(implicit x: X, y: X, z: X): Ns[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns] = _exprSetOpt(Appl, set.map(set => Seq(set)))
+         |  def apply(sets : Option[Seq[Set[t]]])                           : Ns[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns] = _exprSetOpt(Appl, sets)
+         |  def not  (v    : Option[t]          )(implicit x: X)            : Ns[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns] = _exprSetOpt(Not , v.map(v => Seq(Set(v))))
+         |  def not  (vs   : Option[Seq[t]]     )(implicit x: X, y: X)      : Ns[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns] = _exprSetOpt(Not , vs.map(_.map(v => Set(v))))
+         |  def not  (set  : Option[Set[t]]     )(implicit x: X, y: X, z: X): Ns[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns] = _exprSetOpt(Not , set.map(set => Seq(set)))
+         |  def not  (sets : Option[Seq[Set[t]]])                           : Ns[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns] = _exprSetOpt(Not , sets)
+         |  def ==   (set  : Option[Set[t]]     )(implicit x: X)            : Ns[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns] = _exprSetOpt(Eq  , set.map(set => Seq(set)))
+         |  def ==   (sets : Option[Seq[Set[t]]])                           : Ns[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns] = _exprSetOpt(Eq  , sets)
+         |  def !=   (set  : Option[Set[t]]     )(implicit x: X)            : Ns[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns] = _exprSetOpt(Neq , set.map(set => Seq(set)))
+         |  def !=   (sets : Option[Seq[Set[t]]])                           : Ns[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns] = _exprSetOpt(Neq , sets)
+         |  def <    (upper: Option[t]          )                           : Ns[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns] = _exprSetOpt(Lt  , upper.map(v => Seq(Set(v))))
+         |  def <=   (upper: Option[t]          )                           : Ns[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns] = _exprSetOpt(Le  , upper.map(v => Seq(Set(v))))
+         |  def >    (lower: Option[t]          )                           : Ns[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns] = _exprSetOpt(Gt  , lower.map(v => Seq(Set(v))))
+         |  def >=   (lower: Option[t]          )                           : Ns[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns] = _exprSetOpt(Ge  , lower.map(v => Seq(Set(v))))
          |}""".stripMargin
   }
 }
