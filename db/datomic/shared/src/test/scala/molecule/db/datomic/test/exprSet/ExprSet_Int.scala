@@ -268,16 +268,6 @@ object ExprSet_Int extends DatomicTestSuite {
         NsSet.n.a1.ints.>=(int2).query.get ==> List(a, b)
         NsSet.n.a1.ints.>=(int3).query.get ==> List(b)
       }
-
-
-      "updates" - cardSet { implicit conn =>
-        NsSet.n.ints.insert(List(
-          (1, Set(int1, int2)),
-          (2, Set(int2, int3, int4))
-        )).transact
-
-        // todo
-      }
     }
 
 

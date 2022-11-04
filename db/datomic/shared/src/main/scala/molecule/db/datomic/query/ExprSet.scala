@@ -131,14 +131,14 @@ trait ExprSet[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
   ): Unit = {
     op match {
       case V         => attr(e, a, v)
-      case Appl      => appl(e, a, v, sets, res.tpe, res.fromScala)
-      case Not       => not(e, a, v, sets, res.tpe, res.fromScala)
+      case Appl      => appl(e, a, v, sets, res.tpe, res.toDatalog)
+      case Not       => not(e, a, v, sets, res.tpe, res.toDatalog)
       case Eq        => equal(e, a, v, sets, res.fromScala)
-      case Neq       => neq(e, a, v, sets, res.tpe, res.fromScala)
-      case Lt        => compare(e, a, v, sets.head, "<", res.fromScala)
-      case Gt        => compare(e, a, v, sets.head, ">", res.fromScala)
-      case Le        => compare(e, a, v, sets.head, "<=", res.fromScala)
-      case Ge        => compare(e, a, v, sets.head, ">=", res.fromScala)
+      case Neq       => neq(e, a, v, sets, res.fromScala)
+      case Lt        => compare(e, a, v, sets.head.head, "<", res.tpe, res.toDatalog)
+      case Gt        => compare(e, a, v, sets.head.head, ">", res.tpe, res.toDatalog)
+      case Le        => compare(e, a, v, sets.head.head, "<=", res.tpe, res.toDatalog)
+      case Ge        => compare(e, a, v, sets.head.head, ">=", res.tpe, res.toDatalog)
       case NoValue   => noValue(e, a, v)
       case Fn(kw, _) => aggr(e, a, v, kw, res)
       case other     => unexpected(other)
@@ -214,7 +214,7 @@ trait ExprSet[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
     where += s"[$e $a $v$tx]" -> wClause
   }
 
-  private def mkRules[T](e: Var, a: Att, v: Var, sets: Seq[Set[T]], tpe: String, fromScala: Any => Any): Seq[String] = {
+  private def mkRules[T](e: Var, a: Att, v: Var, sets: Seq[Set[T]], tpe: String, toDatalog: T => String): Seq[String] = {
     if (tpe == "URI") {
       sets.flatMap {
         case set if set.isEmpty => None
@@ -228,32 +228,32 @@ trait ExprSet[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
       sets.flatMap {
         case set if set.isEmpty => None
         case set                => Some(
-          set.map(arg => s"[$e $a ${fromScala(arg)}]")
+          set.map(arg => s"[$e $a ${toDatalog(arg)}]")
             .mkString(s"[(rule$v $e)\n    ", "\n    ", "]")
         )
       }
     }
   }
 
-  private def appl[T: ClassTag](e: Var, a: Att, v: Var, sets: Seq[Set[T]], tpe: String, fromScala: Any => Any): Unit = {
+  private def appl[T: ClassTag](e: Var, a: Att, v: Var, sets: Seq[Set[T]], tpe: String, toDatalog: T => String): Unit = {
     if (sets.nonEmpty && sets.flatten.nonEmpty) {
       where += s"[$e $a $v$tx]" -> wClause
       where += s"(rule$v $e)" -> wClause
-      rules ++= mkRules(e, a, v, sets, tpe, fromScala)
+      rules ++= mkRules(e, a, v, sets, tpe, toDatalog)
     } else {
       where += s"[(ground nil) $v]" -> wGround
     }
 
   }
 
-  private def not[T](e: Var, a: Att, v: Var, sets: Seq[Set[T]], tpe: String, fromScala: Any => Any): Unit = {
+  private def not[T](e: Var, a: Att, v: Var, sets: Seq[Set[T]], tpe: String, toDatalog: T => String): Unit = {
     // Common for pre-query and main query
     where += s"[$e $a $v$tx]" -> wClause
 
     if (sets.nonEmpty && sets.flatten.nonEmpty) {
       // Pre-query
       preWhere += s"(rule$v $e)" -> wClause
-      preRules ++= mkRules(e, a, v, sets, tpe, fromScala)
+      preRules ++= mkRules(e, a, v, sets, tpe, toDatalog)
 
       // Main query
       val blacklist   = v + "-blacklist"
@@ -277,9 +277,10 @@ trait ExprSet[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
     args += sets.map(set => set.map(fromScala).asJava).asJava
   }
 
-  private def neq[T](e: Var, a: Att, v: Var, sets: Seq[Set[T]], tpe: String, fromScala: Any => Any): Unit = {
+  private def neq[T](e: Var, a: Att, v: Var, sets: Seq[Set[T]], fromScala: Any => Any): Unit = {
     // Common for pre-query and main query
     where += s"[$e $a $v$tx]" -> wClause
+
     if (sets.nonEmpty && sets.flatten.nonEmpty) {
       val blacklist   = v + "-blacklist"
       val blacklisted = v + "-blacklisted"
@@ -303,12 +304,14 @@ trait ExprSet[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
     }
   }
 
-  private def compare[T](e: Var, a: Att, v: Var, arg: T, op: String, fromScala: Any => Any): Unit = {
-    val v1 = v + 1
-    in += v1
+  private def compare[T](e: Var, a: Att, v: Var, arg: T, op: String, tpe: String, toDatalog: T => String): Unit = {
     where += s"[$e $a $v$tx]" -> wClause
-    where += s"[($op $v $v1)]" -> wNeqOne
-    args += fromScala(arg).asInstanceOf[AnyRef]
+    where += s"(rule$v $e)" -> wClause
+    if (tpe == "URI") {
+      rules += s"""[(rule$v $e) [(ground (new java.net.URI "$arg")) ${v}1] [$e $a ${v}1]]"""
+    } else {
+      rules += s"[(rule$v $e) [$e $a $v][($op $v ${toDatalog(arg)})]]"
+    }
   }
 
   private def noValue(e: Var, a: Att, v: String): Unit = {
