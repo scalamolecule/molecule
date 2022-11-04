@@ -55,20 +55,20 @@ trait ExprOne[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
     attrIndex += 1
     val (e, a) = (es.last, s":${atom.ns}/${atom.attr}")
     atom match {
-      case at: AttrOneOptString     => opt(e, a, at.op, at.vs, optString, sortString(at, attrIndex))
-      case at: AttrOneOptInt        => opt(e, a, at.op, at.vs, optInt, sortInt(at, attrIndex))
-      case at: AttrOneOptLong       => opt(e, a, at.op, at.vs, optLong, sortLong(at, attrIndex))
-      case at: AttrOneOptFloat      => opt(e, a, at.op, at.vs, optFloat, sortFloat(at, attrIndex))
-      case at: AttrOneOptDouble     => opt(e, a, at.op, at.vs, optDouble, sortDouble(at, attrIndex))
-      case at: AttrOneOptBoolean    => opt(e, a, at.op, at.vs, optBoolean, sortBoolean(at, attrIndex))
-      case at: AttrOneOptBigInt     => opt(e, a, at.op, at.vs, optBigInt, sortBigInt(at, attrIndex))
-      case at: AttrOneOptBigDecimal => opt(e, a, at.op, at.vs, optBigDecimal, sortBigDecimal(at, attrIndex))
-      case at: AttrOneOptDate       => opt(e, a, at.op, at.vs, optDate, sortDate(at, attrIndex))
-      case at: AttrOneOptUUID       => opt(e, a, at.op, at.vs, optUUID, sortUUID(at, attrIndex))
-      case at: AttrOneOptURI        => opt(e, a, at.op, at.vs, optURI, sortURI(at, attrIndex))
-      case at: AttrOneOptByte       => opt(e, a, at.op, at.vs, optByte, sortByte(at, attrIndex))
-      case at: AttrOneOptShort      => opt(e, a, at.op, at.vs, optShort, sortShort(at, attrIndex))
-      case at: AttrOneOptChar       => opt(e, a, at.op, at.vs, optChar, sortChar(at, attrIndex))
+      case at: AttrOneOptString     => opt(e, a, at.op, at.vs, resOptString, sortString(at, attrIndex))
+      case at: AttrOneOptInt        => opt(e, a, at.op, at.vs, resOptInt, sortInt(at, attrIndex))
+      case at: AttrOneOptLong       => opt(e, a, at.op, at.vs, resOptLong, sortLong(at, attrIndex))
+      case at: AttrOneOptFloat      => opt(e, a, at.op, at.vs, resOptFloat, sortFloat(at, attrIndex))
+      case at: AttrOneOptDouble     => opt(e, a, at.op, at.vs, resOptDouble, sortDouble(at, attrIndex))
+      case at: AttrOneOptBoolean    => opt(e, a, at.op, at.vs, resOptBoolean, sortBoolean(at, attrIndex))
+      case at: AttrOneOptBigInt     => opt(e, a, at.op, at.vs, resOptBigInt, sortBigInt(at, attrIndex))
+      case at: AttrOneOptBigDecimal => opt(e, a, at.op, at.vs, resOptBigDecimal, sortBigDecimal(at, attrIndex))
+      case at: AttrOneOptDate       => opt(e, a, at.op, at.vs, resOptDate, sortDate(at, attrIndex))
+      case at: AttrOneOptUUID       => opt(e, a, at.op, at.vs, resOptUUID, sortUUID(at, attrIndex))
+      case at: AttrOneOptURI        => opt(e, a, at.op, at.vs, resOptURI, sortURI(at, attrIndex))
+      case at: AttrOneOptByte       => opt(e, a, at.op, at.vs, resOptByte, sortByte(at, attrIndex))
+      case at: AttrOneOptShort      => opt(e, a, at.op, at.vs, resOptShort, sortShort(at, attrIndex))
+      case at: AttrOneOptChar       => opt(e, a, at.op, at.vs, resOptChar, sortChar(at, attrIndex))
     }
     es
   }
@@ -139,7 +139,7 @@ trait ExprOne[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
       case Gt        => compare(e, a, v, args.head, ">", res.fromScala)
       case Le        => compare(e, a, v, args.head, "<=", res.fromScala)
       case Ge        => compare(e, a, v, args.head, ">=", res.fromScala)
-      case NoValue   => noValue(e, a, v)
+      case NoValue   => noValue(e, a)
       case Fn(kw, _) => aggr(e, a, v, kw, res)
       case other     => unexpected(other)
     }
@@ -242,12 +242,12 @@ trait ExprOne[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
     args += fromScala(arg).asInstanceOf[AnyRef]
   }
 
-  private def noValue(e: Var, a: Att, v: String): Unit = {
+  private def noValue(e: Var, a: Att): Unit = {
     where += s"(not [$e $a])" -> wNeqOne
   }
 
 
-  private def optV(e: Var, a: Att, v: Var) = {
+  private def optV(e: Var, a: Att, v: Var): Unit = {
     find += s"(pull $e-$v [[$a :limit nil]]) "
     where += s"[(identity $e) $e-$v]" -> wGround
   }
@@ -259,16 +259,13 @@ trait ExprOne[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
     optArgs: Option[Seq[T]],
     fromScala: Any => Any
   ): Unit = {
-    if (optArgs.isDefined) {
-      find += v
-      in += s"[$v ...]"
-      where += s"[$e $a $v$tx]" -> wClause
-      args += optArgs.get.map(fromScala).toArray
-    } else {
-      // None
+    optArgs.fold[Unit] {
       find += s"(pull $e-$v [[$a :limit nil]])"
       where += s"(not [$e $a])" -> wNeqOne
       where += s"[(identity $e) $e-$v]" -> wGround
+    } { vs =>
+      find += v
+      appl(e, a, v, vs, fromScala)
     }
   }
 
@@ -283,16 +280,7 @@ trait ExprOne[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
     find += v
     where += s"[$e $a $v$tx]" -> wClause
     if (optArgs.isDefined && optArgs.get.nonEmpty) {
-      if (tpe == "URI") {
-        optArgs.get.zipWithIndex.foreach { case (arg, i) =>
-          where += s"""[(ground (new java.net.URI "$arg")) $v$i]""" -> wNeqOne
-          where += s"[(!= $v $v$i)]" -> wNeqOne
-        }
-      } else {
-        optArgs.get.foreach { arg =>
-          where += s"[(!= $v ${toDatalog(arg)})]" -> wNeqOne
-        }
-      }
+      not(e, a, v, optArgs.get, tpe, toDatalog)
     }
   }
 
@@ -304,17 +292,12 @@ trait ExprOne[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
     op: String,
     fromScala: Any => Any
   ): Unit = {
-    if (optArgs.isDefined && optArgs.get.nonEmpty) {
-      find += v
-      val v1 = v + 1
-      in += v1
-      where += s"[$e $a $v$tx]" -> wClause
-      where += s"[($op $v $v1)]" -> wNeqOne
-      args += fromScala(optArgs.get.head).asInstanceOf[AnyRef]
-    } else {
-      // None - return null (clojure nil)
+    optArgs.fold[Unit] {
       find += s"$v-nil"
       where += s"[(ground nil) $v-nil]" -> wGround
+    } { vs =>
+      find += v
+      compare(e, a, v, vs.head, op, fromScala)
     }
   }
 }

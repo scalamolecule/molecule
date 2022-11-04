@@ -14,20 +14,20 @@ trait ExprSet[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
     attrIndex += 1
     val (e, a) = (es.last, s":${atom.ns}/${atom.attr}")
     atom match {
-      case at: AttrSetManString     => man(e, a, at.op, at.vs, resString)
-      case at: AttrSetManInt        => man(e, a, at.op, at.vs, resInt)
-      case at: AttrSetManLong       => man(e, a, at.op, at.vs, resLong)
-      case at: AttrSetManFloat      => man(e, a, at.op, at.vs, resFloat)
-      case at: AttrSetManDouble     => man(e, a, at.op, at.vs, resDouble)
-      case at: AttrSetManBoolean    => man(e, a, at.op, at.vs, resBoolean)
-      case at: AttrSetManBigInt     => man(e, a, at.op, at.vs, resBigInt)
-      case at: AttrSetManBigDecimal => man(e, a, at.op, at.vs, resBigDecimal)
-      case at: AttrSetManDate       => man(e, a, at.op, at.vs, resDate)
-      case at: AttrSetManUUID       => man(e, a, at.op, at.vs, resUUID)
-      case at: AttrSetManURI        => man(e, a, at.op, at.vs, resURI)
-      case at: AttrSetManByte       => man(e, a, at.op, at.vs, resByte)
-      case at: AttrSetManShort      => man(e, a, at.op, at.vs, resShort)
-      case at: AttrSetManChar       => man(e, a, at.op, at.vs, resChar)
+      case at: AttrSetManString     => man(e, a, at.op, at.vs, resSetString)
+      case at: AttrSetManInt        => man(e, a, at.op, at.vs, resSetInt)
+      case at: AttrSetManLong       => man(e, a, at.op, at.vs, resSetLong)
+      case at: AttrSetManFloat      => man(e, a, at.op, at.vs, resSetFloat)
+      case at: AttrSetManDouble     => man(e, a, at.op, at.vs, resSetDouble)
+      case at: AttrSetManBoolean    => man(e, a, at.op, at.vs, resSetBoolean)
+      case at: AttrSetManBigInt     => man(e, a, at.op, at.vs, resSetBigInt)
+      case at: AttrSetManBigDecimal => man(e, a, at.op, at.vs, resSetBigDecimal)
+      case at: AttrSetManDate       => man(e, a, at.op, at.vs, resSetDate)
+      case at: AttrSetManUUID       => man(e, a, at.op, at.vs, resSetUUID)
+      case at: AttrSetManURI        => man(e, a, at.op, at.vs, resSetURI)
+      case at: AttrSetManByte       => man(e, a, at.op, at.vs, resSetByte)
+      case at: AttrSetManShort      => man(e, a, at.op, at.vs, resSetShort)
+      case at: AttrSetManChar       => man(e, a, at.op, at.vs, resSetChar)
     }
     es
   }
@@ -35,20 +35,20 @@ trait ExprSet[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
   protected def resolveAttrSetTac(es: List[Var], atom: AttrSetTac): List[Var] = {
     val (e, a) = (es.last, s":${atom.ns}/${atom.attr}")
     atom match {
-      case at: AttrSetTacString     => tac(e, a, at.op, at.vs, resString)
-      case at: AttrSetTacInt        => tac(e, a, at.op, at.vs, resInt)
-      case at: AttrSetTacLong       => tac(e, a, at.op, at.vs, resLong)
-      case at: AttrSetTacFloat      => tac(e, a, at.op, at.vs, resFloat)
-      case at: AttrSetTacDouble     => tac(e, a, at.op, at.vs, resDouble)
-      case at: AttrSetTacBoolean    => tac(e, a, at.op, at.vs, resBoolean)
-      case at: AttrSetTacBigInt     => tac(e, a, at.op, at.vs, resBigInt)
-      case at: AttrSetTacBigDecimal => tac(e, a, at.op, at.vs, resBigDecimal)
-      case at: AttrSetTacDate       => tac(e, a, at.op, at.vs, resDate)
-      case at: AttrSetTacUUID       => tac(e, a, at.op, at.vs, resUUID)
-      case at: AttrSetTacURI        => tac(e, a, at.op, at.vs, resURI)
-      case at: AttrSetTacByte       => tac(e, a, at.op, at.vs, resByte)
-      case at: AttrSetTacShort      => tac(e, a, at.op, at.vs, resShort)
-      case at: AttrSetTacChar       => tac(e, a, at.op, at.vs, resChar)
+      case at: AttrSetTacString     => tac(e, a, at.op, at.vs, resSetString)
+      case at: AttrSetTacInt        => tac(e, a, at.op, at.vs, resSetInt)
+      case at: AttrSetTacLong       => tac(e, a, at.op, at.vs, resSetLong)
+      case at: AttrSetTacFloat      => tac(e, a, at.op, at.vs, resSetFloat)
+      case at: AttrSetTacDouble     => tac(e, a, at.op, at.vs, resSetDouble)
+      case at: AttrSetTacBoolean    => tac(e, a, at.op, at.vs, resSetBoolean)
+      case at: AttrSetTacBigInt     => tac(e, a, at.op, at.vs, resSetBigInt)
+      case at: AttrSetTacBigDecimal => tac(e, a, at.op, at.vs, resSetBigDecimal)
+      case at: AttrSetTacDate       => tac(e, a, at.op, at.vs, resSetDate)
+      case at: AttrSetTacUUID       => tac(e, a, at.op, at.vs, resSetUUID)
+      case at: AttrSetTacURI        => tac(e, a, at.op, at.vs, resSetURI)
+      case at: AttrSetTacByte       => tac(e, a, at.op, at.vs, resSetByte)
+      case at: AttrSetTacShort      => tac(e, a, at.op, at.vs, resSetShort)
+      case at: AttrSetTacChar       => tac(e, a, at.op, at.vs, resSetChar)
     }
     es
   }
@@ -57,20 +57,20 @@ trait ExprSet[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
     attrIndex += 1
     val (e, a) = (es.last, s":${atom.ns}/${atom.attr}")
     atom match {
-      case at: AttrSetOptString     => opt(e, a, at.op, at.vs, optString)
-      case at: AttrSetOptInt        => opt(e, a, at.op, at.vs, optInt)
-      case at: AttrSetOptLong       => opt(e, a, at.op, at.vs, optLong)
-      case at: AttrSetOptFloat      => opt(e, a, at.op, at.vs, optFloat)
-      case at: AttrSetOptDouble     => opt(e, a, at.op, at.vs, optDouble)
-      case at: AttrSetOptBoolean    => opt(e, a, at.op, at.vs, optBoolean)
-      case at: AttrSetOptBigInt     => opt(e, a, at.op, at.vs, optBigInt)
-      case at: AttrSetOptBigDecimal => opt(e, a, at.op, at.vs, optBigDecimal)
-      case at: AttrSetOptDate       => opt(e, a, at.op, at.vs, optDate)
-      case at: AttrSetOptUUID       => opt(e, a, at.op, at.vs, optUUID)
-      case at: AttrSetOptURI        => opt(e, a, at.op, at.vs, optURI)
-      case at: AttrSetOptByte       => opt(e, a, at.op, at.vs, optByte)
-      case at: AttrSetOptShort      => opt(e, a, at.op, at.vs, optShort)
-      case at: AttrSetOptChar       => opt(e, a, at.op, at.vs, optChar)
+      case at: AttrSetOptString     => opt(e, a, at.op, at.vs, resOptSetString)
+      case at: AttrSetOptInt        => opt(e, a, at.op, at.vs, resOptSetInt)
+      case at: AttrSetOptLong       => opt(e, a, at.op, at.vs, resOptSetLong)
+      case at: AttrSetOptFloat      => opt(e, a, at.op, at.vs, resOptSetFloat)
+      case at: AttrSetOptDouble     => opt(e, a, at.op, at.vs, resOptSetDouble)
+      case at: AttrSetOptBoolean    => opt(e, a, at.op, at.vs, resOptSetBoolean)
+      case at: AttrSetOptBigInt     => opt(e, a, at.op, at.vs, resOptSetBigInt)
+      case at: AttrSetOptBigDecimal => opt(e, a, at.op, at.vs, resOptSetBigDecimal)
+      case at: AttrSetOptDate       => opt(e, a, at.op, at.vs, resOptSetDate)
+      case at: AttrSetOptUUID       => opt(e, a, at.op, at.vs, resOptSetUUID)
+      case at: AttrSetOptURI        => opt(e, a, at.op, at.vs, resOptSetURI)
+      case at: AttrSetOptByte       => opt(e, a, at.op, at.vs, resOptSetByte)
+      case at: AttrSetOptShort      => opt(e, a, at.op, at.vs, resOptSetShort)
+      case at: AttrSetOptChar       => opt(e, a, at.op, at.vs, resOptSetChar)
     }
     es
   }
@@ -111,12 +111,14 @@ trait ExprSet[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
     castScala += res.toScala
     op match {
       case V     => optV(e, a, v)
-      case Appl  => optApply(e, a, v, optSets, res.fromScala)
+      case Appl  => optApply(e, a, v, optSets, res.tpe, res.toDatalog)
       case Not   => optNot(e, a, v, optSets, res.tpe, res.toDatalog)
-      case Lt    => optCompare(e, a, v, optSets, "<", res.fromScala)
-      case Gt    => optCompare(e, a, v, optSets, ">", res.fromScala)
-      case Le    => optCompare(e, a, v, optSets, "<=", res.fromScala)
-      case Ge    => optCompare(e, a, v, optSets, ">=", res.fromScala)
+      case Eq    => optEq(e, a, v, optSets, res.fromScala)
+      case Neq   => optNeq(e, a, v, optSets, res.fromScala)
+      case Lt    => optCompare(e, a, v, optSets, "<", res.tpe, res.toDatalog)
+      case Gt    => optCompare(e, a, v, optSets, ">", res.tpe, res.toDatalog)
+      case Le    => optCompare(e, a, v, optSets, "<=", res.tpe, res.toDatalog)
+      case Ge    => optCompare(e, a, v, optSets, ">=", res.tpe, res.toDatalog)
       case other => unexpected(other)
     }
   }
@@ -139,7 +141,7 @@ trait ExprSet[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
       case Gt        => compare(e, a, v, sets.head.head, ">", res.tpe, res.toDatalog)
       case Le        => compare(e, a, v, sets.head.head, "<=", res.tpe, res.toDatalog)
       case Ge        => compare(e, a, v, sets.head.head, ">=", res.tpe, res.toDatalog)
-      case NoValue   => noValue(e, a, v)
+      case NoValue   => noValue(e, a)
       case Fn(kw, _) => aggr(e, a, v, kw, res)
       case other     => unexpected(other)
     }
@@ -314,58 +316,81 @@ trait ExprSet[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
     }
   }
 
-  private def noValue(e: Var, a: Att, v: String): Unit = {
+  private def noValue(e: Var, a: Att): Unit = {
     where += s"(not [$e $a])" -> wNeqOne
   }
 
 
-  private def optV(e: Var, a: Att, v: Var) = {
+  private def optV(e: Var, a: Att, v: Var): Unit = {
     find += s"(pull $e-$v [[$a :limit nil]]) "
     where += s"[(identity $e) $e-$v]" -> wGround
+  }
+
+  private def none(e: Var, a: Att, v: Var): Unit = {
+    find += s"(pull $e-$v [[$a :limit nil]])"
+    where += s"[(identity $e) $e-$v]" -> wGround
+    where += s"(not [$e $a])" -> wNeqOne
   }
 
   private def optApply[T: ClassTag](
     e: Var,
     a: Att,
     v: Var,
-    optArgs: Option[Seq[Set[T]]],
-    fromScala: Any => Any
+    optSets: Option[Seq[Set[T]]],
+    tpe: String,
+    toDatalog: T => String
   ): Unit = {
-    if (optArgs.isDefined) {
-      find += v
-      in += s"[$v ...]"
-      where += s"[$e $a $v$tx]" -> wClause
-      args += optArgs.get.map(fromScala).toArray
-    } else {
-      // None
-      find += s"(pull $e-$v [[$a :limit nil]])"
-      where += s"(not [$e $a])" -> wNeqOne
-      where += s"[(identity $e) $e-$v]" -> wGround
+    optSets.fold[Unit] {
+      none(e, a, v)
+    } { sets =>
+      find += s"(distinct $v)"
+      appl(e, a, v, sets, tpe, toDatalog)
     }
   }
-
 
   private def optNot[T](
     e: Var,
     a: Att,
     v: Var,
-    optArgs: Option[Seq[Set[T]]],
+    optSets: Option[Seq[Set[T]]],
     tpe: String,
     toDatalog: T => String
   ): Unit = {
-    find += v
-    where += s"[$e $a $v$tx]" -> wClause
-    if (optArgs.isDefined && optArgs.get.nonEmpty) {
-      if (tpe == "URI") {
-        optArgs.get.zipWithIndex.foreach { case (arg, i) =>
-          where += s"""[(ground (new java.net.URI "$arg")) $v$i]""" -> wNeqOne
-          where += s"[(!= $v $v$i)]" -> wNeqOne
-        }
-      } else {
-        optArgs.get.foreach { arg =>
-          //          where += s"[(!= $v ${toDatalog(arg)})]" -> wNeqOne
-        }
-      }
+    find += s"(distinct $v)"
+    if (optSets.isDefined) {
+      not(e, a, v, optSets.get, tpe, toDatalog)
+    } else {
+      where += s"[$e $a $v$tx]" -> wClause
+    }
+  }
+
+  private def optEq[T](
+    e: Var,
+    a: Att,
+    v: Var,
+    optSets: Option[Seq[Set[T]]],
+    fromScala: Any => Any
+  ): Unit = {
+    optSets.fold[Unit] {
+      none(e, a, v)
+    } { sets =>
+      find += s"(distinct $v)"
+      equal(e, a, v, sets, fromScala)
+    }
+  }
+
+  private def optNeq[T](
+    e: Var,
+    a: Att,
+    v: Var,
+    optSets: Option[Seq[Set[T]]],
+    fromScala: Any => Any
+  ): Unit = {
+    optSets.fold[Unit] {
+      none(e, a, v)
+    } { sets =>
+      find += s"(distinct $v)"
+      neq(e, a, v, sets, fromScala)
     }
   }
 
@@ -373,21 +398,17 @@ trait ExprSet[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
     e: Var,
     a: Att,
     v: Var,
-    optArgs: Option[Seq[Set[T]]],
+    optSets: Option[Seq[Set[T]]],
     op: String,
-    fromScala: Any => Any
+    tpe: String,
+    toDatalog: T => String
   ): Unit = {
-    if (optArgs.isDefined && optArgs.get.nonEmpty) {
-      find += v
-      val v1 = v + 1
-      in += v1
+    find += s"(distinct $v)"
+    optSets.fold[Unit] {
       where += s"[$e $a $v$tx]" -> wClause
-      where += s"[($op $v $v1)]" -> wNeqOne
-      args += fromScala(optArgs.get.head).asInstanceOf[AnyRef]
-    } else {
-      // None - return null (clojure nil)
-      find += s"$v-nil"
-      where += s"[(ground nil) $v-nil]" -> wGround
+    } { sets =>
+      compare(e, a, v, sets.head.head, op, tpe, toDatalog)
     }
+
   }
 }

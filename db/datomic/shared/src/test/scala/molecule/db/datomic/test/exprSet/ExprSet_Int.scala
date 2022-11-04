@@ -8,17 +8,24 @@ import utest._
 
 object ExprSet_Int extends DatomicTestSuite {
 
+
   lazy val tests = Tests {
 
     "Mandatory" - {
+
+      "attr" - cardSet { implicit conn =>
+        val a = (1, Set(int1, int2))
+        val b = (2, Set(int2, int3, int4))
+        NsSet.n.ints.insert(List(a, b)).transact
+
+        NsSet.n.a1.ints.query.get ==> List(a, b)
+      }
+
 
       "apply" - cardSet { implicit conn =>
         val a = (1, Set(int1, int2))
         val b = (2, Set(int2, int3, int4))
         NsSet.n.ints.insert(List(a, b)).transact
-
-
-        NsSet.n.a1.ints.query.get ==> List(a, b)
 
         // Sets with one or more values matching
 
@@ -272,6 +279,17 @@ object ExprSet_Int extends DatomicTestSuite {
 
 
     "Tacit" - {
+
+      "attr" - cardSet { implicit conn =>
+        val (a, b) = (1, 2)
+        NsSet.n.ints.insert(List(
+          (a, Set(int1, int2)),
+          (b, Set(int2, int3, int4))
+        )).transact
+
+        NsSet.n.a1.ints_.query.get ==> List(a, b)
+      }
+
 
       "apply" - cardSet { implicit conn =>
         val (a, b) = (1, 2)
@@ -539,11 +557,21 @@ object ExprSet_Int extends DatomicTestSuite {
 
     "Optional" - {
 
+      "attr" - cardSet { implicit conn =>
+        val a = (1, Some(Set(int1, int2)))
+        val b = (2, Some(Set(int2, int3, int4)))
+        val c = (3, None)
+        NsSet.n.ints_?.insert(a, b, c).transact
+
+        NsSet.n.a1.ints_?.query.get ==> List(a, b, c)
+      }
+
+
       "apply" - cardSet { implicit conn =>
         val a = (1, Some(Set(int1, int2)))
         val b = (2, Some(Set(int2, int3, int4)))
         val c = (3, None)
-        NsSet.n.ints_?.insert(a, b, c)
+        NsSet.n.ints_?.insert(a, b, c).transact
 
         // Sets with one or more values matching
 
@@ -609,50 +637,11 @@ object ExprSet_Int extends DatomicTestSuite {
       }
 
 
-      "==" - cardSet { implicit conn =>
-        val a = (1, Some(Set(int1, int2)))
-        val b = (2, Some(Set(int2, int3, int4)))
-        val c = (3, None)
-        NsSet.n.ints_?.insert(a, b, c)
-
-        // Exact Set matches
-
-        // AND semantics
-        // "Is exactly this AND that"
-        NsSet.n.a1.ints_?.==(Some(Set(int1))).query.get ==> List()
-        NsSet.n.a1.ints_?.==(Some(Set(int1, int2))).query.get ==> List(a) // include exact match
-        NsSet.n.a1.ints_?.==(Some(Set(int1, int2, int3))).query.get ==> List()
-        // Same as
-        NsSet.n.a1.ints_?.==(Some(Seq(Set(int1)))).query.get ==> List()
-        NsSet.n.a1.ints_?.==(Some(Seq(Set(int1, int2)))).query.get ==> List(a)
-        NsSet.n.a1.ints_?.==(Some(Seq(Set(int1, int2, int3)))).query.get ==> List()
-
-
-        // AND/OR semantics with multiple Sets
-
-        // "(exactly this AND that) OR (exactly this AND that)"
-        NsSet.n.a1.ints_?.==(Some(Seq(Set(int1), Set(int2, int3)))).query.get ==> List()
-        NsSet.n.a1.ints_?.==(Some(Seq(Set(int1, int2), Set(int2, int3)))).query.get ==> List(a)
-        NsSet.n.a1.ints_?.==(Some(Seq(Set(int1, int2), Set(int2, int3, int4)))).query.get ==> List(a, b)
-
-
-        // Empty Seq/Sets match nothing
-        NsSet.n.a1.ints_?.==(Some(Set.empty[Int])).query.get ==> List()
-        NsSet.n.a1.ints_?.==(Some(Seq.empty[Set[Int]])).query.get ==> List()
-        NsSet.n.a1.ints_?.==(Some(Seq(Set.empty[Int]))).query.get ==> List()
-
-
-        // None matches non-asserted values
-        NsSet.n.a1.ints_?.==(Option.empty[Set[Int]]).query.get ==> List(c)
-        NsSet.n.a1.ints_?.==(Option.empty[Seq[Set[Int]]]).query.get ==> List(c)
-      }
-
-
       "not" - cardSet { implicit conn =>
         val a = (1, Some(Set(int1, int2)))
         val b = (2, Some(Set(int2, int3, int4)))
         val c = (3, None)
-        NsSet.n.ints_?.insert(a, b, c)
+        NsSet.n.ints_?.insert(a, b, c).transact
 
         // Sets without one or more values matching
 
@@ -723,11 +712,50 @@ object ExprSet_Int extends DatomicTestSuite {
       }
 
 
+      "==" - cardSet { implicit conn =>
+        val a = (1, Some(Set(int1, int2)))
+        val b = (2, Some(Set(int2, int3, int4)))
+        val c = (3, None)
+        NsSet.n.ints_?.insert(a, b, c).transact
+
+        // Exact Set matches
+
+        // AND semantics
+        // "Is exactly this AND that"
+        NsSet.n.a1.ints_?.==(Some(Set(int1))).query.get ==> List()
+        NsSet.n.a1.ints_?.==(Some(Set(int1, int2))).query.get ==> List(a) // include exact match
+        NsSet.n.a1.ints_?.==(Some(Set(int1, int2, int3))).query.get ==> List()
+        // Same as
+        NsSet.n.a1.ints_?.==(Some(Seq(Set(int1)))).query.get ==> List()
+        NsSet.n.a1.ints_?.==(Some(Seq(Set(int1, int2)))).query.get ==> List(a)
+        NsSet.n.a1.ints_?.==(Some(Seq(Set(int1, int2, int3)))).query.get ==> List()
+
+
+        // AND/OR semantics with multiple Sets
+
+        // "(exactly this AND that) OR (exactly this AND that)"
+        NsSet.n.a1.ints_?.==(Some(Seq(Set(int1), Set(int2, int3)))).query.get ==> List()
+        NsSet.n.a1.ints_?.==(Some(Seq(Set(int1, int2), Set(int2, int3)))).query.get ==> List(a)
+        NsSet.n.a1.ints_?.==(Some(Seq(Set(int1, int2), Set(int2, int3, int4)))).query.get ==> List(a, b)
+
+
+        // Empty Seq/Sets match nothing
+        NsSet.n.a1.ints_?.==(Some(Set.empty[Int])).query.get ==> List()
+        NsSet.n.a1.ints_?.==(Some(Seq.empty[Set[Int]])).query.get ==> List()
+        NsSet.n.a1.ints_?.==(Some(Seq(Set.empty[Int]))).query.get ==> List()
+
+
+        // None matches non-asserted values
+        NsSet.n.a1.ints_?.==(Option.empty[Set[Int]]).query.get ==> List(c)
+        NsSet.n.a1.ints_?.==(Option.empty[Seq[Set[Int]]]).query.get ==> List(c)
+      }
+
+
       "!=" - cardSet { implicit conn =>
         val a = (1, Some(Set(int1, int2)))
         val b = (2, Some(Set(int2, int3, int4)))
         val c = (3, None)
-        NsSet.n.ints_?.insert(a, b, c)
+        NsSet.n.ints_?.insert(a, b, c).transact
 
         // Non-exact Set matches
 
@@ -766,7 +794,7 @@ object ExprSet_Int extends DatomicTestSuite {
         val a = (1, Some(Set(int1, int2)))
         val b = (2, Some(Set(int2, int3, int4)))
         val c = (3, None)
-        NsSet.n.ints_?.insert(a, b, c)
+        NsSet.n.ints_?.insert(a, b, c).transact
 
         NsSet.n.a1.ints_?.<(Some(int0)).query.get ==> List()
         NsSet.n.a1.ints_?.<(Some(int1)).query.get ==> List()

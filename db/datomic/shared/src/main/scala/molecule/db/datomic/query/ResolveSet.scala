@@ -5,8 +5,9 @@ import java.math.{BigDecimal => jBigDecimal, BigInteger => jBigInt}
 import java.net.URI
 import java.util.{Date, UUID, List => jList, Map => jMap, Set => jSet}
 import molecule.base.util.BaseHelpers
+import molecule.core.util.JavaConversions
 
-object ResolveSet extends BaseHelpers {
+object ResolveSet extends BaseHelpers with JavaConversions {
 
   private lazy val fromBigInt = (v: Any) => v.asInstanceOf[BigInt].bigInteger.asInstanceOf[Any]
   private lazy val fromBigDec = (v: Any) => v.asInstanceOf[BigDecimal].bigDecimal.asInstanceOf[Any]
@@ -124,108 +125,104 @@ object ResolveSet extends BaseHelpers {
     vector2list: AnyRef => AnyRef,
   )
 
-  lazy val resString     = ResSet("String", dString, identity, set2setString, seq2String, set2listString, vector2listString)
-  lazy val resInt        = ResSet("Int", dInt, identity, set2setInt, seq2Int, set2listInt, vector2listInt)
-  lazy val resLong       = ResSet("Long", dLong, identity, set2setLong, seq2Long, set2listLong, vector2listLong)
-  lazy val resFloat      = ResSet("Float", dFloat, identity, set2setFloat, seq2Float, set2listFloat, vector2listFloat)
-  lazy val resDouble     = ResSet("Double", dDouble, identity, set2setDouble, seq2Double, set2listDouble, vector2listDouble)
-  lazy val resBoolean    = ResSet("Boolean", dBoolean, identity, set2setBoolean, seq2Boolean, set2listBoolean, vector2listBoolean)
-  lazy val resBigInt     = ResSet("BigInt", dBigInt, fromBigInt, set2setBigInt, seq2BigInt, set2listBigInt, vector2listBigInt)
-  lazy val resBigDecimal = ResSet("BigDecimal", dBigDec, fromBigDec, set2setBigDecimal, seq2BigDecimal, set2listBigDecimal, vector2listBigDecimal)
-  lazy val resDate       = ResSet("Date", dDate, identity, set2setDate, seq2Date, set2listDate, vector2listDate)
-  lazy val resUUID       = ResSet("UUID", dUUID, identity, set2setUUID, seq2UUID, set2listUUID, vector2listUUID)
-  lazy val resURI        = ResSet("URI", dURI, identity, set2setURI, seq2URI, set2listURI, vector2listURI)
-  lazy val resByte       = ResSet("Byte", dByte, fromByte, set2setByte, seq2Byte, set2listByte, vector2listByte)
-  lazy val resShort      = ResSet("Short", dShort, fromShort, set2setShort, seq2Short, set2listShort, vector2listShort)
-  lazy val resChar       = ResSet("Char", dChar, fromChar, set2setChar, seq2Char, set2listChar, vector2listChar)
+  lazy val resSetString     = ResSet("String", dString, identity, set2setString, seq2String, set2listString, vector2listString)
+  lazy val resSetInt        = ResSet("Int", dInt, identity, set2setInt, seq2Int, set2listInt, vector2listInt)
+  lazy val resSetLong       = ResSet("Long", dLong, identity, set2setLong, seq2Long, set2listLong, vector2listLong)
+  lazy val resSetFloat      = ResSet("Float", dFloat, identity, set2setFloat, seq2Float, set2listFloat, vector2listFloat)
+  lazy val resSetDouble     = ResSet("Double", dDouble, identity, set2setDouble, seq2Double, set2listDouble, vector2listDouble)
+  lazy val resSetBoolean    = ResSet("Boolean", dBoolean, identity, set2setBoolean, seq2Boolean, set2listBoolean, vector2listBoolean)
+  lazy val resSetBigInt     = ResSet("BigInt", dBigInt, fromBigInt, set2setBigInt, seq2BigInt, set2listBigInt, vector2listBigInt)
+  lazy val resSetBigDecimal = ResSet("BigDecimal", dBigDec, fromBigDec, set2setBigDecimal, seq2BigDecimal, set2listBigDecimal, vector2listBigDecimal)
+  lazy val resSetDate       = ResSet("Date", dDate, identity, set2setDate, seq2Date, set2listDate, vector2listDate)
+  lazy val resSetUUID       = ResSet("UUID", dUUID, identity, set2setUUID, seq2UUID, set2listUUID, vector2listUUID)
+  lazy val resSetURI        = ResSet("URI", dURI, identity, set2setURI, seq2URI, set2listURI, vector2listURI)
+  lazy val resSetByte       = ResSet("Byte", dByte, fromByte, set2setByte, seq2Byte, set2listByte, vector2listByte)
+  lazy val resSetShort      = ResSet("Short", dShort, fromShort, set2setShort, seq2Short, set2listShort, vector2listShort)
+  lazy val resSetChar       = ResSet("Char", dChar, fromChar, set2setChar, seq2Char, set2listChar, vector2listChar)
 
 
-  private lazy val toOptString = (v: AnyRef) => (v match {
-    case null      => Option.empty[String]
-    case v: String => Some(v)
-    case v         => Some(v.asInstanceOf[jMap[_, _]].values.iterator.next.asInstanceOf[String])
+  private lazy val toOpSetString = (v: AnyRef) => (v match {
+    case null            => Option.empty[String]
+    case set: jSet[_]    => Some(set.asScala.map(_.asInstanceOf[Integer].toInt))
+    case map: jMap[_, _] => Some(map.values.iterator.next.asInstanceOf[jList[_]].asScala.map(_.asInstanceOf[String].toInt).toSet)
   }).asInstanceOf[AnyRef]
 
-  private lazy val toOptInt = (v: AnyRef) => (v match {
-    case null        => Option.empty[Int]
-    case v: jInteger => Some(v.toInt)
-    case v           => Some(v.asInstanceOf[jMap[_, _]].values.iterator.next.asInstanceOf[Integer].toInt)
+  private lazy val toOpSetInt = (v: AnyRef) => (v match {
+    case null            => Option.empty[Int]
+    case set: jSet[_]    => Some(set.asScala.map(_.asInstanceOf[Integer].toInt))
+    case map: jMap[_, _] => Some(map.values.iterator.next.asInstanceOf[jList[_]].asScala.map(_.asInstanceOf[Integer].toInt).toSet)
   }).asInstanceOf[AnyRef]
 
-  private lazy val toOptLong = (v: AnyRef) => (v match {
-    case null     => Option.empty[Long]
-    case v: jLong => Some(v)
-    case v        => Some(v.asInstanceOf[jMap[_, _]].values.iterator.next.asInstanceOf[Long])
+  private lazy val toOpSetLong = (v: AnyRef) => (v match {
+    case null            => Option.empty[Long]
+    case set: jSet[_]    => Some(set.asScala.map(_.asInstanceOf[Long]))
+    case map: jMap[_, _] => Some(map.values.iterator.next.asInstanceOf[jList[_]].asScala.map(_.asInstanceOf[Long]).toSet)
   }).asInstanceOf[AnyRef]
 
-  private lazy val toOptFloat = (v: AnyRef) => (v match {
-    case null      => Option.empty[Float]
-    case v: jFloat => Some(v.toFloat)
-    case v         => Some(v.asInstanceOf[jMap[_, _]].values.iterator.next.asInstanceOf[Float])
+  private lazy val toOpSetFloat = (v: AnyRef) => (v match {
+    case null            => Option.empty[Float]
+    case set: jSet[_]    => Some(set.asScala.map(_.asInstanceOf[Float]))
+    case map: jMap[_, _] => Some(map.values.iterator.next.asInstanceOf[jList[_]].asScala.map(_.asInstanceOf[Float]).toSet)
   }).asInstanceOf[AnyRef]
 
-  private lazy val toOptDouble = (v: AnyRef) => (v match {
-    case null       => Option.empty[Double]
-    case v: jDouble => Some(v)
-    case v          => Some(v.asInstanceOf[jMap[_, _]].values.iterator.next.asInstanceOf[Double])
+  private lazy val toOpSetDouble = (v: AnyRef) => (v match {
+    case null            => Option.empty[Double]
+    case set: jSet[_]    => Some(set.asScala.map(_.asInstanceOf[Double]))
+    case map: jMap[_, _] => Some(map.values.iterator.next.asInstanceOf[jList[_]].asScala.map(_.asInstanceOf[Double]).toSet)
   }).asInstanceOf[AnyRef]
 
-  private lazy val toOptBoolean = (v: AnyRef) => (v match {
-    case null        => Option.empty[Boolean]
-    case v: jBoolean => Some(v)
-    case v           => Some(v.asInstanceOf[jMap[_, _]].values.iterator.next.asInstanceOf[Boolean])
+  private lazy val toOpSetBoolean = (v: AnyRef) => (v match {
+    case null            => Option.empty[Boolean]
+    case set: jSet[_]    => Some(set.asScala.map(_.asInstanceOf[Boolean]))
+    case map: jMap[_, _] => Some(map.values.iterator.next.asInstanceOf[jList[_]].asScala.map(_.asInstanceOf[Boolean]).toSet)
   }).asInstanceOf[AnyRef]
 
-  private lazy val toOptBigInt = (v: AnyRef) => (v match {
-    case null       => Option.empty[BigInt]
-    case v: jBigInt => Some(BigInt(v))
-    case v          => Some(
-      BigInt(v.asInstanceOf[jMap[_, _]].values.iterator.next.asInstanceOf[jBigInt])
-    )
+  private lazy val toOpSetBigInt = (v: AnyRef) => (v match {
+    case null            => Option.empty[BigInt]
+    case set: jSet[_]    => Some(set.asScala.map(v => BigInt(v.asInstanceOf[jBigInt])))
+    case map: jMap[_, _] => Some(map.values.iterator.next.asInstanceOf[jList[_]].asScala.map(v => BigInt(v.asInstanceOf[jBigInt])).toSet)
   }).asInstanceOf[AnyRef]
 
-  private lazy val toOptBigDecimal = (v: AnyRef) => (v match {
-    case null           => Option.empty[BigDecimal]
-    case v: jBigDecimal => Some(BigDecimal(v))
-    case v              => Some(
-      BigDecimal(v.asInstanceOf[jMap[_, _]].values.iterator.next.asInstanceOf[jBigDecimal])
-    )
+  private lazy val toOpSetBigDecimal = (v: AnyRef) => (v match {
+    case null            => Option.empty[BigDecimal]
+    case set: jSet[_]    => Some(set.asScala.map(v => BigDecimal(v.asInstanceOf[jBigDecimal])))
+    case map: jMap[_, _] => Some(map.values.iterator.next.asInstanceOf[jList[_]].asScala.map(v => BigDecimal(v.asInstanceOf[jBigDecimal])).toSet)
   }).asInstanceOf[AnyRef]
 
-  private lazy val toOptDate = (v: AnyRef) => (v match {
-    case null    => Option.empty[Date]
-    case v: Date => Some(v)
-    case v       => Some(v.asInstanceOf[jMap[_, _]].values.iterator.next.asInstanceOf[Date])
+  private lazy val toOpSetDate = (v: AnyRef) => (v match {
+    case null            => Option.empty[Date]
+    case set: jSet[_]    => Some(set.asScala.map(_.asInstanceOf[Date]))
+    case map: jMap[_, _] => Some(map.values.iterator.next.asInstanceOf[jList[_]].asScala.map(_.asInstanceOf[Date]).toSet)
   }).asInstanceOf[AnyRef]
 
-  private lazy val toOptUUID = (v: AnyRef) => (v match {
-    case null    => Option.empty[UUID]
-    case v: UUID => Some(v)
-    case v       => Some(v.asInstanceOf[jMap[_, _]].values.iterator.next.asInstanceOf[UUID])
+  private lazy val toOpSetUUID = (v: AnyRef) => (v match {
+    case null            => Option.empty[UUID]
+    case set: jSet[_]    => Some(set.asScala.map(_.asInstanceOf[UUID]))
+    case map: jMap[_, _] => Some(map.values.iterator.next.asInstanceOf[jList[_]].asScala.map(_.asInstanceOf[UUID]).toSet)
   }).asInstanceOf[AnyRef]
 
-  private lazy val toOptURI = (v: AnyRef) => (v match {
-    case null   => Option.empty[URI]
-    case v: URI => Some(v)
-    case v      => Some(v.asInstanceOf[jMap[_, _]].values.iterator.next.asInstanceOf[URI])
+  private lazy val toOpSetURI = (v: AnyRef) => (v match {
+    case null            => Option.empty[URI]
+    case set: jSet[_]    => Some(set.asScala.map(_.asInstanceOf[URI]))
+    case map: jMap[_, _] => Some(map.values.iterator.next.asInstanceOf[jList[_]].asScala.map(_.asInstanceOf[URI]).toSet)
   }).asInstanceOf[AnyRef]
 
-  private lazy val toOptByte = (v: AnyRef) => (v match {
-    case null        => Option.empty[Byte]
-    case v: jInteger => Some(v.toByte)
-    case v           => Some(v.asInstanceOf[jMap[_, _]].values.iterator.next.asInstanceOf[Integer].toByte)
+  private lazy val toOpSetByte = (v: AnyRef) => (v match {
+    case null            => Option.empty[Byte]
+    case set: jSet[_]    => Some(set.asScala.map(_.asInstanceOf[Integer].toInt))
+    case map: jMap[_, _] => Some(map.values.iterator.next.asInstanceOf[jList[_]].asScala.map(_.asInstanceOf[Integer].toInt).toSet)
   }).asInstanceOf[AnyRef]
 
-  private lazy val toOptShort = (v: AnyRef) => (v match {
-    case null        => Option.empty[Short]
-    case v: jInteger => Some(v.toShort)
-    case v           => Some(v.asInstanceOf[jMap[_, _]].values.iterator.next.asInstanceOf[Integer].toShort)
+  private lazy val toOpSetShort = (v: AnyRef) => (v match {
+    case null            => Option.empty[Short]
+    case set: jSet[_]    => Some(set.asScala.map(_.asInstanceOf[Integer].toShort))
+    case map: jMap[_, _] => Some(map.values.iterator.next.asInstanceOf[jList[_]].asScala.map(_.asInstanceOf[Integer].toShort).toSet)
   }).asInstanceOf[AnyRef]
 
-  private lazy val toOptChar = (v: AnyRef) => (v match {
-    case null      => Option.empty[Char]
-    case v: String => Some(v.head)
-    case v         => Some(v.asInstanceOf[jMap[_, _]].values.iterator.next.asInstanceOf[String].charAt(0))
+  private lazy val toOpSetChar = (v: AnyRef) => (v match {
+    case null            => Option.empty[Char]
+    case set: jSet[_]    => Some(set.asScala.map(_.asInstanceOf[String].charAt(0)))
+    case map: jMap[_, _] => Some(map.values.iterator.next.asInstanceOf[jList[_]].asScala.map(_.asInstanceOf[String].charAt(0)).toSet)
   }).asInstanceOf[AnyRef]
 
 
@@ -236,18 +233,18 @@ object ResolveSet extends BaseHelpers {
     toScala: AnyRef => AnyRef,
   )
 
-  lazy val optString     = ResSetOpt("String", dString, identity, toOptString)
-  lazy val optInt        = ResSetOpt("Int", dInt, identity, toOptInt)
-  lazy val optLong       = ResSetOpt("Long", dLong, identity, toOptLong)
-  lazy val optFloat      = ResSetOpt("Float", dFloat, identity, toOptFloat)
-  lazy val optDouble     = ResSetOpt("Double", dDouble, identity, toOptDouble)
-  lazy val optBoolean    = ResSetOpt("Boolean", dBoolean, identity, toOptBoolean)
-  lazy val optBigInt     = ResSetOpt("BigInt", dBigInt, fromBigInt, toOptBigInt)
-  lazy val optBigDecimal = ResSetOpt("BigDecimal", dBigDec, fromBigDec, toOptBigDecimal)
-  lazy val optDate       = ResSetOpt("Date", dDate, identity, toOptDate)
-  lazy val optUUID       = ResSetOpt("UUID", dUUID, identity, toOptUUID)
-  lazy val optURI        = ResSetOpt("URI", dURI, identity, toOptURI)
-  lazy val optByte       = ResSetOpt("Byte", dByte, fromByte, toOptByte)
-  lazy val optShort      = ResSetOpt("Short", dShort, fromShort, toOptShort)
-  lazy val optChar       = ResSetOpt("Char", dChar, fromChar, toOptChar)
+  lazy val resOptSetString     = ResSetOpt("String", dString, identity, toOpSetString)
+  lazy val resOptSetInt        = ResSetOpt("Int", dInt, identity, toOpSetInt)
+  lazy val resOptSetLong       = ResSetOpt("Long", dLong, identity, toOpSetLong)
+  lazy val resOptSetFloat      = ResSetOpt("Float", dFloat, identity, toOpSetFloat)
+  lazy val resOptSetDouble     = ResSetOpt("Double", dDouble, identity, toOpSetDouble)
+  lazy val resOptSetBoolean    = ResSetOpt("Boolean", dBoolean, identity, toOpSetBoolean)
+  lazy val resOptSetBigInt     = ResSetOpt("BigInt", dBigInt, fromBigInt, toOpSetBigInt)
+  lazy val resOptSetBigDecimal = ResSetOpt("BigDecimal", dBigDec, fromBigDec, toOpSetBigDecimal)
+  lazy val resOptSetDate       = ResSetOpt("Date", dDate, identity, toOpSetDate)
+  lazy val resOptSetUUID       = ResSetOpt("UUID", dUUID, identity, toOpSetUUID)
+  lazy val resOptSetURI        = ResSetOpt("URI", dURI, identity, toOpSetURI)
+  lazy val resOptSetByte       = ResSetOpt("Byte", dByte, fromByte, toOpSetByte)
+  lazy val resOptSetShort      = ResSetOpt("Short", dShort, fromShort, toOpSetShort)
+  lazy val resOptSetChar       = ResSetOpt("Char", dChar, fromChar, toOpSetChar)
 }
