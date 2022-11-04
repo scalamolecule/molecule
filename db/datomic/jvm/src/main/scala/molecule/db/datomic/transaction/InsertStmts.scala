@@ -1,19 +1,14 @@
 package molecule.db.datomic.transaction
 
-import java.math.BigInteger
-import java.util
-import java.util.{Collections, List => jList}
+import java.util.{Collections, List => jList, Set => jSet}
+import clojure.lang.Keyword
 import molecule.base.util.exceptions.MoleculeException
 import molecule.boilerplate.ast.MoleculeModel._
-import molecule.core.util.fns
 import scala.annotation.tailrec
 
 
-class InsertStmts(elements: Seq[Element], tpls: Seq[Product], tempIdInit: Int = 0)
-  extends InsertResolvers_(elements) {
+class InsertStmts(elements: Seq[Element], tpls: Seq[Product]) extends InsertResolvers_(elements) {
 
-  // Accumulate java insert data
-  final private val stmts: util.ArrayList[jList[AnyRef]] = new java.util.ArrayList[jList[AnyRef]]()
 
   def getStmts: jList[jList[_]] = {
     val tpl2stmts = getResolver
@@ -41,8 +36,16 @@ class InsertStmts(elements: Seq[Element], tpls: Seq[Product], tempIdInit: Int = 
         case attr: Attr =>
           val a = kw(attr.ns, attr.attr)
           attr match {
-            case attr: AttrOneMan => resolve(tail, resolvers :+ resolveAttrOneMan(attr, n, a), n + 1)
-            case attr: AttrOneOpt => resolve(tail, resolvers :+ resolveAttrOneOpt(attr, n, a), n + 1)
+            case attr: AttrOne =>
+              attr match {
+                case attr: AttrOneMan => resolve(tail, resolvers :+ resolveAttrOneMan(attr, n, a), n + 1)
+                case attr: AttrOneOpt => resolve(tail, resolvers :+ resolveAttrOneOpt(attr, n, a), n + 1)
+              }
+            case attr: AttrSet =>
+              attr match {
+                case attr: AttrSetMan => resolve(tail, resolvers :+ resolveAttrSetMan(attr, n, a), n + 1)
+                case attr: AttrSetOpt => resolve(tail, resolvers :+ resolveAttrSetOpt(attr, n, a), n + 1)
+              }
           }
 
         case Ref(ns, refAttr, refNs, one) => resolvers
@@ -52,18 +55,6 @@ class InsertStmts(elements: Seq[Element], tpls: Seq[Product], tempIdInit: Int = 
       case Nil             => resolvers
     }
   }
-
-  import clojure.lang.Keyword
-
-  private def kw(ns: String, attr: String) = Keyword.intern(ns, attr)
-  private lazy val add     = kw("db", "add")
-  private lazy val retract = kw("db", "retract")
-
-  private lazy val bigInt2java = (v: Any) => v.asInstanceOf[BigInt].bigInteger
-  private lazy val bigDec2java = (v: Any) => v.asInstanceOf[BigDecimal].bigDecimal
-  private lazy val char2java   = (v: Any) => v.toString
-  private lazy val byte2java   = (v: Any) => v.asInstanceOf[Byte].toInt
-  private lazy val short2java  = (v: Any) => v.asInstanceOf[Short].toInt
 
   private def resolveAttrOneMan(attr: AttrOneMan, n: Int, a: Keyword): Product => Unit = {
     attr match {
@@ -78,10 +69,9 @@ class InsertStmts(elements: Seq[Element], tpls: Seq[Product], tempIdInit: Int = 
       case _: AttrOneManDate       => addV(a, n, identity)
       case _: AttrOneManUUID       => addV(a, n, identity)
       case _: AttrOneManURI        => addV(a, n, identity)
-      case _: AttrOneManChar       => addV(a, n, char2java)
       case _: AttrOneManByte       => addV(a, n, byte2java)
       case _: AttrOneManShort      => addV(a, n, short2java)
-      case other                   => throw MoleculeException("Unexpected element: " + other)
+      case _: AttrOneManChar       => addV(a, n, char2java)
     }
   }
 
@@ -98,39 +88,48 @@ class InsertStmts(elements: Seq[Element], tpls: Seq[Product], tempIdInit: Int = 
       case _: AttrOneOptDate       => addOptV(a, n, identity)
       case _: AttrOneOptUUID       => addOptV(a, n, identity)
       case _: AttrOneOptURI        => addOptV(a, n, identity)
-      case _: AttrOneOptChar       => addOptV(a, n, char2java)
       case _: AttrOneOptByte       => addOptV(a, n, byte2java)
       case _: AttrOneOptShort      => addOptV(a, n, short2java)
-      case other                   => throw MoleculeException("Unexpected element: " + other)
+      case _: AttrOneOptChar       => addOptV(a, n, char2java)
     }
   }
 
-  @tailrec
-  private def getNs(elements: Seq[Element]): String = elements.head match {
-    case a: Attr       => a.ns
-    case b: Ref        => b.ns
-    case Composite(es) => getNs(es)
-    case other         =>
-      throw MoleculeException("StmtsBuilder: Unexpected head element: " + other)
+  private def resolveAttrSetMan(attr: AttrSetMan, n: Int, a: Keyword): Product => Unit = {
+    attr match {
+      case _: AttrSetManString     => addSet(a, n, identity)
+      case _: AttrSetManInt        => addSet(a, n, identity)
+      case _: AttrSetManLong       => addSet(a, n, identity)
+      case _: AttrSetManFloat      => addSet(a, n, identity)
+      case _: AttrSetManDouble     => addSet(a, n, identity)
+      case _: AttrSetManBoolean    => addSet(a, n, identity)
+      case _: AttrSetManBigInt     => addSet(a, n, bigInt2java)
+      case _: AttrSetManBigDecimal => addSet(a, n, bigDec2java)
+      case _: AttrSetManDate       => addSet(a, n, identity)
+      case _: AttrSetManUUID       => addSet(a, n, identity)
+      case _: AttrSetManURI        => addSet(a, n, identity)
+      case _: AttrSetManByte       => addSet(a, n, byte2java)
+      case _: AttrSetManShort      => addSet(a, n, short2java)
+      case _: AttrSetManChar       => addSet(a, n, char2java)
+    }
   }
 
-  private val nsFull: String        = getNs(elements)
-  private val part  : String        = fns.partNs(nsFull).head
-  private var tempId: Int           = tempIdInit
-  private var lowest: Int           = tempIdInit
-  private var e     : String        = ""
-  private var stmt  : jList[AnyRef] = null
-  private def stmtList = new java.util.ArrayList[AnyRef](4)
-
-
-  private def newId: String = {
-    tempId = lowest - 1
-    lowest = tempId
-    "#db/id[" + part + " " + tempId + "]"
-  }
-  private def prevId: String = {
-    tempId += 1
-    "#db/id[" + part + " " + tempId + "]"
+  private def resolveAttrSetOpt(attr: AttrSetOpt, n: Int, a: Keyword): Product => Unit = {
+    attr match {
+      case _: AttrSetOptString     => addOptSet(a, n, identity)
+      case _: AttrSetOptInt        => addOptSet(a, n, identity)
+      case _: AttrSetOptLong       => addOptSet(a, n, identity)
+      case _: AttrSetOptFloat      => addOptSet(a, n, identity)
+      case _: AttrSetOptDouble     => addOptSet(a, n, identity)
+      case _: AttrSetOptBoolean    => addOptSet(a, n, identity)
+      case _: AttrSetOptBigInt     => addOptSet(a, n, bigInt2java)
+      case _: AttrSetOptBigDecimal => addOptSet(a, n, bigDec2java)
+      case _: AttrSetOptDate       => addOptSet(a, n, identity)
+      case _: AttrSetOptUUID       => addOptSet(a, n, identity)
+      case _: AttrSetOptURI        => addOptSet(a, n, identity)
+      case _: AttrSetOptByte       => addOptSet(a, n, byte2java)
+      case _: AttrSetOptShort      => addOptSet(a, n, short2java)
+      case _: AttrSetOptChar       => addOptSet(a, n, char2java)
+    }
   }
 
 
@@ -159,24 +158,31 @@ class InsertStmts(elements: Seq[Element], tpls: Seq[Product], tempIdInit: Int = 
     }
   }
 
-
-
-  //  private def oneValue(tpe: String): Any => AnyRef = tpe match {
-  //    case "Int"        => (v: Any) => v.toString.toLong.asInstanceOf[AnyRef]
-  //    case "BigInt"     => (v: Any) => new java.math.BigInteger(v.toString)
-  //    case "BigDecimal" => (v: Any) => new java.math.BigDecimal(v.toString)
-  //    case _            => (v: Any) => v.asInstanceOf[AnyRef]
-  //  }
-
-  private def addSet(a: Keyword, value: Any => AnyRef): Iterable[Any] => Unit = {
-    (set: Iterable[Any]) => {
-      set.foreach { v =>
+  private def addSet(a: Keyword, n: Int, value: Any => Any): Product => Unit = {
+    (tpl: Product) => {
+      tpl.productElement(n).asInstanceOf[Set[Any]].foreach { v =>
         stmt = stmtList
         stmt.add(add)
         stmt.add(e)
         stmt.add(a)
-        stmt.add(value(v))
+        stmt.add(value(v).asInstanceOf[AnyRef])
         stmts.add(stmt)
+      }
+    }
+  }
+  private def addOptSet(a: Keyword, n: Int, value: Any => Any): Product => Unit = {
+    (tpl: Product) => {
+      tpl.productElement(n) match {
+        case Some(set: Set[_]) =>
+          set.foreach { v =>
+            stmt = stmtList
+            stmt.add(add)
+            stmt.add(e)
+            stmt.add(a)
+            stmt.add(value(v).asInstanceOf[AnyRef])
+            stmts.add(stmt)
+          }
+        case None    => // no statement to insert
       }
     }
   }

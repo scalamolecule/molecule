@@ -8,11 +8,15 @@ import molecule.core.api.{Connection, QueryOps}
 import molecule.core.util.JavaConversions
 import molecule.db.datomic.facade.Conn_Peer
 import molecule.db.datomic.query.DatomicModel2Query
+import molecule.db.datomic.util.DatomicApiLoader
 import zio.{Chunk, ZIO}
 import scala.concurrent.{ExecutionContext, Future}
 
 class DatomicQueryOpsImpl[Tpl](elements: Seq[Element])
-  extends DatomicModel2Query[Tpl](elements) with QueryOps[Tpl] with JavaConversions {
+  extends DatomicModel2Query[Tpl](elements)
+    with QueryOps[Tpl]
+    with JavaConversions
+    with DatomicApiLoader {
 
   // Refinements
 
@@ -30,12 +34,25 @@ class DatomicQueryOpsImpl[Tpl](elements: Seq[Element])
   override def getAsync(implicit conn: Connection, ec: ExecutionContext): Future[List[Tpl]] = ???
 
   // Synchronous
-  override def get(implicit conn: Connection): List[Tpl] = {
-    val db         = conn.asInstanceOf[Conn_Peer].peerConn.db()
-    val rows       = Peer.q(query, db +: rulesAndInputs: _*)
-    val sortedRows = sortRows(rows)
-    val tuples     = List.newBuilder[Tpl]
-    sortedRows.forEach(row => tuples.addOne(row2tpl(row)))
+  override def get(implicit conn0: Connection): List[Tpl] = {
+    val conn = conn0.asInstanceOf[Conn_Peer]
+    val db   = conn.peerConn.db()
+    val rows = getQueries(conn.optimizeQuery) match {
+      case ("", query)       => Peer.q(query, db +: inputs: _*)
+      case (preQuery, query) =>
+        // Pre-query
+        val preRows = Peer.q(preQuery, db +: preInputs: _*)
+        val preIds  = new java.util.HashSet[Long](preRows.size())
+        preRows.forEach { row =>
+          preIds.add(row.get(0).asInstanceOf[Long])
+        }
+        //        println(preIds)
+        // Main query using entity ids from pre-query
+        Peer.q(query, db +: inputs :+ preIds: _*)
+    }
+
+    val tuples = List.newBuilder[Tpl]
+    sortRows(rows).forEach(row => tuples.addOne(row2tpl(row)))
     tuples.result()
   }
 

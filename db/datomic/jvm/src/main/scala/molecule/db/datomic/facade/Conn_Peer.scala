@@ -18,6 +18,14 @@ import scala.util.control.NonFatal
 case class Conn_Peer(peerConn: DatomicConnection) extends Connection {
   type Data = jList[_]
 
+  override def db: Database = peerConn.db()
+
+  private var optimizeQueries = true
+  def setOptimizeQuery(flag: Boolean): Unit = {
+    optimizeQueries = flag
+  }
+  def optimizeQuery: Boolean = optimizeQueries
+
   final def transactEdn(edn: String): TxReport =
     transact(readAll(new StringReader(edn)).get(0).asInstanceOf[jList[_]])
 
@@ -69,7 +77,7 @@ case class Conn_Peer(peerConn: DatomicConnection) extends Connection {
     p.future
   }
 
-//  override def transact[Data](data: Data): TxReport = ???
+  //  override def transact[Data](data: Data): TxReport = ???
 }
 
 

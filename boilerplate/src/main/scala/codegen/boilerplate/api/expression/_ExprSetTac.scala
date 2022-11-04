@@ -33,7 +33,7 @@ object _ExprSetTac extends BoilerplateGenBase("ExprSetTac", "/api/expression") {
          |  def not    (set  : Set[t], sets: Set[t]*)               : Ns[${`A..V, `}t] = _exprSetTac(Not    , set +: sets)
          |  def not    (sets : Seq[Set[t]]          )               : Ns[${`A..V, `}t] = _exprSetTac(Not    , sets)
          |  def ==     (set  : Set[t]               )               : Ns[${`A..V, `}t] = _exprSetTac(Eq     , Seq(set))
-         |  def ==     (set  : Set[t], sets: Set[t]*)               : Ns[${`A..V, `}t] = _exprSetTac(Eq     , sets)
+         |  def ==     (set  : Set[t], sets: Set[t]*)               : Ns[${`A..V, `}t] = _exprSetTac(Eq     , set +: sets)
          |  def ==     (sets : Seq[Set[t]]          )               : Ns[${`A..V, `}t] = _exprSetTac(Eq     , sets)
          |  def !=     (set  : Set[t]               )               : Ns[${`A..V, `}t] = _exprSetTac(Neq    , Seq(set))
          |  def !=     (set  : Set[t], sets: Set[t]*)               : Ns[${`A..V, `}t] = _exprSetTac(Neq    , set +: sets)

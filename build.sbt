@@ -83,14 +83,15 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
   .enablePlugins(BuildInfoPlugin, MoleculePlugin)
   .settings(sharedSettings ++ testSettings ++ dontPublish)
   .jsSettings(jsSettings)
-//  .jvmSettings(jvmSettings)
+  .jvmSettings(jvmSettings)
 
 lazy val datomic = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .in(file("db/datomic"))
   .settings(name := "molecule-datomic")
+//  .dependsOn(base, boilerplate, core, coreTests)
   .dependsOn(base, boilerplate, core, coreTests)
-  .settings(sharedSettings ++ doPublish)
+  .settings(sharedSettings ++ doPublish ++ testSettings)
   .jsSettings(jsSettings)
   .jvmSettings(datomicSettings)
 
@@ -168,13 +169,15 @@ lazy val datomicSettings: Seq[Def.Setting[_]] = {
     libraryDependencies ++= Seq(
       // Datomic peer dependency
       "com.datomic" % "datomic-free" % DatomicSettings.freeVersion,
+//      "javax.xml.bind" % "jaxb-api" % "2.3.0",
+//      "javax.xml.bind" % "jaxb-api" % "2.4.0-b180830.0359",
 
       // Force newer janino compiler than datomic-free uses (necessary for using tx fns with datomic-free)
       "org.codehaus.janino" % "commons-compiler" % "3.0.12",
       "org.codehaus.janino" % "commons-compiler-jdk" % "3.0.12",
 
       // Datomic client dependencies transiently resolved
-      "org.scalamolecule" %% "datomic-client-api-java-scala" % "1.0.3",
+//      "org.scalamolecule" %% "datomic-client-api-java-scala" % "1.0.3",
 
       // Akka dependencies for MoleculeRpcResponse
       "com.typesafe.akka" %% "akka-actor-typed" % "2.6.19",
@@ -199,6 +202,7 @@ lazy val jvmSettings: Seq[Def.Setting[_]] = {
     libraryDependencies ++= Seq(
       // Datomic peer dependency
       "com.datomic" % "datomic-free" % DatomicSettings.freeVersion,
+      "javax.xml.bind" % "jaxb-api" % "2.4.0-b180830.0359",
 
       // Force newer janino compiler than datomic-free uses (necessary for using tx fns with datomic-free)
       "org.codehaus.janino" % "commons-compiler" % "3.0.12",
@@ -402,19 +406,21 @@ lazy val testSettings: Seq[Def.Setting[_]] = {
       //      // Please download from https://cognitect.com/dev-tools and install locally per included instructions
       //      "com.datomic" % "dev-local" % DatomicSettings.devLocalVersion
     )
-  ) ++ (
-    if (DatomicSettings.useFree)
-      Nil // Datomic free version is already default in `molecule` module
-    else
-      Seq(
-        // To use Datomic Pro, please download from https://www.datomic.com/get-datomic.html
-        // and install locally per included instructions
-        libraryDependencies += "com.datomic" % "datomic-pro" % DatomicSettings.proVersion,
-        excludeDependencies += ExclusionRule("com.datomic", "datomic-free"),
-        credentials += Credentials(Path.userHome / ".sbt" / ".credentials")
-      )
-    )
+  )
 }
+//  ) ++ (
+//    if (DatomicSettings.useFree)
+//      Nil // Datomic free version is already default in `molecule` module
+//    else
+//      Seq(
+//        // To use Datomic Pro, please download from https://www.datomic.com/get-datomic.html
+//        // and install locally per included instructions
+//        libraryDependencies += "com.datomic" % "datomic-pro" % DatomicSettings.proVersion,
+//        excludeDependencies += ExclusionRule("com.datomic", "datomic-free"),
+//        credentials += Credentials(Path.userHome / ".sbt" / ".credentials")
+//      )
+//    )
+//}
 
 lazy val snapshots =
   "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"

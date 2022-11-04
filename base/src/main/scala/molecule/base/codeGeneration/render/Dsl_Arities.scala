@@ -39,7 +39,7 @@ case class Dsl_Arities(schema: MetaSchema, namespace: MetaNs, arity: Int)
 
       val padA = padAttr(attr)
       val pad1 = padType(tpe)
-      val pad2 = padTpe2(tpe)
+      val pad2 = " " * (maxTpe + "Option[]".length + maxCardPad)
 
       val (tM, tO) = card match {
         case CardOne => (tpe + pOne, s"Option[$tpe]" + pOne)
@@ -50,7 +50,12 @@ case class Dsl_Arities(schema: MetaSchema, namespace: MetaNs, arity: Int)
 
       lazy val tpesM = s"${`A..V, `}$tM$pad1        , $tpe$pad1"
       lazy val tpesO = s"${`A..V, `}$tO$pad1, $tpe$pad1"
-      lazy val tpesT = s"${`A..V, `}$tM$pad2        "
+      lazy val tpesT = if (arity == 0)
+        s"${`A..V`}$pad2  $tpe$pad1"
+      else if (arity == schema.maxArity)
+        s"${`A..V`}, $tpe$pad1"
+      else
+        s"${`A..V`}  $pad2, $tpe$pad1"
 
       lazy val elemsM = s"elements :+ ${attr}_man$padA"
       lazy val elemsO = s"elements :+ ${attr}_opt$padA"

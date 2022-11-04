@@ -1,13 +1,14 @@
 package molecule.db.datomic.setup
 
 import molecule.core.api.Connection
+import molecule.core.util.JavaConversions
 import molecule.coreTests.sampledata.CoreData
 import utest._
 import utest.framework.Formatter
 
 trait DatomicTestSuite extends TestSuite with CoreData
   // Platform-specific implementations (JS/JVM) (shows in red as error code in IDE)
-  with DatomicTestSuiteImpl {
+  with DatomicTestSuiteImpl with JavaConversions {
 
   lazy val isJsPlatform: Boolean = isJsPlatform_
   lazy val protocol    : String  = protocol_
@@ -42,6 +43,7 @@ trait DatomicTestSuite extends TestSuite with CoreData
 
 //  def empty[T](test: Future[Conn] => T): T = emptyImpl(test)
   def cardOne[T](test: Connection => T): T = cardOneImpl(test)
+  def cardSet[T](test: Connection => T): T = cardSetImpl(test)
 //  def corePeerOnly[T](test: Future[Conn] => T): T = corePeerOnlyImpl(test)
 //  def bidirectional[T](test: Future[Conn] => T): T = bidirectionalImpl(test)
 //  def partition[T](test: Future[Conn] => T): T = partitionImpl(test)

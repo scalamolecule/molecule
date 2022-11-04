@@ -3,8 +3,9 @@ package molecule.db.datomic.setup
 import java.util.UUID.randomUUID
 import molecule.base.api.SchemaTransaction
 import molecule.core.api.Connection
-import molecule.coreTests.dataModels.core.types.schema.CardOneSchema
+import molecule.coreTests.dataModels.core.types.schema.{CardOneSchema, CardSetSchema}
 import molecule.db.datomic.facade.{Conn_Peer, Datomic_Peer}
+import molecule.db.datomic.util.DatomicApiLoader
 import moleculeBuildInfo.BuildInfo
 //import moleculeTests.dataModels.core.bidirectionals.schema.BidirectionalSchema
 //import moleculeTests.dataModels.core.ref.schema.{NestedSchema, SelfJoinSchema}
@@ -15,14 +16,18 @@ import moleculeBuildInfo.BuildInfo
 //import moleculeTests.dataModels.examples.gremlin.gettingStarted.schema.{ModernGraph1Schema, ModernGraph2Schema}
 
 
-trait DatomicTestSuiteImpl { self: DatomicTestSuite =>
+trait DatomicTestSuiteImpl extends DatomicApiLoader { self: DatomicTestSuite =>
 
   lazy val isJsPlatform_ = false
   lazy val protocol_     = BuildInfo.datomicProtocol
   lazy val useFree_      = BuildInfo.datomicUseFree
 
+  // Needed to make api visible to classloader when using Datomic Free
+//  require("datomic.api")
+
+
   def inMem[T](
-    test: Connection => T,
+    test: Conn_Peer => T,
     schemaTx: SchemaTransaction,
     db: String
   ): T = {
@@ -41,7 +46,8 @@ trait DatomicTestSuiteImpl { self: DatomicTestSuite =>
   }
 
 //  def emptyImpl[T](test: Connection => T): T = inMem(test, EmptySchema, "")
-  def cardOneImpl[T](test: Connection => T): T = inMem(test, CardOneSchema, "m_coretests")
+  def cardOneImpl[T](test: Connection => T): T = inMem(test, CardOneSchema, "m_cardOne")
+  def cardSetImpl[T](test: Connection => T): T = inMem(test, CardSetSchema, "m_cardSet")
 //  def corePeerOnlyImpl[T](test: Connection => T): T = if (system == SystemPeer) coreImpl(test) else ().asInstanceOf[T]
 //  def bidirectionalImpl[T](test: Connection => T): T = inMem(test, BidirectionalSchema, "m_bidirectional")
 //  def partitionImpl[T](test: Connection => T): T = inMem(test, PartitionTestSchema, "m_partitions")

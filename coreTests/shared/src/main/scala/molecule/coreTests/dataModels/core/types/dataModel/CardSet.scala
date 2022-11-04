@@ -5,20 +5,21 @@ import molecule.DataModel
 object CardSet extends DataModel(3) {
 
   trait NsSet {
-    val n          = oneInt
-    val string     = setString.fulltext
-    val int        = setInt
-    val long       = setLong
-    val float      = setFloat
-    val double     = setDouble
-    val boolean    = setBoolean
-    val bigInt     = setBigInt
-    val bigDecimal = setBigDecimal
-    val date       = setDate
-    val uuid       = setUUID
-    val uri        = setURI
-    val byte       = setByte
-    val short      = setShort
-    val char       = setChar
+    val n           = oneInt
+    val nn          = setInt
+    val strings     = setString.fulltext
+    val ints        = setInt
+    val longs       = setLong
+    val floats      = setFloat
+    val doubles     = setDouble
+    val booleans    = setBoolean
+    val bigInts     = setBigInt
+    val bigDecimals = setBigDecimal
+    val dates       = setDate
+    val uuids       = setUUID
+    val uris        = setURI
+    val bytes       = setByte
+    val shorts      = setShort
+    val chars       = setChar
   }
 }

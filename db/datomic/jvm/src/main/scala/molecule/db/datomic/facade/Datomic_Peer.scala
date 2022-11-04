@@ -40,9 +40,6 @@ trait Datomic_Peer extends JavaConversions {
 
   def recreateDbFromEdn(
     schemaTransaction: SchemaTransaction,
-//    datomicSchema: String,
-//    datomicPartitions: String = "",
-//    datomicAliases: String = "",
     protocol: String = "mem",
     dbIdentifier: String = ""
   ): Conn_Peer = {

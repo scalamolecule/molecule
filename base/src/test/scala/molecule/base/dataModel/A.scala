@@ -12,8 +12,8 @@ object A extends DataModel(3) {
 
     val int     = oneInt
     val string  = oneString
-//    val ints    = setInt
-//    val strings = setString
+    val ints    = setInt
+    val strings = setString
   }
   //  }
 

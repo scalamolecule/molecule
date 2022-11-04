@@ -1,20 +1,16 @@
 package molecule.db.datomic.transaction
 
-import java.util
 import java.util.{Collections, List => jList}
+import clojure.lang.Keyword
 import molecule.base.util.exceptions.MoleculeException
 import molecule.boilerplate.ast.MoleculeModel._
-import molecule.core.util.fns
 import scala.annotation.tailrec
-import scala.collection.immutable.Seq
 
 
-class SaveStmts(elements: Seq[Element]) {
-
-  // Accumulate java insert data
-  final private val stmts: util.ArrayList[jList[AnyRef]] = new java.util.ArrayList[jList[AnyRef]]()
+class SaveStmts(elements: Seq[Element]) extends TransactionBase(elements) {
 
   def getStmts: jList[jList[_]] = {
+    e = newId
     resolve(elements)
 
     elements.foreach(println)
@@ -28,12 +24,19 @@ class SaveStmts(elements: Seq[Element]) {
   final private def resolve(elements: Seq[Element]): Unit = {
     elements match {
       case element :: tail => element match {
-        // Prepare java-compatible types
         case attr: Attr =>
           val a = kw(attr.ns, attr.attr)
           attr match {
-            case attr: AttrOneMan => resolveAttrOneMan(attr, a); resolve(tail)
-            case attr: AttrOneOpt => resolveAttrOneOpt(attr, a); resolve(tail)
+            case attr: AttrOne =>
+              attr match {
+                case attr: AttrOneMan => resolveAttrOneMan(attr, a); resolve(tail)
+                case attr: AttrOneOpt => resolveAttrOneOpt(attr, a); resolve(tail)
+              }
+            case attr: AttrSet =>
+              attr match {
+                case attr: AttrSetMan => resolveAttrSetMan(attr, a); resolve(tail)
+                case attr: AttrSetOpt => resolveAttrSetOpt(attr, a); resolve(tail)
+              }
           }
 
         case Ref(ns, refAttr, refNs, one) => ()
@@ -43,14 +46,6 @@ class SaveStmts(elements: Seq[Element]) {
     }
   }
 
-  import clojure.lang.Keyword
-
-  private def kw(ns: String, attr: String) = Keyword.intern(ns, attr)
-
-  private lazy val add     = kw("db", "add")
-  private lazy val retract = kw("db", "retract")
-
-  private def unexpected(element: Element) = throw MoleculeException("Unexpected element: " + element)
 
   def resolveAttrOneMan(attr: AttrOneMan, a: Keyword): Unit = {
     attr match {
@@ -65,13 +60,15 @@ class SaveStmts(elements: Seq[Element]) {
       case AttrOneManDate(_, _, Appl, Seq(v), _, _, _)       => addV(a, v)
       case AttrOneManUUID(_, _, Appl, Seq(v), _, _, _)       => addV(a, v)
       case AttrOneManURI(_, _, Appl, Seq(v), _, _, _)        => addV(a, v)
-      case AttrOneManChar(_, _, Appl, Seq(v), _, _, _)       => addV(a, v.toString)
       case AttrOneManByte(_, _, Appl, Seq(v), _, _, _)       => addV(a, v.toInt)
       case AttrOneManShort(_, _, Appl, Seq(v), _, _, _)      => addV(a, v.toInt)
+      case AttrOneManChar(_, _, Appl, Seq(v), _, _, _)       => addV(a, v.toString)
       case _                                                 =>
         if (attr.op != Appl)
           throw MoleculeException("Can only save one applied value for each attribute. " +
-            s"Found other expression `${attr.op}` in: " + attr)
+            s"Found other expression `${
+              attr.op
+            }` in: " + attr)
         throw MoleculeException("Can only save one value per attribute. Found: " + attr)
     }
   }
@@ -89,51 +86,71 @@ class SaveStmts(elements: Seq[Element]) {
       case AttrOneOptDate(_, _, Appl, Some(Seq(v)), _, _, _)       => addV(a, v)
       case AttrOneOptUUID(_, _, Appl, Some(Seq(v)), _, _, _)       => addV(a, v)
       case AttrOneOptURI(_, _, Appl, Some(Seq(v)), _, _, _)        => addV(a, v)
-      case AttrOneOptChar(_, _, Appl, Some(Seq(v)), _, _, _)       => addV(a, v.toString)
       case AttrOneOptByte(_, _, Appl, Some(Seq(v)), _, _, _)       => addV(a, v.toInt)
       case AttrOneOptShort(_, _, Appl, Some(Seq(v)), _, _, _)      => addV(a, v.toInt)
+      case AttrOneOptChar(_, _, Appl, Some(Seq(v)), _, _, _)       => addV(a, v.toString)
       case _                                                       =>
         if (attr.op != Appl)
           throw MoleculeException("Can only save one applied value for each attribute. " +
-            s"Found other expression `${attr.op}` in: " + attr)
+            s"Found other expression `${
+              attr.op
+            }` in: " + attr)
         throw MoleculeException("Can only save one value per attribute. Found: " + attr)
     }
   }
 
-  @tailrec
-  private def getNs(elements: Seq[Element]): String = elements.head match {
-    case a: Attr       => a.ns
-    case b: Ref        => b.ns
-    case Composite(es) => getNs(es)
-    case element       => unexpected(element)
+
+  def resolveAttrSetMan(attr: AttrSetMan, a: Keyword): Unit = {
+    attr match {
+      case AttrSetManString(_, _, Appl, Seq(set), _, _, _)     => addSet(a, set)
+      case AttrSetManInt(_, _, Appl, Seq(set), _, _, _)        => addSet(a, set)
+      case AttrSetManLong(_, _, Appl, Seq(set), _, _, _)       => addSet(a, set)
+      case AttrSetManFloat(_, _, Appl, Seq(set), _, _, _)      => addSet(a, set)
+      case AttrSetManDouble(_, _, Appl, Seq(set), _, _, _)     => addSet(a, set)
+      case AttrSetManBoolean(_, _, Appl, Seq(set), _, _, _)    => addSet(a, set)
+      case AttrSetManBigInt(_, _, Appl, Seq(set), _, _, _)     => addSet(a, set.map(_.bigInteger))
+      case AttrSetManBigDecimal(_, _, Appl, Seq(set), _, _, _) => addSet(a, set.map(_.bigDecimal))
+      case AttrSetManDate(_, _, Appl, Seq(set), _, _, _)       => addSet(a, set)
+      case AttrSetManUUID(_, _, Appl, Seq(set), _, _, _)       => addSet(a, set)
+      case AttrSetManURI(_, _, Appl, Seq(set), _, _, _)        => addSet(a, set)
+      case AttrSetManByte(_, _, Appl, Seq(set), _, _, _)       => addSet(a, set.map(_.toInt))
+      case AttrSetManShort(_, _, Appl, Seq(set), _, _, _)      => addSet(a, set.map(_.toInt))
+      case AttrSetManChar(_, _, Appl, Seq(set), _, _, _)       => addSet(a, set.map(_.toString))
+      case _                                                   =>
+        if (attr.op != Appl)
+          throw MoleculeException("Can only save one applied Set of values for each Set attribute. " +
+            s"Found other expression `${
+              attr.op
+            }` in: " + attr)
+        throw MoleculeException("Can only save one Set of values per Set attribute. Found: " + attr)
+    }
   }
 
-  private val nsFull  : String        = getNs(elements)
-  private val part    : String        = fns.partNs(nsFull).head
-  private   var tempId: Int           = 0
-  protected var lowest: Int           = 0
-  protected var e     : String        = ""
-  protected var stmt  : jList[AnyRef] = null
-  protected def stmtList = new java.util.ArrayList[AnyRef](4)
-
-
-  protected def newId: String = {
-    tempId = lowest - 1
-    lowest = tempId
-    "#db/id[" + part + " " + tempId + "]"
+  def resolveAttrSetOpt(attr: AttrSetOpt, a: Keyword): Unit = {
+    attr match {
+      case AttrSetOptString(_, _, Appl, Some(Seq(set)), _, _, _)     => addSet(a, set)
+      case AttrSetOptInt(_, _, Appl, Some(Seq(set)), _, _, _)        => addSet(a, set)
+      case AttrSetOptLong(_, _, Appl, Some(Seq(set)), _, _, _)       => addSet(a, set)
+      case AttrSetOptFloat(_, _, Appl, Some(Seq(set)), _, _, _)      => addSet(a, set)
+      case AttrSetOptDouble(_, _, Appl, Some(Seq(set)), _, _, _)     => addSet(a, set)
+      case AttrSetOptBoolean(_, _, Appl, Some(Seq(set)), _, _, _)    => addSet(a, set)
+      case AttrSetOptBigInt(_, _, Appl, Some(Seq(set)), _, _, _)     => addSet(a, set.map(_.bigInteger))
+      case AttrSetOptBigDecimal(_, _, Appl, Some(Seq(set)), _, _, _) => addSet(a, set.map(_.bigDecimal))
+      case AttrSetOptDate(_, _, Appl, Some(Seq(set)), _, _, _)       => addSet(a, set)
+      case AttrSetOptUUID(_, _, Appl, Some(Seq(set)), _, _, _)       => addSet(a, set)
+      case AttrSetOptURI(_, _, Appl, Some(Seq(set)), _, _, _)        => addSet(a, set)
+      case AttrSetOptByte(_, _, Appl, Some(Seq(set)), _, _, _)       => addSet(a, set.map(_.toInt))
+      case AttrSetOptShort(_, _, Appl, Some(Seq(set)), _, _, _)      => addSet(a, set.map(_.toInt))
+      case AttrSetOptChar(_, _, Appl, Some(Seq(set)), _, _, _)       => addSet(a, set.map(_.toString))
+      case _                                                       =>
+        if (attr.op != Appl)
+          throw MoleculeException("Can only save one applied Set of values for each Set attribute. " +
+            s"Found other expression `${
+              attr.op
+            }` in: " + attr)
+        throw MoleculeException("Can only save one Set of values per Set attribute. Found: " + attr)
+    }
   }
-  protected def prevId: String = {
-    tempId += 1
-    "#db/id[" + part + " " + tempId + "]"
-  }
-
-
-  //  protected def oneValue(tpe: String): Any => AnyRef = tpe match {
-  //    case "Int"        => (v: Any) => v.toString.toLong.asInstanceOf[AnyRef]
-  //    case "BigInt"     => (v: Any) => new java.math.BigInteger(v.toString)
-  //    case "BigDecimal" => (v: Any) => new java.math.BigDecimal(v.toString)
-  //    case _            => (v: Any) => v.asInstanceOf[AnyRef]
-  //  }
 
 
   protected def addV(a: Keyword, value: Any): Unit = {
@@ -145,16 +162,15 @@ class SaveStmts(elements: Seq[Element]) {
     stmts.add(stmt)
   }
 
-  protected def addSet(a: Keyword, value: Any => AnyRef): Iterable[Any] => Unit = {
-    (set: Iterable[Any]) => {
-      set.foreach { v =>
+  protected def addSet[T](a: Keyword, set: Set[T]): Unit = {
+    set.foreach {
+      v =>
         stmt = stmtList
         stmt.add(add)
         stmt.add(e)
         stmt.add(a)
-        stmt.add(value(v))
+        stmt.add(v.asInstanceOf[AnyRef])
         stmts.add(stmt)
-      }
     }
   }
 
@@ -193,13 +209,14 @@ class SaveStmts(elements: Seq[Element]) {
   }
 
   protected def cvs[T](a: Keyword, vs: Seq[T]): Unit = {
-    vs.foreach { v =>
-      stmt = stmtList
-      stmt.add(add)
-      stmt.add(e)
-      stmt.add(a)
-      stmt.add(v.asInstanceOf[AnyRef])
-      stmts.add(stmt)
+    vs.foreach {
+      v =>
+        stmt = stmtList
+        stmt.add(add)
+        stmt.add(e)
+        stmt.add(a)
+        stmt.add(v.asInstanceOf[AnyRef])
+        stmts.add(stmt)
     }
   }
 
@@ -209,13 +226,14 @@ class SaveStmts(elements: Seq[Element]) {
         "Only a single set of values can be applied to a tx meta attribute when inserting."
       )
     }
-    sets.head.foreach { v =>
-      stmt = stmtList
-      stmt.add(add)
-      stmt.add(e)
-      stmt.add(a)
-      stmt.add(v.asInstanceOf[AnyRef])
-      stmts.add(stmt)
+    sets.head.foreach {
+      v =>
+        stmt = stmtList
+        stmt.add(add)
+        stmt.add(e)
+        stmt.add(a)
+        stmt.add(v.asInstanceOf[AnyRef])
+        stmts.add(stmt)
     }
   }
 
