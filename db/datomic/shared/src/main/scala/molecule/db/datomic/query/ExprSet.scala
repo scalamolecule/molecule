@@ -236,8 +236,8 @@ trait ExprSet[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
   }
 
   private def appl[T: ClassTag](e: Var, a: Att, v: Var, sets: Seq[Set[T]], tpe: String, toDatalog: T => String): Unit = {
+    where += s"[$e $a $v$tx]" -> wClause
     if (sets.nonEmpty && sets.flatten.nonEmpty) {
-      where += s"[$e $a $v$tx]" -> wClause
       where += s"(rule$v $e)" -> wClause
       rules ++= mkRules(e, a, v, sets, tpe, toDatalog)
     } else {
@@ -282,8 +282,8 @@ trait ExprSet[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
     where += s"[$e $a $v$tx]" -> wClause
 
     if (sets.nonEmpty && sets.flatten.nonEmpty) {
-      val blacklist   = v + "-blacklist"
-      val blacklisted = v + "-blacklisted"
+      val blacklist               = v + "-blacklist"
+      val blacklisted             = v + "-blacklisted"
       val (set, set1, v1, v2, e1) = (v + "-set", v + "-set1", v + 1, v + 2, e + 1)
 
       // Pre-query

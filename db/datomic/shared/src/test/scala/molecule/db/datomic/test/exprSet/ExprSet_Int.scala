@@ -348,46 +348,6 @@ object ExprSet_Int extends DatomicTestSuite {
       }
 
 
-      "==" - cardSet { implicit conn =>
-        val (a, b) = (1, 2)
-        NsSet.n.ints.insert(List(
-          (a, Set(int1, int2)),
-          (b, Set(int2, int3, int4))
-        )).transact
-
-        // Exact Set matches
-
-        // AND semantics
-        // "Is exactly this AND that"
-        NsSet.n.a1.ints_.==(Set(int1)).query.get ==> List()
-        NsSet.n.a1.ints_.==(Set(int1, int2)).query.get ==> List(a) // include exact match
-        NsSet.n.a1.ints_.==(Set(int1, int2, int3)).query.get ==> List()
-        // Same as
-        NsSet.n.a1.ints_.==(Seq(Set(int1))).query.get ==> List()
-        NsSet.n.a1.ints_.==(Seq(Set(int1, int2))).query.get ==> List(a)
-        NsSet.n.a1.ints_.==(Seq(Set(int1, int2, int3))).query.get ==> List()
-
-
-        // AND/OR semantics with multiple Sets
-
-        // "(exactly this AND that) OR (exactly this AND that)"
-        NsSet.n.a1.ints_.==(Set(int1), Set(int2, int3)).query.get ==> List()
-        NsSet.n.a1.ints_.==(Set(int1, int2), Set(int2, int3)).query.get ==> List(a)
-        NsSet.n.a1.ints_.==(Set(int1, int2), Set(int2, int3, int4)).query.get ==> List(a, b)
-        // Same as
-        NsSet.n.a1.ints_.==(Seq(Set(int1), Set(int2, int3))).query.get ==> List()
-        NsSet.n.a1.ints_.==(Seq(Set(int1, int2), Set(int2, int3))).query.get ==> List(a)
-        NsSet.n.a1.ints_.==(Seq(Set(int1, int2), Set(int2, int3, int4))).query.get ==> List(a, b)
-
-
-        // Empty Seq/Sets match nothing
-        NsSet.n.a1.ints_.==(Set(int1, int2), Set.empty[Int]).query.get ==> List(a)
-        NsSet.n.a1.ints_.==(Set.empty[Int]).query.get ==> List()
-        NsSet.n.a1.ints_.==(Seq.empty[Set[Int]]).query.get ==> List()
-        NsSet.n.a1.ints_.==(Seq(Set.empty[Int])).query.get ==> List()
-      }
-
-
       "not" - cardSet { implicit conn =>
         val (a, b) = (1, 2)
         NsSet.n.ints.insert(List(
@@ -465,6 +425,46 @@ object ExprSet_Int extends DatomicTestSuite {
         NsSet.n.a1.ints_.not(Set.empty[Int]).query.get ==> List(a, b)
         NsSet.n.a1.ints_.not(Seq.empty[Set[Int]]).query.get ==> List(a, b)
         NsSet.n.a1.ints_.not(Seq(Set.empty[Int])).query.get ==> List(a, b)
+      }
+
+
+      "==" - cardSet { implicit conn =>
+        val (a, b) = (1, 2)
+        NsSet.n.ints.insert(List(
+          (a, Set(int1, int2)),
+          (b, Set(int2, int3, int4))
+        )).transact
+
+        // Exact Set matches
+
+        // AND semantics
+        // "Is exactly this AND that"
+        NsSet.n.a1.ints_.==(Set(int1)).query.get ==> List()
+        NsSet.n.a1.ints_.==(Set(int1, int2)).query.get ==> List(a) // include exact match
+        NsSet.n.a1.ints_.==(Set(int1, int2, int3)).query.get ==> List()
+        // Same as
+        NsSet.n.a1.ints_.==(Seq(Set(int1))).query.get ==> List()
+        NsSet.n.a1.ints_.==(Seq(Set(int1, int2))).query.get ==> List(a)
+        NsSet.n.a1.ints_.==(Seq(Set(int1, int2, int3))).query.get ==> List()
+
+
+        // AND/OR semantics with multiple Sets
+
+        // "(exactly this AND that) OR (exactly this AND that)"
+        NsSet.n.a1.ints_.==(Set(int1), Set(int2, int3)).query.get ==> List()
+        NsSet.n.a1.ints_.==(Set(int1, int2), Set(int2, int3)).query.get ==> List(a)
+        NsSet.n.a1.ints_.==(Set(int1, int2), Set(int2, int3, int4)).query.get ==> List(a, b)
+        // Same as
+        NsSet.n.a1.ints_.==(Seq(Set(int1), Set(int2, int3))).query.get ==> List()
+        NsSet.n.a1.ints_.==(Seq(Set(int1, int2), Set(int2, int3))).query.get ==> List(a)
+        NsSet.n.a1.ints_.==(Seq(Set(int1, int2), Set(int2, int3, int4))).query.get ==> List(a, b)
+
+
+        // Empty Seq/Sets match nothing
+        NsSet.n.a1.ints_.==(Set(int1, int2), Set.empty[Int]).query.get ==> List(a)
+        NsSet.n.a1.ints_.==(Set.empty[Int]).query.get ==> List()
+        NsSet.n.a1.ints_.==(Seq.empty[Set[Int]]).query.get ==> List()
+        NsSet.n.a1.ints_.==(Seq(Set.empty[Int])).query.get ==> List()
       }
 
 
