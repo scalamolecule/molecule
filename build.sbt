@@ -83,7 +83,7 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
   .enablePlugins(BuildInfoPlugin, MoleculePlugin)
   .settings(sharedSettings ++ testSettings ++ dontPublish)
   .jsSettings(jsSettings)
-  .jvmSettings(jvmSettings)
+//  .jvmSettings(jvmSettings)
 
 lazy val datomic = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
@@ -406,21 +406,21 @@ lazy val testSettings: Seq[Def.Setting[_]] = {
       //      // Please download from https://cognitect.com/dev-tools and install locally per included instructions
       //      "com.datomic" % "dev-local" % DatomicSettings.devLocalVersion
     )
-  )
-}
-//  ) ++ (
-//    if (DatomicSettings.useFree)
-//      Nil // Datomic free version is already default in `molecule` module
-//    else
-//      Seq(
-//        // To use Datomic Pro, please download from https://www.datomic.com/get-datomic.html
-//        // and install locally per included instructions
-//        libraryDependencies += "com.datomic" % "datomic-pro" % DatomicSettings.proVersion,
-//        excludeDependencies += ExclusionRule("com.datomic", "datomic-free"),
-//        credentials += Credentials(Path.userHome / ".sbt" / ".credentials")
-//      )
-//    )
+//  )
 //}
+  )  ++ (
+    if (DatomicSettings.useFree)
+      Nil // Datomic free version is already default in `molecule` module
+    else
+      Seq(
+        // To use Datomic Pro, please download from https://www.datomic.com/get-datomic.html
+        // and install locally per included instructions
+        libraryDependencies += "com.datomic" % "datomic-pro" % DatomicSettings.proVersion,
+        excludeDependencies += ExclusionRule("com.datomic", "datomic-free"),
+        credentials += Credentials(Path.userHome / ".sbt" / ".credentials")
+      )
+    )
+}
 
 lazy val snapshots =
   "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"

@@ -40,8 +40,6 @@ object AggrOneNum_Long_ extends DatomicTestSuite {
       // https://en.wikipedia.org/wiki/Median
       // See also
       // https://forum.datomic.com/t/unexpected-median-rounding/517
-
-      // Card-one
       One.long(median).query.get.head ==> long2
       One.n.long(median).query.get ==> List(
         (1, long1),

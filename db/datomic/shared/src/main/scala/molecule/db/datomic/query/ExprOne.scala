@@ -100,29 +100,6 @@ trait ExprOne[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
     expr(e, a, v, op, args, res)
   }
 
-  private def opt[T: ClassTag](
-    e: Var,
-    a: Att,
-    op: Op,
-    optArgs: Option[Seq[T]],
-    res: ResOneOpt[T],
-    sorter: Option[(Int, (Row, Row) => Int)]
-  ): Unit = {
-    val v = vv
-    castScala += res.toScala
-    sorter.foreach(sorts += _)
-    op match {
-      case V     => optV(e, a, v)
-      case Appl  => optApply(e, a, v, optArgs, res.fromScala)
-      case Not   => optNot(e, a, v, optArgs, res.tpe, res.toDatalog)
-      case Lt    => optCompare(e, a, v, optArgs, "<", res.fromScala)
-      case Gt    => optCompare(e, a, v, optArgs, ">", res.fromScala)
-      case Le    => optCompare(e, a, v, optArgs, "<=", res.fromScala)
-      case Ge    => optCompare(e, a, v, optArgs, ">=", res.fromScala)
-      case other => unexpected(other)
-    }
-  }
-
   private def expr[T: ClassTag](
     e: Var,
     a: Att,
@@ -142,6 +119,29 @@ trait ExprOne[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
       case NoValue   => noValue(e, a)
       case Fn(kw, _) => aggr(e, a, v, kw, res)
       case other     => unexpected(other)
+    }
+  }
+
+  private def opt[T: ClassTag](
+    e: Var,
+    a: Att,
+    op: Op,
+    optArgs: Option[Seq[T]],
+    resOpt: ResOneOpt[T],
+    sorter: Option[(Int, (Row, Row) => Int)]
+  ): Unit = {
+    val v = vv
+    castScala += resOpt.toScala
+    sorter.foreach(sorts += _)
+    op match {
+      case V     => optV(e, a, v)
+      case Appl  => optApply(e, a, v, optArgs, resOpt.fromScala)
+      case Not   => optNot(e, a, v, optArgs, resOpt.tpe, resOpt.toDatalog)
+      case Lt    => optCompare(e, a, v, optArgs, "<", resOpt.fromScala)
+      case Gt    => optCompare(e, a, v, optArgs, ">", resOpt.fromScala)
+      case Le    => optCompare(e, a, v, optArgs, "<=", resOpt.fromScala)
+      case Ge    => optCompare(e, a, v, optArgs, ">=", resOpt.fromScala)
+      case other => unexpected(other)
     }
   }
 

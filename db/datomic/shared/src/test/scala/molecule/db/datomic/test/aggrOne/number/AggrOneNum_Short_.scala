@@ -40,12 +40,10 @@ object AggrOneNum_Short_ extends DatomicTestSuite {
       // https://en.wikipedia.org/wiki/Median
       // See also
       // https://forum.datomic.com/t/unexpected-median-rounding/517
-
-      // Card-one
       One.short(median).query.get.head ==> short2
       One.n.short(median).query.get ==> List(
         (1, short1),
-        (2, 4), // why is this 3 and not 3???
+        (2, 3.0),
       )
     }
 

@@ -19,4 +19,6 @@ trait QueryOps[Tpl] {
   def getAsync(implicit conn: Connection, ec: ExecutionContext): Future[List[Tpl]]
 
   def get(implicit conn: Connection): List[Tpl]
+
+  def inspect(implicit conn: Connection): Unit
 }

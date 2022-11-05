@@ -40,8 +40,6 @@ object AggrOneNum_Float_ extends DatomicTestSuite {
       // https://en.wikipedia.org/wiki/Median
       // See also
       // https://forum.datomic.com/t/unexpected-median-rounding/517
-
-      // Card-one
       One.float(median).query.get.head ==> float2
       One.n.float(median).query.get ==> List(
         (1, float1),

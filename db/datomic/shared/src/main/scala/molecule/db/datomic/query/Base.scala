@@ -47,8 +47,9 @@ trait Base[Tpl] extends BaseHelpers with JavaConversions { self: Model2Query[Tpl
   type Row = java.util.List[AnyRef]
 
   // Sorting
-  protected var attrIndex: Int = -1
   final protected val sorts    = new ArrayBuffer[(Int, (Row, Row) => Int)]
+  protected var attrIndex: Int = -1
+
 
   protected def unexpected(element: Element) = throw MoleculeException("Unexpected element: " + element)
   protected def unexpected(op: Op) = throw MoleculeException("Unexpected operation: " + op)
@@ -73,5 +74,26 @@ trait Base[Tpl] extends BaseHelpers with JavaConversions { self: Model2Query[Tpl
       addTxVar = false
       " ?tx"
     } else ""
+  }
+
+
+  protected def reset: Unit = {
+    preIn.empty
+    preWhere.empty
+    preRules.empty
+    sortIds.empty
+    find.empty
+    widh.empty
+    in.empty
+    where.empty
+    rules.empty
+    inPost.empty
+    wherePost.empty
+    preArgs.empty
+    args.empty
+    castScala.empty
+    sorts.empty
+    attrIndex = -1
+    varIndex = -1
   }
 }

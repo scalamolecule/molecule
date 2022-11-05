@@ -40,12 +40,10 @@ object AggrOneNum_Byte_ extends DatomicTestSuite {
       // https://en.wikipedia.org/wiki/Median
       // See also
       // https://forum.datomic.com/t/unexpected-median-rounding/517
-
-      // Card-one
       One.byte(median).query.get.head ==> byte2
       One.n.byte(median).query.get ==> List(
         (1, byte1),
-        (2, 4), // why is this 3 and not 3???
+        (2, 3.0),
       )
     }
 

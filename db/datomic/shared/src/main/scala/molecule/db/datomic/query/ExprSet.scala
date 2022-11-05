@@ -100,29 +100,6 @@ trait ExprSet[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
     expr(e, a, v, op, args, res)
   }
 
-  private def opt[T: ClassTag](
-    e: Var,
-    a: Att,
-    op: Op,
-    optSets: Option[Seq[Set[T]]],
-    res: ResSetOpt[T],
-  ): Unit = {
-    val v = vv
-    castScala += res.toScala
-    op match {
-      case V     => optV(e, a, v)
-      case Appl  => optApply(e, a, v, optSets, res.tpe, res.toDatalog)
-      case Not   => optNot(e, a, v, optSets, res.tpe, res.toDatalog)
-      case Eq    => optEq(e, a, v, optSets, res.fromScala)
-      case Neq   => optNeq(e, a, v, optSets, res.fromScala)
-      case Lt    => optCompare(e, a, v, optSets, "<", res.tpe, res.toDatalog)
-      case Gt    => optCompare(e, a, v, optSets, ">", res.tpe, res.toDatalog)
-      case Le    => optCompare(e, a, v, optSets, "<=", res.tpe, res.toDatalog)
-      case Ge    => optCompare(e, a, v, optSets, ">=", res.tpe, res.toDatalog)
-      case other => unexpected(other)
-    }
-  }
-
   private def expr[T: ClassTag](
     e: Var,
     a: Att,
@@ -144,6 +121,29 @@ trait ExprSet[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
       case NoValue   => noValue(e, a)
       case Fn(kw, _) => aggr(e, a, v, kw, res)
       case other     => unexpected(other)
+    }
+  }
+
+  private def opt[T: ClassTag](
+    e: Var,
+    a: Att,
+    op: Op,
+    optSets: Option[Seq[Set[T]]],
+    resOpt: ResSetOpt[T],
+  ): Unit = {
+    val v = vv
+    castScala += resOpt.toScala
+    op match {
+      case V     => optV(e, a, v)
+      case Appl  => optApply(e, a, v, optSets, resOpt.tpe, resOpt.toDatalog)
+      case Not   => optNot(e, a, v, optSets, resOpt.tpe, resOpt.toDatalog)
+      case Eq    => optEq(e, a, v, optSets, resOpt.fromScala)
+      case Neq   => optNeq(e, a, v, optSets, resOpt.fromScala)
+      case Lt    => optCompare(e, a, v, optSets, "<", resOpt.tpe, resOpt.toDatalog)
+      case Gt    => optCompare(e, a, v, optSets, ">", resOpt.tpe, resOpt.toDatalog)
+      case Le    => optCompare(e, a, v, optSets, "<=", resOpt.tpe, resOpt.toDatalog)
+      case Ge    => optCompare(e, a, v, optSets, ">=", resOpt.tpe, resOpt.toDatalog)
+      case other => unexpected(other)
     }
   }
 
@@ -216,28 +216,44 @@ trait ExprSet[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
     where += s"[$e $a $v$tx]" -> wClause
   }
 
-  private def mkRules[T](e: Var, a: Att, v: Var, sets: Seq[Set[T]], tpe: String, toDatalog: T => String): Seq[String] = {
-    if (tpe == "URI") {
-      sets.flatMap {
-        case set if set.isEmpty => None
-        case set                => Some(
-          set.zipWithIndex.map { case (arg, i) =>
-            s"""[(ground (new java.net.URI "$arg")) $v$i] [$e $a $v$i]"""
-          }.mkString(s"[(rule$v $e)\n    ", "\n    ", "]")
-        )
-      }
-    } else {
-      sets.flatMap {
-        case set if set.isEmpty => None
-        case set                => Some(
-          set.map(arg => s"[$e $a ${toDatalog(arg)}]")
-            .mkString(s"[(rule$v $e)\n    ", "\n    ", "]")
-        )
-      }
+  private def mkRules[T](
+    e: Var, a: Att, v: Var, sets: Seq[Set[T]], tpe: String, toDatalog: T => String
+  ): Seq[String] = {
+    tpe match {
+      case "Float" =>
+        sets.flatMap {
+          case set if set.isEmpty => None
+          case set                => Some(
+            set.zipWithIndex.map { case (arg, i) =>
+              // Coerce Datomic float values for correct comparison (don't know why this is necessary)
+              // See example: https://clojurians-log.clojureverse.org/datomic/2019-10-29
+              s"""[$e $a $v$i] [(float $v$i) $v$i-float] [(= $v$i-float (float $arg))]"""
+            }.mkString(s"[(rule$v $e)\n    ", "\n    ", "]")
+          )
+        }
+      case "URI"   =>
+        sets.flatMap {
+          case set if set.isEmpty => None
+          case set                => Some(
+            set.zipWithIndex.map { case (arg, i) =>
+              s"""[(ground (new java.net.URI "$arg")) $v$i-uri] [$e $a $v$i-uri]"""
+            }.mkString(s"[(rule$v $e)\n    ", "\n    ", "]")
+          )
+        }
+      case _       =>
+        sets.flatMap {
+          case set if set.isEmpty => None
+          case set                => Some(
+            set.map(arg => s"[$e $a ${toDatalog(arg)}]")
+              .mkString(s"[(rule$v $e)\n    ", "\n    ", "]")
+          )
+        }
     }
   }
 
-  private def appl[T: ClassTag](e: Var, a: Att, v: Var, sets: Seq[Set[T]], tpe: String, toDatalog: T => String): Unit = {
+  private def appl[T: ClassTag](
+    e: Var, a: Att, v: Var, sets: Seq[Set[T]], tpe: String, toDatalog: T => String
+  ): Unit = {
     where += s"[$e $a $v$tx]" -> wClause
     if (sets.nonEmpty && sets.flatten.nonEmpty) {
       where += s"(rule$v $e)" -> wClause
@@ -309,11 +325,11 @@ trait ExprSet[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
   private def compare[T](e: Var, a: Att, v: Var, arg: T, op: String, tpe: String, toDatalog: T => String): Unit = {
     where += s"[$e $a $v$tx]" -> wClause
     where += s"(rule$v $e)" -> wClause
-    if (tpe == "URI") {
-      rules += s"""[(rule$v $e) [(ground (new java.net.URI "$arg")) ${v}1] [$e $a ${v}1]]"""
-    } else {
-      rules += s"[(rule$v $e) [$e $a $v][($op $v ${toDatalog(arg)})]]"
-    }
+    rules += s"[(rule$v $e) [$e $a $v] " + (tpe match {
+      case "Float" => s"""[(float $v) $v-float] [($op $v-float (float $arg))]]""" // compare coerced floats
+      case "URI"   => s"""[($op $v (new java.net.URI "$arg"))]]"""
+      case _       => s"""[($op $v ${toDatalog(arg)})]]"""
+    })
   }
 
   private def noValue(e: Var, a: Att): Unit = {
@@ -409,6 +425,5 @@ trait ExprSet[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
     } { sets =>
       compare(e, a, v, sets.head.head, op, tpe, toDatalog)
     }
-
   }
 }

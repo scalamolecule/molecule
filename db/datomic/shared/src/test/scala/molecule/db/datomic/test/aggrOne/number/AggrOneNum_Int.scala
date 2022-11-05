@@ -39,8 +39,6 @@ object AggrOneNum_Int extends DatomicTestSuite {
       // https://en.wikipedia.org/wiki/Median
       // See also
       // https://forum.datomic.com/t/unexpected-median-rounding/517
-
-      // Card-one
       One.int(median).query.get.head ==> int2
       One.n.int(median).query.get ==> List(
         (1, int1),

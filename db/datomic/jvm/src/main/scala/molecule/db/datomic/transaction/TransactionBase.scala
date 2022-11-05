@@ -2,6 +2,7 @@ package molecule.db.datomic.transaction
 
 import java.util
 import java.util.{List => jList}
+import java.lang.{Boolean => jBoolean}
 import clojure.lang.Keyword
 import molecule.base.util.exceptions.MoleculeException
 import molecule.boilerplate.ast.MoleculeModel._
@@ -43,6 +44,7 @@ abstract class TransactionBase(elements: Seq[Element]) {
   protected lazy val char2java   = (v: Any) => v.toString
   protected lazy val byte2java   = (v: Any) => v.asInstanceOf[Byte].toInt
   protected lazy val short2java  = (v: Any) => v.asInstanceOf[Short].toInt
+  protected lazy val boolean2java  = (v: Any) => v.asInstanceOf[Boolean].asInstanceOf[jBoolean]
 
 
   @tailrec

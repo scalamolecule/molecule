@@ -51,6 +51,8 @@ class DatomicQueryOpsImpl[Tpl](elements: Seq[Element])
         Peer.q(query, db +: inputs :+ preIds: _*)
     }
 
+    rows.forEach(row => println(row))
+
     val tuples = List.newBuilder[Tpl]
     sortRows(rows).forEach(row => tuples.addOne(row2tpl(row)))
     tuples.result()
@@ -79,5 +81,39 @@ class DatomicQueryOpsImpl[Tpl](elements: Seq[Element])
         Collections.sort(sortedRows, comparator)
         sortedRows
     }
+  }
+  override def inspect(implicit conn0: Connection): Unit = {
+    val conn = conn0.asInstanceOf[Conn_Peer]
+    val (preQuery, query) = getQueries(conn.optimizeQuery)
+    val queries = if(preQuery.isEmpty) query else {
+      val preInp = if(preInputs.isEmpty)"" else
+        s"\n\nPRE-INPUTS:\n" + preInputs.mkString("\n")
+
+      val preQ = if(preQuery.isEmpty) "" else
+        s"\n\nPRE-Query:\n" + preQuery + preInp + "\n\n"
+
+      val inp = if(inputs.isEmpty)"" else
+        s"\n\nINPUTS:\n" + inputs.mkString("\n")
+
+      s"""${preQ}QUERY:
+         |$query$inp
+         |
+         |""".stripMargin
+    }
+    val output = get(conn).take(100).zipWithIndex.map { case (row, i) =>
+      s"ROW ${i + 1}:".padTo(7, ' ') + row
+    }.mkString("\n")
+    println(
+      s"""
+         |--------------------------------------------------------------------------
+         |${elements.mkString("\n")}
+         |
+         |$queries
+         |
+         |$output
+         |(showing up to 100 rows)
+         |--------------------------------------------------------------------------
+      """.stripMargin
+    )
   }
 }

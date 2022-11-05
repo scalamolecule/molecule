@@ -40,8 +40,6 @@ object AggrOneNum_BigDecimal_ extends DatomicTestSuite {
       // https://en.wikipedia.org/wiki/Median
       // See also
       // https://forum.datomic.com/t/unexpected-median-rounding/517
-
-      // Card-one
       One.bigDecimal(median).query.get.head ==> bigDecimal2
       One.n.bigDecimal(median).query.get ==> List(
         (1, bigDecimal1),

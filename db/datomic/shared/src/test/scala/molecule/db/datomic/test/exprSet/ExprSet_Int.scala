@@ -100,7 +100,6 @@ object ExprSet_Int extends DatomicTestSuite {
         val b = (2, Set(int2, int3, int4))
         NsSet.n.ints.insert(List(a, b)).transact
 
-
         // Sets without one or more values matching
 
         // "Doesn't have this value"
@@ -301,7 +300,7 @@ object ExprSet_Int extends DatomicTestSuite {
         // Sets with one or more values matching
 
         // "Has this value"
-        NsSet.n.a1.ints_.apply(int0).query.get ==> List()
+        NsSet.n.a1.ints_(int0).query.get ==> List()
         NsSet.n.a1.ints_(int1).query.get ==> List(a)
         NsSet.n.a1.ints_(int2).query.get ==> List(a, b)
         NsSet.n.a1.ints_(int3).query.get ==> List(b)
@@ -315,7 +314,7 @@ object ExprSet_Int extends DatomicTestSuite {
         // OR semantics when multiple values
 
         // "Has this OR that"
-        NsSet.n.a1.ints_.apply(int1, int2).query.get ==> List(a, b)
+        NsSet.n.a1.ints_(int1, int2).query.get ==> List(a, b)
         NsSet.n.a1.ints_(int1, int3).query.get ==> List(a, b)
         NsSet.n.a1.ints_(int2, int3).query.get ==> List(a, b)
         NsSet.n.a1.ints_(int1, int2, int3).query.get ==> List(a, b)

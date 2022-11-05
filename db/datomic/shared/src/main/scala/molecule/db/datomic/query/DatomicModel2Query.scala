@@ -18,6 +18,9 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
   final lazy protected val inputs   : Seq[AnyRef] = renderRules(rules) ++ args
 
   final protected def getQueries(optimized: Boolean): (String, String) = {
+    // Reset mutable accumulators
+    reset
+
     // Recursively resolve molecule
     resolve(List(vv), elements)
 
@@ -31,9 +34,6 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
       val hasRules   = preRules.nonEmpty
       val preQuery   = renderQuery(preSortIds, preFind, widh, in ++ preIn, where ++ preWhere, hasRules, optimized)
       println("\n--- PRE-QUERY -------------------------------------------------")
-      //      println("preIn : " +  preIn)
-      //      println("in    : " +  in)
-      //      println("inPost: " +  inPost)
       println(preQuery)
       if (preInputs.nonEmpty) {
         preInputs.foreach {

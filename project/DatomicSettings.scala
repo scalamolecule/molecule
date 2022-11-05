@@ -29,17 +29,16 @@ object DatomicSettings {
   )
     throw new IllegalArgumentException(
       s"Please download datomic-free-$freeVersion to `$distributionsDir` " +
-        s"and run `bin/maven-install`.\n" +
-        s""
+        s"and run `bin/maven-install`.\n"
     )
 
   // Force Datomic to use a specific protocol (and db) by adding a protocol flag:
   // `sbt <cmd> -Dprotocol=free` where <cmd> can be `compile`, `publish` etc.
   val (protocol, useFree) = sys.props.get("protocol") match {
-    case Some("mem-free") => ("mem", true)
-    case Some("free")     => ("free", true)
-    case Some("dev")      => ("dev", false)
-    case _                => ("mem", false) // default: in-mem protocol with pro db
+    case Some("dev")  => ("dev", false) // pro with transactor running
+    case Some("free") => ("free", true) // free with transactor running
+//    case _            => ("mem", false) // default: in-mem protocol with pro db
+    case _            => ("mem", true) // default: in-mem protocol with free db
   }
 
   val freeVersions     = datomicVersions("datomic-free")
@@ -68,7 +67,7 @@ object DatomicSettings {
 
   val home = distributionsDir + "/datomic-" + (
     if (useFree) "free-" + freeVersion else "pro-" + proVersion
-  )
+    )
   //    val home = protocol match {
   //      case "dev" | "pro" => distributionsDir + "/datomic-pro-" + proVersion
   //      case _             => distributionsDir + "/datomic-free-" + freeVersion
@@ -113,7 +112,7 @@ object DatomicSettings {
       val distDir = new File(distributionsDir)
       if (
         distDir.listFiles() == null
-        || !distDir.listFiles
+          || !distDir.listFiles
           .filter(_.isDirectory)
           .exists(_.getName.contains(system))
       ) {

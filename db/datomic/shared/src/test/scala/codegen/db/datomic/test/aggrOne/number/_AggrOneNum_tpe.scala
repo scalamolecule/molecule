@@ -61,13 +61,6 @@ object _AggrOneNum_tpe extends CodeGenBase with BaseHelpers {
           .replace("1.247219128924647", "1.3719410418171119")
           .replace("2, 1.0", "2, 1.1")
 
-
-        case "Byte" => src
-          .replace("(2, 3.0),", "(2, 4), // why is this 3 and not 3???")
-
-        case "Short" => src
-          .replace("(2, 3.0),", "(2, 4), // why is this 3 and not 3???")
-
         case _ => src
       }
 
