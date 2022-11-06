@@ -85,7 +85,7 @@ trait ExprSet[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
   ): Unit = {
     val v = vv
     find += s"(distinct $v)"
-    castScala += res.toScala
+    castScala += res.j2s
     expr(e, a, v, op, args, res)
   }
 
@@ -112,8 +112,8 @@ trait ExprSet[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
       case V         => attr(e, a, v)
       case Appl      => appl(e, a, v, sets, res.tpe, res.toDatalog)
       case Not       => not(e, a, v, sets, res.tpe, res.toDatalog)
-      case Eq        => equal(e, a, v, sets, res.fromScala)
-      case Neq       => neq(e, a, v, sets, res.fromScala)
+      case Eq        => equal(e, a, v, sets, res.s2j)
+      case Neq       => neq(e, a, v, sets, res.s2j)
       case Lt        => compare(e, a, v, sets.head.head, "<", res.tpe, res.toDatalog)
       case Gt        => compare(e, a, v, sets.head.head, ">", res.tpe, res.toDatalog)
       case Le        => compare(e, a, v, sets.head.head, "<=", res.tpe, res.toDatalog)
@@ -132,13 +132,13 @@ trait ExprSet[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
     resOpt: ResSetOpt[T],
   ): Unit = {
     val v = vv
-    castScala += resOpt.toScala
+    castScala += resOpt.j2s
     op match {
       case V     => optV(e, a, v)
       case Appl  => optApply(e, a, v, optSets, resOpt.tpe, resOpt.toDatalog)
       case Not   => optNot(e, a, v, optSets, resOpt.tpe, resOpt.toDatalog)
-      case Eq    => optEq(e, a, v, optSets, resOpt.fromScala)
-      case Neq   => optNeq(e, a, v, optSets, resOpt.fromScala)
+      case Eq    => optEq(e, a, v, optSets, resOpt.s2j)
+      case Neq   => optNeq(e, a, v, optSets, resOpt.s2j)
       case Lt    => optCompare(e, a, v, optSets, "<", resOpt.tpe, resOpt.toDatalog)
       case Gt    => optCompare(e, a, v, optSets, ">", resOpt.tpe, resOpt.toDatalog)
       case Le    => optCompare(e, a, v, optSets, "<=", resOpt.tpe, resOpt.toDatalog)
@@ -149,58 +149,70 @@ trait ExprSet[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
 
   private def aggr[T](e: Var, a: Att, v: Var, fn: Kw, res: ResSet[T]): Unit = {
     // Replace find/casting with aggregate function/cast
-    find -= v
+    find -= s"(distinct $v)"
     fn match {
       case _: distinct =>
-        find += s"(distinct $v)"
-        castScala -= res.toScala
-        castScala += res.set2list
+        val (v1, v2, e1) = (v + 1, v + 2, e + 1)
+        find += s"(distinct $v2)"
+        where += s"[$e $a $v$tx]" -> wClause
+        where +=
+          s"""[(datomic.api/q
+             |          "[:find (distinct $v1)
+             |            :in $$ $e1
+             |            :where [$e1 $a $v1]]" $$ $e) [[$v2]]]""".stripMargin -> wClause
+        castScala -= res.j2s
+        castScala += res.sets
 
       case mins(n) =>
         find += s"(min $n $v)"
-        castScala -= res.toScala
-        castScala += res.vector2list
+        castScala -= res.j2s
+        castScala += res.vector2sets
 
       case _: min =>
-        find += s"(min $v)"
+        find += s"(min 1 $v)"
+        castScala -= res.j2s
+        castScala += res.vector2set
 
       case maxs(n) =>
         find += s"(max $n $v)"
-        castScala -= res.toScala
-        castScala += res.vector2list
+        castScala -= res.j2s
+        castScala += res.vector2sets
 
       case _: max =>
-        find += s"(max $v)"
+        find += s"(max 1 $v)"
+        castScala -= res.j2s
+        castScala += res.vector2set
 
       case rands(n) =>
         find += s"(rand $n $v)"
-        castScala -= res.toScala
-        castScala += res.vector2list
+        castScala -= res.j2s
+        castScala += res.vector2sets
 
       case _: rand =>
-        find += s"(rand $v)"
+        find += s"(rand 1 $v)"
+        castScala -= res.j2s
+        castScala += res.vector2set
 
       case samples(n) =>
         find += s"(sample $n $v)"
-        castScala -= res.toScala
-        castScala += res.vector2list
+        castScala -= res.j2s
+        castScala += res.vector2sets
 
       case _: sample =>
-        // Have to add "1" for some reason
         find += s"(sample 1 $v)"
-        castScala -= res.toScala
-        castScala += res.seq2t
+        castScala -= res.j2s
+        castScala += res.vector2set
 
       case _: count =>
         find += s"(count $v)"
         widh += e
-        castScala -= res.toScala
+        castScala -= res.j2s
         castScala += toInt
 
       case _: countDistinct =>
         find += s"(count-distinct $v)"
         widh += e
-        castScala -= res.toScala
+        castScala -= res.j2s
         castScala += toInt
 
       case _: sum      => find += s"(sum $v)"

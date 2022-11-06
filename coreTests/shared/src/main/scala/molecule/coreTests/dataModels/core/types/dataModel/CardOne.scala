@@ -4,9 +4,9 @@ import molecule.DataModel
 
 object CardOne extends DataModel(3) {
 
-  trait One {
+  trait NsOne {
     val n          = oneInt
-    val string     = oneString.fulltext
+    val string     = oneString
     val int        = oneInt
     val long       = oneLong
     val float      = oneFloat

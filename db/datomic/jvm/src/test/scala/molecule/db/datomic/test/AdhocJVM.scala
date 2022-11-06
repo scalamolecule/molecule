@@ -4,17 +4,11 @@ import datomic.Peer
 import molecule.coreTests.dataModels.core.types.dsl.CardSet._
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
-import molecule.db.datomic.test.exprSet.ExprSet_Int.{int1, int2}
 import utest._
-import java.util.{Collections, List => jList, Set => jSet}
-import datomic.Peer.tempid
-import molecule.coreTests.dataModels.core.types.dsl.CardOne.One
-import molecule.db.datomic.facade.Conn_Peer
-import molecule.db.datomic.test.exprSet.ExprSet_Float_.float1
-import datomic.Connection.{DB_AFTER, DB_BEFORE, TEMPIDS, TX_DATA}
 
 
 object AdhocJVM extends DatomicTestSuite {
+
 
   lazy val tests = Tests {
 
@@ -31,13 +25,68 @@ object AdhocJVM extends DatomicTestSuite {
     //
     //    }
 
-    "set double" - cardSet { implicit conn =>
+    "set" - cardSet { implicit conn =>
 
-      val t  = (1, Some(Set(true)))
-      val f  = (2, Some(Set(false)))
-      val tf = (3, Some(Set(true, false)))
-      val x  = (4, None)
-      NsSet.n.booleans_?.insert(t, f, tf, x).transact
+      NsSet.n.ints.insert(List(
+        (1, Set(int1, int2)),
+        (2, Set(int2, int3)),
+        (2, Set(int3, int4)),
+        (2, Set(int3, int4)),
+      )).transact
+
+
+      println("------ A")
+      val rows = Peer.q(
+        """[:find  ?a (distinct ?b)
+          | :where [?a :NsSet/ints ?b]]""".stripMargin,
+        conn.db
+      )
+      rows.forEach { r => println(r) }
+
+
+      val sets = new java.util.HashSet[java.util.Set[Integer]](4)
+      rows.forEach(row => sets.add(row.get(1).asInstanceOf[java.util.Set[Integer]]))
+
+
+      println("------ B")
+//        """[:find  ?n ?set ?c2 ?x
+      Peer.q(
+        """[:find  ?n (distinct ?set)
+          | :in    $ [?set ...]
+          | :where [?a :NsSet/n ?n]
+          |        [?a :NsSet/ints ?b]
+          |        [(datomic.api/q
+          |          "[:find (distinct ?c1)
+          |            :in $ ?a
+          |            :where [?a :NsSet/ints ?c1]]" $ ?a) [[?c2]]]
+          |         [(= ?c2 ?set)]
+          | ]""".stripMargin,
+        conn.db,
+        sets
+      ).forEach { r => println(r) }
+
+      println("------ B")
+//        """[:find  ?n ?set ?c2 ?x
+      Peer.q(
+        """[:find  ?n (distinct ?c2)
+          | :where [?a :NsSet/n ?n]
+          |        [?a :NsSet/ints ?b]
+          |        [(datomic.api/q
+          |          "[:find (distinct ?c1)
+          |            :in $ ?a1
+          |            :where [?a1 :NsSet/ints ?c1]]" $ ?a) [[?c2]]]
+          | ]""".stripMargin,
+        conn.db
+      ).forEach { r => println(r) }
+
+      NsSet.n.a1.ints(distinct).query.get ==> List(
+        (1, Set(Set(int1, int2))),
+        (2, Set(
+          Set(int2, int3),
+          Set(int3, int4), // 2 rows coalesced
+        ))
+      )
+
 
       //      val e1 = datomic.Peer.tempid(":db.part/user")
       //      val e2 = datomic.Peer.tempid(":db.part/user")
@@ -52,29 +101,6 @@ object AdhocJVM extends DatomicTestSuite {
       //      )
       //      println(txr.get())
       //      val db = txr.get().get(datomic.Connection.DB_AFTER)
-
-      Peer.q(
-        """[:find  ?b
-          |        (pull ?a-?c [[:NsSet/booleans :limit nil]])
-          | :where [(identity ?a) ?a-?c]
-          |        (not [?a :NsSet/booleans])
-          |        [?a :NsSet/n ?b]]""".stripMargin,
-        conn.db
-      ).forEach { r =>
-        println(r)
-      }
-
-
-
-      //      NsSet.n.a1.booleans.query.get.foreach(println)
-      //            NsSet.n.a1.booleans_?.query.get ==> List(t, f, tf, x)
-
-
-      // None matches non-asserted values
-      NsSet.n.a1.booleans_?(Option.empty[Boolean]).query.get ==> List(x)
-      //        NsSet.n.a1.booleans_?(Option.empty[Seq[Boolean]]).query.get ==> List(x)
-      //        NsSet.n.a1.booleans_?(Option.empty[Set[Boolean]]).query.get ==> List(x)
-      //        NsSet.n.a1.booleans_?(Option.empty[Seq[Set[Boolean]]]).query.get ==> List(x)
     }
   }
 }

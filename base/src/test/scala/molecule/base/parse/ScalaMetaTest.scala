@@ -29,7 +29,7 @@ object ScalaMetaTest extends TestSuite {
 
 
     "Dsl" - {
-      Dsl_Arities(schema, schema.parts.head.nss.head, 3).get ==> "hi"
+      Dsl_Arities(schema, schema.parts.head.nss.head, 1).get ==> "hi"
     }
 
 //    "Schema" - {

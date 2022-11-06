@@ -13,6 +13,7 @@ trait ModelTransformations {
   protected def toInt(es: Seq[Element], kw: Kw): Seq[Element] = {
     val last = es.last match {
       case a: AttrOneMan => AttrOneManInt(a.ns, a.attr, Fn(kw))
+      case a: AttrSetMan => AttrSetManInt(a.ns, a.attr, Fn(kw))
       case a             => unexpected(a)
     }
     es.init :+ last
@@ -26,7 +27,7 @@ trait ModelTransformations {
     es.init :+ last
   }
 
-  protected def toList(es: Seq[Element], kw: Kw, n: Option[Int]): Seq[Element] = {
+  protected def toSet(es: Seq[Element], kw: Kw, n: Option[Int]): Seq[Element] = {
     val last = es.last match {
       case a: AttrOneMan => a match {
         case a: AttrOneManString     => a.copy(op = Fn(kw, n))
@@ -43,6 +44,22 @@ trait ModelTransformations {
         case a: AttrOneManShort      => a.copy(op = Fn(kw, n))
         case a: AttrOneManFloat      => a.copy(op = Fn(kw, n))
         case a: AttrOneManChar       => a.copy(op = Fn(kw, n))
+      }
+      case a: AttrSetMan => a match {
+        case a: AttrSetManString     => a.copy(op = Fn(kw, n))
+        case a: AttrSetManInt        => a.copy(op = Fn(kw, n))
+        case a: AttrSetManLong       => a.copy(op = Fn(kw, n))
+        case a: AttrSetManDouble     => a.copy(op = Fn(kw, n))
+        case a: AttrSetManBoolean    => a.copy(op = Fn(kw, n))
+        case a: AttrSetManBigInt     => a.copy(op = Fn(kw, n))
+        case a: AttrSetManBigDecimal => a.copy(op = Fn(kw, n))
+        case a: AttrSetManDate       => a.copy(op = Fn(kw, n))
+        case a: AttrSetManUUID       => a.copy(op = Fn(kw, n))
+        case a: AttrSetManURI        => a.copy(op = Fn(kw, n))
+        case a: AttrSetManByte       => a.copy(op = Fn(kw, n))
+        case a: AttrSetManShort      => a.copy(op = Fn(kw, n))
+        case a: AttrSetManFloat      => a.copy(op = Fn(kw, n))
+        case a: AttrSetManChar       => a.copy(op = Fn(kw, n))
       }
       case a             => unexpected(a)
     }
@@ -66,6 +83,22 @@ trait ModelTransformations {
         case a: AttrOneManShort      => a.copy(op = Fn(kw))
         case a: AttrOneManFloat      => a.copy(op = Fn(kw))
         case a: AttrOneManChar       => a.copy(op = Fn(kw))
+      }
+      case a: AttrSetMan => a match {
+        case a: AttrSetManString     => a.copy(op = Fn(kw))
+        case a: AttrSetManInt        => a.copy(op = Fn(kw))
+        case a: AttrSetManLong       => a.copy(op = Fn(kw))
+        case a: AttrSetManDouble     => a.copy(op = Fn(kw))
+        case a: AttrSetManBoolean    => a.copy(op = Fn(kw))
+        case a: AttrSetManBigInt     => a.copy(op = Fn(kw))
+        case a: AttrSetManBigDecimal => a.copy(op = Fn(kw))
+        case a: AttrSetManDate       => a.copy(op = Fn(kw))
+        case a: AttrSetManUUID       => a.copy(op = Fn(kw))
+        case a: AttrSetManURI        => a.copy(op = Fn(kw))
+        case a: AttrSetManByte       => a.copy(op = Fn(kw))
+        case a: AttrSetManShort      => a.copy(op = Fn(kw))
+        case a: AttrSetManFloat      => a.copy(op = Fn(kw))
+        case a: AttrSetManChar       => a.copy(op = Fn(kw))
       }
       case a             => unexpected(a)
     }

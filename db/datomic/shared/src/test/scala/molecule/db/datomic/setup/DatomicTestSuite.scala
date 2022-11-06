@@ -42,6 +42,7 @@ trait DatomicTestSuite extends TestSuite with CoreData
   }
 
 //  def empty[T](test: Future[Conn] => T): T = emptyImpl(test)
+  def cardAll[T](test: Connection => T): T = cardAllImpl(test)
   def cardOne[T](test: Connection => T): T = cardOneImpl(test)
   def cardSet[T](test: Connection => T): T = cardSetImpl(test)
 //  def corePeerOnly[T](test: Future[Conn] => T): T = corePeerOnlyImpl(test)

@@ -6,7 +6,10 @@ import molecule.core.MoleculeImplicits_
 import molecule.db.datomic.api._
 import scala.language.implicitConversions
 
-package object datomic extends MoleculeImplicits_ {
+package object datomic
+  extends MoleculeImplicits_
+    with Keywords {
+
   implicit final override def m[A](molecule: Molecule_01[A]): DatomicMoleculeApi_01[A] = new DatomicMoleculeApi_01(molecule)
   implicit final override def m[A, B](molecule: Molecule_02[A, B]): DatomicMoleculeApi_02[A, B] = new DatomicMoleculeApi_02(molecule)
   implicit final override def m[A, B, C](molecule: Molecule_03[A, B, C]): DatomicMoleculeApi_03[A, B, C] = new DatomicMoleculeApi_03(molecule)

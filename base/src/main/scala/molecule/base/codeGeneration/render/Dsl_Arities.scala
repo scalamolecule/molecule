@@ -79,15 +79,14 @@ case class Dsl_Arities(schema: MetaSchema, namespace: MetaNs, arity: Int)
       res += s"override protected def _exprSetTac(op: Op, vs: Seq[Set[t]]$pSet) = new $ns_0[t](addSet(elements, op, vs))"
 
   } else {
-    val tI = s"${`..U`}Int    , Int   "
-    val tD = s"${`..U`}Double , Double"
-    val tL = s"${`..U`}List[t], t     "
-    val tt = s"${`..U`}t      , t     "
-    val tA = s"${`A..V`}      , t     "
+    val tI = s"${`A..U`}Int   , Int   "
+    val tD = s"${`A..U`}Double, Double"
+    val tL = s"${`A..U`}Set[$V], t     "
+    val tA = s"${`A..V`}     , t     "
 
     def one1 = s"override protected def _aggrInt   (kw: Kw                    $pOne) = new $ns_0"
     def one2 = s"override protected def _aggrDouble(kw: Kw                    $pOne) = new $ns_0"
-    def one3 = s"override protected def _aggrList  (kw: Kw, n: Option[Int]    $pOne) = new $ns_0"
+    def one3 = s"override protected def _aggrSet   (kw: Kw, n: Option[Int]    $pOne) = new $ns_0"
     def one4 = s"override protected def _aggrT     (kw: Kw                    $pOne) = new $ns_0"
     def one5 = s"override protected def _exprOneMan(op: Op, vs: Seq[t]        $pOne) = new $ns_0"
     def one6 = s"override protected def _exprOneOpt(op: Op, vs: Option[Seq[t]]$pOne) = new $ns_0"
@@ -101,8 +100,8 @@ case class Dsl_Arities(schema: MetaSchema, namespace: MetaNs, arity: Int)
     if (hasOne || hasSet) {
       res += s"$one1[$tI](toInt    (elements, kw    )) with SortAttrs_$arity[$tI, $ns_0]"
       res += s"$one2[$tD](toDouble (elements, kw    )) with SortAttrs_$arity[$tD, $ns_0]"
-      res += s"$one3[$tL](toList   (elements, kw, n )) with SortAttrs_$arity[$tL, $ns_0]"
-      res += s"$one4[$tt](asIs     (elements, kw    )) with SortAttrs_$arity[$tt, $ns_0]"
+      res += s"$one3[$tL](toSet    (elements, kw, n )) with SortAttrs_$arity[$tL, $ns_0]"
+      res += s"$one4[$tA](asIs     (elements, kw    )) with SortAttrs_$arity[$tA, $ns_0]"
     }
     if (hasOne) {
       res += s"$one5[$tA](addOne   (elements, op, vs)) with SortAttrs_$arity[$tA, $ns_0]"
@@ -134,12 +133,11 @@ case class Dsl_Arities(schema: MetaSchema, namespace: MetaNs, arity: Int)
   val refResult = ref.result()
   val refDefs   = if (refResult.isEmpty) "" else refResult.mkString("\n\n  ", "\n  ", "")
 
-  val tpes     = `A..V, ` + "t"
   val elements = "override val elements: Seq[Element]"
-  val modelOps = s"ModelOps_$arity[$tpes, $ns_0]"
+  val modelOps = s"ModelOps_$arity[${`A..V, `}t, $ns_0]"
 
   def get =
-    s"""class $ns_0[$tpes]($elements) extends $ns with $modelOps with $NS {
+    s"""class $ns_0[${`A..V, `}t]($elements) extends $ns with $modelOps with $NS {
        |  $manAttrs$optAttrs$tacAttrs
        |
        |  $resolvers$refDefs

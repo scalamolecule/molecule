@@ -84,7 +84,7 @@ trait ExprOne[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
   ): Unit = {
     val v = vv
     find += v
-    castScala += res.toScala
+    castScala += res.j2s
     sorter.foreach(sorts += _)
     expr(e, a, v, op, args, res)
   }
@@ -110,12 +110,12 @@ trait ExprOne[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
   ): Unit = {
     op match {
       case V         => attr(e, a, v)
-      case Appl      => appl(e, a, v, args, res.fromScala)
+      case Appl      => appl(e, a, v, args, res.s2j)
       case Not       => not(e, a, v, args, res.tpe, res.toDatalog)
-      case Lt        => compare(e, a, v, args.head, "<", res.fromScala)
-      case Gt        => compare(e, a, v, args.head, ">", res.fromScala)
-      case Le        => compare(e, a, v, args.head, "<=", res.fromScala)
-      case Ge        => compare(e, a, v, args.head, ">=", res.fromScala)
+      case Lt        => compare(e, a, v, args.head, "<", res.s2j)
+      case Gt        => compare(e, a, v, args.head, ">", res.s2j)
+      case Le        => compare(e, a, v, args.head, "<=", res.s2j)
+      case Ge        => compare(e, a, v, args.head, ">=", res.s2j)
       case NoValue   => noValue(e, a)
       case Fn(kw, _) => aggr(e, a, v, kw, res)
       case other     => unexpected(other)
@@ -131,16 +131,16 @@ trait ExprOne[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
     sorter: Option[(Int, (Row, Row) => Int)]
   ): Unit = {
     val v = vv
-    castScala += resOpt.toScala
+    castScala += resOpt.j2s
     sorter.foreach(sorts += _)
     op match {
       case V     => optV(e, a, v)
-      case Appl  => optApply(e, a, v, optArgs, resOpt.fromScala)
+      case Appl  => optApply(e, a, v, optArgs, resOpt.s2j)
       case Not   => optNot(e, a, v, optArgs, resOpt.tpe, resOpt.toDatalog)
-      case Lt    => optCompare(e, a, v, optArgs, "<", resOpt.fromScala)
-      case Gt    => optCompare(e, a, v, optArgs, ">", resOpt.fromScala)
-      case Le    => optCompare(e, a, v, optArgs, "<=", resOpt.fromScala)
-      case Ge    => optCompare(e, a, v, optArgs, ">=", resOpt.fromScala)
+      case Lt    => optCompare(e, a, v, optArgs, "<", resOpt.s2j)
+      case Gt    => optCompare(e, a, v, optArgs, ">", resOpt.s2j)
+      case Le    => optCompare(e, a, v, optArgs, "<=", resOpt.s2j)
+      case Ge    => optCompare(e, a, v, optArgs, ">=", resOpt.s2j)
       case other => unexpected(other)
     }
   }
@@ -151,54 +151,53 @@ trait ExprOne[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
     fn match {
       case _: distinct =>
         find += s"(distinct $v)"
-        castScala -= res.toScala
-        castScala += res.set2list
+        castScala -= res.j2s
+        castScala += res.set2set
 
       case mins(n) =>
         find += s"(min $n $v)"
-        castScala -= res.toScala
-        castScala += res.vector2list
+        castScala -= res.j2s
+        castScala += res.vector2set
 
       case _: min =>
         find += s"(min $v)"
 
       case maxs(n) =>
         find += s"(max $n $v)"
-        castScala -= res.toScala
-        castScala += res.vector2list
+        castScala -= res.j2s
+        castScala += res.vector2set
 
       case _: max =>
         find += s"(max $v)"
 
       case rands(n) =>
         find += s"(rand $n $v)"
-        castScala -= res.toScala
-        castScala += res.vector2list
+        castScala -= res.j2s
+        castScala += res.vector2set
 
       case _: rand =>
         find += s"(rand $v)"
 
       case samples(n) =>
         find += s"(sample $n $v)"
-        castScala -= res.toScala
-        castScala += res.vector2list
+        castScala -= res.j2s
+        castScala += res.vector2set
 
       case _: sample =>
-        // Have to add "1" for some reason
         find += s"(sample 1 $v)"
-        castScala -= res.toScala
+        castScala -= res.j2s
         castScala += res.seq2t
 
       case _: count =>
         find += s"(count $v)"
         widh += e
-        castScala -= res.toScala
+        castScala -= res.j2s
         castScala += toInt
 
       case _: countDistinct =>
         find += s"(count-distinct $v)"
         widh += e
-        castScala -= res.toScala
+        castScala -= res.j2s
         castScala += toInt
 
       case _: sum      => find += s"(sum $v)"

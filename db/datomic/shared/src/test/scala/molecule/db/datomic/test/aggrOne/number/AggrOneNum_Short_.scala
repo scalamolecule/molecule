@@ -1,7 +1,7 @@
 // GENERATED CODE ********************************
 package molecule.db.datomic.test.aggrOne.number
 
-import molecule.boilerplate.api.Keywords._
+
 import molecule.coreTests.dataModels.core.types.dsl.CardOne._
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
@@ -13,14 +13,14 @@ object AggrOneNum_Short_ extends DatomicTestSuite {
   lazy val tests = Tests {
 
     "sum" - cardOne { implicit conn =>
-      One.n.short.insert(List(
+      NsOne.n.short.insert(List(
         (1, short1),
         (2, short2),
         (2, short3),
       )).transact
 
-      One.short(sum).query.get.head ==> (short1 + short2 + short3)
-      One.n.short(sum).query.get ==> List(
+      NsOne.short(sum).query.get.head ==> (short1 + short2 + short3)
+      NsOne.n.short(sum).query.get ==> List(
         (1, short1),
         (2, short2 + short3),
       )
@@ -28,7 +28,7 @@ object AggrOneNum_Short_ extends DatomicTestSuite {
 
 
     "median" - cardOne { implicit futConn =>
-      One.n.short.insert(List(
+      NsOne.n.short.insert(List(
         (1, short1),
         (2, short2),
         (2, short4),
@@ -40,22 +40,22 @@ object AggrOneNum_Short_ extends DatomicTestSuite {
       // https://en.wikipedia.org/wiki/Median
       // See also
       // https://forum.datomic.com/t/unexpected-median-rounding/517
-      One.short(median).query.get.head ==> short2
-      One.n.short(median).query.get ==> List(
+      NsOne.short(median).query.get.head ==> short2
+      NsOne.n.short(median).query.get ==> List(
         (1, short1),
         (2, 3.0),
       )
     }
 
     "avg" - cardOne { implicit conn =>
-      One.n.short.insert(List(
+      NsOne.n.short.insert(List(
         (1, short1),
         (2, short2),
         (2, short4),
       )).transact
 
-      One.short(avg).query.get.head ==> (short1 + short2 + short4) / 3.0
-      One.n.short(avg).query.get ==> List(
+      NsOne.short(avg).query.get.head ==> (short1 + short2 + short4) / 3.0
+      NsOne.n.short(avg).query.get ==> List(
         (1, short1 / 1.0),
         (2, (short2 + short4) / 2.0),
       )
@@ -63,14 +63,14 @@ object AggrOneNum_Short_ extends DatomicTestSuite {
 
 
     "variance" - cardOne { implicit conn =>
-      One.n.short.insert(List(
+      NsOne.n.short.insert(List(
         (1, short1),
         (2, short2),
         (2, short4),
       )).transact
 
-      One.short(variance).query.get.head ==> 1.5555555555555554
-      One.n.short(variance).query.get ==> List(
+      NsOne.short(variance).query.get.head ==> 1.5555555555555554
+      NsOne.n.short(variance).query.get ==> List(
         (1, 0.0),
         (2, 1.0),
       )
@@ -78,14 +78,14 @@ object AggrOneNum_Short_ extends DatomicTestSuite {
 
 
     "stddev" - cardOne { implicit conn =>
-      One.n.short.insert(List(
+      NsOne.n.short.insert(List(
         (1, short1),
         (2, short2),
         (2, short4),
       )).transact
 
-      One.short(stddev).query.get.head ==> 1.247219128924647
-      One.n.short(stddev).query.get ==> List(
+      NsOne.short(stddev).query.get.head ==> 1.247219128924647
+      NsOne.n.short(stddev).query.get ==> List(
         (1, 0.0),
         (2, 1.0),
       )

@@ -24,8 +24,8 @@ class DslFormatting(
     case t     => t
   }
 
-  val maxAttr = attrs.map(_.attr).map(_.length).max
-  val maxTpe  = attrs.map(a => getTpe(a.tpe)).map(_.length).max
+  lazy val maxAttr = attrs.map(_.attr).map(_.length).max
+  lazy val maxTpe  = attrs.map(a => getTpe(a.tpe)).map(_.length).max
 
   lazy val padAttr = (s: String) => padS(maxAttr, s)
   lazy val padType = (s: String) => padS(maxTpe, s)
@@ -33,17 +33,17 @@ class DslFormatting(
 
   def nn(i: Int) = if (i < 10) s"0$i" else s"$i"
 
+  lazy val V        = ('A' + arity - 1).toChar
+  lazy val tpes     = (0 until arity) map (n => (n + 'A').toChar)
   lazy val _0       = "_" + arity
   lazy val _1       = "_" + (arity + 1)
-  lazy val ns_      = ns + "_"
   lazy val ns_0     = ns + _0
   lazy val ns_1     = ns + _1
-  lazy val `, _`    = (0 until arity).map(_ => s", _").mkString("")
-  lazy val `, A`    = if (arity == 0) "" else ", " + (65 until (65 + arity)).map(_.toChar).mkString(", ")
-  lazy val `..U`    = if (arity <= 1) "" else (65 until (65 + arity - 1)).map(_.toChar).mkString("", ", ", ", ")
-  lazy val `A..V`   = if (arity == 0) "" else (65 until (65 + arity)).map(_.toChar).mkString(", ")
-  lazy val `A..V, ` = if (arity == 0) "" else (65 until (65 + arity)).map(_.toChar).mkString("", ", ", ", ")
-  lazy val `[A..V]` = if (arity == 0) "" else (65 until (65 + arity)).map(_.toChar).mkString("[", ", ", "]")
+  lazy val `, A`    = if (arity == 0) "" else ", " + tpes.mkString(", ")
+  lazy val `A..U`   = if (arity <= 1) "" else tpes.init.mkString("", ", ", ", ")
+  lazy val `A..V`   = if (arity == 0) "" else tpes.mkString(", ")
+  lazy val `A..V, ` = if (arity == 0) "" else tpes.mkString("", ", ", ", ")
+  lazy val `[A..V]` = if (arity == 0) "" else tpes.mkString("[", ", ", "]")
 
   lazy val NS = s"Molecule_${nn(arity)}${`[A..V]`}"
 }
