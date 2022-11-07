@@ -35,7 +35,7 @@ object AggrSet_Long_ extends DatomicTestSuite {
         ))
       )
 
-      NsSet.longs.apply(distinct).query.get ==> List(
+      NsSet.longs(distinct).query.get ==> List(
         Set(
           Set(long1, long2),
           Set(long2, long3),
@@ -54,20 +54,22 @@ object AggrSet_Long_ extends DatomicTestSuite {
       )).transact
 
       NsSet.longs(min).query.get ==> List(Set(long1))
-      NsSet.longs(min(1)).query.get ==> List(Set(Set(long1)))
-      NsSet.longs(min(2)).query.get ==> List(Set(Set(long1, long2)))
+      NsSet.longs(min(1)).query.get ==> List(Set(long1))
+      NsSet.longs(min(2)).query.get ==> List(Set(long1, long2))
 
       NsSet.n.longs(min).query.get ==> List(
         (1, Set(long1)),
         (2, Set(long2)),
       )
+      // Same as
       NsSet.n.longs(min(1)).query.get ==> List(
-        (1, Set(Set(long1))),
-        (2, Set(Set(long2))),
+        (1, Set(long1)),
+        (2, Set(long2)),
       )
+
       NsSet.n.longs(min(2)).query.get ==> List(
-        (1, Set(Set(long1, long2))),
-        (2, Set(Set(long2, long3))),
+        (1, Set(long1, long2)),
+        (2, Set(long2, long3)),
       )
     }
 
@@ -81,20 +83,22 @@ object AggrSet_Long_ extends DatomicTestSuite {
       )).transact
 
       NsSet.longs(max).query.get ==> List(Set(long4))
-      NsSet.longs(max(1)).query.get ==> List(Set(Set(long4)))
-      NsSet.longs(max(2)).query.get ==> List(Set(Set(long3, long4)))
+      NsSet.longs(max(1)).query.get ==> List(Set(long4))
+      NsSet.longs(max(2)).query.get ==> List(Set(long3, long4))
 
       NsSet.n.longs(max).query.get ==> List(
         (1, Set(long2)),
         (2, Set(long4)),
       )
+      // Same as
       NsSet.n.longs(max(1)).query.get ==> List(
-        (1, Set(Set(long2))),
-        (2, Set(Set(long4))),
+        (1, Set(long2)),
+        (2, Set(long4)),
       )
+
       NsSet.n.longs(max(2)).query.get ==> List(
-        (1, Set(Set(long1, long2))),
-        (2, Set(Set(long3, long4))),
+        (1, Set(long1, long2)),
+        (2, Set(long3, long4)),
       )
     }
 
@@ -108,8 +112,8 @@ object AggrSet_Long_ extends DatomicTestSuite {
       )).transact
       val all = Set(long1, long2, long3, long4)
       all.contains(NsSet.longs(rand).query.get.head.head) ==> true
-      all.intersect(NsSet.longs(rand(1)).query.get.head.head).nonEmpty ==> true
-      all.intersect(NsSet.longs(rand(2)).query.get.head.head).nonEmpty ==> true
+      all.intersect(NsSet.longs(rand(1)).query.get.head).nonEmpty ==> true
+      all.intersect(NsSet.longs(rand(2)).query.get.head).nonEmpty ==> true
     }
 
 
@@ -122,8 +126,8 @@ object AggrSet_Long_ extends DatomicTestSuite {
       )).transact
       val all = Set(long1, long2, long3, long4)
       all.contains(NsSet.longs(sample).query.get.head.head) ==> true
-      all.intersect(NsSet.longs(sample(1)).query.get.head.head).nonEmpty ==> true
-      all.intersect(NsSet.longs(sample(2)).query.get.head.head).nonEmpty ==> true
+      all.intersect(NsSet.longs(sample(1)).query.get.head).nonEmpty ==> true
+      all.intersect(NsSet.longs(sample(2)).query.get.head).nonEmpty ==> true
     }
 
 

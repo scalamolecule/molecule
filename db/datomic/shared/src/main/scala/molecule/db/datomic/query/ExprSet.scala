@@ -1,10 +1,8 @@
 package molecule.db.datomic.query
 
-import molecule.base.util.exceptions.MoleculeException
 import molecule.boilerplate.api.Keywords._
 import molecule.boilerplate.ast.MoleculeModel._
 import scala.reflect.ClassTag
-import java.util.{Collections, List => jList, Set => jSet}
 
 trait ExprSet[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
 
@@ -166,7 +164,7 @@ trait ExprSet[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
       case mins(n) =>
         find += s"(min $n $v)"
         castScala -= res.j2s
-        castScala += res.vector2sets
+        castScala += res.vector2set
 
       case _: min =>
         find += s"(min 1 $v)"
@@ -176,7 +174,7 @@ trait ExprSet[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
       case maxs(n) =>
         find += s"(max $n $v)"
         castScala -= res.j2s
-        castScala += res.vector2sets
+        castScala += res.vector2set
 
       case _: max =>
         find += s"(max 1 $v)"
@@ -186,7 +184,7 @@ trait ExprSet[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
       case rands(n) =>
         find += s"(rand $n $v)"
         castScala -= res.j2s
-        castScala += res.vector2sets
+        castScala += res.vector2set
 
       case _: rand =>
         find += s"(rand 1 $v)"
@@ -196,7 +194,7 @@ trait ExprSet[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
       case samples(n) =>
         find += s"(sample $n $v)"
         castScala -= res.j2s
-        castScala += res.vector2sets
+        castScala += res.vector2set
 
       case _: sample =>
         find += s"(sample 1 $v)"
@@ -215,11 +213,30 @@ trait ExprSet[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
         castScala -= res.j2s
         castScala += toInt
 
-      case _: sum      => find += s"(sum $v)"
-      case _: median   => find += s"(median $v)"
-      case _: avg      => find += s"(avg $v)"
-      case _: variance => find += s"(variance $v)"
-      case _: stddev   => find += s"(stddev $v)"
+      case _: sum      =>
+        find += s"(sum $v)"
+        castScala -= res.j2s
+        castScala += res.j2sSet
+
+      case _: median   =>
+        find += s"(median $v)"
+        castScala -= res.j2s
+        castScala += res.j2sSet
+
+      case _: avg      =>
+        find += s"(avg $v)"
+        castScala -= res.j2s
+        castScala += res.j2sSet
+
+      case _: variance =>
+        find += s"(variance $v)"
+        castScala -= res.j2s
+        castScala += res.j2sSet
+
+      case _: stddev   =>
+        find += s"(stddev $v)"
+        castScala -= res.j2s
+        castScala += res.j2sSet
     }
     where += s"[$e $a $v$tx]" -> wClause
   }

@@ -35,7 +35,7 @@ object AggrSet_Byte_ extends DatomicTestSuite {
         ))
       )
 
-      NsSet.bytes.apply(distinct).query.get ==> List(
+      NsSet.bytes(distinct).query.get ==> List(
         Set(
           Set(byte1, byte2),
           Set(byte2, byte3),
@@ -54,20 +54,22 @@ object AggrSet_Byte_ extends DatomicTestSuite {
       )).transact
 
       NsSet.bytes(min).query.get ==> List(Set(byte1))
-      NsSet.bytes(min(1)).query.get ==> List(Set(Set(byte1)))
-      NsSet.bytes(min(2)).query.get ==> List(Set(Set(byte1, byte2)))
+      NsSet.bytes(min(1)).query.get ==> List(Set(byte1))
+      NsSet.bytes(min(2)).query.get ==> List(Set(byte1, byte2))
 
       NsSet.n.bytes(min).query.get ==> List(
         (1, Set(byte1)),
         (2, Set(byte2)),
       )
+      // Same as
       NsSet.n.bytes(min(1)).query.get ==> List(
-        (1, Set(Set(byte1))),
-        (2, Set(Set(byte2))),
+        (1, Set(byte1)),
+        (2, Set(byte2)),
       )
+
       NsSet.n.bytes(min(2)).query.get ==> List(
-        (1, Set(Set(byte1, byte2))),
-        (2, Set(Set(byte2, byte3))),
+        (1, Set(byte1, byte2)),
+        (2, Set(byte2, byte3)),
       )
     }
 
@@ -81,20 +83,22 @@ object AggrSet_Byte_ extends DatomicTestSuite {
       )).transact
 
       NsSet.bytes(max).query.get ==> List(Set(byte4))
-      NsSet.bytes(max(1)).query.get ==> List(Set(Set(byte4)))
-      NsSet.bytes(max(2)).query.get ==> List(Set(Set(byte3, byte4)))
+      NsSet.bytes(max(1)).query.get ==> List(Set(byte4))
+      NsSet.bytes(max(2)).query.get ==> List(Set(byte3, byte4))
 
       NsSet.n.bytes(max).query.get ==> List(
         (1, Set(byte2)),
         (2, Set(byte4)),
       )
+      // Same as
       NsSet.n.bytes(max(1)).query.get ==> List(
-        (1, Set(Set(byte2))),
-        (2, Set(Set(byte4))),
+        (1, Set(byte2)),
+        (2, Set(byte4)),
       )
+
       NsSet.n.bytes(max(2)).query.get ==> List(
-        (1, Set(Set(byte1, byte2))),
-        (2, Set(Set(byte3, byte4))),
+        (1, Set(byte1, byte2)),
+        (2, Set(byte3, byte4)),
       )
     }
 
@@ -108,8 +112,8 @@ object AggrSet_Byte_ extends DatomicTestSuite {
       )).transact
       val all = Set(byte1, byte2, byte3, byte4)
       all.contains(NsSet.bytes(rand).query.get.head.head) ==> true
-      all.intersect(NsSet.bytes(rand(1)).query.get.head.head).nonEmpty ==> true
-      all.intersect(NsSet.bytes(rand(2)).query.get.head.head).nonEmpty ==> true
+      all.intersect(NsSet.bytes(rand(1)).query.get.head).nonEmpty ==> true
+      all.intersect(NsSet.bytes(rand(2)).query.get.head).nonEmpty ==> true
     }
 
 
@@ -122,8 +126,8 @@ object AggrSet_Byte_ extends DatomicTestSuite {
       )).transact
       val all = Set(byte1, byte2, byte3, byte4)
       all.contains(NsSet.bytes(sample).query.get.head.head) ==> true
-      all.intersect(NsSet.bytes(sample(1)).query.get.head.head).nonEmpty ==> true
-      all.intersect(NsSet.bytes(sample(2)).query.get.head.head).nonEmpty ==> true
+      all.intersect(NsSet.bytes(sample(1)).query.get.head).nonEmpty ==> true
+      all.intersect(NsSet.bytes(sample(2)).query.get.head).nonEmpty ==> true
     }
 
 

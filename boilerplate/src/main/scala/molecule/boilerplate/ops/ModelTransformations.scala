@@ -22,12 +22,13 @@ trait ModelTransformations {
   protected def toDouble(es: Seq[Element], kw: Kw): Seq[Element] = {
     val last = es.last match {
       case a: AttrOneMan => AttrOneManDouble(a.ns, a.attr, Fn(kw))
+      case a: AttrSetMan => AttrSetManDouble(a.ns, a.attr, Fn(kw))
       case a             => unexpected(a)
     }
     es.init :+ last
   }
 
-  protected def toSet(es: Seq[Element], kw: Kw, n: Option[Int]): Seq[Element] = {
+  protected def toSet(es: Seq[Element], kw: Kw, n: Option[Int] = None): Seq[Element] = {
     val last = es.last match {
       case a: AttrOneMan => a match {
         case a: AttrOneManString     => a.copy(op = Fn(kw, n))

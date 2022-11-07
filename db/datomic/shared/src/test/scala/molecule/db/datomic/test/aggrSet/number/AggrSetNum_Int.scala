@@ -1,6 +1,6 @@
 package molecule.db.datomic.test.aggrSet.number
 
-import molecule.coreTests.dataModels.core.types.dsl.CardOne._
+import molecule.coreTests.dataModels.core.types.dsl.CardSet._
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
@@ -10,26 +10,30 @@ object AggrSetNum_Int extends DatomicTestSuite {
 
   lazy val tests = Tests {
 
-    "sum" - cardOne { implicit conn =>
-      NsOne.n.int.insert(List(
-        (1, int1),
-        (2, int2),
-        (2, int3),
+    "sum" - cardSet { implicit conn =>
+      NsSet.n.ints.insert(List(
+        (1, Set(int1, int2)),
+        (2, Set(int2, int3)),
+        (2, Set(int3, int4)),
+        (2, Set(int3, int4)),
       )).transact
 
-      NsOne.int(sum).query.get.head ==> (int1 + int2 + int3)
-      NsOne.n.int(sum).query.get ==> List(
-        (1, int1),
-        (2, int2 + int3),
+      NsSet.ints.apply(sum).query.get ==> List(
+        Set(10) // int1 + int2 + int3 + int4
+      )
+      NsSet.n.ints(sum).query.get ==> List(
+        (1, Set(3)), // int1 + int2
+        (2, Set(9)), // int2 + int3 + int4
       )
     }
 
 
-    "median" - cardOne { implicit futConn =>
-      NsOne.n.int.insert(List(
-        (1, int1),
-        (2, int2),
-        (2, int4),
+    "median" - cardSet { implicit futConn =>
+      NsSet.n.ints.insert(List(
+        (1, Set(int1, int2)),
+        (2, Set(int2, int3)),
+        (2, Set(int3, int4)),
+        (2, Set(int3, int4)),
       )).transact
 
       // OBS! Datomic rounds down to nearest whole number
@@ -38,54 +42,66 @@ object AggrSetNum_Int extends DatomicTestSuite {
       // https://en.wikipedia.org/wiki/Median
       // See also
       // https://forum.datomic.com/t/unexpected-median-rounding/517
-      NsOne.int(median).query.get.head ==> int2
-      NsOne.n.int(median).query.get ==> List(
-        (1, int1),
-        (2, 3.0),
+      NsSet.ints(median).query.get ==> List(
+        Set(2.0)
       )
-    }
-
-    "avg" - cardOne { implicit conn =>
-      NsOne.n.int.insert(List(
-        (1, int1),
-        (2, int2),
-        (2, int4),
-      )).transact
-
-      NsOne.int(avg).query.get.head ==> (int1 + int2 + int4) / 3.0
-      NsOne.n.int(avg).query.get ==> List(
-        (1, int1 / 1.0),
-        (2, (int2 + int4) / 2.0),
+      NsSet.n.ints(median).query.get ==> List(
+        (1, Set(1.0)),
+        (2, Set(3.0)),
       )
     }
 
 
-    "variance" - cardOne { implicit conn =>
-      NsOne.n.int.insert(List(
-        (1, int1),
-        (2, int2),
-        (2, int4),
+    "avg" - cardSet { implicit conn =>
+      NsSet.n.ints.insert(List(
+        (1, Set(int1, int2)),
+        (2, Set(int2, int3)),
+        (2, Set(int3, int4)),
+        (2, Set(int3, int4)),
       )).transact
 
-      NsOne.int(variance).query.get.head ==> 1.5555555555555554
-      NsOne.n.int(variance).query.get ==> List(
-        (1, 0.0),
-        (2, 1.0),
+      NsSet.ints(avg).query.get ==> List(
+        Set(2.5)
+      )
+      NsSet.n.ints(avg).query.get ==> List(
+        (1, Set(1.5)), // (int1 + int2) / 2.0
+        (2, Set(3.0)), // (int2 + int3 + int4) / 3.0
       )
     }
 
 
-    "stddev" - cardOne { implicit conn =>
-      NsOne.n.int.insert(List(
-        (1, int1),
-        (2, int2),
-        (2, int4),
+    "variance" - cardSet { implicit conn =>
+      NsSet.n.ints.insert(List(
+        (1, Set(int1, int2)),
+        (2, Set(int2, int3)),
+        (2, Set(int3, int4)),
+        (2, Set(int3, int4)),
       )).transact
 
-      NsOne.int(stddev).query.get.head ==> 1.247219128924647
-      NsOne.n.int(stddev).query.get ==> List(
-        (1, 0.0),
-        (2, 1.0),
+      NsSet.ints(variance).query.get ==> List(
+        Set(1.25)
+      )
+      NsSet.n.ints(variance).query.get ==> List(
+        (1, Set(0.25)),
+        (2, Set(0.6666666666666666)),
+      )
+    }
+
+
+    "stddev" - cardSet { implicit conn =>
+      NsSet.n.ints.insert(List(
+        (1, Set(int1, int2)),
+        (2, Set(int2, int3)),
+        (2, Set(int3, int4)),
+        (2, Set(int3, int4)),
+      )).transact
+
+      NsSet.ints(stddev).query.get ==> List(
+        Set(1.118033988749895)
+      )
+      NsSet.n.ints(stddev).query.get ==> List(
+        (1, Set(0.5)),
+        (2, Set(0.816496580927726)),
       )
     }
   }

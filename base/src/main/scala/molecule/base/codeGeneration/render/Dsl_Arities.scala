@@ -79,41 +79,45 @@ case class Dsl_Arities(schema: MetaSchema, namespace: MetaNs, arity: Int)
       res += s"override protected def _exprSetTac(op: Op, vs: Seq[Set[t]]$pSet) = new $ns_0[t](addSet(elements, op, vs))"
 
   } else {
-    val tI = s"${`A..U`}Int   , Int   "
-    val tD = s"${`A..U`}Double, Double"
-    val tL = s"${`A..U`}Set[$V], t     "
-    val tA = s"${`A..V`}     , t     "
+    val tInt_ = s"${`A..U`}Int   , Int   "
+    val tDoub = s"${`A..U`}Double, Double"
+    val tDist = s"${`A..U`}Set[$V], t     "
+    val tSet_ = s"${`A..U`}Set[t], t     "
+    val tA___ = s"${`A..V`}     , t     "
 
-    def one1 = s"override protected def _aggrInt   (kw: Kw                    $pOne) = new $ns_0"
-    def one2 = s"override protected def _aggrDouble(kw: Kw                    $pOne) = new $ns_0"
-    def one3 = s"override protected def _aggrSet   (kw: Kw, n: Option[Int]    $pOne) = new $ns_0"
-    def one4 = s"override protected def _aggrT     (kw: Kw                    $pOne) = new $ns_0"
-    def one5 = s"override protected def _exprOneMan(op: Op, vs: Seq[t]        $pOne) = new $ns_0"
-    def one6 = s"override protected def _exprOneOpt(op: Op, vs: Option[Seq[t]]$pOne) = new $ns_0"
-    def one7 = s"override protected def _exprOneTac(op: Op, vs: Seq[t]        $pOne) = new $ns_0"
-    def one8 = s"override protected def _sort      (sort: String              $pOne) = new $ns_0"
+    def agg1 = s"override protected def _aggrInt   (kw: Kw                    $pOne) = new $ns_0"
+    def agg2 = s"override protected def _aggrDouble(kw: Kw                    $pOne) = new $ns_0"
+    def agg3 = s"override protected def _aggrDist  (kw: Kw                    $pOne) = new $ns_0"
+    def agg4 = s"override protected def _aggrSet   (kw: Kw, n: Option[Int]    $pOne) = new $ns_0"
+    def agg5 = s"override protected def _aggrT     (kw: Kw                    $pOne) = new $ns_0"
+
+    def one1 = s"override protected def _exprOneMan(op: Op, vs: Seq[t]        $pOne) = new $ns_0"
+    def one2 = s"override protected def _exprOneOpt(op: Op, vs: Option[Seq[t]]$pOne) = new $ns_0"
+    def one3 = s"override protected def _exprOneTac(op: Op, vs: Seq[t]        $pOne) = new $ns_0"
+    def one4 = s"override protected def _sort      (sort: String              $pOne) = new $ns_0"
 
     def set1 = s"override protected def _exprSetMan(op: Op, vs: Seq[Set[t]]        $pSet) = new $ns_0"
     def set2 = s"override protected def _exprSetOpt(op: Op, vs: Option[Seq[Set[t]]]$pSet) = new $ns_0"
     def set3 = s"override protected def _exprSetTac(op: Op, vs: Seq[Set[t]]        $pSet) = new $ns_0"
 
     if (hasOne || hasSet) {
-      res += s"$one1[$tI](toInt    (elements, kw    )) with SortAttrs_$arity[$tI, $ns_0]"
-      res += s"$one2[$tD](toDouble (elements, kw    )) with SortAttrs_$arity[$tD, $ns_0]"
-      res += s"$one3[$tL](toSet    (elements, kw, n )) with SortAttrs_$arity[$tL, $ns_0]"
-      res += s"$one4[$tA](asIs     (elements, kw    )) with SortAttrs_$arity[$tA, $ns_0]"
+      res += s"$agg1[$tInt_](toInt    (elements, kw    )) with SortAttrs_$arity[$tInt_, $ns_0]"
+      res += s"$agg2[$tDoub](toDouble (elements, kw    )) with SortAttrs_$arity[$tDoub, $ns_0]"
+      res += s"$agg3[$tDist](toSet    (elements, kw    )) with SortAttrs_$arity[$tDist, $ns_0]"
+      res += s"$agg4[$tSet_](toSet    (elements, kw, n )) with SortAttrs_$arity[$tSet_, $ns_0]"
+      res += s"$agg5[$tA___](asIs     (elements, kw    )) with SortAttrs_$arity[$tA___, $ns_0]"
     }
     if (hasOne) {
-      res += s"$one5[$tA](addOne   (elements, op, vs)) with SortAttrs_$arity[$tA, $ns_0]"
-      res += s"$one6[$tA](addOptOne(elements, op, vs)) with SortAttrs_$arity[$tA, $ns_0]"
-      res += s"$one7[$tA](addOne   (elements, op, vs))"
+      res += s"$one1[$tA___](addOne   (elements, op, vs)) with SortAttrs_$arity[$tA___, $ns_0]"
+      res += s"$one2[$tA___](addOptOne(elements, op, vs)) with SortAttrs_$arity[$tA___, $ns_0]"
+      res += s"$one3[$tA___](addOne   (elements, op, vs))"
     }
     if (hasSet) {
-      res += s"$set1[$tA](addSet   (elements, op, vs)) with SortAttrs_$arity[$tA, $ns_0]"
-      res += s"$set2[$tA](addOptSet(elements, op, vs)) with SortAttrs_$arity[$tA, $ns_0]"
-      res += s"$set3[$tA](addSet   (elements, op, vs))"
+      res += s"$set1[$tA___](addSet   (elements, op, vs)) with SortAttrs_$arity[$tA___, $ns_0]"
+      res += s"$set2[$tA___](addOptSet(elements, op, vs)) with SortAttrs_$arity[$tA___, $ns_0]"
+      res += s"$set3[$tA___](addSet   (elements, op, vs))"
     }
-    res += s"$one8[$tA](addSort  (elements, sort  ))"
+    res += s"$one4[$tA___](addSort  (elements, sort  ))"
   }
 
   refs.foreach {

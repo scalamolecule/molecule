@@ -1,7 +1,6 @@
 // GENERATED CODE ********************************
 package molecule.db.datomic.test.aggrOne.number
 
-
 import molecule.coreTests.dataModels.core.types.dsl.CardOne._
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
@@ -16,13 +15,15 @@ object AggrOneNum_BigInt_ extends DatomicTestSuite {
       NsOne.n.bigInt.insert(List(
         (1, bigInt1),
         (2, bigInt2),
-        (2, bigInt3),
+        (2, bigInt4),
       )).transact
 
-      NsOne.bigInt(sum).query.get.head ==> (bigInt1 + bigInt2 + bigInt3)
+      NsOne.bigInt(sum).query.get ==> List(
+        7 // bigInt1 + bigInt2 + bigInt4
+      )
       NsOne.n.bigInt(sum).query.get ==> List(
-        (1, bigInt1),
-        (2, bigInt2 + bigInt3),
+        (1, 1),
+        (2, 6), // bigInt2 + bigInt4
       )
     }
 
@@ -35,17 +36,20 @@ object AggrOneNum_BigInt_ extends DatomicTestSuite {
       )).transact
 
       // OBS! Datomic rounds down to nearest whole number
-      // (when calculating the median for multiple numbers)!
+      // when calculating the median for multiple numbers!
       // This is another semantic than described on wikipedia:
       // https://en.wikipedia.org/wiki/Median
       // See also
       // https://forum.datomic.com/t/unexpected-median-rounding/517
-      NsOne.bigInt(median).query.get.head ==> bigInt2
+      NsOne.bigInt(median).query.get ==> List(
+        2.0
+      )
       NsOne.n.bigInt(median).query.get ==> List(
-        (1, bigInt1),
+        (1, 1.0),
         (2, 3.0),
       )
     }
+
 
     "avg" - cardOne { implicit conn =>
       NsOne.n.bigInt.insert(List(
@@ -54,10 +58,12 @@ object AggrOneNum_BigInt_ extends DatomicTestSuite {
         (2, bigInt4),
       )).transact
 
-      NsOne.bigInt(avg).query.get.head ==> (BigDecimal(bigInt1 + bigInt2 + bigInt4) / BigDecimal(3)).toDouble
+      NsOne.bigInt(avg).query.get ==> List(
+        2.3333333333333333 // (bigInt1 + bigInt2 + bigInt4) / 3.0
+      )
       NsOne.n.bigInt(avg).query.get ==> List(
-        (1, bigInt1 / BigInt(1)),
-        (2, (bigInt2 + bigInt4) / BigInt(2)),
+        (1, 1.0),
+        (2, 3.0), // (bigInt2 + bigInt4) / 2.0
       )
     }
 
@@ -69,7 +75,9 @@ object AggrOneNum_BigInt_ extends DatomicTestSuite {
         (2, bigInt4),
       )).transact
 
-      NsOne.bigInt(variance).query.get.head ==> 1.5555555555555554
+      NsOne.bigInt(variance).query.get ==> List(
+        1.5555555555555554
+      )
       NsOne.n.bigInt(variance).query.get ==> List(
         (1, 0.0),
         (2, 1.0),
@@ -84,7 +92,9 @@ object AggrOneNum_BigInt_ extends DatomicTestSuite {
         (2, bigInt4),
       )).transact
 
-      NsOne.bigInt(stddev).query.get.head ==> 1.247219128924647
+      NsOne.bigInt(stddev).query.get ==> List(
+        1.247219128924647
+      )
       NsOne.n.bigInt(stddev).query.get ==> List(
         (1, 0.0),
         (2, 1.0),

@@ -35,7 +35,7 @@ object AggrSet_String_ extends DatomicTestSuite {
         ))
       )
 
-      NsSet.strings.apply(distinct).query.get ==> List(
+      NsSet.strings(distinct).query.get ==> List(
         Set(
           Set(string1, string2),
           Set(string2, string3),
@@ -54,20 +54,22 @@ object AggrSet_String_ extends DatomicTestSuite {
       )).transact
 
       NsSet.strings(min).query.get ==> List(Set(string1))
-      NsSet.strings(min(1)).query.get ==> List(Set(Set(string1)))
-      NsSet.strings(min(2)).query.get ==> List(Set(Set(string1, string2)))
+      NsSet.strings(min(1)).query.get ==> List(Set(string1))
+      NsSet.strings(min(2)).query.get ==> List(Set(string1, string2))
 
       NsSet.n.strings(min).query.get ==> List(
         (1, Set(string1)),
         (2, Set(string2)),
       )
+      // Same as
       NsSet.n.strings(min(1)).query.get ==> List(
-        (1, Set(Set(string1))),
-        (2, Set(Set(string2))),
+        (1, Set(string1)),
+        (2, Set(string2)),
       )
+
       NsSet.n.strings(min(2)).query.get ==> List(
-        (1, Set(Set(string1, string2))),
-        (2, Set(Set(string2, string3))),
+        (1, Set(string1, string2)),
+        (2, Set(string2, string3)),
       )
     }
 
@@ -81,20 +83,22 @@ object AggrSet_String_ extends DatomicTestSuite {
       )).transact
 
       NsSet.strings(max).query.get ==> List(Set(string4))
-      NsSet.strings(max(1)).query.get ==> List(Set(Set(string4)))
-      NsSet.strings(max(2)).query.get ==> List(Set(Set(string3, string4)))
+      NsSet.strings(max(1)).query.get ==> List(Set(string4))
+      NsSet.strings(max(2)).query.get ==> List(Set(string3, string4))
 
       NsSet.n.strings(max).query.get ==> List(
         (1, Set(string2)),
         (2, Set(string4)),
       )
+      // Same as
       NsSet.n.strings(max(1)).query.get ==> List(
-        (1, Set(Set(string2))),
-        (2, Set(Set(string4))),
+        (1, Set(string2)),
+        (2, Set(string4)),
       )
+
       NsSet.n.strings(max(2)).query.get ==> List(
-        (1, Set(Set(string1, string2))),
-        (2, Set(Set(string3, string4))),
+        (1, Set(string1, string2)),
+        (2, Set(string3, string4)),
       )
     }
 
@@ -108,8 +112,8 @@ object AggrSet_String_ extends DatomicTestSuite {
       )).transact
       val all = Set(string1, string2, string3, string4)
       all.contains(NsSet.strings(rand).query.get.head.head) ==> true
-      all.intersect(NsSet.strings(rand(1)).query.get.head.head).nonEmpty ==> true
-      all.intersect(NsSet.strings(rand(2)).query.get.head.head).nonEmpty ==> true
+      all.intersect(NsSet.strings(rand(1)).query.get.head).nonEmpty ==> true
+      all.intersect(NsSet.strings(rand(2)).query.get.head).nonEmpty ==> true
     }
 
 
@@ -122,8 +126,8 @@ object AggrSet_String_ extends DatomicTestSuite {
       )).transact
       val all = Set(string1, string2, string3, string4)
       all.contains(NsSet.strings(sample).query.get.head.head) ==> true
-      all.intersect(NsSet.strings(sample(1)).query.get.head.head).nonEmpty ==> true
-      all.intersect(NsSet.strings(sample(2)).query.get.head.head).nonEmpty ==> true
+      all.intersect(NsSet.strings(sample(1)).query.get.head).nonEmpty ==> true
+      all.intersect(NsSet.strings(sample(2)).query.get.head).nonEmpty ==> true
     }
 
 

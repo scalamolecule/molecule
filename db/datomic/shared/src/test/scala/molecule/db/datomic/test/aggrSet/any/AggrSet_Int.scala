@@ -34,7 +34,7 @@ object AggrSet_Int extends DatomicTestSuite {
         ))
       )
 
-      NsSet.ints.apply(distinct).query.get ==> List(
+      NsSet.ints(distinct).query.get ==> List(
         Set(
           Set(int1, int2),
           Set(int2, int3),
@@ -53,20 +53,22 @@ object AggrSet_Int extends DatomicTestSuite {
       )).transact
 
       NsSet.ints(min).query.get ==> List(Set(int1))
-      NsSet.ints(min(1)).query.get ==> List(Set(Set(int1)))
-      NsSet.ints(min(2)).query.get ==> List(Set(Set(int1, int2)))
+      NsSet.ints(min(1)).query.get ==> List(Set(int1))
+      NsSet.ints(min(2)).query.get ==> List(Set(int1, int2))
 
       NsSet.n.ints(min).query.get ==> List(
         (1, Set(int1)),
         (2, Set(int2)),
       )
+      // Same as
       NsSet.n.ints(min(1)).query.get ==> List(
-        (1, Set(Set(int1))),
-        (2, Set(Set(int2))),
+        (1, Set(int1)),
+        (2, Set(int2)),
       )
+
       NsSet.n.ints(min(2)).query.get ==> List(
-        (1, Set(Set(int1, int2))),
-        (2, Set(Set(int2, int3))),
+        (1, Set(int1, int2)),
+        (2, Set(int2, int3)),
       )
     }
 
@@ -80,20 +82,22 @@ object AggrSet_Int extends DatomicTestSuite {
       )).transact
 
       NsSet.ints(max).query.get ==> List(Set(int4))
-      NsSet.ints(max(1)).query.get ==> List(Set(Set(int4)))
-      NsSet.ints(max(2)).query.get ==> List(Set(Set(int3, int4)))
+      NsSet.ints(max(1)).query.get ==> List(Set(int4))
+      NsSet.ints(max(2)).query.get ==> List(Set(int3, int4))
 
       NsSet.n.ints(max).query.get ==> List(
         (1, Set(int2)),
         (2, Set(int4)),
       )
+      // Same as
       NsSet.n.ints(max(1)).query.get ==> List(
-        (1, Set(Set(int2))),
-        (2, Set(Set(int4))),
+        (1, Set(int2)),
+        (2, Set(int4)),
       )
+
       NsSet.n.ints(max(2)).query.get ==> List(
-        (1, Set(Set(int1, int2))),
-        (2, Set(Set(int3, int4))),
+        (1, Set(int1, int2)),
+        (2, Set(int3, int4)),
       )
     }
 
@@ -107,8 +111,8 @@ object AggrSet_Int extends DatomicTestSuite {
       )).transact
       val all = Set(int1, int2, int3, int4)
       all.contains(NsSet.ints(rand).query.get.head.head) ==> true
-      all.intersect(NsSet.ints(rand(1)).query.get.head.head).nonEmpty ==> true
-      all.intersect(NsSet.ints(rand(2)).query.get.head.head).nonEmpty ==> true
+      all.intersect(NsSet.ints(rand(1)).query.get.head).nonEmpty ==> true
+      all.intersect(NsSet.ints(rand(2)).query.get.head).nonEmpty ==> true
     }
 
 
@@ -121,8 +125,8 @@ object AggrSet_Int extends DatomicTestSuite {
       )).transact
       val all = Set(int1, int2, int3, int4)
       all.contains(NsSet.ints(sample).query.get.head.head) ==> true
-      all.intersect(NsSet.ints(sample(1)).query.get.head.head).nonEmpty ==> true
-      all.intersect(NsSet.ints(sample(2)).query.get.head.head).nonEmpty ==> true
+      all.intersect(NsSet.ints(sample(1)).query.get.head).nonEmpty ==> true
+      all.intersect(NsSet.ints(sample(2)).query.get.head).nonEmpty ==> true
     }
 
 

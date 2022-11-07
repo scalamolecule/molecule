@@ -36,7 +36,7 @@ object AggrSet_UUID_ extends DatomicTestSuite {
         ))
       )
 
-      NsSet.uuids.apply(distinct).query.get ==> List(
+      NsSet.uuids(distinct).query.get ==> List(
         Set(
           Set(uuid1, uuid2),
           Set(uuid2, uuid3),
@@ -55,20 +55,22 @@ object AggrSet_UUID_ extends DatomicTestSuite {
       )).transact
 
       NsSet.uuids(min).query.get ==> List(Set(uuid1))
-      NsSet.uuids(min(1)).query.get ==> List(Set(Set(uuid1)))
-      NsSet.uuids(min(2)).query.get ==> List(Set(Set(uuid1, uuid2)))
+      NsSet.uuids(min(1)).query.get ==> List(Set(uuid1))
+      NsSet.uuids(min(2)).query.get ==> List(Set(uuid1, uuid2))
 
       NsSet.n.uuids(min).query.get ==> List(
         (1, Set(uuid1)),
         (2, Set(uuid2)),
       )
+      // Same as
       NsSet.n.uuids(min(1)).query.get ==> List(
-        (1, Set(Set(uuid1))),
-        (2, Set(Set(uuid2))),
+        (1, Set(uuid1)),
+        (2, Set(uuid2)),
       )
+
       NsSet.n.uuids(min(2)).query.get ==> List(
-        (1, Set(Set(uuid1, uuid2))),
-        (2, Set(Set(uuid2, uuid3))),
+        (1, Set(uuid1, uuid2)),
+        (2, Set(uuid2, uuid3)),
       )
     }
 
@@ -82,20 +84,22 @@ object AggrSet_UUID_ extends DatomicTestSuite {
       )).transact
 
       NsSet.uuids(max).query.get ==> List(Set(uuid4))
-      NsSet.uuids(max(1)).query.get ==> List(Set(Set(uuid4)))
-      NsSet.uuids(max(2)).query.get ==> List(Set(Set(uuid3, uuid4)))
+      NsSet.uuids(max(1)).query.get ==> List(Set(uuid4))
+      NsSet.uuids(max(2)).query.get ==> List(Set(uuid3, uuid4))
 
       NsSet.n.uuids(max).query.get ==> List(
         (1, Set(uuid2)),
         (2, Set(uuid4)),
       )
+      // Same as
       NsSet.n.uuids(max(1)).query.get ==> List(
-        (1, Set(Set(uuid2))),
-        (2, Set(Set(uuid4))),
+        (1, Set(uuid2)),
+        (2, Set(uuid4)),
       )
+
       NsSet.n.uuids(max(2)).query.get ==> List(
-        (1, Set(Set(uuid1, uuid2))),
-        (2, Set(Set(uuid3, uuid4))),
+        (1, Set(uuid1, uuid2)),
+        (2, Set(uuid3, uuid4)),
       )
     }
 
@@ -109,8 +113,8 @@ object AggrSet_UUID_ extends DatomicTestSuite {
       )).transact
       val all = Set(uuid1, uuid2, uuid3, uuid4)
       all.contains(NsSet.uuids(rand).query.get.head.head) ==> true
-      all.intersect(NsSet.uuids(rand(1)).query.get.head.head).nonEmpty ==> true
-      all.intersect(NsSet.uuids(rand(2)).query.get.head.head).nonEmpty ==> true
+      all.intersect(NsSet.uuids(rand(1)).query.get.head).nonEmpty ==> true
+      all.intersect(NsSet.uuids(rand(2)).query.get.head).nonEmpty ==> true
     }
 
 
@@ -123,8 +127,8 @@ object AggrSet_UUID_ extends DatomicTestSuite {
       )).transact
       val all = Set(uuid1, uuid2, uuid3, uuid4)
       all.contains(NsSet.uuids(sample).query.get.head.head) ==> true
-      all.intersect(NsSet.uuids(sample(1)).query.get.head.head).nonEmpty ==> true
-      all.intersect(NsSet.uuids(sample(2)).query.get.head.head).nonEmpty ==> true
+      all.intersect(NsSet.uuids(sample(1)).query.get.head).nonEmpty ==> true
+      all.intersect(NsSet.uuids(sample(2)).query.get.head).nonEmpty ==> true
     }
 
 

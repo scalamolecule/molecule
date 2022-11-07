@@ -36,7 +36,7 @@ object AggrSet_Date_ extends DatomicTestSuite {
         ))
       )
 
-      NsSet.dates.apply(distinct).query.get ==> List(
+      NsSet.dates(distinct).query.get ==> List(
         Set(
           Set(date1, date2),
           Set(date2, date3),
@@ -55,20 +55,22 @@ object AggrSet_Date_ extends DatomicTestSuite {
       )).transact
 
       NsSet.dates(min).query.get ==> List(Set(date1))
-      NsSet.dates(min(1)).query.get ==> List(Set(Set(date1)))
-      NsSet.dates(min(2)).query.get ==> List(Set(Set(date1, date2)))
+      NsSet.dates(min(1)).query.get ==> List(Set(date1))
+      NsSet.dates(min(2)).query.get ==> List(Set(date1, date2))
 
       NsSet.n.dates(min).query.get ==> List(
         (1, Set(date1)),
         (2, Set(date2)),
       )
+      // Same as
       NsSet.n.dates(min(1)).query.get ==> List(
-        (1, Set(Set(date1))),
-        (2, Set(Set(date2))),
+        (1, Set(date1)),
+        (2, Set(date2)),
       )
+
       NsSet.n.dates(min(2)).query.get ==> List(
-        (1, Set(Set(date1, date2))),
-        (2, Set(Set(date2, date3))),
+        (1, Set(date1, date2)),
+        (2, Set(date2, date3)),
       )
     }
 
@@ -82,20 +84,22 @@ object AggrSet_Date_ extends DatomicTestSuite {
       )).transact
 
       NsSet.dates(max).query.get ==> List(Set(date4))
-      NsSet.dates(max(1)).query.get ==> List(Set(Set(date4)))
-      NsSet.dates(max(2)).query.get ==> List(Set(Set(date3, date4)))
+      NsSet.dates(max(1)).query.get ==> List(Set(date4))
+      NsSet.dates(max(2)).query.get ==> List(Set(date3, date4))
 
       NsSet.n.dates(max).query.get ==> List(
         (1, Set(date2)),
         (2, Set(date4)),
       )
+      // Same as
       NsSet.n.dates(max(1)).query.get ==> List(
-        (1, Set(Set(date2))),
-        (2, Set(Set(date4))),
+        (1, Set(date2)),
+        (2, Set(date4)),
       )
+
       NsSet.n.dates(max(2)).query.get ==> List(
-        (1, Set(Set(date1, date2))),
-        (2, Set(Set(date3, date4))),
+        (1, Set(date1, date2)),
+        (2, Set(date3, date4)),
       )
     }
 
@@ -109,8 +113,8 @@ object AggrSet_Date_ extends DatomicTestSuite {
       )).transact
       val all = Set(date1, date2, date3, date4)
       all.contains(NsSet.dates(rand).query.get.head.head) ==> true
-      all.intersect(NsSet.dates(rand(1)).query.get.head.head).nonEmpty ==> true
-      all.intersect(NsSet.dates(rand(2)).query.get.head.head).nonEmpty ==> true
+      all.intersect(NsSet.dates(rand(1)).query.get.head).nonEmpty ==> true
+      all.intersect(NsSet.dates(rand(2)).query.get.head).nonEmpty ==> true
     }
 
 
@@ -123,8 +127,8 @@ object AggrSet_Date_ extends DatomicTestSuite {
       )).transact
       val all = Set(date1, date2, date3, date4)
       all.contains(NsSet.dates(sample).query.get.head.head) ==> true
-      all.intersect(NsSet.dates(sample(1)).query.get.head.head).nonEmpty ==> true
-      all.intersect(NsSet.dates(sample(2)).query.get.head.head).nonEmpty ==> true
+      all.intersect(NsSet.dates(sample(1)).query.get.head).nonEmpty ==> true
+      all.intersect(NsSet.dates(sample(2)).query.get.head).nonEmpty ==> true
     }
 
 

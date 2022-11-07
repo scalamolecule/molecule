@@ -1,9 +1,7 @@
 package molecule.db.datomic.query
 
-import java.lang.{Long => jLong}
-import java.math.{BigDecimal => jBigDecimal, BigInteger => jBigInt}
 import java.net.URI
-import java.util.{Date, UUID, List => jList, Set => jSet}
+import java.util.{Date, UUID, List => jList}
 import molecule.base.util.BaseHelpers
 
 trait ResolveBase extends BaseHelpers {

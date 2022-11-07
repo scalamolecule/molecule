@@ -35,7 +35,7 @@ object AggrSet_Float_ extends DatomicTestSuite {
         ))
       )
 
-      NsSet.floats.apply(distinct).query.get ==> List(
+      NsSet.floats(distinct).query.get ==> List(
         Set(
           Set(float1, float2),
           Set(float2, float3),
@@ -54,20 +54,22 @@ object AggrSet_Float_ extends DatomicTestSuite {
       )).transact
 
       NsSet.floats(min).query.get ==> List(Set(float1))
-      NsSet.floats(min(1)).query.get ==> List(Set(Set(float1)))
-      NsSet.floats(min(2)).query.get ==> List(Set(Set(float1, float2)))
+      NsSet.floats(min(1)).query.get ==> List(Set(float1))
+      NsSet.floats(min(2)).query.get ==> List(Set(float1, float2))
 
       NsSet.n.floats(min).query.get ==> List(
         (1, Set(float1)),
         (2, Set(float2)),
       )
+      // Same as
       NsSet.n.floats(min(1)).query.get ==> List(
-        (1, Set(Set(float1))),
-        (2, Set(Set(float2))),
+        (1, Set(float1)),
+        (2, Set(float2)),
       )
+
       NsSet.n.floats(min(2)).query.get ==> List(
-        (1, Set(Set(float1, float2))),
-        (2, Set(Set(float2, float3))),
+        (1, Set(float1, float2)),
+        (2, Set(float2, float3)),
       )
     }
 
@@ -81,20 +83,22 @@ object AggrSet_Float_ extends DatomicTestSuite {
       )).transact
 
       NsSet.floats(max).query.get ==> List(Set(float4))
-      NsSet.floats(max(1)).query.get ==> List(Set(Set(float4)))
-      NsSet.floats(max(2)).query.get ==> List(Set(Set(float3, float4)))
+      NsSet.floats(max(1)).query.get ==> List(Set(float4))
+      NsSet.floats(max(2)).query.get ==> List(Set(float3, float4))
 
       NsSet.n.floats(max).query.get ==> List(
         (1, Set(float2)),
         (2, Set(float4)),
       )
+      // Same as
       NsSet.n.floats(max(1)).query.get ==> List(
-        (1, Set(Set(float2))),
-        (2, Set(Set(float4))),
+        (1, Set(float2)),
+        (2, Set(float4)),
       )
+
       NsSet.n.floats(max(2)).query.get ==> List(
-        (1, Set(Set(float1, float2))),
-        (2, Set(Set(float3, float4))),
+        (1, Set(float1, float2)),
+        (2, Set(float3, float4)),
       )
     }
 
@@ -108,8 +112,8 @@ object AggrSet_Float_ extends DatomicTestSuite {
       )).transact
       val all = Set(float1, float2, float3, float4)
       all.contains(NsSet.floats(rand).query.get.head.head) ==> true
-      all.intersect(NsSet.floats(rand(1)).query.get.head.head).nonEmpty ==> true
-      all.intersect(NsSet.floats(rand(2)).query.get.head.head).nonEmpty ==> true
+      all.intersect(NsSet.floats(rand(1)).query.get.head).nonEmpty ==> true
+      all.intersect(NsSet.floats(rand(2)).query.get.head).nonEmpty ==> true
     }
 
 
@@ -122,8 +126,8 @@ object AggrSet_Float_ extends DatomicTestSuite {
       )).transact
       val all = Set(float1, float2, float3, float4)
       all.contains(NsSet.floats(sample).query.get.head.head) ==> true
-      all.intersect(NsSet.floats(sample(1)).query.get.head.head).nonEmpty ==> true
-      all.intersect(NsSet.floats(sample(2)).query.get.head.head).nonEmpty ==> true
+      all.intersect(NsSet.floats(sample(1)).query.get.head).nonEmpty ==> true
+      all.intersect(NsSet.floats(sample(2)).query.get.head).nonEmpty ==> true
     }
 
 

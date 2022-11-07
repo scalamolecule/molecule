@@ -34,7 +34,7 @@ object AggrSet_Boolean extends DatomicTestSuite {
         ))
       )
 
-      NsSet.booleans.apply(distinct).query.get ==> List(
+      NsSet.booleans(distinct).query.get ==> List(
         Set(
           Set(true),
           Set(false),
@@ -52,20 +52,20 @@ object AggrSet_Boolean extends DatomicTestSuite {
       )).transact
 
       NsSet.booleans(min).query.get ==> List(Set(false))
-      NsSet.booleans(min(1)).query.get ==> List(Set(Set(false)))
-      NsSet.booleans(min(2)).query.get ==> List(Set(Set(true, false)))
+      NsSet.booleans(min(1)).query.get ==> List(Set(false))
+      NsSet.booleans(min(2)).query.get ==> List(Set(true, false))
 
       NsSet.n.booleans(min).query.get ==> List(
         (1, Set(true)),
         (2, Set(false)),
       )
       NsSet.n.booleans(min(1)).query.get ==> List(
-        (1, Set(Set(true))),
-        (2, Set(Set(false))),
+        (1, Set(true)),
+        (2, Set(false)),
       )
       NsSet.n.booleans(min(2)).query.get ==> List(
-        (1, Set(Set(true))),
-        (2, Set(Set(false, true))),
+        (1, Set(true)),
+        (2, Set(false, true)),
       )
     }
 
@@ -78,20 +78,20 @@ object AggrSet_Boolean extends DatomicTestSuite {
       )).transact
 
       NsSet.booleans(max).query.get ==> List(Set(true))
-      NsSet.booleans(max(1)).query.get ==> List(Set(Set(true)))
-      NsSet.booleans(max(2)).query.get ==> List(Set(Set(true, false)))
+      NsSet.booleans(max(1)).query.get ==> List(Set(true))
+      NsSet.booleans(max(2)).query.get ==> List(Set(true, false))
 
       NsSet.n.booleans(max).query.get ==> List(
         (1, Set(true)),
         (2, Set(true)),
       )
       NsSet.n.booleans(max(1)).query.get ==> List(
-        (1, Set(Set(true))),
-        (2, Set(Set(true))),
+        (1, Set(true)),
+        (2, Set(true)),
       )
       NsSet.n.booleans(max(2)).query.get ==> List(
-        (1, Set(Set(true))),
-        (2, Set(Set(true, false))),
+        (1, Set(true)),
+        (2, Set(true, false)),
       )
     }
 
@@ -104,8 +104,8 @@ object AggrSet_Boolean extends DatomicTestSuite {
       )).transact
       val all = Set(true, false)
       all.contains(NsSet.booleans(rand).query.get.head.head) ==> true
-      all.intersect(NsSet.booleans(rand(1)).query.get.head.head).nonEmpty ==> true
-      all.intersect(NsSet.booleans(rand(2)).query.get.head.head).nonEmpty ==> true
+      all.intersect(NsSet.booleans(rand(1)).query.get.head).nonEmpty ==> true
+      all.intersect(NsSet.booleans(rand(2)).query.get.head).nonEmpty ==> true
     }
 
 
@@ -117,8 +117,8 @@ object AggrSet_Boolean extends DatomicTestSuite {
       )).transact
       val all = Set(true, false)
       all.contains(NsSet.booleans(sample).query.get.head.head) ==> true
-      all.intersect(NsSet.booleans(sample(1)).query.get.head.head).nonEmpty ==> true
-      all.intersect(NsSet.booleans(sample(2)).query.get.head.head).nonEmpty ==> true
+      all.intersect(NsSet.booleans(sample(1)).query.get.head).nonEmpty ==> true
+      all.intersect(NsSet.booleans(sample(2)).query.get.head).nonEmpty ==> true
     }
 
 

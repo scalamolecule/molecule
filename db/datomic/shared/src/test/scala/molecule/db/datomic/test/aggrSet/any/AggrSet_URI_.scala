@@ -36,7 +36,7 @@ object AggrSet_URI_ extends DatomicTestSuite {
         ))
       )
 
-      NsSet.uris.apply(distinct).query.get ==> List(
+      NsSet.uris(distinct).query.get ==> List(
         Set(
           Set(uri1, uri2),
           Set(uri2, uri3),
@@ -55,20 +55,22 @@ object AggrSet_URI_ extends DatomicTestSuite {
       )).transact
 
       NsSet.uris(min).query.get ==> List(Set(uri1))
-      NsSet.uris(min(1)).query.get ==> List(Set(Set(uri1)))
-      NsSet.uris(min(2)).query.get ==> List(Set(Set(uri1, uri2)))
+      NsSet.uris(min(1)).query.get ==> List(Set(uri1))
+      NsSet.uris(min(2)).query.get ==> List(Set(uri1, uri2))
 
       NsSet.n.uris(min).query.get ==> List(
         (1, Set(uri1)),
         (2, Set(uri2)),
       )
+      // Same as
       NsSet.n.uris(min(1)).query.get ==> List(
-        (1, Set(Set(uri1))),
-        (2, Set(Set(uri2))),
+        (1, Set(uri1)),
+        (2, Set(uri2)),
       )
+
       NsSet.n.uris(min(2)).query.get ==> List(
-        (1, Set(Set(uri1, uri2))),
-        (2, Set(Set(uri2, uri3))),
+        (1, Set(uri1, uri2)),
+        (2, Set(uri2, uri3)),
       )
     }
 
@@ -82,20 +84,22 @@ object AggrSet_URI_ extends DatomicTestSuite {
       )).transact
 
       NsSet.uris(max).query.get ==> List(Set(uri4))
-      NsSet.uris(max(1)).query.get ==> List(Set(Set(uri4)))
-      NsSet.uris(max(2)).query.get ==> List(Set(Set(uri3, uri4)))
+      NsSet.uris(max(1)).query.get ==> List(Set(uri4))
+      NsSet.uris(max(2)).query.get ==> List(Set(uri3, uri4))
 
       NsSet.n.uris(max).query.get ==> List(
         (1, Set(uri2)),
         (2, Set(uri4)),
       )
+      // Same as
       NsSet.n.uris(max(1)).query.get ==> List(
-        (1, Set(Set(uri2))),
-        (2, Set(Set(uri4))),
+        (1, Set(uri2)),
+        (2, Set(uri4)),
       )
+
       NsSet.n.uris(max(2)).query.get ==> List(
-        (1, Set(Set(uri1, uri2))),
-        (2, Set(Set(uri3, uri4))),
+        (1, Set(uri1, uri2)),
+        (2, Set(uri3, uri4)),
       )
     }
 
@@ -109,8 +113,8 @@ object AggrSet_URI_ extends DatomicTestSuite {
       )).transact
       val all = Set(uri1, uri2, uri3, uri4)
       all.contains(NsSet.uris(rand).query.get.head.head) ==> true
-      all.intersect(NsSet.uris(rand(1)).query.get.head.head).nonEmpty ==> true
-      all.intersect(NsSet.uris(rand(2)).query.get.head.head).nonEmpty ==> true
+      all.intersect(NsSet.uris(rand(1)).query.get.head).nonEmpty ==> true
+      all.intersect(NsSet.uris(rand(2)).query.get.head).nonEmpty ==> true
     }
 
 
@@ -123,8 +127,8 @@ object AggrSet_URI_ extends DatomicTestSuite {
       )).transact
       val all = Set(uri1, uri2, uri3, uri4)
       all.contains(NsSet.uris(sample).query.get.head.head) ==> true
-      all.intersect(NsSet.uris(sample(1)).query.get.head.head).nonEmpty ==> true
-      all.intersect(NsSet.uris(sample(2)).query.get.head.head).nonEmpty ==> true
+      all.intersect(NsSet.uris(sample(1)).query.get.head).nonEmpty ==> true
+      all.intersect(NsSet.uris(sample(2)).query.get.head).nonEmpty ==> true
     }
 
 

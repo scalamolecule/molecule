@@ -15,11 +15,11 @@ object ResolveOne extends ResolveBase {
   protected lazy val j2sDouble    : AnyRef => AnyRef = identity
   protected lazy val j2sBoolean   : AnyRef => AnyRef = identity
   protected lazy val j2sBigInt    : AnyRef => AnyRef = {
-    case v: jBigInt => BigInt(v).asInstanceOf[AnyRef]
-    case v          => BigInt(v.toString).asInstanceOf[AnyRef]
+    case v: jBigInt => BigInt(v)
+    case v          => BigInt(v.toString)
   }
   protected lazy val j2sBigDecimal: AnyRef => AnyRef =
-    (v: AnyRef) => BigDecimal(v.asInstanceOf[jBigDecimal]).asInstanceOf[AnyRef]
+    (v: AnyRef) => BigDecimal(v.asInstanceOf[jBigDecimal])
   protected lazy val j2sDate      : AnyRef => AnyRef = identity
   protected lazy val j2sUUID      : AnyRef => AnyRef = identity
   protected lazy val j2sURI       : AnyRef => AnyRef = identity
@@ -86,8 +86,8 @@ object ResolveOne extends ResolveBase {
   protected lazy val vector2setFloat     : AnyRef => AnyRef = vector2set
   protected lazy val vector2setDouble    : AnyRef => AnyRef = vector2set
   protected lazy val vector2setBoolean   : AnyRef => AnyRef = vector2set
-  protected lazy val vector2setBigInt    : AnyRef => AnyRef = vector2set((v: AnyRef) =>  BigInt(v.toString))
-  protected lazy val vector2setBigDecimal: AnyRef => AnyRef = vector2set((v: AnyRef) =>  BigDecimal(v.toString))
+  protected lazy val vector2setBigInt    : AnyRef => AnyRef = vector2set((v: AnyRef) => BigInt(v.toString))
+  protected lazy val vector2setBigDecimal: AnyRef => AnyRef = vector2set((v: AnyRef) => BigDecimal(v.toString))
   protected lazy val vector2setDate      : AnyRef => AnyRef = vector2set
   protected lazy val vector2setUUID      : AnyRef => AnyRef = vector2set
   protected lazy val vector2setURI       : AnyRef => AnyRef = vector2set
@@ -122,89 +122,89 @@ object ResolveOne extends ResolveBase {
   lazy val resChar      : ResOne[Char]       = ResOne("Char", dChar, s2jChar, j2sChar, firstChar, set2setChar, vector2setChar)
 
 
-  private lazy val j2sOptString = (v: AnyRef) => (v match {
+  private lazy val j2sOptString = (v: AnyRef) => v match {
     case null          => Option.empty[String]
     case v: String     => Some(v) // attr_?(<expr>))
     case v: jMap[_, _] => Some(v.values.iterator.next.asInstanceOf[String]) // attr_?
-  }).asInstanceOf[AnyRef]
+  }
 
-  private lazy val j2sOptInt = (v: AnyRef) => (v match {
+  private lazy val j2sOptInt = (v: AnyRef) => v match {
     case null          => Option.empty[Int]
     case v: jInteger   => Some(v.toInt)
     case v: jMap[_, _] => Some(v.values.iterator.next.asInstanceOf[Integer].toInt)
-  }).asInstanceOf[AnyRef]
+  }
 
-  private lazy val j2sOptLong = (v: AnyRef) => (v match {
+  private lazy val j2sOptLong = (v: AnyRef) => v match {
     case null          => Option.empty[Long]
     case v: jLong      => Some(v)
     case v: jMap[_, _] => Some(v.values.iterator.next.asInstanceOf[Long])
-  }).asInstanceOf[AnyRef]
+  }
 
-  private lazy val j2sOptFloat = (v: AnyRef) => (v match {
+  private lazy val j2sOptFloat = (v: AnyRef) => v match {
     case null          => Option.empty[Float]
     case v: jFloat     => Some(v.toFloat)
     case v: jMap[_, _] => Some(v.values.iterator.next.asInstanceOf[Float])
-  }).asInstanceOf[AnyRef]
+  }
 
-  private lazy val j2sOptDouble = (v: AnyRef) => (v match {
+  private lazy val j2sOptDouble = (v: AnyRef) => v match {
     case null          => Option.empty[Double]
     case v: jDouble    => Some(v)
     case v: jMap[_, _] => Some(v.values.iterator.next.asInstanceOf[Double])
-  }).asInstanceOf[AnyRef]
+  }
 
-  private lazy val j2sOptBoolean = (v: AnyRef) => (v match {
+  private lazy val j2sOptBoolean = (v: AnyRef) => v match {
     case null          => Option.empty[Boolean]
     case v: jBoolean   => Some(v)
     case v: jMap[_, _] => Some(v.values.iterator.next.asInstanceOf[Boolean])
-  }).asInstanceOf[AnyRef]
+  }
 
-  private lazy val j2sOptBigInt = (v: AnyRef) => (v match {
+  private lazy val j2sOptBigInt = (v: AnyRef) => v match {
     case null          => Option.empty[BigInt]
     case v: jBigInt    => Some(BigInt(v))
     case v: jMap[_, _] => Some(BigInt(v.values.iterator.next.asInstanceOf[jBigInt]))
-  }).asInstanceOf[AnyRef]
+  }
 
-  private lazy val j2sOptBigDecimal = (v: AnyRef) => (v match {
+  private lazy val j2sOptBigDecimal = (v: AnyRef) => v match {
     case null           => Option.empty[BigDecimal]
     case v: jBigDecimal => Some(BigDecimal(v))
     case v: jMap[_, _]  => Some(BigDecimal(v.values.iterator.next.asInstanceOf[jBigDecimal]))
-  }).asInstanceOf[AnyRef]
+  }
 
-  private lazy val j2sOptDate = (v: AnyRef) => (v match {
+  private lazy val j2sOptDate = (v: AnyRef) => v match {
     case null          => Option.empty[Date]
     case v: Date       => Some(v)
     case v: jMap[_, _] => Some(v.values.iterator.next.asInstanceOf[Date])
-  }).asInstanceOf[AnyRef]
+  }
 
-  private lazy val j2sOptUUID = (v: AnyRef) => (v match {
+  private lazy val j2sOptUUID = (v: AnyRef) => v match {
     case null          => Option.empty[UUID]
     case v: UUID       => Some(v)
     case v: jMap[_, _] => Some(v.values.iterator.next.asInstanceOf[UUID])
-  }).asInstanceOf[AnyRef]
+  }
 
-  private lazy val j2sOptURI = (v: AnyRef) => (v match {
+  private lazy val j2sOptURI = (v: AnyRef) => v match {
     case null          => Option.empty[URI]
     case v: URI        => Some(v)
     case v: jMap[_, _] => Some(v.values.iterator.next.asInstanceOf[URI])
-  }).asInstanceOf[AnyRef]
+  }
 
-  private lazy val j2sOptByte = (v: AnyRef) => (v match {
+  private lazy val j2sOptByte = (v: AnyRef) => v match {
     case null          => Option.empty[Byte]
     case v: jInteger   => Some(v.toByte)
     case v: jMap[_, _] => Some(v.values.iterator.next.asInstanceOf[Integer].toByte)
-  }).asInstanceOf[AnyRef]
+  }
 
-  private lazy val j2sOptShort = (v: AnyRef) => (v match {
+  private lazy val j2sOptShort = (v: AnyRef) => v match {
     case null          => Option.empty[Short]
     case v: jInteger   => Some(v.toShort)
     case v: jMap[_, _] => Some(v.values.iterator.next.asInstanceOf[Integer].toShort)
-  }).asInstanceOf[AnyRef]
+  }
 
-  private lazy val j2sOptChar = (v: AnyRef) => (v match {
+  private lazy val j2sOptChar = (v: AnyRef) => v match {
     case null          => Option.empty[Char]
     case v: String     => Some(v.head)
     case v: jMap[_, _] => Some(v.values.iterator.next.asInstanceOf[String].charAt(0))
-  }).asInstanceOf[AnyRef]
+  }
 
 
   case class ResOneOpt[T](
