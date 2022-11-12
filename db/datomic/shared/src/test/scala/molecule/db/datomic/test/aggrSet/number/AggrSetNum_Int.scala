@@ -1,6 +1,6 @@
 package molecule.db.datomic.test.aggrSet.number
 
-import molecule.coreTests.dataModels.core.types.dsl.CardSet._
+import molecule.coreTests.dataModels.core.types.dsl.TypesSet._
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
@@ -10,7 +10,7 @@ object AggrSetNum_Int extends DatomicTestSuite {
 
   lazy val tests = Tests {
 
-    "sum" - cardSet { implicit conn =>
+    "sum" - typesSet { implicit conn =>
       NsSet.n.ints.insert(List(
         (1, Set(int1, int2)),
         (2, Set(int2, int3)),
@@ -28,7 +28,7 @@ object AggrSetNum_Int extends DatomicTestSuite {
     }
 
 
-    "median" - cardSet { implicit futConn =>
+    "median" - typesSet { implicit futConn =>
       NsSet.n.ints.insert(List(
         (1, Set(int1, int2)),
         (2, Set(int2, int3)),
@@ -52,7 +52,7 @@ object AggrSetNum_Int extends DatomicTestSuite {
     }
 
 
-    "avg" - cardSet { implicit conn =>
+    "avg" - typesSet { implicit conn =>
       NsSet.n.ints.insert(List(
         (1, Set(int1, int2)),
         (2, Set(int2, int3)),
@@ -70,7 +70,7 @@ object AggrSetNum_Int extends DatomicTestSuite {
     }
 
 
-    "variance" - cardSet { implicit conn =>
+    "variance" - typesSet { implicit conn =>
       NsSet.n.ints.insert(List(
         (1, Set(int1, int2)),
         (2, Set(int2, int3)),
@@ -88,7 +88,7 @@ object AggrSetNum_Int extends DatomicTestSuite {
     }
 
 
-    "stddev" - cardSet { implicit conn =>
+    "stddev" - typesSet { implicit conn =>
       NsSet.n.ints.insert(List(
         (1, Set(int1, int2)),
         (2, Set(int2, int3)),

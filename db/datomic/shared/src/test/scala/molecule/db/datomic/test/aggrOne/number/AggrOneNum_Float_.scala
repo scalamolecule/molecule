@@ -1,7 +1,7 @@
 // GENERATED CODE ********************************
 package molecule.db.datomic.test.aggrOne.number
 
-import molecule.coreTests.dataModels.core.types.dsl.CardOne._
+import molecule.coreTests.dataModels.core.types.dsl.TypesOne._
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
@@ -11,7 +11,7 @@ object AggrOneNum_Float_ extends DatomicTestSuite {
 
   lazy val tests = Tests {
 
-    "sum" - cardOne { implicit conn =>
+    "sum" - typesOne { implicit conn =>
       NsOne.n.float.insert(List(
         (1, float1),
         (2, float2),
@@ -28,7 +28,7 @@ object AggrOneNum_Float_ extends DatomicTestSuite {
     }
 
 
-    "median" - cardOne { implicit futConn =>
+    "median" - typesOne { implicit futConn =>
       NsOne.n.float.insert(List(
         (1, float1),
         (2, float2),
@@ -51,7 +51,7 @@ object AggrOneNum_Float_ extends DatomicTestSuite {
     }
 
 
-    "avg" - cardOne { implicit conn =>
+    "avg" - typesOne { implicit conn =>
       NsOne.n.float.insert(List(
         (1, float1),
         (2, float2),
@@ -68,7 +68,7 @@ object AggrOneNum_Float_ extends DatomicTestSuite {
     }
 
 
-    "variance" - cardOne { implicit conn =>
+    "variance" - typesOne { implicit conn =>
       NsOne.n.float.insert(List(
         (1, float1),
         (2, float2),
@@ -85,7 +85,7 @@ object AggrOneNum_Float_ extends DatomicTestSuite {
     }
 
 
-    "stddev" - cardOne { implicit conn =>
+    "stddev" - typesOne { implicit conn =>
       NsOne.n.float.insert(List(
         (1, float1),
         (2, float2),

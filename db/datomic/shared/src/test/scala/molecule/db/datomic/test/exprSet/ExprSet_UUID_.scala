@@ -2,7 +2,7 @@
 package molecule.db.datomic.test.exprSet
 
 import java.util.UUID
-import molecule.coreTests.dataModels.core.types.dsl.CardSet._
+import molecule.coreTests.dataModels.core.types.dsl.TypesSet._
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
@@ -15,7 +15,7 @@ object ExprSet_UUID_ extends DatomicTestSuite {
 
     "Mandatory" - {
 
-      "attr" - cardSet { implicit conn =>
+      "attr" - typesSet { implicit conn =>
         val a = (1, Set(uuid1, uuid2))
         val b = (2, Set(uuid2, uuid3, uuid4))
         NsSet.n.uuids.insert(List(a, b)).transact
@@ -24,7 +24,7 @@ object ExprSet_UUID_ extends DatomicTestSuite {
       }
 
 
-      "apply" - cardSet { implicit conn =>
+      "apply" - typesSet { implicit conn =>
         val a = (1, Set(uuid1, uuid2))
         val b = (2, Set(uuid2, uuid3, uuid4))
         NsSet.n.uuids.insert(List(a, b)).transact
@@ -97,7 +97,7 @@ object ExprSet_UUID_ extends DatomicTestSuite {
       }
 
 
-      "not" - cardSet { implicit conn =>
+      "not" - typesSet { implicit conn =>
         val a = (1, Set(uuid1, uuid2))
         val b = (2, Set(uuid2, uuid3, uuid4))
         NsSet.n.uuids.insert(List(a, b)).transact
@@ -175,7 +175,7 @@ object ExprSet_UUID_ extends DatomicTestSuite {
       }
 
 
-      "==" - cardSet { implicit conn =>
+      "==" - typesSet { implicit conn =>
         val a = (1, Set(uuid1, uuid2))
         val b = (2, Set(uuid2, uuid3, uuid4))
         NsSet.n.uuids.insert(List(a, b)).transact
@@ -214,7 +214,7 @@ object ExprSet_UUID_ extends DatomicTestSuite {
       }
 
 
-      "!=" - cardSet { implicit conn =>
+      "!=" - typesSet { implicit conn =>
         val a = (1, Set(uuid1, uuid2))
         val b = (2, Set(uuid2, uuid3, uuid4))
         NsSet.n.uuids.insert(List(a, b)).transact
@@ -251,7 +251,7 @@ object ExprSet_UUID_ extends DatomicTestSuite {
       }
 
 
-      "compare" - cardSet { implicit conn =>
+      "compare" - typesSet { implicit conn =>
         val a = (1, Set(uuid1, uuid2))
         val b = (2, Set(uuid2, uuid3, uuid4))
         NsSet.n.uuids.insert(List(a, b)).transact
@@ -281,7 +281,7 @@ object ExprSet_UUID_ extends DatomicTestSuite {
 
     "Tacit" - {
 
-      "attr" - cardSet { implicit conn =>
+      "attr" - typesSet { implicit conn =>
         val (a, b) = (1, 2)
         NsSet.n.uuids.insert(List(
           (a, Set(uuid1, uuid2)),
@@ -292,7 +292,7 @@ object ExprSet_UUID_ extends DatomicTestSuite {
       }
 
 
-      "apply" - cardSet { implicit conn =>
+      "apply" - typesSet { implicit conn =>
         val (a, b) = (1, 2)
         NsSet.n.uuids.insert(List(
           (a, Set(uuid1, uuid2)),
@@ -367,7 +367,7 @@ object ExprSet_UUID_ extends DatomicTestSuite {
       }
 
 
-      "not" - cardSet { implicit conn =>
+      "not" - typesSet { implicit conn =>
         val (a, b) = (1, 2)
         NsSet.n.uuids.insert(List(
           (a, Set(uuid1, uuid2)),
@@ -447,7 +447,7 @@ object ExprSet_UUID_ extends DatomicTestSuite {
       }
 
 
-      "==" - cardSet { implicit conn =>
+      "==" - typesSet { implicit conn =>
         val (a, b) = (1, 2)
         NsSet.n.uuids.insert(List(
           (a, Set(uuid1, uuid2)),
@@ -487,7 +487,7 @@ object ExprSet_UUID_ extends DatomicTestSuite {
       }
 
 
-      "!=" - cardSet { implicit conn =>
+      "!=" - typesSet { implicit conn =>
         val (a, b) = (1, 2)
         NsSet.n.uuids.insert(List(
           (a, Set(uuid1, uuid2)),
@@ -526,7 +526,7 @@ object ExprSet_UUID_ extends DatomicTestSuite {
       }
 
 
-      "compare" - cardSet { implicit conn =>
+      "compare" - typesSet { implicit conn =>
         val (a, b) = (1, 2)
         NsSet.n.uuids.insert(List(
           (a, Set(uuid1, uuid2)),
@@ -558,7 +558,7 @@ object ExprSet_UUID_ extends DatomicTestSuite {
 
     "Optional" - {
 
-      "attr" - cardSet { implicit conn =>
+      "attr" - typesSet { implicit conn =>
         val a = (1, Some(Set(uuid1, uuid2)))
         val b = (2, Some(Set(uuid2, uuid3, uuid4)))
         val c = (3, None)
@@ -568,7 +568,7 @@ object ExprSet_UUID_ extends DatomicTestSuite {
       }
 
 
-      "apply" - cardSet { implicit conn =>
+      "apply" - typesSet { implicit conn =>
         val a = (1, Some(Set(uuid1, uuid2)))
         val b = (2, Some(Set(uuid2, uuid3, uuid4)))
         val c = (3, None)
@@ -638,7 +638,7 @@ object ExprSet_UUID_ extends DatomicTestSuite {
       }
 
 
-      "not" - cardSet { implicit conn =>
+      "not" - typesSet { implicit conn =>
         val a = (1, Some(Set(uuid1, uuid2)))
         val b = (2, Some(Set(uuid2, uuid3, uuid4)))
         val c = (3, None)
@@ -713,7 +713,7 @@ object ExprSet_UUID_ extends DatomicTestSuite {
       }
 
 
-      "==" - cardSet { implicit conn =>
+      "==" - typesSet { implicit conn =>
         val a = (1, Some(Set(uuid1, uuid2)))
         val b = (2, Some(Set(uuid2, uuid3, uuid4)))
         val c = (3, None)
@@ -752,7 +752,7 @@ object ExprSet_UUID_ extends DatomicTestSuite {
       }
 
 
-      "!=" - cardSet { implicit conn =>
+      "!=" - typesSet { implicit conn =>
         val a = (1, Some(Set(uuid1, uuid2)))
         val b = (2, Some(Set(uuid2, uuid3, uuid4)))
         val c = (3, None)
@@ -791,7 +791,7 @@ object ExprSet_UUID_ extends DatomicTestSuite {
       }
 
 
-      "compare" - cardSet { implicit conn =>
+      "compare" - typesSet { implicit conn =>
         val a = (1, Some(Set(uuid1, uuid2)))
         val b = (2, Some(Set(uuid2, uuid3, uuid4)))
         val c = (3, None)

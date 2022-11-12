@@ -3,7 +3,7 @@ package molecule.db.datomic.test.aggrOne.any
 
 
 import java.net.URI
-import molecule.coreTests.dataModels.core.types.dsl.CardOne._
+import molecule.coreTests.dataModels.core.types.dsl.TypesOne._
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
@@ -13,7 +13,7 @@ object AggrOne_URI_ extends DatomicTestSuite {
 
   lazy val tests = Tests {
 
-    "distinct" - cardOne { implicit conn =>
+    "distinct" - typesOne { implicit conn =>
       NsOne.n.uri.insert(List(
         (1, uri1),
         (2, uri2),
@@ -39,7 +39,7 @@ object AggrOne_URI_ extends DatomicTestSuite {
     }
 
 
-    "min" - cardOne { implicit conn =>
+    "min" - typesOne { implicit conn =>
       NsOne.uri.insert(List(uri1, uri2, uri3)).transact
       NsOne.uri(min).query.get.head ==> uri1
       NsOne.uri(min(1)).query.get.head ==> Set(uri1)
@@ -47,7 +47,7 @@ object AggrOne_URI_ extends DatomicTestSuite {
     }
 
 
-    "max" - cardOne { implicit futConn =>
+    "max" - typesOne { implicit futConn =>
       NsOne.uri.insert(List(uri1, uri2, uri3)).transact
       NsOne.uri(max).query.get.head ==> uri3
       NsOne.uri(max(1)).query.get.head ==> Set(uri3)
@@ -55,7 +55,7 @@ object AggrOne_URI_ extends DatomicTestSuite {
     }
 
 
-    "rand" - cardOne { implicit conn =>
+    "rand" - typesOne { implicit conn =>
       NsOne.uri.insert(List(uri1, uri2, uri3)).transact
       val all = Set(uri1, uri2, uri3, uri4)
       all.contains(NsOne.uri.apply(rand).query.get.head) ==> true
@@ -64,7 +64,7 @@ object AggrOne_URI_ extends DatomicTestSuite {
     }
 
 
-    "sample" - cardOne { implicit futConn =>
+    "sample" - typesOne { implicit futConn =>
       NsOne.uri.insert(List(uri1, uri2, uri3)).transact
       val all = Set(uri1, uri2, uri3, uri4)
       all.contains(NsOne.uri(sample).query.get.head) ==> true
@@ -73,7 +73,7 @@ object AggrOne_URI_ extends DatomicTestSuite {
     }
 
 
-    "count, countDistinct" - cardOne { implicit conn =>
+    "count, countDistinct" - typesOne { implicit conn =>
       NsOne.n.uri.insert(List(
         (1, uri1),
         (2, uri2),

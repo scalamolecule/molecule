@@ -1,6 +1,6 @@
 package molecule.db.datomic.test.exprSet
 
-import molecule.coreTests.dataModels.core.types.dsl.CardSet._
+import molecule.coreTests.dataModels.core.types.dsl.TypesSet._
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
@@ -13,7 +13,7 @@ object ExprSet_Int extends DatomicTestSuite {
 
     "Mandatory" - {
 
-      "attr" - cardSet { implicit conn =>
+      "attr" - typesSet { implicit conn =>
         val a = (1, Set(int1, int2))
         val b = (2, Set(int2, int3, int4))
         NsSet.n.ints.insert(List(a, b)).transact
@@ -22,7 +22,7 @@ object ExprSet_Int extends DatomicTestSuite {
       }
 
 
-      "apply" - cardSet { implicit conn =>
+      "apply" - typesSet { implicit conn =>
         val a = (1, Set(int1, int2))
         val b = (2, Set(int2, int3, int4))
         NsSet.n.ints.insert(List(a, b)).transact
@@ -95,7 +95,7 @@ object ExprSet_Int extends DatomicTestSuite {
       }
 
 
-      "not" - cardSet { implicit conn =>
+      "not" - typesSet { implicit conn =>
         val a = (1, Set(int1, int2))
         val b = (2, Set(int2, int3, int4))
         NsSet.n.ints.insert(List(a, b)).transact
@@ -173,7 +173,7 @@ object ExprSet_Int extends DatomicTestSuite {
       }
 
 
-      "==" - cardSet { implicit conn =>
+      "==" - typesSet { implicit conn =>
         val a = (1, Set(int1, int2))
         val b = (2, Set(int2, int3, int4))
         NsSet.n.ints.insert(List(a, b)).transact
@@ -212,7 +212,7 @@ object ExprSet_Int extends DatomicTestSuite {
       }
 
 
-      "!=" - cardSet { implicit conn =>
+      "!=" - typesSet { implicit conn =>
         val a = (1, Set(int1, int2))
         val b = (2, Set(int2, int3, int4))
         NsSet.n.ints.insert(List(a, b)).transact
@@ -249,7 +249,7 @@ object ExprSet_Int extends DatomicTestSuite {
       }
 
 
-      "compare" - cardSet { implicit conn =>
+      "compare" - typesSet { implicit conn =>
         val a = (1, Set(int1, int2))
         val b = (2, Set(int2, int3, int4))
         NsSet.n.ints.insert(List(a, b)).transact
@@ -279,7 +279,7 @@ object ExprSet_Int extends DatomicTestSuite {
 
     "Tacit" - {
 
-      "attr" - cardSet { implicit conn =>
+      "attr" - typesSet { implicit conn =>
         val (a, b) = (1, 2)
         NsSet.n.ints.insert(List(
           (a, Set(int1, int2)),
@@ -290,7 +290,7 @@ object ExprSet_Int extends DatomicTestSuite {
       }
 
 
-      "apply" - cardSet { implicit conn =>
+      "apply" - typesSet { implicit conn =>
         val (a, b) = (1, 2)
         NsSet.n.ints.insert(List(
           (a, Set(int1, int2)),
@@ -365,7 +365,7 @@ object ExprSet_Int extends DatomicTestSuite {
       }
 
 
-      "not" - cardSet { implicit conn =>
+      "not" - typesSet { implicit conn =>
         val (a, b) = (1, 2)
         NsSet.n.ints.insert(List(
           (a, Set(int1, int2)),
@@ -445,7 +445,7 @@ object ExprSet_Int extends DatomicTestSuite {
       }
 
 
-      "==" - cardSet { implicit conn =>
+      "==" - typesSet { implicit conn =>
         val (a, b) = (1, 2)
         NsSet.n.ints.insert(List(
           (a, Set(int1, int2)),
@@ -485,7 +485,7 @@ object ExprSet_Int extends DatomicTestSuite {
       }
 
 
-      "!=" - cardSet { implicit conn =>
+      "!=" - typesSet { implicit conn =>
         val (a, b) = (1, 2)
         NsSet.n.ints.insert(List(
           (a, Set(int1, int2)),
@@ -524,7 +524,7 @@ object ExprSet_Int extends DatomicTestSuite {
       }
 
 
-      "compare" - cardSet { implicit conn =>
+      "compare" - typesSet { implicit conn =>
         val (a, b) = (1, 2)
         NsSet.n.ints.insert(List(
           (a, Set(int1, int2)),
@@ -556,7 +556,7 @@ object ExprSet_Int extends DatomicTestSuite {
 
     "Optional" - {
 
-      "attr" - cardSet { implicit conn =>
+      "attr" - typesSet { implicit conn =>
         val a = (1, Some(Set(int1, int2)))
         val b = (2, Some(Set(int2, int3, int4)))
         val c = (3, None)
@@ -566,7 +566,7 @@ object ExprSet_Int extends DatomicTestSuite {
       }
 
 
-      "apply" - cardSet { implicit conn =>
+      "apply" - typesSet { implicit conn =>
         val a = (1, Some(Set(int1, int2)))
         val b = (2, Some(Set(int2, int3, int4)))
         val c = (3, None)
@@ -636,7 +636,7 @@ object ExprSet_Int extends DatomicTestSuite {
       }
 
 
-      "not" - cardSet { implicit conn =>
+      "not" - typesSet { implicit conn =>
         val a = (1, Some(Set(int1, int2)))
         val b = (2, Some(Set(int2, int3, int4)))
         val c = (3, None)
@@ -711,7 +711,7 @@ object ExprSet_Int extends DatomicTestSuite {
       }
 
 
-      "==" - cardSet { implicit conn =>
+      "==" - typesSet { implicit conn =>
         val a = (1, Some(Set(int1, int2)))
         val b = (2, Some(Set(int2, int3, int4)))
         val c = (3, None)
@@ -750,7 +750,7 @@ object ExprSet_Int extends DatomicTestSuite {
       }
 
 
-      "!=" - cardSet { implicit conn =>
+      "!=" - typesSet { implicit conn =>
         val a = (1, Some(Set(int1, int2)))
         val b = (2, Some(Set(int2, int3, int4)))
         val c = (3, None)
@@ -789,7 +789,7 @@ object ExprSet_Int extends DatomicTestSuite {
       }
 
 
-      "compare" - cardSet { implicit conn =>
+      "compare" - typesSet { implicit conn =>
         val a = (1, Some(Set(int1, int2)))
         val b = (2, Some(Set(int2, int3, int4)))
         val c = (3, None)

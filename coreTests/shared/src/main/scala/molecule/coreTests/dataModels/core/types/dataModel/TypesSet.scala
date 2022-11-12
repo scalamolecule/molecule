@@ -2,7 +2,7 @@ package molecule.coreTests.dataModels.core.types.dataModel
 
 import molecule.DataModel
 
-object CardSet extends DataModel(3) {
+object TypesSet extends DataModel(3) {
 
   trait NsSet {
     val n           = oneInt

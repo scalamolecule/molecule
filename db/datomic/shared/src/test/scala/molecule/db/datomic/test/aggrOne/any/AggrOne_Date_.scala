@@ -3,7 +3,7 @@ package molecule.db.datomic.test.aggrOne.any
 
 
 import java.util.Date
-import molecule.coreTests.dataModels.core.types.dsl.CardOne._
+import molecule.coreTests.dataModels.core.types.dsl.TypesOne._
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
@@ -13,7 +13,7 @@ object AggrOne_Date_ extends DatomicTestSuite {
 
   lazy val tests = Tests {
 
-    "distinct" - cardOne { implicit conn =>
+    "distinct" - typesOne { implicit conn =>
       NsOne.n.date.insert(List(
         (1, date1),
         (2, date2),
@@ -39,7 +39,7 @@ object AggrOne_Date_ extends DatomicTestSuite {
     }
 
 
-    "min" - cardOne { implicit conn =>
+    "min" - typesOne { implicit conn =>
       NsOne.date.insert(List(date1, date2, date3)).transact
       NsOne.date(min).query.get.head ==> date1
       NsOne.date(min(1)).query.get.head ==> Set(date1)
@@ -47,7 +47,7 @@ object AggrOne_Date_ extends DatomicTestSuite {
     }
 
 
-    "max" - cardOne { implicit futConn =>
+    "max" - typesOne { implicit futConn =>
       NsOne.date.insert(List(date1, date2, date3)).transact
       NsOne.date(max).query.get.head ==> date3
       NsOne.date(max(1)).query.get.head ==> Set(date3)
@@ -55,7 +55,7 @@ object AggrOne_Date_ extends DatomicTestSuite {
     }
 
 
-    "rand" - cardOne { implicit conn =>
+    "rand" - typesOne { implicit conn =>
       NsOne.date.insert(List(date1, date2, date3)).transact
       val all = Set(date1, date2, date3, date4)
       all.contains(NsOne.date.apply(rand).query.get.head) ==> true
@@ -64,7 +64,7 @@ object AggrOne_Date_ extends DatomicTestSuite {
     }
 
 
-    "sample" - cardOne { implicit futConn =>
+    "sample" - typesOne { implicit futConn =>
       NsOne.date.insert(List(date1, date2, date3)).transact
       val all = Set(date1, date2, date3, date4)
       all.contains(NsOne.date(sample).query.get.head) ==> true
@@ -73,7 +73,7 @@ object AggrOne_Date_ extends DatomicTestSuite {
     }
 
 
-    "count, countDistinct" - cardOne { implicit conn =>
+    "count, countDistinct" - typesOne { implicit conn =>
       NsOne.n.date.insert(List(
         (1, date1),
         (2, date2),

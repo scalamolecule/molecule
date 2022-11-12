@@ -2,7 +2,7 @@
 package molecule.db.datomic.test.aggrOne.any
 
 
-import molecule.coreTests.dataModels.core.types.dsl.CardOne._
+import molecule.coreTests.dataModels.core.types.dsl.TypesOne._
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
@@ -12,7 +12,7 @@ object AggrOne_Float_ extends DatomicTestSuite {
 
   lazy val tests = Tests {
 
-    "distinct" - cardOne { implicit conn =>
+    "distinct" - typesOne { implicit conn =>
       NsOne.n.float.insert(List(
         (1, float1),
         (2, float2),
@@ -38,7 +38,7 @@ object AggrOne_Float_ extends DatomicTestSuite {
     }
 
 
-    "min" - cardOne { implicit conn =>
+    "min" - typesOne { implicit conn =>
       NsOne.float.insert(List(float1, float2, float3)).transact
       NsOne.float(min).query.get.head ==> float1
       NsOne.float(min(1)).query.get.head ==> Set(float1)
@@ -46,7 +46,7 @@ object AggrOne_Float_ extends DatomicTestSuite {
     }
 
 
-    "max" - cardOne { implicit futConn =>
+    "max" - typesOne { implicit futConn =>
       NsOne.float.insert(List(float1, float2, float3)).transact
       NsOne.float(max).query.get.head ==> float3
       NsOne.float(max(1)).query.get.head ==> Set(float3)
@@ -54,7 +54,7 @@ object AggrOne_Float_ extends DatomicTestSuite {
     }
 
 
-    "rand" - cardOne { implicit conn =>
+    "rand" - typesOne { implicit conn =>
       NsOne.float.insert(List(float1, float2, float3)).transact
       val all = Set(float1, float2, float3, float4)
       all.contains(NsOne.float.apply(rand).query.get.head) ==> true
@@ -63,7 +63,7 @@ object AggrOne_Float_ extends DatomicTestSuite {
     }
 
 
-    "sample" - cardOne { implicit futConn =>
+    "sample" - typesOne { implicit futConn =>
       NsOne.float.insert(List(float1, float2, float3)).transact
       val all = Set(float1, float2, float3, float4)
       all.contains(NsOne.float(sample).query.get.head) ==> true
@@ -72,7 +72,7 @@ object AggrOne_Float_ extends DatomicTestSuite {
     }
 
 
-    "count, countDistinct" - cardOne { implicit conn =>
+    "count, countDistinct" - typesOne { implicit conn =>
       NsOne.n.float.insert(List(
         (1, float1),
         (2, float2),

@@ -2,7 +2,7 @@
 package molecule.db.datomic.test.aggrSet.any
 
 
-import molecule.coreTests.dataModels.core.types.dsl.CardSet._
+import molecule.coreTests.dataModels.core.types.dsl.TypesSet._
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
@@ -12,7 +12,7 @@ object AggrSet_BigInt_ extends DatomicTestSuite {
 
   lazy val tests = Tests {
 
-    "distinct" - cardSet { implicit conn =>
+    "distinct" - typesSet { implicit conn =>
       NsSet.n.bigInts.insert(List(
         (1, Set(bigInt1, bigInt2)),
         (2, Set(bigInt2, bigInt3)),
@@ -45,7 +45,7 @@ object AggrSet_BigInt_ extends DatomicTestSuite {
     }
 
 
-    "min" - cardSet { implicit conn =>
+    "min" - typesSet { implicit conn =>
       NsSet.n.bigInts.insert(List(
         (1, Set(bigInt1, bigInt2)),
         (2, Set(bigInt2, bigInt3)),
@@ -74,7 +74,7 @@ object AggrSet_BigInt_ extends DatomicTestSuite {
     }
 
 
-    "max" - cardSet { implicit futConn =>
+    "max" - typesSet { implicit futConn =>
       NsSet.n.bigInts.insert(List(
         (1, Set(bigInt1, bigInt2)),
         (2, Set(bigInt2, bigInt3)),
@@ -103,7 +103,7 @@ object AggrSet_BigInt_ extends DatomicTestSuite {
     }
 
 
-    "rand" - cardSet { implicit conn =>
+    "rand" - typesSet { implicit conn =>
       NsSet.n.bigInts.insert(List(
         (1, Set(bigInt1, bigInt2)),
         (2, Set(bigInt2, bigInt3)),
@@ -117,7 +117,7 @@ object AggrSet_BigInt_ extends DatomicTestSuite {
     }
 
 
-    "sample" - cardSet { implicit futConn =>
+    "sample" - typesSet { implicit futConn =>
       NsSet.n.bigInts.insert(List(
         (1, Set(bigInt1, bigInt2)),
         (2, Set(bigInt2, bigInt3)),
@@ -131,7 +131,7 @@ object AggrSet_BigInt_ extends DatomicTestSuite {
     }
 
 
-    "count, countDistinct" - cardSet { implicit conn =>
+    "count, countDistinct" - typesSet { implicit conn =>
       NsSet.n.bigInts.insert(List(
         (1, Set(bigInt1, bigInt2)),
         (2, Set(bigInt2, bigInt3)),

@@ -4,9 +4,9 @@ import molecule.boilerplate.api.Keywords._
 import molecule.boilerplate.ast.MoleculeModel._
 import scala.reflect.ClassTag
 
-trait ExprOne[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
+trait ResolveExprOne[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
 
-  import ResolveOne._
+  import LambdasOne._
 
   protected def resolveAttrOneMan(es: List[Var], atom: AttrOneMan): List[Var] = {
     attrIndex += 1
@@ -14,7 +14,7 @@ trait ExprOne[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
     atom match {
       case at: AttrOneManString     => man(e, a, at.op, at.vs, resString, sortString(at, attrIndex))
       case at: AttrOneManInt        => man(e, a, at.op, at.vs, resInt, sortInt(at, attrIndex))
-      case at: AttrOneManLong       => man(e, a, at.op, at.vs, resLong, sortLong(at, attrIndex))
+      case at: AttrOneManLong       => maL(e, a, at.op, at.vs, resLong, sortLong(at, attrIndex))
       case at: AttrOneManFloat      => man(e, a, at.op, at.vs, resFloat, sortFloat(at, attrIndex))
       case at: AttrOneManDouble     => man(e, a, at.op, at.vs, resDouble, sortDouble(at, attrIndex))
       case at: AttrOneManBoolean    => man(e, a, at.op, at.vs, resBoolean, sortBoolean(at, attrIndex))
@@ -87,6 +87,25 @@ trait ExprOne[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
     castScala += res.j2s
     sorter.foreach(sorts += _)
     expr(e, a, v, op, args, res)
+  }
+
+  private def maL(
+    e: Var,
+    a: Att,
+    op: Op,
+    args: Seq[Long],
+    res: ResOne[Long],
+    sorter: Option[(Int, (Row, Row) => Int)]
+  ): Unit = {
+    a match {
+      case ":Generic/e"  =>
+        find += e
+        castScala += res.j2s
+        sorter.foreach(sorts += _)
+//        expr(e, a, v, op, args, res)
+      case ":Generic/tx" =>
+      case a             => man(e, a, op, args, res, sorter)
+    }
   }
 
   private def tac[T: ClassTag](

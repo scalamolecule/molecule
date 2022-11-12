@@ -2,7 +2,7 @@
 package molecule.db.datomic.test.exprOne
 
 import java.util.UUID
-import molecule.coreTests.dataModels.core.types.dsl.CardOne._
+import molecule.coreTests.dataModels.core.types.dsl.TypesOne._
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
@@ -11,7 +11,7 @@ object ExprOne_UUID_ extends DatomicTestSuite {
 
   lazy val tests = Tests {
 
-    "Mandatory" - cardOne { implicit conn =>
+    "Mandatory" - typesOne { implicit conn =>
       val a = (1, uuid1)
       val b = (2, uuid2)
       val c = (3, uuid3)
@@ -60,7 +60,7 @@ object ExprOne_UUID_ extends DatomicTestSuite {
     }
 
 
-    "Tacit" - cardOne { implicit conn =>
+    "Tacit" - typesOne { implicit conn =>
       val (a, b, c, x) = (1, 2, 3, 4)
       NsOne.n.uuid_?.insert(List(
         (a, Some(uuid1)),
@@ -115,7 +115,7 @@ object ExprOne_UUID_ extends DatomicTestSuite {
     }
 
 
-    "Optional" - cardOne { implicit conn =>
+    "Optional" - typesOne { implicit conn =>
       val a = (1, Some(uuid1))
       val b = (2, Some(uuid2))
       val c = (3, Some(uuid3))

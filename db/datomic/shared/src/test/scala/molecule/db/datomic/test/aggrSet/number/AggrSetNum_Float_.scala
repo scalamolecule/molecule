@@ -1,7 +1,7 @@
 // GENERATED CODE ********************************
 package molecule.db.datomic.test.aggrSet.number
 
-import molecule.coreTests.dataModels.core.types.dsl.CardSet._
+import molecule.coreTests.dataModels.core.types.dsl.TypesSet._
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
 import molecule.db.datomic.test.aggrSet.number.AggrSetNum_BigDecimal_.bigDecimal1
@@ -13,7 +13,7 @@ object AggrSetNum_Float_ extends DatomicTestSuite {
 
   lazy val tests = Tests {
 
-    "sum" - cardSet { implicit conn =>
+    "sum" - typesSet { implicit conn =>
       NsSet.n.floats.insert(List(
         (1, Set(float1, float2)),
         (2, Set(float2, float3)),
@@ -31,7 +31,7 @@ object AggrSetNum_Float_ extends DatomicTestSuite {
     }
 
 
-    "median" - cardSet { implicit futConn =>
+    "median" - typesSet { implicit futConn =>
       NsSet.n.floats.insert(List(
         (1, Set(float1, float2)),
         (2, Set(float2, float3)),
@@ -55,7 +55,7 @@ object AggrSetNum_Float_ extends DatomicTestSuite {
     }
 
 
-    "avg" - cardSet { implicit conn =>
+    "avg" - typesSet { implicit conn =>
       NsSet.n.floats.insert(List(
         (1, Set(float1, float2)),
         (2, Set(float2, float3)),
@@ -73,7 +73,7 @@ object AggrSetNum_Float_ extends DatomicTestSuite {
     }
 
 
-    "variance" - cardSet { implicit conn =>
+    "variance" - typesSet { implicit conn =>
       NsSet.n.floats.insert(List(
         (1, Set(float1, float2)),
         (2, Set(float2, float3)),
@@ -91,7 +91,7 @@ object AggrSetNum_Float_ extends DatomicTestSuite {
     }
 
 
-    "stddev" - cardSet { implicit conn =>
+    "stddev" - typesSet { implicit conn =>
       NsSet.n.floats.insert(List(
         (1, Set(float1, float2)),
         (2, Set(float2, float3)),

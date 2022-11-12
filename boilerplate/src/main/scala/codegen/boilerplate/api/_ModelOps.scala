@@ -13,7 +13,8 @@ object _ModelOps extends BoilerplateGenBase("ModelOps", "/api") {
        |
        |
        |trait ${fileName}_0[t, Ns[_]]
-       |  extends ModelTransformations
+       |  extends Molecule_00
+       |    with ModelTransformations
        |    with ExprOneTacOps_0[t, Ns]
        |    with ExprSetTacOps_0[t, Ns]
        |$traits""".stripMargin
@@ -23,7 +24,8 @@ object _ModelOps extends BoilerplateGenBase("ModelOps", "/api") {
     val body =
       s"""
          |trait ${fileName}_$arity[${`A..V`}, t, Ns[${`_, _`}]]
-         |  extends ModelTransformations
+         |  extends Molecule_$n0[${`A..V`}]
+         |    with ModelTransformations
          |    with AggregatesOps_$arity[${`A..V`}, t, Ns]
          |    with ExprOneManOps_$arity[${`A..V`}, t, Ns]
          |    with ExprOneOptOps_$arity[${`A..V`}, t, Ns]

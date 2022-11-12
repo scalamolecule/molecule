@@ -2,7 +2,7 @@
 package molecule.db.datomic.test.aggrOne.any
 
 
-import molecule.coreTests.dataModels.core.types.dsl.CardOne._
+import molecule.coreTests.dataModels.core.types.dsl.TypesOne._
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
@@ -12,7 +12,7 @@ object AggrOne_String_ extends DatomicTestSuite {
 
   lazy val tests = Tests {
 
-    "distinct" - cardOne { implicit conn =>
+    "distinct" - typesOne { implicit conn =>
       NsOne.n.string.insert(List(
         (1, string1),
         (2, string2),
@@ -38,7 +38,7 @@ object AggrOne_String_ extends DatomicTestSuite {
     }
 
 
-    "min" - cardOne { implicit conn =>
+    "min" - typesOne { implicit conn =>
       NsOne.string.insert(List(string1, string2, string3)).transact
       NsOne.string(min).query.get.head ==> string1
       NsOne.string(min(1)).query.get.head ==> Set(string1)
@@ -46,7 +46,7 @@ object AggrOne_String_ extends DatomicTestSuite {
     }
 
 
-    "max" - cardOne { implicit futConn =>
+    "max" - typesOne { implicit futConn =>
       NsOne.string.insert(List(string1, string2, string3)).transact
       NsOne.string(max).query.get.head ==> string3
       NsOne.string(max(1)).query.get.head ==> Set(string3)
@@ -54,7 +54,7 @@ object AggrOne_String_ extends DatomicTestSuite {
     }
 
 
-    "rand" - cardOne { implicit conn =>
+    "rand" - typesOne { implicit conn =>
       NsOne.string.insert(List(string1, string2, string3)).transact
       val all = Set(string1, string2, string3, string4)
       all.contains(NsOne.string.apply(rand).query.get.head) ==> true
@@ -63,7 +63,7 @@ object AggrOne_String_ extends DatomicTestSuite {
     }
 
 
-    "sample" - cardOne { implicit futConn =>
+    "sample" - typesOne { implicit futConn =>
       NsOne.string.insert(List(string1, string2, string3)).transact
       val all = Set(string1, string2, string3, string4)
       all.contains(NsOne.string(sample).query.get.head) ==> true
@@ -72,7 +72,7 @@ object AggrOne_String_ extends DatomicTestSuite {
     }
 
 
-    "count, countDistinct" - cardOne { implicit conn =>
+    "count, countDistinct" - typesOne { implicit conn =>
       NsOne.n.string.insert(List(
         (1, string1),
         (2, string2),

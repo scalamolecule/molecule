@@ -33,7 +33,7 @@ case class Dsl_Arities(schema: MetaSchema, namespace: MetaNs, arity: Int)
   val pMap = " " * (maxCardPad - 13)
 
   attrs.foreach {
-    case MetaAttr(attr, card, tpe0, refNs, options, descr, alias, validation) =>
+    case MetaAttr(attr, card, tpe0, _, _, _, _, _) =>
       val c   = card.marker
       val tpe = getTpe(tpe0)
 
@@ -67,7 +67,8 @@ case class Dsl_Arities(schema: MetaSchema, namespace: MetaNs, arity: Int)
 
       if (!last) {
         man += s"""lazy val ${attr}  $padA = new $ns_1[$tpesM]($elemsM) with $exprM"""
-        opt += s"""lazy val ${attr}_?$padA = new $ns_1[$tpesO]($elemsO) with $exprO"""
+        if (!genericAttrs.contains(attr))
+          opt += s"""lazy val ${attr}_?$padA = new $ns_1[$tpesO]($elemsO) with $exprO"""
       }
       tac += s"""lazy val ${attr}_ $padA = new $ns_0[$tpesT]($elemsT) with $exprT"""
   }
@@ -121,11 +122,13 @@ case class Dsl_Arities(schema: MetaSchema, namespace: MetaNs, arity: Int)
   }
 
   refs.foreach {
-    case MetaAttr(attr, card, _, refNsOpt, options, descr, alias, validation) =>
-      val refCls = camel(attr)
-      val refNs  = refNsOpt.get
-      val refObj = s"""Ref("$ns", "$attr", "$refNs", $card)"""
-      ref += s"object $refCls extends $refNs${_0}[${`A..V, `}t](elements :+ $refObj)"
+    case MetaAttr(attr, card, _, refNsOpt, _, _, _, _) =>
+      val refCls   = camel(attr)
+      val refNs    = refNsOpt.get
+      val refObj   = s"""Ref("$ns", "$attr", "$refNs", $card)"""
+      val pRefAttr = padRefAttr(attr)
+      val pRefNs   = padRefNs(refNs)
+      ref += s"object $refCls$pRefAttr extends $refNs${_0}$pRefNs[${`A..V, `}t](elements :+ $refObj)"
   }
 
   val manAttrs = if (last) "" else man.result().mkString("", "\n  ", "\n\n  ")
@@ -137,14 +140,18 @@ case class Dsl_Arities(schema: MetaSchema, namespace: MetaNs, arity: Int)
   val refResult = ref.result()
   val refDefs   = if (refResult.isEmpty) "" else refResult.mkString("\n\n  ", "\n  ", "")
 
+  val backRefDefs = if (backRefs.isEmpty || arity == 0) "" else backRefs.map(backRef =>
+    s"""object _$backRef extends ${backRef}${_0}[${`A..V, `}t](elements :+ BackRef("$backRef"))"""
+  ).mkString("\n\n  ", "\n  ", "")
+
   val elements = "override val elements: Seq[Element]"
   val modelOps = s"ModelOps_$arity[${`A..V, `}t, $ns_0]"
 
   def get =
-    s"""class $ns_0[${`A..V, `}t]($elements) extends $ns with $modelOps with $NS {
+    s"""class $ns_0[${`A..V, `}t]($elements) extends $ns with $modelOps {
        |  $manAttrs$optAttrs$tacAttrs
        |
-       |  $resolvers$refDefs
+       |  $resolvers$refDefs$backRefDefs
        |}
        |""".stripMargin
 }

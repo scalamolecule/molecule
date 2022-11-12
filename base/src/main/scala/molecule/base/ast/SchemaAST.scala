@@ -76,7 +76,7 @@ object SchemaAST extends BaseHelpers {
 
   case class MetaPart(
     part: String,
-    nss: Seq[MetaNs] = Nil
+    nss: Seq[MetaNs]
   ) {
     def render(tabs: Int): String = {
       val p      = indent(tabs)
@@ -91,7 +91,8 @@ object SchemaAST extends BaseHelpers {
 
   case class MetaNs(
     ns: String,
-    attrs: Seq[MetaAttr] = Nil
+    attrs: Seq[MetaAttr],
+    backRefNss: Seq[String] = Nil
   ) {
     def render(tabs: Int): String = {
       val maxAttr  = attrs.map(_.attr.length).max
@@ -111,7 +112,8 @@ object SchemaAST extends BaseHelpers {
           s"""MetaAttr($attr1, $card, $tpe, $refNs, $options, $descr, $alias, $validation)"""
         }.mkString(pad, s",$pad", s"\n$p")
       }
-      s"""MetaNs("$ns", Seq($attrsStr))"""
+      val backRefs = if(backRefNss.isEmpty) "" else backRefNss.mkString("\"", "\", \"", "\"")
+      s"""MetaNs("$ns", Seq($attrsStr), Seq($backRefs))"""
     }
 
     override def toString: String = render(0)

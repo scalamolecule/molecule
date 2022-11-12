@@ -1,7 +1,7 @@
 // GENERATED CODE ********************************
 package molecule.db.datomic.test.exprOne
 
-import molecule.coreTests.dataModels.core.types.dsl.CardOne._
+import molecule.coreTests.dataModels.core.types.dsl.TypesOne._
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
@@ -10,7 +10,7 @@ object ExprOne_Char_ extends DatomicTestSuite {
 
   lazy val tests = Tests {
 
-    "Mandatory" - cardOne { implicit conn =>
+    "Mandatory" - typesOne { implicit conn =>
       val a = (1, char1)
       val b = (2, char2)
       val c = (3, char3)
@@ -59,7 +59,7 @@ object ExprOne_Char_ extends DatomicTestSuite {
     }
 
 
-    "Tacit" - cardOne { implicit conn =>
+    "Tacit" - typesOne { implicit conn =>
       val (a, b, c, x) = (1, 2, 3, 4)
       NsOne.n.char_?.insert(List(
         (a, Some(char1)),
@@ -114,7 +114,7 @@ object ExprOne_Char_ extends DatomicTestSuite {
     }
 
 
-    "Optional" - cardOne { implicit conn =>
+    "Optional" - typesOne { implicit conn =>
       val a = (1, Some(char1))
       val b = (2, Some(char2))
       val c = (3, Some(char3))

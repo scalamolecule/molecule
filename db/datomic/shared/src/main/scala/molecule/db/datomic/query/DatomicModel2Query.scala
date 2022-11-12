@@ -8,8 +8,9 @@ import scala.collection.mutable.ArrayBuffer;
 
 class DatomicModel2Query[Tpl](elements: Seq[Element])
   extends Model2Query[Tpl]
-    with ExprOne[Tpl]
-    with ExprSet[Tpl]
+    with ResolveExprOne[Tpl]
+    with ResolveExprSet[Tpl]
+    with ResolveRef[Tpl]
     with Sort_[Tpl]
     with Base[Tpl]
     with Cast_[Tpl] {
@@ -97,8 +98,10 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
         case a: AttrSetTac => resolve(resolveAttrSetTac(es, a), tail)
         case other         => unexpected(other)
       }
-      case b: Ref     => es
-      case other      => unexpected(other)
+      case ref: Ref   => resolve(resolveRef(es, ref), tail)
+      case _: BackRef => resolve(resolveBackRef(es), tail)
+
+      case other => unexpected(other)
     }
     case Nil             => es
   }

@@ -1,7 +1,7 @@
 package molecule.db.datomic.test.aggrOne.any
 
 
-import molecule.coreTests.dataModels.core.types.dsl.CardOne._
+import molecule.coreTests.dataModels.core.types.dsl.TypesOne._
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
@@ -11,7 +11,7 @@ object AggrOne_Int extends DatomicTestSuite {
 
   lazy val tests = Tests {
 
-    "distinct" - cardOne { implicit conn =>
+    "distinct" - typesOne { implicit conn =>
       NsOne.n.int.insert(List(
         (1, int1),
         (2, int2),
@@ -37,7 +37,7 @@ object AggrOne_Int extends DatomicTestSuite {
     }
 
 
-    "min" - cardOne { implicit conn =>
+    "min" - typesOne { implicit conn =>
       NsOne.int.insert(List(int1, int2, int3)).transact
       NsOne.int(min).query.get ==> List(int1)
       NsOne.int(min(1)).query.get ==> List(Set(int1))
@@ -45,7 +45,7 @@ object AggrOne_Int extends DatomicTestSuite {
     }
 
 
-    "max" - cardOne { implicit futConn =>
+    "max" - typesOne { implicit futConn =>
       NsOne.int.insert(List(int1, int2, int3)).transact
       NsOne.int(max).query.get ==> List(int3)
       NsOne.int(max(1)).query.get ==> List(Set(int3))
@@ -53,7 +53,7 @@ object AggrOne_Int extends DatomicTestSuite {
     }
 
 
-    "rand" - cardOne { implicit conn =>
+    "rand" - typesOne { implicit conn =>
       NsOne.int.insert(List(int1, int2, int3)).transact
       val all = Set(int1, int2, int3, int4)
       all.contains(NsOne.int.apply(rand).query.get.head) ==> true
@@ -62,7 +62,7 @@ object AggrOne_Int extends DatomicTestSuite {
     }
 
 
-    "sample" - cardOne { implicit futConn =>
+    "sample" - typesOne { implicit futConn =>
       NsOne.int.insert(List(int1, int2, int3)).transact
       val all = Set(int1, int2, int3, int4)
       all.contains(NsOne.int(sample).query.get.head) ==> true
@@ -71,7 +71,7 @@ object AggrOne_Int extends DatomicTestSuite {
     }
 
 
-    "count, countDistinct" - cardOne { implicit conn =>
+    "count, countDistinct" - typesOne { implicit conn =>
       NsOne.n.int.insert(List(
         (1, int1),
         (2, int2),

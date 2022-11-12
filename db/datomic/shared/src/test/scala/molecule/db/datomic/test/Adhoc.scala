@@ -1,7 +1,7 @@
 package molecule.db.datomic.test
 
 
-import molecule.coreTests.dataModels.core.types.dsl.CardOne._
+import molecule.coreTests.dataModels.core.types.dsl.TypesOne._
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
@@ -12,9 +12,8 @@ object Adhoc extends DatomicTestSuite {
 
   lazy val tests = Tests {
 
-    "core" - cardOne { implicit conn =>
+    "core" - typesOne { implicit conn =>
 
-      NsOne.int.insert(1, 2, 3).transact
       NsOne.int.d1.query.get ==> List(3, 2, 1)
       NsOne.int.a1.query.get ==> List(1, 2, 3)
 

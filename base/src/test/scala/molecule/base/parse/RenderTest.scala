@@ -7,7 +7,7 @@ import utest._
 import scala.meta._
 
 
-object ScalaMetaTest extends TestSuite {
+object RenderTest extends TestSuite {
   val projectRoot = System.getProperty("user.dir")
   val basePath    = projectRoot + "/base/src/test/scala/molecule/base/dataModel/"
   val schema      = DataModel2MetaSchema(basePath + "A.scala")
@@ -29,7 +29,7 @@ object ScalaMetaTest extends TestSuite {
 
 
     "Dsl" - {
-      Dsl_Arities(schema, schema.parts.head.nss.head, 1).get ==> "hi"
+      Dsl_Arities(schema, schema.parts.head.nss(1), 1).get ==> "hi"
     }
 
 //    "Schema" - {

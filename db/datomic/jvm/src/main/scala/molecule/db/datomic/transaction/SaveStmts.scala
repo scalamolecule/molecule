@@ -25,6 +25,7 @@ class SaveStmts(elements: Seq[Element]) extends TransactionBase(elements) {
     elements match {
       case element :: tail => element match {
         case attr: Attr =>
+          backRefs = backRefs + (attr.ns -> e)
           val a = kw(attr.ns, attr.attr)
           attr match {
             case attr: AttrOne =>
@@ -39,8 +40,9 @@ class SaveStmts(elements: Seq[Element]) extends TransactionBase(elements) {
               }
           }
 
-        case Ref(ns, refAttr, refNs, one) => ()
-        case element                      => unexpected(element)
+        case Ref(ns, refAttr, _, _) => ref(kw(ns, refAttr)); resolve(tail)
+        case BackRef(backRefNs)     => backRef(backRefNs); resolve(tail)
+        case element                => unexpected(element)
       }
       case Nil             => ()
     }
@@ -142,7 +144,7 @@ class SaveStmts(elements: Seq[Element]) extends TransactionBase(elements) {
       case AttrSetOptByte(_, _, Appl, Some(Seq(set)), _, _, _)       => addSet(a, set.map(_.toInt))
       case AttrSetOptShort(_, _, Appl, Some(Seq(set)), _, _, _)      => addSet(a, set.map(_.toInt))
       case AttrSetOptChar(_, _, Appl, Some(Seq(set)), _, _, _)       => addSet(a, set.map(_.toString))
-      case _                                                       =>
+      case _                                                         =>
         if (attr.op != Appl)
           throw MoleculeException("Can only save one applied Set of values for each Set attribute. " +
             s"Found other expression `${
@@ -163,19 +165,14 @@ class SaveStmts(elements: Seq[Element]) extends TransactionBase(elements) {
   }
 
   protected def addSet[T](a: Keyword, set: Set[T]): Unit = {
-    set.foreach {
-      v =>
-        stmt = stmtList
-        stmt.add(add)
-        stmt.add(e)
-        stmt.add(a)
-        stmt.add(v.asInstanceOf[AnyRef])
-        stmts.add(stmt)
+    set.foreach { v =>
+      stmt = stmtList
+      stmt.add(add)
+      stmt.add(e)
+      stmt.add(a)
+      stmt.add(v.asInstanceOf[AnyRef])
+      stmts.add(stmt)
     }
-  }
-
-  protected def addRef(refAttr: Keyword): () => Unit = {
-    () => bond(refAttr)
   }
 
   protected def addNested(a: Keyword): String => Unit = {
@@ -191,53 +188,11 @@ class SaveStmts(elements: Seq[Element]) extends TransactionBase(elements) {
     }
   }
 
-
-  // Tx meta data is already extracted in the query preparation process.
-
-  protected def vs[T](a: Keyword, array: Array[T]): Unit = {
-    if (array.length != 1) {
-      throw MoleculeException(
-        "Only a single value can be applied to a tx meta attribute when inserting."
-      )
-    }
-    stmt = stmtList
-    stmt.add(add)
-    stmt.add(e)
-    stmt.add(a)
-    stmt.add(array.head.asInstanceOf[AnyRef])
-    stmts.add(stmt)
+  protected def backRef(backRefNs: String): Unit = {
+    e = backRefs(backRefNs)
   }
 
-  protected def cvs[T](a: Keyword, vs: Seq[T]): Unit = {
-    vs.foreach {
-      v =>
-        stmt = stmtList
-        stmt.add(add)
-        stmt.add(e)
-        stmt.add(a)
-        stmt.add(v.asInstanceOf[AnyRef])
-        stmts.add(stmt)
-    }
-  }
-
-  protected def ccs[T](a: Keyword, sets: Seq[Set[T]]): Unit = {
-    if (sets.length != 1) {
-      throw MoleculeException(
-        "Only a single set of values can be applied to a tx meta attribute when inserting."
-      )
-    }
-    sets.head.foreach {
-      v =>
-        stmt = stmtList
-        stmt.add(add)
-        stmt.add(e)
-        stmt.add(a)
-        stmt.add(v.asInstanceOf[AnyRef])
-        stmts.add(stmt)
-    }
-  }
-
-  protected def bond(refAttr: Keyword): Unit = {
+  protected def ref(refAttr: Keyword): Unit = {
     stmt = stmtList
     stmt.add(add)
     stmt.add(e)

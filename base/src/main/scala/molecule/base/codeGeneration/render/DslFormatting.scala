@@ -1,6 +1,6 @@
 package molecule.base.codeGeneration.render
 
-import molecule.base.ast.SchemaAST.{MetaNs, MetaSchema}
+import molecule.base.ast.SchemaAST.{CardOne, MetaAttr, MetaNs, MetaSchema}
 import molecule.base.util.BaseHelpers
 
 
@@ -10,12 +10,22 @@ class DslFormatting(
   arity: Int = 0
 ) extends BaseHelpers {
 
-  lazy val pkg      = schema.pkg + ".dsl"
-  lazy val domain   = schema.domain
-  lazy val maxArity = schema.maxArity
-  lazy val ns       = namespace.ns
-  lazy val attrs    = namespace.attrs
-  lazy val refs     = namespace.attrs.filter(_.refNs.nonEmpty)
+  val pkg          = schema.pkg + ".dsl"
+  val domain       = schema.domain
+  val maxArity     = schema.maxArity
+  val ns           = namespace.ns
+  val attrs        = namespace.attrs ++ Seq(
+    MetaAttr("e", CardOne, "Long", None, Nil, Some("Entity id"), None, None),
+    MetaAttr("a", CardOne, "String", None, Nil, Some("Attribute name"), None, None),
+    MetaAttr("v", CardOne, "String", None, Nil, Some("String representation of any type of value"), None, None),
+    MetaAttr("tx", CardOne, "Long", None, Nil, Some("Transaction entity id"), None, None),
+    MetaAttr("txDate", CardOne, "Date", None, Nil, Some("Transaction time as java.util.Date"), None, None),
+    MetaAttr("txOp", CardOne, "Boolean", None, Nil, Some("Transaction operation (add: True or retract: False"), None, None)
+  )
+  val genericAttrs = Seq("e", "a", "v", "tx", "txDate", "txOp")
+  val refs         = namespace.attrs.filter(_.refNs.nonEmpty)
+  val backRefs     = namespace.backRefNss
+
 
   def camel(s: String) = s"${s.head.toUpper}${s.tail}"
 
@@ -24,12 +34,15 @@ class DslFormatting(
     case t     => t
   }
 
-  lazy val maxAttr = attrs.map(_.attr).map(_.length).max
-  lazy val maxTpe  = attrs.map(a => getTpe(a.tpe)).map(_.length).max
+  lazy val maxAttr    = attrs.map(_.attr.length).max
+  lazy val maxTpe     = attrs.map(a => getTpe(a.tpe).length).max
+  lazy val maxRefAttr = attrs.filter(_.refNs.isDefined).map(_.attr.length).max
+  lazy val maxRefNs   = attrs.flatMap(_.refNs.map(_.length)).max
 
-  lazy val padAttr = (s: String) => padS(maxAttr, s)
-  lazy val padType = (s: String) => padS(maxTpe, s)
-  lazy val padTpe2 = (s: String) => padS(maxTpe + 2 + maxTpe, s)
+  lazy val padAttr    = (s: String) => padS(maxAttr, s)
+  lazy val padType    = (s: String) => padS(maxTpe, s)
+  lazy val padRefAttr = (s: String) => padS(maxRefAttr, s)
+  lazy val padRefNs   = (s: String) => padS(maxRefNs, s)
 
   def nn(i: Int) = if (i < 10) s"0$i" else s"$i"
 

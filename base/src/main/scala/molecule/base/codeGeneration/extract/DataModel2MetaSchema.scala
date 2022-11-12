@@ -2,7 +2,9 @@ package molecule.base.codeGeneration.extract
 
 import java.nio.file.{Files, Paths}
 import molecule.base.ast.SchemaAST._
+import molecule.base.util.exceptions.MoleculeException
 import scala.annotation.tailrec
+import scala.collection.mutable
 import scala.meta._
 
 object DataModel2MetaSchema {
@@ -18,6 +20,8 @@ object DataModel2MetaSchema {
 
 class DataModel2MetaSchema(path: String, dataModel: String) {
   val tree = Input.VirtualFile(path, dataModel).parse[Source].get
+
+  var backRefs = Map.empty[String, Seq[String]]
 
   private val noMix = "Mixing prefixed and non-prefixed namespaces is not allowed."
   private def unexpectedCode(c: Tree) = throw new Exception(
@@ -36,15 +40,21 @@ class DataModel2MetaSchema(path: String, dataModel: String) {
   }
 
   private def getNss(partPrefix: String, nss: Seq[Stat]): Seq[MetaNs] = nss.map {
-    case q"trait $ns { ..$attrs }" => MetaNs(partPrefix + ns.toString, getAttrs(attrs))
-    case q"object $o { ..$_ }"     => throw new Exception(noMix)
-    case other                     => unexpectedCode(other)
+    case q"trait $nsTpe { ..$attrs }" =>
+      val ns = nsTpe.toString
+      if (ns.head.isLower)
+        throw MoleculeException("Namespace traits have to start with upper case letter.")
+      val metaAttrs  = getAttrs(ns, attrs)
+      val backRefNss = backRefs.getOrElse(ns, Nil).distinct.sorted
+      MetaNs(partPrefix + ns, metaAttrs, backRefNss)
+    case q"object $o { ..$_ }"        => throw new Exception(noMix)
+    case other                        => unexpectedCode(other)
   }
 
-  private def getAttrs(attrs: Seq[Stat]): Seq[MetaAttr] = attrs.map {
+  private def getAttrs(ns: String, attrs: Seq[Stat]): Seq[MetaAttr] = attrs.map {
     case q"val $attr = $defs" =>
       val a = attr.toString
-      getAttr(a, defs, (Nil, None, None, None, MetaAttr(a, CardOne, "")))._5
+      getAttr(ns, a, defs, (Nil, None, None, None, MetaAttr(a, CardOne, "")))._5
     case other                => unexpectedCode(other)
   }
 
@@ -56,17 +66,18 @@ class DataModel2MetaSchema(path: String, dataModel: String) {
 
   @tailrec
   private def getAttr(
+    ns: String,
     a: String,
     t: Tree,
     x: (List[String], Option[String], Option[String], Option[String], MetaAttr)
   ): (List[String], Option[String], Option[String], Option[String], MetaAttr) = {
     t match {
-      case q"$prev.index"                   => getAttr(a, prev, ("index" :: x._1, x._2, x._3, x._4, x._5))
-      case q"$prev.noHistory"               => getAttr(a, prev, ("noHistory" :: x._1, x._2, x._3, x._4, x._5))
-      case q"$prev.uniqueIdentity"          => getAttr(a, prev, ("uniqueIdentity" :: x._1, x._2, x._3, x._4, x._5))
-      case q"$prev.unique"                  => getAttr(a, prev, ("unique" :: x._1, x._2, x._3, x._4, x._5))
-      case q"$prev.mandatory"               => getAttr(a, prev, ("mandatory" :: x._1, x._2, x._3, x._4, x._5))
-      case q"$prev.fulltext"                => getAttr(a, prev, ("fulltext" :: x._1, x._2, x._3, x._4, x._5))
+      case q"$prev.index"                   => getAttr(ns, a, prev, ("index" :: x._1, x._2, x._3, x._4, x._5))
+      case q"$prev.noHistory"               => getAttr(ns, a, prev, ("noHistory" :: x._1, x._2, x._3, x._4, x._5))
+      case q"$prev.uniqueIdentity"          => getAttr(ns, a, prev, ("uniqueIdentity" :: x._1, x._2, x._3, x._4, x._5))
+      case q"$prev.unique"                  => getAttr(ns, a, prev, ("unique" :: x._1, x._2, x._3, x._4, x._5))
+      case q"$prev.mandatory"               => getAttr(ns, a, prev, ("mandatory" :: x._1, x._2, x._3, x._4, x._5))
+      case q"$prev.fulltext"                => getAttr(ns, a, prev, ("fulltext" :: x._1, x._2, x._3, x._4, x._5))
       case q"$prev.descr(${Lit.String(s)})" =>
         val descr = if (s.isEmpty)
           throw new Exception(s"Can't apply empty String as description option for attribute $a.")
@@ -74,7 +85,7 @@ class DataModel2MetaSchema(path: String, dataModel: String) {
           throw new Exception(s"Description option for attribute $a can't contain quotes.")
         else
           Some(s)
-        getAttr(a, prev, (x._1, descr, x._3, x._4, x._5))
+        getAttr(ns, a, prev, (x._1, descr, x._3, x._4, x._5))
 
       case q"$prev.alias(${Lit.String(s)})" => s match {
         case r"([a-zA-Z0-9]+)$alias" =>
@@ -84,13 +95,13 @@ class DataModel2MetaSchema(path: String, dataModel: String) {
                 reservedAttrNames.mkString("\n  ")
             )
           } else {
-            getAttr(a, prev, (x._1, x._2, Some(alias), x._4, x._5))
+            getAttr(ns, a, prev, (x._1, x._2, Some(alias), x._4, x._5))
           }
         case other                   =>
           throw new Exception(s"Invalid alias for attribute $a: " + other)
       }
 
-      case q"$prev.validation($lambda)" => getAttr(a, prev, (x._1, x._2, x._3, Some(lambda.toString()), x._5))
+      case q"$prev.validation($lambda)" => getAttr(ns, a, prev, (x._1, x._2, x._3, Some(lambda.toString()), x._5))
 
       case q"oneString"     => attr(x, CardOne, "String")
       case q"oneChar"       => attr(x, CardOne, "Char")
@@ -107,8 +118,13 @@ class DataModel2MetaSchema(path: String, dataModel: String) {
       case q"oneUUID"       => attr(x, CardOne, "UUID")
       case q"oneURI"        => attr(x, CardOne, "URI")
 
-      case q"one[$refNs]"  => attr(x, CardOne, "Long", Some(refNs.toString.replace('.', '_')))
-      case q"many[$refNs]" => attr(x, CardSet, "Long", Some(refNs.toString.replace('.', '_')))
+      case q"one[$refNs]" =>
+        addBackRef(ns, refNs.toString)
+        attr(x, CardOne, "Long", Some(refNs.toString.replace('.', '_')))
+
+      case q"many[$refNs]" =>
+        addBackRef(ns, refNs.toString)
+        attr(x, CardSet, "Long", Some(refNs.toString.replace('.', '_')))
 
       case q"setString"     => attr(x, CardSet, "String")
       case q"setChar"       => attr(x, CardSet, "Char")
@@ -126,6 +142,11 @@ class DataModel2MetaSchema(path: String, dataModel: String) {
       case q"setURI"        => attr(x, CardSet, "URI")
       case other            => unexpectedCode(other)
     }
+  }
+
+  private def addBackRef(ns: String, backRefNs: String): Unit = {
+    val cur = backRefs.getOrElse(backRefNs, Nil)
+    backRefs = backRefs + (backRefNs -> (cur :+ ns))
   }
 
   private def attr(

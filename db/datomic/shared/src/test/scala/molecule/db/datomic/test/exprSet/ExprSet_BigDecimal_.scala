@@ -1,7 +1,7 @@
 // GENERATED CODE ********************************
 package molecule.db.datomic.test.exprSet
 
-import molecule.coreTests.dataModels.core.types.dsl.CardSet._
+import molecule.coreTests.dataModels.core.types.dsl.TypesSet._
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
@@ -14,7 +14,7 @@ object ExprSet_BigDecimal_ extends DatomicTestSuite {
 
     "Mandatory" - {
 
-      "attr" - cardSet { implicit conn =>
+      "attr" - typesSet { implicit conn =>
         val a = (1, Set(bigDecimal1, bigDecimal2))
         val b = (2, Set(bigDecimal2, bigDecimal3, bigDecimal4))
         NsSet.n.bigDecimals.insert(List(a, b)).transact
@@ -23,7 +23,7 @@ object ExprSet_BigDecimal_ extends DatomicTestSuite {
       }
 
 
-      "apply" - cardSet { implicit conn =>
+      "apply" - typesSet { implicit conn =>
         val a = (1, Set(bigDecimal1, bigDecimal2))
         val b = (2, Set(bigDecimal2, bigDecimal3, bigDecimal4))
         NsSet.n.bigDecimals.insert(List(a, b)).transact
@@ -96,7 +96,7 @@ object ExprSet_BigDecimal_ extends DatomicTestSuite {
       }
 
 
-      "not" - cardSet { implicit conn =>
+      "not" - typesSet { implicit conn =>
         val a = (1, Set(bigDecimal1, bigDecimal2))
         val b = (2, Set(bigDecimal2, bigDecimal3, bigDecimal4))
         NsSet.n.bigDecimals.insert(List(a, b)).transact
@@ -174,7 +174,7 @@ object ExprSet_BigDecimal_ extends DatomicTestSuite {
       }
 
 
-      "==" - cardSet { implicit conn =>
+      "==" - typesSet { implicit conn =>
         val a = (1, Set(bigDecimal1, bigDecimal2))
         val b = (2, Set(bigDecimal2, bigDecimal3, bigDecimal4))
         NsSet.n.bigDecimals.insert(List(a, b)).transact
@@ -213,7 +213,7 @@ object ExprSet_BigDecimal_ extends DatomicTestSuite {
       }
 
 
-      "!=" - cardSet { implicit conn =>
+      "!=" - typesSet { implicit conn =>
         val a = (1, Set(bigDecimal1, bigDecimal2))
         val b = (2, Set(bigDecimal2, bigDecimal3, bigDecimal4))
         NsSet.n.bigDecimals.insert(List(a, b)).transact
@@ -250,7 +250,7 @@ object ExprSet_BigDecimal_ extends DatomicTestSuite {
       }
 
 
-      "compare" - cardSet { implicit conn =>
+      "compare" - typesSet { implicit conn =>
         val a = (1, Set(bigDecimal1, bigDecimal2))
         val b = (2, Set(bigDecimal2, bigDecimal3, bigDecimal4))
         NsSet.n.bigDecimals.insert(List(a, b)).transact
@@ -280,7 +280,7 @@ object ExprSet_BigDecimal_ extends DatomicTestSuite {
 
     "Tacit" - {
 
-      "attr" - cardSet { implicit conn =>
+      "attr" - typesSet { implicit conn =>
         val (a, b) = (1, 2)
         NsSet.n.bigDecimals.insert(List(
           (a, Set(bigDecimal1, bigDecimal2)),
@@ -291,7 +291,7 @@ object ExprSet_BigDecimal_ extends DatomicTestSuite {
       }
 
 
-      "apply" - cardSet { implicit conn =>
+      "apply" - typesSet { implicit conn =>
         val (a, b) = (1, 2)
         NsSet.n.bigDecimals.insert(List(
           (a, Set(bigDecimal1, bigDecimal2)),
@@ -366,7 +366,7 @@ object ExprSet_BigDecimal_ extends DatomicTestSuite {
       }
 
 
-      "not" - cardSet { implicit conn =>
+      "not" - typesSet { implicit conn =>
         val (a, b) = (1, 2)
         NsSet.n.bigDecimals.insert(List(
           (a, Set(bigDecimal1, bigDecimal2)),
@@ -446,7 +446,7 @@ object ExprSet_BigDecimal_ extends DatomicTestSuite {
       }
 
 
-      "==" - cardSet { implicit conn =>
+      "==" - typesSet { implicit conn =>
         val (a, b) = (1, 2)
         NsSet.n.bigDecimals.insert(List(
           (a, Set(bigDecimal1, bigDecimal2)),
@@ -486,7 +486,7 @@ object ExprSet_BigDecimal_ extends DatomicTestSuite {
       }
 
 
-      "!=" - cardSet { implicit conn =>
+      "!=" - typesSet { implicit conn =>
         val (a, b) = (1, 2)
         NsSet.n.bigDecimals.insert(List(
           (a, Set(bigDecimal1, bigDecimal2)),
@@ -525,7 +525,7 @@ object ExprSet_BigDecimal_ extends DatomicTestSuite {
       }
 
 
-      "compare" - cardSet { implicit conn =>
+      "compare" - typesSet { implicit conn =>
         val (a, b) = (1, 2)
         NsSet.n.bigDecimals.insert(List(
           (a, Set(bigDecimal1, bigDecimal2)),
@@ -557,7 +557,7 @@ object ExprSet_BigDecimal_ extends DatomicTestSuite {
 
     "Optional" - {
 
-      "attr" - cardSet { implicit conn =>
+      "attr" - typesSet { implicit conn =>
         val a = (1, Some(Set(bigDecimal1, bigDecimal2)))
         val b = (2, Some(Set(bigDecimal2, bigDecimal3, bigDecimal4)))
         val c = (3, None)
@@ -567,7 +567,7 @@ object ExprSet_BigDecimal_ extends DatomicTestSuite {
       }
 
 
-      "apply" - cardSet { implicit conn =>
+      "apply" - typesSet { implicit conn =>
         val a = (1, Some(Set(bigDecimal1, bigDecimal2)))
         val b = (2, Some(Set(bigDecimal2, bigDecimal3, bigDecimal4)))
         val c = (3, None)
@@ -637,7 +637,7 @@ object ExprSet_BigDecimal_ extends DatomicTestSuite {
       }
 
 
-      "not" - cardSet { implicit conn =>
+      "not" - typesSet { implicit conn =>
         val a = (1, Some(Set(bigDecimal1, bigDecimal2)))
         val b = (2, Some(Set(bigDecimal2, bigDecimal3, bigDecimal4)))
         val c = (3, None)
@@ -712,7 +712,7 @@ object ExprSet_BigDecimal_ extends DatomicTestSuite {
       }
 
 
-      "==" - cardSet { implicit conn =>
+      "==" - typesSet { implicit conn =>
         val a = (1, Some(Set(bigDecimal1, bigDecimal2)))
         val b = (2, Some(Set(bigDecimal2, bigDecimal3, bigDecimal4)))
         val c = (3, None)
@@ -751,7 +751,7 @@ object ExprSet_BigDecimal_ extends DatomicTestSuite {
       }
 
 
-      "!=" - cardSet { implicit conn =>
+      "!=" - typesSet { implicit conn =>
         val a = (1, Some(Set(bigDecimal1, bigDecimal2)))
         val b = (2, Some(Set(bigDecimal2, bigDecimal3, bigDecimal4)))
         val c = (3, None)
@@ -790,7 +790,7 @@ object ExprSet_BigDecimal_ extends DatomicTestSuite {
       }
 
 
-      "compare" - cardSet { implicit conn =>
+      "compare" - typesSet { implicit conn =>
         val a = (1, Some(Set(bigDecimal1, bigDecimal2)))
         val b = (2, Some(Set(bigDecimal2, bigDecimal3, bigDecimal4)))
         val c = (3, None)

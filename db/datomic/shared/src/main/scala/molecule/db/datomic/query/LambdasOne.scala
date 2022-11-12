@@ -5,7 +5,7 @@ import java.math.{BigDecimal => jBigDecimal, BigInteger => jBigInt}
 import java.net.URI
 import java.util.{Date, UUID, Map => jMap, Set => jSet, List => jList}
 
-object ResolveOne extends ResolveBase {
+object LambdasOne extends ResolveBase {
 
   // Datomic Java to Scala
   protected lazy val j2sString    : AnyRef => AnyRef = identity

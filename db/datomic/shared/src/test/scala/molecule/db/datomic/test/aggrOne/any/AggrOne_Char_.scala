@@ -2,7 +2,7 @@
 package molecule.db.datomic.test.aggrOne.any
 
 
-import molecule.coreTests.dataModels.core.types.dsl.CardOne._
+import molecule.coreTests.dataModels.core.types.dsl.TypesOne._
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
@@ -12,7 +12,7 @@ object AggrOne_Char_ extends DatomicTestSuite {
 
   lazy val tests = Tests {
 
-    "distinct" - cardOne { implicit conn =>
+    "distinct" - typesOne { implicit conn =>
       NsOne.n.char.insert(List(
         (1, char1),
         (2, char2),
@@ -38,7 +38,7 @@ object AggrOne_Char_ extends DatomicTestSuite {
     }
 
 
-    "min" - cardOne { implicit conn =>
+    "min" - typesOne { implicit conn =>
       NsOne.char.insert(List(char1, char2, char3)).transact
       NsOne.char(min).query.get.head ==> char1
       NsOne.char(min(1)).query.get.head ==> Set(char1)
@@ -46,7 +46,7 @@ object AggrOne_Char_ extends DatomicTestSuite {
     }
 
 
-    "max" - cardOne { implicit futConn =>
+    "max" - typesOne { implicit futConn =>
       NsOne.char.insert(List(char1, char2, char3)).transact
       NsOne.char(max).query.get.head ==> char3
       NsOne.char(max(1)).query.get.head ==> Set(char3)
@@ -54,7 +54,7 @@ object AggrOne_Char_ extends DatomicTestSuite {
     }
 
 
-    "rand" - cardOne { implicit conn =>
+    "rand" - typesOne { implicit conn =>
       NsOne.char.insert(List(char1, char2, char3)).transact
       val all = Set(char1, char2, char3, char4)
       all.contains(NsOne.char.apply(rand).query.get.head) ==> true
@@ -63,7 +63,7 @@ object AggrOne_Char_ extends DatomicTestSuite {
     }
 
 
-    "sample" - cardOne { implicit futConn =>
+    "sample" - typesOne { implicit futConn =>
       NsOne.char.insert(List(char1, char2, char3)).transact
       val all = Set(char1, char2, char3, char4)
       all.contains(NsOne.char(sample).query.get.head) ==> true
@@ -72,7 +72,7 @@ object AggrOne_Char_ extends DatomicTestSuite {
     }
 
 
-    "count, countDistinct" - cardOne { implicit conn =>
+    "count, countDistinct" - typesOne { implicit conn =>
       NsOne.n.char.insert(List(
         (1, char1),
         (2, char2),

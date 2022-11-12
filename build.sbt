@@ -328,6 +328,8 @@ lazy val testSettings: Seq[Def.Setting[_]] = {
 
     // Multiple directories with data models
     moleculeDataModelPaths := Seq(
+//      "molecule/coreTests/dataModels/core/generic",
+      "molecule/coreTests/dataModels/core/ref",
       "molecule/coreTests/dataModels/core/types",
 //      "db/datomic/dataModels/core/base",
 

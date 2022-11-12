@@ -4,9 +4,9 @@ import molecule.boilerplate.api.Keywords._
 import molecule.boilerplate.ast.MoleculeModel._
 import scala.reflect.ClassTag
 
-trait ExprSet[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
+trait ResolveExprSet[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
 
-  import ResolveSet._
+  import LambdasSet._
 
   protected def resolveAttrSetMan(es: List[Var], atom: AttrSetMan): List[Var] = {
     attrIndex += 1

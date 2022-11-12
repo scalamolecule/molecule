@@ -16,12 +16,15 @@ abstract class TransactionBase(elements: Seq[Element]) {
 
   protected def unexpected(element: Element) = throw MoleculeException("Unexpected element: " + element)
 
-  protected val nsFull: String        = getNs(elements)
-  protected val part  : String        = fns.partNs(nsFull).head
-  protected var tempId: Int           = 0 // tempIdInit
-  protected var lowest: Int           = 0 // tempIdInit
-  protected var e     : String        = ""
-  protected var stmt  : jList[AnyRef] = null
+  protected val nsFull   : String              = getNs(elements)
+  protected val part     : String              = fns.partNs(nsFull).head
+  protected var tempId   : Int                 = 0 // tempIdInit
+  protected var lowest   : Int                 = 0 // tempIdInit
+  protected var e        : String              = ""
+  protected var stmt     : jList[AnyRef]       = null
+  protected var backRefs : Map[String, String] = Map.empty[String, String]
+//  protected var backRefs: Seq[String]         = Nil
+
   protected def stmtList = new java.util.ArrayList[AnyRef](4)
 
 
@@ -39,12 +42,12 @@ abstract class TransactionBase(elements: Seq[Element]) {
   protected lazy val add     = kw("db", "add")
   protected lazy val retract = kw("db", "retract")
 
-  protected lazy val bigInt2java = (v: Any) => v.asInstanceOf[BigInt].bigInteger
-  protected lazy val bigDec2java = (v: Any) => v.asInstanceOf[BigDecimal].bigDecimal
-  protected lazy val char2java   = (v: Any) => v.toString
-  protected lazy val byte2java   = (v: Any) => v.asInstanceOf[Byte].toInt
-  protected lazy val short2java  = (v: Any) => v.asInstanceOf[Short].toInt
-  protected lazy val boolean2java  = (v: Any) => v.asInstanceOf[Boolean].asInstanceOf[jBoolean]
+  protected lazy val bigInt2java  = (v: Any) => v.asInstanceOf[BigInt].bigInteger
+  protected lazy val bigDec2java  = (v: Any) => v.asInstanceOf[BigDecimal].bigDecimal
+  protected lazy val char2java    = (v: Any) => v.toString
+  protected lazy val byte2java    = (v: Any) => v.asInstanceOf[Byte].toInt
+  protected lazy val short2java   = (v: Any) => v.asInstanceOf[Short].toInt
+  protected lazy val boolean2java = (v: Any) => v.asInstanceOf[Boolean].asInstanceOf[jBoolean]
 
 
   @tailrec

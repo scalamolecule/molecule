@@ -1,6 +1,6 @@
 package molecule.db.datomic.test.exprOne
 
-import molecule.coreTests.dataModels.core.types.dsl.CardOne._
+import molecule.coreTests.dataModels.core.types.dsl.TypesOne._
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
@@ -10,7 +10,7 @@ object ExprOne_Boolean extends DatomicTestSuite {
 
   lazy val tests = Tests {
 
-    "Mandatory" - cardOne { implicit conn =>
+    "Mandatory" - typesOne { implicit conn =>
       val a = (1, true)
       val b = (2, false)
       NsOne.n.boolean.insert(List(a, b)).transact
@@ -48,7 +48,7 @@ object ExprOne_Boolean extends DatomicTestSuite {
     }
 
 
-    "Tacit" - cardOne { implicit conn =>
+    "Tacit" - typesOne { implicit conn =>
       val (a, b, x) = (1, 2, 3)
       NsOne.n.boolean_?.insert(List(
         (1, Some(true)),
@@ -92,7 +92,7 @@ object ExprOne_Boolean extends DatomicTestSuite {
     }
 
 
-    "Optional" - cardOne { implicit conn =>
+    "Optional" - typesOne { implicit conn =>
       val a = (1, Some(true))
       val b = (2, Some(false))
       val x = (4, Option.empty[Boolean])

@@ -26,10 +26,10 @@ case class Dsl(schema: MetaSchema, namespace: MetaNs)
     val man = List.newBuilder[String]
     val opt = List.newBuilder[String]
     val tac = List.newBuilder[String]
-    attrs.foreach {
-      case MetaAttr(attr, card, tpe, refNs, options, descr, alias, validation) =>
-        val padA = padAttr(attr)
-        val padT = padType(tpe)
+    attrs.collect {
+      case MetaAttr(attr, card, tpe, _, _, _, _, _) if !genericAttrs.contains(attr) =>
+        val padA    = padAttr(attr)
+        val padT    = padType(tpe)
         val attrMan = "Attr" + card.marker + "Man" + tpe
         val attrOpt = "Attr" + card.marker + "Opt" + tpe
         val attrTac = "Attr" + card.marker + "Tac" + tpe
@@ -38,7 +38,7 @@ case class Dsl(schema: MetaSchema, namespace: MetaNs)
         tac += s"""protected lazy val ${attr}_tac$padA: $attrTac$padT = $attrTac$padT("$ns", "$attr"$padA)"""
     }
     val attrDefs = (man.result() ++ Seq("") ++ opt.result() ++ Seq("") ++ tac.result()).mkString("\n  ")
-    s"""trait $ns {
+    s"""trait $ns extends Generic {
        |  $attrDefs
        |}""".stripMargin
   }

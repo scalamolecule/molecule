@@ -2,7 +2,7 @@
 package molecule.db.datomic.test.aggrOne.any
 
 
-import molecule.coreTests.dataModels.core.types.dsl.CardOne._
+import molecule.coreTests.dataModels.core.types.dsl.TypesOne._
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
 import molecule.db.datomic.test.aggrOne.any.AggrOne_Int.{int1, int2, int3}
@@ -13,7 +13,7 @@ object AggrOne_Boolean extends DatomicTestSuite {
 
   lazy val tests = Tests {
 
-    "distinct" - cardOne { implicit conn =>
+    "distinct" - typesOne { implicit conn =>
       NsOne.n.boolean.insert(List(
         (1, true),
         (2, false),
@@ -38,7 +38,7 @@ object AggrOne_Boolean extends DatomicTestSuite {
     }
 
 
-    "min" - cardOne { implicit conn =>
+    "min" - typesOne { implicit conn =>
       NsOne.boolean.insert(List(true, false, true)).transact
       NsOne.boolean(min).query.get.head ==> false
       NsOne.boolean(min(1)).query.get.head ==> Set(false)
@@ -46,7 +46,7 @@ object AggrOne_Boolean extends DatomicTestSuite {
     }
 
 
-    "max" - cardOne { implicit futConn =>
+    "max" - typesOne { implicit futConn =>
       NsOne.boolean.insert(List(true, false, true)).transact
       NsOne.boolean(max).query.get.head ==> true
       NsOne.boolean(max(1)).query.get.head ==> Set(true)
@@ -54,7 +54,7 @@ object AggrOne_Boolean extends DatomicTestSuite {
     }
 
 
-    "rand" - cardOne { implicit conn =>
+    "rand" - typesOne { implicit conn =>
       NsOne.boolean.insert(List(true, false, true)).transact
       val all = Set(true, false, true, boolean4)
       all.contains(NsOne.boolean(rand).query.get.head) ==> true
@@ -63,7 +63,7 @@ object AggrOne_Boolean extends DatomicTestSuite {
     }
 
 
-    "sample" - cardOne { implicit futConn =>
+    "sample" - typesOne { implicit futConn =>
       NsOne.boolean.insert(List(true, false, true)).transact
       val all = Set(true, false, true, boolean4)
       all.contains(NsOne.boolean(sample).query.get.head) ==> true
@@ -72,7 +72,7 @@ object AggrOne_Boolean extends DatomicTestSuite {
     }
 
 
-    "count, countDistinct" - cardOne { implicit conn =>
+    "count, countDistinct" - typesOne { implicit conn =>
       NsOne.n.boolean.insert(List(
         (1, true),
         (2, false),

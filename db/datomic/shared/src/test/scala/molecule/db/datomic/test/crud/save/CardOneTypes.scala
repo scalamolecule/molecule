@@ -1,6 +1,6 @@
 package molecule.db.datomic.test.crud.save
 
-import molecule.coreTests.dataModels.core.types.dsl.CardOne._
+import molecule.coreTests.dataModels.core.types.dsl.TypesOne._
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
@@ -10,7 +10,7 @@ object CardOneTypes extends DatomicTestSuite {
 
   lazy val tests = Tests {
 
-    "mandatory" - cardOne { implicit conn =>
+    "mandatory" - typesOne { implicit conn =>
       NsOne.string(string1).save.transact
 //      One.int(int1).save.transact
 //      One.long.apply(long1).save.transact
@@ -43,7 +43,7 @@ object CardOneTypes extends DatomicTestSuite {
     }
 
 
-    "tacit" - cardOne { implicit conn =>
+    "tacit" - typesOne { implicit conn =>
       NsOne.n.string.insert((11, string1)).transact
 //      One.n.int.insert((12, int1)).transact
 //      One.n.long.insert((13, long1)).transact
@@ -76,7 +76,7 @@ object CardOneTypes extends DatomicTestSuite {
     }
 //
 //
-//    "optional" - cardOne { implicit conn =>
+//    "optional" - typesOne { implicit conn =>
 //      val dataString     = List((11, None), (11, Some(string1)))
 //      val dataInt        = List((12, None), (12, Some(int1)))
 //      val dataLong       = List((13, None), (13, Some(long1)))

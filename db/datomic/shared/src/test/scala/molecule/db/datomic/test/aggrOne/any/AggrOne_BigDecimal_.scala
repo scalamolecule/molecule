@@ -2,7 +2,7 @@
 package molecule.db.datomic.test.aggrOne.any
 
 
-import molecule.coreTests.dataModels.core.types.dsl.CardOne._
+import molecule.coreTests.dataModels.core.types.dsl.TypesOne._
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
@@ -12,7 +12,7 @@ object AggrOne_BigDecimal_ extends DatomicTestSuite {
 
   lazy val tests = Tests {
 
-    "distinct" - cardOne { implicit conn =>
+    "distinct" - typesOne { implicit conn =>
       NsOne.n.bigDecimal.insert(List(
         (1, bigDecimal1),
         (2, bigDecimal2),
@@ -38,7 +38,7 @@ object AggrOne_BigDecimal_ extends DatomicTestSuite {
     }
 
 
-    "min" - cardOne { implicit conn =>
+    "min" - typesOne { implicit conn =>
       NsOne.bigDecimal.insert(List(bigDecimal1, bigDecimal2, bigDecimal3)).transact
       NsOne.bigDecimal(min).query.get.head ==> bigDecimal1
       NsOne.bigDecimal(min(1)).query.get.head ==> Set(bigDecimal1)
@@ -46,7 +46,7 @@ object AggrOne_BigDecimal_ extends DatomicTestSuite {
     }
 
 
-    "max" - cardOne { implicit futConn =>
+    "max" - typesOne { implicit futConn =>
       NsOne.bigDecimal.insert(List(bigDecimal1, bigDecimal2, bigDecimal3)).transact
       NsOne.bigDecimal(max).query.get.head ==> bigDecimal3
       NsOne.bigDecimal(max(1)).query.get.head ==> Set(bigDecimal3)
@@ -54,7 +54,7 @@ object AggrOne_BigDecimal_ extends DatomicTestSuite {
     }
 
 
-    "rand" - cardOne { implicit conn =>
+    "rand" - typesOne { implicit conn =>
       NsOne.bigDecimal.insert(List(bigDecimal1, bigDecimal2, bigDecimal3)).transact
       val all = Set(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4)
       all.contains(NsOne.bigDecimal.apply(rand).query.get.head) ==> true
@@ -63,7 +63,7 @@ object AggrOne_BigDecimal_ extends DatomicTestSuite {
     }
 
 
-    "sample" - cardOne { implicit futConn =>
+    "sample" - typesOne { implicit futConn =>
       NsOne.bigDecimal.insert(List(bigDecimal1, bigDecimal2, bigDecimal3)).transact
       val all = Set(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4)
       all.contains(NsOne.bigDecimal(sample).query.get.head) ==> true
@@ -72,7 +72,7 @@ object AggrOne_BigDecimal_ extends DatomicTestSuite {
     }
 
 
-    "count, countDistinct" - cardOne { implicit conn =>
+    "count, countDistinct" - typesOne { implicit conn =>
       NsOne.n.bigDecimal.insert(List(
         (1, bigDecimal1),
         (2, bigDecimal2),

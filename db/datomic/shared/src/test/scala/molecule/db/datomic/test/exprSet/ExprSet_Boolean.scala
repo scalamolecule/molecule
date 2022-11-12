@@ -1,7 +1,7 @@
 // GENERATED CODE ********************************
 package molecule.db.datomic.test.exprSet
 
-import molecule.coreTests.dataModels.core.types.dsl.CardSet._
+import molecule.coreTests.dataModels.core.types.dsl.TypesSet._
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
@@ -14,7 +14,7 @@ object ExprSet_Boolean extends DatomicTestSuite {
 
     "Mandatory" - {
 
-      "attr" - cardSet { implicit conn =>
+      "attr" - typesSet { implicit conn =>
         val t  = (1, Set(true))
         val f  = (2, Set(false))
         val tf = (3, Set(true, false))
@@ -24,7 +24,7 @@ object ExprSet_Boolean extends DatomicTestSuite {
       }
 
 
-      "apply" - cardSet { implicit conn =>
+      "apply" - typesSet { implicit conn =>
         val t  = (1, Set(true))
         val f  = (2, Set(false))
         val tf = (3, Set(true, false))
@@ -80,7 +80,7 @@ object ExprSet_Boolean extends DatomicTestSuite {
       }
 
 
-      "not" - cardSet { implicit conn =>
+      "not" - typesSet { implicit conn =>
         val t  = (1, Set(true))
         val f  = (2, Set(false))
         val tf = (3, Set(true, false))
@@ -136,7 +136,7 @@ object ExprSet_Boolean extends DatomicTestSuite {
       }
 
 
-      "==" - cardSet { implicit conn =>
+      "==" - typesSet { implicit conn =>
         val t  = (1, Set(true))
         val f  = (2, Set(false))
         val tf = (3, Set(true, false))
@@ -175,7 +175,7 @@ object ExprSet_Boolean extends DatomicTestSuite {
       }
 
 
-      "!=" - cardSet { implicit conn =>
+      "!=" - typesSet { implicit conn =>
         val t  = (1, Set(true))
         val f  = (2, Set(false))
         val tf = (3, Set(true, false))
@@ -213,7 +213,7 @@ object ExprSet_Boolean extends DatomicTestSuite {
       }
 
 
-      "compare" - cardSet { implicit conn =>
+      "compare" - typesSet { implicit conn =>
         val t  = (1, Set(true))
         val f  = (2, Set(false))
         val tf = (3, Set(true, false))
@@ -233,7 +233,7 @@ object ExprSet_Boolean extends DatomicTestSuite {
 
     "Tacit" - {
 
-      "attr" - cardSet { implicit conn =>
+      "attr" - typesSet { implicit conn =>
         val (t, f, tf) = (1, 2, 3)
         NsSet.n.booleans.insert(List(
           (t, Set(true)),
@@ -245,7 +245,7 @@ object ExprSet_Boolean extends DatomicTestSuite {
       }
 
 
-      "apply" - cardSet { implicit conn =>
+      "apply" - typesSet { implicit conn =>
         val (t, f, tf) = (1, 2, 3)
         NsSet.n.booleans.insert(List(
           (t, Set(true)),
@@ -303,7 +303,7 @@ object ExprSet_Boolean extends DatomicTestSuite {
       }
 
 
-      "not" - cardSet { implicit conn =>
+      "not" - typesSet { implicit conn =>
         val (t, f, tf) = (1, 2, 3)
         NsSet.n.booleans.insert(List(
           (t, Set(true)),
@@ -362,7 +362,7 @@ object ExprSet_Boolean extends DatomicTestSuite {
       }
 
 
-      "==" - cardSet { implicit conn =>
+      "==" - typesSet { implicit conn =>
         val (t, f, tf) = (1, 2, 3)
         NsSet.n.booleans.insert(List(
           (t, Set(true)),
@@ -403,7 +403,7 @@ object ExprSet_Boolean extends DatomicTestSuite {
       }
 
 
-      "!=" - cardSet { implicit conn =>
+      "!=" - typesSet { implicit conn =>
         val (t, f, tf) = (1, 2, 3)
         NsSet.n.booleans.insert(List(
           (t, Set(true)),
@@ -443,7 +443,7 @@ object ExprSet_Boolean extends DatomicTestSuite {
       }
 
 
-      "compare" - cardSet { implicit conn =>
+      "compare" - typesSet { implicit conn =>
         val (t, f, tf) = (1, 2, 3)
         NsSet.n.booleans.insert(List(
           (t, Set(true)),
@@ -465,7 +465,7 @@ object ExprSet_Boolean extends DatomicTestSuite {
 
     "Optional" - {
 
-      "attr" - cardSet { implicit conn =>
+      "attr" - typesSet { implicit conn =>
         val t  = (1, Some(Set(true)))
         val f  = (2, Some(Set(false)))
         val tf = (3, Some(Set(true, false)))
@@ -482,7 +482,7 @@ object ExprSet_Boolean extends DatomicTestSuite {
       }
 
 
-      "apply" - cardSet { implicit conn =>
+      "apply" - typesSet { implicit conn =>
         val t  = (1, Some(Set(true)))
         val f  = (2, Some(Set(false)))
         val tf = (3, Some(Set(true, false)))
@@ -538,7 +538,7 @@ object ExprSet_Boolean extends DatomicTestSuite {
       }
 
 
-      "not" - cardSet { implicit conn =>
+      "not" - typesSet { implicit conn =>
         val t  = (1, Some(Set(true)))
         val f  = (2, Some(Set(false)))
         val tf = (3, Some(Set(true, false)))
@@ -595,7 +595,7 @@ object ExprSet_Boolean extends DatomicTestSuite {
       }
 
 
-      "==" - cardSet { implicit conn =>
+      "==" - typesSet { implicit conn =>
         val t  = (1, Some(Set(true)))
         val f  = (2, Some(Set(false)))
         val tf = (3, Some(Set(true, false)))
@@ -634,7 +634,7 @@ object ExprSet_Boolean extends DatomicTestSuite {
       }
 
 
-      "!=" - cardSet { implicit conn =>
+      "!=" - typesSet { implicit conn =>
         val t  = (1, Some(Set(true)))
         val f  = (2, Some(Set(false)))
         val tf = (3, Some(Set(true, false)))
@@ -675,7 +675,7 @@ object ExprSet_Boolean extends DatomicTestSuite {
       }
 
 
-      "compare" - cardSet { implicit conn =>
+      "compare" - typesSet { implicit conn =>
         val t  = (1, Some(Set(true)))
         val f  = (2, Some(Set(false)))
         val tf = (3, Some(Set(true, false)))

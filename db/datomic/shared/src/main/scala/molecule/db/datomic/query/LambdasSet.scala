@@ -7,7 +7,7 @@ import molecule.core.util.JavaConversions
 import java.lang.{Boolean => jBoolean, Double => jDouble, Float => jFloat, Integer => jInteger, Long => jLong}
 
 
-object ResolveSet extends ResolveBase with JavaConversions {
+object LambdasSet extends ResolveBase with JavaConversions {
 
   protected lazy val j2sSetString    : AnyRef => AnyRef = (v: AnyRef) => Set(v)
   protected lazy val j2sSetInt       : AnyRef => AnyRef = (v: AnyRef) => Set(v)

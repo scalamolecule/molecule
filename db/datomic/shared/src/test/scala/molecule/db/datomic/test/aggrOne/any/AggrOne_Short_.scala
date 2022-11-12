@@ -2,7 +2,7 @@
 package molecule.db.datomic.test.aggrOne.any
 
 
-import molecule.coreTests.dataModels.core.types.dsl.CardOne._
+import molecule.coreTests.dataModels.core.types.dsl.TypesOne._
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
@@ -12,7 +12,7 @@ object AggrOne_Short_ extends DatomicTestSuite {
 
   lazy val tests = Tests {
 
-    "distinct" - cardOne { implicit conn =>
+    "distinct" - typesOne { implicit conn =>
       NsOne.n.short.insert(List(
         (1, short1),
         (2, short2),
@@ -38,7 +38,7 @@ object AggrOne_Short_ extends DatomicTestSuite {
     }
 
 
-    "min" - cardOne { implicit conn =>
+    "min" - typesOne { implicit conn =>
       NsOne.short.insert(List(short1, short2, short3)).transact
       NsOne.short(min).query.get.head ==> short1
       NsOne.short(min(1)).query.get.head ==> Set(short1)
@@ -46,7 +46,7 @@ object AggrOne_Short_ extends DatomicTestSuite {
     }
 
 
-    "max" - cardOne { implicit futConn =>
+    "max" - typesOne { implicit futConn =>
       NsOne.short.insert(List(short1, short2, short3)).transact
       NsOne.short(max).query.get.head ==> short3
       NsOne.short(max(1)).query.get.head ==> Set(short3)
@@ -54,7 +54,7 @@ object AggrOne_Short_ extends DatomicTestSuite {
     }
 
 
-    "rand" - cardOne { implicit conn =>
+    "rand" - typesOne { implicit conn =>
       NsOne.short.insert(List(short1, short2, short3)).transact
       val all = Set(short1, short2, short3, short4)
       all.contains(NsOne.short.apply(rand).query.get.head) ==> true
@@ -63,7 +63,7 @@ object AggrOne_Short_ extends DatomicTestSuite {
     }
 
 
-    "sample" - cardOne { implicit futConn =>
+    "sample" - typesOne { implicit futConn =>
       NsOne.short.insert(List(short1, short2, short3)).transact
       val all = Set(short1, short2, short3, short4)
       all.contains(NsOne.short(sample).query.get.head) ==> true
@@ -72,7 +72,7 @@ object AggrOne_Short_ extends DatomicTestSuite {
     }
 
 
-    "count, countDistinct" - cardOne { implicit conn =>
+    "count, countDistinct" - typesOne { implicit conn =>
       NsOne.n.short.insert(List(
         (1, short1),
         (2, short2),

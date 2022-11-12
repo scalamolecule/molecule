@@ -2,7 +2,7 @@
 package molecule.db.datomic.test.aggrOne.any
 
 
-import molecule.coreTests.dataModels.core.types.dsl.CardOne._
+import molecule.coreTests.dataModels.core.types.dsl.TypesOne._
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
@@ -12,7 +12,7 @@ object AggrOne_Byte_ extends DatomicTestSuite {
 
   lazy val tests = Tests {
 
-    "distinct" - cardOne { implicit conn =>
+    "distinct" - typesOne { implicit conn =>
       NsOne.n.byte.insert(List(
         (1, byte1),
         (2, byte2),
@@ -38,7 +38,7 @@ object AggrOne_Byte_ extends DatomicTestSuite {
     }
 
 
-    "min" - cardOne { implicit conn =>
+    "min" - typesOne { implicit conn =>
       NsOne.byte.insert(List(byte1, byte2, byte3)).transact
       NsOne.byte(min).query.get.head ==> byte1
       NsOne.byte(min(1)).query.get.head ==> Set(byte1)
@@ -46,7 +46,7 @@ object AggrOne_Byte_ extends DatomicTestSuite {
     }
 
 
-    "max" - cardOne { implicit futConn =>
+    "max" - typesOne { implicit futConn =>
       NsOne.byte.insert(List(byte1, byte2, byte3)).transact
       NsOne.byte(max).query.get.head ==> byte3
       NsOne.byte(max(1)).query.get.head ==> Set(byte3)
@@ -54,7 +54,7 @@ object AggrOne_Byte_ extends DatomicTestSuite {
     }
 
 
-    "rand" - cardOne { implicit conn =>
+    "rand" - typesOne { implicit conn =>
       NsOne.byte.insert(List(byte1, byte2, byte3)).transact
       val all = Set(byte1, byte2, byte3, byte4)
       all.contains(NsOne.byte.apply(rand).query.get.head) ==> true
@@ -63,7 +63,7 @@ object AggrOne_Byte_ extends DatomicTestSuite {
     }
 
 
-    "sample" - cardOne { implicit futConn =>
+    "sample" - typesOne { implicit futConn =>
       NsOne.byte.insert(List(byte1, byte2, byte3)).transact
       val all = Set(byte1, byte2, byte3, byte4)
       all.contains(NsOne.byte(sample).query.get.head) ==> true
@@ -72,7 +72,7 @@ object AggrOne_Byte_ extends DatomicTestSuite {
     }
 
 
-    "count, countDistinct" - cardOne { implicit conn =>
+    "count, countDistinct" - typesOne { implicit conn =>
       NsOne.n.byte.insert(List(
         (1, byte1),
         (2, byte2),

@@ -1,6 +1,6 @@
 package molecule.db.datomic.test.aggrOne.number
 
-import molecule.coreTests.dataModels.core.types.dsl.CardOne._
+import molecule.coreTests.dataModels.core.types.dsl.TypesOne._
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
@@ -10,7 +10,7 @@ object AggrOneNum_Int extends DatomicTestSuite {
 
   lazy val tests = Tests {
 
-    "sum" - cardOne { implicit conn =>
+    "sum" - typesOne { implicit conn =>
       NsOne.n.int.insert(List(
         (1, int1),
         (2, int2),
@@ -27,7 +27,7 @@ object AggrOneNum_Int extends DatomicTestSuite {
     }
 
 
-    "median" - cardOne { implicit futConn =>
+    "median" - typesOne { implicit futConn =>
       NsOne.n.int.insert(List(
         (1, int1),
         (2, int2),
@@ -50,7 +50,7 @@ object AggrOneNum_Int extends DatomicTestSuite {
     }
 
 
-    "avg" - cardOne { implicit conn =>
+    "avg" - typesOne { implicit conn =>
       NsOne.n.int.insert(List(
         (1, int1),
         (2, int2),
@@ -67,7 +67,7 @@ object AggrOneNum_Int extends DatomicTestSuite {
     }
 
 
-    "variance" - cardOne { implicit conn =>
+    "variance" - typesOne { implicit conn =>
       NsOne.n.int.insert(List(
         (1, int1),
         (2, int2),
@@ -84,7 +84,7 @@ object AggrOneNum_Int extends DatomicTestSuite {
     }
 
 
-    "stddev" - cardOne { implicit conn =>
+    "stddev" - typesOne { implicit conn =>
       NsOne.n.int.insert(List(
         (1, int1),
         (2, int2),

@@ -2,7 +2,7 @@
 package molecule.db.datomic.test.aggrSet.any
 
 
-import molecule.coreTests.dataModels.core.types.dsl.CardSet._
+import molecule.coreTests.dataModels.core.types.dsl.TypesSet._
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
@@ -12,7 +12,7 @@ object AggrSet_BigDecimal_ extends DatomicTestSuite {
 
   lazy val tests = Tests {
 
-    "distinct" - cardSet { implicit conn =>
+    "distinct" - typesSet { implicit conn =>
       NsSet.n.bigDecimals.insert(List(
         (1, Set(bigDecimal1, bigDecimal2)),
         (2, Set(bigDecimal2, bigDecimal3)),
@@ -45,7 +45,7 @@ object AggrSet_BigDecimal_ extends DatomicTestSuite {
     }
 
 
-    "min" - cardSet { implicit conn =>
+    "min" - typesSet { implicit conn =>
       NsSet.n.bigDecimals.insert(List(
         (1, Set(bigDecimal1, bigDecimal2)),
         (2, Set(bigDecimal2, bigDecimal3)),
@@ -74,7 +74,7 @@ object AggrSet_BigDecimal_ extends DatomicTestSuite {
     }
 
 
-    "max" - cardSet { implicit futConn =>
+    "max" - typesSet { implicit futConn =>
       NsSet.n.bigDecimals.insert(List(
         (1, Set(bigDecimal1, bigDecimal2)),
         (2, Set(bigDecimal2, bigDecimal3)),
@@ -103,7 +103,7 @@ object AggrSet_BigDecimal_ extends DatomicTestSuite {
     }
 
 
-    "rand" - cardSet { implicit conn =>
+    "rand" - typesSet { implicit conn =>
       NsSet.n.bigDecimals.insert(List(
         (1, Set(bigDecimal1, bigDecimal2)),
         (2, Set(bigDecimal2, bigDecimal3)),
@@ -117,7 +117,7 @@ object AggrSet_BigDecimal_ extends DatomicTestSuite {
     }
 
 
-    "sample" - cardSet { implicit futConn =>
+    "sample" - typesSet { implicit futConn =>
       NsSet.n.bigDecimals.insert(List(
         (1, Set(bigDecimal1, bigDecimal2)),
         (2, Set(bigDecimal2, bigDecimal3)),
@@ -131,7 +131,7 @@ object AggrSet_BigDecimal_ extends DatomicTestSuite {
     }
 
 
-    "count, countDistinct" - cardSet { implicit conn =>
+    "count, countDistinct" - typesSet { implicit conn =>
       NsSet.n.bigDecimals.insert(List(
         (1, Set(bigDecimal1, bigDecimal2)),
         (2, Set(bigDecimal2, bigDecimal3)),
