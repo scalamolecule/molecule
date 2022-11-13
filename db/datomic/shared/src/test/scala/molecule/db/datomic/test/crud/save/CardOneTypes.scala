@@ -1,6 +1,6 @@
 package molecule.db.datomic.test.crud.save
 
-import molecule.coreTests.dataModels.core.types.dsl.TypesOne._
+import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
@@ -10,8 +10,8 @@ object CardOneTypes extends DatomicTestSuite {
 
   lazy val tests = Tests {
 
-    "mandatory" - typesOne { implicit conn =>
-      NsOne.string(string1).save.transact
+    "mandatory" - types { implicit conn =>
+      Ns.string(string1).save.transact
 //      One.int(int1).save.transact
 //      One.long.apply(long1).save.transact
 //      One.float(float1).save.transact
@@ -26,7 +26,7 @@ object CardOneTypes extends DatomicTestSuite {
 //      One.byte(byte1).save.transact
 //      One.short(short1).save.transact
 
-      NsOne.string.query.get ==> List(string1)
+      Ns.string.query.get ==> List(string1)
 //      One.int.query.get ==> List(int1)
 //      One.long.query.get ==> List(long1)
 //      One.float.query.get ==> List(float1)
@@ -43,8 +43,8 @@ object CardOneTypes extends DatomicTestSuite {
     }
 
 
-    "tacit" - typesOne { implicit conn =>
-      NsOne.n.string.insert((11, string1)).transact
+    "tacit" - types { implicit conn =>
+      Ns.n.string.insert((11, string1)).transact
 //      One.n.int.insert((12, int1)).transact
 //      One.n.long.insert((13, long1)).transact
 //      One.n.float.insert((14, float1)).transact
@@ -59,7 +59,7 @@ object CardOneTypes extends DatomicTestSuite {
 //      One.n.byte.insert((23, byte1)).transact
 //      One.n.short.insert((24, short1)).transact
 
-      NsOne.n.string_.query.get ==> List(11)
+      Ns.n.string_.query.get ==> List(11)
 //      One.n.int_.query.get ==> List(12)
 //      One.n.long_.query.get ==> List(13)
 //      One.n.float_.query.get ==> List(14)
@@ -76,7 +76,7 @@ object CardOneTypes extends DatomicTestSuite {
     }
 //
 //
-//    "optional" - typesOne { implicit conn =>
+//    "optional" - types { implicit conn =>
 //      val dataString     = List((11, None), (11, Some(string1)))
 //      val dataInt        = List((12, None), (12, Some(int1)))
 //      val dataLong       = List((13, None), (13, Some(long1)))

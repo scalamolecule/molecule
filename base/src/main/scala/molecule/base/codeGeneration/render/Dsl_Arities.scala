@@ -125,7 +125,7 @@ case class Dsl_Arities(schema: MetaSchema, namespace: MetaNs, arity: Int)
     case MetaAttr(attr, card, _, refNsOpt, _, _, _, _) =>
       val refCls   = camel(attr)
       val refNs    = refNsOpt.get
-      val refObj   = s"""Ref("$ns", "$attr", "$refNs", $card)"""
+      val refObj   = s"""MoleculeModel.Ref("$ns", "$attr", "$refNs", $card)"""
       val pRefAttr = padRefAttr(attr)
       val pRefNs   = padRefNs(refNs)
       ref += s"object $refCls$pRefAttr extends $refNs${_0}$pRefNs[${`A..V, `}t](elements :+ $refObj)"
@@ -141,7 +141,7 @@ case class Dsl_Arities(schema: MetaSchema, namespace: MetaNs, arity: Int)
   val refDefs   = if (refResult.isEmpty) "" else refResult.mkString("\n\n  ", "\n  ", "")
 
   val backRefDefs = if (backRefs.isEmpty || arity == 0) "" else backRefs.map(backRef =>
-    s"""object _$backRef extends ${backRef}${_0}[${`A..V, `}t](elements :+ BackRef("$backRef"))"""
+    s"""object _$backRef extends $backRef${_0}[${`A..V, `}t](elements :+ MoleculeModel.BackRef("$backRef"))"""
   ).mkString("\n\n  ", "\n  ", "")
 
   val elements = "override val elements: Seq[Element]"

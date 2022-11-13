@@ -19,16 +19,6 @@ trait CodeGenBase {
     "Short",
     "Char",
   )
-  val numTypes = Seq(
-    "Int",
-    "Long",
-    "Float",
-    "Double",
-    "BigInt",
-    "BigDecimal",
-    "Byte",
-    "Short",
-  )
   
   val javaTypes = Map(
     "String" -> "String",
@@ -47,30 +37,19 @@ trait CodeGenBase {
     "Char" -> "String",
   )
 
-  val tpeVarImp = Map(
-    "String" -> ("string", ""),
-    "Int" -> ("int", ""),
-    "Long" -> ("long", ""),
-    "Float" -> ("float", ""),
-    "Double" -> ("double", ""),
-    "Boolean" -> ("boolean", ""),
-    "BigInt" -> ("bigInt", ""),
-    "BigDecimal" -> ("bigDecimal", ""),
-    "Date" -> ("date", "java.util.Date"),
-    "UUID" -> ("uuid", "java.util.UUID"),
-    "URI" -> ("uri", "java.net.URI"),
-    "Byte" -> ("byte", ""),
-    "Short" -> ("short", ""),
-    "Char" -> ("char", ""),
-  )
-  val tpeVarImpNum = Map(
-    "Int" -> ("int", ""),
-    "Long" -> ("long", ""),
-    "Float" -> ("float", ""),
-    "Double" -> ("double", ""),
-    "BigInt" -> ("bigInt", ""),
-    "BigDecimal" -> ("bigDecimal", ""),
-    "Byte" -> ("byte", ""),
-    "Short" -> ("short", ""),
+  val tpeVarImp = List(
+    ("String", "String", "string", ""),
+    ("Long", "Long", "long", ""),
+    ("Float", "Float", "float", ""),
+    ("Double", "Double", "double", ""),
+    ("BigInt", "BigInt", "bigInt", ""),
+    ("BigDecimal", "BigDecimal", "bigDecimal", ""),
+    ("Date", "Date", "date", "java.util.Date"),
+    ("UUID", "UUID", "uuid", "java.util.UUID"),
+    ("URI", "URI", "uri", "java.net.URI"),
+    ("Byte", "Byte", "byte", ""),
+    ("Short", "Short", "short", ""),
+    ("Char", "Char", "char", ""),
+    ("ref", "Long", "ref", ""),
   )
 }

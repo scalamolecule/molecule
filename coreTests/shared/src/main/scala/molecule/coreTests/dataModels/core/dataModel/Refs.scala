@@ -1,8 +1,8 @@
-package molecule.coreTests.dataModels.core.ref.dataModel
+package molecule.coreTests.dataModels.core.dataModel
 
 import molecule.DataModel
 
-object Refs extends DataModel(4) {
+object Refs extends DataModel(10) {
 
   trait Ns {
     val n     = oneInt

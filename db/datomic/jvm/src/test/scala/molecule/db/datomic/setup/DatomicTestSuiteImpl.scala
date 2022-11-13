@@ -3,8 +3,7 @@ package molecule.db.datomic.setup
 import java.util.UUID.randomUUID
 import molecule.base.api.SchemaTransaction
 import molecule.core.api.Connection
-import molecule.coreTests.dataModels.core.ref.schema._
-import molecule.coreTests.dataModels.core.types.schema._
+import molecule.coreTests.dataModels.core.schema._
 import molecule.db.datomic.facade.{Conn_Peer, Datomic_Peer}
 import molecule.db.datomic.util.DatomicApiLoader
 import moleculeBuildInfo.BuildInfo
@@ -47,9 +46,7 @@ trait DatomicTestSuiteImpl extends DatomicApiLoader { self: DatomicTestSuite =>
   }
 
   //  def emptyImpl[T](test: Connection => T): T = inMem(test, EmptySchema, "")
-//  def cardAllImpl[T](test: Connection => T): T = inMem(test, CardAllSchema, "m_cardAll")
-  def typesOneImpl[T](test: Connection => T): T = inMem(test, TypesOneSchema, "m_typesOne")
-  def typesSetImpl[T](test: Connection => T): T = inMem(test, TypesSetSchema, "m_typesSet")
+  def typesImpl[T](test: Connection => T): T = inMem(test, TypesSchema, "m_types")
   def refsImpl[T](test: Connection => T): T = inMem(test, RefsSchema, "m_refs")
 
   //  def corePeerOnlyImpl[T](test: Connection => T): T = if (system == SystemPeer) coreImpl(test) else ().asInstanceOf[T]

@@ -2,7 +2,7 @@
 package molecule.db.datomic.test.aggrSet.any
 
 
-import molecule.coreTests.dataModels.core.types.dsl.TypesSet._
+import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
@@ -12,8 +12,8 @@ object AggrSet_BigInt_ extends DatomicTestSuite {
 
   lazy val tests = Tests {
 
-    "distinct" - typesSet { implicit conn =>
-      NsSet.n.bigInts.insert(List(
+    "distinct" - types { implicit conn =>
+      Ns.n.bigInts.insert(List(
         (1, Set(bigInt1, bigInt2)),
         (2, Set(bigInt2, bigInt3)),
         (2, Set(bigInt3, bigInt4)),
@@ -21,13 +21,13 @@ object AggrSet_BigInt_ extends DatomicTestSuite {
       )).transact
 
       // Non-aggregated card-many Set of attribute values coalesce
-      NsSet.n.a1.bigInts.query.get ==> List(
+      Ns.n.a1.bigInts.query.get ==> List(
         (1, Set(bigInt1, bigInt2)),
         (2, Set(bigInt2, bigInt3, bigInt4)), // 3 rows coalesced
       )
 
       // Use `distinct` keyword to retrieve unique Sets of values
-      NsSet.n.a1.bigInts(distinct).query.get ==> List(
+      Ns.n.a1.bigInts(distinct).query.get ==> List(
         (1, Set(Set(bigInt1, bigInt2))),
         (2, Set(
           Set(bigInt2, bigInt3),
@@ -35,7 +35,7 @@ object AggrSet_BigInt_ extends DatomicTestSuite {
         ))
       )
 
-      NsSet.bigInts(distinct).query.get ==> List(
+      Ns.bigInts(distinct).query.get ==> List(
         Set(
           Set(bigInt1, bigInt2),
           Set(bigInt2, bigInt3),
@@ -45,111 +45,111 @@ object AggrSet_BigInt_ extends DatomicTestSuite {
     }
 
 
-    "min" - typesSet { implicit conn =>
-      NsSet.n.bigInts.insert(List(
+    "min" - types { implicit conn =>
+      Ns.n.bigInts.insert(List(
         (1, Set(bigInt1, bigInt2)),
         (2, Set(bigInt2, bigInt3)),
         (2, Set(bigInt3, bigInt4)),
         (2, Set(bigInt3, bigInt4)),
       )).transact
 
-      NsSet.bigInts(min).query.get ==> List(Set(bigInt1))
-      NsSet.bigInts(min(1)).query.get ==> List(Set(bigInt1))
-      NsSet.bigInts(min(2)).query.get ==> List(Set(bigInt1, bigInt2))
+      Ns.bigInts(min).query.get ==> List(Set(bigInt1))
+      Ns.bigInts(min(1)).query.get ==> List(Set(bigInt1))
+      Ns.bigInts(min(2)).query.get ==> List(Set(bigInt1, bigInt2))
 
-      NsSet.n.bigInts(min).query.get ==> List(
+      Ns.n.bigInts(min).query.get ==> List(
         (1, Set(bigInt1)),
         (2, Set(bigInt2)),
       )
       // Same as
-      NsSet.n.bigInts(min(1)).query.get ==> List(
+      Ns.n.bigInts(min(1)).query.get ==> List(
         (1, Set(bigInt1)),
         (2, Set(bigInt2)),
       )
 
-      NsSet.n.bigInts(min(2)).query.get ==> List(
+      Ns.n.bigInts(min(2)).query.get ==> List(
         (1, Set(bigInt1, bigInt2)),
         (2, Set(bigInt2, bigInt3)),
       )
     }
 
 
-    "max" - typesSet { implicit futConn =>
-      NsSet.n.bigInts.insert(List(
+    "max" - types { implicit futConn =>
+      Ns.n.bigInts.insert(List(
         (1, Set(bigInt1, bigInt2)),
         (2, Set(bigInt2, bigInt3)),
         (2, Set(bigInt3, bigInt4)),
         (2, Set(bigInt3, bigInt4)),
       )).transact
 
-      NsSet.bigInts(max).query.get ==> List(Set(bigInt4))
-      NsSet.bigInts(max(1)).query.get ==> List(Set(bigInt4))
-      NsSet.bigInts(max(2)).query.get ==> List(Set(bigInt3, bigInt4))
+      Ns.bigInts(max).query.get ==> List(Set(bigInt4))
+      Ns.bigInts(max(1)).query.get ==> List(Set(bigInt4))
+      Ns.bigInts(max(2)).query.get ==> List(Set(bigInt3, bigInt4))
 
-      NsSet.n.bigInts(max).query.get ==> List(
+      Ns.n.bigInts(max).query.get ==> List(
         (1, Set(bigInt2)),
         (2, Set(bigInt4)),
       )
       // Same as
-      NsSet.n.bigInts(max(1)).query.get ==> List(
+      Ns.n.bigInts(max(1)).query.get ==> List(
         (1, Set(bigInt2)),
         (2, Set(bigInt4)),
       )
 
-      NsSet.n.bigInts(max(2)).query.get ==> List(
+      Ns.n.bigInts(max(2)).query.get ==> List(
         (1, Set(bigInt1, bigInt2)),
         (2, Set(bigInt3, bigInt4)),
       )
     }
 
 
-    "rand" - typesSet { implicit conn =>
-      NsSet.n.bigInts.insert(List(
+    "rand" - types { implicit conn =>
+      Ns.n.bigInts.insert(List(
         (1, Set(bigInt1, bigInt2)),
         (2, Set(bigInt2, bigInt3)),
         (2, Set(bigInt3, bigInt4)),
         (2, Set(bigInt3, bigInt4)),
       )).transact
       val all = Set(bigInt1, bigInt2, bigInt3, bigInt4)
-      all.contains(NsSet.bigInts(rand).query.get.head.head) ==> true
-      all.intersect(NsSet.bigInts(rand(1)).query.get.head).nonEmpty ==> true
-      all.intersect(NsSet.bigInts(rand(2)).query.get.head).nonEmpty ==> true
+      all.contains(Ns.bigInts(rand).query.get.head.head) ==> true
+      all.intersect(Ns.bigInts(rand(1)).query.get.head).nonEmpty ==> true
+      all.intersect(Ns.bigInts(rand(2)).query.get.head).nonEmpty ==> true
     }
 
 
-    "sample" - typesSet { implicit futConn =>
-      NsSet.n.bigInts.insert(List(
+    "sample" - types { implicit futConn =>
+      Ns.n.bigInts.insert(List(
         (1, Set(bigInt1, bigInt2)),
         (2, Set(bigInt2, bigInt3)),
         (2, Set(bigInt3, bigInt4)),
         (2, Set(bigInt3, bigInt4)),
       )).transact
       val all = Set(bigInt1, bigInt2, bigInt3, bigInt4)
-      all.contains(NsSet.bigInts(sample).query.get.head.head) ==> true
-      all.intersect(NsSet.bigInts(sample(1)).query.get.head).nonEmpty ==> true
-      all.intersect(NsSet.bigInts(sample(2)).query.get.head).nonEmpty ==> true
+      all.contains(Ns.bigInts(sample).query.get.head.head) ==> true
+      all.intersect(Ns.bigInts(sample(1)).query.get.head).nonEmpty ==> true
+      all.intersect(Ns.bigInts(sample(2)).query.get.head).nonEmpty ==> true
     }
 
 
-    "count, countDistinct" - typesSet { implicit conn =>
-      NsSet.n.bigInts.insert(List(
+    "count, countDistinct" - types { implicit conn =>
+      Ns.n.bigInts.insert(List(
         (1, Set(bigInt1, bigInt2)),
         (2, Set(bigInt2, bigInt3)),
         (2, Set(bigInt3, bigInt4)),
         (2, Set(bigInt3, bigInt4)),
       )).transact
 
-      NsSet.n(count).query.get ==> List(4)
-      NsSet.n(countDistinct).query.get ==> List(2)
+      Ns.n(count).query.get ==> List(4)
+      Ns.n(countDistinct).query.get ==> List(2)
 
-      NsSet.bigInts(count).query.get ==> List(8)
-      NsSet.bigInts(countDistinct).query.get ==> List(4)
+      Ns.bigInts(count).query.get ==> List(8)
+      Ns.bigInts(countDistinct).query.get ==> List(4)
 
-      NsSet.n.a1.bigInts(count).query.get ==> List(
+      Ns.n.a1.bigInts(count).query.get ==> List(
         (1, 2),
         (2, 6)
       )
-      NsSet.n.a1.bigInts(countDistinct).query.get ==> List(
+      Ns.n.a1.bigInts(countDistinct).query.get ==> List(
         (1, 2),
         (2, 3)
       )

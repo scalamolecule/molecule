@@ -2,7 +2,7 @@
 package molecule.db.datomic.test.aggrOne.any
 
 
-import molecule.coreTests.dataModels.core.types.dsl.TypesOne._
+import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
@@ -12,85 +12,85 @@ object AggrOne_Double_ extends DatomicTestSuite {
 
   lazy val tests = Tests {
 
-    "distinct" - typesOne { implicit conn =>
-      NsOne.n.double.insert(List(
+    "distinct" - types { implicit conn =>
+      Ns.n.double.insert(List(
         (1, double1),
         (2, double2),
         (2, double2),
         (2, double3),
       )).transact
 
-      NsOne.n.a1.double.query.get.sortBy(_._2) ==> List(
+      Ns.n.a1.double.query.get.sortBy(_._2) ==> List(
         (1, double1),
         (2, double2), // 2 rows coalesced
         (2, double3),
       )
 
       // Distinct values are returned in a List
-      NsOne.n.a1.double.apply(distinct).query.get ==> List(
+      Ns.n.a1.double.apply(distinct).query.get ==> List(
         (1, Set(double1)),
         (2, Set(double2, double3)),
       )
 
-      NsOne.double(distinct).query.get.head ==> Set(
+      Ns.double(distinct).query.get.head ==> Set(
         double1, double2, double3
       )
     }
 
 
-    "min" - typesOne { implicit conn =>
-      NsOne.double.insert(List(double1, double2, double3)).transact
-      NsOne.double(min).query.get.head ==> double1
-      NsOne.double(min(1)).query.get.head ==> Set(double1)
-      NsOne.double(min(2)).query.get.head ==> Set(double1, double2)
+    "min" - types { implicit conn =>
+      Ns.double.insert(List(double1, double2, double3)).transact
+      Ns.double(min).query.get ==> List(double1)
+      Ns.double(min(1)).query.get ==> List(Set(double1))
+      Ns.double(min(2)).query.get ==> List(Set(double1, double2))
     }
 
 
-    "max" - typesOne { implicit futConn =>
-      NsOne.double.insert(List(double1, double2, double3)).transact
-      NsOne.double(max).query.get.head ==> double3
-      NsOne.double(max(1)).query.get.head ==> Set(double3)
-      NsOne.double(max(2)).query.get.head ==> Set(double3, double2)
+    "max" - types { implicit futConn =>
+      Ns.double.insert(List(double1, double2, double3)).transact
+      Ns.double(max).query.get ==> List(double3)
+      Ns.double(max(1)).query.get ==> List(Set(double3))
+      Ns.double(max(2)).query.get ==> List(Set(double3, double2))
     }
 
 
-    "rand" - typesOne { implicit conn =>
-      NsOne.double.insert(List(double1, double2, double3)).transact
+    "rand" - types { implicit conn =>
+      Ns.double.insert(List(double1, double2, double3)).transact
       val all = Set(double1, double2, double3, double4)
-      all.contains(NsOne.double.apply(rand).query.get.head) ==> true
-      all.intersect(NsOne.double(rand(1)).query.get.head).nonEmpty ==> true
-      all.intersect(NsOne.double(rand(2)).query.get.head).nonEmpty ==> true
+      all.contains(Ns.double.apply(rand).query.get.head) ==> true
+      all.intersect(Ns.double(rand(1)).query.get.head).nonEmpty ==> true
+      all.intersect(Ns.double(rand(2)).query.get.head).nonEmpty ==> true
     }
 
 
-    "sample" - typesOne { implicit futConn =>
-      NsOne.double.insert(List(double1, double2, double3)).transact
+    "sample" - types { implicit futConn =>
+      Ns.double.insert(List(double1, double2, double3)).transact
       val all = Set(double1, double2, double3, double4)
-      all.contains(NsOne.double(sample).query.get.head) ==> true
-      all.intersect(NsOne.double(sample(1)).query.get.head).nonEmpty ==> true
-      all.intersect(NsOne.double(sample(2)).query.get.head).nonEmpty ==> true
+      all.contains(Ns.double(sample).query.get.head) ==> true
+      all.intersect(Ns.double(sample(1)).query.get.head).nonEmpty ==> true
+      all.intersect(Ns.double(sample(2)).query.get.head).nonEmpty ==> true
     }
 
 
-    "count, countDistinct" - typesOne { implicit conn =>
-      NsOne.n.double.insert(List(
+    "count, countDistinct" - types { implicit conn =>
+      Ns.n.double.insert(List(
         (1, double1),
         (2, double2),
         (2, double2),
         (2, double3),
       )).transact
 
-      NsOne.n(count).query.get ==> List(4)
-      NsOne.n(countDistinct).query.get ==> List(2)
+      Ns.n(count).query.get ==> List(4)
+      Ns.n(countDistinct).query.get ==> List(2)
 
-      NsOne.double(count).query.get ==> List(4)
-      NsOne.double(countDistinct).query.get ==> List(3)
+      Ns.double(count).query.get ==> List(4)
+      Ns.double(countDistinct).query.get ==> List(3)
 
-      NsOne.n.a1.double(count).query.get ==> List(
+      Ns.n.a1.double(count).query.get ==> List(
         (1, 1),
         (2, 3)
       )
-      NsOne.n.a1.double(countDistinct).query.get ==> List(
+      Ns.n.a1.double(countDistinct).query.get ==> List(
         (1, 1),
         (2, 2)
       )

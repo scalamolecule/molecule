@@ -1,7 +1,7 @@
 // GENERATED CODE ********************************
 package molecule.db.datomic.test.aggrOne.number
 
-import molecule.coreTests.dataModels.core.types.dsl.TypesOne._
+import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
@@ -11,34 +11,34 @@ object AggrOneNum_BigDecimal_ extends DatomicTestSuite {
 
   lazy val tests = Tests {
 
-    "sum" - typesOne { implicit conn =>
-      NsOne.n.bigDecimal.insert(List(
+    "sum" - types { implicit conn =>
+      Ns.n.bigDecimal.insert(List(
         (1, bigDecimal1),
         (2, bigDecimal2),
         (2, bigDecimal4),
       )).transact
 
-      NsOne.bigDecimal(sum).query.get ==> List(
+      Ns.bigDecimal(sum).query.get ==> List(
         7.7 // bigDecimal1 + bigDecimal2 + bigDecimal4
       )
-      NsOne.n.bigDecimal(sum).query.get ==> List(
+      Ns.n.bigDecimal(sum).query.get ==> List(
         (1, 1.1),
         (2, 6.6), // bigDecimal2 + bigDecimal4
       )
     }
 
 
-    "median" - typesOne { implicit futConn =>
-      NsOne.n.bigDecimal.insert(List(
+    "median" - types { implicit futConn =>
+      Ns.n.bigDecimal.insert(List(
         (1, bigDecimal1),
         (2, bigDecimal2),
         (2, bigDecimal4),
       )).transact
 
-      NsOne.bigDecimal(median).query.get ==> List(
+      Ns.bigDecimal(median).query.get ==> List(
         2.2
       )
-      NsOne.n.bigDecimal(median).query.get ==> List(
+      Ns.n.bigDecimal(median).query.get ==> List(
         (1, 1.1),
         (2, 3.0),
       )
@@ -51,51 +51,51 @@ object AggrOneNum_BigDecimal_ extends DatomicTestSuite {
     }
 
 
-    "avg" - typesOne { implicit conn =>
-      NsOne.n.bigDecimal.insert(List(
+    "avg" - types { implicit conn =>
+      Ns.n.bigDecimal.insert(List(
         (1, bigDecimal1),
         (2, bigDecimal2),
         (2, bigDecimal4),
       )).transact
 
-      NsOne.bigDecimal(avg).query.get ==> List(
+      Ns.bigDecimal(avg).query.get ==> List(
         2.566666666666667 // (bigDecimal1 + bigDecimal2 + bigDecimal4) / 3.0
       )
-      NsOne.n.bigDecimal(avg).query.get ==> List(
+      Ns.n.bigDecimal(avg).query.get ==> List(
         (1, 1.1),
         (2, 3.3), // (bigDecimal2 + bigDecimal4) / 2.0
       )
     }
 
 
-    "variance" - typesOne { implicit conn =>
-      NsOne.n.bigDecimal.insert(List(
+    "variance" - types { implicit conn =>
+      Ns.n.bigDecimal.insert(List(
         (1, bigDecimal1),
         (2, bigDecimal2),
         (2, bigDecimal4),
       )).transact
 
-      NsOne.bigDecimal(variance).query.get ==> List(
+      Ns.bigDecimal(variance).query.get ==> List(
         1.8822222222222225
       )
-      NsOne.n.bigDecimal(variance).query.get ==> List(
+      Ns.n.bigDecimal(variance).query.get ==> List(
         (1, 0.0),
         (2, 1.2100000000000002),
       )
     }
 
 
-    "stddev" - typesOne { implicit conn =>
-      NsOne.n.bigDecimal.insert(List(
+    "stddev" - types { implicit conn =>
+      Ns.n.bigDecimal.insert(List(
         (1, bigDecimal1),
         (2, bigDecimal2),
         (2, bigDecimal4),
       )).transact
 
-      NsOne.bigDecimal(stddev).query.get ==> List(
+      Ns.bigDecimal(stddev).query.get ==> List(
         1.3719410418171119
       )
-      NsOne.n.bigDecimal(stddev).query.get ==> List(
+      Ns.n.bigDecimal(stddev).query.get ==> List(
         (1, 0.0),
         (2, 1.1),
       )

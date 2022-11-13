@@ -6,33 +6,33 @@ import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
 
-object AggrOneNum_Long_ extends DatomicTestSuite {
+object AggrOneNum_ref_ extends DatomicTestSuite {
 
 
   lazy val tests = Tests {
 
     "sum" - types { implicit conn =>
-      Ns.n.long.insert(List(
-        (1, long1),
-        (2, long2),
-        (2, long4),
+      Ns.n.ref.insert(List(
+        (1, ref1),
+        (2, ref2),
+        (2, ref4),
       )).transact
 
-      Ns.long(sum).query.get ==> List(
-        7 // long1 + long2 + long4
+      Ns.ref(sum).query.get ==> List(
+        7 // ref1 + ref2 + ref4
       )
-      Ns.n.long(sum).query.get ==> List(
+      Ns.n.ref(sum).query.get ==> List(
         (1, 1),
-        (2, 6), // long2 + long4
+        (2, 6), // ref2 + ref4
       )
     }
 
 
     "median" - types { implicit futConn =>
-      Ns.n.long.insert(List(
-        (1, long1),
-        (2, long2),
-        (2, long4),
+      Ns.n.ref.insert(List(
+        (1, ref1),
+        (2, ref2),
+        (2, ref4),
       )).transact
 
       // OBS! Datomic rounds down to nearest whole number
@@ -41,10 +41,10 @@ object AggrOneNum_Long_ extends DatomicTestSuite {
       // https://en.wikipedia.org/wiki/Median
       // See also
       // https://forum.datomic.com/t/unexpected-median-rounding/517
-      Ns.long(median).query.get ==> List(
+      Ns.ref(median).query.get ==> List(
         2.0
       )
-      Ns.n.long(median).query.get ==> List(
+      Ns.n.ref(median).query.get ==> List(
         (1, 1.0),
         (2, 3.0),
       )
@@ -52,33 +52,33 @@ object AggrOneNum_Long_ extends DatomicTestSuite {
 
 
     "avg" - types { implicit conn =>
-      Ns.n.long.insert(List(
-        (1, long1),
-        (2, long2),
-        (2, long4),
+      Ns.n.ref.insert(List(
+        (1, ref1),
+        (2, ref2),
+        (2, ref4),
       )).transact
 
-      Ns.long(avg).query.get ==> List(
-        2.3333333333333333 // (long1 + long2 + long4) / 3.0
+      Ns.ref(avg).query.get ==> List(
+        2.3333333333333333 // (ref1 + ref2 + ref4) / 3.0
       )
-      Ns.n.long(avg).query.get ==> List(
+      Ns.n.ref(avg).query.get ==> List(
         (1, 1.0),
-        (2, 3.0), // (long2 + long4) / 2.0
+        (2, 3.0), // (ref2 + ref4) / 2.0
       )
     }
 
 
     "variance" - types { implicit conn =>
-      Ns.n.long.insert(List(
-        (1, long1),
-        (2, long2),
-        (2, long4),
+      Ns.n.ref.insert(List(
+        (1, ref1),
+        (2, ref2),
+        (2, ref4),
       )).transact
 
-      Ns.long(variance).query.get ==> List(
+      Ns.ref(variance).query.get ==> List(
         1.5555555555555554
       )
-      Ns.n.long(variance).query.get ==> List(
+      Ns.n.ref(variance).query.get ==> List(
         (1, 0.0),
         (2, 1.0),
       )
@@ -86,16 +86,16 @@ object AggrOneNum_Long_ extends DatomicTestSuite {
 
 
     "stddev" - types { implicit conn =>
-      Ns.n.long.insert(List(
-        (1, long1),
-        (2, long2),
-        (2, long4),
+      Ns.n.ref.insert(List(
+        (1, ref1),
+        (2, ref2),
+        (2, ref4),
       )).transact
 
-      Ns.long(stddev).query.get ==> List(
+      Ns.ref(stddev).query.get ==> List(
         1.247219128924647
       )
-      Ns.n.long(stddev).query.get ==> List(
+      Ns.n.ref(stddev).query.get ==> List(
         (1, 0.0),
         (2, 1.0),
       )

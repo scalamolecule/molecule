@@ -1,6 +1,6 @@
 package molecule.db.datomic.test.ref.flat
 
-import molecule.coreTests.dataModels.core.ref.dsl.Refs._
+import molecule.coreTests.dataModels.core.dsl.Refs._
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._

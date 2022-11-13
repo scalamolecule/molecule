@@ -2,7 +2,7 @@
 package molecule.db.datomic.test.exprSet
 
 import java.util.UUID
-import molecule.coreTests.dataModels.core.types.dsl.TypesSet._
+import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
@@ -15,286 +15,286 @@ object ExprSet_UUID_ extends DatomicTestSuite {
 
     "Mandatory" - {
 
-      "attr" - typesSet { implicit conn =>
+      "attr" - types { implicit conn =>
         val a = (1, Set(uuid1, uuid2))
         val b = (2, Set(uuid2, uuid3, uuid4))
-        NsSet.n.uuids.insert(List(a, b)).transact
+        Ns.n.uuids.insert(List(a, b)).transact
 
-        NsSet.n.a1.uuids.query.get ==> List(a, b)
+        Ns.n.a1.uuids.query.get ==> List(a, b)
       }
 
 
-      "apply" - typesSet { implicit conn =>
+      "apply" - types { implicit conn =>
         val a = (1, Set(uuid1, uuid2))
         val b = (2, Set(uuid2, uuid3, uuid4))
-        NsSet.n.uuids.insert(List(a, b)).transact
+        Ns.n.uuids.insert(List(a, b)).transact
 
         // Sets with one or more values matching
 
         // "Has this value"
-        NsSet.n.a1.uuids(uuid0).query.get ==> List()
-        NsSet.n.a1.uuids(uuid1).query.get ==> List(a)
-        NsSet.n.a1.uuids(uuid2).query.get ==> List(a, b)
-        NsSet.n.a1.uuids(uuid3).query.get ==> List(b)
+        Ns.n.a1.uuids(uuid0).query.get ==> List()
+        Ns.n.a1.uuids(uuid1).query.get ==> List(a)
+        Ns.n.a1.uuids(uuid2).query.get ==> List(a, b)
+        Ns.n.a1.uuids(uuid3).query.get ==> List(b)
         // Same as
-        NsSet.n.a1.uuids(Seq(uuid0)).query.get ==> List()
-        NsSet.n.a1.uuids(Seq(uuid1)).query.get ==> List(a)
-        NsSet.n.a1.uuids(Seq(uuid2)).query.get ==> List(a, b)
-        NsSet.n.a1.uuids(Seq(uuid3)).query.get ==> List(b)
+        Ns.n.a1.uuids(Seq(uuid0)).query.get ==> List()
+        Ns.n.a1.uuids(Seq(uuid1)).query.get ==> List(a)
+        Ns.n.a1.uuids(Seq(uuid2)).query.get ==> List(a, b)
+        Ns.n.a1.uuids(Seq(uuid3)).query.get ==> List(b)
 
 
         // OR semantics when multiple values
 
         // "Has this OR that"
-        NsSet.n.a1.uuids(uuid1, uuid2).query.get ==> List(a, b)
-        NsSet.n.a1.uuids(uuid1, uuid3).query.get ==> List(a, b)
-        NsSet.n.a1.uuids(uuid2, uuid3).query.get ==> List(a, b)
-        NsSet.n.a1.uuids(uuid1, uuid2, uuid3).query.get ==> List(a, b)
+        Ns.n.a1.uuids(uuid1, uuid2).query.get ==> List(a, b)
+        Ns.n.a1.uuids(uuid1, uuid3).query.get ==> List(a, b)
+        Ns.n.a1.uuids(uuid2, uuid3).query.get ==> List(a, b)
+        Ns.n.a1.uuids(uuid1, uuid2, uuid3).query.get ==> List(a, b)
         // Same as
-        NsSet.n.a1.uuids(Seq(uuid1, uuid2)).query.get ==> List(a, b)
-        NsSet.n.a1.uuids(Seq(uuid1, uuid3)).query.get ==> List(a, b)
-        NsSet.n.a1.uuids(Seq(uuid2, uuid3)).query.get ==> List(a, b)
-        NsSet.n.a1.uuids(Seq(uuid1, uuid2, uuid3)).query.get ==> List(a, b)
+        Ns.n.a1.uuids(Seq(uuid1, uuid2)).query.get ==> List(a, b)
+        Ns.n.a1.uuids(Seq(uuid1, uuid3)).query.get ==> List(a, b)
+        Ns.n.a1.uuids(Seq(uuid2, uuid3)).query.get ==> List(a, b)
+        Ns.n.a1.uuids(Seq(uuid1, uuid2, uuid3)).query.get ==> List(a, b)
 
 
         // AND semantics when multiple values in a _Set_
 
         // "Has this AND that"
-        NsSet.n.a1.uuids(Set(uuid1)).query.get ==> List(a)
-        NsSet.n.a1.uuids(Set(uuid1, uuid2)).query.get ==> List(a)
-        NsSet.n.a1.uuids(Set(uuid1, uuid2, uuid3)).query.get ==> List()
-        NsSet.n.a1.uuids(Set(uuid2)).query.get ==> List(a, b)
-        NsSet.n.a1.uuids(Set(uuid2, uuid3)).query.get ==> List(b)
-        NsSet.n.a1.uuids(Set(uuid2, uuid3, uuid4)).query.get ==> List(b)
+        Ns.n.a1.uuids(Set(uuid1)).query.get ==> List(a)
+        Ns.n.a1.uuids(Set(uuid1, uuid2)).query.get ==> List(a)
+        Ns.n.a1.uuids(Set(uuid1, uuid2, uuid3)).query.get ==> List()
+        Ns.n.a1.uuids(Set(uuid2)).query.get ==> List(a, b)
+        Ns.n.a1.uuids(Set(uuid2, uuid3)).query.get ==> List(b)
+        Ns.n.a1.uuids(Set(uuid2, uuid3, uuid4)).query.get ==> List(b)
         // Same as
-        NsSet.n.a1.uuids(Seq(Set(uuid1))).query.get ==> List(a)
-        NsSet.n.a1.uuids(Seq(Set(uuid1, uuid2))).query.get ==> List(a)
-        NsSet.n.a1.uuids(Seq(Set(uuid1, uuid2, uuid3))).query.get ==> List()
-        NsSet.n.a1.uuids(Seq(Set(uuid2))).query.get ==> List(a, b)
-        NsSet.n.a1.uuids(Seq(Set(uuid2, uuid3))).query.get ==> List(b)
-        NsSet.n.a1.uuids(Seq(Set(uuid2, uuid3, uuid4))).query.get ==> List(b)
+        Ns.n.a1.uuids(Seq(Set(uuid1))).query.get ==> List(a)
+        Ns.n.a1.uuids(Seq(Set(uuid1, uuid2))).query.get ==> List(a)
+        Ns.n.a1.uuids(Seq(Set(uuid1, uuid2, uuid3))).query.get ==> List()
+        Ns.n.a1.uuids(Seq(Set(uuid2))).query.get ==> List(a, b)
+        Ns.n.a1.uuids(Seq(Set(uuid2, uuid3))).query.get ==> List(b)
+        Ns.n.a1.uuids(Seq(Set(uuid2, uuid3, uuid4))).query.get ==> List(b)
 
 
         // AND/OR semantics with multiple Sets
 
         // "(has this AND that) OR (has this AND that)"
-        NsSet.n.a1.uuids(Set(uuid1, uuid2), Set(uuid0)).query.get ==> List(a)
-        NsSet.n.a1.uuids(Set(uuid1, uuid2), Set(uuid0, uuid3)).query.get ==> List(a)
-        NsSet.n.a1.uuids(Set(uuid1, uuid2), Set(uuid2, uuid3)).query.get ==> List(a, b)
-        NsSet.n.a1.uuids(Set(uuid1, uuid2), Set(uuid2, uuid3, uuid4)).query.get ==> List(a, b)
+        Ns.n.a1.uuids(Set(uuid1, uuid2), Set(uuid0)).query.get ==> List(a)
+        Ns.n.a1.uuids(Set(uuid1, uuid2), Set(uuid0, uuid3)).query.get ==> List(a)
+        Ns.n.a1.uuids(Set(uuid1, uuid2), Set(uuid2, uuid3)).query.get ==> List(a, b)
+        Ns.n.a1.uuids(Set(uuid1, uuid2), Set(uuid2, uuid3, uuid4)).query.get ==> List(a, b)
         // Same as
-        NsSet.n.a1.uuids(Seq(Set(uuid1, uuid2), Set(uuid0))).query.get ==> List(a)
-        NsSet.n.a1.uuids(Seq(Set(uuid1, uuid2), Set(uuid0, uuid3))).query.get ==> List(a)
-        NsSet.n.a1.uuids(Seq(Set(uuid1, uuid2), Set(uuid2, uuid3))).query.get ==> List(a, b)
-        NsSet.n.a1.uuids(Seq(Set(uuid1, uuid2), Set(uuid2, uuid3, uuid4))).query.get ==> List(a, b)
+        Ns.n.a1.uuids(Seq(Set(uuid1, uuid2), Set(uuid0))).query.get ==> List(a)
+        Ns.n.a1.uuids(Seq(Set(uuid1, uuid2), Set(uuid0, uuid3))).query.get ==> List(a)
+        Ns.n.a1.uuids(Seq(Set(uuid1, uuid2), Set(uuid2, uuid3))).query.get ==> List(a, b)
+        Ns.n.a1.uuids(Seq(Set(uuid1, uuid2), Set(uuid2, uuid3, uuid4))).query.get ==> List(a, b)
 
 
         // Empty Seq/Sets match nothing
-        NsSet.n.a1.uuids(Set(uuid1, uuid2), Set.empty[UUID]).query.get ==> List(a)
-        NsSet.n.a1.uuids(Seq.empty[UUID]).query.get ==> List()
-        NsSet.n.a1.uuids(Set.empty[UUID]).query.get ==> List()
-        NsSet.n.a1.uuids(Seq.empty[Set[UUID]]).query.get ==> List()
+        Ns.n.a1.uuids(Set(uuid1, uuid2), Set.empty[UUID]).query.get ==> List(a)
+        Ns.n.a1.uuids(Seq.empty[UUID]).query.get ==> List()
+        Ns.n.a1.uuids(Set.empty[UUID]).query.get ==> List()
+        Ns.n.a1.uuids(Seq.empty[Set[UUID]]).query.get ==> List()
       }
 
 
-      "not" - typesSet { implicit conn =>
+      "not" - types { implicit conn =>
         val a = (1, Set(uuid1, uuid2))
         val b = (2, Set(uuid2, uuid3, uuid4))
-        NsSet.n.uuids.insert(List(a, b)).transact
+        Ns.n.uuids.insert(List(a, b)).transact
 
         // Sets without one or more values matching
 
         // "Doesn't have this value"
-        NsSet.n.a1.uuids.not(uuid0).query.get ==> List(a, b)
-        NsSet.n.a1.uuids.not(uuid1).query.get ==> List(b)
-        NsSet.n.a1.uuids.not(uuid2).query.get ==> List()
-        NsSet.n.a1.uuids.not(uuid3).query.get ==> List(a)
-        NsSet.n.a1.uuids.not(uuid4).query.get ==> List(a)
-        NsSet.n.a1.uuids.not(uuid5).query.get ==> List(a, b)
+        Ns.n.a1.uuids.not(uuid0).query.get ==> List(a, b)
+        Ns.n.a1.uuids.not(uuid1).query.get ==> List(b)
+        Ns.n.a1.uuids.not(uuid2).query.get ==> List()
+        Ns.n.a1.uuids.not(uuid3).query.get ==> List(a)
+        Ns.n.a1.uuids.not(uuid4).query.get ==> List(a)
+        Ns.n.a1.uuids.not(uuid5).query.get ==> List(a, b)
         // Same as
-        NsSet.n.a1.uuids.not(Seq(uuid0)).query.get ==> List(a, b)
-        NsSet.n.a1.uuids.not(Seq(uuid1)).query.get ==> List(b)
-        NsSet.n.a1.uuids.not(Seq(uuid2)).query.get ==> List()
-        NsSet.n.a1.uuids.not(Seq(uuid3)).query.get ==> List(a)
-        NsSet.n.a1.uuids.not(Seq(uuid4)).query.get ==> List(a)
-        NsSet.n.a1.uuids.not(Seq(uuid5)).query.get ==> List(a, b)
+        Ns.n.a1.uuids.not(Seq(uuid0)).query.get ==> List(a, b)
+        Ns.n.a1.uuids.not(Seq(uuid1)).query.get ==> List(b)
+        Ns.n.a1.uuids.not(Seq(uuid2)).query.get ==> List()
+        Ns.n.a1.uuids.not(Seq(uuid3)).query.get ==> List(a)
+        Ns.n.a1.uuids.not(Seq(uuid4)).query.get ==> List(a)
+        Ns.n.a1.uuids.not(Seq(uuid5)).query.get ==> List(a, b)
 
 
         // OR semantics when multiple values
 
         // "Not (has this OR that)"
-        NsSet.n.a1.uuids.not(uuid1, uuid2).query.get ==> List()
-        NsSet.n.a1.uuids.not(uuid1, uuid3).query.get ==> List()
-        NsSet.n.a1.uuids.not(uuid1, uuid4).query.get ==> List()
-        NsSet.n.a1.uuids.not(uuid1, uuid5).query.get ==> List(b)
+        Ns.n.a1.uuids.not(uuid1, uuid2).query.get ==> List()
+        Ns.n.a1.uuids.not(uuid1, uuid3).query.get ==> List()
+        Ns.n.a1.uuids.not(uuid1, uuid4).query.get ==> List()
+        Ns.n.a1.uuids.not(uuid1, uuid5).query.get ==> List(b)
         // Same as
-        NsSet.n.a1.uuids.not(Seq(uuid1, uuid2)).query.get ==> List()
-        NsSet.n.a1.uuids.not(Seq(uuid1, uuid3)).query.get ==> List()
-        NsSet.n.a1.uuids.not(Seq(uuid1, uuid4)).query.get ==> List()
-        NsSet.n.a1.uuids.not(Seq(uuid1, uuid5)).query.get ==> List(b)
+        Ns.n.a1.uuids.not(Seq(uuid1, uuid2)).query.get ==> List()
+        Ns.n.a1.uuids.not(Seq(uuid1, uuid3)).query.get ==> List()
+        Ns.n.a1.uuids.not(Seq(uuid1, uuid4)).query.get ==> List()
+        Ns.n.a1.uuids.not(Seq(uuid1, uuid5)).query.get ==> List(b)
 
 
         // AND semantics when multiple values in a _Set_
 
         // "Not (has this AND that)"
-        NsSet.n.a1.uuids.not(Set(uuid1)).query.get ==> List(b)
-        NsSet.n.a1.uuids.not(Set(uuid1, uuid2)).query.get ==> List(b)
-        NsSet.n.a1.uuids.not(Set(uuid1, uuid2, uuid3)).query.get ==> List(a, b)
-        NsSet.n.a1.uuids.not(Set(uuid2)).query.get ==> List()
-        NsSet.n.a1.uuids.not(Set(uuid2, uuid3)).query.get ==> List(a)
-        NsSet.n.a1.uuids.not(Set(uuid2, uuid3, uuid4)).query.get ==> List(a)
+        Ns.n.a1.uuids.not(Set(uuid1)).query.get ==> List(b)
+        Ns.n.a1.uuids.not(Set(uuid1, uuid2)).query.get ==> List(b)
+        Ns.n.a1.uuids.not(Set(uuid1, uuid2, uuid3)).query.get ==> List(a, b)
+        Ns.n.a1.uuids.not(Set(uuid2)).query.get ==> List()
+        Ns.n.a1.uuids.not(Set(uuid2, uuid3)).query.get ==> List(a)
+        Ns.n.a1.uuids.not(Set(uuid2, uuid3, uuid4)).query.get ==> List(a)
         // Same as
-        NsSet.n.a1.uuids.not(Seq(Set(uuid1))).query.get ==> List(b)
-        NsSet.n.a1.uuids.not(Seq(Set(uuid1, uuid2))).query.get ==> List(b)
-        NsSet.n.a1.uuids.not(Seq(Set(uuid1, uuid2, uuid3))).query.get ==> List(a, b)
-        NsSet.n.a1.uuids.not(Seq(Set(uuid2))).query.get ==> List()
-        NsSet.n.a1.uuids.not(Seq(Set(uuid2, uuid3))).query.get ==> List(a)
-        NsSet.n.a1.uuids.not(Seq(Set(uuid2, uuid3, uuid4))).query.get ==> List(a)
+        Ns.n.a1.uuids.not(Seq(Set(uuid1))).query.get ==> List(b)
+        Ns.n.a1.uuids.not(Seq(Set(uuid1, uuid2))).query.get ==> List(b)
+        Ns.n.a1.uuids.not(Seq(Set(uuid1, uuid2, uuid3))).query.get ==> List(a, b)
+        Ns.n.a1.uuids.not(Seq(Set(uuid2))).query.get ==> List()
+        Ns.n.a1.uuids.not(Seq(Set(uuid2, uuid3))).query.get ==> List(a)
+        Ns.n.a1.uuids.not(Seq(Set(uuid2, uuid3, uuid4))).query.get ==> List(a)
 
 
         // AND/OR semantics with multiple Sets
 
         // "Not ((has this AND that) OR (has this AND that))"
-        NsSet.n.a1.uuids.not(Set(uuid1, uuid2), Set(uuid0)).query.get ==> List(b)
-        NsSet.n.a1.uuids.not(Set(uuid1, uuid2), Set(uuid0, uuid3)).query.get ==> List(b)
-        NsSet.n.a1.uuids.not(Set(uuid1, uuid2), Set(uuid2, uuid3)).query.get ==> List()
-        NsSet.n.a1.uuids.not(Set(uuid1, uuid2), Set(uuid2, uuid3, uuid4)).query.get ==> List()
+        Ns.n.a1.uuids.not(Set(uuid1, uuid2), Set(uuid0)).query.get ==> List(b)
+        Ns.n.a1.uuids.not(Set(uuid1, uuid2), Set(uuid0, uuid3)).query.get ==> List(b)
+        Ns.n.a1.uuids.not(Set(uuid1, uuid2), Set(uuid2, uuid3)).query.get ==> List()
+        Ns.n.a1.uuids.not(Set(uuid1, uuid2), Set(uuid2, uuid3, uuid4)).query.get ==> List()
         // Same as
-        NsSet.n.a1.uuids.not(Seq(Set(uuid1, uuid2), Set(uuid0))).query.get ==> List(b)
-        NsSet.n.a1.uuids.not(Seq(Set(uuid1, uuid2), Set(uuid0, uuid3))).query.get ==> List(b)
-        NsSet.n.a1.uuids.not(Seq(Set(uuid1, uuid2), Set(uuid2, uuid3))).query.get ==> List()
-        NsSet.n.a1.uuids.not(Seq(Set(uuid1, uuid2), Set(uuid2, uuid3, uuid4))).query.get ==> List()
+        Ns.n.a1.uuids.not(Seq(Set(uuid1, uuid2), Set(uuid0))).query.get ==> List(b)
+        Ns.n.a1.uuids.not(Seq(Set(uuid1, uuid2), Set(uuid0, uuid3))).query.get ==> List(b)
+        Ns.n.a1.uuids.not(Seq(Set(uuid1, uuid2), Set(uuid2, uuid3))).query.get ==> List()
+        Ns.n.a1.uuids.not(Seq(Set(uuid1, uuid2), Set(uuid2, uuid3, uuid4))).query.get ==> List()
 
 
         // Negating empty Seqs/Sets has no effect
-        NsSet.n.a1.uuids.not(Set(uuid1, uuid2), Set.empty[UUID]).query.get ==> List(b)
-        NsSet.n.a1.uuids.not(Seq.empty[UUID]).query.get ==> List(a, b)
-        NsSet.n.a1.uuids.not(Set.empty[UUID]).query.get ==> List(a, b)
-        NsSet.n.a1.uuids.not(Seq.empty[Set[UUID]]).query.get ==> List(a, b)
-        NsSet.n.a1.uuids.not(Seq(Set.empty[UUID])).query.get ==> List(a, b)
+        Ns.n.a1.uuids.not(Set(uuid1, uuid2), Set.empty[UUID]).query.get ==> List(b)
+        Ns.n.a1.uuids.not(Seq.empty[UUID]).query.get ==> List(a, b)
+        Ns.n.a1.uuids.not(Set.empty[UUID]).query.get ==> List(a, b)
+        Ns.n.a1.uuids.not(Seq.empty[Set[UUID]]).query.get ==> List(a, b)
+        Ns.n.a1.uuids.not(Seq(Set.empty[UUID])).query.get ==> List(a, b)
       }
 
 
-      "==" - typesSet { implicit conn =>
+      "==" - types { implicit conn =>
         val a = (1, Set(uuid1, uuid2))
         val b = (2, Set(uuid2, uuid3, uuid4))
-        NsSet.n.uuids.insert(List(a, b)).transact
+        Ns.n.uuids.insert(List(a, b)).transact
 
         // Exact Set matches
 
         // AND semantics
         // "Is exactly this AND that"
-        NsSet.n.a1.uuids.==(Set(uuid1)).query.get ==> List()
-        NsSet.n.a1.uuids.==(Set(uuid1, uuid2)).query.get ==> List(a) // include exact match
-        NsSet.n.a1.uuids.==(Set(uuid1, uuid2, uuid3)).query.get ==> List()
+        Ns.n.a1.uuids.==(Set(uuid1)).query.get ==> List()
+        Ns.n.a1.uuids.==(Set(uuid1, uuid2)).query.get ==> List(a) // include exact match
+        Ns.n.a1.uuids.==(Set(uuid1, uuid2, uuid3)).query.get ==> List()
         // Same as
-        NsSet.n.a1.uuids.==(Seq(Set(uuid1))).query.get ==> List()
-        NsSet.n.a1.uuids.==(Seq(Set(uuid1, uuid2))).query.get ==> List(a)
-        NsSet.n.a1.uuids.==(Seq(Set(uuid1, uuid2, uuid3))).query.get ==> List()
+        Ns.n.a1.uuids.==(Seq(Set(uuid1))).query.get ==> List()
+        Ns.n.a1.uuids.==(Seq(Set(uuid1, uuid2))).query.get ==> List(a)
+        Ns.n.a1.uuids.==(Seq(Set(uuid1, uuid2, uuid3))).query.get ==> List()
 
 
         // AND/OR semantics with multiple Sets
 
         // "(exactly this AND that) OR (exactly this AND that)"
-        NsSet.n.a1.uuids.==(Set(uuid1), Set(uuid2, uuid3)).query.get ==> List()
-        NsSet.n.a1.uuids.==(Set(uuid1, uuid2), Set(uuid2, uuid3)).query.get ==> List(a)
-        NsSet.n.a1.uuids.==(Set(uuid1, uuid2), Set(uuid2, uuid3, uuid4)).query.get ==> List(a, b)
+        Ns.n.a1.uuids.==(Set(uuid1), Set(uuid2, uuid3)).query.get ==> List()
+        Ns.n.a1.uuids.==(Set(uuid1, uuid2), Set(uuid2, uuid3)).query.get ==> List(a)
+        Ns.n.a1.uuids.==(Set(uuid1, uuid2), Set(uuid2, uuid3, uuid4)).query.get ==> List(a, b)
         // Same as
-        NsSet.n.a1.uuids.==(Seq(Set(uuid1), Set(uuid2, uuid3))).query.get ==> List()
-        NsSet.n.a1.uuids.==(Seq(Set(uuid1, uuid2), Set(uuid2, uuid3))).query.get ==> List(a)
-        NsSet.n.a1.uuids.==(Seq(Set(uuid1, uuid2), Set(uuid2, uuid3, uuid4))).query.get ==> List(a, b)
+        Ns.n.a1.uuids.==(Seq(Set(uuid1), Set(uuid2, uuid3))).query.get ==> List()
+        Ns.n.a1.uuids.==(Seq(Set(uuid1, uuid2), Set(uuid2, uuid3))).query.get ==> List(a)
+        Ns.n.a1.uuids.==(Seq(Set(uuid1, uuid2), Set(uuid2, uuid3, uuid4))).query.get ==> List(a, b)
 
 
         // Empty Seq/Sets match nothing
-        NsSet.n.a1.uuids.==(Set(uuid1, uuid2), Set.empty[UUID]).query.get ==> List(a)
-        NsSet.n.a1.uuids.==(Set.empty[UUID], Set(uuid1, uuid2)).query.get ==> List(a)
-        NsSet.n.a1.uuids.==(Set.empty[UUID]).query.get ==> List()
-        NsSet.n.a1.uuids.==(Seq.empty[Set[UUID]]).query.get ==> List()
-        NsSet.n.a1.uuids.==(Seq(Set.empty[UUID])).query.get ==> List()
+        Ns.n.a1.uuids.==(Set(uuid1, uuid2), Set.empty[UUID]).query.get ==> List(a)
+        Ns.n.a1.uuids.==(Set.empty[UUID], Set(uuid1, uuid2)).query.get ==> List(a)
+        Ns.n.a1.uuids.==(Set.empty[UUID]).query.get ==> List()
+        Ns.n.a1.uuids.==(Seq.empty[Set[UUID]]).query.get ==> List()
+        Ns.n.a1.uuids.==(Seq(Set.empty[UUID])).query.get ==> List()
       }
 
 
-      "!=" - typesSet { implicit conn =>
+      "!=" - types { implicit conn =>
         val a = (1, Set(uuid1, uuid2))
         val b = (2, Set(uuid2, uuid3, uuid4))
-        NsSet.n.uuids.insert(List(a, b)).transact
+        Ns.n.uuids.insert(List(a, b)).transact
 
         // Exact Set non-matches
 
         // AND semantics
         // "Not (exactly this AND that)"
-        NsSet.n.a1.uuids.!=(Set(uuid1)).query.get ==> List(a, b)
-        NsSet.n.a1.uuids.!=(Set(uuid1, uuid2)).query.get ==> List(b) // exclude exact match
-        NsSet.n.a1.uuids.!=(Set(uuid1, uuid2, uuid3)).query.get ==> List(a, b)
+        Ns.n.a1.uuids.!=(Set(uuid1)).query.get ==> List(a, b)
+        Ns.n.a1.uuids.!=(Set(uuid1, uuid2)).query.get ==> List(b) // exclude exact match
+        Ns.n.a1.uuids.!=(Set(uuid1, uuid2, uuid3)).query.get ==> List(a, b)
         // Same as
-        NsSet.n.a1.uuids.!=(Seq(Set(uuid1))).query.get ==> List(a, b)
-        NsSet.n.a1.uuids.!=(Seq(Set(uuid1, uuid2))).query.get ==> List(b)
-        NsSet.n.a1.uuids.!=(Seq(Set(uuid1, uuid2, uuid3))).query.get ==> List(a, b)
+        Ns.n.a1.uuids.!=(Seq(Set(uuid1))).query.get ==> List(a, b)
+        Ns.n.a1.uuids.!=(Seq(Set(uuid1, uuid2))).query.get ==> List(b)
+        Ns.n.a1.uuids.!=(Seq(Set(uuid1, uuid2, uuid3))).query.get ==> List(a, b)
 
 
         // AND/OR semantics with multiple Sets
 
         // "Not (exactly this AND that) OR (exactly this AND that)"
-        NsSet.n.a1.uuids.!=(Set(uuid1), Set(uuid2, uuid3)).query.get ==> List(a, b)
-        NsSet.n.a1.uuids.!=(Set(uuid1, uuid2), Set(uuid2, uuid3)).query.get ==> List(b)
-        NsSet.n.a1.uuids.!=(Set(uuid1, uuid2), Set(uuid2, uuid3, uuid4)).query.get ==> List()
+        Ns.n.a1.uuids.!=(Set(uuid1), Set(uuid2, uuid3)).query.get ==> List(a, b)
+        Ns.n.a1.uuids.!=(Set(uuid1, uuid2), Set(uuid2, uuid3)).query.get ==> List(b)
+        Ns.n.a1.uuids.!=(Set(uuid1, uuid2), Set(uuid2, uuid3, uuid4)).query.get ==> List()
         // Same as
-        NsSet.n.a1.uuids.!=(Seq(Set(uuid1), Set(uuid2, uuid3))).query.get ==> List(a, b)
-        NsSet.n.a1.uuids.!=(Seq(Set(uuid1, uuid2), Set(uuid2, uuid3))).query.get ==> List(b)
-        NsSet.n.a1.uuids.!=(Seq(Set(uuid1, uuid2), Set(uuid2, uuid3, uuid4))).query.get ==> List()
+        Ns.n.a1.uuids.!=(Seq(Set(uuid1), Set(uuid2, uuid3))).query.get ==> List(a, b)
+        Ns.n.a1.uuids.!=(Seq(Set(uuid1, uuid2), Set(uuid2, uuid3))).query.get ==> List(b)
+        Ns.n.a1.uuids.!=(Seq(Set(uuid1, uuid2), Set(uuid2, uuid3, uuid4))).query.get ==> List()
 
 
         // Empty Seq/Sets
-        NsSet.n.a1.uuids.!=(Seq(Set(uuid1, uuid2), Set.empty[UUID])).query.get ==> List(b)
-        NsSet.n.a1.uuids.!=(Set.empty[UUID]).query.get ==> List(a, b)
-        NsSet.n.a1.uuids.!=(Seq.empty[Set[UUID]]).query.get ==> List(a, b)
+        Ns.n.a1.uuids.!=(Seq(Set(uuid1, uuid2), Set.empty[UUID])).query.get ==> List(b)
+        Ns.n.a1.uuids.!=(Set.empty[UUID]).query.get ==> List(a, b)
+        Ns.n.a1.uuids.!=(Seq.empty[Set[UUID]]).query.get ==> List(a, b)
       }
 
 
-      "compare" - typesSet { implicit conn =>
+      "compare" - types { implicit conn =>
         val a = (1, Set(uuid1, uuid2))
         val b = (2, Set(uuid2, uuid3, uuid4))
-        NsSet.n.uuids.insert(List(a, b)).transact
+        Ns.n.uuids.insert(List(a, b)).transact
 
-        NsSet.n.a1.uuids.<(uuid0).query.get ==> List()
-        NsSet.n.a1.uuids.<(uuid1).query.get ==> List()
-        NsSet.n.a1.uuids.<(uuid2).query.get ==> List(a)
-        NsSet.n.a1.uuids.<(uuid3).query.get ==> List(a, b)
+        Ns.n.a1.uuids.<(uuid0).query.get ==> List()
+        Ns.n.a1.uuids.<(uuid1).query.get ==> List()
+        Ns.n.a1.uuids.<(uuid2).query.get ==> List(a)
+        Ns.n.a1.uuids.<(uuid3).query.get ==> List(a, b)
 
-        NsSet.n.a1.uuids.<=(uuid0).query.get ==> List()
-        NsSet.n.a1.uuids.<=(uuid1).query.get ==> List(a)
-        NsSet.n.a1.uuids.<=(uuid2).query.get ==> List(a, b)
-        NsSet.n.a1.uuids.<=(uuid3).query.get ==> List(a, b)
+        Ns.n.a1.uuids.<=(uuid0).query.get ==> List()
+        Ns.n.a1.uuids.<=(uuid1).query.get ==> List(a)
+        Ns.n.a1.uuids.<=(uuid2).query.get ==> List(a, b)
+        Ns.n.a1.uuids.<=(uuid3).query.get ==> List(a, b)
 
-        NsSet.n.a1.uuids.>(uuid0).query.get ==> List(a, b)
-        NsSet.n.a1.uuids.>(uuid1).query.get ==> List(a, b)
-        NsSet.n.a1.uuids.>(uuid2).query.get ==> List(b)
-        NsSet.n.a1.uuids.>(uuid3).query.get ==> List(b)
+        Ns.n.a1.uuids.>(uuid0).query.get ==> List(a, b)
+        Ns.n.a1.uuids.>(uuid1).query.get ==> List(a, b)
+        Ns.n.a1.uuids.>(uuid2).query.get ==> List(b)
+        Ns.n.a1.uuids.>(uuid3).query.get ==> List(b)
 
-        NsSet.n.a1.uuids.>=(uuid0).query.get ==> List(a, b)
-        NsSet.n.a1.uuids.>=(uuid1).query.get ==> List(a, b)
-        NsSet.n.a1.uuids.>=(uuid2).query.get ==> List(a, b)
-        NsSet.n.a1.uuids.>=(uuid3).query.get ==> List(b)
+        Ns.n.a1.uuids.>=(uuid0).query.get ==> List(a, b)
+        Ns.n.a1.uuids.>=(uuid1).query.get ==> List(a, b)
+        Ns.n.a1.uuids.>=(uuid2).query.get ==> List(a, b)
+        Ns.n.a1.uuids.>=(uuid3).query.get ==> List(b)
       }
     }
 
 
     "Tacit" - {
 
-      "attr" - typesSet { implicit conn =>
+      "attr" - types { implicit conn =>
         val (a, b) = (1, 2)
-        NsSet.n.uuids.insert(List(
+        Ns.n.uuids.insert(List(
           (a, Set(uuid1, uuid2)),
           (b, Set(uuid2, uuid3, uuid4))
         )).transact
 
-        NsSet.n.a1.uuids_.query.get ==> List(a, b)
+        Ns.n.a1.uuids_.query.get ==> List(a, b)
       }
 
 
-      "apply" - typesSet { implicit conn =>
+      "apply" - types { implicit conn =>
         val (a, b) = (1, 2)
-        NsSet.n.uuids.insert(List(
+        Ns.n.uuids.insert(List(
           (a, Set(uuid1, uuid2)),
           (b, Set(uuid2, uuid3, uuid4))
         )).transact
@@ -302,74 +302,74 @@ object ExprSet_UUID_ extends DatomicTestSuite {
         // Sets with one or more values matching
 
         // "Has this value"
-        NsSet.n.a1.uuids_(uuid0).query.get ==> List()
-        NsSet.n.a1.uuids_(uuid1).query.get ==> List(a)
-        NsSet.n.a1.uuids_(uuid2).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_(uuid3).query.get ==> List(b)
+        Ns.n.a1.uuids_(uuid0).query.get ==> List()
+        Ns.n.a1.uuids_(uuid1).query.get ==> List(a)
+        Ns.n.a1.uuids_(uuid2).query.get ==> List(a, b)
+        Ns.n.a1.uuids_(uuid3).query.get ==> List(b)
         // Same as
-        NsSet.n.a1.uuids_(Seq(uuid0)).query.get ==> List()
-        NsSet.n.a1.uuids_(Seq(uuid1)).query.get ==> List(a)
-        NsSet.n.a1.uuids_(Seq(uuid2)).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_(Seq(uuid3)).query.get ==> List(b)
+        Ns.n.a1.uuids_(Seq(uuid0)).query.get ==> List()
+        Ns.n.a1.uuids_(Seq(uuid1)).query.get ==> List(a)
+        Ns.n.a1.uuids_(Seq(uuid2)).query.get ==> List(a, b)
+        Ns.n.a1.uuids_(Seq(uuid3)).query.get ==> List(b)
 
 
         // OR semantics when multiple values
 
         // "Has this OR that"
-        NsSet.n.a1.uuids_(uuid1, uuid2).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_(uuid1, uuid3).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_(uuid2, uuid3).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_(uuid1, uuid2, uuid3).query.get ==> List(a, b)
+        Ns.n.a1.uuids_(uuid1, uuid2).query.get ==> List(a, b)
+        Ns.n.a1.uuids_(uuid1, uuid3).query.get ==> List(a, b)
+        Ns.n.a1.uuids_(uuid2, uuid3).query.get ==> List(a, b)
+        Ns.n.a1.uuids_(uuid1, uuid2, uuid3).query.get ==> List(a, b)
         // Same as
-        NsSet.n.a1.uuids_(Seq(uuid1, uuid2)).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_(Seq(uuid1, uuid3)).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_(Seq(uuid2, uuid3)).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_(Seq(uuid1, uuid2, uuid3)).query.get ==> List(a, b)
+        Ns.n.a1.uuids_(Seq(uuid1, uuid2)).query.get ==> List(a, b)
+        Ns.n.a1.uuids_(Seq(uuid1, uuid3)).query.get ==> List(a, b)
+        Ns.n.a1.uuids_(Seq(uuid2, uuid3)).query.get ==> List(a, b)
+        Ns.n.a1.uuids_(Seq(uuid1, uuid2, uuid3)).query.get ==> List(a, b)
 
 
         // AND semantics when multiple values in a _Set_
 
         // "Has this AND that"
-        NsSet.n.a1.uuids_(Set(uuid1)).query.get ==> List(a)
-        NsSet.n.a1.uuids_(Set(uuid1, uuid2)).query.get ==> List(a)
-        NsSet.n.a1.uuids_(Set(uuid1, uuid2, uuid3)).query.get ==> List()
-        NsSet.n.a1.uuids_(Set(uuid2)).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_(Set(uuid2, uuid3)).query.get ==> List(b)
-        NsSet.n.a1.uuids_(Set(uuid2, uuid3, uuid4)).query.get ==> List(b)
+        Ns.n.a1.uuids_(Set(uuid1)).query.get ==> List(a)
+        Ns.n.a1.uuids_(Set(uuid1, uuid2)).query.get ==> List(a)
+        Ns.n.a1.uuids_(Set(uuid1, uuid2, uuid3)).query.get ==> List()
+        Ns.n.a1.uuids_(Set(uuid2)).query.get ==> List(a, b)
+        Ns.n.a1.uuids_(Set(uuid2, uuid3)).query.get ==> List(b)
+        Ns.n.a1.uuids_(Set(uuid2, uuid3, uuid4)).query.get ==> List(b)
         // Same as
-        NsSet.n.a1.uuids_(Seq(Set(uuid1))).query.get ==> List(a)
-        NsSet.n.a1.uuids_(Seq(Set(uuid1, uuid2))).query.get ==> List(a)
-        NsSet.n.a1.uuids_(Seq(Set(uuid1, uuid2, uuid3))).query.get ==> List()
-        NsSet.n.a1.uuids_(Seq(Set(uuid2))).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_(Seq(Set(uuid2, uuid3))).query.get ==> List(b)
-        NsSet.n.a1.uuids_(Seq(Set(uuid2, uuid3, uuid4))).query.get ==> List(b)
+        Ns.n.a1.uuids_(Seq(Set(uuid1))).query.get ==> List(a)
+        Ns.n.a1.uuids_(Seq(Set(uuid1, uuid2))).query.get ==> List(a)
+        Ns.n.a1.uuids_(Seq(Set(uuid1, uuid2, uuid3))).query.get ==> List()
+        Ns.n.a1.uuids_(Seq(Set(uuid2))).query.get ==> List(a, b)
+        Ns.n.a1.uuids_(Seq(Set(uuid2, uuid3))).query.get ==> List(b)
+        Ns.n.a1.uuids_(Seq(Set(uuid2, uuid3, uuid4))).query.get ==> List(b)
 
 
         // AND/OR semantics with multiple Sets
 
         // "(has this AND that) OR (has this AND that)"
-        NsSet.n.a1.uuids_(Set(uuid1, uuid2), Set(uuid0)).query.get ==> List(a)
-        NsSet.n.a1.uuids_(Set(uuid1, uuid2), Set(uuid0, uuid3)).query.get ==> List(a)
-        NsSet.n.a1.uuids_(Set(uuid1, uuid2), Set(uuid2, uuid3)).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_(Set(uuid1, uuid2), Set(uuid2, uuid3, uuid4)).query.get ==> List(a, b)
+        Ns.n.a1.uuids_(Set(uuid1, uuid2), Set(uuid0)).query.get ==> List(a)
+        Ns.n.a1.uuids_(Set(uuid1, uuid2), Set(uuid0, uuid3)).query.get ==> List(a)
+        Ns.n.a1.uuids_(Set(uuid1, uuid2), Set(uuid2, uuid3)).query.get ==> List(a, b)
+        Ns.n.a1.uuids_(Set(uuid1, uuid2), Set(uuid2, uuid3, uuid4)).query.get ==> List(a, b)
         // Same as
-        NsSet.n.a1.uuids_(Seq(Set(uuid1, uuid2), Set(uuid0))).query.get ==> List(a)
-        NsSet.n.a1.uuids_(Seq(Set(uuid1, uuid2), Set(uuid0, uuid3))).query.get ==> List(a)
-        NsSet.n.a1.uuids_(Seq(Set(uuid1, uuid2), Set(uuid2, uuid3))).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_(Seq(Set(uuid1, uuid2), Set(uuid2, uuid3, uuid4))).query.get ==> List(a, b)
+        Ns.n.a1.uuids_(Seq(Set(uuid1, uuid2), Set(uuid0))).query.get ==> List(a)
+        Ns.n.a1.uuids_(Seq(Set(uuid1, uuid2), Set(uuid0, uuid3))).query.get ==> List(a)
+        Ns.n.a1.uuids_(Seq(Set(uuid1, uuid2), Set(uuid2, uuid3))).query.get ==> List(a, b)
+        Ns.n.a1.uuids_(Seq(Set(uuid1, uuid2), Set(uuid2, uuid3, uuid4))).query.get ==> List(a, b)
 
 
         // Empty Seq/Sets match nothing
-        NsSet.n.a1.uuids_(Set(uuid1, uuid2), Set.empty[UUID]).query.get ==> List(a)
-        NsSet.n.a1.uuids_(Seq.empty[UUID]).query.get ==> List()
-        NsSet.n.a1.uuids_(Set.empty[UUID]).query.get ==> List()
-        NsSet.n.a1.uuids_(Seq.empty[Set[UUID]]).query.get ==> List()
+        Ns.n.a1.uuids_(Set(uuid1, uuid2), Set.empty[UUID]).query.get ==> List(a)
+        Ns.n.a1.uuids_(Seq.empty[UUID]).query.get ==> List()
+        Ns.n.a1.uuids_(Set.empty[UUID]).query.get ==> List()
+        Ns.n.a1.uuids_(Seq.empty[Set[UUID]]).query.get ==> List()
       }
 
 
-      "not" - typesSet { implicit conn =>
+      "not" - types { implicit conn =>
         val (a, b) = (1, 2)
-        NsSet.n.uuids.insert(List(
+        Ns.n.uuids.insert(List(
           (a, Set(uuid1, uuid2)),
           (b, Set(uuid2, uuid3, uuid4))
         )).transact
@@ -377,79 +377,79 @@ object ExprSet_UUID_ extends DatomicTestSuite {
         // Sets without one or more values matching
 
         // "Doesn't have this value"
-        NsSet.n.a1.uuids_.not(uuid0).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_.not(uuid1).query.get ==> List(b)
-        NsSet.n.a1.uuids_.not(uuid2).query.get ==> List()
-        NsSet.n.a1.uuids_.not(uuid3).query.get ==> List(a)
-        NsSet.n.a1.uuids_.not(uuid4).query.get ==> List(a)
-        NsSet.n.a1.uuids_.not(uuid5).query.get ==> List(a, b)
+        Ns.n.a1.uuids_.not(uuid0).query.get ==> List(a, b)
+        Ns.n.a1.uuids_.not(uuid1).query.get ==> List(b)
+        Ns.n.a1.uuids_.not(uuid2).query.get ==> List()
+        Ns.n.a1.uuids_.not(uuid3).query.get ==> List(a)
+        Ns.n.a1.uuids_.not(uuid4).query.get ==> List(a)
+        Ns.n.a1.uuids_.not(uuid5).query.get ==> List(a, b)
         // Same as
-        NsSet.n.a1.uuids_.not(Seq(uuid0)).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_.not(Seq(uuid1)).query.get ==> List(b)
-        NsSet.n.a1.uuids_.not(Seq(uuid2)).query.get ==> List()
-        NsSet.n.a1.uuids_.not(Seq(uuid3)).query.get ==> List(a)
-        NsSet.n.a1.uuids_.not(Seq(uuid4)).query.get ==> List(a)
-        NsSet.n.a1.uuids_.not(Seq(uuid5)).query.get ==> List(a, b)
+        Ns.n.a1.uuids_.not(Seq(uuid0)).query.get ==> List(a, b)
+        Ns.n.a1.uuids_.not(Seq(uuid1)).query.get ==> List(b)
+        Ns.n.a1.uuids_.not(Seq(uuid2)).query.get ==> List()
+        Ns.n.a1.uuids_.not(Seq(uuid3)).query.get ==> List(a)
+        Ns.n.a1.uuids_.not(Seq(uuid4)).query.get ==> List(a)
+        Ns.n.a1.uuids_.not(Seq(uuid5)).query.get ==> List(a, b)
 
 
         // OR semantics when multiple values
 
         // "Not (has this OR that)"
-        NsSet.n.a1.uuids_.not(uuid1, uuid2).query.get ==> List()
-        NsSet.n.a1.uuids_.not(uuid1, uuid3).query.get ==> List()
-        NsSet.n.a1.uuids_.not(uuid1, uuid4).query.get ==> List()
-        NsSet.n.a1.uuids_.not(uuid1, uuid5).query.get ==> List(b)
+        Ns.n.a1.uuids_.not(uuid1, uuid2).query.get ==> List()
+        Ns.n.a1.uuids_.not(uuid1, uuid3).query.get ==> List()
+        Ns.n.a1.uuids_.not(uuid1, uuid4).query.get ==> List()
+        Ns.n.a1.uuids_.not(uuid1, uuid5).query.get ==> List(b)
         // Same as
-        NsSet.n.a1.uuids_.not(Seq(uuid1, uuid2)).query.get ==> List()
-        NsSet.n.a1.uuids_.not(Seq(uuid1, uuid3)).query.get ==> List()
-        NsSet.n.a1.uuids_.not(Seq(uuid1, uuid4)).query.get ==> List()
-        NsSet.n.a1.uuids_.not(Seq(uuid1, uuid5)).query.get ==> List(b)
+        Ns.n.a1.uuids_.not(Seq(uuid1, uuid2)).query.get ==> List()
+        Ns.n.a1.uuids_.not(Seq(uuid1, uuid3)).query.get ==> List()
+        Ns.n.a1.uuids_.not(Seq(uuid1, uuid4)).query.get ==> List()
+        Ns.n.a1.uuids_.not(Seq(uuid1, uuid5)).query.get ==> List(b)
 
 
         // AND semantics when multiple values in a _Set_
 
         // "Not (has this AND that)"
-        NsSet.n.a1.uuids_.not(Set(uuid1)).query.get ==> List(b)
-        NsSet.n.a1.uuids_.not(Set(uuid1, uuid2)).query.get ==> List(b)
-        NsSet.n.a1.uuids_.not(Set(uuid1, uuid2, uuid3)).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_.not(Set(uuid2)).query.get ==> List()
-        NsSet.n.a1.uuids_.not(Set(uuid2, uuid3)).query.get ==> List(a)
-        NsSet.n.a1.uuids_.not(Set(uuid2, uuid3, uuid4)).query.get ==> List(a)
+        Ns.n.a1.uuids_.not(Set(uuid1)).query.get ==> List(b)
+        Ns.n.a1.uuids_.not(Set(uuid1, uuid2)).query.get ==> List(b)
+        Ns.n.a1.uuids_.not(Set(uuid1, uuid2, uuid3)).query.get ==> List(a, b)
+        Ns.n.a1.uuids_.not(Set(uuid2)).query.get ==> List()
+        Ns.n.a1.uuids_.not(Set(uuid2, uuid3)).query.get ==> List(a)
+        Ns.n.a1.uuids_.not(Set(uuid2, uuid3, uuid4)).query.get ==> List(a)
         // Same as
-        NsSet.n.a1.uuids_.not(Seq(Set(uuid1))).query.get ==> List(b)
-        NsSet.n.a1.uuids_.not(Seq(Set(uuid1, uuid2))).query.get ==> List(b)
-        NsSet.n.a1.uuids_.not(Seq(Set(uuid1, uuid2, uuid3))).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_.not(Seq(Set(uuid2))).query.get ==> List()
-        NsSet.n.a1.uuids_.not(Seq(Set(uuid2, uuid3))).query.get ==> List(a)
-        NsSet.n.a1.uuids_.not(Seq(Set(uuid2, uuid3, uuid4))).query.get ==> List(a)
+        Ns.n.a1.uuids_.not(Seq(Set(uuid1))).query.get ==> List(b)
+        Ns.n.a1.uuids_.not(Seq(Set(uuid1, uuid2))).query.get ==> List(b)
+        Ns.n.a1.uuids_.not(Seq(Set(uuid1, uuid2, uuid3))).query.get ==> List(a, b)
+        Ns.n.a1.uuids_.not(Seq(Set(uuid2))).query.get ==> List()
+        Ns.n.a1.uuids_.not(Seq(Set(uuid2, uuid3))).query.get ==> List(a)
+        Ns.n.a1.uuids_.not(Seq(Set(uuid2, uuid3, uuid4))).query.get ==> List(a)
 
 
         // AND/OR semantics with multiple Sets
 
         // "Not ((has this AND that) OR (has this AND that))"
-        NsSet.n.a1.uuids_.not(Set(uuid1, uuid2), Set(uuid0)).query.get ==> List(b)
-        NsSet.n.a1.uuids_.not(Set(uuid1, uuid2), Set(uuid0, uuid3)).query.get ==> List(b)
-        NsSet.n.a1.uuids_.not(Set(uuid1, uuid2), Set(uuid2, uuid3)).query.get ==> List()
-        NsSet.n.a1.uuids_.not(Set(uuid1, uuid2), Set(uuid2, uuid3, uuid4)).query.get ==> List()
+        Ns.n.a1.uuids_.not(Set(uuid1, uuid2), Set(uuid0)).query.get ==> List(b)
+        Ns.n.a1.uuids_.not(Set(uuid1, uuid2), Set(uuid0, uuid3)).query.get ==> List(b)
+        Ns.n.a1.uuids_.not(Set(uuid1, uuid2), Set(uuid2, uuid3)).query.get ==> List()
+        Ns.n.a1.uuids_.not(Set(uuid1, uuid2), Set(uuid2, uuid3, uuid4)).query.get ==> List()
         // Same as
-        NsSet.n.a1.uuids_.not(Seq(Set(uuid1, uuid2), Set(uuid0))).query.get ==> List(b)
-        NsSet.n.a1.uuids_.not(Seq(Set(uuid1, uuid2), Set(uuid0, uuid3))).query.get ==> List(b)
-        NsSet.n.a1.uuids_.not(Seq(Set(uuid1, uuid2), Set(uuid2, uuid3))).query.get ==> List()
-        NsSet.n.a1.uuids_.not(Seq(Set(uuid1, uuid2), Set(uuid2, uuid3, uuid4))).query.get ==> List()
+        Ns.n.a1.uuids_.not(Seq(Set(uuid1, uuid2), Set(uuid0))).query.get ==> List(b)
+        Ns.n.a1.uuids_.not(Seq(Set(uuid1, uuid2), Set(uuid0, uuid3))).query.get ==> List(b)
+        Ns.n.a1.uuids_.not(Seq(Set(uuid1, uuid2), Set(uuid2, uuid3))).query.get ==> List()
+        Ns.n.a1.uuids_.not(Seq(Set(uuid1, uuid2), Set(uuid2, uuid3, uuid4))).query.get ==> List()
 
 
         // Negating empty Seqs/Sets has no effect
-        NsSet.n.a1.uuids_.not(Set(uuid1, uuid2), Set.empty[UUID]).query.get ==> List(b)
-        NsSet.n.a1.uuids_.not(Seq.empty[UUID]).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_.not(Set.empty[UUID]).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_.not(Seq.empty[Set[UUID]]).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_.not(Seq(Set.empty[UUID])).query.get ==> List(a, b)
+        Ns.n.a1.uuids_.not(Set(uuid1, uuid2), Set.empty[UUID]).query.get ==> List(b)
+        Ns.n.a1.uuids_.not(Seq.empty[UUID]).query.get ==> List(a, b)
+        Ns.n.a1.uuids_.not(Set.empty[UUID]).query.get ==> List(a, b)
+        Ns.n.a1.uuids_.not(Seq.empty[Set[UUID]]).query.get ==> List(a, b)
+        Ns.n.a1.uuids_.not(Seq(Set.empty[UUID])).query.get ==> List(a, b)
       }
 
 
-      "==" - typesSet { implicit conn =>
+      "==" - types { implicit conn =>
         val (a, b) = (1, 2)
-        NsSet.n.uuids.insert(List(
+        Ns.n.uuids.insert(List(
           (a, Set(uuid1, uuid2)),
           (b, Set(uuid2, uuid3, uuid4))
         )).transact
@@ -458,38 +458,38 @@ object ExprSet_UUID_ extends DatomicTestSuite {
 
         // AND semantics
         // "Is exactly this AND that"
-        NsSet.n.a1.uuids_.==(Set(uuid1)).query.get ==> List()
-        NsSet.n.a1.uuids_.==(Set(uuid1, uuid2)).query.get ==> List(a) // include exact match
-        NsSet.n.a1.uuids_.==(Set(uuid1, uuid2, uuid3)).query.get ==> List()
+        Ns.n.a1.uuids_.==(Set(uuid1)).query.get ==> List()
+        Ns.n.a1.uuids_.==(Set(uuid1, uuid2)).query.get ==> List(a) // include exact match
+        Ns.n.a1.uuids_.==(Set(uuid1, uuid2, uuid3)).query.get ==> List()
         // Same as
-        NsSet.n.a1.uuids_.==(Seq(Set(uuid1))).query.get ==> List()
-        NsSet.n.a1.uuids_.==(Seq(Set(uuid1, uuid2))).query.get ==> List(a)
-        NsSet.n.a1.uuids_.==(Seq(Set(uuid1, uuid2, uuid3))).query.get ==> List()
+        Ns.n.a1.uuids_.==(Seq(Set(uuid1))).query.get ==> List()
+        Ns.n.a1.uuids_.==(Seq(Set(uuid1, uuid2))).query.get ==> List(a)
+        Ns.n.a1.uuids_.==(Seq(Set(uuid1, uuid2, uuid3))).query.get ==> List()
 
 
         // AND/OR semantics with multiple Sets
 
         // "(exactly this AND that) OR (exactly this AND that)"
-        NsSet.n.a1.uuids_.==(Set(uuid1), Set(uuid2, uuid3)).query.get ==> List()
-        NsSet.n.a1.uuids_.==(Set(uuid1, uuid2), Set(uuid2, uuid3)).query.get ==> List(a)
-        NsSet.n.a1.uuids_.==(Set(uuid1, uuid2), Set(uuid2, uuid3, uuid4)).query.get ==> List(a, b)
+        Ns.n.a1.uuids_.==(Set(uuid1), Set(uuid2, uuid3)).query.get ==> List()
+        Ns.n.a1.uuids_.==(Set(uuid1, uuid2), Set(uuid2, uuid3)).query.get ==> List(a)
+        Ns.n.a1.uuids_.==(Set(uuid1, uuid2), Set(uuid2, uuid3, uuid4)).query.get ==> List(a, b)
         // Same as
-        NsSet.n.a1.uuids_.==(Seq(Set(uuid1), Set(uuid2, uuid3))).query.get ==> List()
-        NsSet.n.a1.uuids_.==(Seq(Set(uuid1, uuid2), Set(uuid2, uuid3))).query.get ==> List(a)
-        NsSet.n.a1.uuids_.==(Seq(Set(uuid1, uuid2), Set(uuid2, uuid3, uuid4))).query.get ==> List(a, b)
+        Ns.n.a1.uuids_.==(Seq(Set(uuid1), Set(uuid2, uuid3))).query.get ==> List()
+        Ns.n.a1.uuids_.==(Seq(Set(uuid1, uuid2), Set(uuid2, uuid3))).query.get ==> List(a)
+        Ns.n.a1.uuids_.==(Seq(Set(uuid1, uuid2), Set(uuid2, uuid3, uuid4))).query.get ==> List(a, b)
 
 
         // Empty Seq/Sets match nothing
-        NsSet.n.a1.uuids_.==(Set(uuid1, uuid2), Set.empty[UUID]).query.get ==> List(a)
-        NsSet.n.a1.uuids_.==(Set.empty[UUID]).query.get ==> List()
-        NsSet.n.a1.uuids_.==(Seq.empty[Set[UUID]]).query.get ==> List()
-        NsSet.n.a1.uuids_.==(Seq(Set.empty[UUID])).query.get ==> List()
+        Ns.n.a1.uuids_.==(Set(uuid1, uuid2), Set.empty[UUID]).query.get ==> List(a)
+        Ns.n.a1.uuids_.==(Set.empty[UUID]).query.get ==> List()
+        Ns.n.a1.uuids_.==(Seq.empty[Set[UUID]]).query.get ==> List()
+        Ns.n.a1.uuids_.==(Seq(Set.empty[UUID])).query.get ==> List()
       }
 
 
-      "!=" - typesSet { implicit conn =>
+      "!=" - types { implicit conn =>
         val (a, b) = (1, 2)
-        NsSet.n.uuids.insert(List(
+        Ns.n.uuids.insert(List(
           (a, Set(uuid1, uuid2)),
           (b, Set(uuid2, uuid3, uuid4))
         )).transact
@@ -498,331 +498,331 @@ object ExprSet_UUID_ extends DatomicTestSuite {
 
         // AND semantics
         // "Not (exactly this AND that)"
-        NsSet.n.a1.uuids_.!=(Set(uuid1)).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_.!=(Set(uuid1, uuid2)).query.get ==> List(b) // exclude exact match
-        NsSet.n.a1.uuids_.!=(Set(uuid1, uuid2, uuid3)).query.get ==> List(a, b)
+        Ns.n.a1.uuids_.!=(Set(uuid1)).query.get ==> List(a, b)
+        Ns.n.a1.uuids_.!=(Set(uuid1, uuid2)).query.get ==> List(b) // exclude exact match
+        Ns.n.a1.uuids_.!=(Set(uuid1, uuid2, uuid3)).query.get ==> List(a, b)
         // Same as
-        NsSet.n.a1.uuids_.!=(Seq(Set(uuid1))).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_.!=(Seq(Set(uuid1, uuid2))).query.get ==> List(b)
-        NsSet.n.a1.uuids_.!=(Seq(Set(uuid1, uuid2, uuid3))).query.get ==> List(a, b)
+        Ns.n.a1.uuids_.!=(Seq(Set(uuid1))).query.get ==> List(a, b)
+        Ns.n.a1.uuids_.!=(Seq(Set(uuid1, uuid2))).query.get ==> List(b)
+        Ns.n.a1.uuids_.!=(Seq(Set(uuid1, uuid2, uuid3))).query.get ==> List(a, b)
 
 
         // AND/OR semantics with multiple Sets
 
         // "Not (exactly this AND that) OR (exactly this AND that)"
-        NsSet.n.a1.uuids_.!=(Set(uuid1), Set(uuid2, uuid3)).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_.!=(Set(uuid1, uuid2), Set(uuid2, uuid3)).query.get ==> List(b)
-        NsSet.n.a1.uuids_.!=(Set(uuid1, uuid2), Set(uuid2, uuid3, uuid4)).query.get ==> List()
+        Ns.n.a1.uuids_.!=(Set(uuid1), Set(uuid2, uuid3)).query.get ==> List(a, b)
+        Ns.n.a1.uuids_.!=(Set(uuid1, uuid2), Set(uuid2, uuid3)).query.get ==> List(b)
+        Ns.n.a1.uuids_.!=(Set(uuid1, uuid2), Set(uuid2, uuid3, uuid4)).query.get ==> List()
         // Same as
-        NsSet.n.a1.uuids_.!=(Seq(Set(uuid1), Set(uuid2, uuid3))).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_.!=(Seq(Set(uuid1, uuid2), Set(uuid2, uuid3))).query.get ==> List(b)
-        NsSet.n.a1.uuids_.!=(Seq(Set(uuid1, uuid2), Set(uuid2, uuid3, uuid4))).query.get ==> List()
+        Ns.n.a1.uuids_.!=(Seq(Set(uuid1), Set(uuid2, uuid3))).query.get ==> List(a, b)
+        Ns.n.a1.uuids_.!=(Seq(Set(uuid1, uuid2), Set(uuid2, uuid3))).query.get ==> List(b)
+        Ns.n.a1.uuids_.!=(Seq(Set(uuid1, uuid2), Set(uuid2, uuid3, uuid4))).query.get ==> List()
 
 
         // Empty Seq/Sets
-        NsSet.n.a1.uuids_.!=(Seq(Set(uuid1, uuid2), Set.empty[UUID])).query.get ==> List(b)
-        NsSet.n.a1.uuids_.!=(Set.empty[UUID]).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_.!=(Seq.empty[Set[UUID]]).query.get ==> List(a, b)
+        Ns.n.a1.uuids_.!=(Seq(Set(uuid1, uuid2), Set.empty[UUID])).query.get ==> List(b)
+        Ns.n.a1.uuids_.!=(Set.empty[UUID]).query.get ==> List(a, b)
+        Ns.n.a1.uuids_.!=(Seq.empty[Set[UUID]]).query.get ==> List(a, b)
       }
 
 
-      "compare" - typesSet { implicit conn =>
+      "compare" - types { implicit conn =>
         val (a, b) = (1, 2)
-        NsSet.n.uuids.insert(List(
+        Ns.n.uuids.insert(List(
           (a, Set(uuid1, uuid2)),
           (b, Set(uuid2, uuid3, uuid4))
         )).transact
 
-        NsSet.n.a1.uuids_.<(uuid0).query.get ==> List()
-        NsSet.n.a1.uuids_.<(uuid1).query.get ==> List()
-        NsSet.n.a1.uuids_.<(uuid2).query.get ==> List(a)
-        NsSet.n.a1.uuids_.<(uuid3).query.get ==> List(a, b)
+        Ns.n.a1.uuids_.<(uuid0).query.get ==> List()
+        Ns.n.a1.uuids_.<(uuid1).query.get ==> List()
+        Ns.n.a1.uuids_.<(uuid2).query.get ==> List(a)
+        Ns.n.a1.uuids_.<(uuid3).query.get ==> List(a, b)
 
-        NsSet.n.a1.uuids_.<=(uuid0).query.get ==> List()
-        NsSet.n.a1.uuids_.<=(uuid1).query.get ==> List(a)
-        NsSet.n.a1.uuids_.<=(uuid2).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_.<=(uuid3).query.get ==> List(a, b)
+        Ns.n.a1.uuids_.<=(uuid0).query.get ==> List()
+        Ns.n.a1.uuids_.<=(uuid1).query.get ==> List(a)
+        Ns.n.a1.uuids_.<=(uuid2).query.get ==> List(a, b)
+        Ns.n.a1.uuids_.<=(uuid3).query.get ==> List(a, b)
 
-        NsSet.n.a1.uuids_.>(uuid0).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_.>(uuid1).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_.>(uuid2).query.get ==> List(b)
-        NsSet.n.a1.uuids_.>(uuid3).query.get ==> List(b)
+        Ns.n.a1.uuids_.>(uuid0).query.get ==> List(a, b)
+        Ns.n.a1.uuids_.>(uuid1).query.get ==> List(a, b)
+        Ns.n.a1.uuids_.>(uuid2).query.get ==> List(b)
+        Ns.n.a1.uuids_.>(uuid3).query.get ==> List(b)
 
-        NsSet.n.a1.uuids_.>=(uuid0).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_.>=(uuid1).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_.>=(uuid2).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_.>=(uuid3).query.get ==> List(b)
+        Ns.n.a1.uuids_.>=(uuid0).query.get ==> List(a, b)
+        Ns.n.a1.uuids_.>=(uuid1).query.get ==> List(a, b)
+        Ns.n.a1.uuids_.>=(uuid2).query.get ==> List(a, b)
+        Ns.n.a1.uuids_.>=(uuid3).query.get ==> List(b)
       }
     }
 
 
     "Optional" - {
 
-      "attr" - typesSet { implicit conn =>
+      "attr" - types { implicit conn =>
         val a = (1, Some(Set(uuid1, uuid2)))
         val b = (2, Some(Set(uuid2, uuid3, uuid4)))
         val c = (3, None)
-        NsSet.n.uuids_?.insert(a, b, c).transact
+        Ns.n.uuids_?.insert(a, b, c).transact
 
-        NsSet.n.a1.uuids_?.query.get ==> List(a, b, c)
+        Ns.n.a1.uuids_?.query.get ==> List(a, b, c)
       }
 
 
-      "apply" - typesSet { implicit conn =>
+      "apply" - types { implicit conn =>
         val a = (1, Some(Set(uuid1, uuid2)))
         val b = (2, Some(Set(uuid2, uuid3, uuid4)))
         val c = (3, None)
-        NsSet.n.uuids_?.insert(a, b, c).transact
+        Ns.n.uuids_?.insert(a, b, c).transact
 
         // Sets with one or more values matching
 
         // "Has this value"
-        NsSet.n.a1.uuids_?(Some(uuid0)).query.get ==> List()
-        NsSet.n.a1.uuids_?(Some(uuid1)).query.get ==> List(a)
-        NsSet.n.a1.uuids_?(Some(uuid2)).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_?(Some(uuid3)).query.get ==> List(b)
+        Ns.n.a1.uuids_?(Some(uuid0)).query.get ==> List()
+        Ns.n.a1.uuids_?(Some(uuid1)).query.get ==> List(a)
+        Ns.n.a1.uuids_?(Some(uuid2)).query.get ==> List(a, b)
+        Ns.n.a1.uuids_?(Some(uuid3)).query.get ==> List(b)
         // Same as
-        NsSet.n.a1.uuids_?(Some(Seq(uuid0))).query.get ==> List()
-        NsSet.n.a1.uuids_?(Some(Seq(uuid1))).query.get ==> List(a)
-        NsSet.n.a1.uuids_?(Some(Seq(uuid2))).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_?(Some(Seq(uuid3))).query.get ==> List(b)
+        Ns.n.a1.uuids_?(Some(Seq(uuid0))).query.get ==> List()
+        Ns.n.a1.uuids_?(Some(Seq(uuid1))).query.get ==> List(a)
+        Ns.n.a1.uuids_?(Some(Seq(uuid2))).query.get ==> List(a, b)
+        Ns.n.a1.uuids_?(Some(Seq(uuid3))).query.get ==> List(b)
 
 
         // OR semantics when multiple values
 
         // "Has this OR that"
-        NsSet.n.a1.uuids_?(Some(Seq(uuid1, uuid2))).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_?(Some(Seq(uuid1, uuid3))).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_?(Some(Seq(uuid2, uuid3))).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_?(Some(Seq(uuid1, uuid2, uuid3))).query.get ==> List(a, b)
+        Ns.n.a1.uuids_?(Some(Seq(uuid1, uuid2))).query.get ==> List(a, b)
+        Ns.n.a1.uuids_?(Some(Seq(uuid1, uuid3))).query.get ==> List(a, b)
+        Ns.n.a1.uuids_?(Some(Seq(uuid2, uuid3))).query.get ==> List(a, b)
+        Ns.n.a1.uuids_?(Some(Seq(uuid1, uuid2, uuid3))).query.get ==> List(a, b)
 
 
         // AND semantics when multiple values in a _Set_
 
         // "Has this AND that"
-        NsSet.n.a1.uuids_?(Some(Set(uuid1))).query.get ==> List(a)
-        NsSet.n.a1.uuids_?(Some(Set(uuid1, uuid2))).query.get ==> List(a)
-        NsSet.n.a1.uuids_?(Some(Set(uuid1, uuid2, uuid3))).query.get ==> List()
-        NsSet.n.a1.uuids_?(Some(Set(uuid2))).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_?(Some(Set(uuid2, uuid3))).query.get ==> List(b)
-        NsSet.n.a1.uuids_?(Some(Set(uuid2, uuid3, uuid4))).query.get ==> List(b)
+        Ns.n.a1.uuids_?(Some(Set(uuid1))).query.get ==> List(a)
+        Ns.n.a1.uuids_?(Some(Set(uuid1, uuid2))).query.get ==> List(a)
+        Ns.n.a1.uuids_?(Some(Set(uuid1, uuid2, uuid3))).query.get ==> List()
+        Ns.n.a1.uuids_?(Some(Set(uuid2))).query.get ==> List(a, b)
+        Ns.n.a1.uuids_?(Some(Set(uuid2, uuid3))).query.get ==> List(b)
+        Ns.n.a1.uuids_?(Some(Set(uuid2, uuid3, uuid4))).query.get ==> List(b)
         // Same as
-        NsSet.n.a1.uuids_?(Some(Seq(Set(uuid1)))).query.get ==> List(a)
-        NsSet.n.a1.uuids_?(Some(Seq(Set(uuid1, uuid2)))).query.get ==> List(a)
-        NsSet.n.a1.uuids_?(Some(Seq(Set(uuid1, uuid2, uuid3)))).query.get ==> List()
-        NsSet.n.a1.uuids_?(Some(Seq(Set(uuid2)))).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_?(Some(Seq(Set(uuid2, uuid3)))).query.get ==> List(b)
-        NsSet.n.a1.uuids_?(Some(Seq(Set(uuid2, uuid3, uuid4)))).query.get ==> List(b)
+        Ns.n.a1.uuids_?(Some(Seq(Set(uuid1)))).query.get ==> List(a)
+        Ns.n.a1.uuids_?(Some(Seq(Set(uuid1, uuid2)))).query.get ==> List(a)
+        Ns.n.a1.uuids_?(Some(Seq(Set(uuid1, uuid2, uuid3)))).query.get ==> List()
+        Ns.n.a1.uuids_?(Some(Seq(Set(uuid2)))).query.get ==> List(a, b)
+        Ns.n.a1.uuids_?(Some(Seq(Set(uuid2, uuid3)))).query.get ==> List(b)
+        Ns.n.a1.uuids_?(Some(Seq(Set(uuid2, uuid3, uuid4)))).query.get ==> List(b)
 
 
         // AND/OR semantics with multiple Sets
 
         // "(has this AND that) OR (has this AND that)"
-        NsSet.n.a1.uuids_?(Some(Seq(Set(uuid1, uuid2), Set(uuid0)))).query.get ==> List(a)
-        NsSet.n.a1.uuids_?(Some(Seq(Set(uuid1, uuid2), Set(uuid0, uuid3)))).query.get ==> List(a)
-        NsSet.n.a1.uuids_?(Some(Seq(Set(uuid1, uuid2), Set(uuid2, uuid3)))).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_?(Some(Seq(Set(uuid1, uuid2), Set(uuid2, uuid3, uuid4)))).query.get ==> List(a, b)
+        Ns.n.a1.uuids_?(Some(Seq(Set(uuid1, uuid2), Set(uuid0)))).query.get ==> List(a)
+        Ns.n.a1.uuids_?(Some(Seq(Set(uuid1, uuid2), Set(uuid0, uuid3)))).query.get ==> List(a)
+        Ns.n.a1.uuids_?(Some(Seq(Set(uuid1, uuid2), Set(uuid2, uuid3)))).query.get ==> List(a, b)
+        Ns.n.a1.uuids_?(Some(Seq(Set(uuid1, uuid2), Set(uuid2, uuid3, uuid4)))).query.get ==> List(a, b)
 
 
         // Empty Seq/Sets match nothing
-        NsSet.n.a1.uuids_?(Some(Seq.empty[UUID])).query.get ==> List()
-        NsSet.n.a1.uuids_?(Some(Set.empty[UUID])).query.get ==> List()
-        NsSet.n.a1.uuids_?(Some(Seq.empty[Set[UUID]])).query.get ==> List()
+        Ns.n.a1.uuids_?(Some(Seq.empty[UUID])).query.get ==> List()
+        Ns.n.a1.uuids_?(Some(Set.empty[UUID])).query.get ==> List()
+        Ns.n.a1.uuids_?(Some(Seq.empty[Set[UUID]])).query.get ==> List()
 
 
         // None matches non-asserted values
-        NsSet.n.a1.uuids_?(Option.empty[UUID]).query.get ==> List(c)
-        NsSet.n.a1.uuids_?(Option.empty[Seq[UUID]]).query.get ==> List(c)
-        NsSet.n.a1.uuids_?(Option.empty[Set[UUID]]).query.get ==> List(c)
-        NsSet.n.a1.uuids_?(Option.empty[Seq[Set[UUID]]]).query.get ==> List(c)
+        Ns.n.a1.uuids_?(Option.empty[UUID]).query.get ==> List(c)
+        Ns.n.a1.uuids_?(Option.empty[Seq[UUID]]).query.get ==> List(c)
+        Ns.n.a1.uuids_?(Option.empty[Set[UUID]]).query.get ==> List(c)
+        Ns.n.a1.uuids_?(Option.empty[Seq[Set[UUID]]]).query.get ==> List(c)
       }
 
 
-      "not" - typesSet { implicit conn =>
+      "not" - types { implicit conn =>
         val a = (1, Some(Set(uuid1, uuid2)))
         val b = (2, Some(Set(uuid2, uuid3, uuid4)))
         val c = (3, None)
-        NsSet.n.uuids_?.insert(a, b, c).transact
+        Ns.n.uuids_?.insert(a, b, c).transact
 
         // Sets without one or more values matching
 
         // "Doesn't have this value"
-        NsSet.n.a1.uuids_?.not(Some(uuid0)).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_?.not(Some(uuid1)).query.get ==> List(b)
-        NsSet.n.a1.uuids_?.not(Some(uuid2)).query.get ==> List()
-        NsSet.n.a1.uuids_?.not(Some(uuid3)).query.get ==> List(a)
-        NsSet.n.a1.uuids_?.not(Some(uuid4)).query.get ==> List(a)
-        NsSet.n.a1.uuids_?.not(Some(uuid5)).query.get ==> List(a, b)
+        Ns.n.a1.uuids_?.not(Some(uuid0)).query.get ==> List(a, b)
+        Ns.n.a1.uuids_?.not(Some(uuid1)).query.get ==> List(b)
+        Ns.n.a1.uuids_?.not(Some(uuid2)).query.get ==> List()
+        Ns.n.a1.uuids_?.not(Some(uuid3)).query.get ==> List(a)
+        Ns.n.a1.uuids_?.not(Some(uuid4)).query.get ==> List(a)
+        Ns.n.a1.uuids_?.not(Some(uuid5)).query.get ==> List(a, b)
         // Same as
-        NsSet.n.a1.uuids_?.not(Some(Seq(uuid0))).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_?.not(Some(Seq(uuid1))).query.get ==> List(b)
-        NsSet.n.a1.uuids_?.not(Some(Seq(uuid2))).query.get ==> List()
-        NsSet.n.a1.uuids_?.not(Some(Seq(uuid3))).query.get ==> List(a)
-        NsSet.n.a1.uuids_?.not(Some(Seq(uuid4))).query.get ==> List(a)
-        NsSet.n.a1.uuids_?.not(Some(Seq(uuid5))).query.get ==> List(a, b)
+        Ns.n.a1.uuids_?.not(Some(Seq(uuid0))).query.get ==> List(a, b)
+        Ns.n.a1.uuids_?.not(Some(Seq(uuid1))).query.get ==> List(b)
+        Ns.n.a1.uuids_?.not(Some(Seq(uuid2))).query.get ==> List()
+        Ns.n.a1.uuids_?.not(Some(Seq(uuid3))).query.get ==> List(a)
+        Ns.n.a1.uuids_?.not(Some(Seq(uuid4))).query.get ==> List(a)
+        Ns.n.a1.uuids_?.not(Some(Seq(uuid5))).query.get ==> List(a, b)
 
 
         // OR semantics when multiple values
 
         // "Not (has this OR that)"
-        NsSet.n.a1.uuids_?.not(Some(Seq(uuid1, uuid2))).query.get ==> List()
-        NsSet.n.a1.uuids_?.not(Some(Seq(uuid1, uuid3))).query.get ==> List()
-        NsSet.n.a1.uuids_?.not(Some(Seq(uuid1, uuid4))).query.get ==> List()
-        NsSet.n.a1.uuids_?.not(Some(Seq(uuid1, uuid5))).query.get ==> List(b)
+        Ns.n.a1.uuids_?.not(Some(Seq(uuid1, uuid2))).query.get ==> List()
+        Ns.n.a1.uuids_?.not(Some(Seq(uuid1, uuid3))).query.get ==> List()
+        Ns.n.a1.uuids_?.not(Some(Seq(uuid1, uuid4))).query.get ==> List()
+        Ns.n.a1.uuids_?.not(Some(Seq(uuid1, uuid5))).query.get ==> List(b)
 
 
         // AND semantics when multiple values in a _Set_
 
         // "Not (has this AND that)"
-        NsSet.n.a1.uuids_?.not(Some(Set(uuid1))).query.get ==> List(b)
-        NsSet.n.a1.uuids_?.not(Some(Set(uuid1, uuid2))).query.get ==> List(b)
-        NsSet.n.a1.uuids_?.not(Some(Set(uuid1, uuid2, uuid3))).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_?.not(Some(Set(uuid2))).query.get ==> List()
-        NsSet.n.a1.uuids_?.not(Some(Set(uuid2, uuid3))).query.get ==> List(a)
-        NsSet.n.a1.uuids_?.not(Some(Set(uuid2, uuid3, uuid4))).query.get ==> List(a)
+        Ns.n.a1.uuids_?.not(Some(Set(uuid1))).query.get ==> List(b)
+        Ns.n.a1.uuids_?.not(Some(Set(uuid1, uuid2))).query.get ==> List(b)
+        Ns.n.a1.uuids_?.not(Some(Set(uuid1, uuid2, uuid3))).query.get ==> List(a, b)
+        Ns.n.a1.uuids_?.not(Some(Set(uuid2))).query.get ==> List()
+        Ns.n.a1.uuids_?.not(Some(Set(uuid2, uuid3))).query.get ==> List(a)
+        Ns.n.a1.uuids_?.not(Some(Set(uuid2, uuid3, uuid4))).query.get ==> List(a)
         // Same as
-        NsSet.n.a1.uuids_?.not(Some(Seq(Set(uuid1)))).query.get ==> List(b)
-        NsSet.n.a1.uuids_?.not(Some(Seq(Set(uuid1, uuid2)))).query.get ==> List(b)
-        NsSet.n.a1.uuids_?.not(Some(Seq(Set(uuid1, uuid2, uuid3)))).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_?.not(Some(Seq(Set(uuid2)))).query.get ==> List()
-        NsSet.n.a1.uuids_?.not(Some(Seq(Set(uuid2, uuid3)))).query.get ==> List(a)
-        NsSet.n.a1.uuids_?.not(Some(Seq(Set(uuid2, uuid3, uuid4)))).query.get ==> List(a)
+        Ns.n.a1.uuids_?.not(Some(Seq(Set(uuid1)))).query.get ==> List(b)
+        Ns.n.a1.uuids_?.not(Some(Seq(Set(uuid1, uuid2)))).query.get ==> List(b)
+        Ns.n.a1.uuids_?.not(Some(Seq(Set(uuid1, uuid2, uuid3)))).query.get ==> List(a, b)
+        Ns.n.a1.uuids_?.not(Some(Seq(Set(uuid2)))).query.get ==> List()
+        Ns.n.a1.uuids_?.not(Some(Seq(Set(uuid2, uuid3)))).query.get ==> List(a)
+        Ns.n.a1.uuids_?.not(Some(Seq(Set(uuid2, uuid3, uuid4)))).query.get ==> List(a)
 
 
         // AND/OR semantics with multiple Sets
 
         // "Not ((has this AND that) OR (has this AND that))"
-        NsSet.n.a1.uuids_?.not(Some(Seq(Set(uuid1, uuid2), Set(uuid0)))).query.get ==> List(b)
-        NsSet.n.a1.uuids_?.not(Some(Seq(Set(uuid1, uuid2), Set(uuid0, uuid3)))).query.get ==> List(b)
-        NsSet.n.a1.uuids_?.not(Some(Seq(Set(uuid1, uuid2), Set(uuid2, uuid3)))).query.get ==> List()
-        NsSet.n.a1.uuids_?.not(Some(Seq(Set(uuid1, uuid2), Set(uuid2, uuid3, uuid4)))).query.get ==> List()
+        Ns.n.a1.uuids_?.not(Some(Seq(Set(uuid1, uuid2), Set(uuid0)))).query.get ==> List(b)
+        Ns.n.a1.uuids_?.not(Some(Seq(Set(uuid1, uuid2), Set(uuid0, uuid3)))).query.get ==> List(b)
+        Ns.n.a1.uuids_?.not(Some(Seq(Set(uuid1, uuid2), Set(uuid2, uuid3)))).query.get ==> List()
+        Ns.n.a1.uuids_?.not(Some(Seq(Set(uuid1, uuid2), Set(uuid2, uuid3, uuid4)))).query.get ==> List()
 
 
         // Negating empty Seqs/Sets has no effect
-        NsSet.n.a1.uuids_?.not(Some(Seq.empty[UUID])).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_?.not(Some(Set.empty[UUID])).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_?.not(Some(Seq.empty[Set[UUID]])).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_?.not(Some(Seq(Set.empty[UUID]))).query.get ==> List(a, b)
+        Ns.n.a1.uuids_?.not(Some(Seq.empty[UUID])).query.get ==> List(a, b)
+        Ns.n.a1.uuids_?.not(Some(Set.empty[UUID])).query.get ==> List(a, b)
+        Ns.n.a1.uuids_?.not(Some(Seq.empty[Set[UUID]])).query.get ==> List(a, b)
+        Ns.n.a1.uuids_?.not(Some(Seq(Set.empty[UUID]))).query.get ==> List(a, b)
 
 
         // Negating None returns all asserted
-        NsSet.n.a1.uuids_?.not(Option.empty[UUID]).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_?.not(Option.empty[Seq[UUID]]).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_?.not(Option.empty[Set[UUID]]).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_?.not(Option.empty[Seq[Set[UUID]]]).query.get ==> List(a, b)
+        Ns.n.a1.uuids_?.not(Option.empty[UUID]).query.get ==> List(a, b)
+        Ns.n.a1.uuids_?.not(Option.empty[Seq[UUID]]).query.get ==> List(a, b)
+        Ns.n.a1.uuids_?.not(Option.empty[Set[UUID]]).query.get ==> List(a, b)
+        Ns.n.a1.uuids_?.not(Option.empty[Seq[Set[UUID]]]).query.get ==> List(a, b)
       }
 
 
-      "==" - typesSet { implicit conn =>
+      "==" - types { implicit conn =>
         val a = (1, Some(Set(uuid1, uuid2)))
         val b = (2, Some(Set(uuid2, uuid3, uuid4)))
         val c = (3, None)
-        NsSet.n.uuids_?.insert(a, b, c).transact
+        Ns.n.uuids_?.insert(a, b, c).transact
 
         // Exact Set matches
 
         // AND semantics
         // "Is exactly this AND that"
-        NsSet.n.a1.uuids_?.==(Some(Set(uuid1))).query.get ==> List()
-        NsSet.n.a1.uuids_?.==(Some(Set(uuid1, uuid2))).query.get ==> List(a) // include exact match
-        NsSet.n.a1.uuids_?.==(Some(Set(uuid1, uuid2, uuid3))).query.get ==> List()
+        Ns.n.a1.uuids_?.==(Some(Set(uuid1))).query.get ==> List()
+        Ns.n.a1.uuids_?.==(Some(Set(uuid1, uuid2))).query.get ==> List(a) // include exact match
+        Ns.n.a1.uuids_?.==(Some(Set(uuid1, uuid2, uuid3))).query.get ==> List()
         // Same as
-        NsSet.n.a1.uuids_?.==(Some(Seq(Set(uuid1)))).query.get ==> List()
-        NsSet.n.a1.uuids_?.==(Some(Seq(Set(uuid1, uuid2)))).query.get ==> List(a)
-        NsSet.n.a1.uuids_?.==(Some(Seq(Set(uuid1, uuid2, uuid3)))).query.get ==> List()
+        Ns.n.a1.uuids_?.==(Some(Seq(Set(uuid1)))).query.get ==> List()
+        Ns.n.a1.uuids_?.==(Some(Seq(Set(uuid1, uuid2)))).query.get ==> List(a)
+        Ns.n.a1.uuids_?.==(Some(Seq(Set(uuid1, uuid2, uuid3)))).query.get ==> List()
 
 
         // AND/OR semantics with multiple Sets
 
         // "(exactly this AND that) OR (exactly this AND that)"
-        NsSet.n.a1.uuids_?.==(Some(Seq(Set(uuid1), Set(uuid2, uuid3)))).query.get ==> List()
-        NsSet.n.a1.uuids_?.==(Some(Seq(Set(uuid1, uuid2), Set(uuid2, uuid3)))).query.get ==> List(a)
-        NsSet.n.a1.uuids_?.==(Some(Seq(Set(uuid1, uuid2), Set(uuid2, uuid3, uuid4)))).query.get ==> List(a, b)
+        Ns.n.a1.uuids_?.==(Some(Seq(Set(uuid1), Set(uuid2, uuid3)))).query.get ==> List()
+        Ns.n.a1.uuids_?.==(Some(Seq(Set(uuid1, uuid2), Set(uuid2, uuid3)))).query.get ==> List(a)
+        Ns.n.a1.uuids_?.==(Some(Seq(Set(uuid1, uuid2), Set(uuid2, uuid3, uuid4)))).query.get ==> List(a, b)
 
 
         // Empty Seq/Sets match nothing
-        NsSet.n.a1.uuids_?.==(Some(Set.empty[UUID])).query.get ==> List()
-        NsSet.n.a1.uuids_?.==(Some(Seq.empty[Set[UUID]])).query.get ==> List()
-        NsSet.n.a1.uuids_?.==(Some(Seq(Set.empty[UUID]))).query.get ==> List()
+        Ns.n.a1.uuids_?.==(Some(Set.empty[UUID])).query.get ==> List()
+        Ns.n.a1.uuids_?.==(Some(Seq.empty[Set[UUID]])).query.get ==> List()
+        Ns.n.a1.uuids_?.==(Some(Seq(Set.empty[UUID]))).query.get ==> List()
 
 
         // None matches non-asserted values
-        NsSet.n.a1.uuids_?.==(Option.empty[Set[UUID]]).query.get ==> List(c)
-        NsSet.n.a1.uuids_?.==(Option.empty[Seq[Set[UUID]]]).query.get ==> List(c)
+        Ns.n.a1.uuids_?.==(Option.empty[Set[UUID]]).query.get ==> List(c)
+        Ns.n.a1.uuids_?.==(Option.empty[Seq[Set[UUID]]]).query.get ==> List(c)
       }
 
 
-      "!=" - typesSet { implicit conn =>
+      "!=" - types { implicit conn =>
         val a = (1, Some(Set(uuid1, uuid2)))
         val b = (2, Some(Set(uuid2, uuid3, uuid4)))
         val c = (3, None)
-        NsSet.n.uuids_?.insert(a, b, c).transact
+        Ns.n.uuids_?.insert(a, b, c).transact
 
         // Non-exact Set matches
 
         // AND semantics
         // "Not (exactly this AND that)"
-        NsSet.n.a1.uuids_?.!=(Some(Set(uuid1))).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_?.!=(Some(Set(uuid1, uuid2))).query.get ==> List(b) // exclude exact match
-        NsSet.n.a1.uuids_?.!=(Some(Set(uuid1, uuid2, uuid3))).query.get ==> List(a, b)
+        Ns.n.a1.uuids_?.!=(Some(Set(uuid1))).query.get ==> List(a, b)
+        Ns.n.a1.uuids_?.!=(Some(Set(uuid1, uuid2))).query.get ==> List(b) // exclude exact match
+        Ns.n.a1.uuids_?.!=(Some(Set(uuid1, uuid2, uuid3))).query.get ==> List(a, b)
         // Same as
-        NsSet.n.a1.uuids_?.!=(Some(Seq(Set(uuid1)))).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_?.!=(Some(Seq(Set(uuid1, uuid2)))).query.get ==> List(b)
-        NsSet.n.a1.uuids_?.!=(Some(Seq(Set(uuid1, uuid2, uuid3)))).query.get ==> List(a, b)
+        Ns.n.a1.uuids_?.!=(Some(Seq(Set(uuid1)))).query.get ==> List(a, b)
+        Ns.n.a1.uuids_?.!=(Some(Seq(Set(uuid1, uuid2)))).query.get ==> List(b)
+        Ns.n.a1.uuids_?.!=(Some(Seq(Set(uuid1, uuid2, uuid3)))).query.get ==> List(a, b)
 
 
         // AND/OR semantics with multiple Sets
 
         // "Not (exactly this AND that) OR (exactly this AND that)"
-        NsSet.n.a1.uuids_?.!=(Some(Seq(Set(uuid1), Set(uuid2, uuid3)))).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_?.!=(Some(Seq(Set(uuid1, uuid2), Set(uuid2, uuid3)))).query.get ==> List(b)
-        NsSet.n.a1.uuids_?.!=(Some(Seq(Set(uuid1, uuid2), Set(uuid2, uuid3, uuid4)))).query.get ==> List()
+        Ns.n.a1.uuids_?.!=(Some(Seq(Set(uuid1), Set(uuid2, uuid3)))).query.get ==> List(a, b)
+        Ns.n.a1.uuids_?.!=(Some(Seq(Set(uuid1, uuid2), Set(uuid2, uuid3)))).query.get ==> List(b)
+        Ns.n.a1.uuids_?.!=(Some(Seq(Set(uuid1, uuid2), Set(uuid2, uuid3, uuid4)))).query.get ==> List()
 
 
         // Empty Seq/Sets
-        NsSet.n.a1.uuids_?.!=(Some(Seq(Set(uuid1, uuid2), Set.empty[UUID]))).query.get ==> List(b)
-        NsSet.n.a1.uuids_?.!=(Some(Set.empty[UUID])).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_?.!=(Some(Seq.empty[Set[UUID]])).query.get ==> List(a, b)
+        Ns.n.a1.uuids_?.!=(Some(Seq(Set(uuid1, uuid2), Set.empty[UUID]))).query.get ==> List(b)
+        Ns.n.a1.uuids_?.!=(Some(Set.empty[UUID])).query.get ==> List(a, b)
+        Ns.n.a1.uuids_?.!=(Some(Seq.empty[Set[UUID]])).query.get ==> List(a, b)
 
 
         // None matches non-asserted values
-        NsSet.n.a1.uuids_?.==(Option.empty[Set[UUID]]).query.get ==> List(c)
-        NsSet.n.a1.uuids_?.==(Option.empty[Seq[Set[UUID]]]).query.get ==> List(c)
+        Ns.n.a1.uuids_?.==(Option.empty[Set[UUID]]).query.get ==> List(c)
+        Ns.n.a1.uuids_?.==(Option.empty[Seq[Set[UUID]]]).query.get ==> List(c)
       }
 
 
-      "compare" - typesSet { implicit conn =>
+      "compare" - types { implicit conn =>
         val a = (1, Some(Set(uuid1, uuid2)))
         val b = (2, Some(Set(uuid2, uuid3, uuid4)))
         val c = (3, None)
-        NsSet.n.uuids_?.insert(a, b, c).transact
+        Ns.n.uuids_?.insert(a, b, c).transact
 
-        NsSet.n.a1.uuids_?.<(Some(uuid0)).query.get ==> List()
-        NsSet.n.a1.uuids_?.<(Some(uuid1)).query.get ==> List()
-        NsSet.n.a1.uuids_?.<(Some(uuid2)).query.get ==> List(a)
-        NsSet.n.a1.uuids_?.<(Some(uuid3)).query.get ==> List(a, b)
+        Ns.n.a1.uuids_?.<(Some(uuid0)).query.get ==> List()
+        Ns.n.a1.uuids_?.<(Some(uuid1)).query.get ==> List()
+        Ns.n.a1.uuids_?.<(Some(uuid2)).query.get ==> List(a)
+        Ns.n.a1.uuids_?.<(Some(uuid3)).query.get ==> List(a, b)
 
-        NsSet.n.a1.uuids_?.<=(Some(uuid0)).query.get ==> List()
-        NsSet.n.a1.uuids_?.<=(Some(uuid1)).query.get ==> List(a)
-        NsSet.n.a1.uuids_?.<=(Some(uuid2)).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_?.<=(Some(uuid3)).query.get ==> List(a, b)
+        Ns.n.a1.uuids_?.<=(Some(uuid0)).query.get ==> List()
+        Ns.n.a1.uuids_?.<=(Some(uuid1)).query.get ==> List(a)
+        Ns.n.a1.uuids_?.<=(Some(uuid2)).query.get ==> List(a, b)
+        Ns.n.a1.uuids_?.<=(Some(uuid3)).query.get ==> List(a, b)
 
-        NsSet.n.a1.uuids_?.>(Some(uuid0)).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_?.>(Some(uuid1)).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_?.>(Some(uuid2)).query.get ==> List(b)
-        NsSet.n.a1.uuids_?.>(Some(uuid3)).query.get ==> List(b)
+        Ns.n.a1.uuids_?.>(Some(uuid0)).query.get ==> List(a, b)
+        Ns.n.a1.uuids_?.>(Some(uuid1)).query.get ==> List(a, b)
+        Ns.n.a1.uuids_?.>(Some(uuid2)).query.get ==> List(b)
+        Ns.n.a1.uuids_?.>(Some(uuid3)).query.get ==> List(b)
 
-        NsSet.n.a1.uuids_?.>=(Some(uuid0)).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_?.>=(Some(uuid1)).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_?.>=(Some(uuid2)).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_?.>=(Some(uuid3)).query.get ==> List(b)
+        Ns.n.a1.uuids_?.>=(Some(uuid0)).query.get ==> List(a, b)
+        Ns.n.a1.uuids_?.>=(Some(uuid1)).query.get ==> List(a, b)
+        Ns.n.a1.uuids_?.>=(Some(uuid2)).query.get ==> List(a, b)
+        Ns.n.a1.uuids_?.>=(Some(uuid3)).query.get ==> List(b)
 
 
         // None matches any asserted values
-        NsSet.n.a1.uuids_?.<(None).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_?.>(None).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_?.<=(None).query.get ==> List(a, b)
-        NsSet.n.a1.uuids_?.>=(None).query.get ==> List(a, b)
+        Ns.n.a1.uuids_?.<(None).query.get ==> List(a, b)
+        Ns.n.a1.uuids_?.>(None).query.get ==> List(a, b)
+        Ns.n.a1.uuids_?.<=(None).query.get ==> List(a, b)
+        Ns.n.a1.uuids_?.>=(None).query.get ==> List(a, b)
       }
     }
   }

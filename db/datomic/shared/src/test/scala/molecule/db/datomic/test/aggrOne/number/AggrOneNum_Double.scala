@@ -1,6 +1,6 @@
 package molecule.db.datomic.test.aggrOne.number
 
-import molecule.coreTests.dataModels.core.types.dsl.TypesOne._
+import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
@@ -10,34 +10,34 @@ object AggrOneNum_Double extends DatomicTestSuite {
 
   lazy val tests = Tests {
 
-    "sum" - typesOne { implicit conn =>
-      NsOne.n.double.insert(List(
+    "sum" - types { implicit conn =>
+      Ns.n.double.insert(List(
         (1, double1),
         (2, double2),
         (2, double4),
       )).transact
 
-      NsOne.double(sum).query.get ==> List(
+      Ns.double(sum).query.get ==> List(
         7.7 // double1 + double2 + double4
       )
-      NsOne.n.double(sum).query.get ==> List(
+      Ns.n.double(sum).query.get ==> List(
         (1, 1.1),
         (2, 6.6000000000000005), // double2 + double4
       )
     }
 
 
-    "median" - typesOne { implicit futConn =>
-      NsOne.n.double.insert(List(
+    "median" - types { implicit futConn =>
+      Ns.n.double.insert(List(
         (1, double1),
         (2, double2),
         (2, double4),
       )).transact
 
-      NsOne.double(median).query.get ==> List(
+      Ns.double(median).query.get ==> List(
         2.2
       )
-      NsOne.n.double(median).query.get ==> List(
+      Ns.n.double(median).query.get ==> List(
         (1, 1.1),
         (2, 3.0),
       )
@@ -50,51 +50,51 @@ object AggrOneNum_Double extends DatomicTestSuite {
     }
 
 
-    "avg" - typesOne { implicit conn =>
-      NsOne.n.double.insert(List(
+    "avg" - types { implicit conn =>
+      Ns.n.double.insert(List(
         (1, double1),
         (2, double2),
         (2, double4),
       )).transact
 
-      NsOne.double(avg).query.get ==> List(
+      Ns.double(avg).query.get ==> List(
         2.566666666666667 // (double1 + double2 + double4) / 3.0
       )
-      NsOne.n.double(avg).query.get ==> List(
+      Ns.n.double(avg).query.get ==> List(
         (1, 1.1),
         (2, 3.3000000000000003), // (double2 + double4) / 2.0
       )
     }
 
 
-    "variance" - typesOne { implicit conn =>
-      NsOne.n.double.insert(List(
+    "variance" - types { implicit conn =>
+      Ns.n.double.insert(List(
         (1, double1),
         (2, double2),
         (2, double4),
       )).transact
 
-      NsOne.double(variance).query.get ==> List(
+      Ns.double(variance).query.get ==> List(
         1.8822222222222225
       )
-      NsOne.n.double(variance).query.get ==> List(
+      Ns.n.double(variance).query.get ==> List(
         (1, 0.0),
         (2, 1.2100000000000002),
       )
     }
 
 
-    "stddev" - typesOne { implicit conn =>
-      NsOne.n.double.insert(List(
+    "stddev" - types { implicit conn =>
+      Ns.n.double.insert(List(
         (1, double1),
         (2, double2),
         (2, double4),
       )).transact
 
-      NsOne.double(stddev).query.get ==> List(
+      Ns.double(stddev).query.get ==> List(
         1.3719410418171119
       )
-      NsOne.n.double(stddev).query.get ==> List(
+      Ns.n.double(stddev).query.get ==> List(
         (1, 0.0),
         (2, 1.1),
       )

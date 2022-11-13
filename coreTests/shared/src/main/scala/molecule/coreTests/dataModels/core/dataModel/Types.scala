@@ -1,12 +1,11 @@
-package molecule.coreTests.dataModels.core.types.dataModel
+package molecule.coreTests.dataModels.core.dataModel
 
 import molecule.DataModel
 
-object CardAll extends DataModel(3) {
+object Types extends DataModel(3) {
 
-  trait NsAll {
+  trait Ns {
     val n  = oneInt
-    val nn = setInt
 
     // Cardinality one
     val string     = oneString
@@ -23,6 +22,7 @@ object CardAll extends DataModel(3) {
     val byte       = oneByte
     val short      = oneShort
     val char       = oneChar
+    val ref        = one[Ref]
 
     // Cardinality many (Set)
     val strings     = setString
@@ -39,5 +39,10 @@ object CardAll extends DataModel(3) {
     val bytes       = setByte
     val shorts      = setShort
     val chars       = setChar
+    val refs        = many[Ref]
+  }
+
+  trait Ref {
+    val n1 = oneInt
   }
 }

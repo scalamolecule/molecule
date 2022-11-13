@@ -1,7 +1,7 @@
 // GENERATED CODE ********************************
 package molecule.db.datomic.test.aggrOne.number
 
-import molecule.coreTests.dataModels.core.types.dsl.TypesOne._
+import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
@@ -11,25 +11,25 @@ object AggrOneNum_BigInt_ extends DatomicTestSuite {
 
   lazy val tests = Tests {
 
-    "sum" - typesOne { implicit conn =>
-      NsOne.n.bigInt.insert(List(
+    "sum" - types { implicit conn =>
+      Ns.n.bigInt.insert(List(
         (1, bigInt1),
         (2, bigInt2),
         (2, bigInt4),
       )).transact
 
-      NsOne.bigInt(sum).query.get ==> List(
+      Ns.bigInt(sum).query.get ==> List(
         7 // bigInt1 + bigInt2 + bigInt4
       )
-      NsOne.n.bigInt(sum).query.get ==> List(
+      Ns.n.bigInt(sum).query.get ==> List(
         (1, 1),
         (2, 6), // bigInt2 + bigInt4
       )
     }
 
 
-    "median" - typesOne { implicit futConn =>
-      NsOne.n.bigInt.insert(List(
+    "median" - types { implicit futConn =>
+      Ns.n.bigInt.insert(List(
         (1, bigInt1),
         (2, bigInt2),
         (2, bigInt4),
@@ -41,61 +41,61 @@ object AggrOneNum_BigInt_ extends DatomicTestSuite {
       // https://en.wikipedia.org/wiki/Median
       // See also
       // https://forum.datomic.com/t/unexpected-median-rounding/517
-      NsOne.bigInt(median).query.get ==> List(
+      Ns.bigInt(median).query.get ==> List(
         2.0
       )
-      NsOne.n.bigInt(median).query.get ==> List(
+      Ns.n.bigInt(median).query.get ==> List(
         (1, 1.0),
         (2, 3.0),
       )
     }
 
 
-    "avg" - typesOne { implicit conn =>
-      NsOne.n.bigInt.insert(List(
+    "avg" - types { implicit conn =>
+      Ns.n.bigInt.insert(List(
         (1, bigInt1),
         (2, bigInt2),
         (2, bigInt4),
       )).transact
 
-      NsOne.bigInt(avg).query.get ==> List(
+      Ns.bigInt(avg).query.get ==> List(
         2.3333333333333333 // (bigInt1 + bigInt2 + bigInt4) / 3.0
       )
-      NsOne.n.bigInt(avg).query.get ==> List(
+      Ns.n.bigInt(avg).query.get ==> List(
         (1, 1.0),
         (2, 3.0), // (bigInt2 + bigInt4) / 2.0
       )
     }
 
 
-    "variance" - typesOne { implicit conn =>
-      NsOne.n.bigInt.insert(List(
+    "variance" - types { implicit conn =>
+      Ns.n.bigInt.insert(List(
         (1, bigInt1),
         (2, bigInt2),
         (2, bigInt4),
       )).transact
 
-      NsOne.bigInt(variance).query.get ==> List(
+      Ns.bigInt(variance).query.get ==> List(
         1.5555555555555554
       )
-      NsOne.n.bigInt(variance).query.get ==> List(
+      Ns.n.bigInt(variance).query.get ==> List(
         (1, 0.0),
         (2, 1.0),
       )
     }
 
 
-    "stddev" - typesOne { implicit conn =>
-      NsOne.n.bigInt.insert(List(
+    "stddev" - types { implicit conn =>
+      Ns.n.bigInt.insert(List(
         (1, bigInt1),
         (2, bigInt2),
         (2, bigInt4),
       )).transact
 
-      NsOne.bigInt(stddev).query.get ==> List(
+      Ns.bigInt(stddev).query.get ==> List(
         1.247219128924647
       )
-      NsOne.n.bigInt(stddev).query.get ==> List(
+      Ns.n.bigInt(stddev).query.get ==> List(
         (1, 0.0),
         (2, 1.0),
       )

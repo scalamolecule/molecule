@@ -137,7 +137,11 @@ object LambdasOne extends ResolveBase {
   private lazy val j2sOptLong = (v: AnyRef) => v match {
     case null          => Option.empty[Long]
     case v: jLong      => Some(v)
-    case v: jMap[_, _] => Some(v.values.iterator.next.asInstanceOf[Long])
+    case v: jMap[_, _] => v.values.iterator.next match {
+      case l: Long         => Some(l)
+      // ref
+      case map: jMap[_, _] => Some(map.values.iterator.next.asInstanceOf[Long])
+    }
   }
 
   private lazy val j2sOptFloat = (v: AnyRef) => v match {

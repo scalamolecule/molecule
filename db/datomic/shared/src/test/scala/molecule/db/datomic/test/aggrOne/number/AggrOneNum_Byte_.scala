@@ -1,7 +1,7 @@
 // GENERATED CODE ********************************
 package molecule.db.datomic.test.aggrOne.number
 
-import molecule.coreTests.dataModels.core.types.dsl.TypesOne._
+import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
@@ -11,25 +11,25 @@ object AggrOneNum_Byte_ extends DatomicTestSuite {
 
   lazy val tests = Tests {
 
-    "sum" - typesOne { implicit conn =>
-      NsOne.n.byte.insert(List(
+    "sum" - types { implicit conn =>
+      Ns.n.byte.insert(List(
         (1, byte1),
         (2, byte2),
         (2, byte4),
       )).transact
 
-      NsOne.byte(sum).query.get ==> List(
+      Ns.byte(sum).query.get ==> List(
         7 // byte1 + byte2 + byte4
       )
-      NsOne.n.byte(sum).query.get ==> List(
+      Ns.n.byte(sum).query.get ==> List(
         (1, 1),
         (2, 6), // byte2 + byte4
       )
     }
 
 
-    "median" - typesOne { implicit futConn =>
-      NsOne.n.byte.insert(List(
+    "median" - types { implicit futConn =>
+      Ns.n.byte.insert(List(
         (1, byte1),
         (2, byte2),
         (2, byte4),
@@ -41,61 +41,61 @@ object AggrOneNum_Byte_ extends DatomicTestSuite {
       // https://en.wikipedia.org/wiki/Median
       // See also
       // https://forum.datomic.com/t/unexpected-median-rounding/517
-      NsOne.byte(median).query.get ==> List(
+      Ns.byte(median).query.get ==> List(
         2.0
       )
-      NsOne.n.byte(median).query.get ==> List(
+      Ns.n.byte(median).query.get ==> List(
         (1, 1.0),
         (2, 3.0),
       )
     }
 
 
-    "avg" - typesOne { implicit conn =>
-      NsOne.n.byte.insert(List(
+    "avg" - types { implicit conn =>
+      Ns.n.byte.insert(List(
         (1, byte1),
         (2, byte2),
         (2, byte4),
       )).transact
 
-      NsOne.byte(avg).query.get ==> List(
+      Ns.byte(avg).query.get ==> List(
         2.3333333333333333 // (byte1 + byte2 + byte4) / 3.0
       )
-      NsOne.n.byte(avg).query.get ==> List(
+      Ns.n.byte(avg).query.get ==> List(
         (1, 1.0),
         (2, 3.0), // (byte2 + byte4) / 2.0
       )
     }
 
 
-    "variance" - typesOne { implicit conn =>
-      NsOne.n.byte.insert(List(
+    "variance" - types { implicit conn =>
+      Ns.n.byte.insert(List(
         (1, byte1),
         (2, byte2),
         (2, byte4),
       )).transact
 
-      NsOne.byte(variance).query.get ==> List(
+      Ns.byte(variance).query.get ==> List(
         1.5555555555555554
       )
-      NsOne.n.byte(variance).query.get ==> List(
+      Ns.n.byte(variance).query.get ==> List(
         (1, 0.0),
         (2, 1.0),
       )
     }
 
 
-    "stddev" - typesOne { implicit conn =>
-      NsOne.n.byte.insert(List(
+    "stddev" - types { implicit conn =>
+      Ns.n.byte.insert(List(
         (1, byte1),
         (2, byte2),
         (2, byte4),
       )).transact
 
-      NsOne.byte(stddev).query.get ==> List(
+      Ns.byte(stddev).query.get ==> List(
         1.247219128924647
       )
-      NsOne.n.byte(stddev).query.get ==> List(
+      Ns.n.byte(stddev).query.get ==> List(
         (1, 0.0),
         (2, 1.0),
       )

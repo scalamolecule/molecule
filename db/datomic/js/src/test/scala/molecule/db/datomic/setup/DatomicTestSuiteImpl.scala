@@ -2,8 +2,7 @@ package molecule.db.datomic.setup
 
 import molecule.base.api.SchemaTransaction
 import molecule.core.api.{Connection, TxReport}
-import molecule.coreTests.dataModels.core.ref.schema.RefsSchema
-import molecule.coreTests.dataModels.core.types.schema.{TypesOneSchema, TypesSetSchema}
+import molecule.coreTests.dataModels.core.schema._
 import moleculeBuildInfo.BuildInfo
 //import moleculeTests.dataModels.core.bidirectionals.schema.BidirectionalSchema
 //import moleculeTests.dataModels.core.ref.schema.{NestedSchema, SelfJoinSchema}
@@ -43,9 +42,7 @@ trait DatomicTestSuiteImpl { self: DatomicTestSuite =>
   }
 
   //  def emptyImpl[T](test: Future[Conn] => T): T = inMem(test, EmptySchema, "")
-//  def cardAllImpl[T](test: Connection => T): T = inMem(test, CardAllSchema, "m_cardAll")
-  def typesOneImpl[T](test: Connection => T): T = inMem(test, TypesOneSchema, "m_typesOne")
-  def typesSetImpl[T](test: Connection => T): T = inMem(test, TypesSetSchema, "m_typesSet")
+  def typesImpl[T](test: Connection => T): T = inMem(test, TypesSchema, "m_types")
   def refsImpl[T](test: Connection => T): T = inMem(test, RefsSchema, "m_refs")
   //  def corePeerOnlyImpl[T](test: Future[Conn] => T): T = if (system == SystemPeer) coreImpl(test) else ().asInstanceOf[T]
   //  def bidirectionalImpl[T](test: Future[Conn] => T): T = inMem(test, BidirectionalSchema, "m_bidirectional")

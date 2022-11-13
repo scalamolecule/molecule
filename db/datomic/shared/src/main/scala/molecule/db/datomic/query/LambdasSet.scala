@@ -101,7 +101,7 @@ object LambdasSet extends ResolveBase with JavaConversions {
   private lazy val vector2setDouble    : AnyRef => AnyRef = vector2set
   private lazy val vector2setBoolean   : AnyRef => AnyRef = vector2set
   private lazy val vector2setBigInt    : AnyRef => AnyRef = vector2set((v: AnyRef) => BigInt(v.toString))
-  private lazy val vector2setBigDecimal: AnyRef => AnyRef = vector2set((v: AnyRef) =>  BigDecimal(v.toString))
+  private lazy val vector2setBigDecimal: AnyRef => AnyRef = vector2set((v: AnyRef) => BigDecimal(v.toString))
   private lazy val vector2setDate      : AnyRef => AnyRef = vector2set
   private lazy val vector2setUUID      : AnyRef => AnyRef = vector2set
   private lazy val vector2setURI       : AnyRef => AnyRef = vector2set
@@ -151,7 +151,14 @@ object LambdasSet extends ResolveBase with JavaConversions {
   private lazy val j2sOpSetLong = (v: AnyRef) => v match {
     case null            => Option.empty[Set[Long]]
     case set: jSet[_]    => Some(set.asScala.map(_.asInstanceOf[Long]))
-    case map: jMap[_, _] => Some(map.values.iterator.next.asInstanceOf[jList[_]].asScala.map(_.asInstanceOf[Long]).toSet)
+    case map: jMap[_, _] =>
+      val list = map.values.iterator.next.asInstanceOf[jList[_]].asScala
+      list.head match {
+        case _: Long       => Some(list.map(_.asInstanceOf[Long]).toSet)
+        // Refs
+        case _: jMap[_, _] => Some(list.map(_.asInstanceOf[jMap[_, _]].values.iterator.next.asInstanceOf[Long]).toSet)
+      }
+
   }
 
   private lazy val j2sOpSetFloat = (v: AnyRef) => v match {

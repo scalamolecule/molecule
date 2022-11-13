@@ -1,6 +1,6 @@
 package molecule.db.datomic.test.aggrSet.number
 
-import molecule.coreTests.dataModels.core.types.dsl.TypesSet._
+import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
 import molecule.db.datomic.test.aggrSet.number.AggrSetNum_BigDecimal_.bigDecimal1
@@ -12,36 +12,36 @@ object AggrSetNum_Double extends DatomicTestSuite {
 
   lazy val tests = Tests {
 
-    "sum" - typesSet { implicit conn =>
-      NsSet.n.doubles.insert(List(
+    "sum" - types { implicit conn =>
+      Ns.n.doubles.insert(List(
         (1, Set(double1, double2)),
         (2, Set(double2, double3)),
         (2, Set(double3, double4)),
         (2, Set(double3, double4)),
       )).transact
 
-      NsSet.doubles.apply(sum).query.get ==> List(
+      Ns.doubles.apply(sum).query.get ==> List(
         Set(11) // double1 + double2 + double3 + double4
       )
-      NsSet.n.doubles(sum).query.get ==> List(
+      Ns.n.doubles(sum).query.get ==> List(
         (1, Set(3.3000000000000003)), // double1 + double2
         (2, Set(9.9)), // double2 + double3 + double4
       )
     }
 
 
-    "median" - typesSet { implicit futConn =>
-      NsSet.n.doubles.insert(List(
+    "median" - types { implicit futConn =>
+      Ns.n.doubles.insert(List(
         (1, Set(double1, double2)),
         (2, Set(double2, double3)),
         (2, Set(double3, double4)),
         (2, Set(double3, double4)),
       )).transact
 
-      NsSet.doubles(median).query.get ==> List(
+      Ns.doubles(median).query.get ==> List(
         Set(2.0)
       )
-      NsSet.n.doubles(median).query.get ==> List(
+      Ns.n.doubles(median).query.get ==> List(
         (1, Set(1.0)),
         (2, Set(3.3)),
       )
@@ -54,54 +54,54 @@ object AggrSetNum_Double extends DatomicTestSuite {
     }
 
 
-    "avg" - typesSet { implicit conn =>
-      NsSet.n.doubles.insert(List(
+    "avg" - types { implicit conn =>
+      Ns.n.doubles.insert(List(
         (1, Set(double1, double2)),
         (2, Set(double2, double3)),
         (2, Set(double3, double4)),
         (2, Set(double3, double4)),
       )).transact
 
-      NsSet.doubles(avg).query.get ==> List(
+      Ns.doubles(avg).query.get ==> List(
         Set(2.75) // (double1 + double2 + double3 + double4) / 4.0
       )
-      NsSet.n.doubles(avg).query.get ==> List(
+      Ns.n.doubles(avg).query.get ==> List(
         (1, Set(1.6500000000000001)), // (double1 + double2) / 2.0
         (2, Set(3.3000000000000003)), // (double2 + double3 + double4) / 3.0
       )
     }
 
 
-    "variance" - typesSet { implicit conn =>
-      NsSet.n.doubles.insert(List(
+    "variance" - types { implicit conn =>
+      Ns.n.doubles.insert(List(
         (1, Set(double1, double2)),
         (2, Set(double2, double3)),
         (2, Set(double3, double4)),
         (2, Set(double3, double4)),
       )).transact
 
-      NsSet.doubles(variance).query.get ==> List(
+      Ns.doubles(variance).query.get ==> List(
         Set(1.5125000000000002)
       )
-      NsSet.n.doubles(variance).query.get ==> List(
+      Ns.n.doubles(variance).query.get ==> List(
         (1, Set(0.30250000000000005)),
         (2, Set(0.8066666666666668)),
       )
     }
 
 
-    "stddev" - typesSet { implicit conn =>
-      NsSet.n.doubles.insert(List(
+    "stddev" - types { implicit conn =>
+      Ns.n.doubles.insert(List(
         (1, Set(double1, double2)),
         (2, Set(double2, double3)),
         (2, Set(double3, double4)),
         (2, Set(double3, double4)),
       )).transact
 
-      NsSet.doubles(stddev).query.get ==> List(
+      Ns.doubles(stddev).query.get ==> List(
         Set(1.2298373876248845)
       )
-      NsSet.n.doubles(stddev).query.get ==> List(
+      Ns.n.doubles(stddev).query.get ==> List(
         (1, Set(0.55)),
         (2, Set(0.8981462390204987)),
       )

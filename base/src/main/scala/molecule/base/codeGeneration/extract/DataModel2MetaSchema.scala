@@ -60,8 +60,8 @@ class DataModel2MetaSchema(path: String, dataModel: String) {
 
   val reservedAttrNames = List(
     "a", "e", "v", "t", "tx", "txInstant", "op",
-    "save", "insert", "update", "retract ",
-    "self", "apply", "assert", "replace", "not", "contains", "k"
+    "save", "insert", "update", "retract",
+    "self", "apply", "assert", "replace", "not", "contains", "k",
   )
 
   @tailrec

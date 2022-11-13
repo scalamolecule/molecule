@@ -16,14 +16,13 @@ abstract class TransactionBase(elements: Seq[Element]) {
 
   protected def unexpected(element: Element) = throw MoleculeException("Unexpected element: " + element)
 
-  protected val nsFull   : String              = getNs(elements)
-  protected val part     : String              = fns.partNs(nsFull).head
-  protected var tempId   : Int                 = 0 // tempIdInit
-  protected var lowest   : Int                 = 0 // tempIdInit
-  protected var e        : String              = ""
-  protected var stmt     : jList[AnyRef]       = null
-  protected var backRefs : Map[String, String] = Map.empty[String, String]
-//  protected var backRefs: Seq[String]         = Nil
+  protected val nsFull  : String              = getNs(elements)
+  protected val part    : String              = fns.partNs(nsFull).head
+  protected var tempId  : Int                 = 0 // tempIdInit
+  protected var lowest  : Int                 = 0 // tempIdInit
+  protected var e       : String              = ""
+  protected var stmt    : jList[AnyRef]       = null
+  protected var backRefs: Map[String, String] = Map.empty[String, String]
 
   protected def stmtList = new java.util.ArrayList[AnyRef](4)
 
