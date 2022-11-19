@@ -7,7 +7,7 @@ import molecule.boilerplate.ast.MoleculeModel._
 import scala.annotation.tailrec
 
 
-class SaveStmts(elements: Seq[Element]) extends TransactionBase(elements) {
+class SaveStmts(elements: Seq[Element]) extends TransactionBase(elements, 0) {
 
   def getStmts: jList[jList[_]] = {
     e = newId

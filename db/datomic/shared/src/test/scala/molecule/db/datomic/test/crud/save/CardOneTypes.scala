@@ -44,7 +44,7 @@ object CardOneTypes extends DatomicTestSuite {
 
 
     "tacit" - types { implicit conn =>
-      Ns.n.string.insert((11, string1)).transact
+      Ns.n.string.insert.apply(11, string1).transact
 //      One.n.int.insert((12, int1)).transact
 //      One.n.long.insert((13, long1)).transact
 //      One.n.float.insert((14, float1)).transact

@@ -6,7 +6,7 @@ import java.util.{Date, UUID}
 
 trait AttrOneOpt_ { self: ModelBase =>
 
-  sealed trait AttrOneOpt extends AttrOne
+  sealed trait AttrOneOpt extends AttrOne with Optional
   
   case class AttrOneOptString(
     ns          : String,

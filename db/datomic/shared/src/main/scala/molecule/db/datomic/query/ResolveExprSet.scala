@@ -8,10 +8,10 @@ trait ResolveExprSet[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
 
   import LambdasSet._
 
-  protected def resolveAttrSetMan(es: List[Var], atom: AttrSetMan): List[Var] = {
+  protected def resolveAttrSetMan(es: List[Var], attr: AttrSetMan): List[Var] = {
     attrIndex += 1
-    val (e, a) = (es.last, s":${atom.ns}/${atom.attr}")
-    atom match {
+    val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
+    attr match {
       case at: AttrSetManString     => man(e, a, at.op, at.vs, resSetString)
       case at: AttrSetManInt        => man(e, a, at.op, at.vs, resSetInt)
       case at: AttrSetManLong       => man(e, a, at.op, at.vs, resSetLong)
@@ -30,9 +30,9 @@ trait ResolveExprSet[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
     es
   }
 
-  protected def resolveAttrSetTac(es: List[Var], atom: AttrSetTac): List[Var] = {
-    val (e, a) = (es.last, s":${atom.ns}/${atom.attr}")
-    atom match {
+  protected def resolveAttrSetTac(es: List[Var], attr: AttrSetTac): List[Var] = {
+    val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
+    attr match {
       case at: AttrSetTacString     => tac(e, a, at.op, at.vs, resSetString)
       case at: AttrSetTacInt        => tac(e, a, at.op, at.vs, resSetInt)
       case at: AttrSetTacLong       => tac(e, a, at.op, at.vs, resSetLong)
@@ -51,10 +51,10 @@ trait ResolveExprSet[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
     es
   }
 
-  protected def resolveAttrSetOpt(es: List[Var], atom: AttrSetOpt): List[Var] = {
+  protected def resolveAttrSetOpt(es: List[Var], attr: AttrSetOpt): List[Var] = {
     attrIndex += 1
-    val (e, a) = (es.last, s":${atom.ns}/${atom.attr}")
-    atom match {
+    val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
+    attr match {
       case at: AttrSetOptString     => opt(e, a, at.op, at.vs, resOptSetString)
       case at: AttrSetOptInt        => opt(e, a, at.op, at.vs, resOptSetInt)
       case at: AttrSetOptLong       => opt(e, a, at.op, at.vs, resOptSetLong)

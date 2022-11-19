@@ -6,7 +6,7 @@ import java.util.{Date, UUID}
 
 trait AttrOneTac_ { self: ModelBase =>
 
-  sealed trait AttrOneTac extends AttrOne
+  sealed trait AttrOneTac extends AttrOne with Tacit
   
   case class AttrOneTacString(
     ns          : String,

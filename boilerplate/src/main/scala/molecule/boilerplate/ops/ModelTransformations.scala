@@ -4,6 +4,7 @@ import java.net.URI
 import java.util.{Date, UUID}
 import molecule.base.util.exceptions.MoleculeException
 import molecule.boilerplate.api.Keywords.Kw
+import molecule.boilerplate.ast.MoleculeModel
 import molecule.boilerplate.ast.MoleculeModel._
 
 trait ModelTransformations {
@@ -228,6 +229,13 @@ trait ModelTransformations {
       case a             => unexpected(a)
     }
     es.init :+ last
+  }
+
+  protected def addNestedMan(es: Seq[Element], nestedElements: Seq[Element]): Seq[Element] = {
+    es.init :+ Nested(es.last.asInstanceOf[Ref], nestedElements)
+  }
+  protected def addNestedOpt(es: Seq[Element], nestedElements: Seq[Element]): Seq[Element] = {
+    es.init :+ NestedOpt(es.last.asInstanceOf[Ref], nestedElements)
   }
 
   protected def addSort(es: Seq[Element], sort: String): Seq[Element] = {

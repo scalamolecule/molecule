@@ -15,6 +15,12 @@ trait ModelBase extends Validations {
     val sort: Option[String]
     def unapply(a: Attr): (String, String, Op) = (a.ns, a.attr, a.op)
   }
+
+  sealed trait Mode
+  trait Mandatory extends Mode
+  trait Optional extends Mode
+  trait Tacit extends Mode
+
   trait AttrOne extends Attr
   trait AttrSet extends Attr
   trait AttrArray extends Attr
@@ -29,11 +35,18 @@ trait ModelBase extends Validations {
 
   case class BackRef(backRef: String) extends Element
 
-  case class Nested(bond: Ref, elements: Seq[Element]) extends Element
-  case class OptNested(bond: Ref, elements: Seq[Element]) extends Element
+  case class Nested(ref: Ref, elements: Seq[Element]) extends Element with Mandatory {
+    override def toString: String = {
+      s"""|Nested(
+          |  $ref,
+          |  List(
+          |    ${elements.mkString(s",\n    ")}))""".stripMargin
+    }
+  }
+  case class NestedOpt(ref: Ref, elements: Seq[Element]) extends Element with Mandatory
 
-  case class TxMetaData(elements: Seq[Element]) extends Element
-  case class Composite(elements: Seq[Element]) extends Element
+  case class TxMetaData(elements: Seq[Element]) extends Element with Mandatory
+  case class Composite(elements: Seq[Element]) extends Element with Mandatory
   case object Self extends Element
 
   sealed trait Op

@@ -30,11 +30,13 @@ abstract class CodeGenTemplate(val fileName: String, dir: String, basePath: Stri
       case 1 => s"[A" + (" " * 68) + "]"
       case _ => s"[${`(A..V)`}" + (" " * 68) + "]"
     }
-    lazy val `_, _` = Seq.fill(arity + 1)("_").mkString(", ")
-    lazy val ns_1   = s"Ns_" + (arity + 1)
-    lazy val `_1`   = Seq.fill(arity + 1)("_").mkString(", ")
-    lazy val nsIn   = s"Ns[${`_, _`}]"
-    lazy val nsOut  = s"Ns[${`A..V`}]"
+    lazy val `_, _`    = Seq.fill(arity + 1)("_").mkString(", ")
+    lazy val `_, _, _` = Seq.fill(arity + 2)("_").mkString(", ")
+    lazy val _0        = "_" + arity
+    lazy val _1        = "_" + (arity + 1)
+    lazy val ns_1      = s"Ns" + _1
+    lazy val nsIn      = s"Ns[${`_, _`}]"
+    lazy val nsOut     = s"Ns[${`A..V`}]"
 
     def padN(n: Int) = if (n < 10) s"0$n" else n
     val n0 = padN(arity)

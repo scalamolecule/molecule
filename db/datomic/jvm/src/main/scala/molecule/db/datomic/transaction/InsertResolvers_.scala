@@ -4,7 +4,8 @@ package molecule.db.datomic.transaction
 import molecule.boilerplate.ast.MoleculeModel._
 
 
-abstract class InsertResolvers_(elements: Seq[Element]) extends TransactionBase(elements) {
+abstract class InsertResolvers_(elements: Seq[Element], tempIdInit: Int)
+  extends TransactionBase(elements, tempIdInit) {
 
   protected def resolve(
     elements: Seq[Element],
@@ -12,7 +13,7 @@ abstract class InsertResolvers_(elements: Seq[Element]) extends TransactionBase(
     n: Int = 0
   ): List[Product => Unit]
 
-  def getResolver: Product => Unit = {
+  def getResolver(elements: Seq[Element]): Product => Unit = {
     val resolvers: List[Product => Unit] = resolve(elements, Nil)
     resolvers.length match {
       case 1 => resolve1(resolvers)

@@ -8,10 +8,10 @@ trait ResolveExprOne[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
 
   import LambdasOne._
 
-  protected def resolveAttrOneMan(es: List[Var], atom: AttrOneMan): List[Var] = {
+  protected def resolveAttrOneMan(es: List[Var], attr: AttrOneMan): List[Var] = {
     attrIndex += 1
-    val (e, a) = (es.last, s":${atom.ns}/${atom.attr}")
-    atom match {
+    val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
+    attr match {
       case at: AttrOneManString     => man(e, a, at.op, at.vs, resString, sortString(at, attrIndex))
       case at: AttrOneManInt        => man(e, a, at.op, at.vs, resInt, sortInt(at, attrIndex))
       case at: AttrOneManLong       => maL(e, a, at.op, at.vs, resLong, sortLong(at, attrIndex))
@@ -30,9 +30,9 @@ trait ResolveExprOne[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
     es
   }
 
-  protected def resolveAttrOneTac(es: List[Var], atom: AttrOneTac): List[Var] = {
-    val (e, a) = (es.last, s":${atom.ns}/${atom.attr}")
-    atom match {
+  protected def resolveAttrOneTac(es: List[Var], attr: AttrOneTac): List[Var] = {
+    val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
+    attr match {
       case at: AttrOneTacString     => tac(e, a, at.op, at.vs, resString)
       case at: AttrOneTacInt        => tac(e, a, at.op, at.vs, resInt)
       case at: AttrOneTacLong       => tac(e, a, at.op, at.vs, resLong)
@@ -51,10 +51,10 @@ trait ResolveExprOne[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
     es
   }
 
-  protected def resolveAttrOneOpt(es: List[Var], atom: AttrOneOpt): List[Var] = {
+  protected def resolveAttrOneOpt(es: List[Var], attr: AttrOneOpt): List[Var] = {
     attrIndex += 1
-    val (e, a) = (es.last, s":${atom.ns}/${atom.attr}")
-    atom match {
+    val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
+    attr match {
       case at: AttrOneOptString     => opt(e, a, at.op, at.vs, resOptString, sortString(at, attrIndex))
       case at: AttrOneOptInt        => opt(e, a, at.op, at.vs, resOptInt, sortInt(at, attrIndex))
       case at: AttrOneOptLong       => opt(e, a, at.op, at.vs, resOptLong, sortLong(at, attrIndex))
@@ -80,11 +80,12 @@ trait ResolveExprOne[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
     op: Op,
     args: Seq[T],
     res: ResOne[T],
-    sorter: Option[(Int, (Row, Row) => Int)]
+    sorter: Option[(Int, Int => (Row, Row) => Int)]
   ): Unit = {
     val v = vv
     find += v
     castScala += res.j2s
+//    castss = castss.init :+ (castss.head :+ res.j2s)
     sorter.foreach(sorts += _)
     expr(e, a, v, op, args, res)
   }
@@ -95,7 +96,7 @@ trait ResolveExprOne[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
     op: Op,
     args: Seq[Long],
     res: ResOne[Long],
-    sorter: Option[(Int, (Row, Row) => Int)]
+    sorter: Option[(Int, Int => (Row, Row) => Int)]
   ): Unit = {
     a match {
       case ":Generic/e"  =>
@@ -147,7 +148,7 @@ trait ResolveExprOne[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
     op: Op,
     optArgs: Option[Seq[T]],
     resOpt: ResOneOpt[T],
-    sorter: Option[(Int, (Row, Row) => Int)]
+    sorter: Option[(Int, Int => (Row, Row) => Int)]
   ): Unit = {
     val v = vv
     castScala += resOpt.j2s

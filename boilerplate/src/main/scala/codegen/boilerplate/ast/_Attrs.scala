@@ -5,15 +5,15 @@ import codegen.BoilerplateGenBase
 object _Attrs {
 
   def generate = {
-    MakeAttr("One", "Man").generate
-    MakeAttr("One", "Opt").generate
-    MakeAttr("One", "Tac").generate
-    MakeAttr("Set", "Man").generate
-    MakeAttr("Set", "Opt").generate
-    MakeAttr("Set", "Tac").generate
+    MakeAttr("One", "Man", "Mandatory").generate
+    MakeAttr("One", "Opt", "Optional").generate
+    MakeAttr("One", "Tac", "Tacit").generate
+    MakeAttr("Set", "Man", "Mandatory").generate
+    MakeAttr("Set", "Opt", "Optional").generate
+    MakeAttr("Set", "Tac", "Tacit").generate
   }
 
-  case class MakeAttr(card: String, mode: String)
+  case class MakeAttr(card: String, mode: String, modeFull: String)
     extends BoilerplateGenBase("Attr" + card + mode, "/ast") {
     val cardTpe = card match {
       case "One"   => (baseType: String) => baseType
@@ -32,7 +32,7 @@ object _Attrs {
          |
          |trait ${fileName}_ { self: ModelBase =>
          |
-         |  sealed trait Attr$card$mode extends Attr$card
+         |  sealed trait Attr$card$mode extends Attr$card with $modeFull
          |  $attrClasses
          |}""".stripMargin
     }

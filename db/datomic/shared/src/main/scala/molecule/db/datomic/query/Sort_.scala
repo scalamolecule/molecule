@@ -10,197 +10,281 @@ import molecule.boilerplate.ast.MoleculeModel._
 
 trait Sort_[Tpl] { self: Base[Tpl] =>
 
-  protected def sortString(atom: Attr, attrIndex: Int): Option[(Int, (Row, Row) => Int)] = {
-    atom.sort.map { sort =>
+  protected def sortString(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+    attr.sort.map { sort =>
       (
-        sort.last.toInt,
+        sort.last.toString.toInt,
         sort.head match {
-          case 'a' => (a: Row, b: Row) =>
-            a.get(attrIndex).asInstanceOf[String].compareTo(b.get(attrIndex).asInstanceOf[String])
-          case 'd' => (a: Row, b: Row) =>
-            b.get(attrIndex).asInstanceOf[String].compareTo(a.get(attrIndex).asInstanceOf[String])
+          case 'a' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            //println(s"$nestedIdsCount SORT INDEX asc  (${attr.attr}): " + i)
+            (a: Row, b: Row) =>
+              a.get(i).asInstanceOf[String].compareTo(b.get(i).asInstanceOf[String])
+          case 'd' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            //println(s"$nestedIdsCount SORT INDEX desc (${attr.attr}): " + i)
+            (a: Row, b: Row) =>
+              b.get(i).asInstanceOf[String].compareTo(a.get(i).asInstanceOf[String])
         }
       )
     }
   }
 
-  protected def sortInt(atom: Attr, attrIndex: Int): Option[(Int, (Row, Row) => Int)] = {
-    atom.sort.map { sort =>
+  protected def sortInt(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+    attr.sort.map { sort =>
       (
-        sort.last.toInt,
+        sort.last.toString.toInt,
         sort.head match {
-          case 'a' => (a: Row, b: Row) =>
-            a.get(attrIndex).asInstanceOf[jInteger].compareTo(b.get(attrIndex).asInstanceOf[jInteger])
-          case 'd' => (a: Row, b: Row) =>
-            b.get(attrIndex).asInstanceOf[jInteger].compareTo(a.get(attrIndex).asInstanceOf[jInteger])
+          case 'a' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            //println(s"$nestedIdsCount SORT INDEX asc  (${attr.attr}): " + i)
+            (a: Row, b: Row) =>
+              a.get(i).asInstanceOf[jInteger].compareTo(b.get(i).asInstanceOf[jInteger])
+          case 'd' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            //println(s"$nestedIdsCount SORT INDEX desc (${attr.attr}): " + i)
+            (a: Row, b: Row) =>
+              b.get(i).asInstanceOf[jInteger].compareTo(a.get(i).asInstanceOf[jInteger])
         }
       )
     }
   }
 
-  protected def sortLong(atom: Attr, attrIndex: Int): Option[(Int, (Row, Row) => Int)] = {
-    atom.sort.map { sort =>
+  protected def sortLong(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+    attr.sort.map { sort =>
       (
-        sort.last.toInt,
+        sort.last.toString.toInt,
         sort.head match {
-          case 'a' => (a: Row, b: Row) =>
-            a.get(attrIndex).asInstanceOf[jLong].compareTo(b.get(attrIndex).asInstanceOf[jLong])
-          case 'd' => (a: Row, b: Row) =>
-            b.get(attrIndex).asInstanceOf[jLong].compareTo(a.get(attrIndex).asInstanceOf[jLong])
+          case 'a' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            //println(s"$nestedIdsCount SORT INDEX asc  (${attr.attr}): " + i)
+            (a: Row, b: Row) =>
+              a.get(i).asInstanceOf[jLong].compareTo(b.get(i).asInstanceOf[jLong])
+          case 'd' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            //println(s"$nestedIdsCount SORT INDEX desc (${attr.attr}): " + i)
+            (a: Row, b: Row) =>
+              b.get(i).asInstanceOf[jLong].compareTo(a.get(i).asInstanceOf[jLong])
         }
       )
     }
   }
 
-  protected def sortFloat(atom: Attr, attrIndex: Int): Option[(Int, (Row, Row) => Int)] = {
-    atom.sort.map { sort =>
+  protected def sortFloat(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+    attr.sort.map { sort =>
       (
-        sort.last.toInt,
+        sort.last.toString.toInt,
         sort.head match {
-          case 'a' => (a: Row, b: Row) =>
-            a.get(attrIndex).asInstanceOf[jDouble].compareTo(b.get(attrIndex).asInstanceOf[jDouble])
-          case 'd' => (a: Row, b: Row) =>
-            b.get(attrIndex).asInstanceOf[jDouble].compareTo(a.get(attrIndex).asInstanceOf[jDouble])
+          case 'a' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            //println(s"$nestedIdsCount SORT INDEX asc  (${attr.attr}): " + i)
+            (a: Row, b: Row) =>
+              a.get(i).asInstanceOf[jDouble].compareTo(b.get(i).asInstanceOf[jDouble])
+          case 'd' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            //println(s"$nestedIdsCount SORT INDEX desc (${attr.attr}): " + i)
+            (a: Row, b: Row) =>
+              b.get(i).asInstanceOf[jDouble].compareTo(a.get(i).asInstanceOf[jDouble])
         }
       )
     }
   }
 
-  protected def sortDouble(atom: Attr, attrIndex: Int): Option[(Int, (Row, Row) => Int)] = {
-    atom.sort.map { sort =>
+  protected def sortDouble(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+    attr.sort.map { sort =>
       (
-        sort.last.toInt,
+        sort.last.toString.toInt,
         sort.head match {
-          case 'a' => (a: Row, b: Row) =>
-            a.get(attrIndex).asInstanceOf[jDouble].compareTo(b.get(attrIndex).asInstanceOf[jDouble])
-          case 'd' => (a: Row, b: Row) =>
-            b.get(attrIndex).asInstanceOf[jDouble].compareTo(a.get(attrIndex).asInstanceOf[jDouble])
+          case 'a' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            //println(s"$nestedIdsCount SORT INDEX asc  (${attr.attr}): " + i)
+            (a: Row, b: Row) =>
+              a.get(i).asInstanceOf[jDouble].compareTo(b.get(i).asInstanceOf[jDouble])
+          case 'd' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            //println(s"$nestedIdsCount SORT INDEX desc (${attr.attr}): " + i)
+            (a: Row, b: Row) =>
+              b.get(i).asInstanceOf[jDouble].compareTo(a.get(i).asInstanceOf[jDouble])
         }
       )
     }
   }
 
-  protected def sortBoolean(atom: Attr, attrIndex: Int): Option[(Int, (Row, Row) => Int)] = {
-    atom.sort.map { sort =>
+  protected def sortBoolean(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+    attr.sort.map { sort =>
       (
-        sort.last.toInt,
+        sort.last.toString.toInt,
         sort.head match {
-          case 'a' => (a: Row, b: Row) =>
-            a.get(attrIndex).asInstanceOf[jBoolean].compareTo(b.get(attrIndex).asInstanceOf[jBoolean])
-          case 'd' => (a: Row, b: Row) =>
-            b.get(attrIndex).asInstanceOf[jBoolean].compareTo(a.get(attrIndex).asInstanceOf[jBoolean])
+          case 'a' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            //println(s"$nestedIdsCount SORT INDEX asc  (${attr.attr}): " + i)
+            (a: Row, b: Row) =>
+              a.get(i).asInstanceOf[jBoolean].compareTo(b.get(i).asInstanceOf[jBoolean])
+          case 'd' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            //println(s"$nestedIdsCount SORT INDEX desc (${attr.attr}): " + i)
+            (a: Row, b: Row) =>
+              b.get(i).asInstanceOf[jBoolean].compareTo(a.get(i).asInstanceOf[jBoolean])
         }
       )
     }
   }
 
-  protected def sortBigInt(atom: Attr, attrIndex: Int): Option[(Int, (Row, Row) => Int)] = {
-    atom.sort.map { sort =>
+  protected def sortBigInt(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+    attr.sort.map { sort =>
       (
-        sort.last.toInt,
+        sort.last.toString.toInt,
         sort.head match {
-          case 'a' => (a: Row, b: Row) =>
-            a.get(attrIndex).asInstanceOf[jBigInt].compareTo(b.get(attrIndex).asInstanceOf[jBigInt])
-          case 'd' => (a: Row, b: Row) =>
-            b.get(attrIndex).asInstanceOf[jBigInt].compareTo(a.get(attrIndex).asInstanceOf[jBigInt])
+          case 'a' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            //println(s"$nestedIdsCount SORT INDEX asc  (${attr.attr}): " + i)
+            (a: Row, b: Row) =>
+              a.get(i).asInstanceOf[jBigInt].compareTo(b.get(i).asInstanceOf[jBigInt])
+          case 'd' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            //println(s"$nestedIdsCount SORT INDEX desc (${attr.attr}): " + i)
+            (a: Row, b: Row) =>
+              b.get(i).asInstanceOf[jBigInt].compareTo(a.get(i).asInstanceOf[jBigInt])
         }
       )
     }
   }
 
-  protected def sortBigDecimal(atom: Attr, attrIndex: Int): Option[(Int, (Row, Row) => Int)] = {
-    atom.sort.map { sort =>
+  protected def sortBigDecimal(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+    attr.sort.map { sort =>
       (
-        sort.last.toInt,
+        sort.last.toString.toInt,
         sort.head match {
-          case 'a' => (a: Row, b: Row) =>
-            a.get(attrIndex).asInstanceOf[jBigDecimal].compareTo(b.get(attrIndex).asInstanceOf[jBigDecimal])
-          case 'd' => (a: Row, b: Row) =>
-            b.get(attrIndex).asInstanceOf[jBigDecimal].compareTo(a.get(attrIndex).asInstanceOf[jBigDecimal])
+          case 'a' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            //println(s"$nestedIdsCount SORT INDEX asc  (${attr.attr}): " + i)
+            (a: Row, b: Row) =>
+              a.get(i).asInstanceOf[jBigDecimal].compareTo(b.get(i).asInstanceOf[jBigDecimal])
+          case 'd' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            //println(s"$nestedIdsCount SORT INDEX desc (${attr.attr}): " + i)
+            (a: Row, b: Row) =>
+              b.get(i).asInstanceOf[jBigDecimal].compareTo(a.get(i).asInstanceOf[jBigDecimal])
         }
       )
     }
   }
 
-  protected def sortDate(atom: Attr, attrIndex: Int): Option[(Int, (Row, Row) => Int)] = {
-    atom.sort.map { sort =>
+  protected def sortDate(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+    attr.sort.map { sort =>
       (
-        sort.last.toInt,
+        sort.last.toString.toInt,
         sort.head match {
-          case 'a' => (a: Row, b: Row) =>
-            a.get(attrIndex).asInstanceOf[Date].compareTo(b.get(attrIndex).asInstanceOf[Date])
-          case 'd' => (a: Row, b: Row) =>
-            b.get(attrIndex).asInstanceOf[Date].compareTo(a.get(attrIndex).asInstanceOf[Date])
+          case 'a' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            //println(s"$nestedIdsCount SORT INDEX asc  (${attr.attr}): " + i)
+            (a: Row, b: Row) =>
+              a.get(i).asInstanceOf[Date].compareTo(b.get(i).asInstanceOf[Date])
+          case 'd' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            //println(s"$nestedIdsCount SORT INDEX desc (${attr.attr}): " + i)
+            (a: Row, b: Row) =>
+              b.get(i).asInstanceOf[Date].compareTo(a.get(i).asInstanceOf[Date])
         }
       )
     }
   }
 
-  protected def sortUUID(atom: Attr, attrIndex: Int): Option[(Int, (Row, Row) => Int)] = {
-    atom.sort.map { sort =>
+  protected def sortUUID(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+    attr.sort.map { sort =>
       (
-        sort.last.toInt,
+        sort.last.toString.toInt,
         sort.head match {
-          case 'a' => (a: Row, b: Row) =>
-            a.get(attrIndex).asInstanceOf[UUID].compareTo(b.get(attrIndex).asInstanceOf[UUID])
-          case 'd' => (a: Row, b: Row) =>
-            b.get(attrIndex).asInstanceOf[UUID].compareTo(a.get(attrIndex).asInstanceOf[UUID])
+          case 'a' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            //println(s"$nestedIdsCount SORT INDEX asc  (${attr.attr}): " + i)
+            (a: Row, b: Row) =>
+              a.get(i).asInstanceOf[UUID].compareTo(b.get(i).asInstanceOf[UUID])
+          case 'd' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            //println(s"$nestedIdsCount SORT INDEX desc (${attr.attr}): " + i)
+            (a: Row, b: Row) =>
+              b.get(i).asInstanceOf[UUID].compareTo(a.get(i).asInstanceOf[UUID])
         }
       )
     }
   }
 
-  protected def sortURI(atom: Attr, attrIndex: Int): Option[(Int, (Row, Row) => Int)] = {
-    atom.sort.map { sort =>
+  protected def sortURI(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+    attr.sort.map { sort =>
       (
-        sort.last.toInt,
+        sort.last.toString.toInt,
         sort.head match {
-          case 'a' => (a: Row, b: Row) =>
-            a.get(attrIndex).asInstanceOf[URI].compareTo(b.get(attrIndex).asInstanceOf[URI])
-          case 'd' => (a: Row, b: Row) =>
-            b.get(attrIndex).asInstanceOf[URI].compareTo(a.get(attrIndex).asInstanceOf[URI])
+          case 'a' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            //println(s"$nestedIdsCount SORT INDEX asc  (${attr.attr}): " + i)
+            (a: Row, b: Row) =>
+              a.get(i).asInstanceOf[URI].compareTo(b.get(i).asInstanceOf[URI])
+          case 'd' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            //println(s"$nestedIdsCount SORT INDEX desc (${attr.attr}): " + i)
+            (a: Row, b: Row) =>
+              b.get(i).asInstanceOf[URI].compareTo(a.get(i).asInstanceOf[URI])
         }
       )
     }
   }
 
-  protected def sortByte(atom: Attr, attrIndex: Int): Option[(Int, (Row, Row) => Int)] = {
-    atom.sort.map { sort =>
+  protected def sortByte(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+    attr.sort.map { sort =>
       (
-        sort.last.toInt,
+        sort.last.toString.toInt,
         sort.head match {
-          case 'a' => (a: Row, b: Row) =>
-            a.get(attrIndex).asInstanceOf[jInteger].compareTo(b.get(attrIndex).asInstanceOf[jInteger])
-          case 'd' => (a: Row, b: Row) =>
-            b.get(attrIndex).asInstanceOf[jInteger].compareTo(a.get(attrIndex).asInstanceOf[jInteger])
+          case 'a' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            //println(s"$nestedIdsCount SORT INDEX asc  (${attr.attr}): " + i)
+            (a: Row, b: Row) =>
+              a.get(i).asInstanceOf[jInteger].compareTo(b.get(i).asInstanceOf[jInteger])
+          case 'd' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            //println(s"$nestedIdsCount SORT INDEX desc (${attr.attr}): " + i)
+            (a: Row, b: Row) =>
+              b.get(i).asInstanceOf[jInteger].compareTo(a.get(i).asInstanceOf[jInteger])
         }
       )
     }
   }
 
-  protected def sortShort(atom: Attr, attrIndex: Int): Option[(Int, (Row, Row) => Int)] = {
-    atom.sort.map { sort =>
+  protected def sortShort(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+    attr.sort.map { sort =>
       (
-        sort.last.toInt,
+        sort.last.toString.toInt,
         sort.head match {
-          case 'a' => (a: Row, b: Row) =>
-            a.get(attrIndex).asInstanceOf[jInteger].compareTo(b.get(attrIndex).asInstanceOf[jInteger])
-          case 'd' => (a: Row, b: Row) =>
-            b.get(attrIndex).asInstanceOf[jInteger].compareTo(a.get(attrIndex).asInstanceOf[jInteger])
+          case 'a' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            //println(s"$nestedIdsCount SORT INDEX asc  (${attr.attr}): " + i)
+            (a: Row, b: Row) =>
+              a.get(i).asInstanceOf[jInteger].compareTo(b.get(i).asInstanceOf[jInteger])
+          case 'd' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            //println(s"$nestedIdsCount SORT INDEX desc (${attr.attr}): " + i)
+            (a: Row, b: Row) =>
+              b.get(i).asInstanceOf[jInteger].compareTo(a.get(i).asInstanceOf[jInteger])
         }
       )
     }
   }
 
-  protected def sortChar(atom: Attr, attrIndex: Int): Option[(Int, (Row, Row) => Int)] = {
-    atom.sort.map { sort =>
+  protected def sortChar(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+    attr.sort.map { sort =>
       (
-        sort.last.toInt,
+        sort.last.toString.toInt,
         sort.head match {
-          case 'a' => (a: Row, b: Row) =>
-            a.get(attrIndex).asInstanceOf[String].compareTo(b.get(attrIndex).asInstanceOf[String])
-          case 'd' => (a: Row, b: Row) =>
-            b.get(attrIndex).asInstanceOf[String].compareTo(a.get(attrIndex).asInstanceOf[String])
+          case 'a' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            //println(s"$nestedIdsCount SORT INDEX asc  (${attr.attr}): " + i)
+            (a: Row, b: Row) =>
+              a.get(i).asInstanceOf[String].compareTo(b.get(i).asInstanceOf[String])
+          case 'd' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            //println(s"$nestedIdsCount SORT INDEX desc (${attr.attr}): " + i)
+            (a: Row, b: Row) =>
+              b.get(i).asInstanceOf[String].compareTo(a.get(i).asInstanceOf[String])
         }
       )
     }

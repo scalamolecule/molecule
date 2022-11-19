@@ -1,6 +1,6 @@
 package molecule.base.codeGeneration.render
 
-import molecule.base.ast.SchemaAST.{CardOne, MetaAttr, MetaNs, MetaSchema}
+import molecule.base.ast.SchemaAST.{CardOne, CardSet, MetaAttr, MetaNs, MetaSchema}
 import molecule.base.util.BaseHelpers
 
 
@@ -25,6 +25,7 @@ class DslFormatting(
   val genericAttrs = Seq("e", "a", "v", "tx", "txDate", "txOp")
   val refs         = namespace.attrs.filter(_.refNs.nonEmpty)
   val backRefs     = namespace.backRefNss
+  val hasCardMany = namespace.attrs.exists(_.card == CardSet)
 
 
   def camel(s: String) = s"${s.head.toUpper}${s.tail}"
@@ -58,5 +59,5 @@ class DslFormatting(
   lazy val `A..V, ` = if (arity == 0) "" else tpes.mkString("", ", ", ", ")
   lazy val `[A..V]` = if (arity == 0) "" else tpes.mkString("[", ", ", "]")
 
-  lazy val NS = s"Molecule_${nn(arity)}${`[A..V]`}"
+//  lazy val NS = s"Molecule_${nn(arity)}${`[A..V]`}"
 }

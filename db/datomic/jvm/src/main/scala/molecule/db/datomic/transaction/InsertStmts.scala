@@ -1,29 +1,20 @@
 package molecule.db.datomic.transaction
 
-import java.util.{Collections, List => jList, Set => jSet}
+import java.util.{Collections, List => jList}
 import clojure.lang.Keyword
-import molecule.base.ast.SchemaAST._
-import molecule.base.util.exceptions.MoleculeException
 import molecule.boilerplate.ast.MoleculeModel._
 import scala.annotation.tailrec
 
 
-class InsertStmts(elements: Seq[Element], tpls: Seq[Product]) extends InsertResolvers_(elements) {
-  lazy val notImpl = MoleculeException("Not implemented yet...")
-
+class InsertStmts(elements: Seq[Element], data: Seq[Product], tempIdInit: Int = 0)
+  extends InsertResolvers_(elements, tempIdInit) {
 
   def getStmts: jList[jList[_]] = {
-    val tpl2stmts = getResolver
-    tpls.foreach { tpl =>
+    val tpl2stmts = getResolver(elements)
+    data.foreach { tpl =>
       e = newId
       tpl2stmts(tpl)
     }
-
-    println("\n--- INSERT --------------------------------------------------------")
-    elements.foreach(println)
-    println("---")
-    stmts.forEach(stmt => println(stmt))
-
     Collections.unmodifiableList(stmts)
   }
 
@@ -54,9 +45,49 @@ class InsertStmts(elements: Seq[Element], tpls: Seq[Product]) extends InsertReso
         case Ref(ns, refAttr, _, _) => resolve(tail, resolvers :+ addRef(ns, kw(ns, refAttr)), n)
         case BackRef(backRefNs)     => resolve(tail, resolvers :+ addBackRef(backRefNs), n)
 
+        case Nested(Ref(ns, refAttr, _, _), elements) =>
+          resolve(tail, resolvers :+ addNested(n, ns, kw(ns, refAttr), elements), n)
+
+        case NestedOpt(Ref(ns, refAttr, _, _), elements) =>
+          resolve(tail, resolvers :+ addNested(n, ns, kw(ns, refAttr), elements), n)
+
         case other => unexpected(other)
       }
       case Nil             => resolvers
+    }
+  }
+
+
+  private def addNested(n: Int, ns: String, refAttr: Keyword, elements: Seq[Element]): Product => Unit = {
+    val nested2stmts = getResolver(elements)
+    val nestedArity = elements.count {
+      case _: Mandatory@unchecked => true
+      case _: Optional@unchecked  => true
+      case _                      => false
+    }
+    elements.foreach(println)
+    nestedArity match {
+      case 1 =>
+        (tpl: Product) => {
+          val nested       = tpl.productElement(n).asInstanceOf[Seq[Any]]
+          val nestedBaseId = e
+          nested.foreach { value =>
+            e = nestedBaseId
+            val tpl = Tuple1(value)
+            addRef(ns, refAttr)(tpl)
+            nested2stmts(tpl)
+          }
+        }
+      case _ =>
+        (tpl: Product) => {
+          val nested       = tpl.productElement(n).asInstanceOf[Seq[Product]]
+          val nestedBaseId = e
+          nested.foreach { tpl =>
+            e = nestedBaseId
+            addRef(ns, refAttr)(tpl)
+            nested2stmts(tpl)
+          }
+        }
     }
   }
 
@@ -209,19 +240,6 @@ class InsertStmts(elements: Seq[Element], tpls: Seq[Product]) extends InsertReso
 
   private def addBackRef(backRefNs: String): Product => Unit = {
     (_: Product) => e = backRefs(backRefNs)
-  }
-
-  private def addNested(a: Keyword): String => Unit = {
-    (nestedBaseId: String) => {
-      e = nestedBaseId
-      stmt = stmtList
-      stmt.add(add)
-      stmt.add(e)
-      stmt.add(a)
-      e = newId
-      stmt.add(e.asInstanceOf[AnyRef])
-      stmts.add(stmt)
-    }
   }
 
 

@@ -9,22 +9,22 @@ import molecule.boilerplate.ast.MoleculeModel._
 import molecule.core.util.fns
 import scala.annotation.tailrec
 
-abstract class TransactionBase(elements: Seq[Element]) {
+abstract class TransactionBase(elements: Seq[Element], tempIdInit: Int) {
 
-  // Accumulate java insert data
-  final protected val stmts: util.ArrayList[jList[AnyRef]] = new java.util.ArrayList[jList[AnyRef]]()
+  // Accumulate java insertion data
+  final protected val stmts: util.ArrayList[jList[AnyRef]] = new util.ArrayList[jList[AnyRef]]()
 
   protected def unexpected(element: Element) = throw MoleculeException("Unexpected element: " + element)
 
   protected val nsFull  : String              = getNs(elements)
   protected val part    : String              = fns.partNs(nsFull).head
-  protected var tempId  : Int                 = 0 // tempIdInit
-  protected var lowest  : Int                 = 0 // tempIdInit
+  protected var tempId  : Int                 = tempIdInit
+  protected var lowest  : Int                 = tempIdInit
   protected var e       : String              = ""
   protected var stmt    : jList[AnyRef]       = null
   protected var backRefs: Map[String, String] = Map.empty[String, String]
 
-  protected def stmtList = new java.util.ArrayList[AnyRef](4)
+  protected def stmtList = new util.ArrayList[AnyRef](4)
 
 
   protected def newId: String = {

@@ -1,7 +1,7 @@
 package codegen.db.datomic.api
 
 import codegen.DatomicGenBase
-import codegen.db.datomic.query._Cast.fileName
+import codegen.db.datomic.query._CastFlat.fileName
 
 object _DatomicInsert extends DatomicGenBase("DatomicInsert", "/api") {
 

@@ -17,7 +17,10 @@ object DatomicGenerator extends App {
 
 //    db.datomic._DatomicMoleculeImplicits.generate
 
-//    db.datomic.query._Cast.generate
+//    db.datomic.query._CastFlat.generate
+//    db.datomic.query._CastNestedBranch.generate
+    db.datomic.query._CastNestedLeaf.generate
+
 //    db.datomic.query._Sort.generate
 
 }

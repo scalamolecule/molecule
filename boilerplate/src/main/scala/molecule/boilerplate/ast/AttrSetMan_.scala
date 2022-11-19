@@ -6,7 +6,7 @@ import java.util.{Date, UUID}
 
 trait AttrSetMan_ { self: ModelBase =>
 
-  sealed trait AttrSetMan extends AttrSet
+  sealed trait AttrSetMan extends AttrSet with Mandatory
   
   case class AttrSetManString(
     ns          : String,

@@ -1,6 +1,7 @@
 // GENERATED CODE ********************************
 package molecule.db.datomic.query
 
+import java.lang.{Long => jLong}
 import molecule.base.util.BaseHelpers
 import molecule.base.util.exceptions.MoleculeException
 import molecule.boilerplate.ast.MoleculeModel._
@@ -28,12 +29,12 @@ trait Base[Tpl] extends BaseHelpers with JavaConversions { self: Model2Query[Tpl
   final protected val preRules = new ArrayBuffer[String]
 
   // Main query
-  final protected val sortIds = new ArrayBuffer[String]
-  final protected val find    = new ArrayBuffer[String]
-  final protected val widh    = new ArrayBuffer[String]
-  final protected val in      = new ArrayBuffer[String]
-  final protected val where   = new ArrayBuffer[(String, Int)]
-  final protected val rules   = new ArrayBuffer[String]
+  final protected val nestedIds = new ArrayBuffer[String]
+  final protected val find      = new ArrayBuffer[String]
+  final protected val widh      = new ArrayBuffer[String]
+  final protected val in        = new ArrayBuffer[String]
+  final protected val where     = new ArrayBuffer[(String, Int)]
+  final protected val rules     = new ArrayBuffer[String]
 
   // In variables and where clauses not shared with pre-query. To be added lastly to main query
   final protected val inPost    = new ArrayBuffer[String]
@@ -43,13 +44,44 @@ trait Base[Tpl] extends BaseHelpers with JavaConversions { self: Model2Query[Tpl
   final protected val preArgs   = new ArrayBuffer[AnyRef]
   final protected val args      = new ArrayBuffer[AnyRef]
   final protected val castScala = new ArrayBuffer[AnyRef => AnyRef]
+  final protected var castss    = List.empty[List[AnyRef => AnyRef]]
 
   type Row = java.util.List[AnyRef]
 
   // Sorting
-  final protected val sorts    = new ArrayBuffer[(Int, (Row, Row) => Int)]
+  final protected val sortsAcc = new ArrayBuffer[Int => (Row, Row) => Int]
+  final protected val sorts    = new ArrayBuffer[(Int, Int => (Row, Row) => Int)]
   protected var attrIndex: Int = -1
 
+  protected def validateSortIndexes(): Unit = if (sorts.nonEmpty) {
+    sorts.sortBy(_._1).map(_._1).toList match {
+      case Nil                 =>
+      case List(1)             =>
+      case List(1, 2)          =>
+      case List(1, 2, 3)       =>
+      case List(1, 2, 3, 4)    =>
+      case List(1, 2, 3, 4, 5) =>
+      case other               => throw MoleculeException(
+        s"Sort index 1 should be present and additional indexes continuously increase (in any order). " +
+          s"Found sort index(es): " + other.mkString(", ")
+      )
+    }
+  }
+
+  protected def sortNestedLevel(): Unit = {
+    val nestedIndex   = nestedIds.length - 1
+    val levelIdSorter = (_: Int) => (a: Row, b: Row) =>
+      a.get(nestedIndex).asInstanceOf[jLong].compareTo(b.get(nestedIndex).asInstanceOf[jLong])
+
+    validateSortIndexes()
+    sortsAcc ++= sorts.sortBy(_._1).map(_._2)
+
+    // Group by entity id of this level
+    sortsAcc += levelIdSorter
+
+    // Start independent sorting on next nested level
+    sorts.clear()
+  }
 
   protected def unexpected(element: Element) = throw MoleculeException("Unexpected element: " + element)
   protected def unexpected(op: Op) = throw MoleculeException("Unexpected operation: " + op)
@@ -81,7 +113,7 @@ trait Base[Tpl] extends BaseHelpers with JavaConversions { self: Model2Query[Tpl
     preIn.empty
     preWhere.empty
     preRules.empty
-    sortIds.empty
+    nestedIds.empty
     find.empty
     widh.empty
     in.empty

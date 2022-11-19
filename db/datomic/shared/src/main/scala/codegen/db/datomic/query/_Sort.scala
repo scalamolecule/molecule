@@ -24,15 +24,21 @@ object _Sort extends DatomicGenBase("Sort", "/query") {
   def sorter(tpe: String): String = {
     val javaTpe = javaTypes(tpe)
     s"""
-       |  protected def sort$tpe(attr: Attr, attrIndex: Int): Option[(Int, (Row, Row) => Int)] = {
+       |  protected def sort$tpe(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
        |    attr.sort.map { sort =>
        |      (
-       |        sort.last.toInt,
+       |        sort.last.toString.toInt,
        |        sort.head match {
-       |          case 'a' => (a: Row, b: Row) =>
-       |            a.get(attrIndex).asInstanceOf[$javaTpe].compareTo(b.get(attrIndex).asInstanceOf[$javaTpe])
-       |          case 'd' => (a: Row, b: Row) =>
-       |            b.get(attrIndex).asInstanceOf[$javaTpe].compareTo(a.get(attrIndex).asInstanceOf[$javaTpe])
+       |          case 'a' => (nestedIdsCount: Int) =>
+       |            val i = nestedIdsCount + attrIndex
+       |            //println(s"$$nestedIdsCount SORT INDEX asc  ($${attr.attr}): " + i)
+       |            (a: Row, b: Row) =>
+       |              a.get(i).asInstanceOf[$javaTpe].compareTo(b.get(i).asInstanceOf[$javaTpe])
+       |          case 'd' => (nestedIdsCount: Int) =>
+       |            val i = nestedIdsCount + attrIndex
+       |            //println(s"$$nestedIdsCount SORT INDEX desc ($${attr.attr}): " + i)
+       |            (a: Row, b: Row) =>
+       |              b.get(i).asInstanceOf[$javaTpe].compareTo(a.get(i).asInstanceOf[$javaTpe])
        |        }
        |      )
        |    }
