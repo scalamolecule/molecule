@@ -7,7 +7,7 @@ import molecule.core.query.Model2Query
 trait CastFlat_[Tpl] { self: Model2Query[Tpl] with Base[Tpl] =>
 
   final override lazy protected val row2tpl: Row => Tpl = {
-    castScala.length match {
+    casts.length match {
       case 1 => cast1
       case 2 => cast2
       case 3 => cast3
@@ -34,7 +34,7 @@ trait CastFlat_[Tpl] { self: Model2Query[Tpl] with Base[Tpl] =>
   }
 
   final private def cast1: Row => Tpl = {
-    val c0 = castScala(0)
+    val c0 = casts(0)
     (row: Row) =>
       (
         c0(row.get(0))
@@ -42,8 +42,8 @@ trait CastFlat_[Tpl] { self: Model2Query[Tpl] with Base[Tpl] =>
   }
 
   final private def cast2: Row => Tpl = {
-    val c0 = castScala(0)
-    val c1 = castScala(1)
+    val c0 = casts(0)
+    val c1 = casts(1)
     (row: Row) =>
       (
         c0(row.get(0)),
@@ -52,9 +52,9 @@ trait CastFlat_[Tpl] { self: Model2Query[Tpl] with Base[Tpl] =>
   }
 
   final private def cast3: Row => Tpl = {
-    val c0 = castScala(0)
-    val c1 = castScala(1)
-    val c2 = castScala(2)
+    val c0 = casts(0)
+    val c1 = casts(1)
+    val c2 = casts(2)
     (row: Row) =>
       (
         c0(row.get(0)),
@@ -64,10 +64,10 @@ trait CastFlat_[Tpl] { self: Model2Query[Tpl] with Base[Tpl] =>
   }
 
   final private def cast4: Row => Tpl = {
-    val c0 = castScala(0)
-    val c1 = castScala(1)
-    val c2 = castScala(2)
-    val c3 = castScala(3)
+    val c0 = casts(0)
+    val c1 = casts(1)
+    val c2 = casts(2)
+    val c3 = casts(3)
     (row: Row) =>
       (
         c0(row.get(0)),
@@ -78,11 +78,11 @@ trait CastFlat_[Tpl] { self: Model2Query[Tpl] with Base[Tpl] =>
   }
 
   final private def cast5: Row => Tpl = {
-    val c0 = castScala(0)
-    val c1 = castScala(1)
-    val c2 = castScala(2)
-    val c3 = castScala(3)
-    val c4 = castScala(4)
+    val c0 = casts(0)
+    val c1 = casts(1)
+    val c2 = casts(2)
+    val c3 = casts(3)
+    val c4 = casts(4)
     (row: Row) =>
       (
         c0(row.get(0)),
@@ -94,12 +94,12 @@ trait CastFlat_[Tpl] { self: Model2Query[Tpl] with Base[Tpl] =>
   }
 
   final private def cast6: Row => Tpl = {
-    val c0 = castScala(0)
-    val c1 = castScala(1)
-    val c2 = castScala(2)
-    val c3 = castScala(3)
-    val c4 = castScala(4)
-    val c5 = castScala(5)
+    val c0 = casts(0)
+    val c1 = casts(1)
+    val c2 = casts(2)
+    val c3 = casts(3)
+    val c4 = casts(4)
+    val c5 = casts(5)
     (row: Row) =>
       (
         c0(row.get(0)),
@@ -112,13 +112,13 @@ trait CastFlat_[Tpl] { self: Model2Query[Tpl] with Base[Tpl] =>
   }
 
   final private def cast7: Row => Tpl = {
-    val c0 = castScala(0)
-    val c1 = castScala(1)
-    val c2 = castScala(2)
-    val c3 = castScala(3)
-    val c4 = castScala(4)
-    val c5 = castScala(5)
-    val c6 = castScala(6)
+    val c0 = casts(0)
+    val c1 = casts(1)
+    val c2 = casts(2)
+    val c3 = casts(3)
+    val c4 = casts(4)
+    val c5 = casts(5)
+    val c6 = casts(6)
     (row: Row) =>
       (
         c0(row.get(0)),
@@ -132,14 +132,14 @@ trait CastFlat_[Tpl] { self: Model2Query[Tpl] with Base[Tpl] =>
   }
 
   final private def cast8: Row => Tpl = {
-    val c0 = castScala(0)
-    val c1 = castScala(1)
-    val c2 = castScala(2)
-    val c3 = castScala(3)
-    val c4 = castScala(4)
-    val c5 = castScala(5)
-    val c6 = castScala(6)
-    val c7 = castScala(7)
+    val c0 = casts(0)
+    val c1 = casts(1)
+    val c2 = casts(2)
+    val c3 = casts(3)
+    val c4 = casts(4)
+    val c5 = casts(5)
+    val c6 = casts(6)
+    val c7 = casts(7)
     (row: Row) =>
       (
         c0(row.get(0)),
@@ -154,15 +154,15 @@ trait CastFlat_[Tpl] { self: Model2Query[Tpl] with Base[Tpl] =>
   }
 
   final private def cast9: Row => Tpl = {
-    val c0 = castScala(0)
-    val c1 = castScala(1)
-    val c2 = castScala(2)
-    val c3 = castScala(3)
-    val c4 = castScala(4)
-    val c5 = castScala(5)
-    val c6 = castScala(6)
-    val c7 = castScala(7)
-    val c8 = castScala(8)
+    val c0 = casts(0)
+    val c1 = casts(1)
+    val c2 = casts(2)
+    val c3 = casts(3)
+    val c4 = casts(4)
+    val c5 = casts(5)
+    val c6 = casts(6)
+    val c7 = casts(7)
+    val c8 = casts(8)
     (row: Row) =>
       (
         c0(row.get(0)),
@@ -178,16 +178,16 @@ trait CastFlat_[Tpl] { self: Model2Query[Tpl] with Base[Tpl] =>
   }
 
   final private def cast10: Row => Tpl = {
-    val c0 = castScala(0)
-    val c1 = castScala(1)
-    val c2 = castScala(2)
-    val c3 = castScala(3)
-    val c4 = castScala(4)
-    val c5 = castScala(5)
-    val c6 = castScala(6)
-    val c7 = castScala(7)
-    val c8 = castScala(8)
-    val c9 = castScala(9)
+    val c0 = casts(0)
+    val c1 = casts(1)
+    val c2 = casts(2)
+    val c3 = casts(3)
+    val c4 = casts(4)
+    val c5 = casts(5)
+    val c6 = casts(6)
+    val c7 = casts(7)
+    val c8 = casts(8)
+    val c9 = casts(9)
     (row: Row) =>
       (
         c0(row.get(0)),
@@ -204,17 +204,17 @@ trait CastFlat_[Tpl] { self: Model2Query[Tpl] with Base[Tpl] =>
   }
 
   final private def cast11: Row => Tpl = {
-    val c0 = castScala(0)
-    val c1 = castScala(1)
-    val c2 = castScala(2)
-    val c3 = castScala(3)
-    val c4 = castScala(4)
-    val c5 = castScala(5)
-    val c6 = castScala(6)
-    val c7 = castScala(7)
-    val c8 = castScala(8)
-    val c9 = castScala(9)
-    val c10 = castScala(10)
+    val c0 = casts(0)
+    val c1 = casts(1)
+    val c2 = casts(2)
+    val c3 = casts(3)
+    val c4 = casts(4)
+    val c5 = casts(5)
+    val c6 = casts(6)
+    val c7 = casts(7)
+    val c8 = casts(8)
+    val c9 = casts(9)
+    val c10 = casts(10)
     (row: Row) =>
       (
         c0(row.get(0)),
@@ -232,18 +232,18 @@ trait CastFlat_[Tpl] { self: Model2Query[Tpl] with Base[Tpl] =>
   }
 
   final private def cast12: Row => Tpl = {
-    val c0 = castScala(0)
-    val c1 = castScala(1)
-    val c2 = castScala(2)
-    val c3 = castScala(3)
-    val c4 = castScala(4)
-    val c5 = castScala(5)
-    val c6 = castScala(6)
-    val c7 = castScala(7)
-    val c8 = castScala(8)
-    val c9 = castScala(9)
-    val c10 = castScala(10)
-    val c11 = castScala(11)
+    val c0 = casts(0)
+    val c1 = casts(1)
+    val c2 = casts(2)
+    val c3 = casts(3)
+    val c4 = casts(4)
+    val c5 = casts(5)
+    val c6 = casts(6)
+    val c7 = casts(7)
+    val c8 = casts(8)
+    val c9 = casts(9)
+    val c10 = casts(10)
+    val c11 = casts(11)
     (row: Row) =>
       (
         c0(row.get(0)),
@@ -262,19 +262,19 @@ trait CastFlat_[Tpl] { self: Model2Query[Tpl] with Base[Tpl] =>
   }
 
   final private def cast13: Row => Tpl = {
-    val c0 = castScala(0)
-    val c1 = castScala(1)
-    val c2 = castScala(2)
-    val c3 = castScala(3)
-    val c4 = castScala(4)
-    val c5 = castScala(5)
-    val c6 = castScala(6)
-    val c7 = castScala(7)
-    val c8 = castScala(8)
-    val c9 = castScala(9)
-    val c10 = castScala(10)
-    val c11 = castScala(11)
-    val c12 = castScala(12)
+    val c0 = casts(0)
+    val c1 = casts(1)
+    val c2 = casts(2)
+    val c3 = casts(3)
+    val c4 = casts(4)
+    val c5 = casts(5)
+    val c6 = casts(6)
+    val c7 = casts(7)
+    val c8 = casts(8)
+    val c9 = casts(9)
+    val c10 = casts(10)
+    val c11 = casts(11)
+    val c12 = casts(12)
     (row: Row) =>
       (
         c0(row.get(0)),
@@ -294,20 +294,20 @@ trait CastFlat_[Tpl] { self: Model2Query[Tpl] with Base[Tpl] =>
   }
 
   final private def cast14: Row => Tpl = {
-    val c0 = castScala(0)
-    val c1 = castScala(1)
-    val c2 = castScala(2)
-    val c3 = castScala(3)
-    val c4 = castScala(4)
-    val c5 = castScala(5)
-    val c6 = castScala(6)
-    val c7 = castScala(7)
-    val c8 = castScala(8)
-    val c9 = castScala(9)
-    val c10 = castScala(10)
-    val c11 = castScala(11)
-    val c12 = castScala(12)
-    val c13 = castScala(13)
+    val c0 = casts(0)
+    val c1 = casts(1)
+    val c2 = casts(2)
+    val c3 = casts(3)
+    val c4 = casts(4)
+    val c5 = casts(5)
+    val c6 = casts(6)
+    val c7 = casts(7)
+    val c8 = casts(8)
+    val c9 = casts(9)
+    val c10 = casts(10)
+    val c11 = casts(11)
+    val c12 = casts(12)
+    val c13 = casts(13)
     (row: Row) =>
       (
         c0(row.get(0)),
@@ -328,21 +328,21 @@ trait CastFlat_[Tpl] { self: Model2Query[Tpl] with Base[Tpl] =>
   }
 
   final private def cast15: Row => Tpl = {
-    val c0 = castScala(0)
-    val c1 = castScala(1)
-    val c2 = castScala(2)
-    val c3 = castScala(3)
-    val c4 = castScala(4)
-    val c5 = castScala(5)
-    val c6 = castScala(6)
-    val c7 = castScala(7)
-    val c8 = castScala(8)
-    val c9 = castScala(9)
-    val c10 = castScala(10)
-    val c11 = castScala(11)
-    val c12 = castScala(12)
-    val c13 = castScala(13)
-    val c14 = castScala(14)
+    val c0 = casts(0)
+    val c1 = casts(1)
+    val c2 = casts(2)
+    val c3 = casts(3)
+    val c4 = casts(4)
+    val c5 = casts(5)
+    val c6 = casts(6)
+    val c7 = casts(7)
+    val c8 = casts(8)
+    val c9 = casts(9)
+    val c10 = casts(10)
+    val c11 = casts(11)
+    val c12 = casts(12)
+    val c13 = casts(13)
+    val c14 = casts(14)
     (row: Row) =>
       (
         c0(row.get(0)),
@@ -364,22 +364,22 @@ trait CastFlat_[Tpl] { self: Model2Query[Tpl] with Base[Tpl] =>
   }
 
   final private def cast16: Row => Tpl = {
-    val c0 = castScala(0)
-    val c1 = castScala(1)
-    val c2 = castScala(2)
-    val c3 = castScala(3)
-    val c4 = castScala(4)
-    val c5 = castScala(5)
-    val c6 = castScala(6)
-    val c7 = castScala(7)
-    val c8 = castScala(8)
-    val c9 = castScala(9)
-    val c10 = castScala(10)
-    val c11 = castScala(11)
-    val c12 = castScala(12)
-    val c13 = castScala(13)
-    val c14 = castScala(14)
-    val c15 = castScala(15)
+    val c0 = casts(0)
+    val c1 = casts(1)
+    val c2 = casts(2)
+    val c3 = casts(3)
+    val c4 = casts(4)
+    val c5 = casts(5)
+    val c6 = casts(6)
+    val c7 = casts(7)
+    val c8 = casts(8)
+    val c9 = casts(9)
+    val c10 = casts(10)
+    val c11 = casts(11)
+    val c12 = casts(12)
+    val c13 = casts(13)
+    val c14 = casts(14)
+    val c15 = casts(15)
     (row: Row) =>
       (
         c0(row.get(0)),
@@ -402,23 +402,23 @@ trait CastFlat_[Tpl] { self: Model2Query[Tpl] with Base[Tpl] =>
   }
 
   final private def cast17: Row => Tpl = {
-    val c0 = castScala(0)
-    val c1 = castScala(1)
-    val c2 = castScala(2)
-    val c3 = castScala(3)
-    val c4 = castScala(4)
-    val c5 = castScala(5)
-    val c6 = castScala(6)
-    val c7 = castScala(7)
-    val c8 = castScala(8)
-    val c9 = castScala(9)
-    val c10 = castScala(10)
-    val c11 = castScala(11)
-    val c12 = castScala(12)
-    val c13 = castScala(13)
-    val c14 = castScala(14)
-    val c15 = castScala(15)
-    val c16 = castScala(16)
+    val c0 = casts(0)
+    val c1 = casts(1)
+    val c2 = casts(2)
+    val c3 = casts(3)
+    val c4 = casts(4)
+    val c5 = casts(5)
+    val c6 = casts(6)
+    val c7 = casts(7)
+    val c8 = casts(8)
+    val c9 = casts(9)
+    val c10 = casts(10)
+    val c11 = casts(11)
+    val c12 = casts(12)
+    val c13 = casts(13)
+    val c14 = casts(14)
+    val c15 = casts(15)
+    val c16 = casts(16)
     (row: Row) =>
       (
         c0(row.get(0)),
@@ -442,24 +442,24 @@ trait CastFlat_[Tpl] { self: Model2Query[Tpl] with Base[Tpl] =>
   }
 
   final private def cast18: Row => Tpl = {
-    val c0 = castScala(0)
-    val c1 = castScala(1)
-    val c2 = castScala(2)
-    val c3 = castScala(3)
-    val c4 = castScala(4)
-    val c5 = castScala(5)
-    val c6 = castScala(6)
-    val c7 = castScala(7)
-    val c8 = castScala(8)
-    val c9 = castScala(9)
-    val c10 = castScala(10)
-    val c11 = castScala(11)
-    val c12 = castScala(12)
-    val c13 = castScala(13)
-    val c14 = castScala(14)
-    val c15 = castScala(15)
-    val c16 = castScala(16)
-    val c17 = castScala(17)
+    val c0 = casts(0)
+    val c1 = casts(1)
+    val c2 = casts(2)
+    val c3 = casts(3)
+    val c4 = casts(4)
+    val c5 = casts(5)
+    val c6 = casts(6)
+    val c7 = casts(7)
+    val c8 = casts(8)
+    val c9 = casts(9)
+    val c10 = casts(10)
+    val c11 = casts(11)
+    val c12 = casts(12)
+    val c13 = casts(13)
+    val c14 = casts(14)
+    val c15 = casts(15)
+    val c16 = casts(16)
+    val c17 = casts(17)
     (row: Row) =>
       (
         c0(row.get(0)),
@@ -484,25 +484,25 @@ trait CastFlat_[Tpl] { self: Model2Query[Tpl] with Base[Tpl] =>
   }
 
   final private def cast19: Row => Tpl = {
-    val c0 = castScala(0)
-    val c1 = castScala(1)
-    val c2 = castScala(2)
-    val c3 = castScala(3)
-    val c4 = castScala(4)
-    val c5 = castScala(5)
-    val c6 = castScala(6)
-    val c7 = castScala(7)
-    val c8 = castScala(8)
-    val c9 = castScala(9)
-    val c10 = castScala(10)
-    val c11 = castScala(11)
-    val c12 = castScala(12)
-    val c13 = castScala(13)
-    val c14 = castScala(14)
-    val c15 = castScala(15)
-    val c16 = castScala(16)
-    val c17 = castScala(17)
-    val c18 = castScala(18)
+    val c0 = casts(0)
+    val c1 = casts(1)
+    val c2 = casts(2)
+    val c3 = casts(3)
+    val c4 = casts(4)
+    val c5 = casts(5)
+    val c6 = casts(6)
+    val c7 = casts(7)
+    val c8 = casts(8)
+    val c9 = casts(9)
+    val c10 = casts(10)
+    val c11 = casts(11)
+    val c12 = casts(12)
+    val c13 = casts(13)
+    val c14 = casts(14)
+    val c15 = casts(15)
+    val c16 = casts(16)
+    val c17 = casts(17)
+    val c18 = casts(18)
     (row: Row) =>
       (
         c0(row.get(0)),
@@ -528,26 +528,26 @@ trait CastFlat_[Tpl] { self: Model2Query[Tpl] with Base[Tpl] =>
   }
 
   final private def cast20: Row => Tpl = {
-    val c0 = castScala(0)
-    val c1 = castScala(1)
-    val c2 = castScala(2)
-    val c3 = castScala(3)
-    val c4 = castScala(4)
-    val c5 = castScala(5)
-    val c6 = castScala(6)
-    val c7 = castScala(7)
-    val c8 = castScala(8)
-    val c9 = castScala(9)
-    val c10 = castScala(10)
-    val c11 = castScala(11)
-    val c12 = castScala(12)
-    val c13 = castScala(13)
-    val c14 = castScala(14)
-    val c15 = castScala(15)
-    val c16 = castScala(16)
-    val c17 = castScala(17)
-    val c18 = castScala(18)
-    val c19 = castScala(19)
+    val c0 = casts(0)
+    val c1 = casts(1)
+    val c2 = casts(2)
+    val c3 = casts(3)
+    val c4 = casts(4)
+    val c5 = casts(5)
+    val c6 = casts(6)
+    val c7 = casts(7)
+    val c8 = casts(8)
+    val c9 = casts(9)
+    val c10 = casts(10)
+    val c11 = casts(11)
+    val c12 = casts(12)
+    val c13 = casts(13)
+    val c14 = casts(14)
+    val c15 = casts(15)
+    val c16 = casts(16)
+    val c17 = casts(17)
+    val c18 = casts(18)
+    val c19 = casts(19)
     (row: Row) =>
       (
         c0(row.get(0)),
@@ -574,27 +574,27 @@ trait CastFlat_[Tpl] { self: Model2Query[Tpl] with Base[Tpl] =>
   }
 
   final private def cast21: Row => Tpl = {
-    val c0 = castScala(0)
-    val c1 = castScala(1)
-    val c2 = castScala(2)
-    val c3 = castScala(3)
-    val c4 = castScala(4)
-    val c5 = castScala(5)
-    val c6 = castScala(6)
-    val c7 = castScala(7)
-    val c8 = castScala(8)
-    val c9 = castScala(9)
-    val c10 = castScala(10)
-    val c11 = castScala(11)
-    val c12 = castScala(12)
-    val c13 = castScala(13)
-    val c14 = castScala(14)
-    val c15 = castScala(15)
-    val c16 = castScala(16)
-    val c17 = castScala(17)
-    val c18 = castScala(18)
-    val c19 = castScala(19)
-    val c20 = castScala(20)
+    val c0 = casts(0)
+    val c1 = casts(1)
+    val c2 = casts(2)
+    val c3 = casts(3)
+    val c4 = casts(4)
+    val c5 = casts(5)
+    val c6 = casts(6)
+    val c7 = casts(7)
+    val c8 = casts(8)
+    val c9 = casts(9)
+    val c10 = casts(10)
+    val c11 = casts(11)
+    val c12 = casts(12)
+    val c13 = casts(13)
+    val c14 = casts(14)
+    val c15 = casts(15)
+    val c16 = casts(16)
+    val c17 = casts(17)
+    val c18 = casts(18)
+    val c19 = casts(19)
+    val c20 = casts(20)
     (row: Row) =>
       (
         c0(row.get(0)),
@@ -622,28 +622,28 @@ trait CastFlat_[Tpl] { self: Model2Query[Tpl] with Base[Tpl] =>
   }
 
   final private def cast22: Row => Tpl = {
-    val c0 = castScala(0)
-    val c1 = castScala(1)
-    val c2 = castScala(2)
-    val c3 = castScala(3)
-    val c4 = castScala(4)
-    val c5 = castScala(5)
-    val c6 = castScala(6)
-    val c7 = castScala(7)
-    val c8 = castScala(8)
-    val c9 = castScala(9)
-    val c10 = castScala(10)
-    val c11 = castScala(11)
-    val c12 = castScala(12)
-    val c13 = castScala(13)
-    val c14 = castScala(14)
-    val c15 = castScala(15)
-    val c16 = castScala(16)
-    val c17 = castScala(17)
-    val c18 = castScala(18)
-    val c19 = castScala(19)
-    val c20 = castScala(20)
-    val c21 = castScala(21)
+    val c0 = casts(0)
+    val c1 = casts(1)
+    val c2 = casts(2)
+    val c3 = casts(3)
+    val c4 = casts(4)
+    val c5 = casts(5)
+    val c6 = casts(6)
+    val c7 = casts(7)
+    val c8 = casts(8)
+    val c9 = casts(9)
+    val c10 = casts(10)
+    val c11 = casts(11)
+    val c12 = casts(12)
+    val c13 = casts(13)
+    val c14 = casts(14)
+    val c15 = casts(15)
+    val c16 = casts(16)
+    val c17 = casts(17)
+    val c18 = casts(18)
+    val c19 = casts(19)
+    val c20 = casts(20)
+    val c21 = casts(21)
     (row: Row) =>
       (
         c0(row.get(0)),

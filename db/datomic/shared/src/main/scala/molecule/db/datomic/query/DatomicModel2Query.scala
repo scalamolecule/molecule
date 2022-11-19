@@ -1,5 +1,6 @@
 package molecule.db.datomic.query
 
+import molecule.base.util.exceptions.MoleculeException
 import molecule.boilerplate.ast.MoleculeModel._
 import molecule.core.query.Model2Query
 import scala.annotation.tailrec
@@ -16,8 +17,7 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
     with CastFlat_[Tpl]
     with CastNestedBranch_[Tpl]
     with CastNestedLeaf_[Tpl]
-    with Nest[Tpl]
-    {
+    with Nest[Tpl] {
 
   final lazy protected val preInputs: Seq[AnyRef] = renderRules(rules ++ preRules) ++ preArgs
   final lazy protected val inputs   : Seq[AnyRef] = renderRules(rules) ++ args
@@ -72,7 +72,9 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
     hasRules: Boolean,
     optimized: Boolean
   ): String = {
-    val find1       = (nestedIds ++ find).map(v => if (v.startsWith("?")) v else s"\n        $v").mkString(" ").trim
+    val find1       = (nestedIds ++ find ++ renderPull)
+      .map(v => if (v.startsWith("?")) v else s"\n        $v")
+      .mkString(" ").trim
     val widh1       = if (widh.isEmpty) "" else widh.distinct.mkString("\n :with  ", " ", "")
     val r           = if (hasRules) "% " else ""
     val in1         = if (!hasRules && in.isEmpty) "" else in.mkString("\n :in    $ " + r, " ", "")
@@ -83,8 +85,56 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
        | :where $where2]""".stripMargin
   }
 
-  final protected def renderRules(rules: ArrayBuffer[String]): Seq[String] = {
+  final private def renderRules(rules: ArrayBuffer[String]): Seq[String] = {
     if (rules.isEmpty) Nil else Seq(rules.mkString("[\n  ", "\n  ", "\n]"))
+  }
+
+  final private def renderPull: Seq[String] = {
+    @tailrec
+    def addPullAttrs(
+      refAttr: String,
+      elements: Seq[Element],
+      level: Int,
+      acc: String = ""
+    ): (String, Option[NestedOpt]) = {
+      val i = "  " * (level + 5)
+      elements match {
+        case head :: tail =>
+          head match {
+            case nested: NestedOpt => (acc, Some(nested))
+
+            case a: AttrOneMan =>
+              val pull1 = s"\n$i(:${a.ns}/${a.attr} :limit nil)"
+              addPullAttrs(refAttr, tail, level, acc + pull1)
+
+            case a: AttrOneOpt =>
+              val pull1 = s"""\n$i(:${a.ns}/${a.attr} :limit nil :default "__none__")"""
+              addPullAttrs(refAttr, tail, level, acc + pull1)
+
+            case other => throw MoleculeException(
+              "Unexpected element in optional nested molecule: " + other
+            )
+          }
+        case Nil          => (acc, None)
+      }
+    }
+
+    def resolvePull(ref: Ref, elements: Seq[Element], level: Int): String = {
+      val indent  = "  " * (level + 5)
+      val refAttr = s":${ref.ns}/${ref.refAttr}"
+      addPullAttrs(refAttr, elements, level + 1, "") match {
+        case (pullAttrs, None) =>
+          s"""\n$indent{($refAttr :limit nil :default "__none__") [$pullAttrs]}"""
+
+        case (pullAttrs, Some(NestedOpt(ref1, elements1))) =>
+          val nestedPulls = resolvePull(ref1, elements1, level + 1)
+          s"""\n$indent{($refAttr :limit nil :default "__none__") [$pullAttrs$nestedPulls]}"""
+      }
+    }
+
+    pull.fold(Seq.empty[String]) { case (e, NestedOpt(ref, elements)) =>
+      Seq(s"(pull $e [${resolvePull(ref, elements, 0)}])")
+    }
   }
 
   @tailrec
@@ -105,6 +155,7 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
       case ref: Ref              => resolve(resolveRef(es, ref), tail)
       case _: BackRef            => resolve(resolveBackRef(es), tail)
       case Nested(ref, elements) => resolve(resolveNested(es, ref, elements), tail)
+      case n: NestedOpt          => resolve(resolveNestedOptRef(es, n), tail)
       case other                 => unexpected(other)
     }
     case Nil             => es
@@ -113,4 +164,8 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
   def resolveNested(es: List[Var], ref: Ref, elements: Seq[Element]): List[Var] = {
     resolve(resolveNestedRef(es, ref), elements)
   }
+
+  //  def resolveNestedOpt(es: List[Var], nestedOpt: NestedOpt, elements: Seq[Element]): List[Var] = {
+  //    resolve(resolveNestedOptRef(es, nestedOpt), elements)
+  //  }
 }

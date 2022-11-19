@@ -43,7 +43,14 @@ trait ModelBase extends Validations {
           |    ${elements.mkString(s",\n    ")}))""".stripMargin
     }
   }
-  case class NestedOpt(ref: Ref, elements: Seq[Element]) extends Element with Mandatory
+  case class NestedOpt(ref: Ref, elements: Seq[Element]) extends Element with Mandatory {
+    override def toString: String = {
+      s"""|NestedOpt(
+          |  $ref,
+          |  List(
+          |    ${elements.mkString(s",\n    ")}))""".stripMargin
+    }
+  }
 
   case class TxMetaData(elements: Seq[Element]) extends Element with Mandatory
   case class Composite(elements: Seq[Element]) extends Element with Mandatory

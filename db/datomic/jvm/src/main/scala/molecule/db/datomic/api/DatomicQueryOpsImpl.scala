@@ -1,6 +1,7 @@
 package molecule.db.datomic.api
 
-import java.util.{Collections, Comparator, Collection => jCollection}
+import java.util
+import java.util.{Collections, Comparator, Collection => jCollection, Map => jMap}
 import datomic.Peer
 import molecule.base.util.exceptions.MoleculeException
 import molecule.boilerplate.ast.MoleculeModel._
@@ -11,8 +12,6 @@ import molecule.db.datomic.query.DatomicModel2Query
 import molecule.db.datomic.util.DatomicApiLoader
 import zio.{Chunk, ZIO}
 import scala.concurrent.{ExecutionContext, Future}
-import java.lang.{Long => jLong}
-import java.util
 
 class DatomicQueryOpsImpl[Tpl](elements: Seq[Element])
   extends DatomicModel2Query[Tpl](elements)
@@ -52,20 +51,30 @@ class DatomicQueryOpsImpl[Tpl](elements: Seq[Element])
         Peer.q(query, db +: inputs :+ preIds: _*)
     }
 
-//    println("RAW rows:")
-//    rows.forEach(row => println(row))
+    //    println("RAW rows:")
+    //    rows.forEach(row => println(row))
 
     val sortedRows = sortRows(rows)
 
     println("SORTED rows:")
+    //    sortedRows.forEach(row => println(row + row.get(1).getClass.toString))
     sortedRows.forEach(row => println(row))
+    println("--")
+    sortedRows.forEach(row => println(row.get(1).asInstanceOf[jMap[_, _]].values))
+    println("--")
+    sortedRows.forEach(row => println(row.get(1).asInstanceOf[jMap[_, _]].values.iterator().next))
+    println("--")
+    sortedRows.forEach(row => println(row.get(1).asInstanceOf[jMap[_, _]].values.iterator().next.getClass))
 
     if (nestedIds.isEmpty) {
       val tuples = List.newBuilder[Tpl]
       sortedRows.forEach(row => tuples.addOne(row2tpl(row)))
       tuples.result()
+    } else if (nestedOptIds.nonEmpty) {
+      //      castss = castss :+ casts.toList
+      rows2nested(sortedRows)
     } else {
-      castss = castss :+ castScala.toList
+      castss = castss :+ casts.toList
       rows2nested(sortedRows)
     }
   }
@@ -79,12 +88,12 @@ class DatomicQueryOpsImpl[Tpl](elements: Seq[Element])
       case n =>
         validateSortIndexes()
         val sorters = sortsAcc ++ sorts.sortBy(_._1).map(_._2)
-//        println("--- SORT ------------------------------------------------------")
-//        sorters.foreach(println)
+        //        println("--- SORT ------------------------------------------------------")
+        //        sorters.foreach(println)
 
         val nestedIdsCount = nestedIds.length
         val sortedRows     = new java.util.ArrayList(rows)
-        val comparator = new Comparator[Row] {
+        val comparator     = new Comparator[Row] {
           override def compare(a: Row, b: Row): Int = {
             var i      = 0
             var result = 0

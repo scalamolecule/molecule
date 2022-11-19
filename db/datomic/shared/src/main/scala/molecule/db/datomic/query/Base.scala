@@ -29,22 +29,25 @@ trait Base[Tpl] extends BaseHelpers with JavaConversions { self: Model2Query[Tpl
   final protected val preRules = new ArrayBuffer[String]
 
   // Main query
-  final protected val nestedIds = new ArrayBuffer[String]
-  final protected val find      = new ArrayBuffer[String]
-  final protected val widh      = new ArrayBuffer[String]
-  final protected val in        = new ArrayBuffer[String]
-  final protected val where     = new ArrayBuffer[(String, Int)]
-  final protected val rules     = new ArrayBuffer[String]
+  final protected val nestedIds                 = new ArrayBuffer[String]
+  final protected val nestedOptIds              = new ArrayBuffer[String]
+  final protected val find                      = new ArrayBuffer[String]
+  final protected var findPull                  = List.empty[List[String]]
+  final protected var pull: Option[(String, NestedOpt)] = None
+  final protected val widh                      = new ArrayBuffer[String]
+  final protected val in                        = new ArrayBuffer[String]
+  final protected val where                     = new ArrayBuffer[(String, Int)]
+  final protected val rules                     = new ArrayBuffer[String]
 
   // In variables and where clauses not shared with pre-query. To be added lastly to main query
   final protected val inPost    = new ArrayBuffer[String]
   final protected val wherePost = new ArrayBuffer[(String, Int)]
 
   // Input args and cast lambdas
-  final protected val preArgs   = new ArrayBuffer[AnyRef]
-  final protected val args      = new ArrayBuffer[AnyRef]
-  final protected val castScala = new ArrayBuffer[AnyRef => AnyRef]
-  final protected var castss    = List.empty[List[AnyRef => AnyRef]]
+  final protected val preArgs = new ArrayBuffer[AnyRef]
+  final protected val args    = new ArrayBuffer[AnyRef]
+  final protected val casts   = new ArrayBuffer[AnyRef => AnyRef]
+  final protected var castss  = List.empty[List[AnyRef => AnyRef]]
 
   type Row = java.util.List[AnyRef]
 
@@ -123,7 +126,7 @@ trait Base[Tpl] extends BaseHelpers with JavaConversions { self: Model2Query[Tpl
     wherePost.empty
     preArgs.empty
     args.empty
-    castScala.empty
+    casts.empty
     sorts.empty
     attrIndex = -1
     varIndex = -1

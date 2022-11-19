@@ -1,35 +1,34 @@
 package molecule.db.datomic.query
 
 import java.lang.{Long => jLong}
-import java.util
 import java.util.{ArrayList => jArrayList}
 import molecule.core.query.Model2Query
 
 
 trait Nest[Tpl] { self: Model2Query[Tpl] with Base[Tpl] with CastNestedBranch_[Tpl] with CastNestedLeaf_[Tpl] =>
 
-  protected var row    : Row = new jArrayList[AnyRef]()
-  protected var prevRow: Row = new jArrayList[AnyRef]()
+  private var row    : Row = new jArrayList[AnyRef]()
+  private var prevRow: Row = new jArrayList[AnyRef]()
 
   // Previous entity ids on each level
-  protected var p0: jLong = 0L
-  protected var p1: jLong = 0L
-  protected var p2: jLong = 0L
-  protected var p3: jLong = 0L
-  protected var p4: jLong = 0L
-  protected var p5: jLong = 0L
-  protected var p6: jLong = 0L
+  private var p0: jLong = 0L
+  private var p1: jLong = 0L
+  private var p2: jLong = 0L
+  private var p3: jLong = 0L
+  private var p4: jLong = 0L
+  private var p5: jLong = 0L
+  private var p6: jLong = 0L
 
   // Current entity ids on each level
-  protected var e0: jLong = 0L
-  protected var e1: jLong = 0L
-  protected var e2: jLong = 0L
-  protected var e3: jLong = 0L
-  protected var e4: jLong = 0L
-  protected var e5: jLong = 0L
-  protected var e6: jLong = 0L
+  private var e0: jLong = 0L
+  private var e1: jLong = 0L
+  private var e2: jLong = 0L
+  private var e3: jLong = 0L
+  private var e4: jLong = 0L
+  private var e5: jLong = 0L
+  private var e6: jLong = 0L
 
-  protected var nextRow: Boolean = false
+  private var nextRow: Boolean = false
 
   // First row index for each level
   lazy private val i0 = castss.length - 1 // Initial internal entity ids for each level
@@ -41,33 +40,33 @@ trait Nest[Tpl] { self: Model2Query[Tpl] with Base[Tpl] with CastNestedBranch_[T
   lazy private val i6 = i5 + castss(5).length
   lazy private val i7 = i6 + castss(6).length
 
-  protected lazy val tplBranch0: (Row, List[Any]) => Tpl = castBranch[Tpl](castss.head, i0)
-  protected lazy val tplBranch1: (Row, List[Any]) => Any = castBranch[Any](castss(1), i1)
-  protected lazy val tplBranch2: (Row, List[Any]) => Any = castBranch[Any](castss(2), i2)
-  protected lazy val tplBranch3: (Row, List[Any]) => Any = castBranch[Any](castss(3), i3)
-  protected lazy val tplBranch4: (Row, List[Any]) => Any = castBranch[Any](castss(4), i4)
-  protected lazy val tplBranch5: (Row, List[Any]) => Any = castBranch[Any](castss(5), i5)
-  protected lazy val tplBranch6: (Row, List[Any]) => Any = castBranch[Any](castss(6), i6)
+  private lazy val tplBranch0: (Row, List[Any]) => Tpl = castBranch[Tpl](castss.head, i0)
+  private lazy val tplBranch1: (Row, List[Any]) => Any = castBranch[Any](castss(1), i1)
+  private lazy val tplBranch2: (Row, List[Any]) => Any = castBranch[Any](castss(2), i2)
+  private lazy val tplBranch3: (Row, List[Any]) => Any = castBranch[Any](castss(3), i3)
+  private lazy val tplBranch4: (Row, List[Any]) => Any = castBranch[Any](castss(4), i4)
+  private lazy val tplBranch5: (Row, List[Any]) => Any = castBranch[Any](castss(5), i5)
+  private lazy val tplBranch6: (Row, List[Any]) => Any = castBranch[Any](castss(6), i6)
 
-  protected lazy val tplLeaf1: Row => Any = castLeaf(castss(1), i1)
-  protected lazy val tplLeaf2: Row => Any = castLeaf(castss(2), i2)
-  protected lazy val tplLeaf3: Row => Any = castLeaf(castss(3), i3)
-  protected lazy val tplLeaf4: Row => Any = castLeaf(castss(4), i4)
-  protected lazy val tplLeaf5: Row => Any = castLeaf(castss(5), i5)
-  protected lazy val tplLeaf6: Row => Any = castLeaf(castss(6), i6)
-  protected lazy val tplLeaf7: Row => Any = castLeaf(castss(7), i7)
+  private lazy val tplLeaf1: Row => Any = castLeaf(castss(1), i1)
+  private lazy val tplLeaf2: Row => Any = castLeaf(castss(2), i2)
+  private lazy val tplLeaf3: Row => Any = castLeaf(castss(3), i3)
+  private lazy val tplLeaf4: Row => Any = castLeaf(castss(4), i4)
+  private lazy val tplLeaf5: Row => Any = castLeaf(castss(5), i5)
+  private lazy val tplLeaf6: Row => Any = castLeaf(castss(6), i6)
+  private lazy val tplLeaf7: Row => Any = castLeaf(castss(7), i7)
 
-  protected var acc0: List[Tpl] = List.empty[Tpl]
-  protected var acc1: List[Any] = List.empty[Any]
-  protected var acc2: List[Any] = List.empty[Any]
-  protected var acc3: List[Any] = List.empty[Any]
-  protected var acc4: List[Any] = List.empty[Any]
-  protected var acc5: List[Any] = List.empty[Any]
-  protected var acc6: List[Any] = List.empty[Any]
-  protected var acc7: List[Any] = List.empty[Any]
+  private var acc0: List[Tpl] = List.empty[Tpl]
+  private var acc1: List[Any] = List.empty[Any]
+  private var acc2: List[Any] = List.empty[Any]
+  private var acc3: List[Any] = List.empty[Any]
+  private var acc4: List[Any] = List.empty[Any]
+  private var acc5: List[Any] = List.empty[Any]
+  private var acc6: List[Any] = List.empty[Any]
+  private var acc7: List[Any] = List.empty[Any]
 
 
-  final protected def rows2nested(rows: util.ArrayList[Row]): List[Tpl] = {
+  final protected def rows2nested(rows: jArrayList[Row]): List[Tpl] = {
     castss.length match {
       case 2 => rows2nested1(rows)
       case 3 => rows2nested2(rows)
@@ -79,7 +78,7 @@ trait Nest[Tpl] { self: Model2Query[Tpl] with Base[Tpl] with CastNestedBranch_[T
     }
   }
 
-  final protected def rows2nested1(rows: util.ArrayList[Row]): List[Tpl] = {
+  final private def rows2nested1(rows: jArrayList[Row]): List[Tpl] = {
     var i = rows.size - 1
     while (i != -1) {
       row = rows.get(i)
@@ -117,7 +116,7 @@ trait Nest[Tpl] { self: Model2Query[Tpl] with Base[Tpl] with CastNestedBranch_[T
   }
 
 
-  final protected def rows2nested2(rows: util.ArrayList[Row]): List[Tpl] = {
+  final private def rows2nested2(rows: jArrayList[Row]): List[Tpl] = {
     var i = rows.size - 1
     while (i != -1) {
       row = rows.get(i)
@@ -176,7 +175,7 @@ trait Nest[Tpl] { self: Model2Query[Tpl] with Base[Tpl] with CastNestedBranch_[T
   }
 
 
-  final protected def rows2nested3(rows: util.ArrayList[Row]): List[Tpl] = {
+  final private def rows2nested3(rows: jArrayList[Row]): List[Tpl] = {
     var i = rows.size - 1
     while (i != -1) {
       row = rows.get(i)
@@ -259,7 +258,7 @@ trait Nest[Tpl] { self: Model2Query[Tpl] with Base[Tpl] with CastNestedBranch_[T
   }
 
 
-  final protected def rows2nested4(rows: util.ArrayList[Row]): List[Tpl] = {
+  final private def rows2nested4(rows: jArrayList[Row]): List[Tpl] = {
     var i = rows.size - 1
     while (i != -1) {
       row = rows.get(i)
@@ -371,7 +370,7 @@ trait Nest[Tpl] { self: Model2Query[Tpl] with Base[Tpl] with CastNestedBranch_[T
   }
 
 
-  final protected def rows2nested5(rows: util.ArrayList[Row]): List[Tpl] = {
+  final private def rows2nested5(rows: jArrayList[Row]): List[Tpl] = {
     var i = rows.size - 1
     while (i != -1) {
       row = rows.get(i)
@@ -517,7 +516,7 @@ trait Nest[Tpl] { self: Model2Query[Tpl] with Base[Tpl] with CastNestedBranch_[T
   }
 
 
-  final protected def rows2nested6(rows: util.ArrayList[Row]): List[Tpl] = {
+  final private def rows2nested6(rows: jArrayList[Row]): List[Tpl] = {
     var i = rows.size - 1
     while (i != -1) {
       row = rows.get(i)
@@ -702,7 +701,7 @@ trait Nest[Tpl] { self: Model2Query[Tpl] with Base[Tpl] with CastNestedBranch_[T
   }
 
 
-  final protected def rows2nested7(rows: util.ArrayList[Row]): List[Tpl] = {
+  final private def rows2nested7(rows: jArrayList[Row]): List[Tpl] = {
     var i = rows.size - 1
     while (i != -1) {
       row = rows.get(i)

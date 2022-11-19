@@ -21,10 +21,25 @@ trait ResolveRef[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
     where += s"[(identity $e) $e-nested]" -> wGround
     where += s"[$e $refAttr $refId]" -> wClause
 
-    castss = castss :+ castScala.toList
-    castScala.clear()
+    castss = castss :+ casts.toList
+    casts.clear()
 
     sortNestedLevel()
     es :+ refId
+  }
+
+  protected def resolveNestedOptRef(es: List[Var], nestedOpt: NestedOpt): List[Var] = {
+//    val (e, refAttr, refId) = (es.last, s":${ref.ns}/${ref.refAttr}", vv)
+    nestedOptIds += es.last //+ "-nestedOpt"
+    pull = Some((es.last, nestedOpt))
+//    where += s"[(identity $e) $e-nestedOpt]" -> wGround
+//    where += s"[$e $refAttr $refId]" -> wClause
+
+//    castss = castss :+ casts.toList
+//    casts.clear()
+
+//    sortNestedLevel()
+//    es :+ refId
+    es
   }
 }
