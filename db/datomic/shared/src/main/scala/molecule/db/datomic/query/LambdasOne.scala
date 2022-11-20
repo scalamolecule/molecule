@@ -4,6 +4,7 @@ import java.lang.{Boolean => jBoolean, Double => jDouble, Float => jFloat, Integ
 import java.math.{BigDecimal => jBigDecimal, BigInteger => jBigInt}
 import java.net.URI
 import java.util.{Date, UUID, Map => jMap, Set => jSet, List => jList}
+import java.util.{ArrayList => jArrayList, List => jList, Map => jMap, Iterator => jIterator}
 
 object LambdasOne extends ResolveBase {
 
@@ -96,6 +97,22 @@ object LambdasOne extends ResolveBase {
   protected lazy val vector2setChar      : AnyRef => AnyRef = vector2set((v: AnyRef) => v.asInstanceOf[String].charAt(0))
 
 
+  lazy val it2String    : jIterator[_] => Any = (it: jIterator[_]) => it.next.asInstanceOf[String]
+  lazy val it2Int       : jIterator[_] => Any = (it: jIterator[_]) => it.next.asInstanceOf[Integer].toInt
+  lazy val it2Long      : jIterator[_] => Any = (it: jIterator[_]) => it.next.asInstanceOf[jLong].toLong
+  lazy val it2Float     : jIterator[_] => Any = (it: jIterator[_]) => it.next.asInstanceOf[jFloat].toFloat
+  lazy val it2Double    : jIterator[_] => Any = (it: jIterator[_]) => it.next.asInstanceOf[jDouble].toDouble
+  lazy val it2Boolean   : jIterator[_] => Any = (it: jIterator[_]) => it.next.asInstanceOf[Boolean]
+  lazy val it2BigInt    : jIterator[_] => Any = (it: jIterator[_]) => BigInt(it.next.asInstanceOf[jBigInt])
+  lazy val it2BigDecimal: jIterator[_] => Any = (it: jIterator[_]) => BigDecimal(it.next.asInstanceOf[jBigDecimal])
+  lazy val it2Date      : jIterator[_] => Any = (it: jIterator[_]) => it.next.asInstanceOf[Date]
+  lazy val it2UUID      : jIterator[_] => Any = (it: jIterator[_]) => it.next.asInstanceOf[UUID]
+  lazy val it2URI       : jIterator[_] => Any = (it: jIterator[_]) => it.next.asInstanceOf[URI]
+  lazy val it2Byte      : jIterator[_] => Any = (it: jIterator[_]) => it.next.asInstanceOf[Integer].toByte
+  lazy val it2Short     : jIterator[_] => Any = (it: jIterator[_]) => it.next.asInstanceOf[Integer].toShort
+  lazy val it2Char      : jIterator[_] => Any = (it: jIterator[_]) => it.next.asInstanceOf[String].charAt(0)
+
+
   case class ResOne[T](
     tpe: String,
     toDatalog: T => String,
@@ -103,7 +120,7 @@ object LambdasOne extends ResolveBase {
     j2s: AnyRef => AnyRef,
     seq2t: AnyRef => AnyRef,
     set2set: AnyRef => AnyRef,
-    vector2set: AnyRef => AnyRef,
+    vector2set: AnyRef => AnyRef
   )
 
   lazy val resString    : ResOne[String]     = ResOne("String", dString, s2jString, j2sString, firstString, set2setString, vector2setString)
@@ -122,92 +139,137 @@ object LambdasOne extends ResolveBase {
   lazy val resChar      : ResOne[Char]       = ResOne("Char", dChar, s2jChar, j2sChar, firstChar, set2setChar, vector2setChar)
 
 
-  private lazy val j2sOptString = (v: AnyRef) => v match {
+  private lazy val j2sOptString     = (v: AnyRef) => v match {
     case null          => Option.empty[String]
     case v: String     => Some(v) // attr_?(<expr>))
     case v: jMap[_, _] => Some(v.values.iterator.next.asInstanceOf[String]) // attr_?
   }
-
-  private lazy val j2sOptInt = (v: AnyRef) => v match {
+  private lazy val j2sOptInt        = (v: AnyRef) => v match {
     case null          => Option.empty[Int]
     case v: jInteger   => Some(v.toInt)
     case v: jMap[_, _] => Some(v.values.iterator.next.asInstanceOf[Integer].toInt)
   }
-
-  private lazy val j2sOptLong = (v: AnyRef) => v match {
+  private lazy val j2sOptLong       = (v: AnyRef) => v match {
     case null          => Option.empty[Long]
     case v: jLong      => Some(v)
     case v: jMap[_, _] => v.values.iterator.next match {
-      case l: Long         => Some(l)
+      case l: Long => Some(l)
       // ref
       case map: jMap[_, _] => Some(map.values.iterator.next.asInstanceOf[Long])
     }
   }
-
-  private lazy val j2sOptFloat = (v: AnyRef) => v match {
+  private lazy val j2sOptFloat      = (v: AnyRef) => v match {
     case null          => Option.empty[Float]
     case v: jFloat     => Some(v.toFloat)
     case v: jMap[_, _] => Some(v.values.iterator.next.asInstanceOf[Float])
   }
-
-  private lazy val j2sOptDouble = (v: AnyRef) => v match {
+  private lazy val j2sOptDouble     = (v: AnyRef) => v match {
     case null          => Option.empty[Double]
     case v: jDouble    => Some(v)
     case v: jMap[_, _] => Some(v.values.iterator.next.asInstanceOf[Double])
   }
-
-  private lazy val j2sOptBoolean = (v: AnyRef) => v match {
+  private lazy val j2sOptBoolean    = (v: AnyRef) => v match {
     case null          => Option.empty[Boolean]
     case v: jBoolean   => Some(v)
     case v: jMap[_, _] => Some(v.values.iterator.next.asInstanceOf[Boolean])
   }
-
-  private lazy val j2sOptBigInt = (v: AnyRef) => v match {
+  private lazy val j2sOptBigInt     = (v: AnyRef) => v match {
     case null          => Option.empty[BigInt]
     case v: jBigInt    => Some(BigInt(v))
     case v: jMap[_, _] => Some(BigInt(v.values.iterator.next.asInstanceOf[jBigInt]))
   }
-
   private lazy val j2sOptBigDecimal = (v: AnyRef) => v match {
     case null           => Option.empty[BigDecimal]
     case v: jBigDecimal => Some(BigDecimal(v))
     case v: jMap[_, _]  => Some(BigDecimal(v.values.iterator.next.asInstanceOf[jBigDecimal]))
   }
-
-  private lazy val j2sOptDate = (v: AnyRef) => v match {
+  private lazy val j2sOptDate       = (v: AnyRef) => v match {
     case null          => Option.empty[Date]
     case v: Date       => Some(v)
     case v: jMap[_, _] => Some(v.values.iterator.next.asInstanceOf[Date])
   }
-
-  private lazy val j2sOptUUID = (v: AnyRef) => v match {
+  private lazy val j2sOptUUID       = (v: AnyRef) => v match {
     case null          => Option.empty[UUID]
     case v: UUID       => Some(v)
     case v: jMap[_, _] => Some(v.values.iterator.next.asInstanceOf[UUID])
   }
-
-  private lazy val j2sOptURI = (v: AnyRef) => v match {
+  private lazy val j2sOptURI        = (v: AnyRef) => v match {
     case null          => Option.empty[URI]
     case v: URI        => Some(v)
     case v: jMap[_, _] => Some(v.values.iterator.next.asInstanceOf[URI])
   }
-
-  private lazy val j2sOptByte = (v: AnyRef) => v match {
+  private lazy val j2sOptByte       = (v: AnyRef) => v match {
     case null          => Option.empty[Byte]
     case v: jInteger   => Some(v.toByte)
     case v: jMap[_, _] => Some(v.values.iterator.next.asInstanceOf[Integer].toByte)
   }
-
-  private lazy val j2sOptShort = (v: AnyRef) => v match {
+  private lazy val j2sOptShort      = (v: AnyRef) => v match {
     case null          => Option.empty[Short]
     case v: jInteger   => Some(v.toShort)
     case v: jMap[_, _] => Some(v.values.iterator.next.asInstanceOf[Integer].toShort)
   }
-
-  private lazy val j2sOptChar = (v: AnyRef) => v match {
+  private lazy val j2sOptChar       = (v: AnyRef) => v match {
     case null          => Option.empty[Char]
     case v: String     => Some(v.head)
     case v: jMap[_, _] => Some(v.values.iterator.next.asInstanceOf[String].charAt(0))
+  }
+
+
+  lazy val it2OptString    : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case "__none__" => None
+    case v          => Some(v.toString)
+  }
+  lazy val it2OptInt       : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case "__none__" => None
+    case v          => Some(v.asInstanceOf[Integer].toInt)
+  }
+  lazy val it2OptLong      : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case "__none__" => None
+    case v          => Some(v.asInstanceOf[jLong].toLong)
+  }
+  lazy val it2OptFloat     : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case "__none__" => None
+    case v          => Some(v.asInstanceOf[jFloat].toFloat)
+  }
+  lazy val it2OptDouble    : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case "__none__" => None
+    case v          => Some(v.asInstanceOf[jDouble].toDouble)
+  }
+  lazy val it2OptBoolean   : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case "__none__" => None
+    case v          => Some(v.asInstanceOf[Boolean])
+  }
+  lazy val it2OptBigInt    : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case "__none__" => None
+    case v          => Some(BigInt(v.asInstanceOf[jBigInt]))
+  }
+  lazy val it2OptBigDecimal: jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case "__none__" => None
+    case v          => Some(BigDecimal(v.asInstanceOf[jBigDecimal]))
+  }
+  lazy val it2OptDate      : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case "__none__" => None
+    case v          => Some(v.asInstanceOf[Date])
+  }
+  lazy val it2OptUUID      : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case "__none__" => None
+    case v          => Some(v.asInstanceOf[UUID])
+  }
+  lazy val it2OptURI       : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case "__none__" => None
+    case v          => Some(v.asInstanceOf[URI])
+  }
+  lazy val it2OptByte      : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case "__none__" => None
+    case v          => Some(v.asInstanceOf[Integer].toByte)
+  }
+  lazy val it2OptShort     : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case "__none__" => None
+    case v          => Some(v.asInstanceOf[Integer].toShort)
+  }
+  lazy val it2OptChar      : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case "__none__" => None
+    case v          => Some(v.asInstanceOf[String].charAt(0))
   }
 
 
@@ -215,7 +277,7 @@ object LambdasOne extends ResolveBase {
     tpe: String,
     toDatalog: T => String,
     s2j: Any => Any,
-    j2s: AnyRef => AnyRef,
+    j2s: AnyRef => AnyRef
   )
 
   lazy val resOptString    : ResOneOpt[String]     = ResOneOpt("String", dString, s2jString, j2sOptString)

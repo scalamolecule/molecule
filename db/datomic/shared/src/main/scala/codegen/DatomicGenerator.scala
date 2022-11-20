@@ -19,7 +19,10 @@ object DatomicGenerator extends App {
 
 //    db.datomic.query._CastFlat.generate
 //    db.datomic.query._CastNestedBranch.generate
-    db.datomic.query._CastNestedLeaf.generate
+//    db.datomic.query._CastNestedLeaf.generate
+//    db.datomic.query._CastNestedOptBranch.generate
+//    db.datomic.query._CastNestedOptLeaf.generate
+    db.datomic.query._NestOpt.generate
 
 //    db.datomic.query._Sort.generate
 

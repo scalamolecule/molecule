@@ -23,33 +23,6 @@ object Nested extends DatomicTestSuite {
 
     "insert" - refs { implicit conn =>
 
-//            Ns.str.Refs1.*(Ref1.n1).insert.apply(List(
-//              ("a", Seq(30, 31)),
-//              ("a", Seq(10, 11)),
-//              ("b", Seq(20, 21)),
-//            )).transact
-//
-//
-//      //      Ns.str.a1.Refs1.n1.a2.query.get.foreach(println)
-//
-//            Ns.str.a1.Refs1.n1.a2.query.get ==> List(
-//              ("a", 10),
-//              ("a", 11),
-//              ("a", 30),
-//              ("a", 31),
-//              ("b", 20),
-//              ("b", 21),
-//            )
-//
-//      //      Ns.str.a1.Refs1.*(Ref1.n1.a2).query.get ==> List(
-//      //      Ns.str.a2.Refs1.*(Ref1.n1.a1).query.get ==> List(
-//      //      Ns.str.a1.Refs1.*(Ref1.n1).query.get ==> List(
-//            Ns.str.a1.Refs1.*(Ref1.n1.a1).query.get ==> List(
-//              ("a", Seq(30, 31)),
-//              ("a", Seq(10, 11)),
-//              ("b", Seq(20, 21)),
-//            )
-
 
 //      m(Ns.str.Refs1 * Ref1.int1.str1_?).insert(List(
 //        ("A", List((1, Some("a")), (2, None))),
@@ -60,10 +33,10 @@ object Nested extends DatomicTestSuite {
 //        ("A", List((1, Some("a")), (2, None))),
 //        ("B", List())
 //      )
-
-//      m(Ns.str.Refs1 * Ref1.int1.str1_?).query.get ==> List(
-//        ("A", List((1, Some("a")), (2, None)))
-//      )
+//
+////      m(Ns.str.Refs1 * Ref1.int1.str1_?).query.get ==> List(
+////        ("A", List((1, Some("a")), (2, None)))
+////      )
 
 
       Ns.str.Refs1.*(Ref1.int1.Refs2.*(Ref2.int2)).insert(List(

@@ -59,23 +59,27 @@ class DatomicQueryOpsImpl[Tpl](elements: Seq[Element])
     println("SORTED rows:")
     //    sortedRows.forEach(row => println(row + row.get(1).getClass.toString))
     sortedRows.forEach(row => println(row))
-    println("--")
-    sortedRows.forEach(row => println(row.get(1).asInstanceOf[jMap[_, _]].values))
-    println("--")
-    sortedRows.forEach(row => println(row.get(1).asInstanceOf[jMap[_, _]].values.iterator().next))
-    println("--")
-    sortedRows.forEach(row => println(row.get(1).asInstanceOf[jMap[_, _]].values.iterator().next.getClass))
+//    println("--")
+//    sortedRows.forEach(row => println(row.get(1).asInstanceOf[jMap[_, _]].values))
+//    println("--")
+//    sortedRows.forEach(row => println(row.get(1).asInstanceOf[jMap[_, _]].values.iterator().next))
+//    println("--")
+//    sortedRows.forEach(row => println(row.get(1).asInstanceOf[jMap[_, _]].values.iterator().next.getClass))
 
-    if (nestedIds.isEmpty) {
+    if (isNested) {
+      castss = castss :+ casts.toList
+      rows2nested(sortedRows)
+
+    } else if (isNestedOpt) {
+      val tuples = List.newBuilder[Tpl]
+      pullCastss = pullCastss :+ pullCasts.toList
+      sortedRows.forEach(row => tuples.addOne(pullRow2tpl(row)))
+      tuples.result()
+
+    } else {
       val tuples = List.newBuilder[Tpl]
       sortedRows.forEach(row => tuples.addOne(row2tpl(row)))
       tuples.result()
-    } else if (nestedOptIds.nonEmpty) {
-      //      castss = castss :+ casts.toList
-      rows2nested(sortedRows)
-    } else {
-      castss = castss :+ casts.toList
-      rows2nested(sortedRows)
     }
   }
 

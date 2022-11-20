@@ -1,5 +1,6 @@
 package molecule.db.datomic.query
 
+import molecule.base.util.exceptions.MoleculeException
 import molecule.boilerplate.api.Keywords._
 import molecule.boilerplate.ast.MoleculeModel._
 import scala.reflect.ClassTag
@@ -32,6 +33,8 @@ trait ResolveExprOne[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
 
   protected def resolveAttrOneTac(es: List[Var], attr: AttrOneTac): List[Var] = {
     val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
+    if (isNestedOpt)
+      throw MoleculeException("Tacit attributes not allowed in optional nested queries. Found: " + a)
     attr match {
       case at: AttrOneTacString     => tac(e, a, at.op, at.vs, resString)
       case at: AttrOneTacInt        => tac(e, a, at.op, at.vs, resInt)
@@ -85,7 +88,6 @@ trait ResolveExprOne[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
     val v = vv
     find += v
     casts += res.j2s
-//    castss = castss.init :+ (castss.head :+ res.j2s)
     sorter.foreach(sorts += _)
     expr(e, a, v, op, args, res)
   }
@@ -103,7 +105,6 @@ trait ResolveExprOne[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
         find += e
         casts += res.j2s
         sorter.foreach(sorts += _)
-//        expr(e, a, v, op, args, res)
       case ":Generic/tx" =>
       case a             => man(e, a, op, args, res, sorter)
     }
