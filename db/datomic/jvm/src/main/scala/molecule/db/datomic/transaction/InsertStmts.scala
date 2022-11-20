@@ -60,12 +60,11 @@ class InsertStmts(elements: Seq[Element], data: Seq[Product], tempIdInit: Int = 
 
   private def addNested(n: Int, ns: String, refAttr: Keyword, elements: Seq[Element]): Product => Unit = {
     val nested2stmts = getResolver(elements)
-    val nestedArity = elements.count {
+    val nestedArity  = elements.count {
       case _: Mandatory@unchecked => true
       case _: Optional@unchecked  => true
       case _                      => false
     }
-    elements.foreach(println)
     nestedArity match {
       case 1 =>
         (tpl: Product) => {

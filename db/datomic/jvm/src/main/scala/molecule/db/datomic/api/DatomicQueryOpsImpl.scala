@@ -59,12 +59,12 @@ class DatomicQueryOpsImpl[Tpl](elements: Seq[Element])
     println("SORTED rows:")
     //    sortedRows.forEach(row => println(row + row.get(1).getClass.toString))
     sortedRows.forEach(row => println(row))
-//    println("--")
-//    sortedRows.forEach(row => println(row.get(1).asInstanceOf[jMap[_, _]].values))
-//    println("--")
-//    sortedRows.forEach(row => println(row.get(1).asInstanceOf[jMap[_, _]].values.iterator().next))
-//    println("--")
-//    sortedRows.forEach(row => println(row.get(1).asInstanceOf[jMap[_, _]].values.iterator().next.getClass))
+    //    println("--")
+    //    sortedRows.forEach(row => println(row.get(1).asInstanceOf[jMap[_, _]].values))
+    //    println("--")
+    //    sortedRows.forEach(row => println(row.get(1).asInstanceOf[jMap[_, _]].values.iterator().next))
+    //    println("--")
+    //    sortedRows.forEach(row => println(row.get(1).asInstanceOf[jMap[_, _]].values.iterator().next.getClass))
 
     if (isNested) {
       castss = castss :+ casts.toList

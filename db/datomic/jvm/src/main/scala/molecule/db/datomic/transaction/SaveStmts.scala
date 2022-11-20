@@ -42,6 +42,8 @@ class SaveStmts(elements: Seq[Element]) extends TransactionBase(elements, 0) {
 
         case Ref(ns, refAttr, _, _) => ref(kw(ns, refAttr)); resolve(tail)
         case BackRef(backRefNs)     => backRef(backRefNs); resolve(tail)
+        case _: Nested              => throw MoleculeException("Nested data structure not allowed in save molecule.")
+        case _: NestedOpt           => throw MoleculeException("Optional nested data structure not allowed in save molecule.")
         case element                => unexpected(element)
       }
       case Nil             => ()

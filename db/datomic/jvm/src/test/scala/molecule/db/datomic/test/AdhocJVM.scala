@@ -14,7 +14,7 @@ object AdhocJVM extends DatomicTestSuite {
     "refs" - refs { implicit conn =>
 
 
-      val List(a, b) = Ns.n(0).Ref1.n1(1).save.transact.eids
+      val List(a, b) = Ns.n(0).R1.n1(1).save.transact.eids
 //      Ns.n.Ref1.n1.query.get ==> List((0, 1))
 //      Ns.n.ref1.query.get ==> List((0, a))
 

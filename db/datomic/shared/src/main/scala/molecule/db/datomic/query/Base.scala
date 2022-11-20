@@ -1,7 +1,7 @@
 package molecule.db.datomic.query
 
 import java.lang.{Long => jLong}
-import java.util.{Iterator => jIterator}
+import java.util.{Iterator => jIterator, List => jList}
 import molecule.base.util.BaseHelpers
 import molecule.base.util.exceptions.MoleculeException
 import molecule.boilerplate.ast.MoleculeModel._
@@ -13,7 +13,7 @@ import scala.collection.mutable.ArrayBuffer
 trait Base[Tpl] extends BaseHelpers with JavaConversions { self: Model2Query[Tpl] =>
 
   // Datomic row type
-  type Row = java.util.List[AnyRef]
+  type Row = jList[AnyRef]
 
   // Datomic variable (ex ?a)
   type Var = String

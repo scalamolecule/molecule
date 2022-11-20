@@ -36,20 +36,33 @@ trait ModelBase extends Validations {
   case class BackRef(backRef: String) extends Element
 
   case class Nested(ref: Ref, elements: Seq[Element]) extends Element with Mandatory {
-    override def toString: String = {
-      s"""|Nested(
-          |  $ref,
-          |  List(
-          |    ${elements.mkString(s",\n    ")}))""".stripMargin
+    def render(elements: Seq[Element], i: Int): String = {
+      val indent = "  " * i
+      elements.map {
+        case Nested(ref, elements1) =>
+          s"""|Nested(
+              |${indent}  $ref,
+              |${indent}  List(
+              |${indent}    ${render(elements1, i + 2)}))""".stripMargin
+        case other => other
+      }.mkString(s",\n$indent")
     }
+    override def toString: String = render(Seq(this), 0)
   }
+
   case class NestedOpt(ref: Ref, elements: Seq[Element]) extends Element with Mandatory {
-    override def toString: String = {
-      s"""|NestedOpt(
-          |  $ref,
-          |  List(
-          |    ${elements.mkString(s",\n    ")}))""".stripMargin
+    def render(elements: Seq[Element], i: Int): String = {
+      val indent = "  " * i
+      elements.map {
+        case NestedOpt(ref, elements1) =>
+          s"""|NestedOpt(
+              |${indent}  $ref,
+              |${indent}  List(
+              |${indent}    ${render(elements1, i + 2)}))""".stripMargin
+        case other                  => other
+      }.mkString(s",\n$indent")
     }
+    override def toString: String = render(Seq(this), 0)
   }
 
   case class TxMetaData(elements: Seq[Element]) extends Element with Mandatory

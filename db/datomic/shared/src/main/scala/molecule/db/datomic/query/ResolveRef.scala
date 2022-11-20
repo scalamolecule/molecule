@@ -30,11 +30,8 @@ trait ResolveRef[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
   }
 
   protected def resolveNestedOptRef(es: List[Var], nestedOpt: NestedOpt): List[Var] = {
-    nestedOptIds += es.last //+ "-nestedOpt"
+    nestedOptIds += es.last
     pull = Some((es.last, nestedOpt))
-//    if (isNestedOpt)
-//      pullCastss = pullCastss :+ pullCasts.toList
-//    pullCasts.clear()
     isNestedOpt = true
     es
   }
