@@ -31,12 +31,10 @@ object _Sort extends DatomicGenBase("Sort", "/query") {
        |        sort.head match {
        |          case 'a' => (nestedIdsCount: Int) =>
        |            val i = nestedIdsCount + attrIndex
-       |            //println(s"$$nestedIdsCount SORT INDEX asc  ($${attr.attr}): " + i)
        |            (a: Row, b: Row) =>
        |              a.get(i).asInstanceOf[$javaTpe].compareTo(b.get(i).asInstanceOf[$javaTpe])
        |          case 'd' => (nestedIdsCount: Int) =>
        |            val i = nestedIdsCount + attrIndex
-       |            //println(s"$$nestedIdsCount SORT INDEX desc ($${attr.attr}): " + i)
        |            (a: Row, b: Row) =>
        |              b.get(i).asInstanceOf[$javaTpe].compareTo(a.get(i).asInstanceOf[$javaTpe])
        |        }

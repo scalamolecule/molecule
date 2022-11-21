@@ -17,12 +17,10 @@ trait Sort_[Tpl] { self: Base[Tpl] =>
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            //println(s"$nestedIdsCount SORT INDEX asc  (${attr.attr}): " + i)
             (a: Row, b: Row) =>
               a.get(i).asInstanceOf[String].compareTo(b.get(i).asInstanceOf[String])
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            //println(s"$nestedIdsCount SORT INDEX desc (${attr.attr}): " + i)
             (a: Row, b: Row) =>
               b.get(i).asInstanceOf[String].compareTo(a.get(i).asInstanceOf[String])
         }
@@ -37,12 +35,10 @@ trait Sort_[Tpl] { self: Base[Tpl] =>
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            //println(s"$nestedIdsCount SORT INDEX asc  (${attr.attr}): " + i)
             (a: Row, b: Row) =>
               a.get(i).asInstanceOf[jInteger].compareTo(b.get(i).asInstanceOf[jInteger])
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            //println(s"$nestedIdsCount SORT INDEX desc (${attr.attr}): " + i)
             (a: Row, b: Row) =>
               b.get(i).asInstanceOf[jInteger].compareTo(a.get(i).asInstanceOf[jInteger])
         }
@@ -57,12 +53,10 @@ trait Sort_[Tpl] { self: Base[Tpl] =>
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            //println(s"$nestedIdsCount SORT INDEX asc  (${attr.attr}): " + i)
             (a: Row, b: Row) =>
               a.get(i).asInstanceOf[jLong].compareTo(b.get(i).asInstanceOf[jLong])
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            //println(s"$nestedIdsCount SORT INDEX desc (${attr.attr}): " + i)
             (a: Row, b: Row) =>
               b.get(i).asInstanceOf[jLong].compareTo(a.get(i).asInstanceOf[jLong])
         }
@@ -77,12 +71,10 @@ trait Sort_[Tpl] { self: Base[Tpl] =>
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            //println(s"$nestedIdsCount SORT INDEX asc  (${attr.attr}): " + i)
             (a: Row, b: Row) =>
               a.get(i).asInstanceOf[jDouble].compareTo(b.get(i).asInstanceOf[jDouble])
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            //println(s"$nestedIdsCount SORT INDEX desc (${attr.attr}): " + i)
             (a: Row, b: Row) =>
               b.get(i).asInstanceOf[jDouble].compareTo(a.get(i).asInstanceOf[jDouble])
         }
@@ -97,12 +89,10 @@ trait Sort_[Tpl] { self: Base[Tpl] =>
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            //println(s"$nestedIdsCount SORT INDEX asc  (${attr.attr}): " + i)
             (a: Row, b: Row) =>
               a.get(i).asInstanceOf[jDouble].compareTo(b.get(i).asInstanceOf[jDouble])
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            //println(s"$nestedIdsCount SORT INDEX desc (${attr.attr}): " + i)
             (a: Row, b: Row) =>
               b.get(i).asInstanceOf[jDouble].compareTo(a.get(i).asInstanceOf[jDouble])
         }
@@ -117,12 +107,10 @@ trait Sort_[Tpl] { self: Base[Tpl] =>
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            //println(s"$nestedIdsCount SORT INDEX asc  (${attr.attr}): " + i)
             (a: Row, b: Row) =>
               a.get(i).asInstanceOf[jBoolean].compareTo(b.get(i).asInstanceOf[jBoolean])
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            //println(s"$nestedIdsCount SORT INDEX desc (${attr.attr}): " + i)
             (a: Row, b: Row) =>
               b.get(i).asInstanceOf[jBoolean].compareTo(a.get(i).asInstanceOf[jBoolean])
         }
@@ -137,12 +125,10 @@ trait Sort_[Tpl] { self: Base[Tpl] =>
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            //println(s"$nestedIdsCount SORT INDEX asc  (${attr.attr}): " + i)
             (a: Row, b: Row) =>
               a.get(i).asInstanceOf[jBigInt].compareTo(b.get(i).asInstanceOf[jBigInt])
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            //println(s"$nestedIdsCount SORT INDEX desc (${attr.attr}): " + i)
             (a: Row, b: Row) =>
               b.get(i).asInstanceOf[jBigInt].compareTo(a.get(i).asInstanceOf[jBigInt])
         }
@@ -157,12 +143,10 @@ trait Sort_[Tpl] { self: Base[Tpl] =>
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            //println(s"$nestedIdsCount SORT INDEX asc  (${attr.attr}): " + i)
             (a: Row, b: Row) =>
               a.get(i).asInstanceOf[jBigDecimal].compareTo(b.get(i).asInstanceOf[jBigDecimal])
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            //println(s"$nestedIdsCount SORT INDEX desc (${attr.attr}): " + i)
             (a: Row, b: Row) =>
               b.get(i).asInstanceOf[jBigDecimal].compareTo(a.get(i).asInstanceOf[jBigDecimal])
         }
@@ -177,12 +161,10 @@ trait Sort_[Tpl] { self: Base[Tpl] =>
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            //println(s"$nestedIdsCount SORT INDEX asc  (${attr.attr}): " + i)
             (a: Row, b: Row) =>
               a.get(i).asInstanceOf[Date].compareTo(b.get(i).asInstanceOf[Date])
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            //println(s"$nestedIdsCount SORT INDEX desc (${attr.attr}): " + i)
             (a: Row, b: Row) =>
               b.get(i).asInstanceOf[Date].compareTo(a.get(i).asInstanceOf[Date])
         }
@@ -197,12 +179,10 @@ trait Sort_[Tpl] { self: Base[Tpl] =>
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            //println(s"$nestedIdsCount SORT INDEX asc  (${attr.attr}): " + i)
             (a: Row, b: Row) =>
               a.get(i).asInstanceOf[UUID].compareTo(b.get(i).asInstanceOf[UUID])
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            //println(s"$nestedIdsCount SORT INDEX desc (${attr.attr}): " + i)
             (a: Row, b: Row) =>
               b.get(i).asInstanceOf[UUID].compareTo(a.get(i).asInstanceOf[UUID])
         }
@@ -217,12 +197,10 @@ trait Sort_[Tpl] { self: Base[Tpl] =>
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            //println(s"$nestedIdsCount SORT INDEX asc  (${attr.attr}): " + i)
             (a: Row, b: Row) =>
               a.get(i).asInstanceOf[URI].compareTo(b.get(i).asInstanceOf[URI])
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            //println(s"$nestedIdsCount SORT INDEX desc (${attr.attr}): " + i)
             (a: Row, b: Row) =>
               b.get(i).asInstanceOf[URI].compareTo(a.get(i).asInstanceOf[URI])
         }
@@ -237,12 +215,10 @@ trait Sort_[Tpl] { self: Base[Tpl] =>
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            //println(s"$nestedIdsCount SORT INDEX asc  (${attr.attr}): " + i)
             (a: Row, b: Row) =>
               a.get(i).asInstanceOf[jInteger].compareTo(b.get(i).asInstanceOf[jInteger])
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            //println(s"$nestedIdsCount SORT INDEX desc (${attr.attr}): " + i)
             (a: Row, b: Row) =>
               b.get(i).asInstanceOf[jInteger].compareTo(a.get(i).asInstanceOf[jInteger])
         }
@@ -257,12 +233,10 @@ trait Sort_[Tpl] { self: Base[Tpl] =>
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            //println(s"$nestedIdsCount SORT INDEX asc  (${attr.attr}): " + i)
             (a: Row, b: Row) =>
               a.get(i).asInstanceOf[jInteger].compareTo(b.get(i).asInstanceOf[jInteger])
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            //println(s"$nestedIdsCount SORT INDEX desc (${attr.attr}): " + i)
             (a: Row, b: Row) =>
               b.get(i).asInstanceOf[jInteger].compareTo(a.get(i).asInstanceOf[jInteger])
         }
@@ -277,12 +251,10 @@ trait Sort_[Tpl] { self: Base[Tpl] =>
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            //println(s"$nestedIdsCount SORT INDEX asc  (${attr.attr}): " + i)
             (a: Row, b: Row) =>
               a.get(i).asInstanceOf[String].compareTo(b.get(i).asInstanceOf[String])
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            //println(s"$nestedIdsCount SORT INDEX desc (${attr.attr}): " + i)
             (a: Row, b: Row) =>
               b.get(i).asInstanceOf[String].compareTo(a.get(i).asInstanceOf[String])
         }

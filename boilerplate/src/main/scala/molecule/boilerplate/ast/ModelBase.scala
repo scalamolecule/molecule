@@ -41,9 +41,9 @@ trait ModelBase extends Validations {
       elements.map {
         case Nested(ref, elements1) =>
           s"""|Nested(
-              |${indent}  $ref,
-              |${indent}  List(
-              |${indent}    ${render(elements1, i + 2)}))""".stripMargin
+              |$indent  $ref,
+              |$indent  List(
+              |$indent    ${render(elements1, i + 2)}))""".stripMargin
         case other => other
       }.mkString(s",\n$indent")
     }
@@ -56,9 +56,9 @@ trait ModelBase extends Validations {
       elements.map {
         case NestedOpt(ref, elements1) =>
           s"""|NestedOpt(
-              |${indent}  $ref,
-              |${indent}  List(
-              |${indent}    ${render(elements1, i + 2)}))""".stripMargin
+              |$indent  $ref,
+              |$indent  List(
+              |$indent    ${render(elements1, i + 2)}))""".stripMargin
         case other                  => other
       }.mkString(s",\n$indent")
     }

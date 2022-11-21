@@ -1,6 +1,5 @@
 package molecule.db.datomic.query
 
-import java.lang.{Long => jLong}
 import java.util.{Iterator => jIterator, List => jList}
 import molecule.base.util.BaseHelpers
 import molecule.base.util.exceptions.MoleculeException
@@ -73,59 +72,12 @@ trait Base[Tpl] extends BaseHelpers with JavaConversions { self: Model2Query[Tpl
   private var varIndex: Int     = -1
   private var addTxVar: Boolean = false
 
-
-  protected def validateSortIndexes(): Unit = if (sorts.nonEmpty) {
-    sorts.sortBy(_._1).map(_._1).toList match {
-      case Nil                 =>
-      case List(1)             =>
-      case List(1, 2)          =>
-      case List(1, 2, 3)       =>
-      case List(1, 2, 3, 4)    =>
-      case List(1, 2, 3, 4, 5) =>
-      case other               => throw MoleculeException(
-        s"Sort index 1 should be present and additional indexes continuously increase (in any order). " +
-          s"Found sort index(es): " + other.mkString(", ")
-      )
-    }
-  }
-
-  protected def sortNestedLevel(): Unit = {
-    val nestedIndex   = nestedIds.length - 1
-    val levelIdSorter = (_: Int) => (a: Row, b: Row) =>
-      a.get(nestedIndex).asInstanceOf[jLong].compareTo(b.get(nestedIndex).asInstanceOf[jLong])
-
-    validateSortIndexes()
-    sortsAcc ++= sorts.sortBy(_._1).map(_._2)
-
-    // Group by entity id of this level
-    sortsAcc += levelIdSorter
-
-    // Start independent sorting on next nested level
-    sorts.clear()
-  }
-
-  protected def unexpected(element: Element) = throw MoleculeException("Unexpected element: " + element)
-  protected def unexpected(op: Op) = throw MoleculeException("Unexpected operation: " + op)
-
-  protected def vv: String = {
-    varIndex += 1
-    vars(varIndex)
-  }
-
-  protected def tx: String = {
-    if (addTxVar) {
-      addTxVar = false
-      " ?tx"
-    } else ""
-  }
-
-
-  protected def reset: Unit = {
+  protected def resetMutableAccumulators(): Unit = {
     preIn.empty
     preWhere.empty
     preRules.empty
-    isNested     = false
-    isNestedOpt  = false
+    isNested = false
+    isNestedOpt = false
     nestedIds.empty
     nestedOptIds.empty
     find.empty
@@ -149,4 +101,37 @@ trait Base[Tpl] extends BaseHelpers with JavaConversions { self: Model2Query[Tpl
     varIndex = -1
     addTxVar = false
   }
+
+  protected def validateSortIndexes(): Unit = if (sorts.nonEmpty) {
+    sorts.sortBy(_._1).map(_._1).toList match {
+      case Nil                 =>
+      case List(1)             =>
+      case List(1, 2)          =>
+      case List(1, 2, 3)       =>
+      case List(1, 2, 3, 4)    =>
+      case List(1, 2, 3, 4, 5) =>
+      case other               => throw MoleculeException(
+        s"Sort index 1 should be present and additional indexes continuously increase (in any order). " +
+          s"Found sort index(es): " + other.mkString(", ")
+      )
+    }
+  }
+
+  protected def unexpected(element: Element) = throw MoleculeException("Unexpected element: " + element)
+  protected def unexpected(op: Op) = throw MoleculeException("Unexpected operation: " + op)
+
+  protected def vv: String = {
+    varIndex += 1
+    vars(varIndex)
+  }
+
+  protected def tx: String = {
+    if (addTxVar) {
+      addTxVar = false
+      " ?tx"
+    } else ""
+  }
+
+
+
 }

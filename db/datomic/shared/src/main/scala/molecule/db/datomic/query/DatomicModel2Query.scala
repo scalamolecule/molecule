@@ -26,8 +26,7 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
   final lazy protected val inputs   : Seq[AnyRef] = renderRules(rules) ++ args
 
   final protected def getQueries(optimized: Boolean): (String, String) = {
-    // Reset mutable accumulators
-    reset
+    resetMutableAccumulators()
 
     // Recursively resolve molecule elements
     resolve(List(vv), elements)
@@ -105,9 +104,7 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
       elements match {
         case head :: tail =>
           head match {
-            case nested: NestedOpt =>
-              (acc, Some(nested))
-            case a: AttrOneMan     =>
+            case a: AttrOneMan =>
               pullCasts += (a match {
                 case _: AttrOneManString     => it2String
                 case _: AttrOneManInt        => it2Int
@@ -127,7 +124,7 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
               val pull1 = s"\n$i(:${a.ns}/${a.attr} :limit nil)"
               addPullAttrs(refAttr, tail, level, acc + pull1)
 
-            case a: AttrOneOpt     =>
+            case a: AttrOneOpt =>
               pullCasts += (a match {
                 case _: AttrOneOptString     => it2OptString
                 case _: AttrOneOptInt        => it2OptInt
@@ -147,7 +144,12 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
               val pull1 = s"""\n$i(:${a.ns}/${a.attr} :limit nil :default "__none__")"""
               addPullAttrs(refAttr, tail, level, acc + pull1)
 
-            case other             => throw MoleculeException(
+            case nestedOpt: NestedOpt =>
+              validateTailAfterNested(tail)
+              (acc, Some(nestedOpt))
+
+            case _: Nested => noMixedNestedModes
+            case other     => throw MoleculeException(
               "Unexpected element in optional nested molecule: " + other
             )
           }
@@ -176,34 +178,72 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
   @tailrec
   final protected def resolve(es: List[Var], elements: Seq[Element]): List[Var] = elements match {
     case element :: tail => element match {
-      case a: AttrOne            => a match {
-        case a: AttrOneMan =>
-          resolve(resolveAttrOneMan(es, a), tail)
+      case a: AttrOne => a match {
+        case a: AttrOneMan => resolve(resolveAttrOneMan(es, a), tail)
         case a: AttrOneOpt => resolve(resolveAttrOneOpt(es, a), tail)
         case a: AttrOneTac => resolve(resolveAttrOneTac(es, a), tail)
         case other         => unexpected(other)
       }
-      case a: AttrSet            => a match {
+      case a: AttrSet => a match {
         case a: AttrSetMan => resolve(resolveAttrSetMan(es, a), tail)
         case a: AttrSetOpt => resolve(resolveAttrSetOpt(es, a), tail)
         case a: AttrSetTac => resolve(resolveAttrSetTac(es, a), tail)
         case other         => unexpected(other)
       }
-      case ref: Ref              => resolve(resolveRef(es, ref), tail)
-      case _: BackRef            => resolve(resolveBackRef(es), tail)
-      case Nested(ref, elements) => resolve(resolveNested(es, ref, elements), tail)
-      case n: NestedOpt          =>
-        resolve(resolveNestedOptRef(es, n), tail)
-      case other                 => unexpected(other)
+      case ref: Ref   => resolve(resolveRef(es, ref), tail)
+      case _: BackRef => resolve(es.init, tail)
+
+      case Nested(ref, nestedElements)      => resolve(resolveNested(es, ref, nestedElements, tail), tail)
+      case n@NestedOpt(ref, nestedElements) => resolve(resolveNestedOpt(es, n, ref, nestedElements, tail), tail)
+      case other                            => unexpected(other)
     }
     case Nil             => es
   }
 
-  def resolveNested(es: List[Var], ref: Ref, elements: Seq[Element]): List[Var] = {
-    resolve(resolveNestedRef(es, ref), elements)
+  private def resolveNested(
+    es: List[Var], ref: Ref, nestedElements: Seq[Element], tail: Seq[Element]
+  ): List[Var] = {
+    if (isNestedOpt) noMixedNestedModes
+    validateRefNs(ref, nestedElements)
+    validateTailAfterNested(tail)
+    resolve(resolveNestedRef(es, ref), nestedElements)
   }
 
-  //  def resolveNestedOpt(es: List[Var], nestedOpt: NestedOpt, elements: Seq[Element]): List[Var] = {
-  //    resolve(resolveNestedOptRef(es, nestedOpt), elements)
-  //  }
+  private def resolveNestedOpt(
+    es: List[Var], nestedOpt: NestedOpt, ref: Ref, nestedElements: Seq[Element], tail: Seq[Element]
+  ): List[Var] = {
+    if (isNested) noMixedNestedModes
+    validateRefNs(ref, nestedElements)
+    validateTailAfterNested(tail)
+    resolveNestedOptRef(es, nestedOpt)
+  }
+
+
+  private def noMixedNestedModes = throw MoleculeException(
+    "Can't mix mandatory/optional nested data structures."
+  )
+
+  private def validateRefNs(ref: Ref, nestedElements: Seq[Element]): Unit = {
+    val refName  = ref.refAttr.capitalize
+    val nestedNs = nestedElements.head match {
+      case a: Attr => a.ns
+      case r: Ref  => r.ns
+      case other   => unexpected(other)
+    }
+    if (ref.refNs != nestedNs)
+      throw MoleculeException(s"`$refName` can only nest to `${ref.refNs}`. Found: `$nestedNs`")
+  }
+
+  private def validateTailAfterNested(tail: Seq[Element]): Unit = {
+    tail match {
+      case Nil                            => // ok
+      case Seq(_: TxMetaData) if isNested => throw MoleculeException(
+        s"Tx meta data after inner nested structures not allowed."
+      )
+      case Seq(_: TxMetaData)             => // ok
+      case other                          => throw MoleculeException(
+        s"Only tx meta data is allowed after nested structure. Found:\n  " + other.mkString("\n  ")
+      )
+    }
+  }
 }
