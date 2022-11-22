@@ -144,12 +144,9 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
               val pull1 = s"""\n$i(:${a.ns}/${a.attr} :limit nil :default "__none__")"""
               addPullAttrs(refAttr, tail, level, acc + pull1)
 
-            case nestedOpt: NestedOpt =>
-              validateTailAfterNested(tail)
-              (acc, Some(nestedOpt))
-
-            case _: Nested => noMixedNestedModes
-            case other     => throw MoleculeException(
+            case nestedOpt: NestedOpt => (acc, Some(nestedOpt))
+            case _: Nested            => noMixedNestedModes
+            case other                => throw MoleculeException(
               "Unexpected element in optional nested molecule: " + other
             )
           }
@@ -176,23 +173,22 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
   }
 
   @tailrec
-  final protected def resolve(es: List[Var], elements: Seq[Element]): List[Var] = elements match {
+  final private def resolve(es: List[Var], elements: Seq[Element]): List[Var] = elements match {
     case element :: tail => element match {
-      case a: AttrOne => a match {
+      case a: AttrOne                       => a match {
         case a: AttrOneMan => resolve(resolveAttrOneMan(es, a), tail)
         case a: AttrOneOpt => resolve(resolveAttrOneOpt(es, a), tail)
         case a: AttrOneTac => resolve(resolveAttrOneTac(es, a), tail)
         case other         => unexpected(other)
       }
-      case a: AttrSet => a match {
+      case a: AttrSet                       => a match {
         case a: AttrSetMan => resolve(resolveAttrSetMan(es, a), tail)
         case a: AttrSetOpt => resolve(resolveAttrSetOpt(es, a), tail)
         case a: AttrSetTac => resolve(resolveAttrSetTac(es, a), tail)
         case other         => unexpected(other)
       }
-      case ref: Ref   => resolve(resolveRef(es, ref), tail)
-      case _: BackRef => resolve(es.init, tail)
-
+      case ref: Ref                         => resolve(resolveRef(es, ref), tail)
+      case _: BackRef                       => resolve(es.init, tail)
       case Nested(ref, nestedElements)      => resolve(resolveNested(es, ref, nestedElements, tail), tail)
       case n@NestedOpt(ref, nestedElements) => resolve(resolveNestedOpt(es, n, ref, nestedElements, tail), tail)
       case other                            => unexpected(other)
@@ -200,30 +196,28 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
     case Nil             => es
   }
 
-  private def resolveNested(
+  final private def resolveNested(
     es: List[Var], ref: Ref, nestedElements: Seq[Element], tail: Seq[Element]
   ): List[Var] = {
     if (isNestedOpt) noMixedNestedModes
     validateRefNs(ref, nestedElements)
-    validateTailAfterNested(tail)
     resolve(resolveNestedRef(es, ref), nestedElements)
   }
 
-  private def resolveNestedOpt(
+  final private def resolveNestedOpt(
     es: List[Var], nestedOpt: NestedOpt, ref: Ref, nestedElements: Seq[Element], tail: Seq[Element]
   ): List[Var] = {
     if (isNested) noMixedNestedModes
     validateRefNs(ref, nestedElements)
-    validateTailAfterNested(tail)
     resolveNestedOptRef(es, nestedOpt)
   }
 
 
-  private def noMixedNestedModes = throw MoleculeException(
+  final private def noMixedNestedModes = throw MoleculeException(
     "Can't mix mandatory/optional nested data structures."
   )
 
-  private def validateRefNs(ref: Ref, nestedElements: Seq[Element]): Unit = {
+  final private def validateRefNs(ref: Ref, nestedElements: Seq[Element]): Unit = {
     val refName  = ref.refAttr.capitalize
     val nestedNs = nestedElements.head match {
       case a: Attr => a.ns
@@ -234,16 +228,4 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
       throw MoleculeException(s"`$refName` can only nest to `${ref.refNs}`. Found: `$nestedNs`")
   }
 
-  private def validateTailAfterNested(tail: Seq[Element]): Unit = {
-    tail match {
-      case Nil                            => // ok
-      case Seq(_: TxMetaData) if isNested => throw MoleculeException(
-        s"Tx meta data after inner nested structures not allowed."
-      )
-      case Seq(_: TxMetaData)             => // ok
-      case other                          => throw MoleculeException(
-        s"Only tx meta data is allowed after nested structure. Found:\n  " + other.mkString("\n  ")
-      )
-    }
-  }
 }

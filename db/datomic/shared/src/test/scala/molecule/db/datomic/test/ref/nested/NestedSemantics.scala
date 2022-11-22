@@ -23,7 +23,7 @@ object NestedSemantics extends DatomicTestSuite {
     }
 
 
-    "Nested ref must match" - refs { implicit conn =>
+    "Nested namespace must match" - refs { implicit conn =>
       intercept[MoleculeException] {
         Ns.n.Rs1.*(R4.n4).query.get
       }.message ==> "`Rs1` can only nest to `R1`. Found: `R4`"
@@ -42,36 +42,6 @@ object NestedSemantics extends DatomicTestSuite {
       intercept[MoleculeException] {
         Ns.n.Rs1.*?(R1.n1.Rs2.*(R2.n2)).query.get
       }.message ==> "Can't mix mandatory/optional nested data structures."
-    }
-
-
-    "Attributes after nested not allowed" - refs { implicit conn =>
-      intercept[MoleculeException](
-        Ns.n.Rs1.*(R1.n1).str1.query.get
-      ).message ==>
-        """Only tx meta data is allowed after nested structure. Found:
-          |  AttrOneManString(R1,str1,V,List(),None,None,None)""".stripMargin
-
-      intercept[MoleculeException](
-        Ns.n.Rs1.*?(R1.n1).str1.query.get
-      ).message ==>
-        """Only tx meta data is allowed after nested structure. Found:
-          |  AttrOneManString(R1,str1,V,List(),None,None,None)""".stripMargin
-
-
-      // After inner nested
-
-      intercept[MoleculeException](
-        Ns.n.Rs1.*(R1.n1.Rs2.*(R2.n2).str2).query.get
-      ).message ==>
-        """Only tx meta data is allowed after nested structure. Found:
-          |  AttrOneManString(R2,str2,V,List(),None,None,None)""".stripMargin
-
-      intercept[MoleculeException](
-        Ns.n.Rs1.*?(R1.n1.Rs2.*?(R2.n2).str2).query.get
-      ).message ==>
-        """Only tx meta data is allowed after nested structure. Found:
-          |  AttrOneManString(R2,str2,V,List(),None,None,None)""".stripMargin
     }
 
 

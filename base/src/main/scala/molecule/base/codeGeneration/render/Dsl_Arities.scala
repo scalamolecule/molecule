@@ -128,7 +128,8 @@ case class Dsl_Arities(schema: MetaSchema, namespace: MetaNs, arity: Int)
       val refObj   = s"""MoleculeModel.Ref("$ns", "$attr", "$refNs", $card)"""
       val pRefAttr = padRefAttr(attr)
       val pRefNs   = padRefNs(refNs)
-      ref += s"object $refCls$pRefAttr extends $refNs${_0}$pRefNs[${`A..V, `}t](elements :+ $refObj)"
+      val nested   = if (card == CardOne) "" else s" with Nested${_0}${`[A..V]`}"
+      ref += s"object $refCls$pRefAttr extends $refNs${_0}$pRefNs[${`A..V, `}t](elements :+ $refObj)$nested"
   }
 
   val manAttrs = if (last) "" else man.result().mkString("", "\n  ", "\n\n  ")
@@ -136,16 +137,16 @@ case class Dsl_Arities(schema: MetaSchema, namespace: MetaNs, arity: Int)
   val tacAttrs = tac.result().mkString("\n  ")
 
   val elements = "override val elements: Seq[Element]"
-  val ns2      = if (arity == 22) "]" else if (arity == maxArity) s", Dummy${_1}]" else s", $ns_1]"
-  val modelOps = s"ModelOps_$arity[${`A..V, `}t, $ns_0" + ns2
+//  val ns2      = if (arity == 22) "]" else if (arity == maxArity) s", Dummy${_1}]" else s", $ns_1]"
+  val modelOps = s"ModelOps_$arity[${`A..V, `}t, $ns_0]" // + ns2
 
   val resolvers = res.result().mkString("\n  ")
 
   val nested = if (hasCardMany && arity < maxArity) {
     s"""
        |
-       |  override protected def _nestedMan[Tpl](nestedElements: Seq[Element]) = new $ns_1[${`A..V, `}Seq[Tpl], Nothing](addNestedMan(elements, nestedElements))
-       |  override protected def _nestedOpt[Tpl](nestedElements: Seq[Element]) = new $ns_1[${`A..V, `}Seq[Tpl], Nothing](addNestedOpt(elements, nestedElements))""".stripMargin
+       |  override protected def _nestedMan[Tpl](nestedElements: Seq[Element]) = new Tx${_1}[${`A..V, `}Seq[Tpl]](addNestedMan(elements, nestedElements))
+       |  override protected def _nestedOpt[Tpl](nestedElements: Seq[Element]) = new Tx${_1}[${`A..V, `}Seq[Tpl]](addNestedOpt(elements, nestedElements))""".stripMargin
   } else ""
 
   val refResult = ref.result()

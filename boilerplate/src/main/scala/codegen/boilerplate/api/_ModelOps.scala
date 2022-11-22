@@ -12,30 +12,29 @@ object _ModelOps extends BoilerplateGenBase("ModelOps", "/api") {
        |import molecule.boilerplate.ops.ModelTransformations
        |
        |
-       |trait ${fileName}_0[t, Ns0[_], Ns1[_, _]]
+       |trait ${fileName}_0[t, Ns[_]]
        |  extends Molecule_00
        |    with ModelTransformations
-       |    with ExprOneTacOps_0[t, Ns0]
-       |    with ExprSetTacOps_0[t, Ns0]
-       |    with Nested_0[Ns1]
+       |    with ExprOneTacOps_0[t, Ns]
+       |    with ExprSetTacOps_0[t, Ns]
+       |    with NestedOp_0
        |$traits""".stripMargin
   }
 
   case class Trait(arity: Int) extends TemplateVals(arity) {
-    val ns1    = if (arity == 22) "" else s", Ns1[${`_, _, _`}]"
-    val nested = if (arity == 22) "" else s"\n    with Nested_$arity[${`A..V`}, Ns1]"
+    val nested = if (arity == 22) "" else s"\n    with NestedOp_$arity[${`A..V`}]"
     val body   =
       s"""
-         |trait ${fileName}_$arity[${`A..V`}, t, Ns0[${`_, _`}]$ns1]
+         |trait ${fileName}_$arity[${`A..V`}, t, Ns[${`_, _`}]]
          |  extends Molecule_$n0[${`A..V`}]
          |    with ModelTransformations
-         |    with AggregatesOps_$arity[${`A..V`}, t, Ns0]
-         |    with ExprOneManOps_$arity[${`A..V`}, t, Ns0]
-         |    with ExprOneOptOps_$arity[${`A..V`}, t, Ns0]
-         |    with ExprOneTacOps_$arity[${`A..V`}, t, Ns0]
-         |    with ExprSetManOps_$arity[${`A..V`}, t, Ns0]
-         |    with ExprSetOptOps_$arity[${`A..V`}, t, Ns0]
-         |    with ExprSetTacOps_$arity[${`A..V`}, t, Ns0]$nested
-         |    with SortAttrsOps_$arity[${`A..V`}, t, Ns0]""".stripMargin
+         |    with AggregatesOps_$arity[${`A..V`}, t, Ns]
+         |    with ExprOneManOps_$arity[${`A..V`}, t, Ns]
+         |    with ExprOneOptOps_$arity[${`A..V`}, t, Ns]
+         |    with ExprOneTacOps_$arity[${`A..V`}, t, Ns]
+         |    with ExprSetManOps_$arity[${`A..V`}, t, Ns]
+         |    with ExprSetOptOps_$arity[${`A..V`}, t, Ns]
+         |    with ExprSetTacOps_$arity[${`A..V`}, t, Ns]$nested
+         |    with SortAttrsOps_$arity[${`A..V`}, t, Ns]""".stripMargin
   }
 }

@@ -1,7 +1,6 @@
 package molecule.boilerplate.api
 
-import molecule.boilerplate.api._
-import scala.language.higherKinds
+import molecule.boilerplate.ast.MoleculeModel._
 
 
 /** Transaction meta data on molecule.
@@ -17,9 +16,9 @@ import scala.language.higherKinds
  * } yield ()
  * }}}
  */
-trait TxMetaDataBase
+trait TxMetaData_
 
-trait Tx_0 extends TxMetaDataBase {
+case class Tx_0(override val elements: Seq[Element]) extends TxMetaData_ with Molecule_00 {
   object Tx {
     final def apply                                                                   (txMetaData: Molecule_00                                                                  ): Molecule_00                                                                   = ???
     final def apply[a                                                               ] (txMetaData: Molecule_01[a                                                               ]): Molecule_01[a                                                               ] = ???
@@ -71,7 +70,7 @@ trait Tx_0 extends TxMetaDataBase {
   }
 }
 
-trait Tx_1[A] extends TxMetaDataBase {
+case class Tx_1[A](override val elements: Seq[Element]) extends TxMetaData_ with Molecule_01[A] {
   object Tx {
     final def apply                                                                   (txMetaData: Molecule_00                                                               ): Molecule_01[A                                                               ] = ???
     final def apply[a                                                               ] (txMetaData: Molecule_01[a                                                            ]): Molecule_02[A, a                                                            ] = ???
@@ -121,7 +120,7 @@ trait Tx_1[A] extends TxMetaDataBase {
   }
 }
 
-trait Tx_2[A, B] extends TxMetaDataBase {
+case class Tx_2[A, B](override val elements: Seq[Element]) extends TxMetaData_ with Molecule_02[A, B] {
   object Tx {
     final def apply                                                             (txMetaData: Molecule_00                                                            ): Molecule_02[A, B                                                            ] = ???
     final def apply[a                                                         ] (txMetaData: Molecule_01[a                                                         ]): Molecule_03[A, B, a                                                         ] = ???
@@ -169,7 +168,7 @@ trait Tx_2[A, B] extends TxMetaDataBase {
   }
 }
 
-trait Tx_3[A, B, C] extends TxMetaDataBase {
+case class Tx_3[A, B, C](override val elements: Seq[Element]) extends TxMetaData_ with Molecule_03[A, B, C] {
   object Tx {
     final def apply                                                          (txMetaData: Molecule_00                                                         ): Molecule_03[A, B, C                                                         ] = ???
     final def apply[a                                                      ] (txMetaData: Molecule_01[a                                                      ]): Molecule_04[A, B, C, a                                                      ] = ???
@@ -215,7 +214,7 @@ trait Tx_3[A, B, C] extends TxMetaDataBase {
   }
 }
 
-trait Tx_4[A, B, C, D] extends TxMetaDataBase {
+case class Tx_4[A, B, C, D](override val elements: Seq[Element]) extends TxMetaData_ with Molecule_04[A, B, C, D] {
   object Tx {
     final def apply                                                       (txMetaData: Molecule_00                                                      ): Molecule_04[A, B, C, D                                                      ] = ???
     final def apply[a                                                   ] (txMetaData: Molecule_01[a                                                   ]): Molecule_05[A, B, C, D, a                                                   ] = ???
@@ -259,7 +258,7 @@ trait Tx_4[A, B, C, D] extends TxMetaDataBase {
   }
 }
 
-trait Tx_5[A, B, C, D, E] extends TxMetaDataBase {
+case class Tx_5[A, B, C, D, E](override val elements: Seq[Element]) extends TxMetaData_ with Molecule_05[A, B, C, D, E] {
   object Tx {
     final def apply                                                    (txMetaData: Molecule_00                                                   ): Molecule_05[A, B, C, D, E                                                   ] = ???
     final def apply[a                                                ] (txMetaData: Molecule_01[a                                                ]): Molecule_06[A, B, C, D, E, a                                                ] = ???
@@ -301,7 +300,7 @@ trait Tx_5[A, B, C, D, E] extends TxMetaDataBase {
   }
 }
 
-trait Tx_6[A, B, C, D, E, F] extends TxMetaDataBase {
+case class Tx_6[A, B, C, D, E, F](override val elements: Seq[Element]) extends TxMetaData_ with Molecule_06[A, B, C, D, E, F] {
   object Tx {
     final def apply                                                 (txMetaData: Molecule_00                                                ): Molecule_06[A, B, C, D, E, F                                                ] = ???
     final def apply[a                                             ] (txMetaData: Molecule_01[a                                             ]): Molecule_07[A, B, C, D, E, F, a                                             ] = ???
@@ -342,7 +341,7 @@ trait Tx_6[A, B, C, D, E, F] extends TxMetaDataBase {
   }
 }
 
-trait Tx_7[A, B, C, D, E, F, G] extends TxMetaDataBase {
+case class Tx_7[A, B, C, D, E, F, G](override val elements: Seq[Element]) extends TxMetaData_ with Molecule_07[A, B, C, D, E, F, G] {
   object Tx {
     final def apply                                              (txMetaData: Molecule_00                                             ): Molecule_07[A, B, C, D, E, F, G                                             ] = ???
     final def apply[a                                          ] (txMetaData: Molecule_01[a                                          ]): Molecule_08[A, B, C, D, E, F, G, a                                          ] = ???
@@ -380,7 +379,7 @@ trait Tx_7[A, B, C, D, E, F, G] extends TxMetaDataBase {
   }
 }
 
-trait Tx_8[A, B, C, D, E, F, G, H] extends TxMetaDataBase {
+case class Tx_8[A, B, C, D, E, F, G, H](override val elements: Seq[Element]) extends TxMetaData_ with Molecule_08[A, B, C, D, E, F, G, H] {
   object Tx {
     final def apply                                           (txMetaData: Molecule_00                                          ): Molecule_08[A, B, C, D, E, F, G, H                                          ] = ???
     final def apply[a                                       ] (txMetaData: Molecule_01[a                                       ]): Molecule_09[A, B, C, D, E, F, G, H, a                                       ] = ???
@@ -416,7 +415,7 @@ trait Tx_8[A, B, C, D, E, F, G, H] extends TxMetaDataBase {
   }
 }
 
-trait Tx_9[A, B, C, D, E, F, G, H, I] extends TxMetaDataBase {
+case class Tx_9[A, B, C, D, E, F, G, H, I](override val elements: Seq[Element]) extends TxMetaData_ with Molecule_09[A, B, C, D, E, F, G, H, I] {
   object Tx {
     final def apply                                        (txMetaData: Molecule_00                                       ): Molecule_09[A, B, C, D, E, F, G, H, I                                       ] = ???
     final def apply[a                                    ] (txMetaData: Molecule_01[a                                    ]): Molecule_10[A, B, C, D, E, F, G, H, I, a                                    ] = ???
@@ -450,7 +449,7 @@ trait Tx_9[A, B, C, D, E, F, G, H, I] extends TxMetaDataBase {
   }
 }
 
-trait Tx_10[A, B, C, D, E, F, G, H, I, J] extends TxMetaDataBase {
+case class Tx_10[A, B, C, D, E, F, G, H, I, J](override val elements: Seq[Element]) extends TxMetaData_ with Molecule_10[A, B, C, D, E, F, G, H, I, J] {
   object Tx {
     final def apply                                     (txMetaData: Molecule_00                                    ): Molecule_10[A, B, C, D, E, F, G, H, I, J                                    ] = ???
     final def apply[a                                 ] (txMetaData: Molecule_01[a                                 ]): Molecule_11[A, B, C, D, E, F, G, H, I, J, a                                 ] = ???
@@ -482,7 +481,7 @@ trait Tx_10[A, B, C, D, E, F, G, H, I, J] extends TxMetaDataBase {
   }
 }
 
-trait Tx_11[A, B, C, D, E, F, G, H, I, J, K] extends TxMetaDataBase {
+case class Tx_11[A, B, C, D, E, F, G, H, I, J, K](override val elements: Seq[Element]) extends TxMetaData_ with Molecule_11[A, B, C, D, E, F, G, H, I, J, K] {
   object Tx {
     final def apply                                  (txMetaData: Molecule_00                                 ): Molecule_11[A, B, C, D, E, F, G, H, I, J, K                                 ] = ???
     final def apply[a                              ] (txMetaData: Molecule_01[a                              ]): Molecule_12[A, B, C, D, E, F, G, H, I, J, K, a                              ] = ???
@@ -512,7 +511,7 @@ trait Tx_11[A, B, C, D, E, F, G, H, I, J, K] extends TxMetaDataBase {
   }
 }
 
-trait Tx_12[A, B, C, D, E, F, G, H, I, J, K, L] extends TxMetaDataBase {
+case class Tx_12[A, B, C, D, E, F, G, H, I, J, K, L](override val elements: Seq[Element]) extends TxMetaData_ with Molecule_12[A, B, C, D, E, F, G, H, I, J, K, L] {
   object Tx {
     final def apply                               (txMetaData: Molecule_00                              ): Molecule_12[A, B, C, D, E, F, G, H, I, J, K, L                              ] = ???
     final def apply[a                           ] (txMetaData: Molecule_01[a                           ]): Molecule_13[A, B, C, D, E, F, G, H, I, J, K, L, a                           ] = ???
@@ -540,7 +539,7 @@ trait Tx_12[A, B, C, D, E, F, G, H, I, J, K, L] extends TxMetaDataBase {
   }
 }
 
-trait Tx_13[A, B, C, D, E, F, G, H, I, J, K, L, M] extends TxMetaDataBase {
+case class Tx_13[A, B, C, D, E, F, G, H, I, J, K, L, M](override val elements: Seq[Element]) extends TxMetaData_ with Molecule_13[A, B, C, D, E, F, G, H, I, J, K, L, M] {
   object Tx {
     final def apply                            (txMetaData: Molecule_00                           ): Molecule_13[A, B, C, D, E, F, G, H, I, J, K, L, M                           ] = ???
     final def apply[a                        ] (txMetaData: Molecule_01[a                        ]): Molecule_14[A, B, C, D, E, F, G, H, I, J, K, L, M, a                        ] = ???
@@ -566,7 +565,7 @@ trait Tx_13[A, B, C, D, E, F, G, H, I, J, K, L, M] extends TxMetaDataBase {
   }
 }
 
-trait Tx_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N] extends TxMetaDataBase {
+case class Tx_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N](override val elements: Seq[Element]) extends TxMetaData_ with Molecule_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N] {
   object Tx {
     final def apply                         (txMetaData: Molecule_00                        ): Molecule_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N                        ] = ???
     final def apply[a                     ] (txMetaData: Molecule_01[a                     ]): Molecule_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, a                     ] = ???
@@ -590,7 +589,7 @@ trait Tx_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N] extends TxMetaDataBase {
   }
 }
 
-trait Tx_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O] extends TxMetaDataBase {
+case class Tx_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O](override val elements: Seq[Element]) extends TxMetaData_ with Molecule_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O] {
   object Tx {
     final def apply                      (txMetaData: Molecule_00                     ): Molecule_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O                     ] = ???
     final def apply[a                  ] (txMetaData: Molecule_01[a                  ]): Molecule_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, a                  ] = ???
@@ -612,7 +611,7 @@ trait Tx_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O] extends TxMetaDataBase 
   }
 }
 
-trait Tx_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P] extends TxMetaDataBase {
+case class Tx_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P](override val elements: Seq[Element]) extends TxMetaData_ with Molecule_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P] {
   object Tx {
     final def apply                   (txMetaData: Molecule_00                  ): Molecule_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P                  ] = ???
     final def apply[a               ] (txMetaData: Molecule_01[a               ]): Molecule_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, a               ] = ???
@@ -632,7 +631,7 @@ trait Tx_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P] extends TxMetaDataBa
   }
 }
 
-trait Tx_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q] extends TxMetaDataBase {
+case class Tx_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q](override val elements: Seq[Element]) extends TxMetaData_ with Molecule_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q] {
   object Tx {
     final def apply                (txMetaData: Molecule_00               ): Molecule_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q               ] = ???
     final def apply[a            ] (txMetaData: Molecule_01[a            ]): Molecule_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, a            ] = ???
@@ -650,7 +649,7 @@ trait Tx_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q] extends TxMetaDat
   }
 }
 
-trait Tx_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R] extends TxMetaDataBase {
+case class Tx_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R](override val elements: Seq[Element]) extends TxMetaData_ with Molecule_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R] {
   object Tx {
     final def apply             (txMetaData: Molecule_00            ): Molecule_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R            ] = ???
     final def apply[a         ] (txMetaData: Molecule_01[a         ]): Molecule_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, a         ] = ???
@@ -666,7 +665,7 @@ trait Tx_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R] extends TxMeta
   }
 }
 
-trait Tx_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S] extends TxMetaDataBase {
+case class Tx_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S](override val elements: Seq[Element]) extends TxMetaData_ with Molecule_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S] {
   object Tx {
     final def apply         (txMetaData: Molecule_00         ): Molecule_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S         ] = ???
     final def apply[a      ](txMetaData: Molecule_01[a      ]): Molecule_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, a      ] = ???
@@ -680,7 +679,7 @@ trait Tx_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S] extends TxM
   }
 }
 
-trait Tx_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T] extends TxMetaDataBase {
+case class Tx_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T](override val elements: Seq[Element]) extends TxMetaData_ with Molecule_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T] {
   object Tx {
     final def apply       (txMetaData: Molecule_00      ): Molecule_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T      ] = ???
     final def apply[a   ] (txMetaData: Molecule_01[a   ]): Molecule_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, a   ] = ???
@@ -692,7 +691,7 @@ trait Tx_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T] extends 
   }
 }
 
-trait Tx_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U] extends TxMetaDataBase {
+case class Tx_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U](override val elements: Seq[Element]) extends TxMetaData_ with Molecule_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U] {
   object Tx {
     final def apply    (txMetaData: Molecule_00   ): Molecule_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U   ] = ???
     final def apply[a] (txMetaData: Molecule_01[a]): Molecule_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, a] = ???
@@ -702,7 +701,7 @@ trait Tx_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U] exten
   }
 }
 
-trait Tx_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V] extends TxMetaDataBase {
+case class Tx_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V](override val elements: Seq[Element]) extends TxMetaData_ with Molecule_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V] {
   object Tx {
     final def apply(txMetaData: Molecule_00): Molecule_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V] = ???
 
