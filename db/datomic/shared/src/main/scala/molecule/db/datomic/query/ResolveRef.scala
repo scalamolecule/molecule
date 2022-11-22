@@ -4,7 +4,7 @@ import java.lang.{Long => jLong}
 import molecule.boilerplate.ast.MoleculeModel._
 
 
-trait ResolveRef[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
+trait ResolveRef[Tpl] { self: SortOne_[Tpl] with Base[Tpl] =>
 
   protected def resolveRef(es: List[Var], ref: Ref): List[Var] = {
     val (e, refAttr, refId) = (es.last, s":${ref.ns}/${ref.refAttr}", vv)

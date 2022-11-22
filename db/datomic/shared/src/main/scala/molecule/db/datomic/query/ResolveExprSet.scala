@@ -4,7 +4,7 @@ import molecule.boilerplate.api.Keywords._
 import molecule.boilerplate.ast.MoleculeModel._
 import scala.reflect.ClassTag
 
-trait ResolveExprSet[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
+trait ResolveExprSet[Tpl] { self: SortOne_[Tpl] with Base[Tpl] =>
 
   import LambdasSet._
 

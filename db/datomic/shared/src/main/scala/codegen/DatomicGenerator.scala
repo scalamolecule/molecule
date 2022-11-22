@@ -24,6 +24,7 @@ object DatomicGenerator extends App {
 //    db.datomic.query._CastNestedOptLeaf.generate
 //    db.datomic.query._NestOpt.generate
 
-    db.datomic.query._Sort.generate
+//    db.datomic.query._SortOne.generate
+//    db.datomic.query._SortOneOpt.generate
 
 }

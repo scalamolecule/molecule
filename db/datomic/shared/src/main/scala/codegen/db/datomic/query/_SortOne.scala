@@ -2,14 +2,14 @@ package codegen.db.datomic.query
 
 import codegen.DatomicGenBase
 
-object _Sort extends DatomicGenBase("Sort", "/query") {
+object _SortOne extends DatomicGenBase("SortOne", "/query") {
 
   val content = {
     val sorters = baseTypes.map(sorter).mkString("\n")
     s"""// GENERATED CODE ********************************
        |package molecule.db.datomic.query
        |
-       |import java.lang.{Boolean => jBoolean, Double => jDouble, Integer => jInteger, Long => jLong}
+       |import java.lang.{Boolean => jBoolean, Double => jDouble, Integer => jInteger, Long => jLong, Float => jFloat}
        |import java.math.{BigDecimal => jBigDecimal, BigInteger => jBigInt}
        |import java.net.URI
        |import java.util.{Date, UUID}
@@ -24,7 +24,7 @@ object _Sort extends DatomicGenBase("Sort", "/query") {
   def sorter(tpe: String): String = {
     val javaTpe = javaTypes(tpe)
     s"""
-       |  protected def sort$tpe(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+       |  protected def sortOne$tpe(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
        |    attr.sort.map { sort =>
        |      (
        |        sort.last.toString.toInt,

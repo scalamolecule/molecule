@@ -24,7 +24,7 @@ trait CoreData extends DateHandling {
   lazy val (long0, long1, long2, long3, long4, long5)             = (0L, 1L, 2L, 3L, 4L, 5L)
   lazy val (float0, float1, float2, float3, float4, float5)       = (0.0f, 1.1f, 2.2f, 3.3f, 4.4f, 5.5f)
   lazy val (double0, double1, double2, double3, double4, double5) = (0.0, 1.1, 2.2, 3.3, 4.4, 5.5)
-  lazy val (boolean0, boolean1)                                   = (false, true)
+  lazy val (boolean0, boolean1, boolean2)                         = (false, true, false)
   lazy val (date0, date1, date2, date3, date4, date5)             = (da(0), da(1), da(2), da(3), da(4), da(5))
   lazy val (uri0, uri1, uri2, uri3, uri4, uri5)                   = (ur(0), ur(1), ur(2), ur(3), ur(4), ur(5))
   lazy val (bigInt0, bigInt1, bigInt2, bigInt3, bigInt4, bigInt5) = (bi(0), bi(1), bi(2), bi(3), bi(4), bi(5))

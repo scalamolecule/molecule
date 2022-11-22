@@ -1,4 +1,4 @@
-package molecule.db.datomic.test.crud.save
+package molecule.db.datomic.test.crud.insert
 
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.db.datomic._

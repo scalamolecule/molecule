@@ -12,7 +12,8 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
     with ResolveExprOne[Tpl]
     with ResolveExprSet[Tpl]
     with ResolveRef[Tpl]
-    with Sort_[Tpl]
+    with SortOne_[Tpl]
+    with SortOneOpt_[Tpl]
     with Base[Tpl]
     with CastFlat_[Tpl]
     with CastNestedBranch_[Tpl]
@@ -189,15 +190,15 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
       }
       case ref: Ref                         => resolve(resolveRef(es, ref), tail)
       case _: BackRef                       => resolve(es.init, tail)
-      case Nested(ref, nestedElements)      => resolve(resolveNested(es, ref, nestedElements, tail), tail)
-      case n@NestedOpt(ref, nestedElements) => resolve(resolveNestedOpt(es, n, ref, nestedElements, tail), tail)
+      case Nested(ref, nestedElements)      => resolve(resolveNested(es, ref, nestedElements), tail)
+      case n@NestedOpt(ref, nestedElements) => resolve(resolveNestedOpt(es, n, ref, nestedElements), tail)
       case other                            => unexpected(other)
     }
     case Nil             => es
   }
 
   final private def resolveNested(
-    es: List[Var], ref: Ref, nestedElements: Seq[Element], tail: Seq[Element]
+    es: List[Var], ref: Ref, nestedElements: Seq[Element]
   ): List[Var] = {
     if (isNestedOpt) noMixedNestedModes
     validateRefNs(ref, nestedElements)
@@ -205,7 +206,7 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
   }
 
   final private def resolveNestedOpt(
-    es: List[Var], nestedOpt: NestedOpt, ref: Ref, nestedElements: Seq[Element], tail: Seq[Element]
+    es: List[Var], nestedOpt: NestedOpt, ref: Ref, nestedElements: Seq[Element]
   ): List[Var] = {
     if (isNested) noMixedNestedModes
     validateRefNs(ref, nestedElements)

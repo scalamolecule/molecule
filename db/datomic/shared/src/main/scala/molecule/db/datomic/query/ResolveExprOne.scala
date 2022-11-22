@@ -5,7 +5,7 @@ import molecule.boilerplate.api.Keywords._
 import molecule.boilerplate.ast.MoleculeModel._
 import scala.reflect.ClassTag
 
-trait ResolveExprOne[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
+trait ResolveExprOne[Tpl] { self: SortOne_[Tpl] with SortOneOpt_[Tpl] with Base[Tpl] =>
 
   import LambdasOne._
 
@@ -13,20 +13,20 @@ trait ResolveExprOne[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
     attrIndex += 1
     val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
     attr match {
-      case at: AttrOneManString     => man(e, a, at.op, at.vs, resString, sortString(at, attrIndex))
-      case at: AttrOneManInt        => man(e, a, at.op, at.vs, resInt, sortInt(at, attrIndex))
-      case at: AttrOneManLong       => maL(e, a, at.op, at.vs, resLong, sortLong(at, attrIndex))
-      case at: AttrOneManFloat      => man(e, a, at.op, at.vs, resFloat, sortFloat(at, attrIndex))
-      case at: AttrOneManDouble     => man(e, a, at.op, at.vs, resDouble, sortDouble(at, attrIndex))
-      case at: AttrOneManBoolean    => man(e, a, at.op, at.vs, resBoolean, sortBoolean(at, attrIndex))
-      case at: AttrOneManBigInt     => man(e, a, at.op, at.vs, resBigInt, sortBigInt(at, attrIndex))
-      case at: AttrOneManBigDecimal => man(e, a, at.op, at.vs, resBigDecimal, sortBigDecimal(at, attrIndex))
-      case at: AttrOneManDate       => man(e, a, at.op, at.vs, resDate, sortDate(at, attrIndex))
-      case at: AttrOneManUUID       => man(e, a, at.op, at.vs, resUUID, sortUUID(at, attrIndex))
-      case at: AttrOneManURI        => man(e, a, at.op, at.vs, resURI, sortURI(at, attrIndex))
-      case at: AttrOneManByte       => man(e, a, at.op, at.vs, resByte, sortByte(at, attrIndex))
-      case at: AttrOneManShort      => man(e, a, at.op, at.vs, resShort, sortShort(at, attrIndex))
-      case at: AttrOneManChar       => man(e, a, at.op, at.vs, resChar, sortChar(at, attrIndex))
+      case at: AttrOneManString     => man(e, a, at.op, at.vs, resString, sortOneString(at, attrIndex))
+      case at: AttrOneManInt        => man(e, a, at.op, at.vs, resInt, sortOneInt(at, attrIndex))
+      case at: AttrOneManLong       => maL(e, a, at.op, at.vs, resLong, sortOneLong(at, attrIndex))
+      case at: AttrOneManFloat      => man(e, a, at.op, at.vs, resFloat, sortOneFloat(at, attrIndex))
+      case at: AttrOneManDouble     => man(e, a, at.op, at.vs, resDouble, sortOneDouble(at, attrIndex))
+      case at: AttrOneManBoolean    => man(e, a, at.op, at.vs, resBoolean, sortOneBoolean(at, attrIndex))
+      case at: AttrOneManBigInt     => man(e, a, at.op, at.vs, resBigInt, sortOneBigInt(at, attrIndex))
+      case at: AttrOneManBigDecimal => man(e, a, at.op, at.vs, resBigDecimal, sortOneBigDecimal(at, attrIndex))
+      case at: AttrOneManDate       => man(e, a, at.op, at.vs, resDate, sortOneDate(at, attrIndex))
+      case at: AttrOneManUUID       => man(e, a, at.op, at.vs, resUUID, sortOneUUID(at, attrIndex))
+      case at: AttrOneManURI        => man(e, a, at.op, at.vs, resURI, sortOneURI(at, attrIndex))
+      case at: AttrOneManByte       => man(e, a, at.op, at.vs, resByte, sortOneByte(at, attrIndex))
+      case at: AttrOneManShort      => man(e, a, at.op, at.vs, resShort, sortOneShort(at, attrIndex))
+      case at: AttrOneManChar       => man(e, a, at.op, at.vs, resChar, sortOneChar(at, attrIndex))
     }
     es
   }
@@ -58,20 +58,20 @@ trait ResolveExprOne[Tpl] { self: Sort_[Tpl] with Base[Tpl] =>
     attrIndex += 1
     val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
     attr match {
-      case at: AttrOneOptString     => opt(e, a, at.op, at.vs, resOptString, sortString(at, attrIndex))
-      case at: AttrOneOptInt        => opt(e, a, at.op, at.vs, resOptInt, sortInt(at, attrIndex))
-      case at: AttrOneOptLong       => opt(e, a, at.op, at.vs, resOptLong, sortLong(at, attrIndex))
-      case at: AttrOneOptFloat      => opt(e, a, at.op, at.vs, resOptFloat, sortFloat(at, attrIndex))
-      case at: AttrOneOptDouble     => opt(e, a, at.op, at.vs, resOptDouble, sortDouble(at, attrIndex))
-      case at: AttrOneOptBoolean    => opt(e, a, at.op, at.vs, resOptBoolean, sortBoolean(at, attrIndex))
-      case at: AttrOneOptBigInt     => opt(e, a, at.op, at.vs, resOptBigInt, sortBigInt(at, attrIndex))
-      case at: AttrOneOptBigDecimal => opt(e, a, at.op, at.vs, resOptBigDecimal, sortBigDecimal(at, attrIndex))
-      case at: AttrOneOptDate       => opt(e, a, at.op, at.vs, resOptDate, sortDate(at, attrIndex))
-      case at: AttrOneOptUUID       => opt(e, a, at.op, at.vs, resOptUUID, sortUUID(at, attrIndex))
-      case at: AttrOneOptURI        => opt(e, a, at.op, at.vs, resOptURI, sortURI(at, attrIndex))
-      case at: AttrOneOptByte       => opt(e, a, at.op, at.vs, resOptByte, sortByte(at, attrIndex))
-      case at: AttrOneOptShort      => opt(e, a, at.op, at.vs, resOptShort, sortShort(at, attrIndex))
-      case at: AttrOneOptChar       => opt(e, a, at.op, at.vs, resOptChar, sortChar(at, attrIndex))
+      case at: AttrOneOptString     => opt(e, a, at.op, at.vs, resOptString, sortOneOptString(at, attrIndex))
+      case at: AttrOneOptInt        => opt(e, a, at.op, at.vs, resOptInt, sortOneOptInt(at, attrIndex))
+      case at: AttrOneOptLong       => opt(e, a, at.op, at.vs, resOptLong, sortOneOptLong(at, attrIndex))
+      case at: AttrOneOptFloat      => opt(e, a, at.op, at.vs, resOptFloat, sortOneOptFloat(at, attrIndex))
+      case at: AttrOneOptDouble     => opt(e, a, at.op, at.vs, resOptDouble, sortOneOptDouble(at, attrIndex))
+      case at: AttrOneOptBoolean    => opt(e, a, at.op, at.vs, resOptBoolean, sortOneOptBoolean(at, attrIndex))
+      case at: AttrOneOptBigInt     => opt(e, a, at.op, at.vs, resOptBigInt, sortOneOptBigInt(at, attrIndex))
+      case at: AttrOneOptBigDecimal => opt(e, a, at.op, at.vs, resOptBigDecimal, sortOneOptBigDecimal(at, attrIndex))
+      case at: AttrOneOptDate       => opt(e, a, at.op, at.vs, resOptDate, sortOneOptDate(at, attrIndex))
+      case at: AttrOneOptUUID       => opt(e, a, at.op, at.vs, resOptUUID, sortOneOptUUID(at, attrIndex))
+      case at: AttrOneOptURI        => opt(e, a, at.op, at.vs, resOptURI, sortOneOptURI(at, attrIndex))
+      case at: AttrOneOptByte       => opt(e, a, at.op, at.vs, resOptByte, sortOneOptByte(at, attrIndex))
+      case at: AttrOneOptShort      => opt(e, a, at.op, at.vs, resOptShort, sortOneOptShort(at, attrIndex))
+      case at: AttrOneOptChar       => opt(e, a, at.op, at.vs, resOptChar, sortOneOptChar(at, attrIndex))
     }
     es
   }

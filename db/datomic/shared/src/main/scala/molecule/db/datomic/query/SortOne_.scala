@@ -1,16 +1,16 @@
 // GENERATED CODE ********************************
 package molecule.db.datomic.query
 
-import java.lang.{Boolean => jBoolean, Double => jDouble, Integer => jInteger, Long => jLong}
+import java.lang.{Boolean => jBoolean, Double => jDouble, Integer => jInteger, Long => jLong, Float => jFloat}
 import java.math.{BigDecimal => jBigDecimal, BigInteger => jBigInt}
 import java.net.URI
 import java.util.{Date, UUID}
 import molecule.boilerplate.ast.MoleculeModel._
 
 
-trait Sort_[Tpl] { self: Base[Tpl] =>
+trait SortOne_[Tpl] { self: Base[Tpl] =>
 
-  protected def sortString(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+  protected def sortOneString(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
     attr.sort.map { sort =>
       (
         sort.last.toString.toInt,
@@ -28,7 +28,7 @@ trait Sort_[Tpl] { self: Base[Tpl] =>
     }
   }
 
-  protected def sortInt(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+  protected def sortOneInt(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
     attr.sort.map { sort =>
       (
         sort.last.toString.toInt,
@@ -46,7 +46,7 @@ trait Sort_[Tpl] { self: Base[Tpl] =>
     }
   }
 
-  protected def sortLong(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+  protected def sortOneLong(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
     attr.sort.map { sort =>
       (
         sort.last.toString.toInt,
@@ -64,7 +64,25 @@ trait Sort_[Tpl] { self: Base[Tpl] =>
     }
   }
 
-  protected def sortFloat(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+  protected def sortOneFloat(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+    attr.sort.map { sort =>
+      (
+        sort.last.toString.toInt,
+        sort.head match {
+          case 'a' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            (a: Row, b: Row) =>
+              a.get(i).asInstanceOf[jFloat].compareTo(b.get(i).asInstanceOf[jFloat])
+          case 'd' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            (a: Row, b: Row) =>
+              b.get(i).asInstanceOf[jFloat].compareTo(a.get(i).asInstanceOf[jFloat])
+        }
+      )
+    }
+  }
+
+  protected def sortOneDouble(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
     attr.sort.map { sort =>
       (
         sort.last.toString.toInt,
@@ -82,25 +100,7 @@ trait Sort_[Tpl] { self: Base[Tpl] =>
     }
   }
 
-  protected def sortDouble(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
-    attr.sort.map { sort =>
-      (
-        sort.last.toString.toInt,
-        sort.head match {
-          case 'a' => (nestedIdsCount: Int) =>
-            val i = nestedIdsCount + attrIndex
-            (a: Row, b: Row) =>
-              a.get(i).asInstanceOf[jDouble].compareTo(b.get(i).asInstanceOf[jDouble])
-          case 'd' => (nestedIdsCount: Int) =>
-            val i = nestedIdsCount + attrIndex
-            (a: Row, b: Row) =>
-              b.get(i).asInstanceOf[jDouble].compareTo(a.get(i).asInstanceOf[jDouble])
-        }
-      )
-    }
-  }
-
-  protected def sortBoolean(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+  protected def sortOneBoolean(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
     attr.sort.map { sort =>
       (
         sort.last.toString.toInt,
@@ -118,7 +118,7 @@ trait Sort_[Tpl] { self: Base[Tpl] =>
     }
   }
 
-  protected def sortBigInt(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+  protected def sortOneBigInt(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
     attr.sort.map { sort =>
       (
         sort.last.toString.toInt,
@@ -136,7 +136,7 @@ trait Sort_[Tpl] { self: Base[Tpl] =>
     }
   }
 
-  protected def sortBigDecimal(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+  protected def sortOneBigDecimal(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
     attr.sort.map { sort =>
       (
         sort.last.toString.toInt,
@@ -154,7 +154,7 @@ trait Sort_[Tpl] { self: Base[Tpl] =>
     }
   }
 
-  protected def sortDate(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+  protected def sortOneDate(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
     attr.sort.map { sort =>
       (
         sort.last.toString.toInt,
@@ -172,7 +172,7 @@ trait Sort_[Tpl] { self: Base[Tpl] =>
     }
   }
 
-  protected def sortUUID(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+  protected def sortOneUUID(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
     attr.sort.map { sort =>
       (
         sort.last.toString.toInt,
@@ -190,7 +190,7 @@ trait Sort_[Tpl] { self: Base[Tpl] =>
     }
   }
 
-  protected def sortURI(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+  protected def sortOneURI(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
     attr.sort.map { sort =>
       (
         sort.last.toString.toInt,
@@ -208,7 +208,7 @@ trait Sort_[Tpl] { self: Base[Tpl] =>
     }
   }
 
-  protected def sortByte(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+  protected def sortOneByte(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
     attr.sort.map { sort =>
       (
         sort.last.toString.toInt,
@@ -226,7 +226,7 @@ trait Sort_[Tpl] { self: Base[Tpl] =>
     }
   }
 
-  protected def sortShort(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+  protected def sortOneShort(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
     attr.sort.map { sort =>
       (
         sort.last.toString.toInt,
@@ -244,7 +244,7 @@ trait Sort_[Tpl] { self: Base[Tpl] =>
     }
   }
 
-  protected def sortChar(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+  protected def sortOneChar(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
     attr.sort.map { sort =>
       (
         sort.last.toString.toInt,

@@ -45,18 +45,6 @@ object NestedSemantics extends DatomicTestSuite {
     }
 
 
-    //    "Attributes after inner nested not allowed" - refs { implicit conn =>
-    //      intercept[MoleculeException](
-    //        Ns.n.Rs1.*(R1.n1.Rs2.*(R2.n2).str2).query.get
-    //      ).message ==>
-    //        """Only tx meta data is allowed after nested structure. Found:
-    //          |  AttrOneManString(R2,str2,V,List(),None,None,None)""".stripMargin
-    //
-    //      intercept[MoleculeException](
-    //        Ns.n.Rs1.*?(R1.n1.Rs2.*?(R2.n2).str2).query.get
-    //      ).message ==>
-    //        """Only tx meta data is allowed after nested structure. Found:
-    //          |  AttrOneManString(R2,str2,V,List(),None,None,None)""".stripMargin
-    //    }
+
   }
 }
