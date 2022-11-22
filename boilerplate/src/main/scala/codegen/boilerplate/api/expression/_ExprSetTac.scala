@@ -22,7 +22,7 @@ object _ExprSetTac extends BoilerplateGenBase("ExprSetTac", "/api/expression") {
          |}
          |
          |trait ${fileName}_$arity[${`A..V, `}t, Ns[${`_, _`}]]
-         |  extends ${fileName}Ops_$arity[${`A..V, `}t, Ns] { //self: Ns[${`_, _`}] =>
+         |  extends ${fileName}Ops_$arity[${`A..V, `}t, Ns] {
          |  def apply  ()                                           : Ns[${`A..V, `}t] = _exprSetTac(NoValue, Nil)
          |  def apply  (v    : t, vs: t*            )               : Ns[${`A..V, `}t] = _exprSetTac(Appl   , (v +: vs).map(v => Set(v)))
          |  def apply  (vs   : Seq[t]               )(implicit x: X): Ns[${`A..V, `}t] = _exprSetTac(Appl   , vs.map(v => Set(v)))

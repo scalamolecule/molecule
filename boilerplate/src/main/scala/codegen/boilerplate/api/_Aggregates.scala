@@ -13,14 +13,15 @@ object _Aggregates extends BoilerplateGenBase("Aggregates", "/api") {
   }
 
   case class Trait(arity: Int) extends TemplateVals(arity) {
+    val pad = "   " * (arity - 1) + (if(arity < 10) "" else " ")
     val body =
       s"""
          |
          |trait ${fileName}Ops_$arity[${`A..V`}, t, Ns[${`_, _`}]] {
          |  protected def _aggrInt   (kw: Kw                ): Ns[${`A..U, `}Int   , Int   ] with SortAttrs_$arity[${`A..U, `}Int   , Int   , Ns]
          |  protected def _aggrDouble(kw: Kw                ): Ns[${`A..U, `}Double, Double] with SortAttrs_$arity[${`A..U, `}Double, Double, Ns]
-         |  protected def _aggrDist  (kw: Kw                ): Ns[${`A..U, `}Set[$V], t     ] with SortAttrs_$arity[${`A..U, `}Set[$V], t     , Ns]
-         |  protected def _aggrSet   (kw: Kw, n: Option[Int]): Ns[${`A..U, `}Set[t], t     ] with SortAttrs_$arity[${`A..U, `}Set[t], t     , Ns]
+         |  protected def _aggrDist  (kw: Kw                ): Ns[${`A..U, `}Set[$V], t     ]
+         |  protected def _aggrSet   (kw: Kw, n: Option[Int]): Ns[${`A..U, `}Set[t], t     ]
          |  protected def _aggrT     (kw: Kw                ): Ns[${`A..V`}     , t     ] with SortAttrs_$arity[${`A..V`}     , t     , Ns]
          |}
          |
@@ -33,11 +34,11 @@ object _Aggregates extends BoilerplateGenBase("Aggregates", "/api") {
          |  def apply(kw: sample)       : Ns[${`A..V`}     , t     ] with SortAttrs_$arity[${`A..V`}     , t     , Ns] = _aggrT(kw)
          |  def apply(kw: sum)          : Ns[${`A..V`}     , t     ] with SortAttrs_$arity[${`A..V`}     , t     , Ns] = _aggrT(kw)
          |  def apply(kw: median)       : Ns[${`A..V`}     , t     ] with SortAttrs_$arity[${`A..V`}     , t     , Ns] = _aggrT(kw)
-         |  def apply(kw: distinct)     : Ns[${`A..U, `}Set[$V], t     ] with SortAttrs_$arity[${`A..U, `}Set[$V], t     , Ns] = _aggrDist(kw)
-         |  def apply(kw: mins)         : Ns[${`A..U, `}Set[t], t     ] with SortAttrs_$arity[${`A..U, `}Set[t], t     , Ns] = _aggrSet(kw, Some(kw.n))
-         |  def apply(kw: maxs)         : Ns[${`A..U, `}Set[t], t     ] with SortAttrs_$arity[${`A..U, `}Set[t], t     , Ns] = _aggrSet(kw, Some(kw.n))
-         |  def apply(kw: rands)        : Ns[${`A..U, `}Set[t], t     ] with SortAttrs_$arity[${`A..U, `}Set[t], t     , Ns] = _aggrSet(kw, Some(kw.n))
-         |  def apply(kw: samples)      : Ns[${`A..U, `}Set[t], t     ] with SortAttrs_$arity[${`A..U, `}Set[t], t     , Ns] = _aggrSet(kw, Some(kw.n))
+         |  def apply(kw: distinct)     : Ns[${`A..U, `}Set[$V], t     ] $pad                                     = _aggrDist(kw)
+         |  def apply(kw: mins)         : Ns[${`A..U, `}Set[t], t     ] $pad                                     = _aggrSet(kw, Some(kw.n))
+         |  def apply(kw: maxs)         : Ns[${`A..U, `}Set[t], t     ] $pad                                     = _aggrSet(kw, Some(kw.n))
+         |  def apply(kw: rands)        : Ns[${`A..U, `}Set[t], t     ] $pad                                     = _aggrSet(kw, Some(kw.n))
+         |  def apply(kw: samples)      : Ns[${`A..U, `}Set[t], t     ] $pad                                     = _aggrSet(kw, Some(kw.n))
          |  def apply(kw: avg)          : Ns[${`A..U, `}Double, Double] with SortAttrs_$arity[${`A..U, `}Double, Double, Ns] = _aggrDouble(kw)
          |  def apply(kw: variance)     : Ns[${`A..U, `}Double, Double] with SortAttrs_$arity[${`A..U, `}Double, Double, Ns] = _aggrDouble(kw)
          |  def apply(kw: stddev)       : Ns[${`A..U, `}Double, Double] with SortAttrs_$arity[${`A..U, `}Double, Double, Ns] = _aggrDouble(kw)

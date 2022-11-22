@@ -9,7 +9,7 @@ trait ExprSetTacOps_0[t, Ns[_]] extends ExprBase {
 }
 
 trait ExprSetTac_0[t, Ns[_]]
-  extends ExprSetTacOps_0[t, Ns] { //self: Ns[_] =>
+  extends ExprSetTacOps_0[t, Ns] {
   def apply  ()                                           : Ns[t] = _exprSetTac(NoValue, Nil)
   def apply  (v    : t, vs: t*            )               : Ns[t] = _exprSetTac(Appl   , (v +: vs).map(v => Set(v)))
   def apply  (vs   : Seq[t]               )(implicit x: X): Ns[t] = _exprSetTac(Appl   , vs.map(v => Set(v)))
@@ -43,7 +43,7 @@ trait ExprSetTacOps_1[A, t, Ns[_, _]] extends ExprBase {
 }
 
 trait ExprSetTac_1[A, t, Ns[_, _]]
-  extends ExprSetTacOps_1[A, t, Ns] { //self: Ns[_, _] =>
+  extends ExprSetTacOps_1[A, t, Ns] {
   def apply  ()                                           : Ns[A, t] = _exprSetTac(NoValue, Nil)
   def apply  (v    : t, vs: t*            )               : Ns[A, t] = _exprSetTac(Appl   , (v +: vs).map(v => Set(v)))
   def apply  (vs   : Seq[t]               )(implicit x: X): Ns[A, t] = _exprSetTac(Appl   , vs.map(v => Set(v)))
@@ -77,7 +77,7 @@ trait ExprSetTacOps_2[A, B, t, Ns[_, _, _]] extends ExprBase {
 }
 
 trait ExprSetTac_2[A, B, t, Ns[_, _, _]]
-  extends ExprSetTacOps_2[A, B, t, Ns] { //self: Ns[_, _, _] =>
+  extends ExprSetTacOps_2[A, B, t, Ns] {
   def apply  ()                                           : Ns[A, B, t] = _exprSetTac(NoValue, Nil)
   def apply  (v    : t, vs: t*            )               : Ns[A, B, t] = _exprSetTac(Appl   , (v +: vs).map(v => Set(v)))
   def apply  (vs   : Seq[t]               )(implicit x: X): Ns[A, B, t] = _exprSetTac(Appl   , vs.map(v => Set(v)))
@@ -111,7 +111,7 @@ trait ExprSetTacOps_3[A, B, C, t, Ns[_, _, _, _]] extends ExprBase {
 }
 
 trait ExprSetTac_3[A, B, C, t, Ns[_, _, _, _]]
-  extends ExprSetTacOps_3[A, B, C, t, Ns] { //self: Ns[_, _, _, _] =>
+  extends ExprSetTacOps_3[A, B, C, t, Ns] {
   def apply  ()                                           : Ns[A, B, C, t] = _exprSetTac(NoValue, Nil)
   def apply  (v    : t, vs: t*            )               : Ns[A, B, C, t] = _exprSetTac(Appl   , (v +: vs).map(v => Set(v)))
   def apply  (vs   : Seq[t]               )(implicit x: X): Ns[A, B, C, t] = _exprSetTac(Appl   , vs.map(v => Set(v)))
@@ -145,7 +145,7 @@ trait ExprSetTacOps_4[A, B, C, D, t, Ns[_, _, _, _, _]] extends ExprBase {
 }
 
 trait ExprSetTac_4[A, B, C, D, t, Ns[_, _, _, _, _]]
-  extends ExprSetTacOps_4[A, B, C, D, t, Ns] { //self: Ns[_, _, _, _, _] =>
+  extends ExprSetTacOps_4[A, B, C, D, t, Ns] {
   def apply  ()                                           : Ns[A, B, C, D, t] = _exprSetTac(NoValue, Nil)
   def apply  (v    : t, vs: t*            )               : Ns[A, B, C, D, t] = _exprSetTac(Appl   , (v +: vs).map(v => Set(v)))
   def apply  (vs   : Seq[t]               )(implicit x: X): Ns[A, B, C, D, t] = _exprSetTac(Appl   , vs.map(v => Set(v)))
@@ -179,7 +179,7 @@ trait ExprSetTacOps_5[A, B, C, D, E, t, Ns[_, _, _, _, _, _]] extends ExprBase {
 }
 
 trait ExprSetTac_5[A, B, C, D, E, t, Ns[_, _, _, _, _, _]]
-  extends ExprSetTacOps_5[A, B, C, D, E, t, Ns] { //self: Ns[_, _, _, _, _, _] =>
+  extends ExprSetTacOps_5[A, B, C, D, E, t, Ns] {
   def apply  ()                                           : Ns[A, B, C, D, E, t] = _exprSetTac(NoValue, Nil)
   def apply  (v    : t, vs: t*            )               : Ns[A, B, C, D, E, t] = _exprSetTac(Appl   , (v +: vs).map(v => Set(v)))
   def apply  (vs   : Seq[t]               )(implicit x: X): Ns[A, B, C, D, E, t] = _exprSetTac(Appl   , vs.map(v => Set(v)))
@@ -213,7 +213,7 @@ trait ExprSetTacOps_6[A, B, C, D, E, F, t, Ns[_, _, _, _, _, _, _]] extends Expr
 }
 
 trait ExprSetTac_6[A, B, C, D, E, F, t, Ns[_, _, _, _, _, _, _]]
-  extends ExprSetTacOps_6[A, B, C, D, E, F, t, Ns] { //self: Ns[_, _, _, _, _, _, _] =>
+  extends ExprSetTacOps_6[A, B, C, D, E, F, t, Ns] {
   def apply  ()                                           : Ns[A, B, C, D, E, F, t] = _exprSetTac(NoValue, Nil)
   def apply  (v    : t, vs: t*            )               : Ns[A, B, C, D, E, F, t] = _exprSetTac(Appl   , (v +: vs).map(v => Set(v)))
   def apply  (vs   : Seq[t]               )(implicit x: X): Ns[A, B, C, D, E, F, t] = _exprSetTac(Appl   , vs.map(v => Set(v)))
@@ -247,7 +247,7 @@ trait ExprSetTacOps_7[A, B, C, D, E, F, G, t, Ns[_, _, _, _, _, _, _, _]] extend
 }
 
 trait ExprSetTac_7[A, B, C, D, E, F, G, t, Ns[_, _, _, _, _, _, _, _]]
-  extends ExprSetTacOps_7[A, B, C, D, E, F, G, t, Ns] { //self: Ns[_, _, _, _, _, _, _, _] =>
+  extends ExprSetTacOps_7[A, B, C, D, E, F, G, t, Ns] {
   def apply  ()                                           : Ns[A, B, C, D, E, F, G, t] = _exprSetTac(NoValue, Nil)
   def apply  (v    : t, vs: t*            )               : Ns[A, B, C, D, E, F, G, t] = _exprSetTac(Appl   , (v +: vs).map(v => Set(v)))
   def apply  (vs   : Seq[t]               )(implicit x: X): Ns[A, B, C, D, E, F, G, t] = _exprSetTac(Appl   , vs.map(v => Set(v)))
@@ -281,7 +281,7 @@ trait ExprSetTacOps_8[A, B, C, D, E, F, G, H, t, Ns[_, _, _, _, _, _, _, _, _]] 
 }
 
 trait ExprSetTac_8[A, B, C, D, E, F, G, H, t, Ns[_, _, _, _, _, _, _, _, _]]
-  extends ExprSetTacOps_8[A, B, C, D, E, F, G, H, t, Ns] { //self: Ns[_, _, _, _, _, _, _, _, _] =>
+  extends ExprSetTacOps_8[A, B, C, D, E, F, G, H, t, Ns] {
   def apply  ()                                           : Ns[A, B, C, D, E, F, G, H, t] = _exprSetTac(NoValue, Nil)
   def apply  (v    : t, vs: t*            )               : Ns[A, B, C, D, E, F, G, H, t] = _exprSetTac(Appl   , (v +: vs).map(v => Set(v)))
   def apply  (vs   : Seq[t]               )(implicit x: X): Ns[A, B, C, D, E, F, G, H, t] = _exprSetTac(Appl   , vs.map(v => Set(v)))
@@ -315,7 +315,7 @@ trait ExprSetTacOps_9[A, B, C, D, E, F, G, H, I, t, Ns[_, _, _, _, _, _, _, _, _
 }
 
 trait ExprSetTac_9[A, B, C, D, E, F, G, H, I, t, Ns[_, _, _, _, _, _, _, _, _, _]]
-  extends ExprSetTacOps_9[A, B, C, D, E, F, G, H, I, t, Ns] { //self: Ns[_, _, _, _, _, _, _, _, _, _] =>
+  extends ExprSetTacOps_9[A, B, C, D, E, F, G, H, I, t, Ns] {
   def apply  ()                                           : Ns[A, B, C, D, E, F, G, H, I, t] = _exprSetTac(NoValue, Nil)
   def apply  (v    : t, vs: t*            )               : Ns[A, B, C, D, E, F, G, H, I, t] = _exprSetTac(Appl   , (v +: vs).map(v => Set(v)))
   def apply  (vs   : Seq[t]               )(implicit x: X): Ns[A, B, C, D, E, F, G, H, I, t] = _exprSetTac(Appl   , vs.map(v => Set(v)))
@@ -349,7 +349,7 @@ trait ExprSetTacOps_10[A, B, C, D, E, F, G, H, I, J, t, Ns[_, _, _, _, _, _, _, 
 }
 
 trait ExprSetTac_10[A, B, C, D, E, F, G, H, I, J, t, Ns[_, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprSetTacOps_10[A, B, C, D, E, F, G, H, I, J, t, Ns] { //self: Ns[_, _, _, _, _, _, _, _, _, _, _] =>
+  extends ExprSetTacOps_10[A, B, C, D, E, F, G, H, I, J, t, Ns] {
   def apply  ()                                           : Ns[A, B, C, D, E, F, G, H, I, J, t] = _exprSetTac(NoValue, Nil)
   def apply  (v    : t, vs: t*            )               : Ns[A, B, C, D, E, F, G, H, I, J, t] = _exprSetTac(Appl   , (v +: vs).map(v => Set(v)))
   def apply  (vs   : Seq[t]               )(implicit x: X): Ns[A, B, C, D, E, F, G, H, I, J, t] = _exprSetTac(Appl   , vs.map(v => Set(v)))
@@ -383,7 +383,7 @@ trait ExprSetTacOps_11[A, B, C, D, E, F, G, H, I, J, K, t, Ns[_, _, _, _, _, _, 
 }
 
 trait ExprSetTac_11[A, B, C, D, E, F, G, H, I, J, K, t, Ns[_, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprSetTacOps_11[A, B, C, D, E, F, G, H, I, J, K, t, Ns] { //self: Ns[_, _, _, _, _, _, _, _, _, _, _, _] =>
+  extends ExprSetTacOps_11[A, B, C, D, E, F, G, H, I, J, K, t, Ns] {
   def apply  ()                                           : Ns[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetTac(NoValue, Nil)
   def apply  (v    : t, vs: t*            )               : Ns[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetTac(Appl   , (v +: vs).map(v => Set(v)))
   def apply  (vs   : Seq[t]               )(implicit x: X): Ns[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetTac(Appl   , vs.map(v => Set(v)))
@@ -417,7 +417,7 @@ trait ExprSetTacOps_12[A, B, C, D, E, F, G, H, I, J, K, L, t, Ns[_, _, _, _, _, 
 }
 
 trait ExprSetTac_12[A, B, C, D, E, F, G, H, I, J, K, L, t, Ns[_, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprSetTacOps_12[A, B, C, D, E, F, G, H, I, J, K, L, t, Ns] { //self: Ns[_, _, _, _, _, _, _, _, _, _, _, _, _] =>
+  extends ExprSetTacOps_12[A, B, C, D, E, F, G, H, I, J, K, L, t, Ns] {
   def apply  ()                                           : Ns[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetTac(NoValue, Nil)
   def apply  (v    : t, vs: t*            )               : Ns[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetTac(Appl   , (v +: vs).map(v => Set(v)))
   def apply  (vs   : Seq[t]               )(implicit x: X): Ns[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetTac(Appl   , vs.map(v => Set(v)))
@@ -451,7 +451,7 @@ trait ExprSetTacOps_13[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Ns[_, _, _, _, 
 }
 
 trait ExprSetTac_13[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Ns[_, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprSetTacOps_13[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Ns] { //self: Ns[_, _, _, _, _, _, _, _, _, _, _, _, _, _] =>
+  extends ExprSetTacOps_13[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Ns] {
   def apply  ()                                           : Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetTac(NoValue, Nil)
   def apply  (v    : t, vs: t*            )               : Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetTac(Appl   , (v +: vs).map(v => Set(v)))
   def apply  (vs   : Seq[t]               )(implicit x: X): Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetTac(Appl   , vs.map(v => Set(v)))
@@ -485,7 +485,7 @@ trait ExprSetTacOps_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Ns[_, _, _, 
 }
 
 trait ExprSetTac_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Ns[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprSetTacOps_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Ns] { //self: Ns[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _] =>
+  extends ExprSetTacOps_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Ns] {
   def apply  ()                                           : Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetTac(NoValue, Nil)
   def apply  (v    : t, vs: t*            )               : Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetTac(Appl   , (v +: vs).map(v => Set(v)))
   def apply  (vs   : Seq[t]               )(implicit x: X): Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetTac(Appl   , vs.map(v => Set(v)))
@@ -519,7 +519,7 @@ trait ExprSetTacOps_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Ns[_, _, 
 }
 
 trait ExprSetTac_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Ns[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprSetTacOps_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Ns] { //self: Ns[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _] =>
+  extends ExprSetTacOps_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Ns] {
   def apply  ()                                           : Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetTac(NoValue, Nil)
   def apply  (v    : t, vs: t*            )               : Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetTac(Appl   , (v +: vs).map(v => Set(v)))
   def apply  (vs   : Seq[t]               )(implicit x: X): Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetTac(Appl   , vs.map(v => Set(v)))
@@ -553,7 +553,7 @@ trait ExprSetTacOps_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Ns[_, 
 }
 
 trait ExprSetTac_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Ns[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprSetTacOps_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Ns] { //self: Ns[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _] =>
+  extends ExprSetTacOps_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Ns] {
   def apply  ()                                           : Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetTac(NoValue, Nil)
   def apply  (v    : t, vs: t*            )               : Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetTac(Appl   , (v +: vs).map(v => Set(v)))
   def apply  (vs   : Seq[t]               )(implicit x: X): Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetTac(Appl   , vs.map(v => Set(v)))
@@ -587,7 +587,7 @@ trait ExprSetTacOps_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Ns[
 }
 
 trait ExprSetTac_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Ns[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprSetTacOps_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Ns] { //self: Ns[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _] =>
+  extends ExprSetTacOps_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Ns] {
   def apply  ()                                           : Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetTac(NoValue, Nil)
   def apply  (v    : t, vs: t*            )               : Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetTac(Appl   , (v +: vs).map(v => Set(v)))
   def apply  (vs   : Seq[t]               )(implicit x: X): Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetTac(Appl   , vs.map(v => Set(v)))
@@ -621,7 +621,7 @@ trait ExprSetTacOps_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, 
 }
 
 trait ExprSetTac_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, Ns[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprSetTacOps_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, Ns] { //self: Ns[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _] =>
+  extends ExprSetTacOps_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, Ns] {
   def apply  ()                                           : Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetTac(NoValue, Nil)
   def apply  (v    : t, vs: t*            )               : Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetTac(Appl   , (v +: vs).map(v => Set(v)))
   def apply  (vs   : Seq[t]               )(implicit x: X): Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetTac(Appl   , vs.map(v => Set(v)))
@@ -655,7 +655,7 @@ trait ExprSetTacOps_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, 
 }
 
 trait ExprSetTac_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, Ns[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprSetTacOps_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, Ns] { //self: Ns[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _] =>
+  extends ExprSetTacOps_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, Ns] {
   def apply  ()                                           : Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetTac(NoValue, Nil)
   def apply  (v    : t, vs: t*            )               : Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetTac(Appl   , (v +: vs).map(v => Set(v)))
   def apply  (vs   : Seq[t]               )(implicit x: X): Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetTac(Appl   , vs.map(v => Set(v)))
@@ -689,7 +689,7 @@ trait ExprSetTacOps_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, 
 }
 
 trait ExprSetTac_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t, Ns[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprSetTacOps_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t, Ns] { //self: Ns[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _] =>
+  extends ExprSetTacOps_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t, Ns] {
   def apply  ()                                           : Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetTac(NoValue, Nil)
   def apply  (v    : t, vs: t*            )               : Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetTac(Appl   , (v +: vs).map(v => Set(v)))
   def apply  (vs   : Seq[t]               )(implicit x: X): Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetTac(Appl   , vs.map(v => Set(v)))
@@ -723,7 +723,7 @@ trait ExprSetTacOps_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, 
 }
 
 trait ExprSetTac_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t, Ns[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprSetTacOps_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t, Ns] { //self: Ns[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _] =>
+  extends ExprSetTacOps_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t, Ns] {
   def apply  ()                                           : Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetTac(NoValue, Nil)
   def apply  (v    : t, vs: t*            )               : Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetTac(Appl   , (v +: vs).map(v => Set(v)))
   def apply  (vs   : Seq[t]               )(implicit x: X): Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetTac(Appl   , vs.map(v => Set(v)))
@@ -757,7 +757,7 @@ trait ExprSetTacOps_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, 
 }
 
 trait ExprSetTac_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t, Ns[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprSetTacOps_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t, Ns] { //self: Ns[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _] =>
+  extends ExprSetTacOps_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t, Ns] {
   def apply  ()                                           : Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetTac(NoValue, Nil)
   def apply  (v    : t, vs: t*            )               : Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetTac(Appl   , (v +: vs).map(v => Set(v)))
   def apply  (vs   : Seq[t]               )(implicit x: X): Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetTac(Appl   , vs.map(v => Set(v)))

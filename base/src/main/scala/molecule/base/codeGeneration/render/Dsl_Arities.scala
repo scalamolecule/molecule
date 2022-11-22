@@ -104,8 +104,8 @@ case class Dsl_Arities(schema: MetaSchema, namespace: MetaNs, arity: Int)
     if (hasOne || hasSet) {
       res += s"$agg1[$tInt_](toInt    (elements, kw    )) with SortAttrs_$arity[$tInt_, $ns_0]"
       res += s"$agg2[$tDoub](toDouble (elements, kw    )) with SortAttrs_$arity[$tDoub, $ns_0]"
-      res += s"$agg3[$tDist](toSet    (elements, kw    )) with SortAttrs_$arity[$tDist, $ns_0]"
-      res += s"$agg4[$tSet_](toSet    (elements, kw, n )) with SortAttrs_$arity[$tSet_, $ns_0]"
+      res += s"$agg3[$tDist](toSet    (elements, kw    ))"
+      res += s"$agg4[$tSet_](toSet    (elements, kw, n ))"
       res += s"$agg5[$tA___](asIs     (elements, kw    )) with SortAttrs_$arity[$tA___, $ns_0]"
     }
     if (hasOne) {
@@ -114,8 +114,8 @@ case class Dsl_Arities(schema: MetaSchema, namespace: MetaNs, arity: Int)
       res += s"$one3[$tA___](addOne   (elements, op, vs))"
     }
     if (hasSet) {
-      res += s"$set1[$tA___](addSet   (elements, op, vs)) with SortAttrs_$arity[$tA___, $ns_0]"
-      res += s"$set2[$tA___](addOptSet(elements, op, vs)) with SortAttrs_$arity[$tA___, $ns_0]"
+      res += s"$set1[$tA___](addSet   (elements, op, vs))"
+      res += s"$set2[$tA___](addOptSet(elements, op, vs))"
       res += s"$set3[$tA___](addSet   (elements, op, vs))"
     }
     res += s"$one4[$tA___](addSort  (elements, sort  ))"
@@ -137,8 +137,7 @@ case class Dsl_Arities(schema: MetaSchema, namespace: MetaNs, arity: Int)
   val tacAttrs = tac.result().mkString("\n  ")
 
   val elements = "override val elements: Seq[Element]"
-//  val ns2      = if (arity == 22) "]" else if (arity == maxArity) s", Dummy${_1}]" else s", $ns_1]"
-  val modelOps = s"ModelOps_$arity[${`A..V, `}t, $ns_0]" // + ns2
+  val modelOps = s"ModelOps_$arity[${`A..V, `}t, $ns_0]"
 
   val resolvers = res.result().mkString("\n  ")
 
@@ -158,7 +157,7 @@ case class Dsl_Arities(schema: MetaSchema, namespace: MetaNs, arity: Int)
   ).mkString("\n\n  ", "\n  ", "")
 
 
-  def get =
+  def get: String =
     s"""class $ns_0[${`A..V, `}t]($elements) extends $ns with $modelOps {
        |  $manAttrs$optAttrs$tacAttrs
        |

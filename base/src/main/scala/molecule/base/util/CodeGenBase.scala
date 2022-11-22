@@ -24,7 +24,6 @@ trait CodeGenBase {
     "String" -> "String",
     "Int" -> "jInteger",
     "Long" -> "jLong",
-//    "Float" -> "jDouble",
     "Float" -> "jFloat",
     "Double" -> "jDouble",
     "Boolean" -> "jBoolean",

@@ -14,162 +14,227 @@ object SaveCardSet extends DatomicTestSuite {
   lazy val tests = Tests {
 
     "mandatory" - types { implicit conn =>
-      // Can't save multiple values (use insert for that)
+      // Can't save multiple Sets of values (use insert for that)
       intercept[MoleculeException] {
-        Ns.n(1, 2).save.transact
-      }.message ==> "Can only save one value for attribute `:Ns/n`. Found: ArraySeq(1, 2)"
+        Ns.ints(Set(1), Set(2)).save.transact
+      }.message ==> "Can only save one Set of values for Set attribute `:Ns/ints`. Found: ArraySeq(Set(1), Set(2))"
 
       intercept[MoleculeException] {
-        Ns.n(Seq(1, 2)).save.transact
-      }.message ==> "Can only save one value for attribute `:Ns/n`. Found: List(1, 2)"
+        Ns.ints(Seq(Set(1), Set(2))).save.transact
+      }.message ==> "Can only save one Set of values for Set attribute `:Ns/ints`. Found: List(Set(1), Set(2))"
 
-      // Saving empty list of values is ignored
-      Ns.int(Seq.empty[Int]).save.transact
-      Ns.int.query.get ==> List()
-
-
-      Ns.string(string1).save.transact
-      Ns.string(Seq(string2)).save.transact
-
-      Ns.int(int1).save.transact
-      Ns.int(Seq(int2)).save.transact
-
-      Ns.long(long1).save.transact
-      Ns.long(Seq(long2)).save.transact
-
-      Ns.float(float1).save.transact
-      Ns.float(Seq(float2)).save.transact
-
-      Ns.double(double1).save.transact
-      Ns.double(Seq(double2)).save.transact
-
-      Ns.boolean(boolean1).save.transact
-      Ns.boolean(Seq(boolean2)).save.transact
-
-      Ns.bigInt(bigInt1).save.transact
-      Ns.bigInt(Seq(bigInt2)).save.transact
-
-      Ns.bigDecimal(bigDecimal1).save.transact
-      Ns.bigDecimal(Seq(bigDecimal2)).save.transact
-
-      Ns.date(date1).save.transact
-      Ns.date(Seq(date2)).save.transact
-
-      Ns.uuid(uuid1).save.transact
-      Ns.uuid(Seq(uuid2)).save.transact
-
-      Ns.uri(uri1).save.transact
-      Ns.uri(Seq(uri2)).save.transact
-
-      Ns.char(char1).save.transact
-      Ns.char(Seq(char2)).save.transact
-
-      Ns.byte(byte1).save.transact
-      Ns.byte(Seq(byte2)).save.transact
-
-      Ns.short(short1).save.transact
-      Ns.short(Seq(short2)).save.transact
+      // Saving empty list of Sets is ignored
+      Ns.ints(Seq.empty[Set[Int]]).save.transact
+      Ns.ints.query.get ==> List()
 
 
-      Ns.string.a1.query.get ==> List(string1, string2)
-      Ns.int.a1.query.get ==> List(int1, int2)
-      Ns.long.a1.query.get ==> List(long1, long2)
-      Ns.float.a1.query.get ==> List(float1, float2)
-      Ns.double.a1.query.get ==> List(double1, double2)
-      Ns.boolean.a1.query.get ==> List(boolean2, boolean1)
-      Ns.bigInt.a1.query.get ==> List(bigInt1, bigInt2)
-      Ns.bigDecimal.a1.query.get ==> List(bigDecimal1, bigDecimal2)
-      Ns.date.a1.query.get ==> List(date1, date2)
-      Ns.uuid.a1.query.get ==> List(uuid1, uuid2)
-      Ns.uri.a1.query.get ==> List(uri1, uri2)
-      Ns.char.a1.query.get ==> List(char1, char2)
-      Ns.byte.a1.query.get ==> List(byte1, byte2)
-      Ns.short.a1.query.get ==> List(short1, short2)
+      Ns.n(1).strings(Set(string1, string2)).save.transact
+      Ns.n(2).strings(Seq(Set(string1, string3))).save.transact
+
+      Ns.n(1).ints(Set(int1, int2)).save.transact
+      Ns.n(2).ints(Seq(Set(int1, int3))).save.transact
+
+      Ns.n(1).longs(Set(long1, long2)).save.transact
+      Ns.n(2).longs(Seq(Set(long1, long3))).save.transact
+
+      Ns.n(1).floats(Set(float1, float2)).save.transact
+      Ns.n(2).floats(Seq(Set(float1, float3))).save.transact
+
+      Ns.n(1).doubles(Set(double1, double2)).save.transact
+      Ns.n(2).doubles(Seq(Set(double1, double3))).save.transact
+
+      Ns.n(1).booleans(Set(boolean0)).save.transact
+      Ns.n(2).booleans(Seq(Set(boolean0, boolean1))).save.transact
+
+      Ns.n(1).bigInts(Set(bigInt1, bigInt2)).save.transact
+      Ns.n(2).bigInts(Seq(Set(bigInt1, bigInt3))).save.transact
+
+      Ns.n(1).bigDecimals(Set(bigDecimal1, bigDecimal2)).save.transact
+      Ns.n(2).bigDecimals(Seq(Set(bigDecimal1, bigDecimal3))).save.transact
+
+      Ns.n(1).dates(Set(date1, date2)).save.transact
+      Ns.n(2).dates(Seq(Set(date1, date3))).save.transact
+
+      Ns.n(1).uuids(Set(uuid1, uuid2)).save.transact
+      Ns.n(2).uuids(Seq(Set(uuid1, uuid3))).save.transact
+
+      Ns.n(1).uris(Set(uri1, uri2)).save.transact
+      Ns.n(2).uris(Seq(Set(uri1, uri3))).save.transact
+
+      Ns.n(1).bytes(Set(byte1, byte2)).save.transact
+      Ns.n(2).bytes(Seq(Set(byte1, byte3))).save.transact
+
+      Ns.n(1).shorts(Set(short1, short2)).save.transact
+      Ns.n(2).shorts(Seq(Set(short1, short3))).save.transact
+
+      Ns.n(1).chars(Set(char1, char2)).save.transact
+      Ns.n(2).chars(Seq(Set(char1, char3))).save.transact
+
+
+      Ns.n.strings.query.get ==> List((1, Set(string1, string2)), (2, Set(string1, string3)))
+      Ns.n.ints.query.get ==> List((1, Set(int1, int2)), (2, Set(int1, int3)))
+      Ns.n.longs.query.get ==> List((1, Set(long1, long2)), (2, Set(long1, long3)))
+      Ns.n.floats.query.get ==> List((1, Set(float1, float2)), (2, Set(float1, float3)))
+      Ns.n.doubles.query.get ==> List((1, Set(double1, double2)), (2, Set(double1, double3)))
+      Ns.n.booleans.query.get ==> List((1, Set(boolean0)), (2, Set(boolean0, boolean1)))
+      Ns.n.bigInts.query.get ==> List((1, Set(bigInt1, bigInt2)), (2, Set(bigInt1, bigInt3)))
+      Ns.n.bigDecimals.query.get ==> List((1, Set(bigDecimal1, bigDecimal2)), (2, Set(bigDecimal1, bigDecimal3)))
+      Ns.n.dates.query.get ==> List((1, Set(date1, date2)), (2, Set(date1, date3)))
+      Ns.n.uuids.query.get ==> List((1, Set(uuid1, uuid2)), (2, Set(uuid1, uuid3)))
+      Ns.n.uris.query.get ==> List((1, Set(uri1, uri2)), (2, Set(uri1, uri3)))
+      Ns.n.bytes.query.get ==> List((1, Set(byte1, byte2)), (2, Set(byte1, byte3)))
+      Ns.n.shorts.query.get ==> List((1, Set(short1, short2)), (2, Set(short1, short3)))
+      Ns.n.chars.query.get ==> List((1, Set(char1, char2)), (2, Set(char1, char3)))
     }
 
 
     "optional" - types { implicit conn =>
-      // Can't save multiple values (use insert for that)
+      // Can't save multiple Sets of values (use insert for that)
       intercept[MoleculeException] {
-        Ns.n_?(Some(Seq(2, 3))).save.transact
-      }.message ==> "Can only save one value for optional attribute `:Ns/n`. Found: List(2, 3)"
+        Ns.ints_?(Some(Seq(Set(1), Set(2)))).save.transact
+      }.message ==> "Can only save one Set of values for optional Set attribute `:Ns/ints`. Found: List(Set(1), Set(2))"
 
-      // Empty option of values saves nothing
-      Ns.n_?(Option.empty[Seq[Int]]).save.transact
-      Ns.n.query.get ==> List()
-
-
-      Ns.n(1).string_?(Some(string1)).save.transact
-      Ns.n(1).string_?(Some(Seq(string2))).save.transact
-      Ns.n(1).string_?(Option.empty[String]).save.transact
-
-      Ns.n(2).int_?(Some(int1)).save.transact
-      Ns.n(2).int_?(Some(Seq(int2))).save.transact
-      Ns.n(2).int_?(Option.empty[Int]).save.transact
-
-      Ns.n(3).long_?(Some(long1)).save.transact
-      Ns.n(3).long_?(Some(Seq(long2))).save.transact
-      Ns.n(3).long_?(Option.empty[Long]).save.transact
-
-      Ns.n(4).float_?(Some(float1)).save.transact
-      Ns.n(4).float_?(Some(Seq(float2))).save.transact
-      Ns.n(4).float_?(Option.empty[Float]).save.transact
-
-      Ns.n(5).double_?(Some(double1)).save.transact
-      Ns.n(5).double_?(Some(Seq(double2))).save.transact
-      Ns.n(5).double_?(Option.empty[Double]).save.transact
-
-      Ns.n(6).boolean_?(Some(boolean1)).save.transact
-      Ns.n(6).boolean_?(Some(Seq(boolean2))).save.transact
-      Ns.n(6).boolean_?(Option.empty[Boolean]).save.transact
-
-      Ns.n(7).bigInt_?(Some(bigInt1)).save.transact
-      Ns.n(7).bigInt_?(Some(Seq(bigInt2))).save.transact
-      Ns.n(7).bigInt_?(Option.empty[BigInt]).save.transact
-
-      Ns.n(8).bigDecimal_?(Some(bigDecimal1)).save.transact
-      Ns.n(8).bigDecimal_?(Some(Seq(bigDecimal2))).save.transact
-      Ns.n(8).bigDecimal_?(Option.empty[BigDecimal]).save.transact
-
-      Ns.n(9).date_?(Some(date1)).save.transact
-      Ns.n(9).date_?(Some(Seq(date2))).save.transact
-      Ns.n(9).date_?(Option.empty[Date]).save.transact
-
-      Ns.n(10).uuid_?(Some(uuid1)).save.transact
-      Ns.n(10).uuid_?(Some(Seq(uuid2))).save.transact
-      Ns.n(10).uuid_?(Option.empty[UUID]).save.transact
-
-      Ns.n(11).uri_?(Some(uri1)).save.transact
-      Ns.n(11).uri_?(Some(Seq(uri2))).save.transact
-      Ns.n(11).uri_?(Option.empty[URI]).save.transact
-
-      Ns.n(12).byte_?(Some(byte1)).save.transact
-      Ns.n(12).byte_?(Some(Seq(byte2))).save.transact
-      Ns.n(12).byte_?(Option.empty[Byte]).save.transact
-
-      Ns.n(13).short_?(Some(short1)).save.transact
-      Ns.n(13).short_?(Some(Seq(short2))).save.transact
-      Ns.n(13).short_?(Option.empty[Short]).save.transact
-
-      Ns.n(14).char_?(Some(char1)).save.transact
-      Ns.n(14).char_?(Some(Seq(char2))).save.transact
-      Ns.n(14).char_?(Option.empty[Char]).save.transact
+      // Empty option of Set of values saves nothing
+      Ns.ints_?(Option.empty[Seq[Set[Int]]]).save.transact
+      Ns.ints.query.get ==> List()
 
 
-      Ns.n_(1).string_?.a1.query.get ==> List(None, Some(string1), Some(string2))
-      Ns.n_(2).int_?.a1.query.get ==> List(None, Some(int1), Some(int2))
-      Ns.n_(3).long_?.a1.query.get ==> List(None, Some(long1), Some(long2))
-      Ns.n_(4).float_?.a1.query.get ==> List(None, Some(float1), Some(float2))
-      Ns.n_(5).double_?.a1.query.get ==> List(None, Some(double1), Some(double2))
-      Ns.n_(6).boolean_?.a1.query.get ==> List(None, Some(boolean2), Some(boolean1))
-      Ns.n_(7).bigInt_?.a1.query.get ==> List(None, Some(bigInt1), Some(bigInt2))
-      Ns.n_(8).bigDecimal_?.a1.query.get ==> List(None, Some(bigDecimal1), Some(bigDecimal2))
-      Ns.n_(9).date_?.a1.query.get ==> List(None, Some(date1), Some(date2))
-      Ns.n_(10).uuid_?.a1.query.get ==> List(None, Some(uuid1), Some(uuid2))
-      Ns.n_(11).uri_?.a1.query.get ==> List(None, Some(uri1), Some(uri2))
-      Ns.n_(12).byte_?.a1.query.get ==> List(None, Some(byte1), Some(byte2))
-      Ns.n_(13).short_?.a1.query.get ==> List(None, Some(short1), Some(short2))
-      Ns.n_(14).char_?.a1.query.get ==> List(None, Some(char1), Some(char2))
+      Ns.int(1).n(1).strings_?(Some(Set(string1))).save.transact
+      Ns.int(1).n(2).strings_?(Some(Seq(Set(string2, string3)))).save.transact
+      Ns.int(1).n(3).strings_?(Option.empty[Set[String]]).save.transact
+
+      Ns.int(2).n(1).ints_?(Some(Set(int1))).save.transact
+      Ns.int(2).n(2).ints_?(Some(Seq(Set(int2, int3)))).save.transact
+      Ns.int(2).n(3).ints_?(Option.empty[Set[Int]]).save.transact
+
+      Ns.int(3).n(1).longs_?(Some(Set(long1))).save.transact
+      Ns.int(3).n(2).longs_?(Some(Seq(Set(long2, long3)))).save.transact
+      Ns.int(3).n(3).longs_?(Option.empty[Set[Long]]).save.transact
+
+      Ns.int(4).n(1).floats_?(Some(Set(float1))).save.transact
+      Ns.int(4).n(2).floats_?(Some(Seq(Set(float2, float3)))).save.transact
+      Ns.int(4).n(3).floats_?(Option.empty[Set[Float]]).save.transact
+
+      Ns.int(5).n(1).doubles_?(Some(Set(double1))).save.transact
+      Ns.int(5).n(2).doubles_?(Some(Seq(Set(double2, double3)))).save.transact
+      Ns.int(5).n(3).doubles_?(Option.empty[Set[Double]]).save.transact
+
+      Ns.int(6).n(1).booleans_?(Some(Set(boolean0))).save.transact
+      Ns.int(6).n(2).booleans_?(Some(Seq(Set(boolean0, boolean1)))).save.transact
+      Ns.int(6).n(3).booleans_?(Option.empty[Set[Boolean]]).save.transact
+
+      Ns.int(7).n(1).bigInts_?(Some(Set(bigInt1))).save.transact
+      Ns.int(7).n(2).bigInts_?(Some(Seq(Set(bigInt2, bigInt3)))).save.transact
+      Ns.int(7).n(3).bigInts_?(Option.empty[Set[BigInt]]).save.transact
+
+      Ns.int(8).n(1).bigDecimals_?(Some(Set(bigDecimal1))).save.transact
+      Ns.int(8).n(2).bigDecimals_?(Some(Seq(Set(bigDecimal2, bigDecimal3)))).save.transact
+      Ns.int(8).n(3).bigDecimals_?(Option.empty[Set[BigDecimal]]).save.transact
+
+      Ns.int(9).n(1).dates_?(Some(Set(date1))).save.transact
+      Ns.int(9).n(2).dates_?(Some(Seq(Set(date2, date3)))).save.transact
+      Ns.int(9).n(3).dates_?(Option.empty[Set[Date]]).save.transact
+
+      Ns.int(10).n(1).uuids_?(Some(Set(uuid1))).save.transact
+      Ns.int(10).n(2).uuids_?(Some(Seq(Set(uuid2, uuid3)))).save.transact
+      Ns.int(10).n(3).uuids_?(Option.empty[Set[UUID]]).save.transact
+
+      Ns.int(11).n(1).uris_?(Some(Set(uri1))).save.transact
+      Ns.int(11).n(2).uris_?(Some(Seq(Set(uri2, uri3)))).save.transact
+      Ns.int(11).n(3).uris_?(Option.empty[Set[URI]]).save.transact
+
+      Ns.int(12).n(1).bytes_?(Some(Set(byte1))).save.transact
+      Ns.int(12).n(2).bytes_?(Some(Seq(Set(byte2, byte3)))).save.transact
+      Ns.int(12).n(3).bytes_?(Option.empty[Set[Byte]]).save.transact
+
+      Ns.int(13).n(1).shorts_?(Some(Set(short1))).save.transact
+      Ns.int(13).n(2).shorts_?(Some(Seq(Set(short2, short3)))).save.transact
+      Ns.int(13).n(3).shorts_?(Option.empty[Set[Short]]).save.transact
+
+      Ns.int(14).n(1).chars_?(Some(Set(char1))).save.transact
+      Ns.int(14).n(2).chars_?(Some(Seq(Set(char2, char3)))).save.transact
+      Ns.int(14).n(3).chars_?(Option.empty[Set[Char]]).save.transact
+
+
+      Ns.int_(1).n.a1.strings_?.query.get ==> List(
+        (1, Some(Set(string1))),
+        (2, Some(Set(string2, string3))),
+        (3, None)
+      )
+      Ns.int_(2).n.a1.ints_?.query.get ==> List(
+        (1, Some(Set(int1))),
+        (2, Some(Set(int2, int3))),
+        (3, None)
+      )
+      Ns.int_(3).n.a1.longs_?.query.get ==> List(
+        (1, Some(Set(long1))),
+        (2, Some(Set(long2, long3))),
+        (3, None)
+      )
+      Ns.int_(4).n.a1.floats_?.query.get ==> List(
+        (1, Some(Set(float1))),
+        (2, Some(Set(float2, float3))),
+        (3, None)
+      )
+      Ns.int_(5).n.a1.doubles_?.query.get ==> List(
+        (1, Some(Set(double1))),
+        (2, Some(Set(double2, double3))),
+        (3, None)
+      )
+
+      // todo: Bug in Datomic: False Set values not returned
+      Ns.int_(6).n.a1.booleans_?.query.get ==> List(
+        (1, None),
+        (2, Some(Set(boolean1))),
+        (3, None)
+      )
+      // Should be:
+      //      Ns.int_(6).n.a1.booleans_?.query.get ==> List(
+      //        (1, Some(Set(boolean0))),
+      //        (2, Some(Set(boolean0, boolean1))),
+      //        (3, None)
+      //      )
+
+      Ns.int_(7).n.a1.bigInts_?.query.get ==> List(
+        (1, Some(Set(bigInt1))),
+        (2, Some(Set(bigInt2, bigInt3))),
+        (3, None)
+      )
+      Ns.int_(8).n.a1.bigDecimals_?.query.get ==> List(
+        (1, Some(Set(bigDecimal1))),
+        (2, Some(Set(bigDecimal2, bigDecimal3))),
+        (3, None)
+      )
+      Ns.int_(9).n.a1.dates_?.query.get ==> List(
+        (1, Some(Set(date1))),
+        (2, Some(Set(date2, date3))),
+        (3, None)
+      )
+      Ns.int_(10).n.a1.uuids_?.query.get ==> List(
+        (1, Some(Set(uuid1))),
+        (2, Some(Set(uuid2, uuid3))),
+        (3, None)
+      )
+      Ns.int_(11).n.a1.uris_?.query.get ==> List(
+        (1, Some(Set(uri1))),
+        (2, Some(Set(uri2, uri3))),
+        (3, None)
+      )
+      Ns.int_(12).n.a1.bytes_?.query.get ==> List(
+        (1, Some(Set(byte1))),
+        (2, Some(Set(byte2, byte3))),
+        (3, None)
+      )
+      Ns.int_(13).n.a1.shorts_?.query.get ==> List(
+        (1, Some(Set(short1))),
+        (2, Some(Set(short2, short3))),
+        (3, None)
+      )
+      Ns.int_(14).n.a1.chars_?.query.get ==> List(
+        (1, Some(Set(char1))),
+        (2, Some(Set(char2, char3))),
+        (3, None)
+      )
     }
   }
 }

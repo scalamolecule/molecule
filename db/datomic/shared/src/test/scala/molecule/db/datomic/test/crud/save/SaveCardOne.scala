@@ -24,8 +24,8 @@ object SaveCardOne extends DatomicTestSuite {
       }.message ==> "Can only save one value for attribute `:Ns/n`. Found: List(1, 2)"
 
       // Saving empty list of values is ignored
-      Ns.int(Seq.empty[Int]).save.transact
-      Ns.int.query.get ==> List()
+      Ns.n(Seq.empty[Int]).save.transact
+      Ns.n.query.get ==> List()
 
 
       Ns.string(string1).save.transact
@@ -61,14 +61,14 @@ object SaveCardOne extends DatomicTestSuite {
       Ns.uri(uri1).save.transact
       Ns.uri(Seq(uri2)).save.transact
 
-      Ns.char(char1).save.transact
-      Ns.char(Seq(char2)).save.transact
-
       Ns.byte(byte1).save.transact
       Ns.byte(Seq(byte2)).save.transact
 
       Ns.short(short1).save.transact
       Ns.short(Seq(short2)).save.transact
+
+      Ns.char(char1).save.transact
+      Ns.char(Seq(char2)).save.transact
 
 
       Ns.string.a1.query.get ==> List(string1, string2)
@@ -82,17 +82,17 @@ object SaveCardOne extends DatomicTestSuite {
       Ns.date.a1.query.get ==> List(date1, date2)
       Ns.uuid.a1.query.get ==> List(uuid1, uuid2)
       Ns.uri.a1.query.get ==> List(uri1, uri2)
-      Ns.char.a1.query.get ==> List(char1, char2)
       Ns.byte.a1.query.get ==> List(byte1, byte2)
       Ns.short.a1.query.get ==> List(short1, short2)
+      Ns.char.a1.query.get ==> List(char1, char2)
     }
 
 
     "optional" - types { implicit conn =>
       // Can't save multiple values (use insert for that)
       intercept[MoleculeException] {
-        Ns.n_?(Some(Seq(2, 3))).save.transact
-      }.message ==> "Can only save one value for optional attribute `:Ns/n`. Found: List(2, 3)"
+        Ns.n_?(Some(Seq(1, 2))).save.transact
+      }.message ==> "Can only save one value for optional attribute `:Ns/n`. Found: List(1, 2)"
 
       // Empty option of values saves nothing
       Ns.n_?(Option.empty[Seq[Int]]).save.transact
