@@ -11,6 +11,7 @@ object Refs extends DataModel(10) {
     val ints = setInt
     val strs = setString
     val r1   = one[R1]
+    val r1a  = one[R1]
     val rs1  = many[R1]
   }
 
@@ -21,6 +22,7 @@ object Refs extends DataModel(10) {
     val ints1 = setInt
     val strs1 = setString
     val r2    = one[R2]
+    val r2a   = one[R2]
     val rs2   = many[R2]
   }
 
@@ -31,6 +33,7 @@ object Refs extends DataModel(10) {
     val ints2 = setInt
     val strs2 = setString
     val r3    = one[R3]
+    val r3a   = one[R3]
     val rs3   = many[R3]
   }
 

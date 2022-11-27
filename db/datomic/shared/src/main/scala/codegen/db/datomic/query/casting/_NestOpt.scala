@@ -1,14 +1,14 @@
-package codegen.db.datomic.query
+package codegen.db.datomic.query.casting
 
 import codegen.DatomicGenBase
 
-object _NestOpt extends DatomicGenBase("NestOpt", "/query") {
+object _NestOpt extends DatomicGenBase("NestOpt", "/query/casting") {
 
   val content = {
     val pullBranch0_X    = (1 to 21).map(i => s"case $i => pullBranch0_$i(casts)").mkString("\n      ")
     val resolveMethods = (1 to 21).map(arity => Chunk(arity).body).mkString("\n")
     s"""// GENERATED CODE ********************************
-       |package molecule.db.datomic.query
+       |package molecule.db.datomic.query.casting
        |
        |import java.util.{Iterator => jIterator, Map => jMap}
        |import molecule.core.query.Model2Query
@@ -52,8 +52,13 @@ object _NestOpt extends DatomicGenBase("NestOpt", "/query") {
        |
        |  final protected lazy val pullRow2tpl: Row => Tpl = {
        |    casts.length match {
+       |      case 0 => pullBranch0_0
        |      $pullBranch0_X
        |    }
+       |  }
+       |
+       |  final private def pullBranch0_0: Row => Tpl = {
+       |    (row: Row) => pullBranch1(row.get(0).asInstanceOf[jMap[_, _]].values.iterator).asInstanceOf[Tpl]
        |  }
        |$resolveMethods
        |}""".stripMargin

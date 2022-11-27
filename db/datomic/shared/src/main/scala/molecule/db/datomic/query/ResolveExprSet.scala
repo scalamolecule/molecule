@@ -118,7 +118,7 @@ trait ResolveExprSet[Tpl] { self: SortOne_[Tpl] with Base[Tpl] =>
       case Ge        => compare(e, a, v, sets.head.head, ">=", res.tpe, res.toDatalog)
       case NoValue   => noValue(e, a)
       case Fn(kw, _) => aggr(e, a, v, kw, res)
-      case other     => unexpected(other)
+      case other     => unexpectedOp(other)
     }
   }
 
@@ -141,7 +141,7 @@ trait ResolveExprSet[Tpl] { self: SortOne_[Tpl] with Base[Tpl] =>
       case Gt    => optCompare(e, a, v, optSets, ">", resOpt.tpe, resOpt.toDatalog)
       case Le    => optCompare(e, a, v, optSets, "<=", resOpt.tpe, resOpt.toDatalog)
       case Ge    => optCompare(e, a, v, optSets, ">=", resOpt.tpe, resOpt.toDatalog)
-      case other => unexpected(other)
+      case other => unexpectedOp(other)
     }
   }
 

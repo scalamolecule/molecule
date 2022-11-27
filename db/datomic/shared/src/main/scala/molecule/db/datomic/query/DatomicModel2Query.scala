@@ -3,6 +3,7 @@ package molecule.db.datomic.query
 import molecule.base.util.exceptions.MoleculeException
 import molecule.boilerplate.ast.MoleculeModel._
 import molecule.core.query.Model2Query
+import molecule.db.datomic.query.casting._
 import scala.annotation.tailrec
 import scala.collection.mutable.ArrayBuffer
 
@@ -20,6 +21,7 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
     with CastNestedLeaf_[Tpl]
     with CastNestedOptBranch_[Tpl]
     with CastNestedOptLeaf_[Tpl]
+    with CastNestedOptLeafFlatten_[Tpl]
     with Nest[Tpl]
     with NestOpt_[Tpl] {
 
@@ -96,16 +98,17 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
     import LambdasOne._
     @tailrec
     def addPullAttrs(
-      refAttr: String,
       elements: Seq[Element],
       level: Int,
-      acc: String = ""
-    ): (String, Option[NestedOpt]) = {
+      acc: String
+    ): (String, Option[Element], Seq[Element]) = {
       val i = "  " * (level + 5)
       elements match {
         case head :: tail =>
           head match {
-            case a: AttrOneMan =>
+            case a: Attr if a.op != V =>
+              throw MoleculeException("Expressions not allowed in optional nested data structure. Found:\n" + a)
+            case a: AttrOneMan        =>
               pullCasts += (a match {
                 case _: AttrOneManString     => it2String
                 case _: AttrOneManInt        => it2Int
@@ -122,8 +125,9 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
                 case _: AttrOneManShort      => it2Short
                 case _: AttrOneManChar       => it2Char
               })
-              val pull1 = s"\n$i(:${a.ns}/${a.attr} :limit nil)"
-              addPullAttrs(refAttr, tail, level, acc + pull1)
+              //              val pull1 = s"\n$i(:${a.ns}/${a.attr} :limit nil)"
+              val pull1 = s"""\n$i(:${a.ns}/${a.attr} :limit nil :default "$none")"""
+              addPullAttrs(tail, level, acc + pull1)
 
             case a: AttrOneOpt =>
               pullCasts += (a match {
@@ -142,34 +146,68 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
                 case _: AttrOneOptShort      => it2OptShort
                 case _: AttrOneOptChar       => it2OptChar
               })
-              val pull1 = s"""\n$i(:${a.ns}/${a.attr} :limit nil :default "__none__")"""
-              addPullAttrs(refAttr, tail, level, acc + pull1)
+              val pull1 = s"""\n$i(:${a.ns}/${a.attr} :limit nil :default "$none")"""
+              addPullAttrs(tail, level, acc + pull1)
 
-            case nestedOpt: NestedOpt => (acc, Some(nestedOpt))
+            case ref: Ref             => (acc, Some(ref), tail)
+            case backRef: BackRef     => (acc, Some(backRef), tail)
+            case nestedOpt: NestedOpt => (acc, Some(nestedOpt), Nil)
             case _: Nested            => noMixedNestedModes
-            case other                => throw MoleculeException(
+            case a: AttrOneTac =>
+              throw MoleculeException("Tacit attributes not allowed in optional nested data structure. Found:\n" + a)
+            case other         => throw MoleculeException(
               "Unexpected element in optional nested molecule: " + other
             )
           }
-        case Nil          => (acc, None)
+        case Nil          => (acc, None, Nil)
       }
     }
-    def resolvePull(ref: Ref, elements: Seq[Element], level: Int): String = {
+    def resolvePullRef(ref: Ref, elements: Seq[Element], level: Int, append: String): (String, String) = {
       val indent  = "  " * (level + 5)
       val refAttr = s":${ref.ns}/${ref.refAttr}"
-      addPullAttrs(refAttr, elements, level + 1, "") match {
-        case (pullAttrs, None) =>
-          s"""\n$indent{($refAttr :limit nil :default "__none__") [$pullAttrs]}"""
+      addPullAttrs(elements, level + 1, "") match {
+        case (acc1, None, Nil) =>
+          val res = s"""\n$indent{($refAttr :limit nil :default "$none") [$acc1]}"""
+          (res, append)
 
-        case (pullAttrs, Some(NestedOpt(ref1, elements1))) =>
+        case (acc1, Some(ref1: Ref), tail) =>
+          flatten = true
+          val (attrs, append1) = resolvePullRef(ref1, tail, level + 1, "")
+          val res              = s"""\n$indent{($refAttr :limit nil :default "$none") [$acc1$attrs]}"""
+          (res, append + append1)
+
+        case (acc1, Some(_: BackRef), tail) =>
+          // Finish initialization of previous ref
+          val prevRef = s"""\n$indent{($refAttr :limit nil :default "$none") [$acc1"""
+
+          @tailrec
+          def rec(elements: Seq[Element], level1: Int): (Seq[Element], String, String) = elements.head match {
+            case ref1: Ref  =>
+              val tail1            = elements.tail
+              val (attrs, append1) = resolvePullRef(ref1, tail1, level1, "]}") // End previous ref
+              (Nil, prevRef, append + attrs + append1)
+            case _: BackRef =>
+              rec(elements.tail, level1 - 1)
+            case other      => unexpectedElement(other)
+          }
+          val (_, acc2, append2) = rec(tail, level)
+          (acc2, append2)
+
+        case (acc1, Some(NestedOpt(ref1, elements1)), _) =>
           pullCastss = pullCastss :+ pullCasts.toList
           pullCasts.clear()
-          val nestedPulls = resolvePull(ref1, elements1, level + 1)
-          s"""\n$indent{($refAttr :limit nil :default "__none__") [$pullAttrs$nestedPulls]}"""
+          val (attrs, append1) = resolvePullRef(ref1, elements1, level + 1, "")
+          val res              = s"""\n$indent{($refAttr :limit nil :default "$none") [$acc1$attrs$append1]}"""
+          (res, "")
+
+        case (_, Some(other), _) => unexpectedElement(other)
+        case other               => throw MoleculeException("Unexpected resolvePullRef coordinates: " + other)
       }
     }
-    pull.fold(Seq.empty[String]) { case (e, NestedOpt(ref, elements)) =>
-      Seq(s"(pull $e [${resolvePull(ref, elements, 0)}])")
+    pull.fold(Seq.empty[String]) {
+      case (e, NestedOpt(ref, elements)) =>
+        val (attrs, append) = resolvePullRef(ref, elements, -1, "")
+        Seq(s"(pull $e [$attrs$append])")
     }
   }
 
@@ -180,19 +218,22 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
         case a: AttrOneMan => resolve(resolveAttrOneMan(es, a), tail)
         case a: AttrOneOpt => resolve(resolveAttrOneOpt(es, a), tail)
         case a: AttrOneTac => resolve(resolveAttrOneTac(es, a), tail)
-        case other         => unexpected(other)
+        case other         => unexpectedElement(other)
       }
       case a: AttrSet                       => a match {
         case a: AttrSetMan => resolve(resolveAttrSetMan(es, a), tail)
         case a: AttrSetOpt => resolve(resolveAttrSetOpt(es, a), tail)
         case a: AttrSetTac => resolve(resolveAttrSetTac(es, a), tail)
-        case other         => unexpected(other)
+        case other         => unexpectedElement(other)
       }
       case ref: Ref                         => resolve(resolveRef(es, ref), tail)
       case _: BackRef                       => resolve(es.init, tail)
       case Nested(ref, nestedElements)      => resolve(resolveNested(es, ref, nestedElements), tail)
-      case n@NestedOpt(ref, nestedElements) => resolve(resolveNestedOpt(es, n, ref, nestedElements), tail)
-      case other                            => unexpected(other)
+      case n@NestedOpt(ref, nestedElements) =>
+        val zz = resolveNestedOpt(es, n, ref, nestedElements)
+        resolve(zz, tail)
+      //        resolve(resolveNestedOpt(es, n, ref, nestedElements), tail)
+      case other => unexpectedElement(other)
     }
     case Nil             => es
   }
@@ -200,6 +241,7 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
   final private def resolveNested(
     es: List[Var], ref: Ref, nestedElements: Seq[Element]
   ): List[Var] = {
+    isNested = true
     if (isNestedOpt) noMixedNestedModes
     validateRefNs(ref, nestedElements)
     resolve(resolveNestedRef(es, ref), nestedElements)
@@ -208,6 +250,7 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
   final private def resolveNestedOpt(
     es: List[Var], nestedOpt: NestedOpt, ref: Ref, nestedElements: Seq[Element]
   ): List[Var] = {
+    isNestedOpt = true
     if (isNested) noMixedNestedModes
     validateRefNs(ref, nestedElements)
     resolveNestedOptRef(es, nestedOpt)
@@ -223,7 +266,7 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
     val nestedNs = nestedElements.head match {
       case a: Attr => a.ns
       case r: Ref  => r.ns
-      case other   => unexpected(other)
+      case other   => unexpectedElement(other)
     }
     if (ref.refNs != nestedNs)
       throw MoleculeException(s"`$refName` can only nest to `${ref.refNs}`. Found: `$nestedNs`")

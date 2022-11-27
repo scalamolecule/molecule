@@ -1,14 +1,14 @@
-package codegen.db.datomic.query
+package codegen.db.datomic.query.casting
 
 import codegen.DatomicGenBase
 
-object _CastFlat extends DatomicGenBase("CastFlat", "/query") {
+object _CastFlat extends DatomicGenBase("CastFlat", "/query/casting") {
 
   val content = {
     val resolveX = (1 to 22).map(i => s"case $i => cast$i").mkString("\n      ")
     val resolveMethods = (1 to 22).map(arity => Chunk(arity).body).mkString("\n")
     s"""// GENERATED CODE ********************************
-       |package molecule.db.datomic.query
+       |package molecule.db.datomic.query.casting
        |
        |import molecule.core.query.Model2Query
        |

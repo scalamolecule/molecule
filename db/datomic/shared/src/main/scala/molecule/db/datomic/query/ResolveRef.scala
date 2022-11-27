@@ -23,7 +23,6 @@ trait ResolveRef[Tpl] { self: SortOne_[Tpl] with Base[Tpl] =>
     casts.clear()
 
     sortNestedLevel()
-    isNested = true
     es :+ refId
   }
 
@@ -43,9 +42,14 @@ trait ResolveRef[Tpl] { self: SortOne_[Tpl] with Base[Tpl] =>
   }
 
   protected def resolveNestedOptRef(es: List[Var], nestedOpt: NestedOpt): List[Var] = {
-    nestedOptIds += es.last
+    val e = es.last
+    nestedOptIds += e
     pull = Some((es.last, nestedOpt))
-    isNestedOpt = true
+    if (where.isEmpty) {
+      val Ref(ns, refAttr, _, _) = nestedOpt.ref
+      val (refA, refId)          = (s":$ns/$refAttr", vv)
+      where += s"[$e $refA $refId]" -> wClause
+    }
     es
   }
 }

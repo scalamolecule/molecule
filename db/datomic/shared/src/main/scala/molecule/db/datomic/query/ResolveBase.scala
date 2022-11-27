@@ -3,8 +3,24 @@ package molecule.db.datomic.query
 import java.net.URI
 import java.util.{Date, UUID, List => jList}
 import molecule.base.util.BaseHelpers
+import molecule.db.datomic.query.casting.NullValueException
 
 trait ResolveBase extends BaseHelpers {
+
+  // dummy value for null
+  val none = "__none__"
+
+  def nullValue = throw new NullValueException
+
+  def unexpectedValue(other: Any) = other match {
+    case null  => throw new Exception(s"Unexpected null value".stripMargin)
+    case other =>
+      throw new Exception(
+        s"""Unexpected:
+           |  $other
+           |  ${other.getClass}""".stripMargin
+      )
+  }
 
   // Scala to Java
   protected lazy val s2jString    : Any => Any = identity

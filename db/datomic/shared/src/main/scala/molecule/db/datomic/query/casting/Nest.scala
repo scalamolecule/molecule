@@ -1,8 +1,9 @@
-package molecule.db.datomic.query
+package molecule.db.datomic.query.casting
 
 import java.lang.{Long => jLong}
 import java.util.{ArrayList => jArrayList}
 import molecule.core.query.Model2Query
+import molecule.db.datomic.query.Base
 
 
 trait Nest[Tpl] { self: Model2Query[Tpl] with Base[Tpl] with CastNestedBranch_[Tpl] with CastNestedLeaf_[Tpl] =>

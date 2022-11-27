@@ -1,7 +1,8 @@
 // GENERATED CODE ********************************
-package molecule.db.datomic.query
+package molecule.db.datomic.query.casting
 
 import molecule.core.query.Model2Query
+import molecule.db.datomic.query.Base
 
 
 trait CastFlat_[Tpl] { self: Model2Query[Tpl] with Base[Tpl] =>

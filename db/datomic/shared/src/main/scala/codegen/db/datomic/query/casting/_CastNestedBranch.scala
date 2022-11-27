@@ -1,26 +1,31 @@
-package codegen.db.datomic.query
+package codegen.db.datomic.query.casting
 
 import codegen.DatomicGenBase
 
-object _CastNestedLeaf extends DatomicGenBase("CastNestedLeaf", "/query") {
+object _CastNestedBranch extends DatomicGenBase("CastNestedBranch", "/query/casting") {
 
   val content = {
-    val resolveX       = (1 to 22).map(i => s"case $i => cast$i(casts, rowIndexes)").mkString("\n      ")
-    val resolveMethods = (1 to 22).map(arity => Chunk(arity).body).mkString("\n")
+    val resolveX       = (1 to 21).map(i => s"case $i => cast$i[T](casts, rowIndexes)").mkString("\n      ")
+    val resolveMethods = (1 to 21).map(arity => Chunk(arity).body).mkString("\n")
     s"""// GENERATED CODE ********************************
-       |package molecule.db.datomic.query
+       |package molecule.db.datomic.query.casting
        |
        |import molecule.core.query.Model2Query
        |
        |
        |trait ${fileName}_[Tpl] { self: Model2Query[Tpl] with Base[Tpl] =>
        |
-       |  final protected def castLeaf(casts: List[AnyRef => AnyRef], firstRowIndex: Int): Row => Any = {
+       |  final protected def castBranch[T](casts: List[AnyRef => AnyRef], firstRowIndex: Int): (Row, List[Any]) => T = {
        |    val n          = casts.length
        |    val rowIndexes = (firstRowIndex to (firstRowIndex + n)).toList
        |    n match {
+       |      case 0 => cast0[T]
        |      $resolveX
        |    }
+       |  }
+       |
+       |  final private def cast0[T]: (Row, List[Any]) => T = {
+       |    (row: Row, leaf: List[Any]) => leaf.asInstanceOf[T]
        |  }
        |$resolveMethods
        |}""".stripMargin
@@ -32,13 +37,14 @@ object _CastNestedLeaf extends DatomicGenBase("CastNestedLeaf", "/query") {
     val tuple   = (0 until i).map { j => s"c$j(row.get(i$j))" }.mkString(",\n        ")
     val body    =
       s"""
-         |  final private def cast$i(casts: List[AnyRef => AnyRef], rowIndexes: List[Int]): Row => Any = {
+         |  final private def cast$i[T](casts: List[AnyRef => AnyRef], rowIndexes: List[Int]): (Row, List[Any]) => T = {
          |    $casters
          |    val List($indexes) = rowIndexes
-         |    (row: Row) =>
+         |    (row: Row, leaf: List[Any]) =>
          |      (
-         |        $tuple
-         |        )
+         |        $tuple,
+         |        leaf
+         |        ).asInstanceOf[T]
          |  }""".stripMargin
   }
 }

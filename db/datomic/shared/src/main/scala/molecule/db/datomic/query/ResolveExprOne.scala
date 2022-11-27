@@ -139,7 +139,7 @@ trait ResolveExprOne[Tpl] { self: SortOne_[Tpl] with SortOneOpt_[Tpl] with Base[
       case Ge        => compare(e, a, v, args.head, ">=", res.s2j)
       case NoValue   => noValue(e, a)
       case Fn(kw, _) => aggr(e, a, v, kw, res)
-      case other     => unexpected(other)
+      case other     => unexpectedOp(other)
     }
   }
 
@@ -162,7 +162,7 @@ trait ResolveExprOne[Tpl] { self: SortOne_[Tpl] with SortOneOpt_[Tpl] with Base[
       case Gt    => optCompare(e, a, v, optArgs, ">", resOpt.s2j)
       case Le    => optCompare(e, a, v, optArgs, "<=", resOpt.s2j)
       case Ge    => optCompare(e, a, v, optArgs, ">=", resOpt.s2j)
-      case other => unexpected(other)
+      case other => unexpectedOp(other)
     }
   }
 

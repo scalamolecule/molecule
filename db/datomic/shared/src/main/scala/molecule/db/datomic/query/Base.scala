@@ -20,7 +20,6 @@ trait Base[Tpl] extends BaseHelpers with JavaConversions { self: Model2Query[Tpl
   // Datomic attribute name (ex :Person/name)
   type Att = String
 
-
   // Query clause optimization weights
   final protected val wGround         = 1
   final protected val wEqOne          = 2
@@ -40,6 +39,7 @@ trait Base[Tpl] extends BaseHelpers with JavaConversions { self: Model2Query[Tpl
   // Main query
   final protected var isNested     = false
   final protected var isNestedOpt  = false
+  final protected var flatten      = false
   final protected val nestedIds    = new ArrayBuffer[String]
   final protected val nestedOptIds = new ArrayBuffer[String]
   final protected val find         = new ArrayBuffer[String]
@@ -78,6 +78,7 @@ trait Base[Tpl] extends BaseHelpers with JavaConversions { self: Model2Query[Tpl
     preRules.empty
     isNested = false
     isNestedOpt = false
+    flatten = false
     nestedIds.empty
     nestedOptIds.empty
     find.empty
@@ -117,8 +118,8 @@ trait Base[Tpl] extends BaseHelpers with JavaConversions { self: Model2Query[Tpl
     }
   }
 
-  protected def unexpected(element: Element) = throw MoleculeException("Unexpected element: " + element)
-  protected def unexpected(op: Op) = throw MoleculeException("Unexpected operation: " + op)
+  protected def unexpectedElement(element: Element) = throw MoleculeException("Unexpected element: " + element)
+  protected def unexpectedOp(op: Op) = throw MoleculeException("Unexpected operation: " + op)
 
   protected def vv: String = {
     varIndex += 1
@@ -131,7 +132,6 @@ trait Base[Tpl] extends BaseHelpers with JavaConversions { self: Model2Query[Tpl
       " ?tx"
     } else ""
   }
-
 
 
 }
