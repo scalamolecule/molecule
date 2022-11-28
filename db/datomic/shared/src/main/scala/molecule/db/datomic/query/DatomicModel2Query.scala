@@ -100,8 +100,6 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
   }
 
   final private def renderPull: Seq[String] = {
-//    import LambdasOne._
-//    import LambdasSet._
     @tailrec
     def addPullAttrs(
       elements: Seq[Element],
@@ -207,6 +205,7 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
         case Nil          => (acc, None, Nil)
       }
     }
+
     def resolvePullRef(ref: Ref, elements: Seq[Element], level: Int, append: String): (String, String) = {
       val indent  = "  " * (level + 5)
       val refAttr = s":${ref.ns}/${ref.refAttr}"

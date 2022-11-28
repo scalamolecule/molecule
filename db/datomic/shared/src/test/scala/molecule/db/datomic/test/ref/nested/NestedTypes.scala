@@ -9,7 +9,6 @@ import utest._
 
 object NestedTypes extends DatomicTestSuite {
 
-
   lazy val tests = Tests {
 
     "Card one, mandatory" - types { implicit conn =>
@@ -60,7 +59,6 @@ object NestedTypes extends DatomicTestSuite {
     }
 
 
-
     "Card set" - types { implicit conn =>
       Ref.n.Nss.*(Ns.strings).insert(1, List(Set(string1, string2))).transact
       Ref.n.Nss.*(Ns.ints).insert(2, List(Set(int1, int2))).transact
@@ -77,6 +75,7 @@ object NestedTypes extends DatomicTestSuite {
       Ref.n.Nss.*(Ns.bytes).insert(13, List(Set(byte1, byte2))).transact
       Ref.n.Nss.*(Ns.shorts).insert(14, List(Set(short1, short2))).transact
 
+
       Ref.n_.Nss.*(Ns.strings).query.get ==> List(List(Set(string1, string2)))
       Ref.n_.Nss.*(Ns.ints).query.get ==> List(List(Set(int1, int2)))
       Ref.n_.Nss.*(Ns.longs).query.get ==> List(List(Set(long1, long2)))
@@ -92,17 +91,16 @@ object NestedTypes extends DatomicTestSuite {
       Ref.n_.Nss.*(Ns.bytes).query.get ==> List(List(Set(byte1, byte2)))
       Ref.n_.Nss.*(Ns.shorts).query.get ==> List(List(Set(short1, short2)))
 
+
       Ref.n_(1).Nss.*?(Ns.strings).query.get ==> List(List(Set(string1, string2)))
       Ref.n_(2).Nss.*?(Ns.ints).query.get ==> List(List(Set(int1, int2)))
       Ref.n_(3).Nss.*?(Ns.longs).query.get ==> List(List(Set(long1, long2)))
       Ref.n_(4).Nss.*?(Ns.floats).query.get ==> List(List(Set(float1, float2)))
       Ref.n_(5).Nss.*?(Ns.doubles).query.get ==> List(List(Set(double1, double2)))
-
-      // Bug for optional nested card-set Boolean. Only true is preserved. todo
-      Ref.n_(6).Nss.*?(Ns.booleans).query.get ==> List(List(Set(boolean1)))
-      // Should be:
-      // Ref.n_(6).Nss.*?(Ns.booleans).query.get ==> List(List(Set(boolean1, boolean2)))
-
+      if (useFree)
+        Ref.n_(6).Nss.*?(Ns.booleans).query.get ==> List(List(Set(boolean1))) // * Bug in Datomic Free
+      else
+        Ref.n_(6).Nss.*?(Ns.booleans).query.get ==> List(List(Set(boolean2, boolean1)))
       Ref.n_(7).Nss.*?(Ns.bigInts).query.get ==> List(List(Set(bigInt1, bigInt2)))
       Ref.n_(8).Nss.*?(Ns.bigDecimals).query.get ==> List(List(Set(bigDecimal1, bigDecimal2)))
       Ref.n_(9).Nss.*?(Ns.dates).query.get ==> List(List(Set(date1, date2)))
@@ -161,6 +159,7 @@ object NestedTypes extends DatomicTestSuite {
       Ref.n(14).Nss.*?(Ns.n.a1.short_?).query.get ==> List((14, List((1, Some(short1)), (2, None))))
     }
 
+
     "Card set, optional" - types { implicit conn =>
       Ref.n.Nss.*(Ns.n.strings_?).insert(1, List((1, Some(Set(string1, string2))), (2, None))).transact
       Ref.n.Nss.*(Ns.n.ints_?).insert(2, List((1, Some(Set(int1, int2))), (2, None))).transact
@@ -183,10 +182,10 @@ object NestedTypes extends DatomicTestSuite {
       Ref.n(3).Nss.*(Ns.n.a1.longs_?).query.get ==> List((3, List((1, Some(Set(long1, long2))), (2, None))))
       Ref.n(4).Nss.*(Ns.n.a1.floats_?).query.get ==> List((4, List((1, Some(Set(float1, float2))), (2, None))))
       Ref.n(5).Nss.*(Ns.n.a1.doubles_?).query.get ==> List((5, List((1, Some(Set(double1, double2))), (2, None))))
-      Ref.n(6).Nss.*(Ns.n.a1.booleans_?).query.get ==> List((6, List(
-        (1, Some(Set(boolean1))), // Bug in Datomic, should be (1, Some(Set(boolean1, boolean2))),
-        (2, None)
-      )))
+      if (useFree)
+        Ref.n(6).Nss.*(Ns.n.a1.booleans_?).query.get ==> List((6, List((1, Some(Set(boolean1))), (2, None)))) // * Bug in Datomic Free
+      else
+        Ref.n(6).Nss.*(Ns.n.a1.booleans_?).query.get ==> List((6, List((1, Some(Set(boolean2, boolean1))), (2, None))))
       Ref.n(7).Nss.*(Ns.n.a1.bigInts_?).query.get ==> List((7, List((1, Some(Set(bigInt1, bigInt2))), (2, None))))
       Ref.n(8).Nss.*(Ns.n.a1.bigDecimals_?).query.get ==> List((8, List((1, Some(Set(bigDecimal1, bigDecimal2))), (2, None))))
       Ref.n(9).Nss.*(Ns.n.a1.dates_?).query.get ==> List((9, List((1, Some(Set(date1, date2))), (2, None))))
@@ -202,10 +201,10 @@ object NestedTypes extends DatomicTestSuite {
       Ref.n(3).Nss.*?(Ns.n.a1.longs_?).query.get ==> List((3, List((1, Some(Set(long1, long2))), (2, None))))
       Ref.n(4).Nss.*?(Ns.n.a1.floats_?).query.get ==> List((4, List((1, Some(Set(float1, float2))), (2, None))))
       Ref.n(5).Nss.*?(Ns.n.a1.doubles_?).query.get ==> List((5, List((1, Some(Set(double1, double2))), (2, None))))
-      Ref.n(6).Nss.*?(Ns.n.a1.booleans_?).query.get ==> List((6, List(
-        (1, Some(Set(boolean1))), // Bug in Datomic, should be (1, Some(Set(boolean1, boolean2))),
-        (2, None)
-      )))
+      if (useFree)
+        Ref.n(6).Nss.*?(Ns.n.a1.booleans_?).query.get ==> List((6, List((1, Some(Set(boolean1))), (2, None)))) // * Bug in Datomic Free
+      else
+        Ref.n(6).Nss.*?(Ns.n.a1.booleans_?).query.get ==> List((6, List((1, Some(Set(boolean2, boolean1))), (2, None))))
       Ref.n(7).Nss.*?(Ns.n.a1.bigInts_?).query.get ==> List((7, List((1, Some(Set(bigInt1, bigInt2))), (2, None))))
       Ref.n(8).Nss.*?(Ns.n.a1.bigDecimals_?).query.get ==> List((8, List((1, Some(Set(bigDecimal1, bigDecimal2))), (2, None))))
       Ref.n(9).Nss.*?(Ns.n.a1.dates_?).query.get ==> List((9, List((1, Some(Set(date1, date2))), (2, None))))
@@ -216,5 +215,6 @@ object NestedTypes extends DatomicTestSuite {
       Ref.n(14).Nss.*?(Ns.n.a1.shorts_?).query.get ==> List((14, List((1, Some(Set(short1, short2))), (2, None))))
     }
 
+    // * Bug in Datomic Free where card-many set of Boolean values only preserves true. Datomic Pro works correctly
   }
 }
