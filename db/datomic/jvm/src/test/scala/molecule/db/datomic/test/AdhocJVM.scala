@@ -1,7 +1,6 @@
 package molecule.db.datomic.test
 
-import datomic.Peer
-import molecule.coreTests.dataModels.core.dsl.Refs.{Ns, _}
+import molecule.coreTests.dataModels.core.dsl.Refs._
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
@@ -14,106 +13,17 @@ object AdhocJVM extends DatomicTestSuite {
 
     "refs" - refs { implicit conn =>
 
-      Ns.n.Rs1.*(R1.n1.int1.R2.n2._R1.Rs2.str2).insert(0, List((1, 7, 2, "a"))).transact
-      //      Ns.n.Rs1.*(R1.n1.int1.R2.n2.str2).insert(0, List((5, 7, 6, "c"))).transact
-      //      Ns.n.Rs1.*(R1.n1.R2.n2.R3.n3).insert(0, List((1, 2, 3))).transact
-      //      Ns.n.Rs1.*(R1.n1.int1.str1).insert(0, List((3, 4, "b"))).transact
+
+//      Ns.n.Rs1.*(R1.n1.int1).insert(0, List((1, 2))).transact
+//      Ns.n.Rs1.*(R1.n1.int1).query.get ==> List((0, List((1, 2))))
+//      Ns.n.Rs1.*?(R1.n1.int1).query.get ==> List((0, List((1, 2))))
 
 
-      //      println("---------------")
-      //      Peer.q(
-      //        """[:find  ?b
-      //          |        (pull ?a [
-      //          |          {(:Ns/rs1 :limit nil) [
-      //          |            (:R1/n1 :limit nil)
-      //          |            {(:R1/r2 :limit nil :default "__none__") [
-      //          |              (:R2/n2 :limit nil)]}]}])
-      //          | :where [?a :Ns/n ?b]]""".stripMargin,
-      //        conn.db
-      //      ).forEach { r => println(r) }
+      Ns.n.Rs1.*(R1.n1.R2.n2.Rs3.*(R3.n3.R4.n4)).insert(0, List((1, 2, List((3, 4))))).transact
+      Ns.n.Rs1.*?(R1.n1.R2.n2.Rs3.*?(R3.n3.R4.n4)).query.get ==> List((0, List((1, 2, List((3, 4))))))
 
-      //      Ns.n.Rs1.*?(R1.n1.Rs2.*?(R2.n2)).query.get ==> List((0, List((1, 2))))
-      //      Ns.n.Rs1.*?(R1.n1.int1.str1).query.get ==> List((0, List((1, 7))))
-      //      Ns.n.Rs1.*?(R1.n1.R2.n2.str2).query.get ==> List((0, List((1, 2))))
-      //      Ns.n.Rs1.*?(R1.n1.R2.n2.R3.n3).query.get ==> List((0, List((1, 2, 3))))
-
-
-      //      println("---------------")
-      //      Ns.n.Rs1.*(R1.n1.R2.n2.Rs3.n3).insert(0, List((1, 2, 3))).transact
-      //      Ns.n.Rs1.*?(R1.n1).query.get
-      //      Ns.n.Rs1.*?(R1.n1.R2.n2).query.get
-      //      Ns.n.Rs1.*?(R1.n1.R2.n2.Rs3.n3).query.get
-      //      Peer.q(
-      //        """[:find  ?b
-      //          |        (pull ?a [
-      //          |          {(:Ns/rs1 :limit nil) [
-      //          |            (:R1/n1 :limit nil)
-      //          |            {(:R1/r2 :limit nil :default "__none__") [
-      //          |              (:R2/n2 :limit nil)
-      //          |              {(:R2/r3 :limit nil :default "__none__") [
-      //          |                (:R3/n3 :limit nil)
-      //          |              ]}
-      //          |            ]}
-      //          |          ]}
-      //          |        ])
-      //          | :where [?a :Ns/n ?b]]""".stripMargin,
-      //        conn.db
-      //      ).forEach { r => println(r) }
-      //
-      //      println("---------------")
-
-      //      println("---------------")
-      //      Peer.q(
-      //        """[:find  ?b
-      //          |        (pull ?a [
-      //          |          {(:Ns/rs1 :limit nil) [
-      //          |            (:R1/n1 :limit nil)
-      //          |            {(:R1/r2 :limit nil :default "__none__") [
-      //          |              (:R2/n2 :limit nil)
-      //          |            ]}
-      //          |            {(:R1/rs2 :limit nil :default "__none__") [
-      //          |              (:R2/str2 :limit nil)
-      //          |            ]}
-      //          |          ]}
-      //          |        ])
-      //          | :where [?a :Ns/n ?b]]""".stripMargin,
-      //        conn.db
-      //      ).forEach { r => println(r) }
-
-
-      //      Ns.n.Rs1.*?(R1.n1.R2.n2).query.get
-      /*
-      [:find  ?b
-              (pull ?a [
-                {(:Ns/rs1 :limit nil :default "__none__") [
-                  (:R1/n1 :limit nil)
-                  {(:R1/r2 :limit nil :default "__none__") [
-                    (:R2/n2 :limit nil)]}]}])
-       :where [?a :Ns/n ?b]]
-       */
-            Ns.n.Rs1.*?(R1.n1.R2.n2._R1.Rs2.str2).query.get
-      /*
-      [:find  ?b
-              (pull ?a [
-                {(:Ns/rs1 :limit nil :default "__none__") [
-                  (:R1/n1 :limit nil)
-                  {(:R1/r2 :limit nil :default "__none__") [
-                    (:R2/n2 :limit nil)]}
-                  {(:R1/rs2 :limit nil :default "__none__") [
-                    (:R2/str2 :limit nil)]}]}])
-       :where [?a :Ns/n ?b]]
-
-
-       [:find  ?b
-              (pull ?a [
-              {(:Ns/rs1 :limit nil :default "__none__") [
-                (:R1/n1 :limit nil)
-                {(:R1/r2 :limit nil :default "__none__") [
-                  (:R2/n2 :limit nil)]}
-                {(:R1/rs2 :limit nil :default "__none__") [
-                  (:R2/str2 :limit nil)]}])])
-       :where [?a :Ns/n ?b]]
-       */
+//      Ns.n.Rs1.*(R1.n1.R2.n2.R3.n3.Rs4.*(R4.n4.R5.n5)).insert(0, List((1, 2, 3, List((3, 4))))).transact
+//      Ns.n.Rs1.*?(R1.n1.R2.n2.R3.n3.Rs4.*?(R4.n4.R5.n5)).query.get ==> List((0, List((1, 2, 3, List((3, 4))))))
 
     }
 

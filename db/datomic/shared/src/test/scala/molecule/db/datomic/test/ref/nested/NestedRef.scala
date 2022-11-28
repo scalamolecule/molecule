@@ -7,30 +7,29 @@ import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
 
 
-object NestedRefOpt extends DatomicTestSuite {
+object NestedRef extends DatomicTestSuite {
 
 
   lazy val tests = Tests {
 
-    "Mandatory attributes" - refs { implicit conn =>
-      Ns.n.Rs1.*(R1.n1.R2.n2).insert(1, List((1, 2))).transact
-      Ns.n.Rs1.*(R1.n1.int1.R2.n2).insert(2, List((1, 11, 2))).transact
-      Ns.n.Rs1.*(R1.n1.R2.n2.int2).insert(3, List((1, 2, 22))).transact
-      Ns.n.Rs1.*(R1.n1.int1.R2.n2.int2).insert(4, List((1, 11, 2, 22))).transact
+    "Ref" - refs { implicit conn =>
+      Ns.n.Rs1.*(R1.n1.R2.n2).insert(0, List((1, 2))).transact
+      Ns.n(0).Rs1.*(R1.n1.R2.n2).query.get ==> List((0, List((1, 2))))
+      Ns.n(0).Rs1.*?(R1.n1.R2.n2).query.get ==> List((0, List((1, 2))))
 
-
-      Ns.n_(1).Rs1.*?(R1.n1.R2.n2).query.get ==> List(List((1, 2)))
-      Ns.n_(2).Rs1.*?(R1.n1.int1.R2.n2).query.get ==> List(List((1, 11, 2)))
-      Ns.n_(3).Rs1.*?(R1.n1.R2.n2.int2).query.get ==> List(List((1, 2, 22)))
-      Ns.n_(4).Rs1.*?(R1.n1.int1.R2.n2.int2).query.get ==> List(List((1, 11, 2, 22)))
-
-
-      //      Ns.n.Rs1.*(R1.n1.R2.n2.R3.n3).insert(2, List((1, 2, 3))).transact
-      //      Ns.n_(2).Rs1.*(R1.n1.R2.n2.R3.n3).query.get ==> List(List((1, 2, 3)))
-      //      Ns.n_(2).Rs1.*?(R1.n1.R2.n2.R3.n3).query.get ==> List(List((1, 2, 3)))
-
-
+      Ns.n.Rs1.*(R1.n1.R2.n2.Rs3.*(R3.n3.R4.n4)).insert(1, List((1, 2, List((3, 4))))).transact
+      Ns.n(1).Rs1.*(R1.n1.R2.n2.Rs3.*(R3.n3.R4.n4)).query.get ==> List((1, List((1, 2, List((3, 4))))))
+      Ns.n(1).Rs1.*?(R1.n1.R2.n2.Rs3.*?(R3.n3.R4.n4)).query.get ==> List((1, List((1, 2, List((3, 4))))))
     }
+
+
+    "Backref" - refs { implicit conn =>
+      Ns.n.Rs1.*(R1.n1.R2.n2._R1.R2a.str2).insert(0, List((1, 2, "a"))).transact
+
+      Ns.n.Rs1.*(R1.n1.R2.n2._R1.R2a.str2).query.get ==> List((0, List((1, 2, "a"))))
+      Ns.n.Rs1.*?(R1.n1.R2.n2._R1.R2a.str2).query.get ==> List((0, List((1, 2, "a"))))
+    }
+
 
     "Optional attribute" - refs { implicit conn =>
       Ns.n.Rs1.*(R1.n1.int1_?.R2.n2).insert(

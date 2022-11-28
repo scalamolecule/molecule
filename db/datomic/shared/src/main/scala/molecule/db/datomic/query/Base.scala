@@ -61,6 +61,7 @@ trait Base[Tpl] extends BaseHelpers with JavaConversions { self: Model2Query[Tpl
   final protected var castss     = List.empty[List[AnyRef => AnyRef]]
   final protected val pullCasts  = new ArrayBuffer[jIterator[_] => Any]
   final protected var pullCastss = List.empty[List[jIterator[_] => Any]]
+  final protected var pullDepths = List(0)
 
   // Sorting
   final protected val sortsAcc = new ArrayBuffer[Int => (Row, Row) => Int]
@@ -96,6 +97,7 @@ trait Base[Tpl] extends BaseHelpers with JavaConversions { self: Model2Query[Tpl
     castss = Nil
     pullCasts.empty
     pullCastss = Nil
+    pullDepths = List(0)
     sortsAcc.empty
     sorts.empty
     attrIndex = -1

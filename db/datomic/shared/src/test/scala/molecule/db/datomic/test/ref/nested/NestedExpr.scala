@@ -33,7 +33,6 @@ object NestedExpr extends DatomicTestSuite {
       // Expression before optional nested ok
       Ns.n(1).Rs1.*?(R1.n1).query.get ==> List((1, List(1, 2, 3)))
 
-
       // Expressions inside optional nested not allowed
 
       intercept[MoleculeException](

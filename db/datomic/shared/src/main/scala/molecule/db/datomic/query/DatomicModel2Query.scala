@@ -20,10 +20,12 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
     with CastNestedBranch_[Tpl]
     with CastNestedLeaf_[Tpl]
     with CastNestedOptBranch_[Tpl]
+    with CastNestedOptBranchFlatten_[Tpl]
     with CastNestedOptLeaf_[Tpl]
     with CastNestedOptLeafFlatten_[Tpl]
     with Nest[Tpl]
-    with NestOpt_[Tpl] {
+    with NestOpt_[Tpl]
+    with NestOptFlatten_[Tpl] {
 
   final lazy protected val preInputs: Seq[AnyRef] = renderRules(rules ++ preRules) ++ preArgs
   final lazy protected val inputs   : Seq[AnyRef] = renderRules(rules) ++ args
@@ -153,9 +155,9 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
             case backRef: BackRef     => (acc, Some(backRef), tail)
             case nestedOpt: NestedOpt => (acc, Some(nestedOpt), Nil)
             case _: Nested            => noMixedNestedModes
-            case a: AttrOneTac =>
+            case a: AttrOneTac        =>
               throw MoleculeException("Tacit attributes not allowed in optional nested data structure. Found:\n" + a)
-            case other         => throw MoleculeException(
+            case other                => throw MoleculeException(
               "Unexpected element in optional nested molecule: " + other
             )
           }
@@ -172,6 +174,7 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
 
         case (acc1, Some(ref1: Ref), tail) =>
           flatten = true
+          pullDepths = pullDepths.init :+ pullDepths.last + 1
           val (attrs, append1) = resolvePullRef(ref1, tail, level + 1, "")
           val res              = s"""\n$indent{($refAttr :limit nil :default "$none") [$acc1$attrs]}"""
           (res, append + append1)
@@ -196,6 +199,7 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
         case (acc1, Some(NestedOpt(ref1, elements1)), _) =>
           pullCastss = pullCastss :+ pullCasts.toList
           pullCasts.clear()
+          pullDepths = pullDepths :+ 0
           val (attrs, append1) = resolvePullRef(ref1, elements1, level + 1, "")
           val res              = s"""\n$indent{($refAttr :limit nil :default "$none") [$acc1$attrs$append1]}"""
           (res, "")

@@ -12,6 +12,7 @@ object _NestOpt extends DatomicGenBase("NestOpt", "/query/casting") {
        |
        |import java.util.{Iterator => jIterator, Map => jMap}
        |import molecule.core.query.Model2Query
+       |import molecule.db.datomic.query.Base
        |import scala.collection.mutable.ArrayBuffer
        |
        |

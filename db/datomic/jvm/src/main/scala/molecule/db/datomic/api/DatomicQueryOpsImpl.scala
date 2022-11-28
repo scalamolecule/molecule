@@ -73,7 +73,10 @@ class DatomicQueryOpsImpl[Tpl](elements: Seq[Element])
     } else if (isNestedOpt) {
       val tuples = List.newBuilder[Tpl]
       pullCastss = pullCastss :+ pullCasts.toList
-      sortedRows.forEach(row => tuples.addOne(pullRow2tpl(row)))
+      if (flatten)
+        sortedRows.forEach(row => tuples.addOne(pullRowFlatten2tpl(row)))
+      else
+        sortedRows.forEach(row => tuples.addOne(pullRow2tpl(row)))
       tuples.result()
 
     } else {
