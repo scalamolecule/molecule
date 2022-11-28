@@ -1,6 +1,7 @@
 package molecule.db.datomic.query
 
 import java.lang.{Long => jLong}
+import molecule.base.util.exceptions.MoleculeException
 import molecule.boilerplate.ast.MoleculeModel._
 
 
@@ -49,6 +50,9 @@ trait ResolveRef[Tpl] { self: SortOne_[Tpl] with Base[Tpl] =>
       val Ref(ns, refAttr, _, _) = nestedOpt.ref
       val (refA, refId)          = (s":$ns/$refAttr", vv)
       where += s"[$e $refA $refId]" -> wClause
+    }
+    if (where.length == 1 && where.head._1.startsWith("[(identity")) {
+      throw MoleculeException("Single optional attribute before optional nested data structure is not allowed.")
     }
     es
   }

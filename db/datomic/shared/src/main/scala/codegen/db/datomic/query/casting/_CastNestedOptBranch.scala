@@ -15,7 +15,8 @@ object _CastNestedOptBranch extends DatomicGenBase("CastNestedOptBranch", "/quer
        |import molecule.db.datomic.query.Base
        |
        |
-       |trait ${fileName}_[Tpl] { self: Model2Query[Tpl] with Base[Tpl] =>
+       |trait ${fileName}_[Tpl] {
+       |  self: Model2Query[Tpl] with Base[Tpl] =>
        |
        |  final protected def pullBranch(
        |    pullCasts: List[jIterator[_] => Any],

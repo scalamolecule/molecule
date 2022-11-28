@@ -58,7 +58,9 @@ class SaveStmts(elements: Seq[Element]) extends TransactionBase(elements, 0) {
     vs match {
       case Seq(v) => Some(transform(v))
       case Nil    => None
-      case vs     => throw MoleculeException(s"Can only save one value for attribute `$attrName`. Found: " + vs)
+      case vs     => throw MoleculeException(
+        s"Can only save one value for attribute `$attrName`. Found: " + vs
+      )
     }
   }
   def resolveAttrOneMan(attr: AttrOneMan, a: Keyword): Unit = {
@@ -89,8 +91,9 @@ class SaveStmts(elements: Seq[Element]) extends TransactionBase(elements, 0) {
     optVs.flatMap {
       case Seq(v) => Some(transform(v))
       case Nil    => None
-      case vs     =>
-        throw MoleculeException(s"Can only save one value for optional attribute `$attrName`. Found: " + vs)
+      case vs     => throw MoleculeException(
+        s"Can only save one value for optional attribute `$attrName`. Found: " + vs
+      )
     }
   }
   def resolveAttrOneOpt(attr: AttrOneOpt, a: Keyword): Unit = {

@@ -14,16 +14,6 @@ object AdhocJVM extends DatomicTestSuite {
     "refs" - refs { implicit conn =>
 
 
-//      Ns.n.Rs1.*(R1.n1.int1).insert(0, List((1, 2))).transact
-//      Ns.n.Rs1.*(R1.n1.int1).query.get ==> List((0, List((1, 2))))
-//      Ns.n.Rs1.*?(R1.n1.int1).query.get ==> List((0, List((1, 2))))
-
-
-      Ns.n.Rs1.*(R1.n1.R2.n2.Rs3.*(R3.n3.R4.n4)).insert(0, List((1, 2, List((3, 4))))).transact
-      Ns.n.Rs1.*?(R1.n1.R2.n2.Rs3.*?(R3.n3.R4.n4)).query.get ==> List((0, List((1, 2, List((3, 4))))))
-
-//      Ns.n.Rs1.*(R1.n1.R2.n2.R3.n3.Rs4.*(R4.n4.R5.n5)).insert(0, List((1, 2, 3, List((3, 4))))).transact
-//      Ns.n.Rs1.*?(R1.n1.R2.n2.R3.n3.Rs4.*?(R4.n4.R5.n5)).query.get ==> List((0, List((1, 2, 3, List((3, 4))))))
 
     }
 

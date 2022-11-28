@@ -8,6 +8,7 @@ import molecule.base.util.exceptions.MoleculeException
 import molecule.boilerplate.ast.MoleculeModel._
 import molecule.core.util.fns
 import scala.annotation.tailrec
+import scala.collection.mutable.ListBuffer
 
 abstract class TransactionBase(elements: Seq[Element], tempIdInit: Int) {
 
@@ -23,6 +24,7 @@ abstract class TransactionBase(elements: Seq[Element], tempIdInit: Int) {
   protected var e       : String              = ""
   protected var stmt    : jList[AnyRef]       = null
   protected var backRefs: Map[String, String] = Map.empty[String, String]
+  protected val prevRefs: ListBuffer[String]  = new ListBuffer[String]
 
   protected def stmtList = new util.ArrayList[AnyRef](4)
 

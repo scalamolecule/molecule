@@ -6,9 +6,12 @@ import molecule.core.query.Model2Query
 import molecule.db.datomic.query.Base
 
 
-trait CastNestedOptLeafFlatten_[Tpl] { self: Model2Query[Tpl] with Base[Tpl] =>
+trait CastNestedOptLeafFlatten_[Tpl] {
+  self: Model2Query[Tpl] with Base[Tpl] =>
 
-  final protected def pullLeafFlatten(pullCasts: List[jIterator[_] => Any]): jIterator[_] => List[Any] = {
+  final protected def pullLeafFlatten(
+    pullCasts: List[jIterator[_] => Any]
+  ): jIterator[_] => List[Any] = {
     pullCasts.length match {
       case 1 => pullLeafFlatten1(pullCasts)
       case 2 => pullLeafFlatten2(pullCasts)
@@ -35,10 +38,15 @@ trait CastNestedOptLeafFlatten_[Tpl] { self: Model2Query[Tpl] with Base[Tpl] =>
     }
   }
 
-  final private def flatten(list: jArrayList[Any], map: jMap[_, _]): jArrayList[Any] = {
+  final private def flatten(
+    list: jArrayList[Any],
+    map: jMap[_, _]
+  ): jArrayList[Any] = {
     map.values.forEach {
-      case map: jMap[_, _] => flatten(list, map)
-      case v               => list.add(v)
+      case map: jMap[_, _] =>
+        flatten(list, map)
+      case v               =>
+        list.add(v)
     }
     list
   }

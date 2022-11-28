@@ -6,7 +6,8 @@ import molecule.core.query.Model2Query
 import molecule.db.datomic.query.Base
 
 
-trait CastNestedOptBranch_[Tpl] { self: Model2Query[Tpl] with Base[Tpl] =>
+trait CastNestedOptBranch_[Tpl] {
+  self: Model2Query[Tpl] with Base[Tpl] =>
 
   final protected def pullBranch(
     pullCasts: List[jIterator[_] => Any],

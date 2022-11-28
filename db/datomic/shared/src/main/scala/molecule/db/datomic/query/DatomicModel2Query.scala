@@ -1,5 +1,6 @@
 package molecule.db.datomic.query
 
+import molecule.base.ast.SchemaAST.CardOne
 import molecule.base.util.exceptions.MoleculeException
 import molecule.boilerplate.ast.MoleculeModel._
 import molecule.core.query.Model2Query
@@ -16,6 +17,8 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
     with SortOne_[Tpl]
     with SortOneOpt_[Tpl]
     with Base[Tpl]
+    with LambdasOne
+    with LambdasSet
     with CastFlat_[Tpl]
     with CastNestedBranch_[Tpl]
     with CastNestedLeaf_[Tpl]
@@ -97,7 +100,8 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
   }
 
   final private def renderPull: Seq[String] = {
-    import LambdasOne._
+//    import LambdasOne._
+//    import LambdasSet._
     @tailrec
     def addPullAttrs(
       elements: Seq[Element],
@@ -127,7 +131,6 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
                 case _: AttrOneManShort      => it2Short
                 case _: AttrOneManChar       => it2Char
               })
-              //              val pull1 = s"\n$i(:${a.ns}/${a.attr} :limit nil)"
               val pull1 = s"""\n$i(:${a.ns}/${a.attr} :limit nil :default "$none")"""
               addPullAttrs(tail, level, acc + pull1)
 
@@ -147,6 +150,46 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
                 case _: AttrOneOptByte       => it2OptByte
                 case _: AttrOneOptShort      => it2OptShort
                 case _: AttrOneOptChar       => it2OptChar
+              })
+              val pull1 = s"""\n$i(:${a.ns}/${a.attr} :limit nil :default "$none")"""
+              addPullAttrs(tail, level, acc + pull1)
+
+            case a: AttrSetMan =>
+              pullCasts += (a match {
+                case _: AttrSetManString     => it2SetString
+                case _: AttrSetManInt        => it2SetInt
+                case _: AttrSetManLong       => it2SetLong
+                case _: AttrSetManFloat      => it2SetFloat
+                case _: AttrSetManDouble     => it2SetDouble
+                case _: AttrSetManBoolean    => it2SetBoolean
+                case _: AttrSetManBigInt     => it2SetBigInt
+                case _: AttrSetManBigDecimal => it2SetBigDecimal
+                case _: AttrSetManDate       => it2SetDate
+                case _: AttrSetManUUID       => it2SetUUID
+                case _: AttrSetManURI        => it2SetURI
+                case _: AttrSetManByte       => it2SetByte
+                case _: AttrSetManShort      => it2SetShort
+                case _: AttrSetManChar       => it2SetChar
+              })
+              val pull1 = s"""\n$i(:${a.ns}/${a.attr} :limit nil :default "$none")"""
+              addPullAttrs(tail, level, acc + pull1)
+
+            case a: AttrSetOpt =>
+              pullCasts += (a match {
+                case _: AttrSetOptString     => it2OptSetString
+                case _: AttrSetOptInt        => it2OptSetInt
+                case _: AttrSetOptLong       => it2OptSetLong
+                case _: AttrSetOptFloat      => it2OptSetFloat
+                case _: AttrSetOptDouble     => it2OptSetDouble
+                case _: AttrSetOptBoolean    => it2OptSetBoolean
+                case _: AttrSetOptBigInt     => it2OptSetBigInt
+                case _: AttrSetOptBigDecimal => it2OptSetBigDecimal
+                case _: AttrSetOptDate       => it2OptSetDate
+                case _: AttrSetOptUUID       => it2OptSetUUID
+                case _: AttrSetOptURI        => it2OptSetURI
+                case _: AttrSetOptByte       => it2OptSetByte
+                case _: AttrSetOptShort      => it2OptSetShort
+                case _: AttrSetOptChar       => it2OptSetChar
               })
               val pull1 = s"""\n$i(:${a.ns}/${a.attr} :limit nil :default "$none")"""
               addPullAttrs(tail, level, acc + pull1)
@@ -172,25 +215,33 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
           val res = s"""\n$indent{($refAttr :limit nil :default "$none") [$acc1]}"""
           (res, append)
 
-        case (acc1, Some(ref1: Ref), tail) =>
+
+        case (acc1, Some(ref1@Ref(_, _, _, CardOne)), tail) =>
           flatten = true
           pullDepths = pullDepths.init :+ pullDepths.last + 1
           val (attrs, append1) = resolvePullRef(ref1, tail, level + 1, "")
           val res              = s"""\n$indent{($refAttr :limit nil :default "$none") [$acc1$attrs]}"""
           (res, append + append1)
 
-        case (acc1, Some(_: BackRef), tail) =>
+        case (_, Some(ref: Ref), _) => throw MoleculeException(
+          "Only cardinality-one refs allowed in optional nested data structures. Found: " + ref
+        )
+
+        case (acc1, Some(BackRef(backRef)), tail) =>
           // Finish initialization of previous ref
           val prevRef = s"""\n$indent{($refAttr :limit nil :default "$none") [$acc1"""
 
           @tailrec
           def rec(elements: Seq[Element], level1: Int): (Seq[Element], String, String) = elements.head match {
             case ref1: Ref  =>
-              val tail1            = elements.tail
-              val (attrs, append1) = resolvePullRef(ref1, tail1, level1, "]}") // End previous ref
+              val (attrs, append1) = resolvePullRef(ref1, elements.tail, level1, "]}") // End previous ref
               (Nil, prevRef, append + attrs + append1)
-            case _: BackRef =>
-              rec(elements.tail, level1 - 1)
+            case _: BackRef => rec(elements.tail, level1 - 1)
+            case a: Attr    => throw MoleculeException(
+              s"Expected ref after backref _$backRef. " +
+                s"Please add attribute :${a.ns}/${a.attr} to initial namespace ${a.ns} " +
+                s"instead of after backref _$backRef."
+            )
             case other      => unexpectedElement(other)
           }
           val (_, acc2, append2) = rec(tail, level)

@@ -5,11 +5,14 @@ import molecule.core.query.Model2Query
 import molecule.db.datomic.query.Base
 
 
-trait CastNestedBranch_[Tpl] { self: Model2Query[Tpl] with Base[Tpl] =>
+trait CastNestedBranch_[Tpl] {
+  self: Model2Query[Tpl] with Base[Tpl] =>
 
-  final protected def castBranch[T](casts: List[AnyRef => AnyRef], firstRowIndex: Int): (Row, List[Any]) => T = {
+  final protected def castBranch[T](
+    casts: List[AnyRef => AnyRef],
+    firstRowIndex: Int
+  ): (Row, List[Any]) => T = {
     val n          = casts.length
-//    val rowIndexes = (firstRowIndex to (firstRowIndex + n)).toList
     val rowIndexes = (firstRowIndex until (firstRowIndex + n)).toList
     n match {
       case 0 => cast0[T]

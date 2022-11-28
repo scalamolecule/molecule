@@ -15,15 +15,21 @@ object _CastNestedOptLeafFlatten extends DatomicGenBase("CastNestedOptLeafFlatte
        |import molecule.db.datomic.query.Base
        |
        |
-       |trait ${fileName}_[Tpl] { self: Model2Query[Tpl] with Base[Tpl] =>
+       |trait ${fileName}_[Tpl] {
+       |  self: Model2Query[Tpl] with Base[Tpl] =>
        |
-       |  final protected def pullLeafFlatten(pullCasts: List[jIterator[_] => Any]): jIterator[_] => List[Any] = {
+       |  final protected def pullLeafFlatten(
+       |    pullCasts: List[jIterator[_] => Any]
+       |  ): jIterator[_] => List[Any] = {
        |    pullCasts.length match {
        |      $pullLeafFlattenX
        |    }
        |  }
        |
-       |  final private def flatten(list: jArrayList[Any], map: jMap[_, _]): jArrayList[Any] = {
+       |  final private def flatten(
+       |    list: jArrayList[Any],
+       |    map: jMap[_, _]
+       |  ): jArrayList[Any] = {
        |    map.values.forEach {
        |      case map: jMap[_, _] => flatten(list, map)
        |      case v               => list.add(v)

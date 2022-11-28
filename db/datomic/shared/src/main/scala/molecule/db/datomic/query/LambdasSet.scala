@@ -1,13 +1,14 @@
 package molecule.db.datomic.query
 
+import java.lang.{Double => jDouble, Float => jFloat, Long => jLong}
 import java.math.{BigDecimal => jBigDecimal, BigInteger => jBigInt}
 import java.net.URI
-import java.util.{Date, UUID, List => jList, Map => jMap, Set => jSet}
+import java.util.{Date, UUID, Iterator => jIterator, List => jList, Map => jMap, Set => jSet}
 import molecule.core.util.JavaConversions
-import java.lang.{Boolean => jBoolean, Double => jDouble, Float => jFloat, Integer => jInteger, Long => jLong}
 
 
-object LambdasSet extends ResolveBase with JavaConversions {
+object LambdasSet extends LambdasSet
+trait LambdasSet extends ResolveBase with JavaConversions {
 
   protected lazy val j2sSetString    : AnyRef => AnyRef = (v: AnyRef) => Set(v)
   protected lazy val j2sSetInt       : AnyRef => AnyRef = (v: AnyRef) => Set(v)
@@ -154,7 +155,7 @@ object LambdasSet extends ResolveBase with JavaConversions {
     case map: jMap[_, _] =>
       val list = map.values.iterator.next.asInstanceOf[jList[_]].asScala
       list.head match {
-        case _: Long       => Some(list.map(_.asInstanceOf[Long]).toSet)
+        case _: Long => Some(list.map(_.asInstanceOf[Long]).toSet)
         // Refs
         case _: jMap[_, _] => Some(list.map(_.asInstanceOf[jMap[_, _]].values.iterator.next.asInstanceOf[Long]).toSet)
       }
@@ -249,4 +250,137 @@ object LambdasSet extends ResolveBase with JavaConversions {
   lazy val resOptSetByte      : ResSetOpt[Byte]       = ResSetOpt("Byte", dByte, s2jByte, j2sOpSetByte)
   lazy val resOptSetShort     : ResSetOpt[Short]      = ResSetOpt("Short", dShort, s2jShort, j2sOpSetShort)
   lazy val resOptSetChar      : ResSetOpt[Char]       = ResSetOpt("Char", dChar, s2jChar, j2sOpSetChar)
+
+
+
+  // Nested opt ---------------------------------------------------------------------
+
+  lazy val it2SetString    : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case `none`       => nullValue
+    case vs: jList[_] => vs.asScala.map(v => v.toString).toSet
+    case other        => unexpectedValue(other)
+  }
+  lazy val it2SetInt       : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case vs: jList[_] => vs.asScala.map(v => v.toString.toInt).toSet
+    case `none`       => nullValue
+    case other        => unexpectedValue(other)
+  }
+  lazy val it2SetLong      : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case vs: jList[_] => vs.asScala.map(v => v.asInstanceOf[Long]).toSet
+    case `none`       => nullValue
+    case other        => unexpectedValue(other)
+  }
+  lazy val it2SetFloat     : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case vs: jList[_] => vs.asScala.map(v => v.asInstanceOf[Float]).toSet
+    case `none`       => nullValue
+    case other        => unexpectedValue(other)
+  }
+  lazy val it2SetDouble    : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case vs: jList[_] => vs.asScala.map(v => v.asInstanceOf[Double]).toSet
+    case `none`       => nullValue
+    case other        => unexpectedValue(other)
+  }
+  lazy val it2SetBoolean   : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case vs: jList[_] => vs.asScala.map(v => v.asInstanceOf[Boolean]).toSet
+    case `none`       => nullValue
+    case other        => unexpectedValue(other)
+  }
+  lazy val it2SetBigInt    : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case vs: jList[_] => vs.asScala.map(v => BigInt(v.asInstanceOf[jBigInt])).toSet
+    case `none`       => nullValue
+    case other        => unexpectedValue(other)
+  }
+  lazy val it2SetBigDecimal: jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case vs: jList[_] => vs.asScala.map(v => BigDecimal(v.asInstanceOf[jBigDecimal])).toSet
+    case `none`       => nullValue
+    case other        => unexpectedValue(other)
+  }
+  lazy val it2SetDate      : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case vs: jList[_] => vs.asScala.map(v => v.asInstanceOf[Date]).toSet
+    case `none`       => nullValue
+    case other        => unexpectedValue(other)
+  }
+  lazy val it2SetUUID      : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case vs: jList[_] => vs.asScala.map(v => v.asInstanceOf[UUID]).toSet
+    case `none`       => nullValue
+    case other        => unexpectedValue(other)
+  }
+  lazy val it2SetURI       : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case vs: jList[_] => vs.asScala.map(v => v.asInstanceOf[URI]).toSet
+    case `none`       => nullValue
+    case other        => unexpectedValue(other)
+  }
+  lazy val it2SetByte      : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case vs: jList[_] => vs.asScala.map(v => v.asInstanceOf[Integer].toByte).toSet
+    case `none`       => nullValue
+    case other        => unexpectedValue(other)
+  }
+  lazy val it2SetShort     : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case vs: jList[_] => vs.asScala.map(v => v.asInstanceOf[Integer].toShort).toSet
+    case `none`       => nullValue
+    case other        => unexpectedValue(other)
+  }
+  lazy val it2SetChar      : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case `none`       => nullValue
+    case vs: jList[_] => vs.asScala.map(v => v.asInstanceOf[String].charAt(0)).toSet
+    case other        => unexpectedValue(other)
+  }
+
+
+  lazy val it2OptSetString    : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case `none`       => None
+    case vs: jList[_] => Some(vs.asScala.map(v => v.asInstanceOf[String]).toSet)
+  }
+  lazy val it2OptSetInt       : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case `none`       => None
+    case vs: jList[_] => Some(vs.asScala.map(v => v.toString.toInt).toSet)
+  }
+  lazy val it2OptSetLong      : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case `none`       => None
+    case vs: jList[_] => Some(vs.asScala.map(v => v.asInstanceOf[Long]).toSet)
+  }
+  lazy val it2OptSetFloat     : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case `none`       => None
+    case vs: jList[_] => Some(vs.asScala.map(v => v.asInstanceOf[Float]).toSet)
+  }
+  lazy val it2OptSetDouble    : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case `none`       => None
+    case vs: jList[_] => Some(vs.asScala.map(v => v.asInstanceOf[Double]).toSet)
+  }
+  lazy val it2OptSetBoolean   : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case `none`       => None
+    case vs: jList[_] => Some(vs.asScala.map(v => v.asInstanceOf[Boolean]).toSet)
+  }
+  lazy val it2OptSetBigInt    : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case `none`       => None
+    case vs: jList[_] => Some(vs.asScala.map(v => BigInt(v.asInstanceOf[jBigInt])).toSet)
+  }
+  lazy val it2OptSetBigDecimal: jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case `none`       => None
+    case vs: jList[_] => Some(vs.asScala.map(v => BigDecimal(v.asInstanceOf[jBigDecimal])).toSet)
+  }
+  lazy val it2OptSetDate      : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case `none`       => None
+    case vs: jList[_] => Some(vs.asScala.map(v => v.asInstanceOf[Date]).toSet)
+  }
+  lazy val it2OptSetUUID      : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case `none`       => None
+    case vs: jList[_] => Some(vs.asScala.map(v => v.asInstanceOf[UUID]).toSet)
+  }
+  lazy val it2OptSetURI       : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case `none`       => None
+    case vs: jList[_] => Some(vs.asScala.map(v => v.asInstanceOf[URI]).toSet)
+  }
+  lazy val it2OptSetByte      : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case `none`       => None
+    case vs: jList[_] => Some(vs.asScala.map(v => v.asInstanceOf[Integer].toByte).toSet)
+  }
+  lazy val it2OptSetShort     : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case `none`       => None
+    case vs: jList[_] => Some(vs.asScala.map(v => v.asInstanceOf[Integer].toShort).toSet)
+  }
+  lazy val it2OptSetChar      : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case `none`       => None
+    case vs: jList[_] => Some(vs.asScala.map(v => v.asInstanceOf[String].charAt(0)).toSet)
+  }
 }

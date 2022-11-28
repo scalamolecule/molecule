@@ -8,10 +8,7 @@ import scala.collection.mutable.ArrayBuffer
 
 
 trait NestOpt_[Tpl] { self: Model2Query[Tpl] with Base[Tpl]
-  with CastNestedOptBranch_[Tpl]
-//  with CastNestedOptBranchFlatten_[Tpl]
-  with CastNestedOptLeaf_[Tpl] =>
-//  with CastNestedOptLeafFlatten_[Tpl] =>
+  with CastNestedOptBranch_[Tpl] with CastNestedOptLeaf_[Tpl] =>
 
   private lazy val levels = pullCastss.length
 
@@ -47,16 +44,16 @@ trait NestOpt_[Tpl] { self: Model2Query[Tpl] with Base[Tpl]
 
   final protected lazy val pullRow2tpl: Row => Tpl = {
     casts.length match {
-      case 0  => pullBranch0_0
-      case 1  => pullBranch0_1(casts)
-      case 2  => pullBranch0_2(casts)
-      case 3  => pullBranch0_3(casts)
-      case 4  => pullBranch0_4(casts)
-      case 5  => pullBranch0_5(casts)
-      case 6  => pullBranch0_6(casts)
-      case 7  => pullBranch0_7(casts)
-      case 8  => pullBranch0_8(casts)
-      case 9  => pullBranch0_9(casts)
+      case 0 => pullBranch0_0
+      case 1 => pullBranch0_1(casts)
+      case 2 => pullBranch0_2(casts)
+      case 3 => pullBranch0_3(casts)
+      case 4 => pullBranch0_4(casts)
+      case 5 => pullBranch0_5(casts)
+      case 6 => pullBranch0_6(casts)
+      case 7 => pullBranch0_7(casts)
+      case 8 => pullBranch0_8(casts)
+      case 9 => pullBranch0_9(casts)
       case 10 => pullBranch0_10(casts)
       case 11 => pullBranch0_11(casts)
       case 12 => pullBranch0_12(casts)
@@ -82,7 +79,7 @@ trait NestOpt_[Tpl] { self: Model2Query[Tpl] with Base[Tpl]
       (
         c0(row.get(0)),
         pullBranch1(row.get(1).asInstanceOf[jMap[_, _]].values.iterator)
-        ).asInstanceOf[Tpl]
+      ).asInstanceOf[Tpl]
   }
 
   final private def pullBranch0_2(casts: ArrayBuffer[AnyRef => AnyRef]): Row => Tpl = {
@@ -93,7 +90,7 @@ trait NestOpt_[Tpl] { self: Model2Query[Tpl] with Base[Tpl]
         c0(row.get(0)),
         c1(row.get(1)),
         pullBranch1(row.get(2).asInstanceOf[jMap[_, _]].values.iterator)
-        ).asInstanceOf[Tpl]
+      ).asInstanceOf[Tpl]
   }
 
   final private def pullBranch0_3(casts: ArrayBuffer[AnyRef => AnyRef]): Row => Tpl = {
@@ -106,7 +103,7 @@ trait NestOpt_[Tpl] { self: Model2Query[Tpl] with Base[Tpl]
         c1(row.get(1)),
         c2(row.get(2)),
         pullBranch1(row.get(3).asInstanceOf[jMap[_, _]].values.iterator)
-        ).asInstanceOf[Tpl]
+      ).asInstanceOf[Tpl]
   }
 
   final private def pullBranch0_4(casts: ArrayBuffer[AnyRef => AnyRef]): Row => Tpl = {
@@ -121,7 +118,7 @@ trait NestOpt_[Tpl] { self: Model2Query[Tpl] with Base[Tpl]
         c2(row.get(2)),
         c3(row.get(3)),
         pullBranch1(row.get(4).asInstanceOf[jMap[_, _]].values.iterator)
-        ).asInstanceOf[Tpl]
+      ).asInstanceOf[Tpl]
   }
 
   final private def pullBranch0_5(casts: ArrayBuffer[AnyRef => AnyRef]): Row => Tpl = {
@@ -138,7 +135,7 @@ trait NestOpt_[Tpl] { self: Model2Query[Tpl] with Base[Tpl]
         c3(row.get(3)),
         c4(row.get(4)),
         pullBranch1(row.get(5).asInstanceOf[jMap[_, _]].values.iterator)
-        ).asInstanceOf[Tpl]
+      ).asInstanceOf[Tpl]
   }
 
   final private def pullBranch0_6(casts: ArrayBuffer[AnyRef => AnyRef]): Row => Tpl = {
@@ -157,7 +154,7 @@ trait NestOpt_[Tpl] { self: Model2Query[Tpl] with Base[Tpl]
         c4(row.get(4)),
         c5(row.get(5)),
         pullBranch1(row.get(6).asInstanceOf[jMap[_, _]].values.iterator)
-        ).asInstanceOf[Tpl]
+      ).asInstanceOf[Tpl]
   }
 
   final private def pullBranch0_7(casts: ArrayBuffer[AnyRef => AnyRef]): Row => Tpl = {
@@ -178,7 +175,7 @@ trait NestOpt_[Tpl] { self: Model2Query[Tpl] with Base[Tpl]
         c5(row.get(5)),
         c6(row.get(6)),
         pullBranch1(row.get(7).asInstanceOf[jMap[_, _]].values.iterator)
-        ).asInstanceOf[Tpl]
+      ).asInstanceOf[Tpl]
   }
 
   final private def pullBranch0_8(casts: ArrayBuffer[AnyRef => AnyRef]): Row => Tpl = {
@@ -201,7 +198,7 @@ trait NestOpt_[Tpl] { self: Model2Query[Tpl] with Base[Tpl]
         c6(row.get(6)),
         c7(row.get(7)),
         pullBranch1(row.get(8).asInstanceOf[jMap[_, _]].values.iterator)
-        ).asInstanceOf[Tpl]
+      ).asInstanceOf[Tpl]
   }
 
   final private def pullBranch0_9(casts: ArrayBuffer[AnyRef => AnyRef]): Row => Tpl = {
@@ -226,7 +223,7 @@ trait NestOpt_[Tpl] { self: Model2Query[Tpl] with Base[Tpl]
         c7(row.get(7)),
         c8(row.get(8)),
         pullBranch1(row.get(9).asInstanceOf[jMap[_, _]].values.iterator)
-        ).asInstanceOf[Tpl]
+      ).asInstanceOf[Tpl]
   }
 
   final private def pullBranch0_10(casts: ArrayBuffer[AnyRef => AnyRef]): Row => Tpl = {
@@ -253,20 +250,20 @@ trait NestOpt_[Tpl] { self: Model2Query[Tpl] with Base[Tpl]
         c8(row.get(8)),
         c9(row.get(9)),
         pullBranch1(row.get(10).asInstanceOf[jMap[_, _]].values.iterator)
-        ).asInstanceOf[Tpl]
+      ).asInstanceOf[Tpl]
   }
 
   final private def pullBranch0_11(casts: ArrayBuffer[AnyRef => AnyRef]): Row => Tpl = {
-    val c0  = casts(0)
-    val c1  = casts(1)
-    val c2  = casts(2)
-    val c3  = casts(3)
-    val c4  = casts(4)
-    val c5  = casts(5)
-    val c6  = casts(6)
-    val c7  = casts(7)
-    val c8  = casts(8)
-    val c9  = casts(9)
+    val c0 = casts(0)
+    val c1 = casts(1)
+    val c2 = casts(2)
+    val c3 = casts(3)
+    val c4 = casts(4)
+    val c5 = casts(5)
+    val c6 = casts(6)
+    val c7 = casts(7)
+    val c8 = casts(8)
+    val c9 = casts(9)
     val c10 = casts(10)
     (row: Row) =>
       (
@@ -282,20 +279,20 @@ trait NestOpt_[Tpl] { self: Model2Query[Tpl] with Base[Tpl]
         c9(row.get(9)),
         c10(row.get(10)),
         pullBranch1(row.get(11).asInstanceOf[jMap[_, _]].values.iterator)
-        ).asInstanceOf[Tpl]
+      ).asInstanceOf[Tpl]
   }
 
   final private def pullBranch0_12(casts: ArrayBuffer[AnyRef => AnyRef]): Row => Tpl = {
-    val c0  = casts(0)
-    val c1  = casts(1)
-    val c2  = casts(2)
-    val c3  = casts(3)
-    val c4  = casts(4)
-    val c5  = casts(5)
-    val c6  = casts(6)
-    val c7  = casts(7)
-    val c8  = casts(8)
-    val c9  = casts(9)
+    val c0 = casts(0)
+    val c1 = casts(1)
+    val c2 = casts(2)
+    val c3 = casts(3)
+    val c4 = casts(4)
+    val c5 = casts(5)
+    val c6 = casts(6)
+    val c7 = casts(7)
+    val c8 = casts(8)
+    val c9 = casts(9)
     val c10 = casts(10)
     val c11 = casts(11)
     (row: Row) =>
@@ -313,20 +310,20 @@ trait NestOpt_[Tpl] { self: Model2Query[Tpl] with Base[Tpl]
         c10(row.get(10)),
         c11(row.get(11)),
         pullBranch1(row.get(12).asInstanceOf[jMap[_, _]].values.iterator)
-        ).asInstanceOf[Tpl]
+      ).asInstanceOf[Tpl]
   }
 
   final private def pullBranch0_13(casts: ArrayBuffer[AnyRef => AnyRef]): Row => Tpl = {
-    val c0  = casts(0)
-    val c1  = casts(1)
-    val c2  = casts(2)
-    val c3  = casts(3)
-    val c4  = casts(4)
-    val c5  = casts(5)
-    val c6  = casts(6)
-    val c7  = casts(7)
-    val c8  = casts(8)
-    val c9  = casts(9)
+    val c0 = casts(0)
+    val c1 = casts(1)
+    val c2 = casts(2)
+    val c3 = casts(3)
+    val c4 = casts(4)
+    val c5 = casts(5)
+    val c6 = casts(6)
+    val c7 = casts(7)
+    val c8 = casts(8)
+    val c9 = casts(9)
     val c10 = casts(10)
     val c11 = casts(11)
     val c12 = casts(12)
@@ -346,20 +343,20 @@ trait NestOpt_[Tpl] { self: Model2Query[Tpl] with Base[Tpl]
         c11(row.get(11)),
         c12(row.get(12)),
         pullBranch1(row.get(13).asInstanceOf[jMap[_, _]].values.iterator)
-        ).asInstanceOf[Tpl]
+      ).asInstanceOf[Tpl]
   }
 
   final private def pullBranch0_14(casts: ArrayBuffer[AnyRef => AnyRef]): Row => Tpl = {
-    val c0  = casts(0)
-    val c1  = casts(1)
-    val c2  = casts(2)
-    val c3  = casts(3)
-    val c4  = casts(4)
-    val c5  = casts(5)
-    val c6  = casts(6)
-    val c7  = casts(7)
-    val c8  = casts(8)
-    val c9  = casts(9)
+    val c0 = casts(0)
+    val c1 = casts(1)
+    val c2 = casts(2)
+    val c3 = casts(3)
+    val c4 = casts(4)
+    val c5 = casts(5)
+    val c6 = casts(6)
+    val c7 = casts(7)
+    val c8 = casts(8)
+    val c9 = casts(9)
     val c10 = casts(10)
     val c11 = casts(11)
     val c12 = casts(12)
@@ -381,20 +378,20 @@ trait NestOpt_[Tpl] { self: Model2Query[Tpl] with Base[Tpl]
         c12(row.get(12)),
         c13(row.get(13)),
         pullBranch1(row.get(14).asInstanceOf[jMap[_, _]].values.iterator)
-        ).asInstanceOf[Tpl]
+      ).asInstanceOf[Tpl]
   }
 
   final private def pullBranch0_15(casts: ArrayBuffer[AnyRef => AnyRef]): Row => Tpl = {
-    val c0  = casts(0)
-    val c1  = casts(1)
-    val c2  = casts(2)
-    val c3  = casts(3)
-    val c4  = casts(4)
-    val c5  = casts(5)
-    val c6  = casts(6)
-    val c7  = casts(7)
-    val c8  = casts(8)
-    val c9  = casts(9)
+    val c0 = casts(0)
+    val c1 = casts(1)
+    val c2 = casts(2)
+    val c3 = casts(3)
+    val c4 = casts(4)
+    val c5 = casts(5)
+    val c6 = casts(6)
+    val c7 = casts(7)
+    val c8 = casts(8)
+    val c9 = casts(9)
     val c10 = casts(10)
     val c11 = casts(11)
     val c12 = casts(12)
@@ -418,20 +415,20 @@ trait NestOpt_[Tpl] { self: Model2Query[Tpl] with Base[Tpl]
         c13(row.get(13)),
         c14(row.get(14)),
         pullBranch1(row.get(15).asInstanceOf[jMap[_, _]].values.iterator)
-        ).asInstanceOf[Tpl]
+      ).asInstanceOf[Tpl]
   }
 
   final private def pullBranch0_16(casts: ArrayBuffer[AnyRef => AnyRef]): Row => Tpl = {
-    val c0  = casts(0)
-    val c1  = casts(1)
-    val c2  = casts(2)
-    val c3  = casts(3)
-    val c4  = casts(4)
-    val c5  = casts(5)
-    val c6  = casts(6)
-    val c7  = casts(7)
-    val c8  = casts(8)
-    val c9  = casts(9)
+    val c0 = casts(0)
+    val c1 = casts(1)
+    val c2 = casts(2)
+    val c3 = casts(3)
+    val c4 = casts(4)
+    val c5 = casts(5)
+    val c6 = casts(6)
+    val c7 = casts(7)
+    val c8 = casts(8)
+    val c9 = casts(9)
     val c10 = casts(10)
     val c11 = casts(11)
     val c12 = casts(12)
@@ -457,20 +454,20 @@ trait NestOpt_[Tpl] { self: Model2Query[Tpl] with Base[Tpl]
         c14(row.get(14)),
         c15(row.get(15)),
         pullBranch1(row.get(16).asInstanceOf[jMap[_, _]].values.iterator)
-        ).asInstanceOf[Tpl]
+      ).asInstanceOf[Tpl]
   }
 
   final private def pullBranch0_17(casts: ArrayBuffer[AnyRef => AnyRef]): Row => Tpl = {
-    val c0  = casts(0)
-    val c1  = casts(1)
-    val c2  = casts(2)
-    val c3  = casts(3)
-    val c4  = casts(4)
-    val c5  = casts(5)
-    val c6  = casts(6)
-    val c7  = casts(7)
-    val c8  = casts(8)
-    val c9  = casts(9)
+    val c0 = casts(0)
+    val c1 = casts(1)
+    val c2 = casts(2)
+    val c3 = casts(3)
+    val c4 = casts(4)
+    val c5 = casts(5)
+    val c6 = casts(6)
+    val c7 = casts(7)
+    val c8 = casts(8)
+    val c9 = casts(9)
     val c10 = casts(10)
     val c11 = casts(11)
     val c12 = casts(12)
@@ -498,20 +495,20 @@ trait NestOpt_[Tpl] { self: Model2Query[Tpl] with Base[Tpl]
         c15(row.get(15)),
         c16(row.get(16)),
         pullBranch1(row.get(17).asInstanceOf[jMap[_, _]].values.iterator)
-        ).asInstanceOf[Tpl]
+      ).asInstanceOf[Tpl]
   }
 
   final private def pullBranch0_18(casts: ArrayBuffer[AnyRef => AnyRef]): Row => Tpl = {
-    val c0  = casts(0)
-    val c1  = casts(1)
-    val c2  = casts(2)
-    val c3  = casts(3)
-    val c4  = casts(4)
-    val c5  = casts(5)
-    val c6  = casts(6)
-    val c7  = casts(7)
-    val c8  = casts(8)
-    val c9  = casts(9)
+    val c0 = casts(0)
+    val c1 = casts(1)
+    val c2 = casts(2)
+    val c3 = casts(3)
+    val c4 = casts(4)
+    val c5 = casts(5)
+    val c6 = casts(6)
+    val c7 = casts(7)
+    val c8 = casts(8)
+    val c9 = casts(9)
     val c10 = casts(10)
     val c11 = casts(11)
     val c12 = casts(12)
@@ -541,20 +538,20 @@ trait NestOpt_[Tpl] { self: Model2Query[Tpl] with Base[Tpl]
         c16(row.get(16)),
         c17(row.get(17)),
         pullBranch1(row.get(18).asInstanceOf[jMap[_, _]].values.iterator)
-        ).asInstanceOf[Tpl]
+      ).asInstanceOf[Tpl]
   }
 
   final private def pullBranch0_19(casts: ArrayBuffer[AnyRef => AnyRef]): Row => Tpl = {
-    val c0  = casts(0)
-    val c1  = casts(1)
-    val c2  = casts(2)
-    val c3  = casts(3)
-    val c4  = casts(4)
-    val c5  = casts(5)
-    val c6  = casts(6)
-    val c7  = casts(7)
-    val c8  = casts(8)
-    val c9  = casts(9)
+    val c0 = casts(0)
+    val c1 = casts(1)
+    val c2 = casts(2)
+    val c3 = casts(3)
+    val c4 = casts(4)
+    val c5 = casts(5)
+    val c6 = casts(6)
+    val c7 = casts(7)
+    val c8 = casts(8)
+    val c9 = casts(9)
     val c10 = casts(10)
     val c11 = casts(11)
     val c12 = casts(12)
@@ -586,20 +583,20 @@ trait NestOpt_[Tpl] { self: Model2Query[Tpl] with Base[Tpl]
         c17(row.get(17)),
         c18(row.get(18)),
         pullBranch1(row.get(19).asInstanceOf[jMap[_, _]].values.iterator)
-        ).asInstanceOf[Tpl]
+      ).asInstanceOf[Tpl]
   }
 
   final private def pullBranch0_20(casts: ArrayBuffer[AnyRef => AnyRef]): Row => Tpl = {
-    val c0  = casts(0)
-    val c1  = casts(1)
-    val c2  = casts(2)
-    val c3  = casts(3)
-    val c4  = casts(4)
-    val c5  = casts(5)
-    val c6  = casts(6)
-    val c7  = casts(7)
-    val c8  = casts(8)
-    val c9  = casts(9)
+    val c0 = casts(0)
+    val c1 = casts(1)
+    val c2 = casts(2)
+    val c3 = casts(3)
+    val c4 = casts(4)
+    val c5 = casts(5)
+    val c6 = casts(6)
+    val c7 = casts(7)
+    val c8 = casts(8)
+    val c9 = casts(9)
     val c10 = casts(10)
     val c11 = casts(11)
     val c12 = casts(12)
@@ -633,20 +630,20 @@ trait NestOpt_[Tpl] { self: Model2Query[Tpl] with Base[Tpl]
         c18(row.get(18)),
         c19(row.get(19)),
         pullBranch1(row.get(20).asInstanceOf[jMap[_, _]].values.iterator)
-        ).asInstanceOf[Tpl]
+      ).asInstanceOf[Tpl]
   }
 
   final private def pullBranch0_21(casts: ArrayBuffer[AnyRef => AnyRef]): Row => Tpl = {
-    val c0  = casts(0)
-    val c1  = casts(1)
-    val c2  = casts(2)
-    val c3  = casts(3)
-    val c4  = casts(4)
-    val c5  = casts(5)
-    val c6  = casts(6)
-    val c7  = casts(7)
-    val c8  = casts(8)
-    val c9  = casts(9)
+    val c0 = casts(0)
+    val c1 = casts(1)
+    val c2 = casts(2)
+    val c3 = casts(3)
+    val c4 = casts(4)
+    val c5 = casts(5)
+    val c6 = casts(6)
+    val c7 = casts(7)
+    val c8 = casts(8)
+    val c9 = casts(9)
     val c10 = casts(10)
     val c11 = casts(11)
     val c12 = casts(12)
@@ -682,6 +679,6 @@ trait NestOpt_[Tpl] { self: Model2Query[Tpl] with Base[Tpl]
         c19(row.get(19)),
         c20(row.get(20)),
         pullBranch1(row.get(21).asInstanceOf[jMap[_, _]].values.iterator)
-        ).asInstanceOf[Tpl]
+      ).asInstanceOf[Tpl]
   }
 }

@@ -2,6 +2,7 @@ package molecule.db.datomic.transaction
 
 import java.util.{Collections, List => jList}
 import clojure.lang.Keyword
+import molecule.base.util.exceptions.MoleculeException
 import molecule.boilerplate.ast.MoleculeModel._
 import scala.annotation.tailrec
 
@@ -42,13 +43,25 @@ class InsertStmts(elements: Seq[Element], data: Seq[Product], tempIdInit: Int = 
               }
           }
 
-        case Ref(ns, refAttr, _, _) => resolve(tail, resolvers :+ addRef(ns, kw(ns, refAttr)), n)
-        case BackRef(backRefNs)     => resolve(tail, resolvers :+ addBackRef(backRefNs), n)
+        case Ref(ns, refAttr, refNs, _) =>
+          prevRefs += refAttr
+          resolve(tail, resolvers :+ addRef(ns, kw(ns, refAttr)), n)
+
+        case BackRef(backRefNs) =>
+          tail.head match {
+            case Ref(_, refAttr, refNs, _) if prevRefs.contains(refAttr) => throw MoleculeException(
+              s"Can't re-use previous namespace ${refAttr.capitalize} after backref _$backRefNs."
+            )
+            case _                                                       => // ok
+          }
+          resolve(tail, resolvers :+ addBackRef(backRefNs), n)
 
         case Nested(Ref(ns, refAttr, _, _), elements) =>
+          prevRefs.clear()
           resolve(tail, resolvers :+ addNested(n, ns, kw(ns, refAttr), elements), n)
 
         case NestedOpt(Ref(ns, refAttr, _, _), elements) =>
+          prevRefs.clear()
           resolve(tail, resolvers :+ addNested(n, ns, kw(ns, refAttr), elements), n)
 
         case other => unexpected(other)

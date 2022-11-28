@@ -43,6 +43,7 @@ object Types extends DataModel(3) {
   }
 
   trait Ref {
-    val n1 = oneInt
+    val n = oneInt
+    val nss = many[Ns]
   }
 }

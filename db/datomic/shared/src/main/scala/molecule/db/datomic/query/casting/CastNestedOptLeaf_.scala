@@ -6,9 +6,12 @@ import molecule.core.query.Model2Query
 import molecule.db.datomic.query.Base
 
 
-trait CastNestedOptLeaf_[Tpl] { self: Model2Query[Tpl] with Base[Tpl] =>
+trait CastNestedOptLeaf_[Tpl] {
+  self: Model2Query[Tpl] with Base[Tpl] =>
 
-  final protected def pullLeaf(pullCasts: List[jIterator[_] => Any]): jIterator[_] => List[Any] = {
+  final protected def pullLeaf(
+    pullCasts: List[jIterator[_] => Any]
+  ): jIterator[_] => List[Any] = {
     pullCasts.length match {
       case 1 => pullLeaf1(pullCasts)
       case 2 => pullLeaf2(pullCasts)

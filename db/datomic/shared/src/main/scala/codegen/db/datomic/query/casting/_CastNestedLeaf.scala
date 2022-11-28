@@ -11,13 +11,18 @@ object _CastNestedLeaf extends DatomicGenBase("CastNestedLeaf", "/query/casting"
        |package molecule.db.datomic.query.casting
        |
        |import molecule.core.query.Model2Query
+       |import molecule.db.datomic.query.Base
        |
        |
-       |trait ${fileName}_[Tpl] { self: Model2Query[Tpl] with Base[Tpl] =>
+       |trait ${fileName}_[Tpl] {
+       |  self: Model2Query[Tpl] with Base[Tpl] =>
        |
-       |  final protected def castLeaf(casts: List[AnyRef => AnyRef], firstRowIndex: Int): Row => Any = {
+       |  final protected def castLeaf(
+       |    casts: List[AnyRef => AnyRef],
+       |    firstRowIndex: Int
+       |  ): Row => Any = {
        |    val n          = casts.length
-       |    val rowIndexes = (firstRowIndex to (firstRowIndex + n)).toList
+       |    val rowIndexes = (firstRowIndex until (firstRowIndex + n)).toList
        |    n match {
        |      $resolveX
        |    }

@@ -3,10 +3,10 @@ package molecule.db.datomic.query
 import java.lang.{Boolean => jBoolean, Double => jDouble, Float => jFloat, Integer => jInteger, Long => jLong}
 import java.math.{BigDecimal => jBigDecimal, BigInteger => jBigInt}
 import java.net.URI
-import java.util.{Date, UUID, Map => jMap, Set => jSet, List => jList}
-import java.util.{ArrayList => jArrayList, List => jList, Map => jMap, Iterator => jIterator}
+import java.util.{Date, UUID, Iterator => jIterator, List => jList, Map => jMap, Set => jSet}
 
-object LambdasOne extends ResolveBase {
+object LambdasOne extends LambdasOne
+trait LambdasOne extends ResolveBase {
 
   // Datomic Java to Scala
   protected lazy val j2sString    : AnyRef => AnyRef = identity
@@ -95,78 +95,6 @@ object LambdasOne extends ResolveBase {
   protected lazy val vector2setByte      : AnyRef => AnyRef = vector2set((v: AnyRef) => v.asInstanceOf[Integer].toByte)
   protected lazy val vector2setShort     : AnyRef => AnyRef = vector2set((v: AnyRef) => v.asInstanceOf[Integer].toShort)
   protected lazy val vector2setChar      : AnyRef => AnyRef = vector2set((v: AnyRef) => v.asInstanceOf[String].charAt(0))
-
-
-  lazy val it2String    : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case `none`    => nullValue
-    case v: String => v
-    case other     => unexpectedValue(other)
-  }
-  lazy val it2Int       : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case v: Integer => v.toInt
-    case `none`     => nullValue
-    case other      => unexpectedValue(other)
-  }
-  lazy val it2Long      : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case v: jLong => v.toLong
-    case `none`   => nullValue
-    case other    => unexpectedValue(other)
-  }
-  lazy val it2Float     : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case v: jFloat => v.toFloat
-    case `none`    => nullValue
-    case other     => unexpectedValue(other)
-  }
-  lazy val it2Double    : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case v: jDouble => v.toDouble
-    case `none`     => nullValue
-    case other      => unexpectedValue(other)
-  }
-  lazy val it2Boolean   : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case v: Boolean => v
-    case `none`     => nullValue
-    case other      => unexpectedValue(other)
-  }
-  lazy val it2BigInt    : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case v: jBigInt => BigInt(v)
-    case `none`     => nullValue
-    case other      => unexpectedValue(other)
-  }
-  lazy val it2BigDecimal: jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case v: jBigDecimal => BigDecimal(v)
-    case `none`         => nullValue
-    case other          => unexpectedValue(other)
-  }
-  lazy val it2Date      : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case v: Date => v
-    case `none`  => nullValue
-    case other   => unexpectedValue(other)
-  }
-  lazy val it2UUID      : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case v: UUID => v
-    case `none`  => nullValue
-    case other   => unexpectedValue(other)
-  }
-  lazy val it2URI       : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case v: URI => v
-    case `none` => nullValue
-    case other  => unexpectedValue(other)
-  }
-  lazy val it2Byte      : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case v: Integer => v.toByte
-    case `none`     => nullValue
-    case other      => unexpectedValue(other)
-  }
-  lazy val it2Short     : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case v: Integer => v.toShort
-    case `none`     => nullValue
-    case other      => unexpectedValue(other)
-  }
-  lazy val it2Char      : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case `none`    => nullValue
-    case v: String => v.charAt(0)
-    case other     => unexpectedValue(other)
-  }
 
 
   case class ResOne[T](
@@ -271,6 +199,103 @@ object LambdasOne extends ResolveBase {
   }
 
 
+  case class ResOneOpt[T](
+    tpe: String,
+    toDatalog: T => String,
+    s2j: Any => Any,
+    j2s: AnyRef => AnyRef
+  )
+
+  lazy val resOptString    : ResOneOpt[String]     = ResOneOpt("String", dString, s2jString, j2sOptString)
+  lazy val resOptInt       : ResOneOpt[Int]        = ResOneOpt("Int", dInt, s2jInt, j2sOptInt)
+  lazy val resOptLong      : ResOneOpt[Long]       = ResOneOpt("Long", dLong, s2jLong, j2sOptLong)
+  lazy val resOptFloat     : ResOneOpt[Float]      = ResOneOpt("Float", dFloat, s2jFloat, j2sOptFloat)
+  lazy val resOptDouble    : ResOneOpt[Double]     = ResOneOpt("Double", dDouble, s2jDouble, j2sOptDouble)
+  lazy val resOptBoolean   : ResOneOpt[Boolean]    = ResOneOpt("Boolean", dBoolean, s2jBoolean, j2sOptBoolean)
+  lazy val resOptBigInt    : ResOneOpt[BigInt]     = ResOneOpt("BigInt", dBigInt, s2jBigInt, j2sOptBigInt)
+  lazy val resOptBigDecimal: ResOneOpt[BigDecimal] = ResOneOpt("BigDecimal", dBigDecimal, s2jBigDecimal, j2sOptBigDecimal)
+  lazy val resOptDate      : ResOneOpt[Date]       = ResOneOpt("Date", dDate, s2jDate, j2sOptDate)
+  lazy val resOptUUID      : ResOneOpt[UUID]       = ResOneOpt("UUID", dUUID, s2jUUID, j2sOptUUID)
+  lazy val resOptURI       : ResOneOpt[URI]        = ResOneOpt("URI", dURI, s2jURI, j2sOptURI)
+  lazy val resOptByte      : ResOneOpt[Byte]       = ResOneOpt("Byte", dByte, s2jByte, j2sOptByte)
+  lazy val resOptShort     : ResOneOpt[Short]      = ResOneOpt("Short", dShort, s2jShort, j2sOptShort)
+  lazy val resOptChar      : ResOneOpt[Char]       = ResOneOpt("Char", dChar, s2jChar, j2sOptChar)
+
+
+  // Nested opt ---------------------------------------------------------------------
+
+  lazy val it2String    : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case `none`    => nullValue
+    case v: String => v
+    case other     => unexpectedValue(other)
+  }
+  lazy val it2Int       : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case v: Integer => v.toInt
+    case `none`     => nullValue
+    case other      => unexpectedValue(other)
+  }
+  lazy val it2Long      : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case v: jLong => v.toLong
+    case `none`   => nullValue
+    case other    => unexpectedValue(other)
+  }
+  lazy val it2Float     : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case v: jFloat => v.toFloat
+    case `none`    => nullValue
+    case other     => unexpectedValue(other)
+  }
+  lazy val it2Double    : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case v: jDouble => v.toDouble
+    case `none`     => nullValue
+    case other      => unexpectedValue(other)
+  }
+  lazy val it2Boolean   : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case v: Boolean => v
+    case `none`     => nullValue
+    case other      => unexpectedValue(other)
+  }
+  lazy val it2BigInt    : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case v: jBigInt => BigInt(v)
+    case `none`     => nullValue
+    case other      => unexpectedValue(other)
+  }
+  lazy val it2BigDecimal: jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case v: jBigDecimal => BigDecimal(v)
+    case `none`         => nullValue
+    case other          => unexpectedValue(other)
+  }
+  lazy val it2Date      : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case v: Date => v
+    case `none`  => nullValue
+    case other   => unexpectedValue(other)
+  }
+  lazy val it2UUID      : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case v: UUID => v
+    case `none`  => nullValue
+    case other   => unexpectedValue(other)
+  }
+  lazy val it2URI       : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case v: URI => v
+    case `none` => nullValue
+    case other  => unexpectedValue(other)
+  }
+  lazy val it2Byte      : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case v: Integer => v.toByte
+    case `none`     => nullValue
+    case other      => unexpectedValue(other)
+  }
+  lazy val it2Short     : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case v: Integer => v.toShort
+    case `none`     => nullValue
+    case other      => unexpectedValue(other)
+  }
+  lazy val it2Char      : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case `none`    => nullValue
+    case v: String => v.charAt(0)
+    case other     => unexpectedValue(other)
+  }
+
+
   lazy val it2OptString    : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
     case `none` => None
     case v      => Some(v.toString)
@@ -327,27 +352,4 @@ object LambdasOne extends ResolveBase {
     case `none` => None
     case v      => Some(v.asInstanceOf[String].charAt(0))
   }
-
-
-  case class ResOneOpt[T](
-    tpe: String,
-    toDatalog: T => String,
-    s2j: Any => Any,
-    j2s: AnyRef => AnyRef
-  )
-
-  lazy val resOptString    : ResOneOpt[String]     = ResOneOpt("String", dString, s2jString, j2sOptString)
-  lazy val resOptInt       : ResOneOpt[Int]        = ResOneOpt("Int", dInt, s2jInt, j2sOptInt)
-  lazy val resOptLong      : ResOneOpt[Long]       = ResOneOpt("Long", dLong, s2jLong, j2sOptLong)
-  lazy val resOptFloat     : ResOneOpt[Float]      = ResOneOpt("Float", dFloat, s2jFloat, j2sOptFloat)
-  lazy val resOptDouble    : ResOneOpt[Double]     = ResOneOpt("Double", dDouble, s2jDouble, j2sOptDouble)
-  lazy val resOptBoolean   : ResOneOpt[Boolean]    = ResOneOpt("Boolean", dBoolean, s2jBoolean, j2sOptBoolean)
-  lazy val resOptBigInt    : ResOneOpt[BigInt]     = ResOneOpt("BigInt", dBigInt, s2jBigInt, j2sOptBigInt)
-  lazy val resOptBigDecimal: ResOneOpt[BigDecimal] = ResOneOpt("BigDecimal", dBigDecimal, s2jBigDecimal, j2sOptBigDecimal)
-  lazy val resOptDate      : ResOneOpt[Date]       = ResOneOpt("Date", dDate, s2jDate, j2sOptDate)
-  lazy val resOptUUID      : ResOneOpt[UUID]       = ResOneOpt("UUID", dUUID, s2jUUID, j2sOptUUID)
-  lazy val resOptURI       : ResOneOpt[URI]        = ResOneOpt("URI", dURI, s2jURI, j2sOptURI)
-  lazy val resOptByte      : ResOneOpt[Byte]       = ResOneOpt("Byte", dByte, s2jByte, j2sOptByte)
-  lazy val resOptShort     : ResOneOpt[Short]      = ResOneOpt("Short", dShort, s2jShort, j2sOptShort)
-  lazy val resOptChar      : ResOneOpt[Char]       = ResOneOpt("Char", dChar, s2jChar, j2sOptChar)
 }

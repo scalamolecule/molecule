@@ -12,18 +12,18 @@ object NestedBasic extends DatomicTestSuite {
   lazy val tests = Tests {
 
     "Mandatory/optional rows" - refs { implicit conn =>
-      Ns.n.Rs1.*(R1.n1).insert(
+      Ns.i.Rs1.*(R1.i).insert(
         (1, List(10, 11)),
         (2, Nil),
       ).transact
 
       // Mandatory nested data
-      Ns.n.Rs1.*(R1.n1).query.get ==> List(
+      Ns.i.Rs1.*(R1.i.a1).query.get ==> List(
         (1, List(10, 11)),
       )
 
       // Optional nested data
-      Ns.n.Rs1.*?(R1.n1).query.get ==> List(
+      Ns.i.Rs1.*?(R1.i.a1).query.get ==> List(
         (1, List(10, 11)),
         (2, Nil),
       )

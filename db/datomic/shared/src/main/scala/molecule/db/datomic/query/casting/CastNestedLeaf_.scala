@@ -5,9 +5,13 @@ import molecule.core.query.Model2Query
 import molecule.db.datomic.query.Base
 
 
-trait CastNestedLeaf_[Tpl] { self: Model2Query[Tpl] with Base[Tpl] =>
+trait CastNestedLeaf_[Tpl] {
+  self: Model2Query[Tpl] with Base[Tpl] =>
 
-  final protected def castLeaf(casts: List[AnyRef => AnyRef], firstRowIndex: Int): Row => Any = {
+  final protected def castLeaf(
+    casts: List[AnyRef => AnyRef],
+    firstRowIndex: Int
+  ): Row => Any = {
     val n          = casts.length
     val rowIndexes = (firstRowIndex until (firstRowIndex + n)).toList
     n match {

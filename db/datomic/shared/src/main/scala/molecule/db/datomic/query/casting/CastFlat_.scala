@@ -5,9 +5,10 @@ import molecule.core.query.Model2Query
 import molecule.db.datomic.query.Base
 
 
-trait CastFlat_[Tpl] { self: Model2Query[Tpl] with Base[Tpl] =>
+trait CastFlat_[Tpl] {
+  self: Model2Query[Tpl] with Base[Tpl] =>
 
-  override lazy protected val row2tpl: Row => Tpl = {
+  final override lazy protected val row2tpl: Row => Tpl = {
     casts.length match {
       case 1 => cast1
       case 2 => cast2

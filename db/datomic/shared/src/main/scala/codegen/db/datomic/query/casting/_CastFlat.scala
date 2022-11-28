@@ -11,12 +11,14 @@ object _CastFlat extends DatomicGenBase("CastFlat", "/query/casting") {
        |package molecule.db.datomic.query.casting
        |
        |import molecule.core.query.Model2Query
+       |import molecule.db.datomic.query.Base
        |
        |
-       |trait ${fileName}_[Tpl] { self: Model2Query[Tpl] with Base[Tpl] =>
+       |trait ${fileName}_[Tpl] {
+       |  self: Model2Query[Tpl] with Base[Tpl] =>
        |
        |  final override lazy protected val row2tpl: Row => Tpl = {
-       |    castScala.length match {
+       |    casts.length match {
        |      $resolveX
        |    }
        |  }
@@ -25,7 +27,7 @@ object _CastFlat extends DatomicGenBase("CastFlat", "/query/casting") {
   }
 
   case class Chunk(i: Int) extends TemplateVals(i) {
-    val resolvers = (0 until i).map { j => s"val c$j = castScala($j)" }.mkString("\n    ")
+    val resolvers = (0 until i).map { j => s"val c$j = casts($j)" }.mkString("\n    ")
     val tuple     = (0 until i).map { j => s"c$j(row.get($j))" }.mkString(",\n        ")
     val body      =
       s"""
