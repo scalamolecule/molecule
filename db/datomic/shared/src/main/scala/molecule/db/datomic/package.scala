@@ -6,10 +6,7 @@ import molecule.core.MoleculeImplicits_
 import molecule.db.datomic.api._
 import scala.language.implicitConversions
 
-package object datomic
-  extends MoleculeImplicits_
-    with Keywords {
-
+package object datomic extends MoleculeImplicits_ {
   implicit final override def m[A](molecule: Molecule_01[A]): DatomicMoleculeApi_01[A] = new DatomicMoleculeApi_01(molecule)
   implicit final override def m[A, B](molecule: Molecule_02[A, B]): DatomicMoleculeApi_02[A, B] = new DatomicMoleculeApi_02(molecule)
   implicit final override def m[A, B, C](molecule: Molecule_03[A, B, C]): DatomicMoleculeApi_03[A, B, C] = new DatomicMoleculeApi_03(molecule)
@@ -32,4 +29,27 @@ package object datomic
   implicit final override def m[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T](molecule: Molecule_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T]): DatomicMoleculeApi_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T] = new DatomicMoleculeApi_20(molecule)
   implicit final override def m[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U](molecule: Molecule_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U]): DatomicMoleculeApi_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U] = new DatomicMoleculeApi_21(molecule)
   implicit final override def m[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V](molecule: Molecule_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V]): DatomicMoleculeApi_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V] = new DatomicMoleculeApi_22(molecule)
+
+  implicit final override def m[T1](composite: Composite_01[T1]): DatomicMoleculeApi_01[T1] = new DatomicMoleculeApi_01(composite)
+  implicit final override def m[T1, T2](composite: Composite_02[T1, T2]): DatomicMoleculeApi_02[T1, T2] = new DatomicMoleculeApi_02(composite)
+  implicit final override def m[T1, T2, T3](composite: Composite_03[T1, T2, T3]): DatomicMoleculeApi_03[T1, T2, T3] = new DatomicMoleculeApi_03(composite)
+  implicit final override def m[T1, T2, T3, T4](composite: Composite_04[T1, T2, T3, T4]): DatomicMoleculeApi_04[T1, T2, T3, T4] = new DatomicMoleculeApi_04(composite)
+  implicit final override def m[T1, T2, T3, T4, T5](composite: Composite_05[T1, T2, T3, T4, T5]): DatomicMoleculeApi_05[T1, T2, T3, T4, T5] = new DatomicMoleculeApi_05(composite)
+  implicit final override def m[T1, T2, T3, T4, T5, T6](composite: Composite_06[T1, T2, T3, T4, T5, T6]): DatomicMoleculeApi_06[T1, T2, T3, T4, T5, T6] = new DatomicMoleculeApi_06(composite)
+  implicit final override def m[T1, T2, T3, T4, T5, T6, T7](composite: Composite_07[T1, T2, T3, T4, T5, T6, T7]): DatomicMoleculeApi_07[T1, T2, T3, T4, T5, T6, T7] = new DatomicMoleculeApi_07(composite)
+  implicit final override def m[T1, T2, T3, T4, T5, T6, T7, T8](composite: Composite_08[T1, T2, T3, T4, T5, T6, T7, T8]): DatomicMoleculeApi_08[T1, T2, T3, T4, T5, T6, T7, T8] = new DatomicMoleculeApi_08(composite)
+  implicit final override def m[T1, T2, T3, T4, T5, T6, T7, T8, T9](composite: Composite_09[T1, T2, T3, T4, T5, T6, T7, T8, T9]): DatomicMoleculeApi_09[T1, T2, T3, T4, T5, T6, T7, T8, T9] = new DatomicMoleculeApi_09(composite)
+  implicit final override def m[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10](composite: Composite_10[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10]): DatomicMoleculeApi_10[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10] = new DatomicMoleculeApi_10(composite)
+  implicit final override def m[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11](composite: Composite_11[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11]): DatomicMoleculeApi_11[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11] = new DatomicMoleculeApi_11(composite)
+  implicit final override def m[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12](composite: Composite_12[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12]): DatomicMoleculeApi_12[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12] = new DatomicMoleculeApi_12(composite)
+  implicit final override def m[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13](composite: Composite_13[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13]): DatomicMoleculeApi_13[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13] = new DatomicMoleculeApi_13(composite)
+  implicit final override def m[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14](composite: Composite_14[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14]): DatomicMoleculeApi_14[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14] = new DatomicMoleculeApi_14(composite)
+  implicit final override def m[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15](composite: Composite_15[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15]): DatomicMoleculeApi_15[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15] = new DatomicMoleculeApi_15(composite)
+  implicit final override def m[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16](composite: Composite_16[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16]): DatomicMoleculeApi_16[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16] = new DatomicMoleculeApi_16(composite)
+  implicit final override def m[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17](composite: Composite_17[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17]): DatomicMoleculeApi_17[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17] = new DatomicMoleculeApi_17(composite)
+  implicit final override def m[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18](composite: Composite_18[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18]): DatomicMoleculeApi_18[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18] = new DatomicMoleculeApi_18(composite)
+  implicit final override def m[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19](composite: Composite_19[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19]): DatomicMoleculeApi_19[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19] = new DatomicMoleculeApi_19(composite)
+  implicit final override def m[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20](composite: Composite_20[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20]): DatomicMoleculeApi_20[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20] = new DatomicMoleculeApi_20(composite)
+  implicit final override def m[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21](composite: Composite_21[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21]): DatomicMoleculeApi_21[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21] = new DatomicMoleculeApi_21(composite)
+  implicit final override def m[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22](composite: Composite_22[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22]): DatomicMoleculeApi_22[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22] = new DatomicMoleculeApi_22(composite)
 }

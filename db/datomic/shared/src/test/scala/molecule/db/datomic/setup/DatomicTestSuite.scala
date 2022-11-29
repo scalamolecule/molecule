@@ -4,6 +4,7 @@ import molecule.base.util.exceptions.MoleculeException
 import molecule.core.api.Connection
 import molecule.core.util.JavaConversions
 import molecule.coreTests.sampledata.CoreData
+import molecule.db.datomic.setup.DatomicTestSuiteImpl
 import utest._
 import utest.framework.Formatter
 

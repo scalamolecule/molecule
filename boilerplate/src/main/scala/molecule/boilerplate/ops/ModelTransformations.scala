@@ -231,13 +231,6 @@ trait ModelTransformations {
     es.init :+ last
   }
 
-  protected def addNestedMan(es: Seq[Element], nestedElements: Seq[Element]): Seq[Element] = {
-    es.init :+ Nested(es.last.asInstanceOf[Ref], nestedElements)
-  }
-  protected def addNestedOpt(es: Seq[Element], nestedElements: Seq[Element]): Seq[Element] = {
-    es.init :+ NestedOpt(es.last.asInstanceOf[Ref], nestedElements)
-  }
-
   protected def addSort(es: Seq[Element], sort: String): Seq[Element] = {
     val last = es.last match {
       case a: AttrOneMan => a match {

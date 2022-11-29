@@ -8,6 +8,7 @@ object _ExprSetTac extends BoilerplateGenBase("ExprSetTac", "/api/expression") {
     s"""// GENERATED CODE ********************************
        |package molecule.boilerplate.api.expression
        |
+       |import molecule.boilerplate.api._
        |import molecule.boilerplate.ast.MoleculeModel._
        |$traits
        |""".stripMargin

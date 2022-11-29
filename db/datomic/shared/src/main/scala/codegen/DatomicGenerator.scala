@@ -16,6 +16,8 @@ object DatomicGenerator extends App {
 
   // jvm specific only -----------------------------------
 
+  //    datomic.query.casting._CastComposite.generate
+  //    datomic.query.casting._CastCompositeTpl.generate
   //  datomic.query.casting._CastFlat.generate
   //  datomic.query.casting._CastNestedBranch.generate
   //  datomic.query.casting._CastNestedLeaf.generate
@@ -29,5 +31,5 @@ object DatomicGenerator extends App {
   //  datomic.query._SortOne.generate
   //  datomic.query._SortOneOpt.generate
   //
-  //  datomic._DatomicMoleculeImplicits.generate
+  //    datomic._DatomicMoleculeImplicits.generate
 }

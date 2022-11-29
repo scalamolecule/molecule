@@ -4,7 +4,7 @@ import codegen.core._MoleculeImplicits
 
 object CoreGenerator extends App {
 
-  _MoleculeImplicits.generate
+//  _MoleculeImplicits.generate
 //  core.api._Insert.generate
 
 

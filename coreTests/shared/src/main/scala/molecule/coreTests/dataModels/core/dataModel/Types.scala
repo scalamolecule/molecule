@@ -5,7 +5,7 @@ import molecule.DataModel
 object Types extends DataModel(3) {
 
   trait Ns {
-    val n  = oneInt
+    val i = oneInt
 
     // Cardinality one
     val string     = oneString
@@ -43,7 +43,8 @@ object Types extends DataModel(3) {
   }
 
   trait Ref {
-    val n = oneInt
+    val i   = oneInt
+    val s   = oneString
     val nss = many[Ns]
   }
 }

@@ -19,6 +19,10 @@ abstract class CodeGenTemplate(val fileName: String, dir: String, basePath: Stri
     lazy val `, A..V`   = if (tpes.isEmpty) "" else tpes.mkString(", ", ", ", "")
     lazy val `A..U, `   = if (tpes.size <= 1) "" else tpes.init.mkString("", ", ", ", ")
     lazy val `[A..V]`   = if (arity == 0) "" else tpes.mkString("[", ", ", "]")
+    lazy val Tn         = if (arity == 0) "" else (1 to arity).map(i => s"T$i").mkString(", ")
+    lazy val `[Tn]`     = if (arity == 0) "" else s"[$Tn]"
+    lazy val `[T0]`     = if (arity == 0) " " * 68 else s"[$Tn" + (" " * 68) + "]"
+    lazy val `T1, `     = if (arity == 0) "" else s"$Tn, "
 
     val `A..V,` = arity match {
       case 0 => ""
@@ -44,6 +48,12 @@ abstract class CodeGenTemplate(val fileName: String, dir: String, basePath: Stri
 
     lazy val `..`  = " " * (if (arity == 1) 3 else 3 * (arity - 1) + 3)
     lazy val `..N` = if (arity >= 10) `..` + " " else `..`
+
+    val tpl = arity match {
+      case 0 => "Nothing"
+      case 1 => "A"
+      case _ => s"(${`A..V`})"
+    }
   }
 
   // Implement in sub classes

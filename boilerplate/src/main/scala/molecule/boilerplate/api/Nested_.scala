@@ -25,12 +25,12 @@ import molecule.boilerplate.ast.MoleculeModel._
   */
 trait NestedBase
 
-trait NestedOp_0 extends NestedBase {
-  protected def _nestedMan[Tpl](nestedElements: Seq[Element]): Tx_1[Seq[Tpl]] = ???
-  protected def _nestedOpt[Tpl](nestedElements: Seq[Element]): Tx_1[Seq[Tpl]] = ???
+trait NestedOp_0 extends NestedBase { self: Molecule[Nothing] =>
+  protected def _nestedMan[Tpl](nestedElements: Seq[Element]): Tx_1[Seq[Tpl]] = new Tx_1[Seq[Tpl]](elements.init :+ Nested(elements.last.asInstanceOf[Ref], nestedElements))
+  protected def _nestedOpt[Tpl](nestedElements: Seq[Element]): Tx_1[Seq[Tpl]] = new Tx_1[Seq[Tpl]](elements.init :+ NestedOpt(elements.last.asInstanceOf[Ref], nestedElements))
 }
 
-trait Nested_0 extends NestedOp_0 {
+trait Nested_0 extends NestedOp_0 { self: Molecule[Nothing] =>
   final def * [a                                                               ] (nested: Molecule_01[a                                                               ]): Tx_1[Seq[a                                                                 ]] = _nestedMan[a                                                                 ](nested.elements)
   final def * [a, b                                                            ] (nested: Molecule_02[a, b                                                            ]): Tx_1[Seq[(a, b                                                            )]] = _nestedMan[(a, b                                                            )](nested.elements)
   final def * [a, b, c                                                         ] (nested: Molecule_03[a, b, c                                                         ]): Tx_1[Seq[(a, b, c                                                         )]] = _nestedMan[(a, b, c                                                         )](nested.elements)
@@ -78,12 +78,12 @@ trait Nested_0 extends NestedOp_0 {
 }
 
 
-trait NestedOp_1[A] extends NestedBase {
-  protected def _nestedMan[Tpl](nestedElements: Seq[Element]): Tx_2[A, Seq[Tpl]] = ???
-  protected def _nestedOpt[Tpl](nestedElements: Seq[Element]): Tx_2[A, Seq[Tpl]] = ???
+trait NestedOp_1[A] extends NestedBase { self: Molecule[A] =>
+  protected def _nestedMan[Tpl](nestedElements: Seq[Element]): Tx_2[A, Seq[Tpl]] = new Tx_2[A, Seq[Tpl]](elements.init :+ Nested(elements.last.asInstanceOf[Ref], nestedElements))
+  protected def _nestedOpt[Tpl](nestedElements: Seq[Element]): Tx_2[A, Seq[Tpl]] = new Tx_2[A, Seq[Tpl]](elements.init :+ NestedOpt(elements.last.asInstanceOf[Ref], nestedElements))
 }
 
-trait Nested_1[A] extends NestedOp_1[A] {
+trait Nested_1[A] extends NestedOp_1[A] { self: Molecule[A] =>
   final def * [a                                                               ] (nested: Molecule_01[a                                                               ]): Tx_2[A, Seq[a                                                                 ]] = _nestedMan[a                                                                 ](nested.elements)
   final def * [a, b                                                            ] (nested: Molecule_02[a, b                                                            ]): Tx_2[A, Seq[(a, b                                                            )]] = _nestedMan[(a, b                                                            )](nested.elements)
   final def * [a, b, c                                                         ] (nested: Molecule_03[a, b, c                                                         ]): Tx_2[A, Seq[(a, b, c                                                         )]] = _nestedMan[(a, b, c                                                         )](nested.elements)
@@ -131,12 +131,12 @@ trait Nested_1[A] extends NestedOp_1[A] {
 }
 
 
-trait NestedOp_2[A, B] extends NestedBase {
-  protected def _nestedMan[Tpl](nestedElements: Seq[Element]): Tx_3[A, B, Seq[Tpl]] = ???
-  protected def _nestedOpt[Tpl](nestedElements: Seq[Element]): Tx_3[A, B, Seq[Tpl]] = ???
+trait NestedOp_2[A, B] extends NestedBase { self: Molecule[(A, B)] =>
+  protected def _nestedMan[Tpl](nestedElements: Seq[Element]): Tx_3[A, B, Seq[Tpl]] = new Tx_3[A, B, Seq[Tpl]](elements.init :+ Nested(elements.last.asInstanceOf[Ref], nestedElements))
+  protected def _nestedOpt[Tpl](nestedElements: Seq[Element]): Tx_3[A, B, Seq[Tpl]] = new Tx_3[A, B, Seq[Tpl]](elements.init :+ NestedOpt(elements.last.asInstanceOf[Ref], nestedElements))
 }
 
-trait Nested_2[A, B] extends NestedOp_2[A, B] {
+trait Nested_2[A, B] extends NestedOp_2[A, B] { self: Molecule[(A, B)] =>
   final def * [a                                                               ] (nested: Molecule_01[a                                                               ]): Tx_3[A, B, Seq[a                                                                 ]] = _nestedMan[a                                                                 ](nested.elements)
   final def * [a, b                                                            ] (nested: Molecule_02[a, b                                                            ]): Tx_3[A, B, Seq[(a, b                                                            )]] = _nestedMan[(a, b                                                            )](nested.elements)
   final def * [a, b, c                                                         ] (nested: Molecule_03[a, b, c                                                         ]): Tx_3[A, B, Seq[(a, b, c                                                         )]] = _nestedMan[(a, b, c                                                         )](nested.elements)
@@ -184,12 +184,12 @@ trait Nested_2[A, B] extends NestedOp_2[A, B] {
 }
 
 
-trait NestedOp_3[A, B, C] extends NestedBase {
-  protected def _nestedMan[Tpl](nestedElements: Seq[Element]): Tx_4[A, B, C, Seq[Tpl]] = ???
-  protected def _nestedOpt[Tpl](nestedElements: Seq[Element]): Tx_4[A, B, C, Seq[Tpl]] = ???
+trait NestedOp_3[A, B, C] extends NestedBase { self: Molecule[(A, B, C)] =>
+  protected def _nestedMan[Tpl](nestedElements: Seq[Element]): Tx_4[A, B, C, Seq[Tpl]] = new Tx_4[A, B, C, Seq[Tpl]](elements.init :+ Nested(elements.last.asInstanceOf[Ref], nestedElements))
+  protected def _nestedOpt[Tpl](nestedElements: Seq[Element]): Tx_4[A, B, C, Seq[Tpl]] = new Tx_4[A, B, C, Seq[Tpl]](elements.init :+ NestedOpt(elements.last.asInstanceOf[Ref], nestedElements))
 }
 
-trait Nested_3[A, B, C] extends NestedOp_3[A, B, C] {
+trait Nested_3[A, B, C] extends NestedOp_3[A, B, C] { self: Molecule[(A, B, C)] =>
   final def * [a                                                               ] (nested: Molecule_01[a                                                               ]): Tx_4[A, B, C, Seq[a                                                                 ]] = _nestedMan[a                                                                 ](nested.elements)
   final def * [a, b                                                            ] (nested: Molecule_02[a, b                                                            ]): Tx_4[A, B, C, Seq[(a, b                                                            )]] = _nestedMan[(a, b                                                            )](nested.elements)
   final def * [a, b, c                                                         ] (nested: Molecule_03[a, b, c                                                         ]): Tx_4[A, B, C, Seq[(a, b, c                                                         )]] = _nestedMan[(a, b, c                                                         )](nested.elements)
@@ -237,12 +237,12 @@ trait Nested_3[A, B, C] extends NestedOp_3[A, B, C] {
 }
 
 
-trait NestedOp_4[A, B, C, D] extends NestedBase {
-  protected def _nestedMan[Tpl](nestedElements: Seq[Element]): Tx_5[A, B, C, D, Seq[Tpl]] = ???
-  protected def _nestedOpt[Tpl](nestedElements: Seq[Element]): Tx_5[A, B, C, D, Seq[Tpl]] = ???
+trait NestedOp_4[A, B, C, D] extends NestedBase { self: Molecule[(A, B, C, D)] =>
+  protected def _nestedMan[Tpl](nestedElements: Seq[Element]): Tx_5[A, B, C, D, Seq[Tpl]] = new Tx_5[A, B, C, D, Seq[Tpl]](elements.init :+ Nested(elements.last.asInstanceOf[Ref], nestedElements))
+  protected def _nestedOpt[Tpl](nestedElements: Seq[Element]): Tx_5[A, B, C, D, Seq[Tpl]] = new Tx_5[A, B, C, D, Seq[Tpl]](elements.init :+ NestedOpt(elements.last.asInstanceOf[Ref], nestedElements))
 }
 
-trait Nested_4[A, B, C, D] extends NestedOp_4[A, B, C, D] {
+trait Nested_4[A, B, C, D] extends NestedOp_4[A, B, C, D] { self: Molecule[(A, B, C, D)] =>
   final def * [a                                                               ] (nested: Molecule_01[a                                                               ]): Tx_5[A, B, C, D, Seq[a                                                                 ]] = _nestedMan[a                                                                 ](nested.elements)
   final def * [a, b                                                            ] (nested: Molecule_02[a, b                                                            ]): Tx_5[A, B, C, D, Seq[(a, b                                                            )]] = _nestedMan[(a, b                                                            )](nested.elements)
   final def * [a, b, c                                                         ] (nested: Molecule_03[a, b, c                                                         ]): Tx_5[A, B, C, D, Seq[(a, b, c                                                         )]] = _nestedMan[(a, b, c                                                         )](nested.elements)
@@ -290,12 +290,12 @@ trait Nested_4[A, B, C, D] extends NestedOp_4[A, B, C, D] {
 }
 
 
-trait NestedOp_5[A, B, C, D, E] extends NestedBase {
-  protected def _nestedMan[Tpl](nestedElements: Seq[Element]): Tx_6[A, B, C, D, E, Seq[Tpl]] = ???
-  protected def _nestedOpt[Tpl](nestedElements: Seq[Element]): Tx_6[A, B, C, D, E, Seq[Tpl]] = ???
+trait NestedOp_5[A, B, C, D, E] extends NestedBase { self: Molecule[(A, B, C, D, E)] =>
+  protected def _nestedMan[Tpl](nestedElements: Seq[Element]): Tx_6[A, B, C, D, E, Seq[Tpl]] = new Tx_6[A, B, C, D, E, Seq[Tpl]](elements.init :+ Nested(elements.last.asInstanceOf[Ref], nestedElements))
+  protected def _nestedOpt[Tpl](nestedElements: Seq[Element]): Tx_6[A, B, C, D, E, Seq[Tpl]] = new Tx_6[A, B, C, D, E, Seq[Tpl]](elements.init :+ NestedOpt(elements.last.asInstanceOf[Ref], nestedElements))
 }
 
-trait Nested_5[A, B, C, D, E] extends NestedOp_5[A, B, C, D, E] {
+trait Nested_5[A, B, C, D, E] extends NestedOp_5[A, B, C, D, E] { self: Molecule[(A, B, C, D, E)] =>
   final def * [a                                                               ] (nested: Molecule_01[a                                                               ]): Tx_6[A, B, C, D, E, Seq[a                                                                 ]] = _nestedMan[a                                                                 ](nested.elements)
   final def * [a, b                                                            ] (nested: Molecule_02[a, b                                                            ]): Tx_6[A, B, C, D, E, Seq[(a, b                                                            )]] = _nestedMan[(a, b                                                            )](nested.elements)
   final def * [a, b, c                                                         ] (nested: Molecule_03[a, b, c                                                         ]): Tx_6[A, B, C, D, E, Seq[(a, b, c                                                         )]] = _nestedMan[(a, b, c                                                         )](nested.elements)
@@ -343,12 +343,12 @@ trait Nested_5[A, B, C, D, E] extends NestedOp_5[A, B, C, D, E] {
 }
 
 
-trait NestedOp_6[A, B, C, D, E, F] extends NestedBase {
-  protected def _nestedMan[Tpl](nestedElements: Seq[Element]): Tx_7[A, B, C, D, E, F, Seq[Tpl]] = ???
-  protected def _nestedOpt[Tpl](nestedElements: Seq[Element]): Tx_7[A, B, C, D, E, F, Seq[Tpl]] = ???
+trait NestedOp_6[A, B, C, D, E, F] extends NestedBase { self: Molecule[(A, B, C, D, E, F)] =>
+  protected def _nestedMan[Tpl](nestedElements: Seq[Element]): Tx_7[A, B, C, D, E, F, Seq[Tpl]] = new Tx_7[A, B, C, D, E, F, Seq[Tpl]](elements.init :+ Nested(elements.last.asInstanceOf[Ref], nestedElements))
+  protected def _nestedOpt[Tpl](nestedElements: Seq[Element]): Tx_7[A, B, C, D, E, F, Seq[Tpl]] = new Tx_7[A, B, C, D, E, F, Seq[Tpl]](elements.init :+ NestedOpt(elements.last.asInstanceOf[Ref], nestedElements))
 }
 
-trait Nested_6[A, B, C, D, E, F] extends NestedOp_6[A, B, C, D, E, F] {
+trait Nested_6[A, B, C, D, E, F] extends NestedOp_6[A, B, C, D, E, F] { self: Molecule[(A, B, C, D, E, F)] =>
   final def * [a                                                               ] (nested: Molecule_01[a                                                               ]): Tx_7[A, B, C, D, E, F, Seq[a                                                                 ]] = _nestedMan[a                                                                 ](nested.elements)
   final def * [a, b                                                            ] (nested: Molecule_02[a, b                                                            ]): Tx_7[A, B, C, D, E, F, Seq[(a, b                                                            )]] = _nestedMan[(a, b                                                            )](nested.elements)
   final def * [a, b, c                                                         ] (nested: Molecule_03[a, b, c                                                         ]): Tx_7[A, B, C, D, E, F, Seq[(a, b, c                                                         )]] = _nestedMan[(a, b, c                                                         )](nested.elements)
@@ -396,12 +396,12 @@ trait Nested_6[A, B, C, D, E, F] extends NestedOp_6[A, B, C, D, E, F] {
 }
 
 
-trait NestedOp_7[A, B, C, D, E, F, G] extends NestedBase {
-  protected def _nestedMan[Tpl](nestedElements: Seq[Element]): Tx_8[A, B, C, D, E, F, G, Seq[Tpl]] = ???
-  protected def _nestedOpt[Tpl](nestedElements: Seq[Element]): Tx_8[A, B, C, D, E, F, G, Seq[Tpl]] = ???
+trait NestedOp_7[A, B, C, D, E, F, G] extends NestedBase { self: Molecule[(A, B, C, D, E, F, G)] =>
+  protected def _nestedMan[Tpl](nestedElements: Seq[Element]): Tx_8[A, B, C, D, E, F, G, Seq[Tpl]] = new Tx_8[A, B, C, D, E, F, G, Seq[Tpl]](elements.init :+ Nested(elements.last.asInstanceOf[Ref], nestedElements))
+  protected def _nestedOpt[Tpl](nestedElements: Seq[Element]): Tx_8[A, B, C, D, E, F, G, Seq[Tpl]] = new Tx_8[A, B, C, D, E, F, G, Seq[Tpl]](elements.init :+ NestedOpt(elements.last.asInstanceOf[Ref], nestedElements))
 }
 
-trait Nested_7[A, B, C, D, E, F, G] extends NestedOp_7[A, B, C, D, E, F, G] {
+trait Nested_7[A, B, C, D, E, F, G] extends NestedOp_7[A, B, C, D, E, F, G] { self: Molecule[(A, B, C, D, E, F, G)] =>
   final def * [a                                                               ] (nested: Molecule_01[a                                                               ]): Tx_8[A, B, C, D, E, F, G, Seq[a                                                                 ]] = _nestedMan[a                                                                 ](nested.elements)
   final def * [a, b                                                            ] (nested: Molecule_02[a, b                                                            ]): Tx_8[A, B, C, D, E, F, G, Seq[(a, b                                                            )]] = _nestedMan[(a, b                                                            )](nested.elements)
   final def * [a, b, c                                                         ] (nested: Molecule_03[a, b, c                                                         ]): Tx_8[A, B, C, D, E, F, G, Seq[(a, b, c                                                         )]] = _nestedMan[(a, b, c                                                         )](nested.elements)
@@ -449,12 +449,12 @@ trait Nested_7[A, B, C, D, E, F, G] extends NestedOp_7[A, B, C, D, E, F, G] {
 }
 
 
-trait NestedOp_8[A, B, C, D, E, F, G, H] extends NestedBase {
-  protected def _nestedMan[Tpl](nestedElements: Seq[Element]): Tx_9[A, B, C, D, E, F, G, H, Seq[Tpl]] = ???
-  protected def _nestedOpt[Tpl](nestedElements: Seq[Element]): Tx_9[A, B, C, D, E, F, G, H, Seq[Tpl]] = ???
+trait NestedOp_8[A, B, C, D, E, F, G, H] extends NestedBase { self: Molecule[(A, B, C, D, E, F, G, H)] =>
+  protected def _nestedMan[Tpl](nestedElements: Seq[Element]): Tx_9[A, B, C, D, E, F, G, H, Seq[Tpl]] = new Tx_9[A, B, C, D, E, F, G, H, Seq[Tpl]](elements.init :+ Nested(elements.last.asInstanceOf[Ref], nestedElements))
+  protected def _nestedOpt[Tpl](nestedElements: Seq[Element]): Tx_9[A, B, C, D, E, F, G, H, Seq[Tpl]] = new Tx_9[A, B, C, D, E, F, G, H, Seq[Tpl]](elements.init :+ NestedOpt(elements.last.asInstanceOf[Ref], nestedElements))
 }
 
-trait Nested_8[A, B, C, D, E, F, G, H] extends NestedOp_8[A, B, C, D, E, F, G, H] {
+trait Nested_8[A, B, C, D, E, F, G, H] extends NestedOp_8[A, B, C, D, E, F, G, H] { self: Molecule[(A, B, C, D, E, F, G, H)] =>
   final def * [a                                                               ] (nested: Molecule_01[a                                                               ]): Tx_9[A, B, C, D, E, F, G, H, Seq[a                                                                 ]] = _nestedMan[a                                                                 ](nested.elements)
   final def * [a, b                                                            ] (nested: Molecule_02[a, b                                                            ]): Tx_9[A, B, C, D, E, F, G, H, Seq[(a, b                                                            )]] = _nestedMan[(a, b                                                            )](nested.elements)
   final def * [a, b, c                                                         ] (nested: Molecule_03[a, b, c                                                         ]): Tx_9[A, B, C, D, E, F, G, H, Seq[(a, b, c                                                         )]] = _nestedMan[(a, b, c                                                         )](nested.elements)
@@ -502,12 +502,12 @@ trait Nested_8[A, B, C, D, E, F, G, H] extends NestedOp_8[A, B, C, D, E, F, G, H
 }
 
 
-trait NestedOp_9[A, B, C, D, E, F, G, H, I] extends NestedBase {
-  protected def _nestedMan[Tpl](nestedElements: Seq[Element]): Tx_10[A, B, C, D, E, F, G, H, I, Seq[Tpl]] = ???
-  protected def _nestedOpt[Tpl](nestedElements: Seq[Element]): Tx_10[A, B, C, D, E, F, G, H, I, Seq[Tpl]] = ???
+trait NestedOp_9[A, B, C, D, E, F, G, H, I] extends NestedBase { self: Molecule[(A, B, C, D, E, F, G, H, I)] =>
+  protected def _nestedMan[Tpl](nestedElements: Seq[Element]): Tx_10[A, B, C, D, E, F, G, H, I, Seq[Tpl]] = new Tx_10[A, B, C, D, E, F, G, H, I, Seq[Tpl]](elements.init :+ Nested(elements.last.asInstanceOf[Ref], nestedElements))
+  protected def _nestedOpt[Tpl](nestedElements: Seq[Element]): Tx_10[A, B, C, D, E, F, G, H, I, Seq[Tpl]] = new Tx_10[A, B, C, D, E, F, G, H, I, Seq[Tpl]](elements.init :+ NestedOpt(elements.last.asInstanceOf[Ref], nestedElements))
 }
 
-trait Nested_9[A, B, C, D, E, F, G, H, I] extends NestedOp_9[A, B, C, D, E, F, G, H, I] {
+trait Nested_9[A, B, C, D, E, F, G, H, I] extends NestedOp_9[A, B, C, D, E, F, G, H, I] { self: Molecule[(A, B, C, D, E, F, G, H, I)] =>
   final def * [a                                                               ] (nested: Molecule_01[a                                                               ]): Tx_10[A, B, C, D, E, F, G, H, I, Seq[a                                                                 ]] = _nestedMan[a                                                                 ](nested.elements)
   final def * [a, b                                                            ] (nested: Molecule_02[a, b                                                            ]): Tx_10[A, B, C, D, E, F, G, H, I, Seq[(a, b                                                            )]] = _nestedMan[(a, b                                                            )](nested.elements)
   final def * [a, b, c                                                         ] (nested: Molecule_03[a, b, c                                                         ]): Tx_10[A, B, C, D, E, F, G, H, I, Seq[(a, b, c                                                         )]] = _nestedMan[(a, b, c                                                         )](nested.elements)
@@ -555,12 +555,12 @@ trait Nested_9[A, B, C, D, E, F, G, H, I] extends NestedOp_9[A, B, C, D, E, F, G
 }
 
 
-trait NestedOp_10[A, B, C, D, E, F, G, H, I, J] extends NestedBase {
-  protected def _nestedMan[Tpl](nestedElements: Seq[Element]): Tx_11[A, B, C, D, E, F, G, H, I, J, Seq[Tpl]] = ???
-  protected def _nestedOpt[Tpl](nestedElements: Seq[Element]): Tx_11[A, B, C, D, E, F, G, H, I, J, Seq[Tpl]] = ???
+trait NestedOp_10[A, B, C, D, E, F, G, H, I, J] extends NestedBase { self: Molecule[(A, B, C, D, E, F, G, H, I, J)] =>
+  protected def _nestedMan[Tpl](nestedElements: Seq[Element]): Tx_11[A, B, C, D, E, F, G, H, I, J, Seq[Tpl]] = new Tx_11[A, B, C, D, E, F, G, H, I, J, Seq[Tpl]](elements.init :+ Nested(elements.last.asInstanceOf[Ref], nestedElements))
+  protected def _nestedOpt[Tpl](nestedElements: Seq[Element]): Tx_11[A, B, C, D, E, F, G, H, I, J, Seq[Tpl]] = new Tx_11[A, B, C, D, E, F, G, H, I, J, Seq[Tpl]](elements.init :+ NestedOpt(elements.last.asInstanceOf[Ref], nestedElements))
 }
 
-trait Nested_10[A, B, C, D, E, F, G, H, I, J] extends NestedOp_10[A, B, C, D, E, F, G, H, I, J] {
+trait Nested_10[A, B, C, D, E, F, G, H, I, J] extends NestedOp_10[A, B, C, D, E, F, G, H, I, J] { self: Molecule[(A, B, C, D, E, F, G, H, I, J)] =>
   final def * [a                                                               ] (nested: Molecule_01[a                                                               ]): Tx_11[A, B, C, D, E, F, G, H, I, J, Seq[a                                                                 ]] = _nestedMan[a                                                                 ](nested.elements)
   final def * [a, b                                                            ] (nested: Molecule_02[a, b                                                            ]): Tx_11[A, B, C, D, E, F, G, H, I, J, Seq[(a, b                                                            )]] = _nestedMan[(a, b                                                            )](nested.elements)
   final def * [a, b, c                                                         ] (nested: Molecule_03[a, b, c                                                         ]): Tx_11[A, B, C, D, E, F, G, H, I, J, Seq[(a, b, c                                                         )]] = _nestedMan[(a, b, c                                                         )](nested.elements)
@@ -608,12 +608,12 @@ trait Nested_10[A, B, C, D, E, F, G, H, I, J] extends NestedOp_10[A, B, C, D, E,
 }
 
 
-trait NestedOp_11[A, B, C, D, E, F, G, H, I, J, K] extends NestedBase {
-  protected def _nestedMan[Tpl](nestedElements: Seq[Element]): Tx_12[A, B, C, D, E, F, G, H, I, J, K, Seq[Tpl]] = ???
-  protected def _nestedOpt[Tpl](nestedElements: Seq[Element]): Tx_12[A, B, C, D, E, F, G, H, I, J, K, Seq[Tpl]] = ???
+trait NestedOp_11[A, B, C, D, E, F, G, H, I, J, K] extends NestedBase { self: Molecule[(A, B, C, D, E, F, G, H, I, J, K)] =>
+  protected def _nestedMan[Tpl](nestedElements: Seq[Element]): Tx_12[A, B, C, D, E, F, G, H, I, J, K, Seq[Tpl]] = new Tx_12[A, B, C, D, E, F, G, H, I, J, K, Seq[Tpl]](elements.init :+ Nested(elements.last.asInstanceOf[Ref], nestedElements))
+  protected def _nestedOpt[Tpl](nestedElements: Seq[Element]): Tx_12[A, B, C, D, E, F, G, H, I, J, K, Seq[Tpl]] = new Tx_12[A, B, C, D, E, F, G, H, I, J, K, Seq[Tpl]](elements.init :+ NestedOpt(elements.last.asInstanceOf[Ref], nestedElements))
 }
 
-trait Nested_11[A, B, C, D, E, F, G, H, I, J, K] extends NestedOp_11[A, B, C, D, E, F, G, H, I, J, K] {
+trait Nested_11[A, B, C, D, E, F, G, H, I, J, K] extends NestedOp_11[A, B, C, D, E, F, G, H, I, J, K] { self: Molecule[(A, B, C, D, E, F, G, H, I, J, K)] =>
   final def * [a                                                               ] (nested: Molecule_01[a                                                               ]): Tx_12[A, B, C, D, E, F, G, H, I, J, K, Seq[a                                                                 ]] = _nestedMan[a                                                                 ](nested.elements)
   final def * [a, b                                                            ] (nested: Molecule_02[a, b                                                            ]): Tx_12[A, B, C, D, E, F, G, H, I, J, K, Seq[(a, b                                                            )]] = _nestedMan[(a, b                                                            )](nested.elements)
   final def * [a, b, c                                                         ] (nested: Molecule_03[a, b, c                                                         ]): Tx_12[A, B, C, D, E, F, G, H, I, J, K, Seq[(a, b, c                                                         )]] = _nestedMan[(a, b, c                                                         )](nested.elements)
@@ -661,12 +661,12 @@ trait Nested_11[A, B, C, D, E, F, G, H, I, J, K] extends NestedOp_11[A, B, C, D,
 }
 
 
-trait NestedOp_12[A, B, C, D, E, F, G, H, I, J, K, L] extends NestedBase {
-  protected def _nestedMan[Tpl](nestedElements: Seq[Element]): Tx_13[A, B, C, D, E, F, G, H, I, J, K, L, Seq[Tpl]] = ???
-  protected def _nestedOpt[Tpl](nestedElements: Seq[Element]): Tx_13[A, B, C, D, E, F, G, H, I, J, K, L, Seq[Tpl]] = ???
+trait NestedOp_12[A, B, C, D, E, F, G, H, I, J, K, L] extends NestedBase { self: Molecule[(A, B, C, D, E, F, G, H, I, J, K, L)] =>
+  protected def _nestedMan[Tpl](nestedElements: Seq[Element]): Tx_13[A, B, C, D, E, F, G, H, I, J, K, L, Seq[Tpl]] = new Tx_13[A, B, C, D, E, F, G, H, I, J, K, L, Seq[Tpl]](elements.init :+ Nested(elements.last.asInstanceOf[Ref], nestedElements))
+  protected def _nestedOpt[Tpl](nestedElements: Seq[Element]): Tx_13[A, B, C, D, E, F, G, H, I, J, K, L, Seq[Tpl]] = new Tx_13[A, B, C, D, E, F, G, H, I, J, K, L, Seq[Tpl]](elements.init :+ NestedOpt(elements.last.asInstanceOf[Ref], nestedElements))
 }
 
-trait Nested_12[A, B, C, D, E, F, G, H, I, J, K, L] extends NestedOp_12[A, B, C, D, E, F, G, H, I, J, K, L] {
+trait Nested_12[A, B, C, D, E, F, G, H, I, J, K, L] extends NestedOp_12[A, B, C, D, E, F, G, H, I, J, K, L] { self: Molecule[(A, B, C, D, E, F, G, H, I, J, K, L)] =>
   final def * [a                                                               ] (nested: Molecule_01[a                                                               ]): Tx_13[A, B, C, D, E, F, G, H, I, J, K, L, Seq[a                                                                 ]] = _nestedMan[a                                                                 ](nested.elements)
   final def * [a, b                                                            ] (nested: Molecule_02[a, b                                                            ]): Tx_13[A, B, C, D, E, F, G, H, I, J, K, L, Seq[(a, b                                                            )]] = _nestedMan[(a, b                                                            )](nested.elements)
   final def * [a, b, c                                                         ] (nested: Molecule_03[a, b, c                                                         ]): Tx_13[A, B, C, D, E, F, G, H, I, J, K, L, Seq[(a, b, c                                                         )]] = _nestedMan[(a, b, c                                                         )](nested.elements)
@@ -714,12 +714,12 @@ trait Nested_12[A, B, C, D, E, F, G, H, I, J, K, L] extends NestedOp_12[A, B, C,
 }
 
 
-trait NestedOp_13[A, B, C, D, E, F, G, H, I, J, K, L, M] extends NestedBase {
-  protected def _nestedMan[Tpl](nestedElements: Seq[Element]): Tx_14[A, B, C, D, E, F, G, H, I, J, K, L, M, Seq[Tpl]] = ???
-  protected def _nestedOpt[Tpl](nestedElements: Seq[Element]): Tx_14[A, B, C, D, E, F, G, H, I, J, K, L, M, Seq[Tpl]] = ???
+trait NestedOp_13[A, B, C, D, E, F, G, H, I, J, K, L, M] extends NestedBase { self: Molecule[(A, B, C, D, E, F, G, H, I, J, K, L, M)] =>
+  protected def _nestedMan[Tpl](nestedElements: Seq[Element]): Tx_14[A, B, C, D, E, F, G, H, I, J, K, L, M, Seq[Tpl]] = new Tx_14[A, B, C, D, E, F, G, H, I, J, K, L, M, Seq[Tpl]](elements.init :+ Nested(elements.last.asInstanceOf[Ref], nestedElements))
+  protected def _nestedOpt[Tpl](nestedElements: Seq[Element]): Tx_14[A, B, C, D, E, F, G, H, I, J, K, L, M, Seq[Tpl]] = new Tx_14[A, B, C, D, E, F, G, H, I, J, K, L, M, Seq[Tpl]](elements.init :+ NestedOpt(elements.last.asInstanceOf[Ref], nestedElements))
 }
 
-trait Nested_13[A, B, C, D, E, F, G, H, I, J, K, L, M] extends NestedOp_13[A, B, C, D, E, F, G, H, I, J, K, L, M] {
+trait Nested_13[A, B, C, D, E, F, G, H, I, J, K, L, M] extends NestedOp_13[A, B, C, D, E, F, G, H, I, J, K, L, M] { self: Molecule[(A, B, C, D, E, F, G, H, I, J, K, L, M)] =>
   final def * [a                                                               ] (nested: Molecule_01[a                                                               ]): Tx_14[A, B, C, D, E, F, G, H, I, J, K, L, M, Seq[a                                                                 ]] = _nestedMan[a                                                                 ](nested.elements)
   final def * [a, b                                                            ] (nested: Molecule_02[a, b                                                            ]): Tx_14[A, B, C, D, E, F, G, H, I, J, K, L, M, Seq[(a, b                                                            )]] = _nestedMan[(a, b                                                            )](nested.elements)
   final def * [a, b, c                                                         ] (nested: Molecule_03[a, b, c                                                         ]): Tx_14[A, B, C, D, E, F, G, H, I, J, K, L, M, Seq[(a, b, c                                                         )]] = _nestedMan[(a, b, c                                                         )](nested.elements)
@@ -767,12 +767,12 @@ trait Nested_13[A, B, C, D, E, F, G, H, I, J, K, L, M] extends NestedOp_13[A, B,
 }
 
 
-trait NestedOp_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N] extends NestedBase {
-  protected def _nestedMan[Tpl](nestedElements: Seq[Element]): Tx_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, Seq[Tpl]] = ???
-  protected def _nestedOpt[Tpl](nestedElements: Seq[Element]): Tx_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, Seq[Tpl]] = ???
+trait NestedOp_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N] extends NestedBase { self: Molecule[(A, B, C, D, E, F, G, H, I, J, K, L, M, N)] =>
+  protected def _nestedMan[Tpl](nestedElements: Seq[Element]): Tx_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, Seq[Tpl]] = new Tx_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, Seq[Tpl]](elements.init :+ Nested(elements.last.asInstanceOf[Ref], nestedElements))
+  protected def _nestedOpt[Tpl](nestedElements: Seq[Element]): Tx_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, Seq[Tpl]] = new Tx_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, Seq[Tpl]](elements.init :+ NestedOpt(elements.last.asInstanceOf[Ref], nestedElements))
 }
 
-trait Nested_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N] extends NestedOp_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N] {
+trait Nested_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N] extends NestedOp_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N] { self: Molecule[(A, B, C, D, E, F, G, H, I, J, K, L, M, N)] =>
   final def * [a                                                               ] (nested: Molecule_01[a                                                               ]): Tx_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, Seq[a                                                                 ]] = _nestedMan[a                                                                 ](nested.elements)
   final def * [a, b                                                            ] (nested: Molecule_02[a, b                                                            ]): Tx_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, Seq[(a, b                                                            )]] = _nestedMan[(a, b                                                            )](nested.elements)
   final def * [a, b, c                                                         ] (nested: Molecule_03[a, b, c                                                         ]): Tx_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, Seq[(a, b, c                                                         )]] = _nestedMan[(a, b, c                                                         )](nested.elements)
@@ -820,12 +820,12 @@ trait Nested_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N] extends NestedOp_14[A,
 }
 
 
-trait NestedOp_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O] extends NestedBase {
-  protected def _nestedMan[Tpl](nestedElements: Seq[Element]): Tx_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, Seq[Tpl]] = ???
-  protected def _nestedOpt[Tpl](nestedElements: Seq[Element]): Tx_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, Seq[Tpl]] = ???
+trait NestedOp_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O] extends NestedBase { self: Molecule[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O)] =>
+  protected def _nestedMan[Tpl](nestedElements: Seq[Element]): Tx_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, Seq[Tpl]] = new Tx_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, Seq[Tpl]](elements.init :+ Nested(elements.last.asInstanceOf[Ref], nestedElements))
+  protected def _nestedOpt[Tpl](nestedElements: Seq[Element]): Tx_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, Seq[Tpl]] = new Tx_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, Seq[Tpl]](elements.init :+ NestedOpt(elements.last.asInstanceOf[Ref], nestedElements))
 }
 
-trait Nested_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O] extends NestedOp_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O] {
+trait Nested_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O] extends NestedOp_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O] { self: Molecule[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O)] =>
   final def * [a                                                               ] (nested: Molecule_01[a                                                               ]): Tx_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, Seq[a                                                                 ]] = _nestedMan[a                                                                 ](nested.elements)
   final def * [a, b                                                            ] (nested: Molecule_02[a, b                                                            ]): Tx_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, Seq[(a, b                                                            )]] = _nestedMan[(a, b                                                            )](nested.elements)
   final def * [a, b, c                                                         ] (nested: Molecule_03[a, b, c                                                         ]): Tx_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, Seq[(a, b, c                                                         )]] = _nestedMan[(a, b, c                                                         )](nested.elements)
@@ -873,12 +873,12 @@ trait Nested_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O] extends NestedOp_15
 }
 
 
-trait NestedOp_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P] extends NestedBase {
-  protected def _nestedMan[Tpl](nestedElements: Seq[Element]): Tx_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Seq[Tpl]] = ???
-  protected def _nestedOpt[Tpl](nestedElements: Seq[Element]): Tx_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Seq[Tpl]] = ???
+trait NestedOp_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P] extends NestedBase { self: Molecule[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P)] =>
+  protected def _nestedMan[Tpl](nestedElements: Seq[Element]): Tx_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Seq[Tpl]] = new Tx_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Seq[Tpl]](elements.init :+ Nested(elements.last.asInstanceOf[Ref], nestedElements))
+  protected def _nestedOpt[Tpl](nestedElements: Seq[Element]): Tx_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Seq[Tpl]] = new Tx_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Seq[Tpl]](elements.init :+ NestedOpt(elements.last.asInstanceOf[Ref], nestedElements))
 }
 
-trait Nested_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P] extends NestedOp_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P] {
+trait Nested_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P] extends NestedOp_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P] { self: Molecule[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P)] =>
   final def * [a                                                               ] (nested: Molecule_01[a                                                               ]): Tx_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Seq[a                                                                 ]] = _nestedMan[a                                                                 ](nested.elements)
   final def * [a, b                                                            ] (nested: Molecule_02[a, b                                                            ]): Tx_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Seq[(a, b                                                            )]] = _nestedMan[(a, b                                                            )](nested.elements)
   final def * [a, b, c                                                         ] (nested: Molecule_03[a, b, c                                                         ]): Tx_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Seq[(a, b, c                                                         )]] = _nestedMan[(a, b, c                                                         )](nested.elements)
@@ -926,12 +926,12 @@ trait Nested_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P] extends NestedOp
 }
 
 
-trait NestedOp_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q] extends NestedBase {
-  protected def _nestedMan[Tpl](nestedElements: Seq[Element]): Tx_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, Seq[Tpl]] = ???
-  protected def _nestedOpt[Tpl](nestedElements: Seq[Element]): Tx_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, Seq[Tpl]] = ???
+trait NestedOp_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q] extends NestedBase { self: Molecule[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q)] =>
+  protected def _nestedMan[Tpl](nestedElements: Seq[Element]): Tx_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, Seq[Tpl]] = new Tx_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, Seq[Tpl]](elements.init :+ Nested(elements.last.asInstanceOf[Ref], nestedElements))
+  protected def _nestedOpt[Tpl](nestedElements: Seq[Element]): Tx_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, Seq[Tpl]] = new Tx_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, Seq[Tpl]](elements.init :+ NestedOpt(elements.last.asInstanceOf[Ref], nestedElements))
 }
 
-trait Nested_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q] extends NestedOp_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q] {
+trait Nested_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q] extends NestedOp_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q] { self: Molecule[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q)] =>
   final def * [a                                                               ] (nested: Molecule_01[a                                                               ]): Tx_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, Seq[a                                                                 ]] = _nestedMan[a                                                                 ](nested.elements)
   final def * [a, b                                                            ] (nested: Molecule_02[a, b                                                            ]): Tx_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, Seq[(a, b                                                            )]] = _nestedMan[(a, b                                                            )](nested.elements)
   final def * [a, b, c                                                         ] (nested: Molecule_03[a, b, c                                                         ]): Tx_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, Seq[(a, b, c                                                         )]] = _nestedMan[(a, b, c                                                         )](nested.elements)
@@ -979,12 +979,12 @@ trait Nested_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q] extends Neste
 }
 
 
-trait NestedOp_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R] extends NestedBase {
-  protected def _nestedMan[Tpl](nestedElements: Seq[Element]): Tx_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, Seq[Tpl]] = ???
-  protected def _nestedOpt[Tpl](nestedElements: Seq[Element]): Tx_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, Seq[Tpl]] = ???
+trait NestedOp_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R] extends NestedBase { self: Molecule[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R)] =>
+  protected def _nestedMan[Tpl](nestedElements: Seq[Element]): Tx_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, Seq[Tpl]] = new Tx_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, Seq[Tpl]](elements.init :+ Nested(elements.last.asInstanceOf[Ref], nestedElements))
+  protected def _nestedOpt[Tpl](nestedElements: Seq[Element]): Tx_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, Seq[Tpl]] = new Tx_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, Seq[Tpl]](elements.init :+ NestedOpt(elements.last.asInstanceOf[Ref], nestedElements))
 }
 
-trait Nested_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R] extends NestedOp_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R] {
+trait Nested_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R] extends NestedOp_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R] { self: Molecule[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R)] =>
   final def * [a                                                               ] (nested: Molecule_01[a                                                               ]): Tx_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, Seq[a                                                                 ]] = _nestedMan[a                                                                 ](nested.elements)
   final def * [a, b                                                            ] (nested: Molecule_02[a, b                                                            ]): Tx_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, Seq[(a, b                                                            )]] = _nestedMan[(a, b                                                            )](nested.elements)
   final def * [a, b, c                                                         ] (nested: Molecule_03[a, b, c                                                         ]): Tx_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, Seq[(a, b, c                                                         )]] = _nestedMan[(a, b, c                                                         )](nested.elements)
@@ -1032,12 +1032,12 @@ trait Nested_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R] extends Ne
 }
 
 
-trait NestedOp_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S] extends NestedBase {
-  protected def _nestedMan[Tpl](nestedElements: Seq[Element]): Tx_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, Seq[Tpl]] = ???
-  protected def _nestedOpt[Tpl](nestedElements: Seq[Element]): Tx_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, Seq[Tpl]] = ???
+trait NestedOp_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S] extends NestedBase { self: Molecule[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S)] =>
+  protected def _nestedMan[Tpl](nestedElements: Seq[Element]): Tx_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, Seq[Tpl]] = new Tx_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, Seq[Tpl]](elements.init :+ Nested(elements.last.asInstanceOf[Ref], nestedElements))
+  protected def _nestedOpt[Tpl](nestedElements: Seq[Element]): Tx_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, Seq[Tpl]] = new Tx_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, Seq[Tpl]](elements.init :+ NestedOpt(elements.last.asInstanceOf[Ref], nestedElements))
 }
 
-trait Nested_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S] extends NestedOp_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S] {
+trait Nested_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S] extends NestedOp_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S] { self: Molecule[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S)] =>
   final def * [a                                                               ] (nested: Molecule_01[a                                                               ]): Tx_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, Seq[a                                                                 ]] = _nestedMan[a                                                                 ](nested.elements)
   final def * [a, b                                                            ] (nested: Molecule_02[a, b                                                            ]): Tx_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, Seq[(a, b                                                            )]] = _nestedMan[(a, b                                                            )](nested.elements)
   final def * [a, b, c                                                         ] (nested: Molecule_03[a, b, c                                                         ]): Tx_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, Seq[(a, b, c                                                         )]] = _nestedMan[(a, b, c                                                         )](nested.elements)
@@ -1085,12 +1085,12 @@ trait Nested_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S] extends
 }
 
 
-trait NestedOp_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T] extends NestedBase {
-  protected def _nestedMan[Tpl](nestedElements: Seq[Element]): Tx_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, Seq[Tpl]] = ???
-  protected def _nestedOpt[Tpl](nestedElements: Seq[Element]): Tx_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, Seq[Tpl]] = ???
+trait NestedOp_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T] extends NestedBase { self: Molecule[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T)] =>
+  protected def _nestedMan[Tpl](nestedElements: Seq[Element]): Tx_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, Seq[Tpl]] = new Tx_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, Seq[Tpl]](elements.init :+ Nested(elements.last.asInstanceOf[Ref], nestedElements))
+  protected def _nestedOpt[Tpl](nestedElements: Seq[Element]): Tx_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, Seq[Tpl]] = new Tx_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, Seq[Tpl]](elements.init :+ NestedOpt(elements.last.asInstanceOf[Ref], nestedElements))
 }
 
-trait Nested_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T] extends NestedOp_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T] {
+trait Nested_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T] extends NestedOp_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T] { self: Molecule[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T)] =>
   final def * [a                                                               ] (nested: Molecule_01[a                                                               ]): Tx_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, Seq[a                                                                 ]] = _nestedMan[a                                                                 ](nested.elements)
   final def * [a, b                                                            ] (nested: Molecule_02[a, b                                                            ]): Tx_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, Seq[(a, b                                                            )]] = _nestedMan[(a, b                                                            )](nested.elements)
   final def * [a, b, c                                                         ] (nested: Molecule_03[a, b, c                                                         ]): Tx_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, Seq[(a, b, c                                                         )]] = _nestedMan[(a, b, c                                                         )](nested.elements)
@@ -1138,12 +1138,12 @@ trait Nested_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T] exte
 }
 
 
-trait NestedOp_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U] extends NestedBase {
-  protected def _nestedMan[Tpl](nestedElements: Seq[Element]): Tx_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, Seq[Tpl]] = ???
-  protected def _nestedOpt[Tpl](nestedElements: Seq[Element]): Tx_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, Seq[Tpl]] = ???
+trait NestedOp_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U] extends NestedBase { self: Molecule[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U)] =>
+  protected def _nestedMan[Tpl](nestedElements: Seq[Element]): Tx_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, Seq[Tpl]] = new Tx_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, Seq[Tpl]](elements.init :+ Nested(elements.last.asInstanceOf[Ref], nestedElements))
+  protected def _nestedOpt[Tpl](nestedElements: Seq[Element]): Tx_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, Seq[Tpl]] = new Tx_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, Seq[Tpl]](elements.init :+ NestedOpt(elements.last.asInstanceOf[Ref], nestedElements))
 }
 
-trait Nested_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U] extends NestedOp_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U] {
+trait Nested_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U] extends NestedOp_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U] { self: Molecule[(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U)] =>
   final def * [a                                                               ] (nested: Molecule_01[a                                                               ]): Tx_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, Seq[a                                                                 ]] = _nestedMan[a                                                                 ](nested.elements)
   final def * [a, b                                                            ] (nested: Molecule_02[a, b                                                            ]): Tx_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, Seq[(a, b                                                            )]] = _nestedMan[(a, b                                                            )](nested.elements)
   final def * [a, b, c                                                         ] (nested: Molecule_03[a, b, c                                                         ]): Tx_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, Seq[(a, b, c                                                         )]] = _nestedMan[(a, b, c                                                         )](nested.elements)

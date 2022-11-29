@@ -38,12 +38,12 @@ object _Nested extends BoilerplateGenBase("Nested", "/api") {
   case class Trait(arity: Int) extends TemplateVals(arity) {
     val body =
       s"""
-         |trait NestedOp${_0}${`[A..V]`} extends NestedBase {
-         |  protected def _nestedMan[Tpl](nestedElements: Seq[Element]): Tx${_1}[${`A..V, `}Seq[Tpl]] = ???
-         |  protected def _nestedOpt[Tpl](nestedElements: Seq[Element]): Tx${_1}[${`A..V, `}Seq[Tpl]] = ???
+         |trait NestedOp${_0}${`[A..V]`} extends NestedBase { self: Molecule[$tpl] =>
+         |  protected def _nestedMan[Tpl](nestedElements: Seq[Element]): Tx${_1}[${`A..V, `}Seq[Tpl]] = new Tx${_1}[${`A..V, `}Seq[Tpl]](elements.init :+ Nested(elements.last.asInstanceOf[Ref], nestedElements))
+         |  protected def _nestedOpt[Tpl](nestedElements: Seq[Element]): Tx${_1}[${`A..V, `}Seq[Tpl]] = new Tx${_1}[${`A..V, `}Seq[Tpl]](elements.init :+ NestedOpt(elements.last.asInstanceOf[Ref], nestedElements))
          |}
          |
-         |trait ${fileName}_$arity${`[A..V]`} extends NestedOp${_0}${`[A..V]`} {
+         |trait ${fileName}_$arity${`[A..V]`} extends NestedOp${_0}${`[A..V]`} { self: Molecule[$tpl] =>
          |  final def * [a                                                               ] (nested: Molecule_01[a                                                               ]): Tx${_1}[${`A..V, `}Seq[a                                                                 ]] = _nestedMan[a                                                                 ](nested.elements)
          |  final def * [a, b                                                            ] (nested: Molecule_02[a, b                                                            ]): Tx${_1}[${`A..V, `}Seq[(a, b                                                            )]] = _nestedMan[(a, b                                                            )](nested.elements)
          |  final def * [a, b, c                                                         ] (nested: Molecule_03[a, b, c                                                         ]): Tx${_1}[${`A..V, `}Seq[(a, b, c                                                         )]] = _nestedMan[(a, b, c                                                         )](nested.elements)

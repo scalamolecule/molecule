@@ -9,6 +9,7 @@ import molecule.core.api.{Connection, QueryOps}
 import molecule.core.util.JavaConversions
 import molecule.db.datomic.facade.Conn_Peer
 import molecule.db.datomic.query.DatomicModel2Query
+import molecule.db.datomic.query.casting.CastComposite_
 import molecule.db.datomic.util.DatomicApiLoader
 import zio.{Chunk, ZIO}
 import scala.concurrent.{ExecutionContext, Future}
@@ -35,9 +36,9 @@ class DatomicQueryOpsImpl[Tpl](elements: Seq[Element])
 
   // Synchronous
   override def get(implicit conn0: Connection): List[Tpl] = {
-    val conn = conn0.asInstanceOf[Conn_Peer]
-    val db   = conn.peerConn.db()
-    val rows = getQueries(conn.optimizeQuery) match {
+    val conn       = conn0.asInstanceOf[Conn_Peer]
+    val db         = conn.peerConn.db()
+    val rows       = getQueries(conn.optimizeQuery) match {
       case ("", query)       => Peer.q(query, db +: inputs: _*)
       case (preQuery, query) =>
         // Pre-query
@@ -46,32 +47,22 @@ class DatomicQueryOpsImpl[Tpl](elements: Seq[Element])
         preRows.forEach { row =>
           preIds.add(row.get(0).asInstanceOf[Long])
         }
-        //        println(preIds)
         // Main query using entity ids from pre-query
         Peer.q(query, db +: inputs :+ preIds: _*)
     }
-
     //    println("RAW rows:")
     //    rows.forEach(row => println(row))
-
     val sortedRows = sortRows(rows)
 
     println("SORTED rows:")
-    //    sortedRows.forEach(row => println(row + row.get(1).getClass.toString))
     sortedRows.forEach(row => println(row))
-    //    println("--")
-    //    sortedRows.forEach(row => println(row.get(1).asInstanceOf[jMap[_, _]].values))
-    //    println("--")
-    //    sortedRows.forEach(row => println(row.get(1).asInstanceOf[jMap[_, _]].values.iterator().next))
-    //    println("--")
-    //    sortedRows.forEach(row => println(row.get(1).asInstanceOf[jMap[_, _]].values.iterator().next.getClass))
 
+    lazy val tuples = List.newBuilder[Tpl]
     if (isNested) {
       castss = castss :+ casts.toList
       rows2nested(sortedRows)
 
     } else if (isNestedOpt) {
-      val tuples = List.newBuilder[Tpl]
       pullCastss = pullCastss :+ pullCasts.toList
       if (flatten)
         sortedRows.forEach(row => tuples.addOne(pullRowFlatten2tpl(row)))
@@ -79,8 +70,12 @@ class DatomicQueryOpsImpl[Tpl](elements: Seq[Element])
         sortedRows.forEach(row => tuples.addOne(pullRow2tpl(row)))
       tuples.result()
 
+    } else if (isComposite) {
+//      val row2tpl = new CastComposite_[Tpl].row2tpl
+      sortedRows.forEach(row => tuples.addOne(compositeRow2tpl(row)))
+      tuples.result()
+
     } else {
-      val tuples = List.newBuilder[Tpl]
       sortedRows.forEach(row => tuples.addOne(row2tpl(row)))
       tuples.result()
     }

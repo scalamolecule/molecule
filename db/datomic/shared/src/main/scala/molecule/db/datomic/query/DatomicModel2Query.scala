@@ -20,6 +20,7 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
     with LambdasOne
     with LambdasSet
     with CastFlat_[Tpl]
+    with CastComposite_[Tpl]
     with CastNestedBranch_[Tpl]
     with CastNestedLeaf_[Tpl]
     with CastNestedOptBranch_[Tpl]
@@ -227,7 +228,7 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
         )
 
         case (acc1, Some(BackRef(backRef)), tail) =>
-          // Finish initialization of previous ref
+          // Finish initialization of previous ref before stepping back
           val prevRef = s"""\n$indent{($refAttr :limit nil :default "$none") [$acc1"""
 
           @tailrec
@@ -283,13 +284,25 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
       case ref: Ref                         => resolve(resolveRef(es, ref), tail)
       case _: BackRef                       => resolve(es.init, tail)
       case Nested(ref, nestedElements)      => resolve(resolveNested(es, ref, nestedElements), tail)
-      case n@NestedOpt(ref, nestedElements) =>
-        val zz = resolveNestedOpt(es, n, ref, nestedElements)
-        resolve(zz, tail)
-      //        resolve(resolveNestedOpt(es, n, ref, nestedElements), tail)
-      case other => unexpectedElement(other)
+      case n@NestedOpt(ref, nestedElements) => resolve(resolveNestedOpt(es, n, ref, nestedElements), tail)
+      case Composite(compositeElements)     => resolve(resolveComposite(es, compositeElements), tail)
+      case other                            => unexpectedElement(other)
     }
     case Nil             => es
+  }
+
+  final private def resolveComposite(
+    es: List[Var], compositeElements: Seq[Element]
+  ): List[Var] = {
+    isComposite = true
+    compositeTplCounts = compositeTplCounts :+ compositeElements.count {
+      case _: AttrOneMan => true
+      case _: AttrOneOpt => true
+      case _: AttrSetMan => true
+      case _: AttrSetOpt => true
+      case _             => false
+    }
+    resolve(es, compositeElements)
   }
 
   final private def resolveNested(

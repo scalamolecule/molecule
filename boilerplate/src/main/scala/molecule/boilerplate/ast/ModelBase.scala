@@ -65,8 +65,14 @@ trait ModelBase extends Validations {
     override def toString: String = render(Seq(this), 0)
   }
 
-  case class TxMetaData(elements: Seq[Element]) extends Element with Mandatory
-  case class Composite(elements: Seq[Element]) extends Element with Mandatory
+  case class TxMetaData(elements: Seq[Element]) extends Element with Mandatory {
+    override def toString: String = elements.mkString("TxMetaData(List(\n  ", ",\n  ", "\n))")
+  }
+
+  case class Composite(elements: Seq[Element]) extends Element with Mandatory {
+    override def toString: String = elements.mkString("Composite(List(\n  ", ",\n  ", "\n))")
+  }
+
   case object Self extends Element
 
   sealed trait Op

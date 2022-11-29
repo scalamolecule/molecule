@@ -141,13 +141,6 @@ case class Dsl_Arities(schema: MetaSchema, namespace: MetaNs, arity: Int)
 
   val resolvers = res.result().mkString("\n  ")
 
-  val nested = if (hasCardMany && arity < maxArity) {
-    s"""
-       |
-       |  override protected def _nestedMan[Tpl](nestedElements: Seq[Element]) = new Tx${_1}[${`A..V, `}Seq[Tpl]](addNestedMan(elements, nestedElements))
-       |  override protected def _nestedOpt[Tpl](nestedElements: Seq[Element]) = new Tx${_1}[${`A..V, `}Seq[Tpl]](addNestedOpt(elements, nestedElements))""".stripMargin
-  } else ""
-
   val refResult = ref.result()
   val refDefs   = if (refResult.isEmpty) "" else refResult.mkString("\n\n  ", "\n  ", "")
 
@@ -161,7 +154,7 @@ case class Dsl_Arities(schema: MetaSchema, namespace: MetaNs, arity: Int)
     s"""class $ns_0[${`A..V, `}t]($elements) extends $ns with $modelOps {
        |  $manAttrs$optAttrs$tacAttrs
        |
-       |  $resolvers$nested$refDefs$backRefDefs
+       |  $resolvers$refDefs$backRefDefs
        |}
        |""".stripMargin
 }

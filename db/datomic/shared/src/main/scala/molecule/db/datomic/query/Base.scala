@@ -39,6 +39,7 @@ trait Base[Tpl] extends BaseHelpers with JavaConversions { self: Model2Query[Tpl
   // Main query
   final protected var isNested     = false
   final protected var isNestedOpt  = false
+  final protected var isComposite  = false
   final protected var flatten      = false
   final protected val nestedIds    = new ArrayBuffer[String]
   final protected val nestedOptIds = new ArrayBuffer[String]
@@ -55,13 +56,14 @@ trait Base[Tpl] extends BaseHelpers with JavaConversions { self: Model2Query[Tpl
   final protected val wherePost = new ArrayBuffer[(String, Int)]
 
   // Input args and cast lambdas
-  final protected val preArgs    = new ArrayBuffer[AnyRef]
-  final protected val args       = new ArrayBuffer[AnyRef]
-  final protected val casts      = new ArrayBuffer[AnyRef => AnyRef]
-  final protected var castss     = List.empty[List[AnyRef => AnyRef]]
-  final protected val pullCasts  = new ArrayBuffer[jIterator[_] => Any]
-  final protected var pullCastss = List.empty[List[jIterator[_] => Any]]
-  final protected var pullDepths = List(0)
+  final protected val preArgs            = new ArrayBuffer[AnyRef]
+  final protected val args               = new ArrayBuffer[AnyRef]
+  final protected val casts              = new ArrayBuffer[AnyRef => AnyRef]
+  final protected var castss             = List.empty[List[AnyRef => AnyRef]]
+  final protected val pullCasts          = new ArrayBuffer[jIterator[_] => Any]
+  final protected var pullCastss         = List.empty[List[jIterator[_] => Any]]
+  final protected var pullDepths         = List(0)
+  final protected var compositeTplCounts = List.empty[Int]
 
   // Sorting
   final protected val sortsAcc = new ArrayBuffer[Int => (Row, Row) => Int]
@@ -79,6 +81,7 @@ trait Base[Tpl] extends BaseHelpers with JavaConversions { self: Model2Query[Tpl
     preRules.empty
     isNested = false
     isNestedOpt = false
+    isComposite = false
     flatten = false
     nestedIds.empty
     nestedOptIds.empty

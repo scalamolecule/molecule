@@ -1,6 +1,7 @@
 // GENERATED CODE ********************************
 package molecule.boilerplate.api.expression
 
+import molecule.boilerplate.api._
 import molecule.boilerplate.api.Keywords.unify
 import molecule.boilerplate.ast.MoleculeModel._
 
@@ -10,7 +11,7 @@ trait ExprOneTacOps_0[t, Ns[_]] {
 }
 
 trait ExprOneTac_0[t, Ns[_]]
-  extends ExprOneTacOps_0[t, Ns] {
+  extends ExprOneTacOps_0[t, Ns]{
   def apply()                : Ns[t] = _exprOneTac(NoValue, Nil)
   def apply(unify: unify    ): Ns[t] = _exprOneTac(Unify  , Nil)
   def apply(v    : t, vs: t*): Ns[t] = _exprOneTac(Appl   , v +: vs)
@@ -29,7 +30,7 @@ trait ExprOneTacOps_1[A, t, Ns[_, _]] {
 }
 
 trait ExprOneTac_1[A, t, Ns[_, _]]
-  extends ExprOneTacOps_1[A, t, Ns] {
+  extends ExprOneTacOps_1[A, t, Ns]{
   def apply()                : Ns[A, t] = _exprOneTac(NoValue, Nil)
   def apply(unify: unify    ): Ns[A, t] = _exprOneTac(Unify  , Nil)
   def apply(v    : t, vs: t*): Ns[A, t] = _exprOneTac(Appl   , v +: vs)
@@ -48,7 +49,7 @@ trait ExprOneTacOps_2[A, B, t, Ns[_, _, _]] {
 }
 
 trait ExprOneTac_2[A, B, t, Ns[_, _, _]]
-  extends ExprOneTacOps_2[A, B, t, Ns] {
+  extends ExprOneTacOps_2[A, B, t, Ns]{
   def apply()                : Ns[A, B, t] = _exprOneTac(NoValue, Nil)
   def apply(unify: unify    ): Ns[A, B, t] = _exprOneTac(Unify  , Nil)
   def apply(v    : t, vs: t*): Ns[A, B, t] = _exprOneTac(Appl   , v +: vs)
@@ -67,7 +68,7 @@ trait ExprOneTacOps_3[A, B, C, t, Ns[_, _, _, _]] {
 }
 
 trait ExprOneTac_3[A, B, C, t, Ns[_, _, _, _]]
-  extends ExprOneTacOps_3[A, B, C, t, Ns] {
+  extends ExprOneTacOps_3[A, B, C, t, Ns]{
   def apply()                : Ns[A, B, C, t] = _exprOneTac(NoValue, Nil)
   def apply(unify: unify    ): Ns[A, B, C, t] = _exprOneTac(Unify  , Nil)
   def apply(v    : t, vs: t*): Ns[A, B, C, t] = _exprOneTac(Appl   , v +: vs)
@@ -86,7 +87,7 @@ trait ExprOneTacOps_4[A, B, C, D, t, Ns[_, _, _, _, _]] {
 }
 
 trait ExprOneTac_4[A, B, C, D, t, Ns[_, _, _, _, _]]
-  extends ExprOneTacOps_4[A, B, C, D, t, Ns] {
+  extends ExprOneTacOps_4[A, B, C, D, t, Ns]{
   def apply()                : Ns[A, B, C, D, t] = _exprOneTac(NoValue, Nil)
   def apply(unify: unify    ): Ns[A, B, C, D, t] = _exprOneTac(Unify  , Nil)
   def apply(v    : t, vs: t*): Ns[A, B, C, D, t] = _exprOneTac(Appl   , v +: vs)
@@ -105,7 +106,7 @@ trait ExprOneTacOps_5[A, B, C, D, E, t, Ns[_, _, _, _, _, _]] {
 }
 
 trait ExprOneTac_5[A, B, C, D, E, t, Ns[_, _, _, _, _, _]]
-  extends ExprOneTacOps_5[A, B, C, D, E, t, Ns] {
+  extends ExprOneTacOps_5[A, B, C, D, E, t, Ns]{
   def apply()                : Ns[A, B, C, D, E, t] = _exprOneTac(NoValue, Nil)
   def apply(unify: unify    ): Ns[A, B, C, D, E, t] = _exprOneTac(Unify  , Nil)
   def apply(v    : t, vs: t*): Ns[A, B, C, D, E, t] = _exprOneTac(Appl   , v +: vs)
@@ -124,7 +125,7 @@ trait ExprOneTacOps_6[A, B, C, D, E, F, t, Ns[_, _, _, _, _, _, _]] {
 }
 
 trait ExprOneTac_6[A, B, C, D, E, F, t, Ns[_, _, _, _, _, _, _]]
-  extends ExprOneTacOps_6[A, B, C, D, E, F, t, Ns] {
+  extends ExprOneTacOps_6[A, B, C, D, E, F, t, Ns]{
   def apply()                : Ns[A, B, C, D, E, F, t] = _exprOneTac(NoValue, Nil)
   def apply(unify: unify    ): Ns[A, B, C, D, E, F, t] = _exprOneTac(Unify  , Nil)
   def apply(v    : t, vs: t*): Ns[A, B, C, D, E, F, t] = _exprOneTac(Appl   , v +: vs)
@@ -143,7 +144,7 @@ trait ExprOneTacOps_7[A, B, C, D, E, F, G, t, Ns[_, _, _, _, _, _, _, _]] {
 }
 
 trait ExprOneTac_7[A, B, C, D, E, F, G, t, Ns[_, _, _, _, _, _, _, _]]
-  extends ExprOneTacOps_7[A, B, C, D, E, F, G, t, Ns] {
+  extends ExprOneTacOps_7[A, B, C, D, E, F, G, t, Ns]{
   def apply()                : Ns[A, B, C, D, E, F, G, t] = _exprOneTac(NoValue, Nil)
   def apply(unify: unify    ): Ns[A, B, C, D, E, F, G, t] = _exprOneTac(Unify  , Nil)
   def apply(v    : t, vs: t*): Ns[A, B, C, D, E, F, G, t] = _exprOneTac(Appl   , v +: vs)
@@ -162,7 +163,7 @@ trait ExprOneTacOps_8[A, B, C, D, E, F, G, H, t, Ns[_, _, _, _, _, _, _, _, _]] 
 }
 
 trait ExprOneTac_8[A, B, C, D, E, F, G, H, t, Ns[_, _, _, _, _, _, _, _, _]]
-  extends ExprOneTacOps_8[A, B, C, D, E, F, G, H, t, Ns] {
+  extends ExprOneTacOps_8[A, B, C, D, E, F, G, H, t, Ns]{
   def apply()                : Ns[A, B, C, D, E, F, G, H, t] = _exprOneTac(NoValue, Nil)
   def apply(unify: unify    ): Ns[A, B, C, D, E, F, G, H, t] = _exprOneTac(Unify  , Nil)
   def apply(v    : t, vs: t*): Ns[A, B, C, D, E, F, G, H, t] = _exprOneTac(Appl   , v +: vs)
@@ -181,7 +182,7 @@ trait ExprOneTacOps_9[A, B, C, D, E, F, G, H, I, t, Ns[_, _, _, _, _, _, _, _, _
 }
 
 trait ExprOneTac_9[A, B, C, D, E, F, G, H, I, t, Ns[_, _, _, _, _, _, _, _, _, _]]
-  extends ExprOneTacOps_9[A, B, C, D, E, F, G, H, I, t, Ns] {
+  extends ExprOneTacOps_9[A, B, C, D, E, F, G, H, I, t, Ns]{
   def apply()                : Ns[A, B, C, D, E, F, G, H, I, t] = _exprOneTac(NoValue, Nil)
   def apply(unify: unify    ): Ns[A, B, C, D, E, F, G, H, I, t] = _exprOneTac(Unify  , Nil)
   def apply(v    : t, vs: t*): Ns[A, B, C, D, E, F, G, H, I, t] = _exprOneTac(Appl   , v +: vs)
@@ -200,7 +201,7 @@ trait ExprOneTacOps_10[A, B, C, D, E, F, G, H, I, J, t, Ns[_, _, _, _, _, _, _, 
 }
 
 trait ExprOneTac_10[A, B, C, D, E, F, G, H, I, J, t, Ns[_, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprOneTacOps_10[A, B, C, D, E, F, G, H, I, J, t, Ns] {
+  extends ExprOneTacOps_10[A, B, C, D, E, F, G, H, I, J, t, Ns]{
   def apply()                : Ns[A, B, C, D, E, F, G, H, I, J, t] = _exprOneTac(NoValue, Nil)
   def apply(unify: unify    ): Ns[A, B, C, D, E, F, G, H, I, J, t] = _exprOneTac(Unify  , Nil)
   def apply(v    : t, vs: t*): Ns[A, B, C, D, E, F, G, H, I, J, t] = _exprOneTac(Appl   , v +: vs)
@@ -219,7 +220,7 @@ trait ExprOneTacOps_11[A, B, C, D, E, F, G, H, I, J, K, t, Ns[_, _, _, _, _, _, 
 }
 
 trait ExprOneTac_11[A, B, C, D, E, F, G, H, I, J, K, t, Ns[_, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprOneTacOps_11[A, B, C, D, E, F, G, H, I, J, K, t, Ns] {
+  extends ExprOneTacOps_11[A, B, C, D, E, F, G, H, I, J, K, t, Ns]{
   def apply()                : Ns[A, B, C, D, E, F, G, H, I, J, K, t] = _exprOneTac(NoValue, Nil)
   def apply(unify: unify    ): Ns[A, B, C, D, E, F, G, H, I, J, K, t] = _exprOneTac(Unify  , Nil)
   def apply(v    : t, vs: t*): Ns[A, B, C, D, E, F, G, H, I, J, K, t] = _exprOneTac(Appl   , v +: vs)
@@ -238,7 +239,7 @@ trait ExprOneTacOps_12[A, B, C, D, E, F, G, H, I, J, K, L, t, Ns[_, _, _, _, _, 
 }
 
 trait ExprOneTac_12[A, B, C, D, E, F, G, H, I, J, K, L, t, Ns[_, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprOneTacOps_12[A, B, C, D, E, F, G, H, I, J, K, L, t, Ns] {
+  extends ExprOneTacOps_12[A, B, C, D, E, F, G, H, I, J, K, L, t, Ns]{
   def apply()                : Ns[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprOneTac(NoValue, Nil)
   def apply(unify: unify    ): Ns[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprOneTac(Unify  , Nil)
   def apply(v    : t, vs: t*): Ns[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprOneTac(Appl   , v +: vs)
@@ -257,7 +258,7 @@ trait ExprOneTacOps_13[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Ns[_, _, _, _, 
 }
 
 trait ExprOneTac_13[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Ns[_, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprOneTacOps_13[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Ns] {
+  extends ExprOneTacOps_13[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Ns]{
   def apply()                : Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprOneTac(NoValue, Nil)
   def apply(unify: unify    ): Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprOneTac(Unify  , Nil)
   def apply(v    : t, vs: t*): Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprOneTac(Appl   , v +: vs)
@@ -276,7 +277,7 @@ trait ExprOneTacOps_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Ns[_, _, _, 
 }
 
 trait ExprOneTac_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Ns[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprOneTacOps_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Ns] {
+  extends ExprOneTacOps_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Ns]{
   def apply()                : Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprOneTac(NoValue, Nil)
   def apply(unify: unify    ): Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprOneTac(Unify  , Nil)
   def apply(v    : t, vs: t*): Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprOneTac(Appl   , v +: vs)
@@ -295,7 +296,7 @@ trait ExprOneTacOps_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Ns[_, _, 
 }
 
 trait ExprOneTac_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Ns[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprOneTacOps_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Ns] {
+  extends ExprOneTacOps_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Ns]{
   def apply()                : Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprOneTac(NoValue, Nil)
   def apply(unify: unify    ): Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprOneTac(Unify  , Nil)
   def apply(v    : t, vs: t*): Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprOneTac(Appl   , v +: vs)
@@ -314,7 +315,7 @@ trait ExprOneTacOps_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Ns[_, 
 }
 
 trait ExprOneTac_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Ns[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprOneTacOps_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Ns] {
+  extends ExprOneTacOps_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Ns]{
   def apply()                : Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprOneTac(NoValue, Nil)
   def apply(unify: unify    ): Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprOneTac(Unify  , Nil)
   def apply(v    : t, vs: t*): Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprOneTac(Appl   , v +: vs)
@@ -333,7 +334,7 @@ trait ExprOneTacOps_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Ns[
 }
 
 trait ExprOneTac_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Ns[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprOneTacOps_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Ns] {
+  extends ExprOneTacOps_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Ns]{
   def apply()                : Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprOneTac(NoValue, Nil)
   def apply(unify: unify    ): Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprOneTac(Unify  , Nil)
   def apply(v    : t, vs: t*): Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprOneTac(Appl   , v +: vs)
@@ -352,7 +353,7 @@ trait ExprOneTacOps_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, 
 }
 
 trait ExprOneTac_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, Ns[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprOneTacOps_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, Ns] {
+  extends ExprOneTacOps_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, Ns]{
   def apply()                : Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprOneTac(NoValue, Nil)
   def apply(unify: unify    ): Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprOneTac(Unify  , Nil)
   def apply(v    : t, vs: t*): Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprOneTac(Appl   , v +: vs)
@@ -371,7 +372,7 @@ trait ExprOneTacOps_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, 
 }
 
 trait ExprOneTac_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, Ns[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprOneTacOps_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, Ns] {
+  extends ExprOneTacOps_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, Ns]{
   def apply()                : Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprOneTac(NoValue, Nil)
   def apply(unify: unify    ): Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprOneTac(Unify  , Nil)
   def apply(v    : t, vs: t*): Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprOneTac(Appl   , v +: vs)
@@ -390,7 +391,7 @@ trait ExprOneTacOps_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, 
 }
 
 trait ExprOneTac_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t, Ns[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprOneTacOps_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t, Ns] {
+  extends ExprOneTacOps_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t, Ns]{
   def apply()                : Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprOneTac(NoValue, Nil)
   def apply(unify: unify    ): Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprOneTac(Unify  , Nil)
   def apply(v    : t, vs: t*): Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprOneTac(Appl   , v +: vs)
@@ -409,7 +410,7 @@ trait ExprOneTacOps_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, 
 }
 
 trait ExprOneTac_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t, Ns[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprOneTacOps_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t, Ns] {
+  extends ExprOneTacOps_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t, Ns]{
   def apply()                : Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprOneTac(NoValue, Nil)
   def apply(unify: unify    ): Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprOneTac(Unify  , Nil)
   def apply(v    : t, vs: t*): Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprOneTac(Appl   , v +: vs)
@@ -428,7 +429,7 @@ trait ExprOneTacOps_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, 
 }
 
 trait ExprOneTac_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t, Ns[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprOneTacOps_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t, Ns] {
+  extends ExprOneTacOps_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t, Ns]{
   def apply()                : Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprOneTac(NoValue, Nil)
   def apply(unify: unify    ): Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprOneTac(Unify  , Nil)
   def apply(v    : t, vs: t*): Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprOneTac(Appl   , v +: vs)

@@ -43,7 +43,7 @@ class InsertStmts(elements: Seq[Element], data: Seq[Product], tempIdInit: Int = 
               }
           }
 
-        case Ref(ns, refAttr, refNs, _) =>
+        case Ref(ns, refAttr, _, _) =>
           prevRefs += refAttr
           resolve(tail, resolvers :+ addRef(ns, kw(ns, refAttr)), n)
 
@@ -64,12 +64,23 @@ class InsertStmts(elements: Seq[Element], data: Seq[Product], tempIdInit: Int = 
           prevRefs.clear()
           resolve(tail, resolvers :+ addNested(n, ns, kw(ns, refAttr), elements), n)
 
+        case Composite(elements) =>
+          resolve(tail, resolvers :+ addComposite(n, elements), n + 1)
+
         case other => unexpected(other)
       }
       case Nil             => resolvers
     }
   }
 
+
+  private def addComposite(n: Int, elements: Seq[Element]): Product => Unit = {
+    val composite2stmts = getResolver(elements)
+    elements.length match {
+      case 1 => (tpl: Product) => composite2stmts(Tuple1(tpl.productElement(n)))
+      case _ => (tpl: Product) => composite2stmts(tpl.productElement(n).asInstanceOf[Product])
+    }
+  }
 
   private def addNested(n: Int, ns: String, refAttr: Keyword, elements: Seq[Element]): Product => Unit = {
     val nested2stmts = getResolver(elements)

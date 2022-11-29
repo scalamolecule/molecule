@@ -10,7 +10,7 @@ trait ExprSetOptOps_1[A, t, Ns[_, _]] extends ExprBase {
 }
 
 trait ExprSetOpt_1[A, t, Ns[_, _]]
-  extends ExprSetOptOps_1[A, t, Ns] {
+  extends ExprSetOptOps_1[A, t, Ns]{
   def apply(v    : Option[t]          )(implicit x: X)            : Ns[A, t] = _exprSetOpt(Appl, v.map(v => Seq(Set(v))))
   def apply(vs   : Option[Seq[t]]     )(implicit x: X, y: X)      : Ns[A, t] = _exprSetOpt(Appl, vs.map(_.map(v => Set(v))))
   def apply(set  : Option[Set[t]]     )(implicit x: X, y: X, z: X): Ns[A, t] = _exprSetOpt(Appl, set.map(set => Seq(set)))
@@ -35,7 +35,7 @@ trait ExprSetOptOps_2[A, B, t, Ns[_, _, _]] extends ExprBase {
 }
 
 trait ExprSetOpt_2[A, B, t, Ns[_, _, _]]
-  extends ExprSetOptOps_2[A, B, t, Ns] {
+  extends ExprSetOptOps_2[A, B, t, Ns]{
   def apply(v    : Option[t]          )(implicit x: X)            : Ns[A, B, t] = _exprSetOpt(Appl, v.map(v => Seq(Set(v))))
   def apply(vs   : Option[Seq[t]]     )(implicit x: X, y: X)      : Ns[A, B, t] = _exprSetOpt(Appl, vs.map(_.map(v => Set(v))))
   def apply(set  : Option[Set[t]]     )(implicit x: X, y: X, z: X): Ns[A, B, t] = _exprSetOpt(Appl, set.map(set => Seq(set)))
@@ -60,7 +60,7 @@ trait ExprSetOptOps_3[A, B, C, t, Ns[_, _, _, _]] extends ExprBase {
 }
 
 trait ExprSetOpt_3[A, B, C, t, Ns[_, _, _, _]]
-  extends ExprSetOptOps_3[A, B, C, t, Ns] {
+  extends ExprSetOptOps_3[A, B, C, t, Ns]{
   def apply(v    : Option[t]          )(implicit x: X)            : Ns[A, B, C, t] = _exprSetOpt(Appl, v.map(v => Seq(Set(v))))
   def apply(vs   : Option[Seq[t]]     )(implicit x: X, y: X)      : Ns[A, B, C, t] = _exprSetOpt(Appl, vs.map(_.map(v => Set(v))))
   def apply(set  : Option[Set[t]]     )(implicit x: X, y: X, z: X): Ns[A, B, C, t] = _exprSetOpt(Appl, set.map(set => Seq(set)))
@@ -85,7 +85,7 @@ trait ExprSetOptOps_4[A, B, C, D, t, Ns[_, _, _, _, _]] extends ExprBase {
 }
 
 trait ExprSetOpt_4[A, B, C, D, t, Ns[_, _, _, _, _]]
-  extends ExprSetOptOps_4[A, B, C, D, t, Ns] {
+  extends ExprSetOptOps_4[A, B, C, D, t, Ns]{
   def apply(v    : Option[t]          )(implicit x: X)            : Ns[A, B, C, D, t] = _exprSetOpt(Appl, v.map(v => Seq(Set(v))))
   def apply(vs   : Option[Seq[t]]     )(implicit x: X, y: X)      : Ns[A, B, C, D, t] = _exprSetOpt(Appl, vs.map(_.map(v => Set(v))))
   def apply(set  : Option[Set[t]]     )(implicit x: X, y: X, z: X): Ns[A, B, C, D, t] = _exprSetOpt(Appl, set.map(set => Seq(set)))
@@ -110,7 +110,7 @@ trait ExprSetOptOps_5[A, B, C, D, E, t, Ns[_, _, _, _, _, _]] extends ExprBase {
 }
 
 trait ExprSetOpt_5[A, B, C, D, E, t, Ns[_, _, _, _, _, _]]
-  extends ExprSetOptOps_5[A, B, C, D, E, t, Ns] {
+  extends ExprSetOptOps_5[A, B, C, D, E, t, Ns]{
   def apply(v    : Option[t]          )(implicit x: X)            : Ns[A, B, C, D, E, t] = _exprSetOpt(Appl, v.map(v => Seq(Set(v))))
   def apply(vs   : Option[Seq[t]]     )(implicit x: X, y: X)      : Ns[A, B, C, D, E, t] = _exprSetOpt(Appl, vs.map(_.map(v => Set(v))))
   def apply(set  : Option[Set[t]]     )(implicit x: X, y: X, z: X): Ns[A, B, C, D, E, t] = _exprSetOpt(Appl, set.map(set => Seq(set)))
@@ -135,7 +135,7 @@ trait ExprSetOptOps_6[A, B, C, D, E, F, t, Ns[_, _, _, _, _, _, _]] extends Expr
 }
 
 trait ExprSetOpt_6[A, B, C, D, E, F, t, Ns[_, _, _, _, _, _, _]]
-  extends ExprSetOptOps_6[A, B, C, D, E, F, t, Ns] {
+  extends ExprSetOptOps_6[A, B, C, D, E, F, t, Ns]{
   def apply(v    : Option[t]          )(implicit x: X)            : Ns[A, B, C, D, E, F, t] = _exprSetOpt(Appl, v.map(v => Seq(Set(v))))
   def apply(vs   : Option[Seq[t]]     )(implicit x: X, y: X)      : Ns[A, B, C, D, E, F, t] = _exprSetOpt(Appl, vs.map(_.map(v => Set(v))))
   def apply(set  : Option[Set[t]]     )(implicit x: X, y: X, z: X): Ns[A, B, C, D, E, F, t] = _exprSetOpt(Appl, set.map(set => Seq(set)))
@@ -160,7 +160,7 @@ trait ExprSetOptOps_7[A, B, C, D, E, F, G, t, Ns[_, _, _, _, _, _, _, _]] extend
 }
 
 trait ExprSetOpt_7[A, B, C, D, E, F, G, t, Ns[_, _, _, _, _, _, _, _]]
-  extends ExprSetOptOps_7[A, B, C, D, E, F, G, t, Ns] {
+  extends ExprSetOptOps_7[A, B, C, D, E, F, G, t, Ns]{
   def apply(v    : Option[t]          )(implicit x: X)            : Ns[A, B, C, D, E, F, G, t] = _exprSetOpt(Appl, v.map(v => Seq(Set(v))))
   def apply(vs   : Option[Seq[t]]     )(implicit x: X, y: X)      : Ns[A, B, C, D, E, F, G, t] = _exprSetOpt(Appl, vs.map(_.map(v => Set(v))))
   def apply(set  : Option[Set[t]]     )(implicit x: X, y: X, z: X): Ns[A, B, C, D, E, F, G, t] = _exprSetOpt(Appl, set.map(set => Seq(set)))
@@ -185,7 +185,7 @@ trait ExprSetOptOps_8[A, B, C, D, E, F, G, H, t, Ns[_, _, _, _, _, _, _, _, _]] 
 }
 
 trait ExprSetOpt_8[A, B, C, D, E, F, G, H, t, Ns[_, _, _, _, _, _, _, _, _]]
-  extends ExprSetOptOps_8[A, B, C, D, E, F, G, H, t, Ns] {
+  extends ExprSetOptOps_8[A, B, C, D, E, F, G, H, t, Ns]{
   def apply(v    : Option[t]          )(implicit x: X)            : Ns[A, B, C, D, E, F, G, H, t] = _exprSetOpt(Appl, v.map(v => Seq(Set(v))))
   def apply(vs   : Option[Seq[t]]     )(implicit x: X, y: X)      : Ns[A, B, C, D, E, F, G, H, t] = _exprSetOpt(Appl, vs.map(_.map(v => Set(v))))
   def apply(set  : Option[Set[t]]     )(implicit x: X, y: X, z: X): Ns[A, B, C, D, E, F, G, H, t] = _exprSetOpt(Appl, set.map(set => Seq(set)))
@@ -210,7 +210,7 @@ trait ExprSetOptOps_9[A, B, C, D, E, F, G, H, I, t, Ns[_, _, _, _, _, _, _, _, _
 }
 
 trait ExprSetOpt_9[A, B, C, D, E, F, G, H, I, t, Ns[_, _, _, _, _, _, _, _, _, _]]
-  extends ExprSetOptOps_9[A, B, C, D, E, F, G, H, I, t, Ns] {
+  extends ExprSetOptOps_9[A, B, C, D, E, F, G, H, I, t, Ns]{
   def apply(v    : Option[t]          )(implicit x: X)            : Ns[A, B, C, D, E, F, G, H, I, t] = _exprSetOpt(Appl, v.map(v => Seq(Set(v))))
   def apply(vs   : Option[Seq[t]]     )(implicit x: X, y: X)      : Ns[A, B, C, D, E, F, G, H, I, t] = _exprSetOpt(Appl, vs.map(_.map(v => Set(v))))
   def apply(set  : Option[Set[t]]     )(implicit x: X, y: X, z: X): Ns[A, B, C, D, E, F, G, H, I, t] = _exprSetOpt(Appl, set.map(set => Seq(set)))
@@ -235,7 +235,7 @@ trait ExprSetOptOps_10[A, B, C, D, E, F, G, H, I, J, t, Ns[_, _, _, _, _, _, _, 
 }
 
 trait ExprSetOpt_10[A, B, C, D, E, F, G, H, I, J, t, Ns[_, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprSetOptOps_10[A, B, C, D, E, F, G, H, I, J, t, Ns] {
+  extends ExprSetOptOps_10[A, B, C, D, E, F, G, H, I, J, t, Ns]{
   def apply(v    : Option[t]          )(implicit x: X)            : Ns[A, B, C, D, E, F, G, H, I, J, t] = _exprSetOpt(Appl, v.map(v => Seq(Set(v))))
   def apply(vs   : Option[Seq[t]]     )(implicit x: X, y: X)      : Ns[A, B, C, D, E, F, G, H, I, J, t] = _exprSetOpt(Appl, vs.map(_.map(v => Set(v))))
   def apply(set  : Option[Set[t]]     )(implicit x: X, y: X, z: X): Ns[A, B, C, D, E, F, G, H, I, J, t] = _exprSetOpt(Appl, set.map(set => Seq(set)))
@@ -260,7 +260,7 @@ trait ExprSetOptOps_11[A, B, C, D, E, F, G, H, I, J, K, t, Ns[_, _, _, _, _, _, 
 }
 
 trait ExprSetOpt_11[A, B, C, D, E, F, G, H, I, J, K, t, Ns[_, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprSetOptOps_11[A, B, C, D, E, F, G, H, I, J, K, t, Ns] {
+  extends ExprSetOptOps_11[A, B, C, D, E, F, G, H, I, J, K, t, Ns]{
   def apply(v    : Option[t]          )(implicit x: X)            : Ns[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetOpt(Appl, v.map(v => Seq(Set(v))))
   def apply(vs   : Option[Seq[t]]     )(implicit x: X, y: X)      : Ns[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetOpt(Appl, vs.map(_.map(v => Set(v))))
   def apply(set  : Option[Set[t]]     )(implicit x: X, y: X, z: X): Ns[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetOpt(Appl, set.map(set => Seq(set)))
@@ -285,7 +285,7 @@ trait ExprSetOptOps_12[A, B, C, D, E, F, G, H, I, J, K, L, t, Ns[_, _, _, _, _, 
 }
 
 trait ExprSetOpt_12[A, B, C, D, E, F, G, H, I, J, K, L, t, Ns[_, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprSetOptOps_12[A, B, C, D, E, F, G, H, I, J, K, L, t, Ns] {
+  extends ExprSetOptOps_12[A, B, C, D, E, F, G, H, I, J, K, L, t, Ns]{
   def apply(v    : Option[t]          )(implicit x: X)            : Ns[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetOpt(Appl, v.map(v => Seq(Set(v))))
   def apply(vs   : Option[Seq[t]]     )(implicit x: X, y: X)      : Ns[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetOpt(Appl, vs.map(_.map(v => Set(v))))
   def apply(set  : Option[Set[t]]     )(implicit x: X, y: X, z: X): Ns[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetOpt(Appl, set.map(set => Seq(set)))
@@ -310,7 +310,7 @@ trait ExprSetOptOps_13[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Ns[_, _, _, _, 
 }
 
 trait ExprSetOpt_13[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Ns[_, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprSetOptOps_13[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Ns] {
+  extends ExprSetOptOps_13[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Ns]{
   def apply(v    : Option[t]          )(implicit x: X)            : Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetOpt(Appl, v.map(v => Seq(Set(v))))
   def apply(vs   : Option[Seq[t]]     )(implicit x: X, y: X)      : Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetOpt(Appl, vs.map(_.map(v => Set(v))))
   def apply(set  : Option[Set[t]]     )(implicit x: X, y: X, z: X): Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetOpt(Appl, set.map(set => Seq(set)))
@@ -335,7 +335,7 @@ trait ExprSetOptOps_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Ns[_, _, _, 
 }
 
 trait ExprSetOpt_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Ns[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprSetOptOps_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Ns] {
+  extends ExprSetOptOps_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Ns]{
   def apply(v    : Option[t]          )(implicit x: X)            : Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetOpt(Appl, v.map(v => Seq(Set(v))))
   def apply(vs   : Option[Seq[t]]     )(implicit x: X, y: X)      : Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetOpt(Appl, vs.map(_.map(v => Set(v))))
   def apply(set  : Option[Set[t]]     )(implicit x: X, y: X, z: X): Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetOpt(Appl, set.map(set => Seq(set)))
@@ -360,7 +360,7 @@ trait ExprSetOptOps_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Ns[_, _, 
 }
 
 trait ExprSetOpt_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Ns[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprSetOptOps_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Ns] {
+  extends ExprSetOptOps_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Ns]{
   def apply(v    : Option[t]          )(implicit x: X)            : Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetOpt(Appl, v.map(v => Seq(Set(v))))
   def apply(vs   : Option[Seq[t]]     )(implicit x: X, y: X)      : Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetOpt(Appl, vs.map(_.map(v => Set(v))))
   def apply(set  : Option[Set[t]]     )(implicit x: X, y: X, z: X): Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetOpt(Appl, set.map(set => Seq(set)))
@@ -385,7 +385,7 @@ trait ExprSetOptOps_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Ns[_, 
 }
 
 trait ExprSetOpt_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Ns[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprSetOptOps_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Ns] {
+  extends ExprSetOptOps_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Ns]{
   def apply(v    : Option[t]          )(implicit x: X)            : Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetOpt(Appl, v.map(v => Seq(Set(v))))
   def apply(vs   : Option[Seq[t]]     )(implicit x: X, y: X)      : Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetOpt(Appl, vs.map(_.map(v => Set(v))))
   def apply(set  : Option[Set[t]]     )(implicit x: X, y: X, z: X): Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetOpt(Appl, set.map(set => Seq(set)))
@@ -410,7 +410,7 @@ trait ExprSetOptOps_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Ns[
 }
 
 trait ExprSetOpt_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Ns[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprSetOptOps_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Ns] {
+  extends ExprSetOptOps_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Ns]{
   def apply(v    : Option[t]          )(implicit x: X)            : Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetOpt(Appl, v.map(v => Seq(Set(v))))
   def apply(vs   : Option[Seq[t]]     )(implicit x: X, y: X)      : Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetOpt(Appl, vs.map(_.map(v => Set(v))))
   def apply(set  : Option[Set[t]]     )(implicit x: X, y: X, z: X): Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetOpt(Appl, set.map(set => Seq(set)))
@@ -435,7 +435,7 @@ trait ExprSetOptOps_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, 
 }
 
 trait ExprSetOpt_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, Ns[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprSetOptOps_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, Ns] {
+  extends ExprSetOptOps_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, Ns]{
   def apply(v    : Option[t]          )(implicit x: X)            : Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetOpt(Appl, v.map(v => Seq(Set(v))))
   def apply(vs   : Option[Seq[t]]     )(implicit x: X, y: X)      : Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetOpt(Appl, vs.map(_.map(v => Set(v))))
   def apply(set  : Option[Set[t]]     )(implicit x: X, y: X, z: X): Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetOpt(Appl, set.map(set => Seq(set)))
@@ -460,7 +460,7 @@ trait ExprSetOptOps_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, 
 }
 
 trait ExprSetOpt_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, Ns[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprSetOptOps_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, Ns] {
+  extends ExprSetOptOps_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, Ns]{
   def apply(v    : Option[t]          )(implicit x: X)            : Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetOpt(Appl, v.map(v => Seq(Set(v))))
   def apply(vs   : Option[Seq[t]]     )(implicit x: X, y: X)      : Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetOpt(Appl, vs.map(_.map(v => Set(v))))
   def apply(set  : Option[Set[t]]     )(implicit x: X, y: X, z: X): Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetOpt(Appl, set.map(set => Seq(set)))
@@ -485,7 +485,7 @@ trait ExprSetOptOps_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, 
 }
 
 trait ExprSetOpt_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t, Ns[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprSetOptOps_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t, Ns] {
+  extends ExprSetOptOps_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t, Ns]{
   def apply(v    : Option[t]          )(implicit x: X)            : Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetOpt(Appl, v.map(v => Seq(Set(v))))
   def apply(vs   : Option[Seq[t]]     )(implicit x: X, y: X)      : Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetOpt(Appl, vs.map(_.map(v => Set(v))))
   def apply(set  : Option[Set[t]]     )(implicit x: X, y: X, z: X): Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetOpt(Appl, set.map(set => Seq(set)))
@@ -510,7 +510,7 @@ trait ExprSetOptOps_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, 
 }
 
 trait ExprSetOpt_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t, Ns[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprSetOptOps_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t, Ns] {
+  extends ExprSetOptOps_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t, Ns]{
   def apply(v    : Option[t]          )(implicit x: X)            : Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetOpt(Appl, v.map(v => Seq(Set(v))))
   def apply(vs   : Option[Seq[t]]     )(implicit x: X, y: X)      : Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetOpt(Appl, vs.map(_.map(v => Set(v))))
   def apply(set  : Option[Set[t]]     )(implicit x: X, y: X, z: X): Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetOpt(Appl, set.map(set => Seq(set)))
@@ -535,7 +535,7 @@ trait ExprSetOptOps_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, 
 }
 
 trait ExprSetOpt_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t, Ns[_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _]]
-  extends ExprSetOptOps_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t, Ns] {
+  extends ExprSetOptOps_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t, Ns]{
   def apply(v    : Option[t]          )(implicit x: X)            : Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetOpt(Appl, v.map(v => Seq(Set(v))))
   def apply(vs   : Option[Seq[t]]     )(implicit x: X, y: X)      : Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetOpt(Appl, vs.map(_.map(v => Set(v))))
   def apply(set  : Option[Set[t]]     )(implicit x: X, y: X, z: X): Ns[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetOpt(Appl, set.map(set => Seq(set)))

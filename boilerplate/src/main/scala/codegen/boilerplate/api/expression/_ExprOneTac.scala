@@ -8,6 +8,7 @@ object _ExprOneTac extends BoilerplateGenBase( "ExprOneTac", "/api/expression") 
     s"""// GENERATED CODE ********************************
        |package molecule.boilerplate.api.expression
        |
+       |import molecule.boilerplate.api._
        |import molecule.boilerplate.api.Keywords.unify
        |import molecule.boilerplate.ast.MoleculeModel._
        |$traits
@@ -23,7 +24,7 @@ object _ExprOneTac extends BoilerplateGenBase( "ExprOneTac", "/api/expression") 
          |}
          |
          |trait ${fileName}_$arity[${`A..V, `}t, $nsIn]
-         |  extends ${fileName}Ops_$arity[${`A..V, `}t, Ns] {
+         |  extends ${fileName}Ops_$arity[${`A..V, `}t, Ns]{
          |  def apply()                : Ns[${`A..V, `}t] = _exprOneTac(NoValue, Nil)
          |  def apply(unify: unify    ): Ns[${`A..V, `}t] = _exprOneTac(Unify  , Nil)
          |  def apply(v    : t, vs: t*): Ns[${`A..V, `}t] = _exprOneTac(Appl   , v +: vs)
