@@ -15,13 +15,13 @@ object SaveCardOne extends DatomicTestSuite {
 
     "mandatory" - types { implicit conn =>
       // Can't save multiple values (use insert for that)
-      intercept[MoleculeException] {
+      intercept[MoleculeException](
         Ns.i(1, 2).save.transact
-      }.message ==> "Can only save one value for attribute `:Ns/i`. Found: ArraySeq(1, 2)"
+      ).message ==> "Can only save one value for attribute `:Ns/i`. Found: ArraySeq(1, 2)"
 
-      intercept[MoleculeException] {
+      intercept[MoleculeException](
         Ns.i(Seq(1, 2)).save.transact
-      }.message ==> "Can only save one value for attribute `:Ns/i`. Found: List(1, 2)"
+      ).message ==> "Can only save one value for attribute `:Ns/i`. Found: List(1, 2)"
 
       // Saving empty list of values is ignored
       Ns.i(Seq.empty[Int]).save.transact
@@ -90,9 +90,9 @@ object SaveCardOne extends DatomicTestSuite {
 
     "optional" - types { implicit conn =>
       // Can't save multiple values (use insert for that)
-      intercept[MoleculeException] {
+      intercept[MoleculeException](
         Ns.i_?(Some(Seq(1, 2))).save.transact
-      }.message ==> "Can only save one value for optional attribute `:Ns/i`. Found: List(1, 2)"
+      ).message ==> "Can only save one value for optional attribute `:Ns/i`. Found: List(1, 2)"
 
       // Empty option of values saves nothing
       Ns.i_?(Option.empty[Seq[Int]]).save.transact

@@ -8,14 +8,18 @@ import molecule.boilerplate.ast.MoleculeModel._
 import scala.annotation.tailrec
 
 
-class SaveStmts(elements: Seq[Element]) extends TransactionBase(elements, 0) {
+class SaveStmtsMaker(elements: Seq[Element]) extends TransactionBase(elements) {
 
   def getStmts: jList[jList[_]] = {
+    println("--- SAVE --------------")
+    elements.foreach(println)
+    checkConflictingAttributes(elements)
+
     e = newId
+    e0 = e
     resolve(elements)
 
-    elements.foreach(println)
-    println("--- SAVE --------------")
+    println("---")
     stmts.forEach(stmt => println(stmt))
 
     Collections.unmodifiableList(stmts)
@@ -26,28 +30,38 @@ class SaveStmts(elements: Seq[Element]) extends TransactionBase(elements, 0) {
     elements match {
       case element :: tail => element match {
         case attr: Attr =>
+          if (attr.op != Appl) {
+            throw MoleculeException("Can't save attributes without applied value. Found:\n" + attr)
+          }
           backRefs = backRefs + (attr.ns -> e)
           val a = kw(attr.ns, attr.attr)
           attr match {
-            case attr: AttrOne =>
+            case attr: AttrOne        =>
               attr match {
                 case attr: AttrOneMan => resolveAttrOneMan(attr, a); resolve(tail)
                 case attr: AttrOneOpt => resolveAttrOneOpt(attr, a); resolve(tail)
               }
-            case attr: AttrSet =>
+            case attr: AttrSet        =>
               attr match {
                 case attr: AttrSetMan => resolveAttrSetMan(attr, a); resolve(tail)
                 case attr: AttrSetOpt => resolveAttrSetOpt(attr, a); resolve(tail)
               }
           }
 
-        case Ref(ns, refAttr, _, _) => ref(kw(ns, refAttr)); resolve(tail)
-        case BackRef(backRefNs)     => backRef(backRefNs); resolve(tail)
-        case _: Nested              =>
-          throw MoleculeException("Nested data structure not allowed in save molecule.")
-        case _: NestedOpt           =>
-          throw MoleculeException("Optional nested data structure not allowed in save molecule.")
-        case element                => unexpected(element)
+        case Ref(ns, refAttr, _, _)       => ref(kw(ns, refAttr)); resolve(tail)
+        case BackRef(backRefNs)           => backRef(backRefNs); resolve(tail)
+        case _: Nested                    => throw MoleculeException(
+          "Nested data structure not allowed in save molecule. Please use insert instead."
+        )
+        case _: NestedOpt                 => throw MoleculeException(
+          "Optional nested data structure not allowed in save molecule. Please use insert instead."
+        )
+        case Composite(compositeElements) =>
+          // Start from initial entity id for each composite sub group
+          e = e0
+          resolve(compositeElements ++ tail)
+
+        case element                      => unexpected(element)
       }
       case Nil             => ()
     }

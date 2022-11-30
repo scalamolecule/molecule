@@ -15,13 +15,13 @@ object SaveCardSet extends DatomicTestSuite {
 
     "mandatory" - types { implicit conn =>
       // Can't save multiple Sets of values (use insert for that)
-      intercept[MoleculeException] {
+      intercept[MoleculeException](
         Ns.ints(Set(1), Set(2)).save.transact
-      }.message ==> "Can only save one Set of values for Set attribute `:Ns/ints`. Found: ArraySeq(Set(1), Set(2))"
+      ).message ==> "Can only save one Set of values for Set attribute `:Ns/ints`. Found: ArraySeq(Set(1), Set(2))"
 
-      intercept[MoleculeException] {
+      intercept[MoleculeException](
         Ns.ints(Seq(Set(1), Set(2))).save.transact
-      }.message ==> "Can only save one Set of values for Set attribute `:Ns/ints`. Found: List(Set(1), Set(2))"
+      ).message ==> "Can only save one Set of values for Set attribute `:Ns/ints`. Found: List(Set(1), Set(2))"
 
       // Saving empty list of Sets is ignored
       Ns.ints(Seq.empty[Set[Int]]).save.transact
@@ -90,9 +90,9 @@ object SaveCardSet extends DatomicTestSuite {
 
     "optional" - types { implicit conn =>
       // Can't save multiple Sets of values (use insert for that)
-      intercept[MoleculeException] {
+      intercept[MoleculeException](
         Ns.ints_?(Some(Seq(Set(1), Set(2)))).save.transact
-      }.message ==> "Can only save one Set of values for optional Set attribute `:Ns/ints`. Found: List(Set(1), Set(2))"
+      ).message ==> "Can only save one Set of values for optional Set attribute `:Ns/ints`. Found: List(Set(1), Set(2))"
 
       // Empty option of Set of values saves nothing
       Ns.ints_?(Option.empty[Seq[Set[Int]]]).save.transact

@@ -4,8 +4,7 @@ package molecule.db.datomic.transaction
 import molecule.boilerplate.ast.MoleculeModel._
 
 
-abstract class InsertResolvers_(elements: Seq[Element], tempIdInit: Int)
-  extends TransactionBase(elements, tempIdInit) {
+abstract class InsertResolvers_(elements: Seq[Element]) extends TransactionBase(elements) {
 
   protected def resolve(
     elements: Seq[Element],

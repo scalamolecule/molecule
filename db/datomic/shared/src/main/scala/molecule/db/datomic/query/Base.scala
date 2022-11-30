@@ -101,6 +101,7 @@ trait Base[Tpl] extends BaseHelpers with JavaConversions { self: Model2Query[Tpl
     pullCasts.empty
     pullCastss = Nil
     pullDepths = List(0)
+    compositeTplCounts = List.empty[Int]
     sortsAcc.empty
     sorts.empty
     attrIndex = -1

@@ -8,7 +8,7 @@ import molecule.db.datomic.query.Base
 trait CastComposite_[Tpl] extends CastCompositeTpl_[Tpl] {
   self: Model2Query[Tpl] with Base[Tpl] =>
 
-  final protected def compositeRow2tpl: Row => Tpl = {
+  final lazy protected val compositeRow2tpl: Row => Tpl = {
     val tplCounts = compositeTplCounts.filterNot(_ == 0)
     tplCounts.length match {
       case 1 => cast1(tplCounts)

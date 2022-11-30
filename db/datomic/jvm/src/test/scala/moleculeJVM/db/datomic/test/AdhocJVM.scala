@@ -1,4 +1,4 @@
-package molecule.db.datomic.test
+package moleculeJVM.db.datomic.test
 
 import molecule.coreTests.dataModels.core.dsl.Refs._
 import molecule.db.datomic._

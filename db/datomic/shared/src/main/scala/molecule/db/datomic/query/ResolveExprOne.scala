@@ -13,7 +13,8 @@ trait ResolveExprOne[Tpl] { self: SortOne_[Tpl] with SortOneOpt_[Tpl] with Base[
     attrIndex += 1
     val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
     attr match {
-      case at: AttrOneManString     => man(e, a, at.op, at.vs, resString, sortOneString(at, attrIndex))
+      case at: AttrOneManString     =>
+        man(e, a, at.op, at.vs, resString, sortOneString(at, attrIndex))
       case at: AttrOneManInt        => man(e, a, at.op, at.vs, resInt, sortOneInt(at, attrIndex))
       case at: AttrOneManLong       => maL(e, a, at.op, at.vs, resLong, sortOneLong(at, attrIndex))
       case at: AttrOneManFloat      => man(e, a, at.op, at.vs, resFloat, sortOneFloat(at, attrIndex))

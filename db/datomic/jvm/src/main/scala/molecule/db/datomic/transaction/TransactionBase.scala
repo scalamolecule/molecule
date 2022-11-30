@@ -10,7 +10,7 @@ import molecule.core.util.fns
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 
-abstract class TransactionBase(elements: Seq[Element], tempIdInit: Int) {
+abstract class TransactionBase(elements: Seq[Element]) {
 
   // Accumulate java insertion data
   final protected val stmts: util.ArrayList[jList[AnyRef]] = new util.ArrayList[jList[AnyRef]]()
@@ -19,8 +19,9 @@ abstract class TransactionBase(elements: Seq[Element], tempIdInit: Int) {
 
   protected val nsFull  : String              = getNs(elements)
   protected val part    : String              = fns.partNs(nsFull).head
-  protected var tempId  : Int                 = tempIdInit
-  protected var lowest  : Int                 = tempIdInit
+  protected var tempId  : Int                 = 0
+  protected var lowest  : Int                 = 0
+  protected var e0      : String              = ""
   protected var e       : String              = ""
   protected var stmt    : jList[AnyRef]       = null
   protected var backRefs: Map[String, String] = Map.empty[String, String]
@@ -28,14 +29,9 @@ abstract class TransactionBase(elements: Seq[Element], tempIdInit: Int) {
 
   protected def stmtList = new util.ArrayList[AnyRef](4)
 
-
   protected def newId: String = {
     tempId = lowest - 1
     lowest = tempId
-    "#db/id[" + part + " " + tempId + "]"
-  }
-  protected def prevId: String = {
-    tempId += 1
     "#db/id[" + part + " " + tempId + "]"
   }
 
@@ -60,4 +56,62 @@ abstract class TransactionBase(elements: Seq[Element], tempIdInit: Int) {
       throw MoleculeException("StmtsBuilder: Unexpected head element: " + other)
   }
 
+  private def dup(element: String) = throw MoleculeException(
+    "Can't transact duplicate element: " + element
+  )
+
+  @tailrec
+  final protected def checkConflictingAttributes(
+    elements: Seq[Element],
+    prev: Array[Array[Array[String]]] = Array(Array(Array.empty[String])),
+    level: Int = 0,
+    group: Int = 0,
+    refPath: Seq[String] = Seq("")
+  ): Unit = {
+    elements match {
+      case head :: tail => head match {
+        case a: Attr =>
+          val attr = a.ns + "." + a.attr
+          // Distinguish multiple ref paths to the same namespace
+          val attrPrefixed = refPath.mkString("-") + "-" + attr
+          if (prev(level)(group).contains(attrPrefixed))
+            dup(attr)
+          prev(level)(group) = prev(level)(group) :+ attrPrefixed
+          checkConflictingAttributes(tail, prev, level, group, refPath)
+
+        case r: Ref =>
+          val ref = r.ns + "." + r.refAttr
+          if (prev(level)(group).contains(ref))
+            dup(ref)
+          prev(level) = prev(level) :+ Array(ref)
+          checkConflictingAttributes(tail, prev, level, group + 1, refPath :+ ref)
+
+        case _: BackRef =>
+          if (group == 0)
+            throw MoleculeException("Can't use backref from here.")
+          checkConflictingAttributes(tail, prev, level, group - 1, refPath.init)
+
+        case Composite(es) =>
+          checkConflictingAttributes(es ++ tail, prev)
+
+        case Nested(r, es) =>
+          val ref = r.ns + "." + r.refAttr
+          if (prev(level)(group).contains(ref))
+            dup(ref)
+          val prev1 = prev :+ Array(Array(ref))
+          checkConflictingAttributes(es ++ tail, prev1, level + 1, 0, refPath)
+
+        case NestedOpt(r, es) =>
+          val ref = r.ns + "." + r.refAttr
+          if (prev(level)(group).contains(ref))
+            dup(ref)
+          val prev1 = prev :+ Array(Array(ref))
+          checkConflictingAttributes(es ++ tail, prev1, level + 1, 0, refPath)
+
+        case other =>
+          throw MoleculeException("StmtsBuilder: Unexpected  element: " + other)
+      }
+      case Nil          => ()
+    }
+  }
 }

@@ -7,13 +7,15 @@ import molecule.boilerplate.ast.MoleculeModel._
 import scala.annotation.tailrec
 
 
-class InsertStmts(elements: Seq[Element], data: Seq[Product], tempIdInit: Int = 0)
-  extends InsertResolvers_(elements, tempIdInit) {
+class InsertStmtsMaker(elements: Seq[Element], data: Seq[Product])
+  extends InsertResolvers_(elements) {
 
   def getStmts: jList[jList[_]] = {
+    checkConflictingAttributes(elements)
     val tpl2stmts = getResolver(elements)
     data.foreach { tpl =>
       e = newId
+      e0 = e
       tpl2stmts(tpl)
     }
     Collections.unmodifiableList(stmts)
@@ -28,6 +30,9 @@ class InsertStmts(elements: Seq[Element], data: Seq[Product], tempIdInit: Int = 
     elements match {
       case element :: tail => element match {
         case attr: Attr =>
+          if (attr.op != V) {
+            throw MoleculeException("Can't insert attributes with applied value. Found:\n" + attr)
+          }
           val ns = attr.ns
           val a  = kw(attr.ns, attr.attr)
           attr match {
@@ -49,10 +54,10 @@ class InsertStmts(elements: Seq[Element], data: Seq[Product], tempIdInit: Int = 
 
         case BackRef(backRefNs) =>
           tail.head match {
-            case Ref(_, refAttr, refNs, _) if prevRefs.contains(refAttr) => throw MoleculeException(
+            case Ref(_, refAttr, _, _) if prevRefs.contains(refAttr) => throw MoleculeException(
               s"Can't re-use previous namespace ${refAttr.capitalize} after backref _$backRefNs."
             )
-            case _                                                       => // ok
+            case _                                                   => // ok
           }
           resolve(tail, resolvers :+ addBackRef(backRefNs), n)
 
@@ -76,9 +81,14 @@ class InsertStmts(elements: Seq[Element], data: Seq[Product], tempIdInit: Int = 
 
   private def addComposite(n: Int, elements: Seq[Element]): Product => Unit = {
     val composite2stmts = getResolver(elements)
+    // Start from initial entity id for each composite sub group
     elements.length match {
-      case 1 => (tpl: Product) => composite2stmts(Tuple1(tpl.productElement(n)))
-      case _ => (tpl: Product) => composite2stmts(tpl.productElement(n).asInstanceOf[Product])
+      case 1 => (tpl: Product) =>
+        e = e0
+        composite2stmts(Tuple1(tpl.productElement(n)))
+      case _ => (tpl: Product) =>
+        e = e0
+        composite2stmts(tpl.productElement(n).asInstanceOf[Product])
     }
   }
 

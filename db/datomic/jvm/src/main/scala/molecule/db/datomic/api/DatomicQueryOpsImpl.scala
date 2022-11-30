@@ -1,7 +1,7 @@
 package molecule.db.datomic.api
 
 import java.util
-import java.util.{Collections, Comparator, Collection => jCollection, Map => jMap}
+import java.util.{Collections, Comparator, Collection => jCollection}
 import datomic.Peer
 import molecule.base.util.exceptions.MoleculeException
 import molecule.boilerplate.ast.MoleculeModel._
@@ -9,7 +9,6 @@ import molecule.core.api.{Connection, QueryOps}
 import molecule.core.util.JavaConversions
 import molecule.db.datomic.facade.Conn_Peer
 import molecule.db.datomic.query.DatomicModel2Query
-import molecule.db.datomic.query.casting.CastComposite_
 import molecule.db.datomic.util.DatomicApiLoader
 import zio.{Chunk, ZIO}
 import scala.concurrent.{ExecutionContext, Future}
@@ -71,7 +70,6 @@ class DatomicQueryOpsImpl[Tpl](elements: Seq[Element])
       tuples.result()
 
     } else if (isComposite) {
-//      val row2tpl = new CastComposite_[Tpl].row2tpl
       sortedRows.forEach(row => tuples.addOne(compositeRow2tpl(row)))
       tuples.result()
 

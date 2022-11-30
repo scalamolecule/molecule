@@ -111,8 +111,10 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
       elements match {
         case head :: tail =>
           head match {
-            case a: Attr if a.op != V =>
-              throw MoleculeException("Expressions not allowed in optional nested data structure. Found:\n" + a)
+            case a: Attr if a.op != V => throw MoleculeException(
+              "Expressions not allowed in optional nested data structure. Found:\n" + a
+            )
+
             case a: AttrOneMan        =>
               pullCasts += (a match {
                 case _: AttrOneManString     => it2String
@@ -281,19 +283,18 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
         case a: AttrSetTac => resolve(resolveAttrSetTac(es, a), tail)
         case other         => unexpectedElement(other)
       }
-      case ref: Ref                         => resolve(resolveRef(es, ref), tail)
+      case ref: Ref                         =>
+        resolve(resolveRef(es, ref), tail)
       case _: BackRef                       => resolve(es.init, tail)
       case Nested(ref, nestedElements)      => resolve(resolveNested(es, ref, nestedElements), tail)
       case n@NestedOpt(ref, nestedElements) => resolve(resolveNestedOpt(es, n, ref, nestedElements), tail)
-      case Composite(compositeElements)     => resolve(resolveComposite(es, compositeElements), tail)
+      case Composite(compositeElements)     => resolve(resolveComposite(compositeElements), tail)
       case other                            => unexpectedElement(other)
     }
     case Nil             => es
   }
 
-  final private def resolveComposite(
-    es: List[Var], compositeElements: Seq[Element]
-  ): List[Var] = {
+  final private def resolveComposite(compositeElements: Seq[Element]): List[Var] = {
     isComposite = true
     compositeTplCounts = compositeTplCounts :+ compositeElements.count {
       case _: AttrOneMan => true
@@ -302,7 +303,8 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
       case _: AttrSetOpt => true
       case _             => false
     }
-    resolve(es, compositeElements)
+    // Use first entity id in each composite sub group
+    resolve(List("?a"), compositeElements)
   }
 
   final private def resolveNested(
