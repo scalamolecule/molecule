@@ -17,15 +17,16 @@ abstract class TransactionBase(elements: Seq[Element]) {
 
   protected def unexpected(element: Element) = throw MoleculeException("Unexpected element: " + element)
 
-  protected val nsFull  : String              = getNs(elements)
-  protected val part    : String              = fns.partNs(nsFull).head
-  protected var tempId  : Int                 = 0
-  protected var lowest  : Int                 = 0
-  protected var e0      : String              = ""
-  protected var e       : String              = ""
-  protected var stmt    : jList[AnyRef]       = null
-  protected var backRefs: Map[String, String] = Map.empty[String, String]
-  protected val prevRefs: ListBuffer[String]  = new ListBuffer[String]
+  protected val nsFull       : String              = getNs(elements)
+  protected val part         : String              = fns.partNs(nsFull).head
+  protected var tempId       : Int                 = 0
+  protected var lowest       : Int                 = 0
+  protected var e0           : String              = ""
+  protected var e            : String              = ""
+  protected var stmt         : jList[AnyRef]       = null
+  protected var backRefs     : Map[String, String] = Map.empty[String, String]
+  protected val prevRefs     : ListBuffer[String]  = new ListBuffer[String]
+  protected var hasComposites: Boolean             = false
 
   protected def stmtList = new util.ArrayList[AnyRef](4)
 
@@ -71,7 +72,7 @@ abstract class TransactionBase(elements: Seq[Element]) {
     elements match {
       case head :: tail => head match {
         case a: Attr =>
-          val attr = a.ns + "." + a.attr
+          val attr         = a.ns + "." + a.attr
           // Distinguish multiple ref paths to the same namespace
           val attrPrefixed = refPath.mkString("-") + "-" + attr
           if (prev(level)(group).contains(attrPrefixed))

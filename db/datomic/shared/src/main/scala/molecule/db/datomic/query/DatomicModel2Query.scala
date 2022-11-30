@@ -38,7 +38,8 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
     resetMutableAccumulators()
 
     // Recursively resolve molecule elements
-    resolve(List(vv), elements)
+    baseVar = vv
+    resolve(List(baseVar), elements)
 
     // Build Datomic query string(s)
     val mainQuery = renderQuery(nestedIds, find, widh, in ++ inPost, where ++ wherePost, rules.nonEmpty, optimized)
@@ -115,7 +116,7 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
               "Expressions not allowed in optional nested data structure. Found:\n" + a
             )
 
-            case a: AttrOneMan        =>
+            case a: AttrOneMan =>
               pullCasts += (a match {
                 case _: AttrOneManString     => it2String
                 case _: AttrOneManInt        => it2Int
@@ -296,21 +297,22 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
 
   final private def resolveComposite(compositeElements: Seq[Element]): List[Var] = {
     isComposite = true
-    compositeTplCounts = compositeTplCounts :+ compositeElements.count {
+    compositeTplCountss = compositeTplCountss.init :+ (compositeTplCountss.last :+ compositeElements.count {
       case _: AttrOneMan => true
       case _: AttrOneOpt => true
       case _: AttrSetMan => true
       case _: AttrSetOpt => true
       case _             => false
-    }
+    })
     // Use first entity id in each composite sub group
-    resolve(List("?a"), compositeElements)
+    resolve(List(baseVar), compositeElements)
   }
 
   final private def resolveNested(
     es: List[Var], ref: Ref, nestedElements: Seq[Element]
   ): List[Var] = {
     isNested = true
+    compositeTplCountss = compositeTplCountss :+ List.empty[Int]
     if (isNestedOpt) noMixedNestedModes
     validateRefNs(ref, nestedElements)
     resolve(resolveNestedRef(es, ref), nestedElements)
@@ -333,9 +335,13 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
   final private def validateRefNs(ref: Ref, nestedElements: Seq[Element]): Unit = {
     val refName  = ref.refAttr.capitalize
     val nestedNs = nestedElements.head match {
-      case a: Attr => a.ns
-      case r: Ref  => r.ns
-      case other   => unexpectedElement(other)
+      case a: Attr       => a.ns
+      case r: Ref        => r.ns
+      case Composite(es) => es.head match {
+        case a: Attr => a.ns
+        case other   => unexpectedElement(other)
+      }
+      case other         => unexpectedElement(other)
     }
     if (ref.refNs != nestedNs)
       throw MoleculeException(s"`$refName` can only nest to `${ref.refNs}`. Found: `$nestedNs`")

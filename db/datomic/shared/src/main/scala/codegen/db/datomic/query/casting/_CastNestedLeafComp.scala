@@ -2,10 +2,10 @@ package codegen.db.datomic.query.casting
 
 import codegen.DatomicGenBase
 
-object _CastComposite extends DatomicGenBase("CastComposite", "/query/casting") {
+object _CastNestedLeafComp extends DatomicGenBase("CastNestedLeafComp", "/query/casting") {
 
   val content = {
-    val resolveX       = (1 to 22).map(i => s"case $i => cast$i(tplCounts)").mkString("\n      ")
+    val resolveX       = (1 to 22).map(i => s"case $i => cast$i(firstRowIndex, tplCounts)").mkString("\n      ")
     val resolveMethods = (1 to 22).map(arity => Chunk(arity).body).mkString("\n")
     s"""// GENERATED CODE ********************************
        |package molecule.db.datomic.query.casting
@@ -14,11 +14,13 @@ object _CastComposite extends DatomicGenBase("CastComposite", "/query/casting") 
        |import molecule.db.datomic.query.Base
        |
        |
-       |trait ${fileName}_[Tpl] extends ${fileName}Tpl_[Tpl] {
+       |trait ${fileName}_[Tpl] extends CastCompositeTpl_[Tpl] {
        |  self: Model2Query[Tpl] with Base[Tpl] =>
        |
-       |  final protected def compositeRow2tpl: Row => Tpl = {
-       |    val tplCounts = compositeTplCountss.head.filterNot(_ == 0)
+       |  final protected def castLeafComp(
+       |    firstRowIndex: Int,
+       |    tplCounts: List[Int] = Nil
+       |  ): Row => Any = {
        |    tplCounts.length match {
        |      $resolveX
        |    }
@@ -29,19 +31,22 @@ object _CastComposite extends DatomicGenBase("CastComposite", "/query/casting") 
 
   case class Chunk(i: Int) extends TemplateVals(i) {
     val counts = (0 until i).map("n" + _).mkString(", ")
-    val indexes = (Seq("val i0 = 0") ++ (1 until i).map(j => s"val i$j = n${j - 1} + i${j - 1}")).mkString("\n    ")
+    val indexes = (Seq("val i0 = firstRowIndex") ++ (1 until i).map(j => s"val i$j = n${j - 1} + i${j - 1}")).mkString("\n    ")
     val casters = (0 until i).map { j => s"val c$j = castSubTpl(n$j, i$j)" }.mkString("\n    ")
     val tuple   = (0 until i).map { j => s"c$j(row)" }.mkString(",\n        ")
     val body    =
       s"""
-         |  final private def cast$i(tplCounts: List[Int]): Row => Tpl = {
+         |  final private def cast$i(
+         |    firstRowIndex: Int,
+         |    tplCounts: List[Int]
+         |  ): Row => Any = {
          |    val List($counts) = tplCounts
          |    $indexes
          |    $casters
          |    (row: Row) =>
          |      (
          |        $tuple
-         |        ).asInstanceOf[Tpl]
+         |        )
          |  }""".stripMargin
   }
 }

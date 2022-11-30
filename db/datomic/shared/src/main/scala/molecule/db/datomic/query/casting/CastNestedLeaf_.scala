@@ -5,42 +5,54 @@ import molecule.core.query.Model2Query
 import molecule.db.datomic.query.Base
 
 
-trait CastNestedLeaf_[Tpl] {
+trait CastNestedLeaf_[Tpl] extends CastNestedLeafComp_[Tpl] {
   self: Model2Query[Tpl] with Base[Tpl] =>
 
   final protected def castLeaf(
-    casts: List[AnyRef => AnyRef],
-    firstRowIndex: Int
+    castsLeaf: List[AnyRef => AnyRef],
+    firstRowIndex: Int,
+    compositeTplCounts: List[Int] = Nil
   ): Row => Any = {
-    val n          = casts.length
-    val rowIndexes = (firstRowIndex until (firstRowIndex + n)).toList
-    n match {
-      case 1 => cast1(casts, rowIndexes)
-      case 2 => cast2(casts, rowIndexes)
-      case 3 => cast3(casts, rowIndexes)
-      case 4 => cast4(casts, rowIndexes)
-      case 5 => cast5(casts, rowIndexes)
-      case 6 => cast6(casts, rowIndexes)
-      case 7 => cast7(casts, rowIndexes)
-      case 8 => cast8(casts, rowIndexes)
-      case 9 => cast9(casts, rowIndexes)
-      case 10 => cast10(casts, rowIndexes)
-      case 11 => cast11(casts, rowIndexes)
-      case 12 => cast12(casts, rowIndexes)
-      case 13 => cast13(casts, rowIndexes)
-      case 14 => cast14(casts, rowIndexes)
-      case 15 => cast15(casts, rowIndexes)
-      case 16 => cast16(casts, rowIndexes)
-      case 17 => cast17(casts, rowIndexes)
-      case 18 => cast18(casts, rowIndexes)
-      case 19 => cast19(casts, rowIndexes)
-      case 20 => cast20(casts, rowIndexes)
-      case 21 => cast21(casts, rowIndexes)
-      case 22 => cast22(casts, rowIndexes)
+    if (compositeTplCounts.nonEmpty) {
+      casts.clear()
+      // Add dummies lambdas for nested entity indexes and top level attr casts
+      casts.addAll((0 until firstRowIndex).toList.map(i => identity))
+      casts.addAll(castsLeaf)
+      castLeafComp(firstRowIndex, compositeTplCounts.filterNot(_ == 0))
+    } else {
+      val n          = casts.length
+      val rowIndexes = (firstRowIndex until (firstRowIndex + n)).toList
+      n match {
+        case 1 => cast1(castsLeaf, rowIndexes)
+        case 2 => cast2(castsLeaf, rowIndexes)
+        case 3 => cast3(castsLeaf, rowIndexes)
+        case 4 => cast4(castsLeaf, rowIndexes)
+        case 5 => cast5(castsLeaf, rowIndexes)
+        case 6 => cast6(castsLeaf, rowIndexes)
+        case 7 => cast7(castsLeaf, rowIndexes)
+        case 8 => cast8(castsLeaf, rowIndexes)
+        case 9 => cast9(castsLeaf, rowIndexes)
+        case 10 => cast10(castsLeaf, rowIndexes)
+        case 11 => cast11(castsLeaf, rowIndexes)
+        case 12 => cast12(castsLeaf, rowIndexes)
+        case 13 => cast13(castsLeaf, rowIndexes)
+        case 14 => cast14(castsLeaf, rowIndexes)
+        case 15 => cast15(castsLeaf, rowIndexes)
+        case 16 => cast16(castsLeaf, rowIndexes)
+        case 17 => cast17(castsLeaf, rowIndexes)
+        case 18 => cast18(castsLeaf, rowIndexes)
+        case 19 => cast19(castsLeaf, rowIndexes)
+        case 20 => cast20(castsLeaf, rowIndexes)
+        case 21 => cast21(castsLeaf, rowIndexes)
+        case 22 => cast22(castsLeaf, rowIndexes)
+      }
     }
   }
 
-  final private def cast1(casts: List[AnyRef => AnyRef], rowIndexes: List[Int]): Row => Any = {
+  final private def cast1(
+    casts: List[AnyRef => AnyRef],
+    rowIndexes: List[Int]
+  ): Row => Any = {
     val c0 = casts(0)
     val List(i0) = rowIndexes
     (row: Row) =>
@@ -49,7 +61,10 @@ trait CastNestedLeaf_[Tpl] {
         )
   }
 
-  final private def cast2(casts: List[AnyRef => AnyRef], rowIndexes: List[Int]): Row => Any = {
+  final private def cast2(
+    casts: List[AnyRef => AnyRef],
+    rowIndexes: List[Int]
+  ): Row => Any = {
     val c0 = casts(0)
     val c1 = casts(1)
     val List(i0, i1) = rowIndexes
@@ -60,7 +75,10 @@ trait CastNestedLeaf_[Tpl] {
         )
   }
 
-  final private def cast3(casts: List[AnyRef => AnyRef], rowIndexes: List[Int]): Row => Any = {
+  final private def cast3(
+    casts: List[AnyRef => AnyRef],
+    rowIndexes: List[Int]
+  ): Row => Any = {
     val c0 = casts(0)
     val c1 = casts(1)
     val c2 = casts(2)
@@ -73,7 +91,10 @@ trait CastNestedLeaf_[Tpl] {
         )
   }
 
-  final private def cast4(casts: List[AnyRef => AnyRef], rowIndexes: List[Int]): Row => Any = {
+  final private def cast4(
+    casts: List[AnyRef => AnyRef],
+    rowIndexes: List[Int]
+  ): Row => Any = {
     val c0 = casts(0)
     val c1 = casts(1)
     val c2 = casts(2)
@@ -88,7 +109,10 @@ trait CastNestedLeaf_[Tpl] {
         )
   }
 
-  final private def cast5(casts: List[AnyRef => AnyRef], rowIndexes: List[Int]): Row => Any = {
+  final private def cast5(
+    casts: List[AnyRef => AnyRef],
+    rowIndexes: List[Int]
+  ): Row => Any = {
     val c0 = casts(0)
     val c1 = casts(1)
     val c2 = casts(2)
@@ -105,7 +129,10 @@ trait CastNestedLeaf_[Tpl] {
         )
   }
 
-  final private def cast6(casts: List[AnyRef => AnyRef], rowIndexes: List[Int]): Row => Any = {
+  final private def cast6(
+    casts: List[AnyRef => AnyRef],
+    rowIndexes: List[Int]
+  ): Row => Any = {
     val c0 = casts(0)
     val c1 = casts(1)
     val c2 = casts(2)
@@ -124,7 +151,10 @@ trait CastNestedLeaf_[Tpl] {
         )
   }
 
-  final private def cast7(casts: List[AnyRef => AnyRef], rowIndexes: List[Int]): Row => Any = {
+  final private def cast7(
+    casts: List[AnyRef => AnyRef],
+    rowIndexes: List[Int]
+  ): Row => Any = {
     val c0 = casts(0)
     val c1 = casts(1)
     val c2 = casts(2)
@@ -145,7 +175,10 @@ trait CastNestedLeaf_[Tpl] {
         )
   }
 
-  final private def cast8(casts: List[AnyRef => AnyRef], rowIndexes: List[Int]): Row => Any = {
+  final private def cast8(
+    casts: List[AnyRef => AnyRef],
+    rowIndexes: List[Int]
+  ): Row => Any = {
     val c0 = casts(0)
     val c1 = casts(1)
     val c2 = casts(2)
@@ -168,7 +201,10 @@ trait CastNestedLeaf_[Tpl] {
         )
   }
 
-  final private def cast9(casts: List[AnyRef => AnyRef], rowIndexes: List[Int]): Row => Any = {
+  final private def cast9(
+    casts: List[AnyRef => AnyRef],
+    rowIndexes: List[Int]
+  ): Row => Any = {
     val c0 = casts(0)
     val c1 = casts(1)
     val c2 = casts(2)
@@ -193,7 +229,10 @@ trait CastNestedLeaf_[Tpl] {
         )
   }
 
-  final private def cast10(casts: List[AnyRef => AnyRef], rowIndexes: List[Int]): Row => Any = {
+  final private def cast10(
+    casts: List[AnyRef => AnyRef],
+    rowIndexes: List[Int]
+  ): Row => Any = {
     val c0 = casts(0)
     val c1 = casts(1)
     val c2 = casts(2)
@@ -220,7 +259,10 @@ trait CastNestedLeaf_[Tpl] {
         )
   }
 
-  final private def cast11(casts: List[AnyRef => AnyRef], rowIndexes: List[Int]): Row => Any = {
+  final private def cast11(
+    casts: List[AnyRef => AnyRef],
+    rowIndexes: List[Int]
+  ): Row => Any = {
     val c0 = casts(0)
     val c1 = casts(1)
     val c2 = casts(2)
@@ -249,7 +291,10 @@ trait CastNestedLeaf_[Tpl] {
         )
   }
 
-  final private def cast12(casts: List[AnyRef => AnyRef], rowIndexes: List[Int]): Row => Any = {
+  final private def cast12(
+    casts: List[AnyRef => AnyRef],
+    rowIndexes: List[Int]
+  ): Row => Any = {
     val c0 = casts(0)
     val c1 = casts(1)
     val c2 = casts(2)
@@ -280,7 +325,10 @@ trait CastNestedLeaf_[Tpl] {
         )
   }
 
-  final private def cast13(casts: List[AnyRef => AnyRef], rowIndexes: List[Int]): Row => Any = {
+  final private def cast13(
+    casts: List[AnyRef => AnyRef],
+    rowIndexes: List[Int]
+  ): Row => Any = {
     val c0 = casts(0)
     val c1 = casts(1)
     val c2 = casts(2)
@@ -313,7 +361,10 @@ trait CastNestedLeaf_[Tpl] {
         )
   }
 
-  final private def cast14(casts: List[AnyRef => AnyRef], rowIndexes: List[Int]): Row => Any = {
+  final private def cast14(
+    casts: List[AnyRef => AnyRef],
+    rowIndexes: List[Int]
+  ): Row => Any = {
     val c0 = casts(0)
     val c1 = casts(1)
     val c2 = casts(2)
@@ -348,7 +399,10 @@ trait CastNestedLeaf_[Tpl] {
         )
   }
 
-  final private def cast15(casts: List[AnyRef => AnyRef], rowIndexes: List[Int]): Row => Any = {
+  final private def cast15(
+    casts: List[AnyRef => AnyRef],
+    rowIndexes: List[Int]
+  ): Row => Any = {
     val c0 = casts(0)
     val c1 = casts(1)
     val c2 = casts(2)
@@ -385,7 +439,10 @@ trait CastNestedLeaf_[Tpl] {
         )
   }
 
-  final private def cast16(casts: List[AnyRef => AnyRef], rowIndexes: List[Int]): Row => Any = {
+  final private def cast16(
+    casts: List[AnyRef => AnyRef],
+    rowIndexes: List[Int]
+  ): Row => Any = {
     val c0 = casts(0)
     val c1 = casts(1)
     val c2 = casts(2)
@@ -424,7 +481,10 @@ trait CastNestedLeaf_[Tpl] {
         )
   }
 
-  final private def cast17(casts: List[AnyRef => AnyRef], rowIndexes: List[Int]): Row => Any = {
+  final private def cast17(
+    casts: List[AnyRef => AnyRef],
+    rowIndexes: List[Int]
+  ): Row => Any = {
     val c0 = casts(0)
     val c1 = casts(1)
     val c2 = casts(2)
@@ -465,7 +525,10 @@ trait CastNestedLeaf_[Tpl] {
         )
   }
 
-  final private def cast18(casts: List[AnyRef => AnyRef], rowIndexes: List[Int]): Row => Any = {
+  final private def cast18(
+    casts: List[AnyRef => AnyRef],
+    rowIndexes: List[Int]
+  ): Row => Any = {
     val c0 = casts(0)
     val c1 = casts(1)
     val c2 = casts(2)
@@ -508,7 +571,10 @@ trait CastNestedLeaf_[Tpl] {
         )
   }
 
-  final private def cast19(casts: List[AnyRef => AnyRef], rowIndexes: List[Int]): Row => Any = {
+  final private def cast19(
+    casts: List[AnyRef => AnyRef],
+    rowIndexes: List[Int]
+  ): Row => Any = {
     val c0 = casts(0)
     val c1 = casts(1)
     val c2 = casts(2)
@@ -553,7 +619,10 @@ trait CastNestedLeaf_[Tpl] {
         )
   }
 
-  final private def cast20(casts: List[AnyRef => AnyRef], rowIndexes: List[Int]): Row => Any = {
+  final private def cast20(
+    casts: List[AnyRef => AnyRef],
+    rowIndexes: List[Int]
+  ): Row => Any = {
     val c0 = casts(0)
     val c1 = casts(1)
     val c2 = casts(2)
@@ -600,7 +669,10 @@ trait CastNestedLeaf_[Tpl] {
         )
   }
 
-  final private def cast21(casts: List[AnyRef => AnyRef], rowIndexes: List[Int]): Row => Any = {
+  final private def cast21(
+    casts: List[AnyRef => AnyRef],
+    rowIndexes: List[Int]
+  ): Row => Any = {
     val c0 = casts(0)
     val c1 = casts(1)
     val c2 = casts(2)
@@ -649,7 +721,10 @@ trait CastNestedLeaf_[Tpl] {
         )
   }
 
-  final private def cast22(casts: List[AnyRef => AnyRef], rowIndexes: List[Int]): Row => Any = {
+  final private def cast22(
+    casts: List[AnyRef => AnyRef],
+    rowIndexes: List[Int]
+  ): Row => Any = {
     val c0 = casts(0)
     val c1 = casts(1)
     val c2 = casts(2)

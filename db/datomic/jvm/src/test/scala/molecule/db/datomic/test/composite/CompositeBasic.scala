@@ -50,7 +50,7 @@ object CompositeBasic extends DatomicTestSuite {
 
 
       (Ns.i.R1.i + R2.i).insert((1, 2), 3).transact
-      
+
       (Ns.i.R1.i + R2.i).query.get ==> List(((1, 2), 3))
       (Ns.i.R1.i_ + R2.i).query.get ==> List((1, 3))
       (Ns.i_.R1.i + R2.i).query.get ==> List((2, 3))
@@ -61,6 +61,28 @@ object CompositeBasic extends DatomicTestSuite {
       (Ns.i.R1.i_ + R2.i_).query.get ==> List(1)
       (Ns.i_.R1.i + R2.i_).query.get ==> List(2)
       (Ns.R1.i + R2.i_).query.get ==> List(2)
+    }
+
+
+    "Expr" - refs { implicit conn =>
+      (R3.i.s + Ns.i.s).insert(
+        ((1, "a"), (4, "x")),
+        ((2, "b"), (5, "y")),
+        ((3, "c"), (6, "z")),
+      ).transact
+
+      (R3.i.a1.s + Ns.i.s).query.get ==> List(
+        ((1, "a"), (4, "x")),
+        ((2, "b"), (5, "y")),
+        ((3, "c"), (6, "z")),
+      )
+      (R3.i.<(3).a1.s + Ns.i.s).query.get ==> List(
+        ((1, "a"), (4, "x")),
+        ((2, "b"), (5, "y")),
+      )
+      (R3.i.<(3).a1.s + Ns.i.>(4).s).query.get ==> List(
+        ((2, "b"), (5, "y")),
+      )
     }
   }
 }

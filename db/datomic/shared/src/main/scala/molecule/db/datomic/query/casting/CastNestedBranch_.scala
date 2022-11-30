@@ -5,8 +5,7 @@ import molecule.core.query.Model2Query
 import molecule.db.datomic.query.Base
 
 
-trait CastNestedBranch_[Tpl] {
-  self: Model2Query[Tpl] with Base[Tpl] =>
+trait CastNestedBranch_[Tpl] { self: Model2Query[Tpl] with Base[Tpl] =>
 
   final protected def castBranch[T](
     casts: List[AnyRef => AnyRef],
@@ -44,7 +43,10 @@ trait CastNestedBranch_[Tpl] {
     (row: Row, leaf: List[Any]) => leaf.asInstanceOf[T]
   }
 
-  final private def cast1[T](casts: List[AnyRef => AnyRef], rowIndexes: List[Int]): (Row, List[Any]) => T = {
+  final private def cast1[T](
+    casts: List[AnyRef => AnyRef],
+    rowIndexes: List[Int]
+  ): (Row, List[Any]) => T = {
     val c0 = casts(0)
     val List(i0) = rowIndexes
     (row: Row, leaf: List[Any]) =>
@@ -54,7 +56,10 @@ trait CastNestedBranch_[Tpl] {
         ).asInstanceOf[T]
   }
 
-  final private def cast2[T](casts: List[AnyRef => AnyRef], rowIndexes: List[Int]): (Row, List[Any]) => T = {
+  final private def cast2[T](
+    casts: List[AnyRef => AnyRef],
+    rowIndexes: List[Int]
+  ): (Row, List[Any]) => T = {
     val c0 = casts(0)
     val c1 = casts(1)
     val List(i0, i1) = rowIndexes
@@ -66,7 +71,10 @@ trait CastNestedBranch_[Tpl] {
         ).asInstanceOf[T]
   }
 
-  final private def cast3[T](casts: List[AnyRef => AnyRef], rowIndexes: List[Int]): (Row, List[Any]) => T = {
+  final private def cast3[T](
+    casts: List[AnyRef => AnyRef],
+    rowIndexes: List[Int]
+  ): (Row, List[Any]) => T = {
     val c0 = casts(0)
     val c1 = casts(1)
     val c2 = casts(2)
@@ -80,7 +88,10 @@ trait CastNestedBranch_[Tpl] {
         ).asInstanceOf[T]
   }
 
-  final private def cast4[T](casts: List[AnyRef => AnyRef], rowIndexes: List[Int]): (Row, List[Any]) => T = {
+  final private def cast4[T](
+    casts: List[AnyRef => AnyRef],
+    rowIndexes: List[Int]
+  ): (Row, List[Any]) => T = {
     val c0 = casts(0)
     val c1 = casts(1)
     val c2 = casts(2)
@@ -96,7 +107,10 @@ trait CastNestedBranch_[Tpl] {
         ).asInstanceOf[T]
   }
 
-  final private def cast5[T](casts: List[AnyRef => AnyRef], rowIndexes: List[Int]): (Row, List[Any]) => T = {
+  final private def cast5[T](
+    casts: List[AnyRef => AnyRef],
+    rowIndexes: List[Int]
+  ): (Row, List[Any]) => T = {
     val c0 = casts(0)
     val c1 = casts(1)
     val c2 = casts(2)
@@ -114,7 +128,10 @@ trait CastNestedBranch_[Tpl] {
         ).asInstanceOf[T]
   }
 
-  final private def cast6[T](casts: List[AnyRef => AnyRef], rowIndexes: List[Int]): (Row, List[Any]) => T = {
+  final private def cast6[T](
+    casts: List[AnyRef => AnyRef],
+    rowIndexes: List[Int]
+  ): (Row, List[Any]) => T = {
     val c0 = casts(0)
     val c1 = casts(1)
     val c2 = casts(2)
@@ -134,7 +151,10 @@ trait CastNestedBranch_[Tpl] {
         ).asInstanceOf[T]
   }
 
-  final private def cast7[T](casts: List[AnyRef => AnyRef], rowIndexes: List[Int]): (Row, List[Any]) => T = {
+  final private def cast7[T](
+    casts: List[AnyRef => AnyRef],
+    rowIndexes: List[Int]
+  ): (Row, List[Any]) => T = {
     val c0 = casts(0)
     val c1 = casts(1)
     val c2 = casts(2)
@@ -156,7 +176,10 @@ trait CastNestedBranch_[Tpl] {
         ).asInstanceOf[T]
   }
 
-  final private def cast8[T](casts: List[AnyRef => AnyRef], rowIndexes: List[Int]): (Row, List[Any]) => T = {
+  final private def cast8[T](
+    casts: List[AnyRef => AnyRef],
+    rowIndexes: List[Int]
+  ): (Row, List[Any]) => T = {
     val c0 = casts(0)
     val c1 = casts(1)
     val c2 = casts(2)
@@ -180,7 +203,10 @@ trait CastNestedBranch_[Tpl] {
         ).asInstanceOf[T]
   }
 
-  final private def cast9[T](casts: List[AnyRef => AnyRef], rowIndexes: List[Int]): (Row, List[Any]) => T = {
+  final private def cast9[T](
+    casts: List[AnyRef => AnyRef],
+    rowIndexes: List[Int]
+  ): (Row, List[Any]) => T = {
     val c0 = casts(0)
     val c1 = casts(1)
     val c2 = casts(2)
@@ -206,7 +232,10 @@ trait CastNestedBranch_[Tpl] {
         ).asInstanceOf[T]
   }
 
-  final private def cast10[T](casts: List[AnyRef => AnyRef], rowIndexes: List[Int]): (Row, List[Any]) => T = {
+  final private def cast10[T](
+    casts: List[AnyRef => AnyRef],
+    rowIndexes: List[Int]
+  ): (Row, List[Any]) => T = {
     val c0 = casts(0)
     val c1 = casts(1)
     val c2 = casts(2)
@@ -234,7 +263,10 @@ trait CastNestedBranch_[Tpl] {
         ).asInstanceOf[T]
   }
 
-  final private def cast11[T](casts: List[AnyRef => AnyRef], rowIndexes: List[Int]): (Row, List[Any]) => T = {
+  final private def cast11[T](
+    casts: List[AnyRef => AnyRef],
+    rowIndexes: List[Int]
+  ): (Row, List[Any]) => T = {
     val c0 = casts(0)
     val c1 = casts(1)
     val c2 = casts(2)
@@ -264,7 +296,10 @@ trait CastNestedBranch_[Tpl] {
         ).asInstanceOf[T]
   }
 
-  final private def cast12[T](casts: List[AnyRef => AnyRef], rowIndexes: List[Int]): (Row, List[Any]) => T = {
+  final private def cast12[T](
+    casts: List[AnyRef => AnyRef],
+    rowIndexes: List[Int]
+  ): (Row, List[Any]) => T = {
     val c0 = casts(0)
     val c1 = casts(1)
     val c2 = casts(2)
@@ -296,7 +331,10 @@ trait CastNestedBranch_[Tpl] {
         ).asInstanceOf[T]
   }
 
-  final private def cast13[T](casts: List[AnyRef => AnyRef], rowIndexes: List[Int]): (Row, List[Any]) => T = {
+  final private def cast13[T](
+    casts: List[AnyRef => AnyRef],
+    rowIndexes: List[Int]
+  ): (Row, List[Any]) => T = {
     val c0 = casts(0)
     val c1 = casts(1)
     val c2 = casts(2)
@@ -330,7 +368,10 @@ trait CastNestedBranch_[Tpl] {
         ).asInstanceOf[T]
   }
 
-  final private def cast14[T](casts: List[AnyRef => AnyRef], rowIndexes: List[Int]): (Row, List[Any]) => T = {
+  final private def cast14[T](
+    casts: List[AnyRef => AnyRef],
+    rowIndexes: List[Int]
+  ): (Row, List[Any]) => T = {
     val c0 = casts(0)
     val c1 = casts(1)
     val c2 = casts(2)
@@ -366,7 +407,10 @@ trait CastNestedBranch_[Tpl] {
         ).asInstanceOf[T]
   }
 
-  final private def cast15[T](casts: List[AnyRef => AnyRef], rowIndexes: List[Int]): (Row, List[Any]) => T = {
+  final private def cast15[T](
+    casts: List[AnyRef => AnyRef],
+    rowIndexes: List[Int]
+  ): (Row, List[Any]) => T = {
     val c0 = casts(0)
     val c1 = casts(1)
     val c2 = casts(2)
@@ -404,7 +448,10 @@ trait CastNestedBranch_[Tpl] {
         ).asInstanceOf[T]
   }
 
-  final private def cast16[T](casts: List[AnyRef => AnyRef], rowIndexes: List[Int]): (Row, List[Any]) => T = {
+  final private def cast16[T](
+    casts: List[AnyRef => AnyRef],
+    rowIndexes: List[Int]
+  ): (Row, List[Any]) => T = {
     val c0 = casts(0)
     val c1 = casts(1)
     val c2 = casts(2)
@@ -444,7 +491,10 @@ trait CastNestedBranch_[Tpl] {
         ).asInstanceOf[T]
   }
 
-  final private def cast17[T](casts: List[AnyRef => AnyRef], rowIndexes: List[Int]): (Row, List[Any]) => T = {
+  final private def cast17[T](
+    casts: List[AnyRef => AnyRef],
+    rowIndexes: List[Int]
+  ): (Row, List[Any]) => T = {
     val c0 = casts(0)
     val c1 = casts(1)
     val c2 = casts(2)
@@ -486,7 +536,10 @@ trait CastNestedBranch_[Tpl] {
         ).asInstanceOf[T]
   }
 
-  final private def cast18[T](casts: List[AnyRef => AnyRef], rowIndexes: List[Int]): (Row, List[Any]) => T = {
+  final private def cast18[T](
+    casts: List[AnyRef => AnyRef],
+    rowIndexes: List[Int]
+  ): (Row, List[Any]) => T = {
     val c0 = casts(0)
     val c1 = casts(1)
     val c2 = casts(2)
@@ -530,7 +583,10 @@ trait CastNestedBranch_[Tpl] {
         ).asInstanceOf[T]
   }
 
-  final private def cast19[T](casts: List[AnyRef => AnyRef], rowIndexes: List[Int]): (Row, List[Any]) => T = {
+  final private def cast19[T](
+    casts: List[AnyRef => AnyRef],
+    rowIndexes: List[Int]
+  ): (Row, List[Any]) => T = {
     val c0 = casts(0)
     val c1 = casts(1)
     val c2 = casts(2)
@@ -576,7 +632,10 @@ trait CastNestedBranch_[Tpl] {
         ).asInstanceOf[T]
   }
 
-  final private def cast20[T](casts: List[AnyRef => AnyRef], rowIndexes: List[Int]): (Row, List[Any]) => T = {
+  final private def cast20[T](
+    casts: List[AnyRef => AnyRef],
+    rowIndexes: List[Int]
+  ): (Row, List[Any]) => T = {
     val c0 = casts(0)
     val c1 = casts(1)
     val c2 = casts(2)
@@ -624,7 +683,10 @@ trait CastNestedBranch_[Tpl] {
         ).asInstanceOf[T]
   }
 
-  final private def cast21[T](casts: List[AnyRef => AnyRef], rowIndexes: List[Int]): (Row, List[Any]) => T = {
+  final private def cast21[T](
+    casts: List[AnyRef => AnyRef],
+    rowIndexes: List[Int]
+  ): (Row, List[Any]) => T = {
     val c0 = casts(0)
     val c1 = casts(1)
     val c2 = casts(2)

@@ -12,7 +12,7 @@ object Adhoc extends DatomicTestSuite {
 
   lazy val tests = Tests {
 
-    "core" - types { implicit conn =>
+    "types" - types { implicit conn =>
 
 //      Ns.int.d1.query.get ==> List(3, 2, 1)
 //      Ns.int.a1.query.get ==> List(1, 2, 3)

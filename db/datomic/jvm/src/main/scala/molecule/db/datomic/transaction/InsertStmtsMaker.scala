@@ -80,6 +80,7 @@ class InsertStmtsMaker(elements: Seq[Element], data: Seq[Product])
 
 
   private def addComposite(n: Int, elements: Seq[Element]): Product => Unit = {
+    hasComposites = true
     val composite2stmts = getResolver(elements)
     // Start from initial entity id for each composite sub group
     elements.length match {
@@ -93,6 +94,8 @@ class InsertStmtsMaker(elements: Seq[Element], data: Seq[Product])
   }
 
   private def addNested(n: Int, ns: String, refAttr: Keyword, elements: Seq[Element]): Product => Unit = {
+    if (hasComposites)
+      throw MoleculeException("Composites are only allow on last level (leaf) of nested data structure.")
     val nested2stmts = getResolver(elements)
     val nestedArity  = elements.count {
       case _: Mandatory@unchecked => true
@@ -108,6 +111,7 @@ class InsertStmtsMaker(elements: Seq[Element], data: Seq[Product])
             e = nestedBaseId
             val tpl = Tuple1(value)
             addRef(ns, refAttr)(tpl)
+            e0 = e
             nested2stmts(tpl)
           }
         }
@@ -118,6 +122,7 @@ class InsertStmtsMaker(elements: Seq[Element], data: Seq[Product])
           nested.foreach { tpl =>
             e = nestedBaseId
             addRef(ns, refAttr)(tpl)
+            e0 = e
             nested2stmts(tpl)
           }
         }

@@ -14,8 +14,7 @@ object _CastNestedBranch extends DatomicGenBase("CastNestedBranch", "/query/cast
        |import molecule.db.datomic.query.Base
        |
        |
-       |trait ${fileName}_[Tpl] {
-       |  self: Model2Query[Tpl] with Base[Tpl] =>
+       |trait ${fileName}_[Tpl] { self: Model2Query[Tpl] with Base[Tpl] =>
        |
        |  final protected def castBranch[T](
        |    casts: List[AnyRef => AnyRef],
@@ -42,7 +41,10 @@ object _CastNestedBranch extends DatomicGenBase("CastNestedBranch", "/query/cast
     val tuple   = (0 until i).map { j => s"c$j(row.get(i$j))" }.mkString(",\n        ")
     val body    =
       s"""
-         |  final private def cast$i[T](casts: List[AnyRef => AnyRef], rowIndexes: List[Int]): (Row, List[Any]) => T = {
+         |  final private def cast$i[T](
+         |    casts: List[AnyRef => AnyRef],
+         |    rowIndexes: List[Int]
+         |  ): (Row, List[Any]) => T = {
          |    $casters
          |    val List($indexes) = rowIndexes
          |    (row: Row, leaf: List[Any]) =>

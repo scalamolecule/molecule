@@ -43,10 +43,8 @@ trait CastNestedOptLeafFlatten_[Tpl] {
     map: jMap[_, _]
   ): jArrayList[Any] = {
     map.values.forEach {
-      case map: jMap[_, _] =>
-        flatten(list, map)
-      case v               =>
-        list.add(v)
+      case map: jMap[_, _] => flatten(list, map)
+      case v               => list.add(v)
     }
     list
   }
