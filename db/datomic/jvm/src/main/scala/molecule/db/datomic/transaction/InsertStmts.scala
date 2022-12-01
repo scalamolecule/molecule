@@ -69,12 +69,24 @@ class InsertStmts(elements: Seq[Element], data: Seq[Product])
           prevRefs.clear()
           resolve(tail, resolvers :+ addNested(n, ns, kw(ns, refAttr), elements), n)
 
-        case Composite(elements) =>
-          resolve(tail, resolvers :+ addComposite(n, elements), n + 1)
+        case Composite(compositeElements) =>
+          resolve(tail, resolvers :+ addComposite(n, compositeElements), n + 1)
+
+        case TxMetaData(txElements) =>
+          resolve(tail, resolvers :+ addTxMetaData(n, txElements), n)
 
         case other => unexpected(other)
       }
       case Nil             => resolvers
+    }
+  }
+
+
+  private def addTxMetaData(n: Int, elements: Seq[Element]): Product => Unit = {
+    val tx2stmts = getResolver(elements, n)
+    (tpl: Product) => {
+      e = tx
+      tx2stmts(tpl)
     }
   }
 
