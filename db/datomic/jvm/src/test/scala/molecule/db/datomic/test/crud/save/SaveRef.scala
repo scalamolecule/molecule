@@ -15,15 +15,18 @@ object SaveRef extends DatomicTestSuite {
       Ns.i.R1.i.query.get ==> List((1, 2))
     }
 
+
     "Card many" - refs { implicit conn =>
       Ns.i(1).Rs1.i(2).save.transact
       Ns.i.Rs1.i.query.get ==> List((1, 2))
     }
 
+
     "Backref" - refs { implicit conn =>
       Ns.i(1).Rs1.i(2)._Ns.s("a").save.transact
       Ns.i.Rs1.i._Ns.s.query.get ==> List((1, 2, "a"))
     }
+
 
     "Composite" - refs { implicit conn =>
       (Ns.i(1) + R2.i(2)).save.transact
@@ -31,6 +34,12 @@ object SaveRef extends DatomicTestSuite {
 
       (Ns.R1.i(1) + R2.i(2)).save.transact
       (Ns.R1.i + R2.i).query.get ==> List((1, 2))
+    }
+
+
+    "TxMetaData" - refs { implicit conn =>
+      Ns.i(1).Tx(R2.i(2)).save.transact
+      Ns.i.Tx(R2.i).query.get ==> List((1, 2))
     }
   }
 }

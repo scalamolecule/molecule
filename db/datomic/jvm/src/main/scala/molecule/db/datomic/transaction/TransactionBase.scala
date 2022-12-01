@@ -39,6 +39,7 @@ abstract class TransactionBase(elements: Seq[Element]) {
   protected def kw(ns: String, attr: String) = Keyword.intern(ns, attr)
   protected lazy val add     = kw("db", "add")
   protected lazy val retract = kw("db", "retract")
+  protected lazy val tx      = "datomic.tx"
 
   protected lazy val bigInt2java  = (v: Any) => v.asInstanceOf[BigInt].bigInteger
   protected lazy val bigDec2java  = (v: Any) => v.asInstanceOf[BigDecimal].bigDecimal
@@ -108,6 +109,10 @@ abstract class TransactionBase(elements: Seq[Element]) {
             dup(ref)
           val prev1 = prev :+ Array(Array(ref))
           checkConflictingAttributes(es ++ tail, prev1, level + 1, 0, refPath)
+
+        case TxMetaData(txElements) =>
+          val prev1 = prev :+ Array(Array.empty[String])
+          checkConflictingAttributes(txElements, prev1, level + 1, 0, Nil)
 
         case other =>
           throw MoleculeException("StmtsBuilder: Unexpected  element: " + other)

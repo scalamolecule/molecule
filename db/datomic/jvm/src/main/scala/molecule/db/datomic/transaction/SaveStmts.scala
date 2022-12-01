@@ -8,9 +8,9 @@ import molecule.boilerplate.ast.MoleculeModel._
 import scala.annotation.tailrec
 
 
-class SaveStmtsMaker(elements: Seq[Element]) extends TransactionBase(elements) {
+class SaveStmts(elements: Seq[Element]) extends TransactionBase(elements) {
 
-  def getStmts: jList[jList[_]] = {
+  def get: jList[jList[_]] = {
     println("--- SAVE --------------")
     elements.foreach(println)
     checkConflictingAttributes(elements)
@@ -60,6 +60,10 @@ class SaveStmtsMaker(elements: Seq[Element]) extends TransactionBase(elements) {
           // Start from initial entity id for each composite sub group
           e = e0
           resolve(compositeElements ++ tail)
+
+        case TxMetaData(txElements) =>
+          e = tx
+          resolve(txElements) // tail is empty (no more attributes possible after Tx)
 
         case element                      => unexpected(element)
       }

@@ -2,7 +2,7 @@ package molecule.db.datomic.api
 
 import molecule.boilerplate.ast.MoleculeModel.Element
 import molecule.core.api.Insert_
-import molecule.db.datomic.transaction.InsertStmtsMaker
+import molecule.db.datomic.transaction.InsertStmts
 
 // Platform-specific implementation
 
@@ -13,6 +13,6 @@ class DatomicInsertImpl(elements: Seq[Element]) extends Insert_ {
     println("\n--- INSERT --------------------------------------------------------")
     elements.foreach(println)
 
-    new DatomicInsertOps(new InsertStmtsMaker(elements, data))
+    new DatomicInsertOps(new InsertStmts(elements, data))
   }
 }

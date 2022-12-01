@@ -17,8 +17,9 @@ object _ModelOps extends BoilerplateGenBase("ModelOps", "/api") {
        |    with ModelTransformations
        |    with ExprOneTacOps_0[t, Ns]
        |    with ExprSetTacOps_0[t, Ns]
-       |    with NestedOp_0
        |    with CompositeInit_0
+       |    with NestedOp_0
+       |    with Tx_0_
        |$traits""".stripMargin
   }
 
@@ -35,8 +36,9 @@ object _ModelOps extends BoilerplateGenBase("ModelOps", "/api") {
          |    with ExprOneTacOps_$arity[${`A..V`}, t, Ns]
          |    with ExprSetManOps_$arity[${`A..V`}, t, Ns]
          |    with ExprSetOptOps_$arity[${`A..V`}, t, Ns]
-         |    with ExprSetTacOps_$arity[${`A..V`}, t, Ns]$nested
-         |    with CompositeInit_$arity[${`A..V`}]
-         |    with SortAttrsOps_$arity[${`A..V`}, t, Ns]""".stripMargin
+         |    with ExprSetTacOps_$arity[${`A..V`}, t, Ns]
+         |    with SortAttrsOps_$arity[${`A..V`}, t, Ns]
+         |    with CompositeInit_$arity[${`A..V`}]$nested
+         |    with Tx_${arity}_[${`A..V`}]""".stripMargin
   }
 }

@@ -37,9 +37,17 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
   final protected def getQueries(optimized: Boolean): (String, String) = {
     resetMutableAccumulators()
 
+    // Add 4th tx var to first attribute if tx meta data exists
+    elements.last match {
+      case _: TxMetaData => addTxVar = true
+      case _             => ()
+    }
+
+    // Remember first entity id variable for subsequent composite groups
+    firstEid = vv
+
     // Recursively resolve molecule elements
-    baseVar = vv
-    resolve(List(baseVar), elements)
+    resolve(List(firstEid), elements)
 
     // Build Datomic query string(s)
     val mainQuery = renderQuery(nestedIds, find, widh, in ++ inPost, where ++ wherePost, rules.nonEmpty, optimized)
@@ -284,19 +292,23 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
         case a: AttrSetTac => resolve(resolveAttrSetTac(es, a), tail)
         case other         => unexpectedElement(other)
       }
-      case ref: Ref                         =>
-        resolve(resolveRef(es, ref), tail)
+      case ref: Ref                         => resolve(resolveRef(es, ref), tail)
       case _: BackRef                       => resolve(es.init, tail)
+      case Composite(compositeElements)     => resolve(resolveComposite(compositeElements), tail)
       case Nested(ref, nestedElements)      => resolve(resolveNested(es, ref, nestedElements), tail)
       case n@NestedOpt(ref, nestedElements) => resolve(resolveNestedOpt(es, n, ref, nestedElements), tail)
-      case Composite(compositeElements)     => resolve(resolveComposite(compositeElements), tail)
+      case TxMetaData(txElements)           => resolve(resolveTxMetaData(txElements), Nil)
       case other                            => unexpectedElement(other)
     }
     case Nil             => es
   }
 
   final private def resolveComposite(compositeElements: Seq[Element]): List[Var] = {
-    isComposite = true
+    if (hasTxMetaData) {
+      txComposite = true
+    } else {
+      isComposite = true
+    }
     compositeTplCountss = compositeTplCountss.init :+ (compositeTplCountss.last :+ compositeElements.count {
       case _: AttrOneMan => true
       case _: AttrOneOpt => true
@@ -305,7 +317,7 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
       case _             => false
     })
     // Use first entity id in each composite sub group
-    resolve(List(baseVar), compositeElements)
+    resolve(List(firstEid), compositeElements)
   }
 
   final private def resolveNested(
@@ -325,6 +337,11 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
     if (isNested) noMixedNestedModes
     validateRefNs(ref, nestedElements)
     resolveNestedOptRef(es, nestedOpt)
+  }
+
+  final private def resolveTxMetaData(txElements: Seq[Element]): List[Var] = {
+    hasTxMetaData = true
+    resolve(List(txVar), txElements)
   }
 
 

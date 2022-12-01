@@ -7,10 +7,10 @@ import molecule.boilerplate.ast.MoleculeModel._
 import scala.annotation.tailrec
 
 
-class InsertStmtsMaker(elements: Seq[Element], data: Seq[Product])
+class InsertStmts(elements: Seq[Element], data: Seq[Product])
   extends InsertResolvers_(elements) {
 
-  def getStmts: jList[jList[_]] = {
+  def get: jList[jList[_]] = {
     checkConflictingAttributes(elements)
     val tpl2stmts = getResolver(elements)
     data.foreach { tpl =>

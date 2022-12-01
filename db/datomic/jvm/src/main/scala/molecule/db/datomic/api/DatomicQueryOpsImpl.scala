@@ -70,11 +70,22 @@ class DatomicQueryOpsImpl[Tpl](elements: Seq[Element])
       tuples.result()
 
     } else if (isComposite) {
+      if (hasTxMetaData && !txComposite) {
+        val txAttrCounts = List.fill(find.length - compositeTplCountss.flatten.sum)(1)
+        compositeTplCountss = List(compositeTplCountss.head ++ txAttrCounts)
+      }
       sortedRows.forEach(row => tuples.addOne(compositeRow2tpl(row)))
       tuples.result()
 
     } else {
-      sortedRows.forEach(row => tuples.addOne(row2tpl(row)))
+      if (txComposite) {
+        val txAttrCounts = compositeTplCountss.head
+        val initialAttrsCount = find.length - txAttrCounts.sum
+        compositeTplCountss = List(initialAttrsCount +: txAttrCounts)
+        sortedRows.forEach(row => tuples.addOne(compositeRow2tpl(row)))
+      } else {
+        sortedRows.forEach(row => tuples.addOne(row2tpl(row)))
+      }
       tuples.result()
     }
   }
