@@ -1,29 +1,30 @@
 package molecule.db.datomic.transaction
 
 import java.net.URI
-import java.util.{Collections, Date, UUID, List => jList}
+import java.util.{Collections, Date, UUID, ArrayList => jArrayList, List => jList}
 import clojure.lang.Keyword
 import molecule.base.util.exceptions.MoleculeException
 import molecule.boilerplate.ast.MoleculeModel._
 import scala.annotation.tailrec
 
 
-class SaveStmts(elements: Seq[Element]) extends TransactionBase(elements) {
+class SaveStmts(elements: Seq[Element], isInsertTxMetaData: Boolean = false)
+  extends TransactionBase(elements) {
 
-  def get: jList[jList[_]] = {
+  def getRawStmts(eid: String): jArrayList[jList[AnyRef]] = {
     println("--- SAVE --------------")
     elements.foreach(println)
     checkConflictingAttributes(elements)
-
-    e = newId
+    e = eid
     e0 = e
     resolve(elements)
-
     println("---")
     stmts.forEach(stmt => println(stmt))
-
-    Collections.unmodifiableList(stmts)
+    stmts
   }
+
+  def getStmts: jList[jList[_]] = Collections.unmodifiableList(getRawStmts(newId))
+
 
   @tailrec
   final private def resolve(elements: Seq[Element]): Unit = {
@@ -31,20 +32,25 @@ class SaveStmts(elements: Seq[Element]) extends TransactionBase(elements) {
       case element :: tail => element match {
         case attr: Attr =>
           if (attr.op != Appl) {
-            throw MoleculeException("Can't save attributes without applied value. Found:\n" + attr)
+            if (isInsertTxMetaData)
+              throw MoleculeException("Please apply tx meta data to tacit attributes. Found:\n" + attr)
+            else
+              throw MoleculeException("Can't save attributes without applied value. Found:\n" + attr)
           }
           backRefs = backRefs + (attr.ns -> e)
           val a = kw(attr.ns, attr.attr)
           attr match {
-            case attr: AttrOne        =>
+            case attr: AttrOne =>
               attr match {
                 case attr: AttrOneMan => resolveAttrOneMan(attr, a); resolve(tail)
                 case attr: AttrOneOpt => resolveAttrOneOpt(attr, a); resolve(tail)
+                case attr: AttrOneTac => resolveAttrOneTac(attr, a); resolve(tail)
               }
-            case attr: AttrSet        =>
+            case attr: AttrSet =>
               attr match {
                 case attr: AttrSetMan => resolveAttrSetMan(attr, a); resolve(tail)
                 case attr: AttrSetOpt => resolveAttrSetOpt(attr, a); resolve(tail)
+                case attr: AttrSetTac => resolveAttrSetTac(attr, a); resolve(tail)
               }
           }
 
@@ -58,14 +64,15 @@ class SaveStmts(elements: Seq[Element]) extends TransactionBase(elements) {
         )
         case Composite(compositeElements) =>
           // Start from initial entity id for each composite sub group
-          e = e0
+          e = if (isInsertTxMetaData) tx else e0
           resolve(compositeElements ++ tail)
 
         case TxMetaData(txElements) =>
           e = tx
+          e0 = tx
           resolve(txElements) // tail is empty (no more attributes possible after Tx)
 
-        case element                      => unexpected(element)
+        case element => unexpected(element)
       }
       case Nil             => ()
     }
@@ -100,6 +107,28 @@ class SaveStmts(elements: Seq[Element]) extends TransactionBase(elements) {
       case AttrOneManChar(_, _, Appl, vs, _, _, _)       => addV(a, oneV[Char](an, vs, _.toString))
       case _                                             => throw MoleculeException(
         s"Can only save one applied value for attribute `$an`. Found expression: ${attr.op}"
+      )
+    }
+  }
+  def resolveAttrOneTac(attr: AttrOneTac, a: Keyword): Unit = {
+    val an = a.toString
+    attr match {
+      case AttrOneTacString(_, _, Appl, vs, _, _, _)     => addV(a, oneV[String](an, vs, identity))
+      case AttrOneTacInt(_, _, Appl, vs, _, _, _)        => addV(a, oneV[Int](an, vs, identity))
+      case AttrOneTacLong(_, _, Appl, vs, _, _, _)       => addV(a, oneV[Long](an, vs, identity))
+      case AttrOneTacFloat(_, _, Appl, vs, _, _, _)      => addV(a, oneV[Float](an, vs, identity))
+      case AttrOneTacDouble(_, _, Appl, vs, _, _, _)     => addV(a, oneV[Double](an, vs, identity))
+      case AttrOneTacBoolean(_, _, Appl, vs, _, _, _)    => addV(a, oneV[Boolean](an, vs, identity))
+      case AttrOneTacBigInt(_, _, Appl, vs, _, _, _)     => addV(a, oneV[BigInt](an, vs, _.bigInteger))
+      case AttrOneTacBigDecimal(_, _, Appl, vs, _, _, _) => addV(a, oneV[BigDecimal](an, vs, _.bigDecimal))
+      case AttrOneTacDate(_, _, Appl, vs, _, _, _)       => addV(a, oneV[Date](an, vs, identity))
+      case AttrOneTacUUID(_, _, Appl, vs, _, _, _)       => addV(a, oneV[UUID](an, vs, identity))
+      case AttrOneTacURI(_, _, Appl, vs, _, _, _)        => addV(a, oneV[URI](an, vs, identity))
+      case AttrOneTacByte(_, _, Appl, vs, _, _, _)       => addV(a, oneV[Byte](an, vs, _.toInt))
+      case AttrOneTacShort(_, _, Appl, vs, _, _, _)      => addV(a, oneV[Short](an, vs, _.toInt))
+      case AttrOneTacChar(_, _, Appl, vs, _, _, _)       => addV(a, oneV[Char](an, vs, _.toString))
+      case _                                             => throw MoleculeException(
+        s"Can only save one applied value for tacit attribute `$an`. Found expression: ${attr.op}"
       )
     }
   }
@@ -166,6 +195,28 @@ class SaveStmts(elements: Seq[Element]) extends TransactionBase(elements) {
       case AttrSetManChar(_, _, Appl, sets, _, _, _)       => addSet(a, oneSet[Char](an, sets, _.toString))
       case _                                               => throw MoleculeException(
         s"Can only save one applied Set of values for Set attribute `$an`. Found expression: ${attr.op}"
+      )
+    }
+  }
+  def resolveAttrSetTac(attr: AttrSetTac, a: Keyword): Unit = {
+    val an = a.toString
+    attr match {
+      case AttrSetTacString(_, _, Appl, sets, _, _, _)     => addSet(a, oneSet[String](an, sets, identity))
+      case AttrSetTacInt(_, _, Appl, sets, _, _, _)        => addSet(a, oneSet[Int](an, sets, identity))
+      case AttrSetTacLong(_, _, Appl, sets, _, _, _)       => addSet(a, oneSet[Long](an, sets, identity))
+      case AttrSetTacFloat(_, _, Appl, sets, _, _, _)      => addSet(a, oneSet[Float](an, sets, identity))
+      case AttrSetTacDouble(_, _, Appl, sets, _, _, _)     => addSet(a, oneSet[Double](an, sets, identity))
+      case AttrSetTacBoolean(_, _, Appl, sets, _, _, _)    => addSet(a, oneSet[Boolean](an, sets, identity))
+      case AttrSetTacBigInt(_, _, Appl, sets, _, _, _)     => addSet(a, oneSet[BigInt](an, sets, _.bigInteger))
+      case AttrSetTacBigDecimal(_, _, Appl, sets, _, _, _) => addSet(a, oneSet[BigDecimal](an, sets, _.bigDecimal))
+      case AttrSetTacDate(_, _, Appl, sets, _, _, _)       => addSet(a, oneSet[Date](an, sets, identity))
+      case AttrSetTacUUID(_, _, Appl, sets, _, _, _)       => addSet(a, oneSet[UUID](an, sets, identity))
+      case AttrSetTacURI(_, _, Appl, sets, _, _, _)        => addSet(a, oneSet[URI](an, sets, identity))
+      case AttrSetTacByte(_, _, Appl, sets, _, _, _)       => addSet(a, oneSet[Byte](an, sets, _.toInt))
+      case AttrSetTacShort(_, _, Appl, sets, _, _, _)      => addSet(a, oneSet[Short](an, sets, _.toInt))
+      case AttrSetTacChar(_, _, Appl, sets, _, _, _)       => addSet(a, oneSet[Char](an, sets, _.toString))
+      case _                                               => throw MoleculeException(
+        s"Can only save one applied Set of values for tacit Set attribute `$an`. Found expression: ${attr.op}"
       )
     }
   }

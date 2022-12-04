@@ -39,7 +39,7 @@ trait CastNestedOptLeaf_[Tpl] {
   }
 
   final private def pullLeaf1(pullCasts: List[jIterator[_] => Any]): jIterator[_] => List[Any] = {
-    val c0 = pullCasts(0)
+    val List(c1) = pullCasts
     (it: jIterator[_]) =>
       try {
         it.next match {
@@ -47,28 +47,6 @@ trait CastNestedOptLeaf_[Tpl] {
             case map: jMap[_, _] =>
               val it = map.values.iterator
               (
-                c0(it)
-              )
-          }
-          case _            => Nil
-        }
-      } catch {
-        case _: NullValueException => Nil
-        case e: Throwable          => throw e
-      }
-  }
-
-  final private def pullLeaf2(pullCasts: List[jIterator[_] => Any]): jIterator[_] => List[Any] = {
-    val c0 = pullCasts(0)
-    val c1 = pullCasts(1)
-    (it: jIterator[_]) =>
-      try {
-        it.next match {
-          case vs: jList[_] => vs.asScala.toList.map {
-            case map: jMap[_, _] =>
-              val it = map.values.iterator
-              (
-                c0(it),
                 c1(it)
               )
           }
@@ -80,10 +58,8 @@ trait CastNestedOptLeaf_[Tpl] {
       }
   }
 
-  final private def pullLeaf3(pullCasts: List[jIterator[_] => Any]): jIterator[_] => List[Any] = {
-    val c0 = pullCasts(0)
-    val c1 = pullCasts(1)
-    val c2 = pullCasts(2)
+  final private def pullLeaf2(pullCasts: List[jIterator[_] => Any]): jIterator[_] => List[Any] = {
+    val List(c1, c2) = pullCasts
     (it: jIterator[_]) =>
       try {
         it.next match {
@@ -91,7 +67,6 @@ trait CastNestedOptLeaf_[Tpl] {
             case map: jMap[_, _] =>
               val it = map.values.iterator
               (
-                c0(it),
                 c1(it),
                 c2(it)
               )
@@ -104,11 +79,8 @@ trait CastNestedOptLeaf_[Tpl] {
       }
   }
 
-  final private def pullLeaf4(pullCasts: List[jIterator[_] => Any]): jIterator[_] => List[Any] = {
-    val c0 = pullCasts(0)
-    val c1 = pullCasts(1)
-    val c2 = pullCasts(2)
-    val c3 = pullCasts(3)
+  final private def pullLeaf3(pullCasts: List[jIterator[_] => Any]): jIterator[_] => List[Any] = {
+    val List(c1, c2, c3) = pullCasts
     (it: jIterator[_]) =>
       try {
         it.next match {
@@ -116,7 +88,6 @@ trait CastNestedOptLeaf_[Tpl] {
             case map: jMap[_, _] =>
               val it = map.values.iterator
               (
-                c0(it),
                 c1(it),
                 c2(it),
                 c3(it)
@@ -130,12 +101,8 @@ trait CastNestedOptLeaf_[Tpl] {
       }
   }
 
-  final private def pullLeaf5(pullCasts: List[jIterator[_] => Any]): jIterator[_] => List[Any] = {
-    val c0 = pullCasts(0)
-    val c1 = pullCasts(1)
-    val c2 = pullCasts(2)
-    val c3 = pullCasts(3)
-    val c4 = pullCasts(4)
+  final private def pullLeaf4(pullCasts: List[jIterator[_] => Any]): jIterator[_] => List[Any] = {
+    val List(c1, c2, c3, c4) = pullCasts
     (it: jIterator[_]) =>
       try {
         it.next match {
@@ -143,7 +110,6 @@ trait CastNestedOptLeaf_[Tpl] {
             case map: jMap[_, _] =>
               val it = map.values.iterator
               (
-                c0(it),
                 c1(it),
                 c2(it),
                 c3(it),
@@ -158,13 +124,8 @@ trait CastNestedOptLeaf_[Tpl] {
       }
   }
 
-  final private def pullLeaf6(pullCasts: List[jIterator[_] => Any]): jIterator[_] => List[Any] = {
-    val c0 = pullCasts(0)
-    val c1 = pullCasts(1)
-    val c2 = pullCasts(2)
-    val c3 = pullCasts(3)
-    val c4 = pullCasts(4)
-    val c5 = pullCasts(5)
+  final private def pullLeaf5(pullCasts: List[jIterator[_] => Any]): jIterator[_] => List[Any] = {
+    val List(c1, c2, c3, c4, c5) = pullCasts
     (it: jIterator[_]) =>
       try {
         it.next match {
@@ -172,7 +133,6 @@ trait CastNestedOptLeaf_[Tpl] {
             case map: jMap[_, _] =>
               val it = map.values.iterator
               (
-                c0(it),
                 c1(it),
                 c2(it),
                 c3(it),
@@ -188,14 +148,8 @@ trait CastNestedOptLeaf_[Tpl] {
       }
   }
 
-  final private def pullLeaf7(pullCasts: List[jIterator[_] => Any]): jIterator[_] => List[Any] = {
-    val c0 = pullCasts(0)
-    val c1 = pullCasts(1)
-    val c2 = pullCasts(2)
-    val c3 = pullCasts(3)
-    val c4 = pullCasts(4)
-    val c5 = pullCasts(5)
-    val c6 = pullCasts(6)
+  final private def pullLeaf6(pullCasts: List[jIterator[_] => Any]): jIterator[_] => List[Any] = {
+    val List(c1, c2, c3, c4, c5, c6) = pullCasts
     (it: jIterator[_]) =>
       try {
         it.next match {
@@ -203,7 +157,6 @@ trait CastNestedOptLeaf_[Tpl] {
             case map: jMap[_, _] =>
               val it = map.values.iterator
               (
-                c0(it),
                 c1(it),
                 c2(it),
                 c3(it),
@@ -220,15 +173,8 @@ trait CastNestedOptLeaf_[Tpl] {
       }
   }
 
-  final private def pullLeaf8(pullCasts: List[jIterator[_] => Any]): jIterator[_] => List[Any] = {
-    val c0 = pullCasts(0)
-    val c1 = pullCasts(1)
-    val c2 = pullCasts(2)
-    val c3 = pullCasts(3)
-    val c4 = pullCasts(4)
-    val c5 = pullCasts(5)
-    val c6 = pullCasts(6)
-    val c7 = pullCasts(7)
+  final private def pullLeaf7(pullCasts: List[jIterator[_] => Any]): jIterator[_] => List[Any] = {
+    val List(c1, c2, c3, c4, c5, c6, c7) = pullCasts
     (it: jIterator[_]) =>
       try {
         it.next match {
@@ -236,7 +182,6 @@ trait CastNestedOptLeaf_[Tpl] {
             case map: jMap[_, _] =>
               val it = map.values.iterator
               (
-                c0(it),
                 c1(it),
                 c2(it),
                 c3(it),
@@ -254,16 +199,8 @@ trait CastNestedOptLeaf_[Tpl] {
       }
   }
 
-  final private def pullLeaf9(pullCasts: List[jIterator[_] => Any]): jIterator[_] => List[Any] = {
-    val c0 = pullCasts(0)
-    val c1 = pullCasts(1)
-    val c2 = pullCasts(2)
-    val c3 = pullCasts(3)
-    val c4 = pullCasts(4)
-    val c5 = pullCasts(5)
-    val c6 = pullCasts(6)
-    val c7 = pullCasts(7)
-    val c8 = pullCasts(8)
+  final private def pullLeaf8(pullCasts: List[jIterator[_] => Any]): jIterator[_] => List[Any] = {
+    val List(c1, c2, c3, c4, c5, c6, c7, c8) = pullCasts
     (it: jIterator[_]) =>
       try {
         it.next match {
@@ -271,7 +208,6 @@ trait CastNestedOptLeaf_[Tpl] {
             case map: jMap[_, _] =>
               val it = map.values.iterator
               (
-                c0(it),
                 c1(it),
                 c2(it),
                 c3(it),
@@ -290,17 +226,8 @@ trait CastNestedOptLeaf_[Tpl] {
       }
   }
 
-  final private def pullLeaf10(pullCasts: List[jIterator[_] => Any]): jIterator[_] => List[Any] = {
-    val c0 = pullCasts(0)
-    val c1 = pullCasts(1)
-    val c2 = pullCasts(2)
-    val c3 = pullCasts(3)
-    val c4 = pullCasts(4)
-    val c5 = pullCasts(5)
-    val c6 = pullCasts(6)
-    val c7 = pullCasts(7)
-    val c8 = pullCasts(8)
-    val c9 = pullCasts(9)
+  final private def pullLeaf9(pullCasts: List[jIterator[_] => Any]): jIterator[_] => List[Any] = {
+    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9) = pullCasts
     (it: jIterator[_]) =>
       try {
         it.next match {
@@ -308,7 +235,6 @@ trait CastNestedOptLeaf_[Tpl] {
             case map: jMap[_, _] =>
               val it = map.values.iterator
               (
-                c0(it),
                 c1(it),
                 c2(it),
                 c3(it),
@@ -328,18 +254,8 @@ trait CastNestedOptLeaf_[Tpl] {
       }
   }
 
-  final private def pullLeaf11(pullCasts: List[jIterator[_] => Any]): jIterator[_] => List[Any] = {
-    val c0 = pullCasts(0)
-    val c1 = pullCasts(1)
-    val c2 = pullCasts(2)
-    val c3 = pullCasts(3)
-    val c4 = pullCasts(4)
-    val c5 = pullCasts(5)
-    val c6 = pullCasts(6)
-    val c7 = pullCasts(7)
-    val c8 = pullCasts(8)
-    val c9 = pullCasts(9)
-    val c10 = pullCasts(10)
+  final private def pullLeaf10(pullCasts: List[jIterator[_] => Any]): jIterator[_] => List[Any] = {
+    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10) = pullCasts
     (it: jIterator[_]) =>
       try {
         it.next match {
@@ -347,7 +263,6 @@ trait CastNestedOptLeaf_[Tpl] {
             case map: jMap[_, _] =>
               val it = map.values.iterator
               (
-                c0(it),
                 c1(it),
                 c2(it),
                 c3(it),
@@ -368,19 +283,8 @@ trait CastNestedOptLeaf_[Tpl] {
       }
   }
 
-  final private def pullLeaf12(pullCasts: List[jIterator[_] => Any]): jIterator[_] => List[Any] = {
-    val c0 = pullCasts(0)
-    val c1 = pullCasts(1)
-    val c2 = pullCasts(2)
-    val c3 = pullCasts(3)
-    val c4 = pullCasts(4)
-    val c5 = pullCasts(5)
-    val c6 = pullCasts(6)
-    val c7 = pullCasts(7)
-    val c8 = pullCasts(8)
-    val c9 = pullCasts(9)
-    val c10 = pullCasts(10)
-    val c11 = pullCasts(11)
+  final private def pullLeaf11(pullCasts: List[jIterator[_] => Any]): jIterator[_] => List[Any] = {
+    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11) = pullCasts
     (it: jIterator[_]) =>
       try {
         it.next match {
@@ -388,7 +292,6 @@ trait CastNestedOptLeaf_[Tpl] {
             case map: jMap[_, _] =>
               val it = map.values.iterator
               (
-                c0(it),
                 c1(it),
                 c2(it),
                 c3(it),
@@ -410,20 +313,8 @@ trait CastNestedOptLeaf_[Tpl] {
       }
   }
 
-  final private def pullLeaf13(pullCasts: List[jIterator[_] => Any]): jIterator[_] => List[Any] = {
-    val c0 = pullCasts(0)
-    val c1 = pullCasts(1)
-    val c2 = pullCasts(2)
-    val c3 = pullCasts(3)
-    val c4 = pullCasts(4)
-    val c5 = pullCasts(5)
-    val c6 = pullCasts(6)
-    val c7 = pullCasts(7)
-    val c8 = pullCasts(8)
-    val c9 = pullCasts(9)
-    val c10 = pullCasts(10)
-    val c11 = pullCasts(11)
-    val c12 = pullCasts(12)
+  final private def pullLeaf12(pullCasts: List[jIterator[_] => Any]): jIterator[_] => List[Any] = {
+    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12) = pullCasts
     (it: jIterator[_]) =>
       try {
         it.next match {
@@ -431,7 +322,6 @@ trait CastNestedOptLeaf_[Tpl] {
             case map: jMap[_, _] =>
               val it = map.values.iterator
               (
-                c0(it),
                 c1(it),
                 c2(it),
                 c3(it),
@@ -454,21 +344,8 @@ trait CastNestedOptLeaf_[Tpl] {
       }
   }
 
-  final private def pullLeaf14(pullCasts: List[jIterator[_] => Any]): jIterator[_] => List[Any] = {
-    val c0 = pullCasts(0)
-    val c1 = pullCasts(1)
-    val c2 = pullCasts(2)
-    val c3 = pullCasts(3)
-    val c4 = pullCasts(4)
-    val c5 = pullCasts(5)
-    val c6 = pullCasts(6)
-    val c7 = pullCasts(7)
-    val c8 = pullCasts(8)
-    val c9 = pullCasts(9)
-    val c10 = pullCasts(10)
-    val c11 = pullCasts(11)
-    val c12 = pullCasts(12)
-    val c13 = pullCasts(13)
+  final private def pullLeaf13(pullCasts: List[jIterator[_] => Any]): jIterator[_] => List[Any] = {
+    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13) = pullCasts
     (it: jIterator[_]) =>
       try {
         it.next match {
@@ -476,7 +353,6 @@ trait CastNestedOptLeaf_[Tpl] {
             case map: jMap[_, _] =>
               val it = map.values.iterator
               (
-                c0(it),
                 c1(it),
                 c2(it),
                 c3(it),
@@ -500,22 +376,8 @@ trait CastNestedOptLeaf_[Tpl] {
       }
   }
 
-  final private def pullLeaf15(pullCasts: List[jIterator[_] => Any]): jIterator[_] => List[Any] = {
-    val c0 = pullCasts(0)
-    val c1 = pullCasts(1)
-    val c2 = pullCasts(2)
-    val c3 = pullCasts(3)
-    val c4 = pullCasts(4)
-    val c5 = pullCasts(5)
-    val c6 = pullCasts(6)
-    val c7 = pullCasts(7)
-    val c8 = pullCasts(8)
-    val c9 = pullCasts(9)
-    val c10 = pullCasts(10)
-    val c11 = pullCasts(11)
-    val c12 = pullCasts(12)
-    val c13 = pullCasts(13)
-    val c14 = pullCasts(14)
+  final private def pullLeaf14(pullCasts: List[jIterator[_] => Any]): jIterator[_] => List[Any] = {
+    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14) = pullCasts
     (it: jIterator[_]) =>
       try {
         it.next match {
@@ -523,7 +385,6 @@ trait CastNestedOptLeaf_[Tpl] {
             case map: jMap[_, _] =>
               val it = map.values.iterator
               (
-                c0(it),
                 c1(it),
                 c2(it),
                 c3(it),
@@ -548,23 +409,8 @@ trait CastNestedOptLeaf_[Tpl] {
       }
   }
 
-  final private def pullLeaf16(pullCasts: List[jIterator[_] => Any]): jIterator[_] => List[Any] = {
-    val c0 = pullCasts(0)
-    val c1 = pullCasts(1)
-    val c2 = pullCasts(2)
-    val c3 = pullCasts(3)
-    val c4 = pullCasts(4)
-    val c5 = pullCasts(5)
-    val c6 = pullCasts(6)
-    val c7 = pullCasts(7)
-    val c8 = pullCasts(8)
-    val c9 = pullCasts(9)
-    val c10 = pullCasts(10)
-    val c11 = pullCasts(11)
-    val c12 = pullCasts(12)
-    val c13 = pullCasts(13)
-    val c14 = pullCasts(14)
-    val c15 = pullCasts(15)
+  final private def pullLeaf15(pullCasts: List[jIterator[_] => Any]): jIterator[_] => List[Any] = {
+    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15) = pullCasts
     (it: jIterator[_]) =>
       try {
         it.next match {
@@ -572,7 +418,6 @@ trait CastNestedOptLeaf_[Tpl] {
             case map: jMap[_, _] =>
               val it = map.values.iterator
               (
-                c0(it),
                 c1(it),
                 c2(it),
                 c3(it),
@@ -598,24 +443,8 @@ trait CastNestedOptLeaf_[Tpl] {
       }
   }
 
-  final private def pullLeaf17(pullCasts: List[jIterator[_] => Any]): jIterator[_] => List[Any] = {
-    val c0 = pullCasts(0)
-    val c1 = pullCasts(1)
-    val c2 = pullCasts(2)
-    val c3 = pullCasts(3)
-    val c4 = pullCasts(4)
-    val c5 = pullCasts(5)
-    val c6 = pullCasts(6)
-    val c7 = pullCasts(7)
-    val c8 = pullCasts(8)
-    val c9 = pullCasts(9)
-    val c10 = pullCasts(10)
-    val c11 = pullCasts(11)
-    val c12 = pullCasts(12)
-    val c13 = pullCasts(13)
-    val c14 = pullCasts(14)
-    val c15 = pullCasts(15)
-    val c16 = pullCasts(16)
+  final private def pullLeaf16(pullCasts: List[jIterator[_] => Any]): jIterator[_] => List[Any] = {
+    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16) = pullCasts
     (it: jIterator[_]) =>
       try {
         it.next match {
@@ -623,7 +452,6 @@ trait CastNestedOptLeaf_[Tpl] {
             case map: jMap[_, _] =>
               val it = map.values.iterator
               (
-                c0(it),
                 c1(it),
                 c2(it),
                 c3(it),
@@ -650,25 +478,8 @@ trait CastNestedOptLeaf_[Tpl] {
       }
   }
 
-  final private def pullLeaf18(pullCasts: List[jIterator[_] => Any]): jIterator[_] => List[Any] = {
-    val c0 = pullCasts(0)
-    val c1 = pullCasts(1)
-    val c2 = pullCasts(2)
-    val c3 = pullCasts(3)
-    val c4 = pullCasts(4)
-    val c5 = pullCasts(5)
-    val c6 = pullCasts(6)
-    val c7 = pullCasts(7)
-    val c8 = pullCasts(8)
-    val c9 = pullCasts(9)
-    val c10 = pullCasts(10)
-    val c11 = pullCasts(11)
-    val c12 = pullCasts(12)
-    val c13 = pullCasts(13)
-    val c14 = pullCasts(14)
-    val c15 = pullCasts(15)
-    val c16 = pullCasts(16)
-    val c17 = pullCasts(17)
+  final private def pullLeaf17(pullCasts: List[jIterator[_] => Any]): jIterator[_] => List[Any] = {
+    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17) = pullCasts
     (it: jIterator[_]) =>
       try {
         it.next match {
@@ -676,7 +487,6 @@ trait CastNestedOptLeaf_[Tpl] {
             case map: jMap[_, _] =>
               val it = map.values.iterator
               (
-                c0(it),
                 c1(it),
                 c2(it),
                 c3(it),
@@ -704,26 +514,8 @@ trait CastNestedOptLeaf_[Tpl] {
       }
   }
 
-  final private def pullLeaf19(pullCasts: List[jIterator[_] => Any]): jIterator[_] => List[Any] = {
-    val c0 = pullCasts(0)
-    val c1 = pullCasts(1)
-    val c2 = pullCasts(2)
-    val c3 = pullCasts(3)
-    val c4 = pullCasts(4)
-    val c5 = pullCasts(5)
-    val c6 = pullCasts(6)
-    val c7 = pullCasts(7)
-    val c8 = pullCasts(8)
-    val c9 = pullCasts(9)
-    val c10 = pullCasts(10)
-    val c11 = pullCasts(11)
-    val c12 = pullCasts(12)
-    val c13 = pullCasts(13)
-    val c14 = pullCasts(14)
-    val c15 = pullCasts(15)
-    val c16 = pullCasts(16)
-    val c17 = pullCasts(17)
-    val c18 = pullCasts(18)
+  final private def pullLeaf18(pullCasts: List[jIterator[_] => Any]): jIterator[_] => List[Any] = {
+    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18) = pullCasts
     (it: jIterator[_]) =>
       try {
         it.next match {
@@ -731,7 +523,6 @@ trait CastNestedOptLeaf_[Tpl] {
             case map: jMap[_, _] =>
               val it = map.values.iterator
               (
-                c0(it),
                 c1(it),
                 c2(it),
                 c3(it),
@@ -760,27 +551,8 @@ trait CastNestedOptLeaf_[Tpl] {
       }
   }
 
-  final private def pullLeaf20(pullCasts: List[jIterator[_] => Any]): jIterator[_] => List[Any] = {
-    val c0 = pullCasts(0)
-    val c1 = pullCasts(1)
-    val c2 = pullCasts(2)
-    val c3 = pullCasts(3)
-    val c4 = pullCasts(4)
-    val c5 = pullCasts(5)
-    val c6 = pullCasts(6)
-    val c7 = pullCasts(7)
-    val c8 = pullCasts(8)
-    val c9 = pullCasts(9)
-    val c10 = pullCasts(10)
-    val c11 = pullCasts(11)
-    val c12 = pullCasts(12)
-    val c13 = pullCasts(13)
-    val c14 = pullCasts(14)
-    val c15 = pullCasts(15)
-    val c16 = pullCasts(16)
-    val c17 = pullCasts(17)
-    val c18 = pullCasts(18)
-    val c19 = pullCasts(19)
+  final private def pullLeaf19(pullCasts: List[jIterator[_] => Any]): jIterator[_] => List[Any] = {
+    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19) = pullCasts
     (it: jIterator[_]) =>
       try {
         it.next match {
@@ -788,7 +560,6 @@ trait CastNestedOptLeaf_[Tpl] {
             case map: jMap[_, _] =>
               val it = map.values.iterator
               (
-                c0(it),
                 c1(it),
                 c2(it),
                 c3(it),
@@ -818,28 +589,8 @@ trait CastNestedOptLeaf_[Tpl] {
       }
   }
 
-  final private def pullLeaf21(pullCasts: List[jIterator[_] => Any]): jIterator[_] => List[Any] = {
-    val c0 = pullCasts(0)
-    val c1 = pullCasts(1)
-    val c2 = pullCasts(2)
-    val c3 = pullCasts(3)
-    val c4 = pullCasts(4)
-    val c5 = pullCasts(5)
-    val c6 = pullCasts(6)
-    val c7 = pullCasts(7)
-    val c8 = pullCasts(8)
-    val c9 = pullCasts(9)
-    val c10 = pullCasts(10)
-    val c11 = pullCasts(11)
-    val c12 = pullCasts(12)
-    val c13 = pullCasts(13)
-    val c14 = pullCasts(14)
-    val c15 = pullCasts(15)
-    val c16 = pullCasts(16)
-    val c17 = pullCasts(17)
-    val c18 = pullCasts(18)
-    val c19 = pullCasts(19)
-    val c20 = pullCasts(20)
+  final private def pullLeaf20(pullCasts: List[jIterator[_] => Any]): jIterator[_] => List[Any] = {
+    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20) = pullCasts
     (it: jIterator[_]) =>
       try {
         it.next match {
@@ -847,7 +598,6 @@ trait CastNestedOptLeaf_[Tpl] {
             case map: jMap[_, _] =>
               val it = map.values.iterator
               (
-                c0(it),
                 c1(it),
                 c2(it),
                 c3(it),
@@ -878,29 +628,8 @@ trait CastNestedOptLeaf_[Tpl] {
       }
   }
 
-  final private def pullLeaf22(pullCasts: List[jIterator[_] => Any]): jIterator[_] => List[Any] = {
-    val c0 = pullCasts(0)
-    val c1 = pullCasts(1)
-    val c2 = pullCasts(2)
-    val c3 = pullCasts(3)
-    val c4 = pullCasts(4)
-    val c5 = pullCasts(5)
-    val c6 = pullCasts(6)
-    val c7 = pullCasts(7)
-    val c8 = pullCasts(8)
-    val c9 = pullCasts(9)
-    val c10 = pullCasts(10)
-    val c11 = pullCasts(11)
-    val c12 = pullCasts(12)
-    val c13 = pullCasts(13)
-    val c14 = pullCasts(14)
-    val c15 = pullCasts(15)
-    val c16 = pullCasts(16)
-    val c17 = pullCasts(17)
-    val c18 = pullCasts(18)
-    val c19 = pullCasts(19)
-    val c20 = pullCasts(20)
-    val c21 = pullCasts(21)
+  final private def pullLeaf21(pullCasts: List[jIterator[_] => Any]): jIterator[_] => List[Any] = {
+    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c21) = pullCasts
     (it: jIterator[_]) =>
       try {
         it.next match {
@@ -908,7 +637,6 @@ trait CastNestedOptLeaf_[Tpl] {
             case map: jMap[_, _] =>
               val it = map.values.iterator
               (
-                c0(it),
                 c1(it),
                 c2(it),
                 c3(it),
@@ -930,6 +658,47 @@ trait CastNestedOptLeaf_[Tpl] {
                 c19(it),
                 c20(it),
                 c21(it)
+              )
+          }
+          case _            => Nil
+        }
+      } catch {
+        case _: NullValueException => Nil
+        case e: Throwable          => throw e
+      }
+  }
+
+  final private def pullLeaf22(pullCasts: List[jIterator[_] => Any]): jIterator[_] => List[Any] = {
+    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c21, c22) = pullCasts
+    (it: jIterator[_]) =>
+      try {
+        it.next match {
+          case vs: jList[_] => vs.asScala.toList.map {
+            case map: jMap[_, _] =>
+              val it = map.values.iterator
+              (
+                c1(it),
+                c2(it),
+                c3(it),
+                c4(it),
+                c5(it),
+                c6(it),
+                c7(it),
+                c8(it),
+                c9(it),
+                c10(it),
+                c11(it),
+                c12(it),
+                c13(it),
+                c14(it),
+                c15(it),
+                c16(it),
+                c17(it),
+                c18(it),
+                c19(it),
+                c20(it),
+                c21(it),
+                c22(it)
               )
           }
           case _            => Nil

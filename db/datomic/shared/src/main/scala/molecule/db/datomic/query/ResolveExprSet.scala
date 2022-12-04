@@ -9,6 +9,7 @@ trait ResolveExprSet[Tpl] { self: SortOne_[Tpl] with Base[Tpl] =>
   import LambdasSet._
 
   protected def resolveAttrSetMan(es: List[Var], attr: AttrSetMan): List[Var] = {
+    addArity()
     attrIndex += 1
     val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
     attr match {
@@ -52,6 +53,7 @@ trait ResolveExprSet[Tpl] { self: SortOne_[Tpl] with Base[Tpl] =>
   }
 
   protected def resolveAttrSetOpt(es: List[Var], attr: AttrSetOpt): List[Var] = {
+    addArity()
     attrIndex += 1
     val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
     attr match {
@@ -83,7 +85,7 @@ trait ResolveExprSet[Tpl] { self: SortOne_[Tpl] with Base[Tpl] =>
   ): Unit = {
     val v = vv
     find += s"(distinct $v)"
-    casts += res.j2s
+    addCast(res.j2s)
     expr(e, a, v, op, args, res)
   }
 
@@ -130,7 +132,7 @@ trait ResolveExprSet[Tpl] { self: SortOne_[Tpl] with Base[Tpl] =>
     resOpt: ResSetOpt[T],
   ): Unit = {
     val v = vv
-    casts += resOpt.j2s
+    addCast(resOpt.j2s)
     op match {
       case V     => optV(e, a, v)
       case Appl  => optApply(e, a, v, optSets, resOpt.tpe, resOpt.toDatalog)
@@ -158,85 +160,69 @@ trait ResolveExprSet[Tpl] { self: SortOne_[Tpl] with Base[Tpl] =>
              |          "[:find (distinct $v1)
              |            :in $$ $e1
              |            :where [$e1 $a $v1]]" $$ $e) [[$v2]]]""".stripMargin -> wClause
-        casts -= res.j2s
-        casts += res.sets
+        replaceCast(res.sets)
 
       case mins(n) =>
         find += s"(min $n $v)"
-        casts -= res.j2s
-        casts += res.vector2set
+        replaceCast(res.vector2set)
 
       case _: min =>
         find += s"(min 1 $v)"
-        casts -= res.j2s
-        casts += res.vector2set
+        replaceCast(res.vector2set)
 
       case maxs(n) =>
         find += s"(max $n $v)"
-        casts -= res.j2s
-        casts += res.vector2set
+        replaceCast(res.vector2set)
 
       case _: max =>
         find += s"(max 1 $v)"
-        casts -= res.j2s
-        casts += res.vector2set
+        replaceCast(res.vector2set)
 
       case rands(n) =>
         find += s"(rand $n $v)"
-        casts -= res.j2s
-        casts += res.vector2set
+        replaceCast(res.vector2set)
 
       case _: rand =>
         find += s"(rand 1 $v)"
-        casts -= res.j2s
-        casts += res.vector2set
+        replaceCast(res.vector2set)
 
       case samples(n) =>
         find += s"(sample $n $v)"
-        casts -= res.j2s
-        casts += res.vector2set
+        replaceCast(res.vector2set)
 
       case _: sample =>
         find += s"(sample 1 $v)"
-        casts -= res.j2s
-        casts += res.vector2set
+        replaceCast(res.vector2set)
 
       case _: count =>
         find += s"(count $v)"
         widh += e
-        casts -= res.j2s
-        casts += toInt
+        replaceCast(toInt)
 
       case _: countDistinct =>
         find += s"(count-distinct $v)"
         widh += e
-        casts -= res.j2s
-        casts += toInt
+        replaceCast(toInt)
 
-      case _: sum      =>
+      case _: sum =>
         find += s"(sum $v)"
-        casts -= res.j2s
-        casts += res.j2sSet
+        replaceCast(res.j2sSet)
 
-      case _: median   =>
+      case _: median =>
         find += s"(median $v)"
-        casts -= res.j2s
-        casts += res.j2sSet
+        replaceCast(res.j2sSet)
 
-      case _: avg      =>
+      case _: avg =>
         find += s"(avg $v)"
-        casts -= res.j2s
-        casts += res.j2sSet
+        replaceCast(res.j2sSet)
 
       case _: variance =>
         find += s"(variance $v)"
-        casts -= res.j2s
-        casts += res.j2sSet
+        replaceCast(res.j2sSet)
 
-      case _: stddev   =>
+      case _: stddev =>
         find += s"(stddev $v)"
-        casts -= res.j2s
-        casts += res.j2sSet
+        replaceCast(res.j2sSet)
     }
     where += s"[$e $a $v$tx]" -> wClause
   }

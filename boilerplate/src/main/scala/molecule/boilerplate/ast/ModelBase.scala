@@ -2,11 +2,15 @@ package molecule.boilerplate.ast
 
 import molecule.base.ast.SchemaAST._
 import molecule.boilerplate.api.Keywords.Kw
+import scala.annotation.tailrec
 
 
 trait ModelBase extends Validations {
 
-  sealed trait Element
+  sealed trait Element {
+    def render(i: Int = 0): String = "  " * i + this.toString
+    def renders(es: Seq[Element], i: Int): String = es.map(_.render(i)).mkString(",\n")
+  }
 
   trait Attr extends Element {
     val ns  : String
@@ -36,41 +40,41 @@ trait ModelBase extends Validations {
   case class BackRef(backRef: String) extends Element
 
   case class Nested(ref: Ref, elements: Seq[Element]) extends Element with Mandatory {
-    def render(elements: Seq[Element], i: Int): String = {
+    override def render(i: Int): String = {
       val indent = "  " * i
-      elements.map {
-        case Nested(ref, elements1) =>
-          s"""|Nested(
-              |$indent  $ref,
-              |$indent  List(
-              |$indent    ${render(elements1, i + 2)}))""".stripMargin
-        case other => other
-      }.mkString(s",\n$indent")
+      s"""|${indent}Nested(
+          |${indent}  $ref,
+          |${indent}  List(
+          |${renders(elements, i + 2)}))""".stripMargin
     }
-    override def toString: String = render(Seq(this), 0)
+    override def toString: String = render(0)
   }
 
   case class NestedOpt(ref: Ref, elements: Seq[Element]) extends Element with Mandatory {
-    def render(elements: Seq[Element], i: Int): String = {
+    override def render(i: Int): String = {
       val indent = "  " * i
-      elements.map {
-        case NestedOpt(ref, elements1) =>
-          s"""|NestedOpt(
-              |$indent  $ref,
-              |$indent  List(
-              |$indent    ${render(elements1, i + 2)}))""".stripMargin
-        case other                  => other
-      }.mkString(s",\n$indent")
+      s"""|${indent}NestedOpt(
+          |${indent}  $ref,
+          |${indent}  List(
+          |${renders(elements, i + 2)}))""".stripMargin
     }
-    override def toString: String = render(Seq(this), 0)
+    override def toString: String = render(0)
   }
 
   case class TxMetaData(elements: Seq[Element]) extends Element with Mandatory {
-    override def toString: String = elements.mkString("TxMetaData(List(\n  ", ",\n  ", "\n))")
+    override def render(i: Int): String = {
+      s"""|${"  " * i}TxMetaData(List(
+          |${renders(elements, i + 1)}))""".stripMargin
+    }
+    override def toString: String = render(0)
   }
 
   case class Composite(elements: Seq[Element]) extends Element with Mandatory {
-    override def toString: String = elements.mkString("Composite(List(\n  ", ",\n  ", "\n))")
+    override def render(i: Int): String = {
+      s"""|${"  " * i}Composite(List(
+          |${renders(elements, i + 1)}))""".stripMargin
+    }
+    override def toString: String = render(0)
   }
 
   case object Self extends Element

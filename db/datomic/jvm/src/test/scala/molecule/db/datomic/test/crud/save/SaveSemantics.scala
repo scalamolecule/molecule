@@ -82,10 +82,10 @@ object SaveSemantics extends DatomicTestSuite {
         // On different levels is ok
         (Ns.i(1).R1.i(2) + R1.i(3)).save.transact
 
-        // Duplicates on same referenced level not allowed
+        // Can't reference same ns twice
         intercept[MoleculeException](
-          (Ns.i(1).R1.i(2) + Ns.s("a").R1.i(3)).save.transact
-        ).message ==> "Can't transact duplicate element: R1.i"
+          (Ns.i(1).R1.i(2) + Ns.s("a").R1.s("b")).save.transact
+        ).message ==> "Can't transact duplicate element: Ns.r1"
       }
 
       "Across sub tuples, after backref" - refs { implicit conn =>

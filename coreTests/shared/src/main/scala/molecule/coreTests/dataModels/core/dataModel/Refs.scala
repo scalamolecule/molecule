@@ -52,11 +52,13 @@ object Refs extends DataModel(10) {
 
   trait R6 {
     val i   = oneInt
+    val s   = oneString
     val r7  = one[R7]
     val rs7 = many[R7]
   }
 
   trait R7 {
-    val i  = oneInt
+    val i = oneInt
+    val s = oneString
   }
 }

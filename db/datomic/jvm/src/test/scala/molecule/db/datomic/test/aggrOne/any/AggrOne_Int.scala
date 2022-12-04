@@ -26,7 +26,7 @@ object AggrOne_Int extends DatomicTestSuite {
       )
 
       // Distinct values are returned in a List
-      Ns.i.a1.int.apply(distinct).query.get ==> List(
+      Ns.i.a1.int(distinct).query.get ==> List(
         (1, Set(int1)),
         (2, Set(int2, int3)),
       )
@@ -56,7 +56,7 @@ object AggrOne_Int extends DatomicTestSuite {
     "rand" - types { implicit conn =>
       Ns.int.insert(List(int1, int2, int3)).transact
       val all = Set(int1, int2, int3, int4)
-      all.contains(Ns.int.apply(rand).query.get.head) ==> true
+      all.contains(Ns.int(rand).query.get.head) ==> true
       all.intersect(Ns.int(rand(1)).query.get.head).nonEmpty ==> true
       all.intersect(Ns.int(rand(2)).query.get.head).nonEmpty ==> true
     }

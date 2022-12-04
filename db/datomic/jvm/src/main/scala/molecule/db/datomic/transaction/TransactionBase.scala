@@ -1,8 +1,7 @@
 package molecule.db.datomic.transaction
 
-import java.util
-import java.util.{List => jList}
 import java.lang.{Boolean => jBoolean}
+import java.util.{ArrayList => jArrayList, List => jList}
 import clojure.lang.Keyword
 import molecule.base.util.exceptions.MoleculeException
 import molecule.boilerplate.ast.MoleculeModel._
@@ -13,7 +12,7 @@ import scala.collection.mutable.ListBuffer
 abstract class TransactionBase(elements: Seq[Element]) {
 
   // Accumulate java insertion data
-  final protected val stmts: util.ArrayList[jList[AnyRef]] = new util.ArrayList[jList[AnyRef]]()
+  final protected val stmts: jArrayList[jList[AnyRef]] = new jArrayList[jList[AnyRef]]()
 
   protected def unexpected(element: Element) = throw MoleculeException("Unexpected element: " + element)
 
@@ -28,7 +27,7 @@ abstract class TransactionBase(elements: Seq[Element]) {
   protected val prevRefs     : ListBuffer[String]  = new ListBuffer[String]
   protected var hasComposites: Boolean             = false
 
-  protected def stmtList = new util.ArrayList[AnyRef](4)
+  protected def stmtList = new jArrayList[AnyRef](4)
 
   protected def newId: String = {
     tempId = lowest - 1
@@ -76,6 +75,8 @@ abstract class TransactionBase(elements: Seq[Element]) {
           val attr         = a.ns + "." + a.attr
           // Distinguish multiple ref paths to the same namespace
           val attrPrefixed = refPath.mkString("-") + "-" + attr
+          //          println(refPath)
+          //          println(attrPrefixed)
           if (prev(level)(group).contains(attrPrefixed))
             dup(attr)
           prev(level)(group) = prev(level)(group) :+ attrPrefixed
@@ -83,8 +84,12 @@ abstract class TransactionBase(elements: Seq[Element]) {
 
         case r: Ref =>
           val ref = r.ns + "." + r.refAttr
-          if (prev(level)(group).contains(ref))
+          if (prev(level)(group).contains(ref)) {
             dup(ref)
+          }
+          if (refPath.contains(ref)) {
+            dup(ref)
+          }
           prev(level) = prev(level) :+ Array(ref)
           checkConflictingAttributes(tail, prev, level, group + 1, refPath :+ ref)
 
@@ -94,7 +99,7 @@ abstract class TransactionBase(elements: Seq[Element]) {
           checkConflictingAttributes(tail, prev, level, group - 1, refPath.init)
 
         case Composite(es) =>
-          checkConflictingAttributes(es ++ tail, prev)
+          checkConflictingAttributes(es ++ tail, prev, level, group, Seq(""))
 
         case Nested(r, es) =>
           val ref = r.ns + "." + r.refAttr

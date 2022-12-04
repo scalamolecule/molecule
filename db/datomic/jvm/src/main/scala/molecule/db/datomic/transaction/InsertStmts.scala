@@ -10,13 +10,23 @@ import scala.annotation.tailrec
 class InsertStmts(elements: Seq[Element], data: Seq[Product])
   extends InsertResolvers_(elements) {
 
-  def get: jList[jList[_]] = {
-    checkConflictingAttributes(elements)
-    val tpl2stmts = getResolver(elements)
+  def getStmts: jList[jList[_]] = {
+    // Resolve tx meta elements separately and merge append
+    val (mainElements, txMetaElements) = elements.last match {
+      case TxMetaData(txMetaElements) => (elements.init, txMetaElements)
+      case _                          => (elements, Nil)
+    }
+    checkConflictingAttributes(mainElements)
+    val tpl2stmts = getResolver(mainElements)
     data.foreach { tpl =>
       e = newId
       e0 = e
       tpl2stmts(tpl)
+    }
+    if (txMetaElements.nonEmpty) {
+      e = tx
+      val txMetaStmts = new SaveStmts(txMetaElements, true).getRawStmts(tx)
+      stmts.addAll(txMetaStmts)
     }
     Collections.unmodifiableList(stmts)
   }
@@ -72,24 +82,11 @@ class InsertStmts(elements: Seq[Element], data: Seq[Product])
         case Composite(compositeElements) =>
           resolve(tail, resolvers :+ addComposite(n, compositeElements), n + 1)
 
-        case TxMetaData(txElements) =>
-          resolve(tail, resolvers :+ addTxMetaData(n, txElements), n)
-
         case other => unexpected(other)
       }
       case Nil             => resolvers
     }
   }
-
-
-  private def addTxMetaData(n: Int, elements: Seq[Element]): Product => Unit = {
-    val tx2stmts = getResolver(elements, n)
-    (tpl: Product) => {
-      e = tx
-      tx2stmts(tpl)
-    }
-  }
-
 
   private def addComposite(n: Int, elements: Seq[Element]): Product => Unit = {
     hasComposites = true
@@ -106,8 +103,6 @@ class InsertStmts(elements: Seq[Element], data: Seq[Product])
   }
 
   private def addNested(n: Int, ns: String, refAttr: Keyword, elements: Seq[Element]): Product => Unit = {
-    if (hasComposites)
-      throw MoleculeException("Composites are only allow on last level (leaf) of nested data structure.")
     val nested2stmts = getResolver(elements)
     val nestedArity  = elements.count {
       case _: Mandatory@unchecked => true
@@ -179,6 +174,25 @@ class InsertStmts(elements: Seq[Element], data: Seq[Product])
     }
   }
 
+  private def resolveAttrOneTac(attr: AttrOneTac, n: Int, ns: String, a: Keyword): Product => Unit = {
+    attr match {
+      case _: AttrOneTacString     => addTxV(ns, a, n, identity)
+      case _: AttrOneTacInt        => addTxV(ns, a, n, identity)
+      case _: AttrOneTacLong       => addTxV(ns, a, n, identity)
+      case _: AttrOneTacFloat      => addTxV(ns, a, n, identity)
+      case _: AttrOneTacDouble     => addTxV(ns, a, n, identity)
+      case _: AttrOneTacBoolean    => addTxV(ns, a, n, boolean2java)
+      case _: AttrOneTacBigInt     => addTxV(ns, a, n, bigInt2java)
+      case _: AttrOneTacBigDecimal => addTxV(ns, a, n, bigDec2java)
+      case _: AttrOneTacDate       => addTxV(ns, a, n, identity)
+      case _: AttrOneTacUUID       => addTxV(ns, a, n, identity)
+      case _: AttrOneTacURI        => addTxV(ns, a, n, identity)
+      case _: AttrOneTacByte       => addTxV(ns, a, n, byte2java)
+      case _: AttrOneTacShort      => addTxV(ns, a, n, short2java)
+      case _: AttrOneTacChar       => addTxV(ns, a, n, char2java)
+    }
+  }
+
   private def resolveAttrSetMan(attr: AttrSetMan, n: Int, ns: String, a: Keyword): Product => Unit = {
     attr match {
       case _: AttrSetManString     => addSet(ns, a, n, identity)
@@ -242,6 +256,18 @@ class InsertStmts(elements: Seq[Element], data: Seq[Product])
           stmts.add(stmt)
         case None    => // no statement to insert
       }
+    }
+  }
+  private def addTxV(ns: String, a: Keyword, n: Int, value: Any => Any): Product => Unit = {
+    (tpl: Product) => {
+      e = tx
+      backRefs = backRefs + (ns -> e)
+      stmt = stmtList
+      stmt.add(add)
+      stmt.add(e)
+      stmt.add(a)
+      stmt.add(value(tpl.productElement(n)).asInstanceOf[AnyRef])
+      stmts.add(stmt)
     }
   }
 

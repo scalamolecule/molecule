@@ -40,8 +40,8 @@ trait Base[Tpl] extends BaseHelpers with JavaConversions { self: Model2Query[Tpl
   final protected var isNested      = false
   final protected var isNestedOpt   = false
   final protected var isComposite   = false
-  final protected var hasTxMetaData = false
-  final protected var txComposite   = false
+  final protected var isTxMetaData  = false
+  final protected var isTxComposite = false
   final protected var flatten       = false
   final protected val nestedIds     = new ArrayBuffer[String]
   final protected val nestedOptIds  = new ArrayBuffer[String]
@@ -58,14 +58,13 @@ trait Base[Tpl] extends BaseHelpers with JavaConversions { self: Model2Query[Tpl
   final protected val wherePost = new ArrayBuffer[(String, Int)]
 
   // Input args and cast lambdas
-  final protected val preArgs             = new ArrayBuffer[AnyRef]
-  final protected val args                = new ArrayBuffer[AnyRef]
-  final protected val casts               = new ArrayBuffer[AnyRef => AnyRef]
-  final protected var castss              = List.empty[List[AnyRef => AnyRef]]
-  final protected val pullCasts           = new ArrayBuffer[jIterator[_] => Any]
-  final protected var pullCastss          = List.empty[List[jIterator[_] => Any]]
-  final protected var pullDepths          = List(0)
-  final protected var compositeTplCountss = List(List.empty[Int])
+  final protected val preArgs     = new ArrayBuffer[AnyRef]
+  final protected val args        = new ArrayBuffer[AnyRef]
+  final protected var castss     = List(List.empty[AnyRef => AnyRef])
+  final protected val pullCasts   = new ArrayBuffer[jIterator[_] => Any]
+  final protected var pullCastss  = List.empty[List[jIterator[_] => Any]]
+  final protected var pullDepths  = List(0)
+  final protected var aritiess    = List(List.empty[List[Int]])
 
   // Sorting
   final protected val sortsAcc       = new ArrayBuffer[Int => (Row, Row) => Int]
@@ -87,8 +86,8 @@ trait Base[Tpl] extends BaseHelpers with JavaConversions { self: Model2Query[Tpl
     isNested = false
     isNestedOpt = false
     isComposite = false
-    hasTxMetaData = false
-    txComposite = false
+    isTxMetaData = false
+    isTxComposite = false
     flatten = false
     nestedIds.empty
     nestedOptIds.empty
@@ -103,12 +102,10 @@ trait Base[Tpl] extends BaseHelpers with JavaConversions { self: Model2Query[Tpl
     wherePost.empty
     preArgs.empty
     args.empty
-    casts.empty
-    castss = Nil
     pullCasts.empty
     pullCastss = Nil
     pullDepths = List(0)
-    compositeTplCountss = List(List.empty[Int])
+    aritiess = List(Nil)
     sortsAcc.empty
     sorts.empty
     attrIndex = -1
@@ -116,6 +113,59 @@ trait Base[Tpl] extends BaseHelpers with JavaConversions { self: Model2Query[Tpl
     addTxVar = false
     firstEid = ""
   }
+
+  final protected def addCast(cast: AnyRef => AnyRef): Unit = {
+    if (isTxMetaData)
+      castss = (castss.head :+ cast) :: castss.tail
+    else
+      castss = castss.init :+ (castss.last :+ cast)
+  }
+
+  final protected def removeLastCast(): Unit = {
+    if (isTxMetaData)
+      castss = castss.head.init :: castss.tail
+    else {
+      castss = castss.init :+ castss.last.init
+    }
+  }
+  final protected def replaceCast(cast: AnyRef => AnyRef): Unit = {
+    removeLastCast()
+    addCast(cast)
+  }
+
+  final protected def addArity(): Unit = {
+    if (isTxMetaData) {
+      // Top level
+      if (isTxComposite) {
+        // Increase last arity
+        val topLevel: List[List[Int]] = aritiess.head
+        val arities                   = if (topLevel.isEmpty)
+          List(List(1))
+        else {
+          topLevel.init :+ (topLevel.last :+ 1)
+        }
+        aritiess = arities :: aritiess.tail
+      } else {
+        // Add new arity of 1
+        aritiess = (aritiess.head :+ List(1)) :: aritiess.tail
+      }
+    } else {
+      // Current level
+      if (isComposite) {
+        // Increase last arity
+        val lastLevel = aritiess.last
+        val arities   = if (lastLevel.isEmpty)
+          List(List(1))
+        else
+          lastLevel.init :+ (lastLevel.last :+ 1)
+        aritiess = aritiess.init :+ arities
+      } else {
+        // Add new arity of 1
+        aritiess = aritiess.init :+ (aritiess.last :+ List(1))
+      }
+    }
+  }
+
 
   final protected def validateSortIndexes(): Unit = if (sorts.nonEmpty) {
     sorts.sortBy(_._1).map(_._1).toList match {

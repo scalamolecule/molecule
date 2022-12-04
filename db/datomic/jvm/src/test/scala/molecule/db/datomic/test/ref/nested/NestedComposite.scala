@@ -50,15 +50,5 @@ object NestedComposite extends DatomicTestSuite {
             (2, 3)))))
       )
     }
-
-
-    "Composite only on last level (leaf)" - refs { implicit conn =>
-      intercept[MoleculeException](
-        Ns.i.Rs1.*(R1.i + R3.i.Rs4.*(R4.i)).insert(
-          0, List(
-            (1, (2, List(2))))
-        ).transact
-      ).message ==> "Composites are only allow on last level (leaf) of nested data structure."
-    }
   }
 }

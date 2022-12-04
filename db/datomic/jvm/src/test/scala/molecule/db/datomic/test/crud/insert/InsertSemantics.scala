@@ -82,10 +82,10 @@ object InsertSemantics extends DatomicTestSuite {
         // On different levels is ok
         (Ns.i.R1.i + R1.i).insert((1, 2), 3).transact
 
-        // Duplicates on same referenced level not allowed
+        // Can't reference same ns twice
         intercept[MoleculeException](
-          (Ns.i.R1.i + Ns.s.R1.i).insert((1, 2), ("a", 3)).transact
-        ).message ==> "Can't transact duplicate element: R1.i"
+          (Ns.i.R1.i + Ns.s.R1.s).insert((1, 2), ("a", "b")).transact
+        ).message ==> "Can't transact duplicate element: Ns.r1"
       }
 
       "Across sub tuples, after backref" - refs { implicit conn =>

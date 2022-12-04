@@ -16,13 +16,11 @@ trait ResolveRef[Tpl] { self: SortOne_[Tpl] with Base[Tpl] =>
   protected def resolveNestedRef(es: List[Var], ref: Ref): List[Var] = {
     val (e, refAttr, refId) = (es.last, s":${ref.ns}/${ref.refAttr}", vv)
     firstEid = refId // for composites in nested
-    nestedIds += e + "-nested"
-    where += s"[(identity $e) $e-nested]" -> wGround
+    nestedIds += e
     where += s"[$e $refAttr $refId]" -> wClause
 
     // Start new level of casts
-    castss = castss :+ casts.toList
-    casts.clear()
+    castss = castss :+ Nil
 
     sortNestedLevel()
     es :+ refId

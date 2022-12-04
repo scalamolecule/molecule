@@ -14,7 +14,7 @@ class DatomicSaveOpsImpl(elements: Seq[Element]) extends SaveOps {
 
   override def transact(implicit conn: Connection): TxReport = {
     conn.asInstanceOf[Conn_Peer].transact(
-      new SaveStmts(elements).get
+      new SaveStmts(elements).getStmts
     )
   }
   override def transactAsync(implicit conn: Connection, ec: ExecutionContext): Future[TxReport] = ???

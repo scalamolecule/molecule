@@ -14,9 +14,10 @@ class DatomicInsertOps(insertStmts: InsertStmts) extends InsertOps {
   override def transactAsync(implicit conn: Connection, ec: ExecutionContext): Future[TxReport] = ???
 
   override def transact(implicit conn: Connection): TxReport = {
-    val stmts = insertStmts.get
-    println("---")
-    stmts.forEach(stmt => println(stmt))
+    val stmts = insertStmts.getStmts
+//    println("---")
+//    stmts.forEach(stmt => println(stmt))
+
     conn.asInstanceOf[Conn_Peer].transact(stmts)
   }
 }

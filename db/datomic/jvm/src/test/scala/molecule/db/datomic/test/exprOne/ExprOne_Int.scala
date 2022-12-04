@@ -7,6 +7,7 @@ import utest._
 
 object ExprOne_Int extends DatomicTestSuite {
 
+
   lazy val tests = Tests {
 
     "Mandatory" - types { implicit conn =>

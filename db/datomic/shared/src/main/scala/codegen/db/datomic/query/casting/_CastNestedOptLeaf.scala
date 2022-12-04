@@ -30,12 +30,12 @@ object _CastNestedOptLeaf extends DatomicGenBase("CastNestedOptLeaf", "/query/ca
   }
 
   case class Chunk(i: Int) extends TemplateVals(i) {
-    val casters  = (0 until i).map { j => s"val c$j = pullCasts($j)" }.mkString("\n    ")
-    val castings = (0 until i).map { j => s"c$j(it)" }.mkString(",\n                ")
+    val casters  = (1 to i).map { j => s"c$j" }.mkString(", ")
+    val castings = (1 to i).map { j => s"c$j(it)" }.mkString(",\n                ")
     val body     =
       s"""
          |  final private def pullLeaf$i(pullCasts: List[jIterator[_] => Any]): jIterator[_] => List[Any] = {
-         |    $casters
+         |    val List($casters) = pullCasts
          |    (it: jIterator[_]) =>
          |      try {
          |        it.next match {

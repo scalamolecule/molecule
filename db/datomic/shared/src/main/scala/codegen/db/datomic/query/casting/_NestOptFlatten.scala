@@ -5,7 +5,7 @@ import codegen.DatomicGenBase
 object _NestOptFlatten extends DatomicGenBase("NestOptFlatten", "/query/casting") {
 
   val content = {
-    val pullBranch0_X    = (1 to 21).map(i => s"case $i => pullBranch0_$i(casts)").mkString("\n      ")
+    val pullBranch0_X    = (1 to 21).map(i => s"case $i => pullBranch0_$i(casters)").mkString("\n      ")
     val resolveMethods = (1 to 21).map(arity => Chunk(arity).body).mkString("\n")
     s"""// GENERATED CODE ********************************
        |package molecule.db.datomic.query.casting
@@ -52,7 +52,8 @@ object _NestOptFlatten extends DatomicGenBase("NestOptFlatten", "/query/casting"
        |  }
        |
        |  final protected lazy val pullRowFlatten2tpl: Row => Tpl = {
-       |    casts.length match {
+       |    val casters = castss.last
+       |    casters.length match {
        |      case 0 => pullBranch0_0
        |      $pullBranch0_X
        |    }
@@ -66,12 +67,12 @@ object _NestOptFlatten extends DatomicGenBase("NestOptFlatten", "/query/casting"
   }
 
   case class Chunk(i: Int) extends TemplateVals(i) {
-    val casters  = (0 until i).map { j => s"val c$j = casts($j)" }.mkString("\n    ")
-    val castings = (0 until i).map { j => s"c$j(row.get($j))" }.mkString(",\n        ")
+    val casters  = (1 to i).map { j => s"c$j" }.mkString(", ")
+    val castings = (1 to i).map { j => s"c$j(row.get(${j - 1}))" }.mkString(",\n        ")
     val body     =
       s"""
-         |  final private def pullBranch0_$i(casts: ArrayBuffer[AnyRef => AnyRef]): Row => Tpl = {
-         |    $casters
+         |  final private def pullBranch0_$i(casters: List[AnyRef => AnyRef]): Row => Tpl = {
+         |    val List($casters) = casters
          |    (row: Row) =>
          |      (
          |        $castings,

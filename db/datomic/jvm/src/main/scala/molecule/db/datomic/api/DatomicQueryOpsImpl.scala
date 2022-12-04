@@ -1,7 +1,6 @@
 package molecule.db.datomic.api
 
-import java.util
-import java.util.{Collections, Comparator, Collection => jCollection}
+import java.util.{Collections, Comparator, ArrayList => jArrayList, Collection => jCollection}
 import datomic.Peer
 import molecule.base.util.exceptions.MoleculeException
 import molecule.boilerplate.ast.MoleculeModel._
@@ -56,11 +55,12 @@ class DatomicQueryOpsImpl[Tpl](elements: Seq[Element])
     println("SORTED rows:")
     sortedRows.forEach(row => println(row))
 
+    // Remove started composite groups that turned out to have only tacit attributes
+    aritiess = aritiess.map(_.filterNot(_.isEmpty))
+
     lazy val tuples = List.newBuilder[Tpl]
     if (isNested) {
-      castss = castss :+ casts.toList
       rows2nested(sortedRows)
-
     } else if (isNestedOpt) {
       pullCastss = pullCastss :+ pullCasts.toList
       if (flatten)
@@ -68,24 +68,9 @@ class DatomicQueryOpsImpl[Tpl](elements: Seq[Element])
       else
         sortedRows.forEach(row => tuples.addOne(pullRow2tpl(row)))
       tuples.result()
-
-    } else if (isComposite) {
-      if (hasTxMetaData && !txComposite) {
-        val txAttrCounts = List.fill(find.length - compositeTplCountss.flatten.sum)(1)
-        compositeTplCountss = List(compositeTplCountss.head ++ txAttrCounts)
-      }
-      sortedRows.forEach(row => tuples.addOne(compositeRow2tpl(row)))
-      tuples.result()
-
     } else {
-      if (txComposite) {
-        val txAttrCounts = compositeTplCountss.head
-        val initialAttrsCount = find.length - txAttrCounts.sum
-        compositeTplCountss = List(initialAttrsCount +: txAttrCounts)
-        sortedRows.forEach(row => tuples.addOne(compositeRow2tpl(row)))
-      } else {
-        sortedRows.forEach(row => tuples.addOne(row2tpl(row)))
-      }
+      val row2tpl = castTpl(aritiess.head, castss.head)
+      sortedRows.forEach(row => tuples.addOne(row2tpl(row).asInstanceOf[Tpl]))
       tuples.result()
     }
   }
@@ -93,9 +78,9 @@ class DatomicQueryOpsImpl[Tpl](elements: Seq[Element])
 
   // Helpers
 
-  private def sortRows(rows: jCollection[Row]): util.ArrayList[Row] = {
+  private def sortRows(rows: jCollection[Row]): jArrayList[Row] = {
     (sortsAcc.length + sorts.length) match {
-      case 0 => new java.util.ArrayList(rows)
+      case 0 => new jArrayList(rows)
       case n =>
         validateSortIndexes()
         val sorters = sortsAcc ++ sorts.sortBy(_._1).map(_._2)
@@ -103,7 +88,7 @@ class DatomicQueryOpsImpl[Tpl](elements: Seq[Element])
         //        sorters.foreach(println)
 
         val nestedIdsCount = nestedIds.length
-        val sortedRows     = new java.util.ArrayList(rows)
+        val sortedRows     = new jArrayList(rows)
         val comparator     = new Comparator[Row] {
           override def compare(a: Row, b: Row): Int = {
             var i      = 0

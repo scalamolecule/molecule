@@ -12,8 +12,8 @@ abstract class InsertResolvers_(elements: Seq[Element]) extends TransactionBase(
     n: Int = 0
   ): List[Product => Unit]
 
-  def getResolver(elements: Seq[Element], n: Int = 0): Product => Unit = {
-    val resolvers: List[Product => Unit] = resolve(elements, Nil, n)
+  def getResolver(elements: Seq[Element]): Product => Unit = {
+    val resolvers: List[Product => Unit] = resolve(elements, Nil)
     resolvers.length match {
       case 1 => resolve1(resolvers)
       case 2 => resolve2(resolvers)

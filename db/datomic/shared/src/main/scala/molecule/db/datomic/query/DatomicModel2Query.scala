@@ -19,10 +19,8 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
     with Base[Tpl]
     with LambdasOne
     with LambdasSet
-    with CastFlat_[Tpl]
-    with CastComposite_[Tpl]
     with CastNestedBranch_[Tpl]
-    with CastNestedLeaf_[Tpl]
+    with CastTpl_[Tpl]
     with CastNestedOptBranch_[Tpl]
     with CastNestedOptBranchFlatten_[Tpl]
     with CastNestedOptLeaf_[Tpl]
@@ -226,7 +224,6 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
           val res = s"""\n$indent{($refAttr :limit nil :default "$none") [$acc1]}"""
           (res, append)
 
-
         case (acc1, Some(ref1@Ref(_, _, _, CardOne)), tail) =>
           flatten = true
           pullDepths = pullDepths.init :+ pullDepths.last + 1
@@ -297,25 +294,24 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
       case Composite(compositeElements)     => resolve(resolveComposite(compositeElements), tail)
       case Nested(ref, nestedElements)      => resolve(resolveNested(es, ref, nestedElements), tail)
       case n@NestedOpt(ref, nestedElements) => resolve(resolveNestedOpt(es, n, ref, nestedElements), tail)
-      case TxMetaData(txElements)           => resolve(resolveTxMetaData(txElements), Nil)
+      case TxMetaData(txElements)           => resolveTxMetaData(txElements)
       case other                            => unexpectedElement(other)
     }
     case Nil             => es
   }
 
+
   final private def resolveComposite(compositeElements: Seq[Element]): List[Var] = {
-    if (hasTxMetaData) {
-      txComposite = true
+    if (isTxMetaData) {
+      isTxComposite = true
     } else {
       isComposite = true
     }
-    compositeTplCountss = compositeTplCountss.init :+ (compositeTplCountss.last :+ compositeElements.count {
-      case _: AttrOneMan => true
-      case _: AttrOneOpt => true
-      case _: AttrSetMan => true
-      case _: AttrSetOpt => true
-      case _             => false
-    })
+    if (isNested && isTxMetaData) {
+      aritiess = (aritiess.head :+ Nil) :: aritiess.tail
+    } else {
+      aritiess = aritiess.init :+ (aritiess.last :+ Nil)
+    }
     // Use first entity id in each composite sub group
     resolve(List(firstEid), compositeElements)
   }
@@ -324,7 +320,18 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
     es: List[Var], ref: Ref, nestedElements: Seq[Element]
   ): List[Var] = {
     isNested = true
-    compositeTplCountss = compositeTplCountss :+ List.empty[Int]
+    // Add marker for leaf and add new level
+    val newLevel = Nil
+    val curLevel = aritiess.last
+    if (isComposite) {
+      val curLevelCompositWithNested = curLevel.init :+ (curLevel.last :+ -1)
+      aritiess = (aritiess.init :+ curLevelCompositWithNested) :+ newLevel
+    } else {
+      val curLevelWithNested = curLevel :+ List(-1)
+      aritiess = (aritiess.init :+ curLevelWithNested) :+ newLevel
+    }
+
+
     if (isNestedOpt) noMixedNestedModes
     validateRefNs(ref, nestedElements)
     resolve(resolveNestedRef(es, ref), nestedElements)
@@ -340,7 +347,9 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
   }
 
   final private def resolveTxMetaData(txElements: Seq[Element]): List[Var] = {
-    hasTxMetaData = true
+    isTxMetaData = true
+    // Use txVar as first entity id var for composites elements
+    firstEid = txVar
     resolve(List(txVar), txElements)
   }
 

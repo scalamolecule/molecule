@@ -49,8 +49,8 @@ object _CastNestedOptBranchFlatten
   }
 
   case class Chunk(i: Int) extends TemplateVals(i) {
-    val casters  = (0 until i).map { j => s"val c$j = pullCasts($j)" }.mkString("\n    ")
-    val castings = (0 until i).map { j => s"c$j(it)" }.mkString(",\n                ")
+    val casters  = (1 to i).map { j => s"c$j" }.mkString(", ")
+    val castings = (1 to i).map { j => s"c$j(it)" }.mkString(",\n                ")
     val body     =
       s"""
          |  final private def pullBranch$i(
@@ -58,7 +58,7 @@ object _CastNestedOptBranchFlatten
          |    pullLeaf: jIterator[_] => List[Any],
          |    levelIndex: Int
          |  ): jIterator[_] => List[Any] = {
-         |    $casters
+         |    val List($casters) = pullCasts
          |    val list = new jArrayList[Any](${i + 1})
          |    (it: jIterator[_]) =>
          |      try {
