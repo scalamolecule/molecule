@@ -31,25 +31,26 @@ trait Datomic_Peer extends JavaConversions {
   }
 
   private[molecule] def connect(
+    schema: SchemaTransaction,
     protocol: String,
     dbIdentifier: String,
   ): Conn_Peer = {
     val id = if (dbIdentifier == "") randomUUID().toString else dbIdentifier
-    Conn_Peer(s"datomic:$protocol://$id")
+    Conn_Peer(schema, s"datomic:$protocol://$id")
   }
 
   def recreateDbFromEdn(
-    schemaTransaction: SchemaTransaction,
+    schema: SchemaTransaction,
     protocol: String = "mem",
     dbIdentifier: String = ""
   ): Conn_Peer = {
     val id = if (dbIdentifier == "") randomUUID().toString else dbIdentifier
     deleteDatabase(protocol, id)
     createDatabase(protocol, id)
-    val conn = connect(protocol, id)
+    val conn = connect(schema, protocol, id)
     // Ensure each transaction finishes before the next
     // partitions/attributes (or none for initial empty test dummy)
-    conn.transactEdn(schemaTransaction.datomicSchema)
+    conn.transactEdn(schema.datomicSchema)
     conn
   }
 

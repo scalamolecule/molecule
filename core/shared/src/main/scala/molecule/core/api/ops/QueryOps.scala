@@ -1,6 +1,7 @@
-package molecule.core.api
+package molecule.core.api.ops
 
 import molecule.base.util.exceptions.MoleculeException
+import molecule.core.api.Connection
 import zio.{Chunk, ZIO}
 import scala.concurrent.{ExecutionContext, Future}
 

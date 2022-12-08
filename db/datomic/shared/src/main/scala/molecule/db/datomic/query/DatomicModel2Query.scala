@@ -267,6 +267,7 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
         case other               => throw MoleculeException("Unexpected resolvePullRef coordinates: " + other)
       }
     }
+
     pull.fold(Seq.empty[String]) {
       case (e, NestedOpt(ref, elements)) =>
         val (attrs, append) = resolvePullRef(ref, elements, -1, "")
@@ -320,7 +321,11 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
     es: List[Var], ref: Ref, nestedElements: Seq[Element]
   ): List[Var] = {
     isNested = true
-    // Add marker for leaf and add new level
+    if (isNestedOpt)
+      noMixedNestedModes
+    validateRefNs(ref, nestedElements)
+
+    // Add marker for nested and add new level
     val newLevel = Nil
     val curLevel = aritiess.last
     if (isComposite) {
@@ -330,10 +335,6 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
       val curLevelWithNested = curLevel :+ List(-1)
       aritiess = (aritiess.init :+ curLevelWithNested) :+ newLevel
     }
-
-
-    if (isNestedOpt) noMixedNestedModes
-    validateRefNs(ref, nestedElements)
     resolve(resolveNestedRef(es, ref), nestedElements)
   }
 
@@ -341,7 +342,8 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
     es: List[Var], nestedOpt: NestedOpt, ref: Ref, nestedElements: Seq[Element]
   ): List[Var] = {
     isNestedOpt = true
-    if (isNested) noMixedNestedModes
+    if (isNested)
+      noMixedNestedModes
     validateRefNs(ref, nestedElements)
     resolveNestedOptRef(es, nestedOpt)
   }

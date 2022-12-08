@@ -13,6 +13,8 @@ trait AggregatesOps_1[A, t, Ns[_, _]] {
 }
 
 trait Aggregates_1[A, t, Ns[_, _]] extends AggregatesOps_1[A, t, Ns] {
+  def as(kw: v1)        : Ns[Int   , Int   ] with SortAttrs_1[Int   , Int   , Ns] = _aggrInt(kw)
+
   def apply(kw: count)        : Ns[Int   , Int   ] with SortAttrs_1[Int   , Int   , Ns] = _aggrInt(kw)
   def apply(kw: countDistinct): Ns[Int   , Int   ] with SortAttrs_1[Int   , Int   , Ns] = _aggrInt(kw)
   def apply(kw: min)          : Ns[A     , t     ] with SortAttrs_1[A     , t     , Ns] = _aggrT(kw)

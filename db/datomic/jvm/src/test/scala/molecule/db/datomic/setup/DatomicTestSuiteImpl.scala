@@ -28,14 +28,14 @@ trait DatomicTestSuiteImpl extends DatomicApiLoader { self: DatomicTestSuite =>
 
   def inMem[T](
     test: Conn_Peer => T,
-    schemaTx: SchemaTransaction,
+    schema: SchemaTransaction,
     db: String
   ): T = {
     val dbUri           = if (protocol_ == "mem") "" else {
       println(s"Re-creating live `$db` database...")
       "localhost:4334/" + randomUUID().toString
     }
-    val conn: Conn_Peer = Datomic_Peer.recreateDbFromEdn(schemaTx, protocol_, dbUri)
+    val conn: Conn_Peer = Datomic_Peer.recreateDbFromEdn(schema, protocol_, dbUri)
 
     //    val futConn = system match {
     //      case SystemPeer       => Datomic_Peer.recreateDbFrom(schemaTx, protocol_, dbUri)

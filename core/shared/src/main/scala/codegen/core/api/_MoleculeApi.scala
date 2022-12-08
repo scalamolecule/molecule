@@ -10,6 +10,8 @@ object _MoleculeApi extends CoreGenBase( "MoleculeApi", "/api") {
     s"""// GENERATED CODE ********************************
        |package molecule.core.api
        |
+       |import molecule.core.api.ops._
+       |
        |$traits
        |""".stripMargin
   }
@@ -20,9 +22,9 @@ object _MoleculeApi extends CoreGenBase( "MoleculeApi", "/api") {
          |trait ${fileName}_$n0[${`A..V`}] {
          |  def save  : SaveOps
          |  def insert: Insert_$arity[${`A..V`}]
-         |  def update: Insert_$arity[${`A..V`}]
-         |  def delete: Insert_$arity[${`A..V`}]
          |  def query : QueryOps[${`(A..V)`}]
+         |  def update: UpdateOps
+         |  def delete: DeleteOps
          |}""".stripMargin
   }
 }

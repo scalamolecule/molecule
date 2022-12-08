@@ -1,7 +1,11 @@
 package molecule.core.api
 
-trait Connection {
+import molecule.base.api.SchemaTransaction
+
+abstract class Connection(val schema: SchemaTransaction) {
+
   type Data
+
   def transact(data: Data): TxReport
 
   def db: Any = ???

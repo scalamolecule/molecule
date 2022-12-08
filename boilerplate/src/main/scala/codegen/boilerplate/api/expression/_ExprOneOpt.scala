@@ -25,10 +25,10 @@ object _ExprOneOpt extends BoilerplateGenBase( "ExprOneOpt", "/api/expression") 
          |trait ${fileName}_$arity[${`A..V`}, t, Ns[${`_, _`}]]
          |  extends ${fileName}Ops_$arity[${`A..V`}, t, Ns]
          |    with SortAttrs_$arity[${`A..V`}, t, Ns] {
-         |  def apply(v    : Option[t]     )(implicit x: X): Ns[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns] = _exprOneOpt(Appl, v.map(Seq(_)))
-         |  def apply(vs   : Option[Seq[t]])               : Ns[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns] = _exprOneOpt(Appl, vs)
-         |  def not  (v    : Option[t]     )(implicit x: X): Ns[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns] = _exprOneOpt(Not , v.map(Seq(_)))
-         |  def not  (vs   : Option[Seq[t]])               : Ns[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns] = _exprOneOpt(Not , vs)
+         |  def apply(v    : Option[t]     )(implicit x: X): Ns[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns] = _exprOneOpt(Appl, v.map(Seq(_))    )
+         |  def apply(vs   : Option[Seq[t]])               : Ns[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns] = _exprOneOpt(Appl, vs               )
+         |  def not  (v    : Option[t]     )(implicit x: X): Ns[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns] = _exprOneOpt(Not , v.map(Seq(_))    )
+         |  def not  (vs   : Option[Seq[t]])               : Ns[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns] = _exprOneOpt(Not , vs               )
          |  def <    (upper: Option[t]     )               : Ns[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns] = _exprOneOpt(Lt  , upper.map(Seq(_)))
          |  def <=   (upper: Option[t]     )               : Ns[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns] = _exprOneOpt(Le  , upper.map(Seq(_)))
          |  def >    (lower: Option[t]     )               : Ns[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns] = _exprOneOpt(Gt  , lower.map(Seq(_)))

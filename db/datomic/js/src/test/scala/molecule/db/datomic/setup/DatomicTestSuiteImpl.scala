@@ -32,7 +32,7 @@ trait DatomicTestSuiteImpl { self: DatomicTestSuite =>
     //      case SystemPeerServer => DatomicPeerServerProxy("k", "s", "localhost:8998", peerServerDb, clientSchema, nsMap, attrMap)
     //    }
 
-    val conn: Connection = new Connection {
+    val conn: Connection = new Connection(schema) {
       override type Data = this.type
       override def transact(data: this.type): TxReport = ???
     }

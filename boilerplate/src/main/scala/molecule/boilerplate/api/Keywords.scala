@@ -412,6 +412,10 @@ trait KeywordsStable {
    */
   object unify extends unify
   trait unify extends Kw
+
+
+  object v1 extends v1
+  trait v1 extends Kw
 }
 
 object Keywords extends KeywordsStable
@@ -436,4 +440,6 @@ trait Keywords {
 
   // Self reference unifying
   object unify extends Keywords.unify
+
+  object v1 extends Keywords.v1
 }

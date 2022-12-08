@@ -15,6 +15,9 @@ trait SchemaTransaction {
   /** Attribute name -> (cardinality, Scala type) */
   val attrMap: Map[String, (Cardinality, String)]
 
+  val uniqueAttrs: List[String]
+
+
 
   /** Edn data strings to transact Datomic Peer schema. */
   val datomicSchema    : String

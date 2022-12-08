@@ -1,9 +1,9 @@
-package molecule.db.datomic.api
+package molecule.db.datomic.api.ops
 
-import java.util.{List => jList}
 import molecule.base.util.exceptions.MoleculeException
 import molecule.boilerplate.ast.MoleculeModel._
-import molecule.core.api.{Connection, QueryOps}
+import molecule.core.api.Connection
+import molecule.core.api.ops.QueryOps
 import molecule.core.util.JavaConversions
 import zio.{Chunk, ZIO}
 import scala.concurrent.{ExecutionContext, Future}

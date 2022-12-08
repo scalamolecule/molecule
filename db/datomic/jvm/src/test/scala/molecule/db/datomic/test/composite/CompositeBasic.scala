@@ -8,6 +8,9 @@ import molecule.db.datomic._
 
 object CompositeBasic extends DatomicTestSuite {
 
+  // For more complex structures, see:
+  // molecule.db.datomic.test.crud.save.SaveTxMetaData
+  // molecule.db.datomic.test.crud.insert.InsertTxMetaData
 
   lazy val tests = Tests {
 

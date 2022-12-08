@@ -1,10 +1,11 @@
-package molecule.db.datomic.api
+package molecule.db.datomic.api.ops
 
 import java.util.{Collections, Comparator, ArrayList => jArrayList, Collection => jCollection}
 import datomic.Peer
 import molecule.base.util.exceptions.MoleculeException
 import molecule.boilerplate.ast.MoleculeModel._
-import molecule.core.api.{Connection, QueryOps}
+import molecule.core.api.Connection
+import molecule.core.api.ops.QueryOps
 import molecule.core.util.JavaConversions
 import molecule.db.datomic.facade.Conn_Peer
 import molecule.db.datomic.query.DatomicModel2Query
@@ -18,7 +19,7 @@ class DatomicQueryOpsImpl[Tpl](elements: Seq[Element])
     with JavaConversions
     with DatomicApiLoader {
 
-  // Refinements - todo
+  // Refinements - prevent non-sensical combinations todo
   override def take(n: Int): DatomicQueryOpsImpl[Tpl] = this
   override def drop(n: Int): DatomicQueryOpsImpl[Tpl] = this
   override def from(cursor: String): DatomicQueryOpsImpl[Tpl] = this

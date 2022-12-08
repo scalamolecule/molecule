@@ -1,6 +1,8 @@
 // GENERATED CODE ********************************
 package molecule.core.api
 
+import molecule.core.api.ops.InsertOps
+
 trait Insert_ {
   // Implemented for each db and JS/JVM platform
   private[core] def _insertOp(tpls: Seq[Product]): InsertOps

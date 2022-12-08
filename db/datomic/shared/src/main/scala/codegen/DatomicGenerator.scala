@@ -5,11 +5,11 @@ import codegen.db._
 
 object DatomicGenerator extends App {
 
+
+    core.api._MoleculeApi.generate
   //  core.api._Insert.generate
-  //  datomic.api._DatomicInsert.generate
-  //
-  //  core.api._MoleculeApi.generate
-  //  datomic.api._DatomicMoleculeApi.generate
+    datomic.api._DatomicMoleculeApi.generate
+//    datomic.api._DatomicInsert.generate
   //
   //
 //    datomic.query.casting._CastNestedBranch.generate

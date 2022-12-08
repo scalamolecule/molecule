@@ -11,6 +11,7 @@ object _DatomicMoleculeApi extends DatomicGenBase("DatomicMoleculeApi", "/api") 
        |
        |import molecule.boilerplate.api._
        |import molecule.core.api._
+       |import molecule.db.datomic.api.ops._
        |
        |$classes
        |""".stripMargin
@@ -22,10 +23,10 @@ object _DatomicMoleculeApi extends DatomicGenBase("DatomicMoleculeApi", "/api") 
       s"""
          |class ${fileName}_$n0[${`A..V`}](molecule: Molecule_$n0[${`A..V`}]) extends MoleculeApi_$n0[${`A..V`}] {
          |  override def save  : DatomicSaveOps${`..N`}$p  = new DatomicSaveOps(molecule.elements)
-         |  override def insert: DatomicInsert_$arity[${`A..V`}]$p = new DatomicInsert_$arity[${`A..V`}](molecule)
-         |  override def update: DatomicInsert_$arity[${`A..V`}]$p = new DatomicInsert_$arity[${`A..V`}](molecule)
-         |  override def delete: DatomicInsert_$arity[${`A..V`}]$p = new DatomicInsert_$arity[${`A..V`}](molecule)
+         |  override def insert: DatomicInsert_$arity[${`A..V`}]$p = new DatomicInsert_$arity[${`A..V`}](molecule.elements)
          |  override def query : DatomicQueryOps[${`(A..V)`}] = new DatomicQueryOps[${`(A..V)`}](molecule.elements)
+         |  override def update: DatomicUpdateOps${`..N`}$p= new DatomicUpdateOps(molecule.elements)
+         |  override def delete: DatomicDeleteOps${`..N`}$p= new DatomicDeleteOps(molecule.elements)
          |}""".stripMargin
   }
 }

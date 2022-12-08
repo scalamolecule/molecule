@@ -30,6 +30,9 @@ case class Schema(schema: MetaSchema) {
         |  override lazy val attrMap: Map[String, (Cardinality, String)] = ${schema.attrMap(1)}
         |
         |
+        |  override lazy val uniqueAttrs: List[String] = ${schema.uniqueAttrs}
+        |
+        |
         |${Schema_Datomic(schema).get}
         |}""".stripMargin
 }

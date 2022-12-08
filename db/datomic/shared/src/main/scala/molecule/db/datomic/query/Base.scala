@@ -58,13 +58,13 @@ trait Base[Tpl] extends BaseHelpers with JavaConversions { self: Model2Query[Tpl
   final protected val wherePost = new ArrayBuffer[(String, Int)]
 
   // Input args and cast lambdas
-  final protected val preArgs     = new ArrayBuffer[AnyRef]
-  final protected val args        = new ArrayBuffer[AnyRef]
+  final protected val preArgs    = new ArrayBuffer[AnyRef]
+  final protected val args       = new ArrayBuffer[AnyRef]
   final protected var castss     = List(List.empty[AnyRef => AnyRef])
-  final protected val pullCasts   = new ArrayBuffer[jIterator[_] => Any]
-  final protected var pullCastss  = List.empty[List[jIterator[_] => Any]]
-  final protected var pullDepths  = List(0)
-  final protected var aritiess    = List(List.empty[List[Int]])
+  final protected val pullCasts  = new ArrayBuffer[jIterator[_] => Any]
+  final protected var pullCastss = List.empty[List[jIterator[_] => Any]]
+  final protected var pullDepths = List(0)
+  final protected var aritiess   = List(List.empty[List[Int]])
 
   // Sorting
   final protected val sortsAcc       = new ArrayBuffer[Int => (Row, Row) => Int]

@@ -39,6 +39,14 @@ trait ModelBase extends Validations {
 
   case class BackRef(backRef: String) extends Element
 
+  case class Composite(elements: Seq[Element]) extends Element with Mandatory {
+    override def render(i: Int): String = {
+      s"""|${"  " * i}Composite(List(
+          |${renders(elements, i + 1)}))""".stripMargin
+    }
+    override def toString: String = render(0)
+  }
+
   case class Nested(ref: Ref, elements: Seq[Element]) extends Element with Mandatory {
     override def render(i: Int): String = {
       val indent = "  " * i
@@ -64,14 +72,6 @@ trait ModelBase extends Validations {
   case class TxMetaData(elements: Seq[Element]) extends Element with Mandatory {
     override def render(i: Int): String = {
       s"""|${"  " * i}TxMetaData(List(
-          |${renders(elements, i + 1)}))""".stripMargin
-    }
-    override def toString: String = render(0)
-  }
-
-  case class Composite(elements: Seq[Element]) extends Element with Mandatory {
-    override def render(i: Int): String = {
-      s"""|${"  " * i}Composite(List(
           |${renders(elements, i + 1)}))""".stripMargin
     }
     override def toString: String = render(0)

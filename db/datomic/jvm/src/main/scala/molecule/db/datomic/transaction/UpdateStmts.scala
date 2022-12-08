@@ -1,61 +1,92 @@
 package molecule.db.datomic.transaction
 
 import java.net.URI
-import java.util.{Collections, Date, UUID, ArrayList => jArrayList, List => jList}
+import java.util.{Collections, Date, UUID, List => jList}
 import clojure.lang.Keyword
 import molecule.base.util.exceptions.MoleculeException
 import molecule.boilerplate.ast.MoleculeModel._
 import scala.annotation.tailrec
 
 
-class SaveStmts(elements: Seq[Element], isInsertTxMetaData: Boolean = false)
-  extends DatomicTransactionBase(elements) {
+class UpdateStmts(
+  uniqueAttrs: List[String],
+  elements: Seq[Element],
+  isMultiple: Boolean,
+) extends DatomicTransactionBase(elements) {
 
-  def getRawStmts(eid: String): jArrayList[jList[AnyRef]] = {
-    println("\n--- SAVE --------------")
+  def getStmts: (jList[jList[AnyRef]], Option[String]) = {
+    println("\n--- UPDATE --------------")
     elements.foreach(println)
     checkConflictingAttributes(elements)
-    e = eid
-    e0 = e
-    resolve(elements)
+
+//    val eids =
+
+    elements.head match {
+      // Update one with entity id
+      case AttrOneTacLong("Generic", "e", Appl, Seq(eid), _, _, _) =>
+
+        e = eid.asInstanceOf[AnyRef]
+        e0 = e
+        updateWithEids(elements.tail)
+
+      // Update multiple with entity ids
+      case AttrOneTacLong("Generic", "e", Appl, eids, _, _, _) =>
+        if (!isMultiple)
+          throw MoleculeException("Please provide explicit `update.multiple` to update multiple entities.")
+        e = eids.head.asInstanceOf[AnyRef]
+        e0 = e
+        updateWithEids(elements.tail)
+
+      case other => throw MoleculeException(
+        "Please apply one or more entity ids to the initial namespace."
+      )
+    }
     println("---")
     stmts.forEach(stmt => println(stmt))
-    stmts
+    (Collections.unmodifiableList(stmts), None)
   }
 
-  def getStmts: jList[jList[_]] = Collections.unmodifiableList(getRawStmts(newId))
+  private def uniqueIdentifier(elements: Seq[Element]) = {
+    val uniqueIdentifiers = elements.collect {
+      case AttrOneTacLong("Generic", "e", Appl, Seq(eid), _, _, _) =>
 
+      case a: Attr if uniqueAttrs.contains(s"${a.ns}.${a.attr}")   =>
+    }
+  }
+
+  private def noFilters(attr: Attr): Unit = {
+    throw MoleculeException(
+      "Can't filter update by tacit attribute values when using entity ids. Found:\n" + attr
+    )
+  }
 
   @tailrec
-  final private def resolve(elements: Seq[Element]): Unit = {
+  final protected def updateWithEids(elements: Seq[Element]): Unit = {
     elements match {
       case element :: tail => element match {
         case attr: Attr =>
           if (attr.op != Appl) {
-            if (isInsertTxMetaData)
-              throw MoleculeException("Please apply tx meta data to tacit attributes. Found:\n" + attr)
-            else
-              throw MoleculeException("Can't save attributes without applied value. Found:\n" + attr)
+            throw MoleculeException("Can't save attributes without applied value. Found:\n" + attr)
           }
           backRefs = backRefs + (attr.ns -> e)
           val a = kw(attr.ns, attr.attr)
           attr match {
             case attr: AttrOne =>
               attr match {
-                case attr: AttrOneMan => resolveAttrOneMan(attr, a); resolve(tail)
-                case attr: AttrOneOpt => resolveAttrOneOpt(attr, a); resolve(tail)
-                case attr: AttrOneTac => resolveAttrOneTac(attr, a); resolve(tail)
+                case attr: AttrOneMan => resolveAttrOneMan(attr, a); updateWithEids(tail)
+                case attr: AttrOneOpt => resolveAttrOneOpt(attr, a); updateWithEids(tail)
+                case attr: AttrOneTac => noFilters(attr)
               }
             case attr: AttrSet =>
               attr match {
-                case attr: AttrSetMan => resolveAttrSetMan(attr, a); resolve(tail)
-                case attr: AttrSetOpt => resolveAttrSetOpt(attr, a); resolve(tail)
-                case attr: AttrSetTac => resolveAttrSetTac(attr, a); resolve(tail)
+                case attr: AttrSetMan => resolveAttrSetMan(attr, a); updateWithEids(tail)
+                case attr: AttrSetOpt => resolveAttrSetOpt(attr, a); updateWithEids(tail)
+                case attr: AttrSetTac => noFilters(attr)
               }
           }
 
-        case Ref(ns, refAttr, _, _)       => ref(kw(ns, refAttr)); resolve(tail)
-        case BackRef(backRefNs)           => backRef(backRefNs); resolve(tail)
+        case Ref(ns, refAttr, _, _)       => ref(kw(ns, refAttr)); updateWithEids(tail)
+        case BackRef(backRefNs)           => backRef(backRefNs); updateWithEids(tail)
         case _: Nested                    => throw MoleculeException(
           "Nested data structure not allowed in save molecule. Please use insert instead."
         )
@@ -63,14 +94,12 @@ class SaveStmts(elements: Seq[Element], isInsertTxMetaData: Boolean = false)
           "Optional nested data structure not allowed in save molecule. Please use insert instead."
         )
         case Composite(compositeElements) =>
-          // Start from initial entity id for each composite sub group
-          e = if (isInsertTxMetaData) tx else e0
-          resolve(compositeElements ++ tail)
+          updateWithEids(compositeElements ++ tail)
 
         case TxMetaData(txElements) =>
           e = tx
           e0 = tx
-          resolve(txElements) // tail is empty (no more attributes possible after Tx)
+          updateWithEids(txElements) // tail is empty (no more attributes possible after Tx)
 
         case element => unexpected(element)
       }

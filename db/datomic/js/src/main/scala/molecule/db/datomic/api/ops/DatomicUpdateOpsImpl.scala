@@ -1,12 +1,13 @@
-package molecule.db.datomic.api
+package molecule.db.datomic.api.ops
 
 import molecule.base.util.exceptions.MoleculeException
 import molecule.boilerplate.ast.MoleculeModel._
-import molecule.core.api.{Connection, SaveOps, TxReport}
+import molecule.core.api.ops.{SaveOps, UpdateOps}
+import molecule.core.api.{Connection, TxReport}
 import zio.ZIO
 import scala.concurrent.{ExecutionContext, Future}
 
-class DatomicSaveOpsImpl(elements: Seq[Element]) extends SaveOps {
+class DatomicUpdateOpsImpl(elements: Seq[Element]) extends UpdateOps {
 
   override def run: ZIO[Connection, MoleculeException, TxReport] = ???
 
@@ -15,4 +16,6 @@ class DatomicSaveOpsImpl(elements: Seq[Element]) extends SaveOps {
     ???
   }
   override def transactAsync(implicit conn: Connection, ec: ExecutionContext): Future[TxReport] = ???
+
+  override def multiple: UpdateOps = ???
 }

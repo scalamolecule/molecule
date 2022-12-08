@@ -62,7 +62,8 @@ object SchemaAST extends BaseHelpers {
         ns <- part.nss
         attr <- ns.attrs
       } yield {
-        (s":${ns.ns}/${attr.attr}", attr.card, attr.tpe)
+        (s"${ns.ns}.${attr.attr}", attr.card, attr.tpe)
+//        (s":${ns.ns}/${attr.attr}", attr.card, attr.tpe)
       }
       val maxSp    = attrData.map(_._1.length).max
       val attrs    = attrData.map {
@@ -70,6 +71,18 @@ object SchemaAST extends BaseHelpers {
       }
       val attrsStr = if (attrs.isEmpty) "" else attrs.mkString(pad, s",$pad", s"\n$p")
       s"Map($attrsStr)"
+    }
+
+    def uniqueAttrs: String = {
+      val attrs = for {
+        part <- parts
+        ns <- part.nss
+        attr <- ns.attrs if attr.options.exists(s => s == "unique" || s == "uniqueIdentity")
+      } yield {
+        s""""${ns.ns}.${attr.attr}""""
+      }
+      val attrsStr = if (attrs.isEmpty) "" else attrs.mkString("\n    ", s",\n    ", s"\n  ")
+      s"List($attrsStr)"
     }
   }
 

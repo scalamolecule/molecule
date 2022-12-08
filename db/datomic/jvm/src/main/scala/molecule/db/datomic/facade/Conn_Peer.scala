@@ -5,9 +5,9 @@ import java.util.{List => jList}
 import java.{lang => jl, util => ju}
 import datomic.Util.readAll
 import datomic.{Connection => DatomicConnection, _}
+import molecule.base.api.SchemaTransaction
 import molecule.base.util.exceptions.MoleculeException
 import molecule.core.api.{Connection, TxReport}
-
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.{Await, ExecutionContext, Future, Promise}
@@ -15,7 +15,11 @@ import scala.jdk.CollectionConverters._
 import scala.util.control.NonFatal
 
 
-case class Conn_Peer(peerConn: DatomicConnection) extends Connection {
+class Conn_Peer(
+  override val schema: SchemaTransaction,
+  val peerConn: DatomicConnection
+) extends Connection(schema) {
+
   type Data = jList[_]
 
   override def db: Database = peerConn.db()
@@ -51,7 +55,8 @@ case class Conn_Peer(peerConn: DatomicConnection) extends Connection {
               println(
                 "---- ExecutionException: -------------\n" +
                   listenF +
-                  javaStmts.fold("")(stmts => "\n---- javaStmts: ----\n" + stmts.asScala.toList.mkString("\n"))
+                  javaStmts.fold("")(stmts => "\n---- javaStmts: ----\n" +
+                    stmts.asScala.toList.mkString("\n"))
               )
               // White list of exceptions that can be pickled by BooPickle
               p.failure(
@@ -66,7 +71,8 @@ case class Conn_Peer(peerConn: DatomicConnection) extends Connection {
               println(
                 "---- NonFatal exception: -------------\n" +
                   listenF +
-                  javaStmts.fold("")(stmts => "\n---- javaStmts: ----\n" + stmts.asScala.toList.mkString("\n"))
+                  javaStmts.fold("")(stmts => "\n---- javaStmts: ----\n" +
+                    stmts.asScala.toList.mkString("\n"))
               )
               p.failure(MoleculeException(e.getMessage))
           }
@@ -82,5 +88,9 @@ case class Conn_Peer(peerConn: DatomicConnection) extends Connection {
 
 
 object Conn_Peer {
-  def apply(uri: String): Conn_Peer = Conn_Peer(datomic.Peer.connect(uri))
+  def apply(schema: SchemaTransaction, uri: String): Conn_Peer =
+    new Conn_Peer(schema, datomic.Peer.connect(uri))
+
+  def apply(schema: SchemaTransaction, peerConn: DatomicConnection): Conn_Peer =
+    new Conn_Peer(schema, peerConn)
 }

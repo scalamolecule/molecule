@@ -3,11 +3,12 @@ package molecule.boilerplate.ast
 
 import java.net.URI
 import java.util.{Date, UUID}
+import scala.util.Try
 
 trait AttrOneMan_ { self: ModelBase =>
 
   sealed trait AttrOneMan extends AttrOne with Mandatory
-  
+
   case class AttrOneManString(
     ns          : String,
     attr        : String,
@@ -15,7 +16,7 @@ trait AttrOneMan_ { self: ModelBase =>
     vs          : Seq[String] = Nil,
     defaultValue: Option[String] = None,
     validation  : Option[ValidateString] = None,
-    sort        : Option[String] = None
+    sort        : Option[String] = None,
   ) extends AttrOneMan
 
   case class AttrOneManInt(

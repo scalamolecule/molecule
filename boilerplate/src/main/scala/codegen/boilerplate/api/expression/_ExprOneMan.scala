@@ -26,10 +26,11 @@ object _ExprOneMan extends BoilerplateGenBase( "ExprOneMan", "/api/expression") 
          |  extends ${fileName}Ops_$arity[${`A..V`}, t, Ns]
          |    with Aggregates_$arity[${`A..V`}, t, Ns]
          |    with SortAttrs_$arity[${`A..V`}, t, Ns] {
-         |  def apply(v    : t, vs: t*): Ns[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns] = _exprOneMan(Appl, v +: vs)
-         |  def apply(vs   : Seq[t]   ): Ns[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns] = _exprOneMan(Appl, vs)
-         |  def not  (v    : t, vs: t*): Ns[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns] = _exprOneMan(Not , v +: vs)
-         |  def not  (vs   : Seq[t]   ): Ns[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns] = _exprOneMan(Not , vs)
+         |  def apply(                ): Ns[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns] = _exprOneMan(Appl, Nil       )
+         |  def apply(v    : t, vs: t*): Ns[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns] = _exprOneMan(Appl, v +: vs   )
+         |  def apply(vs   : Seq[t]   ): Ns[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns] = _exprOneMan(Appl, vs        )
+         |  def not  (v    : t, vs: t*): Ns[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns] = _exprOneMan(Not , v +: vs   )
+         |  def not  (vs   : Seq[t]   ): Ns[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns] = _exprOneMan(Not , vs        )
          |  def <    (upper: t        ): Ns[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns] = _exprOneMan(Lt  , Seq(upper))
          |  def <=   (upper: t        ): Ns[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns] = _exprOneMan(Le  , Seq(upper))
          |  def >    (lower: t        ): Ns[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns] = _exprOneMan(Gt  , Seq(lower))

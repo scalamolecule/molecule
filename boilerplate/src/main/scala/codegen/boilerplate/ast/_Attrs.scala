@@ -52,4 +52,30 @@ object _Attrs {
          |  ) extends Attr$card$mode""".stripMargin
     }
   }
+
+
+  //  class ValInt extends ValidateInt {
+  //    override def validate(v: Int, test: => Boolean): Either[String, Int] = {
+  //      try Right {
+  //        test
+  //        v
+  //      } catch {
+  //        case e: NumberFormatException => Left("Number should be positive. Was " + v)
+  //      }
+  //    }
+  //  }
+  //  val valInt: ValInt = new ValInt
+  //
+  //  val attrInt = AttrOneManInt(
+  //    "Ns", "int", V, Nil, None, Some(valInt)
+  //  )
+  //
+  //  attrInt.validation.fold(println("No validator found")) { validator =>
+  //    validator.validate(-3) match {
+  //      case Left(err) => println(err)
+  //      case Right(v)  => v / 0
+  //    }
+  //  }
+  //  val a1: ValidateInt             = attrInt.validation.get
+  //  val a2: Either[String, Boolean] = a1.validate(-3)
 }
