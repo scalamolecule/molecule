@@ -41,7 +41,7 @@ class InsertStmts(elements: Seq[Element], data: Seq[Product])
       case element :: tail => element match {
         case attr: Attr =>
           if (attr.op != V) {
-            throw MoleculeException("Can't insert attributes with applied value. Found:\n" + attr)
+            throw MoleculeException("Can't insert attributes with an applied value. Found:\n" + attr)
           }
           val ns = attr.ns
           val a  = kw(attr.ns, attr.attr)

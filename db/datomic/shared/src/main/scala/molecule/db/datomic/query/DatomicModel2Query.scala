@@ -81,6 +81,10 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
     (preQuery, mainQuery)
   }
 
+  final def getEidQueryWithInputs: (Att, Seq[AnyRef]) = {
+    (getQueries(false)._2, inputs)
+  }
+
   final private def renderQuery(
     nestedIds: ArrayBuffer[String],
     find: ArrayBuffer[String],

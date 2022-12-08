@@ -8,22 +8,32 @@ import molecule.boilerplate.ast.MoleculeModel._
 import scala.annotation.tailrec
 
 
-class SaveStmts(elements: Seq[Element], isInsertTxMetaData: Boolean = false)
+class SaveStmts(
+  elements: Seq[Element],
+  isInsertTxMetaData: Boolean = false,
+  debug: Boolean = true
+)
   extends DatomicTransactionBase(elements) {
 
   def getRawStmts(eid: String): jArrayList[jList[AnyRef]] = {
-    println("\n--- SAVE --------------")
-    elements.foreach(println)
+    if (debug) {
+      println("\n--- SAVE --------------")
+      elements.foreach(println)
+    }
     checkConflictingAttributes(elements)
     e = eid
     e0 = e
     resolve(elements)
-    println("---")
-    stmts.forEach(stmt => println(stmt))
+
+    if (debug) {
+      println("---")
+      stmts.forEach(stmt => println(stmt))
+    }
     stmts
   }
 
-  def getStmts: jList[jList[_]] = Collections.unmodifiableList(getRawStmts(newId))
+//  def getStmts: jList[jList[_]] = Collections.unmodifiableList(getRawStmts(newId))
+  def getStmts: jList[jList[AnyRef]] = getRawStmts(newId)
 
 
   @tailrec
@@ -35,7 +45,7 @@ class SaveStmts(elements: Seq[Element], isInsertTxMetaData: Boolean = false)
             if (isInsertTxMetaData)
               throw MoleculeException("Please apply tx meta data to tacit attributes. Found:\n" + attr)
             else
-              throw MoleculeException("Can't save attributes without applied value. Found:\n" + attr)
+              throw MoleculeException("Can't save attributes without an applied value. Found:\n" + attr)
           }
           backRefs = backRefs + (attr.ns -> e)
           val a = kw(attr.ns, attr.attr)

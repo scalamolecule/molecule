@@ -1,5 +1,6 @@
 package molecule.db.datomic.api.ops
 
+import java.util.Collections
 import datomic.Peer
 import molecule.base.util.exceptions.MoleculeException
 import molecule.boilerplate.ast.MoleculeModel._
@@ -9,6 +10,7 @@ import molecule.db.datomic.facade.Conn_Peer
 import molecule.db.datomic.transaction.{DatomicTransactionBase, UpdateStmts}
 import zio.ZIO
 import scala.concurrent.{ExecutionContext, Future}
+import java.util.{Collections, List => jList}
 
 class DatomicUpdateOpsImpl(
   elements: Seq[Element],
@@ -20,21 +22,34 @@ class DatomicUpdateOpsImpl(
   override def transactAsync(implicit conn: Connection, ec: ExecutionContext): Future[TxReport] = ???
 
   override def transact(implicit conn0: Connection): TxReport = {
-    val conn              = conn0.asInstanceOf[Conn_Peer]
-    val (stmts0, idQuery) = new UpdateStmts(conn.schema.uniqueAttrs, elements, isMultiple).getStmts
-    var eid               = 0L
-    val stmts1            = idQuery.fold(stmts0) { query =>
-      stmts.clear()
-      Peer.q(query, conn.peerConn.db()).forEach { idRow =>
-        eid = idRow.get(0).asInstanceOf[Long]
-        stmts0.forEach { stmt =>
-          stmt.set(1, eid)
-          stmts.add(stmt)
+    val conn = conn0.asInstanceOf[Conn_Peer]
+
+    val (eids, idQuery, inputs, dataStmts) =
+      new UpdateStmts(conn.schema.uniqueAttrs, elements, isMultiple).getStmts
+
+    stmts.clear()
+    idQuery.fold {
+      eids.foreach { eid =>
+        dataStmts.forEach { dataStmt =>
+          val updateStmt = stmtList
+          updateStmt.addAll(dataStmt)
+          updateStmt.set(1, eid.asInstanceOf[AnyRef])
+          stmts.add(updateStmt)
         }
       }
-      stmts
+    } { query =>
+      var eid: AnyRef = 0L.asInstanceOf[AnyRef]
+      Peer.q(query, conn.peerConn.db() +: inputs: _*).forEach { idRow =>
+        eid = idRow.get(0)
+        dataStmts.forEach { dataStmt =>
+          dataStmt.set(1, eid)
+          stmts.add(dataStmt)
+        }
+      }
     }
-    conn.transact(stmts1)
+    println("---")
+    stmts.forEach(stmt => println(stmt))
+    conn.transact(stmts)
   }
   override def multiple: UpdateOps = new DatomicUpdateOpsImpl(elements, true)
 }
