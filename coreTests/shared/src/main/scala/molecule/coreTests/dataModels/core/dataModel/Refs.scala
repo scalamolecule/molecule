@@ -6,8 +6,6 @@ object Refs extends DataModel(10) {
 
   trait Ns {
     val i        = oneInt
-    val iUnique  = oneInt.unique
-    val iUniqueI = oneInt.uniqueIdentity
     val s        = oneString
     val r1       = one[R1]
     val rs1      = many[R1]
@@ -16,7 +14,6 @@ object Refs extends DataModel(10) {
 
   trait R1 {
     val i       = oneInt
-    val iUnique = oneInt.unique
     val s       = oneString
     val r2      = one[R2]
     val r2a     = one[R2]
@@ -25,7 +22,6 @@ object Refs extends DataModel(10) {
 
   trait R2 {
     val i       = oneInt
-    val iUnique = oneInt.unique
     val s       = oneString
     val ii      = setInt
     val r3      = one[R3]

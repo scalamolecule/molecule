@@ -12,8 +12,7 @@ class SaveStmts(
   elements: Seq[Element],
   isInsertTxMetaData: Boolean = false,
   debug: Boolean = true
-)
-  extends DatomicTransactionBase(elements) {
+) extends DatomicTransactionBase(elements) {
 
   def getRawStmts(eid: String): jArrayList[jList[AnyRef]] = {
     if (debug) {
@@ -32,7 +31,7 @@ class SaveStmts(
     stmts
   }
 
-//  def getStmts: jList[jList[_]] = Collections.unmodifiableList(getRawStmts(newId))
+  //  def getStmts: jList[jList[_]] = Collections.unmodifiableList(getRawStmts(newId))
   def getStmts: jList[jList[AnyRef]] = getRawStmts(newId)
 
 
@@ -74,12 +73,12 @@ class SaveStmts(
         )
         case Composite(compositeElements) =>
           // Start from initial entity id for each composite sub group
-          e = if (isInsertTxMetaData) tx else e0
+          e = if (isInsertTxMetaData) datomicTx else e0
           resolve(compositeElements ++ tail)
 
         case TxMetaData(txElements) =>
-          e = tx
-          e0 = tx
+          e = datomicTx
+          e0 = datomicTx
           resolve(txElements) // tail is empty (no more attributes possible after Tx)
 
         case element => unexpected(element)
@@ -89,182 +88,165 @@ class SaveStmts(
   }
 
 
-  private def oneV[T](attrName: String, vs: Seq[T], transform: T => Any): Option[Any] = {
+  private def oneV[T](attr: Attr, vs: Seq[T], transform: T => Any): Option[Any] = {
     vs match {
       case Seq(v) => Some(transform(v))
       case Nil    => None
       case vs     => throw MoleculeException(
-        s"Can only save one value for attribute `$attrName`. Found: " + vs
+        s"Can only save one value for attribute `${attr.name}`. Found: " + vs
       )
     }
   }
-  def resolveAttrOneMan(attr: AttrOneMan, a: Keyword): Unit = {
-    val an = a.toString
-    attr match {
-      case AttrOneManString(_, _, Appl, vs, _, _, _)     => addV(a, oneV[String](an, vs, identity))
-      case AttrOneManInt(_, _, Appl, vs, _, _, _)        => addV(a, oneV[Int](an, vs, identity))
-      case AttrOneManLong(_, _, Appl, vs, _, _, _)       => addV(a, oneV[Long](an, vs, identity))
-      case AttrOneManFloat(_, _, Appl, vs, _, _, _)      => addV(a, oneV[Float](an, vs, identity))
-      case AttrOneManDouble(_, _, Appl, vs, _, _, _)     => addV(a, oneV[Double](an, vs, identity))
-      case AttrOneManBoolean(_, _, Appl, vs, _, _, _)    => addV(a, oneV[Boolean](an, vs, identity))
-      case AttrOneManBigInt(_, _, Appl, vs, _, _, _)     => addV(a, oneV[BigInt](an, vs, _.bigInteger))
-      case AttrOneManBigDecimal(_, _, Appl, vs, _, _, _) => addV(a, oneV[BigDecimal](an, vs, _.bigDecimal))
-      case AttrOneManDate(_, _, Appl, vs, _, _, _)       => addV(a, oneV[Date](an, vs, identity))
-      case AttrOneManUUID(_, _, Appl, vs, _, _, _)       => addV(a, oneV[UUID](an, vs, identity))
-      case AttrOneManURI(_, _, Appl, vs, _, _, _)        => addV(a, oneV[URI](an, vs, identity))
-      case AttrOneManByte(_, _, Appl, vs, _, _, _)       => addV(a, oneV[Byte](an, vs, _.toInt))
-      case AttrOneManShort(_, _, Appl, vs, _, _, _)      => addV(a, oneV[Short](an, vs, _.toInt))
-      case AttrOneManChar(_, _, Appl, vs, _, _, _)       => addV(a, oneV[Char](an, vs, _.toString))
-      case _                                             => throw MoleculeException(
-        s"Can only save one applied value for attribute `$an`. Found expression: ${attr.op}"
-      )
-    }
+  private def resolveAttrOneMan(attr: AttrOneMan, a: Keyword): Unit = attr match {
+    case AttrOneManString(_, _, Appl, vs, _, _, _)     => addV(a, oneV[String](attr, vs, identity))
+    case AttrOneManInt(_, _, Appl, vs, _, _, _)        => addV(a, oneV[Int](attr, vs, identity))
+    case AttrOneManLong(_, _, Appl, vs, _, _, _)       => addV(a, oneV[Long](attr, vs, identity))
+    case AttrOneManFloat(_, _, Appl, vs, _, _, _)      => addV(a, oneV[Float](attr, vs, identity))
+    case AttrOneManDouble(_, _, Appl, vs, _, _, _)     => addV(a, oneV[Double](attr, vs, identity))
+    case AttrOneManBoolean(_, _, Appl, vs, _, _, _)    => addV(a, oneV[Boolean](attr, vs, identity))
+    case AttrOneManBigInt(_, _, Appl, vs, _, _, _)     => addV(a, oneV[BigInt](attr, vs, _.bigInteger))
+    case AttrOneManBigDecimal(_, _, Appl, vs, _, _, _) => addV(a, oneV[BigDecimal](attr, vs, _.bigDecimal))
+    case AttrOneManDate(_, _, Appl, vs, _, _, _)       => addV(a, oneV[Date](attr, vs, identity))
+    case AttrOneManUUID(_, _, Appl, vs, _, _, _)       => addV(a, oneV[UUID](attr, vs, identity))
+    case AttrOneManURI(_, _, Appl, vs, _, _, _)        => addV(a, oneV[URI](attr, vs, identity))
+    case AttrOneManByte(_, _, Appl, vs, _, _, _)       => addV(a, oneV[Byte](attr, vs, _.toInt))
+    case AttrOneManShort(_, _, Appl, vs, _, _, _)      => addV(a, oneV[Short](attr, vs, _.toInt))
+    case AttrOneManChar(_, _, Appl, vs, _, _, _)       => addV(a, oneV[Char](attr, vs, _.toString))
+    case _                                             => throw MoleculeException(
+      s"Can only save one applied value for attribute `${attr.name}`. Found expression: ${attr.op}"
+    )
   }
-  def resolveAttrOneTac(attr: AttrOneTac, a: Keyword): Unit = {
-    val an = a.toString
-    attr match {
-      case AttrOneTacString(_, _, Appl, vs, _, _, _)     => addV(a, oneV[String](an, vs, identity))
-      case AttrOneTacInt(_, _, Appl, vs, _, _, _)        => addV(a, oneV[Int](an, vs, identity))
-      case AttrOneTacLong(_, _, Appl, vs, _, _, _)       => addV(a, oneV[Long](an, vs, identity))
-      case AttrOneTacFloat(_, _, Appl, vs, _, _, _)      => addV(a, oneV[Float](an, vs, identity))
-      case AttrOneTacDouble(_, _, Appl, vs, _, _, _)     => addV(a, oneV[Double](an, vs, identity))
-      case AttrOneTacBoolean(_, _, Appl, vs, _, _, _)    => addV(a, oneV[Boolean](an, vs, identity))
-      case AttrOneTacBigInt(_, _, Appl, vs, _, _, _)     => addV(a, oneV[BigInt](an, vs, _.bigInteger))
-      case AttrOneTacBigDecimal(_, _, Appl, vs, _, _, _) => addV(a, oneV[BigDecimal](an, vs, _.bigDecimal))
-      case AttrOneTacDate(_, _, Appl, vs, _, _, _)       => addV(a, oneV[Date](an, vs, identity))
-      case AttrOneTacUUID(_, _, Appl, vs, _, _, _)       => addV(a, oneV[UUID](an, vs, identity))
-      case AttrOneTacURI(_, _, Appl, vs, _, _, _)        => addV(a, oneV[URI](an, vs, identity))
-      case AttrOneTacByte(_, _, Appl, vs, _, _, _)       => addV(a, oneV[Byte](an, vs, _.toInt))
-      case AttrOneTacShort(_, _, Appl, vs, _, _, _)      => addV(a, oneV[Short](an, vs, _.toInt))
-      case AttrOneTacChar(_, _, Appl, vs, _, _, _)       => addV(a, oneV[Char](an, vs, _.toString))
-      case _                                             => throw MoleculeException(
-        s"Can only save one applied value for tacit attribute `$an`. Found expression: ${attr.op}"
-      )
-    }
+  private def resolveAttrOneTac(attr: AttrOneTac, a: Keyword): Unit = attr match {
+    case AttrOneTacString(_, _, Appl, vs, _, _, _)     => addV(a, oneV[String](attr, vs, identity))
+    case AttrOneTacInt(_, _, Appl, vs, _, _, _)        => addV(a, oneV[Int](attr, vs, identity))
+    case AttrOneTacLong(_, _, Appl, vs, _, _, _)       => addV(a, oneV[Long](attr, vs, identity))
+    case AttrOneTacFloat(_, _, Appl, vs, _, _, _)      => addV(a, oneV[Float](attr, vs, identity))
+    case AttrOneTacDouble(_, _, Appl, vs, _, _, _)     => addV(a, oneV[Double](attr, vs, identity))
+    case AttrOneTacBoolean(_, _, Appl, vs, _, _, _)    => addV(a, oneV[Boolean](attr, vs, identity))
+    case AttrOneTacBigInt(_, _, Appl, vs, _, _, _)     => addV(a, oneV[BigInt](attr, vs, _.bigInteger))
+    case AttrOneTacBigDecimal(_, _, Appl, vs, _, _, _) => addV(a, oneV[BigDecimal](attr, vs, _.bigDecimal))
+    case AttrOneTacDate(_, _, Appl, vs, _, _, _)       => addV(a, oneV[Date](attr, vs, identity))
+    case AttrOneTacUUID(_, _, Appl, vs, _, _, _)       => addV(a, oneV[UUID](attr, vs, identity))
+    case AttrOneTacURI(_, _, Appl, vs, _, _, _)        => addV(a, oneV[URI](attr, vs, identity))
+    case AttrOneTacByte(_, _, Appl, vs, _, _, _)       => addV(a, oneV[Byte](attr, vs, _.toInt))
+    case AttrOneTacShort(_, _, Appl, vs, _, _, _)      => addV(a, oneV[Short](attr, vs, _.toInt))
+    case AttrOneTacChar(_, _, Appl, vs, _, _, _)       => addV(a, oneV[Char](attr, vs, _.toString))
+    case _                                             => throw MoleculeException(
+      s"Can only save one applied value for tacit attribute `${attr.name}`. Found expression: ${attr.op}"
+    )
   }
 
 
-  private def oneOptV[T](attrName: String, optVs: Option[Seq[T]], transform: T => Any): Option[Any] = {
+  private def oneOptV[T](attr: Attr, optVs: Option[Seq[T]], transform: T => Any): Option[Any] = {
     optVs.flatMap {
       case Seq(v) => Some(transform(v))
       case Nil    => None
       case vs     => throw MoleculeException(
-        s"Can only save one value for optional attribute `$attrName`. Found: " + vs
+        s"Can only save one value for optional attribute `${attr.name}`. Found: " + vs
       )
     }
   }
-  def resolveAttrOneOpt(attr: AttrOneOpt, a: Keyword): Unit = {
-    val an = a.toString
-    attr match {
-      case AttrOneOptString(_, _, Appl, optVs, _, _, _)     => addV(a, oneOptV[String](an, optVs, identity))
-      case AttrOneOptInt(_, _, Appl, optVs, _, _, _)        => addV(a, oneOptV[Int](an, optVs, identity))
-      case AttrOneOptLong(_, _, Appl, optVs, _, _, _)       => addV(a, oneOptV[Long](an, optVs, identity))
-      case AttrOneOptFloat(_, _, Appl, optVs, _, _, _)      => addV(a, oneOptV[Float](an, optVs, identity))
-      case AttrOneOptDouble(_, _, Appl, optVs, _, _, _)     => addV(a, oneOptV[Double](an, optVs, identity))
-      case AttrOneOptBoolean(_, _, Appl, optVs, _, _, _)    => addV(a, oneOptV[Boolean](an, optVs, identity))
-      case AttrOneOptBigInt(_, _, Appl, optVs, _, _, _)     => addV(a, oneOptV[BigInt](an, optVs, _.bigInteger))
-      case AttrOneOptBigDecimal(_, _, Appl, optVs, _, _, _) => addV(a, oneOptV[BigDecimal](an, optVs, _.bigDecimal))
-      case AttrOneOptDate(_, _, Appl, optVs, _, _, _)       => addV(a, oneOptV[Date](an, optVs, identity))
-      case AttrOneOptUUID(_, _, Appl, optVs, _, _, _)       => addV(a, oneOptV[UUID](an, optVs, identity))
-      case AttrOneOptURI(_, _, Appl, optVs, _, _, _)        => addV(a, oneOptV[URI](an, optVs, identity))
-      case AttrOneOptByte(_, _, Appl, optVs, _, _, _)       => addV(a, oneOptV[Byte](an, optVs, _.toInt))
-      case AttrOneOptShort(_, _, Appl, optVs, _, _, _)      => addV(a, oneOptV[Short](an, optVs, _.toInt))
-      case AttrOneOptChar(_, _, Appl, optVs, _, _, _)       => addV(a, oneOptV[Char](an, optVs, _.toString))
-      case _                                                => throw MoleculeException(
-        s"Can only save one applied value for optional attribute `$an`. Found expression: ${attr.op}"
-      )
-    }
+  private def resolveAttrOneOpt(attr: AttrOneOpt, a: Keyword): Unit = attr match {
+    case AttrOneOptString(_, _, Appl, optVs, _, _, _)     => addV(a, oneOptV[String](attr, optVs, identity))
+    case AttrOneOptInt(_, _, Appl, optVs, _, _, _)        => addV(a, oneOptV[Int](attr, optVs, identity))
+    case AttrOneOptLong(_, _, Appl, optVs, _, _, _)       => addV(a, oneOptV[Long](attr, optVs, identity))
+    case AttrOneOptFloat(_, _, Appl, optVs, _, _, _)      => addV(a, oneOptV[Float](attr, optVs, identity))
+    case AttrOneOptDouble(_, _, Appl, optVs, _, _, _)     => addV(a, oneOptV[Double](attr, optVs, identity))
+    case AttrOneOptBoolean(_, _, Appl, optVs, _, _, _)    => addV(a, oneOptV[Boolean](attr, optVs, identity))
+    case AttrOneOptBigInt(_, _, Appl, optVs, _, _, _)     => addV(a, oneOptV[BigInt](attr, optVs, _.bigInteger))
+    case AttrOneOptBigDecimal(_, _, Appl, optVs, _, _, _) => addV(a, oneOptV[BigDecimal](attr, optVs, _.bigDecimal))
+    case AttrOneOptDate(_, _, Appl, optVs, _, _, _)       => addV(a, oneOptV[Date](attr, optVs, identity))
+    case AttrOneOptUUID(_, _, Appl, optVs, _, _, _)       => addV(a, oneOptV[UUID](attr, optVs, identity))
+    case AttrOneOptURI(_, _, Appl, optVs, _, _, _)        => addV(a, oneOptV[URI](attr, optVs, identity))
+    case AttrOneOptByte(_, _, Appl, optVs, _, _, _)       => addV(a, oneOptV[Byte](attr, optVs, _.toInt))
+    case AttrOneOptShort(_, _, Appl, optVs, _, _, _)      => addV(a, oneOptV[Short](attr, optVs, _.toInt))
+    case AttrOneOptChar(_, _, Appl, optVs, _, _, _)       => addV(a, oneOptV[Char](attr, optVs, _.toString))
+    case _                                                => throw MoleculeException(
+      s"Can only save one applied value for optional attribute `${attr.name}`. Found expression: ${attr.op}"
+    )
   }
 
 
-  private def oneSet[T](attrName: String, sets: Seq[Set[T]], transform: T => Any): Option[Set[Any]] = {
+  private def oneSet[T](attr: Attr, sets: Seq[Set[T]], transform: T => Any): Option[Set[Any]] = {
     sets match {
       case Seq(set)     => Some(set.map(transform))
       case Nil          => None
       case multipleSets => throw MoleculeException(
-        s"Can only save one Set of values for Set attribute `$attrName`. Found: " + multipleSets
+        s"Can only save one Set of values for Set attribute `${attr.name}`. Found: " + multipleSets
       )
     }
   }
-  def resolveAttrSetMan(attr: AttrSetMan, a: Keyword): Unit = {
-    val an = a.toString
-    attr match {
-      case AttrSetManString(_, _, Appl, sets, _, _, _)     => addSet(a, oneSet[String](an, sets, identity))
-      case AttrSetManInt(_, _, Appl, sets, _, _, _)        => addSet(a, oneSet[Int](an, sets, identity))
-      case AttrSetManLong(_, _, Appl, sets, _, _, _)       => addSet(a, oneSet[Long](an, sets, identity))
-      case AttrSetManFloat(_, _, Appl, sets, _, _, _)      => addSet(a, oneSet[Float](an, sets, identity))
-      case AttrSetManDouble(_, _, Appl, sets, _, _, _)     => addSet(a, oneSet[Double](an, sets, identity))
-      case AttrSetManBoolean(_, _, Appl, sets, _, _, _)    => addSet(a, oneSet[Boolean](an, sets, identity))
-      case AttrSetManBigInt(_, _, Appl, sets, _, _, _)     => addSet(a, oneSet[BigInt](an, sets, _.bigInteger))
-      case AttrSetManBigDecimal(_, _, Appl, sets, _, _, _) => addSet(a, oneSet[BigDecimal](an, sets, _.bigDecimal))
-      case AttrSetManDate(_, _, Appl, sets, _, _, _)       => addSet(a, oneSet[Date](an, sets, identity))
-      case AttrSetManUUID(_, _, Appl, sets, _, _, _)       => addSet(a, oneSet[UUID](an, sets, identity))
-      case AttrSetManURI(_, _, Appl, sets, _, _, _)        => addSet(a, oneSet[URI](an, sets, identity))
-      case AttrSetManByte(_, _, Appl, sets, _, _, _)       => addSet(a, oneSet[Byte](an, sets, _.toInt))
-      case AttrSetManShort(_, _, Appl, sets, _, _, _)      => addSet(a, oneSet[Short](an, sets, _.toInt))
-      case AttrSetManChar(_, _, Appl, sets, _, _, _)       => addSet(a, oneSet[Char](an, sets, _.toString))
-      case _                                               => throw MoleculeException(
-        s"Can only save one applied Set of values for Set attribute `$an`. Found expression: ${attr.op}"
-      )
-    }
+  private def resolveAttrSetMan(attr: AttrSetMan, a: Keyword): Unit = attr match {
+    case AttrSetManString(_, _, Appl, sets, _, _, _)     => addSet(a, oneSet[String](attr, sets, identity))
+    case AttrSetManInt(_, _, Appl, sets, _, _, _)        => addSet(a, oneSet[Int](attr, sets, identity))
+    case AttrSetManLong(_, _, Appl, sets, _, _, _)       => addSet(a, oneSet[Long](attr, sets, identity))
+    case AttrSetManFloat(_, _, Appl, sets, _, _, _)      => addSet(a, oneSet[Float](attr, sets, identity))
+    case AttrSetManDouble(_, _, Appl, sets, _, _, _)     => addSet(a, oneSet[Double](attr, sets, identity))
+    case AttrSetManBoolean(_, _, Appl, sets, _, _, _)    => addSet(a, oneSet[Boolean](attr, sets, identity))
+    case AttrSetManBigInt(_, _, Appl, sets, _, _, _)     => addSet(a, oneSet[BigInt](attr, sets, _.bigInteger))
+    case AttrSetManBigDecimal(_, _, Appl, sets, _, _, _) => addSet(a, oneSet[BigDecimal](attr, sets, _.bigDecimal))
+    case AttrSetManDate(_, _, Appl, sets, _, _, _)       => addSet(a, oneSet[Date](attr, sets, identity))
+    case AttrSetManUUID(_, _, Appl, sets, _, _, _)       => addSet(a, oneSet[UUID](attr, sets, identity))
+    case AttrSetManURI(_, _, Appl, sets, _, _, _)        => addSet(a, oneSet[URI](attr, sets, identity))
+    case AttrSetManByte(_, _, Appl, sets, _, _, _)       => addSet(a, oneSet[Byte](attr, sets, _.toInt))
+    case AttrSetManShort(_, _, Appl, sets, _, _, _)      => addSet(a, oneSet[Short](attr, sets, _.toInt))
+    case AttrSetManChar(_, _, Appl, sets, _, _, _)       => addSet(a, oneSet[Char](attr, sets, _.toString))
+    case _                                               => throw MoleculeException(
+      s"Can only save one applied Set of values for Set attribute `${attr.name}`. Found expression: ${attr.op}"
+    )
   }
-  def resolveAttrSetTac(attr: AttrSetTac, a: Keyword): Unit = {
-    val an = a.toString
-    attr match {
-      case AttrSetTacString(_, _, Appl, sets, _, _, _)     => addSet(a, oneSet[String](an, sets, identity))
-      case AttrSetTacInt(_, _, Appl, sets, _, _, _)        => addSet(a, oneSet[Int](an, sets, identity))
-      case AttrSetTacLong(_, _, Appl, sets, _, _, _)       => addSet(a, oneSet[Long](an, sets, identity))
-      case AttrSetTacFloat(_, _, Appl, sets, _, _, _)      => addSet(a, oneSet[Float](an, sets, identity))
-      case AttrSetTacDouble(_, _, Appl, sets, _, _, _)     => addSet(a, oneSet[Double](an, sets, identity))
-      case AttrSetTacBoolean(_, _, Appl, sets, _, _, _)    => addSet(a, oneSet[Boolean](an, sets, identity))
-      case AttrSetTacBigInt(_, _, Appl, sets, _, _, _)     => addSet(a, oneSet[BigInt](an, sets, _.bigInteger))
-      case AttrSetTacBigDecimal(_, _, Appl, sets, _, _, _) => addSet(a, oneSet[BigDecimal](an, sets, _.bigDecimal))
-      case AttrSetTacDate(_, _, Appl, sets, _, _, _)       => addSet(a, oneSet[Date](an, sets, identity))
-      case AttrSetTacUUID(_, _, Appl, sets, _, _, _)       => addSet(a, oneSet[UUID](an, sets, identity))
-      case AttrSetTacURI(_, _, Appl, sets, _, _, _)        => addSet(a, oneSet[URI](an, sets, identity))
-      case AttrSetTacByte(_, _, Appl, sets, _, _, _)       => addSet(a, oneSet[Byte](an, sets, _.toInt))
-      case AttrSetTacShort(_, _, Appl, sets, _, _, _)      => addSet(a, oneSet[Short](an, sets, _.toInt))
-      case AttrSetTacChar(_, _, Appl, sets, _, _, _)       => addSet(a, oneSet[Char](an, sets, _.toString))
-      case _                                               => throw MoleculeException(
-        s"Can only save one applied Set of values for tacit Set attribute `$an`. Found expression: ${attr.op}"
-      )
-    }
+  private def resolveAttrSetTac(attr: AttrSetTac, a: Keyword): Unit = attr match {
+    case AttrSetTacString(_, _, Appl, sets, _, _, _)     => addSet(a, oneSet[String](attr, sets, identity))
+    case AttrSetTacInt(_, _, Appl, sets, _, _, _)        => addSet(a, oneSet[Int](attr, sets, identity))
+    case AttrSetTacLong(_, _, Appl, sets, _, _, _)       => addSet(a, oneSet[Long](attr, sets, identity))
+    case AttrSetTacFloat(_, _, Appl, sets, _, _, _)      => addSet(a, oneSet[Float](attr, sets, identity))
+    case AttrSetTacDouble(_, _, Appl, sets, _, _, _)     => addSet(a, oneSet[Double](attr, sets, identity))
+    case AttrSetTacBoolean(_, _, Appl, sets, _, _, _)    => addSet(a, oneSet[Boolean](attr, sets, identity))
+    case AttrSetTacBigInt(_, _, Appl, sets, _, _, _)     => addSet(a, oneSet[BigInt](attr, sets, _.bigInteger))
+    case AttrSetTacBigDecimal(_, _, Appl, sets, _, _, _) => addSet(a, oneSet[BigDecimal](attr, sets, _.bigDecimal))
+    case AttrSetTacDate(_, _, Appl, sets, _, _, _)       => addSet(a, oneSet[Date](attr, sets, identity))
+    case AttrSetTacUUID(_, _, Appl, sets, _, _, _)       => addSet(a, oneSet[UUID](attr, sets, identity))
+    case AttrSetTacURI(_, _, Appl, sets, _, _, _)        => addSet(a, oneSet[URI](attr, sets, identity))
+    case AttrSetTacByte(_, _, Appl, sets, _, _, _)       => addSet(a, oneSet[Byte](attr, sets, _.toInt))
+    case AttrSetTacShort(_, _, Appl, sets, _, _, _)      => addSet(a, oneSet[Short](attr, sets, _.toInt))
+    case AttrSetTacChar(_, _, Appl, sets, _, _, _)       => addSet(a, oneSet[Char](attr, sets, _.toString))
+    case _                                               => throw MoleculeException(
+      s"Can only save one applied Set of values for tacit Set attribute `${attr.name}`. Found expression: ${attr.op}"
+    )
   }
 
 
-  private def oneOptSet[T](attrName: String, optSets: Option[Seq[Set[T]]], transform: T => Any): Option[Set[Any]] = {
+  private def oneOptSet[T](attr: Attr, optSets: Option[Seq[Set[T]]], transform: T => Any): Option[Set[Any]] = {
     optSets.flatMap {
       case Seq(set) => Some(set.map(transform))
       case Nil      => None
       case vs       => throw MoleculeException(
-        s"Can only save one Set of values for optional Set attribute `$attrName`. Found: " + vs
+        s"Can only save one Set of values for optional Set attribute `${attr.name}`. Found: " + vs
       )
     }
   }
-  def resolveAttrSetOpt(attr: AttrSetOpt, a: Keyword): Unit = {
-    val an = a.toString
-    attr match {
-      case AttrSetOptString(_, _, Appl, optSets, _, _, _)     => addSet(a, oneOptSet[String](an, optSets, identity))
-      case AttrSetOptInt(_, _, Appl, optSets, _, _, _)        => addSet(a, oneOptSet[Int](an, optSets, identity))
-      case AttrSetOptLong(_, _, Appl, optSets, _, _, _)       => addSet(a, oneOptSet[Long](an, optSets, identity))
-      case AttrSetOptFloat(_, _, Appl, optSets, _, _, _)      => addSet(a, oneOptSet[Float](an, optSets, identity))
-      case AttrSetOptDouble(_, _, Appl, optSets, _, _, _)     => addSet(a, oneOptSet[Double](an, optSets, identity))
-      case AttrSetOptBoolean(_, _, Appl, optSets, _, _, _)    => addSet(a, oneOptSet[Boolean](an, optSets, identity))
-      case AttrSetOptBigInt(_, _, Appl, optSets, _, _, _)     => addSet(a, oneOptSet[BigInt](an, optSets, _.bigInteger))
-      case AttrSetOptBigDecimal(_, _, Appl, optSets, _, _, _) => addSet(a, oneOptSet[BigDecimal](an, optSets, _.bigDecimal))
-      case AttrSetOptDate(_, _, Appl, optSets, _, _, _)       => addSet(a, oneOptSet[Date](an, optSets, identity))
-      case AttrSetOptUUID(_, _, Appl, optSets, _, _, _)       => addSet(a, oneOptSet[UUID](an, optSets, identity))
-      case AttrSetOptURI(_, _, Appl, optSets, _, _, _)        => addSet(a, oneOptSet[URI](an, optSets, identity))
-      case AttrSetOptByte(_, _, Appl, optSets, _, _, _)       => addSet(a, oneOptSet[Byte](an, optSets, _.toInt))
-      case AttrSetOptShort(_, _, Appl, optSets, _, _, _)      => addSet(a, oneOptSet[Short](an, optSets, _.toInt))
-      case AttrSetOptChar(_, _, Appl, optSets, _, _, _)       => addSet(a, oneOptSet[Char](an, optSets, _.toString))
-      case _                                                  => throw MoleculeException(
-        s"Can only save one applied Set of values for optional Set attribute `$an`. Found expression: ${attr.op}"
-      )
-    }
+  private def resolveAttrSetOpt(attr: AttrSetOpt, a: Keyword): Unit = attr match {
+    case AttrSetOptString(_, _, Appl, optSets, _, _, _)     => addSet(a, oneOptSet[String](attr, optSets, identity))
+    case AttrSetOptInt(_, _, Appl, optSets, _, _, _)        => addSet(a, oneOptSet[Int](attr, optSets, identity))
+    case AttrSetOptLong(_, _, Appl, optSets, _, _, _)       => addSet(a, oneOptSet[Long](attr, optSets, identity))
+    case AttrSetOptFloat(_, _, Appl, optSets, _, _, _)      => addSet(a, oneOptSet[Float](attr, optSets, identity))
+    case AttrSetOptDouble(_, _, Appl, optSets, _, _, _)     => addSet(a, oneOptSet[Double](attr, optSets, identity))
+    case AttrSetOptBoolean(_, _, Appl, optSets, _, _, _)    => addSet(a, oneOptSet[Boolean](attr, optSets, identity))
+    case AttrSetOptBigInt(_, _, Appl, optSets, _, _, _)     => addSet(a, oneOptSet[BigInt](attr, optSets, _.bigInteger))
+    case AttrSetOptBigDecimal(_, _, Appl, optSets, _, _, _) => addSet(a, oneOptSet[BigDecimal](attr, optSets, _.bigDecimal))
+    case AttrSetOptDate(_, _, Appl, optSets, _, _, _)       => addSet(a, oneOptSet[Date](attr, optSets, identity))
+    case AttrSetOptUUID(_, _, Appl, optSets, _, _, _)       => addSet(a, oneOptSet[UUID](attr, optSets, identity))
+    case AttrSetOptURI(_, _, Appl, optSets, _, _, _)        => addSet(a, oneOptSet[URI](attr, optSets, identity))
+    case AttrSetOptByte(_, _, Appl, optSets, _, _, _)       => addSet(a, oneOptSet[Byte](attr, optSets, _.toInt))
+    case AttrSetOptShort(_, _, Appl, optSets, _, _, _)      => addSet(a, oneOptSet[Short](attr, optSets, _.toInt))
+    case AttrSetOptChar(_, _, Appl, optSets, _, _, _)       => addSet(a, oneOptSet[Char](attr, optSets, _.toString))
+    case _                                                  => throw MoleculeException(
+      s"Can only save one applied Set of values for optional Set attribute `${attr.name}`. " +
+        s"Found expression: ${attr.op}"
+    )
   }
 
-  protected def addV(a: Keyword, optValue: Option[Any]): Unit = {
+  private def addV(a: Keyword, optValue: Option[Any]): Unit = {
     // No stmts if None
     optValue.foreach { value =>
       stmt = stmtList
@@ -276,7 +258,7 @@ class SaveStmts(
     }
   }
 
-  protected def addSet[T](a: Keyword, optSet: Option[Set[T]]): Unit = {
+  private def addSet[T](a: Keyword, optSet: Option[Set[T]]): Unit = {
     optSet.foreach { set =>
       set.foreach { v =>
         stmt = stmtList
@@ -289,7 +271,7 @@ class SaveStmts(
     }
   }
 
-  protected def addNested(a: Keyword): String => Unit = {
+  private def addNested(a: Keyword): String => Unit = {
     (nestedBaseId: String) => {
       e = nestedBaseId
       stmt = stmtList
@@ -302,11 +284,11 @@ class SaveStmts(
     }
   }
 
-  protected def backRef(backRefNs: String): Unit = {
+  private def backRef(backRefNs: String): Unit = {
     e = backRefs(backRefNs)
   }
 
-  protected def ref(refAttr: Keyword): Unit = {
+  private def ref(refAttr: Keyword): Unit = {
     stmt = stmtList
     stmt.add(add)
     stmt.add(e)

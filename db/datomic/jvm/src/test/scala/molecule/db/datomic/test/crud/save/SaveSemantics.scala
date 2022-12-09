@@ -14,12 +14,12 @@ object SaveSemantics extends DatomicTestSuite {
     "Can't mix save/insert" - refs { implicit conn =>
       intercept[MoleculeException](
         (Ns.i + R2.i).save.transact
-      ).message ==> "Can't save attributes without applied value. Found:\n" +
+      ).message ==> "Can't save attributes without an applied value. Found:\n" +
         "AttrOneManInt(Ns,i,V,List(),None,None,None)"
 
       intercept[MoleculeException](
         (Ns.i(1) + R2.i).save.transact
-      ).message ==> "Can't save attributes without applied value. Found:\n" +
+      ).message ==> "Can't save attributes without an applied value. Found:\n" +
         "AttrOneManInt(R2,i,V,List(),None,None,None)"
     }
 

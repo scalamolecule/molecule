@@ -18,6 +18,7 @@ trait ModelBase extends Validations {
     val op  : Op
     val sort: Option[String]
     def unapply(a: Attr): (String, String, Op) = (a.ns, a.attr, a.op)
+    def name = ns + "." + attr
   }
 
   sealed trait Mode

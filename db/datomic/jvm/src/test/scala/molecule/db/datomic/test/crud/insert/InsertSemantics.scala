@@ -14,12 +14,12 @@ object InsertSemantics extends DatomicTestSuite {
     "Can't mix save/insert" - refs { implicit conn =>
       intercept[MoleculeException](
         (Ns.i(1) + R2.i(2)).insert(1, 2).transact
-      ).message ==> "Can't insert attributes with applied value. Found:\n" +
+      ).message ==> "Can't insert attributes with an applied value. Found:\n" +
         "AttrOneManInt(Ns,i,Appl,List(1),None,None,None)"
 
       intercept[MoleculeException](
         (Ns.i + R2.i(2)).insert(1, 2).transact
-      ).message ==> "Can't insert attributes with applied value. Found:\n" +
+      ).message ==> "Can't insert attributes with an applied value. Found:\n" +
         "AttrOneManInt(R2,i,Appl,List(2),None,None,None)"
     }
 

@@ -24,8 +24,8 @@ class InsertStmts(elements: Seq[Element], data: Seq[Product])
       tpl2stmts(tpl)
     }
     if (txMetaElements.nonEmpty) {
-      e = tx
-      val txMetaStmts = new SaveStmts(txMetaElements, true).getRawStmts(tx)
+      e = datomicTx
+      val txMetaStmts = new SaveStmts(txMetaElements, true).getRawStmts(datomicTx)
       stmts.addAll(txMetaStmts)
     }
     Collections.unmodifiableList(stmts)
@@ -260,7 +260,7 @@ class InsertStmts(elements: Seq[Element], data: Seq[Product])
   }
   private def addTxV(ns: String, a: Keyword, n: Int, value: Any => Any): Product => Unit = {
     (tpl: Product) => {
-      e = tx
+      e = datomicTx
       backRefs = backRefs + (ns -> e)
       stmt = stmtList
       stmt.add(add)
@@ -317,58 +317,4 @@ class InsertStmts(elements: Seq[Element], data: Seq[Product])
   private def addBackRef(backRefNs: String): Product => Unit = {
     (_: Product) => e = backRefs(backRefNs)
   }
-
-
-  //  // Tx meta data is already extracted in the query preparation process.
-  //
-  //  private def vs[T](a: Keyword, array: Array[T]): Unit = {
-  //    if (array.length != 1) {
-  //      throw MoleculeException(
-  //        "Only a single value can be applied to a tx meta attribute when inserting."
-  //      )
-  //    }
-  //    stmt = stmtList
-  //    stmt.add(add)
-  //    stmt.add(e)
-  //    stmt.add(a)
-  //    stmt.add(array.head.asInstanceOf[AnyRef])
-  //    stmts.add(stmt)
-  //  }
-  //
-  //  private def cvs[T](a: Keyword, vs: Seq[T]): Unit = {
-  //    vs.foreach { v =>
-  //      stmt = stmtList
-  //      stmt.add(add)
-  //      stmt.add(e)
-  //      stmt.add(a)
-  //      stmt.add(v.asInstanceOf[AnyRef])
-  //      stmts.add(stmt)
-  //    }
-  //  }
-  //
-  //  private def ccs[T](a: Keyword, sets: Seq[Set[T]]): Unit = {
-  //    if (sets.length != 1) {
-  //      throw MoleculeException(
-  //        "Only a single set of values can be applied to a tx meta attribute when inserting."
-  //      )
-  //    }
-  //    sets.head.foreach { v =>
-  //      stmt = stmtList
-  //      stmt.add(add)
-  //      stmt.add(e)
-  //      stmt.add(a)
-  //      stmt.add(v.asInstanceOf[AnyRef])
-  //      stmts.add(stmt)
-  //    }
-  //  }
-
-  //  private def ref(refAttr: Keyword): Unit = {
-  //    stmt = stmtList
-  //    stmt.add(add)
-  //    stmt.add(e)
-  //    stmt.add(refAttr)
-  //    e = newId
-  //    stmt.add(e.asInstanceOf[AnyRef])
-  //    stmts.add(stmt)
-  //  }
 }

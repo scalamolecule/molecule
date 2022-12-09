@@ -16,6 +16,7 @@ class DatomicInsertOpsJS(edn: String) extends InsertOps {
   override def transact(implicit conn: Connection): TxReport = {
 //    conn.asInstanceOf[Connection].transact(stmts)
     new TxReport{
+      def tx = 42L
       def eids: List[Long] = List(123)
     }
   }

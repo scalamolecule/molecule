@@ -108,6 +108,9 @@ trait ResolveExprOne[Tpl] { self: SortOne_[Tpl] with SortOneOpt_[Tpl] with Base[
         addCast(res.j2s)
         sorter.foreach(sorts += _)
       case ":Generic/tx" =>
+        find += txVar
+        addCast(res.j2s)
+        sorter.foreach(sorts += _)
       case a             => man(e, a, op, args, res, sorter)
     }
   }

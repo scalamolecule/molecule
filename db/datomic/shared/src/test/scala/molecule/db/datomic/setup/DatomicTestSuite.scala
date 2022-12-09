@@ -59,6 +59,7 @@ trait DatomicTestSuite extends TestSuite with CoreData
   //  def empty[T](test: Future[Conn] => T): T = emptyImpl(test)
   def types[T](test: Connection => T): T = typesImpl(test)
   def refs[T](test: Connection => T): T = refsImpl(test)
+  def unique[T](test: Connection => T): T = uniqueImpl(test)
   //  def corePeerOnly[T](test: Future[Conn] => T): T = corePeerOnlyImpl(test)
   //  def bidirectional[T](test: Future[Conn] => T): T = bidirectionalImpl(test)
   //  def partition[T](test: Future[Conn] => T): T = partitionImpl(test)

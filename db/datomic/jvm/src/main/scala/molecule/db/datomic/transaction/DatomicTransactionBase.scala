@@ -36,9 +36,10 @@ abstract class DatomicTransactionBase(elements: Seq[Element]) {
   }
 
   protected def kw(ns: String, attr: String) = Keyword.intern(ns, attr)
-  protected lazy val add     = kw("db", "add")
-  protected lazy val retract = kw("db", "retract")
-  protected lazy val tx      = "datomic.tx"
+  protected lazy val add       = kw("db", "add")
+  protected lazy val retract   = kw("db", "retract")
+  protected lazy val dbId      = kw("db", "id")
+  protected lazy val datomicTx = "datomic.tx"
 
   protected lazy val bigInt2java  = (v: Any) => v.asInstanceOf[BigInt].bigInteger
   protected lazy val bigDec2java  = (v: Any) => v.asInstanceOf[BigDecimal].bigDecimal
@@ -53,13 +54,10 @@ abstract class DatomicTransactionBase(elements: Seq[Element]) {
     case a: Attr       => a.ns
     case b: Ref        => b.ns
     case Composite(es) => getNs(es)
-    case other         =>
-      throw MoleculeException("StmtsBuilder: Unexpected head element: " + other)
+    case other         => throw MoleculeException("Unexpected head element: " + other)
   }
 
-  private def dup(element: String) = throw MoleculeException(
-    "Can't transact duplicate element: " + element
-  )
+  private def dup(element: String) = throw MoleculeException("Can't transact duplicate element: " + element)
 
   @tailrec
   final protected def checkConflictingAttributes(
@@ -120,7 +118,7 @@ abstract class DatomicTransactionBase(elements: Seq[Element]) {
           checkConflictingAttributes(txElements, prev1, level + 1, 0, Nil)
 
         case other =>
-          throw MoleculeException("StmtsBuilder: Unexpected  element: " + other)
+          throw MoleculeException("Unexpected  element: " + other)
       }
       case Nil          => ()
     }

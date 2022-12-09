@@ -35,11 +35,23 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
   final protected def getQueries(optimized: Boolean): (String, String) = {
     resetMutableAccumulators()
 
-    // Add 4th tx var to first attribute if tx meta data exists
-    elements.last match {
-      case _: TxMetaData => addTxVar = true
-      case _             => ()
+    // Add 4th tx var to first attribute if tx value is needed
+    @tailrec
+    def checkTx(elements: Seq[Element]): Unit = {
+      elements match {
+        case element :: tail =>
+          element match {
+            case _: TxMetaData                                  => addTxVar = true
+            case AttrOneManLong("Generic", "tx", _, _, _, _, _) => addTxVar = true
+            case AttrOneTacLong("Generic", "tx", _, _, _, _, _) => addTxVar = true
+            case Composite(elements)                            => checkTx(elements)
+            case Nested(_, elements)                            => checkTx(elements)
+            case _                                              => checkTx(tail)
+          }
+        case Nil             => ()
+      }
     }
+    checkTx(elements)
 
     // Remember first entity id variable for subsequent composite groups
     firstEid = vv

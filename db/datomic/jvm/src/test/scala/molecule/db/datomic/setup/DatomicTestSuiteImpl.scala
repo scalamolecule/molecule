@@ -48,6 +48,7 @@ trait DatomicTestSuiteImpl extends DatomicApiLoader { self: DatomicTestSuite =>
   //  def emptyImpl[T](test: Connection => T): T = inMem(test, EmptySchema, "")
   def typesImpl[T](test: Connection => T): T = inMem(test, TypesSchema, "m_types")
   def refsImpl[T](test: Connection => T): T = inMem(test, RefsSchema, "m_refs")
+  def uniqueImpl[T](test: Connection => T): T = inMem(test, UniqueSchema, "m_unique")
 
   //  def corePeerOnlyImpl[T](test: Connection => T): T = if (system == SystemPeer) coreImpl(test) else ().asInstanceOf[T]
   //  def bidirectionalImpl[T](test: Connection => T): T = inMem(test, BidirectionalSchema, "m_bidirectional")
