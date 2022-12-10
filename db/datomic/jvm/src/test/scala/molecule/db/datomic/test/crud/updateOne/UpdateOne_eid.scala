@@ -3,6 +3,7 @@ package molecule.db.datomic.test.crud.updateOne
 
 import molecule.base.util.exceptions.MoleculeException
 import molecule.coreTests.dataModels.core.dsl.Types._
+import molecule.coreTests.dataModels.core.dsl.Unique.Other
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
@@ -84,25 +85,36 @@ object UpdateOne_eid extends DatomicTestSuite {
       (Ns(eid).int(3).string("c") + Ref.i(4).s("d")).update.transact
       (Ns.int.string + Ref.i.s).query.get ==> List(((3, "c"), (4, "d")))
 
+      // Updating sub group with same entity id
       Ref(eid).i(5).update.transact
       (Ns.int.string + Ref.i.s).query.get ==> List(((3, "c"), (5, "d")))
     }
 
 
     "Update tx meta data" - types { implicit conn =>
-      val eid = Ns.int.Tx(Ref.s_("tx")).insert(1).transact.eids.head
+      val eid = Ns.int.Tx(Other.s_("tx")).insert(1).transact.eids.head
       Ns.int.Tx(Ref.s).query.get ==> List((1, "tx"))
 
-      val tx = Ns(eid).int(2).Tx(Ref.s("tx2")).update.transact.tx
+      val tx = Ns(eid).int(2).Tx(Other.s("tx2")).update.transact.tx
       Ns.int.Tx(Ref.s).query.get ==> List((2, "tx2"))
 
       intercept[MoleculeException](
-        Ns(eid).Tx(Ref.s("tx3")).update.transact
+        Ns(eid).Tx(Other.s("tx3")).update.transact
       ).message ==> "Can't update tx meta data only."
 
       // We can though update the tx entity itself
-      Ref(tx).s("tx3").update.transact.tx
-      Ns.int.Tx(Ref.s).query.get ==> List((2, "tx3"))
+      Ref(tx).s("tx3").update.transact
+      Ns.int.Tx(Other.s).query.get ==> List((2, "tx3"))
+    }
+
+
+    "Composite + tx meta data" - types { implicit conn =>
+      val eid = (Ns.int.string + Ref.i.s).Tx(Other.i_(42)).insert((1, "a"), (2, "b")).transact.eids.head
+      (Ns.int.string + Ref.i.s).Tx(Other.i).query.get ==> List(((1, "a"), (2, "b"), 42))
+
+      // Composite sub groups share the same entity id
+      (Ns(eid).int(3).string("c") + Ref.i(4).s("d")).Tx(Other.i(43)).update.transact
+      (Ns.int.string + Ref.i.s).Tx(Other.i).query.get ==> List(((3, "c"), (4, "d"), 43))
     }
 
 
@@ -112,11 +124,11 @@ object UpdateOne_eid extends DatomicTestSuite {
         val eid = Ns.int.insert(1).transact.eids.head
         Ns.int.query.get ==> List(1)
 
-        // Works the same as Ns(eid)
+        // Works the same way as Ns(eid)
         Ns.e_(eid).int(2).update.transact
         Ns.int.query.get ==> List(2)
 
-        // Using e_ gives flexibility to order attributes freely
+        // e_ doesn't have to be first
         Ns.int(3).e_(eid).update.transact
         Ns.int.query.get ==> List(3)
       }

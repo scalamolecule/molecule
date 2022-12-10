@@ -12,9 +12,8 @@ object UpdateOne_free extends DatomicTestSuite {
   lazy val tests = Tests {
 
 
-
-        "Matching" - types { implicit conn =>
-          Ns.int_.>(2).string("new value").update.multiple.transact ==> List(2)
-        }
+    "Matching" - types { implicit conn =>
+//      Ns.int_.>(2).string("new value").update.multiple.transact ==> List(2)
+    }
   }
 }

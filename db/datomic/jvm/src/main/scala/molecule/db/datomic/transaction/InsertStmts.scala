@@ -25,9 +25,11 @@ class InsertStmts(elements: Seq[Element], data: Seq[Product])
     }
     if (txMetaElements.nonEmpty) {
       e = datomicTx
-      val txMetaStmts = new SaveStmts(txMetaElements, true).getRawStmts(datomicTx)
+      val txMetaStmts = new SaveStmts(txMetaElements, true, false).getRawStmts(datomicTx)
       stmts.addAll(txMetaStmts)
     }
+
+
     Collections.unmodifiableList(stmts)
   }
 

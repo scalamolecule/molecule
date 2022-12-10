@@ -29,21 +29,21 @@ object InsertSemantics extends DatomicTestSuite {
       "Same ns" - refs { implicit conn =>
         intercept[MoleculeException](
           Ns.i.i.insert(1, 2).transact
-        ).message ==> "Can't transact duplicate element: Ns.i"
+        ).message ==> "Can't transact duplicate attribute `Ns.i`."
       }
 
       "After backref" - refs { implicit conn =>
         intercept[MoleculeException](
           Ns.i.R1.i._Ns.i.insert(1, 2, 3).transact
-        ).message ==> "Can't transact duplicate element: Ns.i"
+        ).message ==> "Can't transact duplicate attribute `Ns.i`."
 
         intercept[MoleculeException](
           Ns.i.R1.i.R2.i._R1.i.insert(1, 2, 3, 4).transact
-        ).message ==> "Can't transact duplicate element: R1.i"
+        ).message ==> "Can't transact duplicate attribute `R1.i`."
 
         intercept[MoleculeException](
           Ns.i.R1.i.R2.i._R1._Ns.i.insert(1, 2, 3, 4).transact
-        ).message ==> "Can't transact duplicate element: Ns.i"
+        ).message ==> "Can't transact duplicate attribute `Ns.i`."
       }
     }
 
@@ -56,26 +56,26 @@ object InsertSemantics extends DatomicTestSuite {
         // Same ns
         intercept[MoleculeException](
           (R2.i + Ns.i.i).insert(0, (1, 2)).transact
-        ).message ==> "Can't transact duplicate element: Ns.i"
+        ).message ==> "Can't transact duplicate attribute `Ns.i`."
 
         // After backref
         intercept[MoleculeException](
           (R2.i + Ns.i.R1.i._Ns.i).insert(0, (1, 2, 3)).transact
-        ).message ==> "Can't transact duplicate element: Ns.i"
+        ).message ==> "Can't transact duplicate attribute `Ns.i`."
 
         intercept[MoleculeException](
           (R2.i + Ns.i.R1.i.R2.i._R1.i).insert(0, (1, 2, 3, 4)).transact
-        ).message ==> "Can't transact duplicate element: R1.i"
+        ).message ==> "Can't transact duplicate attribute `R1.i`."
 
         intercept[MoleculeException](
           (R2.i + Ns.i.R1.i.R2.i._R1._Ns.i).insert(0, (1, 2, 3, 4)).transact
-        ).message ==> "Can't transact duplicate element: Ns.i"
+        ).message ==> "Can't transact duplicate attribute `Ns.i`."
       }
 
       "Across sub tuples, top level" - refs { implicit conn =>
         intercept[MoleculeException](
           (Ns.i + Ns.i).insert(1, 2).transact
-        ).message ==> "Can't transact duplicate element: Ns.i"
+        ).message ==> "Can't transact duplicate attribute `Ns.i`."
       }
 
       "Across sub tuples, ref" - refs { implicit conn =>
@@ -85,17 +85,17 @@ object InsertSemantics extends DatomicTestSuite {
         // Can't reference same ns twice
         intercept[MoleculeException](
           (Ns.i.R1.i + Ns.s.R1.s).insert((1, 2), ("a", "b")).transact
-        ).message ==> "Can't transact duplicate element: Ns.r1"
+        ).message ==> "Can't transact duplicate attribute `Ns.r1`."
       }
 
       "Across sub tuples, after backref" - refs { implicit conn =>
         intercept[MoleculeException](
           (Ns.s + Ns.i.R1.i._Ns.s).insert("a", (1, 2, "b")).transact
-        ).message ==> "Can't transact duplicate element: Ns.s"
+        ).message ==> "Can't transact duplicate attribute `Ns.s`."
 
         intercept[MoleculeException](
           (Ns.s + Ns.i.R1.i.R2.i._R1._Ns.s).insert("a", (1, 2, 3, "b")).transact
-        ).message ==> "Can't transact duplicate element: Ns.s"
+        ).message ==> "Can't transact duplicate attribute `Ns.s`."
       }
     }
 
@@ -105,21 +105,21 @@ object InsertSemantics extends DatomicTestSuite {
       "Same ns" - refs { implicit conn =>
         intercept[MoleculeException](
           Ns.i.Rs1.*(R1.i.i).insert(1, List((2, 3))).transact
-        ).message ==> "Can't transact duplicate element: R1.i"
+        ).message ==> "Can't transact duplicate attribute `R1.i`."
 
         intercept[MoleculeException](
           Ns.i.Rs1.*?(R1.i.i).insert(1, List((2, 3))).transact
-        ).message ==> "Can't transact duplicate element: R1.i"
+        ).message ==> "Can't transact duplicate attribute `R1.i`."
       }
 
       "Backref in nested" - refs { implicit conn =>
         intercept[MoleculeException](
           Ns.i.Rs1.*(R1.i.R2.i._R1.i).insert(1, List((2, 3, 4))).transact
-        ).message ==> "Can't transact duplicate element: R1.i"
+        ).message ==> "Can't transact duplicate attribute `R1.i`."
 
         intercept[MoleculeException](
           Ns.i.Rs1.*?(R1.i.R2.i._R1.i).insert(1, List((2, 3, 4))).transact
-        ).message ==> "Can't transact duplicate element: R1.i"
+        ).message ==> "Can't transact duplicate attribute `R1.i`."
       }
     }
 

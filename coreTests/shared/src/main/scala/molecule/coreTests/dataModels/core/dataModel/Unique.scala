@@ -25,6 +25,18 @@ object Unique extends DataModel(3) {
     val char       = oneChar.unique
 
     // Cardinality many (Set)
-    val ints        = setInt.unique
+    val ints = setInt.unique
+
+    val ref = one[Ref]
+  }
+
+  trait Ref {
+    val i   = oneInt.unique
+    val s   = oneString
+  }
+
+  trait Other {
+    val i = oneInt.unique
+    val s = oneString
   }
 }

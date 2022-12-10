@@ -33,7 +33,7 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
   final lazy protected val inputs   : Seq[AnyRef] = renderRules(rules) ++ args
 
   final protected def getQueries(optimized: Boolean): (String, String) = {
-    resetMutableAccumulators()
+//    resetMutableAccumulators()
 
     // Add 4th tx var to first attribute if tx value is needed
     @tailrec
@@ -44,8 +44,8 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
             case _: TxMetaData                                  => addTxVar = true
             case AttrOneManLong("Generic", "tx", _, _, _, _, _) => addTxVar = true
             case AttrOneTacLong("Generic", "tx", _, _, _, _, _) => addTxVar = true
-            case Composite(elements)                            => checkTx(elements)
-            case Nested(_, elements)                            => checkTx(elements)
+            case Composite(elements)                            => checkTx(elements ++ tail)
+            case Nested(_, elements)                            => checkTx(tail ++ elements)
             case _                                              => checkTx(tail)
           }
         case Nil             => ()

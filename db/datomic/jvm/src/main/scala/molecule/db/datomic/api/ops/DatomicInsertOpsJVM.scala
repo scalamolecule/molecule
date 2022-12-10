@@ -16,8 +16,8 @@ class DatomicInsertOpsJVM(insertStmts: InsertStmts) extends InsertOps {
 
   override def transact(implicit conn: Connection): TxReport = {
     val stmts = insertStmts.getStmts
-    //    println("---")
-    //    stmts.forEach(stmt => println(stmt))
+    println("---")
+    stmts.forEach(stmt => println(stmt))
     conn.asInstanceOf[Conn_Peer].transact(stmts)
   }
 }

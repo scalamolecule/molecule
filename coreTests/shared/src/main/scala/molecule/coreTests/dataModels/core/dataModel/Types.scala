@@ -47,4 +47,9 @@ object Types extends DataModel(3) {
     val s   = oneString
     val nss = many[Ns]
   }
+
+  trait Other {
+    val i = oneInt
+    val s = oneString
+  }
 }

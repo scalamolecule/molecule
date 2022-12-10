@@ -57,7 +57,7 @@ abstract class DatomicTransactionBase(elements: Seq[Element]) {
     case other         => throw MoleculeException("Unexpected head element: " + other)
   }
 
-  private def dup(element: String) = throw MoleculeException("Can't transact duplicate element: " + element)
+  private def dup(element: String) = throw MoleculeException(s"Can't transact duplicate attribute `$element`.")
 
   @tailrec
   final protected def checkConflictingAttributes(
@@ -65,20 +65,31 @@ abstract class DatomicTransactionBase(elements: Seq[Element]) {
     prev: Array[Array[Array[String]]] = Array(Array(Array.empty[String])),
     level: Int = 0,
     group: Int = 0,
-    refPath: Seq[String] = Seq("")
+    refPath: Seq[String] = Seq(""),
+    distinguishMode: Boolean = false
   ): Unit = {
     elements match {
       case head :: tail => head match {
         case a: Attr =>
           val attr         = a.ns + "." + a.attr
           // Distinguish multiple ref paths to the same namespace
-          val attrPrefixed = refPath.mkString("-") + "-" + attr
-          //          println(refPath)
-          //          println(attrPrefixed)
+          val attrPrefixed = if (distinguishMode) {
+            val mode = a match {
+              case _: AttrOneMan => "man"
+              case _: AttrOneOpt => "opt"
+              case _: AttrOneTac => "tac"
+              case _: AttrSetMan => "man"
+              case _: AttrSetOpt => "opt"
+              case _: AttrSetTac => "tac"
+            }
+            refPath.mkString("-") + "-" + attr + "-" + mode
+          } else {
+            refPath.mkString("-") + "-" + attr
+          }
           if (prev(level)(group).contains(attrPrefixed))
             dup(attr)
           prev(level)(group) = prev(level)(group) :+ attrPrefixed
-          checkConflictingAttributes(tail, prev, level, group, refPath)
+          checkConflictingAttributes(tail, prev, level, group, refPath, distinguishMode)
 
         case r: Ref =>
           val ref = r.ns + "." + r.refAttr
@@ -89,33 +100,33 @@ abstract class DatomicTransactionBase(elements: Seq[Element]) {
             dup(ref)
           }
           prev(level) = prev(level) :+ Array(ref)
-          checkConflictingAttributes(tail, prev, level, group + 1, refPath :+ ref)
+          checkConflictingAttributes(tail, prev, level, group + 1, refPath :+ ref, distinguishMode)
 
         case _: BackRef =>
           if (group == 0)
             throw MoleculeException("Can't use backref from here.")
-          checkConflictingAttributes(tail, prev, level, group - 1, refPath.init)
+          checkConflictingAttributes(tail, prev, level, group - 1, refPath.init, distinguishMode)
 
         case Composite(es) =>
-          checkConflictingAttributes(es ++ tail, prev, level, group, Seq(""))
+          checkConflictingAttributes(es ++ tail, prev, level, group, Seq(""), distinguishMode)
 
         case Nested(r, es) =>
           val ref = r.ns + "." + r.refAttr
           if (prev(level)(group).contains(ref))
             dup(ref)
           val prev1 = prev :+ Array(Array(ref))
-          checkConflictingAttributes(es ++ tail, prev1, level + 1, 0, refPath)
+          checkConflictingAttributes(es ++ tail, prev1, level + 1, 0, refPath, distinguishMode)
 
         case NestedOpt(r, es) =>
           val ref = r.ns + "." + r.refAttr
           if (prev(level)(group).contains(ref))
             dup(ref)
           val prev1 = prev :+ Array(Array(ref))
-          checkConflictingAttributes(es ++ tail, prev1, level + 1, 0, refPath)
+          checkConflictingAttributes(es ++ tail, prev1, level + 1, 0, refPath, distinguishMode)
 
         case TxMetaData(txElements) =>
           val prev1 = prev :+ Array(Array.empty[String])
-          checkConflictingAttributes(txElements, prev1, level + 1, 0, Nil)
+          checkConflictingAttributes(txElements, prev1, level + 1, 0, Nil, distinguishMode)
 
         case other =>
           throw MoleculeException("Unexpected  element: " + other)

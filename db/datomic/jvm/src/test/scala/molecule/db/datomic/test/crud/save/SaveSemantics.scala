@@ -29,21 +29,21 @@ object SaveSemantics extends DatomicTestSuite {
       "Same ns" - refs { implicit conn =>
         intercept[MoleculeException](
           Ns.i(1).i(2).save.transact
-        ).message ==> "Can't transact duplicate element: Ns.i"
+        ).message ==> "Can't transact duplicate attribute `Ns.i`."
       }
 
       "After backref" - refs { implicit conn =>
         intercept[MoleculeException](
           Ns.i(1).R1.i(2)._Ns.i(3).save.transact
-        ).message ==> "Can't transact duplicate element: Ns.i"
+        ).message ==> "Can't transact duplicate attribute `Ns.i`."
 
         intercept[MoleculeException](
           Ns.i(1).R1.i(2).R2.i(3)._R1.i(4).save.transact
-        ).message ==> "Can't transact duplicate element: R1.i"
+        ).message ==> "Can't transact duplicate attribute `R1.i`."
 
         intercept[MoleculeException](
           Ns.i(1).R1.i(2).R2.i(3)._R1._Ns.i(4).save.transact
-        ).message ==> "Can't transact duplicate element: Ns.i"
+        ).message ==> "Can't transact duplicate attribute `Ns.i`."
       }
     }
 
@@ -56,26 +56,26 @@ object SaveSemantics extends DatomicTestSuite {
         // Same ns
         intercept[MoleculeException](
           (R2.i(1) + Ns.i(2).i(3)).save.transact
-        ).message ==> "Can't transact duplicate element: Ns.i"
+        ).message ==> "Can't transact duplicate attribute `Ns.i`."
 
         // After backref
         intercept[MoleculeException](
           (R2.i(1) + Ns.i(2).R1.i(3)._Ns.i(4)).save.transact
-        ).message ==> "Can't transact duplicate element: Ns.i"
+        ).message ==> "Can't transact duplicate attribute `Ns.i`."
 
         intercept[MoleculeException](
           (R2.i(1) + Ns.i(2).R1.i(3).R2.i(4)._R1.i(5)).save.transact
-        ).message ==> "Can't transact duplicate element: R1.i"
+        ).message ==> "Can't transact duplicate attribute `R1.i`."
 
         intercept[MoleculeException](
           (R2.i(1) + Ns.i(2).R1.i(3).R2.i(4)._R1._Ns.i(5)).save.transact
-        ).message ==> "Can't transact duplicate element: Ns.i"
+        ).message ==> "Can't transact duplicate attribute `Ns.i`."
       }
 
       "Across sub tuples, top level" - refs { implicit conn =>
         intercept[MoleculeException](
           (Ns.i(1) + Ns.i(2)).save.transact
-        ).message ==> "Can't transact duplicate element: Ns.i"
+        ).message ==> "Can't transact duplicate attribute `Ns.i`."
       }
 
       "Across sub tuples, ref" - refs { implicit conn =>
@@ -85,17 +85,17 @@ object SaveSemantics extends DatomicTestSuite {
         // Can't reference same ns twice
         intercept[MoleculeException](
           (Ns.i(1).R1.i(2) + Ns.s("a").R1.s("b")).save.transact
-        ).message ==> "Can't transact duplicate element: Ns.r1"
+        ).message ==> "Can't transact duplicate attribute `Ns.r1`."
       }
 
       "Across sub tuples, after backref" - refs { implicit conn =>
         intercept[MoleculeException](
           (Ns.s("a") + Ns.i(1).R1.i(2)._Ns.s("b")).save.transact
-        ).message ==> "Can't transact duplicate element: Ns.s"
+        ).message ==> "Can't transact duplicate attribute `Ns.s`."
 
         intercept[MoleculeException](
           (Ns.s("a") + Ns.i(1).R1.i(2).R2.i(3)._R1._Ns.s("b")).save.transact
-        ).message ==> "Can't transact duplicate element: Ns.s"
+        ).message ==> "Can't transact duplicate attribute `Ns.s`."
       }
     }
 

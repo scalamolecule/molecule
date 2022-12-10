@@ -3,6 +3,7 @@ package molecule.db.datomic.transaction
 import java.net.URI
 import java.util.{Date, UUID}
 import clojure.lang.Keyword
+import datomic.Util.list
 import molecule.base.util.exceptions.MoleculeException
 import molecule.base.ast.SchemaAST._
 import molecule.boilerplate.ast.MoleculeModel._
@@ -20,7 +21,7 @@ class UpdateStmts(
   def getStmts: (Seq[AnyRef], Option[String], Seq[AnyRef], Seq[(String, Keyword, AnyRef)]) = {
     println("\n--- UPDATE --------------")
     elements.foreach(println)
-    checkConflictingAttributes(elements)
+    checkConflictingAttributes(elements, distinguishMode = true)
 
     val (eids, filterElements, data) = extract(elements, Nil, Nil, Nil)
 
@@ -67,27 +68,24 @@ class UpdateStmts(
               case a if uniqueAttrs.contains(a.name) =>
                 if (eids.nonEmpty)
                   throw MoleculeException("Can only apply one unique attribute value for update. Found:\n" + a)
-                val at        = s":${a.ns}/${a.attr}"
-                val lookupRef = attr match {
-                  case AttrOneTacString(_, _, _, Seq(v), _, _, _)     => datomic.Util.list(at, v)
-                  case AttrOneTacInt(_, _, _, Seq(v), _, _, _)        => datomic.Util.list(at, v)
-                  case AttrOneTacLong(_, _, _, Seq(v), _, _, _)       => datomic.Util.list(at, v)
-                  case AttrOneTacFloat(_, _, _, Seq(v), _, _, _)      => datomic.Util.list(at, v)
-                  case AttrOneTacDouble(_, _, _, Seq(v), _, _, _)     => datomic.Util.list(at, v)
-                  case AttrOneTacBoolean(_, _, _, Seq(v), _, _, _)    => datomic.Util.list(at, v)
-                  case AttrOneTacBigInt(_, _, _, Seq(v), _, _, _)     => datomic.Util.list(at, v.bigInteger)
-                  case AttrOneTacBigDecimal(_, _, _, Seq(v), _, _, _) => datomic.Util.list(at, v.bigDecimal)
-                  case AttrOneTacDate(_, _, _, Seq(v), _, _, _)       => datomic.Util.list(at, v)
-                  case AttrOneTacUUID(_, _, _, Seq(v), _, _, _)       => datomic.Util.list(at, v)
-                  case AttrOneTacURI(_, _, _, Seq(v), _, _, _)        => datomic.Util.list(at, v)
-                  case AttrOneTacByte(_, _, _, Seq(v), _, _, _)       => datomic.Util.list(at, v.toInt)
-                  case AttrOneTacShort(_, _, _, Seq(v), _, _, _)      => datomic.Util.list(at, v.toInt)
-                  case AttrOneTacChar(_, _, _, Seq(v), _, _, _)       => datomic.Util.list(at, v.toString)
-                  case _                                              => throw MoleculeException(
-                    s"Can only update with one applied value for tacit attribute `${a.name}`. Found:\n" + a
-                  )
+                val at         = s":${a.ns}/${a.attr}"
+                val lookupRefs = attr match {
+                  case AttrOneTacString(_, _, _, vs, _, _, _)     => vs.map(v => list(at, v))
+                  case AttrOneTacInt(_, _, _, vs, _, _, _)        => vs.map(v => list(at, v))
+                  case AttrOneTacLong(_, _, _, vs, _, _, _)       => vs.map(v => list(at, v))
+                  case AttrOneTacFloat(_, _, _, vs, _, _, _)      => vs.map(v => list(at, v))
+                  case AttrOneTacDouble(_, _, _, vs, _, _, _)     => vs.map(v => list(at, v))
+                  case AttrOneTacBoolean(_, _, _, vs, _, _, _)    => vs.map(v => list(at, v))
+                  case AttrOneTacBigInt(_, _, _, vs, _, _, _)     => vs.map(v => list(at, v.bigInteger))
+                  case AttrOneTacBigDecimal(_, _, _, vs, _, _, _) => vs.map(v => list(at, v.bigDecimal))
+                  case AttrOneTacDate(_, _, _, vs, _, _, _)       => vs.map(v => list(at, v))
+                  case AttrOneTacUUID(_, _, _, vs, _, _, _)       => vs.map(v => list(at, v))
+                  case AttrOneTacURI(_, _, _, vs, _, _, _)        => vs.map(v => list(at, v))
+                  case AttrOneTacByte(_, _, _, vs, _, _, _)       => vs.map(v => list(at, v.toInt))
+                  case AttrOneTacShort(_, _, _, vs, _, _, _)      => vs.map(v => list(at, v.toInt))
+                  case AttrOneTacChar(_, _, _, vs, _, _, _)       => vs.map(v => list(at, v.toString))
                 }
-                extract(tail, eids :+ lookupRef, filter, data)
+                extract(tail, eids ++ lookupRefs, filter, data)
 
               case _ => extract(tail, eids, filter :+ attr, data)
             }
