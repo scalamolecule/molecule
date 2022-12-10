@@ -26,6 +26,7 @@ object _DatomicMoleculeApi extends DatomicGenBase("DatomicMoleculeApi", "/api") 
          |  override def insert: DatomicInsert_$arity[${`A..V`}]$p = new DatomicInsert_$arity[${`A..V`}](molecule.elements)
          |  override def query : DatomicQueryOps[${`(A..V)`}] = new DatomicQueryOps[${`(A..V)`}](molecule.elements)
          |  override def update: DatomicUpdateOps${`..N`}$p= new DatomicUpdateOps(molecule.elements)
+         |  override def upsert: DatomicUpdateOps${`..N`}$p= new DatomicUpdateOps(molecule.elements, true)
          |  override def delete: DatomicDeleteOps${`..N`}$p= new DatomicDeleteOps(molecule.elements)
          |}""".stripMargin
   }

@@ -24,6 +24,7 @@ object _MoleculeApi extends CoreGenBase( "MoleculeApi", "/api") {
          |  def insert: Insert_$arity[${`A..V`}]
          |  def query : QueryOps[${`(A..V)`}]
          |  def update: UpdateOps
+         |  def upsert: UpdateOps
          |  def delete: DeleteOps
          |}""".stripMargin
   }

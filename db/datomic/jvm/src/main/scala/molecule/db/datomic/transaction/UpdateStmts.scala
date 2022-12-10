@@ -13,10 +13,9 @@ import scala.annotation.tailrec
 class UpdateStmts(
   uniqueAttrs: List[String],
   elements: Seq[Element],
+  isUpsert: Boolean = false,
   isMultiple: Boolean,
-) extends DatomicTransactionBase(elements) {
-
-  def reqMultiple = throw MoleculeException("Please provide explicit `update.multiple` to update multiple entities.")
+) extends DatomicTransactionBase(elements, isUpsert) {
 
   def getStmts: (Seq[AnyRef], Option[String], Seq[AnyRef], Seq[(String, Keyword, AnyRef)]) = {
     println("\n--- UPDATE --------------")
@@ -26,7 +25,7 @@ class UpdateStmts(
     val (eids, filterElements, data) = extract(elements, Nil, Nil, Nil)
 
     if (!isMultiple && eids.length > 1)
-      reqMultiple
+      throw MoleculeException(s"Please provide explicit `$update.multiple` to $update multiple entities.")
 
     val (idQuery, inputs) = if (eids.isEmpty && filterElements.nonEmpty) {
       val filterElements1 = AttrOneManLong("Generic", "e", V) +: filterElements
@@ -39,7 +38,7 @@ class UpdateStmts(
   }
 
   @tailrec
-  final protected def extract(
+  final private def extract(
     elements: Seq[Element],
     eids: Seq[Any],
     filter: Seq[Element],
@@ -47,60 +46,70 @@ class UpdateStmts(
   ): (Seq[Any], Seq[Element], Seq[(String, Keyword, AnyRef)]) = {
     elements match {
       case element :: tail => element match {
-        case attr: Attr =>
-          if (attr.op != Appl)
-            throw MoleculeException("Can't update attributes without an applied value. Found:\n" + attr)
-
-          attr match {
-            case attr: AttrOneTac => attr match {
-              case AttrOneTacLong("Generic", "e", _, eids1, _, _, _) =>
-                if (eids.nonEmpty)
-                  throw MoleculeException("Can't apply entity ids twice in update.")
-
-                if (eids1.isEmpty)
-                  throw MoleculeException("Empty list of entity ids not allowed.")
-
-                if (!isMultiple && eids1.length > 1)
-                  reqMultiple
-
-                extract(tail, eids1, filter, data)
-
-              case a if uniqueAttrs.contains(a.name) =>
-                if (eids.nonEmpty)
-                  throw MoleculeException("Can only apply one unique attribute value for update. Found:\n" + a)
-                val at         = s":${a.ns}/${a.attr}"
-                val lookupRefs = attr match {
-                  case AttrOneTacString(_, _, _, vs, _, _, _)     => vs.map(v => list(at, v))
-                  case AttrOneTacInt(_, _, _, vs, _, _, _)        => vs.map(v => list(at, v))
-                  case AttrOneTacLong(_, _, _, vs, _, _, _)       => vs.map(v => list(at, v))
-                  case AttrOneTacFloat(_, _, _, vs, _, _, _)      => vs.map(v => list(at, v))
-                  case AttrOneTacDouble(_, _, _, vs, _, _, _)     => vs.map(v => list(at, v))
-                  case AttrOneTacBoolean(_, _, _, vs, _, _, _)    => vs.map(v => list(at, v))
-                  case AttrOneTacBigInt(_, _, _, vs, _, _, _)     => vs.map(v => list(at, v.bigInteger))
-                  case AttrOneTacBigDecimal(_, _, _, vs, _, _, _) => vs.map(v => list(at, v.bigDecimal))
-                  case AttrOneTacDate(_, _, _, vs, _, _, _)       => vs.map(v => list(at, v))
-                  case AttrOneTacUUID(_, _, _, vs, _, _, _)       => vs.map(v => list(at, v))
-                  case AttrOneTacURI(_, _, _, vs, _, _, _)        => vs.map(v => list(at, v))
-                  case AttrOneTacByte(_, _, _, vs, _, _, _)       => vs.map(v => list(at, v.toInt))
-                  case AttrOneTacShort(_, _, _, vs, _, _, _)      => vs.map(v => list(at, v.toInt))
-                  case AttrOneTacChar(_, _, _, vs, _, _, _)       => vs.map(v => list(at, v.toString))
-                }
-                extract(tail, eids ++ lookupRefs, filter, data)
-
-              case _ => extract(tail, eids, filter :+ attr, data)
+        case attr: Attr => attr match {
+          // Mandatory value attribute
+          case dataAttr: AttrOneMan =>
+            if (dataAttr.op != Appl)
+              throw MoleculeException(s"Can't $update attributes without an applied value. Found:\n" + dataAttr)
+            if (isUpsert) {
+              // Disregard if value already exists
+              extract(tail, eids, filter, data :+ getData(dataAttr))
+            } else {
+              // Make sure current value exists
+              val dummyTacitAttr = AttrOneTacInt(dataAttr.ns, dataAttr.attr, V, Nil, None, None, None)
+              extract(tail, eids, filter :+ dummyTacitAttr, data :+ getData(dataAttr))
             }
-            case attr: AttrOneMan => extract(tail, eids, filter :+ attr, data :+ getData(attr))
-            case _: AttrOneOpt    => throw MoleculeException("Can't update optional values. Found:\n" + attr)
-            case _: AttrSetTac    => throw MoleculeException("Can only lookup entity with card-one attribute value. Found:\n" + attr)
-            case _                => extract(tail, eids, filter, data)
+
+          // Tacit filter attribute
+          case filterAttr: AttrOneTac => filterAttr match {
+            case AttrOneTacLong("Generic", "e", _, eids1, _, _, _) =>
+              if (eids.nonEmpty)
+                throw MoleculeException(s"Can't apply entity ids twice in $update.")
+              if (eids1.isEmpty)
+                throw MoleculeException("Empty list of entity ids not allowed.")
+              extract(tail, eids1, filter, data)
+
+            case uniqueFilterAttr if uniqueAttrs.contains(uniqueFilterAttr.name) =>
+              if (eids.nonEmpty)
+                throw MoleculeException(
+                  s"Can only apply one unique attribute value for $update. Found:\n" + uniqueFilterAttr
+                )
+              val at         = s":${uniqueFilterAttr.ns}/${uniqueFilterAttr.attr}"
+              val lookupRefs = filterAttr match {
+                case AttrOneTacString(_, _, _, vs, _, _, _)     => vs.map(v => list(at, v))
+                case AttrOneTacInt(_, _, _, vs, _, _, _)        => vs.map(v => list(at, v))
+                case AttrOneTacLong(_, _, _, vs, _, _, _)       => vs.map(v => list(at, v))
+                case AttrOneTacFloat(_, _, _, vs, _, _, _)      => vs.map(v => list(at, v))
+                case AttrOneTacDouble(_, _, _, vs, _, _, _)     => vs.map(v => list(at, v))
+                case AttrOneTacBoolean(_, _, _, vs, _, _, _)    => vs.map(v => list(at, v))
+                case AttrOneTacBigInt(_, _, _, vs, _, _, _)     => vs.map(v => list(at, v.bigInteger))
+                case AttrOneTacBigDecimal(_, _, _, vs, _, _, _) => vs.map(v => list(at, v.bigDecimal))
+                case AttrOneTacDate(_, _, _, vs, _, _, _)       => vs.map(v => list(at, v))
+                case AttrOneTacUUID(_, _, _, vs, _, _, _)       => vs.map(v => list(at, v))
+                case AttrOneTacURI(_, _, _, vs, _, _, _)        => vs.map(v => list(at, v))
+                case AttrOneTacByte(_, _, _, vs, _, _, _)       => vs.map(v => list(at, v.toInt))
+                case AttrOneTacShort(_, _, _, vs, _, _, _)      => vs.map(v => list(at, v.toInt))
+                case AttrOneTacChar(_, _, _, vs, _, _, _)       => vs.map(v => list(at, v.toString))
+              }
+              extract(tail, eids ++ lookupRefs, filter, data)
+
+            case nonUniqueFilterAttr =>
+              extract(tail, eids, filter :+ nonUniqueFilterAttr, data)
           }
 
-        case _: Nested    => throw MoleculeException("Nested data structure not allowed in update molecule.")
-        case _: NestedOpt => throw MoleculeException("Optional nested data structure not allowed in update molecule.")
+          case _: AttrOneOpt => throw MoleculeException(s"Can't $update optional values. Found:\n" + attr)
+          case _: AttrSetTac => throw MoleculeException(
+            "Can only lookup entity with card-one attribute value. Found:\n" + attr
+          )
+          case _             => extract(tail, eids, filter, data)
+        }
+
+        case _: Nested    => throw MoleculeException(s"Nested data structure not allowed in $update molecule.")
+        case _: NestedOpt => throw MoleculeException(s"Optional nested data structure not allowed in $update molecule.")
 
         case r@Ref(ns, a, _, CardOne) => extract(tail, eids, filter :+ r, data :+ ("ref", kw(ns, a), null))
         case r: Ref                   => throw MoleculeException(
-          s"Can't update ambiguous attributes in card-many referenced namespaces. Found `${r.refAttr.capitalize}`"
+          s"Can't $update ambiguous attributes in card-many referenced namespaces. Found `${r.refAttr.capitalize}`"
         )
 
         case b: BackRef => extract(tail, eids, filter :+ b, data)
@@ -111,20 +120,22 @@ class UpdateStmts(
 
         case TxMetaData(es) =>
           if (data.isEmpty)
-            throw MoleculeException(s"Can't update tx meta data only.")
+            throw MoleculeException(s"Can't $update tx meta data only.")
           val (eids1, filters1, data1) = extractSubElements(es)
           extract(tail, eids ++ eids1, filter ++ filters1, (data :+ ("tx", null, null)) ++ data1)
 
         case element => unexpected(element)
       }
-      case Nil             => (eids, filter, data)
+
+      case Nil => (eids, filter, data)
     }
   }
 
-  private def extractSubElements(elements: Seq[Element]): (Seq[Any], Seq[Element], Seq[(String, Keyword, AnyRef)]) = {
+  private def extractSubElements(
+    elements: Seq[Element]
+  ): (Seq[Any], Seq[Element], Seq[(String, Keyword, AnyRef)]) = {
     extract(elements, Nil, Nil, Nil)
   }
-
 
   private def getData(attr: AttrOneMan): (String, Keyword, AnyRef) = attr match {
     case AttrOneManString(_, _, _, vs, _, _, _)     => oneV[String](attr, vs, identity)
@@ -142,16 +153,17 @@ class UpdateStmts(
     case AttrOneManShort(_, _, _, vs, _, _, _)      => oneV[Short](attr, vs, _.toInt)
     case AttrOneManChar(_, _, _, vs, _, _, _)       => oneV[Char](attr, vs, _.toString)
     case _                                          => throw MoleculeException(
-      s"Can only update one applied value for attribute `${attr.name}`. Found expression: ${attr.op}"
+      s"Can only $update one applied value for attribute `${attr.name}`. Found expression: ${attr.op}"
     )
   }
+
   private def oneV[T](attr: Attr, vs: Seq[T], transform: T => Any): (String, Keyword, AnyRef) = {
     val a = kw(attr.ns, attr.attr)
     vs match {
       case Seq(v) => ("add", a, transform(v).asInstanceOf[AnyRef])
       case Nil    => ("retract", a, null)
       case vs     => throw MoleculeException(
-        s"Can only update one value for attribute `${attr.name}`. Found: " + vs
+        s"Can only $update one value for attribute `${attr.name}`. Found: " + vs
       )
     }
   }

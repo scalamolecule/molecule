@@ -7,7 +7,7 @@ import molecule.core.api.{Connection, TxReport}
 import zio.ZIO
 import scala.concurrent.{ExecutionContext, Future}
 
-class DatomicUpdateOpsImpl(elements: Seq[Element]) extends UpdateOps {
+class DatomicUpdateOpsImpl(elements: Seq[Element], isUpsert: Boolean) extends UpdateOps {
 
   override def run: ZIO[Connection, MoleculeException, TxReport] = ???
 

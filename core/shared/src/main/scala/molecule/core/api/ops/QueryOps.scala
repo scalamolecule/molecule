@@ -14,6 +14,8 @@ trait QueryOps[Tpl] {
   def drop(n: Int): QueryOps[Tpl]
   def from(cursor: String): QueryOps[Tpl]
 
+  //  List(1).slice(0, 2)
+
 
   def run(implicit conn: Connection): ZIO[Connection, MoleculeException, Chunk[Tpl]]
 

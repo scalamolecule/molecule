@@ -33,8 +33,6 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
   final lazy protected val inputs   : Seq[AnyRef] = renderRules(rules) ++ args
 
   final protected def getQueries(optimized: Boolean): (String, String) = {
-//    resetMutableAccumulators()
-
     // Add 4th tx var to first attribute if tx value is needed
     @tailrec
     def checkTx(elements: Seq[Element]): Unit = {

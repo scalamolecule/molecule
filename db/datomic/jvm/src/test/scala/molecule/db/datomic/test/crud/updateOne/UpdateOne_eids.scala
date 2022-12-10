@@ -3,12 +3,11 @@ package molecule.db.datomic.test.crud.updateOne
 
 import molecule.base.util.exceptions.MoleculeException
 import molecule.coreTests.dataModels.core.dsl.Types._
-import molecule.coreTests.dataModels.core.dsl.Unique.Other
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
 
-object UpdateOne_eid extends DatomicTestSuite {
+object UpdateOne_eids extends DatomicTestSuite {
 
 
   lazy val tests = Tests {
@@ -93,17 +92,17 @@ object UpdateOne_eid extends DatomicTestSuite {
 
     "Update tx meta data" - types { implicit conn =>
       val eid = Ns.int.Tx(Other.s_("tx")).insert(1).transact.eids.head
-      Ns.int.Tx(Ref.s).query.get ==> List((1, "tx"))
+      Ns.int.Tx(Other.s).query.get ==> List((1, "tx"))
 
       val tx = Ns(eid).int(2).Tx(Other.s("tx2")).update.transact.tx
-      Ns.int.Tx(Ref.s).query.get ==> List((2, "tx2"))
+      Ns.int.Tx(Other.s).query.get ==> List((2, "tx2"))
 
       intercept[MoleculeException](
         Ns(eid).Tx(Other.s("tx3")).update.transact
       ).message ==> "Can't update tx meta data only."
 
       // We can though update the tx entity itself
-      Ref(tx).s("tx3").update.transact
+      Other(tx).s("tx3").update.transact
       Ns.int.Tx(Other.s).query.get ==> List((2, "tx3"))
     }
 

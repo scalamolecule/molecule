@@ -13,8 +13,9 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class DatomicUpdateOpsImpl(
   elements: Seq[Element],
-  isMultiple: Boolean = false
-) extends DatomicTransactionBase(elements) with UpdateOps {
+  isUpsert: Boolean = false,
+  isMultiple: Boolean = false,
+) extends DatomicTransactionBase(elements, isUpsert) with UpdateOps {
 
   override def run: ZIO[Connection, MoleculeException, TxReport] = ???
 
@@ -23,12 +24,20 @@ class DatomicUpdateOpsImpl(
   override def transact(implicit conn0: Connection): TxReport = {
     val conn = conn0.asInstanceOf[Conn_Peer]
 
-    val (eids, idQuery, inputs, data) =
-      new UpdateStmts(conn.schema.uniqueAttrs, elements, isMultiple).getStmts
+    val (eids, idQuery, inputs, data) = new UpdateStmts(
+      conn.schema.uniqueAttrs, elements, isUpsert, isMultiple
+    ).getStmts
 
     lazy val db = conn.peerConn.db()
     idQuery.fold(eids.foreach(addStmts)) { query =>
-      Peer.q(query, db +: inputs: _*).forEach { idRow =>
+      val res   = Peer.q(query, db +: inputs: _*)
+      val count = res.size()
+      if (!isMultiple && count > 1)
+        throw MoleculeException(
+          s"Please provide explicit `$update.multiple` to $update multiple entities " +
+            s"(found $count matching entities)."
+        )
+      res.forEach { idRow =>
         addStmts(idRow.get(0))
       }
     }
@@ -57,7 +66,7 @@ class DatomicUpdateOpsImpl(
         case ("tx", _, _)        => eid = datomicTx
       }
     }
-    println("---")
+    println("--- insert stmts: ---")
     stmts.forEach(stmt => println(stmt))
     conn.transact(stmts)
   }
@@ -65,5 +74,5 @@ class DatomicUpdateOpsImpl(
 
   // Modifiers
 
-  override def multiple: UpdateOps = new DatomicUpdateOpsImpl(elements, true)
+  override def multiple: UpdateOps = new DatomicUpdateOpsImpl(elements, isUpsert, true)
 }

@@ -7,7 +7,7 @@ import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
 
 
-object UpdateOne_uniqueAttr extends DatomicTestSuite {
+object UpdateOne_uniqueAttrs extends DatomicTestSuite {
 
 
   lazy val tests = Tests {

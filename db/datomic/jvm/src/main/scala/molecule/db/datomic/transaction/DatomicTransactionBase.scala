@@ -9,7 +9,11 @@ import molecule.core.util.fns
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 
-abstract class DatomicTransactionBase(elements: Seq[Element]) {
+abstract class DatomicTransactionBase(
+  elements: Seq[Element],
+  isUpsert: Boolean = false
+) {
+  val update = if (isUpsert) "upsert" else "update"
 
   // Accumulate java insertion data
   final protected val stmts: jArrayList[jList[AnyRef]] = new jArrayList[jList[AnyRef]]()

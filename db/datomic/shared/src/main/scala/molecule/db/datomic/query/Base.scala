@@ -79,41 +79,6 @@ trait Base[Tpl] extends BaseHelpers with JavaConversions { self: Model2Query[Tpl
   final protected var addTxVar  : Boolean = false
   final protected var firstEid  : String  = ""
 
-  final protected def resetMutableAccumulators(): Unit = {
-    preIn.empty
-    preWhere.empty
-    preRules.empty
-    isNested = false
-    isNestedOpt = false
-    isComposite = false
-    isTxMetaData = false
-    isTxComposite = false
-    flatten = false
-    nestedIds.empty
-    nestedOptIds.empty
-    find.empty
-    findPull = Nil
-    pull = None
-    widh.empty
-    in.empty
-    where.empty
-    rules.empty
-    inPost.empty
-    wherePost.empty
-    preArgs.empty
-    args.empty
-    pullCasts.empty
-    pullCastss = Nil
-    pullDepths = List(0)
-    aritiess = List(Nil)
-    sortsAcc.empty
-    sorts.empty
-    attrIndex = -1
-    varIndex = -1
-    addTxVar = false
-    firstEid = ""
-  }
-
   final protected def addCast(cast: AnyRef => AnyRef): Unit = {
     if (isTxMetaData)
       castss = (castss.head :+ cast) :: castss.tail

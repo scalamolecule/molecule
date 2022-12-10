@@ -19,7 +19,7 @@ class DatomicQueryOpsImpl[Tpl](elements: Seq[Element])
     with JavaConversions
     with DatomicApiLoader {
 
-  // Refinements - prevent non-sensical combinations todo
+  // Refinements - prevent no-sense combinations todo
   override def take(n: Int): DatomicQueryOpsImpl[Tpl] = this
   override def drop(n: Int): DatomicQueryOpsImpl[Tpl] = this
   override def from(cursor: String): DatomicQueryOpsImpl[Tpl] = this
