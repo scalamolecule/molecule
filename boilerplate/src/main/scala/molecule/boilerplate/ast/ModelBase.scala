@@ -94,6 +94,6 @@ trait ModelBase extends Validations {
   case class Fn(fn: Kw, n: Option[Int] = None) extends Op
   case object Unify extends Op
   case object Add extends Op
-  case object Replace extends Op
-  case object Delete extends Op
+  case object Swap extends Op
+  case object Remove extends Op
 }

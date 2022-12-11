@@ -5,6 +5,6 @@ trait ExprBase {
 
   protected def abs2sets[t](pairs: Seq[(t, t)]): Seq[Set[t]] = {
     val (from, to) = pairs.unzip
-    Seq(from.toSet, to.toSet)
+    from.map(Set(_)) ++ to.map(Set(_))
   }
 }

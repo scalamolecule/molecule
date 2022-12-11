@@ -32,7 +32,8 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
   final lazy protected val preInputs: Seq[AnyRef] = renderRules(rules ++ preRules) ++ preArgs
   final lazy protected val inputs   : Seq[AnyRef] = renderRules(rules) ++ args
 
-  final protected def getQueries(optimized: Boolean): (String, String) = {
+//  final protected def getQueries(optimized: Boolean): (String, String) = {
+  final  def getQueries(optimized: Boolean): (String, String) = {
     // Add 4th tx var to first attribute if tx value is needed
     @tailrec
     def checkTx(elements: Seq[Element]): Unit = {
@@ -77,7 +78,7 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
       preQuery
     }
 
-    println("\n--- QUERY -------------------------------------------------------")
+    println("\n\n--- QUERY ------------------------------------------------------------------------")
     elements.foreach(println)
     println("---")
     println(mainQuery)

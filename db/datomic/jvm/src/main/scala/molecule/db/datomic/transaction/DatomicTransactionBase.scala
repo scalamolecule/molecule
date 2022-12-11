@@ -31,15 +31,6 @@ abstract class DatomicTransactionBase(
   protected val prevRefs     : ListBuffer[AnyRef]  = new ListBuffer[AnyRef]
   protected var hasComposites: Boolean             = false
 
-  protected def stmtList = new jArrayList[AnyRef](4)
-
-  protected def newId: String = {
-    tempId = lowest - 1
-    lowest = tempId
-    "#db/id[" + part + " " + tempId + "]"
-  }
-
-  protected def kw(ns: String, attr: String) = Keyword.intern(ns, attr)
   protected lazy val add       = kw("db", "add")
   protected lazy val retract   = kw("db", "retract")
   protected lazy val dbId      = kw("db", "id")
@@ -52,6 +43,28 @@ abstract class DatomicTransactionBase(
   protected lazy val short2java   = (v: Any) => v.asInstanceOf[Short].toInt
   protected lazy val boolean2java = (v: Any) => v.asInstanceOf[Boolean].asInstanceOf[jBoolean]
 
+
+  protected def newId: String = {
+    tempId = lowest - 1
+    lowest = tempId
+    "#db/id[" + part + " " + tempId + "]"
+  }
+  protected def kw(ns: String, attr: String) = Keyword.intern(ns, attr)
+
+  protected def stmtList = new jArrayList[AnyRef](4)
+  protected def addStmt(
+    op: Keyword,
+    e: AnyRef,
+    a: Keyword,
+    v: AnyRef,
+  ): Unit = {
+    val addStmt = stmtList
+    addStmt.add(op)
+    addStmt.add(e)
+    addStmt.add(a)
+    addStmt.add(v)
+    stmts.add(addStmt)
+  }
 
   @tailrec
   final protected def getNs(elements: Seq[Element]): String = elements.head match {

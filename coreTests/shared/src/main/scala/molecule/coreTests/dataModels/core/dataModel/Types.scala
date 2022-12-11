@@ -6,6 +6,7 @@ object Types extends DataModel(3) {
 
   trait Ns {
     val i = oneInt
+    val s = oneString
 
     // Cardinality one
     val string     = oneString
@@ -43,13 +44,20 @@ object Types extends DataModel(3) {
   }
 
   trait Ref {
-    val i   = oneInt
-    val s   = oneString
+    val i = oneInt
+    val s = oneString
+
+    val ii = setInt
+    val ss = setString
+
     val nss = many[Ns]
   }
 
   trait Other {
     val i = oneInt
     val s = oneString
+
+    val ii = setInt
+    val ss = setString
   }
 }

@@ -15,7 +15,6 @@ object Adhoc extends DatomicTestSuite {
       import molecule.coreTests.dataModels.core.dsl.Types._
 
 
-//      Ns.i.Ns.s
     }
 
     "refs" - refs { implicit conn =>

@@ -16,7 +16,7 @@ class SaveStmts(
 
   def getRawStmts(eid: String): jArrayList[jList[AnyRef]] = {
     if (debug) {
-      println("\n--- SAVE --------------")
+      println("\n\n--- SAVE -----------------------------------------------------------------------")
       elements.foreach(println)
     }
     checkConflictingAttributes(elements)

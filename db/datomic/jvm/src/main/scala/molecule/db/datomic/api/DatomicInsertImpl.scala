@@ -11,7 +11,7 @@ class DatomicInsertImpl(elements: Seq[Element]) extends Insert_ {
 
   override def _insertOp(data: Seq[Product]): DatomicInsertOpsJVM = {
 
-    println("\n--- INSERT --------------------------------------------------------")
+    println("\n\n--- INSERT -----------------------------------------------------------------------")
     elements.foreach(println)
 
     new DatomicInsertOpsJVM(new InsertStmts(elements, data))

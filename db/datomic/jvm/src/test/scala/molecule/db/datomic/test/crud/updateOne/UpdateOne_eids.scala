@@ -12,12 +12,21 @@ object UpdateOne_eids extends DatomicTestSuite {
 
   lazy val tests = Tests {
 
-    "1 attribute of 1 entity updated" - types { implicit conn =>
+    "Update/upsert" - types { implicit conn =>
       val eid = Ns.int.insert(1).transact.eids.head
       Ns.int.query.get ==> List(1)
 
+      // Update existing value
       Ns(eid).int(2).update.transact
       Ns.int.query.get ==> List(2)
+
+      // Updating a non-asserted attribute has no effect
+      Ns(eid).string("a").update.transact
+      Ns.int.string_?.query.get ==> List((2, None))
+
+      // Upserting a non-asserted attribute adds the value
+      Ns(eid).string("a").upsert.transact
+      Ns.int.string_?.query.get ==> List((2, Some("a")))
     }
 
 
@@ -154,7 +163,7 @@ object UpdateOne_eids extends DatomicTestSuite {
       "Can't update card-many referenced attributes" - types { implicit conn =>
         intercept[MoleculeException](
           Ns(42).i(1).Refs.i(2).update.transact
-        ).message ==> "Can't update ambiguous attributes in card-many referenced namespaces. Found `Refs`"
+        ).message ==> "Can't update attributes in card-many referenced namespaces. Found `Refs`"
       }
     }
   }

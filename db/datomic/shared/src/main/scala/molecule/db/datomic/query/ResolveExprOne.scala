@@ -16,7 +16,7 @@ trait ResolveExprOne[Tpl] { self: SortOne_[Tpl] with SortOneOpt_[Tpl] with Base[
     attr match {
       case at: AttrOneManString     => man(e, a, at.op, at.vs, resString, sortOneString(at, attrIndex))
       case at: AttrOneManInt        => man(e, a, at.op, at.vs, resInt, sortOneInt(at, attrIndex))
-      case at: AttrOneManLong       => maL(e, a, at.op, at.vs, resLong, sortOneLong(at, attrIndex))
+      case at: AttrOneManLong       => manLong(e, a, at.op, at.vs, resLong, sortOneLong(at, attrIndex))
       case at: AttrOneManFloat      => man(e, a, at.op, at.vs, resFloat, sortOneFloat(at, attrIndex))
       case at: AttrOneManDouble     => man(e, a, at.op, at.vs, resDouble, sortOneDouble(at, attrIndex))
       case at: AttrOneManBoolean    => man(e, a, at.op, at.vs, resBoolean, sortOneBoolean(at, attrIndex))
@@ -94,7 +94,7 @@ trait ResolveExprOne[Tpl] { self: SortOne_[Tpl] with SortOneOpt_[Tpl] with Base[
     expr(e, a, v, op, args, res)
   }
 
-  private def maL(
+  private def manLong(
     e: Var,
     a: Att,
     op: Op,
@@ -111,7 +111,8 @@ trait ResolveExprOne[Tpl] { self: SortOne_[Tpl] with SortOneOpt_[Tpl] with Base[
         find += txVar
         addCast(res.j2s)
         sorter.foreach(sorts += _)
-      case a             => man(e, a, op, args, res, sorter)
+      case a             =>
+        man(e, a, op, args, res, sorter)
     }
   }
 
