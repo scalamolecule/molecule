@@ -4,6 +4,10 @@ package molecule.core.api
 import molecule.core.api.ops._
 
 
+trait MoleculeApi_00 {
+  def delete: DeleteOps
+}
+
 trait MoleculeApi_01[A] {
   def save  : SaveOps
   def insert: Insert_1[A]

@@ -9,6 +9,7 @@ trait QueryOps[Tpl] {
 
   // Time
   def asOf(n: Int): QueryOps[Tpl] = ???
+  def history: QueryOps[Tpl] = ???
 
   def take(n: Int): QueryOps[Tpl]
   def drop(n: Int): QueryOps[Tpl]

@@ -29,7 +29,6 @@ class InsertStmts(elements: Seq[Element], data: Seq[Product])
       stmts.addAll(txMetaStmts)
     }
 
-
     Collections.unmodifiableList(stmts)
   }
 
@@ -173,25 +172,6 @@ class InsertStmts(elements: Seq[Element], data: Seq[Product])
       case _: AttrOneOptByte       => addOptV(ns, a, n, byte2java)
       case _: AttrOneOptShort      => addOptV(ns, a, n, short2java)
       case _: AttrOneOptChar       => addOptV(ns, a, n, char2java)
-    }
-  }
-
-  private def resolveAttrOneTac(attr: AttrOneTac, n: Int, ns: String, a: Keyword): Product => Unit = {
-    attr match {
-      case _: AttrOneTacString     => addTxV(ns, a, n, identity)
-      case _: AttrOneTacInt        => addTxV(ns, a, n, identity)
-      case _: AttrOneTacLong       => addTxV(ns, a, n, identity)
-      case _: AttrOneTacFloat      => addTxV(ns, a, n, identity)
-      case _: AttrOneTacDouble     => addTxV(ns, a, n, identity)
-      case _: AttrOneTacBoolean    => addTxV(ns, a, n, boolean2java)
-      case _: AttrOneTacBigInt     => addTxV(ns, a, n, bigInt2java)
-      case _: AttrOneTacBigDecimal => addTxV(ns, a, n, bigDec2java)
-      case _: AttrOneTacDate       => addTxV(ns, a, n, identity)
-      case _: AttrOneTacUUID       => addTxV(ns, a, n, identity)
-      case _: AttrOneTacURI        => addTxV(ns, a, n, identity)
-      case _: AttrOneTacByte       => addTxV(ns, a, n, byte2java)
-      case _: AttrOneTacShort      => addTxV(ns, a, n, short2java)
-      case _: AttrOneTacChar       => addTxV(ns, a, n, char2java)
     }
   }
 

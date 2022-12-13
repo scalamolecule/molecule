@@ -1,5 +1,7 @@
 package codegen
 
+import codegen.db.datomic.test.crud.update.set.ops._UpdateSetOps_tpe
+
 object DatomicTestGenerator extends App {
 
 //  codegen.db.datomic.test.exprOne._ExprOne_tpe.generate
@@ -16,5 +18,5 @@ object DatomicTestGenerator extends App {
   ///Users/mg/molecule/molecule2/db/datomic/jvm/src/test/scala/molecule/db/datomic/test/crud/updateSet/ops/UpdateSetOps_Int.scala
   //                          db/datomic/shared/src/test/scala/molecule/db/datomic/test/crud/updateSet/ops/UpdateSetOps_Int.scala
 
-  codegen.db.datomic.test.crud.updateSet.ops._UpdateSetOps_tpe.generate
+  _UpdateSetOps_tpe.generate
 }

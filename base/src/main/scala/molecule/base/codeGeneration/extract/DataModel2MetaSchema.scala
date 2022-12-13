@@ -78,6 +78,7 @@ class DataModel2MetaSchema(path: String, dataModel: String) {
       case q"$prev.unique"                  => getAttr(ns, a, prev, ("unique" :: x._1, x._2, x._3, x._4, x._5))
       case q"$prev.mandatory"               => getAttr(ns, a, prev, ("mandatory" :: x._1, x._2, x._3, x._4, x._5))
       case q"$prev.fulltext"                => getAttr(ns, a, prev, ("fulltext" :: x._1, x._2, x._3, x._4, x._5))
+      case q"$prev.owner"                   => getAttr(ns, a, prev, ("owner" :: x._1, x._2, x._3, x._4, x._5))
       case q"$prev.descr(${Lit.String(s)})" =>
         val descr = if (s.isEmpty)
           throw new Exception(s"Can't apply empty String as description option for attribute $a.")

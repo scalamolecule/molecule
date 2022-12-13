@@ -12,6 +12,10 @@ object _MoleculeApi extends CoreGenBase( "MoleculeApi", "/api") {
        |
        |import molecule.core.api.ops._
        |
+       |
+       |trait MoleculeApi_00 {
+       |  def delete: DeleteOps
+       |}
        |$traits
        |""".stripMargin
   }

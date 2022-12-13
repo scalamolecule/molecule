@@ -6,10 +6,11 @@ import zio.ZIO
 import scala.concurrent.{ExecutionContext, Future}
 
 trait DeleteOps {
+  // Modifiers
+  def multiple: DeleteOps
 
+  // Actions
   def run: ZIO[Connection, MoleculeException, TxReport]
-
   def transactAsync(implicit conn: Connection, ec: ExecutionContext): Future[TxReport]
-
   def transact(implicit conn: Connection): TxReport
 }

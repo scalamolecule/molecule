@@ -5,28 +5,33 @@ import molecule.DataModel
 object Refs extends DataModel(10) {
 
   trait Ns {
-    val i        = oneInt
-    val s        = oneString
-    val r1       = one[R1]
-    val rs1      = many[R1]
-    val self     = one[Ns]
+    val i          = oneInt
+    val s          = oneString
+    val r1         = one[R1]
+    val rs1        = many[R1]
+    val self       = one[Ns]
+    val owned1     = one[R1].owner
+    val ownedMany1 = many[R1].owner
+
   }
 
   trait R1 {
-    val i       = oneInt
-    val s       = oneString
-    val r2      = one[R2]
-    val r2a     = one[R2]
-    val rs2     = many[R2]
+    val i          = oneInt
+    val s          = oneString
+    val r2         = one[R2]
+    val r2a        = one[R2]
+    val rs2        = many[R2]
+    val owned2     = one[R2].owner
+    val ownedMany2 = many[R2].owner
   }
 
   trait R2 {
-    val i       = oneInt
-    val s       = oneString
-    val ii      = setInt
-    val r3      = one[R3]
-    val r3a     = one[R3]
-    val rs3     = many[R3]
+    val i   = oneInt
+    val s   = oneString
+    val ii  = setInt
+    val r3  = one[R3]
+    val r3a = one[R3]
+    val rs3 = many[R3]
   }
 
   trait R3 {

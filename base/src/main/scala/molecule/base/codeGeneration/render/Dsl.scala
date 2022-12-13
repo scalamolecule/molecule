@@ -62,8 +62,8 @@ case class Dsl(schema: MetaSchema, namespace: MetaNs)
        |$baseNs
        |
        |object $ns extends $ns_0[Nothing](Nil) {
-       |  final def apply(eid: Long, eids: Long*) = new $ns_1[Long, Long](Seq(AttrOneTacLong("Generic", "e", Appl, eid +: eids)))
-       |  final def apply(eids: Iterable[Long])   = new $ns_1[Long, Long](Seq(AttrOneTacLong("Generic", "e", Appl, eids.toSeq)))
+       |  final def apply(eid: Long, eids: Long*) = new $ns_1[Long, Long](Seq(AttrOneTacLong("_Generic", "eids", Appl, eid +: eids)))
+       |  final def apply(eids: Iterable[Long])   = new $ns_1[Long, Long](Seq(AttrOneTacLong("_Generic", "eids", Appl, eids.toSeq)))
        |}
        |
        |

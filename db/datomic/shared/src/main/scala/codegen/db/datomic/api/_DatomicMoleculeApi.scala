@@ -13,6 +13,10 @@ object _DatomicMoleculeApi extends DatomicGenBase("DatomicMoleculeApi", "/api") 
        |import molecule.core.api._
        |import molecule.db.datomic.api.ops._
        |
+       |
+       |class DatomicMoleculeApi_00(molecule: Molecule_00) extends MoleculeApi_00 {
+       |  override def delete: DatomicDeleteOps = new DatomicDeleteOps(molecule.elements)
+       |}
        |$classes
        |""".stripMargin
   }

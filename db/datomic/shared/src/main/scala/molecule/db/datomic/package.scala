@@ -7,6 +7,7 @@ import molecule.db.datomic.api._
 import scala.language.implicitConversions
 
 package object datomic extends MoleculeImplicits_ {
+  implicit final override def m(molecule: Molecule_00): DatomicMoleculeApi_00 = new DatomicMoleculeApi_00(molecule)
   implicit final override def m[A](molecule: Molecule_01[A]): DatomicMoleculeApi_01[A] = new DatomicMoleculeApi_01(molecule)
   implicit final override def m[A, B](molecule: Molecule_02[A, B]): DatomicMoleculeApi_02[A, B] = new DatomicMoleculeApi_02(molecule)
   implicit final override def m[A, B, C](molecule: Molecule_03[A, B, C]): DatomicMoleculeApi_03[A, B, C] = new DatomicMoleculeApi_03(molecule)
@@ -30,6 +31,7 @@ package object datomic extends MoleculeImplicits_ {
   implicit final override def m[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U](molecule: Molecule_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U]): DatomicMoleculeApi_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U] = new DatomicMoleculeApi_21(molecule)
   implicit final override def m[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V](molecule: Molecule_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V]): DatomicMoleculeApi_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V] = new DatomicMoleculeApi_22(molecule)
 
+  implicit final override def m(composite: Composite_00): DatomicMoleculeApi_00 = new DatomicMoleculeApi_00(composite)
   implicit final override def m[T1](composite: Composite_01[T1]): DatomicMoleculeApi_01[T1] = new DatomicMoleculeApi_01(composite)
   implicit final override def m[T1, T2](composite: Composite_02[T1, T2]): DatomicMoleculeApi_02[T1, T2] = new DatomicMoleculeApi_02(composite)
   implicit final override def m[T1, T2, T3](composite: Composite_03[T1, T2, T3]): DatomicMoleculeApi_03[T1, T2, T3] = new DatomicMoleculeApi_03(composite)

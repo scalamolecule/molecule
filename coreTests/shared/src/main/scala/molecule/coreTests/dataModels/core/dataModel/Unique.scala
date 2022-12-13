@@ -31,12 +31,14 @@ object Unique extends DataModel(3) {
   }
 
   trait Ref {
-    val i   = oneInt.unique
+    val i   = oneInt
     val s   = oneString
+    val int = oneInt.unique
   }
 
   trait Other {
-    val i = oneInt.unique
-    val s = oneString
+    val i   = oneInt
+    val s   = oneString
+    val int = oneInt.unique
   }
 }

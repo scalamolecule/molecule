@@ -1,23 +1,48 @@
 package molecule.db.datomic.api.ops
 
+import datomic.Peer
 import molecule.base.util.exceptions.MoleculeException
 import molecule.boilerplate.ast.MoleculeModel._
 import molecule.core.api.ops.DeleteOps
 import molecule.core.api.{Connection, TxReport}
 import molecule.db.datomic.facade.Conn_Peer
-import molecule.db.datomic.transaction.SaveStmts
+import molecule.db.datomic.transaction.{DatomicTransactionBase, DeleteStmts}
 import zio.ZIO
 import scala.concurrent.{ExecutionContext, Future}
 
-class DatomicDeleteOpsImpl(elements: Seq[Element]) extends DeleteOps {
+class DatomicDeleteOpsImpl(
+  elements: Seq[Element],
+  isMultiple: Boolean = false
+) extends DatomicTransactionBase(elements) with DeleteOps {
+
+  // Modifiers
+  override def multiple: DeleteOps = new DatomicDeleteOpsImpl(elements, true)
+
+
+  // Actions
 
   override def run: ZIO[Connection, MoleculeException, TxReport] = ???
 
   override def transactAsync(implicit conn: Connection, ec: ExecutionContext): Future[TxReport] = ???
 
-  override def transact(implicit conn: Connection): TxReport = {
-    conn.asInstanceOf[Conn_Peer].transact(
-      new SaveStmts(elements).getStmts
-    )
+  override def transact(implicit conn0: Connection): TxReport = {
+    val conn                        = conn0.asInstanceOf[Conn_Peer]
+    val (eids, filterQuery, inputs) = new DeleteStmts(conn.schema.uniqueAttrs, elements, isMultiple).resolve
+
+    filterQuery.fold {
+      eids.foreach(addRetractEntityStmt)
+    } { query =>
+      val db      = conn.peerConn.db()
+      val eidRows = Peer.q(query, db +: inputs: _*)
+      val count   = eidRows.size()
+      if (!isMultiple && count > 1)
+        multipleModifierMissing(count)
+      eidRows.forEach(eidRow => addRetractEntityStmt(eidRow.get(0)))
+    }
+    println("\n\n--- DELETE -----------------------------------------------------------------------")
+    elements.foreach(println)
+    println("---")
+    stmts.forEach(stmt => println(stmt))
+    conn.transact(stmts)
   }
 }

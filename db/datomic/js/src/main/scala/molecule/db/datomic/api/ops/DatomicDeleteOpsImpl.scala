@@ -9,6 +9,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class DatomicDeleteOpsImpl(elements: Seq[Element]) extends DeleteOps {
 
+  override def multiple: DeleteOps = ???
+
   override def run: ZIO[Connection, MoleculeException, TxReport] = ???
 
   override def transact(implicit conn: Connection): TxReport = {

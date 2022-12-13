@@ -24,5 +24,6 @@ object DatomicGenerator extends App {
 //    datomic.query._SortOne.generate
 //    datomic.query._SortOneOpt.generate
 //
-//    datomic._DatomicMoleculeImplicits.generate
+    codegen.core._MoleculeImplicits.generate
+    datomic._DatomicMoleculeImplicits.generate
 }

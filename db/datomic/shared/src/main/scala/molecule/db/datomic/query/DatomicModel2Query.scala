@@ -41,8 +41,8 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
         case element :: tail =>
           element match {
             case _: TxMetaData                                  => addTxVar = true
-            case AttrOneManLong("Generic", "tx", _, _, _, _, _) => addTxVar = true
-            case AttrOneTacLong("Generic", "tx", _, _, _, _, _) => addTxVar = true
+            case AttrOneManLong("_Generic", "tx", _, _, _, _, _) => addTxVar = true
+            case AttrOneTacLong("_Generic", "tx", _, _, _, _, _) => addTxVar = true
             case Composite(elements)                            => checkTx(elements ++ tail)
             case Nested(_, elements)                            => checkTx(tail ++ elements)
             case _                                              => checkTx(tail)

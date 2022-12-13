@@ -16,8 +16,10 @@ object _DatomicMoleculeImplicits extends DatomicGenBase( "package", "") {
        |import scala.language.implicitConversions
        |
        |package object datomic extends MoleculeImplicits_ {
+       |  implicit final override def m(molecule: Molecule_00): DatomicMoleculeApi_00 = new DatomicMoleculeApi_00(molecule)
        |$moleculeFactories
        |
+       |  implicit final override def m(composite: Composite_00): DatomicMoleculeApi_00 = new DatomicMoleculeApi_00(composite)
        |$compositeFactories
        |}""".stripMargin
   }

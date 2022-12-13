@@ -18,8 +18,6 @@ abstract class DatomicTransactionBase(
   // Accumulate java insertion data
   final protected val stmts: jArrayList[jList[AnyRef]] = new jArrayList[jList[AnyRef]]()
 
-  protected def unexpected(element: Element) = throw MoleculeException("Unexpected element: " + element)
-
   protected val nsFull       : String              = getNs(elements)
   protected val part         : String              = fns.partNs(nsFull).head
   protected var tempId       : Int                 = 0
@@ -31,10 +29,11 @@ abstract class DatomicTransactionBase(
   protected val prevRefs     : ListBuffer[AnyRef]  = new ListBuffer[AnyRef]
   protected var hasComposites: Boolean             = false
 
-  protected lazy val add       = kw("db", "add")
-  protected lazy val retract   = kw("db", "retract")
-  protected lazy val dbId      = kw("db", "id")
-  protected lazy val datomicTx = "datomic.tx"
+  protected lazy val add           = kw("db", "add")
+  protected lazy val retract       = kw("db", "retract")
+  protected lazy val retractEntity = kw("db", "retractEntity")
+  protected lazy val dbId          = kw("db", "id")
+  protected lazy val datomicTx     = "datomic.tx"
 
   protected lazy val bigInt2java  = (v: Any) => v.asInstanceOf[BigInt].bigInteger
   protected lazy val bigDec2java  = (v: Any) => v.asInstanceOf[BigDecimal].bigDecimal
@@ -65,6 +64,12 @@ abstract class DatomicTransactionBase(
     addStmt.add(v)
     stmts.add(addStmt)
   }
+  protected def addRetractEntityStmt(eid: AnyRef) = {
+    val stmt = new jArrayList[AnyRef](2)
+    stmt.add(retractEntity)
+    stmt.add(eid)
+    stmts.add(stmt)
+  }
 
   @tailrec
   final protected def getNs(elements: Seq[Element]): String = elements.head match {
@@ -73,6 +78,13 @@ abstract class DatomicTransactionBase(
     case Composite(es) => getNs(es)
     case other         => throw MoleculeException("Unexpected head element: " + other)
   }
+
+  protected def unexpected(element: Element) = throw MoleculeException("Unexpected element: " + element)
+
+  protected def multipleModifierMissing(count: Int) = throw MoleculeException(
+    s"Please provide explicit `$update.multiple` to $update multiple entities " +
+      s"(found $count matching entities)."
+  )
 
   private def dup(element: String) = throw MoleculeException(s"Can't transact duplicate attribute `$element`.")
 

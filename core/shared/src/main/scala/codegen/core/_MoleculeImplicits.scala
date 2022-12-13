@@ -15,8 +15,10 @@ object _MoleculeImplicits extends CoreGenBase( "MoleculeImplicits", "") {
        |import scala.language.implicitConversions
        |
        |trait ${fileName}_ extends Keywords {
+       |  implicit def m(molecule: Molecule_00): MoleculeApi_00
        |$moleculeFactories
        |
+       |  implicit def m(composite: Composite_00): MoleculeApi_00
        |$compositeFactories
        |}""".stripMargin
   }

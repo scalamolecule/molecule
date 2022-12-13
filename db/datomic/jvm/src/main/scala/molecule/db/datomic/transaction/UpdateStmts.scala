@@ -9,7 +9,6 @@ import molecule.base.util.exceptions.MoleculeException
 import molecule.boilerplate.ast.MoleculeModel._
 import molecule.db.datomic.query.DatomicModel2Query
 import scala.annotation.tailrec
-import scala.collection.immutable.{Nil, Seq}
 
 class UpdateStmts(
   uniqueAttrs: List[String],
@@ -18,43 +17,44 @@ class UpdateStmts(
   isMultiple: Boolean,
 ) extends DatomicTransactionBase(elements, isUpsert) {
 
-  def getStmts: (Seq[AnyRef], Option[String], Seq[AnyRef], Seq[(String, Keyword, Seq[AnyRef], Boolean)]) = {
+  def resolve: (Seq[AnyRef], Option[String], Seq[AnyRef], Seq[(String, Keyword, Seq[AnyRef], Boolean)]) = {
     checkConflictingAttributes(elements, distinguishMode = true)
 
     val (eids, filterElements, data) = extract(elements, Nil, Nil, Nil)
 
     if (!isMultiple && eids.length > 1)
-      throw MoleculeException(s"Please provide explicit `$update.multiple` to $update multiple entities.")
+      multipleModifierMissing(eids.length)
 
     val (filterQuery, inputs) = if (eids.isEmpty && filterElements.nonEmpty) {
-      val filterElements1 = AttrOneManLong("Generic", "e", V) +: filterElements
+      val filterElements1 = AttrOneManLong("_Generic", "e", V) +: filterElements
       val (query, inputs) = new DatomicModel2Query[Any](filterElements1).getEidQueryWithInputs
       (Some(query), inputs)
     } else {
       (None, Nil)
     }
-    (eids.asInstanceOf[Seq[AnyRef]], filterQuery, inputs, data)
+    (eids, filterQuery, inputs, data)
   }
 
   @tailrec
   final private def extract(
     elements: Seq[Element],
-    eids: Seq[Any],
-    filter: Seq[Element],
+    eids: Seq[AnyRef],
+    filterElements: Seq[Element],
     data: Seq[(String, Keyword, Seq[AnyRef], Boolean)]
-  ): (Seq[Any], Seq[Element], Seq[(String, Keyword, Seq[AnyRef], Boolean)]) = {
+  ): (Seq[AnyRef], Seq[Element], Seq[(String, Keyword, Seq[AnyRef], Boolean)]) = {
     elements match {
       case element :: tail => element match {
-        case attr: Attr   => attr match {
-          case a: AttrOneMan => oneMan(tail, eids, filter, data, a)
-          case a: AttrOneTac => oneTac(tail, eids, filter, data, a)
+        case attr: Attr => attr match {
+          case a: AttrOneTac => oneTac(tail, eids, filterElements, data, a)
+          case a: AttrOneMan => oneMan(tail, eids, filterElements, data, a)
           case a: AttrSetMan => a.op match {
-            case Appl   => setApply(tail, eids, filter, data, a)
-            case Add    => extract(tail, eids, filter, data :+ setAdd(a))
-            case Swap   => extract(tail, eids, filter, data ++ setSwap(a))
-            case Remove => extract(tail, eids, filter, data ++ setRemove(a))
+            case Appl   => setApply(tail, eids, filterElements, data, a)
+            case Add    => extract(tail, eids, filterElements, data :+ setAdd(a))
+            case Swap   => extract(tail, eids, filterElements, data ++ setSwap(a))
+            case Remove => extract(tail, eids, filterElements, data ++ setRemove(a))
             case _      => throw MoleculeException(s"Unexpected $update operation for card-many attribute. Found:\n" + a)
           }
+
           case _: AttrSetTac => throw MoleculeException("Can only lookup entity with card-one attribute value. Found:\n" + attr)
           case _: AttrOneOpt => throw MoleculeException(s"Can't $update optional values. Found:\n" + attr)
           case _: AttrSetOpt => throw MoleculeException(s"Can't $update optional values. Found:\n" + attr)
@@ -64,47 +64,51 @@ class UpdateStmts(
         case _: Nested    => throw MoleculeException(s"Nested data structure not allowed in $update molecule.")
         case _: NestedOpt => throw MoleculeException(s"Optional nested data structure not allowed in $update molecule.")
 
-        case r@Ref(ns, a, _, CardOne) => extract(tail, eids, filter :+ r, data :+ ("ref", kw(ns, a), Nil, false))
+        case r@Ref(ns, a, _, CardOne) => extract(tail, eids, filterElements :+ r, data :+ ("ref", kw(ns, a), Nil, false))
         case r: Ref                   => throw MoleculeException(
           s"Can't $update attributes in card-many referenced namespaces. Found `${r.refAttr.capitalize}`"
         )
-        case b: BackRef               => extract(tail, eids, filter :+ b, data)
+        case b: BackRef               => extract(tail, eids, filterElements :+ b, data)
 
         case Composite(es) =>
           val (eids1, filters1, data1) = extractSubElements(es)
-          extract(tail, eids ++ eids1, filter ++ filters1, data ++ data1)
+          extract(tail, eids ++ eids1, filterElements ++ filters1, data ++ data1)
 
         case TxMetaData(es) =>
           if (data.isEmpty)
             throw MoleculeException(s"Can't $update tx meta data only.")
           val (eids1, filters1, data1) = extractSubElements(es)
-          extract(tail, eids ++ eids1, filter ++ filters1, (data :+ ("tx", null, Nil, false)) ++ data1)
-        case element        => unexpected(element)
+          extract(tail, eids ++ eids1, filterElements ++ filters1, (data :+ ("tx", null, Nil, false)) ++ data1)
+
+        case element => unexpected(element)
       }
-      case Nil             => (eids, filter, data)
+      case Nil             => (eids, filterElements, data)
     }
   }
 
 
   private def oneMan(
     tail: Seq[Element],
-    eids: Seq[Any],
-    filter: Seq[Element],
+    eids: Seq[AnyRef],
+    filterElements: Seq[Element],
     data: Seq[(String, Keyword, Seq[AnyRef], Boolean)],
     dataAttr: AttrOneMan
-  ): (Seq[Any], Seq[Element], Seq[(String, Keyword, Seq[AnyRef], Boolean)]) = {
+  ): (Seq[AnyRef], Seq[Element], Seq[(String, Keyword, Seq[AnyRef], Boolean)]) = {
     if (dataAttr.op != Appl)
       throw MoleculeException(s"Can't $update attributes without an applied value. Found:\n" + dataAttr)
     if (isUpsert) {
       // Disregard if value already exists
-      extract(tail, eids, filter, data :+ oneApply(dataAttr))
+      extract(tail, eids, filterElements, data :+ oneApply(dataAttr))
     } else {
       // Make sure current value exists
       val dummyFilterAttr = AttrOneTacInt(dataAttr.ns, dataAttr.attr, V, Nil, None, None, None)
-      extract(tail, eids, filter :+ dummyFilterAttr, data :+ oneApply(dataAttr))
+      extract(tail, eids, filterElements :+ dummyFilterAttr, data :+ oneApply(dataAttr))
     }
   }
   private def oneApply(attr: AttrOneMan): (String, Keyword, Seq[AnyRef], Boolean) = attr match {
+    case a if a.ns == "_Generic" => throw MoleculeException(
+      s"Generic attributes not allowed in update molecule. Found:\n" + a)
+
     case AttrOneManString(_, _, _, vs, _, _, _)     => addOneV[String](attr, vs, identity)
     case AttrOneManInt(_, _, _, vs, _, _, _)        => addOneV[Int](attr, vs, identity)
     case AttrOneManLong(_, _, _, vs, _, _, _)       => addOneV[Long](attr, vs, identity)
@@ -136,18 +140,22 @@ class UpdateStmts(
 
   private def oneTac(
     tail: Seq[Element],
-    eids: Seq[Any],
-    filter: Seq[Element],
+    eids: Seq[AnyRef],
+    filterElements: Seq[Element],
     data: Seq[(String, Keyword, Seq[AnyRef], Boolean)],
     filterAttr: AttrOneTac
-  ): (Seq[Any], Seq[Element], Seq[(String, Keyword, Seq[AnyRef], Boolean)]) = {
+  ): (Seq[AnyRef], Seq[Element], Seq[(String, Keyword, Seq[AnyRef], Boolean)]) = {
     filterAttr match {
-      case AttrOneTacLong("Generic", "e", _, eids1, _, _, _) =>
+      case AttrOneTacLong("_Generic", "eids", Appl, eids1, _, _, _) =>
         if (eids.nonEmpty)
           throw MoleculeException(s"Can't apply entity ids twice in $update.")
-        if (eids1.isEmpty)
-          throw MoleculeException("Empty list of entity ids not allowed.")
-        extract(tail, eids1, filter, data)
+        extract(tail, eids1.asInstanceOf[Seq[AnyRef]], filterElements, data)
+
+      case AttrOneTacLong("_Generic", "e", Appl, _, _, _, _) => throw MoleculeException(
+        "Can't update by applying entity ids to e_")
+
+      case a if a.ns == "_Generic" => throw MoleculeException(
+        s"Generic attributes not allowed in update molecule. Found:\n" + a)
 
       case uniqueFilterAttr if uniqueAttrs.contains(uniqueFilterAttr.name) =>
         if (eids.nonEmpty)
@@ -171,28 +179,28 @@ class UpdateStmts(
           case AttrOneTacShort(_, _, _, vs, _, _, _)      => vs.map(v => list(at, v.toInt))
           case AttrOneTacChar(_, _, _, vs, _, _, _)       => vs.map(v => list(at, v.toString))
         }
-        extract(tail, eids ++ lookupRefs, filter, data)
+        extract(tail, eids ++ lookupRefs, filterElements, data)
 
       case nonUniqueFilterAttr =>
-        extract(tail, eids, filter :+ nonUniqueFilterAttr, data)
+        extract(tail, eids, filterElements :+ nonUniqueFilterAttr, data)
     }
   }
 
 
   private def setApply(
     tail: Seq[Element],
-    eids: Seq[Any],
-    filter: Seq[Element],
+    eids: Seq[AnyRef],
+    filterElements: Seq[Element],
     data: Seq[(String, Keyword, Seq[AnyRef], Boolean)],
     dataAttr: AttrSetMan
-  ): (Seq[Any], Seq[Element], Seq[(String, Keyword, Seq[AnyRef], Boolean)]) = {
+  ): (Seq[AnyRef], Seq[Element], Seq[(String, Keyword, Seq[AnyRef], Boolean)]) = {
     if (isUpsert) {
       // Disregard if value already exists
-      extract(tail, eids, filter, data :+ setAdd(dataAttr, true))
+      extract(tail, eids, filterElements, data :+ setAdd(dataAttr, true))
     } else {
       // Make sure current value exists
       val dummyFilterAttr = AttrOneTacInt(dataAttr.ns, dataAttr.attr, V, Nil, None, None, None)
-      extract(tail, eids, filter :+ dummyFilterAttr, data :+ setAdd(dataAttr, true))
+      extract(tail, eids, filterElements :+ dummyFilterAttr, data :+ setAdd(dataAttr, true))
     }
   }
 
@@ -293,6 +301,9 @@ class UpdateStmts(
     case AttrSetManByte(_, _, _, Seq(set), _, _, _)       => removeSetVs[Byte](attr, set, _.toInt)
     case AttrSetManShort(_, _, _, Seq(set), _, _, _)      => removeSetVs[Short](attr, set, _.toInt)
     case AttrSetManChar(_, _, _, Seq(set), _, _, _)       => removeSetVs[Char](attr, set, _.toString)
+    case _                                                => throw MoleculeException(
+      s"Can only remove one Set of values for Set attribute `${attr.name}`. Found: $attr"
+    )
   }
   private def removeSetVs[T](
     attr: Attr,
@@ -306,7 +317,7 @@ class UpdateStmts(
 
   private def extractSubElements(
     elements: Seq[Element]
-  ): (Seq[Any], Seq[Element], Seq[(String, Keyword, Seq[AnyRef], Boolean)]) = {
+  ): (Seq[AnyRef], Seq[Element], Seq[(String, Keyword, Seq[AnyRef], Boolean)]) = {
     extract(elements, Nil, Nil, Nil)
   }
 

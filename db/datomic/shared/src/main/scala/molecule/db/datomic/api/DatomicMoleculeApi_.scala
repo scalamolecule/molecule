@@ -6,6 +6,10 @@ import molecule.core.api._
 import molecule.db.datomic.api.ops._
 
 
+class DatomicMoleculeApi_00(molecule: Molecule_00) extends MoleculeApi_00 {
+  override def delete: DatomicDeleteOps = new DatomicDeleteOps(molecule.elements)
+}
+
 class DatomicMoleculeApi_01[A](molecule: Molecule_01[A]) extends MoleculeApi_01[A] {
   override def save  : DatomicSaveOps     = new DatomicSaveOps(molecule.elements)
   override def insert: DatomicInsert_1[A] = new DatomicInsert_1[A](molecule.elements)

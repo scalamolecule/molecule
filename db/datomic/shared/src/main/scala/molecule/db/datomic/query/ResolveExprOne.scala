@@ -103,11 +103,11 @@ trait ResolveExprOne[Tpl] { self: SortOne_[Tpl] with SortOneOpt_[Tpl] with Base[
     sorter: Option[(Int, Int => (Row, Row) => Int)]
   ): Unit = {
     a match {
-      case ":Generic/e"  =>
+      case ":_Generic/e"  =>
         find += e
         addCast(res.j2s)
         sorter.foreach(sorts += _)
-      case ":Generic/tx" =>
+      case ":_Generic/tx" =>
         find += txVar
         addCast(res.j2s)
         sorter.foreach(sorts += _)
