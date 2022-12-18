@@ -4,11 +4,15 @@ package molecule.db.datomic.query.casting
 import java.util.{Iterator => jIterator, Map => jMap}
 import molecule.core.query.Model2Query
 import molecule.db.datomic.query.Base
-import scala.collection.mutable.ArrayBuffer
+import scala.annotation.tailrec
 
 
-trait NestOpt_[Tpl] { self: Model2Query[Tpl] with Base[Tpl]
-  with CastNestedOptBranch_[Tpl] with CastNestedOptLeaf_[Tpl] =>
+trait NestOpt_[Tpl]
+  extends CastNestedOptBranch_[Tpl]
+    with CastNestedOptLeaf_[Tpl]
+    with CastRow2Tpl_[Tpl]
+    with Base[Tpl]
+    with Model2Query[Tpl] {
 
   private lazy val levels = pullCastss.length
 
@@ -20,456 +24,543 @@ trait NestOpt_[Tpl] { self: Model2Query[Tpl] with Base[Tpl]
   private lazy val pullCasts6 = pullCastss(5)
   private lazy val pullCasts7 = pullCastss(6)
 
+  private lazy val pullSorts1 = pullSortss.head
+  private lazy val pullSorts2 = pullSortss(1)
+  private lazy val pullSorts3 = pullSortss(2)
+  private lazy val pullSorts4 = pullSortss(3)
+  private lazy val pullSorts5 = pullSortss(4)
+  private lazy val pullSorts6 = pullSortss(5)
+  private lazy val pullSorts7 = pullSortss(6)
+
   private lazy val pullBranch1: jIterator[_] => List[Any] = {
-    if (levels == 1) pullLeaf(pullCasts1) else pullBranch(pullCasts1, pullBranch2)
-  }
-  private lazy val pullBranch2: jIterator[_] => List[Any] = {
-    if (levels == 2) pullLeaf(pullCasts2) else pullBranch(pullCasts2, pullBranch3)
-  }
-  private lazy val pullBranch3: jIterator[_] => List[Any] = {
-    if (levels == 3) pullLeaf(pullCasts3) else pullBranch(pullCasts3, pullBranch4)
-  }
-  private lazy val pullBranch4: jIterator[_] => List[Any] = {
-    if (levels == 4) pullLeaf(pullCasts4) else pullBranch(pullCasts4, pullBranch5)
-  }
-  private lazy val pullBranch5: jIterator[_] => List[Any] = {
-    if (levels == 5) pullLeaf(pullCasts5) else pullBranch(pullCasts5, pullBranch6)
-  }
-  private lazy val pullBranch6: jIterator[_] => List[Any] = {
-    if (levels == 6) pullLeaf(pullCasts6) else pullBranch(pullCasts6, pullBranch7)
-  }
-  private lazy val pullBranch7: jIterator[_] => List[Any] = {
-    pullLeaf(pullCasts7)
+    if (levels == 1)
+      pullLeaf(aritiess(1), pullCasts1, pullSorts1)
+    else
+      pullBranch(aritiess(1), pullCasts1, pullSorts1, pullBranch2, refDepths(1))
   }
 
-  final protected lazy val pullRow2tpl: Row => Tpl = {
-    val casters = castss.last
-    casters.length match {
-      case 0 => pullBranch0_0
-      case 1 => pullBranch0_1(casters)
-      case 2 => pullBranch0_2(casters)
-      case 3 => pullBranch0_3(casters)
-      case 4 => pullBranch0_4(casters)
-      case 5 => pullBranch0_5(casters)
-      case 6 => pullBranch0_6(casters)
-      case 7 => pullBranch0_7(casters)
-      case 8 => pullBranch0_8(casters)
-      case 9 => pullBranch0_9(casters)
-      case 10 => pullBranch0_10(casters)
-      case 11 => pullBranch0_11(casters)
-      case 12 => pullBranch0_12(casters)
-      case 13 => pullBranch0_13(casters)
-      case 14 => pullBranch0_14(casters)
-      case 15 => pullBranch0_15(casters)
-      case 16 => pullBranch0_16(casters)
-      case 17 => pullBranch0_17(casters)
-      case 18 => pullBranch0_18(casters)
-      case 19 => pullBranch0_19(casters)
-      case 20 => pullBranch0_20(casters)
-      case 21 => pullBranch0_21(casters)
+  private lazy val pullBranch2: jIterator[_] => List[Any] = {
+    if (levels == 2)
+      pullLeaf(aritiess(2), pullCasts2, pullSorts2)
+    else
+      pullBranch(aritiess(2), pullCasts2, pullSorts2, pullBranch3, refDepths(2))
+  }
+
+  private lazy val pullBranch3: jIterator[_] => List[Any] = {
+    if (levels == 3)
+      pullLeaf(aritiess(3), pullCasts3, pullSorts3)
+    else
+      pullBranch(aritiess(3), pullCasts3, pullSorts3, pullBranch4, refDepths(3))
+  }
+
+  private lazy val pullBranch4: jIterator[_] => List[Any] = {
+    if (levels == 4)
+      pullLeaf(aritiess(4), pullCasts4, pullSorts4)
+    else
+      pullBranch(aritiess(4), pullCasts4, pullSorts4, pullBranch5, refDepths(4))
+  }
+
+  private lazy val pullBranch5: jIterator[_] => List[Any] = {
+    if (levels == 5)
+      pullLeaf(aritiess(5), pullCasts5, pullSorts5)
+    else
+      pullBranch(aritiess(5), pullCasts5, pullSorts5, pullBranch6, refDepths(5))
+  }
+
+  private lazy val pullBranch6: jIterator[_] => List[Any] = {
+    if (levels == 6)
+      pullLeaf(aritiess(6), pullCasts6, pullSorts6)
+    else
+      pullBranch(aritiess(6), pullCasts6, pullSorts6, pullBranch7, refDepths(6))
+  }
+
+  private lazy val pullBranch7: jIterator[_] => List[Any] = {
+    pullLeaf(aritiess(7), pullCasts7, pullSorts7)
+  }
+
+  protected lazy val pullNestedData: AnyRef => AnyRef = {
+    (rowValue: AnyRef) => pullBranch1(rowValue.asInstanceOf[jMap[_, _]].values.iterator)
+  }
+
+  @tailrec
+  final private def resolveArities(
+    arities: List[List[Int]],
+    casts: List[AnyRef => AnyRef],
+    rowIndex: Int,
+    rowIndexTx: Int,
+    acc: List[Row => AnyRef]
+  ): List[Row => AnyRef] = {
+    arities match {
+      case List(1) :: as =>
+        val cast = (row: Row) => casts.head(row.get(rowIndex))
+        resolveArities(as, casts.tail, rowIndex + 1, rowIndexTx, acc :+ cast)
+
+      // NestedOpt
+      case List(-1) :: as =>
+        val cast = (row: Row) => casts.head(row.get(rowIndex))
+        resolveArities(as, casts.tail, rowIndexTx, rowIndexTx, acc :+ cast)
+
+      // Composite branch
+      case ii :: as if ii.last == -1 =>
+        val n                      = ii.length - 1
+        val (tplCasts, moreCasts0) = casts.splitAt(n)
+
+        // Explicitly pull branch in composite tuple
+        val nested = (row: Row) => pullBranch1(row.get(rowIndex + n).asInstanceOf[jMap[_, _]].values.iterator)
+        val cast   = (row: Row) =>
+          castRow2Tpl(ii.map(List(_)), tplCasts, rowIndex, Some(nested(row)))(row).asInstanceOf[AnyRef]
+
+        // From here on it is tx meta data
+        val moreCasts = moreCasts0.tail // ignore
+        resolveArities(as, moreCasts, rowIndexTx, 0, acc :+ cast)
+
+      // Top level composite (can be before nested and after in tx meta data)
+      case ii :: as =>
+        val n                     = ii.length
+        val (tplCasts, moreCasts) = casts.splitAt(n)
+        val tplCaster             = castRow2Tpl(ii.map(List(_)), tplCasts, rowIndex, None)
+        val cast                  = (row: Row) => tplCaster(row).asInstanceOf[AnyRef]
+        resolveArities(as, moreCasts, rowIndex + n, rowIndexTx, acc :+ cast)
+
+      case Nil => acc
     }
   }
 
-  final private def pullBranch0_0: Row => Tpl = {
-    (row: Row) => pullBranch1(row.get(0).asInstanceOf[jMap[_, _]].values.iterator).asInstanceOf[Tpl]
+  final protected lazy val pullRow2tpl: Row => Tpl = {
+    val arities    = aritiess.head
+    val casts      = castss.head
+    val rowIndexTx = arities.flatten.takeWhile(_ != -1).sum + 1
+    val casters    = resolveArities(arities, casts, 0, rowIndexTx, Nil)
+    casters.length match {
+      case 1 => cast1(casters)
+      case 2 => cast2(casters)
+      case 3 => cast3(casters)
+      case 4 => cast4(casters)
+      case 5 => cast5(casters)
+      case 6 => cast6(casters)
+      case 7 => cast7(casters)
+      case 8 => cast8(casters)
+      case 9 => cast9(casters)
+      case 10 => cast10(casters)
+      case 11 => cast11(casters)
+      case 12 => cast12(casters)
+      case 13 => cast13(casters)
+      case 14 => cast14(casters)
+      case 15 => cast15(casters)
+      case 16 => cast16(casters)
+      case 17 => cast17(casters)
+      case 18 => cast18(casters)
+      case 19 => cast19(casters)
+      case 20 => cast20(casters)
+      case 21 => cast21(casters)
+      case 22 => cast22(casters)
+    }
   }
 
-  final private def pullBranch0_1(casters: List[AnyRef => AnyRef]): Row => Tpl = {
+  final private def cast1(casters: List[Row => AnyRef]): Row => Tpl = {
     val List(c1) = casters
     (row: Row) =>
       (
-        c1(row.get(0)),
-        pullBranch1(row.get(1).asInstanceOf[jMap[_, _]].values.iterator)
+        c1(row)
       ).asInstanceOf[Tpl]
   }
 
-  final private def pullBranch0_2(casters: List[AnyRef => AnyRef]): Row => Tpl = {
+  final private def cast2(casters: List[Row => AnyRef]): Row => Tpl = {
     val List(c1, c2) = casters
     (row: Row) =>
       (
-        c1(row.get(0)),
-        c2(row.get(1)),
-        pullBranch1(row.get(2).asInstanceOf[jMap[_, _]].values.iterator)
+        c1(row),
+        c2(row)
       ).asInstanceOf[Tpl]
   }
 
-  final private def pullBranch0_3(casters: List[AnyRef => AnyRef]): Row => Tpl = {
+  final private def cast3(casters: List[Row => AnyRef]): Row => Tpl = {
     val List(c1, c2, c3) = casters
     (row: Row) =>
       (
-        c1(row.get(0)),
-        c2(row.get(1)),
-        c3(row.get(2)),
-        pullBranch1(row.get(3).asInstanceOf[jMap[_, _]].values.iterator)
+        c1(row),
+        c2(row),
+        c3(row)
       ).asInstanceOf[Tpl]
   }
 
-  final private def pullBranch0_4(casters: List[AnyRef => AnyRef]): Row => Tpl = {
+  final private def cast4(casters: List[Row => AnyRef]): Row => Tpl = {
     val List(c1, c2, c3, c4) = casters
     (row: Row) =>
       (
-        c1(row.get(0)),
-        c2(row.get(1)),
-        c3(row.get(2)),
-        c4(row.get(3)),
-        pullBranch1(row.get(4).asInstanceOf[jMap[_, _]].values.iterator)
+        c1(row),
+        c2(row),
+        c3(row),
+        c4(row)
       ).asInstanceOf[Tpl]
   }
 
-  final private def pullBranch0_5(casters: List[AnyRef => AnyRef]): Row => Tpl = {
+  final private def cast5(casters: List[Row => AnyRef]): Row => Tpl = {
     val List(c1, c2, c3, c4, c5) = casters
     (row: Row) =>
       (
-        c1(row.get(0)),
-        c2(row.get(1)),
-        c3(row.get(2)),
-        c4(row.get(3)),
-        c5(row.get(4)),
-        pullBranch1(row.get(5).asInstanceOf[jMap[_, _]].values.iterator)
+        c1(row),
+        c2(row),
+        c3(row),
+        c4(row),
+        c5(row)
       ).asInstanceOf[Tpl]
   }
 
-  final private def pullBranch0_6(casters: List[AnyRef => AnyRef]): Row => Tpl = {
+  final private def cast6(casters: List[Row => AnyRef]): Row => Tpl = {
     val List(c1, c2, c3, c4, c5, c6) = casters
     (row: Row) =>
       (
-        c1(row.get(0)),
-        c2(row.get(1)),
-        c3(row.get(2)),
-        c4(row.get(3)),
-        c5(row.get(4)),
-        c6(row.get(5)),
-        pullBranch1(row.get(6).asInstanceOf[jMap[_, _]].values.iterator)
+        c1(row),
+        c2(row),
+        c3(row),
+        c4(row),
+        c5(row),
+        c6(row)
       ).asInstanceOf[Tpl]
   }
 
-  final private def pullBranch0_7(casters: List[AnyRef => AnyRef]): Row => Tpl = {
+  final private def cast7(casters: List[Row => AnyRef]): Row => Tpl = {
     val List(c1, c2, c3, c4, c5, c6, c7) = casters
     (row: Row) =>
       (
-        c1(row.get(0)),
-        c2(row.get(1)),
-        c3(row.get(2)),
-        c4(row.get(3)),
-        c5(row.get(4)),
-        c6(row.get(5)),
-        c7(row.get(6)),
-        pullBranch1(row.get(7).asInstanceOf[jMap[_, _]].values.iterator)
+        c1(row),
+        c2(row),
+        c3(row),
+        c4(row),
+        c5(row),
+        c6(row),
+        c7(row)
       ).asInstanceOf[Tpl]
   }
 
-  final private def pullBranch0_8(casters: List[AnyRef => AnyRef]): Row => Tpl = {
+  final private def cast8(casters: List[Row => AnyRef]): Row => Tpl = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8) = casters
     (row: Row) =>
       (
-        c1(row.get(0)),
-        c2(row.get(1)),
-        c3(row.get(2)),
-        c4(row.get(3)),
-        c5(row.get(4)),
-        c6(row.get(5)),
-        c7(row.get(6)),
-        c8(row.get(7)),
-        pullBranch1(row.get(8).asInstanceOf[jMap[_, _]].values.iterator)
+        c1(row),
+        c2(row),
+        c3(row),
+        c4(row),
+        c5(row),
+        c6(row),
+        c7(row),
+        c8(row)
       ).asInstanceOf[Tpl]
   }
 
-  final private def pullBranch0_9(casters: List[AnyRef => AnyRef]): Row => Tpl = {
+  final private def cast9(casters: List[Row => AnyRef]): Row => Tpl = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9) = casters
     (row: Row) =>
       (
-        c1(row.get(0)),
-        c2(row.get(1)),
-        c3(row.get(2)),
-        c4(row.get(3)),
-        c5(row.get(4)),
-        c6(row.get(5)),
-        c7(row.get(6)),
-        c8(row.get(7)),
-        c9(row.get(8)),
-        pullBranch1(row.get(9).asInstanceOf[jMap[_, _]].values.iterator)
+        c1(row),
+        c2(row),
+        c3(row),
+        c4(row),
+        c5(row),
+        c6(row),
+        c7(row),
+        c8(row),
+        c9(row)
       ).asInstanceOf[Tpl]
   }
 
-  final private def pullBranch0_10(casters: List[AnyRef => AnyRef]): Row => Tpl = {
+  final private def cast10(casters: List[Row => AnyRef]): Row => Tpl = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10) = casters
     (row: Row) =>
       (
-        c1(row.get(0)),
-        c2(row.get(1)),
-        c3(row.get(2)),
-        c4(row.get(3)),
-        c5(row.get(4)),
-        c6(row.get(5)),
-        c7(row.get(6)),
-        c8(row.get(7)),
-        c9(row.get(8)),
-        c10(row.get(9)),
-        pullBranch1(row.get(10).asInstanceOf[jMap[_, _]].values.iterator)
+        c1(row),
+        c2(row),
+        c3(row),
+        c4(row),
+        c5(row),
+        c6(row),
+        c7(row),
+        c8(row),
+        c9(row),
+        c10(row)
       ).asInstanceOf[Tpl]
   }
 
-  final private def pullBranch0_11(casters: List[AnyRef => AnyRef]): Row => Tpl = {
+  final private def cast11(casters: List[Row => AnyRef]): Row => Tpl = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11) = casters
     (row: Row) =>
       (
-        c1(row.get(0)),
-        c2(row.get(1)),
-        c3(row.get(2)),
-        c4(row.get(3)),
-        c5(row.get(4)),
-        c6(row.get(5)),
-        c7(row.get(6)),
-        c8(row.get(7)),
-        c9(row.get(8)),
-        c10(row.get(9)),
-        c11(row.get(10)),
-        pullBranch1(row.get(11).asInstanceOf[jMap[_, _]].values.iterator)
+        c1(row),
+        c2(row),
+        c3(row),
+        c4(row),
+        c5(row),
+        c6(row),
+        c7(row),
+        c8(row),
+        c9(row),
+        c10(row),
+        c11(row)
       ).asInstanceOf[Tpl]
   }
 
-  final private def pullBranch0_12(casters: List[AnyRef => AnyRef]): Row => Tpl = {
+  final private def cast12(casters: List[Row => AnyRef]): Row => Tpl = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12) = casters
     (row: Row) =>
       (
-        c1(row.get(0)),
-        c2(row.get(1)),
-        c3(row.get(2)),
-        c4(row.get(3)),
-        c5(row.get(4)),
-        c6(row.get(5)),
-        c7(row.get(6)),
-        c8(row.get(7)),
-        c9(row.get(8)),
-        c10(row.get(9)),
-        c11(row.get(10)),
-        c12(row.get(11)),
-        pullBranch1(row.get(12).asInstanceOf[jMap[_, _]].values.iterator)
+        c1(row),
+        c2(row),
+        c3(row),
+        c4(row),
+        c5(row),
+        c6(row),
+        c7(row),
+        c8(row),
+        c9(row),
+        c10(row),
+        c11(row),
+        c12(row)
       ).asInstanceOf[Tpl]
   }
 
-  final private def pullBranch0_13(casters: List[AnyRef => AnyRef]): Row => Tpl = {
+  final private def cast13(casters: List[Row => AnyRef]): Row => Tpl = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13) = casters
     (row: Row) =>
       (
-        c1(row.get(0)),
-        c2(row.get(1)),
-        c3(row.get(2)),
-        c4(row.get(3)),
-        c5(row.get(4)),
-        c6(row.get(5)),
-        c7(row.get(6)),
-        c8(row.get(7)),
-        c9(row.get(8)),
-        c10(row.get(9)),
-        c11(row.get(10)),
-        c12(row.get(11)),
-        c13(row.get(12)),
-        pullBranch1(row.get(13).asInstanceOf[jMap[_, _]].values.iterator)
+        c1(row),
+        c2(row),
+        c3(row),
+        c4(row),
+        c5(row),
+        c6(row),
+        c7(row),
+        c8(row),
+        c9(row),
+        c10(row),
+        c11(row),
+        c12(row),
+        c13(row)
       ).asInstanceOf[Tpl]
   }
 
-  final private def pullBranch0_14(casters: List[AnyRef => AnyRef]): Row => Tpl = {
+  final private def cast14(casters: List[Row => AnyRef]): Row => Tpl = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14) = casters
     (row: Row) =>
       (
-        c1(row.get(0)),
-        c2(row.get(1)),
-        c3(row.get(2)),
-        c4(row.get(3)),
-        c5(row.get(4)),
-        c6(row.get(5)),
-        c7(row.get(6)),
-        c8(row.get(7)),
-        c9(row.get(8)),
-        c10(row.get(9)),
-        c11(row.get(10)),
-        c12(row.get(11)),
-        c13(row.get(12)),
-        c14(row.get(13)),
-        pullBranch1(row.get(14).asInstanceOf[jMap[_, _]].values.iterator)
+        c1(row),
+        c2(row),
+        c3(row),
+        c4(row),
+        c5(row),
+        c6(row),
+        c7(row),
+        c8(row),
+        c9(row),
+        c10(row),
+        c11(row),
+        c12(row),
+        c13(row),
+        c14(row)
       ).asInstanceOf[Tpl]
   }
 
-  final private def pullBranch0_15(casters: List[AnyRef => AnyRef]): Row => Tpl = {
+  final private def cast15(casters: List[Row => AnyRef]): Row => Tpl = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15) = casters
     (row: Row) =>
       (
-        c1(row.get(0)),
-        c2(row.get(1)),
-        c3(row.get(2)),
-        c4(row.get(3)),
-        c5(row.get(4)),
-        c6(row.get(5)),
-        c7(row.get(6)),
-        c8(row.get(7)),
-        c9(row.get(8)),
-        c10(row.get(9)),
-        c11(row.get(10)),
-        c12(row.get(11)),
-        c13(row.get(12)),
-        c14(row.get(13)),
-        c15(row.get(14)),
-        pullBranch1(row.get(15).asInstanceOf[jMap[_, _]].values.iterator)
+        c1(row),
+        c2(row),
+        c3(row),
+        c4(row),
+        c5(row),
+        c6(row),
+        c7(row),
+        c8(row),
+        c9(row),
+        c10(row),
+        c11(row),
+        c12(row),
+        c13(row),
+        c14(row),
+        c15(row)
       ).asInstanceOf[Tpl]
   }
 
-  final private def pullBranch0_16(casters: List[AnyRef => AnyRef]): Row => Tpl = {
+  final private def cast16(casters: List[Row => AnyRef]): Row => Tpl = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16) = casters
     (row: Row) =>
       (
-        c1(row.get(0)),
-        c2(row.get(1)),
-        c3(row.get(2)),
-        c4(row.get(3)),
-        c5(row.get(4)),
-        c6(row.get(5)),
-        c7(row.get(6)),
-        c8(row.get(7)),
-        c9(row.get(8)),
-        c10(row.get(9)),
-        c11(row.get(10)),
-        c12(row.get(11)),
-        c13(row.get(12)),
-        c14(row.get(13)),
-        c15(row.get(14)),
-        c16(row.get(15)),
-        pullBranch1(row.get(16).asInstanceOf[jMap[_, _]].values.iterator)
+        c1(row),
+        c2(row),
+        c3(row),
+        c4(row),
+        c5(row),
+        c6(row),
+        c7(row),
+        c8(row),
+        c9(row),
+        c10(row),
+        c11(row),
+        c12(row),
+        c13(row),
+        c14(row),
+        c15(row),
+        c16(row)
       ).asInstanceOf[Tpl]
   }
 
-  final private def pullBranch0_17(casters: List[AnyRef => AnyRef]): Row => Tpl = {
+  final private def cast17(casters: List[Row => AnyRef]): Row => Tpl = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17) = casters
     (row: Row) =>
       (
-        c1(row.get(0)),
-        c2(row.get(1)),
-        c3(row.get(2)),
-        c4(row.get(3)),
-        c5(row.get(4)),
-        c6(row.get(5)),
-        c7(row.get(6)),
-        c8(row.get(7)),
-        c9(row.get(8)),
-        c10(row.get(9)),
-        c11(row.get(10)),
-        c12(row.get(11)),
-        c13(row.get(12)),
-        c14(row.get(13)),
-        c15(row.get(14)),
-        c16(row.get(15)),
-        c17(row.get(16)),
-        pullBranch1(row.get(17).asInstanceOf[jMap[_, _]].values.iterator)
+        c1(row),
+        c2(row),
+        c3(row),
+        c4(row),
+        c5(row),
+        c6(row),
+        c7(row),
+        c8(row),
+        c9(row),
+        c10(row),
+        c11(row),
+        c12(row),
+        c13(row),
+        c14(row),
+        c15(row),
+        c16(row),
+        c17(row)
       ).asInstanceOf[Tpl]
   }
 
-  final private def pullBranch0_18(casters: List[AnyRef => AnyRef]): Row => Tpl = {
+  final private def cast18(casters: List[Row => AnyRef]): Row => Tpl = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18) = casters
     (row: Row) =>
       (
-        c1(row.get(0)),
-        c2(row.get(1)),
-        c3(row.get(2)),
-        c4(row.get(3)),
-        c5(row.get(4)),
-        c6(row.get(5)),
-        c7(row.get(6)),
-        c8(row.get(7)),
-        c9(row.get(8)),
-        c10(row.get(9)),
-        c11(row.get(10)),
-        c12(row.get(11)),
-        c13(row.get(12)),
-        c14(row.get(13)),
-        c15(row.get(14)),
-        c16(row.get(15)),
-        c17(row.get(16)),
-        c18(row.get(17)),
-        pullBranch1(row.get(18).asInstanceOf[jMap[_, _]].values.iterator)
+        c1(row),
+        c2(row),
+        c3(row),
+        c4(row),
+        c5(row),
+        c6(row),
+        c7(row),
+        c8(row),
+        c9(row),
+        c10(row),
+        c11(row),
+        c12(row),
+        c13(row),
+        c14(row),
+        c15(row),
+        c16(row),
+        c17(row),
+        c18(row)
       ).asInstanceOf[Tpl]
   }
 
-  final private def pullBranch0_19(casters: List[AnyRef => AnyRef]): Row => Tpl = {
+  final private def cast19(casters: List[Row => AnyRef]): Row => Tpl = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19) = casters
     (row: Row) =>
       (
-        c1(row.get(0)),
-        c2(row.get(1)),
-        c3(row.get(2)),
-        c4(row.get(3)),
-        c5(row.get(4)),
-        c6(row.get(5)),
-        c7(row.get(6)),
-        c8(row.get(7)),
-        c9(row.get(8)),
-        c10(row.get(9)),
-        c11(row.get(10)),
-        c12(row.get(11)),
-        c13(row.get(12)),
-        c14(row.get(13)),
-        c15(row.get(14)),
-        c16(row.get(15)),
-        c17(row.get(16)),
-        c18(row.get(17)),
-        c19(row.get(18)),
-        pullBranch1(row.get(19).asInstanceOf[jMap[_, _]].values.iterator)
+        c1(row),
+        c2(row),
+        c3(row),
+        c4(row),
+        c5(row),
+        c6(row),
+        c7(row),
+        c8(row),
+        c9(row),
+        c10(row),
+        c11(row),
+        c12(row),
+        c13(row),
+        c14(row),
+        c15(row),
+        c16(row),
+        c17(row),
+        c18(row),
+        c19(row)
       ).asInstanceOf[Tpl]
   }
 
-  final private def pullBranch0_20(casters: List[AnyRef => AnyRef]): Row => Tpl = {
+  final private def cast20(casters: List[Row => AnyRef]): Row => Tpl = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20) = casters
     (row: Row) =>
       (
-        c1(row.get(0)),
-        c2(row.get(1)),
-        c3(row.get(2)),
-        c4(row.get(3)),
-        c5(row.get(4)),
-        c6(row.get(5)),
-        c7(row.get(6)),
-        c8(row.get(7)),
-        c9(row.get(8)),
-        c10(row.get(9)),
-        c11(row.get(10)),
-        c12(row.get(11)),
-        c13(row.get(12)),
-        c14(row.get(13)),
-        c15(row.get(14)),
-        c16(row.get(15)),
-        c17(row.get(16)),
-        c18(row.get(17)),
-        c19(row.get(18)),
-        c20(row.get(19)),
-        pullBranch1(row.get(20).asInstanceOf[jMap[_, _]].values.iterator)
+        c1(row),
+        c2(row),
+        c3(row),
+        c4(row),
+        c5(row),
+        c6(row),
+        c7(row),
+        c8(row),
+        c9(row),
+        c10(row),
+        c11(row),
+        c12(row),
+        c13(row),
+        c14(row),
+        c15(row),
+        c16(row),
+        c17(row),
+        c18(row),
+        c19(row),
+        c20(row)
       ).asInstanceOf[Tpl]
   }
 
-  final private def pullBranch0_21(casters: List[AnyRef => AnyRef]): Row => Tpl = {
+  final private def cast21(casters: List[Row => AnyRef]): Row => Tpl = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c21) = casters
     (row: Row) =>
       (
-        c1(row.get(0)),
-        c2(row.get(1)),
-        c3(row.get(2)),
-        c4(row.get(3)),
-        c5(row.get(4)),
-        c6(row.get(5)),
-        c7(row.get(6)),
-        c8(row.get(7)),
-        c9(row.get(8)),
-        c10(row.get(9)),
-        c11(row.get(10)),
-        c12(row.get(11)),
-        c13(row.get(12)),
-        c14(row.get(13)),
-        c15(row.get(14)),
-        c16(row.get(15)),
-        c17(row.get(16)),
-        c18(row.get(17)),
-        c19(row.get(18)),
-        c20(row.get(19)),
-        c21(row.get(20)),
-        pullBranch1(row.get(21).asInstanceOf[jMap[_, _]].values.iterator)
+        c1(row),
+        c2(row),
+        c3(row),
+        c4(row),
+        c5(row),
+        c6(row),
+        c7(row),
+        c8(row),
+        c9(row),
+        c10(row),
+        c11(row),
+        c12(row),
+        c13(row),
+        c14(row),
+        c15(row),
+        c16(row),
+        c17(row),
+        c18(row),
+        c19(row),
+        c20(row),
+        c21(row)
+      ).asInstanceOf[Tpl]
+  }
+
+  final private def cast22(casters: List[Row => AnyRef]): Row => Tpl = {
+    val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c21, c22) = casters
+    (row: Row) =>
+      (
+        c1(row),
+        c2(row),
+        c3(row),
+        c4(row),
+        c5(row),
+        c6(row),
+        c7(row),
+        c8(row),
+        c9(row),
+        c10(row),
+        c11(row),
+        c12(row),
+        c13(row),
+        c14(row),
+        c15(row),
+        c16(row),
+        c17(row),
+        c18(row),
+        c19(row),
+        c20(row),
+        c21(row),
+        c22(row)
       ).asInstanceOf[Tpl]
   }
 }

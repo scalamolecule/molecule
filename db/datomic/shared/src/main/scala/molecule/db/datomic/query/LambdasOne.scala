@@ -14,7 +14,8 @@ trait LambdasOne extends ResolveBase {
   protected lazy val j2sLong      : AnyRef => AnyRef = identity
   protected lazy val j2sFloat     : AnyRef => AnyRef = identity
   protected lazy val j2sDouble    : AnyRef => AnyRef = identity
-  protected lazy val j2sBoolean   : AnyRef => AnyRef = identity
+  protected lazy val j2sBoolean   : AnyRef => AnyRef =
+    identity
   protected lazy val j2sBigInt    : AnyRef => AnyRef = {
     case v: jBigInt => BigInt(v)
     case v          => BigInt(v.toString)
@@ -224,6 +225,18 @@ trait LambdasOne extends ResolveBase {
 
   // Nested opt ---------------------------------------------------------------------
 
+  lazy val it2String2    : AnyRef => AnyRef = (v: AnyRef) => v match {
+    case `none`    => nullValue
+    case v: String => v.asInstanceOf[AnyRef]
+    case other     => unexpectedValue(other)
+  }
+  lazy val it2Int2       : AnyRef => AnyRef = (v: AnyRef) => v match {
+    case v: Integer => v.toInt.asInstanceOf[AnyRef]
+    case `none`     => nullValue
+    case other      => unexpectedValue(other)
+  }
+
+
   lazy val it2String    : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
     case `none`    => nullValue
     case v: String => v
@@ -250,9 +263,9 @@ trait LambdasOne extends ResolveBase {
     case other      => unexpectedValue(other)
   }
   lazy val it2Boolean   : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case v: Boolean => v
-    case `none`     => nullValue
-    case other      => unexpectedValue(other)
+    case v: jBoolean => v
+    case `none`      => nullValue
+    case other       => unexpectedValue(other)
   }
   lazy val it2BigInt    : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
     case v: jBigInt => BigInt(v)

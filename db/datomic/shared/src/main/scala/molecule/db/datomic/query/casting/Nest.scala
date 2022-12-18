@@ -9,7 +9,6 @@ import molecule.db.datomic.query.Base
 trait Nest[Tpl] { self: Model2Query[Tpl]
   with Base[Tpl]
   with CastNestedBranch_[Tpl] =>
-  //  with CastTpl_[Tpl] =>
 
   private var row    : Row = new jArrayList[AnyRef]()
   private var prevRow: Row = new jArrayList[AnyRef]()
@@ -48,21 +47,21 @@ trait Nest[Tpl] { self: Model2Query[Tpl]
   private lazy val i7 = i6 + aritiess(6).flatten.takeWhile(_ != -1).sum
 
   private lazy val rowIndexTx                          = row.size() - txAttrs
-  private lazy val tplBranch0: (Row, List[Any]) => Tpl = castBranch[Tpl](aritiess(0), castss(0), i0, rowIndexTx = rowIndexTx)
-  private lazy val tplBranch1: (Row, List[Any]) => Any = castBranch[Any](aritiess(1), castss(1), i1)
-  private lazy val tplBranch2: (Row, List[Any]) => Any = castBranch[Any](aritiess(2), castss(2), i2)
-  private lazy val tplBranch3: (Row, List[Any]) => Any = castBranch[Any](aritiess(3), castss(3), i3)
-  private lazy val tplBranch4: (Row, List[Any]) => Any = castBranch[Any](aritiess(4), castss(4), i4)
-  private lazy val tplBranch5: (Row, List[Any]) => Any = castBranch[Any](aritiess(5), castss(5), i5)
-  private lazy val tplBranch6: (Row, List[Any]) => Any = castBranch[Any](aritiess(6), castss(6), i6)
+  private lazy val tplBranch0: (Row, List[Any]) => Tpl = castBranch[Tpl](aritiess(0), castss(0), i0, rowIndexTx)
+  private lazy val tplBranch1: (Row, List[Any]) => Any = castBranch[Any](aritiess(1), castss(1), i1, 0)
+  private lazy val tplBranch2: (Row, List[Any]) => Any = castBranch[Any](aritiess(2), castss(2), i2, 0)
+  private lazy val tplBranch3: (Row, List[Any]) => Any = castBranch[Any](aritiess(3), castss(3), i3, 0)
+  private lazy val tplBranch4: (Row, List[Any]) => Any = castBranch[Any](aritiess(4), castss(4), i4, 0)
+  private lazy val tplBranch5: (Row, List[Any]) => Any = castBranch[Any](aritiess(5), castss(5), i5, 0)
+  private lazy val tplBranch6: (Row, List[Any]) => Any = castBranch[Any](aritiess(6), castss(6), i6, 0)
 
-  private lazy val tplLeaf1: Row => Any = castTpl(aritiess(1), castss(1), i1)
-  private lazy val tplLeaf2: Row => Any = castTpl(aritiess(2), castss(2), i2)
-  private lazy val tplLeaf3: Row => Any = castTpl(aritiess(3), castss(3), i3)
-  private lazy val tplLeaf4: Row => Any = castTpl(aritiess(4), castss(4), i4)
-  private lazy val tplLeaf5: Row => Any = castTpl(aritiess(5), castss(5), i5)
-  private lazy val tplLeaf6: Row => Any = castTpl(aritiess(6), castss(6), i6)
-  private lazy val tplLeaf7: Row => Any = castTpl(aritiess(7), castss(7), i7)
+  private lazy val tplLeaf1: Row => Any = castRow2Tpl(aritiess(1), castss(1), i1, None)
+  private lazy val tplLeaf2: Row => Any = castRow2Tpl(aritiess(2), castss(2), i2, None)
+  private lazy val tplLeaf3: Row => Any = castRow2Tpl(aritiess(3), castss(3), i3, None)
+  private lazy val tplLeaf4: Row => Any = castRow2Tpl(aritiess(4), castss(4), i4, None)
+  private lazy val tplLeaf5: Row => Any = castRow2Tpl(aritiess(5), castss(5), i5, None)
+  private lazy val tplLeaf6: Row => Any = castRow2Tpl(aritiess(6), castss(6), i6, None)
+  private lazy val tplLeaf7: Row => Any = castRow2Tpl(aritiess(7), castss(7), i7, None)
 
   private var acc0: List[Tpl] = List.empty[Tpl]
   private var acc1: List[Any] = List.empty[Any]

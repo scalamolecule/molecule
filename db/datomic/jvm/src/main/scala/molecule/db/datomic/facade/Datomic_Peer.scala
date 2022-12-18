@@ -34,20 +34,22 @@ trait Datomic_Peer extends JavaConversions {
     schema: SchemaTransaction,
     protocol: String,
     dbIdentifier: String,
+    isFreeVersion: Boolean
   ): Conn_Peer = {
     val id = if (dbIdentifier == "") randomUUID().toString else dbIdentifier
-    Conn_Peer(schema, s"datomic:$protocol://$id")
+    Conn_Peer(schema, s"datomic:$protocol://$id", isFreeVersion)
   }
 
   def recreateDbFromEdn(
     schema: SchemaTransaction,
     protocol: String = "mem",
-    dbIdentifier: String = ""
+    dbIdentifier: String = "",
+    isFreeVersion: Boolean = false
   ): Conn_Peer = {
     val id = if (dbIdentifier == "") randomUUID().toString else dbIdentifier
     deleteDatabase(protocol, id)
     createDatabase(protocol, id)
-    val conn = connect(schema, protocol, id)
+    val conn = connect(schema, protocol, id, isFreeVersion)
     // Ensure each transaction finishes before the next
     // partitions/attributes (or none for initial empty test dummy)
     conn.transactEdn(schema.datomicSchema)

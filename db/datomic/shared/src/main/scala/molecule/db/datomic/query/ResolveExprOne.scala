@@ -5,28 +5,30 @@ import molecule.boilerplate.api.Keywords._
 import molecule.boilerplate.ast.MoleculeModel._
 import scala.reflect.ClassTag
 
-trait ResolveExprOne[Tpl] { self: SortOne_[Tpl] with SortOneOpt_[Tpl] with Base[Tpl] =>
+trait ResolveExprOne[Tpl]
+  extends SortOneSpecial[Tpl]
+    with SortOneOpt_[Tpl] { self: Base[Tpl] =>
 
   import LambdasOne._
 
   protected def resolveAttrOneMan(es: List[Var], attr: AttrOneMan): List[Var] = {
-    addArity()
+    aritiesAttr()
     attrIndex += 1
     val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
     attr match {
       case at: AttrOneManString     => man(e, a, at.op, at.vs, resString, sortOneString(at, attrIndex))
-      case at: AttrOneManInt        => man(e, a, at.op, at.vs, resInt, sortOneInt(at, attrIndex))
+      case at: AttrOneManInt        => man(e, a, at.op, at.vs, resInt, intSorter(at, attrIndex))
       case at: AttrOneManLong       => manLong(e, a, at.op, at.vs, resLong, sortOneLong(at, attrIndex))
-      case at: AttrOneManFloat      => man(e, a, at.op, at.vs, resFloat, sortOneFloat(at, attrIndex))
+      case at: AttrOneManFloat      => man(e, a, at.op, at.vs, resFloat, floatSorter(at, attrIndex))
       case at: AttrOneManDouble     => man(e, a, at.op, at.vs, resDouble, sortOneDouble(at, attrIndex))
       case at: AttrOneManBoolean    => man(e, a, at.op, at.vs, resBoolean, sortOneBoolean(at, attrIndex))
-      case at: AttrOneManBigInt     => man(e, a, at.op, at.vs, resBigInt, sortOneBigInt(at, attrIndex))
+      case at: AttrOneManBigInt     => man(e, a, at.op, at.vs, resBigInt, bigIntSorter(at, attrIndex))
       case at: AttrOneManBigDecimal => man(e, a, at.op, at.vs, resBigDecimal, sortOneBigDecimal(at, attrIndex))
       case at: AttrOneManDate       => man(e, a, at.op, at.vs, resDate, sortOneDate(at, attrIndex))
       case at: AttrOneManUUID       => man(e, a, at.op, at.vs, resUUID, sortOneUUID(at, attrIndex))
       case at: AttrOneManURI        => man(e, a, at.op, at.vs, resURI, sortOneURI(at, attrIndex))
-      case at: AttrOneManByte       => man(e, a, at.op, at.vs, resByte, sortOneByte(at, attrIndex))
-      case at: AttrOneManShort      => man(e, a, at.op, at.vs, resShort, sortOneShort(at, attrIndex))
+      case at: AttrOneManByte       => man(e, a, at.op, at.vs, resByte, byteSorter(at, attrIndex))
+      case at: AttrOneManShort      => man(e, a, at.op, at.vs, resShort, shortSorter(at, attrIndex))
       case at: AttrOneManChar       => man(e, a, at.op, at.vs, resChar, sortOneChar(at, attrIndex))
     }
     es
@@ -56,13 +58,13 @@ trait ResolveExprOne[Tpl] { self: SortOne_[Tpl] with SortOneOpt_[Tpl] with Base[
   }
 
   protected def resolveAttrOneOpt(es: List[Var], attr: AttrOneOpt): List[Var] = {
-    addArity()
+    aritiesAttr()
     attrIndex += 1
     val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
     attr match {
       case at: AttrOneOptString     => opt(e, a, at.op, at.vs, resOptString, sortOneOptString(at, attrIndex))
       case at: AttrOneOptInt        => opt(e, a, at.op, at.vs, resOptInt, sortOneOptInt(at, attrIndex))
-      case at: AttrOneOptLong       => opt(e, a, at.op, at.vs, resOptLong, sortOneOptLong(at, attrIndex))
+      case at: AttrOneOptLong       => opt(e, a, at.op, at.vs, resOptLong, sorterOneOptLong(at, attrIndex))
       case at: AttrOneOptFloat      => opt(e, a, at.op, at.vs, resOptFloat, sortOneOptFloat(at, attrIndex))
       case at: AttrOneOptDouble     => opt(e, a, at.op, at.vs, resOptDouble, sortOneOptDouble(at, attrIndex))
       case at: AttrOneOptBoolean    => opt(e, a, at.op, at.vs, resOptBoolean, sortOneOptBoolean(at, attrIndex))
@@ -78,6 +80,22 @@ trait ResolveExprOne[Tpl] { self: SortOne_[Tpl] with SortOneOpt_[Tpl] with Base[
     es
   }
 
+  private def sorterOneOptLong(
+    at: AttrOneOptLong,
+    attrIndex: Int
+  ): Option[(Int, Int => (Row, Row) => Int)] = {
+    if (at.isRef)
+      sortOneOptLongRef(at, attrIndex)
+    else
+      sortOneOptLong(at, attrIndex)
+  }
+
+  private def addSort(sorter: Option[(Int, Int => (Row, Row) => Int)]): Unit = {
+    sorter.foreach {
+      case s if isTxMetaData => sortss = (sortss.head :+ s) +: sortss.tail
+      case s                 => sortss = sortss.init :+ (sortss.last :+ s)
+    }
+  }
 
   private def man[T: ClassTag](
     e: Var,
@@ -90,7 +108,7 @@ trait ResolveExprOne[Tpl] { self: SortOne_[Tpl] with SortOneOpt_[Tpl] with Base[
     val v = vv
     find += v
     addCast(res.j2s)
-    sorter.foreach(sorts += _)
+    addSort(sorter)
     expr(e, a, v, op, args, res)
   }
 
@@ -106,12 +124,12 @@ trait ResolveExprOne[Tpl] { self: SortOne_[Tpl] with SortOneOpt_[Tpl] with Base[
       case ":_Generic/e"  =>
         find += e
         addCast(res.j2s)
-        sorter.foreach(sorts += _)
+        addSort(sorter)
       case ":_Generic/tx" =>
         find += txVar
         addCast(res.j2s)
-        sorter.foreach(sorts += _)
-      case a             =>
+        addSort(sorter)
+      case a              =>
         man(e, a, op, args, res, sorter)
     }
   }
@@ -159,7 +177,7 @@ trait ResolveExprOne[Tpl] { self: SortOne_[Tpl] with SortOneOpt_[Tpl] with Base[
   ): Unit = {
     val v = vv
     addCast(resOpt.j2s)
-    sorter.foreach(sorts += _)
+    addSort(sorter)
     op match {
       case V     => optV(e, a, v)
       case Appl  => optApply(e, a, v, optArgs, resOpt.s2j)

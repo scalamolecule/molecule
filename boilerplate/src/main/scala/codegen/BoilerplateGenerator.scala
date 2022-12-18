@@ -6,9 +6,9 @@ object BoilerplateGenerator extends App {
 //  boilerplate.api.expression._ExprOneOpt.generate
 //  boilerplate.api.expression._ExprOneTac.generate
 //
-  boilerplate.api.expression._ExprSetMan.generate
+//  boilerplate.api.expression._ExprSetMan.generate
 //  boilerplate.api.expression._ExprSetOpt.generate
-  boilerplate.api.expression._ExprSetTac.generate
+//  boilerplate.api.expression._ExprSetTac.generate
 //
 //  boilerplate.api.expression._ExprMapMan.generate
 //  boilerplate.api.expression._ExprMapOpt.generate

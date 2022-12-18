@@ -90,7 +90,8 @@ case class Dsl_Arities(schema: MetaSchema, namespace: MetaNs, arity: Int)
     def agg2 = s"override protected def _aggrDouble(kw: Kw                    $pOne) = new $ns_0"
     def agg3 = s"override protected def _aggrDist  (kw: Kw                    $pOne) = new $ns_0"
     def agg4 = s"override protected def _aggrSet   (kw: Kw, n: Option[Int]    $pOne) = new $ns_0"
-    def agg5 = s"override protected def _aggrT     (kw: Kw                    $pOne) = new $ns_0"
+    def agg5 = s"override protected def _aggrTsort (kw: Kw                    $pOne) = new $ns_0"
+    def agg6 = s"override protected def _aggrT     (kw: Kw                    $pOne) = new $ns_0"
 
     def one1 = s"override protected def _exprOneMan(op: Op, vs: Seq[t]        $pOne) = new $ns_0"
     def one2 = s"override protected def _exprOneOpt(op: Op, vs: Option[Seq[t]]$pOne) = new $ns_0"
@@ -107,6 +108,7 @@ case class Dsl_Arities(schema: MetaSchema, namespace: MetaNs, arity: Int)
       res += s"$agg3[$tDist](toSet    (elements, kw    ))"
       res += s"$agg4[$tSet_](toSet    (elements, kw, n ))"
       res += s"$agg5[$tA___](asIs     (elements, kw    )) with SortAttrs_$arity[$tA___, $ns_0]"
+      res += s"$agg6[$tA___](asIs     (elements, kw    ))"
     }
     if (hasOne) {
       res += s"$one1[$tA___](addOne   (elements, op, vs)) with SortAttrs_$arity[$tA___, $ns_0]"

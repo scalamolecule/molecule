@@ -38,7 +38,7 @@ class DeleteStmts(
     elements match {
       case element :: tail => element match {
         case attr: Attr => attr match {
-          case AttrOneTacLong("_Generic", "eids", Appl, eids1, _, _, _) =>
+          case AttrOneTacLong("_Generic", "eids", Appl, eids1, _, _, _, _) =>
             if (eids.nonEmpty)
               throw MoleculeException(s"Can't apply entity ids twice for delete.")
             if (!topLevel)
@@ -46,7 +46,7 @@ class DeleteStmts(
                 s"Can only apply entity ids to be deleted at top level/first composite group of molecule.")
             extract(tail, eids1.asInstanceOf[Seq[AnyRef]], filterElements, topLevel)
 
-          case AttrOneTacLong("_Generic", "e", Appl, _, _, _, _) => throw MoleculeException(
+          case AttrOneTacLong("_Generic", "e", Appl, _, _, _, _, _) => throw MoleculeException(
             "Can't delete by applying entity ids to e_")
 
           case a if a.ns == "_Generic" => throw MoleculeException(

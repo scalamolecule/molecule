@@ -17,7 +17,8 @@ import scala.util.control.NonFatal
 
 class Conn_Peer(
   override val schema: SchemaTransaction,
-  val peerConn: DatomicConnection
+  val peerConn: DatomicConnection,
+  val isFreeVersion: Boolean
 ) extends Connection(schema) {
 
   type Data = jList[_]
@@ -88,9 +89,17 @@ class Conn_Peer(
 
 
 object Conn_Peer {
-  def apply(schema: SchemaTransaction, uri: String): Conn_Peer =
-    new Conn_Peer(schema, datomic.Peer.connect(uri))
+  def apply(
+    schema: SchemaTransaction,
+    uri: String,
+    isFreeVersion: Boolean
+  ): Conn_Peer =
+    new Conn_Peer(schema, datomic.Peer.connect(uri), isFreeVersion)
 
-  def apply(schema: SchemaTransaction, peerConn: DatomicConnection): Conn_Peer =
-    new Conn_Peer(schema, peerConn)
+  def apply(
+    schema: SchemaTransaction,
+    peerConn: DatomicConnection,
+    isFreeVersion: Boolean
+  ): Conn_Peer =
+    new Conn_Peer(schema, peerConn, isFreeVersion)
 }

@@ -28,15 +28,16 @@ case class Dsl(schema: MetaSchema, namespace: MetaNs)
     val opt = List.newBuilder[String]
     val tac = List.newBuilder[String]
     attrs.collect {
-      case MetaAttr(attr, card, tpe, _, _, _, _, _) if !genericAttrs.contains(attr) =>
+      case MetaAttr(attr, card, tpe, refNs, _, _, _, _) if !genericAttrs.contains(attr) =>
         val padA    = padAttr(attr)
-        val padT    = padType(tpe)
+        val padT = padType(tpe)
+        val isRef   = if (refNs.isDefined) ", isRef = true" else ""
         val attrMan = "Attr" + card.marker + "Man" + tpe
         val attrOpt = "Attr" + card.marker + "Opt" + tpe
         val attrTac = "Attr" + card.marker + "Tac" + tpe
-        man += s"""protected lazy val ${attr}_man$padA: $attrMan$padT = $attrMan$padT("$ns", "$attr"$padA)"""
-        opt += s"""protected lazy val ${attr}_opt$padA: $attrOpt$padT = $attrOpt$padT("$ns", "$attr"$padA)"""
-        tac += s"""protected lazy val ${attr}_tac$padA: $attrTac$padT = $attrTac$padT("$ns", "$attr"$padA)"""
+        man += s"""protected lazy val ${attr}_man$padA: $attrMan$padT = $attrMan$padT("$ns", "$attr"$padA$isRef)"""
+        opt += s"""protected lazy val ${attr}_opt$padA: $attrOpt$padT = $attrOpt$padT("$ns", "$attr"$padA$isRef)"""
+        tac += s"""protected lazy val ${attr}_tac$padA: $attrTac$padT = $attrTac$padT("$ns", "$attr"$padA$isRef)"""
     }
     val attrDefs = (man.result() ++ Seq("") ++ opt.result() ++ Seq("") ++ tac.result()).mkString("\n  ")
     s"""trait $ns extends Generic {

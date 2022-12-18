@@ -35,7 +35,8 @@ trait AttrSetTac_ { self: ModelBase =>
     vs          : Seq[Set[Long]] = Nil,
     defaultValue: Option[Set[Long]] = None,
     validation  : Option[ValidateLong] = None,
-    sort        : Option[String] = None
+    sort        : Option[String] = None,
+    isRef       : Boolean = false
   ) extends AttrSetTac
 
   case class AttrSetTacFloat(

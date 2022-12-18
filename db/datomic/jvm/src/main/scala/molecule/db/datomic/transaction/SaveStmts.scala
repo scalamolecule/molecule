@@ -100,7 +100,7 @@ class SaveStmts(
   private def resolveAttrOneMan(attr: AttrOneMan, a: Keyword): Unit = attr match {
     case AttrOneManString(_, _, Appl, vs, _, _, _)     => addV(a, oneV[String](attr, vs, identity))
     case AttrOneManInt(_, _, Appl, vs, _, _, _)        => addV(a, oneV[Int](attr, vs, identity))
-    case AttrOneManLong(_, _, Appl, vs, _, _, _)       => addV(a, oneV[Long](attr, vs, identity))
+    case AttrOneManLong(_, _, Appl, vs, _, _, _, _)       => addV(a, oneV[Long](attr, vs, identity))
     case AttrOneManFloat(_, _, Appl, vs, _, _, _)      => addV(a, oneV[Float](attr, vs, identity))
     case AttrOneManDouble(_, _, Appl, vs, _, _, _)     => addV(a, oneV[Double](attr, vs, identity))
     case AttrOneManBoolean(_, _, Appl, vs, _, _, _)    => addV(a, oneV[Boolean](attr, vs, identity))
@@ -119,7 +119,7 @@ class SaveStmts(
   private def resolveAttrOneTac(attr: AttrOneTac, a: Keyword): Unit = attr match {
     case AttrOneTacString(_, _, Appl, vs, _, _, _)     => addV(a, oneV[String](attr, vs, identity))
     case AttrOneTacInt(_, _, Appl, vs, _, _, _)        => addV(a, oneV[Int](attr, vs, identity))
-    case AttrOneTacLong(_, _, Appl, vs, _, _, _)       => addV(a, oneV[Long](attr, vs, identity))
+    case AttrOneTacLong(_, _, Appl, vs, _, _, _, _)       => addV(a, oneV[Long](attr, vs, identity))
     case AttrOneTacFloat(_, _, Appl, vs, _, _, _)      => addV(a, oneV[Float](attr, vs, identity))
     case AttrOneTacDouble(_, _, Appl, vs, _, _, _)     => addV(a, oneV[Double](attr, vs, identity))
     case AttrOneTacBoolean(_, _, Appl, vs, _, _, _)    => addV(a, oneV[Boolean](attr, vs, identity))
@@ -149,7 +149,7 @@ class SaveStmts(
   private def resolveAttrOneOpt(attr: AttrOneOpt, a: Keyword): Unit = attr match {
     case AttrOneOptString(_, _, Appl, optVs, _, _, _)     => addV(a, oneOptV[String](attr, optVs, identity))
     case AttrOneOptInt(_, _, Appl, optVs, _, _, _)        => addV(a, oneOptV[Int](attr, optVs, identity))
-    case AttrOneOptLong(_, _, Appl, optVs, _, _, _)       => addV(a, oneOptV[Long](attr, optVs, identity))
+    case AttrOneOptLong(_, _, Appl, optVs, _, _, _, _)       => addV(a, oneOptV[Long](attr, optVs, identity))
     case AttrOneOptFloat(_, _, Appl, optVs, _, _, _)      => addV(a, oneOptV[Float](attr, optVs, identity))
     case AttrOneOptDouble(_, _, Appl, optVs, _, _, _)     => addV(a, oneOptV[Double](attr, optVs, identity))
     case AttrOneOptBoolean(_, _, Appl, optVs, _, _, _)    => addV(a, oneOptV[Boolean](attr, optVs, identity))
@@ -179,7 +179,7 @@ class SaveStmts(
   private def resolveAttrSetMan(attr: AttrSetMan, a: Keyword): Unit = attr match {
     case AttrSetManString(_, _, Appl, sets, _, _, _)     => addSet(a, oneSet[String](attr, sets, identity))
     case AttrSetManInt(_, _, Appl, sets, _, _, _)        => addSet(a, oneSet[Int](attr, sets, identity))
-    case AttrSetManLong(_, _, Appl, sets, _, _, _)       => addSet(a, oneSet[Long](attr, sets, identity))
+    case AttrSetManLong(_, _, Appl, sets, _, _, _, _)       => addSet(a, oneSet[Long](attr, sets, identity))
     case AttrSetManFloat(_, _, Appl, sets, _, _, _)      => addSet(a, oneSet[Float](attr, sets, identity))
     case AttrSetManDouble(_, _, Appl, sets, _, _, _)     => addSet(a, oneSet[Double](attr, sets, identity))
     case AttrSetManBoolean(_, _, Appl, sets, _, _, _)    => addSet(a, oneSet[Boolean](attr, sets, identity))
@@ -198,7 +198,7 @@ class SaveStmts(
   private def resolveAttrSetTac(attr: AttrSetTac, a: Keyword): Unit = attr match {
     case AttrSetTacString(_, _, Appl, sets, _, _, _)     => addSet(a, oneSet[String](attr, sets, identity))
     case AttrSetTacInt(_, _, Appl, sets, _, _, _)        => addSet(a, oneSet[Int](attr, sets, identity))
-    case AttrSetTacLong(_, _, Appl, sets, _, _, _)       => addSet(a, oneSet[Long](attr, sets, identity))
+    case AttrSetTacLong(_, _, Appl, sets, _, _, _, _)       => addSet(a, oneSet[Long](attr, sets, identity))
     case AttrSetTacFloat(_, _, Appl, sets, _, _, _)      => addSet(a, oneSet[Float](attr, sets, identity))
     case AttrSetTacDouble(_, _, Appl, sets, _, _, _)     => addSet(a, oneSet[Double](attr, sets, identity))
     case AttrSetTacBoolean(_, _, Appl, sets, _, _, _)    => addSet(a, oneSet[Boolean](attr, sets, identity))
@@ -228,7 +228,7 @@ class SaveStmts(
   private def resolveAttrSetOpt(attr: AttrSetOpt, a: Keyword): Unit = attr match {
     case AttrSetOptString(_, _, Appl, optSets, _, _, _)     => addSet(a, oneOptSet[String](attr, optSets, identity))
     case AttrSetOptInt(_, _, Appl, optSets, _, _, _)        => addSet(a, oneOptSet[Int](attr, optSets, identity))
-    case AttrSetOptLong(_, _, Appl, optSets, _, _, _)       => addSet(a, oneOptSet[Long](attr, optSets, identity))
+    case AttrSetOptLong(_, _, Appl, optSets, _, _, _, _)       => addSet(a, oneOptSet[Long](attr, optSets, identity))
     case AttrSetOptFloat(_, _, Appl, optSets, _, _, _)      => addSet(a, oneOptSet[Float](attr, optSets, identity))
     case AttrSetOptDouble(_, _, Appl, optSets, _, _, _)     => addSet(a, oneOptSet[Double](attr, optSets, identity))
     case AttrSetOptBoolean(_, _, Appl, optSets, _, _, _)    => addSet(a, oneOptSet[Boolean](attr, optSets, identity))

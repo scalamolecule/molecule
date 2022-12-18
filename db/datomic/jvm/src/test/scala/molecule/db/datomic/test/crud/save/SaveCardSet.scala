@@ -132,8 +132,8 @@ object SaveCardSet extends DatomicTestSuite {
       Ns.int(5).i(3).doubles_?(Option.empty[Set[Double]]).save.transact
 
       Ns.int(6).i(0).booleans_?(Some(Set.empty[Boolean])).save.transact
-      Ns.int(6).i(1).booleans_?(Some(Set(boolean0))).save.transact
-      Ns.int(6).i(2).booleans_?(Some(Seq(Set(boolean0, boolean1)))).save.transact
+      Ns.int(6).i(1).booleans_?(Some(Set(boolean1))).save.transact
+      Ns.int(6).i(2).booleans_?(Some(Seq(Set(boolean1, boolean2)))).save.transact
       Ns.int(6).i(3).booleans_?(Option.empty[Set[Boolean]]).save.transact
 
       Ns.int(7).i(0).bigInts_?(Some(Set.empty[BigInt])).save.transact
@@ -212,7 +212,7 @@ object SaveCardSet extends DatomicTestSuite {
       Ns.int_(6).i.a1.booleans_?.query.get ==> List(
         (0, None),
         (1, None),
-        (2, Some(Set(boolean1))),
+        (2, Some(Set(boolean2))),
         (3, None)
       )
       // Should be:

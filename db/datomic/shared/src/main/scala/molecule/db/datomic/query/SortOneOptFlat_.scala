@@ -8,9 +8,23 @@ import java.util.{Date, UUID}
 import molecule.boilerplate.ast.MoleculeModel._
 
 
-trait SortOne_[Tpl] { self: Base[Tpl] =>
+trait SortOneOptFlat_[Tpl] extends ResolveBase { self: Base[Tpl] =>
 
-  protected def sortOneString(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+  private def compare(
+    a: Row,
+    b: Row,
+    i: Int,
+    compareMapValues: (Any, Any) => Int
+  ): Int = {
+    (a.get(i), b.get(i)) match {
+      case (`none`, `none`)   => 0
+      case (`none`, _)        => -1
+      case (_, `none`)        => 1
+      case (v1: Any, v2: Any) => compareMapValues(v1, v2)
+    }
+  }
+
+  protected def sortOneOptFlatString(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
     attr.sort.map { sort =>
       (
         sort.last.toString.toInt,
@@ -18,17 +32,19 @@ trait SortOne_[Tpl] { self: Base[Tpl] =>
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              a.get(i).asInstanceOf[String].compareTo(b.get(i).asInstanceOf[String])
+              compare(a, b, i, (v1, v2) =>
+                v1.asInstanceOf[String].compareTo(v2.asInstanceOf[String]))
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              b.get(i).asInstanceOf[String].compareTo(a.get(i).asInstanceOf[String])
+              compare(b, a, i, (v1, v2) =>
+                v1.asInstanceOf[String].compareTo(v2.asInstanceOf[String]))
         }
       )
     }
   }
 
-  protected def sortOneInt(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+  protected def sortOneOptFlatInt(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
     attr.sort.map { sort =>
       (
         sort.last.toString.toInt,
@@ -36,17 +52,17 @@ trait SortOne_[Tpl] { self: Base[Tpl] =>
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              a.get(i).asInstanceOf[jInteger].compareTo(b.get(i).asInstanceOf[jInteger])
+              compare(a, b, i, (v1, v2) => v1.asInstanceOf[jInteger].compareTo(v2.asInstanceOf[jInteger]))
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              b.get(i).asInstanceOf[jInteger].compareTo(a.get(i).asInstanceOf[jInteger])
+              compare(b, a, i, (v1, v2) => v1.asInstanceOf[jInteger].compareTo(v2.asInstanceOf[jInteger]))
         }
       )
     }
   }
 
-  protected def sortOneLong(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+  protected def sortOneOptFlatLong(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
     attr.sort.map { sort =>
       (
         sort.last.toString.toInt,
@@ -54,17 +70,17 @@ trait SortOne_[Tpl] { self: Base[Tpl] =>
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              a.get(i).asInstanceOf[jLong].compareTo(b.get(i).asInstanceOf[jLong])
+              compare(a, b, i, (v1, v2) => v1.asInstanceOf[jLong].compareTo(v2.asInstanceOf[jLong]))
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              b.get(i).asInstanceOf[jLong].compareTo(a.get(i).asInstanceOf[jLong])
+              compare(b, a, i, (v1, v2) => v1.asInstanceOf[jLong].compareTo(v2.asInstanceOf[jLong]))
         }
       )
     }
   }
 
-  protected def sortOneFloat(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+  protected def sortOneOptFlatFloat(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
     attr.sort.map { sort =>
       (
         sort.last.toString.toInt,
@@ -72,17 +88,17 @@ trait SortOne_[Tpl] { self: Base[Tpl] =>
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              a.get(i).asInstanceOf[jFloat].compareTo(b.get(i).asInstanceOf[jFloat])
+              compare(a, b, i, (v1, v2) => v1.asInstanceOf[jFloat].compareTo(v2.asInstanceOf[jFloat]))
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              b.get(i).asInstanceOf[jFloat].compareTo(a.get(i).asInstanceOf[jFloat])
+              compare(b, a, i, (v1, v2) => v1.asInstanceOf[jFloat].compareTo(v2.asInstanceOf[jFloat]))
         }
       )
     }
   }
 
-  protected def sortOneDouble(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+  protected def sortOneOptFlatDouble(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
     attr.sort.map { sort =>
       (
         sort.last.toString.toInt,
@@ -90,17 +106,17 @@ trait SortOne_[Tpl] { self: Base[Tpl] =>
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              a.get(i).asInstanceOf[jDouble].compareTo(b.get(i).asInstanceOf[jDouble])
+              compare(a, b, i, (v1, v2) => v1.asInstanceOf[jDouble].compareTo(v2.asInstanceOf[jDouble]))
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              b.get(i).asInstanceOf[jDouble].compareTo(a.get(i).asInstanceOf[jDouble])
+              compare(b, a, i, (v1, v2) => v1.asInstanceOf[jDouble].compareTo(v2.asInstanceOf[jDouble]))
         }
       )
     }
   }
 
-  protected def sortOneBoolean(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+  protected def sortOneOptFlatBoolean(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
     attr.sort.map { sort =>
       (
         sort.last.toString.toInt,
@@ -108,17 +124,17 @@ trait SortOne_[Tpl] { self: Base[Tpl] =>
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              a.get(i).asInstanceOf[jBoolean].compareTo(b.get(i).asInstanceOf[jBoolean])
+              compare(a, b, i, (v1, v2) => v1.asInstanceOf[jBoolean].compareTo(v2.asInstanceOf[jBoolean]))
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              b.get(i).asInstanceOf[jBoolean].compareTo(a.get(i).asInstanceOf[jBoolean])
+              compare(b, a, i, (v1, v2) => v1.asInstanceOf[jBoolean].compareTo(v2.asInstanceOf[jBoolean]))
         }
       )
     }
   }
 
-  protected def sortOneBigInt(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+  protected def sortOneOptFlatBigInt(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
     attr.sort.map { sort =>
       (
         sort.last.toString.toInt,
@@ -126,17 +142,17 @@ trait SortOne_[Tpl] { self: Base[Tpl] =>
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              a.get(i).asInstanceOf[jBigInt].compareTo(b.get(i).asInstanceOf[jBigInt])
+              compare(a, b, i, (v1, v2) => v1.asInstanceOf[jBigInt].compareTo(v2.asInstanceOf[jBigInt]))
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              b.get(i).asInstanceOf[jBigInt].compareTo(a.get(i).asInstanceOf[jBigInt])
+              compare(b, a, i, (v1, v2) => v1.asInstanceOf[jBigInt].compareTo(v2.asInstanceOf[jBigInt]))
         }
       )
     }
   }
 
-  protected def sortOneBigDecimal(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+  protected def sortOneOptFlatBigDecimal(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
     attr.sort.map { sort =>
       (
         sort.last.toString.toInt,
@@ -144,17 +160,17 @@ trait SortOne_[Tpl] { self: Base[Tpl] =>
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              a.get(i).asInstanceOf[jBigDecimal].compareTo(b.get(i).asInstanceOf[jBigDecimal])
+              compare(a, b, i, (v1, v2) => v1.asInstanceOf[jBigDecimal].compareTo(v2.asInstanceOf[jBigDecimal]))
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              b.get(i).asInstanceOf[jBigDecimal].compareTo(a.get(i).asInstanceOf[jBigDecimal])
+              compare(b, a, i, (v1, v2) => v1.asInstanceOf[jBigDecimal].compareTo(v2.asInstanceOf[jBigDecimal]))
         }
       )
     }
   }
 
-  protected def sortOneDate(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+  protected def sortOneOptFlatDate(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
     attr.sort.map { sort =>
       (
         sort.last.toString.toInt,
@@ -162,17 +178,17 @@ trait SortOne_[Tpl] { self: Base[Tpl] =>
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              a.get(i).asInstanceOf[Date].compareTo(b.get(i).asInstanceOf[Date])
+              compare(a, b, i, (v1, v2) => v1.asInstanceOf[Date].compareTo(v2.asInstanceOf[Date]))
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              b.get(i).asInstanceOf[Date].compareTo(a.get(i).asInstanceOf[Date])
+              compare(b, a, i, (v1, v2) => v1.asInstanceOf[Date].compareTo(v2.asInstanceOf[Date]))
         }
       )
     }
   }
 
-  protected def sortOneUUID(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+  protected def sortOneOptFlatUUID(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
     attr.sort.map { sort =>
       (
         sort.last.toString.toInt,
@@ -180,17 +196,17 @@ trait SortOne_[Tpl] { self: Base[Tpl] =>
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              a.get(i).asInstanceOf[UUID].compareTo(b.get(i).asInstanceOf[UUID])
+              compare(a, b, i, (v1, v2) => v1.asInstanceOf[UUID].compareTo(v2.asInstanceOf[UUID]))
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              b.get(i).asInstanceOf[UUID].compareTo(a.get(i).asInstanceOf[UUID])
+              compare(b, a, i, (v1, v2) => v1.asInstanceOf[UUID].compareTo(v2.asInstanceOf[UUID]))
         }
       )
     }
   }
 
-  protected def sortOneURI(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+  protected def sortOneOptFlatURI(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
     attr.sort.map { sort =>
       (
         sort.last.toString.toInt,
@@ -198,17 +214,17 @@ trait SortOne_[Tpl] { self: Base[Tpl] =>
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              a.get(i).asInstanceOf[URI].compareTo(b.get(i).asInstanceOf[URI])
+              compare(a, b, i, (v1, v2) => v1.asInstanceOf[URI].compareTo(v2.asInstanceOf[URI]))
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              b.get(i).asInstanceOf[URI].compareTo(a.get(i).asInstanceOf[URI])
+              compare(b, a, i, (v1, v2) => v1.asInstanceOf[URI].compareTo(v2.asInstanceOf[URI]))
         }
       )
     }
   }
 
-  protected def sortOneByte(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+  protected def sortOneOptFlatByte(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
     attr.sort.map { sort =>
       (
         sort.last.toString.toInt,
@@ -216,17 +232,17 @@ trait SortOne_[Tpl] { self: Base[Tpl] =>
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              a.get(i).asInstanceOf[jInteger].compareTo(b.get(i).asInstanceOf[jInteger])
+              compare(a, b, i, (v1, v2) => v1.asInstanceOf[jInteger].compareTo(v2.asInstanceOf[jInteger]))
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              b.get(i).asInstanceOf[jInteger].compareTo(a.get(i).asInstanceOf[jInteger])
+              compare(b, a, i, (v1, v2) => v1.asInstanceOf[jInteger].compareTo(v2.asInstanceOf[jInteger]))
         }
       )
     }
   }
 
-  protected def sortOneShort(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+  protected def sortOneOptFlatShort(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
     attr.sort.map { sort =>
       (
         sort.last.toString.toInt,
@@ -234,17 +250,17 @@ trait SortOne_[Tpl] { self: Base[Tpl] =>
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              a.get(i).asInstanceOf[jInteger].compareTo(b.get(i).asInstanceOf[jInteger])
+              compare(a, b, i, (v1, v2) => v1.asInstanceOf[jInteger].compareTo(v2.asInstanceOf[jInteger]))
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              b.get(i).asInstanceOf[jInteger].compareTo(a.get(i).asInstanceOf[jInteger])
+              compare(b, a, i, (v1, v2) => v1.asInstanceOf[jInteger].compareTo(v2.asInstanceOf[jInteger]))
         }
       )
     }
   }
 
-  protected def sortOneChar(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+  protected def sortOneOptFlatChar(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
     attr.sort.map { sort =>
       (
         sort.last.toString.toInt,
@@ -252,11 +268,11 @@ trait SortOne_[Tpl] { self: Base[Tpl] =>
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              a.get(i).asInstanceOf[String].compareTo(b.get(i).asInstanceOf[String])
+              compare(a, b, i, (v1, v2) => v1.asInstanceOf[String].compareTo(v2.asInstanceOf[String]))
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              b.get(i).asInstanceOf[String].compareTo(a.get(i).asInstanceOf[String])
+              compare(b, a, i, (v1, v2) => v1.asInstanceOf[String].compareTo(v2.asInstanceOf[String]))
         }
       )
     }

@@ -2,6 +2,7 @@ package molecule.db.datomic.setup
 
 import molecule.base.util.exceptions.MoleculeException
 import molecule.core.api.Connection
+import molecule.core.api.ops.QueryOps
 import molecule.core.util.JavaConversions
 import molecule.coreTests.sampledata.CoreData
 import molecule.db.datomic.setup.DatomicTestSuiteImpl
@@ -54,6 +55,12 @@ trait DatomicTestSuite extends TestSuite with CoreData
         throw MoleculeException(s"Unexpected error message:\n$other\n\nEXPECTED:\n$error\n")
       case unexpected: Throwable                              => throw unexpected
     }
+  }
+
+  def pullBooleanBug[Tpl](query: QueryOps[Tpl])(implicit conn: Connection): Unit = {
+    intercept[MoleculeException](
+      query.get
+    ).message ==> "Datomic Free (not Pro) has a bug that pulls boolean `false` values as nil."
   }
 
   //  def empty[T](test: Future[Conn] => T): T = emptyImpl(test)

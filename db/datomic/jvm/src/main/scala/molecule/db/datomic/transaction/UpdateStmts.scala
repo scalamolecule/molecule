@@ -111,7 +111,7 @@ class UpdateStmts(
 
     case AttrOneManString(_, _, _, vs, _, _, _)     => addOneV[String](attr, vs, identity)
     case AttrOneManInt(_, _, _, vs, _, _, _)        => addOneV[Int](attr, vs, identity)
-    case AttrOneManLong(_, _, _, vs, _, _, _)       => addOneV[Long](attr, vs, identity)
+    case AttrOneManLong(_, _, _, vs, _, _, _, _)       => addOneV[Long](attr, vs, identity)
     case AttrOneManFloat(_, _, _, vs, _, _, _)      => addOneV[Float](attr, vs, identity)
     case AttrOneManDouble(_, _, _, vs, _, _, _)     => addOneV[Double](attr, vs, identity)
     case AttrOneManBoolean(_, _, _, vs, _, _, _)    => addOneV[Boolean](attr, vs, identity)
@@ -146,12 +146,12 @@ class UpdateStmts(
     filterAttr: AttrOneTac
   ): (Seq[AnyRef], Seq[Element], Seq[(String, Keyword, Seq[AnyRef], Boolean)]) = {
     filterAttr match {
-      case AttrOneTacLong("_Generic", "eids", Appl, eids1, _, _, _) =>
+      case AttrOneTacLong("_Generic", "eids", Appl, eids1, _, _, _, _) =>
         if (eids.nonEmpty)
           throw MoleculeException(s"Can't apply entity ids twice in $update.")
         extract(tail, eids1.asInstanceOf[Seq[AnyRef]], filterElements, data)
 
-      case AttrOneTacLong("_Generic", "e", Appl, _, _, _, _) => throw MoleculeException(
+      case AttrOneTacLong("_Generic", "e", Appl, _, _, _, _, _) => throw MoleculeException(
         "Can't update by applying entity ids to e_")
 
       case a if a.ns == "_Generic" => throw MoleculeException(
@@ -166,7 +166,7 @@ class UpdateStmts(
         val lookupRefs = filterAttr match {
           case AttrOneTacString(_, _, _, vs, _, _, _)     => vs.map(v => list(at, v))
           case AttrOneTacInt(_, _, _, vs, _, _, _)        => vs.map(v => list(at, v))
-          case AttrOneTacLong(_, _, _, vs, _, _, _)       => vs.map(v => list(at, v))
+          case AttrOneTacLong(_, _, _, vs, _, _, _, _)       => vs.map(v => list(at, v))
           case AttrOneTacFloat(_, _, _, vs, _, _, _)      => vs.map(v => list(at, v))
           case AttrOneTacDouble(_, _, _, vs, _, _, _)     => vs.map(v => list(at, v))
           case AttrOneTacBoolean(_, _, _, vs, _, _, _)    => vs.map(v => list(at, v))
@@ -211,7 +211,7 @@ class UpdateStmts(
   ): (String, Keyword, Seq[AnyRef], Boolean) = attr match {
     case AttrSetManString(_, _, _, sets, _, _, _)     => addSetVs[String](attr, sets, identity, retractCur)
     case AttrSetManInt(_, _, _, sets, _, _, _)        => addSetVs[Int](attr, sets, identity, retractCur)
-    case AttrSetManLong(_, _, _, sets, _, _, _)       => addSetVs[Long](attr, sets, identity, retractCur)
+    case AttrSetManLong(_, _, _, sets, _, _, _, _)       => addSetVs[Long](attr, sets, identity, retractCur)
     case AttrSetManFloat(_, _, _, sets, _, _, _)      => addSetVs[Float](attr, sets, identity, retractCur)
     case AttrSetManDouble(_, _, _, sets, _, _, _)     => addSetVs[Double](attr, sets, identity, retractCur)
     case AttrSetManBoolean(_, _, _, sets, _, _, _)    => addSetVs[Boolean](attr, sets, identity, retractCur)
@@ -244,7 +244,7 @@ class UpdateStmts(
   private def setSwap(attr: AttrSetMan): Seq[(String, Keyword, Seq[AnyRef], Boolean)] = attr match {
     case AttrSetManString(_, _, _, sets, _, _, _)     => swapSetVs[String](attr, sets, identity)
     case AttrSetManInt(_, _, _, sets, _, _, _)        => swapSetVs[Int](attr, sets, identity)
-    case AttrSetManLong(_, _, _, sets, _, _, _)       => swapSetVs[Long](attr, sets, identity)
+    case AttrSetManLong(_, _, _, sets, _, _, _, _)       => swapSetVs[Long](attr, sets, identity)
     case AttrSetManFloat(_, _, _, sets, _, _, _)      => swapSetVs[Float](attr, sets, identity)
     case AttrSetManDouble(_, _, _, sets, _, _, _)     => swapSetVs[Double](attr, sets, identity)
     case AttrSetManBoolean(_, _, _, sets, _, _, _)    => swapSetVs[Boolean](attr, sets, identity)
@@ -289,7 +289,7 @@ class UpdateStmts(
   private def setRemove(attr: AttrSetMan): Seq[(String, Keyword, Seq[AnyRef], Boolean)] = attr match {
     case AttrSetManString(_, _, _, Seq(set), _, _, _)     => removeSetVs[String](attr, set, identity)
     case AttrSetManInt(_, _, _, Seq(set), _, _, _)        => removeSetVs[Int](attr, set, identity)
-    case AttrSetManLong(_, _, _, Seq(set), _, _, _)       => removeSetVs[Long](attr, set, identity)
+    case AttrSetManLong(_, _, _, Seq(set), _, _, _, _)       => removeSetVs[Long](attr, set, identity)
     case AttrSetManFloat(_, _, _, Seq(set), _, _, _)      => removeSetVs[Float](attr, set, identity)
     case AttrSetManDouble(_, _, _, Seq(set), _, _, _)     => removeSetVs[Double](attr, set, identity)
     case AttrSetManBoolean(_, _, _, Seq(set), _, _, _)    => removeSetVs[Boolean](attr, set, identity)

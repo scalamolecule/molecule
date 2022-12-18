@@ -35,7 +35,8 @@ trait AttrSetMan_ { self: ModelBase =>
     vs          : Seq[Set[Long]] = Nil,
     defaultValue: Option[Set[Long]] = None,
     validation  : Option[ValidateLong] = None,
-    sort        : Option[String] = None
+    sort        : Option[String] = None,
+    isRef       : Boolean = false
   ) extends AttrSetMan
 
   case class AttrSetManFloat(

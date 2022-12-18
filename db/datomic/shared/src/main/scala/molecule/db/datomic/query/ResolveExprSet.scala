@@ -4,12 +4,12 @@ import molecule.boilerplate.api.Keywords._
 import molecule.boilerplate.ast.MoleculeModel._
 import scala.reflect.ClassTag
 
-trait ResolveExprSet[Tpl] { self: SortOne_[Tpl] with Base[Tpl] =>
+trait ResolveExprSet[Tpl] { self: Base[Tpl] =>
 
   import LambdasSet._
 
   protected def resolveAttrSetMan(es: List[Var], attr: AttrSetMan): List[Var] = {
-    addArity()
+    aritiesAttr()
     attrIndex += 1
     val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
     attr match {
@@ -53,7 +53,7 @@ trait ResolveExprSet[Tpl] { self: SortOne_[Tpl] with Base[Tpl] =>
   }
 
   protected def resolveAttrSetOpt(es: List[Var], attr: AttrSetOpt): List[Var] = {
-    addArity()
+    aritiesAttr()
     attrIndex += 1
     val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
     attr match {
@@ -62,7 +62,11 @@ trait ResolveExprSet[Tpl] { self: SortOne_[Tpl] with Base[Tpl] =>
       case at: AttrSetOptLong       => opt(e, a, at.op, at.vs, resOptSetLong)
       case at: AttrSetOptFloat      => opt(e, a, at.op, at.vs, resOptSetFloat)
       case at: AttrSetOptDouble     => opt(e, a, at.op, at.vs, resOptSetDouble)
-      case at: AttrSetOptBoolean    => opt(e, a, at.op, at.vs, resOptSetBoolean)
+      case at: AttrSetOptBoolean    =>
+        if (isFree && isNested)
+          datomicFreePullBooleanBug
+        else
+          opt(e, a, at.op, at.vs, resOptSetBoolean)
       case at: AttrSetOptBigInt     => opt(e, a, at.op, at.vs, resOptSetBigInt)
       case at: AttrSetOptBigDecimal => opt(e, a, at.op, at.vs, resOptSetBigDecimal)
       case at: AttrSetOptDate       => opt(e, a, at.op, at.vs, resOptSetDate)

@@ -2,7 +2,7 @@ package codegen.db.datomic.query.casting
 
 import codegen.DatomicGenBase
 
-object _CastTpl extends DatomicGenBase("CastTpl", "/query/casting") {
+object _CastRow2Tpl extends DatomicGenBase("CastRow2Tpl", "/query/casting") {
 
   val content = {
     val resolveX       = (1 to 22).map(i => s"case $i => cast$i(casters)").mkString("\n      ")
@@ -18,42 +18,41 @@ object _CastTpl extends DatomicGenBase("CastTpl", "/query/casting") {
        |trait ${fileName}_[Tpl] { self: Model2Query[Tpl] with Base[Tpl] =>
        |
        |  @tailrec
-       |  final private def rec(
+       |  final private def resolveArities(
        |    arities: List[List[Int]],
        |    casts: List[AnyRef => AnyRef],
        |    rowIndex: Int,
-       |    castIndex: Int,
        |    acc: List[Row => Any],
        |    nested: Option[List[Any]]
        |  ): List[Row => Any] = {
        |    arities match {
        |      case List(1) :: as =>
-       |        rec(as, casts, rowIndex + 1, castIndex + 1,
-       |          acc :+ ((row: Row) => casts(castIndex)(row.get(rowIndex))), nested)
+       |        val cast = (row: Row) => casts.head(row.get(rowIndex))
+       |        resolveArities(as, casts.tail, rowIndex + 1, acc :+ cast, nested)
        |
        |      // Nested
        |      case List(-1) :: Nil =>
-       |        rec(Nil, casts, 0, 0,
-       |          acc :+ ((_: Row) => nested.get), None)
+       |        val cast = (_: Row) => nested.get
+       |        resolveArities(Nil, casts, 0, acc :+ cast, None)
        |
        |      // Composite
        |      case ii :: as =>
-       |        val n = ii.length
-       |        rec(as, casts, rowIndex + n, castIndex + n,
-       |          acc :+ castTpl(List.fill(n)(List(1)), casts, rowIndex, castIndex), nested)
+       |        val n                     = ii.length
+       |        val (tplCasts, moreCasts) = casts.splitAt(n)
+       |        val cast                  = castRow2Tpl(ii.map(List(_)), tplCasts, rowIndex, nested)
+       |        resolveArities(as, moreCasts, rowIndex + n, acc :+ cast, nested)
        |
        |      case Nil => acc
        |    }
        |  }
        |
-       |  final protected def castTpl(
+       |  final protected def castRow2Tpl(
        |    arities: List[List[Int]],
        |    casts: List[AnyRef => AnyRef],
-       |    rowIndex: Int = 0,
-       |    castIndex: Int = 0,
-       |    nested: Option[List[Any]] = None
+       |    rowIndex: Int,
+       |    nested: Option[List[Any]]
        |  ): Row => Any = {
-       |    val casters = rec(arities, casts, rowIndex, castIndex, Nil, nested)
+       |    val casters = resolveArities(arities, casts, rowIndex, Nil, nested)
        |    arities.length match {
        |      $resolveX
        |    }

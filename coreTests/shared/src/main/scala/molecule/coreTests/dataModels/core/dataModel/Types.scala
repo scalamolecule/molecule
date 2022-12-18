@@ -2,7 +2,7 @@ package molecule.coreTests.dataModels.core.dataModel
 
 import molecule.DataModel
 
-object Types extends DataModel(3) {
+object Types extends DataModel(5) {
 
   trait Ns {
     val i = oneInt

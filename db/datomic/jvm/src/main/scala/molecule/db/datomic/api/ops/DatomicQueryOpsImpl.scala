@@ -35,9 +35,10 @@ class DatomicQueryOpsImpl[Tpl](elements: Seq[Element])
 
   // Synchronous
   override def get(implicit conn0: Connection): List[Tpl] = {
-    val conn       = conn0.asInstanceOf[Conn_Peer]
-    val db         = conn.peerConn.db()
-    val rows       = getQueries(conn.optimizeQuery) match {
+    val conn = conn0.asInstanceOf[Conn_Peer]
+    val db   = conn.peerConn.db()
+    isFree = conn.isFreeVersion
+    val rows = getQueries(conn.optimizeQuery) match {
       case ("", query)       => Peer.q(query, db +: inputs: _*)
       case (preQuery, query) =>
         // Pre-query
@@ -49,8 +50,9 @@ class DatomicQueryOpsImpl[Tpl](elements: Seq[Element])
         // Main query using entity ids from pre-query
         Peer.q(query, db +: inputs :+ preIds: _*)
     }
-    //    println("RAW rows:")
-    //    rows.forEach(row => println(row))
+    println("RAW rows:")
+    rows.forEach(row => println(row))
+
     val sortedRows = sortRows(rows)
 
     println("SORTED rows:")
@@ -64,13 +66,11 @@ class DatomicQueryOpsImpl[Tpl](elements: Seq[Element])
       rows2nested(sortedRows)
     } else if (isNestedOpt) {
       pullCastss = pullCastss :+ pullCasts.toList
-      if (flatten)
-        sortedRows.forEach(row => tuples.addOne(pullRowFlatten2tpl(row)))
-      else
-        sortedRows.forEach(row => tuples.addOne(pullRow2tpl(row)))
+      pullSortss = pullSortss :+ pullSorts.sortBy(_._1).map(_._2).toList
+      sortedRows.forEach(row => tuples.addOne(pullRow2tpl(row)))
       tuples.result()
     } else {
-      val row2tpl = castTpl(aritiess.head, castss.head)
+      val row2tpl = castRow2Tpl(aritiess.head, castss.head, 0, None)
       sortedRows.forEach(row => tuples.addOne(row2tpl(row).asInstanceOf[Tpl]))
       tuples.result()
     }
@@ -80,14 +80,10 @@ class DatomicQueryOpsImpl[Tpl](elements: Seq[Element])
   // Helpers
 
   private def sortRows(rows: jCollection[Row]): jArrayList[Row] = {
-    (sortsAcc.length + sorts.length) match {
+    val sorters = getFlatSorters(sortss)
+    sorters.length match {
       case 0 => new jArrayList(rows)
       case n =>
-        validateSortIndexes()
-        val sorters = sortsAcc ++ sorts.sortBy(_._1).map(_._2)
-        //        println("--- SORT ------------------------------------------------------")
-        //        sorters.foreach(println)
-
         val nestedIdsCount = nestedIds.length
         val sortedRows     = new jArrayList(rows)
         val comparator     = new Comparator[Row] {
@@ -106,9 +102,9 @@ class DatomicQueryOpsImpl[Tpl](elements: Seq[Element])
     }
   }
 
-
   override def inspect(implicit conn0: Connection): Unit = {
-    val conn              = conn0.asInstanceOf[Conn_Peer]
+    val conn = conn0.asInstanceOf[Conn_Peer]
+    isFree = conn.isFreeVersion
     val (preQuery, query) = getQueries(conn.optimizeQuery)
     val queries           = if (preQuery.isEmpty) query else {
       val preInp = if (preInputs.isEmpty) "" else

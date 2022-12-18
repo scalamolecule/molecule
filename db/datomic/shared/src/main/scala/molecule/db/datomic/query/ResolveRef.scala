@@ -3,9 +3,10 @@ package molecule.db.datomic.query
 import java.lang.{Long => jLong}
 import molecule.base.util.exceptions.MoleculeException
 import molecule.boilerplate.ast.MoleculeModel._
+import molecule.db.datomic.query.casting.NestOpt_
 
 
-trait ResolveRef[Tpl] { self: SortOne_[Tpl] with Base[Tpl] =>
+trait ResolveRef[Tpl] { self: Base[Tpl] with NestOpt_[Tpl] =>
 
   protected def resolveRef(es: List[Var], ref: Ref): List[Var] = {
     val (e, refAttr, refId) = (es.last, s":${ref.ns}/${ref.refAttr}", vv)
@@ -30,29 +31,26 @@ trait ResolveRef[Tpl] { self: SortOne_[Tpl] with Base[Tpl] =>
     val nestedIndex   = nestedIds.length - 1
     val levelIdSorter = (_: Int) => (a: Row, b: Row) =>
       a.get(nestedIndex).asInstanceOf[jLong].compareTo(b.get(nestedIndex).asInstanceOf[jLong])
-
-    validateSortIndexes()
-    sortsAcc ++= sorts.sortBy(_._1).map(_._2)
-
-    // Group by entity id of this level
-    sortsAcc += levelIdSorter
-
-    // Start independent sorting on next nested level
-    sorts.clear()
+    val dummyIndexOfNestedEid = 6
+    sortss = sortss.init :+ (sortss.last :+ (dummyIndexOfNestedEid, levelIdSorter))
+    sortss = sortss :+ Nil
   }
 
-  protected def resolveNestedOptRef(es: List[Var], nestedOpt: NestedOpt): List[Var] = {
-    val e = es.last
+  protected def resolveNestedOptRef(e: Var, nestedRef: Ref): Unit = {
     nestedOptIds += e
-    pull = Some((es.last, nestedOpt))
     if (where.isEmpty) {
-      val Ref(ns, refAttr, _, _) = nestedOpt.ref
+      val Ref(ns, refAttr, _, _) = nestedRef
       val (refA, refId)          = (s":$ns/$refAttr", vv)
       where += s"[$e $refA $refId]" -> wClause
     }
     if (where.length == 1 && where.head._1.startsWith("[(identity")) {
       throw MoleculeException("Single optional attribute before optional nested data structure is not allowed.")
     }
-    es
+
+    // Add nested caster
+    castss = (castss.head :+ pullNestedData) +: castss.tail
+
+    // Start new level of casts
+    castss = castss :+ Nil
   }
 }

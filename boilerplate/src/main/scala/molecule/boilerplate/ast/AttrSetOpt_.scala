@@ -35,7 +35,8 @@ trait AttrSetOpt_ { self: ModelBase =>
     vs          : Option[Seq[Set[Long]]] = None,
     defaultValue: Option[Set[Long]] = None,
     validation  : Option[ValidateLong] = None,
-    sort        : Option[String] = None
+    sort        : Option[String] = None,
+    isRef       : Boolean = false
   ) extends AttrSetOpt
 
   case class AttrSetOptFloat(
