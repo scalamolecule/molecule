@@ -47,9 +47,6 @@ trait Base[Tpl] extends BaseHelpers with JavaConversions { self: Model2Query[Tpl
   final protected val nestedIds    = new ArrayBuffer[String]
   final protected val nestedOptIds = new ArrayBuffer[String]
   final protected val find         = new ArrayBuffer[String]
-  //  final protected var findNestedPull      = List.empty[String]
-  //  final protected var findAfterNestedPull = List.empty[String]
-  //  final protected var pull                = Option.empty[(String, NestedOpt)]
   final protected val widh         = new ArrayBuffer[String]
   final protected val in           = new ArrayBuffer[String]
   final protected val where        = new ArrayBuffer[(String, Int)]
@@ -159,8 +156,6 @@ trait Base[Tpl] extends BaseHelpers with JavaConversions { self: Model2Query[Tpl
         aritiess = aritiess.init :+ (aritiess.last :+ List(1))
       }
     }
-    //    println("---------")
-    //    aritiess.foreach(println)
   }
 
   final protected def getFlatSorters(

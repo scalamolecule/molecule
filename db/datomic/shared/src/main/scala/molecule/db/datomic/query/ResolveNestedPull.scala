@@ -21,7 +21,7 @@ trait ResolveNestedPull[Tpl]
       level: Int,
       attrIndex: Int,
       acc: String
-    ): (String, Option[Element], Seq[Element]) = {
+    ): (String, Option[Element], Seq[Element], Int) = {
       val i = "  " * (level + 6)
       elements match {
         case head :: tail =>
@@ -45,9 +45,9 @@ trait ResolveNestedPull[Tpl]
               resolveAttrSetOpt(a)
               addPullAttrs(tail, level, attrIndex + 1, acc + renderPull(i, a))
 
-            case ref: Ref                     => (acc, Some(ref), tail)
-            case backRef: BackRef             => (acc, Some(backRef), tail)
-            case nestedOpt: NestedOpt         => (acc, Some(nestedOpt), Nil)
+            case ref: Ref                     => (acc, Some(ref), tail, attrIndex)
+            case backRef: BackRef             => (acc, Some(backRef), tail, attrIndex)
+            case nestedOpt: NestedOpt         => (acc, Some(nestedOpt), Nil, attrIndex)
             case _: Nested                    => noMixedNestedModes
             case Composite(compositeElements) =>
               aritiesComposite()
@@ -59,7 +59,7 @@ trait ResolveNestedPull[Tpl]
               "Unexpected element in optional nested molecule: " + other
             )
           }
-        case Nil          => (acc, None, Nil)
+        case Nil          => (acc, None, Nil, attrIndex)
       }
     }
 
@@ -67,26 +67,28 @@ trait ResolveNestedPull[Tpl]
       ref: Ref,
       elements: Seq[Element],
       level: Int,
+      attrIndex: Int,
       append: String
     ): (String, String) = {
       val indent  = "  " * (level + 5)
       val refAttr = s":${ref.ns}/${ref.refAttr}"
-      addPullAttrs(elements, level, 0, "") match {
-        case (acc1, None, Nil) =>
+      addPullAttrs(elements, level, attrIndex, "") match {
+        case (acc1, None, Nil, _) =>
           val res = s"""\n$indent{($refAttr :limit nil :default "$none") [$acc1]}"""
           (res, append)
 
-        case (acc1, Some(ref1@Ref(_, _, _, CardOne)), tail) =>
+        case (acc1, Some(ref1@Ref(_, _, _, CardOne)), tail, attrIndex1) =>
           refDepths = refDepths.init :+ refDepths.last + 1
-          val (attrs, append1) = resolvePullRef(ref1, tail, level + 1, "")
+          // Continue increasing attrIndex after refs
+          val (attrs, append1) = resolvePullRef(ref1, tail, level + 1, attrIndex1, "")
           val res              = s"""\n$indent{($refAttr :limit nil :default "$none") [$acc1$attrs]}"""
           (res, append + append1)
 
-        case (_, Some(ref: Ref), _) => throw MoleculeException(
+        case (_, Some(ref: Ref), _, _) => throw MoleculeException(
           "Only cardinality-one refs allowed in optional nested data structures. Found: " + ref
         )
 
-        case (acc1, Some(BackRef(backRef)), tail) =>
+        case (acc1, Some(BackRef(backRef)), tail, attrIndex1) =>
           // Finish initialization of previous ref before stepping back
           val prevRef = s"""\n$indent{($refAttr :limit nil :default "$none") [$acc1"""
 
@@ -94,7 +96,7 @@ trait ResolveNestedPull[Tpl]
           def rec(elements: Seq[Element], level1: Int): (Seq[Element], String, String) = elements.head match {
             case ref1: Ref  =>
               // End previous ref
-              val (attrs, append1) = resolvePullRef(ref1, elements.tail, level1, "]}")
+              val (attrs, append1) = resolvePullRef(ref1, elements.tail, level1,attrIndex1,  "]}")
               (Nil, prevRef, append + attrs + append1)
             case _: BackRef => rec(elements.tail, level1 - 1)
             case a: Attr    => throw MoleculeException(
@@ -107,7 +109,7 @@ trait ResolveNestedPull[Tpl]
           val (_, acc2, append2) = rec(tail, level)
           (acc2, append2)
 
-        case (acc1, Some(NestedOpt(ref1, elements1)), _) =>
+        case (acc1, Some(NestedOpt(ref1, elements1)), _, _) =>
           // New sub level
           pullCastss = pullCastss :+ pullCasts.toList
           pullCasts.clear()
@@ -115,16 +117,16 @@ trait ResolveNestedPull[Tpl]
           pullSorts.clear()
           refDepths = refDepths :+ 0
           aritiesNested()
-          val (attrs, append1) = resolvePullRef(ref1, elements1, level + 1, "")
+          val (attrs, append1) = resolvePullRef(ref1, elements1, level + 1, 0, "")
           val res              = s"""\n$indent{($refAttr :limit nil :default "$none") [$acc1$attrs$append1]}"""
           (res, "")
 
-        case (_, Some(other), _) => unexpectedElement(other)
+        case (_, Some(other), _, _) => unexpectedElement(other)
         case other               => throw MoleculeException("Unexpected resolvePullRef coordinates: " + other)
       }
     }
 
-    val (attrs, append) = resolvePullRef(ref, elements, 0, "")
+    val (attrs, append) = resolvePullRef(ref, elements, 0, 0,"")
     find += s"(pull $e [$attrs$append])\n       "
   }
 

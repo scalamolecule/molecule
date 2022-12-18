@@ -176,6 +176,9 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
       noMixedNestedModes
     validateRefNs(nestedRef, nestedElements)
 
+    // On top level, move past nested pull date to tx meta data (if any)
+    attrIndex += 1
+
     aritiesNested()
     val e = es.last
     resolveNestedOptRef(e, nestedRef)

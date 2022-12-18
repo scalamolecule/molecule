@@ -7,6 +7,7 @@ object Refs extends DataModel(10) {
   trait Ns {
     val i          = oneInt
     val s          = oneString
+    val b          = oneBoolean
     val r1         = one[R1]
     val rs1        = many[R1]
     val self       = one[Ns]

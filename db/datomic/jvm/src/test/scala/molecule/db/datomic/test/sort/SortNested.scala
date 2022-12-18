@@ -17,19 +17,6 @@ object SortNested extends DatomicTestSuite {
     "Basic types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
 
-      //      Ref.i.Nss.*(Ns.int.long.string).insert((1, List(
-      //        (1, 10L, "a"),
-      //        (2, 20L, "a"),
-      //        (3, 30L, "b"),
-      //      ))).transact
-      //
-      //      Ref.i.Nss.*?(Ns.int.a2.long.string.d1).query.get ==> List((1, List(
-      //        (3, 30L, "b"),
-      //        (1, 10L, "a"),
-      //        (2, 20L, "a"),
-      //      )))
-
-
       Ref.i.Nss.*(Ns.string).insert((1, List(string1, string2))).transact
       Ref.i.Nss.*(Ns.int).insert((2, List(int1, int2))).transact
       Ref.i.Nss.*(Ns.long).insert((3, List(long1, long2))).transact
@@ -45,7 +32,6 @@ object SortNested extends DatomicTestSuite {
       Ref.i.Nss.*(Ns.short).insert((13, List(short1, short2))).transact
       Ref.i.Nss.*(Ns.char).insert((14, List(char1, char2))).transact
       Ref.i.Nss.*(Ns.ref).insert((15, List(ref1, ref2))).transact
-
 
       // Ascending
 
@@ -79,7 +65,6 @@ object SortNested extends DatomicTestSuite {
       Ref.i_(13).Nss.*?(Ns.short.a1).query.get ==> List(List(short1, short2))
       Ref.i_(14).Nss.*?(Ns.char.a1).query.get ==> List(List(char1, char2))
       Ref.i_(15).Nss.*?(Ns.ref.a1).query.get ==> List(List(ref1, ref2))
-
 
       // Descending
 
