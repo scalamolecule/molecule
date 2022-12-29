@@ -5,6 +5,7 @@ import molecule.boilerplate.api.Keywords.Kw
 import scala.annotation.tailrec
 
 
+object ModelBase extends ModelBase
 trait ModelBase extends Validations {
 
   sealed trait Element {

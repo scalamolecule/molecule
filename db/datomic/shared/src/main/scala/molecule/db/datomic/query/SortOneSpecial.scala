@@ -108,11 +108,11 @@ trait SortOneSpecial[Tpl]
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              new jLong(a.get(i).toString).compareTo(new jLong(b.get(i).toString))
+              jLong.valueOf(a.get(i).toString).compareTo(jLong.valueOf(b.get(i).toString))
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              new jLong(b.get(i).toString).compareTo(new jLong(a.get(i).toString))
+              jLong.valueOf(b.get(i).toString).compareTo(jLong.valueOf(a.get(i).toString))
         }
       )
     }
@@ -126,11 +126,11 @@ trait SortOneSpecial[Tpl]
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              new jDouble(a.get(i).toString).compareTo(new jDouble(b.get(i).toString))
+              jDouble.parseDouble(a.get(i).toString).compareTo(jDouble.parseDouble(b.get(i).toString))
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              new jDouble(b.get(i).toString).compareTo(new jDouble(a.get(i).toString))
+              jDouble.parseDouble(b.get(i).toString).compareTo(jDouble.parseDouble(a.get(i).toString))
         }
       )
     }

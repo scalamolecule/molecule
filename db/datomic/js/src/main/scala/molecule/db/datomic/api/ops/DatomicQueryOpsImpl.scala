@@ -19,11 +19,9 @@ class DatomicQueryOpsImpl[Tpl](elements: Seq[Element])
 
 
   //  override def run: ZIO[DataSource, Throwable, Chunk[Tpl]] = ZIO.succeed(Chunk.empty[Tpl]) // .provideEnvironment(conn)
-  override def run(implicit conn: Connection): ZIO[Connection, MoleculeException, Chunk[Tpl]] = ???
+  //  override def run(implicit conn: Connection): ZIO[Connection, MoleculeException, Chunk[Tpl]] = ???
 
-  override def getAsync(implicit conn: Connection, ec: ExecutionContext): Future[List[Tpl]] = ???
-
-  override def get(implicit conn: Connection): List[Tpl] = {
+  override def get(implicit conn: Connection, ec: ExecutionContext): Future[List[Tpl]] = {
     //    val query                               = ""
     //    val inputs: Seq[AnyRef] = ???
     //    val rows: util.Collection[jList[AnyRef]] = Peer.q(query, inputs: _*)
@@ -31,7 +29,14 @@ class DatomicQueryOpsImpl[Tpl](elements: Seq[Element])
     //    val tuples = List.newBuilder[Tpl]
     //    rows.forEach(row => tuples.addOne(row2tpls(row)))
     //    tuples.result()
-    Nil
+    Future {
+      try {
+        ???
+      } catch {
+        case e: Throwable => Future.failed(e)
+      }
+    }.flatten
   }
-  override def inspect(implicit conn: Connection): Unit = ???
+
+  override def inspect(implicit conn: Connection, ec: ExecutionContext): Future[Unit] = ???
 }

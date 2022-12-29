@@ -4,17 +4,12 @@ import java.util.UUID.randomUUID
 import molecule.base.api.SchemaTransaction
 import molecule.core.api.Connection
 import molecule.coreTests.dataModels.core.schema._
-import molecule.db.datomic.facade.{Conn_Peer, Datomic_Peer}
+import molecule.db.datomic.facade.{DatomicConn_JVM, DatomicPeer}
 import molecule.db.datomic.util.DatomicApiLoader
 import moleculeBuildInfo.BuildInfo
-//import moleculeTests.dataModels.core.bidirectionals.schema.BidirectionalSchema
-//import moleculeTests.dataModels.core.ref.schema.{NestedSchema, SelfJoinSchema}
-//import moleculeTests.dataModels.core.schemaDef.schema.PartitionTestSchema
-//import moleculeTests.dataModels.examples.datomic.dayOfDatomic.schema._
-//import moleculeTests.dataModels.examples.datomic.mbrainz.schema.MBrainzSchema
-//import moleculeTests.dataModels.examples.datomic.seattle.schema.SeattleSchema
-//import moleculeTests.dataModels.examples.gremlin.gettingStarted.schema.{ModernGraph1Schema, ModernGraph2Schema}
-
+import scala.concurrent.{Await, Future}
+import molecule.core.util.Executor._
+import scala.concurrent.duration._
 
 trait DatomicTestSuiteImpl extends DatomicApiLoader { self: DatomicTestSuite =>
 
@@ -25,30 +20,40 @@ trait DatomicTestSuiteImpl extends DatomicApiLoader { self: DatomicTestSuite =>
   // Needed to make api visible to classloader when using Datomic Free
   //  require("datomic.api")
 
-
   def inMem[T](
-    test: Conn_Peer => T,
+//    test: Future[DatomicConn_JVM] => T,
+    test: DatomicConn_JVM => T,
     schema: SchemaTransaction,
-    db: String
+    //    db: String
+//  ): Future[T] = {
   ): T = {
-    val dbUri           = if (protocol_ == "mem") "" else {
-      println(s"Re-creating live `$db` database...")
+    val dbUri                 = if (protocol_ == "mem") "" else {
+      println(s"Re-creating live database...")
       "localhost:4334/" + randomUUID().toString
     }
-    val conn: Conn_Peer = Datomic_Peer.recreateDbFromEdn(schema, protocol_, dbUri, useFree_)
+    val conn = Await.result(
+      DatomicPeer.recreateDbFromEdn(schema, protocol_, dbUri, useFree_),
+      2.seconds
+    )
 
     //    val futConn = system match {
-    //      case SystemPeer       => Datomic_Peer.recreateDbFrom(schemaTx, protocol_, dbUri)
+    //      case SystemPeer       => DatomicPeer.recreateDbFrom(schemaTx, protocol_, dbUri)
     //      case SystemDevLocal   => Datomic_DevLocal("datomic-samples-temp", datomicHome).recreateDbFrom(schemaTx)
     //      case SystemPeerServer => Datomic_PeerServer("k", "s", "localhost:8998").connect(schemaTx, db)
     //    }
+
+//    conn.map(conn => test(conn))
     test(conn)
   }
 
   //  def emptyImpl[T](test: Connection => T): T = inMem(test, EmptySchema, "")
-  def typesImpl[T](test: Connection => T): T = inMem(test, TypesSchema, "m_types")
-  def refsImpl[T](test: Connection => T): T = inMem(test, RefsSchema, "m_refs")
-  def uniqueImpl[T](test: Connection => T): T = inMem(test, UniqueSchema, "m_unique")
+  def typesImpl[T](test: Connection => T): T = inMem(test, TypesSchema)
+  def refsImpl[T](test: Connection => T): T = inMem(test, RefsSchema)
+  def uniqueImpl[T](test: Connection => T): T = inMem(test, UniqueSchema)
+
+//  def typesImpl[T](test: Future[Connection] => T): T = inMem(test, TypesSchema)
+//  def refsImpl[T](test: Future[Connection] => T): T = inMem(test, RefsSchema)
+//  def uniqueImpl[T](test: Future[Connection] => T): T = inMem(test, UniqueSchema)
 
   //  def corePeerOnlyImpl[T](test: Connection => T): T = if (system == SystemPeer) coreImpl(test) else ().asInstanceOf[T]
   //  def bidirectionalImpl[T](test: Connection => T): T = inMem(test, BidirectionalSchema, "m_bidirectional")
@@ -68,7 +73,7 @@ trait DatomicTestSuiteImpl extends DatomicApiLoader { self: DatomicTestSuite =>
   //  def mbrainzImpl[T](test: Connection => Future[T]): Future[T] = {
   //    implicit val futConn: Connection = system match {
   //      case SystemPeer =>
-  //        Datomic_Peer
+  //        DatomicPeer
   //          .connect(MBrainzSchema, "dev", "localhost:4334/mbrainz-1968-1973")
   //
   //      case SystemDevLocal =>

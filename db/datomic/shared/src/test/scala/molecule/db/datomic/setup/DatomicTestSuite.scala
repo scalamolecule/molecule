@@ -4,9 +4,11 @@ import molecule.base.util.exceptions.MoleculeException
 import molecule.core.api.Connection
 import molecule.core.api.ops.QueryOps
 import molecule.core.util.JavaConversions
-import molecule.coreTests.sampledata.CoreData
-import molecule.db.datomic.setup.DatomicTestSuiteImpl
+import molecule.coreTests.dataModels.core.dsl.Unique.Unique
 import utest._
+import scala.concurrent.Future
+//import molecule.coreTests.sampledata.CoreData
+import molecule.core.util.Executor._
 import utest.framework.Formatter
 
 trait DatomicTestSuite extends TestSuite with CoreData
@@ -36,6 +38,28 @@ trait DatomicTestSuite extends TestSuite with CoreData
     //      })
   }
 
+//  import molecule.core.util.FutureUtils._
+
+  implicit class ArrowFutureAssert(lhs: Future[Any]) {
+    def ==*[V](rhs: V): Future[Unit] = {
+      (lhs, rhs) match {
+        // Hack to make Arrays compare sanely; at some point we may want some
+        // custom, extensible, typesafe equality check but for now this will do
+        case (lhs: Future[_], rhs: Array[_]) =>
+          lhs.map {
+            case lhs: Array[_] =>
+              Predef.assert(
+                lhs.toSeq == rhs.toSeq, s"==* assertion failed: ${lhs.toSeq} != ${rhs.toSeq}"
+              )
+          }
+        case (lhs, rhs)                      =>
+          lhs.map(lhs =>
+            Predef.assert(lhs == rhs, s"==* assertion failed: $lhs != $rhs")
+          )
+      }
+    }
+  }
+
   override def utestFormatter: Formatter = new Formatter {
     override def formatIcon(success: Boolean): ufansi.Str = {
       formatResultColor(success)(
@@ -57,16 +81,23 @@ trait DatomicTestSuite extends TestSuite with CoreData
     }
   }
 
-  def pullBooleanBug[Tpl](query: QueryOps[Tpl])(implicit conn: Connection): Unit = {
-    intercept[MoleculeException](
-      query.get
-    ).message ==> "Datomic Free (not Pro) has a bug that pulls boolean `false` values as nil."
+  def pullBooleanBug[Tpl](query: QueryOps[Tpl])(implicit conn: Connection): Future[Unit] = {
+    query.get
+      .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
+      err ==> "Datomic Free (not Pro) has a bug that pulls boolean `false` values as nil."
+    }
   }
+
 
   //  def empty[T](test: Future[Conn] => T): T = emptyImpl(test)
   def types[T](test: Connection => T): T = typesImpl(test)
   def refs[T](test: Connection => T): T = refsImpl(test)
   def unique[T](test: Connection => T): T = uniqueImpl(test)
+
+//  def types[T](test: Future[Connection] => T): T = typesImpl(test)
+//  def refs[T](test: Future[Connection] => T): T = refsImpl(test)
+//  def unique[T](test: Future[Connection] => T): T = uniqueImpl(test)
+
   //  def corePeerOnly[T](test: Future[Conn] => T): T = corePeerOnlyImpl(test)
   //  def bidirectional[T](test: Future[Conn] => T): T = bidirectionalImpl(test)
   //  def partition[T](test: Future[Conn] => T): T = partitionImpl(test)

@@ -11,11 +11,16 @@ class DatomicUpdateOpsImpl(elements: Seq[Element], isUpsert: Boolean) extends Up
 
   override def run: ZIO[Connection, MoleculeException, TxReport] = ???
 
-  override def transact(implicit conn: Connection): TxReport = {
+  override def transact(implicit conn: Connection, ec: ExecutionContext): Future[TxReport] = {
 //    conn.asInstanceOf[Conn_Peer].transact(stmts)
-    ???
+    Future {
+      try {
+        ???
+      } catch {
+        case e: Throwable => Future.failed(e)
+      }
+    }.flatten
   }
-  override def transactAsync(implicit conn: Connection, ec: ExecutionContext): Future[TxReport] = ???
 
   override def multiple: UpdateOps = ???
 }

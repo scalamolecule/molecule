@@ -2,6 +2,7 @@ package codegen.boilerplate.api.expression
 
 import codegen.BoilerplateGenBase
 
+
 object _ExprSetMan extends BoilerplateGenBase( "ExprSetMan", "/api/expression") {
   val content = {
     val traits = (1 to 22).map(arity => Trait(arity).body).mkString("\n")

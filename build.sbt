@@ -1,11 +1,13 @@
 import org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv
+//import org.scalajs.linker.interface.ModuleSplitStyle
 
 val scala212 = "2.12.17"
-val scala213 = "2.13.8"
-val scala3   = "3.2.0"
+val scala213 = "2.13.10"
+val scala3   = "3.2.1"
 val allScala = Seq(scala212, scala213, scala3)
 
-val zioVersion = "2.0.1"
+val zioVersion  = "2.0.1"
+val akkaVersion = "2.7.0"
 
 //inThisBuild(
 //  List(
@@ -74,7 +76,7 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
   .dependsOn(boilerplate)
   .settings(sharedSettings ++ doPublish)
   .jsSettings(jsSettings)
-//  .jvmSettings(jvmSettings)
+  .jvmSettings(jvmSettings)
 
 lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
@@ -118,13 +120,13 @@ lazy val baseSettings: Seq[Def.Setting[_]] = Seq(
     "dev.zio" %% "zio" % zioVersion,
     "dev.zio" %% "zio-streams" % zioVersion,
     "dev.zio" %% "zio-test" % zioVersion % Test
-  )
-)
-
-lazy val sharedSettings: Seq[Def.Setting[_]] = baseSettings ++ Seq(
-  resolvers ++= Seq(
-    "clojars" at "https://clojars.org/repo"
   ),
+
+  //  libraryDependencies += "com.lihaoyi" %%% "utest" % "0.7.4" % "test",
+  testFrameworks += new TestFramework("utest.runner.Framework"),
+  //    testFrameworks += new TestFramework("molecule.db.datomic.setup.MoleculeTestFramework"),
+
+
   Compile / unmanagedSourceDirectories ++= {
     (Compile / unmanagedSourceDirectories).value.map { dir =>
       CrossVersion.partialVersion(scalaVersion.value) match {
@@ -133,12 +135,27 @@ lazy val sharedSettings: Seq[Def.Setting[_]] = baseSettings ++ Seq(
       }
     }
   },
+)
+
+lazy val sharedSettings: Seq[Def.Setting[_]] = baseSettings ++ Seq(
+  resolvers ++= Seq(
+    "clojars" at "https://clojars.org/repo"
+  ),
+  //  Compile / unmanagedSourceDirectories ++= {
+  //    (Compile / unmanagedSourceDirectories).value.map { dir =>
+  //      CrossVersion.partialVersion(scalaVersion.value) match {
+  //        case Some((2, 13)) => file(dir.getPath ++ "-2.13+")
+  //        case _             => file(dir.getPath ++ "-2.13-")
+  //      }
+  //    }
+  //  },
   libraryDependencies ++= Seq(
     "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-    "org.scala-js" %%% "scala-js-macrotask-executor" % "1.0.0",
     "io.suzaku" %%% "boopickle" % "1.4.0",
-    "com.github.cornerman" %%% "sloth" % "0.6.2"
+    "com.github.cornerman" %%% "sloth" % "0.6.5",
     //    "com.lihaoyi" %%% "utest" % "0.7.11",
+
+    "org.scalactic" %% "scalactic" % "3.2.14"
   ),
 
   // Let IntelliJ detect sbt-molecule-created jars in unmanaged lib directories
@@ -148,12 +165,30 @@ lazy val sharedSettings: Seq[Def.Setting[_]] = baseSettings ++ Seq(
 lazy val jsSettings: Seq[Def.Setting[_]] = Seq(
   libraryDependencies ++= Seq(
     "org.scala-js" %%% "scalajs-dom" % "2.1.0",
-    "io.github.cquiroz" %%% "scala-java-time" % "2.3.0",
+    "org.scala-js" %%% "scala-js-macrotask-executor" % "1.1.1",
+
+    //    "io.github.cquiroz" %%% "scala-java-time" % "2.3.0",
     // This creates quite a lot of locales code but is needed on the js side.
     // See https://github.com/cquiroz/scala-java-time/issues/69
-    "io.github.cquiroz" %%% "scala-java-time-tzdb" % "2.3.0"
+    "io.github.cquiroz" %%% "scala-java-time" % "2.4.0" % Test,
+
+    "org.scala-js" %%% "scalajs-java-securerandom" % "1.0.0",
+    //    "org.scala-js" %%% "scalajs-java-securerandom" % "1.0.0" cross CrossVersion.for3Use2_13,
+
+
   ),
-  //    jsEnv := new JSDOMNodeJSEnv()
+
+  //  Test / scalaJSLinkerConfig ~= {
+  //    _.withModuleKind(ModuleKind.ESModule)
+  //  },
+  //  Test / scalaJSLinkerConfig ~= {
+  //    _.withModuleSplitStyle(ModuleSplitStyle.FewestModules)
+  //  },
+  //  Test / scalaJSLinkerConfig ~= {
+  //    _.withSourceMap(false)
+  //  },
+
+  //  jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv()
   jsEnv := new JSDOMNodeJSEnv(
     JSDOMNodeJSEnv
       .Config()
@@ -168,23 +203,23 @@ lazy val datomicSettings: Seq[Def.Setting[_]] = {
     libraryDependencies ++= Seq(
       // Datomic peer dependency
       "com.datomic" % "datomic-free" % DatomicSettings.freeVersion,
-//      "javax.xml.bind" % "jaxb-api" % "2.3.0",
-//      "javax.xml.bind" % "jaxb-api" % "2.4.0-b180830.0359",
+      //      "javax.xml.bind" % "jaxb-api" % "2.3.0",
+      //      "javax.xml.bind" % "jaxb-api" % "2.4.0-b180830.0359",
 
       // Force newer janino compiler than datomic-free uses (necessary for using tx fns with datomic-free)
       "org.codehaus.janino" % "commons-compiler" % "3.0.12",
       "org.codehaus.janino" % "commons-compiler-jdk" % "3.0.12",
 
       // Datomic client dependencies transiently resolved
-//      "org.scalamolecule" %% "datomic-client-api-java-scala" % "1.0.3",
+      //      "org.scalamolecule" %% "datomic-client-api-java-scala" % "1.0.3",
 
-      // Akka dependencies for MoleculeRpcResponse
-      "com.typesafe.akka" %% "akka-actor-typed" % "2.6.19",
-      "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.13.2",
+      //      // Akka dependencies for MoleculeRpcResponse
+      //      "com.typesafe.akka" %% "akka-actor-typed" % "2.6.19",
+      //      "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.13.2",
 
-      // Enforce one version to avoid warnings of multiple dependency versions when running tests
-      "org.slf4j" % "slf4j-api" % "1.7.36",
-      "org.slf4j" % "slf4j-nop" % "1.7.36"
+      //      // Enforce one version to avoid warnings of multiple dependency versions when running tests
+      //      "org.slf4j" % "slf4j-api" % "1.7.36",
+      //      "org.slf4j" % "slf4j-nop" % "1.7.36"
     ) ++ (CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((2, 13)) => Nil
       case _             =>
@@ -199,32 +234,25 @@ lazy val datomicSettings: Seq[Def.Setting[_]] = {
 lazy val jvmSettings: Seq[Def.Setting[_]] = {
   Seq(
     libraryDependencies ++= Seq(
-      // Datomic peer dependency
-      "com.datomic" % "datomic-free" % DatomicSettings.freeVersion,
-      "javax.xml.bind" % "jaxb-api" % "2.4.0-b180830.0359",
-
-      // Force newer janino compiler than datomic-free uses (necessary for using tx fns with datomic-free)
-      "org.codehaus.janino" % "commons-compiler" % "3.0.12",
-      "org.codehaus.janino" % "commons-compiler-jdk" % "3.0.12",
-
-      // Datomic client dependencies transiently resolved
-      "org.scalamolecule" %% "datomic-client-api-java-scala" % "1.0.3",
+      //      // Datomic peer dependency
+      //      "com.datomic" % "datomic-free" % DatomicSettings.freeVersion,
+      //      "javax.xml.bind" % "jaxb-api" % "2.4.0-b180830.0359",
+      //
+      //      // Force newer janino compiler than datomic-free uses (necessary for using tx fns with datomic-free)
+      //      "org.codehaus.janino" % "commons-compiler" % "3.0.12",
+      //      "org.codehaus.janino" % "commons-compiler-jdk" % "3.0.12",
+      //
+      //      // Datomic client dependencies transiently resolved
+      //      "org.scalamolecule" %% "datomic-client-api-java-scala" % "1.0.3",
 
       // Akka dependencies for MoleculeRpcResponse
-      "com.typesafe.akka" %% "akka-actor-typed" % "2.6.19",
+      "com.typesafe.akka" %% "akka-actor-typed" % akkaVersion,
       "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.13.2",
 
       // Enforce one version to avoid warnings of multiple dependency versions when running tests
       "org.slf4j" % "slf4j-api" % "1.7.36",
       "org.slf4j" % "slf4j-nop" % "1.7.36"
-    ) ++ (CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((2, 13)) => Nil
-      case _             =>
-        // For @TxFns macro annotation on Scala 2.12
-        sbt.compilerPlugin(
-          "org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full
-        ) :: Nil
-    })
+    )
   )
 }
 
@@ -291,9 +319,10 @@ lazy val testSettings: Seq[Def.Setting[_]] = {
         case _             => file(unmanagedBase.value.getPath ++ "/2.12")
       }
     },
-    testFrameworks += new TestFramework(
-      "moleculeTests.setup.MoleculeTestFramework"
-    ),
+
+    //    libraryDependencies += "com.lihaoyi" %%% "utest" % "0.7.4" % "test",
+    //    testFrameworks += new TestFramework("utest.runner.Framework"),
+    //    //    testFrameworks += new TestFramework("molecule.db.datomic.setup.MoleculeTestFramework"),
 
     // Run tests for all systems sequentially to avoid data locks with db
     // Only applies on JVM. On JS platform there's no parallelism anyway.
@@ -323,7 +352,7 @@ lazy val testSettings: Seq[Def.Setting[_]] = {
     moleculePluginActive := sys.props.get("molecule").contains("true"),
 
     // We need schema conversions for mBrainz
-//    moleculeSchemaConversions := true, // (default is false)
+    //    moleculeSchemaConversions := true, // (default is false)
 
     // Multiple directories with data models
     moleculeDataModelPaths := Seq(
@@ -339,20 +368,20 @@ lazy val testSettings: Seq[Def.Setting[_]] = {
       //      "moleculeTests/dataModels/examples/datomic/seattle",
       //      "moleculeTests/dataModels/examples/gremlin/gettingStarted"
     ),
-    moleculeMakeJars := false,
+    //    moleculeMakeJars := false,
 
 //    // Temporarily limit number of tests to be compiled by sbt (comment out this whole sbt setting to test all)
 //    // Note that intellij doesn't recognize this setting - there you can right click on files and exclude
 //    unmanagedSources / excludeFilter := {
-//      val jvmTests    =
-//        (baseDirectory.value / "../jvm/src/test/scala/moleculeTests/jvm").getCanonicalPath
-//      val sharedTests =
-//        (baseDirectory.value / "../shared/src/test/scala/moleculeTests/tests").getCanonicalPath
+//      val test = "src/test/scala/molecule/db/datomic/test"
+//      def path(platform: String) = (baseDirectory.value / s"../$platform/$test").getCanonicalPath
+//      val jvmTests    = path("jvm")
+//      val sharedTests = path("shared")
 //      val allowed     = Seq(
 //        //        jvmTests + "/datomic",
 //        //        jvmTests + "/restore",
 //        //        jvmTests + "/AdhocJVM.scala",
-//        sharedTests + "/core/api"
+//        //        sharedTests + "/core/api"
 //        //        sharedTests + "/core/attribute",
 //        //        sharedTests + "/core/attrMap",
 //        //        sharedTests + "/core/bidirectionals",
@@ -378,7 +407,7 @@ lazy val testSettings: Seq[Def.Setting[_]] = {
 //        //        sharedTests + "/examples/datomic/seattle",
 //        //        sharedTests + "/examples/gremlin/gettingStarted",
 //        //        sharedTests + "/sbtmolecule/codeGen",
-//        //        sharedTests + "/Adhoc.scala",
+//        sharedTests + "/Adhoc.scala",
 //      )
 //      new SimpleFileFilter(f =>
 //        (f.getCanonicalPath.startsWith(jvmTests) || f.getCanonicalPath
@@ -393,20 +422,21 @@ lazy val testSettings: Seq[Def.Setting[_]] = {
       "dev.zio" %% "zio" % zioVersion,
       "dev.zio" %% "zio-schema" % "0.2.1",
       "dev.zio" %% "zio-test" % zioVersion % "test",
-      "dev.zio" %% "zio-test-sbt" % zioVersion % "test"
+      "dev.zio" %% "zio-test-sbt" % zioVersion % "test",
       //      "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.13.2",
-      //      "com.typesafe.akka"            %% "akka-stream"          % "2.6.19",
-      //      "com.typesafe.akka"            %% "akka-actor"           % "2.6.19",
-      //      "com.typesafe.akka"            %% "akka-actor-typed"     % "2.6.19",
-      //      "ch.megard"                    %% "akka-http-cors"       % "1.1.3",
+      "com.typesafe.akka" %% "akka-stream" % akkaVersion,
+      "com.typesafe.akka" %% "akka-actor" % akkaVersion,
+      "com.typesafe.akka" %% "akka-actor-typed" % akkaVersion,
+      "com.typesafe.akka" %% "akka-http" % "10.4.0",
+      "ch.megard" %% "akka-http-cors" % "1.1.3",
       //
       //      // Free, but proprietary Client dev-local dependency needed for testing client/dev-local
       //      // Please download from https://cognitect.com/dev-tools and install locally per included instructions
       //      "com.datomic" % "dev-local" % DatomicSettings.devLocalVersion
     )
-//  )
-//}
-  )  ++ (
+    //  )
+    //}
+  ) ++ (
     if (DatomicSettings.useFree)
       Nil // Datomic free version is already default in `molecule` module
     else

@@ -8,7 +8,7 @@ import molecule.base.util.exceptions.MoleculeException
 import molecule.boilerplate.ast.MoleculeModel._
 import molecule.core.api.ops.UpdateOps
 import molecule.core.api.{Connection, TxReport}
-import molecule.db.datomic.facade.Conn_Peer
+import molecule.db.datomic.facade.DatomicConn_JVM
 import molecule.db.datomic.transaction.{DatomicTransactionBase, UpdateStmts}
 import zio.ZIO
 import scala.concurrent.{ExecutionContext, Future}
@@ -25,10 +25,8 @@ class DatomicUpdateOpsImpl(
   // Actions
   override def run: ZIO[Connection, MoleculeException, TxReport] = ???
 
-  override def transactAsync(implicit conn: Connection, ec: ExecutionContext): Future[TxReport] = ???
-
-  override def transact(implicit conn0: Connection): TxReport = {
-    val conn = conn0.asInstanceOf[Conn_Peer]
+  override def transact(implicit conn0: Connection, ec: ExecutionContext): Future[TxReport] = try {
+    val conn = conn0.asInstanceOf[DatomicConn_JVM]
 
     val (eids, filterQuery, inputs, data) = new UpdateStmts(
       conn.schema.uniqueAttrs, elements, isUpsert, isMultiple
@@ -52,6 +50,8 @@ class DatomicUpdateOpsImpl(
     println("---")
     stmts.forEach(stmt => println(stmt))
     conn.transact(stmts)
+  } catch {
+    case e: Throwable => Future.failed(e)
   }
 
 

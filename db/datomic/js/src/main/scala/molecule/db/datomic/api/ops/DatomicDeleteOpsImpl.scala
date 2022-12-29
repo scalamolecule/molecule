@@ -13,9 +13,13 @@ class DatomicDeleteOpsImpl(elements: Seq[Element]) extends DeleteOps {
 
   override def run: ZIO[Connection, MoleculeException, TxReport] = ???
 
-  override def transact(implicit conn: Connection): TxReport = {
-//    conn.asInstanceOf[Conn_Peer].transact(stmts)
-    ???
+  override def transact(implicit conn: Connection, ec: ExecutionContext): Future[TxReport] = {
+    Future {
+      try {
+        ???
+      } catch {
+        case e: Throwable => Future.failed(e)
+      }
+    }.flatten
   }
-  override def transactAsync(implicit conn: Connection, ec: ExecutionContext): Future[TxReport] = ???
 }

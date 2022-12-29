@@ -12,7 +12,7 @@ import scala.collection.mutable.ListBuffer
 abstract class DatomicTransactionBase(
   elements: Seq[Element],
   isUpsert: Boolean = false
-) {
+) extends DatomicDataType_JVM {
   val update = if (isUpsert) "upsert" else "update"
 
   // Accumulate java insertion data

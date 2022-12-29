@@ -11,7 +11,6 @@ trait UpdateOps {
 
   // Actions
   def run: ZIO[Connection, MoleculeException, TxReport]
-  def transactAsync(implicit conn: Connection, ec: ExecutionContext): Future[TxReport]
-  def transact(implicit conn: Connection): TxReport
+  def transact(implicit conn: Connection, ec: ExecutionContext): Future[TxReport]
 
 }

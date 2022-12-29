@@ -225,12 +225,12 @@ trait LambdasOne extends ResolveBase {
 
   // Nested opt ---------------------------------------------------------------------
 
-  lazy val it2String2    : AnyRef => AnyRef = (v: AnyRef) => v match {
+  lazy val it2String2    : AnyRef => AnyRef = {
     case `none`    => nullValue
     case v: String => v.asInstanceOf[AnyRef]
     case other     => unexpectedValue(other)
   }
-  lazy val it2Int2       : AnyRef => AnyRef = (v: AnyRef) => v match {
+  lazy val it2Int2       : AnyRef => AnyRef = {
     case v: Integer => v.toInt.asInstanceOf[AnyRef]
     case `none`     => nullValue
     case other      => unexpectedValue(other)

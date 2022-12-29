@@ -8,9 +8,10 @@ import scala.annotation.tailrec
 
 
 class InsertStmts(elements: Seq[Element], data: Seq[Product])
-  extends InsertResolvers_(elements) {
+  extends InsertResolvers_(elements) with DatomicDataType_JVM {
 
-  def getStmts: jList[jList[_]] = {
+//  def getStmts: jList[jList[_]] = {
+  def getStmts: Data = {
     // Resolve tx meta elements separately and merge append
     val (mainElements, txMetaElements) = elements.last match {
       case TxMetaData(txMetaElements) => (elements.init, txMetaElements)
@@ -25,7 +26,8 @@ class InsertStmts(elements: Seq[Element], data: Seq[Product])
     }
     if (txMetaElements.nonEmpty) {
       e = datomicTx
-      val txMetaStmts = new SaveStmts(txMetaElements, true, false).getRawStmts(datomicTx)
+      val txMetaStmts = new SaveStmts(txMetaElements, true, false)
+        .getRawStmts(datomicTx)
       stmts.addAll(txMetaStmts)
     }
 

@@ -1,7 +1,6 @@
 package codegen.core.api
 
 import codegen.CoreGenBase
-import codegen.core.api._Insert.fileName
 
 object _MoleculeApi extends CoreGenBase( "MoleculeApi", "/api") {
 

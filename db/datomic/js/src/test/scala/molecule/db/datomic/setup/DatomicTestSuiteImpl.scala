@@ -1,28 +1,26 @@
 package molecule.db.datomic.setup
 
 import molecule.base.api.SchemaTransaction
-import molecule.core.api.{Connection, TxReport}
+import molecule.core.api.Connection
+import molecule.core.marshalling.WebClient
 import molecule.coreTests.dataModels.core.schema._
+import molecule.db.datomic.facade.DatomicConn_JS
 import moleculeBuildInfo.BuildInfo
-//import moleculeTests.dataModels.core.bidirectionals.schema.BidirectionalSchema
-//import moleculeTests.dataModels.core.ref.schema.{NestedSchema, SelfJoinSchema}
-//import moleculeTests.dataModels.core.schemaDef.schema.PartitionTestSchema
-//import moleculeTests.dataModels.examples.datomic.dayOfDatomic.schema._
-//import moleculeTests.dataModels.examples.datomic.mbrainz.schema.MBrainzSchema
-//import moleculeTests.dataModels.examples.datomic.seattle.schema.SeattleSchema
-//import moleculeTests.dataModels.examples.gremlin.gettingStarted.schema.{ModernGraph1Schema, ModernGraph2Schema}
+import scala.concurrent.Future
+import molecule.core.util.Executor._
 
 
-trait DatomicTestSuiteImpl { self: DatomicTestSuite =>
+trait DatomicTestSuiteImpl extends WebClient { self: DatomicTestSuite =>
 
   lazy val isJsPlatform_ = true
   lazy val protocol_     = BuildInfo.datomicProtocol
   lazy val useFree_      = BuildInfo.datomicUseFree
 
   def inMem[T](
+//    test: Future[Connection] => T,
     test: Connection => T,
-    schema: SchemaTransaction,
-    peerServerDb: String
+    schema: SchemaTransaction
+//  ): Future[T] = {
   ): T = {
     //    val (peerSchema, nsMap, attrMap) = (schema.datomicPeer, schema.datomicClient, schema.nsMap, schema.attrMap)
 
@@ -32,19 +30,24 @@ trait DatomicTestSuiteImpl { self: DatomicTestSuite =>
     //      case SystemPeerServer => DatomicPeerServerProxy("k", "s", "localhost:8998", peerServerDb, clientSchema, nsMap, attrMap)
     //    }
 
-    val conn: Connection = new Connection(schema) {
-      override type Data = this.type
-      override def transact(data: this.type): TxReport = ???
-    }
+//    val conn: Connection = new Connection(schema) {
+//      override type Data = this.type
+//      override def transact(data: this.type): TxReport = ???
+//    }
 
-
+    val conn = DatomicConn_JS(schema, "localhost", 8080)
     test(conn)
+//    Future(test(conn))
   }
 
   //  def emptyImpl[T](test: Future[Conn] => T): T = inMem(test, EmptySchema, "")
-  def typesImpl[T](test: Connection => T): T = inMem(test, TypesSchema, "m_types")
-  def refsImpl[T](test: Connection => T): T = inMem(test, RefsSchema, "m_refs")
-  def uniqueImpl[T](test: Connection => T): T = inMem(test, UniqueSchema, "m_unique")
+//  def typesImpl[T](test: Future[Connection] => T): T = inMem(test, TypesSchema)
+//  def refsImpl[T](test: Future[Connection] => T): T = inMem(test, RefsSchema)
+//  def uniqueImpl[T](test: Future[Connection] => T): T = inMem(test, UniqueSchema)
+
+  def typesImpl[T](test: Connection => T): T = inMem(test, TypesSchema)
+  def refsImpl[T](test: Connection => T): T = inMem(test, RefsSchema)
+  def uniqueImpl[T](test: Connection => T): T = inMem(test, UniqueSchema)
 
   //  def corePeerOnlyImpl[T](test: Future[Conn] => T): T = if (system == SystemPeer) coreImpl(test) else ().asInstanceOf[T]
   //  def bidirectionalImpl[T](test: Future[Conn] => T): T = inMem(test, BidirectionalSchema, "m_bidirectional")
