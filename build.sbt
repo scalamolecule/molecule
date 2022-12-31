@@ -241,8 +241,8 @@ lazy val jvmSettings: Seq[Def.Setting[_]] = {
       //      // Force newer janino compiler than datomic-free uses (necessary for using tx fns with datomic-free)
       //      "org.codehaus.janino" % "commons-compiler" % "3.0.12",
       //      "org.codehaus.janino" % "commons-compiler-jdk" % "3.0.12",
-      //
-      //      // Datomic client dependencies transiently resolved
+
+      // Datomic client dependencies transiently resolved
       //      "org.scalamolecule" %% "datomic-client-api-java-scala" % "1.0.3",
 
       // Akka dependencies for MoleculeRpcResponse
@@ -370,51 +370,56 @@ lazy val testSettings: Seq[Def.Setting[_]] = {
     ),
     //    moleculeMakeJars := false,
 
-//    // Temporarily limit number of tests to be compiled by sbt (comment out this whole sbt setting to test all)
-//    // Note that intellij doesn't recognize this setting - there you can right click on files and exclude
-//    unmanagedSources / excludeFilter := {
-//      val test = "src/test/scala/molecule/db/datomic/test"
-//      def path(platform: String) = (baseDirectory.value / s"../$platform/$test").getCanonicalPath
-//      val jvmTests    = path("jvm")
-//      val sharedTests = path("shared")
-//      val allowed     = Seq(
-//        //        jvmTests + "/datomic",
-//        //        jvmTests + "/restore",
-//        //        jvmTests + "/AdhocJVM.scala",
-//        //        sharedTests + "/core/api"
-//        //        sharedTests + "/core/attribute",
-//        //        sharedTests + "/core/attrMap",
-//        //        sharedTests + "/core/bidirectionals",
-//        //        sharedTests + "/core/crud",
-//        //        sharedTests + "/core/expression/equality",
-//        //        sharedTests + "/core/input1",
-//        //        sharedTests + "/core/input2",
-//        //        sharedTests + "/core/input3",
-//        //        sharedTests + "/core/json",
-//        //        sharedTests + "/core/nested",
-//        //        sharedTests + "/core/obj",
-//        //        sharedTests + "/core/pagination",
-//        //        sharedTests + "/core/ref",
-//        //        sharedTests + "/core/sorting",
-//        //        sharedTests + "/db/datomic/composite",
-//        //        sharedTests + "/db/datomic/entity",
-//        //        sharedTests + "/db/datomic/generic",
-//        //        sharedTests + "/db/datomic/partitions",
-//        //        sharedTests + "/db/datomic/time",
-//        //        sharedTests + "/db/datomic/txMetaData",
-//        //        sharedTests + "/examples/datomic/dayOfDatomic",
-//        //        sharedTests + "/examples/datomic/mbrainz",
-//        //        sharedTests + "/examples/datomic/seattle",
-//        //        sharedTests + "/examples/gremlin/gettingStarted",
-//        //        sharedTests + "/sbtmolecule/codeGen",
-//        sharedTests + "/Adhoc.scala",
-//      )
-//      new SimpleFileFilter(f =>
-//        (f.getCanonicalPath.startsWith(jvmTests) || f.getCanonicalPath
-//          .startsWith(sharedTests)) &&
-//          !allowed.exists(p => f.getCanonicalPath.startsWith(p))
-//      )
-//    },
+    // Temporarily limit number of tests to be compiled by sbt (comment out this whole sbt setting to test all)
+    // Note that intellij doesn't recognize this setting - there you can right click on files and exclude
+    unmanagedSources / excludeFilter := {
+      val test = "src/test/scala/molecule/db/datomic/test"
+      def path(platform: String) = (baseDirectory.value / s"../$platform/$test").getCanonicalPath
+      val jsTests     = path("js")
+      val jvmTests    = path("jvm")
+      val sharedTests = path("shared")
+      val allowed     = Seq(
+        //                jvmTests,
+        //                jvmTests + "/datomic",
+        //        jvmTests + "/restore",
+        //        jvmTests + "/AdhocJVM.scala",
+        //        sharedTests + "/core/api"
+        //        sharedTests + "/core/attribute",
+        //        sharedTests + "/core/attrMap",
+        //        sharedTests + "/core/bidirectionals",
+        //        sharedTests + "/core/crud",
+        //        sharedTests + "/core/expression/equality",
+        //        sharedTests + "/core/input1",
+        //        sharedTests + "/core/input2",
+        //        sharedTests + "/core/input3",
+        //        sharedTests + "/core/json",
+        //        sharedTests + "/core/nested",
+        //        sharedTests + "/core/obj",
+        //        sharedTests + "/core/pagination",
+        //        sharedTests + "/core/ref",
+        //        sharedTests + "/core/sorting",
+        //        sharedTests + "/db/datomic/composite",
+        //        sharedTests + "/db/datomic/entity",
+        //        sharedTests + "/db/datomic/generic",
+        //        sharedTests + "/db/datomic/partitions",
+        //        sharedTests + "/db/datomic/time",
+        //        sharedTests + "/db/datomic/txMetaData",
+        //        sharedTests + "/examples/datomic/dayOfDatomic",
+        //        sharedTests + "/examples/datomic/mbrainz",
+        //        sharedTests + "/examples/datomic/seattle",
+        //        sharedTests + "/examples/gremlin/gettingStarted",
+        //        sharedTests + "/sbtmolecule/codeGen",
+        //            sharedTests + "/Adhoc.scala",
+        sharedTests,
+        jsTests + "/AdhocJs.scala",
+      )
+      new SimpleFileFilter(f =>
+        (f.getCanonicalPath.startsWith(jsTests)
+          || f.getCanonicalPath.startsWith(jvmTests)
+          || f.getCanonicalPath.startsWith(sharedTests)) &&
+          !allowed.exists(p => f.getCanonicalPath.startsWith(p))
+      )
+    },
 
     // Allow resolving local dependencies if using Datomic proprietary dev-local or pro
     resolvers += Resolver.mavenLocal,

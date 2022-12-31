@@ -1,10 +1,13 @@
 package molecule.db.datomic.test
 
+import molecule.core.transaction.Save
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Refs._
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
+import molecule.db.datomic.transaction.Save_stmts
 import utest._
+import molecule.boilerplate.ast.Model._
 
 
 object AdhocJVM extends DatomicTestSuite {
@@ -14,10 +17,11 @@ object AdhocJVM extends DatomicTestSuite {
 
     "refs" - refs { implicit conn =>
 
-      for {
-        _ <- Ns.i(7).save.transact
 
-      } yield ()
+      //      for {
+      //        _ <- Ns.i(7).save.transact
+      //
+      //      } yield ()
 
     }
 

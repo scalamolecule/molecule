@@ -2,7 +2,7 @@ package molecule.db.datomic.query
 
 import java.lang.{Long => jLong}
 import molecule.base.util.exceptions.MoleculeException
-import molecule.boilerplate.ast.MoleculeModel._
+import molecule.boilerplate.ast.Model._
 import molecule.db.datomic.query.casting.NestOpt_
 
 

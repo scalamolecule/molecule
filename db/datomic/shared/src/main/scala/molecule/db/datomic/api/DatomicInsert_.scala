@@ -1,7 +1,7 @@
 // GENERATED CODE ********************************
 package molecule.db.datomic.api
 
-import molecule.boilerplate.ast.MoleculeModel._
+import molecule.boilerplate.ast.Model._
 import molecule.core.api._
 
 

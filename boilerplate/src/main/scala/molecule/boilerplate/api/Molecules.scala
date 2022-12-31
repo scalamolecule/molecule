@@ -1,6 +1,6 @@
 package molecule.boilerplate.api
 
-import molecule.boilerplate.ast.MoleculeModel.Element
+import molecule.boilerplate.ast.Model.Element
 
 
 trait Molecule[Tpl] {

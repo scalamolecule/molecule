@@ -10,7 +10,7 @@ object _ExprOneTac extends BoilerplateGenBase( "ExprOneTac", "/api/expression") 
        |package molecule.boilerplate.api.expression
        |
        |import molecule.boilerplate.api.Keywords.unify
-       |import molecule.boilerplate.ast.MoleculeModel._
+       |import molecule.boilerplate.ast.Model._
        |$traits
        |""".stripMargin
   }

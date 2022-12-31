@@ -3,7 +3,7 @@ package molecule.core.api.ops
 import molecule.core.api.Connection
 import scala.concurrent.{ExecutionContext, Future}
 
-trait QueryOps[Tpl] {
+trait QueryOps[Tpl] extends BaseOps {
 
   // Time
   def asOf(n: Int): QueryOps[Tpl] = ???

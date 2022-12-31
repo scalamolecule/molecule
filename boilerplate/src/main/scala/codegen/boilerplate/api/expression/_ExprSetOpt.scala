@@ -9,7 +9,7 @@ object _ExprSetOpt extends BoilerplateGenBase( "ExprSetOpt", "/api/expression") 
     s"""// GENERATED CODE ********************************
        |package molecule.boilerplate.api.expression
        |
-       |import molecule.boilerplate.ast.MoleculeModel._
+       |import molecule.boilerplate.ast.Model._
        |$traits
        |""".stripMargin
   }

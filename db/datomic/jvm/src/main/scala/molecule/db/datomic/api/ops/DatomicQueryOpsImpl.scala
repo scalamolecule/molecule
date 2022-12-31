@@ -2,7 +2,7 @@ package molecule.db.datomic.api.ops
 
 import java.util.{Collections, Comparator, ArrayList => jArrayList, Collection => jCollection}
 import datomic.Peer
-import molecule.boilerplate.ast.MoleculeModel._
+import molecule.boilerplate.ast.Model._
 import molecule.core.api.Connection
 import molecule.core.api.ops.QueryOps
 import molecule.core.util.JavaConversions
@@ -30,30 +30,7 @@ class DatomicQueryOpsImpl[Tpl](elements: Seq[Element])
   override def get(implicit conn0: Connection, ec: ExecutionContext): Future[List[Tpl]] = {
     Future {
       try {
-        val conn = conn0.asInstanceOf[DatomicConn_JVM]
-        val db   = conn.peerConn.db()
-        isFree = conn.isFreeVersion
-        val rows = blocking {
-          getQueries(conn.optimizeQuery) match {
-            case ("", query)       => Peer.q(query, db +: inputs: _*)
-            case (preQuery, query) =>
-              // Pre-query
-              val preRows = Peer.q(preQuery, db +: preInputs: _*)
-              val preIds  = new java.util.HashSet[Long](preRows.size())
-              preRows.forEach { row =>
-                preIds.add(row.get(0).asInstanceOf[Long])
-              }
-              // Main query using entity ids from pre-query
-              Peer.q(query, db +: inputs :+ preIds: _*)
-          }
-        }
-        println("RAW rows:")
-        rows.forEach(row => println(row))
-
-        val sortedRows = sortRows(rows)
-
-        println("SORTED rows:")
-        sortedRows.forEach(row => println(row))
+        val sortedRows = getSortedRows
 
         // Remove started composite groups that turned out to have only tacit attributes
         aritiess = aritiess.map(_.filterNot(_.isEmpty))
@@ -78,10 +55,37 @@ class DatomicQueryOpsImpl[Tpl](elements: Seq[Element])
     }.flatten
   }
 
+  def getSortedRows(implicit conn0: Connection): jArrayList[Row] = {
+    val conn = conn0.asInstanceOf[DatomicConn_JVM]
+    val db   = conn.peerConn.db()
+    isFree = conn.isFreeVersion
+    val rows = getQueries(conn.optimizeQuery) match {
+      case ("", query)       => Peer.q(query, db +: inputs: _*)
+      case (preQuery, query) =>
+        // Pre-query
+        val preRows = Peer.q(preQuery, db +: preInputs: _*)
+        val preIds  = new java.util.HashSet[Long](preRows.size())
+        preRows.forEach { row =>
+          preIds.add(row.get(0).asInstanceOf[Long])
+        }
+        // Main query using entity ids from pre-query
+        Peer.q(query, db +: inputs :+ preIds: _*)
+    }
+
+    println("RAW rows:")
+    rows.forEach(row => println(row))
+
+    val sortedRows = sortRows(rows)
+
+    println("SORTED rows:")
+    sortedRows.forEach(row => println(row))
+    sortedRows
+  }
+
 
   // Helpers
 
-  private def sortRows(rows: jCollection[Row]): jArrayList[Row] = {
+  def sortRows(rows: jCollection[Row]): jArrayList[Row] = {
     val sorters = getFlatSorters(sortss)
     sorters.length match {
       case 0 => new jArrayList(rows)

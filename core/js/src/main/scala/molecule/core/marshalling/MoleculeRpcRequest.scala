@@ -2,7 +2,6 @@ package molecule.core.marshalling
 
 import java.nio.ByteBuffer
 import boopickle.Default._
-import molecule.core.marshalling.IdType.Id
 import molecule.core.util.Executor._
 import org.scalajs.dom
 import org.scalajs.dom.XMLHttpRequest

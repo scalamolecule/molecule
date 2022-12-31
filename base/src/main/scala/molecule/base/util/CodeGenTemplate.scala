@@ -64,7 +64,7 @@ abstract class CodeGenTemplate(val fileName: String, dir: String, basePath: Stri
     println(s"Generated $path/$fileName2.scala")
   }
 
-  private def mkFile(fileName: String, body: String): Unit = {
+  protected def mkFile(fileName: String, body: String): Unit = {
     val filePath = s"$path/$fileName.scala"
     val bw       = new BufferedWriter(new FileWriter(new File(filePath)))
     bw.write(body)

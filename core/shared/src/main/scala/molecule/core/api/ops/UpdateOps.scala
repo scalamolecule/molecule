@@ -5,7 +5,7 @@ import molecule.core.api.{Connection, TxReport}
 import zio.ZIO
 import scala.concurrent.{ExecutionContext, Future}
 
-trait UpdateOps {
+trait UpdateOps extends BaseOps {
   // Modifiers
   def multiple: UpdateOps
 

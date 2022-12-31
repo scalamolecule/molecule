@@ -10,7 +10,7 @@ object _ExprOneOpt extends BoilerplateGenBase( "ExprOneOpt", "/api/expression") 
        |package molecule.boilerplate.api.expression
        |
        |import molecule.boilerplate.api._
-       |import molecule.boilerplate.ast.MoleculeModel._
+       |import molecule.boilerplate.ast.Model._
        |$traits
        |""".stripMargin
   }

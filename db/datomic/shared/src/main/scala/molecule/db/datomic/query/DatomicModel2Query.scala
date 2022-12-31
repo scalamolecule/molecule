@@ -1,7 +1,7 @@
 package molecule.db.datomic.query
 
 import molecule.base.util.exceptions.MoleculeException
-import molecule.boilerplate.ast.MoleculeModel._
+import molecule.boilerplate.ast.Model._
 import molecule.core.query.Model2Query
 import molecule.db.datomic.query.casting._
 import scala.annotation.tailrec
@@ -20,10 +20,11 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
     with CastNestedOptBranch_[Tpl]
     with CastNestedOptLeaf_[Tpl]
     with Nest[Tpl]
-    with NestOpt_[Tpl] {
+    with NestOpt_[Tpl]
+    {
 
-  final lazy protected val preInputs: Seq[AnyRef] = renderRules(rules ++ preRules) ++ preArgs
-  final lazy protected val inputs   : Seq[AnyRef] = renderRules(rules) ++ args
+  final lazy val preInputs: Seq[AnyRef] = renderRules(rules ++ preRules) ++ preArgs
+  final lazy val inputs   : Seq[AnyRef] = renderRules(rules) ++ args
 
   final def getQueries(optimized: Boolean): (String, String) = {
 

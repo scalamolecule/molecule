@@ -13,7 +13,7 @@ object _SortOneOpt extends DatomicGenBase("SortOneOpt", "/query") {
        |import java.math.{BigDecimal => jBigDecimal, BigInteger => jBigInt}
        |import java.net.URI
        |import java.util.{Date, UUID, Map => jMap}
-       |import molecule.boilerplate.ast.MoleculeModel._
+       |import molecule.boilerplate.ast.Model._
        |
        |
        |trait ${fileName}_[Tpl] { self: Base[Tpl] =>

@@ -1,6 +1,7 @@
 package molecule.db.datomic.test
 
 
+import molecule.core.transaction.Save
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.db.datomic._
@@ -10,14 +11,18 @@ import utest._
 
 object Adhoc extends DatomicTestSuite {
 
+
   lazy val tests = Tests {
 
     "types1" - types { implicit conn =>
       //      import molecule.coreTests.dataModels.core.dsl.Types._
-      for {
-        _ <- Ns.int(1).save.transact
-        _ <- Ns.int.query.get.map(_ ==> List(1))
-      } yield ()
+
+
+
+//      for {
+//        _ <- Ns.int(1).save.transact
+//        _ <- Ns.int.query.get.map(_ ==> List(1))
+//      } yield ()
     }
 
     //    "refs" - refs { implicit conn =>

@@ -2,7 +2,7 @@ package molecule.db.datomic.query
 
 import molecule.base.util.exceptions.MoleculeException
 import molecule.boilerplate.api.Keywords._
-import molecule.boilerplate.ast.MoleculeModel._
+import molecule.boilerplate.ast.Model._
 import scala.reflect.ClassTag
 
 trait ResolveExprOne[Tpl]
@@ -242,6 +242,8 @@ trait ResolveExprOne[Tpl]
       case _: avg      => find += s"(avg $v)"
       case _: variance => find += s"(variance $v)"
       case _: stddev   => find += s"(stddev $v)"
+
+      case other => unexpectedKw(other)
     }
     where += s"[$e $a $v$tx]" -> wClause
   }

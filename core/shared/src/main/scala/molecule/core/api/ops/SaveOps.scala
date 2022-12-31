@@ -5,7 +5,7 @@ import molecule.core.api.{Connection, TxReport}
 import zio.ZIO
 import scala.concurrent.{ExecutionContext, Future}
 
-trait SaveOps {
+trait SaveOps extends BaseOps {
 
   def run: ZIO[Connection, MoleculeException, TxReport]
 

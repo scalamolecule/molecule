@@ -36,7 +36,7 @@ package molecule.boilerplate.api
  */
 trait KeywordsStable {
 
-  trait Kw
+  sealed trait Kw
 
   case class AggrList(n: Int) extends Kw
 

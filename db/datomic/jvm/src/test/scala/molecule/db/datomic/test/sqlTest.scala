@@ -3,7 +3,7 @@
 //import molecule.base.api.SchemaTransaction
 //import molecule.base.ast.SchemaAST
 //import molecule.base.ast.SchemaAST.{Cardinality, MetaAttr, MetaNs, MetaPart, MetaSchema, one}
-//import molecule.boilerplate.ast.MoleculeModel._
+//import molecule.boilerplate.ast.Model._
 //import molecule.core.Ns
 //import molecule.db.datomic._
 //import molecule.db.datomic.facade.{DatomicConn_JVM, DatomicPeer}
@@ -12,14 +12,14 @@
 //
 ////  trait Query1 {
 ////    type InputValues
-////    def molecule2queryString(m: MoleculeModel): (String, InputValues)
+////    def molecule2queryString(m: Model): (String, InputValues)
 ////    def run = ???
 ////  }
 ////
 ////  class DatomicQuery extends Query1 {
 ////    type InputValues = List[Any]
 ////    override def molecule2queryString(
-////      m: MoleculeModel
+////      m: Model
 ////    ): (String, InputValues) = {
 ////      val query       =
 ////        """[:find ?b ?c :where [?a :Ns/name ?b] [?a :Ns/age ?c]]""".stripMargin

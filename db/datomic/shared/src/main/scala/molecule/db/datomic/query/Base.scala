@@ -3,10 +3,11 @@ package molecule.db.datomic.query
 import java.util.{Iterator => jIterator, List => jList}
 import molecule.base.util.BaseHelpers
 import molecule.base.util.exceptions.MoleculeException
-import molecule.boilerplate.ast.MoleculeModel._
+import molecule.boilerplate.ast.Model._
 import molecule.core.query.Model2Query
 import molecule.core.util.JavaConversions
 import scala.collection.mutable.ArrayBuffer
+import molecule.boilerplate.api.Keywords.Kw
 
 
 trait Base[Tpl] extends BaseHelpers with JavaConversions { self: Model2Query[Tpl] =>
@@ -189,6 +190,7 @@ trait Base[Tpl] extends BaseHelpers with JavaConversions { self: Model2Query[Tpl
 
   final protected def unexpectedElement(element: Element) = throw MoleculeException("Unexpected element: " + element)
   final protected def unexpectedOp(op: Op) = throw MoleculeException("Unexpected operation: " + op)
+  final protected def unexpectedKw(kw: Kw) = throw MoleculeException("Unexpected operation: " + kw)
 
   final protected def noMixedNestedModes = throw MoleculeException(
     "Can't mix mandatory/optional nested data structures."

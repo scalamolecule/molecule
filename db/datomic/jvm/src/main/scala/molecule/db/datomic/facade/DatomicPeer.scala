@@ -2,7 +2,7 @@ package molecule.db.datomic.facade
 
 import java.util.UUID.randomUUID
 import datomic.Peer
-import molecule.base.api.SchemaTransaction
+import molecule.core.marshalling.DatomicPeerProxy
 import molecule.core.util.JavaConversions
 import scala.concurrent.{ExecutionContext, Future, blocking}
 
@@ -29,17 +29,17 @@ trait DatomicPeer extends JavaConversions {
   }
 
   private[molecule] def connect(
-    schema: SchemaTransaction,
+    proxy: DatomicPeerProxy,
     protocol: String,
-    dbIdentifier: String,
-    isFreeVersion: Boolean
+    dbIdentifier: String = "",
+    isFreeVersion: Boolean = true
   ): DatomicConn_JVM = blocking {
     val id = if (dbIdentifier == "") randomUUID().toString else dbIdentifier
-    DatomicConn_JVM(schema, s"datomic:$protocol://$id", isFreeVersion)
+    DatomicConn_JVM(proxy, s"datomic:$protocol://$id", isFreeVersion)
   }
 
   def recreateDbFromEdn(
-    schema: SchemaTransaction,
+    proxy: DatomicPeerProxy,
     protocol: String = "mem",
     dbIdentifier: String = "",
     isFreeVersion: Boolean = false
@@ -47,20 +47,20 @@ trait DatomicPeer extends JavaConversions {
     val id = if (dbIdentifier == "") randomUUID().toString else dbIdentifier
     deleteDatabase(protocol, id)
     createDatabase(protocol, id)
-    val conn = connect(schema, protocol, id, isFreeVersion)
-
-    conn.transactEdn(schema.datomicSchema).map(_ => conn)
-    //    for {
-    //      _ <- deleteDatabase(protocol, id)
-    //      _ <- createDatabase(protocol, id)
-    //      conn <- connect(schema, protocol, id, isFreeVersion)
-    //      // Ensure each transaction finishes before the next
-    //      // partitions/attributes (or none for initial empty test dummy)
-    //      _ <- conn.transactEdn(schema.datomicSchema)
-    //
-    //    } yield conn
+    val conn = connect(proxy, protocol, id, isFreeVersion)
+    // Ensure each transaction finishes before the next
+    for {
+      // partitions
+      _ <- if (proxy.schema.head.nonEmpty)
+        conn.transactEdn(proxy.schema.head) else Future.unit
+      // attributes
+      _ <- if (proxy.schema(1).nonEmpty)
+        conn.transactEdn(proxy.schema(1)) else Future.unit
+      // aliases
+      _ <- if (proxy.schema(2).nonEmpty)
+        conn.transactEdn(proxy.schema(2)) else Future.unit
+    } yield conn
   }
-
 }
 
 object DatomicPeer extends DatomicPeer

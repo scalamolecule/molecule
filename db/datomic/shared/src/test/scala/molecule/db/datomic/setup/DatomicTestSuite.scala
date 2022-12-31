@@ -4,7 +4,6 @@ import molecule.base.util.exceptions.MoleculeException
 import molecule.core.api.Connection
 import molecule.core.api.ops.QueryOps
 import molecule.core.util.JavaConversions
-import molecule.coreTests.dataModels.core.dsl.Unique.Unique
 import utest._
 import scala.concurrent.Future
 //import molecule.coreTests.sampledata.CoreData
@@ -13,7 +12,8 @@ import utest.framework.Formatter
 
 trait DatomicTestSuite extends TestSuite with CoreData
   // Platform-specific implementations (JS/JVM) (shows in red as error code in IDE)
-  with DatomicTestSuiteImpl with JavaConversions {
+  with DatomicTestSuiteImpl
+  with JavaConversions {
 
   lazy val isJsPlatform: Boolean = isJsPlatform_
   lazy val protocol    : String  = protocol_
@@ -36,28 +36,6 @@ trait DatomicTestSuite extends TestSuite with CoreData
     //        case SystemDevLocal   => s" DevLocal $protocol"
     //        case SystemPeerServer => s" PeerServer $protocol"
     //      })
-  }
-
-//  import molecule.core.util.FutureUtils._
-
-  implicit class ArrowFutureAssert(lhs: Future[Any]) {
-    def ==*[V](rhs: V): Future[Unit] = {
-      (lhs, rhs) match {
-        // Hack to make Arrays compare sanely; at some point we may want some
-        // custom, extensible, typesafe equality check but for now this will do
-        case (lhs: Future[_], rhs: Array[_]) =>
-          lhs.map {
-            case lhs: Array[_] =>
-              Predef.assert(
-                lhs.toSeq == rhs.toSeq, s"==* assertion failed: ${lhs.toSeq} != ${rhs.toSeq}"
-              )
-          }
-        case (lhs, rhs)                      =>
-          lhs.map(lhs =>
-            Predef.assert(lhs == rhs, s"==* assertion failed: $lhs != $rhs")
-          )
-      }
-    }
   }
 
   override def utestFormatter: Formatter = new Formatter {

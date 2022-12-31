@@ -2,12 +2,10 @@ package molecule.db.datomic.setup
 
 import molecule.base.api.SchemaTransaction
 import molecule.core.api.Connection
-import molecule.core.marshalling.WebClient
+import molecule.core.marshalling.{DatomicPeerProxy, WebClient}
 import molecule.coreTests.dataModels.core.schema._
 import molecule.db.datomic.facade.DatomicConn_JS
 import moleculeBuildInfo.BuildInfo
-import scala.concurrent.Future
-import molecule.core.util.Executor._
 
 
 trait DatomicTestSuiteImpl extends WebClient { self: DatomicTestSuite =>
@@ -17,38 +15,30 @@ trait DatomicTestSuiteImpl extends WebClient { self: DatomicTestSuite =>
   lazy val useFree_      = BuildInfo.datomicUseFree
 
   def inMem[T](
-//    test: Future[Connection] => T,
     test: Connection => T,
-    schema: SchemaTransaction
-//  ): Future[T] = {
+    schemaTx: SchemaTransaction
   ): T = {
-    //    val (peerSchema, nsMap, attrMap) = (schema.datomicPeer, schema.datomicClient, schema.nsMap, schema.attrMap)
+    val (schema, nsMap, attrMap, uniqueAttrs) = (
+      Seq(
+        schemaTx.datomicPartitions,
+        schemaTx.datomicSchema,
+        schemaTx.datomicAliases
+      ),
+      schemaTx.nsMap,
+      schemaTx.attrMap,
+      schemaTx.uniqueAttrs,
+    )
 
-    //    val proxy = system match {
-    //      case SystemPeer       => DatomicPeerProxy("mem", "", peerSchema, nsMap, attrMap)
-    //      case SystemDevLocal   => DatomicDevLocalProxy("mem", "datomic-samples-temp", datomicHome, "", clientSchema, nsMap, attrMap)
-    //      case SystemPeerServer => DatomicPeerServerProxy("k", "s", "localhost:8998", peerServerDb, clientSchema, nsMap, attrMap)
-    //    }
-
-//    val conn: Connection = new Connection(schema) {
-//      override type Data = this.type
-//      override def transact(data: this.type): TxReport = ???
-//    }
-
-    val conn = DatomicConn_JS(schema, "localhost", 8080)
-    test(conn)
-//    Future(test(conn))
+    val proxy = DatomicPeerProxy("mem", "", schema, nsMap, attrMap, uniqueAttrs)
+    test(DatomicConn_JS(proxy, "localhost", 8080))
   }
 
-  //  def emptyImpl[T](test: Future[Conn] => T): T = inMem(test, EmptySchema, "")
-//  def typesImpl[T](test: Future[Connection] => T): T = inMem(test, TypesSchema)
-//  def refsImpl[T](test: Future[Connection] => T): T = inMem(test, RefsSchema)
-//  def uniqueImpl[T](test: Future[Connection] => T): T = inMem(test, UniqueSchema)
 
   def typesImpl[T](test: Connection => T): T = inMem(test, TypesSchema)
   def refsImpl[T](test: Connection => T): T = inMem(test, RefsSchema)
   def uniqueImpl[T](test: Connection => T): T = inMem(test, UniqueSchema)
 
+  //  def emptyImpl[T](test: Connection => T): T = inMem(test, EmptySchema)
   //  def corePeerOnlyImpl[T](test: Future[Conn] => T): T = if (system == SystemPeer) coreImpl(test) else ().asInstanceOf[T]
   //  def bidirectionalImpl[T](test: Future[Conn] => T): T = inMem(test, BidirectionalSchema, "m_bidirectional")
   //  def partitionImpl[T](test: Future[Conn] => T): T = inMem(test, PartitionTestSchema, "m_partitions")

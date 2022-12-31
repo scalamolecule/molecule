@@ -1,7 +1,3 @@
 package molecule.core.api
 
-trait TxReport {
-
-  def tx: Long
-  def eids: List[Long]
-}
+case class TxReport(tx: Long, eids: List[Long])

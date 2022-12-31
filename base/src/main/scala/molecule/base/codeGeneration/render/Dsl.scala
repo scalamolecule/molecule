@@ -12,8 +12,8 @@ case class Dsl(schema: MetaSchema, namespace: MetaNs)
       "molecule.boilerplate.api._",
       "molecule.boilerplate.api.expression._",
       "molecule.boilerplate.api.Keywords._",
-      "molecule.boilerplate.ast.MoleculeModel",
-      "molecule.boilerplate.ast.MoleculeModel._",
+      "molecule.boilerplate.ast.Model",
+      "molecule.boilerplate.ast.Model._",
     )
     val typeImports = attrs.collect {
       case MetaAttr(_, _, "Date", _, _, _, _, _) => "java.util.Date"

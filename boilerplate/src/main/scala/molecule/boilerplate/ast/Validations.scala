@@ -2,16 +2,18 @@ package molecule.boilerplate.ast
 
 import java.net.URI
 import java.util.{Date, UUID}
+import boopickle.Default._
 import molecule.base.ast.SchemaAST._
 
 
 trait Validations {
 
+  sealed trait Validate
 
   abstract class ValidateString {
     def validate(v: String, test: => Boolean): Either[String, String]
   }
-  abstract class ValidateInt {
+  abstract class ValidateInt extends Validate {
     def validate(v: Int, test: => Boolean): Either[String, Int]
   }
   abstract class ValidateLong {
@@ -94,5 +96,4 @@ trait Validations {
   abstract class ValidateSetChar {
     def validate(v: Char): Either[String, Char]
   }
-
 }

@@ -5,7 +5,7 @@ import java.lang.{Boolean => jBoolean, Double => jDouble, Long => jLong}
 import java.math.{BigDecimal => jBigDecimal}
 import java.util.{Map => jMap}
 import molecule.boilerplate.api.Keywords._
-import molecule.boilerplate.ast.MoleculeModel._
+import molecule.boilerplate.ast.Model._
 
 
 trait SortOneSpecial[Tpl]

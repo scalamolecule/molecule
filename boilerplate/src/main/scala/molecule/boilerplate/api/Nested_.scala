@@ -1,7 +1,7 @@
 // GENERATED CODE ********************************
 package molecule.boilerplate.api
 
-import molecule.boilerplate.ast.MoleculeModel._
+import molecule.boilerplate.ast.Model._
 
 /** Add nested molecule.
   * <br><br>

@@ -1,6 +1,6 @@
 package molecule.boilerplate.api
 
-import molecule.boilerplate.ast.MoleculeModel._
+import molecule.boilerplate.ast.Model._
 
 
 /** Transaction meta data on molecule.

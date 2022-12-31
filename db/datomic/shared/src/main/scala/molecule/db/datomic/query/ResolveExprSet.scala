@@ -1,7 +1,7 @@
 package molecule.db.datomic.query
 
 import molecule.boilerplate.api.Keywords._
-import molecule.boilerplate.ast.MoleculeModel._
+import molecule.boilerplate.ast.Model._
 import scala.reflect.ClassTag
 
 trait ResolveExprSet[Tpl] { self: Base[Tpl] =>
@@ -227,6 +227,8 @@ trait ResolveExprSet[Tpl] { self: Base[Tpl] =>
       case _: stddev =>
         find += s"(stddev $v)"
         replaceCast(res.j2sSet)
+
+      case other => unexpectedKw(other)
     }
     where += s"[$e $a $v$tx]" -> wClause
   }

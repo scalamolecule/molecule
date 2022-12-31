@@ -127,7 +127,7 @@ case class Dsl_Arities(schema: MetaSchema, namespace: MetaNs, arity: Int)
     case MetaAttr(attr, card, _, refNsOpt, _, _, _, _) =>
       val refCls   = camel(attr)
       val refNs    = refNsOpt.get
-      val refObj   = s"""MoleculeModel.Ref("$ns", "$attr", "$refNs", $card)"""
+      val refObj   = s"""Model.Ref("$ns", "$attr", "$refNs", $card)"""
       val pRefAttr = padRefAttr(attr)
       val pRefNs   = padRefNs(refNs)
       val nested   = if (card == CardOne) "" else s" with Nested${_0}${`[A..V]`}"
@@ -148,7 +148,7 @@ case class Dsl_Arities(schema: MetaSchema, namespace: MetaNs, arity: Int)
 
 
   val backRefDefs = if (backRefs.isEmpty) "" else backRefs.map(backRef =>
-    s"""object _$backRef extends $backRef${_0}[${`A..V, `}t](elements :+ MoleculeModel.BackRef("$backRef"))"""
+    s"""object _$backRef extends $backRef${_0}[${`A..V, `}t](elements :+ Model.BackRef("$backRef"))"""
   ).mkString("\n\n  ", "\n  ", "")
 
 

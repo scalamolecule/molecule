@@ -3,7 +3,7 @@ package molecule.db.datomic.query
 import java.util.{Iterator => jIterator}
 import molecule.base.ast.SchemaAST.CardOne
 import molecule.base.util.exceptions.MoleculeException
-import molecule.boilerplate.ast.MoleculeModel._
+import molecule.boilerplate.ast.Model._
 import scala.annotation.tailrec
 
 

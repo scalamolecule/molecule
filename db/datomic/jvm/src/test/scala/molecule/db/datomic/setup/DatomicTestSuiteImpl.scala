@@ -3,12 +3,13 @@ package molecule.db.datomic.setup
 import java.util.UUID.randomUUID
 import molecule.base.api.SchemaTransaction
 import molecule.core.api.Connection
+import molecule.core.marshalling.DatomicPeerProxy
+import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.schema._
 import molecule.db.datomic.facade.{DatomicConn_JVM, DatomicPeer}
 import molecule.db.datomic.util.DatomicApiLoader
 import moleculeBuildInfo.BuildInfo
-import scala.concurrent.{Await, Future}
-import molecule.core.util.Executor._
+import scala.concurrent.Await
 import scala.concurrent.duration._
 
 trait DatomicTestSuiteImpl extends DatomicApiLoader { self: DatomicTestSuite =>
@@ -21,39 +22,42 @@ trait DatomicTestSuiteImpl extends DatomicApiLoader { self: DatomicTestSuite =>
   //  require("datomic.api")
 
   def inMem[T](
-//    test: Future[DatomicConn_JVM] => T,
     test: DatomicConn_JVM => T,
-    schema: SchemaTransaction,
-    //    db: String
-//  ): Future[T] = {
+    schemaTx: SchemaTransaction,
   ): T = {
-    val dbUri                 = if (protocol_ == "mem") "" else {
+    val dbUri                    = if (protocol_ == "mem") "" else {
       println(s"Re-creating live database...")
       "localhost:4334/" + randomUUID().toString
     }
-    val conn = Await.result(
-      DatomicPeer.recreateDbFromEdn(schema, protocol_, dbUri, useFree_),
-      2.seconds
+    val (schema, nsMap, attrMap, uniqueAttrs) = (
+      Seq(
+        schemaTx.datomicPartitions,
+        schemaTx.datomicSchema,
+        schemaTx.datomicAliases
+      ),
+      schemaTx.nsMap,
+      schemaTx.attrMap,
+      schemaTx.uniqueAttrs,
     )
 
-    //    val futConn = system match {
-    //      case SystemPeer       => DatomicPeer.recreateDbFrom(schemaTx, protocol_, dbUri)
-    //      case SystemDevLocal   => Datomic_DevLocal("datomic-samples-temp", datomicHome).recreateDbFrom(schemaTx)
-    //      case SystemPeerServer => Datomic_PeerServer("k", "s", "localhost:8998").connect(schemaTx, db)
-    //    }
+    val proxy = DatomicPeerProxy("mem", "", schema, nsMap, attrMap, uniqueAttrs)
 
-//    conn.map(conn => test(conn))
+    // Block to enable supplying Connection instead of Future[Connection] to tests
+    val conn = Await.result(
+      DatomicPeer.recreateDbFromEdn(proxy, protocol_, dbUri, useFree_),
+      2.seconds
+    )
     test(conn)
   }
 
-  //  def emptyImpl[T](test: Connection => T): T = inMem(test, EmptySchema, "")
   def typesImpl[T](test: Connection => T): T = inMem(test, TypesSchema)
   def refsImpl[T](test: Connection => T): T = inMem(test, RefsSchema)
   def uniqueImpl[T](test: Connection => T): T = inMem(test, UniqueSchema)
 
-//  def typesImpl[T](test: Future[Connection] => T): T = inMem(test, TypesSchema)
-//  def refsImpl[T](test: Future[Connection] => T): T = inMem(test, RefsSchema)
-//  def uniqueImpl[T](test: Future[Connection] => T): T = inMem(test, UniqueSchema)
+  //  def emptyImpl[T](test: Connection => T): T = inMem(test, EmptySchema, "")
+  //  def typesImpl[T](test: Future[Connection] => T): T = inMem(test, TypesSchema)
+  //  def refsImpl[T](test: Future[Connection] => T): T = inMem(test, RefsSchema)
+  //  def uniqueImpl[T](test: Future[Connection] => T): T = inMem(test, UniqueSchema)
 
   //  def corePeerOnlyImpl[T](test: Connection => T): T = if (system == SystemPeer) coreImpl(test) else ().asInstanceOf[T]
   //  def bidirectionalImpl[T](test: Connection => T): T = inMem(test, BidirectionalSchema, "m_bidirectional")

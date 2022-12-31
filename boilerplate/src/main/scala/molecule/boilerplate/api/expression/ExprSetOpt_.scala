@@ -1,7 +1,7 @@
 // GENERATED CODE ********************************
 package molecule.boilerplate.api.expression
 
-import molecule.boilerplate.ast.MoleculeModel._
+import molecule.boilerplate.ast.Model._
 
 
 trait ExprSetOptOps_1[A, t, Ns[_, _]] extends ExprBase {

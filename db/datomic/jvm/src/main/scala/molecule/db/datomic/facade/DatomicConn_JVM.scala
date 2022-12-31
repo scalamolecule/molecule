@@ -1,24 +1,26 @@
 package molecule.db.datomic.facade
 
 import java.io.StringReader
-import java.util.{List => jList}
+import java.util.{Date, List => jList, Map => jMap}
 import java.{lang => jl, util => ju}
+import datomic.Connection.{DB_AFTER, DB_BEFORE, TEMPIDS, TX_DATA}
 import datomic.Util.readAll
-import datomic.{Connection => DatomicConnection, _}
-import molecule.base.api.SchemaTransaction
+import datomic.db.{Datum => PeerDatom}
+import datomic.{Connection => DatomicConnection, Datom => _, _}
 import molecule.base.util.exceptions.MoleculeException
 import molecule.core.api.{Connection, TxReport}
+import molecule.core.marshalling.DatomicPeerProxy
 import molecule.db.datomic.transaction.DatomicDataType_JVM
+import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.jdk.CollectionConverters._
 import scala.util.control.NonFatal
 
-
-class DatomicConn_JVM(
-  override val schema: SchemaTransaction,
-  val peerConn: DatomicConnection,
-  val isFreeVersion: Boolean
-) extends Connection(schema) with DatomicDataType_JVM {
+case class DatomicConn_JVM(
+  override val proxy: DatomicPeerProxy,
+  peerConn: DatomicConnection,
+  isFreeVersion: Boolean
+) extends Connection(proxy) with DatomicDataType_JVM {
 
   override def db: Database = peerConn.db()
 
@@ -32,7 +34,7 @@ class DatomicConn_JVM(
     transact(readAll(new StringReader(edn)).get(0).asInstanceOf[Data])
 
   override def transact(javaStmts: Data)(implicit ec: ExecutionContext): Future[TxReport] = {
-    bridgeDatomicFuture(peerConn.transactAsync(javaStmts)).map(DatomicTxReport)
+    bridgeDatomicFuture(peerConn.transactAsync(javaStmts)).map(txReport)
   }
 
   private def bridgeDatomicFuture[T](
@@ -77,21 +79,63 @@ class DatomicConn_JVM(
     )
     p.future
   }
+
+
+  private def txReport(rawTxReport: jMap[_, _]) = {
+    def t: Long = dbAfter.basisT
+
+    def tx: Long = Peer.toTx(t).asInstanceOf[Long]
+
+    def txInstant: Date = {
+      rawTxReport.get(DatomicConnection.TX_DATA).asInstanceOf[jList[PeerDatom]].get(0).v().asInstanceOf[Date]
+    }
+
+    def eids: List[Long] = {
+      // Fast lookups with mutable Buffers
+      // https://www.lihaoyi.com/post/BenchmarkingScalaCollections.html#lookup-performance
+
+      val allIds           = ListBuffer.empty[Long]
+      val datoms           = rawTxReport.get(TX_DATA).asInstanceOf[jList[PeerDatom]].iterator
+      val tempIds          = rawTxReport.get(TEMPIDS).asInstanceOf[jMap[_, _]].values().asScala.toBuffer
+      val tx               = datoms.next().e().asInstanceOf[Long] // Initial txInstant datom
+      var txMetaData       = false
+      var datom: PeerDatom = null
+      var e                = 0L
+      // Filter out tx meta data assertions
+      while (!txMetaData && datoms.hasNext) {
+        datom = datoms.next
+        e = datom.e().asInstanceOf[Long]
+        if (e == tx)
+          txMetaData = true
+        if (
+          !txMetaData
+            && datom.added()
+            && !allIds.contains(e)
+        ) {
+          if (tempIds.contains(e)) {
+            allIds += e
+          }
+        }
+      }
+      allIds.toList
+    }
+
+    /** Get database value before transaction. */
+    def dbBefore: Database = rawTxReport.get(DB_BEFORE).asInstanceOf[Database]
+
+    /** Get database value after transaction. */
+    def dbAfter: Database = rawTxReport.get(DB_AFTER).asInstanceOf[Database]
+
+    TxReport(tx, eids)
+  }
 }
 
 
 object DatomicConn_JVM {
   def apply(
-    schema: SchemaTransaction,
+    proxy: DatomicPeerProxy,
     uri: String,
     isFreeVersion: Boolean
   ): DatomicConn_JVM =
-    new DatomicConn_JVM(schema, datomic.Peer.connect(uri), isFreeVersion)
-
-  def apply(
-    schema: SchemaTransaction,
-    peerConn: DatomicConnection,
-    isFreeVersion: Boolean
-  ): DatomicConn_JVM =
-    new DatomicConn_JVM(schema, peerConn, isFreeVersion)
+    DatomicConn_JVM(proxy, datomic.Peer.connect(uri), isFreeVersion)
 }
