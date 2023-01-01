@@ -13,9 +13,6 @@ trait QueryOps[Tpl] extends BaseOps {
   def drop(n: Int): QueryOps[Tpl]
   def from(cursor: String): QueryOps[Tpl]
 
-  //  List(1).slice(0, 2)
-
-
 //  def run(implicit conn: Connection): ZIO[Connection, MoleculeException, Chunk[Tpl]]
 
   def get(implicit conn: Connection, ec: ExecutionContext): Future[List[Tpl]]

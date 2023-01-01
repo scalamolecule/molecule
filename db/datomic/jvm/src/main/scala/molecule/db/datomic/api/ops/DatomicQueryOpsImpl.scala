@@ -55,7 +55,8 @@ class DatomicQueryOpsImpl[Tpl](elements: Seq[Element])
     }.flatten
   }
 
-  def getSortedRows(implicit conn0: Connection): jArrayList[Row] = {
+
+  private def getSortedRows(implicit conn0: Connection): jArrayList[Row] = {
     val conn = conn0.asInstanceOf[DatomicConn_JVM]
     val db   = conn.peerConn.db()
     isFree = conn.isFreeVersion

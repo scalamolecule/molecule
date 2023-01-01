@@ -2,7 +2,6 @@ package molecule.db.datomic.api.ops
 
 import molecule.base.util.exceptions.MoleculeException
 import molecule.boilerplate.ast.Model._
-import molecule.boilerplate.ast.Model._
 import molecule.core.api.ops.SaveOps
 import molecule.core.api.{Connection, TxReport}
 import molecule.core.transaction.Save
@@ -10,7 +9,6 @@ import molecule.db.datomic.facade.DatomicConn_JS
 import molecule.db.datomic.transaction.Save_edn
 import zio.ZIO
 import scala.concurrent._
-//import molecule.core.util.Executor._
 
 
 class DatomicSaveOpsImpl(elements: Seq[Element]) extends SaveOps {

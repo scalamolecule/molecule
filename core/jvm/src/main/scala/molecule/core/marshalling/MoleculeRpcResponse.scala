@@ -9,7 +9,7 @@ import sloth._
 import scala.concurrent.{ExecutionContextExecutor, Future}
 import scala.util.control.NonFatal
 
-case class MoleculeRpcResponse(interface: String, port: Int) extends BooPicklers {
+case class MoleculeRpcResponse(interface: String, port: Int) {
   implicit val system          : ActorSystem[Nothing]     = ActorSystem(Behaviors.empty, "MoleculeAjaxSystem")
   implicit val executionContext: ExecutionContextExecutor = system.executionContext
   val MoleculeRpc = "MoleculeRpc"
@@ -28,21 +28,33 @@ case class MoleculeRpcResponse(interface: String, port: Int) extends BooPicklers
           byteBufferResultFuture
             .map(_.array())
             .recoverWith { exc =>
-              println("---- MoleculeRpcResponse, unexpected ajax response:\n" + exc)
+              println("---- MoleculeRpcResponse, unexpected ajax response:\n" + msg(path, args, exc))
               println(exc.getStackTrace.mkString("\n"))
               Future.failed(exc)
             }
 
-        case Left(err) =>
-          println(s"##### MoleculeRpcResponse, server failure:\n" + err)
-          err match {
-            case PathNotFound(path: List[String])  => Future.failed(new RuntimeException(s"PathNotFound($path)"))
-            case HandlerError(exc: Throwable)      => Future.failed(new RuntimeException(s"HandlerError(${exc.getMessage})"))
-            case DeserializerError(exc: Throwable) => Future.failed(new RuntimeException(s"DeserializerError(${exc.getMessage})"))
+        case Left(error) =>
+          println(s"##### MoleculeRpcResponse, server failure:\n" + error)
+          error match {
+            case PathNotFound(path: List[String]) =>
+              Future.failed(new RuntimeException(s"PathNotFound($path)"))
+
+            case HandlerError(exc: Throwable) =>
+              Future.failed(new RuntimeException(s"HandlerError(${msg(path, args, exc)})"))
+
+            case DeserializerError(exc: Throwable) =>
+              Future.failed(new RuntimeException(s"DeserializerError(${msg(path, args, exc)})"))
           }
       }
     } catch {
       case NonFatal(exc) => Future.failed(exc)
     }
   }.flatten
+
+  private def msg(path: List[String], args: ByteBuffer, exc: Throwable): String = {
+    s"""path: $path
+       |args: ${args.array().toList}
+       |err : ${exc.getMessage}
+       |$exc""".stripMargin
+  }
 }

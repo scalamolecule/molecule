@@ -159,7 +159,7 @@ object ExprOne_Int extends DatomicTestSuite {
         _ <- Ns.i.a1.int_?.not(Some(Seq(int2, int3))).query.get.map(_ ==> List(a))
         // Empty Seq of negation args matches all asserted values (non-null)
         _ <- Ns.i.a1.int_?.not(Some(Seq.empty[Int])).query.get.map(_ ==> List(a, b, c))
-        // None matches all asserted values (non-null)
+        // Negating None matches all asserted values (non-null)
         _ <- Ns.i.a1.int_?.not(Option.empty[Int]).query.get.map(_ ==> List(a, b, c))
         _ <- Ns.i.a1.int_?.not(Option.empty[Seq[Int]]).query.get.map(_ ==> List(a, b, c))
 

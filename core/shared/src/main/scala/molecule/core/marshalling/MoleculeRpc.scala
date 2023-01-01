@@ -21,7 +21,8 @@ trait MoleculeRpc {
   def query(
     proxy: ConnProxy,
     elements: Seq[Element]
-  ): Future[Either[MoleculeException, (Seq[Element], List[List[Int]])]]
+  ): Future[Either[MoleculeException, DTO]]
+
 
   //  def transact(
   //    proxy: ConnProxy,

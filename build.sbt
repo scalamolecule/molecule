@@ -380,7 +380,7 @@ lazy val testSettings: Seq[Def.Setting[_]] = {
       val sharedTests = path("shared")
       val allowed     = Seq(
         //                jvmTests,
-        //                jvmTests + "/datomic",
+//        sharedTests + "/expr",
         //        jvmTests + "/restore",
         //        jvmTests + "/AdhocJVM.scala",
         //        sharedTests + "/core/api"
@@ -410,7 +410,7 @@ lazy val testSettings: Seq[Def.Setting[_]] = {
         //        sharedTests + "/examples/gremlin/gettingStarted",
         //        sharedTests + "/sbtmolecule/codeGen",
         //            sharedTests + "/Adhoc.scala",
-        sharedTests,
+        //        sharedTests,
         jsTests + "/AdhocJs.scala",
       )
       new SimpleFileFilter(f =>

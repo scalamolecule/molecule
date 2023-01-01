@@ -10,15 +10,13 @@ import molecule.boilerplate.ast.Model._
 import scala.util.{Failure, Success, Try}
 
 
-trait BooPicklers {
+object Boopicklers {
 
-  // Common picklers
   implicit val datePickler = transformPickler((t: Long) => new java.util.Date(t))(_.getTime)
   implicit val uriPickler  = transformPickler((t: String) => new URI(t))(_.toString)
 
   implicit val pickleKw = compositePickler[Kw]
   pickleKw.addConcreteType[AggrList]
-
 
   implicit val pickleOp = compositePickler[Op]
   pickleOp.addConcreteType[V.type]
@@ -143,6 +141,8 @@ trait BooPicklers {
 
   implicit val proxyPickler = compositePickler[ConnProxy]
     .addConcreteType[DatomicPeerProxy]
+
+//  implicit val pickleDTO = compositePickler[DTO]
 
 
   // Copying this method so that we can avoid `import chameleon.ext.boopickle._`

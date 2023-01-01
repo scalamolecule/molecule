@@ -2,7 +2,7 @@ package molecule.db.datomic.api.ops
 
 import molecule.base.util.exceptions.MoleculeException
 import molecule.boilerplate.ast.Model._
-import molecule.core.api.ops.{DeleteOps, SaveOps}
+import molecule.core.api.ops.DeleteOps
 import molecule.core.api.{Connection, TxReport}
 import zio.ZIO
 import scala.concurrent.{ExecutionContext, Future}

@@ -6,20 +6,19 @@ import akka.http.scaladsl.model.HttpEntity
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import boopickle.Default._
-import cats.implicits._
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
-import molecule.core.marshalling.{BooPicklers, MoleculeRpc, MoleculeRpcResponse}
+import molecule.core.marshalling.Boopicklers._
+import molecule.core.marshalling.{MoleculeRpc, MoleculeRpcResponse}
 import sloth._
 import scala.concurrent.Future
 import scala.concurrent.duration.DurationInt
 import scala.util.{Failure, Success}
 
-/** Akka Http RPC server responding to molecule ajax requests */
-object DatomicRpcServer
-  extends MoleculeRpcResponse("localhost", 8080)
-    with App with BooPicklers {
 
-  lazy val router = Router[ByteBuffer, Future].route[MoleculeRpc](DatomicRpcImpl)
+/** Akka Http RPC server responding to molecule ajax requests */
+object DatomicRpcServer extends MoleculeRpcResponse("localhost", 8080) with App {
+
+  lazy val router = Router[ByteBuffer, Future].route[MoleculeRpc](DatomicRpcJVM)
 
   Http()
     .newServerAt(interface, port)
@@ -29,7 +28,6 @@ object DatomicRpcServer
       case Success(b) => println(s"Ajax server is running ${b.localAddress} ")
       case Failure(e) => println(s"there was an error starting the server $e")
     }
-
 
   lazy val route: Route = cors() {
     // Remaining is the method name

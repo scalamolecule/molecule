@@ -11,7 +11,7 @@ import scala.scalajs.js.typedarray.TypedArrayBufferOps._
 import scala.scalajs.js.typedarray._
 
 case class MoleculeRpcRequest(interface: String, port: Int)
-  extends RequestTransport[ByteBuffer, Future] with BooPicklers {
+  extends RequestTransport[ByteBuffer, Future]  {
 
   case class PostException(xhr: dom.XMLHttpRequest) extends Exception {
     def isTimeout: Boolean = xhr.status == 0 && xhr.readyState == 4

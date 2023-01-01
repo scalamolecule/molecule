@@ -14,6 +14,7 @@ import utest._
 import molecule.boilerplate.ast.Model._
 import molecule.db.datomic._
 import molecule.core.util.Executor._
+import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 
 
 object AdhocJs extends DatomicTestSuite {
@@ -22,12 +23,31 @@ object AdhocJs extends DatomicTestSuite {
 //  val aa: Array[Int] = new Array[Int](0)
 //  val aa: Array[Int] = Array.empty[Int]
 
+  val buf = ArrayBuffer.empty[Int]
+  buf.addOne(1)
+  val es = Seq(AttrOneManInt("Ns", "int", V, Seq(5)))
+  val edn =
+    """[
+      | [:db/add #db/id[db.part/user -1] :Ns/i 7]
+      |]""".stripMargin
+
+
   lazy val tests = Tests {
 
     "types" - types { implicit conn =>
+      val proxy = conn.proxy
       for {
-        _ <- Ns.i(7).save.transact //.map(_ ==> 7)
-        _ <- Ns.i.query.get.map(_ ==> List(7))
+
+
+//        _ <- conn.rpc.test(buf).map(_ ==> 42)
+//        _ <- conn.rpc.test(Array(1)).map(_ ==> 42)
+//        _ <- conn.rpc.test2.map(_ ==> 8)
+//        _ <- conn.rpc.test3.map(_ ==> 8)
+//        _ <- conn.rpc.transactEdn(proxy, edn).map(_ ==> 8)
+        _ <- Ns.i(7).save.transact
+        _ <- Ns.i(8).save.transact
+        _ <- Ns.i.query.get.map(_ ==> List(7, 8))
+//        _ <- conn.rpc.query2(conn.proxy, es)
       } yield ()
     }
 

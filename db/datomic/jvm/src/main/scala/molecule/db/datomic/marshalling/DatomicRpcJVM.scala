@@ -4,10 +4,11 @@ import java.io.StringReader
 import java.util.{UUID, List => jList}
 import datomic.Util._
 import molecule.base.util.exceptions.MoleculeException
-import molecule.boilerplate.ast.Model
 import molecule.boilerplate.ast.Model._
 import molecule.core.api.TxReport
+import molecule.core.marshalling.Boopicklers._
 import molecule.core.marshalling._
+import molecule.core.marshalling.pack.Tpls2DTO
 import molecule.core.util.Executor._
 import molecule.core.util.JavaConversions
 import molecule.db.datomic.api.ops.DatomicQueryOpsImpl
@@ -16,8 +17,7 @@ import molecule.db.datomic.transaction.DatomicDataType_JVM
 import scala.collection.mutable
 import scala.concurrent.Future
 
-object DatomicRpcImpl extends MoleculeRpc
-  with BooPicklers
+object DatomicRpcJVM extends MoleculeRpc
   //  with ClojureBridge
   with DatomicDataType_JVM
   with JavaConversions {
@@ -52,16 +52,24 @@ object DatomicRpcImpl extends MoleculeRpc
   override def query(
     proxy: ConnProxy,
     elements: Seq[Element]
-  ): Future[Either[MoleculeException, (Seq[Element], List[List[Int]])]] = {
-    getConn(proxy).map { conn =>
+  ): Future[Either[MoleculeException, DTO]] = {
+    for {
+      conn <- getConn(proxy)
+      rows <- new DatomicQueryOpsImpl(elements).get(conn, global)
+    } yield {
       try {
-        val sortedRows = new DatomicQueryOpsImpl(elements).getSortedRows(conn)
-        Right(DatomicDataTransfer(elements, sortedRows).pack)
+        val dto = Tpls2DTO(elements, rows).pack
+        println("--------------")
+        println("-3- " + dto.oneInt.toList)
+        //        Right(Tpls2DTO(elements, rows).pack)
+        Right(dto)
       } catch {
         case exc: Throwable => Left(MoleculeException(exc.getMessage, exc))
       }
     }
   }
+
+//  override
 
 
   // Connection pool ---------------------------------------------
