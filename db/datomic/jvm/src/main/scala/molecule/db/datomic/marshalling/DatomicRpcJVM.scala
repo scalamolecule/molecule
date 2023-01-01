@@ -58,18 +58,12 @@ object DatomicRpcJVM extends MoleculeRpc
       rows <- new DatomicQueryOpsImpl(elements).get(conn, global)
     } yield {
       try {
-        val dto = Tpls2DTO(elements, rows).pack
-        println("--------------")
-        println("-3- " + dto.oneInt.toList)
-        //        Right(Tpls2DTO(elements, rows).pack)
-        Right(dto)
+        Right(Tpls2DTO(elements, rows).pack)
       } catch {
         case exc: Throwable => Left(MoleculeException(exc.getMessage, exc))
       }
     }
   }
-
-//  override
 
 
   // Connection pool ---------------------------------------------

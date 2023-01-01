@@ -17,7 +17,8 @@ class DatomicInsertOpsJVM(elements: Seq[Element], data: Seq[Product]) extends In
   override def transact(implicit conn: Connection, ec: ExecutionContext): Future[TxReport] = {
     Future {
       try {
-        val stmts = (new Insert with Insert_stmts).getStmts(elements, data)
+        val stmts = (new Insert with Insert_stmts)
+          .getStmts(elements, data)
         println("---")
         stmts.forEach(stmt => println(stmt))
         conn.asInstanceOf[DatomicConn_JVM].transact(stmts)

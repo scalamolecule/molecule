@@ -5,6 +5,9 @@ import java.util.{Date, UUID}
 
 
 case class DTO(
+//  levelCounts: List[List[Int]],
+//  counts: Array[Array[Array[Int]]] = Array(Array(Array.empty[Int])),
+  rowCount: Int,
   oneString: Iterable[String],
   oneInt: Iterable[Int],
   oneLong: Iterable[Long],
@@ -60,5 +63,5 @@ case class DTO(
   setOptURI: Iterable[Option[Set[URI]]],
   setOptByte: Iterable[Option[Set[Byte]]],
   setOptShort: Iterable[Option[Set[Short]]],
-  setOptChar: Iterable[Option[Set[Char]]]
+  setOptChar: Iterable[Option[Set[Char]]],
 )

@@ -25,16 +25,13 @@ class DatomicQueryOpsImpl[Tpl](elements: Seq[Element])
     val conn = conn0.asInstanceOf[DatomicConn_JS]
     conn.rpc.query(conn.proxy, elements).flatMap {
       case Right(dto) =>
-        println("--------------")
-        println("-4- " + dto.oneInt.toList)
         try {
-//          Future(dto.oneInt.toList.asInstanceOf[List[Tpl]])
-          Future(DTO2tpls(elements, dto).unpack)
+          val tpls = DTO2tpls(elements, dto).unpack
+          Future(tpls)
         } catch {
           case e: Throwable => Future.failed(e)
         }
-
-      case Left(exc)               => Future.failed(exc)
+      case Left(exc)  => Future.failed(exc)
     }
   }
 

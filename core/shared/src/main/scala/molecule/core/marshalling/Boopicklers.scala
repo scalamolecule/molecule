@@ -142,8 +142,6 @@ object Boopicklers {
   implicit val proxyPickler = compositePickler[ConnProxy]
     .addConcreteType[DatomicPeerProxy]
 
-//  implicit val pickleDTO = compositePickler[DTO]
-
 
   // Copying this method so that we can avoid `import chameleon.ext.boopickle._`
   // in all custom SlothControllers and WebClients

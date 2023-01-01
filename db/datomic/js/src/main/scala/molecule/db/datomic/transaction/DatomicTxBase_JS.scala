@@ -21,6 +21,7 @@ trait DatomicTxBase_JS extends DatomicDataType_JS with BaseHelpers {
   }
 
   val buf       = new StringBuffer()
+  val strBuf    = new StringBuffer()
   var following = false
 
   protected var nsFull       : String              = ""
@@ -72,10 +73,12 @@ trait DatomicTxBase_JS extends DatomicDataType_JS with BaseHelpers {
       s"(found $count matching entities)."
   )
 
-  def quote(s: String): Unit = {
-    buf.append('"')
-    appendEscapedString(s)
-    buf.append('"')
+  def quote(s: String): String = {
+    //    buf.append('"')
+    //    appendEscapedString(s)
+    //    buf.append('"')
+    s"\"${escapedString(s)}\""
+//    s"\"xx\""
   }
 
   //  def apply(stmts: Seq[Statement], conn: Conn): (String, Set[String]) = {
@@ -101,7 +104,34 @@ trait DatomicTxBase_JS extends DatomicDataType_JS with BaseHelpers {
         set ++ (start to end).toSet
     }
 
-  def appendEscapedString(s: String): Unit = {
+//  def appendEscapedString(s: String): Unit = {
+//    s.foreach { c =>
+//      val strReplacement = c match {
+//        case '"'  => "\\\""
+//        case '\\' => "\\\\"
+//        case '\b' => "\\b"
+//        case '\f' => "\\f"
+//        case '\n' => "\\n"
+//        case '\r' => "\\r"
+//        case '\t' => "\\t"
+//        // Set.contains will cause boxing of c to Character, try and avoid this
+//        case c if (c >= '\u0000' && c < '\u0020') || jsEscapeChars.contains(c) =>
+//          "\\u%04x".format(c: Int)
+//
+//        case _ => ""
+//      }
+//
+//      // Use Char version of append if we can, as it's cheaper.
+//      if (strReplacement.isEmpty) {
+//        buf.append(c)
+//      } else {
+//        buf.append(strReplacement)
+//      }
+//    }
+//  }
+
+  def escapedString(s: String): String = {
+    strBuf.setLength(0)
     s.foreach { c =>
       val strReplacement = c match {
         case '"'  => "\\\""
@@ -120,11 +150,12 @@ trait DatomicTxBase_JS extends DatomicDataType_JS with BaseHelpers {
 
       // Use Char version of append if we can, as it's cheaper.
       if (strReplacement.isEmpty) {
-        buf.append(c)
+        strBuf.append(c)
       } else {
-        buf.append(strReplacement)
+        strBuf.append(strReplacement)
       }
     }
+    strBuf.toString
   }
 
 

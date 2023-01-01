@@ -8,4 +8,8 @@ object CoreGenerator extends App {
 
   // Use instead in tandem with db.datomic.api._DatomicMoleculeApi.generate to coordinate correct overrides
 //  core.api._MoleculeApi.generate
+
+
+//  core.marshalling.pack._Packers.generate
+//  core.marshalling.unpack._Unpackers.generate
 }

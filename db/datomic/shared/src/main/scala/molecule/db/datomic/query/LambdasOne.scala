@@ -10,7 +10,10 @@ trait LambdasOne extends ResolveBase {
 
   // Datomic Java to Scala
   protected lazy val j2sString    : AnyRef => AnyRef = identity
-  protected lazy val j2sInt       : AnyRef => AnyRef = identity
+  protected lazy val j2sInt       : AnyRef => AnyRef = {
+    case v: Integer => v.toInt.asInstanceOf[AnyRef]
+    case v: jLong   => v.toInt.asInstanceOf[AnyRef]
+  }
   protected lazy val j2sLong      : AnyRef => AnyRef = identity
   protected lazy val j2sFloat     : AnyRef => AnyRef = identity
   protected lazy val j2sDouble    : AnyRef => AnyRef = identity
