@@ -23,15 +23,8 @@ trait Save_edn extends DatomicTxBase_JS with Save2Data { self: Save =>
     CheckConflictingAttrs(elements)
     e = eid
     e0 = e
-
     resolve(elements)
-    val edn = s"[${buf.toString}\n]"
-
-    if (debug) {
-      println("---")
-      println(edn)
-    }
-    edn
+    s"[${buf.toString}\n]"
   }
 
   def getEdn(elements: Seq[Element]): Data = {
