@@ -12,8 +12,8 @@ import scala.util.{Failure, Success, Try}
 
 object Boopicklers {
 
-  implicit val datePickler = transformPickler((t: Long) => new java.util.Date(t))(_.getTime)
-  implicit val uriPickler  = transformPickler((t: String) => new URI(t))(_.toString)
+  implicit val pickleDate = transformPickler((t: Long) => new java.util.Date(t))(_.getTime)
+  implicit val pickleURI  = transformPickler((t: String) => new URI(t))(_.toString)
 
   implicit val pickleKw = compositePickler[Kw]
   pickleKw.addConcreteType[AggrList]
@@ -31,6 +31,9 @@ object Boopicklers {
   pickleOp.addConcreteType[NoValue.type]
   pickleOp.addConcreteType[Fn]
   pickleOp.addConcreteType[Unify.type]
+  pickleOp.addConcreteType[Add.type]
+  pickleOp.addConcreteType[Swap.type]
+  pickleOp.addConcreteType[Remove.type]
 
   implicit val pickleValidateString = compositePickler[ValidateString]
   implicit val pickleValidateInt = compositePickler[ValidateInt]
@@ -48,6 +51,13 @@ object Boopicklers {
   implicit val pickleValidateChar = compositePickler[ValidateChar]
 
   implicit val pickleElement = compositePickler[Element]
+  pickleElement.addConcreteType[Ref]
+  pickleElement.addConcreteType[BackRef]
+  pickleElement.addConcreteType[Composite]
+  pickleElement.addConcreteType[Nested]
+  pickleElement.addConcreteType[NestedOpt]
+  pickleElement.addConcreteType[TxMetaData]
+
   pickleElement.addConcreteType[AttrOneManString]
   pickleElement.addConcreteType[AttrOneManInt]
   pickleElement.addConcreteType[AttrOneManLong]
@@ -134,12 +144,12 @@ object Boopicklers {
   pickleElement.addConcreteType[AttrSetTacChar]
 
 
-  implicit val exPickler = exceptionPickler
-  exPickler
+  implicit val pickleExceptions = exceptionPickler
+  pickleExceptions
     .addConcreteType[MoleculeException]
     .addConcreteType[MoleculeCompileException]
 
-  implicit val proxyPickler = compositePickler[ConnProxy]
+  implicit val pickleConnProxy = compositePickler[ConnProxy]
     .addConcreteType[DatomicPeerProxy]
 
 

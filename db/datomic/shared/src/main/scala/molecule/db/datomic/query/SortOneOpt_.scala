@@ -60,16 +60,17 @@ trait SortOneOpt_[Tpl] { self: Base[Tpl] =>
             (a: Row, b: Row) =>
               compare(
                 a, b, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
-                  m1.values.iterator.next.asInstanceOf[jInteger].compareTo(
-                    m2.values.iterator.next.asInstanceOf[jInteger])
+                  // Datomic can return both Integer or Long
+                  m1.values.iterator.next.toString.toInt.compareTo(
+                    m2.values.iterator.next.toString.toInt)
               )
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
               compare(
                 b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
-                  m1.values.iterator.next.asInstanceOf[jInteger].compareTo(
-                    m2.values.iterator.next.asInstanceOf[jInteger])
+                  m1.values.iterator.next.toString.toInt.compareTo(
+                    m2.values.iterator.next.toString.toInt)
               )
         }
       )

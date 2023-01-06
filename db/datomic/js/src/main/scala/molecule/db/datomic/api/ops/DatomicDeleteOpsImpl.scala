@@ -1,25 +1,20 @@
 package molecule.db.datomic.api.ops
 
-import molecule.base.util.exceptions.MoleculeException
 import molecule.boilerplate.ast.Model._
 import molecule.core.api.ops.DeleteOps
 import molecule.core.api.{Connection, TxReport}
-import zio.ZIO
+import molecule.db.datomic.facade.DatomicConn_JS
 import scala.concurrent.{ExecutionContext, Future}
 
-class DatomicDeleteOpsImpl(elements: Seq[Element]) extends DeleteOps {
+class DatomicDeleteOpsImpl(
+  elements: Seq[Element],
+  isMultiple: Boolean
+) extends DeleteOps {
 
-  override def multiple: DeleteOps = ???
+  override def multiple: DeleteOps = new DatomicDeleteOpsImpl(elements, true)
 
-  override def run: ZIO[Connection, MoleculeException, TxReport] = ???
-
-  override def transact(implicit conn: Connection, ec: ExecutionContext): Future[TxReport] = {
-    Future {
-      try {
-        ???
-      } catch {
-        case e: Throwable => Future.failed(e)
-      }
-    }.flatten
+  override def transact(implicit conn0: Connection, ec: ExecutionContext): Future[TxReport] = {
+    val conn = conn0.asInstanceOf[DatomicConn_JS]
+    conn.rpc.delete(conn.proxy, elements, isMultiple).future
   }
 }

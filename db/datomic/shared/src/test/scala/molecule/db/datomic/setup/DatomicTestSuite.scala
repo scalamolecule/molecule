@@ -3,12 +3,11 @@ package molecule.db.datomic.setup
 import molecule.base.util.exceptions.MoleculeException
 import molecule.core.api.Connection
 import molecule.core.api.ops.QueryOps
+import molecule.core.util.Executor._
 import molecule.core.util.JavaConversions
 import utest._
-import scala.concurrent.Future
-//import molecule.coreTests.sampledata.CoreData
-import molecule.core.util.Executor._
 import utest.framework.Formatter
+import scala.concurrent.Future
 
 trait DatomicTestSuite extends TestSuite with CoreData
   // Platform-specific implementations (JS/JVM) (shows in red as error code in IDE)
@@ -66,15 +65,14 @@ trait DatomicTestSuite extends TestSuite with CoreData
     }
   }
 
-
-  //  def empty[T](test: Future[Conn] => T): T = emptyImpl(test)
   def types[T](test: Connection => T): T = typesImpl(test)
   def refs[T](test: Connection => T): T = refsImpl(test)
   def unique[T](test: Connection => T): T = uniqueImpl(test)
 
-//  def types[T](test: Future[Connection] => T): T = typesImpl(test)
-//  def refs[T](test: Future[Connection] => T): T = refsImpl(test)
-//  def unique[T](test: Future[Connection] => T): T = uniqueImpl(test)
+  //  def empty[T](test: Future[Conn] => T): T = emptyImpl(test)
+  //  def types[T](test: Future[Connection] => T): T = typesImpl(test)
+  //  def refs[T](test: Future[Connection] => T): T = refsImpl(test)
+  //  def unique[T](test: Future[Connection] => T): T = uniqueImpl(test)
 
   //  def corePeerOnly[T](test: Future[Conn] => T): T = corePeerOnlyImpl(test)
   //  def bidirectional[T](test: Future[Conn] => T): T = bidirectionalImpl(test)

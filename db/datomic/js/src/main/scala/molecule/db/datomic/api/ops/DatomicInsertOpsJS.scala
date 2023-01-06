@@ -1,23 +1,18 @@
 package molecule.db.datomic.api.ops
 
-import molecule.base.util.exceptions.MoleculeException
+import molecule.boilerplate.ast.Model._
 import molecule.core.api.ops.InsertOps
 import molecule.core.api.{Connection, TxReport}
-import zio.ZIO
+import molecule.core.marshalling.pack.Tpls2DTO
+import molecule.db.datomic.facade.DatomicConn_JS
 import scala.concurrent.{ExecutionContext, Future}
 
+class DatomicInsertOpsJS(elements: Seq[Element], tpls: Seq[Product]) extends InsertOps {
 
-class DatomicInsertOpsJS(edn: String) extends InsertOps {
-
-  override def run: ZIO[Connection, MoleculeException, TxReport] = ???
-
-  override def transact(implicit conn: Connection, ec: ExecutionContext): Future[TxReport] = {
-    Future {
-      try {
-        ???
-      } catch {
-        case e: Throwable => Future.failed(e)
-      }
-    }.flatten
+  override def transact(implicit conn0: Connection, ec: ExecutionContext): Future[TxReport] = {
+    val conn                      = conn0.asInstanceOf[DatomicConn_JS]
+    val (tplElements, txElements) = splitElements(elements)
+    val tplData                   = Tpls2DTO(tplElements, tpls).pack
+    conn.rpc.insert(conn.proxy, tplElements, tplData, txElements).future
   }
 }

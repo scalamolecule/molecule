@@ -3,14 +3,17 @@ package molecule.core.marshalling.unpack
 import molecule.base.util.exceptions.MoleculeException
 import molecule.boilerplate.ast.Model._
 import scala.annotation.tailrec
+import scala.collection.mutable.ListBuffer
 
 trait UnpackTpls[Tpl] { self: DTO2tpls[Tpl] =>
 
+  private val prevRefs: ListBuffer[String] = ListBuffer.empty[String]
 
   @tailrec
   final protected def resolveUnpackers(
     elements: Seq[Element],
-    acc: List[() => Any]
+    unpackers: List[() => Any],
+    level: Int
   ): List[() => Any] = {
     elements match {
       case element :: tail => element match {
@@ -18,43 +21,77 @@ trait UnpackTpls[Tpl] { self: DTO2tpls[Tpl] =>
           a match {
             case a: AttrOne =>
               a match {
-                case a: AttrOneMan => resolveUnpackers(tail, acc :+ unpackAttrOneMan(a))
-                case a: AttrOneOpt => resolveUnpackers(tail, acc :+ unpackAttrOneOpt(a))
+                case a: AttrOneMan => resolveUnpackers(tail, unpackers :+ unpackAttrOneMan(a), level)
+                case a: AttrOneOpt => resolveUnpackers(tail, unpackers :+ unpackAttrOneOpt(a), level)
+                case _: AttrOneTac => resolveUnpackers(tail, unpackers, level)
               }
             case a: AttrSet =>
               a match {
-                case a: AttrSetMan => resolveUnpackers(tail, acc :+ unpackAttrSetMan(a))
-                case a: AttrSetOpt => resolveUnpackers(tail, acc :+ unpackAttrSetOpt(a))
+                case a: AttrSetMan => resolveUnpackers(tail, unpackers :+ unpackAttrSetMan(a), level)
+                case a: AttrSetOpt => resolveUnpackers(tail, unpackers :+ unpackAttrSetOpt(a), level)
+                case _: AttrSetTac => resolveUnpackers(tail, unpackers, level)
               }
           }
 
-        //        case Ref(ns, refAttr, _, _) =>
-        //          prevRefs += refAttr
-        //          resolve(tail, resolvers :+ addRef(ns, refAttr), n)
-        //
-        //        case BackRef(backRefNs) =>
-        //          tail.head match {
-        //            case Ref(_, refAttr, _, _) if prevRefs.contains(refAttr) => throw MoleculeException(
-        //              s"Can't re-use previous namespace ${refAttr.capitalize} after backref _$backRefNs."
-        //            )
-        //            case _                                                   => // ok
-        //          }
-        //          resolve(tail, resolvers :+ addBackRef(backRefNs), n)
-        //
-        //        case Nested(Ref(ns, refAttr, _, _), elements) =>
-        //          prevRefs.clear()
-        //          resolve(tail, resolvers :+ addNested(n, ns, refAttr, elements), n)
-        //
-        //        case NestedOpt(Ref(ns, refAttr, _, _), elements) =>
-        //          prevRefs.clear()
-        //          resolve(tail, resolvers :+ addNested(n, ns, refAttr, elements), n)
-        //
-        //        case Composite(compositeElements) =>
-        //          resolve(tail, resolvers :+ addComposite(n, compositeElements), n + 1)
+        case Ref(_, refAttr, _, _) =>
+          prevRefs += refAttr
+          resolveUnpackers(tail, unpackers, level)
+
+        case BackRef(backRefNs) =>
+          tail.head match {
+            case Ref(_, refAttr, _, _) if prevRefs.contains(refAttr) => throw MoleculeException(
+              s"Can't re-use previous namespace ${refAttr.capitalize} after backref _$backRefNs."
+            )
+            case _                                                   => // ok
+          }
+          resolveUnpackers(tail, unpackers, level)
+
+        case Nested(_, nestedElements) =>
+          prevRefs.clear()
+          resolveUnpackers(tail, unpackers :+ unpackNested(level + 1, nestedElements), level)
+
+        case NestedOpt(_, nestedElements) =>
+          prevRefs.clear()
+          resolveUnpackers(tail, unpackers :+ unpackNested(level + 1, nestedElements), level)
+
+        case Composite(compositeElements) =>
+          resolveUnpackers(tail, unpackers :+ unpackComposite(level, compositeElements), level)
+
+        case TxMetaData(txMetaDataElements) =>
+          // Tx meta data is last attribute values in top level tuple
+          unpackers ++ unpackTxMetaData(txMetaDataElements, level)
 
         case other => unexpected(other)
       }
-      case Nil             => acc
+      case Nil             => unpackers
+    }
+  }
+
+  private def unpackTxMetaData(
+    txMetaDataElements: Seq[Element],
+    level: Int
+  ): List[() => Any] = {
+    resolveUnpackers(txMetaDataElements, Nil, level)
+  }
+
+  private def unpackComposite(
+    level: Int,
+    compositeElements: Seq[Element]
+  ): () => Any = {
+    val unpackCompositeData = getUnpacker(compositeElements, level)
+    () => unpackCompositeData()
+  }
+
+  private def unpackNested(
+    level: Int,
+    nestedElements: Seq[Element]
+  ): () => Any = {
+    // Recursively unpack nested levels
+    val unpackNestedData = getUnpacker(nestedElements, level)
+    () => {
+      (0 until levelCounts(level).next()).toList.map { _ =>
+        unpackNestedData()
+      }
     }
   }
 
@@ -67,16 +104,16 @@ trait UnpackTpls[Tpl] { self: DTO2tpls[Tpl] =>
       case _: AttrOneManString     => () => oneString.next()
       case _: AttrOneManInt        => () => oneInt.next()
       case _: AttrOneManLong       => () => oneLong.next()
-      case _: AttrOneManDouble     => () => oneDouble.next()
-      case _: AttrOneManBoolean    => () => oneBoolean.next()
-      case _: AttrOneManBigInt     => () => oneBigInt.next()
-      case _: AttrOneManBigDecimal => () => oneBigDecimal.next()
+      case _: AttrOneManFloat     => () => oneFloat.next()
+      case _: AttrOneManDouble    => () => oneDouble.next()
+      case _: AttrOneManBoolean     => () => oneBoolean.next()
+      case _: AttrOneManBigInt => () => oneBigInt.next()
+      case _: AttrOneManBigDecimal       => () => oneBigDecimal.next()
       case _: AttrOneManDate       => () => oneDate.next()
-      case _: AttrOneManUUID       => () => oneUUID.next()
-      case _: AttrOneManURI        => () => oneURI.next()
-      case _: AttrOneManByte       => () => oneByte.next()
+      case _: AttrOneManUUID        => () => oneUUID.next()
+      case _: AttrOneManURI       => () => oneURI.next()
+      case _: AttrOneManByte      => () => oneByte.next()
       case _: AttrOneManShort      => () => oneShort.next()
-      case _: AttrOneManFloat      => () => oneFloat.next()
       case _: AttrOneManChar       => () => oneChar.next()
     }
   }
@@ -86,16 +123,16 @@ trait UnpackTpls[Tpl] { self: DTO2tpls[Tpl] =>
       case _: AttrOneOptString     => () => oneOptString.next()
       case _: AttrOneOptInt        => () => oneOptInt.next()
       case _: AttrOneOptLong       => () => oneOptLong.next()
-      case _: AttrOneOptFloat      => () => oneOptDouble.next()
-      case _: AttrOneOptDouble     => () => oneOptBoolean.next()
-      case _: AttrOneOptBoolean    => () => oneOptBigInt.next()
-      case _: AttrOneOptBigInt     => () => oneOptBigDecimal.next()
-      case _: AttrOneOptBigDecimal => () => oneOptDate.next()
-      case _: AttrOneOptDate       => () => oneOptUUID.next()
-      case _: AttrOneOptUUID       => () => oneOptURI.next()
-      case _: AttrOneOptURI        => () => oneOptByte.next()
-      case _: AttrOneOptByte       => () => oneOptShort.next()
-      case _: AttrOneOptShort      => () => oneOptFloat.next()
+      case _: AttrOneOptFloat      => () => oneOptFloat.next()
+      case _: AttrOneOptDouble     => () => oneOptDouble.next()
+      case _: AttrOneOptBoolean    => () => oneOptBoolean.next()
+      case _: AttrOneOptBigInt     => () => oneOptBigInt.next()
+      case _: AttrOneOptBigDecimal => () => oneOptBigDecimal.next()
+      case _: AttrOneOptDate       => () => oneOptDate.next()
+      case _: AttrOneOptUUID       => () => oneOptUUID.next()
+      case _: AttrOneOptURI        => () => oneOptURI.next()
+      case _: AttrOneOptByte       => () => oneOptByte.next()
+      case _: AttrOneOptShort      => () => oneOptShort.next()
       case _: AttrOneOptChar       => () => oneOptChar.next()
     }
   }
@@ -105,16 +142,16 @@ trait UnpackTpls[Tpl] { self: DTO2tpls[Tpl] =>
       case _: AttrSetManString     => () => setString.next()
       case _: AttrSetManInt        => () => setInt.next()
       case _: AttrSetManLong       => () => setLong.next()
-      case _: AttrSetManFloat      => () => setDouble.next()
-      case _: AttrSetManDouble     => () => setBoolean.next()
-      case _: AttrSetManBoolean    => () => setBigInt.next()
-      case _: AttrSetManBigInt     => () => setBigDecimal.next()
-      case _: AttrSetManBigDecimal => () => setDate.next()
-      case _: AttrSetManDate       => () => setUUID.next()
-      case _: AttrSetManUUID       => () => setURI.next()
-      case _: AttrSetManURI        => () => setByte.next()
-      case _: AttrSetManByte       => () => setShort.next()
-      case _: AttrSetManShort      => () => setFloat.next()
+      case _: AttrSetManFloat      => () => setFloat.next()
+      case _: AttrSetManDouble     => () => setDouble.next()
+      case _: AttrSetManBoolean    => () => setBoolean.next()
+      case _: AttrSetManBigInt     => () => setBigInt.next()
+      case _: AttrSetManBigDecimal => () => setBigDecimal.next()
+      case _: AttrSetManDate       => () => setDate.next()
+      case _: AttrSetManUUID       => () => setUUID.next()
+      case _: AttrSetManURI        => () => setURI.next()
+      case _: AttrSetManByte       => () => setByte.next()
+      case _: AttrSetManShort      => () => setShort.next()
       case _: AttrSetManChar       => () => setChar.next()
     }
   }
@@ -124,24 +161,24 @@ trait UnpackTpls[Tpl] { self: DTO2tpls[Tpl] =>
       case _: AttrSetOptString     => () => setOptString.next()
       case _: AttrSetOptInt        => () => setOptInt.next()
       case _: AttrSetOptLong       => () => setOptLong.next()
-      case _: AttrSetOptFloat      => () => setOptDouble.next()
-      case _: AttrSetOptDouble     => () => setOptBoolean.next()
-      case _: AttrSetOptBoolean    => () => setOptBigInt.next()
-      case _: AttrSetOptBigInt     => () => setOptBigDecimal.next()
-      case _: AttrSetOptBigDecimal => () => setOptDate.next()
-      case _: AttrSetOptDate       => () => setOptUUID.next()
-      case _: AttrSetOptUUID       => () => setOptURI.next()
-      case _: AttrSetOptURI        => () => setOptByte.next()
-      case _: AttrSetOptByte       => () => setOptShort.next()
-      case _: AttrSetOptShort      => () => setOptFloat.next()
+      case _: AttrSetOptFloat      => () => setOptFloat.next()
+      case _: AttrSetOptDouble     => () => setOptDouble.next()
+      case _: AttrSetOptBoolean    => () => setOptBoolean.next()
+      case _: AttrSetOptBigInt     => () => setOptBigInt.next()
+      case _: AttrSetOptBigDecimal => () => setOptBigDecimal.next()
+      case _: AttrSetOptDate       => () => setOptDate.next()
+      case _: AttrSetOptUUID       => () => setOptUUID.next()
+      case _: AttrSetOptURI        => () => setOptURI.next()
+      case _: AttrSetOptByte       => () => setOptByte.next()
+      case _: AttrSetOptShort      => () => setOptShort.next()
       case _: AttrSetOptChar       => () => setOptChar.next()
     }
   }
 
-  private def err(element: Element): Nothing = {
-    throw MoleculeException(
-      s"""Unexpected element/value when unpacking tuple DTO:
-         |  element: $element""".stripMargin
-    )
-  }
+//  private def err(element: Element): Nothing = {
+//    throw MoleculeException(
+//      s"""Unexpected element/value when unpacking tuple DTO:
+//         |  element: $element""".stripMargin
+//    )
+//  }
 }

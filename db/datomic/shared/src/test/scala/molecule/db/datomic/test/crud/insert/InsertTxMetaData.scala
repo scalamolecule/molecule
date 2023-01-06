@@ -17,14 +17,14 @@ object InsertTxMetaData extends DatomicTestSuite {
         _ <- Ns.i.Tx(R2.i).insert(1, 2).transact
           .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
           err ==>
-            """Please apply tx meta data to tacit attributes. Found:
+            """Missing applied value for attribute:
               |AttrOneManInt(R2,i,V,List(),None,None,None)""".stripMargin
         }
 
         _ <- Ns.i.Tx(R2.i_?).insert(1, Some(2)).transact
           .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
           err ==>
-            """Please apply tx meta data to tacit attributes. Found:
+            """Missing applied value for attribute:
               |AttrOneOptInt(R2,i,V,None,None,None,None)""".stripMargin
         }
       } yield ()

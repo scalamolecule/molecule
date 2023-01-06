@@ -14,7 +14,7 @@ object _Unpackers extends CoreGenBase( "Unpackers", "/marshalling/unpack") {
        |
        |trait ${fileName}_[Tpl] { self: DTO2tpls[Tpl] =>
        |
-       |  def getUnpackers(elements: Seq[Element]): () => Any = {
+       |  def getUnpacker(elements: Seq[Element]): () => Any = {
        |    val unpackers: List[() => Any] = resolveUnpackers(elements, Nil)
        |    unpackers.length match {
        |      $unpackX

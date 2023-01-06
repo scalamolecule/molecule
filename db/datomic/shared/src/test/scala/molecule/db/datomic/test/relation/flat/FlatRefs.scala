@@ -89,7 +89,7 @@ object FlatRefs extends DatomicTestSuite {
       _ <- Ns.i(0).rs1(b1, b2).save.transact
         .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
         err ==> "Can only save one Set of values for Set attribute `Ns.rs1`. " +
-          s"Found: ArraySeq(Set($b1), Set($b2))"
+          s"Found: Set($b1), Set($b2)"
       }
 
       // Referencing namespace attributes repeat for each referenced entity

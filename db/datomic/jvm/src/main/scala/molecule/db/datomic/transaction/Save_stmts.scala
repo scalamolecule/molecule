@@ -1,6 +1,7 @@
 package molecule.db.datomic.transaction
 
-import java.util.{ArrayList => jArrayList, List => jList}
+import java.net.URI
+import java.util.{Date, UUID}
 import molecule.boilerplate.ast.Model._
 import molecule.core.transaction.{Save, Save2Data}
 import molecule.core.validation.CheckConflictingAttrs
@@ -10,9 +11,11 @@ trait Save_stmts extends DatomicTxBase_JVM with Save2Data { self: Save =>
   def getRawStmts(
     elements: Seq[Element],
     eid: String,
-    debug: Boolean = true
-  ): jArrayList[jList[AnyRef]] = {
-    initTxBase(elements)
+    debug: Boolean = true,
+    init: Boolean = true
+  ): Data = {
+    if (init)
+      initTxBase(elements)
     if (debug) {
       println("\n\n--- SAVE -----------------------------------------------------------------------")
       elements.foreach(println)
@@ -29,7 +32,10 @@ trait Save_stmts extends DatomicTxBase_JVM with Save2Data { self: Save =>
     stmts
   }
 
-  def getStmts(elements: Seq[Element]): Data = getRawStmts(elements, newId)
+  def getStmts(elements: Seq[Element]): Data = {
+    initTxBase(elements)
+    getRawStmts(elements, newId, init = false)
+  }
 
 
   override protected def handleNs(ns: String): Unit = {
@@ -72,17 +78,18 @@ trait Save_stmts extends DatomicTxBase_JVM with Save2Data { self: Save =>
     stmts.add(stmt)
   }
 
-  override protected lazy val valueString     = identity
-  override protected lazy val valueInt        = identity
-  override protected lazy val valueLong       = identity
-  override protected lazy val valueFloat      = identity
-  override protected lazy val valueDouble     = identity
-  override protected lazy val valueBoolean    = identity
+  // Save Int as Long in Datomic (
+  override protected lazy val valueString     = (v: String) => v
+  override protected lazy val valueInt        = (v: Int) => v //.toLong
+  override protected lazy val valueLong       = (v: Long) => v
+  override protected lazy val valueFloat      = (v: Float) => v
+  override protected lazy val valueDouble     = (v: Double) => v
+  override protected lazy val valueBoolean    = (v: Boolean) => v
   override protected lazy val valueBigInt     = (v: BigInt) => v.bigInteger
   override protected lazy val valueBigDecimal = (v: BigDecimal) => v.bigDecimal
-  override protected lazy val valueDate       = identity
-  override protected lazy val valueUUID       = identity
-  override protected lazy val valueURI        = identity
+  override protected lazy val valueDate       = (v: Date) => v
+  override protected lazy val valueUUID       = (v: UUID) => v
+  override protected lazy val valueURI        = (v: URI) => v
   override protected lazy val valueByte       = (v: Byte) => v.toInt
   override protected lazy val valueShort      = (v: Short) => v.toInt
   override protected lazy val valueChar       = (v: Char) => v.toString

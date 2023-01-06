@@ -10,21 +10,16 @@ import molecule.db.datomic.transaction.Insert_stmts
 import zio.ZIO
 import scala.concurrent.{ExecutionContext, Future}
 
-class DatomicInsertOpsJVM(elements: Seq[Element], data: Seq[Product]) extends InsertOps {
+class DatomicInsertOpsJVM(elements: Seq[Element], tpls: Seq[Product]) extends InsertOps {
 
   override def run: ZIO[Connection, MoleculeException, TxReport] = ???
 
   override def transact(implicit conn: Connection, ec: ExecutionContext): Future[TxReport] = {
     Future {
-      try {
-        val stmts = (new Insert with Insert_stmts)
-          .getStmts(elements, data)
-        println("---")
-        stmts.forEach(stmt => println(stmt))
-        conn.asInstanceOf[DatomicConn_JVM].transact(stmts)
-      } catch {
-        case e: Throwable => Future.failed(e)
-      }
+      val stmts = (new Insert with Insert_stmts).getStmts(elements, tpls)
+      println("---")
+      stmts.forEach(stmt => println(stmt))
+      conn.asInstanceOf[DatomicConn_JVM].transact(stmts)
     }.flatten
   }
 }

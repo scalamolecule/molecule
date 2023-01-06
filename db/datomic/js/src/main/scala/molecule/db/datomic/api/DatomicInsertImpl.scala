@@ -7,7 +7,6 @@ import molecule.db.datomic.api.ops.DatomicInsertOpsJS
 abstract class DatomicInsertImpl(elements: Seq[Element]) extends Insert_ {
 
   override def _insertOp(tpls: Seq[Product]): DatomicInsertOpsJS = {
-    val edn = ""
-    new DatomicInsertOpsJS(edn)
+    new DatomicInsertOpsJS(elements, tpls)
   }
 }

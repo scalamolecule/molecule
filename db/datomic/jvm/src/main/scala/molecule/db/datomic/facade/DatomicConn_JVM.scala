@@ -9,7 +9,8 @@ import datomic.db.{Datum => PeerDatom}
 import datomic.{Connection => DatomicConnection, Datom => _, _}
 import molecule.base.util.exceptions.MoleculeException
 import molecule.core.api.{Connection, TxReport}
-import molecule.core.marshalling.DatomicPeerProxy
+import molecule.core.marshalling.{DatomicPeerProxy, MoleculeRpc}
+import molecule.db.datomic.marshalling.DatomicRpcJVM
 import molecule.db.datomic.transaction.DatomicDataType_JVM
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future, Promise}
@@ -23,6 +24,8 @@ case class DatomicConn_JVM(
 ) extends Connection(proxy) with DatomicDataType_JVM {
 
   override def db: Database = peerConn.db()
+
+  private[molecule] final override lazy val rpc: MoleculeRpc = DatomicRpcJVM
 
   private var optimizeQueries = true
   def setOptimizeQuery(flag: Boolean): Unit = {

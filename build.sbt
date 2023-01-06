@@ -1,5 +1,5 @@
 import org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv
-//import org.scalajs.linker.interface.ModuleSplitStyle
+import org.scalajs.linker.interface.ModuleSplitStyle
 
 val scala212 = "2.12.17"
 val scala213 = "2.13.10"
@@ -123,8 +123,8 @@ lazy val baseSettings: Seq[Def.Setting[_]] = Seq(
   ),
 
   //  libraryDependencies += "com.lihaoyi" %%% "utest" % "0.7.4" % "test",
-  testFrameworks += new TestFramework("utest.runner.Framework"),
-  //    testFrameworks += new TestFramework("molecule.db.datomic.setup.MoleculeTestFramework"),
+  //  testFrameworks += new TestFramework("utest.runner.Framework"),
+  testFrameworks += new TestFramework("molecule.db.datomic.setup.MoleculeTestFramework"),
 
 
   Compile / unmanagedSourceDirectories ++= {
@@ -170,7 +170,8 @@ lazy val jsSettings: Seq[Def.Setting[_]] = Seq(
     //    "io.github.cquiroz" %%% "scala-java-time" % "2.3.0",
     // This creates quite a lot of locales code but is needed on the js side.
     // See https://github.com/cquiroz/scala-java-time/issues/69
-    "io.github.cquiroz" %%% "scala-java-time" % "2.4.0" % Test,
+    "io.github.cquiroz" %%% "scala-java-time" % "2.5.0" % Test,
+    "io.github.cquiroz" %%% "scala-java-time-tzdb" % "2.5.0" % Test,
 
     "org.scala-js" %%% "scalajs-java-securerandom" % "1.0.0",
     //    "org.scala-js" %%% "scalajs-java-securerandom" % "1.0.0" cross CrossVersion.for3Use2_13,
@@ -184,11 +185,13 @@ lazy val jsSettings: Seq[Def.Setting[_]] = Seq(
   //  Test / scalaJSLinkerConfig ~= {
   //    _.withModuleSplitStyle(ModuleSplitStyle.FewestModules)
   //  },
-  //  Test / scalaJSLinkerConfig ~= {
-  //    _.withSourceMap(false)
-  //  },
+  Test / scalaJSLinkerConfig ~= {
+    //      _.withSourceMap(true)
+    _.withSourceMap(false)
+  },
 
-  //  jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv()
+  //  scalaJSLinkerConfig in (Compile, fullOptJS) ~= { _.withSourceMap(false) },
+
   jsEnv := new JSDOMNodeJSEnv(
     JSDOMNodeJSEnv
       .Config()
@@ -196,6 +199,8 @@ lazy val jsSettings: Seq[Def.Setting[_]] = Seq(
       // https://github.com/scala-js/scala-js-js-envs/issues/12
       .withArgs(List("--dns-result-order=ipv4first"))
   )
+  // "Error: connect ECONNREFUSED ::1:8080" with this one alone... shouldn't it work?
+  //  jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv()
 )
 
 lazy val datomicSettings: Seq[Def.Setting[_]] = {
@@ -379,10 +384,8 @@ lazy val testSettings: Seq[Def.Setting[_]] = {
       val jvmTests    = path("jvm")
       val sharedTests = path("shared")
       val allowed     = Seq(
-        //                jvmTests,
-//        sharedTests + "/expr",
+        //        sharedTests + "/expr",
         //        jvmTests + "/restore",
-        //        jvmTests + "/AdhocJVM.scala",
         //        sharedTests + "/core/api"
         //        sharedTests + "/core/attribute",
         //        sharedTests + "/core/attrMap",
@@ -411,6 +414,8 @@ lazy val testSettings: Seq[Def.Setting[_]] = {
         //        sharedTests + "/sbtmolecule/codeGen",
         //            sharedTests + "/Adhoc.scala",
         //        sharedTests,
+        sharedTests + "/crud",
+        jvmTests + "/AdhocJVM.scala",
         jsTests + "/AdhocJs.scala",
       )
       new SimpleFileFilter(f =>

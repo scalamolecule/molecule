@@ -38,6 +38,14 @@ trait DatomicTestSuiteImpl extends WebClient { self: DatomicTestSuite =>
   def refsImpl[T](test: Connection => T): T = inMem(test, RefsSchema)
   def uniqueImpl[T](test: Connection => T): T = inMem(test, UniqueSchema)
 
+//  def typesImpl[C <: Connection, T](test: DatomicConn_JS => T): T = inMem(test, TypesSchema)
+//  def refsImpl[C <: Connection, T](test: C => T): T = inMem(test, RefsSchema)
+//  def uniqueImpl[C <: Connection, T](test: C => T): T = inMem(test, UniqueSchema)
+
+//  def typesImpl[T](test: Connection => T): T = inMem(test, TypesSchema)
+//  def refsImpl[T](test: Connection => T): T = inMem(test, RefsSchema)
+//  def uniqueImpl[T](test: Connection => T): T = inMem(test, UniqueSchema)
+
   //  def emptyImpl[T](test: Connection => T): T = inMem(test, EmptySchema)
   //  def corePeerOnlyImpl[T](test: Future[Conn] => T): T = if (system == SystemPeer) coreImpl(test) else ().asInstanceOf[T]
   //  def bidirectionalImpl[T](test: Future[Conn] => T): T = inMem(test, BidirectionalSchema, "m_bidirectional")

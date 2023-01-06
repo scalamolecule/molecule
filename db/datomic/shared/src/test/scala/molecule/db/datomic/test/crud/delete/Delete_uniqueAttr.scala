@@ -11,7 +11,7 @@ object Delete_uniqueAttr extends DatomicTestSuite {
 
   lazy val tests = Tests {
 
-    "Delete by unique attribute value, check types" - unique { implicit conn =>
+    "Delete by unique attribute value - check types" - unique { implicit conn =>
       for {
         // Initial values
         _ <- Unique.i.string.insert((1, string1), (2, string2)).transact

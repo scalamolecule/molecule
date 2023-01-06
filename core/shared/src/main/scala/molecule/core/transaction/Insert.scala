@@ -11,7 +11,7 @@ class Insert extends InsertResolvers_ { self: Insert2Data =>
   final override protected def resolve(
     elements: Seq[Element],
     resolvers: List[Product => Unit],
-    n: Int = 0
+    tplIndex: Int = 0
   ): List[Product => Unit] = {
     elements match {
       case element :: tail => element match {
@@ -22,19 +22,19 @@ class Insert extends InsertResolvers_ { self: Insert2Data =>
           a match {
             case a: AttrOne =>
               a match {
-                case a: AttrOneMan => resolve(tail, resolvers :+ resolveAttrOneMan(a, n), n + 1)
-                case a: AttrOneOpt => resolve(tail, resolvers :+ resolveAttrOneOpt(a, n), n + 1)
+                case a: AttrOneMan => resolve(tail, resolvers :+ resolveAttrOneMan(a, tplIndex), tplIndex + 1)
+                case a: AttrOneOpt => resolve(tail, resolvers :+ resolveAttrOneOpt(a, tplIndex), tplIndex + 1)
               }
             case a: AttrSet =>
               a match {
-                case a: AttrSetMan => resolve(tail, resolvers :+ resolveAttrSetMan(a, n), n + 1)
-                case a: AttrSetOpt => resolve(tail, resolvers :+ resolveAttrSetOpt(a, n), n + 1)
+                case a: AttrSetMan => resolve(tail, resolvers :+ resolveAttrSetMan(a, tplIndex), tplIndex + 1)
+                case a: AttrSetOpt => resolve(tail, resolvers :+ resolveAttrSetOpt(a, tplIndex), tplIndex + 1)
               }
           }
 
         case Ref(ns, refAttr, _, _) =>
           prevRefs += refAttr
-          resolve(tail, resolvers :+ addRef(ns, refAttr), n)
+          resolve(tail, resolvers :+ addRef(ns, refAttr), tplIndex)
 
         case BackRef(backRefNs) =>
           tail.head match {
@@ -43,18 +43,20 @@ class Insert extends InsertResolvers_ { self: Insert2Data =>
             )
             case _                                                   => // ok
           }
-          resolve(tail, resolvers :+ addBackRef(backRefNs), n)
+          resolve(tail, resolvers :+ addBackRef(backRefNs), tplIndex)
 
-        case Nested(Ref(ns, refAttr, _, _), elements) =>
+        case Nested(Ref(ns, refAttr, _, _), nestedElements) =>
           prevRefs.clear()
-          resolve(tail, resolvers :+ addNested(n, ns, refAttr, elements), n)
+          resolve(tail, resolvers :+ addNested(tplIndex, ns, refAttr, nestedElements), tplIndex)
 
-        case NestedOpt(Ref(ns, refAttr, _, _), elements) =>
+        case NestedOpt(Ref(ns, refAttr, _, _), nestedElements) =>
           prevRefs.clear()
-          resolve(tail, resolvers :+ addNested(n, ns, refAttr, elements), n)
+          resolve(tail, resolvers :+ addNested(tplIndex, ns, refAttr, nestedElements), tplIndex)
 
         case Composite(compositeElements) =>
-          resolve(tail, resolvers :+ addComposite(n, compositeElements), n + 1)
+          resolve(tail, resolvers :+ addComposite(tplIndex, compositeElements), tplIndex + 1)
+
+        // TxMetaData is handed separately in Insert_stmts with call to save_stmts
 
         case other => unexpected(other)
       }
@@ -62,83 +64,83 @@ class Insert extends InsertResolvers_ { self: Insert2Data =>
     }
   }
 
-  private def resolveAttrOneMan(a: AttrOneMan, n: Int): Product => Unit = {
+  private def resolveAttrOneMan(a: AttrOneMan, tplIndex: Int): Product => Unit = {
     val (ns, attr) = (a.ns, a.attr)
     a match {
-      case _: AttrOneManString     => addV(ns, attr, n, valueString)
-      case _: AttrOneManInt        => addV(ns, attr, n, valueInt)
-      case _: AttrOneManLong       => addV(ns, attr, n, valueLong)
-      case _: AttrOneManFloat      => addV(ns, attr, n, valueFloat)
-      case _: AttrOneManDouble     => addV(ns, attr, n, valueDouble)
-      case _: AttrOneManBoolean    => addV(ns, attr, n, valueBoolean)
-      case _: AttrOneManBigInt     => addV(ns, attr, n, valueBigInt)
-      case _: AttrOneManBigDecimal => addV(ns, attr, n, valueBigDecimal)
-      case _: AttrOneManDate       => addV(ns, attr, n, valueDate)
-      case _: AttrOneManUUID       => addV(ns, attr, n, valueUUID)
-      case _: AttrOneManURI        => addV(ns, attr, n, valueURI)
-      case _: AttrOneManByte       => addV(ns, attr, n, valueByte)
-      case _: AttrOneManShort      => addV(ns, attr, n, valueShort)
-      case _: AttrOneManChar       => addV(ns, attr, n, valueChar)
+      case _: AttrOneManString     => addV(ns, attr, tplIndex, valueString)
+      case _: AttrOneManInt        => addV(ns, attr, tplIndex, valueInt)
+      case _: AttrOneManLong       => addV(ns, attr, tplIndex, valueLong)
+      case _: AttrOneManFloat      => addV(ns, attr, tplIndex, valueFloat)
+      case _: AttrOneManDouble     => addV(ns, attr, tplIndex, valueDouble)
+      case _: AttrOneManBoolean    => addV(ns, attr, tplIndex, valueBoolean)
+      case _: AttrOneManBigInt     => addV(ns, attr, tplIndex, valueBigInt)
+      case _: AttrOneManBigDecimal => addV(ns, attr, tplIndex, valueBigDecimal)
+      case _: AttrOneManDate       => addV(ns, attr, tplIndex, valueDate)
+      case _: AttrOneManUUID       => addV(ns, attr, tplIndex, valueUUID)
+      case _: AttrOneManURI        => addV(ns, attr, tplIndex, valueURI)
+      case _: AttrOneManByte       => addV(ns, attr, tplIndex, valueByte)
+      case _: AttrOneManShort      => addV(ns, attr, tplIndex, valueShort)
+      case _: AttrOneManChar       => addV(ns, attr, tplIndex, valueChar)
     }
   }
 
-  private def resolveAttrOneOpt(a: AttrOneOpt, n: Int): Product => Unit = {
+  private def resolveAttrOneOpt(a: AttrOneOpt, tplIndex: Int): Product => Unit = {
     val (ns, attr) = (a.ns, a.attr)
     a match {
-      case _: AttrOneOptString     => addOptV(ns, attr, n, valueString)
-      case _: AttrOneOptInt        => addOptV(ns, attr, n, valueInt)
-      case _: AttrOneOptLong       => addOptV(ns, attr, n, valueLong)
-      case _: AttrOneOptFloat      => addOptV(ns, attr, n, valueFloat)
-      case _: AttrOneOptDouble     => addOptV(ns, attr, n, valueDouble)
-      case _: AttrOneOptBoolean    => addOptV(ns, attr, n, valueBoolean)
-      case _: AttrOneOptBigInt     => addOptV(ns, attr, n, valueBigInt)
-      case _: AttrOneOptBigDecimal => addOptV(ns, attr, n, valueBigDecimal)
-      case _: AttrOneOptDate       => addOptV(ns, attr, n, valueDate)
-      case _: AttrOneOptUUID       => addOptV(ns, attr, n, valueUUID)
-      case _: AttrOneOptURI        => addOptV(ns, attr, n, valueURI)
-      case _: AttrOneOptByte       => addOptV(ns, attr, n, valueByte)
-      case _: AttrOneOptShort      => addOptV(ns, attr, n, valueShort)
-      case _: AttrOneOptChar       => addOptV(ns, attr, n, valueChar)
+      case _: AttrOneOptString     => addOptV(ns, attr, tplIndex, valueString)
+      case _: AttrOneOptInt        => addOptV(ns, attr, tplIndex, valueInt)
+      case _: AttrOneOptLong       => addOptV(ns, attr, tplIndex, valueLong)
+      case _: AttrOneOptFloat      => addOptV(ns, attr, tplIndex, valueFloat)
+      case _: AttrOneOptDouble     => addOptV(ns, attr, tplIndex, valueDouble)
+      case _: AttrOneOptBoolean    => addOptV(ns, attr, tplIndex, valueBoolean)
+      case _: AttrOneOptBigInt     => addOptV(ns, attr, tplIndex, valueBigInt)
+      case _: AttrOneOptBigDecimal => addOptV(ns, attr, tplIndex, valueBigDecimal)
+      case _: AttrOneOptDate       => addOptV(ns, attr, tplIndex, valueDate)
+      case _: AttrOneOptUUID       => addOptV(ns, attr, tplIndex, valueUUID)
+      case _: AttrOneOptURI        => addOptV(ns, attr, tplIndex, valueURI)
+      case _: AttrOneOptByte       => addOptV(ns, attr, tplIndex, valueByte)
+      case _: AttrOneOptShort      => addOptV(ns, attr, tplIndex, valueShort)
+      case _: AttrOneOptChar       => addOptV(ns, attr, tplIndex, valueChar)
     }
   }
 
-  private def resolveAttrSetMan(a: AttrSetMan, n: Int): Product => Unit = {
+  private def resolveAttrSetMan(a: AttrSetMan, tplIndex: Int): Product => Unit = {
     val (ns, attr) = (a.ns, a.attr)
     a match {
-      case _: AttrSetManString     => addSet(ns, attr, n, valueString)
-      case _: AttrSetManInt        => addSet(ns, attr, n, valueInt)
-      case _: AttrSetManLong       => addSet(ns, attr, n, valueLong)
-      case _: AttrSetManFloat      => addSet(ns, attr, n, valueFloat)
-      case _: AttrSetManDouble     => addSet(ns, attr, n, valueDouble)
-      case _: AttrSetManBoolean    => addSet(ns, attr, n, valueBoolean)
-      case _: AttrSetManBigInt     => addSet(ns, attr, n, valueBigInt)
-      case _: AttrSetManBigDecimal => addSet(ns, attr, n, valueBigDecimal)
-      case _: AttrSetManDate       => addSet(ns, attr, n, valueDate)
-      case _: AttrSetManUUID       => addSet(ns, attr, n, valueUUID)
-      case _: AttrSetManURI        => addSet(ns, attr, n, valueURI)
-      case _: AttrSetManByte       => addSet(ns, attr, n, valueByte)
-      case _: AttrSetManShort      => addSet(ns, attr, n, valueShort)
-      case _: AttrSetManChar       => addSet(ns, attr, n, valueChar)
+      case _: AttrSetManString     => addSet(ns, attr, tplIndex, valueString)
+      case _: AttrSetManInt        => addSet(ns, attr, tplIndex, valueInt)
+      case _: AttrSetManLong       => addSet(ns, attr, tplIndex, valueLong)
+      case _: AttrSetManFloat      => addSet(ns, attr, tplIndex, valueFloat)
+      case _: AttrSetManDouble     => addSet(ns, attr, tplIndex, valueDouble)
+      case _: AttrSetManBoolean    => addSet(ns, attr, tplIndex, valueBoolean)
+      case _: AttrSetManBigInt     => addSet(ns, attr, tplIndex, valueBigInt)
+      case _: AttrSetManBigDecimal => addSet(ns, attr, tplIndex, valueBigDecimal)
+      case _: AttrSetManDate       => addSet(ns, attr, tplIndex, valueDate)
+      case _: AttrSetManUUID       => addSet(ns, attr, tplIndex, valueUUID)
+      case _: AttrSetManURI        => addSet(ns, attr, tplIndex, valueURI)
+      case _: AttrSetManByte       => addSet(ns, attr, tplIndex, valueByte)
+      case _: AttrSetManShort      => addSet(ns, attr, tplIndex, valueShort)
+      case _: AttrSetManChar       => addSet(ns, attr, tplIndex, valueChar)
     }
   }
 
-  private def resolveAttrSetOpt(a: AttrSetOpt, n: Int): Product => Unit = {
+  private def resolveAttrSetOpt(a: AttrSetOpt, tplIndex: Int): Product => Unit = {
     val (ns, attr) = (a.ns, a.attr)
     a match {
-      case _: AttrSetOptString     => addOptSet(ns, attr, n, valueString)
-      case _: AttrSetOptInt        => addOptSet(ns, attr, n, valueInt)
-      case _: AttrSetOptLong       => addOptSet(ns, attr, n, valueLong)
-      case _: AttrSetOptFloat      => addOptSet(ns, attr, n, valueFloat)
-      case _: AttrSetOptDouble     => addOptSet(ns, attr, n, valueDouble)
-      case _: AttrSetOptBoolean    => addOptSet(ns, attr, n, valueBoolean)
-      case _: AttrSetOptBigInt     => addOptSet(ns, attr, n, valueBigInt)
-      case _: AttrSetOptBigDecimal => addOptSet(ns, attr, n, valueBigDecimal)
-      case _: AttrSetOptDate       => addOptSet(ns, attr, n, valueDate)
-      case _: AttrSetOptUUID       => addOptSet(ns, attr, n, valueUUID)
-      case _: AttrSetOptURI        => addOptSet(ns, attr, n, valueURI)
-      case _: AttrSetOptByte       => addOptSet(ns, attr, n, valueByte)
-      case _: AttrSetOptShort      => addOptSet(ns, attr, n, valueShort)
-      case _: AttrSetOptChar       => addOptSet(ns, attr, n, valueChar)
+      case _: AttrSetOptString     => addOptSet(ns, attr, tplIndex, valueString)
+      case _: AttrSetOptInt        => addOptSet(ns, attr, tplIndex, valueInt)
+      case _: AttrSetOptLong       => addOptSet(ns, attr, tplIndex, valueLong)
+      case _: AttrSetOptFloat      => addOptSet(ns, attr, tplIndex, valueFloat)
+      case _: AttrSetOptDouble     => addOptSet(ns, attr, tplIndex, valueDouble)
+      case _: AttrSetOptBoolean    => addOptSet(ns, attr, tplIndex, valueBoolean)
+      case _: AttrSetOptBigInt     => addOptSet(ns, attr, tplIndex, valueBigInt)
+      case _: AttrSetOptBigDecimal => addOptSet(ns, attr, tplIndex, valueBigDecimal)
+      case _: AttrSetOptDate       => addOptSet(ns, attr, tplIndex, valueDate)
+      case _: AttrSetOptUUID       => addOptSet(ns, attr, tplIndex, valueUUID)
+      case _: AttrSetOptURI        => addOptSet(ns, attr, tplIndex, valueURI)
+      case _: AttrSetOptByte       => addOptSet(ns, attr, tplIndex, valueByte)
+      case _: AttrSetOptShort      => addOptSet(ns, attr, tplIndex, valueShort)
+      case _: AttrSetOptChar       => addOptSet(ns, attr, tplIndex, valueChar)
     }
   }
 }

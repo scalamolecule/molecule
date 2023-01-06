@@ -49,17 +49,17 @@ object _Model extends BoilerplateGenBase("Model", "/ast") {
     def body(baseType: String): String = {
       val tpe   = cardTpe(baseType)
       val isRef = if (baseType == "Long" && Seq("One", "Set").contains(card))
-        ",\n    isRef       : Boolean = false" else ""
+        ",\n    isRef: Boolean = false" else ""
       val vs    = if (mode == "Opt") s"Option[Seq[$tpe]] = None" else s"Seq[$tpe] = Nil"
       s"""
          |  case class Attr$card$mode$baseType(
-         |    ns          : String,
-         |    attr        : String,
-         |    op          : Op = V,
-         |    vs          : $vs,
+         |    ns: String,
+         |    attr: String,
+         |    op: Op = V,
+         |    vs: $vs,
          |    defaultValue: Option[$tpe] = None,
-         |    validation  : Option[Validate$baseType] = None,
-         |    sort        : Option[String] = None$isRef
+         |    validation: Option[Validate$baseType] = None,
+         |    sort: Option[String] = None$isRef
          |  ) extends Attr$card$mode""".stripMargin
     }
 

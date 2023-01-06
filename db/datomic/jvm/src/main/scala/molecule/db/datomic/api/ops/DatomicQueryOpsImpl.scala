@@ -9,7 +9,7 @@ import molecule.core.util.JavaConversions
 import molecule.db.datomic.facade.DatomicConn_JVM
 import molecule.db.datomic.query.DatomicModel2Query
 import molecule.db.datomic.util.DatomicApiLoader
-import scala.concurrent.{ExecutionContext, Future, blocking}
+import scala.concurrent.{ExecutionContext, Future}
 
 class DatomicQueryOpsImpl[Tpl](elements: Seq[Element])
   extends DatomicModel2Query[Tpl](elements)
@@ -23,35 +23,27 @@ class DatomicQueryOpsImpl[Tpl](elements: Seq[Element])
   override def from(cursor: String): DatomicQueryOpsImpl[Tpl] = this
 
 
-  // Delivery contexts
-
-  //  override def run(implicit conn: Connection): ZIO[Connection, MoleculeException, Chunk[Tpl]] = ???
-
   override def get(implicit conn0: Connection, ec: ExecutionContext): Future[List[Tpl]] = {
     Future {
-      try {
-        val sortedRows = getSortedRows
+      val sortedRows = getSortedRows
 
-        // Remove started composite groups that turned out to have only tacit attributes
-        aritiess = aritiess.map(_.filterNot(_.isEmpty))
+      // Remove started composite groups that turned out to have only tacit attributes
+      aritiess = aritiess.map(_.filterNot(_.isEmpty))
 
-        lazy val tuples = List.newBuilder[Tpl]
-        val result = if (isNested) {
-          rows2nested(sortedRows)
-        } else if (isNestedOpt) {
-          pullCastss = pullCastss :+ pullCasts.toList
-          pullSortss = pullSortss :+ pullSorts.sortBy(_._1).map(_._2).toList
-          sortedRows.forEach(row => tuples.addOne(pullRow2tpl(row)))
-          tuples.result()
-        } else {
-          val row2tpl = castRow2Tpl(aritiess.head, castss.head, 0, None)
-          sortedRows.forEach(row => tuples.addOne(row2tpl(row).asInstanceOf[Tpl]))
-          tuples.result()
-        }
-        Future(result)
-      } catch {
-        case e: Throwable => Future.failed(e)
+      lazy val tuples = List.newBuilder[Tpl]
+      val result = if (isNested) {
+        rows2nested(sortedRows)
+      } else if (isNestedOpt) {
+        pullCastss = pullCastss :+ pullCasts.toList
+        pullSortss = pullSortss :+ pullSorts.sortBy(_._1).map(_._2).toList
+        sortedRows.forEach(row => tuples.addOne(pullRow2tpl(row)))
+        tuples.result()
+      } else {
+        val row2tpl = castRow2Tpl(aritiess.head, castss.head, 0, None)
+        sortedRows.forEach(row => tuples.addOne(row2tpl(row).asInstanceOf[Tpl]))
+        tuples.result()
       }
+      Future(result)
     }.flatten
   }
 
@@ -77,7 +69,6 @@ class DatomicQueryOpsImpl[Tpl](elements: Seq[Element])
     rows.forEach(row => println(row))
 
     val sortedRows = sortRows(rows)
-
     println("SORTED rows:")
     sortedRows.forEach(row => println(row))
     sortedRows

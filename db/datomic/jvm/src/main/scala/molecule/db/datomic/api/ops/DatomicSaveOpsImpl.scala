@@ -16,12 +16,8 @@ class DatomicSaveOpsImpl(elements: Seq[Element]) extends SaveOps {
 
   override def transact(implicit conn: Connection, ec: ExecutionContext): Future[TxReport] = {
     Future {
-      try {
-        val stmts = (new Save() with Save_stmts).getStmts(elements)
-        conn.asInstanceOf[DatomicConn_JVM].transact(stmts)
-      } catch {
-        case e: Throwable => Future.failed(e)
-      }
+      val stmts = (new Save() with Save_stmts).getStmts(elements)
+      conn.asInstanceOf[DatomicConn_JVM].transact(stmts)
     }.flatten
   }
 }

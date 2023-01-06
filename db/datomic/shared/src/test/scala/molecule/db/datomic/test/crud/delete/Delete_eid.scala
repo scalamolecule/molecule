@@ -24,7 +24,7 @@ object Delete_eid extends DatomicTestSuite {
     }
 
 
-    "n entities, vararg" - refs { implicit conn =>
+    "n entities vararg" - refs { implicit conn =>
       for {
         List(e1, e2, _) <- Ns.i.insert(1, 2, 3).transact.map(_.eids)
         _ <- Ns.i.query.get.map(_ ==> List(1, 2, 3))
@@ -35,7 +35,7 @@ object Delete_eid extends DatomicTestSuite {
       } yield ()
     }
 
-    "n entities, iterable" - refs { implicit conn =>
+    "n entities iterable" - refs { implicit conn =>
       for {
         List(e1, e2, _) <- Ns.i.insert(1, 2, 3).transact.map(_.eids)
         _ <- Ns.i.query.get.map(_ ==> List(1, 2, 3))
@@ -237,7 +237,7 @@ object Delete_eid extends DatomicTestSuite {
         for {
           _ <- Ns(42).i(2, 3).update.transact
             .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
-            err ==> "Can only update one value for attribute `Ns.i`. Found: ArraySeq(2, 3)"
+            err ==> "Can only update one value for attribute `Ns.i`. Found: 2, 3"
           }
         } yield ()
       }

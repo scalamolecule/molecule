@@ -5,12 +5,12 @@ import molecule.core.api.{Connection, TxReport}
 import zio.ZIO
 import scala.concurrent.{ExecutionContext, Future}
 
-trait UpdateOps extends BaseOps {
+trait UpdateOps extends BaseOps  {
+
   // Modifiers
   def multiple: UpdateOps
 
   // Actions
-  def run: ZIO[Connection, MoleculeException, TxReport]
+  def run: ZIO[Connection, MoleculeException, TxReport] = ???
   def transact(implicit conn: Connection, ec: ExecutionContext): Future[TxReport]
-
 }

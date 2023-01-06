@@ -39,7 +39,7 @@ object SaveRef extends DatomicTestSuite {
       for {
         _ <- (Ns.i(1) + R2.i(2)).save.transact
         _ <- (Ns.i + R2.i).query.get.map(_ ==> List((1, 2)))
-
+//
         _ <- (Ns.R1.i(1) + R2.i(2)).save.transact
         _ <- (Ns.R1.i + R2.i).query.get.map(_ ==> List((1, 2)))
       } yield ()

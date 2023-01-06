@@ -183,7 +183,7 @@ object UpdateOne_eid extends DatomicTestSuite {
         for {
           _ <- Ns(42).int(2, 3).update.transact
             .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
-            err ==> "Can only update one value for attribute `Ns.int`. Found: ArraySeq(2, 3)"
+            err ==> "Can only update one value for attribute `Ns.int`. Found: 2, 3"
           }
         } yield ()
       }
@@ -211,7 +211,7 @@ object UpdateOne_eid extends DatomicTestSuite {
         for {
           _ <- Ns(42).int(2, 3).update.transact
             .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
-            err ==> "Can only update one value for attribute `Ns.int`. Found: ArraySeq(2, 3)"
+            err ==> "Can only update one value for attribute `Ns.int`. Found: 2, 3"
           }
         } yield ()
       }

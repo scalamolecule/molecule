@@ -1,77 +1,143 @@
 package molecule.db.datomic.marshalling
 
-import java.io.StringReader
-import java.util.{UUID, List => jList}
-import datomic.Util._
+import java.util.UUID
 import molecule.base.util.exceptions.MoleculeException
 import molecule.boilerplate.ast.Model._
 import molecule.core.api.TxReport
 import molecule.core.marshalling.Boopicklers._
 import molecule.core.marshalling._
 import molecule.core.marshalling.pack.Tpls2DTO
+import molecule.core.marshalling.unpack.DTO2tpls
+import molecule.core.transaction.{Delete, Insert, Save, Update}
 import molecule.core.util.Executor._
-import molecule.core.util.JavaConversions
+import molecule.core.util.{JavaConversions, ModelUtils}
 import molecule.db.datomic.api.ops.DatomicQueryOpsImpl
 import molecule.db.datomic.facade.{DatomicConn_JVM, DatomicPeer}
-import molecule.db.datomic.transaction.DatomicDataType_JVM
+import molecule.db.datomic.transaction._
 import scala.collection.mutable
 import scala.concurrent.Future
 
 object DatomicRpcJVM extends MoleculeRpc
-  //  with ClojureBridge
-  with DatomicDataType_JVM
-  with JavaConversions {
+  with DatomicTxBase_JVM
+  with JavaConversions
+  with ModelUtils {
 
   // Api ---------------------------------------------
-
-  override def transact(
-    elements: Seq[Element]
-  ): Future[Either[MoleculeException, TxReport]] = {
-    ???
-  }
-
-  override def transactEdn(
-    proxy: ConnProxy,
-    edn: String,
-    uriAttrs: Set[String] = Set.empty[String]
-  ): Future[Either[MoleculeException, TxReport]] = {
-    for {
-      conn <- getConn(proxy)
-      javaStmts = getJavaStmts(edn, uriAttrs)
-      _ = javaStmts.forEach(s => println(s))
-
-      txReport <- conn.transact(javaStmts)
-        .flatMap(txR => Future(Right(txR)))
-        .recoverWith {
-          case e: MoleculeException => Future(Left(e))
-          case e: Throwable         => Future(Left(MoleculeException(e.getMessage, e)))
-        }
-    } yield txReport
-  }
 
   override def query(
     proxy: ConnProxy,
     elements: Seq[Element]
-  ): Future[Either[MoleculeException, DTO]] = {
+  ): Future[Either[MoleculeException, DTO]] = either {
     for {
       conn <- getConn(proxy)
-      rows <- new DatomicQueryOpsImpl(elements).get(conn, global)
+      rows <- new DatomicQueryOpsImpl[Any](elements).get(conn, global)
     } yield {
-      try {
-        Right(Tpls2DTO(elements, rows).pack)
-      } catch {
-        case exc: Throwable => Left(MoleculeException(exc.getMessage, exc))
+      //      println("rows: " + rows)
+      val tpls = if (countValueAttrs(elements) == 1) {
+        rows.map(v => Tuple1(v))
+      } else {
+        rows
       }
+      val dto  = Tpls2DTO(elements, tpls.asInstanceOf[Seq[Product]]).pack
+      //      println(dto)
+      dto
     }
   }
+
+  override def save(
+    proxy: ConnProxy,
+    elements: Seq[Element]
+  ): Future[Either[MoleculeException, TxReport]] = either {
+    for {
+      conn <- getConn(proxy)
+      stmts = (new Save() with Save_stmts).getStmts(elements)
+      txReport <- conn.transact(stmts)
+    } yield txReport
+  }
+
+  override def insert(
+    proxy: ConnProxy,
+    tplElements: Seq[Element],
+    tplData: DTO,
+    txElements: Seq[Element],
+  ): Future[Either[MoleculeException, TxReport]] = either {
+    for {
+      conn <- getConn(proxy)
+      //      _ = println("tplData: " + tplData)
+
+      tpls = if (countValueAttrs(tplElements) == 1) {
+        DTO2tpls[Any](tplElements, tplData).unpack.map(v => Tuple1(v))
+      } else {
+        DTO2tpls[Product](tplElements, tplData).unpack
+      }
+      //      _ = println("tpls: " + tpls)
+      //      _ = println("txEs: " + txElements)
+
+      stmts = (new Insert with Insert_stmts).getStmts(tplElements, tpls)
+      _ = if (txElements.nonEmpty) {
+        val txStmts = (new Save() with Save_stmts)
+          .getRawStmts(txElements, datomicTx, false)
+        stmts.addAll(txStmts)
+      }
+      //      _ = println("stmts")
+      //      _ = stmts.forEach(s => println(s))
+      txReport <- conn.transact(stmts)
+    } yield txReport
+  }
+
+  override def update(
+    proxy: ConnProxy,
+    elements: Seq[Element],
+    isUpsert: Boolean,
+    isMultiple: Boolean,
+  ): Future[Either[MoleculeException, TxReport]] = either {
+    for {
+      conn <- getConn(proxy)
+      stmts = (new Update(conn.proxy.uniqueAttrs, isUpsert, isMultiple) with Update_stmts)
+        .getStmts(conn, elements)
+      txReport <- conn.transact(stmts)
+    } yield txReport
+  }
+
+  override def delete(
+    proxy: ConnProxy,
+    elements: Seq[Element],
+    isMultiple: Boolean
+  ): Future[Either[MoleculeException, TxReport]] = either {
+    for {
+      conn <- getConn(proxy)
+      stmts = (new Delete with Delete_stmts).getStmtsData(conn, elements, isMultiple)
+      txReport <- conn.transact(stmts)
+    } yield txReport
+  }
+
+
+  private def either[T](fut: Future[T]): Future[Either[MoleculeException, T]] = {
+    // Transfer exceptions in Either to allow Boopickle to serialize
+    fut
+      .map(txR => Right(txR))
+      .recover {
+        case e: MoleculeException =>
+//          printStackTrace(e)
+          Left(e)
+        case e: Throwable         =>
+//          printStackTrace(e)
+          Left(MoleculeException(e.getMessage, e))
+      }
+  }
+
+  private def printStackTrace(exc: Throwable): Unit = {
+    println(exc.getStackTrace.mkString("\n"))
+  }
+
 
 
   // Connection pool ---------------------------------------------
 
-  // todo - this is primitive, is a more correct implementation needed?
+  // todo
   private val connectionPool = mutable.HashMap.empty[UUID, Future[DatomicConn_JVM]]
 
-  private def clearConnPool: Future[Unit] = Future {
+  override def clearConnPool: Future[Unit] = Future {
     //    println(s"Connection pool with ${connectionPool.size} connections cleared.")
     connectionPool.clear()
   }
@@ -84,64 +150,59 @@ object DatomicRpcJVM extends MoleculeRpc
       conn
     }
     connectionPool(proxy.uuid) = futConnTimeAdjusted
+    //    println("connectionPool.size: " + connectionPool.size)
     futConnTimeAdjusted
   }
 
-  private def getFreshConn(proxy: ConnProxy): Future[DatomicConn_JVM] = proxy match {
-    case proxy@DatomicPeerProxy(protocol, dbIdentifier, _, _, _, _, _, _, _, _) =>
-      protocol match {
-        case "mem" =>
-          DatomicPeer.recreateDbFromEdn(proxy)
-            .recoverWith { case exc =>
-              //              printStackTrace(exc)
-              Future.failed[DatomicConn_JVM](MoleculeException(exc.getMessage))
-            }
+  private def getFreshConn(proxy: ConnProxy): Future[DatomicConn_JVM] = {
+    proxy match {
+      case proxy@DatomicPeerProxy(protocol, dbIdentifier, _, _, _, _, _, _, _, _) =>
+        protocol match {
+          case "mem" =>
+            DatomicPeer.recreateDbFromEdn(proxy)
+              .recover(exc => throw MoleculeException(exc.getMessage))
 
-        case "free" | "dev" | "pro" =>
-          Future(DatomicPeer.connect(proxy, protocol, dbIdentifier))
-            .recoverWith { case exc =>
-              //              printStackTrace(exc)
-              Future.failed[DatomicConn_JVM](MoleculeException(exc.getMessage))
-            }
+          case "free" | "dev" | "pro" =>
+            Future(DatomicPeer.connect(proxy, protocol, dbIdentifier))
+              .recover(exc => throw MoleculeException(exc.getMessage))
 
-        case other =>
-          Future.failed(MoleculeException(
-            s"\nCan't serve Peer protocol `$other`."
-          ))
-      }
+          case other => Future.failed(MoleculeException(s"\nCan't serve Peer protocol `$other`."))
+        }
+    }
   }
-  private def getJavaStmts(
-    stmtsEdn: String,
-    uriAttrs: Set[String]
-  ): Data = {
-    val stmts = readAll(new StringReader(stmtsEdn)).get(0).asInstanceOf[jList[AnyRef]]
-    stmts.asInstanceOf[Data]
-    //    if (uriAttrs.isEmpty) {
-    //      stmts.asInstanceOf[Data]
-    //    } else {
-    //      def uri(s: AnyRef): AnyRef = {
-    //        // Depends on requiring clojure.core.async
-    //        readString(s"""#=(new java.net.URI "$s")""")
-    //      }
-    //      val stmtsSize = stmts.size()
-    //      val newStmts  = new util.ArrayList[jList[_]](stmtsSize)
-    //      stmts.forEach { stmtRaw =>
-    //        val stmt = stmtRaw.asInstanceOf[jList[AnyRef]]
-    //        if (uriAttrs.contains(stmt.get(2).toString)) {
-    //          val uriStmt = stmt.get(0).toString match {
-    //            case ":db/add"     => list(stmt.get(0), stmt.get(1), stmt.get(2), uri(stmt.get(3)))
-    //            case ":db/retract" => list(stmt.get(0), stmt.get(1), stmt.get(2), uri(stmt.get(3)))
-    //            case ":db.fn/cas"  => list(stmt.get(0), stmt.get(1), stmt.get(2), uri(stmt.get(3)), uri(stmt.get(4)))
-    //            case _             => stmt
-    //          }
-    //          newStmts.add(uriStmt)
-    //        } else {
-    //          newStmts.add(stmt)
-    //        }
-    //      }
-    //      Collections.unmodifiableList(newStmts).asInstanceOf[Data]
-    //    }
-  }
+
+  //  private def getJavaStmts(
+  //    stmtsEdn: String,
+  //    uriAttrs: Set[String]
+  //  ): Data = {
+  //    val stmts = readAll(new StringReader(stmtsEdn)).get(0).asInstanceOf[jList[AnyRef]]
+  //    stmts.asInstanceOf[Data]
+  //    //    if (uriAttrs.isEmpty) {
+  //    //      stmts.asInstanceOf[Data]
+  //    //    } else {
+  //    //      def uri(s: AnyRef): AnyRef = {
+  //    //        // Depends on requiring clojure.core.async
+  //    //        readString(s"""#=(new java.net.URI "$s")""")
+  //    //      }
+  //    //      val stmtsSize = stmts.size()
+  //    //      val newStmts  = new util.ArrayList[jList[_]](stmtsSize)
+  //    //      stmts.forEach { stmtRaw =>
+  //    //        val stmt = stmtRaw.asInstanceOf[jList[AnyRef]]
+  //    //        if (uriAttrs.contains(stmt.get(2).toString)) {
+  //    //          val uriStmt = stmt.get(0).toString match {
+  //    //            case ":db/add"     => list(stmt.get(0), stmt.get(1), stmt.get(2), uri(stmt.get(3)))
+  //    //            case ":db/retract" => list(stmt.get(0), stmt.get(1), stmt.get(2), uri(stmt.get(3)))
+  //    //            case ":db.fn/cas"  => list(stmt.get(0), stmt.get(1), stmt.get(2), uri(stmt.get(3)), uri(stmt.get(4)))
+  //    //            case _             => stmt
+  //    //          }
+  //    //          newStmts.add(uriStmt)
+  //    //        } else {
+  //    //          newStmts.add(stmt)
+  //    //        }
+  //    //      }
+  //    //      Collections.unmodifiableList(newStmts).asInstanceOf[Data]
+  //    //    }
+  //  }
 
   //  def transact(
   //    proxy: ConnProxy,

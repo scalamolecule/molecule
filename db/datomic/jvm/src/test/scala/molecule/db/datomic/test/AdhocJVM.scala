@@ -15,15 +15,50 @@ object AdhocJVM extends DatomicTestSuite {
 
   lazy val tests = Tests {
 
-    "refs" - refs { implicit conn =>
+
+    "types" - types { implicit conn =>
+      import molecule.coreTests.dataModels.core.dsl.Types._
+      for {
+        //        _ <- Ns.i(1).s("a").save.transact
+        //        _ <- Ns.i(2).s("b").save.transact
+        //        _ <- Ns.i.s.query.get.map(_ ==> List((1, "a"), (2, "b")))
+
+        //        _ <- Ns.i(1).Ref.s("a").save.transact
+        //        _ <- Ns.i(2).Ref.s("b").save.transact
+        //        _ <- Ns.i.Ref.s.query.get.map(_ ==> List((1, "a"), (2, "b")))
+
+//        _ <- Ns.i.s.insert((1, "a"), (2, "b")).transact
+//        _ <- Ns.i.s.query.get.map(_ ==> List((1, "a"), (2, "b")))
 
 
-      //      for {
-      //        _ <- Ns.i(7).save.transact
-      //
-      //      } yield ()
+        //        _ <- Ns.i.Refs.*(Ref.i).insert(
+        //          (1, List(2, 3))
+        //        ).transact
+        //        _ <- Ns.i.Refs.*(Ref.i.a1).query.get.map(_.head ==>
+        //          //        _ <- Ns.i.Refs.*(Ref.i).query.get.map(_.head ==>
+        //          (1, List(2, 3))
+        //        )
 
+
+        eid <- Ns.int.insert(1).transact.map(_.eids.head)
+//        _ <- Ns.int.query.get.map(_ ==> List(1))
+//
+//        // Update existing value
+//        _ <- Ns(eid).int(2).update.transact
+//        _ <- Ns.int.query.get.map(_ ==> List(2))
+      } yield ()
     }
+
+
+//    "refs" - refs { implicit conn =>
+//
+//
+//      //      for {
+//      //        _ <- Ns.i(7).save.transact
+//      //
+//      //      } yield ()
+//
+//    }
 
     //    "set" - typesSet { implicit conn =>
     //

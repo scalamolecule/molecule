@@ -11,11 +11,7 @@ import scala.collection.mutable.ListBuffer
 
 trait DatomicTxBase_JVM extends DatomicDataType_JVM {
 
-  protected def initTxBase(
-    elements: Seq[Element],
-    isUpsert: Boolean = false
-  ): Unit = {
-    update = if (isUpsert) "upsert" else "update"
+  protected def initTxBase(elements: Seq[Element]): Unit = {
     nsFull = getInitialNs(elements)
     part = fns.partNs(nsFull).head
   }
@@ -83,10 +79,4 @@ trait DatomicTxBase_JVM extends DatomicDataType_JVM {
     case Composite(es) => getInitialNs(es)
     case other         => throw MoleculeException("Unexpected head element: " + other)
   }
-
-  var update = "update" // or "upsert"
-  protected def multipleModifierMissing(count: Int) = throw MoleculeException(
-    s"Please provide explicit `$update.multiple` to $update multiple entities " +
-      s"(found $count matching entities)."
-  )
 }

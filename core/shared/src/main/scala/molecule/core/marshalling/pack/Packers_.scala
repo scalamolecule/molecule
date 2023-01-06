@@ -3,10 +3,10 @@ package molecule.core.marshalling.pack
 
 import molecule.boilerplate.ast.Model._
 
-trait Packers_ { self: Tpls2DTO =>
+trait Packers_  { self: Tpls2DTO =>
 
-  def getPacker(elements: Seq[Element]): Product => Unit = {
-    val packers: List[Product => Unit] = resolvePackers(elements, Nil)
+  def getPacker(elements: Seq[Element], level: Int): Product => Unit = {
+    val packers: List[Product => Unit] = resolvePackers(elements, Nil, level, 0)
     packers.length match {
       case 1 => resolve1(packers)
       case 2 => resolve2(packers)

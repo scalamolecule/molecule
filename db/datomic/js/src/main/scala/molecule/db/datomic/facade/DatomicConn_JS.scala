@@ -21,8 +21,5 @@ case class DatomicConn_JS(
   //      MoleculeRpcRequest("localhost", 8080)
   //    ).wire[MoleculeRpc]
 
-  //  override type Data = String // edn string
-
-  //  override def transact[T <: Data](data: T)(implicit ec: ExecutionContext): Future[TxReport] = ???
-  override def transact(data: Data)(implicit ec: ExecutionContext): Future[TxReport] = ???
+//  override def transact(data: Data)(implicit ec: ExecutionContext): Future[TxReport] = ???
 }

@@ -14,10 +14,7 @@ class Save(isTx: Boolean = false) { self: Save2Data =>
       case element :: tail => element match {
         case a: Attr =>
           if (a.op != Appl) {
-            if (isTx)
-              throw MoleculeException("Please apply tx meta data to tacit attributes. Found:\n" + a)
-            else
-              throw MoleculeException("Can't save attributes without an applied value. Found:\n" + a)
+            throw MoleculeException("Missing applied value for attribute:\n" + a)
           }
           handleNs(a.ns)
           a match {
@@ -58,7 +55,6 @@ class Save(isTx: Boolean = false) { self: Save2Data =>
     }
   }
 
-
   private def oneV[T](
     ns: String,
     attr: String,
@@ -69,7 +65,7 @@ class Save(isTx: Boolean = false) { self: Save2Data =>
       case Seq(v) => Some(transform(v))
       case Nil    => None
       case vs     => throw MoleculeException(
-        s"Can only save one value for attribute `$ns.$attr`. Found: " + vs
+        s"Can only save one value for attribute `$ns.$attr`. Found: " + vs.mkString(", ")
       )
     }
   }
@@ -129,7 +125,7 @@ class Save(isTx: Boolean = false) { self: Save2Data =>
       case Seq(v) => Some(transform(v))
       case Nil    => None
       case vs     => throw MoleculeException(
-        s"Can only save one value for optional attribute `$ns.$attr`. Found: " + vs
+        s"Can only save one value for optional attribute `$ns.$attr`. Found: " + vs.mkString(", ")
       )
     }
   }
@@ -167,7 +163,7 @@ class Save(isTx: Boolean = false) { self: Save2Data =>
       case Seq(set)     => Some(set.map(transform))
       case Nil          => None
       case multipleSets => throw MoleculeException(
-        s"Can only save one Set of values for Set attribute `$ns.$attr`. Found: " + multipleSets
+        s"Can only save one Set of values for Set attribute `$ns.$attr`. Found: " + multipleSets.mkString(", ")
       )
     }
   }
@@ -227,7 +223,7 @@ class Save(isTx: Boolean = false) { self: Save2Data =>
       case Seq(set) => Some(set.map(transform))
       case Nil      => None
       case vs       => throw MoleculeException(
-        s"Can only save one Set of values for optional Set attribute `$ns.$attr`. Found: " + vs
+        s"Can only save one Set of values for optional Set attribute `$ns.$attr`. Found: " + vs.mkString(", ")
       )
     }
   }

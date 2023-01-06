@@ -11,25 +11,23 @@ object SaveTxMetaData extends DatomicTestSuite {
 
   lazy val tests = Tests {
 
-    "Basic" - refs { implicit conn =>
+    "Mandatory tx attr" - refs { implicit conn =>
       for {
         _ <- Ns.i(1).Tx(R2.i(7)).save.transact
-        _ <- Ns.i.Tx(R2.i).query.get.map(_ ==> List(
-          (1, 7)
-        ))
+        _ <- Ns.i.Tx(R2.i).query.get.map(_ ==> List((1, 7)))
       } yield ()
     }
 
-    "Multiple attrs" - refs { implicit conn =>
+    "Tacit tx attr" - refs { implicit conn =>
+      // Same effect as with mandatory tx meta attr
+      // To keep parity with insert tx meta attrs
       for {
-        _ <- Ns.i(1).Tx(R2.i(7).s("tx").ii(Set(8, 9))).save.transact
-        _ <- Ns.i.Tx(R2.i.s.ii).query.get.map(_ ==> List(
-          (1, 7, "tx", Set(8, 9))
-        ))
+        _ <- Ns.i(1).Tx(R2.i(7)).save.transact
+        _ <- Ns.i.Tx(R2.i).query.get.map(_ ==> List((1, 7)))
       } yield ()
     }
 
-    "Optional attribute" - refs { implicit conn =>
+    "Optional tx attr" - refs { implicit conn =>
       for {
         _ <- Ns.i(1).Tx(R2.i(7).s_?(Some("tx"))).save.transact
         _ <- Ns.i.Tx(R2.i.s_?).query.get.map(_ ==> List(
@@ -43,6 +41,14 @@ object SaveTxMetaData extends DatomicTestSuite {
       } yield ()
     }
 
+    "Multiple attrs" - refs { implicit conn =>
+      for {
+        _ <- Ns.i(1).Tx(R2.i(7).s("tx").ii(Set(8, 9))).save.transact
+        _ <- Ns.i.Tx(R2.i.s.ii).query.get.map(_ ==> List(
+          (1, 7, "tx", Set(8, 9))
+        ))
+      } yield ()
+    }
 
     "Tx ref" - refs { implicit conn =>
       for {

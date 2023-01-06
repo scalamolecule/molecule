@@ -1,18 +1,23 @@
 package molecule.db.datomic.transaction
 
+import java.util.{Set => jSet}
+import clojure.lang.Keyword
 import datomic.Util.list
+import datomic.query.EntityMap
+import datomic.{Database, Peer}
 import molecule.base.util.exceptions.MoleculeException
 import molecule.boilerplate.ast.Model._
 import molecule.core.transaction.{Update, Update2Data}
 import molecule.core.validation.CheckConflictingAttrs
+import molecule.db.datomic.facade.DatomicConn_JVM
 import molecule.db.datomic.query.DatomicModel2Query
 
-trait Update_stmts extends Update2Data { self: Update =>
+trait Update_stmts extends DatomicTxBase_JVM with Update2Data { self: Update =>
 
-  def getStmtsData(
-    elements: Seq[Element],
-    isMultiple: Boolean,
-  ): (Seq[AnyRef], Option[String], Seq[AnyRef], Seq[(String, String, String, Seq[AnyRef], Boolean)]) = {
+  def getStmts(
+    conn: DatomicConn_JVM,
+    elements: Seq[Element]
+  ): Data = {
     CheckConflictingAttrs(elements, distinguishMode = true)
 
     val (eids, filterElements, data) = resolve(elements, Nil, Nil, Nil)
@@ -32,8 +37,97 @@ trait Update_stmts extends Update2Data { self: Update =>
     } else {
       (None, Nil)
     }
-    (eids, filterQuery, inputs, data)
+
+    val db = conn.peerConn.db()
+    filterQuery.fold {
+      val addStmts = eid2stmts(data, db, isUpsert)
+      eids.foreach(addStmts)
+    } { query =>
+      val eidRows = Peer.q(query, db +: inputs: _*)
+      val count   = eidRows.size()
+      if (!isMultiple && count > 1) {
+        throw MoleculeException(
+          s"Please provide explicit `$update.multiple` to $update multiple entities " +
+            s"(found $count matching entities)."
+        )
+      }
+      val addStmts = eid2stmts(data, db)
+      eidRows.forEach(eidRow => addStmts(eidRow.get(0)))
+    }
+
+    println("\n\n--- UPDATE -----------------------------------------------------------------------")
+    elements.foreach(println)
+    println("---")
+    stmts.forEach(stmt => println(stmt))
+    stmts
   }
+
+  private def eid2stmts(
+    data: Seq[(String, String, String, Seq[AnyRef], Boolean)],
+    db: Database,
+    addNewValues: Boolean = true
+  ): AnyRef => Unit = {
+    (eid0: AnyRef) => {
+      var eid : AnyRef = eid0
+      var txId: AnyRef = null
+      var entity       = db.entity(eid)
+      data.foreach {
+        case ("add", ns, attr, newValues, retractCur) =>
+          val a = kw(ns, attr)
+          if (retractCur) {
+            val eid1      = if (txId != null) txId else eid
+            // todo: optimize with one query for all eids
+            val curValues = Peer.q("[:find ?v :in $ ?e ?a :where [?e ?a ?v]]", db, eid1, a)
+            curValues.forEach { row =>
+              val curValue = row.get(0)
+              if (!newValues.contains(curValue))
+                appendStmt(retract, eid1, a, curValue)
+            }
+          }
+          if (addNewValues || entity.get(a) != null) {
+            newValues.foreach(newValue =>
+              appendStmt(add, eid, a, newValue)
+            )
+          }
+
+        case ("retract", ns, attr, retractValues, _) =>
+          val a = kw(ns, attr)
+          if (retractValues.isEmpty) {
+            val cur = entity.get(a)
+            if (cur != null) {
+              cur match {
+                case set: jSet[_] =>
+                  set.forEach {
+                    case kw: Keyword          => appendStmt(retract, eid, a, db.entity(kw).get(":db/id"))
+                    case entityMap: EntityMap => appendStmt(retract, eid, a, entityMap.get(":db/id"))
+                    case v                    => appendStmt(retract, eid, a, v.asInstanceOf[AnyRef])
+                  }
+                case v            =>
+                  appendStmt(retract, eid, a, v)
+              }
+            }
+          } else {
+            retractValues.foreach(retractValue =>
+              appendStmt(retract, eid, a, retractValue)
+            )
+          }
+
+        case ("ref", ns, refAttr, _, _) =>
+          val a = kw(ns, refAttr)
+          entity = entity.get(a).asInstanceOf[EntityMap]
+          eid = entity.get(dbId)
+
+        case ("tx", _, _, _, _) =>
+          // Get transaction entity id
+          txId = Peer.q("[:find ?tx :in $ ?e :where [?e _ _ ?tx]]", db, eid).iterator.next.get(0)
+          entity = db.entity(txId)
+          eid = datomicTx
+
+        case other => throw MoleculeException("Unexpected data in update: " + other)
+      }
+    }
+  }
+
 
   override protected def uniqueEids(
     filterAttr: AttrOneTac,

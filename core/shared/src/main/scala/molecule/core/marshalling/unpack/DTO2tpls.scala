@@ -13,20 +13,24 @@ case class DTO2tpls[Tpl](elements: Seq[Element], dto: DTO)
 
   protected lazy val tuples = List.newBuilder[Tpl]
 
-
-  def unpack: List[Tpl] = {
+  def unpack: List[Tpl] = try {
     if (elements.size == 1) {
       unpackValues(elements.head)
     } else {
-      val unpackRow = getUnpackers(elements)
+      val unpackRow = getUnpacker(elements, 0)
       (0 until rowCount).foreach { _ =>
         tuples.addOne(unpackRow().asInstanceOf[Tpl])
       }
       tuples.result()
     }
+  } catch {
+    case e: Throwable =>
+      println(e.getStackTrace.mkString("\n"))
+      throw e
   }
 
   protected lazy val rowCount        : Int                               = dto.rowCount
+  protected lazy val levelCounts     : List[Iterator[Int]]               = dto.levelCounts.map(_.iterator)
   protected lazy val oneString       : Iterator[String]                  = dto.oneString.iterator
   protected lazy val oneInt          : Iterator[Int]                     = dto.oneInt.iterator
   protected lazy val oneLong         : Iterator[Long]                    = dto.oneLong.iterator

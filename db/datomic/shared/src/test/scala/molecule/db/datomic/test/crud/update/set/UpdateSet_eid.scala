@@ -170,19 +170,19 @@ object UpdateSet_eid extends DatomicTestSuite {
         for {
           _ <- Ns(42).ints(Seq(Set(1), Set(2))).update.transact
             .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
-            err ==> "Can only update one Set of values for Set attribute `Ns.ints`. Found: List(Set(1), Set(2))"
+            err ==> "Can only update one Set of values for Set attribute `Ns.ints`. Found: Set(1), Set(2)"
           }
 
           // Same as
           _ <- Ns(42).ints(Set(1), Set(2)).update.transact
             .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
-            err ==> "Can only update one Set of values for Set attribute `Ns.ints`. Found: ArraySeq(Set(1), Set(2))"
+            err ==> "Can only update one Set of values for Set attribute `Ns.ints`. Found: Set(1), Set(2)"
           }
 
           // Same as
           _ <- Ns(42).ints(1, 2).update.transact
             .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
-            err ==> "Can only update one Set of values for Set attribute `Ns.ints`. Found: ArraySeq(Set(1), Set(2))"
+            err ==> "Can only update one Set of values for Set attribute `Ns.ints`. Found: Set(1), Set(2)"
           }
         } yield ()
       }

@@ -17,5 +17,5 @@ trait QueryOps[Tpl] extends BaseOps {
 
   def get(implicit conn: Connection, ec: ExecutionContext): Future[List[Tpl]]
 
-  def inspect(implicit conn: Connection, ec: ExecutionContext): Future[Unit]
+  def inspect(implicit conn: Connection, ec: ExecutionContext): Future[Unit] = ???
 }

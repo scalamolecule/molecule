@@ -5,9 +5,8 @@ import java.util.{Date, UUID}
 
 
 case class DTO(
-//  levelCounts: List[List[Int]],
-//  counts: Array[Array[Array[Int]]] = Array(Array(Array.empty[Int])),
   rowCount: Int,
+  levelCounts: List[List[Int]],
   oneString: List[String],
   oneInt: List[Int],
   oneLong: List[Long],

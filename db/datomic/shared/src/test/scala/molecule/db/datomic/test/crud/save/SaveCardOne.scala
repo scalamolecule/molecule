@@ -14,17 +14,17 @@ object SaveCardOne extends DatomicTestSuite {
 
   lazy val tests = Tests {
 
-    "mandatory" - types { implicit conn =>
+    "Mandatory" - types { implicit conn =>
       for {
         // Can't save multiple values (use insert for that)
         _ <- Ns.i(1, 2).save.transact
           .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
-          err ==> "Can only save one value for attribute `Ns.i`. Found: ArraySeq(1, 2)"
+          err ==> "Can only save one value for attribute `Ns.i`. Found: 1, 2"
         }
 
         _ <- Ns.i(Seq(1, 2)).save.transact
           .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
-          err ==> "Can only save one value for attribute `Ns.i`. Found: List(1, 2)"
+          err ==> "Can only save one value for attribute `Ns.i`. Found: 1, 2"
         }
 
         // Saving empty list of values is ignored
@@ -93,12 +93,12 @@ object SaveCardOne extends DatomicTestSuite {
     }
 
 
-    "optional" - types { implicit conn =>
+    "Optional" - types { implicit conn =>
       for {
         // Can't save multiple values (use insert for that)
         _ <- Ns.i_?(Some(Seq(1, 2))).save.transact
           .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
-          err ==> "Can only save one value for optional attribute `Ns.i`. Found: List(1, 2)"
+          err ==> "Can only save one value for optional attribute `Ns.i`. Found: 1, 2"
         }
 
         // Empty option of values saves nothing
@@ -161,7 +161,6 @@ object SaveCardOne extends DatomicTestSuite {
         _ <- Ns.i(14).char_?(Some(char1)).save.transact
         _ <- Ns.i(14).char_?(Some(Seq(char2))).save.transact
         _ <- Ns.i(14).char_?(Option.empty[Char]).save.transact
-
 
         _ <- Ns.i_(1).string_?.a1.query.get.map(_ ==> List(None, Some(string1), Some(string2)))
         _ <- Ns.i_(2).int_?.a1.query.get.map(_ ==> List(None, Some(int1), Some(int2)))

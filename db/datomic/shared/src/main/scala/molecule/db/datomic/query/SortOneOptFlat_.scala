@@ -52,11 +52,12 @@ trait SortOneOptFlat_[Tpl] extends ResolveBase { self: Base[Tpl] =>
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              compare(a, b, i, (v1, v2) => v1.asInstanceOf[jInteger].compareTo(v2.asInstanceOf[jInteger]))
+              // Datomic can return both Integer or Long
+              compare(a, b, i, (v1, v2) => v1.toString.toInt.compareTo(v2.toString.toInt))
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              compare(b, a, i, (v1, v2) => v1.asInstanceOf[jInteger].compareTo(v2.asInstanceOf[jInteger]))
+              compare(b, a, i, (v1, v2) => v1.toString.toInt.compareTo(v2.toString.toInt))
         }
       )
     }

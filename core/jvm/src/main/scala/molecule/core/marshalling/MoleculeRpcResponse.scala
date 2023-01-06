@@ -18,43 +18,53 @@ case class MoleculeRpcResponse(interface: String, port: Int) {
     router: Router[ByteBuffer, Future],
     pathStr: String,
     argsData: ByteBuffer
-  ): Future[Array[Byte]] = Future {
-    try {
-      val path       = pathStr.split("/").toList
-      val args       = Unpickle.apply[ByteBuffer].fromBytes(argsData)
-      val callResult = router(Request[ByteBuffer](path, args))
-      callResult match {
-        case Right(byteBufferResultFuture) =>
-          byteBufferResultFuture
-            .map(_.array())
-            .recoverWith { exc =>
-              println("---- MoleculeRpcResponse, unexpected ajax response:\n" + msg(path, args, exc))
-              println(exc.getStackTrace.mkString("\n"))
-              Future.failed(exc)
-            }
-
-        case Left(error) =>
-          println(s"##### MoleculeRpcResponse, server failure:\n" + error)
-          error match {
-            case PathNotFound(path: List[String]) =>
-              Future.failed(new RuntimeException(s"PathNotFound($path)"))
-
-            case HandlerError(exc: Throwable) =>
-              Future.failed(new RuntimeException(s"HandlerError(${msg(path, args, exc)})"))
-
-            case DeserializerError(exc: Throwable) =>
-              Future.failed(new RuntimeException(s"DeserializerError(${msg(path, args, exc)})"))
+  ): Future[Array[Byte]] = try {
+    val path       = pathStr.split("/").toList
+    val args       = Unpickle.apply[ByteBuffer].fromBytes(argsData)
+    val callResult = router(Request[ByteBuffer](path, args))
+    callResult match {
+      case Right(byteBufferResultFuture) =>
+        byteBufferResultFuture
+          .map(_.array())
+          .recover { e =>
+            println("---- MoleculeRpcResponse, unexpected ajax response:\n" + msg(path, e))
+            throw e
           }
-      }
-    } catch {
-      case NonFatal(exc) => Future.failed(exc)
-    }
-  }.flatten
 
-  private def msg(path: List[String], args: ByteBuffer, exc: Throwable): String = {
-    s"""path: $path
-       |args: ${args.array().toList}
-       |err : ${exc.getMessage}
-       |$exc""".stripMargin
+      case Left(error) =>
+        println(s"##### MoleculeRpcResponse, server failure:\n" + error)
+        error match {
+          case PathNotFound(path: List[String]) =>
+            Future.failed(new RuntimeException(s"PathNotFound($path)"))
+
+          case HandlerError(exc: Throwable) =>
+            printStackTrace(exc)
+            Future.failed(new RuntimeException(s"HandlerError(${msg(path, exc)})"))
+
+          case DeserializerError(exc: Throwable) =>
+            printStackTrace(exc)
+            Future.failed(new RuntimeException(s"DeserializerError(${msg(path, exc)})"))
+        }
+    }
+  } catch {
+    case e: Throwable =>
+      println(
+        s"""##### Unexpected pickle/router failure:
+           |$e
+           |--
+           |${e.getStackTrace.mkString("\n")}""".stripMargin
+      )
+      Future.failed(e)
+  }
+
+  private def msg(path: List[String], exc: Throwable): String = {
+    s"""path: ${path.mkString("/")}
+       |$exc
+       |--
+       |${exc.getStackTrace.mkString("\n")}""".stripMargin
+  }
+
+  private def printStackTrace(exc: Throwable) = {
+    println(exc.getStackTrace.mkString("\n"))
   }
 }

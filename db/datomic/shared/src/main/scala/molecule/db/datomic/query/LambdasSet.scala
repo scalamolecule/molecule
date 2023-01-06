@@ -1,6 +1,6 @@
 package molecule.db.datomic.query
 
-import java.lang.{Double => jDouble, Float => jFloat, Long => jLong}
+import java.lang.{Long => jLong}
 import java.math.{BigDecimal => jBigDecimal, BigInteger => jBigInt}
 import java.net.URI
 import java.util.{Date, UUID, Iterator => jIterator, List => jList, Map => jMap, Set => jSet}
@@ -11,7 +11,8 @@ object LambdasSet extends LambdasSet
 trait LambdasSet extends ResolveBase with JavaConversions {
 
   protected lazy val j2sSetString    : AnyRef => AnyRef = (v: AnyRef) => Set(v)
-  protected lazy val j2sSetInt       : AnyRef => AnyRef = (v: AnyRef) => Set(v)
+  // Datomic can return both Integer or Long
+  protected lazy val j2sSetInt       : AnyRef => AnyRef = (v: AnyRef) => Set(v.toString.toInt)
   protected lazy val j2sSetLong      : AnyRef => AnyRef = (v: AnyRef) => Set(v)
   protected lazy val j2sSetFloat     : AnyRef => AnyRef = (v: AnyRef) => Set(v)
   protected lazy val j2sSetDouble    : AnyRef => AnyRef = (v: AnyRef) => Set(v)
@@ -36,44 +37,44 @@ trait LambdasSet extends ResolveBase with JavaConversions {
   protected lazy val j2sSetChar      : AnyRef => AnyRef =
     (v: AnyRef) => Set(v.asInstanceOf[String].charAt(0))
 
-  private lazy val set2setString    : AnyRef => AnyRef = set2set
-  private lazy val set2setInt       : AnyRef => AnyRef = set2set
-  private lazy val set2setLong      : AnyRef => AnyRef = set2set
-  private lazy val set2setFloat     : AnyRef => AnyRef = set2set
-  private lazy val set2setDouble    : AnyRef => AnyRef = set2set
-  private lazy val set2setBoolean   : AnyRef => AnyRef = set2set
-  private lazy val set2setBigInt    : AnyRef => AnyRef = set2set((v: AnyRef) => BigInt(v.toString))
-  private lazy val set2setBigDecimal: AnyRef => AnyRef = set2set((v: AnyRef) => BigDecimal(v.toString))
-  private lazy val set2setDate      : AnyRef => AnyRef = set2set
-  private lazy val set2setUUID      : AnyRef => AnyRef = set2set
-  private lazy val set2setURI       : AnyRef => AnyRef = set2set
-  private lazy val set2setByte      : AnyRef => AnyRef = set2set((v: AnyRef) => v.asInstanceOf[Integer].toByte)
-  private lazy val set2setShort     : AnyRef => AnyRef = set2set((v: AnyRef) => v.asInstanceOf[Integer].toShort)
-  private lazy val set2setChar      : AnyRef => AnyRef = set2set((v: AnyRef) => v.asInstanceOf[String].charAt(0))
+  private lazy val set2setString    : AnyRef => AnyRef = jset2set
+  private lazy val set2setInt       : AnyRef => AnyRef = jset2set((v: AnyRef) => v.toString.toInt)
+  private lazy val set2setLong      : AnyRef => AnyRef = jset2set
+  private lazy val set2setFloat     : AnyRef => AnyRef = jset2set
+  private lazy val set2setDouble    : AnyRef => AnyRef = jset2set
+  private lazy val set2setBoolean   : AnyRef => AnyRef = jset2set
+  private lazy val set2setBigInt    : AnyRef => AnyRef = jset2set((v: AnyRef) => BigInt(v.toString))
+  private lazy val set2setBigDecimal: AnyRef => AnyRef = jset2set((v: AnyRef) => BigDecimal(v.toString))
+  private lazy val set2setDate      : AnyRef => AnyRef = jset2set
+  private lazy val set2setUUID      : AnyRef => AnyRef = jset2set
+  private lazy val set2setURI       : AnyRef => AnyRef = jset2set
+  private lazy val set2setByte      : AnyRef => AnyRef = jset2set((v: AnyRef) => v.asInstanceOf[Integer].toByte)
+  private lazy val set2setShort     : AnyRef => AnyRef = jset2set((v: AnyRef) => v.asInstanceOf[Integer].toShort)
+  private lazy val set2setChar      : AnyRef => AnyRef = jset2set((v: AnyRef) => v.asInstanceOf[String].charAt(0))
 
-  private def set2set: AnyRef => AnyRef =
+  private def jset2set: AnyRef => AnyRef =
     (v: AnyRef) => v.asInstanceOf[jSet[_]].toArray.toSet
 
-  private def set2set(value: AnyRef => Any): AnyRef => AnyRef =
+  private def jset2set(value: AnyRef => Any): AnyRef => AnyRef =
     (v: AnyRef) => v.asInstanceOf[jSet[_]].toArray.map(value).toSet
 
 
-  private lazy val set2setsString    : AnyRef => AnyRef = set2setsT[String]
-  private lazy val set2setsInt       : AnyRef => AnyRef = set2setsT[Int]
-  private lazy val set2setsLong      : AnyRef => AnyRef = set2setsT[Long]
-  private lazy val set2setsFloat     : AnyRef => AnyRef = set2setsT[Float]
-  private lazy val set2setsDouble    : AnyRef => AnyRef = set2setsT[Double]
-  private lazy val set2setsBoolean   : AnyRef => AnyRef = set2setsT[Boolean]
-  private lazy val set2setsBigInt    : AnyRef => AnyRef = set2setsT[BigInt]((v: Any) => BigInt(v.toString))
-  private lazy val set2setsBigDecimal: AnyRef => AnyRef = set2setsT[BigDecimal]((v: Any) => BigDecimal(v.toString))
-  private lazy val set2setsDate      : AnyRef => AnyRef = set2setsT[Date]
-  private lazy val set2setsUUID      : AnyRef => AnyRef = set2setsT[UUID]
-  private lazy val set2setsURI       : AnyRef => AnyRef = set2setsT[URI]
-  private lazy val set2setsByte      : AnyRef => AnyRef = set2setsT[Byte]((v: Any) => v.asInstanceOf[Integer].toByte)
-  private lazy val set2setsShort     : AnyRef => AnyRef = set2setsT[Short]((v: Any) => v.asInstanceOf[Integer].toShort)
-  private lazy val set2setsChar      : AnyRef => AnyRef = set2setsT[Char]((v: Any) => v.asInstanceOf[String].charAt(0))
+  private lazy val set2setsString    : AnyRef => AnyRef = jset2setsT[String]
+  private lazy val set2setsInt       : AnyRef => AnyRef = jset2setsT[Int]((v: Any) => v.toString.toInt)
+  private lazy val set2setsLong      : AnyRef => AnyRef = jset2setsT[Long]
+  private lazy val set2setsFloat     : AnyRef => AnyRef = jset2setsT[Float]
+  private lazy val set2setsDouble    : AnyRef => AnyRef = jset2setsT[Double]
+  private lazy val set2setsBoolean   : AnyRef => AnyRef = jset2setsT[Boolean]
+  private lazy val set2setsBigInt    : AnyRef => AnyRef = jset2setsT[BigInt]((v: Any) => BigInt(v.toString))
+  private lazy val set2setsBigDecimal: AnyRef => AnyRef = jset2setsT[BigDecimal]((v: Any) => BigDecimal(v.toString))
+  private lazy val set2setsDate      : AnyRef => AnyRef = jset2setsT[Date]
+  private lazy val set2setsUUID      : AnyRef => AnyRef = jset2setsT[UUID]
+  private lazy val set2setsURI       : AnyRef => AnyRef = jset2setsT[URI]
+  private lazy val set2setsByte      : AnyRef => AnyRef = jset2setsT[Byte]((v: Any) => v.asInstanceOf[Integer].toByte)
+  private lazy val set2setsShort     : AnyRef => AnyRef = jset2setsT[Short]((v: Any) => v.asInstanceOf[Integer].toShort)
+  private lazy val set2setsChar      : AnyRef => AnyRef = jset2setsT[Char]((v: Any) => v.asInstanceOf[String].charAt(0))
 
-  private def set2setsT[T]: AnyRef => AnyRef = (v: AnyRef) => {
+  private def jset2setsT[T]: AnyRef => AnyRef = (v: AnyRef) => {
     var sets = Set.empty[Set[T]]
     var set  = Set.empty[T]
     v.asInstanceOf[jSet[_]].forEach { row =>
@@ -83,7 +84,7 @@ trait LambdasSet extends ResolveBase with JavaConversions {
     }
     sets
   }
-  private def set2setsT[T](value: Any => T): AnyRef => AnyRef = (v: AnyRef) => {
+  private def jset2setsT[T](value: Any => T): AnyRef => AnyRef = (v: AnyRef) => {
     var sets = Set.empty[Set[T]]
     var set  = Set.empty[T]
     v.asInstanceOf[jSet[_]].forEach { row =>
@@ -95,20 +96,20 @@ trait LambdasSet extends ResolveBase with JavaConversions {
   }
 
 
-  private lazy val vector2setString    : AnyRef => AnyRef = vector2set
-  private lazy val vector2setInt       : AnyRef => AnyRef = vector2set
-  private lazy val vector2setLong      : AnyRef => AnyRef = vector2set
-  private lazy val vector2setFloat     : AnyRef => AnyRef = vector2set
-  private lazy val vector2setDouble    : AnyRef => AnyRef = vector2set
-  private lazy val vector2setBoolean   : AnyRef => AnyRef = vector2set
-  private lazy val vector2setBigInt    : AnyRef => AnyRef = vector2set((v: AnyRef) => BigInt(v.toString))
-  private lazy val vector2setBigDecimal: AnyRef => AnyRef = vector2set((v: AnyRef) => BigDecimal(v.toString))
-  private lazy val vector2setDate      : AnyRef => AnyRef = vector2set
-  private lazy val vector2setUUID      : AnyRef => AnyRef = vector2set
-  private lazy val vector2setURI       : AnyRef => AnyRef = vector2set
-  private lazy val vector2setByte      : AnyRef => AnyRef = vector2set((v: AnyRef) => v.asInstanceOf[Integer].toByte)
-  private lazy val vector2setShort     : AnyRef => AnyRef = vector2set((v: AnyRef) => v.asInstanceOf[Integer].toShort)
-  private lazy val vector2setChar      : AnyRef => AnyRef = vector2set((v: AnyRef) => v.asInstanceOf[String].charAt(0))
+  private lazy val vector2setString    : AnyRef => AnyRef = jvector2set
+  private lazy val vector2setInt       : AnyRef => AnyRef = jvector2set((v: AnyRef) => v.toString.toInt)
+  private lazy val vector2setLong      : AnyRef => AnyRef = jvector2set
+  private lazy val vector2setFloat     : AnyRef => AnyRef = jvector2set
+  private lazy val vector2setDouble    : AnyRef => AnyRef = jvector2set
+  private lazy val vector2setBoolean   : AnyRef => AnyRef = jvector2set
+  private lazy val vector2setBigInt    : AnyRef => AnyRef = jvector2set((v: AnyRef) => BigInt(v.toString))
+  private lazy val vector2setBigDecimal: AnyRef => AnyRef = jvector2set((v: AnyRef) => BigDecimal(v.toString))
+  private lazy val vector2setDate      : AnyRef => AnyRef = jvector2set
+  private lazy val vector2setUUID      : AnyRef => AnyRef = jvector2set
+  private lazy val vector2setURI       : AnyRef => AnyRef = jvector2set
+  private lazy val vector2setByte      : AnyRef => AnyRef = jvector2set((v: AnyRef) => v.asInstanceOf[Integer].toByte)
+  private lazy val vector2setShort     : AnyRef => AnyRef = jvector2set((v: AnyRef) => v.asInstanceOf[Integer].toShort)
+  private lazy val vector2setChar      : AnyRef => AnyRef = jvector2set((v: AnyRef) => v.asInstanceOf[String].charAt(0))
 
 
   case class ResSet[T](
@@ -144,9 +145,10 @@ trait LambdasSet extends ResolveBase with JavaConversions {
   }
 
   private lazy val j2sOpSetInt = (v: AnyRef) => v match {
-    case null            => Option.empty[Set[Int]]
-    case set: jSet[_]    => Some(set.asScala.map(_.asInstanceOf[Integer].toInt))
-    case map: jMap[_, _] => Some(map.values.iterator.next.asInstanceOf[jList[_]].asScala.map(_.asInstanceOf[Integer].toInt).toSet)
+    case null => Option.empty[Set[Int]]
+    // Datomic can return both Integer or Long
+    case set: jSet[_]    => Some(set.asScala.map(_.toString.toInt))
+    case map: jMap[_, _] => Some(map.values.iterator.next.asInstanceOf[jList[_]].asScala.map(_.toString.toInt).toSet)
   }
 
   private lazy val j2sOpSetLong = (v: AnyRef) => v match {
@@ -261,6 +263,7 @@ trait LambdasSet extends ResolveBase with JavaConversions {
     case other        => unexpectedValue(other)
   }
   lazy val it2SetInt       : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    // Datomic can return both Integer or Long
     case vs: jList[_] => vs.asScala.map(v => v.toString.toInt).toSet
     case `none`       => nullValue
     case other        => unexpectedValue(other)
@@ -332,7 +335,8 @@ trait LambdasSet extends ResolveBase with JavaConversions {
     case vs: jList[_] => Some(vs.asScala.map(v => v.asInstanceOf[String]).toSet)
   }
   lazy val it2OptSetInt       : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case `none`       => None
+    case `none` => None
+    // Datomic can return both Integer or Long
     case vs: jList[_] => Some(vs.asScala.map(v => v.toString.toInt).toSet)
   }
   lazy val it2OptSetLong      : jIterator[_] => Any = (it: jIterator[_]) => it.next match {

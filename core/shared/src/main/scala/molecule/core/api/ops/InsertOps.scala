@@ -7,7 +7,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait InsertOps extends BaseOps {
 
-  def run: ZIO[Connection, MoleculeException, TxReport]
+  def run: ZIO[Connection, MoleculeException, TxReport] = ???
 
   def transact(implicit conn: Connection, ec: ExecutionContext): Future[TxReport]
 }

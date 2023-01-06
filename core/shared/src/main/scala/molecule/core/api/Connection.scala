@@ -6,7 +6,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 abstract class Connection(val proxy: ConnProxy) { self: DataType =>
 
-  def transact(data: Data)(implicit ec: ExecutionContext): Future[TxReport]
+  def transact(data: Data)(implicit ec: ExecutionContext): Future[TxReport] = throw jvmOnly("transact")
 
   def db: Any = ???
 

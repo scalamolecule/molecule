@@ -19,19 +19,19 @@ object SaveCardSet extends DatomicTestSuite {
         // Can't save multiple Sets of values (use insert for that)
         _ <- Ns.ints(Seq(Set(1), Set(2))).save.transact
           .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
-          err ==> "Can only save one Set of values for Set attribute `Ns.ints`. Found: List(Set(1), Set(2))"
+          err ==> "Can only save one Set of values for Set attribute `Ns.ints`. Found: Set(1), Set(2)"
         }
 
         // Same as
         _ <- Ns.ints(Set(1), Set(2)).save.transact
           .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
-          err ==> "Can only save one Set of values for Set attribute `Ns.ints`. Found: ArraySeq(Set(1), Set(2))"
+          err ==> "Can only save one Set of values for Set attribute `Ns.ints`. Found: Set(1), Set(2)"
         }
 
         // Same as
         _ <- Ns.ints(1, 2).save.transact
           .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
-          err ==> "Can only save one Set of values for Set attribute `Ns.ints`. Found: ArraySeq(Set(1), Set(2))"
+          err ==> "Can only save one Set of values for Set attribute `Ns.ints`. Found: Set(1), Set(2)"
         }
 
         // Saving empty list of Sets is ignored
@@ -105,7 +105,7 @@ object SaveCardSet extends DatomicTestSuite {
         // Can't save multiple Sets of values (use insert for that)
         _ <- Ns.ints_?(Some(Seq(Set(1), Set(2)))).save.transact
           .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
-          err ==> "Can only save one Set of values for optional Set attribute `Ns.ints`. Found: List(Set(1), Set(2))"
+          err ==> "Can only save one Set of values for optional Set attribute `Ns.ints`. Found: Set(1), Set(2)"
         }
 
         // Empty option of Set of values saves nothing

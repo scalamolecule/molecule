@@ -9,7 +9,8 @@ import scala.annotation.tailrec
 
 class Update(
   uniqueAttrs: List[String],
-  val isUpsert: Boolean = false,
+  val isUpsert: Boolean,
+  val isMultiple: Boolean,
 ) { self: Update2Data =>
 
   val update = if (isUpsert) "upsert" else "update"
@@ -111,7 +112,7 @@ class Update(
       case Seq(v) => ("add", a.ns, a.attr, Seq(transform(v).asInstanceOf[AnyRef]), false)
       case Nil    => ("retract", a.ns, a.attr, Nil, false)
       case vs     => throw MoleculeException(
-        s"Can only $update one value for attribute `${a.name}`. Found: " + vs
+        s"Can only $update one value for attribute `${a.name}`. Found: " + vs.mkString(", ")
       )
     }
   }
@@ -196,7 +197,7 @@ class Update(
       case Seq(set) => ("add", a.ns, a.attr, set.map(v => transform(v).asInstanceOf[AnyRef]).toSeq, retractCur)
       case Nil      => ("retract", a.ns, a.attr, Nil, retractCur)
       case vs       => throw MoleculeException(
-        s"Can only $update one Set of values for Set attribute `${a.name}`. Found: " + vs
+        s"Can only $update one Set of values for Set attribute `${a.name}`. Found: " + vs.mkString(", ")
       )
     }
   }

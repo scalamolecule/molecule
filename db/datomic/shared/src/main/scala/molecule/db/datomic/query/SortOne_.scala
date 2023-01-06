@@ -36,11 +36,12 @@ trait SortOne_[Tpl] { self: Base[Tpl] =>
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              a.get(i).asInstanceOf[jInteger].compareTo(b.get(i).asInstanceOf[jInteger])
+              // Datomic can return both Integer or Long
+              a.get(i).toString.toInt.compareTo(b.get(i).toString.toInt)
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              b.get(i).asInstanceOf[jInteger].compareTo(a.get(i).asInstanceOf[jInteger])
+              b.get(i).toString.toInt.compareTo(a.get(i).toString.toInt)
         }
       )
     }

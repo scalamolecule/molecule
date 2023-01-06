@@ -1,15 +1,23 @@
 package molecule.core.api.ops
 
 import molecule.base.util.exceptions.MoleculeException
+import molecule.core.util.ModelUtils
 import scala.concurrent.{ExecutionContext, Future}
 
-trait BaseOps {
+trait BaseOps extends ModelUtils {
+
   implicit class futEither2fut[T](fut: Future[Either[MoleculeException, T]])(implicit ec: ExecutionContext) {
-    def toFuture: Future[T] = {
-      fut.flatMap {
-        case Left(exc)       => Future.failed(exc)
-        case Right(txReport) => Future(txReport)
+    def future: Future[T] = {
+      fut.map {
+        case Right(result) => result
+        case Left(exc)     =>
+//          printStackTrace(exc)
+          throw exc
       }
     }
+  }
+
+  protected def printStackTrace(exc: Throwable): Unit = {
+    println(exc.getStackTrace.mkString("\n"))
   }
 }

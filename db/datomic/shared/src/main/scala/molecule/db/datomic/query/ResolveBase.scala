@@ -24,7 +24,8 @@ trait ResolveBase extends BaseHelpers {
 
   // Scala to Java
   protected lazy val s2jString    : Any => Any = identity
-  protected lazy val s2jInt       : Any => Any = identity
+  // Save Int as Long in Datomic
+  protected lazy val s2jInt       : Any => Any = (v: Any) => v.asInstanceOf[Int].toLong.asInstanceOf[Any]
   protected lazy val s2jLong      : Any => Any = identity
   protected lazy val s2jFloat     : Any => Any = identity
   protected lazy val s2jDouble    : Any => Any = identity
@@ -59,9 +60,9 @@ trait ResolveBase extends BaseHelpers {
   protected lazy val dChar      : Char => String       = (v: Char) => "\"" + v.toString + "\""
 
 
-  protected def vector2set: AnyRef => AnyRef =
+  protected def jvector2set: AnyRef => AnyRef =
     (v: AnyRef) => v.asInstanceOf[jList[_]].toArray.toSet
 
-  protected def vector2set(value: AnyRef => Any): AnyRef => AnyRef =
+  protected def jvector2set(value: AnyRef => Any): AnyRef => AnyRef =
     (v: AnyRef) => v.asInstanceOf[jList[_]].toArray.toSet.map(value)
 }

@@ -1,34 +1,44 @@
 package molecule.db.datomic.test
 
 import boopickle.Default._
-import molecule.coreTests.dataModels.core.dsl.Types._
-import molecule.db.datomic.setup.DatomicTestSuite
-import utest._
-//import molecule.db.datomic.RpcTester._
+import molecule.base.util.exceptions.MoleculeException
 import molecule.core.util.Executor._
 import molecule.db.datomic._
-
+import molecule.db.datomic.setup.DatomicTestSuite
+import utest._
 
 object AdhocJs extends DatomicTestSuite {
 
   lazy val tests = Tests {
 
     "types" - types { implicit conn =>
-      val proxy = conn.proxy
+      import molecule.coreTests.dataModels.core.dsl.Types._
       for {
 
-        _ <- Ns.i(1).s("a").save.transact
-        _ <- Ns.i(2).s("b").save.transact
-        _ <- Ns.i.s.query.get.map(_ ==> List((1, "a"), (2, "b")))
-//        _ <- conn.rpc.query2(conn.proxy, es)
+        _ <- Ns.i(1).save.transact
+
       } yield ()
     }
 
 
     //    "refs" - refs { implicit conn =>
-    //      //      Ns.i.v.Self.i(v).s
-    //      //      Ns.i.>(1).as(v1).R1.i.<(v1)
+    //      import molecule.coreTests.dataModels.core.dsl.Refs._
+    //      for {
+    ////        _ <- Ns.i.Tx(R2.i_(7)).insert(1).transact
+    ////        _ <- Ns.i.Tx(R2.i).query.get.map(_ ==> List((1, 7)))
     //
+    ////        _ <- Ns.i(1).s("a").Tx(R2.i_(7)).save.transact
+    ////        _ <- Ns.i.s.Tx(R2.i).query.get.map(_ ==> List((1, "a", 7)))
+    //
+    //
+    //        _ <- Ns.i(1).Tx(R2.i_(7).s_("tx")).save.transact
+    //        _ <- Ns.i.Tx(R2.i.s).query.get.map(_ ==> List(
+    //          (1, 7, "tx")
+    //        ))
+    //
+    ////        _ <- Ns.i.s.Tx(R2.i_(7)).insert((1, "a"), (2, "b")).transact
+    ////        _ <- Ns.i.s.Tx(R2.i).query.get.map(_ ==> List((1, "a", 7), (2, "b", 7)))
+    //      } yield ()
     //    }
   }
 }

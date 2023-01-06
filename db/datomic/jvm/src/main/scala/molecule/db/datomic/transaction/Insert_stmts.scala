@@ -3,6 +3,7 @@ package molecule.db.datomic.transaction
 import java.util.Collections
 import molecule.boilerplate.ast.Model._
 import molecule.core.transaction.{Insert, Insert2Data, InsertResolvers_, Save}
+import molecule.core.util.ModelUtils
 import molecule.core.validation.CheckConflictingAttrs
 import scala.collection.mutable.ListBuffer
 
@@ -10,12 +11,21 @@ import scala.collection.mutable.ListBuffer
 trait Insert_stmts
   extends DatomicTxBase_JVM
     with Insert2Data
-    with DatomicDataType_JVM { self: Insert with InsertResolvers_ =>
+    with DatomicDataType_JVM
+    with ModelUtils { self: Insert with InsertResolvers_ =>
 
   override protected val prevRefs: ListBuffer[AnyRef] = new ListBuffer[AnyRef]
 
-
-  def getStmts(elements: Seq[Element], data: Seq[Product]): Data = {
+  def getStmts(
+    elements: Seq[Element],
+    tpls: Seq[Product],
+    debug: Boolean = true
+  ): Data = {
+    initTxBase(elements)
+    if (debug) {
+      println("\n\n--- INSERT -----------------------------------------------------------------------")
+      elements.foreach(println)
+    }
     // Resolve tx meta elements separately and merge append
     val (mainElements, txMetaElements) = elements.last match {
       case TxMetaData(txMetaElements) => (elements.init, txMetaElements)
@@ -23,55 +33,57 @@ trait Insert_stmts
     }
     CheckConflictingAttrs(mainElements)
     val tpl2stmts = getResolver(mainElements)
-    data.foreach { tpl =>
+    tpls.foreach { tpl =>
       e = newId
       e0 = e
       tpl2stmts(tpl)
     }
+
     if (txMetaElements.nonEmpty) {
-      val txMetaStmts = (new Save(true) with Save_stmts).getRawStmts(txMetaElements, datomicTx)
+      val txMetaStmts = (new Save(true) with Save_stmts)
+        .getRawStmts(txMetaElements, datomicTx, false)
       stmts.addAll(txMetaStmts)
     }
-    Collections.unmodifiableList(stmts)
+    if (debug) {
+      println("---")
+      stmts.forEach(stmt => println(stmt))
+    }
+    stmts
   }
 
   override protected def addComposite(
-    n: Int,
-    elements: Seq[Element]
+    tplIndex: Int,
+    compositeElements: Seq[Element]
   ): Product => Unit = {
     hasComposites = true
-    val composite2stmts = getResolver(elements)
+    val composite2stmts = getResolver(compositeElements)
     // Start from initial entity id for each composite sub group
-    elements.length match {
+    countValueAttrs(compositeElements) match {
       case 1 => (tpl: Product) =>
         e = e0
-        composite2stmts(Tuple1(tpl.productElement(n)))
+        composite2stmts(Tuple1(tpl.productElement(tplIndex)))
       case _ => (tpl: Product) =>
         e = e0
-        composite2stmts(tpl.productElement(n).asInstanceOf[Product])
+        composite2stmts(tpl.productElement(tplIndex).asInstanceOf[Product])
     }
   }
 
   override protected def addNested(
-    n: Int,
+    tplIndex: Int,
     ns: String,
     refAttr: String,
-    elements: Seq[Element]
+    nestedElements: Seq[Element]
   ): Product => Unit = {
-    val nested2stmts = getResolver(elements)
-    val nestedArity  = elements.count {
-      case _: Mandatory@unchecked => true
-      case _: Optional@unchecked  => true
-      case _                      => false
-    }
-    nestedArity match {
-      case 1 =>
+    // Recursively resolve nested levels
+    val nested2stmts = getResolver(nestedElements)
+    countValueAttrs(nestedElements) match {
+      case 1 => // Single nested values
         (tpl: Product) => {
-          val nested       = tpl.productElement(n).asInstanceOf[Seq[Any]]
+          val nestedValues = tpl.productElement(tplIndex).asInstanceOf[Seq[Any]]
           val nestedBaseId = e
-          nested.foreach { value =>
+          nestedValues.foreach { nestedValue =>
             e = nestedBaseId
-            val tpl = Tuple1(value)
+            val tpl = Tuple1(nestedValue)
             addRef(ns, refAttr)(tpl)
             e0 = e
             nested2stmts(tpl)
@@ -79,59 +91,58 @@ trait Insert_stmts
         }
       case _ =>
         (tpl: Product) => {
-          val nested       = tpl.productElement(n).asInstanceOf[Seq[Product]]
+          val nestedTpls   = tpl.productElement(tplIndex).asInstanceOf[Seq[Product]]
           val nestedBaseId = e
-          nested.foreach { tpl =>
+          nestedTpls.foreach { nestedTpl =>
             e = nestedBaseId
-            addRef(ns, refAttr)(tpl)
+            addRef(ns, refAttr)(nestedTpl)
             e0 = e
-            nested2stmts(tpl)
+            nested2stmts(nestedTpl)
           }
         }
     }
   }
 
-  override protected def addV(ns: String, attr: String, n: Int, value: Any => Any): Product => Unit = {
+  override protected def addV(ns: String, attr: String, tplIndex: Int, value: Any => Any): Product => Unit = {
     val a = kw(ns, attr)
     (tpl: Product) => {
       backRefs = backRefs + (ns -> e)
-      appendStmt(add, e, a, value(tpl.productElement(n)).asInstanceOf[AnyRef])
+      appendStmt(add, e, a, value(tpl.productElement(tplIndex)).asInstanceOf[AnyRef])
     }
   }
-  override protected def addOptV(ns: String, attr: String, n: Int, value: Any => Any): Product => Unit = {
+  override protected def addOptV(ns: String, attr: String, tplIndex: Int, value: Any => Any): Product => Unit = {
     val a = kw(ns, attr)
     (tpl: Product) => {
       backRefs = backRefs + (ns -> e)
-      tpl.productElement(n) match {
-        case Some(v) =>
-          appendStmt(add, e, a, value(v).asInstanceOf[AnyRef])
+      tpl.productElement(tplIndex) match {
+        case Some(v) => appendStmt(add, e, a, value(v).asInstanceOf[AnyRef])
         case None    => // no statement to insert
       }
     }
   }
-  override protected def addTxV(ns: String, attr: String, n: Int, value: Any => Any): Product => Unit = {
+  override protected def addTxV(ns: String, attr: String, tplIndex: Int, value: Any => Any): Product => Unit = {
     val a = kw(ns, attr)
     (tpl: Product) => {
       e = datomicTx
       backRefs = backRefs + (ns -> e)
-      appendStmt(add, e, a, value(tpl.productElement(n)).asInstanceOf[AnyRef])
+      appendStmt(add, e, a, value(tpl.productElement(tplIndex)).asInstanceOf[AnyRef])
     }
   }
 
-  override protected def addSet(ns: String, attr: String, n: Int, value: Any => Any): Product => Unit = {
+  override protected def addSet(ns: String, attr: String, tplIndex: Int, value: Any => Any): Product => Unit = {
     val a = kw(ns, attr)
     (tpl: Product) => {
       backRefs = backRefs + (ns -> e)
-      tpl.productElement(n).asInstanceOf[Set[Any]].foreach { v =>
+      tpl.productElement(tplIndex).asInstanceOf[Set[Any]].foreach { v =>
         appendStmt(add, e, a, value(v).asInstanceOf[AnyRef])
       }
     }
   }
-  override protected def addOptSet(ns: String, attr: String, n: Int, value: Any => Any): Product => Unit = {
+  override protected def addOptSet(ns: String, attr: String, tplIndex: Int, value: Any => Any): Product => Unit = {
     val a = kw(ns, attr)
     (tpl: Product) => {
       backRefs = backRefs + (ns -> e)
-      tpl.productElement(n) match {
+      tpl.productElement(tplIndex) match {
         case Some(set: Set[_]) =>
           set.foreach { v =>
             appendStmt(add, e, a, value(v).asInstanceOf[AnyRef])
@@ -158,8 +169,10 @@ trait Insert_stmts
     (_: Product) => e = backRefs(backRefNs)
   }
 
-  override protected lazy val valueString     = identity
-  override protected lazy val valueInt        = identity
+  override protected lazy val valueString = identity
+
+  // Save Int as Long in Datomic since we can't enforce Integers in edn (for JS rpc)
+  override protected lazy val valueInt        = (v: Any) => v.asInstanceOf[Int].toLong
   override protected lazy val valueLong       = identity
   override protected lazy val valueFloat      = identity
   override protected lazy val valueDouble     = identity

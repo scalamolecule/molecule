@@ -10,10 +10,8 @@ trait LambdasOne extends ResolveBase {
 
   // Datomic Java to Scala
   protected lazy val j2sString    : AnyRef => AnyRef = identity
-  protected lazy val j2sInt       : AnyRef => AnyRef = {
-    case v: Integer => v.toInt.asInstanceOf[AnyRef]
-    case v: jLong   => v.toInt.asInstanceOf[AnyRef]
-  }
+  // Datomic can return both Integer or Long
+  protected lazy val j2sInt       : AnyRef => AnyRef = (v: AnyRef) => v.toString.toInt.asInstanceOf[AnyRef]
   protected lazy val j2sLong      : AnyRef => AnyRef = identity
   protected lazy val j2sFloat     : AnyRef => AnyRef = identity
   protected lazy val j2sDouble    : AnyRef => AnyRef = identity
@@ -85,20 +83,20 @@ trait LambdasOne extends ResolveBase {
     (v: AnyRef) => v.asInstanceOf[jSet[_]].toArray.map(value).toSet
 
 
-  protected lazy val vector2setString    : AnyRef => AnyRef = vector2set
-  protected lazy val vector2setInt       : AnyRef => AnyRef = vector2set
-  protected lazy val vector2setLong      : AnyRef => AnyRef = vector2set
-  protected lazy val vector2setFloat     : AnyRef => AnyRef = vector2set
-  protected lazy val vector2setDouble    : AnyRef => AnyRef = vector2set
-  protected lazy val vector2setBoolean   : AnyRef => AnyRef = vector2set
-  protected lazy val vector2setBigInt    : AnyRef => AnyRef = vector2set((v: AnyRef) => BigInt(v.toString))
-  protected lazy val vector2setBigDecimal: AnyRef => AnyRef = vector2set((v: AnyRef) => BigDecimal(v.toString))
-  protected lazy val vector2setDate      : AnyRef => AnyRef = vector2set
-  protected lazy val vector2setUUID      : AnyRef => AnyRef = vector2set
-  protected lazy val vector2setURI       : AnyRef => AnyRef = vector2set
-  protected lazy val vector2setByte      : AnyRef => AnyRef = vector2set((v: AnyRef) => v.asInstanceOf[Integer].toByte)
-  protected lazy val vector2setShort     : AnyRef => AnyRef = vector2set((v: AnyRef) => v.asInstanceOf[Integer].toShort)
-  protected lazy val vector2setChar      : AnyRef => AnyRef = vector2set((v: AnyRef) => v.asInstanceOf[String].charAt(0))
+  protected lazy val vector2setString    : AnyRef => AnyRef = jvector2set
+  protected lazy val vector2setInt       : AnyRef => AnyRef = jvector2set
+  protected lazy val vector2setLong      : AnyRef => AnyRef = jvector2set
+  protected lazy val vector2setFloat     : AnyRef => AnyRef = jvector2set
+  protected lazy val vector2setDouble    : AnyRef => AnyRef = jvector2set
+  protected lazy val vector2setBoolean   : AnyRef => AnyRef = jvector2set
+  protected lazy val vector2setBigInt    : AnyRef => AnyRef = jvector2set((v: AnyRef) => BigInt(v.toString))
+  protected lazy val vector2setBigDecimal: AnyRef => AnyRef = jvector2set((v: AnyRef) => BigDecimal(v.toString))
+  protected lazy val vector2setDate      : AnyRef => AnyRef = jvector2set
+  protected lazy val vector2setUUID      : AnyRef => AnyRef = jvector2set
+  protected lazy val vector2setURI       : AnyRef => AnyRef = jvector2set
+  protected lazy val vector2setByte      : AnyRef => AnyRef = jvector2set((v: AnyRef) => v.asInstanceOf[Integer].toByte)
+  protected lazy val vector2setShort     : AnyRef => AnyRef = jvector2set((v: AnyRef) => v.asInstanceOf[Integer].toShort)
+  protected lazy val vector2setChar      : AnyRef => AnyRef = jvector2set((v: AnyRef) => v.asInstanceOf[String].charAt(0))
 
 
   case class ResOne[T](
@@ -133,9 +131,11 @@ trait LambdasOne extends ResolveBase {
     case v: jMap[_, _] => Some(v.values.iterator.next.asInstanceOf[String]) // attr_?
   }
   private lazy val j2sOptInt        = (v: AnyRef) => v match {
-    case null          => Option.empty[Int]
+    case null => Option.empty[Int]
+    // Datomic can return both Integer or Long
+    case v: jLong      => Some(v.toInt)
     case v: jInteger   => Some(v.toInt)
-    case v: jMap[_, _] => Some(v.values.iterator.next.asInstanceOf[Integer].toInt)
+    case v: jMap[_, _] => Some(v.values.iterator.next.toString.toInt)
   }
   private lazy val j2sOptLong       = (v: AnyRef) => v match {
     case null          => Option.empty[Long]
@@ -228,12 +228,14 @@ trait LambdasOne extends ResolveBase {
 
   // Nested opt ---------------------------------------------------------------------
 
-  lazy val it2String2    : AnyRef => AnyRef = {
+  lazy val it2String2: AnyRef => AnyRef = {
     case `none`    => nullValue
     case v: String => v.asInstanceOf[AnyRef]
     case other     => unexpectedValue(other)
   }
-  lazy val it2Int2       : AnyRef => AnyRef = {
+  lazy val it2Int2   : AnyRef => AnyRef = {
+    // Datomic can return both Integer or Long
+    case v: jLong   => v.toInt.asInstanceOf[AnyRef]
     case v: Integer => v.toInt.asInstanceOf[AnyRef]
     case `none`     => nullValue
     case other      => unexpectedValue(other)
@@ -246,6 +248,8 @@ trait LambdasOne extends ResolveBase {
     case other     => unexpectedValue(other)
   }
   lazy val it2Int       : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    // Datomic can return both Integer or Long
+    case v: jLong   => v.toInt
     case v: Integer => v.toInt
     case `none`     => nullValue
     case other      => unexpectedValue(other)
@@ -317,8 +321,10 @@ trait LambdasOne extends ResolveBase {
     case v      => Some(v.toString)
   }
   lazy val it2OptInt       : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case `none` => None
-    case v      => Some(v.asInstanceOf[Integer].toInt)
+    // Datomic can return both Integer or Long
+    case `none`     => None
+    case v: Integer => Some(v.toInt)
+    case v: jLong   => Some(v.toInt)
   }
   lazy val it2OptLong      : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
     case `none` => None

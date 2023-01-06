@@ -22,7 +22,7 @@ trait DatomicTestSuiteImpl extends DatomicApiLoader { self: DatomicTestSuite =>
   //  require("datomic.api")
 
   def inMem[T](
-    test: DatomicConn_JVM => T,
+    test: Connection => T,
     schemaTx: SchemaTransaction,
   ): T = {
     val dbUri                    = if (protocol_ == "mem") "" else {
