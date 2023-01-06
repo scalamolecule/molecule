@@ -1,7 +1,6 @@
 package molecule.db.datomic.query
 
 import molecule.base.util.exceptions.MoleculeException
-import molecule.boilerplate.api.Keywords._
 import molecule.boilerplate.ast.Model._
 import scala.reflect.ClassTag
 
@@ -162,7 +161,7 @@ trait ResolveExprOne[Tpl]
       case Le        => compare(e, a, v, args.head, "<=", res.s2j)
       case Ge        => compare(e, a, v, args.head, ">=", res.s2j)
       case NoValue   => noValue(e, a)
-      case Fn(kw, _) => aggr(e, a, v, kw, res)
+      case Fn(kw, n) => aggr(e, a, v, kw, n, res)
       case other     => unexpectedOp(other)
     }
   }
@@ -190,58 +189,59 @@ trait ResolveExprOne[Tpl]
     }
   }
 
-  private def aggr[T](e: Var, a: Att, v: Var, fn: Kw, res: ResOne[T]): Unit = {
+  private def aggr[T](e: Var, a: Att, v: Var, fn: String, optN: Option[Int], res: ResOne[T]): Unit = {
+    lazy val n = optN.getOrElse(0)
     // Replace find/casting with aggregate function/cast
     find -= v
     fn match {
-      case _: distinct =>
+      case "distinct" =>
         find += s"(distinct $v)"
         replaceCast(res.set2set)
 
-      case mins(n) =>
+      case "mins" =>
         find += s"(min $n $v)"
         replaceCast(res.vector2set)
 
-      case _: min =>
+      case "min" =>
         find += s"(min $v)"
 
-      case maxs(n) =>
+      case "maxs" =>
         find += s"(max $n $v)"
         replaceCast(res.vector2set)
 
-      case _: max =>
+      case "max" =>
         find += s"(max $v)"
 
-      case rands(n) =>
+      case "rands" =>
         find += s"(rand $n $v)"
         replaceCast(res.vector2set)
 
-      case _: rand =>
+      case "rand" =>
         find += s"(rand $v)"
 
-      case samples(n) =>
+      case "samples" =>
         find += s"(sample $n $v)"
         replaceCast(res.vector2set)
 
-      case _: sample =>
+      case "sample" =>
         find += s"(sample 1 $v)"
         replaceCast(res.seq2t)
 
-      case _: count =>
+      case "count" =>
         find += s"(count $v)"
         widh += e
         replaceCast(toInt)
 
-      case _: countDistinct =>
+      case "countDistinct" =>
         find += s"(count-distinct $v)"
         widh += e
         replaceCast(toInt)
 
-      case _: sum      => find += s"(sum $v)"
-      case _: median   => find += s"(median $v)"
-      case _: avg      => find += s"(avg $v)"
-      case _: variance => find += s"(variance $v)"
-      case _: stddev   => find += s"(stddev $v)"
+      case "sum"      => find += s"(sum $v)"
+      case "median"   => find += s"(median $v)"
+      case "avg"      => find += s"(avg $v)"
+      case "variance" => find += s"(variance $v)"
+      case "stddev"   => find += s"(stddev $v)"
 
       case other => unexpectedKw(other)
     }

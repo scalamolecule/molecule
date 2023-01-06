@@ -21,12 +21,12 @@ object AggrSetNum_ref_ extends DatomicTestSuite {
           (2, Set(ref3, ref4)),
         )).transact
 
-        _ <- Ns.refs.apply(sum).query.get.map(_ ==> List(
-          Set(10) // ref1 + ref2 + ref3 + ref4
+        _ <- Ns.refs.apply(sum).query.get.map(_ === List(
+          Set(ref1 + ref2 + ref3 + ref4)
         ))
-        _ <- Ns.i.refs(sum).query.get.map(_ ==> List(
-          (1, Set(3)), // ref1 + ref2
-          (2, Set(9)), // ref2 + ref3 + ref4
+        _ <- Ns.i.refs(sum).query.get.map(_ === List(
+          (1, Set(ref1 + ref2)),
+          (2, Set(ref2 + ref3 + ref4)),
         ))
       } yield ()
     }
@@ -41,18 +41,18 @@ object AggrSetNum_ref_ extends DatomicTestSuite {
           (2, Set(ref3, ref4)),
         )).transact
 
-        // OBS! Datomic rounds down to nearest whole number
-        // (when calculating the median for multiple numbers)!
-        // This is another semantic than described on wikipedia:
-        // https://en.wikipedia.org/wiki/Median
-        // See also
-        // https://forum.datomic.com/t/unexpected-median-rounding/517
-        _ <- Ns.refs(median).query.get.map(_ ==> List(
-          Set(2.0)
+        _ <- Ns.refs(median).query.get.map(_ === List(
+          Set(ref2)
         ))
-        _ <- Ns.i.refs(median).query.get.map(_ ==> List(
-          (1, Set(1.0)),
+        _ <- Ns.i.refs(median).query.get.map(_ === List(
+          (1, Set(ref1)),
           (2, Set(3.0)),
+          // OBS! Datomic rounds down to nearest whole number
+          // (when calculating the median for multiple numbers)!
+          // This is another semantic than described on wikipedia:
+          // https://en.wikipedia.org/wiki/Median
+          // See also
+          // https://forum.datomic.com/t/unexpected-median-rounding/517
         ))
       } yield ()
     }
@@ -67,12 +67,12 @@ object AggrSetNum_ref_ extends DatomicTestSuite {
           (2, Set(ref3, ref4)),
         )).transact
 
-        _ <- Ns.refs(avg).query.get.map(_ ==> List(
-          Set(2.5)
+        _ <- Ns.refs(avg).query.get.map(_ === List(
+          Set(averageOf(ref1, ref2, ref3, ref4))
         ))
-        _ <- Ns.i.refs(avg).query.get.map(_ ==> List(
-          (1, Set(1.5)), // (ref1 + ref2) / 2.0
-          (2, Set(3.0)), // (ref2 + ref3 + ref4) / 3.0
+        _ <- Ns.i.refs(avg).query.get.map(_ === List(
+          (1, Set(averageOf(ref1, ref2))),
+          (2, Set(averageOf(ref2, ref3, ref4))),
         ))
       } yield ()
     }
@@ -87,12 +87,12 @@ object AggrSetNum_ref_ extends DatomicTestSuite {
           (2, Set(ref3, ref4)),
         )).transact
 
-        _ <- Ns.refs(variance).query.get.map(_ ==> List(
-          Set(1.25)
+        _ <- Ns.refs(variance).query.get.map(_ === List(
+          Set(varianceOf(ref1, ref2, ref3, ref4))
         ))
-        _ <- Ns.i.refs(variance).query.get.map(_ ==> List(
-          (1, Set(0.25)),
-          (2, Set(0.6666666666666666)),
+        _ <- Ns.i.refs(variance).query.get.map(_ === List(
+          (1, Set(varianceOf(ref1, ref2))),
+          (2, Set(varianceOf(ref2, ref3, ref4))),
         ))
       } yield ()
     }
@@ -107,12 +107,12 @@ object AggrSetNum_ref_ extends DatomicTestSuite {
           (2, Set(ref3, ref4)),
         )).transact
 
-        _ <- Ns.refs(stddev).query.get.map(_ ==> List(
-          Set(1.118033988749895)
+        _ <- Ns.refs(stddev).query.get.map(_ === List(
+          Set(stdDevOf(ref1, ref2, ref3, ref4))
         ))
-        _ <- Ns.i.refs(stddev).query.get.map(_ ==> List(
-          (1, Set(0.5)),
-          (2, Set(0.816496580927726)),
+        _ <- Ns.i.refs(stddev).query.get.map(_ === List(
+          (1, Set(stdDevOf(ref1, ref2))),
+          (2, Set(stdDevOf(ref2, ref3, ref4))),
         ))
       } yield ()
     }

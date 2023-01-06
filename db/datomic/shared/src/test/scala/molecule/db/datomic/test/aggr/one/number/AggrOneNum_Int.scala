@@ -6,6 +6,7 @@ import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
 
+
 object AggrOneNum_Int extends DatomicTestSuite {
 
 
@@ -19,12 +20,14 @@ object AggrOneNum_Int extends DatomicTestSuite {
           (2, int4),
         )).transact
 
-        _ <- Ns.int(sum).query.get.map(_ ==> List(
-          7 // int1 + int2 + int4
+        // Using === for tolerant precision comparison
+        // (only necessary on JS platform with JavaScript imprecision)
+        _ <- Ns.int(sum).query.get.map(_ === List(
+          int1 + int2 + int4
         ))
-        _ <- Ns.i.int(sum).query.get.map(_ ==> List(
-          (1, 1),
-          (2, 6), // int2 + int4
+        _ <- Ns.i.int(sum).query.get.map(_ === List(
+          (1, int1),
+          (2, int2 + int4),
         ))
       } yield ()
     }
@@ -38,18 +41,18 @@ object AggrOneNum_Int extends DatomicTestSuite {
           (2, int4),
         )).transact
 
-        // OBS! Datomic rounds down to nearest whole number
-        // when calculating the median for multiple numbers!
-        // This is another semantic than described on wikipedia:
-        // https://en.wikipedia.org/wiki/Median
-        // See also
-        // https://forum.datomic.com/t/unexpected-median-rounding/517
-        _ <- Ns.int(median).query.get.map(_ ==> List(
-          2.0
+        _ <- Ns.int(median).query.get.map(_ === List(
+          int2
         ))
-        _ <- Ns.i.int(median).query.get.map(_ ==> List(
-          (1, 1.0),
+        _ <- Ns.i.int(median).query.get.map(_ === List(
+          (1, int1),
           (2, 3.0),
+          // OBS! Datomic rounds down to nearest whole number
+          // when calculating the median for multiple numbers!
+          // This is another semantic than described on wikipedia:
+          // https://en.wikipedia.org/wiki/Median
+          // See also
+          // https://forum.datomic.com/t/unexpected-median-rounding/517
         ))
       } yield ()
     }
@@ -63,12 +66,12 @@ object AggrOneNum_Int extends DatomicTestSuite {
           (2, int4),
         )).transact
 
-        _ <- Ns.int(avg).query.get.map(_ ==> List(
-          2.3333333333333333 // (int1 + int2 + int4) / 3.0
+        _ <- Ns.int(avg).query.get.map(_ === List(
+          averageOf(int1, int2, int4)
         ))
-        _ <- Ns.i.int(avg).query.get.map(_ ==> List(
-          (1, 1.0),
-          (2, 3.0), // (int2 + int4) / 2.0
+        _ <- Ns.i.int(avg).query.get.map(_ === List(
+          (1, averageOf(int1)),
+          (2, averageOf(int2, int4)),
         ))
       } yield ()
     }
@@ -82,12 +85,12 @@ object AggrOneNum_Int extends DatomicTestSuite {
           (2, int4),
         )).transact
 
-        _ <- Ns.int(variance).query.get.map(_ ==> List(
-          1.5555555555555554
+        _ <- Ns.int(variance).query.get.map(_ === List(
+          varianceOf(int1, int2, int4)
         ))
-        _ <- Ns.i.int(variance).query.get.map(_ ==> List(
-          (1, 0.0),
-          (2, 1.0),
+        _ <- Ns.i.int(variance).query.get.map(_ === List(
+          (1, varianceOf(int1)),
+          (2, varianceOf(int2, int4)),
         ))
       } yield ()
     }
@@ -101,12 +104,12 @@ object AggrOneNum_Int extends DatomicTestSuite {
           (2, int4),
         )).transact
 
-        _ <- Ns.int(stddev).query.get.map(_ ==> List(
-          1.247219128924647
+        _ <- Ns.int(stddev).query.get.map(_ === List(
+          stdDevOf(int1, int2, int4)
         ))
-        _ <- Ns.i.int(stddev).query.get.map(_ ==> List(
-          (1, 0.0),
-          (2, 1.0),
+        _ <- Ns.i.int(stddev).query.get.map(_ === List(
+          (1, stdDevOf(int1)),
+          (2, stdDevOf(int2, int4)),
         ))
       } yield ()
     }

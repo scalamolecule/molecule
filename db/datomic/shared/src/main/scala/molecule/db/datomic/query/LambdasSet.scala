@@ -1,6 +1,6 @@
 package molecule.db.datomic.query
 
-import java.lang.{Long => jLong}
+import java.lang.{Double => jDouble, Float => jFloat, Long => jLong}
 import java.math.{BigDecimal => jBigDecimal, BigInteger => jBigInt}
 import java.net.URI
 import java.util.{Date, UUID, Iterator => jIterator, List => jList, Map => jMap, Set => jSet}
@@ -14,7 +14,10 @@ trait LambdasSet extends ResolveBase with JavaConversions {
   // Datomic can return both Integer or Long
   protected lazy val j2sSetInt       : AnyRef => AnyRef = (v: AnyRef) => Set(v.toString.toInt)
   protected lazy val j2sSetLong      : AnyRef => AnyRef = (v: AnyRef) => Set(v)
-  protected lazy val j2sSetFloat     : AnyRef => AnyRef = (v: AnyRef) => Set(v)
+  protected lazy val j2sSetFloat     : AnyRef => AnyRef = {
+    case v: jFloat  => Set(v.asInstanceOf[AnyRef])
+    case v: jDouble => Set(v.toFloat.asInstanceOf[AnyRef])
+  }
   protected lazy val j2sSetDouble    : AnyRef => AnyRef = (v: AnyRef) => Set(v)
   protected lazy val j2sSetBoolean   : AnyRef => AnyRef = (v: AnyRef) => Set(v)
   protected lazy val j2sSetBigInt    : AnyRef => AnyRef = {

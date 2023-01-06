@@ -10,7 +10,7 @@ import molecule.boilerplate.ast.Model._
 
 trait SortOneSpecial[Tpl]
   extends SortOne_[Tpl]
-    with ResolveBase { self: Base[Tpl]  =>
+    with ResolveBase { self: Base[Tpl] =>
 
   private def compare(
     a: Row,
@@ -29,9 +29,9 @@ trait SortOneSpecial[Tpl]
   protected def intSorter(at: AttrOneManInt, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
     at.op match {
       case Fn(kw, _) => kw match {
-        case _: sum    => sortOneLong(at, attrIndex)
-        case _: median => sortOneLongString(at, attrIndex)
-        case _         => sortOneInt(at, attrIndex)
+        case "sum"    => sortOneLong(at, attrIndex)
+        case "median" => sortOneLongString(at, attrIndex)
+        case _        => sortOneInt(at, attrIndex)
       }
       case _         => sortOneInt(at, attrIndex)
     }
@@ -40,9 +40,9 @@ trait SortOneSpecial[Tpl]
   protected def floatSorter(at: AttrOneManFloat, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
     at.op match {
       case Fn(kw, _) => kw match {
-        case _: sum    => sortOneDouble(at, attrIndex)
-        case _: median => sortOneDoubleString(at, attrIndex)
-        case _         => sortOneFloat(at, attrIndex)
+        case "sum"    => sortOneDouble(at, attrIndex)
+        case "median" => sortOneDoubleString(at, attrIndex)
+        case _        => sortOneFloat(at, attrIndex)
       }
       case _         => sortOneFloat(at, attrIndex)
     }
@@ -51,9 +51,9 @@ trait SortOneSpecial[Tpl]
   protected def bigIntSorter(at: AttrOneManBigInt, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
     at.op match {
       case Fn(kw, _) => kw match {
-        case _: sum    => sortOneBigDecimalString(at, attrIndex)
-        case _: median => sortOneBigDecimalString(at, attrIndex)
-        case _         => sortOneBigInt(at, attrIndex)
+        case "sum"    => sortOneBigDecimalString(at, attrIndex)
+        case "median" => sortOneBigDecimalString(at, attrIndex)
+        case _        => sortOneBigInt(at, attrIndex)
       }
       case _         => sortOneBigInt(at, attrIndex)
     }
@@ -62,9 +62,9 @@ trait SortOneSpecial[Tpl]
   protected def byteSorter(at: AttrOneManByte, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
     at.op match {
       case Fn(kw, _) => kw match {
-        case _: sum    => sortOneLong(at, attrIndex)
-        case _: median => sortOneLongString(at, attrIndex)
-        case _         => sortOneByte(at, attrIndex)
+        case "sum"    => sortOneLong(at, attrIndex)
+        case "median" => sortOneLongString(at, attrIndex)
+        case _        => sortOneByte(at, attrIndex)
       }
       case _         => sortOneByte(at, attrIndex)
     }
@@ -73,9 +73,9 @@ trait SortOneSpecial[Tpl]
   protected def shortSorter(at: AttrOneManShort, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
     at.op match {
       case Fn(kw, _) => kw match {
-        case _: sum    => sortOneLong(at, attrIndex)
-        case _: median => sortOneLongString(at, attrIndex)
-        case _         => sortOneShort(at, attrIndex)
+        case "sum"    => sortOneLong(at, attrIndex)
+        case "median" => sortOneLongString(at, attrIndex)
+        case _        => sortOneShort(at, attrIndex)
       }
       case _         => sortOneShort(at, attrIndex)
     }

@@ -155,7 +155,8 @@ lazy val sharedSettings: Seq[Def.Setting[_]] = baseSettings ++ Seq(
     "com.github.cornerman" %%% "sloth" % "0.6.5",
     //    "com.lihaoyi" %%% "utest" % "0.7.11",
 
-    "org.scalactic" %% "scalactic" % "3.2.14"
+    // For aggregate tolerant trippelequal
+    "org.scalactic" %%% "scalactic" % "3.2.14" % Test
   ),
 
   // Let IntelliJ detect sbt-molecule-created jars in unmanaged lib directories
@@ -413,8 +414,11 @@ lazy val testSettings: Seq[Def.Setting[_]] = {
         //        sharedTests + "/examples/gremlin/gettingStarted",
         //        sharedTests + "/sbtmolecule/codeGen",
         //            sharedTests + "/Adhoc.scala",
+
+//        sharedTests + "/aggr/set/num",
+        sharedTests + "/aggr",
+        //        sharedTests + "/crud",
         //        sharedTests,
-        sharedTests + "/crud",
         jvmTests + "/AdhocJVM.scala",
         jsTests + "/AdhocJs.scala",
       )

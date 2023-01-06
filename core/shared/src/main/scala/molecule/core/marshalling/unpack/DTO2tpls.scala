@@ -7,22 +7,16 @@ import molecule.core.marshalling.DTO
 
 
 case class DTO2tpls[Tpl](elements: Seq[Element], dto: DTO)
-  extends Unpackers_[Tpl]
-    with UnpackValues[Tpl]
-    with UnpackTpls[Tpl] {
+  extends Unpackers_[Tpl] with UnpackTpls[Tpl] {
 
   protected lazy val tuples = List.newBuilder[Tpl]
 
   def unpack: List[Tpl] = try {
-    if (elements.size == 1) {
-      unpackValues(elements.head)
-    } else {
-      val unpackRow = getUnpacker(elements, 0)
-      (0 until rowCount).foreach { _ =>
-        tuples.addOne(unpackRow().asInstanceOf[Tpl])
-      }
-      tuples.result()
+    val unpackRow = getUnpacker(elements, 0)
+    (0 until rowCount).foreach { _ =>
+      tuples.addOne(unpackRow().asInstanceOf[Tpl])
     }
+    tuples.result()
   } catch {
     case e: Throwable =>
       println(e.getStackTrace.mkString("\n"))

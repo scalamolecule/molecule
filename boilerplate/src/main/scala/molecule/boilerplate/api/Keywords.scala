@@ -36,9 +36,7 @@ package molecule.boilerplate.api
  */
 trait KeywordsStable {
 
-  sealed trait Kw
-
-  case class AggrList(n: Int) extends Kw
+  trait Kw
 
   trait AggrKw extends Kw
   trait AggrCoalesce extends AggrKw
@@ -66,7 +64,6 @@ trait KeywordsStable {
    * List[attribute-type]
    * @group aggregates
    */
-  case object distinct extends distinct
   trait distinct extends AggrKw
 
   /** Minimum attribute value(s). <br><br> Apply `min` keyword to attribute to
@@ -87,7 +84,6 @@ trait KeywordsStable {
    * Can at most return the number of values that match.
    * @group aggregates
    */
-  object min extends min
   trait min extends AggrKw {
 
     /** Minimum n values of attribute. <br><br> Apply `min(n)` to attribute to
@@ -109,7 +105,9 @@ trait KeywordsStable {
     def apply(i: Int): mins = mins(i)
   }
 
-  case class mins(n: Int) extends Kw
+  case class mins(n: Int) extends Kw {
+    override def toString = "mins"
+  }
 
   /** Maximum attribute value(s). <br><br> Apply `max` keyword to attribute to
    * return the maximum attribute value of entities matching the molecule.
@@ -129,7 +127,6 @@ trait KeywordsStable {
    * Can at most return the number of values that match.
    * @group aggregates
    */
-  object max extends max
   trait max extends AggrKw {
 
     /** Maximum n values of attribute. <br><br> Apply `max(n)` to attribute to
@@ -150,8 +147,9 @@ trait KeywordsStable {
     def apply(i: Int): maxs = maxs(i)
   }
 
-  case class maxs(n: Int) extends Kw
-  //  trait maxs extends AggrKw
+  case class maxs(n: Int) extends Kw {
+    override def toString = "maxs"
+  }
 
   /** Random attribute value(s). <br><br> Apply `random` keyword to attribute to
    * return a single random attribute of entities matching the molecule.
@@ -170,7 +168,6 @@ trait KeywordsStable {
    *
    * @group aggregates
    */
-  object rand extends rand
   trait rand extends AggrKw {
 
     /** Random values of attribute. <br><br> Apply a number n to `random` to
@@ -191,8 +188,9 @@ trait KeywordsStable {
     def apply(n: Int): rands = rands(n)
   }
 
-  case class rands(n: Int) extends Kw
-  //  trait rands extends AggrKw
+  case class rands(n: Int) extends Kw {
+    override def toString = "rands"
+  }
 
   /** Sample attribute value(s). <br><br> Apply `sample` keyword to attribute to
    * return a single sample (random) attribute value of entities matching the
@@ -213,7 +211,6 @@ trait KeywordsStable {
    * Can at most return the number of values that match.
    * @group aggregates
    */
-  object sample extends sample
   trait sample extends AggrKw {
 
     /** Distinct sample values of attribute. <br><br> Apply `sample(n)` to an
@@ -236,8 +233,9 @@ trait KeywordsStable {
     def apply(n: Int): samples = samples(n)
   }
 
-  case class samples(n: Int) extends Kw
-  //  trait samples extends AggrKw
+  case class samples(n: Int) extends Kw {
+    override def toString = "samples"
+  }
 
   /** Count of attribute values. <br><br> Apply `count` keyword to attribute to
    * return count of attribute values of entities matching the molecule.
@@ -260,7 +258,6 @@ trait KeywordsStable {
    * Int
    * @group aggregates
    */
-  object count extends count
   trait count extends AggrCoalesce with AggrInt
 
   /** Count of distinct attribute values. <br><br> Apply `countDistinct` keyword
@@ -285,7 +282,6 @@ trait KeywordsStable {
    * Int
    * @group aggregates
    */
-  object countDistinct extends countDistinct
   trait countDistinct extends AggrCoalesce
 
   /** Sum of attribute values. <br><br> Apply `sum` keyword to attribute to
@@ -301,7 +297,6 @@ trait KeywordsStable {
    * Value of Attribute type
    * @group aggrNumber
    */
-  object sum extends sum
   trait sum extends AggrCoalesce
 
   /** Median of attribute values. <br><br> Apply `median` keyword to attribute
@@ -335,7 +330,6 @@ trait KeywordsStable {
    * Value of Attribute type
    * @group aggrNumber
    */
-  object median extends median
   trait median extends AggrCoalesce
 
   /** Average of attribute values. <br><br> Apply `avg` keyword to attribute to
@@ -351,7 +345,6 @@ trait KeywordsStable {
    * Double
    * @group aggrNumber
    */
-  object avg extends avg
   trait avg extends AggrCoalesce
 
   /** Variance of attribute values. <br><br> Apply `variance` keyword to
@@ -368,7 +361,6 @@ trait KeywordsStable {
    * Double
    * @group aggrNumber
    */
-  object variance extends variance
   trait variance extends AggrCoalesce
 
   /** Variance of attribute values. <br><br> Apply `stddev` keyword to attribute
@@ -384,7 +376,6 @@ trait KeywordsStable {
    * Double
    * @group aggrNumber
    */
-  object stddev extends stddev
   trait stddev extends AggrCoalesce
 
   /** Unify attribute value in self-join. <br><br> Apply `unify` marker to
@@ -410,11 +401,9 @@ trait KeywordsStable {
    *
    * @group attrMarker
    */
-  object unify extends unify
   trait unify extends Kw
 
 
-  object v1 extends v1
   trait v1 extends Kw
 }
 
@@ -423,23 +412,51 @@ object Keywords extends KeywordsStable
 
 trait Keywords {
   // Common for all types
-  object distinct extends Keywords.distinct
-  object min extends Keywords.min
-  object max extends Keywords.max
-  object rand extends Keywords.rand
-  object sample extends Keywords.sample
-  object count extends Keywords.count
-  object countDistinct extends Keywords.countDistinct
+  object distinct extends Keywords.distinct {
+    override def toString = "distinct"
+  }
+  object min extends Keywords.min {
+    override def toString = "min"
+  }
+  object max extends Keywords.max {
+    override def toString = "max"
+  }
+  object rand extends Keywords.rand {
+    override def toString = "rand"
+  }
+  object sample extends Keywords.sample {
+    override def toString = "sample"
+  }
+  object count extends Keywords.count {
+    override def toString = "count"
+  }
+  object countDistinct extends Keywords.countDistinct {
+    override def toString = "countDistinct"
+  }
 
   // Number aggregators
-  object sum extends Keywords.sum
-  object median extends Keywords.median
-  object avg extends Keywords.avg
-  object variance extends Keywords.variance
-  object stddev extends Keywords.stddev
+  object sum extends Keywords.sum {
+    override def toString = "sum"
+  }
+  object median extends Keywords.median {
+    override def toString = "median"
+  }
+  object avg extends Keywords.avg {
+    override def toString = "avg"
+  }
+  object variance extends Keywords.variance {
+    override def toString = "variance"
+  }
+  object stddev extends Keywords.stddev {
+    override def toString = "stddev"
+  }
 
   // Self reference unifying
-  object unify extends Keywords.unify
+  object unify extends Keywords.unify {
+    override def toString = "unify"
+  }
 
-  object v1 extends Keywords.v1
+  object v1 extends Keywords.v1 {
+    override def toString = "v1"
+  }
 }

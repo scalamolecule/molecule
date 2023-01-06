@@ -1,10 +1,10 @@
 package molecule.db.datomic.test.aggr.set.any
 
+import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
-import molecule.core.util.Executor._
 
 object AggrSet_Int extends DatomicTestSuite {
 
@@ -140,7 +140,7 @@ object AggrSet_Int extends DatomicTestSuite {
     }
 
 
-    "count, countDistinct" - types { implicit conn =>
+    "count countDistinct" - types { implicit conn =>
       for {
         _ <- Ns.i.ints.insert(List(
           (1, Set(int1, int2)),

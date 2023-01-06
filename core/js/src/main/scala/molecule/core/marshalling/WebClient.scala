@@ -8,6 +8,6 @@ import scala.concurrent.Future
 
 trait WebClient {
 
-  def moleculeAjax(interface: String, port: Int): ClientCo[ByteBuffer, Future] =
-    Client.apply[ByteBuffer, Future](MoleculeRpcRequest(interface, port))
+  def moleculeAjax(moleculeRpcRequest: MoleculeRpcRequest): ClientCo[ByteBuffer, Future] =
+    Client.apply[ByteBuffer, Future](moleculeRpcRequest)
 }

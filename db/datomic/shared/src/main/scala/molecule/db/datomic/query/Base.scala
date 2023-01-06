@@ -190,7 +190,7 @@ trait Base[Tpl] extends BaseHelpers with JavaConversions { self: Model2Query[Tpl
 
   final protected def unexpectedElement(element: Element) = throw MoleculeException("Unexpected element: " + element)
   final protected def unexpectedOp(op: Op) = throw MoleculeException("Unexpected operation: " + op)
-  final protected def unexpectedKw(kw: Kw) = throw MoleculeException("Unexpected operation: " + kw)
+  final protected def unexpectedKw(kw: String) = throw MoleculeException("Unexpected keyword: " + kw)
 
   final protected def noMixedNestedModes = throw MoleculeException(
     "Can't mix mandatory/optional nested data structures."

@@ -5,7 +5,9 @@ import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
+import org.scalactic.TripleEquals._
 import utest._
+
 
 object AggrOneNum_Long_ extends DatomicTestSuite {
 
@@ -20,12 +22,14 @@ object AggrOneNum_Long_ extends DatomicTestSuite {
           (2, long4),
         )).transact
 
-        _ <- Ns.long(sum).query.get.map(_ ==> List(
-          7 // long1 + long2 + long4
+        // Using === for tolerant precision comparison
+        // (only necessary on JS platform with JavaScript imprecision)
+        _ <- Ns.long(sum).query.get.map(_ === List(
+          long1 + long2 + long4
         ))
-        _ <- Ns.i.long(sum).query.get.map(_ ==> List(
-          (1, 1),
-          (2, 6), // long2 + long4
+        _ <- Ns.i.long(sum).query.get.map(_ === List(
+          (1, long1),
+          (2, long2 + long4),
         ))
       } yield ()
     }
@@ -39,18 +43,18 @@ object AggrOneNum_Long_ extends DatomicTestSuite {
           (2, long4),
         )).transact
 
-        // OBS! Datomic rounds down to nearest whole number
-        // when calculating the median for multiple numbers!
-        // This is another semantic than described on wikipedia:
-        // https://en.wikipedia.org/wiki/Median
-        // See also
-        // https://forum.datomic.com/t/unexpected-median-rounding/517
-        _ <- Ns.long(median).query.get.map(_ ==> List(
-          2.0
+        _ <- Ns.long(median).query.get.map(_ === List(
+          long2
         ))
-        _ <- Ns.i.long(median).query.get.map(_ ==> List(
-          (1, 1.0),
+        _ <- Ns.i.long(median).query.get.map(_ === List(
+          (1, long1),
           (2, 3.0),
+          // OBS! Datomic rounds down to nearest whole number
+          // when calculating the median for multiple numbers!
+          // This is another semantic than described on wikipedia:
+          // https://en.wikipedia.org/wiki/Median
+          // See also
+          // https://forum.datomic.com/t/unexpected-median-rounding/517
         ))
       } yield ()
     }
@@ -64,12 +68,12 @@ object AggrOneNum_Long_ extends DatomicTestSuite {
           (2, long4),
         )).transact
 
-        _ <- Ns.long(avg).query.get.map(_ ==> List(
-          2.3333333333333333 // (long1 + long2 + long4) / 3.0
+        _ <- Ns.long(avg).query.get.map(_ === List(
+          averageOf(long1, long2, long4)
         ))
-        _ <- Ns.i.long(avg).query.get.map(_ ==> List(
-          (1, 1.0),
-          (2, 3.0), // (long2 + long4) / 2.0
+        _ <- Ns.i.long(avg).query.get.map(_ === List(
+          (1, averageOf(long1)),
+          (2, averageOf(long2, long4)),
         ))
       } yield ()
     }
@@ -83,12 +87,12 @@ object AggrOneNum_Long_ extends DatomicTestSuite {
           (2, long4),
         )).transact
 
-        _ <- Ns.long(variance).query.get.map(_ ==> List(
-          1.5555555555555554
+        _ <- Ns.long(variance).query.get.map(_ === List(
+          varianceOf(long1, long2, long4)
         ))
-        _ <- Ns.i.long(variance).query.get.map(_ ==> List(
-          (1, 0.0),
-          (2, 1.0),
+        _ <- Ns.i.long(variance).query.get.map(_ === List(
+          (1, varianceOf(long1)),
+          (2, varianceOf(long2, long4)),
         ))
       } yield ()
     }
@@ -102,12 +106,12 @@ object AggrOneNum_Long_ extends DatomicTestSuite {
           (2, long4),
         )).transact
 
-        _ <- Ns.long(stddev).query.get.map(_ ==> List(
-          1.247219128924647
+        _ <- Ns.long(stddev).query.get.map(_ === List(
+          stdDevOf(long1, long2, long4)
         ))
-        _ <- Ns.i.long(stddev).query.get.map(_ ==> List(
-          (1, 0.0),
-          (2, 1.0),
+        _ <- Ns.i.long(stddev).query.get.map(_ === List(
+          (1, stdDevOf(long1)),
+          (2, stdDevOf(long2, long4)),
         ))
       } yield ()
     }

@@ -5,7 +5,9 @@ import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
+import org.scalactic.TripleEquals._
 import utest._
+
 
 object AggrOneNum_BigDecimal_ extends DatomicTestSuite {
 
@@ -20,12 +22,14 @@ object AggrOneNum_BigDecimal_ extends DatomicTestSuite {
           (2, bigDecimal4),
         )).transact
 
-        _ <- Ns.bigDecimal(sum).query.get.map(_ ==> List(
-          7.7 // bigDecimal1 + bigDecimal2 + bigDecimal4
+        // Using === for tolerant precision comparison
+        // (only necessary on JS platform with JavaScript imprecision)
+        _ <- Ns.bigDecimal(sum).query.get.map(_ === List(
+          bigDecimal1 + bigDecimal2 + bigDecimal4
         ))
-        _ <- Ns.i.bigDecimal(sum).query.get.map(_ ==> List(
-          (1, 1.1),
-          (2, 6.6), // bigDecimal2 + bigDecimal4
+        _ <- Ns.i.bigDecimal(sum).query.get.map(_ === List(
+          (1, bigDecimal1),
+          (2, bigDecimal2 + bigDecimal4),
         ))
       } yield ()
     }
@@ -39,19 +43,19 @@ object AggrOneNum_BigDecimal_ extends DatomicTestSuite {
           (2, bigDecimal4),
         )).transact
 
-        _ <- Ns.bigDecimal(median).query.get.map(_ ==> List(
-          2.2
+        _ <- Ns.bigDecimal(median).query.get.map(_ === List(
+          bigDecimal2
         ))
-        _ <- Ns.i.bigDecimal(median).query.get.map(_ ==> List(
-          (1, 1.1),
+        _ <- Ns.i.bigDecimal(median).query.get.map(_ === List(
+          (1, bigDecimal1),
           (2, 3.0),
+          // OBS! Datomic rounds down to nearest whole number
+          // when calculating the median for multiple numbers!
+          // This is another semantic than described on wikipedia:
+          // https://en.wikipedia.org/wiki/Median
+          // See also
+          // https://forum.datomic.com/t/unexpected-median-rounding/517
         ))
-        // OBS! Datomic rounds down to nearest whole number
-        // when calculating the median for multiple numbers!
-        // This is another semantic than described on wikipedia:
-        // https://en.wikipedia.org/wiki/Median
-        // See also
-        // https://forum.datomic.com/t/unexpected-median-rounding/517
       } yield ()
     }
 
@@ -64,12 +68,12 @@ object AggrOneNum_BigDecimal_ extends DatomicTestSuite {
           (2, bigDecimal4),
         )).transact
 
-        _ <- Ns.bigDecimal(avg).query.get.map(_ ==> List(
-          2.566666666666667 // (bigDecimal1 + bigDecimal2 + bigDecimal4) / 3.0
+        _ <- Ns.bigDecimal(avg).query.get.map(_ === List(
+          averageOf(bigDecimal1, bigDecimal2, bigDecimal4)
         ))
-        _ <- Ns.i.bigDecimal(avg).query.get.map(_ ==> List(
-          (1, 1.1),
-          (2, 3.3), // (bigDecimal2 + bigDecimal4) / 2.0
+        _ <- Ns.i.bigDecimal(avg).query.get.map(_ === List(
+          (1, averageOf(bigDecimal1)),
+          (2, averageOf(bigDecimal2, bigDecimal4)),
         ))
       } yield ()
     }
@@ -83,12 +87,12 @@ object AggrOneNum_BigDecimal_ extends DatomicTestSuite {
           (2, bigDecimal4),
         )).transact
 
-        _ <- Ns.bigDecimal(variance).query.get.map(_ ==> List(
-          1.8822222222222225
+        _ <- Ns.bigDecimal(variance).query.get.map(_ === List(
+          varianceOf(bigDecimal1, bigDecimal2, bigDecimal4)
         ))
-        _ <- Ns.i.bigDecimal(variance).query.get.map(_ ==> List(
-          (1, 0.0),
-          (2, 1.2100000000000002),
+        _ <- Ns.i.bigDecimal(variance).query.get.map(_ === List(
+          (1, varianceOf(bigDecimal1)),
+          (2, varianceOf(bigDecimal2, bigDecimal4)),
         ))
       } yield ()
     }
@@ -102,12 +106,12 @@ object AggrOneNum_BigDecimal_ extends DatomicTestSuite {
           (2, bigDecimal4),
         )).transact
 
-        _ <- Ns.bigDecimal(stddev).query.get.map(_ ==> List(
-          1.3719410418171119
+        _ <- Ns.bigDecimal(stddev).query.get.map(_ === List(
+          stdDevOf(bigDecimal1, bigDecimal2, bigDecimal4)
         ))
-        _ <- Ns.i.bigDecimal(stddev).query.get.map(_ ==> List(
-          (1, 0.0),
-          (2, 1.1),
+        _ <- Ns.i.bigDecimal(stddev).query.get.map(_ === List(
+          (1, stdDevOf(bigDecimal1)),
+          (2, stdDevOf(bigDecimal2, bigDecimal4)),
         ))
       } yield ()
     }

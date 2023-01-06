@@ -100,21 +100,50 @@ trait UnpackTpls[Tpl] { self: DTO2tpls[Tpl] =>
     throw MoleculeException("Unexpected element: " + element)
 
   private def unpackAttrOneMan(a: AttrOneMan): () => Any = {
+    a.op match {
+      case Fn(kw, _) => kw match {
+        case "count" | "countDistinct"                          => () => oneInt.next()
+        case "distinct" | "mins" | "maxs" | "rands" | "samples" => unpackAttrOneManSet(a)
+        case "avg" | "variance" | "stddev"                      => () => oneDouble.next()
+        case _                                                  => unpackAttrOneManV(a)
+      }
+      case _         => unpackAttrOneManV(a)
+    }
+  }
+  private def unpackAttrOneManV(a: AttrOneMan): () => Any = {
     a match {
       case _: AttrOneManString     => () => oneString.next()
       case _: AttrOneManInt        => () => oneInt.next()
       case _: AttrOneManLong       => () => oneLong.next()
-      case _: AttrOneManFloat     => () => oneFloat.next()
-      case _: AttrOneManDouble    => () => oneDouble.next()
-      case _: AttrOneManBoolean     => () => oneBoolean.next()
-      case _: AttrOneManBigInt => () => oneBigInt.next()
-      case _: AttrOneManBigDecimal       => () => oneBigDecimal.next()
+      case _: AttrOneManFloat      => () => oneFloat.next()
+      case _: AttrOneManDouble     => () => oneDouble.next()
+      case _: AttrOneManBoolean    => () => oneBoolean.next()
+      case _: AttrOneManBigInt     => () => oneBigInt.next()
+      case _: AttrOneManBigDecimal => () => oneBigDecimal.next()
       case _: AttrOneManDate       => () => oneDate.next()
-      case _: AttrOneManUUID        => () => oneUUID.next()
-      case _: AttrOneManURI       => () => oneURI.next()
-      case _: AttrOneManByte      => () => oneByte.next()
+      case _: AttrOneManUUID       => () => oneUUID.next()
+      case _: AttrOneManURI        => () => oneURI.next()
+      case _: AttrOneManByte       => () => oneByte.next()
       case _: AttrOneManShort      => () => oneShort.next()
       case _: AttrOneManChar       => () => oneChar.next()
+    }
+  }
+  private def unpackAttrOneManSet(a: AttrOneMan): () => Any = {
+    a match {
+      case _: AttrOneManString     => () => setString.next()
+      case _: AttrOneManInt        => () => setInt.next()
+      case _: AttrOneManLong       => () => setLong.next()
+      case _: AttrOneManFloat      => () => setFloat.next()
+      case _: AttrOneManDouble     => () => setDouble.next()
+      case _: AttrOneManBoolean    => () => setBoolean.next()
+      case _: AttrOneManBigInt     => () => setBigInt.next()
+      case _: AttrOneManBigDecimal => () => setBigDecimal.next()
+      case _: AttrOneManDate       => () => setDate.next()
+      case _: AttrOneManUUID       => () => setUUID.next()
+      case _: AttrOneManURI        => () => setURI.next()
+      case _: AttrOneManByte       => () => setByte.next()
+      case _: AttrOneManShort      => () => setShort.next()
+      case _: AttrOneManChar       => () => setChar.next()
     }
   }
 
@@ -138,6 +167,18 @@ trait UnpackTpls[Tpl] { self: DTO2tpls[Tpl] =>
   }
 
   private def unpackAttrSetMan(a: AttrSetMan): () => Any = {
+    a.op match {
+      case Fn(kw, _) => kw match {
+        case "count" | "countDistinct"             => () => oneInt.next()
+        case "distinct"                            => unpackAttrSetManSet(a)
+        case "mins" | "maxs" | "rands" | "samples" => unpackAttrSetManV(a)
+        case "avg" | "variance" | "stddev"         => () => setDouble.next()
+        case _                                     => unpackAttrSetManV(a)
+      }
+      case _         => unpackAttrSetManV(a)
+    }
+  }
+  private def unpackAttrSetManV(a: AttrSetMan): () => Any = {
     a match {
       case _: AttrSetManString     => () => setString.next()
       case _: AttrSetManInt        => () => setInt.next()
@@ -153,6 +194,34 @@ trait UnpackTpls[Tpl] { self: DTO2tpls[Tpl] =>
       case _: AttrSetManByte       => () => setByte.next()
       case _: AttrSetManShort      => () => setShort.next()
       case _: AttrSetManChar       => () => setChar.next()
+    }
+  }
+  private def unpackAttrSetManSet(a: AttrSetMan): () => Any = {
+    a match {
+      case _: AttrSetManString     => unpackSets(setString)
+      case _: AttrSetManInt        => unpackSets(setInt)
+      case _: AttrSetManLong       => unpackSets(setLong)
+      case _: AttrSetManFloat      => unpackSets(setFloat)
+      case _: AttrSetManDouble     => unpackSets(setDouble)
+      case _: AttrSetManBoolean    => unpackSets(setBoolean)
+      case _: AttrSetManBigInt     => unpackSets(setBigInt)
+      case _: AttrSetManBigDecimal => unpackSets(setBigDecimal)
+      case _: AttrSetManDate       => unpackSets(setDate)
+      case _: AttrSetManUUID       => unpackSets(setUUID)
+      case _: AttrSetManURI        => unpackSets(setURI)
+      case _: AttrSetManByte       => unpackSets(setByte)
+      case _: AttrSetManShort      => unpackSets(setShort)
+      case _: AttrSetManChar       => unpackSets(setChar)
+    }
+  }
+  private def unpackSets[T](it: Iterator[Set[T]]): () => Set[Set[T]] = {
+    val counts = levelCounts.head
+    () => {
+      var sets = Set.empty[Set[T]]
+      (0 until counts.next()).foreach(_ =>
+        sets = sets + it.next()
+      )
+      sets
     }
   }
 
@@ -174,11 +243,4 @@ trait UnpackTpls[Tpl] { self: DTO2tpls[Tpl] =>
       case _: AttrSetOptChar       => () => setOptChar.next()
     }
   }
-
-//  private def err(element: Element): Nothing = {
-//    throw MoleculeException(
-//      s"""Unexpected element/value when unpacking tuple DTO:
-//         |  element: $element""".stripMargin
-//    )
-//  }
 }

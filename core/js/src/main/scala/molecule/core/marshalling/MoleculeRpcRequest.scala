@@ -10,6 +10,7 @@ import scala.concurrent.{Future, Promise}
 import scala.scalajs.js.typedarray.TypedArrayBufferOps._
 import scala.scalajs.js.typedarray._
 
+
 case class MoleculeRpcRequest(interface: String, port: Int)
   extends RequestTransport[ByteBuffer, Future] {
 
@@ -22,8 +23,7 @@ case class MoleculeRpcRequest(interface: String, port: Int)
   override def apply(slothReq: Request[ByteBuffer]): Future[ByteBuffer] = {
     val url         = s"http://$interface:$port/ajax/" + slothReq.path.mkString("/")
     val byteBuffer  = Pickle.intoBytes(slothReq.payload)
-//    val requestData = byteBuffer.typedArray()
-    val requestData = byteBuffer.typedArray().subarray(byteBuffer.position, byteBuffer.limit)
+    val requestData = byteBuffer.typedArray()
 
     val req     = new dom.XMLHttpRequest()
     val promise = Promise[dom.XMLHttpRequest]()

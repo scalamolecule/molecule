@@ -11,12 +11,15 @@ trait LambdasOne extends ResolveBase {
   // Datomic Java to Scala
   protected lazy val j2sString    : AnyRef => AnyRef = identity
   // Datomic can return both Integer or Long
-  protected lazy val j2sInt       : AnyRef => AnyRef = (v: AnyRef) => v.toString.toInt.asInstanceOf[AnyRef]
+  protected lazy val j2sInt       : AnyRef => AnyRef =
+    (v: AnyRef) => v.toString.toInt.asInstanceOf[AnyRef]
   protected lazy val j2sLong      : AnyRef => AnyRef = identity
-  protected lazy val j2sFloat     : AnyRef => AnyRef = identity
+  protected lazy val j2sFloat     : AnyRef => AnyRef = {
+    case v: jFloat  => v.asInstanceOf[AnyRef]
+    case v: jDouble => v.toFloat.asInstanceOf[AnyRef]
+  }
   protected lazy val j2sDouble    : AnyRef => AnyRef = identity
-  protected lazy val j2sBoolean   : AnyRef => AnyRef =
-    identity
+  protected lazy val j2sBoolean   : AnyRef => AnyRef = identity
   protected lazy val j2sBigInt    : AnyRef => AnyRef = {
     case v: jBigInt => BigInt(v)
     case v          => BigInt(v.toString)
@@ -62,7 +65,7 @@ trait LambdasOne extends ResolveBase {
 
 
   protected lazy val set2setString    : AnyRef => AnyRef = set2set
-  protected lazy val set2setInt       : AnyRef => AnyRef = set2set
+  protected lazy val set2setInt       : AnyRef => AnyRef = set2set((v: AnyRef) => v.toString.toInt)
   protected lazy val set2setLong      : AnyRef => AnyRef = set2set
   protected lazy val set2setFloat     : AnyRef => AnyRef = set2set
   protected lazy val set2setDouble    : AnyRef => AnyRef = set2set
@@ -84,7 +87,7 @@ trait LambdasOne extends ResolveBase {
 
 
   protected lazy val vector2setString    : AnyRef => AnyRef = jvector2set
-  protected lazy val vector2setInt       : AnyRef => AnyRef = jvector2set
+  protected lazy val vector2setInt       : AnyRef => AnyRef = jvector2set((v: AnyRef) => v.toString.toInt)
   protected lazy val vector2setLong      : AnyRef => AnyRef = jvector2set
   protected lazy val vector2setFloat     : AnyRef => AnyRef = jvector2set
   protected lazy val vector2setDouble    : AnyRef => AnyRef = jvector2set

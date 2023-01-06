@@ -11,7 +11,7 @@ trait BaseOps extends ModelUtils {
       fut.map {
         case Right(result) => result
         case Left(exc)     =>
-//          printStackTrace(exc)
+          //          printStackTrace(exc) // Not useful on JS side
           throw exc
       }
     }

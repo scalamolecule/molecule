@@ -21,12 +21,12 @@ object AggrSetNum_Float_ extends DatomicTestSuite {
           (2, Set(float3, float4)),
         )).transact
 
-        _ <- Ns.floats.apply(sum).query.get.map(_ ==> List(
-          Set(11.00000011920929) // float1 + float2 + float3 + float4
+        _ <- Ns.floats.apply(sum).query.get.map(_ === List(
+          Set(float1 + float2 + float3 + float4)
         ))
-        _ <- Ns.i.floats(sum).query.get.map(_ ==> List(
-          (1, Set(3.3000000715255737)), // float1 + float2
-          (2, Set(9.900000095367432)), // float2 + float3 + float4
+        _ <- Ns.i.floats(sum).query.get.map(_ === List(
+          (1, Set(float1 + float2)),
+          (2, Set(float2 + float3 + float4)),
         ))
       } yield ()
     }
@@ -41,19 +41,19 @@ object AggrSetNum_Float_ extends DatomicTestSuite {
           (2, Set(float3, float4)),
         )).transact
 
-        _ <- Ns.floats(median).query.get.map(_ ==> List(
-          Set(2.0)
+        _ <- Ns.floats(median).query.get.map(_ === List(
+          Set(float2)
         ))
-        _ <- Ns.i.floats(median).query.get.map(_ ==> List(
-          (1, Set(1.0f)),
-          (2, Set(3.3f)),
+        _ <- Ns.i.floats(median).query.get.map(_ === List(
+          (1, Set(float1)),
+          (2, Set(3.0)),
+          // OBS! Datomic rounds down to nearest whole number
+          // (when calculating the median for multiple numbers)!
+          // This is another semantic than described on wikipedia:
+          // https://en.wikipedia.org/wiki/Median
+          // See also
+          // https://forum.datomic.com/t/unexpected-median-rounding/517
         ))
-        // OBS! Datomic rounds down to nearest whole number
-        // (when calculating the median for multiple numbers)!
-        // This is another semantic than described on wikipedia:
-        // https://en.wikipedia.org/wiki/Median
-        // See also
-        // https://forum.datomic.com/t/unexpected-median-rounding/517
       } yield ()
     }
 
@@ -67,12 +67,12 @@ object AggrSetNum_Float_ extends DatomicTestSuite {
           (2, Set(float3, float4)),
         )).transact
 
-        _ <- Ns.floats(avg).query.get.map(_ ==> List(
-          Set(2.7500000298023224) // (float1 + float2 + float3 + float4) / 4.0
+        _ <- Ns.floats(avg).query.get.map(_ === List(
+          Set(averageOf(float1, float2, float3, float4))
         ))
-        _ <- Ns.i.floats(avg).query.get.map(_ ==> List(
-          (1, Set(1.6500000357627869)), // (float1 + float2) / 2.0
-          (2, Set(3.300000031789144)), // (float2 + float3 + float4) / 3.0
+        _ <- Ns.i.floats(avg).query.get.map(_ === List(
+          (1, Set(averageOf(float1, float2))),
+          (2, Set(averageOf(float2, float3, float4))),
         ))
       } yield ()
     }
@@ -87,12 +87,12 @@ object AggrSetNum_Float_ extends DatomicTestSuite {
           (2, Set(float3, float4)),
         )).transact
 
-        _ <- Ns.floats(variance).query.get.map(_ ==> List(
-          Set(1.5125000327825573)
+        _ <- Ns.floats(variance).query.get.map(_ === List(
+          Set(varianceOf(float1, float2, float3, float4))
         ))
-        _ <- Ns.i.floats(variance).query.get.map(_ ==> List(
-          (1, Set(0.302500013113022)),
-          (2, Set(0.8066667016347285)),
+        _ <- Ns.i.floats(variance).query.get.map(_ === List(
+          (1, Set(varianceOf(float1, float2))),
+          (2, Set(varianceOf(float2, float3, float4))),
         ))
       } yield ()
     }
@@ -107,12 +107,12 @@ object AggrSetNum_Float_ extends DatomicTestSuite {
           (2, Set(float3, float4)),
         )).transact
 
-        _ <- Ns.floats(stddev).query.get.map(_ ==> List(
-          Set(1.2298374009528892)
+        _ <- Ns.floats(stddev).query.get.map(_ === List(
+          Set(stdDevOf(float1, float2, float3, float4))
         ))
-        _ <- Ns.i.floats(stddev).query.get.map(_ ==> List(
-          (1, Set(0.550000011920929)),
-          (2, Set(0.8981462584872959)),
+        _ <- Ns.i.floats(stddev).query.get.map(_ === List(
+          (1, Set(stdDevOf(float1, float2))),
+          (2, Set(stdDevOf(float2, float3, float4))),
         ))
       } yield ()
     }

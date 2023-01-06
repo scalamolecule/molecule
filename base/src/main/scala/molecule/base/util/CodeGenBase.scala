@@ -37,6 +37,7 @@ trait CodeGenBase {
     "Char" -> "String",
   )
 
+  // All types except Int
   val tpeVarImp = List(
     ("String", "String", "string", ""),
     ("Long", "Long", "long", ""),
@@ -51,5 +52,17 @@ trait CodeGenBase {
     ("Short", "Short", "short", ""),
     ("Char", "Char", "char", ""),
     ("ref", "Long", "ref", ""),
+  )
+
+  // Number types except Int
+  val numberTypes = List(
+    ("Long", "Long", "long"),
+    ("Float", "Float", "float"),
+    ("Double", "Double", "double"),
+    ("BigInt", "BigInt", "bigInt"),
+    ("BigDecimal", "BigDecimal", "bigDecimal"),
+    ("Byte", "Byte", "byte"),
+    ("Short", "Short", "short"),
+    ("ref", "Long", "ref"),
   )
 }

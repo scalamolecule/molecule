@@ -93,7 +93,7 @@ trait Model extends Validations {
   case object Gt extends Op
   case object Ge extends Op
   case object NoValue extends Op
-  case class Fn(fn: Kw, n: Option[Int] = None) extends Op
+  case class Fn(fn: String, n: Option[Int] = None) extends Op
   case object Unify extends Op
   case object Add extends Op
   case object Swap extends Op

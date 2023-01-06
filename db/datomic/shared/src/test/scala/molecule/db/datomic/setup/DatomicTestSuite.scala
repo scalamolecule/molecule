@@ -5,6 +5,8 @@ import molecule.core.api.Connection
 import molecule.core.api.ops.QueryOps
 import molecule.core.util.Executor._
 import molecule.core.util.JavaConversions
+import molecule.coreTests.util.AggrUtils
+import org.scalactic.TripleEquals
 import utest._
 import utest.framework.Formatter
 import scala.concurrent.Future
@@ -12,7 +14,9 @@ import scala.concurrent.Future
 trait DatomicTestSuite extends TestSuite with CoreData
   // Platform-specific implementations (JS/JVM) (shows in red as error code in IDE)
   with DatomicTestSuiteImpl
-  with JavaConversions {
+  with JavaConversions
+  with TripleEquals
+  with AggrUtils {
 
   lazy val isJsPlatform: Boolean = isJsPlatform_
   lazy val protocol    : String  = protocol_

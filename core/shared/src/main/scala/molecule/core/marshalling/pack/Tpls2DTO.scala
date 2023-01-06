@@ -8,9 +8,7 @@ import scala.collection.mutable.ListBuffer
 
 
 case class Tpls2DTO(elements: Seq[Element], tpls: Seq[Product])
-  extends Packers_
-    with PackTuple
-    with PackValue {
+  extends Packers_ with PackTuple {
 
   def pack: DTO = try {
     if (tpls.nonEmpty) {

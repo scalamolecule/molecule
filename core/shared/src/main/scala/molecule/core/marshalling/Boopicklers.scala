@@ -5,18 +5,14 @@ import java.nio.ByteBuffer
 import boopickle.Default._
 import chameleon._
 import molecule.base.util.exceptions.{MoleculeCompileException, MoleculeException}
-import molecule.boilerplate.api.Keywords._
 import molecule.boilerplate.ast.Model._
 import scala.util.{Failure, Success, Try}
 
 
-object Boopicklers {
+  object Boopicklers {
 
   implicit val pickleDate = transformPickler((t: Long) => new java.util.Date(t))(_.getTime)
   implicit val pickleURI  = transformPickler((t: String) => new URI(t))(_.toString)
-
-  implicit val pickleKw = compositePickler[Kw]
-  pickleKw.addConcreteType[AggrList]
 
   implicit val pickleOp = compositePickler[Op]
   pickleOp.addConcreteType[V.type]
@@ -35,20 +31,20 @@ object Boopicklers {
   pickleOp.addConcreteType[Swap.type]
   pickleOp.addConcreteType[Remove.type]
 
-  implicit val pickleValidateString = compositePickler[ValidateString]
-  implicit val pickleValidateInt = compositePickler[ValidateInt]
-  implicit val pickleValidateLong = compositePickler[ValidateLong]
-  implicit val pickleValidateDouble = compositePickler[ValidateDouble]
-  implicit val pickleValidateBoolean = compositePickler[ValidateBoolean]
-  implicit val pickleValidateBigInt = compositePickler[ValidateBigInt]
+  implicit val pickleValidateString     = compositePickler[ValidateString]
+  implicit val pickleValidateInt        = compositePickler[ValidateInt]
+  implicit val pickleValidateLong       = compositePickler[ValidateLong]
+  implicit val pickleValidateDouble     = compositePickler[ValidateDouble]
+  implicit val pickleValidateBoolean    = compositePickler[ValidateBoolean]
+  implicit val pickleValidateBigInt     = compositePickler[ValidateBigInt]
   implicit val pickleValidateBigDecimal = compositePickler[ValidateBigDecimal]
-  implicit val pickleValidateDate = compositePickler[ValidateDate]
-  implicit val pickleValidateUUID = compositePickler[ValidateUUID]
-  implicit val pickleValidateURI = compositePickler[ValidateURI]
-  implicit val pickleValidateByte = compositePickler[ValidateByte]
-  implicit val pickleValidateShort = compositePickler[ValidateShort]
-  implicit val pickleValidateFloat = compositePickler[ValidateFloat]
-  implicit val pickleValidateChar = compositePickler[ValidateChar]
+  implicit val pickleValidateDate       = compositePickler[ValidateDate]
+  implicit val pickleValidateUUID       = compositePickler[ValidateUUID]
+  implicit val pickleValidateURI        = compositePickler[ValidateURI]
+  implicit val pickleValidateByte       = compositePickler[ValidateByte]
+  implicit val pickleValidateShort      = compositePickler[ValidateShort]
+  implicit val pickleValidateFloat      = compositePickler[ValidateFloat]
+  implicit val pickleValidateChar       = compositePickler[ValidateChar]
 
   implicit val pickleElement = compositePickler[Element]
   pickleElement.addConcreteType[Ref]

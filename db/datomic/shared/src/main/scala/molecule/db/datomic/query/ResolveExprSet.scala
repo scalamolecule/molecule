@@ -1,6 +1,5 @@
 package molecule.db.datomic.query
 
-import molecule.boilerplate.api.Keywords._
 import molecule.boilerplate.ast.Model._
 import scala.reflect.ClassTag
 
@@ -123,7 +122,7 @@ trait ResolveExprSet[Tpl] { self: Base[Tpl] =>
       case Le        => compare(e, a, v, sets.head.head, "<=", res.tpe, res.toDatalog)
       case Ge        => compare(e, a, v, sets.head.head, ">=", res.tpe, res.toDatalog)
       case NoValue   => noValue(e, a)
-      case Fn(kw, _) => aggr(e, a, v, kw, res)
+      case Fn(kw, n) => aggr(e, a, v, kw, n, res)
       case other     => unexpectedOp(other)
     }
   }
@@ -151,11 +150,12 @@ trait ResolveExprSet[Tpl] { self: Base[Tpl] =>
     }
   }
 
-  private def aggr[T](e: Var, a: Att, v: Var, fn: Kw, res: ResSet[T]): Unit = {
+  private def aggr[T](e: Var, a: Att, v: Var, fn: String, optN: Option[Int], res: ResSet[T]): Unit = {
+    lazy val n = optN.getOrElse(0)
     // Replace find/casting with aggregate function/cast
     find -= s"(distinct $v)"
     fn match {
-      case _: distinct =>
+      case "distinct" =>
         val (v1, v2, e1) = (v + 1, v + 2, e + 1)
         find += s"(distinct $v2)"
         where += s"[$e $a $v$tx]" -> wClause
@@ -166,65 +166,65 @@ trait ResolveExprSet[Tpl] { self: Base[Tpl] =>
              |            :where [$e1 $a $v1]]" $$ $e) [[$v2]]]""".stripMargin -> wClause
         replaceCast(res.sets)
 
-      case mins(n) =>
+      case "mins" =>
         find += s"(min $n $v)"
         replaceCast(res.vector2set)
 
-      case _: min =>
+      case "min" =>
         find += s"(min 1 $v)"
         replaceCast(res.vector2set)
 
-      case maxs(n) =>
+      case "maxs" =>
         find += s"(max $n $v)"
         replaceCast(res.vector2set)
 
-      case _: max =>
+      case "max" =>
         find += s"(max 1 $v)"
         replaceCast(res.vector2set)
 
-      case rands(n) =>
+      case "rands" =>
         find += s"(rand $n $v)"
         replaceCast(res.vector2set)
 
-      case _: rand =>
+      case "rand" =>
         find += s"(rand 1 $v)"
         replaceCast(res.vector2set)
 
-      case samples(n) =>
+      case "samples" =>
         find += s"(sample $n $v)"
         replaceCast(res.vector2set)
 
-      case _: sample =>
+      case "sample" =>
         find += s"(sample 1 $v)"
         replaceCast(res.vector2set)
 
-      case _: count =>
+      case "count" =>
         find += s"(count $v)"
         widh += e
         replaceCast(toInt)
 
-      case _: countDistinct =>
+      case "countDistinct" =>
         find += s"(count-distinct $v)"
         widh += e
         replaceCast(toInt)
 
-      case _: sum =>
+      case "sum" =>
         find += s"(sum $v)"
         replaceCast(res.j2sSet)
 
-      case _: median =>
+      case "median" =>
         find += s"(median $v)"
         replaceCast(res.j2sSet)
 
-      case _: avg =>
+      case "avg" =>
         find += s"(avg $v)"
         replaceCast(res.j2sSet)
 
-      case _: variance =>
+      case "variance" =>
         find += s"(variance $v)"
         replaceCast(res.j2sSet)
 
-      case _: stddev =>
+      case "stddev" =>
         find += s"(stddev $v)"
         replaceCast(res.j2sSet)
 

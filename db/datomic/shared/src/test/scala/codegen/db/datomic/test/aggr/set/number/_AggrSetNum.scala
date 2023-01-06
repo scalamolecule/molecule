@@ -4,15 +4,10 @@ import java.nio.file.{Files, Paths}
 import codegen.DatomicTestGenBase
 import molecule.base.util.{BaseHelpers, CodeGenBase}
 
-object _AggrSetNum_whole extends CodeGenBase with BaseHelpers {
+object _AggrSetNum extends CodeGenBase with BaseHelpers {
 
-  def generate: Unit = {
-    TransformFile("BigInt", "BigInt", "bigInt").generate
-    TransformFile("Byte", "Byte", "byte").generate
-    TransformFile("Long", "Long", "long").generate
-    TransformFile("Short", "Short", "short").generate
-    TransformFile("ref", "Long", "ref").generate
-  }
+  def generate: Unit = numberTypes.foreach(TransformFile.tupled(_).generate)
+
 
   case class TransformFile(name: String, tpe: String, v: String)
     extends DatomicTestGenBase(s"AggrSetNum_$name", "/test/aggr/set/number") {

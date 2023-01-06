@@ -1,3 +1,4 @@
+// GENERATED CODE ********************************
 package molecule.db.datomic.test.aggr.set.number
 
 import molecule.core.util.Executor._
@@ -6,7 +7,7 @@ import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
 
-object AggrSetNum_Double extends DatomicTestSuite {
+object AggrSetNum_Double_ extends DatomicTestSuite {
 
 
   lazy val tests = Tests {
@@ -20,12 +21,12 @@ object AggrSetNum_Double extends DatomicTestSuite {
           (2, Set(double3, double4)),
         )).transact
 
-        _ <- Ns.doubles.apply(sum).query.get.map(_ ==> List(
-          Set(11) // double1 + double2 + double3 + double4
+        _ <- Ns.doubles.apply(sum).query.get.map(_ === List(
+          Set(double1 + double2 + double3 + double4)
         ))
-        _ <- Ns.i.doubles(sum).query.get.map(_ ==> List(
-          (1, Set(3.3000000000000003)), // double1 + double2
-          (2, Set(9.9)), // double2 + double3 + double4
+        _ <- Ns.i.doubles(sum).query.get.map(_ === List(
+          (1, Set(double1 + double2)),
+          (2, Set(double2 + double3 + double4)),
         ))
       } yield ()
     }
@@ -40,19 +41,19 @@ object AggrSetNum_Double extends DatomicTestSuite {
           (2, Set(double3, double4)),
         )).transact
 
-        _ <- Ns.doubles(median).query.get.map(_ ==> List(
-          Set(2.0)
+        _ <- Ns.doubles(median).query.get.map(_ === List(
+          Set(double2)
         ))
-        _ <- Ns.i.doubles(median).query.get.map(_ ==> List(
-          (1, Set(1.0)),
-          (2, Set(3.3)),
+        _ <- Ns.i.doubles(median).query.get.map(_ === List(
+          (1, Set(double1)),
+          (2, Set(3.0)),
+          // OBS! Datomic rounds down to nearest whole number
+          // (when calculating the median for multiple numbers)!
+          // This is another semantic than described on wikipedia:
+          // https://en.wikipedia.org/wiki/Median
+          // See also
+          // https://forum.datomic.com/t/unexpected-median-rounding/517
         ))
-        // OBS! Datomic rounds down to nearest whole number
-        // (when calculating the median for multiple numbers)!
-        // This is another semantic than described on wikipedia:
-        // https://en.wikipedia.org/wiki/Median
-        // See also
-        // https://forum.datomic.com/t/unexpected-median-rounding/517
       } yield ()
     }
 
@@ -66,12 +67,12 @@ object AggrSetNum_Double extends DatomicTestSuite {
           (2, Set(double3, double4)),
         )).transact
 
-        _ <- Ns.doubles(avg).query.get.map(_ ==> List(
-          Set(2.75) // (double1 + double2 + double3 + double4) / 4.0
+        _ <- Ns.doubles(avg).query.get.map(_ === List(
+          Set(averageOf(double1, double2, double3, double4))
         ))
-        _ <- Ns.i.doubles(avg).query.get.map(_ ==> List(
-          (1, Set(1.6500000000000001)), // (double1 + double2) / 2.0
-          (2, Set(3.3000000000000003)), // (double2 + double3 + double4) / 3.0
+        _ <- Ns.i.doubles(avg).query.get.map(_ === List(
+          (1, Set(averageOf(double1, double2))),
+          (2, Set(averageOf(double2, double3, double4))),
         ))
       } yield ()
     }
@@ -86,12 +87,12 @@ object AggrSetNum_Double extends DatomicTestSuite {
           (2, Set(double3, double4)),
         )).transact
 
-        _ <- Ns.doubles(variance).query.get.map(_ ==> List(
-          Set(1.5125000000000002)
+        _ <- Ns.doubles(variance).query.get.map(_ === List(
+          Set(varianceOf(double1, double2, double3, double4))
         ))
-        _ <- Ns.i.doubles(variance).query.get.map(_ ==> List(
-          (1, Set(0.30250000000000005)),
-          (2, Set(0.8066666666666668)),
+        _ <- Ns.i.doubles(variance).query.get.map(_ === List(
+          (1, Set(varianceOf(double1, double2))),
+          (2, Set(varianceOf(double2, double3, double4))),
         ))
       } yield ()
     }
@@ -106,12 +107,12 @@ object AggrSetNum_Double extends DatomicTestSuite {
           (2, Set(double3, double4)),
         )).transact
 
-        _ <- Ns.doubles(stddev).query.get.map(_ ==> List(
-          Set(1.2298373876248845)
+        _ <- Ns.doubles(stddev).query.get.map(_ === List(
+          Set(stdDevOf(double1, double2, double3, double4))
         ))
-        _ <- Ns.i.doubles(stddev).query.get.map(_ ==> List(
-          (1, Set(0.55)),
-          (2, Set(0.8981462390204987)),
+        _ <- Ns.i.doubles(stddev).query.get.map(_ === List(
+          (1, Set(stdDevOf(double1, double2))),
+          (2, Set(stdDevOf(double2, double3, double4))),
         ))
       } yield ()
     }
