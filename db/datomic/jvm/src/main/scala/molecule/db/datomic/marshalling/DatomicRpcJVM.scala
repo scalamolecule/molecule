@@ -13,6 +13,7 @@ import molecule.core.util.Executor._
 import molecule.core.util.{JavaConversions, ModelUtils}
 import molecule.db.datomic.api.ops.DatomicQueryOpsImpl
 import molecule.db.datomic.facade.{DatomicConn_JVM, DatomicPeer}
+import molecule.db.datomic.query.Base
 import molecule.db.datomic.transaction._
 import scala.collection.mutable
 import scala.concurrent.Future
@@ -33,11 +34,16 @@ object DatomicRpcJVM extends MoleculeRpc
       rows <- new DatomicQueryOpsImpl[Any](elements).get(conn, global)
     } yield {
       //      println("rows: " + rows)
-      val tpls = if (countValueAttrs(elements) == 1) {
-        rows.map(v => Tuple1(v))
-      } else {
-        rows
+      //      println("elements: " + elements)
+      //      println("countValueAttrs(elements): " + countValueAttrs(elements))
+      val tpls = {
+        if (countValueAttrs(elements) == 1) {
+          rows.map(v => Tuple1(v))
+        } else {
+          rows
+        }
       }
+      //      println("tpls: " + tpls)
       val dto  = Tpls2DTO(elements, tpls.asInstanceOf[Seq[Product]]).pack
       //      println(dto)
       dto
@@ -156,10 +162,10 @@ object DatomicRpcJVM extends MoleculeRpc
 
   private def getFreshConn(proxy: ConnProxy): Future[DatomicConn_JVM] = {
     proxy match {
-      case proxy@DatomicPeerProxy(protocol, dbIdentifier, _, _, _, _, _, _, _, _) =>
+      case proxy@DatomicPeerProxy(protocol, dbIdentifier, _, _, _, _, _, _, _, _, isFreeVersion) =>
         protocol match {
           case "mem" =>
-            DatomicPeer.recreateDbFromEdn(proxy, protocol, dbIdentifier)
+            DatomicPeer.recreateDbFromEdn(proxy, protocol, dbIdentifier, isFreeVersion)
               .recover(exc => throw MoleculeException(exc.getMessage))
 
           case "free" | "dev" | "pro" =>

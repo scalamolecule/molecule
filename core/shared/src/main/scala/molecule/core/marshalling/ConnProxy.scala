@@ -65,5 +65,6 @@ case class DatomicPeerProxy(
   testDbStatus: Int = 0,
   testDbView: Option[DbView] = None,
   adhocDbView: Option[DbView] = None,
-  uuid: UUID = UUID.randomUUID()
+  uuid: UUID = UUID.randomUUID(),
+  isFreeVersion: Boolean = true
 ) extends ConnProxy

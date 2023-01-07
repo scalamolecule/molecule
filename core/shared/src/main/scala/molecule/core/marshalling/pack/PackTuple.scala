@@ -60,7 +60,10 @@ trait PackTuple extends ModelUtils { self: Tpls2DTO =>
           resolvePackers(tail, packers :+ packNested(level + 1, tplIndex, nestedElements), level, tplIndex + 1)
 
         case Composite(compositeElements) =>
-          resolvePackers(tail, packers :+ packComposite(level, tplIndex, compositeElements), level, tplIndex + 1)
+          packComposite(level, tplIndex, compositeElements) match {
+            case Nil         => resolvePackers(tail, packers, level, tplIndex)
+            case Seq(packer) => resolvePackers(tail, packers :+ packer, level, tplIndex + 1)
+          }
 
         case TxMetaData(txMetaDataElements) =>
           // Tx meta data is last attribute values in top level tuple
@@ -86,12 +89,13 @@ trait PackTuple extends ModelUtils { self: Tpls2DTO =>
     level: Int,
     tplIndex: Int,
     compositeElements: Seq[Element]
-  ): Product => Unit = {
-    val packCompositeData = getPacker(compositeElements, level)
+  ): Seq[Product => Unit] = {
+    lazy val packCompositeData = getPacker(compositeElements, level)
     // Start from initial entity id for each composite sub group
     countValueAttrs(compositeElements) match {
-      case 1 => (tpl: Product) => packCompositeData(Tuple1(tpl.productElement(tplIndex)))
-      case _ => (tpl: Product) => packCompositeData(tpl.productElement(tplIndex).asInstanceOf[Product])
+      case 0 => Nil
+      case 1 => Seq((tpl: Product) => packCompositeData(Tuple1(tpl.productElement(tplIndex))))
+      case _ => Seq((tpl: Product) => packCompositeData(tpl.productElement(tplIndex).asInstanceOf[Product]))
     }
   }
 

@@ -11,34 +11,25 @@ object AdhocJs extends DatomicTestSuite {
 
   lazy val tests = Tests {
 
-    "types" - types { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Types._
-      for {
+    //    "types" - types { implicit conn =>
+    //      import molecule.coreTests.dataModels.core.dsl.Types._
+    //      for {
+    //
+    //        _ <- Ns.i(1).save.transact
+    //
+    //      } yield ()
+    //    }
 
-        _ <- Ns.i(1).save.transact
+
+    "refs" - refs { implicit conn =>
+      import molecule.coreTests.dataModels.core.dsl.Refs._
+      for {
+        _ <- (R3.i + Ns.i.R1.i).insert(0, (1, 2)).transact
+
+        _ <- R3.i.query.get.map(_ ==> List(0))
+        _ <- (R3.i + Ns.R1.i_).query.get.map(_ ==> List(0))
 
       } yield ()
     }
-
-
-    //    "refs" - refs { implicit conn =>
-    //      import molecule.coreTests.dataModels.core.dsl.Refs._
-    //      for {
-    ////        _ <- Ns.i.Tx(R2.i_(7)).insert(1).transact
-    ////        _ <- Ns.i.Tx(R2.i).query.get.map(_ ==> List((1, 7)))
-    //
-    ////        _ <- Ns.i(1).s("a").Tx(R2.i_(7)).save.transact
-    ////        _ <- Ns.i.s.Tx(R2.i).query.get.map(_ ==> List((1, "a", 7)))
-    //
-    //
-    //        _ <- Ns.i(1).Tx(R2.i_(7).s_("tx")).save.transact
-    //        _ <- Ns.i.Tx(R2.i.s).query.get.map(_ ==> List(
-    //          (1, 7, "tx")
-    //        ))
-    //
-    ////        _ <- Ns.i.s.Tx(R2.i_(7)).insert((1, "a"), (2, "b")).transact
-    ////        _ <- Ns.i.s.Tx(R2.i).query.get.map(_ ==> List((1, "a", 7), (2, "b", 7)))
-    //      } yield ()
-    //    }
   }
 }

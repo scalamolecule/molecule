@@ -5,11 +5,11 @@ import java.util.{ArrayList => jArrayList, List => jList}
 import clojure.lang.Keyword
 import molecule.base.util.exceptions.MoleculeException
 import molecule.boilerplate.ast.Model._
-import molecule.core.util.fns
+import molecule.core.util.{ModelUtils, fns}
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 
-trait DatomicTxBase_JVM extends DatomicDataType_JVM {
+trait DatomicTxBase_JVM extends DatomicDataType_JVM with ModelUtils {
 
   protected def initTxBase(elements: Seq[Element]): Unit = {
     nsFull = getInitialNs(elements)
@@ -70,13 +70,5 @@ trait DatomicTxBase_JVM extends DatomicDataType_JVM {
     stmt.add(retractEntity)
     stmt.add(eid)
     stmts.add(stmt)
-  }
-
-  @tailrec
-  final protected def getInitialNs(elements: Seq[Element]): String = elements.head match {
-    case a: Attr       => a.ns
-    case b: Ref        => b.ns
-    case Composite(es) => getInitialNs(es)
-    case other         => throw MoleculeException("Unexpected head element: " + other)
   }
 }

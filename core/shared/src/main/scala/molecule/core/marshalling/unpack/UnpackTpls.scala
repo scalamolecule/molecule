@@ -2,10 +2,11 @@ package molecule.core.marshalling.unpack
 
 import molecule.base.util.exceptions.MoleculeException
 import molecule.boilerplate.ast.Model._
+import molecule.core.util.ModelUtils
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 
-trait UnpackTpls[Tpl] { self: DTO2tpls[Tpl] =>
+trait UnpackTpls[Tpl] extends ModelUtils { self: DTO2tpls[Tpl] =>
 
   private val prevRefs: ListBuffer[String] = ListBuffer.empty[String]
 
@@ -55,7 +56,7 @@ trait UnpackTpls[Tpl] { self: DTO2tpls[Tpl] =>
           resolveUnpackers(tail, unpackers :+ unpackNested(level + 1, nestedElements), level)
 
         case Composite(compositeElements) =>
-          resolveUnpackers(tail, unpackers :+ unpackComposite(level, compositeElements), level)
+          resolveUnpackers(tail, unpackers ++ unpackComposite(level, compositeElements), level)
 
         case TxMetaData(txMetaDataElements) =>
           // Tx meta data is last attribute values in top level tuple
@@ -77,9 +78,13 @@ trait UnpackTpls[Tpl] { self: DTO2tpls[Tpl] =>
   private def unpackComposite(
     level: Int,
     compositeElements: Seq[Element]
-  ): () => Any = {
-    val unpackCompositeData = getUnpacker(compositeElements, level)
-    () => unpackCompositeData()
+  ): Seq[() => Any] = {
+    countValueAttrs(compositeElements) match {
+      case 0 => Nil
+      case n =>
+        val unpackCompositeData = getUnpacker(compositeElements, level)
+        Seq(() => unpackCompositeData())
+    }
   }
 
   private def unpackNested(

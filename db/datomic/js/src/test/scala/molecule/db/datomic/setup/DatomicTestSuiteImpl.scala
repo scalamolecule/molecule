@@ -29,7 +29,9 @@ trait DatomicTestSuiteImpl extends WebClient { self: DatomicTestSuite =>
       schemaTx.uniqueAttrs,
     )
 
-    val proxy = DatomicPeerProxy("mem", "", schema, nsMap, attrMap, uniqueAttrs)
+    val proxy = DatomicPeerProxy(
+      "mem", "", schema, nsMap, attrMap, uniqueAttrs, isFreeVersion = useFree_
+    )
     test(DatomicConn_JS(proxy, DatomicRpcRequest.moleculeRpcRequest))
   }
 

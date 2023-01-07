@@ -12,7 +12,7 @@ object NestedTypes extends DatomicTestSuite {
 
   lazy val tests = Tests {
 
-    "Card one, mandatory" - types { implicit conn =>
+    "Card one mandatory" - types { implicit conn =>
       for {
         _ <- Ref.i.Nss.*(Ns.string).insert(1, List(string1, string2)).transact
         _ <- Ref.i.Nss.*(Ns.int).insert(2, List(int1, int2)).transact
@@ -60,13 +60,15 @@ object NestedTypes extends DatomicTestSuite {
 
         _ <- if (useFree)
           pullBooleanBug(Ref.i_(6).Nss.*?(Ns.boolean.a1).query)
+//          Ref.i_(6).Nss.*?(Ns.boolean.a1).query.get.map(_ ==> List(List(boolean1, boolean2)))
+//          Ref.i_(6).Nss.*?(Ns.boolean.a1).query.get.map(_ ==> List(List()))
         else
           Ref.i_(6).Nss.*?(Ns.boolean.a1).query.get.map(_ ==> List(List(boolean1, boolean2)))
       } yield ()
     }
 
 
-    "Card one, optional" - types { implicit conn =>
+    "Card one optional" - types { implicit conn =>
       for {
         _ <- Ref.i.Nss.*(Ns.i.string_?).insert(1, List((1, Some(string1)), (2, None))).transact
         _ <- Ref.i.Nss.*(Ns.i.int_?).insert(2, List((1, Some(int1)), (2, None))).transact
@@ -121,7 +123,7 @@ object NestedTypes extends DatomicTestSuite {
     }
 
 
-    "Card set, mandatory" - types { implicit conn =>
+    "Card set mandatory" - types { implicit conn =>
       for {
         _ <- Ref.i.Nss.*(Ns.strings).insert(1, List(Set(string1, string2))).transact
         _ <- Ref.i.Nss.*(Ns.ints).insert(2, List(Set(int1, int2))).transact
@@ -177,7 +179,7 @@ object NestedTypes extends DatomicTestSuite {
     }
 
 
-    "Card set, optional" - types { implicit conn =>
+    "Card set optional" - types { implicit conn =>
       for {
         _ <- Ref.i.Nss.*(Ns.i.strings_?).insert(1, List((1, Some(Set(string1, string2))), (2, None))).transact
         _ <- Ref.i.Nss.*(Ns.i.ints_?).insert(2, List((1, Some(Set(int1, int2))), (2, None))).transact
