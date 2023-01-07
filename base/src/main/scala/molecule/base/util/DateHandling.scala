@@ -3,17 +3,18 @@ package molecule.base.util
 import java.time._
 import java.time.format.DateTimeFormatter
 import java.util.{Date, TimeZone}
+import scribe.Logging
 
 
-trait DateHandling extends RegexMatching {
+trait DateHandling extends RegexMatching with Logging {
 
   def localZoneOffset: ZoneOffset = OffsetDateTime.now().getOffset
-  def localOffset    : String     = localZoneOffset.toString
-  def zone           : ZoneId     = ZoneId.of(TimeZone.getDefault.getID)
+  def localOffset: String = localZoneOffset.toString
+  def zone: ZoneId = ZoneId.of(TimeZone.getDefault.getID)
 
   private def error(err: String): Nothing = {
     val err1 = "[DateHandling]  " + err
-    println(err1)
+    logger.error(err1)
     throw new IllegalArgumentException(err1)
   }
 
@@ -93,7 +94,8 @@ trait DateHandling extends RegexMatching {
              ): ZonedDateTime = {
 
     def mkZh(zh0: String): Int =
-      if (zh0.contains("Z")) 0 /* UTC */ else zh0.toInt
+      if (zh0.contains("Z")) 0 /* UTC */
+      else zh0.toInt
     def mkZm(zh0: String, zm0: String): Int =
       if (zh0.contains("Z")) 0 else zm0.toInt
 

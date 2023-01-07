@@ -12,6 +12,7 @@ import molecule.core.api.{Connection, TxReport}
 import molecule.core.marshalling.{DatomicPeerProxy, MoleculeRpc}
 import molecule.db.datomic.marshalling.DatomicRpcJVM
 import molecule.db.datomic.transaction.DatomicDataType_JVM
+import scribe.Logging
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.jdk.CollectionConverters._
@@ -21,7 +22,7 @@ case class DatomicConn_JVM(
   override val proxy: DatomicPeerProxy,
   peerConn: DatomicConnection,
   isFreeVersion: Boolean
-) extends Connection(proxy) with DatomicDataType_JVM {
+) extends Connection(proxy) with DatomicDataType_JVM with Logging {
 
   override def db: Database = peerConn.db()
 
@@ -52,7 +53,7 @@ case class DatomicConn_JVM(
             p.success(listenF.get())
           } catch {
             case e: ju.concurrent.ExecutionException =>
-              println(
+              logger.error(
                 "---- ExecutionException: -------------\n" +
                   listenF +
                   javaStmts.fold("")(stmts => "\n---- javaStmts: ----\n" +
@@ -68,7 +69,7 @@ case class DatomicConn_JVM(
               )
 
             case NonFatal(e) =>
-              println(
+              logger.error(
                 "---- NonFatal exception: -------------\n" +
                   listenF +
                   javaStmts.fold("")(stmts => "\n---- javaStmts: ----\n" +

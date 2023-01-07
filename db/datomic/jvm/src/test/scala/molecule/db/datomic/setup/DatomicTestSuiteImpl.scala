@@ -9,10 +9,11 @@ import molecule.coreTests.dataModels.core.schema._
 import molecule.db.datomic.facade.{DatomicConn_JVM, DatomicPeer}
 import molecule.db.datomic.util.DatomicApiLoader
 import moleculeBuildInfo.BuildInfo
+import scribe.Logging
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
-trait DatomicTestSuiteImpl extends DatomicApiLoader { self: DatomicTestSuite =>
+trait DatomicTestSuiteImpl extends DatomicApiLoader with Logging { self: DatomicTestSuite =>
 
   lazy val isJsPlatform_ = false
   lazy val protocol_     = BuildInfo.datomicProtocol
@@ -23,7 +24,7 @@ trait DatomicTestSuiteImpl extends DatomicApiLoader { self: DatomicTestSuite =>
     schemaTx: SchemaTransaction,
   ): T = {
     val dbUri                    = if (protocol_ == "mem") "" else {
-      println(s"Re-creating live database...")
+      logger.info(s"Re-creating live database...")
       "localhost:4334/" + randomUUID().toString
     }
     val (schema, nsMap, attrMap, uniqueAttrs) = (

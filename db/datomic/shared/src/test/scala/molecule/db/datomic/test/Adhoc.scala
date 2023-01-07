@@ -6,24 +6,28 @@ import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
+import scribe.output.LogOutput
+import scribe.output.format.OutputFormat
+import scribe.writer.Writer
+import scribe.{LogRecord, Logger, Logging}
 import utest._
+import scala.collection.mutable.ListBuffer
 
 
-object Adhoc extends DatomicTestSuite {
+object Adhoc extends DatomicTestSuite with Logging {
 
 
   lazy val tests = Tests {
 
-    "types1" - types { implicit conn =>
-      //      import molecule.coreTests.dataModels.core.dsl.Types._
-
-
-
-//      for {
-//        _ <- Ns.int(1).save.transact
-//        _ <- Ns.int.query.get.map(_ ==> List(1))
-//      } yield ()
+    "types" - types { implicit conn =>
+      import molecule.coreTests.dataModels.core.dsl.Types._
+      for {
+        _ <- Ns.int.insert(1, 2, 3).transact
+        _ <- Ns.int(1, 2).query.get.map(_ ==> List(1, 2))
+        _ <- Ns.int.query.get.map(_ ==> List(1, 2, 3))
+      } yield ()
     }
+
 
     //    "refs" - refs { implicit conn =>
     //      import molecule.coreTests.dataModels.core.dsl.Refs._

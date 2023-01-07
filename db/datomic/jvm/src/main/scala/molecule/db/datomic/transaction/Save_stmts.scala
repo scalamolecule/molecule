@@ -5,8 +5,9 @@ import java.util.{Date, UUID}
 import molecule.boilerplate.ast.Model._
 import molecule.core.transaction.{Save, Save2Data}
 import molecule.core.validation.CheckConflictingAttrs
+import scribe.Logging
 
-trait Save_stmts extends DatomicTxBase_JVM with Save2Data { self: Save =>
+trait Save_stmts extends DatomicTxBase_JVM with Save2Data with Logging { self: Save =>
 
   def getRawStmts(
     elements: Seq[Element],
@@ -14,20 +15,18 @@ trait Save_stmts extends DatomicTxBase_JVM with Save2Data { self: Save =>
     debug: Boolean = true,
     init: Boolean = true
   ): Data = {
-    if (init)
+    if (init) {
       initTxBase(elements)
-    if (debug) {
-      println("\n\n--- SAVE -----------------------------------------------------------------------")
-      elements.foreach(println)
     }
     CheckConflictingAttrs(elements)
     e = eid
     e0 = e
+
+    // populate `stmts`
     resolve(elements)
 
     if (debug) {
-      println("---")
-      stmts.forEach(stmt => println(stmt))
+      logger.debug(("SAVE:" +: elements).mkString("\n"), "\n\n", stmts.toArray().mkString("\n"))
     }
     stmts
   }

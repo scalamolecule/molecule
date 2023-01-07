@@ -5,8 +5,9 @@ import java.time._
 import java.time.format.DateTimeFormatter
 import java.util.{Date, UUID}
 import molecule.base.util.exceptions.MoleculeException
+import scribe.Logging
 
-trait BaseHelpers extends DateHandling {
+trait BaseHelpers extends DateHandling with Logging {
 
   def clean(attr: String): String = attr.last match {
     case '_' => attr.init
@@ -139,17 +140,6 @@ trait BaseHelpers extends DateHandling {
     case a          => Seq(a)
   }
 
-
-  class log {
-    private var buf = Seq.empty[String]
-    def apply(s: Any): Unit = buf = buf :+ s.toString
-    def print(): Unit = {
-      println(buf.mkString("\n"))
-      buf = Nil
-    }
-  }
-
-
   private val time0     = System.currentTimeMillis()
   private var prevTime  = time0
   private val times     = collection.mutable.Map.empty[Int, Long]
@@ -172,7 +162,7 @@ trait BaseHelpers extends DateHandling {
     times += n -> time2
     prevTime = time2
     val d = LocalDateTime.ofInstant(Instant.ofEpochMilli(elapsed), ZoneOffset.UTC)
-    println(s"TIME $n: " + formatter.format(d))
+    logger.debug(s"TIME $n: " + formatter.format(d))
   }
 
   protected def okIdent(name: String): String = name match {

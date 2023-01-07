@@ -71,8 +71,7 @@ object _Model extends BoilerplateGenBase("Model", "/ast") {
   }
 
   override def generate: Unit = {
-    //            println(content)
     mkFile(fileName, content)
-    println(s"Generated $path/$fileName.scala")
+    logger.info(s"Generated $path/$fileName.scala")
   }
 }

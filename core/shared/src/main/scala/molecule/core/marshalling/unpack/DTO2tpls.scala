@@ -4,10 +4,11 @@ import java.net.URI
 import java.util.{Date, UUID}
 import molecule.boilerplate.ast.Model._
 import molecule.core.marshalling.DTO
+import scribe.Logging
 
 
 case class DTO2tpls[Tpl](elements: Seq[Element], dto: DTO)
-  extends Unpackers_[Tpl] with UnpackTpls[Tpl] {
+  extends Unpackers_[Tpl] with UnpackTpls[Tpl] with Logging {
 
   protected lazy val tuples = List.newBuilder[Tpl]
 
@@ -19,7 +20,7 @@ case class DTO2tpls[Tpl](elements: Seq[Element], dto: DTO)
     tuples.result()
   } catch {
     case e: Throwable =>
-      println(e.getStackTrace.mkString("\n"))
+      logger.error(e.getStackTrace.mkString("\n"))
       throw e
   }
 

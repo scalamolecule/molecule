@@ -11,27 +11,28 @@ object AdhocJs extends DatomicTestSuite {
 
   lazy val tests = Tests {
 
-    //    "types" - types { implicit conn =>
-    //      import molecule.coreTests.dataModels.core.dsl.Types._
-    //      for {
-    //
-    //        _ <- Ns.i(1).save.transact
-    //
-    //      } yield ()
-    //    }
-
-
-    "refs" - refs { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Refs._
+    "types" - types { implicit conn =>
+      import molecule.coreTests.dataModels.core.dsl.Types._
       for {
-        _ <- (Ns.i(1) + R2.i(2)).insert(1, 2).transact
-          .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
-          err ==> "Can't insert attributes with an applied value. Found:\n" +
-            "AttrOneManInt(Ns,i,Appl,List(1),None,None,None)"
-        }
 
+        _ <- Ns.i(1).save.transact
+        _ <- Ns.i.query.get
 
       } yield ()
     }
+
+
+    //    "refs" - refs { implicit conn =>
+    //      import molecule.coreTests.dataModels.core.dsl.Refs._
+    //      for {
+    //        _ <- (Ns.i(1) + R2.i(2)).insert(1, 2).transact
+    //          .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
+    //          err ==> "Can't insert attributes with an applied value. Found:\n" +
+    //            "AttrOneManInt(Ns,i,Appl,List(1),None,None,None)"
+    //        }
+    //
+    //
+    //      } yield ()
+    //    }
   }
 }

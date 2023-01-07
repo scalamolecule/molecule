@@ -11,8 +11,9 @@ import molecule.core.transaction.{Update, Update2Data}
 import molecule.core.validation.CheckConflictingAttrs
 import molecule.db.datomic.facade.DatomicConn_JVM
 import molecule.db.datomic.query.DatomicModel2Query
+import scribe.Logging
 
-trait Update_stmts extends DatomicTxBase_JVM with Update2Data { self: Update =>
+trait Update_stmts extends DatomicTxBase_JVM with Update2Data with Logging { self: Update =>
 
   def getStmts(
     conn: DatomicConn_JVM,
@@ -55,10 +56,7 @@ trait Update_stmts extends DatomicTxBase_JVM with Update2Data { self: Update =>
       eidRows.forEach(eidRow => addStmts(eidRow.get(0)))
     }
 
-    println("\n\n--- UPDATE -----------------------------------------------------------------------")
-    elements.foreach(println)
-    println("---")
-    stmts.forEach(stmt => println(stmt))
+    logger.debug(("UPDATE:" +: elements).mkString("\n"), "\n\n", stmts.toArray().mkString("\n"))
     stmts
   }
 

@@ -15,13 +15,14 @@ import molecule.db.datomic.api.ops.DatomicQueryOpsImpl
 import molecule.db.datomic.facade.{DatomicConn_JVM, DatomicPeer}
 import molecule.db.datomic.query.Base
 import molecule.db.datomic.transaction._
+import scribe.Logging
 import scala.collection.mutable
 import scala.concurrent.Future
 
 object DatomicRpcJVM extends MoleculeRpc
   with DatomicTxBase_JVM
   with JavaConversions
-  with ModelUtils {
+  with ModelUtils with Logging {
 
   // Api ---------------------------------------------
 
@@ -33,9 +34,6 @@ object DatomicRpcJVM extends MoleculeRpc
       conn <- getConn(proxy)
       rows <- new DatomicQueryOpsImpl[Any](elements).get(conn, global)
     } yield {
-      //      println("rows: " + rows)
-      //      println("elements: " + elements)
-      //      println("countValueAttrs(elements): " + countValueAttrs(elements))
       val tpls = {
         if (countValueAttrs(elements) == 1) {
           rows.map(v => Tuple1(v))
@@ -43,10 +41,7 @@ object DatomicRpcJVM extends MoleculeRpc
           rows
         }
       }
-      //      println("tpls: " + tpls)
-      val dto  = Tpls2DTO(elements, tpls.asInstanceOf[Seq[Product]]).pack
-      //      println(dto)
-      dto
+      Tpls2DTO(elements, tpls.asInstanceOf[Seq[Product]]).pack
     }
   }
 
@@ -69,24 +64,17 @@ object DatomicRpcJVM extends MoleculeRpc
   ): Future[Either[MoleculeException, TxReport]] = either {
     for {
       conn <- getConn(proxy)
-      //      _ = println("tplData: " + tplData)
-
       tpls = if (countValueAttrs(tplElements) == 1) {
         DTO2tpls[Any](tplElements, tplData).unpack.map(v => Tuple1(v))
       } else {
         DTO2tpls[Product](tplElements, tplData).unpack
       }
-      //      _ = println("tpls: " + tpls)
-      //      _ = println("txEs: " + txElements)
-
       stmts = (new Insert with Insert_stmts).getStmts(tplElements, tpls)
       _ = if (txElements.nonEmpty) {
         val txStmts = (new Save() with Save_stmts)
           .getRawStmts(txElements, datomicTx, false)
         stmts.addAll(txStmts)
       }
-      //      _ = println("stmts")
-      //      _ = stmts.forEach(s => println(s))
       txReport <- conn.transact(stmts)
     } yield txReport
   }
@@ -123,28 +111,20 @@ object DatomicRpcJVM extends MoleculeRpc
     fut
       .map(txR => Right(txR))
       .recover {
-        case e: MoleculeException =>
-          //          printStackTrace(e)
-          Left(e)
-        case e: Throwable         =>
-          //          printStackTrace(e)
-          Left(MoleculeException(e.getMessage, e))
+        case e: MoleculeException => Left(e)
+        case e: Throwable         => Left(MoleculeException(e.getMessage, e))
       }
-  }
-
-  private def printStackTrace(exc: Throwable): Unit = {
-    println(exc.getStackTrace.mkString("\n"))
   }
 
 
 
   // Connection pool ---------------------------------------------
 
-  // todo
+  // todo: real solution
   private val connectionPool = mutable.HashMap.empty[UUID, Future[DatomicConn_JVM]]
 
   override def clearConnPool: Future[Unit] = Future {
-    //    println(s"Connection pool with ${connectionPool.size} connections cleared.")
+    // logger.debug(s"Connection pool with ${connectionPool.size} connections cleared.")
     connectionPool.clear()
   }
 
@@ -156,7 +136,7 @@ object DatomicRpcJVM extends MoleculeRpc
       conn
     }
     connectionPool(proxy.uuid) = futConnTimeAdjusted
-    //    println("connectionPool.size: " + connectionPool.size)
+    // logger.debug("connectionPool.size: " + connectionPool.size)
     futConnTimeAdjusted
   }
 

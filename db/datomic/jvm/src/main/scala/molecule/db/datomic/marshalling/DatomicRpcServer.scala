@@ -11,8 +11,7 @@ import molecule.core.marshalling.Boopicklers._
 import molecule.core.marshalling.{MoleculeRpc, MoleculeRpcResponse}
 import sloth._
 import scala.concurrent.Future
-import scala.concurrent.duration.DurationInt
-import scala.util.{Failure, Success}
+import scala.io.StdIn
 
 
 /** Akka Http RPC server responding to molecule ajax requests */
@@ -20,17 +19,8 @@ object DatomicRpcServer extends MoleculeRpcResponse("localhost", 8080) with App 
 
   lazy val router = Router[ByteBuffer, Future].route[MoleculeRpc](DatomicRpcJVM)
 
-  Http()
-    .newServerAt(interface, port)
-    .bind(route)
-    .map(_.addToCoordinatedShutdown(hardTerminationDeadline = 120.seconds))
-    .onComplete {
-      case Success(b) => println(s"Akka http server is running ${b.localAddress} ")
-      case Failure(e) => println(s"there was an error starting the server $e")
-    }
-
   lazy val route: Route = cors() {
-    // Remaining is the method name
+    // Remaining is the rpc method name
     path("ajax" / MoleculeRpc / Remaining)(respond)
   }
 
@@ -56,4 +46,11 @@ object DatomicRpcServer extends MoleculeRpcResponse("localhost", 8080) with App 
       }
     }
   }
+
+  val bindingFuture = Http().newServerAt(interface, port).bind(route)
+  println(s"Server online at http://localhost:8088/\nPress RETURN to stop...")
+  StdIn.readLine()
+  bindingFuture
+    .flatMap(_.unbind())
+    .onComplete(_ => system.terminate())
 }

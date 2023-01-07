@@ -14,8 +14,4 @@ trait BaseOps extends ModelUtils {
       }
     }
   }
-
-  protected def printStackTrace(exc: Throwable): Unit = {
-    println(exc.getStackTrace.mkString("\n"))
-  }
 }

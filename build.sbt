@@ -123,7 +123,8 @@ lazy val baseSettings: Seq[Def.Setting[_]] = Seq(
     "com.lihaoyi" %%% "utest" % "0.7.11" % Test,
     "dev.zio" %% "zio" % zioVersion,
     "dev.zio" %% "zio-streams" % zioVersion,
-    "dev.zio" %% "zio-test" % zioVersion % Test
+    "dev.zio" %% "zio-test" % zioVersion % Test,
+    "com.outr" %%% "scribe" % "3.10.6"
   ),
 
   //  libraryDependencies += "com.lihaoyi" %%% "utest" % "0.7.4" % "test",
@@ -387,9 +388,10 @@ lazy val testSettings: Seq[Def.Setting[_]] = {
         //        sharedTests + "/relation",
         //        sharedTests + "/sort",
         //        sharedTests + "/txMetaData",
-        sharedTests,
+                sharedTests,
         jvmTests + "/AdhocJVM.scala",
         jsTests + "/AdhocJs.scala",
+        sharedTests + "/Adhoc.scala",
       )
       new SimpleFileFilter(f =>
         (f.getCanonicalPath.startsWith(jsTests)

@@ -4,12 +4,13 @@ import java.nio.ByteBuffer
 import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
 import boopickle.Default._
+import scribe.Logging
 import sloth.ServerFailure.{DeserializerError, HandlerError, PathNotFound}
 import sloth._
 import scala.concurrent.{ExecutionContextExecutor, Future}
 import scala.util.control.NonFatal
 
-case class MoleculeRpcResponse(interface: String, port: Int) {
+case class MoleculeRpcResponse(interface: String, port: Int) extends Logging {
   implicit val system          : ActorSystem[Nothing]     = ActorSystem(Behaviors.empty, "MoleculeAjaxSystem")
   implicit val executionContext: ExecutionContextExecutor = system.executionContext
   val MoleculeRpc = "MoleculeRpc"
@@ -27,28 +28,28 @@ case class MoleculeRpcResponse(interface: String, port: Int) {
         byteBufferResultFuture
           .map(_.array())
           .recover { e =>
-            println("---- MoleculeRpcResponse, unexpected ajax response:\n" + msg(path, e))
+            logger.warn("---- MoleculeRpcResponse, unexpected ajax response:\n" + msg(path, e))
             throw e
           }
 
       case Left(error) =>
-        println(s"##### MoleculeRpcResponse, server failure:\n" + error)
+        logger.error(s"##### MoleculeRpcResponse, server failure:\n" + error)
         error match {
           case PathNotFound(path: List[String]) =>
             Future.failed(new RuntimeException(s"PathNotFound($path)"))
 
           case HandlerError(exc: Throwable) =>
-            printStackTrace(exc)
+            logger.error(exc.getStackTrace.mkString("\n"))
             Future.failed(new RuntimeException(s"HandlerError(${msg(path, exc)})"))
 
           case DeserializerError(exc: Throwable) =>
-            printStackTrace(exc)
+            logger.error(exc.getStackTrace.mkString("\n"))
             Future.failed(new RuntimeException(s"DeserializerError(${msg(path, exc)})"))
         }
     }
   } catch {
     case e: Throwable =>
-      println(
+      logger.error(
         s"""##### Unexpected pickle/router failure:
            |$e
            |--
@@ -62,9 +63,5 @@ case class MoleculeRpcResponse(interface: String, port: Int) {
        |$exc
        |--
        |${exc.getStackTrace.mkString("\n")}""".stripMargin
-  }
-
-  private def printStackTrace(exc: Throwable) = {
-    println(exc.getStackTrace.mkString("\n"))
   }
 }

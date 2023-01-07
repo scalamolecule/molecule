@@ -9,13 +9,15 @@ import molecule.core.util.JavaConversions
 import molecule.db.datomic.facade.DatomicConn_JVM
 import molecule.db.datomic.query.DatomicModel2Query
 import molecule.db.datomic.util.DatomicApiLoader
+import scribe.Logging
+import scribe.data.MDC
 import scala.concurrent.{ExecutionContext, Future}
 
 class DatomicQueryOpsImpl[Tpl](elements: Seq[Element])
   extends DatomicModel2Query[Tpl](elements)
     with QueryOps[Tpl]
     with JavaConversions
-    with DatomicApiLoader {
+    with DatomicApiLoader with Logging {
 
   // Refinements - prevent no-sense combinations todo
   override def take(n: Int): DatomicQueryOpsImpl[Tpl] = this
@@ -25,11 +27,52 @@ class DatomicQueryOpsImpl[Tpl](elements: Seq[Element])
 
   override def get(implicit conn0: Connection, ec: ExecutionContext): Future[List[Tpl]] = {
     Future {
-      val sortedRows = getSortedRows
+      val conn = conn0.asInstanceOf[DatomicConn_JVM]
+      val db   = conn.peerConn.db()
+      isFree = conn.isFreeVersion
+
+      // Retrieve
+      val rows = getQueries(conn.optimizeQuery) match {
+        case ("", query)       => Peer.q(query, db +: inputs: _*)
+        case (preQuery, query) =>
+          // Pre-query
+          val preRows = Peer.q(preQuery, db +: preInputs: _*)
+          val preIds  = new java.util.HashSet[Long](preRows.size())
+          preRows.forEach { row =>
+            preIds.add(row.get(0).asInstanceOf[Long])
+          }
+          // Main query using entity ids from pre-query
+          Peer.q(query, db +: inputs :+ preIds: _*)
+      }
+
+      // Sort
+      val sorters    = getFlatSorters(sortss)
+      val sortedRows = sorters.length match {
+        case 0 => new jArrayList(rows)
+        case n =>
+          val nestedIdsCount = nestedIds.length
+          val sortedRows     = new jArrayList(rows)
+          val comparator     = new Comparator[Row] {
+            override def compare(a: Row, b: Row): Int = {
+              var i      = 0
+              var result = 0
+              do {
+                result = sorters(i)(nestedIdsCount)(a, b)
+                i += 1
+              } while (result == 0 && i != n)
+              result
+            }
+          }
+          Collections.sort(sortedRows, comparator)
+          sortedRows
+      }
+
+      logger.debug(sortedRows.toArray().mkString("\n"))
 
       // Remove started composite groups that turned out to have only tacit attributes
       aritiess = aritiess.map(_.filterNot(_.isEmpty))
 
+      // Organize in List of expected Tpl's
       lazy val tuples = List.newBuilder[Tpl]
       val result = if (isNested) {
         rows2nested(sortedRows)
@@ -47,58 +90,6 @@ class DatomicQueryOpsImpl[Tpl](elements: Seq[Element])
     }.flatten
   }
 
-
-  private def getSortedRows(implicit conn0: Connection): jArrayList[Row] = {
-    val conn = conn0.asInstanceOf[DatomicConn_JVM]
-    val db   = conn.peerConn.db()
-    isFree = conn.isFreeVersion
-    val rows = getQueries(conn.optimizeQuery) match {
-      case ("", query)       => Peer.q(query, db +: inputs: _*)
-      case (preQuery, query) =>
-        // Pre-query
-        val preRows = Peer.q(preQuery, db +: preInputs: _*)
-        val preIds  = new java.util.HashSet[Long](preRows.size())
-        preRows.forEach { row =>
-          preIds.add(row.get(0).asInstanceOf[Long])
-        }
-        // Main query using entity ids from pre-query
-        Peer.q(query, db +: inputs :+ preIds: _*)
-    }
-
-    println("RAW rows:")
-    rows.forEach(row => println(row))
-
-    val sortedRows = sortRows(rows)
-    println("SORTED rows:")
-    sortedRows.forEach(row => println(row))
-    sortedRows
-  }
-
-
-  // Helpers
-
-  def sortRows(rows: jCollection[Row]): jArrayList[Row] = {
-    val sorters = getFlatSorters(sortss)
-    sorters.length match {
-      case 0 => new jArrayList(rows)
-      case n =>
-        val nestedIdsCount = nestedIds.length
-        val sortedRows     = new jArrayList(rows)
-        val comparator     = new Comparator[Row] {
-          override def compare(a: Row, b: Row): Int = {
-            var i      = 0
-            var result = 0
-            do {
-              result = sorters(i)(nestedIdsCount)(a, b)
-              i += 1
-            } while (result == 0 && i != n)
-            result
-          }
-        }
-        Collections.sort(sortedRows, comparator)
-        sortedRows
-    }
-  }
 
   override def inspect(implicit conn0: Connection, ec: ExecutionContext): Future[Unit] = {
     val conn = conn0.asInstanceOf[DatomicConn_JVM]
@@ -123,7 +114,7 @@ class DatomicQueryOpsImpl[Tpl](elements: Seq[Element])
       val output = rows.take(100).zipWithIndex.map { case (row, i) =>
         s"ROW ${i + 1}:".padTo(7, ' ') + row
       }.mkString("\n")
-      println(
+      logger.info(
         s"""
            |--------------------------------------------------------------------------
            |${elements.mkString("\n")}

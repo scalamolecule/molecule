@@ -1,9 +1,11 @@
 package molecule.base.util
 
 import java.io.{BufferedWriter, File, FileWriter}
+import scribe.Logging
 
 
-abstract class CodeGenTemplate(val fileName: String, dir: String, basePath: String) extends CodeGenBase {
+abstract class CodeGenTemplate(val fileName: String, dir: String, basePath: String)
+  extends CodeGenBase with Logging {
   val path: String = basePath + dir
   val fileName2    = if (fileName == "package") "package" else fileName + "_"
 
@@ -61,7 +63,7 @@ abstract class CodeGenTemplate(val fileName: String, dir: String, basePath: Stri
 
   def generate: Unit = {
     mkFile(fileName2, content)
-    println(s"Generated $path/$fileName2.scala")
+    logger.info(s"Generated $path/$fileName2.scala")
   }
 
   protected def mkFile(fileName: String, body: String): Unit = {

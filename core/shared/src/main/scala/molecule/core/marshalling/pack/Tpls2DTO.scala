@@ -4,11 +4,12 @@ import java.net.URI
 import java.util.{Date, UUID}
 import molecule.boilerplate.ast.Model._
 import molecule.core.marshalling.DTO
+import scribe.Logging
 import scala.collection.mutable.ListBuffer
 
 
 case class Tpls2DTO(elements: Seq[Element], tpls: Seq[Product])
-  extends Packers_ with PackTuple {
+  extends Packers_ with PackTuple with Logging {
 
   def pack: DTO = try {
     if (tpls.nonEmpty) {
@@ -18,7 +19,7 @@ case class Tpls2DTO(elements: Seq[Element], tpls: Seq[Product])
     dto
   } catch{
     case e: Throwable =>
-      println(e.getStackTrace.mkString("\n"))
+      logger.error(e.getStackTrace.mkString("\n"))
       throw e
   }
 

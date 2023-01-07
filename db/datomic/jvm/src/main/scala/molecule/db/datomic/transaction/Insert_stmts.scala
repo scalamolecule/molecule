@@ -5,6 +5,7 @@ import molecule.boilerplate.ast.Model._
 import molecule.core.transaction.{Insert, Insert2Data, InsertResolvers_, Save}
 import molecule.core.util.ModelUtils
 import molecule.core.validation.CheckConflictingAttrs
+import scribe.Logging
 import scala.collection.mutable.ListBuffer
 
 
@@ -12,20 +13,13 @@ trait Insert_stmts
   extends DatomicTxBase_JVM
     with Insert2Data
     with DatomicDataType_JVM
-    with ModelUtils { self: Insert with InsertResolvers_ =>
+    with ModelUtils with Logging { self: Insert with InsertResolvers_ =>
 
   override protected val prevRefs: ListBuffer[AnyRef] = new ListBuffer[AnyRef]
 
-  def getStmts(
-    elements: Seq[Element],
-    tpls: Seq[Product],
-    debug: Boolean = true
-  ): Data = {
+  def getStmts(elements: Seq[Element], tpls: Seq[Product]): Data = {
     initTxBase(elements)
-    if (debug) {
-      println("\n\n--- INSERT -----------------------------------------------------------------------")
-      elements.foreach(println)
-    }
+
     // Resolve tx meta elements separately and merge append
     val (mainElements, txMetaElements) = elements.last match {
       case TxMetaData(txMetaElements) => (elements.init, txMetaElements)
@@ -44,10 +38,7 @@ trait Insert_stmts
         .getRawStmts(txMetaElements, datomicTx, false)
       stmts.addAll(txMetaStmts)
     }
-    if (debug) {
-      println("---")
-      stmts.forEach(stmt => println(stmt))
-    }
+    logger.debug(("INSERT:" +: elements).mkString("\n"), "\n\n", stmts.toArray().mkString("\n"))
     stmts
   }
 

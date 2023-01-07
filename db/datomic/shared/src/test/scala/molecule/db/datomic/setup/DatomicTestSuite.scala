@@ -7,8 +7,10 @@ import molecule.core.util.Executor._
 import molecule.core.util.JavaConversions
 import molecule.coreTests.util.AggrUtils
 import org.scalactic.TripleEquals
+import scribe.Level
+import scribe.format._
 import utest._
-import utest.framework.Formatter
+import utest.framework.{Formatter => uFormatter}
 import scala.concurrent.Future
 
 trait DatomicTestSuite extends TestSuite with CoreData
@@ -17,6 +19,29 @@ trait DatomicTestSuite extends TestSuite with CoreData
   with JavaConversions
   with TripleEquals
   with AggrUtils {
+
+
+  // See scribe.format.Formatter
+  val logFormatter = Formatter.fromBlocks(
+    groupBySecond(
+      cyan(bold(dateFull)),
+      string(" ["),
+      bold(levelColoredPaddedRight),
+      string("]"),
+      space,
+      green(position),
+      newLine,
+    ),
+    multiLine(messages),
+    mdc,
+  )
+
+  scribe.Logger.root
+    .clearHandlers()
+    .clearModifiers()
+    .withHandler(formatter = logFormatter, minimumLevel = Some(Level.Trace))
+    .replace()
+
 
   lazy val isJsPlatform: Boolean = isJsPlatform_
   lazy val protocol    : String  = protocol_
@@ -41,7 +66,7 @@ trait DatomicTestSuite extends TestSuite with CoreData
     //      })
   }
 
-  override def utestFormatter: Formatter = new Formatter {
+  override def utestFormatter: uFormatter = new uFormatter {
     override def formatIcon(success: Boolean): ufansi.Str = {
       formatResultColor(success)(
         (if (success) "+ " else "X ") + platformSystemProtocol

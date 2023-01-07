@@ -19,16 +19,11 @@ class DatomicQueryOpsImpl[Tpl](elements: Seq[Element])
     val conn = conn0.asInstanceOf[DatomicConn_JS]
     conn.rpc.query(conn.proxy, elements)
       .map {
-        case Right(dto) =>
-          //          println("=== dto: " + dto.oneInt)
-          //          println("=== dto: " + dto.levelCounts.head)
-          //          println("=== dto: " + dto.setInt)
-          DTO2tpls[Tpl](elements, dto).unpack
+        case Right(dto) => DTO2tpls[Tpl](elements, dto).unpack
         case Left(exc)  => throw exc
-      }.recover {
-      case e: Throwable =>
-        printStackTrace(e)
-        throw e
-    }
+      }
+      .recover {
+        case e: Throwable => throw e
+      }
   }
 }

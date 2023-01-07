@@ -4,6 +4,7 @@ import molecule.base.util.exceptions.MoleculeException
 import molecule.boilerplate.ast.Model._
 import molecule.core.query.Model2Query
 import molecule.db.datomic.query.casting._
+import scribe.Logging
 import scala.annotation.tailrec
 import scala.collection.mutable.ArrayBuffer
 
@@ -21,7 +22,7 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
     with CastNestedOptLeaf_[Tpl]
     with Nest[Tpl]
     with NestOpt_[Tpl]
-    {
+    with Logging {
 
   final lazy val preInputs: Seq[AnyRef] = renderRules(rules ++ preRules) ++ preArgs
   final lazy val inputs   : Seq[AnyRef] = renderRules(rules) ++ args
@@ -65,30 +66,26 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
       val preQuery   = renderQuery(
         preSortIds, preFind, widh, in ++ preIn, where ++ preWhere, hasRules, optimized
       )
-      println("\n--- PRE-QUERY -------------------------------------------------")
-      println(preQuery)
-      if (preInputs.nonEmpty) {
-        preInputs.foreach {
-          case a: Array[_] => println(a.toList)
-          case other       => println(other)
-        }
-      }
       preQuery
     }
 
-    println("\n\n--- QUERY ------------------------------------------------------------------------")
-    elements.foreach(println)
-    println("---")
-    println(mainQuery)
-    if (inputs.nonEmpty) {
-      println("---")
-      inputs.foreach {
-        case a: Array[_] => println(a.toList)
-        case other       => println(other)
+    // Log queries
+    val preQueryStrs = if (preQuery.nonEmpty) Seq(s"\nPRE-QUERY:\n$preQuery") else Nil
+    val inputsStrs = if (inputs.nonEmpty) {
+      "" +: inputs.map {
+        case a: Array[_] => a.toList.toString
+        case other       => other.toString
       }
-    }
+    } else Nil
+    logger.debug(
+      ("QUERY:" +: elements).mkString("\n"),
+      "\n\n",
+      ((mainQuery +: inputsStrs) ++ preQueryStrs).mkString("\n")
+    )
+
     (preQuery, mainQuery)
   }
+
 
   final def getEidQueryWithInputs: (Att, Seq[AnyRef]) = {
     (getQueries(false)._2, inputs)
