@@ -10,9 +10,11 @@ import scala.concurrent.{ExecutionContext, Future}
 class DatomicInsertOpsJS(elements: Seq[Element], tpls: Seq[Product]) extends InsertOps {
 
   override def transact(implicit conn0: Connection, ec: ExecutionContext): Future[TxReport] = {
-    val conn                      = conn0.asInstanceOf[DatomicConn_JS]
-    val (tplElements, txElements) = splitElements(elements)
-    val tplData                   = Tpls2DTO(tplElements, tpls).pack
-    conn.rpc.insert(conn.proxy, tplElements, tplData, txElements).future
+    Future { // (catch exceptions before rpc call)
+      val conn                      = conn0.asInstanceOf[DatomicConn_JS]
+      val (tplElements, txElements) = splitElements(elements)
+      val tplData                   = Tpls2DTO(tplElements, tpls).pack
+      conn.rpc.insert(conn.proxy, tplElements, tplData, txElements).future
+    }.flatten
   }
 }

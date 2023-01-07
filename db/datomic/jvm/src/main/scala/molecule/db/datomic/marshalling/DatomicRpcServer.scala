@@ -25,7 +25,7 @@ object DatomicRpcServer extends MoleculeRpcResponse("localhost", 8080) with App 
     .bind(route)
     .map(_.addToCoordinatedShutdown(hardTerminationDeadline = 120.seconds))
     .onComplete {
-      case Success(b) => println(s"Ajax server is running ${b.localAddress} ")
+      case Success(b) => println(s"Akka http server is running ${b.localAddress} ")
       case Failure(e) => println(s"there was an error starting the server $e")
     }
 

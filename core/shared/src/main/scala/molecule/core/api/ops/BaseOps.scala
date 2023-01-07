@@ -10,9 +10,7 @@ trait BaseOps extends ModelUtils {
     def future: Future[T] = {
       fut.map {
         case Right(result) => result
-        case Left(exc)     =>
-          //          printStackTrace(exc) // Not useful on JS side
-          throw exc
+        case Left(exc)     => throw exc
       }
     }
   }

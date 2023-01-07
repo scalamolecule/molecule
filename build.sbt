@@ -114,6 +114,10 @@ lazy val baseSettings: Seq[Def.Setting[_]] = Seq(
     "-language:existentials",
     "-Yrangepos"
   ),
+  //  javacOptions := Seq(
+  //    "-XX:+HeapDumpOnOutOfMemoryError"
+  //    "-XX:HeapDumpPath=/Users/mg/molecule/molecule2/project/resources/heapdumps",
+  //  ),
   libraryDependencies ++= Seq(
     "org.scalameta" %% "scalameta" % "4.5.10",
     "com.lihaoyi" %%% "utest" % "0.7.11" % Test,
@@ -276,12 +280,8 @@ lazy val boilerplateSettings: Seq[Def.Setting[_]] = {
     // Prevent current dsl files from colliding with generated code
     unmanagedSources / excludeFilter :=
       (if (generateGeneric) {
-        val genericDir =
-          (baseDirectory.value / dslPath).getCanonicalPath
-        new SimpleFileFilter(f =>
-          f.getCanonicalPath
-            .startsWith(genericDir + "/")
-        )
+        val genericDir = (baseDirectory.value / dslPath).getCanonicalPath
+        new SimpleFileFilter(f => f.getCanonicalPath.startsWith(genericDir + "/"))
       } else NothingFilter),
 
     // Copy generated dsl code to project
@@ -292,15 +292,11 @@ lazy val boilerplateSettings: Seq[Def.Setting[_]] = {
             val dirGenerated = new File(
               (sourceManaged.value / "main/molecule/boilerplate/api/generic").getCanonicalPath
             )
-            val dirShared    =
-              new File((baseDirectory.value / dslPath).getCanonicalPath)
-            val isJvm        = baseDirectory.value.toString.endsWith("jvm")
+            val dirShared    = new File((baseDirectory.value / dslPath).getCanonicalPath)
             // Source files have been created at this point by the sbt-molecule plugin
             if (dirGenerated.exists() && dirShared.exists()) {
               IO.copyDirectory(dirGenerated, dirShared, true)
-              println(
-                "Copied generated generic dsl code to project source code."
-              )
+              println("Copied generated generic dsl code to project source code.")
               IO.delete(dirGenerated)
               println("Deleted generated generic dsl code. " + dirGenerated)
             }
@@ -309,12 +305,9 @@ lazy val boilerplateSettings: Seq[Def.Setting[_]] = {
       }
       .triggeredBy(Compile / compile)
       .value
-
-    //    libraryDependencies ++= Seq(
-    //      "org.scalameta" %% "scalameta" % "4.5.10"
-    //    )
   )
 }
+
 
 lazy val testSettings: Seq[Def.Setting[_]] = {
   Seq(
@@ -336,6 +329,7 @@ lazy val testSettings: Seq[Def.Setting[_]] = {
 
     // Ensure clojure loads correctly for async tests run from sbt
     Test / classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.Flat,
+
     buildInfoPackage := "moleculeBuildInfo",
     buildInfoKeys := Seq[BuildInfoKey](
       name,
@@ -385,42 +379,15 @@ lazy val testSettings: Seq[Def.Setting[_]] = {
       val jvmTests    = path("jvm")
       val sharedTests = path("shared")
       val allowed     = Seq(
-        //        sharedTests + "/expr",
         //        jvmTests + "/restore",
-        //        sharedTests + "/core/api"
-        //        sharedTests + "/core/attribute",
-        //        sharedTests + "/core/attrMap",
-        //        sharedTests + "/core/bidirectionals",
-        //        sharedTests + "/core/crud",
-        //        sharedTests + "/core/expression/equality",
-        //        sharedTests + "/core/input1",
-        //        sharedTests + "/core/input2",
-        //        sharedTests + "/core/input3",
-        //        sharedTests + "/core/json",
-        //        sharedTests + "/core/nested",
-        //        sharedTests + "/core/obj",
-        //        sharedTests + "/core/pagination",
-        //        sharedTests + "/core/ref",
-        //        sharedTests + "/core/sorting",
-        //        sharedTests + "/db/datomic/composite",
-        //        sharedTests + "/db/datomic/entity",
-        //        sharedTests + "/db/datomic/generic",
-        //        sharedTests + "/db/datomic/partitions",
-        //        sharedTests + "/db/datomic/time",
-        //        sharedTests + "/db/datomic/txMetaData",
-        //        sharedTests + "/examples/datomic/dayOfDatomic",
-        //        sharedTests + "/examples/datomic/mbrainz",
-        //        sharedTests + "/examples/datomic/seattle",
-        //        sharedTests + "/examples/gremlin/gettingStarted",
-        //        sharedTests + "/sbtmolecule/codeGen",
-        //            sharedTests + "/Adhoc.scala",
-
-//        sharedTests + "/aggr",
-//        sharedTests + "/composite",
-//        sharedTests + "/crud",
-//        sharedTests + "/expr",
-        sharedTests + "/relation",
-        //        sharedTests,
+        //        sharedTests + "/aggr",
+        //        sharedTests + "/composite",
+        //        sharedTests + "/crud",
+        //        sharedTests + "/expr",
+        //        sharedTests + "/relation",
+        //        sharedTests + "/sort",
+        //        sharedTests + "/txMetaData",
+        sharedTests,
         jvmTests + "/AdhocJVM.scala",
         jsTests + "/AdhocJs.scala",
       )
@@ -450,8 +417,6 @@ lazy val testSettings: Seq[Def.Setting[_]] = {
       //      // Please download from https://cognitect.com/dev-tools and install locally per included instructions
       //      "com.datomic" % "dev-local" % DatomicSettings.devLocalVersion
     )
-    //  )
-    //}
   ) ++ (
     if (DatomicSettings.useFree)
       Nil // Datomic free version is already default in `molecule` module

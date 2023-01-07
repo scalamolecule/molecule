@@ -60,8 +60,6 @@ object NestedTypes extends DatomicTestSuite {
 
         _ <- if (useFree)
           pullBooleanBug(Ref.i_(6).Nss.*?(Ns.boolean.a1).query)
-//          Ref.i_(6).Nss.*?(Ns.boolean.a1).query.get.map(_ ==> List(List(boolean1, boolean2)))
-//          Ref.i_(6).Nss.*?(Ns.boolean.a1).query.get.map(_ ==> List(List()))
         else
           Ref.i_(6).Nss.*?(Ns.boolean.a1).query.get.map(_ ==> List(List(boolean1, boolean2)))
       } yield ()

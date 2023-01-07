@@ -24,10 +24,12 @@ object AdhocJs extends DatomicTestSuite {
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
-        _ <- (R3.i + Ns.i.R1.i).insert(0, (1, 2)).transact
+        _ <- (Ns.i(1) + R2.i(2)).insert(1, 2).transact
+          .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
+          err ==> "Can't insert attributes with an applied value. Found:\n" +
+            "AttrOneManInt(Ns,i,Appl,List(1),None,None,None)"
+        }
 
-        _ <- R3.i.query.get.map(_ ==> List(0))
-        _ <- (R3.i + Ns.R1.i_).query.get.map(_ ==> List(0))
 
       } yield ()
     }
