@@ -12,7 +12,7 @@ trait UnpackTpls[Tpl] extends ModelUtils { self: DTO2tpls[Tpl] =>
 
   @tailrec
   final protected def resolveUnpackers(
-    elements: Seq[Element],
+    elements: List[Element],
     unpackers: List[() => Any],
     level: Int
   ): List[() => Any] = {
@@ -69,7 +69,7 @@ trait UnpackTpls[Tpl] extends ModelUtils { self: DTO2tpls[Tpl] =>
   }
 
   private def unpackTxMetaData(
-    txMetaDataElements: Seq[Element],
+    txMetaDataElements: List[Element],
     level: Int
   ): List[() => Any] = {
     resolveUnpackers(txMetaDataElements, Nil, level)
@@ -77,7 +77,7 @@ trait UnpackTpls[Tpl] extends ModelUtils { self: DTO2tpls[Tpl] =>
 
   private def unpackComposite(
     level: Int,
-    compositeElements: Seq[Element]
+    compositeElements: List[Element]
   ): Seq[() => Any] = {
     countValueAttrs(compositeElements) match {
       case 0 => Nil
@@ -89,7 +89,7 @@ trait UnpackTpls[Tpl] extends ModelUtils { self: DTO2tpls[Tpl] =>
 
   private def unpackNested(
     level: Int,
-    nestedElements: Seq[Element]
+    nestedElements: List[Element]
   ): () => Any = {
     // Recursively unpack nested levels
     val unpackNestedData = getUnpacker(nestedElements, level)

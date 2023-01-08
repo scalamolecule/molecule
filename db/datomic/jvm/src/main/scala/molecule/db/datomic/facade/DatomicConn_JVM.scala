@@ -8,11 +8,11 @@ import datomic.Util.readAll
 import datomic.db.{Datum => PeerDatom}
 import datomic.{Connection => DatomicConnection, Datom => _, _}
 import molecule.base.util.exceptions.MoleculeException
+import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.api.{Connection, TxReport}
 import molecule.core.marshalling.{DatomicPeerProxy, MoleculeRpc}
 import molecule.db.datomic.marshalling.DatomicRpcJVM
 import molecule.db.datomic.transaction.DatomicDataType_JVM
-import scribe.Logging
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.jdk.CollectionConverters._
@@ -22,7 +22,9 @@ case class DatomicConn_JVM(
   override val proxy: DatomicPeerProxy,
   peerConn: DatomicConnection,
   isFreeVersion: Boolean
-) extends Connection(proxy) with DatomicDataType_JVM with Logging {
+) extends Connection(proxy)
+  with DatomicDataType_JVM
+  with MoleculeLogging {
 
   override def db: Database = peerConn.db()
 

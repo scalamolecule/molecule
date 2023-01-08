@@ -1,23 +1,24 @@
 package molecule.db.datomic.api.ops
 
-import java.util.{Collections, Comparator, ArrayList => jArrayList, Collection => jCollection}
+import java.util.{Collections, Comparator, ArrayList => jArrayList}
 import datomic.Peer
 import molecule.boilerplate.ast.Model._
+import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.api.Connection
 import molecule.core.api.ops.QueryOps
 import molecule.core.util.JavaConversions
 import molecule.db.datomic.facade.DatomicConn_JVM
 import molecule.db.datomic.query.DatomicModel2Query
 import molecule.db.datomic.util.DatomicApiLoader
-import scribe.Logging
-import scribe.data.MDC
+import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
 
-class DatomicQueryOpsImpl[Tpl](elements: Seq[Element])
+class DatomicQueryOpsImpl[Tpl](elements: List[Element])
   extends DatomicModel2Query[Tpl](elements)
     with QueryOps[Tpl]
     with JavaConversions
-    with DatomicApiLoader with Logging {
+    with DatomicApiLoader
+    with MoleculeLogging {
 
   // Refinements - prevent no-sense combinations todo
   override def take(n: Int): DatomicQueryOpsImpl[Tpl] = this
@@ -73,17 +74,17 @@ class DatomicQueryOpsImpl[Tpl](elements: Seq[Element])
       aritiess = aritiess.map(_.filterNot(_.isEmpty))
 
       // Organize in List of expected Tpl's
-      lazy val tuples = List.newBuilder[Tpl]
+      lazy val tuples = ListBuffer.empty[Tpl]
       val result = if (isNested) {
         rows2nested(sortedRows)
       } else if (isNestedOpt) {
         pullCastss = pullCastss :+ pullCasts.toList
         pullSortss = pullSortss :+ pullSorts.sortBy(_._1).map(_._2).toList
-        sortedRows.forEach(row => tuples.addOne(pullRow2tpl(row)))
+        sortedRows.forEach(row => tuples += pullRow2tpl(row))
         tuples.result()
       } else {
         val row2tpl = castRow2Tpl(aritiess.head, castss.head, 0, None)
-        sortedRows.forEach(row => tuples.addOne(row2tpl(row).asInstanceOf[Tpl]))
+        sortedRows.forEach(row => tuples += row2tpl(row).asInstanceOf[Tpl])
         tuples.result()
       }
       Future(result)

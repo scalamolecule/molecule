@@ -42,31 +42,31 @@ object NestedExpr extends DatomicTestSuite {
         _ <- Ns.i_.Rs1.*?(R1.i(1)).query.get
           .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
           err ==> "Expressions not allowed in optional nested data structure. Found:\n" +
-            "AttrOneManInt(R1,i,Appl,List(1),None,None,None)"
+            """AttrOneManInt("R1", "i", Appl, Seq(1), None, None, None)"""
         }
 
         _ <- Ns.i_.Rs1.*?(R1.i.<(2)).query.get
           .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
           err ==> "Expressions not allowed in optional nested data structure. Found:\n" +
-            "AttrOneManInt(R1,i,Lt,List(2),None,None,None)"
+            """AttrOneManInt("R1", "i", Lt, Seq(2), None, None, None)"""
         }
 
         _ <- Ns.i_.Rs1.*?(R1.i.<=(2)).query.get
           .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
           err ==> "Expressions not allowed in optional nested data structure. Found:\n" +
-            "AttrOneManInt(R1,i,Le,List(2),None,None,None)"
+            """AttrOneManInt("R1", "i", Le, Seq(2), None, None, None)"""
         }
 
         _ <- Ns.i_.Rs1.*?(R1.i.>(2)).query.get
           .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
           err ==> "Expressions not allowed in optional nested data structure. Found:\n" +
-            "AttrOneManInt(R1,i,Gt,List(2),None,None,None)"
+            """AttrOneManInt("R1", "i", Gt, Seq(2), None, None, None)"""
         }
 
         _ <- Ns.i_.Rs1.*?(R1.i.>=(2)).query.get
           .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
           err ==> "Expressions not allowed in optional nested data structure. Found:\n" +
-            "AttrOneManInt(R1,i,Ge,List(2),None,None,None)"
+            """AttrOneManInt("R1", "i", Ge, Seq(2), None, None, None)"""
         }
       } yield ()
     }

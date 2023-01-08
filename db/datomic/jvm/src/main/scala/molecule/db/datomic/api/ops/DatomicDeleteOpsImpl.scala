@@ -9,7 +9,7 @@ import molecule.db.datomic.transaction.{DatomicTxBase_JVM, Delete_stmts}
 import scala.concurrent.{ExecutionContext, Future}
 
 class DatomicDeleteOpsImpl(
-  elements: Seq[Element],
+  elements: List[Element],
   isMultiple: Boolean = false
 ) extends DatomicTxBase_JVM with DeleteOps {
 

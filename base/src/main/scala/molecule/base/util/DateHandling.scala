@@ -3,10 +3,9 @@ package molecule.base.util
 import java.time._
 import java.time.format.DateTimeFormatter
 import java.util.{Date, TimeZone}
-import scribe.Logging
 
 
-trait DateHandling extends RegexMatching with Logging {
+trait DateHandling extends RegexMatching {
 
   def localZoneOffset: ZoneOffset = OffsetDateTime.now().getOffset
   def localOffset: String = localZoneOffset.toString
@@ -14,7 +13,6 @@ trait DateHandling extends RegexMatching with Logging {
 
   private def error(err: String): Nothing = {
     val err1 = "[DateHandling]  " + err
-    logger.error(err1)
     throw new IllegalArgumentException(err1)
   }
 

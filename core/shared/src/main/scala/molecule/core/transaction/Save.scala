@@ -9,7 +9,7 @@ import scala.annotation.tailrec
 class Save(isTx: Boolean = false) { self: Save2Data =>
 
   @tailrec
-  final protected def resolve(elements: Seq[Element]): Unit = {
+  final protected def resolve(elements: List[Element]): Unit = {
     elements match {
       case element :: tail => element match {
         case a: Attr =>

@@ -77,7 +77,7 @@ object UpdateSet_filter extends DatomicTestSuite {
         _ <- Ns.ints_(42).ints(1).update.transact
           .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
           err ==> "Can only lookup entity with card-one attribute value. Found:\n" +
-            "AttrSetTacInt(Ns,ints,Appl,List(Set(42)),None,None,None)"
+            """AttrSetTacInt("Ns", "ints", Appl, Seq(Set(42)), None, None, None)"""
         }
       } yield ()
     }

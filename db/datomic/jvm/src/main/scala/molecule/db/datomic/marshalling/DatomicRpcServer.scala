@@ -11,7 +11,8 @@ import molecule.core.marshalling.Boopicklers._
 import molecule.core.marshalling.{MoleculeRpc, MoleculeRpcResponse}
 import sloth._
 import scala.concurrent.Future
-import scala.io.StdIn
+import scala.concurrent.duration.DurationInt
+import scala.util.{Failure, Success}
 
 
 /** Akka Http RPC server responding to molecule ajax requests */
@@ -47,10 +48,21 @@ object DatomicRpcServer extends MoleculeRpcResponse("localhost", 8080) with App 
     }
   }
 
-  val bindingFuture = Http().newServerAt(interface, port).bind(route)
-  println(s"Server online at http://localhost:8088/\nPress RETURN to stop...")
-  StdIn.readLine()
-  bindingFuture
-    .flatMap(_.unbind())
-    .onComplete(_ => system.terminate())
+  Http()
+    .newServerAt(interface, port)
+    .bind(route)
+    .map(_.addToCoordinatedShutdown(hardTerminationDeadline = 120.seconds))
+    .onComplete {
+      case Success(b) => println(s"Akka http server is running ${b.localAddress} ")
+      case Failure(e) => println(s"there was an error starting the server $e")
+    }
+
+  // This creates problems with `sbt -client` --> project datomicJS not loading..
+  // (don't know if this variation is better, need to consult some Akka Http expert)
+  //  val bindingFuture = Http().newServerAt(interface, port).bind(route)
+  //  println(s"Server online at http://localhost:8088/\nPress RETURN to stop...")
+  //  scala.io.StdIn.readLine()
+  //  bindingFuture
+  //    .flatMap(_.unbind())
+  //    .onComplete(_ => system.terminate())
 }

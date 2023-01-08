@@ -5,7 +5,6 @@ import codegen.BoilerplateGenBase
 object _CompositeInit extends BoilerplateGenBase("CompositeInit", "/api") {
   val content = {
     val traits = (0 to 22).map(arity => Trait(arity).body).mkString("\n")
-    //       |import scala.language.higherKinds
     s"""// GENERATED CODE ********************************
        |package molecule.boilerplate.api
        |
@@ -52,13 +51,13 @@ object _CompositeInit extends BoilerplateGenBase("CompositeInit", "/api") {
        |trait CompositeInitBase
        |
        |trait CompositeInitOp_0[Tpl] extends CompositeInitBase { self: Molecule[Tpl] =>
-       |  protected def _composite00    (compositeElements: Seq[Element]): Composite_00     = Composite_00(Seq(Composite(elements), Composite(compositeElements)))
-       |  protected def _composite01[T1](compositeElements: Seq[Element]): Composite_01[T1] = Composite_01(Seq(Composite(elements), Composite(compositeElements)))
+       |  protected def _composite00    (compositeElements: List[Element]): Composite_00     = Composite_00(List(Composite(elements), Composite(compositeElements)))
+       |  protected def _composite01[T1](compositeElements: List[Element]): Composite_01[T1] = Composite_01(List(Composite(elements), Composite(compositeElements)))
        |}
        |
        |trait CompositeInitOp_n[Tpl] extends CompositeInitBase { self: Molecule[Tpl] =>
-       |  protected def _composite01[T1    ](compositeElements: Seq[Element]): Composite_01[T1    ] = Composite_01(Seq(Composite(elements), Composite(compositeElements)))
-       |  protected def _composite02[T1, T2](compositeElements: Seq[Element]): Composite_02[T1, T2] = Composite_02(Seq(Composite(elements), Composite(compositeElements)))
+       |  protected def _composite01[T1    ](compositeElements: List[Element]): Composite_01[T1    ] = Composite_01(List(Composite(elements), Composite(compositeElements)))
+       |  protected def _composite02[T1, T2](compositeElements: List[Element]): Composite_02[T1, T2] = Composite_02(List(Composite(elements), Composite(compositeElements)))
        |}
        |$traits
        |""".stripMargin

@@ -204,13 +204,13 @@ object UpdateOne_uniqueAttr extends DatomicTestSuite {
         _ <- Unique.int_(1).string_("x").s("c").update.transact
           .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
           err ==> "Can only apply one unique attribute value for update. Found:\n" +
-            "AttrOneTacString(Unique,string,Appl,List(x),None,None,None)"
+            """AttrOneTacString("Unique", "string", Appl, Seq("x"), None, None, None)"""
         }
 
         _ <- Unique.ints_(1).s("b").update.transact
           .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
           err ==> "Can only lookup entity with card-one attribute value. Found:\n" +
-            "AttrSetTacInt(Unique,ints,Appl,List(Set(1)),None,None,None)"
+            """AttrSetTacInt("Unique", "ints", Appl, Seq(Set(1)), None, None, None)"""
         }
       } yield ()
     }

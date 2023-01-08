@@ -17,11 +17,11 @@ class Update(
 
   @tailrec
   final protected def resolve(
-    elements: Seq[Element],
+    elements: List[Element],
     eids: Seq[AnyRef],
-    filterElements: Seq[Element],
+    filterElements: List[Element],
     data: Seq[(String, String, String, Seq[AnyRef], Boolean)]
-  ): (Seq[AnyRef], Seq[Element], Seq[(String, String, String, Seq[AnyRef], Boolean)]) = {
+  ): (Seq[AnyRef], List[Element], Seq[(String, String, String, Seq[AnyRef], Boolean)]) = {
     elements match {
       case element :: tail => element match {
         case a: Attr => a match {
@@ -68,12 +68,12 @@ class Update(
 
 
   private def oneMan(
-    tail: Seq[Element],
+    tail: List[Element],
     eids: Seq[AnyRef],
-    filterElements: Seq[Element],
+    filterElements: List[Element],
     data: Seq[(String, String, String, Seq[AnyRef], Boolean)],
     dataAttr: AttrOneMan
-  ): (Seq[AnyRef], Seq[Element], Seq[(String, String, String, Seq[AnyRef], Boolean)]) = {
+  ): (Seq[AnyRef], List[Element], Seq[(String, String, String, Seq[AnyRef], Boolean)]) = {
     if (dataAttr.op != Appl)
       throw MoleculeException(s"Can't $update attributes without an applied value. Found:\n" + dataAttr)
     if (isUpsert) {
@@ -118,12 +118,12 @@ class Update(
   }
 
   private def oneTac(
-    tail: Seq[Element],
+    tail: List[Element],
     eids: Seq[AnyRef],
-    filterElements: Seq[Element],
+    filterElements: List[Element],
     data: Seq[(String, String, String, Seq[AnyRef], Boolean)],
     filterAttr: AttrOneTac
-  ): (Seq[AnyRef], Seq[Element], Seq[(String, String, String, Seq[AnyRef], Boolean)]) = {
+  ): (Seq[AnyRef], List[Element], Seq[(String, String, String, Seq[AnyRef], Boolean)]) = {
     filterAttr match {
       case AttrOneTacLong("_Generic", "eids", Appl, eids1, _, _, _, _) =>
         if (eids.nonEmpty)
@@ -151,12 +151,12 @@ class Update(
 
 
   private def setApply(
-    tail: Seq[Element],
+    tail: List[Element],
     eids: Seq[AnyRef],
-    filterElements: Seq[Element],
+    filterElements: List[Element],
     data: Seq[(String, String, String, Seq[AnyRef], Boolean)],
     dataAttr: AttrSetMan
-  ): (Seq[AnyRef], Seq[Element], Seq[(String, String, String, Seq[AnyRef], Boolean)]) = {
+  ): (Seq[AnyRef], List[Element], Seq[(String, String, String, Seq[AnyRef], Boolean)]) = {
     if (isUpsert) {
       // Disregard if value already exists
       resolve(tail, eids, filterElements, data :+ setAdd(dataAttr, true))
@@ -276,8 +276,8 @@ class Update(
 
 
   private def extractSubElements(
-    elements: Seq[Element]
-  ): (Seq[AnyRef], Seq[Element], Seq[(String, String, String, Seq[AnyRef], Boolean)]) = {
+    elements: List[Element]
+  ): (Seq[AnyRef], List[Element], Seq[(String, String, String, Seq[AnyRef], Boolean)]) = {
     resolve(elements, Nil, Nil, Nil)
   }
 

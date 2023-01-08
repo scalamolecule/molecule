@@ -3,19 +3,20 @@ package molecule.core.marshalling.unpack
 import java.net.URI
 import java.util.{Date, UUID}
 import molecule.boilerplate.ast.Model._
+import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.marshalling.DTO
-import scribe.Logging
+import scala.collection.mutable.ListBuffer
 
 
-case class DTO2tpls[Tpl](elements: Seq[Element], dto: DTO)
-  extends Unpackers_[Tpl] with UnpackTpls[Tpl] with Logging {
+case class DTO2tpls[Tpl](elements: List[Element], dto: DTO)
+  extends Unpackers_[Tpl] with UnpackTpls[Tpl] with MoleculeLogging {
 
-  protected lazy val tuples = List.newBuilder[Tpl]
+  protected lazy val tuples = ListBuffer.empty[Tpl]
 
   def unpack: List[Tpl] = try {
     val unpackRow = getUnpacker(elements, 0)
     (0 until rowCount).foreach { _ =>
-      tuples.addOne(unpackRow().asInstanceOf[Tpl])
+      tuples += unpackRow().asInstanceOf[Tpl]
     }
     tuples.result()
   } catch {

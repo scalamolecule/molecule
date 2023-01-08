@@ -14,7 +14,7 @@ object _Packers extends CoreGenBase("Packers", "/marshalling/pack") {
        |
        |trait ${fileName}_ { self: Tpls2DTO =>
        |
-       |  def getPacker(elements: Seq[Element]): Product => Unit = {
+       |  def getPacker(elements: List[Element]): Product => Unit = {
        |    val packers: List[Product => Unit] = resolvePackers(elements, Nil)
        |    packers.length match {
        |      $unpackX

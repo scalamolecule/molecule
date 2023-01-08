@@ -192,7 +192,7 @@ object UpdateSet_eid extends DatomicTestSuite {
           _ <- Ns(42).ints_?(Some(Set(1))).update.transact
             .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
             err ==> "Can't update optional values. Found:\n" +
-              "AttrSetOptInt(Ns,ints,Appl,Some(List(Set(1))),None,None,None)"
+              """AttrSetOptInt("Ns", "ints", Appl, Some(Seq(Set(1))), None, None, None)"""
           }
         } yield ()
       }

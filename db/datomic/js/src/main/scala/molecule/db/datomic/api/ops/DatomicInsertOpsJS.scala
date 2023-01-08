@@ -7,7 +7,7 @@ import molecule.core.marshalling.pack.Tpls2DTO
 import molecule.db.datomic.facade.DatomicConn_JS
 import scala.concurrent.{ExecutionContext, Future}
 
-class DatomicInsertOpsJS(elements: Seq[Element], tpls: Seq[Product]) extends InsertOps {
+class DatomicInsertOpsJS(elements: List[Element], tpls: Seq[Product]) extends InsertOps {
 
   override def transact(implicit conn0: Connection, ec: ExecutionContext): Future[TxReport] = {
     Future { // (catch exceptions before rpc call)

@@ -11,7 +11,7 @@ object CheckConflictingAttrs {
 
   @tailrec
   final def apply(
-    elements: Seq[Element],
+    elements: List[Element],
     prev: Array[Array[Array[String]]] = Array(Array(Array.empty[String])),
     level: Int = 0,
     group: Int = 0,

@@ -5,9 +5,8 @@ import java.time._
 import java.time.format.DateTimeFormatter
 import java.util.{Date, UUID}
 import molecule.base.util.exceptions.MoleculeException
-import scribe.Logging
 
-trait BaseHelpers extends DateHandling with Logging {
+trait BaseHelpers extends DateHandling {
 
   def clean(attr: String): String = attr.last match {
     case '_' => attr.init
@@ -59,15 +58,17 @@ trait BaseHelpers extends DateHandling with Logging {
     }
   }
 
-  final def os(opt: Option[Set[_]]): String = opt.fold("None")(v => s"""Some(${render(v)})""")
+  final def os(opt: Option[Set[_]]): String = opt.fold("None")(vs => s"""Some(${vs.map(render).mkString(", ")})""")
 
   final def o(opt: Option[Any]): String = opt.fold("None")(v => s"""Some(${render(v)})""")
+  final def opt(opt: Option[Any]): String = opt.fold("None")(v => s"""Some($v)""")
+
 
   final def oStr(opt: Option[String]): String = if (opt.isEmpty) "None" else s"""Some("${opt.get}")"""
   final def oStr2(opt: Option[String]): String = if (opt.isEmpty) "None" else {
     val s = escStr(opt.get)
     if (s.contains("\n"))
-//      s"Some(\n\"\"\"$s\"\"\")"
+    //      s"Some(\n\"\"\"$s\"\"\")"
       s"Some(\n" + "\"\"\"" + s + "\"\"\")"
     else
       s"""Some("$s")"""
@@ -162,7 +163,7 @@ trait BaseHelpers extends DateHandling with Logging {
     times += n -> time2
     prevTime = time2
     val d = LocalDateTime.ofInstant(Instant.ofEpochMilli(elapsed), ZoneOffset.UTC)
-    logger.debug(s"TIME $n: " + formatter.format(d))
+    println(s"TIME $n: " + formatter.format(d))
   }
 
   protected def okIdent(name: String): String = name match {

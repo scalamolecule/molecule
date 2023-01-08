@@ -39,8 +39,8 @@ object _Nested extends BoilerplateGenBase("Nested", "/api") {
     val body =
       s"""
          |trait NestedOp${_0}${`[A..V]`} extends NestedBase { self: Molecule[$tpl] =>
-         |  protected def _nestedMan[Tpl](nestedElements: Seq[Element]): Tx${_1}[${`A..V, `}Seq[Tpl]] = new Tx${_1}[${`A..V, `}Seq[Tpl]](elements.init :+ Nested(elements.last.asInstanceOf[Ref], nestedElements))
-         |  protected def _nestedOpt[Tpl](nestedElements: Seq[Element]): Tx${_1}[${`A..V, `}Seq[Tpl]] = new Tx${_1}[${`A..V, `}Seq[Tpl]](elements.init :+ NestedOpt(elements.last.asInstanceOf[Ref], nestedElements))
+         |  protected def _nestedMan[Tpl](nestedElements: List[Element]): Tx${_1}[${`A..V, `}Seq[Tpl]] = new Tx${_1}[${`A..V, `}Seq[Tpl]](elements.init :+ Nested(elements.last.asInstanceOf[Ref], nestedElements))
+         |  protected def _nestedOpt[Tpl](nestedElements: List[Element]): Tx${_1}[${`A..V, `}Seq[Tpl]] = new Tx${_1}[${`A..V, `}Seq[Tpl]](elements.init :+ NestedOpt(elements.last.asInstanceOf[Ref], nestedElements))
          |}
          |
          |trait ${fileName}_$arity${`[A..V]`} extends NestedOp${_0}${`[A..V]`} { self: Molecule[$tpl] =>

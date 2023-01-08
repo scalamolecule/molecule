@@ -1,11 +1,11 @@
 package codegen
 
 import molecule.base.util.CodeGenTemplate
-import scribe.Logging
+import molecule.boilerplate.util.MoleculeLogging
 
 abstract class BoilerplateGenBase(fileName: String, dir: String)
   extends CodeGenTemplate(
     fileName,
     dir,
     "boilerplate/src/main/scala/molecule/boilerplate"
-  ) with Logging
+  ) with MoleculeLogging

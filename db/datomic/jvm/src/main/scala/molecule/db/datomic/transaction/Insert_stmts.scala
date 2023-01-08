@@ -1,23 +1,22 @@
 package molecule.db.datomic.transaction
 
-import java.util.Collections
 import molecule.boilerplate.ast.Model._
+import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.{Insert, Insert2Data, InsertResolvers_, Save}
 import molecule.core.util.ModelUtils
 import molecule.core.validation.CheckConflictingAttrs
-import scribe.Logging
 import scala.collection.mutable.ListBuffer
-
 
 trait Insert_stmts
   extends DatomicTxBase_JVM
     with Insert2Data
     with DatomicDataType_JVM
-    with ModelUtils with Logging { self: Insert with InsertResolvers_ =>
+    with ModelUtils
+    with MoleculeLogging { self: Insert with InsertResolvers_ =>
 
   override protected val prevRefs: ListBuffer[AnyRef] = new ListBuffer[AnyRef]
 
-  def getStmts(elements: Seq[Element], tpls: Seq[Product]): Data = {
+  def getStmts(elements: List[Element], tpls: Seq[Product]): Data = {
     initTxBase(elements)
 
     // Resolve tx meta elements separately and merge append
@@ -38,13 +37,16 @@ trait Insert_stmts
         .getRawStmts(txMetaElements, datomicTx, false)
       stmts.addAll(txMetaStmts)
     }
-    logger.debug(("INSERT:" +: elements).mkString("\n"), "\n\n", stmts.toArray().mkString("\n"))
+
+    val insertStrs = "INSERT:" +: elements :+ "" :+ stmts.toArray().mkString("\n")
+    logger.debug(insertStrs.mkString("\n").trim)
+
     stmts
   }
 
   override protected def addComposite(
     tplIndex: Int,
-    compositeElements: Seq[Element]
+    compositeElements: List[Element]
   ): Product => Unit = {
     hasComposites = true
     val composite2stmts = getResolver(compositeElements)
@@ -63,7 +65,7 @@ trait Insert_stmts
     tplIndex: Int,
     ns: String,
     refAttr: String,
-    nestedElements: Seq[Element]
+    nestedElements: List[Element]
   ): Product => Unit = {
     // Recursively resolve nested levels
     val nested2stmts = getResolver(nestedElements)

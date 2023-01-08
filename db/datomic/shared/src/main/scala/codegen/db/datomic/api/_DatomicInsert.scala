@@ -19,7 +19,7 @@ object _DatomicInsert extends DatomicGenBase("DatomicInsert", "/api") {
   case class Trait(arity: Int) extends TemplateVals(arity) {
     val body =
       s"""
-         |class ${fileName}_$arity[${`A..V`}](elements: Seq[Element])
+         |class ${fileName}_$arity[${`A..V`}](elements: List[Element])
          |  extends ${fileName}Impl(elements) with Insert_$arity[${`A..V`}]""".stripMargin
   }
 }

@@ -9,8 +9,8 @@ trait Insert2Data extends Action2Data { self: Insert =>
 
   protected val prevRefs: ListBuffer[AnyRef]
 
-  protected def addComposite(tplIndex: Int, elements: Seq[Element]): Product => Unit
-  protected def addNested(tplIndex: Int, ns: String, refAttr: String, elements: Seq[Element]): Product => Unit
+  protected def addComposite(tplIndex: Int, elements: List[Element]): Product => Unit
+  protected def addNested(tplIndex: Int, ns: String, refAttr: String, elements: List[Element]): Product => Unit
   protected def addV(ns: String, attr: String, n: Int, value: Any => Any): Product => Unit
   protected def addOptV(ns: String, attr: String, n: Int, value: Any => Any): Product => Unit
   protected def addTxV(ns: String, attr: String, n: Int, value: Any => Any): Product => Unit

@@ -6,7 +6,7 @@ import molecule.core.api.{Connection, TxReport}
 import molecule.db.datomic.facade.DatomicConn_JS
 import scala.concurrent._
 
-class DatomicSaveOpsImpl(elements: Seq[Element]) extends SaveOps {
+class DatomicSaveOpsImpl(elements: List[Element]) extends SaveOps {
 
   override def transact(implicit conn0: Connection, ec: ExecutionContext): Future[TxReport] = {
     val conn = conn0.asInstanceOf[DatomicConn_JS]

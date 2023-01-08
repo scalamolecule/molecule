@@ -3,14 +3,14 @@ package molecule.db.datomic.transaction
 import java.net.URI
 import java.util.{Date, UUID}
 import molecule.boilerplate.ast.Model._
+import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.{Save, Save2Data}
 import molecule.core.validation.CheckConflictingAttrs
-import scribe.Logging
 
-trait Save_stmts extends DatomicTxBase_JVM with Save2Data with Logging { self: Save =>
+trait Save_stmts extends DatomicTxBase_JVM with Save2Data with MoleculeLogging { self: Save =>
 
   def getRawStmts(
-    elements: Seq[Element],
+    elements: List[Element],
     eid: String,
     debug: Boolean = true,
     init: Boolean = true
@@ -26,12 +26,13 @@ trait Save_stmts extends DatomicTxBase_JVM with Save2Data with Logging { self: S
     resolve(elements)
 
     if (debug) {
-      logger.debug(("SAVE:" +: elements).mkString("\n"), "\n\n", stmts.toArray().mkString("\n"))
+      val saveStrs = "SAVE:" +: elements :+ "" :+ stmts.toArray().mkString("\n")
+      logger.debug(saveStrs.mkString("\n").trim)
     }
     stmts
   }
 
-  def getStmts(elements: Seq[Element]): Data = {
+  def getStmts(elements: List[Element]): Data = {
     initTxBase(elements)
     getRawStmts(elements, newId, init = false)
   }

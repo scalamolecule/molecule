@@ -2,14 +2,14 @@ package molecule.db.datomic.query
 
 import molecule.base.util.exceptions.MoleculeException
 import molecule.boilerplate.ast.Model._
+import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.query.Model2Query
 import molecule.db.datomic.query.casting._
-import scribe.Logging
 import scala.annotation.tailrec
 import scala.collection.mutable.ArrayBuffer
 
 
-class DatomicModel2Query[Tpl](elements: Seq[Element])
+class DatomicModel2Query[Tpl](elements: List[Element])
   extends Model2Query[Tpl]
     with ResolveExprOne[Tpl]
     with ResolveExprSet[Tpl]
@@ -22,7 +22,7 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
     with CastNestedOptLeaf_[Tpl]
     with Nest[Tpl]
     with NestOpt_[Tpl]
-    with Logging {
+    with MoleculeLogging {
 
   final lazy val preInputs: Seq[AnyRef] = renderRules(rules ++ preRules) ++ preArgs
   final lazy val inputs   : Seq[AnyRef] = renderRules(rules) ++ args
@@ -31,7 +31,7 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
 
     // Add 4th tx var to first attribute if tx value is needed
     @tailrec
-    def checkTx(elements: Seq[Element]): Unit = {
+    def checkTx(elements: List[Element]): Unit = {
       elements match {
         case element :: tail =>
           element match {
@@ -77,11 +77,8 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
         case other       => other.toString
       }
     } else Nil
-    logger.debug(
-      ("QUERY:" +: elements).mkString("\n"),
-      "\n\n",
-      ((mainQuery +: inputsStrs) ++ preQueryStrs).mkString("\n")
-    )
+    val queryStrs = (elements :+ "" :+ mainQuery) ++ inputsStrs ++ preQueryStrs
+    logger.debug(queryStrs.mkString("\n").trim)
 
     (preQuery, mainQuery)
   }
@@ -121,7 +118,7 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
   @tailrec
   final private def resolve(
     es: List[Var],
-    elements: Seq[Element]
+    elements: List[Element]
   ): List[Var] = elements match {
     case element :: tail => element match {
       case a: AttrOne                           => a match {
@@ -148,14 +145,14 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
   }
 
 
-  final private def resolveComposite(compositeElements: Seq[Element]): List[Var] = {
+  final private def resolveComposite(compositeElements: List[Element]): List[Var] = {
     aritiesComposite()
     // Use first entity id in each composite sub group
     resolve(List(firstEid), compositeElements)
   }
 
   final private def resolveNested(
-    es: List[Var], ref: Ref, nestedElements: Seq[Element]
+    es: List[Var], ref: Ref, nestedElements: List[Element]
   ): List[Var] = {
     isNested = true
     if (isNestedOpt)
@@ -167,7 +164,7 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
   }
 
   final private def resolveNestedOpt(
-    es: List[Var], nestedRef: Ref, nestedElements: Seq[Element]
+    es: List[Var], nestedRef: Ref, nestedElements: List[Element]
   ): List[Var] = {
     isNestedOpt = true
     if (isNested)
@@ -184,14 +181,14 @@ class DatomicModel2Query[Tpl](elements: Seq[Element])
     es
   }
 
-  final private def resolveTxMetaData(txElements: Seq[Element]): List[Var] = {
+  final private def resolveTxMetaData(txElements: List[Element]): List[Var] = {
     isTxMetaData = true
     // Use txVar as first entity id var for composite elements
     firstEid = txVar
     resolve(List(txVar), txElements)
   }
 
-  final private def validateRefNs(ref: Ref, nestedElements: Seq[Element]): Unit = {
+  final private def validateRefNs(ref: Ref, nestedElements: List[Element]): Unit = {
     val refName  = ref.refAttr.capitalize
     val nestedNs = nestedElements.head match {
       case a: Attr       => a.ns

@@ -3,6 +3,7 @@ package molecule.db.datomic.marshalling
 import java.util.UUID
 import molecule.base.util.exceptions.MoleculeException
 import molecule.boilerplate.ast.Model._
+import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.api.TxReport
 import molecule.core.marshalling.Boopicklers._
 import molecule.core.marshalling._
@@ -13,22 +14,23 @@ import molecule.core.util.Executor._
 import molecule.core.util.{JavaConversions, ModelUtils}
 import molecule.db.datomic.api.ops.DatomicQueryOpsImpl
 import molecule.db.datomic.facade.{DatomicConn_JVM, DatomicPeer}
-import molecule.db.datomic.query.Base
 import molecule.db.datomic.transaction._
-import scribe.Logging
+import molecule.db.datomic.util.DatomicApiLoader
 import scala.collection.mutable
 import scala.concurrent.Future
 
 object DatomicRpcJVM extends MoleculeRpc
   with DatomicTxBase_JVM
   with JavaConversions
-  with ModelUtils with Logging {
+  with DatomicApiLoader
+  with ModelUtils
+  with MoleculeLogging {
 
   // Api ---------------------------------------------
 
   override def query(
     proxy: ConnProxy,
-    elements: Seq[Element]
+    elements: List[Element]
   ): Future[Either[MoleculeException, DTO]] = either {
     for {
       conn <- getConn(proxy)
@@ -47,7 +49,7 @@ object DatomicRpcJVM extends MoleculeRpc
 
   override def save(
     proxy: ConnProxy,
-    elements: Seq[Element]
+    elements: List[Element]
   ): Future[Either[MoleculeException, TxReport]] = either {
     for {
       conn <- getConn(proxy)
@@ -58,9 +60,9 @@ object DatomicRpcJVM extends MoleculeRpc
 
   override def insert(
     proxy: ConnProxy,
-    tplElements: Seq[Element],
+    tplElements: List[Element],
     tplData: DTO,
-    txElements: Seq[Element],
+    txElements: List[Element],
   ): Future[Either[MoleculeException, TxReport]] = either {
     for {
       conn <- getConn(proxy)
@@ -81,7 +83,7 @@ object DatomicRpcJVM extends MoleculeRpc
 
   override def update(
     proxy: ConnProxy,
-    elements: Seq[Element],
+    elements: List[Element],
     isUpsert: Boolean,
     isMultiple: Boolean,
   ): Future[Either[MoleculeException, TxReport]] = either {
@@ -95,7 +97,7 @@ object DatomicRpcJVM extends MoleculeRpc
 
   override def delete(
     proxy: ConnProxy,
-    elements: Seq[Element],
+    elements: List[Element],
     isMultiple: Boolean
   ): Future[Either[MoleculeException, TxReport]] = either {
     for {
@@ -146,11 +148,15 @@ object DatomicRpcJVM extends MoleculeRpc
         protocol match {
           case "mem" =>
             DatomicPeer.recreateDbFromEdn(proxy, protocol, dbIdentifier, isFreeVersion)
-              .recover(exc => throw MoleculeException(exc.getMessage))
+              .recover {
+                case exc: Throwable => throw MoleculeException(exc.getMessage)
+              }
 
           case "free" | "dev" | "pro" =>
             Future(DatomicPeer.connect(proxy, protocol, dbIdentifier))
-              .recover(exc => throw MoleculeException(exc.getMessage))
+              .recover {
+                case exc: Throwable => throw MoleculeException(exc.getMessage)
+              }
 
           case other => Future.failed(MoleculeException(s"\nCan't serve Peer protocol `$other`."))
         }

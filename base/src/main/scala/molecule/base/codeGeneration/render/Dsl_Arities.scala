@@ -138,7 +138,7 @@ case class Dsl_Arities(schema: MetaSchema, namespace: MetaNs, arity: Int)
   val optAttrs = if (last) "" else opt.result().mkString("", "\n  ", "\n\n  ")
   val tacAttrs = tac.result().mkString("\n  ")
 
-  val elements = "override val elements: Seq[Element]"
+  val elements = "override val elements: List[Element]"
   val modelOps = s"ModelOps_$arity[${`A..V, `}t, $ns_0]"
 
   val resolvers = res.result().mkString("\n  ")

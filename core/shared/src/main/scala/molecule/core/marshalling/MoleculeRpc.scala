@@ -9,37 +9,37 @@ trait MoleculeRpc {
 
   def query(
     proxy: ConnProxy,
-    elements: Seq[Element]
+    elements: List[Element]
   ): Future[Either[MoleculeException, DTO]]
 
   def save(
     proxy: ConnProxy,
-    elements: Seq[Element]
+    elements: List[Element]
   ): Future[Either[MoleculeException, TxReport]]
 
   def insert(
     proxy: ConnProxy,
-    tplElements: Seq[Element],
+    tplElements: List[Element],
     tplData: DTO,
-    txElements: Seq[Element],
+    txElements: List[Element],
   ): Future[Either[MoleculeException, TxReport]]
 
   def update(
     proxy: ConnProxy,
-    elements: Seq[Element],
+    elements: List[Element],
     isUpsert: Boolean = false,
     isMultiple: Boolean = false,
   ): Future[Either[MoleculeException, TxReport]]
 
   def delete(
     proxy: ConnProxy,
-    elements: Seq[Element],
+    elements: List[Element],
     isMultiple: Boolean = false
   ): Future[Either[MoleculeException, TxReport]]
 
 
   //  def transact(
-  //    elements: Seq[Element]
+  //    elements: List[Element]
   //  ): Future[Either[MoleculeException, TxReport]]
   //
   //  def insert(

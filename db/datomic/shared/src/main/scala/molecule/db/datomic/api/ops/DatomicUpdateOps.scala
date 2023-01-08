@@ -5,7 +5,7 @@ import molecule.core.api.Connection
 import molecule.core.api.ops._
 
 class DatomicUpdateOps(
-  elements: Seq[Element],
+  elements: List[Element],
   isUpsert: Boolean = false,
   isMultiple: Boolean = false,
 ) extends DatomicUpdateOpsImpl(elements, isUpsert, isMultiple) with UpdateOps

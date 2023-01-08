@@ -4,13 +4,12 @@ import java.nio.ByteBuffer
 import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
 import boopickle.Default._
-import scribe.Logging
+import molecule.boilerplate.util.MoleculeLogging
 import sloth.ServerFailure.{DeserializerError, HandlerError, PathNotFound}
 import sloth._
 import scala.concurrent.{ExecutionContextExecutor, Future}
-import scala.util.control.NonFatal
 
-case class MoleculeRpcResponse(interface: String, port: Int) extends Logging {
+case class MoleculeRpcResponse(interface: String, port: Int) extends MoleculeLogging {
   implicit val system          : ActorSystem[Nothing]     = ActorSystem(Behaviors.empty, "MoleculeAjaxSystem")
   implicit val executionContext: ExecutionContextExecutor = system.executionContext
   val MoleculeRpc = "MoleculeRpc"
@@ -27,9 +26,10 @@ case class MoleculeRpcResponse(interface: String, port: Int) extends Logging {
       case Right(byteBufferResultFuture) =>
         byteBufferResultFuture
           .map(_.array())
-          .recover { e =>
-            logger.warn("---- MoleculeRpcResponse, unexpected ajax response:\n" + msg(path, e))
-            throw e
+          .recover {
+            case e: Throwable =>
+              logger.warn("---- MoleculeRpcResponse, unexpected ajax response:\n" + msg(path, e))
+              throw e
           }
 
       case Left(error) =>

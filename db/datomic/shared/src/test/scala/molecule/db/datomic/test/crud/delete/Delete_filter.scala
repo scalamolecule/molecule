@@ -180,7 +180,7 @@ object Delete_filter extends DatomicTestSuite {
           _ <- Ns.i.<=(2).delete.multiple.transact
             .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
             err ==> "Can only filter delete by values applied to tacit card-one attributes. Found:\n" +
-              "AttrOneManInt(Ns,i,Le,List(2),None,None,None)"
+              """AttrOneManInt("Ns", "i", Le, Seq(2), None, None, None)"""
           }
         } yield ()
       }

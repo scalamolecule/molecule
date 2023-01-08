@@ -7,8 +7,8 @@ import scala.annotation.tailrec
 
 trait ModelUtils {
 
-  protected def countValueAttrs(elements: Seq[Element]): Int = {
-    def countValueAttrs(es: Seq[Element]): Int = {
+  protected def countValueAttrs(elements: List[Element]): Int = {
+    def countValueAttrs(es: List[Element]): Int = {
       es.count {
         case _: Mandatory@unchecked => true
         case _: Optional@unchecked  => true
@@ -26,7 +26,7 @@ trait ModelUtils {
   }
 
   @tailrec
-  final protected def getInitialNs(elements: Seq[Element]): String = elements.head match {
+  final protected def getInitialNs(elements: List[Element]): String = elements.head match {
     case a: Attr       => a.ns
     case b: Ref        => b.ns
     case Composite(es) => getInitialNs(es)
@@ -34,7 +34,7 @@ trait ModelUtils {
   }
 
 
-  def splitElements(elements: Seq[Element]): (Seq[Element], Seq[Element]) = {
+  def splitElements(elements: List[Element]): (List[Element], List[Element]) = {
     elements.last match {
       case TxMetaData(txMetaElements) => (elements.init, txMetaElements)
       case _                          => (elements, Nil)

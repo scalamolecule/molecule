@@ -15,7 +15,7 @@ trait PackTuple extends ModelUtils { self: Tpls2DTO =>
 
   @tailrec
   final protected def resolvePackers(
-    elements: Seq[Element],
+    elements: List[Element],
     packers: List[Product => Unit],
     level: Int,
     tplIndex: Int
@@ -78,7 +78,7 @@ trait PackTuple extends ModelUtils { self: Tpls2DTO =>
 
 
   private def packTxMeta(
-    txMetaDataElements: Seq[Element],
+    txMetaDataElements: List[Element],
     level: Int,
     tplIndex: Int
   ): List[Product => Unit] = {
@@ -88,7 +88,7 @@ trait PackTuple extends ModelUtils { self: Tpls2DTO =>
   private def packComposite(
     level: Int,
     tplIndex: Int,
-    compositeElements: Seq[Element]
+    compositeElements: List[Element]
   ): Seq[Product => Unit] = {
     lazy val packCompositeData = getPacker(compositeElements, level)
     // Start from initial entity id for each composite sub group
@@ -102,7 +102,7 @@ trait PackTuple extends ModelUtils { self: Tpls2DTO =>
   private def packNested(
     level: Int,
     tplIndex: Int,
-    nestedElements: Seq[Element]
+    nestedElements: List[Element]
   ): Product => Unit = {
     // Recursively pack nested levels
     val packNestedData = getPacker(nestedElements, level)
@@ -110,7 +110,7 @@ trait PackTuple extends ModelUtils { self: Tpls2DTO =>
       case 1 => // Single nested values
         (tpl: Product) => {
           val nestedValues = tpl.productElement(tplIndex).asInstanceOf[Seq[Any]]
-          levelCounts(level).addOne(nestedValues.size)
+          levelCounts(level) += nestedValues.size
           nestedValues.foreach { nestedValue =>
             packNestedData(Tuple1(nestedValue))
           }
@@ -118,7 +118,7 @@ trait PackTuple extends ModelUtils { self: Tpls2DTO =>
       case _ =>
         (tpl: Product) => {
           val nestedTpls = tpl.productElement(tplIndex).asInstanceOf[Seq[Product]]
-          levelCounts(level).addOne(nestedTpls.size)
+          levelCounts(level) += nestedTpls.size
           nestedTpls.foreach(packNestedData)
         }
     }
@@ -139,70 +139,70 @@ trait PackTuple extends ModelUtils { self: Tpls2DTO =>
     }
   }
   private def packAttrOneManInt(tplIndex: Int): Product => Unit = {
-    (tpl: Product) => oneInt.addOne(tpl.productElement(tplIndex).toString.toInt)
+    (tpl: Product) => oneInt += tpl.productElement(tplIndex).toString.toInt
   }
   private def packAttrOneManDouble(tplIndex: Int): Product => Unit = {
-    (tpl: Product) => oneDouble.addOne(tpl.productElement(tplIndex).asInstanceOf[Double])
+    (tpl: Product) => oneDouble += tpl.productElement(tplIndex).asInstanceOf[Double]
   }
   private def packAttrOneManV(a: AttrOneMan, tplIndex: Int): Product => Unit = {
     a match {
-      case _: AttrOneManString => (tpl: Product) => oneString.addOne(tpl.productElement(tplIndex).asInstanceOf[String])
-      case _: AttrOneManInt    => (tpl: Product) => oneInt.addOne(tpl.productElement(tplIndex).toString.toInt)
-      case _: AttrOneManLong   => (tpl: Product) => oneLong.addOne(tpl.productElement(tplIndex).asInstanceOf[Long])
+      case _: AttrOneManString => (tpl: Product) => oneString += tpl.productElement(tplIndex).asInstanceOf[String]
+      case _: AttrOneManInt    => (tpl: Product) => oneInt += tpl.productElement(tplIndex).toString.toInt
+      case _: AttrOneManLong   => (tpl: Product) => oneLong += tpl.productElement(tplIndex).asInstanceOf[Long]
       case _: AttrOneManFloat  => (tpl: Product) =>
         tpl.productElement(tplIndex) match {
-          case f: Float  => oneFloat.addOne(f)
-          case d: Double => oneFloat.addOne(d.toFloat)
+          case f: Float  => oneFloat += f
+          case d: Double => oneFloat += d.toFloat
         }
 
-      case _: AttrOneManDouble     => (tpl: Product) => oneDouble.addOne(tpl.productElement(tplIndex).asInstanceOf[Double])
-      case _: AttrOneManBoolean    => (tpl: Product) => oneBoolean.addOne(tpl.productElement(tplIndex).asInstanceOf[Boolean])
-      case _: AttrOneManBigInt     => (tpl: Product) => oneBigInt.addOne(tpl.productElement(tplIndex).asInstanceOf[BigInt])
-      case _: AttrOneManBigDecimal => (tpl: Product) => oneBigDecimal.addOne(tpl.productElement(tplIndex).asInstanceOf[BigDecimal])
-      case _: AttrOneManDate       => (tpl: Product) => oneDate.addOne(tpl.productElement(tplIndex).asInstanceOf[Date])
-      case _: AttrOneManUUID       => (tpl: Product) => oneUUID.addOne(tpl.productElement(tplIndex).asInstanceOf[UUID])
-      case _: AttrOneManURI        => (tpl: Product) => oneURI.addOne(tpl.productElement(tplIndex).asInstanceOf[URI])
-      case _: AttrOneManByte       => (tpl: Product) => oneByte.addOne(tpl.productElement(tplIndex).asInstanceOf[Byte])
-      case _: AttrOneManShort      => (tpl: Product) => oneShort.addOne(tpl.productElement(tplIndex).asInstanceOf[Short])
-      case _: AttrOneManChar       => (tpl: Product) => oneChar.addOne(tpl.productElement(tplIndex).asInstanceOf[Char])
+      case _: AttrOneManDouble     => (tpl: Product) => oneDouble += tpl.productElement(tplIndex).asInstanceOf[Double]
+      case _: AttrOneManBoolean    => (tpl: Product) => oneBoolean += tpl.productElement(tplIndex).asInstanceOf[Boolean]
+      case _: AttrOneManBigInt     => (tpl: Product) => oneBigInt += tpl.productElement(tplIndex).asInstanceOf[BigInt]
+      case _: AttrOneManBigDecimal => (tpl: Product) => oneBigDecimal += tpl.productElement(tplIndex).asInstanceOf[BigDecimal]
+      case _: AttrOneManDate       => (tpl: Product) => oneDate += tpl.productElement(tplIndex).asInstanceOf[Date]
+      case _: AttrOneManUUID       => (tpl: Product) => oneUUID += tpl.productElement(tplIndex).asInstanceOf[UUID]
+      case _: AttrOneManURI        => (tpl: Product) => oneURI += tpl.productElement(tplIndex).asInstanceOf[URI]
+      case _: AttrOneManByte       => (tpl: Product) => oneByte += tpl.productElement(tplIndex).asInstanceOf[Byte]
+      case _: AttrOneManShort      => (tpl: Product) => oneShort += tpl.productElement(tplIndex).asInstanceOf[Short]
+      case _: AttrOneManChar       => (tpl: Product) => oneChar += tpl.productElement(tplIndex).asInstanceOf[Char]
     }
   }
 
   private def packAttrOneManSet(a: AttrOneMan, tplIndex: Int): Product => Unit = {
     a match {
-      case _: AttrOneManString     => (tpl: Product) => setString.addOne(tpl.productElement(tplIndex).asInstanceOf[Set[String]])
-      case _: AttrOneManInt        => (tpl: Product) => setInt.addOne(tpl.productElement(tplIndex).asInstanceOf[Set[Int]])
-      case _: AttrOneManLong       => (tpl: Product) => setLong.addOne(tpl.productElement(tplIndex).asInstanceOf[Set[Long]])
-      case _: AttrOneManFloat      => (tpl: Product) => setFloat.addOne(tpl.productElement(tplIndex).asInstanceOf[Set[Float]])
-      case _: AttrOneManDouble     => (tpl: Product) => setDouble.addOne(tpl.productElement(tplIndex).asInstanceOf[Set[Double]])
-      case _: AttrOneManBoolean    => (tpl: Product) => setBoolean.addOne(tpl.productElement(tplIndex).asInstanceOf[Set[Boolean]])
-      case _: AttrOneManBigInt     => (tpl: Product) => setBigInt.addOne(tpl.productElement(tplIndex).asInstanceOf[Set[BigInt]])
-      case _: AttrOneManBigDecimal => (tpl: Product) => setBigDecimal.addOne(tpl.productElement(tplIndex).asInstanceOf[Set[BigDecimal]])
-      case _: AttrOneManDate       => (tpl: Product) => setDate.addOne(tpl.productElement(tplIndex).asInstanceOf[Set[Date]])
-      case _: AttrOneManUUID       => (tpl: Product) => setUUID.addOne(tpl.productElement(tplIndex).asInstanceOf[Set[UUID]])
-      case _: AttrOneManURI        => (tpl: Product) => setURI.addOne(tpl.productElement(tplIndex).asInstanceOf[Set[URI]])
-      case _: AttrOneManByte       => (tpl: Product) => setByte.addOne(tpl.productElement(tplIndex).asInstanceOf[Set[Byte]])
-      case _: AttrOneManShort      => (tpl: Product) => setShort.addOne(tpl.productElement(tplIndex).asInstanceOf[Set[Short]])
-      case _: AttrOneManChar       => (tpl: Product) => setChar.addOne(tpl.productElement(tplIndex).asInstanceOf[Set[Char]])
+      case _: AttrOneManString     => (tpl: Product) => setString += tpl.productElement(tplIndex).asInstanceOf[Set[String]]
+      case _: AttrOneManInt        => (tpl: Product) => setInt += tpl.productElement(tplIndex).asInstanceOf[Set[Int]]
+      case _: AttrOneManLong       => (tpl: Product) => setLong += tpl.productElement(tplIndex).asInstanceOf[Set[Long]]
+      case _: AttrOneManFloat      => (tpl: Product) => setFloat += tpl.productElement(tplIndex).asInstanceOf[Set[Float]]
+      case _: AttrOneManDouble     => (tpl: Product) => setDouble += tpl.productElement(tplIndex).asInstanceOf[Set[Double]]
+      case _: AttrOneManBoolean    => (tpl: Product) => setBoolean += tpl.productElement(tplIndex).asInstanceOf[Set[Boolean]]
+      case _: AttrOneManBigInt     => (tpl: Product) => setBigInt += tpl.productElement(tplIndex).asInstanceOf[Set[BigInt]]
+      case _: AttrOneManBigDecimal => (tpl: Product) => setBigDecimal += tpl.productElement(tplIndex).asInstanceOf[Set[BigDecimal]]
+      case _: AttrOneManDate       => (tpl: Product) => setDate += tpl.productElement(tplIndex).asInstanceOf[Set[Date]]
+      case _: AttrOneManUUID       => (tpl: Product) => setUUID += tpl.productElement(tplIndex).asInstanceOf[Set[UUID]]
+      case _: AttrOneManURI        => (tpl: Product) => setURI += tpl.productElement(tplIndex).asInstanceOf[Set[URI]]
+      case _: AttrOneManByte       => (tpl: Product) => setByte += tpl.productElement(tplIndex).asInstanceOf[Set[Byte]]
+      case _: AttrOneManShort      => (tpl: Product) => setShort += tpl.productElement(tplIndex).asInstanceOf[Set[Short]]
+      case _: AttrOneManChar       => (tpl: Product) => setChar += tpl.productElement(tplIndex).asInstanceOf[Set[Char]]
     }
   }
 
   private def packAttrOneOpt(a: AttrOneOpt, tplIndex: Int): Product => Unit = {
     a match {
-      case _: AttrOneOptString     => (tpl: Product) => oneOptString.addOne(tpl.productElement(tplIndex).asInstanceOf[Option[String]])
-      case _: AttrOneOptInt        => (tpl: Product) => oneOptInt.addOne(tpl.productElement(tplIndex).asInstanceOf[Option[Int]])
-      case _: AttrOneOptLong       => (tpl: Product) => oneOptLong.addOne(tpl.productElement(tplIndex).asInstanceOf[Option[Long]])
-      case _: AttrOneOptFloat      => (tpl: Product) => oneOptFloat.addOne(tpl.productElement(tplIndex).asInstanceOf[Option[Float]])
-      case _: AttrOneOptDouble     => (tpl: Product) => oneOptDouble.addOne(tpl.productElement(tplIndex).asInstanceOf[Option[Double]])
-      case _: AttrOneOptBoolean    => (tpl: Product) => oneOptBoolean.addOne(tpl.productElement(tplIndex).asInstanceOf[Option[Boolean]])
-      case _: AttrOneOptBigInt     => (tpl: Product) => oneOptBigInt.addOne(tpl.productElement(tplIndex).asInstanceOf[Option[BigInt]])
-      case _: AttrOneOptBigDecimal => (tpl: Product) => oneOptBigDecimal.addOne(tpl.productElement(tplIndex).asInstanceOf[Option[BigDecimal]])
-      case _: AttrOneOptDate       => (tpl: Product) => oneOptDate.addOne(tpl.productElement(tplIndex).asInstanceOf[Option[Date]])
-      case _: AttrOneOptUUID       => (tpl: Product) => oneOptUUID.addOne(tpl.productElement(tplIndex).asInstanceOf[Option[UUID]])
-      case _: AttrOneOptURI        => (tpl: Product) => oneOptURI.addOne(tpl.productElement(tplIndex).asInstanceOf[Option[URI]])
-      case _: AttrOneOptByte       => (tpl: Product) => oneOptByte.addOne(tpl.productElement(tplIndex).asInstanceOf[Option[Byte]])
-      case _: AttrOneOptShort      => (tpl: Product) => oneOptShort.addOne(tpl.productElement(tplIndex).asInstanceOf[Option[Short]])
-      case _: AttrOneOptChar       => (tpl: Product) => oneOptChar.addOne(tpl.productElement(tplIndex).asInstanceOf[Option[Char]])
+      case _: AttrOneOptString     => (tpl: Product) => oneOptString += tpl.productElement(tplIndex).asInstanceOf[Option[String]]
+      case _: AttrOneOptInt        => (tpl: Product) => oneOptInt += tpl.productElement(tplIndex).asInstanceOf[Option[Int]]
+      case _: AttrOneOptLong       => (tpl: Product) => oneOptLong += tpl.productElement(tplIndex).asInstanceOf[Option[Long]]
+      case _: AttrOneOptFloat      => (tpl: Product) => oneOptFloat += tpl.productElement(tplIndex).asInstanceOf[Option[Float]]
+      case _: AttrOneOptDouble     => (tpl: Product) => oneOptDouble += tpl.productElement(tplIndex).asInstanceOf[Option[Double]]
+      case _: AttrOneOptBoolean    => (tpl: Product) => oneOptBoolean += tpl.productElement(tplIndex).asInstanceOf[Option[Boolean]]
+      case _: AttrOneOptBigInt     => (tpl: Product) => oneOptBigInt += tpl.productElement(tplIndex).asInstanceOf[Option[BigInt]]
+      case _: AttrOneOptBigDecimal => (tpl: Product) => oneOptBigDecimal += tpl.productElement(tplIndex).asInstanceOf[Option[BigDecimal]]
+      case _: AttrOneOptDate       => (tpl: Product) => oneOptDate += tpl.productElement(tplIndex).asInstanceOf[Option[Date]]
+      case _: AttrOneOptUUID       => (tpl: Product) => oneOptUUID += tpl.productElement(tplIndex).asInstanceOf[Option[UUID]]
+      case _: AttrOneOptURI        => (tpl: Product) => oneOptURI += tpl.productElement(tplIndex).asInstanceOf[Option[URI]]
+      case _: AttrOneOptByte       => (tpl: Product) => oneOptByte += tpl.productElement(tplIndex).asInstanceOf[Option[Byte]]
+      case _: AttrOneOptShort      => (tpl: Product) => oneOptShort += tpl.productElement(tplIndex).asInstanceOf[Option[Short]]
+      case _: AttrOneOptChar       => (tpl: Product) => oneOptChar += tpl.productElement(tplIndex).asInstanceOf[Option[Char]]
     }
   }
 
@@ -219,10 +219,10 @@ trait PackTuple extends ModelUtils { self: Tpls2DTO =>
     }
   }
   private def packAttrSetManInt(tplIndex: Int): Product => Unit = {
-    (tpl: Product) => oneInt.addOne(tpl.productElement(tplIndex).asInstanceOf[Int])
+    (tpl: Product) => oneInt += tpl.productElement(tplIndex).asInstanceOf[Int]
   }
   private def packAttrSetManDouble(tplIndex: Int): Product => Unit = {
-    (tpl: Product) => setDouble.addOne(tpl.productElement(tplIndex).asInstanceOf[Set[Double]])
+    (tpl: Product) => setDouble += tpl.productElement(tplIndex).asInstanceOf[Set[Double]]
   }
   private def packAttrSetManV(a: AttrSetMan, tplIndex: Int): Product => Unit = {
     a match {
@@ -261,32 +261,32 @@ trait PackTuple extends ModelUtils { self: Tpls2DTO =>
     }
   }
   private def packSet[T](tplIndex: Int, buf: ListBuffer[Set[T]]): Product => Unit = {
-    (tpl: Product) => buf.addOne(tpl.productElement(tplIndex).asInstanceOf[Set[T]])
+    (tpl: Product) => buf += tpl.productElement(tplIndex).asInstanceOf[Set[T]]
   }
   private def packSets[T](tplIndex: Int, buf: ListBuffer[Set[T]]): Product => Unit = {
     (tpl: Product) => {
       val sets = tpl.productElement(tplIndex).asInstanceOf[Set[Set[T]]]
-      levelCounts.head.addOne(sets.size)
-      sets.foreach(set => buf.addOne(set))
+      levelCounts.head += sets.size
+      sets.foreach(set => buf += set)
     }
   }
 
   private def packAttrSetOpt(a: AttrSetOpt, tplIndex: Int): Product => Unit = {
     a match {
-      case _: AttrSetOptString     => (tpl: Product) => setOptString.addOne(tpl.productElement(tplIndex).asInstanceOf[Option[Set[String]]])
-      case _: AttrSetOptInt        => (tpl: Product) => setOptInt.addOne(tpl.productElement(tplIndex).asInstanceOf[Option[Set[Int]]])
-      case _: AttrSetOptLong       => (tpl: Product) => setOptLong.addOne(tpl.productElement(tplIndex).asInstanceOf[Option[Set[Long]]])
-      case _: AttrSetOptFloat      => (tpl: Product) => setOptFloat.addOne(tpl.productElement(tplIndex).asInstanceOf[Option[Set[Float]]])
-      case _: AttrSetOptDouble     => (tpl: Product) => setOptDouble.addOne(tpl.productElement(tplIndex).asInstanceOf[Option[Set[Double]]])
-      case _: AttrSetOptBoolean    => (tpl: Product) => setOptBoolean.addOne(tpl.productElement(tplIndex).asInstanceOf[Option[Set[Boolean]]])
-      case _: AttrSetOptBigInt     => (tpl: Product) => setOptBigInt.addOne(tpl.productElement(tplIndex).asInstanceOf[Option[Set[BigInt]]])
-      case _: AttrSetOptBigDecimal => (tpl: Product) => setOptBigDecimal.addOne(tpl.productElement(tplIndex).asInstanceOf[Option[Set[BigDecimal]]])
-      case _: AttrSetOptDate       => (tpl: Product) => setOptDate.addOne(tpl.productElement(tplIndex).asInstanceOf[Option[Set[Date]]])
-      case _: AttrSetOptUUID       => (tpl: Product) => setOptUUID.addOne(tpl.productElement(tplIndex).asInstanceOf[Option[Set[UUID]]])
-      case _: AttrSetOptURI        => (tpl: Product) => setOptURI.addOne(tpl.productElement(tplIndex).asInstanceOf[Option[Set[URI]]])
-      case _: AttrSetOptByte       => (tpl: Product) => setOptByte.addOne(tpl.productElement(tplIndex).asInstanceOf[Option[Set[Byte]]])
-      case _: AttrSetOptShort      => (tpl: Product) => setOptShort.addOne(tpl.productElement(tplIndex).asInstanceOf[Option[Set[Short]]])
-      case _: AttrSetOptChar       => (tpl: Product) => setOptChar.addOne(tpl.productElement(tplIndex).asInstanceOf[Option[Set[Char]]])
+      case _: AttrSetOptString     => (tpl: Product) => setOptString += tpl.productElement(tplIndex).asInstanceOf[Option[Set[String]]]
+      case _: AttrSetOptInt        => (tpl: Product) => setOptInt += tpl.productElement(tplIndex).asInstanceOf[Option[Set[Int]]]
+      case _: AttrSetOptLong       => (tpl: Product) => setOptLong += tpl.productElement(tplIndex).asInstanceOf[Option[Set[Long]]]
+      case _: AttrSetOptFloat      => (tpl: Product) => setOptFloat += tpl.productElement(tplIndex).asInstanceOf[Option[Set[Float]]]
+      case _: AttrSetOptDouble     => (tpl: Product) => setOptDouble += tpl.productElement(tplIndex).asInstanceOf[Option[Set[Double]]]
+      case _: AttrSetOptBoolean    => (tpl: Product) => setOptBoolean += tpl.productElement(tplIndex).asInstanceOf[Option[Set[Boolean]]]
+      case _: AttrSetOptBigInt     => (tpl: Product) => setOptBigInt += tpl.productElement(tplIndex).asInstanceOf[Option[Set[BigInt]]]
+      case _: AttrSetOptBigDecimal => (tpl: Product) => setOptBigDecimal += tpl.productElement(tplIndex).asInstanceOf[Option[Set[BigDecimal]]]
+      case _: AttrSetOptDate       => (tpl: Product) => setOptDate += tpl.productElement(tplIndex).asInstanceOf[Option[Set[Date]]]
+      case _: AttrSetOptUUID       => (tpl: Product) => setOptUUID += tpl.productElement(tplIndex).asInstanceOf[Option[Set[UUID]]]
+      case _: AttrSetOptURI        => (tpl: Product) => setOptURI += tpl.productElement(tplIndex).asInstanceOf[Option[Set[URI]]]
+      case _: AttrSetOptByte       => (tpl: Product) => setOptByte += tpl.productElement(tplIndex).asInstanceOf[Option[Set[Byte]]]
+      case _: AttrSetOptShort      => (tpl: Product) => setOptShort += tpl.productElement(tplIndex).asInstanceOf[Option[Set[Short]]]
+      case _: AttrSetOptChar       => (tpl: Product) => setOptChar += tpl.productElement(tplIndex).asInstanceOf[Option[Set[Char]]]
     }
   }
 }

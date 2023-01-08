@@ -10,7 +10,7 @@ trait ModelTransformations {
 
   def unexpected(element: Element) = throw MoleculeException("Unexpected element: " + element)
 
-  protected def toInt(es: Seq[Element], kw: Kw): Seq[Element] = {
+  protected def toInt(es: List[Element], kw: Kw): List[Element] = {
     val last = es.last match {
       case a: AttrOneMan => AttrOneManInt(a.ns, a.attr, Fn(kw.toString))
       case a: AttrSetMan => AttrSetManInt(a.ns, a.attr, Fn(kw.toString))
@@ -19,7 +19,7 @@ trait ModelTransformations {
     es.init :+ last
   }
 
-  protected def toDouble(es: Seq[Element], kw: Kw): Seq[Element] = {
+  protected def toDouble(es: List[Element], kw: Kw): List[Element] = {
     val last = es.last match {
       case a: AttrOneMan => AttrOneManDouble(a.ns, a.attr, Fn(kw.toString))
       case a: AttrSetMan => AttrSetManDouble(a.ns, a.attr, Fn(kw.toString))
@@ -28,7 +28,7 @@ trait ModelTransformations {
     es.init :+ last
   }
 
-  protected def toSet(es: Seq[Element], kw: Kw, n: Option[Int] = None): Seq[Element] = {
+  protected def toSet(es: List[Element], kw: Kw, n: Option[Int] = None): List[Element] = {
     val last = es.last match {
       case a: AttrOneMan => a match {
         case a: AttrOneManString     => a.copy(op = Fn(kw.toString, n))
@@ -67,7 +67,7 @@ trait ModelTransformations {
     es.init :+ last
   }
 
-  protected def asIs(es: Seq[Element], kw: Kw): Seq[Element] = {
+  protected def asIs(es: List[Element], kw: Kw): List[Element] = {
     val last = es.last match {
       case a: AttrOneMan => a match {
         case a: AttrOneManString     => a.copy(op = Fn(kw.toString))
@@ -106,7 +106,7 @@ trait ModelTransformations {
     es.init :+ last
   }
 
-  protected def addOne[T](es: Seq[Element], op: Op, vs: Seq[T]): Seq[Element] = {
+  protected def addOne[T](es: List[Element], op: Op, vs: Seq[T]): List[Element] = {
     val last = es.last match {
       case a: AttrOneMan => a match {
         case a: AttrOneManString     => a.copy(op = op, vs = vs.asInstanceOf[Seq[String]])
@@ -145,7 +145,7 @@ trait ModelTransformations {
     es.init :+ last
   }
 
-  protected def addOptOne[T](es: Seq[Element], op: Op, vs: Option[Seq[T]]): Seq[Element] = {
+  protected def addOptOne[T](es: List[Element], op: Op, vs: Option[Seq[T]]): List[Element] = {
     val last = es.last match {
       case a: AttrOneOpt => a match {
         case a: AttrOneOptString     => a.copy(op = op, vs = vs.asInstanceOf[Option[Seq[String]]])
@@ -168,7 +168,7 @@ trait ModelTransformations {
     es.init :+ last
   }
 
-  protected def addSet[T](es: Seq[Element], op: Op, vs: Seq[Set[T]]): Seq[Element] = {
+  protected def addSet[T](es: List[Element], op: Op, vs: Seq[Set[T]]): List[Element] = {
     val last = es.last match {
       case a: AttrSetMan => a match {
         case a: AttrSetManString     => a.copy(op = op, vs = vs.asInstanceOf[Seq[Set[String]]])
@@ -207,7 +207,7 @@ trait ModelTransformations {
     es.init :+ last
   }
 
-  protected def addOptSet[T](es: Seq[Element], op: Op, vs: Option[Seq[Set[T]]]): Seq[Element] = {
+  protected def addOptSet[T](es: List[Element], op: Op, vs: Option[Seq[Set[T]]]): List[Element] = {
     val last = es.last match {
       case a: AttrSetOpt => a match {
         case a: AttrSetOptString     => a.copy(op = op, vs = vs.asInstanceOf[Option[Seq[Set[String]]]])
@@ -230,7 +230,7 @@ trait ModelTransformations {
     es.init :+ last
   }
 
-  protected def addSort(es: Seq[Element], sort: String): Seq[Element] = {
+  protected def addSort(es: List[Element], sort: String): List[Element] = {
     val last = es.last match {
       case a: AttrOneMan => a match {
         case a: AttrOneManString     => a.copy(sort = Some(sort))

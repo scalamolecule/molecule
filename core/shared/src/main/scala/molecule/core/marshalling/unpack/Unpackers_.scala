@@ -5,7 +5,7 @@ import molecule.boilerplate.ast.Model._
 
 trait Unpackers_[Tpl] { self: DTO2tpls[Tpl] =>
 
-  def getUnpacker(elements: Seq[Element], level: Int): () => Any = {
+  def getUnpacker(elements: List[Element], level: Int): () => Any = {
     val unpackers: List[() => Any] = resolveUnpackers(elements, Nil, level)
     unpackers.length match {
       case 1 => resolve1(unpackers)

@@ -8,7 +8,7 @@ import molecule.core.util.JavaConversions
 import molecule.db.datomic.facade.DatomicConn_JS
 import scala.concurrent.{ExecutionContext, Future}
 
-class DatomicQueryOpsImpl[Tpl](elements: Seq[Element])
+class DatomicQueryOpsImpl[Tpl](elements: List[Element])
   extends QueryOps[Tpl] with JavaConversions {
 
   override def take(n: Int): DatomicQueryOpsImpl[Tpl] = this

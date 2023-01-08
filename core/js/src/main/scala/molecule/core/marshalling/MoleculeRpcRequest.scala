@@ -2,18 +2,17 @@ package molecule.core.marshalling
 
 import java.nio.ByteBuffer
 import boopickle.Default._
+import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.util.Executor._
 import org.scalajs.dom
 import org.scalajs.dom.XMLHttpRequest
-import scribe.Logging
 import sloth._
 import scala.concurrent.{Future, Promise}
 import scala.scalajs.js.typedarray.TypedArrayBufferOps._
 import scala.scalajs.js.typedarray._
 
-
 case class MoleculeRpcRequest(interface: String, port: Int)
-  extends RequestTransport[ByteBuffer, Future] with Logging {
+  extends RequestTransport[ByteBuffer, Future] with MoleculeLogging {
 
   case class PostException(xhr: dom.XMLHttpRequest) extends Exception {
     def isTimeout: Boolean = xhr.status == 0 && xhr.readyState == 4

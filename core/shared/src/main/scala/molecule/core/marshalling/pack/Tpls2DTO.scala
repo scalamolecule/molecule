@@ -3,13 +3,13 @@ package molecule.core.marshalling.pack
 import java.net.URI
 import java.util.{Date, UUID}
 import molecule.boilerplate.ast.Model._
+import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.marshalling.DTO
-import scribe.Logging
 import scala.collection.mutable.ListBuffer
 
 
-case class Tpls2DTO(elements: Seq[Element], tpls: Seq[Product])
-  extends Packers_ with PackTuple with Logging {
+case class Tpls2DTO(elements: List[Element], tpls: Seq[Product])
+  extends Packers_ with PackTuple with MoleculeLogging {
 
   def pack: DTO = try {
     if (tpls.nonEmpty) {

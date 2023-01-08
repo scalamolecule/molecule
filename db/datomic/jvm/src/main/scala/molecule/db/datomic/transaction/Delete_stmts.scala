@@ -3,16 +3,16 @@ package molecule.db.datomic.transaction
 import datomic.Peer
 import molecule.base.util.exceptions.MoleculeException
 import molecule.boilerplate.ast.Model._
+import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.{Delete, Delete2Data}
 import molecule.db.datomic.facade.DatomicConn_JVM
 import molecule.db.datomic.query.DatomicModel2Query
-import scribe.Logging
 
-trait Delete_stmts extends DatomicTxBase_JVM with Delete2Data with Logging { self: Delete =>
+trait Delete_stmts extends DatomicTxBase_JVM with Delete2Data with MoleculeLogging { self: Delete =>
 
   def getStmtsData(
     conn: DatomicConn_JVM,
-    elements: Seq[Element],
+    elements: List[Element],
     isMultiple: Boolean
   ): Data = {
     initTxBase(elements)
@@ -47,7 +47,9 @@ trait Delete_stmts extends DatomicTxBase_JVM with Delete2Data with Logging { sel
       eidRows.forEach(eidRow => addRetractEntityStmt(eidRow.get(0)))
     }
 
-    logger.debug(("DELETE:" +: elements).mkString("\n"), "\n\n", stmts.toArray().mkString("\n"))
+    val deleteStrs = "DELETE:" +: elements :+ "" :+ stmts.toArray().mkString("\n")
+    logger.debug(deleteStrs.mkString("\n").trim)
+
     stmts
   }
 }

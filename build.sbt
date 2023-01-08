@@ -104,7 +104,7 @@ lazy val baseSettings: Seq[Def.Setting[_]] = Seq(
   ThisBuild / version := "0.1.0-SNAPSHOT",
   ThisBuild / scalaVersion := scala213,
   ThisBuild / versionScheme := Some("early-semver"),
-  crossScalaVersions := Seq(scala212, scala213),
+  crossScalaVersions := Seq(scala212, scala213, scala3),
   scalacOptions := List(
     "-feature",
     "-deprecation",
@@ -114,22 +114,17 @@ lazy val baseSettings: Seq[Def.Setting[_]] = Seq(
     "-language:existentials",
     "-Yrangepos"
   ),
-  //  javacOptions := Seq(
-  //    "-XX:+HeapDumpOnOutOfMemoryError"
-  //    "-XX:HeapDumpPath=/Users/mg/molecule/molecule2/project/resources/heapdumps",
-  //  ),
   libraryDependencies ++= Seq(
-    "org.scalameta" %% "scalameta" % "4.5.10",
+    "org.scalameta" %% "scalameta" % "4.7.1" cross CrossVersion.for3Use2_13,
     "com.lihaoyi" %%% "utest" % "0.7.11" % Test,
-    "dev.zio" %% "zio" % zioVersion,
-    "dev.zio" %% "zio-streams" % zioVersion,
-    "dev.zio" %% "zio-test" % zioVersion % Test,
-    "com.outr" %%% "scribe" % "3.10.6"
+//    "dev.zio" %% "zio" % zioVersion,
+//    "dev.zio" %% "zio-streams" % zioVersion,
+//    "dev.zio" %% "zio-test" % zioVersion % Test
   ),
 
   //  libraryDependencies += "com.lihaoyi" %%% "utest" % "0.7.4" % "test",
-  //  testFrameworks += new TestFramework("utest.runner.Framework"),
-  testFrameworks += new TestFramework("molecule.db.datomic.setup.MoleculeTestFramework"),
+  testFrameworks += new TestFramework("utest.runner.Framework"),
+  //  testFrameworks += new TestFramework("molecule.db.datomic.setup.MoleculeTestFramework"),
 
 
   Compile / unmanagedSourceDirectories ++= {
@@ -155,13 +150,14 @@ lazy val sharedSettings: Seq[Def.Setting[_]] = baseSettings ++ Seq(
   //    }
   //  },
   libraryDependencies ++= Seq(
-    "org.scala-lang" % "scala-reflect" % scalaVersion.value,
+//    "org.scala-lang" % "scala-reflect" % scalaVersion.value,
     "io.suzaku" %%% "boopickle" % "1.4.0",
     "com.github.cornerman" %%% "sloth" % "0.6.5",
     //    "com.lihaoyi" %%% "utest" % "0.7.11",
 
     // For aggregate tolerant trippelequal
-    "org.scalactic" %%% "scalactic" % "3.2.14" % Test
+    "org.scalactic" %%% "scalactic" % "3.2.14" % Test,
+    "com.outr" %%% "scribe" % "3.10.6"
   ),
 
   // Let IntelliJ detect sbt-molecule-created jars in unmanaged lib directories
@@ -179,7 +175,7 @@ lazy val jsSettings: Seq[Def.Setting[_]] = Seq(
     "io.github.cquiroz" %%% "scala-java-time" % "2.5.0" % Test,
     "io.github.cquiroz" %%% "scala-java-time-tzdb" % "2.5.0" % Test,
 
-    "org.scala-js" %%% "scalajs-java-securerandom" % "1.0.0",
+    "org.scala-js" %%% "scalajs-java-securerandom" % "1.0.0" cross CrossVersion.for3Use2_13,
     //    "org.scala-js" %%% "scalajs-java-securerandom" % "1.0.0" cross CrossVersion.for3Use2_13,
 
 
@@ -223,14 +219,6 @@ lazy val datomicSettings: Seq[Def.Setting[_]] = {
 
       // Datomic client dependencies transiently resolved
       //      "org.scalamolecule" %% "datomic-client-api-java-scala" % "1.0.3",
-
-      //      // Akka dependencies for MoleculeRpcResponse
-      //      "com.typesafe.akka" %% "akka-actor-typed" % "2.6.19",
-      //      "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.13.2",
-
-      //      // Enforce one version to avoid warnings of multiple dependency versions when running tests
-      //      "org.slf4j" % "slf4j-api" % "1.7.36",
-      //      "org.slf4j" % "slf4j-nop" % "1.7.36"
     ) ++ (CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((2, 13)) => Nil
       case _             =>
@@ -254,7 +242,7 @@ lazy val jvmSettings: Seq[Def.Setting[_]] = {
       //      "org.codehaus.janino" % "commons-compiler-jdk" % "3.0.12",
 
       // Datomic client dependencies transiently resolved
-      //      "org.scalamolecule" %% "datomic-client-api-java-scala" % "1.0.3",
+      "org.scalamolecule" %% "datomic-client-api-java-scala" % "1.0.3",
 
       // Akka dependencies for MoleculeRpcResponse
       "com.typesafe.akka" %% "akka-actor-typed" % akkaVersion,
@@ -383,12 +371,12 @@ lazy val testSettings: Seq[Def.Setting[_]] = {
         //        jvmTests + "/restore",
         //        sharedTests + "/aggr",
         //        sharedTests + "/composite",
-        //        sharedTests + "/crud",
+        sharedTests + "/crud",
         //        sharedTests + "/expr",
         //        sharedTests + "/relation",
         //        sharedTests + "/sort",
         //        sharedTests + "/txMetaData",
-                sharedTests,
+        //        sharedTests,
         jvmTests + "/AdhocJVM.scala",
         jsTests + "/AdhocJs.scala",
         sharedTests + "/Adhoc.scala",

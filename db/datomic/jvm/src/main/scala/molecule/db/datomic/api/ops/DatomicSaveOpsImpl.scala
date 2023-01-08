@@ -10,7 +10,7 @@ import molecule.db.datomic.transaction.Save_stmts
 import zio.ZIO
 import scala.concurrent.{ExecutionContext, Future}
 
-class DatomicSaveOpsImpl(elements: Seq[Element]) extends SaveOps {
+class DatomicSaveOpsImpl(elements: List[Element]) extends SaveOps {
 
   override def run: ZIO[Connection, MoleculeException, TxReport] = ???
 

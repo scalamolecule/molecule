@@ -5,7 +5,7 @@ import molecule.boilerplate.ast.Model._
 
 trait Packers_  { self: Tpls2DTO =>
 
-  def getPacker(elements: Seq[Element], level: Int): Product => Unit = {
+  def getPacker(elements: List[Element], level: Int): Product => Unit = {
     val packers: List[Product => Unit] = resolvePackers(elements, Nil, level, 0)
     packers.length match {
       case 1 => resolve1(packers)

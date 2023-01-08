@@ -4,7 +4,7 @@ import molecule.boilerplate.ast.Model._
 import molecule.core.api.ops._
 
 
-class DatomicQueryOps[Tpl](elements: Seq[Element])
+class DatomicQueryOps[Tpl](elements: List[Element])
   extends DatomicQueryOpsImpl[Tpl](elements) with QueryOps[Tpl] {
 
 //  type Raw = jList[AnyRef]

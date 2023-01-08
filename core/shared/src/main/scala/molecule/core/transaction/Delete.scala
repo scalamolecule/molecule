@@ -8,11 +8,11 @@ class Delete { self: Delete2Data =>
 
   @tailrec
   final protected def resolve(
-    elements: Seq[Element],
+    elements: List[Element],
     eids: Seq[AnyRef],
-    filterElements: Seq[Element],
+    filterElements: List[Element],
     topLevel: Boolean
-  ): (Seq[AnyRef], Seq[Element]) = {
+  ): (Seq[AnyRef], List[Element]) = {
     elements match {
       case element :: tail => element match {
         case attr: Attr => attr match {
@@ -56,9 +56,9 @@ class Delete { self: Delete2Data =>
   }
 
   private def extractSubElements(
-    elements: Seq[Element],
+    elements: List[Element],
     topLevel: Boolean
-  ): (Seq[AnyRef], Seq[Element]) = {
+  ): (Seq[AnyRef], List[Element]) = {
     resolve(elements, Nil, Nil, topLevel)
   }
 }

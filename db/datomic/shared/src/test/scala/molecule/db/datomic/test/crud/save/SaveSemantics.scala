@@ -17,13 +17,13 @@ object SaveSemantics extends DatomicTestSuite {
         _ <- (Ns.i + R2.i).save.transact
           .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
           err ==> "Missing applied value for attribute:\n" +
-            "AttrOneManInt(Ns,i,V,List(),None,None,None)"
+            """AttrOneManInt("Ns", "i", V, Seq(), None, None, None)"""
         }
 
         _ <- (Ns.i(1) + R2.i).save.transact
           .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
           err ==> "Missing applied value for attribute:\n" +
-            "AttrOneManInt(R2,i,V,List(),None,None,None)"
+            """AttrOneManInt("R2", "i", V, Seq(), None, None, None)"""
         }
       } yield ()
     }

@@ -1,9 +1,8 @@
 package molecule.db.datomic.setup
 
-import molecule.db.datomic.marshalling.DatomicRpcServer
-import scribe.Logging
+import molecule.boilerplate.util.MoleculeLogging
 
-class MoleculeTestFramework extends utest.runner.Framework with Logging {
+class MoleculeTestFramework extends utest.runner.Framework with MoleculeLogging {
 
 //  override def teardown(): Unit = {
 //    logger.info("Tearing down JVM MoleculeTestFramework")

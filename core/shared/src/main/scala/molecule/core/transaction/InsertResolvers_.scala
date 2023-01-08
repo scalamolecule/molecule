@@ -6,12 +6,12 @@ import molecule.boilerplate.ast.Model._
 trait InsertResolvers_ {
 
   protected def resolve(
-    elements: Seq[Element],
+    elements: List[Element],
     acc: List[Product => Unit],
     n: Int = 0
   ): List[Product => Unit]
 
-  def getResolver(elements: Seq[Element]): Product => Unit = {
+  def getResolver(elements: List[Element]): Product => Unit = {
     val resolvers: List[Product => Unit] = resolve(elements, Nil)
     resolvers.length match {
       case 1  => resolve1(resolvers)

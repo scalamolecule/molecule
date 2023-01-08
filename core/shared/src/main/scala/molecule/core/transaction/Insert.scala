@@ -9,7 +9,7 @@ class Insert extends InsertResolvers_ { self: Insert2Data =>
 
   @tailrec
   final override protected def resolve(
-    elements: Seq[Element],
+    elements: List[Element],
     resolvers: List[Product => Unit],
     tplIndex: Int = 0
   ): List[Product => Unit] = {

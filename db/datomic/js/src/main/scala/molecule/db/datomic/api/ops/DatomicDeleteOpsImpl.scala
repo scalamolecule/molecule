@@ -7,7 +7,7 @@ import molecule.db.datomic.facade.DatomicConn_JS
 import scala.concurrent.{ExecutionContext, Future}
 
 class DatomicDeleteOpsImpl(
-  elements: Seq[Element],
+  elements: List[Element],
   isMultiple: Boolean
 ) extends DeleteOps {
 

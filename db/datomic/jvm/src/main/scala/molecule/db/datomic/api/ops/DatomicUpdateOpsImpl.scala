@@ -9,7 +9,7 @@ import molecule.db.datomic.transaction.{DatomicTxBase_JVM, Update_stmts}
 import scala.concurrent.{ExecutionContext, Future}
 
 class DatomicUpdateOpsImpl(
-  elements: Seq[Element],
+  elements: List[Element],
   isUpsert: Boolean = false,
   isMultiple: Boolean = false,
 ) extends UpdateOps with DatomicTxBase_JVM {

@@ -11,7 +11,7 @@ import scala.collection.mutable.ListBuffer
 
 trait DatomicTxBase_JVM extends DatomicDataType_JVM with ModelUtils {
 
-  protected def initTxBase(elements: Seq[Element]): Unit = {
+  protected def initTxBase(elements: List[Element]): Unit = {
     nsFull = getInitialNs(elements)
     part = fns.partNs(nsFull).head
   }

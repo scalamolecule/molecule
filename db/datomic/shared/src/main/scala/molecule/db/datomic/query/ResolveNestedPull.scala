@@ -14,14 +14,14 @@ trait ResolveNestedPull[Tpl]
     with LambdasSet { self: Base[Tpl] =>
 
 
-  final protected def resolveNestedOptElements(e: Var, ref: Ref, elements: Seq[Element]): Unit = {
+  final protected def resolveNestedOptElements(e: Var, ref: Ref, elements: List[Element]): Unit = {
     @tailrec
     def addPullAttrs(
-      elements: Seq[Element],
+      elements: List[Element],
       level: Int,
       attrIndex: Int,
       acc: String
-    ): (String, Option[Element], Seq[Element], Int) = {
+    ): (String, Option[Element], List[Element], Int) = {
       val i = "  " * (level + 6)
       elements match {
         case head :: tail =>
@@ -65,7 +65,7 @@ trait ResolveNestedPull[Tpl]
 
     def resolvePullRef(
       ref: Ref,
-      elements: Seq[Element],
+      elements: List[Element],
       level: Int,
       attrIndex: Int,
       append: String
@@ -93,7 +93,7 @@ trait ResolveNestedPull[Tpl]
           val prevRef = s"""\n$indent{($refAttr :limit nil :default "$none") [$acc1"""
 
           @tailrec
-          def rec(elements: Seq[Element], level1: Int): (Seq[Element], String, String) = elements.head match {
+          def rec(elements: List[Element], level1: Int): (List[Element], String, String) = elements.head match {
             case ref1: Ref  =>
               // End previous ref
               val (attrs, append1) = resolvePullRef(ref1, elements.tail, level1,attrIndex1,  "]}")

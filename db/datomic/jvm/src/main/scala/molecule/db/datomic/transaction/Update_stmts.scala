@@ -7,17 +7,17 @@ import datomic.query.EntityMap
 import datomic.{Database, Peer}
 import molecule.base.util.exceptions.MoleculeException
 import molecule.boilerplate.ast.Model._
+import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.{Update, Update2Data}
 import molecule.core.validation.CheckConflictingAttrs
 import molecule.db.datomic.facade.DatomicConn_JVM
 import molecule.db.datomic.query.DatomicModel2Query
-import scribe.Logging
 
-trait Update_stmts extends DatomicTxBase_JVM with Update2Data with Logging { self: Update =>
+trait Update_stmts extends DatomicTxBase_JVM with Update2Data with MoleculeLogging { self: Update =>
 
   def getStmts(
     conn: DatomicConn_JVM,
-    elements: Seq[Element]
+    elements: List[Element]
   ): Data = {
     CheckConflictingAttrs(elements, distinguishMode = true)
 
@@ -56,7 +56,9 @@ trait Update_stmts extends DatomicTxBase_JVM with Update2Data with Logging { sel
       eidRows.forEach(eidRow => addStmts(eidRow.get(0)))
     }
 
-    logger.debug(("UPDATE:" +: elements).mkString("\n"), "\n\n", stmts.toArray().mkString("\n"))
+    val updateStrs = "UPDATE:" +: elements :+ "" :+ stmts.toArray().mkString("\n")
+    logger.debug(updateStrs.mkString("\n").trim)
+
     stmts
   }
 
@@ -134,20 +136,20 @@ trait Update_stmts extends DatomicTxBase_JVM with Update2Data with Logging { sel
   ): Seq[AnyRef] = {
     val at = s":$ns/$attr"
     filterAttr match {
-      case AttrOneTacString(_, _, _, vs, _, _, _)     => vs.map(v => list(at, v))
-      case AttrOneTacInt(_, _, _, vs, _, _, _)        => vs.map(v => list(at, v))
-      case AttrOneTacLong(_, _, _, vs, _, _, _, _)    => vs.map(v => list(at, v))
-      case AttrOneTacFloat(_, _, _, vs, _, _, _)      => vs.map(v => list(at, v))
-      case AttrOneTacDouble(_, _, _, vs, _, _, _)     => vs.map(v => list(at, v))
-      case AttrOneTacBoolean(_, _, _, vs, _, _, _)    => vs.map(v => list(at, v))
-      case AttrOneTacBigInt(_, _, _, vs, _, _, _)     => vs.map(v => list(at, v.bigInteger))
-      case AttrOneTacBigDecimal(_, _, _, vs, _, _, _) => vs.map(v => list(at, v.bigDecimal))
-      case AttrOneTacDate(_, _, _, vs, _, _, _)       => vs.map(v => list(at, v))
-      case AttrOneTacUUID(_, _, _, vs, _, _, _)       => vs.map(v => list(at, v))
-      case AttrOneTacURI(_, _, _, vs, _, _, _)        => vs.map(v => list(at, v))
-      case AttrOneTacByte(_, _, _, vs, _, _, _)       => vs.map(v => list(at, v.toInt))
-      case AttrOneTacShort(_, _, _, vs, _, _, _)      => vs.map(v => list(at, v.toInt))
-      case AttrOneTacChar(_, _, _, vs, _, _, _)       => vs.map(v => list(at, v.toString))
+      case AttrOneTacString(_, _, _, vs, _, _, _)     => vs.map(v => list(at, v.asInstanceOf[AnyRef]))
+      case AttrOneTacInt(_, _, _, vs, _, _, _)        => vs.map(v => list(at, v.asInstanceOf[AnyRef]))
+      case AttrOneTacLong(_, _, _, vs, _, _, _, _)    => vs.map(v => list(at, v.asInstanceOf[AnyRef]))
+      case AttrOneTacFloat(_, _, _, vs, _, _, _)      => vs.map(v => list(at, v.asInstanceOf[AnyRef]))
+      case AttrOneTacDouble(_, _, _, vs, _, _, _)     => vs.map(v => list(at, v.asInstanceOf[AnyRef]))
+      case AttrOneTacBoolean(_, _, _, vs, _, _, _)    => vs.map(v => list(at, v.asInstanceOf[AnyRef]))
+      case AttrOneTacBigInt(_, _, _, vs, _, _, _)     => vs.map(v => list(at, v.bigInteger.asInstanceOf[AnyRef]))
+      case AttrOneTacBigDecimal(_, _, _, vs, _, _, _) => vs.map(v => list(at, v.bigDecimal.asInstanceOf[AnyRef]))
+      case AttrOneTacDate(_, _, _, vs, _, _, _)       => vs.map(v => list(at, v.asInstanceOf[AnyRef]))
+      case AttrOneTacUUID(_, _, _, vs, _, _, _)       => vs.map(v => list(at, v.asInstanceOf[AnyRef]))
+      case AttrOneTacURI(_, _, _, vs, _, _, _)        => vs.map(v => list(at, v.asInstanceOf[AnyRef]))
+      case AttrOneTacByte(_, _, _, vs, _, _, _)       => vs.map(v => list(at, v.toInt.asInstanceOf[AnyRef]))
+      case AttrOneTacShort(_, _, _, vs, _, _, _)      => vs.map(v => list(at, v.toInt.asInstanceOf[AnyRef]))
+      case AttrOneTacChar(_, _, _, vs, _, _, _)       => vs.map(v => list(at, v.toString.asInstanceOf[AnyRef]))
     }
   }
 

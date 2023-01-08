@@ -15,7 +15,7 @@ object _InsertResolvers extends CoreGenBase( "InsertResolvers", "/transaction") 
        |trait ${fileName}_ {
        |
        |  protected def resolve(
-       |    elements: Seq[Element],
+       |    elements: List[Element],
        |    acc: List[Product => Unit],
        |    n: Int = 0
        |  ): List[Product => Unit]

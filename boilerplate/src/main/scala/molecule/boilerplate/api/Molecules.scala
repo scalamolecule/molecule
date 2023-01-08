@@ -4,7 +4,7 @@ import molecule.boilerplate.ast.Model.Element
 
 
 trait Molecule[Tpl] {
-  private[molecule] val elements: Seq[Element]
+  private[molecule] val elements: List[Element]
 }
 trait Molecule_00 extends Molecule[Nothing]
 trait Molecule_01[A] extends Molecule[A]

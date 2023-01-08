@@ -10,7 +10,7 @@ import molecule.db.datomic.transaction.Insert_stmts
 import zio.ZIO
 import scala.concurrent.{ExecutionContext, Future}
 
-class DatomicInsertOpsJVM(elements: Seq[Element], tpls: Seq[Product]) extends InsertOps {
+class DatomicInsertOpsJVM(elements: List[Element], tpls: Seq[Product]) extends InsertOps {
 
   override def run: ZIO[Connection, MoleculeException, TxReport] = ???
 

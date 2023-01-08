@@ -5,7 +5,7 @@ import molecule.core.api.Insert_
 import molecule.db.datomic.api.ops.DatomicInsertOpsJS
 
 // Platform-specific implementation
-abstract class DatomicInsertImpl(elements: Seq[Element]) extends Insert_ {
+abstract class DatomicInsertImpl(elements: List[Element]) extends Insert_ {
   override def _insertOp(tpls: Seq[Product]): DatomicInsertOpsJS = {
     new DatomicInsertOpsJS(elements, tpls)
   }
