@@ -4,7 +4,7 @@ import molecule.base.util.exceptions.MoleculeError
 import molecule.boilerplate.ast.Model._
 import scala.annotation.tailrec
 
-class Delete { //self: DeleteOps =>
+class Delete {
 
   @tailrec
   final protected def resolve(

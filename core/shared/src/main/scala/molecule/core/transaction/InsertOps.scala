@@ -5,7 +5,7 @@ import java.util.{Date, UUID}
 import molecule.boilerplate.ast.Model._
 import scala.collection.mutable.ListBuffer
 
-trait InsertOps extends Action2Data { self: Insert =>
+trait InsertOps { self: Insert =>
 
   protected val prevRefs: ListBuffer[AnyRef]
 

@@ -2,18 +2,12 @@ package molecule.core.marshalling
 
 import java.io.FileNotFoundException
 import java.net.URI
-import java.nio.ByteBuffer
 import java.util.Date
 import boopickle.CompositePickler
 import boopickle.Default._
-import chameleon._
 import molecule.base.util.exceptions.{MoleculeCompileException, MoleculeError}
-import molecule.boilerplate
-import molecule.boilerplate.ast
-import molecule.boilerplate.ast.Model
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
-import scala.util.{Failure, Success, Try}
 
 
 object Boopicklers extends MoleculeLogging {
@@ -157,32 +151,4 @@ object Boopicklers extends MoleculeLogging {
 
   implicit val pickleConnProxy: CompositePickler[ConnProxy] = compositePickler[ConnProxy]
     .addConcreteType[DatomicPeerProxy]
-
-
-//  // Copying this method so that we can avoid `import chameleon.ext.boopickle._`
-//  // in all custom SlothControllers and WebClients
-//  implicit def boopickleSerializerDeserializer[T: Pickler]: SerializerDeserializer[T, ByteBuffer] = {
-//    new Serializer[T, ByteBuffer] with Deserializer[T, ByteBuffer] {
-//      override def serialize(arg: T): ByteBuffer = {
-//        try {
-//          logger.error(arg.toString)
-//          Pickle.intoBytes(arg)
-//        } catch {
-//          case e: Throwable =>
-//            logger.warn(e.toString)
-//            throw e
-//        }
-//      }
-//      override def deserialize(arg: ByteBuffer): Either[Throwable, T] = {
-//        Try(Unpickle.apply[T].fromBytes(arg)) match {
-//          case Success(data) =>
-//            logger.error(data.toString)
-//            Right(data)
-//          case Failure(exc)  =>
-//            logger.warn(exc.toString)
-//            Left(exc)
-//        }
-//      }
-//    }
-//  }
 }

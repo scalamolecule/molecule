@@ -20,7 +20,7 @@ object _InsertResolvers extends CoreGenBase( "InsertResolvers", "/transaction") 
        |    n: Int = 0
        |  ): List[Product => Unit]
        |
-       |  def getResolver: Product => Unit = {
+       |  def getResolver(elements: List[Element]): Product => Unit = {
        |    val resolvers: List[Product => Unit] = resolve(elements, Nil)
        |    resolvers.length match {
        |      $resolveX

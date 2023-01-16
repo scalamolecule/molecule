@@ -12,7 +12,7 @@ object _PickleTpl extends CoreGenBase("PickleTpl", "/marshalling/serialize") {
        |
        |import molecule.boilerplate.ast.Model._
        |
-       |trait ${fileName}_ { self: Pickle =>
+       |trait ${fileName}_ { self: PickleTpls =>
        |
        |  def getPickler(elements: List[Element]): Product => Unit = {
        |    val picklers: List[Product => Unit] = resolvePicklers(elements, Nil, 0)

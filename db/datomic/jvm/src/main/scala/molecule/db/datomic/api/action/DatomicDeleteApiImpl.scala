@@ -5,13 +5,13 @@ import molecule.core.api.action.DeleteApi
 import molecule.core.api.{Connection, TxReport}
 import molecule.core.transaction.Delete
 import molecule.db.datomic.facade.DatomicConn_JVM
-import molecule.db.datomic.transaction.{DatomicTxBase_JVM, Delete_stmts}
+import molecule.db.datomic.transaction.Delete_stmts
 import scala.concurrent.{ExecutionContext, Future}
 
 class DatomicDeleteApiImpl(
   elements: List[Element],
   isMultiple: Boolean = false
-) extends DatomicTxBase_JVM with DeleteApi {
+) extends DeleteApi {
 
   // Modifiers
   override def multiple: DeleteApi = new DatomicDeleteApiImpl(elements, true)

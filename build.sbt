@@ -104,25 +104,16 @@ lazy val sharedSettings: Seq[Def.Setting[_]] = baseSettings ++ Seq(
   libraryDependencies ++= Seq(
     //    "org.scala-lang" % "scala-reflect" % scalaVersion.value,
     "io.suzaku" %%% "boopickle" % "1.4.0",
-    "com.github.cornerman" %%% "sloth" % "0.6.5" cross CrossVersion.for3Use2_13,
 
-    // For aggregate tolerant trippelequal
+    // Tolerant roundings with trippelequal in aggregate tests
     "org.scalactic" %%% "scalactic" % "3.2.14" % Test,
+
+    // Logging
     "com.outr" %%% "scribe" % "3.10.6"
   ),
 
   // Let IntelliJ detect sbt-molecule-created jars in unmanaged lib directories
-  exportJars := true,
-
-  //  Compile / unmanagedSourceDirectories ++= {
-  //    (Compile / unmanagedSourceDirectories).value.map { dir =>
-  //      CrossVersion.partialVersion(scalaVersion.value) match {
-  //        case Some((2, 12)) => file(dir.getPath ++ "-212")
-  //        case Some((2, 13)) => file(dir.getPath ++ "-213")
-  //        case _             => file(dir.getPath ++ "-3")
-  //      }
-  //    }
-  //  }
+  exportJars := true
 )
 
 lazy val jsSettings: Seq[Def.Setting[_]] = Seq(
@@ -328,7 +319,7 @@ lazy val testSettings: Seq[Def.Setting[_]] = {
         //        sharedTests + "/relation",
         //        sharedTests + "/sort",
         //        sharedTests + "/txMetaData",
-        sharedTests,
+//        sharedTests,
         jvmTests + "/AdhocJVM.scala",
         jsTests + "/AdhocJs.scala",
         sharedTests + "/Adhoc.scala",

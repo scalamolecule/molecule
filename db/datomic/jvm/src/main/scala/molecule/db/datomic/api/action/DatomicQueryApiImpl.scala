@@ -2,12 +2,10 @@ package molecule.db.datomic.api.action
 
 import java.util.{Collections, Comparator, ArrayList => jArrayList}
 import datomic.Peer
-import molecule.base.util.exceptions.MoleculeError
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.api.Connection
 import molecule.core.api.action.QueryApi
-import molecule.core.util.JavaConversions
 import molecule.db.datomic.facade.DatomicConn_JVM
 import molecule.db.datomic.query.DatomicModel2Query
 import molecule.db.datomic.util.DatomicApiLoader
@@ -17,7 +15,6 @@ import scala.concurrent.{ExecutionContext, Future}
 class DatomicQueryApiImpl[Tpl](elements: List[Element])
   extends DatomicModel2Query[Tpl](elements)
     with QueryApi[Tpl]
-    with JavaConversions
     with DatomicApiLoader
     with MoleculeLogging {
 

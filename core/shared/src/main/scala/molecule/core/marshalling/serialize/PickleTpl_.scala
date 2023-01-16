@@ -3,7 +3,7 @@ package molecule.core.marshalling.serialize
 
 import molecule.boilerplate.ast.Model._
 
-trait PickleTpl_  { self: PickleTpls =>
+trait PickleTpl_ { self: PickleTpls =>
 
   def getPickler(elements: List[Element]): Product => Unit = {
     val picklers: List[Product => Unit] = resolvePicklers(elements, Nil, 0)

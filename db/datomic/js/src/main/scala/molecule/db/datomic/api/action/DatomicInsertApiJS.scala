@@ -12,25 +12,10 @@ import scala.concurrent.{ExecutionContext, Future}
 class DatomicInsertApiJS(elements: List[Element], tpls: Seq[Product])
   extends InsertApi with MoleculeLogging {
 
-  override def transact(implicit conn0: Connection, ec: ExecutionContext): Future[TxReport] =  {
-    Future { // (catch exceptions before rpc call)
-      val conn                      = conn0.asInstanceOf[DatomicConn_JS]
-      val (tplElements, txElements) = splitElements(elements)
-//      if (txElements.nonEmpty) {
-//        logger.error("A")
-//        attrsHaveAppliedValue(txElements)
-//      }
-
-      //      val tplsClean = (if (countValueAttrs(tplElements) == 1) {
-//        tpls.map {
-//          case Tuple1(v) => v
-//          case tpl       => tpl
-//        }
-//      } else tpls).asInstanceOf[Seq[Product]]
-//      val tplsSerialized = PickleTpls(tplElements, Right(tplsClean)).pickle
-
-      val tplsSerialized = PickleTpls(tplElements, Right(tpls), true).pickle
-      conn.rpc.insert(conn.proxy, tplElements, tplsSerialized, txElements).future
-    }.flatten
+  override def transact(implicit conn0: Connection, ec: ExecutionContext): Future[TxReport] = tryFuture {
+    val conn                      = conn0.asInstanceOf[DatomicConn_JS]
+    val (tplElements, txElements) = splitElements(elements)
+    val tplsSerialized            = PickleTpls(tplElements, Right(tpls), true).pickle
+    conn.rpc.insert(conn.proxy, tplElements, tplsSerialized, txElements).future
   }
 }

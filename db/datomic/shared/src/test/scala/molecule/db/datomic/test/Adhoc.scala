@@ -1,7 +1,6 @@
 package molecule.db.datomic.test
 
 
-import molecule.base.util.exceptions.MoleculeError
 import molecule.core.util.Executor._
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
@@ -43,42 +42,34 @@ object Adhoc extends DatomicTestSuite {
 
   lazy val tests = Tests {
 
-//    "types" - types { implicit conn =>
-//      import molecule.coreTests.dataModels.core.dsl.Types._
-//      for {
-//        //        _ <- Ns.int(7).save.transact
-//
-//
-//        List(a, b) <- Ns.int.insert(1, 2).transact.map(_.eids)
-//        //        _ <- Ns.int(3).save.transact
-//        //        _ <- Ns.int.query.get.map(_ ==> List(1, 2, 3))
-//        //        _ <- Ns(a).int(10).update.transact
-//        //        _ <- Ns(b).delete.transact
-//        //        _ <- Ns.int.query.get.map(_ ==> List(3, 10))
-//      } yield ()
-//    }
-
-
-    "refs" - refs { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Refs._
+    "types" - types { implicit conn =>
+      import molecule.coreTests.dataModels.core.dsl.Types._
       for {
-//        _ <- (Ns.i + R2.i).save.transact
-//          .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
-//          err ==> "Missing applied value for attribute:\n" +
-//            """AttrOneManInt("Ns", "i", V, Seq(), None, None, None)"""
-//        }
-        _ <- Ns.i.Tx(R2.i).insert(1, 2).transact
-          .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
-          err ==>
-            """Missing applied value for attribute:
-              |AttrOneManInt("R2", "i", V, Seq(), None, None, None)""".stripMargin
-        }
+        List(a, b) <- Ns.int.insert(1, 2).transact.map(_.eids)
+        _ <- Ns.int(3).save.transact
+        _ <- Ns.int.query.get.map(_ ==> List(1, 2, 3))
+        _ <- Ns(a).int(10).update.transact
+        _ <- Ns(b).delete.transact
+        _ <- Ns.int.query.get.map(_ ==> List(3, 10))
 
 
 
 
       } yield ()
     }
+
+
+    //    "refs" - refs { implicit conn =>
+    //      import molecule.coreTests.dataModels.core.dsl.Refs._
+    //      for {
+    //        _ <- Ns.i.Tx(R2.i).insert(1, 2).transact
+    //          .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
+    //          err ==>
+    //            """Missing applied value for attribute:
+    //              |AttrOneManInt("R2", "i", V, Seq(), None, None, None)""".stripMargin
+    //        }
+    //      } yield ()
+    //    }
   }
 
 }

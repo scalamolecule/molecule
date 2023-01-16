@@ -58,7 +58,7 @@ class Insert extends InsertResolvers_ { self: InsertOps =>
 
         // TxMetaData is handed separately in Insert_stmts with call to save_stmts
 
-        case other => unexpected(other)
+        case other => throw MoleculeError("Unexpected element: " + other)
       }
       case Nil             => resolvers
     }

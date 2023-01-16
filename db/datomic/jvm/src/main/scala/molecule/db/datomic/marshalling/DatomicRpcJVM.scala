@@ -18,8 +18,6 @@ object DatomicRpcJVM extends MoleculeRpc
   with DatomicTxBase_JVM
   with ApiOps {
 
-  // Api ---------------------------------------------
-
   // Data is typed when un-serialized on client side
   override def query[Any](
     proxy: ConnProxy,
@@ -50,27 +48,19 @@ object DatomicRpcJVM extends MoleculeRpc
   ): Future[Either[MoleculeError, TxReport]] = either {
     for {
       conn <- getConn(proxy)
-      //      _ = logger.trace("insert...")
-
       tplsEither = UnpickleTpls[Any](tplElements, ByteBuffer.wrap(tplsSerialized)).unpickle
-      //      _ = logger.trace(tplsEither.toString)
-
       tplProducts = tplsEither match {
         case Right(tpls) =>
           (if (countValueAttrs(tplElements) == 1) {
             tpls.map(Tuple1(_))
           } else tpls).asInstanceOf[Seq[Product]]
-
-        case Left(err) => throw err // catched in outer either wrapper
+        case Left(err)   => throw err // catched in outer either wrapper
       }
       stmts = (new Insert with Insert_stmts).getStmts(tplElements, tplProducts)
-      //      _ = logger.trace(stmts.toString)
       _ = if (txElements.nonEmpty) {
         val txStmts = (new Save() with Save_stmts).getRawStmts(txElements, datomicTx, false)
-        //        logger.trace(txStmts.toString)
         stmts.addAll(txStmts)
       }
-
       txReport <- conn.transact(stmts)
     } yield txReport
   }
@@ -87,7 +77,6 @@ object DatomicRpcJVM extends MoleculeRpc
         .getStmts(conn, elements)
       txReport <- conn.transact(stmts)
     } yield txReport
-
   }
 
   override def delete(
@@ -97,18 +86,7 @@ object DatomicRpcJVM extends MoleculeRpc
   ): Future[Either[MoleculeError, TxReport]] = either {
     for {
       conn <- getConn(proxy)
-      stmts = {
-
-        (new Delete with Delete_stmts).getStmtsData(conn, elements, isMultiple)
-      }
-      //      stmts = try {
-      //        (new Delete with Delete_stmts).getStmtsData(conn, elements, isMultiple)
-      //      } catch {
-      //        case e: Throwable =>
-      //          logger.error(e.toString)
-      //          logger.error(e.getStackTrace.toList.mkString("\n"))
-      //          throw e
-      //      }
+      stmts = (new Delete with Delete_stmts).getStmtsData(conn, elements, isMultiple)
       txReport <- conn.transact(stmts)
     } yield txReport
   }

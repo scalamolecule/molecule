@@ -1,22 +1,22 @@
-package codegen.core.marshalling.unpack
+package codegen.core.marshalling.deserialize
 
 import codegen.CoreGenBase
 
-object _Unpackers extends CoreGenBase( "Unpackers", "/marshalling/unpack") {
+object _UnpickleTpl extends CoreGenBase( "UnpickleTpl", "/marshalling/deserialize") {
 
   val content = {
-    val unpackX       = (1 to 22).map(i => s"case $i => resolve$i(unpackers)").mkString("\n      ")
+    val unpackX       = (1 to 22).map(i => s"case $i => resolve$i(unpicklers)").mkString("\n      ")
     val unpackMethods = (1 to 22).map(arity => Chunk(arity).body).mkString("\n")
     s"""// GENERATED CODE ********************************
-       |package molecule.core.marshalling.unpack
+       |package molecule.core.marshalling.deserialize
        |
        |import molecule.boilerplate.ast.Model._
        |
-       |trait ${fileName}_[Tpl] { self: DTO2tpls[Tpl] =>
+       |trait ${fileName}_[Tpl] { self: UnpickleTpls[Tpl] =>
        |
-       |  def getUnpacker(elements: List[Element]): () => Any = {
-       |    val unpackers: List[() => Any] = resolveUnpackers(elements, Nil)
-       |    unpackers.length match {
+       |  def getUnpickler(elements: List[Element]): () => Any = {
+       |    val unpicklers: List[() => Any] = resolveUnpicklers(elements, Nil)
+       |    unpicklers.length match {
        |      $unpackX
        |    }
        |  }
@@ -29,8 +29,8 @@ object _Unpackers extends CoreGenBase( "Unpackers", "/marshalling/unpack") {
     val calls     = (1 to i).map { j => s"u$j()" }.mkString(",\n        ")
     val body      =
       s"""
-         |  final private def resolve$i(unpackers: List[() => Any]): () => Any = {
-         |    val List($unpackers) = unpackers
+         |  final private def resolve$i(unpicklers: List[() => Any]): () => Any = {
+         |    val List($unpackers) = unpicklers
          |    () => {
          |      (
          |        $calls
