@@ -2,7 +2,7 @@ package molecule.core.marshalling.pack
 
 import java.net.URI
 import java.util.{Date, UUID}
-import molecule.base.util.exceptions.MoleculeException
+import molecule.base.util.exceptions.MoleculeError
 import molecule.boilerplate.ast.Model._
 import molecule.core.util.ModelUtils
 import scala.annotation.tailrec
@@ -44,7 +44,7 @@ trait PackTuple extends ModelUtils { self: Tpls2DTO =>
 
         case BackRef(backRefNs) =>
           tail.head match {
-            case Ref(_, refAttr, _, _) if prevRefs.contains(refAttr) => throw MoleculeException(
+            case Ref(_, refAttr, _, _) if prevRefs.contains(refAttr) => throw MoleculeError(
               s"Can't re-use previous namespace ${refAttr.capitalize} after backref _$backRefNs."
             )
             case _                                                   => // ok
@@ -69,8 +69,6 @@ trait PackTuple extends ModelUtils { self: Tpls2DTO =>
           // Tx meta data is last attribute values in top level tuple
           // TxMetaData is only packed for queries. Inserts handle tx meta elements separately after all tpl inserts.
           packers ++ packTxMeta(txMetaDataElements, level, tplIndex)
-
-        case other => unexpected(other)
       }
       case Nil             => packers
     }
@@ -125,7 +123,7 @@ trait PackTuple extends ModelUtils { self: Tpls2DTO =>
   }
 
   private def unexpected(element: Element) =
-    throw MoleculeException("Unexpected element: " + element)
+    throw MoleculeError("Unexpected element: " + element)
 
   private def packAttrOneMan(a: AttrOneMan, tplIndex: Int): Product => Unit = {
     a.op match {

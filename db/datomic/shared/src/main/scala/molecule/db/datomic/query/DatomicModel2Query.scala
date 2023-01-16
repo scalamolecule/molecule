@@ -1,6 +1,6 @@
 package molecule.db.datomic.query
 
-import molecule.base.util.exceptions.MoleculeException
+import molecule.base.util.exceptions.MoleculeError
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.query.Model2Query
@@ -29,7 +29,7 @@ class DatomicModel2Query[Tpl](elements: List[Element])
 
   final def getQueries(optimized: Boolean): (String, String) = {
 
-    // Add 4th tx var to first attribute if tx value is needed
+    // Add 4th tx var to first attribute datom if tx value is needed
     @tailrec
     def checkTx(elements: List[Element]): Unit = {
       elements match {
@@ -200,7 +200,7 @@ class DatomicModel2Query[Tpl](elements: List[Element])
       case other         => unexpectedElement(other)
     }
     if (ref.refNs != nestedNs)
-      throw MoleculeException(s"`$refName` can only nest to `${ref.refNs}`. Found: `$nestedNs`")
+      throw MoleculeError(s"`$refName` can only nest to `${ref.refNs}`. Found: `$nestedNs`")
   }
 
 }

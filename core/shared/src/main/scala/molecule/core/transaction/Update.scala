@@ -3,7 +3,7 @@ package molecule.core.transaction
 import java.net.URI
 import java.util.{Date, UUID}
 import molecule.base.ast.SchemaAST._
-import molecule.base.util.exceptions.MoleculeException
+import molecule.base.util.exceptions.MoleculeError
 import molecule.boilerplate.ast.Model._
 import scala.annotation.tailrec
 
@@ -11,7 +11,7 @@ class Update(
   uniqueAttrs: List[String],
   val isUpsert: Boolean,
   val isMultiple: Boolean,
-) { self: Update2Data =>
+) { self: UpdateOps =>
 
   val update = if (isUpsert) "upsert" else "update"
 
@@ -32,20 +32,20 @@ class Update(
             case Add    => resolve(tail, eids, filterElements, data :+ setAdd(a))
             case Swap   => resolve(tail, eids, filterElements, data ++ setSwap(a))
             case Remove => resolve(tail, eids, filterElements, data ++ setRemove(a))
-            case _      => throw MoleculeException(s"Unexpected $update operation for card-many attribute. Found:\n" + a)
+            case _      => throw MoleculeError(s"Unexpected $update operation for card-many attribute. Found:\n" + a)
           }
 
-          case _: AttrSetTac => throw MoleculeException("Can only lookup entity with card-one attribute value. Found:\n" + a)
-          case _: AttrOneOpt => throw MoleculeException(s"Can't $update optional values. Found:\n" + a)
-          case _: AttrSetOpt => throw MoleculeException(s"Can't $update optional values. Found:\n" + a)
-          case _             => throw MoleculeException(s"Not implemented yet. Found:\n" + a)
+          case _: AttrSetTac => throw MoleculeError("Can only lookup entity with card-one attribute value. Found:\n" + a)
+          case _: AttrOneOpt => throw MoleculeError(s"Can't $update optional values. Found:\n" + a)
+          case _: AttrSetOpt => throw MoleculeError(s"Can't $update optional values. Found:\n" + a)
+          case _             => throw MoleculeError(s"Not implemented yet. Found:\n" + a)
         }
 
-        case _: Nested    => throw MoleculeException(s"Nested data structure not allowed in $update molecule.")
-        case _: NestedOpt => throw MoleculeException(s"Optional nested data structure not allowed in $update molecule.")
+        case _: Nested    => throw MoleculeError(s"Nested data structure not allowed in $update molecule.")
+        case _: NestedOpt => throw MoleculeError(s"Optional nested data structure not allowed in $update molecule.")
 
         case r@Ref(ns, attr, _, CardOne) => resolve(tail, eids, filterElements :+ r, data :+ ("ref", ns, attr, Nil, false))
-        case r: Ref                      => throw MoleculeException(
+        case r: Ref                      => throw MoleculeError(
           s"Can't $update attributes in card-many referenced namespaces. Found `${r.refAttr.capitalize}`"
         )
         case b: BackRef                  => resolve(tail, eids, filterElements :+ b, data)
@@ -56,11 +56,9 @@ class Update(
 
         case TxMetaData(es) =>
           if (data.isEmpty)
-            throw MoleculeException(s"Can't $update tx meta data only.")
+            throw MoleculeError(s"Can't $update tx meta data only.")
           val (eids1, filters1, data1) = extractSubElements(es)
           resolve(tail, eids ++ eids1, filterElements ++ filters1, (data :+ ("tx", null, null, Nil, false)) ++ data1)
-
-        case element => unexpected(element)
       }
       case Nil             => (eids, filterElements, data)
     }
@@ -75,7 +73,7 @@ class Update(
     dataAttr: AttrOneMan
   ): (Seq[AnyRef], List[Element], Seq[(String, String, String, Seq[AnyRef], Boolean)]) = {
     if (dataAttr.op != Appl)
-      throw MoleculeException(s"Can't $update attributes without an applied value. Found:\n" + dataAttr)
+      throw MoleculeError(s"Can't $update attributes without an applied value. Found:\n" + dataAttr)
     if (isUpsert) {
       // Disregard if value already exists
       resolve(tail, eids, filterElements, data :+ oneApply(dataAttr))
@@ -86,7 +84,7 @@ class Update(
     }
   }
   private def oneApply(attr: AttrOneMan): (String, String, String, Seq[AnyRef], Boolean) = attr match {
-    case a if a.ns == "_Generic" => throw MoleculeException(
+    case a if a.ns == "_Generic" => throw MoleculeError(
       s"Generic attributes not allowed in update molecule. Found:\n" + a)
 
     case AttrOneManString(_, _, _, vs, _, _, _)     => addOneV[String](attr, vs, valueString)
@@ -103,15 +101,12 @@ class Update(
     case AttrOneManByte(_, _, _, vs, _, _, _)       => addOneV[Byte](attr, vs, valueByte)
     case AttrOneManShort(_, _, _, vs, _, _, _)      => addOneV[Short](attr, vs, valueShort)
     case AttrOneManChar(_, _, _, vs, _, _, _)       => addOneV[Char](attr, vs, valueChar)
-    case _                                          => throw MoleculeException(
-      s"Can only $update one applied value for attribute `${attr.name}`. Found expression: ${attr.op}"
-    )
   }
   private def addOneV[T](a: Attr, vs: Seq[T], transform: T => Any): (String, String, String, Seq[AnyRef], Boolean) = {
     vs match {
       case Seq(v) => ("add", a.ns, a.attr, Seq(transform(v).asInstanceOf[AnyRef]), false)
       case Nil    => ("retract", a.ns, a.attr, Nil, false)
-      case vs     => throw MoleculeException(
+      case vs     => throw MoleculeError(
         s"Can only $update one value for attribute `${a.name}`. Found: " + vs.mkString(", ")
       )
     }
@@ -127,18 +122,18 @@ class Update(
     filterAttr match {
       case AttrOneTacLong("_Generic", "eids", Appl, eids1, _, _, _, _) =>
         if (eids.nonEmpty)
-          throw MoleculeException(s"Can't apply entity ids twice in $update.")
+          throw MoleculeError(s"Can't apply entity ids twice in $update.")
         resolve(tail, eids1.asInstanceOf[Seq[AnyRef]], filterElements, data)
 
-      case AttrOneTacLong("_Generic", "e", Appl, _, _, _, _, _) => throw MoleculeException(
+      case AttrOneTacLong("_Generic", "e", Appl, _, _, _, _, _) => throw MoleculeError(
         "Can't update by applying entity ids to e_")
 
-      case a if a.ns == "_Generic" => throw MoleculeException(
+      case a if a.ns == "_Generic" => throw MoleculeError(
         s"Generic attributes not allowed in update molecule. Found:\n" + a)
 
       case uniqueFilterAttr if uniqueAttrs.contains(uniqueFilterAttr.name) =>
         if (eids.nonEmpty)
-          throw MoleculeException(
+          throw MoleculeError(
             s"Can only apply one unique attribute value for $update. Found:\n" + uniqueFilterAttr
           )
         val lookupRefs = uniqueEids(filterAttr, uniqueFilterAttr.ns, uniqueFilterAttr.attr)
@@ -196,7 +191,7 @@ class Update(
     sets match {
       case Seq(set) => ("add", a.ns, a.attr, set.map(v => transform(v).asInstanceOf[AnyRef]).toSeq, retractCur)
       case Nil      => ("retract", a.ns, a.attr, Nil, retractCur)
-      case vs       => throw MoleculeException(
+      case vs       => throw MoleculeError(
         s"Can only $update one Set of values for Set attribute `${a.name}`. Found: " + vs.mkString(", ")
       )
     }
@@ -227,16 +222,16 @@ class Update(
     val (retracts0, adds0) = sets.splitAt(sets.length / 2)
     val (retracts, adds)   = (retracts0.flatten, adds0.flatten)
     if (retracts.length != retracts.distinct.length)
-      throw MoleculeException(s"Can't swap from duplicate retract values.")
+      throw MoleculeError(s"Can't swap from duplicate retract values.")
 
     if (adds.length != adds.distinct.length)
-      throw MoleculeException(s"Can't swap to duplicate replacement values.")
+      throw MoleculeError(s"Can't swap to duplicate replacement values.")
 
     if (retracts.isEmpty) {
       Nil
     } else {
       if (retracts.size != adds.size)
-        throw MoleculeException(
+        throw MoleculeError(
           s"Can't swap duplicate keys/values: "
         )
       Seq(
@@ -262,7 +257,7 @@ class Update(
     case AttrSetManByte(_, _, _, Seq(set), _, _, _)       => removeSetVs[Byte](attr, set, valueByte)
     case AttrSetManShort(_, _, _, Seq(set), _, _, _)      => removeSetVs[Short](attr, set, valueShort)
     case AttrSetManChar(_, _, _, Seq(set), _, _, _)       => removeSetVs[Char](attr, set, valueChar)
-    case _                                                => throw MoleculeException(
+    case _                                                => throw MoleculeError(
       s"Can only remove one Set of values for Set attribute `${attr.name}`. Found: $attr"
     )
   }

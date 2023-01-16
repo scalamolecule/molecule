@@ -1,6 +1,6 @@
 package molecule.core.marshalling.unpack
 
-import molecule.base.util.exceptions.MoleculeException
+import molecule.base.util.exceptions.MoleculeError
 import molecule.boilerplate.ast.Model._
 import molecule.core.util.ModelUtils
 import scala.annotation.tailrec
@@ -40,7 +40,7 @@ trait UnpackTpls[Tpl] extends ModelUtils { self: DTO2tpls[Tpl] =>
 
         case BackRef(backRefNs) =>
           tail.head match {
-            case Ref(_, refAttr, _, _) if prevRefs.contains(refAttr) => throw MoleculeException(
+            case Ref(_, refAttr, _, _) if prevRefs.contains(refAttr) => throw MoleculeError(
               s"Can't re-use previous namespace ${refAttr.capitalize} after backref _$backRefNs."
             )
             case _                                                   => // ok
@@ -61,8 +61,6 @@ trait UnpackTpls[Tpl] extends ModelUtils { self: DTO2tpls[Tpl] =>
         case TxMetaData(txMetaDataElements) =>
           // Tx meta data is last attribute values in top level tuple
           unpackers ++ unpackTxMetaData(txMetaDataElements, level)
-
-        case other => unexpected(other)
       }
       case Nil             => unpackers
     }
@@ -102,7 +100,7 @@ trait UnpackTpls[Tpl] extends ModelUtils { self: DTO2tpls[Tpl] =>
 
 
   protected def unexpected(element: Element) =
-    throw MoleculeException("Unexpected element: " + element)
+    throw MoleculeError("Unexpected element: " + element)
 
   private def unpackAttrOneMan(a: AttrOneMan): () => Any = {
     a.op match {

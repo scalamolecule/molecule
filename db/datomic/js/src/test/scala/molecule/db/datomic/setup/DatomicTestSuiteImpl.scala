@@ -2,13 +2,13 @@ package molecule.db.datomic.setup
 
 import molecule.base.api.SchemaTransaction
 import molecule.core.api.Connection
-import molecule.core.marshalling.{DatomicPeerProxy, WebClient}
+import molecule.core.marshalling.DatomicPeerProxy
 import molecule.coreTests.dataModels.core.schema._
 import molecule.db.datomic.facade.DatomicConn_JS
 import moleculeBuildInfo.BuildInfo
 
 
-trait DatomicTestSuiteImpl extends WebClient { self: DatomicTestSuite =>
+trait DatomicTestSuiteImpl { self: DatomicTestSuite =>
 
   lazy val isJsPlatform_ = true
   lazy val protocol_     = BuildInfo.datomicProtocol

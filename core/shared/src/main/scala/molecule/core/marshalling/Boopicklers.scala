@@ -3,9 +3,14 @@ package molecule.core.marshalling
 import java.io.FileNotFoundException
 import java.net.URI
 import java.nio.ByteBuffer
+import java.util.Date
+import boopickle.CompositePickler
 import boopickle.Default._
 import chameleon._
-import molecule.base.util.exceptions.{MoleculeCompileException, MoleculeException}
+import molecule.base.util.exceptions.{MoleculeCompileException, MoleculeError}
+import molecule.boilerplate
+import molecule.boilerplate.ast
+import molecule.boilerplate.ast.Model
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import scala.util.{Failure, Success, Try}
@@ -13,10 +18,10 @@ import scala.util.{Failure, Success, Try}
 
 object Boopicklers extends MoleculeLogging {
 
-  implicit val pickleDate = transformPickler((t: Long) => new java.util.Date(t))(_.getTime)
-  implicit val pickleURI  = transformPickler((t: String) => new URI(t))(_.toString)
+  implicit val pickleDate: Pickler[Date] = transformPickler((t: Long) => new java.util.Date(t))(_.getTime)
+  implicit val pickleURI : Pickler[URI]  = transformPickler((t: String) => new URI(t))(_.toString)
 
-  implicit val pickleOp = compositePickler[Op]
+  implicit val pickleOp: CompositePickler[Op] = compositePickler[Op]
   pickleOp.addConcreteType[V.type]
   pickleOp.addConcreteType[Appl.type]
   pickleOp.addConcreteType[Not.type]
@@ -33,22 +38,22 @@ object Boopicklers extends MoleculeLogging {
   pickleOp.addConcreteType[Swap.type]
   pickleOp.addConcreteType[Remove.type]
 
-  implicit val pickleValidateString     = compositePickler[ValidateString]
-  implicit val pickleValidateInt        = compositePickler[ValidateInt]
-  implicit val pickleValidateLong       = compositePickler[ValidateLong]
-  implicit val pickleValidateDouble     = compositePickler[ValidateDouble]
-  implicit val pickleValidateBoolean    = compositePickler[ValidateBoolean]
-  implicit val pickleValidateBigInt     = compositePickler[ValidateBigInt]
-  implicit val pickleValidateBigDecimal = compositePickler[ValidateBigDecimal]
-  implicit val pickleValidateDate       = compositePickler[ValidateDate]
-  implicit val pickleValidateUUID       = compositePickler[ValidateUUID]
-  implicit val pickleValidateURI        = compositePickler[ValidateURI]
-  implicit val pickleValidateByte       = compositePickler[ValidateByte]
-  implicit val pickleValidateShort      = compositePickler[ValidateShort]
-  implicit val pickleValidateFloat      = compositePickler[ValidateFloat]
-  implicit val pickleValidateChar       = compositePickler[ValidateChar]
+  implicit val pickleValidateString    : CompositePickler[ValidateString]     = compositePickler[ValidateString]
+  implicit val pickleValidateInt       : CompositePickler[ValidateInt]        = compositePickler[ValidateInt]
+  implicit val pickleValidateLong      : CompositePickler[ValidateLong]       = compositePickler[ValidateLong]
+  implicit val pickleValidateDouble    : CompositePickler[ValidateDouble]     = compositePickler[ValidateDouble]
+  implicit val pickleValidateBoolean   : CompositePickler[ValidateBoolean]    = compositePickler[ValidateBoolean]
+  implicit val pickleValidateBigInt    : CompositePickler[ValidateBigInt]     = compositePickler[ValidateBigInt]
+  implicit val pickleValidateBigDecimal: CompositePickler[ValidateBigDecimal] = compositePickler[ValidateBigDecimal]
+  implicit val pickleValidateDate      : CompositePickler[ValidateDate]       = compositePickler[ValidateDate]
+  implicit val pickleValidateUUID      : CompositePickler[ValidateUUID]       = compositePickler[ValidateUUID]
+  implicit val pickleValidateURI       : CompositePickler[ValidateURI]        = compositePickler[ValidateURI]
+  implicit val pickleValidateByte      : CompositePickler[ValidateByte]       = compositePickler[ValidateByte]
+  implicit val pickleValidateShort     : CompositePickler[ValidateShort]      = compositePickler[ValidateShort]
+  implicit val pickleValidateFloat     : CompositePickler[ValidateFloat]      = compositePickler[ValidateFloat]
+  implicit val pickleValidateChar      : CompositePickler[ValidateChar]       = compositePickler[ValidateChar]
 
-  implicit val pickleElement = compositePickler[Element]
+  implicit val pickleElement: CompositePickler[Element] = compositePickler[Element]
   pickleElement.addConcreteType[Ref]
   pickleElement.addConcreteType[BackRef]
   pickleElement.addConcreteType[Composite]
@@ -142,39 +147,42 @@ object Boopicklers extends MoleculeLogging {
   pickleElement.addConcreteType[AttrSetTacChar]
 
 
-  implicit val pickleExceptions = exceptionPickler
+  implicit val pickleExceptions: CompositePickler[Throwable] = exceptionPickler
   pickleExceptions
-    .addConcreteType[MoleculeException]
+    .addConcreteType[MoleculeError]
     .addConcreteType[MoleculeCompileException]
 
-  implicit val pickleFileNotFoundEception = compositePickler[FileNotFoundException]
+  implicit val pickleFileNotFoundEception: CompositePickler[FileNotFoundException] =
+    compositePickler[FileNotFoundException]
 
-  implicit val pickleConnProxy = compositePickler[ConnProxy]
+  implicit val pickleConnProxy: CompositePickler[ConnProxy] = compositePickler[ConnProxy]
     .addConcreteType[DatomicPeerProxy]
 
 
-  // Copying this method so that we can avoid `import chameleon.ext.boopickle._`
-  // in all custom SlothControllers and WebClients
-  implicit def boopickleSerializerDeserializer[T: Pickler]: SerializerDeserializer[T, ByteBuffer] = {
-    new Serializer[T, ByteBuffer] with Deserializer[T, ByteBuffer] {
-      override def serialize(arg: T): ByteBuffer = {
-        try {
-          logger.trace(arg.toString)
-          Pickle.intoBytes(arg)
-        } catch {
-          case e: Throwable =>
-            logger.warn(e.toString)
-            throw e
-        }
-      }
-      override def deserialize(arg: ByteBuffer): Either[Throwable, T] = {
-        Try(Unpickle.apply[T].fromBytes(arg)) match {
-          case Success(data) => Right(data)
-          case Failure(exc)  =>
-            logger.warn(exc.toString)
-            Left(exc)
-        }
-      }
-    }
-  }
+//  // Copying this method so that we can avoid `import chameleon.ext.boopickle._`
+//  // in all custom SlothControllers and WebClients
+//  implicit def boopickleSerializerDeserializer[T: Pickler]: SerializerDeserializer[T, ByteBuffer] = {
+//    new Serializer[T, ByteBuffer] with Deserializer[T, ByteBuffer] {
+//      override def serialize(arg: T): ByteBuffer = {
+//        try {
+//          logger.error(arg.toString)
+//          Pickle.intoBytes(arg)
+//        } catch {
+//          case e: Throwable =>
+//            logger.warn(e.toString)
+//            throw e
+//        }
+//      }
+//      override def deserialize(arg: ByteBuffer): Either[Throwable, T] = {
+//        Try(Unpickle.apply[T].fromBytes(arg)) match {
+//          case Success(data) =>
+//            logger.error(data.toString)
+//            Right(data)
+//          case Failure(exc)  =>
+//            logger.warn(exc.toString)
+//            Left(exc)
+//        }
+//      }
+//    }
+//  }
 }

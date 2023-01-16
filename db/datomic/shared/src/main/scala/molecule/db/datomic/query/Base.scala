@@ -2,7 +2,7 @@ package molecule.db.datomic.query
 
 import java.util.{Iterator => jIterator, List => jList}
 import molecule.base.util.BaseHelpers
-import molecule.base.util.exceptions.MoleculeException
+import molecule.base.util.exceptions.MoleculeError
 import molecule.boilerplate.ast.Model._
 import molecule.core.query.Model2Query
 import molecule.core.util.JavaConversions
@@ -179,7 +179,7 @@ trait Base[Tpl] extends BaseHelpers with JavaConversions { self: Model2Query[Tpl
         case List(1, 2, 3, 4, 6)    =>
         case List(1, 2, 3, 4, 5)    =>
         case List(1, 2, 3, 4, 5, 6) =>
-        case other                  => throw MoleculeException(
+        case other                  => throw MoleculeError(
           s"Sort index 1 should be present and additional indexes continuously increase (in any order). " +
             s"Found sort index(es): " + other.mkString(", ")
         )
@@ -188,16 +188,16 @@ trait Base[Tpl] extends BaseHelpers with JavaConversions { self: Model2Query[Tpl
     }
   }
 
-  final protected def unexpectedElement(element: Element) = throw MoleculeException("Unexpected element: " + element)
-  final protected def unexpectedOp(op: Op) = throw MoleculeException("Unexpected operation: " + op)
-  final protected def unexpectedKw(kw: String) = throw MoleculeException("Unexpected keyword: " + kw)
+  final protected def unexpectedElement(element: Element) = throw MoleculeError("Unexpected element: " + element)
+  final protected def unexpectedOp(op: Op) = throw MoleculeError("Unexpected operation: " + op)
+  final protected def unexpectedKw(kw: String) = throw MoleculeError("Unexpected keyword: " + kw)
 
-  final protected def noMixedNestedModes = throw MoleculeException(
+  final protected def noMixedNestedModes = throw MoleculeError(
     "Can't mix mandatory/optional nested data structures."
   )
 
   final protected def datomicFreePullBooleanBug: Nothing = {
-    throw MoleculeException(
+    throw MoleculeError(
       "Datomic Free (not Pro) has a bug that pulls boolean `false` values as nil."
     )
   }

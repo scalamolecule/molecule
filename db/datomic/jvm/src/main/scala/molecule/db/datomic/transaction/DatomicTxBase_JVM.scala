@@ -1,13 +1,18 @@
 package molecule.db.datomic.transaction
 
 import java.lang.{Boolean => jBoolean}
-import java.util.{ArrayList => jArrayList, List => jList}
+import java.util.{UUID, ArrayList => jArrayList, List => jList}
 import clojure.lang.Keyword
-import molecule.base.util.exceptions.MoleculeException
+import molecule.base.util.exceptions.MoleculeError
 import molecule.boilerplate.ast.Model._
+import molecule.core.marshalling.{ConnProxy, DatomicPeerProxy}
 import molecule.core.util.{ModelUtils, fns}
+import molecule.db.datomic.facade.{DatomicConn_JVM, DatomicPeer}
 import scala.annotation.tailrec
+import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
+import scala.concurrent.Future
+import molecule.core.util.Executor._
 
 trait DatomicTxBase_JVM extends DatomicDataType_JVM with ModelUtils {
 
@@ -70,5 +75,49 @@ trait DatomicTxBase_JVM extends DatomicDataType_JVM with ModelUtils {
     stmt.add(retractEntity)
     stmt.add(eid)
     stmts.add(stmt)
+  }
+
+
+  // Connection pool ---------------------------------------------
+
+  // todo: real solution
+  protected val connectionPool = mutable.HashMap.empty[UUID, Future[DatomicConn_JVM]]
+
+//  override def clearConnPool: Future[Unit] = Future {
+//    // logger.debug(s"Connection pool with ${connectionPool.size} connections cleared.")
+//    connectionPool.clear()
+//  }
+
+  protected def getConn(proxy: ConnProxy): Future[DatomicConn_JVM] = {
+    val futConn             = connectionPool.getOrElse(proxy.uuid, getFreshConn(proxy))
+    val futConnTimeAdjusted = futConn.map { conn =>
+      //      conn.updateAdhocDbView(proxy.adhocDbView)
+      //      conn.updateTestDbView(proxy.testDbView, proxy.testDbStatus)
+      conn
+    }
+    connectionPool(proxy.uuid) = futConnTimeAdjusted
+    // logger.debug("connectionPool.size: " + connectionPool.size)
+    futConnTimeAdjusted
+  }
+
+  protected def getFreshConn(proxy: ConnProxy): Future[DatomicConn_JVM] = {
+    proxy match {
+      case proxy@DatomicPeerProxy(protocol, dbIdentifier, _, _, _, _, _, _, _, _, isFreeVersion) =>
+        protocol match {
+          case "mem" =>
+            DatomicPeer.recreateDbFromEdn(proxy, protocol, dbIdentifier, isFreeVersion)
+              .recover {
+                case exc: Throwable => throw MoleculeError(exc.getMessage)
+              }
+
+          case "free" | "dev" | "pro" =>
+            Future(DatomicPeer.connect(proxy, protocol, dbIdentifier))
+              .recover {
+                case exc: Throwable => throw MoleculeError(exc.getMessage)
+              }
+
+          case other => Future.failed(MoleculeError(s"\nCan't serve Peer protocol `$other`."))
+        }
+    }
   }
 }

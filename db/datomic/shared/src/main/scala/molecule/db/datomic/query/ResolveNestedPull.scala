@@ -2,8 +2,10 @@ package molecule.db.datomic.query
 
 import java.util.{Iterator => jIterator}
 import molecule.base.ast.SchemaAST.CardOne
-import molecule.base.util.exceptions.MoleculeException
+import molecule.base.util.exceptions.MoleculeError
 import molecule.boilerplate.ast.Model._
+import molecule.boilerplate.util.MoleculeLogging
+import molecule.core.util.ModelUtils
 import scala.annotation.tailrec
 
 
@@ -11,7 +13,9 @@ trait ResolveNestedPull[Tpl]
   extends SortOneOptFlat_[Tpl]
     with SortOneSpecial[Tpl]
     with LambdasOne
-    with LambdasSet { self: Base[Tpl] =>
+    with LambdasSet
+    with ModelUtils
+    with MoleculeLogging { self: Base[Tpl] =>
 
 
   final protected def resolveNestedOptElements(e: Var, ref: Ref, elements: List[Element]): Unit = {
@@ -26,10 +30,11 @@ trait ResolveNestedPull[Tpl]
       elements match {
         case head :: tail =>
           head match {
-            case a: Attr if a.op != V => throw MoleculeException(
+            case a: Attr if a.op != V => throw MoleculeError(
               "Expressions not allowed in optional nested data structure. Found:\n" + a
             )
-            case a: AttrOneMan        =>
+
+            case a: AttrOneMan =>
               resolveAttrOneMan(a, attrIndex)
               addPullAttrs(tail, level, attrIndex + 1, acc + renderPull(i, a))
 
@@ -53,9 +58,9 @@ trait ResolveNestedPull[Tpl]
               aritiesComposite()
               addPullAttrs(compositeElements ++ tail, level, attrIndex, acc)
 
-            case a: AttrOneTac => throw MoleculeException(
+            case a: AttrOneTac => throw MoleculeError(
               "Tacit attributes not allowed in optional nested data structure. Found:\n" + a)
-            case other         => throw MoleculeException(
+            case other         => throw MoleculeError(
               "Unexpected element in optional nested molecule: " + other
             )
           }
@@ -84,7 +89,7 @@ trait ResolveNestedPull[Tpl]
           val res              = s"""\n$indent{($refAttr :limit nil :default "$none") [$acc1$attrs]}"""
           (res, append + append1)
 
-        case (_, Some(ref: Ref), _, _) => throw MoleculeException(
+        case (_, Some(ref: Ref), _, _) => throw MoleculeError(
           "Only cardinality-one refs allowed in optional nested data structures. Found: " + ref
         )
 
@@ -96,10 +101,10 @@ trait ResolveNestedPull[Tpl]
           def rec(elements: List[Element], level1: Int): (List[Element], String, String) = elements.head match {
             case ref1: Ref  =>
               // End previous ref
-              val (attrs, append1) = resolvePullRef(ref1, elements.tail, level1,attrIndex1,  "]}")
+              val (attrs, append1) = resolvePullRef(ref1, elements.tail, level1, attrIndex1, "]}")
               (Nil, prevRef, append + attrs + append1)
             case _: BackRef => rec(elements.tail, level1 - 1)
-            case a: Attr    => throw MoleculeException(
+            case a: Attr    => throw MoleculeError(
               s"Expected ref after backref _$backRef. " +
                 s"Please add attribute :${a.ns}/${a.attr} to initial namespace ${a.ns} " +
                 s"instead of after backref _$backRef."
@@ -122,11 +127,11 @@ trait ResolveNestedPull[Tpl]
           (res, "")
 
         case (_, Some(other), _, _) => unexpectedElement(other)
-        case other               => throw MoleculeException("Unexpected resolvePullRef coordinates: " + other)
+        case other                  => throw MoleculeError("Unexpected resolvePullRef coordinates: " + other)
       }
     }
 
-    val (attrs, append) = resolvePullRef(ref, elements, 0, 0,"")
+    val (attrs, append) = resolvePullRef(ref, elements, 0, 0, "")
     find += s"(pull $e [$attrs$append])\n       "
   }
 

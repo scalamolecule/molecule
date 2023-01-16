@@ -1,6 +1,6 @@
 package molecule.db.datomic.test.sort
 
-import molecule.base.util.exceptions.MoleculeException
+import molecule.base.util.exceptions.MoleculeError
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.db.datomic._
@@ -334,31 +334,31 @@ object SortIndexes extends DatomicTestSuite {
     "Correct use of sort markers" - types { implicit conn =>
       for {
         _ <- Ns.string.a1.int.a1.query.get
-          .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
+          .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
           err ==> "Sort index 1 should be present and additional indexes continuously " +
             "increase (in any order). Found sort index(es): 1, 1"
         }
 
         _ <- Ns.string.d1.int.d2.long.d2.query.get
-          .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
+          .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
           err ==> "Sort index 1 should be present and additional indexes continuously " +
             "increase (in any order). Found sort index(es): 1, 2, 2"
         }
 
         _ <- Ns.string.a1.int.a3.query.get
-          .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
+          .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
           err ==> "Sort index 1 should be present and additional indexes continuously " +
             "increase (in any order). Found sort index(es): 1, 3"
         }
 
         _ <- Ns.string.d3.int.d1.query.get
-          .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
+          .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
           err ==> "Sort index 1 should be present and additional indexes continuously " +
             "increase (in any order). Found sort index(es): 1, 3"
         }
 
         _ <- Ns.string.d2.int.a3.query.get
-          .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
+          .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
           err ==> "Sort index 1 should be present and additional indexes continuously " +
             "increase (in any order). Found sort index(es): 2, 3"
         }

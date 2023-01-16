@@ -1,17 +1,17 @@
 package molecule.db.datomic.setup
 
-import molecule.base.util.exceptions.MoleculeException
+import molecule.base.util.exceptions.MoleculeError
 import molecule.core.api.Connection
-import molecule.core.api.ops.QueryOps
+import molecule.core.api.action.QueryApi
 import molecule.core.util.Executor._
 import molecule.core.util.JavaConversions
-import molecule.coreTests.util.AggrUtils
+import molecule.coreTests.util.{AggrUtils, TestData}
 import org.scalactic.TripleEquals
 import utest._
 import utest.framework.{Formatter => uFormatter}
 import scala.concurrent.Future
 
-trait DatomicTestSuite extends TestSuite with CoreData
+trait DatomicTestSuite extends TestSuite with TestData
   // Platform-specific implementations (JS/JVM) (shows in red as error code in IDE)
   with DatomicTestSuiteImpl
   with JavaConversions
@@ -38,19 +38,19 @@ trait DatomicTestSuite extends TestSuite with CoreData
   protected def moleculeException(code: => Unit)(error: String): Unit = {
     try {
       code
-      throw MoleculeException("Test unexpectedly passed")
+      throw MoleculeError("Test unexpectedly passed")
     } catch {
-      case MoleculeException(`error`, _)                      => assert(true)
-      case e@MoleculeException("Test unexpectedly passed", _) => throw e
-      case MoleculeException(other, _)                        =>
-        throw MoleculeException(s"Unexpected error message:\n$other\n\nEXPECTED:\n$error\n")
-      case unexpected: Throwable                              => throw unexpected
+      case MoleculeError(`error`, _)                      => assert(true)
+      case e@MoleculeError("Test unexpectedly passed", _) => throw e
+      case MoleculeError(other, _)                        =>
+        throw MoleculeError(s"Unexpected error message:\n$other\n\nEXPECTED:\n$error\n")
+      case unexpected: Throwable                          => throw unexpected
     }
   }
 
-  def pullBooleanBug[Tpl](query: QueryOps[Tpl])(implicit conn: Connection): Future[Unit] = {
+  def pullBooleanBug[Tpl](query: QueryApi[Tpl])(implicit conn: Connection): Future[Unit] = {
     query.get
-      .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
+      .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
       err ==> "Datomic Free (not Pro) has a bug that pulls boolean `false` values as nil."
     }
   }

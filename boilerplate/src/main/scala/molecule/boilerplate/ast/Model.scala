@@ -126,6 +126,7 @@ trait Model extends Validations {
       def defV: String = defaultValue.fold("None")(v => s"Some(${format(v)})")
       s"""AttrOneManString("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
     }
+    def unapply(v: String): String = vs.head
   }
 
   case class AttrOneManInt(

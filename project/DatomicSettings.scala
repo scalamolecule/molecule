@@ -75,23 +75,23 @@ object DatomicSettings {
 
   val dbType = if (protocol == "mem") if (useFree) "(free)" else "(pro)" else ""
 
-  // print current datomic setup to console when running sbt commands from terminal
-  println(
-    s"""------------------------------------------------------------------------
-       |  Datomic protocol : $protocol $dbType
-       |  Datomic home     : $home
-       |
-       |  Available versions
-       |  free      : $freeVersions
-       |  pro       : $proVersions
-       |  dev-Local : $devLocalVersions
-       |
-       |  Current versions
-       |  free      : $freeVersion
-       |  pro       : $proVersion
-       |  dev-Local : $devLocalVersion
-       |------------------------------------------------------------------------""".stripMargin
-  )
+//  // print current datomic setup to console when running sbt commands from terminal
+//  println(
+//    s"""------------------------------------------------------------------------
+//       |  Datomic protocol : $protocol $dbType
+//       |  Datomic home     : $home
+//       |
+//       |  Available versions
+//       |  free      : $freeVersions
+//       |  pro       : $proVersions
+//       |  dev-Local : $devLocalVersions
+//       |
+//       |  Current versions
+//       |  free      : $freeVersion
+//       |  pro       : $proVersion
+//       |  dev-Local : $devLocalVersion
+//       |------------------------------------------------------------------------""".stripMargin
+//  )
 
   private def datomicVersions(system: String): Seq[String] = {
     val datomicPath =

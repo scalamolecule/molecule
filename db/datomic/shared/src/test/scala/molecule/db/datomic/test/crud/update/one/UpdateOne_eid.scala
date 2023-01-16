@@ -1,6 +1,6 @@
 package molecule.db.datomic.test.crud.update.one
 
-import molecule.base.util.exceptions.MoleculeException
+import molecule.base.util.exceptions.MoleculeError
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.db.datomic._
@@ -52,7 +52,7 @@ object UpdateOne_eid extends DatomicTestSuite {
         // Not adding `multiple` prevents unintentional update of multiple (possible all!) entities
 
         _ <- Ns(List(b, c)).int(5).update.transact
-          .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
+          .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
           err ==> "Please provide explicit `update.multiple` to update " +
             "multiple entities (found 2 matching entities)."
         }
@@ -125,7 +125,7 @@ object UpdateOne_eid extends DatomicTestSuite {
 
 
         _ <- Ns(eid).Tx(Other.s("tx3")).update.transact
-          .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
+          .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
           err ==> "Can't update tx meta data only."
         }
 
@@ -153,7 +153,7 @@ object UpdateOne_eid extends DatomicTestSuite {
       "e_(eid) not allowed" - types { implicit conn =>
         for {
           _ <- Ns.e_(42).int(2).update.transact
-            .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
+            .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
             err ==> "Can't update by applying entity ids to e_"
           }
         } yield ()
@@ -162,7 +162,7 @@ object UpdateOne_eid extends DatomicTestSuite {
       "Tacit generic attributes not allowed" - types { implicit conn =>
         for {
           _ <- Ns(42).a_("x").update.transact
-            .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
+            .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
             err ==> "Generic attributes not allowed in update molecule. Found:\n" +
               """AttrOneTacString("_Generic", "a", Appl, Seq("x"), None, None, None)"""
           }
@@ -172,7 +172,7 @@ object UpdateOne_eid extends DatomicTestSuite {
       "Mandatory generic attributes not allowed" - types { implicit conn =>
         for {
           _ <- Ns(42).a("x").update.transact
-            .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
+            .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
             err ==> "Generic attributes not allowed in update molecule. Found:\n" +
               """AttrOneManString("_Generic", "a", Appl, Seq("x"), None, None, None)"""
           }
@@ -182,7 +182,7 @@ object UpdateOne_eid extends DatomicTestSuite {
       "Can't update multiple values for one card-one attribute" - types { implicit conn =>
         for {
           _ <- Ns(42).int(2, 3).update.transact
-            .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
+            .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
             err ==> "Can only update one value for attribute `Ns.int`. Found: 2, 3"
           }
         } yield ()
@@ -191,7 +191,7 @@ object UpdateOne_eid extends DatomicTestSuite {
       "Can't update optional values" - types { implicit conn =>
         for {
           _ <- Ns(42).int_?(Some(1)).update.transact
-            .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
+            .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
             err ==> "Can't update optional values. Found:\n" +
               """AttrOneOptInt("Ns", "int", Appl, Some(Seq(1)), None, None, None)"""
           }
@@ -201,7 +201,7 @@ object UpdateOne_eid extends DatomicTestSuite {
       "Can't update card-many referenced attributes" - types { implicit conn =>
         for {
           _ <- Ns(42).i(1).Refs.i(2).update.transact
-            .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
+            .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
             err ==> "Can't update attributes in card-many referenced namespaces. Found `Refs`"
           }
         } yield ()
@@ -210,7 +210,7 @@ object UpdateOne_eid extends DatomicTestSuite {
       "Can't update multiple values for one card-one attribute" - types { implicit conn =>
         for {
           _ <- Ns(42).int(2, 3).update.transact
-            .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
+            .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
             err ==> "Can only update one value for attribute `Ns.int`. Found: 2, 3"
           }
         } yield ()

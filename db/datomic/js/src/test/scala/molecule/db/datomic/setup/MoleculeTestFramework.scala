@@ -3,9 +3,8 @@ package molecule.db.datomic.setup
 import boopickle.Default._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.marshalling.Boopicklers._
-import molecule.core.marshalling.WebClient
 
-class MoleculeTestFramework extends utest.runner.Framework with WebClient with MoleculeLogging {
+class MoleculeTestFramework extends utest.runner.Framework with MoleculeLogging {
 
 //  override def setup(): Unit = {
 //    logger.info("Setting up JS MoleculeTestFramework")

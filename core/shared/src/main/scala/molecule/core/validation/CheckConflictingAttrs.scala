@@ -1,13 +1,11 @@
 package molecule.core.validation
 
-import molecule.base.util.exceptions.MoleculeException
+import molecule.base.util.exceptions.MoleculeError
 import molecule.boilerplate.ast.Model._
 import scala.annotation.tailrec
 
-//object CheckConflictingAttrs extends CheckConflictingAttrs
-
 object CheckConflictingAttrs {
-  private def dup(element: String) = throw MoleculeException(s"Can't transact duplicate attribute `$element`.")
+  private def dup(element: String) = throw MoleculeError(s"Can't transact duplicate attribute `$element`.")
 
   @tailrec
   final def apply(
@@ -54,7 +52,7 @@ object CheckConflictingAttrs {
 
         case _: BackRef =>
           if (group == 0)
-            throw MoleculeException("Can't use backref from here.")
+            throw MoleculeError("Can't use backref from here.")
           apply(tail, prev, level, group - 1, refPath.init, distinguishMode)
 
         case Composite(es) =>
@@ -77,9 +75,6 @@ object CheckConflictingAttrs {
         case TxMetaData(txElements) =>
           val prev1 = prev :+ Array(Array.empty[String])
           apply(txElements, prev1, level + 1, 0, Nil, distinguishMode)
-
-        case other =>
-          throw MoleculeException("Unexpected  element: " + other)
       }
       case Nil          => ()
     }

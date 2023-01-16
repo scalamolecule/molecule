@@ -2,11 +2,14 @@ package molecule.core.transaction
 
 import java.net.URI
 import java.util.{Date, UUID}
-import molecule.base.util.exceptions.MoleculeException
+import molecule.base.util.exceptions.MoleculeError
 import molecule.boilerplate.ast.Model._
+import molecule.boilerplate.util.MoleculeLogging
+import molecule.core.util.ModelUtils
 import scala.annotation.tailrec
 
-class Save(isTx: Boolean = false) { self: Save2Data =>
+class Save(isTxMetaData: Boolean = false)
+  extends ModelUtils with MoleculeLogging { self: SaveOps =>
 
   @tailrec
   final protected def resolve(elements: List[Element]): Unit = {
@@ -14,7 +17,7 @@ class Save(isTx: Boolean = false) { self: Save2Data =>
       case element :: tail => element match {
         case a: Attr =>
           if (a.op != Appl) {
-            throw MoleculeException("Missing applied value for attribute:\n" + a)
+            throw MoleculeError("Missing applied value for attribute:\n" + a)
           }
           handleNs(a.ns)
           a match {
@@ -34,22 +37,20 @@ class Save(isTx: Boolean = false) { self: Save2Data =>
 
         case Ref(ns, refAttr, _, _)       => ref(ns, refAttr); resolve(tail)
         case BackRef(backRefNs)           => backRef(backRefNs); resolve(tail)
-        case _: Nested                    => throw MoleculeException(
+        case _: Nested                    => throw MoleculeError(
           "Nested data structure not allowed in save molecule. Please use insert instead."
         )
-        case _: NestedOpt                 => throw MoleculeException(
+        case _: NestedOpt                 => throw MoleculeError(
           "Optional nested data structure not allowed in save molecule. Please use insert instead."
         )
         case Composite(compositeElements) =>
           // Start from initial entity id for each composite sub group
-          handleComposite(isTx)
+          handleComposite(isTxMetaData)
           resolve(compositeElements ++ tail)
 
         case TxMetaData(txElements) =>
           handleTxMetaData()
           resolve(txElements) // tail is empty (no more attributes possible after Tx)
-
-        case element => unexpected(element)
       }
       case Nil             => ()
     }
@@ -64,7 +65,7 @@ class Save(isTx: Boolean = false) { self: Save2Data =>
     vs match {
       case Seq(v) => Some(transform(v))
       case Nil    => None
-      case vs     => throw MoleculeException(
+      case vs     => throw MoleculeError(
         s"Can only save one value for attribute `$ns.$attr`. Found: " + vs.mkString(", ")
       )
     }
@@ -86,9 +87,6 @@ class Save(isTx: Boolean = false) { self: Save2Data =>
       case a: AttrOneManByte       => addV(ns, attr, oneV[Byte](ns, attr, a.vs, valueByte))
       case a: AttrOneManShort      => addV(ns, attr, oneV[Short](ns, attr, a.vs, valueShort))
       case a: AttrOneManChar       => addV(ns, attr, oneV[Char](ns, attr, a.vs, valueChar))
-      case _                       => throw MoleculeException(
-        s"Can only save one applied value for attribute `$ns.$attr`. Found expression: ${a.op}"
-      )
     }
   }
   private def resolveAttrOneTac(a: AttrOneTac): Unit = {
@@ -108,9 +106,6 @@ class Save(isTx: Boolean = false) { self: Save2Data =>
       case a: AttrOneTacByte       => addV(ns, attr, oneV[Byte](ns, attr, a.vs, valueByte))
       case a: AttrOneTacShort      => addV(ns, attr, oneV[Short](ns, attr, a.vs, valueShort))
       case a: AttrOneTacChar       => addV(ns, attr, oneV[Char](ns, attr, a.vs, valueChar))
-      case _                       => throw MoleculeException(
-        s"Can only save one applied value for tacit attribute `$ns.$attr`. Found expression: ${a.op}"
-      )
     }
   }
 
@@ -124,7 +119,7 @@ class Save(isTx: Boolean = false) { self: Save2Data =>
     optVs.flatMap {
       case Seq(v) => Some(transform(v))
       case Nil    => None
-      case vs     => throw MoleculeException(
+      case vs     => throw MoleculeError(
         s"Can only save one value for optional attribute `$ns.$attr`. Found: " + vs.mkString(", ")
       )
     }
@@ -146,9 +141,6 @@ class Save(isTx: Boolean = false) { self: Save2Data =>
       case a: AttrOneOptByte       => addV(ns, attr, oneOptV[Byte](ns, attr, a.vs, valueByte))
       case a: AttrOneOptShort      => addV(ns, attr, oneOptV[Short](ns, attr, a.vs, valueShort))
       case a: AttrOneOptChar       => addV(ns, attr, oneOptV[Char](ns, attr, a.vs, valueChar))
-      case _                       => throw MoleculeException(
-        s"Can only save one applied value for optional attribute `$ns.$attr`. Found expression: ${a.op}"
-      )
     }
   }
 
@@ -162,7 +154,7 @@ class Save(isTx: Boolean = false) { self: Save2Data =>
     sets match {
       case Seq(set)     => Some(set.map(transform))
       case Nil          => None
-      case multipleSets => throw MoleculeException(
+      case multipleSets => throw MoleculeError(
         s"Can only save one Set of values for Set attribute `$ns.$attr`. Found: " + multipleSets.mkString(", ")
       )
     }
@@ -184,9 +176,6 @@ class Save(isTx: Boolean = false) { self: Save2Data =>
       case a: AttrSetManByte       => addSet(ns, attr, oneSet[Byte](ns, attr, a.vs, valueByte))
       case a: AttrSetManShort      => addSet(ns, attr, oneSet[Short](ns, attr, a.vs, valueShort))
       case a: AttrSetManChar       => addSet(ns, attr, oneSet[Char](ns, attr, a.vs, valueChar))
-      case _                       => throw MoleculeException(
-        s"Can only save one applied Set of values for Set attribute `$ns.$attr`. Found expression: ${a.op}"
-      )
     }
   }
   private def resolveAttrSetTac(a: AttrSetTac): Unit = {
@@ -206,9 +195,6 @@ class Save(isTx: Boolean = false) { self: Save2Data =>
       case a: AttrSetTacByte       => addSet(ns, attr, oneSet[Byte](ns, attr, a.vs, valueByte))
       case a: AttrSetTacShort      => addSet(ns, attr, oneSet[Short](ns, attr, a.vs, valueShort))
       case a: AttrSetTacChar       => addSet(ns, attr, oneSet[Char](ns, attr, a.vs, valueChar))
-      case _                       => throw MoleculeException(
-        s"Can only save one applied Set of values for tacit Set attribute `$ns.$attr`. Found expression: ${a.op}"
-      )
     }
   }
 
@@ -222,7 +208,7 @@ class Save(isTx: Boolean = false) { self: Save2Data =>
     optSets.flatMap {
       case Seq(set) => Some(set.map(transform))
       case Nil      => None
-      case vs       => throw MoleculeException(
+      case vs       => throw MoleculeError(
         s"Can only save one Set of values for optional Set attribute `$ns.$attr`. Found: " + vs.mkString(", ")
       )
     }
@@ -244,10 +230,6 @@ class Save(isTx: Boolean = false) { self: Save2Data =>
       case a: AttrSetOptByte       => addSet(ns, attr, oneOptSet[Byte](ns, attr, a.vs, valueByte))
       case a: AttrSetOptShort      => addSet(ns, attr, oneOptSet[Short](ns, attr, a.vs, valueShort))
       case a: AttrSetOptChar       => addSet(ns, attr, oneOptSet[Char](ns, attr, a.vs, valueChar))
-      case _                       => throw MoleculeException(
-        s"Can only save one applied Set of values for optional Set attribute `$ns.$attr`. " +
-          s"Found expression: ${at.op}"
-      )
     }
   }
 }

@@ -1,6 +1,6 @@
 package molecule.db.datomic.test.crud.update.set
 
-import molecule.base.util.exceptions.MoleculeException
+import molecule.base.util.exceptions.MoleculeError
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.db.datomic._
@@ -75,7 +75,7 @@ object UpdateSet_filter extends DatomicTestSuite {
     "Update filter value itself" - types { implicit conn =>
       for {
         _ <- Ns.ints_(42).ints(1).update.transact
-          .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
+          .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
           err ==> "Can only lookup entity with card-one attribute value. Found:\n" +
             """AttrSetTacInt("Ns", "ints", Appl, Seq(Set(42)), None, None, None)"""
         }
@@ -120,13 +120,13 @@ object UpdateSet_filter extends DatomicTestSuite {
           ).transact
 
           _ <- Ns.i_(1).ints(4).update.transact
-            .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
+            .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
             err ==> "Please provide explicit `update.multiple` to update " +
               "multiple entities (found 2 matching entities)."
           }
 
           _ <- Ns.i_(1).ints(Set(4)).upsert.transact
-            .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
+            .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
             err ==> "Please provide explicit `upsert.multiple` to upsert " +
               "multiple entities (found 2 matching entities)."
           }

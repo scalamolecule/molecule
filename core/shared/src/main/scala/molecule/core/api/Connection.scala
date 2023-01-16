@@ -1,6 +1,6 @@
 package molecule.core.api
 
-import molecule.base.util.exceptions.MoleculeException
+import molecule.base.util.exceptions.MoleculeError
 import molecule.core.marshalling.{ConnProxy, MoleculeRpc}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -12,11 +12,9 @@ abstract class Connection(val proxy: ConnProxy) { self: DataType =>
 
   private[molecule] lazy val rpc: MoleculeRpc = throw jsOnly("rpc")
 
-  //  private[molecule] var curProxy: ConnProxy = proxy
+  protected def jsOnly(method: String): MoleculeError =
+    MoleculeError(s"`$method` only implemented on JS platform.")
 
-  protected def jsOnly(method: String): MoleculeException =
-    MoleculeException(s"`$method` only implemented on JS platform.")
-
-  protected def jvmOnly(method: String): MoleculeException =
-    MoleculeException(s"`$method` only implemented on JVM platform.")
+  protected def jvmOnly(method: String): MoleculeError =
+    MoleculeError(s"`$method` only implemented on JVM platform.")
 }

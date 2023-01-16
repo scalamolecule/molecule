@@ -2,7 +2,7 @@ package codegen.boilerplate.ast
 
 import java.io.File
 import codegen.BoilerplateGenBase
-import molecule.base.util.exceptions.MoleculeException
+import molecule.base.util.exceptions.MoleculeError
 import scala.io.Source
 
 object _Model extends BoilerplateGenBase("Model", "/ast") {
@@ -12,7 +12,7 @@ object _Model extends BoilerplateGenBase("Model", "/ast") {
     val lines     = it.getLines().toList
     val delimiter = "// GENERATED (edit in _Model generator)"
     if (!lines.exists(_.contains(delimiter)))
-      throw MoleculeException(
+      throw MoleculeError(
         s"Couldn't find delimiting text '$delimiter' in file Model. " +
           "Please insert it before code to be generated."
       )

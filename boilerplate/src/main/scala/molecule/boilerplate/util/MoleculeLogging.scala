@@ -24,5 +24,8 @@ trait MoleculeLogging extends Logging {
     .clearHandlers()
     .clearModifiers()
     .withHandler(formatter = logFormatter, minimumLevel = Some(Level.Trace))
+//    .withHandler(formatter = logFormatter, minimumLevel = Some(Level.Debug))
+//    .withHandler(formatter = logFormatter, minimumLevel = Some(Level.Warn))
+//    .withHandler(formatter = logFormatter, minimumLevel = Some(Level.Error))
     .replace()
 }

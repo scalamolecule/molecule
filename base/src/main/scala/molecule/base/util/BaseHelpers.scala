@@ -4,7 +4,7 @@ import java.net.URI
 import java.time._
 import java.time.format.DateTimeFormatter
 import java.util.{Date, UUID}
-import molecule.base.util.exceptions.MoleculeException
+import molecule.base.util.exceptions.MoleculeError
 
 trait BaseHelpers extends DateHandling {
 
@@ -168,27 +168,27 @@ trait BaseHelpers extends DateHandling {
 
   protected def okIdent(name: String): String = name match {
     case r":-?[a-zA-Z][a-zA-Z0-9_]+/[a-z][a-zA-Z0-9]+" => name
-    case _                                             => throw MoleculeException(
+    case _                                             => throw MoleculeError(
       s"Invalid attribute name `$name`. " +
         "Expecting attribute name in the format `:<Ns>/<attr>` or `:<part_Ns>/<attr>`"
     )
   }
   protected def okEnumIdent(enumIdent: String): String = enumIdent match {
     case r":[a-zA-Z][a-zA-Z0-9_]+\.[a-zA-Z0-9_]+/[a-zA-Z0-9]+" => enumIdent
-    case _                                                     => throw MoleculeException(
+    case _                                                     => throw MoleculeError(
       s"Invalid enum attribute name `$enumIdent`. " +
         "Expecting enum attribute name in the format `:<Ns>.<attr>/<enum>` or `:<part_Ns>.<attr>/<enum>`"
     )
   }
   protected def okNamespaceName(name: String): String = name match {
     case r"[a-zA-Z][a-zA-Z0-9_]+" => name
-    case _                        => throw MoleculeException(
+    case _                        => throw MoleculeError(
       s"Invalid namespace name `$name`. Expecting namespace name in the format `[a-zA-Z][a-zA-Z0-9_]+`"
     )
   }
   protected def okPartitionName(name: String): String = name match {
     case r"[a-z][a-zA-Z0-9]+" => name
-    case _                    => throw MoleculeException(
+    case _                    => throw MoleculeError(
       s"Invalid partition name `$name`. Expecting partition name in the format `[a-z][a-zA-Z0-9]+`"
     )
   }

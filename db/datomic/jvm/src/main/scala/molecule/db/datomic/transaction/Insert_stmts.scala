@@ -2,14 +2,14 @@ package molecule.db.datomic.transaction
 
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
-import molecule.core.transaction.{Insert, Insert2Data, InsertResolvers_, Save}
+import molecule.core.transaction.{Insert, InsertOps, InsertResolvers_, Save}
 import molecule.core.util.ModelUtils
 import molecule.core.validation.CheckConflictingAttrs
 import scala.collection.mutable.ListBuffer
 
 trait Insert_stmts
   extends DatomicTxBase_JVM
-    with Insert2Data
+    with InsertOps
     with DatomicDataType_JVM
     with ModelUtils
     with MoleculeLogging { self: Insert with InsertResolvers_ =>
@@ -18,12 +18,7 @@ trait Insert_stmts
 
   def getStmts(elements: List[Element], tpls: Seq[Product]): Data = {
     initTxBase(elements)
-
-    // Resolve tx meta elements separately and merge append
-    val (mainElements, txMetaElements) = elements.last match {
-      case TxMetaData(txMetaElements) => (elements.init, txMetaElements)
-      case _                          => (elements, Nil)
-    }
+    val (mainElements, txMetaElements) = splitElements(elements)
     CheckConflictingAttrs(mainElements)
     val tpl2stmts = getResolver(mainElements)
     tpls.foreach { tpl =>

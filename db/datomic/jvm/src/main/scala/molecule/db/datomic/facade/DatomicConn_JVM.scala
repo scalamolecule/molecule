@@ -7,11 +7,10 @@ import datomic.Connection.{DB_AFTER, DB_BEFORE, TEMPIDS, TX_DATA}
 import datomic.Util.readAll
 import datomic.db.{Datum => PeerDatom}
 import datomic.{Connection => DatomicConnection, Datom => _, _}
-import molecule.base.util.exceptions.MoleculeException
+import molecule.base.util.exceptions.MoleculeError
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.api.{Connection, TxReport}
-import molecule.core.marshalling.{DatomicPeerProxy, MoleculeRpc}
-import molecule.db.datomic.marshalling.DatomicRpcJVM
+import molecule.core.marshalling.DatomicPeerProxy
 import molecule.db.datomic.transaction.DatomicDataType_JVM
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future, Promise}
@@ -28,7 +27,7 @@ case class DatomicConn_JVM(
 
   override def db: Database = peerConn.db()
 
-  private[molecule] final override lazy val rpc: MoleculeRpc = DatomicRpcJVM
+//  private[molecule] final override lazy val rpc: MoleculeRpc = DatomicRpcJVM
 
   private var optimizeQueries = true
   def setOptimizeQuery(flag: Boolean): Unit = {
@@ -65,8 +64,8 @@ case class DatomicConn_JVM(
               p.failure(
                 e.getCause match {
                   //                  case e: TxFnException     => e
-                  case e: MoleculeException => e
-                  case e                    => MoleculeException(e.getMessage.trim)
+                  case e: MoleculeError => e
+                  case e                => MoleculeError(e.getMessage.trim)
                 }
               )
 
@@ -77,7 +76,7 @@ case class DatomicConn_JVM(
                   javaStmts.fold("")(stmts => "\n---- javaStmts: ----\n" +
                     stmts.asScala.toList.mkString("\n"))
               )
-              p.failure(MoleculeException(e.getMessage))
+              p.failure(MoleculeError(e.getMessage))
           }
         }
       },

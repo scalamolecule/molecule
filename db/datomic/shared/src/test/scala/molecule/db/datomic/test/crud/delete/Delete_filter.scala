@@ -1,6 +1,6 @@
 package molecule.db.datomic.test.crud.delete
 
-import molecule.base.util.exceptions.MoleculeException
+import molecule.base.util.exceptions.MoleculeError
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.db.datomic._
@@ -178,7 +178,7 @@ object Delete_filter extends DatomicTestSuite {
       "Only tacit attributes" - types { implicit conn =>
         for {
           _ <- Ns.i.<=(2).delete.multiple.transact
-            .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
+            .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
             err ==> "Can only filter delete by values applied to tacit card-one attributes. Found:\n" +
               """AttrOneManInt("Ns", "i", Le, Seq(2), None, None, None)"""
           }
@@ -188,12 +188,12 @@ object Delete_filter extends DatomicTestSuite {
       "Multiple values" - types { implicit conn =>
         for {
           _ <- Ns.i_(1).int(1, 2).update.transact
-            .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
+            .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
             err ==> "Can only update one value for attribute `Ns.int`. Found: 1, 2"
           }
 
           _ <- Ns.i_(1).int(1, 2).upsert.transact
-            .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
+            .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
             err ==> "Can only upsert one value for attribute `Ns.int`. Found: 1, 2"
           }
         } yield ()

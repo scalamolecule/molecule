@@ -63,7 +63,6 @@ object SchemaAST extends BaseHelpers {
         attr <- ns.attrs
       } yield {
         (s"${ns.ns}.${attr.attr}", attr.card, attr.tpe)
-//        (s":${ns.ns}/${attr.attr}", attr.card, attr.tpe)
       }
       val maxSp    = attrData.map(_._1.length).max
       val attrs    = attrData.map {

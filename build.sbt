@@ -1,5 +1,4 @@
 import org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv
-import org.scalajs.linker.interface.ModuleSplitStyle
 
 val scala212 = "2.12.17"
 val scala213 = "2.13.10"
@@ -7,35 +6,8 @@ val scala3   = "3.2.1"
 val allScala = Seq(scala212, scala213, scala3)
 
 val zioVersion  = "2.0.1"
-val akkaVersion = "2.7.0"
+val akkaVersion = "2.8.0-M3"
 
-//inThisBuild(
-//  List(
-//    scalaVersion             := scala213,
-//    crossScalaVersions       := allScala,
-//    organization             := "org.scalamolecule",
-//    description              := "molecule",
-//    homepage                 := Some(url("http://www.scalamolecule.org")),
-//    licenses                 := List(License.Apache2),
-//    resolvers += "Sonatype OSS Snapshots" at "https://s01.oss.sonatype.org/content/repositories/snapshots",
-//    Test / parallelExecution := false,
-//    scmInfo                  := Some(
-//      ScmInfo(
-//        url("https://github.com/scalamolecule/molecule"),
-//        "scm:git:git@github.com:scalamolecule/molecule.git"
-//      )
-//    ),
-//    developers               := List(
-//      Developer(
-//        id = "marcgrue",
-//        name = "Marc Grue",
-//        email = "marcgrue@gmail.com",
-//        url = url("http://marcgrue.com")
-//      )
-//    )
-//  )
-//)
-//name := "molecule"
 
 lazy val root = project
   .in(file("."))
@@ -57,7 +29,7 @@ lazy val root = project
 lazy val base = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Pure)
   .settings(name := "molecule-base")
-  .settings(baseSettings)
+  .settings(commonSettings ++ baseSettings)
   .settings(doPublish)
 
 lazy val boilerplate = crossProject(JSPlatform, JVMPlatform)
@@ -65,10 +37,7 @@ lazy val boilerplate = crossProject(JSPlatform, JVMPlatform)
   .settings(name := "molecule-boilerplate")
   .dependsOn(base)
   .settings(sharedSettings ++ doPublish)
-  .settings(boilerplateSettings)
-  .enablePlugins(MoleculePlugin)
   .jsSettings(jsSettings)
-//  .jvmSettings(jvmSettings)
 
 lazy val core = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
@@ -85,7 +54,6 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
   .enablePlugins(BuildInfoPlugin, MoleculePlugin)
   .settings(sharedSettings ++ testSettings ++ dontPublish)
   .jsSettings(jsSettings)
-//  .jvmSettings(jvmSettings)
 
 lazy val datomic = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
@@ -103,57 +71,40 @@ lazy val baseSettings: Seq[Def.Setting[_]] = Seq(
   ThisBuild / organizationHomepage := Some(url("http://www.scalamolecule.org")),
   ThisBuild / version := "0.1.0-SNAPSHOT",
   ThisBuild / scalaVersion := scala213,
+  //  ThisBuild / scalaVersion := scala3,
   ThisBuild / versionScheme := Some("early-semver"),
   crossScalaVersions := Seq(scala212, scala213, scala3),
-  scalacOptions := List(
-    "-feature",
-    "-deprecation",
-    "-language:implicitConversions",
-    "-language:postfixOps",
-    "-language:higherKinds",
-    "-language:existentials",
-    "-Yrangepos"
-  ),
-  libraryDependencies ++= Seq(
-    "org.scalameta" %% "scalameta" % "4.7.1" cross CrossVersion.for3Use2_13,
-    "com.lihaoyi" %%% "utest" % "0.7.11" % Test,
-//    "dev.zio" %% "zio" % zioVersion,
-//    "dev.zio" %% "zio-streams" % zioVersion,
-//    "dev.zio" %% "zio-test" % zioVersion % Test
-  ),
+  libraryDependencies ++= {
+    if (scalaVersion.value == scala3) {
+      Seq(
 
-  //  libraryDependencies += "com.lihaoyi" %%% "utest" % "0.7.4" % "test",
-  testFrameworks += new TestFramework("utest.runner.Framework"),
-  //  testFrameworks += new TestFramework("molecule.db.datomic.setup.MoleculeTestFramework"),
-
-
-  Compile / unmanagedSourceDirectories ++= {
-    (Compile / unmanagedSourceDirectories).value.map { dir =>
-      CrossVersion.partialVersion(scalaVersion.value) match {
-        case Some((2, 13)) => file(dir.getPath ++ "-2.13+")
-        case _             => file(dir.getPath ++ "-2.13-")
-      }
+      )
+    } else {
+      Seq(
+        "org.scalameta" %% "scalameta" % "4.7.1" // cross CrossVersion.for3Use2_13,
+      )
     }
-  },
+  } ++
+    Seq(
+      "com.lihaoyi" %%% "utest" % "0.8.1" % Test,
+      "dev.zio" %% "zio" % zioVersion,
+      "dev.zio" %% "zio-streams" % zioVersion,
+      "dev.zio" %% "zio-test" % zioVersion % Test
+    ),
+
+  testFrameworks += new TestFramework("utest.runner.Framework")
+  //  testFrameworks += new TestFramework("molecule.db.datomic.setup.MoleculeTestFramework"),
 )
 
 lazy val sharedSettings: Seq[Def.Setting[_]] = baseSettings ++ Seq(
   resolvers ++= Seq(
     "clojars" at "https://clojars.org/repo"
   ),
-  //  Compile / unmanagedSourceDirectories ++= {
-  //    (Compile / unmanagedSourceDirectories).value.map { dir =>
-  //      CrossVersion.partialVersion(scalaVersion.value) match {
-  //        case Some((2, 13)) => file(dir.getPath ++ "-2.13+")
-  //        case _             => file(dir.getPath ++ "-2.13-")
-  //      }
-  //    }
-  //  },
+
   libraryDependencies ++= Seq(
-//    "org.scala-lang" % "scala-reflect" % scalaVersion.value,
+    //    "org.scala-lang" % "scala-reflect" % scalaVersion.value,
     "io.suzaku" %%% "boopickle" % "1.4.0",
-    "com.github.cornerman" %%% "sloth" % "0.6.5",
-    //    "com.lihaoyi" %%% "utest" % "0.7.11",
+    "com.github.cornerman" %%% "sloth" % "0.6.5" cross CrossVersion.for3Use2_13,
 
     // For aggregate tolerant trippelequal
     "org.scalactic" %%% "scalactic" % "3.2.14" % Test,
@@ -161,7 +112,17 @@ lazy val sharedSettings: Seq[Def.Setting[_]] = baseSettings ++ Seq(
   ),
 
   // Let IntelliJ detect sbt-molecule-created jars in unmanaged lib directories
-  exportJars := true
+  exportJars := true,
+
+  //  Compile / unmanagedSourceDirectories ++= {
+  //    (Compile / unmanagedSourceDirectories).value.map { dir =>
+  //      CrossVersion.partialVersion(scalaVersion.value) match {
+  //        case Some((2, 12)) => file(dir.getPath ++ "-212")
+  //        case Some((2, 13)) => file(dir.getPath ++ "-213")
+  //        case _             => file(dir.getPath ++ "-3")
+  //      }
+  //    }
+  //  }
 )
 
 lazy val jsSettings: Seq[Def.Setting[_]] = Seq(
@@ -169,30 +130,13 @@ lazy val jsSettings: Seq[Def.Setting[_]] = Seq(
     "org.scala-js" %%% "scalajs-dom" % "2.1.0",
     "org.scala-js" %%% "scala-js-macrotask-executor" % "1.1.1",
 
-    //    "io.github.cquiroz" %%% "scala-java-time" % "2.3.0",
     // This creates quite a lot of locales code but is needed on the js side.
     // See https://github.com/cquiroz/scala-java-time/issues/69
     "io.github.cquiroz" %%% "scala-java-time" % "2.5.0" % Test,
     "io.github.cquiroz" %%% "scala-java-time-tzdb" % "2.5.0" % Test,
 
-    "org.scala-js" %%% "scalajs-java-securerandom" % "1.0.0" cross CrossVersion.for3Use2_13,
-    //    "org.scala-js" %%% "scalajs-java-securerandom" % "1.0.0" cross CrossVersion.for3Use2_13,
-
-
+    "org.scala-js" %%% "scalajs-java-securerandom" % "1.0.0" cross CrossVersion.for3Use2_13
   ),
-
-  //  Test / scalaJSLinkerConfig ~= {
-  //    _.withModuleKind(ModuleKind.ESModule)
-  //  },
-  //  Test / scalaJSLinkerConfig ~= {
-  //    _.withModuleSplitStyle(ModuleSplitStyle.FewestModules)
-  //  },
-  Test / scalaJSLinkerConfig ~= {
-    //      _.withSourceMap(true)
-    _.withSourceMap(false)
-  },
-
-  //  scalaJSLinkerConfig in (Compile, fullOptJS) ~= { _.withSourceMap(false) },
 
   jsEnv := new JSDOMNodeJSEnv(
     JSDOMNodeJSEnv
@@ -215,17 +159,16 @@ lazy val datomicSettings: Seq[Def.Setting[_]] = {
 
       // Force newer janino compiler than datomic-free uses (necessary for using tx fns with datomic-free)
       "org.codehaus.janino" % "commons-compiler" % "3.0.12",
-      "org.codehaus.janino" % "commons-compiler-jdk" % "3.0.12",
+      "org.codehaus.janino" % "commons-compiler-jdk" % "3.0.12"
 
       // Datomic client dependencies transiently resolved
       //      "org.scalamolecule" %% "datomic-client-api-java-scala" % "1.0.3",
     ) ++ (CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((2, 13)) => Nil
-      case _             =>
+      case Some((2, 12)) =>
         // For @TxFns macro annotation on Scala 2.12
-        sbt.compilerPlugin(
-          "org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full
-        ) :: Nil
+        sbt.compilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full) :: Nil
+      case _             => Nil
     })
   )
 }
@@ -242,10 +185,16 @@ lazy val jvmSettings: Seq[Def.Setting[_]] = {
       //      "org.codehaus.janino" % "commons-compiler-jdk" % "3.0.12",
 
       // Datomic client dependencies transiently resolved
-      "org.scalamolecule" %% "datomic-client-api-java-scala" % "1.0.3",
+      //      "org.scalamolecule" %% "datomic-client-api-java-scala" % "1.0.3",
 
       // Akka dependencies for MoleculeRpcResponse
+      "com.typesafe.akka" %% "akka-stream" % akkaVersion,
+      "com.typesafe.akka" %% "akka-actor" % akkaVersion,
       "com.typesafe.akka" %% "akka-actor-typed" % akkaVersion,
+      "com.typesafe.akka" %% "akka-http" % "10.5.0-M1",
+      "ch.megard" %% "akka-http-cors" % "1.1.3",
+
+
       "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.13.2",
 
       // Enforce one version to avoid warnings of multiple dependency versions when running tests
@@ -255,47 +204,47 @@ lazy val jvmSettings: Seq[Def.Setting[_]] = {
   )
 }
 
-lazy val boilerplateSettings: Seq[Def.Setting[_]] = {
-  // If boilerplate code generation changes we re-generate code in
-  // <src>.molecule.boilerplate.api.generic.dsl with:
-  // sbt compile -Dmolecule=generic
-  val generateGeneric = sys.props.get("molecule").contains("generic")
-  val dslPath         = "../src/main/scala/molecule/boilerplate/api/generic/"
-  Seq(
-    moleculePluginActive := generateGeneric,
-    moleculeMakeJars := false,
-    moleculeDataModelPaths := Seq("molecule/boilerplate/api/generic"),
-
-    // Prevent current dsl files from colliding with generated code
-    unmanagedSources / excludeFilter :=
-      (if (generateGeneric) {
-        val genericDir = (baseDirectory.value / dslPath).getCanonicalPath
-        new SimpleFileFilter(f => f.getCanonicalPath.startsWith(genericDir + "/"))
-      } else NothingFilter),
-
-    // Copy generated dsl code to project
-    Compile / moleculeJars := Def
-      .taskDyn {
-        if (generateGeneric) {
-          Def.task {
-            val dirGenerated = new File(
-              (sourceManaged.value / "main/molecule/boilerplate/api/generic").getCanonicalPath
-            )
-            val dirShared    = new File((baseDirectory.value / dslPath).getCanonicalPath)
-            // Source files have been created at this point by the sbt-molecule plugin
-            if (dirGenerated.exists() && dirShared.exists()) {
-              IO.copyDirectory(dirGenerated, dirShared, true)
-              println("Copied generated generic dsl code to project source code.")
-              IO.delete(dirGenerated)
-              println("Deleted generated generic dsl code. " + dirGenerated)
-            }
-          }
-        } else Def.task {}
-      }
-      .triggeredBy(Compile / compile)
-      .value
-  )
-}
+//lazy val boilerplateSettings: Seq[Def.Setting[_]] = {
+//  // If boilerplate code generation changes we re-generate code in
+//  // <src>.molecule.boilerplate.api.generic.dsl with:
+//  // sbt compile -Dmolecule=generic
+//  val generateGeneric = sys.props.get("molecule").contains("generic")
+//  val dslPath         = "../src/main/scala/molecule/boilerplate/api/generic/"
+//  Seq(
+//    moleculePluginActive := generateGeneric,
+//    moleculeMakeJars := false,
+//    moleculeDataModelPaths := Seq("molecule/boilerplate/api/generic"),
+//
+//    // Prevent current dsl files from colliding with generated code
+//    unmanagedSources / excludeFilter :=
+//      (if (generateGeneric) {
+//        val genericDir = (baseDirectory.value / dslPath).getCanonicalPath
+//        new SimpleFileFilter(f => f.getCanonicalPath.startsWith(genericDir + "/"))
+//      } else NothingFilter),
+//
+//    // Copy generated dsl code to project
+//    Compile / moleculeJars := Def
+//      .taskDyn {
+//        if (generateGeneric) {
+//          Def.task {
+//            val dirGenerated = new File(
+//              (sourceManaged.value / "main/molecule/boilerplate/api/generic").getCanonicalPath
+//            )
+//            val dirShared    = new File((baseDirectory.value / dslPath).getCanonicalPath)
+//            // Source files have been created at this point by the sbt-molecule plugin
+//            if (dirGenerated.exists() && dirShared.exists()) {
+//              IO.copyDirectory(dirGenerated, dirShared, true)
+//              println("Copied generated generic dsl code to project source code.")
+//              IO.delete(dirGenerated)
+//              println("Deleted generated generic dsl code. " + dirGenerated)
+//            }
+//          }
+//        } else Def.task {}
+//      }
+//      .triggeredBy(Compile / compile)
+//      .value
+//  )
+//}
 
 
 lazy val testSettings: Seq[Def.Setting[_]] = {
@@ -307,10 +256,6 @@ lazy val testSettings: Seq[Def.Setting[_]] = {
         case _             => file(unmanagedBase.value.getPath ++ "/2.12")
       }
     },
-
-    //    libraryDependencies += "com.lihaoyi" %%% "utest" % "0.7.4" % "test",
-    //    testFrameworks += new TestFramework("utest.runner.Framework"),
-    //    //    testFrameworks += new TestFramework("molecule.db.datomic.setup.MoleculeTestFramework"),
 
     // Run tests for all systems sequentially to avoid data locks with db
     // Only applies on JVM. On JS platform there's no parallelism anyway.
@@ -345,7 +290,7 @@ lazy val testSettings: Seq[Def.Setting[_]] = {
 
     // Multiple directories with data models
     moleculeDataModelPaths := Seq(
-      "molecule/coreTests/dataModels/core",
+      "molecule/coreTests/dataModels/core"
 
       //      "moleculeTests/dataModels/core/base"
       //      "moleculeTests/dataModels/core/bidirectionals",
@@ -359,6 +304,13 @@ lazy val testSettings: Seq[Def.Setting[_]] = {
     ),
     //    moleculeMakeJars := false,
 
+    Global / excludeLintKeys ++= Set(
+      buildInfoPackage,
+      buildInfoKeys,
+      moleculePluginActive,
+      moleculeDataModelPaths
+    ),
+
     // Temporarily limit number of tests to be compiled by sbt (comment out this whole sbt setting to test all)
     // Note that intellij doesn't recognize this setting - there you can right click on files and exclude
     unmanagedSources / excludeFilter := {
@@ -369,14 +321,14 @@ lazy val testSettings: Seq[Def.Setting[_]] = {
       val sharedTests = path("shared")
       val allowed     = Seq(
         //        jvmTests + "/restore",
-        //        sharedTests + "/aggr",
-        //        sharedTests + "/composite",
-        sharedTests + "/crud",
+        //                sharedTests + "/aggr",
+        //                sharedTests + "/composite",
+        //        sharedTests + "/crud",
         //        sharedTests + "/expr",
         //        sharedTests + "/relation",
         //        sharedTests + "/sort",
         //        sharedTests + "/txMetaData",
-        //        sharedTests,
+        sharedTests,
         jvmTests + "/AdhocJVM.scala",
         jsTests + "/AdhocJs.scala",
         sharedTests + "/Adhoc.scala",
@@ -397,15 +349,11 @@ lazy val testSettings: Seq[Def.Setting[_]] = {
       "dev.zio" %% "zio-test" % zioVersion % "test",
       "dev.zio" %% "zio-test-sbt" % zioVersion % "test",
       //      "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.13.2",
-      "com.typesafe.akka" %% "akka-stream" % akkaVersion,
-      "com.typesafe.akka" %% "akka-actor" % akkaVersion,
-      "com.typesafe.akka" %% "akka-actor-typed" % akkaVersion,
-      "com.typesafe.akka" %% "akka-http" % "10.4.0",
-      "ch.megard" %% "akka-http-cors" % "1.1.3",
-      //
-      //      // Free, but proprietary Client dev-local dependency needed for testing client/dev-local
-      //      // Please download from https://cognitect.com/dev-tools and install locally per included instructions
-      //      "com.datomic" % "dev-local" % DatomicSettings.devLocalVersion
+      //      "com.typesafe.akka" %% "akka-stream" % akkaVersion,
+      //      "com.typesafe.akka" %% "akka-actor" % akkaVersion,
+      //      "com.typesafe.akka" %% "akka-actor-typed" % akkaVersion,
+      //      "com.typesafe.akka" %% "akka-http" % "10.5.0-M1",
+      //      "ch.megard" %% "akka-http-cors" % "1.1.3"
     )
   ) ++ (
     if (DatomicSettings.useFree)
@@ -420,6 +368,58 @@ lazy val testSettings: Seq[Def.Setting[_]] = {
       )
     )
 }
+//  scalacOptions := List(
+//    "-feature",
+//    "-deprecation",
+//    "-language:implicitConversions",
+//    "-language:postfixOps",
+//    "-language:higherKinds",
+//    "-language:existentials",
+//    "-Yrangepos"
+//  ),
+lazy val commonSettings                    = Def.settings(
+  scalacOptions ++= Seq(
+    "-deprecation",
+    "-encoding",
+    "UTF-8",
+    "-feature",
+    "-language:higherKinds",
+    "-language:existentials",
+    "-unchecked",
+    "-Xfatal-warnings"
+  ) ++ (CrossVersion.partialVersion(scalaVersion.value) match {
+    case Some((2, 12)) =>
+      Seq(
+        "-Xsource:2.13",
+        "-Yno-adapted-args",
+        "-Ypartial-unification",
+        "-Ywarn-extra-implicit",
+        "-Ywarn-inaccessible",
+        "-Ywarn-infer-any",
+        "-Ywarn-unused:-nowarn",
+        "-Ywarn-nullary-override",
+        "-Ywarn-nullary-unit",
+        "-opt-inline-from:<source>",
+        "-opt-warnings",
+        "-opt:l:inline",
+        "-explaintypes"
+      )
+    case Some((2, 13)) =>
+      Seq(
+        "-Xlint:-byname-implicit",
+        "-explaintypes"
+      )
+
+    case Some((3, _)) =>
+      Seq(
+        "-explain-types",
+        //        "-Ykind-projector",
+        //        "-unchecked",
+        "-source:3.0-migration"
+      )
+    case _            => Nil
+  })
+)
 
 lazy val snapshots =
   "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"

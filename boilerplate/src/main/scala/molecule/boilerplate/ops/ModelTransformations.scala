@@ -2,13 +2,13 @@ package molecule.boilerplate.ops
 
 import java.net.URI
 import java.util.{Date, UUID}
-import molecule.base.util.exceptions.MoleculeException
+import molecule.base.util.exceptions.MoleculeError
 import molecule.boilerplate.api.Keywords.Kw
 import molecule.boilerplate.ast.Model._
 
 trait ModelTransformations {
 
-  def unexpected(element: Element) = throw MoleculeException("Unexpected element: " + element)
+  def unexpected(element: Element) = throw MoleculeError("Unexpected element: " + element)
 
   protected def toInt(es: List[Element], kw: Kw): List[Element] = {
     val last = es.last match {

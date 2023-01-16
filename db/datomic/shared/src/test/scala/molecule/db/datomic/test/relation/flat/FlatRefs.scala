@@ -1,6 +1,6 @@
 package molecule.db.datomic.test.relation.flat
 
-import molecule.base.util.exceptions.MoleculeException
+import molecule.base.util.exceptions.MoleculeError
 import molecule.coreTests.dataModels.core.dsl.Refs._
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
@@ -87,7 +87,7 @@ object FlatRefs extends DatomicTestSuite {
 
       // Saving individual ref ids (not in a Set) is not allowed
       _ <- Ns.i(0).rs1(b1, b2).save.transact
-        .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
+        .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
         err ==> "Can only save one Set of values for Set attribute `Ns.rs1`. " +
           s"Found: Set($b1), Set($b2)"
       }

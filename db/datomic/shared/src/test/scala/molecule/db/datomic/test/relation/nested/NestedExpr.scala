@@ -1,6 +1,6 @@
 package molecule.db.datomic.test.relation.nested
 
-import molecule.base.util.exceptions.MoleculeException
+import molecule.base.util.exceptions.MoleculeError
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Refs._
 import molecule.db.datomic._
@@ -40,31 +40,31 @@ object NestedExpr extends DatomicTestSuite {
         // Expressions inside optional nested not allowed
 
         _ <- Ns.i_.Rs1.*?(R1.i(1)).query.get
-          .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
+          .map(_ ==> "Unexpected success 1").recover { case MoleculeError(err, _) =>
           err ==> "Expressions not allowed in optional nested data structure. Found:\n" +
             """AttrOneManInt("R1", "i", Appl, Seq(1), None, None, None)"""
         }
 
         _ <- Ns.i_.Rs1.*?(R1.i.<(2)).query.get
-          .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
+          .map(_ ==> "Unexpected success 2").recover { case MoleculeError(err, _) =>
           err ==> "Expressions not allowed in optional nested data structure. Found:\n" +
             """AttrOneManInt("R1", "i", Lt, Seq(2), None, None, None)"""
         }
 
         _ <- Ns.i_.Rs1.*?(R1.i.<=(2)).query.get
-          .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
+          .map(_ ==> "Unexpected success 3").recover { case MoleculeError(err, _) =>
           err ==> "Expressions not allowed in optional nested data structure. Found:\n" +
             """AttrOneManInt("R1", "i", Le, Seq(2), None, None, None)"""
         }
 
         _ <- Ns.i_.Rs1.*?(R1.i.>(2)).query.get
-          .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
+          .map(_ ==> "Unexpected success 4").recover { case MoleculeError(err, _) =>
           err ==> "Expressions not allowed in optional nested data structure. Found:\n" +
             """AttrOneManInt("R1", "i", Gt, Seq(2), None, None, None)"""
         }
 
         _ <- Ns.i_.Rs1.*?(R1.i.>=(2)).query.get
-          .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
+          .map(_ ==> "Unexpected success 5").recover { case MoleculeError(err, _) =>
           err ==> "Expressions not allowed in optional nested data structure. Found:\n" +
             """AttrOneManInt("R1", "i", Ge, Seq(2), None, None, None)"""
         }

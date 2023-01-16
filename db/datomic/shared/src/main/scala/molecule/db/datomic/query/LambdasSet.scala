@@ -62,31 +62,21 @@ trait LambdasSet extends ResolveBase with JavaConversions {
     (v: AnyRef) => v.asInstanceOf[jSet[_]].toArray.map(value).toSet
 
 
-  private lazy val set2setsString    : AnyRef => AnyRef = jset2setsT[String]
-  private lazy val set2setsInt       : AnyRef => AnyRef = jset2setsT[Int]((v: Any) => v.toString.toInt)
-  private lazy val set2setsLong      : AnyRef => AnyRef = jset2setsT[Long]
-  private lazy val set2setsFloat     : AnyRef => AnyRef = jset2setsT[Float]
-  private lazy val set2setsDouble    : AnyRef => AnyRef = jset2setsT[Double]
-  private lazy val set2setsBoolean   : AnyRef => AnyRef = jset2setsT[Boolean]
+  private lazy val set2setsString    : AnyRef => AnyRef = jset2setsT[String](_.asInstanceOf[String])
+  private lazy val set2setsInt       : AnyRef => AnyRef = jset2setsT[Int](_.toString.toInt)
+  private lazy val set2setsLong      : AnyRef => AnyRef = jset2setsT[Long](_.asInstanceOf[Long])
+  private lazy val set2setsFloat     : AnyRef => AnyRef = jset2setsT[Float](_.asInstanceOf[Float])
+  private lazy val set2setsDouble    : AnyRef => AnyRef = jset2setsT[Double](_.asInstanceOf[Double])
+  private lazy val set2setsBoolean   : AnyRef => AnyRef = jset2setsT[Boolean](_.asInstanceOf[Boolean])
   private lazy val set2setsBigInt    : AnyRef => AnyRef = jset2setsT[BigInt]((v: Any) => BigInt(v.toString))
   private lazy val set2setsBigDecimal: AnyRef => AnyRef = jset2setsT[BigDecimal]((v: Any) => BigDecimal(v.toString))
-  private lazy val set2setsDate      : AnyRef => AnyRef = jset2setsT[Date]
-  private lazy val set2setsUUID      : AnyRef => AnyRef = jset2setsT[UUID]
-  private lazy val set2setsURI       : AnyRef => AnyRef = jset2setsT[URI]
-  private lazy val set2setsByte      : AnyRef => AnyRef = jset2setsT[Byte]((v: Any) => v.asInstanceOf[Integer].toByte)
-  private lazy val set2setsShort     : AnyRef => AnyRef = jset2setsT[Short]((v: Any) => v.asInstanceOf[Integer].toShort)
-  private lazy val set2setsChar      : AnyRef => AnyRef = jset2setsT[Char]((v: Any) => v.asInstanceOf[String].charAt(0))
+  private lazy val set2setsDate      : AnyRef => AnyRef = jset2setsT[Date](_.asInstanceOf[Date])
+  private lazy val set2setsUUID      : AnyRef => AnyRef = jset2setsT[UUID](_.asInstanceOf[UUID])
+  private lazy val set2setsURI       : AnyRef => AnyRef = jset2setsT[URI](_.asInstanceOf[URI])
+  private lazy val set2setsByte      : AnyRef => AnyRef = jset2setsT[Byte](_.asInstanceOf[Integer].toByte)
+  private lazy val set2setsShort     : AnyRef => AnyRef = jset2setsT[Short](_.asInstanceOf[Integer].toShort)
+  private lazy val set2setsChar      : AnyRef => AnyRef = jset2setsT[Char](_.asInstanceOf[String].charAt(0))
 
-  private def jset2setsT[T]: AnyRef => AnyRef = (v: AnyRef) => {
-    var sets = Set.empty[Set[T]]
-    var set  = Set.empty[T]
-    v.asInstanceOf[jSet[_]].forEach { row =>
-      set = Set.empty[T]
-      row.asInstanceOf[jSet[_]].forEach(v => set = set + v.asInstanceOf[T])
-      sets += set
-    }
-    sets
-  }
   private def jset2setsT[T](value: Any => T): AnyRef => AnyRef = (v: AnyRef) => {
     var sets = Set.empty[Set[T]]
     var set  = Set.empty[T]
@@ -95,7 +85,7 @@ trait LambdasSet extends ResolveBase with JavaConversions {
       row.asInstanceOf[jSet[_]].forEach(v => set = set + value(v))
       sets += set
     }
-    sets
+    sets.asInstanceOf[AnyRef]
   }
 
 

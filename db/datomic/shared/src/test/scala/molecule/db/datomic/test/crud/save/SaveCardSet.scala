@@ -2,7 +2,7 @@ package molecule.db.datomic.test.crud.save
 
 import java.net.URI
 import java.util.{Date, UUID}
-import molecule.base.util.exceptions.MoleculeException
+import molecule.base.util.exceptions.MoleculeError
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.db.datomic._
@@ -18,19 +18,19 @@ object SaveCardSet extends DatomicTestSuite {
       for {
         // Can't save multiple Sets of values (use insert for that)
         _ <- Ns.ints(Seq(Set(1), Set(2))).save.transact
-          .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
+          .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
           err ==> "Can only save one Set of values for Set attribute `Ns.ints`. Found: Set(1), Set(2)"
         }
 
         // Same as
         _ <- Ns.ints(Set(1), Set(2)).save.transact
-          .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
+          .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
           err ==> "Can only save one Set of values for Set attribute `Ns.ints`. Found: Set(1), Set(2)"
         }
 
         // Same as
         _ <- Ns.ints(1, 2).save.transact
-          .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
+          .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
           err ==> "Can only save one Set of values for Set attribute `Ns.ints`. Found: Set(1), Set(2)"
         }
 
@@ -104,7 +104,7 @@ object SaveCardSet extends DatomicTestSuite {
       for {
         // Can't save multiple Sets of values (use insert for that)
         _ <- Ns.ints_?(Some(Seq(Set(1), Set(2)))).save.transact
-          .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
+          .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
           err ==> "Can only save one Set of values for optional Set attribute `Ns.ints`. Found: Set(1), Set(2)"
         }
 

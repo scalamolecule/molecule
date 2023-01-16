@@ -1,7 +1,6 @@
 package molecule.db.datomic.test
 
 import boopickle.Default._
-import molecule.base.util.exceptions.MoleculeException
 import molecule.core.util.Executor._
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
@@ -13,10 +12,30 @@ object AdhocJs extends DatomicTestSuite {
 
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
+
+
+      val a = (1, Some(Set(bigDecimal1, bigDecimal2)))
+      val b = (2, Some(Set(bigDecimal2, bigDecimal3, bigDecimal4)))
+      val c = (3, None)
+
+
+
+
       for {
 
-        _ <- Ns.i(1).save.transact
-        _ <- Ns.i.query.get
+
+        _ <- Ns.i.bigDecimals_?.insert(a, b, c).transact
+
+        // Sets with one or more values matching
+
+        // "Has this value"
+        //          _ <- Ns.i.a1.bigDecimals_?(Some(bigDecimal0)).query.get.map(_ ==> List())
+        _ <- Ns.i.a1.bigDecimals_?.apply(Some(bigDecimal1)).query.get.map(_ ==> List(a))
+        //          _ <- Ns.i.a1.bigDecimals_?(Some(bigDecimal2)).query.get.map(_ ==> List(a, b))
+        //          _ <- Ns.i.a1.bigDecimals_?(Some(bigDecimal3)).query.get.map(_ ==> List(b))
+
+
+
 
       } yield ()
     }
@@ -25,12 +44,8 @@ object AdhocJs extends DatomicTestSuite {
     //    "refs" - refs { implicit conn =>
     //      import molecule.coreTests.dataModels.core.dsl.Refs._
     //      for {
-    //        _ <- (Ns.i(1) + R2.i(2)).insert(1, 2).transact
-    //          .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
-    //          err ==> "Can't insert attributes with an applied value. Found:\n" +
-    //            "AttrOneManInt(Ns,i,Appl,List(1),None,None,None)"
-    //        }
     //
+    //        _ <- Ns.i.Rs1.*(R1.i).insert(0, List(1)).transact
     //
     //      } yield ()
     //    }

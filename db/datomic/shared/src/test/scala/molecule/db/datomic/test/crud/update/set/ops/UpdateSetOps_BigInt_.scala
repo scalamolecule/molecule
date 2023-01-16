@@ -1,7 +1,7 @@
 // GENERATED CODE ********************************
 package molecule.db.datomic.test.crud.update.set.ops
 
-import molecule.base.util.exceptions.MoleculeException
+import molecule.base.util.exceptions.MoleculeError
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.db.datomic._
@@ -102,12 +102,12 @@ object UpdateSetOps_BigInt_ extends DatomicTestSuite {
 
         // Can't swap duplicate from/to values
         _ <- Ns(42).bigInts.swap(bigInt1 -> bigInt2, bigInt1 -> bigInt3).update.transact
-          .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
+          .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
           err ==> "Can't swap from duplicate retract values."
         }
 
         _ <- Ns(42).bigInts.swap(bigInt1 -> bigInt3, bigInt2 -> bigInt3).update.transact
-          .map(_ ==> "Unexpected success").recover { case MoleculeException(err, _) =>
+          .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
           err ==> "Can't swap to duplicate replacement values."
         }
       } yield ()

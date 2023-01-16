@@ -56,10 +56,12 @@ trait CastNestedOptBranch_[Tpl]
             override def compare(a: Row, b: Row): Int = {
               var i      = 0
               var result = 0
-              do {
+              result = pullSorts(i)(0)(a, b)
+              i += 1
+              while (result == 0 && i != n) {
                 result = pullSorts(i)(0)(a, b)
                 i += 1
-              } while (result == 0 && i != n)
+              }
               result
             }
           }

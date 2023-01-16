@@ -1,11 +1,11 @@
 package molecule.core.transaction
 
-import molecule.base.util.exceptions.MoleculeException
+import molecule.base.util.exceptions.MoleculeError
 import molecule.boilerplate.ast.Model._
 import scala.annotation.tailrec
 
 
-class Insert extends InsertResolvers_ { self: Insert2Data =>
+class Insert extends InsertResolvers_ { self: InsertOps =>
 
   @tailrec
   final override protected def resolve(
@@ -17,7 +17,7 @@ class Insert extends InsertResolvers_ { self: Insert2Data =>
       case element :: tail => element match {
         case a: Attr =>
           if (a.op != V) {
-            throw MoleculeException("Can't insert attributes with an applied value. Found:\n" + a)
+            throw MoleculeError("Can't insert attributes with an applied value. Found:\n" + a)
           }
           a match {
             case a: AttrOne =>
@@ -38,7 +38,7 @@ class Insert extends InsertResolvers_ { self: Insert2Data =>
 
         case BackRef(backRefNs) =>
           tail.head match {
-            case Ref(_, refAttr, _, _) if prevRefs.contains(refAttr) => throw MoleculeException(
+            case Ref(_, refAttr, _, _) if prevRefs.contains(refAttr) => throw MoleculeError(
               s"Can't re-use previous namespace ${refAttr.capitalize} after backref _$backRefNs."
             )
             case _                                                   => // ok
