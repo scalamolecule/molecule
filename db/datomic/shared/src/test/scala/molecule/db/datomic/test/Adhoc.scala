@@ -36,6 +36,8 @@ object Adhoc extends DatomicTestSuite {
   ////Person.name(hej)
   //
   //  int(hej)
+
+
   lazy val tests = Tests {
 
     "types" - types { implicit conn =>

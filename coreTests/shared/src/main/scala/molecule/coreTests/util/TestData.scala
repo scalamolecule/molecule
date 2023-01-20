@@ -1,7 +1,5 @@
 package molecule.coreTests.util
 
-//package molecule.db.datomic.setup
-
 import java.net.URI
 import java.util.UUID._
 import java.util.{Date, UUID}

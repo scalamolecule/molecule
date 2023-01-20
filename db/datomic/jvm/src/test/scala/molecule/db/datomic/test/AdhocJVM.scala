@@ -5,21 +5,13 @@ import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
 
-//import molecule.core.util.Executor._
-//import molecule.coreTests.dataModels.core.dsl.Types._
-//import molecule.db.datomic._
-//import molecule.db.datomic.setup.DatomicTestSuite
-//import org.scalactic.TripleEquals._
-
 object AdhocJVM extends DatomicTestSuite {
 
 
   lazy val tests = Tests {
 
-
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
-//      import molecule.db.datomic.dataModels.core.dsl.Types._
       for {
 
         _ <- Ns.i(1).save.transact

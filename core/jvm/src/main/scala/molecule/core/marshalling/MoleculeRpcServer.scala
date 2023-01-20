@@ -1,13 +1,5 @@
 package molecule.core.marshalling
 
-//import akka.actor.ActorSystem
-//import akka.actor.typed.ActorSystem
-//import akka.actor.typed.scaladsl.Behaviors
-//import akka.http.scaladsl.Http
-//import akka.http.scaladsl.model.HttpEntity
-//import akka.http.scaladsl.server.Directives._
-//import akka.http.scaladsl.server.Route
-
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.HttpEntity
@@ -30,9 +22,6 @@ import scala.util.{Failure, Success}
  * sbt datomicJVM/run
  * */
 abstract class MoleculeRpcServer(rpc: MoleculeRpc) extends RpcHandlers(rpc){
-//  implicit val system          : ActorSystem[Nothing]     = ActorSystem(Behaviors.empty, "MoleculeAjaxSystem")
-//  implicit val executionContext: ExecutionContextExecutor = system.executionContext
-
   implicit val system          : ActorSystem              = ActorSystem()
   implicit val executionContext: ExecutionContextExecutor = system.dispatcher
 
