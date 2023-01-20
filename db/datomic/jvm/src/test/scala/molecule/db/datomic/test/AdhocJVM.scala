@@ -1,14 +1,15 @@
 package molecule.db.datomic.test
 
-import molecule.core.transaction.Save
 import molecule.core.util.Executor._
-import molecule.coreTests.dataModels.core.dsl.Refs._
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
-import molecule.db.datomic.transaction.Save_stmts
 import utest._
-import molecule.boilerplate.ast.Model._
 
+//import molecule.core.util.Executor._
+//import molecule.coreTests.dataModels.core.dsl.Types._
+//import molecule.db.datomic._
+//import molecule.db.datomic.setup.DatomicTestSuite
+//import org.scalactic.TripleEquals._
 
 object AdhocJVM extends DatomicTestSuite {
 
@@ -18,9 +19,12 @@ object AdhocJVM extends DatomicTestSuite {
 
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
+//      import molecule.db.datomic.dataModels.core.dsl.Types._
       for {
 
         _ <- Ns.i(1).save.transact
+        _ <- Ns.i.query.get.map(_ ==> List(1))
+
 
       } yield ()
     }

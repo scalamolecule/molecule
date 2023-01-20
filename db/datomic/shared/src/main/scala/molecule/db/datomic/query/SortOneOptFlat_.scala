@@ -8,7 +8,7 @@ import java.util.{Date, UUID}
 import molecule.boilerplate.ast.Model._
 
 
-trait SortOneOptFlat_[Tpl] extends ResolveBase { self: Base[Tpl] =>
+trait SortOneOptFlat_[Tpl] extends ResolveBase { self: DatomicModel2Query[Tpl] =>
 
   private def compare(
     a: Row,

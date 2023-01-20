@@ -58,7 +58,7 @@ abstract class CodeGenTemplate(val fileName: String, dir: String, basePath: Stri
   // Implement in sub classes
   def content: String
 
-  def generate: Unit = {
+  def generate(): Unit = {
     mkFile(fileName2, content)
     println(s"Generated $path/$fileName2.scala")
   }

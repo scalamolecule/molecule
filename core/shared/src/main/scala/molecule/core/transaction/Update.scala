@@ -16,7 +16,7 @@ class Update(
   val update = if (isUpsert) "upsert" else "update"
 
   @tailrec
-  final protected def resolve(
+  final def resolve(
     elements: List[Element],
     eids: Seq[AnyRef],
     filterElements: List[Element],

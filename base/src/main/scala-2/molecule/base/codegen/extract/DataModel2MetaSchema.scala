@@ -7,35 +7,53 @@ import scala.annotation.tailrec
 import scala.meta._
 
 object DataModel2MetaSchema {
-  def apply(path: String): MetaSchema = {
-    val bytes     = Files.readAllBytes(Paths.get(path))
-    val dataModel = new String(bytes, "UTF-8")
-    new DataModel2MetaSchema(path, dataModel).schema
-  }
-  def apply(path: String, dataModel: String): MetaSchema = {
-    new DataModel2MetaSchema(path, dataModel).schema
+  def apply(filePath: String, scalaVersion: String = "3"): MetaSchema = {
+    val bytes   = Files.readAllBytes(Paths.get(filePath))
+    val pkgPath = new String(bytes, "UTF-8")
+    new DataModel2MetaSchema(filePath, pkgPath, scalaVersion).schema
   }
 }
 
-class DataModel2MetaSchema(path: String, dataModel: String) {
-  val tree = Input.VirtualFile(path, dataModel).parse[Source].get
+class DataModel2MetaSchema(filePath: String, pkgPath: String, scalaVersion: String) {
+  private val virtualFile = Input.VirtualFile(filePath, pkgPath)
+  private val dialect     = scalaVersion match {
+    case "3"   => dialects.Scala3(virtualFile)
+    case "213" => dialects.Scala213(virtualFile)
+    case "212" => dialects.Scala212(virtualFile)
+  }
+  private val tree = dialect.parse[Source].get
 
-  var backRefs = Map.empty[String, Seq[String]]
+  private var backRefs = Map.empty[String, Seq[String]]
 
-  private val noMix = "Mixing prefixed and non-prefixed namespaces is not allowed."
-  private def unexpectedCode(c: Tree) = throw new Exception(
-    s"Unexpected DataModel code in file $path:\n" + c
+  private def noMix() = throw new Exception(
+    "Mixing prefixed and non-prefixed namespaces is not allowed."
+  )
+  private def unexpected(c: Tree, msg: String = ":") = throw new Exception(
+    s"Unexpected DataModel code in file $filePath$msg\n" + c
   )
 
-  private val (pkg, domain, maxArity, body) = tree.children.headOption match {
-    case Some(q"""package $pkg.dataModel {
-        ..$imports
-        object $domain extends DataModel($maxArity) {
-          ..$body
-        }
-      }""")    => (pkg.toString, domain.toString, maxArity.toString.toInt, body)
-    case None  => unexpectedCode(tree)
-    case other => unexpectedCode(other.get)
+  private val (pkg, afterPkg) = tree.children.collectFirst {
+    case Pkg(Term.Select(pkg, Term.Name("dataModel")), afterPkg) => (pkg.toString, afterPkg)
+  }.getOrElse(unexpected(tree, ". Couldn't find package definition in code:\n"))
+
+  private val (domain, maxArity, body) = afterPkg.collectFirst {
+    case Defn.Object(_, Term.Name(domain),
+    Template.internal.Impl(_,
+    List(Init.internal.Impl(Type.Name("DataModel"), _,
+    List(Term.ArgClause(List(Lit.Int(maxArity)), _))
+    )), _, body, _)) => (domain, maxArity, body)
+  }.getOrElse(unexpected(tree,
+    ". Couldn't find `object <YourDataModel> extends DataModel(<arity>) {...}` in code:\n"))
+
+  def schema: MetaSchema = {
+    val parts = body.head match {
+      case q"object $_ { ..$_ }" => body.map {
+        case q"object $part { ..$nss }" => MetaPart(part.toString, getNss(part.toString + "_", nss))
+        case q"trait $ns $template"     => noMix()
+      }
+      case _                     => Seq(MetaPart("", getNss("", body)))
+    }
+    MetaSchema(pkg, domain, maxArity, parts)
   }
 
   private def getNss(partPrefix: String, nss: Seq[Stat]): Seq[MetaNs] = nss.map {
@@ -46,18 +64,18 @@ class DataModel2MetaSchema(path: String, dataModel: String) {
       val metaAttrs  = getAttrs(ns, attrs)
       val backRefNss = backRefs.getOrElse(ns, Nil).distinct.sorted
       MetaNs(partPrefix + ns, metaAttrs, backRefNss)
-    case q"object $o { ..$_ }"        => throw new Exception(noMix)
-    case other                        => unexpectedCode(other)
+    case q"object $o { ..$_ }"        => noMix()
+    case other                        => unexpected(other)
   }
 
   private def getAttrs(ns: String, attrs: Seq[Stat]): Seq[MetaAttr] = attrs.map {
     case q"val $attr = $defs" =>
       val a = attr.toString
       getAttr(ns, a, defs, (Nil, None, None, None, MetaAttr(a, CardOne, "")))._5
-    case other                => unexpectedCode(other)
+    case other                => unexpected(other)
   }
 
-  val reservedAttrNames = List(
+  private val reservedAttrNames = List(
     "a", "e", "v", "t", "tx", "txInstant", "op",
     "save", "insert", "update", "retract",
     "self", "apply", "assert", "replace", "not", "contains", "k",
@@ -140,7 +158,7 @@ class DataModel2MetaSchema(path: String, dataModel: String) {
       case q"setDate"       => attr(x, CardSet, "Date")
       case q"setUUID"       => attr(x, CardSet, "UUID")
       case q"setURI"        => attr(x, CardSet, "URI")
-      case other            => unexpectedCode(other)
+      case other            => unexpected(other)
     }
   }
 
@@ -164,17 +182,6 @@ class DataModel2MetaSchema(path: String, dataModel: String) {
       alias = acc._3,
       validation = acc._4
     ))
-  }
-
-  private val schema: MetaSchema = {
-    val parts = body.head match {
-      case q"object $_ { ..$_ }" => body.map {
-        case q"object $part { ..$nss }" => MetaPart(part.toString, getNss(part.toString + "_", nss))
-        case q"trait $ns $template"     => throw new Exception(noMix)
-      }
-      case _                     => Seq(MetaPart("", getNss("", body)))
-    }
-    MetaSchema(pkg, domain, maxArity, parts)
   }
 }
 

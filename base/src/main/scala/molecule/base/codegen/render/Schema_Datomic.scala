@@ -95,11 +95,11 @@ case class Schema_Datomic(schema: MetaSchema) extends BaseHelpers with RegexMatc
         |    \"\"\"""".stripMargin
 
   def get: String =
-    s"""|  override lazy val datomicPartitions: String = $datomicPartitions
+    s"""|  val datomicPartitions: String = $datomicPartitions
         |
         |
-        |  override lazy val datomicSchema: String = $datomicSchema
+        |  val datomicSchema: String = $datomicSchema
         |
         |
-        |  override lazy val datomicAliases: String = $datomicAliases""".stripMargin
+        |  val datomicAliases: String = $datomicAliases""".stripMargin
 }

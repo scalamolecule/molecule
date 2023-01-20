@@ -7,7 +7,6 @@ import molecule.boilerplate.ast.Model._
 import molecule.core.query.Model2Query
 import molecule.core.util.JavaConversions
 import scala.collection.mutable.ArrayBuffer
-import molecule.boilerplate.api.Keywords.Kw
 
 
 trait Base[Tpl] extends BaseHelpers with JavaConversions { self: Model2Query[Tpl] =>

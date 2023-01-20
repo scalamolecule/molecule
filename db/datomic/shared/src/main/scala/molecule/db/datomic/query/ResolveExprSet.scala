@@ -3,7 +3,7 @@ package molecule.db.datomic.query
 import molecule.boilerplate.ast.Model._
 import scala.reflect.ClassTag
 
-trait ResolveExprSet[Tpl] { self: Base[Tpl] =>
+trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] =>
 
   import LambdasSet._
 

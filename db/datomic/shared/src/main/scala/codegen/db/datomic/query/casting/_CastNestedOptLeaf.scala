@@ -78,7 +78,7 @@ object _CastNestedOptLeaf extends DatomicGenBase("CastNestedOptLeaf", "/query/ca
        |    list: jArrayList[Any],
        |    map: jMap[_, _]
        |  ): jArrayList[Any] = {
-       |    map.values.forEach {
+       |    map.values.asScala.foreach {
        |      case map: jMap[_, _] => flatten(list, map)
        |      case v               => list.add(v)
        |    }
@@ -129,7 +129,7 @@ object _CastNestedOptLeaf extends DatomicGenBase("CastNestedOptLeaf", "/query/ca
          |      } { comparator =>
          |        (rows: jList[_]) =>
          |          val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
-         |          rows.forEach {
+         |          rows.asScala.foreach {
          |            case row: jMap[_, _] =>
          |              val list = new jArrayList[Any]($i)
          |              sortedRows.add(flatten(list, row).asInstanceOf[Row])

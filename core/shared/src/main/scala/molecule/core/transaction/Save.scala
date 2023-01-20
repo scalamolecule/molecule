@@ -12,7 +12,7 @@ class Save(isTxMetaData: Boolean = false)
   extends ModelUtils with MoleculeLogging { self: SaveOps =>
 
   @tailrec
-  final protected def resolve(elements: List[Element]): Unit = {
+  final def resolve(elements: List[Element]): Unit = {
     elements match {
       case element :: tail => element match {
         case a: Attr =>

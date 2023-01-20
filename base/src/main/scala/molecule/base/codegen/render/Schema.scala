@@ -11,7 +11,7 @@ case class Schema(schema: MetaSchema) {
         |*
         |* To change:
         |* 1. edit data model file in `${schema.pkg}.dataModel/`
-        |* 2. `sbt clean compile -Dmolecule=true`
+        |* 2. `sbt compile -Dmolecule=true`
         |*/
         |package ${schema.pkg}.schema
         |import molecule.base.api.SchemaTransaction
@@ -20,17 +20,17 @@ case class Schema(schema: MetaSchema) {
         |
         |object ${schema.domain}Schema extends SchemaTransaction {
         |
-        |  override lazy val metaSchema: MetaSchema =
+        |  val metaSchema: MetaSchema =
         |    ${schema.render(2)}
         |
         |
-        |  override lazy val nsMap: Map[String, MetaNs] = ${schema.nsMap(1)}
+        |  val nsMap: Map[String, MetaNs] = ${schema.nsMap(1)}
         |
         |
-        |  override lazy val attrMap: Map[String, (Cardinality, String)] = ${schema.attrMap(1)}
+        |  val attrMap: Map[String, (Cardinality, String)] = ${schema.attrMap(1)}
         |
         |
-        |  override lazy val uniqueAttrs: List[String] = ${schema.uniqueAttrs}
+        |  val uniqueAttrs: List[String] = ${schema.uniqueAttrs}
         |
         |
         |${Schema_Datomic(schema).get}

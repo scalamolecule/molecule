@@ -8,18 +8,18 @@ trait UpdateOps extends Action2Data { self: Update =>
 
   protected def uniqueEids(filterAttr: AttrOneTac, ns: String, attr: String): Seq[AnyRef]
 
-  protected val valueString    : String => Any
-  protected val valueInt       : Int => Any
-  protected val valueLong      : Long => Any
-  protected val valueFloat     : Float => Any
-  protected val valueDouble    : Double => Any
-  protected val valueBoolean   : Boolean => Any
-  protected val valueBigInt    : BigInt => Any
-  protected val valueBigDecimal: BigDecimal => Any
-  protected val valueDate      : Date => Any
-  protected val valueUUID      : UUID => Any
-  protected val valueURI       : URI => Any
-  protected val valueByte      : Byte => Any
-  protected val valueShort     : Short => Any
-  protected val valueChar      : Char => Any
+  protected lazy val valueString    : String => Any     = ???
+  protected lazy val valueInt       : Int => Any        = ???
+  protected lazy val valueLong      : Long => Any       = ???
+  protected lazy val valueFloat     : Float => Any      = ???
+  protected lazy val valueDouble    : Double => Any     = ???
+  protected lazy val valueBoolean   : Boolean => Any    = ???
+  protected lazy val valueBigInt    : BigInt => Any     = ???
+  protected lazy val valueBigDecimal: BigDecimal => Any = ???
+  protected lazy val valueDate      : Date => Any       = ???
+  protected lazy val valueUUID      : UUID => Any       = ???
+  protected lazy val valueURI       : URI => Any        = ???
+  protected lazy val valueByte      : Byte => Any       = ???
+  protected lazy val valueShort     : Short => Any      = ???
+  protected lazy val valueChar      : Char => Any       = ???
 }

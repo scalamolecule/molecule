@@ -3,7 +3,7 @@ package molecule.base.codegen.render
 import molecule.base.ast.SchemaAST._
 
 
-case class Dsl_Arities(schema: MetaSchema, namespace: MetaNs, arity: Int)
+case class Dsl_Arities(schema: MetaSchema, partPrefix: String, namespace: MetaNs, arity: Int)
   extends DslFormatting(schema, namespace, arity) {
 
   val man = List.newBuilder[String]
@@ -125,8 +125,8 @@ case class Dsl_Arities(schema: MetaSchema, namespace: MetaNs, arity: Int)
 
   refs.foreach {
     case MetaAttr(attr, card, _, refNsOpt, _, _, _, _) =>
-      val refCls   = camel(attr)
-      val refNs    = refNsOpt.get
+      val refCls   = partPrefix + camel(attr)
+      val refNs    = partPrefix + refNsOpt.get
       val refObj   = s"""Model.Ref("$ns", "$attr", "$refNs", $card)"""
       val pRefAttr = padRefAttr(attr)
       val pRefNs   = padRefNs(refNs)
@@ -146,11 +146,10 @@ case class Dsl_Arities(schema: MetaSchema, namespace: MetaNs, arity: Int)
   val refResult = ref.result()
   val refDefs   = if (refResult.isEmpty) "" else refResult.mkString("\n\n  ", "\n  ", "")
 
-
-  val backRefDefs = if (backRefs.isEmpty) "" else backRefs.map(backRef =>
+  val backRefDefs = if (backRefs.isEmpty) "" else backRefs.map { backRef0 =>
+    val backRef = partPrefix + backRef0
     s"""object _$backRef extends $backRef${_0}[${`A..V, `}t](elements :+ Model.BackRef("$backRef"))"""
-  ).mkString("\n\n  ", "\n  ", "")
-
+  }.mkString("\n\n  ", "\n  ", "")
 
   def get: String =
     s"""class $ns_0[${`A..V, `}t]($elements) extends $ns with $modelOps {

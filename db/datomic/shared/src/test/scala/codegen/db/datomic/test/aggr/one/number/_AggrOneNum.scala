@@ -6,7 +6,9 @@ import molecule.base.util.{BaseHelpers, CodeGenBase}
 
 object _AggrOneNum extends CodeGenBase with BaseHelpers {
 
-  def generate: Unit = numberTypes.foreach(TransformFile.tupled(_).generate)
+  def generate: Unit = numberTypes.foreach{ case (name, tpe, v) =>
+    TransformFile(name, tpe, v).generate()
+  }
 
   case class TransformFile(name: String, tpe: String, v: String)
     extends DatomicTestGenBase(s"AggrOneNum_$name", "/test/aggr/one/number") {

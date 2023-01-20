@@ -6,7 +6,6 @@ import java.net.URI
 import java.util.{Date, UUID, Iterator => jIterator, List => jList, Map => jMap, Set => jSet}
 import molecule.core.util.JavaConversions
 
-
 object LambdasSet extends LambdasSet
 trait LambdasSet extends ResolveBase with JavaConversions {
 
@@ -80,9 +79,9 @@ trait LambdasSet extends ResolveBase with JavaConversions {
   private def jset2setsT[T](value: Any => T): AnyRef => AnyRef = (v: AnyRef) => {
     var sets = Set.empty[Set[T]]
     var set  = Set.empty[T]
-    v.asInstanceOf[jSet[_]].forEach { row =>
+    v.asInstanceOf[jSet[_]].asScala.foreach { row =>
       set = Set.empty[T]
-      row.asInstanceOf[jSet[_]].forEach(v => set = set + value(v))
+      row.asInstanceOf[jSet[_]].asScala.foreach(v => set = set + value(v))
       sets += set
     }
     sets.asInstanceOf[AnyRef]
@@ -150,11 +149,10 @@ trait LambdasSet extends ResolveBase with JavaConversions {
     case map: jMap[_, _] =>
       val list = map.values.iterator.next.asInstanceOf[jList[_]].asScala
       list.head match {
-        case _: Long => Some(list.map(_.asInstanceOf[Long]).toSet)
+        case _: jLong => Some(list.map(_.asInstanceOf[Long]).toSet)
         // Refs
         case _: jMap[_, _] => Some(list.map(_.asInstanceOf[jMap[_, _]].values.iterator.next.asInstanceOf[Long]).toSet)
       }
-
   }
 
   private lazy val j2sOpSetFloat = (v: AnyRef) => v match {

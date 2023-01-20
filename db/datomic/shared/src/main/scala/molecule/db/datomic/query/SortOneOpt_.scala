@@ -8,7 +8,7 @@ import java.util.{Date, UUID, Map => jMap}
 import molecule.boilerplate.ast.Model._
 
 
-trait SortOneOpt_[Tpl] { self: Base[Tpl] =>
+trait SortOneOpt_[Tpl] { self: DatomicModel2Query[Tpl] =>
 
   private def compare(
     a: Row,

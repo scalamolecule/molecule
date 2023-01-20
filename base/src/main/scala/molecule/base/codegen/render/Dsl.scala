@@ -3,7 +3,7 @@ package molecule.base.codegen.render
 import molecule.base.ast.SchemaAST.{MetaAttr, MetaNs, MetaSchema}
 
 
-case class Dsl(schema: MetaSchema, namespace: MetaNs)
+case class Dsl(schema: MetaSchema, partPrefix: String, namespace: MetaNs)
   extends DslFormatting(schema, namespace) {
 
   val imports: String = {
@@ -45,7 +45,7 @@ case class Dsl(schema: MetaSchema, namespace: MetaNs)
        |}""".stripMargin
   }
 
-  val nss: String = (0 to schema.maxArity).map(Dsl_Arities(schema, namespace, _).get).mkString("\n\n")
+  val nss: String = (0 to schema.maxArity).map(Dsl_Arities(schema, partPrefix, namespace, _).get).mkString("\n\n")
 
   def get: String =
     s"""/*
@@ -53,7 +53,7 @@ case class Dsl(schema: MetaSchema, namespace: MetaNs)
        |*
        |* To change:
        |* 1. Edit data model in $pkg.dataModel.$domain
-       |* 2. `sbt clean compile -Dmolecule=true`
+       |* 2. `sbt compile -Dmolecule=true`
        |*/
        |package $pkg.$domain
        |

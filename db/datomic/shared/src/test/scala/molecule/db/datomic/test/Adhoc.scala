@@ -8,8 +8,6 @@ import utest._
 
 
 object Adhoc extends DatomicTestSuite {
-
-
   //  // See Zio-http route
   //  abstract class RouteDecode[A](f: String => A) {
   //    def unapply(a: String): Option[A] =
@@ -38,8 +36,6 @@ object Adhoc extends DatomicTestSuite {
   ////Person.name(hej)
   //
   //  int(hej)
-
-
   lazy val tests = Tests {
 
     "types" - types { implicit conn =>
@@ -48,7 +44,7 @@ object Adhoc extends DatomicTestSuite {
         List(a, b) <- Ns.int.insert(1, 2).transact.map(_.eids)
         _ <- Ns.int(3).save.transact
         _ <- Ns.int.query.get.map(_ ==> List(1, 2, 3))
-        _ <- Ns(a).int(10).update.transact
+        _ <- Ns.apply(a).int(10).update.transact
         _ <- Ns(b).delete.transact
         _ <- Ns.int.query.get.map(_ ==> List(3, 10))
 

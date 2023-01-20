@@ -19,18 +19,18 @@ trait InsertOps { self: Insert =>
   protected def addRef(ns: String, refAttr: String): Product => Unit
   protected def addBackRef(backRefNs: String): Product => Unit
 
-  protected val valueString    : Any => Any
-  protected val valueInt       : Any => Any
-  protected val valueLong      : Any => Any
-  protected val valueFloat     : Any => Any
-  protected val valueDouble    : Any => Any
-  protected val valueBoolean   : Any => Any
-  protected val valueBigInt    : Any => Any
-  protected val valueBigDecimal: Any => Any
-  protected val valueDate      : Any => Any
-  protected val valueUUID      : Any => Any
-  protected val valueURI       : Any => Any
-  protected val valueByte      : Any => Any
-  protected val valueShort     : Any => Any
-  protected val valueChar      : Any => Any
+  protected lazy val valueString    : Any => Any = ???
+  protected lazy val valueInt       : Any => Any = ???
+  protected lazy val valueLong      : Any => Any = ???
+  protected lazy val valueFloat     : Any => Any = ???
+  protected lazy val valueDouble    : Any => Any = ???
+  protected lazy val valueBoolean   : Any => Any = ???
+  protected lazy val valueBigInt    : Any => Any = ???
+  protected lazy val valueBigDecimal: Any => Any = ???
+  protected lazy val valueDate      : Any => Any = ???
+  protected lazy val valueUUID      : Any => Any = ???
+  protected lazy val valueURI       : Any => Any = ???
+  protected lazy val valueByte      : Any => Any = ???
+  protected lazy val valueShort     : Any => Any = ???
+  protected lazy val valueChar      : Any => Any = ???
 }

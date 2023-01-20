@@ -1,7 +1,14 @@
 package molecule.core.marshalling
 
-import akka.actor.typed.ActorSystem
-import akka.actor.typed.scaladsl.Behaviors
+//import akka.actor.ActorSystem
+//import akka.actor.typed.ActorSystem
+//import akka.actor.typed.scaladsl.Behaviors
+//import akka.http.scaladsl.Http
+//import akka.http.scaladsl.model.HttpEntity
+//import akka.http.scaladsl.server.Directives._
+//import akka.http.scaladsl.server.Route
+
+import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.HttpEntity
 import akka.http.scaladsl.server.Directives._
@@ -23,8 +30,13 @@ import scala.util.{Failure, Success}
  * sbt datomicJVM/run
  * */
 abstract class MoleculeRpcServer(rpc: MoleculeRpc) extends RpcHandlers(rpc){
-  implicit val system          : ActorSystem[Nothing]     = ActorSystem(Behaviors.empty, "MoleculeAjaxSystem")
-  implicit val executionContext: ExecutionContextExecutor = system.executionContext
+//  implicit val system          : ActorSystem[Nothing]     = ActorSystem(Behaviors.empty, "MoleculeAjaxSystem")
+//  implicit val executionContext: ExecutionContextExecutor = system.executionContext
+
+  implicit val system          : ActorSystem              = ActorSystem()
+  implicit val executionContext: ExecutionContextExecutor = system.dispatcher
+
+
   val MoleculeRpc = "MoleculeRpc"
 
   Http()
@@ -35,7 +47,6 @@ abstract class MoleculeRpcServer(rpc: MoleculeRpc) extends RpcHandlers(rpc){
       case Success(b) => println(s"Akka http server is running ${b.localAddress} ")
       case Failure(e) => println(s"there was an error starting the server $e")
     }
-
 
   lazy val route: Route = cors() {
     path(MoleculeRpc / "query")(toRoute(handleQuery)) ~
@@ -57,7 +68,7 @@ abstract class MoleculeRpcServer(rpc: MoleculeRpc) extends RpcHandlers(rpc){
             }
           )
 
-          case other => complete("Unexpected HttpEntity in DatomicRpcServer: " + other)
+          case other => complete("Unexpected HttpEntity in MoleculeRpcServer: " + other)
         }
       }
     }

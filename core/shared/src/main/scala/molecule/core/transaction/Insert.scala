@@ -8,7 +8,7 @@ import scala.annotation.tailrec
 class Insert extends InsertResolvers_ { self: InsertOps =>
 
   @tailrec
-  final override protected def resolve(
+  final override def resolve(
     elements: List[Element],
     resolvers: List[Product => Unit],
     tplIndex: Int = 0

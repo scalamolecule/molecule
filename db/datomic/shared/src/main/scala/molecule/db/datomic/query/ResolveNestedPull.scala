@@ -15,7 +15,7 @@ trait ResolveNestedPull[Tpl]
     with LambdasOne
     with LambdasSet
     with ModelUtils
-    with MoleculeLogging { self: Base[Tpl] =>
+    with MoleculeLogging { self: DatomicModel2Query[Tpl] =>
 
 
   final protected def resolveNestedOptElements(e: Var, ref: Ref, elements: List[Element]): Unit = {

@@ -141,7 +141,7 @@ object _Model extends BoilerplateGenBase("Model", "/ast") {
        |""".stripMargin
   }
 
-  override def generate: Unit = {
+  override def generate(): Unit = {
     mkFile(fileName, content)
     logger.info(s"Generated $path/$fileName.scala")
   }

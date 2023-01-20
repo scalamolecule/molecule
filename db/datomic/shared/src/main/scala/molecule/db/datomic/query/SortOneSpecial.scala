@@ -10,7 +10,7 @@ import molecule.boilerplate.ast.Model._
 
 trait SortOneSpecial[Tpl]
   extends SortOne_[Tpl]
-    with ResolveBase { self: Base[Tpl] =>
+    with ResolveBase { self: DatomicModel2Query[Tpl] =>
 
   private def compare(
     a: Row,

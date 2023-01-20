@@ -100,7 +100,7 @@ trait CastNestedOptBranch_[Tpl]
     max: Int,
     cur: Int
   ): jArrayList[Any] = {
-    map.values.forEach {
+    map.values.asScala.foreach {
       case map: jMap[_, _] if cur == max => list.add(map)
       case map: jMap[_, _]               => flatten(list, map, max, cur + 1)
       case v                             => list.add(v)
@@ -145,7 +145,7 @@ trait CastNestedOptBranch_[Tpl]
       } { comparator =>
         (rows: jList[_]) =>
           val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
-          rows.forEach {
+          rows.asScala.foreach {
             case row: jMap[_, _] =>
               val list = new jArrayList[Any](1)
               sortedRows.add(flatten(list, row, refDepth, 0).asInstanceOf[Row])
@@ -179,7 +179,7 @@ trait CastNestedOptBranch_[Tpl]
       } { comparator =>
         (rows: jList[_]) =>
           val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
-          rows.forEach {
+          rows.asScala.foreach {
             case row: jMap[_, _] =>
               val list = new jArrayList[Any](2)
               sortedRows.add(flatten(list, row, refDepth, 0).asInstanceOf[Row])
@@ -214,7 +214,7 @@ trait CastNestedOptBranch_[Tpl]
       } { comparator =>
         (rows: jList[_]) =>
           val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
-          rows.forEach {
+          rows.asScala.foreach {
             case row: jMap[_, _] =>
               val list = new jArrayList[Any](3)
               sortedRows.add(flatten(list, row, refDepth, 0).asInstanceOf[Row])
@@ -250,7 +250,7 @@ trait CastNestedOptBranch_[Tpl]
       } { comparator =>
         (rows: jList[_]) =>
           val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
-          rows.forEach {
+          rows.asScala.foreach {
             case row: jMap[_, _] =>
               val list = new jArrayList[Any](4)
               sortedRows.add(flatten(list, row, refDepth, 0).asInstanceOf[Row])
@@ -287,7 +287,7 @@ trait CastNestedOptBranch_[Tpl]
       } { comparator =>
         (rows: jList[_]) =>
           val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
-          rows.forEach {
+          rows.asScala.foreach {
             case row: jMap[_, _] =>
               val list = new jArrayList[Any](5)
               sortedRows.add(flatten(list, row, refDepth, 0).asInstanceOf[Row])
@@ -325,7 +325,7 @@ trait CastNestedOptBranch_[Tpl]
       } { comparator =>
         (rows: jList[_]) =>
           val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
-          rows.forEach {
+          rows.asScala.foreach {
             case row: jMap[_, _] =>
               val list = new jArrayList[Any](6)
               sortedRows.add(flatten(list, row, refDepth, 0).asInstanceOf[Row])
@@ -364,7 +364,7 @@ trait CastNestedOptBranch_[Tpl]
       } { comparator =>
         (rows: jList[_]) =>
           val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
-          rows.forEach {
+          rows.asScala.foreach {
             case row: jMap[_, _] =>
               val list = new jArrayList[Any](7)
               sortedRows.add(flatten(list, row, refDepth, 0).asInstanceOf[Row])
@@ -404,7 +404,7 @@ trait CastNestedOptBranch_[Tpl]
       } { comparator =>
         (rows: jList[_]) =>
           val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
-          rows.forEach {
+          rows.asScala.foreach {
             case row: jMap[_, _] =>
               val list = new jArrayList[Any](8)
               sortedRows.add(flatten(list, row, refDepth, 0).asInstanceOf[Row])
@@ -445,7 +445,7 @@ trait CastNestedOptBranch_[Tpl]
       } { comparator =>
         (rows: jList[_]) =>
           val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
-          rows.forEach {
+          rows.asScala.foreach {
             case row: jMap[_, _] =>
               val list = new jArrayList[Any](9)
               sortedRows.add(flatten(list, row, refDepth, 0).asInstanceOf[Row])
@@ -487,7 +487,7 @@ trait CastNestedOptBranch_[Tpl]
       } { comparator =>
         (rows: jList[_]) =>
           val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
-          rows.forEach {
+          rows.asScala.foreach {
             case row: jMap[_, _] =>
               val list = new jArrayList[Any](10)
               sortedRows.add(flatten(list, row, refDepth, 0).asInstanceOf[Row])
@@ -530,7 +530,7 @@ trait CastNestedOptBranch_[Tpl]
       } { comparator =>
         (rows: jList[_]) =>
           val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
-          rows.forEach {
+          rows.asScala.foreach {
             case row: jMap[_, _] =>
               val list = new jArrayList[Any](11)
               sortedRows.add(flatten(list, row, refDepth, 0).asInstanceOf[Row])
@@ -574,7 +574,7 @@ trait CastNestedOptBranch_[Tpl]
       } { comparator =>
         (rows: jList[_]) =>
           val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
-          rows.forEach {
+          rows.asScala.foreach {
             case row: jMap[_, _] =>
               val list = new jArrayList[Any](12)
               sortedRows.add(flatten(list, row, refDepth, 0).asInstanceOf[Row])
@@ -619,7 +619,7 @@ trait CastNestedOptBranch_[Tpl]
       } { comparator =>
         (rows: jList[_]) =>
           val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
-          rows.forEach {
+          rows.asScala.foreach {
             case row: jMap[_, _] =>
               val list = new jArrayList[Any](13)
               sortedRows.add(flatten(list, row, refDepth, 0).asInstanceOf[Row])
@@ -665,7 +665,7 @@ trait CastNestedOptBranch_[Tpl]
       } { comparator =>
         (rows: jList[_]) =>
           val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
-          rows.forEach {
+          rows.asScala.foreach {
             case row: jMap[_, _] =>
               val list = new jArrayList[Any](14)
               sortedRows.add(flatten(list, row, refDepth, 0).asInstanceOf[Row])
@@ -712,7 +712,7 @@ trait CastNestedOptBranch_[Tpl]
       } { comparator =>
         (rows: jList[_]) =>
           val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
-          rows.forEach {
+          rows.asScala.foreach {
             case row: jMap[_, _] =>
               val list = new jArrayList[Any](15)
               sortedRows.add(flatten(list, row, refDepth, 0).asInstanceOf[Row])
@@ -760,7 +760,7 @@ trait CastNestedOptBranch_[Tpl]
       } { comparator =>
         (rows: jList[_]) =>
           val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
-          rows.forEach {
+          rows.asScala.foreach {
             case row: jMap[_, _] =>
               val list = new jArrayList[Any](16)
               sortedRows.add(flatten(list, row, refDepth, 0).asInstanceOf[Row])
@@ -809,7 +809,7 @@ trait CastNestedOptBranch_[Tpl]
       } { comparator =>
         (rows: jList[_]) =>
           val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
-          rows.forEach {
+          rows.asScala.foreach {
             case row: jMap[_, _] =>
               val list = new jArrayList[Any](17)
               sortedRows.add(flatten(list, row, refDepth, 0).asInstanceOf[Row])
@@ -859,7 +859,7 @@ trait CastNestedOptBranch_[Tpl]
       } { comparator =>
         (rows: jList[_]) =>
           val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
-          rows.forEach {
+          rows.asScala.foreach {
             case row: jMap[_, _] =>
               val list = new jArrayList[Any](18)
               sortedRows.add(flatten(list, row, refDepth, 0).asInstanceOf[Row])
@@ -910,7 +910,7 @@ trait CastNestedOptBranch_[Tpl]
       } { comparator =>
         (rows: jList[_]) =>
           val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
-          rows.forEach {
+          rows.asScala.foreach {
             case row: jMap[_, _] =>
               val list = new jArrayList[Any](19)
               sortedRows.add(flatten(list, row, refDepth, 0).asInstanceOf[Row])
@@ -962,7 +962,7 @@ trait CastNestedOptBranch_[Tpl]
       } { comparator =>
         (rows: jList[_]) =>
           val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
-          rows.forEach {
+          rows.asScala.foreach {
             case row: jMap[_, _] =>
               val list = new jArrayList[Any](20)
               sortedRows.add(flatten(list, row, refDepth, 0).asInstanceOf[Row])
@@ -1015,7 +1015,7 @@ trait CastNestedOptBranch_[Tpl]
       } { comparator =>
         (rows: jList[_]) =>
           val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
-          rows.forEach {
+          rows.asScala.foreach {
             case row: jMap[_, _] =>
               val list = new jArrayList[Any](21)
               sortedRows.add(flatten(list, row, refDepth, 0).asInstanceOf[Row])

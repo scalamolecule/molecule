@@ -87,7 +87,7 @@ object _CastNestedOptBranch extends DatomicGenBase("CastNestedOptBranch", "/quer
        |    max: Int,
        |    cur: Int
        |  ): jArrayList[Any] = {
-       |    map.values.forEach {
+       |    map.values.asScala.foreach {
        |      case map: jMap[_, _] if cur == max => list.add(map)
        |      case map: jMap[_, _]               => flatten(list, map, max, cur + 1)
        |      case v                             => list.add(v)
@@ -140,7 +140,7 @@ object _CastNestedOptBranch extends DatomicGenBase("CastNestedOptBranch", "/quer
          |      } { comparator =>
          |        (rows: jList[_]) =>
          |          val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
-         |          rows.forEach {
+         |          rows.asScala.foreach {
          |            case row: jMap[_, _] =>
          |              val list = new jArrayList[Any]($i)
          |              sortedRows.add(flatten(list, row, refDepth, 0).asInstanceOf[Row])

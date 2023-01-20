@@ -59,13 +59,9 @@ trait TestData extends DateHandling {
   : (Char, Char, Char, Char, Char, Char, Char, Char, Char, Char) =
     ('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j')
 
-  lazy val (byte0, byte1, byte2, byte3, byte4, byte5, byte6, byte7, byte8, byte9):
-    (Byte, Byte, Byte, Byte, Byte, Byte, Byte, Byte, Byte, Byte) =
-    (0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
+  lazy val List(byte0, byte1, byte2, byte3, byte4, byte5, byte6, byte7, byte8, byte9) = (0 to 9).toList.map(_.toByte)
 
-  lazy val (short0, short1, short2, short3, short4, short5, short6, short7, short8, short9):
-    (Short, Short, Short, Short, Short, Short, Short, Short, Short, Short) =
-    (0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
+  lazy val List(short0, short1, short2, short3, short4, short5, short6, short7, short8, short9) = (0 to 9).toList.map(_.toShort)
 
   lazy val (ref0, ref1, ref2, ref3, ref4, ref5, ref6, ref7, ref8, ref9) =
     (0L, 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L)
