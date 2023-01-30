@@ -5,7 +5,7 @@ import molecule.core.util.Executor._
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
-
+import molecule.base.util.exceptions.MoleculeError
 
 object Adhoc extends DatomicTestSuite {
   //  // See Zio-http route
@@ -38,19 +38,41 @@ object Adhoc extends DatomicTestSuite {
   //  int(hej)
 
 
+
   lazy val tests = Tests {
 
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
       for {
-        List(a, b) <- Ns.int.insert(1, 2).transact.map(_.eids)
-        _ <- Ns.int(3).save.transact
-        _ <- Ns.int.query.get.map(_ ==> List(1, 2, 3))
-        _ <- Ns.apply(a).int(10).update.transact
-        _ <- Ns(b).delete.transact
-        _ <- Ns.int.query.get.map(_ ==> List(3, 10))
+//        List(a, b) <- Ns.int.insert(1, 2).transact.map(_.eids)
+//        _ <- Ns.int(3).save.transact
+//        _ <- Ns.int.query.get.map(_ ==> List(1, 2, 3))
+//        _ <- Ns.apply(a).int(10).update.transact
+//        _ <- Ns(b).delete.transact
+//        _ <- Ns.int.query.get.map(_ ==> List(3, 10))
 
+        _ <- Ns.string.a1.int.a1.query.get
+          .map(_ ==> "Unexpected success 1").recover { case MoleculeError(err, _) =>
+          err ==> "Sort index 1 should be present and additional indexes continuously " +
+            "increase (in any order). Found sort index(es): 1, 1"
+        }
 
+//        _ <- Ns.int.insert(1, 2, 3).transact
+//        _ <- Ns.int.query.get.map(_ ==> List(1, 2, 3))
+//
+//        _ <- Ns.int.query.limit(2).get.map(_ ==> List(1, 2))
+//        _ <- Ns.int.query.limit(-2).get.map(_ ==> List(2, 3))
+
+//        _ <- Ns.int.query.offset(1).get.map(_ ==> PageInfo(List(2, 3), 3, true, false))
+//        _ <- Ns.int.query.offset(1).get.map(_.data ==> List(2, 3))
+//        _ <- Ns.int.query.offset(1).get.map(_.totalCount ==> 3)
+//
+//        _ <- Ns.int.query.offset(1).limit(1).get.map(_.data ==> List(2))
+//        _ <- Ns.int.query.limit(1).offset(1).get.map(_.data ==> List(2))
+
+//        _ <- Ns.int.query.from("cursor").get.map(_ ==> Page(List(1, 2), Some(2)))
+//        _ <- Ns.int.query.from("cursor").offset(2).get.map(_ ==> QueryResultList(List(1, 2), Some(2)))
+//        _ <- Ns.int.query.offset(2).from("cursor").get.map(_ ==> QueryResultList(List(1, 2), Some(2)))
 
 
       } yield ()

@@ -5,7 +5,7 @@ import molecule.DataModel
 object Types extends DataModel(5) {
 
   trait Ns {
-    val i = oneInt
+    val i = oneInt.unique
     val s = oneString
 
     // Cardinality one

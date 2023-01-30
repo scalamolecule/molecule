@@ -48,13 +48,6 @@ trait DatomicTestSuite extends TestSuite with TestData
     }
   }
 
-  def pullBooleanBug[Tpl](query: QueryApi[Tpl])(implicit conn: Connection): Future[Unit] = {
-    query.get
-      .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
-      err ==> "Datomic Free (not Pro) has a bug that pulls boolean `false` values as nil."
-    }
-  }
-
   def types[T](test: Connection => T): T = typesImpl(test)
   def refs[T](test: Connection => T): T = refsImpl(test)
   def unique[T](test: Connection => T): T = uniqueImpl(test)

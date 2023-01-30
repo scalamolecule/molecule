@@ -334,31 +334,31 @@ object SortIndexes extends DatomicTestSuite {
     "Correct use of sort markers" - types { implicit conn =>
       for {
         _ <- Ns.string.a1.int.a1.query.get
-          .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
+          .map(_ ==> "Unexpected success 1").recover { case MoleculeError(err, _) =>
           err ==> "Sort index 1 should be present and additional indexes continuously " +
             "increase (in any order). Found sort index(es): 1, 1"
         }
 
         _ <- Ns.string.d1.int.d2.long.d2.query.get
-          .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
+          .map(_ ==> "Unexpected success 2").recover { case MoleculeError(err, _) =>
           err ==> "Sort index 1 should be present and additional indexes continuously " +
             "increase (in any order). Found sort index(es): 1, 2, 2"
         }
 
         _ <- Ns.string.a1.int.a3.query.get
-          .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
+          .map(_ ==> "Unexpected success 3").recover { case MoleculeError(err, _) =>
           err ==> "Sort index 1 should be present and additional indexes continuously " +
             "increase (in any order). Found sort index(es): 1, 3"
         }
 
         _ <- Ns.string.d3.int.d1.query.get
-          .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
+          .map(_ ==> "Unexpected success 4").recover { case MoleculeError(err, _) =>
           err ==> "Sort index 1 should be present and additional indexes continuously " +
             "increase (in any order). Found sort index(es): 1, 3"
         }
 
         _ <- Ns.string.d2.int.a3.query.get
-          .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
+          .map(_ ==> "Unexpected success 5").recover { case MoleculeError(err, _) =>
           err ==> "Sort index 1 should be present and additional indexes continuously " +
             "increase (in any order). Found sort index(es): 2, 3"
         }

@@ -4,7 +4,7 @@ import java.nio.ByteBuffer
 import molecule.base.util.exceptions.MoleculeError
 import molecule.boilerplate.ast.Model._
 import molecule.core.api.TxReport
-import molecule.core.api.action.ApiOps
+import molecule.core.api.action.ApiUtils
 import molecule.core.marshalling.Boopicklers._
 import molecule.core.marshalling._
 import molecule.core.marshalling.deserialize.UnpickleTpls
@@ -16,9 +16,9 @@ import scala.concurrent.Future
 
 object DatomicRpcJVM extends MoleculeRpc
   with DatomicTxBase_JVM
-  with ApiOps {
+  with ApiUtils {
 
-  // Data is typed when un-serialized on client side
+  // Data is typed when deserialized on client side
   override def query[Any](
     proxy: ConnProxy,
     elements: List[Element]

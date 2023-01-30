@@ -5,7 +5,7 @@ import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.util.ModelUtils
 import scala.concurrent.{ExecutionContext, Future}
 
-trait ApiOps extends ModelUtils with MoleculeLogging {
+trait ApiUtils extends ModelUtils with MoleculeLogging {
 
   implicit class futEither2fut[T](fut: Future[Either[MoleculeError, T]])(implicit ec: ExecutionContext) {
     def future: Future[T] = {

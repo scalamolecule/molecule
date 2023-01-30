@@ -27,7 +27,7 @@ class DatomicModel2Query[Tpl](elements: List[Element])
   final lazy val preInputs: Seq[AnyRef] = renderRules(rules ++ preRules) ++ preArgs
   final lazy val inputs   : Seq[AnyRef] = renderRules(rules) ++ args
 
-  final def getQueries(optimized: Boolean): (String, String) = {
+  final protected def getQueries(optimized: Boolean): (String, String) = {
 
     // Add 4th tx var to first attribute datom if tx value is needed
     @tailrec
@@ -79,6 +79,16 @@ class DatomicModel2Query[Tpl](elements: List[Element])
     } else Nil
     val queryStrs = (elements :+ "" :+ mainQuery) ++ inputsStrs ++ preQueryStrs
     logger.debug(queryStrs.mkString("\n").trim)
+
+//    // Post-adjustments of casts/arities
+//    if (isNestedOpt) {
+//      pullCastss = pullCastss :+ pullCasts.toList
+//      pullSortss = pullSortss :+ pullSorts.sortBy(_._1).map(_._2).toList
+//    } else if (!isNested) {
+//      // Flat rows
+//      // Remove started composite groups that turned out to have only tacit attributes
+//      aritiess = aritiess.map(_.filterNot(_.isEmpty))
+//    }
 
     (preQuery, mainQuery)
   }

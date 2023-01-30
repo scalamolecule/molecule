@@ -5,7 +5,7 @@ import molecule.core.api.{Connection, TxReport}
 import zio.ZIO
 import scala.concurrent.{ExecutionContext, Future}
 
-trait InsertApi extends ApiOps {
+trait InsertApi extends ApiUtils {
 
   def run: ZIO[Connection, MoleculeError, TxReport] = ???
 

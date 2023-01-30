@@ -4,7 +4,7 @@ import boopickle.Default._
 import molecule.base.util.exceptions.MoleculeError
 import molecule.boilerplate.ast.Model._
 import molecule.core.api.TxReport
-import molecule.core.api.action.ApiOps
+import molecule.core.api.action.ApiUtils
 import molecule.core.marshalling.Boopicklers._
 import molecule.core.marshalling.deserialize.UnpickleTpls
 import molecule.core.util.Executor._
@@ -15,7 +15,7 @@ import scala.scalajs.js.typedarray.TypedArrayBufferOps._
 case class MoleculeRpcJS(interface: String, port: Int)
   extends MoleculeRpcRequest(interface, port)
     with MoleculeRpc
-    with ApiOps {
+    with ApiUtils {
 
 
   override def query[Tpl](
