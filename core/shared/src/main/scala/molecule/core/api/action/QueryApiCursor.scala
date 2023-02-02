@@ -7,5 +7,5 @@ trait QueryApiCursor[Tpl] extends ApiUtils {
 
   def limit(n: Int): QueryApiCursor[Tpl]
 
-  def get(implicit conn: Connection, ec: ExecutionContext): Future[(List[Tpl], String)]
+  def get(implicit conn: Connection, ec: ExecutionContext): Future[(List[Tpl], String, Boolean)]
 }

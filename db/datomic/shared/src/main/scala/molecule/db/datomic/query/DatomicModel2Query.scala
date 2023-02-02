@@ -9,7 +9,7 @@ import scala.annotation.tailrec
 import scala.collection.mutable.ArrayBuffer
 
 
-class DatomicModel2Query[Tpl](elements: List[Element])
+class DatomicModel2Query[Tpl](elements0: List[Element])
   extends Model2Query[Tpl]
     with ResolveExprOne[Tpl]
     with ResolveExprSet[Tpl]
@@ -27,7 +27,13 @@ class DatomicModel2Query[Tpl](elements: List[Element])
   final lazy val preInputs: Seq[AnyRef] = renderRules(rules ++ preRules) ++ preArgs
   final lazy val inputs   : Seq[AnyRef] = renderRules(rules) ++ args
 
-  final protected def getQueries(optimized: Boolean): (String, String) = {
+  // Some specialized expressions require a pre-query to extract entity ids for the main query
+  // Returns (preQuery, mainQuery)
+  final protected def getQueries(
+    optimized: Boolean,
+    altElements: List[Element] = Nil
+  ): (String, String) = {
+    val elements = if (altElements.isEmpty) elements0 else altElements
 
     // Add 4th tx var to first attribute datom if tx value is needed
     @tailrec
@@ -71,24 +77,14 @@ class DatomicModel2Query[Tpl](elements: List[Element])
 
     // Log queries
     val preQueryStrs = if (preQuery.nonEmpty) Seq(s"\nPRE-QUERY:\n$preQuery") else Nil
-    val inputsStrs = if (inputs.nonEmpty) {
+    val inputsStrs   = if (inputs.nonEmpty) {
       "" +: inputs.map {
         case a: Array[_] => a.toList.toString
         case other       => other.toString
       }
     } else Nil
-    val queryStrs = (elements :+ "" :+ mainQuery) ++ inputsStrs ++ preQueryStrs
+    val queryStrs    = (elements :+ "" :+ mainQuery) ++ inputsStrs ++ preQueryStrs
     logger.debug(queryStrs.mkString("\n").trim)
-
-//    // Post-adjustments of casts/arities
-//    if (isNestedOpt) {
-//      pullCastss = pullCastss :+ pullCasts.toList
-//      pullSortss = pullSortss :+ pullSorts.sortBy(_._1).map(_._2).toList
-//    } else if (!isNested) {
-//      // Flat rows
-//      // Remove started composite groups that turned out to have only tacit attributes
-//      aritiess = aritiess.map(_.filterNot(_.isEmpty))
-//    }
 
     (preQuery, mainQuery)
   }

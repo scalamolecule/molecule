@@ -14,7 +14,7 @@ case class DatomicQueryApiCursor[Tpl](
 
   override def limit(l: Int): DatomicQueryApiCursor[Tpl] = copy(limit = l)
 
-  override def get(implicit conn0: Connection, ec: ExecutionContext): Future[(List[Tpl], String)] = {
+  override def get(implicit conn0: Connection, ec: ExecutionContext): Future[(List[Tpl], String, Boolean)] = {
     val conn = conn0.asInstanceOf[DatomicConn_JS]
     conn.rpc.query[Tpl](conn.proxy, elements).future
     ???

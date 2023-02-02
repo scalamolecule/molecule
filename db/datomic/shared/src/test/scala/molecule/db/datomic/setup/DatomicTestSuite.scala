@@ -2,14 +2,11 @@ package molecule.db.datomic.setup
 
 import molecule.base.util.exceptions.MoleculeError
 import molecule.core.api.Connection
-import molecule.core.api.action.QueryApi
-import molecule.core.util.Executor._
 import molecule.core.util.JavaConversions
 import molecule.coreTests.util.{AggrUtils, TestData}
 import org.scalactic.TripleEquals
 import utest._
 import utest.framework.{Formatter => uFormatter}
-import scala.concurrent.Future
 
 trait DatomicTestSuite extends TestSuite with TestData
   // Platform-specific implementations (JS/JVM) (shows in red as error code in IDE)

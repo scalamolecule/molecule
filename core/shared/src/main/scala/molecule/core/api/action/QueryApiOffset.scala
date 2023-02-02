@@ -7,5 +7,5 @@ trait QueryApiOffset[Tpl] extends ApiUtils {
 
   def limit(n: Int): QueryApiOffset[Tpl]
 
-  def get(implicit conn: Connection, ec: ExecutionContext): Future[(List[Tpl], Int)]
+  def get(implicit conn: Connection, ec: ExecutionContext): Future[(List[Tpl], Int, Boolean)]
 }

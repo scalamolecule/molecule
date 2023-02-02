@@ -5,7 +5,6 @@ import java.math.{BigDecimal => jBigDecimal, BigInteger => jBigInt}
 import java.net.URI
 import java.util.{Date, UUID, Iterator => jIterator, List => jList, Map => jMap, Set => jSet}
 
-object LambdasOne extends LambdasOne
 trait LambdasOne extends ResolveBase {
 
   // Datomic Java to Scala

@@ -107,7 +107,7 @@ trait Model extends Validations {
   case object Remove extends Op
 
 
-  // GENERATED (edit in _Model generator) ======================================
+  // GENERATED from here and below (edit in _Model generator) ======================================
   
   sealed trait AttrOneMan extends AttrOne with Mandatory
   

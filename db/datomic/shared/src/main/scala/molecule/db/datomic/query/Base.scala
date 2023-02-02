@@ -164,7 +164,7 @@ trait Base[Tpl] extends BaseHelpers with JavaConversions { self: Model2Query[Tpl
     sortss.flatMap { sorts =>
       val sortsOrdered = sorts.sortBy(_._1)
       // Index 6s are for entity ids on each nested level.
-      // Is always last on each level to allow previous sort indexes sort first.
+      // Is always last on each level to allow user sort indexes to sort first.
       sortsOrdered.map(_._1) match {
         case Nil                    =>
         case List(6)                =>

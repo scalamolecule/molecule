@@ -3,9 +3,7 @@ package molecule.db.datomic.query
 import molecule.boilerplate.ast.Model._
 import scala.reflect.ClassTag
 
-trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] =>
-
-  import LambdasSet._
+trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
 
   protected def resolveAttrSetMan(es: List[Var], attr: AttrSetMan): List[Var] = {
     aritiesAttr()

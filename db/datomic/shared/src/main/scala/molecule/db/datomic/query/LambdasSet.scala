@@ -6,7 +6,6 @@ import java.net.URI
 import java.util.{Date, UUID, Iterator => jIterator, List => jList, Map => jMap, Set => jSet}
 import molecule.core.util.JavaConversions
 
-object LambdasSet extends LambdasSet
 trait LambdasSet extends ResolveBase with JavaConversions {
 
   protected lazy val j2sSetString    : AnyRef => AnyRef = (v: AnyRef) => Set(v)
