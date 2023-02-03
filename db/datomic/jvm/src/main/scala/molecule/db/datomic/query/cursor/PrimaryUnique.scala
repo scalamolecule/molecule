@@ -11,6 +11,9 @@ import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
 
 /**
+ * Molecule has a unique attribute that is sorted first.
+ *
+ * Then we can easily filter by its previous value in either direction.
  *
  * @param elements Molecule model
  * @param limit    When going forward from start, use a positive number.

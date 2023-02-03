@@ -58,7 +58,7 @@ trait CursorUtils extends BaseHelpers {
       case "Boolean"    => (v: Any) => v.toString
       case "BigInt"     => (v: Any) => v.toString
       case "BigDecimal" => (v: Any) => v.toString
-      case "Date"       => (v: Any) => v.toString
+      case "Date"       => (v: Any) => date2str(v.asInstanceOf[Date])
       case "UUID"       => (v: Any) => v.toString
       case "URI"        => (v: Any) => v.toString
       case "Byte"       => (v: Any) => v.toString
@@ -67,6 +67,7 @@ trait CursorUtils extends BaseHelpers {
     }
   }
 
+  // Decode String value from cursor to java value for direct comparison with raw row value
   protected def decoder(tpe: String): String => Any = {
     tpe match {
       case "String"     => (v: String) => unescStr(v)
@@ -75,14 +76,14 @@ trait CursorUtils extends BaseHelpers {
       case "Float"      => (v: String) => v.toFloat
       case "Double"     => (v: String) => v.toDouble
       case "Boolean"    => (v: String) => v.toBoolean
-      case "BigInt"     => (v: String) => BigInt(v)
-      case "BigDecimal" => (v: String) => BigDecimal(v)
+      case "BigInt"     => (v: String) => BigInt(v).bigInteger
+      case "BigDecimal" => (v: String) => BigDecimal(v).bigDecimal
       case "Date"       => (v: String) => str2date(v)
       case "UUID"       => (v: String) => UUID.fromString(v)
       case "URI"        => (v: String) => new URI(v)
       case "Byte"       => (v: String) => v.toByte
       case "Short"      => (v: String) => v.toShort
-      case "Char"       => (v: String) => v.charAt(0)
+      case "Char"       => (v: String) => v // compare String
     }
   }
 

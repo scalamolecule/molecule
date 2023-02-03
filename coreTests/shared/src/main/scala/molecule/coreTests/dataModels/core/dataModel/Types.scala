@@ -7,6 +7,7 @@ object Types extends DataModel(5) {
   trait Ns {
     val i = oneInt
     val s = oneString
+    val u = oneInt.unique
 
     // Cardinality one
     val string     = oneString

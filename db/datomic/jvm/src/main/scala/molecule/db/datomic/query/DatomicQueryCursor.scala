@@ -54,7 +54,7 @@ case class DatomicQueryCursor[Tpl](
           } else {
             strategy match {
               case "1" => PrimaryUnique(elements, limit, cursor).getPage(coords, l)
-              case "2" => SomeUnique(elements, limit, cursor).getPage(coords, l)
+              case "2" => SubUnique(elements, limit, cursor).getPage(coords, l)
             }
           }
         case None         => Future.failed(MoleculeError("Unexpected undefined cursor."))
@@ -107,8 +107,10 @@ case class DatomicQueryCursor[Tpl](
       val row2tpl = castRow2Tpl(aritiess.head, castss.head, 0, None)
       sortedRows.subList(0, limitAbs).forEach(row => tuples += row2tpl(row).asInstanceOf[Tpl])
       val tpls   = if (forward) tuples.result() else tuples.result().reverse
-      //      println("INITIAL RESULT: " + tpls)
       val cursor = initialCursor(conn, tpls)
+      //      println("INITIAL RESULT: " + tpls)
+      //      println("INITIAL RESULT: " + cursor)
+      //      println("INITIAL RESULT: " + hasMore)
       (tpls, cursor, hasMore)
     }
   }
@@ -143,14 +145,15 @@ case class DatomicQueryCursor[Tpl](
                 val (dir, pos) = (sort.head.toString, sort.last.toString)
                 if (unique.contains(a.name)) {
                   if (pos == "1") {
-                    // 1. Unique primary sort attribute. We can use this exclusively
+                    // 1. Unique primary sort attribute.
                     val (tpe, encode) = tpeEncode(a)
                     val edgeValues    = edgeVs(tpls, i, encode)
                     val coords1       = List("1", getHash, i.toString, tpe, a.ns, a.attr) ++ edgeValues
+                    // We can use this exclusively. So we don't need more meta data
                     checkSort(Nil, 1, coords1, -1)
 
                   } else {
-                    // 2. Some unique sort attribute
+                    // 2. Unique sub-sort attribute
                     val strategy1     = 2.min(strategy)
                     val init          = if (coords.isEmpty)
                       List(strategy1.toString, getHash) ++ coords.drop(2)
@@ -159,6 +162,7 @@ case class DatomicQueryCursor[Tpl](
                     val (tpe, encode) = tpeEncode(a)
                     val edgeValues    = edgeVs(tpls, i, encode)
                     val coords1       = List("unique", dir, pos, i.toString, tpe, a.ns, a.attr) ++ edgeValues
+                    // We might have a primary non-unique sort attribute after. So we continue
                     checkSort(tail, strategy1, init ++ coords1, i + 1)
                   }
 
