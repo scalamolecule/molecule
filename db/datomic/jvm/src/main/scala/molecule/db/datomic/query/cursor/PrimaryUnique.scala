@@ -31,13 +31,13 @@ case class PrimaryUnique[Tpl](
   with ModelTransformations
   with MoleculeLogging {
 
-  def getPage(coords: List[String], limit: Int)
+  def getPage(tokens: List[String], limit: Int)
              (implicit conn: DatomicConn_JVM, ec: ExecutionContext)
   : Future[(List[Tpl], String, Boolean)] = future {
-    val List(tpe, ns, attr, firstV, lastV) = coords.drop(3)
+    val List(tpe, ns, attr, _, a, z) = tokens.drop(2)
 
     val forward     = limit > 0
-    val (fn, v)     = if (forward) (Gt, lastV) else (Lt, firstV)
+    val (fn, v)     = if (forward) (Gt, z) else (Lt, a)
     val filterAttr  = getFilterAttr(tpe, ns, attr, fn, v)
     val altElements = filterAttr +: (if (forward) elements else reverseTopLevelSorting(elements))
     val rows        = getRawData(conn, altElements)
@@ -54,24 +54,16 @@ case class PrimaryUnique[Tpl](
       val row2tpl = castRow2Tpl(aritiess.head, castss.head, 0, None)
       sortedRows.subList(0, limitAbs).forEach(row => tuples += row2tpl(row).asInstanceOf[Tpl])
       val tpls   = if (forward) tuples.result() else tuples.result().reverse
-      val cursor = nextCursorUnique(tpls, coords)
+      val cursor = nextCursorUnique(tpls, tokens)
       (tpls, cursor, hasMore)
     }
   }
 
 
-  private def nextCursorUnique(tpls: List[Tpl], coords: List[String]): String = {
-    val coords1 = coords.dropRight(2) ++ edgeVs(tpls, coords(2).toInt, encoder(coords(3)))
-    Base64.getEncoder.encodeToString(coords1.mkString("\n").getBytes)
-  }
-
-  private def edgeVs(tpls: List[Tpl], i: Int, encode: Any => String): List[String] = {
-    tpls.head match {
-      case tpl: Product => List(
-        encode(tpl.productElement(i)),
-        encode(tpls.last.asInstanceOf[Product].productElement(i))
-      )
-      case v            => List(encode(v), encode(tpls.last))
-    }
+  private def nextCursorUnique(tpls: List[Tpl], tokens: List[String]): String = {
+    val uniqueIndex = tokens(5).toInt
+    val encode      = encoder(tokens(2))
+    val tokens1     = tokens.dropRight(2) ++ getUniquePair(tpls, uniqueIndex, encode)
+    Base64.getEncoder.encodeToString(tokens1.mkString("\n").getBytes)
   }
 }

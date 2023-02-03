@@ -45,16 +45,16 @@ case class DatomicQueryCursor[Tpl](
       case Some(l) => cursor match {
         case Some("")     => getInitialPage(l)
         case Some(cursor) =>
-          val raw                   = new String(Base64.getDecoder.decode(cursor))
-          val coords                = raw.split("\n").toList
-          //          println("coords: " + coords)
-          val strategy :: hash :: _ = coords
+          val raw    = new String(Base64.getDecoder.decode(cursor))
+          val tokens = raw.split("\n").toList
+          println("tokens: " + tokens)
+          val strategy :: hash :: _ = tokens
           if ((elements.hashCode() & 0xFFFFF) != hash.toInt) {
             Future.failed(MoleculeError("Can only use cursor for un-modified query."))
           } else {
             strategy match {
-              case "1" => PrimaryUnique(elements, limit, cursor).getPage(coords, l)
-              case "2" => SubUnique(elements, limit, cursor).getPage(coords, l)
+              case "1" => PrimaryUnique(elements, limit, cursor).getPage(tokens, l)
+              case "2" => SubUnique(elements, limit, cursor).getPage(tokens, l)
             }
           }
         case None         => Future.failed(MoleculeError("Unexpected undefined cursor."))
@@ -108,7 +108,7 @@ case class DatomicQueryCursor[Tpl](
       sortedRows.subList(0, limitAbs).forEach(row => tuples += row2tpl(row).asInstanceOf[Tpl])
       val tpls   = if (forward) tuples.result() else tuples.result().reverse
       val cursor = initialCursor(conn, tpls)
-      //      println("INITIAL RESULT: " + tpls)
+      println("INITIAL RESULT: " + tpls)
       //      println("INITIAL RESULT: " + cursor)
       //      println("INITIAL RESULT: " + hasMore)
       (tpls, cursor, hasMore)
@@ -116,86 +116,83 @@ case class DatomicQueryCursor[Tpl](
   }
 
 
-  private def edgeVs(tpls: List[Tpl], i: Int, encode: Any => String): List[String] = {
-    tpls.head match {
-      case tpl: Product => List(
-        encode(tpl.productElement(i)),
-        encode(tpls.last.asInstanceOf[Product].productElement(i))
-      )
-      case v            => List(encode(v), encode(tpls.last))
-    }
-  }
-
   private def initialCursor(conn: DatomicConn_JVM, tpls: List[Tpl]): String = {
     val unique = conn.proxy.uniqueAttrs
     @tailrec
     def checkSort(
       elements: List[Element],
       strategy: Int,
-      coords: List[String],
-      i: Int
+      tokens: List[String],
+      uniqueIndex: Int
     ): List[String] = {
       elements match {
         case element :: tail =>
           element match {
-            case a: AttrOne if a.isInstanceOf[Tacit] => checkSort(tail, strategy, coords, i)
+            case a: AttrOne if a.isInstanceOf[Tacit] => checkSort(tail, strategy, tokens, uniqueIndex)
             case a: AttrOne                          =>
               if (a.sort.isDefined) {
-                val sort       = a.sort.get
-                val (dir, pos) = (sort.head.toString, sort.last.toString)
-                if (unique.contains(a.name)) {
+                val sort         = a.sort.get
+                val (dir, pos)   = (sort.head.toString, sort.last.toString)
+                val isNearUnique = {
+                  a match {
+                    case _: AttrOneManDate => true
+                    case _: AttrOneOptDate => true
+                    case _                 => false
+                  }
+                }
+                if (isNearUnique || unique.contains(a.name)) {
                   if (pos == "1") {
-                    // 1. Unique primary sort attribute.
+                    // 1. Unique primary sort attribute
                     val (tpe, encode) = tpeEncode(a)
-                    val edgeValues    = edgeVs(tpls, i, encode)
-                    val coords1       = List("1", getHash, i.toString, tpe, a.ns, a.attr) ++ edgeValues
+                    val attrTokens    = List("1", getHash, tpe, a.ns, a.attr, uniqueIndex.toString)
+                    //                    val uniqueValues  = getUniqueValues(tpls, uniqueIndex, encode)
+                    val uniqueValues  = getUniquePair(tpls, uniqueIndex, encode)
                     // We can use this exclusively. So we don't need more meta data
-                    checkSort(Nil, 1, coords1, -1)
+                    checkSort(Nil, 1, attrTokens ++ uniqueValues, -1)
 
                   } else {
                     // 2. Unique sub-sort attribute
                     val strategy1     = 2.min(strategy)
-                    val init          = if (coords.isEmpty)
-                      List(strategy1.toString, getHash) ++ coords.drop(2)
-                    else
-                      List(strategy1.toString, coords(1)) ++ coords.drop(2)
+                    val init          = setStrategy(strategy1, tokens)
                     val (tpe, encode) = tpeEncode(a)
-                    val edgeValues    = edgeVs(tpls, i, encode)
-                    val coords1       = List("unique", dir, pos, i.toString, tpe, a.ns, a.attr) ++ edgeValues
+                    val attrTokens    = List("unique", dir, pos, tpe, a.ns, a.attr, uniqueIndex.toString)
+                    val uniqueValues  = getUniqueValues(tpls, uniqueIndex, encode)
                     // We might have a primary non-unique sort attribute after. So we continue
-                    checkSort(tail, strategy1, init ++ coords1, i + 1)
+                    checkSort(tail, strategy1, init ++ attrTokens ++ uniqueValues, uniqueIndex + 1)
                   }
 
-                } else if (List("Date").contains(a.toString)) {
-                  // 3. Near-unique sort attribute
-                  checkSort(tail, 3.min(strategy), coords, i + 1)
-
                 } else {
-                  // 4. Non-unique sort attribute
-                  val strategy1     = 4.min(strategy)
-                  val init          = if (coords.isEmpty)
-                    List(strategy1.toString, getHash) ++ coords.drop(2)
-                  else
-                    List(strategy1.toString, coords(1)) ++ coords.drop(2)
+                  // 3. Non-unique sort attribute
+                  val strategy1     = 3.min(strategy)
+                  val init          = setStrategy(strategy1, tokens)
                   val (tpe, encode) = tpeEncode(a)
-                  val edgeValues    = edgeVs(tpls, i, encode)
-                  val coords1       = List("standard", dir, pos, i.toString, tpe, a.ns, a.attr) ++ edgeValues
-                  checkSort(tail, strategy1, init ++ coords1, i + 1)
+                  val attrTokens    = List("standard", dir, pos, tpe, a.ns, a.attr, uniqueIndex.toString)
+                  val uniqueValues  = getUniqueValues(tpls, uniqueIndex, encode)
+                  checkSort(tail, strategy1, init ++ attrTokens ++ uniqueValues, uniqueIndex + 1)
                 }
 
               } else {
                 // Non-sorted attribute
-                checkSort(tail, strategy, coords, i)
+                checkSort(tail, strategy, tokens, uniqueIndex)
               }
 
-            case Composite(elements) => checkSort(elements ++ tail, strategy, coords, i)
-            case _                   => checkSort(tail, strategy, coords, i)
+            case Composite(elements) => checkSort(elements ++ tail, strategy, tokens, uniqueIndex)
+
+            // Only top level sorting - ignore nested and tx meta data
+            case _ => checkSort(tail, strategy, tokens, uniqueIndex)
           }
-        case Nil             => coords
+        case Nil             => tokens
       }
     }
-    val coords = checkSort(elements, 10, Nil, 0)
-    Base64.getEncoder.encodeToString(coords.mkString("\n").getBytes)
+    val tokens = checkSort(elements, 10, Nil, 0)
+    Base64.getEncoder.encodeToString(tokens.mkString("\n").getBytes)
+  }
+
+  private def setStrategy(strategy1: Int, tokens: List[String]): List[String] = {
+    if (tokens.isEmpty)
+      List(strategy1.toString, getHash)
+    else
+      List(strategy1.toString, tokens(1)) ++ tokens.drop(2)
   }
 
   private def getHash: String = (elements.hashCode() & 0xFFFFF).toString

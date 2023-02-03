@@ -45,6 +45,24 @@ abstract class DatomicQuery[Tpl](
     aritiess = aritiess.map(_.filterNot(_.isEmpty))
   }
 
+
+  protected def getUniqueValues(tpls0: List[Tpl], uniqueIndex: Int, encode: Any => String): List[String] = {
+    val tpls   = (if (tpls0.head.isInstanceOf[Product]) tpls0 else tpls0.map(Tuple1(_))).asInstanceOf[List[Product]]
+    val first3 = tpls.take(3).map(t => encode(t.productElement(uniqueIndex))).padTo(3, "")
+    val last3  = tpls.takeRight(3).map(t => encode(t.productElement(uniqueIndex))).reverse.padTo(3, "").reverse
+    first3 ++ last3
+  }
+
+  protected def getUniquePair(tpls: List[Tpl], uniqueIndex: Int, encode: Any => String): List[String] = {
+    tpls.head match {
+      case tpl: Product => List(
+        encode(tpl.productElement(uniqueIndex)),
+        encode(tpls.last.asInstanceOf[Product].productElement(uniqueIndex))
+      )
+      case v            => List(encode(v), encode(tpls.last))
+    }
+  }
+
   protected def getRawData(
     conn: DatomicConn_JVM,
     altElements: List[Element] = Nil
