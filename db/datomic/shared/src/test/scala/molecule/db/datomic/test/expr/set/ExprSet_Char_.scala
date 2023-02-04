@@ -590,6 +590,13 @@ object ExprSet_Char_ extends DatomicTestSuite {
           _ <- Ns.i.chars_?.insert(a, b, c).transact
 
           _ <- Ns.i.a1.chars_?.query.get.map(_ ==> List(a, b, c))
+
+          // Distinct result even with redundant None's (two i = 3 with no char value)
+          _ <- Ns.i.insert(3).transact
+          _ <- Ns.i.>=(2).a1.chars_?.query.get.map(_ ==> List(
+            (2, Some(Set(char2, char3, char4))),
+            (3, None),
+          ))
         } yield ()
       }
 

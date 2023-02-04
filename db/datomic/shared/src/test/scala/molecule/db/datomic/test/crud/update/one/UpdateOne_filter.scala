@@ -46,7 +46,7 @@ object UpdateOne_filter extends DatomicTestSuite {
           (2, Some(3)),
         ).transact.map(_.eids)
 
-        _ <- Ns.i.int_?.query.get.map(_ ==> List(
+        _ <- Ns.i.a1.int_?.a2.query.get.map(_ ==> List(
           (1, None),
           (1, Some(2)),
           (2, Some(3)),

@@ -26,10 +26,7 @@ case class PrimaryUnique[Tpl](
   limit: Option[Int],
   cursor: String
 ) extends DatomicQuery[Tpl](elements, limit)
-  with ApiUtils
-  with CursorUtils
-  with ModelTransformations
-  with MoleculeLogging {
+  with ApiUtils with CursorUtils with ModelTransformations with MoleculeLogging {
 
   def getPage(tokens: List[String], limit: Int)
              (implicit conn: DatomicConn_JVM, ec: ExecutionContext)
@@ -41,21 +38,54 @@ case class PrimaryUnique[Tpl](
     val filterAttr  = getFilterAttr(tpe, ns, attr, fn, v)
     val altElements = filterAttr +: (if (forward) elements else reverseTopLevelSorting(elements))
     val rows        = getRawData(conn, altElements)
-    val totalCount  = rows.size
     val sortedRows  = sortRows(rows)
-    val limitAbs    = limit.abs.min(totalCount)
     logger.debug(sortedRows.toArray().mkString("\n"))
-    postAdjustAritiess()
-    if (totalCount == 0) {
-      (Nil, "", false)
-    } else {
-      val hasMore = limitAbs < totalCount
-      val tuples  = ListBuffer.empty[Tpl]
-      val row2tpl = castRow2Tpl(aritiess.head, castss.head, 0, None)
-      sortedRows.subList(0, limitAbs).forEach(row => tuples += row2tpl(row).asInstanceOf[Tpl])
-      val tpls   = if (forward) tuples.result() else tuples.result().reverse
-      val cursor = nextCursorUnique(tpls, tokens)
+
+    if (isNested) {
+      val nestedRows    = rows2nested(sortedRows)
+      val toplevelCount = nestedRows.length
+      val limitAbs      = limit.abs.min(toplevelCount)
+      val hasMore       = limitAbs < toplevelCount
+      val selectedRows  = nestedRows.take(limitAbs)
+      val tpls          = if (forward) selectedRows else selectedRows.reverse
+      val cursor        = nextCursorUnique(tpls, tokens)
+      //      println("PRIMARY UNIQUE Nested tpls: " + tpls)
       (tpls, cursor, hasMore)
+
+    } else {
+      val totalCount = rows.size
+
+
+      val limitAbs = limit.abs.min(totalCount)
+      val hasMore  = limitAbs < totalCount
+
+      val tuples = ListBuffer.empty[Tpl]
+
+      if (isNestedOpt) {
+        postAdjustPullCasts()
+        if (totalCount == 0) {
+          (Nil, "", false)
+        } else {
+          sortedRows.subList(0, limitAbs).forEach(row => tuples += pullRow2tpl(row))
+          val tpls   = if (forward) tuples.result() else tuples.result().reverse
+          val cursor = nextCursorUnique(tpls, tokens)
+          //          println("PRIMARY UNIQUE NestedOpt tpls: " + tpls)
+          (tpls, cursor, hasMore)
+        }
+
+      } else {
+        postAdjustAritiess()
+        if (totalCount == 0) {
+          (Nil, "", false)
+        } else {
+          val row2tpl = castRow2Tpl(aritiess.head, castss.head, 0, None)
+          sortedRows.subList(0, limitAbs).forEach(row => tuples += row2tpl(row).asInstanceOf[Tpl])
+          val tpls   = if (forward) tuples.result() else tuples.result().reverse
+          val cursor = nextCursorUnique(tpls, tokens)
+          //          println("PRIMARY UNIQUE Flat tpls: " + tpls)
+          (tpls, cursor, hasMore)
+        }
+      }
     }
   }
 
@@ -64,7 +94,7 @@ case class PrimaryUnique[Tpl](
     val List(_, _, tpe, _, _, i, _, _) = tokens
 
     val uniqueIndex = i.toInt
-    val encode      = encoder(tpe)
+    val encode      = encoder(tpe, "")
     val tokens1     = tokens.dropRight(2) ++ getUniquePair(tpls, uniqueIndex, encode)
     Base64.getEncoder.encodeToString(tokens1.mkString("\n").getBytes)
   }

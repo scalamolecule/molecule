@@ -2,14 +2,12 @@ package molecule.db.datomic.query
 
 import java.util.Base64
 import molecule.base.util.exceptions.MoleculeError
-import molecule.base.util.{BaseHelpers, DateHandling}
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.ops.ModelTransformations
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.api.action.ApiUtils
 import molecule.db.datomic.facade.DatomicConn_JVM
 import molecule.db.datomic.query.cursor._
-import molecule.db.datomic.util.DatomicApiLoader
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
@@ -69,51 +67,59 @@ case class DatomicQueryCursor[Tpl](
     val forward     = limit > 0
     val altElements = if (forward) elements else reverseTopLevelSorting(elements)
     val rows        = getRawData(conn, altElements)
-    val totalCount  = rows.size
     val sortedRows  = sortRows(rows)
-    val limitAbs    = limit.abs.min(totalCount)
     logger.debug(sortedRows.toArray().mkString("\n"))
 
-    //    if (isNested) {
-    //      val nestedRows    = rows2nested(sortedRows)
-    //      val toplevelCount = nestedRows.length
-    //      val fromUntil     = getFromUntil(toplevelCount, limit, offset)
-    //      val fromUntil     = ()
-    //      val hasMore          = fromUntil.fold(totalCount > 0)(_._3)
-    //      (offsetList(nestedRows, fromUntil), "xx", hasMore)
-    //
-    //    } else {
-    //      val fromUntil = getFromUntil(totalCount, limit, offset)
-    //      val hasMore      = fromUntil.fold(totalCount > 0)(_._3)
-    //      val tuples    = ListBuffer.empty[Tpl]
-    //
-    //      if (isNestedOpt) {
-    //        postAdjustPullCasts()
-    //        offsetRaw(sortedRows, fromUntil).forEach(row => tuples += pullRow2tpl(row))
-    //        (tuples.result(), "xx", hasMore)
-    //
-    //      } else {
-    //        postAdjustAritiess()
-    //        val row2tpl = castRow2Tpl(aritiess.head, castss.head, 0, None)
-    //        offsetRaw(sortedRows, fromUntil).forEach(row => tuples += row2tpl(row).asInstanceOf[Tpl])
-    //        (tuples.result(), "xx", hasMore)
-    //      }
-    //    }
-    postAdjustAritiess()
-    if (totalCount == 0) {
-      (Nil, "", false)
-    } else {
-      val hasMore      = limitAbs < totalCount
-      val tuples       = ListBuffer.empty[Tpl]
-      val row2tpl      = castRow2Tpl(aritiess.head, castss.head, 0, None)
-      val selectedRows = sortedRows.subList(0, limitAbs)
-      selectedRows.forEach(row => tuples += row2tpl(row).asInstanceOf[Tpl])
-      val tpls   = if (forward) tuples.result() else tuples.result().reverse
-      val cursor = initialCursor(conn, tpls)
-      println("INITIAL RESULT: " + tpls)
-      //      println("INITIAL RESULT: " + cursor)
-      //      println("INITIAL RESULT: " + hasMore)
+    if (isNested) {
+      val nestedRows    = rows2nested(sortedRows)
+      val toplevelCount = nestedRows.length
+      val limitAbs      = limit.abs.min(toplevelCount)
+      val hasMore       = limitAbs < toplevelCount
+      val selectedRows  = nestedRows.take(limitAbs)
+      val tpls          = if (forward) selectedRows else selectedRows.reverse
+      val cursor        = initialCursor(conn, tpls)
+      //      println("INITIAL NESTED: " + tpls)
+      //      println("INITIAL NESTED: " + cursor)
+      //      println("INITIAL NESTED: " + hasMore)
       (tpls, cursor, hasMore)
+
+    } else {
+      val totalCount = rows.size
+      val limitAbs   = limit.abs.min(totalCount)
+      val hasMore    = limitAbs < totalCount
+      val tuples     = ListBuffer.empty[Tpl]
+
+      if (isNestedOpt) {
+        postAdjustPullCasts()
+        if (totalCount == 0) {
+          (Nil, "", false)
+        } else {
+          val selectedRows = sortedRows.subList(0, limitAbs)
+          selectedRows.forEach(row => tuples += pullRow2tpl(row))
+          val tpls   = if (forward) tuples.result() else tuples.result().reverse
+          val cursor = initialCursor(conn, tpls)
+          //          println("INITIAL NESTED OPT: " + tpls)
+          //          println("INITIAL NESTED OPT: " + cursor)
+          //          println("INITIAL NESTED OPT: " + hasMore)
+          (tpls, cursor, hasMore)
+        }
+
+      } else {
+        postAdjustAritiess()
+        if (totalCount == 0) {
+          (Nil, "", false)
+        } else {
+          val row2tpl      = castRow2Tpl(aritiess.head, castss.head, 0, None)
+          val selectedRows = sortedRows.subList(0, limitAbs)
+          selectedRows.forEach(row => tuples += row2tpl(row).asInstanceOf[Tpl])
+          val tpls   = if (forward) tuples.result() else tuples.result().reverse
+          val cursor = initialCursor(conn, tpls)
+          //          println("INITIAL FLAT: " + tpls)
+          //          println("INITIAL FLAT: " + cursor)
+          //          println("INITIAL FLAT: " + hasMore)
+          (tpls, cursor, hasMore)
+        }
+      }
     }
   }
 
@@ -145,6 +151,10 @@ case class DatomicQueryCursor[Tpl](
                   }
                 }
                 if (opt) {
+                  if(pos == "1")
+                    throw MoleculeError(
+                      s"Can't use optional attribute (`${a.name}`) as primary sort attribute with cursor pagination."
+                    )
                   // We use row hashes only when there's no unique sort attributes
                   val init          = setStrategy(3, tokens)
                   val (tpe, encode) = tpeEncode(a)

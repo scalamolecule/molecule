@@ -1,14 +1,14 @@
 package molecule.db.datomic.query.cursor
 
 import java.net.URI
-import java.util.{Collections, Date, UUID, Iterator => jIterator, List => jList, Map => jMap, Set => jSet}
+import java.util.{Date, UUID}
 import molecule.base.util.BaseHelpers
 import molecule.base.util.exceptions.MoleculeError
 import molecule.boilerplate.ast.Model._
 
 trait CursorUtils extends BaseHelpers {
 
-  protected def tpeEncode(element: Element): (String, Any => String) = {
+  protected def tpeEncode(element: AttrOne): (String, Any => String) = {
     element match {
       case a: AttrOneMan =>
         a match {
@@ -29,18 +29,15 @@ trait CursorUtils extends BaseHelpers {
         }
       case a: AttrOneOpt =>
         a match {
-          case _: AttrOneOptString => ("String", (v: Any) => escStr(v.toString))
-          case _: AttrOneOptInt    => ("Int", {
-            case Some(v) => "_" + v.toString
-            case _       => "_"
-          })
+          case _: AttrOneOptString     => ("String", (v: Any) => escStr(v.toString))
+          case _: AttrOneOptInt        => ("Int", (v: Any) => v.toString)
           case _: AttrOneOptLong       => ("Long", (v: Any) => v.toString)
           case _: AttrOneOptFloat      => ("Float", (v: Any) => v.toString)
           case _: AttrOneOptDouble     => ("Double", (v: Any) => v.toString)
           case _: AttrOneOptBoolean    => ("Boolean", (v: Any) => v.toString)
           case _: AttrOneOptBigInt     => ("BigInt", (v: Any) => v.toString)
           case _: AttrOneOptBigDecimal => ("BigDecimal", (v: Any) => v.toString)
-          case _: AttrOneOptDate       => ("Date", (v: Any) => date2str(v.asInstanceOf[Date]))
+          case _: AttrOneOptDate       => ("Date", (v: Any) => v.toString) // (row hash used instead)
           case _: AttrOneOptUUID       => ("UUID", (v: Any) => v.toString)
           case _: AttrOneOptURI        => ("URI", (v: Any) => v.toString)
           case _: AttrOneOptByte       => ("Byte", (v: Any) => v.toString)
@@ -51,27 +48,25 @@ trait CursorUtils extends BaseHelpers {
     }
   }
 
-  protected def encoder(tpe: String, opt: String = ""): Any => String = {
-    if (opt == "opt")
+  protected def encoder(tpe: String, kind: String): Any => String = {
+    if (kind == "OPTIONAL") {
       tpe match {
         case "String"     => (v: Any) => v.toString
-        case "Int"        => {
-          case Some(v) => "_" + v.toString
-          case _       => "_"
-        }
+        case "Int"        => (v: Any) => v.toString
         case "Long"       => (v: Any) => v.toString
         case "Float"      => (v: Any) => v.toString
         case "Double"     => (v: Any) => v.toString
         case "Boolean"    => (v: Any) => v.toString
         case "BigInt"     => (v: Any) => v.toString
         case "BigDecimal" => (v: Any) => v.toString
-        case "Date"       => (v: Any) => date2str(v.asInstanceOf[Date])
+        case "Date"       => (v: Any) => v.asInstanceOf[Option[Date]].map(date2str(_)).toString
         case "UUID"       => (v: Any) => v.toString
         case "URI"        => (v: Any) => v.toString
         case "Byte"       => (v: Any) => v.toString
         case "Short"      => (v: Any) => v.toString
         case "Char"       => (v: Any) => v.toString
       }
+    }
     else
       tpe match {
         case "String"     => (v: Any) => v.toString
@@ -91,47 +86,24 @@ trait CursorUtils extends BaseHelpers {
       }
   }
 
-  import clojure.lang.PersistentArrayMap
-
   // Decode String value from cursor to java value for direct comparison with raw row value
-  protected def decoder(tpe: String, opt: String = ""): String => Any = {
-    if (opt == "opt")
-      tpe match {
-        case "String" => (v: String) => if (v == "_") null else Some(unescStr(v.tail))
-        //        case "Int"        => (v: String) => if (v == "_") null else PersistentArrayMap.createWithCheck(Array(v.tail.toInt))
-        //        case "Int"        => (v: String) => if (v == "_") null else PersistentArrayMap.create()
-        //        case "Int"        => (v: String) => if (v == "_") null else Collections.singletonMap("username1", "password1")
-        case "Int"        => (v: String) => if (v == "_") null else v.tail.toInt
-        case "Long"       => (v: String) => v.toLong
-        case "Float"      => (v: String) => v.toFloat
-        case "Double"     => (v: String) => v.toDouble
-        case "Boolean"    => (v: String) => v.toBoolean
-        case "BigInt"     => (v: String) => BigInt(v).bigInteger
-        case "BigDecimal" => (v: String) => BigDecimal(v).bigDecimal
-        case "Date"       => (v: String) => str2date(v)
-        case "UUID"       => (v: String) => UUID.fromString(v)
-        case "URI"        => (v: String) => new URI(v)
-        case "Byte"       => (v: String) => v.toByte
-        case "Short"      => (v: String) => v.toShort
-        case "Char"       => (v: String) => v // compare String
-      }
-    else
-      tpe match {
-        case "String"     => (v: String) => unescStr(v)
-        case "Int"        => (v: String) => v.toInt
-        case "Long"       => (v: String) => v.toLong
-        case "Float"      => (v: String) => v.toFloat
-        case "Double"     => (v: String) => v.toDouble
-        case "Boolean"    => (v: String) => v.toBoolean
-        case "BigInt"     => (v: String) => BigInt(v).bigInteger
-        case "BigDecimal" => (v: String) => BigDecimal(v).bigDecimal
-        case "Date"       => (v: String) => str2date(v)
-        case "UUID"       => (v: String) => UUID.fromString(v)
-        case "URI"        => (v: String) => new URI(v)
-        case "Byte"       => (v: String) => v.toByte
-        case "Short"      => (v: String) => v.toShort
-        case "Char"       => (v: String) => v // compare String
-      }
+  protected def decoder(tpe: String): String => Any = {
+    tpe match {
+      case "String"     => (v: String) => unescStr(v)
+      case "Int"        => (v: String) => v.toInt
+      case "Long"       => (v: String) => v.toLong
+      case "Float"      => (v: String) => v.toFloat
+      case "Double"     => (v: String) => v.toDouble
+      case "Boolean"    => (v: String) => v.toBoolean
+      case "BigInt"     => (v: String) => BigInt(v).bigInteger
+      case "BigDecimal" => (v: String) => BigDecimal(v).bigDecimal
+      case "Date"       => (v: String) => str2date(v)
+      case "UUID"       => (v: String) => UUID.fromString(v)
+      case "URI"        => (v: String) => new URI(v)
+      case "Byte"       => (v: String) => v.toByte
+      case "Short"      => (v: String) => v.toShort
+      case "Char"       => (v: String) => v // compare String
+    }
   }
 
   protected def getFilterAttr(tpe: String, ns: String, attr: String, fn: Op, v: String): AttrOneTac = {

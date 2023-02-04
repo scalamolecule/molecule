@@ -76,7 +76,7 @@ object MutationDelete extends DatomicTestSuite {
           _ <- query.from(cur).limit(4).get
             .map(_ ==> "Unexpected success")
             .recover { case MoleculeError(msg, _) =>
-              msg ==> "Couldn't find next page. Last 3 rows were all deleted/updated."
+              msg ==> "Couldn't find next page. Edge rows were all deleted/updated."
             }
         } yield ()
       }
@@ -159,7 +159,7 @@ object MutationDelete extends DatomicTestSuite {
           _ <- query.from(cur).limit(-4).get
             .map(_ ==> "Unexpected success")
             .recover { case MoleculeError(msg, _) =>
-              msg ==> "Couldn't find next page. Last 3 rows were all deleted/updated."
+              msg ==> "Couldn't find next page. Edge rows were all deleted/updated."
             }
         } yield ()
       }

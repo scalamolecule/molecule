@@ -161,7 +161,7 @@ object ExprOne_URI_ extends DatomicTestSuite {
         _ <- Ns.i.a1.uri_?.not(Some(Seq(uri2, uri3))).query.get.map(_ ==> List(a))
         // Empty Seq of negation args matches all asserted values (non-null)
         _ <- Ns.i.a1.uri_?.not(Some(Seq.empty[URI])).query.get.map(_ ==> List(a, b, c))
-        // None matches all asserted values (non-null)
+        // Negating None matches all asserted values (non-null)
         _ <- Ns.i.a1.uri_?.not(Option.empty[URI]).query.get.map(_ ==> List(a, b, c))
         _ <- Ns.i.a1.uri_?.not(Option.empty[Seq[URI]]).query.get.map(_ ==> List(a, b, c))
 
@@ -175,6 +175,13 @@ object ExprOne_URI_ extends DatomicTestSuite {
         _ <- Ns.i.a1.uri_?.<=(None).query.get.map(_ ==> List())
         _ <- Ns.i.a1.uri_?.>(None).query.get.map(_ ==> List())
         _ <- Ns.i.a1.uri_?.>=(None).query.get.map(_ ==> List())
+
+        // Distinct result even with redundant None's (two i = 4 with no uri value)
+        _ <- Ns.i.insert(4).transact
+        _ <- Ns.i.>=(3).a1.uri_?.query.get.map(_ ==> List(
+          (3, Some(uri3)),
+          (4, None),
+        ))
       } yield ()
     }
   }

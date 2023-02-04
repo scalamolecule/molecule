@@ -38,47 +38,17 @@ object Adhoc extends DatomicTestSuite {
   //  int(hej)
 
 
-
   lazy val tests = Tests {
-    val a = (1, Set(int1, int2))
-    val b = (2, Set(int2, int3, int4))
 
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
       for {
-//        List(a, b) <- Ns.int.insert(1, 2).transact.map(_.eids)
-//        _ <- Ns.int(3).save.transact
-//        _ <- Ns.int.query.get.map(_ ==> List(1, 2, 3))
-//        _ <- Ns.apply(a).int(10).update.transact
-//        _ <- Ns(b).delete.transact
-//        _ <- Ns.int.query.get.map(_ ==> List(3, 10))
-
-
-
-
-        _ <- Ns.i.ints.insert(List(a, b)).transact
-
-        _ <- Ns.i.a1.ints.<(int2).query.get.map(_ ==> List(a))
-        _ <- Ns.i.a1.ints.<(int3).query.get.map(_ ==> List(a, b))
-
-//
-//        _ <- Ns.int.insert(1, 2, 3).transact
-//        _ <- Ns.int.query.get.map(_ ==> List(1, 2, 3))
-
-
-//        _ <- Ns.int.query.limit(2).get.map(_ ==> List(1, 2))
-//        _ <- Ns.int.query.limit(-2).get.map(_ ==> List(2, 3))
-
-//        _ <- Ns.int.query.offset(1).get.map(_ ==> PageInfo(List(2, 3), 3, true, false))
-//        _ <- Ns.int.query.offset(1).get.map(_.data ==> List(2, 3))
-//        _ <- Ns.int.query.offset(1).get.map(_.totalCount ==> 3)
-//
-//        _ <- Ns.int.query.offset(1).limit(1).get.map(_.data ==> List(2))
-//        _ <- Ns.int.query.limit(1).offset(1).get.map(_.data ==> List(2))
-
-//        _ <- Ns.int.query.from("cursor").get.map(_ ==> Page(List(1, 2), Some(2)))
-//        _ <- Ns.int.query.from("cursor").offset(2).get.map(_ ==> QueryResultList(List(1, 2), Some(2)))
-//        _ <- Ns.int.query.offset(2).from("cursor").get.map(_ ==> QueryResultList(List(1, 2), Some(2)))
+        List(a, b) <- Ns.int.insert(1, 2).transact.map(_.eids)
+        _ <- Ns.int(3).save.transact
+        _ <- Ns.int.query.get.map(_ ==> List(1, 2, 3))
+        _ <- Ns.apply(a).int(10).update.transact
+        _ <- Ns(b).delete.transact
+        _ <- Ns.int.query.get.map(_ ==> List(3, 10))
 
 
       } yield ()

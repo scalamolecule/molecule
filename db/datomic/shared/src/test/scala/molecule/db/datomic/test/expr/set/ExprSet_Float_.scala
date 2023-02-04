@@ -590,6 +590,13 @@ object ExprSet_Float_ extends DatomicTestSuite {
           _ <- Ns.i.floats_?.insert(a, b, c).transact
 
           _ <- Ns.i.a1.floats_?.query.get.map(_ ==> List(a, b, c))
+
+          // Distinct result even with redundant None's (two i = 3 with no float value)
+          _ <- Ns.i.insert(3).transact
+          _ <- Ns.i.>=(2).a1.floats_?.query.get.map(_ ==> List(
+            (2, Some(Set(float2, float3, float4))),
+            (3, None),
+          ))
         } yield ()
       }
 

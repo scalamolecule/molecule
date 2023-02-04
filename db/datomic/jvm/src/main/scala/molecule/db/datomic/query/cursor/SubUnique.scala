@@ -1,5 +1,6 @@
 package molecule.db.datomic.query.cursor
 
+import java.util
 import java.util.{Base64, Collections}
 import molecule.base.util.exceptions.MoleculeError
 import molecule.boilerplate.ast.Model._
@@ -10,7 +11,6 @@ import molecule.db.datomic.query.DatomicQuery
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
-import java.util.{Collections, Date, UUID, Iterator => jIterator, List => jList, Map => jMap, Set => jSet}
 
 /**
  * Molecule has a unique attribute that is not sorted first.
@@ -35,10 +35,7 @@ case class SubUnique[Tpl](
   limit: Option[Int],
   cursor: String
 ) extends DatomicQuery[Tpl](elements, limit)
-  with ApiUtils
-  with CursorUtils
-  with MoleculeLogging {
-
+  with ApiUtils with CursorUtils with MoleculeLogging {
 
   def getPage(tokens: List[String], limit: Int)
              (implicit conn: DatomicConn_JVM, ec: ExecutionContext)
@@ -63,87 +60,151 @@ case class SubUnique[Tpl](
     }
 
     // Get row index for unique edge value to go from
-    val (uniqueIndex, uniqueValues, attempts) = {
+    val (uniqueIndex, uniqueValues) = {
       val List(_, _, _, tpe, _, _, i, a, b, c, x, y, z) = attrTokens.find(_.head == "UNIQUE").get
 
       val decode       = decoder(tpe)
       val uniqueValues = (if (forward) List(z, y, x) else List(a, b, c)).filter(_.nonEmpty).map(decode)
-      (i.toInt, uniqueValues, uniqueValues.length)
+      (i.toInt, uniqueValues)
     }
-
-    //    println("filterAttr: " + filterAttr)
-    println("uniqueIndex : " + uniqueIndex)
-    println("uniqueValues: " + uniqueValues)
-    println("uniqueValue: " + uniqueValues.head)
-    //    println("uniqueValue: " + uniqueValues.head.getClass)
 
     val altElements = filterAttr +: elements
     val rows        = getRawData(conn, altElements)
-    val totalCount  = rows.size
     val sortedRows  = sortRows(rows)
     logger.debug(sortedRows.toArray().mkString("\n"))
-    postAdjustAritiess()
-    if (totalCount == 0) {
-      (Nil, "", false)
+
+    if (isNested) {
+      val nestedTpls    = rows2nested(sortedRows)
+      val toplevelCount = nestedTpls.length
+      if (toplevelCount == 0) {
+        (Nil, "", false)
+      } else {
+        val count          = if (forward) limit.min(toplevelCount) else toplevelCount - (toplevelCount + limit).max(0)
+        val nestedTpls1    = if (forward) nestedTpls else nestedTpls.reverse
+        val (tuples, more) = paginateTpls(uniqueValues, nestedTpls1, count, uniqueIndex)
+        val tpls           = if (forward) tuples.result() else tuples.result().reverse
+        val cursor         = nextCursorSubUnique(tpls, tokens)
+        //        println("SUB UNIQUE Nested tpls: " + tpls)
+        (tpls, cursor, more > 0)
+      }
+
     } else {
-      val (from, until) = if (forward) (0, limit.min(totalCount)) else ((totalCount + limit).max(0), totalCount)
-      val count         = until - from
-      //      println("limit: " + limit)
-      //      println("total: " + totalCount)
-      //      println("from : " + from)
-      //      println("until: " + until)
-      //      println("count: " + count)
-      val row2tpl       = castRow2Tpl(aritiess.head, castss.head, 0, None)
-      var window        = false
-      var i             = 0
-      var more          = 0
-      if (!forward)
-        Collections.reverse(sortedRows)
+      val totalCount = rows.size
+      if (totalCount == 0) {
+        (Nil, "", false)
+      } else {
+        if (isNestedOpt) {
+          postAdjustPullCasts()
+          val count = if (forward) limit.min(totalCount) else totalCount - (totalCount + limit).max(0)
+          if (!forward) Collections.reverse(sortedRows)
+          val (tuples, more) = paginateRows(uniqueValues, sortedRows, count, pullRow2tpl, uniqueIndex)
+          val tpls           = if (forward) tuples.result() else tuples.result().reverse
+          //          println("SUB UNIQUE NestedOpt tpls: " + tpls)
+          val cursor         = nextCursorSubUnique(tpls, tokens)
+          (tpls, cursor, more > 0)
 
-      println("unique row value: " + sortedRows.get(0).get(uniqueIndex))
-      println("unique row value: " + sortedRows.get(0).get(uniqueIndex).getClass)
-
-      val tuples = ListBuffer.empty[Tpl]
-      @tailrec
-      def paginateFrom(uniqueValues: List[Any]): Unit = {
-        uniqueValues match {
-          case uniqueValue :: remainingUniqueValues =>
-            println("---------- paginateFrom unique value: " + uniqueValue)
-            sortedRows.forEach {
-              case row if window && i != count                =>
-                println("A " + row)
-                i += 1
-                tuples += row2tpl(row).asInstanceOf[Tpl]
-              case row if row.get(uniqueIndex) == uniqueValue =>
-                println("B " + row)
-                window = true
-              case row                                        =>
-                if (window)
-                  more += 1
-                println("C " + row)
-            }
-            if (tuples.isEmpty) {
-              // Try with next unique edge value
-              paginateFrom(remainingUniqueValues)
-            }
-
-          case Nil => throw MoleculeError(s"Couldn't find next page. Last $attempts rows were all deleted/updated.")
+        } else {
+          postAdjustAritiess()
+          val count   = if (forward) limit.min(totalCount) else totalCount - (totalCount + limit).max(0)
+          val row2tpl = castRow2Tpl(aritiess.head, castss.head, 0, None)
+          if (!forward) Collections.reverse(sortedRows)
+          val (tuples, more) = paginateRows(uniqueValues, sortedRows, count, row2tpl, uniqueIndex)
+          val tpls           = if (forward) tuples.result() else tuples.result().reverse
+          //          println("SUB UNIQUE Flat tpls: " + tpls)
+          val cursor         = nextCursorSubUnique(tpls, tokens)
+          (tpls, cursor, more > 0)
         }
       }
-      paginateFrom(uniqueValues)
-
-      val tpls = if (forward) tuples.result() else tuples.result().reverse
-//      println("tpls: " + tpls)
-//      println("more: " + more)
-      val cursor = nextCursorSubUnique(tpls, tokens)
-      (tpls, cursor, more > 0)
     }
   }
+
+
+  def paginateTpls(
+    uniqueValues: List[Any],
+    tpls: List[Tpl],
+    count: Int,
+    uniqueIndex: Int
+  ): (ListBuffer[Tpl], Int) = {
+    val tuples      = ListBuffer.empty[Tpl]
+    val tplProducts = tpls.map(_.asInstanceOf[Product])
+    var window      = false
+    var i           = 0
+    var more        = 0
+    @tailrec
+    def findFrom(uniqueValues: List[Any]): Unit = {
+      uniqueValues match {
+        case uniqueValue :: remainingUniqueValues =>
+          //          println("---------- paginateFrom unique value: " + uniqueValue)
+          tplProducts.foreach {
+            case tplProduct if window && i != count                                  =>
+              //              println("A " + tplProduct)
+              i += 1
+              tuples += tplProduct.asInstanceOf[Tpl]
+            case tplProduct if tplProduct.productElement(uniqueIndex) == uniqueValue =>
+              //              println("B " + tplProduct)
+              window = true
+            case tplProduct                                                          =>
+              if (window) more += 1
+            //              println("C " + tplProduct)
+          }
+          if (tuples.isEmpty) {
+            // Recursively try with next unique edge value
+            findFrom(remainingUniqueValues)
+          }
+
+        case Nil => throw MoleculeError(edgeValuesNotFound)
+      }
+    }
+    findFrom(uniqueValues)
+    (tuples, more)
+  }
+
+
+  def paginateRows(
+    uniqueValues: List[Any],
+    sortedRows: util.ArrayList[util.List[AnyRef]],
+    count: Int,
+    row2tpl: Row => Any,
+    uniqueIndex: Int
+  ): (ListBuffer[Tpl], Int) = {
+    val tuples = ListBuffer.empty[Tpl]
+    var window = false
+    var i      = 0
+    var more   = 0
+    @tailrec
+    def findFrom(uniqueValues: List[Any]): Unit = {
+      uniqueValues match {
+        case uniqueValue :: remainingUniqueValues =>
+          //          println("---------- paginateFrom unique value: " + uniqueValue)
+          sortedRows.forEach {
+            case row if window && i != count                =>
+              //              println("A " + row)
+              i += 1
+              tuples += row2tpl(row).asInstanceOf[Tpl]
+            case row if row.get(uniqueIndex) == uniqueValue =>
+              //              println("B " + row)
+              window = true
+            case row                                        =>
+              if (window) more += 1
+            //              println("C " + row)
+          }
+          if (tuples.isEmpty) {
+            // Recursively try with next unique edge value
+            findFrom(remainingUniqueValues)
+          }
+
+        case Nil => throw MoleculeError(edgeValuesNotFound)
+      }
+    }
+    findFrom(uniqueValues)
+    (tuples, more)
+  }
+
 
   private def nextCursorSubUnique(tpls: List[Tpl], tokens: List[String]): String = {
     val attrTokens = tokens.drop(2).grouped(13).toList.collect {
       case List(kind, dir, pos, tpe, ns, attr, uniqueIndex, _, _, _, _, _, _) =>
-        val encode = encoder(tpe)
+        val encode = encoder(tpe, kind)
         List(kind, dir, pos, tpe, ns, attr, uniqueIndex) ++ getUniqueValues(tpls, uniqueIndex.toInt, encode)
     }.flatten
     val tokens1    = tokens.take(2) ++ attrTokens

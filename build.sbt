@@ -172,11 +172,11 @@ lazy val datomic = crossProject(JSPlatform, JVMPlatform)
         //        sharedTests + "/composite",
         //        sharedTests + "/crud",
         //        sharedTests + "/expr",
-                sharedTests + "/pagination",
+//        sharedTests + "/pagination",
         //        sharedTests + "/relation",
         //        sharedTests + "/sort",
         //        sharedTests + "/txMetaData",
-//        sharedTests,
+                sharedTests,
         jvmTests + "/AdhocJVM.scala",
         jsTests + "/AdhocJs.scala",
         sharedTests + "/Adhoc.scala"

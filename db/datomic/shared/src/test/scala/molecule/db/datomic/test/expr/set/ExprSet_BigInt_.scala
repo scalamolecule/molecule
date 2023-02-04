@@ -590,6 +590,13 @@ object ExprSet_BigInt_ extends DatomicTestSuite {
           _ <- Ns.i.bigInts_?.insert(a, b, c).transact
 
           _ <- Ns.i.a1.bigInts_?.query.get.map(_ ==> List(a, b, c))
+
+          // Distinct result even with redundant None's (two i = 3 with no bigInt value)
+          _ <- Ns.i.insert(3).transact
+          _ <- Ns.i.>=(2).a1.bigInts_?.query.get.map(_ ==> List(
+            (2, Some(Set(bigInt2, bigInt3, bigInt4))),
+            (3, None),
+          ))
         } yield ()
       }
 

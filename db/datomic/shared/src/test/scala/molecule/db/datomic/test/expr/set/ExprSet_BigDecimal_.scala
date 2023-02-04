@@ -590,6 +590,13 @@ object ExprSet_BigDecimal_ extends DatomicTestSuite {
           _ <- Ns.i.bigDecimals_?.insert(a, b, c).transact
 
           _ <- Ns.i.a1.bigDecimals_?.query.get.map(_ ==> List(a, b, c))
+
+          // Distinct result even with redundant None's (two i = 3 with no bigDecimal value)
+          _ <- Ns.i.insert(3).transact
+          _ <- Ns.i.>=(2).a1.bigDecimals_?.query.get.map(_ ==> List(
+            (2, Some(Set(bigDecimal2, bigDecimal3, bigDecimal4))),
+            (3, None),
+          ))
         } yield ()
       }
 

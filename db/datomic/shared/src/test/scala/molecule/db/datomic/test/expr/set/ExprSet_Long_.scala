@@ -590,6 +590,13 @@ object ExprSet_Long_ extends DatomicTestSuite {
           _ <- Ns.i.longs_?.insert(a, b, c).transact
 
           _ <- Ns.i.a1.longs_?.query.get.map(_ ==> List(a, b, c))
+
+          // Distinct result even with redundant None's (two i = 3 with no long value)
+          _ <- Ns.i.insert(3).transact
+          _ <- Ns.i.>=(2).a1.longs_?.query.get.map(_ ==> List(
+            (2, Some(Set(long2, long3, long4))),
+            (3, None),
+          ))
         } yield ()
       }
 

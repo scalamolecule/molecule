@@ -591,6 +591,13 @@ object ExprSet_Date_ extends DatomicTestSuite {
           _ <- Ns.i.dates_?.insert(a, b, c).transact
 
           _ <- Ns.i.a1.dates_?.query.get.map(_ ==> List(a, b, c))
+
+          // Distinct result even with redundant None's (two i = 3 with no date value)
+          _ <- Ns.i.insert(3).transact
+          _ <- Ns.i.>=(2).a1.dates_?.query.get.map(_ ==> List(
+            (2, Some(Set(date2, date3, date4))),
+            (3, None),
+          ))
         } yield ()
       }
 

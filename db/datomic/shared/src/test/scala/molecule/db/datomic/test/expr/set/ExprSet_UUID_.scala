@@ -591,6 +591,13 @@ object ExprSet_UUID_ extends DatomicTestSuite {
           _ <- Ns.i.uuids_?.insert(a, b, c).transact
 
           _ <- Ns.i.a1.uuids_?.query.get.map(_ ==> List(a, b, c))
+
+          // Distinct result even with redundant None's (two i = 3 with no uuid value)
+          _ <- Ns.i.insert(3).transact
+          _ <- Ns.i.>=(2).a1.uuids_?.query.get.map(_ ==> List(
+            (2, Some(Set(uuid2, uuid3, uuid4))),
+            (3, None),
+          ))
         } yield ()
       }
 

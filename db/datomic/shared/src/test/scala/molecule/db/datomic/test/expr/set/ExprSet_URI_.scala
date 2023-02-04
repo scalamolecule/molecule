@@ -591,6 +591,13 @@ object ExprSet_URI_ extends DatomicTestSuite {
           _ <- Ns.i.uris_?.insert(a, b, c).transact
 
           _ <- Ns.i.a1.uris_?.query.get.map(_ ==> List(a, b, c))
+
+          // Distinct result even with redundant None's (two i = 3 with no uri value)
+          _ <- Ns.i.insert(3).transact
+          _ <- Ns.i.>=(2).a1.uris_?.query.get.map(_ ==> List(
+            (2, Some(Set(uri2, uri3, uri4))),
+            (3, None),
+          ))
         } yield ()
       }
 

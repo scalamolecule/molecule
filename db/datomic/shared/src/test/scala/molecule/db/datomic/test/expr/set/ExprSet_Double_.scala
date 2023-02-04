@@ -590,6 +590,13 @@ object ExprSet_Double_ extends DatomicTestSuite {
           _ <- Ns.i.doubles_?.insert(a, b, c).transact
 
           _ <- Ns.i.a1.doubles_?.query.get.map(_ ==> List(a, b, c))
+
+          // Distinct result even with redundant None's (two i = 3 with no double value)
+          _ <- Ns.i.insert(3).transact
+          _ <- Ns.i.>=(2).a1.doubles_?.query.get.map(_ ==> List(
+            (2, Some(Set(double2, double3, double4))),
+            (3, None),
+          ))
         } yield ()
       }
 

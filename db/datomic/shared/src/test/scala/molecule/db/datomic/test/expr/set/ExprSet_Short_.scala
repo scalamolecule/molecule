@@ -590,6 +590,13 @@ object ExprSet_Short_ extends DatomicTestSuite {
           _ <- Ns.i.shorts_?.insert(a, b, c).transact
 
           _ <- Ns.i.a1.shorts_?.query.get.map(_ ==> List(a, b, c))
+
+          // Distinct result even with redundant None's (two i = 3 with no short value)
+          _ <- Ns.i.insert(3).transact
+          _ <- Ns.i.>=(2).a1.shorts_?.query.get.map(_ ==> List(
+            (2, Some(Set(short2, short3, short4))),
+            (3, None),
+          ))
         } yield ()
       }
 

@@ -161,7 +161,7 @@ object ExprOne_UUID_ extends DatomicTestSuite {
         _ <- Ns.i.a1.uuid_?.not(Some(Seq(uuid2, uuid3))).query.get.map(_ ==> List(a))
         // Empty Seq of negation args matches all asserted values (non-null)
         _ <- Ns.i.a1.uuid_?.not(Some(Seq.empty[UUID])).query.get.map(_ ==> List(a, b, c))
-        // None matches all asserted values (non-null)
+        // Negating None matches all asserted values (non-null)
         _ <- Ns.i.a1.uuid_?.not(Option.empty[UUID]).query.get.map(_ ==> List(a, b, c))
         _ <- Ns.i.a1.uuid_?.not(Option.empty[Seq[UUID]]).query.get.map(_ ==> List(a, b, c))
 
@@ -175,6 +175,13 @@ object ExprOne_UUID_ extends DatomicTestSuite {
         _ <- Ns.i.a1.uuid_?.<=(None).query.get.map(_ ==> List())
         _ <- Ns.i.a1.uuid_?.>(None).query.get.map(_ ==> List())
         _ <- Ns.i.a1.uuid_?.>=(None).query.get.map(_ ==> List())
+
+        // Distinct result even with redundant None's (two i = 4 with no uuid value)
+        _ <- Ns.i.insert(4).transact
+        _ <- Ns.i.>=(3).a1.uuid_?.query.get.map(_ ==> List(
+          (3, Some(uuid3)),
+          (4, None),
+        ))
       } yield ()
     }
   }

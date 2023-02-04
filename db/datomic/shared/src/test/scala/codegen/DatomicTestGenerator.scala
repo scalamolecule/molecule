@@ -12,6 +12,6 @@ object DatomicTestGenerator extends App {
   //
   //  crud.update.set.ops._UpdateSetOps_tpe.generate()
   //
-  //  expr.one._ExprOne_tpe.generate()
-  //  expr.set._ExprSet_tpe.generate()
+  //    expr.one._ExprOne_tpe.generate()
+  //    expr.set._ExprSet_tpe.generate()
 }

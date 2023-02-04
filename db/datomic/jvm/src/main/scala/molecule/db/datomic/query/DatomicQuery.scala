@@ -1,5 +1,6 @@
 package molecule.db.datomic.query
 
+import java.util
 import java.util.{Collections, Comparator, ArrayList => jArrayList, Collection => jCollection, List => jList}
 import datomic.Peer
 import molecule.base.util.exceptions.MoleculeError
@@ -27,6 +28,8 @@ abstract class DatomicQuery[Tpl](
 
   lazy val limitNotZeroMsg = "Limit cannot be 0. " +
     "Please use a positive number to limit next rows, or a negative number to limit previous rows."
+
+  lazy val edgeValuesNotFound = "Couldn't find next page. Edge rows were all deleted/updated."
 
   protected def limitNotZero(): Unit = {
     if (limit.isDefined && limit.get == 0) {
@@ -76,7 +79,8 @@ abstract class DatomicQuery[Tpl](
     isFree = conn.isFreeVersion
     val db = conn.peerConn.db()
     getQueries(conn.optimizeQuery, altElements) match {
-      case ("", query)       => Peer.q(query, db +: inputs: _*)
+      case ("", query)       =>
+        distinct(Peer.q(query, db +: inputs: _*))
       case (preQuery, query) =>
         // Pre-query
         val preRows = Peer.q(preQuery, db +: preInputs: _*)
@@ -85,9 +89,17 @@ abstract class DatomicQuery[Tpl](
           preIds.add(row.get(0).asInstanceOf[Long])
         }
         // Main query using entity ids from pre-query
-        Peer.q(query, db +: inputs :+ preIds: _*)
+        distinct(Peer.q(query, db +: inputs :+ preIds: _*))
     }
   }
+
+  private def distinct(rows: jCollection[jList[AnyRef]]): jCollection[jList[AnyRef]] = {
+    if (hasOptAttr)
+      new util.HashSet[jList[AnyRef]](rows)
+    else
+      rows
+  }
+
 
   protected def sortRows(rows: jCollection[jList[AnyRef]]): jArrayList[jList[AnyRef]] = {
     val sorters = getFlatSorters(sortss)
@@ -114,6 +126,40 @@ abstract class DatomicQuery[Tpl](
     }
   }
 
+
+  protected def offsetRaw(
+    sortedRows: jArrayList[jList[AnyRef]],
+    fromUntil: Option[(Int, Int, Boolean)]
+  ): jList[jList[AnyRef]] = {
+    fromUntil.fold[jList[jList[AnyRef]]](sortedRows) {
+      case (from, until, _) => sortedRows.subList(from, until)
+    }
+  }
+
+  protected def offsetList(
+    sortedRows: List[Tpl],
+    fromUntil: Option[(Int, Int, Boolean)]
+  ): List[Tpl] = {
+    fromUntil.fold(sortedRows) {
+      case (from, until, _) => sortedRows.slice(from, until)
+    }
+  }
+
+  protected def getFromUntil(
+    tc: Int,
+    limit: Option[Int],
+    offset: Option[Int]
+  ): Option[(Int, Int, Boolean)] = {
+    (offset, limit) match {
+      case (None, None)                => None
+      case (None, Some(l)) if l > 0    => Some((0, l.min(tc), l < tc))
+      case (None, Some(l))             => Some(((tc + l).max(0), tc, (tc + l) > 0))
+      case (Some(o), None) if o > 0    => Some((o.min(tc), tc, o < tc))
+      case (Some(o), None)             => Some((-o.max(0), tc, -o < tc))
+      case (Some(o), Some(l)) if l > 0 => Some((o.min(tc), (o + l).min(tc), (o + l) < tc))
+      case (Some(o), Some(l))          => Some(((tc + o + l).max(0), (tc + o).max(0), (tc + o + l).max(0) > 0))
+    }
+  }
 
 
   //  def inspect(implicit conn0: DatomicConn_JVM, ec: ExecutionContext): Future[Unit] = {

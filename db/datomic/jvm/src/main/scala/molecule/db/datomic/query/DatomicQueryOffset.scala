@@ -1,12 +1,10 @@
 package molecule.db.datomic.query
 
-import java.util.{ArrayList => jArrayList, List => jList}
 import molecule.base.util.exceptions.MoleculeError
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.api.action.ApiUtils
 import molecule.db.datomic.facade.DatomicConn_JVM
-import molecule.db.datomic.util.DatomicApiLoader
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -25,8 +23,6 @@ case class DatomicQueryOffset[Tpl](
   offset: Option[Int],
 ) extends DatomicQuery[Tpl](elements, limit)
   with ApiUtils
-  //  with OffsetUtils
-//  with DatomicApiLoader
   with MoleculeLogging {
 
   // Handles both offset- and non-paginated results
@@ -67,40 +63,4 @@ case class DatomicQueryOffset[Tpl](
       }
     }
   }
-
-
-  private def offsetRaw(
-    sortedRows: jArrayList[jList[AnyRef]],
-    fromUntil: Option[(Int, Int, Boolean)]
-  ): jList[jList[AnyRef]] = {
-    fromUntil.fold[jList[jList[AnyRef]]](sortedRows) {
-      case (from, until, _) => sortedRows.subList(from, until)
-    }
-  }
-
-  private def offsetList(
-    sortedRows: List[Tpl],
-    fromUntil: Option[(Int, Int, Boolean)]
-  ): List[Tpl] = {
-    fromUntil.fold(sortedRows) {
-      case (from, until, _) => sortedRows.slice(from, until)
-    }
-  }
-
-  private def getFromUntil(
-    tc: Int,
-    limit: Option[Int],
-    offset: Option[Int]
-  ): Option[(Int, Int, Boolean)] = {
-    (offset, limit) match {
-      case (None, None)                => None
-      case (None, Some(l)) if l > 0    => Some((0, l.min(tc), l < tc))
-      case (None, Some(l))             => Some(((tc + l).max(0), tc, (tc + l) > 0))
-      case (Some(o), None) if o > 0    => Some((o.min(tc), tc, o < tc))
-      case (Some(o), None)             => Some((-o.max(0), tc, -o < tc))
-      case (Some(o), Some(l)) if l > 0 => Some((o.min(tc), (o + l).min(tc), (o + l) < tc))
-      case (Some(o), Some(l))          => Some(((tc + o + l).max(0), (tc + o).max(0), (tc + o + l).max(0) > 0))
-    }
-  }
-
 }

@@ -160,7 +160,7 @@ object ExprOne_Double_ extends DatomicTestSuite {
         _ <- Ns.i.a1.double_?.not(Some(Seq(double2, double3))).query.get.map(_ ==> List(a))
         // Empty Seq of negation args matches all asserted values (non-null)
         _ <- Ns.i.a1.double_?.not(Some(Seq.empty[Double])).query.get.map(_ ==> List(a, b, c))
-        // None matches all asserted values (non-null)
+        // Negating None matches all asserted values (non-null)
         _ <- Ns.i.a1.double_?.not(Option.empty[Double]).query.get.map(_ ==> List(a, b, c))
         _ <- Ns.i.a1.double_?.not(Option.empty[Seq[Double]]).query.get.map(_ ==> List(a, b, c))
 
@@ -174,6 +174,13 @@ object ExprOne_Double_ extends DatomicTestSuite {
         _ <- Ns.i.a1.double_?.<=(None).query.get.map(_ ==> List())
         _ <- Ns.i.a1.double_?.>(None).query.get.map(_ ==> List())
         _ <- Ns.i.a1.double_?.>=(None).query.get.map(_ ==> List())
+
+        // Distinct result even with redundant None's (two i = 4 with no double value)
+        _ <- Ns.i.insert(4).transact
+        _ <- Ns.i.>=(3).a1.double_?.query.get.map(_ ==> List(
+          (3, Some(double3)),
+          (4, None),
+        ))
       } yield ()
     }
   }
