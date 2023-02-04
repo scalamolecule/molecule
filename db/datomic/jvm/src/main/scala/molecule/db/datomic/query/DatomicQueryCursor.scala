@@ -55,6 +55,7 @@ case class DatomicQueryCursor[Tpl](
             strategy match {
               case "1" => PrimaryUnique(elements, limit, cursor).getPage(tokens, l)
               case "2" => SubUnique(elements, limit, cursor).getPage(tokens, l)
+              case "3" => NoUnique(elements, limit, cursor).getPage(tokens, l)
             }
           }
         case None         => Future.failed(MoleculeError("Unexpected undefined cursor."))
@@ -102,10 +103,11 @@ case class DatomicQueryCursor[Tpl](
     if (totalCount == 0) {
       (Nil, "", false)
     } else {
-      val hasMore = limitAbs < totalCount
-      val tuples  = ListBuffer.empty[Tpl]
-      val row2tpl = castRow2Tpl(aritiess.head, castss.head, 0, None)
-      sortedRows.subList(0, limitAbs).forEach(row => tuples += row2tpl(row).asInstanceOf[Tpl])
+      val hasMore      = limitAbs < totalCount
+      val tuples       = ListBuffer.empty[Tpl]
+      val row2tpl      = castRow2Tpl(aritiess.head, castss.head, 0, None)
+      val selectedRows = sortedRows.subList(0, limitAbs)
+      selectedRows.forEach(row => tuples += row2tpl(row).asInstanceOf[Tpl])
       val tpls   = if (forward) tuples.result() else tuples.result().reverse
       val cursor = initialCursor(conn, tpls)
       println("INITIAL RESULT: " + tpls)
@@ -123,76 +125,90 @@ case class DatomicQueryCursor[Tpl](
       elements: List[Element],
       strategy: Int,
       tokens: List[String],
-      uniqueIndex: Int
+      i: Int,
+      rowHashes: List[String],
     ): List[String] = {
       elements match {
         case element :: tail =>
           element match {
-            case a: AttrOne if a.isInstanceOf[Tacit] => checkSort(tail, strategy, tokens, uniqueIndex)
+            case a: AttrOne if a.isInstanceOf[Tacit] => checkSort(tail, strategy, tokens, i, rowHashes)
             case a: AttrOne                          =>
               if (a.sort.isDefined) {
-                val sort         = a.sort.get
-                val (dir, pos)   = (sort.head.toString, sort.last.toString)
-                val isNearUnique = {
+                val sort                = a.sort.get
+                val (dir, pos)          = (sort.head.toString, sort.last.toString)
+                val (isNearUnique, opt) = {
                   a match {
-                    case _: AttrOneManDate => true
-                    case _: AttrOneOptDate => true
-                    case _                 => false
+                    case _: AttrOneManDate              => (true, false)
+                    case _: AttrOneOptDate              => (false, true)
+                    case _ if a.isInstanceOf[Mandatory] => (false, false)
+                    case _                              => (false, true)
                   }
                 }
-                if (isNearUnique || unique.contains(a.name)) {
+                if (opt) {
+                  // We use row hashes only when there's no unique sort attributes
+                  val init          = setStrategy(3, tokens)
+                  val (tpe, encode) = tpeEncode(a)
+                  val attrTokens    = List("OPTIONAL", dir, pos, tpe, a.ns, a.attr, i.toString)
+                  val uniqueValues  = getUniqueValues(tpls, i, encode)
+                  val rowHashes1    = if (rowHashes.nonEmpty) rowHashes else getRowHashes(tpls)
+                  checkSort(tail, 3, init ++ attrTokens ++ uniqueValues, i + 1, rowHashes1)
+
+                } else if (isNearUnique || unique.contains(a.name)) {
                   if (pos == "1") {
                     // 1. Unique primary sort attribute
                     val (tpe, encode) = tpeEncode(a)
-                    val attrTokens    = List("1", getHash, tpe, a.ns, a.attr, uniqueIndex.toString)
-                    //                    val uniqueValues  = getUniqueValues(tpls, uniqueIndex, encode)
-                    val uniqueValues  = getUniquePair(tpls, uniqueIndex, encode)
+                    val initTokens    = List("1", getHash, tpe, a.ns, a.attr, i.toString)
+                    val uniqueValues  = getUniquePair(tpls, i, encode)
                     // We can use this exclusively. So we don't need more meta data
-                    checkSort(Nil, 1, attrTokens ++ uniqueValues, -1)
+                    checkSort(Nil, 1, initTokens ++ uniqueValues, -1, Nil)
 
                   } else {
                     // 2. Unique sub-sort attribute
                     val strategy1     = 2.min(strategy)
                     val init          = setStrategy(strategy1, tokens)
                     val (tpe, encode) = tpeEncode(a)
-                    val attrTokens    = List("unique", dir, pos, tpe, a.ns, a.attr, uniqueIndex.toString)
-                    val uniqueValues  = getUniqueValues(tpls, uniqueIndex, encode)
+                    val attrTokens    = List("UNIQUE", dir, pos, tpe, a.ns, a.attr, i.toString)
+                    val uniqueValues  = getUniqueValues(tpls, i, encode)
                     // We might have a primary non-unique sort attribute after. So we continue
-                    checkSort(tail, strategy1, init ++ attrTokens ++ uniqueValues, uniqueIndex + 1)
+                    checkSort(tail, strategy1, init ++ attrTokens ++ uniqueValues, i + 1, Nil)
                   }
 
                 } else {
-                  // 3. Non-unique sort attribute
+                  // 3. Non-unique sort attribute (strategy 1 or 2 still possible..)
                   val strategy1     = 3.min(strategy)
                   val init          = setStrategy(strategy1, tokens)
                   val (tpe, encode) = tpeEncode(a)
-                  val attrTokens    = List("standard", dir, pos, tpe, a.ns, a.attr, uniqueIndex.toString)
-                  val uniqueValues  = getUniqueValues(tpls, uniqueIndex, encode)
-                  checkSort(tail, strategy1, init ++ attrTokens ++ uniqueValues, uniqueIndex + 1)
+                  val attrTokens    = List("MANDATORY", dir, pos, tpe, a.ns, a.attr, i.toString)
+                  val uniqueValues  = getUniqueValues(tpls, i, encode)
+                  val rowHashes1    = if (rowHashes.nonEmpty) rowHashes else getRowHashes(tpls)
+                  checkSort(tail, strategy1, init ++ attrTokens ++ uniqueValues, i + 1, rowHashes1)
                 }
 
               } else {
                 // Non-sorted attribute
-                checkSort(tail, strategy, tokens, uniqueIndex)
+                checkSort(tail, strategy, tokens, i, rowHashes)
               }
 
-            case Composite(elements) => checkSort(elements ++ tail, strategy, tokens, uniqueIndex)
+            case Composite(elements) => checkSort(elements ++ tail, strategy, tokens, i, rowHashes)
 
             // Only top level sorting - ignore nested and tx meta data
-            case _ => checkSort(tail, strategy, tokens, uniqueIndex)
+            case _ => checkSort(tail, strategy, tokens, i, rowHashes)
           }
-        case Nil             => tokens
+
+        case Nil if strategy == 3 => tokens ++ rowHashes
+        case Nil                  => tokens
       }
     }
-    val tokens = checkSort(elements, 10, Nil, 0)
+
+    val tokens = checkSort(elements, 10, Nil, 0, Nil)
     Base64.getEncoder.encodeToString(tokens.mkString("\n").getBytes)
   }
 
-  private def setStrategy(strategy1: Int, tokens: List[String]): List[String] = {
+  private def setStrategy(strategy: Int, tokens: List[String]): List[String] = {
     if (tokens.isEmpty)
-      List(strategy1.toString, getHash)
+      List(strategy.toString, getHash)
     else
-      List(strategy1.toString, tokens(1)) ++ tokens.drop(2)
+      List(strategy.toString, tokens(1)) ++ tokens.drop(2)
   }
 
   private def getHash: String = (elements.hashCode() & 0xFFFFF).toString

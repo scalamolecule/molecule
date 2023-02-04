@@ -8,7 +8,7 @@ import utest._
 import scala.annotation.nowarn
 import scala.util.Random
 
-object ResolveStandardUnique extends DatomicTestSuite {
+object DirectionsStandardUnique extends DatomicTestSuite {
 
   @nowarn lazy val tests = Tests {
 

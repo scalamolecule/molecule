@@ -27,7 +27,8 @@ object Unique extends DataModel(3) {
     // Cardinality many (Set)
     val ints = setInt.unique
 
-    val ref = one[Ref]
+    val ref  = one[Ref]
+    val refs = many[Ref]
   }
 
   trait Ref {

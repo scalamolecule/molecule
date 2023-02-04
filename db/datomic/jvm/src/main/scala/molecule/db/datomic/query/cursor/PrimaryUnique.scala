@@ -34,7 +34,7 @@ case class PrimaryUnique[Tpl](
   def getPage(tokens: List[String], limit: Int)
              (implicit conn: DatomicConn_JVM, ec: ExecutionContext)
   : Future[(List[Tpl], String, Boolean)] = future {
-    val List(tpe, ns, attr, _, a, z) = tokens.drop(2)
+    val List(_, _, tpe, ns, attr, _, a, z) = tokens
 
     val forward     = limit > 0
     val (fn, v)     = if (forward) (Gt, z) else (Lt, a)
@@ -61,8 +61,10 @@ case class PrimaryUnique[Tpl](
 
 
   private def nextCursorUnique(tpls: List[Tpl], tokens: List[String]): String = {
-    val uniqueIndex = tokens(5).toInt
-    val encode      = encoder(tokens(2))
+    val List(_, _, tpe, _, _, i, _, _) = tokens
+
+    val uniqueIndex = i.toInt
+    val encode      = encoder(tpe)
     val tokens1     = tokens.dropRight(2) ++ getUniquePair(tpls, uniqueIndex, encode)
     Base64.getEncoder.encodeToString(tokens1.mkString("\n").getBytes)
   }

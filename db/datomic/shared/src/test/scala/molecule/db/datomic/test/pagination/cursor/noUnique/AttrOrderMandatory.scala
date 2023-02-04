@@ -1,31 +1,40 @@
-package molecule.db.datomic.test.pagination.cursor.subUnique
+package molecule.db.datomic.test.pagination.cursor.noUnique
 
 import molecule.core.util.Executor._
-import molecule.coreTests.dataModels.core.dsl.Unique._
+import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.db.datomic._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
-import scala.annotation.nowarn
+import scala.annotation.{nowarn, tailrec}
 import scala.util.Random
 
-object ResolveMultipleStandard extends DatomicTestSuite {
+object AttrOrderMandatory extends DatomicTestSuite {
 
-  def getTriples: List[(String, Int, Int)] = (1 to 5).toList.map { int =>
-    val s = ('a' + scala.util.Random.between(0, 2)).toChar.toString // "a" or "b"
-    val i = scala.util.Random.between(1, 3) // 1 or 2
-    (s, i, int)
+  @tailrec
+  def getTriples(acc: List[(String, Int, Int)]): List[(String, Int, Int)] = {
+    if (acc.length != 5) {
+      val pair = (
+        ('a' + scala.util.Random.between(0, 2)).toChar.toString, // "a" or "b"
+        Random.between(1, 3), // 1 or 2
+        Random.between(1, 6) // 1-5
+      )
+      // No duplicate rows
+      if (!acc.contains(pair)) getTriples(acc :+ pair) else getTriples(acc)
+    } else {
+      acc
+    }
   }
 
   @nowarn lazy val tests = Tests {
 
     "Unique first" - {
 
-      "u3-1-2" - unique { implicit conn =>
-        val triples             = getTriples.map(t => (t._3, t._1, t._2))
+      "u3-1-2" - types { implicit conn =>
+        val triples             = getTriples(Nil).map(t => (t._3, t._1, t._2))
         val List(a, b, c, d, e) = triples.sortBy(p => (p._2, p._3, p._1))
-        val query               = (c: String, l: Int) => Unique.int.a3.s.a1.i.a2.query.from(c).limit(l)
+        val query               = (c: String, l: Int) => Ns.int.a3.s.a1.i.a2.query.from(c).limit(l)
         for {
-          _ <- Unique.int.s.i.insert(triples).transact
+          _ <- Ns.int.s.i.insert(triples).transact
           c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
           c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
           c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
@@ -34,12 +43,12 @@ object ResolveMultipleStandard extends DatomicTestSuite {
         } yield ()
       }
 
-      "u3-2-1" - unique { implicit conn =>
-        val triples             = getTriples.map(t => (t._3, t._1, t._2))
+      "u3-2-1" - types { implicit conn =>
+        val triples             = getTriples(Nil).map(t => (t._3, t._1, t._2))
         val List(a, b, c, d, e) = triples.sortBy(p => (p._3, p._2, p._1))
-        val query               = (c: String, l: Int) => Unique.int.a3.s.a2.i.a1.query.from(c).limit(l)
+        val query               = (c: String, l: Int) => Ns.int.a3.s.a2.i.a1.query.from(c).limit(l)
         for {
-          _ <- Unique.int.s.i.insert(triples).transact
+          _ <- Ns.int.s.i.insert(triples).transact
           c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
           c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
           c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
@@ -48,12 +57,12 @@ object ResolveMultipleStandard extends DatomicTestSuite {
         } yield ()
       }
 
-      "u2-1-3" - unique { implicit conn =>
-        val triples             = getTriples.map(t => (t._3, t._1, t._2))
+      "u2-1-3" - types { implicit conn =>
+        val triples             = getTriples(Nil).map(t => (t._3, t._1, t._2))
         val List(a, b, c, d, e) = triples.sortBy(p => (p._2, p._1, p._3))
-        val query               = (c: String, l: Int) => Unique.int.a2.s.a1.i.a3.query.from(c).limit(l)
+        val query               = (c: String, l: Int) => Ns.int.a2.s.a1.i.a3.query.from(c).limit(l)
         for {
-          _ <- Unique.int.s.i.insert(triples).transact
+          _ <- Ns.int.s.i.insert(triples).transact
           c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
           c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
           c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
@@ -62,12 +71,12 @@ object ResolveMultipleStandard extends DatomicTestSuite {
         } yield ()
       }
 
-      "u2-3-1" - unique { implicit conn =>
-        val triples             = getTriples.map(t => (t._3, t._1, t._2))
+      "u2-3-1" - types { implicit conn =>
+        val triples             = getTriples(Nil).map(t => (t._3, t._1, t._2))
         val List(a, b, c, d, e) = triples.sortBy(p => (p._3, p._1, p._2))
-        val query               = (c: String, l: Int) => Unique.int.a2.s.a3.i.a1.query.from(c).limit(l)
+        val query               = (c: String, l: Int) => Ns.int.a2.s.a3.i.a1.query.from(c).limit(l)
         for {
-          _ <- Unique.int.s.i.insert(triples).transact
+          _ <- Ns.int.s.i.insert(triples).transact
           c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
           c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
           c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
@@ -80,12 +89,12 @@ object ResolveMultipleStandard extends DatomicTestSuite {
 
     "Unique middle" - {
 
-      "1-u3-2" - unique { implicit conn =>
-        val triples             = getTriples.map(t => (t._1, t._3, t._2))
+      "1-u3-2" - types { implicit conn =>
+        val triples             = getTriples(Nil).map(t => (t._1, t._3, t._2))
         val List(a, b, c, d, e) = triples.sortBy(p => (p._1, p._3, p._2))
-        val query               = (c: String, l: Int) => Unique.s.a1.int.a3.i.a2.query.from(c).limit(l)
+        val query               = (c: String, l: Int) => Ns.s.a1.int.a3.i.a2.query.from(c).limit(l)
         for {
-          _ <- Unique.s.int.i.insert(triples).transact
+          _ <- Ns.s.int.i.insert(triples).transact
           c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
           c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
           c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
@@ -94,12 +103,12 @@ object ResolveMultipleStandard extends DatomicTestSuite {
         } yield ()
       }
 
-      "2-u3-1" - unique { implicit conn =>
-        val triples             = getTriples.map(t => (t._1, t._3, t._2))
-        val List(a, b, c, d, e) = triples.sortBy(p => (p._3, p._1, p._3))
-        val query               = (c: String, l: Int) => Unique.s.a2.int.a3.i.a1.query.from(c).limit(l)
+      "2-u3-1" - types { implicit conn =>
+        val triples = getTriples(Nil).map(t => (t._1, t._3, t._2))
+        val List(a, b, c, d, e) = triples.sortBy(p => (p._3, p._1, p._2))
+        val query = (c: String, l: Int) => Ns.s.a2.int.a3.i.a1.query.from(c).limit(l)
         for {
-          _ <- Unique.s.int.i.insert(triples).transact
+          _ <- Ns.s.int.i.insert(triples).transact
           c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
           c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
           c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
@@ -108,12 +117,12 @@ object ResolveMultipleStandard extends DatomicTestSuite {
         } yield ()
       }
 
-      "1-u2-3" - unique { implicit conn =>
-        val triples             = getTriples.map(t => (t._1, t._3, t._2))
+      "1-u2-3" - types { implicit conn =>
+        val triples             = getTriples(Nil).map(t => (t._1, t._3, t._2))
         val List(a, b, c, d, e) = triples.sortBy(p => (p._1, p._2, p._3))
-        val query               = (c: String, l: Int) => Unique.s.a1.int.a2.i.a3.query.from(c).limit(l)
+        val query               = (c: String, l: Int) => Ns.s.a1.int.a2.i.a3.query.from(c).limit(l)
         for {
-          _ <- Unique.s.int.i.insert(triples).transact
+          _ <- Ns.s.int.i.insert(triples).transact
           c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
           c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
           c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
@@ -122,12 +131,12 @@ object ResolveMultipleStandard extends DatomicTestSuite {
         } yield ()
       }
 
-      "3-u2-1" - unique { implicit conn =>
-        val triples             = getTriples.map(t => (t._1, t._3, t._2))
+      "3-u2-1" - types { implicit conn =>
+        val triples             = getTriples(Nil).map(t => (t._1, t._3, t._2))
         val List(a, b, c, d, e) = triples.sortBy(p => (p._3, p._2, p._1))
-        val query               = (c: String, l: Int) => Unique.s.a3.int.a2.i.a1.query.from(c).limit(l)
+        val query               = (c: String, l: Int) => Ns.s.a3.int.a2.i.a1.query.from(c).limit(l)
         for {
-          _ <- Unique.s.int.i.insert(triples).transact
+          _ <- Ns.s.int.i.insert(triples).transact
           c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
           c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
           c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
@@ -140,12 +149,12 @@ object ResolveMultipleStandard extends DatomicTestSuite {
 
     "Unique last" - {
 
-      "1-2-u3" - unique { implicit conn =>
-        val triples             = getTriples
+      "1-2-u3" - types { implicit conn =>
+        val triples             = getTriples(Nil)
         val List(a, b, c, d, e) = triples.sortBy(p => (p._1, p._2, p._3))
-        val query               = (c: String, l: Int) => Unique.s.a1.i.a2.int.a3.query.from(c).limit(l)
+        val query               = (c: String, l: Int) => Ns.s.a1.i.a2.int.a3.query.from(c).limit(l)
         for {
-          _ <- Unique.s.i.int.insert(triples).transact
+          _ <- Ns.s.i.int.insert(triples).transact
           c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
           c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
           c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
@@ -154,12 +163,12 @@ object ResolveMultipleStandard extends DatomicTestSuite {
         } yield ()
       }
 
-      "2-1-u3" - unique { implicit conn =>
-        val triples             = getTriples
+      "2-1-u3" - types { implicit conn =>
+        val triples             = getTriples(Nil)
         val List(a, b, c, d, e) = triples.sortBy(p => (p._2, p._1, p._3))
-        val query               = (c: String, l: Int) => Unique.s.a2.i.a1.int.a3.query.from(c).limit(l)
+        val query               = (c: String, l: Int) => Ns.s.a2.i.a1.int.a3.query.from(c).limit(l)
         for {
-          _ <- Unique.s.i.int.insert(triples).transact
+          _ <- Ns.s.i.int.insert(triples).transact
           c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
           c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
           c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
@@ -168,12 +177,12 @@ object ResolveMultipleStandard extends DatomicTestSuite {
         } yield ()
       }
 
-      "1-3-u2" - unique { implicit conn =>
-        val triples             = getTriples
+      "1-3-u2" - types { implicit conn =>
+        val triples             = getTriples(Nil)
         val List(a, b, c, d, e) = triples.sortBy(p => (p._1, p._3, p._2))
-        val query               = (c: String, l: Int) => Unique.s.a1.i.a3.int.a2.query.from(c).limit(l)
+        val query               = (c: String, l: Int) => Ns.s.a1.i.a3.int.a2.query.from(c).limit(l)
         for {
-          _ <- Unique.s.i.int.insert(triples).transact
+          _ <- Ns.s.i.int.insert(triples).transact
           c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
           c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
           c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
@@ -182,12 +191,12 @@ object ResolveMultipleStandard extends DatomicTestSuite {
         } yield ()
       }
 
-      "3-1-u2" - unique { implicit conn =>
-        val triples             = getTriples
+      "3-1-u2" - types { implicit conn =>
+        val triples             = getTriples(Nil)
         val List(a, b, c, d, e) = triples.sortBy(p => (p._2, p._3, p._1))
-        val query               = (c: String, l: Int) => Unique.s.a3.i.a1.int.a2.query.from(c).limit(l)
+        val query               = (c: String, l: Int) => Ns.s.a3.i.a1.int.a2.query.from(c).limit(l)
         for {
-          _ <- Unique.s.i.int.insert(triples).transact
+          _ <- Ns.s.i.int.insert(triples).transact
           c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
           c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
           c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }

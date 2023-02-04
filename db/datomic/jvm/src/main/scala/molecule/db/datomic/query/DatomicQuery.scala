@@ -53,6 +53,12 @@ abstract class DatomicQuery[Tpl](
     first3 ++ last3
   }
 
+  protected def getRowHashes(tpls: List[Tpl]): List[String] = {
+    val first3 = tpls.take(3).map(row => row.hashCode().toString).padTo(3, "")
+    val last3  = tpls.takeRight(3).map(row => row.hashCode().toString).reverse.padTo(3, "").reverse
+    first3 ++ last3
+  }
+
   protected def getUniquePair(tpls: List[Tpl], uniqueIndex: Int, encode: Any => String): List[String] = {
     tpls.head match {
       case tpl: Product => List(

@@ -7,7 +7,7 @@ import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
 import scala.annotation.nowarn
 
-object CursorPrimaryUnique extends DatomicTestSuite {
+object Directions extends DatomicTestSuite {
   val x = ""
 
   // (Allow pattern matching the result without warnings)

@@ -7,7 +7,7 @@ import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
 import scala.annotation.nowarn
 
-object ResilienceDelete extends DatomicTestSuite {
+object MutationDelete extends DatomicTestSuite {
   val x     = ""
   val query = Unique.int.a1.query
 
