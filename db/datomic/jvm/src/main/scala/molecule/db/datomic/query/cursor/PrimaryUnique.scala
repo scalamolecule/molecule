@@ -42,15 +42,18 @@ case class PrimaryUnique[Tpl](
     logger.debug(sortedRows.toArray().mkString("\n"))
 
     if (isNested) {
-      val nestedRows    = rows2nested(sortedRows)
-      val toplevelCount = nestedRows.length
-      val limitAbs      = limit.abs.min(toplevelCount)
-      val hasMore       = limitAbs < toplevelCount
-      val selectedRows  = nestedRows.take(limitAbs)
-      val tpls          = if (forward) selectedRows else selectedRows.reverse
-      val cursor        = nextCursorUnique(tpls, tokens)
-      //      println("PRIMARY UNIQUE Nested tpls: " + tpls)
-      (tpls, cursor, hasMore)
+      if (sortedRows.size() == 0) {
+        (Nil, "", false)
+      } else {
+        val nestedRows    = rows2nested(sortedRows)
+        val toplevelCount = nestedRows.length
+        val limitAbs      = limit.abs.min(toplevelCount)
+        val hasMore       = limitAbs < toplevelCount
+        val selectedRows  = nestedRows.take(limitAbs)
+        val tpls          = if (forward) selectedRows else selectedRows.reverse
+        val cursor        = nextCursorUnique(tpls, tokens)
+        (tpls, cursor, hasMore)
+      }
 
     } else {
       val totalCount = rows.size
@@ -69,7 +72,6 @@ case class PrimaryUnique[Tpl](
           sortedRows.subList(0, limitAbs).forEach(row => tuples += pullRow2tpl(row))
           val tpls   = if (forward) tuples.result() else tuples.result().reverse
           val cursor = nextCursorUnique(tpls, tokens)
-          //          println("PRIMARY UNIQUE NestedOpt tpls: " + tpls)
           (tpls, cursor, hasMore)
         }
 
@@ -78,11 +80,10 @@ case class PrimaryUnique[Tpl](
         if (totalCount == 0) {
           (Nil, "", false)
         } else {
-          val row2tpl = castRow2Tpl(aritiess.head, castss.head, 0, None)
+          val row2tpl = castRow2AnyTpl(aritiess.head, castss.head, 0, None)
           sortedRows.subList(0, limitAbs).forEach(row => tuples += row2tpl(row).asInstanceOf[Tpl])
           val tpls   = if (forward) tuples.result() else tuples.result().reverse
           val cursor = nextCursorUnique(tpls, tokens)
-          //          println("PRIMARY UNIQUE Flat tpls: " + tpls)
           (tpls, cursor, hasMore)
         }
       }
@@ -92,10 +93,7 @@ case class PrimaryUnique[Tpl](
 
   private def nextCursorUnique(tpls: List[Tpl], tokens: List[String]): String = {
     val List(_, _, tpe, _, _, i, _, _) = tokens
-
-    val uniqueIndex = i.toInt
-    val encode      = encoder(tpe, "")
-    val tokens1     = tokens.dropRight(2) ++ getUniquePair(tpls, uniqueIndex, encode)
+    val tokens1                        = tokens.dropRight(2) ++ getUniquePair(tpls, i.toInt, encoder(tpe, ""))
     Base64.getEncoder.encodeToString(tokens1.mkString("\n").getBytes)
   }
 }

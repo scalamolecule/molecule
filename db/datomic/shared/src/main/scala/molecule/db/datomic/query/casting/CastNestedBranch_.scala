@@ -32,7 +32,7 @@ trait CastNestedBranch_[Tpl]
         val n                     = ii.length - 1
         val (tplCasts, moreCasts) = casts.splitAt(n)
         val cast                  = (row: Row, nested: List[Any]) =>
-          castRow2Tpl(ii.map(List(_)), tplCasts, rowIndex, Some(nested))(row)
+          castRow2AnyTpl(ii.map(List(_)), tplCasts, rowIndex, Some(nested))(row)
         resolveArities(as, moreCasts, rowIndexTx, rowIndexTx, acc :+ cast)
 
       // Composite
@@ -40,7 +40,7 @@ trait CastNestedBranch_[Tpl]
         val n                     = ii.length
         val (tplCasts, moreCasts) = casts.splitAt(n)
         val cast                  = (row: Row, _: List[Any]) =>
-          castRow2Tpl(ii.map(List(_)), tplCasts, rowIndex, None)(row)
+          castRow2AnyTpl(ii.map(List(_)), tplCasts, rowIndex, None)(row)
         resolveArities(as, moreCasts, rowIndex + n, rowIndexTx, acc :+ cast)
 
       case Nil => acc

@@ -108,7 +108,7 @@ trait NestOpt_[Tpl]
         // Explicitly pull branch in composite tuple
         val nested = (row: Row) => pullBranch1(row.get(rowIndex + n).asInstanceOf[jMap[_, _]].values.iterator)
         val cast   = (row: Row) =>
-          castRow2Tpl(ii.map(List(_)), tplCasts, rowIndex, Some(nested(row)))(row).asInstanceOf[AnyRef]
+          castRow2AnyTpl(ii.map(List(_)), tplCasts, rowIndex, Some(nested(row)))(row).asInstanceOf[AnyRef]
 
         // From here on it is tx meta data
         val moreCasts = moreCasts0.tail // ignore
@@ -118,7 +118,7 @@ trait NestOpt_[Tpl]
       case ii :: as =>
         val n                     = ii.length
         val (tplCasts, moreCasts) = casts.splitAt(n)
-        val tplCaster             = castRow2Tpl(ii.map(List(_)), tplCasts, rowIndex, None)
+        val tplCaster             = castRow2AnyTpl(ii.map(List(_)), tplCasts, rowIndex, None)
         val cast                  = (row: Row) => tplCaster(row).asInstanceOf[AnyRef]
         resolveArities(as, moreCasts, rowIndex + n, rowIndexTx, acc :+ cast)
 

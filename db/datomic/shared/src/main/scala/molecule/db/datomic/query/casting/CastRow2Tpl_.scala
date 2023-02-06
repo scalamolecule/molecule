@@ -30,14 +30,14 @@ trait CastRow2Tpl_[Tpl] { self: Model2Query[Tpl] with Base[Tpl] =>
       case ii :: as =>
         val n                     = ii.length
         val (tplCasts, moreCasts) = casts.splitAt(n)
-        val cast                  = castRow2Tpl(ii.map(List(_)), tplCasts, rowIndex, nested)
+        val cast                  = castRow2AnyTpl(ii.map(List(_)), tplCasts, rowIndex, nested)
         resolveArities(as, moreCasts, rowIndex + n, acc :+ cast, nested)
 
       case Nil => acc
     }
   }
 
-  final protected def castRow2Tpl(
+  final protected def castRow2AnyTpl(
     arities: List[List[Int]],
     casts: List[AnyRef => AnyRef],
     rowIndex: Int,

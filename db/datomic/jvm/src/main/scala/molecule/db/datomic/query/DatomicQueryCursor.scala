@@ -78,9 +78,6 @@ case class DatomicQueryCursor[Tpl](
       val selectedRows  = nestedRows.take(limitAbs)
       val tpls          = if (forward) selectedRows else selectedRows.reverse
       val cursor        = initialCursor(conn, tpls)
-      //      println("INITIAL NESTED: " + tpls)
-      //      println("INITIAL NESTED: " + cursor)
-      //      println("INITIAL NESTED: " + hasMore)
       (tpls, cursor, hasMore)
 
     } else {
@@ -98,9 +95,6 @@ case class DatomicQueryCursor[Tpl](
           selectedRows.forEach(row => tuples += pullRow2tpl(row))
           val tpls   = if (forward) tuples.result() else tuples.result().reverse
           val cursor = initialCursor(conn, tpls)
-          //          println("INITIAL NESTED OPT: " + tpls)
-          //          println("INITIAL NESTED OPT: " + cursor)
-          //          println("INITIAL NESTED OPT: " + hasMore)
           (tpls, cursor, hasMore)
         }
 
@@ -109,14 +103,11 @@ case class DatomicQueryCursor[Tpl](
         if (totalCount == 0) {
           (Nil, "", false)
         } else {
-          val row2tpl      = castRow2Tpl(aritiess.head, castss.head, 0, None)
+          val row2tpl      = castRow2AnyTpl(aritiess.head, castss.head, 0, None)
           val selectedRows = sortedRows.subList(0, limitAbs)
           selectedRows.forEach(row => tuples += row2tpl(row).asInstanceOf[Tpl])
           val tpls   = if (forward) tuples.result() else tuples.result().reverse
           val cursor = initialCursor(conn, tpls)
-          //          println("INITIAL FLAT: " + tpls)
-          //          println("INITIAL FLAT: " + cursor)
-          //          println("INITIAL FLAT: " + hasMore)
           (tpls, cursor, hasMore)
         }
       }
@@ -151,7 +142,7 @@ case class DatomicQueryCursor[Tpl](
                   }
                 }
                 if (opt) {
-                  if(pos == "1")
+                  if (pos == "1")
                     throw MoleculeError(
                       s"Can't use optional attribute (`${a.name}`) as primary sort attribute with cursor pagination."
                     )

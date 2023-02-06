@@ -6,7 +6,10 @@ import datomic.Peer
 import molecule.base.util.exceptions.MoleculeError
 import molecule.boilerplate.ast.Model._
 import molecule.db.datomic.facade.DatomicConn_JVM
+import molecule.db.datomic.query.cursor.CursorUtils
 import molecule.db.datomic.util.DatomicApiLoader
+import scala.annotation.tailrec
+import scala.collection.mutable.ListBuffer
 
 /**
  *
@@ -23,7 +26,7 @@ abstract class DatomicQuery[Tpl](
   limit: Option[Int],
 ) extends DatomicModel2Query[Tpl](elements)
   with DatomicApiLoader // todo: necessary?
-{
+  with CursorUtils {
 
 
   lazy val limitNotZeroMsg = "Limit cannot be 0. " +
@@ -159,6 +162,150 @@ abstract class DatomicQuery[Tpl](
       case (Some(o), Some(l)) if l > 0 => Some((o.min(tc), (o + l).min(tc), (o + l) < tc))
       case (Some(o), Some(l))          => Some(((tc + o + l).max(0), (tc + o).max(0), (tc + o + l).max(0) > 0))
     }
+  }
+
+  lazy val row2AnyTpl = castRow2AnyTpl(aritiess.head, castss.head, 0, None)
+
+  def paginateFromIdentifiers(
+    conn: DatomicConn_JVM,
+    limit: Int,
+    forward: Boolean,
+    allTokens: List[String],
+    attrTokens: List[String],
+    identifiers: List[Any],
+    identifyTpl: Tpl => Any,
+    identifyRow: Boolean => Row => Any,
+    nextCursor: (List[Tpl], List[String]) => String
+  ): (List[Tpl], String, Boolean) = {
+    // Filter query by primary non-unique sort attribute
+    val filterAttr  = {
+      val List(_, dir, _, tpe, ns, attr, _, a, b, c, x, y, z) = attrTokens
+
+      // Filter by most inclusive value
+      val first   = List(c, b, a).filter(_.nonEmpty).head
+      val last    = List(x, y, z).filter(_.nonEmpty).head
+      val (fn, v) = (forward, dir) match {
+        case (true, "a") => (Ge, last)
+        case (true, _)   => (Le, first)
+        case (_, "a")    => (Le, first)
+        case (_, _)      => (Ge, last)
+      }
+      getFilterAttr(tpe, ns, attr, fn, v)
+    }
+    val altElements = filterAttr +: elements
+    val rows        = getRawData(conn, altElements)
+    val sortedRows  = sortRows(rows)
+    logger.debug(sortedRows.toArray().mkString("\n"))
+
+    if (isNested) {
+      val nestedTpls = rows2nested(sortedRows)
+      val totalCount = nestedTpls.length
+      if (totalCount == 0) {
+        (Nil, "", false)
+      } else {
+        val count          = getCount(limit, forward, totalCount)
+        val nestedTpls1    = if (forward) nestedTpls else nestedTpls.reverse
+        val (tuples, more) = paginateTpls(count, nestedTpls1, identifiers, identifyTpl)
+        val tpls           = if (forward) tuples else tuples.reverse
+        val cursor         = nextCursor(tpls, allTokens)
+        (tpls, cursor, more > 0)
+      }
+
+    } else {
+      val totalCount = rows.size
+      if (totalCount == 0) {
+        (Nil, "", false)
+      } else {
+        if (isNestedOpt) {
+          postAdjustPullCasts()
+          if (!forward) Collections.reverse(sortedRows)
+          val count          = getCount(limit, forward, totalCount)
+          val (tuples, more) = paginateRows(count, sortedRows, identifiers, identifyRow(true), pullRow2tpl)
+          val tpls           = if (forward) tuples else tuples.reverse
+          val cursor         = nextCursor(tpls, allTokens)
+          (tpls, cursor, more > 0)
+
+        } else {
+          postAdjustAritiess()
+          if (!forward) Collections.reverse(sortedRows)
+          val count          = getCount(limit, forward, totalCount)
+          val row2tpl        = (row: Row) => row2AnyTpl(row).asInstanceOf[Tpl]
+          val (tuples, more) = paginateRows(count, sortedRows, identifiers, identifyRow(false), row2tpl)
+          val tpls           = if (forward) tuples else tuples.reverse
+          val cursor         = nextCursor(tpls, allTokens)
+          (tpls, cursor, more > 0)
+        }
+      }
+    }
+  }
+
+  private def getCount(limit: Int, forward: Boolean, totalCount: Int) = {
+    if (forward)
+      limit.min(totalCount)
+    else
+      totalCount - (totalCount + limit).max(0)
+  }
+
+  def paginateTpls(
+    count: Int,
+    tpls: List[Tpl],
+    identifiers: List[Any],
+    identify: Tpl => Any
+  ): (List[Tpl], Int) = {
+    val tuples = ListBuffer.empty[Tpl]
+    var window = false
+    var i      = 0
+    var more   = 0
+    @tailrec
+    def findFrom(identifiers: List[Any]): Unit = {
+      identifiers match {
+        case identifier :: remainingIdentifiers =>
+          tpls.foreach {
+            case tpl if window && i != count        => i += 1; tuples += tpl
+            case tpl if identify(tpl) == identifier => window = true
+            case _                                  => if (window) more += 1
+          }
+          if (tuples.isEmpty) {
+            // Recursively try with next identifier
+            findFrom(remainingIdentifiers)
+          }
+        case Nil                                => throw MoleculeError(edgeValuesNotFound)
+      }
+    }
+    findFrom(identifiers)
+    (tuples.result(), more)
+  }
+
+
+  def paginateRows(
+    count: Int,
+    sortedRows: jList[jList[AnyRef]],
+    identifiers: List[Any],
+    identify: Row => Any,
+    row2tpl: Row => Tpl,
+  ): (List[Tpl], Int) = {
+    val tuples = ListBuffer.empty[Tpl]
+    var window = false
+    var i      = 0
+    var more   = 0
+    @tailrec
+    def findFrom(identifiers: List[Any]): Unit = {
+      identifiers match {
+        case identifier :: remainingidentifiers =>
+          sortedRows.forEach {
+            case row if window && i != count        => i += 1; tuples += row2tpl(row)
+            case row if identify(row) == identifier => window = true
+            case _                                  => if (window) more += 1
+          }
+          if (tuples.isEmpty) {
+            // Recursively try with next identifier
+            findFrom(remainingidentifiers)
+          }
+        case Nil                                => throw MoleculeError(edgeValuesNotFound)
+      }
+    }
+    findFrom(identifiers)
+    (tuples.result(), more)
   }
 
 

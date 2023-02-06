@@ -55,13 +55,13 @@ trait Nest[Tpl] { self: Model2Query[Tpl]
   private lazy val tplBranch5: (Row, List[Any]) => Any = castBranch[Any](aritiess(5), castss(5), i5, 0)
   private lazy val tplBranch6: (Row, List[Any]) => Any = castBranch[Any](aritiess(6), castss(6), i6, 0)
 
-  private lazy val tplLeaf1: Row => Any = castRow2Tpl(aritiess(1), castss(1), i1, None)
-  private lazy val tplLeaf2: Row => Any = castRow2Tpl(aritiess(2), castss(2), i2, None)
-  private lazy val tplLeaf3: Row => Any = castRow2Tpl(aritiess(3), castss(3), i3, None)
-  private lazy val tplLeaf4: Row => Any = castRow2Tpl(aritiess(4), castss(4), i4, None)
-  private lazy val tplLeaf5: Row => Any = castRow2Tpl(aritiess(5), castss(5), i5, None)
-  private lazy val tplLeaf6: Row => Any = castRow2Tpl(aritiess(6), castss(6), i6, None)
-  private lazy val tplLeaf7: Row => Any = castRow2Tpl(aritiess(7), castss(7), i7, None)
+  private lazy val tplLeaf1: Row => Any = castRow2AnyTpl(aritiess(1), castss(1), i1, None)
+  private lazy val tplLeaf2: Row => Any = castRow2AnyTpl(aritiess(2), castss(2), i2, None)
+  private lazy val tplLeaf3: Row => Any = castRow2AnyTpl(aritiess(3), castss(3), i3, None)
+  private lazy val tplLeaf4: Row => Any = castRow2AnyTpl(aritiess(4), castss(4), i4, None)
+  private lazy val tplLeaf5: Row => Any = castRow2AnyTpl(aritiess(5), castss(5), i5, None)
+  private lazy val tplLeaf6: Row => Any = castRow2AnyTpl(aritiess(6), castss(6), i6, None)
+  private lazy val tplLeaf7: Row => Any = castRow2AnyTpl(aritiess(7), castss(7), i7, None)
 
   private var acc0: List[Tpl] = List.empty[Tpl]
   private var acc1: List[Any] = List.empty[Any]
