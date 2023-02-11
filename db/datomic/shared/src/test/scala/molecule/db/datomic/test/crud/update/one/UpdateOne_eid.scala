@@ -3,7 +3,7 @@ package molecule.db.datomic.test.crud.update.one
 import molecule.base.util.exceptions.MoleculeError
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
-import molecule.db.datomic._
+import molecule.db.datomic.async._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
 
@@ -41,21 +41,12 @@ object UpdateOne_eid extends DatomicTestSuite {
           (c, 3),
         ))
 
-        // Explicitly add `multiple` to update multiple entities
-        _ <- Ns(List(b, c)).int(4).update.multiple.transact
+        _ <- Ns(List(b, c)).int(4).update.transact
         _ <- Ns.e.a1.int.query.get.map(_ ==> List(
           (a, 1),
           (b, 4),
           (c, 4),
         ))
-
-        // Not adding `multiple` prevents unintentional update of multiple (possible all!) entities
-
-        _ <- Ns(List(b, c)).int(5).update.transact
-          .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
-          err ==> "Please provide explicit `update.multiple` to update " +
-            "multiple entities (found 2 matching entities)."
-        }
       } yield ()
     }
 

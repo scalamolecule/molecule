@@ -4,10 +4,10 @@ import java.net.URI
 import java.util.{Date, UUID}
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
-import molecule.core.transaction.{Save, SaveOps}
+import molecule.core.transaction.{SaveExtraction, SaveOps}
 import molecule.core.validation.CheckConflictingAttrs
 
-trait Save_stmts extends DatomicTxBase_JVM with SaveOps with MoleculeLogging { self: Save =>
+trait Save_stmts extends DatomicTxBase_JVM with SaveOps with MoleculeLogging { self: SaveExtraction =>
 
   def getRawStmts(
     elements: List[Element],

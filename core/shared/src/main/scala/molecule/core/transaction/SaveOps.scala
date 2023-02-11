@@ -3,7 +3,7 @@ package molecule.core.transaction
 import java.net.URI
 import java.util.{Date, UUID}
 
-trait SaveOps extends Action2Data { self: Save =>
+trait SaveOps extends Action2Data { self: SaveExtraction =>
 
   protected def addV(ns: String, attr: String, optValue: Option[Any]): Unit
   protected def addSet[T](ns: String, attr: String, optSet: Option[Set[T]]): Unit

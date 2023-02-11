@@ -1,11 +1,9 @@
 package molecule.core.transaction
 
-import java.net.URI
-import java.util.{Date, UUID}
 import molecule.boilerplate.ast.Model._
 import scala.collection.mutable.ListBuffer
 
-trait InsertOps { self: Insert =>
+trait InsertOps { self: InsertExtraction =>
 
   protected val prevRefs: ListBuffer[AnyRef]
 

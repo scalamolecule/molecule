@@ -2,7 +2,7 @@ package molecule.db.datomic.test
 
 import boopickle.Default._
 import molecule.core.util.Executor._
-import molecule.db.datomic._
+import molecule.db.datomic.async._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
 

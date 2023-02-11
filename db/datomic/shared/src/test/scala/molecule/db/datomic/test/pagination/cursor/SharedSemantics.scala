@@ -3,7 +3,7 @@ package molecule.db.datomic.test.pagination.cursor
 import molecule.base.util.exceptions.MoleculeError
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Unique._
-import molecule.db.datomic._
+import molecule.db.datomic.async._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
 import scala.annotation.nowarn

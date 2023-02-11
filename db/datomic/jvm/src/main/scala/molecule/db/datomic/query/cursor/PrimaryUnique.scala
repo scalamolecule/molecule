@@ -1,12 +1,13 @@
 package molecule.db.datomic.query.cursor
 
 import java.util.Base64
+import molecule.base.util.exceptions.MoleculeError
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.ops.ModelTransformations
 import molecule.boilerplate.util.MoleculeLogging
-import molecule.core.api.action.ApiUtils
+import molecule.core.api.FutureUtils
 import molecule.db.datomic.facade.DatomicConn_JVM
-import molecule.db.datomic.query.DatomicQuery
+import molecule.db.datomic.query.DatomicQueryResolve
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -25,12 +26,11 @@ case class PrimaryUnique[Tpl](
   elements: List[Element],
   limit: Option[Int],
   cursor: String
-) extends DatomicQuery[Tpl](elements, limit)
-  with ApiUtils with CursorUtils with ModelTransformations with MoleculeLogging {
+) extends DatomicQueryResolve[Tpl](elements, limit)
+  with FutureUtils with CursorUtils with ModelTransformations with MoleculeLogging {
 
   def getPage(tokens: List[String], limit: Int)
-             (implicit conn: DatomicConn_JVM, ec: ExecutionContext)
-  : Future[(List[Tpl], String, Boolean)] = future {
+             (implicit conn: DatomicConn_JVM): (List[Tpl], String, Boolean) = try {
     val List(_, _, tpe, ns, attr, _, a, z) = tokens
 
     val forward     = limit > 0
@@ -41,10 +41,10 @@ case class PrimaryUnique[Tpl](
     val sortedRows  = sortRows(rows)
     logger.debug(sortedRows.toArray().mkString("\n"))
 
-    if (isNested) {
-      if (sortedRows.size() == 0) {
-        (Nil, "", false)
-      } else {
+    if (sortedRows.size() == 0) {
+      (Nil, "", false)
+    } else {
+      if (isNested) {
         val nestedRows    = rows2nested(sortedRows)
         val toplevelCount = nestedRows.length
         val limitAbs      = limit.abs.min(toplevelCount)
@@ -53,33 +53,22 @@ case class PrimaryUnique[Tpl](
         val tpls          = if (forward) selectedRows else selectedRows.reverse
         val cursor        = nextCursorUnique(tpls, tokens)
         (tpls, cursor, hasMore)
-      }
 
-    } else {
-      val totalCount = rows.size
+      } else {
+        val totalCount = rows.size
+        val limitAbs   = limit.abs.min(totalCount)
+        val hasMore    = limitAbs < totalCount
+        val tuples     = ListBuffer.empty[Tpl]
 
-
-      val limitAbs = limit.abs.min(totalCount)
-      val hasMore  = limitAbs < totalCount
-
-      val tuples = ListBuffer.empty[Tpl]
-
-      if (isNestedOpt) {
-        postAdjustPullCasts()
-        if (totalCount == 0) {
-          (Nil, "", false)
-        } else {
+        if (isNestedOpt) {
+          postAdjustPullCasts()
           sortedRows.subList(0, limitAbs).forEach(row => tuples += pullRow2tpl(row))
           val tpls   = if (forward) tuples.result() else tuples.result().reverse
           val cursor = nextCursorUnique(tpls, tokens)
           (tpls, cursor, hasMore)
-        }
 
-      } else {
-        postAdjustAritiess()
-        if (totalCount == 0) {
-          (Nil, "", false)
         } else {
+          postAdjustAritiess()
           val row2tpl = castRow2AnyTpl(aritiess.head, castss.head, 0, None)
           sortedRows.subList(0, limitAbs).forEach(row => tuples += row2tpl(row).asInstanceOf[Tpl])
           val tpls   = if (forward) tuples.result() else tuples.result().reverse
@@ -88,6 +77,8 @@ case class PrimaryUnique[Tpl](
         }
       }
     }
+  } catch {
+    case t: Throwable => throw MoleculeError(t.toString)
   }
 
 

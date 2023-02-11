@@ -27,14 +27,12 @@ trait MoleculeRpc {
   def update(
     proxy: ConnProxy,
     elements: List[Element],
-    isUpsert: Boolean = false,
-    isMultiple: Boolean = false,
+    isUpsert: Boolean = false
   ): Future[Either[MoleculeError, TxReport]]
 
   def delete(
     proxy: ConnProxy,
-    elements: List[Element],
-    isMultiple: Boolean = false
+    elements: List[Element]
   ): Future[Either[MoleculeError, TxReport]]
 
 //  // Connection pool ...............................

@@ -2,7 +2,7 @@ package molecule.db.datomic.test.relation.flat
 
 import molecule.base.util.exceptions.MoleculeError
 import molecule.coreTests.dataModels.core.dsl.Refs._
-import molecule.db.datomic._
+import molecule.db.datomic.async._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
 import molecule.core.util.Executor._

@@ -3,7 +3,7 @@ package molecule.db.datomic.test.crud.update.one
 import molecule.base.util.exceptions.MoleculeError
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Unique._
-import molecule.db.datomic._
+import molecule.db.datomic.async._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
 
@@ -91,8 +91,7 @@ object UpdateOne_uniqueAttr extends DatomicTestSuite {
           (c, 3, int3),
         ))
 
-        // Explicitly add `multiple` to update multiple entities
-        _ <- Unique.i(4).int_(int2, int3).update.multiple.transact
+        _ <- Unique.i(4).int_(int2, int3).update.transact
         _ <- Unique.e.a1.i.query.get.map(_ ==> List(
           (a, 1),
           (b, 4),
@@ -191,15 +190,7 @@ object UpdateOne_uniqueAttr extends DatomicTestSuite {
           err ==> "Can't transact duplicate attribute `Unique.i`."
         }
 
-        // One tacit (filter), one mandatory (new value) is ok
         _ <- Unique.i_(1).i(2).update.transact
-
-        // Not adding `multiple` prevents unintentional update of multiple (possible all!) entities
-        _ <- Unique.i(1).int_(1, 2).update.transact
-          .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
-          err ==> "Please provide explicit `update.multiple` to update " +
-            "multiple entities (found 2 matching entities)."
-        }
 
         _ <- Unique.int_(1).string_("x").s("c").update.transact
           .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>

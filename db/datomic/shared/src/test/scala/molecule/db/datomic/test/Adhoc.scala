@@ -2,10 +2,10 @@ package molecule.db.datomic.test
 
 
 import molecule.core.util.Executor._
-import molecule.db.datomic._
+import molecule.db.datomic.async._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
-import molecule.base.util.exceptions.MoleculeError
+import scala.language.implicitConversions
 
 object Adhoc extends DatomicTestSuite {
   //  // See Zio-http route
@@ -37,18 +37,33 @@ object Adhoc extends DatomicTestSuite {
   //
   //  int(hej)
 
+//  object int {
+//    implicit class sync2api[Tpl](z: DatomicQueryApi[Tpl]) {
+//      def go: Int = 7
+//    }
+//  }
+//  object str {
+//    implicit class sync2api[Tpl](z: DatomicQueryApi[Tpl]) {
+//      def go: String = "hello"
+//    }
+//  }
 
   lazy val tests = Tests {
 
+
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
+
       for {
         List(a, b) <- Ns.int.insert(1, 2).transact.map(_.eids)
-        _ <- Ns.int(3).save.transact
-        _ <- Ns.int.query.get.map(_ ==> List(1, 2, 3))
-        _ <- Ns.apply(a).int(10).update.transact
-        _ <- Ns(b).delete.transact
-        _ <- Ns.int.query.get.map(_ ==> List(3, 10))
+//        _ <- Ns.int(3).save.transact
+//        _ <- Ns.int.query.get.map(_ ==> List(1, 2, 3))
+//        _ <- Ns(a).int(10).update.transact
+//        _ <- Ns(b).delete.transact
+//        _ <- Ns.int.query.get.map(_ ==> List(3, 10))
+//        _ <- Ns.int.query.get.map(_ ==> List(3, 10))
+
+
 
 
       } yield ()

@@ -3,7 +3,7 @@ package molecule.db.datomic.test.crud.update.one
 import molecule.base.util.exceptions.MoleculeError
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
-import molecule.db.datomic._
+import molecule.db.datomic.async._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
 
@@ -20,7 +20,6 @@ object UpdateOne_filter extends DatomicTestSuite {
         // Update entities with non-unique `i` attribute with value 1
         // Updating a non-asserted value doesn't insert it (nothing is updated)
         _ <- Ns.i_(1).int(2).update.transact
-        // (we don't need the `multiple` identifier here since only one entity matches)
         _ <- Ns.i.int_?.query.get.map(_ ==> List((1, None)))
 
         // Upserting a non-asserted value inserts it
@@ -61,8 +60,7 @@ object UpdateOne_filter extends DatomicTestSuite {
         ))
 
         // Upsert all entities where non-unique attribute i is 1
-        // `multiple` modifier needed since multiple entities match
-        _ <- Ns.i_(1).int(5).upsert.multiple.transact
+        _ <- Ns.i_(1).int(5).upsert.transact
         _ <- Ns.e.a1.i.int_?.query.get.map(_ ==> List(
           (a, 1, Some(5)), // 5 inserted
           (b, 1, Some(5)), // 4 updated to 5
@@ -99,7 +97,7 @@ object UpdateOne_filter extends DatomicTestSuite {
         ))
 
         // Update all entities where non-unique attribute i <= 2
-        _ <- Ns.i_.<=(2).int(4).update.multiple.transact
+        _ <- Ns.i_.<=(2).int(4).update.transact
 
         _ <- Ns.i.a1.int.query.get.map(_ ==> List(
           (1, 4), // updated
@@ -123,36 +121,6 @@ object UpdateOne_filter extends DatomicTestSuite {
             .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
             err ==> "Can only upsert one value for attribute `Ns.int`. Found: 1, 2"
           }
-        } yield ()
-      }
-
-      "Guard against multiple updates" - types { implicit conn =>
-        for {
-          _ <- Ns.i.int.insert(
-            (1, 1),
-            (1, 2),
-            (2, 3),
-          ).transact
-
-          _ <- Ns.i_(1).int(4).update.transact
-            .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
-            err ==> "Please provide explicit `update.multiple` to update " +
-              "multiple entities (found 2 matching entities)."
-          }
-
-          _ <- Ns.i_(1).int(4).upsert.transact
-            .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
-            err ==> "Please provide explicit `upsert.multiple` to upsert " +
-              "multiple entities (found 2 matching entities)."
-          }
-
-          // Ok to update 1 entity without `multiple` modifier
-          _ <- Ns.i_(2).int(4).update.transact
-          _ <- Ns.i_(2).int(4).upsert.transact
-
-          // Ok to update multiple entities when `multiple` modifier is added
-          _ <- Ns.i_(1).int(4).update.multiple.transact
-          _ <- Ns.i_(1).int(4).upsert.multiple.transact
         } yield ()
       }
     }

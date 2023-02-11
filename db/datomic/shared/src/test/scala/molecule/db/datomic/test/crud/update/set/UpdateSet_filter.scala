@@ -3,7 +3,7 @@ package molecule.db.datomic.test.crud.update.set
 import molecule.base.util.exceptions.MoleculeError
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
-import molecule.db.datomic._
+import molecule.db.datomic.async._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
 
@@ -61,8 +61,7 @@ object UpdateSet_filter extends DatomicTestSuite {
         ))
 
         // Upsert all entities where non-unique attribute i is 1
-        // `multiple` modifier needed since multiple entities match
-        _ <- Ns.i_(1).ints(Set(5)).upsert.multiple.transact
+        _ <- Ns.i_(1).ints(Set(5)).upsert.transact
         _ <- Ns.e.a1.i.ints_?.query.get.map(_ ==> List(
           (a, 1, Some(Set(5))), // 5 inserted
           (b, 1, Some(Set(5))), // 4 updated to 5
@@ -98,7 +97,7 @@ object UpdateSet_filter extends DatomicTestSuite {
         ))
 
         // Update all entities where non-unique attribute i <= 2
-        _ <- Ns.i_.<=(2).ints(Set(4)).update.multiple.transact
+        _ <- Ns.i_.<=(2).ints(Set(4)).update.transact
 
         _ <- Ns.i.a1.ints.query.get.map(_ ==> List(
           (1, Set(4)), // updated
@@ -106,40 +105,6 @@ object UpdateSet_filter extends DatomicTestSuite {
           (3, Set(3)),
         ))
       } yield ()
-    }
-
-
-    "Semantics" - {
-
-      "Guard against multiple updates" - types { implicit conn =>
-        for {
-          _ <- Ns.i.ints.insert(
-            (1, Set(1)),
-            (1, Set(2)),
-            (2, Set(3)),
-          ).transact
-
-          _ <- Ns.i_(1).ints(4).update.transact
-            .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
-            err ==> "Please provide explicit `update.multiple` to update " +
-              "multiple entities (found 2 matching entities)."
-          }
-
-          _ <- Ns.i_(1).ints(Set(4)).upsert.transact
-            .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
-            err ==> "Please provide explicit `upsert.multiple` to upsert " +
-              "multiple entities (found 2 matching entities)."
-          }
-
-          // Ok to update 1 entity without `multiple` modifier
-          _ <- Ns.i_(2).ints(Set(4)).update.transact
-          _ <- Ns.i_(2).ints(Set(4)).upsert.transact
-
-          // Ok to update multiple entities when `multiple` modifier is added
-          _ <- Ns.i_(1).ints(Set(4)).update.multiple.transact
-          _ <- Ns.i_(1).ints(Set(4)).upsert.multiple.transact
-        } yield ()
-      }
     }
   }
 }

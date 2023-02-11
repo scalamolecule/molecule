@@ -4,7 +4,7 @@ package molecule.db.datomic.test.aggr.one.any
 import java.net.URI
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
-import molecule.db.datomic._
+import molecule.db.datomic.async._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
 

@@ -7,7 +7,7 @@ object CoreGenerator extends App {
 
 
   // Use instead in tandem with db.datomic.api._DatomicMoleculeApi.generate() to coordinate correct overrides
-  //  core.api._MoleculeApi.generate()
+//    core.api._MoleculeApi.generate()
 
   //  core.transaction._InsertResolvers.generate()
 

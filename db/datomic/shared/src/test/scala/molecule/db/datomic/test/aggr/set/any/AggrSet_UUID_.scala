@@ -3,7 +3,7 @@ package molecule.db.datomic.test.aggr.set.any
 
 import java.util.UUID
 import molecule.coreTests.dataModels.core.dsl.Types._
-import molecule.db.datomic._
+import molecule.db.datomic.async._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
 import molecule.core.util.Executor._

@@ -1,11 +1,12 @@
 package molecule.db.datomic.query.cursor
 
 import java.util.Base64
+import molecule.base.util.exceptions.MoleculeError
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
-import molecule.core.api.action.ApiUtils
+import molecule.core.api.FutureUtils
 import molecule.db.datomic.facade.DatomicConn_JVM
-import molecule.db.datomic.query.DatomicQuery
+import molecule.db.datomic.query.DatomicQueryResolve
 import scala.concurrent.{ExecutionContext, Future}
 
 /**
@@ -30,12 +31,12 @@ case class SubUnique[Tpl](
   elements: List[Element],
   limit: Option[Int],
   cursor: String
-) extends DatomicQuery[Tpl](elements, limit)
-  with ApiUtils with CursorUtils with MoleculeLogging {
+) extends DatomicQueryResolve[Tpl](elements, limit)
+  with FutureUtils with CursorUtils with MoleculeLogging {
 
   def getPage(allTokens: List[String], limit: Int)
-             (implicit conn: DatomicConn_JVM, ec: ExecutionContext)
-  : Future[(List[Tpl], String, Boolean)] = future {
+             (implicit conn: DatomicConn_JVM)
+  : (List[Tpl], String, Boolean) = try {
     val forward     = limit > 0
     val attrsTokens = allTokens.drop(2).grouped(13).toList.sortBy(_(2))
 
@@ -60,6 +61,8 @@ case class SubUnique[Tpl](
       identifyRow,
       nextCursorSubUnique
     )
+  } catch {
+    case t: Throwable => throw MoleculeError(t.toString)
   }
 
   private def nextCursorSubUnique(tpls: List[Tpl], tokens: List[String]): String = {

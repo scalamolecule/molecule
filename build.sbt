@@ -179,7 +179,8 @@ lazy val datomic = crossProject(JSPlatform, JVMPlatform)
                 sharedTests,
         jvmTests + "/AdhocJVM.scala",
         jsTests + "/AdhocJs.scala",
-        sharedTests + "/Adhoc.scala"
+        sharedTests + "/Adhoc.scala",
+        sharedTests + "/SyncApi.scala"
       )
       new SimpleFileFilter(f =>
         (f.getCanonicalPath.startsWith(jsTests)

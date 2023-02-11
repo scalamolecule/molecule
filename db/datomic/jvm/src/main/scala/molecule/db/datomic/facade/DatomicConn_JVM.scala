@@ -13,9 +13,11 @@ import molecule.core.api.{Connection, TxReport}
 import molecule.core.marshalling.DatomicPeerProxy
 import molecule.db.datomic.transaction.DatomicDataType_JVM
 import scala.collection.mutable.ListBuffer
+import scala.concurrent.duration.DurationInt
 import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.jdk.CollectionConverters._
 import scala.util.control.NonFatal
+import scala.concurrent.Await
 
 case class DatomicConn_JVM(
   override val proxy: DatomicPeerProxy,
@@ -36,10 +38,16 @@ case class DatomicConn_JVM(
   def optimizeQuery: Boolean = optimizeQueries
 
   final def transactEdn(edn: String)(implicit ec: ExecutionContext): Future[TxReport] =
-    transact(readAll(new StringReader(edn)).get(0).asInstanceOf[Data])
+    transact_async(readAll(new StringReader(edn)).get(0).asInstanceOf[Data])
 
-  override def transact(javaStmts: Data)(implicit ec: ExecutionContext): Future[TxReport] = {
+  override def transact_async(javaStmts: Data)(implicit ec: ExecutionContext): Future[TxReport] = {
     bridgeDatomicFuture(peerConn.transactAsync(javaStmts)).map(txReport)
+  }
+  override def transact_sync(javaStmts: Data): TxReport = try {
+    import molecule.core.util.Executor._
+    Await.result(transact_async(javaStmts), 10.seconds)
+  } catch {
+    case t: Throwable => throw MoleculeError(t.toString)
   }
 
   private def bridgeDatomicFuture[T](

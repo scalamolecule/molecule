@@ -2,7 +2,7 @@ package molecule.db.datomic.transaction
 
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
-import molecule.core.transaction.{Insert, InsertOps, InsertResolvers_, Save}
+import molecule.core.transaction.{InsertExtraction, InsertOps, InsertResolvers_, SaveExtraction}
 import molecule.core.util.ModelUtils
 import molecule.core.validation.CheckConflictingAttrs
 import scala.collection.mutable.ListBuffer
@@ -12,7 +12,7 @@ trait Insert_stmts
     with InsertOps
     with DatomicDataType_JVM
     with ModelUtils
-    with MoleculeLogging { self: Insert with InsertResolvers_ =>
+    with MoleculeLogging { self: InsertExtraction with InsertResolvers_ =>
 
   override protected val prevRefs: ListBuffer[AnyRef] = new ListBuffer[AnyRef]
 
@@ -28,7 +28,7 @@ trait Insert_stmts
     }
 
     if (txMetaElements.nonEmpty) {
-      val txMetaStmts = (new Save(true) with Save_stmts)
+      val txMetaStmts = (new SaveExtraction(true) with Save_stmts)
         .getRawStmts(txMetaElements, datomicTx, false)
       stmts.addAll(txMetaStmts)
     }

@@ -3,8 +3,7 @@ package molecule.core.marshalling
 import boopickle.Default._
 import molecule.base.util.exceptions.MoleculeError
 import molecule.boilerplate.ast.Model._
-import molecule.core.api.TxReport
-import molecule.core.api.action.ApiUtils
+import molecule.core.api.{FutureUtils, TxReport}
 import molecule.core.marshalling.Boopicklers._
 import molecule.core.marshalling.deserialize.UnpickleTpls
 import molecule.core.util.Executor._
@@ -15,7 +14,7 @@ import scala.scalajs.js.typedarray.TypedArrayBufferOps._
 case class MoleculeRpcJS(interface: String, port: Int)
   extends MoleculeRpcRequest(interface, port)
     with MoleculeRpc
-    with ApiUtils {
+    with FutureUtils {
 
 
   override def query[Tpl](
@@ -56,10 +55,9 @@ case class MoleculeRpcJS(interface: String, port: Int)
   override def update(
     proxy: ConnProxy,
     elements: List[Element],
-    isUpsert: Boolean = false,
-    isMultiple: Boolean = false,
+    isUpsert: Boolean = false
   ): Future[Either[MoleculeError, TxReport]] = Future {
-    val argsSerialized = Pickle.intoBytes((proxy, elements, isUpsert, isMultiple)).typedArray()
+    val argsSerialized = Pickle.intoBytes((proxy, elements, isUpsert)).typedArray()
     xmlRequest("update", argsSerialized).map(resultSerialized =>
       Unpickle.apply[Either[MoleculeError, TxReport]].fromBytes(resultSerialized)
     )
@@ -68,10 +66,9 @@ case class MoleculeRpcJS(interface: String, port: Int)
 
   override def delete(
     proxy: ConnProxy,
-    elements: List[Element],
-    isMultiple: Boolean = false
+    elements: List[Element]
   ): Future[Either[MoleculeError, TxReport]] = Future {
-    val argsSerialized = Pickle.intoBytes((proxy, elements, isMultiple)).typedArray()
+    val argsSerialized = Pickle.intoBytes((proxy, elements)).typedArray()
     xmlRequest("delete", argsSerialized).map(resultSerialized =>
       Unpickle.apply[Either[MoleculeError, TxReport]].fromBytes(resultSerialized)
     )

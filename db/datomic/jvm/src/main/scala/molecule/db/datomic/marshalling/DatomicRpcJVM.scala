@@ -3,20 +3,20 @@ package molecule.db.datomic.marshalling
 import java.nio.ByteBuffer
 import molecule.base.util.exceptions.MoleculeError
 import molecule.boilerplate.ast.Model._
-import molecule.core.api.TxReport
-import molecule.core.api.action.ApiUtils
+import molecule.core.api.{FutureUtils, TxReport}
 import molecule.core.marshalling.Boopicklers._
 import molecule.core.marshalling._
 import molecule.core.marshalling.deserialize.UnpickleTpls
-import molecule.core.transaction.{Delete, Insert, Save, Update}
+import molecule.core.transaction._
 import molecule.core.util.Executor._
-import molecule.db.datomic.api.action.DatomicQueryApiImpl
+import molecule.db.datomic.action.DatomicQueryImpl
+import molecule.db.datomic.async._
 import molecule.db.datomic.transaction._
 import scala.concurrent.Future
 
 object DatomicRpcJVM extends MoleculeRpc
   with DatomicTxBase_JVM
-  with ApiUtils {
+  with FutureUtils {
 
   // Data is typed when deserialized on client side
   override def query[Any](
@@ -25,7 +25,7 @@ object DatomicRpcJVM extends MoleculeRpc
   ): Future[Either[MoleculeError, List[Any]]] = either {
     for {
       conn <- getConn(proxy)
-      rows <- new DatomicQueryApiImpl[Any](elements).get(conn, global)
+      rows <- new DatomicQueryImpl[Any](elements).get(conn, global)
     } yield rows
   }
 
@@ -35,8 +35,8 @@ object DatomicRpcJVM extends MoleculeRpc
   ): Future[Either[MoleculeError, TxReport]] = either {
     for {
       conn <- getConn(proxy)
-      stmts = (new Save() with Save_stmts).getStmts(elements)
-      txReport <- conn.transact(stmts)
+      stmts = (new SaveExtraction() with Save_stmts).getStmts(elements)
+      txReport <- conn.transact_async(stmts)
     } yield txReport
   }
 
@@ -56,38 +56,36 @@ object DatomicRpcJVM extends MoleculeRpc
           } else tpls).asInstanceOf[Seq[Product]]
         case Left(err)   => throw err // catched in outer either wrapper
       }
-      stmts = (new Insert with Insert_stmts).getStmts(tplElements, tplProducts)
+      stmts = (new InsertExtraction with Insert_stmts).getStmts(tplElements, tplProducts)
       _ = if (txElements.nonEmpty) {
-        val txStmts = (new Save() with Save_stmts).getRawStmts(txElements, datomicTx, false)
+        val txStmts = (new SaveExtraction() with Save_stmts).getRawStmts(txElements, datomicTx, false)
         stmts.addAll(txStmts)
       }
-      txReport <- conn.transact(stmts)
+      txReport <- conn.transact_async(stmts)
     } yield txReport
   }
 
   override def update(
     proxy: ConnProxy,
     elements: List[Element],
-    isUpsert: Boolean = false,
-    isMultiple: Boolean = false,
+    isUpsert: Boolean = false
   ): Future[Either[MoleculeError, TxReport]] = either {
     for {
       conn <- getConn(proxy)
-      stmts = (new Update(conn.proxy.uniqueAttrs, isUpsert, isMultiple) with Update_stmts)
+      stmts = (new UpdateExtraction(conn.proxy.uniqueAttrs, isUpsert) with Update_stmts)
         .getStmts(conn, elements)
-      txReport <- conn.transact(stmts)
+      txReport <- conn.transact_async(stmts)
     } yield txReport
   }
 
   override def delete(
     proxy: ConnProxy,
-    elements: List[Element],
-    isMultiple: Boolean = false
+    elements: List[Element]
   ): Future[Either[MoleculeError, TxReport]] = either {
     for {
       conn <- getConn(proxy)
-      stmts = (new Delete with Delete_stmts).getStmtsData(conn, elements, isMultiple)
-      txReport <- conn.transact(stmts)
+      stmts = (new DeleteExtraction with Delete_stmts).getStmtsData(conn, elements)
+      txReport <- conn.transact_async(stmts)
     } yield txReport
   }
 }

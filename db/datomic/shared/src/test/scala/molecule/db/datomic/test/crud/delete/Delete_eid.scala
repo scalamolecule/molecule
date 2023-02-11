@@ -2,7 +2,7 @@ package molecule.db.datomic.test.crud.delete
 
 import molecule.base.util.exceptions.MoleculeError
 import molecule.coreTests.dataModels.core.dsl.Refs._
-import molecule.db.datomic._
+import molecule.db.datomic.async._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
 import molecule.core.util.Executor._
@@ -16,8 +16,6 @@ object Delete_eid extends DatomicTestSuite {
       for {
         List(e1, _) <- Ns.i.insert(1, 2).transact.map(_.eids)
         _ <- Ns.i.query.get.map(_ ==> List(1, 2))
-
-        // When deleting one entity, `multiple` modifier is not required
         _ <- Ns(e1).delete.transact
         _ <- Ns.i.query.get.map(_ ==> List(2))
       } yield ()
@@ -28,9 +26,7 @@ object Delete_eid extends DatomicTestSuite {
       for {
         List(e1, e2, _) <- Ns.i.insert(1, 2, 3).transact.map(_.eids)
         _ <- Ns.i.query.get.map(_ ==> List(1, 2, 3))
-
-        // When deleting multiple entities, `multiple` modifier is required
-        _ <- Ns(e1, e2).delete.multiple.transact
+        _ <- Ns(e1, e2).delete.transact
         _ <- Ns.i.query.get.map(_ ==> List(3))
       } yield ()
     }
@@ -39,8 +35,7 @@ object Delete_eid extends DatomicTestSuite {
       for {
         List(e1, e2, _) <- Ns.i.insert(1, 2, 3).transact.map(_.eids)
         _ <- Ns.i.query.get.map(_ ==> List(1, 2, 3))
-
-        _ <- Ns(Seq(e1, e2)).delete.multiple.transact
+        _ <- Ns(Seq(e1, e2)).delete.transact
         _ <- Ns.i.query.get.map(_ ==> List(3))
       } yield ()
     }

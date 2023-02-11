@@ -3,7 +3,7 @@ package molecule.db.datomic.test.crud.delete
 import molecule.base.util.exceptions.MoleculeError
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
-import molecule.db.datomic._
+import molecule.db.datomic.async._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
 
@@ -30,7 +30,7 @@ object Delete_filter extends DatomicTestSuite {
           (e3, 2),
         ))
 
-        _ <- Ns.i_(2).delete.multiple.transact
+        _ <- Ns.i_(2).delete.transact
         _ <- Ns.e.i.query.get.map(_ ==> List(
           (e1, 1),
         ))
@@ -43,7 +43,7 @@ object Delete_filter extends DatomicTestSuite {
         _ <- Ns.i.insert(1, 2, 3).transact
 
         // Update all entities where non-ns attribute i <= 2
-        _ <- Ns.i_.<=(2).delete.multiple.transact
+        _ <- Ns.i_.<=(2).delete.transact
 
         _ <- Ns.i.query.get.map(_ ==> List(3))
       } yield ()
@@ -64,7 +64,7 @@ object Delete_filter extends DatomicTestSuite {
         ))
 
         // Update all entities where non-ns attribute i > 1 and s < "c"
-        _ <- Ns.i_.>(1).s_.<("c").delete.multiple.transact
+        _ <- Ns.i_.>(1).s_.<("c").delete.transact
 
         _ <- Ns.i.s.query.get.map(_ ==> List(
           (1, "a"),
@@ -177,7 +177,7 @@ object Delete_filter extends DatomicTestSuite {
 
       "Only tacit attributes" - types { implicit conn =>
         for {
-          _ <- Ns.i.<=(2).delete.multiple.transact
+          _ <- Ns.i.<=(2).delete.transact
             .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
             err ==> "Can only filter delete by values applied to tacit card-one attributes. Found:\n" +
               """AttrOneManInt("Ns", "i", Le, Seq(2), None, None, None)"""

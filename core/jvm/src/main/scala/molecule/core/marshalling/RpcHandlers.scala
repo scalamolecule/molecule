@@ -44,18 +44,18 @@ abstract class RpcHandlers(rpc: MoleculeRpc) extends MoleculeLogging with Serial
   }
 
   def handleUpdate(argsSerialized: ByteString): Future[Array[Byte]] = tryUnpickle {
-    val (proxy, elements, isUpsert, isMultiple) =
-      Unpickle.apply[(ConnProxy, List[Element], Boolean, Boolean)]
+    val (proxy, elements, isUpsert) =
+      Unpickle.apply[(ConnProxy, List[Element], Boolean)]
         .fromBytes(argsSerialized.asByteBuffer)
-    rpc.update(proxy, elements, isUpsert, isMultiple)
+    rpc.update(proxy, elements, isUpsert)
       .map(either => Pickle.intoBytes[Either[MoleculeError, TxReport]](either).toArray)
   }
 
   def handleDelete(argsSerialized: ByteString): Future[Array[Byte]] = tryUnpickle {
-    val (proxy, elements, isMultiple) =
-      Unpickle.apply[(ConnProxy, List[Element], Boolean)]
+    val (proxy, elements) =
+      Unpickle.apply[(ConnProxy, List[Element])]
         .fromBytes(argsSerialized.asByteBuffer)
-    rpc.delete(proxy, elements, isMultiple)
+    rpc.delete(proxy, elements)
       .map(either => Pickle.intoBytes[Either[MoleculeError, TxReport]](either).toArray)
   }
 

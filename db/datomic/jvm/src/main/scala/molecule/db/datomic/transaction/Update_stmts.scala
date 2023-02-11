@@ -8,12 +8,12 @@ import datomic.{Database, Peer}
 import molecule.base.util.exceptions.MoleculeError
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
-import molecule.core.transaction.{Update, UpdateOps}
+import molecule.core.transaction.{UpdateExtraction, UpdateOps}
 import molecule.core.validation.CheckConflictingAttrs
 import molecule.db.datomic.facade.DatomicConn_JVM
 import molecule.db.datomic.query.DatomicModel2Query
 
-trait Update_stmts extends DatomicTxBase_JVM with UpdateOps with MoleculeLogging { self: Update =>
+trait Update_stmts extends DatomicTxBase_JVM with UpdateOps with MoleculeLogging { self: UpdateExtraction =>
 
   def getStmts(
     conn: DatomicConn_JVM,
@@ -22,14 +22,6 @@ trait Update_stmts extends DatomicTxBase_JVM with UpdateOps with MoleculeLogging
     CheckConflictingAttrs(elements, distinguishMode = true)
 
     val (eids, filterElements, data) = resolve(elements, Nil, Nil, Nil)
-
-    if (!isMultiple && eids.length > 1) {
-      val update = if (self.isUpsert) "upsert" else "update"
-      throw MoleculeError(
-        s"Please provide explicit `$update.multiple` to $update multiple entities " +
-          s"(found ${eids.length} matching entities)."
-      )
-    }
 
     val (filterQuery, inputs) = if (eids.isEmpty && filterElements.nonEmpty) {
       val filterElements1 = AttrOneManLong("_Generic", "e", V) +: filterElements
@@ -46,12 +38,6 @@ trait Update_stmts extends DatomicTxBase_JVM with UpdateOps with MoleculeLogging
     } { query =>
       val eidRows = Peer.q(query, db +: inputs: _*)
       val count   = eidRows.size()
-      if (!isMultiple && count > 1) {
-        throw MoleculeError(
-          s"Please provide explicit `$update.multiple` to $update multiple entities " +
-            s"(found $count matching entities)."
-        )
-      }
       val addStmts = eid2stmts(data, db)
       eidRows.forEach(eidRow => addStmts(eidRow.get(0)))
     }

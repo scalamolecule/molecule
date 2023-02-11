@@ -2,7 +2,7 @@ package molecule.db.datomic.test.crud.delete
 
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Unique._
-import molecule.db.datomic._
+import molecule.db.datomic.async._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
 
@@ -67,10 +67,7 @@ object Delete_uniqueAttr extends DatomicTestSuite {
     "Multiple entities deleted" - unique { implicit conn =>
       for {
         _ <- Unique.int.insert(1, 2, 3).transact
-
-        // Explicitly add `multiple` to update multiple entities
-        _ <- Unique.int_(1, 2).delete.multiple.transact
-
+        _ <- Unique.int_(1, 2).delete.transact
         _ <- Unique.int.query.get.map(_ ==> List(3))
       } yield ()
     }

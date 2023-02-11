@@ -4,7 +4,7 @@ import java.net.URI
 import java.util.{Date, UUID}
 import molecule.boilerplate.ast.Model._
 
-trait UpdateOps extends Action2Data { self: Update =>
+trait UpdateOps extends Action2Data { self: UpdateExtraction =>
 
   protected def uniqueEids(filterAttr: AttrOneTac, ns: String, attr: String): Seq[AnyRef]
 

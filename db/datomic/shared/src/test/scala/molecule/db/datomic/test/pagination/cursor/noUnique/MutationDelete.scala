@@ -3,7 +3,7 @@ package molecule.db.datomic.test.pagination.cursor.noUnique
 import molecule.base.util.exceptions.MoleculeError
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
-import molecule.db.datomic._
+import molecule.db.datomic.async._
 import molecule.db.datomic.setup.DatomicTestSuite
 import utest._
 import scala.annotation.{nowarn, tailrec}
@@ -66,7 +66,7 @@ object MutationDelete extends DatomicTestSuite {
           cur <- query.from("").limit(4).get.map { case (List(`a`, `b`, `c`, `d`), cur, true) => cur }
 
           // Delete 2 last row on this page
-          _ <- Ns(e3, e4).delete.multiple.transact
+          _ <- Ns(e3, e4).delete.transact
 
           // Next page unaffected
           _ <- query.from(cur).limit(4).get.map { case (List(`e`, `f`), _, false) => () }
@@ -81,7 +81,7 @@ object MutationDelete extends DatomicTestSuite {
           cur <- query.from("").limit(4).get.map { case (List(`a`, `b`, `c`, `d`), cur, true) => cur }
 
           // Delete 3 last row on this page
-          _ <- Ns(e2, e3, e4).delete.multiple.transact
+          _ <- Ns(e2, e3, e4).delete.transact
 
           // Can't find next page with all 3 unique edge values deleted (or updated)
           _ <- query.from(cur).limit(4).get
@@ -149,7 +149,7 @@ object MutationDelete extends DatomicTestSuite {
           cur <- query.from("").limit(-4).get.map { case (List(`c`, `d`, `e`, `f`), cur, true) => cur }
 
           // Delete 2 first row on this page
-          _ <- Ns(e3, e4).delete.multiple.transact
+          _ <- Ns(e3, e4).delete.transact
 
           // Next page unaffected
           _ <- query.from(cur).limit(-4).get.map { case (List(`a`, `b`), _, false) => () }
@@ -164,7 +164,7 @@ object MutationDelete extends DatomicTestSuite {
           cur <- query.from("").limit(-4).get.map { case (List(`c`, `d`, `e`, `f`), cur, true) => cur }
 
           // Delete 3 first row on this page
-          _ <- Ns(e3, e4, e5).delete.multiple.transact
+          _ <- Ns(e3, e4, e5).delete.transact
 
           // Can't find next page with all 3 unique edge values deleted (or updated)
           _ <- query.from(cur).limit(-4).get

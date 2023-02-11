@@ -11,25 +11,25 @@ object _MoleculeImplicits extends CoreGenBase( "MoleculeImplicits", "") {
        |package molecule.core
        |
        |import molecule.boilerplate.api._
-       |import molecule.core.api._
+       |import molecule.core.action._
        |import scala.language.implicitConversions
        |
        |trait ${fileName}_ extends Keywords {
-       |  implicit def m(molecule: Molecule_00): MoleculeApi_00
+       |  implicit def m(molecule: Molecule_00): Actions_00
        |$moleculeFactories
        |
-       |  implicit def m(composite: Composite_00): MoleculeApi_00
+       |  implicit def m(composite: Composite_00): Actions_00
        |$compositeFactories
        |}""".stripMargin
   }
 
   case class MoleculeFactories(arity: Int) extends TemplateVals(arity) {
     val body =
-      s"""  implicit def m[${`A..V`}](molecule: Molecule_$n0[${`A..V`}]): MoleculeApi_$n0[${`A..V`}]""".stripMargin
+      s"""  implicit def m[${`A..V`}](molecule: Molecule_$n0[${`A..V`}]): Actions_$n0[${`A..V`}]""".stripMargin
   }
 
   case class CompositeFactories(arity: Int) extends TemplateVals(arity) {
     val body =
-      s"""  implicit def m[$Tn](composite: Composite_$n0[$Tn]): MoleculeApi_$n0[$Tn]""".stripMargin
+      s"""  implicit def m[$Tn](composite: Composite_$n0[$Tn]): Actions_$n0[$Tn]""".stripMargin
   }
 }

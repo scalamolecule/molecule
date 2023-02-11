@@ -1,5 +1,5 @@
 package molecule.core.transaction
 
-trait DeleteOps { self: Delete =>
+trait DeleteOps { self: DeleteExtraction =>
 
 }

@@ -1,28 +1,20 @@
 package molecule.db.datomic.transaction
 
 import datomic.Peer
-import molecule.base.util.exceptions.MoleculeError
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
-import molecule.core.transaction.{Delete, DeleteOps}
+import molecule.core.transaction.{DeleteExtraction, DeleteOps}
 import molecule.db.datomic.facade.DatomicConn_JVM
 import molecule.db.datomic.query.DatomicModel2Query
 
-trait Delete_stmts extends DatomicTxBase_JVM with DeleteOps with MoleculeLogging { self: Delete =>
+trait Delete_stmts extends DatomicTxBase_JVM with DeleteOps with MoleculeLogging { self: DeleteExtraction =>
 
   def getStmtsData(
     conn: DatomicConn_JVM,
-    elements: List[Element],
-    isMultiple: Boolean
+    elements: List[Element]
   ): Data = {
     initTxBase(elements)
     val (eids, filterElements) = resolve(elements, Nil, Nil, true)
-
-    if (!isMultiple && eids.length > 1)
-      throw MoleculeError(
-        s"Please provide explicit `delete.multiple` to delete multiple entities " +
-          s"(found ${eids.length} matching entities)."
-      )
 
     val (filterQuery, inputs) = if (eids.isEmpty && filterElements.nonEmpty) {
       val filterElements1 = AttrOneManLong("_Generic", "e", V) +: filterElements
@@ -38,13 +30,6 @@ trait Delete_stmts extends DatomicTxBase_JVM with DeleteOps with MoleculeLogging
     } { query =>
       val db      = conn.peerConn.db()
       val eidRows = Peer.q(query, db +: inputs: _*)
-      val count   = eidRows.size()
-      if (!isMultiple && count > 1) {
-        throw MoleculeError(
-          s"Please provide explicit `delete.multiple` to delete multiple entities " +
-            s"(found $count matching entities)."
-        )
-      }
       eidRows.forEach(eidRow => addRetractEntityStmt(eidRow.get(0)))
     }
 
