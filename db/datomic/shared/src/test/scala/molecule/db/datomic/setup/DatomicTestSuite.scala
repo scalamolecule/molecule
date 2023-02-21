@@ -32,19 +32,6 @@ trait DatomicTestSuite extends TestSuite with TestData
     }
   }
 
-  protected def moleculeException(code: => Unit)(error: String): Unit = {
-    try {
-      code
-      throw MoleculeError("Test unexpectedly passed")
-    } catch {
-      case MoleculeError(`error`, _)                      => assert(true)
-      case e@MoleculeError("Test unexpectedly passed", _) => throw e
-      case MoleculeError(other, _)                        =>
-        throw MoleculeError(s"Unexpected error message:\n$other\n\nEXPECTED:\n$error\n")
-      case unexpected: Throwable                          => throw unexpected
-    }
-  }
-
   def types[T](test: Connection => T): T = typesImpl(test)
   def refs[T](test: Connection => T): T = refsImpl(test)
   def unique[T](test: Connection => T): T = uniqueImpl(test)

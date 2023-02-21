@@ -2,17 +2,6 @@ package molecule.core.api
 
 trait ApiSync {
 
-
-  trait DeleteApi {
-    def transact(implicit conn: Connection): TxReport
-  }
-
-
-  trait InsertApi {
-    def transact(implicit conn: Connection): TxReport
-  }
-
-
   trait QueryApi[Tpl] {
     def get(implicit conn: Connection): List[Tpl]
     def inspect(implicit conn: Connection): Unit
@@ -31,7 +20,15 @@ trait ApiSync {
     def transact(implicit conn: Connection): TxReport
   }
 
+  trait InsertApi {
+    def transact(implicit conn: Connection): TxReport
+  }
+
   trait UpdateApi {
+    def transact(implicit conn: Connection): TxReport
+  }
+
+  trait DeleteApi {
     def transact(implicit conn: Connection): TxReport
   }
 }

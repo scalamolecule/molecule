@@ -10,7 +10,7 @@ import scala.annotation.nowarn
 object Directions extends DatomicTestSuite {
   val x = ""
 
-  // (Allow pattern matching the result without warnings)
+  // (Allow pattern matching results without warnings)
   @nowarn lazy val tests = Tests {
 
     "Unique primary sort" - {

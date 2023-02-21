@@ -4,17 +4,6 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait ApiAsync {
 
-
-  trait DeleteApi {
-    def transact(implicit conn: Connection, ec: ExecutionContext): Future[TxReport]
-  }
-
-
-  trait InsertApi {
-    def transact(implicit conn: Connection, ec: ExecutionContext): Future[TxReport]
-  }
-
-
   trait QueryApi[Tpl] {
     def get(implicit conn: Connection, ec: ExecutionContext): Future[List[Tpl]]
     def inspect(implicit conn: Connection, ec: ExecutionContext): Future[Unit]
@@ -33,7 +22,15 @@ trait ApiAsync {
     def transact(implicit conn: Connection, ec: ExecutionContext): Future[TxReport]
   }
 
+  trait InsertApi {
+    def transact(implicit conn: Connection, ec: ExecutionContext): Future[TxReport]
+  }
+
   trait UpdateApi {
+    def transact(implicit conn: Connection, ec: ExecutionContext): Future[TxReport]
+  }
+
+  trait DeleteApi {
     def transact(implicit conn: Connection, ec: ExecutionContext): Future[TxReport]
   }
 }

@@ -5,14 +5,6 @@ import zio.{Chunk, ZIO}
 
 trait ApiTypeLevel {
 
-  trait DeleteApi {
-    def transact: ZIO[Connection, MoleculeError, TxReport] = ???
-  }
-
-  trait InsertApi {
-    def transact: ZIO[Connection, MoleculeError, TxReport] = ???
-  }
-
   trait QueryMethods[Tpl] {
     def get: ZIO[Connection, MoleculeError, Chunk[Tpl]]
     def inspect: ZIO[Connection, MoleculeError, Unit]
@@ -28,10 +20,18 @@ trait ApiTypeLevel {
 
 
   trait SaveApi {
-    def transact: ZIO[Connection, MoleculeError, TxReport] = ???
+    def transact: ZIO[Connection, MoleculeError, TxReport]
+  }
+
+  trait InsertApi {
+    def transact: ZIO[Connection, MoleculeError, TxReport]
   }
 
   trait UpdateApi {
-    def transact: ZIO[Connection, MoleculeError, TxReport] = ???
+    def transact: ZIO[Connection, MoleculeError, TxReport]
+  }
+
+  trait DeleteApi {
+    def transact: ZIO[Connection, MoleculeError, TxReport]
   }
 }

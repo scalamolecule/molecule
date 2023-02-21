@@ -14,14 +14,14 @@ object OffsetSemantics extends DatomicTestSuite {
 
   lazy val tests = Tests {
 
-    "Invalid limit/offset" - types { implicit conn =>
+    "Different limit/offset sign" - types { implicit conn =>
       for {
-        _ <- Ns.int.a1.query.limit(0).get
-          .map(_ ==> "Unexpected success")
-          .recover { case MoleculeError(msg, _) =>
-            msg ==> "Limit cannot be 0. Please use a positive number to limit next rows, " +
-              "or a negative number to limit previous rows."
-          }
+//        _ <- Ns.int.a1.query.limit(0).get
+//          .map(_ ==> "Unexpected success")
+//          .recover { case MoleculeError(msg, _) =>
+//            msg ==> "Limit cannot be 0. Please use a positive number to limit next rows, " +
+//              "or a negative number to limit previous rows."
+//          }
 
         _ <- Ns.int.a1.query.limit(20).offset(-10).get
           .map(_ ==> "Unexpected success")

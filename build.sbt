@@ -2,10 +2,10 @@ import org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv
 
 val scala212 = "2.12.17"
 val scala213 = "2.13.10"
-val scala3   = "3.2.1"
+val scala3   = "3.2.2"
 val allScala = Seq(scala212, scala213, scala3)
 
-val zioVersion      = "2.0.1"
+val zioVersion      = "2.0.8"
 val akkaVersion     = "2.8.0-M3"
 val akkaHttpVersion = "10.5.0-M1"
 
@@ -18,7 +18,7 @@ inThisBuild(
     versionScheme := Some("early-semver"),
     scalaVersion := scala213,
     //    scalaVersion := scala3,
-    crossScalaVersions := Seq(scala212, scala213, scala3),
+    crossScalaVersions := allScala,
 
     // Run tests for all systems sequentially to avoid data locks with db
     // Only applies on JVM. On JS platform there's no parallelism anyway.
@@ -90,10 +90,13 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
   .settings(
     libraryDependencies ++= Seq(
       "io.suzaku" %%% "boopickle" % "1.4.0",
-      "dev.zio" %% "zio" % zioVersion,
-      "dev.zio" %% "zio-streams" % zioVersion,
-      "dev.zio" %% "zio-test" % zioVersion % Test
+      "dev.zio" %%% "zio" % zioVersion,
+      "dev.zio" %%% "zio-streams" % zioVersion,
+      "dev.zio" %%% "zio-test" % zioVersion % Test,
+      "dev.zio" %%% "zio-test-sbt" % zioVersion //% Test // todo: why does this collide?
     )
+//    Test / fork := true,
+//    run / fork := true
   )
   .jsSettings(
     libraryDependencies ++= Seq(
@@ -172,11 +175,11 @@ lazy val datomic = crossProject(JSPlatform, JVMPlatform)
         //        sharedTests + "/composite",
         //        sharedTests + "/crud",
         //        sharedTests + "/expr",
-//        sharedTests + "/pagination",
+        //        sharedTests + "/pagination",
         //        sharedTests + "/relation",
         //        sharedTests + "/sort",
         //        sharedTests + "/txMetaData",
-                sharedTests,
+        sharedTests,
         jvmTests + "/AdhocJVM.scala",
         jsTests + "/AdhocJs.scala",
         sharedTests + "/Adhoc.scala",
@@ -211,7 +214,10 @@ lazy val datomic = crossProject(JSPlatform, JVMPlatform)
     // Suppress "un-used" keys warning
     Global / excludeLintKeys ++= Set(buildInfoPackage, buildInfoKeys),
 
-    testFrameworks += new TestFramework("utest.runner.Framework")
+    testFrameworks := Seq(
+      new TestFramework("utest.runner.Framework"),
+      new TestFramework("zio.test.sbt.ZTestFramework")
+    )
   )
   .jvmSettings(
     // Ensure clojure loads correctly for async tests run from sbt

@@ -29,17 +29,7 @@ abstract class DatomicQueryResolve[Tpl](
   with CursorUtils {
 
 
-  lazy val limitNotZeroMsg = "Limit cannot be 0. " +
-    "Please use a positive number to limit next rows, or a negative number to limit previous rows."
-
   lazy val edgeValuesNotFound = "Couldn't find next page. Edge rows were all deleted/updated."
-
-  protected def limitNotZero(): Unit = {
-    if (limit.isDefined && limit.get == 0) {
-      throw MoleculeError(limitNotZeroMsg)
-    }
-  }
-
 
   protected def postAdjustPullCasts() = {
     pullCastss = pullCastss :+ pullCasts.toList

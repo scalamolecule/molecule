@@ -21,11 +21,17 @@ object OffsetForward extends DatomicTestSuite {
         // Populated
         _ <- Ns.int.insert(1, 2, 3).transact
 
+        _ <- Ns.int.a1.query.limit(0).get.map(_ ==> Nil)
         _ <- Ns.int.a1.query.limit(1).get.map(_ ==> List(1))
         _ <- Ns.int.a1.query.limit(2).get.map(_ ==> List(1, 2))
         _ <- Ns.int.a1.query.limit(3).get.map(_ ==> List(1, 2, 3))
         // limit beyond total count just returns all
         _ <- Ns.int.a1.query.limit(4).get.map(_ ==> List(1, 2, 3))
+
+        _ <- Ns.int.a1.query.offset(0).get.map(_ ==> (List(1, 2, 3), 3, true))
+        _ <- Ns.int.a1.query.offset(1).get.map(_ ==> (List(2, 3), 3, true))
+        _ <- Ns.int.a1.query.offset(2).get.map(_ ==> (List(3), 3, true))
+        _ <- Ns.int.a1.query.offset(3).get.map(_ ==> (Nil, 3, false))
 
         _ <- Ns.int.a1.query.limit(2).get.map(_ ==> List(1, 2))
         _ <- Ns.int.a1.query.limit(2).offset(1).get.map(_._1 ==> List(2, 3))

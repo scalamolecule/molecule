@@ -33,7 +33,6 @@ case class DatomicQueryResolveOffset[Tpl](
   // Datomic querying is synchronous
   def getListFromOffset_sync(implicit conn: DatomicConn_JVM)
   : (List[Tpl], Int, Boolean) = try {
-    limitNotZero()
     if (offset.isDefined && limit.isDefined && limit.get >> 31 != offset.get >> 31) {
       throw MoleculeError("Limit and offset should both be positive or negative.")
     }

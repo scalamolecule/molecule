@@ -5,7 +5,7 @@ import molecule.base.ast.SchemaAST.{Cardinality, MetaNs}
 import molecule.core.marshalling.dbView.DbView
 
 sealed trait ConnProxy {
-  /** Seq of edn strings to transact schema. Supplied from generated boilerplate code. */
+  /** Seq of strings to transact schema. Supplied from generated boilerplate code. */
   val schema: Seq[String]
 
   /** Map of attribute meta data per namespace. Supplied from generated boilerplate code.

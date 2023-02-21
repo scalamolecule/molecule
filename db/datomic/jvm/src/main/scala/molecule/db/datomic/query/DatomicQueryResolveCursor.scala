@@ -38,7 +38,6 @@ case class DatomicQueryResolveCursor[Tpl](
   def getListFromCursor_sync(implicit conn: DatomicConn_JVM)
   : (List[Tpl], String, Boolean) = {
     limit match {
-      case Some(0) => throw MoleculeError(limitNotZeroMsg)
       case Some(l) => cursor match {
         case Some("")     => getInitialPage(l)
         case Some(cursor) =>
