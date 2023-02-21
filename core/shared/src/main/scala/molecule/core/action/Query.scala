@@ -6,7 +6,7 @@ trait Query[Tpl] {
   def offset(n: Int): QueryOffset[Tpl]
   def from(cursor: String): QueryCursor[Tpl]
 
-  // Time
-    def asOf(n: Int): Query[Tpl] = ???
-    def history: Query[Tpl] = ???
+  // Datomic time api
+  def asOf(n: Int): Query[Tpl] = ???
+  def history: Query[Tpl] = ???
 }

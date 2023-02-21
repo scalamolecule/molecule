@@ -1,6 +1,7 @@
 package molecule.core.marshalling
 
 import java.util.UUID
+import molecule.base.api.SchemaTransaction
 import molecule.base.ast.SchemaAST.{Cardinality, MetaNs}
 import molecule.core.marshalling.dbView.DbView
 
@@ -68,3 +69,26 @@ case class DatomicPeerProxy(
   uuid: UUID = UUID.randomUUID(),
   isFreeVersion: Boolean = true
 ) extends ConnProxy
+
+
+object DatomicPeerProxy {
+  def apply(
+    protocol: String,
+    dbIdentifier: String,
+    schemaTx: SchemaTransaction
+  ): DatomicPeerProxy = {
+    // Use only necessary data from boilerplate
+    DatomicPeerProxy(
+      protocol,
+      dbIdentifier,
+      Seq(
+        schemaTx.datomicPartitions,
+        schemaTx.datomicSchema,
+        schemaTx.datomicAliases
+      ),
+      schemaTx.nsMap,
+      schemaTx.attrMap,
+      schemaTx.uniqueAttrs
+    )
+  }
+}

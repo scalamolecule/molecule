@@ -24,19 +24,7 @@ trait DatomicZioSpec extends ZIOSpecDefault with TestData with DatomicApiLoader 
       println(s"Re-creating live database...")
       "localhost:4334/" + randomUUID().toString
     }
-
-    val (schema, nsMap, attrMap, uniqueAttrs) = (
-      Seq(
-        schemaTx.datomicPartitions,
-        schemaTx.datomicSchema,
-        schemaTx.datomicAliases
-      ),
-      schemaTx.nsMap,
-      schemaTx.attrMap,
-      schemaTx.uniqueAttrs,
-    )
-
-    val proxy = DatomicPeerProxy("mem", "", schema, nsMap, attrMap, uniqueAttrs)
+    val proxy        = DatomicPeerProxy("mem", "", schemaTx)
     ZLayer.scoped(
       ZIO.fromFuture(
         _ => DatomicPeer.recreateDbFromEdn(proxy, protocol, dbIdentifier, useFree)
@@ -45,5 +33,6 @@ trait DatomicZioSpec extends ZIOSpecDefault with TestData with DatomicApiLoader 
   }
 
   def types = inMem(TypesSchema)
+  def refs = inMem(RefsSchema)
   def unique = inMem(UniqueSchema)
 }

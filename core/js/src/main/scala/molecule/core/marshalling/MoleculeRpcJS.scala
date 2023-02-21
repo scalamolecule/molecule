@@ -3,10 +3,11 @@ package molecule.core.marshalling
 import boopickle.Default._
 import molecule.base.util.exceptions.MoleculeError
 import molecule.boilerplate.ast.Model._
-import molecule.core.api.{FutureUtils, TxReport}
+import molecule.core.api.TxReport
 import molecule.core.marshalling.Boopicklers._
 import molecule.core.marshalling.deserialize.UnpickleTpls
 import molecule.core.util.Executor._
+import molecule.core.util.FutureUtils
 import scala.concurrent.Future
 import scala.scalajs.js.typedarray.TypedArrayBufferOps._
 

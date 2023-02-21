@@ -5,7 +5,7 @@ import molecule.base.util.exceptions.MoleculeError
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.ops.ModelTransformations
 import molecule.boilerplate.util.MoleculeLogging
-import molecule.core.api.FutureUtils
+import molecule.core.util.FutureUtils
 import molecule.db.datomic.facade.DatomicConn_JVM
 import molecule.db.datomic.query.cursor._
 import scala.annotation.tailrec

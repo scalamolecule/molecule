@@ -3,13 +3,14 @@ package molecule.db.datomic.marshalling
 import java.nio.ByteBuffer
 import molecule.base.util.exceptions.MoleculeError
 import molecule.boilerplate.ast.Model._
-import molecule.core.api.{FutureUtils, TxReport}
+import molecule.core.api.TxReport
 import molecule.core.marshalling.Boopicklers._
 import molecule.core.marshalling._
 import molecule.core.marshalling.deserialize.UnpickleTpls
 import molecule.core.transaction._
 import molecule.core.util.Executor._
-import molecule.db.datomic.action.DatomicQueryImpl
+import molecule.core.util.FutureUtils
+import molecule.db.datomic.action.DatomicQuery
 import molecule.db.datomic.async._
 import molecule.db.datomic.transaction._
 import scala.concurrent.Future
@@ -25,7 +26,7 @@ object DatomicRpcJVM extends MoleculeRpc
   ): Future[Either[MoleculeError, List[Any]]] = either {
     for {
       conn <- getConn(proxy)
-      rows <- new DatomicQueryImpl[Any](elements).get(conn, global)
+      rows <- new DatomicQuery[Any](elements).get(conn, global)
     } yield rows
   }
 

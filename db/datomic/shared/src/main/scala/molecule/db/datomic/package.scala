@@ -4,14 +4,14 @@ package molecule.db
 import molecule.boilerplate.api._
 import molecule.core.MoleculeImplicits_
 import molecule.db.datomic.action._
-import molecule.db.datomic.api.{DatomicApiAsync, DatomicApiSync, DatomicApiZioImpl}
+import molecule.db.datomic.api.{DatomicApiAsync, DatomicApiSync, DatomicApiZio}
 import scala.language.implicitConversions
 
 package object datomic {
 
   object async extends DatomicMoleculeImplicits with DatomicApiAsync
   object sync extends DatomicMoleculeImplicits with DatomicApiSync
-  object zio extends DatomicMoleculeImplicits with DatomicApiZioImpl
+  object zio extends DatomicMoleculeImplicits with DatomicApiZio
 
   object typelevel extends DatomicMoleculeImplicits with DatomicApiAsync
   object laminar extends DatomicMoleculeImplicits with DatomicApiAsync

@@ -14,7 +14,7 @@ object _DatomicActions extends DatomicGenBase("DatomicActions", "/action") {
        |
        |
        |class DatomicActions_00(molecule: Molecule_00) extends Actions_00 {
-       |  override def delete: DatomicDelete = new DatomicDelete(molecule.elements)
+       |  override def delete: DatomicDelete = DatomicDelete(molecule.elements)
        |}
        |$classes
        |""".stripMargin
@@ -25,12 +25,12 @@ object _DatomicActions extends DatomicGenBase("DatomicActions", "/action") {
     val body =
       s"""
          |class ${fileName}_$n0[${`A..V`}](molecule: Molecule_$n0[${`A..V`}]) extends Actions_$n0[${`A..V`}] {
-         |  override def save  : DatomicSave${`..N`}     = new DatomicSave(molecule.elements)
-         |  override def insert: DatomicInsert_$arity[${`A..V`}] = new DatomicInsert_$arity[${`A..V`}](molecule.elements)
-         |  override def query : DatomicQuery[${`(A..V)`}]$p = new DatomicQuery[${`(A..V)`}](molecule.elements)
-         |  override def update: DatomicUpdate${`..N`}   = new DatomicUpdate(molecule.elements)
-         |  override def upsert: DatomicUpdate${`..N`}   = new DatomicUpdate(molecule.elements, true)
-         |  override def delete: DatomicDelete${`..N`}   = new DatomicDelete(molecule.elements)
+         |  override def save  : DatomicSave${`..N`}     = DatomicSave(molecule.elements)
+         |  override def insert: DatomicInsert_$arity[${`A..V`}] = DatomicInsert_$arity[${`A..V`}](molecule.elements)
+         |  override def query : DatomicQuery[${`(A..V)`}]$p = DatomicQuery[${`(A..V)`}](molecule.elements)
+         |  override def update: DatomicUpdate${`..N`}   = DatomicUpdate(molecule.elements)
+         |  override def upsert: DatomicUpdate${`..N`}   = DatomicUpdate(molecule.elements, true)
+         |  override def delete: DatomicDelete${`..N`}   = DatomicDelete(molecule.elements)
          |}""".stripMargin
   }
 }
