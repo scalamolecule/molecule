@@ -153,7 +153,7 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
 
 lazy val datomic = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
-  .in(file("db/datomic"))
+  .in(file("datomic"))
   .settings(publish / skip := true)
   .settings(name := "molecule-datomic")
   .enablePlugins(BuildInfoPlugin)
