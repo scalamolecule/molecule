@@ -9,8 +9,23 @@ trait MoleculeRpc {
 
   def query[Tpl](
     proxy: ConnProxy,
-    elements: List[Element]
+    elements: List[Element],
+    limit: Option[Int]
   ): Future[Either[MoleculeError, List[Tpl]]]
+
+  def queryOffset[Tpl](
+    proxy: ConnProxy,
+    elements: List[Element],
+    limit: Option[Int],
+    offset: Int
+  ): Future[Either[MoleculeError, (List[Tpl], Int, Boolean)]]
+
+  def queryCursor[Tpl](
+    proxy: ConnProxy,
+    elements: List[Element],
+    limit: Option[Int],
+    cursor: String
+  ): Future[Either[MoleculeError, (List[Tpl], String, Boolean)]]
 
   def save(
     proxy: ConnProxy,

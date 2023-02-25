@@ -68,5 +68,4 @@ trait DatomicApiAsync extends ApiAsync {
       conn.transact_async(stmts)
     }
   }
-
 }

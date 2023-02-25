@@ -20,11 +20,36 @@ case class MoleculeRpcJS(interface: String, port: Int)
 
   override def query[Tpl](
     proxy: ConnProxy,
-    elements: List[Element]
+    elements: List[Element],
+    limit: Option[Int]
   ): Future[Either[MoleculeError, List[Tpl]]] = Future {
-    val argsSerialized = Pickle.intoBytes((proxy, elements)).typedArray()
-    xmlRequest("query", argsSerialized).map(resultSerialized =>
+    val argsSerialized = Pickle.intoBytes((proxy, elements, limit)).typedArray()
+    xmlHttpRequest("query", argsSerialized).map(resultSerialized =>
       UnpickleTpls[Tpl](elements, resultSerialized).unpickle
+    )
+  }.flatten
+
+  override def queryOffset[Tpl](
+    proxy: ConnProxy,
+    elements: List[Element],
+    limit: Option[Int],
+    offset: Int
+  ): Future[Either[MoleculeError, (List[Tpl], Int, Boolean)]] = Future {
+    val argsSerialized = Pickle.intoBytes((proxy, elements, limit, offset)).typedArray()
+    xmlHttpRequest("queryOffset", argsSerialized).map(resultSerialized =>
+      UnpickleTpls[Tpl](elements, resultSerialized).unpickleOffset
+    )
+  }.flatten
+
+  override def queryCursor[Tpl](
+    proxy: ConnProxy,
+    elements: List[Element],
+    limit: Option[Int],
+    cursor: String
+  ): Future[Either[MoleculeError, (List[Tpl], String, Boolean)]] = Future {
+    val argsSerialized = Pickle.intoBytes((proxy, elements, limit, cursor)).typedArray()
+    xmlHttpRequest("queryCursor", argsSerialized).map(resultSerialized =>
+      UnpickleTpls[Tpl](elements, resultSerialized).unpickleCursor
     )
   }.flatten
 
@@ -34,7 +59,7 @@ case class MoleculeRpcJS(interface: String, port: Int)
     elements: List[Element]
   ): Future[Either[MoleculeError, TxReport]] = Future {
     val argsSerialized = Pickle.intoBytes((proxy, elements)).typedArray()
-    xmlRequest("save", argsSerialized).map(resultSerialized =>
+    xmlHttpRequest("save", argsSerialized).map(resultSerialized =>
       Unpickle.apply[Either[MoleculeError, TxReport]].fromBytes(resultSerialized)
     )
   }.flatten
@@ -47,7 +72,7 @@ case class MoleculeRpcJS(interface: String, port: Int)
     txElements: List[Element],
   ): Future[Either[MoleculeError, TxReport]] = Future {
     val argsSerialized = Pickle.intoBytes((proxy, tplElements, tplsSerialized, txElements)).typedArray()
-    xmlRequest("insert", argsSerialized).map(resultSerialized =>
+    xmlHttpRequest("insert", argsSerialized).map(resultSerialized =>
       Unpickle.apply[Either[MoleculeError, TxReport]].fromBytes(resultSerialized)
     )
   }.flatten
@@ -59,7 +84,7 @@ case class MoleculeRpcJS(interface: String, port: Int)
     isUpsert: Boolean = false
   ): Future[Either[MoleculeError, TxReport]] = Future {
     val argsSerialized = Pickle.intoBytes((proxy, elements, isUpsert)).typedArray()
-    xmlRequest("update", argsSerialized).map(resultSerialized =>
+    xmlHttpRequest("update", argsSerialized).map(resultSerialized =>
       Unpickle.apply[Either[MoleculeError, TxReport]].fromBytes(resultSerialized)
     )
   }.flatten
@@ -70,7 +95,7 @@ case class MoleculeRpcJS(interface: String, port: Int)
     elements: List[Element]
   ): Future[Either[MoleculeError, TxReport]] = Future {
     val argsSerialized = Pickle.intoBytes((proxy, elements)).typedArray()
-    xmlRequest("delete", argsSerialized).map(resultSerialized =>
+    xmlHttpRequest("delete", argsSerialized).map(resultSerialized =>
       Unpickle.apply[Either[MoleculeError, TxReport]].fromBytes(resultSerialized)
     )
   }.flatten

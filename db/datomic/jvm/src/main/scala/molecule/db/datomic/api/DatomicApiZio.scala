@@ -47,50 +47,61 @@ trait DatomicApiZio extends ApiZio {
 
 
   implicit class datomicSaveApiZio[Tpl](save: DatomicSave) extends SaveApi {
-    override def transact: ZIO[Connection, MoleculeError, TxReport] = for {
-      stmts <- ZIO.succeed(new SaveExtraction() with Save_stmts).map(_.getStmts(save.elements))
-      txReport <- transactStmts(stmts)
-    } yield txReport
+    override def transact: ZIO[Connection, MoleculeError, TxReport] = {
+      for {
+        stmts <- ZIO.succeed(new SaveExtraction() with Save_stmts)
+          .map(_.getStmts(save.elements))
+        txReport <- transactStmts(stmts)
+      } yield txReport
+    }
   }
 
   implicit class datomicInsertApiZio[Tpl](insert0: Insert) extends InsertApi {
     val insert = insert0.asInstanceOf[DatomicInsert_JVM]
-    override def transact: ZIO[Connection, MoleculeError, TxReport] = for {
-      stmts <- ZIO.succeed(new InsertExtraction with Insert_stmts).map(_.getStmts(insert.elements, insert.tpls))
-      txReport <- transactStmts(stmts)
-    } yield txReport
+    override def transact: ZIO[Connection, MoleculeError, TxReport] = {
+      for {
+        stmts <- ZIO.succeed(new InsertExtraction with Insert_stmts)
+          .map(_.getStmts(insert.elements, insert.tpls))
+        txReport <- transactStmts(stmts)
+      } yield txReport
+    }
   }
 
   implicit class datomicUpdateApiZio[Tpl](update: DatomicUpdate) extends UpdateApi {
-    override def transact: ZIO[Connection, MoleculeError, TxReport] = for {
-      conn0 <- ZIO.service[Connection]
-      conn = conn0.asInstanceOf[DatomicConn_JVM]
-      stmts <- ZIO.succeed(new UpdateExtraction(conn.proxy.uniqueAttrs, update.isUpsert) with Update_stmts)
-        .map(_.getStmts(conn, update.elements))
-      txReport <- transactStmtsWithConn(conn, stmts)
-    } yield txReport
+    override def transact: ZIO[Connection, MoleculeError, TxReport] = {
+      for {
+        conn0 <- ZIO.service[Connection]
+        conn = conn0.asInstanceOf[DatomicConn_JVM]
+        stmts <- ZIO.succeed(
+          new UpdateExtraction(conn.proxy.uniqueAttrs, update.isUpsert) with Update_stmts
+        ).map(_.getStmts(conn, update.elements))
+        txReport <- transactStmtsWithConn(conn, stmts)
+      } yield txReport
+    }
   }
 
   implicit class datomicDeleteApiZio[Tpl](delete: DatomicDelete) extends DeleteApi {
-    override def transact: ZIO[Connection, MoleculeError, TxReport] = for {
-      conn0 <- ZIO.service[Connection]
-      conn = conn0.asInstanceOf[DatomicConn_JVM]
-      stmts <- ZIO.succeed(new DeleteExtraction with Delete_stmts).map(_.getStmtsData(conn, delete.elements))
-      txReport <- transactStmtsWithConn(conn, stmts)
-    } yield txReport
+    override def transact: ZIO[Connection, MoleculeError, TxReport] = {
+      for {
+        conn0 <- ZIO.service[Connection]
+        conn = conn0.asInstanceOf[DatomicConn_JVM]
+        stmts <- ZIO.succeed(new DeleteExtraction with Delete_stmts)
+          .map(_.getStmtsData(conn, delete.elements))
+        txReport <- transactStmtsWithConn(conn, stmts)
+      } yield txReport
+    }
   }
 
 
   // Helpers ---------
 
-  private def getResult[T](query: DatomicConn_JVM => Future[T]): ZIO[Connection, MoleculeError, T] = for {
-    conn0 <- ZIO.service[Connection]
-    conn = conn0.asInstanceOf[DatomicConn_JVM]
-    result <- ZIO.fromFuture(_ => query(conn)).mapError {
-      case e: MoleculeError => e
-      case e: Throwable     => MoleculeError(e.toString, e)
-    }
-  } yield result
+  private def getResult[T](query: DatomicConn_JVM => Future[T]): ZIO[Connection, MoleculeError, T] = {
+    for {
+      conn0 <- ZIO.service[Connection]
+      conn = conn0.asInstanceOf[DatomicConn_JVM]
+      result <- moleculeError(ZIO.fromFuture(_ => query(conn)))
+    } yield result
+  }
 
   private def transactStmts(stmts: Data): ZIO[Connection, MoleculeError, TxReport] = {
     for {
@@ -100,10 +111,10 @@ trait DatomicApiZio extends ApiZio {
   }
 
   private def transactStmtsWithConn(conn: DatomicConn_JVM, stmts: Data): ZIO[Connection, MoleculeError, TxReport] = {
-    moleculeErrorTx(ZIO.fromFuture(_ => conn.transact_async(stmts)))
+    moleculeError(ZIO.fromFuture(_ => conn.transact_async(stmts)))
   }
 
-  private def moleculeErrorTx(result: Task[TxReport]): ZIO[Connection, MoleculeError, TxReport] = {
+  private def moleculeError[T](result: Task[T]): ZIO[Connection, MoleculeError, T] = {
     result.mapError {
       case e: MoleculeError => e
       case e: Throwable     => MoleculeError(e.toString, e)

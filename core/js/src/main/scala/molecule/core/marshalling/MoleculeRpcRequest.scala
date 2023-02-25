@@ -16,7 +16,7 @@ class MoleculeRpcRequest(interface: String, port: Int) extends MoleculeLogging {
   }
 
 
-  def xmlRequest(action: String, argsSerialized: Int8Array): Future[ByteBuffer] = {
+  def xmlHttpRequest(action: String, argsSerialized: Int8Array): Future[ByteBuffer] = {
     val url     = s"http://$interface:$port/MoleculeRpc/$action"
     val req     = new dom.XMLHttpRequest()
     val promise = Promise[dom.XMLHttpRequest]()

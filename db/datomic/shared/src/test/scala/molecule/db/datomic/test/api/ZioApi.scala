@@ -5,7 +5,7 @@ import molecule.coreTests.dataModels.core.dsl.Unique.Unique
 import molecule.db.datomic.setup.DatomicZioSpec
 import molecule.db.datomic.zio._
 import zio._
-import zio.test.TestAspect._
+import zio.test.TestAspect.{sequential, _}
 import zio.test._
 import scala.annotation.nowarn
 
@@ -13,8 +13,7 @@ object ZioApi extends DatomicZioSpec {
 
   @nowarn override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("Molecule ZIO api")(
-
-      test("Crud actions")(
+      test("Crud actions") {
         for {
           eids <- Ns.int.insert(1, 2).transact.map(_.eids)
           _ <- Ns.int(3).save.transact
@@ -22,10 +21,12 @@ object ZioApi extends DatomicZioSpec {
           _ <- Ns(eids(0)).int(10).update.transact
           _ <- Ns(eids(1)).delete.transact
           b <- Ns.int.query.get
-        } yield
-          assertTrue(a == List(1, 2, 3)) &&
+        } yield {
+          assertTrue(eids.size == 2) &&
+            assertTrue(a == List(1, 2, 3)) &&
             assertTrue(b == List(3, 10))
-      ),
+        }
+      }.provide(types.orDie),
 
       test("Offset query")(
         for {
@@ -39,7 +40,7 @@ object ZioApi extends DatomicZioSpec {
             assertTrue(b == List(1, 2)) &&
             assertTrue(c == (List(2, 3), 3, true)) &&
             assertTrue(d == (List(2), 3, true))
-      ),
+      ).provide(types.orDie),
 
       test("Cursor query") {
         val query = Unique.int.a1.query
@@ -51,10 +52,9 @@ object ZioApi extends DatomicZioSpec {
           c2 <- query.from(c3).limit(-2).get.map { case (List(3, 4), c, true) => c }
           res <- query.from(c2).limit(-2).get
         } yield {
-          assertTrue(res._1 == List(1, 2)) &&
-            assertTrue(!res._3)
+          assertTrue(res._1 == List(1, 2) && !res._3)
         }
       }.provide(unique.orDie)
 
-    ).provide(types.orDie) @@ sequential
+    ) @@ sequential
 }

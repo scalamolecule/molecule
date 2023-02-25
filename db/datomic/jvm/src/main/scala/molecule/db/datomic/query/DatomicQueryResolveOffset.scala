@@ -20,7 +20,7 @@ import scala.concurrent.{ExecutionContext, Future}
 case class DatomicQueryResolveOffset[Tpl](
   elements: List[Element],
   limit: Option[Int],
-  offset: Option[Int],
+  offset: Option[Int]
 ) extends DatomicQueryResolve[Tpl](elements, limit)
   with FutureUtils
   with MoleculeLogging {

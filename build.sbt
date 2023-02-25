@@ -64,7 +64,6 @@ lazy val base = crossProject(JSPlatform, JVMPlatform)
     testFrameworks += new TestFramework("utest.runner.Framework")
   )
 
-
 lazy val boilerplate = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .settings(name := "molecule-boilerplate")
@@ -81,7 +80,6 @@ lazy val boilerplate = crossProject(JSPlatform, JVMPlatform)
     testFrameworks += new TestFramework("utest.runner.Framework")
   )
 
-
 lazy val core = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .settings(name := "molecule-core")
@@ -93,10 +91,8 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
       "dev.zio" %%% "zio" % zioVersion,
       "dev.zio" %%% "zio-streams" % zioVersion,
       "dev.zio" %%% "zio-test" % zioVersion % Test,
-      "dev.zio" %%% "zio-test-sbt" % zioVersion //% Test // todo: why does this collide?
+      "dev.zio" %%% "zio-test-sbt" % zioVersion // % Test // todo: why does this collide?
     )
-//    Test / fork := true,
-//    run / fork := true
   )
   .jsSettings(
     libraryDependencies ++= Seq(
@@ -117,7 +113,6 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
     )
   )
 
-
 lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .settings(name := "molecule-coreTests")
@@ -135,7 +130,11 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
     //    moleculeMakeJars := false,
 
     // Suppress "un-used" keys warning
-    Global / excludeLintKeys ++= Set(moleculePluginActive, moleculeDataModelPaths, moleculeMakeJars),
+    Global / excludeLintKeys ++= Set(
+      moleculePluginActive,
+      moleculeDataModelPaths,
+      moleculeMakeJars
+    ),
 
     // Let IntelliJ detect sbt-molecule-created jars in unmanaged lib directories
     exportJars := true,
@@ -152,7 +151,6 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
   )
   .jsSettings(jsEnvironment)
 
-
 lazy val datomic = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .in(file("db/datomic"))
@@ -165,13 +163,15 @@ lazy val datomic = crossProject(JSPlatform, JVMPlatform)
     // Note that intellij doesn't recognize this setting - there you can right click on files and exclude
     unmanagedSources / excludeFilter := {
       val test = "src/test/scala/molecule/db/datomic/test"
-      def path(platform: String) = (baseDirectory.value / s"../$platform/$test").getCanonicalPath
+      def path(platform: String) =
+        (baseDirectory.value / s"../$platform/$test").getCanonicalPath
       val jsTests     = path("js")
       val jvmTests    = path("jvm")
       val sharedTests = path("shared")
       val allowed     = Seq(
         //        jvmTests + "/restore",
         //        sharedTests + "/aggr",
+        //        sharedTests + "/api",
         //        sharedTests + "/composite",
         //        sharedTests + "/crud",
         //        sharedTests + "/expr",
@@ -192,7 +192,6 @@ lazy val datomic = crossProject(JSPlatform, JVMPlatform)
           !allowed.exists(p => f.getCanonicalPath.startsWith(p))
       )
     },
-
     buildInfoPackage := "moleculeBuildInfo",
     buildInfoKeys := Seq[BuildInfoKey](
       name,
@@ -213,7 +212,6 @@ lazy val datomic = crossProject(JSPlatform, JVMPlatform)
 
     // Suppress "un-used" keys warning
     Global / excludeLintKeys ++= Set(buildInfoPackage, buildInfoKeys),
-
     testFrameworks := Seq(
       new TestFramework("utest.runner.Framework"),
       new TestFramework("zio.test.sbt.ZTestFramework")
@@ -222,7 +220,6 @@ lazy val datomic = crossProject(JSPlatform, JVMPlatform)
   .jvmSettings(
     // Ensure clojure loads correctly for async tests run from sbt
     Test / classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.Flat,
-
     resolvers += "clojars" at "https://clojars.org/repo",
     libraryDependencies ++= Seq(
       "com.datomic" % "datomic-free" % DatomicSettings.freeVersion
@@ -230,7 +227,9 @@ lazy val datomic = crossProject(JSPlatform, JVMPlatform)
       case Some((2, 13)) => Nil
       case Some((2, 12)) =>
         // For @TxFns macro annotation on Scala 2.12
-        sbt.compilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full) :: Nil
+        sbt.compilerPlugin(
+          "org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full
+        ) :: Nil
       case _             => Nil
     })
   )
@@ -249,7 +248,6 @@ lazy val datomic = crossProject(JSPlatform, JVMPlatform)
       )
   )
   .jsSettings(jsEnvironment)
-
 
 lazy val jsEnvironment = {
   Seq(

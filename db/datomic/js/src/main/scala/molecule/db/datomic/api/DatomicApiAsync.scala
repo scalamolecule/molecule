@@ -14,7 +14,7 @@ trait DatomicApiAsync extends ApiAsync with FutureUtils {
   implicit class datomicQueryApiAsync[Tpl](q: DatomicQuery[Tpl]) extends QueryApi[Tpl] {
     override def get(implicit conn0: Connection, ec: ExecutionContext): Future[List[Tpl]] = {
       val conn = conn0.asInstanceOf[DatomicConn_JS]
-      conn.rpc.query[Tpl](conn.proxy, q.elements).future
+      conn.rpc.query[Tpl](conn.proxy, q.elements, q.limit).future
     }
     override def inspect(implicit conn: Connection, ec: ExecutionContext): Future[Unit] = ???
   }
@@ -22,8 +22,7 @@ trait DatomicApiAsync extends ApiAsync with FutureUtils {
   implicit class datomicQueryOffsetApiAsync[Tpl](q: DatomicQueryOffset[Tpl]) extends QueryOffsetApi[Tpl] {
     override def get(implicit conn0: Connection, ec: ExecutionContext): Future[(List[Tpl], Int, Boolean)] = {
       val conn = conn0.asInstanceOf[DatomicConn_JS]
-      conn.rpc.query[Tpl](conn.proxy, q.elements).future
-      ???
+      conn.rpc.queryOffset[Tpl](conn.proxy, q.elements, q.limit, q.offset).future
     }
     override def inspect(implicit conn: Connection, ec: ExecutionContext): Future[Unit] = ???
   }
@@ -31,8 +30,7 @@ trait DatomicApiAsync extends ApiAsync with FutureUtils {
   implicit class datomicQueryCursorApiAsync[Tpl](q: DatomicQueryCursor[Tpl]) extends QueryCursorApi[Tpl] {
     override def get(implicit conn0: Connection, ec: ExecutionContext): Future[(List[Tpl], String, Boolean)] = {
       val conn = conn0.asInstanceOf[DatomicConn_JS]
-      conn.rpc.query[Tpl](conn.proxy, q.elements).future
-      ???
+      conn.rpc.queryCursor[Tpl](conn.proxy, q.elements, q.limit, q.cursor).future
     }
     override def inspect(implicit conn: Connection, ec: ExecutionContext): Future[Unit] = ???
   }
@@ -50,7 +48,7 @@ trait DatomicApiAsync extends ApiAsync with FutureUtils {
     override def transact(implicit conn0: Connection, ec: ExecutionContext): Future[TxReport] = tryFuture {
       val conn                      = conn0.asInstanceOf[DatomicConn_JS]
       val (tplElements, txElements) = splitElements(insert.elements)
-      val tplsSerialized            = PickleTpls(tplElements, Right(insert.tpls), true).pickle
+      val tplsSerialized            = PickleTpls(tplElements, true).pickle(Right(insert.tpls))
       conn.rpc.insert(conn.proxy, tplElements, tplsSerialized, txElements).future
     }
   }

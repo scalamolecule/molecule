@@ -17,11 +17,27 @@ import scala.language.implicitConversions
 abstract class RpcHandlers(rpc: MoleculeRpc) extends MoleculeLogging with SerializationUtils {
 
   def handleQuery(argsSerialized: ByteString): Future[Array[Byte]] = tryUnpickle {
-    val (proxy, elements) = Unpickle.apply[(ConnProxy, List[Element])]
+    val (proxy, elements, limit) = Unpickle.apply[(ConnProxy, List[Element], Option[Int])]
       .fromBytes(argsSerialized.asByteBuffer)
     // Data is typed when un-serialized on the client side
-    rpc.query[Any](proxy, elements).map(either =>
-      PickleTpls(elements, either, false).pickle
+    rpc.query[Any](proxy, elements, limit).map(result =>
+      PickleTpls(elements, false).pickle(result)
+    )
+  }
+  def handleQueryOffset(argsSerialized: ByteString): Future[Array[Byte]] = tryUnpickle {
+    val (proxy, elements, limit, offset) = Unpickle.apply[(ConnProxy, List[Element], Option[Int], Int)]
+      .fromBytes(argsSerialized.asByteBuffer)
+    // Data is typed when un-serialized on the client side
+    rpc.queryOffset[Any](proxy, elements, limit, offset).map(result =>
+      PickleTpls(elements, false).pickleOffset(result)
+    )
+  }
+  def handleQueryCursor(argsSerialized: ByteString): Future[Array[Byte]] = tryUnpickle {
+    val (proxy, elements, limit, cursor) = Unpickle.apply[(ConnProxy, List[Element], Option[Int], String)]
+      .fromBytes(argsSerialized.asByteBuffer)
+    // Data is typed when un-serialized on the client side
+    rpc.queryCursor[Any](proxy, elements, limit, cursor).map(result =>
+      PickleTpls(elements, false).pickleCursor(result)
     )
   }
 

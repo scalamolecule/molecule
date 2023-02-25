@@ -16,7 +16,6 @@ import scala.collection.mutable.ListBuffer
 
 case class PickleTpls(
   elements: List[Element],
-  either: Either[MoleculeError, Seq[Any]],
   allTuples: Boolean
 ) extends PickleTpl_
   with ModelUtils
@@ -29,10 +28,34 @@ case class PickleTpls(
   private val enc   = state.enc
   type DummyNotUsed = Int
 
-  def pickle: Array[Byte] = {
-    either match {
+  def pickle(result: Either[MoleculeError, Seq[Any]]): Array[Byte] = {
+    result match {
       case Right(tpls) => pickleTpls(tpls)
       case Left(err)   => LeftPickler[MoleculeError, DummyNotUsed].pickle(Left(err))(state)
+    }
+    state.toByteBuffer.toArray
+  }
+  def pickleOffset(result: Either[MoleculeError, (Seq[Any], Int, Boolean)]): Array[Byte] = {
+    result match {
+      case Right((tpls, limit, more)) =>
+//        enk.writeInt(3) // Start Tuple3 with size 3
+        pickleTpls(tpls)
+        enk.writeInt(limit)
+        enk.writeBoolean(more)
+      case Left(err)                  =>
+        LeftPickler[MoleculeError, DummyNotUsed].pickle(Left(err))(state)
+    }
+    state.toByteBuffer.toArray
+  }
+  def pickleCursor(result: Either[MoleculeError, (Seq[Any], String, Boolean)]): Array[Byte] = {
+    result match {
+      case Right((tpls, cursor, more)) =>
+//        enk.writeInt(3) // Start Tuple3 with size 3
+        pickleTpls(tpls)
+        enk.writeString(cursor)
+        enk.writeBoolean(more)
+      case Left(err)                   =>
+        LeftPickler[MoleculeError, DummyNotUsed].pickle(Left(err))(state)
     }
     state.toByteBuffer.toArray
   }

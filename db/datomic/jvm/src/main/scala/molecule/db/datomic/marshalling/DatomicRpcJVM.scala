@@ -10,7 +10,7 @@ import molecule.core.marshalling.deserialize.UnpickleTpls
 import molecule.core.transaction._
 import molecule.core.util.Executor._
 import molecule.core.util.FutureUtils
-import molecule.db.datomic.action.DatomicQuery
+import molecule.db.datomic.action.{DatomicQuery, DatomicQueryCursor, DatomicQueryOffset}
 import molecule.db.datomic.async._
 import molecule.db.datomic.transaction._
 import scala.concurrent.Future
@@ -19,14 +19,38 @@ object DatomicRpcJVM extends MoleculeRpc
   with DatomicTxBase_JVM
   with FutureUtils {
 
-  // Data is typed when deserialized on client side
   override def query[Any](
     proxy: ConnProxy,
-    elements: List[Element]
+    elements: List[Element],
+    limit: Option[Int]
   ): Future[Either[MoleculeError, List[Any]]] = either {
     for {
       conn <- getConn(proxy)
-      rows <- new DatomicQuery[Any](elements).get(conn, global)
+      rows <- new DatomicQuery[Any](elements, limit).get(conn, global)
+    } yield rows
+  }
+
+  override def queryOffset[Any](
+    proxy: ConnProxy,
+    elements: List[Element],
+    limit: Option[Int],
+    offset: Int
+  ): Future[Either[MoleculeError, (List[Any], Int, Boolean)]] = either {
+    for {
+      conn <- getConn(proxy)
+      rows <- new DatomicQueryOffset[Any](elements, limit, offset).get(conn, global)
+    } yield rows
+  }
+
+  override def queryCursor[Any](
+    proxy: ConnProxy,
+    elements: List[Element],
+    limit: Option[Int],
+    cursor: String
+  ): Future[Either[MoleculeError, (List[Any], String, Boolean)]] = either {
+    for {
+      conn <- getConn(proxy)
+      rows <- new DatomicQueryCursor[Any](elements, limit, cursor).get(conn, global)
     } yield rows
   }
 

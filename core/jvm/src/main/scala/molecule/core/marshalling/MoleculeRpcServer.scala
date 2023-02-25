@@ -21,7 +21,7 @@ import scala.util.{Failure, Success}
  *
  * sbt datomicJVM/run
  * */
-abstract class MoleculeRpcServer(rpc: MoleculeRpc) extends RpcHandlers(rpc){
+abstract class MoleculeRpcServer(rpc: MoleculeRpc) extends RpcHandlers(rpc) {
   implicit val system          : ActorSystem              = ActorSystem()
   implicit val executionContext: ExecutionContextExecutor = system.dispatcher
 
@@ -39,6 +39,8 @@ abstract class MoleculeRpcServer(rpc: MoleculeRpc) extends RpcHandlers(rpc){
 
   lazy val route: Route = cors() {
     path(MoleculeRpc / "query")(toRoute(handleQuery)) ~
+      path(MoleculeRpc / "queryOffset")(toRoute(handleQueryOffset)) ~
+      path(MoleculeRpc / "queryCursor")(toRoute(handleQueryCursor)) ~
       path(MoleculeRpc / "save")(toRoute(handleSave)) ~
       path(MoleculeRpc / "insert")(toRoute(handleInsert)) ~
       path(MoleculeRpc / "update")(toRoute(handleUpdate)) ~

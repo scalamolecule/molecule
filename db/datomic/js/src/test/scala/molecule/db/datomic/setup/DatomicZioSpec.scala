@@ -1,14 +1,14 @@
 package molecule.db.datomic.setup
 
-import java.util.UUID.randomUUID
 import molecule.base.api.SchemaTransaction
 import molecule.core.api.Connection
 import molecule.core.marshalling.DatomicPeerProxy
 import molecule.coreTests.dataModels.core.schema._
 import molecule.coreTests.util.TestData
+import molecule.db.datomic.facade.DatomicConn_JS
 import moleculeBuildInfo.BuildInfo
+import zio.ZLayer
 import zio.test.ZIOSpecDefault
-import zio.{ZIO, ZLayer}
 
 trait DatomicZioSpec extends ZIOSpecDefault with TestData {
 
@@ -17,18 +17,8 @@ trait DatomicZioSpec extends ZIOSpecDefault with TestData {
   lazy val useFree      = BuildInfo.datomicUseFree
 
   def inMem(schemaTx: SchemaTransaction): ZLayer[Any, Throwable, Connection] = {
-    val dbIdentifier                          = if (protocol == "mem") "" else {
-      println(s"Re-creating live database...")
-      "localhost:4334/" + randomUUID().toString
-    }
     val proxy = DatomicPeerProxy("mem", "", schemaTx)
-
-    //    ZLayer.scoped(
-    //      ZIO.fromFuture(
-    //        _ => DatomicPeer.recreateDbFromEdn(proxy, protocol, dbIdentifier, useFree)
-    //      )
-    //    )
-    ???
+    ZLayer.succeed(DatomicConn_JS(proxy, DatomicRpcRequest.moleculeRpcRequest))
   }
 
   def types = inMem(TypesSchema)
