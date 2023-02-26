@@ -71,7 +71,7 @@ abstract class DatomicQueryResolve[Tpl](
   ): jCollection[jList[AnyRef]] = {
     isFree = conn.isFreeVersion
     val db = conn.peerConn.db()
-    getQueries(conn.optimizeQuery, altElements) match {
+    processQueries(conn.optimizeQuery, altElements) match {
       case ("", query)       =>
         distinct(Peer.q(query, db +: inputs: _*))
       case (preQuery, query) =>

@@ -28,19 +28,23 @@ trait DatomicApiSync extends ApiSync {
   }
 
 
-  implicit class datomicSaveApiSync[Tpl](save: DatomicSave) extends SaveApi {
+  implicit class datomicSaveApiSync[Tpl](save: DatomicSave) extends Transaction {
     override def transact(implicit conn: Connection): TxReport = noSyncOnJSplatform
+    override def inspect(implicit conn: Connection): Unit = noSyncOnJSplatform
   }
 
-  implicit class datomicInsertApiSync[Tpl](insert: Insert) extends InsertApi {
+  implicit class datomicInsertApiSync[Tpl](insert: Insert) extends Transaction {
     override def transact(implicit conn: Connection): TxReport = noSyncOnJSplatform
+    override def inspect(implicit conn: Connection): Unit = noSyncOnJSplatform
   }
 
-  implicit class datomicUpdateApiSync[Tpl](update: DatomicUpdate) extends UpdateApi {
+  implicit class datomicUpdateApiSync[Tpl](update: DatomicUpdate) extends Transaction {
     override def transact(implicit conn: Connection): TxReport = noSyncOnJSplatform
+    override def inspect(implicit conn: Connection): Unit = noSyncOnJSplatform
   }
 
-  implicit class datomicDeleteApiSync[Tpl](delete: DatomicDelete) extends DeleteApi {
+  implicit class datomicDeleteApiSync[Tpl](delete: DatomicDelete) extends Transaction {
     override def transact(implicit conn: Connection): TxReport = noSyncOnJSplatform
+    override def inspect(implicit conn: Connection): Unit = noSyncOnJSplatform
   }
 }

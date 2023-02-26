@@ -1,34 +1,23 @@
 package molecule.core.api
 
-trait ApiSync {
+trait ApiSync extends PrintInspect {
 
-  trait QueryApi[Tpl] {
+  trait QueryApi[Tpl] extends Inspectable {
     def get(implicit conn: Connection): List[Tpl]
-    def inspect(implicit conn: Connection): Unit
   }
-  trait QueryOffsetApi[Tpl] {
+  trait QueryOffsetApi[Tpl] extends Inspectable {
     def get(implicit conn: Connection): (List[Tpl], Int, Boolean)
-    def inspect(implicit conn: Connection): Unit
   }
-  trait QueryCursorApi[Tpl] {
+  trait QueryCursorApi[Tpl] extends Inspectable {
     def get(implicit conn: Connection): (List[Tpl], String, Boolean)
+  }
+
+
+  trait Transaction extends Inspectable {
+    def transact(implicit conn: Connection): TxReport
+  }
+
+  trait Inspectable {
     def inspect(implicit conn: Connection): Unit
-  }
-
-
-  trait SaveApi {
-    def transact(implicit conn: Connection): TxReport
-  }
-
-  trait InsertApi {
-    def transact(implicit conn: Connection): TxReport
-  }
-
-  trait UpdateApi {
-    def transact(implicit conn: Connection): TxReport
-  }
-
-  trait DeleteApi {
-    def transact(implicit conn: Connection): TxReport
   }
 }

@@ -26,6 +26,17 @@ object AsyncApi extends DatomicTestSuite {
         } yield ()
       }
 
+      "Crud actions, inspect" - types { implicit conn =>
+        for {
+          List(a, b) <- Ns.int.insert(1, 2).transact.map(_.eids) // Need data for update and delete
+          _ <- Ns.int.insert(1, 2).inspect
+          _ <- Ns.int(3).save.inspect
+          _ <- Ns.int.query.inspect
+          _ <- Ns(a).int(10).update.inspect
+          _ <- Ns(b).delete.inspect
+        } yield ()
+      }
+
       "Offset query" - types { implicit conn =>
         for {
           _ <- Ns.int.insert(1, 2, 3).transact

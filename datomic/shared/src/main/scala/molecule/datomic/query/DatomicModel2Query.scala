@@ -29,7 +29,7 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
 
   // Some specialized expressions require a pre-query to extract entity ids for the main query
   // Returns (preQuery, mainQuery)
-  final protected def getQueries(
+  final def processQueries(
     optimized: Boolean,
     altElements: List[Element] = Nil
   ): (String, String) = {
@@ -56,10 +56,20 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
     // Remember first entity id variable for subsequent composite groups
     firstEid = vv
 
-    // Recursively resolve molecule elements
+    // Recursively resolve molecule elements - mutations happen here!
     resolve(List(firstEid), elements)
 
     // Build Datomic query string(s)
+    val (mainQuery, preQuery, queryStrs) = renderQueries(elements, optimized)
+    logger.debug(queryStrs)
+
+    (preQuery, mainQuery)
+  }
+
+  final def renderQueries(
+    elements: List[Element],
+    optimized: Boolean = true
+  ): (String, String, String) = {
     val mainQuery = renderQuery(
       nestedIds, find, widh, in ++ inPost, where ++ wherePost, rules.nonEmpty, optimized
     )
@@ -75,7 +85,6 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
       preQuery
     }
 
-    // Log queries
     val preQueryStrs = if (preQuery.nonEmpty) Seq(s"\nPRE-QUERY:\n$preQuery") else Nil
     val inputsStrs   = if (inputs.nonEmpty) {
       "" +: inputs.map {
@@ -83,15 +92,13 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
         case other       => other.toString
       }
     } else Nil
-    val queryStrs    = (elements :+ "" :+ mainQuery) ++ inputsStrs ++ preQueryStrs
-    logger.debug(queryStrs.mkString("\n").trim)
+    val queryStrs = ((elements :+ "" :+ mainQuery) ++ inputsStrs ++ preQueryStrs).mkString("\n").trim
 
-    (preQuery, mainQuery)
+    (mainQuery, preQuery, queryStrs)
   }
 
-
   final def getEidQueryWithInputs: (Att, Seq[AnyRef]) = {
-    (getQueries(false)._2, inputs)
+    (processQueries(false)._2, inputs)
   }
 
   final private def renderQuery(

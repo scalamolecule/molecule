@@ -1,6 +1,7 @@
 package molecule.datomic.api
 
 import molecule.base.util.exceptions.MoleculeError
+import molecule.boilerplate.ast.Model._
 import molecule.core.action.Insert
 import molecule.core.api.{ApiZio, Connection, TxReport}
 import molecule.core.transaction.{DeleteExtraction, InsertExtraction, SaveExtraction, UpdateExtraction}
@@ -13,7 +14,8 @@ import molecule.datomic.transaction.{Delete_stmts, Insert_stmts, Save_stmts, Upd
 import zio._
 import scala.concurrent.Future
 
-trait DatomicApiZio extends ApiZio {
+
+trait DatomicApiZio extends DatomicZioApiBase with ApiZio {
 
   implicit class datomicQueryApiZio[Tpl](q: DatomicQuery[Tpl]) extends QueryApi[Tpl] {
     override def get: ZIO[Connection, MoleculeError, List[Tpl]] = {
@@ -22,7 +24,8 @@ trait DatomicApiZio extends ApiZio {
           .getListFromOffset_async(conn, global).map(_._1)
       )
     }
-    override def inspect: ZIO[Connection, MoleculeError, Unit] = ???
+    override def inspect: ZIO[Connection, MoleculeError, Unit] =
+      printInspectQuery("QUERY", q.elements)
   }
 
   implicit class datomicQueryOffsetApiZio[Tpl](q: DatomicQueryOffset[Tpl]) extends QueryOffsetApi[Tpl] {
@@ -32,7 +35,8 @@ trait DatomicApiZio extends ApiZio {
           .getListFromOffset_async(conn, global)
       )
     }
-    override def inspect: ZIO[Connection, MoleculeError, Unit] = ???
+    override def inspect: ZIO[Connection, MoleculeError, Unit] =
+      printInspectQuery("QUERY (offset)", q.elements)
   }
 
   implicit class datomicQueryCursorApiZio[Tpl](q: DatomicQueryCursor[Tpl]) extends QueryCursorApi[Tpl] {
@@ -42,54 +46,87 @@ trait DatomicApiZio extends ApiZio {
           .getListFromCursor_async(conn, global)
       )
     }
-    override def inspect: ZIO[Connection, MoleculeError, Unit] = ???
+    override def inspect: ZIO[Connection, MoleculeError, Unit] =
+      printInspectQuery("QUERY (cursor)", q.elements)
   }
 
 
-  implicit class datomicSaveApiZio[Tpl](save: DatomicSave) extends SaveApi {
+  implicit class datomicSaveApiZio[Tpl](save: DatomicSave) extends Transaction {
     override def transact: ZIO[Connection, MoleculeError, TxReport] = {
       for {
-        stmts <- ZIO.succeed(new SaveExtraction() with Save_stmts)
-          .map(_.getStmts(save.elements))
+        stmts <- ZIO.succeed(getStmts)
         txReport <- transactStmts(stmts)
       } yield txReport
     }
+
+    override def inspect: ZIO[Connection, MoleculeError, Unit] =
+      printInspectTx("SAVE", save.elements, getStmts)
+
+    private def getStmts: Data =
+      (new SaveExtraction() with Save_stmts).getStmts(save.elements)
   }
 
-  implicit class datomicInsertApiZio[Tpl](insert0: Insert) extends InsertApi {
+
+  implicit class datomicInsertApiZio[Tpl](insert0: Insert) extends Transaction {
     val insert = insert0.asInstanceOf[DatomicInsert_JVM]
     override def transact: ZIO[Connection, MoleculeError, TxReport] = {
       for {
-        stmts <- ZIO.succeed(new InsertExtraction with Insert_stmts)
-          .map(_.getStmts(insert.elements, insert.tpls))
+        stmts <- ZIO.succeed(getStmts)
         txReport <- transactStmts(stmts)
       } yield txReport
     }
+
+    override def inspect: ZIO[Connection, MoleculeError, Unit] =
+      printInspectTx("INSERT", insert.elements, getStmts)
+
+    private def getStmts: Data =
+      (new InsertExtraction with Insert_stmts).getStmts(insert.elements, insert.tpls)
   }
 
-  implicit class datomicUpdateApiZio[Tpl](update: DatomicUpdate) extends UpdateApi {
+
+  implicit class datomicUpdateApiZio[Tpl](update: DatomicUpdate) extends Transaction {
     override def transact: ZIO[Connection, MoleculeError, TxReport] = {
       for {
         conn0 <- ZIO.service[Connection]
         conn = conn0.asInstanceOf[DatomicConn_JVM]
-        stmts <- ZIO.succeed(
-          new UpdateExtraction(conn.proxy.uniqueAttrs, update.isUpsert) with Update_stmts
-        ).map(_.getStmts(conn, update.elements))
+        stmts <- ZIO.succeed(getStmts(conn))
         txReport <- transactStmtsWithConn(conn, stmts)
       } yield txReport
     }
+
+    override def inspect: ZIO[Connection, MoleculeError, Unit] = {
+      for {
+        conn0 <- ZIO.service[Connection]
+        conn = conn0.asInstanceOf[DatomicConn_JVM]
+        res <- printInspectTx("UPDATE", update.elements, getStmts(conn))
+      } yield res
+    }
+
+    private def getStmts(conn: DatomicConn_JVM): Data =
+      (new UpdateExtraction(conn.proxy.uniqueAttrs, update.isUpsert) with Update_stmts)
+        .getStmts(conn, update.elements)
   }
 
-  implicit class datomicDeleteApiZio[Tpl](delete: DatomicDelete) extends DeleteApi {
+
+  implicit class datomicDeleteApiZio[Tpl](delete: DatomicDelete) extends Transaction {
     override def transact: ZIO[Connection, MoleculeError, TxReport] = {
       for {
         conn0 <- ZIO.service[Connection]
         conn = conn0.asInstanceOf[DatomicConn_JVM]
-        stmts <- ZIO.succeed(new DeleteExtraction with Delete_stmts)
-          .map(_.getStmtsData(conn, delete.elements))
+        stmts <- ZIO.succeed(getStmts(conn))
         txReport <- transactStmtsWithConn(conn, stmts)
       } yield txReport
     }
+    override def inspect: ZIO[Connection, MoleculeError, Unit] = {
+      for {
+        conn0 <- ZIO.service[Connection]
+        conn = conn0.asInstanceOf[DatomicConn_JVM]
+        res <- printInspectTx("DELETE", delete.elements, getStmts(conn))
+      } yield res
+    }
+
+    private def getStmts(conn: DatomicConn_JVM): Data =
+      (new DeleteExtraction with Delete_stmts).getStmtsData(conn, delete.elements)
   }
 
 
@@ -114,10 +151,13 @@ trait DatomicApiZio extends ApiZio {
     moleculeError(ZIO.fromFuture(_ => conn.transact_async(stmts)))
   }
 
-  private def moleculeError[T](result: Task[T]): ZIO[Connection, MoleculeError, T] = {
-    result.mapError {
-      case e: MoleculeError => e
-      case e: Throwable     => MoleculeError(e.toString, e)
-    }
+  private def printInspectTx(
+    label: String,
+    elements: List[Element],
+    stmts: Data
+  ): ZIO[Connection, MoleculeError, Unit] = {
+    ZIO.succeed(
+      printInspect(label, elements, stmts.toArray().toList.mkString("\n"))
+    )
   }
 }

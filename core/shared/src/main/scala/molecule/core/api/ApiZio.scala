@@ -1,37 +1,29 @@
 package molecule.core.api
 
 import molecule.base.util.exceptions.MoleculeError
-import zio.{Chunk, ZIO}
+import zio.ZIO
 
-trait ApiZio {
+trait ApiZio extends PrintInspect {
 
-  trait QueryApi[Tpl] {
+  trait QueryApi[Tpl] extends Inspectable {
     def get: ZIO[Connection, MoleculeError, List[Tpl]]
     def inspect: ZIO[Connection, MoleculeError, Unit]
   }
-  trait QueryOffsetApi[Tpl] {
+  trait QueryOffsetApi[Tpl] extends Inspectable {
     def get: ZIO[Connection, MoleculeError, (List[Tpl], Int, Boolean)]
     def inspect: ZIO[Connection, MoleculeError, Unit]
   }
-  trait QueryCursorApi[Tpl] {
+  trait QueryCursorApi[Tpl] extends Inspectable {
     def get: ZIO[Connection, MoleculeError, (List[Tpl], String, Boolean)]
     def inspect: ZIO[Connection, MoleculeError, Unit]
   }
 
 
-  trait SaveApi {
+  trait Transaction extends Inspectable {
     def transact: ZIO[Connection, MoleculeError, TxReport]
   }
 
-  trait InsertApi {
-    def transact: ZIO[Connection, MoleculeError, TxReport]
-  }
-
-  trait UpdateApi {
-    def transact: ZIO[Connection, MoleculeError, TxReport]
-  }
-
-  trait DeleteApi {
-    def transact: ZIO[Connection, MoleculeError, TxReport]
+  trait Inspectable {
+    def inspect: ZIO[Connection, MoleculeError, Unit]
   }
 }

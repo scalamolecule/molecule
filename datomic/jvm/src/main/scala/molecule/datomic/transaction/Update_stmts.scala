@@ -37,7 +37,6 @@ trait Update_stmts extends DatomicTxBase_JVM with UpdateOps with MoleculeLogging
       eids.foreach(addStmts)
     } { query =>
       val eidRows  = Peer.q(query, db +: inputs: _*)
-      val count    = eidRows.size()
       val addStmts = eid2stmts(data, db)
       eidRows.forEach(eidRow => addStmts(eidRow.get(0)))
     }

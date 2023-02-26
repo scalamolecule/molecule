@@ -22,6 +22,15 @@ object SyncApi extends DatomicTestSuite {
         Ns.int.query.get ==> List(3, 10)
       }
 
+      "Sync actions, inspect" - types { implicit conn =>
+        val List(a, b) = Ns.int.insert(1, 2).transact.eids // Need data for update and delete
+        Ns.int.insert(1, 2).inspect
+        Ns.int(3).save.inspect
+        Ns.int.query.inspect
+        Ns(a).int(10).update.inspect
+        Ns(b).delete.inspect
+      }
+
       "Offset query" - types { implicit conn =>
         Ns.int.insert(1, 2, 3).transact
         Ns.int.query.get ==> List(1, 2, 3)

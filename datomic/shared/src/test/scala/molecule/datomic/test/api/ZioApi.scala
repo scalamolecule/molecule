@@ -28,6 +28,18 @@ object ZioApi extends DatomicZioSpec {
         }
       }.provide(types.orDie),
 
+      test("Crud actions, inspect") {
+        for {
+          eids <- Ns.int.insert(1, 2).transact.map(_.eids) // Need data for update and delete
+          _ <- Ns.int.insert(1, 2).inspect
+          _ <- Ns.int(3).save.inspect
+          _ <- Ns.int.query.inspect
+          _ <- Ns.int.query.get
+          _ <- Ns(eids(0)).int(10).update.inspect
+          _ <- Ns(eids(1)).delete.inspect
+        } yield assertTrue(true)
+      }.provide(types.orDie),
+
       test("Offset query")(
         for {
           _ <- Ns.int.insert(1, 2, 3).transact

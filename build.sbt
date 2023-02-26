@@ -5,9 +5,9 @@ val scala213 = "2.13.10"
 val scala3   = "3.2.2"
 val allScala = Seq(scala212, scala213, scala3)
 
-val zioVersion      = "2.0.8"
 val akkaVersion     = "2.8.0-M3"
 val akkaHttpVersion = "10.5.0-M1"
+val zioVersion      = "2.0.8"
 
 inThisBuild(
   List(
@@ -64,6 +64,7 @@ lazy val base = crossProject(JSPlatform, JVMPlatform)
     testFrameworks += new TestFramework("utest.runner.Framework")
   )
 
+
 lazy val boilerplate = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .settings(name := "molecule-boilerplate")
@@ -74,11 +75,12 @@ lazy val boilerplate = crossProject(JSPlatform, JVMPlatform)
       // Logging
       "com.outr" %%% "scribe" % "3.10.6",
 
-      // Tolerant roundings with trippelequal on js platform
+      // Tolerant roundings with triple equal on js platform
       "org.scalactic" %%% "scalactic" % "3.2.14"
     ),
     testFrameworks += new TestFramework("utest.runner.Framework")
   )
+
 
 lazy val core = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
@@ -91,7 +93,7 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
       "dev.zio" %%% "zio" % zioVersion,
       "dev.zio" %%% "zio-streams" % zioVersion,
       "dev.zio" %%% "zio-test" % zioVersion % Test,
-      "dev.zio" %%% "zio-test-sbt" % zioVersion // % Test // todo: why does this collide?
+      "dev.zio" %%% "zio-test-sbt" % zioVersion, // % Test // todo: why does this collide?
     )
   )
   .jsSettings(
@@ -112,6 +114,7 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
       "org.slf4j" % "slf4j-nop" % "1.7.36"
     )
   )
+
 
 lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
@@ -150,6 +153,7 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
     testFrameworks += new TestFramework("utest.runner.Framework")
   )
   .jsSettings(jsEnvironment)
+
 
 lazy val datomic = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
@@ -248,6 +252,7 @@ lazy val datomic = crossProject(JSPlatform, JVMPlatform)
       )
   )
   .jsSettings(jsEnvironment)
+
 
 lazy val jsEnvironment = {
   Seq(
