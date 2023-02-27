@@ -28,11 +28,11 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
   final lazy val inputs   : Seq[AnyRef] = renderRules(rules) ++ args
 
   // Some specialized expressions require a pre-query to extract entity ids for the main query
-  // Returns (preQuery, mainQuery)
-  final def processQueries(
+  // Returns (preQuery, mainQuery, query string for inspection)
+  final def getQueries(
     optimized: Boolean,
     altElements: List[Element] = Nil
-  ): (String, String) = {
+  ): (String, String, String) = {
     val elements = if (altElements.isEmpty) elements0 else altElements
 
     // Add 4th tx var to first attribute datom if tx value is needed
@@ -56,20 +56,10 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
     // Remember first entity id variable for subsequent composite groups
     firstEid = vv
 
-    // Recursively resolve molecule elements - mutations happen here!
+    // Recursively resolve molecule elements. Beware that this is mutational
     resolve(List(firstEid), elements)
 
     // Build Datomic query string(s)
-    val (mainQuery, preQuery, queryStrs) = renderQueries(elements, optimized)
-    logger.debug(queryStrs)
-
-    (preQuery, mainQuery)
-  }
-
-  final def renderQueries(
-    elements: List[Element],
-    optimized: Boolean = true
-  ): (String, String, String) = {
     val mainQuery = renderQuery(
       nestedIds, find, widh, in ++ inPost, where ++ wherePost, rules.nonEmpty, optimized
     )
@@ -92,13 +82,14 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
         case other       => other.toString
       }
     } else Nil
-    val queryStrs = ((elements :+ "" :+ mainQuery) ++ inputsStrs ++ preQueryStrs).mkString("\n").trim
+    val queryStrs    = ((elements :+ "" :+ mainQuery) ++ inputsStrs ++ preQueryStrs).mkString("\n").trim
+    logger.debug(queryStrs)
 
-    (mainQuery, preQuery, queryStrs)
+    (preQuery, mainQuery, queryStrs)
   }
 
   final def getEidQueryWithInputs: (Att, Seq[AnyRef]) = {
-    (processQueries(false)._2, inputs)
+    (getQueries(false)._2, inputs)
   }
 
   final private def renderQuery(

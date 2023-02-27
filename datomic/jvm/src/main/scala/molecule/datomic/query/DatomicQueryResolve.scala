@@ -71,10 +71,10 @@ abstract class DatomicQueryResolve[Tpl](
   ): jCollection[jList[AnyRef]] = {
     isFree = conn.isFreeVersion
     val db = conn.peerConn.db()
-    processQueries(conn.optimizeQuery, altElements) match {
-      case ("", query)       =>
+    getQueries(conn.optimizeQuery, altElements) match {
+      case ("", query, _)       =>
         distinct(Peer.q(query, db +: inputs: _*))
-      case (preQuery, query) =>
+      case (preQuery, query, _) =>
         // Pre-query
         val preRows = Peer.q(preQuery, db +: preInputs: _*)
         val preIds  = new java.util.HashSet[Long](preRows.size())

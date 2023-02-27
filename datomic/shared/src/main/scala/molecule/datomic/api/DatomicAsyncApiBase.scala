@@ -8,12 +8,8 @@ import scala.concurrent.{ExecutionContext, Future}
 trait DatomicAsyncApiBase extends PrintInspect {
 
   protected def printInspectQuery(label: String, elements: List[Element])
-                                 (implicit ec: ExecutionContext): Future[Unit] = {
-    val d2q = new DatomicModel2Query(elements)
-    // Process model to query
-    d2q.processQueries(true)
-    Future(
-      printInspect(label, Nil, d2q.renderQueries(elements)._3)
-    )
+                                 (implicit ec: ExecutionContext): Future[Unit] = Future {
+    val queries = new DatomicModel2Query(elements).getQueries(true)._3
+    printInspect(label, Nil, queries)
   }
 }

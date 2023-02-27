@@ -18,12 +18,8 @@ trait DatomicZioApiBase extends PrintInspect {
   protected def printInspectQuery(
     label: String,
     elements: List[Element]
-  ): ZIO[Connection, MoleculeError, Unit] = {
-    val d2q = new DatomicModel2Query(elements)
-    // Process model to query
-    d2q.processQueries(true)
-    ZIO.succeed(
-      printInspect(label, Nil, d2q.renderQueries(elements)._3)
-    )
+  ): ZIO[Connection, MoleculeError, Unit] = ZIO.succeed {
+    val queries = new DatomicModel2Query(elements).getQueries(true)._3
+    printInspect(label, Nil, queries)
   }
 }

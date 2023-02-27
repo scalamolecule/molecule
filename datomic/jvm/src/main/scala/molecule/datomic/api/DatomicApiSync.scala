@@ -101,9 +101,7 @@ trait DatomicApiSync extends ApiSync {
 
 
   private def printInspectQuery(label: String, elements: List[Element]): Unit = {
-    val m2q = new DatomicModel2Query(elements)
-    m2q.processQueries(true)
-    val queries = m2q.renderQueries(elements)._3
+    val queries = new DatomicModel2Query(elements).getQueries(true)._3
     printInspect(label, elements, queries)
   }
 
