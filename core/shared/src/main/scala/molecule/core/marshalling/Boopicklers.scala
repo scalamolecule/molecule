@@ -8,6 +8,7 @@ import boopickle.Default._
 import molecule.base.util.exceptions.{MoleculeCompileException, MoleculeError}
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
+import molecule.core.api.TxReport
 
 
 object Boopicklers extends MoleculeLogging {
@@ -151,4 +152,6 @@ object Boopicklers extends MoleculeLogging {
 
   implicit val pickleConnProxy: CompositePickler[ConnProxy] = compositePickler[ConnProxy]
     .addConcreteType[DatomicPeerProxy]
+
+  implicit val pickleTxReport: CompositePickler[TxReport] = compositePickler[TxReport]
 }

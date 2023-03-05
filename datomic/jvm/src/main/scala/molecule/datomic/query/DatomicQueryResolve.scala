@@ -6,7 +6,7 @@ import datomic.Peer
 import molecule.base.util.exceptions.MoleculeError
 import molecule.boilerplate.ast.Model._
 import molecule.datomic.facade.DatomicConn_JVM
-import molecule.datomic.query.cursor.CursorUtils
+import molecule.datomic.query.cursorStrategy.CursorUtils
 import molecule.datomic.util.DatomicApiLoader
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
@@ -67,10 +67,12 @@ abstract class DatomicQueryResolve[Tpl](
 
   protected def getRawData(
     conn: DatomicConn_JVM,
-    altElements: List[Element] = Nil
+    altElements: List[Element] = Nil,
+    altDb: Option[datomic.Database] = None
   ): jCollection[jList[AnyRef]] = {
     isFree = conn.isFreeVersion
-    val db = conn.peerConn.db()
+//    val db = conn.peerConn.db()
+    val db = altDb.getOrElse(conn.peerConn.db())
     getQueries(conn.optimizeQuery, altElements) match {
       case ("", query, _)       =>
         distinct(Peer.q(query, db +: inputs: _*))

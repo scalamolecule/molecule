@@ -1,6 +1,7 @@
 package molecule.datomic.test
 
 import molecule.core.util.Executor._
+import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.datomic.async._
 import molecule.datomic.setup.DatomicTestSuite
 import utest._
@@ -11,26 +12,49 @@ object AdhocJVM extends DatomicTestSuite {
   lazy val tests = Tests {
 
     "types" - types { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Types._
+      var acc = List.empty[List[Int]]
       for {
-
         _ <- Ns.i(1).save.transact
-        _ <- Ns.i.query.get.map(_ ==> List(1))
+        // start subscription in separate thread
+        _ = Ns.i.query.subscribe { freshResult => acc = acc :+ freshResult }
+        _ <- Ns.i(2).save.transact
+        _ <- Ns.i(3).save.transact
+      } yield {
+        // Allow subscription thread to catch up
+        Thread.sleep(200)
+        acc ==> List(
+          List(1, 2), // query result after 2 was added
+          List(1, 2, 3) // query result after 3 was added
+        )
+      }
+    }
 
-
-      } yield ()
+    "types2" - types { implicit conn =>
+      var acc = List.empty[List[Int]]
+      for {
+        _ <- Ns.i(1).save.transact
+        _ <- Ns.i(2).save.transact
+        _ = Ns.i.query.subscribe { freshResult => acc = acc :+ freshResult }
+        _ <- Ns.i(3).save.transact
+      } yield {
+        // Allow subscription thread to catch up
+        Thread.sleep(200)
+        acc ==> List(
+          List(1, 2, 3) // query result after 3 was added
+        )
+      }
     }
 
 
-//    "refs" - refs { implicit conn =>
-//
-//
-//      //      for {
-//      //        _ <- Ns.i(7).save.transact
-//      //
-//      //      } yield ()
-//
-//    }
+    //    "refs" - refs { implicit conn =>
+    //
+    //
+    //      //      for {
+    //      //        _ <- Ns.i(7).save.transact
+    //      //
+    //      //      } yield ()
+    //
+    //    }
 
     //    "set" - typesSet { implicit conn =>
     //

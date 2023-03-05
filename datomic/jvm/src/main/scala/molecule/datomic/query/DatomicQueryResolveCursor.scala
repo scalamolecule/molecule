@@ -7,7 +7,7 @@ import molecule.boilerplate.ops.ModelTransformations
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.util.FutureUtils
 import molecule.datomic.facade.DatomicConn_JVM
-import molecule.datomic.query.cursor.{CursorUtils, NoUnique, PrimaryUnique, SubUnique}
+import molecule.datomic.query.cursorStrategy.{CursorUtils, NoUnique, PrimaryUnique, SubUnique}
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}

@@ -19,6 +19,11 @@ object DatomicRpcJVM extends MoleculeRpc
   with DatomicTxBase_JVM
   with FutureUtils {
 
+  /**
+   * Tuple type is not marshalled from client to server. So we signal this with the 'Any' type parameter.
+   * Model elements are used to pickle the correct types here on the server side. And once wired to the
+   * client side we can unpickle the data again from the model and cast to type `Tpl`.
+   */
   override def query[Any](
     proxy: ConnProxy,
     elements: List[Element],
@@ -26,8 +31,8 @@ object DatomicRpcJVM extends MoleculeRpc
   ): Future[Either[MoleculeError, List[Any]]] = either {
     for {
       conn <- getConn(proxy)
-      rows <- new DatomicQuery[Any](elements, limit).get(conn, global)
-    } yield rows
+      tpls <- new DatomicQuery[Any](elements, limit).get(conn, global)
+    } yield tpls
   }
 
   override def queryOffset[Any](
@@ -38,8 +43,8 @@ object DatomicRpcJVM extends MoleculeRpc
   ): Future[Either[MoleculeError, (List[Any], Int, Boolean)]] = either {
     for {
       conn <- getConn(proxy)
-      rows <- new DatomicQueryOffset[Any](elements, limit, offset).get(conn, global)
-    } yield rows
+      tpls <- new DatomicQueryOffset[Any](elements, limit, offset).get(conn, global)
+    } yield tpls
   }
 
   override def queryCursor[Any](
@@ -50,8 +55,8 @@ object DatomicRpcJVM extends MoleculeRpc
   ): Future[Either[MoleculeError, (List[Any], String, Boolean)]] = either {
     for {
       conn <- getConn(proxy)
-      rows <- new DatomicQueryCursor[Any](elements, limit, cursor).get(conn, global)
-    } yield rows
+      tpls <- new DatomicQueryCursor[Any](elements, limit, cursor).get(conn, global)
+    } yield tpls
   }
 
   override def save(

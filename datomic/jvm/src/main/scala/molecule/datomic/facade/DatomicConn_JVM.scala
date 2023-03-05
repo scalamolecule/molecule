@@ -1,18 +1,17 @@
 package molecule.datomic.facade
 
 import java.io.StringReader
-import java.util.{Date, List => jList, Map => jMap}
+import java.util.{Date, List => jList}
 import java.{lang => jl, util => ju}
-import datomic.Connection.{DB_AFTER, DB_BEFORE, TEMPIDS, TX_DATA}
 import datomic.Util.readAll
-import datomic.db.{Datum => PeerDatom}
 import datomic.{Connection => DatomicConnection, Datom => _, _}
 import molecule.base.util.exceptions.MoleculeError
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.api.{Connection, TxReport}
 import molecule.core.marshalling.DatomicPeerProxy
 import molecule.datomic.transaction.DatomicDataType_JVM
-import scala.collection.mutable.ListBuffer
+import molecule.datomic.util.MakeDatomicTxReport
+import scala.collection.mutable
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.{Await, ExecutionContext, Future, Promise}
 import scala.jdk.CollectionConverters._
@@ -28,8 +27,6 @@ case class DatomicConn_JVM(
 
   override def db: Database = peerConn.db()
 
-  //  private[molecule] final override lazy val rpc: MoleculeRpc = DatomicRpcJVM
-
   private var optimizeQueries = true
   def setOptimizeQuery(flag: Boolean): Unit = {
     optimizeQueries = flag
@@ -40,7 +37,7 @@ case class DatomicConn_JVM(
     transact_async(readAll(new StringReader(edn)).get(0).asInstanceOf[Data])
 
   override def transact_async(javaStmts: Data)(implicit ec: ExecutionContext): Future[TxReport] = {
-    bridgeDatomicFuture(peerConn.transactAsync(javaStmts)).map(txReport)
+    bridgeDatomicFuture(peerConn.transactAsync(javaStmts)).map(MakeDatomicTxReport(_))
   }
   override def transact_sync(javaStmts: Data): TxReport = try {
     import molecule.core.util.Executor._
@@ -93,53 +90,152 @@ case class DatomicConn_JVM(
   }
 
 
-  private def txReport(rawTxReport: jMap[_, _]) = {
-    def t: Long = dbAfter.basisT
+  //  final def sync: Conn = usingAdhocDbView(Sync(0))
+  //  final def sync(t: Long): Conn = usingAdhocDbView(Sync(t))
 
-    def tx: Long = Peer.toTx(t).asInstanceOf[Long]
+  /**
+   * Request that a background indexing job begin immediately.
+   *
+   * Background indexing will happen asynchronously. You can track indexing
+   * completion with syncIndex(long).
+   */
+  final def requestIndex: Boolean =
+    peerConn.requestIndex()
+  //
+  //  /** Synchronize Peer database to have been indexed through time t.
+  //   *
+  //   * (only implemented for Peer api)
+  //   *
+  //   * Sets a flag with a time t on the connection to do the synchronization
+  //   * on the first subsequent query. Hereafter the flag is removed.
+  //   *
+  //   * The synchronization guarantees a database that has been indexed through time t.
+  //   * The synchronization does not involve calling the transactor.
+  //   *
+  //   * A Future with the synchronized database is returned for the query to use. The future
+  //   * can take arbitrarily long to complete. Waiting code should specify a timeout.
+  //   *
+  //   * Only use `syncIndex` when coordination of multiple peer/client processes is required.
+  //   *
+  //   * @param ec an implicit execution context.
+  //   * @return Peer Connection with synchronization flag set
+  //   */
+  //  final def syncIndex(t: Long): DatomicConn_JVM =
+  //    usingAdhocDbView(SyncIndex(t)).asInstanceOf[DatomicConn_JVM]
+  //
+  //  /** Synchronize Peer database to be aware of all schema changes up to time t.
+  //   *
+  //   * (only implemented for Peer api)
+  //   *
+  //   * Sets a flag with a time t on the connection to do the synchronization
+  //   * on the first subsequent query. Hereafter the flag is removed.
+  //   *
+  //   * The synchronization guarantees a database aware of all schema changes up to
+  //   * time t. The synchronization does not involve calling the transactor.
+  //   *
+  //   * A Future with the synchronized database is returned for the query to use. The future
+  //   * can take arbitrarily long to complete. Waiting code should specify a timeout.
+  //   *
+  //   * Only use `syncSchema` when coordination of multiple peer/client processes is required.
+  //   *
+  //   * @param ec an implicit execution context.
+  //   * @return Connection with synchronization flag set
+  //   */
+  //  final def syncSchema(t: Long): DatomicConn_JVM =
+  //    usingAdhocDbView(SyncSchema(t)).asInstanceOf[DatomicConn_JVM]
+  //
+  //  /** Synchronize Peer database to be aware of all excisions up to time t.
+  //   *
+  //   * (only implemented for Peer api)
+  //   *
+  //   * Sets a flag with a time t on the connection to do the synchronization
+  //   * on the first subsequent query. Hereafter the flag is removed.
+  //   *
+  //   * The synchronization guarantees a database aware of all excisions up to a time t.
+  //   * The synchronization does not involve calling the transactor.
+  //   *
+  //   * A Future with the synchronized database is returned for the query to use. The future
+  //   * can take arbitrarily long to complete. Waiting code should specify a timeout.
+  //   *
+  //   * Only use `syncSchema` when coordination of multiple peer/client processes is required.
+  //   *
+  //   * @param ec an implicit execution context.
+  //   * @return Connection with synchronization flag set
+  //   */
+  //  final def syncExcise(t: Long): DatomicConn_JVM =
+  //    usingAdhocDbView(SyncExcise(t)).asInstanceOf[DatomicConn_JVM]
 
-    def txInstant: Date = {
-      rawTxReport.get(DatomicConnection.TX_DATA).asInstanceOf[jList[PeerDatom]].get(0).v().asInstanceOf[Date]
+
+  private[molecule] val attrIds = mutable.Map.empty[String, java.lang.Long]
+
+  /**
+   * Gets the single transaction report queue associated with this connection,
+   * creating it if necessary.
+   *
+   * The transaction report queue receives reports from all transactions in the
+   * system. Objects on the queue have the same keys as returned by
+   * transact(java.util.List).
+   *
+   * The returned queue may be consumed from more than one thread.
+   *
+   * Note that the returned queue does not block producers, and will consume
+   * memory until you consume the elements from it. Reports will be added to the
+   * queue at some point after the db has been updated.
+   *
+   * If this connection originated the transaction, the transaction future will
+   * be notified first, before a report is placed on the queue.
+   *
+   * @return TxReportQueue
+   */
+  final lazy val txReportQueue: DatomicTxReportQueue = {
+    // Get attribute ids for masking tx report datoms that match query attributes
+    Peer.q(
+      """[:find  ?nsFull ?attr ?attrId
+        | :where [_ :db.install/attribute ?attrId ?tx]
+        |        [?attrId :db/ident ?attrIdent]
+        |        [(namespace ?attrIdent) ?nsFull]
+        |        [(.matches ^String ?nsFull "(db|db.alter|db.excise|db.install|db.part|db.sys|fressian|db.entity|db.attr|-.*)") ?sys]
+        |        [(= ?sys false)]
+        |        [(name ?attrIdent) ?attr]
+        |]""".stripMargin,
+      peerConn.db
+    ).forEach { row =>
+      attrIds += (row.get(0).toString + "." + row.get(1).toString -> row.get(2).asInstanceOf[java.lang.Long])
     }
-
-    def eids: List[Long] = {
-      // Fast lookups with mutable Buffers
-      // https://www.lihaoyi.com/post/BenchmarkingScalaCollections.html#lookup-performance
-
-      val allIds           = ListBuffer.empty[Long]
-      val datoms           = rawTxReport.get(TX_DATA).asInstanceOf[jList[PeerDatom]].iterator
-      val tempIds          = rawTxReport.get(TEMPIDS).asInstanceOf[jMap[_, _]].values().asScala.toBuffer
-      val tx               = datoms.next().e().asInstanceOf[Long] // Initial txInstant datom
-      var txMetaData       = false
-      var datom: PeerDatom = null
-      var e                = 0L
-      // Filter out tx meta data assertions
-      while (!txMetaData && datoms.hasNext) {
-        datom = datoms.next
-        e = datom.e().asInstanceOf[Long]
-        if (e == tx)
-          txMetaData = true
-        if (
-          !txMetaData
-            && datom.added()
-            && !allIds.contains(e)
-        ) {
-          if (tempIds.contains(e)) {
-            allIds += e
-          }
-        }
-      }
-      allIds.toList
-    }
-
-    /** Get database value before transaction. */
-    def dbBefore: Database = rawTxReport.get(DB_BEFORE).asInstanceOf[Database]
-
-    /** Get database value after transaction. */
-    def dbAfter: Database = rawTxReport.get(DB_AFTER).asInstanceOf[Database]
-
-    TxReport(tx, eids)
+    DatomicTxReportQueue(peerConn.txReportQueue())
   }
+
+  /**
+   * Removes the tx report queue associated with this connection.
+   */
+  final def removeTxReportQueue(): Unit =
+    peerConn.removeTxReportQueue()
+
+  /**
+   * Reclaim storage garbage older than a certain age.
+   *
+   * As part of capacity planning for a Datomic system, you should schedule
+   * regular (e.g daily, weekly) calls to gcStorage.
+   *
+   * @param olderThan
+   */
+  final def gcStorage(olderThan: Date): Unit =
+    peerConn.gcStorage(olderThan)
+
+  /**
+   * Request the release of resources associated with this connection.
+   *
+   * Method returns immediately, resources will be released asynchronously.
+   *
+   * This method should only be called when the entire process is no longer
+   * interested in the connection.
+   *
+   * Note that Datomic connections do not adhere to an acquire/use/release pattern.
+   * They are thread-safe, cached, and long lived. Many processes (e.g. application
+   * servers) will never call release.
+   */
+  final def release(): Unit =
+    peerConn.release()
 }
 
 

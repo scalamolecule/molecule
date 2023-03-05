@@ -2,10 +2,11 @@ package molecule.core.api
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait ApiAsync extends PrintInspect {
+trait ApiAsync {
 
   trait QueryApi[Tpl] extends Inspectable {
     def get(implicit conn: Connection, ec: ExecutionContext): Future[List[Tpl]]
+//    def subscribe(implicit conn: Connection, ec: ExecutionContext): Future[(List[Tpl], String, Boolean)]
   }
   trait QueryOffsetApi[Tpl] extends Inspectable {
     def get(implicit conn: Connection, ec: ExecutionContext): Future[(List[Tpl], Int, Boolean)]
@@ -13,6 +14,9 @@ trait ApiAsync extends PrintInspect {
   trait QueryCursorApi[Tpl] extends Inspectable {
     def get(implicit conn: Connection, ec: ExecutionContext): Future[(List[Tpl], String, Boolean)]
   }
+//  trait QuerySubscriptionApi[Tpl] {
+//    def subscribe(implicit conn: Connection, ec: ExecutionContext): Future[(List[Tpl], String, Boolean)]
+//  }
 
 
   trait Transaction extends Inspectable {

@@ -19,6 +19,10 @@ trait DatomicApiSync extends ApiSync {
       DatomicQueryResolveOffset[Tpl](q.elements, q.limit, None)
         .getListFromOffset_sync(conn.asInstanceOf[DatomicConn_JVM])._1
     }
+    def subscribe(callback: List[Tpl] => Unit)(implicit conn: Connection): Unit = {
+      DatomicQueryResolveOffset[Tpl](q.elements, q.limit, None)
+        .subscribe(conn.asInstanceOf[DatomicConn_JVM], callback)
+    }
     override def inspect(implicit conn: Connection): Unit =
       printInspectQuery("QUERY", q.elements)
   }
@@ -37,7 +41,6 @@ trait DatomicApiSync extends ApiSync {
       DatomicQueryResolveCursor[Tpl](q.elements, q.limit, Some(q.cursor))
         .getListFromCursor_sync(conn.asInstanceOf[DatomicConn_JVM])
     }
-
     override def inspect(implicit conn: Connection): Unit =
       printInspectQuery("QUERY (cursor)", q.elements)
   }
@@ -47,10 +50,9 @@ trait DatomicApiSync extends ApiSync {
     override def transact(implicit conn: Connection): TxReport = catchMoleculeError {
       conn.asInstanceOf[DatomicConn_JVM].transact_sync(getStmts)
     }
-
-    override def inspect(implicit conn: Connection): Unit =
+    override def inspect(implicit conn: Connection): Unit = {
       printInspectTx("SAVE", save.elements, getStmts)
-
+    }
     private def getStmts: Data =
       (new SaveExtraction() with Save_stmts).getStmts(save.elements)
   }
@@ -61,10 +63,9 @@ trait DatomicApiSync extends ApiSync {
     override def transact(implicit conn: Connection): TxReport = catchMoleculeError {
       conn.asInstanceOf[DatomicConn_JVM].transact_sync(getStmts)
     }
-
-    override def inspect(implicit conn: Connection): Unit =
+    override def inspect(implicit conn: Connection): Unit = {
       printInspectTx("INSERT", insert.elements, getStmts)
-
+    }
     private def getStmts: Data = {
       (new InsertExtraction with Insert_stmts).getStmts(insert.elements, insert.tpls)
     }
@@ -76,10 +77,9 @@ trait DatomicApiSync extends ApiSync {
       val conn = conn0.asInstanceOf[DatomicConn_JVM]
       conn.transact_sync(getStmts(conn))
     }
-
-    override def inspect(implicit conn0: Connection): Unit =
+    override def inspect(implicit conn0: Connection): Unit = {
       printInspectTx("UPDATE", update.elements, getStmts(conn0.asInstanceOf[DatomicConn_JVM]))
-
+    }
     private def getStmts(conn: DatomicConn_JVM): Data =
       (new UpdateExtraction(conn.proxy.uniqueAttrs, update.isUpsert) with Update_stmts)
         .getStmts(conn, update.elements)
@@ -91,10 +91,9 @@ trait DatomicApiSync extends ApiSync {
       val conn = conn0.asInstanceOf[DatomicConn_JVM]
       conn.transact_sync(getStmts(conn))
     }
-
-    override def inspect(implicit conn0: Connection): Unit =
+    override def inspect(implicit conn0: Connection): Unit = {
       printInspectTx("DELETE", delete.elements, getStmts(conn0.asInstanceOf[DatomicConn_JVM]))
-
+    }
     private def getStmts(conn: DatomicConn_JVM): Data =
       (new DeleteExtraction with Delete_stmts).getStmtsData(conn, delete.elements)
   }

@@ -1,4 +1,4 @@
-package molecule.datomic.query.cursor
+package molecule.datomic.query.cursorStrategy
 
 import java.net.URI
 import java.util.{Date, UUID}

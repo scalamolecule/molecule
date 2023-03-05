@@ -1,3 +1,6 @@
 package molecule.core.api
 
-case class TxReport(tx: Long, eids: List[Long])
+trait TxReport {
+  val tx  : Long
+  val eids: List[Long]
+}

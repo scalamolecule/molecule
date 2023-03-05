@@ -1,4 +1,4 @@
-package molecule.datomic.query.cursor
+package molecule.datomic.query.cursorStrategy
 
 import java.util.Base64
 import molecule.base.util.exceptions.MoleculeError
