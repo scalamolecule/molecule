@@ -20,7 +20,7 @@ trait DatomicApiAsync extends DatomicAsyncApiBase with ApiAsync with FutureUtils
       DatomicQueryResolveOffset[Tpl](q.elements, q.limit, None)
         .getListFromOffset_async(conn.asInstanceOf[DatomicConn_JVM], ec).map(_._1)
     }
-    def subscribe(callback: List[Tpl] => Unit)(implicit conn: Connection): Unit = {
+    override def subscribe(callback: List[Tpl] => Unit)(implicit conn: Connection): Unit = {
       DatomicQueryResolveOffset[Tpl](q.elements, q.limit, None)
         .subscribe(conn.asInstanceOf[DatomicConn_JVM], callback)
     }

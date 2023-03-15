@@ -35,6 +35,17 @@ object DatomicRpcJVM extends MoleculeRpc
     } yield tpls
   }
 
+  override def subscribe[Any](
+    proxy: ConnProxy,
+    elements: List[Element],
+    limit: Option[Int],
+    callback: List[Any] => Unit
+  ): Unit = {
+    getConn(proxy).map(conn =>
+      new DatomicQuery[Any](elements, limit).subscribe(callback)(conn)
+    )
+  }
+
   override def queryOffset[Any](
     proxy: ConnProxy,
     elements: List[Element],

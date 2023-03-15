@@ -9,7 +9,6 @@ import molecule.core.util.Executor._
 import molecule.core.util.FutureUtils
 import molecule.datomic.action._
 import molecule.datomic.facade.DatomicConn_JS
-import molecule.datomic.query.DatomicModel2Query
 import zio._
 import scala.concurrent.Future
 
@@ -20,6 +19,19 @@ trait DatomicApiZio extends DatomicZioApiBase with ApiZio with FutureUtils {
       getResult((conn: DatomicConn_JS) =>
         conn.rpc.query[Tpl](conn.proxy, q.elements, q.limit).future
       )
+    }
+    override def subscribe(callback: List[Tpl] => Unit): ZIO[Connection, MoleculeError, Unit] = {
+      for {
+        conn0 <- ZIO.service[Connection]
+        conn = conn0.asInstanceOf[DatomicConn_JS]
+      } yield {
+        try {
+          conn.rpc.subscribe[Tpl](conn.proxy, q.elements, q.limit, callback)
+        } catch {
+          case e: MoleculeError => ZIO.fail(e)
+          case e: Throwable     => ZIO.fail(MoleculeError(e.toString, e))
+        }
+      }
     }
     override def inspect: ZIO[Connection, MoleculeError, Unit] =
       printInspectQuery("QUERY", q.elements)

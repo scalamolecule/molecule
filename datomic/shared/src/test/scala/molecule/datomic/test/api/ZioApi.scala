@@ -28,7 +28,7 @@ object ZioApi extends DatomicZioSpec {
         }
       }.provide(types.orDie),
 
-      test("Crud actions, inspect") {
+      test("Inspection") {
         for {
           eids <- Ns.int.insert(1, 2).transact.map(_.eids) // Need data for update and delete
           _ <- Ns.int.insert(1, 2).inspect
@@ -66,7 +66,65 @@ object ZioApi extends DatomicZioSpec {
         } yield {
           assertTrue(res._1 == List(1, 2) && !res._3)
         }
-      }.provide(unique.orDie)
+      }.provide(unique.orDie),
+
+      test("Subscription") {
+        var intermediaryResults = List.empty[List[Int]]
+        for {
+          // Initial data (not pushed)
+          _ <- Ns.i(1).save.transact
+
+          // Start subscription in separate thread
+          _ <- Ns.i.query.subscribe { freshResult =>
+            intermediaryResults = intermediaryResults :+ freshResult
+          }
+          // Wait for subscription thread to startup to propagate first result
+          _ <- delay(500)()
+          //          _ <- TestClock.adjust(500.milliseconds) // doesn't work on first run on JS...
+
+          // Make changes to generate new results to be pushed
+          _ <- Ns.i(2).save.transact
+          _ <- Ns.i(3).save.transact
+
+          // Not affecting subscription since it doesn't mach subscription query (Ns.i)
+          _ <- Ns.string("foo").save.transact
+
+          // Wait for subscription thread to propagate last result to client
+          _ <- delay(50)()
+          //          _ <- TestClock.adjust(50.milliseconds) // doesn't work on first run on JS...
+        } yield {
+          assertTrue(intermediaryResults == List(
+            List(1, 2), // query result after 2 was added
+            List(1, 2, 3) // query result after 3 was added
+          ))
+        }
+      }.provide(types.orDie),
+
+      // todo: Make more zio-idiomatic. There's some concurrency issue with setting the Ref...
+
+      //      test("Subscription") {
+      //        for {
+      //          r <- zio.Ref.make(List.empty[List[Int]])
+      //          // _ <- r.getAndUpdate(_ :+ List(42)) // this works fine
+      //          _ <- Ns.i(1).save.transact
+      //          // start subscription in separate thread
+      //          _ <- Ns.i.query.subscribe { freshResult =>
+      //            println("####### " + freshResult)
+      //            // todo: why is the ref not updated?
+      //            r.getAndUpdate(_ :+ freshResult) // in another thread/fiber?
+      //          }
+      //          _ <- Ns.i(2).save.transact
+      //          _ <- Ns.i(3).save.transact
+      //          // Allow subscription thread to catch up
+      //          _ <- TestClock.adjust(200.milliseconds)
+      //          intermediaryResults <- r.get
+      //        } yield {
+      //          assertTrue(intermediaryResults == List(
+      //            List(1, 2), // query result after 2 was added
+      //            List(1, 2, 3) // query result after 3 was added
+      //          ))
+      //        }
+      //      }.provide(types.orDie),
 
     ) @@ sequential
 }

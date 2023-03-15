@@ -1,7 +1,6 @@
 package molecule.datomic.facade
 
 import java.util.Date
-import molecule.core.api.TxReport
 
 /**
  * Facade to Datomic transaction report with convenience methods to access tx data.
@@ -12,18 +11,15 @@ import molecule.core.api.TxReport
  * @param txInstant    Transaction instant (Date).
  * @param eids         List of affected entity ids from transaction
  * @param txData       Tx report data, a List of [[molecule.datomic.base.api.Datom]]
- * @param basisTafter  Datomic time point t on after Db
- * @param tempIds      Temporary ids generated
  */
 case class DatomicTxReport(
   basisTbefore: Long,
   t: Long,
-  override val tx: Long,
+  tx: Long,
   txInstant: Date,
-  override val eids: List[Long],
   txData: List[Datom],
-//  tempIds: List[Long]
-) extends TxReport {
+  eids: List[Long]
+) {
 
   /** Convenience method to get single affected entity id from transaction.
    *
@@ -36,15 +32,14 @@ case class DatomicTxReport(
    *
    * @return
    */
-  val eid: Long = eids.head
+  lazy val eid: Long = eids.head
 
   override def toString = {
-    s"""TxReport {
+    s"""DatomicTxReport {
        |  dbBefore.t: $basisTbefore
        |  dbAfter.t : $t
        |  txData    : ${txData.mkString(",\n              ")}
        |  eids      : $eids
        |}""".stripMargin
-//       |  tempIds   : $tempIds
   }
 }

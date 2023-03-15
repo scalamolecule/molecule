@@ -38,7 +38,7 @@ case class DatomicQueryResolveOffset[Tpl](
     getListFromOffset_sync(None)(conn)
   }
   // Optional use of DB_AFTER for subscriptions
-  def getListFromOffset_sync(altDb: Option[datomic.Database] = None)(implicit conn: DatomicConn_JVM)
+  def getListFromOffset_sync(altDb: Option[datomic.Database])(implicit conn: DatomicConn_JVM)
   : (List[Tpl], Int, Boolean) = try {
     if (offset.isDefined && limit.isDefined && limit.get >> 31 != offset.get >> 31) {
       throw MoleculeError("Limit and offset should both be positive or negative.")
@@ -46,7 +46,7 @@ case class DatomicQueryResolveOffset[Tpl](
     val rows       = getRawData(conn, altDb = altDb)
     val totalCount = rows.size
     val sortedRows = sortRows(rows)
-    logger.debug(sortedRows.toArray().mkString("\n"))
+    //    logger.debug(sortedRows.toArray().mkString("\n"))
 
     if (isNested) {
       val nestedRows    = rows2nested(sortedRows)
@@ -84,19 +84,22 @@ case class DatomicQueryResolveOffset[Tpl](
       override def run(): Unit = {
         while (true) {
           try {
-            // blocks until there's new data transacted
+            //            println("Loop...")
+            // blocks until new data is transacted
             val rawTxReport = queue.javaQueue.take
             val txReport    = MakeDatomicTxReport(rawTxReport)
+            //            println("TAKE:\n" + txReport)
 
             // Check if any attribute from the query is present in transacted data
             txReport.txData.collectFirst {
               case Datom(_, attrId, _, tx, _) if queryAttrIds.contains(attrId) => tx
             }.foreach { _ =>
+              //              println("Match...")
               // Callback with fresh data when query attribute is matched in tx report
               // Use immutable db_after that is lazily resolved.
               // See https://blog.datomic.com/2013/10/the-transaction-report-queue.html
-              val dbAfter     = rawTxReport.get(DB_AFTER).asInstanceOf[datomic.Database]
-              val freshResult = DatomicQueryResolveOffset[Tpl](elements, limit, None)
+              val dbAfter                = rawTxReport.get(DB_AFTER).asInstanceOf[datomic.Database]
+              val freshResult: List[Tpl] = DatomicQueryResolveOffset[Tpl](elements, limit, None)
                 .getListFromOffset_sync(Some(dbAfter))(conn)._1
               callback(freshResult)
             }

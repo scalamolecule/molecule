@@ -10,7 +10,7 @@ import molecule.datomic.facade.DatomicPeer
 import molecule.datomic.setup.DatomicTestSuiteBase
 import molecule.datomic.util.DatomicApiLoader
 import moleculeBuildInfo.BuildInfo
-import scala.concurrent.Await
+import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
 
 trait DatomicTestSuite extends DatomicTestSuiteBase with DatomicApiLoader {
@@ -29,7 +29,7 @@ trait DatomicTestSuite extends DatomicTestSuiteBase with DatomicApiLoader {
     // Block to enable supplying Connection instead of Future[Connection] to tests
     val conn = Await.result(
       DatomicPeer.recreateDbFromEdn(proxy, protocol, dbUri, useFree),
-      2.seconds
+      1.second
     )
     test(conn)
   }
@@ -37,4 +37,9 @@ trait DatomicTestSuite extends DatomicTestSuiteBase with DatomicApiLoader {
   def types[T](test: Connection => T): T = inMem(test, TypesSchema)
   def refs[T](test: Connection => T): T = inMem(test, RefsSchema)
   def unique[T](test: Connection => T): T = inMem(test, UniqueSchema)
+
+  def delay[T](ms: Int)(body: => T): Future[T] = Future {
+    Thread.sleep(ms)
+    body
+  }
 }

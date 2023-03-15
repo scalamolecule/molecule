@@ -18,6 +18,10 @@ trait DatomicApiAsync extends DatomicAsyncApiBase with ApiAsync with FutureUtils
       val conn = conn0.asInstanceOf[DatomicConn_JS]
       conn.rpc.query[Tpl](conn.proxy, q.elements, q.limit).future
     }
+    override def subscribe(callback: List[Tpl] => Unit)(implicit conn0: Connection): Unit = {
+      val conn = conn0.asInstanceOf[DatomicConn_JS]
+      conn.rpc.subscribe[Tpl](conn.proxy, q.elements, q.limit, callback)
+    }
     override def inspect(implicit conn: Connection, ec: ExecutionContext): Future[Unit] =
       printInspectQuery("QUERY", q.elements)
   }

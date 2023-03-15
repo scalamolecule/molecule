@@ -17,6 +17,8 @@ case class DatomicQuery[Tpl](
   // Datomic special features
 
   // Time
-  override def asOf(n: Int): Query[Tpl] = ???
-  override def history: Query[Tpl] = ???
+  def asOf(n: Int): Query[Tpl] = ???
+  def since(n: Int): Query[Tpl] = ???
+  def widh(n: Int): Query[Tpl] = ???
+  def history: Query[Tpl] = ???
 }

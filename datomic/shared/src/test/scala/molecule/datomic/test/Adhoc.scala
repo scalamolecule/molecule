@@ -5,6 +5,7 @@ import molecule.datomic.setup.DatomicTestSuite
 import molecule.datomic.async._
 import utest._
 import scala.language.implicitConversions
+import molecule.coreTests.dataModels.core.dsl.Types._
 
 object Adhoc extends DatomicTestSuite {
   //  // See Zio-http route
@@ -49,29 +50,17 @@ object Adhoc extends DatomicTestSuite {
 
   lazy val tests = Tests {
 
-
     "types" - types { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Types._
-
       for {
-
-        _ <- Ns.int.insert(1, 2).inspect
-        _ <- Ns.int(3).save.inspect
-        _ <- Ns.int.query.inspect
-        _ <- Ns(42).int(10).update.inspect
-        _ <- Ns(43).delete.inspect
-        _ <- Ns.int.query.inspect
-
         List(a, b) <- Ns.int.insert(1, 2).transact.map(_.eids)
         _ <- Ns.int(3).save.transact
         _ <- Ns.int.query.get.map(_ ==> List(1, 2, 3))
         _ <- Ns(a).int(10).update.transact
         _ <- Ns(b).delete.transact
         _ <- Ns.int.query.get.map(_ ==> List(3, 10))
-
-
       } yield ()
     }
+
 
 
     //    "refs" - refs { implicit conn =>

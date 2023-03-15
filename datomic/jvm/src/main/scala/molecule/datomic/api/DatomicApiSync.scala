@@ -19,7 +19,7 @@ trait DatomicApiSync extends ApiSync {
       DatomicQueryResolveOffset[Tpl](q.elements, q.limit, None)
         .getListFromOffset_sync(conn.asInstanceOf[DatomicConn_JVM])._1
     }
-    def subscribe(callback: List[Tpl] => Unit)(implicit conn: Connection): Unit = {
+    override def subscribe(callback: List[Tpl] => Unit)(implicit conn: Connection): Unit = {
       DatomicQueryResolveOffset[Tpl](q.elements, q.limit, None)
         .subscribe(conn.asInstanceOf[DatomicConn_JVM], callback)
     }

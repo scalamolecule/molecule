@@ -3,6 +3,7 @@ package molecule.datomic.facade
 import java.io.StringReader
 import java.util.{Date, List => jList}
 import java.{lang => jl, util => ju}
+import com.google.common.util.concurrent.UncheckedExecutionException
 import datomic.Util.readAll
 import datomic.{Connection => DatomicConnection, Datom => _, _}
 import molecule.base.util.exceptions.MoleculeError
@@ -10,7 +11,7 @@ import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.api.{Connection, TxReport}
 import molecule.core.marshalling.DatomicPeerProxy
 import molecule.datomic.transaction.DatomicDataType_JVM
-import molecule.datomic.util.MakeDatomicTxReport
+import molecule.datomic.util.MakeTxReport
 import scala.collection.mutable
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.{Await, ExecutionContext, Future, Promise}
@@ -37,7 +38,8 @@ case class DatomicConn_JVM(
     transact_async(readAll(new StringReader(edn)).get(0).asInstanceOf[Data])
 
   override def transact_async(javaStmts: Data)(implicit ec: ExecutionContext): Future[TxReport] = {
-    bridgeDatomicFuture(peerConn.transactAsync(javaStmts)).map(MakeDatomicTxReport(_))
+    bridgeDatomicFuture(peerConn.transactAsync(javaStmts)).map(MakeTxReport(_))
+    //    bridgeDatomicFuture(peerConn.transactAsync(javaStmts)).map(MakeDatomicTxReport(_))
   }
   override def transact_sync(javaStmts: Data): TxReport = try {
     import molecule.core.util.Executor._
@@ -185,24 +187,51 @@ case class DatomicConn_JVM(
    * If this connection originated the transaction, the transaction future will
    * be notified first, before a report is placed on the queue.
    *
+   * Sometimes (!) sbt needs to be restarted if this exception is thrown:
+   * java.lang.ClassCastException: datomic.extensions$eval19 cannot be cast to clojure.lang.IFn
+   *
+   * I'm quessing this is a concurrency issue:
+   *
+   * @see https://clojurians-log.clojureverse.org/luminus/2022-02-11
    * @return TxReportQueue
    */
   final lazy val txReportQueue: DatomicTxReportQueue = {
     // Get attribute ids for masking tx report datoms that match query attributes
-    Peer.q(
-      """[:find  ?nsFull ?attr ?attrId
-        | :where [_ :db.install/attribute ?attrId ?tx]
-        |        [?attrId :db/ident ?attrIdent]
-        |        [(namespace ?attrIdent) ?nsFull]
-        |        [(.matches ^String ?nsFull "(db|db.alter|db.excise|db.install|db.part|db.sys|fressian|db.entity|db.attr|-.*)") ?sys]
-        |        [(= ?sys false)]
-        |        [(name ?attrIdent) ?attr]
-        |]""".stripMargin,
-      peerConn.db
-    ).forEach { row =>
-      attrIds += (row.get(0).toString + "." + row.get(1).toString -> row.get(2).asInstanceOf[java.lang.Long])
+    // todo: find attribute ids once and cache instead of querying on each subscription
+    try {
+      if (attrIds.isEmpty) {
+        Peer.q(
+          """[:find  ?nsFull ?attr ?attrId
+            | :where [_ :db.install/attribute ?attrId ?tx]
+            |        [?attrId :db/ident ?attrIdent]
+            |        [(namespace ?attrIdent) ?nsFull]
+            |        [(.matches ^String ?nsFull "(db|db.alter|db.excise|db.install|db.part|db.sys|fressian|db.entity|db.attr|-.*)") ?sys]
+            |        [(= ?sys false)]
+            |        [(name ?attrIdent) ?attr]
+            |]""".stripMargin,
+          peerConn.db
+        ).forEach { row =>
+          attrIds += (row.get(0).toString + "." + row.get(1).toString -> row.get(2).asInstanceOf[java.lang.Long])
+        }
+      }
+      DatomicTxReportQueue(peerConn.txReportQueue())
+    } catch {
+      case e: UncheckedExecutionException =>
+        println(
+          """-------------
+            |When the http server is terminated with a keyboard stroke and
+            |subscription molecule on client side is called, this error occurs.
+            |Then please ctrl-c the sbt process and restart the server.
+            |TODO: Either skip system.terminated() or find some setting with
+            |Akka Http to avoid this.
+            |-------------""".stripMargin
+        )
+        e.printStackTrace()
+        throw e
+      case e: Throwable                   =>
+        e.printStackTrace()
+        throw e
     }
-    DatomicTxReportQueue(peerConn.txReportQueue())
   }
 
   /**

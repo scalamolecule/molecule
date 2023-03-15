@@ -26,7 +26,8 @@ object AsyncApi extends DatomicTestSuite {
         } yield ()
       }
 
-      "Crud actions, inspect" - types { implicit conn =>
+
+      "Inspection" - types { implicit conn =>
         for {
           List(a, b) <- Ns.int.insert(1, 2).transact.map(_.eids) // Need data for update and delete
           _ <- Ns.int.insert(1, 2).inspect
@@ -36,6 +37,7 @@ object AsyncApi extends DatomicTestSuite {
           _ <- Ns(b).delete.inspect
         } yield ()
       }
+
 
       "Offset query" - types { implicit conn =>
         for {
@@ -47,6 +49,7 @@ object AsyncApi extends DatomicTestSuite {
         } yield ()
       }
 
+
       "Cursor query" - unique { implicit conn =>
         val query = Unique.int.a1.query
         for {
@@ -56,6 +59,37 @@ object AsyncApi extends DatomicTestSuite {
           c3 <- query.from(c2).limit(2).get.map { case (List(5), c, false) => c }
           c4 <- query.from(c3).limit(-2).get.map { case (List(3, 4), c, true) => c }
           _ <- query.from(c4).limit(-2).get.map { case (List(1, 2), _, false) => () }
+        } yield ()
+      }
+
+
+      "Subscription" - types { implicit conn =>
+        var intermediaryResults = List.empty[List[Int]]
+        for {
+          // Initial data (not pushed)
+          _ <- Ns.i(1).save.transact
+
+          // Start subscription in separate thread on server
+          _ = Ns.i.query.subscribe { freshResult =>
+            intermediaryResults = intermediaryResults :+ freshResult
+          }
+          // Wait for subscription thread to startup to propagate first result
+          _ <- delay(500)()
+
+          // Make changes to generate new results to be pushed
+          _ <- Ns.i(2).save.transact
+          _ <- Ns.i(3).save.transact
+
+          // Not affecting subscription since it doesn't mach subscription query (Ns.i)
+          _ <- Ns.string("foo").save.transact
+
+          // Wait for subscription thread to propagate last result
+          _ <- delay(50)(
+            intermediaryResults ==> List(
+              List(1, 2), // query result after 2 was added
+              List(1, 2, 3), // query result after 3 was added
+            )
+          )
         } yield ()
       }
     }

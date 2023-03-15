@@ -24,6 +24,13 @@ trait DatomicApiZio extends DatomicZioApiBase with ApiZio {
           .getListFromOffset_async(conn, global).map(_._1)
       )
     }
+    override def subscribe(callback: List[Tpl] => Unit): ZIO[Connection, Nothing, Unit] = {
+      for {
+        conn0 <- ZIO.service[Connection]
+        res <- ZIO.succeed(DatomicQueryResolveOffset[Tpl](q.elements, q.limit, None)
+          .subscribe(conn0.asInstanceOf[DatomicConn_JVM], callback))
+      } yield res
+    }
     override def inspect: ZIO[Connection, MoleculeError, Unit] =
       printInspectQuery("QUERY", q.elements)
   }

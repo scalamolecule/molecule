@@ -7,8 +7,11 @@ import molecule.coreTests.dataModels.core.schema._
 import molecule.coreTests.util.TestData
 import molecule.datomic.facade.DatomicConn_JS
 import moleculeBuildInfo.BuildInfo
-import zio.ZLayer
 import zio.test.ZIOSpecDefault
+import zio.{Task, ZIO, ZLayer}
+import scala.concurrent.Promise
+import scala.scalajs.js.timers.setTimeout
+import scala.util.Try
 
 trait DatomicZioSpec extends ZIOSpecDefault with TestData {
 
@@ -24,4 +27,13 @@ trait DatomicZioSpec extends ZIOSpecDefault with TestData {
   def types = inMem(TypesSchema)
   def refs = inMem(RefsSchema)
   def unique = inMem(UniqueSchema)
+
+
+  def delay[T](ms: Int)(body: => T): Task[T] = ZIO.fromFuture { _ =>
+    val promise = Promise[T]()
+    setTimeout(ms)(
+      promise.complete(Try(body))
+    )
+    promise.future
+  }
 }

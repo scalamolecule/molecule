@@ -166,7 +166,7 @@ lazy val datomic = crossProject(JSPlatform, JVMPlatform)
     // Temporarily limit number of tests to be compiled by sbt (comment out this whole sbt setting to test all)
     // Note that intellij doesn't recognize this setting - there you can right click on files and exclude
     unmanagedSources / excludeFilter := {
-      val test = "src/test/scala/molecule/db/datomic/test"
+      val test = "src/test/scala/molecule/datomic/test"
       def path(platform: String) =
         (baseDirectory.value / s"../$platform/$test").getCanonicalPath
       val jsTests     = path("js")
@@ -182,12 +182,12 @@ lazy val datomic = crossProject(JSPlatform, JVMPlatform)
         //        sharedTests + "/pagination",
         //        sharedTests + "/relation",
         //        sharedTests + "/sort",
+        //        sharedTests + "/SyncApi.scala"
         //        sharedTests + "/txMetaData",
-        sharedTests,
+        //        sharedTests,
         jvmTests + "/AdhocJVM.scala",
         jsTests + "/AdhocJs.scala",
         sharedTests + "/Adhoc.scala",
-        sharedTests + "/SyncApi.scala"
       )
       new SimpleFileFilter(f =>
         (f.getCanonicalPath.startsWith(jsTests)

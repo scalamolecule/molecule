@@ -152,6 +152,4 @@ object Boopicklers extends MoleculeLogging {
 
   implicit val pickleConnProxy: CompositePickler[ConnProxy] = compositePickler[ConnProxy]
     .addConcreteType[DatomicPeerProxy]
-
-  implicit val pickleTxReport: CompositePickler[TxReport] = compositePickler[TxReport]
 }

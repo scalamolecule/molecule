@@ -29,22 +29,6 @@ object AdhocJVM extends DatomicTestSuite {
       }
     }
 
-    "types2" - types { implicit conn =>
-      var acc = List.empty[List[Int]]
-      for {
-        _ <- Ns.i(1).save.transact
-        _ <- Ns.i(2).save.transact
-        _ = Ns.i.query.subscribe { freshResult => acc = acc :+ freshResult }
-        _ <- Ns.i(3).save.transact
-      } yield {
-        // Allow subscription thread to catch up
-        Thread.sleep(200)
-        acc ==> List(
-          List(1, 2, 3) // query result after 3 was added
-        )
-      }
-    }
-
 
     //    "refs" - refs { implicit conn =>
     //

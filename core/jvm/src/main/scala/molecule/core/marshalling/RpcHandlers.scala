@@ -14,34 +14,33 @@ import scala.concurrent.Future
 import scala.language.implicitConversions
 
 
+// Data is only typed when un-serialized on the client side
 abstract class RpcHandlers(rpc: MoleculeRpc) extends MoleculeLogging with SerializationUtils {
 
-  def handleQuery(argsSerialized: ByteString): Future[Array[Byte]] = tryUnpickle {
+  def handleQuery(argsSerialized: ByteString): Future[Array[Byte]] = handleErrors {
     val (proxy, elements, limit) = Unpickle.apply[(ConnProxy, List[Element], Option[Int])]
       .fromBytes(argsSerialized.asByteBuffer)
-    // Data is typed when un-serialized on the client side
     rpc.query[Any](proxy, elements, limit).map(result =>
       PickleTpls(elements, false).pickle(result)
     )
   }
-  def handleQueryOffset(argsSerialized: ByteString): Future[Array[Byte]] = tryUnpickle {
+
+  def handleQueryOffset(argsSerialized: ByteString): Future[Array[Byte]] = handleErrors {
     val (proxy, elements, limit, offset) = Unpickle.apply[(ConnProxy, List[Element], Option[Int], Int)]
       .fromBytes(argsSerialized.asByteBuffer)
-    // Data is typed when un-serialized on the client side
     rpc.queryOffset[Any](proxy, elements, limit, offset).map(result =>
       PickleTpls(elements, false).pickleOffset(result)
     )
   }
-  def handleQueryCursor(argsSerialized: ByteString): Future[Array[Byte]] = tryUnpickle {
+  def handleQueryCursor(argsSerialized: ByteString): Future[Array[Byte]] = handleErrors {
     val (proxy, elements, limit, cursor) = Unpickle.apply[(ConnProxy, List[Element], Option[Int], String)]
       .fromBytes(argsSerialized.asByteBuffer)
-    // Data is typed when un-serialized on the client side
     rpc.queryCursor[Any](proxy, elements, limit, cursor).map(result =>
       PickleTpls(elements, false).pickleCursor(result)
     )
   }
 
-  def handleSave(argsSerialized: ByteString): Future[Array[Byte]] = tryUnpickle {
+  def handleSave(argsSerialized: ByteString): Future[Array[Byte]] = handleErrors {
     val (proxy, elements) = Unpickle.apply[(ConnProxy, List[Element])]
       .fromBytes(argsSerialized.asByteBuffer)
     rpc.save(proxy, elements).map(either =>
@@ -49,7 +48,7 @@ abstract class RpcHandlers(rpc: MoleculeRpc) extends MoleculeLogging with Serial
     )
   }
 
-  def handleInsert(argsSerialized: ByteString): Future[Array[Byte]] = tryUnpickle {
+  def handleInsert(argsSerialized: ByteString): Future[Array[Byte]] = handleErrors {
     val (proxy, tplElements, tplsSerialized, txElements) =
       Unpickle.apply[(ConnProxy, List[Element], Array[Byte], List[Element])]
         .fromBytes(argsSerialized.asByteBuffer)
@@ -59,7 +58,7 @@ abstract class RpcHandlers(rpc: MoleculeRpc) extends MoleculeLogging with Serial
       )
   }
 
-  def handleUpdate(argsSerialized: ByteString): Future[Array[Byte]] = tryUnpickle {
+  def handleUpdate(argsSerialized: ByteString): Future[Array[Byte]] = handleErrors {
     val (proxy, elements, isUpsert) =
       Unpickle.apply[(ConnProxy, List[Element], Boolean)]
         .fromBytes(argsSerialized.asByteBuffer)
@@ -67,7 +66,7 @@ abstract class RpcHandlers(rpc: MoleculeRpc) extends MoleculeLogging with Serial
       .map(either => Pickle.intoBytes[Either[MoleculeError, TxReport]](either).toArray)
   }
 
-  def handleDelete(argsSerialized: ByteString): Future[Array[Byte]] = tryUnpickle {
+  def handleDelete(argsSerialized: ByteString): Future[Array[Byte]] = handleErrors {
     val (proxy, elements) =
       Unpickle.apply[(ConnProxy, List[Element])]
         .fromBytes(argsSerialized.asByteBuffer)
@@ -85,8 +84,17 @@ abstract class RpcHandlers(rpc: MoleculeRpc) extends MoleculeLogging with Serial
     )
   }
 
-  private def tryUnpickle(body: => Future[Array[Byte]]): Future[Array[Byte]] = try {
+  private def handleErrors(body: => Future[Array[Byte]]): Future[Array[Byte]] = try {
     body
+      .recoverWith {
+        case e: MoleculeError =>
+          logger.error(e.toString)
+          left(e.copy(message = msg + e.message))
+        case e: Throwable     =>
+          logger.error(e.toString)
+          logger.error(e.getStackTrace.mkString("\n"))
+          left(MoleculeError(msg + e.toString, e))
+      }
   } catch {
     case e: MoleculeError =>
       logger.trace(e)

@@ -1,5 +1,6 @@
 package molecule.core.marshalling
 
+import java.nio.ByteBuffer
 import boopickle.Default._
 import molecule.base.util.exceptions.MoleculeError
 import molecule.boilerplate.ast.Model._
@@ -28,6 +29,23 @@ case class MoleculeRpcJS(interface: String, port: Int)
       UnpickleTpls[Tpl](elements, resultSerialized).unpickle
     )
   }.flatten
+
+  override def subscribe[Tpl](
+    proxy: ConnProxy,
+    elements: List[Element],
+    limit: Option[Int],
+    callback: List[Tpl] => Unit
+  ): Unit = {
+    val argsSerialized   = Pickle.intoBytes((proxy, elements, limit)).typedArray()
+    val callbackUnpickle = (resultSerialized: ByteBuffer) =>
+      UnpickleTpls[Tpl](elements, resultSerialized).unpickle match {
+        case Right(tpls)         => callback(tpls)
+        case Left(moleculeError) =>
+          // Ignore but log errors
+          logger.warn(moleculeError.toString)
+      }
+    startSubscription(argsSerialized, callbackUnpickle)
+  }
 
   override def queryOffset[Tpl](
     proxy: ConnProxy,

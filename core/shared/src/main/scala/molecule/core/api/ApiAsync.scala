@@ -6,7 +6,7 @@ trait ApiAsync {
 
   trait QueryApi[Tpl] extends Inspectable {
     def get(implicit conn: Connection, ec: ExecutionContext): Future[List[Tpl]]
-//    def subscribe(implicit conn: Connection, ec: ExecutionContext): Future[(List[Tpl], String, Boolean)]
+    def subscribe(callback: List[Tpl] => Unit)(implicit conn: Connection): Unit
   }
   trait QueryOffsetApi[Tpl] extends Inspectable {
     def get(implicit conn: Connection, ec: ExecutionContext): Future[(List[Tpl], Int, Boolean)]
@@ -14,9 +14,6 @@ trait ApiAsync {
   trait QueryCursorApi[Tpl] extends Inspectable {
     def get(implicit conn: Connection, ec: ExecutionContext): Future[(List[Tpl], String, Boolean)]
   }
-//  trait QuerySubscriptionApi[Tpl] {
-//    def subscribe(implicit conn: Connection, ec: ExecutionContext): Future[(List[Tpl], String, Boolean)]
-//  }
 
 
   trait Transaction extends Inspectable {

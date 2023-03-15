@@ -4,6 +4,7 @@ trait ApiSync extends PrintInspect {
 
   trait QueryApi[Tpl] extends Inspectable {
     def get(implicit conn: Connection): List[Tpl]
+    def subscribe(callback: List[Tpl] => Unit)(implicit conn: Connection): Unit
   }
   trait QueryOffsetApi[Tpl] extends Inspectable {
     def get(implicit conn: Connection): (List[Tpl], Int, Boolean)

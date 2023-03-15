@@ -7,15 +7,13 @@ trait ApiZio extends PrintInspect {
 
   trait QueryApi[Tpl] extends Inspectable {
     def get: ZIO[Connection, MoleculeError, List[Tpl]]
-    def inspect: ZIO[Connection, MoleculeError, Unit]
+    def subscribe(callback: List[Tpl] => Unit): ZIO[Connection, MoleculeError, Unit]
   }
   trait QueryOffsetApi[Tpl] extends Inspectable {
     def get: ZIO[Connection, MoleculeError, (List[Tpl], Int, Boolean)]
-    def inspect: ZIO[Connection, MoleculeError, Unit]
   }
   trait QueryCursorApi[Tpl] extends Inspectable {
     def get: ZIO[Connection, MoleculeError, (List[Tpl], String, Boolean)]
-    def inspect: ZIO[Connection, MoleculeError, Unit]
   }
 
 

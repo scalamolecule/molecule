@@ -71,7 +71,6 @@ abstract class DatomicQueryResolve[Tpl](
     altDb: Option[datomic.Database] = None
   ): jCollection[jList[AnyRef]] = {
     isFree = conn.isFreeVersion
-//    val db = conn.peerConn.db()
     val db = altDb.getOrElse(conn.peerConn.db())
     getQueries(conn.optimizeQuery, altElements) match {
       case ("", query, _)       =>

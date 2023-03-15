@@ -35,4 +35,10 @@ trait DatomicZioSpec extends ZIOSpecDefault with TestData with DatomicApiLoader 
   def types = inMem(TypesSchema)
   def refs = inMem(RefsSchema)
   def unique = inMem(UniqueSchema)
+
+
+  def delay[T](ms: Int)(body: => T): ZIO[Any, Nothing, T] = ZIO.succeed {
+    Thread.sleep(ms)
+    body
+  }
 }

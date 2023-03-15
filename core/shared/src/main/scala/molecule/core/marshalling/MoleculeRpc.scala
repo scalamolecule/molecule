@@ -13,6 +13,13 @@ trait MoleculeRpc {
     limit: Option[Int]
   ): Future[Either[MoleculeError, List[Tpl]]]
 
+  def subscribe[Tpl](
+    proxy: ConnProxy,
+    elements: List[Element],
+    limit: Option[Int],
+    callback: List[Tpl] => Unit
+  ): Unit
+
   def queryOffset[Tpl](
     proxy: ConnProxy,
     elements: List[Element],
@@ -50,7 +57,5 @@ trait MoleculeRpc {
     elements: List[Element]
   ): Future[Either[MoleculeError, TxReport]]
 
-//  // Connection pool ...............................
-//
-//  def clearConnPool: Future[Unit]
+
 }

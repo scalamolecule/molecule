@@ -14,6 +14,7 @@ trait DatomicApiSync extends ApiSync {
 
   implicit class datomicQueryApiSync[Tpl](q: DatomicQuery[Tpl]) extends QueryApi[Tpl] {
     override def get(implicit conn: Connection): List[Tpl] = noSyncOnJSplatform
+    override def subscribe(callback: List[Tpl] => Unit)(implicit conn: Connection): Unit = noSyncOnJSplatform
     override def inspect(implicit conn: Connection): Unit = noSyncOnJSplatform
   }
 
