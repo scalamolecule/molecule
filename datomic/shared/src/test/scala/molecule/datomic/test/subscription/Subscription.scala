@@ -1,14 +1,13 @@
-package molecule.datomic.test
+package molecule.datomic.test.subscription
 
-import boopickle.Default._
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.datomic.async._
 import molecule.datomic.setup.DatomicTestSuite
 import utest._
+import scala.language.implicitConversions
 
-
-object AdhocJs extends DatomicTestSuite {
+object Subscription extends DatomicTestSuite {
 
   lazy val tests = Tests {
 
@@ -20,7 +19,6 @@ object AdhocJs extends DatomicTestSuite {
 
         // Start subscription in separate thread on server
         _ = Ns.i.query.subscribe { freshResult =>
-//          println("====== callback 0: " + freshResult)
           intermediaryResults = intermediaryResults :+ freshResult
         }
         // Wait for subscription thread to startup to propagate first result
@@ -43,7 +41,8 @@ object AdhocJs extends DatomicTestSuite {
       } yield ()
     }
 
-    "types" - types { implicit conn =>
+
+    "Multiple" - types { implicit conn =>
       var intermediaryResults1 = List.empty[List[Int]]
       var intermediaryResults2 = List.empty[List[String]]
       for {
@@ -51,16 +50,15 @@ object AdhocJs extends DatomicTestSuite {
         _ <- Ns.i(1).save.transact
         _ <- Ns.s("a").save.transact
 
+        // For some reason needed on JVM (concurrency related)
         _ <- delay(300)(())
 
         // start subscriptions in separate thread on server
         _ = Ns.i.query.subscribe { freshResult =>
-//          println("====== callback 1: " + freshResult)
           intermediaryResults1 = intermediaryResults1 :+ freshResult
         }
         _ <- delay(300)(())
         _ = Ns.s.query.subscribe { freshResult =>
-//          println("====== callback 2: " + freshResult)
           intermediaryResults2 = intermediaryResults2 :+ freshResult
         }
 
@@ -90,15 +88,5 @@ object AdhocJs extends DatomicTestSuite {
         )
       } yield ()
     }
-
-
-    //    "refs" - refs { implicit conn =>
-    //      import molecule.coreTests.dataModels.core.dsl.Refs._
-    //      for {
-    //
-    //        _ <- Ns.i.Rs1.*(R1.i).insert(0, List(1)).transact
-    //
-    //      } yield ()
-    //    }
   }
 }

@@ -1,13 +1,12 @@
 package molecule.datomic.query
 
-import java.util.concurrent.Executors
-import datomic.Connection.DB_AFTER
+import datomic.Database
 import molecule.base.util.exceptions.MoleculeError
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.util.FutureUtils
-import molecule.datomic.facade.{Datom, DatomicConn_JVM}
-import molecule.datomic.util.MakeDatomicTxReport
+import molecule.datomic.facade.DatomicConn_JVM
+import molecule.datomic.subscription.TxReportWatcher
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -76,41 +75,19 @@ case class DatomicQueryResolveOffset[Tpl](
     case t: Throwable => throw MoleculeError(t.toString)
   }
 
-  def subscribe(conn: DatomicConn_JVM, callback: List[Tpl] => Unit): Unit = {
-    val queue        = conn.txReportQueue
+
+  def subscribe(
+    conn: DatomicConn_JVM,
+    txReportWatcher: TxReportWatcher,
+    callback: List[Tpl] => Unit
+  ): Unit = {
     val allAttrIds   = conn.attrIds
     val queryAttrIds = elements.collect { case a: Attr => allAttrIds(a.name) }
-    object TxReportWatcher extends Runnable {
-      override def run(): Unit = {
-        while (true) {
-          try {
-            //            println("Loop...")
-            // blocks until new data is transacted
-            val rawTxReport = queue.javaQueue.take
-            val txReport    = MakeDatomicTxReport(rawTxReport)
-            //            println("TAKE:\n" + txReport)
-
-            // Check if any attribute from the query is present in transacted data
-            txReport.txData.collectFirst {
-              case Datom(_, attrId, _, tx, _) if queryAttrIds.contains(attrId) => tx
-            }.foreach { _ =>
-              //              println("Match...")
-              // Callback with fresh data when query attribute is matched in tx report
-              // Use immutable db_after that is lazily resolved.
-              // See https://blog.datomic.com/2013/10/the-transaction-report-queue.html
-              val dbAfter                = rawTxReport.get(DB_AFTER).asInstanceOf[datomic.Database]
-              val freshResult: List[Tpl] = DatomicQueryResolveOffset[Tpl](elements, limit, None)
-                .getListFromOffset_sync(Some(dbAfter))(conn)._1
-              callback(freshResult)
-            }
-          } catch {
-            case e: InterruptedException =>
-              e.printStackTrace()
-              throw MoleculeError("Datomic transaction queue interrupted.")
-          }
-        }
-      }
+    val dbCallBack   = (dbAfter: Database) => {
+      val freshResult: List[Tpl] = DatomicQueryResolveOffset[Tpl](elements, limit, None)
+        .getListFromOffset_sync(Some(dbAfter))(conn)._1
+      callback(freshResult)
     }
-    Executors.newSingleThreadExecutor().execute(TxReportWatcher)
+    txReportWatcher.addSubscription(queryAttrIds, dbCallBack)
   }
 }

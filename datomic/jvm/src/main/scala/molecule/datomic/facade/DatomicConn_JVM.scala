@@ -26,6 +26,8 @@ case class DatomicConn_JVM(
   with DatomicDataType_JVM
   with MoleculeLogging {
 
+  private[molecule] var fresh = true
+
   override def db: Database = peerConn.db()
 
   private var optimizeQueries = true

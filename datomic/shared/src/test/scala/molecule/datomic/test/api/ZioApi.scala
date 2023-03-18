@@ -79,7 +79,7 @@ object ZioApi extends DatomicZioSpec {
             intermediaryResults = intermediaryResults :+ freshResult
           }
           // Wait for subscription thread to startup to propagate first result
-          _ <- delay(500)()
+          _ <- delay(500)(())
           //          _ <- TestClock.adjust(500.milliseconds) // doesn't work on first run on JS...
 
           // Make changes to generate new results to be pushed
@@ -90,7 +90,7 @@ object ZioApi extends DatomicZioSpec {
           _ <- Ns.string("foo").save.transact
 
           // Wait for subscription thread to propagate last result to client
-          _ <- delay(50)()
+          _ <- delay(50)(())
           //          _ <- TestClock.adjust(50.milliseconds) // doesn't work on first run on JS...
         } yield {
           assertTrue(intermediaryResults == List(

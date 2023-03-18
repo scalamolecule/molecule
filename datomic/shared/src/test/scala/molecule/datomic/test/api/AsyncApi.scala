@@ -74,7 +74,7 @@ object AsyncApi extends DatomicTestSuite {
             intermediaryResults = intermediaryResults :+ freshResult
           }
           // Wait for subscription thread to startup to propagate first result
-          _ <- delay(500)()
+          _ <- delay(500)(())
 
           // Make changes to generate new results to be pushed
           _ <- Ns.i(2).save.transact
@@ -84,11 +84,11 @@ object AsyncApi extends DatomicTestSuite {
           _ <- Ns.string("foo").save.transact
 
           // Wait for subscription thread to propagate last result
-          _ <- delay(50)(
-            intermediaryResults ==> List(
-              List(1, 2), // query result after 2 was added
-              List(1, 2, 3), // query result after 3 was added
-            )
+          _ <- delay(100)(())
+
+          _ = intermediaryResults ==> List(
+            List(1, 2), // query result after 2 was added
+            List(1, 2, 3), // query result after 3 was added
           )
         } yield ()
       }

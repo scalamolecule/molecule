@@ -15,7 +15,7 @@ import zio._
 import scala.concurrent.Future
 
 
-trait DatomicApiZio extends DatomicZioApiBase with ApiZio {
+trait DatomicApiZio extends DatomicApi_JVM with DatomicZioApiBase with ApiZio {
 
   implicit class datomicQueryApiZio[Tpl](q: DatomicQuery[Tpl]) extends QueryApi[Tpl] {
     override def get: ZIO[Connection, MoleculeError, List[Tpl]] = {
@@ -27,8 +27,9 @@ trait DatomicApiZio extends DatomicZioApiBase with ApiZio {
     override def subscribe(callback: List[Tpl] => Unit): ZIO[Connection, Nothing, Unit] = {
       for {
         conn0 <- ZIO.service[Connection]
+        datomicConn = conn0.asInstanceOf[DatomicConn_JVM]
         res <- ZIO.succeed(DatomicQueryResolveOffset[Tpl](q.elements, q.limit, None)
-          .subscribe(conn0.asInstanceOf[DatomicConn_JVM], callback))
+          .subscribe(datomicConn, getWatcher(datomicConn), callback))
       } yield res
     }
     override def inspect: ZIO[Connection, MoleculeError, Unit] =

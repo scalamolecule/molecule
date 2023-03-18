@@ -12,7 +12,7 @@ import molecule.datomic.query.{DatomicModel2Query, DatomicQueryResolveCursor, Da
 import molecule.datomic.transaction.{Delete_stmts, Insert_stmts, Save_stmts, Update_stmts}
 
 
-trait DatomicApiSync extends ApiSync {
+trait DatomicApiSync extends DatomicApi_JVM with ApiSync {
 
   implicit class datomicQueryApiSync[Tpl](q: DatomicQuery[Tpl]) extends QueryApi[Tpl] {
     override def get(implicit conn: Connection): List[Tpl] = {
@@ -20,8 +20,9 @@ trait DatomicApiSync extends ApiSync {
         .getListFromOffset_sync(conn.asInstanceOf[DatomicConn_JVM])._1
     }
     override def subscribe(callback: List[Tpl] => Unit)(implicit conn: Connection): Unit = {
+      val datomicConn = conn.asInstanceOf[DatomicConn_JVM]
       DatomicQueryResolveOffset[Tpl](q.elements, q.limit, None)
-        .subscribe(conn.asInstanceOf[DatomicConn_JVM], callback)
+        .subscribe(datomicConn, getWatcher(datomicConn), callback)
     }
     override def inspect(implicit conn: Connection): Unit =
       printInspectQuery("QUERY", q.elements)

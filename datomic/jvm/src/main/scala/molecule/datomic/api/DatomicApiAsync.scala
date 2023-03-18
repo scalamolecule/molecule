@@ -13,7 +13,7 @@ import molecule.datomic.transaction.{Delete_stmts, Insert_stmts, Save_stmts, Upd
 import scala.concurrent.{ExecutionContext, Future}
 
 
-trait DatomicApiAsync extends DatomicAsyncApiBase with ApiAsync with FutureUtils {
+trait DatomicApiAsync extends DatomicApi_JVM with DatomicAsyncApiBase with ApiAsync with FutureUtils {
 
   implicit class datomicQueryApiAsync[Tpl](q: DatomicQuery[Tpl]) extends QueryApi[Tpl] {
     override def get(implicit conn: Connection, ec: ExecutionContext): Future[List[Tpl]] = {
@@ -21,8 +21,9 @@ trait DatomicApiAsync extends DatomicAsyncApiBase with ApiAsync with FutureUtils
         .getListFromOffset_async(conn.asInstanceOf[DatomicConn_JVM], ec).map(_._1)
     }
     override def subscribe(callback: List[Tpl] => Unit)(implicit conn: Connection): Unit = {
+      val datomicConn = conn.asInstanceOf[DatomicConn_JVM]
       DatomicQueryResolveOffset[Tpl](q.elements, q.limit, None)
-        .subscribe(conn.asInstanceOf[DatomicConn_JVM], callback)
+        .subscribe(datomicConn, getWatcher(datomicConn), callback)
     }
     override def inspect(implicit conn: Connection, ec: ExecutionContext): Future[Unit] =
       printInspectQuery("QUERY", q.elements)

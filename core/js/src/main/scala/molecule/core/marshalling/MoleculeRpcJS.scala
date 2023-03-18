@@ -30,21 +30,23 @@ case class MoleculeRpcJS(interface: String, port: Int)
     )
   }.flatten
 
+
   override def subscribe[Tpl](
     proxy: ConnProxy,
     elements: List[Element],
     limit: Option[Int],
     callback: List[Tpl] => Unit
   ): Unit = {
-    val argsSerialized   = Pickle.intoBytes((proxy, elements, limit)).typedArray()
-    val callbackUnpickle = (resultSerialized: ByteBuffer) =>
+    val argsSerialized      = Pickle.intoBytes((proxy, elements, limit)).typedArray()
+    val callbackDeserialize = (resultSerialized: ByteBuffer) => {
       UnpickleTpls[Tpl](elements, resultSerialized).unpickle match {
-        case Right(tpls)         => callback(tpls)
-        case Left(moleculeError) =>
-          // Ignore but log errors
-          logger.warn(moleculeError.toString)
+        case Right(tpls)                        => callback(tpls)
+        case Left(MoleculeError("no match", _)) => // do nothing
+        case Left(moleculeError)                => logger.warn(moleculeError.toString)
       }
-    startSubscription(argsSerialized, callbackUnpickle)
+    }
+    //    println("ELEMENTS: " + elements)
+    websocketSubscription(argsSerialized, callbackDeserialize)
   }
 
   override def queryOffset[Tpl](

@@ -1,6 +1,7 @@
 package molecule.core.marshalling
 
 import java.nio.ByteBuffer
+import java.util.UUID
 import boopickle.Default._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.util.Executor._
@@ -51,37 +52,37 @@ class MoleculeRpcRequest(interface: String, port: Int) extends MoleculeLogging {
   }
 
 
-  def startSubscription(
+  def websocketSubscription(
     argsSerialized: Int8Array,
-    callback: ByteBuffer => Unit
+    callbackDeserialize: ByteBuffer => Unit
   ): Unit = {
-    val uri    = s"ws://$interface:$port/molecule/ws"
+    // One websocket connection per subscription
+    val uuid   = UUID.randomUUID()
+    val uri    = s"ws://$interface:$port/molecule/ws/$uuid"
     val socket = new WebSocket(uri)
     socket.binaryType = "arraybuffer"
     socket.onerror = {
       case e: dom.Event =>
-        //        println(s"WebSocket error: $e!")
+        logger.error(s"WebSocket error: $e!")
         //        keys(e).toList.foreach(k => println(s"$k -> ${apply(k)}"))
         socket.close(1000, e.toString)
-      // Restart ws?
     }
     socket.onclose = {
-      case _: dom.CloseEvent =>
-      //        println("WebSocket onclose")
-      // Restart ws?
+      case _: dom.CloseEvent => logger.warn("WebSocket onclose")
     }
     socket.onopen = {
       case _: dom.Event =>
+        logger.trace(s"WebSocket onopen")
         //        println("WebSocket onopen...")
         socket.send(argsSerialized.buffer)
     }
 
-    // Feed serialized response into callback
     socket.onmessage = {
       case e: MessageEvent =>
+        logger.trace(s"WebSocket onmessage")
         //        println("WebSocket onmessage...")
         val resultSerialized = TypedArrayBuffer.wrap(e.data.asInstanceOf[ArrayBuffer])
-        callback(resultSerialized)
+        callbackDeserialize(resultSerialized)
     }
   }
 }

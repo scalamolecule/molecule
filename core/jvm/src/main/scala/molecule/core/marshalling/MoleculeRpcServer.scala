@@ -57,7 +57,6 @@ abstract class MoleculeRpcServer(rpc: MoleculeRpc) extends RpcHandlers(rpc) {
 
     val sink = Sink.foreach[Message] {
       case BinaryMessage.Strict(argsSerialized) =>
-        //        println("Incoming...")
         // Deserialize query coordinates
         val (proxy, elements, limit) = Unpickle.apply[(ConnProxy, List[Element], Option[Int])]
           .fromBytes(argsSerialized.asByteBuffer)
@@ -74,6 +73,7 @@ abstract class MoleculeRpcServer(rpc: MoleculeRpc) extends RpcHandlers(rpc) {
         }
 
         // Subscribe to updated query results from db queue in separate thread
+        // Data result is typed when deserialized on the client side
         rpc.subscribe[Any](proxy, elements, limit, callback)
 
       case _ =>
@@ -95,7 +95,7 @@ abstract class MoleculeRpcServer(rpc: MoleculeRpc) extends RpcHandlers(rpc) {
       path(prefix / "insert")(toRoute(handleInsert)) ~
       path(prefix / "update")(toRoute(handleUpdate)) ~
       path(prefix / "delete")(toRoute(handleDelete)) ~
-      path(prefix / "ws")(handleWebSocketMessages(wsFlow))
+      path(prefix / "ws" / Remaining)(_ => handleWebSocketMessages(wsFlow))
   }
 
   Http()

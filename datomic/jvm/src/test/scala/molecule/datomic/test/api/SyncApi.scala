@@ -6,7 +6,8 @@ import molecule.datomic.sync._
 import utest._
 import scala.annotation.nowarn
 
-
+// Only testing synchronous api on JVM platform since the JS platform
+// is dependent on asynchronous retrieval of data from the server.
 object SyncApi extends DatomicTestSuite {
 
   @nowarn lazy val tests = Tests {
