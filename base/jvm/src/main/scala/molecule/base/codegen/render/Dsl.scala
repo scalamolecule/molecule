@@ -23,23 +23,33 @@ case class Dsl(schema: MetaSchema, partPrefix: String, namespace: MetaNs)
     (baseImports ++ typeImports).sorted.mkString("import ", "\nimport ", "")
   }
 
+  val validationExtractor = Dsl_Validations(schema, namespace)
+
   val baseNs: String = {
+    val vas = List.newBuilder[String]
     val man = List.newBuilder[String]
     val opt = List.newBuilder[String]
     val tac = List.newBuilder[String]
     attrs.collect {
-      case MetaAttr(attr, card, tpe, refNs, _, _, _, _) if !genericAttrs.contains(attr) =>
+      case MetaAttr(attr, card, tpe, refNs, _, _, _, validations) if !genericAttrs.contains(attr) =>
+        val withV   = if (validations.nonEmpty) {
+          vas += validationExtractor.validationMethod(attr, tpe, validations)
+          s", validation = Some(validation_$attr)"
+        } else ""
         val padA    = padAttr(attr)
-        val padT = padType(tpe)
-        val isRef   = if (refNs.isDefined) ", isRef = true" else ""
+        val padT    = padType(tpe)
+        val isRef   = if (refNs.isDefined) ", status = Some(\"ref\")" else ""
         val attrMan = "Attr" + card.marker + "Man" + tpe
         val attrOpt = "Attr" + card.marker + "Opt" + tpe
         val attrTac = "Attr" + card.marker + "Tac" + tpe
-        man += s"""protected lazy val ${attr}_man$padA: $attrMan$padT = $attrMan$padT("$ns", "$attr"$padA$isRef)"""
-        opt += s"""protected lazy val ${attr}_opt$padA: $attrOpt$padT = $attrOpt$padT("$ns", "$attr"$padA$isRef)"""
-        tac += s"""protected lazy val ${attr}_tac$padA: $attrTac$padT = $attrTac$padT("$ns", "$attr"$padA$isRef)"""
+        man += s"""protected lazy val ${attr}_man$padA: $attrMan$padT = $attrMan$padT("$ns", "$attr"$padA$isRef$withV)"""
+        opt += s"""protected lazy val ${attr}_opt$padA: $attrOpt$padT = $attrOpt$padT("$ns", "$attr"$padA$isRef$withV)"""
+        tac += s"""protected lazy val ${attr}_tac$padA: $attrTac$padT = $attrTac$padT("$ns", "$attr"$padA$isRef$withV)"""
     }
-    val attrDefs = (man.result() ++ Seq("") ++ opt.result() ++ Seq("") ++ tac.result()).mkString("\n  ")
+    val vas1     = vas.result()
+    val vas2     = if (vas1.isEmpty) Nil else "" +: vas1
+    val attrDefs = (man.result() ++ Seq("") ++ opt.result() ++ Seq("") ++ tac.result() ++ vas2).mkString("\n  ")
+
     s"""trait $ns extends Generic {
        |  $attrDefs
        |}""".stripMargin
@@ -47,7 +57,7 @@ case class Dsl(schema: MetaSchema, partPrefix: String, namespace: MetaNs)
 
   val nss: String = (0 to schema.maxArity).map(Dsl_Arities(schema, partPrefix, namespace, _).get).mkString("\n\n")
 
-  def get: String =
+  def get: String = {
     s"""/*
        |* AUTO-GENERATED Molecule DSL boilerplate code for namespace `$ns`
        |*
@@ -70,4 +80,5 @@ case class Dsl(schema: MetaSchema, partPrefix: String, namespace: MetaNs)
        |
        |$nss
        |""".stripMargin
+  }
 }

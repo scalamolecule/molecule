@@ -9,9 +9,7 @@ import molecule.datomic.util.MakeDatomicTxReport
 import scala.collection.mutable.ListBuffer
 
 
-case class TxReportWatcher(
-  conn: DatomicConn_JVM
-) extends Runnable {
+case class TxReportWatcher(conn: DatomicConn_JVM) extends Runnable {
 
   private val blockingQueue = conn.txReportQueue.javaQueue
   private val dbCallbacks   = ListBuffer.empty[(List[jLong], Database => Unit)]
@@ -22,7 +20,6 @@ case class TxReportWatcher(
   ): ListBuffer[(List[jLong], Database => Unit)] = {
     dbCallbacks.addOne(queryAttrIds -> dbCallback)
   }
-
 
   override def run(): Unit = {
     while (true) {

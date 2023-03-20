@@ -10,12 +10,12 @@ class DslFormatting(schema: MetaSchema, namespace: MetaNs, arity: Int = 0) exten
   val maxArity     = schema.maxArity
   val ns           = namespace.ns
   val attrs        = namespace.attrs ++ Seq(
-    MetaAttr("e", CardOne, "Long", None, Nil, Some("Entity id"), None, None),
-    MetaAttr("a", CardOne, "String", None, Nil, Some("Attribute name"), None, None),
-    MetaAttr("v", CardOne, "String", None, Nil, Some("String representation of any type of value"), None, None),
-    MetaAttr("tx", CardOne, "Long", None, Nil, Some("Transaction entity id"), None, None),
-    MetaAttr("txDate", CardOne, "Date", None, Nil, Some("Transaction time as java.util.Date"), None, None),
-    MetaAttr("txOp", CardOne, "Boolean", None, Nil, Some("Transaction operation (add: True or retract: False"), None, None)
+    MetaAttr("e", CardOne, "Long", None, Nil, Some("Entity id"), None, Nil),
+    MetaAttr("a", CardOne, "String", None, Nil, Some("Attribute name"), None, Nil),
+    MetaAttr("v", CardOne, "String", None, Nil, Some("String representation of any type of value"), None, Nil),
+    MetaAttr("tx", CardOne, "Long", None, Nil, Some("Transaction entity id"), None, Nil),
+    MetaAttr("txDate", CardOne, "Date", None, Nil, Some("Transaction time as java.util.Date"), None, Nil),
+    MetaAttr("txOp", CardOne, "Boolean", None, Nil, Some("Transaction operation (add: True or retract: False"), None, Nil)
   )
   val genericAttrs = Seq("e", "a", "v", "tx", "txDate", "txOp")
   val refs         = namespace.attrs.filter(_.refNs.nonEmpty)

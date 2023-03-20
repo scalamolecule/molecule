@@ -9,11 +9,12 @@ import molecule.datomic.action._
 import molecule.datomic.facade.DatomicConn_JVM
 import molecule.datomic.marshalling.DatomicRpcJVM.Data
 import molecule.datomic.query.{DatomicQueryResolveCursor, DatomicQueryResolveOffset}
+import molecule.datomic.subscription.SubscriptionStarter
 import molecule.datomic.transaction.{Delete_stmts, Insert_stmts, Save_stmts, Update_stmts}
 import scala.concurrent.{ExecutionContext, Future}
 
 
-trait DatomicApiAsync extends DatomicApi_JVM with DatomicAsyncApiBase with ApiAsync with FutureUtils {
+trait DatomicApiAsync extends SubscriptionStarter with DatomicAsyncApiBase with ApiAsync with FutureUtils {
 
   implicit class datomicQueryApiAsync[Tpl](q: DatomicQuery[Tpl]) extends QueryApi[Tpl] {
     override def get(implicit conn: Connection, ec: ExecutionContext): Future[List[Tpl]] = {

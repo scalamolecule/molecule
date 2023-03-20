@@ -1,10 +1,9 @@
-package molecule.datomic.api
+package molecule.datomic.subscription
 
 import molecule.datomic.facade.DatomicConn_JVM
-import molecule.datomic.subscription.TxReportWatcher
 
 
-trait DatomicApi_JVM {
+trait SubscriptionStarter {
 
   private var txReportWatcher: Option[TxReportWatcher] = None
 

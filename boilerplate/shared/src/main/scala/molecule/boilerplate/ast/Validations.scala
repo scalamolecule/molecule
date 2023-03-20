@@ -6,92 +6,92 @@ import java.util.{Date, UUID}
 
 trait Validations {
 
-  sealed trait Validate
+//  sealed trait Validate
 
   abstract class ValidateString {
-    def validate(v: String, test: => Boolean): Either[String, String]
+    def validate(v: String): Seq[String]
   }
-  abstract class ValidateInt extends Validate {
-    def validate(v: Int, test: => Boolean): Either[String, Int]
+  abstract class ValidateInt {
+    def validate(v: Int): Seq[String]
   }
   abstract class ValidateLong {
-    def validate(v: Long): Either[String, Long]
+    def validate(v: Long): Seq[String]
   }
   abstract class ValidateFloat {
-    def validate(v: Float): Either[String, Float]
+    def validate(v: Float): Seq[String]
   }
   abstract class ValidateDouble {
-    def validate(v: Double): Either[String, Double]
+    def validate(v: Double): Seq[String]
   }
   abstract class ValidateBoolean {
-    def validate(v: Boolean): Either[String, Boolean]
+    def validate(v: Boolean): Seq[String]
   }
   abstract class ValidateBigInt {
-    def validate(v: BigInt): Either[String, BigInt]
+    def validate(v: BigInt): Seq[String]
   }
   abstract class ValidateBigDecimal {
-    def validate(v: BigDecimal): Either[String, BigDecimal]
+    def validate(v: BigDecimal): Seq[String]
   }
   abstract class ValidateDate {
-    def validate(v: Date): Either[String, Date]
+    def validate(v: Date): Seq[String]
   }
   abstract class ValidateUUID {
-    def validate(v: UUID): Either[String, UUID]
+    def validate(v: UUID): Seq[String]
   }
   abstract class ValidateURI {
-    def validate(v: URI): Either[String, URI]
+    def validate(v: URI): Seq[String]
   }
   abstract class ValidateByte {
-    def validate(v: Byte): Either[String, Byte]
+    def validate(v: Byte): Seq[String]
   }
   abstract class ValidateShort {
-    def validate(v: Short): Either[String, Short]
+    def validate(v: Short): Seq[String]
   }
   abstract class ValidateChar {
-    def validate(v: Char): Either[String, Char]
+    def validate(v: Char): Seq[String]
   }
 
 
   abstract class ValidateSetString {
-    def validate(v: String): Either[String, String]
+    def validate(v: String): Seq[String]
   }
   abstract class ValidateSetInt {
-    def validate(v: Int): Either[String, Int]
+    def validate(v: Int): Seq[String]
   }
   abstract class ValidateSetLong {
-    def validate(v: Long): Either[String, Long]
+    def validate(v: Long): Seq[String]
   }
   abstract class ValidateSetFloat {
-    def validate(v: Float): Either[String, Float]
+    def validate(v: Float): Seq[String]
   }
   abstract class ValidateSetDouble {
-    def validate(v: Double): Either[String, Double]
+    def validate(v: Double): Seq[String]
   }
   abstract class ValidateSetBoolean {
-    def validate(v: Boolean): Either[String, Boolean]
+    def validate(v: Boolean): Seq[String]
   }
   abstract class ValidateSetBigInt {
-    def validate(v: BigInt): Either[String, BigInt]
+    def validate(v: BigInt): Seq[String]
   }
   abstract class ValidateSetBigDecimal {
-    def validate(v: BigDecimal): Either[String, BigDecimal]
+    def validate(v: BigDecimal): Seq[String]
   }
   abstract class ValidateSetDate {
-    def validate(v: Date): Either[String, Date]
+    def validate(v: Date): Seq[String]
   }
   abstract class ValidateSetUUID {
-    def validate(v: UUID): Either[String, UUID]
+    def validate(v: UUID): Seq[String]
   }
   abstract class ValidateSetURI {
-    def validate(v: URI): Either[String, URI]
+    def validate(v: URI): Seq[String]
   }
   abstract class ValidateSetByte {
-    def validate(v: Byte): Either[String, Byte]
+    def validate(v: Byte): Seq[String]
   }
   abstract class ValidateSetShort {
-    def validate(v: Short): Either[String, Short]
+    def validate(v: Short): Seq[String]
   }
   abstract class ValidateSetChar {
-    def validate(v: Char): Either[String, Char]
+    def validate(v: Char): Seq[String]
   }
 }

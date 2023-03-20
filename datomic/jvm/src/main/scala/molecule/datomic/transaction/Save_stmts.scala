@@ -78,7 +78,7 @@ trait Save_stmts extends DatomicTxBase_JVM with SaveOps with MoleculeLogging { s
     stmts.add(stmt)
   }
 
-  // Save Int as Long in Datomic (
+  // Save Int as Long in Datomic
   override protected lazy val valueString     = (v: String) => v
   override protected lazy val valueInt        = (v: Int) => v //.toLong
   override protected lazy val valueLong       = (v: Long) => v

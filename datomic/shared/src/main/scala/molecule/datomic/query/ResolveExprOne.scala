@@ -82,7 +82,7 @@ trait ResolveExprOne[Tpl]
     at: AttrOneOptLong,
     attrIndex: Int
   ): Option[(Int, Int => (Row, Row) => Int)] = {
-    if (at.isRef)
+    if (at.status.contains("ref"))
       sortOneOptLongRef(at, attrIndex)
     else
       sortOneOptLong(at, attrIndex)

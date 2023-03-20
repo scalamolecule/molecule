@@ -5,6 +5,7 @@ import java.util.{Date, UUID}
 import molecule.base.util.exceptions.MoleculeError
 import molecule.boilerplate.api.Keywords.Kw
 import molecule.boilerplate.ast.Model._
+import scala.util.{Try, Success, Failure}
 
 trait ModelTransformations {
 
@@ -106,11 +107,18 @@ trait ModelTransformations {
     es.init :+ last
   }
 
+
   protected def addOne[T](es: List[Element], op: Op, vs: Seq[T]): List[Element] = {
     val last = es.last match {
       case a: AttrOneMan => a match {
         case a: AttrOneManString     => a.copy(op = op, vs = vs.asInstanceOf[Seq[String]])
-        case a: AttrOneManInt        => a.copy(op = op, vs = vs.asInstanceOf[Seq[Int]])
+        case a: AttrOneManInt        =>
+          val vs1    = vs.asInstanceOf[Seq[Int]]
+          val errors = a.validation.fold(Seq.empty[String]) { validator =>
+            vs1.flatMap(v => validator.validate(v))
+          }
+
+          a.copy(op = op, vs = vs1)
         case a: AttrOneManLong       => a.copy(op = op, vs = vs.asInstanceOf[Seq[Long]])
         case a: AttrOneManDouble     => a.copy(op = op, vs = vs.asInstanceOf[Seq[Double]])
         case a: AttrOneManBoolean    => a.copy(op = op, vs = vs.asInstanceOf[Seq[Boolean]])
@@ -273,38 +281,38 @@ trait ModelTransformations {
   protected def reverseTopLevelSorting(es: List[Element]): List[Element] = {
     es.map {
       case a: AttrOneMan => a match {
-        case a@AttrOneManString(_, _, _, _, _, _, Some(sort))     => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneManInt(_, _, _, _, _, _, Some(sort))        => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneManLong(_, _, _, _, _, _, Some(sort), _)    => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneManFloat(_, _, _, _, _, _, Some(sort))      => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneManDouble(_, _, _, _, _, _, Some(sort))     => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneManBoolean(_, _, _, _, _, _, Some(sort))    => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneManBigInt(_, _, _, _, _, _, Some(sort))     => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneManBigDecimal(_, _, _, _, _, _, Some(sort)) => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneManDate(_, _, _, _, _, _, Some(sort))       => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneManUUID(_, _, _, _, _, _, Some(sort))       => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneManURI(_, _, _, _, _, _, Some(sort))        => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneManByte(_, _, _, _, _, _, Some(sort))       => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneManShort(_, _, _, _, _, _, Some(sort))      => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneManChar(_, _, _, _, _, _, Some(sort))       => a.copy(sort = Some(reverseSort(sort)))
-        case a                                                    => a
+        case a@AttrOneManString(_, _, _, _, _, _, _, Some(sort))     => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneManInt(_, _, _, _, _, _, _, Some(sort))        => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneManLong(_, _, _, _, _, _, _, Some(sort))       => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneManFloat(_, _, _, _, _, _, _, Some(sort))      => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneManDouble(_, _, _, _, _, _, _, Some(sort))     => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneManBoolean(_, _, _, _, _, _, _, Some(sort))    => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneManBigInt(_, _, _, _, _, _, _, Some(sort))     => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneManBigDecimal(_, _, _, _, _, _, _, Some(sort)) => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneManDate(_, _, _, _, _, _, _, Some(sort))       => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneManUUID(_, _, _, _, _, _, _, Some(sort))       => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneManURI(_, _, _, _, _, _, _, Some(sort))        => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneManByte(_, _, _, _, _, _, _, Some(sort))       => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneManShort(_, _, _, _, _, _, _, Some(sort))      => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneManChar(_, _, _, _, _, _, _, Some(sort))       => a.copy(sort = Some(reverseSort(sort)))
+        case a                                                       => a
       }
       case a: AttrOneOpt => a match {
-        case a@AttrOneOptString(_, _, _, _, _, _, Some(sort))     => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneOptInt(_, _, _, _, _, _, Some(sort))        => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneOptLong(_, _, _, _, _, _, Some(sort), _)    => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneOptFloat(_, _, _, _, _, _, Some(sort))      => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneOptDouble(_, _, _, _, _, _, Some(sort))     => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneOptBoolean(_, _, _, _, _, _, Some(sort))    => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneOptBigInt(_, _, _, _, _, _, Some(sort))     => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneOptBigDecimal(_, _, _, _, _, _, Some(sort)) => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneOptDate(_, _, _, _, _, _, Some(sort))       => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneOptUUID(_, _, _, _, _, _, Some(sort))       => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneOptURI(_, _, _, _, _, _, Some(sort))        => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneOptByte(_, _, _, _, _, _, Some(sort))       => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneOptShort(_, _, _, _, _, _, Some(sort))      => a.copy(sort = Some(reverseSort(sort)))
-        case a@AttrOneOptChar(_, _, _, _, _, _, Some(sort))       => a.copy(sort = Some(reverseSort(sort)))
-        case a                                                    => a
+        case a@AttrOneOptString(_, _, _, _, _, _, _, Some(sort))     => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneOptInt(_, _, _, _, _, _, _, Some(sort))        => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneOptLong(_, _, _, _, _, _, _, Some(sort))       => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneOptFloat(_, _, _, _, _, _, _, Some(sort))      => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneOptDouble(_, _, _, _, _, _, _, Some(sort))     => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneOptBoolean(_, _, _, _, _, _, _, Some(sort))    => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneOptBigInt(_, _, _, _, _, _, _, Some(sort))     => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneOptBigDecimal(_, _, _, _, _, _, _, Some(sort)) => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneOptDate(_, _, _, _, _, _, _, Some(sort))       => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneOptUUID(_, _, _, _, _, _, _, Some(sort))       => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneOptURI(_, _, _, _, _, _, _, Some(sort))        => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneOptByte(_, _, _, _, _, _, _, Some(sort))       => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneOptShort(_, _, _, _, _, _, _, Some(sort))      => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneOptChar(_, _, _, _, _, _, _, Some(sort))       => a.copy(sort = Some(reverseSort(sort)))
+        case a                                                       => a
       }
       case other         => other
     }

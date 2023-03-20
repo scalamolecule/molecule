@@ -1,30 +1,15 @@
-package molecule.base.dataModel
+package molecule.coreTests.dataModels.core.dataModel
 
 import java.util.Date
 import molecule.DataModel
 
-object Nss extends DataModel(3) {
-
-  trait Ns {
-    val int    = oneInt
-    val string = oneString
-    val ref1   = one[Ref1]
-  }
-
-  trait Ref1 {
-    val str1 = oneString.descr("foo")
-    val int1 = oneInt.unique.descr("bar").alias("hej")
-  }
+object Validation extends DataModel(4) {
 
   trait Format {
-    val single1 = oneInt.validate(_ > 2, "error...")
-    val single2 = oneInt.validate((v: Int) => v.>(2),
-      """Very elaborate error explanation
-        |with multiple lines
-        |""".stripMargin
-    )
-    val single3 = oneInt.validate((v: Int) => v.>(2),
-      """Very elaborate error explanation
+    val noErrorMsg        = oneInt.validate(_ > 2)
+    val errorMsg          = oneInt.validate(_ > 2, "One-line error msg")
+    val multilineErrorMsg = oneInt.validate((v: Int) => v.>(2),
+      """Long error explanation
         |with multiple lines""".stripMargin
     )
 
@@ -36,38 +21,39 @@ object Nss extends DataModel(3) {
     val multiLine2 = oneInt.validate(
       { v =>
         val data   = 22
-        val result = data % 10
+        val result = {
+          data % 10
+        }
         v > result
       },
-      "Error message for multiline test"
+      "One-line error msg"
     )
-    val multiLine3 = oneInt.validate(
-      { v =>
-        val data   = 22
-        val result = data % 10
-        v > result
-      },
-      """Multiline error message
-        |for multiline test""".stripMargin
+    val multiLine3 = oneInt.validate({ v =>
+      val data   = 22
+      val result = data % 10
+      v > result
+    },
+      """Long error explanation
+        |with multiple lines""".stripMargin
     )
 
-    val logic = oneInt.validate(v => v > 2 && v < 8 && v % 2 == 0)
 
-    val withMsg = oneInt.validate(
+    val logic = oneInt.validate(
       v => v >= 3 && v <= 9 && v % 2 == 1,
       "Value must be an odd number between 3 and 9"
     )
 
     val multipleMsgs = oneInt.validate {
-      case v if v <= 2     => "Number must be bigger than 2"
-      case v if v >= 10    => "Number must be smaller than 10"
-      case v if v % 2 == 0 => "Number must be odd"
-    }
-
-    val multipleMsgs2 = oneInt.validate {
-      case v if v <= 2     => "Number must be bigger than 2"
-      case v if v >= 10    => "Number must be smaller than 10"
-      case v if v % 2 == 0 =>
+      case v if v <= 2  => "Number must be bigger than 2"
+      case v if v >= 10 => "Number must be smaller than 10"
+      case v if {
+        2 + v == 4
+      }                 => "single-line check"
+      case v if {
+        // Comments in code blocks are picked up
+        val divider = 2
+        v % divider == 0
+      }                 =>
         """Number must
           |be odd""".stripMargin
     }
@@ -166,4 +152,3 @@ object Nss extends DataModel(3) {
   //    val requiring = oneString.require(required).descr("Needs required attribute value")
   //  }
 }
-

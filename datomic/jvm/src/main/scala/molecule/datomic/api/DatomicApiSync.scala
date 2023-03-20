@@ -9,10 +9,11 @@ import molecule.datomic.action._
 import molecule.datomic.facade.DatomicConn_JVM
 import molecule.datomic.marshalling.DatomicRpcJVM.Data
 import molecule.datomic.query.{DatomicModel2Query, DatomicQueryResolveCursor, DatomicQueryResolveOffset}
+import molecule.datomic.subscription.SubscriptionStarter
 import molecule.datomic.transaction.{Delete_stmts, Insert_stmts, Save_stmts, Update_stmts}
 
 
-trait DatomicApiSync extends DatomicApi_JVM with ApiSync {
+trait DatomicApiSync extends SubscriptionStarter with ApiSync {
 
   implicit class datomicQueryApiSync[Tpl](q: DatomicQuery[Tpl]) extends QueryApi[Tpl] {
     override def get(implicit conn: Connection): List[Tpl] = {

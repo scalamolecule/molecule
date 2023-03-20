@@ -21,7 +21,7 @@ class DataModel2MetaSchema(filePath: String, pkgPath: String, scalaVersion: Stri
     case "213" => dialects.Scala213(virtualFile)
     case "212" => dialects.Scala212(virtualFile)
   }
-  private val tree = dialect.parse[Source].get
+  private val tree        = dialect.parse[Source].get
 
   private var backRefs = Map.empty[String, Seq[String]]
 
@@ -71,7 +71,7 @@ class DataModel2MetaSchema(filePath: String, pkgPath: String, scalaVersion: Stri
   private def getAttrs(ns: String, attrs: Seq[Stat]): Seq[MetaAttr] = attrs.map {
     case q"val $attr = $defs" =>
       val a = attr.toString
-      getAttr(ns, a, defs, (Nil, None, None, None, MetaAttr(a, CardOne, "")))._5
+      getAttr(ns, a, defs, (Nil, None, None, Nil, MetaAttr(a, CardOne, "")))._5
     case other                => unexpected(other)
   }
 
@@ -86,14 +86,13 @@ class DataModel2MetaSchema(filePath: String, pkgPath: String, scalaVersion: Stri
     ns: String,
     a: String,
     t: Tree,
-    x: (List[String], Option[String], Option[String], Option[String], MetaAttr)
-  ): (List[String], Option[String], Option[String], Option[String], MetaAttr) = {
+    x: (List[String], Option[String], Option[String], Seq[(String, String)], MetaAttr)
+  ): (List[String], Option[String], Option[String], Seq[(String, String)], MetaAttr) = {
     t match {
       case q"$prev.index"                   => getAttr(ns, a, prev, ("index" :: x._1, x._2, x._3, x._4, x._5))
       case q"$prev.noHistory"               => getAttr(ns, a, prev, ("noHistory" :: x._1, x._2, x._3, x._4, x._5))
       case q"$prev.uniqueIdentity"          => getAttr(ns, a, prev, ("uniqueIdentity" :: x._1, x._2, x._3, x._4, x._5))
       case q"$prev.unique"                  => getAttr(ns, a, prev, ("unique" :: x._1, x._2, x._3, x._4, x._5))
-      case q"$prev.mandatory"               => getAttr(ns, a, prev, ("mandatory" :: x._1, x._2, x._3, x._4, x._5))
       case q"$prev.fulltext"                => getAttr(ns, a, prev, ("fulltext" :: x._1, x._2, x._3, x._4, x._5))
       case q"$prev.owner"                   => getAttr(ns, a, prev, ("owner" :: x._1, x._2, x._3, x._4, x._5))
       case q"$prev.descr(${Lit.String(s)})" =>
@@ -119,7 +118,6 @@ class DataModel2MetaSchema(filePath: String, pkgPath: String, scalaVersion: Stri
           throw new Exception(s"Invalid alias for attribute $a: " + other)
       }
 
-      case q"$prev.validation($lambda)" => getAttr(ns, a, prev, (x._1, x._2, x._3, Some(lambda.toString()), x._5))
 
       case q"oneString"     => attr(x, CardOne, "String")
       case q"oneChar"       => attr(x, CardOne, "Char")
@@ -158,7 +156,81 @@ class DataModel2MetaSchema(filePath: String, pkgPath: String, scalaVersion: Stri
       case q"setDate"       => attr(x, CardSet, "Date")
       case q"setUUID"       => attr(x, CardSet, "UUID")
       case q"setURI"        => attr(x, CardSet, "URI")
-      case other            => unexpected(other)
+
+
+      // Validations ................................................
+
+      case q"$prev.validate { ..case $cases }" =>
+        val validations = cases.map {
+          case Case(v, Some(test), Lit.String(error))                                               =>
+            (indent(s"$v => $test"), error)
+          case Case(v, Some(test), Term.Select(Lit.String(multilineMsg), Term.Name("stripMargin"))) =>
+            (indent(s"$v => $test"), multilineMsg)
+          case Case(v, None, Lit.String(error))                                                     =>
+            throw new Exception(s"""Please provide if-expression: case $v if <test..> = "$error"""")
+          case other                                                                                =>
+            throw new Exception("Unexpected validation case: " + other)
+        }
+        getAttr(ns, a, prev, (x._1, x._2, x._3, validations, x._5))
+
+      case q"$prev.validate($test)" =>
+        getAttr(ns, a, prev, (x._1, x._2, x._3, List(indent(test.toString()) -> ""), x._5))
+
+      case q"$prev.validate($test, ${Lit.String(error)})" =>
+        getAttr(ns, a, prev, (x._1, x._2, x._3, List(indent(test.toString()) -> error), x._5))
+
+      case q"$prev.validate($test, ${Term.Select(Lit.String(multilineMsg), Term.Name("stripMargin"))})" =>
+        getAttr(ns, a, prev, (x._1, x._2, x._3, List(indent(test.toString()) -> multilineMsg), x._5))
+
+      case q"$prev.email" =>
+        val test  = "(s: String) => emailRegex.findFirstMatchIn(s).isDefined"
+        val error = "Invalid email"
+        getAttr(ns, a, prev, (x._1, x._2, x._3, List(test -> error), x._5))
+
+      case q"$prev.email(${Lit.String(error)})" =>
+        val test = "(s: String) => emailRegex.findFirstMatchIn(s).isDefined"
+        getAttr(ns, a, prev, (x._1, x._2, x._3, List(test -> error), x._5))
+
+      case q"$prev.regex(${Lit.String(regex)})" =>
+        val test  = s"""(s: String) => "$regex".r.findFirstMatchIn(s).isDefined"""
+        val error = s"String doesn't match regex: $regex"
+        getAttr(ns, a, prev, (x._1, x._2, x._3, List(test -> error), x._5))
+
+      case q"$prev.regex(${Lit.String(regex)}, ${Lit.String(error)})" =>
+        val test = s"""(s: String) => "$regex".r.findFirstMatchIn(s).isDefined"""
+        getAttr(ns, a, prev, (x._1, x._2, x._3, List(test -> error), x._5))
+
+      case q"$prev.allowed(..$vs)" =>
+        val test  = s"""v => Seq$vs.contains(v)"""
+        val error = s"Value `$$v` is not one of the allowed values in Seq$vs"
+        getAttr(ns, a, prev, (x._1, x._2, x._3, List(test -> error), x._5))
+
+
+      case q"$prev.require(..$attrs)" =>
+        val test  = s""
+        val error = s""
+        getAttr(ns, a, prev, (x._1, x._2, x._3, List(test -> error), x._5))
+
+      case q"$prev.mandatory" =>
+        getAttr(ns, a, prev, ("mandatory" :: x._1, x._2, x._3, x._4, x._5))
+
+      case q"$prev.value" =>
+        getAttr(ns, a, prev, ("value" :: x._1, x._2, x._3, x._4, x._5))
+
+      case other => unexpected(other)
+    }
+  }
+
+  def indent(code: String): String = {
+    if (code.contains('\n')) {
+      val testIndented = {
+        val lines  = code.split('\n').toList
+        val indent = lines.map(_.takeWhile(_ == ' ').length).filterNot(_ == 0).min
+        lines.map(_.replaceFirst(s"\\s{$indent}", "")).mkString("\n")
+      }
+      testIndented
+    } else {
+      code
     }
   }
 
@@ -168,19 +240,19 @@ class DataModel2MetaSchema(filePath: String, pkgPath: String, scalaVersion: Stri
   }
 
   private def attr(
-    acc: (List[String], Option[String], Option[String], Option[String], MetaAttr),
+    acc: (List[String], Option[String], Option[String], Seq[(String, String)], MetaAttr),
     card: Cardinality,
     tpe: String,
     refNs: Option[String] = None
-  ): (List[String], Option[String], Option[String], Option[String], MetaAttr) = {
-    (Nil, None, None, None, acc._5.copy(
+  ): (List[String], Option[String], Option[String], Seq[(String, String)], MetaAttr) = {
+    (Nil, None, None, Nil, acc._5.copy(
       card = card,
       tpe = tpe,
       refNs = refNs,
       options = acc._1,
       descr = acc._2,
       alias = acc._3,
-      validation = acc._4
+      validations = acc._4
     ))
   }
 }

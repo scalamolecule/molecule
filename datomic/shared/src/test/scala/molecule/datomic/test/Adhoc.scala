@@ -6,61 +6,61 @@ import molecule.datomic.async._
 import utest._
 import scala.language.implicitConversions
 import molecule.coreTests.dataModels.core.dsl.Types._
+import molecule.base.util.exceptions.MoleculeError
 
 object Adhoc extends DatomicTestSuite {
-  //  // See Zio-http route
-  //  abstract class RouteDecode[A](f: String => A) {
-  //    def unapply(a: String): Option[A] =
-  //      try {
-  //        Option(f(a))
-  //      } catch {
-  //        case _: Throwable => None
-  //      }
-  //  }
-  //
-  //  object boolean extends RouteDecode(_.toBoolean)
-  //  object byte extends RouteDecode(_.toByte)
-  //  object short extends RouteDecode(_.toShort)
-  //  object int extends RouteDecode(_.toInt)
-  //  object long extends RouteDecode(_.toLong)
-  //  object float extends RouteDecode(_.toFloat)
-  //  object double extends RouteDecode(_.toDouble)
-  ////  object uuid extends RouteDecode(str => UUID.fromString(str))
-  ////  object date extends RouteDecode(str => LocalDate.parse(str))
-  ////  object time extends RouteDecode(str => LocalDateTime.parse(str))
-  ////  object Person {
-  ////    lazy val name = RouteDecode(str => LocalDateTime.parse(str))
-  ////  }
-  //
-  //
-  ////Person.name(hej)
-  //
-  //  int(hej)
 
-  //  object int {
-  //    implicit class sync2api[Tpl](z: DatomicQueryApi[Tpl]) {
-  //      def go: Int = 7
-  //    }
-  //  }
-  //  object str {
-  //    implicit class sync2api[Tpl](z: DatomicQueryApi[Tpl]) {
-  //      def go: String = "hello"
-  //    }
-  //  }
+  Seq(
+    "(v: Int) => v.>(2)" ->
+      "Format.single2 with value `$v` doesn't satisfy validation: (v: Int) => v.>(2)"
+  )
 
   lazy val tests = Tests {
 
     "types" - types { implicit conn =>
       for {
-        List(a, b) <- Ns.int.insert(1, 2).transact.map(_.eids)
-        _ <- Ns.int(3).save.transact
-        _ <- Ns.int.query.get.map(_ ==> List(1, 2, 3))
-        _ <- Ns(a).int(10).update.transact
-        _ <- Ns(b).delete.transact
-        _ <- Ns.int.query.get.map(_ ==> List(3, 10))
+
+        _ <- Ns.int.apply(3).save.transact
+        _ <- Ns.int.query.get.map(_ ==> List(3))
+
+        _ <- Ns.int.apply(2).save.transact
+          .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
+          err ==> "Ns.int with value `2` doesn't satisfy validation: _ > 2 xx"
+        }
+        _ <- Ns.int.query.get.map(_ ==> List(2, 3))
+
       } yield ()
     }
 
+    /*
+
+    val validation_int = new ValidateInt {
+      def validate(v: Int): Seq[String] = {
+        val ok = {
+          v > 2
+        }
+        if (ok) Nil else List(s"Ns.int with value `$v` doesn't satisfy validation: _ > 2")
+      }
+    }
+    val validation_int2 = new ValidateInt {
+      def validate(v: Int): Seq[String] = {
+        val checks: Seq[(Int => Boolean, String)] = Seq(
+          (v => v <= 2, "Number must be bigger than 2"),
+          (v => v >= 10, "Number must be smaller than 10"),
+          (v => v % 2 == 0, "Number must be odd")
+        )
+        checks.flatMap {
+          case (test, error) => if (test(v)) Nil else Seq(error)
+        }
+      }
+    }
+
+    protected lazy val i_man          : AttrOneManInt        = AttrOneManInt       ("Ns", "i"          )
+    protected lazy val s_man          : AttrOneManString     = AttrOneManString    ("Ns", "s"          )
+    protected lazy val u_man          : AttrOneManInt        = AttrOneManInt       ("Ns", "u"          )
+    protected lazy val string_man     : AttrOneManString     = AttrOneManString    ("Ns", "string"     )
+    protected lazy val int_man        : AttrOneManInt        = AttrOneManInt       ("Ns", "int"        , validation = Some(validation_int))
+     */
 
     //    "refs" - refs { implicit conn =>
     //      import molecule.coreTests.dataModels.core.dsl.Refs._

@@ -8,27 +8,7 @@ import molecule.base.util.exceptions.MoleculeError
 
 trait BaseHelpers extends DateHandling {
 
-  def clean(attr: String): String = attr.last match {
-    case '_' => attr.init
-    case '$' => attr.init
-    case _   => attr
-  }
-  //  def orig(attr: String, mode: String): String = mode match {
-  //    case "man" => attr
-  //    case "opt" => attr + "$"
-  //    case "tac" => attr + "_"
-  //  }
-
-
-  def firstLow(str: Any): String = str.toString.head.toLower.toString + str.toString.tail
-
-  def getKwName(kw: String): String = kw.substring(kw.indexOf('/') + 1)
-
-  def thousands(i: Long): String =
-    i.toString.reverse.grouped(3).mkString(" ").reverse
-
   def indent(tabs: Int): String = "  " * tabs
-
 
   def escStr(s: String): String =
     s.replace("""\""", """\\""").replace(""""""", """\"""")
@@ -36,39 +16,17 @@ trait BaseHelpers extends DateHandling {
   def unescStr(s: String): String =
     s.replace("""\"""", """"""").replace("""\\""", """\""")
 
-  def withDecimal(v: Any): String = {
-    val s = v.toString
-    if (s.contains(".")) s else s + ".0"
-  }
-
-  protected def double(arg: Any): String = "__n__" + arg + (if (arg.toString.contains(".")) "" else ".0")
-  protected def bigDec(arg: Any): BigDecimal = BigDecimal(withDecimal(arg))
-
   def padS(longest: Int, str: String): String = pad(longest, str.length)
 
   def pad(longest: Int, shorter: Int): String = if (longest > shorter) " " * (longest - shorter) else ""
 
-  // Ensure decimal digits on JS platform output
-  def jsNumber(tpe: String, v: Any): Any = {
-    (tpe, v) match {
-      case ("Double", v: Double)                                          => if (v.isWhole) s"${v.toLong}.0" else v
-      case ("BigDecimal", v: BigDecimal)                                  => if (v.isWhole) s"${v.toBigInt}.0" else v
-      case ("Double" | "BigDecimal", v) if v.toString.startsWith("__n__") => v.toString.drop(5)
-      case (_, v)                                                         => v
-    }
-  }
-
-  final def os(opt: Option[Set[_]]): String = opt.fold("None")(vs => s"""Some(${vs.map(render).mkString(", ")})""")
-
   final def o(opt: Option[Any]): String = opt.fold("None")(v => s"""Some(${render(v)})""")
   final def opt(opt: Option[Any]): String = opt.fold("None")(v => s"""Some($v)""")
-
 
   final def oStr(opt: Option[String]): String = if (opt.isEmpty) "None" else s"""Some("${opt.get}")"""
   final def oStr2(opt: Option[String]): String = if (opt.isEmpty) "None" else {
     val s = escStr(opt.get)
     if (s.contains("\n"))
-    //      s"Some(\n\"\"\"$s\"\"\")"
       s"Some(\n" + "\"\"\"" + s + "\"\"\")"
     else
       s"""Some("$s")"""
@@ -92,53 +50,6 @@ trait BaseHelpers extends DateHandling {
       case (a, b)      => s"${render(a)} -> ${render(b)}"
       case v           => render(v)
     }.mkString("Seq(", ", ", ")")
-  }
-
-
-  final def sqOLD[T](values: Seq[T]): String =
-    values.map {
-      case set: Set[_] => set.map(render).mkString("Set(", ", ", ")")
-      case seq: Seq[_] => seq.map(render).mkString("Seq(", ", ", ")")
-      case (a, b)      => s"${render(a)} -> ${render(b)}"
-      case v           => render(v)
-    }.mkString("Seq(", ", ", ")")
-
-  final def untupled(rawData: Iterable[Seq[Any]]): Iterable[Seq[Any]] = {
-    if (this.toString.contains("compositeOutMolecule")) {
-      rawData.map(_ flatMap tupleToSeq)
-    } else {
-      rawData
-    }
-  }
-
-  final protected def tupleToSeq(arg: Any): Seq[Any] = arg match {
-    case l: Seq[_]  => l
-    case Some(v)    => Seq(v)
-    case None       => Seq()
-    case p: Product => p match {
-      case t: (_, _)                                                             => Seq(t._1, t._2)
-      case t: (_, _, _)                                                          => Seq(t._1, t._2, t._3)
-      case t: (_, _, _, _)                                                       => Seq(t._1, t._2, t._3, t._4)
-      case t: (_, _, _, _, _)                                                    => Seq(t._1, t._2, t._3, t._4, t._5)
-      case t: (_, _, _, _, _, _)                                                 => Seq(t._1, t._2, t._3, t._4, t._5, t._6)
-      case t: (_, _, _, _, _, _, _)                                              => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7)
-      case t: (_, _, _, _, _, _, _, _)                                           => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8)
-      case t: (_, _, _, _, _, _, _, _, _)                                        => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9)
-      case t: (_, _, _, _, _, _, _, _, _, _)                                     => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10)
-      case t: (_, _, _, _, _, _, _, _, _, _, _)                                  => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10, t._11)
-      case t: (_, _, _, _, _, _, _, _, _, _, _, _)                               => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10, t._11, t._12)
-      case t: (_, _, _, _, _, _, _, _, _, _, _, _, _)                            => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10, t._11, t._12, t._13)
-      case t: (_, _, _, _, _, _, _, _, _, _, _, _, _, _)                         => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10, t._11, t._12, t._13, t._14)
-      case t: (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _)                      => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10, t._11, t._12, t._13, t._14, t._15)
-      case t: (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)                   => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10, t._11, t._12, t._13, t._14, t._15, t._16)
-      case t: (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)                => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10, t._11, t._12, t._13, t._14, t._15, t._16, t._17)
-      case t: (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)             => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10, t._11, t._12, t._13, t._14, t._15, t._16, t._17, t._18)
-      case t: (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)          => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10, t._11, t._12, t._13, t._14, t._15, t._16, t._17, t._18, t._19)
-      case t: (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)       => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10, t._11, t._12, t._13, t._14, t._15, t._16, t._17, t._18, t._19, t._20)
-      case t: (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)    => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10, t._11, t._12, t._13, t._14, t._15, t._16, t._17, t._18, t._19, t._20, t._21)
-      case t: (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _) => Seq(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10, t._11, t._12, t._13, t._14, t._15, t._16, t._17, t._18, t._19, t._20, t._21, t._22)
-    }
-    case a          => Seq(a)
   }
 
   private val time0     = System.currentTimeMillis()

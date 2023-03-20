@@ -121,20 +121,20 @@ trait Update_stmts extends DatomicTxBase_JVM with UpdateOps with MoleculeLogging
   ): Seq[AnyRef] = {
     val at = s":$ns/$attr"
     filterAttr match {
-      case AttrOneTacString(_, _, _, vs, _, _, _)     => vs.map(v => list(at, v.asInstanceOf[AnyRef]))
-      case AttrOneTacInt(_, _, _, vs, _, _, _)        => vs.map(v => list(at, v.asInstanceOf[AnyRef]))
+      case AttrOneTacString(_, _, _, vs, _, _, _, _)     => vs.map(v => list(at, v.asInstanceOf[AnyRef]))
+      case AttrOneTacInt(_, _, _, vs, _, _, _, _)        => vs.map(v => list(at, v.asInstanceOf[AnyRef]))
       case AttrOneTacLong(_, _, _, vs, _, _, _, _)    => vs.map(v => list(at, v.asInstanceOf[AnyRef]))
-      case AttrOneTacFloat(_, _, _, vs, _, _, _)      => vs.map(v => list(at, v.asInstanceOf[AnyRef]))
-      case AttrOneTacDouble(_, _, _, vs, _, _, _)     => vs.map(v => list(at, v.asInstanceOf[AnyRef]))
-      case AttrOneTacBoolean(_, _, _, vs, _, _, _)    => vs.map(v => list(at, v.asInstanceOf[AnyRef]))
-      case AttrOneTacBigInt(_, _, _, vs, _, _, _)     => vs.map(v => list(at, v.bigInteger.asInstanceOf[AnyRef]))
-      case AttrOneTacBigDecimal(_, _, _, vs, _, _, _) => vs.map(v => list(at, v.bigDecimal.asInstanceOf[AnyRef]))
-      case AttrOneTacDate(_, _, _, vs, _, _, _)       => vs.map(v => list(at, v.asInstanceOf[AnyRef]))
-      case AttrOneTacUUID(_, _, _, vs, _, _, _)       => vs.map(v => list(at, v.asInstanceOf[AnyRef]))
-      case AttrOneTacURI(_, _, _, vs, _, _, _)        => vs.map(v => list(at, v.asInstanceOf[AnyRef]))
-      case AttrOneTacByte(_, _, _, vs, _, _, _)       => vs.map(v => list(at, v.toInt.asInstanceOf[AnyRef]))
-      case AttrOneTacShort(_, _, _, vs, _, _, _)      => vs.map(v => list(at, v.toInt.asInstanceOf[AnyRef]))
-      case AttrOneTacChar(_, _, _, vs, _, _, _)       => vs.map(v => list(at, v.toString.asInstanceOf[AnyRef]))
+      case AttrOneTacFloat(_, _, _, vs, _, _, _, _)      => vs.map(v => list(at, v.asInstanceOf[AnyRef]))
+      case AttrOneTacDouble(_, _, _, vs, _, _, _, _)     => vs.map(v => list(at, v.asInstanceOf[AnyRef]))
+      case AttrOneTacBoolean(_, _, _, vs, _, _, _, _)    => vs.map(v => list(at, v.asInstanceOf[AnyRef]))
+      case AttrOneTacBigInt(_, _, _, vs, _, _, _, _)     => vs.map(v => list(at, v.bigInteger.asInstanceOf[AnyRef]))
+      case AttrOneTacBigDecimal(_, _, _, vs, _, _, _, _) => vs.map(v => list(at, v.bigDecimal.asInstanceOf[AnyRef]))
+      case AttrOneTacDate(_, _, _, vs, _, _, _, _)       => vs.map(v => list(at, v.asInstanceOf[AnyRef]))
+      case AttrOneTacUUID(_, _, _, vs, _, _, _, _)       => vs.map(v => list(at, v.asInstanceOf[AnyRef]))
+      case AttrOneTacURI(_, _, _, vs, _, _, _, _)        => vs.map(v => list(at, v.asInstanceOf[AnyRef]))
+      case AttrOneTacByte(_, _, _, vs, _, _, _, _)       => vs.map(v => list(at, v.toInt.asInstanceOf[AnyRef]))
+      case AttrOneTacShort(_, _, _, vs, _, _, _, _)      => vs.map(v => list(at, v.toInt.asInstanceOf[AnyRef]))
+      case AttrOneTacChar(_, _, _, vs, _, _, _, _)       => vs.map(v => list(at, v.toString.asInstanceOf[AnyRef]))
     }
   }
 

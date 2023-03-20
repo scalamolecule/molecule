@@ -154,21 +154,22 @@ trait DataModelApi {
    */
   trait many extends refOptions[many]
 
+  trait attr
 
-  trait string extends stringOptions
-  trait char extends Options[char, Char]
-  trait byte extends Options[byte, Byte]
-  trait short extends Options[short, Short]
-  trait int extends Options[int, Int]
-  trait long extends Options[long, Long]
-  trait float extends Options[float, Float]
-  trait double extends Options[double, Double]
-  trait boolean extends Options[boolean, Boolean]
-  trait bigInt extends Options[bigInt, BigInt]
-  trait bigDecimal extends Options[bigDecimal, BigDecimal]
-  trait date extends Options[date, Date]
-  trait uuid extends Options[uuid, UUID]
-  trait uri extends Options[uri, URI]
+  trait string extends attr with stringOptions
+  trait char extends attr with Options[char, Char]
+  trait byte extends attr with Options[byte, Byte]
+  trait short extends attr with Options[short, Short]
+  trait int extends attr with Options[int, Int]
+  trait long extends attr with Options[long, Long]
+  trait float extends attr with Options[float, Float]
+  trait double extends attr with Options[double, Double]
+  trait boolean extends attr with Options[boolean, Boolean]
+  trait bigInt extends attr with Options[bigInt, BigInt]
+  trait bigDecimal extends attr with Options[bigDecimal, BigDecimal]
+  trait date extends attr with Options[date, Date]
+  trait uuid extends attr with Options[uuid, UUID]
+  trait uri extends attr with Options[uri, URI]
 
 
   // Options ---------------------------------------------------------
@@ -206,9 +207,6 @@ trait DataModelApi {
      * Attempts to insert a duplicate value for a different entity id will fail.
      * */
     lazy val unique: Self = ???
-    //    lazy val uniqueValue: Self = ???
-
-    lazy val mandatory: Self = ???
 
 
     /** Alias to non-compatible attribute name like `type` or `first-name` etc.
@@ -218,17 +216,42 @@ trait DataModelApi {
      * */
     def alias(altAttrName: String): Self = ???
 
-    def allowed(first: Tpe, more: Tpe*): Self = ???
-
     def descr(s: String): Self = ???
 
-    def validation(lambda: Tpe => Boolean): Self = ???
+
+    // Validation .................
+
+    def validate(ok: Tpe => Boolean, failureMsg: String = ""): Self = ???
+    def validate(err2msg: PartialFunction[Tpe, String]): Self = ???
+
+
+    // Allowed values (like enumerations)
+//    def allowed(first: Tpe, more: Tpe*): Self = ???
+    def allowed(vs: Tpe*): Self = ???
+
+    // Require other attributes to be asserted
+    // Useful for tuples
+    def require(attrs: attr*): Self = ???
+
+    // Required for any entity using this namespace.
+    // Can be applied to multiple attributes.
+    // Used to guarantee minimum of data for namespace.
+    val mandatory: Self = ???
+
+    // hmm, difficult to implement... - possible?
+    val value: Tpe = ???
   }
 
 
   trait stringOptions extends Options[string, String] {
     val fulltext: string = ???
+
+    // Validation .................
+    val email: string = ???
+    def email(msg: String): string = ???
+    def regex(expr: String, msg: String = ""): string = ???
   }
+
 
   trait refOptions[Self] extends Options[Self, Long] {
 
@@ -255,6 +278,7 @@ trait DataModelApi {
      */
     lazy val owner: Self = ???
   }
+
 
   //  // Any ---------------------------------------------------------
   //

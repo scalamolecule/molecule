@@ -10,7 +10,7 @@ object _Model extends BoilerplateGenBase("Model", "/ast") {
   private val customCode = {
     val it        = Source.fromFile(new File(path + "/Model.scala"))
     val lines     = it.getLines().toList
-    val delimiter = "// GENERATED (edit in _Model generator)"
+    val delimiter = "// GENERATED from here and below (edit in _Model generator)"
     if (!lines.exists(_.contains(delimiter)))
       throw MoleculeError(
         s"Couldn't find delimiting text '$delimiter' in file Model. " +
@@ -34,7 +34,7 @@ object _Model extends BoilerplateGenBase("Model", "/ast") {
     }.mkString("\n")
     customCode +
       s"""
-         |  // GENERATED (edit in _Model generator) ======================================
+         |  // GENERATED from here and below (edit in _Model generator) ======================================
          |  $attrClasses}""".stripMargin
   }
 
@@ -49,13 +49,11 @@ object _Model extends BoilerplateGenBase("Model", "/ast") {
     // Render attribute toString method so that a printout can be directly used as valid Scala code
 
     def body(baseType: String): String = {
-      val tpe               = cardTpe(baseType)
-      val attrType          = s"Attr$card$mode$baseType"
-      val (isRef, isRefStr) = if (baseType == "Long" && Seq("One", "Set").contains(card))
-        (",\n    isRef: Boolean = false", ", $isRef") else ("", "")
-      val vs                = if (mode == "Opt") s"Option[Seq[$tpe]] = None" else s"Seq[$tpe] = Nil"
-      val format_?          = !List("Int", "Double", "Boolean").contains(baseType)
-      val format            = baseType match {
+      val tpe      = cardTpe(baseType)
+      val attrType = s"Attr$card$mode$baseType"
+      val vs       = if (mode == "Opt") s"Option[Seq[$tpe]] = None" else s"Seq[$tpe] = Nil"
+      val format_? = !List("Int", "Double", "Boolean").contains(baseType)
+      val format   = baseType match {
         case "String"     => """"\"" + escStr(v) + "\"""""
         case "Int"        => "v"
         case "Long"       => """v.toString + "L""""
@@ -71,50 +69,42 @@ object _Model extends BoilerplateGenBase("Model", "/ast") {
         case "Short"      => """s"$v.toShort""""
         case "Char"       => """s"'$v'""""
       }
-      val attrStr           = card match {
+      val attrStr  = card match {
         case "One" => mode match {
           case "Opt" =>
             if (format_?)
               s"""def format(v: $baseType): String = $format
                  |      def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
-                 |      def defV: String = defaultValue.fold("None")(v => s"Some($${format(v)})")
-                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $$defV, $${o(validation)}, $${oStr(sort)}$isRefStr)\"\"\"""".stripMargin
+                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${o(validation)}, $$errs, $${oStr(status)}, $${oStr(sort)}))\"\"\"""".stripMargin
             else
               s"""def vss: String = vs.fold("None")(_.mkString("Some(Seq(", ", ", "))"))
-                 |      def defV: String = defaultValue.fold("None")(v => s"Some($$v)")
-                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $$defV, $${opt(validation)}, $${oStr(sort)}$isRefStr)\"\"\"""".stripMargin
+                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${opt(validation)}, $$errs, $${oStr(status)}, $${oStr(sort)}))\"\"\"""".stripMargin
           case _     =>
             if (format_?)
               s"""def format(v: $baseType): String = $format
                  |      def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-                 |      def defV: String = defaultValue.fold("None")(v => s"Some($${format(v)})")
-                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $$defV, $${o(validation)}, $${oStr(sort)}$isRefStr)\"\"\"""".stripMargin
+                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${o(validation)}, $$errs, $${oStr(status)}, $${oStr(sort)}))\"\"\"""".stripMargin
             else
               s"""def vss: String = vs.mkString("Seq(", ", ", ")")
-                 |      def defV: String = defaultValue.fold("None")(v => s"Some($$v)")
-                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $$defV, $${opt(validation)}, $${oStr(sort)}$isRefStr)\"\"\"""".stripMargin
+                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${opt(validation)}, $$errs, $${oStr(status)}, $${oStr(sort)})‘)\"\"\"""".stripMargin
         }
         case "Set" => mode match {
           case "Opt" =>
             if (format_?)
               s"""def format(v: $baseType): String = $format
                  |      def vss: String = vs.fold("None")(_.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-                 |      def defV: String = defaultValue.fold("None")(set => s"Some($${set.map(format).mkString("Set(", ", ", ")")})")
-                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $$defV, $${o(validation)}, $${oStr(sort)}$isRefStr)\"\"\"""".stripMargin
+                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${o(validation)}, $$errs, $${oStr(status)}, $${oStr(sort)})‘)\"\"\"""".stripMargin
             else
               s"""def vss: String = vs.fold("None")(_.map(_.mkString("Set(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-                 |      def defV: String = defaultValue.fold("None")(set => s"Some($${set.mkString("Set(", ", ", ")")})")
-                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $$defV, $${opt(validation)}, $${oStr(sort)}$isRefStr)\"\"\"""".stripMargin
+                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${opt(validation)}, $$errs, $${oStr(status)}, $${oStr(sort)})‘)\"\"\"""".stripMargin
           case _     =>
             if (format_?)
               s"""def format(v: $baseType): String = $format
                  |      def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-                 |      def defV: String = defaultValue.fold("None")(set => s"Some($${set.map(format).mkString("Set(", ", ", ")")})")
-                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $$defV, $${o(validation)}, $${oStr(sort)}$isRefStr)\"\"\"""".stripMargin
+                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${o(validation)}, $$errs, $${oStr(status)}, $${oStr(sort)})‘)\"\"\"""".stripMargin
             else
               s"""def vss: String = vs.map(set => set.mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-                 |      def defV: String = defaultValue.fold("None")(set => s"Some($${set.mkString("Set(", ", ", ")")})")
-                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $$defV, $${opt(validation)}, $${oStr(sort)}$isRefStr)\"\"\"""".stripMargin
+                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${opt(validation)}, $$errs, $${oStr(status)}, $${oStr(sort)})‘)\"\"\"""".stripMargin
         }
       }
 
@@ -124,9 +114,10 @@ object _Model extends BoilerplateGenBase("Model", "/ast") {
          |    override val attr: String,
          |    override val op: Op = V,
          |    vs: $vs,
-         |    defaultValue: Option[$tpe] = None,
          |    validation: Option[Validate$baseType] = None,
-         |    override val sort: Option[String] = None$isRef
+         |    override val errors: Seq[String] = Nil,
+         |    override val status: Option[String] = None,
+         |    override val sort: Option[String] = None
          |  ) extends Attr$card$mode {
          |    override def toString: String = {
          |      $attrStr

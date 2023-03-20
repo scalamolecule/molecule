@@ -20,12 +20,15 @@ trait Model extends Validations {
   }
 
   trait Attr extends Element {
-    val ns  : String
-    val attr: String
-    val op  : Op
-    val sort: Option[String]
+    val ns    : String
+    val attr  : String
+    val op    : Op
+    val errors: Seq[String]
+    val status: Option[String]
+    val sort  : Option[String]
     def unapply(a: Attr): (String, String, Op) = (a.ns, a.attr, a.op)
     def name = ns + "." + attr
+    protected def errs = errors.mkString("\"", "\", \"", "\"")
   }
 
   trait AttrOne extends Attr
@@ -106,6 +109,13 @@ trait Model extends Validations {
   case object Swap extends Op
   case object Remove extends Op
 
+  // Email regex for validators in boilerplate code
+  // W3C recommendation:
+  // https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address
+  val emailRegex = "/^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/".r
+  // More elaborate one from https://stackoverflow.com/a/201378
+  // "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])".r
+
 
   // GENERATED from here and below (edit in _Model generator) ======================================
   
@@ -116,15 +126,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[String] = Nil,
-    defaultValue: Option[String] = None,
     validation: Option[ValidateString] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrOneMan {
     override def toString: String = {
       def format(v: String): String = "\"" + escStr(v) + "\""
       def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(v => s"Some(${format(v)})")
-      s"""AttrOneManString("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrOneManString("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
     }
   }
 
@@ -133,14 +143,14 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[Int] = Nil,
-    defaultValue: Option[Int] = None,
     validation: Option[ValidateInt] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrOneMan {
     override def toString: String = {
       def vss: String = vs.mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(v => s"Some($v)")
-      s"""AttrOneManInt("$ns", "$attr", $op, $vss, $defV, ${opt(validation)}, ${oStr(sort)})"""
+      s"""AttrOneManInt("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
     }
   }
 
@@ -149,16 +159,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[Long] = Nil,
-    defaultValue: Option[Long] = None,
     validation: Option[ValidateLong] = None,
-    override val sort: Option[String] = None,
-    isRef: Boolean = false
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
+    override val sort: Option[String] = None
   ) extends AttrOneMan {
     override def toString: String = {
       def format(v: Long): String = v.toString + "L"
       def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(v => s"Some(${format(v)})")
-      s"""AttrOneManLong("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)}, $isRef)"""
+      s"""AttrOneManLong("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
     }
   }
 
@@ -167,15 +176,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[Float] = Nil,
-    defaultValue: Option[Float] = None,
     validation: Option[ValidateFloat] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrOneMan {
     override def toString: String = {
       def format(v: Float): String = v.toString + "f"
       def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(v => s"Some(${format(v)})")
-      s"""AttrOneManFloat("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrOneManFloat("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
     }
   }
 
@@ -184,14 +193,14 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[Double] = Nil,
-    defaultValue: Option[Double] = None,
     validation: Option[ValidateDouble] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrOneMan {
     override def toString: String = {
       def vss: String = vs.mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(v => s"Some($v)")
-      s"""AttrOneManDouble("$ns", "$attr", $op, $vss, $defV, ${opt(validation)}, ${oStr(sort)})"""
+      s"""AttrOneManDouble("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
     }
   }
 
@@ -200,14 +209,14 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[Boolean] = Nil,
-    defaultValue: Option[Boolean] = None,
     validation: Option[ValidateBoolean] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrOneMan {
     override def toString: String = {
       def vss: String = vs.mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(v => s"Some($v)")
-      s"""AttrOneManBoolean("$ns", "$attr", $op, $vss, $defV, ${opt(validation)}, ${oStr(sort)})"""
+      s"""AttrOneManBoolean("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
     }
   }
 
@@ -216,15 +225,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[BigInt] = Nil,
-    defaultValue: Option[BigInt] = None,
     validation: Option[ValidateBigInt] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrOneMan {
     override def toString: String = {
       def format(v: BigInt): String = "BigInt(" + v + ")"
       def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(v => s"Some(${format(v)})")
-      s"""AttrOneManBigInt("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrOneManBigInt("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
     }
   }
 
@@ -233,15 +242,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[BigDecimal] = Nil,
-    defaultValue: Option[BigDecimal] = None,
     validation: Option[ValidateBigDecimal] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrOneMan {
     override def toString: String = {
       def format(v: BigDecimal): String = "BigDecimal(" + v + ")"
       def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(v => s"Some(${format(v)})")
-      s"""AttrOneManBigDecimal("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrOneManBigDecimal("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
     }
   }
 
@@ -250,15 +259,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[Date] = Nil,
-    defaultValue: Option[Date] = None,
     validation: Option[ValidateDate] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrOneMan {
     override def toString: String = {
       def format(v: Date): String = "new Date(" + v.getTime + ")"
       def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(v => s"Some(${format(v)})")
-      s"""AttrOneManDate("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrOneManDate("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
     }
   }
 
@@ -267,15 +276,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[UUID] = Nil,
-    defaultValue: Option[UUID] = None,
     validation: Option[ValidateUUID] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrOneMan {
     override def toString: String = {
       def format(v: UUID): String = "UUID.fromString(\"" + v.toString + "\")"
       def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(v => s"Some(${format(v)})")
-      s"""AttrOneManUUID("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrOneManUUID("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
     }
   }
 
@@ -284,15 +293,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[URI] = Nil,
-    defaultValue: Option[URI] = None,
     validation: Option[ValidateURI] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrOneMan {
     override def toString: String = {
       def format(v: URI): String = "new URI(\"" + v.toString + "\")"
       def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(v => s"Some(${format(v)})")
-      s"""AttrOneManURI("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrOneManURI("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
     }
   }
 
@@ -301,15 +310,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[Byte] = Nil,
-    defaultValue: Option[Byte] = None,
     validation: Option[ValidateByte] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrOneMan {
     override def toString: String = {
       def format(v: Byte): String = s"$v.toByte"
       def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(v => s"Some(${format(v)})")
-      s"""AttrOneManByte("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrOneManByte("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
     }
   }
 
@@ -318,15 +327,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[Short] = Nil,
-    defaultValue: Option[Short] = None,
     validation: Option[ValidateShort] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrOneMan {
     override def toString: String = {
       def format(v: Short): String = s"$v.toShort"
       def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(v => s"Some(${format(v)})")
-      s"""AttrOneManShort("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrOneManShort("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
     }
   }
 
@@ -335,15 +344,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[Char] = Nil,
-    defaultValue: Option[Char] = None,
     validation: Option[ValidateChar] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrOneMan {
     override def toString: String = {
       def format(v: Char): String = s"'$v'"
       def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(v => s"Some(${format(v)})")
-      s"""AttrOneManChar("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrOneManChar("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
     }
   }
 
@@ -355,15 +364,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Option[Seq[String]] = None,
-    defaultValue: Option[String] = None,
     validation: Option[ValidateString] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrOneOpt {
     override def toString: String = {
       def format(v: String): String = "\"" + escStr(v) + "\""
       def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
-      def defV: String = defaultValue.fold("None")(v => s"Some(${format(v)})")
-      s"""AttrOneOptString("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrOneOptString("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
     }
   }
 
@@ -372,14 +381,14 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Option[Seq[Int]] = None,
-    defaultValue: Option[Int] = None,
     validation: Option[ValidateInt] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrOneOpt {
     override def toString: String = {
       def vss: String = vs.fold("None")(_.mkString("Some(Seq(", ", ", "))"))
-      def defV: String = defaultValue.fold("None")(v => s"Some($v)")
-      s"""AttrOneOptInt("$ns", "$attr", $op, $vss, $defV, ${opt(validation)}, ${oStr(sort)})"""
+      s"""AttrOneOptInt("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
     }
   }
 
@@ -388,16 +397,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Option[Seq[Long]] = None,
-    defaultValue: Option[Long] = None,
     validation: Option[ValidateLong] = None,
-    override val sort: Option[String] = None,
-    isRef: Boolean = false
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
+    override val sort: Option[String] = None
   ) extends AttrOneOpt {
     override def toString: String = {
       def format(v: Long): String = v.toString + "L"
       def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
-      def defV: String = defaultValue.fold("None")(v => s"Some(${format(v)})")
-      s"""AttrOneOptLong("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)}, $isRef)"""
+      s"""AttrOneOptLong("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
     }
   }
 
@@ -406,15 +414,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Option[Seq[Float]] = None,
-    defaultValue: Option[Float] = None,
     validation: Option[ValidateFloat] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrOneOpt {
     override def toString: String = {
       def format(v: Float): String = v.toString + "f"
       def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
-      def defV: String = defaultValue.fold("None")(v => s"Some(${format(v)})")
-      s"""AttrOneOptFloat("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrOneOptFloat("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
     }
   }
 
@@ -423,14 +431,14 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Option[Seq[Double]] = None,
-    defaultValue: Option[Double] = None,
     validation: Option[ValidateDouble] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrOneOpt {
     override def toString: String = {
       def vss: String = vs.fold("None")(_.mkString("Some(Seq(", ", ", "))"))
-      def defV: String = defaultValue.fold("None")(v => s"Some($v)")
-      s"""AttrOneOptDouble("$ns", "$attr", $op, $vss, $defV, ${opt(validation)}, ${oStr(sort)})"""
+      s"""AttrOneOptDouble("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
     }
   }
 
@@ -439,14 +447,14 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Option[Seq[Boolean]] = None,
-    defaultValue: Option[Boolean] = None,
     validation: Option[ValidateBoolean] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrOneOpt {
     override def toString: String = {
       def vss: String = vs.fold("None")(_.mkString("Some(Seq(", ", ", "))"))
-      def defV: String = defaultValue.fold("None")(v => s"Some($v)")
-      s"""AttrOneOptBoolean("$ns", "$attr", $op, $vss, $defV, ${opt(validation)}, ${oStr(sort)})"""
+      s"""AttrOneOptBoolean("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
     }
   }
 
@@ -455,15 +463,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Option[Seq[BigInt]] = None,
-    defaultValue: Option[BigInt] = None,
     validation: Option[ValidateBigInt] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrOneOpt {
     override def toString: String = {
       def format(v: BigInt): String = "BigInt(" + v + ")"
       def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
-      def defV: String = defaultValue.fold("None")(v => s"Some(${format(v)})")
-      s"""AttrOneOptBigInt("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrOneOptBigInt("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
     }
   }
 
@@ -472,15 +480,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Option[Seq[BigDecimal]] = None,
-    defaultValue: Option[BigDecimal] = None,
     validation: Option[ValidateBigDecimal] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrOneOpt {
     override def toString: String = {
       def format(v: BigDecimal): String = "BigDecimal(" + v + ")"
       def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
-      def defV: String = defaultValue.fold("None")(v => s"Some(${format(v)})")
-      s"""AttrOneOptBigDecimal("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrOneOptBigDecimal("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
     }
   }
 
@@ -489,15 +497,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Option[Seq[Date]] = None,
-    defaultValue: Option[Date] = None,
     validation: Option[ValidateDate] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrOneOpt {
     override def toString: String = {
       def format(v: Date): String = "new Date(" + v.getTime + ")"
       def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
-      def defV: String = defaultValue.fold("None")(v => s"Some(${format(v)})")
-      s"""AttrOneOptDate("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrOneOptDate("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
     }
   }
 
@@ -506,15 +514,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Option[Seq[UUID]] = None,
-    defaultValue: Option[UUID] = None,
     validation: Option[ValidateUUID] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrOneOpt {
     override def toString: String = {
       def format(v: UUID): String = "UUID.fromString(\"" + v.toString + "\")"
       def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
-      def defV: String = defaultValue.fold("None")(v => s"Some(${format(v)})")
-      s"""AttrOneOptUUID("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrOneOptUUID("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
     }
   }
 
@@ -523,15 +531,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Option[Seq[URI]] = None,
-    defaultValue: Option[URI] = None,
     validation: Option[ValidateURI] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrOneOpt {
     override def toString: String = {
       def format(v: URI): String = "new URI(\"" + v.toString + "\")"
       def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
-      def defV: String = defaultValue.fold("None")(v => s"Some(${format(v)})")
-      s"""AttrOneOptURI("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrOneOptURI("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
     }
   }
 
@@ -540,15 +548,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Option[Seq[Byte]] = None,
-    defaultValue: Option[Byte] = None,
     validation: Option[ValidateByte] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrOneOpt {
     override def toString: String = {
       def format(v: Byte): String = s"$v.toByte"
       def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
-      def defV: String = defaultValue.fold("None")(v => s"Some(${format(v)})")
-      s"""AttrOneOptByte("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrOneOptByte("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
     }
   }
 
@@ -557,15 +565,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Option[Seq[Short]] = None,
-    defaultValue: Option[Short] = None,
     validation: Option[ValidateShort] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrOneOpt {
     override def toString: String = {
       def format(v: Short): String = s"$v.toShort"
       def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
-      def defV: String = defaultValue.fold("None")(v => s"Some(${format(v)})")
-      s"""AttrOneOptShort("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrOneOptShort("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
     }
   }
 
@@ -574,15 +582,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Option[Seq[Char]] = None,
-    defaultValue: Option[Char] = None,
     validation: Option[ValidateChar] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrOneOpt {
     override def toString: String = {
       def format(v: Char): String = s"'$v'"
       def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
-      def defV: String = defaultValue.fold("None")(v => s"Some(${format(v)})")
-      s"""AttrOneOptChar("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrOneOptChar("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
     }
   }
 
@@ -594,15 +602,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[String] = Nil,
-    defaultValue: Option[String] = None,
     validation: Option[ValidateString] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrOneTac {
     override def toString: String = {
       def format(v: String): String = "\"" + escStr(v) + "\""
       def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(v => s"Some(${format(v)})")
-      s"""AttrOneTacString("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrOneTacString("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
     }
   }
 
@@ -611,14 +619,14 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[Int] = Nil,
-    defaultValue: Option[Int] = None,
     validation: Option[ValidateInt] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrOneTac {
     override def toString: String = {
       def vss: String = vs.mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(v => s"Some($v)")
-      s"""AttrOneTacInt("$ns", "$attr", $op, $vss, $defV, ${opt(validation)}, ${oStr(sort)})"""
+      s"""AttrOneTacInt("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
     }
   }
 
@@ -627,16 +635,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[Long] = Nil,
-    defaultValue: Option[Long] = None,
     validation: Option[ValidateLong] = None,
-    override val sort: Option[String] = None,
-    isRef: Boolean = false
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
+    override val sort: Option[String] = None
   ) extends AttrOneTac {
     override def toString: String = {
       def format(v: Long): String = v.toString + "L"
       def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(v => s"Some(${format(v)})")
-      s"""AttrOneTacLong("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)}, $isRef)"""
+      s"""AttrOneTacLong("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
     }
   }
 
@@ -645,15 +652,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[Float] = Nil,
-    defaultValue: Option[Float] = None,
     validation: Option[ValidateFloat] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrOneTac {
     override def toString: String = {
       def format(v: Float): String = v.toString + "f"
       def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(v => s"Some(${format(v)})")
-      s"""AttrOneTacFloat("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrOneTacFloat("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
     }
   }
 
@@ -662,14 +669,14 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[Double] = Nil,
-    defaultValue: Option[Double] = None,
     validation: Option[ValidateDouble] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrOneTac {
     override def toString: String = {
       def vss: String = vs.mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(v => s"Some($v)")
-      s"""AttrOneTacDouble("$ns", "$attr", $op, $vss, $defV, ${opt(validation)}, ${oStr(sort)})"""
+      s"""AttrOneTacDouble("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
     }
   }
 
@@ -678,14 +685,14 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[Boolean] = Nil,
-    defaultValue: Option[Boolean] = None,
     validation: Option[ValidateBoolean] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrOneTac {
     override def toString: String = {
       def vss: String = vs.mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(v => s"Some($v)")
-      s"""AttrOneTacBoolean("$ns", "$attr", $op, $vss, $defV, ${opt(validation)}, ${oStr(sort)})"""
+      s"""AttrOneTacBoolean("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
     }
   }
 
@@ -694,15 +701,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[BigInt] = Nil,
-    defaultValue: Option[BigInt] = None,
     validation: Option[ValidateBigInt] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrOneTac {
     override def toString: String = {
       def format(v: BigInt): String = "BigInt(" + v + ")"
       def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(v => s"Some(${format(v)})")
-      s"""AttrOneTacBigInt("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrOneTacBigInt("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
     }
   }
 
@@ -711,15 +718,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[BigDecimal] = Nil,
-    defaultValue: Option[BigDecimal] = None,
     validation: Option[ValidateBigDecimal] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrOneTac {
     override def toString: String = {
       def format(v: BigDecimal): String = "BigDecimal(" + v + ")"
       def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(v => s"Some(${format(v)})")
-      s"""AttrOneTacBigDecimal("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrOneTacBigDecimal("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
     }
   }
 
@@ -728,15 +735,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[Date] = Nil,
-    defaultValue: Option[Date] = None,
     validation: Option[ValidateDate] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrOneTac {
     override def toString: String = {
       def format(v: Date): String = "new Date(" + v.getTime + ")"
       def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(v => s"Some(${format(v)})")
-      s"""AttrOneTacDate("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrOneTacDate("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
     }
   }
 
@@ -745,15 +752,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[UUID] = Nil,
-    defaultValue: Option[UUID] = None,
     validation: Option[ValidateUUID] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrOneTac {
     override def toString: String = {
       def format(v: UUID): String = "UUID.fromString(\"" + v.toString + "\")"
       def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(v => s"Some(${format(v)})")
-      s"""AttrOneTacUUID("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrOneTacUUID("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
     }
   }
 
@@ -762,15 +769,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[URI] = Nil,
-    defaultValue: Option[URI] = None,
     validation: Option[ValidateURI] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrOneTac {
     override def toString: String = {
       def format(v: URI): String = "new URI(\"" + v.toString + "\")"
       def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(v => s"Some(${format(v)})")
-      s"""AttrOneTacURI("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrOneTacURI("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
     }
   }
 
@@ -779,15 +786,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[Byte] = Nil,
-    defaultValue: Option[Byte] = None,
     validation: Option[ValidateByte] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrOneTac {
     override def toString: String = {
       def format(v: Byte): String = s"$v.toByte"
       def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(v => s"Some(${format(v)})")
-      s"""AttrOneTacByte("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrOneTacByte("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
     }
   }
 
@@ -796,15 +803,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[Short] = Nil,
-    defaultValue: Option[Short] = None,
     validation: Option[ValidateShort] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrOneTac {
     override def toString: String = {
       def format(v: Short): String = s"$v.toShort"
       def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(v => s"Some(${format(v)})")
-      s"""AttrOneTacShort("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrOneTacShort("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
     }
   }
 
@@ -813,15 +820,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[Char] = Nil,
-    defaultValue: Option[Char] = None,
     validation: Option[ValidateChar] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrOneTac {
     override def toString: String = {
       def format(v: Char): String = s"'$v'"
       def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(v => s"Some(${format(v)})")
-      s"""AttrOneTacChar("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrOneTacChar("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
     }
   }
 
@@ -833,15 +840,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[Set[String]] = Nil,
-    defaultValue: Option[Set[String]] = None,
     validation: Option[ValidateString] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrSetMan {
     override def toString: String = {
       def format(v: String): String = "\"" + escStr(v) + "\""
       def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(set => s"Some(${set.map(format).mkString("Set(", ", ", ")")})")
-      s"""AttrSetManString("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrSetManString("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
     }
   }
 
@@ -850,14 +857,14 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[Set[Int]] = Nil,
-    defaultValue: Option[Set[Int]] = None,
     validation: Option[ValidateInt] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrSetMan {
     override def toString: String = {
       def vss: String = vs.map(set => set.mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(set => s"Some(${set.mkString("Set(", ", ", ")")})")
-      s"""AttrSetManInt("$ns", "$attr", $op, $vss, $defV, ${opt(validation)}, ${oStr(sort)})"""
+      s"""AttrSetManInt("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
     }
   }
 
@@ -866,16 +873,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[Set[Long]] = Nil,
-    defaultValue: Option[Set[Long]] = None,
     validation: Option[ValidateLong] = None,
-    override val sort: Option[String] = None,
-    isRef: Boolean = false
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
+    override val sort: Option[String] = None
   ) extends AttrSetMan {
     override def toString: String = {
       def format(v: Long): String = v.toString + "L"
       def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(set => s"Some(${set.map(format).mkString("Set(", ", ", ")")})")
-      s"""AttrSetManLong("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)}, $isRef)"""
+      s"""AttrSetManLong("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
     }
   }
 
@@ -884,15 +890,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[Set[Float]] = Nil,
-    defaultValue: Option[Set[Float]] = None,
     validation: Option[ValidateFloat] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrSetMan {
     override def toString: String = {
       def format(v: Float): String = v.toString + "f"
       def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(set => s"Some(${set.map(format).mkString("Set(", ", ", ")")})")
-      s"""AttrSetManFloat("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrSetManFloat("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
     }
   }
 
@@ -901,14 +907,14 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[Set[Double]] = Nil,
-    defaultValue: Option[Set[Double]] = None,
     validation: Option[ValidateDouble] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrSetMan {
     override def toString: String = {
       def vss: String = vs.map(set => set.mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(set => s"Some(${set.mkString("Set(", ", ", ")")})")
-      s"""AttrSetManDouble("$ns", "$attr", $op, $vss, $defV, ${opt(validation)}, ${oStr(sort)})"""
+      s"""AttrSetManDouble("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
     }
   }
 
@@ -917,14 +923,14 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[Set[Boolean]] = Nil,
-    defaultValue: Option[Set[Boolean]] = None,
     validation: Option[ValidateBoolean] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrSetMan {
     override def toString: String = {
       def vss: String = vs.map(set => set.mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(set => s"Some(${set.mkString("Set(", ", ", ")")})")
-      s"""AttrSetManBoolean("$ns", "$attr", $op, $vss, $defV, ${opt(validation)}, ${oStr(sort)})"""
+      s"""AttrSetManBoolean("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
     }
   }
 
@@ -933,15 +939,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[Set[BigInt]] = Nil,
-    defaultValue: Option[Set[BigInt]] = None,
     validation: Option[ValidateBigInt] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrSetMan {
     override def toString: String = {
       def format(v: BigInt): String = "BigInt(" + v + ")"
       def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(set => s"Some(${set.map(format).mkString("Set(", ", ", ")")})")
-      s"""AttrSetManBigInt("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrSetManBigInt("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
     }
   }
 
@@ -950,15 +956,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[Set[BigDecimal]] = Nil,
-    defaultValue: Option[Set[BigDecimal]] = None,
     validation: Option[ValidateBigDecimal] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrSetMan {
     override def toString: String = {
       def format(v: BigDecimal): String = "BigDecimal(" + v + ")"
       def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(set => s"Some(${set.map(format).mkString("Set(", ", ", ")")})")
-      s"""AttrSetManBigDecimal("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrSetManBigDecimal("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
     }
   }
 
@@ -967,15 +973,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[Set[Date]] = Nil,
-    defaultValue: Option[Set[Date]] = None,
     validation: Option[ValidateDate] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrSetMan {
     override def toString: String = {
       def format(v: Date): String = "new Date(" + v.getTime + ")"
       def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(set => s"Some(${set.map(format).mkString("Set(", ", ", ")")})")
-      s"""AttrSetManDate("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrSetManDate("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
     }
   }
 
@@ -984,15 +990,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[Set[UUID]] = Nil,
-    defaultValue: Option[Set[UUID]] = None,
     validation: Option[ValidateUUID] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrSetMan {
     override def toString: String = {
       def format(v: UUID): String = "UUID.fromString(\"" + v.toString + "\")"
       def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(set => s"Some(${set.map(format).mkString("Set(", ", ", ")")})")
-      s"""AttrSetManUUID("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrSetManUUID("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
     }
   }
 
@@ -1001,15 +1007,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[Set[URI]] = Nil,
-    defaultValue: Option[Set[URI]] = None,
     validation: Option[ValidateURI] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrSetMan {
     override def toString: String = {
       def format(v: URI): String = "new URI(\"" + v.toString + "\")"
       def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(set => s"Some(${set.map(format).mkString("Set(", ", ", ")")})")
-      s"""AttrSetManURI("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrSetManURI("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
     }
   }
 
@@ -1018,15 +1024,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[Set[Byte]] = Nil,
-    defaultValue: Option[Set[Byte]] = None,
     validation: Option[ValidateByte] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrSetMan {
     override def toString: String = {
       def format(v: Byte): String = s"$v.toByte"
       def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(set => s"Some(${set.map(format).mkString("Set(", ", ", ")")})")
-      s"""AttrSetManByte("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrSetManByte("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
     }
   }
 
@@ -1035,15 +1041,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[Set[Short]] = Nil,
-    defaultValue: Option[Set[Short]] = None,
     validation: Option[ValidateShort] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrSetMan {
     override def toString: String = {
       def format(v: Short): String = s"$v.toShort"
       def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(set => s"Some(${set.map(format).mkString("Set(", ", ", ")")})")
-      s"""AttrSetManShort("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrSetManShort("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
     }
   }
 
@@ -1052,15 +1058,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[Set[Char]] = Nil,
-    defaultValue: Option[Set[Char]] = None,
     validation: Option[ValidateChar] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrSetMan {
     override def toString: String = {
       def format(v: Char): String = s"'$v'"
       def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(set => s"Some(${set.map(format).mkString("Set(", ", ", ")")})")
-      s"""AttrSetManChar("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrSetManChar("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
     }
   }
 
@@ -1072,15 +1078,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Option[Seq[Set[String]]] = None,
-    defaultValue: Option[Set[String]] = None,
     validation: Option[ValidateString] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrSetOpt {
     override def toString: String = {
       def format(v: String): String = "\"" + escStr(v) + "\""
       def vss: String = vs.fold("None")(_.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-      def defV: String = defaultValue.fold("None")(set => s"Some(${set.map(format).mkString("Set(", ", ", ")")})")
-      s"""AttrSetOptString("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrSetOptString("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
     }
   }
 
@@ -1089,14 +1095,14 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Option[Seq[Set[Int]]] = None,
-    defaultValue: Option[Set[Int]] = None,
     validation: Option[ValidateInt] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrSetOpt {
     override def toString: String = {
       def vss: String = vs.fold("None")(_.map(_.mkString("Set(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-      def defV: String = defaultValue.fold("None")(set => s"Some(${set.mkString("Set(", ", ", ")")})")
-      s"""AttrSetOptInt("$ns", "$attr", $op, $vss, $defV, ${opt(validation)}, ${oStr(sort)})"""
+      s"""AttrSetOptInt("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
     }
   }
 
@@ -1105,16 +1111,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Option[Seq[Set[Long]]] = None,
-    defaultValue: Option[Set[Long]] = None,
     validation: Option[ValidateLong] = None,
-    override val sort: Option[String] = None,
-    isRef: Boolean = false
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
+    override val sort: Option[String] = None
   ) extends AttrSetOpt {
     override def toString: String = {
       def format(v: Long): String = v.toString + "L"
       def vss: String = vs.fold("None")(_.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-      def defV: String = defaultValue.fold("None")(set => s"Some(${set.map(format).mkString("Set(", ", ", ")")})")
-      s"""AttrSetOptLong("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)}, $isRef)"""
+      s"""AttrSetOptLong("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
     }
   }
 
@@ -1123,15 +1128,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Option[Seq[Set[Float]]] = None,
-    defaultValue: Option[Set[Float]] = None,
     validation: Option[ValidateFloat] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrSetOpt {
     override def toString: String = {
       def format(v: Float): String = v.toString + "f"
       def vss: String = vs.fold("None")(_.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-      def defV: String = defaultValue.fold("None")(set => s"Some(${set.map(format).mkString("Set(", ", ", ")")})")
-      s"""AttrSetOptFloat("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrSetOptFloat("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
     }
   }
 
@@ -1140,14 +1145,14 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Option[Seq[Set[Double]]] = None,
-    defaultValue: Option[Set[Double]] = None,
     validation: Option[ValidateDouble] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrSetOpt {
     override def toString: String = {
       def vss: String = vs.fold("None")(_.map(_.mkString("Set(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-      def defV: String = defaultValue.fold("None")(set => s"Some(${set.mkString("Set(", ", ", ")")})")
-      s"""AttrSetOptDouble("$ns", "$attr", $op, $vss, $defV, ${opt(validation)}, ${oStr(sort)})"""
+      s"""AttrSetOptDouble("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
     }
   }
 
@@ -1156,14 +1161,14 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Option[Seq[Set[Boolean]]] = None,
-    defaultValue: Option[Set[Boolean]] = None,
     validation: Option[ValidateBoolean] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrSetOpt {
     override def toString: String = {
       def vss: String = vs.fold("None")(_.map(_.mkString("Set(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-      def defV: String = defaultValue.fold("None")(set => s"Some(${set.mkString("Set(", ", ", ")")})")
-      s"""AttrSetOptBoolean("$ns", "$attr", $op, $vss, $defV, ${opt(validation)}, ${oStr(sort)})"""
+      s"""AttrSetOptBoolean("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
     }
   }
 
@@ -1172,15 +1177,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Option[Seq[Set[BigInt]]] = None,
-    defaultValue: Option[Set[BigInt]] = None,
     validation: Option[ValidateBigInt] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrSetOpt {
     override def toString: String = {
       def format(v: BigInt): String = "BigInt(" + v + ")"
       def vss: String = vs.fold("None")(_.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-      def defV: String = defaultValue.fold("None")(set => s"Some(${set.map(format).mkString("Set(", ", ", ")")})")
-      s"""AttrSetOptBigInt("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrSetOptBigInt("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
     }
   }
 
@@ -1189,15 +1194,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Option[Seq[Set[BigDecimal]]] = None,
-    defaultValue: Option[Set[BigDecimal]] = None,
     validation: Option[ValidateBigDecimal] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrSetOpt {
     override def toString: String = {
       def format(v: BigDecimal): String = "BigDecimal(" + v + ")"
       def vss: String = vs.fold("None")(_.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-      def defV: String = defaultValue.fold("None")(set => s"Some(${set.map(format).mkString("Set(", ", ", ")")})")
-      s"""AttrSetOptBigDecimal("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrSetOptBigDecimal("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
     }
   }
 
@@ -1206,15 +1211,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Option[Seq[Set[Date]]] = None,
-    defaultValue: Option[Set[Date]] = None,
     validation: Option[ValidateDate] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrSetOpt {
     override def toString: String = {
       def format(v: Date): String = "new Date(" + v.getTime + ")"
       def vss: String = vs.fold("None")(_.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-      def defV: String = defaultValue.fold("None")(set => s"Some(${set.map(format).mkString("Set(", ", ", ")")})")
-      s"""AttrSetOptDate("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrSetOptDate("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
     }
   }
 
@@ -1223,15 +1228,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Option[Seq[Set[UUID]]] = None,
-    defaultValue: Option[Set[UUID]] = None,
     validation: Option[ValidateUUID] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrSetOpt {
     override def toString: String = {
       def format(v: UUID): String = "UUID.fromString(\"" + v.toString + "\")"
       def vss: String = vs.fold("None")(_.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-      def defV: String = defaultValue.fold("None")(set => s"Some(${set.map(format).mkString("Set(", ", ", ")")})")
-      s"""AttrSetOptUUID("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrSetOptUUID("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
     }
   }
 
@@ -1240,15 +1245,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Option[Seq[Set[URI]]] = None,
-    defaultValue: Option[Set[URI]] = None,
     validation: Option[ValidateURI] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrSetOpt {
     override def toString: String = {
       def format(v: URI): String = "new URI(\"" + v.toString + "\")"
       def vss: String = vs.fold("None")(_.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-      def defV: String = defaultValue.fold("None")(set => s"Some(${set.map(format).mkString("Set(", ", ", ")")})")
-      s"""AttrSetOptURI("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrSetOptURI("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
     }
   }
 
@@ -1257,15 +1262,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Option[Seq[Set[Byte]]] = None,
-    defaultValue: Option[Set[Byte]] = None,
     validation: Option[ValidateByte] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrSetOpt {
     override def toString: String = {
       def format(v: Byte): String = s"$v.toByte"
       def vss: String = vs.fold("None")(_.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-      def defV: String = defaultValue.fold("None")(set => s"Some(${set.map(format).mkString("Set(", ", ", ")")})")
-      s"""AttrSetOptByte("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrSetOptByte("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
     }
   }
 
@@ -1274,15 +1279,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Option[Seq[Set[Short]]] = None,
-    defaultValue: Option[Set[Short]] = None,
     validation: Option[ValidateShort] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrSetOpt {
     override def toString: String = {
       def format(v: Short): String = s"$v.toShort"
       def vss: String = vs.fold("None")(_.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-      def defV: String = defaultValue.fold("None")(set => s"Some(${set.map(format).mkString("Set(", ", ", ")")})")
-      s"""AttrSetOptShort("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrSetOptShort("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
     }
   }
 
@@ -1291,15 +1296,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Option[Seq[Set[Char]]] = None,
-    defaultValue: Option[Set[Char]] = None,
     validation: Option[ValidateChar] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrSetOpt {
     override def toString: String = {
       def format(v: Char): String = s"'$v'"
       def vss: String = vs.fold("None")(_.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-      def defV: String = defaultValue.fold("None")(set => s"Some(${set.map(format).mkString("Set(", ", ", ")")})")
-      s"""AttrSetOptChar("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrSetOptChar("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
     }
   }
 
@@ -1311,15 +1316,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[Set[String]] = Nil,
-    defaultValue: Option[Set[String]] = None,
     validation: Option[ValidateString] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrSetTac {
     override def toString: String = {
       def format(v: String): String = "\"" + escStr(v) + "\""
       def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(set => s"Some(${set.map(format).mkString("Set(", ", ", ")")})")
-      s"""AttrSetTacString("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrSetTacString("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
     }
   }
 
@@ -1328,14 +1333,14 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[Set[Int]] = Nil,
-    defaultValue: Option[Set[Int]] = None,
     validation: Option[ValidateInt] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrSetTac {
     override def toString: String = {
       def vss: String = vs.map(set => set.mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(set => s"Some(${set.mkString("Set(", ", ", ")")})")
-      s"""AttrSetTacInt("$ns", "$attr", $op, $vss, $defV, ${opt(validation)}, ${oStr(sort)})"""
+      s"""AttrSetTacInt("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
     }
   }
 
@@ -1344,16 +1349,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[Set[Long]] = Nil,
-    defaultValue: Option[Set[Long]] = None,
     validation: Option[ValidateLong] = None,
-    override val sort: Option[String] = None,
-    isRef: Boolean = false
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
+    override val sort: Option[String] = None
   ) extends AttrSetTac {
     override def toString: String = {
       def format(v: Long): String = v.toString + "L"
       def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(set => s"Some(${set.map(format).mkString("Set(", ", ", ")")})")
-      s"""AttrSetTacLong("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)}, $isRef)"""
+      s"""AttrSetTacLong("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
     }
   }
 
@@ -1362,15 +1366,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[Set[Float]] = Nil,
-    defaultValue: Option[Set[Float]] = None,
     validation: Option[ValidateFloat] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrSetTac {
     override def toString: String = {
       def format(v: Float): String = v.toString + "f"
       def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(set => s"Some(${set.map(format).mkString("Set(", ", ", ")")})")
-      s"""AttrSetTacFloat("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrSetTacFloat("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
     }
   }
 
@@ -1379,14 +1383,14 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[Set[Double]] = Nil,
-    defaultValue: Option[Set[Double]] = None,
     validation: Option[ValidateDouble] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrSetTac {
     override def toString: String = {
       def vss: String = vs.map(set => set.mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(set => s"Some(${set.mkString("Set(", ", ", ")")})")
-      s"""AttrSetTacDouble("$ns", "$attr", $op, $vss, $defV, ${opt(validation)}, ${oStr(sort)})"""
+      s"""AttrSetTacDouble("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
     }
   }
 
@@ -1395,14 +1399,14 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[Set[Boolean]] = Nil,
-    defaultValue: Option[Set[Boolean]] = None,
     validation: Option[ValidateBoolean] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrSetTac {
     override def toString: String = {
       def vss: String = vs.map(set => set.mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(set => s"Some(${set.mkString("Set(", ", ", ")")})")
-      s"""AttrSetTacBoolean("$ns", "$attr", $op, $vss, $defV, ${opt(validation)}, ${oStr(sort)})"""
+      s"""AttrSetTacBoolean("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
     }
   }
 
@@ -1411,15 +1415,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[Set[BigInt]] = Nil,
-    defaultValue: Option[Set[BigInt]] = None,
     validation: Option[ValidateBigInt] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrSetTac {
     override def toString: String = {
       def format(v: BigInt): String = "BigInt(" + v + ")"
       def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(set => s"Some(${set.map(format).mkString("Set(", ", ", ")")})")
-      s"""AttrSetTacBigInt("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrSetTacBigInt("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
     }
   }
 
@@ -1428,15 +1432,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[Set[BigDecimal]] = Nil,
-    defaultValue: Option[Set[BigDecimal]] = None,
     validation: Option[ValidateBigDecimal] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrSetTac {
     override def toString: String = {
       def format(v: BigDecimal): String = "BigDecimal(" + v + ")"
       def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(set => s"Some(${set.map(format).mkString("Set(", ", ", ")")})")
-      s"""AttrSetTacBigDecimal("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrSetTacBigDecimal("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
     }
   }
 
@@ -1445,15 +1449,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[Set[Date]] = Nil,
-    defaultValue: Option[Set[Date]] = None,
     validation: Option[ValidateDate] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrSetTac {
     override def toString: String = {
       def format(v: Date): String = "new Date(" + v.getTime + ")"
       def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(set => s"Some(${set.map(format).mkString("Set(", ", ", ")")})")
-      s"""AttrSetTacDate("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrSetTacDate("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
     }
   }
 
@@ -1462,15 +1466,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[Set[UUID]] = Nil,
-    defaultValue: Option[Set[UUID]] = None,
     validation: Option[ValidateUUID] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrSetTac {
     override def toString: String = {
       def format(v: UUID): String = "UUID.fromString(\"" + v.toString + "\")"
       def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(set => s"Some(${set.map(format).mkString("Set(", ", ", ")")})")
-      s"""AttrSetTacUUID("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrSetTacUUID("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
     }
   }
 
@@ -1479,15 +1483,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[Set[URI]] = Nil,
-    defaultValue: Option[Set[URI]] = None,
     validation: Option[ValidateURI] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrSetTac {
     override def toString: String = {
       def format(v: URI): String = "new URI(\"" + v.toString + "\")"
       def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(set => s"Some(${set.map(format).mkString("Set(", ", ", ")")})")
-      s"""AttrSetTacURI("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrSetTacURI("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
     }
   }
 
@@ -1496,15 +1500,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[Set[Byte]] = Nil,
-    defaultValue: Option[Set[Byte]] = None,
     validation: Option[ValidateByte] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrSetTac {
     override def toString: String = {
       def format(v: Byte): String = s"$v.toByte"
       def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(set => s"Some(${set.map(format).mkString("Set(", ", ", ")")})")
-      s"""AttrSetTacByte("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrSetTacByte("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
     }
   }
 
@@ -1513,15 +1517,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[Set[Short]] = Nil,
-    defaultValue: Option[Set[Short]] = None,
     validation: Option[ValidateShort] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrSetTac {
     override def toString: String = {
       def format(v: Short): String = s"$v.toShort"
       def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(set => s"Some(${set.map(format).mkString("Set(", ", ", ")")})")
-      s"""AttrSetTacShort("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrSetTacShort("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
     }
   }
 
@@ -1530,15 +1534,15 @@ trait Model extends Validations {
     override val attr: String,
     override val op: Op = V,
     vs: Seq[Set[Char]] = Nil,
-    defaultValue: Option[Set[Char]] = None,
     validation: Option[ValidateChar] = None,
+    override val errors: Seq[String] = Nil,
+    override val status: Option[String] = None,
     override val sort: Option[String] = None
   ) extends AttrSetTac {
     override def toString: String = {
       def format(v: Char): String = s"'$v'"
       def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      def defV: String = defaultValue.fold("None")(set => s"Some(${set.map(format).mkString("Set(", ", ", ")")})")
-      s"""AttrSetTacChar("$ns", "$attr", $op, $vss, $defV, ${o(validation)}, ${oStr(sort)})"""
+      s"""AttrSetTacChar("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
     }
   }
 }

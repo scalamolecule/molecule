@@ -10,12 +10,13 @@ import molecule.datomic.action._
 import molecule.datomic.facade.DatomicConn_JVM
 import molecule.datomic.marshalling.DatomicRpcJVM.Data
 import molecule.datomic.query.{DatomicQueryResolveCursor, DatomicQueryResolveOffset}
+import molecule.datomic.subscription.SubscriptionStarter
 import molecule.datomic.transaction.{Delete_stmts, Insert_stmts, Save_stmts, Update_stmts}
 import zio._
 import scala.concurrent.Future
 
 
-trait DatomicApiZio extends DatomicApi_JVM with DatomicZioApiBase with ApiZio {
+trait DatomicApiZio extends SubscriptionStarter with DatomicZioApiBase with ApiZio {
 
   implicit class datomicQueryApiZio[Tpl](q: DatomicQuery[Tpl]) extends QueryApi[Tpl] {
     override def get: ZIO[Connection, MoleculeError, List[Tpl]] = {
