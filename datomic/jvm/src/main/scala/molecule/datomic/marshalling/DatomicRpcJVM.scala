@@ -1,7 +1,7 @@
 package molecule.datomic.marshalling
 
 import java.nio.ByteBuffer
-import molecule.base.util.exceptions.MoleculeError
+import molecule.base.util.exceptions.{ExecutionError, MoleculeError}
 import molecule.boilerplate.ast.Model._
 import molecule.core.api.TxReport
 import molecule.core.marshalling.Boopicklers._

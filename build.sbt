@@ -130,7 +130,7 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
     moleculeDataModelPaths := Seq(
       "molecule/coreTests/dataModels/core"
     ),
-    moleculeMakeJars := false,
+//    moleculeMakeJars := false,
 
     // Suppress "un-used" keys warning
     Global / excludeLintKeys ++= Set(

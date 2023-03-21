@@ -3,7 +3,7 @@ package molecule.datomic.query.cursorStrategy
 import java.net.URI
 import java.util.{Date, UUID}
 import molecule.base.util.BaseHelpers
-import molecule.base.util.exceptions.MoleculeError
+import molecule.base.util.exceptions.ExecutionError
 import molecule.boilerplate.ast.Model._
 
 trait CursorUtils extends BaseHelpers {
@@ -44,7 +44,7 @@ trait CursorUtils extends BaseHelpers {
           case _: AttrOneOptShort      => ("Short", (v: Any) => v.toString)
           case _: AttrOneOptChar       => ("Char", (v: Any) => v.toString)
         }
-      case other         => throw MoleculeError("Unexpected element for tpeEncode: " + other)
+      case other         => throw ExecutionError("Unexpected element for tpeEncode: " + other)
     }
   }
 

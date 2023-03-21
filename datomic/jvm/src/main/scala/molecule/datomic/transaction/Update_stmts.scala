@@ -5,7 +5,7 @@ import clojure.lang.Keyword
 import datomic.Util.list
 import datomic.query.EntityMap
 import datomic.{Database, Peer}
-import molecule.base.util.exceptions.MoleculeError
+import molecule.base.util.exceptions.ExecutionError
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.{UpdateExtraction, UpdateOps}
@@ -108,7 +108,7 @@ trait Update_stmts extends DatomicTxBase_JVM with UpdateOps with MoleculeLogging
           entity = db.entity(txId)
           eid = datomicTx
 
-        case other => throw MoleculeError("Unexpected data in update: " + other)
+        case other => throw ExecutionError("Unexpected data in update: " + other)
       }
     }
   }

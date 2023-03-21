@@ -1,6 +1,6 @@
 package molecule.core.transaction
 
-import molecule.base.util.exceptions.MoleculeError
+import molecule.base.util.exceptions.ExecutionError
 import molecule.boilerplate.ast.Model._
 import scala.annotation.tailrec
 
@@ -17,7 +17,7 @@ class InsertExtraction extends InsertResolvers_ { self: InsertOps =>
       case element :: tail => element match {
         case a: Attr =>
           if (a.op != V) {
-            throw MoleculeError("Can't insert attributes with an applied value. Found:\n" + a)
+            throw ExecutionError("Can't insert attributes with an applied value. Found:\n" + a)
           }
           a match {
             case a: AttrOne =>
@@ -38,7 +38,7 @@ class InsertExtraction extends InsertResolvers_ { self: InsertOps =>
 
         case BackRef(backRefNs) =>
           tail.head match {
-            case Ref(_, refAttr, _, _) if prevRefs.contains(refAttr) => throw MoleculeError(
+            case Ref(_, refAttr, _, _) if prevRefs.contains(refAttr) => throw ExecutionError(
               s"Can't re-use previous namespace ${refAttr.capitalize} after backref _$backRefNs."
             )
             case _                                                   => // ok
@@ -58,7 +58,7 @@ class InsertExtraction extends InsertResolvers_ { self: InsertOps =>
 
         // TxMetaData is handed separately in Insert_stmts with call to save_stmts
 
-        case other => throw MoleculeError("Unexpected element: " + other)
+        case other => throw ExecutionError("Unexpected element: " + other)
       }
       case Nil             => resolvers
     }

@@ -2,7 +2,7 @@ package molecule.datomic.query
 
 import java.util.{Iterator => jIterator, List => jList}
 import molecule.base.util.BaseHelpers
-import molecule.base.util.exceptions.MoleculeError
+import molecule.base.util.exceptions.ExecutionError
 import molecule.boilerplate.ast.Model._
 import molecule.core.query.Model2Query
 import molecule.core.util.JavaConversions
@@ -181,7 +181,7 @@ trait Base[Tpl] extends BaseHelpers with JavaConversions { self: Model2Query[Tpl
         case List(1, 2, 3, 4, 6)    =>
         case List(1, 2, 3, 4, 5)    =>
         case List(1, 2, 3, 4, 5, 6) =>
-        case other                  => throw MoleculeError(
+        case other                  => throw ExecutionError(
           s"Sort index 1 should be present and additional indexes continuously increase (in any order). " +
             s"Found sort index(es): " + other.mkString(", ")
         )
@@ -190,16 +190,16 @@ trait Base[Tpl] extends BaseHelpers with JavaConversions { self: Model2Query[Tpl
     }
   }
 
-  final protected def unexpectedElement(element: Element) = throw MoleculeError("Unexpected element: " + element)
-  final protected def unexpectedOp(op: Op) = throw MoleculeError("Unexpected operation: " + op)
-  final protected def unexpectedKw(kw: String) = throw MoleculeError("Unexpected keyword: " + kw)
+  final protected def unexpectedElement(element: Element) = throw ExecutionError("Unexpected element: " + element)
+  final protected def unexpectedOp(op: Op) = throw ExecutionError("Unexpected operation: " + op)
+  final protected def unexpectedKw(kw: String) = throw ExecutionError("Unexpected keyword: " + kw)
 
-  final protected def noMixedNestedModes = throw MoleculeError(
+  final protected def noMixedNestedModes = throw ExecutionError(
     "Can't mix mandatory/optional nested data structures."
   )
 
   final protected def datomicFreePullBooleanBug: Nothing = {
-    throw MoleculeError(
+    throw ExecutionError(
       "Datomic Free (not Pro) has a bug that pulls boolean `false` values as nil."
     )
   }

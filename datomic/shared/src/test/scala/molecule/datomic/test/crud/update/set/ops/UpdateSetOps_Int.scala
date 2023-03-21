@@ -1,6 +1,6 @@
 package molecule.datomic.test.crud.update.set.ops
 
-import molecule.base.util.exceptions.MoleculeError
+import molecule.base.util.exceptions.ExecutionError
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.datomic.setup.DatomicTestSuite
@@ -101,12 +101,12 @@ object UpdateSetOps_Int extends DatomicTestSuite {
 
         // Can't swap duplicate from/to values
         _ <- Ns(42).ints.swap(int1 -> int2, int1 -> int3).update.transact
-          .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
+          .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
           err ==> "Can't swap from duplicate retract values."
         }
 
         _ <- Ns(42).ints.swap(int1 -> int3, int2 -> int3).update.transact
-          .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
+          .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
           err ==> "Can't swap to duplicate replacement values."
         }
       } yield ()

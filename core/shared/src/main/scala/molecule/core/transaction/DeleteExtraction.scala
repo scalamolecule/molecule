@@ -1,6 +1,6 @@
 package molecule.core.transaction
 
-import molecule.base.util.exceptions.MoleculeError
+import molecule.base.util.exceptions.ExecutionError
 import molecule.boilerplate.ast.Model._
 import scala.annotation.tailrec
 
@@ -18,26 +18,26 @@ class DeleteExtraction {
         case attr: Attr => attr match {
           case AttrOneTacLong("_Generic", "eids", Appl, eids1, _, _, _, _) =>
             if (eids.nonEmpty)
-              throw MoleculeError(s"Can't apply entity ids twice for delete.")
+              throw ExecutionError(s"Can't apply entity ids twice for delete.")
             if (!topLevel)
-              throw MoleculeError(
+              throw ExecutionError(
                 s"Can only apply entity ids to be deleted at top level/first composite group of molecule.")
             resolve(tail, eids1.asInstanceOf[Seq[AnyRef]], filterElements, topLevel)
 
-          case AttrOneTacLong("_Generic", "e", Appl, _, _, _, _, _) => throw MoleculeError(
+          case AttrOneTacLong("_Generic", "e", Appl, _, _, _, _, _) => throw ExecutionError(
             "Can't delete by applying entity ids to e_")
 
-          case a if a.ns == "_Generic" => throw MoleculeError(
+          case a if a.ns == "_Generic" => throw ExecutionError(
             s"Generic attributes not allowed in update molecule. Found:\n" + a)
 
           case _: AttrOneTac => resolve(tail, eids, filterElements :+ attr, topLevel)
-          case _             => throw MoleculeError(
+          case _             => throw ExecutionError(
             "Can only filter delete by values applied to tacit card-one attributes. Found:\n" + attr
           )
         }
 
-        case _: Nested    => throw MoleculeError(s"Nested data structure not allowed in delete molecule.")
-        case _: NestedOpt => throw MoleculeError(s"Optional nested data structure not allowed in delete molecule.")
+        case _: Nested    => throw ExecutionError(s"Nested data structure not allowed in delete molecule.")
+        case _: NestedOpt => throw ExecutionError(s"Optional nested data structure not allowed in delete molecule.")
         case r: Ref       => resolve(tail, eids, filterElements :+ r, false)
         case b: BackRef   => resolve(tail, eids, filterElements :+ b, false)
 

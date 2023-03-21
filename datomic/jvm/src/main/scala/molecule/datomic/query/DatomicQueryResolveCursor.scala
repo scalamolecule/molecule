@@ -1,7 +1,7 @@
 package molecule.datomic.query
 
 import java.util.Base64
-import molecule.base.util.exceptions.MoleculeError
+import molecule.base.util.exceptions.ExecutionError
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.ops.ModelTransformations
 import molecule.boilerplate.util.MoleculeLogging
@@ -46,7 +46,7 @@ case class DatomicQueryResolveCursor[Tpl](
           //          println("tokens: " + tokens)
           val strategy :: hash :: _ = tokens
           if ((elements.hashCode() & 0xFFFFF) != hash.toInt) {
-            throw MoleculeError("Can only use cursor for un-modified query.")
+            throw ExecutionError("Can only use cursor for un-modified query.")
           } else {
             strategy match {
               case "1" => PrimaryUnique(elements, limit, cursor).getPage(tokens, l)
@@ -54,9 +54,9 @@ case class DatomicQueryResolveCursor[Tpl](
               case "3" => NoUnique(elements, limit, cursor).getPage(tokens, l)
             }
           }
-        case None         => throw MoleculeError("Unexpected undefined cursor.")
+        case None         => throw ExecutionError("Unexpected undefined cursor.")
       }
-      case None    => throw MoleculeError("Please set limit to use cursor pagination.")
+      case None    => throw ExecutionError("Please set limit to use cursor pagination.")
     }
   }
 
@@ -142,7 +142,7 @@ case class DatomicQueryResolveCursor[Tpl](
                 }
                 if (opt) {
                   if (pos == "1")
-                    throw MoleculeError(
+                    throw ExecutionError(
                       s"Can't use optional attribute (`${a.name}`) as primary sort attribute with cursor pagination."
                     )
                   // We use row hashes only when there's no unique sort attributes

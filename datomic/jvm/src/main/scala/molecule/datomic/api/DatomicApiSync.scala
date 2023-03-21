@@ -1,6 +1,6 @@
 package molecule.datomic.api
 
-import molecule.base.util.exceptions.MoleculeError
+import molecule.base.util.exceptions.ExecutionError
 import molecule.boilerplate.ast.Model._
 import molecule.core.action.Insert
 import molecule.core.api.{ApiSync, Connection, TxReport}
@@ -49,7 +49,7 @@ trait DatomicApiSync extends SubscriptionStarter with ApiSync {
 
 
   implicit class datomicSaveApiSync[Tpl](save: DatomicSave) extends Transaction {
-    override def transact(implicit conn: Connection): TxReport = catchMoleculeError {
+    override def transact(implicit conn: Connection): TxReport = catchExecutionError {
       conn.asInstanceOf[DatomicConn_JVM].transact_sync(getStmts)
     }
     override def inspect(implicit conn: Connection): Unit = {
@@ -62,7 +62,7 @@ trait DatomicApiSync extends SubscriptionStarter with ApiSync {
 
   implicit class datomicInsertApiSync[Tpl](insert0: Insert) extends Transaction {
     val insert = insert0.asInstanceOf[DatomicInsert_JVM]
-    override def transact(implicit conn: Connection): TxReport = catchMoleculeError {
+    override def transact(implicit conn: Connection): TxReport = catchExecutionError {
       conn.asInstanceOf[DatomicConn_JVM].transact_sync(getStmts)
     }
     override def inspect(implicit conn: Connection): Unit = {
@@ -75,7 +75,7 @@ trait DatomicApiSync extends SubscriptionStarter with ApiSync {
 
 
   implicit class datomicUpdateApiSync[Tpl](update: DatomicUpdate) extends Transaction {
-    override def transact(implicit conn0: Connection): TxReport = catchMoleculeError {
+    override def transact(implicit conn0: Connection): TxReport = catchExecutionError {
       val conn = conn0.asInstanceOf[DatomicConn_JVM]
       conn.transact_sync(getStmts(conn))
     }
@@ -89,7 +89,7 @@ trait DatomicApiSync extends SubscriptionStarter with ApiSync {
 
 
   implicit class datomicDeleteApiSync[Tpl](delete: DatomicDelete) extends Transaction {
-    override def transact(implicit conn0: Connection): TxReport = catchMoleculeError {
+    override def transact(implicit conn0: Connection): TxReport = catchExecutionError {
       val conn = conn0.asInstanceOf[DatomicConn_JVM]
       conn.transact_sync(getStmts(conn))
     }
@@ -110,11 +110,11 @@ trait DatomicApiSync extends SubscriptionStarter with ApiSync {
     printInspect(label, elements, stmts.toArray().toList.mkString("\n"))
   }
 
-  private def catchMoleculeError(tx: => TxReport): TxReport = {
+  private def catchExecutionError(tx: => TxReport): TxReport = {
     try {
       tx
     } catch {
-      case t: Throwable => throw MoleculeError(t.toString)
+      case t: Throwable => throw ExecutionError(t.toString)
     }
   }
 }

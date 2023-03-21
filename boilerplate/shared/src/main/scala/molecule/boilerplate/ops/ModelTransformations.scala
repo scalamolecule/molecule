@@ -2,14 +2,14 @@ package molecule.boilerplate.ops
 
 import java.net.URI
 import java.util.{Date, UUID}
-import molecule.base.util.exceptions.MoleculeError
+import molecule.base.util.exceptions.ExecutionError
 import molecule.boilerplate.api.Keywords.Kw
 import molecule.boilerplate.ast.Model._
 import scala.util.{Try, Success, Failure}
 
 trait ModelTransformations {
 
-  def unexpected(element: Element) = throw MoleculeError("Unexpected element: " + element)
+  def unexpected(element: Element) = throw ExecutionError("Unexpected element: " + element)
 
   protected def toInt(es: List[Element], kw: Kw): List[Element] = {
     val last = es.last match {
@@ -117,8 +117,7 @@ trait ModelTransformations {
           val errors = a.validation.fold(Seq.empty[String]) { validator =>
             vs1.flatMap(v => validator.validate(v))
           }
-
-          a.copy(op = op, vs = vs1)
+          a.copy(op = op, vs = vs1, errors = errors)
         case a: AttrOneManLong       => a.copy(op = op, vs = vs.asInstanceOf[Seq[Long]])
         case a: AttrOneManDouble     => a.copy(op = op, vs = vs.asInstanceOf[Seq[Double]])
         case a: AttrOneManBoolean    => a.copy(op = op, vs = vs.asInstanceOf[Seq[Boolean]])

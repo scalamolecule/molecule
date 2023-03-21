@@ -2,7 +2,7 @@ package molecule.base.codegen.extract
 
 import java.nio.file.{Files, Paths}
 import molecule.base.ast.SchemaAST._
-import molecule.base.util.exceptions.MoleculeError
+import molecule.base.util.exceptions.ExecutionError
 import scala.annotation.tailrec
 import scala.meta._
 
@@ -60,7 +60,7 @@ class DataModel2MetaSchema(filePath: String, pkgPath: String, scalaVersion: Stri
     case q"trait $nsTpe { ..$attrs }" =>
       val ns = nsTpe.toString
       if (ns.head.isLower)
-        throw MoleculeError("Namespace traits have to start with upper case letter.")
+        throw ExecutionError("Namespace traits have to start with upper case letter.")
       val metaAttrs  = getAttrs(ns, attrs)
       val backRefNss = backRefs.getOrElse(ns, Nil).distinct.sorted
       MetaNs(partPrefix + ns, metaAttrs, backRefNss)

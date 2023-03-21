@@ -2,7 +2,7 @@ package molecule.core.marshalling
 
 import java.nio.ByteBuffer
 import boopickle.Default._
-import molecule.base.util.exceptions.MoleculeError
+import molecule.base.util.exceptions._
 import molecule.boilerplate.ast.Model._
 import molecule.core.api.TxReport
 import molecule.core.marshalling.Boopicklers._
@@ -40,9 +40,9 @@ case class MoleculeRpcJS(interface: String, port: Int)
     val argsSerialized      = Pickle.intoBytes((proxy, elements, limit)).typedArray()
     val callbackDeserialize = (resultSerialized: ByteBuffer) => {
       UnpickleTpls[Tpl](elements, resultSerialized).unpickle match {
-        case Right(tpls)                        => callback(tpls)
-        case Left(MoleculeError("no match", _)) => // do nothing
-        case Left(moleculeError)                => logger.warn(moleculeError.toString)
+        case Right(tpls)                         => callback(tpls)
+        case Left(ExecutionError("no match", _)) => // do nothing
+        case Left(moleculeError)                 => logger.warn(moleculeError.toString)
       }
     }
     //    println("ELEMENTS: " + elements)

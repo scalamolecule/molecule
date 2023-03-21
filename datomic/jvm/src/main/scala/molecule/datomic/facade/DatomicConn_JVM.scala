@@ -6,7 +6,7 @@ import java.{lang => jl, util => ju}
 import com.google.common.util.concurrent.UncheckedExecutionException
 import datomic.Util.readAll
 import datomic.{Connection => DatomicConnection, Datom => _, _}
-import molecule.base.util.exceptions.MoleculeError
+import molecule.base.util.exceptions.ExecutionError
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.api.{Connection, TxReport}
 import molecule.core.marshalling.DatomicPeerProxy
@@ -41,13 +41,12 @@ case class DatomicConn_JVM(
 
   override def transact_async(javaStmts: Data)(implicit ec: ExecutionContext): Future[TxReport] = {
     bridgeDatomicFuture(peerConn.transactAsync(javaStmts)).map(MakeTxReport(_))
-    //    bridgeDatomicFuture(peerConn.transactAsync(javaStmts)).map(MakeDatomicTxReport(_))
   }
   override def transact_sync(javaStmts: Data): TxReport = try {
     import molecule.core.util.Executor._
     Await.result(transact_async(javaStmts), 10.seconds)
   } catch {
-    case t: Throwable => throw MoleculeError(t.toString)
+    case t: Throwable => throw ExecutionError(t.toString)
   }
 
   private def bridgeDatomicFuture[T](
@@ -72,8 +71,8 @@ case class DatomicConn_JVM(
               p.failure(
                 e.getCause match {
                   //                  case e: TxFnException     => e
-                  case e: MoleculeError => e
-                  case e                => MoleculeError(e.getMessage.trim)
+                  case e: ExecutionError => e
+                  case e                 => ExecutionError(e.getMessage.trim)
                 }
               )
 
@@ -84,7 +83,7 @@ case class DatomicConn_JVM(
                   javaStmts.fold("")(stmts => "\n---- javaStmts: ----\n" +
                     stmts.asScala.toList.mkString("\n"))
               )
-              p.failure(MoleculeError(e.getMessage))
+              p.failure(ExecutionError(e.getMessage))
           }
         }
       },

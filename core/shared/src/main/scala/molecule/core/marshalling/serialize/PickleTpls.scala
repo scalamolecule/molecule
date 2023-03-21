@@ -5,7 +5,7 @@ import java.util.{Date, UUID}
 import boopickle.BasicPicklers._
 import boopickle.Default._
 import boopickle._
-import molecule.base.util.exceptions.MoleculeError
+import molecule.base.util.exceptions.{ExecutionError, MoleculeError}
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.marshalling.Boopicklers._
@@ -110,7 +110,7 @@ case class PickleTpls(
 
         case BackRef(backRefNs) =>
           tail.head match {
-            case Ref(_, refAttr, _, _) if prevRefs.contains(refAttr) => throw MoleculeError(
+            case Ref(_, refAttr, _, _) if prevRefs.contains(refAttr) => throw ExecutionError(
               s"Can't re-use previous namespace ${refAttr.capitalize} after backref _$backRefNs."
             )
             case _                                                   => // ok

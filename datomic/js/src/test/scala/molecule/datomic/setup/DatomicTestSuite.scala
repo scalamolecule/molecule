@@ -24,6 +24,7 @@ trait DatomicTestSuite extends DatomicTestSuiteBase {
   def types[T](test: Connection => T): T = inMem(test, TypesSchema)
   def refs[T](test: Connection => T): T = inMem(test, RefsSchema)
   def unique[T](test: Connection => T): T = inMem(test, UniqueSchema)
+  def validation[T](test: Connection => T): T = inMem(test, ValidationSchema)
 
   def delay[T](ms: Int)(body: => T): Future[T] = {
     val promise = Promise[T]()

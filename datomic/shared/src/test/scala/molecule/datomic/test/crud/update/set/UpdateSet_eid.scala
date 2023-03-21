@@ -1,6 +1,6 @@
 package molecule.datomic.test.crud.update.set
 
-import molecule.base.util.exceptions.MoleculeError
+import molecule.base.util.exceptions.ExecutionError
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.datomic.setup.DatomicTestSuite
@@ -115,7 +115,7 @@ object UpdateSet_eid extends DatomicTestSuite {
         _ <- Ns.ints.Tx(Other.ss).query.get.map(_.head ==> (Set(2), Set("tx2")))
 
         _ <- Ns(eid).Tx(Other.ss(Set("tx3"))).update.transact
-          .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
+          .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
           err ==> "Can't update tx meta data only."
         }
 
@@ -147,7 +147,7 @@ object UpdateSet_eid extends DatomicTestSuite {
       "e_(eid) not allowed" - types { implicit conn =>
         for {
           _ <- Ns.e_(42).ints(2).update.transact
-            .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
+            .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
             err ==> "Can't update by applying entity ids to e_"
           }
         } yield ()
@@ -156,19 +156,19 @@ object UpdateSet_eid extends DatomicTestSuite {
       "Can't update multiple values for one card-one attribute" - types { implicit conn =>
         for {
           _ <- Ns(42).ints(Seq(Set(1), Set(2))).update.transact
-            .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
+            .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
             err ==> "Can only update one Set of values for Set attribute `Ns.ints`. Found: Set(1), Set(2)"
           }
 
           // Same as
           _ <- Ns(42).ints(Set(1), Set(2)).update.transact
-            .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
+            .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
             err ==> "Can only update one Set of values for Set attribute `Ns.ints`. Found: Set(1), Set(2)"
           }
 
           // Same as
           _ <- Ns(42).ints(1, 2).update.transact
-            .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
+            .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
             err ==> "Can only update one Set of values for Set attribute `Ns.ints`. Found: Set(1), Set(2)"
           }
         } yield ()
@@ -177,7 +177,7 @@ object UpdateSet_eid extends DatomicTestSuite {
       "Can't update optional values" - types { implicit conn =>
         for {
           _ <- Ns(42).ints_?(Some(Set(1))).update.transact
-            .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
+            .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
             err ==> "Can't update optional values. Found:\n" +
               """AttrSetOptInt("Ns", "ints", Appl, Some(Seq(Set(1))), None, None, None)"""
           }
@@ -187,7 +187,7 @@ object UpdateSet_eid extends DatomicTestSuite {
       "Can't update card-many referenced attributes" - types { implicit conn =>
         for {
           _ <- Ns(42).i(1).Refs.i(2).update.transact
-            .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
+            .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
             err ==> "Can't update attributes in card-many referenced namespaces. Found `Refs`"
           }
         } yield ()

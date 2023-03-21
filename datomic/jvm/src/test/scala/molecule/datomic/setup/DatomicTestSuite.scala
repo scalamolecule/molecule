@@ -7,11 +7,10 @@ import molecule.core.marshalling.DatomicPeerProxy
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.schema._
 import molecule.datomic.facade.DatomicPeer
-import molecule.datomic.setup.DatomicTestSuiteBase
 import molecule.datomic.util.DatomicApiLoader
 import moleculeBuildInfo.BuildInfo
-import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
+import scala.concurrent.{Await, Future}
 
 trait DatomicTestSuite extends DatomicTestSuiteBase with DatomicApiLoader {
 
@@ -37,6 +36,7 @@ trait DatomicTestSuite extends DatomicTestSuiteBase with DatomicApiLoader {
   def types[T](test: Connection => T): T = inMem(test, TypesSchema)
   def refs[T](test: Connection => T): T = inMem(test, RefsSchema)
   def unique[T](test: Connection => T): T = inMem(test, UniqueSchema)
+  def validation[T](test: Connection => T): T = inMem(test, ValidationSchema)
 
   def delay[T](ms: Int)(body: => T): Future[T] = Future {
     Thread.sleep(ms)

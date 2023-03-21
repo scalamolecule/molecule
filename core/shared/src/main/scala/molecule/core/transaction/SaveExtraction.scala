@@ -2,7 +2,7 @@ package molecule.core.transaction
 
 import java.net.URI
 import java.util.{Date, UUID}
-import molecule.base.util.exceptions.MoleculeError
+import molecule.base.util.exceptions.ExecutionError
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.util.ModelUtils
@@ -17,7 +17,7 @@ class SaveExtraction(isTxMetaData: Boolean = false)
       case element :: tail => element match {
         case a: Attr =>
           if (a.op != Appl) {
-            throw MoleculeError("Missing applied value for attribute:\n" + a)
+            throw ExecutionError("Missing applied value for attribute:\n" + a)
           }
           handleNs(a.ns)
           a match {
@@ -37,10 +37,10 @@ class SaveExtraction(isTxMetaData: Boolean = false)
 
         case Ref(ns, refAttr, _, _)       => ref(ns, refAttr); resolve(tail)
         case BackRef(backRefNs)           => backRef(backRefNs); resolve(tail)
-        case _: Nested                    => throw MoleculeError(
+        case _: Nested                    => throw ExecutionError(
           "Nested data structure not allowed in save molecule. Please use insert instead."
         )
-        case _: NestedOpt                 => throw MoleculeError(
+        case _: NestedOpt                 => throw ExecutionError(
           "Optional nested data structure not allowed in save molecule. Please use insert instead."
         )
         case Composite(compositeElements) =>
@@ -65,7 +65,7 @@ class SaveExtraction(isTxMetaData: Boolean = false)
     vs match {
       case Seq(v) => Some(transform(v))
       case Nil    => None
-      case vs     => throw MoleculeError(
+      case vs     => throw ExecutionError(
         s"Can only save one value for attribute `$ns.$attr`. Found: " + vs.mkString(", ")
       )
     }
@@ -119,7 +119,7 @@ class SaveExtraction(isTxMetaData: Boolean = false)
     optVs.flatMap {
       case Seq(v) => Some(transform(v))
       case Nil    => None
-      case vs     => throw MoleculeError(
+      case vs     => throw ExecutionError(
         s"Can only save one value for optional attribute `$ns.$attr`. Found: " + vs.mkString(", ")
       )
     }
@@ -154,7 +154,7 @@ class SaveExtraction(isTxMetaData: Boolean = false)
     sets match {
       case Seq(set)     => Some(set.map(transform))
       case Nil          => None
-      case multipleSets => throw MoleculeError(
+      case multipleSets => throw ExecutionError(
         s"Can only save one Set of values for Set attribute `$ns.$attr`. Found: " + multipleSets.mkString(", ")
       )
     }
@@ -208,7 +208,7 @@ class SaveExtraction(isTxMetaData: Boolean = false)
     optSets.flatMap {
       case Seq(set) => Some(set.map(transform))
       case Nil      => None
-      case vs       => throw MoleculeError(
+      case vs       => throw ExecutionError(
         s"Can only save one Set of values for optional Set attribute `$ns.$attr`. Found: " + vs.mkString(", ")
       )
     }

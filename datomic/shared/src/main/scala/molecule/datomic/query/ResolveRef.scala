@@ -1,7 +1,7 @@
 package molecule.datomic.query
 
 import java.lang.{Long => jLong}
-import molecule.base.util.exceptions.MoleculeError
+import molecule.base.util.exceptions.ExecutionError
 import molecule.boilerplate.ast.Model._
 import molecule.datomic.query.casting.NestOpt_
 
@@ -44,7 +44,7 @@ trait ResolveRef[Tpl] { self: Base[Tpl] with NestOpt_[Tpl] =>
       where += s"[$e $refA $refId]" -> wClause
     }
     if (where.length == 1 && where.head._1.startsWith("[(identity")) {
-      throw MoleculeError("Single optional attribute before optional nested data structure is not allowed.")
+      throw ExecutionError("Single optional attribute before optional nested data structure is not allowed.")
     }
 
     // Add nested caster

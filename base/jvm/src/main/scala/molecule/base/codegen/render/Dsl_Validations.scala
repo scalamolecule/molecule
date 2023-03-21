@@ -37,8 +37,8 @@ case class Dsl_Validations(schema: MetaSchema, namespace: MetaNs)
         s"Seq(${renderError(error)})"
       }
     }
-    s"""val validation_$attr = new Validate$tpe {
-       |    def validate(v: $tpe): Seq[String] = {
+    s"""private lazy val validation_$attr = new Validate$tpe {
+       |    override def validate(v: $tpe): Seq[String] = {
        |      val ok: $tpe => Boolean = $testStr
        |      if (ok(v)) Nil else $errorStr
        |    }
@@ -62,8 +62,8 @@ case class Dsl_Validations(schema: MetaSchema, namespace: MetaNs)
         }
     }.mkString(",\n        ")
 
-    s"""val validation_$attr = new Validate$tpe {
-       |    def validate(v: $tpe): Seq[String] = {
+    s"""private lazy val validation_$attr = new Validate$tpe {
+       |    override def validate(v: $tpe): Seq[String] = {
        |      Seq[($tpe => Boolean, String)](
        |        $test2errorPairs
        |      ).flatMap {

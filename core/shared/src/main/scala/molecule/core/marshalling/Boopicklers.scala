@@ -5,10 +5,9 @@ import java.net.URI
 import java.util.Date
 import boopickle.CompositePickler
 import boopickle.Default._
-import molecule.base.util.exceptions.{MoleculeCompileException, MoleculeError}
+import molecule.base.util.exceptions.{ExecutionError, MoleculeError, ValidationErrors}
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
-import molecule.core.api.TxReport
 
 
 object Boopicklers extends MoleculeLogging {
@@ -32,21 +31,6 @@ object Boopicklers extends MoleculeLogging {
   pickleOp.addConcreteType[Add.type]
   pickleOp.addConcreteType[Swap.type]
   pickleOp.addConcreteType[Remove.type]
-
-  implicit val pickleValidateString    : CompositePickler[ValidateString]     = compositePickler[ValidateString]
-  implicit val pickleValidateInt       : CompositePickler[ValidateInt]        = compositePickler[ValidateInt]
-  implicit val pickleValidateLong      : CompositePickler[ValidateLong]       = compositePickler[ValidateLong]
-  implicit val pickleValidateDouble    : CompositePickler[ValidateDouble]     = compositePickler[ValidateDouble]
-  implicit val pickleValidateBoolean   : CompositePickler[ValidateBoolean]    = compositePickler[ValidateBoolean]
-  implicit val pickleValidateBigInt    : CompositePickler[ValidateBigInt]     = compositePickler[ValidateBigInt]
-  implicit val pickleValidateBigDecimal: CompositePickler[ValidateBigDecimal] = compositePickler[ValidateBigDecimal]
-  implicit val pickleValidateDate      : CompositePickler[ValidateDate]       = compositePickler[ValidateDate]
-  implicit val pickleValidateUUID      : CompositePickler[ValidateUUID]       = compositePickler[ValidateUUID]
-  implicit val pickleValidateURI       : CompositePickler[ValidateURI]        = compositePickler[ValidateURI]
-  implicit val pickleValidateByte      : CompositePickler[ValidateByte]       = compositePickler[ValidateByte]
-  implicit val pickleValidateShort     : CompositePickler[ValidateShort]      = compositePickler[ValidateShort]
-  implicit val pickleValidateFloat     : CompositePickler[ValidateFloat]      = compositePickler[ValidateFloat]
-  implicit val pickleValidateChar      : CompositePickler[ValidateChar]       = compositePickler[ValidateChar]
 
   implicit val pickleElement: CompositePickler[Element] = compositePickler[Element]
   pickleElement.addConcreteType[Ref]
@@ -98,6 +82,7 @@ object Boopicklers extends MoleculeLogging {
   pickleElement.addConcreteType[AttrOneTacShort]
   pickleElement.addConcreteType[AttrOneTacFloat]
   pickleElement.addConcreteType[AttrOneTacChar]
+
   pickleElement.addConcreteType[AttrSetManString]
   pickleElement.addConcreteType[AttrSetManInt]
   pickleElement.addConcreteType[AttrSetManLong]
@@ -145,7 +130,8 @@ object Boopicklers extends MoleculeLogging {
   implicit val pickleExceptions: CompositePickler[Throwable] = exceptionPickler
   pickleExceptions
     .addConcreteType[MoleculeError]
-    .addConcreteType[MoleculeCompileException]
+    .addConcreteType[ExecutionError]
+    .addConcreteType[ValidationErrors]
 
   implicit val pickleFileNotFoundEception: CompositePickler[FileNotFoundException] =
     compositePickler[FileNotFoundException]

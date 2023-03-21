@@ -6,92 +6,46 @@ import java.util.{Date, UUID}
 
 trait Validations {
 
-//  sealed trait Validate
-
-  abstract class ValidateString {
-    def validate(v: String): Seq[String]
+  case class ValidateString() {
+    def validate(v: String): Seq[String] = Nil
   }
-  abstract class ValidateInt {
-    def validate(v: Int): Seq[String]
+  case class ValidateInt() {
+    def validate(v: Int): Seq[String] = Nil
   }
-  abstract class ValidateLong {
-    def validate(v: Long): Seq[String]
+  case class ValidateLong() {
+    def validate(v: Long): Seq[String] = Nil
   }
-  abstract class ValidateFloat {
-    def validate(v: Float): Seq[String]
+  case class ValidateFloat() {
+    def validate(v: Float): Seq[String] = Nil
   }
-  abstract class ValidateDouble {
-    def validate(v: Double): Seq[String]
+  case class ValidateDouble() {
+    def validate(v: Double): Seq[String] = Nil
   }
-  abstract class ValidateBoolean {
-    def validate(v: Boolean): Seq[String]
+  case class ValidateBoolean() {
+    def validate(v: Boolean): Seq[String] = Nil
   }
-  abstract class ValidateBigInt {
-    def validate(v: BigInt): Seq[String]
+  case class ValidateBigInt() {
+    def validate(v: BigInt): Seq[String] = Nil
   }
-  abstract class ValidateBigDecimal {
-    def validate(v: BigDecimal): Seq[String]
+  case class ValidateBigDecimal() {
+    def validate(v: BigDecimal): Seq[String] = Nil
   }
-  abstract class ValidateDate {
-    def validate(v: Date): Seq[String]
+  case class ValidateDate() {
+    def validate(v: Date): Seq[String] = Nil
   }
-  abstract class ValidateUUID {
-    def validate(v: UUID): Seq[String]
+  case class ValidateUUID() {
+    def validate(v: UUID): Seq[String] = Nil
   }
-  abstract class ValidateURI {
-    def validate(v: URI): Seq[String]
+  case class ValidateURI() {
+    def validate(v: URI): Seq[String] = Nil
   }
-  abstract class ValidateByte {
-    def validate(v: Byte): Seq[String]
+  case class ValidateByte() {
+    def validate(v: Byte): Seq[String] = Nil
   }
-  abstract class ValidateShort {
-    def validate(v: Short): Seq[String]
+  case class ValidateShort() {
+    def validate(v: Short): Seq[String] = Nil
   }
-  abstract class ValidateChar {
-    def validate(v: Char): Seq[String]
-  }
-
-
-  abstract class ValidateSetString {
-    def validate(v: String): Seq[String]
-  }
-  abstract class ValidateSetInt {
-    def validate(v: Int): Seq[String]
-  }
-  abstract class ValidateSetLong {
-    def validate(v: Long): Seq[String]
-  }
-  abstract class ValidateSetFloat {
-    def validate(v: Float): Seq[String]
-  }
-  abstract class ValidateSetDouble {
-    def validate(v: Double): Seq[String]
-  }
-  abstract class ValidateSetBoolean {
-    def validate(v: Boolean): Seq[String]
-  }
-  abstract class ValidateSetBigInt {
-    def validate(v: BigInt): Seq[String]
-  }
-  abstract class ValidateSetBigDecimal {
-    def validate(v: BigDecimal): Seq[String]
-  }
-  abstract class ValidateSetDate {
-    def validate(v: Date): Seq[String]
-  }
-  abstract class ValidateSetUUID {
-    def validate(v: UUID): Seq[String]
-  }
-  abstract class ValidateSetURI {
-    def validate(v: URI): Seq[String]
-  }
-  abstract class ValidateSetByte {
-    def validate(v: Byte): Seq[String]
-  }
-  abstract class ValidateSetShort {
-    def validate(v: Short): Seq[String]
-  }
-  abstract class ValidateSetChar {
-    def validate(v: Char): Seq[String]
+  case class ValidateChar() {
+    def validate(v: Char): Seq[String] = Nil
   }
 }

@@ -1,7 +1,7 @@
 package molecule.datomic.query.cursorStrategy
 
 import java.util.Base64
-import molecule.base.util.exceptions.MoleculeError
+import molecule.base.util.exceptions.ExecutionError
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.util.FutureUtils
@@ -45,7 +45,7 @@ case class NoUnique[Tpl](
       nextCursorNoUnique
     )
   } catch {
-    case t: Throwable => throw MoleculeError(t.toString)
+    case t: Throwable => throw ExecutionError(t.toString)
   }
 
   private def nextCursorNoUnique(tpls: List[Tpl], tokens: List[String]): String = {

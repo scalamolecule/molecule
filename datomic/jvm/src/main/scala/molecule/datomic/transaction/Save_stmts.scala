@@ -6,6 +6,7 @@ import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.{SaveExtraction, SaveOps}
 import molecule.core.validation.CheckConflictingAttrs
+import molecule.base.util.exceptions.ValidationErrors
 
 trait Save_stmts extends DatomicTxBase_JVM with SaveOps with MoleculeLogging { self: SaveExtraction =>
 
@@ -18,7 +19,10 @@ trait Save_stmts extends DatomicTxBase_JVM with SaveOps with MoleculeLogging { s
     if (init) {
       initTxBase(elements)
     }
-    CheckConflictingAttrs(elements)
+    val validationErrors = CheckConflictingAttrs(elements)
+    if (validationErrors.nonEmpty) {
+      throw ValidationErrors(validationErrors)
+    }
     e = eid
     e0 = e
 

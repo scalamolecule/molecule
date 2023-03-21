@@ -11,7 +11,7 @@ import akka.stream.scaladsl.{Flow, Sink, Source}
 import akka.util.ByteString
 import boopickle.Default._
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
-import molecule.base.util.exceptions.MoleculeError
+import molecule.base.util.exceptions.ExecutionError
 import molecule.boilerplate.ast.Model._
 import molecule.core.marshalling.Boopicklers._
 import molecule.core.marshalling.serialize.PickleTpls
@@ -77,8 +77,8 @@ abstract class MoleculeRpcServer(rpc: MoleculeRpc) extends RpcHandlers(rpc) {
         rpc.subscribe[Any](proxy, elements, limit, callback)
 
       case _ =>
-        val resultBytes = Pickle.intoBytes[Either[MoleculeError, Int]](
-          Left(MoleculeError("Expected a single strict binary message"))
+        val resultBytes = Pickle.intoBytes[Either[ExecutionError, Int]](
+          Left(ExecutionError("Expected a single strict binary message"))
         ).toArray
         Source.single(BinaryMessage(ByteString(resultBytes)))
     }

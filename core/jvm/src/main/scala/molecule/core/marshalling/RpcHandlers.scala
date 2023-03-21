@@ -2,7 +2,7 @@ package molecule.core.marshalling
 
 import akka.util.ByteString
 import boopickle.Default._
-import molecule.base.util.exceptions.MoleculeError
+import molecule.base.util.exceptions.{ExecutionError, MoleculeError, ValidationErrors}
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.api.TxReport
@@ -87,21 +87,27 @@ abstract class RpcHandlers(rpc: MoleculeRpc) extends MoleculeLogging with Serial
   private def handleErrors(body: => Future[Array[Byte]]): Future[Array[Byte]] = try {
     body
       .recoverWith {
-        case e: MoleculeError =>
+        case e: ValidationErrors =>
+          logger.error(e.toString)
+          left(e.copy(message = Some(msg + e.msg)))
+        case e: ExecutionError   =>
           logger.error(e.toString)
           left(e.copy(message = msg + e.message))
-        case e: Throwable     =>
+        case e: Throwable        =>
           logger.error(e.toString)
           logger.error(e.getStackTrace.mkString("\n"))
-          left(MoleculeError(msg + e.toString, e))
+          left(ExecutionError(msg + e.toString, e))
       }
   } catch {
-    case e: MoleculeError =>
+    case e: ValidationErrors =>
+      logger.trace(e)
+      left(e.copy(message = Some(msg + e.msg)))
+    case e: ExecutionError   =>
       logger.trace(e)
       left(e.copy(message = msg + e.message))
-    case e: Throwable     =>
+    case e: Throwable        =>
       logger.error(e.toString)
       logger.error(e.getStackTrace.mkString("\n"))
-      left(MoleculeError(msg + e.toString, e))
+      left(ExecutionError(msg + e.toString, e))
   }
 }

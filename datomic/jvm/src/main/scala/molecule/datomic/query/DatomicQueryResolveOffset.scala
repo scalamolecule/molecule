@@ -1,7 +1,7 @@
 package molecule.datomic.query
 
 import datomic.Database
-import molecule.base.util.exceptions.MoleculeError
+import molecule.base.util.exceptions.ExecutionError
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.util.FutureUtils
@@ -40,7 +40,7 @@ case class DatomicQueryResolveOffset[Tpl](
   def getListFromOffset_sync(altDb: Option[datomic.Database])(implicit conn: DatomicConn_JVM)
   : (List[Tpl], Int, Boolean) = try {
     if (offset.isDefined && limit.isDefined && limit.get >> 31 != offset.get >> 31) {
-      throw MoleculeError("Limit and offset should both be positive or negative.")
+      throw ExecutionError("Limit and offset should both be positive or negative.")
     }
     val rows       = getRawData(conn, altDb = altDb)
     val totalCount = rows.size
@@ -72,7 +72,7 @@ case class DatomicQueryResolveOffset[Tpl](
       }
     }
   } catch {
-    case t: Throwable => throw MoleculeError(t.toString)
+    case t: Throwable => throw ExecutionError(t.toString)
   }
 
 

@@ -43,7 +43,7 @@ object Validation extends DataModel(4) {
       "Value must be an odd number between 3 and 9"
     )
 
-    val multipleMsgs = oneInt.validate {
+    val multipleErrors = oneInt.validate {
       case v if v <= 2  => "Number must be bigger than 2"
       case v if v >= 10 => "Number must be smaller than 10"
       case v if {

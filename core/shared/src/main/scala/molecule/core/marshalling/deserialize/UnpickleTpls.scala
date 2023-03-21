@@ -6,7 +6,7 @@ import java.util.{Date, UUID}
 import boopickle.BasicPicklers._
 import boopickle.Default._
 import boopickle._
-import molecule.base.util.exceptions.MoleculeError
+import molecule.base.util.exceptions.ExecutionError
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.marshalling.Boopicklers._
@@ -28,22 +28,22 @@ case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuff
   )
   private val dec   = state.dec
 
-  def unpickle: Either[MoleculeError, List[Tpl]] = {
+  def unpickle: Either[ExecutionError, List[Tpl]] = {
     dec.readInt match { // decode Left/Right
       case 2 => Right(unpickleTpls)
-      case _ => Left(Unpickle.apply[MoleculeError].fromState(state))
+      case _ => Left(Unpickle.apply[ExecutionError].fromState(state))
     }
   }
-  def unpickleOffset: Either[MoleculeError, (List[Tpl], Int, Boolean)] = {
+  def unpickleOffset: Either[ExecutionError, (List[Tpl], Int, Boolean)] = {
     dec.readInt match { // decode Left/Right
       case 2 => Right((unpickleTpls, dek.readInt, dek.readBoolean))
-      case _ => Left(Unpickle.apply[MoleculeError].fromState(state))
+      case _ => Left(Unpickle.apply[ExecutionError].fromState(state))
     }
   }
-  def unpickleCursor: Either[MoleculeError, (List[Tpl], String, Boolean)] = {
+  def unpickleCursor: Either[ExecutionError, (List[Tpl], String, Boolean)] = {
     dec.readInt match { // decode Left/Right
       case 2 => Right((unpickleTpls, dek.readString, dek.readBoolean))
-      case _ => Left(Unpickle.apply[MoleculeError].fromState(state))
+      case _ => Left(Unpickle.apply[ExecutionError].fromState(state))
     }
   }
 
@@ -94,7 +94,7 @@ case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuff
 
         case BackRef(backRefNs) =>
           tail.head match {
-            case Ref(_, refAttr, _, _) if prevRefs.contains(refAttr) => throw MoleculeError(
+            case Ref(_, refAttr, _, _) if prevRefs.contains(refAttr) => throw ExecutionError(
               s"Can't re-use previous namespace ${refAttr.capitalize} after backref _$backRefNs."
             )
             case _                                                   => // ok
@@ -238,7 +238,7 @@ case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuff
   }
 
   protected def unexpected(element: Element) =
-    throw MoleculeError("Unexpected element: " + element)
+    throw ExecutionError("Unexpected element: " + element)
 
   private def unpickleAttrOneMan(a: AttrOneMan): () => Any = {
     a.op match {

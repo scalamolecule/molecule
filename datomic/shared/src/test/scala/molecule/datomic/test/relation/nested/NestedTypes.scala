@@ -1,6 +1,6 @@
 package molecule.datomic.test.relation.nested
 
-import molecule.base.util.exceptions.MoleculeError
+import molecule.base.util.exceptions.ExecutionError
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.datomic.setup.DatomicTestSuite
@@ -61,7 +61,7 @@ object NestedTypes extends DatomicTestSuite {
 
         _ <- if (useFree)
           Ref.i_(6).Nss.*?(Ns.boolean.a1).query.get
-            .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
+            .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
             err ==> "Datomic Free (not Pro) has a bug that pulls boolean `false` values as nil."
           }
         else
@@ -118,7 +118,7 @@ object NestedTypes extends DatomicTestSuite {
 
         _ <- if (useFree) {
           Ref.i(6).Nss.*?(Ns.i.a1.boolean_?).query.get
-            .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
+            .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
             err ==> "Datomic Free (not Pro) has a bug that pulls boolean `false` values as nil."
           }
         } else {
@@ -178,7 +178,7 @@ object NestedTypes extends DatomicTestSuite {
 
         _ <- if (useFree)
           Ref.i_(6).Nss.*?(Ns.booleans).query.get
-            .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
+            .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
             err ==> "Datomic Free (not Pro) has a bug that pulls boolean `false` values as nil."
           }
         else
@@ -234,7 +234,7 @@ object NestedTypes extends DatomicTestSuite {
 
         _ <- if (useFree) {
           Ref.i(6).Nss.*(Ns.i.a1.booleans_?).query.get
-            .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
+            .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
             err ==> "Datomic Free (not Pro) has a bug that pulls boolean `false` values as nil."
           }
         } else {
@@ -242,7 +242,7 @@ object NestedTypes extends DatomicTestSuite {
         }
         _ <- if (useFree) {
           Ref.i(6).Nss.*?(Ns.i.a1.booleans_?).query.get
-            .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
+            .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
             err ==> "Datomic Free (not Pro) has a bug that pulls boolean `false` values as nil."
           }
         } else {

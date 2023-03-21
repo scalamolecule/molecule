@@ -3,7 +3,7 @@ package molecule.datomic.transaction
 import java.lang.{Boolean => jBoolean}
 import java.util.{UUID, ArrayList => jArrayList, List => jList}
 import clojure.lang.Keyword
-import molecule.base.util.exceptions.MoleculeError
+import molecule.base.util.exceptions.ExecutionError
 import molecule.boilerplate.ast.Model._
 import molecule.core.marshalling.{ConnProxy, DatomicPeerProxy}
 import molecule.core.util.Executor._
@@ -106,16 +106,16 @@ trait DatomicTxBase_JVM extends DatomicDataType_JVM with ModelUtils {
           case "mem" =>
             DatomicPeer.recreateDbFromEdn(proxy, protocol, dbIdentifier, isFreeVersion)
               .recover {
-                case exc: Throwable => throw MoleculeError(exc.getMessage)
+                case exc: Throwable => throw ExecutionError(exc.getMessage)
               }
 
           case "free" | "dev" | "pro" =>
             Future(DatomicPeer.connect(proxy, protocol, dbIdentifier))
               .recover {
-                case exc: Throwable => throw MoleculeError(exc.getMessage)
+                case exc: Throwable => throw ExecutionError(exc.getMessage)
               }
 
-          case other => Future.failed(MoleculeError(s"\nCan't serve Peer protocol `$other`."))
+          case other => Future.failed(ExecutionError(s"\nCan't serve Peer protocol `$other`."))
         }
     }
   }

@@ -1,7 +1,7 @@
 package molecule.datomic.query.cursorStrategy
 
 import java.util.Base64
-import molecule.base.util.exceptions.MoleculeError
+import molecule.base.util.exceptions.ExecutionError
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.ops.ModelTransformations
 import molecule.boilerplate.util.MoleculeLogging
@@ -77,7 +77,7 @@ case class PrimaryUnique[Tpl](
       }
     }
   } catch {
-    case t: Throwable => throw MoleculeError(t.toString)
+    case t: Throwable => throw ExecutionError(t.toString)
   }
 
 

@@ -2,7 +2,7 @@
 package molecule.datomic.test.crud.update.set.ops
 
 import java.net.URI
-import molecule.base.util.exceptions.MoleculeError
+import molecule.base.util.exceptions.ExecutionError
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.datomic.setup.DatomicTestSuite
@@ -103,12 +103,12 @@ object UpdateSetOps_URI_ extends DatomicTestSuite {
 
         // Can't swap duplicate from/to values
         _ <- Ns(42).uris.swap(uri1 -> uri2, uri1 -> uri3).update.transact
-          .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
+          .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
           err ==> "Can't swap from duplicate retract values."
         }
 
         _ <- Ns(42).uris.swap(uri1 -> uri3, uri2 -> uri3).update.transact
-          .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
+          .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
           err ==> "Can't swap to duplicate replacement values."
         }
       } yield ()

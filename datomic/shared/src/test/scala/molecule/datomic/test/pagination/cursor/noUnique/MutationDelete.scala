@@ -1,6 +1,6 @@
 package molecule.datomic.test.pagination.cursor.noUnique
 
-import molecule.base.util.exceptions.MoleculeError
+import molecule.base.util.exceptions.ExecutionError
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.datomic.setup.DatomicTestSuite
@@ -86,7 +86,7 @@ object MutationDelete extends DatomicTestSuite {
           // Can't find next page with all 3 unique edge values deleted (or updated)
           _ <- query.from(cur).limit(4).get
             .map(_ ==> "Unexpected success")
-            .recover { case MoleculeError(msg, _) =>
+            .recover { case ExecutionError(msg, _) =>
               msg ==> "Couldn't find next page. Edge rows were all deleted/updated."
             }
         } yield ()
@@ -169,7 +169,7 @@ object MutationDelete extends DatomicTestSuite {
           // Can't find next page with all 3 unique edge values deleted (or updated)
           _ <- query.from(cur).limit(-4).get
             .map(_ ==> "Unexpected success")
-            .recover { case MoleculeError(msg, _) =>
+            .recover { case ExecutionError(msg, _) =>
               msg ==> "Couldn't find next page. Edge rows were all deleted/updated."
             }
         } yield ()

@@ -1,6 +1,6 @@
 package molecule.datomic.test.pagination.offset
 
-import molecule.base.util.exceptions.MoleculeError
+import molecule.base.util.exceptions.ExecutionError
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.datomic.setup.DatomicTestSuite
@@ -18,14 +18,14 @@ object OffsetSemantics extends DatomicTestSuite {
       for {
 //        _ <- Ns.int.a1.query.limit(0).get
 //          .map(_ ==> "Unexpected success")
-//          .recover { case MoleculeError(msg, _) =>
+//          .recover { case ExecutionError(msg, _) =>
 //            msg ==> "Limit cannot be 0. Please use a positive number to limit next rows, " +
 //              "or a negative number to limit previous rows."
 //          }
 
         _ <- Ns.int.a1.query.limit(20).offset(-10).get
           .map(_ ==> "Unexpected success")
-          .recover { case MoleculeError(msg, _) =>
+          .recover { case ExecutionError(msg, _) =>
             msg ==> "Limit and offset should both be positive or negative."
           }
       } yield ()

@@ -27,6 +27,7 @@ trait DatomicZioSpec extends ZIOSpecDefault with TestData {
   def types = inMem(TypesSchema)
   def refs = inMem(RefsSchema)
   def unique = inMem(UniqueSchema)
+  def validation = inMem(ValidationSchema)
 
 
   def delay[T](ms: Int)(body: => T): Task[T] = ZIO.fromFuture { _ =>

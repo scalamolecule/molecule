@@ -2,7 +2,7 @@ package molecule.datomic.query
 
 import java.util.{Iterator => jIterator}
 import molecule.base.ast.SchemaAST.CardOne
-import molecule.base.util.exceptions.MoleculeError
+import molecule.base.util.exceptions.ExecutionError
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.util.ModelUtils
@@ -30,7 +30,7 @@ trait ResolveNestedPull[Tpl]
       elements match {
         case head :: tail =>
           head match {
-            case a: Attr if a.op != V => throw MoleculeError(
+            case a: Attr if a.op != V => throw ExecutionError(
               "Expressions not allowed in optional nested data structure. Found:\n" + a
             )
 
@@ -58,9 +58,9 @@ trait ResolveNestedPull[Tpl]
               aritiesComposite()
               addPullAttrs(compositeElements ++ tail, level, attrIndex, acc)
 
-            case a: AttrOneTac => throw MoleculeError(
+            case a: AttrOneTac => throw ExecutionError(
               "Tacit attributes not allowed in optional nested data structure. Found:\n" + a)
-            case other         => throw MoleculeError(
+            case other         => throw ExecutionError(
               "Unexpected element in optional nested molecule: " + other
             )
           }
@@ -89,7 +89,7 @@ trait ResolveNestedPull[Tpl]
           val res              = s"""\n$indent{($refAttr :limit nil :default "$none") [$acc1$attrs]}"""
           (res, append + append1)
 
-        case (_, Some(ref: Ref), _, _) => throw MoleculeError(
+        case (_, Some(ref: Ref), _, _) => throw ExecutionError(
           "Only cardinality-one refs allowed in optional nested data structures. Found: " + ref
         )
 
@@ -104,7 +104,7 @@ trait ResolveNestedPull[Tpl]
               val (attrs, append1) = resolvePullRef(ref1, elements.tail, level1, attrIndex1, "]}")
               (Nil, prevRef, append + attrs + append1)
             case _: BackRef => rec(elements.tail, level1 - 1)
-            case a: Attr    => throw MoleculeError(
+            case a: Attr    => throw ExecutionError(
               s"Expected ref after backref _$backRef. " +
                 s"Please add attribute :${a.ns}/${a.attr} to initial namespace ${a.ns} " +
                 s"instead of after backref _$backRef."
@@ -127,7 +127,7 @@ trait ResolveNestedPull[Tpl]
           (res, "")
 
         case (_, Some(other), _, _) => unexpectedElement(other)
-        case other                  => throw MoleculeError("Unexpected resolvePullRef coordinates: " + other)
+        case other                  => throw ExecutionError("Unexpected resolvePullRef coordinates: " + other)
       }
     }
 

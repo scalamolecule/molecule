@@ -1,33 +1,46 @@
 package molecule.datomic.test
 
+import molecule.base.util.exceptions._
+import molecule.core.api.TxReport
 import molecule.core.util.Executor._
-import molecule.datomic.setup.DatomicTestSuite
-import molecule.datomic.async._
-import utest._
-import scala.language.implicitConversions
 import molecule.coreTests.dataModels.core.dsl.Types._
-import molecule.base.util.exceptions.MoleculeError
+import molecule.datomic.async._
+import molecule.datomic.setup.DatomicTestSuite
+import utest._
+import scala.concurrent.Future
+import scala.language.implicitConversions
 
 object Adhoc extends DatomicTestSuite {
 
-  Seq(
-    "(v: Int) => v.>(2)" ->
-      "Format.single2 with value `$v` doesn't satisfy validation: (v: Int) => v.>(2)"
-  )
+
+//  implicit class result2expectedError(txR: Future[TxReport]) {
+//    def expect(error: PartialFunction[Throwable, Any]): Future[Any] = {
+//      txR.map(_ ==> "Unexpected success").recover(error)
+//    }
+//  }
 
   lazy val tests = Tests {
 
-    "types" - types { implicit conn =>
+//    "types" - types { implicit conn =>
+//      for {
+//        _ <- Ns.int.apply(3).save.transact
+//        _ <- Ns.int.query.get.map(_ ==> List(3))
+//
+//      } yield ()
+//    }
+
+
+    "validation" - validation { implicit conn =>
+      import molecule.coreTests.dataModels.core.dsl.Validation._
       for {
-
-        _ <- Ns.int.apply(3).save.transact
-        _ <- Ns.int.query.get.map(_ ==> List(3))
-
-        _ <- Ns.int.apply(2).save.transact
-          .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
-          err ==> "Ns.int with value `2` doesn't satisfy validation: _ > 2 xx"
+        _ <- Format.errorMsg.apply(1).save.transact.expect{
+          case ValidationErrors(errors, _) =>
+            errors.head ==>
+              "Format.errorMsg" -> Seq("One-line error msg")
         }
-        _ <- Ns.int.query.get.map(_ ==> List(2, 3))
+
+        // 1 has correctly not been saved
+        _ <- Format.errorMsg.query.get.map(_ ==> Nil)
 
       } yield ()
     }
@@ -66,7 +79,7 @@ object Adhoc extends DatomicTestSuite {
     //      import molecule.coreTests.dataModels.core.dsl.Refs._
     //      for {
     //        _ <- Ns.i.Tx(R2.i).insert(1, 2).transact
-    //          .map(_ ==> "Unexpected success").recover { case MoleculeError(err, _) =>
+    //          .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
     //          err ==>
     //            """Missing applied value for attribute:
     //              |AttrOneManInt("R2", "i", V, Seq(), None, None, None)""".stripMargin
