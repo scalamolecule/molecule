@@ -177,23 +177,20 @@ object Delete_filter extends DatomicTestSuite {
 
       "Only tacit attributes" - types { implicit conn =>
         for {
-          _ <- Ns.i.<=(2).delete.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
+          _ <- Ns.i.<=(2).delete.transact.expect { case ExecutionError(err, _) =>
             err ==> "Can only filter delete by values applied to tacit card-one attributes. Found:\n" +
-              """AttrOneManInt("Ns", "i", Le, Seq(2), None, None, None)"""
+              """AttrOneManInt("Ns", "i", Le, Seq(2), None, Nil, None, None)"""
           }
         } yield ()
       }
 
       "Multiple values" - types { implicit conn =>
         for {
-          _ <- Ns.i_(1).int(1, 2).update.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
+          _ <- Ns.i_(1).int(1, 2).update.transact.expect { case ExecutionError(err, _) =>
             err ==> "Can only update one value for attribute `Ns.int`. Found: 1, 2"
           }
 
-          _ <- Ns.i_(1).int(1, 2).upsert.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
+          _ <- Ns.i_(1).int(1, 2).upsert.transact.expect { case ExecutionError(err, _) =>
             err ==> "Can only upsert one value for attribute `Ns.int`. Found: 1, 2"
           }
         } yield ()

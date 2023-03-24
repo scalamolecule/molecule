@@ -102,13 +102,11 @@ object UpdateSetOps_URI_ extends DatomicTestSuite {
 
 
         // Can't swap duplicate from/to values
-        _ <- Ns(42).uris.swap(uri1 -> uri2, uri1 -> uri3).update.transact
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
+        _ <- Ns(42).uris.swap(uri1 -> uri2, uri1 -> uri3).update.transact.expect { case ExecutionError(err, _) =>
           err ==> "Can't swap from duplicate retract values."
         }
 
-        _ <- Ns(42).uris.swap(uri1 -> uri3, uri2 -> uri3).update.transact
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
+        _ <- Ns(42).uris.swap(uri1 -> uri3, uri2 -> uri3).update.transact.expect { case ExecutionError(err, _) =>
           err ==> "Can't swap to duplicate replacement values."
         }
       } yield ()

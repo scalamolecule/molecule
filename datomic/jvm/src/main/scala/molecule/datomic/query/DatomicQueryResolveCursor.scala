@@ -3,7 +3,7 @@ package molecule.datomic.query
 import java.util.Base64
 import molecule.base.util.exceptions.ExecutionError
 import molecule.boilerplate.ast.Model._
-import molecule.boilerplate.ops.ModelTransformations
+import molecule.boilerplate.ops.ModelTransformations_
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.util.FutureUtils
 import molecule.datomic.facade.DatomicConn_JVM
@@ -27,7 +27,7 @@ case class DatomicQueryResolveCursor[Tpl](
 ) extends DatomicQueryResolve[Tpl](elements, limit)
   with FutureUtils
   with CursorUtils
-  with ModelTransformations
+  with ModelTransformations_
   with MoleculeLogging {
 
 

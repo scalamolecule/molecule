@@ -28,7 +28,7 @@ trait Model extends Validations {
     val sort  : Option[String]
     def unapply(a: Attr): (String, String, Op) = (a.ns, a.attr, a.op)
     def name = ns + "." + attr
-    protected def errs = errors.mkString("\"", "\", \"", "\"")
+    protected def errs: String = if (errors.isEmpty) "Nil" else errors.mkString("Seq(\"", "\", \"", "\")")
   }
 
   trait AttrOne extends Attr
@@ -110,17 +110,16 @@ trait Model extends Validations {
   case object Remove extends Op
 
   // Email regex for validators in boilerplate code
-  // W3C recommendation:
-  // https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address
-  val emailRegex = "/^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/".r
-  // More elaborate one from https://stackoverflow.com/a/201378
-  // "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])".r
+  // todo: make configurable
+  // From section 5 in https://www.baeldung.com/java-email-validation-regex
+  // Allowing unicode characters
+  val emailRegex = "^(?=.{1,64}@)[\\p{L}0-9_-]+(\\.[\\p{L}0-9_-]+)*@[^-][\\p{L}0-9-]+(\\.[\\p{L}0-9-]+)*(\\.[\\p{L}]{2,})$".r
 
 
   // GENERATED from here and below (edit in _Model generator) ======================================
-  
+
   sealed trait AttrOneMan extends AttrOne with Mandatory
-  
+
   case class AttrOneManString(
     override val ns: String,
     override val attr: String,
@@ -134,7 +133,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: String): String = "\"" + escStr(v) + "\""
       def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-      s"""AttrOneManString("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
+      s"""AttrOneManString("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -150,7 +149,7 @@ trait Model extends Validations {
   ) extends AttrOneMan {
     override def toString: String = {
       def vss: String = vs.mkString("Seq(", ", ", ")")
-      s"""AttrOneManInt("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
+      s"""AttrOneManInt("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -167,7 +166,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: Long): String = v.toString + "L"
       def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-      s"""AttrOneManLong("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
+      s"""AttrOneManLong("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -184,7 +183,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: Float): String = v.toString + "f"
       def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-      s"""AttrOneManFloat("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
+      s"""AttrOneManFloat("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -200,7 +199,7 @@ trait Model extends Validations {
   ) extends AttrOneMan {
     override def toString: String = {
       def vss: String = vs.mkString("Seq(", ", ", ")")
-      s"""AttrOneManDouble("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
+      s"""AttrOneManDouble("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -216,7 +215,7 @@ trait Model extends Validations {
   ) extends AttrOneMan {
     override def toString: String = {
       def vss: String = vs.mkString("Seq(", ", ", ")")
-      s"""AttrOneManBoolean("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
+      s"""AttrOneManBoolean("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -233,7 +232,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: BigInt): String = "BigInt(" + v + ")"
       def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-      s"""AttrOneManBigInt("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
+      s"""AttrOneManBigInt("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -250,7 +249,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: BigDecimal): String = "BigDecimal(" + v + ")"
       def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-      s"""AttrOneManBigDecimal("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
+      s"""AttrOneManBigDecimal("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -267,7 +266,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: Date): String = "new Date(" + v.getTime + ")"
       def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-      s"""AttrOneManDate("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
+      s"""AttrOneManDate("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -284,7 +283,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: UUID): String = "UUID.fromString(\"" + v.toString + "\")"
       def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-      s"""AttrOneManUUID("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
+      s"""AttrOneManUUID("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -301,7 +300,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: URI): String = "new URI(\"" + v.toString + "\")"
       def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-      s"""AttrOneManURI("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
+      s"""AttrOneManURI("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -318,7 +317,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: Byte): String = s"$v.toByte"
       def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-      s"""AttrOneManByte("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
+      s"""AttrOneManByte("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -335,7 +334,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: Short): String = s"$v.toShort"
       def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-      s"""AttrOneManShort("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
+      s"""AttrOneManShort("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -352,13 +351,13 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: Char): String = s"'$v'"
       def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-      s"""AttrOneManChar("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
+      s"""AttrOneManChar("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
 
   sealed trait AttrOneOpt extends AttrOne with Optional
-  
+
   case class AttrOneOptString(
     override val ns: String,
     override val attr: String,
@@ -372,7 +371,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: String): String = "\"" + escStr(v) + "\""
       def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
-      s"""AttrOneOptString("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
+      s"""AttrOneOptString("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -388,7 +387,7 @@ trait Model extends Validations {
   ) extends AttrOneOpt {
     override def toString: String = {
       def vss: String = vs.fold("None")(_.mkString("Some(Seq(", ", ", "))"))
-      s"""AttrOneOptInt("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
+      s"""AttrOneOptInt("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -405,7 +404,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: Long): String = v.toString + "L"
       def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
-      s"""AttrOneOptLong("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
+      s"""AttrOneOptLong("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -422,7 +421,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: Float): String = v.toString + "f"
       def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
-      s"""AttrOneOptFloat("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
+      s"""AttrOneOptFloat("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -438,7 +437,7 @@ trait Model extends Validations {
   ) extends AttrOneOpt {
     override def toString: String = {
       def vss: String = vs.fold("None")(_.mkString("Some(Seq(", ", ", "))"))
-      s"""AttrOneOptDouble("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
+      s"""AttrOneOptDouble("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -454,7 +453,7 @@ trait Model extends Validations {
   ) extends AttrOneOpt {
     override def toString: String = {
       def vss: String = vs.fold("None")(_.mkString("Some(Seq(", ", ", "))"))
-      s"""AttrOneOptBoolean("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
+      s"""AttrOneOptBoolean("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -471,7 +470,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: BigInt): String = "BigInt(" + v + ")"
       def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
-      s"""AttrOneOptBigInt("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
+      s"""AttrOneOptBigInt("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -488,7 +487,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: BigDecimal): String = "BigDecimal(" + v + ")"
       def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
-      s"""AttrOneOptBigDecimal("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
+      s"""AttrOneOptBigDecimal("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -505,7 +504,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: Date): String = "new Date(" + v.getTime + ")"
       def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
-      s"""AttrOneOptDate("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
+      s"""AttrOneOptDate("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -522,7 +521,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: UUID): String = "UUID.fromString(\"" + v.toString + "\")"
       def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
-      s"""AttrOneOptUUID("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
+      s"""AttrOneOptUUID("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -539,7 +538,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: URI): String = "new URI(\"" + v.toString + "\")"
       def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
-      s"""AttrOneOptURI("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
+      s"""AttrOneOptURI("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -556,7 +555,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: Byte): String = s"$v.toByte"
       def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
-      s"""AttrOneOptByte("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
+      s"""AttrOneOptByte("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -573,7 +572,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: Short): String = s"$v.toShort"
       def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
-      s"""AttrOneOptShort("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
+      s"""AttrOneOptShort("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -590,13 +589,13 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: Char): String = s"'$v'"
       def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
-      s"""AttrOneOptChar("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
+      s"""AttrOneOptChar("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
 
   sealed trait AttrOneTac extends AttrOne with Tacit
-  
+
   case class AttrOneTacString(
     override val ns: String,
     override val attr: String,
@@ -610,7 +609,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: String): String = "\"" + escStr(v) + "\""
       def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-      s"""AttrOneTacString("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
+      s"""AttrOneTacString("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -626,7 +625,7 @@ trait Model extends Validations {
   ) extends AttrOneTac {
     override def toString: String = {
       def vss: String = vs.mkString("Seq(", ", ", ")")
-      s"""AttrOneTacInt("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
+      s"""AttrOneTacInt("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -643,7 +642,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: Long): String = v.toString + "L"
       def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-      s"""AttrOneTacLong("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
+      s"""AttrOneTacLong("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -660,7 +659,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: Float): String = v.toString + "f"
       def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-      s"""AttrOneTacFloat("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
+      s"""AttrOneTacFloat("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -676,7 +675,7 @@ trait Model extends Validations {
   ) extends AttrOneTac {
     override def toString: String = {
       def vss: String = vs.mkString("Seq(", ", ", ")")
-      s"""AttrOneTacDouble("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
+      s"""AttrOneTacDouble("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -692,7 +691,7 @@ trait Model extends Validations {
   ) extends AttrOneTac {
     override def toString: String = {
       def vss: String = vs.mkString("Seq(", ", ", ")")
-      s"""AttrOneTacBoolean("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
+      s"""AttrOneTacBoolean("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -709,7 +708,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: BigInt): String = "BigInt(" + v + ")"
       def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-      s"""AttrOneTacBigInt("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
+      s"""AttrOneTacBigInt("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -726,7 +725,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: BigDecimal): String = "BigDecimal(" + v + ")"
       def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-      s"""AttrOneTacBigDecimal("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
+      s"""AttrOneTacBigDecimal("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -743,7 +742,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: Date): String = "new Date(" + v.getTime + ")"
       def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-      s"""AttrOneTacDate("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
+      s"""AttrOneTacDate("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -760,7 +759,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: UUID): String = "UUID.fromString(\"" + v.toString + "\")"
       def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-      s"""AttrOneTacUUID("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
+      s"""AttrOneTacUUID("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -777,7 +776,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: URI): String = "new URI(\"" + v.toString + "\")"
       def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-      s"""AttrOneTacURI("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
+      s"""AttrOneTacURI("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -794,7 +793,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: Byte): String = s"$v.toByte"
       def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-      s"""AttrOneTacByte("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
+      s"""AttrOneTacByte("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -811,7 +810,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: Short): String = s"$v.toShort"
       def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-      s"""AttrOneTacShort("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
+      s"""AttrOneTacShort("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -828,13 +827,13 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: Char): String = s"'$v'"
       def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-      s"""AttrOneTacChar("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)}))"""
+      s"""AttrOneTacChar("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
 
   sealed trait AttrSetMan extends AttrSet with Mandatory
-  
+
   case class AttrSetManString(
     override val ns: String,
     override val attr: String,
@@ -848,7 +847,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: String): String = "\"" + escStr(v) + "\""
       def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrSetManString("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
+      s"""AttrSetManString("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -864,7 +863,7 @@ trait Model extends Validations {
   ) extends AttrSetMan {
     override def toString: String = {
       def vss: String = vs.map(set => set.mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrSetManInt("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
+      s"""AttrSetManInt("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -881,7 +880,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: Long): String = v.toString + "L"
       def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrSetManLong("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
+      s"""AttrSetManLong("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -898,7 +897,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: Float): String = v.toString + "f"
       def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrSetManFloat("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
+      s"""AttrSetManFloat("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -914,7 +913,7 @@ trait Model extends Validations {
   ) extends AttrSetMan {
     override def toString: String = {
       def vss: String = vs.map(set => set.mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrSetManDouble("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
+      s"""AttrSetManDouble("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -930,7 +929,7 @@ trait Model extends Validations {
   ) extends AttrSetMan {
     override def toString: String = {
       def vss: String = vs.map(set => set.mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrSetManBoolean("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
+      s"""AttrSetManBoolean("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -947,7 +946,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: BigInt): String = "BigInt(" + v + ")"
       def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrSetManBigInt("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
+      s"""AttrSetManBigInt("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -964,7 +963,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: BigDecimal): String = "BigDecimal(" + v + ")"
       def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrSetManBigDecimal("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
+      s"""AttrSetManBigDecimal("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -981,7 +980,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: Date): String = "new Date(" + v.getTime + ")"
       def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrSetManDate("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
+      s"""AttrSetManDate("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -998,7 +997,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: UUID): String = "UUID.fromString(\"" + v.toString + "\")"
       def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrSetManUUID("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
+      s"""AttrSetManUUID("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -1015,7 +1014,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: URI): String = "new URI(\"" + v.toString + "\")"
       def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrSetManURI("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
+      s"""AttrSetManURI("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -1032,7 +1031,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: Byte): String = s"$v.toByte"
       def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrSetManByte("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
+      s"""AttrSetManByte("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -1049,7 +1048,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: Short): String = s"$v.toShort"
       def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrSetManShort("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
+      s"""AttrSetManShort("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -1066,13 +1065,13 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: Char): String = s"'$v'"
       def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrSetManChar("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
+      s"""AttrSetManChar("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
 
   sealed trait AttrSetOpt extends AttrSet with Optional
-  
+
   case class AttrSetOptString(
     override val ns: String,
     override val attr: String,
@@ -1086,7 +1085,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: String): String = "\"" + escStr(v) + "\""
       def vss: String = vs.fold("None")(_.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-      s"""AttrSetOptString("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
+      s"""AttrSetOptString("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -1102,7 +1101,7 @@ trait Model extends Validations {
   ) extends AttrSetOpt {
     override def toString: String = {
       def vss: String = vs.fold("None")(_.map(_.mkString("Set(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-      s"""AttrSetOptInt("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
+      s"""AttrSetOptInt("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -1119,7 +1118,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: Long): String = v.toString + "L"
       def vss: String = vs.fold("None")(_.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-      s"""AttrSetOptLong("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
+      s"""AttrSetOptLong("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -1136,7 +1135,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: Float): String = v.toString + "f"
       def vss: String = vs.fold("None")(_.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-      s"""AttrSetOptFloat("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
+      s"""AttrSetOptFloat("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -1152,7 +1151,7 @@ trait Model extends Validations {
   ) extends AttrSetOpt {
     override def toString: String = {
       def vss: String = vs.fold("None")(_.map(_.mkString("Set(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-      s"""AttrSetOptDouble("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
+      s"""AttrSetOptDouble("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -1168,7 +1167,7 @@ trait Model extends Validations {
   ) extends AttrSetOpt {
     override def toString: String = {
       def vss: String = vs.fold("None")(_.map(_.mkString("Set(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-      s"""AttrSetOptBoolean("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
+      s"""AttrSetOptBoolean("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -1185,7 +1184,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: BigInt): String = "BigInt(" + v + ")"
       def vss: String = vs.fold("None")(_.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-      s"""AttrSetOptBigInt("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
+      s"""AttrSetOptBigInt("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -1202,7 +1201,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: BigDecimal): String = "BigDecimal(" + v + ")"
       def vss: String = vs.fold("None")(_.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-      s"""AttrSetOptBigDecimal("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
+      s"""AttrSetOptBigDecimal("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -1219,7 +1218,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: Date): String = "new Date(" + v.getTime + ")"
       def vss: String = vs.fold("None")(_.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-      s"""AttrSetOptDate("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
+      s"""AttrSetOptDate("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -1236,7 +1235,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: UUID): String = "UUID.fromString(\"" + v.toString + "\")"
       def vss: String = vs.fold("None")(_.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-      s"""AttrSetOptUUID("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
+      s"""AttrSetOptUUID("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -1253,7 +1252,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: URI): String = "new URI(\"" + v.toString + "\")"
       def vss: String = vs.fold("None")(_.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-      s"""AttrSetOptURI("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
+      s"""AttrSetOptURI("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -1270,7 +1269,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: Byte): String = s"$v.toByte"
       def vss: String = vs.fold("None")(_.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-      s"""AttrSetOptByte("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
+      s"""AttrSetOptByte("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -1287,7 +1286,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: Short): String = s"$v.toShort"
       def vss: String = vs.fold("None")(_.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-      s"""AttrSetOptShort("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
+      s"""AttrSetOptShort("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -1304,13 +1303,13 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: Char): String = s"'$v'"
       def vss: String = vs.fold("None")(_.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-      s"""AttrSetOptChar("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
+      s"""AttrSetOptChar("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
 
   sealed trait AttrSetTac extends AttrSet with Tacit
-  
+
   case class AttrSetTacString(
     override val ns: String,
     override val attr: String,
@@ -1324,7 +1323,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: String): String = "\"" + escStr(v) + "\""
       def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrSetTacString("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
+      s"""AttrSetTacString("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -1340,7 +1339,7 @@ trait Model extends Validations {
   ) extends AttrSetTac {
     override def toString: String = {
       def vss: String = vs.map(set => set.mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrSetTacInt("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
+      s"""AttrSetTacInt("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -1357,7 +1356,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: Long): String = v.toString + "L"
       def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrSetTacLong("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
+      s"""AttrSetTacLong("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -1374,7 +1373,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: Float): String = v.toString + "f"
       def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrSetTacFloat("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
+      s"""AttrSetTacFloat("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -1390,7 +1389,7 @@ trait Model extends Validations {
   ) extends AttrSetTac {
     override def toString: String = {
       def vss: String = vs.map(set => set.mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrSetTacDouble("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
+      s"""AttrSetTacDouble("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -1406,7 +1405,7 @@ trait Model extends Validations {
   ) extends AttrSetTac {
     override def toString: String = {
       def vss: String = vs.map(set => set.mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrSetTacBoolean("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
+      s"""AttrSetTacBoolean("$ns", "$attr", $op, $vss, ${opt(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -1423,7 +1422,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: BigInt): String = "BigInt(" + v + ")"
       def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrSetTacBigInt("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
+      s"""AttrSetTacBigInt("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -1440,7 +1439,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: BigDecimal): String = "BigDecimal(" + v + ")"
       def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrSetTacBigDecimal("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
+      s"""AttrSetTacBigDecimal("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -1457,7 +1456,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: Date): String = "new Date(" + v.getTime + ")"
       def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrSetTacDate("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
+      s"""AttrSetTacDate("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -1474,7 +1473,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: UUID): String = "UUID.fromString(\"" + v.toString + "\")"
       def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrSetTacUUID("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
+      s"""AttrSetTacUUID("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -1491,7 +1490,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: URI): String = "new URI(\"" + v.toString + "\")"
       def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrSetTacURI("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
+      s"""AttrSetTacURI("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -1508,7 +1507,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: Byte): String = s"$v.toByte"
       def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrSetTacByte("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
+      s"""AttrSetTacByte("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -1525,7 +1524,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: Short): String = s"$v.toShort"
       def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrSetTacShort("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
+      s"""AttrSetTacShort("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 
@@ -1542,7 +1541,7 @@ trait Model extends Validations {
     override def toString: String = {
       def format(v: Char): String = s"'$v'"
       def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrSetTacChar("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})‘)"""
+      s"""AttrSetTacChar("$ns", "$attr", $op, $vss, ${o(validation)}, $errs, ${oStr(status)}, ${oStr(sort)})"""
     }
   }
 }

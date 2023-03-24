@@ -105,8 +105,8 @@ case class Dsl_Arities(schema: MetaSchema, partPrefix: String, namespace: MetaNs
     if (hasOne || hasSet) {
       res += s"$agg1[$tInt_](toInt    (elements, kw    )) with SortAttrs_$arity[$tInt_, $ns_0]"
       res += s"$agg2[$tDoub](toDouble (elements, kw    )) with SortAttrs_$arity[$tDoub, $ns_0]"
-      res += s"$agg3[$tDist](toSet    (elements, kw    ))"
-      res += s"$agg4[$tSet_](toSet    (elements, kw, n ))"
+      res += s"$agg3[$tDist](asIs     (elements, kw    ))"
+      res += s"$agg4[$tSet_](asIs     (elements, kw, n ))"
       res += s"$agg5[$tA___](asIs     (elements, kw    )) with SortAttrs_$arity[$tA___, $ns_0]"
       res += s"$agg6[$tA___](asIs     (elements, kw    ))"
     }

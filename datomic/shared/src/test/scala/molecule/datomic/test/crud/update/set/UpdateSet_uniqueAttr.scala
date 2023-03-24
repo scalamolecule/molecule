@@ -15,10 +15,9 @@ object UpdateSet_uniqueAttr extends DatomicTestSuite {
 
     "Semantics" - unique { implicit conn =>
       for {
-        _ <- Unique.ints_(1).s("b").update.transact
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
+        _ <- Unique.ints_(1).s("b").update.transact.expect { case ExecutionError(err, _) =>
           err ==> "Can only lookup entity with card-one attribute value. Found:\n" +
-            """AttrSetTacInt("Unique", "ints", Appl, Seq(Set(1)), None, None, None)"""
+            """AttrSetTacInt("Unique", "ints", Appl, Seq(Set(1)), None, Nil, None, None)"""
         }
       } yield ()
     }

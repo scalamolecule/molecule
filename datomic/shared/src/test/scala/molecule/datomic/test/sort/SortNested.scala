@@ -99,16 +99,14 @@ object SortNested extends DatomicTestSuite {
         _ <- Ref.i_(15).Nss.*?(Ns.ref.d1).query.get.map(_ ==> List(List(ref2, ref1)))
 
         _ <- if (useFree) {
-          Ref.i_(6).Nss.*?(Ns.boolean.a1).query.get
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
+          Ref.i_(6).Nss.*?(Ns.boolean.a1).query.get.expect { case ExecutionError(err, _) =>
             err ==> "Datomic Free (not Pro) has a bug that pulls boolean `false` values as nil."
           }
         } else {
           Ref.i_(6).Nss.*?(Ns.boolean).query.get.map(_ ==> List(List(boolean1, boolean2)))
         }
         _ <- if (useFree) {
-          Ref.i_(6).Nss.*?(Ns.boolean.d1).query.get
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
+          Ref.i_(6).Nss.*?(Ns.boolean.d1).query.get.expect { case ExecutionError(err, _) =>
             err ==> "Datomic Free (not Pro) has a bug that pulls boolean `false` values as nil."
           }
         } else {
@@ -191,8 +189,7 @@ object SortNested extends DatomicTestSuite {
           (3, None)))).transact
 
         _ <- if (useFree) {
-          Ref.i_(6).Nss.*?(Ns.i.a2.boolean_?.a1).query.get
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
+          Ref.i_(6).Nss.*?(Ns.i.a2.boolean_?.a1).query.get.expect { case ExecutionError(err, _) =>
             err ==> "Datomic Free (not Pro) has a bug that pulls boolean `false` values as nil."
           }
         } else {
@@ -201,8 +198,7 @@ object SortNested extends DatomicTestSuite {
             (2, Some(true)))))
         }
         _ <- if (useFree) {
-          Ref.i_(6).Nss.*?(Ns.i.d2.boolean_?.d1).query.get
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
+          Ref.i_(6).Nss.*?(Ns.i.d2.boolean_?.d1).query.get.expect { case ExecutionError(err, _) =>
             err ==> "Datomic Free (not Pro) has a bug that pulls boolean `false` values as nil."
           }
         } else {

@@ -33,9 +33,25 @@ trait DatomicTestSuiteBase extends TestSuite
   }
 
 
-  implicit class result2expectedError(txR: Future[TxReport]) {
+  implicit class txResult2expectedError(txR: Future[TxReport]) {
     def expect(error: PartialFunction[Throwable, Any]): Future[Any] = {
       txR.map(_ ==> "Unexpected success").recover(error)
+    }
+  }
+
+  implicit class querytResult2expectedError[Tpl](data: Future[List[Tpl]]) {
+    def expect(error: PartialFunction[Throwable, Any]): Future[Any] = {
+      data.map(_ ==> "Unexpected success").recover(error)
+    }
+  }
+  implicit class query2Result2expectedError[Tpl](data: Future[(List[Tpl], Int, Boolean)]) {
+    def expect(error: PartialFunction[Throwable, Any]): Future[Any] = {
+      data.map(_ ==> "Unexpected success").recover(error)
+    }
+  }
+  implicit class query3Result2expectedError[Tpl](data: Future[(List[Tpl], String, Boolean)]) {
+    def expect(error: PartialFunction[Throwable, Any]): Future[Any] = {
+      data.map(_ ==> "Unexpected success").recover(error)
     }
   }
 }

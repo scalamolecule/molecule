@@ -8,6 +8,13 @@ import molecule.base.util.exceptions.ExecutionError
 
 trait BaseHelpers extends DateHandling {
 
+  def firstLow(str: Any): String = str.toString.head.toLower.toString + str.toString.tail
+
+  def getKwName(kw: String): String = kw.substring(kw.indexOf('/') + 1)
+
+  def thousands(i: Long): String =
+    i.toString.reverse.grouped(3).mkString(" ").reverse
+
   def indent(tabs: Int): String = "  " * tabs
 
   def escStr(s: String): String =
@@ -15,6 +22,14 @@ trait BaseHelpers extends DateHandling {
 
   def unescStr(s: String): String =
     s.replace("""\"""", """"""").replace("""\\""", """\""")
+
+  def withDecimal(v: Any): String = {
+    val s = v.toString
+    if (s.contains(".")) s else s + ".0"
+  }
+
+  protected def double(arg: Any): String = "__n__" + arg + (if (arg.toString.contains(".")) "" else ".0")
+  protected def bigDec(arg: Any): BigDecimal = BigDecimal(withDecimal(arg))
 
   def padS(longest: Int, str: String): String = pad(longest, str.length)
 

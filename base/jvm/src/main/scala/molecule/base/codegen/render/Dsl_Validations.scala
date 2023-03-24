@@ -21,20 +21,21 @@ case class Dsl_Validations(schema: MetaSchema, namespace: MetaNs)
     } else {
       test
     }
+    val error1        = renderError(error)
     val errorStr      = {
       if (error.contains("\n")) {
         s"""Seq(
-           |        ${renderError(error)}
+           |        $error1
            |      )""".stripMargin('#') // Allow pipe character inside multiline string
       } else if (error.isEmpty) {
         val indentedTest = test.split('\n').toList.mkString("|           |  ", "\n||           |  ", "")
         s"""Seq(
            |        s\"\"\"$ns.$attr with value `$$v` doesn't satisfy validation:
-           |        $indentedTest
-           |        |           |\"\"\".stripMargin
+           |         $indentedTest
+           |         |           |\"\"\".stripMargin
            |      )""".stripMargin('#')
       } else {
-        s"Seq(${renderError(error)})"
+        s"Seq($error1)"
       }
     }
     s"""private lazy val validation_$attr = new Validate$tpe {
@@ -55,10 +56,11 @@ case class Dsl_Validations(schema: MetaSchema, namespace: MetaNs)
         } else {
           test
         }
+        val error1  = renderError(error)
         if (error.contains("\n")) {
-          s"""($testStr, \n          ${renderError(error)})"""
+          s"""($testStr, \n          $error1)"""
         } else {
-          s"""($testStr, "$error")"""
+          s"""($testStr, $error1)"""
         }
     }.mkString(",\n        ")
 
@@ -74,12 +76,13 @@ case class Dsl_Validations(schema: MetaSchema, namespace: MetaNs)
   }
 
 
-  private def renderError(error: String): String = {
+  private def renderError(error0: String): String = {
+    val error = error0.replace("_value_", "$v")
     if (error.contains('\n')) {
-      val indented = error.split('\n').toList.mkString("\n||  ")
-      s"""\"\"\"$indented\"\"\".stripMargin"""
+      val indented = error.split('\n').toList.mkString("\n||   ")
+      s"""s\"\"\"$indented\"\"\".stripMargin"""
     } else {
-      s"""\"$error\""""
+      s"""s\"\"\"$error\"\"\""""
     }
   }
 }

@@ -1,7 +1,7 @@
 package molecule.base.util
 
 
-trait CodeGenBase {
+trait CodeGenBase extends BaseHelpers {
 
   val baseTypes = Seq(
     "String",
@@ -18,6 +18,23 @@ trait CodeGenBase {
     "Byte",
     "Short",
     "Char",
+  )
+
+  val baseTypesWithSpaces = Seq(
+    "String" -> "    ",
+    "Int" -> "       ",
+    "Long" -> "      ",
+    "Float" -> "     ",
+    "Double" -> "    ",
+    "Boolean" -> "   ",
+    "BigInt" -> "    ",
+    "BigDecimal" -> "",
+    "Date" -> "      ",
+    "UUID" -> "      ",
+    "URI" -> "       ",
+    "Byte" -> "      ",
+    "Short" -> "     ",
+    "Char" -> "      ",
   )
   
   val javaTypes = Map(
@@ -65,4 +82,21 @@ trait CodeGenBase {
     ("Short", "Short", "short"),
     ("ref", "Long", "ref"),
   )
+
+  def format(baseType: String, v: String) : String = baseType match {
+    case "String"     => "\"" + escStr(v) + "\""
+    case "Int"        => v
+    case "Long"       => v + "L"
+    case "Float"      => v + "f"
+    case "Double"     => v
+    case "Boolean"    => v
+    case "BigInt"     => "BigInt(" + v + ")"
+    case "BigDecimal" => "BigDecimal(" + v + ")"
+    case "Date"       => "new Date(" + v.toLong + ")"
+    case "UUID"       => "UUID.fromString(\"" + v + "\")"
+    case "URI"        => "new URI(\"" + v + "\")"
+    case "Byte"       => v
+    case "Short"      => v
+    case "Char"       => "'" + v + "'"
+  }
 }

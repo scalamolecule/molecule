@@ -102,13 +102,11 @@ object UpdateSetOps_Date_ extends DatomicTestSuite {
 
 
         // Can't swap duplicate from/to values
-        _ <- Ns(42).dates.swap(date1 -> date2, date1 -> date3).update.transact
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
+        _ <- Ns(42).dates.swap(date1 -> date2, date1 -> date3).update.transact.expect { case ExecutionError(err, _) =>
           err ==> "Can't swap from duplicate retract values."
         }
 
-        _ <- Ns(42).dates.swap(date1 -> date3, date2 -> date3).update.transact
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
+        _ <- Ns(42).dates.swap(date1 -> date3, date2 -> date3).update.transact.expect { case ExecutionError(err, _) =>
           err ==> "Can't swap to duplicate replacement values."
         }
       } yield ()

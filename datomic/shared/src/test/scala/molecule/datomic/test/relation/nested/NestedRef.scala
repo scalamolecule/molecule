@@ -100,13 +100,11 @@ object NestedRef extends DatomicTestSuite {
 
     "Backref insert: no ref re-use after" - refs { implicit conn =>
       for {
-        _ <- Ns.i.Rs1.*(R1.i.R2.i._R1.R2.s).insert(0, List((1, 2, "a"))).transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
+        _ <- Ns.i.Rs1.*(R1.i.R2.i._R1.R2.s).insert(0, List((1, 2, "a"))).transact.expect { case ExecutionError(err, _) =>
             err ==> "Can't re-use previous namespace R2 after backref _R1."
           }
 
-        _ <- Ns.i.Rs1.*(R1.i.R2.i.R3.i._R2._R1.R2.s).insert(0, List((1, 2, 3, "a"))).transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
+        _ <- Ns.i.Rs1.*(R1.i.R2.i.R3.i._R2._R1.R2.s).insert(0, List((1, 2, 3, "a"))).transact.expect { case ExecutionError(err, _) =>
             err ==> "Can't re-use previous namespace R2 after backref _R1."
           }
       } yield ()
@@ -173,18 +171,16 @@ object NestedRef extends DatomicTestSuite {
       for {
         _ <- Future("start for-comprehension with Future...")
 
-        _ <- Ns.i.Rs1.*?(R1.s.i_).query.get
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
+        _ <- Ns.i.Rs1.*?(R1.s.i_).query.get.expect { case ExecutionError(err, _) =>
           err ==>
             """Tacit attributes not allowed in optional nested data structure. Found:
-              |AttrOneTacInt("R1", "i", V, Seq(), None, None, None)""".stripMargin
+              |AttrOneTacInt("R1", "i", V, Seq(), None, Nil, None, None)""".stripMargin
         }
 
-        _ <- Ns.i.Rs1.*?(R1.i.R2.i_).query.get
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
+        _ <- Ns.i.Rs1.*?(R1.i.R2.i_).query.get.expect { case ExecutionError(err, _) =>
           err ==>
             """Tacit attributes not allowed in optional nested data structure. Found:
-              |AttrOneTacInt("R2", "i", V, Seq(), None, None, None)""".stripMargin
+              |AttrOneTacInt("R2", "i", V, Seq(), None, Nil, None, None)""".stripMargin
         }
 
         // Ok:
@@ -192,8 +188,7 @@ object NestedRef extends DatomicTestSuite {
         _ <- Ns.i.Rs1.*?(R1.i.R2.i).query.get
 
 
-        _ <- Ns.i.Rs1.*?(R1.i.Rs2.i).query.get
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
+        _ <- Ns.i.Rs1.*?(R1.i.Rs2.i).query.get.expect { case ExecutionError(err, _) =>
           err ==> "Only cardinality-one refs allowed in optional nested data structures. Found: " +
             """Ref("R1", "rs2", "R2", CardSet)"""
         }
@@ -201,8 +196,7 @@ object NestedRef extends DatomicTestSuite {
         _ <- Ns.i.Rs1.*?(R1.i.R2.i).query.get
 
 
-        _ <- Ns.i.Rs1.*?(R1.i.R2.i._R1.s.R2a.i).query.get
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
+        _ <- Ns.i.Rs1.*?(R1.i.R2.i._R1.s.R2a.i).query.get.expect { case ExecutionError(err, _) =>
           err ==> "Expected ref after backref _R1. " +
             "Please add attribute :R1/s to initial namespace R1 instead of after backref _R1."
         }
@@ -210,8 +204,7 @@ object NestedRef extends DatomicTestSuite {
         _ <- Ns.i.Rs1.*?(R1.i.s.R2.i._R1.R2a.i).query.get
 
 
-        _ <- Ns.s_?.Rs1.*?(R1.i.R2.i.s_?).query.get
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
+        _ <- Ns.s_?.Rs1.*?(R1.i.R2.i.s_?).query.get.expect { case ExecutionError(err, _) =>
           err ==> "Single optional attribute before optional nested data structure is not allowed."
         }
         // Ok:

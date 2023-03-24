@@ -19,11 +19,14 @@ trait Insert_stmts
   def getStmts(elements: List[Element], tpls: Seq[Product]): Data = {
     initTxBase(elements)
     val (mainElements, txMetaElements) = splitElements(elements)
+
     CheckConflictingAttrs(mainElements)
+
     val tpl2stmts = getResolver(mainElements)
     tpls.foreach { tpl =>
       e = newId
       e0 = e
+      // populate `stmts`
       tpl2stmts(tpl)
     }
 

@@ -184,7 +184,7 @@ class DataModel2MetaSchema(filePath: String, pkgPath: String, scalaVersion: Stri
 
       case q"$prev.email" =>
         val test  = "(s: String) => emailRegex.findFirstMatchIn(s).isDefined"
-        val error = "Invalid email"
+        val error = s"""`_value_` is not a valid email"""
         getAttr(ns, a, prev, (x._1, x._2, x._3, List(test -> error), x._5))
 
       case q"$prev.email(${Lit.String(error)})" =>
@@ -193,16 +193,20 @@ class DataModel2MetaSchema(filePath: String, pkgPath: String, scalaVersion: Stri
 
       case q"$prev.regex(${Lit.String(regex)})" =>
         val test  = s"""(s: String) => "$regex".r.findFirstMatchIn(s).isDefined"""
-        val error = s"String doesn't match regex: $regex"
+        val error = s"""\"_value_\" doesn't match regex pattern: ${regex.replace("$", "$$")}"""
         getAttr(ns, a, prev, (x._1, x._2, x._3, List(test -> error), x._5))
 
       case q"$prev.regex(${Lit.String(regex)}, ${Lit.String(error)})" =>
         val test = s"""(s: String) => "$regex".r.findFirstMatchIn(s).isDefined"""
         getAttr(ns, a, prev, (x._1, x._2, x._3, List(test -> error), x._5))
 
+      case q"$prev.allowed(Seq(..$vs), ${Lit.String(error)})" =>
+        val test  = s"""v => Seq$vs.contains(v)"""
+        getAttr(ns, a, prev, (x._1, x._2, x._3, List(test -> error), x._5))
+
       case q"$prev.allowed(..$vs)" =>
         val test  = s"""v => Seq$vs.contains(v)"""
-        val error = s"Value `$$v` is not one of the allowed values in Seq$vs"
+        val error = s"""Value `_value_` is not one of the allowed values in Seq$vs"""
         getAttr(ns, a, prev, (x._1, x._2, x._3, List(test -> error), x._5))
 
 

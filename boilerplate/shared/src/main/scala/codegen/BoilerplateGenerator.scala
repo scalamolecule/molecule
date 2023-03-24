@@ -21,5 +21,6 @@ object BoilerplateGenerator extends App {
 //  boilerplate.api._Nested.generate()
 //  boilerplate.api._SortAttrs.generate()
 //
-  boilerplate.ast._Model.generate()
+//  boilerplate.ast._Model.generate()
+//  boilerplate.ops._ModelTransformations.generate()
 }

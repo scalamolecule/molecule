@@ -16,18 +16,16 @@ object OffsetSemantics extends DatomicTestSuite {
 
     "Different limit/offset sign" - types { implicit conn =>
       for {
-//        _ <- Ns.int.a1.query.limit(0).get
-//          .map(_ ==> "Unexpected success")
-//          .recover { case ExecutionError(msg, _) =>
-//            msg ==> "Limit cannot be 0. Please use a positive number to limit next rows, " +
-//              "or a negative number to limit previous rows."
-//          }
+        //        _ <- Ns.int.a1.query.limit(0).get
+        //          .map(_ ==> "Unexpected success")
+        //          .recover { case ExecutionError(msg, _) =>
+        //            msg ==> "Limit cannot be 0. Please use a positive number to limit next rows, " +
+        //              "or a negative number to limit previous rows."
+        //          }
 
-        _ <- Ns.int.a1.query.limit(20).offset(-10).get
-          .map(_ ==> "Unexpected success")
-          .recover { case ExecutionError(msg, _) =>
-            msg ==> "Limit and offset should both be positive or negative."
-          }
+        _ <- Ns.int.a1.query.limit(20).offset(-10).get.expect { case ExecutionError(msg, _) =>
+          msg ==> "Limit and offset should both be positive or negative."
+        }
       } yield ()
     }
 

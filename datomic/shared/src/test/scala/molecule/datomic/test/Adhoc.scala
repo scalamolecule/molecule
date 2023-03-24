@@ -1,5 +1,7 @@
 package molecule.datomic.test
 
+import java.util.Date
+import molecule.base.ast.SchemaAST.{CardOne, MetaAttr}
 import molecule.base.util.exceptions._
 import molecule.core.api.TxReport
 import molecule.core.util.Executor._
@@ -13,27 +15,21 @@ import scala.language.implicitConversions
 object Adhoc extends DatomicTestSuite {
 
 
-//  implicit class result2expectedError(txR: Future[TxReport]) {
-//    def expect(error: PartialFunction[Throwable, Any]): Future[Any] = {
-//      txR.map(_ ==> "Unexpected success").recover(error)
-//    }
-//  }
-
   lazy val tests = Tests {
 
-//    "types" - types { implicit conn =>
-//      for {
-//        _ <- Ns.int.apply(3).save.transact
-//        _ <- Ns.int.query.get.map(_ ==> List(3))
-//
-//      } yield ()
-//    }
+    //    "types" - types { implicit conn =>
+    //      for {
+    //        _ <- Ns.int.apply(3).save.transact
+    //        _ <- Ns.int.query.get.map(_ ==> List(3))
+    //
+    //      } yield ()
+    //    }
 
 
     "validation" - validation { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Validation._
       for {
-        _ <- Format.errorMsg.apply(1).save.transact.expect{
+        _ <- Format.errorMsg.apply(1).save.transact.expect {
           case ValidationErrors(errors, _) =>
             errors.head ==>
               "Format.errorMsg" -> Seq("One-line error msg")
@@ -41,6 +37,10 @@ object Adhoc extends DatomicTestSuite {
 
         // 1 has correctly not been saved
         _ <- Format.errorMsg.query.get.map(_ ==> Nil)
+
+        _ = {
+          println(str2date("2001-07-01 00:00:00").getTime)
+        }
 
       } yield ()
     }
@@ -82,7 +82,7 @@ object Adhoc extends DatomicTestSuite {
     //          .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
     //          err ==>
     //            """Missing applied value for attribute:
-    //              |AttrOneManInt("R2", "i", V, Seq(), None, None, None)""".stripMargin
+    //              |AttrOneManInt("R2", "i", V, Seq(), None, Nil, None, None)""".stripMargin
     //        }
     //      } yield ()
     //    }

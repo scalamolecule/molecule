@@ -6,7 +6,7 @@ import molecule.base.util.{BaseHelpers, CodeGenBase}
 
 object _AggrSetNum extends CodeGenBase with BaseHelpers {
 
-  def generate: Unit = numberTypes.foreach { case (name, tpe, v) =>
+  def generate(): Unit = numberTypes.foreach { case (name, tpe, v) =>
     TransformFile(name, tpe, v).generate()
   }
 

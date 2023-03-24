@@ -101,13 +101,11 @@ object UpdateSetOps_Double_ extends DatomicTestSuite {
 
 
         // Can't swap duplicate from/to values
-        _ <- Ns(42).doubles.swap(double1 -> double2, double1 -> double3).update.transact
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
+        _ <- Ns(42).doubles.swap(double1 -> double2, double1 -> double3).update.transact.expect { case ExecutionError(err, _) =>
           err ==> "Can't swap from duplicate retract values."
         }
 
-        _ <- Ns(42).doubles.swap(double1 -> double3, double2 -> double3).update.transact
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
+        _ <- Ns(42).doubles.swap(double1 -> double3, double2 -> double3).update.transact.expect { case ExecutionError(err, _) =>
           err ==> "Can't swap to duplicate replacement values."
         }
       } yield ()

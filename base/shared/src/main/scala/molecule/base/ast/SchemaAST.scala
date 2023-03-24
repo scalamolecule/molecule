@@ -153,20 +153,15 @@ object SchemaAST extends BaseHelpers {
     if (validations.isEmpty) {
       "Nil"
     } else {
-      val (test, error) = validations.head
-      if (validations.length == 1 && !(test.contains('\n') || error.contains('\n'))) {
-        s"""Seq((\"\"\"$test\"\"\", \"$error\"))"""
+      validations.map {
+        case (test, error) =>
+          val errorStr = if (error.isEmpty) "\"\"" else s"""\"\"\"$error\"\"\""""
+          s"""            (
+             |              \"\"\"$test\"\"\",
+             |              $errorStr
+             |            )""".stripMargin
+      }.mkString("Seq(\n", ",\n", ")")
 
-      } else {
-        validations.map {
-          case (test, error) =>
-            val errorStr = if (error.contains('\n')) s"""\"\"\"$error\"\"\"""" else s"""\"$error\""""
-            s"""            (
-               |              \"\"\"$test\"\"\",
-               |              $errorStr
-               |            )""".stripMargin
-        }.mkString("Seq(\n", ",\n", ")")
-      }
     }
   }
 }

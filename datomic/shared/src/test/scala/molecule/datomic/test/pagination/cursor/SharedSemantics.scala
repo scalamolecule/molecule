@@ -17,8 +17,7 @@ object SharedSemantics extends DatomicTestSuite {
         _ <- Unique.int.insert(1, 2, 3).transact
 
         c1 <- Unique.int.a1.query.from("").limit(2).get.map { case (List(1, 2), c, true) => c }
-        _ <- Unique.i_(1).int.a1.query.from(c1).limit(2).get
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
+        _ <- Unique.i_(1).int.a1.query.from(c1).limit(2).get.expect { case ExecutionError(err, _) =>
           err ==> "Can only use cursor for un-modified query."
         }
       } yield ()

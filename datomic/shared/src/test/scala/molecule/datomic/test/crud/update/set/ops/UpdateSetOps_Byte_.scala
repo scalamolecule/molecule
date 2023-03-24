@@ -101,13 +101,11 @@ object UpdateSetOps_Byte_ extends DatomicTestSuite {
 
 
         // Can't swap duplicate from/to values
-        _ <- Ns(42).bytes.swap(byte1 -> byte2, byte1 -> byte3).update.transact
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
+        _ <- Ns(42).bytes.swap(byte1 -> byte2, byte1 -> byte3).update.transact.expect { case ExecutionError(err, _) =>
           err ==> "Can't swap from duplicate retract values."
         }
 
-        _ <- Ns(42).bytes.swap(byte1 -> byte3, byte2 -> byte3).update.transact
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
+        _ <- Ns(42).bytes.swap(byte1 -> byte3, byte2 -> byte3).update.transact.expect { case ExecutionError(err, _) =>
           err ==> "Can't swap to duplicate replacement values."
         }
       } yield ()

@@ -228,6 +228,7 @@ trait DataModelApi {
     // Allowed values (like enumerations)
 //    def allowed(first: Tpe, more: Tpe*): Self = ???
     def allowed(vs: Tpe*): Self = ???
+    def allowed(vs: Seq[Tpe], failureMsg: String): Self = ???
 
     // Require other attributes to be asserted
     // Useful for tuples

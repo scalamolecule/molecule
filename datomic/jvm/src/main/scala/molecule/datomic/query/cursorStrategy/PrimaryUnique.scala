@@ -3,7 +3,7 @@ package molecule.datomic.query.cursorStrategy
 import java.util.Base64
 import molecule.base.util.exceptions.ExecutionError
 import molecule.boilerplate.ast.Model._
-import molecule.boilerplate.ops.ModelTransformations
+import molecule.boilerplate.ops.ModelTransformations_
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.util.FutureUtils
 import molecule.datomic.facade.DatomicConn_JVM
@@ -26,7 +26,7 @@ case class PrimaryUnique[Tpl](
   limit: Option[Int],
   cursor: String
 ) extends DatomicQueryResolve[Tpl](elements, limit)
-  with FutureUtils with CursorUtils with ModelTransformations with MoleculeLogging {
+  with FutureUtils with CursorUtils with ModelTransformations_ with MoleculeLogging {
 
   def getPage(tokens: List[String], limit: Int)
              (implicit conn: DatomicConn_JVM): (List[Tpl], String, Boolean) = try {
