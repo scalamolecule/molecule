@@ -3,7 +3,7 @@ package molecule.datomic.query
 import java.util
 import java.util.{Collections, Comparator, ArrayList => jArrayList, Collection => jCollection, List => jList}
 import datomic.Peer
-import molecule.base.util.exceptions.ExecutionError
+import molecule.base.error.ExecutionError
 import molecule.boilerplate.ast.Model._
 import molecule.datomic.facade.DatomicConn_JVM
 import molecule.datomic.query.cursorStrategy.CursorUtils

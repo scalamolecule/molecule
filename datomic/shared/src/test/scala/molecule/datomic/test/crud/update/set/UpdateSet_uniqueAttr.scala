@@ -1,6 +1,6 @@
 package molecule.datomic.test.crud.update.set
 
-import molecule.base.util.exceptions.ExecutionError
+import molecule.base.error.ExecutionError
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Unique._
 import molecule.datomic.setup.DatomicTestSuite
@@ -11,7 +11,7 @@ import utest._
 object UpdateSet_uniqueAttr extends DatomicTestSuite {
 
 
-  lazy val tests = Tests {
+  override lazy val tests = Tests {
 
     "Semantics" - unique { implicit conn =>
       for {

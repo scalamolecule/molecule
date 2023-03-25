@@ -2,8 +2,8 @@ package molecule.datomic.query.cursorStrategy
 
 import java.net.URI
 import java.util.{Date, UUID}
+import molecule.base.error.ExecutionError
 import molecule.base.util.BaseHelpers
-import molecule.base.util.exceptions.ExecutionError
 import molecule.boilerplate.ast.Model._
 
 trait CursorUtils extends BaseHelpers {

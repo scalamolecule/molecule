@@ -10,7 +10,7 @@ import utest._
 object AggrOne_Boolean extends DatomicTestSuite {
 
 
-  lazy val tests = Tests {
+  override lazy val tests = Tests {
 
     "distinct" - types { implicit conn =>
       for {

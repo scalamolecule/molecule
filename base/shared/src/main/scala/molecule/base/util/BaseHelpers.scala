@@ -4,7 +4,7 @@ import java.net.URI
 import java.time._
 import java.time.format.DateTimeFormatter
 import java.util.{Date, UUID}
-import molecule.base.util.exceptions.ExecutionError
+import molecule.base.error.ExecutionError
 
 trait BaseHelpers extends DateHandling {
 

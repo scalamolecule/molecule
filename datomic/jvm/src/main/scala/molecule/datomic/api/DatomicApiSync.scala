@@ -1,10 +1,10 @@
 package molecule.datomic.api
 
-import molecule.base.util.exceptions.ExecutionError
+import molecule.base.error.ExecutionError
 import molecule.boilerplate.ast.Model._
 import molecule.core.action.Insert
 import molecule.core.api.{ApiSync, Connection, TxReport}
-import molecule.core.transaction.{DeleteExtraction, InsertExtraction, SaveExtraction, UpdateExtraction}
+import molecule.core.transaction.{DeleteExtraction, InsertExtraction_, SaveExtraction, UpdateExtraction}
 import molecule.datomic.action._
 import molecule.datomic.facade.DatomicConn_JVM
 import molecule.datomic.marshalling.DatomicRpcJVM.Data
@@ -69,7 +69,7 @@ trait DatomicApiSync extends SubscriptionStarter with ApiSync {
       printInspectTx("INSERT", insert.elements, getStmts)
     }
     private def getStmts: Data = {
-      (new InsertExtraction with Insert_stmts).getStmts(insert.elements, insert.tpls)
+      (new InsertExtraction_ with Insert_stmts).getStmts(insert.elements, insert.tpls)
     }
   }
 

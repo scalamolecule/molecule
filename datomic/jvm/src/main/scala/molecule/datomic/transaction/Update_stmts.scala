@@ -5,11 +5,11 @@ import clojure.lang.Keyword
 import datomic.Util.list
 import datomic.query.EntityMap
 import datomic.{Database, Peer}
-import molecule.base.util.exceptions.ExecutionError
+import molecule.base.error.ExecutionError
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.{UpdateExtraction, UpdateOps}
-import molecule.core.validation.CheckConflictingAttrs
+import molecule.core.validation.ConflictingAttrs
 import molecule.datomic.facade.DatomicConn_JVM
 import molecule.datomic.query.DatomicModel2Query
 
@@ -19,7 +19,7 @@ trait Update_stmts extends DatomicTxBase_JVM with UpdateOps with MoleculeLogging
     conn: DatomicConn_JVM,
     elements: List[Element]
   ): Data = {
-    CheckConflictingAttrs(elements, distinguishMode = true)
+    ConflictingAttrs.check(elements, distinguishMode = true)
 
     val (eids, filterElements, data) = resolve(elements, Nil, Nil, Nil)
 

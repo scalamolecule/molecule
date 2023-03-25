@@ -9,7 +9,8 @@ object CoreGenerator extends App {
   // Use instead in tandem with datomic.api._DatomicMoleculeApi.generate() to coordinate correct overrides
 //    core.api._MoleculeApi.generate()
 
-  //  core.transaction._InsertResolvers.generate()
+//    core.transaction._InsertResolvers.generate()
+//    core.transaction._InsertExtractions.generate()
 
   //  core.marshalling.serialize._PickleTpl.generate()
   //  core.marshalling.deserialize._UnpickleTpl.generate()

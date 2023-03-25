@@ -12,7 +12,7 @@ import utest._
 object ExprSet_UUID_ extends DatomicTestSuite {
 
 
-  lazy val tests = Tests {
+  override lazy val tests = Tests {
 
     "Mandatory" - {
 

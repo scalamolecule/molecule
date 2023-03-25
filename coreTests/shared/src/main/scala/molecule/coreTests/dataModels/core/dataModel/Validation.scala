@@ -105,7 +105,7 @@ object Validation extends DataModel(4) {
     val longs       = setLong.validate(_ > 1L)
     val floats      = setFloat.validate(_ > 1.1f)
     val doubles     = setDouble.validate(_ > 1.1)
-    val booleans    = setBoolean.validate(_ == true)
+    val booleans    = setBoolean.validate(_ == false)
     val bigInts     = setBigInt.validate(_ > BigInt(1))
     val bigDecimals = setBigDecimal.validate(_ > BigDecimal(1.1))
     val dates       = setDate.validate(_.after(new Date(993942000000L))) // "2001-07-01 00:00:00"
@@ -126,6 +126,7 @@ object Validation extends DataModel(4) {
       "^[a-zA-Z0-9]+$",
       "Username cannot contain special characters."
     )
+    val enums        = many[Allowed]
   }
 
   trait Allowed {

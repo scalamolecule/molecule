@@ -1,8 +1,8 @@
 package molecule.datomic.query
 
 import java.util.{Iterator => jIterator, List => jList}
+import molecule.base.error.ExecutionError
 import molecule.base.util.BaseHelpers
-import molecule.base.util.exceptions.ExecutionError
 import molecule.boilerplate.ast.Model._
 import molecule.core.query.Model2Query
 import molecule.core.util.JavaConversions

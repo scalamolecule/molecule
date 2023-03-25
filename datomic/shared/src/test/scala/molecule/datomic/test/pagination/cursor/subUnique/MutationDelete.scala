@@ -1,6 +1,6 @@
 package molecule.datomic.test.pagination.cursor.subUnique
 
-import molecule.base.util.exceptions.ExecutionError
+import molecule.base.error.ExecutionError
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Unique._
 import molecule.datomic.setup.DatomicTestSuite

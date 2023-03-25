@@ -9,7 +9,7 @@ import scala.language.implicitConversions
 
 object Subscription extends DatomicTestSuite {
 
-  lazy val tests = Tests {
+  override lazy val tests = Tests {
 
     "Single" - types { implicit conn =>
       var intermediaryResults = List.empty[List[Int]]

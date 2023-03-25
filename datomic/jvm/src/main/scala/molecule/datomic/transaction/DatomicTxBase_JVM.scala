@@ -3,7 +3,7 @@ package molecule.datomic.transaction
 import java.lang.{Boolean => jBoolean}
 import java.util.{UUID, ArrayList => jArrayList, List => jList}
 import clojure.lang.Keyword
-import molecule.base.util.exceptions.ExecutionError
+import molecule.base.error.ExecutionError
 import molecule.boilerplate.ast.Model._
 import molecule.core.marshalling.{ConnProxy, DatomicPeerProxy}
 import molecule.core.util.Executor._

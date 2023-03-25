@@ -10,7 +10,7 @@ import utest._
 object NestedBasic extends DatomicTestSuite {
 
 
-  lazy val tests = Tests {
+  override lazy val tests = Tests {
 
     "Mandatory/optional rows" - refs { implicit conn =>
       for {

@@ -6,8 +6,13 @@ import molecule.boilerplate.ast.Model._
 
 trait UpdateOps extends Action2Data { self: UpdateExtraction =>
 
-  protected def uniqueEids(filterAttr: AttrOneTac, ns: String, attr: String): Seq[AnyRef]
+  protected def uniqueEids(
+    filterAttr: AttrOneTac,
+    ns: String,
+    attr: String
+  ): Seq[AnyRef]
 
+  // Typed input value to expected db type
   protected lazy val valueString    : String => Any     = ???
   protected lazy val valueInt       : Int => Any        = ???
   protected lazy val valueLong      : Long => Any       = ???

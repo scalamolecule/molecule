@@ -12,7 +12,7 @@ import scala.concurrent.Future
 object ExprSet_Boolean extends DatomicTestSuite {
 
 
-  lazy val tests = Tests {
+  override lazy val tests = Tests {
 
     "Mandatory" - {
 

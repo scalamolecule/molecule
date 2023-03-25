@@ -1,6 +1,6 @@
 package molecule.datomic.api
 
-import molecule.base.util.exceptions.ExecutionError
+import molecule.base.error.ExecutionError
 import molecule.boilerplate.ast.Model._
 import molecule.core.api.{Connection, PrintInspect}
 import molecule.datomic.query.DatomicModel2Query

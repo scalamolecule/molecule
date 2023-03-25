@@ -1,7 +1,7 @@
 package molecule.datomic.query
 
 import datomic.Database
-import molecule.base.util.exceptions.ExecutionError
+import molecule.base.error.ExecutionError
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.util.FutureUtils

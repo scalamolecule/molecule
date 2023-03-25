@@ -1,6 +1,6 @@
 package molecule.datomic.test.crud.delete
 
-import molecule.base.util.exceptions.ExecutionError
+import molecule.base.error.ExecutionError
 import molecule.coreTests.dataModels.core.dsl.Refs._
 import molecule.datomic.async._
 import utest._
@@ -10,7 +10,7 @@ import molecule.datomic.setup.DatomicTestSuite
 object Delete_eid extends DatomicTestSuite {
 
 
-  lazy val tests = Tests {
+  override lazy val tests = Tests {
 
     "1 entity" - refs { implicit conn =>
       for {

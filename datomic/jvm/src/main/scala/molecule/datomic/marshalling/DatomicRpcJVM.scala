@@ -1,7 +1,7 @@
 package molecule.datomic.marshalling
 
 import java.nio.ByteBuffer
-import molecule.base.util.exceptions.{ExecutionError, MoleculeError}
+import molecule.base.error.{ExecutionError, MoleculeError}
 import molecule.boilerplate.ast.Model._
 import molecule.core.api.TxReport
 import molecule.core.marshalling.Boopicklers._
@@ -97,7 +97,7 @@ object DatomicRpcJVM extends MoleculeRpc
           } else tpls).asInstanceOf[Seq[Product]]
         case Left(err)   => throw err // catched in outer either wrapper
       }
-      stmts = (new InsertExtraction with Insert_stmts).getStmts(tplElements, tplProducts)
+      stmts = (new InsertExtraction_ with Insert_stmts).getStmts(tplElements, tplProducts)
       _ = if (txElements.nonEmpty) {
         val txStmts = (new SaveExtraction() with Save_stmts).getRawStmts(txElements, datomicTx, false)
         stmts.addAll(txStmts)

@@ -9,7 +9,7 @@ import utest._
 object ExprOne_Boolean extends DatomicTestSuite {
 
 
-  lazy val tests = Tests {
+  override lazy val tests = Tests {
 
     "Mandatory" - types { implicit conn =>
       val a = (1, true)

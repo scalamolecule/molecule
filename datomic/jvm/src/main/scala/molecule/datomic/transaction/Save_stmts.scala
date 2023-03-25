@@ -2,11 +2,11 @@ package molecule.datomic.transaction
 
 import java.net.URI
 import java.util.{Date, UUID}
+import molecule.base.error.ValidationErrors
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.{SaveExtraction, SaveOps}
-import molecule.core.validation.CheckConflictingAttrs
-import molecule.base.util.exceptions.ValidationErrors
+import molecule.core.validation.ConflictingAttrs
 
 trait Save_stmts extends DatomicTxBase_JVM with SaveOps with MoleculeLogging { self: SaveExtraction =>
 
@@ -19,7 +19,7 @@ trait Save_stmts extends DatomicTxBase_JVM with SaveOps with MoleculeLogging { s
     if (init) {
       initTxBase(elements)
     }
-    val validationErrors = CheckConflictingAttrs(elements)
+    val validationErrors = ConflictingAttrs.check(elements)
     if (validationErrors.nonEmpty) {
       throw ValidationErrors(validationErrors)
     }

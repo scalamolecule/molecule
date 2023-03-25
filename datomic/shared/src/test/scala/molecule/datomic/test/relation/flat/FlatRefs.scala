@@ -1,6 +1,6 @@
 package molecule.datomic.test.relation.flat
 
-import molecule.base.util.exceptions.ExecutionError
+import molecule.base.error.ExecutionError
 import molecule.coreTests.dataModels.core.dsl.Refs._
 import molecule.datomic.async._
 import utest._
@@ -11,7 +11,7 @@ import molecule.datomic.setup.DatomicTestSuite
 object FlatRefs extends DatomicTestSuite {
 
 
-  lazy val tests = Tests {
+  override lazy val tests = Tests {
 
     "ref" - refs { implicit conn =>
       for {

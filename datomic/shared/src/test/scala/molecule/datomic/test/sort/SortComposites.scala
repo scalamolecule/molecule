@@ -10,7 +10,7 @@ import utest._
 object SortComposites extends DatomicTestSuite {
 
 
-  lazy val tests = Tests {
+  override lazy val tests = Tests {
 
     "1 + 1" - refs { implicit conn =>
       for {

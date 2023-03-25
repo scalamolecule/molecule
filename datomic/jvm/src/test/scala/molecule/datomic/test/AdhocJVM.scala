@@ -9,7 +9,7 @@ import utest._
 object AdhocJVM extends DatomicTestSuite {
 
 
-  lazy val tests = Tests {
+  override lazy val tests = Tests {
 
 
     "types" - types { implicit conn =>

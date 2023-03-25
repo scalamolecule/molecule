@@ -14,7 +14,7 @@ object AttrToString extends TestSuite with Validations {
   val attr = Model
 
 
-  lazy val tests = Tests {
+  override lazy val tests = Tests {
 
     "One" - {
       "One mandatory" - {

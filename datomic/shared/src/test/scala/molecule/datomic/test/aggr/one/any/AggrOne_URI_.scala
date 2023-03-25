@@ -11,7 +11,7 @@ import utest._
 object AggrOne_URI_ extends DatomicTestSuite {
 
 
-  lazy val tests = Tests {
+  override lazy val tests = Tests {
 
     "distinct" - types { implicit conn =>
       for {

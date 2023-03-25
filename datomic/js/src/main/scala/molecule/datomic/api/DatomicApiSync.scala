@@ -1,6 +1,6 @@
 package molecule.datomic.api
 
-import molecule.base.util.exceptions.ExecutionError
+import molecule.base.error.ExecutionError
 import molecule.core.action.Insert
 import molecule.core.api.{ApiSync, Connection, TxReport}
 import molecule.datomic.action._

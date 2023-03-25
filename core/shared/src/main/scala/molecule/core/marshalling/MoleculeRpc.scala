@@ -1,6 +1,6 @@
 package molecule.core.marshalling
 
-import molecule.base.util.exceptions.MoleculeError
+import molecule.base.error.MoleculeError
 import molecule.boilerplate.ast.Model._
 import molecule.core.api.TxReport
 import scala.concurrent.Future

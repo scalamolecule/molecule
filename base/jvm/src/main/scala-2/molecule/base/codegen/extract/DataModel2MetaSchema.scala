@@ -2,7 +2,7 @@ package molecule.base.codegen.extract
 
 import java.nio.file.{Files, Paths}
 import molecule.base.ast.SchemaAST._
-import molecule.base.util.exceptions.ExecutionError
+import molecule.base.error.ExecutionError
 import scala.annotation.tailrec
 import scala.meta._
 

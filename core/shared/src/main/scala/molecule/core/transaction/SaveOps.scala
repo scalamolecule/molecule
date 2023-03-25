@@ -5,16 +5,32 @@ import java.util.{Date, UUID}
 
 trait SaveOps extends Action2Data { self: SaveExtraction =>
 
-  protected def addV(ns: String, attr: String, optValue: Option[Any]): Unit
-  protected def addSet[T](ns: String, attr: String, optSet: Option[Set[T]]): Unit
-  protected def backRef(backRefNs: String): Unit
-  protected def ref(ns: String, refAttr: String): Unit
+  protected def addV(
+    ns: String,
+    attr: String,
+    optValue: Option[Any]
+  ): Unit
+
+  protected def addSet[T](
+    ns: String,
+    attr: String,
+    optSet: Option[Set[T]]
+  ): Unit
+
+  protected def backRef(
+    backRefNs: String
+  ): Unit
+
+  protected def ref(
+    ns: String,
+    refAttr: String
+  ): Unit
 
   protected def handleNs(ns: String): Unit
   protected def handleComposite(isInsertTxMetaData: Boolean): Unit
   protected def handleTxMetaData(): Unit
 
-
+  // Typed input value to expected db type
   protected lazy val valueString    : String => Any     = ???
   protected lazy val valueInt       : Int => Any        = ???
   protected lazy val valueLong      : Long => Any       = ???

@@ -1,6 +1,6 @@
 package molecule.datomic.test.crud.insert
 
-import molecule.base.util.exceptions.ExecutionError
+import molecule.base.error.ExecutionError
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Refs._
 import molecule.datomic.setup.DatomicTestSuite
@@ -10,7 +10,7 @@ import utest._
 object InsertSemantics extends DatomicTestSuite {
 
 
-  lazy val tests = Tests {
+  override lazy val tests = Tests {
 
     "Can't mix save/insert" - refs { implicit conn =>
       for {

@@ -1,6 +1,6 @@
 package molecule.datomic.test.crud.update.set
 
-import molecule.base.util.exceptions.ExecutionError
+import molecule.base.error.ExecutionError
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.datomic.setup.DatomicTestSuite
@@ -10,7 +10,7 @@ import utest._
 object UpdateSet_eid extends DatomicTestSuite {
 
 
-  lazy val tests = Tests {
+  override lazy val tests = Tests {
 
     "Update/upsert" - types { implicit conn =>
       for {

@@ -1,7 +1,7 @@
 package molecule.datomic.query.cursorStrategy
 
 import java.util.Base64
-import molecule.base.util.exceptions.ExecutionError
+import molecule.base.error.ExecutionError
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.ops.ModelTransformations_
 import molecule.boilerplate.util.MoleculeLogging

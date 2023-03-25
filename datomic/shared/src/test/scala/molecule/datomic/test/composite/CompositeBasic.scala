@@ -12,7 +12,7 @@ object CompositeBasic extends DatomicTestSuite {
   // molecule.datomic.test.crud.save.SaveTxMetaData
   // molecule.datomic.test.crud.insert.InsertTxMetaData
 
-  lazy val tests = Tests {
+  override lazy val tests = Tests {
 
     "basic" - refs { implicit conn =>
       for {

@@ -14,7 +14,7 @@ object TxMetaBasic extends DatomicTestSuite {
   // molecule.datomic.test.crud.insert.InsertTxMetaData
 
 
-  lazy val tests = Tests {
+  override lazy val tests = Tests {
 
     "1 level" - refs { implicit conn =>
       for {

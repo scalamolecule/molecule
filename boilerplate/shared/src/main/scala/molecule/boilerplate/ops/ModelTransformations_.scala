@@ -2,7 +2,7 @@ package molecule.boilerplate.ops
 
 import java.net.URI
 import java.util.{Date, UUID}
-import molecule.base.util.exceptions.ExecutionError
+import molecule.base.error.ExecutionError
 import molecule.boilerplate.api.Keywords.Kw
 import molecule.boilerplate.ast.Model._
 

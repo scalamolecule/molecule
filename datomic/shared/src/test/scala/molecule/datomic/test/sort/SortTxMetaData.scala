@@ -10,7 +10,7 @@ import utest._
 object SortTxMetaData extends DatomicTestSuite {
 
 
-  lazy val tests = Tests {
+  override lazy val tests = Tests {
 
     "flat" - refs { implicit conn =>
       for {

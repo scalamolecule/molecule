@@ -2,7 +2,7 @@ package molecule.datomic.test.crud.save
 
 import java.net.URI
 import java.util.{Date, UUID}
-import molecule.base.util.exceptions.ExecutionError
+import molecule.base.error.ExecutionError
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.datomic.setup.DatomicTestSuite
@@ -12,7 +12,7 @@ import utest._
 object SaveCardSet extends DatomicTestSuite {
 
 
-  lazy val tests = Tests {
+  override lazy val tests = Tests {
 
     "mandatory" - types { implicit conn =>
       for {

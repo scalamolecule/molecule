@@ -15,7 +15,7 @@ object SortAggr extends DatomicTestSuite {
     (BigDecimal(1.0), BigDecimal(2.0), BigDecimal(3.0), BigDecimal(4.0))
 
 
-  lazy val tests = Tests {
+  override lazy val tests = Tests {
 
     "count" - types { implicit conn =>
       for {

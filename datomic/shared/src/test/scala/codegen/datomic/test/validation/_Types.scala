@@ -19,7 +19,7 @@
 //       |
 //       |object Types_ extends DatomicTestSuite {
 //       |
-//       |  lazy val tests = Tests {
+//       |  override lazy val tests = Tests {
 //       |
 //       |    $cardOne
 //       |  }

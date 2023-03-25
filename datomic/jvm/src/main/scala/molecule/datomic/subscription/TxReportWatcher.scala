@@ -3,7 +3,7 @@ package molecule.datomic.subscription
 import java.lang.{Long => jLong}
 import datomic.Connection.DB_AFTER
 import datomic.Database
-import molecule.base.util.exceptions.ExecutionError
+import molecule.base.error.ExecutionError
 import molecule.datomic.facade.DatomicConn_JVM
 import molecule.datomic.util.MakeDatomicTxReport
 import scala.collection.mutable.ListBuffer

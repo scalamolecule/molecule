@@ -1,6 +1,6 @@
 package molecule.datomic.test.pagination.offset
 
-import molecule.base.util.exceptions.ExecutionError
+import molecule.base.error.ExecutionError
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.datomic.setup.DatomicTestSuite
@@ -12,7 +12,7 @@ import utest._
 
 object OffsetSemantics extends DatomicTestSuite {
 
-  lazy val tests = Tests {
+  override lazy val tests = Tests {
 
     "Different limit/offset sign" - types { implicit conn =>
       for {

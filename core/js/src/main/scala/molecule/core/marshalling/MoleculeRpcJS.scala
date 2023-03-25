@@ -2,7 +2,7 @@ package molecule.core.marshalling
 
 import java.nio.ByteBuffer
 import boopickle.Default._
-import molecule.base.util.exceptions._
+import molecule.base.error.{ExecutionError, MoleculeError}
 import molecule.boilerplate.ast.Model._
 import molecule.core.api.TxReport
 import molecule.core.marshalling.Boopicklers._

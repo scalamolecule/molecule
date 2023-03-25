@@ -9,7 +9,7 @@ import utest._
 object Delete_uniqueAttr extends DatomicTestSuite {
 
 
-  lazy val tests = Tests {
+  override lazy val tests = Tests {
 
     "Delete by unique attribute value - check types" - unique { implicit conn =>
       for {

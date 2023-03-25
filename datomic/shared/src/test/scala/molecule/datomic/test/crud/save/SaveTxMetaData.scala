@@ -9,7 +9,7 @@ import utest._
 object SaveTxMetaData extends DatomicTestSuite {
 
 
-  lazy val tests = Tests {
+  override lazy val tests = Tests {
 
     "Mandatory tx attr" - refs { implicit conn =>
       for {

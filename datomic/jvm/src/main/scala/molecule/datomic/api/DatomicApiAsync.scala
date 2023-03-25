@@ -3,7 +3,7 @@ package molecule.datomic.api
 import molecule.boilerplate.ast.Model._
 import molecule.core.action.Insert
 import molecule.core.api.{ApiAsync, Connection, TxReport}
-import molecule.core.transaction.{DeleteExtraction, InsertExtraction, SaveExtraction, UpdateExtraction}
+import molecule.core.transaction.{DeleteExtraction, InsertExtraction_, SaveExtraction, UpdateExtraction}
 import molecule.core.util.FutureUtils
 import molecule.datomic.action._
 import molecule.datomic.facade.DatomicConn_JVM
@@ -53,7 +53,6 @@ trait DatomicApiAsync extends SubscriptionStarter with DatomicAsyncApiBase with 
     override def transact(implicit conn: Connection, ec: ExecutionContext): Future[TxReport] = tryFuture {
       conn.asInstanceOf[DatomicConn_JVM].transact_async(getStmts)
     }
-
     override def inspect(implicit conn: Connection, ec: ExecutionContext): Future[Unit] =
       printInspectTx("SAVE", save.elements, getStmts)
 
@@ -71,7 +70,7 @@ trait DatomicApiAsync extends SubscriptionStarter with DatomicAsyncApiBase with 
       printInspectTx("INSERT", insert.elements, getStmts)
 
     private def getStmts: Data =
-      (new InsertExtraction with Insert_stmts).getStmts(insert.elements, insert.tpls)
+      (new InsertExtraction_ with Insert_stmts).getStmts(insert.elements, insert.tpls)
   }
 
 

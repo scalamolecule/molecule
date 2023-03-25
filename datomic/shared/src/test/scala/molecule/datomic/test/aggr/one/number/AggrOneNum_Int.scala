@@ -10,7 +10,7 @@ import utest._
 object AggrOneNum_Int extends DatomicTestSuite {
 
 
-  lazy val tests = Tests {
+  override lazy val tests = Tests {
 
     "sum" - types { implicit conn =>
       for {

@@ -1,6 +1,6 @@
 package molecule.core.util
 
-import molecule.base.util.exceptions.ExecutionError
+import molecule.base.error.ExecutionError
 import molecule.boilerplate.ast.Model._
 import scala.annotation.tailrec
 

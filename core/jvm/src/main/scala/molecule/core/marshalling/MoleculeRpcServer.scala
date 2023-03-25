@@ -11,7 +11,7 @@ import akka.stream.scaladsl.{Flow, Sink, Source}
 import akka.util.ByteString
 import boopickle.Default._
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
-import molecule.base.util.exceptions.ExecutionError
+import molecule.base.error.ExecutionError
 import molecule.boilerplate.ast.Model._
 import molecule.core.marshalling.Boopicklers._
 import molecule.core.marshalling.serialize.PickleTpls

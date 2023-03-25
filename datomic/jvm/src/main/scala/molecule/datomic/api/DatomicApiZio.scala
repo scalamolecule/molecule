@@ -1,10 +1,10 @@
 package molecule.datomic.api
 
-import molecule.base.util.exceptions.ExecutionError
+import molecule.base.error.ExecutionError
 import molecule.boilerplate.ast.Model._
 import molecule.core.action.Insert
 import molecule.core.api.{ApiZio, Connection, TxReport}
-import molecule.core.transaction.{DeleteExtraction, InsertExtraction, SaveExtraction, UpdateExtraction}
+import molecule.core.transaction.{DeleteExtraction, InsertExtraction_, SaveExtraction, UpdateExtraction}
 import molecule.core.util.Executor._
 import molecule.datomic.action._
 import molecule.datomic.facade.DatomicConn_JVM
@@ -89,7 +89,7 @@ trait DatomicApiZio extends SubscriptionStarter with DatomicZioApiBase with ApiZ
       printInspectTx("INSERT", insert.elements, getStmts)
 
     private def getStmts: Data =
-      (new InsertExtraction with Insert_stmts).getStmts(insert.elements, insert.tpls)
+      (new InsertExtraction_ with Insert_stmts).getStmts(insert.elements, insert.tpls)
   }
 
 

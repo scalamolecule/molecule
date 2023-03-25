@@ -10,7 +10,7 @@ import utest._
 object ExprSet_Int extends DatomicTestSuite {
 
 
-  lazy val tests = Tests {
+  override lazy val tests = Tests {
 
     "Mandatory" - {
 

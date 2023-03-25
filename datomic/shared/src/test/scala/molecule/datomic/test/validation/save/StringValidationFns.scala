@@ -1,6 +1,6 @@
-package molecule.datomic.test.validation
+package molecule.datomic.test.validation.save
 
-import molecule.base.util.exceptions._
+import molecule.base.error.ValidationErrors
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Validation._
 import molecule.datomic.async._
@@ -9,9 +9,9 @@ import utest._
 import scala.language.implicitConversions
 
 
-object StringChecks extends DatomicTestSuite {
+object StringValidationFns extends DatomicTestSuite {
 
-  lazy val tests = Tests {
+  override lazy val tests = Tests {
 
     "Email, default msg" - validation { implicit conn =>
       for {
@@ -34,7 +34,8 @@ object StringChecks extends DatomicTestSuite {
               "`foo@bar` is not a valid email"
             )
         }
-        _ <- Strings.email("foo@bar.com").save.transact // ok
+        // ok
+        _ <- Strings.email("foo@bar.com").save.transact
       } yield ()
     }
 

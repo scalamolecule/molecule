@@ -8,7 +8,7 @@ import utest._
 
 object OffsetBackwards extends DatomicTestSuite {
 
-  lazy val tests = Tests {
+  override lazy val tests = Tests {
 
     "Flat" - types { implicit conn =>
       for {

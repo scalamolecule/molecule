@@ -1,7 +1,7 @@
 package molecule.datomic.query
 
 import java.lang.{Long => jLong}
-import molecule.base.util.exceptions.ExecutionError
+import molecule.base.error.ExecutionError
 import molecule.boilerplate.ast.Model._
 import molecule.datomic.query.casting.NestOpt_
 

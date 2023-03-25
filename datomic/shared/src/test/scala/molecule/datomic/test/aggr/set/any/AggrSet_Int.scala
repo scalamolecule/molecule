@@ -9,7 +9,7 @@ import utest._
 object AggrSet_Int extends DatomicTestSuite {
 
 
-  lazy val tests = Tests {
+  override lazy val tests = Tests {
 
     "distinct" - types { implicit conn =>
       for {

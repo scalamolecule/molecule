@@ -1,14 +1,14 @@
 package molecule.core.validation
 
-import molecule.base.util.exceptions.ExecutionError
+import molecule.base.error.ExecutionError
 import molecule.boilerplate.ast.Model._
 import scala.annotation.tailrec
 
-object CheckConflictingAttrs {
+object ConflictingAttrs {
   private def dup(element: String) = throw ExecutionError(s"Can't transact duplicate attribute `$element`.")
 
   @tailrec
-  final def apply(
+  final def check(
     elements: List[Element],
     prev: Array[Array[Array[String]]] = Array(Array(Array.empty[String])),
     level: Int = 0,
@@ -42,7 +42,7 @@ object CheckConflictingAttrs {
           val validationErrors1 = if (a.errors.isEmpty) validationErrors else {
             validationErrors.+(attr -> a.errors)
           }
-          apply(tail, prev, level, group, refPath, distinguishMode, validationErrors1)
+          check(tail, prev, level, group, refPath, distinguishMode, validationErrors1)
 
         case r: Ref =>
           val ref = r.ns + "." + r.refAttr
@@ -53,33 +53,33 @@ object CheckConflictingAttrs {
             dup(ref)
           }
           prev(level) = prev(level) :+ Array(ref)
-          apply(tail, prev, level, group + 1, refPath :+ ref, distinguishMode, validationErrors)
+          check(tail, prev, level, group + 1, refPath :+ ref, distinguishMode, validationErrors)
 
         case _: BackRef =>
           if (group == 0)
             throw ExecutionError("Can't use backref from here.")
-          apply(tail, prev, level, group - 1, refPath.init, distinguishMode, validationErrors)
+          check(tail, prev, level, group - 1, refPath.init, distinguishMode, validationErrors)
 
         case Composite(es) =>
-          apply(es ++ tail, prev, level, group, Seq(""), distinguishMode, validationErrors)
+          check(es ++ tail, prev, level, group, Seq(""), distinguishMode, validationErrors)
 
         case Nested(r, es) =>
           val ref = r.ns + "." + r.refAttr
           if (prev(level)(group).contains(ref))
             dup(ref)
           val prev1 = prev :+ Array(Array(ref))
-          apply(es ++ tail, prev1, level + 1, 0, refPath, distinguishMode, validationErrors)
+          check(es ++ tail, prev1, level + 1, 0, refPath, distinguishMode, validationErrors)
 
         case NestedOpt(r, es) =>
           val ref = r.ns + "." + r.refAttr
           if (prev(level)(group).contains(ref))
             dup(ref)
           val prev1 = prev :+ Array(Array(ref))
-          apply(es ++ tail, prev1, level + 1, 0, refPath, distinguishMode, validationErrors)
+          check(es ++ tail, prev1, level + 1, 0, refPath, distinguishMode, validationErrors)
 
         case TxMetaData(txElements) =>
           val prev1 = prev :+ Array(Array.empty[String])
-          apply(txElements, prev1, level + 1, 0, Nil, distinguishMode, validationErrors)
+          check(txElements, prev1, level + 1, 0, Nil, distinguishMode, validationErrors)
       }
       case Nil          => validationErrors
     }

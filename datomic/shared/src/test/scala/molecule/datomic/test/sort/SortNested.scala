@@ -1,6 +1,6 @@
 package molecule.datomic.test.sort
 
-import molecule.base.util.exceptions.ExecutionError
+import molecule.base.error.ExecutionError
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Refs._
 import molecule.datomic.setup.DatomicTestSuite
@@ -11,7 +11,7 @@ import utest._
 object SortNested extends DatomicTestSuite {
 
 
-  lazy val tests = Tests {
+  override lazy val tests = Tests {
 
     "Basic types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._

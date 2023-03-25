@@ -2,7 +2,7 @@ package molecule.core.marshalling
 
 import akka.util.ByteString
 import boopickle.Default._
-import molecule.base.util.exceptions.{ExecutionError, MoleculeError, ValidationErrors}
+import molecule.base.error.{ExecutionError, MoleculeError, ValidationErrors}
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.api.TxReport

@@ -10,7 +10,7 @@ import utest._
 object NestedComposite extends DatomicTestSuite {
 
 
-  lazy val tests = Tests {
+  override lazy val tests = Tests {
 
     "1 level" - refs { implicit conn =>
       for {

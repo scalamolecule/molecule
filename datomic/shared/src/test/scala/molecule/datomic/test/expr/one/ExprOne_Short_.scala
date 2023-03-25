@@ -10,7 +10,7 @@ import utest._
 object ExprOne_Short_ extends DatomicTestSuite {
 
 
-  lazy val tests = Tests {
+  override lazy val tests = Tests {
 
     "Mandatory" - types { implicit conn =>
       val a = (1, short1)

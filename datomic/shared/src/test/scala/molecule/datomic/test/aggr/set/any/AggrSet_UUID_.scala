@@ -11,7 +11,7 @@ import molecule.datomic.setup.DatomicTestSuite
 object AggrSet_UUID_ extends DatomicTestSuite {
 
 
-  lazy val tests = Tests {
+  override lazy val tests = Tests {
 
     "distinct" - types { implicit conn =>
       for {

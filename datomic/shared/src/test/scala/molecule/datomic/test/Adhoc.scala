@@ -2,7 +2,7 @@ package molecule.datomic.test
 
 import java.util.Date
 import molecule.base.ast.SchemaAST.{CardOne, MetaAttr}
-import molecule.base.util.exceptions._
+import molecule.base.error.ValidationErrors
 import molecule.core.api.TxReport
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
@@ -15,7 +15,7 @@ import scala.language.implicitConversions
 object Adhoc extends DatomicTestSuite {
 
 
-  lazy val tests = Tests {
+  override lazy val tests = Tests {
 
     //    "types" - types { implicit conn =>
     //      for {
@@ -40,40 +40,12 @@ object Adhoc extends DatomicTestSuite {
 
         _ = {
           println(str2date("2001-07-01 00:00:00").getTime)
+          println(date1.getTime)
         }
 
       } yield ()
     }
 
-    /*
-
-    val validation_int = new ValidateInt {
-      def validate(v: Int): Seq[String] = {
-        val ok = {
-          v > 2
-        }
-        if (ok) Nil else List(s"Ns.int with value `$v` doesn't satisfy validation: _ > 2")
-      }
-    }
-    val validation_int2 = new ValidateInt {
-      def validate(v: Int): Seq[String] = {
-        val checks: Seq[(Int => Boolean, String)] = Seq(
-          (v => v <= 2, "Number must be bigger than 2"),
-          (v => v >= 10, "Number must be smaller than 10"),
-          (v => v % 2 == 0, "Number must be odd")
-        )
-        checks.flatMap {
-          case (test, error) => if (test(v)) Nil else Seq(error)
-        }
-      }
-    }
-
-    protected lazy val i_man          : AttrOneManInt        = AttrOneManInt       ("Ns", "i"          )
-    protected lazy val s_man          : AttrOneManString     = AttrOneManString    ("Ns", "s"          )
-    protected lazy val u_man          : AttrOneManInt        = AttrOneManInt       ("Ns", "u"          )
-    protected lazy val string_man     : AttrOneManString     = AttrOneManString    ("Ns", "string"     )
-    protected lazy val int_man        : AttrOneManInt        = AttrOneManInt       ("Ns", "int"        , validation = Some(validation_int))
-     */
 
     //    "refs" - refs { implicit conn =>
     //      import molecule.coreTests.dataModels.core.dsl.Refs._

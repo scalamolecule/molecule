@@ -6,7 +6,7 @@ import java.{lang => jl, util => ju}
 import com.google.common.util.concurrent.UncheckedExecutionException
 import datomic.Util.readAll
 import datomic.{Connection => DatomicConnection, Datom => _, _}
-import molecule.base.util.exceptions.ExecutionError
+import molecule.base.error.ExecutionError
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.api.{Connection, TxReport}
 import molecule.core.marshalling.DatomicPeerProxy

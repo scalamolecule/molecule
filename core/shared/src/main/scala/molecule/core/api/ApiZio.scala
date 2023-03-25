@@ -1,6 +1,6 @@
 package molecule.core.api
 
-import molecule.base.util.exceptions.ExecutionError
+import molecule.base.error.ExecutionError
 import zio.ZIO
 
 trait ApiZio extends PrintInspect {

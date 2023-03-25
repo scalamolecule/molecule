@@ -5,7 +5,7 @@ import java.util.{Date, UUID}
 import boopickle.BasicPicklers._
 import boopickle.Default._
 import boopickle._
-import molecule.base.util.exceptions.{ExecutionError, MoleculeError}
+import molecule.base.error.{ExecutionError, MoleculeError}
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.marshalling.Boopicklers._

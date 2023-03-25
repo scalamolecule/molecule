@@ -1,6 +1,6 @@
 package molecule.core.api
 
-import molecule.base.util.exceptions.ExecutionError
+import molecule.base.error.ExecutionError
 import molecule.core.marshalling.{ConnProxy, MoleculeRpc}
 import scala.concurrent.{ExecutionContext, Future}
 
