@@ -17,16 +17,13 @@ case class ValidationErrors(
   )
 }
 
-case class InsertValidationErrors(
+case class InsertErrors(
   errors: Seq[(Int, Seq[InsertError])],
   message: Option[String] = None
 ) extends MoleculeError {
-  override def msg: String = errors.map {
-    case (rowIndex, rowErrors) =>
-      s"""ROW $rowIndex -----------------------------
-         |${rowErrors.mkString("\n")}
-         |""".stripMargin
-  }.mkString("\n------------\n  ")
+  override def msg: String = {
+    toString
+  }
 
   def errorsStr(indent: Int = 0, extraPipe: Boolean = false) = {
     val s   = "  " * indent
@@ -37,15 +34,19 @@ case class InsertValidationErrors(
           val errorsStr = errors.map { error =>
             error.render(indent + 3, true)
           }.mkString(s",\n$s      ")
+          val rowIndexComment = if(rowIndex == -1)
+            "Appended tx meta data errors row "
+          else
+            "Top-level row index"
           val str =
             s"""$s  (
-               |$s    $rowIndex, // Top-level row index
+               |$s    $rowIndex, // $rowIndexComment
                |$s    Seq(
                |$s      $errorsStr
                |$s    )
                |$s  )"""
           if (extraPipe) str else str.stripMargin
-      }.mkString("\n", ",\n  ", lastBreak)
+      }.mkString("\n", ",\n", lastBreak)
     }
     s"""Seq($str)"""
   }

@@ -17,7 +17,7 @@ object TypesOneOpt extends DatomicTestSuite {
     "String" - validation { implicit conn =>
       for {
         _ <- Type.string_?.insert(Some("a")).transact.expect {
-          case InsertValidationErrors(indexedInsertErrors, _) =>
+          case InsertErrors(indexedInsertErrors, _) =>
             indexedInsertErrors ==>
               Seq(
                 (
@@ -41,7 +41,7 @@ object TypesOneOpt extends DatomicTestSuite {
 
         // Isolate expected single InsertError with pattern matching
         _ <- Type.string_?.insert(Some("a")).transact.expect {
-          case InsertValidationErrors(Seq((_, Seq(insertError))), _) =>
+          case InsertErrors(Seq((_, Seq(insertError))), _) =>
             insertError ==> InsertError(0, 0,
               "Type.string",
               Seq(
@@ -53,7 +53,7 @@ object TypesOneOpt extends DatomicTestSuite {
 
         // Isolate expected single error alone
         _ <- Type.string_?.insert(Some("a")).transact.expect {
-          case InsertValidationErrors(Seq((_, Seq(InsertError(_, _, _, Seq(error), _)))), _) =>
+          case InsertErrors(Seq((_, Seq(InsertError(_, _, _, Seq(error), _)))), _) =>
             error ==>
               s"""Type.string with value `a` doesn't satisfy validation:
                  |  _ > "a"
@@ -66,7 +66,7 @@ object TypesOneOpt extends DatomicTestSuite {
     "Int" - validation { implicit conn =>
       for {
         _ <- Type.int_?.insert(Some(1)).transact.expect {
-          case InsertValidationErrors(Seq((_, Seq(InsertError(_, _, _, Seq(error), _)))), _) =>
+          case InsertErrors(Seq((_, Seq(InsertError(_, _, _, Seq(error), _)))), _) =>
             error ==>
               s"""Type.int with value `1` doesn't satisfy validation:
                  |  _ > 1
@@ -78,7 +78,7 @@ object TypesOneOpt extends DatomicTestSuite {
     "Long" - validation { implicit conn =>
       for {
         _ <- Type.long_?.insert(Some(1L)).transact.expect {
-          case InsertValidationErrors(Seq((_, Seq(InsertError(_, _, _, Seq(error), _)))), _) =>
+          case InsertErrors(Seq((_, Seq(InsertError(_, _, _, Seq(error), _)))), _) =>
             error ==>
               s"""Type.long with value `1` doesn't satisfy validation:
                  |  _ > 1L
@@ -89,8 +89,8 @@ object TypesOneOpt extends DatomicTestSuite {
 
     "Float" - validation { implicit conn =>
       for {
-        _ <- Type.float_?.insert(Some(1.1f)).transact.expect {
-          case InsertValidationErrors(Seq((_, Seq(InsertError(_, _, _, Seq(error), _)))), _) =>
+        _ <- Type.float_?.insert(Some(float1)).transact.expect {
+          case InsertErrors(Seq((_, Seq(InsertError(_, _, _, Seq(error), _)))), _) =>
             error ==>
               s"""Type.float with value `1.1` doesn't satisfy validation:
                  |  _ > 1.1f
@@ -101,8 +101,8 @@ object TypesOneOpt extends DatomicTestSuite {
 
     "Double" - validation { implicit conn =>
       for {
-        _ <- Type.double_?.insert(Some(1.1)).transact.expect {
-          case InsertValidationErrors(Seq((_, Seq(InsertError(_, _, _, Seq(error), _)))), _) =>
+        _ <- Type.double_?.insert(Some(double1)).transact.expect {
+          case InsertErrors(Seq((_, Seq(InsertError(_, _, _, Seq(error), _)))), _) =>
             error ==>
               s"""Type.double with value `1.1` doesn't satisfy validation:
                  |  _ > 1.1
@@ -114,7 +114,7 @@ object TypesOneOpt extends DatomicTestSuite {
     "Boolean" - validation { implicit conn =>
       for {
         _ <- Type.boolean_?.insert(Some(true)).transact.expect {
-          case InsertValidationErrors(Seq((_, Seq(InsertError(_, _, _, Seq(error), _)))), _) =>
+          case InsertErrors(Seq((_, Seq(InsertError(_, _, _, Seq(error), _)))), _) =>
             error ==>
               s"""Type.boolean with value `true` doesn't satisfy validation:
                  |  _ == false
@@ -125,8 +125,8 @@ object TypesOneOpt extends DatomicTestSuite {
 
     "BigInt" - validation { implicit conn =>
       for {
-        _ <- Type.bigInt_?.insert(Some(BigInt(1))).transact.expect {
-          case InsertValidationErrors(Seq((_, Seq(InsertError(_, _, _, Seq(error), _)))), _) =>
+        _ <- Type.bigInt_?.insert(Some(bigInt1)).transact.expect {
+          case InsertErrors(Seq((_, Seq(InsertError(_, _, _, Seq(error), _)))), _) =>
             error ==>
               s"""Type.bigInt with value `1` doesn't satisfy validation:
                  |  _ > BigInt(1)
@@ -137,8 +137,8 @@ object TypesOneOpt extends DatomicTestSuite {
 
     "BigDecimal" - validation { implicit conn =>
       for {
-        _ <- Type.bigDecimal_?.insert(Some(BigDecimal(1.1))).transact.expect {
-          case InsertValidationErrors(Seq((_, Seq(InsertError(_, _, _, Seq(error), _)))), _) =>
+        _ <- Type.bigDecimal_?.insert(Some(bigDecimal1)).transact.expect {
+          case InsertErrors(Seq((_, Seq(InsertError(_, _, _, Seq(error), _)))), _) =>
             error ==>
               s"""Type.bigDecimal with value `1.1` doesn't satisfy validation:
                  |  _ > BigDecimal(1.1)
@@ -149,8 +149,8 @@ object TypesOneOpt extends DatomicTestSuite {
 
     "Date" - validation { implicit conn =>
       for {
-        _ <- Type.date_?.insert(Some(new Date(993942000000L))).transact.expect {
-          case InsertValidationErrors(Seq((_, Seq(InsertError(_, _, _, Seq(error), _)))), _) =>
+        _ <- Type.date_?.insert(Some(date1)).transact.expect {
+          case InsertErrors(Seq((_, Seq(InsertError(_, _, _, Seq(error), _)))), _) =>
             error ==>
               s"""Type.date with value `$date1` doesn't satisfy validation:
                  |  _.after(new Date(993942000000L))
@@ -162,7 +162,7 @@ object TypesOneOpt extends DatomicTestSuite {
     "UUID" - validation { implicit conn =>
       for {
         _ <- Type.uuid_?.insert(Some(UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"))).transact.expect {
-          case InsertValidationErrors(Seq((_, Seq(InsertError(_, _, _, Seq(error), _)))), _) =>
+          case InsertErrors(Seq((_, Seq(InsertError(_, _, _, Seq(error), _)))), _) =>
             error ==>
               s"""Type.uuid with value `aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa` doesn't satisfy validation:
                  |  _.toString != "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
@@ -175,7 +175,7 @@ object TypesOneOpt extends DatomicTestSuite {
       val uri = new URI("x")
       for {
         _ <- Type.uri_?.insert(Some(uri)).transact.expect {
-          case InsertValidationErrors(Seq((_, Seq(InsertError(_, _, _, Seq(error), _)))), _) =>
+          case InsertErrors(Seq((_, Seq(InsertError(_, _, _, Seq(error), _)))), _) =>
             error ==>
               s"""Type.uri with value `x` doesn't satisfy validation:
                  |  _.toString.length > 1
@@ -187,7 +187,7 @@ object TypesOneOpt extends DatomicTestSuite {
     "Byte" - validation { implicit conn =>
       for {
         _ <- Type.byte_?.insert(Some(byte1)).transact.expect {
-          case InsertValidationErrors(Seq((_, Seq(InsertError(_, _, _, Seq(error), _)))), _) =>
+          case InsertErrors(Seq((_, Seq(InsertError(_, _, _, Seq(error), _)))), _) =>
             error ==>
               s"""Type.byte with value `$byte1` doesn't satisfy validation:
                  |  _ > $byte1
@@ -199,7 +199,7 @@ object TypesOneOpt extends DatomicTestSuite {
     "Short" - validation { implicit conn =>
       for {
         _ <- Type.short_?.insert(Some(short1)).transact.expect {
-          case InsertValidationErrors(Seq((_, Seq(InsertError(_, _, _, Seq(error), _)))), _) =>
+          case InsertErrors(Seq((_, Seq(InsertError(_, _, _, Seq(error), _)))), _) =>
             error ==>
               s"""Type.short with value `$short1` doesn't satisfy validation:
                  |  _ > $short1
@@ -211,7 +211,7 @@ object TypesOneOpt extends DatomicTestSuite {
     "Char" - validation { implicit conn =>
       for {
         _ <- Type.char_?.insert(Some('a')).transact.expect {
-          case InsertValidationErrors(Seq((_, Seq(InsertError(_, _, _, Seq(error), _)))), _) =>
+          case InsertErrors(Seq((_, Seq(InsertError(_, _, _, Seq(error), _)))), _) =>
             error ==>
               s"""Type.char with value `a` doesn't satisfy validation:
                  |  _ > 'a'
@@ -223,7 +223,7 @@ object TypesOneOpt extends DatomicTestSuite {
     "ref" - validation { implicit conn =>
       for {
         _ <- Type.ref_?.insert(Some(1L)).transact.expect {
-          case InsertValidationErrors(Seq((_, Seq(InsertError(_, _, _, Seq(error), _)))), _) =>
+          case InsertErrors(Seq((_, Seq(InsertError(_, _, _, Seq(error), _)))), _) =>
             error ==>
               s"""Type.ref with value `1` doesn't satisfy validation:
                  |  _ > 1L

@@ -110,8 +110,7 @@ object UpdateOne_eid extends DatomicTestSuite {
         eid <- Ns.int.Tx(Other.s_("tx")).insert(1).transact.map(_.eids.head)
         _ <- Ns.int.Tx(Other.s).query.get.map(_ ==> List((1, "tx")))
 
-        tx
-          <- Ns(eid).int(2).Tx(Other.s("tx2")).update.transact.map(_.tx)
+        tx <- Ns(eid).int(2).Tx(Other.s("tx2")).update.transact.map(_.tx)
         _ <- Ns.int.Tx(Other.s).query.get.map(_ ==> List((2, "tx2")))
 
 

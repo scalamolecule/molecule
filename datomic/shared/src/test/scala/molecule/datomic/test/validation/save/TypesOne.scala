@@ -28,6 +28,7 @@ object TypesOne extends DatomicTestSuite {
                 )
               )
         }
+
         // Focusing only on the first (and only) error message
         // (See ValidationFormatting tests for multi-error validations)
         _ <- Type.string("a").save.transact.expect {
@@ -66,7 +67,7 @@ object TypesOne extends DatomicTestSuite {
 
     "Float" - validation { implicit conn =>
       for {
-        _ <- Type.float(1.1f).save.transact.expect {
+        _ <- Type.float(float1).save.transact.expect {
           case ValidationErrors(errorMap, _) =>
             errorMap.head._2.head ==>
               s"""Type.float with value `1.1` doesn't satisfy validation:
@@ -78,7 +79,7 @@ object TypesOne extends DatomicTestSuite {
 
     "Double" - validation { implicit conn =>
       for {
-        _ <- Type.double(1.1).save.transact.expect {
+        _ <- Type.double(double1).save.transact.expect {
           case ValidationErrors(errorMap, _) =>
             errorMap.head._2.head ==>
               s"""Type.double with value `1.1` doesn't satisfy validation:
@@ -102,7 +103,7 @@ object TypesOne extends DatomicTestSuite {
 
     "BigInt" - validation { implicit conn =>
       for {
-        _ <- Type.bigInt(BigInt(1)).save.transact.expect {
+        _ <- Type.bigInt(bigInt1).save.transact.expect {
           case ValidationErrors(errorMap, _) =>
             errorMap.head._2.head ==>
               s"""Type.bigInt with value `1` doesn't satisfy validation:
@@ -114,7 +115,7 @@ object TypesOne extends DatomicTestSuite {
 
     "BigDecimal" - validation { implicit conn =>
       for {
-        _ <- Type.bigDecimal(BigDecimal(1.1)).save.transact.expect {
+        _ <- Type.bigDecimal(bigDecimal1).save.transact.expect {
           case ValidationErrors(errorMap, _) =>
             errorMap.head._2.head ==>
               s"""Type.bigDecimal with value `1.1` doesn't satisfy validation:
@@ -126,7 +127,7 @@ object TypesOne extends DatomicTestSuite {
 
     "Date" - validation { implicit conn =>
       for {
-        _ <- Type.date(new Date(993942000000L)).save.transact.expect {
+        _ <- Type.date(date1).save.transact.expect {
           case ValidationErrors(errorMap, _) =>
             errorMap.head._2.head ==>
               s"""Type.date with value `$date1` doesn't satisfy validation:

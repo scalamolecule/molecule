@@ -1,6 +1,6 @@
 package molecule.core.util
 
-import molecule.base.error.{ExecutionError, InsertValidationErrors, MoleculeError, ValidationErrors}
+import molecule.base.error.{ExecutionError, InsertErrors, MoleculeError, ValidationErrors}
 import molecule.boilerplate.util.MoleculeLogging
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -23,13 +23,13 @@ trait FutureUtils extends ModelUtils with MoleculeLogging {
     fut
       .map(txR => Right(txR))
       .recover {
-        case e: ValidationErrors       =>
+        case e: ValidationErrors =>
           logger.trace(e.toString)
           Left(e)
-        case e: InsertValidationErrors =>
+        case e: InsertErrors     =>
           logger.trace(e.toString)
           Left(e)
-        case e: ExecutionError         =>
+        case e: ExecutionError   =>
           logger.trace(e.toString)
           Left(e)
         case e: Throwable              =>
@@ -41,9 +41,9 @@ trait FutureUtils extends ModelUtils with MoleculeLogging {
 
   def future[T](body: => T)(implicit ec: ExecutionContext): Future[T] = {
     Future(body).recover {
-      case e: ValidationErrors       => throw e
-      case e: InsertValidationErrors => throw e
-      case e: ExecutionError         => throw e
+      case e: ValidationErrors => throw e
+      case e: InsertErrors     => throw e
+      case e: ExecutionError   => throw e
       case e: Throwable              => throw ExecutionError(e.toString, e)
     }
   }
@@ -51,9 +51,9 @@ trait FutureUtils extends ModelUtils with MoleculeLogging {
   def tryFuture[T](toFuture: => Future[T])(implicit ec: ExecutionContext): Future[T] = try {
     toFuture
   } catch {
-    case e: ValidationErrors       => Future.failed(e)
-    case e: InsertValidationErrors => Future.failed(e)
-    case e: ExecutionError         => Future.failed(e)
+    case e: ValidationErrors => Future.failed(e)
+    case e: InsertErrors     => Future.failed(e)
+    case e: ExecutionError   => Future.failed(e)
     case e: Throwable              => Future.failed(ExecutionError(e.toString, e))
   }
 }

@@ -168,7 +168,7 @@ class UpdateExtraction(
   ): (String, String, String, Seq[AnyRef], Boolean) = attr match {
     case AttrSetManString(_, _, _, sets, _, _, _, _)     => addSetVs[String](attr, sets, valueString, retractCur)
     case AttrSetManInt(_, _, _, sets, _, _, _, _)        => addSetVs[Int](attr, sets, valueInt, retractCur)
-    case AttrSetManLong(_, _, _, sets, _, _, _, _)    => addSetVs[Long](attr, sets, valueLong, retractCur)
+    case AttrSetManLong(_, _, _, sets, _, _, _, _)       => addSetVs[Long](attr, sets, valueLong, retractCur)
     case AttrSetManFloat(_, _, _, sets, _, _, _, _)      => addSetVs[Float](attr, sets, valueFloat, retractCur)
     case AttrSetManDouble(_, _, _, sets, _, _, _, _)     => addSetVs[Double](attr, sets, valueDouble, retractCur)
     case AttrSetManBoolean(_, _, _, sets, _, _, _, _)    => addSetVs[Boolean](attr, sets, valueBoolean, retractCur)
@@ -200,7 +200,7 @@ class UpdateExtraction(
   private def setSwap(attr: AttrSetMan): Seq[(String, String, String, Seq[AnyRef], Boolean)] = attr match {
     case AttrSetManString(_, _, _, sets, _, _, _, _)     => swapSetVs[String](attr, sets, valueString)
     case AttrSetManInt(_, _, _, sets, _, _, _, _)        => swapSetVs[Int](attr, sets, valueInt)
-    case AttrSetManLong(_, _, _, sets, _, _, _, _)    => swapSetVs[Long](attr, sets, valueLong)
+    case AttrSetManLong(_, _, _, sets, _, _, _, _)       => swapSetVs[Long](attr, sets, valueLong)
     case AttrSetManFloat(_, _, _, sets, _, _, _, _)      => swapSetVs[Float](attr, sets, valueFloat)
     case AttrSetManDouble(_, _, _, sets, _, _, _, _)     => swapSetVs[Double](attr, sets, valueDouble)
     case AttrSetManBoolean(_, _, _, sets, _, _, _, _)    => swapSetVs[Boolean](attr, sets, valueBoolean)
@@ -244,7 +244,7 @@ class UpdateExtraction(
   private def setRemove(attr: AttrSetMan): Seq[(String, String, String, Seq[AnyRef], Boolean)] = attr match {
     case AttrSetManString(_, _, _, Seq(set), _, _, _, _)     => removeSetVs[String](attr, set, valueString)
     case AttrSetManInt(_, _, _, Seq(set), _, _, _, _)        => removeSetVs[Int](attr, set, valueInt)
-    case AttrSetManLong(_, _, _, Seq(set), _, _, _, _)    => removeSetVs[Long](attr, set, valueLong)
+    case AttrSetManLong(_, _, _, Seq(set), _, _, _, _)       => removeSetVs[Long](attr, set, valueLong)
     case AttrSetManFloat(_, _, _, Seq(set), _, _, _, _)      => removeSetVs[Float](attr, set, valueFloat)
     case AttrSetManDouble(_, _, _, Seq(set), _, _, _, _)     => removeSetVs[Double](attr, set, valueDouble)
     case AttrSetManBoolean(_, _, _, Seq(set), _, _, _, _)    => removeSetVs[Boolean](attr, set, valueBoolean)
@@ -256,7 +256,7 @@ class UpdateExtraction(
     case AttrSetManByte(_, _, _, Seq(set), _, _, _, _)       => removeSetVs[Byte](attr, set, valueByte)
     case AttrSetManShort(_, _, _, Seq(set), _, _, _, _)      => removeSetVs[Short](attr, set, valueShort)
     case AttrSetManChar(_, _, _, Seq(set), _, _, _, _)       => removeSetVs[Char](attr, set, valueChar)
-    case _                                                => throw ExecutionError(
+    case _                                                   => throw ExecutionError(
       s"Can only remove one Set of values for Set attribute `${attr.name}`. Found: $attr"
     )
   }

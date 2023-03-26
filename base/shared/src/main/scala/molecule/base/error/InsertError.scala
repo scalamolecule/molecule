@@ -66,7 +66,7 @@ case class InsertError(
     }
 
     s"""InsertError(
-       |$s  $outerTpl, // Outer tuple
+       |$s  $outerTpl, // Composite tuple index
        |$s  $tplIndex, // tuple index
        |$s  "$fullAttr",
        |$s  Seq($errorsStr),

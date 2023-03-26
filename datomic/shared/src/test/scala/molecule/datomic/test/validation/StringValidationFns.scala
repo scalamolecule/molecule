@@ -1,6 +1,6 @@
-package molecule.datomic.test.validation.save
+package molecule.datomic.test.validation
 
-import molecule.base.error.ValidationErrors
+import molecule.base.error._
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Validation._
 import molecule.datomic.async._
@@ -21,6 +21,12 @@ object StringValidationFns extends DatomicTestSuite {
               "`foo@bar` is not a valid email"
             )
         }
+        // Same with insert
+        _ <- Strings.email.insert("foo@bar").transact.expect {
+          case InsertErrors(Seq((_, Seq(InsertError(_, _, _, Seq(error), _)))), _) =>
+            error ==> "`foo@bar` is not a valid email"
+        }
+
         _ <- Strings.email("foo@bar", "foo@baz").save.transact.expect {
           case ValidationErrors(errors, _) =>
             errors.head ==> "Strings.email" -> Seq(

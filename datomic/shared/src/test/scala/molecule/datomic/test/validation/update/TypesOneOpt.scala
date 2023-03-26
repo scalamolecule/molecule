@@ -1,4 +1,4 @@
-package molecule.datomic.test.validation.save
+package molecule.datomic.test.validation.update
 
 import java.net.URI
 import java.util.{Date, UUID}
@@ -16,7 +16,9 @@ object TypesOneOpt extends DatomicTestSuite {
 
     "String" - validation { implicit conn =>
       for {
-        _ <- Type.string_?(Some("a")).save.transact.expect {
+        eid <- Type.string("b").save.transact.map(_.eids.head)
+
+        _ <- Type(eid).string_?(Some("a")).update.transact.expect {
           case ValidationErrors(errorMap, _) =>
             errorMap ==>
               Map(
@@ -27,21 +29,25 @@ object TypesOneOpt extends DatomicTestSuite {
                 )
               )
         }
-        // Focusing only on the first (and only) error message
-        // (See ValidationFormatting tests for multi-error validations)
-        _ <- Type.string_?(Some("a")).save.transact.expect {
+
+        // Focusing on error message only
+        _ <- Type(eid).string_?(Some("a")).update.transact.expect {
           case ValidationErrors(errorMap, _) =>
             errorMap.head._2.head ==>
               s"""Type.string with value `a` doesn't satisfy validation:
                  |  _ > "a"
                  |""".stripMargin
         }
+
+        // Value hasn't changed
+        _ <- Type.string.query.get.map(_ ==> List("b"))
       } yield ()
     }
 
     "Int" - validation { implicit conn =>
       for {
-        _ <- Type.int_?(Some(1)).save.transact.expect {
+        eid <- Type.int(2).save.transact.map(_.eids.head)
+        _ <- Type(eid).int_?(Some(1)).update.transact.expect {
           case ValidationErrors(errorMap, _) =>
             errorMap.head._2.head ==>
               s"""Type.int with value `1` doesn't satisfy validation:
@@ -53,7 +59,8 @@ object TypesOneOpt extends DatomicTestSuite {
 
     "Long" - validation { implicit conn =>
       for {
-        _ <- Type.long_?(Some(1L)).save.transact.expect {
+        eid <- Type.long(2L).save.transact.map(_.eids.head)
+        _ <- Type(eid).long_?(Some(1L)).update.transact.expect {
           case ValidationErrors(errorMap, _) =>
             errorMap.head._2.head ==>
               s"""Type.long with value `1` doesn't satisfy validation:
@@ -65,7 +72,8 @@ object TypesOneOpt extends DatomicTestSuite {
 
     "Float" - validation { implicit conn =>
       for {
-        _ <- Type.float_?(Some(float1)).save.transact.expect {
+        eid <- Type.float(float2).save.transact.map(_.eids.head)
+        _ <- Type(eid).float_?(Some(float1)).update.transact.expect {
           case ValidationErrors(errorMap, _) =>
             errorMap.head._2.head ==>
               s"""Type.float with value `1.1` doesn't satisfy validation:
@@ -77,7 +85,8 @@ object TypesOneOpt extends DatomicTestSuite {
 
     "Double" - validation { implicit conn =>
       for {
-        _ <- Type.double_?(Some(double1)).save.transact.expect {
+        eid <- Type.double(double2).save.transact.map(_.eids.head)
+        _ <- Type(eid).double_?(Some(double1)).update.transact.expect {
           case ValidationErrors(errorMap, _) =>
             errorMap.head._2.head ==>
               s"""Type.double with value `1.1` doesn't satisfy validation:
@@ -89,7 +98,8 @@ object TypesOneOpt extends DatomicTestSuite {
 
     "Boolean" - validation { implicit conn =>
       for {
-        _ <- Type.boolean_?(Some(true)).save.transact.expect {
+        eid <- Type.boolean(false).save.transact.map(_.eids.head)
+        _ <- Type(eid).boolean_?(Some(true)).update.transact.expect {
           case ValidationErrors(errorMap, _) =>
             errorMap.head._2.head ==>
               s"""Type.boolean with value `true` doesn't satisfy validation:
@@ -101,7 +111,8 @@ object TypesOneOpt extends DatomicTestSuite {
 
     "BigInt" - validation { implicit conn =>
       for {
-        _ <- Type.bigInt_?(Some(bigInt1)).save.transact.expect {
+        eid <- Type.bigInt(bigInt2).save.transact.map(_.eids.head)
+        _ <- Type(eid).bigInt_?(Some(bigInt1)).update.transact.expect {
           case ValidationErrors(errorMap, _) =>
             errorMap.head._2.head ==>
               s"""Type.bigInt with value `1` doesn't satisfy validation:
@@ -113,7 +124,8 @@ object TypesOneOpt extends DatomicTestSuite {
 
     "BigDecimal" - validation { implicit conn =>
       for {
-        _ <- Type.bigDecimal_?(Some(bigDecimal1)).save.transact.expect {
+        eid <- Type.bigDecimal(bigDecimal2).save.transact.map(_.eids.head)
+        _ <- Type(eid).bigDecimal_?(Some(bigDecimal1)).update.transact.expect {
           case ValidationErrors(errorMap, _) =>
             errorMap.head._2.head ==>
               s"""Type.bigDecimal with value `1.1` doesn't satisfy validation:
@@ -125,7 +137,8 @@ object TypesOneOpt extends DatomicTestSuite {
 
     "Date" - validation { implicit conn =>
       for {
-        _ <- Type.date_?(Some(date1)).save.transact.expect {
+        eid <- Type.date(date2).save.transact.map(_.eids.head)
+        _ <- Type(eid).date_?(Some(date1)).update.transact.expect {
           case ValidationErrors(errorMap, _) =>
             errorMap.head._2.head ==>
               s"""Type.date with value `$date1` doesn't satisfy validation:
@@ -137,7 +150,8 @@ object TypesOneOpt extends DatomicTestSuite {
 
     "UUID" - validation { implicit conn =>
       for {
-        _ <- Type.uuid_?(Some(UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"))).save.transact.expect {
+        eid <- Type.uuid(UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-bbbbbbbbbbbb")).save.transact.map(_.eids.head)
+        _ <- Type(eid).uuid_?(Some(UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"))).update.transact.expect {
           case ValidationErrors(errorMap, _) =>
             errorMap.head._2.head ==>
               s"""Type.uuid with value `aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa` doesn't satisfy validation:
@@ -148,9 +162,11 @@ object TypesOneOpt extends DatomicTestSuite {
     }
 
     "URI" - validation { implicit conn =>
-      val uri = new URI("x")
+      val uri1 = new URI("x")
+      val uri2 = new URI("xy")
       for {
-        _ <- Type.uri_?(Some(uri)).save.transact.expect {
+        eid <- Type.uri(uri2).save.transact.map(_.eids.head)
+        _ <- Type(eid).uri_?(Some(uri1)).update.transact.expect {
           case ValidationErrors(errorMap, _) =>
             errorMap.head._2.head ==>
               s"""Type.uri with value `x` doesn't satisfy validation:
@@ -162,7 +178,8 @@ object TypesOneOpt extends DatomicTestSuite {
 
     "Byte" - validation { implicit conn =>
       for {
-        _ <- Type.byte_?(Some(byte1)).save.transact.expect {
+        eid <- Type.byte(byte2).save.transact.map(_.eids.head)
+        _ <- Type(eid).byte_?(Some(byte1)).update.transact.expect {
           case ValidationErrors(errorMap, _) =>
             errorMap.head._2.head ==>
               s"""Type.byte with value `$byte1` doesn't satisfy validation:
@@ -174,7 +191,8 @@ object TypesOneOpt extends DatomicTestSuite {
 
     "Short" - validation { implicit conn =>
       for {
-        _ <- Type.short_?(Some(short1)).save.transact.expect {
+        eid <- Type.short(short2).save.transact.map(_.eids.head)
+        _ <- Type(eid).short_?(Some(short1)).update.transact.expect {
           case ValidationErrors(errorMap, _) =>
             errorMap.head._2.head ==>
               s"""Type.short with value `$short1` doesn't satisfy validation:
@@ -186,7 +204,8 @@ object TypesOneOpt extends DatomicTestSuite {
 
     "Char" - validation { implicit conn =>
       for {
-        _ <- Type.char_?(Some('a')).save.transact.expect {
+        eid <- Type.char('b').save.transact.map(_.eids.head)
+        _ <- Type(eid).char_?(Some('a')).update.transact.expect {
           case ValidationErrors(errorMap, _) =>
             errorMap.head._2.head ==>
               s"""Type.char with value `a` doesn't satisfy validation:
@@ -198,7 +217,8 @@ object TypesOneOpt extends DatomicTestSuite {
 
     "ref" - validation { implicit conn =>
       for {
-        _ <- Type.ref_?(Some(1L)).save.transact.expect {
+        eid <- Type.ref(2L).save.transact.map(_.eids.head)
+        _ <- Type(eid).ref_?(Some(1L)).update.transact.expect {
           case ValidationErrors(errorMap, _) =>
             errorMap.head._2.head ==>
               s"""Type.ref with value `1` doesn't satisfy validation:

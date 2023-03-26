@@ -17,7 +17,7 @@ object Composites extends DatomicTestSuite {
         _ <- (Type.int + Allowed.luckyNumber).insert(
           (1, 7) // bad, ok
         ).transact.expect {
-          case InsertValidationErrors(errors, _) =>
+          case InsertErrors(errors, _) =>
             errors ==> Seq(
               (
                 0, // row index
@@ -41,7 +41,7 @@ object Composites extends DatomicTestSuite {
         _ <- (Type.int + Allowed.luckyNumber).insert(
           (2, 0) // ok, bad
         ).transact.expect {
-          case InsertValidationErrors(errors, _) =>
+          case InsertErrors(errors, _) =>
             errors ==> Seq(
               (
                 0, // row index
@@ -61,7 +61,7 @@ object Composites extends DatomicTestSuite {
         _ <- (Type.int + Allowed.luckyNumber).insert(
           (1, 0) // bad, bad
         ).transact.expect {
-          case InsertValidationErrors(errors, _) =>
+          case InsertErrors(errors, _) =>
             errors ==> Seq(
               (
                 0, // row index
@@ -97,7 +97,7 @@ object Composites extends DatomicTestSuite {
         _ <- (Type.int.string + Allowed.luckyNumber).insert(
           ((1, "b"), 7) // (bad, ok), ok
         ).transact.expect {
-          case InsertValidationErrors(errors, _) =>
+          case InsertErrors(errors, _) =>
             errors ==> Seq(
               (
                 0, // row index
@@ -121,7 +121,7 @@ object Composites extends DatomicTestSuite {
         _ <- (Type.int.string + Allowed.luckyNumber).insert(
           ((2, "a"), 7) // (ok, bad), ok
         ).transact.expect {
-          case InsertValidationErrors(errors, _) =>
+          case InsertErrors(errors, _) =>
             errors ==> Seq(
               (
                 0, // row index
@@ -145,7 +145,7 @@ object Composites extends DatomicTestSuite {
         _ <- (Type.int.string + Allowed.luckyNumber).insert(
           ((2, "b"), 0) // (ok, ok), bad
         ).transact.expect {
-          case InsertValidationErrors(errors, _) =>
+          case InsertErrors(errors, _) =>
             errors ==> Seq(
               (
                 0, // row index
@@ -165,7 +165,7 @@ object Composites extends DatomicTestSuite {
         _ <- (Type.int.string + Allowed.luckyNumber).insert(
           ((1, "a"), 7) // (bad, bad), ok
         ).transact.expect {
-          case InsertValidationErrors(errors, _) =>
+          case InsertErrors(errors, _) =>
             errors ==> Seq(
               (
                 0, // row index
@@ -200,7 +200,7 @@ object Composites extends DatomicTestSuite {
         _ <- (Type.int.string + Allowed.luckyNumber).insert(
           ((1, "b"), 0) // (bad, ok), bad
         ).transact.expect {
-          case InsertValidationErrors(errors, _) =>
+          case InsertErrors(errors, _) =>
             errors ==> Seq(
               (
                 0, // row index
@@ -231,7 +231,7 @@ object Composites extends DatomicTestSuite {
         _ <- (Type.int.string + Allowed.luckyNumber).insert(
           ((2, "a"), 0) // (ok, bad), bad
         ).transact.expect {
-          case InsertValidationErrors(errors, _) =>
+          case InsertErrors(errors, _) =>
             errors ==> Seq(
               (
                 0, // row index
@@ -262,7 +262,7 @@ object Composites extends DatomicTestSuite {
         _ <- (Type.int.string + Allowed.luckyNumber).insert(
           ((1, "a"), 0) // (bad, bad), bad
         ).transact.expect {
-          case InsertValidationErrors(errors, _) =>
+          case InsertErrors(errors, _) =>
             errors ==> Seq(
               (
                 0, // row index
@@ -309,7 +309,7 @@ object Composites extends DatomicTestSuite {
         _ <- (Allowed.luckyNumber + Type.int.string).insert(
           (7, (1, "b")) // ok, (bad, ok)
         ).transact.expect {
-          case InsertValidationErrors(errors, _) =>
+          case InsertErrors(errors, _) =>
             errors ==> Seq(
               (
                 0, // row index
@@ -333,7 +333,7 @@ object Composites extends DatomicTestSuite {
         _ <- (Allowed.luckyNumber + Type.int.string).insert(
           (7, (2, "a")) // ok, (ok, bad)
         ).transact.expect {
-          case InsertValidationErrors(errors, _) =>
+          case InsertErrors(errors, _) =>
             errors ==> Seq(
               (
                 0, // row index
@@ -357,7 +357,7 @@ object Composites extends DatomicTestSuite {
         _ <- (Allowed.luckyNumber + Type.int.string).insert(
           (0, (2, "b")) // bad, (ok, ok)
         ).transact.expect {
-          case InsertValidationErrors(errors, _) =>
+          case InsertErrors(errors, _) =>
             errors ==> Seq(
               (
                 0, // row index
@@ -377,7 +377,7 @@ object Composites extends DatomicTestSuite {
         _ <- (Allowed.luckyNumber + Type.int.string).insert(
           (7, (1, "a")) // ok, (bad, bad)
         ).transact.expect {
-          case InsertValidationErrors(errors, _) =>
+          case InsertErrors(errors, _) =>
             errors ==> Seq(
               (
                 0, // row index
@@ -412,7 +412,7 @@ object Composites extends DatomicTestSuite {
         _ <- (Allowed.luckyNumber + Type.int.string).insert(
           (0, (1, "b")) // bad, (bad, ok)
         ).transact.expect {
-          case InsertValidationErrors(errors, _) =>
+          case InsertErrors(errors, _) =>
             errors ==> Seq(
               (
                 0, // row index
@@ -443,7 +443,7 @@ object Composites extends DatomicTestSuite {
         _ <- (Allowed.luckyNumber + Type.int.string).insert(
           (0, (2, "a")) // bad, (ok, bad)
         ).transact.expect {
-          case InsertValidationErrors(errors, _) =>
+          case InsertErrors(errors, _) =>
             errors ==> Seq(
               (
                 0, // row index
@@ -474,7 +474,7 @@ object Composites extends DatomicTestSuite {
         _ <- (Allowed.luckyNumber + Type.int.string).insert(
           (0, (1, "a")) // bad, (bad, bad)
         ).transact.expect {
-          case InsertValidationErrors(errors, _) =>
+          case InsertErrors(errors, _) =>
             errors ==> Seq(
               (
                 0, // row index
@@ -521,7 +521,7 @@ object Composites extends DatomicTestSuite {
         _ <- (Type.int.string + Allowed.luckyNumber.luckyNumber2).insert(
           ((1, "b"), (7, 9)) // (bad, ok), (ok, ok)
         ).transact.expect {
-          case InsertValidationErrors(errors, _) =>
+          case InsertErrors(errors, _) =>
             errors ==> Seq(
               (
                 0, // row index
@@ -545,7 +545,7 @@ object Composites extends DatomicTestSuite {
         _ <- (Type.int.string + Allowed.luckyNumber.luckyNumber2).insert(
           ((2, "a"), (7, 9)) // (ok, bad), (ok, ok)
         ).transact.expect {
-          case InsertValidationErrors(errors, _) =>
+          case InsertErrors(errors, _) =>
             errors ==> Seq(
               (
                 0, // row index
@@ -569,7 +569,7 @@ object Composites extends DatomicTestSuite {
         _ <- (Type.int.string + Allowed.luckyNumber.luckyNumber2).insert(
           ((2, "b"), (0, 9)) // (ok, ok), (bad, ok)
         ).transact.expect {
-          case InsertValidationErrors(errors, _) =>
+          case InsertErrors(errors, _) =>
             errors ==> Seq(
               (
                 0, // row index
@@ -589,7 +589,7 @@ object Composites extends DatomicTestSuite {
         _ <- (Type.int.string + Allowed.luckyNumber.luckyNumber2).insert(
           ((2, "b"), (7, 0)) // (ok, ok), (ok, bad)
         ).transact.expect {
-          case InsertValidationErrors(errors, _) =>
+          case InsertErrors(errors, _) =>
             errors ==> Seq(
               (
                 0, // row index
@@ -610,7 +610,7 @@ object Composites extends DatomicTestSuite {
         _ <- (Type.int.string + Allowed.luckyNumber.luckyNumber2).insert(
           ((1, "a"), (0, 2)) // (bad, bad), (bad, bad)
         ).transact.expect {
-          case InsertValidationErrors(errors, _) =>
+          case InsertErrors(errors, _) =>
             errors ==> Seq(
               (
                 0, // row index
@@ -666,7 +666,7 @@ object Composites extends DatomicTestSuite {
           ((3, "b"), (9, 9)), // (ok , ok ), (ok , ok)
           ((1, "c"), (13, 0)) // (bad, ok ), (ok, bad)
         ).transact.expect {
-          case InsertValidationErrors(errors, _) =>
+          case InsertErrors(errors, _) =>
             errors ==> Seq(
               (
                 0, // row index of first row

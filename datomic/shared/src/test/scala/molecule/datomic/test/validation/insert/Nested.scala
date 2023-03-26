@@ -21,7 +21,7 @@ object Nested extends DatomicTestSuite {
             "b@bb.com",
           ))
         ).transact.expect {
-          case InsertValidationErrors(errors, _) =>
+          case InsertErrors(errors, _) =>
             errors ==> Seq(
               (
                 0, // Top-level row index
@@ -48,7 +48,7 @@ object Nested extends DatomicTestSuite {
             "b@bb.com",
           ))
         ).transact.expect {
-          case InsertValidationErrors(errors, _) =>
+          case InsertErrors(errors, _) =>
             errors ==> Seq(
               (
                 0, // Top-level row index
@@ -84,7 +84,7 @@ object Nested extends DatomicTestSuite {
             "b@bb",
           ))
         ).transact.expect {
-          case InsertValidationErrors(errors, _) =>
+          case InsertErrors(errors, _) =>
             errors ==> Seq(
               (
                 0, // Top-level row index
@@ -120,7 +120,7 @@ object Nested extends DatomicTestSuite {
             "b@bb.com",
           ))
         ).transact.expect {
-          case InsertValidationErrors(errors, _) =>
+          case InsertErrors(errors, _) =>
             errors ==> Seq(
               (
                 0, // Top-level row index
@@ -165,7 +165,7 @@ object Nested extends DatomicTestSuite {
             "b@bb.com",
           ))
         ).transact.expect {
-          case InsertValidationErrors(errors, _) =>
+          case InsertErrors(errors, _) =>
             errors ==> Seq(
               (
                 0, // Top-level row index
@@ -210,7 +210,7 @@ object Nested extends DatomicTestSuite {
             "b@bb",
           ))
         ).transact.expect {
-          case InsertValidationErrors(errors, _) =>
+          case InsertErrors(errors, _) =>
             errors ==> Seq(
               (
                 0, // Top-level row index
@@ -258,7 +258,7 @@ object Nested extends DatomicTestSuite {
             "b@bb",
           ))
         ).transact.expect {
-          case InsertValidationErrors(errors, _) =>
+          case InsertErrors(errors, _) =>
             errors ==> Seq(
               (
                 0, // Top-level row index
@@ -318,7 +318,7 @@ object Nested extends DatomicTestSuite {
             ("b@bb", List(9, 2))
           ))
         ).transact.expect {
-          case InsertValidationErrors(errors, _) =>
+          case InsertErrors(errors, _) =>
             errors ==> Seq(
               (
                 0, // Top-level row index
@@ -421,7 +421,7 @@ object Nested extends DatomicTestSuite {
             ("b@bb.com", (0, 13))
           ))
         ).transact.expect {
-          case InsertValidationErrors(errors, _) =>
+          case InsertErrors(errors, _) =>
             errors ==> Seq(
               (
                 0, // Top-level row index

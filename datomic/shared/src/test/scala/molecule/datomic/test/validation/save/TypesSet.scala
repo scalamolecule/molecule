@@ -81,10 +81,10 @@ object TypesSet extends DatomicTestSuite {
 
     "Float" - validation { implicit conn =>
       for {
-        _ <- Type.floats(Set(0.1f, 1.1f, 2.2f)).save.transact.expect {
+        _ <- Type.floats(Set(float0, float1, float2)).save.transact.expect {
           case ValidationErrors(errorMap, _) =>
             errorMap.head._2 ==> Seq(
-              s"""Type.floats with value `0.1` doesn't satisfy validation:
+              s"""Type.floats with value `0.0` doesn't satisfy validation:
                  |  _ > 1.1f
                  |""".stripMargin,
               s"""Type.floats with value `1.1` doesn't satisfy validation:
@@ -97,10 +97,10 @@ object TypesSet extends DatomicTestSuite {
 
     "Double" - validation { implicit conn =>
       for {
-        _ <- Type.doubles(Set(0.1, 1.1, 2.2)).save.transact.expect {
+        _ <- Type.doubles(Set(double0, double1, double2)).save.transact.expect {
           case ValidationErrors(errorMap, _) =>
             errorMap.head._2 ==> Seq(
-              s"""Type.doubles with value `0.1` doesn't satisfy validation:
+              s"""Type.doubles with value `0.0` doesn't satisfy validation:
                  |  _ > 1.1
                  |""".stripMargin,
               s"""Type.doubles with value `1.1` doesn't satisfy validation:
@@ -126,7 +126,7 @@ object TypesSet extends DatomicTestSuite {
 
     "BigInt" - validation { implicit conn =>
       for {
-        _ <- Type.bigInts(Set(BigInt(0), BigInt(1), BigInt(2))).save.transact.expect {
+        _ <- Type.bigInts(Set(bigInt0, bigInt1, bigInt2)).save.transact.expect {
           case ValidationErrors(errorMap, _) =>
             errorMap.head._2 ==> Seq(
               s"""Type.bigInts with value `0` doesn't satisfy validation:
@@ -142,10 +142,10 @@ object TypesSet extends DatomicTestSuite {
 
     "BigDecimal" - validation { implicit conn =>
       for {
-        _ <- Type.bigDecimals(Set(BigDecimal(0.1), BigDecimal(1.1), BigDecimal(2.2))).save.transact.expect {
+        _ <- Type.bigDecimals(Set(bigDecimal0, bigDecimal1, bigDecimal2)).save.transact.expect {
           case ValidationErrors(errorMap, _) =>
             errorMap.head._2 ==> Seq(
-              s"""Type.bigDecimals with value `0.1` doesn't satisfy validation:
+              s"""Type.bigDecimals with value `0.0` doesn't satisfy validation:
                  |  _ > BigDecimal(1.1)
                  |""".stripMargin,
               s"""Type.bigDecimals with value `1.1` doesn't satisfy validation:

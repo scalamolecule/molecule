@@ -5,7 +5,7 @@ import clojure.lang.Keyword
 import datomic.Util.list
 import datomic.query.EntityMap
 import datomic.{Database, Peer}
-import molecule.base.error.ExecutionError
+import molecule.base.error.{ExecutionError, ValidationErrors}
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.{UpdateExtraction, UpdateOps}
@@ -19,7 +19,10 @@ trait Update_stmts extends DatomicTxBase_JVM with UpdateOps with MoleculeLogging
     conn: DatomicConn_JVM,
     elements: List[Element]
   ): Data = {
-    ConflictingAttrs.check(elements, distinguishMode = true)
+    val validationErrors = ConflictingAttrs.check(elements, distinguishMode = true)
+    if (validationErrors.nonEmpty) {
+      throw ValidationErrors(validationErrors)
+    }
 
     val (eids, filterElements, data) = resolve(elements, Nil, Nil, Nil)
 
@@ -123,7 +126,7 @@ trait Update_stmts extends DatomicTxBase_JVM with UpdateOps with MoleculeLogging
     filterAttr match {
       case AttrOneTacString(_, _, _, vs, _, _, _, _)     => vs.map(v => list(at, v.asInstanceOf[AnyRef]))
       case AttrOneTacInt(_, _, _, vs, _, _, _, _)        => vs.map(v => list(at, v.asInstanceOf[AnyRef]))
-      case AttrOneTacLong(_, _, _, vs, _, _, _, _)    => vs.map(v => list(at, v.asInstanceOf[AnyRef]))
+      case AttrOneTacLong(_, _, _, vs, _, _, _, _)       => vs.map(v => list(at, v.asInstanceOf[AnyRef]))
       case AttrOneTacFloat(_, _, _, vs, _, _, _, _)      => vs.map(v => list(at, v.asInstanceOf[AnyRef]))
       case AttrOneTacDouble(_, _, _, vs, _, _, _, _)     => vs.map(v => list(at, v.asInstanceOf[AnyRef]))
       case AttrOneTacBoolean(_, _, _, vs, _, _, _, _)    => vs.map(v => list(at, v.asInstanceOf[AnyRef]))

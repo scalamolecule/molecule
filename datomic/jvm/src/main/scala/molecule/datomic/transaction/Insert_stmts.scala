@@ -24,7 +24,7 @@ trait Insert_stmts
     ConflictingAttrs.check(mainElements)
 
     val tpl2stmts          : Product => Seq[InsertError]  = getResolver(mainElements)
-    val indexedInsertErrors: Seq[(Int, Seq[InsertError])] =
+    val insertErrors: Seq[(Int, Seq[InsertError])] =
       tpls.zipWithIndex.flatMap { case (tpl, rowIndex) =>
         e = newId
         e0 = e
@@ -33,8 +33,20 @@ trait Insert_stmts
         if (rowErrors.isEmpty) None else Some((rowIndex, rowErrors))
       }
 
-    if (indexedInsertErrors.nonEmpty) {
-      throw InsertValidationErrors(indexedInsertErrors)
+    val allValidationErrors = insertErrors ++ {
+      // Convert tx meta data save errors to a single insert error
+      val txMetaDataErrors = ConflictingAttrs.check(txMetaElements).toSeq.zipWithIndex.map {
+        case ((fullAttr, errors), i) => InsertError(0, i, fullAttr, errors, Nil)
+      }
+      if (txMetaDataErrors.isEmpty) Nil else
+        Seq(
+          // Append a tx meta data errors row (with meta row index -1)
+          (-1, txMetaDataErrors)
+        )
+    }
+
+    if (allValidationErrors.nonEmpty) {
+      throw InsertErrors(allValidationErrors)
     }
 
     if (txMetaElements.nonEmpty) {
