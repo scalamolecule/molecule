@@ -2,7 +2,7 @@ package molecule.core.marshalling
 
 import akka.util.ByteString
 import boopickle.Default._
-import molecule.base.error.{ExecutionError, MoleculeError, ValidationErrors}
+import molecule.base.error._
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.api.TxReport
@@ -87,11 +87,17 @@ abstract class RpcHandlers(rpc: MoleculeRpc) extends MoleculeLogging with Serial
   private def handleErrors(body: => Future[Array[Byte]]): Future[Array[Byte]] = try {
     body
       .recoverWith {
+        case e: ModelError       =>
+          logger.error(e.toString)
+          left(e.copy(message = msg + e.message))
         case e: ValidationErrors =>
           logger.error(e.toString)
           left(e.copy(message = Some(msg + e.msg)))
+        case e: InsertErrors     =>
+          logger.trace(e)
+          left(e.copy(message = Some(msg + e.msg)))
         case e: ExecutionError   =>
-          logger.error(e.toString)
+          logger.trace(e)
           left(e.copy(message = msg + e.message))
         case e: Throwable        =>
           logger.error(e.toString)
@@ -99,10 +105,16 @@ abstract class RpcHandlers(rpc: MoleculeRpc) extends MoleculeLogging with Serial
           left(ExecutionError(msg + e.toString, e))
       }
   } catch {
+    case e: ModelError       =>
+      logger.trace(e)
+      left(e.copy(message = msg + e.message))
     case e: ValidationErrors =>
       logger.trace(e)
       left(e.copy(message = Some(msg + e.msg)))
-    case e: ExecutionError   =>
+    case e: InsertErrors =>
+      logger.trace(e)
+      left(e.copy(message = Some(msg + e.msg)))
+    case e: ExecutionError       =>
       logger.trace(e)
       left(e.copy(message = msg + e.message))
     case e: Throwable        =>

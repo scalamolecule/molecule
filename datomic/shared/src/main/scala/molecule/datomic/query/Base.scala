@@ -1,7 +1,8 @@
 package molecule.datomic.query
 
 import java.util.{Iterator => jIterator, List => jList}
-import molecule.base.error.ExecutionError
+import molecule.base.error._
+
 import molecule.base.util.BaseHelpers
 import molecule.boilerplate.ast.Model._
 import molecule.core.query.Model2Query
@@ -181,7 +182,7 @@ trait Base[Tpl] extends BaseHelpers with JavaConversions { self: Model2Query[Tpl
         case List(1, 2, 3, 4, 6)    =>
         case List(1, 2, 3, 4, 5)    =>
         case List(1, 2, 3, 4, 5, 6) =>
-        case other                  => throw ExecutionError(
+        case other                  => throw ModelError(
           s"Sort index 1 should be present and additional indexes continuously increase (in any order). " +
             s"Found sort index(es): " + other.mkString(", ")
         )
@@ -190,11 +191,11 @@ trait Base[Tpl] extends BaseHelpers with JavaConversions { self: Model2Query[Tpl
     }
   }
 
-  final protected def unexpectedElement(element: Element) = throw ExecutionError("Unexpected element: " + element)
-  final protected def unexpectedOp(op: Op) = throw ExecutionError("Unexpected operation: " + op)
-  final protected def unexpectedKw(kw: String) = throw ExecutionError("Unexpected keyword: " + kw)
+  final protected def unexpectedElement(element: Element) = throw ModelError("Unexpected element: " + element)
+  final protected def unexpectedOp(op: Op) = throw ModelError("Unexpected operation: " + op)
+  final protected def unexpectedKw(kw: String) = throw ModelError("Unexpected keyword: " + kw)
 
-  final protected def noMixedNestedModes = throw ExecutionError(
+  final protected def noMixedNestedModes = throw ModelError(
     "Can't mix mandatory/optional nested data structures."
   )
 

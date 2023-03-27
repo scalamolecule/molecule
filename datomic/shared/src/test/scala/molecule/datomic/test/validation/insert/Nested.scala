@@ -20,7 +20,8 @@ object Nested extends DatomicTestSuite {
             "a@aa.com",
             "b@bb.com",
           ))
-        ).transact.expect {
+        ).transact
+          .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
             errors ==> Seq(
               (
@@ -47,7 +48,8 @@ object Nested extends DatomicTestSuite {
             "a@aa",
             "b@bb.com",
           ))
-        ).transact.expect {
+        ).transact
+          .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
             errors ==> Seq(
               (
@@ -83,7 +85,8 @@ object Nested extends DatomicTestSuite {
             "a@aa.com",
             "b@bb",
           ))
-        ).transact.expect {
+        ).transact
+          .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
             errors ==> Seq(
               (
@@ -119,7 +122,8 @@ object Nested extends DatomicTestSuite {
             "a@aa",
             "b@bb.com",
           ))
-        ).transact.expect {
+        ).transact
+          .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
             errors ==> Seq(
               (
@@ -164,7 +168,8 @@ object Nested extends DatomicTestSuite {
             "a@aa",
             "b@bb.com",
           ))
-        ).transact.expect {
+        ).transact
+          .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
             errors ==> Seq(
               (
@@ -209,7 +214,8 @@ object Nested extends DatomicTestSuite {
             "a@aa",
             "b@bb",
           ))
-        ).transact.expect {
+        ).transact
+          .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
             errors ==> Seq(
               (
@@ -257,7 +263,8 @@ object Nested extends DatomicTestSuite {
             "a@aa",
             "b@bb",
           ))
-        ).transact.expect {
+        ).transact
+          .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
             errors ==> Seq(
               (
@@ -312,12 +319,13 @@ object Nested extends DatomicTestSuite {
 
     "3 levels" - validation { implicit conn =>
       for {
-        _ <- Type.int.Refs.*(Strings.email.Enums.*(Allowed.luckyNumber)).insert(
+        _ <- Type.int.Refs.*(Strings.email.Enums.*(Enum.luckyNumber)).insert(
           (1, List(
             ("a@aa.com", List(1, 7)),
             ("b@bb", List(9, 2))
           ))
-        ).transact.expect {
+        ).transact
+          .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
             errors ==> Seq(
               (
@@ -355,7 +363,7 @@ object Nested extends DatomicTestSuite {
                                   InsertError(
                                     0, // Outer tuple
                                     0, // tuple index
-                                    "Allowed.luckyNumber",
+                                    "Enum.luckyNumber",
                                     Seq(
                                       """Value `1` is not one of the allowed values in Seq(7, 9, 13)"""
                                     ),
@@ -391,7 +399,7 @@ object Nested extends DatomicTestSuite {
                                   InsertError(
                                     0, // Outer tuple
                                     0, // tuple index
-                                    "Allowed.luckyNumber",
+                                    "Enum.luckyNumber",
                                     Seq(
                                       """Value `2` is not one of the allowed values in Seq(7, 9, 13)"""
                                     ),
@@ -415,12 +423,13 @@ object Nested extends DatomicTestSuite {
 
     "Nested + composite" - validation { implicit conn =>
       for {
-        _ <- Type.int.Refs.*(Strings.email + Allowed.luckyNumber.luckyNumber2).insert(
+        _ <- Type.int.Refs.*(Strings.email + Enum.luckyNumber.luckyNumber2).insert(
           (1, List(
             ("a@aa", (7, 2)),
             ("b@bb.com", (0, 13))
           ))
-        ).transact.expect {
+        ).transact
+          .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
             errors ==> Seq(
               (
@@ -458,7 +467,7 @@ object Nested extends DatomicTestSuite {
                           InsertError(
                             1, // Outer tuple
                             1, // tuple index
-                            "Allowed.luckyNumber2",
+                            "Enum.luckyNumber2",
                             Seq(
                               """Lucky number can only be 7, 9 or 13"""
                             ),
@@ -472,7 +481,7 @@ object Nested extends DatomicTestSuite {
                           InsertError(
                             1, // Outer tuple
                             0, // tuple index
-                            "Allowed.luckyNumber",
+                            "Enum.luckyNumber",
                             Seq(
                               """Value `0` is not one of the allowed values in Seq(7, 9, 13)"""
                             ),

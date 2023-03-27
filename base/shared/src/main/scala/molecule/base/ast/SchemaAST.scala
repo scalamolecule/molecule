@@ -104,28 +104,33 @@ object SchemaAST extends BaseHelpers {
   case class MetaNs(
     ns: String,
     attrs: Seq[MetaAttr],
-    backRefNss: Seq[String] = Nil
+    backRefNss: Seq[String] = Nil,
+    mandatory: Seq[String] = Nil,
+    tuples: Seq[String] = Nil
   ) {
     def render(tabs: Int): String = {
-      val maxAttr  = attrs.map(_.attr.length).max
-      val maxTpe   = attrs.map(_.tpe.length).max
-      val attrsStr = if (attrs.isEmpty) "" else {
+      val maxAttr      = attrs.map(_.attr.length).max
+      val maxTpe       = attrs.map(_.tpe.length).max
+      val attrsStr     = if (attrs.isEmpty) "" else {
         val p   = indent(tabs)
         val pad = s"\n$p  "
         attrs.map { attr =>
-          val attr1        = "\"" + attr.attr + "\"" + padS(maxAttr, attr.attr)
-          val card         = attr.card
-          val tpe          = "\"" + attr.tpe + "\"" + padS(maxTpe, attr.tpe)
-          val refNs        = o(attr.refNs)
-          val options      = sq(attr.options)
-          val descr        = o(attr.descr)
-          val alias        = o(attr.alias)
-          val validations1 = renderValidations(attr.validations)
-          s"""MetaAttr($attr1, $card, $tpe, $refNs, $options, $descr, $alias, $validations1)"""
+          val attr1         = "\"" + attr.attr + "\"" + padS(maxAttr, attr.attr)
+          val card          = attr.card
+          val tpe           = "\"" + attr.tpe + "\"" + padS(maxTpe, attr.tpe)
+          val refNs         = o(attr.refNs)
+          val options       = sq(attr.options)
+          val descr         = o(attr.description)
+          val alias         = o(attr.alias)
+          val requiredAttrs = sq(attr.requiredAttrs)
+          val validations1  = renderValidations(attr.validations)
+          s"""MetaAttr($attr1, $card, $tpe, $refNs, $options, $descr, $alias, $requiredAttrs, $validations1)"""
         }.mkString(pad, s",$pad", s"\n$p")
       }
-      val backRefs = if (backRefNss.isEmpty) "" else backRefNss.mkString("\"", "\", \"", "\"")
-      s"""MetaNs("$ns", Seq($attrsStr), Seq($backRefs))"""
+      val backRefs     = if (backRefNss.isEmpty) "" else backRefNss.mkString("\"", "\", \"", "\"")
+      val mandatoryStr = if (mandatory.isEmpty) "" else mandatory.mkString("\"", "\", \"", "\"")
+      val tupleStr     = if (tuples.isEmpty) "" else tuples.mkString("\"", "\", \"", "\"")
+      s"""MetaNs("$ns", Seq($attrsStr), Seq($backRefs), Seq($mandatoryStr), Seq($tupleStr))"""
     }
 
     override def toString: String = render(0)
@@ -138,13 +143,14 @@ object SchemaAST extends BaseHelpers {
     tpe: String,
     refNs: Option[String] = None,
     options: Seq[String] = Nil,
-    descr: Option[String] = None,
+    description: Option[String] = None,
     alias: Option[String] = None,
+    requiredAttrs: Seq[String] = Nil,
     validations: Seq[(String, String)] = Nil
   ) {
     override def toString: String = {
       val validations1 = renderValidations(validations)
-      s"""MetaAttr("$attr", $card, "$tpe", ${o(refNs)}, ${sq(options)}, ${o(descr)}, ${o(alias)}, $validations1)"""
+      s"""MetaAttr("$attr", $card, "$tpe", ${o(refNs)}, ${sq(options)}, ${o(description)}, ${o(alias)}, ${sq(requiredAttrs)}, $validations1)"""
     }
   }
 

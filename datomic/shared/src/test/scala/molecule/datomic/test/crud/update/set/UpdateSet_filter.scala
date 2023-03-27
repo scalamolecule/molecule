@@ -1,6 +1,6 @@
 package molecule.datomic.test.crud.update.set
 
-import molecule.base.error.ExecutionError
+import molecule.base.error.ModelError
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.datomic.setup.DatomicTestSuite
@@ -73,7 +73,8 @@ object UpdateSet_filter extends DatomicTestSuite {
 
     "Update filter value itself" - types { implicit conn =>
       for {
-        _ <- Ns.ints_(42).ints(1).update.transact.expect { case ExecutionError(err, _) =>
+        _ <- Ns.ints_(42).ints(1).update.transact
+            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Can only lookup entity with card-one attribute value. Found:\n" +
             """AttrSetTacInt("Ns", "ints", Appl, Seq(Set(42)), None, Nil, None, None)"""
         }

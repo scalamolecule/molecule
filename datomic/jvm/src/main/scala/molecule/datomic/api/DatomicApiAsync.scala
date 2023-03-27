@@ -1,5 +1,6 @@
 package molecule.datomic.api
 
+import molecule.base.ast.SchemaAST.MetaNs
 import molecule.boilerplate.ast.Model._
 import molecule.core.action.Insert
 import molecule.core.api.{ApiAsync, Connection, TxReport}
@@ -51,26 +52,26 @@ trait DatomicApiAsync extends SubscriptionStarter with DatomicAsyncApiBase with 
 
   implicit class datomicSaveApiAsync[Tpl](save: DatomicSave) extends Transaction {
     override def transact(implicit conn: Connection, ec: ExecutionContext): Future[TxReport] = tryFuture {
-      conn.asInstanceOf[DatomicConn_JVM].transact_async(getStmts)
+      conn.asInstanceOf[DatomicConn_JVM].transact_async(getStmts(conn.proxy.nsMap))
     }
     override def inspect(implicit conn: Connection, ec: ExecutionContext): Future[Unit] =
-      printInspectTx("SAVE", save.elements, getStmts)
+      printInspectTx("SAVE", save.elements, getStmts(conn.proxy.nsMap))
 
-    private def getStmts: Data =
-      (new SaveExtraction() with Save_stmts).getStmts(save.elements)
+    private def getStmts(nsMap: Map[String, MetaNs]): Data =
+      (new SaveExtraction() with Save_stmts).getStmts(nsMap, save.elements)
   }
 
 
   implicit class datomicInsertApiAsync[Tpl](insert0: Insert) extends Transaction {
     val insert = insert0.asInstanceOf[DatomicInsert_JVM]
     override def transact(implicit conn: Connection, ec: ExecutionContext): Future[TxReport] = tryFuture {
-      conn.asInstanceOf[DatomicConn_JVM].transact_async(getStmts)
+      conn.asInstanceOf[DatomicConn_JVM].transact_async(getStmts(conn.proxy.nsMap))
     }
     override def inspect(implicit conn: Connection, ec: ExecutionContext): Future[Unit] =
-      printInspectTx("INSERT", insert.elements, getStmts)
+      printInspectTx("INSERT", insert.elements, getStmts(conn.proxy.nsMap))
 
-    private def getStmts: Data =
-      (new InsertExtraction_ with Insert_stmts).getStmts(insert.elements, insert.tpls)
+    private def getStmts(nsMap: Map[String, MetaNs]): Data =
+      (new InsertExtraction_ with Insert_stmts).getStmts(nsMap, insert.elements, insert.tpls)
   }
 
 

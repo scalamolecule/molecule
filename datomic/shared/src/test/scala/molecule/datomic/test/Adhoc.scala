@@ -29,7 +29,8 @@ object Adhoc extends DatomicTestSuite {
     "validation" - validation { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Validation._
       for {
-        _ <- Format.errorMsg.apply(1).save.transact.expect {
+        _ <- Format.errorMsg.apply(1).save.transact
+          .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errors, _) =>
             errors.head ==>
               "Format.errorMsg" -> Seq("One-line error msg")

@@ -1,6 +1,6 @@
 package molecule.datomic.test.crud.insert
 
-import molecule.base.error.ExecutionError
+import molecule.base.error.ModelError
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Refs._
 import molecule.datomic.setup.DatomicTestSuite
@@ -14,13 +14,15 @@ object InsertTxMetaData extends DatomicTestSuite {
 
     "Apply tx meta data to tacit attributes only" - refs { implicit conn =>
       for {
-        _ <- Ns.i.Tx(R2.i).insert(1, 2).transact.expect { case ExecutionError(err, _) =>
+        _ <- Ns.i.Tx(R2.i).insert(1, 2).transact
+            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==>
             """Missing applied value for attribute:
               |AttrOneManInt("R2", "i", V, Seq(), None, Nil, None, None)""".stripMargin
         }
 
-        _ <- Ns.i.Tx(R2.i_?).insert(1, Some(2)).transact.expect { case ExecutionError(err, _) =>
+        _ <- Ns.i.Tx(R2.i_?).insert(1, Some(2)).transact
+            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==>
             """Missing applied value for attribute:
               |AttrOneOptInt("R2", "i", V, None, None, Nil, None, None)""".stripMargin

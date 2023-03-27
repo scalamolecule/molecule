@@ -28,7 +28,7 @@ trait DatomicTestSuite extends DatomicTestSuiteBase with DatomicApiLoader {
     // Block to enable supplying Connection instead of Future[Connection] to tests
     val conn = Await.result(
       DatomicPeer.recreateDbFromEdn(proxy, protocol, dbUri, useFree),
-      1.second
+      10.second
     )
     test(conn)
   }

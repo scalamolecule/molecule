@@ -1,6 +1,6 @@
 package molecule.datomic.test.pagination.cursor
 
-import molecule.base.error.ExecutionError
+import molecule.base.error.ModelError
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Unique._
 import molecule.datomic.setup.DatomicTestSuite
@@ -17,7 +17,8 @@ object SharedSemantics extends DatomicTestSuite {
         _ <- Unique.int.insert(1, 2, 3).transact
 
         c1 <- Unique.int.a1.query.from("").limit(2).get.map { case (List(1, 2), c, true) => c }
-        _ <- Unique.i_(1).int.a1.query.from(c1).limit(2).get.expect { case ExecutionError(err, _) =>
+        _ <- Unique.i_(1).int.a1.query.from(c1).limit(2).get
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Can only use cursor for un-modified query."
         }
       } yield ()

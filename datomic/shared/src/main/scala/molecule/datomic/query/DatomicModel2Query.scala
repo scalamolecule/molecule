@@ -1,6 +1,6 @@
 package molecule.datomic.query
 
-import molecule.base.error.ExecutionError
+import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.query.Model2Query
@@ -204,7 +204,7 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
       case other         => unexpectedElement(other)
     }
     if (ref.refNs != nestedNs)
-      throw ExecutionError(s"`$refName` can only nest to `${ref.refNs}`. Found: `$nestedNs`")
+      throw ModelError(s"`$refName` can only nest to `${ref.refNs}`. Found: `$nestedNs`")
   }
 
 }

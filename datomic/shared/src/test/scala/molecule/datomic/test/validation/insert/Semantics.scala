@@ -16,7 +16,8 @@ object Semantics extends DatomicTestSuite {
 
     "1 row, 1 error" - validation { implicit conn =>
       for {
-        _ <- Type.int.insert(1).transact.expect {
+        _ <- Type.int.insert(1).transact
+          .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
             errors ==> Seq(
               (
@@ -43,7 +44,8 @@ object Semantics extends DatomicTestSuite {
 
     "1 row, 2 errors" - validation { implicit conn =>
       for {
-        _ <- Type.int.long.insert((1, 1L)).transact.expect {
+        _ <- Type.int.long.insert((1, 1L)).transact
+          .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
             errors ==> Seq(
               (
@@ -84,7 +86,8 @@ object Semantics extends DatomicTestSuite {
         _ <- Type.int.long.insert(
           (0, 0L),
           (1, 1L),
-        ).transact.expect {
+        ).transact
+          .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
             errors ==> Seq(
               (
@@ -153,7 +156,8 @@ object Semantics extends DatomicTestSuite {
           (1, 3L), // bad - ok
           (2, 2L), // ok  - ok
           (0, 1L), // bad  - bad
-        ).transact.expect {
+        ).transact
+          .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
             errors ==> Seq(
               // first row: 1 error
@@ -216,7 +220,8 @@ object Semantics extends DatomicTestSuite {
           (1, 3), // bad  - ok
           (3, 5), // ok   - ok
           (0, 0), // bad  - bad
-        ).transact.expect {
+        ).transact
+          .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
             errors ==> Seq(
               // first row: 1 error

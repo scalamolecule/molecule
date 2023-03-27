@@ -1,6 +1,6 @@
 package molecule.datomic.query
 
-import molecule.base.error.ExecutionError
+import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import scala.reflect.ClassTag
 
@@ -34,7 +34,7 @@ trait ResolveExprOne[Tpl]
   protected def resolveAttrOneTac(es: List[Var], attr: AttrOneTac): List[Var] = {
     val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
     if (isNestedOpt)
-      throw ExecutionError("Tacit attributes not allowed in optional nested queries. Found: " + a)
+      throw ModelError("Tacit attributes not allowed in optional nested queries. Found: " + a)
     attr match {
       case at: AttrOneTacString     => tac(e, a, at.op, at.vs, resString)
       case at: AttrOneTacInt        => tac(e, a, at.op, at.vs, resInt)

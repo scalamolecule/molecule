@@ -10,11 +10,14 @@ object _InsertResolvers extends CoreGenBase("InsertResolvers", "/transaction") {
     s"""// GENERATED CODE ********************************
        |package molecule.core.transaction
        |
+       |import molecule.base.ast.SchemaAST.MetaNs
+       |import molecule.base.error.InsertError
        |import molecule.boilerplate.ast.Model._
        |
        |trait ${fileName}_ {
        |
        |  protected def resolve(
+       |    nsMap: Map[String, MetaNs],
        |    elements: List[Element],
        |    resolvers: List[Product => Seq[InsertError]],
        |    tpl: Int,
@@ -22,11 +25,12 @@ object _InsertResolvers extends CoreGenBase("InsertResolvers", "/transaction") {
        |  ): List[Product => Seq[InsertError]]
        |
        |  def getResolver(
+       |    nsMap: Map[String, MetaNs],
        |    elements: List[Element],
        |    outerTpl: Int = 0
        |  ): Product => Seq[InsertError] = {
        |    val resolvers: List[Product => Seq[InsertError]] =
-       |      resolve(elements, Nil, outerTpl, 0)
+       |      resolve(nsMap, elements, Nil, outerTpl, 0)
        |
        |    resolvers.length match {
        |      $resolveX

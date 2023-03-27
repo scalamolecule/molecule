@@ -20,7 +20,7 @@ case class Dsl_Arities(schema: MetaSchema, partPrefix: String, namespace: MetaNs
   var hasArr = false
   var hasMap = false
 
-  val maxCardPad = attrs.map(a => a.card match {
+  val maxCardPad = attrsAll.map(a => a.card match {
     case CardOne => hasOne = true; 0
     case CardSet => hasSet = true; 5
     case CardArr => hasArr = true; 7
@@ -32,14 +32,16 @@ case class Dsl_Arities(schema: MetaSchema, partPrefix: String, namespace: MetaNs
   val pArr = " " * (maxCardPad - 7)
   val pMap = " " * (maxCardPad - 13)
 
-  attrs.foreach {
-    case MetaAttr(attr, card, tpe0, _, _, _, _, _) =>
+  attrsAll.foreach {
+    case MetaAttr(attr, card, tpe0, _, _, _, _, _, _) =>
       val c   = card.marker
       val tpe = getTpe(tpe0)
 
-      val padA = padAttr(attr)
-      val pad1 = padType(tpe)
-      val pad2 = " " * (maxTpe + "Option[]".length + maxCardPad)
+      val padA = padAttrAll(attr)
+      val pad0 = padTypeCustom(tpe)
+      val pad1 = padTypeAll(tpe)
+      val pad3 = pad1 + " " * (maxTpeCustom + "Option[]".length - maxTpeAll)
+      val pad4 = " " * (maxTpeCustom + "Option[]".length + maxCardPad)
 
       val (tM, tO) = card match {
         case CardOne => (tpe + pOne, s"Option[$tpe]" + pOne)
@@ -48,14 +50,14 @@ case class Dsl_Arities(schema: MetaSchema, partPrefix: String, namespace: MetaNs
         case CardMap => (s"Map[String, $tpe]" + pMap, s"Option[Map[String, $tpe]]" + pMap)
       }
 
-      lazy val tpesM = s"${`A..V, `}$tM$pad1        , $tpe$pad1"
-      lazy val tpesO = s"${`A..V, `}$tO$pad1, $tpe$pad1"
+      lazy val tpesM = s"${`A..V, `}$tM$pad3, $tpe$pad1"
+      lazy val tpesO = s"${`A..V, `}$tO$pad0, $tpe$pad1"
       lazy val tpesT = if (arity == 0)
-        s"${`A..V`}$pad2  $tpe$pad1"
+        s"${`A..V`}$pad4  $tpe$pad1"
       else if (arity == schema.maxArity)
         s"${`A..V`}, $tpe$pad1"
       else
-        s"${`A..V`}  $pad2, $tpe$pad1"
+        s"${`A..V`}  $pad4, $tpe$pad1"
 
       lazy val elemsM = s"elements :+ ${attr}_man$padA"
       lazy val elemsO = s"elements :+ ${attr}_opt$padA"
@@ -66,7 +68,7 @@ case class Dsl_Arities(schema: MetaSchema, partPrefix: String, namespace: MetaNs
       lazy val exprT = s"Expr${c}Tac${_0}[$tpesT, $ns_0]"
 
       if (!last) {
-        man += s"""lazy val ${attr}  $padA = new $ns_1[$tpesM]($elemsM) with $exprM"""
+        man += s"""lazy val $attr  $padA = new $ns_1[$tpesM]($elemsM) with $exprM"""
         if (!genericAttrs.contains(attr))
           opt += s"""lazy val ${attr}_?$padA = new $ns_1[$tpesO]($elemsO) with $exprO"""
       }
@@ -124,7 +126,7 @@ case class Dsl_Arities(schema: MetaSchema, partPrefix: String, namespace: MetaNs
   }
 
   refs.foreach {
-    case MetaAttr(attr, card, _, refNsOpt, _, _, _, _) =>
+    case MetaAttr(attr, card, _, refNsOpt, _, _, _, _, _) =>
       val refCls   = partPrefix + camel(attr)
       val refNs    = partPrefix + refNsOpt.get
       val refObj   = s"""Model.Ref("$ns", "$attr", "$refNs", $card)"""

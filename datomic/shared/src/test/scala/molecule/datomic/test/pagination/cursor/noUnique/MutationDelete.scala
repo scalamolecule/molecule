@@ -1,6 +1,6 @@
 package molecule.datomic.test.pagination.cursor.noUnique
 
-import molecule.base.error.ExecutionError
+import molecule.base.error.ModelError
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.datomic.setup.DatomicTestSuite
@@ -22,7 +22,7 @@ object MutationDelete extends DatomicTestSuite {
     }
   }
 
-  val query =  Ns.i.a1.int.a2.query
+  val query = Ns.i.a1.int.a2.query
 
   @nowarn lazy val tests = Tests {
 
@@ -32,7 +32,7 @@ object MutationDelete extends DatomicTestSuite {
         val pairs            = getPairs(4, Nil)
         val List(a, b, c, d) = pairs.sortBy(p => (p._1, p._2))
         for {
-          List(e1, e2, e3, e4) <-  Ns.i.int.insert(a, b, c, d).transact.map(_.eids)
+          List(e1, e2, e3, e4) <- Ns.i.int.insert(a, b, c, d).transact.map(_.eids)
           cur <- query.from("").limit(2).get.map { case (List(`a`, `b`), cur, true) => cur }
 
           // Delete row before next page
@@ -47,7 +47,7 @@ object MutationDelete extends DatomicTestSuite {
         val pairs                  = getPairs(6, Nil)
         val List(a, b, c, d, e, f) = pairs.sortBy(p => (p._1, p._2))
         for {
-          List(e1, e2, e3, e4, e5, e6) <-  Ns.i.int.insert(a, b, c, d, e, f).transact.map(_.eids)
+          List(e1, e2, e3, e4, e5, e6) <- Ns.i.int.insert(a, b, c, d, e, f).transact.map(_.eids)
           cur <- query.from("").limit(4).get.map { case (List(`a`, `b`, `c`, `d`), cur, true) => cur }
 
           // Delete last row on this page
@@ -62,7 +62,7 @@ object MutationDelete extends DatomicTestSuite {
         val pairs                  = getPairs(6, Nil)
         val List(a, b, c, d, e, f) = pairs.sortBy(p => (p._1, p._2))
         for {
-          List(e1, e2, e3, e4, e5, e6) <-  Ns.i.int.insert(a, b, c, d, e, f).transact.map(_.eids)
+          List(e1, e2, e3, e4, e5, e6) <- Ns.i.int.insert(a, b, c, d, e, f).transact.map(_.eids)
           cur <- query.from("").limit(4).get.map { case (List(`a`, `b`, `c`, `d`), cur, true) => cur }
 
           // Delete 2 last row on this page
@@ -77,16 +77,17 @@ object MutationDelete extends DatomicTestSuite {
         val pairs                  = getPairs(6, Nil)
         val List(a, b, c, d, e, f) = pairs.sortBy(p => (p._1, p._2))
         for {
-          List(e1, e2, e3, e4, e5, e6) <-  Ns.i.int.insert(a, b, c, d, e, f).transact.map(_.eids)
+          List(e1, e2, e3, e4, e5, e6) <- Ns.i.int.insert(a, b, c, d, e, f).transact.map(_.eids)
           cur <- query.from("").limit(4).get.map { case (List(`a`, `b`, `c`, `d`), cur, true) => cur }
 
           // Delete 3 last row on this page
           _ <- Ns(e2, e3, e4).delete.transact
 
           // Can't find next page with all 3 unique edge values deleted (or updated)
-          _ <- query.from(cur).limit(4).get.expect { case ExecutionError(msg, _) =>
-              msg ==> "Couldn't find next page. Edge rows were all deleted/updated."
-            }
+          _ <- query.from(cur).limit(4).get
+            .map(_ ==> "Unexpected success").recover { case ModelError(msg) =>
+            msg ==> "Couldn't find next page. Edge rows were all deleted/updated."
+          }
         } yield ()
       }
 
@@ -94,7 +95,7 @@ object MutationDelete extends DatomicTestSuite {
         val pairs            = getPairs(4, Nil)
         val List(a, b, c, d) = pairs.sortBy(p => (p._1, p._2))
         for {
-          List(e1, e2, e3, e4) <-  Ns.i.int.insert(a, b, c, d).transact.map(_.eids)
+          List(e1, e2, e3, e4) <- Ns.i.int.insert(a, b, c, d).transact.map(_.eids)
           cur <- query.from("").limit(2).get.map { case (List(`a`, `b`), cur, true) => cur }
 
           // Delete row after this page
@@ -113,7 +114,7 @@ object MutationDelete extends DatomicTestSuite {
         val pairs            = getPairs(4, Nil)
         val List(a, b, c, d) = pairs.sortBy(p => (p._1, p._2))
         for {
-          List(e1, e2, e3, e4) <-  Ns.i.int.insert(a, b, c, d).transact.map(_.eids)
+          List(e1, e2, e3, e4) <- Ns.i.int.insert(a, b, c, d).transact.map(_.eids)
           cur <- query.from("").limit(-2).get.map { case (List(`c`, `d`), cur, true) => cur }
 
           // Delete row before next page
@@ -128,7 +129,7 @@ object MutationDelete extends DatomicTestSuite {
         val pairs                  = getPairs(6, Nil)
         val List(a, b, c, d, e, f) = pairs.sortBy(p => (p._1, p._2))
         for {
-          List(e1, e2, e3, e4, e5, e6) <-  Ns.i.int.insert(a, b, c, d, e, f).transact.map(_.eids)
+          List(e1, e2, e3, e4, e5, e6) <- Ns.i.int.insert(a, b, c, d, e, f).transact.map(_.eids)
           cur <- query.from("").limit(-4).get.map { case (List(`c`, `d`, `e`, `f`), cur, true) => cur }
 
           // Delete first row on this page
@@ -143,7 +144,7 @@ object MutationDelete extends DatomicTestSuite {
         val pairs                  = getPairs(6, Nil)
         val List(a, b, c, d, e, f) = pairs.sortBy(p => (p._1, p._2))
         for {
-          List(e1, e2, e3, e4, e5, e6) <-  Ns.i.int.insert(a, b, c, d, e, f).transact.map(_.eids)
+          List(e1, e2, e3, e4, e5, e6) <- Ns.i.int.insert(a, b, c, d, e, f).transact.map(_.eids)
           cur <- query.from("").limit(-4).get.map { case (List(`c`, `d`, `e`, `f`), cur, true) => cur }
 
           // Delete 2 first row on this page
@@ -158,16 +159,17 @@ object MutationDelete extends DatomicTestSuite {
         val pairs                  = getPairs(6, Nil)
         val List(a, b, c, d, e, f) = pairs.sortBy(p => (p._1, p._2))
         for {
-          List(e1, e2, e3, e4, e5, e6) <-  Ns.i.int.insert(a, b, c, d, e, f).transact.map(_.eids)
+          List(e1, e2, e3, e4, e5, e6) <- Ns.i.int.insert(a, b, c, d, e, f).transact.map(_.eids)
           cur <- query.from("").limit(-4).get.map { case (List(`c`, `d`, `e`, `f`), cur, true) => cur }
 
           // Delete 3 first row on this page
           _ <- Ns(e3, e4, e5).delete.transact
 
           // Can't find next page with all 3 unique edge values deleted (or updated)
-          _ <- query.from(cur).limit(-4).get.expect { case ExecutionError(msg, _) =>
-              msg ==> "Couldn't find next page. Edge rows were all deleted/updated."
-            }
+          _ <- query.from(cur).limit(-4).get
+            .map(_ ==> "Unexpected success").recover { case ModelError(msg) =>
+            msg ==> "Couldn't find next page. Edge rows were all deleted/updated."
+          }
         } yield ()
       }
 
@@ -175,7 +177,7 @@ object MutationDelete extends DatomicTestSuite {
         val pairs            = getPairs(4, Nil)
         val List(a, b, c, d) = pairs.sortBy(p => (p._1, p._2))
         for {
-          List(e1, e2, e3, e4) <-  Ns.i.int.insert(a, b, c, d).transact.map(_.eids)
+          List(e1, e2, e3, e4) <- Ns.i.int.insert(a, b, c, d).transact.map(_.eids)
           cur <- query.from("").limit(-2).get.map { case (List(`c`, `d`), cur, true) => cur }
 
           // Delete row after this page

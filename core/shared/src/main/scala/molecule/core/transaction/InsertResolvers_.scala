@@ -1,12 +1,14 @@
 // GENERATED CODE ********************************
 package molecule.core.transaction
 
+import molecule.base.ast.SchemaAST.MetaNs
 import molecule.base.error.InsertError
 import molecule.boilerplate.ast.Model._
 
 trait InsertResolvers_ {
 
   protected def resolve(
+    nsMap: Map[String, MetaNs],
     elements: List[Element],
     resolvers: List[Product => Seq[InsertError]],
     tpl: Int,
@@ -14,11 +16,12 @@ trait InsertResolvers_ {
   ): List[Product => Seq[InsertError]]
 
   def getResolver(
+    nsMap: Map[String, MetaNs],
     elements: List[Element],
     outerTpl: Int = 0
   ): Product => Seq[InsertError] = {
     val resolvers: List[Product => Seq[InsertError]] =
-      resolve(elements, Nil, outerTpl, 0)
+      resolve(nsMap, elements, Nil, outerTpl, 0)
 
     resolvers.length match {
       case 1  => resolve1(resolvers)

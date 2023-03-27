@@ -1,6 +1,6 @@
 package molecule.datomic.test.relation.nested
 
-import molecule.base.error.ExecutionError
+import molecule.base.error.ModelError
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Refs._
 import molecule.datomic.setup.DatomicTestSuite
@@ -39,27 +39,32 @@ object NestedExpr extends DatomicTestSuite {
 
         // Expressions inside optional nested not allowed
 
-        _ <- Ns.i_.Rs1.*?(R1.i(1)).query.get.expect { case ExecutionError(err, _) =>
+        _ <- Ns.i_.Rs1.*?(R1.i(1)).query.get
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Expressions not allowed in optional nested data structure. Found:\n" +
             """AttrOneManInt("R1", "i", Appl, Seq(1), None, Nil, None, None)"""
         }
 
-        _ <- Ns.i_.Rs1.*?(R1.i.<(2)).query.get.expect { case ExecutionError(err, _) =>
+        _ <- Ns.i_.Rs1.*?(R1.i.<(2)).query.get
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Expressions not allowed in optional nested data structure. Found:\n" +
             """AttrOneManInt("R1", "i", Lt, Seq(2), None, Nil, None, None)"""
         }
 
-        _ <- Ns.i_.Rs1.*?(R1.i.<=(2)).query.get.expect { case ExecutionError(err, _) =>
+        _ <- Ns.i_.Rs1.*?(R1.i.<=(2)).query.get
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Expressions not allowed in optional nested data structure. Found:\n" +
             """AttrOneManInt("R1", "i", Le, Seq(2), None, Nil, None, None)"""
         }
 
-        _ <- Ns.i_.Rs1.*?(R1.i.>(2)).query.get.expect { case ExecutionError(err, _) =>
+        _ <- Ns.i_.Rs1.*?(R1.i.>(2)).query.get
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Expressions not allowed in optional nested data structure. Found:\n" +
             """AttrOneManInt("R1", "i", Gt, Seq(2), None, Nil, None, None)"""
         }
 
-        _ <- Ns.i_.Rs1.*?(R1.i.>=(2)).query.get.expect { case ExecutionError(err, _) =>
+        _ <- Ns.i_.Rs1.*?(R1.i.>=(2)).query.get
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Expressions not allowed in optional nested data structure. Found:\n" +
             """AttrOneManInt("R1", "i", Ge, Seq(2), None, Nil, None, None)"""
         }

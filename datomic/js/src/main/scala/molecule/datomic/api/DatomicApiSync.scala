@@ -1,6 +1,6 @@
 package molecule.datomic.api
 
-import molecule.base.error.ExecutionError
+import molecule.base.error.ModelError
 import molecule.core.action.Insert
 import molecule.core.api.{ApiSync, Connection, TxReport}
 import molecule.datomic.action._
@@ -8,7 +8,7 @@ import molecule.datomic.action._
 
 trait DatomicApiSync extends ApiSync {
 
-  def noSyncOnJSplatform = throw ExecutionError(
+  def noSyncOnJSplatform = throw ModelError(
     "Molecule has no synchronous api on the JS platform since RPCs are asynchronous."
   )
 

@@ -1,7 +1,7 @@
 // GENERATED CODE ********************************
 package molecule.datomic.test.crud.update.set.ops
 
-import molecule.base.error.ExecutionError
+import molecule.base.error._
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.datomic.setup.DatomicTestSuite
@@ -101,11 +101,13 @@ object UpdateSetOps_BigInt_ extends DatomicTestSuite {
 
 
         // Can't swap duplicate from/to values
-        _ <- Ns(42).bigInts.swap(bigInt1 -> bigInt2, bigInt1 -> bigInt3).update.transact.expect { case ExecutionError(err, _) =>
+        _ <- Ns(42).bigInts.swap(bigInt1 -> bigInt2, bigInt1 -> bigInt3).update.transact
+            .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
           err ==> "Can't swap from duplicate retract values."
         }
 
-        _ <- Ns(42).bigInts.swap(bigInt1 -> bigInt3, bigInt2 -> bigInt3).update.transact.expect { case ExecutionError(err, _) =>
+        _ <- Ns(42).bigInts.swap(bigInt1 -> bigInt3, bigInt2 -> bigInt3).update.transact
+            .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
           err ==> "Can't swap to duplicate replacement values."
         }
       } yield ()
@@ -116,29 +118,33 @@ object UpdateSetOps_BigInt_ extends DatomicTestSuite {
       for {
         eid <- Ns.bigInts(Set(bigInt1, bigInt2, bigInt3, bigInt4, bigInt5, bigInt6)).save.transact.map(_.eids.head)
 
-        // Retract value
+        // Remove value
         _ <- Ns(eid).bigInts.remove(bigInt6).update.transact
         _ <- Ns.bigInts.query.get.map(_.head ==> Set(bigInt1, bigInt2, bigInt3, bigInt4, bigInt5))
 
-        // Retracting non-existing value has no effect
+        // Removing non-existing value has no effect
         _ <- Ns(eid).bigInts.remove(bigInt7).update.transact
         _ <- Ns.bigInts.query.get.map(_.head ==> Set(bigInt1, bigInt2, bigInt3, bigInt4, bigInt5))
 
-        // Retracting duplicate values removes the distinct value
+        // Removing duplicate values removes the distinct value
         _ <- Ns(eid).bigInts.remove(bigInt5, bigInt5).update.transact
         _ <- Ns.bigInts.query.get.map(_.head ==> Set(bigInt1, bigInt2, bigInt3, bigInt4))
 
-        // Retract multiple values (vararg)
+        // Remove multiple values (vararg)
         _ <- Ns(eid).bigInts.remove(bigInt3, bigInt4).update.transact
         _ <- Ns.bigInts.query.get.map(_.head ==> Set(bigInt1, bigInt2))
 
-        // Retract Seq of values
+        // Remove Seq of values
         _ <- Ns(eid).bigInts.remove(Seq(bigInt2)).update.transact
         _ <- Ns.bigInts.query.get.map(_.head ==> Set(bigInt1))
 
-        // Retracting empty Seq of values has no effect
+        // Removing empty Seq of values has no effect
         _ <- Ns(eid).bigInts.remove(Seq.empty[BigInt]).update.transact
         _ <- Ns.bigInts.query.get.map(_.head ==> Set(bigInt1))
+
+        // Removing all elements is like deleting the attribute
+        _ <- Ns(eid).bigInts.remove(Seq(bigInt1)).update.transact
+        _ <- Ns.bigInts.query.get.map(_ ==> Nil)
       } yield ()
     }
   }

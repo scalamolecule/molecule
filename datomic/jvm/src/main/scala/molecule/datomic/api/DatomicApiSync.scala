@@ -1,6 +1,7 @@
 package molecule.datomic.api
 
-import molecule.base.error.ExecutionError
+import molecule.base.ast.SchemaAST.MetaNs
+import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.core.action.Insert
 import molecule.core.api.{ApiSync, Connection, TxReport}
@@ -50,26 +51,26 @@ trait DatomicApiSync extends SubscriptionStarter with ApiSync {
 
   implicit class datomicSaveApiSync[Tpl](save: DatomicSave) extends Transaction {
     override def transact(implicit conn: Connection): TxReport = catchExecutionError {
-      conn.asInstanceOf[DatomicConn_JVM].transact_sync(getStmts)
+      conn.asInstanceOf[DatomicConn_JVM].transact_sync(getStmts(conn.proxy.nsMap))
     }
     override def inspect(implicit conn: Connection): Unit = {
-      printInspectTx("SAVE", save.elements, getStmts)
+      printInspectTx("SAVE", save.elements, getStmts(conn.proxy.nsMap))
     }
-    private def getStmts: Data =
-      (new SaveExtraction() with Save_stmts).getStmts(save.elements)
+    private def getStmts(nsMap: Map[String, MetaNs]): Data =
+      (new SaveExtraction() with Save_stmts).getStmts(nsMap, save.elements)
   }
 
 
   implicit class datomicInsertApiSync[Tpl](insert0: Insert) extends Transaction {
     val insert = insert0.asInstanceOf[DatomicInsert_JVM]
     override def transact(implicit conn: Connection): TxReport = catchExecutionError {
-      conn.asInstanceOf[DatomicConn_JVM].transact_sync(getStmts)
+      conn.asInstanceOf[DatomicConn_JVM].transact_sync(getStmts(conn.proxy.nsMap))
     }
     override def inspect(implicit conn: Connection): Unit = {
-      printInspectTx("INSERT", insert.elements, getStmts)
+      printInspectTx("INSERT", insert.elements, getStmts(conn.proxy.nsMap))
     }
-    private def getStmts: Data = {
-      (new InsertExtraction_ with Insert_stmts).getStmts(insert.elements, insert.tpls)
+    private def getStmts(nsMap: Map[String, MetaNs]): Data = {
+      (new InsertExtraction_ with Insert_stmts).getStmts(nsMap, insert.elements, insert.tpls)
     }
   }
 
@@ -114,7 +115,7 @@ trait DatomicApiSync extends SubscriptionStarter with ApiSync {
     try {
       tx
     } catch {
-      case t: Throwable => throw ExecutionError(t.toString)
+      case t: Throwable => throw ModelError(t.toString)
     }
   }
 }

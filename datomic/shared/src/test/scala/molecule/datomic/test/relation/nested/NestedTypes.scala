@@ -1,6 +1,6 @@
 package molecule.datomic.test.relation.nested
 
-import molecule.base.error.ExecutionError
+import molecule.base.error._
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.datomic.setup.DatomicTestSuite
@@ -60,7 +60,8 @@ object NestedTypes extends DatomicTestSuite {
         _ <- Ref.i_(14).Nss.*?(Ns.short.a1).query.get.map(_ ==> List(List(short1, short2)))
 
         _ <- if (useFree)
-          Ref.i_(6).Nss.*?(Ns.boolean.a1).query.get.expect { case ExecutionError(err, _) =>
+          Ref.i_(6).Nss.*?(Ns.boolean.a1).query.get
+          .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
             err ==> "Datomic Free (not Pro) has a bug that pulls boolean `false` values as nil."
           }
         else
@@ -116,7 +117,8 @@ object NestedTypes extends DatomicTestSuite {
         _ <- Ref.i(14).Nss.*?(Ns.i.a1.short_?).query.get.map(_ ==> List((14, List((1, Some(short1)), (2, None)))))
 
         _ <- if (useFree) {
-          Ref.i(6).Nss.*?(Ns.i.a1.boolean_?).query.get.expect { case ExecutionError(err, _) =>
+          Ref.i(6).Nss.*?(Ns.i.a1.boolean_?).query.get
+          .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
             err ==> "Datomic Free (not Pro) has a bug that pulls boolean `false` values as nil."
           }
         } else {
@@ -175,7 +177,8 @@ object NestedTypes extends DatomicTestSuite {
         _ <- Ref.i_(14).Nss.*?(Ns.shorts).query.get.map(_ ==> List(List(Set(short1, short2))))
 
         _ <- if (useFree)
-          Ref.i_(6).Nss.*?(Ns.booleans).query.get.expect { case ExecutionError(err, _) =>
+          Ref.i_(6).Nss.*?(Ns.booleans).query.get
+          .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
             err ==> "Datomic Free (not Pro) has a bug that pulls boolean `false` values as nil."
           }
         else
@@ -230,14 +233,16 @@ object NestedTypes extends DatomicTestSuite {
         _ <- Ref.i(14).Nss.*?(Ns.i.a1.shorts_?).query.get.map(_ ==> List((14, List((1, Some(Set(short1, short2))), (2, None)))))
 
         _ <- if (useFree) {
-          Ref.i(6).Nss.*(Ns.i.a1.booleans_?).query.get.expect { case ExecutionError(err, _) =>
+          Ref.i(6).Nss.*(Ns.i.a1.booleans_?).query.get
+          .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
             err ==> "Datomic Free (not Pro) has a bug that pulls boolean `false` values as nil."
           }
         } else {
           Ref.i(6).Nss.*(Ns.i.a1.booleans_?).query.get.map(_ ==> List((6, List((1, Some(Set(boolean1, boolean2))), (2, None)))))
         }
         _ <- if (useFree) {
-          Ref.i(6).Nss.*?(Ns.i.a1.booleans_?).query.get.expect { case ExecutionError(err, _) =>
+          Ref.i(6).Nss.*?(Ns.i.a1.booleans_?).query.get
+          .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
             err ==> "Datomic Free (not Pro) has a bug that pulls boolean `false` values as nil."
           }
         } else {

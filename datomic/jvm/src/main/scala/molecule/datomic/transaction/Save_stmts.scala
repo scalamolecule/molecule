@@ -2,15 +2,17 @@ package molecule.datomic.transaction
 
 import java.net.URI
 import java.util.{Date, UUID}
+import molecule.base.ast.SchemaAST.MetaNs
 import molecule.base.error.ValidationErrors
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.{SaveExtraction, SaveOps}
-import molecule.core.validation.ConflictingAttrs
+import molecule.core.validation.PreValidation
 
 trait Save_stmts extends DatomicTxBase_JVM with SaveOps with MoleculeLogging { self: SaveExtraction =>
 
   def getRawStmts(
+    nsMap: Map[String, MetaNs],
     elements: List[Element],
     eid: String,
     debug: Boolean = true,
@@ -19,7 +21,7 @@ trait Save_stmts extends DatomicTxBase_JVM with SaveOps with MoleculeLogging { s
     if (init) {
       initTxBase(elements)
     }
-    val validationErrors = ConflictingAttrs.check(elements)
+    val validationErrors = PreValidation(nsMap).check(elements)
     if (validationErrors.nonEmpty) {
       throw ValidationErrors(validationErrors)
     }
@@ -36,9 +38,9 @@ trait Save_stmts extends DatomicTxBase_JVM with SaveOps with MoleculeLogging { s
     stmts
   }
 
-  def getStmts(elements: List[Element]): Data = {
+  def getStmts(nsMap: Map[String, MetaNs], elements: List[Element]): Data = {
     initTxBase(elements)
-    getRawStmts(elements, newId, init = false)
+    getRawStmts(nsMap, elements, newId, init = false)
   }
 
 
@@ -84,7 +86,7 @@ trait Save_stmts extends DatomicTxBase_JVM with SaveOps with MoleculeLogging { s
 
   // Save Int as Long in Datomic
   override protected lazy val valueString     = (v: String) => v
-  override protected lazy val valueInt        = (v: Int) => v //.toLong
+  override protected lazy val valueInt        = (v: Int) => v
   override protected lazy val valueLong       = (v: Long) => v
   override protected lazy val valueFloat      = (v: Float) => v
   override protected lazy val valueDouble     = (v: Double) => v

@@ -120,60 +120,62 @@ object Validation extends DataModel(3) {
       "^[a-zA-Z0-9]+$",
       "Username cannot contain special characters."
     )
-    val enums        = many[Allowed]
+    val enums        = many[Enum]
   }
 
-  trait Allowed {
-    val luckyNumber  = oneInt.allowed(7, 9, 13)
-    val luckyNumber2 = oneInt.allowed(
+  trait Enum {
+    //    val luckyNumber  = oneInt.allowed(7, 9, 13)
+    //    val luckyNumber2 = oneInt.allowed(
+    //      Seq(7, 9, 13),
+    //      "Lucky number can only be 7, 9 or 13"
+    //    )
+
+    val luckyNumber  = oneInt.enums(7, 9, 13)
+    val luckyNumber2 = oneInt.enums(
       Seq(7, 9, 13),
       "Lucky number can only be 7, 9 or 13"
     )
   }
 
+  trait Mandatory {
+    val name    = oneString.mandatory
+    val age     = oneInt
+    val hobbies = setString.mandatory
+  }
 
-  // todo --------------------------------------
+  trait Required {
+    // Pair of data guaranteed
+    val username = oneString.require(password)
+    val password = oneString
 
-  //  trait AttrValue {
-  //    val min1 = oneInt
-  //    val mid1 = oneInt.validate(i => i > min1.value && i < max1.value)
-  //    val max1 = oneInt
-  //
-  //    // Same as
-  //    val min2 = oneInt.validate(_ < mid2.value)
-  //    val mid2 = oneInt.validate(_ < max2.value)
-  //    val max2 = oneInt
-  //
-  //    // Same as
-  //    val min3 = oneInt.validate(_ < mid2.value)
-  //    val mid3 = oneInt
-  //    val max3 = oneInt.validate(_ > mid2.value)
-  //
-  //    val compareWithCalculation = oneInt.validate(_ > date.value.getTime.toInt)
-  //    val date                   = oneDate
-  //
-  //    val int5 = oneInt.validate(_ > ints.value) // hmm, shouldn't be possible
-  //    val ints = setInt
-  //  }
-  //
-  //  trait Mandatory {
-  //    val username = oneString.mandatory
-  //    val email    = oneInt.mandatory
-  //    val age      = oneString
-  //  }
-  //
-  //  trait Require {
-  //    // tuple enforcement
-  //    val lat  = oneInt.require(long)
-  //    val long = oneInt.descr("(will reversely also require `lat`")
-  //
-  //    // triple enforcement
-  //    val x = oneInt.require(y, z)
-  //    val y = oneInt.descr("(will reversely also require `x` and `z`")
-  //    val z = oneInt.descr("(will reversely also require `x` and `y`")
-  //
-  //    // Asymmetric requirement
-  //    val required  = oneString.descr("Doesn't need requiring attribute value")
-  //    val requiring = oneString.require(required).descr("Needs required attribute value")
-  //  }
+    // Triple of data guaranteed
+    val x = oneInt.require(y, z)
+    val y = oneInt
+    val z = oneInt
+
+    // Overlapping pair of data guaranteed
+    // Since z is required, x and z will be required too
+    val w = oneInt.require(z)
+
+    val freeAttr = oneString.description("Neither requiring or required")
+  }
+
+  trait AttrValue {
+    val low  = oneInt.validate(_ < high.value)
+    val high = oneInt
+
+    val min1 = oneInt
+    val mid1 = oneInt.validate(i => i > min1.value && i < max1.value)
+    val max1 = oneInt
+
+    // Same as
+    val min2 = oneInt.validate(_ < mid2.value)
+    val mid2 = oneInt.validate(_ < max2.value)
+    val max2 = oneInt
+
+    // Same as
+    val min3 = oneInt.validate(_ < mid2.value)
+    val mid3 = oneInt
+    val max3 = oneInt.validate(_ > mid2.value)
+  }
 }

@@ -1,7 +1,7 @@
 package molecule.datomic.marshalling
 
 import java.nio.ByteBuffer
-import molecule.base.error.{ExecutionError, MoleculeError}
+import molecule.base.error.{ModelError, MoleculeError}
 import molecule.boilerplate.ast.Model._
 import molecule.core.api.TxReport
 import molecule.core.marshalling.Boopicklers._
@@ -20,9 +20,10 @@ object DatomicRpcJVM extends MoleculeRpc
   with FutureUtils {
 
   /**
-   * Tuple type is not marshalled from client to server. So we signal this with the 'Any' type parameter.
-   * Model elements are used to pickle the correct types here on the server side. And once wired to the
-   * client side we can unpickle the data again from the model and cast to type `Tpl`.
+   * Tuple type is not marshalled from client to server. So we signal this with
+   * the 'Any' type parameter. Model elements are used to pickle the correct types
+   * here on the server side. And once wired to the client side we can unpickle
+   * the data again from the model and cast to type `Tpl`.
    */
   override def query[Any](
     proxy: ConnProxy,
@@ -76,7 +77,7 @@ object DatomicRpcJVM extends MoleculeRpc
   ): Future[Either[MoleculeError, TxReport]] = either {
     for {
       conn <- getConn(proxy)
-      stmts = (new SaveExtraction() with Save_stmts).getStmts(elements)
+      stmts = (new SaveExtraction() with Save_stmts).getStmts(proxy.nsMap, elements)
       txReport <- conn.transact_async(stmts)
     } yield txReport
   }
@@ -97,9 +98,11 @@ object DatomicRpcJVM extends MoleculeRpc
           } else tpls).asInstanceOf[Seq[Product]]
         case Left(err)   => throw err // catched in outer either wrapper
       }
-      stmts = (new InsertExtraction_ with Insert_stmts).getStmts(tplElements, tplProducts)
+      stmts = (new InsertExtraction_ with Insert_stmts)
+        .getStmts(proxy.nsMap, tplElements, tplProducts)
       _ = if (txElements.nonEmpty) {
-        val txStmts = (new SaveExtraction() with Save_stmts).getRawStmts(txElements, datomicTx, false)
+        val txStmts = (new SaveExtraction() with Save_stmts)
+          .getRawStmts(proxy.nsMap, txElements, datomicTx, false)
         stmts.addAll(txStmts)
       }
       txReport <- conn.transact_async(stmts)

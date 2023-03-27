@@ -15,7 +15,8 @@ object TxMetaData extends DatomicTestSuite {
     "Save" - validation { implicit conn =>
       for {
         // Main data invalid
-        _ <- Type.int(0).Tx(Allowed.luckyNumber_(7)).save.transact.expect {
+        _ <- Type.int(0).Tx(Enum.luckyNumber_(7)).save.transact
+          .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap, _) =>
             errorMap ==>
               Map(
@@ -28,18 +29,20 @@ object TxMetaData extends DatomicTestSuite {
         }
 
         // Tx meta data invalid
-        _ <- Type.int(2).Tx(Allowed.luckyNumber_(0)).save.transact.expect {
+        _ <- Type.int(2).Tx(Enum.luckyNumber_(0)).save.transact
+          .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap, _) =>
             errorMap ==>
               Map(
-                "Allowed.luckyNumber" -> Seq(
+                "Enum.luckyNumber" -> Seq(
                   "Value `0` is not one of the allowed values in Seq(7, 9, 13)"
                 )
               )
         }
 
         // Main data and tx meta data invalid
-        _ <- Type.int(0).Tx(Allowed.luckyNumber_(0)).save.transact.expect {
+        _ <- Type.int(0).Tx(Enum.luckyNumber_(0)).save.transact
+          .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap, _) =>
             errorMap ==>
               Map(
@@ -48,7 +51,7 @@ object TxMetaData extends DatomicTestSuite {
                      |  _ > 1
                      |""".stripMargin
                 ),
-                "Allowed.luckyNumber" -> Seq(
+                "Enum.luckyNumber" -> Seq(
                   "Value `0` is not one of the allowed values in Seq(7, 9, 13)"
                 )
               )
@@ -60,10 +63,11 @@ object TxMetaData extends DatomicTestSuite {
     "Insert" - validation { implicit conn =>
       for {
         // Main data invalid
-        _ <- Type.int.Tx(Allowed.luckyNumber_(7)).insert(
+        _ <- Type.int.Tx(Enum.luckyNumber_(7)).insert(
           10,
           -1
-        ).transact.expect {
+        ).transact
+          .map(_ ==> "Unexpected success").recover {
           case InsertErrors(indexedInsertErrors, _) =>
             indexedInsertErrors ==> Seq(
               (
@@ -86,10 +90,11 @@ object TxMetaData extends DatomicTestSuite {
         }
 
         // Tx meta data invalid
-        _ <- Type.int.Tx(Allowed.luckyNumber_(0)).insert(
+        _ <- Type.int.Tx(Enum.luckyNumber_(0)).insert(
           10,
           11
-        ).transact.expect {
+        ).transact
+          .map(_ ==> "Unexpected success").recover {
           case InsertErrors(indexedInsertErrors, _) =>
             indexedInsertErrors ==> Seq(
               (
@@ -98,7 +103,7 @@ object TxMetaData extends DatomicTestSuite {
                   InsertError(
                     0, // Composite tuple index
                     0, // tuple index
-                    "Allowed.luckyNumber",
+                    "Enum.luckyNumber",
                     Seq(
                       """Value `0` is not one of the allowed values in Seq(7, 9, 13)"""
                     ),
@@ -111,10 +116,11 @@ object TxMetaData extends DatomicTestSuite {
 
 
         // Main data and tx meta data invalid
-        _ <- Type.int.Tx(Allowed.luckyNumber_(0)).insert(
+        _ <- Type.int.Tx(Enum.luckyNumber_(0)).insert(
           10,
           -1
-        ).transact.expect {
+        ).transact
+          .map(_ ==> "Unexpected success").recover {
           case InsertErrors(indexedInsertErrors, _) =>
             indexedInsertErrors ==> Seq(
               (
@@ -139,7 +145,7 @@ object TxMetaData extends DatomicTestSuite {
                   InsertError(
                     0, // Composite tuple index
                     0, // tuple index
-                    "Allowed.luckyNumber",
+                    "Enum.luckyNumber",
                     Seq(
                       """Value `0` is not one of the allowed values in Seq(7, 9, 13)"""
                     ),
@@ -156,15 +162,16 @@ object TxMetaData extends DatomicTestSuite {
     "Update" - validation { implicit conn =>
       for {
         // Save valid tx meta data and get transaction entity id
-        tx <- Type.int(2).Tx(Allowed.luckyNumber_(7)).save.transact.map(_.tx)
+        tx <- Type.int(2).Tx(Enum.luckyNumber_(7)).save.transact.map(_.tx)
 
         // Update transaction meta data with invalid value
         // (like updating any other values)
-        _ <- Allowed(tx).luckyNumber(2).update.transact.expect {
+        _ <- Enum(tx).luckyNumber(2).update.transact
+          .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap, _) =>
             errorMap ==>
               Map(
-                "Allowed.luckyNumber" -> Seq(
+                "Enum.luckyNumber" -> Seq(
                   "Value `2` is not one of the allowed values in Seq(7, 9, 13)"
                 )
               )

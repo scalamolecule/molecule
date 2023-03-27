@@ -2,7 +2,7 @@
 package molecule.datomic.test.crud.update.set.ops
 
 import java.util.UUID
-import molecule.base.error.ExecutionError
+import molecule.base.error._
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.datomic.setup.DatomicTestSuite
@@ -102,11 +102,13 @@ object UpdateSetOps_UUID_ extends DatomicTestSuite {
 
 
         // Can't swap duplicate from/to values
-        _ <- Ns(42).uuids.swap(uuid1 -> uuid2, uuid1 -> uuid3).update.transact.expect { case ExecutionError(err, _) =>
+        _ <- Ns(42).uuids.swap(uuid1 -> uuid2, uuid1 -> uuid3).update.transact
+            .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
           err ==> "Can't swap from duplicate retract values."
         }
 
-        _ <- Ns(42).uuids.swap(uuid1 -> uuid3, uuid2 -> uuid3).update.transact.expect { case ExecutionError(err, _) =>
+        _ <- Ns(42).uuids.swap(uuid1 -> uuid3, uuid2 -> uuid3).update.transact
+            .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
           err ==> "Can't swap to duplicate replacement values."
         }
       } yield ()
@@ -117,29 +119,33 @@ object UpdateSetOps_UUID_ extends DatomicTestSuite {
       for {
         eid <- Ns.uuids(Set(uuid1, uuid2, uuid3, uuid4, uuid5, uuid6)).save.transact.map(_.eids.head)
 
-        // Retract value
+        // Remove value
         _ <- Ns(eid).uuids.remove(uuid6).update.transact
         _ <- Ns.uuids.query.get.map(_.head ==> Set(uuid1, uuid2, uuid3, uuid4, uuid5))
 
-        // Retracting non-existing value has no effect
+        // Removing non-existing value has no effect
         _ <- Ns(eid).uuids.remove(uuid7).update.transact
         _ <- Ns.uuids.query.get.map(_.head ==> Set(uuid1, uuid2, uuid3, uuid4, uuid5))
 
-        // Retracting duplicate values removes the distinct value
+        // Removing duplicate values removes the distinct value
         _ <- Ns(eid).uuids.remove(uuid5, uuid5).update.transact
         _ <- Ns.uuids.query.get.map(_.head ==> Set(uuid1, uuid2, uuid3, uuid4))
 
-        // Retract multiple values (vararg)
+        // Remove multiple values (vararg)
         _ <- Ns(eid).uuids.remove(uuid3, uuid4).update.transact
         _ <- Ns.uuids.query.get.map(_.head ==> Set(uuid1, uuid2))
 
-        // Retract Seq of values
+        // Remove Seq of values
         _ <- Ns(eid).uuids.remove(Seq(uuid2)).update.transact
         _ <- Ns.uuids.query.get.map(_.head ==> Set(uuid1))
 
-        // Retracting empty Seq of values has no effect
+        // Removing empty Seq of values has no effect
         _ <- Ns(eid).uuids.remove(Seq.empty[UUID]).update.transact
         _ <- Ns.uuids.query.get.map(_.head ==> Set(uuid1))
+
+        // Removing all elements is like deleting the attribute
+        _ <- Ns(eid).uuids.remove(Seq(uuid1)).update.transact
+        _ <- Ns.uuids.query.get.map(_ ==> Nil)
       } yield ()
     }
   }

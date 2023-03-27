@@ -15,10 +15,10 @@ case class Dsl(schema: MetaSchema, partPrefix: String, namespace: MetaNs)
       "molecule.boilerplate.ast.Model",
       "molecule.boilerplate.ast.Model._",
     )
-    val typeImports = attrs.collect {
-      case MetaAttr(_, _, "Date", _, _, _, _, _) => "java.util.Date"
-      case MetaAttr(_, _, "UUID", _, _, _, _, _) => "java.util.UUID"
-      case MetaAttr(_, _, "URI", _, _, _, _, _)  => "java.net.URI"
+    val typeImports = attrsAll.collect {
+      case MetaAttr(_, _, "Date", _, _, _, _, _, _) => "java.util.Date"
+      case MetaAttr(_, _, "UUID", _, _, _, _, _, _) => "java.util.UUID"
+      case MetaAttr(_, _, "URI", _, _, _, _, _, _)  => "java.net.URI"
     }.distinct
     (baseImports ++ typeImports).sorted.mkString("import ", "\nimport ", "")
   }
@@ -30,21 +30,21 @@ case class Dsl(schema: MetaSchema, partPrefix: String, namespace: MetaNs)
     val man = List.newBuilder[String]
     val opt = List.newBuilder[String]
     val tac = List.newBuilder[String]
-    attrs.collect {
-      case MetaAttr(attr, card, tpe, refNs, _, _, _, validations) if !genericAttrs.contains(attr) =>
+    attrsAll.collect {
+      case MetaAttr(attr, card, tpe, refNs, _, _, _, _, validations) if !genericAttrs.contains(attr) =>
         val withV   = if (validations.nonEmpty) {
           vas += validationExtractor.validationMethod(attr, tpe, validations)
           s", validation = Some(validation_$attr)"
         } else ""
-        val padA    = padAttr(attr)
-        val padT    = padType(tpe)
+        val padA    = padAttrCustom(attr)
+        val padT0   = padTypeCustom(tpe)
         val isRef   = if (refNs.isDefined) ", status = Some(\"ref\")" else ""
         val attrMan = "Attr" + card.marker + "Man" + tpe
         val attrOpt = "Attr" + card.marker + "Opt" + tpe
         val attrTac = "Attr" + card.marker + "Tac" + tpe
-        man += s"""protected lazy val ${attr}_man$padA: $attrMan$padT = $attrMan$padT("$ns", "$attr"$padA$isRef$withV)"""
-        opt += s"""protected lazy val ${attr}_opt$padA: $attrOpt$padT = $attrOpt$padT("$ns", "$attr"$padA$isRef$withV)"""
-        tac += s"""protected lazy val ${attr}_tac$padA: $attrTac$padT = $attrTac$padT("$ns", "$attr"$padA$isRef$withV)"""
+        man += s"""protected lazy val ${attr}_man$padA: $attrMan$padT0 = $attrMan$padT0("$ns", "$attr"$padA$isRef$withV)"""
+        opt += s"""protected lazy val ${attr}_opt$padA: $attrOpt$padT0 = $attrOpt$padT0("$ns", "$attr"$padA$isRef$withV)"""
+        tac += s"""protected lazy val ${attr}_tac$padA: $attrTac$padT0 = $attrTac$padT0("$ns", "$attr"$padA$isRef$withV)"""
     }
     val vas1     = vas.result()
     val vas2     = if (vas1.isEmpty) Nil else "" +: vas1

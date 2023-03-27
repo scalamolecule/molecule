@@ -6,7 +6,7 @@ import java.{lang => jl, util => ju}
 import com.google.common.util.concurrent.UncheckedExecutionException
 import datomic.Util.readAll
 import datomic.{Connection => DatomicConnection, Datom => _, _}
-import molecule.base.error.ExecutionError
+import molecule.base.error.ModelError
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.api.{Connection, TxReport}
 import molecule.core.marshalling.DatomicPeerProxy
@@ -46,7 +46,7 @@ case class DatomicConn_JVM(
     import molecule.core.util.Executor._
     Await.result(transact_async(javaStmts), 10.seconds)
   } catch {
-    case t: Throwable => throw ExecutionError(t.toString)
+    case t: Throwable => throw ModelError(t.toString)
   }
 
   private def bridgeDatomicFuture[T](
@@ -71,8 +71,8 @@ case class DatomicConn_JVM(
               p.failure(
                 e.getCause match {
                   //                  case e: TxFnException     => e
-                  case e: ExecutionError => e
-                  case e                 => ExecutionError(e.getMessage.trim)
+                  case e: ModelError => e
+                  case e             => ModelError(e.getMessage.trim)
                 }
               )
 
@@ -83,7 +83,7 @@ case class DatomicConn_JVM(
                   javaStmts.fold("")(stmts => "\n---- javaStmts: ----\n" +
                     stmts.asScala.toList.mkString("\n"))
               )
-              p.failure(ExecutionError(e.getMessage))
+              p.failure(ModelError(e.getMessage))
           }
         }
       },

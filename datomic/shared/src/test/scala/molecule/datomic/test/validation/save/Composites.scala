@@ -15,7 +15,8 @@ object Composites extends DatomicTestSuite {
     "1 + 1" - validation { implicit conn =>
       for {
         // bad, ok
-        _ <- (Type.int(1) + Allowed.luckyNumber(7)).save.transact.expect {
+        _ <- (Type.int(1) + Enum.luckyNumber(7)).save.transact
+          .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap, _) =>
             errorMap ==>
               Map(
@@ -28,18 +29,20 @@ object Composites extends DatomicTestSuite {
         }
 
         // ok, bad
-        _ <- (Type.int(2) + Allowed.luckyNumber(0)).save.transact.expect {
+        _ <- (Type.int(2) + Enum.luckyNumber(0)).save.transact
+          .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap, _) =>
             errorMap ==>
               Map(
-                "Allowed.luckyNumber" -> Seq(
+                "Enum.luckyNumber" -> Seq(
                   "Value `0` is not one of the allowed values in Seq(7, 9, 13)"
                 )
               )
         }
 
         // bad, bad
-        _ <- (Type.int(1) + Allowed.luckyNumber(0)).save.transact.expect {
+        _ <- (Type.int(1) + Enum.luckyNumber(0)).save.transact
+          .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap, _) =>
             errorMap ==>
               Map(
@@ -48,7 +51,7 @@ object Composites extends DatomicTestSuite {
                      |  _ > 1
                      |""".stripMargin
                 ),
-                "Allowed.luckyNumber" -> Seq(
+                "Enum.luckyNumber" -> Seq(
                   "Value `0` is not one of the allowed values in Seq(7, 9, 13)"
                 )
               )
@@ -60,7 +63,8 @@ object Composites extends DatomicTestSuite {
     "2 + 1" - validation { implicit conn =>
       for {
         // (bad, ok), ok
-        _ <- (Type.int(1).string("b") + Allowed.luckyNumber(7)).save.transact.expect {
+        _ <- (Type.int(1).string("b") + Enum.luckyNumber(7)).save.transact
+          .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap, _) =>
             errorMap ==>
               Map(
@@ -73,7 +77,8 @@ object Composites extends DatomicTestSuite {
         }
 
         // (ok, bad), ok
-        _ <- (Type.int(2).string("a") + Allowed.luckyNumber(7)).save.transact.expect {
+        _ <- (Type.int(2).string("a") + Enum.luckyNumber(7)).save.transact
+          .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap, _) =>
             errorMap ==>
               Map(
@@ -86,18 +91,20 @@ object Composites extends DatomicTestSuite {
         }
 
         // (ok, ok), bad
-        _ <- (Type.int(2).string("b") + Allowed.luckyNumber(0)).save.transact.expect {
+        _ <- (Type.int(2).string("b") + Enum.luckyNumber(0)).save.transact
+          .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap, _) =>
             errorMap ==>
               Map(
-                "Allowed.luckyNumber" -> Seq(
+                "Enum.luckyNumber" -> Seq(
                   "Value `0` is not one of the allowed values in Seq(7, 9, 13)"
                 )
               )
         }
 
         // (bad, bad), ok
-        _ <- (Type.int(1).string("a") + Allowed.luckyNumber(7)).save.transact.expect {
+        _ <- (Type.int(1).string("a") + Enum.luckyNumber(7)).save.transact
+          .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap, _) =>
             errorMap ==>
               Map(
@@ -115,7 +122,8 @@ object Composites extends DatomicTestSuite {
         }
 
         // (bad, ok), bad
-        _ <- (Type.int(1).string("b") + Allowed.luckyNumber(0)).save.transact.expect {
+        _ <- (Type.int(1).string("b") + Enum.luckyNumber(0)).save.transact
+          .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap, _) =>
             errorMap ==>
               Map(
@@ -124,14 +132,15 @@ object Composites extends DatomicTestSuite {
                      |  _ > 1
                      |""".stripMargin
                 ),
-                "Allowed.luckyNumber" -> Seq(
+                "Enum.luckyNumber" -> Seq(
                   "Value `0` is not one of the allowed values in Seq(7, 9, 13)"
                 )
               )
         }
 
         // (ok, bad), bad
-        _ <- (Type.int(2).string("a") + Allowed.luckyNumber(0)).save.transact.expect {
+        _ <- (Type.int(2).string("a") + Enum.luckyNumber(0)).save.transact
+          .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap, _) =>
             errorMap ==>
               Map(
@@ -140,14 +149,15 @@ object Composites extends DatomicTestSuite {
                      |  _ > "a"
                      |""".stripMargin
                 ),
-                "Allowed.luckyNumber" -> Seq(
+                "Enum.luckyNumber" -> Seq(
                   "Value `0` is not one of the allowed values in Seq(7, 9, 13)"
                 )
               )
         }
 
         // (bad, bad), bad
-        _ <- (Type.int(1).string("a") + Allowed.luckyNumber(0)).save.transact.expect {
+        _ <- (Type.int(1).string("a") + Enum.luckyNumber(0)).save.transact
+          .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap, _) =>
             errorMap ==>
               Map(
@@ -161,7 +171,7 @@ object Composites extends DatomicTestSuite {
                      |  _ > "a"
                      |""".stripMargin
                 ),
-                "Allowed.luckyNumber" -> Seq(
+                "Enum.luckyNumber" -> Seq(
                   "Value `0` is not one of the allowed values in Seq(7, 9, 13)"
                 )
               )
@@ -173,7 +183,8 @@ object Composites extends DatomicTestSuite {
     "1 + 2" - validation { implicit conn =>
       for {
         // ok, (bad, ok)
-        _ <- (Allowed.luckyNumber(7) + Type.int(1).string("b")).save.transact.expect {
+        _ <- (Enum.luckyNumber(7) + Type.int(1).string("b")).save.transact
+          .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap, _) =>
             errorMap ==>
               Map(
@@ -186,7 +197,8 @@ object Composites extends DatomicTestSuite {
         }
 
         // ok, (ok, bad)
-        _ <- (Allowed.luckyNumber(7) + Type.int(2).string("a")).save.transact.expect {
+        _ <- (Enum.luckyNumber(7) + Type.int(2).string("a")).save.transact
+          .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap, _) =>
             errorMap ==>
               Map(
@@ -199,18 +211,20 @@ object Composites extends DatomicTestSuite {
         }
 
         // bad, (ok, ok)
-        _ <- (Allowed.luckyNumber(0) + Type.int(2).string("b")).save.transact.expect {
+        _ <- (Enum.luckyNumber(0) + Type.int(2).string("b")).save.transact
+          .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap, _) =>
             errorMap ==>
               Map(
-                "Allowed.luckyNumber" -> Seq(
+                "Enum.luckyNumber" -> Seq(
                   "Value `0` is not one of the allowed values in Seq(7, 9, 13)"
                 )
               )
         }
 
         // ok, (bad, bad)
-        _ <- (Allowed.luckyNumber(7) + Type.int(1).string("a")).save.transact.expect {
+        _ <- (Enum.luckyNumber(7) + Type.int(1).string("a")).save.transact
+          .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap, _) =>
             errorMap ==>
               Map(
@@ -228,11 +242,12 @@ object Composites extends DatomicTestSuite {
         }
 
         // bad, (bad, ok)
-        _ <- (Allowed.luckyNumber(0) + Type.int(1).string("b")).save.transact.expect {
+        _ <- (Enum.luckyNumber(0) + Type.int(1).string("b")).save.transact
+          .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap, _) =>
             errorMap ==>
               Map(
-                "Allowed.luckyNumber" -> Seq(
+                "Enum.luckyNumber" -> Seq(
                   "Value `0` is not one of the allowed values in Seq(7, 9, 13)"
                 ),
                 "Type.int" -> Seq(
@@ -244,11 +259,12 @@ object Composites extends DatomicTestSuite {
         }
 
         // bad, (ok, bad)
-        _ <- (Allowed.luckyNumber(0) + Type.int(2).string("a")).save.transact.expect {
+        _ <- (Enum.luckyNumber(0) + Type.int(2).string("a")).save.transact
+          .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap, _) =>
             errorMap ==>
               Map(
-                "Allowed.luckyNumber" -> Seq(
+                "Enum.luckyNumber" -> Seq(
                   "Value `0` is not one of the allowed values in Seq(7, 9, 13)"
                 ),
                 "Type.string" -> Seq(
@@ -260,11 +276,12 @@ object Composites extends DatomicTestSuite {
         }
 
         // bad, (bad, bad)
-        _ <- (Allowed.luckyNumber(0) + Type.int(1).string("a")).save.transact.expect {
+        _ <- (Enum.luckyNumber(0) + Type.int(1).string("a")).save.transact
+          .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap, _) =>
             errorMap ==>
               Map(
-                "Allowed.luckyNumber" -> Seq(
+                "Enum.luckyNumber" -> Seq(
                   "Value `0` is not one of the allowed values in Seq(7, 9, 13)"
                 ),
                 "Type.int" -> Seq(
@@ -286,7 +303,8 @@ object Composites extends DatomicTestSuite {
     "2 + 2" - validation { implicit conn =>
       for {
         // (bad, ok), (ok, ok)
-        _ <- (Type.int(1).string("b") + Allowed.luckyNumber(7).luckyNumber2(9)).save.transact.expect {
+        _ <- (Type.int(1).string("b") + Enum.luckyNumber(7).luckyNumber2(9)).save.transact
+          .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap, _) =>
             errorMap ==>
               Map(
@@ -299,7 +317,8 @@ object Composites extends DatomicTestSuite {
         }
 
         // (ok, bad), (ok, ok)
-        _ <- (Type.int(2).string("a") + Allowed.luckyNumber(7).luckyNumber2(9)).save.transact.expect {
+        _ <- (Type.int(2).string("a") + Enum.luckyNumber(7).luckyNumber2(9)).save.transact
+          .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap, _) =>
             errorMap ==>
               Map(
@@ -312,11 +331,12 @@ object Composites extends DatomicTestSuite {
         }
 
         // (ok, ok), (bad, ok)
-        _ <- (Type.int(2).string("b") + Allowed.luckyNumber(0).luckyNumber2(9)).save.transact.expect {
+        _ <- (Type.int(2).string("b") + Enum.luckyNumber(0).luckyNumber2(9)).save.transact
+          .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap, _) =>
             errorMap ==>
               Map(
-                "Allowed.luckyNumber" -> Seq(
+                "Enum.luckyNumber" -> Seq(
                   "Value `0` is not one of the allowed values in Seq(7, 9, 13)"
                 )
               )
@@ -324,11 +344,12 @@ object Composites extends DatomicTestSuite {
         }
 
         // (ok, ok), (ok, bad)
-        _ <- (Type.int(2).string("b") + Allowed.luckyNumber(7).luckyNumber2(0)).save.transact.expect {
+        _ <- (Type.int(2).string("b") + Enum.luckyNumber(7).luckyNumber2(0)).save.transact
+          .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap, _) =>
             errorMap ==>
               Map(
-                "Allowed.luckyNumber2" -> Seq(
+                "Enum.luckyNumber2" -> Seq(
                   "Lucky number can only be 7, 9 or 13"
                 )
               )
@@ -336,7 +357,8 @@ object Composites extends DatomicTestSuite {
 
         // Jackpot
         // (bad, bad), (bad, bad)
-        _ <- (Type.int(1).string("a") + Allowed.luckyNumber(0).luckyNumber2(2)).save.transact.expect {
+        _ <- (Type.int(1).string("a") + Enum.luckyNumber(0).luckyNumber2(2)).save.transact
+          .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap, _) =>
             errorMap ==>
               Map(
@@ -350,10 +372,10 @@ object Composites extends DatomicTestSuite {
                      |  _ > "a"
                      |""".stripMargin
                 ),
-                "Allowed.luckyNumber" -> Seq(
+                "Enum.luckyNumber" -> Seq(
                   "Value `0` is not one of the allowed values in Seq(7, 9, 13)"
                 ),
-                "Allowed.luckyNumber2" -> Seq(
+                "Enum.luckyNumber2" -> Seq(
                   "Lucky number can only be 7, 9 or 13"
                 )
               )

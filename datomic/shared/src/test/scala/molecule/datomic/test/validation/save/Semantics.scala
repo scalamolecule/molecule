@@ -14,7 +14,8 @@ object Semantics extends DatomicTestSuite {
 
     "1 attribute" - validation { implicit conn =>
       for {
-        _ <- Type.int(1).save.transact.expect {
+        _ <- Type.int(1).save.transact
+          .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap, _) =>
             errorMap ==>
               Map(
@@ -31,7 +32,8 @@ object Semantics extends DatomicTestSuite {
 
     "2 attributes" - validation { implicit conn =>
       for {
-        _ <- Type.int(1).long(3L).save.transact.expect {
+        _ <- Type.int(1).long(3L).save.transact
+          .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap, _) =>
             errorMap ==>
               Map(
@@ -43,7 +45,8 @@ object Semantics extends DatomicTestSuite {
               )
         }
 
-        _ <- Type.int(3).long(1L).save.transact.expect {
+        _ <- Type.int(3).long(1L).save.transact
+          .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap, _) =>
             errorMap ==>
               Map(
@@ -55,7 +58,8 @@ object Semantics extends DatomicTestSuite {
               )
         }
 
-        _ <- Type.int(1).long(1L).save.transact.expect {
+        _ <- Type.int(1).long(1L).save.transact
+          .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap, _) =>
             errorMap ==>
               Map(
@@ -77,7 +81,8 @@ object Semantics extends DatomicTestSuite {
 
     "2 attributes, multi-error" - validation { implicit conn =>
       for {
-        _ <- Format.errorMsg(1).multipleErrors(0).save.transact.expect {
+        _ <- Format.errorMsg(1).multipleErrors(0).save.transact
+          .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap, _) =>
             errorMap ==>
               Map(

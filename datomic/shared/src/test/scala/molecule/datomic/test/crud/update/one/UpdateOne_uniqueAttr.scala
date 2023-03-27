@@ -1,6 +1,6 @@
 package molecule.datomic.test.crud.update.one
 
-import molecule.base.error.ExecutionError
+import molecule.base.error.ModelError
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Unique._
 import molecule.datomic.setup.DatomicTestSuite
@@ -159,7 +159,8 @@ object UpdateOne_uniqueAttr extends DatomicTestSuite {
         _ <- Unique.int_(0).i(2).Tx(Other.i(43).s("tx2")).update.transact
         _ <- Unique.i.Tx(Other.i.s).query.get.map(_ ==> List((2, 43, "tx2")))
 
-        _ <- Unique.int_(0).Tx(Other.s("tx3")).update.transact.expect { case ExecutionError(err, _) =>
+        _ <- Unique.int_(0).Tx(Other.s("tx3")).update.transact
+            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Can't update tx meta data only."
         }
 
@@ -184,18 +185,21 @@ object UpdateOne_uniqueAttr extends DatomicTestSuite {
 
     "Semantics" - unique { implicit conn =>
       for {
-        _ <- Unique.i(1).i(2).int_(1).update.transact.expect { case ExecutionError(err, _) =>
+        _ <- Unique.i(1).i(2).int_(1).update.transact
+            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Can't transact duplicate attribute `Unique.i`."
         }
 
         _ <- Unique.i_(1).i(2).update.transact
 
-        _ <- Unique.int_(1).string_("x").s("c").update.transact.expect { case ExecutionError(err, _) =>
+        _ <- Unique.int_(1).string_("x").s("c").update.transact
+            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Can only apply one unique attribute value for update. Found:\n" +
             """AttrOneTacString("Unique", "string", Appl, Seq("x"), None, Nil, None, None)"""
         }
 
-        _ <- Unique.ints_(1).s("b").update.transact.expect { case ExecutionError(err, _) =>
+        _ <- Unique.ints_(1).s("b").update.transact
+            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Can only lookup entity with card-one attribute value. Found:\n" +
             """AttrSetTacInt("Unique", "ints", Appl, Seq(Set(1)), None, Nil, None, None)"""
         }

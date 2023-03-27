@@ -1,9 +1,15 @@
 package molecule.base.error
 
-//sealed trait MoleculeError extends Throwable with Product with Serializable {
+
 sealed trait MoleculeError extends Throwable with Product with Serializable {
   def msg: String
   override def getMessage: String = msg
+}
+
+
+case class ModelError(message: String) extends MoleculeError {
+  override def msg: String = toString
+  override def toString: String = message
 }
 
 case class ValidationErrors(

@@ -18,7 +18,8 @@ object ValidationFormatting extends DatomicTestSuite {
 
     "Test, default msg" - validation { implicit conn =>
       for {
-        _ <- Format.noErrorMsg(1).save.transact.expect {
+        _ <- Format.noErrorMsg(1).save.transact
+          .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap, _) =>
             errorMap.head ==>
               "Format.noErrorMsg" -> Seq(
@@ -41,7 +42,8 @@ object ValidationFormatting extends DatomicTestSuite {
 
     "Test, msg" - validation { implicit conn =>
       for {
-        _ <- Format.errorMsg(1).save.transact.expect {
+        _ <- Format.errorMsg(1).save.transact
+          .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap, _) =>
             errorMap.head ==>
               "Format.errorMsg" -> Seq("One-line error msg")
@@ -52,7 +54,8 @@ object ValidationFormatting extends DatomicTestSuite {
 
     "Test, msg with value" - validation { implicit conn =>
       for {
-        _ <- Format.errorMsgWithValue(1).save.transact.expect {
+        _ <- Format.errorMsgWithValue(1).save.transact
+          .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap, _) =>
             errorMap.head ==>
               "Format.errorMsgWithValue" -> Seq("One-line error msg. Found 1")
@@ -63,7 +66,8 @@ object ValidationFormatting extends DatomicTestSuite {
 
     "Test, msg with quoted value" - validation { implicit conn =>
       for {
-        _ <- Format.errorMsgWithValueQuoted("hi").save.transact.expect {
+        _ <- Format.errorMsgWithValueQuoted("hi").save.transact
+          .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap, _) =>
             errorMap.head ==>
               "Format.errorMsgWithValueQuoted" -> Seq("""Expected hello. Found "hi".""")
@@ -73,7 +77,8 @@ object ValidationFormatting extends DatomicTestSuite {
 
     "Test, msg with quoted value 2" - validation { implicit conn =>
       for {
-        _ <- Format.errorMsgWithValueQuoted2("hi").save.transact.expect {
+        _ <- Format.errorMsgWithValueQuoted2("hi").save.transact
+          .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap, _) =>
             errorMap.head ==>
               "Format.errorMsgWithValueQuoted2" -> Seq("""Expected hello. Found "hi".""")
@@ -84,7 +89,8 @@ object ValidationFormatting extends DatomicTestSuite {
 
     "Test, multi-line msg" - validation { implicit conn =>
       for {
-        _ <- Format.multilineErrorMsg(1).save.transact.expect {
+        _ <- Format.multilineErrorMsg(1).save.transact
+          .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap, _) =>
             errorMap.head ==>
               "Format.multilineErrorMsg" -> Seq(
@@ -98,7 +104,8 @@ object ValidationFormatting extends DatomicTestSuite {
 
     "Test, multi-line msg with value" - validation { implicit conn =>
       for {
-        _ <- Format.multilineMsgWithValue(1).save.transact.expect {
+        _ <- Format.multilineMsgWithValue(1).save.transact
+          .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap, _) =>
             errorMap.head ==>
               "Format.multilineMsgWithValue" -> Seq(
@@ -111,7 +118,8 @@ object ValidationFormatting extends DatomicTestSuite {
 
     "Test, multi-line msg with value 2" - validation { implicit conn =>
       for {
-        _ <- Format.multilineMsgWithValue2(1).save.transact.expect {
+        _ <- Format.multilineMsgWithValue2(1).save.transact
+          .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap, _) =>
             errorMap.head ==>
               "Format.multilineMsgWithValue2" -> Seq(
@@ -125,7 +133,8 @@ object ValidationFormatting extends DatomicTestSuite {
 
     "Multi-line test, default msg" - validation { implicit conn =>
       for {
-        _ <- Format.multiLine(1).save.transact.expect {
+        _ <- Format.multiLine(1).save.transact
+          .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap, _) =>
             errorMap.head ==>
               "Format.multiLine" -> Seq(
@@ -144,7 +153,8 @@ object ValidationFormatting extends DatomicTestSuite {
 
     "Multi-line test, msg" - validation { implicit conn =>
       for {
-        _ <- Format.multiLine2(1).save.transact.expect {
+        _ <- Format.multiLine2(1).save.transact
+          .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap, _) =>
             errorMap.head ==>
               "Format.multiLine2" -> Seq("One-line error msg")
@@ -155,7 +165,8 @@ object ValidationFormatting extends DatomicTestSuite {
 
     "Multi-line test, multi-line msg" - validation { implicit conn =>
       for {
-        _ <- Format.multiLine3(1).save.transact.expect {
+        _ <- Format.multiLine3(1).save.transact
+          .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap, _) =>
             errorMap.head ==>
               "Format.multiLine3" -> Seq(
@@ -169,7 +180,8 @@ object ValidationFormatting extends DatomicTestSuite {
 
     "Single test line with logic" - validation { implicit conn =>
       for {
-        _ <- Format.logic(1).save.transact.expect {
+        _ <- Format.logic(1).save.transact
+          .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap, _) =>
             errorMap.head ==>
               "Format.logic" -> Seq("Value must be an odd number between 3 and 9 but not 7")
@@ -181,25 +193,29 @@ object ValidationFormatting extends DatomicTestSuite {
     "Multiple validations" - validation { implicit conn =>
       for {
         // Fail validation 1
-        _ <- Format.multipleErrors(1).save.transact.expect {
+        _ <- Format.multipleErrors(1).save.transact
+          .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap, _) =>
             errorMap.head ==>
               "Format.multipleErrors" -> Seq("Number must be bigger than 2. Found: 1")
         }
         // Fail validation 2
-        _ <- Format.multipleErrors(11).save.transact.expect {
+        _ <- Format.multipleErrors(11).save.transact
+          .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap, _) =>
             errorMap.head ==>
               "Format.multipleErrors" -> Seq("Number must be smaller than 10. Found: 11")
         }
         // Fail validation 3
-        _ <- Format.multipleErrors(7).save.transact.expect {
+        _ <- Format.multipleErrors(7).save.transact
+          .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap, _) =>
             errorMap.head ==>
               "Format.multipleErrors" -> Seq("Number must not be count of allowed numbers. Found: 7")
         }
         // Fail validation 4
-        _ <- Format.multipleErrors(4).save.transact.expect {
+        _ <- Format.multipleErrors(4).save.transact
+          .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap, _) =>
             errorMap.head ==>
               "Format.multipleErrors" -> Seq(
@@ -209,7 +225,8 @@ object ValidationFormatting extends DatomicTestSuite {
         }
 
         // Multiple errorMap at once - fail validation 1 + 4
-        _ <- Format.multipleErrors(0).save.transact.expect {
+        _ <- Format.multipleErrors(0).save.transact
+          .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap, _) =>
             errorMap.head ==>
               "Format.multipleErrors" -> Seq(
@@ -224,7 +241,8 @@ object ValidationFormatting extends DatomicTestSuite {
     "Multiple validations, multiple values" - validation { implicit conn =>
       for {
         // Only 5 is ok
-        _ <- Format.multipleErrors(0, 5, 11).save.transact.expect {
+        _ <- Format.multipleErrors(0, 5, 11).save.transact
+          .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap, _) =>
             errorMap.head ==>
               "Format.multipleErrors" -> Seq(
@@ -243,7 +261,8 @@ object ValidationFormatting extends DatomicTestSuite {
 
     "Multiple attribute validations" - validation { implicit conn =>
       for {
-        _ <- Format.errorMsg(1).multipleErrors(0).save.transact.expect {
+        _ <- Format.errorMsg(1).multipleErrors(0).save.transact
+          .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap, _) =>
             // All errorMap in Map with attribute name keys
             errorMap ==> Map(

@@ -5,13 +5,14 @@ import clojure.lang.Keyword
 import datomic.Util.list
 import datomic.query.EntityMap
 import datomic.{Database, Peer}
-import molecule.base.error.{ExecutionError, ValidationErrors}
+import molecule.base.error._
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.{UpdateExtraction, UpdateOps}
-import molecule.core.validation.ConflictingAttrs
+import molecule.core.validation.PreValidation
 import molecule.datomic.facade.DatomicConn_JVM
 import molecule.datomic.query.DatomicModel2Query
+import scala.collection.mutable.ListBuffer
 
 trait Update_stmts extends DatomicTxBase_JVM with UpdateOps with MoleculeLogging { self: UpdateExtraction =>
 
@@ -19,7 +20,27 @@ trait Update_stmts extends DatomicTxBase_JVM with UpdateOps with MoleculeLogging
     conn: DatomicConn_JVM,
     elements: List[Element]
   ): Data = {
-    val validationErrors = ConflictingAttrs.check(elements, distinguishMode = true)
+    val db = conn.peerConn.db()
+
+    val checkCurrentSetValues: Attr => Set[Any] = (attr: Attr) => {
+      val a = s":${attr.ns}/${attr.attr}"
+      try {
+        val curValues = Peer.q(s"[:find ?vs :where [_ $a ?vs]]", db)
+        if (curValues.isEmpty) {
+          throw ExecutionError(s"While checking to avoid removing the last values of mandatory " +
+            s"attribute ${attr.ns}.${attr.attr} the current Set of values couldn't be found.")
+        }
+        val vs = ListBuffer.empty[Any]
+        curValues.forEach(row => vs.addOne(row.get(0)))
+        vs.toSet
+      } catch {
+        case e: MoleculeError => throw e
+        case t: Throwable     => throw ExecutionError(
+          s"Unexpected error trying to find current values of mandatory attribute ${attr.name}", t)
+      }
+    }
+
+    val validationErrors = PreValidation(conn.proxy.nsMap, Some(checkCurrentSetValues)).check(elements)
     if (validationErrors.nonEmpty) {
       throw ValidationErrors(validationErrors)
     }
@@ -34,7 +55,6 @@ trait Update_stmts extends DatomicTxBase_JVM with UpdateOps with MoleculeLogging
       (None, Nil)
     }
 
-    val db = conn.peerConn.db()
     filterQuery.fold {
       val addStmts = eid2stmts(data, db, isUpsert)
       eids.foreach(addStmts)
@@ -111,7 +131,7 @@ trait Update_stmts extends DatomicTxBase_JVM with UpdateOps with MoleculeLogging
           entity = db.entity(txId)
           eid = datomicTx
 
-        case other => throw ExecutionError("Unexpected data in update: " + other)
+        case other => throw ModelError("Unexpected data in update: " + other)
       }
     }
   }

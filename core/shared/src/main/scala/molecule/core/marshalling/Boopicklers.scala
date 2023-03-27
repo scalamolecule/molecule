@@ -5,7 +5,7 @@ import java.net.URI
 import java.util.Date
 import boopickle.CompositePickler
 import boopickle.Default._
-import molecule.base.error.{ExecutionError, InsertError, InsertErrors, MoleculeError, ValidationErrors}
+import molecule.base.error._
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 
@@ -132,9 +132,10 @@ object Boopicklers extends MoleculeLogging {
   implicit val pickleExceptions: CompositePickler[Throwable] = exceptionPickler
   pickleExceptions
     .addConcreteType[MoleculeError]
-    .addConcreteType[ExecutionError]
+    .addConcreteType[ModelError]
     .addConcreteType[ValidationErrors]
     .addConcreteType[InsertErrors]
+    .addConcreteType[ExecutionError]
 
   implicit val pickleFileNotFoundEception: CompositePickler[FileNotFoundException] =
     compositePickler[FileNotFoundException]

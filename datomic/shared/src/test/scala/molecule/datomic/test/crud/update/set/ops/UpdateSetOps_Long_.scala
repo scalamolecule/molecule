@@ -1,7 +1,7 @@
 // GENERATED CODE ********************************
 package molecule.datomic.test.crud.update.set.ops
 
-import molecule.base.error.ExecutionError
+import molecule.base.error._
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.datomic.setup.DatomicTestSuite
@@ -101,11 +101,13 @@ object UpdateSetOps_Long_ extends DatomicTestSuite {
 
 
         // Can't swap duplicate from/to values
-        _ <- Ns(42).longs.swap(long1 -> long2, long1 -> long3).update.transact.expect { case ExecutionError(err, _) =>
+        _ <- Ns(42).longs.swap(long1 -> long2, long1 -> long3).update.transact
+            .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
           err ==> "Can't swap from duplicate retract values."
         }
 
-        _ <- Ns(42).longs.swap(long1 -> long3, long2 -> long3).update.transact.expect { case ExecutionError(err, _) =>
+        _ <- Ns(42).longs.swap(long1 -> long3, long2 -> long3).update.transact
+            .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
           err ==> "Can't swap to duplicate replacement values."
         }
       } yield ()
@@ -116,29 +118,33 @@ object UpdateSetOps_Long_ extends DatomicTestSuite {
       for {
         eid <- Ns.longs(Set(long1, long2, long3, long4, long5, long6)).save.transact.map(_.eids.head)
 
-        // Retract value
+        // Remove value
         _ <- Ns(eid).longs.remove(long6).update.transact
         _ <- Ns.longs.query.get.map(_.head ==> Set(long1, long2, long3, long4, long5))
 
-        // Retracting non-existing value has no effect
+        // Removing non-existing value has no effect
         _ <- Ns(eid).longs.remove(long7).update.transact
         _ <- Ns.longs.query.get.map(_.head ==> Set(long1, long2, long3, long4, long5))
 
-        // Retracting duplicate values removes the distinct value
+        // Removing duplicate values removes the distinct value
         _ <- Ns(eid).longs.remove(long5, long5).update.transact
         _ <- Ns.longs.query.get.map(_.head ==> Set(long1, long2, long3, long4))
 
-        // Retract multiple values (vararg)
+        // Remove multiple values (vararg)
         _ <- Ns(eid).longs.remove(long3, long4).update.transact
         _ <- Ns.longs.query.get.map(_.head ==> Set(long1, long2))
 
-        // Retract Seq of values
+        // Remove Seq of values
         _ <- Ns(eid).longs.remove(Seq(long2)).update.transact
         _ <- Ns.longs.query.get.map(_.head ==> Set(long1))
 
-        // Retracting empty Seq of values has no effect
+        // Removing empty Seq of values has no effect
         _ <- Ns(eid).longs.remove(Seq.empty[Long]).update.transact
         _ <- Ns.longs.query.get.map(_.head ==> Set(long1))
+
+        // Removing all elements is like deleting the attribute
+        _ <- Ns(eid).longs.remove(Seq(long1)).update.transact
+        _ <- Ns.longs.query.get.map(_ ==> Nil)
       } yield ()
     }
   }

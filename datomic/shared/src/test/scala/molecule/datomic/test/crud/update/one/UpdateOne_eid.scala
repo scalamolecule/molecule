@@ -1,6 +1,6 @@
 package molecule.datomic.test.crud.update.one
 
-import molecule.base.error.ExecutionError
+import molecule.base.error._
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.datomic.setup.DatomicTestSuite
@@ -114,7 +114,8 @@ object UpdateOne_eid extends DatomicTestSuite {
         _ <- Ns.int.Tx(Other.s).query.get.map(_ ==> List((2, "tx2")))
 
 
-        _ <- Ns(eid).Tx(Other.s("tx3")).update.transact.expect { case ExecutionError(err, _) =>
+        _ <- Ns(eid).Tx(Other.s("tx3")).update.transact
+            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Can't update tx meta data only."
         }
 
@@ -141,7 +142,8 @@ object UpdateOne_eid extends DatomicTestSuite {
 
       "e_(eid) not allowed" - types { implicit conn =>
         for {
-          _ <- Ns.e_(42).int(2).update.transact.expect { case ExecutionError(err, _) =>
+          _ <- Ns.e_(42).int(2).update.transact
+            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Can't update by applying entity ids to e_"
           }
         } yield ()
@@ -149,7 +151,8 @@ object UpdateOne_eid extends DatomicTestSuite {
 
       "Tacit generic attributes not allowed" - types { implicit conn =>
         for {
-          _ <- Ns(42).a_("x").update.transact.expect { case ExecutionError(err, _) =>
+          _ <- Ns(42).a_("x").update.transact
+            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Generic attributes not allowed in update molecule. Found:\n" +
               """AttrOneTacString("_Generic", "a", Appl, Seq("x"), None, Nil, None, None)"""
           }
@@ -158,7 +161,8 @@ object UpdateOne_eid extends DatomicTestSuite {
 
       "Mandatory generic attributes not allowed" - types { implicit conn =>
         for {
-          _ <- Ns(42).a("x").update.transact.expect { case ExecutionError(err, _) =>
+          _ <- Ns(42).a("x").update.transact
+            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Generic attributes not allowed in update molecule. Found:\n" +
               """AttrOneManString("_Generic", "a", Appl, Seq("x"), None, Nil, None, None)"""
           }
@@ -167,7 +171,8 @@ object UpdateOne_eid extends DatomicTestSuite {
 
       "Can't update multiple values for one card-one attribute" - types { implicit conn =>
         for {
-          _ <- Ns(42).int(2, 3).update.transact.expect { case ExecutionError(err, _) =>
+          _ <- Ns(42).int(2, 3).update.transact
+            .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
             err ==> "Can only update one value for attribute `Ns.int`. Found: 2, 3"
           }
         } yield ()
@@ -175,7 +180,8 @@ object UpdateOne_eid extends DatomicTestSuite {
 
       "Can't update optional values" - types { implicit conn =>
         for {
-          _ <- Ns(42).int_?(Some(1)).update.transact.expect { case ExecutionError(err, _) =>
+          _ <- Ns(42).int_?(Some(1)).update.transact
+            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Can't update optional values. Found:\n" +
               """AttrOneOptInt("Ns", "int", Appl, Some(Seq(1)), None, Nil, None, None)"""
           }
@@ -184,7 +190,8 @@ object UpdateOne_eid extends DatomicTestSuite {
 
       "Can't update card-many referenced attributes" - types { implicit conn =>
         for {
-          _ <- Ns(42).i(1).Refs.i(2).update.transact.expect { case ExecutionError(err, _) =>
+          _ <- Ns(42).i(1).Refs.i(2).update.transact
+            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Can't update attributes in card-many referenced namespaces. Found `Refs`"
           }
         } yield ()
@@ -192,7 +199,8 @@ object UpdateOne_eid extends DatomicTestSuite {
 
       "Can't update multiple values for one card-one attribute" - types { implicit conn =>
         for {
-          _ <- Ns(42).int(2, 3).update.transact.expect { case ExecutionError(err, _) =>
+          _ <- Ns(42).int(2, 3).update.transact
+            .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
             err ==> "Can only update one value for attribute `Ns.int`. Found: 2, 3"
           }
         } yield ()

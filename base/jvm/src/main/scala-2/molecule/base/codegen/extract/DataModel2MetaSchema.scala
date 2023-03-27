@@ -2,7 +2,7 @@ package molecule.base.codegen.extract
 
 import java.nio.file.{Files, Paths}
 import molecule.base.ast.SchemaAST._
-import molecule.base.error.ExecutionError
+import molecule.base.error.ModelError
 import scala.annotation.tailrec
 import scala.meta._
 
@@ -60,10 +60,11 @@ class DataModel2MetaSchema(filePath: String, pkgPath: String, scalaVersion: Stri
     case q"trait $nsTpe { ..$attrs }" =>
       val ns = nsTpe.toString
       if (ns.head.isLower)
-        throw ExecutionError("Namespace traits have to start with upper case letter.")
-      val metaAttrs  = getAttrs(ns, attrs)
-      val backRefNss = backRefs.getOrElse(ns, Nil).distinct.sorted
-      MetaNs(partPrefix + ns, metaAttrs, backRefNss)
+        throw ModelError("Namespace traits have to start with upper case letter.")
+      val metaAttrs      = getAttrs(ns, attrs)
+      val backRefNss     = backRefs.getOrElse(ns, Nil).distinct.sorted
+      val mandatoryAttrs = metaAttrs.collect { case a if a.options.contains("mandatory") => a.attr }
+      MetaNs(partPrefix + ns, metaAttrs, backRefNss, mandatoryAttrs)
     case q"object $o { ..$_ }"        => noMix()
     case other                        => unexpected(other)
   }
@@ -71,8 +72,9 @@ class DataModel2MetaSchema(filePath: String, pkgPath: String, scalaVersion: Stri
   private def getAttrs(ns: String, attrs: Seq[Stat]): Seq[MetaAttr] = attrs.map {
     case q"val $attr = $defs" =>
       val a = attr.toString
-      getAttr(ns, a, defs, (Nil, None, None, Nil, MetaAttr(a, CardOne, "")))._5
-    case other                => unexpected(other)
+      acc(ns, defs, MetaAttr(a, CardOne, ""))
+
+    case other => unexpected(other)
   }
 
   private val reservedAttrNames = List(
@@ -81,28 +83,25 @@ class DataModel2MetaSchema(filePath: String, pkgPath: String, scalaVersion: Stri
     "self", "apply", "assert", "replace", "not", "contains", "k",
   )
 
+
   @tailrec
-  private def getAttr(
-    ns: String,
-    a: String,
-    t: Tree,
-    x: (List[String], Option[String], Option[String], Seq[(String, String)], MetaAttr)
-  ): (List[String], Option[String], Option[String], Seq[(String, String)], MetaAttr) = {
+  private def acc(ns: String, t: Tree, a: MetaAttr): MetaAttr = {
     t match {
-      case q"$prev.index"                   => getAttr(ns, a, prev, ("index" :: x._1, x._2, x._3, x._4, x._5))
-      case q"$prev.noHistory"               => getAttr(ns, a, prev, ("noHistory" :: x._1, x._2, x._3, x._4, x._5))
-      case q"$prev.uniqueIdentity"          => getAttr(ns, a, prev, ("uniqueIdentity" :: x._1, x._2, x._3, x._4, x._5))
-      case q"$prev.unique"                  => getAttr(ns, a, prev, ("unique" :: x._1, x._2, x._3, x._4, x._5))
-      case q"$prev.fulltext"                => getAttr(ns, a, prev, ("fulltext" :: x._1, x._2, x._3, x._4, x._5))
-      case q"$prev.owner"                   => getAttr(ns, a, prev, ("owner" :: x._1, x._2, x._3, x._4, x._5))
-      case q"$prev.descr(${Lit.String(s)})" =>
-        val descr = if (s.isEmpty)
+      case q"$prev.index"          => acc(ns, prev, a.copy(options = a.options :+ "index"))
+      case q"$prev.noHistory"      => acc(ns, prev, a.copy(options = a.options :+ "noHistory"))
+      case q"$prev.uniqueIdentity" => acc(ns, prev, a.copy(options = a.options :+ "uniqueIdentity"))
+      case q"$prev.unique"         => acc(ns, prev, a.copy(options = a.options :+ "unique"))
+      case q"$prev.fulltext"       => acc(ns, prev, a.copy(options = a.options :+ "fulltext"))
+      case q"$prev.owner"          => acc(ns, prev, a.copy(options = a.options :+ "owner"))
+      case q"$prev.mandatory"      => acc(ns, prev, a.copy(options = a.options :+ "mandatory"))
+
+      case q"$prev.description(${Lit.String(s)})" =>
+        if (s.isEmpty)
           throw new Exception(s"Can't apply empty String as description option for attribute $a.")
         else if (s.contains("\""))
           throw new Exception(s"Description option for attribute $a can't contain quotes.")
         else
-          Some(s)
-        getAttr(ns, a, prev, (x._1, descr, x._3, x._4, x._5))
+          acc(ns, prev, a.copy(description = Some(s)))
 
       case q"$prev.alias(${Lit.String(s)})" => s match {
         case r"([a-zA-Z0-9]+)$alias" =>
@@ -112,50 +111,49 @@ class DataModel2MetaSchema(filePath: String, pkgPath: String, scalaVersion: Stri
                 reservedAttrNames.mkString("\n  ")
             )
           } else {
-            getAttr(ns, a, prev, (x._1, x._2, Some(alias), x._4, x._5))
+            acc(ns, prev, a.copy(alias = Some(alias)))
           }
         case other                   =>
           throw new Exception(s"Invalid alias for attribute $a: " + other)
       }
 
-
-      case q"oneString"     => attr(x, CardOne, "String")
-      case q"oneChar"       => attr(x, CardOne, "Char")
-      case q"oneByte"       => attr(x, CardOne, "Byte")
-      case q"oneShort"      => attr(x, CardOne, "Short")
-      case q"oneInt"        => attr(x, CardOne, "Int")
-      case q"oneLong"       => attr(x, CardOne, "Long")
-      case q"oneFloat"      => attr(x, CardOne, "Float")
-      case q"oneDouble"     => attr(x, CardOne, "Double")
-      case q"oneBoolean"    => attr(x, CardOne, "Boolean")
-      case q"oneBigInt"     => attr(x, CardOne, "BigInt")
-      case q"oneBigDecimal" => attr(x, CardOne, "BigDecimal")
-      case q"oneDate"       => attr(x, CardOne, "Date")
-      case q"oneUUID"       => attr(x, CardOne, "UUID")
-      case q"oneURI"        => attr(x, CardOne, "URI")
+      case q"oneString"     => a.copy(card = CardOne, tpe = "String")
+      case q"oneChar"       => a.copy(card = CardOne, tpe = "Char")
+      case q"oneByte"       => a.copy(card = CardOne, tpe = "Byte")
+      case q"oneShort"      => a.copy(card = CardOne, tpe = "Short")
+      case q"oneInt"        => a.copy(card = CardOne, tpe = "Int")
+      case q"oneLong"       => a.copy(card = CardOne, tpe = "Long")
+      case q"oneFloat"      => a.copy(card = CardOne, tpe = "Float")
+      case q"oneDouble"     => a.copy(card = CardOne, tpe = "Double")
+      case q"oneBoolean"    => a.copy(card = CardOne, tpe = "Boolean")
+      case q"oneBigInt"     => a.copy(card = CardOne, tpe = "BigInt")
+      case q"oneBigDecimal" => a.copy(card = CardOne, tpe = "BigDecimal")
+      case q"oneDate"       => a.copy(card = CardOne, tpe = "Date")
+      case q"oneUUID"       => a.copy(card = CardOne, tpe = "UUID")
+      case q"oneURI"        => a.copy(card = CardOne, tpe = "URI")
 
       case q"one[$refNs]" =>
         addBackRef(ns, refNs.toString)
-        attr(x, CardOne, "Long", Some(refNs.toString.replace('.', '_')))
+        a.copy(card = CardOne, tpe = "Long", refNs = Some(refNs.toString.replace('.', '_')))
 
       case q"many[$refNs]" =>
         addBackRef(ns, refNs.toString)
-        attr(x, CardSet, "Long", Some(refNs.toString.replace('.', '_')))
+        a.copy(card = CardSet, tpe = "Long", refNs = Some(refNs.toString.replace('.', '_')))
 
-      case q"setString"     => attr(x, CardSet, "String")
-      case q"setChar"       => attr(x, CardSet, "Char")
-      case q"setByte"       => attr(x, CardSet, "Byte")
-      case q"setShort"      => attr(x, CardSet, "Short")
-      case q"setInt"        => attr(x, CardSet, "Int")
-      case q"setLong"       => attr(x, CardSet, "Long")
-      case q"setFloat"      => attr(x, CardSet, "Float")
-      case q"setDouble"     => attr(x, CardSet, "Double")
-      case q"setBoolean"    => attr(x, CardSet, "Boolean")
-      case q"setBigInt"     => attr(x, CardSet, "BigInt")
-      case q"setBigDecimal" => attr(x, CardSet, "BigDecimal")
-      case q"setDate"       => attr(x, CardSet, "Date")
-      case q"setUUID"       => attr(x, CardSet, "UUID")
-      case q"setURI"        => attr(x, CardSet, "URI")
+      case q"setString"     => a.copy(card = CardSet, tpe = "String")
+      case q"setChar"       => a.copy(card = CardSet, tpe = "Char")
+      case q"setByte"       => a.copy(card = CardSet, tpe = "Byte")
+      case q"setShort"      => a.copy(card = CardSet, tpe = "Short")
+      case q"setInt"        => a.copy(card = CardSet, tpe = "Int")
+      case q"setLong"       => a.copy(card = CardSet, tpe = "Long")
+      case q"setFloat"      => a.copy(card = CardSet, tpe = "Float")
+      case q"setDouble"     => a.copy(card = CardSet, tpe = "Double")
+      case q"setBoolean"    => a.copy(card = CardSet, tpe = "Boolean")
+      case q"setBigInt"     => a.copy(card = CardSet, tpe = "BigInt")
+      case q"setBigDecimal" => a.copy(card = CardSet, tpe = "BigDecimal")
+      case q"setDate"       => a.copy(card = CardSet, tpe = "Date")
+      case q"setUUID"       => a.copy(card = CardSet, tpe = "UUID")
+      case q"setURI"        => a.copy(card = CardSet, tpe = "URI")
 
 
       // Validations ................................................
@@ -171,57 +169,49 @@ class DataModel2MetaSchema(filePath: String, pkgPath: String, scalaVersion: Stri
           case other                                                                                =>
             throw new Exception("Unexpected validation case: " + other)
         }
-        getAttr(ns, a, prev, (x._1, x._2, x._3, validations, x._5))
+        acc(ns, prev, a.copy(validations = a.validations ++ validations))
 
       case q"$prev.validate($test)" =>
-        getAttr(ns, a, prev, (x._1, x._2, x._3, List(indent(test.toString()) -> ""), x._5))
+        acc(ns, prev, a.copy(validations = a.validations :+ indent(test.toString()) -> ""))
 
       case q"$prev.validate($test, ${Lit.String(error)})" =>
-        getAttr(ns, a, prev, (x._1, x._2, x._3, List(indent(test.toString()) -> error), x._5))
+        acc(ns, prev, a.copy(validations = a.validations :+ indent(test.toString()) -> error))
 
       case q"$prev.validate($test, ${Term.Select(Lit.String(multilineMsg), Term.Name("stripMargin"))})" =>
-        getAttr(ns, a, prev, (x._1, x._2, x._3, List(indent(test.toString()) -> multilineMsg), x._5))
+        acc(ns, prev, a.copy(validations = a.validations :+ indent(test.toString()) -> multilineMsg))
 
       case q"$prev.email" =>
         val test  = "(s: String) => emailRegex.findFirstMatchIn(s).isDefined"
         val error = s"""`_value_` is not a valid email"""
-        getAttr(ns, a, prev, (x._1, x._2, x._3, List(test -> error), x._5))
+        acc(ns, prev, a.copy(validations = a.validations :+ test -> error))
 
       case q"$prev.email(${Lit.String(error)})" =>
         val test = "(s: String) => emailRegex.findFirstMatchIn(s).isDefined"
-        getAttr(ns, a, prev, (x._1, x._2, x._3, List(test -> error), x._5))
+        acc(ns, prev, a.copy(validations = a.validations :+ test -> error))
 
       case q"$prev.regex(${Lit.String(regex)})" =>
         val test  = s"""(s: String) => "$regex".r.findFirstMatchIn(s).isDefined"""
         val error = s"""\"_value_\" doesn't match regex pattern: ${regex.replace("$", "$$")}"""
-        getAttr(ns, a, prev, (x._1, x._2, x._3, List(test -> error), x._5))
+        acc(ns, prev, a.copy(validations = a.validations :+ test -> error))
 
       case q"$prev.regex(${Lit.String(regex)}, ${Lit.String(error)})" =>
         val test = s"""(s: String) => "$regex".r.findFirstMatchIn(s).isDefined"""
-        getAttr(ns, a, prev, (x._1, x._2, x._3, List(test -> error), x._5))
+        acc(ns, prev, a.copy(validations = a.validations :+ test -> error))
 
-      case q"$prev.allowed(Seq(..$vs), ${Lit.String(error)})" =>
-        val test  = s"""v => Seq$vs.contains(v)"""
-        getAttr(ns, a, prev, (x._1, x._2, x._3, List(test -> error), x._5))
+      case q"$prev.enums(Seq(..$vs), ${Lit.String(error)})" =>
+        val test = s"""v => Seq$vs.contains(v)"""
+        acc(ns, prev, a.copy(validations = a.validations :+ test -> error))
 
-      case q"$prev.allowed(..$vs)" =>
+      case q"$prev.enums(..$vs)" =>
         val test  = s"""v => Seq$vs.contains(v)"""
         val error = s"""Value `_value_` is not one of the allowed values in Seq$vs"""
-        getAttr(ns, a, prev, (x._1, x._2, x._3, List(test -> error), x._5))
+        acc(ns, prev, a.copy(validations = a.validations :+ test -> error))
 
+      case q"$prev.require(..$otherAttrs)" =>
+        acc(ns, prev, a.copy(requiredAttrs = otherAttrs.map(_.toString)))
 
-      case q"$prev.require(..$attrs)" =>
-        val test  = s""
-        val error = s""
-        getAttr(ns, a, prev, (x._1, x._2, x._3, List(test -> error), x._5))
-
-      case q"$prev.mandatory" =>
-        getAttr(ns, a, prev, ("mandatory" :: x._1, x._2, x._3, x._4, x._5))
-
-      case q"$prev.value" =>
-        getAttr(ns, a, prev, ("value" :: x._1, x._2, x._3, x._4, x._5))
-
-      case other => unexpected(other)
+      case q"$prev.value" => acc(ns, prev, a)
+      case other          => unexpected(other)
     }
   }
 
@@ -254,7 +244,7 @@ class DataModel2MetaSchema(filePath: String, pkgPath: String, scalaVersion: Stri
       tpe = tpe,
       refNs = refNs,
       options = acc._1,
-      descr = acc._2,
+      description = acc._2,
       alias = acc._3,
       validations = acc._4
     ))

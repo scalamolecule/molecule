@@ -1,6 +1,6 @@
 package molecule.datomic.test.crud.delete
 
-import molecule.base.error.ExecutionError
+import molecule.base.error._
 import molecule.coreTests.dataModels.core.dsl.Refs._
 import molecule.datomic.async._
 import utest._
@@ -196,11 +196,13 @@ object Delete_eid extends DatomicTestSuite {
 
       "e_(eid) not allowed" - refs { implicit conn =>
         for {
-          _ <- Ns.e_(42).i(2).delete.transact.expect { case ExecutionError(err, _) =>
+          _ <- Ns.e_(42).i(2).delete.transact
+            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Can't delete by applying entity ids to e_"
           }
 
-          _ <- Ns.e_(42).i(2).delete.transact.expect { case ExecutionError(err, _) =>
+          _ <- Ns.e_(42).i(2).delete.transact
+            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Can't delete by applying entity ids to e_"
           }
         } yield ()
@@ -208,7 +210,8 @@ object Delete_eid extends DatomicTestSuite {
 
       "Tacit generic attributes not allowed" - refs { implicit conn =>
         for {
-          _ <- Ns(42).a_("x").delete.transact.expect { case ExecutionError(err, _) =>
+          _ <- Ns(42).a_("x").delete.transact
+            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Generic attributes not allowed in update molecule. Found:\n" +
               """AttrOneTacString("_Generic", "a", Appl, Seq("x"), None, Nil, None, None)"""
           }
@@ -217,7 +220,8 @@ object Delete_eid extends DatomicTestSuite {
 
       "Mandatory generic attributes not allowed" - refs { implicit conn =>
         for {
-          _ <- Ns(42).a("x").delete.transact.expect { case ExecutionError(err, _) =>
+          _ <- Ns(42).a("x").delete.transact
+            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Generic attributes not allowed in update molecule. Found:\n" +
               """AttrOneManString("_Generic", "a", Appl, Seq("x"), None, Nil, None, None)"""
           }
@@ -226,7 +230,8 @@ object Delete_eid extends DatomicTestSuite {
 
       "Can't update multiple values for one card-one attribute" - refs { implicit conn =>
         for {
-          _ <- Ns(42).i(2, 3).update.transact.expect { case ExecutionError(err, _) =>
+          _ <- Ns(42).i(2, 3).update.transact
+            .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
             err ==> "Can only update one value for attribute `Ns.i`. Found: 2, 3"
           }
         } yield ()
@@ -234,7 +239,8 @@ object Delete_eid extends DatomicTestSuite {
 
       "Can't update optional values" - refs { implicit conn =>
         for {
-          _ <- Ns(42).i_?(Some(1)).update.transact.expect { case ExecutionError(err, _) =>
+          _ <- Ns(42).i_?(Some(1)).update.transact
+            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Can't update optional values. Found:\n" +
               """AttrOneOptInt("Ns", "i", Appl, Some(Seq(1)), None, Nil, None, None)"""
           }
@@ -243,7 +249,8 @@ object Delete_eid extends DatomicTestSuite {
 
       "Can't update card-many referenced attributes" - refs { implicit conn =>
         for {
-          _ <- Ns(42).i(1).Rs1.i(2).update.transact.expect { case ExecutionError(err, _) =>
+          _ <- Ns(42).i(1).Rs1.i(2).update.transact
+            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Can't update attributes in card-many referenced namespaces. Found `Rs1`"
           }
         } yield ()

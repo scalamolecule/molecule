@@ -1,7 +1,7 @@
 // GENERATED CODE ********************************
 package molecule.datomic.test.crud.update.set.ops
 
-import molecule.base.error.ExecutionError
+import molecule.base.error._
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.datomic.setup.DatomicTestSuite
@@ -101,11 +101,13 @@ object UpdateSetOps_Float_ extends DatomicTestSuite {
 
 
         // Can't swap duplicate from/to values
-        _ <- Ns(42).floats.swap(float1 -> float2, float1 -> float3).update.transact.expect { case ExecutionError(err, _) =>
+        _ <- Ns(42).floats.swap(float1 -> float2, float1 -> float3).update.transact
+            .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
           err ==> "Can't swap from duplicate retract values."
         }
 
-        _ <- Ns(42).floats.swap(float1 -> float3, float2 -> float3).update.transact.expect { case ExecutionError(err, _) =>
+        _ <- Ns(42).floats.swap(float1 -> float3, float2 -> float3).update.transact
+            .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
           err ==> "Can't swap to duplicate replacement values."
         }
       } yield ()
@@ -116,29 +118,33 @@ object UpdateSetOps_Float_ extends DatomicTestSuite {
       for {
         eid <- Ns.floats(Set(float1, float2, float3, float4, float5, float6)).save.transact.map(_.eids.head)
 
-        // Retract value
+        // Remove value
         _ <- Ns(eid).floats.remove(float6).update.transact
         _ <- Ns.floats.query.get.map(_.head ==> Set(float1, float2, float3, float4, float5))
 
-        // Retracting non-existing value has no effect
+        // Removing non-existing value has no effect
         _ <- Ns(eid).floats.remove(float7).update.transact
         _ <- Ns.floats.query.get.map(_.head ==> Set(float1, float2, float3, float4, float5))
 
-        // Retracting duplicate values removes the distinct value
+        // Removing duplicate values removes the distinct value
         _ <- Ns(eid).floats.remove(float5, float5).update.transact
         _ <- Ns.floats.query.get.map(_.head ==> Set(float1, float2, float3, float4))
 
-        // Retract multiple values (vararg)
+        // Remove multiple values (vararg)
         _ <- Ns(eid).floats.remove(float3, float4).update.transact
         _ <- Ns.floats.query.get.map(_.head ==> Set(float1, float2))
 
-        // Retract Seq of values
+        // Remove Seq of values
         _ <- Ns(eid).floats.remove(Seq(float2)).update.transact
         _ <- Ns.floats.query.get.map(_.head ==> Set(float1))
 
-        // Retracting empty Seq of values has no effect
+        // Removing empty Seq of values has no effect
         _ <- Ns(eid).floats.remove(Seq.empty[Float]).update.transact
         _ <- Ns.floats.query.get.map(_.head ==> Set(float1))
+
+        // Removing all elements is like deleting the attribute
+        _ <- Ns(eid).floats.remove(Seq(float1)).update.transact
+        _ <- Ns.floats.query.get.map(_ ==> Nil)
       } yield ()
     }
   }

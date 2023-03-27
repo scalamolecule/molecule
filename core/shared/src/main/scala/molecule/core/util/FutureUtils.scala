@@ -1,6 +1,6 @@
 package molecule.core.util
 
-import molecule.base.error.{ExecutionError, InsertErrors, MoleculeError, ValidationErrors}
+import molecule.base.error._
 import molecule.boilerplate.util.MoleculeLogging
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -23,16 +23,10 @@ trait FutureUtils extends ModelUtils with MoleculeLogging {
     fut
       .map(txR => Right(txR))
       .recover {
-        case e: ValidationErrors =>
+        case e: MoleculeError =>
           logger.trace(e.toString)
           Left(e)
-        case e: InsertErrors     =>
-          logger.trace(e.toString)
-          Left(e)
-        case e: ExecutionError   =>
-          logger.trace(e.toString)
-          Left(e)
-        case e: Throwable              =>
+        case e: Throwable     =>
           // Unexpected error that should be treated like a bug to be fixed
           logger.error(e.toString + "\n" + e.getStackTrace.toList.mkString("\n"))
           Left(ExecutionError(e.getMessage, e))
@@ -41,19 +35,15 @@ trait FutureUtils extends ModelUtils with MoleculeLogging {
 
   def future[T](body: => T)(implicit ec: ExecutionContext): Future[T] = {
     Future(body).recover {
-      case e: ValidationErrors => throw e
-      case e: InsertErrors     => throw e
-      case e: ExecutionError   => throw e
-      case e: Throwable              => throw ExecutionError(e.toString, e)
+      case e: MoleculeError => throw e
+      case e: Throwable     => throw ExecutionError(e.toString, e)
     }
   }
 
   def tryFuture[T](toFuture: => Future[T])(implicit ec: ExecutionContext): Future[T] = try {
     toFuture
   } catch {
-    case e: ValidationErrors => Future.failed(e)
-    case e: InsertErrors     => Future.failed(e)
-    case e: ExecutionError   => Future.failed(e)
-    case e: Throwable              => Future.failed(ExecutionError(e.toString, e))
+    case e: MoleculeError => Future.failed(e)
+    case e: Throwable     => Future.failed(ExecutionError(e.toString, e))
   }
 }

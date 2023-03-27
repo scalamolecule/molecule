@@ -17,7 +17,8 @@ object TypesSet extends DatomicTestSuite {
 
     "String" - validation { implicit conn =>
       for {
-        _ <- Type.strings.insert(Set("-", "a", "b")).transact.expect {
+        _ <- Type.strings.insert(Set("-", "a", "b")).transact
+          .map(_ ==> "Unexpected success").recover {
           case InsertErrors(indexedInsertErrors, _) =>
             indexedInsertErrors ==>
               Seq(
@@ -45,7 +46,8 @@ object TypesSet extends DatomicTestSuite {
         }
 
         // Isolate expected single InsertError with pattern matching
-        _ <- Type.strings.insert(Set("-", "a", "b")).transact.expect {
+        _ <- Type.strings.insert(Set("-", "a", "b")).transact
+          .map(_ ==> "Unexpected success").recover {
           case InsertErrors(Seq((_, Seq(insertError))), _) =>
             insertError ==> InsertError(0, 0,
               "Type.strings",
@@ -60,7 +62,8 @@ object TypesSet extends DatomicTestSuite {
         }
 
         // Isolate expected errors
-        _ <- Type.strings.insert(Set("-", "a", "b")).transact.expect {
+        _ <- Type.strings.insert(Set("-", "a", "b")).transact
+          .map(_ ==> "Unexpected success").recover {
           case InsertErrors(Seq((_, Seq(InsertError(_, _, _, errors, _)))), _) =>
             errors ==> Seq(
               s"""Type.strings with value `-` doesn't satisfy validation:
@@ -77,7 +80,8 @@ object TypesSet extends DatomicTestSuite {
 
     "Int" - validation { implicit conn =>
       for {
-        _ <- Type.ints.insert(Set(0, 1, 2)).transact.expect {
+        _ <- Type.ints.insert(Set(0, 1, 2)).transact
+          .map(_ ==> "Unexpected success").recover {
           case InsertErrors(Seq((_, Seq(InsertError(_, _, _, errors, _)))), _) =>
             errors ==> Seq(
               s"""Type.ints with value `0` doesn't satisfy validation:
@@ -93,7 +97,8 @@ object TypesSet extends DatomicTestSuite {
 
     "Long" - validation { implicit conn =>
       for {
-        _ <- Type.longs.insert(Set(0L, 1L, 2L)).transact.expect {
+        _ <- Type.longs.insert(Set(0L, 1L, 2L)).transact
+          .map(_ ==> "Unexpected success").recover {
           case InsertErrors(Seq((_, Seq(InsertError(_, _, _, errors, _)))), _) =>
             errors ==> Seq(
               s"""Type.longs with value `0` doesn't satisfy validation:
@@ -109,7 +114,8 @@ object TypesSet extends DatomicTestSuite {
 
     "Float" - validation { implicit conn =>
       for {
-        _ <- Type.floats.insert(Set(float0, float1, float2)).transact.expect {
+        _ <- Type.floats.insert(Set(float0, float1, float2)).transact
+          .map(_ ==> "Unexpected success").recover {
           case InsertErrors(Seq((_, Seq(InsertError(_, _, _, errors, _)))), _) =>
             errors ==> Seq(
               s"""Type.floats with value `0.0` doesn't satisfy validation:
@@ -125,7 +131,8 @@ object TypesSet extends DatomicTestSuite {
 
     "Double" - validation { implicit conn =>
       for {
-        _ <- Type.doubles.insert(Set(double0, double1, double2)).transact.expect {
+        _ <- Type.doubles.insert(Set(double0, double1, double2)).transact
+          .map(_ ==> "Unexpected success").recover {
           case InsertErrors(Seq((_, Seq(InsertError(_, _, _, errors, _)))), _) =>
             errors ==> Seq(
               s"""Type.doubles with value `0.0` doesn't satisfy validation:
@@ -141,7 +148,8 @@ object TypesSet extends DatomicTestSuite {
 
     "Boolean" - validation { implicit conn =>
       for {
-        _ <- Type.booleans.insert(Set(true, false)).transact.expect {
+        _ <- Type.booleans.insert(Set(true, false)).transact
+          .map(_ ==> "Unexpected success").recover {
           case InsertErrors(Seq((_, Seq(InsertError(_, _, _, errors, _)))), _) =>
             errors ==> Seq(
               s"""Type.booleans with value `true` doesn't satisfy validation:
@@ -154,7 +162,8 @@ object TypesSet extends DatomicTestSuite {
 
     "BigInt" - validation { implicit conn =>
       for {
-        _ <- Type.bigInts.insert(Set(bigInt0, bigInt1, bigInt2)).transact.expect {
+        _ <- Type.bigInts.insert(Set(bigInt0, bigInt1, bigInt2)).transact
+          .map(_ ==> "Unexpected success").recover {
           case InsertErrors(Seq((_, Seq(InsertError(_, _, _, errors, _)))), _) =>
             errors ==> Seq(
               s"""Type.bigInts with value `0` doesn't satisfy validation:
@@ -170,7 +179,8 @@ object TypesSet extends DatomicTestSuite {
 
     "BigDecimal" - validation { implicit conn =>
       for {
-        _ <- Type.bigDecimals.insert(Set(bigDecimal0, bigDecimal1, bigDecimal2)).transact.expect {
+        _ <- Type.bigDecimals.insert(Set(bigDecimal0, bigDecimal1, bigDecimal2)).transact
+          .map(_ ==> "Unexpected success").recover {
           case InsertErrors(Seq((_, Seq(InsertError(_, _, _, errors, _)))), _) =>
             errors ==> Seq(
               s"""Type.bigDecimals with value `0.0` doesn't satisfy validation:
@@ -186,7 +196,8 @@ object TypesSet extends DatomicTestSuite {
 
     "Date" - validation { implicit conn =>
       for {
-        _ <- Type.dates.insert(Set(date0, date1, date2)).transact.expect {
+        _ <- Type.dates.insert(Set(date0, date1, date2)).transact
+          .map(_ ==> "Unexpected success").recover {
           case InsertErrors(Seq((_, Seq(InsertError(_, _, _, errors, _)))), _) =>
             errors ==> Seq(
               s"""Type.dates with value `$date0` doesn't satisfy validation:
@@ -205,7 +216,8 @@ object TypesSet extends DatomicTestSuite {
         _ <- Type.uuids.insert(Set(
           UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
           UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-bbbbbbbbbbbb")
-        )).transact.expect {
+        )).transact
+          .map(_ ==> "Unexpected success").recover {
           case InsertErrors(Seq((_, Seq(InsertError(_, _, _, errors, _)))), _) =>
             errors ==> Seq(
               s"""Type.uuids with value `aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa` doesn't satisfy validation:
@@ -221,7 +233,8 @@ object TypesSet extends DatomicTestSuite {
       val uri1 = new URI("y")
       val uri2 = new URI("xy")
       for {
-        _ <- Type.uris.insert(Set(uri0, uri1, uri2)).transact.expect {
+        _ <- Type.uris.insert(Set(uri0, uri1, uri2)).transact
+          .map(_ ==> "Unexpected success").recover {
           case InsertErrors(Seq((_, Seq(InsertError(_, _, _, errors, _)))), _) =>
             errors ==> Seq(
               s"""Type.uris with value `x` doesn't satisfy validation:
@@ -237,7 +250,8 @@ object TypesSet extends DatomicTestSuite {
 
     "Byte" - validation { implicit conn =>
       for {
-        _ <- Type.bytes.insert(Set(byte0, byte1, byte2)).transact.expect {
+        _ <- Type.bytes.insert(Set(byte0, byte1, byte2)).transact
+          .map(_ ==> "Unexpected success").recover {
           case InsertErrors(Seq((_, Seq(InsertError(_, _, _, errors, _)))), _) =>
             errors ==> Seq(
               s"""Type.bytes with value `$byte0` doesn't satisfy validation:
@@ -253,7 +267,8 @@ object TypesSet extends DatomicTestSuite {
 
     "Short" - validation { implicit conn =>
       for {
-        _ <- Type.shorts.insert(Set(short0, short1, short2)).transact.expect {
+        _ <- Type.shorts.insert(Set(short0, short1, short2)).transact
+          .map(_ ==> "Unexpected success").recover {
           case InsertErrors(Seq((_, Seq(InsertError(_, _, _, errors, _)))), _) =>
             errors ==> Seq(
               s"""Type.shorts with value `$short0` doesn't satisfy validation:
@@ -269,7 +284,8 @@ object TypesSet extends DatomicTestSuite {
 
     "Char" - validation { implicit conn =>
       for {
-        _ <- Type.chars.insert(Set('-', 'a', 'b')).transact.expect {
+        _ <- Type.chars.insert(Set('-', 'a', 'b')).transact
+          .map(_ ==> "Unexpected success").recover {
           case InsertErrors(Seq((_, Seq(InsertError(_, _, _, errors, _)))), _) =>
             errors ==> Seq(
               s"""Type.chars with value `-` doesn't satisfy validation:
@@ -285,7 +301,8 @@ object TypesSet extends DatomicTestSuite {
 
     "ref" - validation { implicit conn =>
       for {
-        _ <- Type.refs.insert(Set(0L, 1L, 2L)).transact.expect {
+        _ <- Type.refs.insert(Set(0L, 1L, 2L)).transact
+          .map(_ ==> "Unexpected success").recover {
           case InsertErrors(Seq((_, Seq(InsertError(_, _, _, errors, _)))), _) =>
             errors ==> Seq(
               s"""Type.refs with value `0` doesn't satisfy validation:

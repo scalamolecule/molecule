@@ -3,7 +3,7 @@ package molecule.core.transaction
 import java.net.URI
 import java.util.{Date, UUID}
 import molecule.base.ast.SchemaAST._
-import molecule.base.error.ExecutionError
+import molecule.base.error._
 import molecule.boilerplate.ast.Model._
 import scala.annotation.tailrec
 
@@ -31,20 +31,20 @@ class UpdateExtraction(
             case Add    => resolve(tail, eids, filterElements, data :+ setAdd(a))
             case Swap   => resolve(tail, eids, filterElements, data ++ setSwap(a))
             case Remove => resolve(tail, eids, filterElements, data ++ setRemove(a))
-            case _      => throw ExecutionError(s"Unexpected $update operation for card-many attribute. Found:\n" + a)
+            case _      => throw ModelError(s"Unexpected $update operation for card-many attribute. Found:\n" + a)
           }
 
-          case _: AttrSetTac => throw ExecutionError("Can only lookup entity with card-one attribute value. Found:\n" + a)
-          case _: AttrOneOpt => throw ExecutionError(s"Can't $update optional values. Found:\n" + a)
-          case _: AttrSetOpt => throw ExecutionError(s"Can't $update optional values. Found:\n" + a)
-          case _             => throw ExecutionError(s"Not implemented yet. Found:\n" + a)
+          case _: AttrSetTac => throw ModelError("Can only lookup entity with card-one attribute value. Found:\n" + a)
+          case _: AttrOneOpt => throw ModelError(s"Can't $update optional values. Found:\n" + a)
+          case _: AttrSetOpt => throw ModelError(s"Can't $update optional values. Found:\n" + a)
+          case _             => throw ModelError(s"Not implemented yet. Found:\n" + a)
         }
 
-        case _: Nested    => throw ExecutionError(s"Nested data structure not allowed in $update molecule.")
-        case _: NestedOpt => throw ExecutionError(s"Optional nested data structure not allowed in $update molecule.")
+        case _: Nested    => throw ModelError(s"Nested data structure not allowed in $update molecule.")
+        case _: NestedOpt => throw ModelError(s"Optional nested data structure not allowed in $update molecule.")
 
         case r@Ref(ns, attr, _, CardOne) => resolve(tail, eids, filterElements :+ r, data :+ ("ref", ns, attr, Nil, false))
-        case r: Ref                      => throw ExecutionError(
+        case r: Ref                      => throw ModelError(
           s"Can't $update attributes in card-many referenced namespaces. Found `${r.refAttr.capitalize}`"
         )
         case b: BackRef                  => resolve(tail, eids, filterElements :+ b, data)
@@ -55,7 +55,7 @@ class UpdateExtraction(
 
         case TxMetaData(es) =>
           if (data.isEmpty)
-            throw ExecutionError(s"Can't $update tx meta data only.")
+            throw ModelError(s"Can't $update tx meta data only.")
           val (eids1, filters1, data1) = extractSubElements(es)
           resolve(tail, eids ++ eids1, filterElements ++ filters1, (data :+ ("tx", null, null, Nil, false)) ++ data1)
       }
@@ -72,7 +72,7 @@ class UpdateExtraction(
     dataAttr: AttrOneMan
   ): (Seq[AnyRef], List[Element], Seq[(String, String, String, Seq[AnyRef], Boolean)]) = {
     if (dataAttr.op != Appl)
-      throw ExecutionError(s"Can't $update attributes without an applied value. Found:\n" + dataAttr)
+      throw ModelError(s"Can't $update attributes without an applied value. Found:\n" + dataAttr)
     if (isUpsert) {
       // Disregard if value already exists
       resolve(tail, eids, filterElements, data :+ oneApply(dataAttr))
@@ -83,7 +83,7 @@ class UpdateExtraction(
     }
   }
   private def oneApply(attr: AttrOneMan): (String, String, String, Seq[AnyRef], Boolean) = attr match {
-    case a if a.ns == "_Generic" => throw ExecutionError(
+    case a if a.ns == "_Generic" => throw ModelError(
       s"Generic attributes not allowed in update molecule. Found:\n" + a)
 
     case AttrOneManString(_, _, _, vs, _, _, _, _)     => addOneV[String](attr, vs, valueString)
@@ -121,18 +121,18 @@ class UpdateExtraction(
     filterAttr match {
       case AttrOneTacLong("_Generic", "eids", Appl, eids1, _, _, _, _) =>
         if (eids.nonEmpty)
-          throw ExecutionError(s"Can't apply entity ids twice in $update.")
+          throw ModelError(s"Can't apply entity ids twice in $update.")
         resolve(tail, eids1.asInstanceOf[Seq[AnyRef]], filterElements, data)
 
-      case AttrOneTacLong("_Generic", "e", Appl, _, _, _, _, _) => throw ExecutionError(
+      case AttrOneTacLong("_Generic", "e", Appl, _, _, _, _, _) => throw ModelError(
         "Can't update by applying entity ids to e_")
 
-      case a if a.ns == "_Generic" => throw ExecutionError(
+      case a if a.ns == "_Generic" => throw ModelError(
         s"Generic attributes not allowed in update molecule. Found:\n" + a)
 
       case uniqueFilterAttr if uniqueAttrs.contains(uniqueFilterAttr.name) =>
         if (eids.nonEmpty)
-          throw ExecutionError(
+          throw ModelError(
             s"Can only apply one unique attribute value for $update. Found:\n" + uniqueFilterAttr
           )
         val lookupRefs = uniqueEids(filterAttr, uniqueFilterAttr.ns, uniqueFilterAttr.attr)
@@ -231,7 +231,10 @@ class UpdateExtraction(
     } else {
       if (retracts.size != adds.size)
         throw ExecutionError(
-          s"Can't swap duplicate keys/values: "
+          s"""Can't swap duplicate keys/values:
+             |  RETRACTS: $retracts
+             |  ADDS    : $adds
+             |""".stripMargin
         )
       Seq(
         ("retract", a.ns, a.attr, retracts.map(v => transform(v).asInstanceOf[AnyRef]), false),

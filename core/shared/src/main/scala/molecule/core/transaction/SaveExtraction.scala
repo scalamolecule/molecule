@@ -2,7 +2,7 @@ package molecule.core.transaction
 
 import java.net.URI
 import java.util.{Date, UUID}
-import molecule.base.error.ExecutionError
+import molecule.base.error._
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.util.ModelUtils
@@ -17,7 +17,7 @@ class SaveExtraction(isTxMetaData: Boolean = false)
       case element :: tail => element match {
         case a: Attr =>
           if (a.op != Appl) {
-            throw ExecutionError("Missing applied value for attribute:\n" + a)
+            throw ModelError("Missing applied value for attribute:\n" + a)
           }
           handleNs(a.ns)
           a match {
@@ -37,10 +37,10 @@ class SaveExtraction(isTxMetaData: Boolean = false)
 
         case Ref(ns, refAttr, _, _)       => ref(ns, refAttr); resolve(tail)
         case BackRef(backRefNs)           => backRef(backRefNs); resolve(tail)
-        case _: Nested                    => throw ExecutionError(
+        case _: Nested                    => throw ModelError(
           "Nested data structure not allowed in save molecule. Please use insert instead."
         )
-        case _: NestedOpt                 => throw ExecutionError(
+        case _: NestedOpt                 => throw ModelError(
           "Optional nested data structure not allowed in save molecule. Please use insert instead."
         )
         case Composite(compositeElements) =>

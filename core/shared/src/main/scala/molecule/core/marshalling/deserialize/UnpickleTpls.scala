@@ -6,7 +6,7 @@ import java.util.{Date, UUID}
 import boopickle.BasicPicklers._
 import boopickle.Default._
 import boopickle._
-import molecule.base.error.ExecutionError
+import molecule.base.error._
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.marshalling.Boopicklers._
@@ -94,7 +94,7 @@ case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuff
 
         case BackRef(backRefNs) =>
           tail.head match {
-            case Ref(_, refAttr, _, _) if prevRefs.contains(refAttr) => throw ExecutionError(
+            case Ref(_, refAttr, _, _) if prevRefs.contains(refAttr) => throw ModelError(
               s"Can't re-use previous namespace ${refAttr.capitalize} after backref _$backRefNs."
             )
             case _                                                   => // ok
@@ -238,7 +238,7 @@ case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuff
   }
 
   protected def unexpected(element: Element) =
-    throw ExecutionError("Unexpected element: " + element)
+    throw ModelError("Unexpected element: " + element)
 
   private def unpickleAttrOneMan(a: AttrOneMan): () => Any = {
     a.op match {

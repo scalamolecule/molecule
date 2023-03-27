@@ -70,7 +70,7 @@ case class Schema_Datomic(schema: MetaSchema) extends BaseHelpers with RegexMatc
       case "owner"          => Seq(s""":db/isComponent   true""")
       case _                => Nil
     }
-    val descr     = a.descr.fold(Seq.empty[String])(txt => Seq(s""":db/doc           "$txt""""))
+    val descr     = a.description.fold(Seq.empty[String])(txt => Seq(s""":db/doc           "$txt""""))
 
     (mandatory ++ options ++ descr).distinct.mkString("\n         ")
   }

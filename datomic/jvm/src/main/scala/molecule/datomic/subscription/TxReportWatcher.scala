@@ -3,7 +3,7 @@ package molecule.datomic.subscription
 import java.lang.{Long => jLong}
 import datomic.Connection.DB_AFTER
 import datomic.Database
-import molecule.base.error.ExecutionError
+import molecule.base.error.ModelError
 import molecule.datomic.facade.DatomicConn_JVM
 import molecule.datomic.util.MakeDatomicTxReport
 import scala.collection.mutable.ListBuffer
@@ -42,7 +42,7 @@ case class TxReportWatcher(conn: DatomicConn_JVM) extends Runnable {
       } catch {
         case e: InterruptedException =>
           e.printStackTrace()
-          throw ExecutionError("Datomic transaction queue interrupted.")
+          throw ModelError("Datomic transaction queue interrupted.")
       }
     }
   }

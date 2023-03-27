@@ -1,11 +1,12 @@
 package molecule.datomic.transaction
 
+import molecule.base.ast.SchemaAST.MetaNs
 import molecule.base.error._
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.{InsertExtraction_, InsertOps, InsertResolvers_, SaveExtraction}
 import molecule.core.util.ModelUtils
-import molecule.core.validation.ConflictingAttrs
+import molecule.core.validation.PreValidation
 import scala.collection.mutable.ListBuffer
 
 trait Insert_stmts
@@ -17,13 +18,20 @@ trait Insert_stmts
 
   override protected val prevRefs: ListBuffer[AnyRef] = new ListBuffer[AnyRef]
 
-  def getStmts(elements: List[Element], tpls: Seq[Product]): Data = {
+  def getStmts(
+    nsMap: Map[String, MetaNs],
+    elements: List[Element],
+    tpls: Seq[Product]
+  ): Data = {
     initTxBase(elements)
     val (mainElements, txMetaElements) = splitElements(elements)
 
-    ConflictingAttrs.check(mainElements)
+    val validationErrors = PreValidation(nsMap).check(mainElements)
+    if (validationErrors.nonEmpty) {
+      throw ValidationErrors(validationErrors)
+    }
 
-    val tpl2stmts          : Product => Seq[InsertError]  = getResolver(mainElements)
+    val tpl2stmts   : Product => Seq[InsertError]  = getResolver(nsMap, mainElements)
     val insertErrors: Seq[(Int, Seq[InsertError])] =
       tpls.zipWithIndex.flatMap { case (tpl, rowIndex) =>
         e = newId
@@ -35,7 +43,7 @@ trait Insert_stmts
 
     val allValidationErrors = insertErrors ++ {
       // Convert tx meta data save errors to a single insert error
-      val txMetaDataErrors = ConflictingAttrs.check(txMetaElements).toSeq.zipWithIndex.map {
+      val txMetaDataErrors = PreValidation(nsMap).check(txMetaElements).toSeq.zipWithIndex.map {
         case ((fullAttr, errors), i) => InsertError(0, i, fullAttr, errors, Nil)
       }
       if (txMetaDataErrors.isEmpty) Nil else
@@ -51,7 +59,7 @@ trait Insert_stmts
 
     if (txMetaElements.nonEmpty) {
       val txMetaStmts = (new SaveExtraction(true) with Save_stmts)
-        .getRawStmts(txMetaElements, datomicTx, false)
+        .getRawStmts(nsMap, txMetaElements, datomicTx, false)
       stmts.addAll(txMetaStmts)
     }
 
@@ -62,12 +70,13 @@ trait Insert_stmts
   }
 
   override protected def addComposite(
+    nsMap: Map[String, MetaNs],
     tpl: Int,
     tplIndex: Int,
     compositeElements: List[Element]
   ): Product => Seq[InsertError] = {
     hasComposites = true
-    val composite2stmts = getResolver(compositeElements, tpl)
+    val composite2stmts = getResolver(nsMap, compositeElements, tpl)
     // Start from initial entity id for each composite sub group
     countValueAttrs(compositeElements) match {
       case 1 => (tpl: Product) =>
@@ -80,13 +89,14 @@ trait Insert_stmts
   }
 
   override protected def addNested(
+    nsMap: Map[String, MetaNs],
     tplIndex: Int,
     ns: String,
     refAttr: String,
     nestedElements: List[Element]
   ): Product => Seq[InsertError] = {
     // Recursively resolve nested data
-    val nested2stmts = getResolver(nestedElements)
+    val nested2stmts = getResolver(nsMap, nestedElements)
     val fullRefAttr  = ns + "." + refAttr
     countValueAttrs(nestedElements) match {
       case 1 => // Nested arity-1 values
@@ -144,7 +154,7 @@ trait Insert_stmts
     attr: String,
     outerTpl: Int,
     tplIndex: Int,
-    raw2java: T => Any,
+    scala2dbTpe: T => Any,
     validate: T => Seq[String]
   ): Product => Seq[InsertError] = {
     val a = kw(ns, attr)
@@ -152,9 +162,9 @@ trait Insert_stmts
       backRefs = backRefs + (ns -> e)
       tpl.productElement(tplIndex) match {
         case Some(rawValue) =>
-          val typedValue = rawValue.asInstanceOf[T]
-          appendStmt(add, e, a, raw2java(typedValue).asInstanceOf[AnyRef])
-          val errors = validate(typedValue)
+          val scalaValue = rawValue.asInstanceOf[T]
+          appendStmt(add, e, a, scala2dbTpe(scalaValue).asInstanceOf[AnyRef])
+          val errors = validate(scalaValue)
           if (errors.isEmpty) Nil else {
             Seq(InsertError(outerTpl, tplIndex, ns + "." + attr, errors, Nil))
           }
@@ -168,19 +178,26 @@ trait Insert_stmts
     attr: String,
     outerTpl: Int,
     tplIndex: Int,
-    raw2java: T => Any,
+    mandatory: Boolean,
+    scala2dbTpe: T => Any,
     validate: T => Seq[String]
   ): Product => Seq[InsertError] = {
     val a = kw(ns, attr)
     (tpl: Product) => {
       backRefs = backRefs + (ns -> e)
-      val errors = tpl.productElement(tplIndex).asInstanceOf[Set[_]].flatMap { rawValue =>
-        val typedValue = rawValue.asInstanceOf[T]
-        appendStmt(add, e, a, raw2java(typedValue).asInstanceOf[AnyRef])
-        validate(typedValue)
-      }.toSeq
-      if (errors.isEmpty) Nil else {
-        Seq(InsertError(outerTpl, tplIndex, ns + "." + attr, errors, Nil))
+      val rawSet = tpl.productElement(tplIndex).asInstanceOf[Set[_]]
+      if (mandatory && rawSet.isEmpty) {
+        val error = s"Can't insert empty Set for mandatory attribute"
+        Seq(InsertError(outerTpl, tplIndex, ns + "." + attr, Seq(error), Nil))
+      } else {
+        val errors = rawSet.flatMap { rawValue =>
+          val scalaValue = rawValue.asInstanceOf[T]
+          appendStmt(add, e, a, scala2dbTpe(scalaValue).asInstanceOf[AnyRef])
+          validate(scalaValue)
+        }.toSeq
+        if (errors.isEmpty) Nil else {
+          Seq(InsertError(outerTpl, tplIndex, ns + "." + attr, errors, Nil))
+        }
       }
     }
   }
@@ -190,7 +207,7 @@ trait Insert_stmts
     attr: String,
     outerTpl: Int,
     tplIndex: Int,
-    raw2java: T => Any,
+    scala2dbTpe: T => Any,
     validate: T => Seq[String]
   ): Product => Seq[InsertError] = {
     val a = kw(ns, attr)
@@ -199,9 +216,9 @@ trait Insert_stmts
       tpl.productElement(tplIndex) match {
         case Some(set: Set[_]) =>
           val errors = set.toSeq.flatMap { rawValue =>
-            val typedValue = rawValue.asInstanceOf[T]
-            appendStmt(add, e, a, raw2java(typedValue).asInstanceOf[AnyRef])
-            validate(typedValue)
+            val scalaValue = rawValue.asInstanceOf[T]
+            appendStmt(add, e, a, scala2dbTpe(scalaValue).asInstanceOf[AnyRef])
+            validate(scalaValue)
           }
           if (errors.isEmpty) Nil else {
             Seq(InsertError(outerTpl, tplIndex, ns + "." + attr, errors, Nil))
@@ -210,22 +227,6 @@ trait Insert_stmts
       }
     }
   }
-
-  //  override protected def addTxV[T](
-  //    ns: String,
-  //    attr: String,
-  //    outerTpl: Int,
-  //    tplIndex: Int,
-  //    value: T => Any
-  //  ): Product => Seq[InsertError] = {
-  //    val a = kw(ns, attr)
-  //    (tpl: Product) => {
-  //      e = datomicTx
-  //      backRefs = backRefs + (ns -> e)
-  //      appendStmt(add, e, a, value(tpl.productElement(tplIndex).asInstanceOf[T]).asInstanceOf[AnyRef])
-  //      Nil
-  //    }
-  //  }
 
   override protected def addRef(ns: String, refAttr: String): Product => Seq[InsertError] = {
     val a = kw(ns, refAttr)

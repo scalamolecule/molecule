@@ -1,6 +1,6 @@
 package molecule.core.util
 
-import molecule.base.error.ExecutionError
+import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import scala.annotation.tailrec
 
@@ -31,7 +31,7 @@ trait ModelUtils {
       case a: Attr       => a.ns
       case b: Ref        => b.ns
       case Composite(es) => getInitialNs(es)
-      case other         => throw ExecutionError("Unexpected head element: " + other)
+      case other         => throw ModelError("Unexpected head element: " + other)
     }
   }
 

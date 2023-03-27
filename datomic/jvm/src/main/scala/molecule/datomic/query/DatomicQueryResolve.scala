@@ -3,7 +3,7 @@ package molecule.datomic.query
 import java.util
 import java.util.{Collections, Comparator, ArrayList => jArrayList, Collection => jCollection, List => jList}
 import datomic.Peer
-import molecule.base.error.ExecutionError
+import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.datomic.facade.DatomicConn_JVM
 import molecule.datomic.query.cursorStrategy.CursorUtils
@@ -256,7 +256,7 @@ abstract class DatomicQueryResolve[Tpl](
             // Recursively try with next identifier
             findFrom(remainingIdentifiers)
           }
-        case Nil                                => throw ExecutionError(edgeValuesNotFound)
+        case Nil                                => throw ModelError(edgeValuesNotFound)
       }
     }
     findFrom(identifiers)
@@ -288,7 +288,7 @@ abstract class DatomicQueryResolve[Tpl](
             // Recursively try with next identifier
             findFrom(remainingidentifiers)
           }
-        case Nil                                => throw ExecutionError(edgeValuesNotFound)
+        case Nil                                => throw ModelError(edgeValuesNotFound)
       }
     }
     findFrom(identifiers)

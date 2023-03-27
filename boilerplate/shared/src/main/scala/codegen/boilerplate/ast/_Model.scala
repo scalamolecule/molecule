@@ -2,7 +2,7 @@ package codegen.boilerplate.ast
 
 import java.io.File
 import codegen.BoilerplateGenBase
-import molecule.base.error.ExecutionError
+import molecule.base.error._
 import scala.io.Source
 
 object _Model extends BoilerplateGenBase("Model", "/ast") {

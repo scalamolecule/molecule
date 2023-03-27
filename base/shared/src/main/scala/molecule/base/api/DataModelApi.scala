@@ -76,109 +76,86 @@ import java.util.{Date, UUID}
 object DataModelApi extends DataModelApi
 trait DataModelApi {
 
-  // Types
-  object oneString extends string
-  object oneChar extends char
-  object oneByte extends byte
-  object oneShort extends short
-  object oneInt extends int
-  object oneLong extends long
-  object oneFloat extends float
-  object oneDouble extends double
-  object oneBoolean extends boolean
-  object oneBigInt extends bigInt
-  object oneBigDecimal extends bigDecimal
-  object oneDate extends date
-  object oneUUID extends uuid
-  object oneURI extends uri
+  // Types ..................................................
 
-  object setString extends string
-  object setChar extends char
-  object setByte extends byte
-  object setShort extends short
-  object setInt extends int
-  object setLong extends long
-  object setFloat extends float
-  object setDouble extends double
-  object setBoolean extends boolean
-  object setBigInt extends bigInt
-  object setBigDecimal extends bigDecimal
-  object setDate extends date
-  object setUUID extends uuid
-  object setURI extends uri
+  object oneString extends oneString
+  object oneInt extends oneInt
+  object oneLong extends oneLong
+  object oneFloat extends oneFloat
+  object oneDouble extends oneDouble
+  object oneBoolean extends oneBoolean
+  object oneBigInt extends oneBigInt
+  object oneBigDecimal extends oneBigDecimal
+  object oneDate extends oneDate
+  object oneUUID extends oneUUID
+  object oneURI extends oneURI
+  object oneByte extends oneByte
+  object oneShort extends oneShort
+  object oneChar extends oneChar
 
-  object arrayString extends string
-  object arrayChar extends char
-  object arrayByte extends byte
-  object arrayShort extends short
-  object arrayInt extends int
-  object arrayLong extends long
-  object arrayFloat extends float
-  object arrayDouble extends double
-  object arrayBoolean extends boolean
-  object arrayBigInt extends bigInt
-  object arrayBigDecimal extends bigDecimal
-  object arrayDate extends date
-  object arrayUUID extends uuid
-  object arrayURI extends uri
-
-  object mapString extends string
-  object mapChar extends char
-  object mapByte extends byte
-  object mapShort extends short
-  object mapInt extends int
-  object mapLong extends long
-  object mapFloat extends float
-  object mapDouble extends double
-  object mapBoolean extends boolean
-  object mapBigInt extends bigInt
-  object mapBigDecimal extends bigDecimal
-  object mapDate extends date
-  object mapUUID extends uuid
-  object mapURI extends uri
+  trait oneString extends stringOptions[oneString, String]
+  trait oneInt extends Options[oneInt, Int, Int]
+  trait oneLong extends Options[oneLong, Long, Long]
+  trait oneFloat extends Options[oneFloat, Float, Float]
+  trait oneDouble extends Options[oneDouble, Double, Double]
+  trait oneBoolean extends Options[oneBoolean, Boolean, Boolean]
+  trait oneBigInt extends Options[oneBigInt, BigInt, BigInt]
+  trait oneBigDecimal extends Options[oneBigDecimal, BigDecimal, BigDecimal]
+  trait oneDate extends Options[oneDate, Date, Date]
+  trait oneUUID extends Options[oneUUID, UUID, UUID]
+  trait oneURI extends Options[oneURI, URI, URI]
+  trait oneByte extends Options[oneByte, Byte, Byte]
+  trait oneShort extends Options[oneShort, Short, Short]
+  trait oneChar extends Options[oneChar, Char, Char]
 
 
-  // Refs
+  object setString extends setString
+  object setInt extends setInt
+  object setLong extends setLong
+  object setFloat extends setFloat
+  object setDouble extends setDouble
+  object setBoolean extends setBoolean
+  object setBigInt extends setBigInt
+  object setBigDecimal extends setBigDecimal
+  object setDate extends setDate
+  object setUUID extends setUUID
+  object setURI extends setURI
+  object setByte extends setByte
+  object setShort extends setShort
+  object setChar extends  setChar
+
+  trait setString extends stringOptions[oneString, Set[String]]
+  trait setInt extends Options[setInt, Set[Int], Int]
+  trait setLong extends Options[setLong, Set[Long], Long]
+  trait setFloat extends Options[setFloat, Set[Float], Float]
+  trait setDouble extends Options[setDouble, Set[Double], Double]
+  trait setBoolean extends Options[setBoolean, Set[Boolean], Boolean]
+  trait setBigInt extends Options[setBigInt, Set[BigInt], BigInt]
+  trait setBigDecimal extends Options[setBigDecimal, Set[BigDecimal], BigDecimal]
+  trait setDate extends Options[setDate, Set[Date], Date]
+  trait setUUID extends Options[setUUID, Set[UUID], UUID]
+  trait setURI extends Options[setURI, Set[URI], URI]
+  trait setByte extends Options[setByte, Set[Byte], Byte]
+  trait setShort extends Options[setShort, Set[Short], Short]
+  trait setChar extends  Options[setChar, Set[Char], Char]
+
+
+  // Refs ..................................................
+
   object one extends one
   object many extends many
 
-  /** Card-one reference.
-   *
-   * @group ref
-   */
-  trait one extends refOptions[one]
-
-  /** Card-many reference.
-   *
-   * @group ref
-   */
-  trait many extends refOptions[many]
-
-  trait attr
-
-  trait string extends attr with stringOptions
-  trait char extends attr with Options[char, Char]
-  trait byte extends attr with Options[byte, Byte]
-  trait short extends attr with Options[short, Short]
-  trait int extends attr with Options[int, Int]
-  trait long extends attr with Options[long, Long]
-  trait float extends attr with Options[float, Float]
-  trait double extends attr with Options[double, Double]
-  trait boolean extends attr with Options[boolean, Boolean]
-  trait bigInt extends attr with Options[bigInt, BigInt]
-  trait bigDecimal extends attr with Options[bigDecimal, BigDecimal]
-  trait date extends attr with Options[date, Date]
-  trait uuid extends attr with Options[uuid, UUID]
-  trait uri extends attr with Options[uri, URI]
+  trait one extends refOptions[one, Long]
+  trait many extends refOptions[many, Set[Long]]
 
 
-  // Options ---------------------------------------------------------
+  // Options ..................................................
 
   /** Attribute options.
    *
    * @group opt
    */
-  sealed trait Options[Self, Tpe] {
+  sealed trait Options[Self, Tpe, BaseTpe] {
 
     /** Index option (defaults to true).
      * <br><br>
@@ -208,6 +185,10 @@ trait DataModelApi {
      * */
     lazy val unique: Self = ???
 
+    // Required for any entity using this namespace.
+    // Can be applied to multiple attributes.
+    // Used to guarantee minimum of data for namespace.
+    lazy val mandatory: Self = ???
 
     /** Alias to non-compatible attribute name like `type` or `first-name` etc.
      *
@@ -216,45 +197,40 @@ trait DataModelApi {
      * */
     def alias(altAttrName: String): Self = ???
 
-    def descr(s: String): Self = ???
+    def description(s: String): Self = ???
 
 
     // Validation .................
 
-    def validate(ok: Tpe => Boolean, failureMsg: String = ""): Self = ???
-    def validate(err2msg: PartialFunction[Tpe, String]): Self = ???
+    def validate(ok: BaseTpe => Boolean, failureMsg: String = ""): Self = ???
+    def validate(err2msg: PartialFunction[BaseTpe, String]): Self = ???
 
 
     // Allowed values (like enumerations)
-//    def allowed(first: Tpe, more: Tpe*): Self = ???
-    def allowed(vs: Tpe*): Self = ???
-    def allowed(vs: Seq[Tpe], failureMsg: String): Self = ???
+    def enums(vs: BaseTpe*): Self = ???
+    def enums(vs: Seq[BaseTpe], failureMsg: String): Self = ???
 
     // Require other attributes to be asserted
     // Useful for tuples
-    def require(attrs: attr*): Self = ???
+    def require[T <: Options[_, _, _]](attrs: T*): Self = ???
 
-    // Required for any entity using this namespace.
-    // Can be applied to multiple attributes.
-    // Used to guarantee minimum of data for namespace.
-    val mandatory: Self = ???
 
     // hmm, difficult to implement... - possible?
     val value: Tpe = ???
   }
 
 
-  trait stringOptions extends Options[string, String] {
-    val fulltext: string = ???
+  trait stringOptions[Self, Tpe] extends Options[Self, Tpe, String] {
+    val fulltext: Self = ???
 
     // Validation .................
-    val email: string = ???
-    def email(msg: String): string = ???
-    def regex(expr: String, msg: String = ""): string = ???
+    val email: Self = ???
+    def email(msg: String): Self = ???
+    def regex(expr: String, msg: String = ""): Self = ???
   }
 
 
-  trait refOptions[Self] extends Options[Self, Long] {
+  trait refOptions[Self, Tpe] extends Options[Self, Tpe, Long] {
 
     /** Apply namespace type to reference.
      *
@@ -279,61 +255,5 @@ trait DataModelApi {
      */
     lazy val owner: Self = ???
   }
-
-
-  //  // Any ---------------------------------------------------------
-  //
-  //  /** Internal card-one Any attribute for multi-typed `v` values in log, Datoms and indexes.
-  //   *
-  //   * Do _not_ use in custom data models.
-  //   *
-  //   * It is only implemented internally for the `v` value of generic log and indexes.
-  //   *
-  //   * @group one
-  //   */
-  //  private[molecule] object oneAny extends optionBuilder[oneString, Any]
-  //
-  //  // Bidirectional ref ---------------------------------------------------------
-  //
-  //  /** Card-one bi-directional reference.
-  //   *
-  //   * @group bi
-  //   */
-  //  trait oneBi extends refOptionBuilder[oneBi]
-  //  object oneBi extends oneBi
-  //
-  //
-  //  /** Card-many bi-directional reference.
-  //   *
-  //   * @group bi
-  //   */
-  //  trait manyBi extends refOptionBuilder[manyBi]
-  //  object manyBi extends manyBi
-  //
-  //
-  //  // Bidirectional edge ---------------------------------------------------------
-  //
-  //  /** Card-one bi-directional edge reference.
-  //   *
-  //   * @group edge
-  //   */
-  //  trait oneBiEdge extends refOptionBuilder[oneBiEdge]
-  //  object oneBiEdge extends oneBiEdge
-  //
-  //
-  //  /** Card-many bi-directional edge reference.
-  //   *
-  //   * @group edge
-  //   */
-  //  trait manyBiEdge extends refOptionBuilder[manyBiEdge]
-  //  object manyBiEdge extends manyBiEdge
-  //
-  //
-  //  /** Bi-directional edge target attribute.
-  //   *
-  //   * @group edge
-  //   */
-  //  trait target extends refOptionBuilder[target]
-  //  object target extends target
 }
 
