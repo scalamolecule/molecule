@@ -9,7 +9,6 @@ import molecule.datomic.setup.DatomicTestSuite
 
 object Delete_eid extends DatomicTestSuite {
 
-
   override lazy val tests = Tests {
 
     "1 entity" - refs { implicit conn =>

@@ -22,7 +22,7 @@ trait Update_stmts extends DatomicTxBase_JVM with UpdateOps with MoleculeLogging
   ): Data = {
     val db = conn.peerConn.db()
 
-    val checkCurrentSetValues: Attr => Set[Any] = (attr: Attr) => {
+    val getCurSetValues: Attr => Set[Any] = (attr: Attr) => {
       val a = s":${attr.ns}/${attr.attr}"
       try {
         val curValues = Peer.q(s"[:find ?vs :where [_ $a ?vs]]", db)
@@ -40,7 +40,7 @@ trait Update_stmts extends DatomicTxBase_JVM with UpdateOps with MoleculeLogging
       }
     }
 
-    val validationErrors = PreValidation(conn.proxy.nsMap, Some(checkCurrentSetValues)).check(elements)
+    val validationErrors = PreValidation(conn.proxy.nsMap, Some(getCurSetValues)).check(elements)
     if (validationErrors.nonEmpty) {
       throw ValidationErrors(validationErrors)
     }

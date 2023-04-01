@@ -185,10 +185,8 @@ trait DataModelApi {
      * */
     lazy val unique: Self = ???
 
-    // Required for any entity using this namespace.
-    // Can be applied to multiple attributes.
-    // Used to guarantee minimum of data for namespace.
     lazy val mandatory: Self = ???
+
 
     /** Alias to non-compatible attribute name like `type` or `first-name` etc.
      *
@@ -202,7 +200,7 @@ trait DataModelApi {
 
     // Validation .................
 
-    def validate(ok: BaseTpe => Boolean, failureMsg: String = ""): Self = ???
+    def validate(ok: BaseTpe => Boolean, errorMsg: String = ""): Self = ???
     def validate(err2msg: PartialFunction[BaseTpe, String]): Self = ???
 
 
@@ -210,9 +208,8 @@ trait DataModelApi {
     def enums(vs: BaseTpe*): Self = ???
     def enums(vs: Seq[BaseTpe], failureMsg: String): Self = ???
 
-    // Require other attributes to be asserted
-    // Useful for tuples
-    def require[T <: Options[_, _, _]](attrs: T*): Self = ???
+    // Tupled attributes
+    def tuple[T <: Options[_, _, _]](otherAttrsInTuple: T*): Self = ???
 
 
     // hmm, difficult to implement... - possible?
@@ -221,6 +218,7 @@ trait DataModelApi {
 
 
   trait stringOptions[Self, Tpe] extends Options[Self, Tpe, String] {
+    // Enable fulltext search
     val fulltext: Self = ???
 
     // Validation .................
@@ -242,7 +240,8 @@ trait DataModelApi {
      *
      * This entity owns the referenced entity/entities.
      *
-     * - If this entity is deleted, this references are deleted too (and recursively if sub entities have owned entities)
+     * - If this entity is deleted, this references are deleted too
+     * (and recursively if sub entities have owned entities)
      *
      * <br><br>
      * Specifies that an attribute whose type is :db.type/ref is a component.

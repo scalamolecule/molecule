@@ -8,63 +8,48 @@ import scala.annotation.tailrec
 
 case class PreValidation(
   nsMap: Map[String, MetaNs],
-  getSetValues: Option[Attr => Set[Any]] = None
+  getCurSetValues: Option[Attr => Set[Any]] = None
 ) {
-  private lazy val isUpdate = getSetValues.isDefined
+  private lazy val isUpdate = getCurSetValues.isDefined
 
-  private def dup(element: String) = throw ModelError(s"Can't transact duplicate attribute `$element`.")
+  private def dup(element: String) =
+    throw ModelError(s"Can't transact duplicate attribute `$element`.")
+
+  private var prev            : Array[Array[Array[String]]] = Array(Array(Array.empty[String]))
+  private var level           : Int                         = 0
+  private var group           : Int                         = 0
+  private var refPath         : Seq[String]                 = Seq.empty[String]
+  private var prevNs          : String                      = ""
+  private var isTx            : Boolean                     = false
+  private var mandatoryAttrs  : Set[String]                 = Set.empty[String]
+  private var mandatoryRefs   : Set[(String, String)]       = Set.empty[(String, String)]
+  private var deletingAttrs   : Set[String]                 = Set.empty[String]
+  private var validationErrors: Map[String, Seq[String]]    = Map.empty[String, Seq[String]]
 
 
   @tailrec
-  final def check(
-    elements: List[Element],
-    prev: Array[Array[Array[String]]] = Array(Array(Array.empty[String])),
-    level: Int = 0,
-    group: Int = 0,
-    refPath: Seq[String] = Seq(""),
-    prevNs: String = "",
-    isTx: Boolean = false,
-    mandatoryAttrs: Set[String] = Set.empty[String],
-    deletingAttrs: Set[String] = Set.empty[String],
-    validationErrors: Map[String, Seq[String]] = Map.empty[String, Seq[String]]
-  ): Map[String, Seq[String]] = {
+  final def check(elements: List[Element]): Map[String, Seq[String]] = {
     elements match {
       case head :: tail => head match {
         case a: Attr =>
-          val attr    = a.ns + "." + a.attr
-          val generic = a.ns == "_Generic"
-
-          val (newNs, mandatoryAttrs1) = if (prevNs == a.ns || generic) {
-            (prevNs, mandatoryAttrs)
-          } else {
-            (a.ns, mandatoryAttrs ++ nsMap(a.ns).mandatory.map(attr => a.ns + "." + attr))
-          }
-
-          val (mandatoryAttrs2, deletingAttrs1) = if (generic || !mandatoryAttrs1.contains(attr)) {
-            (mandatoryAttrs1, deletingAttrs)
-          } else {
-            if (isUpdate) {
-              if (
-                (a.op == V || a.op == Appl) && deletingAttr(a)
-                  || a.op == Remove && removingLastValue(a, getSetValues.get(a))
-              ) {
-                // Wrongfully trying to delete mandatory attr - add to watchlist
-                (mandatoryAttrs1, deletingAttrs + attr)
-              } else {
-                (mandatoryAttrs1, deletingAttrs)
-              }
-
-            } else if (
-              (a.isInstanceOf[Mandatory] || isTx)
-                && !(a.isInstanceOf[AttrSet] && a.op == Appl && deletingAttr(a))
-            ) {
-              // Mandatory attribute is ok - remove from watchlist
-              (mandatoryAttrs1 - attr, deletingAttrs)
-
-            } else {
-              (mandatoryAttrs1, deletingAttrs)
+          val attr   = a.ns + "." + a.attr
+          val custom = a.ns != "_Generic"
+          if (custom && prevNs != a.ns) {
+            prevNs = a.ns
+            mandatoryAttrs ++= nsMap(a.ns).mandatoryAttrs.map(attr =>
+              a.ns + "." + attr
+            )
+            mandatoryRefs ++= nsMap(a.ns).mandatoryRefs.map {
+              case (attr, refNs) =>
+                (a.ns + "." + attr) -> refNs
             }
           }
+
+          if (custom && mandatoryAttrs.contains(attr))
+            checkMandatoryAttr(a, attr)
+
+          if (custom && mandatoryRefs.map(_._1).contains(attr))
+            checkMandatoryRefAttr(a, attr)
 
           // Distinguish multiple ref paths to the same namespace
           val attrPrefixed = if (isUpdate) {
@@ -84,55 +69,58 @@ case class PreValidation(
             dup(attr)
           prev(level)(group) = prev(level)(group) :+ attrPrefixed
 
-          val validationErrors1 = if (a.errors.isEmpty) validationErrors else {
-            validationErrors.+(attr -> a.errors)
-          }
-
-          check(tail, prev, level, group, refPath,
-            newNs, isTx, mandatoryAttrs2, deletingAttrs1, validationErrors1)
+          if (a.errors.nonEmpty)
+            validationErrors.+=(attr -> a.errors)
+          check(tail)
 
         case r: Ref =>
-          val ref = r.ns + "." + r.refAttr
-          if (prev(level)(group).contains(ref)) {
-            dup(ref)
-          }
-          if (refPath.contains(ref)) {
-            dup(ref)
-          }
-          prev(level) = prev(level) :+ Array(ref)
-          check(tail, prev, level, group + 1, refPath :+ ref,
-            prevNs, isTx, mandatoryAttrs, deletingAttrs, validationErrors)
+          val refAttr = r.ns + "." + r.refAttr
+          if (prev(level)(group).contains(refAttr))
+            dup(refAttr)
+          if (refPath.contains(refAttr))
+            dup(refAttr)
+          prev(level) = prev(level) :+ Array(refAttr)
+          group += 1
+          mandatoryRefs = mandatoryRefs.filterNot(_._1 == refAttr)
+          refPath = refPath :+ refAttr
+          check(tail)
 
         case backRef: BackRef =>
           if (group == 0)
             throw ModelError(s"Can't use backref namespace `_${backRef.backRef}` from here.")
-          check(tail, prev, level, group - 1, refPath.init,
-            prevNs, isTx, mandatoryAttrs, deletingAttrs, validationErrors)
+          group -= 1
+          refPath = refPath.init
+          check(tail)
 
         case Composite(es) =>
-          check(es ++ tail, prev, level, group, Seq(""),
-            prevNs, isTx, mandatoryAttrs, deletingAttrs, validationErrors)
+          refPath = Seq.empty[String]
+          check(es ++ tail)
 
         case Nested(r, es) =>
           val ref = r.ns + "." + r.refAttr
           if (prev(level)(group).contains(ref))
             dup(ref)
-          val prev1 = prev :+ Array(Array(ref))
-          check(es ++ tail, prev1, level + 1, 0, refPath,
-            prevNs, isTx, mandatoryAttrs, deletingAttrs, validationErrors)
+          prev = prev :+ Array(Array(ref))
+          level += 1
+          group = 0
+          check(es ++ tail)
 
         case NestedOpt(r, es) =>
           val ref = r.ns + "." + r.refAttr
           if (prev(level)(group).contains(ref))
             dup(ref)
-          val prev1 = prev :+ Array(Array(ref))
-          check(es ++ tail, prev1, level + 1, 0, refPath,
-            prevNs, isTx, mandatoryAttrs, deletingAttrs, validationErrors)
+          prev = prev :+ Array(Array(ref))
+          level += 1
+          group = 0
+          check(es ++ tail)
 
         case TxMetaData(txElements) =>
-          val prev1 = prev :+ Array(Array.empty[String])
-          check(txElements, prev1, level + 1, 0, Nil,
-            prevNs, true, mandatoryAttrs, deletingAttrs, validationErrors)
+          prev = prev :+ Array(Array.empty[String])
+          level += 1
+          group = 0
+          refPath = Seq.empty[String]
+          isTx = true
+          check(txElements)
       }
       case Nil          =>
         if (!isUpdate && mandatoryAttrs.nonEmpty) {
@@ -142,7 +130,16 @@ case class PreValidation(
                |""".stripMargin
           )
         }
-        //        if (isUpdate && mandatoryAttrs.nonEmpty) {
+        if (!isUpdate && mandatoryRefs.nonEmpty) {
+          val list = mandatoryRefs.map {
+            case (a, refNs) => s"$a pointing to namespace $refNs"
+          }.mkString("\n  ")
+          throw ModelError(
+            s"""Missing/empty mandatory references:
+               |  $list
+               |""".stripMargin
+          )
+        }
         if (isUpdate && deletingAttrs.nonEmpty) {
           throw ModelError(
             s"""Can't delete mandatory attributes (or remove last values of card-many attributes):
@@ -151,6 +148,43 @@ case class PreValidation(
           )
         }
         validationErrors
+    }
+  }
+
+
+  private def checkMandatoryAttr(a: Attr, attr: String) = {
+    if (isUpdate) {
+      if (
+        (a.op == V || a.op == Appl) && deletingAttr(a)
+          || a.op == Remove && removingLastValue(a, getCurSetValues.get(a))
+      ) {
+        // Wrongfully trying to delete mandatory attr - add to watchlist
+        deletingAttrs += attr
+      }
+    } else if (
+      (a.isInstanceOf[Mandatory] || isTx)
+        && !(a.isInstanceOf[AttrSet] && a.op == Appl && deletingAttr(a))
+    ) {
+      // Mandatory attribute is ok - remove from watchlist
+      mandatoryAttrs -= attr
+    }
+  }
+
+  private def checkMandatoryRefAttr(a: Attr, attr: String) = {
+    if (isUpdate) {
+      if (
+        (a.op == V || a.op == Appl) && deletingAttr(a)
+          || a.op == Remove && removingLastValue(a, getCurSetValues.get(a))
+      ) {
+        // Wrongfully trying to delete mandatory attr - add to watchlist
+        deletingAttrs += attr
+      }
+    } else if (
+      (a.isInstanceOf[Mandatory] || isTx)
+        && !(a.isInstanceOf[AttrSet] && a.op == Appl && deletingAttr(a))
+    ) {
+      // Mandatory attribute is ok - remove from watchlist
+      mandatoryRefs = mandatoryRefs.filterNot(_._1 == attr)
     }
   }
 

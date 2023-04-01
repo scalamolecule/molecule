@@ -15,26 +15,32 @@ object DataModel2MetaSchema {
 }
 
 class DataModel2MetaSchema(filePath: String, pkgPath: String, scalaVersion: String) {
-  private val virtualFile = Input.VirtualFile(filePath, pkgPath)
-  private val dialect     = scalaVersion match {
+  private val virtualFile       = Input.VirtualFile(filePath, pkgPath)
+  private val dialect           = scalaVersion match {
     case "3"   => dialects.Scala3(virtualFile)
     case "213" => dialects.Scala213(virtualFile)
     case "212" => dialects.Scala212(virtualFile)
   }
-  private val tree        = dialect.parse[Source].get
+  private val tree              = dialect.parse[Source].get
+  private val reservedAttrNames = List(
+    "a", "e", "v", "t", "tx", "txInstant", "op", // Generic attributes
+    "save", "insert", "update", "delete", // Actions
+    //    "self", // if self-reference keyword is re-introduced
+    "apply", "not", "add", "swap", "remove", // Expressions
+  )
+  private var backRefs          = Map.empty[String, Seq[String]]
 
-  private var backRefs = Map.empty[String, Seq[String]]
-
-  private def noMix() = throw new Exception(
+  private def noMix() = throw ModelError(
     "Mixing prefixed and non-prefixed namespaces is not allowed."
   )
-  private def unexpected(c: Tree, msg: String = ":") = throw new Exception(
+  private def unexpected(c: Tree, msg: String = ":") = throw ModelError(
     s"Unexpected DataModel code in file $filePath$msg\n" + c
   )
 
   private val (pkg, afterPkg) = tree.children.collectFirst {
     case Pkg(Term.Select(pkg, Term.Name("dataModel")), afterPkg) => (pkg.toString, afterPkg)
   }.getOrElse(unexpected(tree, ". Couldn't find package definition in code:\n"))
+
 
   private val (domain, maxArity, body) = afterPkg.collectFirst {
     case Defn.Object(_, Term.Name(domain),
@@ -45,6 +51,16 @@ class DataModel2MetaSchema(filePath: String, pkgPath: String, scalaVersion: Stri
   }.getOrElse(unexpected(tree,
     ". Couldn't find `object <YourDataModel> extends DataModel(<arity>) {...}` in code:\n"))
 
+  private def err(msg: String, ns: String = "", attr: String = "") = {
+    val fullNs = if (ns.isEmpty && attr.isEmpty) "" else
+      s" for attribute $ns.$attr"
+    throw ModelError(
+      s"""Problem in data model $pkg.dataModel.$domain$fullNs:
+         |$msg
+         |""".stripMargin
+    )
+  }
+
   def schema: MetaSchema = {
     val parts = body.head match {
       case q"object $_ { ..$_ }" => body.map {
@@ -53,18 +69,82 @@ class DataModel2MetaSchema(filePath: String, pkgPath: String, scalaVersion: Stri
       }
       case _                     => Seq(MetaPart("", getNss("", body)))
     }
+    checkCircularMandatoryRefs(parts)
     MetaSchema(pkg, domain, maxArity, parts)
+  }
+
+  private def checkCircularMandatoryRefs(parts: Seq[MetaPart]): Unit = {
+    val mappings: Map[String, Seq[(String, String)]] = parts
+      .flatMap(_.nss
+        .filter(_.attrs.exists(ref => ref.refNs.nonEmpty && ref.options.contains("mandatory"))))
+      .map(ns => ns.ns -> ns.attrs.collect {
+        case ref if ref.refNs.nonEmpty && ref.options.contains("mandatory") =>
+          s"${ns.ns}.${ref.attr}" -> ref.refNs.get
+      }).toMap
+
+    def check(prevNss: Seq[String], graph: Seq[String], ns: String): Unit = {
+      mappings.get(ns).foreach { refs =>
+        // Referenced namespace has mandatory refs. Keep checking
+        refs.foreach {
+          case (refAttr, refNs) if prevNss.contains(refNs) =>
+            val last = if (graph.length == 1) refNs else s"$refAttr --> $refNs"
+            err(
+              s"""Circular mandatory references not allowed. Found:
+                 |  ${graph.mkString(" --> ")} --> $last
+                 |""".stripMargin
+            )
+          case (refAttr, refNs)                            =>
+            check(prevNss :+ refNs, graph :+ refAttr, refNs)
+        }
+      }
+    }
+
+    mappings.foreach {
+      case (ns, refs) => refs.foreach {
+        case (refAttr, refNs) =>
+          // Recursively check each mandatory ref. Can likely be optimized...
+          check(Seq(ns), Seq(refAttr), refNs)
+      }
+    }
   }
 
   private def getNss(partPrefix: String, nss: Seq[Stat]): Seq[MetaNs] = nss.map {
     case q"trait $nsTpe { ..$attrs }" =>
       val ns = nsTpe.toString
-      if (ns.head.isLower)
-        throw ModelError("Namespace traits have to start with upper case letter.")
+      if (ns.head.isLower) {
+        err(s"Please change namespace trait name `$ns` to start with upper case letter.")
+      }
+      if (ns.length == 1) {
+        err(
+          s"Please change namespace trait name `$ns` to have at least 2 characters " +
+            "(to avoid interference with type parameters).")
+      }
+      if (attrs.isEmpty) {
+        err(s"Please define attribute(s) in namespace $ns")
+      }
       val metaAttrs      = getAttrs(ns, attrs)
       val backRefNss     = backRefs.getOrElse(ns, Nil).distinct.sorted
-      val mandatoryAttrs = metaAttrs.collect { case a if a.options.contains("mandatory") => a.attr }
-      MetaNs(partPrefix + ns, metaAttrs, backRefNss, mandatoryAttrs)
+      val mandatoryAttrs = metaAttrs.collect {
+        case a if a.refNs.isEmpty && a.options.contains("mandatory") => a.attr
+      }
+      val mandatoryRefs  = metaAttrs.collect {
+        case a if a.refNs.nonEmpty && a.options.contains("mandatory") => a.attr -> a.refNs.get
+      }
+
+      val overlappingTuples = metaAttrs
+        .collect { case a if a.requiredAttrs.nonEmpty => a.requiredAttrs :+ a.attr }
+        .flatten.groupBy(identity).collect { case (a, req) if req.length > 1 => a }
+
+      if (overlappingTuples.nonEmpty) {
+        err(
+          s"""Attributes are only allowed to belong to one tuple. Found attributes in multiple tuples:
+             |  ${overlappingTuples.map(a => s"$ns.$a").mkString("\n  ")}
+             |""".stripMargin
+        )
+      }
+
+
+      MetaNs(partPrefix + ns, metaAttrs, backRefNss, mandatoryAttrs, mandatoryRefs)
     case q"object $o { ..$_ }"        => noMix()
     case other                        => unexpected(other)
   }
@@ -72,17 +152,16 @@ class DataModel2MetaSchema(filePath: String, pkgPath: String, scalaVersion: Stri
   private def getAttrs(ns: String, attrs: Seq[Stat]): Seq[MetaAttr] = attrs.map {
     case q"val $attr = $defs" =>
       val a = attr.toString
+      if (reservedAttrNames.contains(a)) {
+        err(
+          s"Please change attribute name $ns.$a to avoid colliding with reserved molecule names:\n  " +
+            reservedAttrNames.mkString("\n  ")
+        )
+      }
       acc(ns, defs, MetaAttr(a, CardOne, ""))
 
     case other => unexpected(other)
   }
-
-  private val reservedAttrNames = List(
-    "a", "e", "v", "t", "tx", "txInstant", "op",
-    "save", "insert", "update", "retract",
-    "self", "apply", "assert", "replace", "not", "contains", "k",
-  )
-
 
   @tailrec
   private def acc(ns: String, t: Tree, a: MetaAttr): MetaAttr = {
@@ -97,24 +176,24 @@ class DataModel2MetaSchema(filePath: String, pkgPath: String, scalaVersion: Stri
 
       case q"$prev.description(${Lit.String(s)})" =>
         if (s.isEmpty)
-          throw new Exception(s"Can't apply empty String as description option for attribute $a.")
+          err(s"Can't apply empty String as description option for attribute $ns.$a")
         else if (s.contains("\""))
-          throw new Exception(s"Description option for attribute $a can't contain quotes.")
+          err(s"Description option for attribute $ns.$a can't contain quotation marks.")
         else
           acc(ns, prev, a.copy(description = Some(s)))
 
       case q"$prev.alias(${Lit.String(s)})" => s match {
         case r"([a-zA-Z0-9]+)$alias" =>
           if (reservedAttrNames.contains(alias)) {
-            throw new Exception(
-              s"Alias `$alias` for attribute $a can't be any of the reserved molecule attribute names:\n  " +
+            err(
+              s"Alias `$alias` for attribute $ns.$a can't be any of the reserved molecule attribute names:\n  " +
                 reservedAttrNames.mkString("\n  ")
             )
           } else {
             acc(ns, prev, a.copy(alias = Some(alias)))
           }
         case other                   =>
-          throw new Exception(s"Invalid alias for attribute $a: " + other)
+          err(s"Invalid alias for attribute $ns.$a: " + other)
       }
 
       case q"oneString"     => a.copy(card = CardOne, tpe = "String")
@@ -165,9 +244,9 @@ class DataModel2MetaSchema(filePath: String, pkgPath: String, scalaVersion: Stri
           case Case(v, Some(test), Term.Select(Lit.String(multilineMsg), Term.Name("stripMargin"))) =>
             (indent(s"$v => $test"), multilineMsg)
           case Case(v, None, Lit.String(error))                                                     =>
-            throw new Exception(s"""Please provide if-expression: case $v if <test..> = "$error"""")
+            err(s"""Please provide if-expression: case $v if <test..> = "$error"""", ns, a.attr)
           case other                                                                                =>
-            throw new Exception("Unexpected validation case: " + other)
+            err("Unexpected validation case: " + other, ns, a.attr)
         }
         acc(ns, prev, a.copy(validations = a.validations ++ validations))
 
@@ -207,7 +286,7 @@ class DataModel2MetaSchema(filePath: String, pkgPath: String, scalaVersion: Stri
         val error = s"""Value `_value_` is not one of the allowed values in Seq$vs"""
         acc(ns, prev, a.copy(validations = a.validations :+ test -> error))
 
-      case q"$prev.require(..$otherAttrs)" =>
+      case q"$prev.tuple(..$otherAttrs)" =>
         acc(ns, prev, a.copy(requiredAttrs = otherAttrs.map(_.toString)))
 
       case q"$prev.value" => acc(ns, prev, a)
@@ -231,23 +310,6 @@ class DataModel2MetaSchema(filePath: String, pkgPath: String, scalaVersion: Stri
   private def addBackRef(ns: String, backRefNs: String): Unit = {
     val cur = backRefs.getOrElse(backRefNs, Nil)
     backRefs = backRefs + (backRefNs -> (cur :+ ns))
-  }
-
-  private def attr(
-    acc: (List[String], Option[String], Option[String], Seq[(String, String)], MetaAttr),
-    card: Cardinality,
-    tpe: String,
-    refNs: Option[String] = None
-  ): (List[String], Option[String], Option[String], Seq[(String, String)], MetaAttr) = {
-    (Nil, None, None, Nil, acc._5.copy(
-      card = card,
-      tpe = tpe,
-      refNs = refNs,
-      options = acc._1,
-      description = acc._2,
-      alias = acc._3,
-      validations = acc._4
-    ))
   }
 }
 

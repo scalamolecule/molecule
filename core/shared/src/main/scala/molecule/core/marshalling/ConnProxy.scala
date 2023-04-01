@@ -4,6 +4,7 @@ import java.util.UUID
 import molecule.base.api.SchemaTransaction
 import molecule.base.ast.SchemaAST.{Cardinality, MetaNs}
 import molecule.core.marshalling.dbView.DbView
+import molecule.core.util.MetaModelUtils
 
 sealed trait ConnProxy {
   /** Seq of strings to transact schema. Supplied from generated boilerplate code. */
@@ -14,6 +15,8 @@ sealed trait ConnProxy {
    * Ns -> MetaNs
    * */
   val nsMap: Map[String, MetaNs]
+
+  val hasMandatoryRefs: Boolean
 
   /** Map of attribute meta data. Supplied from generated boilerplate code.
    *
@@ -59,6 +62,7 @@ case class DatomicPeerProxy(
 
   schema: Seq[String],
   nsMap: Map[String, MetaNs],
+  hasMandatoryRefs: Boolean,
   attrMap: Map[String, (Cardinality, String)],
   uniqueAttrs: List[String],
 
@@ -71,7 +75,7 @@ case class DatomicPeerProxy(
 ) extends ConnProxy
 
 
-object DatomicPeerProxy {
+object DatomicPeerProxy extends MetaModelUtils {
   def apply(
     protocol: String,
     dbIdentifier: String,
@@ -87,6 +91,7 @@ object DatomicPeerProxy {
         schemaTx.datomicAliases
       ),
       schemaTx.nsMap,
+      getHasMandatoryRefs(schemaTx.nsMap),
       schemaTx.attrMap,
       schemaTx.uniqueAttrs
     )

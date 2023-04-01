@@ -37,7 +37,7 @@ class InsertExtraction_ extends InsertResolvers_ { self: InsertOps =>
             case a: AttrSet =>
               a match {
                 case a: AttrSetMan =>
-                  val mandatory = nsMap(a.ns).mandatory.contains(a.attr)
+                  val mandatory = nsMap(a.ns).mandatoryAttrs.contains(a.attr)
                   resolve(nsMap, tail, resolvers :+
                     resolveAttrSetMan(a, outerTpl, tplIndex, mandatory), outerTpl, tplIndex + 1)
 

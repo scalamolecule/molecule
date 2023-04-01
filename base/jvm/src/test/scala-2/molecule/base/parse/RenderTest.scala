@@ -1,5 +1,6 @@
 package molecule.base.parse
 
+import molecule.base.ast.SchemaAST._
 import molecule.base.codegen.extract.DataModel2MetaSchema
 import molecule.base.codegen.render.Dsl
 import utest._
@@ -26,8 +27,8 @@ object RenderTest extends TestSuite {
       //      Dsl(typesNss, "", typesNss.parts.head.nss(0)).get ==> "check"
       //      Dsl(validationNss, "", validationNss.parts.head.nss(3)).get ==> "check"
 
-      //      validationNss ==> "check"
-      validationNss.parts.head.nss(5) ==> "check"
+      validationNss ==> "check"
+      //      validationNss.parts.head.nss(1) ==> "check"
     }
   }
 

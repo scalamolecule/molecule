@@ -105,13 +105,14 @@ object SchemaAST extends BaseHelpers {
     ns: String,
     attrs: Seq[MetaAttr],
     backRefNss: Seq[String] = Nil,
-    mandatory: Seq[String] = Nil,
+    mandatoryAttrs: Seq[String] = Nil,
+    mandatoryRefs: Seq[(String, String)] = Nil,
     tuples: Seq[String] = Nil
   ) {
     def render(tabs: Int): String = {
-      val maxAttr      = attrs.map(_.attr.length).max
-      val maxTpe       = attrs.map(_.tpe.length).max
-      val attrsStr     = if (attrs.isEmpty) "" else {
+      val maxAttr           = attrs.map(_.attr.length).max
+      val maxTpe            = attrs.map(_.tpe.length).max
+      val attrsStr          = if (attrs.isEmpty) "" else {
         val p   = indent(tabs)
         val pad = s"\n$p  "
         attrs.map { attr =>
@@ -127,10 +128,13 @@ object SchemaAST extends BaseHelpers {
           s"""MetaAttr($attr1, $card, $tpe, $refNs, $options, $descr, $alias, $requiredAttrs, $validations1)"""
         }.mkString(pad, s",$pad", s"\n$p")
       }
-      val backRefs     = if (backRefNss.isEmpty) "" else backRefNss.mkString("\"", "\", \"", "\"")
-      val mandatoryStr = if (mandatory.isEmpty) "" else mandatory.mkString("\"", "\", \"", "\"")
-      val tupleStr     = if (tuples.isEmpty) "" else tuples.mkString("\"", "\", \"", "\"")
-      s"""MetaNs("$ns", Seq($attrsStr), Seq($backRefs), Seq($mandatoryStr), Seq($tupleStr))"""
+      val backRefs          = if (backRefNss.isEmpty) "" else backRefNss.mkString("\"", "\", \"", "\"")
+      val mandatoryAttrsStr = if (mandatoryAttrs.isEmpty) "" else mandatoryAttrs.mkString("\"", "\", \"", "\"")
+      val mandatoryRefsStr  = if (mandatoryRefs.isEmpty) "" else mandatoryRefs.map {
+        case (attr, refNs) => s"""\"$attr\" -> \"$refNs\""""
+      }.mkString(", ")
+      val tupleStr          = if (tuples.isEmpty) "" else tuples.mkString("\"", "\", \"", "\"")
+      s"""MetaNs("$ns", Seq($attrsStr), Seq($backRefs), Seq($mandatoryAttrsStr), Seq($mandatoryRefsStr), Seq($tupleStr))"""
     }
 
     override def toString: String = render(0)
