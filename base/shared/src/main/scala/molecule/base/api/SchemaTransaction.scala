@@ -12,8 +12,8 @@ trait SchemaTransaction {
   /** Namespace name -> MetaNs */
   val nsMap: Map[String, MetaNs]
 
-  /** Attribute name -> (cardinality, Scala type) */
-  val attrMap: Map[String, (Cardinality, String)]
+  /** Attribute name -> (Cardinality, Scala type, Required attributes) */
+  val attrMap: Map[String, (Cardinality, String, Seq[String])]
 
   val uniqueAttrs: List[String]
 

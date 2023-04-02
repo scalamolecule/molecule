@@ -2,7 +2,7 @@ package molecule.datomic.transaction
 
 import java.net.URI
 import java.util.{Date, UUID}
-import molecule.base.ast.SchemaAST.MetaNs
+import molecule.base.ast.SchemaAST.{Cardinality, MetaNs}
 import molecule.base.error.ValidationErrors
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
@@ -13,6 +13,7 @@ trait Save_stmts extends DatomicTxBase_JVM with SaveOps with MoleculeLogging { s
 
   def getRawStmts(
     nsMap: Map[String, MetaNs],
+    attrMap: Map[String, (Cardinality, String, Seq[String])],
     elements: List[Element],
     eid: String,
     debug: Boolean = true,
@@ -21,7 +22,7 @@ trait Save_stmts extends DatomicTxBase_JVM with SaveOps with MoleculeLogging { s
     if (init) {
       initTxBase(elements)
     }
-    val validationErrors = PreValidation(nsMap).check(elements)
+    val validationErrors = PreValidation(nsMap, attrMap).check(elements)
     if (validationErrors.nonEmpty) {
       throw ValidationErrors(validationErrors)
     }
@@ -38,9 +39,13 @@ trait Save_stmts extends DatomicTxBase_JVM with SaveOps with MoleculeLogging { s
     stmts
   }
 
-  def getStmts(nsMap: Map[String, MetaNs], elements: List[Element]): Data = {
+  def getStmts(
+    nsMap: Map[String, MetaNs],
+    attrMap: Map[String, (Cardinality, String, Seq[String])],
+    elements: List[Element]
+  ): Data = {
     initTxBase(elements)
-    getRawStmts(nsMap, elements, newId, init = false)
+    getRawStmts(nsMap, attrMap, elements, newId, init = false)
   }
 
 

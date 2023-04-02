@@ -5,6 +5,7 @@ import molecule.base.error._
 import molecule.boilerplate.ast.Model._
 import molecule.core.action.Insert
 import molecule.core.api.{ApiZio, Connection, TxReport}
+import molecule.core.marshalling.ConnProxy
 import molecule.core.transaction.{DeleteExtraction, InsertExtraction_, SaveExtraction, UpdateExtraction}
 import molecule.core.util.Executor._
 import molecule.datomic.action._
@@ -66,7 +67,7 @@ trait DatomicApiZio extends SubscriptionStarter with DatomicZioApiBase with ApiZ
       for {
         conn0 <- ZIO.service[Connection]
         conn = conn0.asInstanceOf[DatomicConn_JVM]
-        stmts <- ZIO.succeed(getStmts(conn.proxy.nsMap))
+        stmts <- ZIO.succeed(getStmts(conn.proxy))
         txReport <- transactStmts(stmts)
       } yield txReport
     }
@@ -75,11 +76,12 @@ trait DatomicApiZio extends SubscriptionStarter with DatomicZioApiBase with ApiZ
       for {
         conn0 <- ZIO.service[Connection]
         conn = conn0.asInstanceOf[DatomicConn_JVM]
-      } yield printInspectTx("SAVE", save.elements, getStmts(conn.proxy.nsMap))
+      } yield printInspectTx("SAVE", save.elements, getStmts(conn.proxy))
     }
 
-    private def getStmts(nsMap: Map[String, MetaNs]): Data =
-      (new SaveExtraction() with Save_stmts).getStmts(nsMap, save.elements)
+    private def getStmts(proxy: ConnProxy): Data =
+      (new SaveExtraction() with Save_stmts)
+        .getStmts(proxy.nsMap, proxy.attrMap, save.elements)
   }
 
 
@@ -89,7 +91,7 @@ trait DatomicApiZio extends SubscriptionStarter with DatomicZioApiBase with ApiZ
       for {
         conn0 <- ZIO.service[Connection]
         conn = conn0.asInstanceOf[DatomicConn_JVM]
-        stmts <- ZIO.succeed(getStmts(conn.proxy.nsMap))
+        stmts <- ZIO.succeed(getStmts(conn.proxy))
         txReport <- transactStmts(stmts)
       } yield txReport
     }
@@ -99,11 +101,12 @@ trait DatomicApiZio extends SubscriptionStarter with DatomicZioApiBase with ApiZ
         conn0 <- ZIO.service[Connection]
         conn = conn0.asInstanceOf[DatomicConn_JVM]
       } yield
-        printInspectTx("INSERT", insert.elements, getStmts(conn.proxy.nsMap))
+        printInspectTx("INSERT", insert.elements, getStmts(conn.proxy))
     }
 
-    private def getStmts(nsMap: Map[String, MetaNs]): Data =
-      (new InsertExtraction_ with Insert_stmts).getStmts(nsMap, insert.elements, insert.tpls)
+    private def getStmts(proxy: ConnProxy): Data =
+      (new InsertExtraction_ with Insert_stmts)
+        .getStmts(proxy.nsMap, proxy.attrMap, insert.elements, insert.tpls)
   }
 
 

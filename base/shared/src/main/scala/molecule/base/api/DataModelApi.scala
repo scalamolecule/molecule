@@ -209,7 +209,7 @@ trait DataModelApi {
     def enums(vs: Seq[BaseTpe], failureMsg: String): Self = ???
 
     // Tupled attributes
-    def tuple[T <: Options[_, _, _]](otherAttrsInTuple: T*): Self = ???
+    def require[T <: Options[_, _, _]](attrs: T*): Self = ???
 
 
     // hmm, difficult to implement... - possible?
@@ -240,8 +240,8 @@ trait DataModelApi {
      *
      * This entity owns the referenced entity/entities.
      *
-     * - If this entity is deleted, this references are deleted too
-     * (and recursively if sub entities have owned entities)
+     * - If this entity is deleted, its references are deleted too
+     * (and recursively if sub entities have owned entities!)
      *
      * <br><br>
      * Specifies that an attribute whose type is :db.type/ref is a component.

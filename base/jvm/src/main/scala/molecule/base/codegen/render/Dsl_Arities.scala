@@ -148,10 +148,14 @@ case class Dsl_Arities(schema: MetaSchema, partPrefix: String, namespace: MetaNs
   val refResult = ref.result()
   val refDefs   = if (refResult.isEmpty) "" else refResult.mkString("\n\n  ", "\n  ", "")
 
-  val backRefDefs = if (backRefs.isEmpty) "" else backRefs.map { backRef0 =>
-    val backRef = partPrefix + backRef0
-    s"""object _$backRef extends $backRef${_0}[${`A..V, `}t](elements :+ Model.BackRef("$backRef"))"""
-  }.mkString("\n\n  ", "\n  ", "")
+  val backRefDefs = if (backRefs.isEmpty) "" else {
+    val max = backRefs.map(_.length).max
+    backRefs.map { backRef0 =>
+      val backRef = partPrefix + backRef0
+      val pad     = padS(max, backRef)
+      s"""object _$backRef$pad extends $backRef${_0}$pad[${`A..V, `}t](elements :+ Model.BackRef("$backRef"))"""
+    }.mkString("\n\n  ", "\n  ", "")
+  }
 
   def get: String =
     s"""class $ns_0[${`A..V, `}t]($elements) extends $ns with $modelOps {

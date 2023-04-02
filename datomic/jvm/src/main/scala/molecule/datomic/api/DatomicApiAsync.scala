@@ -4,6 +4,7 @@ import molecule.base.ast.SchemaAST.MetaNs
 import molecule.boilerplate.ast.Model._
 import molecule.core.action.Insert
 import molecule.core.api.{ApiAsync, Connection, TxReport}
+import molecule.core.marshalling.ConnProxy
 import molecule.core.transaction.{DeleteExtraction, InsertExtraction_, SaveExtraction, UpdateExtraction}
 import molecule.core.util.FutureUtils
 import molecule.datomic.action._
@@ -52,26 +53,28 @@ trait DatomicApiAsync extends SubscriptionStarter with DatomicAsyncApiBase with 
 
   implicit class datomicSaveApiAsync[Tpl](save: DatomicSave) extends Transaction {
     override def transact(implicit conn: Connection, ec: ExecutionContext): Future[TxReport] = tryFuture {
-      conn.asInstanceOf[DatomicConn_JVM].transact_async(getStmts(conn.proxy.nsMap))
+      conn.asInstanceOf[DatomicConn_JVM].transact_async(getStmts(conn.proxy))
     }
     override def inspect(implicit conn: Connection, ec: ExecutionContext): Future[Unit] =
-      printInspectTx("SAVE", save.elements, getStmts(conn.proxy.nsMap))
+      printInspectTx("SAVE", save.elements, getStmts(conn.proxy))
 
-    private def getStmts(nsMap: Map[String, MetaNs]): Data =
-      (new SaveExtraction() with Save_stmts).getStmts(nsMap, save.elements)
+    private def getStmts(proxy: ConnProxy): Data =
+      (new SaveExtraction() with Save_stmts)
+        .getStmts(proxy.nsMap, proxy.attrMap, save.elements)
   }
 
 
   implicit class datomicInsertApiAsync[Tpl](insert0: Insert) extends Transaction {
     val insert = insert0.asInstanceOf[DatomicInsert_JVM]
     override def transact(implicit conn: Connection, ec: ExecutionContext): Future[TxReport] = tryFuture {
-      conn.asInstanceOf[DatomicConn_JVM].transact_async(getStmts(conn.proxy.nsMap))
+      conn.asInstanceOf[DatomicConn_JVM].transact_async(getStmts(conn.proxy))
     }
     override def inspect(implicit conn: Connection, ec: ExecutionContext): Future[Unit] =
-      printInspectTx("INSERT", insert.elements, getStmts(conn.proxy.nsMap))
+      printInspectTx("INSERT", insert.elements, getStmts(conn.proxy))
 
-    private def getStmts(nsMap: Map[String, MetaNs]): Data =
-      (new InsertExtraction_ with Insert_stmts).getStmts(nsMap, insert.elements, insert.tpls)
+    private def getStmts(proxy: ConnProxy): Data =
+      (new InsertExtraction_ with Insert_stmts)
+        .getStmts(proxy.nsMap, proxy.attrMap, insert.elements, insert.tpls)
   }
 
 

@@ -62,11 +62,13 @@ object SchemaAST extends BaseHelpers {
         ns <- part.nss
         attr <- ns.attrs
       } yield {
-        (s"${ns.ns}.${attr.attr}", attr.card, attr.tpe)
+        (s"${ns.ns}.${attr.attr}", attr.card, attr.tpe, attr.requiredAttrs)
       }
       val maxSp    = attrData.map(_._1.length).max
       val attrs    = attrData.map {
-        case (a, card, tpe) => s""""$a"${padS(maxSp, a)} -> ($card, "$tpe")"""
+        case (a, card, tpe, reqAttrs) =>
+          val reqAttrsStr = reqAttrs.map(a => s""""$a"""").mkString(", ")
+          s""""$a"${padS(maxSp, a)} -> ($card, "$tpe"${padS(10, tpe)}, Seq($reqAttrsStr))"""
       }
       val attrsStr = if (attrs.isEmpty) "" else attrs.mkString(pad, s",$pad", s"\n$p")
       s"Map($attrsStr)"
@@ -106,8 +108,7 @@ object SchemaAST extends BaseHelpers {
     attrs: Seq[MetaAttr],
     backRefNss: Seq[String] = Nil,
     mandatoryAttrs: Seq[String] = Nil,
-    mandatoryRefs: Seq[(String, String)] = Nil,
-    tuples: Seq[String] = Nil
+    mandatoryRefs: Seq[(String, String)] = Nil
   ) {
     def render(tabs: Int): String = {
       val maxAttr           = attrs.map(_.attr.length).max
@@ -133,8 +134,7 @@ object SchemaAST extends BaseHelpers {
       val mandatoryRefsStr  = if (mandatoryRefs.isEmpty) "" else mandatoryRefs.map {
         case (attr, refNs) => s"""\"$attr\" -> \"$refNs\""""
       }.mkString(", ")
-      val tupleStr          = if (tuples.isEmpty) "" else tuples.mkString("\"", "\", \"", "\"")
-      s"""MetaNs("$ns", Seq($attrsStr), Seq($backRefs), Seq($mandatoryAttrsStr), Seq($mandatoryRefsStr), Seq($tupleStr))"""
+      s"""MetaNs("$ns", Seq($attrsStr), Seq($backRefs), Seq($mandatoryAttrsStr), Seq($mandatoryRefsStr))"""
     }
 
     override def toString: String = render(0)

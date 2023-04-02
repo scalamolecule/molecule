@@ -70,9 +70,18 @@ class DataModel2MetaSchema(filePath: String, pkgPath: String, scalaVersion: Stri
       case _                     => Seq(MetaPart("", getNss("", body)))
     }
     checkCircularMandatoryRefs(parts)
-    MetaSchema(pkg, domain, maxArity, parts)
+    val parts1 = addBackRefs(parts)
+    MetaSchema(pkg, domain, maxArity, parts1)
   }
 
+  private def addBackRefs(parts: Seq[MetaPart]): Seq[MetaPart] = {
+    parts.map { part =>
+      val nss1 = part.nss.map { ns =>
+        ns.copy(backRefNss = backRefs.getOrElse(ns.ns, Nil).distinct.sorted)
+      }
+      part.copy(nss = nss1)
+    }
+  }
   private def checkCircularMandatoryRefs(parts: Seq[MetaPart]): Unit = {
     val mappings: Map[String, Seq[(String, String)]] = parts
       .flatMap(_.nss
@@ -123,7 +132,6 @@ class DataModel2MetaSchema(filePath: String, pkgPath: String, scalaVersion: Stri
         err(s"Please define attribute(s) in namespace $ns")
       }
       val metaAttrs      = getAttrs(ns, attrs)
-      val backRefNss     = backRefs.getOrElse(ns, Nil).distinct.sorted
       val mandatoryAttrs = metaAttrs.collect {
         case a if a.refNs.isEmpty && a.options.contains("mandatory") => a.attr
       }
@@ -131,20 +139,31 @@ class DataModel2MetaSchema(filePath: String, pkgPath: String, scalaVersion: Stri
         case a if a.refNs.nonEmpty && a.options.contains("mandatory") => a.attr -> a.refNs.get
       }
 
-      val overlappingTuples = metaAttrs
-        .collect { case a if a.requiredAttrs.nonEmpty => a.requiredAttrs :+ a.attr }
-        .flatten.groupBy(identity).collect { case (a, req) if req.length > 1 => a }
-
-      if (overlappingTuples.nonEmpty) {
+      // Required attributes
+      val reqGroups           = metaAttrs.collect {
+        case a if a.requiredAttrs.nonEmpty => a.requiredAttrs :+ (ns + "." + a.attr)
+      }
+      val reqAttrs            = reqGroups.flatten
+      val overlappingRequired = reqAttrs.groupBy(identity).collect { case (a, req) if req.length > 1 => a }
+      if (overlappingRequired.nonEmpty) {
+        val s = if (overlappingRequired.size == 1) "" else "s"
         err(
-          s"""Attributes are only allowed to belong to one tuple. Found attributes in multiple tuples:
-             |  ${overlappingTuples.map(a => s"$ns.$a").mkString("\n  ")}
+          s"""Attributes can only be required once. Found attribute$s in multiple groups of requirements:
+             |  ${overlappingRequired.mkString("\n  ")}
              |""".stripMargin
         )
       }
+      val metaAttrs1 = metaAttrs.map { a =>
+        val attr = ns + "." + a.attr
+        if (reqAttrs.contains(attr)) {
+          val otherAttrs = reqGroups.collectFirst {
+            case group if group.contains(attr) => group.filterNot(_ == attr)
+          }
+          a.copy(requiredAttrs = otherAttrs.get)
+        } else a
+      }
 
-
-      MetaNs(partPrefix + ns, metaAttrs, backRefNss, mandatoryAttrs, mandatoryRefs)
+      MetaNs(partPrefix + ns, metaAttrs1, Nil, mandatoryAttrs, mandatoryRefs)
     case q"object $o { ..$_ }"        => noMix()
     case other                        => unexpected(other)
   }
@@ -286,8 +305,8 @@ class DataModel2MetaSchema(filePath: String, pkgPath: String, scalaVersion: Stri
         val error = s"""Value `_value_` is not one of the allowed values in Seq$vs"""
         acc(ns, prev, a.copy(validations = a.validations :+ test -> error))
 
-      case q"$prev.tuple(..$otherAttrs)" =>
-        acc(ns, prev, a.copy(requiredAttrs = otherAttrs.map(_.toString)))
+      case q"$prev.require(..$otherAttrs)" =>
+        acc(ns, prev, a.copy(requiredAttrs = otherAttrs.map(ns + "." + _)))
 
       case q"$prev.value" => acc(ns, prev, a)
       case other          => unexpected(other)

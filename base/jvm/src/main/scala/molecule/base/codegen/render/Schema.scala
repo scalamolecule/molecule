@@ -27,7 +27,7 @@ case class Schema(schema: MetaSchema) {
         |  val nsMap: Map[String, MetaNs] = ${schema.nsMap(1)}
         |
         |
-        |  val attrMap: Map[String, (Cardinality, String)] = ${schema.attrMap(1)}
+        |  val attrMap: Map[String, (Cardinality, String, Seq[String])] = ${schema.attrMap(1)}
         |
         |
         |  val uniqueAttrs: List[String] = ${schema.uniqueAttrs}

@@ -163,8 +163,8 @@ object Validation extends DataModel(4) {
   }
 
   trait MandatoryRefAB {
-    val i       = oneInt
-    val refA    = one[RefA].mandatory
+    val i    = oneInt
+    val refA = one[RefA].mandatory
   }
   trait MandatoryRefB {
     val i    = oneInt
@@ -204,24 +204,29 @@ object Validation extends DataModel(4) {
   //  }
 
 
-  trait Tuples {
+  trait Require {
     val i = oneInt
 
+    // Pair of data guaranteed
+    val username = oneString.require(password)
+    val password = oneString
+
+    // Triple of data guaranteed
     // Only points with all 3 coordinates present are valid
-    val x = oneInt.tuple(y, z)
+    val x = oneInt.require(y, z)
     val y = oneInt
     val z = oneInt
 
-    // Attributes can only belong to one tuple.
-    // w can't build tuple with z that is already in another tuple
-    // val w = oneInt.tuple(z)
+    // Attributes can only be required once.
+    // w can't require z since z is already required
+    // val w = oneInt.require(z)
 
     // Mixed ref/attr
-    val tupleWithRef = oneInt.tuple(refB)
-    val refB         = one[RefB]
+    val int  = oneInt.require(refB)
+    val refB = one[RefB]
 
     // Ref-only tuples
-    val ref1 = one[RefB].tuple(ref2)
+    val ref1 = one[RefB].require(ref2)
     val ref2 = one[Enum]
   }
 }

@@ -1,6 +1,6 @@
 package molecule.core.validation
 
-import molecule.base.ast.SchemaAST.MetaNs
+import molecule.base.ast.SchemaAST.{Cardinality, MetaNs}
 import molecule.base.error._
 import molecule.boilerplate.ast.Model._
 import scala.annotation.tailrec
@@ -8,6 +8,7 @@ import scala.annotation.tailrec
 
 case class PreValidation(
   nsMap: Map[String, MetaNs],
+  attrMap: Map[String, (Cardinality, String, Seq[String])],
   getCurSetValues: Option[Attr => Set[Any]] = None
 ) {
   private lazy val isUpdate = getCurSetValues.isDefined
@@ -23,6 +24,8 @@ case class PreValidation(
   private var isTx            : Boolean                     = false
   private var mandatoryAttrs  : Set[String]                 = Set.empty[String]
   private var mandatoryRefs   : Set[(String, String)]       = Set.empty[(String, String)]
+  private var requiredAttrs   : Set[String]                 = Set.empty[String]
+  private var presentAttrs    : Set[String]                 = Set.empty[String]
   private var deletingAttrs   : Set[String]                 = Set.empty[String]
   private var validationErrors: Map[String, Seq[String]]    = Map.empty[String, Seq[String]]
 
@@ -32,24 +35,27 @@ case class PreValidation(
     elements match {
       case head :: tail => head match {
         case a: Attr =>
-          val attr   = a.ns + "." + a.attr
-          val custom = a.ns != "_Generic"
-          if (custom && prevNs != a.ns) {
-            prevNs = a.ns
-            mandatoryAttrs ++= nsMap(a.ns).mandatoryAttrs.map(attr =>
-              a.ns + "." + attr
-            )
-            mandatoryRefs ++= nsMap(a.ns).mandatoryRefs.map {
-              case (attr, refNs) =>
-                (a.ns + "." + attr) -> refNs
+          val attr = a.ns + "." + a.attr
+          if (a.ns != "_Generic") {
+            if (prevNs != a.ns) {
+              prevNs = a.ns
+              mandatoryAttrs ++= nsMap(a.ns).mandatoryAttrs.map(attr =>
+                a.ns + "." + attr
+              )
+              mandatoryRefs ++= nsMap(a.ns).mandatoryRefs.map {
+                case (attr, refNs) =>
+                  (a.ns + "." + attr) -> refNs
+              }
             }
+            requiredAttrs ++= attrMap(attr)._3
+            presentAttrs += attr
+
+            if (mandatoryAttrs.contains(attr))
+              registerMandatoryAttr(a, attr)
+
+            if (mandatoryRefs.map(_._1).contains(attr))
+              registerMandatoryRefAttr(a, attr)
           }
-
-          if (custom && mandatoryAttrs.contains(attr))
-            checkMandatoryAttr(a, attr)
-
-          if (custom && mandatoryRefs.map(_._1).contains(attr))
-            checkMandatoryRefAttr(a, attr)
 
           // Distinguish multiple ref paths to the same namespace
           val attrPrefixed = if (isUpdate) {
@@ -82,6 +88,7 @@ case class PreValidation(
           prev(level) = prev(level) :+ Array(refAttr)
           group += 1
           mandatoryRefs = mandatoryRefs.filterNot(_._1 == refAttr)
+          presentAttrs += refAttr
           refPath = refPath :+ refAttr
           check(tail)
 
@@ -123,36 +130,52 @@ case class PreValidation(
           check(txElements)
       }
       case Nil          =>
-        if (!isUpdate && mandatoryAttrs.nonEmpty) {
-          throw ModelError(
-            s"""Missing/empty mandatory attributes:
-               |  ${mandatoryAttrs.mkString("\n  ")}
-               |""".stripMargin
-          )
-        }
-        if (!isUpdate && mandatoryRefs.nonEmpty) {
-          val list = mandatoryRefs.map {
-            case (a, refNs) => s"$a pointing to namespace $refNs"
-          }.mkString("\n  ")
-          throw ModelError(
-            s"""Missing/empty mandatory references:
-               |  $list
-               |""".stripMargin
-          )
-        }
-        if (isUpdate && deletingAttrs.nonEmpty) {
-          throw ModelError(
-            s"""Can't delete mandatory attributes (or remove last values of card-many attributes):
-               |  ${deletingAttrs.mkString("\n  ")}
-               |""".stripMargin
-          )
-        }
+        checkMandatoryAndRequiredAttrs()
         validationErrors
     }
   }
 
+  private def checkMandatoryAndRequiredAttrs(): Unit = {
+    if (!isUpdate && mandatoryAttrs.nonEmpty) {
+      throw ModelError(
+        s"""Missing/empty mandatory attributes:
+           |  ${mandatoryAttrs.mkString("\n  ")}
+           |""".stripMargin
+      )
+    }
+    if (!isUpdate && mandatoryRefs.nonEmpty) {
+      val list = mandatoryRefs.map {
+        case (a, refNs) => s"$a pointing to namespace $refNs"
+      }.mkString("\n  ")
+      throw ModelError(
+        s"""Missing/empty mandatory references:
+           |  $list
+           |""".stripMargin
+      )
+    }
+    if (isUpdate && deletingAttrs.nonEmpty) {
+      throw ModelError(
+        s"""Can't delete mandatory attributes (or remove last values of card-many attributes):
+           |  ${deletingAttrs.mkString("\n  ")}
+           |""".stripMargin
+      )
+    }
+    if (requiredAttrs.nonEmpty) {
+      val presentAttrs1  = presentAttrs.toList.distinct
+      val requiredAttrs1 = requiredAttrs.toList.distinct
 
-  private def checkMandatoryAttr(a: Attr, attr: String) = {
+      val missingRequiredAttrs = requiredAttrs1.diff(presentAttrs1)
+      if (missingRequiredAttrs.nonEmpty) {
+        throw ModelError(
+          s"""Missing/empty required attributes:
+             |  ${missingRequiredAttrs.mkString("\n  ")}
+             |""".stripMargin
+        )
+      }
+    }
+  }
+
+  private def registerMandatoryAttr(a: Attr, attr: String) = {
     if (isUpdate) {
       if (
         (a.op == V || a.op == Appl) && deletingAttr(a)
@@ -170,7 +193,7 @@ case class PreValidation(
     }
   }
 
-  private def checkMandatoryRefAttr(a: Attr, attr: String) = {
+  private def registerMandatoryRefAttr(a: Attr, attr: String) = {
     if (isUpdate) {
       if (
         (a.op == V || a.op == Appl) && deletingAttr(a)

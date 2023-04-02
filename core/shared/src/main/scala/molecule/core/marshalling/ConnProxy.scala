@@ -22,7 +22,7 @@ sealed trait ConnProxy {
    *
    * Attr name -> (Cardinality, type string)
    * */
-  val attrMap: Map[String, (Cardinality, String)]
+  val attrMap: Map[String, (Cardinality, String, Seq[String])]
 
   val uniqueAttrs: List[String]
 
@@ -63,7 +63,7 @@ case class DatomicPeerProxy(
   schema: Seq[String],
   nsMap: Map[String, MetaNs],
   hasMandatoryRefs: Boolean,
-  attrMap: Map[String, (Cardinality, String)],
+  attrMap: Map[String, (Cardinality, String, Seq[String])],
   uniqueAttrs: List[String],
 
   // Internal settings, not intended to be set by user

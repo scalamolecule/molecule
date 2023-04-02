@@ -40,7 +40,11 @@ trait Update_stmts extends DatomicTxBase_JVM with UpdateOps with MoleculeLogging
       }
     }
 
-    val validationErrors = PreValidation(conn.proxy.nsMap, Some(getCurSetValues)).check(elements)
+    val validationErrors = PreValidation(
+      conn.proxy.nsMap,
+      conn.proxy.attrMap,
+      Some(getCurSetValues)
+    ).check(elements)
     if (validationErrors.nonEmpty) {
       throw ValidationErrors(validationErrors)
     }

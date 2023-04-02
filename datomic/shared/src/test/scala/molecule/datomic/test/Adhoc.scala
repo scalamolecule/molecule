@@ -2,10 +2,11 @@ package molecule.datomic.test
 
 import java.util.Date
 import molecule.base.ast.SchemaAST.{CardOne, MetaAttr}
-import molecule.base.error.ValidationErrors
+import molecule.base.error._
 import molecule.core.api.TxReport
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
+import molecule.coreTests.dataModels.core.dsl.Validation._
 import molecule.datomic.async._
 import molecule.datomic.setup.DatomicTestSuite
 import utest._
@@ -25,27 +26,6 @@ object Adhoc extends DatomicTestSuite {
     //      } yield ()
     //    }
 
-
-    "validation" - validation { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Validation._
-      for {
-        _ <- Format.errorMsg.apply(1).save.transact
-          .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errors, _) =>
-            errors.head ==>
-              "Format.errorMsg" -> Seq("One-line error msg")
-        }
-
-        // 1 has correctly not been saved
-        _ <- Format.errorMsg.query.get.map(_ ==> Nil)
-
-        _ = {
-          println(str2date("2001-07-01 00:00:00").getTime)
-          println(date1.getTime)
-        }
-
-      } yield ()
-    }
 
 
     //    "refs" - refs { implicit conn =>
