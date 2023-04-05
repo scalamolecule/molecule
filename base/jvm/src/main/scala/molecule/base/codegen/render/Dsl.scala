@@ -16,9 +16,9 @@ case class Dsl(schema: MetaSchema, partPrefix: String, namespace: MetaNs)
       "molecule.boilerplate.ast.Model._",
     )
     val typeImports = attrsAll.collect {
-      case MetaAttr(_, _, "Date", _, _, _, _, _, _) => "java.util.Date"
-      case MetaAttr(_, _, "UUID", _, _, _, _, _, _) => "java.util.UUID"
-      case MetaAttr(_, _, "URI", _, _, _, _, _, _)  => "java.net.URI"
+      case MetaAttr(_, _, "Date", _, _, _, _, _, _, _) => "java.util.Date"
+      case MetaAttr(_, _, "UUID", _, _, _, _, _, _, _) => "java.util.UUID"
+      case MetaAttr(_, _, "URI", _, _, _, _, _, _, _)  => "java.net.URI"
     }.distinct
     (baseImports ++ typeImports).sorted.mkString("import ", "\nimport ", "")
   }
@@ -26,15 +26,24 @@ case class Dsl(schema: MetaSchema, partPrefix: String, namespace: MetaNs)
   val validationExtractor = Dsl_Validations(schema, namespace)
 
   val baseNs: String = {
-    val vas = List.newBuilder[String]
     val man = List.newBuilder[String]
     val opt = List.newBuilder[String]
     val tac = List.newBuilder[String]
+    val vas = List.newBuilder[String]
     attrsAll.collect {
-      case MetaAttr(attr, card, tpe, refNs, _, _, _, _, validations) if !genericAttrs.contains(attr) =>
-        val withV   = if (validations.nonEmpty) {
-          vas += validationExtractor.validationMethod(attr, tpe, validations)
-          s", validation = Some(validation_$attr)"
+      case MetaAttr(attr, card, tpe, refNs, _, _, _, _, valueAttrs, validations) if !genericAttrs.contains(attr) =>
+        val valids  = if (validations.nonEmpty) {
+          val valueAttrMetas = attrsCustom.collect {
+            case MetaAttr(attr1, card, tpe, _, _, _, _, _, _, _)
+              if valueAttrs.contains(attr1) => attr1 -> s"Attr${card.marker}Man$tpe"
+          }.sortBy(_._1)
+          vas += validationExtractor.validationMethod(attr, tpe, validations, valueAttrMetas)
+          if (valueAttrs.isEmpty) {
+            s", validator = Some(validation_$attr)"
+          } else {
+            val valueAttrsStr = valueAttrs.mkString("\"", "\", \"", "\"")
+            s", validator = Some(validation_$attr), valueAttrs = Seq($valueAttrsStr)"
+          }
         } else ""
         val padA    = padAttrCustom(attr)
         val padT0   = padTypeCustom(tpe)
@@ -42,9 +51,9 @@ case class Dsl(schema: MetaSchema, partPrefix: String, namespace: MetaNs)
         val attrMan = "Attr" + card.marker + "Man" + tpe
         val attrOpt = "Attr" + card.marker + "Opt" + tpe
         val attrTac = "Attr" + card.marker + "Tac" + tpe
-        man += s"""protected lazy val ${attr}_man$padA: $attrMan$padT0 = $attrMan$padT0("$ns", "$attr"$padA$isRef$withV)"""
-        opt += s"""protected lazy val ${attr}_opt$padA: $attrOpt$padT0 = $attrOpt$padT0("$ns", "$attr"$padA$isRef$withV)"""
-        tac += s"""protected lazy val ${attr}_tac$padA: $attrTac$padT0 = $attrTac$padT0("$ns", "$attr"$padA$isRef$withV)"""
+        man += s"""protected lazy val ${attr}_man$padA: $attrMan$padT0 = $attrMan$padT0("$ns", "$attr"$padA$isRef$valids)"""
+        opt += s"""protected lazy val ${attr}_opt$padA: $attrOpt$padT0 = $attrOpt$padT0("$ns", "$attr"$padA$isRef$valids)"""
+        tac += s"""protected lazy val ${attr}_tac$padA: $attrTac$padT0 = $attrTac$padT0("$ns", "$attr"$padA$isRef$valids)"""
     }
     val vas1     = vas.result()
     val vas2     = if (vas1.isEmpty) Nil else "" +: vas1

@@ -3,7 +3,7 @@ package molecule.coreTests.dataModels.core.dataModel
 import java.util.Date
 import molecule.DataModel
 
-object Validation extends DataModel(4) {
+object Validation extends DataModel(5) {
 
   trait Strings {
     val email        = oneString.email
@@ -60,25 +60,26 @@ object Validation extends DataModel(4) {
   }
 
   //  trait AttrValue {
-  //    val low  = oneInt.validate(_ < high.value)
+  //    //    val low  = oneInt.validate(_ < high.value)
+  //    val low  = oneInt.validate(_ < 7)
   //    val high = oneInt
   //
-  //    val min1 = oneInt
-  //    val mid1 = oneInt.validate(i => i > min1.value && i < max1.value)
-  //    val max1 = oneInt
-  //
-  //    // Same as
-  //    val min2 = oneInt.validate(_ < mid2.value)
-  //    val mid2 = oneInt.validate(_ < max2.value)
-  //    val max2 = oneInt
-  //
-  //    // Same as
-  //    val min3 = oneInt.validate(_ < mid2.value)
-  //    val mid3 = oneInt
-  //    val max3 = oneInt.validate(_ > mid2.value)
+  //    //    val min1 = oneInt
+  //    //    val mid1 = oneInt.validate(i => i > min1.value && i < max1.value)
+  //    //    val max1 = oneInt
+  //    //
+  //    //    // Same as
+  //    //    val min2 = oneInt.validate(_ < mid2.value)
+  //    //    val mid2 = oneInt.validate(_ < max2.value)
+  //    //    val max2 = oneInt
+  //    //
+  //    //    // Same as
+  //    //    val min3 = oneInt.validate(_ < mid2.value)
+  //    //    val mid3 = oneInt
+  //    //    val max3 = oneInt.validate(_ > mid2.value)
   //  }
 
-  trait Format {
+  trait FormatConstants {
     val noErrorMsg               = oneInt.validate(_ > 2)
     val errorMsg                 = oneInt.validate(
       _ > 2,
@@ -86,27 +87,32 @@ object Validation extends DataModel(4) {
     )
     val errorMsgWithValue        = oneInt.validate(
       _ > 2,
-      "One-line error msg. Found _value_"
+      "One-line error msg. Found $v"
     )
     val errorMsgWithValueQuoted  = oneString.validate(
       _.startsWith("hello"),
-      "Expected hello. Found \"_value_\"."
+      "Expected hello. Found \"$v\"."
     )
     val errorMsgWithValueQuoted2 = oneString.validate(
       _.startsWith("hello"),
-      """Expected hello. Found "_value_"."""
+      """Expected hello. Found "$v"."""
     )
+    // String interpolation in validation error messages not allowed
+    //    val errorMsgWithValueQuoted3 = oneString.validate(
+    //      _.startsWith("hello"),
+    //      s"""Expected hello. Found $$v."""
+    //    )
     val multilineErrorMsg        = oneInt.validate((v: Int) => v.>(2),
       """Long error explanation
         |with multiple lines""".stripMargin
     )
     val multilineMsgWithValue    = oneInt.validate((v: Int) => v.>(2),
       """Validation failed:
-        |Input value _value_ is not bigger than 2.""".stripMargin
+        |Input value $v is not bigger than 2.""".stripMargin
     )
     val multilineMsgWithValue2   = oneInt.validate((v: Int) => v.>(2),
       """Validation failed:
-        |Input value "_value_" is not bigger than 2.""".stripMargin
+        |Input value "$v" is not bigger than 2.""".stripMargin
     )
 
     val multiLine  = oneInt.validate { v =>
@@ -140,21 +146,108 @@ object Validation extends DataModel(4) {
     )
 
     val multipleErrors = oneInt.validate {
-      case v if v > 2  => "Number must be bigger than 2. Found: _value_"
-      case v if v < 10 => "Number must be smaller than 10. Found: _value_"
-      case v if {
-        val count = (3 to 9).length
-        v != count
-      }                => "Number must not be count of allowed numbers. Found: _value_"
+      case v if v > 2  => "Test 1: Number must be bigger than 2. Found: $v"
+      case v if v < 10 => "Test 2: Number must be smaller than 10. Found: $v"
+      case v if v != 7 => "Test 3: Number must not be 7"
       case v if {
         // Comments in code blocks are transferred to boilerplate code
         val divider = 2
         v % divider == 1
       }                =>
-        """Number must
-          |be odd. Found: _value_""".stripMargin
+        """Test 4: Number must
+          |be odd. Found: $v""".stripMargin
     }
   }
+
+
+  trait FormatVariables {
+    // Calling `value` is only allowed in validation code
+    // val intx = oneInt.value
+
+
+    val int        = oneInt
+    val noErrorMsg = oneInt.validate(_ > int.value)
+
+    val int1     = oneInt
+    val errorMsg = oneInt.validate(
+      _ > int1.value,
+      "One-line error msg"
+    )
+
+    val int2              = oneInt
+    val errorMsgWithValue = oneInt.validate(
+      _ > int2.value,
+      "One-line error msg. Found $v"
+    )
+
+    val int3         = oneInt
+    val multilineMsg = oneInt.validate((v: Int) => v.>(int3.value),
+      """Validation failed:
+        |Input value `$v` is not bigger than `int3` value `$int3`.""".stripMargin
+    )
+
+    val int4      = oneInt
+    val multiLine = oneInt.validate { v =>
+      val data   = 22
+      val result = data % int4.value
+      v > result
+    }
+
+    val int5       = oneInt
+    val multiLine2 = oneInt.validate(
+      { v =>
+        val data   = 22
+        val result = {
+          data % int5.value
+        }
+        v > result
+      },
+      "One-line error msg"
+    )
+
+    val int6       = oneInt
+    val multiLine3 = oneInt.validate({ v =>
+      val data   = 22
+      val result = data % int6.value
+      v > result
+    },
+      """Long error explanation
+        |with multiple lines""".stripMargin
+    )
+
+    val int7  = oneInt
+    val logic = oneInt.validate(
+      v => v >= 3 && v <= 9 && v != int7.value && v % 2 == 1,
+      "Value must be an odd number between 3 and 9 but not `int7` value `$int7`"
+    )
+
+    val int8           = oneInt
+    val str            = oneString
+    val ints           = setInt
+    val strs           = setString
+    val multipleErrors = oneInt.validate {
+      case v if v > 4 =>
+        "Test 1: Number must be bigger than 4. Found: $v"
+
+      case v if v > int8.value =>
+        "Test 2: Number must be bigger than `int8` value `$int8`. Found: $v"
+
+      case v if v < str.value.length * 2 =>
+        "Test 3: Number must be smaller than `str` value `$str` length `${str.length}` * 2. Found: $v"
+
+      case v if {
+        v != ints.value.head - 3
+      } => "Test 4: Number must not be `ints` head value `${ints.head}` minus 3. Found: $v"
+
+      case v if {
+        val divider = strs.value.size
+        v % divider == 1
+      } =>
+        """Test 5: Number must
+          |be odd. Found: $v""".stripMargin
+    }
+  }
+
 
   trait MandatoryAttr {
     val name    = oneString.mandatory

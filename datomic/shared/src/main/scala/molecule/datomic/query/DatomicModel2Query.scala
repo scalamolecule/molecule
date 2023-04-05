@@ -41,12 +41,12 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
       elements match {
         case element :: tail =>
           element match {
-            case _: TxMetaData                                      => addTxVar = true
-            case AttrOneManLong("_Generic", "tx", _, _, _, _, _, _) => addTxVar = true
-            case AttrOneTacLong("_Generic", "tx", _, _, _, _, _, _) => addTxVar = true
-            case Composite(elements)                                => checkTx(elements ++ tail)
-            case Nested(_, elements)                                => checkTx(tail ++ elements)
-            case _                                                  => checkTx(tail)
+            case _: TxMetaData                                         => addTxVar = true
+            case AttrOneManLong("_Generic", "tx", _, _, _, _, _, _, _) => addTxVar = true
+            case AttrOneTacLong("_Generic", "tx", _, _, _, _, _, _, _) => addTxVar = true
+            case Composite(elements)                                   => checkTx(elements ++ tail)
+            case Nested(_, elements)                                   => checkTx(tail ++ elements)
+            case _                                                     => checkTx(tail)
           }
         case Nil             => ()
       }

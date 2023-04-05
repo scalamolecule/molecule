@@ -38,7 +38,7 @@ case class PickleTpls(
   def pickleOffset(result: Either[MoleculeError, (Seq[Any], Int, Boolean)]): Array[Byte] = {
     result match {
       case Right((tpls, limit, more)) =>
-//        enk.writeInt(3) // Start Tuple3 with size 3
+        //        enk.writeInt(3) // Start Tuple3 with size 3
         pickleTpls(tpls)
         enk.writeInt(limit)
         enk.writeBoolean(more)
@@ -50,7 +50,7 @@ case class PickleTpls(
   def pickleCursor(result: Either[MoleculeError, (Seq[Any], String, Boolean)]): Array[Byte] = {
     result match {
       case Right((tpls, cursor, more)) =>
-//        enk.writeInt(3) // Start Tuple3 with size 3
+        //        enk.writeInt(3) // Start Tuple3 with size 3
         pickleTpls(tpls)
         enk.writeString(cursor)
         enk.writeBoolean(more)
@@ -102,6 +102,7 @@ case class PickleTpls(
                 case a: AttrSetOpt => resolvePicklers(tail, picklers :+ pickleAttrSetOpt(a, tplIndex), tplIndex + 1)
                 case _: AttrSetTac => resolvePicklers(tail, picklers, tplIndex)
               }
+            case a          => throw new Exception("Attribute family not implemented for " + a)
           }
 
         case Ref(_, refAttr, _, _) =>

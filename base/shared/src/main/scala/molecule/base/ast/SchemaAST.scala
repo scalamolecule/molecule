@@ -62,7 +62,7 @@ object SchemaAST extends BaseHelpers {
         ns <- part.nss
         attr <- ns.attrs
       } yield {
-        (s"${ns.ns}.${attr.attr}", attr.card, attr.tpe, attr.requiredAttrs)
+        (s"${ns.ns}.${attr.attr}", attr.card, attr.baseTpe, attr.requiredAttrs)
       }
       val maxSp    = attrData.map(_._1.length).max
       val attrs    = attrData.map {
@@ -112,21 +112,22 @@ object SchemaAST extends BaseHelpers {
   ) {
     def render(tabs: Int): String = {
       val maxAttr           = attrs.map(_.attr.length).max
-      val maxTpe            = attrs.map(_.tpe.length).max
+      val maxTpe            = attrs.map(_.baseTpe.length).max
       val attrsStr          = if (attrs.isEmpty) "" else {
         val p   = indent(tabs)
         val pad = s"\n$p  "
         attrs.map { attr =>
           val attr1         = "\"" + attr.attr + "\"" + padS(maxAttr, attr.attr)
           val card          = attr.card
-          val tpe           = "\"" + attr.tpe + "\"" + padS(maxTpe, attr.tpe)
+          val tpe           = "\"" + attr.baseTpe + "\"" + padS(maxTpe, attr.baseTpe)
           val refNs         = o(attr.refNs)
           val options       = sq(attr.options)
           val descr         = o(attr.description)
           val alias         = o(attr.alias)
           val requiredAttrs = sq(attr.requiredAttrs)
+          val valueAttrs    = sq(attr.valueAttrs)
           val validations1  = renderValidations(attr.validations)
-          s"""MetaAttr($attr1, $card, $tpe, $refNs, $options, $descr, $alias, $requiredAttrs, $validations1)"""
+          s"""MetaAttr($attr1, $card, $tpe, $refNs, $options, $descr, $alias, $requiredAttrs, $valueAttrs, $validations1)"""
         }.mkString(pad, s",$pad", s"\n$p")
       }
       val backRefs          = if (backRefNss.isEmpty) "" else backRefNss.mkString("\"", "\", \"", "\"")
@@ -144,17 +145,18 @@ object SchemaAST extends BaseHelpers {
   case class MetaAttr(
     attr: String,
     card: Cardinality,
-    tpe: String,
+    baseTpe: String,
     refNs: Option[String] = None,
     options: Seq[String] = Nil,
     description: Option[String] = None,
     alias: Option[String] = None,
     requiredAttrs: Seq[String] = Nil,
+    valueAttrs: Seq[String] = Nil,
     validations: Seq[(String, String)] = Nil
   ) {
     override def toString: String = {
       val validations1 = renderValidations(validations)
-      s"""MetaAttr("$attr", $card, "$tpe", ${o(refNs)}, ${sq(options)}, ${o(description)}, ${o(alias)}, ${sq(requiredAttrs)}, $validations1)"""
+      s"""MetaAttr("$attr", $card, "$baseTpe", ${o(refNs)}, ${sq(options)}, ${o(description)}, ${o(alias)}, ${sq(requiredAttrs)}, ${sq(valueAttrs)}, $validations1)"""
     }
   }
 

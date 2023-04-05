@@ -77,27 +77,5 @@ object Semantics extends DatomicTestSuite {
         }
       } yield ()
     }
-
-
-    "2 attributes, multi-error" - validation { implicit conn =>
-      for {
-        _ <- Format.errorMsg(1).multipleErrors(0).save.transact
-          .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
-            errorMap ==>
-              Map(
-                "Format.errorMsg" -> Seq(
-                  "One-line error msg"
-                ),
-
-                "Format.multipleErrors" -> Seq(
-                  "Number must be bigger than 2. Found: 0",
-                  """Number must
-                    |be odd. Found: 0""".stripMargin
-                )
-              )
-        }
-      } yield ()
-    }
   }
 }

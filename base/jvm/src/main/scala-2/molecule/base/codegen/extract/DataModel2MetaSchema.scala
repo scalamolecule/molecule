@@ -4,6 +4,7 @@ import java.nio.file.{Files, Paths}
 import molecule.base.ast.SchemaAST._
 import molecule.base.error.ModelError
 import scala.annotation.tailrec
+import scala.collection.mutable.ListBuffer
 import scala.meta._
 
 object DataModel2MetaSchema {
@@ -15,20 +16,23 @@ object DataModel2MetaSchema {
 }
 
 class DataModel2MetaSchema(filePath: String, pkgPath: String, scalaVersion: String) {
-  private val virtualFile       = Input.VirtualFile(filePath, pkgPath)
-  private val dialect           = scalaVersion match {
+  private val virtualFile = Input.VirtualFile(filePath, pkgPath)
+  private val dialect     = scalaVersion match {
     case "3"   => dialects.Scala3(virtualFile)
     case "213" => dialects.Scala213(virtualFile)
     case "212" => dialects.Scala212(virtualFile)
   }
-  private val tree              = dialect.parse[Source].get
+  private val tree        = dialect.parse[Source].get
+
   private val reservedAttrNames = List(
     "a", "e", "v", "t", "tx", "txInstant", "op", // Generic attributes
     "save", "insert", "update", "delete", // Actions
     //    "self", // if self-reference keyword is re-introduced
     "apply", "not", "add", "swap", "remove", // Expressions
   )
-  private var backRefs          = Map.empty[String, Seq[String]]
+
+  private var backRefs   = Map.empty[String, Seq[String]]
+  private val valueAttrs = ListBuffer.empty[String]
 
   private def noMix() = throw ModelError(
     "Mixing prefixed and non-prefixed namespaces is not allowed."
@@ -48,8 +52,9 @@ class DataModel2MetaSchema(filePath: String, pkgPath: String, scalaVersion: Stri
     List(Init.internal.Impl(Type.Name("DataModel"), _,
     List(Term.ArgClause(List(Lit.Int(maxArity)), _))
     )), _, body, _)) => (domain, maxArity, body)
-  }.getOrElse(unexpected(tree,
-    ". Couldn't find `object <YourDataModel> extends DataModel(<arity>) {...}` in code:\n"))
+  }.getOrElse(
+    unexpected(tree, ". Couldn't find `object <YourDataModel> extends DataModel(<arity>) {...}` in code:\n")
+  )
 
   private def err(msg: String, ns: String = "", attr: String = "") = {
     val fullNs = if (ns.isEmpty && attr.isEmpty) "" else
@@ -139,24 +144,29 @@ class DataModel2MetaSchema(filePath: String, pkgPath: String, scalaVersion: Stri
         case a if a.refNs.nonEmpty && a.options.contains("mandatory") => a.attr -> a.refNs.get
       }
 
-      // Required attributes
-      val reqGroups           = metaAttrs.collect {
-        case a if a.requiredAttrs.nonEmpty => a.requiredAttrs :+ (ns + "." + a.attr)
+      // Merge required groups with common attributes
+      val reqGroups       = metaAttrs.collect {
+        case a if a.requiredAttrs.nonEmpty => a.requiredAttrs
       }
-      val reqAttrs            = reqGroups.flatten
-      val overlappingRequired = reqAttrs.groupBy(identity).collect { case (a, req) if req.length > 1 => a }
-      if (overlappingRequired.nonEmpty) {
-        val s = if (overlappingRequired.size == 1) "" else "s"
-        err(
-          s"""Attributes can only be required once. Found attribute$s in multiple groups of requirements:
-             |  ${overlappingRequired.mkString("\n  ")}
-             |""".stripMargin
-        )
-      }
+      val reqGroupsMerged = reqGroups.map { group =>
+        reqGroups.flatMap {
+          case otherGroup if otherGroup.intersect(group).nonEmpty => (otherGroup ++ group).distinct.sorted
+          case _                                                  => group
+        }.distinct.sorted
+      }.distinct
+
+      //      metaAttrs.foreach(println)
+      //      println("--------")
+      //      reqGroups.foreach(println)
+      //      println("--------")
+      //      reqGroupsMerged.foreach(println)
+
+      val reqAttrs   = reqGroupsMerged.flatten
       val metaAttrs1 = metaAttrs.map { a =>
-        val attr = ns + "." + a.attr
+//        val attr = ns + "." + a.attr
+        val attr = a.attr
         if (reqAttrs.contains(attr)) {
-          val otherAttrs = reqGroups.collectFirst {
+          val otherAttrs = reqGroupsMerged.collectFirst {
             case group if group.contains(attr) => group.filterNot(_ == attr)
           }
           a.copy(requiredAttrs = otherAttrs.get)
@@ -184,6 +194,7 @@ class DataModel2MetaSchema(filePath: String, pkgPath: String, scalaVersion: Stri
 
   @tailrec
   private def acc(ns: String, t: Tree, a: MetaAttr): MetaAttr = {
+    val attr = ns + "." + a.attr
     t match {
       case q"$prev.index"          => acc(ns, prev, a.copy(options = a.options :+ "index"))
       case q"$prev.noHistory"      => acc(ns, prev, a.copy(options = a.options :+ "noHistory"))
@@ -215,105 +226,163 @@ class DataModel2MetaSchema(filePath: String, pkgPath: String, scalaVersion: Stri
           err(s"Invalid alias for attribute $ns.$a: " + other)
       }
 
-      case q"oneString"     => a.copy(card = CardOne, tpe = "String")
-      case q"oneChar"       => a.copy(card = CardOne, tpe = "Char")
-      case q"oneByte"       => a.copy(card = CardOne, tpe = "Byte")
-      case q"oneShort"      => a.copy(card = CardOne, tpe = "Short")
-      case q"oneInt"        => a.copy(card = CardOne, tpe = "Int")
-      case q"oneLong"       => a.copy(card = CardOne, tpe = "Long")
-      case q"oneFloat"      => a.copy(card = CardOne, tpe = "Float")
-      case q"oneDouble"     => a.copy(card = CardOne, tpe = "Double")
-      case q"oneBoolean"    => a.copy(card = CardOne, tpe = "Boolean")
-      case q"oneBigInt"     => a.copy(card = CardOne, tpe = "BigInt")
-      case q"oneBigDecimal" => a.copy(card = CardOne, tpe = "BigDecimal")
-      case q"oneDate"       => a.copy(card = CardOne, tpe = "Date")
-      case q"oneUUID"       => a.copy(card = CardOne, tpe = "UUID")
-      case q"oneURI"        => a.copy(card = CardOne, tpe = "URI")
+      case q"oneString"     => a.copy(card = CardOne, baseTpe = "String")
+      case q"oneChar"       => a.copy(card = CardOne, baseTpe = "Char")
+      case q"oneByte"       => a.copy(card = CardOne, baseTpe = "Byte")
+      case q"oneShort"      => a.copy(card = CardOne, baseTpe = "Short")
+      case q"oneInt"        => a.copy(card = CardOne, baseTpe = "Int")
+      case q"oneLong"       => a.copy(card = CardOne, baseTpe = "Long")
+      case q"oneFloat"      => a.copy(card = CardOne, baseTpe = "Float")
+      case q"oneDouble"     => a.copy(card = CardOne, baseTpe = "Double")
+      case q"oneBoolean"    => a.copy(card = CardOne, baseTpe = "Boolean")
+      case q"oneBigInt"     => a.copy(card = CardOne, baseTpe = "BigInt")
+      case q"oneBigDecimal" => a.copy(card = CardOne, baseTpe = "BigDecimal")
+      case q"oneDate"       => a.copy(card = CardOne, baseTpe = "Date")
+      case q"oneUUID"       => a.copy(card = CardOne, baseTpe = "UUID")
+      case q"oneURI"        => a.copy(card = CardOne, baseTpe = "URI")
 
       case q"one[$refNs]" =>
         addBackRef(ns, refNs.toString)
-        a.copy(card = CardOne, tpe = "Long", refNs = Some(refNs.toString.replace('.', '_')))
+        a.copy(card = CardOne, baseTpe = "Long", refNs = Some(refNs.toString.replace('.', '_')))
 
       case q"many[$refNs]" =>
         addBackRef(ns, refNs.toString)
-        a.copy(card = CardSet, tpe = "Long", refNs = Some(refNs.toString.replace('.', '_')))
+        a.copy(card = CardSet, baseTpe = "Long", refNs = Some(refNs.toString.replace('.', '_')))
 
-      case q"setString"     => a.copy(card = CardSet, tpe = "String")
-      case q"setChar"       => a.copy(card = CardSet, tpe = "Char")
-      case q"setByte"       => a.copy(card = CardSet, tpe = "Byte")
-      case q"setShort"      => a.copy(card = CardSet, tpe = "Short")
-      case q"setInt"        => a.copy(card = CardSet, tpe = "Int")
-      case q"setLong"       => a.copy(card = CardSet, tpe = "Long")
-      case q"setFloat"      => a.copy(card = CardSet, tpe = "Float")
-      case q"setDouble"     => a.copy(card = CardSet, tpe = "Double")
-      case q"setBoolean"    => a.copy(card = CardSet, tpe = "Boolean")
-      case q"setBigInt"     => a.copy(card = CardSet, tpe = "BigInt")
-      case q"setBigDecimal" => a.copy(card = CardSet, tpe = "BigDecimal")
-      case q"setDate"       => a.copy(card = CardSet, tpe = "Date")
-      case q"setUUID"       => a.copy(card = CardSet, tpe = "UUID")
-      case q"setURI"        => a.copy(card = CardSet, tpe = "URI")
+      case q"setString"     => a.copy(card = CardSet, baseTpe = "String")
+      case q"setChar"       => a.copy(card = CardSet, baseTpe = "Char")
+      case q"setByte"       => a.copy(card = CardSet, baseTpe = "Byte")
+      case q"setShort"      => a.copy(card = CardSet, baseTpe = "Short")
+      case q"setInt"        => a.copy(card = CardSet, baseTpe = "Int")
+      case q"setLong"       => a.copy(card = CardSet, baseTpe = "Long")
+      case q"setFloat"      => a.copy(card = CardSet, baseTpe = "Float")
+      case q"setDouble"     => a.copy(card = CardSet, baseTpe = "Double")
+      case q"setBoolean"    => a.copy(card = CardSet, baseTpe = "Boolean")
+      case q"setBigInt"     => a.copy(card = CardSet, baseTpe = "BigInt")
+      case q"setBigDecimal" => a.copy(card = CardSet, baseTpe = "BigDecimal")
+      case q"setDate"       => a.copy(card = CardSet, baseTpe = "Date")
+      case q"setUUID"       => a.copy(card = CardSet, baseTpe = "UUID")
+      case q"setURI"        => a.copy(card = CardSet, baseTpe = "URI")
 
 
       // Validations ................................................
 
       case q"$prev.validate { ..case $cases }" =>
-        val validations = cases.map {
-          case Case(v, Some(test), Lit.String(error))                                               =>
-            (indent(s"$v => $test"), error)
+        oneValidationCall(ns, a)
+        val (valueAttrs, validations) = cases.map {
+          case Case(v, Some(test), Lit.String(error)) =>
+            val valueAttrs = extractValueAttrs(ns, a, q"$test")
+            val validation = (indent(s"$v => $test"), error)
+            (valueAttrs, validation)
+
           case Case(v, Some(test), Term.Select(Lit.String(multilineMsg), Term.Name("stripMargin"))) =>
-            (indent(s"$v => $test"), multilineMsg)
-          case Case(v, None, Lit.String(error))                                                     =>
+            val valueAttrs = extractValueAttrs(ns, a, q"$test")
+            val validation = (indent(s"$v => $test"), multilineMsg)
+            (valueAttrs, validation)
+
+          case Case(v, Some(test), Term.Interpolate(Term.Name("s"), _, _)) =>
+            err(
+              s"String interpolation not allowed for validation error messages of `$attr`. " +
+                s"Please remove the s prefix."
+            )
+
+          case Case(v, None, Lit.String(error)) =>
             err(s"""Please provide if-expression: case $v if <test..> = "$error"""", ns, a.attr)
-          case other                                                                                =>
-            err("Unexpected validation case: " + other, ns, a.attr)
-        }
-        acc(ns, prev, a.copy(validations = a.validations ++ validations))
+
+          case other => err("Unexpected validation case: " + other, ns, a.attr)
+        }.unzip
+
+        val valueAttrs1 = valueAttrs.flatten.distinct.sorted
+        val valueAttrs2 = if (valueAttrs1.isEmpty) Nil else (a.attr +: valueAttrs1).distinct.sorted
+        val reqAttrs1   = a.requiredAttrs ++ valueAttrs2
+        acc(ns, prev, a.copy(requiredAttrs = reqAttrs1, valueAttrs = valueAttrs1, validations = validations))
 
       case q"$prev.validate($test)" =>
-        acc(ns, prev, a.copy(validations = a.validations :+ indent(test.toString()) -> ""))
+        oneValidationCall(ns, a)
+        val valueAttrs1  = extractValueAttrs(ns, a, q"$test")
+        val valueAttrs2  = if (valueAttrs1.isEmpty) Nil else (a.attr +: valueAttrs1).distinct.sorted
+        val reqAttrs1    = a.requiredAttrs ++ valueAttrs2
+        val validations1 = Seq(indent(test.toString()) -> "")
+        acc(ns, prev, a.copy(requiredAttrs = reqAttrs1, valueAttrs = valueAttrs1, validations = validations1))
 
       case q"$prev.validate($test, ${Lit.String(error)})" =>
-        acc(ns, prev, a.copy(validations = a.validations :+ indent(test.toString()) -> error))
+        oneValidationCall(ns, a)
+        val valueAttrs1  = extractValueAttrs(ns, a, q"$test")
+        val valueAttrs2  = if (valueAttrs1.isEmpty) Nil else (a.attr +: valueAttrs1).distinct.sorted
+        val reqAttrs1    = a.requiredAttrs ++ valueAttrs2
+        val validations1 = Seq(indent(test.toString()) -> error)
+        acc(ns, prev, a.copy(requiredAttrs = reqAttrs1, valueAttrs = valueAttrs1, validations = validations1))
 
       case q"$prev.validate($test, ${Term.Select(Lit.String(multilineMsg), Term.Name("stripMargin"))})" =>
-        acc(ns, prev, a.copy(validations = a.validations :+ indent(test.toString()) -> multilineMsg))
+        oneValidationCall(ns, a)
+        val valueAttrs1  = extractValueAttrs(ns, a, q"$test")
+        val valueAttrs2  = if (valueAttrs1.isEmpty) Nil else (a.attr +: valueAttrs1).distinct.sorted
+        val reqAttrs1    = a.requiredAttrs ++ valueAttrs2
+        val validations1 = Seq(indent(test.toString()) -> multilineMsg)
+        acc(ns, prev, a.copy(requiredAttrs = reqAttrs1, valueAttrs = valueAttrs1, validations = validations1))
+
+      case q"$prev.validate($test, ${Term.Interpolate(Term.Name("s"), _, _)})" =>
+        err(
+          s"String interpolation not allowed for validation error messages of `$attr`. " +
+            s"Please remove the s prefix."
+        )
 
       case q"$prev.email" =>
+        oneValidationCall(ns, a)
         val test  = "(s: String) => emailRegex.findFirstMatchIn(s).isDefined"
-        val error = s"""`_value_` is not a valid email"""
-        acc(ns, prev, a.copy(validations = a.validations :+ test -> error))
+        val error = s"""`$$v` is not a valid email"""
+        acc(ns, prev, a.copy(validations = Seq(test -> error)))
 
       case q"$prev.email(${Lit.String(error)})" =>
+        oneValidationCall(ns, a)
         val test = "(s: String) => emailRegex.findFirstMatchIn(s).isDefined"
-        acc(ns, prev, a.copy(validations = a.validations :+ test -> error))
+        acc(ns, prev, a.copy(validations = Seq(test -> error)))
 
       case q"$prev.regex(${Lit.String(regex)})" =>
+        oneValidationCall(ns, a)
         val test  = s"""(s: String) => "$regex".r.findFirstMatchIn(s).isDefined"""
-        val error = s"""\"_value_\" doesn't match regex pattern: ${regex.replace("$", "$$")}"""
-        acc(ns, prev, a.copy(validations = a.validations :+ test -> error))
+        val error = s"""\"$$v\" doesn't match regex pattern: ${regex.replace("$", "$$")}"""
+        acc(ns, prev, a.copy(validations = Seq(test -> error)))
 
       case q"$prev.regex(${Lit.String(regex)}, ${Lit.String(error)})" =>
+        oneValidationCall(ns, a)
         val test = s"""(s: String) => "$regex".r.findFirstMatchIn(s).isDefined"""
-        acc(ns, prev, a.copy(validations = a.validations :+ test -> error))
+        acc(ns, prev, a.copy(validations = Seq(test -> error)))
 
       case q"$prev.enums(Seq(..$vs), ${Lit.String(error)})" =>
+        oneValidationCall(ns, a)
         val test = s"""v => Seq$vs.contains(v)"""
-        acc(ns, prev, a.copy(validations = a.validations :+ test -> error))
+        acc(ns, prev, a.copy(validations = Seq(test -> error)))
 
       case q"$prev.enums(..$vs)" =>
+        oneValidationCall(ns, a)
         val test  = s"""v => Seq$vs.contains(v)"""
-        val error = s"""Value `_value_` is not one of the allowed values in Seq$vs"""
-        acc(ns, prev, a.copy(validations = a.validations :+ test -> error))
+        val error = s"""Value `$$v` is not one of the allowed values in Seq$vs"""
+        acc(ns, prev, a.copy(validations = Seq(test -> error)))
 
       case q"$prev.require(..$otherAttrs)" =>
-        acc(ns, prev, a.copy(requiredAttrs = otherAttrs.map(ns + "." + _)))
+//        val reqAttrs1 = attr +: otherAttrs.map(ns + "." + _)
+        val reqAttrs1 = a.attr +: otherAttrs.map(_.toString)
+        acc(ns, prev, a.copy(requiredAttrs = reqAttrs1))
 
-      case q"$prev.value" => acc(ns, prev, a)
-      case other          => unexpected(other)
+      case q"$prev.value" => err(
+        s"Calling `value` on attribute `$attr` is only allowed in validations code of other attributes."
+      )
+
+      case other =>
+        println(other.structure)
+        unexpected(other)
     }
   }
 
-  def indent(code: String): String = {
+  private def oneValidationCall(ns: String, a: MetaAttr) = if (a.validations.nonEmpty) {
+    throw ModelError(
+      s"Please use `validate { ..<pattern matches> }` for multiple validations of attribute `$ns.${a.attr}`"
+    )
+  }
+
+  private def indent(code0: String): String = {
+    val code = code0.replaceAll("\\.value", "")
     if (code.contains('\n')) {
       val testIndented = {
         val lines  = code.split('\n').toList
@@ -325,6 +394,25 @@ class DataModel2MetaSchema(filePath: String, pkgPath: String, scalaVersion: Stri
       code
     }
   }
+
+  // Recursively traverse test code trees to extract attribute names
+  private lazy val traverser = (ns: String) => new Traverser {
+    override def apply(tree: Tree): Unit = tree match {
+      case Term.Select(Term.Name(attr), Term.Name("value")) =>
+        //        println(s"--- $ns.$attr")
+//        valueAttrs += s"$ns.$attr"
+        valueAttrs += attr
+
+      case node => super.apply(node)
+    }
+  }
+
+  private def extractValueAttrs(ns: String, a: MetaAttr, test: Stat): List[String] = {
+    valueAttrs.clear()
+    traverser(ns)(test)
+    valueAttrs.result().distinct.sorted
+  }
+
 
   private def addBackRef(ns: String, backRefNs: String): Unit = {
     val cur = backRefs.getOrElse(backRefNs, Nil)

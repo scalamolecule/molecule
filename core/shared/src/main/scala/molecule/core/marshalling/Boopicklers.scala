@@ -33,6 +33,7 @@ object Boopicklers extends MoleculeLogging {
   pickleOp.addConcreteType[Remove.type]
 
   implicit val pickleElement: CompositePickler[Element] = compositePickler[Element]
+  pickleElement.addConcreteType[Attr]
   pickleElement.addConcreteType[Ref]
   pickleElement.addConcreteType[BackRef]
   pickleElement.addConcreteType[Composite]

@@ -33,7 +33,7 @@ case class Dsl_Arities(schema: MetaSchema, partPrefix: String, namespace: MetaNs
   val pMap = " " * (maxCardPad - 13)
 
   attrsAll.foreach {
-    case MetaAttr(attr, card, tpe0, _, _, _, _, _, _) =>
+    case MetaAttr(attr, card, tpe0, _, _, _, _, _, _, _) =>
       val c   = card.marker
       val tpe = getTpe(tpe0)
 
@@ -126,7 +126,7 @@ case class Dsl_Arities(schema: MetaSchema, partPrefix: String, namespace: MetaNs
   }
 
   refs.foreach {
-    case MetaAttr(attr, card, _, refNsOpt, _, _, _, _, _) =>
+    case MetaAttr(attr, card, _, refNsOpt, _, _, _, _, _, _) =>
       val refCls   = partPrefix + camel(attr)
       val refNs    = partPrefix + refNsOpt.get
       val refObj   = s"""Model.Ref("$ns", "$attr", "$refNs", $card)"""

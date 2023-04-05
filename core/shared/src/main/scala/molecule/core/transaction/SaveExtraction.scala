@@ -33,6 +33,7 @@ class SaveExtraction(isTxMetaData: Boolean = false)
                 case a: AttrSetOpt => resolveAttrSetOpt(a); resolve(tail)
                 case a: AttrSetTac => resolveAttrSetTac(a); resolve(tail)
               }
+            case a           => throw new Exception("Attribute family not implemented for " + a)
           }
 
         case Ref(ns, refAttr, _, _)       => ref(ns, refAttr); resolve(tail)

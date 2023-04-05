@@ -2,7 +2,7 @@ package codegen.core.transaction
 
 import codegen.CoreGenBase
 
-object _InsertExtractions extends CoreGenBase("InsertExtraction", "/transaction") {
+object _InsertExtraction extends CoreGenBase("InsertExtraction", "/transaction") {
 
   override val content = {
     s"""// GENERATED CODE ********************************
@@ -16,7 +16,7 @@ object _InsertExtractions extends CoreGenBase("InsertExtraction", "/transaction"
        |import scala.annotation.tailrec
        |
        |
-       |class InsertExtraction_ extends InsertResolvers_ { self: InsertOps =>
+       |class $fileName_ extends InsertResolvers_ { self: InsertOps =>
        |
        |  @tailrec
        |  final override def resolve(
@@ -51,6 +51,7 @@ object _InsertExtractions extends CoreGenBase("InsertExtraction", "/transaction"
        |                case a: AttrSetOpt => resolve(nsMap, tail, resolvers :+
        |                  resolveAttrSetOpt(a, outerTpl, tplIndex), outerTpl, tplIndex + 1)
        |              }
+       |            case a          => throw new Exception("Attribute family not implemented for " + a)
        |          }
        |
        |        case Ref(ns, refAttr, _, _) =>
@@ -135,8 +136,8 @@ object _InsertExtractions extends CoreGenBase("InsertExtraction", "/transaction"
         s"ns, attr, outerTpl, tplIndex, value$baseType, validate"
 
       s"""case at: Attr$card$mode$baseType =>
-         |        val validate = at.validation.fold((_: $baseType) => Seq.empty[String])(validation =>
-         |          (v: $baseType) => validation.validate(v)
+         |        val validate = at.validator.fold((_: $baseType) => Seq.empty[String])(validator =>
+         |          (v: $baseType) => validator.validate(v)
          |        )
          |        $op($params)""".stripMargin
     }.mkString("\n\n      ")

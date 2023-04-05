@@ -6,7 +6,7 @@ import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.{InsertExtraction_, InsertOps, InsertResolvers_, SaveExtraction}
 import molecule.core.util.ModelUtils
-import molecule.core.validation.PreValidation
+import molecule.core.validation.Validation
 import scala.collection.mutable.ListBuffer
 
 trait Insert_stmts
@@ -27,7 +27,7 @@ trait Insert_stmts
     initTxBase(elements)
     val (mainElements, txMetaElements) = splitElements(elements)
 
-    val validationErrors = PreValidation(nsMap, attrMap).check(mainElements)
+    val validationErrors = Validation(nsMap, attrMap).check(mainElements)
     if (validationErrors.nonEmpty) {
       throw ValidationErrors(validationErrors)
     }
@@ -44,7 +44,7 @@ trait Insert_stmts
 
     val allValidationErrors = insertErrors ++ {
       // Convert tx meta data save errors to a single insert error
-      val txMetaDataErrors = PreValidation(nsMap, attrMap).check(txMetaElements).toSeq.zipWithIndex.map {
+      val txMetaDataErrors = Validation(nsMap, attrMap).check(txMetaElements).toSeq.zipWithIndex.map {
         case ((fullAttr, errors), i) => InsertError(0, i, fullAttr, errors, Nil)
       }
       if (txMetaDataErrors.isEmpty) Nil else

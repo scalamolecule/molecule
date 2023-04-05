@@ -7,7 +7,7 @@ import molecule.base.error.ValidationErrors
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.{SaveExtraction, SaveOps}
-import molecule.core.validation.PreValidation
+import molecule.core.validation.Validation
 
 trait Save_stmts extends DatomicTxBase_JVM with SaveOps with MoleculeLogging { self: SaveExtraction =>
 
@@ -22,7 +22,7 @@ trait Save_stmts extends DatomicTxBase_JVM with SaveOps with MoleculeLogging { s
     if (init) {
       initTxBase(elements)
     }
-    val validationErrors = PreValidation(nsMap, attrMap).check(elements)
+    val validationErrors = Validation(nsMap, attrMap).check(elements)
     if (validationErrors.nonEmpty) {
       throw ValidationErrors(validationErrors)
     }

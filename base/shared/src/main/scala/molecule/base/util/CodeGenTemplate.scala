@@ -4,7 +4,7 @@ import java.io.{BufferedWriter, File, FileWriter}
 
 abstract class CodeGenTemplate(val fileName: String, dir: String, basePath: String) extends CodeGenBase {
   val path: String = basePath + dir
-  val fileName2    = if (fileName == "package") "package" else fileName + "_"
+  val fileName_    = if (fileName == "package") "package" else fileName + "_"
 
   class TemplateVals(arity: Int) {
     lazy val V          = ('A' + arity - 1).toChar
@@ -59,8 +59,8 @@ abstract class CodeGenTemplate(val fileName: String, dir: String, basePath: Stri
   def content: String
 
   def generate(): Unit = {
-    mkFile(fileName2, content)
-    println(s"Generated $path/$fileName2.scala")
+    mkFile(fileName_, content)
+    println(s"Generated $path/$fileName_.scala")
   }
 
   protected def mkFile(fileName: String, body: String): Unit = {

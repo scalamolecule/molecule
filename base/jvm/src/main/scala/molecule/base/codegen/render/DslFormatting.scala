@@ -32,8 +32,8 @@ class DslFormatting(schema: MetaSchema, namespace: MetaNs, arity: Int = 0) exten
 
   lazy val maxAttrCustom = attrsCustom.map(_.attr.length).max
   lazy val maxAttrAll    = attrsAll.map(_.attr.length).max
-  lazy val maxTpeCustom  = attrsCustom.map(a => getTpe(a.tpe).length).max
-  lazy val maxTpeAll     = attrsAll.map(a => getTpe(a.tpe).length).max
+  lazy val maxTpeCustom  = attrsCustom.map(a => getTpe(a.baseTpe).length).max
+  lazy val maxTpeAll     = attrsAll.map(a => getTpe(a.baseTpe).length).max
   lazy val maxRefAttr    = attrsAll.filter(_.refNs.isDefined).map(_.attr.length).max
   lazy val maxRefNs      = attrsAll.flatMap(_.refNs.map(_.length)).max
 

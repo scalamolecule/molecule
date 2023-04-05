@@ -20,7 +20,9 @@ object RequiredAttrs extends DatomicTestSuite {
           case ModelError(error) =>
             error ==>
               """Missing/empty required attributes:
-                |  Require.password
+                |  Required: password
+                |  Present : username
+                |  Missing : password
                 |""".stripMargin
         }
 
@@ -30,7 +32,9 @@ object RequiredAttrs extends DatomicTestSuite {
           case ModelError(error) =>
             error ==>
               """Missing/empty required attributes:
-                |  Require.username
+                |  Required: username
+                |  Present : password
+                |  Missing : username
                 |""".stripMargin
         }
 
@@ -47,8 +51,9 @@ object RequiredAttrs extends DatomicTestSuite {
           case ModelError(error) =>
             error ==>
               """Missing/empty required attributes:
-                |  Require.y
-                |  Require.z
+                |  Required: y, z
+                |  Present : i, x
+                |  Missing : y, z
                 |""".stripMargin
         }
         _ <- Require.i(0).x(1).y(2).save.transact
@@ -56,7 +61,9 @@ object RequiredAttrs extends DatomicTestSuite {
           case ModelError(error) =>
             error ==>
               """Missing/empty required attributes:
-                |  Require.z
+                |  Required: y, z, x
+                |  Present : i, x, y
+                |  Missing : z
                 |""".stripMargin
         }
 
@@ -73,7 +80,9 @@ object RequiredAttrs extends DatomicTestSuite {
           case ModelError(error) =>
             error ==>
               """Missing/empty required attributes:
-                |  Require.refB
+                |  Required: refB
+                |  Present : int
+                |  Missing : refB
                 |""".stripMargin
         }
 
@@ -93,7 +102,9 @@ object RequiredAttrs extends DatomicTestSuite {
           case ModelError(error) =>
             error ==>
               """Missing/empty required attributes:
-                |  Require.ref2
+                |  Required: ref2
+                |  Present : ref1
+                |  Missing : ref2
                 |""".stripMargin
         }
 

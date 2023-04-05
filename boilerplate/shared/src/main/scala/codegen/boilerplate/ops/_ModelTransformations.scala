@@ -9,13 +9,13 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |
        |import java.net.URI
        |import java.util.{Date, UUID}
-       |import molecule.base.util.exceptions.ExecutionError
+       |import molecule.base.error.ModelError
        |import molecule.boilerplate.api.Keywords.Kw
        |import molecule.boilerplate.ast.Model._
        |
        |trait ModelTransformations_ {
        |
-       |  def unexpected(element: Element) = throw ExecutionError("Unexpected element: " + element)
+       |  def unexpected(element: Element) = throw ModelError("Unexpected element: " + element)
        |
        |  protected def toInt(es: List[Element], kw: Kw): List[Element] = {
        |    val last = es.last match {
@@ -112,11 +112,11 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |    es.map {
        |      case attr: AttrOneMan => attr match {
        |        ${reverseTopLevelSorting("Man")}
-       |        case a                                                       => a
+       |        case a                                                          => a
        |      }
        |      case attr: AttrOneOpt => attr match {
        |        ${reverseTopLevelSorting("Opt")}
-       |        case a                                                       => a
+       |        case a                                                          => a
        |      }
        |      case other         => other
        |    }
@@ -139,7 +139,8 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
     baseTypes.map(baseType =>
       s"""case a: AttrOne$mode$baseType =>
          |          val vs1     = vs.asInstanceOf[Seq[$baseType]]
-         |          val errors1 = a.validation.fold(Seq.empty[String]) { validator =>
+         |          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+         |            val validator = a.validator.get
          |            vs1.flatMap(v => validator.validate(v))
          |          }
          |          a.copy(op = op, vs = vs1, errors = errors1)""".stripMargin
@@ -150,10 +151,9 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
     baseTypes.map(baseType =>
       s"""case a: AttrOneOpt$baseType =>
          |          val vs1     = vs.asInstanceOf[Option[Seq[$baseType]]]
-         |          val errors1 = vs1.fold(Seq.empty[String]) { vs =>
-         |            a.validation.fold(Seq.empty[String]) { validator =>
-         |              vs.flatMap(v => validator.validate(v))
-         |            }
+         |          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+         |            val validator = a.validator.get
+         |            vs1.get.flatMap(v => validator.validate(v))
          |          }
          |          a.copy(op = op, vs = vs1, errors = errors1)""".stripMargin
     ).mkString("\n\n        ")
@@ -163,7 +163,8 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
     baseTypes.map(baseType =>
       s"""case a: AttrSet$mode$baseType =>
          |          val sets    = vs.asInstanceOf[Seq[Set[$baseType]]]
-         |          val errors1 = a.validation.fold(Seq.empty[String]) { validator =>
+         |          val errors1 = if (sets.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+         |            val validator = a.validator.get
          |            sets.flatMap(set => set.flatMap(v => validator.validate(v)))
          |          }
          |          a.copy(op = op, vs = sets, errors = errors1)""".stripMargin
@@ -174,10 +175,9 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
     baseTypes.map(baseType =>
       s"""case a: AttrSetOpt$baseType =>
          |          val sets    = vs.asInstanceOf[Option[Seq[Set[$baseType]]]]
-         |          val errors1 = sets.fold(Seq.empty[String]) { vs =>
-         |            a.validation.fold(Seq.empty[String]) { validator =>
-         |              vs.flatMap(set => set.flatMap(v => validator.validate(v)))
-         |            }
+         |          val errors1 = if (sets.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+         |            val validator = a.validator.get
+         |            sets.get.flatMap(set => set.flatMap(v => validator.validate(v)))
          |          }
          |          a.copy(op = op, vs = sets, errors = errors1)""".stripMargin
     ).mkString("\n\n        ")
@@ -191,7 +191,7 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
 
   private def reverseTopLevelSorting(mode: String): String = {
     baseTypesWithSpaces.map { case (baseType, space) =>
-      s"case a@AttrOne$mode$baseType(_, _, _, _, _, _, _, Some(sort)) $space=> a.copy(sort = Some(reverseSort(sort)))"
+      s"case a@AttrOne$mode$baseType(_, _, _, _, _, _, _, _, Some(sort)) $space=> a.copy(sort = Some(reverseSort(sort)))"
     }.mkString("\n        ")
   }
 }

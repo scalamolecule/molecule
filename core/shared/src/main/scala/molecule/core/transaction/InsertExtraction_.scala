@@ -44,6 +44,7 @@ class InsertExtraction_ extends InsertResolvers_ { self: InsertOps =>
                 case a: AttrSetOpt => resolve(nsMap, tail, resolvers :+
                   resolveAttrSetOpt(a, outerTpl, tplIndex), outerTpl, tplIndex + 1)
               }
+            case a          => throw new Exception("Attribute family not implemented for " + a)
           }
 
         case Ref(ns, refAttr, _, _) =>
@@ -86,86 +87,86 @@ class InsertExtraction_ extends InsertResolvers_ { self: InsertOps =>
     val (ns, attr) = (a.ns, a.attr)
     a match {
       case at: AttrOneManString =>
-        val validate = at.validation.fold((_: String) => Seq.empty[String])(validation =>
-          (v: String) => validation.validate(v)
+        val validate = at.validator.fold((_: String) => Seq.empty[String])(validator =>
+          (v: String) => validator.validate(v)
         )
         addV(ns, attr, outerTpl, tplIndex, valueString, validate)
 
       case at: AttrOneManInt =>
-        val validate = at.validation.fold((_: Int) => Seq.empty[String])(validation =>
-          (v: Int) => validation.validate(v)
+        val validate = at.validator.fold((_: Int) => Seq.empty[String])(validator =>
+          (v: Int) => validator.validate(v)
         )
         addV(ns, attr, outerTpl, tplIndex, valueInt, validate)
 
       case at: AttrOneManLong =>
-        val validate = at.validation.fold((_: Long) => Seq.empty[String])(validation =>
-          (v: Long) => validation.validate(v)
+        val validate = at.validator.fold((_: Long) => Seq.empty[String])(validator =>
+          (v: Long) => validator.validate(v)
         )
         addV(ns, attr, outerTpl, tplIndex, valueLong, validate)
 
       case at: AttrOneManFloat =>
-        val validate = at.validation.fold((_: Float) => Seq.empty[String])(validation =>
-          (v: Float) => validation.validate(v)
+        val validate = at.validator.fold((_: Float) => Seq.empty[String])(validator =>
+          (v: Float) => validator.validate(v)
         )
         addV(ns, attr, outerTpl, tplIndex, valueFloat, validate)
 
       case at: AttrOneManDouble =>
-        val validate = at.validation.fold((_: Double) => Seq.empty[String])(validation =>
-          (v: Double) => validation.validate(v)
+        val validate = at.validator.fold((_: Double) => Seq.empty[String])(validator =>
+          (v: Double) => validator.validate(v)
         )
         addV(ns, attr, outerTpl, tplIndex, valueDouble, validate)
 
       case at: AttrOneManBoolean =>
-        val validate = at.validation.fold((_: Boolean) => Seq.empty[String])(validation =>
-          (v: Boolean) => validation.validate(v)
+        val validate = at.validator.fold((_: Boolean) => Seq.empty[String])(validator =>
+          (v: Boolean) => validator.validate(v)
         )
         addV(ns, attr, outerTpl, tplIndex, valueBoolean, validate)
 
       case at: AttrOneManBigInt =>
-        val validate = at.validation.fold((_: BigInt) => Seq.empty[String])(validation =>
-          (v: BigInt) => validation.validate(v)
+        val validate = at.validator.fold((_: BigInt) => Seq.empty[String])(validator =>
+          (v: BigInt) => validator.validate(v)
         )
         addV(ns, attr, outerTpl, tplIndex, valueBigInt, validate)
 
       case at: AttrOneManBigDecimal =>
-        val validate = at.validation.fold((_: BigDecimal) => Seq.empty[String])(validation =>
-          (v: BigDecimal) => validation.validate(v)
+        val validate = at.validator.fold((_: BigDecimal) => Seq.empty[String])(validator =>
+          (v: BigDecimal) => validator.validate(v)
         )
         addV(ns, attr, outerTpl, tplIndex, valueBigDecimal, validate)
 
       case at: AttrOneManDate =>
-        val validate = at.validation.fold((_: Date) => Seq.empty[String])(validation =>
-          (v: Date) => validation.validate(v)
+        val validate = at.validator.fold((_: Date) => Seq.empty[String])(validator =>
+          (v: Date) => validator.validate(v)
         )
         addV(ns, attr, outerTpl, tplIndex, valueDate, validate)
 
       case at: AttrOneManUUID =>
-        val validate = at.validation.fold((_: UUID) => Seq.empty[String])(validation =>
-          (v: UUID) => validation.validate(v)
+        val validate = at.validator.fold((_: UUID) => Seq.empty[String])(validator =>
+          (v: UUID) => validator.validate(v)
         )
         addV(ns, attr, outerTpl, tplIndex, valueUUID, validate)
 
       case at: AttrOneManURI =>
-        val validate = at.validation.fold((_: URI) => Seq.empty[String])(validation =>
-          (v: URI) => validation.validate(v)
+        val validate = at.validator.fold((_: URI) => Seq.empty[String])(validator =>
+          (v: URI) => validator.validate(v)
         )
         addV(ns, attr, outerTpl, tplIndex, valueURI, validate)
 
       case at: AttrOneManByte =>
-        val validate = at.validation.fold((_: Byte) => Seq.empty[String])(validation =>
-          (v: Byte) => validation.validate(v)
+        val validate = at.validator.fold((_: Byte) => Seq.empty[String])(validator =>
+          (v: Byte) => validator.validate(v)
         )
         addV(ns, attr, outerTpl, tplIndex, valueByte, validate)
 
       case at: AttrOneManShort =>
-        val validate = at.validation.fold((_: Short) => Seq.empty[String])(validation =>
-          (v: Short) => validation.validate(v)
+        val validate = at.validator.fold((_: Short) => Seq.empty[String])(validator =>
+          (v: Short) => validator.validate(v)
         )
         addV(ns, attr, outerTpl, tplIndex, valueShort, validate)
 
       case at: AttrOneManChar =>
-        val validate = at.validation.fold((_: Char) => Seq.empty[String])(validation =>
-          (v: Char) => validation.validate(v)
+        val validate = at.validator.fold((_: Char) => Seq.empty[String])(validator =>
+          (v: Char) => validator.validate(v)
         )
         addV(ns, attr, outerTpl, tplIndex, valueChar, validate)
     }
@@ -176,86 +177,86 @@ class InsertExtraction_ extends InsertResolvers_ { self: InsertOps =>
     val (ns, attr) = (a.ns, a.attr)
     a match {
       case at: AttrOneOptString =>
-        val validate = at.validation.fold((_: String) => Seq.empty[String])(validation =>
-          (v: String) => validation.validate(v)
+        val validate = at.validator.fold((_: String) => Seq.empty[String])(validator =>
+          (v: String) => validator.validate(v)
         )
         addOptV(ns, attr, outerTpl, tplIndex, valueString, validate)
 
       case at: AttrOneOptInt =>
-        val validate = at.validation.fold((_: Int) => Seq.empty[String])(validation =>
-          (v: Int) => validation.validate(v)
+        val validate = at.validator.fold((_: Int) => Seq.empty[String])(validator =>
+          (v: Int) => validator.validate(v)
         )
         addOptV(ns, attr, outerTpl, tplIndex, valueInt, validate)
 
       case at: AttrOneOptLong =>
-        val validate = at.validation.fold((_: Long) => Seq.empty[String])(validation =>
-          (v: Long) => validation.validate(v)
+        val validate = at.validator.fold((_: Long) => Seq.empty[String])(validator =>
+          (v: Long) => validator.validate(v)
         )
         addOptV(ns, attr, outerTpl, tplIndex, valueLong, validate)
 
       case at: AttrOneOptFloat =>
-        val validate = at.validation.fold((_: Float) => Seq.empty[String])(validation =>
-          (v: Float) => validation.validate(v)
+        val validate = at.validator.fold((_: Float) => Seq.empty[String])(validator =>
+          (v: Float) => validator.validate(v)
         )
         addOptV(ns, attr, outerTpl, tplIndex, valueFloat, validate)
 
       case at: AttrOneOptDouble =>
-        val validate = at.validation.fold((_: Double) => Seq.empty[String])(validation =>
-          (v: Double) => validation.validate(v)
+        val validate = at.validator.fold((_: Double) => Seq.empty[String])(validator =>
+          (v: Double) => validator.validate(v)
         )
         addOptV(ns, attr, outerTpl, tplIndex, valueDouble, validate)
 
       case at: AttrOneOptBoolean =>
-        val validate = at.validation.fold((_: Boolean) => Seq.empty[String])(validation =>
-          (v: Boolean) => validation.validate(v)
+        val validate = at.validator.fold((_: Boolean) => Seq.empty[String])(validator =>
+          (v: Boolean) => validator.validate(v)
         )
         addOptV(ns, attr, outerTpl, tplIndex, valueBoolean, validate)
 
       case at: AttrOneOptBigInt =>
-        val validate = at.validation.fold((_: BigInt) => Seq.empty[String])(validation =>
-          (v: BigInt) => validation.validate(v)
+        val validate = at.validator.fold((_: BigInt) => Seq.empty[String])(validator =>
+          (v: BigInt) => validator.validate(v)
         )
         addOptV(ns, attr, outerTpl, tplIndex, valueBigInt, validate)
 
       case at: AttrOneOptBigDecimal =>
-        val validate = at.validation.fold((_: BigDecimal) => Seq.empty[String])(validation =>
-          (v: BigDecimal) => validation.validate(v)
+        val validate = at.validator.fold((_: BigDecimal) => Seq.empty[String])(validator =>
+          (v: BigDecimal) => validator.validate(v)
         )
         addOptV(ns, attr, outerTpl, tplIndex, valueBigDecimal, validate)
 
       case at: AttrOneOptDate =>
-        val validate = at.validation.fold((_: Date) => Seq.empty[String])(validation =>
-          (v: Date) => validation.validate(v)
+        val validate = at.validator.fold((_: Date) => Seq.empty[String])(validator =>
+          (v: Date) => validator.validate(v)
         )
         addOptV(ns, attr, outerTpl, tplIndex, valueDate, validate)
 
       case at: AttrOneOptUUID =>
-        val validate = at.validation.fold((_: UUID) => Seq.empty[String])(validation =>
-          (v: UUID) => validation.validate(v)
+        val validate = at.validator.fold((_: UUID) => Seq.empty[String])(validator =>
+          (v: UUID) => validator.validate(v)
         )
         addOptV(ns, attr, outerTpl, tplIndex, valueUUID, validate)
 
       case at: AttrOneOptURI =>
-        val validate = at.validation.fold((_: URI) => Seq.empty[String])(validation =>
-          (v: URI) => validation.validate(v)
+        val validate = at.validator.fold((_: URI) => Seq.empty[String])(validator =>
+          (v: URI) => validator.validate(v)
         )
         addOptV(ns, attr, outerTpl, tplIndex, valueURI, validate)
 
       case at: AttrOneOptByte =>
-        val validate = at.validation.fold((_: Byte) => Seq.empty[String])(validation =>
-          (v: Byte) => validation.validate(v)
+        val validate = at.validator.fold((_: Byte) => Seq.empty[String])(validator =>
+          (v: Byte) => validator.validate(v)
         )
         addOptV(ns, attr, outerTpl, tplIndex, valueByte, validate)
 
       case at: AttrOneOptShort =>
-        val validate = at.validation.fold((_: Short) => Seq.empty[String])(validation =>
-          (v: Short) => validation.validate(v)
+        val validate = at.validator.fold((_: Short) => Seq.empty[String])(validator =>
+          (v: Short) => validator.validate(v)
         )
         addOptV(ns, attr, outerTpl, tplIndex, valueShort, validate)
 
       case at: AttrOneOptChar =>
-        val validate = at.validation.fold((_: Char) => Seq.empty[String])(validation =>
-          (v: Char) => validation.validate(v)
+        val validate = at.validator.fold((_: Char) => Seq.empty[String])(validator =>
+          (v: Char) => validator.validate(v)
         )
         addOptV(ns, attr, outerTpl, tplIndex, valueChar, validate)
     }
@@ -271,86 +272,86 @@ class InsertExtraction_ extends InsertResolvers_ { self: InsertOps =>
     val (ns, attr) = (a.ns, a.attr)
     a match {
       case at: AttrSetManString =>
-        val validate = at.validation.fold((_: String) => Seq.empty[String])(validation =>
-          (v: String) => validation.validate(v)
+        val validate = at.validator.fold((_: String) => Seq.empty[String])(validator =>
+          (v: String) => validator.validate(v)
         )
         addSet(ns, attr, outerTpl, tplIndex, mandatory, valueString, validate)
 
       case at: AttrSetManInt =>
-        val validate = at.validation.fold((_: Int) => Seq.empty[String])(validation =>
-          (v: Int) => validation.validate(v)
+        val validate = at.validator.fold((_: Int) => Seq.empty[String])(validator =>
+          (v: Int) => validator.validate(v)
         )
         addSet(ns, attr, outerTpl, tplIndex, mandatory, valueInt, validate)
 
       case at: AttrSetManLong =>
-        val validate = at.validation.fold((_: Long) => Seq.empty[String])(validation =>
-          (v: Long) => validation.validate(v)
+        val validate = at.validator.fold((_: Long) => Seq.empty[String])(validator =>
+          (v: Long) => validator.validate(v)
         )
         addSet(ns, attr, outerTpl, tplIndex, mandatory, valueLong, validate)
 
       case at: AttrSetManFloat =>
-        val validate = at.validation.fold((_: Float) => Seq.empty[String])(validation =>
-          (v: Float) => validation.validate(v)
+        val validate = at.validator.fold((_: Float) => Seq.empty[String])(validator =>
+          (v: Float) => validator.validate(v)
         )
         addSet(ns, attr, outerTpl, tplIndex, mandatory, valueFloat, validate)
 
       case at: AttrSetManDouble =>
-        val validate = at.validation.fold((_: Double) => Seq.empty[String])(validation =>
-          (v: Double) => validation.validate(v)
+        val validate = at.validator.fold((_: Double) => Seq.empty[String])(validator =>
+          (v: Double) => validator.validate(v)
         )
         addSet(ns, attr, outerTpl, tplIndex, mandatory, valueDouble, validate)
 
       case at: AttrSetManBoolean =>
-        val validate = at.validation.fold((_: Boolean) => Seq.empty[String])(validation =>
-          (v: Boolean) => validation.validate(v)
+        val validate = at.validator.fold((_: Boolean) => Seq.empty[String])(validator =>
+          (v: Boolean) => validator.validate(v)
         )
         addSet(ns, attr, outerTpl, tplIndex, mandatory, valueBoolean, validate)
 
       case at: AttrSetManBigInt =>
-        val validate = at.validation.fold((_: BigInt) => Seq.empty[String])(validation =>
-          (v: BigInt) => validation.validate(v)
+        val validate = at.validator.fold((_: BigInt) => Seq.empty[String])(validator =>
+          (v: BigInt) => validator.validate(v)
         )
         addSet(ns, attr, outerTpl, tplIndex, mandatory, valueBigInt, validate)
 
       case at: AttrSetManBigDecimal =>
-        val validate = at.validation.fold((_: BigDecimal) => Seq.empty[String])(validation =>
-          (v: BigDecimal) => validation.validate(v)
+        val validate = at.validator.fold((_: BigDecimal) => Seq.empty[String])(validator =>
+          (v: BigDecimal) => validator.validate(v)
         )
         addSet(ns, attr, outerTpl, tplIndex, mandatory, valueBigDecimal, validate)
 
       case at: AttrSetManDate =>
-        val validate = at.validation.fold((_: Date) => Seq.empty[String])(validation =>
-          (v: Date) => validation.validate(v)
+        val validate = at.validator.fold((_: Date) => Seq.empty[String])(validator =>
+          (v: Date) => validator.validate(v)
         )
         addSet(ns, attr, outerTpl, tplIndex, mandatory, valueDate, validate)
 
       case at: AttrSetManUUID =>
-        val validate = at.validation.fold((_: UUID) => Seq.empty[String])(validation =>
-          (v: UUID) => validation.validate(v)
+        val validate = at.validator.fold((_: UUID) => Seq.empty[String])(validator =>
+          (v: UUID) => validator.validate(v)
         )
         addSet(ns, attr, outerTpl, tplIndex, mandatory, valueUUID, validate)
 
       case at: AttrSetManURI =>
-        val validate = at.validation.fold((_: URI) => Seq.empty[String])(validation =>
-          (v: URI) => validation.validate(v)
+        val validate = at.validator.fold((_: URI) => Seq.empty[String])(validator =>
+          (v: URI) => validator.validate(v)
         )
         addSet(ns, attr, outerTpl, tplIndex, mandatory, valueURI, validate)
 
       case at: AttrSetManByte =>
-        val validate = at.validation.fold((_: Byte) => Seq.empty[String])(validation =>
-          (v: Byte) => validation.validate(v)
+        val validate = at.validator.fold((_: Byte) => Seq.empty[String])(validator =>
+          (v: Byte) => validator.validate(v)
         )
         addSet(ns, attr, outerTpl, tplIndex, mandatory, valueByte, validate)
 
       case at: AttrSetManShort =>
-        val validate = at.validation.fold((_: Short) => Seq.empty[String])(validation =>
-          (v: Short) => validation.validate(v)
+        val validate = at.validator.fold((_: Short) => Seq.empty[String])(validator =>
+          (v: Short) => validator.validate(v)
         )
         addSet(ns, attr, outerTpl, tplIndex, mandatory, valueShort, validate)
 
       case at: AttrSetManChar =>
-        val validate = at.validation.fold((_: Char) => Seq.empty[String])(validation =>
-          (v: Char) => validation.validate(v)
+        val validate = at.validator.fold((_: Char) => Seq.empty[String])(validator =>
+          (v: Char) => validator.validate(v)
         )
         addSet(ns, attr, outerTpl, tplIndex, mandatory, valueChar, validate)
     }
@@ -361,86 +362,86 @@ class InsertExtraction_ extends InsertResolvers_ { self: InsertOps =>
     val (ns, attr) = (a.ns, a.attr)
     a match {
       case at: AttrSetOptString =>
-        val validate = at.validation.fold((_: String) => Seq.empty[String])(validation =>
-          (v: String) => validation.validate(v)
+        val validate = at.validator.fold((_: String) => Seq.empty[String])(validator =>
+          (v: String) => validator.validate(v)
         )
         addOptSet(ns, attr, outerTpl, tplIndex, valueString, validate)
 
       case at: AttrSetOptInt =>
-        val validate = at.validation.fold((_: Int) => Seq.empty[String])(validation =>
-          (v: Int) => validation.validate(v)
+        val validate = at.validator.fold((_: Int) => Seq.empty[String])(validator =>
+          (v: Int) => validator.validate(v)
         )
         addOptSet(ns, attr, outerTpl, tplIndex, valueInt, validate)
 
       case at: AttrSetOptLong =>
-        val validate = at.validation.fold((_: Long) => Seq.empty[String])(validation =>
-          (v: Long) => validation.validate(v)
+        val validate = at.validator.fold((_: Long) => Seq.empty[String])(validator =>
+          (v: Long) => validator.validate(v)
         )
         addOptSet(ns, attr, outerTpl, tplIndex, valueLong, validate)
 
       case at: AttrSetOptFloat =>
-        val validate = at.validation.fold((_: Float) => Seq.empty[String])(validation =>
-          (v: Float) => validation.validate(v)
+        val validate = at.validator.fold((_: Float) => Seq.empty[String])(validator =>
+          (v: Float) => validator.validate(v)
         )
         addOptSet(ns, attr, outerTpl, tplIndex, valueFloat, validate)
 
       case at: AttrSetOptDouble =>
-        val validate = at.validation.fold((_: Double) => Seq.empty[String])(validation =>
-          (v: Double) => validation.validate(v)
+        val validate = at.validator.fold((_: Double) => Seq.empty[String])(validator =>
+          (v: Double) => validator.validate(v)
         )
         addOptSet(ns, attr, outerTpl, tplIndex, valueDouble, validate)
 
       case at: AttrSetOptBoolean =>
-        val validate = at.validation.fold((_: Boolean) => Seq.empty[String])(validation =>
-          (v: Boolean) => validation.validate(v)
+        val validate = at.validator.fold((_: Boolean) => Seq.empty[String])(validator =>
+          (v: Boolean) => validator.validate(v)
         )
         addOptSet(ns, attr, outerTpl, tplIndex, valueBoolean, validate)
 
       case at: AttrSetOptBigInt =>
-        val validate = at.validation.fold((_: BigInt) => Seq.empty[String])(validation =>
-          (v: BigInt) => validation.validate(v)
+        val validate = at.validator.fold((_: BigInt) => Seq.empty[String])(validator =>
+          (v: BigInt) => validator.validate(v)
         )
         addOptSet(ns, attr, outerTpl, tplIndex, valueBigInt, validate)
 
       case at: AttrSetOptBigDecimal =>
-        val validate = at.validation.fold((_: BigDecimal) => Seq.empty[String])(validation =>
-          (v: BigDecimal) => validation.validate(v)
+        val validate = at.validator.fold((_: BigDecimal) => Seq.empty[String])(validator =>
+          (v: BigDecimal) => validator.validate(v)
         )
         addOptSet(ns, attr, outerTpl, tplIndex, valueBigDecimal, validate)
 
       case at: AttrSetOptDate =>
-        val validate = at.validation.fold((_: Date) => Seq.empty[String])(validation =>
-          (v: Date) => validation.validate(v)
+        val validate = at.validator.fold((_: Date) => Seq.empty[String])(validator =>
+          (v: Date) => validator.validate(v)
         )
         addOptSet(ns, attr, outerTpl, tplIndex, valueDate, validate)
 
       case at: AttrSetOptUUID =>
-        val validate = at.validation.fold((_: UUID) => Seq.empty[String])(validation =>
-          (v: UUID) => validation.validate(v)
+        val validate = at.validator.fold((_: UUID) => Seq.empty[String])(validator =>
+          (v: UUID) => validator.validate(v)
         )
         addOptSet(ns, attr, outerTpl, tplIndex, valueUUID, validate)
 
       case at: AttrSetOptURI =>
-        val validate = at.validation.fold((_: URI) => Seq.empty[String])(validation =>
-          (v: URI) => validation.validate(v)
+        val validate = at.validator.fold((_: URI) => Seq.empty[String])(validator =>
+          (v: URI) => validator.validate(v)
         )
         addOptSet(ns, attr, outerTpl, tplIndex, valueURI, validate)
 
       case at: AttrSetOptByte =>
-        val validate = at.validation.fold((_: Byte) => Seq.empty[String])(validation =>
-          (v: Byte) => validation.validate(v)
+        val validate = at.validator.fold((_: Byte) => Seq.empty[String])(validator =>
+          (v: Byte) => validator.validate(v)
         )
         addOptSet(ns, attr, outerTpl, tplIndex, valueByte, validate)
 
       case at: AttrSetOptShort =>
-        val validate = at.validation.fold((_: Short) => Seq.empty[String])(validation =>
-          (v: Short) => validation.validate(v)
+        val validate = at.validator.fold((_: Short) => Seq.empty[String])(validator =>
+          (v: Short) => validator.validate(v)
         )
         addOptSet(ns, attr, outerTpl, tplIndex, valueShort, validate)
 
       case at: AttrSetOptChar =>
-        val validate = at.validation.fold((_: Char) => Seq.empty[String])(validation =>
-          (v: Char) => validation.validate(v)
+        val validate = at.validator.fold((_: Char) => Seq.empty[String])(validator =>
+          (v: Char) => validator.validate(v)
         )
         addOptSet(ns, attr, outerTpl, tplIndex, valueChar, validate)
     }

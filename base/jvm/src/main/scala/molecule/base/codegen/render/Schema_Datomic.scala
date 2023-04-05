@@ -36,7 +36,7 @@ case class Schema_Datomic(schema: MetaSchema) extends BaseHelpers with RegexMatc
     case other   => throw new Exception("Yet unsupported cardinality: " + other)
   }
 
-  def datomicType(a: MetaAttr): String = a.tpe match {
+  def datomicType(a: MetaAttr): String = a.baseTpe match {
     case "String"                   => "string"
     case "Char"                     => "string"
     case "Byte"                     => "long"
