@@ -16,12 +16,12 @@ object Semantics extends DatomicTestSuite {
       for {
         _ <- Type.int(1).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap ==>
               Map(
                 "Type.int" -> Seq(
                   s"""Type.int with value `1` doesn't satisfy validation:
-                     |  _ > 1
+                     |  _ > 2
                      |""".stripMargin
                 )
               )
@@ -34,12 +34,12 @@ object Semantics extends DatomicTestSuite {
       for {
         _ <- Type.int(1).long(3L).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap ==>
               Map(
                 "Type.int" -> Seq(
                   s"""Type.int with value `1` doesn't satisfy validation:
-                     |  _ > 1
+                     |  _ > 2
                      |""".stripMargin
                 )
               )
@@ -47,12 +47,12 @@ object Semantics extends DatomicTestSuite {
 
         _ <- Type.int(3).long(1L).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap ==>
               Map(
                 "Type.long" -> Seq(
                   s"""Type.long with value `1` doesn't satisfy validation:
-                     |  _ > 1L
+                     |  _ > 2L
                      |""".stripMargin
                 )
               )
@@ -60,17 +60,17 @@ object Semantics extends DatomicTestSuite {
 
         _ <- Type.int(1).long(1L).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap ==>
               Map(
                 "Type.int" -> Seq(
                   s"""Type.int with value `1` doesn't satisfy validation:
-                     |  _ > 1
+                     |  _ > 2
                      |""".stripMargin
                 ),
                 "Type.long" -> Seq(
                   s"""Type.long with value `1` doesn't satisfy validation:
-                     |  _ > 1L
+                     |  _ > 2L
                      |""".stripMargin
                 )
               )

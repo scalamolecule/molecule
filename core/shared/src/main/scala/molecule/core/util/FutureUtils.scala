@@ -14,7 +14,8 @@ trait FutureUtils extends ModelUtils with MoleculeLogging {
           case Left(moleculeError) => throw moleculeError
         }
         .recover {
-          case e: Throwable => throw e
+          case e: MoleculeError => throw e
+          case e: Throwable     => throw ExecutionError(e.toString)
         }
     }
   }
@@ -29,14 +30,14 @@ trait FutureUtils extends ModelUtils with MoleculeLogging {
         case e: Throwable     =>
           // Unexpected error that should be treated like a bug to be fixed
           logger.error(e.toString + "\n" + e.getStackTrace.toList.mkString("\n"))
-          Left(ExecutionError(e.getMessage, e))
+          Left(ExecutionError(e.getMessage))
       }
   }
 
   def future[T](body: => T)(implicit ec: ExecutionContext): Future[T] = {
     Future(body).recover {
       case e: MoleculeError => throw e
-      case e: Throwable     => throw ExecutionError(e.toString, e)
+      case e: Throwable     => throw ExecutionError(e.toString)
     }
   }
 
@@ -44,6 +45,6 @@ trait FutureUtils extends ModelUtils with MoleculeLogging {
     toFuture
   } catch {
     case e: MoleculeError => Future.failed(e)
-    case e: Throwable     => Future.failed(ExecutionError(e.toString, e))
+    case e: Throwable     => Future.failed(ExecutionError(e.toString))
   }
 }

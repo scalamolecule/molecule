@@ -6,7 +6,7 @@ import molecule.boilerplate.ast.Model._
 import molecule.core.action.Insert
 import molecule.core.api.{ApiSync, Connection, TxReport}
 import molecule.core.marshalling.ConnProxy
-import molecule.core.transaction.{DeleteExtraction, InsertExtraction_, SaveExtraction, UpdateExtraction}
+import molecule.core.transaction.{DeleteExtraction, InsertExtraction, SaveExtraction, UpdateExtraction}
 import molecule.datomic.action._
 import molecule.datomic.facade.DatomicConn_JVM
 import molecule.datomic.marshalling.DatomicRpcJVM.Data
@@ -58,8 +58,7 @@ trait DatomicApiSync extends SubscriptionStarter with ApiSync {
       printInspectTx("SAVE", save.elements, getStmts(conn.proxy))
     }
     private def getStmts(proxy: ConnProxy): Data =
-      (new SaveExtraction() with Save_stmts)
-        .getStmts(proxy.nsMap, proxy.attrMap, save.elements)
+      (new SaveExtraction() with Save_stmts).getStmts(save.elements)
   }
 
 
@@ -72,7 +71,7 @@ trait DatomicApiSync extends SubscriptionStarter with ApiSync {
       printInspectTx("INSERT", insert.elements, getStmts(conn.proxy))
     }
     private def getStmts(proxy: ConnProxy): Data = {
-      (new InsertExtraction_ with Insert_stmts)
+      (new InsertExtraction with Insert_stmts)
         .getStmts(proxy.nsMap, proxy.attrMap, insert.elements, insert.tpls)
     }
   }

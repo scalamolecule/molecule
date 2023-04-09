@@ -5,7 +5,6 @@ import codegen.BoilerplateGenBase
 object _Composite extends BoilerplateGenBase("Composite", "/api") {
   val content = {
     val traits = (0 to 21).map(arity => Trait(arity).body).mkString("\n")
-    //       |import scala.language.higherKinds
     s"""// GENERATED CODE ********************************
        |package molecule.boilerplate.api
        |
@@ -36,7 +35,7 @@ object _Composite extends BoilerplateGenBase("Composite", "/api") {
   case class Trait(arity: Int) extends TemplateVals(arity) {
     val body =
       s"""
-         |case class ${fileName}_$n0${`[Tn]`}(override val elements: List[Element]) extends Molecule_$n0${`[Tn]`} with CompositeBase with Tx${_0}_${`[Tn]`} {
+         |case class $fileName_$n0${`[Tn]`}(override val elements: List[Element]) extends Molecule_$n0${`[Tn]`} with CompositeBase with Tx${_0}_${`[Tn]`} {
          |  final def +                                                                  (nextMolecule: Molecule_00                                                                  ): Composite_$n0${`[T0]`} = Composite_$n0(elements :+ Composite(nextMolecule.elements))
          |  final def +[a                                                               ](nextMolecule: Molecule_01[a                                                               ]): Composite_$n1[${`T1, `}a                                                                 ] = Composite_$n1(elements :+ Composite(nextMolecule.elements))
          |  final def +[a, b                                                            ](nextMolecule: Molecule_02[a, b                                                            ]): Composite_$n1[${`T1, `}(a, b                                                            )] = Composite_$n1(elements :+ Composite(nextMolecule.elements))

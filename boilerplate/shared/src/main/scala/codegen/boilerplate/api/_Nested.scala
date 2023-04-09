@@ -43,7 +43,7 @@ object _Nested extends BoilerplateGenBase("Nested", "/api") {
          |  protected def _nestedOpt[Tpl](nestedElements: List[Element]): Tx${_1}[${`A..V, `}Seq[Tpl]] = new Tx${_1}[${`A..V, `}Seq[Tpl]](elements.init :+ NestedOpt(elements.last.asInstanceOf[Ref], nestedElements))
          |}
          |
-         |trait ${fileName}_$arity${`[A..V]`} extends NestedOp${_0}${`[A..V]`} { self: Molecule[$tpl] =>
+         |trait $fileName_$arity${`[A..V]`} extends NestedOp${_0}${`[A..V]`} { self: Molecule[$tpl] =>
          |  final def * [a                                                               ] (nested: Molecule_01[a                                                               ]): Tx${_1}[${`A..V, `}Seq[a                                                                 ]] = _nestedMan[a                                                                 ](nested.elements)
          |  final def * [a, b                                                            ] (nested: Molecule_02[a, b                                                            ]): Tx${_1}[${`A..V, `}Seq[(a, b                                                            )]] = _nestedMan[(a, b                                                            )](nested.elements)
          |  final def * [a, b, c                                                         ] (nested: Molecule_03[a, b, c                                                         ]): Tx${_1}[${`A..V, `}Seq[(a, b, c                                                         )]] = _nestedMan[(a, b, c                                                         )](nested.elements)

@@ -23,7 +23,7 @@ object _ExprSetMan extends BoilerplateGenBase( "ExprSetMan", "/api/expression") 
          |  protected def _exprSetMan(op: Op, sets: Seq[Set[t]]): Ns[${`A..V`}, t] = ???
          |}
          |
-         |trait ${fileName}_$arity[${`A..V`}, t, Ns[${`_, _`}]]
+         |trait $fileName_$arity[${`A..V`}, t, Ns[${`_, _`}]]
          |  extends ${fileName}Ops_$arity[${`A..V`}, t, Ns]
          |    with Aggregates_$arity[${`A..V`}, t, Ns] {
          |  def apply (                             )               : Ns[${`A..V`}, t] = _exprSetMan(Appl  , Nil                       )

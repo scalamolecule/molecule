@@ -172,7 +172,7 @@ object UpdateOne_eid extends DatomicTestSuite {
       "Can't update multiple values for one card-one attribute" - types { implicit conn =>
         for {
           _ <- Ns(42).int(2, 3).update.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
+            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
             err ==> "Can only update one value for attribute `Ns.int`. Found: 2, 3"
           }
         } yield ()
@@ -200,7 +200,7 @@ object UpdateOne_eid extends DatomicTestSuite {
       "Can't update multiple values for one card-one attribute" - types { implicit conn =>
         for {
           _ <- Ns(42).int(2, 3).update.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
+            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
             err ==> "Can only update one value for attribute `Ns.int`. Found: 2, 3"
           }
         } yield ()

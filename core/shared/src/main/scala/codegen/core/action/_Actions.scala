@@ -20,7 +20,7 @@ object _Actions extends CoreGenBase( "Actions", "/action") {
   case class Trait(arity: Int) extends TemplateVals(arity) {
     val body =
       s"""
-         |trait ${fileName}_$n0[${`A..V`}] {
+         |trait $fileName_$n0[${`A..V`}] {
          |  def save  : Save
          |  def insert: Insert_$arity[${`A..V`}]
          |  def query : Query[${`(A..V)`}]

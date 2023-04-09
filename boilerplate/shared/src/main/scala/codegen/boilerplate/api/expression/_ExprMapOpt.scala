@@ -18,7 +18,7 @@ object _ExprMapOpt extends BoilerplateGenBase( "exprMapO", "/api/expression") {
   case class Trait(arity: Int) extends TemplateVals(arity) {
     val body =
       s"""
-         |trait ${fileName}_$arity[Attr, t, ${`A..V`}, $nsIn]
+         |trait $fileName_$arity[Attr, t, ${`A..V`}, $nsIn]
          |  extends SortAttrs_$arity[Attr, t, ${`A..V`}, Ns] {
          |  def apply(some: Option[Map[String, t]]): $nsOut = ???
          |}""".stripMargin

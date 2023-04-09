@@ -13,8 +13,8 @@ package object datomic {
   object sync extends DatomicMoleculeImplicits with DatomicApiSync
   object zio extends DatomicMoleculeImplicits with DatomicApiZio
 
-  object typelevel extends DatomicMoleculeImplicits with DatomicApiAsync
-  object laminar extends DatomicMoleculeImplicits with DatomicApiAsync
+  //  object typelevel extends DatomicMoleculeImplicits with DatomicApiAsync
+  //  object laminar extends DatomicMoleculeImplicits with DatomicApiAsync
 
   private[datomic] trait DatomicMoleculeImplicits extends MoleculeImplicits_ {
     implicit final override def m(molecule: Molecule_00): DatomicActions_00 = new DatomicActions_00(molecule)

@@ -149,11 +149,11 @@ object MandatoryRefs extends DatomicTestSuite {
       for {
         List(e1, r1) <- MandatoryRefB.i(1).RefB.i(1).save.transact.map(_.eids)
 
-        // Can't delete refId since MandatoryRefB.refB is referencing it and is mandatory
+        // Can't delete r1 since MandatoryRefB.refB is referencing it and is mandatory
         _ <- RefB(r1).delete.transact
           .map(_ ==> "Unexpected success").recover {
-          case ExecutionError(error, _) =>
-            error ==>
+          case ExecutionError(err) =>
+            err ==>
               s"""Can't delete entities referenced by mandatory ref attributes of other entities:
                  |  MandatoryRefB.refB: List($e1)
                  |""".stripMargin
@@ -168,7 +168,7 @@ object MandatoryRefs extends DatomicTestSuite {
         // Now 3 entities would be rendered invalid if we deleted r1
         _ <- RefB(r1).delete.transact
           .map(_ ==> "Unexpected success").recover {
-          case ExecutionError(error, _) =>
+          case ExecutionError(error) =>
             error ==>
               s"""Can't delete entities referenced by mandatory ref attributes of other entities:
                  |  MandatoryRefB.refB: List($e1)

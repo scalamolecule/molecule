@@ -1,72 +1,44 @@
 package molecule.datomic.transaction
 
 import molecule.base.ast.SchemaAST.{Cardinality, MetaNs}
-import molecule.base.error._
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
-import molecule.core.transaction.{InsertExtraction_, InsertOps, InsertResolvers_, SaveExtraction}
+import molecule.core.transaction.ops.InsertOps
+import molecule.core.transaction.{InsertExtraction, InsertResolvers_, SaveExtraction}
 import molecule.core.util.ModelUtils
-import molecule.core.validation.Validation
-import scala.collection.mutable.ListBuffer
 
 trait Insert_stmts
   extends DatomicTxBase_JVM
     with InsertOps
     with DatomicDataType_JVM
     with ModelUtils
-    with MoleculeLogging { self: InsertExtraction_ with InsertResolvers_ =>
-
-  override protected val prevRefs: ListBuffer[AnyRef] = new ListBuffer[AnyRef]
+    with MoleculeLogging { self: InsertExtraction with InsertResolvers_ =>
 
   def getStmts(
     nsMap: Map[String, MetaNs],
     attrMap: Map[String, (Cardinality, String, Seq[String])],
     elements: List[Element],
-    tpls: Seq[Product]
+    tpls: Seq[Product],
+    debug: Boolean = true
   ): Data = {
     initTxBase(elements)
     val (mainElements, txMetaElements) = splitElements(elements)
-
-    val validationErrors = Validation(nsMap, attrMap).check(mainElements)
-    if (validationErrors.nonEmpty) {
-      throw ValidationErrors(validationErrors)
+    val row2stmts                      = getResolver(nsMap, mainElements)
+    tpls.foreach { tpl =>
+      e = newId
+      e0 = e
+      // populate `stmts`
+      row2stmts(tpl)
     }
-
-    val tpl2stmts   : Product => Seq[InsertError]  = getResolver(nsMap, mainElements)
-    val insertErrors: Seq[(Int, Seq[InsertError])] =
-      tpls.zipWithIndex.flatMap { case (tpl, rowIndex) =>
-        e = newId
-        e0 = e
-        // populate `stmts` and return insert validation errors for each row
-        val rowErrors: Seq[InsertError] = tpl2stmts(tpl)
-        if (rowErrors.isEmpty) None else Some((rowIndex, rowErrors))
-      }
-
-    val allValidationErrors = insertErrors ++ {
-      // Convert tx meta data save errors to a single insert error
-      val txMetaDataErrors = Validation(nsMap, attrMap).check(txMetaElements).toSeq.zipWithIndex.map {
-        case ((fullAttr, errors), i) => InsertError(0, i, fullAttr, errors, Nil)
-      }
-      if (txMetaDataErrors.isEmpty) Nil else
-        Seq(
-          // Append a tx meta data errors row (with meta row index -1)
-          (-1, txMetaDataErrors)
-        )
-    }
-
-    if (allValidationErrors.nonEmpty) {
-      throw InsertErrors(allValidationErrors)
-    }
-
     if (txMetaElements.nonEmpty) {
       val txMetaStmts = (new SaveExtraction(true) with Save_stmts)
-        .getRawStmts(nsMap, attrMap, txMetaElements, datomicTx, false)
+        .getRawStmts(txMetaElements, datomicTx, false)
       stmts.addAll(txMetaStmts)
     }
-
-    val insertStrs = "INSERT:" +: elements :+ "" :+ stmts.toArray().mkString("\n")
-    logger.debug(insertStrs.mkString("\n").trim)
-
+    if (debug) {
+      val insertStrs = "INSERT:" +: elements :+ "" :+ stmts.toArray().mkString("\n")
+      logger.debug(insertStrs.mkString("\n").trim)
+    }
     stmts
   }
 
@@ -75,7 +47,7 @@ trait Insert_stmts
     tpl: Int,
     tplIndex: Int,
     compositeElements: List[Element]
-  ): Product => Seq[InsertError] = {
+  ): Product => Unit = {
     hasComposites = true
     val composite2stmts = getResolver(nsMap, compositeElements, tpl)
     // Start from initial entity id for each composite sub group
@@ -95,37 +67,32 @@ trait Insert_stmts
     ns: String,
     refAttr: String,
     nestedElements: List[Element]
-  ): Product => Seq[InsertError] = {
+  ): Product => Unit = {
     // Recursively resolve nested data
     val nested2stmts = getResolver(nsMap, nestedElements)
-    val fullRefAttr  = ns + "." + refAttr
     countValueAttrs(nestedElements) match {
       case 1 => // Nested arity-1 values
         (tpl: Product) => {
-          val nestedValues  = tpl.productElement(tplIndex).asInstanceOf[Seq[Any]]
-          val nestedBaseId  = e
-          val indexedErrors = nestedValues.zipWithIndex.flatMap { case (nestedValue, rowIndex) =>
+          val values       = tpl.productElement(tplIndex).asInstanceOf[Seq[Any]]
+          val nestedBaseId = e
+          values.foreach { value =>
             e = nestedBaseId
-            val nestedTpl = Tuple1(nestedValue)
+            val nestedTpl = Tuple1(value)
             addRef(ns, refAttr)(nestedTpl)
             e0 = e
-            val rowErrors: Seq[InsertError] = nested2stmts(nestedTpl)
-            if (rowErrors.isEmpty) None else Some((rowIndex, rowErrors))
+            nested2stmts(nestedTpl)
           }
-          if (indexedErrors.isEmpty) Nil else Seq(InsertError(0, 0, fullRefAttr, Nil, indexedErrors))
         }
       case _ =>
         (tpl: Product) => {
-          val nestedTpls    = tpl.productElement(tplIndex).asInstanceOf[Seq[Product]]
-          val nestedBaseId  = e
-          val indexedErrors = nestedTpls.zipWithIndex.flatMap { case (nestedTpl, rowIndex) =>
+          val nestedTpls   = tpl.productElement(tplIndex).asInstanceOf[Seq[Product]]
+          val nestedBaseId = e
+          nestedTpls.foreach { nestedTpl =>
             e = nestedBaseId
             addRef(ns, refAttr)(nestedTpl)
             e0 = e
-            val rowErrors: Seq[InsertError] = nested2stmts(nestedTpl)
-            if (rowErrors.isEmpty) None else Some((rowIndex, rowErrors))
+            nested2stmts(nestedTpl)
           }
-          if (indexedErrors.isEmpty) Nil else Seq(InsertError(0, 0, fullRefAttr, Nil, indexedErrors))
         }
     }
   }
@@ -135,19 +102,13 @@ trait Insert_stmts
     attr: String,
     outerTpl: Int,
     tplIndex: Int,
-    raw2java: T => Any,
-    validate: T => Seq[String]
-  ): Product => Seq[InsertError] = {
+    scala2dbTpe: T => Any,
+  ): Product => Unit = {
     val a = kw(ns, attr)
-    (tpl: Product) => {
-      backRefs = backRefs + (ns -> e)
-      val rawValue = tpl.productElement(tplIndex).asInstanceOf[T]
-      appendStmt(add, e, a, raw2java(rawValue).asInstanceOf[AnyRef])
-      val errors = validate(rawValue)
-      if (errors.isEmpty) Nil else {
-        Seq(InsertError(outerTpl, tplIndex, ns + "." + attr, errors, Nil))
-      }
-    }
+    backRefs = backRefs + (ns -> e)
+    (tpl: Product) =>
+      appendStmt(add, e, a,
+        scala2dbTpe(tpl.productElement(tplIndex).asInstanceOf[T]).asInstanceOf[AnyRef])
   }
 
   override protected def addOptV[T](
@@ -156,22 +117,15 @@ trait Insert_stmts
     outerTpl: Int,
     tplIndex: Int,
     scala2dbTpe: T => Any,
-    validate: T => Seq[String]
-  ): Product => Seq[InsertError] = {
+  ): Product => Unit = {
     val a = kw(ns, attr)
-    (tpl: Product) => {
-      backRefs = backRefs + (ns -> e)
+    backRefs = backRefs + (ns -> e)
+    (tpl: Product) =>
       tpl.productElement(tplIndex) match {
-        case Some(rawValue) =>
-          val scalaValue = rawValue.asInstanceOf[T]
-          appendStmt(add, e, a, scala2dbTpe(scalaValue).asInstanceOf[AnyRef])
-          val errors = validate(scalaValue)
-          if (errors.isEmpty) Nil else {
-            Seq(InsertError(outerTpl, tplIndex, ns + "." + attr, errors, Nil))
-          }
-        case None           => Nil // no statement to insert
+        case Some(value) => appendStmt(add, e, a,
+          scala2dbTpe(value.asInstanceOf[T]).asInstanceOf[AnyRef])
+        case _           => () // no statement to insert
       }
-    }
   }
 
   override protected def addSet[T](
@@ -179,28 +133,14 @@ trait Insert_stmts
     attr: String,
     outerTpl: Int,
     tplIndex: Int,
-    mandatory: Boolean,
     scala2dbTpe: T => Any,
-    validate: T => Seq[String]
-  ): Product => Seq[InsertError] = {
+  ): Product => Unit = {
     val a = kw(ns, attr)
-    (tpl: Product) => {
-      backRefs = backRefs + (ns -> e)
-      val rawSet = tpl.productElement(tplIndex).asInstanceOf[Set[_]]
-      if (mandatory && rawSet.isEmpty) {
-        val error = s"Can't insert empty Set for mandatory attribute"
-        Seq(InsertError(outerTpl, tplIndex, ns + "." + attr, Seq(error), Nil))
-      } else {
-        val errors = rawSet.flatMap { rawValue =>
-          val scalaValue = rawValue.asInstanceOf[T]
-          appendStmt(add, e, a, scala2dbTpe(scalaValue).asInstanceOf[AnyRef])
-          validate(scalaValue)
-        }.toSeq
-        if (errors.isEmpty) Nil else {
-          Seq(InsertError(outerTpl, tplIndex, ns + "." + attr, errors, Nil))
-        }
+    backRefs = backRefs + (ns -> e)
+    (tpl: Product) =>
+      tpl.productElement(tplIndex).asInstanceOf[Set[_]].foreach { value =>
+        appendStmt(add, e, a, scala2dbTpe(value.asInstanceOf[T]).asInstanceOf[AnyRef])
       }
-    }
   }
 
   override protected def addOptSet[T](
@@ -209,27 +149,20 @@ trait Insert_stmts
     outerTpl: Int,
     tplIndex: Int,
     scala2dbTpe: T => Any,
-    validate: T => Seq[String]
-  ): Product => Seq[InsertError] = {
+  ): Product => Unit = {
     val a = kw(ns, attr)
-    (tpl: Product) => {
-      backRefs = backRefs + (ns -> e)
+    backRefs = backRefs + (ns -> e)
+    (tpl: Product) =>
       tpl.productElement(tplIndex) match {
         case Some(set: Set[_]) =>
-          val errors = set.toSeq.flatMap { rawValue =>
-            val scalaValue = rawValue.asInstanceOf[T]
-            appendStmt(add, e, a, scala2dbTpe(scalaValue).asInstanceOf[AnyRef])
-            validate(scalaValue)
-          }
-          if (errors.isEmpty) Nil else {
-            Seq(InsertError(outerTpl, tplIndex, ns + "." + attr, errors, Nil))
-          }
-        case None              => Nil // no statement to insert
+          set.foreach(value =>
+            appendStmt(add, e, a, scala2dbTpe(value.asInstanceOf[T]).asInstanceOf[AnyRef])
+          )
+        case None              => () // no statement to insert
       }
-    }
   }
 
-  override protected def addRef(ns: String, refAttr: String): Product => Seq[InsertError] = {
+  override protected def addRef(ns: String, refAttr: String): Product => Unit = {
     val a = kw(ns, refAttr)
     (_: Product) =>
       backRefs = backRefs + (ns -> e)
@@ -240,18 +173,17 @@ trait Insert_stmts
       e = newId
       stmt.add(e)
       stmts.add(stmt)
-      Nil
   }
 
-  override protected def addBackRef(backRefNs: String): Product => Seq[InsertError] = {
+  override protected def addBackRef(backRefNs: String): Product => Unit = {
     (_: Product) =>
       e = backRefs(backRefNs)
-      Nil
   }
 
 
-  override protected lazy val valueString     = identity
   // Save Int as Long in Datomic since we can't enforce Integers in edn (for JS rpc)
+
+  override protected lazy val valueString     = identity
   override protected lazy val valueInt        = (v: Any) => v.asInstanceOf[Int].toLong
   override protected lazy val valueLong       = identity
   override protected lazy val valueFloat      = identity

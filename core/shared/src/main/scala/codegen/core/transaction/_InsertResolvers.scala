@@ -14,22 +14,22 @@ object _InsertResolvers extends CoreGenBase("InsertResolvers", "/transaction") {
        |import molecule.base.error.InsertError
        |import molecule.boilerplate.ast.Model._
        |
-       |trait ${fileName}_ {
+       |trait $fileName_ {
        |
        |  protected def resolve(
        |    nsMap: Map[String, MetaNs],
        |    elements: List[Element],
-       |    resolvers: List[Product => Seq[InsertError]],
+       |    resolvers: List[Product => Unit],
        |    tpl: Int,
        |    tplIndex: Int
-       |  ): List[Product => Seq[InsertError]]
+       |  ): List[Product => Unit]
        |
        |  def getResolver(
        |    nsMap: Map[String, MetaNs],
        |    elements: List[Element],
        |    outerTpl: Int = 0
-       |  ): Product => Seq[InsertError] = {
-       |    val resolvers: List[Product => Seq[InsertError]] =
+       |  ): Product => Unit = {
+       |    val resolvers: List[Product => Unit] =
        |      resolve(nsMap, elements, Nil, outerTpl, 0)
        |
        |    resolvers.length match {
@@ -42,17 +42,16 @@ object _InsertResolvers extends CoreGenBase("InsertResolvers", "/transaction") {
 
   case class Chunk(i: Int) extends TemplateVals(i) {
     val resolvers = (1 to i).map { j => s"r$j" }.mkString(", ")
-    val calls     = (1 to i).map { j => s"r$j(tpl)" }.mkString(",\n        ")
+    val calls     = (1 to i).map { j => s"r$j(tpl)" }.mkString("\n      ")
     val body      =
       s"""
          |  final private def resolve$i(
-         |    resolvers: List[Product => Seq[InsertError]]
-         |  ): Product => Seq[InsertError] = {
+         |    resolvers: List[Product => Unit]
+         |  ): Product => Unit = {
          |    val List($resolvers) = resolvers
-         |    (tpl: Product) =>
-         |      Seq(
-         |        $calls
-         |      ).flatten
+         |    (tpl: Product) => {
+         |      $calls
+         |    }
          |  }""".stripMargin
   }
 }

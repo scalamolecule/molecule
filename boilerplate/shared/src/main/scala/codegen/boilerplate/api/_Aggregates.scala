@@ -26,7 +26,7 @@ object _Aggregates extends BoilerplateGenBase("Aggregates", "/api") {
          |  protected def _aggrT     (kw: Kw                ): Ns[${`A..V`}     , t     ]
          |}
          |
-         |trait ${fileName}_$arity[${`A..V`}, t, Ns[${`_, _`}]] extends ${fileName}Ops_$arity[${`A..V`}, t, Ns] {
+         |trait $fileName_$arity[${`A..V`}, t, Ns[${`_, _`}]] extends ${fileName}Ops_$arity[${`A..V`}, t, Ns] {
          |  def apply(kw: count)        : Ns[${`A..U, `}Int   , Int   ] with SortAttrs_$arity[${`A..U, `}Int   , Int   , Ns] = _aggrInt(kw)
          |  def apply(kw: countDistinct): Ns[${`A..U, `}Int   , Int   ] with SortAttrs_$arity[${`A..U, `}Int   , Int   , Ns] = _aggrInt(kw)
          |  def apply(kw: min)          : Ns[${`A..V`}     , t     ] with SortAttrs_$arity[${`A..V`}     , t     , Ns] = _aggrTsort(kw)

@@ -1,4 +1,6 @@
 import org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv
+import org.scalajs.linker.interface.ESVersion
+
 
 val scala212 = "2.12.17"
 val scala213 = "2.13.10"
@@ -98,7 +100,7 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
   )
   .jsSettings(
     libraryDependencies ++= Seq(
-      "org.scala-js" %%% "scalajs-dom" % "2.1.0",
+      "org.scala-js" %%% "scalajs-dom" % "2.4.0",
       "org.scala-js" %%% "scala-js-macrotask-executor" % "1.1.1",
       "org.scala-js" %%% "scalajs-java-securerandom" % "1.0.0" cross CrossVersion.for3Use2_13
     )
@@ -263,9 +265,13 @@ lazy val jsEnvironment = {
         // for some reason still needed with Scala.js 1.9
         // https://github.com/scala-js/scala-js-js-envs/issues/12
         .withArgs(List("--dns-result-order=ipv4first"))
-    )
+    ),
     // "Error: connect ECONNREFUSED ::1:8080" with this one alone... shouldn't it work?
     //  jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv()
+
+    // Allowing unicode characters in regex expressions (used in email regex)
+    // https://www.scala-js.org/doc/regular-expressions.html
+    scalaJSLinkerConfig ~= (_.withESFeatures(_.withESVersion(ESVersion.ES2018)))
   )
 }
 

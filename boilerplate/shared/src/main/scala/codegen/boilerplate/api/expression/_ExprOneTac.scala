@@ -23,7 +23,7 @@ object _ExprOneTac extends BoilerplateGenBase( "ExprOneTac", "/api/expression") 
          |  protected def _exprOneTac(op: Op, vs: Seq[t]): Ns[${`A..V, `}t] = ???
          |}
          |
-         |trait ${fileName}_$arity[${`A..V, `}t, $nsIn]
+         |trait $fileName_$arity[${`A..V, `}t, $nsIn]
          |  extends ${fileName}Ops_$arity[${`A..V, `}t, Ns]{
          |  def apply()                : Ns[${`A..V, `}t] = _exprOneTac(NoValue, Nil       )
          |  def apply(unify: unify    ): Ns[${`A..V, `}t] = _exprOneTac(Unify  , Nil       )

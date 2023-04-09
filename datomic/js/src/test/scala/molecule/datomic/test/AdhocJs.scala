@@ -14,9 +14,8 @@ object AdhocJs extends DatomicTestSuite {
 
     "types" - types { implicit conn =>
       for {
-        _ <- Ns.i(1).save.transact
-
-
+        _ <- Ns.int(3).save.transact
+        _ <- Ns.int.query.get.map(_ ==> List(3))
       } yield ()
     }
 

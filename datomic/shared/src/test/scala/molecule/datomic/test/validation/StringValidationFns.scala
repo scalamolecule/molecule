@@ -17,8 +17,8 @@ object StringValidationFns extends DatomicTestSuite {
       for {
         _ <- Strings.email("foo@bar").save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errors, _) =>
-            errors.head ==> "Strings.email" -> Seq(
+          case ValidationErrors(errorMap) =>
+            errorMap.head ==> "Strings.email" -> Seq(
               "`foo@bar` is not a valid email"
             )
         }
@@ -31,16 +31,16 @@ object StringValidationFns extends DatomicTestSuite {
 
         _ <- Strings.email("foo@bar", "foo@baz").save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errors, _) =>
-            errors.head ==> "Strings.email" -> Seq(
+          case ValidationErrors(errorMap) =>
+            errorMap.head ==> "Strings.email" -> Seq(
               "`foo@bar` is not a valid email",
               "`foo@baz` is not a valid email",
             )
         }
         _ <- Strings.email("foo@bar.com", "foo@bar").save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errors, _) =>
-            errors.head ==> "Strings.email" -> Seq(
+          case ValidationErrors(errorMap) =>
+            errorMap.head ==> "Strings.email" -> Seq(
               "`foo@bar` is not a valid email"
             )
         }
@@ -53,23 +53,23 @@ object StringValidationFns extends DatomicTestSuite {
       for {
         _ <- Strings.emailWithMsg("foo@bar").save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errors, _) =>
-            errors.head ==> "Strings.emailWithMsg" -> Seq(
+          case ValidationErrors(errorMap) =>
+            errorMap.head ==> "Strings.emailWithMsg" -> Seq(
               "Please provide a real email"
             )
         }
         _ <- Strings.emailWithMsg("foo@bar", "foo@baz").save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errors, _) =>
-            errors.head ==> "Strings.emailWithMsg" -> Seq(
+          case ValidationErrors(errorMap) =>
+            errorMap.head ==> "Strings.emailWithMsg" -> Seq(
               "Please provide a real email",
               "Please provide a real email",
             )
         }
         _ <- Strings.emailWithMsg("foo@bar.com", "foo@bar").save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errors, _) =>
-            errors.head ==> "Strings.emailWithMsg" -> Seq(
+          case ValidationErrors(errorMap) =>
+            errorMap.head ==> "Strings.emailWithMsg" -> Seq(
               "Please provide a real email"
             )
         }
@@ -82,8 +82,8 @@ object StringValidationFns extends DatomicTestSuite {
       for {
         _ <- Strings.regex("Ben-hur").save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errors, _) =>
-            errors.head ==> "Strings.regex" -> Seq(
+          case ValidationErrors(errorMap) =>
+            errorMap.head ==> "Strings.regex" -> Seq(
               """"Ben-hur" doesn't match regex pattern: ^[a-zA-Z0-9]+$"""
             )
         }
@@ -95,8 +95,8 @@ object StringValidationFns extends DatomicTestSuite {
       for {
         _ <- Strings.regexWithMsg("Ben-hur").save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errors, _) =>
-            errors.head ==> "Strings.regexWithMsg" -> Seq(
+          case ValidationErrors(errorMap) =>
+            errorMap.head ==> "Strings.regexWithMsg" -> Seq(
               "Username cannot contain special characters."
             )
         }

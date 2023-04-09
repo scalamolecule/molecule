@@ -23,7 +23,7 @@ object _ExprOneMan extends BoilerplateGenBase( "ExprOneMan", "/api/expression") 
          |  protected def _exprOneMan(op: Op, vs: Seq[t]): Ns[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns] = ???
          |}
          |
-         |trait ${fileName}_$arity[${`A..V`}, t, Ns[${`_, _`}]]
+         |trait $fileName_$arity[${`A..V`}, t, Ns[${`_, _`}]]
          |  extends ${fileName}Ops_$arity[${`A..V`}, t, Ns]
          |    with Aggregates_$arity[${`A..V`}, t, Ns]
          |    with SortAttrs_$arity[${`A..V`}, t, Ns] {

@@ -256,7 +256,8 @@ abstract class DatomicQueryResolve[Tpl](
             // Recursively try with next identifier
             findFrom(remainingIdentifiers)
           }
-        case Nil                                => throw ModelError(edgeValuesNotFound)
+
+        case Nil => throw ModelError(edgeValuesNotFound)
       }
     }
     findFrom(identifiers)
@@ -288,7 +289,8 @@ abstract class DatomicQueryResolve[Tpl](
             // Recursively try with next identifier
             findFrom(remainingidentifiers)
           }
-        case Nil                                => throw ModelError(edgeValuesNotFound)
+
+        case Nil => throw ModelError(edgeValuesNotFound)
       }
     }
     findFrom(identifiers)

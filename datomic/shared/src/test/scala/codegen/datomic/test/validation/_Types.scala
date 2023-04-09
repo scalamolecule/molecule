@@ -32,8 +32,8 @@
 //      s""""Card one, $name" - validation { implicit conn =>
 //         |      for {
 //         |        _ <- Type.$v(${v}1).save.transact.expect {
-//         |          case ValidationErrors(errors, _) =>
-//         |            errors.head ==>
+//         |          case ValidationErrors(errorMap) =>
+//         |            errorMap.head ==>
 //         |              "Type.$v" -> Seq(
 //         |                s\"\"\"Type.$v with value `$$${v}1` doesn't satisfy validation:
 //         |                   |  _ > $$${v}1

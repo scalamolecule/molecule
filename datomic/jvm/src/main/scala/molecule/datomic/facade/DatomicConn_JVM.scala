@@ -6,7 +6,7 @@ import java.{lang => jl, util => ju}
 import com.google.common.util.concurrent.UncheckedExecutionException
 import datomic.Util.readAll
 import datomic.{Connection => DatomicConnection, Datom => _, _}
-import molecule.base.error.ModelError
+import molecule.base.error._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.api.{Connection, TxReport}
 import molecule.core.marshalling.DatomicPeerProxy
@@ -36,12 +36,18 @@ case class DatomicConn_JVM(
   }
   def optimizeQuery: Boolean = optimizeQueries
 
-  final def transactEdn(edn: String)(implicit ec: ExecutionContext): Future[TxReport] =
+  final def transactEdn(edn: String)(implicit ec: ExecutionContext): Future[TxReport] = {
     transact_async(readAll(new StringReader(edn)).get(0).asInstanceOf[Data])
+  }
 
   override def transact_async(javaStmts: Data)(implicit ec: ExecutionContext): Future[TxReport] = {
-    bridgeDatomicFuture(peerConn.transactAsync(javaStmts)).map(MakeTxReport(_))
+    bridgeDatomicFuture(peerConn.transactAsync(javaStmts))
+      .map(MakeTxReport(_))
+      .recover{
+        case e: Throwable => throw e
+      }
   }
+
   override def transact_sync(javaStmts: Data): TxReport = try {
     import molecule.core.util.Executor._
     Await.result(transact_async(javaStmts), 10.seconds)
@@ -71,8 +77,8 @@ case class DatomicConn_JVM(
               p.failure(
                 e.getCause match {
                   //                  case e: TxFnException     => e
-                  case e: ModelError => e
-                  case e             => ModelError(e.getMessage.trim)
+                  case e: MoleculeError => e
+                  case e                => ExecutionError(e.getMessage.trim)
                 }
               )
 
@@ -83,7 +89,7 @@ case class DatomicConn_JVM(
                   javaStmts.fold("")(stmts => "\n---- javaStmts: ----\n" +
                     stmts.asScala.toList.mkString("\n"))
               )
-              p.failure(ModelError(e.getMessage))
+              p.failure(ExecutionError(e.getMessage))
           }
         }
       },

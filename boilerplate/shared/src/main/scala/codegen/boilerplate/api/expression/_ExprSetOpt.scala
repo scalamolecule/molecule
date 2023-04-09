@@ -22,7 +22,7 @@ object _ExprSetOpt extends BoilerplateGenBase( "ExprSetOpt", "/api/expression") 
          |  protected def _exprSetOpt(op: Op, optSets: Option[Seq[Set[t]]]): Ns[${`A..V`}, t] = ???
          |}
          |
-         |trait ${fileName}_$arity[${`A..V`}, t, Ns[${`_, _`}]]
+         |trait $fileName_$arity[${`A..V`}, t, Ns[${`_, _`}]]
          |  extends ${fileName}Ops_$arity[${`A..V`}, t, Ns]{
          |  def apply(v    : Option[t]          )(implicit x: X)            : Ns[${`A..V`}, t] = _exprSetOpt(Appl, v.map(v => Seq(Set(v)))    )
          |  def apply(vs   : Option[Seq[t]]     )(implicit x: X, y: X)      : Ns[${`A..V`}, t] = _exprSetOpt(Appl, vs.map(_.map(v => Set(v))) )

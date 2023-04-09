@@ -29,7 +29,7 @@ object Semantics extends DatomicTestSuite {
                     "Type.int",
                     Seq(
                       s"""Type.int with value `1` doesn't satisfy validation:
-                         |  _ > 1
+                         |  _ > 2
                          |""".stripMargin
                     ),
                     Nil // composite/nested errors
@@ -57,7 +57,7 @@ object Semantics extends DatomicTestSuite {
                     "Type.int",
                     Seq(
                       s"""Type.int with value `1` doesn't satisfy validation:
-                         |  _ > 1
+                         |  _ > 2
                          |""".stripMargin
                     ),
                     Nil
@@ -68,7 +68,7 @@ object Semantics extends DatomicTestSuite {
                     "Type.long",
                     Seq(
                       s"""Type.long with value `1` doesn't satisfy validation:
-                         |  _ > 1L
+                         |  _ > 2L
                          |""".stripMargin
                     ),
                     Nil
@@ -99,7 +99,7 @@ object Semantics extends DatomicTestSuite {
                     "Type.int",
                     Seq(
                       s"""Type.int with value `0` doesn't satisfy validation:
-                         |  _ > 1
+                         |  _ > 2
                          |""".stripMargin
                     ),
                     Nil
@@ -110,7 +110,7 @@ object Semantics extends DatomicTestSuite {
                     "Type.long",
                     Seq(
                       s"""Type.long with value `0` doesn't satisfy validation:
-                         |  _ > 1L
+                         |  _ > 2L
                          |""".stripMargin
                     ),
                     Nil
@@ -126,7 +126,7 @@ object Semantics extends DatomicTestSuite {
                     "Type.int",
                     Seq(
                       s"""Type.int with value `1` doesn't satisfy validation:
-                         |  _ > 1
+                         |  _ > 2
                          |""".stripMargin
                     ),
                     Nil
@@ -137,7 +137,7 @@ object Semantics extends DatomicTestSuite {
                     "Type.long",
                     Seq(
                       s"""Type.long with value `1` doesn't satisfy validation:
-                         |  _ > 1L
+                         |  _ > 2L
                          |""".stripMargin
                     ),
                     Nil
@@ -153,8 +153,8 @@ object Semantics extends DatomicTestSuite {
     "3 rows, mixed errors" - validation { implicit conn =>
       for {
         _ <- Type.int.long.insert(
-          (1, 3L), // bad - ok
-          (2, 2L), // ok  - ok
+          (1, 4L), // bad - ok
+          (3, 3L), // ok  - ok
           (0, 1L), // bad  - bad
         ).transact
           .map(_ ==> "Unexpected success").recover {
@@ -170,7 +170,7 @@ object Semantics extends DatomicTestSuite {
                     "Type.int",
                     Seq(
                       s"""Type.int with value `1` doesn't satisfy validation:
-                         |  _ > 1
+                         |  _ > 2
                          |""".stripMargin
                     ),
                     Nil
@@ -190,7 +190,7 @@ object Semantics extends DatomicTestSuite {
                     "Type.int",
                     Seq(
                       s"""Type.int with value `0` doesn't satisfy validation:
-                         |  _ > 1
+                         |  _ > 2
                          |""".stripMargin
                     ),
                     Nil
@@ -201,7 +201,7 @@ object Semantics extends DatomicTestSuite {
                     "Type.long",
                     Seq(
                       s"""Type.long with value `1` doesn't satisfy validation:
-                         |  _ > 1L
+                         |  _ > 2L
                          |""".stripMargin
                     ),
                     Nil

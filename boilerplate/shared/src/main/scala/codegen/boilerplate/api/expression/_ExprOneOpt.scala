@@ -23,7 +23,7 @@ object _ExprOneOpt extends BoilerplateGenBase( "ExprOneOpt", "/api/expression") 
          |  protected def _exprOneOpt(op: Op, vs: Option[Seq[t]]): Ns[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns] = ???
          |}
          |
-         |trait ${fileName}_$arity[${`A..V`}, t, Ns[${`_, _`}]]
+         |trait $fileName_$arity[${`A..V`}, t, Ns[${`_, _`}]]
          |  extends ${fileName}Ops_$arity[${`A..V`}, t, Ns]
          |    with SortAttrs_$arity[${`A..V`}, t, Ns] {
          |  def apply(v    : Option[t]     )(implicit x: X): Ns[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns] = _exprOneOpt(Appl, v.map(Seq(_))    )

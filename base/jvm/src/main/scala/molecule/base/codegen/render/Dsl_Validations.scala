@@ -10,47 +10,98 @@ case class Dsl_Validations(schema: MetaSchema, namespace: MetaNs)
     attr: String,
     baseTpe: String,
     validations: Seq[(String, String)],
-    valueAttrMetas: Seq[(String, String)]
+    valueAttrs: Seq[(String, String, String, String)]
   ): String = {
-    val validator         = "Validate" + baseTpe
-    val (pad, start, end) = if (valueAttrMetas.isEmpty) {
-      ("", "", "")
+    val static = valueAttrs.isEmpty
+    val single = validations.length == 1
+    val pad    = if (static) "" else "  "
+    val body   = if (single) {
+      getBodySingle(pad, attr, baseTpe, validations.head)
     } else {
-      val maxValueAttr    = valueAttrMetas.map(_._1.length).max
-      val maxMetaAttr     = valueAttrMetas.map(_._2.length).max
-      val values          = valueAttrMetas
-        .zipWithIndex
-        .map { case ((attr, metaAttr), i) =>
-          val pad1 = padS(maxValueAttr, attr)
-          val pad2 = padS(maxMetaAttr, metaAttr)
-          s"\n      val $attr$pad1 = _attrs($i).asInstanceOf[$metaAttr$pad2].vs.head"
-        }
-        .mkString(
-          // prefixing with underscore to avoid name clash with possible custom attribute name `attrs`
-          s"\n    override def validateWith(_attrs: Seq[Attr]): $validator = new $validator(_attrs) {",
-          "",
-          ""
-        )
-      ("  ", values, "\n    }")
+      getBodyMulti(pad, baseTpe, validations)
     }
-    validations.size match {
-      case 1 => singleValidation(attr, baseTpe, validations.head, pad, start, end)
-      case _ => multipleValidations(attr, baseTpe, validations, pad, start, end)
+    if (static) {
+      getStatic(pad, body, attr, baseTpe)
+    } else {
+      getDynamic(body, attr, baseTpe, valueAttrs)
     }
   }
 
-  private def singleValidation(
+
+  private def getStatic(
+    pad: String,
+    body: String,
+    attr: String,
+    baseTpe: String,
+  ): String = {
+    s"""private lazy val validation_$attr = new Validate$baseTpe {
+       |$pad    override def validate(v: $baseTpe): Seq[String] = {
+       |$pad      $body
+       |$pad    }
+       |$pad  }"""
+  }
+
+
+  private def getDynamic(
+    body: String,
+    attr: String,
+    baseTpe: String,
+    valueAttrs: Seq[(String, String, String, String)]
+  ): String = {
+    val validator      = "Validate" + baseTpe
+    val maxAttr        = valueAttrs.map(_._1.length).max.max(9) // align with _validate too
+    val maxMetaAttr    = valueAttrs.map(_._3.length).max
+    val maxValue       = valueAttrs.map(_._4.length).max
+    val variableParams = valueAttrs.map { case (attr, tpe, _, _) => s"$attr: $tpe" }.mkString(", ")
+    val variables      = valueAttrs.map(_._1).mkString(", ")
+
+    val (variablesMeta, variablesValue) = valueAttrs
+      .zipWithIndex
+      .map { case ((attr, _, metaAttr, value), i) =>
+        val pad1 = padS(maxAttr, attr)
+        val pad2 = padS(maxMetaAttr, metaAttr)
+        val pad3 = padS(maxValue, value)
+        (
+          s"val $attr$pad1 = _attrs($i).asInstanceOf[$metaAttr$pad2].vs.head",
+          s"val $attr$pad1 = _values($i).asInstanceOf[$value$pad3].v"
+        )
+      }.unzip
+
+    val variablesFromMetaAttr = variablesMeta.mkString("\n      ")
+    val variablesFromValue    = variablesValue.mkString("\n      ")
+
+    s"""
+       |  private lazy val validation_$attr = new $validator {
+       |    val _withVariables = {
+       |      ($variableParams) =>
+       |        (v: $baseTpe) => {
+       |          $body
+       |        }
+       |    }
+       |    override def withAttrs(_attrs: Seq[Attr]): $validator = new $validator(_attrs) {
+       |      $variablesFromMetaAttr
+       |      val _validate = _withVariables($variables)
+       |      override def validate(v: $baseTpe): Seq[String] = _validate(v)
+       |    }
+       |    override def withValues(_values: Seq[Value]): $validator = new $validator(_values = _values) {
+       |      $variablesFromValue
+       |      val _validate = _withVariables($variables)
+       |      override def validate(v: $baseTpe): Seq[String] = _validate(v)
+       |    }
+       |  }"""
+  }
+
+
+  private def getBodySingle(
+    pad: String,
     attr: String,
     baseTpe: String,
     validation: (String, String),
-    pad: String,
-    start: String,
-    end: String
   ): String = {
     val (test, error) = validation
     val testStr       = if (test.contains("\n")) {
       val lines = test.split('\n').toList
-      (lines.head +: lines.tail.map(s"$pad      " + _)).mkString("\n")
+      (lines.head +: lines.tail.map(s"$pad        " + _)).mkString("\n")
     } else {
       test
     }
@@ -58,67 +109,56 @@ case class Dsl_Validations(schema: MetaSchema, namespace: MetaNs)
     val errorStr      = {
       if (error.contains("\n")) {
         s"""Seq(
-           |$pad        $error1
-           |$pad      )""".stripMargin('#') // Allow pipe character inside multiline string
+           |$pad          $error1
+           |$pad        )"""
       } else if (error.isEmpty) {
-        val indentedTest = test.split('\n').toList.mkString(s"|$pad           |  ", s"\n||$pad           |  ", "")
+        val indentedTest = test.split('\n').toList.mkString(s"|$pad             |  ", s"\n||$pad             |  ", "")
         s"""Seq(
-           |$pad        s\"\"\"$ns.$attr with value `$$v` doesn't satisfy validation:
-           |$pad         $indentedTest
-           |$pad         |$pad           |\"\"\".stripMargin
-           |$pad      )""".stripMargin('#')
+           |$pad          s\"\"\"$ns.$attr with value `$$v` doesn't satisfy validation:
+           |$pad           $indentedTest
+           |$pad|$pad             |\"\"\".stripMargin
+           |$pad        )""".stripMargin('#')
       } else {
         s"Seq($error1)"
       }
     }
-    s"""private lazy val validation_$attr = new Validate$baseTpe {$start
-       |$pad    override def validate(v: $baseTpe): Seq[String] = {
-       |$pad      val ok: $baseTpe => Boolean = $testStr
-       |$pad      if (ok(v)) Nil else $errorStr
-       |$pad    }$end
-       |  }""".stripMargin('#')
+
+    s"""val ok: $baseTpe => Boolean = $testStr
+       |$pad        if (ok(v)) Nil else $errorStr"""
   }
 
 
-  private def multipleValidations(
-    attr: String,
-    tpe: String,
-    validations: Seq[(String, String)],
+  private def getBodyMulti(
     pad: String,
-    start: String,
-    end: String
+    baseTpe: String,
+    validations: Seq[(String, String)],
   ): String = {
     val test2errorPairs = validations.map {
       case (test, error) =>
         val testStr = if (test.contains("\n")) {
           val lines = test.split('\n').toList
-          (lines.head +: lines.tail.map(s"$pad          " + _)).mkString("\n")
+          (lines.head +: lines.tail.map(s"$pad            " + _)).mkString("\n")
         } else {
           test
         }
         val error1  = renderError(error, pad)
         if (error.contains("\n")) {
-          s"""($testStr, \n$pad          $error1)"""
+          s"""($testStr, \n$pad            $error1)"""
         } else {
           s"""($testStr, $error1)"""
         }
-    }.mkString(s",\n$pad        ")
+    }.mkString(s",\n$pad          ")
 
-    s"""private lazy val validation_$attr = new Validate$tpe {$start
-       |$pad    override def validate(v: $tpe): Seq[String] = {
-       |$pad      Seq[($tpe => Boolean, String)](
-       |$pad        $test2errorPairs
-       |$pad      ).flatMap {
-       |$pad        case (ok, error) => if (ok(v)) Nil else Seq(error)
-       |$pad      }
-       |$pad    }$end
-       |  }""".stripMargin('#') // Allow pipe character inside multiline string
+    s"""Seq[($baseTpe => Boolean, String)](
+       |$pad          $test2errorPairs
+       |$pad        ).flatMap {
+       |$pad          case (ok, error) => if (ok(v)) Nil else Seq(error)
+       |$pad        }"""
   }
-
 
   private def renderError(error: String, pad: String): String = {
     if (error.contains('\n')) {
-      val indented = error.split('\n').toList.mkString(s"\n||$pad   ")
+      val indented = error.split('\n').toList.mkString(s"\n||$pad     ")
       s"""s\"\"\"$indented\"\"\".stripMargin"""
     } else {
       s"""s\"\"\"$error\"\"\""""

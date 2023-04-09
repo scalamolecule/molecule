@@ -14,28 +14,28 @@ object Composites extends DatomicTestSuite {
 
     "1 + 1" - validation { implicit conn =>
       for {
-        eid <- (Type.int(2) + Enum.luckyNumber(7)).save.transact.map(_.eids.head)
+        eid <- (Type.int(3) + Enum.luckyNumber(7)).save.transact.map(_.eids.head)
 
         // Composite sub groups share the same entity id
 
         // bad, ok
         _ <- (Type(eid).int(1) + Enum.luckyNumber(9)).update.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap ==>
               Map(
                 "Type.int" -> Seq(
                   s"""Type.int with value `1` doesn't satisfy validation:
-                     |  _ > 1
+                     |  _ > 2
                      |""".stripMargin
                 )
               )
         }
 
         // ok, bad
-        _ <- (Type(eid).int(2) + Enum.luckyNumber(0)).update.transact
+        _ <- (Type(eid).int(3) + Enum.luckyNumber(0)).update.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap ==>
               Map(
                 "Enum.luckyNumber" -> Seq(
@@ -47,12 +47,12 @@ object Composites extends DatomicTestSuite {
         // bad, bad
         _ <- (Type(eid).int(1) + Enum.luckyNumber(0)).update.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap ==>
               Map(
                 "Type.int" -> Seq(
                   s"""Type.int with value `1` doesn't satisfy validation:
-                     |  _ > 1
+                     |  _ > 2
                      |""".stripMargin
                 ),
                 "Enum.luckyNumber" -> Seq(

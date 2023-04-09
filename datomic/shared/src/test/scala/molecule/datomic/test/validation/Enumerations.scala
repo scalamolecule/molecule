@@ -17,8 +17,8 @@ object Enumerations extends DatomicTestSuite {
       for {
         _ <- Enum.luckyNumber(8).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errors, _) =>
-            errors.head ==> "Enum.luckyNumber" -> Seq(
+          case ValidationErrors(errorMap) =>
+            errorMap.head ==> "Enum.luckyNumber" -> Seq(
               "Value `8` is not one of the allowed values in Seq(7, 9, 13)"
             )
         }
@@ -31,8 +31,8 @@ object Enumerations extends DatomicTestSuite {
 
         _ <- Enum.luckyNumber(7, 8).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errors, _) =>
-            errors.head ==> "Enum.luckyNumber" -> Seq(
+          case ValidationErrors(errorMap) =>
+            errorMap.head ==> "Enum.luckyNumber" -> Seq(
               "Value `8` is not one of the allowed values in Seq(7, 9, 13)"
             )
         }
@@ -44,8 +44,8 @@ object Enumerations extends DatomicTestSuite {
       for {
         _ <- Enum.luckyNumber2(5).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errors, _) =>
-            errors.head ==> "Enum.luckyNumber2" -> Seq(
+          case ValidationErrors(errorMap) =>
+            errorMap.head ==> "Enum.luckyNumber2" -> Seq(
               "Lucky number can only be 7, 9 or 13"
             )
         }

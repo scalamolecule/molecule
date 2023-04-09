@@ -16,7 +16,7 @@ object _CastNestedOptLeaf extends DatomicGenBase("CastNestedOptLeaf", "/query/ca
        |import scala.annotation.tailrec
        |
        |
-       |trait ${fileName}_[Tpl]
+       |trait $fileName_[Tpl]
        |  extends CastRow2Tpl_[Tpl] with CastIt2Tpl_ { self: Model2Query[Tpl] with Base[Tpl] =>
        |
        |  @tailrec

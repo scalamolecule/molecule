@@ -40,12 +40,11 @@ case class MoleculeRpcJS(interface: String, port: Int)
     val argsSerialized      = Pickle.intoBytes((proxy, elements, limit)).typedArray()
     val callbackDeserialize = (resultSerialized: ByteBuffer) => {
       UnpickleTpls[Tpl](elements, resultSerialized).unpickle match {
-        case Right(tpls)                         => callback(tpls)
-        case Left(ExecutionError("no match", _)) => // do nothing
-        case Left(moleculeError)                 => logger.warn(moleculeError.toString)
+        case Right(tpls)                      => callback(tpls)
+        case Left(ExecutionError("no match")) => // do nothing
+        case Left(moleculeError)              => logger.warn(moleculeError.toString)
       }
     }
-    //    println("ELEMENTS: " + elements)
     websocketSubscription(argsSerialized, callbackDeserialize)
   }
 

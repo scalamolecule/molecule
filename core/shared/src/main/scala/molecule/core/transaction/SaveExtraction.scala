@@ -5,6 +5,7 @@ import java.util.{Date, UUID}
 import molecule.base.error._
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
+import molecule.core.transaction.ops.SaveOps
 import molecule.core.util.ModelUtils
 import scala.annotation.tailrec
 

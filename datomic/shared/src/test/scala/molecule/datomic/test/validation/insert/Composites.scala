@@ -29,7 +29,7 @@ object Composites extends DatomicTestSuite {
                     "Type.int",
                     Seq(
                       s"""Type.int with value `1` doesn't satisfy validation:
-                         |  _ > 1
+                         |  _ > 2
                          |""".stripMargin
                     ),
                     Nil // composite/nested errors
@@ -40,7 +40,7 @@ object Composites extends DatomicTestSuite {
         }
 
         _ <- (Type.int + Enum.luckyNumber).insert(
-          (2, 0) // ok, bad
+          (3, 0) // ok, bad
         ).transact
           .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
@@ -75,7 +75,7 @@ object Composites extends DatomicTestSuite {
                     "Type.int",
                     Seq(
                       s"""Type.int with value `1` doesn't satisfy validation:
-                         |  _ > 1
+                         |  _ > 2
                          |""".stripMargin
                     ),
                     Nil // composite/nested errors
@@ -98,7 +98,7 @@ object Composites extends DatomicTestSuite {
     "2 + 1" - validation { implicit conn =>
       for {
         _ <- (Type.int.string + Enum.luckyNumber).insert(
-          ((1, "b"), 7) // (bad, ok), ok
+          ((1, "c"), 7) // (bad, ok), ok
         ).transact
           .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
@@ -112,7 +112,7 @@ object Composites extends DatomicTestSuite {
                     "Type.int",
                     Seq(
                       s"""Type.int with value `1` doesn't satisfy validation:
-                         |  _ > 1
+                         |  _ > 2
                          |""".stripMargin
                     ),
                     Nil // composite/nested errors
@@ -123,7 +123,7 @@ object Composites extends DatomicTestSuite {
         }
 
         _ <- (Type.int.string + Enum.luckyNumber).insert(
-          ((2, "a"), 7) // (ok, bad), ok
+          ((3, "a"), 7) // (ok, bad), ok
         ).transact
           .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
@@ -137,7 +137,7 @@ object Composites extends DatomicTestSuite {
                     "Type.string",
                     Seq(
                       s"""Type.string with value `a` doesn't satisfy validation:
-                         |  _ > "a"
+                         |  _ > "b"
                          |""".stripMargin
                     ),
                     Nil // composite/nested errors
@@ -148,7 +148,7 @@ object Composites extends DatomicTestSuite {
         }
 
         _ <- (Type.int.string + Enum.luckyNumber).insert(
-          ((2, "b"), 0) // (ok, ok), bad
+          ((3, "c"), 0) // (ok, ok), bad
         ).transact
           .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
@@ -183,7 +183,7 @@ object Composites extends DatomicTestSuite {
                     "Type.int",
                     Seq(
                       s"""Type.int with value `1` doesn't satisfy validation:
-                         |  _ > 1
+                         |  _ > 2
                          |""".stripMargin
                     ),
                     Nil // composite/nested errors
@@ -194,7 +194,7 @@ object Composites extends DatomicTestSuite {
                     "Type.string",
                     Seq(
                       s"""Type.string with value `a` doesn't satisfy validation:
-                         |  _ > "a"
+                         |  _ > "b"
                          |""".stripMargin
                     ),
                     Nil // composite/nested errors
@@ -205,7 +205,7 @@ object Composites extends DatomicTestSuite {
         }
 
         _ <- (Type.int.string + Enum.luckyNumber).insert(
-          ((1, "b"), 0) // (bad, ok), bad
+          ((1, "c"), 0) // (bad, ok), bad
         ).transact
           .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
@@ -219,7 +219,7 @@ object Composites extends DatomicTestSuite {
                     "Type.int",
                     Seq(
                       s"""Type.int with value `1` doesn't satisfy validation:
-                         |  _ > 1
+                         |  _ > 2
                          |""".stripMargin
                     ),
                     Nil // composite/nested errors
@@ -237,7 +237,7 @@ object Composites extends DatomicTestSuite {
         }
 
         _ <- (Type.int.string + Enum.luckyNumber).insert(
-          ((2, "a"), 0) // (ok, bad), bad
+          ((3, "a"), 0) // (ok, bad), bad
         ).transact
           .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
@@ -251,7 +251,7 @@ object Composites extends DatomicTestSuite {
                     "Type.string",
                     Seq(
                       s"""Type.string with value `a` doesn't satisfy validation:
-                         |  _ > "a"
+                         |  _ > "b"
                          |""".stripMargin
                     ),
                     Nil // composite/nested errors
@@ -283,7 +283,7 @@ object Composites extends DatomicTestSuite {
                     "Type.int",
                     Seq(
                       s"""Type.int with value `1` doesn't satisfy validation:
-                         |  _ > 1
+                         |  _ > 2
                          |""".stripMargin
                     ),
                     Nil // composite/nested errors
@@ -294,7 +294,7 @@ object Composites extends DatomicTestSuite {
                     "Type.string",
                     Seq(
                       s"""Type.string with value `a` doesn't satisfy validation:
-                         |  _ > "a"
+                         |  _ > "b"
                          |""".stripMargin
                     ),
                     Nil // composite/nested errors
@@ -317,7 +317,7 @@ object Composites extends DatomicTestSuite {
     "1 + 2" - validation { implicit conn =>
       for {
         _ <- (Enum.luckyNumber + Type.int.string).insert(
-          (7, (1, "b")) // ok, (bad, ok)
+          (7, (1, "c")) // ok, (bad, ok)
         ).transact
           .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
@@ -331,7 +331,7 @@ object Composites extends DatomicTestSuite {
                     "Type.int",
                     Seq(
                       s"""Type.int with value `1` doesn't satisfy validation:
-                         |  _ > 1
+                         |  _ > 2
                          |""".stripMargin
                     ),
                     Nil // composite/nested errors
@@ -342,7 +342,7 @@ object Composites extends DatomicTestSuite {
         }
 
         _ <- (Enum.luckyNumber + Type.int.string).insert(
-          (7, (2, "a")) // ok, (ok, bad)
+          (7, (3, "a")) // ok, (ok, bad)
         ).transact
           .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
@@ -356,7 +356,7 @@ object Composites extends DatomicTestSuite {
                     "Type.string",
                     Seq(
                       s"""Type.string with value `a` doesn't satisfy validation:
-                         |  _ > "a"
+                         |  _ > "b"
                          |""".stripMargin
                     ),
                     Nil // composite/nested errors
@@ -367,7 +367,7 @@ object Composites extends DatomicTestSuite {
         }
 
         _ <- (Enum.luckyNumber + Type.int.string).insert(
-          (0, (2, "b")) // bad, (ok, ok)
+          (0, (3, "c")) // bad, (ok, ok)
         ).transact
           .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
@@ -402,7 +402,7 @@ object Composites extends DatomicTestSuite {
                     "Type.int",
                     Seq(
                       s"""Type.int with value `1` doesn't satisfy validation:
-                         |  _ > 1
+                         |  _ > 2
                          |""".stripMargin
                     ),
                     Nil // composite/nested errors
@@ -413,7 +413,7 @@ object Composites extends DatomicTestSuite {
                     "Type.string",
                     Seq(
                       s"""Type.string with value `a` doesn't satisfy validation:
-                         |  _ > "a"
+                         |  _ > "b"
                          |""".stripMargin
                     ),
                     Nil // composite/nested errors
@@ -424,7 +424,7 @@ object Composites extends DatomicTestSuite {
         }
 
         _ <- (Enum.luckyNumber + Type.int.string).insert(
-          (0, (1, "b")) // bad, (bad, ok)
+          (0, (1, "c")) // bad, (bad, ok)
         ).transact
           .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
@@ -445,7 +445,7 @@ object Composites extends DatomicTestSuite {
                     "Type.int",
                     Seq(
                       s"""Type.int with value `1` doesn't satisfy validation:
-                         |  _ > 1
+                         |  _ > 2
                          |""".stripMargin
                     ),
                     Nil // composite/nested errors
@@ -456,7 +456,7 @@ object Composites extends DatomicTestSuite {
         }
 
         _ <- (Enum.luckyNumber + Type.int.string).insert(
-          (0, (2, "a")) // bad, (ok, bad)
+          (0, (3, "a")) // bad, (ok, bad)
         ).transact
           .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
@@ -477,7 +477,7 @@ object Composites extends DatomicTestSuite {
                     "Type.string",
                     Seq(
                       s"""Type.string with value `a` doesn't satisfy validation:
-                         |  _ > "a"
+                         |  _ > "b"
                          |""".stripMargin
                     ),
                     Nil // composite/nested errors
@@ -509,7 +509,7 @@ object Composites extends DatomicTestSuite {
                     "Type.int",
                     Seq(
                       s"""Type.int with value `1` doesn't satisfy validation:
-                         |  _ > 1
+                         |  _ > 2
                          |""".stripMargin
                     ),
                     Nil // composite/nested errors
@@ -520,7 +520,7 @@ object Composites extends DatomicTestSuite {
                     "Type.string",
                     Seq(
                       s"""Type.string with value `a` doesn't satisfy validation:
-                         |  _ > "a"
+                         |  _ > "b"
                          |""".stripMargin
                     ),
                     Nil // composite/nested errors
@@ -536,7 +536,7 @@ object Composites extends DatomicTestSuite {
     "2 + 2" - validation { implicit conn =>
       for {
         _ <- (Type.int.string + Enum.luckyNumber.luckyNumber2).insert(
-          ((1, "b"), (7, 9)) // (bad, ok), (ok, ok)
+          ((1, "c"), (7, 9)) // (bad, ok), (ok, ok)
         ).transact
           .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
@@ -550,7 +550,7 @@ object Composites extends DatomicTestSuite {
                     "Type.int",
                     Seq(
                       s"""Type.int with value `1` doesn't satisfy validation:
-                         |  _ > 1
+                         |  _ > 2
                          |""".stripMargin
                     ),
                     Nil // composite/nested errors
@@ -561,7 +561,7 @@ object Composites extends DatomicTestSuite {
         }
 
         _ <- (Type.int.string + Enum.luckyNumber.luckyNumber2).insert(
-          ((2, "a"), (7, 9)) // (ok, bad), (ok, ok)
+          ((3, "a"), (7, 9)) // (ok, bad), (ok, ok)
         ).transact
           .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
@@ -575,7 +575,7 @@ object Composites extends DatomicTestSuite {
                     "Type.string",
                     Seq(
                       s"""Type.string with value `a` doesn't satisfy validation:
-                         |  _ > "a"
+                         |  _ > "b"
                          |""".stripMargin
                     ),
                     Nil // composite/nested errors
@@ -586,7 +586,7 @@ object Composites extends DatomicTestSuite {
         }
 
         _ <- (Type.int.string + Enum.luckyNumber.luckyNumber2).insert(
-          ((2, "b"), (0, 9)) // (ok, ok), (bad, ok)
+          ((3, "c"), (0, 9)) // (ok, ok), (bad, ok)
         ).transact
           .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
@@ -607,7 +607,7 @@ object Composites extends DatomicTestSuite {
         }
 
         _ <- (Type.int.string + Enum.luckyNumber.luckyNumber2).insert(
-          ((2, "b"), (7, 0)) // (ok, ok), (ok, bad)
+          ((3, "c"), (7, 0)) // (ok, ok), (ok, bad)
         ).transact
           .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
@@ -643,7 +643,7 @@ object Composites extends DatomicTestSuite {
                     "Type.int",
                     Seq(
                       s"""Type.int with value `1` doesn't satisfy validation:
-                         |  _ > 1
+                         |  _ > 2
                          |""".stripMargin
                     ),
                     Nil // composite/nested errors
@@ -654,7 +654,7 @@ object Composites extends DatomicTestSuite {
                     "Type.string",
                     Seq(
                       s"""Type.string with value `a` doesn't satisfy validation:
-                         |  _ > "a"
+                         |  _ > "b"
                          |""".stripMargin
                     ),
                     Nil // composite/nested errors
@@ -684,8 +684,8 @@ object Composites extends DatomicTestSuite {
     "Multiple rows" - validation { implicit conn =>
       for {
         _ <- (Type.int.string + Enum.luckyNumber.luckyNumber2).insert(
-          ((2, "a"), (7, 9)), // (ok , bad), (ok , ok)
-          ((3, "b"), (9, 9)), // (ok , ok ), (ok , ok)
+          ((3, "a"), (7, 9)), // (ok , bad), (ok , ok)
+          ((4, "c"), (9, 9)), // (ok , ok ), (ok , ok)
           ((1, "c"), (13, 0)) // (bad, ok ), (ok, bad)
         ).transact
           .map(_ ==> "Unexpected success").recover {
@@ -700,7 +700,7 @@ object Composites extends DatomicTestSuite {
                     "Type.string",
                     Seq(
                       s"""Type.string with value `a` doesn't satisfy validation:
-                         |  _ > "a"
+                         |  _ > "b"
                          |""".stripMargin
                     ),
                     Nil // composite/nested errors
@@ -719,7 +719,7 @@ object Composites extends DatomicTestSuite {
                     "Type.int",
                     Seq(
                       s"""Type.int with value `1` doesn't satisfy validation:
-                         |  _ > 1
+                         |  _ > 2
                          |""".stripMargin
                     ),
                     Nil // composite/nested errors

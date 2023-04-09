@@ -100,7 +100,7 @@ object SortNested extends DatomicTestSuite {
 
         _ <- if (useFree) {
           Ref.i_(6).Nss.*?(Ns.boolean.a1).query.get
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
+          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
             err ==> "Datomic Free (not Pro) has a bug that pulls boolean `false` values as nil."
           }
         } else {
@@ -108,7 +108,7 @@ object SortNested extends DatomicTestSuite {
         }
         _ <- if (useFree) {
           Ref.i_(6).Nss.*?(Ns.boolean.d1).query.get
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
+          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
             err ==> "Datomic Free (not Pro) has a bug that pulls boolean `false` values as nil."
           }
         } else {
@@ -192,7 +192,7 @@ object SortNested extends DatomicTestSuite {
 
         _ <- if (useFree) {
           Ref.i_(6).Nss.*?(Ns.i.a2.boolean_?.a1).query.get
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
+          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
             err ==> "Datomic Free (not Pro) has a bug that pulls boolean `false` values as nil."
           }
         } else {
@@ -202,7 +202,7 @@ object SortNested extends DatomicTestSuite {
         }
         _ <- if (useFree) {
           Ref.i_(6).Nss.*?(Ns.i.d2.boolean_?.d1).query.get
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
+          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
             err ==> "Datomic Free (not Pro) has a bug that pulls boolean `false` values as nil."
           }
         } else {

@@ -69,7 +69,7 @@ object _CompositeInit extends BoilerplateGenBase("CompositeInit", "/api") {
     val opN  = if (arity == 0) "0" else "n"
     val body =
       s"""
-         |trait ${fileName}_$arity${`[A..V]`} extends CompositeInitOp_$opN[$tpl] { self: Molecule[$tpl] =>
+         |trait $fileName_$arity${`[A..V]`} extends CompositeInitOp_$opN[$tpl] { self: Molecule[$tpl] =>
          |  final def +                                                                  (nextMolecule: Molecule_00                                                                  ): Composite_$n0${`[A0]`} = _composite$n0${`[A0]`}(nextMolecule.elements)
          |  final def +[a                                                               ](nextMolecule: Molecule_01[a                                                               ]): Composite_$n1[${`A..V,`}a                                                                 ] = _composite$n1[${`A..V,`}a                                                                 ](nextMolecule.elements)
          |  final def +[a, b                                                            ](nextMolecule: Molecule_02[a, b                                                            ]): Composite_$n1[${`A..V,`}(a, b                                                            )] = _composite$n1[${`A..V,`}(a, b                                                            )](nextMolecule.elements)

@@ -8,57 +8,27 @@ import datomic.{Database, Peer}
 import molecule.base.error._
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
-import molecule.core.transaction.{UpdateExtraction, UpdateOps}
-import molecule.core.validation.Validation
+import molecule.core.transaction.UpdateExtraction
+import molecule.core.transaction.ops.UpdateOps
 import molecule.datomic.facade.DatomicConn_JVM
 import molecule.datomic.query.DatomicModel2Query
-import scala.collection.mutable.ListBuffer
 
 trait Update_stmts extends DatomicTxBase_JVM with UpdateOps with MoleculeLogging { self: UpdateExtraction =>
 
   def getStmts(
     conn: DatomicConn_JVM,
-    elements: List[Element]
+    elements: List[Element],
+    debug: Boolean = true
   ): Data = {
-    val db = conn.peerConn.db()
-
-    val getCurSetValues: Attr => Set[Any] = (attr: Attr) => {
-      val a = s":${attr.ns}/${attr.attr}"
-      try {
-        val curValues = Peer.q(s"[:find ?vs :where [_ $a ?vs]]", db)
-        if (curValues.isEmpty) {
-          throw ExecutionError(s"While checking to avoid removing the last values of mandatory " +
-            s"attribute ${attr.ns}.${attr.attr} the current Set of values couldn't be found.")
-        }
-        val vs = ListBuffer.empty[Any]
-        curValues.forEach(row => vs.addOne(row.get(0)))
-        vs.toSet
-      } catch {
-        case e: MoleculeError => throw e
-        case t: Throwable     => throw ExecutionError(
-          s"Unexpected error trying to find current values of mandatory attribute ${attr.name}", t)
-      }
-    }
-
-    val validationErrors = Validation(
-      conn.proxy.nsMap,
-      conn.proxy.attrMap,
-      Some(getCurSetValues)
-    ).check(elements)
-    if (validationErrors.nonEmpty) {
-      throw ValidationErrors(validationErrors)
-    }
-
+    val db                           = conn.peerConn.db()
     val (eids, filterElements, data) = resolve(elements, Nil, Nil, Nil)
-
-    val (filterQuery, inputs) = if (eids.isEmpty && filterElements.nonEmpty) {
+    val (filterQuery, inputs)        = if (eids.isEmpty && filterElements.nonEmpty) {
       val filterElements1 = AttrOneManLong("_Generic", "e", V) +: filterElements
       val (query, inputs) = new DatomicModel2Query[Any](filterElements1).getEidQueryWithInputs
       (Some(query), inputs)
     } else {
       (None, Nil)
     }
-
     filterQuery.fold {
       val addStmts = eid2stmts(data, db, isUpsert)
       eids.foreach(addStmts)
@@ -67,10 +37,10 @@ trait Update_stmts extends DatomicTxBase_JVM with UpdateOps with MoleculeLogging
       val addStmts = eid2stmts(data, db)
       eidRows.forEach(eidRow => addStmts(eidRow.get(0)))
     }
-
-    val updateStrs = "UPDATE:" +: elements :+ "" :+ stmts.toArray().mkString("\n")
-    logger.debug(updateStrs.mkString("\n").trim)
-
+    if (debug) {
+      val updateStrs = "UPDATE:" +: elements :+ "" :+ stmts.toArray().mkString("\n")
+      logger.debug(updateStrs.mkString("\n").trim)
+    }
     stmts
   }
 

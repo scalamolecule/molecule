@@ -19,7 +19,7 @@ object _ExprMapMan extends BoilerplateGenBase("exprMapM", "/api/expression") {
   case class Trait(arity: Int) extends TemplateVals(arity) {
     val body =
       s"""
-         |trait ${fileName}_$arity[Attr, t, ${`A..V`}, $nsIn]
+         |trait $fileName_$arity[Attr, t, ${`A..V`}, $nsIn]
          |  extends Aggregates_$arity[Attr, t, ${`A..V`}, Ns]
          |    with SortAttrs_$arity[Attr, t, ${`A..V`}, Ns] {
          |  def apply  (pair : (String, t), pairs: (String, t)*)                            : $nsOut with Vs  = ???

@@ -163,7 +163,7 @@ class DataModel2MetaSchema(filePath: String, pkgPath: String, scalaVersion: Stri
 
       val reqAttrs   = reqGroupsMerged.flatten
       val metaAttrs1 = metaAttrs.map { a =>
-//        val attr = ns + "." + a.attr
+        //        val attr = ns + "." + a.attr
         val attr = a.attr
         if (reqAttrs.contains(attr)) {
           val otherAttrs = reqGroupsMerged.collectFirst {
@@ -361,7 +361,7 @@ class DataModel2MetaSchema(filePath: String, pkgPath: String, scalaVersion: Stri
         acc(ns, prev, a.copy(validations = Seq(test -> error)))
 
       case q"$prev.require(..$otherAttrs)" =>
-//        val reqAttrs1 = attr +: otherAttrs.map(ns + "." + _)
+        //        val reqAttrs1 = attr +: otherAttrs.map(ns + "." + _)
         val reqAttrs1 = a.attr +: otherAttrs.map(_.toString)
         acc(ns, prev, a.copy(requiredAttrs = reqAttrs1))
 
@@ -398,12 +398,8 @@ class DataModel2MetaSchema(filePath: String, pkgPath: String, scalaVersion: Stri
   // Recursively traverse test code trees to extract attribute names
   private lazy val traverser = (ns: String) => new Traverser {
     override def apply(tree: Tree): Unit = tree match {
-      case Term.Select(Term.Name(attr), Term.Name("value")) =>
-        //        println(s"--- $ns.$attr")
-//        valueAttrs += s"$ns.$attr"
-        valueAttrs += attr
-
-      case node => super.apply(node)
+      case Term.Select(Term.Name(attr), Term.Name("value")) => valueAttrs += attr
+      case node                                             => super.apply(node)
     }
   }
 

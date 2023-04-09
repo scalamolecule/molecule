@@ -12,7 +12,7 @@ object _UnpickleTpl extends CoreGenBase( "UnpickleTpl", "/marshalling/deserializ
        |
        |import molecule.boilerplate.ast.Model._
        |
-       |trait ${fileName}_[Tpl] { self: UnpickleTpls[Tpl] =>
+       |trait $fileName_[Tpl] { self: UnpickleTpls[Tpl] =>
        |
        |  def getUnpickler(elements: List[Element]): () => Any = {
        |    val unpicklers: List[() => Any] = resolveUnpicklers(elements, Nil)

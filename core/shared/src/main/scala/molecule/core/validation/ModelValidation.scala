@@ -2,15 +2,16 @@ package molecule.core.validation
 
 import molecule.base.ast.SchemaAST.{Cardinality, MetaNs}
 import molecule.base.error._
+import molecule.boilerplate.ast.Model
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.ops.ModelTransformations_
 import scala.annotation.tailrec
-import scala.collection.mutable
 
 
-case class Validation(
+case class ModelValidation(
   nsMap: Map[String, MetaNs],
   attrMap: Map[String, (Cardinality, String, Seq[String])],
+  isInsert: Boolean = false,
   getCurSetValues: Option[Attr => Set[Any]] = None
 ) extends ModelTransformations_ {
   private lazy val isUpdate = getCurSetValues.isDefined
@@ -46,17 +47,10 @@ case class Validation(
             register(a, attr)
           checkPath(a, attr)
 
-          val valueAttrErrors = if (a.valueAttrs.isEmpty)
-            Nil
-          else
-            valueValidate(a)
-          val staticErrors    = if (a.errors.isEmpty)
-            Nil
-          else
-            a.errors
-          val allErrors       = valueAttrErrors ++ staticErrors
+          val valueAttrErrors = if (a.valueAttrs.isEmpty) Nil else valueValidate(a)
+          val allErrors       = valueAttrErrors ++ a.errors
           if (allErrors.nonEmpty)
-            validationErrors.+=(attr -> allErrors)
+            validationErrors += attr -> allErrors
 
           check(tail)
 
@@ -123,13 +117,8 @@ case class Validation(
   private def register(a: Attr, attr: String) = {
     if (prevNs != a.ns) {
       prevNs = a.ns
-      mandatoryAttrs ++= nsMap(a.ns).mandatoryAttrs.map(attr =>
-        a.ns + "." + attr
-      )
-      mandatoryRefs ++= nsMap(a.ns).mandatoryRefs.map {
-        case (attr, refNs) =>
-          (a.ns + "." + attr) -> refNs
-      }
+      mandatoryAttrs ++= nsMap(a.ns).mandatoryAttrs.map(attr => a.ns + "." + attr)
+      mandatoryRefs ++= nsMap(a.ns).mandatoryRefs.map { case (attr, refNs) => (a.ns + "." + attr) -> refNs }
     }
     requiredAttrs ++= attrMap(attr)._3
     presentAttrs += a.attr
@@ -164,19 +153,13 @@ case class Validation(
 
   private def valueValidate(a: Attr): Seq[String] = {
     val attrs0 = a.valueAttrs.flatMap { attr =>
-      //      val fullAttr = a.ns + "." + attr
-      curElements.collect {
-        //        case a1: Attr if (a1.ns + "." + a1.attr) == fullAttr =>
+      curElements.collectFirst {
         case a1: Attr if a1.attr == attr =>
-          //          requiredAttrs -= fullAttr
           requiredAttrs -= attr
           attr -> a1
       }
     }
-    //    println("-------------")
-    //    attrs0.foreach(println)
-
-    val attrs = attrs0.sortBy(_._1).map(_._2)
+    val attrs  = attrs0.sortBy(_._1).map(_._2)
     if (a.valueAttrs.length != attrs.length) {
       val needs    = a.valueAttrs
       val found    = attrs0.map(_._1)
@@ -198,77 +181,84 @@ case class Validation(
       )
     }
 
-    a match {
-      case a: AttrOneMan => a match {
-        case AttrOneManString(_, _, _, vs, Some(validator), _, _, _, _)     => validator.validateWith(attrs).validate(one(vs))
-        case AttrOneManInt(_, _, _, vs, Some(validator), _, _, _, _)        => validator.validateWith(attrs).validate(one(vs))
-        case AttrOneManLong(_, _, _, vs, Some(validator), _, _, _, _)       => validator.validateWith(attrs).validate(one(vs))
-        case AttrOneManFloat(_, _, _, vs, Some(validator), _, _, _, _)      => validator.validateWith(attrs).validate(one(vs))
-        case AttrOneManDouble(_, _, _, vs, Some(validator), _, _, _, _)     => validator.validateWith(attrs).validate(one(vs))
-        case AttrOneManBoolean(_, _, _, vs, Some(validator), _, _, _, _)    => validator.validateWith(attrs).validate(one(vs))
-        case AttrOneManBigInt(_, _, _, vs, Some(validator), _, _, _, _)     => validator.validateWith(attrs).validate(one(vs))
-        case AttrOneManBigDecimal(_, _, _, vs, Some(validator), _, _, _, _) => validator.validateWith(attrs).validate(one(vs))
-        case AttrOneManDate(_, _, _, vs, Some(validator), _, _, _, _)       => validator.validateWith(attrs).validate(one(vs))
-        case AttrOneManUUID(_, _, _, vs, Some(validator), _, _, _, _)       => validator.validateWith(attrs).validate(one(vs))
-        case AttrOneManURI(_, _, _, vs, Some(validator), _, _, _, _)        => validator.validateWith(attrs).validate(one(vs))
-        case AttrOneManByte(_, _, _, vs, Some(validator), _, _, _, _)       => validator.validateWith(attrs).validate(one(vs))
-        case AttrOneManShort(_, _, _, vs, Some(validator), _, _, _, _)      => validator.validateWith(attrs).validate(one(vs))
-        case AttrOneManChar(_, _, _, vs, Some(validator), _, _, _, _)       => validator.validateWith(attrs).validate(one(vs))
-        case _                                                              => err
+    if (isInsert) {
+      // Validation for inserts are handled in transaction.InsertExtraction_
+      Nil
+    } else {
+      a match {
+        case a: AttrOneMan => a match {
+          case AttrOneManString(_, _, _, vs, Some(validator), _, _, _, _)     => validator.withAttrs(attrs).validate(one(vs))
+          case AttrOneManInt(_, _, _, vs, Some(validator), _, _, _, _)        => validator.withAttrs(attrs).validate(one(vs))
+          case AttrOneManLong(_, _, _, vs, Some(validator), _, _, _, _)       => validator.withAttrs(attrs).validate(one(vs))
+          case AttrOneManFloat(_, _, _, vs, Some(validator), _, _, _, _)      => validator.withAttrs(attrs).validate(one(vs))
+          case AttrOneManDouble(_, _, _, vs, Some(validator), _, _, _, _)     => validator.withAttrs(attrs).validate(one(vs))
+          case AttrOneManBoolean(_, _, _, vs, Some(validator), _, _, _, _)    => validator.withAttrs(attrs).validate(one(vs))
+          case AttrOneManBigInt(_, _, _, vs, Some(validator), _, _, _, _)     => validator.withAttrs(attrs).validate(one(vs))
+          case AttrOneManBigDecimal(_, _, _, vs, Some(validator), _, _, _, _) => validator.withAttrs(attrs).validate(one(vs))
+          case AttrOneManDate(_, _, _, vs, Some(validator), _, _, _, _)       => validator.withAttrs(attrs).validate(one(vs))
+          case AttrOneManUUID(_, _, _, vs, Some(validator), _, _, _, _)       => validator.withAttrs(attrs).validate(one(vs))
+          case AttrOneManURI(_, _, _, vs, Some(validator), _, _, _, _)        => validator.withAttrs(attrs).validate(one(vs))
+          case AttrOneManByte(_, _, _, vs, Some(validator), _, _, _, _)       => validator.withAttrs(attrs).validate(one(vs))
+          case AttrOneManShort(_, _, _, vs, Some(validator), _, _, _, _)      => validator.withAttrs(attrs).validate(one(vs))
+          case AttrOneManChar(_, _, _, vs, Some(validator), _, _, _, _)       => validator.withAttrs(attrs).validate(one(vs))
+          case _                                                              => err
+        }
+        // todo: Optional?
+
+        //      // Tacit tx meta attrs can update
+        //      case a: AttrOneTac => a match {
+        //        case AttrOneTacString(_, _, _, Nil, _, _, _, _, _)     => true
+        //        case AttrOneTacInt(_, _, _, Nil, _, _, _, _, _)        => true
+        //        case AttrOneTacLong(_, _, _, Nil, _, _, _, _, _)       => true
+        //        case AttrOneTacFloat(_, _, _, Nil, _, _, _, _, _)      => true
+        //        case AttrOneTacDouble(_, _, _, Nil, _, _, _, _, _)     => true
+        //        case AttrOneTacBoolean(_, _, _, Nil, _, _, _, _, _)    => true
+        //        case AttrOneTacBigInt(_, _, _, Nil, _, _, _, _, _)     => true
+        //        case AttrOneTacBigDecimal(_, _, _, Nil, _, _, _, _, _) => true
+        //        case AttrOneTacDate(_, _, _, Nil, _, _, _, _, _)       => true
+        //        case AttrOneTacUUID(_, _, _, Nil, _, _, _, _, _)       => true
+        //        case AttrOneTacURI(_, _, _, Nil, _, _, _, _, _)        => true
+        //        case AttrOneTacByte(_, _, _, Nil, _, _, _, _, _)       => true
+        //        case AttrOneTacShort(_, _, _, Nil, _, _, _, _, _)      => true
+        //        case AttrOneTacChar(_, _, _, Nil, _, _, _, _, _)       => true
+        //        case _                                                 => false
+        //      }
+        case a: AttrSetMan => a match {
+          case AttrSetManString(_, _, _, sets, Some(validator), _, _, _, _)     => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
+          case AttrSetManInt(_, _, _, sets, Some(validator), _, _, _, _)        => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
+          case AttrSetManLong(_, _, _, sets, Some(validator), _, _, _, _)       => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
+          case AttrSetManFloat(_, _, _, sets, Some(validator), _, _, _, _)      => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
+          case AttrSetManDouble(_, _, _, sets, Some(validator), _, _, _, _)     => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
+          case AttrSetManBoolean(_, _, _, sets, Some(validator), _, _, _, _)    => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
+          case AttrSetManBigInt(_, _, _, sets, Some(validator), _, _, _, _)     => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
+          case AttrSetManBigDecimal(_, _, _, sets, Some(validator), _, _, _, _) => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
+          case AttrSetManDate(_, _, _, sets, Some(validator), _, _, _, _)       => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
+          case AttrSetManUUID(_, _, _, sets, Some(validator), _, _, _, _)       => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
+          case AttrSetManURI(_, _, _, sets, Some(validator), _, _, _, _)        => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
+          case AttrSetManByte(_, _, _, sets, Some(validator), _, _, _, _)       => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
+          case AttrSetManShort(_, _, _, sets, Some(validator), _, _, _, _)      => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
+          case AttrSetManChar(_, _, _, sets, Some(validator), _, _, _, _)       => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
+          case _                                                                => err
+        }
+        //      case a: AttrSetTac => a match {
+        //        case AttrSetTacString(_, _, _, vs, _, _, _, _, _)     => vs.isEmpty || vs.head.isEmpty
+        //        case AttrSetTacInt(_, _, _, vs, _, _, _, _, _)        => vs.isEmpty || vs.head.isEmpty
+        //        case AttrSetTacLong(_, _, _, vs, _, _, _, _, _)       => vs.isEmpty || vs.head.isEmpty
+        //        case AttrSetTacFloat(_, _, _, vs, _, _, _, _, _)      => vs.isEmpty || vs.head.isEmpty
+        //        case AttrSetTacDouble(_, _, _, vs, _, _, _, _, _)     => vs.isEmpty || vs.head.isEmpty
+        //        case AttrSetTacBoolean(_, _, _, vs, _, _, _, _, _)    => vs.isEmpty || vs.head.isEmpty
+        //        case AttrSetTacBigInt(_, _, _, vs, _, _, _, _, _)     => vs.isEmpty || vs.head.isEmpty
+        //        case AttrSetTacBigDecimal(_, _, _, vs, _, _, _, _, _) => vs.isEmpty || vs.head.isEmpty
+        //        case AttrSetTacDate(_, _, _, vs, _, _, _, _, _)       => vs.isEmpty || vs.head.isEmpty
+        //        case AttrSetTacUUID(_, _, _, vs, _, _, _, _, _)       => vs.isEmpty || vs.head.isEmpty
+        //        case AttrSetTacURI(_, _, _, vs, _, _, _, _, _)        => vs.isEmpty || vs.head.isEmpty
+        //        case AttrSetTacByte(_, _, _, vs, _, _, _, _, _)       => vs.isEmpty || vs.head.isEmpty
+        //        case AttrSetTacShort(_, _, _, vs, _, _, _, _, _)      => vs.isEmpty || vs.head.isEmpty
+        //        case AttrSetTacChar(_, _, _, vs, _, _, _, _, _)       => vs.isEmpty || vs.head.isEmpty
+        //        case _                                                => false
+        //      }
+        case _ => err
       }
-      //      // Tacit tx meta attrs can update
-      //      case a: AttrOneTac => a match {
-      //        case AttrOneTacString(_, _, _, Nil, _, _, _, _, _)     => true
-      //        case AttrOneTacInt(_, _, _, Nil, _, _, _, _, _)        => true
-      //        case AttrOneTacLong(_, _, _, Nil, _, _, _, _, _)       => true
-      //        case AttrOneTacFloat(_, _, _, Nil, _, _, _, _, _)      => true
-      //        case AttrOneTacDouble(_, _, _, Nil, _, _, _, _, _)     => true
-      //        case AttrOneTacBoolean(_, _, _, Nil, _, _, _, _, _)    => true
-      //        case AttrOneTacBigInt(_, _, _, Nil, _, _, _, _, _)     => true
-      //        case AttrOneTacBigDecimal(_, _, _, Nil, _, _, _, _, _) => true
-      //        case AttrOneTacDate(_, _, _, Nil, _, _, _, _, _)       => true
-      //        case AttrOneTacUUID(_, _, _, Nil, _, _, _, _, _)       => true
-      //        case AttrOneTacURI(_, _, _, Nil, _, _, _, _, _)        => true
-      //        case AttrOneTacByte(_, _, _, Nil, _, _, _, _, _)       => true
-      //        case AttrOneTacShort(_, _, _, Nil, _, _, _, _, _)      => true
-      //        case AttrOneTacChar(_, _, _, Nil, _, _, _, _, _)       => true
-      //        case _                                                 => false
-      //      }
-      case a: AttrSetMan => a match {
-        case AttrSetManString(_, _, _, sets, Some(validator), _, _, _, _)     => val vr = validator.validateWith(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
-        case AttrSetManInt(_, _, _, sets, Some(validator), _, _, _, _)        => val vr = validator.validateWith(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
-        case AttrSetManLong(_, _, _, sets, Some(validator), _, _, _, _)       => val vr = validator.validateWith(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
-        case AttrSetManFloat(_, _, _, sets, Some(validator), _, _, _, _)      => val vr = validator.validateWith(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
-        case AttrSetManDouble(_, _, _, sets, Some(validator), _, _, _, _)     => val vr = validator.validateWith(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
-        case AttrSetManBoolean(_, _, _, sets, Some(validator), _, _, _, _)    => val vr = validator.validateWith(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
-        case AttrSetManBigInt(_, _, _, sets, Some(validator), _, _, _, _)     => val vr = validator.validateWith(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
-        case AttrSetManBigDecimal(_, _, _, sets, Some(validator), _, _, _, _) => val vr = validator.validateWith(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
-        case AttrSetManDate(_, _, _, sets, Some(validator), _, _, _, _)       => val vr = validator.validateWith(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
-        case AttrSetManUUID(_, _, _, sets, Some(validator), _, _, _, _)       => val vr = validator.validateWith(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
-        case AttrSetManURI(_, _, _, sets, Some(validator), _, _, _, _)        => val vr = validator.validateWith(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
-        case AttrSetManByte(_, _, _, sets, Some(validator), _, _, _, _)       => val vr = validator.validateWith(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
-        case AttrSetManShort(_, _, _, sets, Some(validator), _, _, _, _)      => val vr = validator.validateWith(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
-        case AttrSetManChar(_, _, _, sets, Some(validator), _, _, _, _)       => val vr = validator.validateWith(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
-        case _                                                                => err
-      }
-      //      case a: AttrSetTac => a match {
-      //        case AttrSetTacString(_, _, _, vs, _, _, _, _, _)     => vs.isEmpty || vs.head.isEmpty
-      //        case AttrSetTacInt(_, _, _, vs, _, _, _, _, _)        => vs.isEmpty || vs.head.isEmpty
-      //        case AttrSetTacLong(_, _, _, vs, _, _, _, _, _)       => vs.isEmpty || vs.head.isEmpty
-      //        case AttrSetTacFloat(_, _, _, vs, _, _, _, _, _)      => vs.isEmpty || vs.head.isEmpty
-      //        case AttrSetTacDouble(_, _, _, vs, _, _, _, _, _)     => vs.isEmpty || vs.head.isEmpty
-      //        case AttrSetTacBoolean(_, _, _, vs, _, _, _, _, _)    => vs.isEmpty || vs.head.isEmpty
-      //        case AttrSetTacBigInt(_, _, _, vs, _, _, _, _, _)     => vs.isEmpty || vs.head.isEmpty
-      //        case AttrSetTacBigDecimal(_, _, _, vs, _, _, _, _, _) => vs.isEmpty || vs.head.isEmpty
-      //        case AttrSetTacDate(_, _, _, vs, _, _, _, _, _)       => vs.isEmpty || vs.head.isEmpty
-      //        case AttrSetTacUUID(_, _, _, vs, _, _, _, _, _)       => vs.isEmpty || vs.head.isEmpty
-      //        case AttrSetTacURI(_, _, _, vs, _, _, _, _, _)        => vs.isEmpty || vs.head.isEmpty
-      //        case AttrSetTacByte(_, _, _, vs, _, _, _, _, _)       => vs.isEmpty || vs.head.isEmpty
-      //        case AttrSetTacShort(_, _, _, vs, _, _, _, _, _)      => vs.isEmpty || vs.head.isEmpty
-      //        case AttrSetTacChar(_, _, _, vs, _, _, _, _, _)       => vs.isEmpty || vs.head.isEmpty
-      //        case _                                                => false
-      //      }
-      case _ => err
     }
   }
 

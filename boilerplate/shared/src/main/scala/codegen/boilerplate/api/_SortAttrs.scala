@@ -17,7 +17,7 @@ object _SortAttrs extends BoilerplateGenBase("SortAttrs", "/api") {
          |trait ${fileName}Ops_$arity[${`A..V`}, t, Ns[${`_, _`}]] {
          |  protected def _sort(sort: String): Ns[${`A..V`}, t]
          |}
-         |trait ${fileName}_$arity[${`A..V`}, t, Ns[${`_, _`}]] extends ${fileName}Ops_$arity[${`A..V`}, t, Ns] {
+         |trait $fileName_$arity[${`A..V`}, t, Ns[${`_, _`}]] extends ${fileName}Ops_$arity[${`A..V`}, t, Ns] {
          |  def a1: Ns[${`A..V`}, t] = _sort("a1")
          |  def a2: Ns[${`A..V`}, t] = _sort("a2")
          |  def a3: Ns[${`A..V`}, t] = _sort("a3")

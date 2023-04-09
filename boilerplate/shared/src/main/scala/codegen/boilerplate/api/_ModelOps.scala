@@ -27,7 +27,7 @@ object _ModelOps extends BoilerplateGenBase("ModelOps", "/api") {
     val nested = if (arity == 22) "" else s"\n    with NestedOp_$arity[${`A..V`}]"
     val body   =
       s"""
-         |trait ${fileName}_$arity[${`A..V`}, t, Ns[${`_, _`}]]
+         |trait $fileName_$arity[${`A..V`}, t, Ns[${`_, _`}]]
          |  extends Molecule_$n0[${`A..V`}]
          |    with ModelTransformations_
          |    with AggregatesOps_$arity[${`A..V`}, t, Ns]

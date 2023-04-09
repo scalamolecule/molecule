@@ -4,7 +4,6 @@ package molecule.base.error
 sealed trait MoleculeError extends Throwable with Product with Serializable {
   def msg: String
   override def getMessage: String = msg
-  override def toString: String = msg
 }
 
 
@@ -14,13 +13,12 @@ case class ModelError(message: String) extends MoleculeError {
 }
 
 
-case class ValidationErrors(
-  errors: Map[String, Seq[String]],
-  message: Option[String] = None
-) extends MoleculeError {
-  override def msg: String = message.toString
+case class ValidationErrors(errorMap: Map[String, Seq[String]]) extends MoleculeError {
+//  override def msg: String = "ValidationErrors with optional message: " + message + "\n" + toString
+  override def msg: String = toString
+
   override def toString: String = {
-    val errorList = errors.map { case (attr, errs) =>
+    val errorList = errorMap.map { case (attr, errs) =>
       val errs1   = errs.map(error =>
         if (error.contains('\n')) {
           val list     = error.split('\n').toList
@@ -40,8 +38,7 @@ case class ValidationErrors(
     s"""ValidationErrors(
        |  Map(
        |    $errorList
-       |  ),
-       |  $message
+       |  )
        |)""".stripMargin
   }
 }
@@ -51,7 +48,7 @@ case class InsertErrors(
   errors: Seq[(Int, Seq[InsertError])],
   message: Option[String] = None
 ) extends MoleculeError {
-  override def msg: String = message.toString
+  override def msg: String = "InsertErrors with optional message: " + message
 
   // Recurse potentially nested insert errors
   private def errorsStr(indent: Int = 0, extraPipe: Boolean = false) = {
@@ -81,22 +78,15 @@ case class InsertErrors(
   }
 
   override def toString: String = {
-    s"""InsertValidationErrors(
+    s"""InsertErrors(
        |  ${errorsStr(1, true)},
        |  $message
        |)""".stripMargin
   }
 }
 
-case class ExecutionError(
-  message: String,
-  cause: Throwable = null
-) extends MoleculeError {
-  override def msg: String = toString
 
-  override def toString: String = {
-    val stackTrace = if (cause == null) "" else
-      cause.getStackTrace.toList.mkString("\n", "\n", "")
-    message + stackTrace
-  }
+case class ExecutionError(message: String) extends MoleculeError {
+  override def msg: String = message
+  override def toString: String = message
 }

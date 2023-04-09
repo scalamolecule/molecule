@@ -156,19 +156,19 @@ object UpdateSet_eid extends DatomicTestSuite {
       "Can't update multiple values for one card-one attribute" - types { implicit conn =>
         for {
           _ <- Ns(42).ints(Seq(Set(1), Set(2))).update.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
+            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
             err ==> "Can only update one Set of values for Set attribute `Ns.ints`. Found: Set(1), Set(2)"
           }
 
           // Same as
           _ <- Ns(42).ints(Set(1), Set(2)).update.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
+            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
             err ==> "Can only update one Set of values for Set attribute `Ns.ints`. Found: Set(1), Set(2)"
           }
 
           // Same as
           _ <- Ns(42).ints(1, 2).update.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
+            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
             err ==> "Can only update one Set of values for Set attribute `Ns.ints`. Found: Set(1), Set(2)"
           }
         } yield ()

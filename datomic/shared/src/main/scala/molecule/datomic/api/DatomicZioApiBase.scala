@@ -11,7 +11,7 @@ trait DatomicZioApiBase extends PrintInspect {
   protected def moleculeError[T](result: Task[T]): ZIO[Connection, MoleculeError, T] = {
     result.mapError {
       case e: MoleculeError => e
-      case e: Throwable     => ExecutionError(e.toString, e)
+      case e: Throwable     => ExecutionError(e.toString)
     }
   }
 

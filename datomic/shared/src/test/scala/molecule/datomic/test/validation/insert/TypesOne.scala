@@ -30,7 +30,7 @@ object TypesOne extends DatomicTestSuite {
                       "Type.string",
                       Seq(
                         s"""Type.string with value `a` doesn't satisfy validation:
-                           |  _ > "a"
+                           |  _ > "b"
                            |""".stripMargin
                       ),
                       Nil // composite/nested errors
@@ -40,26 +40,13 @@ object TypesOne extends DatomicTestSuite {
               )
         }
 
-        // Isolate expected single InsertError with pattern matching
+        // Isolate expected error
         _ <- Type.string.insert("a").transact
           .map(_ ==> "Unexpected success").recover {
-          case InsertErrors(Seq((_, Seq(insertError))), _) =>
-            insertError ==> InsertError(0, 0,
-              "Type.string",
-              Seq(
-                s"""Type.string with value `a` doesn't satisfy validation:
-                   |  _ > "a"
-                   |""".stripMargin
-              ), Nil)
-        }
-
-        // Isolate expected single error alone
-        _ <- Type.string.insert("a").transact
-          .map(_ ==> "Unexpected success").recover {
-          case InsertErrors(Seq((_, Seq(InsertError(_, _, _, Seq(error), _)))), _) =>
-            error ==>
+          case InsertErrors(errors, _) =>
+            errors.head._2.head.errors.head ==>
               s"""Type.string with value `a` doesn't satisfy validation:
-                 |  _ > "a"
+                 |  _ > "b"
                  |""".stripMargin
         }
 
@@ -70,10 +57,10 @@ object TypesOne extends DatomicTestSuite {
       for {
         _ <- Type.int.insert(1).transact
           .map(_ ==> "Unexpected success").recover {
-          case InsertErrors(Seq((_, Seq(InsertError(_, _, _, Seq(error), _)))), _) =>
-            error ==>
+          case InsertErrors(errors, _) =>
+            errors.head._2.head.errors.head ==>
               s"""Type.int with value `1` doesn't satisfy validation:
-                 |  _ > 1
+                 |  _ > 2
                  |""".stripMargin
         }
       } yield ()
@@ -83,10 +70,10 @@ object TypesOne extends DatomicTestSuite {
       for {
         _ <- Type.long.insert(1L).transact
           .map(_ ==> "Unexpected success").recover {
-          case InsertErrors(Seq((_, Seq(InsertError(_, _, _, Seq(error), _)))), _) =>
-            error ==>
+          case InsertErrors(errors, _) =>
+            errors.head._2.head.errors.head ==>
               s"""Type.long with value `1` doesn't satisfy validation:
-                 |  _ > 1L
+                 |  _ > 2L
                  |""".stripMargin
         }
       } yield ()
@@ -96,10 +83,10 @@ object TypesOne extends DatomicTestSuite {
       for {
         _ <- Type.float.insert(float1).transact
           .map(_ ==> "Unexpected success").recover {
-          case InsertErrors(Seq((_, Seq(InsertError(_, _, _, Seq(error), _)))), _) =>
-            error ==>
+          case InsertErrors(errors, _) =>
+            errors.head._2.head.errors.head ==>
               s"""Type.float with value `1.1` doesn't satisfy validation:
-                 |  _ > 1.1f
+                 |  _ > 2.2f
                  |""".stripMargin
         }
       } yield ()
@@ -109,10 +96,10 @@ object TypesOne extends DatomicTestSuite {
       for {
         _ <- Type.double.insert(double1).transact
           .map(_ ==> "Unexpected success").recover {
-          case InsertErrors(Seq((_, Seq(InsertError(_, _, _, Seq(error), _)))), _) =>
-            error ==>
+          case InsertErrors(errors, _) =>
+            errors.head._2.head.errors.head ==>
               s"""Type.double with value `1.1` doesn't satisfy validation:
-                 |  _ > 1.1
+                 |  _ > 2.2
                  |""".stripMargin
         }
       } yield ()
@@ -122,8 +109,8 @@ object TypesOne extends DatomicTestSuite {
       for {
         _ <- Type.boolean.insert(true).transact
           .map(_ ==> "Unexpected success").recover {
-          case InsertErrors(Seq((_, Seq(InsertError(_, _, _, Seq(error), _)))), _) =>
-            error ==>
+          case InsertErrors(errors, _) =>
+            errors.head._2.head.errors.head ==>
               s"""Type.boolean with value `true` doesn't satisfy validation:
                  |  _ == false
                  |""".stripMargin
@@ -135,10 +122,10 @@ object TypesOne extends DatomicTestSuite {
       for {
         _ <- Type.bigInt.insert(bigInt1).transact
           .map(_ ==> "Unexpected success").recover {
-          case InsertErrors(Seq((_, Seq(InsertError(_, _, _, Seq(error), _)))), _) =>
-            error ==>
+          case InsertErrors(errors, _) =>
+            errors.head._2.head.errors.head ==>
               s"""Type.bigInt with value `1` doesn't satisfy validation:
-                 |  _ > BigInt(1)
+                 |  _ > BigInt(2)
                  |""".stripMargin
         }
       } yield ()
@@ -148,10 +135,10 @@ object TypesOne extends DatomicTestSuite {
       for {
         _ <- Type.bigDecimal.insert(bigDecimal1).transact
           .map(_ ==> "Unexpected success").recover {
-          case InsertErrors(Seq((_, Seq(InsertError(_, _, _, Seq(error), _)))), _) =>
-            error ==>
+          case InsertErrors(errors, _) =>
+            errors.head._2.head.errors.head ==>
               s"""Type.bigDecimal with value `1.1` doesn't satisfy validation:
-                 |  _ > BigDecimal(1.1)
+                 |  _ > BigDecimal(2.2)
                  |""".stripMargin
         }
       } yield ()
@@ -161,8 +148,8 @@ object TypesOne extends DatomicTestSuite {
       for {
         _ <- Type.date.insert(date1).transact
           .map(_ ==> "Unexpected success").recover {
-          case InsertErrors(Seq((_, Seq(InsertError(_, _, _, Seq(error), _)))), _) =>
-            error ==>
+          case InsertErrors(errors, _) =>
+            errors.head._2.head.errors.head ==>
               s"""Type.date with value `$date1` doesn't satisfy validation:
                  |  _.after(new Date(993942000000L))
                  |""".stripMargin
@@ -174,8 +161,8 @@ object TypesOne extends DatomicTestSuite {
       for {
         _ <- Type.uuid.insert(UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")).transact
           .map(_ ==> "Unexpected success").recover {
-          case InsertErrors(Seq((_, Seq(InsertError(_, _, _, Seq(error), _)))), _) =>
-            error ==>
+          case InsertErrors(errors, _) =>
+            errors.head._2.head.errors.head ==>
               s"""Type.uuid with value `aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa` doesn't satisfy validation:
                  |  _.toString != "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
                  |""".stripMargin
@@ -188,10 +175,10 @@ object TypesOne extends DatomicTestSuite {
       for {
         _ <- Type.uri.insert(uri).transact
           .map(_ ==> "Unexpected success").recover {
-          case InsertErrors(Seq((_, Seq(InsertError(_, _, _, Seq(error), _)))), _) =>
-            error ==>
+          case InsertErrors(errors, _) =>
+            errors.head._2.head.errors.head ==>
               s"""Type.uri with value `x` doesn't satisfy validation:
-                 |  _.toString.length > 1
+                 |  _.toString.length > 2
                  |""".stripMargin
         }
       } yield ()
@@ -201,10 +188,10 @@ object TypesOne extends DatomicTestSuite {
       for {
         _ <- Type.byte.insert(byte1).transact
           .map(_ ==> "Unexpected success").recover {
-          case InsertErrors(Seq((_, Seq(InsertError(_, _, _, Seq(error), _)))), _) =>
-            error ==>
+          case InsertErrors(errors, _) =>
+            errors.head._2.head.errors.head ==>
               s"""Type.byte with value `$byte1` doesn't satisfy validation:
-                 |  _ > $byte1
+                 |  _ > $byte2
                  |""".stripMargin
         }
       } yield ()
@@ -214,10 +201,10 @@ object TypesOne extends DatomicTestSuite {
       for {
         _ <- Type.short.insert(short1).transact
           .map(_ ==> "Unexpected success").recover {
-          case InsertErrors(Seq((_, Seq(InsertError(_, _, _, Seq(error), _)))), _) =>
-            error ==>
+          case InsertErrors(errors, _) =>
+            errors.head._2.head.errors.head ==>
               s"""Type.short with value `$short1` doesn't satisfy validation:
-                 |  _ > $short1
+                 |  _ > $short2
                  |""".stripMargin
         }
       } yield ()
@@ -227,10 +214,10 @@ object TypesOne extends DatomicTestSuite {
       for {
         _ <- Type.char.insert('a').transact
           .map(_ ==> "Unexpected success").recover {
-          case InsertErrors(Seq((_, Seq(InsertError(_, _, _, Seq(error), _)))), _) =>
-            error ==>
+          case InsertErrors(errors, _) =>
+            errors.head._2.head.errors.head ==>
               s"""Type.char with value `a` doesn't satisfy validation:
-                 |  _ > 'a'
+                 |  _ > 'b'
                  |""".stripMargin
         }
       } yield ()
@@ -240,10 +227,10 @@ object TypesOne extends DatomicTestSuite {
       for {
         _ <- Type.ref.insert(1L).transact
           .map(_ ==> "Unexpected success").recover {
-          case InsertErrors(Seq((_, Seq(InsertError(_, _, _, Seq(error), _)))), _) =>
-            error ==>
+          case InsertErrors(errors, _) =>
+            errors.head._2.head.errors.head ==>
               s"""Type.ref with value `1` doesn't satisfy validation:
-                 |  _ > 1L
+                 |  _ > 2L
                  |""".stripMargin
         }
       } yield ()

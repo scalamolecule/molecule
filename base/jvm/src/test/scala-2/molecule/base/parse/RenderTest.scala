@@ -25,7 +25,7 @@ object RenderTest extends TestSuite {
       //      Dsl(schemaNss, "", schemaNss.parts.head.nss(2)).get ==> "check"
 
       //      Dsl(typesNss, "", typesNss.parts.head.nss(0)).get ==> "check"
-      Dsl(validationNss, "", validationNss.parts.head.nss(12)).get ==> "check"
+      Dsl(validationNss, "", validationNss.parts.head.nss(4)).get ==> "check"
 
       //            validationNss ==> "check"
       //      validationNss.parts.head.nss(11) ==> "check"

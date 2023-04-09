@@ -18,7 +18,7 @@ object _ExprMapTac extends BoilerplateGenBase("exprMapT", "/api/expression") {
   case class Trait(arity: Int) extends TemplateVals(arity) {
     val body =
       s"""
-         |trait ${fileName}_$arity[Attr, t${`, A..V`}, $nsIn] {
+         |trait $fileName_$arity[Attr, t${`, A..V`}, $nsIn] {
          |  def apply  ()                                                                   : $nsOut          = ???
          |  def apply  (pair : (String, t), pairs: (String, t)*)                            : $nsOut with Vs  = ???
          |  def apply  (pairs: Iterable[(String, t)])                                       : $nsOut with CVs = ???

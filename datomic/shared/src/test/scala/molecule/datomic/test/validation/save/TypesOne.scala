@@ -19,12 +19,12 @@ object TypesOne extends DatomicTestSuite {
       for {
         _ <- Type.string("a").save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap ==>
               Map(
                 "Type.string" -> Seq(
                   s"""Type.string with value `a` doesn't satisfy validation:
-                     |  _ > "a"
+                     |  _ > "b"
                      |""".stripMargin
                 )
               )
@@ -34,10 +34,10 @@ object TypesOne extends DatomicTestSuite {
         // (See ValidationFormatting tests for multi-error validations)
         _ <- Type.string("a").save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap.head._2.head ==>
               s"""Type.string with value `a` doesn't satisfy validation:
-                 |  _ > "a"
+                 |  _ > "b"
                  |""".stripMargin
         }
       } yield ()
@@ -47,10 +47,10 @@ object TypesOne extends DatomicTestSuite {
       for {
         _ <- Type.int(1).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap.head._2.head ==>
               s"""Type.int with value `1` doesn't satisfy validation:
-                 |  _ > 1
+                 |  _ > 2
                  |""".stripMargin
         }
       } yield ()
@@ -60,10 +60,10 @@ object TypesOne extends DatomicTestSuite {
       for {
         _ <- Type.long(1L).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap.head._2.head ==>
               s"""Type.long with value `1` doesn't satisfy validation:
-                 |  _ > 1L
+                 |  _ > 2L
                  |""".stripMargin
         }
       } yield ()
@@ -73,10 +73,10 @@ object TypesOne extends DatomicTestSuite {
       for {
         _ <- Type.float(float1).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap.head._2.head ==>
               s"""Type.float with value `1.1` doesn't satisfy validation:
-                 |  _ > 1.1f
+                 |  _ > 2.2f
                  |""".stripMargin
         }
       } yield ()
@@ -86,10 +86,10 @@ object TypesOne extends DatomicTestSuite {
       for {
         _ <- Type.double(double1).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap.head._2.head ==>
               s"""Type.double with value `1.1` doesn't satisfy validation:
-                 |  _ > 1.1
+                 |  _ > 2.2
                  |""".stripMargin
         }
       } yield ()
@@ -99,7 +99,7 @@ object TypesOne extends DatomicTestSuite {
       for {
         _ <- Type.boolean(true).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap.head._2.head ==>
               s"""Type.boolean with value `true` doesn't satisfy validation:
                  |  _ == false
@@ -112,10 +112,10 @@ object TypesOne extends DatomicTestSuite {
       for {
         _ <- Type.bigInt(bigInt1).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap.head._2.head ==>
               s"""Type.bigInt with value `1` doesn't satisfy validation:
-                 |  _ > BigInt(1)
+                 |  _ > BigInt(2)
                  |""".stripMargin
         }
       } yield ()
@@ -125,10 +125,10 @@ object TypesOne extends DatomicTestSuite {
       for {
         _ <- Type.bigDecimal(bigDecimal1).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap.head._2.head ==>
               s"""Type.bigDecimal with value `1.1` doesn't satisfy validation:
-                 |  _ > BigDecimal(1.1)
+                 |  _ > BigDecimal(2.2)
                  |""".stripMargin
         }
       } yield ()
@@ -138,7 +138,7 @@ object TypesOne extends DatomicTestSuite {
       for {
         _ <- Type.date(date1).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap.head._2.head ==>
               s"""Type.date with value `$date1` doesn't satisfy validation:
                  |  _.after(new Date(993942000000L))
@@ -151,7 +151,7 @@ object TypesOne extends DatomicTestSuite {
       for {
         _ <- Type.uuid(UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap.head._2.head ==>
               s"""Type.uuid with value `aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa` doesn't satisfy validation:
                  |  _.toString != "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
@@ -165,10 +165,10 @@ object TypesOne extends DatomicTestSuite {
       for {
         _ <- Type.uri(uri).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap.head._2.head ==>
               s"""Type.uri with value `x` doesn't satisfy validation:
-                 |  _.toString.length > 1
+                 |  _.toString.length > 2
                  |""".stripMargin
         }
       } yield ()
@@ -178,10 +178,10 @@ object TypesOne extends DatomicTestSuite {
       for {
         _ <- Type.byte(byte1).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap.head._2.head ==>
               s"""Type.byte with value `$byte1` doesn't satisfy validation:
-                 |  _ > $byte1
+                 |  _ > $byte2
                  |""".stripMargin
         }
       } yield ()
@@ -191,10 +191,10 @@ object TypesOne extends DatomicTestSuite {
       for {
         _ <- Type.short(short1).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap.head._2.head ==>
               s"""Type.short with value `$short1` doesn't satisfy validation:
-                 |  _ > $short1
+                 |  _ > $short2
                  |""".stripMargin
         }
       } yield ()
@@ -204,10 +204,10 @@ object TypesOne extends DatomicTestSuite {
       for {
         _ <- Type.char('a').save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap.head._2.head ==>
               s"""Type.char with value `a` doesn't satisfy validation:
-                 |  _ > 'a'
+                 |  _ > 'b'
                  |""".stripMargin
         }
       } yield ()
@@ -217,10 +217,10 @@ object TypesOne extends DatomicTestSuite {
       for {
         _ <- Type.ref(1L).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap.head._2.head ==>
               s"""Type.ref with value `1` doesn't satisfy validation:
-                 |  _ > 1L
+                 |  _ > 2L
                  |""".stripMargin
         }
       } yield ()

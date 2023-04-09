@@ -29,7 +29,7 @@ trait DatomicApiZio extends DatomicZioApiBase with ApiZio with FutureUtils {
           conn.rpc.subscribe[Tpl](conn.proxy, q.elements, q.limit, callback)
         } catch {
           case e: MoleculeError => ZIO.fail(e)
-          case e: Throwable     => ZIO.fail(ExecutionError(e.toString, e))
+          case e: Throwable     => ZIO.fail(ExecutionError(e.toString))
         }
       }
     }

@@ -101,12 +101,12 @@ object UpdateSetOps_Int extends DatomicTestSuite {
 
         // Can't swap duplicate from/to values
         _ <- Ns(42).ints.swap(int1 -> int2, int1 -> int3).update.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
+            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
           err ==> "Can't swap from duplicate retract values."
         }
 
         _ <- Ns(42).ints.swap(int1 -> int3, int2 -> int3).update.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
+            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
           err ==> "Can't swap to duplicate replacement values."
         }
       } yield ()

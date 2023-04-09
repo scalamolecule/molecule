@@ -92,7 +92,7 @@ abstract class RpcHandlers(rpc: MoleculeRpc) extends MoleculeLogging with Serial
           left(e.copy(message = msg + e.message))
         case e: ValidationErrors =>
           logger.error(e.toString)
-          left(e.copy(message = Some(msg + e.msg)))
+          left(e)
         case e: InsertErrors     =>
           logger.trace(e)
           left(e.copy(message = Some(msg + e.msg)))
@@ -102,7 +102,7 @@ abstract class RpcHandlers(rpc: MoleculeRpc) extends MoleculeLogging with Serial
         case e: Throwable        =>
           logger.error(e.toString)
           logger.error(e.getStackTrace.mkString("\n"))
-          left(ExecutionError(msg + e.toString, e))
+          left(ExecutionError(msg + e.toString))
       }
   } catch {
     case e: ModelError       =>
@@ -110,7 +110,7 @@ abstract class RpcHandlers(rpc: MoleculeRpc) extends MoleculeLogging with Serial
       left(e.copy(message = msg + e.message))
     case e: ValidationErrors =>
       logger.trace(e)
-      left(e.copy(message = Some(msg + e.msg)))
+      left(e)
     case e: InsertErrors =>
       logger.trace(e)
       left(e.copy(message = Some(msg + e.msg)))
@@ -120,6 +120,6 @@ abstract class RpcHandlers(rpc: MoleculeRpc) extends MoleculeLogging with Serial
     case e: Throwable        =>
       logger.error(e.toString)
       logger.error(e.getStackTrace.mkString("\n"))
-      left(ExecutionError(msg + e.toString, e))
+      left(ExecutionError(msg + e.toString))
   }
 }

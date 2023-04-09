@@ -87,7 +87,7 @@ object FlatRefs extends DatomicTestSuite {
 
         // Saving individual ref ids (not in a Set) is not allowed
         _ <- Ns.i(0).rs1(b1, b2).save.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
+            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
           err ==> "Can only save one Set of values for Set attribute `Ns.rs1`. " +
             s"Found: Set($b1), Set($b2)"
         }

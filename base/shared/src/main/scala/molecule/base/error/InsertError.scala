@@ -23,17 +23,9 @@ case class InsertError(
         if (error.contains('\n')) {
           val list     = error.split('\n').toList
           val indented = if (extraPipe) {
-            list.mkString(
-              "",
-              s"\n||$s       |",
-              s"\n||$s       |"
-            )
+            list.mkString("", s"\n||$s       |", "")
           } else {
-            list.mkString(
-              "",
-              s"\n|$s       |",
-              s"\n|$s       |"
-            )
+            list.mkString("", s"\n|$s       |", "")
           }
           s"""s\"\"\"$indented\"\"\".stripMargin"""
         } else {

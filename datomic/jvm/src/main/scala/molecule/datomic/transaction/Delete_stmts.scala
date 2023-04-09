@@ -4,7 +4,8 @@ import datomic.Peer
 import molecule.base.error.ExecutionError
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
-import molecule.core.transaction.{DeleteExtraction, DeleteOps}
+import molecule.core.transaction.DeleteExtraction
+import molecule.core.transaction.ops.DeleteOps
 import molecule.datomic.facade.DatomicConn_JVM
 import molecule.datomic.query.DatomicModel2Query
 import scala.collection.mutable
@@ -14,7 +15,8 @@ trait Delete_stmts extends DatomicTxBase_JVM with DeleteOps with MoleculeLogging
 
   def getStmtsData(
     conn: DatomicConn_JVM,
-    elements: List[Element]
+    elements: List[Element],
+    debug: Boolean = true
   ): Data = {
     initTxBase(elements)
     val (eids, filterElements) = resolve(elements, Nil, Nil, true)
@@ -68,10 +70,10 @@ trait Delete_stmts extends DatomicTxBase_JVM with DeleteOps with MoleculeLogging
         }
       }
     }
-
-    val deleteStrs = "DELETE:" +: elements :+ "" :+ stmts.toArray().mkString("\n")
-    logger.debug(deleteStrs.mkString("\n").trim)
-
+    if (debug) {
+      val deleteStrs = "DELETE:" +: elements :+ "" :+ stmts.toArray().mkString("\n")
+      logger.debug(deleteStrs.mkString("\n").trim)
+    }
     stmts
   }
 }

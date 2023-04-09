@@ -1,6 +1,6 @@
 package molecule.base.codegen.render
 
-import molecule.base.ast.SchemaAST.{MetaAttr, MetaNs, MetaSchema}
+import molecule.base.ast.SchemaAST._
 
 
 case class Dsl(schema: MetaSchema, partPrefix: String, namespace: MetaNs)
@@ -34,8 +34,10 @@ case class Dsl(schema: MetaSchema, partPrefix: String, namespace: MetaNs)
       case MetaAttr(attr, card, tpe, refNs, _, _, _, _, valueAttrs, validations) if !genericAttrs.contains(attr) =>
         val valids  = if (validations.nonEmpty) {
           val valueAttrMetas = attrsCustom.collect {
-            case MetaAttr(attr1, card, tpe, _, _, _, _, _, _, _)
-              if valueAttrs.contains(attr1) => attr1 -> s"Attr${card.marker}Man$tpe"
+            case MetaAttr(attr1, card1, tpe1, _, _, _, _, _, _, _)
+              if valueAttrs.contains(attr1) =>
+              val fullTpe = if (card1.isInstanceOf[CardOne.type]) tpe1 else s"Set[$tpe1]"
+              (attr1, fullTpe, s"Attr${card1.marker}Man$tpe1", s"${card1.marker}$tpe1")
           }.sortBy(_._1)
           vas += validationExtractor.validationMethod(attr, tpe, validations, valueAttrMetas)
           if (valueAttrs.isEmpty) {

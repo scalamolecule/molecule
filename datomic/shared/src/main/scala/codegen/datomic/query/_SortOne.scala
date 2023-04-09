@@ -16,7 +16,7 @@ object _SortOne extends DatomicGenBase("SortOne", "/query") {
        |import molecule.boilerplate.ast.Model._
        |
        |
-       |trait ${fileName}_[Tpl] { self: Base[Tpl] =>
+       |trait $fileName_[Tpl] { self: Base[Tpl] =>
        |$sorters
        |}""".stripMargin
   }

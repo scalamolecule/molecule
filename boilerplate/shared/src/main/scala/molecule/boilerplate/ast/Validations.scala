@@ -8,76 +8,91 @@ import molecule.boilerplate.ast.Model._
 trait Validations {
   
   sealed trait Validator {
-    def validateWith(attrs: Seq[Attr]): Validator
+    def withAttrs(_attrs: Seq[Attr]): Validator
+    def withValues(_values: Seq[Value]): Validator
   }
 
-  case class ValidateString(attrs: Seq[Attr] = Nil) extends Validator {
-    override def validateWith(attrs: Seq[Attr]): ValidateString = ???
-    def validate(v: String): Seq[String] = Nil
+  case class ValidateString(_attrs: Seq[Attr] = Nil, _values: Seq[Value] = Nil) extends Validator {
+    override def withAttrs(_attrs: Seq[Attr]): ValidateString = ???
+    override def withValues(_values: Seq[Value]): ValidateString = ???
+    def validate(v: String): Seq[String] = ???
   }
 
-  case class ValidateInt(attrs: Seq[Attr] = Nil) extends Validator {
-    override def validateWith(attrs: Seq[Attr]): ValidateInt = ???
-    def validate(v: Int): Seq[String] = Nil
+  case class ValidateInt(_attrs: Seq[Attr] = Nil, _values: Seq[Value] = Nil) extends Validator {
+    override def withAttrs(_attrs: Seq[Attr]): ValidateInt = ???
+    override def withValues(_values: Seq[Value]): ValidateInt = ???
+    def validate(v: Int): Seq[String] = ???
   }
 
-  case class ValidateLong(attrs: Seq[Attr] = Nil) extends Validator {
-    override def validateWith(attrs: Seq[Attr]): ValidateLong = ???
-    def validate(v: Long): Seq[String] = Nil
+  case class ValidateLong(_attrs: Seq[Attr] = Nil, _values: Seq[Value] = Nil) extends Validator {
+    override def withAttrs(_attrs: Seq[Attr]): ValidateLong = ???
+    override def withValues(_values: Seq[Value]): ValidateLong = ???
+    def validate(v: Long): Seq[String] = ???
   }
 
-  case class ValidateFloat(attrs: Seq[Attr] = Nil) extends Validator {
-    override def validateWith(attrs: Seq[Attr]): ValidateFloat = ???
-    def validate(v: Float): Seq[String] = Nil
+  case class ValidateFloat(_attrs: Seq[Attr] = Nil, _values: Seq[Value] = Nil) extends Validator {
+    override def withAttrs(_attrs: Seq[Attr]): ValidateFloat = ???
+    override def withValues(_values: Seq[Value]): ValidateFloat = ???
+    def validate(v: Float): Seq[String] = ???
   }
 
-  case class ValidateDouble(attrs: Seq[Attr] = Nil) extends Validator {
-    override def validateWith(attrs: Seq[Attr]): ValidateDouble = ???
-    def validate(v: Double): Seq[String] = Nil
+  case class ValidateDouble(_attrs: Seq[Attr] = Nil, _values: Seq[Value] = Nil) extends Validator {
+    override def withAttrs(_attrs: Seq[Attr]): ValidateDouble = ???
+    override def withValues(_values: Seq[Value]): ValidateDouble = ???
+    def validate(v: Double): Seq[String] = ???
   }
 
-  case class ValidateBoolean(attrs: Seq[Attr] = Nil) extends Validator {
-    override def validateWith(attrs: Seq[Attr]): ValidateBoolean = ???
-    def validate(v: Boolean): Seq[String] = Nil
+  case class ValidateBoolean(_attrs: Seq[Attr] = Nil, _values: Seq[Value] = Nil) extends Validator {
+    override def withAttrs(_attrs: Seq[Attr]): ValidateBoolean = ???
+    override def withValues(_values: Seq[Value]): ValidateBoolean = ???
+    def validate(v: Boolean): Seq[String] = ???
   }
 
-  case class ValidateBigInt(attrs: Seq[Attr] = Nil) extends Validator {
-    override def validateWith(attrs: Seq[Attr]): ValidateBigInt = ???
-    def validate(v: BigInt): Seq[String] = Nil
+  case class ValidateBigInt(_attrs: Seq[Attr] = Nil, _values: Seq[Value] = Nil) extends Validator {
+    override def withAttrs(_attrs: Seq[Attr]): ValidateBigInt = ???
+    override def withValues(_values: Seq[Value]): ValidateBigInt = ???
+    def validate(v: BigInt): Seq[String] = ???
   }
 
-  case class ValidateBigDecimal(attrs: Seq[Attr] = Nil) extends Validator {
-    override def validateWith(attrs: Seq[Attr]): ValidateBigDecimal = ???
-    def validate(v: BigDecimal): Seq[String] = Nil
+  case class ValidateBigDecimal(_attrs: Seq[Attr] = Nil, _values: Seq[Value] = Nil) extends Validator {
+    override def withAttrs(_attrs: Seq[Attr]): ValidateBigDecimal = ???
+    override def withValues(_values: Seq[Value]): ValidateBigDecimal = ???
+    def validate(v: BigDecimal): Seq[String] = ???
   }
 
-  case class ValidateDate(attrs: Seq[Attr] = Nil) extends Validator {
-    override def validateWith(attrs: Seq[Attr]): ValidateDate = ???
-    def validate(v: Date): Seq[String] = Nil
+  case class ValidateDate(_attrs: Seq[Attr] = Nil, _values: Seq[Value] = Nil) extends Validator {
+    override def withAttrs(_attrs: Seq[Attr]): ValidateDate = ???
+    override def withValues(_values: Seq[Value]): ValidateDate = ???
+    def validate(v: Date): Seq[String] = ???
   }
 
-  case class ValidateUUID(attrs: Seq[Attr] = Nil) extends Validator {
-    override def validateWith(attrs: Seq[Attr]): ValidateUUID = ???
-    def validate(v: UUID): Seq[String] = Nil
+  case class ValidateUUID(_attrs: Seq[Attr] = Nil, _values: Seq[Value] = Nil) extends Validator {
+    override def withAttrs(_attrs: Seq[Attr]): ValidateUUID = ???
+    override def withValues(_values: Seq[Value]): ValidateUUID = ???
+    def validate(v: UUID): Seq[String] = ???
   }
 
-  case class ValidateURI(attrs: Seq[Attr] = Nil) extends Validator {
-    override def validateWith(attrs: Seq[Attr]): ValidateURI = ???
-    def validate(v: URI): Seq[String] = Nil
+  case class ValidateURI(_attrs: Seq[Attr] = Nil, _values: Seq[Value] = Nil) extends Validator {
+    override def withAttrs(_attrs: Seq[Attr]): ValidateURI = ???
+    override def withValues(_values: Seq[Value]): ValidateURI = ???
+    def validate(v: URI): Seq[String] = ???
   }
 
-  case class ValidateByte(attrs: Seq[Attr] = Nil) extends Validator {
-    override def validateWith(attrs: Seq[Attr]): ValidateByte = ???
-    def validate(v: Byte): Seq[String] = Nil
+  case class ValidateByte(_attrs: Seq[Attr] = Nil, _values: Seq[Value] = Nil) extends Validator {
+    override def withAttrs(_attrs: Seq[Attr]): ValidateByte = ???
+    override def withValues(_values: Seq[Value]): ValidateByte = ???
+    def validate(v: Byte): Seq[String] = ???
   }
 
-  case class ValidateShort(attrs: Seq[Attr] = Nil) extends Validator {
-    override def validateWith(attrs: Seq[Attr]): ValidateShort = ???
-    def validate(v: Short): Seq[String] = Nil
+  case class ValidateShort(_attrs: Seq[Attr] = Nil, _values: Seq[Value] = Nil) extends Validator {
+    override def withAttrs(_attrs: Seq[Attr]): ValidateShort = ???
+    override def withValues(_values: Seq[Value]): ValidateShort = ???
+    def validate(v: Short): Seq[String] = ???
   }
 
-  case class ValidateChar(attrs: Seq[Attr] = Nil) extends Validator {
-    override def validateWith(attrs: Seq[Attr]): ValidateChar = ???
-    def validate(v: Char): Seq[String] = Nil
+  case class ValidateChar(_attrs: Seq[Attr] = Nil, _values: Seq[Value] = Nil) extends Validator {
+    override def withAttrs(_attrs: Seq[Attr]): ValidateChar = ???
+    override def withValues(_values: Seq[Value]): ValidateChar = ???
+    def validate(v: Char): Seq[String] = ???
   }
 }

@@ -17,21 +17,21 @@ object TxMetaData extends DatomicTestSuite {
         // Main data invalid
         _ <- Type.int(0).Tx(Enum.luckyNumber_(7)).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap ==>
               Map(
                 "Type.int" -> Seq(
                   s"""Type.int with value `0` doesn't satisfy validation:
-                     |  _ > 1
+                     |  _ > 2
                      |""".stripMargin
                 )
               )
         }
 
         // Tx meta data invalid
-        _ <- Type.int(2).Tx(Enum.luckyNumber_(0)).save.transact
+        _ <- Type.int(3).Tx(Enum.luckyNumber_(0)).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap ==>
               Map(
                 "Enum.luckyNumber" -> Seq(
@@ -43,12 +43,12 @@ object TxMetaData extends DatomicTestSuite {
         // Main data and tx meta data invalid
         _ <- Type.int(0).Tx(Enum.luckyNumber_(0)).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap ==>
               Map(
                 "Type.int" -> Seq(
                   s"""Type.int with value `0` doesn't satisfy validation:
-                     |  _ > 1
+                     |  _ > 2
                      |""".stripMargin
                 ),
                 "Enum.luckyNumber" -> Seq(
@@ -79,7 +79,7 @@ object TxMetaData extends DatomicTestSuite {
                     "Type.int",
                     Seq(
                       s"""Type.int with value `-1` doesn't satisfy validation:
-                         |  _ > 1
+                         |  _ > 2
                          |""".stripMargin
                     ),
                     Seq()
@@ -132,7 +132,7 @@ object TxMetaData extends DatomicTestSuite {
                     "Type.int",
                     Seq(
                       s"""Type.int with value `-1` doesn't satisfy validation:
-                         |  _ > 1
+                         |  _ > 2
                          |""".stripMargin
                     ),
                     Seq()
@@ -162,13 +162,13 @@ object TxMetaData extends DatomicTestSuite {
     "Update" - validation { implicit conn =>
       for {
         // Save valid tx meta data and get transaction entity id
-        tx <- Type.int(2).Tx(Enum.luckyNumber_(7)).save.transact.map(_.tx)
+        tx <- Type.int(3).Tx(Enum.luckyNumber_(7)).save.transact.map(_.tx)
 
         // Update transaction meta data with invalid value
         // (like updating any other values)
         _ <- Enum(tx).luckyNumber(2).update.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap ==>
               Map(
                 "Enum.luckyNumber" -> Seq(

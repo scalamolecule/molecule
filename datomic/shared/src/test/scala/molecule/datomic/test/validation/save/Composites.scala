@@ -17,21 +17,21 @@ object Composites extends DatomicTestSuite {
         // bad, ok
         _ <- (Type.int(1) + Enum.luckyNumber(7)).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap ==>
               Map(
                 "Type.int" -> Seq(
                   s"""Type.int with value `1` doesn't satisfy validation:
-                     |  _ > 1
+                     |  _ > 2
                      |""".stripMargin
                 )
               )
         }
 
         // ok, bad
-        _ <- (Type.int(2) + Enum.luckyNumber(0)).save.transact
+        _ <- (Type.int(3) + Enum.luckyNumber(0)).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap ==>
               Map(
                 "Enum.luckyNumber" -> Seq(
@@ -43,12 +43,12 @@ object Composites extends DatomicTestSuite {
         // bad, bad
         _ <- (Type.int(1) + Enum.luckyNumber(0)).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap ==>
               Map(
                 "Type.int" -> Seq(
                   s"""Type.int with value `1` doesn't satisfy validation:
-                     |  _ > 1
+                     |  _ > 2
                      |""".stripMargin
                 ),
                 "Enum.luckyNumber" -> Seq(
@@ -63,37 +63,37 @@ object Composites extends DatomicTestSuite {
     "2 + 1" - validation { implicit conn =>
       for {
         // (bad, ok), ok
-        _ <- (Type.int(1).string("b") + Enum.luckyNumber(7)).save.transact
+        _ <- (Type.int(1).string("c") + Enum.luckyNumber(7)).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap ==>
               Map(
                 "Type.int" -> Seq(
                   s"""Type.int with value `1` doesn't satisfy validation:
-                     |  _ > 1
+                     |  _ > 2
                      |""".stripMargin
                 )
               )
         }
 
         // (ok, bad), ok
-        _ <- (Type.int(2).string("a") + Enum.luckyNumber(7)).save.transact
+        _ <- (Type.int(3).string("a") + Enum.luckyNumber(7)).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap ==>
               Map(
                 "Type.string" -> Seq(
                   s"""Type.string with value `a` doesn't satisfy validation:
-                     |  _ > "a"
+                     |  _ > "b"
                      |""".stripMargin
                 )
               )
         }
 
         // (ok, ok), bad
-        _ <- (Type.int(2).string("b") + Enum.luckyNumber(0)).save.transact
+        _ <- (Type.int(3).string("c") + Enum.luckyNumber(0)).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap ==>
               Map(
                 "Enum.luckyNumber" -> Seq(
@@ -105,31 +105,31 @@ object Composites extends DatomicTestSuite {
         // (bad, bad), ok
         _ <- (Type.int(1).string("a") + Enum.luckyNumber(7)).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap ==>
               Map(
                 "Type.int" -> Seq(
                   s"""Type.int with value `1` doesn't satisfy validation:
-                     |  _ > 1
+                     |  _ > 2
                      |""".stripMargin
                 ),
                 "Type.string" -> Seq(
                   s"""Type.string with value `a` doesn't satisfy validation:
-                     |  _ > "a"
+                     |  _ > "b"
                      |""".stripMargin
                 )
               )
         }
 
         // (bad, ok), bad
-        _ <- (Type.int(1).string("b") + Enum.luckyNumber(0)).save.transact
+        _ <- (Type.int(1).string("c") + Enum.luckyNumber(0)).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap ==>
               Map(
                 "Type.int" -> Seq(
                   s"""Type.int with value `1` doesn't satisfy validation:
-                     |  _ > 1
+                     |  _ > 2
                      |""".stripMargin
                 ),
                 "Enum.luckyNumber" -> Seq(
@@ -139,14 +139,14 @@ object Composites extends DatomicTestSuite {
         }
 
         // (ok, bad), bad
-        _ <- (Type.int(2).string("a") + Enum.luckyNumber(0)).save.transact
+        _ <- (Type.int(3).string("a") + Enum.luckyNumber(0)).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap ==>
               Map(
                 "Type.string" -> Seq(
                   s"""Type.string with value `a` doesn't satisfy validation:
-                     |  _ > "a"
+                     |  _ > "b"
                      |""".stripMargin
                 ),
                 "Enum.luckyNumber" -> Seq(
@@ -158,17 +158,17 @@ object Composites extends DatomicTestSuite {
         // (bad, bad), bad
         _ <- (Type.int(1).string("a") + Enum.luckyNumber(0)).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap ==>
               Map(
                 "Type.int" -> Seq(
                   s"""Type.int with value `1` doesn't satisfy validation:
-                     |  _ > 1
+                     |  _ > 2
                      |""".stripMargin
                 ),
                 "Type.string" -> Seq(
                   s"""Type.string with value `a` doesn't satisfy validation:
-                     |  _ > "a"
+                     |  _ > "b"
                      |""".stripMargin
                 ),
                 "Enum.luckyNumber" -> Seq(
@@ -183,37 +183,37 @@ object Composites extends DatomicTestSuite {
     "1 + 2" - validation { implicit conn =>
       for {
         // ok, (bad, ok)
-        _ <- (Enum.luckyNumber(7) + Type.int(1).string("b")).save.transact
+        _ <- (Enum.luckyNumber(7) + Type.int(1).string("c")).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap ==>
               Map(
                 "Type.int" -> Seq(
                   s"""Type.int with value `1` doesn't satisfy validation:
-                     |  _ > 1
+                     |  _ > 2
                      |""".stripMargin
                 )
               )
         }
 
         // ok, (ok, bad)
-        _ <- (Enum.luckyNumber(7) + Type.int(2).string("a")).save.transact
+        _ <- (Enum.luckyNumber(7) + Type.int(3).string("a")).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap ==>
               Map(
                 "Type.string" -> Seq(
                   s"""Type.string with value `a` doesn't satisfy validation:
-                     |  _ > "a"
+                     |  _ > "b"
                      |""".stripMargin
                 )
               )
         }
 
         // bad, (ok, ok)
-        _ <- (Enum.luckyNumber(0) + Type.int(2).string("b")).save.transact
+        _ <- (Enum.luckyNumber(0) + Type.int(3).string("c")).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap ==>
               Map(
                 "Enum.luckyNumber" -> Seq(
@@ -225,26 +225,26 @@ object Composites extends DatomicTestSuite {
         // ok, (bad, bad)
         _ <- (Enum.luckyNumber(7) + Type.int(1).string("a")).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap ==>
               Map(
                 "Type.int" -> Seq(
                   s"""Type.int with value `1` doesn't satisfy validation:
-                     |  _ > 1
+                     |  _ > 2
                      |""".stripMargin
                 ),
                 "Type.string" -> Seq(
                   s"""Type.string with value `a` doesn't satisfy validation:
-                     |  _ > "a"
+                     |  _ > "b"
                      |""".stripMargin
                 )
               )
         }
 
         // bad, (bad, ok)
-        _ <- (Enum.luckyNumber(0) + Type.int(1).string("b")).save.transact
+        _ <- (Enum.luckyNumber(0) + Type.int(1).string("c")).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap ==>
               Map(
                 "Enum.luckyNumber" -> Seq(
@@ -252,16 +252,16 @@ object Composites extends DatomicTestSuite {
                 ),
                 "Type.int" -> Seq(
                   s"""Type.int with value `1` doesn't satisfy validation:
-                     |  _ > 1
+                     |  _ > 2
                      |""".stripMargin
                 )
               )
         }
 
         // bad, (ok, bad)
-        _ <- (Enum.luckyNumber(0) + Type.int(2).string("a")).save.transact
+        _ <- (Enum.luckyNumber(0) + Type.int(3).string("a")).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap ==>
               Map(
                 "Enum.luckyNumber" -> Seq(
@@ -269,7 +269,7 @@ object Composites extends DatomicTestSuite {
                 ),
                 "Type.string" -> Seq(
                   s"""Type.string with value `a` doesn't satisfy validation:
-                     |  _ > "a"
+                     |  _ > "b"
                      |""".stripMargin
                 )
               )
@@ -278,7 +278,7 @@ object Composites extends DatomicTestSuite {
         // bad, (bad, bad)
         _ <- (Enum.luckyNumber(0) + Type.int(1).string("a")).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap ==>
               Map(
                 "Enum.luckyNumber" -> Seq(
@@ -286,12 +286,12 @@ object Composites extends DatomicTestSuite {
                 ),
                 "Type.int" -> Seq(
                   s"""Type.int with value `1` doesn't satisfy validation:
-                     |  _ > 1
+                     |  _ > 2
                      |""".stripMargin
                 ),
                 "Type.string" -> Seq(
                   s"""Type.string with value `a` doesn't satisfy validation:
-                     |  _ > "a"
+                     |  _ > "b"
                      |""".stripMargin
                 )
               )
@@ -303,37 +303,37 @@ object Composites extends DatomicTestSuite {
     "2 + 2" - validation { implicit conn =>
       for {
         // (bad, ok), (ok, ok)
-        _ <- (Type.int(1).string("b") + Enum.luckyNumber(7).luckyNumber2(9)).save.transact
+        _ <- (Type.int(1).string("c") + Enum.luckyNumber(7).luckyNumber2(9)).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap ==>
               Map(
                 "Type.int" -> Seq(
                   s"""Type.int with value `1` doesn't satisfy validation:
-                     |  _ > 1
+                     |  _ > 2
                      |""".stripMargin
                 )
               )
         }
 
         // (ok, bad), (ok, ok)
-        _ <- (Type.int(2).string("a") + Enum.luckyNumber(7).luckyNumber2(9)).save.transact
+        _ <- (Type.int(3).string("a") + Enum.luckyNumber(7).luckyNumber2(9)).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap ==>
               Map(
                 "Type.string" -> Seq(
                   s"""Type.string with value `a` doesn't satisfy validation:
-                     |  _ > "a"
+                     |  _ > "b"
                      |""".stripMargin
                 )
               )
         }
 
         // (ok, ok), (bad, ok)
-        _ <- (Type.int(2).string("b") + Enum.luckyNumber(0).luckyNumber2(9)).save.transact
+        _ <- (Type.int(3).string("c") + Enum.luckyNumber(0).luckyNumber2(9)).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap ==>
               Map(
                 "Enum.luckyNumber" -> Seq(
@@ -344,9 +344,9 @@ object Composites extends DatomicTestSuite {
         }
 
         // (ok, ok), (ok, bad)
-        _ <- (Type.int(2).string("b") + Enum.luckyNumber(7).luckyNumber2(0)).save.transact
+        _ <- (Type.int(3).string("c") + Enum.luckyNumber(7).luckyNumber2(0)).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap ==>
               Map(
                 "Enum.luckyNumber2" -> Seq(
@@ -359,17 +359,17 @@ object Composites extends DatomicTestSuite {
         // (bad, bad), (bad, bad)
         _ <- (Type.int(1).string("a") + Enum.luckyNumber(0).luckyNumber2(2)).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap ==>
               Map(
                 "Type.int" -> Seq(
                   s"""Type.int with value `1` doesn't satisfy validation:
-                     |  _ > 1
+                     |  _ > 2
                      |""".stripMargin
                 ),
                 "Type.string" -> Seq(
                   s"""Type.string with value `a` doesn't satisfy validation:
-                     |  _ > "a"
+                     |  _ > "b"
                      |""".stripMargin
                 ),
                 "Enum.luckyNumber" -> Seq(

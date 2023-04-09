@@ -18,12 +18,12 @@ object SaveCardOne extends DatomicTestSuite {
       for {
         // Can't save multiple values (use insert for that)
         _ <- Ns.i(1, 2).save.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
+            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
           err ==> "Can only save one value for attribute `Ns.i`. Found: 1, 2"
         }
 
         _ <- Ns.i(Seq(1, 2)).save.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
+            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
           err ==> "Can only save one value for attribute `Ns.i`. Found: 1, 2"
         }
 
@@ -97,7 +97,7 @@ object SaveCardOne extends DatomicTestSuite {
       for {
         // Can't save multiple values (use insert for that)
         _ <- Ns.i_?(Some(Seq(1, 2))).save.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
+            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
           err ==> "Can only save one value for optional attribute `Ns.i`. Found: 1, 2"
         }
 

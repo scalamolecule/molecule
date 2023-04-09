@@ -16,7 +16,7 @@ object _NestOpt extends DatomicGenBase("NestOpt", "/query/casting") {
        |import scala.annotation.tailrec
        |
        |
-       |trait ${fileName}_[Tpl]
+       |trait $fileName_[Tpl]
        |  extends CastNestedOptBranch_[Tpl]
        |    with CastNestedOptLeaf_[Tpl]
        |    with CastRow2Tpl_[Tpl]

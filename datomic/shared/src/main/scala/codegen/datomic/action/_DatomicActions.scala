@@ -24,7 +24,7 @@ object _DatomicActions extends DatomicGenBase("DatomicActions", "/action") {
     val p    = if (arity == 1) "   " else if (arity >= 10) "  " else " "
     val body =
       s"""
-         |class ${fileName}_$n0[${`A..V`}](molecule: Molecule_$n0[${`A..V`}]) extends Actions_$n0[${`A..V`}] {
+         |class $fileName_$n0[${`A..V`}](molecule: Molecule_$n0[${`A..V`}]) extends Actions_$n0[${`A..V`}] {
          |  override def save  : DatomicSave${`..N`}     = DatomicSave(molecule.elements)
          |  override def insert: DatomicInsert_$arity[${`A..V`}] = DatomicInsert_$arity[${`A..V`}](molecule.elements)
          |  override def query : DatomicQuery[${`(A..V)`}]$p = DatomicQuery[${`(A..V)`}](molecule.elements)

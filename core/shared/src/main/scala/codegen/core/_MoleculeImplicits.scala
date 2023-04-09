@@ -12,9 +12,9 @@ object _MoleculeImplicits extends CoreGenBase( "MoleculeImplicits", "") {
        |
        |import molecule.boilerplate.api._
        |import molecule.core.action._
-       |import scala.language.implicitConversions
+       |//import scala.language.implicitConversions
        |
-       |trait ${fileName}_ extends Keywords {
+       |trait $fileName_ extends Keywords {
        |  implicit def m(molecule: Molecule_00): Actions_00
        |$moleculeFactories
        |

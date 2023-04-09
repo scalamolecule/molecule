@@ -102,12 +102,12 @@ object UpdateSetOps_ref_ extends DatomicTestSuite {
 
         // Can't swap duplicate from/to values
         _ <- Ns(42).refs.swap(ref1 -> ref2, ref1 -> ref3).update.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
+            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
           err ==> "Can't swap from duplicate retract values."
         }
 
         _ <- Ns(42).refs.swap(ref1 -> ref3, ref2 -> ref3).update.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
+            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
           err ==> "Can't swap to duplicate replacement values."
         }
       } yield ()

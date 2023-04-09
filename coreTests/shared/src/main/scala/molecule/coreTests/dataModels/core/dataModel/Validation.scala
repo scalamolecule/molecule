@@ -26,37 +26,37 @@ object Validation extends DataModel(5) {
   }
 
   trait Type {
-    val string     = oneString.validate(_ > "a")
-    val int        = oneInt.validate(_ > 1)
-    val long       = oneLong.validate(_ > 1L)
-    val float      = oneFloat.validate(_ > 1.1f)
-    val double     = oneDouble.validate(_ > 1.1)
+    val string     = oneString.validate(_ > "b")
+    val int        = oneInt.validate(_ > 2)
+    val long       = oneLong.validate(_ > 2L)
+    val float      = oneFloat.validate(_ > 2.2f)
+    val double     = oneDouble.validate(_ > 2.2)
     val boolean    = oneBoolean.validate(_ == false)
-    val bigInt     = oneBigInt.validate(_ > BigInt(1))
-    val bigDecimal = oneBigDecimal.validate(_ > BigDecimal(1.1))
-    val date       = oneDate.validate(_.after(new Date(993942000000L))) // "2001-07-01 00:00:00"
+    val bigInt     = oneBigInt.validate(_ > BigInt(2))
+    val bigDecimal = oneBigDecimal.validate(_ > BigDecimal(2.2))
+    val date       = oneDate.validate(_.after(new Date(993942000000L)))
     val uuid       = oneUUID.validate(_.toString != "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
-    val uri        = oneURI.validate(_.toString.length > 1)
-    val byte       = oneByte.validate(_ > 1)
-    val short      = oneShort.validate(_ > 1)
-    val char       = oneChar.validate(_ > 'a')
-    val ref        = one[Strings].validate(_ > 1L)
+    val uri        = oneURI.validate(_.toString.length > 2)
+    val byte       = oneByte.validate(_ > 2)
+    val short      = oneShort.validate(_ > 2)
+    val char       = oneChar.validate(_ > 'b')
+    val ref        = one[Strings].validate(_ > 2L)
 
-    val strings     = setString.validate(_ > "a")
-    val ints        = setInt.validate(_ > 1)
-    val longs       = setLong.validate(_ > 1L)
-    val floats      = setFloat.validate(_ > 1.1f)
-    val doubles     = setDouble.validate(_ > 1.1)
+    val strings     = setString.validate(_ > "c")
+    val ints        = setInt.validate(_ > 3)
+    val longs       = setLong.validate(_ > 3L)
+    val floats      = setFloat.validate(_ > 3.3f)
+    val doubles     = setDouble.validate(_ > 3.3)
     val booleans    = setBoolean.validate(_ == false)
-    val bigInts     = setBigInt.validate(_ > BigInt(1))
-    val bigDecimals = setBigDecimal.validate(_ > BigDecimal(1.1))
-    val dates       = setDate.validate(_.after(new Date(993942000000L))) // "2001-07-01 00:00:00"
+    val bigInts     = setBigInt.validate(_ > BigInt(3))
+    val bigDecimals = setBigDecimal.validate(_ > BigDecimal(3.3))
+    val dates       = setDate.validate(_.after(new Date(1057010400000L)))
     val uuids       = setUUID.validate(_.toString != "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
-    val uris        = setURI.validate(_.toString.length > 1)
-    val bytes       = setByte.validate(_ > 1)
-    val shorts      = setShort.validate(_ > 1)
-    val chars       = setChar.validate(_ > 'a')
-    val refs        = many[Strings].validate(_ > 1L)
+    val uris        = setURI.validate(_.toString.length > 3)
+    val bytes       = setByte.validate(_ > 3)
+    val shorts      = setShort.validate(_ > 3)
+    val chars       = setChar.validate(_ > 'c')
+    val refs        = many[Strings].validate(_ > 3L)
   }
 
   //  trait AttrValue {
@@ -79,7 +79,7 @@ object Validation extends DataModel(5) {
   //    //    val max3 = oneInt.validate(_ > mid2.value)
   //  }
 
-  trait FormatConstants {
+  trait Constants {
     val noErrorMsg               = oneInt.validate(_ > 2)
     val errorMsg                 = oneInt.validate(
       _ > 2,
@@ -160,7 +160,7 @@ object Validation extends DataModel(5) {
   }
 
 
-  trait FormatVariables {
+  trait Variables {
     // Calling `value` is only allowed in validation code
     // val intx = oneInt.value
 

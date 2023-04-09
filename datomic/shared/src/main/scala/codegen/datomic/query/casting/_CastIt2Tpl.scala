@@ -13,7 +13,7 @@ object _CastIt2Tpl extends DatomicGenBase("CastIt2Tpl", "/query/casting") {
        |import java.util.{Iterator => jIterator}
        |
        |
-       |trait ${fileName}_ {
+       |trait $fileName_ {
        |
        |  final protected def castIt2Tpl(
        |    casts: List[jIterator[_] => Any]

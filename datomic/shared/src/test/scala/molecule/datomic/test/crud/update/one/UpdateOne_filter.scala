@@ -113,12 +113,12 @@ object UpdateOne_filter extends DatomicTestSuite {
       "Multiple values" - types { implicit conn =>
         for {
           _ <- Ns.i_(1).int(1, 2).update.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
+            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
             err ==> "Can only update one value for attribute `Ns.int`. Found: 1, 2"
           }
 
           _ <- Ns.i_(1).int(1, 2).upsert.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
+            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
             err ==> "Can only upsert one value for attribute `Ns.int`. Found: 1, 2"
           }
         } yield ()

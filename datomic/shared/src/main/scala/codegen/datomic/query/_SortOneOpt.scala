@@ -16,7 +16,7 @@ object _SortOneOpt extends DatomicGenBase("SortOneOpt", "/query") {
        |import molecule.boilerplate.ast.Model._
        |
        |
-       |trait ${fileName}_[Tpl] { self: Base[Tpl] =>
+       |trait $fileName_[Tpl] { self: Base[Tpl] =>
        |
        |  private def compare(
        |    a: Row,

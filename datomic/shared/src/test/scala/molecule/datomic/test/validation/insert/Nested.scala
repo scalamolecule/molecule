@@ -31,7 +31,7 @@ object Nested extends DatomicTestSuite {
                     "Type.int",
                     Seq(
                       s"""Type.int with value `1` doesn't satisfy validation:
-                         |  _ > 1
+                         |  _ > 2
                          |""".stripMargin
                     ),
                     Nil // composite/nested errors
@@ -44,7 +44,7 @@ object Nested extends DatomicTestSuite {
 
         // ok, List(bad, ok)
         _ <- Type.int.Refs.*(Strings.email).insert(
-          (2, List(
+          (3, List(
             "a@aa",
             "b@bb.com",
           ))
@@ -81,7 +81,7 @@ object Nested extends DatomicTestSuite {
 
         // ok, List(ok, bad)
         _ <- Type.int.Refs.*(Strings.email).insert(
-          (2, List(
+          (3, List(
             "a@aa.com",
             "b@bb",
           ))
@@ -133,7 +133,7 @@ object Nested extends DatomicTestSuite {
                     "Type.int",
                     Seq(
                       s"""Type.int with value `1` doesn't satisfy validation:
-                         |  _ > 1
+                         |  _ > 2
                          |""".stripMargin
                     ),
                     Nil // composite/nested errors
@@ -179,7 +179,7 @@ object Nested extends DatomicTestSuite {
                     "Type.int",
                     Seq(
                       s"""Type.int with value `1` doesn't satisfy validation:
-                         |  _ > 1
+                         |  _ > 2
                          |""".stripMargin
                     ),
                     Nil // composite/nested errors
@@ -210,7 +210,7 @@ object Nested extends DatomicTestSuite {
 
         // ok, List(bad, bad)
         _ <- Type.int.Refs.*(Strings.email).insert(
-          (2, List(
+          (3, List(
             "a@aa",
             "b@bb",
           ))
@@ -274,7 +274,7 @@ object Nested extends DatomicTestSuite {
                     "Type.int",
                     Seq(
                       s"""Type.int with value `1` doesn't satisfy validation:
-                         |  _ > 1
+                         |  _ > 2
                          |""".stripMargin
                     ),
                     Nil // composite/nested errors
@@ -337,7 +337,7 @@ object Nested extends DatomicTestSuite {
                     "Type.int",
                     Seq(
                       s"""Type.int with value `1` doesn't satisfy validation:
-                         |  _ > 1
+                         |  _ > 2
                          |""".stripMargin
                     ),
                     Seq()
@@ -441,7 +441,7 @@ object Nested extends DatomicTestSuite {
                     "Type.int",
                     Seq(
                       s"""Type.int with value `1` doesn't satisfy validation:
-                         |  _ > 1
+                         |  _ > 2
                          |""".stripMargin
                     ),
                     Seq()

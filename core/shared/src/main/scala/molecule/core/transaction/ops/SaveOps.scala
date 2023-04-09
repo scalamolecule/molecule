@@ -1,9 +1,10 @@
-package molecule.core.transaction
+package molecule.core.transaction.ops
 
 import java.net.URI
 import java.util.{Date, UUID}
+import molecule.core.transaction.Action2Data
 
-trait SaveOps extends Action2Data { self: SaveExtraction =>
+trait SaveOps extends Action2Data {
 
   protected def addV(
     ns: String,

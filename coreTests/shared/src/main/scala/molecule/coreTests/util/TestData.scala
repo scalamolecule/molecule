@@ -17,9 +17,6 @@ trait TestData extends DateHandling {
   private def bi(i: Int): BigInt = BigInt(i)
   private def bd(d: Double): BigDecimal = BigDecimal(d)
 
-
-  //  lazy val (i0, i1, i2, n3, n4, n5) = (0, 1, 2, 3, 4, 5)
-
   lazy val (string0, string1, string2, string3, string4, string5, string6, string7, string8, string9) =
     ("-", "a", "b", "c", "d", "e", "f", "g", "h", "i")
 

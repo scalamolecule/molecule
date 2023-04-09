@@ -16,33 +16,33 @@ object TypesSet extends DatomicTestSuite {
 
     "String" - validation { implicit conn =>
       for {
-        _ <- Type.strings(Set("-", "a", "b")).save.transact
+        _ <- Type.strings(Set("a", "b", "d")).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap ==>
               Map(
                 "Type.strings" -> Seq(
-                  s"""Type.strings with value `-` doesn't satisfy validation:
-                     |  _ > "a"
-                     |""".stripMargin,
                   s"""Type.strings with value `a` doesn't satisfy validation:
-                     |  _ > "a"
+                     |  _ > "c"
+                     |""".stripMargin,
+                  s"""Type.strings with value `b` doesn't satisfy validation:
+                     |  _ > "c"
                      |""".stripMargin
-                  // (value b is ok)
+                  // (value d is ok)
                 )
               )
         }
         // Focusing only on the first (and only) error message
         // (See ValidationFormatting tests for multi-error validations)
-        _ <- Type.strings(Set("-", "a", "a")).save.transact
+        _ <- Type.strings(Set("a", "b", "d")).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap.head._2 ==> Seq(
-              s"""Type.strings with value `-` doesn't satisfy validation:
-                 |  _ > "a"
-                 |""".stripMargin,
               s"""Type.strings with value `a` doesn't satisfy validation:
-                 |  _ > "a"
+                 |  _ > "c"
+                 |""".stripMargin,
+              s"""Type.strings with value `b` doesn't satisfy validation:
+                 |  _ > "c"
                  |""".stripMargin
             )
         }
@@ -51,15 +51,15 @@ object TypesSet extends DatomicTestSuite {
 
     "Int" - validation { implicit conn =>
       for {
-        _ <- Type.ints(Set(0, 1, 2)).save.transact
+        _ <- Type.ints(Set(1, 2, 4)).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap.head._2.sorted ==> Seq(
-              s"""Type.ints with value `0` doesn't satisfy validation:
-                 |  _ > 1
-                 |""".stripMargin,
               s"""Type.ints with value `1` doesn't satisfy validation:
-                 |  _ > 1
+                 |  _ > 3
+                 |""".stripMargin,
+              s"""Type.ints with value `2` doesn't satisfy validation:
+                 |  _ > 3
                  |""".stripMargin
             )
         }
@@ -68,15 +68,15 @@ object TypesSet extends DatomicTestSuite {
 
     "Long" - validation { implicit conn =>
       for {
-        _ <- Type.longs(Set(0L, 1L, 2L)).save.transact
+        _ <- Type.longs(Set(1L, 2L, 4L)).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap.head._2 ==> Seq(
-              s"""Type.longs with value `0` doesn't satisfy validation:
-                 |  _ > 1L
-                 |""".stripMargin,
               s"""Type.longs with value `1` doesn't satisfy validation:
-                 |  _ > 1L
+                 |  _ > 3L
+                 |""".stripMargin,
+              s"""Type.longs with value `2` doesn't satisfy validation:
+                 |  _ > 3L
                  |""".stripMargin
             )
         }
@@ -85,15 +85,15 @@ object TypesSet extends DatomicTestSuite {
 
     "Float" - validation { implicit conn =>
       for {
-        _ <- Type.floats(Set(float0, float1, float2)).save.transact
+        _ <- Type.floats(Set(float1, float2, float4)).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap.head._2 ==> Seq(
-              s"""Type.floats with value `0.0` doesn't satisfy validation:
-                 |  _ > 1.1f
-                 |""".stripMargin,
               s"""Type.floats with value `1.1` doesn't satisfy validation:
-                 |  _ > 1.1f
+                 |  _ > 3.3f
+                 |""".stripMargin,
+              s"""Type.floats with value `2.2` doesn't satisfy validation:
+                 |  _ > 3.3f
                  |""".stripMargin
             )
         }
@@ -102,15 +102,15 @@ object TypesSet extends DatomicTestSuite {
 
     "Double" - validation { implicit conn =>
       for {
-        _ <- Type.doubles(Set(double0, double1, double2)).save.transact
+        _ <- Type.doubles(Set(double1, double2, double4)).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap.head._2 ==> Seq(
-              s"""Type.doubles with value `0.0` doesn't satisfy validation:
-                 |  _ > 1.1
-                 |""".stripMargin,
               s"""Type.doubles with value `1.1` doesn't satisfy validation:
-                 |  _ > 1.1
+                 |  _ > 3.3
+                 |""".stripMargin,
+              s"""Type.doubles with value `2.2` doesn't satisfy validation:
+                 |  _ > 3.3
                  |""".stripMargin
             )
         }
@@ -121,7 +121,7 @@ object TypesSet extends DatomicTestSuite {
       for {
         _ <- Type.booleans(Set(true, false)).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap.head._2 ==> Seq(
               s"""Type.booleans with value `true` doesn't satisfy validation:
                  |  _ == false
@@ -133,15 +133,15 @@ object TypesSet extends DatomicTestSuite {
 
     "BigInt" - validation { implicit conn =>
       for {
-        _ <- Type.bigInts(Set(bigInt0, bigInt1, bigInt2)).save.transact
+        _ <- Type.bigInts(Set(bigInt1, bigInt2, bigInt4)).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap.head._2 ==> Seq(
-              s"""Type.bigInts with value `0` doesn't satisfy validation:
-                 |  _ > BigInt(1)
-                 |""".stripMargin,
               s"""Type.bigInts with value `1` doesn't satisfy validation:
-                 |  _ > BigInt(1)
+                 |  _ > BigInt(3)
+                 |""".stripMargin,
+              s"""Type.bigInts with value `2` doesn't satisfy validation:
+                 |  _ > BigInt(3)
                  |""".stripMargin
             )
         }
@@ -150,15 +150,15 @@ object TypesSet extends DatomicTestSuite {
 
     "BigDecimal" - validation { implicit conn =>
       for {
-        _ <- Type.bigDecimals(Set(bigDecimal0, bigDecimal1, bigDecimal2)).save.transact
+        _ <- Type.bigDecimals(Set(bigDecimal1, bigDecimal2, bigDecimal4)).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap.head._2 ==> Seq(
-              s"""Type.bigDecimals with value `0.0` doesn't satisfy validation:
-                 |  _ > BigDecimal(1.1)
-                 |""".stripMargin,
               s"""Type.bigDecimals with value `1.1` doesn't satisfy validation:
-                 |  _ > BigDecimal(1.1)
+                 |  _ > BigDecimal(3.3)
+                 |""".stripMargin,
+              s"""Type.bigDecimals with value `2.2` doesn't satisfy validation:
+                 |  _ > BigDecimal(3.3)
                  |""".stripMargin
             )
         }
@@ -167,15 +167,15 @@ object TypesSet extends DatomicTestSuite {
 
     "Date" - validation { implicit conn =>
       for {
-        _ <- Type.dates(Set(date0, date1, date2)).save.transact
+        _ <- Type.dates(Set(date1, date2, date4)).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap.head._2 ==> Seq(
-              s"""Type.dates with value `$date0` doesn't satisfy validation:
-                 |  _.after(new Date(993942000000L))
-                 |""".stripMargin,
               s"""Type.dates with value `$date1` doesn't satisfy validation:
-                 |  _.after(new Date(993942000000L))
+                 |  _.after(new Date(1057010400000L))
+                 |""".stripMargin,
+              s"""Type.dates with value `$date2` doesn't satisfy validation:
+                 |  _.after(new Date(1057010400000L))
                  |""".stripMargin
             )
         }
@@ -189,7 +189,7 @@ object TypesSet extends DatomicTestSuite {
           UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-bbbbbbbbbbbb")
         )).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap.head._2 ==> Seq(
               s"""Type.uuids with value `aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa` doesn't satisfy validation:
                  |  _.toString != "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
@@ -200,19 +200,19 @@ object TypesSet extends DatomicTestSuite {
     }
 
     "URI" - validation { implicit conn =>
-      val uri0 = new URI("x")
-      val uri1 = new URI("y")
-      val uri2 = new URI("xy")
+      val uri0 = new URI("a")
+      val uri1 = new URI("ab")
+      val uri2 = new URI("abcd")
       for {
         _ <- Type.uris(Set(uri0, uri1, uri2)).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap.head._2 ==> Seq(
-              s"""Type.uris with value `x` doesn't satisfy validation:
-                 |  _.toString.length > 1
+              s"""Type.uris with value `a` doesn't satisfy validation:
+                 |  _.toString.length > 3
                  |""".stripMargin,
-              s"""Type.uris with value `y` doesn't satisfy validation:
-                 |  _.toString.length > 1
+              s"""Type.uris with value `ab` doesn't satisfy validation:
+                 |  _.toString.length > 3
                  |""".stripMargin
             )
         }
@@ -221,15 +221,15 @@ object TypesSet extends DatomicTestSuite {
 
     "Byte" - validation { implicit conn =>
       for {
-        _ <- Type.bytes(Set(byte0, byte1, byte2)).save.transact
+        _ <- Type.bytes(Set(byte1, byte2, byte4)).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap.head._2 ==> Seq(
-              s"""Type.bytes with value `$byte0` doesn't satisfy validation:
-                 |  _ > $byte1
-                 |""".stripMargin,
               s"""Type.bytes with value `$byte1` doesn't satisfy validation:
-                 |  _ > $byte1
+                 |  _ > $byte3
+                 |""".stripMargin,
+              s"""Type.bytes with value `$byte2` doesn't satisfy validation:
+                 |  _ > $byte3
                  |""".stripMargin
             )
         }
@@ -238,15 +238,15 @@ object TypesSet extends DatomicTestSuite {
 
     "Short" - validation { implicit conn =>
       for {
-        _ <- Type.shorts(Set(short0, short1, short2)).save.transact
+        _ <- Type.shorts(Set(short1, short2, short4)).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap.head._2 ==> Seq(
-              s"""Type.shorts with value `$short0` doesn't satisfy validation:
-                 |  _ > $short1
-                 |""".stripMargin,
               s"""Type.shorts with value `$short1` doesn't satisfy validation:
-                 |  _ > $short1
+                 |  _ > $short3
+                 |""".stripMargin,
+              s"""Type.shorts with value `$short2` doesn't satisfy validation:
+                 |  _ > $short3
                  |""".stripMargin
             )
         }
@@ -255,15 +255,15 @@ object TypesSet extends DatomicTestSuite {
 
     "Char" - validation { implicit conn =>
       for {
-        _ <- Type.chars(Set('-', 'a', 'b')).save.transact
+        _ <- Type.chars(Set('a', 'b', 'd')).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap.head._2 ==> Seq(
-              s"""Type.chars with value `-` doesn't satisfy validation:
-                 |  _ > 'a'
-                 |""".stripMargin,
               s"""Type.chars with value `a` doesn't satisfy validation:
-                 |  _ > 'a'
+                 |  _ > 'c'
+                 |""".stripMargin,
+              s"""Type.chars with value `b` doesn't satisfy validation:
+                 |  _ > 'c'
                  |""".stripMargin
             )
         }
@@ -272,15 +272,15 @@ object TypesSet extends DatomicTestSuite {
 
     "ref" - validation { implicit conn =>
       for {
-        _ <- Type.refs(Set(0L, 1L, 2L)).save.transact
+        _ <- Type.refs(Set(1L, 2L, 4L)).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap, _) =>
+          case ValidationErrors(errorMap) =>
             errorMap.head._2 ==> Seq(
-              s"""Type.refs with value `0` doesn't satisfy validation:
-                 |  _ > 1L
-                 |""".stripMargin,
               s"""Type.refs with value `1` doesn't satisfy validation:
-                 |  _ > 1L
+                 |  _ > 3L
+                 |""".stripMargin,
+              s"""Type.refs with value `2` doesn't satisfy validation:
+                 |  _ > 3L
                  |""".stripMargin
             )
         }

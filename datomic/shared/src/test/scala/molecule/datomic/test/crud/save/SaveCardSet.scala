@@ -18,19 +18,19 @@ object SaveCardSet extends DatomicTestSuite {
       for {
         // Can't save multiple Sets of values (use insert for that)
         _ <- Ns.ints(Seq(Set(1), Set(2))).save.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
+            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
           err ==> "Can only save one Set of values for Set attribute `Ns.ints`. Found: Set(1), Set(2)"
         }
 
         // Same as
         _ <- Ns.ints(Set(1), Set(2)).save.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
+            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
           err ==> "Can only save one Set of values for Set attribute `Ns.ints`. Found: Set(1), Set(2)"
         }
 
         // Same as
         _ <- Ns.ints(1, 2).save.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
+            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
           err ==> "Can only save one Set of values for Set attribute `Ns.ints`. Found: Set(1), Set(2)"
         }
 
@@ -104,7 +104,7 @@ object SaveCardSet extends DatomicTestSuite {
       for {
         // Can't save multiple Sets of values (use insert for that)
         _ <- Ns.ints_?(Some(Seq(Set(1), Set(2)))).save.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
+            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
           err ==> "Can only save one Set of values for optional Set attribute `Ns.ints`. Found: Set(1), Set(2)"
         }
 

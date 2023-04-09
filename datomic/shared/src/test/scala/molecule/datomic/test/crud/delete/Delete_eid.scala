@@ -230,7 +230,7 @@ object Delete_eid extends DatomicTestSuite {
       "Can't update multiple values for one card-one attribute" - refs { implicit conn =>
         for {
           _ <- Ns(42).i(2, 3).update.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err, _) =>
+            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
             err ==> "Can only update one value for attribute `Ns.i`. Found: 2, 3"
           }
         } yield ()

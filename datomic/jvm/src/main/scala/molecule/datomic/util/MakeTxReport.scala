@@ -43,6 +43,6 @@ object MakeTxReport {
       allIds.toList
     }
 
-    new TxReport(tx, eids)
+    TxReport(tx, eids)
   }
 }

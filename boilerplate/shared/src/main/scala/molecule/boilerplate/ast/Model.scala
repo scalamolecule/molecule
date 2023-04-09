@@ -6,7 +6,7 @@ import molecule.base.ast.SchemaAST._
 
 
 object Model extends Model
-trait Model extends Validations {
+trait Model extends Validations with Values {
 
   sealed trait Mode
   trait Mandatory extends Mode
@@ -34,10 +34,10 @@ trait Model extends Validations {
     protected def vats: String = if (valueAttrs.isEmpty) "Nil" else valueAttrs.mkString("Seq(\"", "\", \"", "\")")
   }
 
-  trait AttrOne extends Attr
-  trait AttrSet extends Attr
-  trait AttrArray extends Attr
-  trait AttrMap extends Attr
+  sealed trait AttrOne extends Attr
+  sealed trait AttrSet extends Attr
+  //  trait AttrArray extends Attr
+  //  trait AttrMap extends Attr
 
   case class Ref(
     ns: String,
