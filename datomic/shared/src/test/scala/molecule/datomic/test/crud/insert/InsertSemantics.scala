@@ -12,7 +12,7 @@ object InsertSemantics extends DatomicTestSuite {
 
   override lazy val tests = Tests {
 
-    "Can't mix save/insert" - refs { implicit conn =>
+    "Insert not allowed to apply values to attributes" - refs { implicit conn =>
       for {
         _ <- (Ns.i(1) + R2.i(2)).insert(1, 2).transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>

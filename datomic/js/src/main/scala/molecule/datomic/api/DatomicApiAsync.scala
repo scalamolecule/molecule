@@ -10,7 +10,7 @@ import molecule.core.util.FutureUtils
 import molecule.core.validation.ModelValidation
 import molecule.core.validation.insert.InsertValidation
 import molecule.datomic.action._
-import molecule.datomic.facade.{DatomicConn_JS, DatomicConn_JVM}
+import molecule.datomic.facade.DatomicConn_JS
 import scala.concurrent.{ExecutionContext, Future}
 
 

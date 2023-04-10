@@ -7,6 +7,7 @@ import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.datomic.setup.DatomicTestSuite
 import molecule.datomic.async._
+import molecule.datomic.test.crud.save.SaveCardOne.types
 import utest._
 
 object SaveCardSet extends DatomicTestSuite {
@@ -278,6 +279,15 @@ object SaveCardSet extends DatomicTestSuite {
           (2, Some(Set(char2, char3))),
           (3, None)
         ))
+      } yield ()
+    }
+
+
+    "Tacit" - types { implicit conn =>
+      for {
+        // Values applied to both mandatory and tacit attributes are saved
+        _ <- Ns.i(1).ints_(2).save.transact
+        _ <- Ns.i.ints.query.get.map(_ ==> List((1, Set(2))))
       } yield ()
     }
   }

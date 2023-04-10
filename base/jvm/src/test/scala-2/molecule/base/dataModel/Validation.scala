@@ -34,7 +34,7 @@ object Validation extends DataModel(4) {
     val boolean    = oneBoolean.validate(_ == false)
     val bigInt     = oneBigInt.validate(_ > BigInt(2))
     val bigDecimal = oneBigDecimal.validate(_ > BigDecimal(2.2))
-    val date       = oneDate.validate(_.after(new Date(993942000000L))) // "2001-07-01 00:00:00"
+    val date       = oneDate.validate(_.after(new Date(993942000000L)))
     val uuid       = oneUUID.validate(_.toString != "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
     val uri        = oneURI.validate(_.toString.length > 2)
     val byte       = oneByte.validate(_ > 2)
@@ -50,7 +50,7 @@ object Validation extends DataModel(4) {
     val booleans    = setBoolean.validate(_ == false)
     val bigInts     = setBigInt.validate(_ > BigInt(3))
     val bigDecimals = setBigDecimal.validate(_ > BigDecimal(3.3))
-    val dates       = setDate.validate(_.after(new Date(993942000000L))) // "2001-07-01 00:00:00"
+    val dates       = setDate.validate(_.after(new Date(1057010400000L)))
     val uuids       = setUUID.validate(_.toString != "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
     val uris        = setURI.validate(_.toString.length > 3)
     val bytes       = setByte.validate(_ > 3)
@@ -58,26 +58,6 @@ object Validation extends DataModel(4) {
     val chars       = setChar.validate(_ > 'c')
     val refs        = many[Strings].validate(_ > 3L)
   }
-
-  //  trait AttrValue {
-  //    //    val low  = oneInt.validate(_ < high.value)
-  //    val low  = oneInt.validate(_ < 7)
-  //    val high = oneInt
-  //
-  //    //    val min1 = oneInt
-  //    //    val mid1 = oneInt.validate(i => i > min1.value && i < max1.value)
-  //    //    val max1 = oneInt
-  //    //
-  //    //    // Same as
-  //    //    val min2 = oneInt.validate(_ < mid2.value)
-  //    //    val mid2 = oneInt.validate(_ < max2.value)
-  //    //    val max2 = oneInt
-  //    //
-  //    //    // Same as
-  //    //    val min3 = oneInt.validate(_ < mid2.value)
-  //    //    val mid3 = oneInt
-  //    //    val max3 = oneInt.validate(_ > mid2.value)
-  //  }
 
   trait Constants {
     val noErrorMsg               = oneInt.validate(_ > 2)

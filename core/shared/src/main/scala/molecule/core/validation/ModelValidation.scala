@@ -152,12 +152,22 @@ case class ModelValidation(
     prev(level)(group) = prev(level)(group) :+ attrPrefixed
   }
 
+  private def onlyMandatory(a: Attr) = {
+    val mode = if (a.isInstanceOf[Tacit]) "tacit" else "optional"
+    throw ModelError(s"Required attributes have to be mandatory. Found $mode attribute ${a.ns}.${a.attr}")
+  }
+
   private def valueValidate(a: Attr): Seq[String] = {
     val attrs0 = a.valueAttrs.flatMap { attr =>
       curElements.collectFirst {
         case a1: Attr if a1.attr == attr =>
-          requiredAttrs -= attr
-          attr -> a1
+          a1 match {
+            case _: AttrOneMan | _: AttrSetMan =>
+              requiredAttrs -= attr
+              attr -> a1
+
+            case a2 => onlyMandatory(a2)
+          }
       }
     }
     val attrs  = attrs0.sortBy(_._1).map(_._2)
@@ -178,7 +188,7 @@ case class ModelValidation(
     def err = throw new Exception("Unexpected value validation attribute: " + a)
     def one[T](vs: Seq[T]): T = if (vs.length == 1) vs.head else {
       throw ExecutionError(
-        s"Please use `insert` to store multiple values for attribute ${a.ns}.${a.attr}."
+        s"Please use `insert` to store multiple values for attribute ${a.ns}.${a.attr}"
       )
     }
 
@@ -186,7 +196,7 @@ case class ModelValidation(
       Nil
     } else {
       a match {
-        case a: AttrOneMan => a match {
+        case a1: AttrOneMan                => a1 match {
           case AttrOneManString(_, _, _, vs, Some(validator), _, _, _, _)     => validator.withAttrs(attrs).validate(one(vs))
           case AttrOneManInt(_, _, _, vs, Some(validator), _, _, _, _)        => validator.withAttrs(attrs).validate(one(vs))
           case AttrOneManLong(_, _, _, vs, Some(validator), _, _, _, _)       => validator.withAttrs(attrs).validate(one(vs))
@@ -203,27 +213,9 @@ case class ModelValidation(
           case AttrOneManChar(_, _, _, vs, Some(validator), _, _, _, _)       => validator.withAttrs(attrs).validate(one(vs))
           case _                                                              => err
         }
-        // todo: Optional?
+        case _: AttrOneTac | _: AttrOneOpt => onlyMandatory(a)
 
-        //      // Tacit tx meta attrs can update
-        //      case a: AttrOneTac => a match {
-        //        case AttrOneTacString(_, _, _, Nil, _, _, _, _, _)     => true
-        //        case AttrOneTacInt(_, _, _, Nil, _, _, _, _, _)        => true
-        //        case AttrOneTacLong(_, _, _, Nil, _, _, _, _, _)       => true
-        //        case AttrOneTacFloat(_, _, _, Nil, _, _, _, _, _)      => true
-        //        case AttrOneTacDouble(_, _, _, Nil, _, _, _, _, _)     => true
-        //        case AttrOneTacBoolean(_, _, _, Nil, _, _, _, _, _)    => true
-        //        case AttrOneTacBigInt(_, _, _, Nil, _, _, _, _, _)     => true
-        //        case AttrOneTacBigDecimal(_, _, _, Nil, _, _, _, _, _) => true
-        //        case AttrOneTacDate(_, _, _, Nil, _, _, _, _, _)       => true
-        //        case AttrOneTacUUID(_, _, _, Nil, _, _, _, _, _)       => true
-        //        case AttrOneTacURI(_, _, _, Nil, _, _, _, _, _)        => true
-        //        case AttrOneTacByte(_, _, _, Nil, _, _, _, _, _)       => true
-        //        case AttrOneTacShort(_, _, _, Nil, _, _, _, _, _)      => true
-        //        case AttrOneTacChar(_, _, _, Nil, _, _, _, _, _)       => true
-        //        case _                                                 => false
-        //      }
-        case a: AttrSetMan => a match {
+        case a: AttrSetMan                 => a match {
           case AttrSetManString(_, _, _, sets, Some(validator), _, _, _, _)     => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
           case AttrSetManInt(_, _, _, sets, Some(validator), _, _, _, _)        => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
           case AttrSetManLong(_, _, _, sets, Some(validator), _, _, _, _)       => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
@@ -240,36 +232,13 @@ case class ModelValidation(
           case AttrSetManChar(_, _, _, sets, Some(validator), _, _, _, _)       => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
           case _                                                                => err
         }
-        //      case a: AttrSetTac => a match {
-        //        case AttrSetTacString(_, _, _, vs, _, _, _, _, _)     => vs.isEmpty || vs.head.isEmpty
-        //        case AttrSetTacInt(_, _, _, vs, _, _, _, _, _)        => vs.isEmpty || vs.head.isEmpty
-        //        case AttrSetTacLong(_, _, _, vs, _, _, _, _, _)       => vs.isEmpty || vs.head.isEmpty
-        //        case AttrSetTacFloat(_, _, _, vs, _, _, _, _, _)      => vs.isEmpty || vs.head.isEmpty
-        //        case AttrSetTacDouble(_, _, _, vs, _, _, _, _, _)     => vs.isEmpty || vs.head.isEmpty
-        //        case AttrSetTacBoolean(_, _, _, vs, _, _, _, _, _)    => vs.isEmpty || vs.head.isEmpty
-        //        case AttrSetTacBigInt(_, _, _, vs, _, _, _, _, _)     => vs.isEmpty || vs.head.isEmpty
-        //        case AttrSetTacBigDecimal(_, _, _, vs, _, _, _, _, _) => vs.isEmpty || vs.head.isEmpty
-        //        case AttrSetTacDate(_, _, _, vs, _, _, _, _, _)       => vs.isEmpty || vs.head.isEmpty
-        //        case AttrSetTacUUID(_, _, _, vs, _, _, _, _, _)       => vs.isEmpty || vs.head.isEmpty
-        //        case AttrSetTacURI(_, _, _, vs, _, _, _, _, _)        => vs.isEmpty || vs.head.isEmpty
-        //        case AttrSetTacByte(_, _, _, vs, _, _, _, _, _)       => vs.isEmpty || vs.head.isEmpty
-        //        case AttrSetTacShort(_, _, _, vs, _, _, _, _, _)      => vs.isEmpty || vs.head.isEmpty
-        //        case AttrSetTacChar(_, _, _, vs, _, _, _, _, _)       => vs.isEmpty || vs.head.isEmpty
-        //        case _                                                => false
-        //      }
-        case _ => err
+        case _: AttrSetTac | _: AttrSetOpt => onlyMandatory(a)
+        case _                             => err
       }
     }
   }
 
   private def checkMandatoryAndRequiredAttrs(): Unit = {
-    //    println("---------------------")
-    //    println("isUpdate      : " + isUpdate)
-    //    println("mandatoryAttrs: " + mandatoryAttrs)
-    //    println("mandatoryRefs : " + mandatoryRefs)
-    //    println("deletingAttrs : " + deletingAttrs)
-
-
     if (!isUpdate && mandatoryAttrs.nonEmpty) {
       throw ModelError(
         s"""Missing/empty mandatory attributes:
@@ -287,8 +256,6 @@ case class ModelValidation(
            |""".stripMargin
       )
     }
-
-
     if (isUpdate && deletingAttrs.nonEmpty) {
       throw ModelError(
         s"""Can't delete mandatory attributes (or remove last values of card-many attributes):

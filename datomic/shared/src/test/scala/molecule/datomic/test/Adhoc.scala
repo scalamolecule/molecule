@@ -13,6 +13,7 @@ import utest._
 import scala.concurrent.Future
 import scala.language.implicitConversions
 import molecule.boilerplate.ast.Model._
+import scala.collection.immutable.Map
 
 object Adhoc extends DatomicTestSuite {
 
@@ -27,14 +28,9 @@ object Adhoc extends DatomicTestSuite {
     //      } yield ()
     //    }
 
-    "Msg" - validation { implicit conn =>
+    "validation" - validation { implicit conn =>
       for {
-//        _ <- Type.int(3).long_?(Option.empty[Long]).save.transact
-//        _ <- Type.int(3).long_?(Some(1L)).save.inspect
-//        _ <- Type.int(3).long_?(Some(3L)).save.transact
-
-        _ <- Constants.noErrorMsg(3).save.transact
-
+        _ <- Type.int(3).long(3L).save.transact
 
       } yield ()
     }

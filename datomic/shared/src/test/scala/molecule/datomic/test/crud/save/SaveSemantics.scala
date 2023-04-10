@@ -12,7 +12,7 @@ object SaveSemantics extends DatomicTestSuite {
 
   override lazy val tests = Tests {
 
-    "Can't mix save/insert" - refs { implicit conn =>
+    "Save requires applied values" - refs { implicit conn =>
       for {
         _ <- (Ns.i + R2.i).save.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>

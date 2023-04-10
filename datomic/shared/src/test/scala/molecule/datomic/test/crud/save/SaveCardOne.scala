@@ -178,5 +178,14 @@ object SaveCardOne extends DatomicTestSuite {
         _ <- Ns.i_(14).char_?.a1.query.get.map(_ ==> List(None, Some(char1), Some(char2)))
       } yield ()
     }
+
+
+    "Tacit" - types { implicit conn =>
+      for {
+        // Values applied to both mandatory and tacit attributes are saved
+        _ <- Ns.i(1).int_(2).save.transact
+        _ <- Ns.i.int.query.get.map(_ ==> List((1, 2)))
+      } yield ()
+    }
   }
 }

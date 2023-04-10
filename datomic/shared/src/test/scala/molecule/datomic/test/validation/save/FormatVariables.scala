@@ -154,6 +154,45 @@ object FormatVariables extends DatomicTestSuite {
     }
 
 
+    "Validation attributes only mandatory" - validation { implicit conn =>
+      for {
+        _ <- Variables.errorMsg_(1).int1(2).save.transact
+          .map(_ ==> "Unexpected success").recover {
+          case ModelError(error) =>
+            error ==> "Required attributes have to be mandatory. Found tacit attribute Variables.errorMsg"
+        }
+        _ <- Variables.errorMsg_?(Some(1)).int1(2).save.transact
+          .map(_ ==> "Unexpected success").recover {
+          case ModelError(error) =>
+            error ==> "Required attributes have to be mandatory. Found optional attribute Variables.errorMsg"
+        }
+
+        _ <- Variables.errorMsg(1).int1_(2).save.transact
+          .map(_ ==> "Unexpected success").recover {
+          case ModelError(error) =>
+            error ==> "Required attributes have to be mandatory. Found tacit attribute Variables.int1"
+        }
+        _ <- Variables.errorMsg(1).int1_?(Some(2)).save.transact
+          .map(_ ==> "Unexpected success").recover {
+          case ModelError(error) =>
+            error ==> "Required attributes have to be mandatory. Found optional attribute Variables.int1"
+        }
+
+        // Check Set cardinality attribute ints
+        _ <- Variables.multipleErrors(1).int8(3).str("hello").ints_(Set(10)).strs(Set("hi", "there")).save.transact
+          .map(_ ==> "Unexpected success").recover {
+          case ModelError(error) =>
+            error ==> "Required attributes have to be mandatory. Found tacit attribute Variables.ints"
+        }
+        _ <- Variables.multipleErrors(1).int8(3).str("hello").ints_?(Some(Set(10))).strs(Set("hi", "there")).save.transact
+          .map(_ ==> "Unexpected success").recover {
+          case ModelError(error) =>
+            error ==> "Required attributes have to be mandatory. Found optional attribute Variables.ints"
+        }
+      } yield ()
+    }
+
+
     "Multiple validations, missing value attrs" - validation { implicit conn =>
       for {
         // Valid values passing all 5 tests
@@ -212,6 +251,24 @@ object FormatVariables extends DatomicTestSuite {
     }
 
 
+    "Value attributes are tied to validation attributes using them" - validation { implicit conn =>
+      for {
+        // multipleErrors requires int8, ints, strs and str for its validation
+        // Like a quintuple of coherent data
+        _ <- Variables.int8(3).str("hello").save.transact
+          .map(_ ==> "Unexpected success").recover {
+          case ModelError(error) =>
+            error ==>
+              """Missing/empty required attributes:
+                |  Required: int8, ints, strs, str, multipleErrors
+                |  Present : int8, str
+                |  Missing : ints, strs, multipleErrors
+                |""".stripMargin
+        }
+      } yield ()
+    }
+
+
     "Multiple validations" - validation { implicit conn =>
       for {
         _ <- Variables.multipleErrors(3).int8(3).str("hello").ints(Set(10)).strs(Set("hi", "there")).save.transact
@@ -258,7 +315,7 @@ object FormatVariables extends DatomicTestSuite {
         _ <- Variables.multipleErrors(0, 3, 11).int8(3).str("hello").ints(Set(10)).strs(Set("hi", "there")).save.transact
           .map(_ ==> "Unexpected success").recover {
           case ExecutionError(err) =>
-            err ==> "Please use `insert` to store multiple values for attribute Variables.multipleErrors."
+            err ==> "Please use `insert` to store multiple values for attribute Variables.multipleErrors"
         }
       } yield ()
     }

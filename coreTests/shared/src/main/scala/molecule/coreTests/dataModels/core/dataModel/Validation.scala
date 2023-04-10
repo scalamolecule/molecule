@@ -59,26 +59,6 @@ object Validation extends DataModel(5) {
     val refs        = many[Strings].validate(_ > 3L)
   }
 
-  //  trait AttrValue {
-  //    //    val low  = oneInt.validate(_ < high.value)
-  //    val low  = oneInt.validate(_ < 7)
-  //    val high = oneInt
-  //
-  //    //    val min1 = oneInt
-  //    //    val mid1 = oneInt.validate(i => i > min1.value && i < max1.value)
-  //    //    val max1 = oneInt
-  //    //
-  //    //    // Same as
-  //    //    val min2 = oneInt.validate(_ < mid2.value)
-  //    //    val mid2 = oneInt.validate(_ < max2.value)
-  //    //    val max2 = oneInt
-  //    //
-  //    //    // Same as
-  //    //    val min3 = oneInt.validate(_ < mid2.value)
-  //    //    val mid3 = oneInt
-  //    //    val max3 = oneInt.validate(_ > mid2.value)
-  //  }
-
   trait Constants {
     val noErrorMsg               = oneInt.validate(_ > 2)
     val errorMsg                 = oneInt.validate(

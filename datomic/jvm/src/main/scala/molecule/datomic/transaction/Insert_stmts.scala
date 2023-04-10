@@ -1,6 +1,6 @@
 package molecule.datomic.transaction
 
-import molecule.base.ast.SchemaAST.{Cardinality, MetaNs}
+import molecule.base.ast.SchemaAST.MetaNs
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.ops.InsertOps

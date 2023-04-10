@@ -42,7 +42,7 @@ trait Update_stmts extends DatomicTxBase_JVM with UpdateOps with MoleculeLogging
         } catch {
           case e: MoleculeError => throw e
           case t: Throwable     => throw ExecutionError(
-            s"Unexpected error trying to find current values of mandatory attribute ${attr.name}")
+            s"Unexpected error trying to find current values of mandatory attribute ${attr.name}:\n" + t)
         }
       }
 
