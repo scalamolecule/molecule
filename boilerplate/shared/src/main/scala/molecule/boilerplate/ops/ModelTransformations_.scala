@@ -774,40 +774,42 @@ trait ModelTransformations_ {
   }
 
   protected def addSort(es: List[Element], sort: String): List[Element] = {
-    val last = es.last match {
-      case a: AttrOneMan => a match {
-        case a: AttrOneManString     => a.copy(sort = Some(sort))
-        case a: AttrOneManInt        => a.copy(sort = Some(sort))
-        case a: AttrOneManLong       => a.copy(sort = Some(sort))
-        case a: AttrOneManFloat      => a.copy(sort = Some(sort))
-        case a: AttrOneManDouble     => a.copy(sort = Some(sort))
-        case a: AttrOneManBoolean    => a.copy(sort = Some(sort))
-        case a: AttrOneManBigInt     => a.copy(sort = Some(sort))
-        case a: AttrOneManBigDecimal => a.copy(sort = Some(sort))
-        case a: AttrOneManDate       => a.copy(sort = Some(sort))
-        case a: AttrOneManUUID       => a.copy(sort = Some(sort))
-        case a: AttrOneManURI        => a.copy(sort = Some(sort))
-        case a: AttrOneManByte       => a.copy(sort = Some(sort))
-        case a: AttrOneManShort      => a.copy(sort = Some(sort))
-        case a: AttrOneManChar       => a.copy(sort = Some(sort))
+    val last = if (sort.isEmpty) es.last else {
+      es.last match {
+        case a: AttrOneMan => a match {
+          case a: AttrOneManString     => a.copy(sort = Some(sort))
+          case a: AttrOneManInt        => a.copy(sort = Some(sort))
+          case a: AttrOneManLong       => a.copy(sort = Some(sort))
+          case a: AttrOneManFloat      => a.copy(sort = Some(sort))
+          case a: AttrOneManDouble     => a.copy(sort = Some(sort))
+          case a: AttrOneManBoolean    => a.copy(sort = Some(sort))
+          case a: AttrOneManBigInt     => a.copy(sort = Some(sort))
+          case a: AttrOneManBigDecimal => a.copy(sort = Some(sort))
+          case a: AttrOneManDate       => a.copy(sort = Some(sort))
+          case a: AttrOneManUUID       => a.copy(sort = Some(sort))
+          case a: AttrOneManURI        => a.copy(sort = Some(sort))
+          case a: AttrOneManByte       => a.copy(sort = Some(sort))
+          case a: AttrOneManShort      => a.copy(sort = Some(sort))
+          case a: AttrOneManChar       => a.copy(sort = Some(sort))
+        }
+        case a: AttrOneOpt => a match {
+          case a: AttrOneOptString     => a.copy(sort = Some(sort))
+          case a: AttrOneOptInt        => a.copy(sort = Some(sort))
+          case a: AttrOneOptLong       => a.copy(sort = Some(sort))
+          case a: AttrOneOptFloat      => a.copy(sort = Some(sort))
+          case a: AttrOneOptDouble     => a.copy(sort = Some(sort))
+          case a: AttrOneOptBoolean    => a.copy(sort = Some(sort))
+          case a: AttrOneOptBigInt     => a.copy(sort = Some(sort))
+          case a: AttrOneOptBigDecimal => a.copy(sort = Some(sort))
+          case a: AttrOneOptDate       => a.copy(sort = Some(sort))
+          case a: AttrOneOptUUID       => a.copy(sort = Some(sort))
+          case a: AttrOneOptURI        => a.copy(sort = Some(sort))
+          case a: AttrOneOptByte       => a.copy(sort = Some(sort))
+          case a: AttrOneOptShort      => a.copy(sort = Some(sort))
+          case a: AttrOneOptChar       => a.copy(sort = Some(sort))
+        }
+        case a             => unexpected(a)
       }
-      case a: AttrOneOpt => a match {
-        case a: AttrOneOptString     => a.copy(sort = Some(sort))
-        case a: AttrOneOptInt        => a.copy(sort = Some(sort))
-        case a: AttrOneOptLong       => a.copy(sort = Some(sort))
-        case a: AttrOneOptFloat      => a.copy(sort = Some(sort))
-        case a: AttrOneOptDouble     => a.copy(sort = Some(sort))
-        case a: AttrOneOptBoolean    => a.copy(sort = Some(sort))
-        case a: AttrOneOptBigInt     => a.copy(sort = Some(sort))
-        case a: AttrOneOptBigDecimal => a.copy(sort = Some(sort))
-        case a: AttrOneOptDate       => a.copy(sort = Some(sort))
-        case a: AttrOneOptUUID       => a.copy(sort = Some(sort))
-        case a: AttrOneOptURI        => a.copy(sort = Some(sort))
-        case a: AttrOneOptByte       => a.copy(sort = Some(sort))
-        case a: AttrOneOptShort      => a.copy(sort = Some(sort))
-        case a: AttrOneOptChar       => a.copy(sort = Some(sort))
-      }
-      case a             => unexpected(a)
     }
     es.init :+ last
   }
@@ -849,7 +851,7 @@ trait ModelTransformations_ {
         case a@AttrOneOptChar(_, _, _, _, _, _, _, _, Some(sort))       => a.copy(sort = Some(reverseSort(sort)))
         case a                                                          => a
       }
-      case other         => other
+      case other            => other
     }
   }
 
