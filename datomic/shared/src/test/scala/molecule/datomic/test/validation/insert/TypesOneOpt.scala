@@ -85,7 +85,7 @@ object TypesOneOpt extends DatomicTestSuite {
           .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
             errors.head._2.head.errors.head ==>
-              s"""Type.float with value `1.1` doesn't satisfy validation:
+              s"""Type.float with value `$float1` doesn't satisfy validation:
                  |  _ > 2.2f
                  |""".stripMargin
         }
@@ -98,7 +98,7 @@ object TypesOneOpt extends DatomicTestSuite {
           .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
             errors.head._2.head.errors.head ==>
-              s"""Type.double with value `1.1` doesn't satisfy validation:
+              s"""Type.double with value `$double1` doesn't satisfy validation:
                  |  _ > 2.2
                  |""".stripMargin
         }
@@ -124,7 +124,7 @@ object TypesOneOpt extends DatomicTestSuite {
           .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
             errors.head._2.head.errors.head ==>
-              s"""Type.bigInt with value `1` doesn't satisfy validation:
+              s"""Type.bigInt with value `$bigInt1` doesn't satisfy validation:
                  |  _ > BigInt(2)
                  |""".stripMargin
         }
@@ -137,7 +137,7 @@ object TypesOneOpt extends DatomicTestSuite {
           .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
             errors.head._2.head.errors.head ==>
-              s"""Type.bigDecimal with value `1.1` doesn't satisfy validation:
+              s"""Type.bigDecimal with value `$bigDecimal1` doesn't satisfy validation:
                  |  _ > BigDecimal(2.2)
                  |""".stripMargin
         }

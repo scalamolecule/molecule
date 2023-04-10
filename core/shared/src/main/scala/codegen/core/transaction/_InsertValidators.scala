@@ -11,6 +11,7 @@ object _InsertValidators extends CoreGenBase("InsertValidators", "/transaction")
        |import java.net.URI
        |import java.util.{Date, UUID}
        |import molecule.boilerplate.ast.Model._
+       |import molecule.core.validation.insert.InsertValueResolvers_
        |
        |trait $fileName_ extends InsertValueResolvers_ {
        |  $validators

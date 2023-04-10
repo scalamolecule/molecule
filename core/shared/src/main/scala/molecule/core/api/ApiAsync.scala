@@ -1,6 +1,6 @@
 package molecule.core.api
 
-import molecule.base.error.{InsertError, MoleculeError}
+import molecule.base.error.InsertError
 import scala.concurrent.{ExecutionContext, Future}
 
 trait ApiAsync {
@@ -17,14 +17,20 @@ trait ApiAsync {
   }
 
 
-  trait Transaction extends Inspectable {
+  trait SaveTransaction extends Inspectable {
     def transact(implicit conn: Connection, ec: ExecutionContext): Future[TxReport]
-    def validate(implicit conn: Connection): Map[String, Seq[String]] = ???
+    def validate(implicit conn: Connection): Map[String, Seq[String]]
   }
 
   trait InsertTransaction extends Inspectable {
     def transact(implicit conn: Connection, ec: ExecutionContext): Future[TxReport]
-    def validate(implicit conn: Connection): Seq[(Int, Seq[InsertError])] = ???
+    def validate(implicit conn: Connection): Seq[(Int, Seq[InsertError])]
+  }
+
+  trait UpdateTransaction extends SaveTransaction
+
+  trait DeleteTransaction extends Inspectable {
+    def transact(implicit conn: Connection, ec: ExecutionContext): Future[TxReport]
   }
 
   trait Inspectable {

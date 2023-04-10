@@ -7,6 +7,8 @@ import molecule.core.api.{ApiZio, Connection, TxReport}
 import molecule.core.marshalling.ConnProxy
 import molecule.core.transaction.{DeleteExtraction, InsertExtraction, SaveExtraction, UpdateExtraction}
 import molecule.core.util.Executor._
+import molecule.core.validation.ModelValidation
+import molecule.core.validation.insert.InsertValidation
 import molecule.datomic.action._
 import molecule.datomic.facade.DatomicConn_JVM
 import molecule.datomic.marshalling.DatomicRpcJVM.Data
@@ -17,7 +19,7 @@ import zio._
 import scala.concurrent.Future
 
 
-trait DatomicApiZio extends SubscriptionStarter with DatomicZioApiBase with ApiZio {
+trait DatomicApiZio extends JVMDatomicApiBase with SubscriptionStarter with DatomicZioApiBase with ApiZio {
 
   implicit class datomicQueryApiZio[Tpl](q: DatomicQuery[Tpl]) extends QueryApi[Tpl] {
     override def get: ZIO[Connection, MoleculeError, List[Tpl]] = {
@@ -34,8 +36,9 @@ trait DatomicApiZio extends SubscriptionStarter with DatomicZioApiBase with ApiZ
           .subscribe(datomicConn, getWatcher(datomicConn), callback))
       } yield res
     }
-    override def inspect: ZIO[Connection, MoleculeError, Unit] =
+    override def inspect: ZIO[Connection, MoleculeError, Unit] = {
       printInspectQuery("QUERY", q.elements)
+    }
   }
 
   implicit class datomicQueryOffsetApiZio[Tpl](q: DatomicQueryOffset[Tpl]) extends QueryOffsetApi[Tpl] {
@@ -45,8 +48,9 @@ trait DatomicApiZio extends SubscriptionStarter with DatomicZioApiBase with ApiZ
           .getListFromOffset_async(conn, global)
       )
     }
-    override def inspect: ZIO[Connection, MoleculeError, Unit] =
+    override def inspect: ZIO[Connection, MoleculeError, Unit] = {
       printInspectQuery("QUERY (offset)", q.elements)
+    }
   }
 
   implicit class datomicQueryCursorApiZio[Tpl](q: DatomicQueryCursor[Tpl]) extends QueryCursorApi[Tpl] {
@@ -56,44 +60,55 @@ trait DatomicApiZio extends SubscriptionStarter with DatomicZioApiBase with ApiZ
           .getListFromCursor_async(conn, global)
       )
     }
-    override def inspect: ZIO[Connection, MoleculeError, Unit] =
+    override def inspect: ZIO[Connection, MoleculeError, Unit] = {
       printInspectQuery("QUERY (cursor)", q.elements)
+    }
   }
 
 
-  implicit class datomicSaveApiZio[Tpl](save: DatomicSave) extends Transaction {
+  implicit class datomicSaveApiZio[Tpl](save: DatomicSave) extends SaveTransaction {
     override def transact: ZIO[Connection, MoleculeError, TxReport] = {
       for {
         conn0 <- ZIO.service[Connection]
+        errors <- validate
         conn = conn0.asInstanceOf[DatomicConn_JVM]
         stmts <- ZIO.succeed(getStmts(conn.proxy))
         txReport <- transactStmts(stmts)
       } yield txReport
     }
-
     override def inspect: ZIO[Connection, MoleculeError, Unit] = {
       for {
         conn0 <- ZIO.service[Connection]
         conn = conn0.asInstanceOf[DatomicConn_JVM]
       } yield printInspectTx("SAVE", save.elements, getStmts(conn.proxy))
     }
-
-    private def getStmts(proxy: ConnProxy): Data =
+    private def getStmts(proxy: ConnProxy): Data = {
       (new SaveExtraction() with Save_stmts).getStmts(save.elements)
+    }
+    override def validate: ZIO[Connection, MoleculeError, Map[String, Seq[String]]] = {
+      for {
+        conn0 <- ZIO.service[Connection]
+        conn = conn0.asInstanceOf[DatomicConn_JVM]
+        proxy = conn.proxy
+        errors <- ZIO.succeed[Map[String, Seq[String]]](
+          ModelValidation(proxy.nsMap, proxy.attrMap, "save").check(save.elements)
+        )
+      } yield errors
+    }
   }
 
 
-  implicit class datomicInsertApiZio[Tpl](insert0: Insert) extends Transaction {
+  implicit class datomicInsertApiZio[Tpl](insert0: Insert) extends InsertTransaction {
     val insert = insert0.asInstanceOf[DatomicInsert_JVM]
     override def transact: ZIO[Connection, MoleculeError, TxReport] = {
       for {
         conn0 <- ZIO.service[Connection]
+        errors <- validate
         conn = conn0.asInstanceOf[DatomicConn_JVM]
         stmts <- ZIO.succeed(getStmts(conn.proxy))
         txReport <- transactStmts(stmts)
       } yield txReport
     }
-
     override def inspect: ZIO[Connection, MoleculeError, Unit] = {
       for {
         conn0 <- ZIO.service[Connection]
@@ -101,23 +116,32 @@ trait DatomicApiZio extends SubscriptionStarter with DatomicZioApiBase with ApiZ
       } yield
         printInspectTx("INSERT", insert.elements, getStmts(conn.proxy))
     }
-
-    private def getStmts(proxy: ConnProxy): Data =
+    private def getStmts(proxy: ConnProxy): Data = {
       (new InsertExtraction with Insert_stmts)
-        .getStmts(proxy.nsMap, proxy.attrMap, insert.elements, insert.tpls)
+        .getStmts(proxy.nsMap, insert.elements, insert.tpls)
+    }
+    override def validate: ZIO[Connection, MoleculeError, Seq[(Int, Seq[InsertError])]] = {
+      for {
+        conn0 <- ZIO.service[Connection]
+        conn = conn0.asInstanceOf[DatomicConn_JVM]
+        errors <- ZIO.succeed[Seq[(Int, Seq[InsertError])]](
+          InsertValidation.validate(conn, insert.elements, insert.tpls)
+        )
+      } yield errors
+    }
   }
 
 
-  implicit class datomicUpdateApiZio[Tpl](update: DatomicUpdate) extends Transaction {
+  implicit class datomicUpdateApiZio[Tpl](update: DatomicUpdate) extends UpdateTransaction {
     override def transact: ZIO[Connection, MoleculeError, TxReport] = {
       for {
         conn0 <- ZIO.service[Connection]
+        errors <- validate
         conn = conn0.asInstanceOf[DatomicConn_JVM]
         stmts <- ZIO.succeed(getStmts(conn))
         txReport <- transactStmtsWithConn(conn, stmts)
       } yield txReport
     }
-
     override def inspect: ZIO[Connection, MoleculeError, Unit] = {
       for {
         conn0 <- ZIO.service[Connection]
@@ -125,14 +149,20 @@ trait DatomicApiZio extends SubscriptionStarter with DatomicZioApiBase with ApiZ
         res <- printInspectTx("UPDATE", update.elements, getStmts(conn))
       } yield res
     }
-
-    private def getStmts(conn: DatomicConn_JVM): Data =
+    private def getStmts(conn: DatomicConn_JVM): Data = {
       (new UpdateExtraction(conn.proxy.uniqueAttrs, update.isUpsert) with Update_stmts)
         .getStmts(conn, update.elements)
+    }
+    override def validate: ZIO[Connection, MoleculeError, Map[String, Seq[String]]] = {
+      for {
+        conn0 <- ZIO.service[Connection]
+        errors <- ZIO.succeed[Map[String, Seq[String]]](validateUpdate(conn0, update.elements))
+      } yield errors
+    }
   }
 
 
-  implicit class datomicDeleteApiZio[Tpl](delete: DatomicDelete) extends Transaction {
+  implicit class datomicDeleteApiZio[Tpl](delete: DatomicDelete) extends DeleteTransaction {
     override def transact: ZIO[Connection, MoleculeError, TxReport] = {
       for {
         conn0 <- ZIO.service[Connection]
@@ -148,9 +178,9 @@ trait DatomicApiZio extends SubscriptionStarter with DatomicZioApiBase with ApiZ
         res <- printInspectTx("DELETE", delete.elements, getStmts(conn))
       } yield res
     }
-
-    private def getStmts(conn: DatomicConn_JVM): Data =
+    private def getStmts(conn: DatomicConn_JVM): Data = {
       (new DeleteExtraction with Delete_stmts).getStmtsData(conn, delete.elements)
+    }
   }
 
 

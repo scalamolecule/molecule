@@ -31,10 +31,10 @@ trait MoleculeLogging extends Logging {
   scribe.Logger.root
     .clearHandlers()
     .clearModifiers()
-//        .withHandler(formatter = logFormatter, minimumLevel = Some(Level.Trace))
-//        .withHandler(formatter = logFormatter, minimumLevel = Some(Level.Debug))
-        .withHandler(formatter = logFormatter, minimumLevel = Some(Level.Warn))
+    //    .withHandler(formatter = logFormatter, minimumLevel = Some(Level.Trace))
+    //    .withHandler(formatter = logFormatter, minimumLevel = Some(Level.Debug))
+    .withHandler(formatter = logFormatter, minimumLevel = Some(Level.Warn))
     //    .withHandler(formatter = logFormatter, minimumLevel = Some(Level.Error))
-//    .withHandler(formatter = logFormatter, minimumLevel = Some(logLevel))
+    //    .withHandler(formatter = logFormatter, minimumLevel = Some(logLevel))
     .replace()
 }

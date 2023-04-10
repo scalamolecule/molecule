@@ -1,6 +1,6 @@
 package molecule.datomic.api
 
-import molecule.base.error.ModelError
+import molecule.base.error.{InsertError, ModelError}
 import molecule.core.action.Insert
 import molecule.core.api.{ApiSync, Connection, TxReport}
 import molecule.datomic.action._
@@ -29,22 +29,25 @@ trait DatomicApiSync extends ApiSync {
   }
 
 
-  implicit class datomicSaveApiSync[Tpl](save: DatomicSave) extends Transaction {
+  implicit class datomicSaveApiSync[Tpl](save: DatomicSave) extends SaveTransaction {
     override def transact(implicit conn: Connection): TxReport = noSyncOnJSplatform
+    override def validate(implicit conn: Connection): Map[String, Seq[String]] = noSyncOnJSplatform
     override def inspect(implicit conn: Connection): Unit = noSyncOnJSplatform
   }
 
-  implicit class datomicInsertApiSync[Tpl](insert: Insert) extends Transaction {
+  implicit class datomicInsertApiSync[Tpl](insert: Insert) extends InsertTransaction {
     override def transact(implicit conn: Connection): TxReport = noSyncOnJSplatform
+    override def validate(implicit conn: Connection): Seq[(Int, Seq[InsertError])] = noSyncOnJSplatform
     override def inspect(implicit conn: Connection): Unit = noSyncOnJSplatform
   }
 
-  implicit class datomicUpdateApiSync[Tpl](update: DatomicUpdate) extends Transaction {
+  implicit class datomicUpdateApiSync[Tpl](update: DatomicUpdate) extends UpdateTransaction {
     override def transact(implicit conn: Connection): TxReport = noSyncOnJSplatform
+    override def validate(implicit conn: Connection): Map[String, Seq[String]] = noSyncOnJSplatform
     override def inspect(implicit conn: Connection): Unit = noSyncOnJSplatform
   }
 
-  implicit class datomicDeleteApiSync[Tpl](delete: DatomicDelete) extends Transaction {
+  implicit class datomicDeleteApiSync[Tpl](delete: DatomicDelete) extends DeleteTransaction {
     override def transact(implicit conn: Connection): TxReport = noSyncOnJSplatform
     override def inspect(implicit conn: Connection): Unit = noSyncOnJSplatform
   }

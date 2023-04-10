@@ -35,6 +35,7 @@ case class PickleTpls(
     }
     state.toByteBuffer.toArray
   }
+
   def pickleOffset(result: Either[MoleculeError, (Seq[Any], Int, Boolean)]): Array[Byte] = {
     result match {
       case Right((tpls, limit, more)) =>
@@ -47,6 +48,7 @@ case class PickleTpls(
     }
     state.toByteBuffer.toArray
   }
+
   def pickleCursor(result: Either[MoleculeError, (Seq[Any], String, Boolean)]): Array[Byte] = {
     result match {
       case Right((tpls, cursor, more)) =>
@@ -55,7 +57,21 @@ case class PickleTpls(
         enk.writeString(cursor)
         enk.writeBoolean(more)
       case Left(err)                   =>
-        LeftPickler[MoleculeError, DummyNotUsed].pickle(Left(err))(state)
+          LeftPickler[MoleculeError, DummyNotUsed].pickle(Left(err))(state)
+
+//
+//        println("ERR: " + err)
+//        println("ERR: " + err.getClass)
+//
+//
+//        try {
+//
+//        } catch {
+//          case e: Throwable =>
+//            logger.error("PickleTpls.pickleCursor: " +
+//              e.toString + "\n" + e.getStackTrace.toList.mkString("\n"))
+//            throw e
+//        }
     }
     state.toByteBuffer.toArray
   }
@@ -190,11 +206,21 @@ case class PickleTpls(
 
   object enk {
     // todo: find out why we can't encode all types directly as-is
-    lazy val writeString    : String => Unit     = (value: String) => enc.writeString(value)
-    lazy val writeInt       : Int => Unit        = (value: Int) => enc.writeInt(value.toString.toInt)
-    lazy val writeLong      : Long => Unit       = (value: Long) => enc.writeLong(value)
-    lazy val writeFloat     : Float => Unit      = (value: Float) => enc.writeString(value.toString)
-    lazy val writeDouble    : Double => Unit     = (value: Double) => enc.writeString(value.toString)
+    lazy val writeString: String => Unit = (value: String) => enc.writeString(value)
+
+    // todo: Skip brute forcing values to Strings
+    lazy val writeInt   : Int => Unit    = (value: Int) => enc.writeInt(value.toString.toInt)
+    lazy val writeLong  : Long => Unit   = (value: Long) => enc.writeString(value.toString)
+    lazy val writeFloat : Float => Unit  = (value: Float) => enc.writeString(value.toString)
+    lazy val writeDouble: Double => Unit = (value: Double) => enc.writeString(value.toString)
+
+    // todo: how can we make these work instead?
+    //    lazy val writeInt       : Int => Unit        = (value: Int) => enc.writeInt(value)
+    //    lazy val writeLong      : Long => Unit       = (value: Long) => enc.writeLong(value)
+    //    lazy val writeFloat     : Float => Unit      = (value: Float) => enc.writeFloat(value)
+    //    lazy val writeDouble    : Double => Unit     = (value: Double) => enc.writeDouble(value)
+
+
     lazy val writeBoolean   : Boolean => Unit    = (value: Boolean) => BooleanPickler.pickle(value)(state)
     lazy val writeBigInt    : BigInt => Unit     = (value: BigInt) => {
       val ba = value.toByteArray

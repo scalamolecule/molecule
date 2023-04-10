@@ -103,10 +103,10 @@ object TypesSet extends DatomicTestSuite {
           .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
             errors.head._2.head.errors ==> Seq(
-              s"""Type.floats with value `1.1` doesn't satisfy validation:
+              s"""Type.floats with value `$float1` doesn't satisfy validation:
                  |  _ > 3.3f
                  |""".stripMargin,
-              s"""Type.floats with value `2.2` doesn't satisfy validation:
+              s"""Type.floats with value `$float2` doesn't satisfy validation:
                  |  _ > 3.3f
                  |""".stripMargin
             )
@@ -120,10 +120,10 @@ object TypesSet extends DatomicTestSuite {
           .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
             errors.head._2.head.errors ==> Seq(
-              s"""Type.doubles with value `1.1` doesn't satisfy validation:
+              s"""Type.doubles with value `$double1` doesn't satisfy validation:
                  |  _ > 3.3
                  |""".stripMargin,
-              s"""Type.doubles with value `2.2` doesn't satisfy validation:
+              s"""Type.doubles with value `$double2` doesn't satisfy validation:
                  |  _ > 3.3
                  |""".stripMargin
             )
@@ -151,10 +151,10 @@ object TypesSet extends DatomicTestSuite {
           .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
             errors.head._2.head.errors ==> Seq(
-              s"""Type.bigInts with value `1` doesn't satisfy validation:
+              s"""Type.bigInts with value `$bigInt1` doesn't satisfy validation:
                  |  _ > BigInt(3)
                  |""".stripMargin,
-              s"""Type.bigInts with value `2` doesn't satisfy validation:
+              s"""Type.bigInts with value `$bigInt2` doesn't satisfy validation:
                  |  _ > BigInt(3)
                  |""".stripMargin
             )
@@ -168,10 +168,10 @@ object TypesSet extends DatomicTestSuite {
           .map(_ ==> "Unexpected success").recover {
           case InsertErrors(errors, _) =>
             errors.head._2.head.errors ==> Seq(
-              s"""Type.bigDecimals with value `1.1` doesn't satisfy validation:
+              s"""Type.bigDecimals with value `$bigDecimal1` doesn't satisfy validation:
                  |  _ > BigDecimal(3.3)
                  |""".stripMargin,
-              s"""Type.bigDecimals with value `2.2` doesn't satisfy validation:
+              s"""Type.bigDecimals with value `$bigDecimal2` doesn't satisfy validation:
                  |  _ > BigDecimal(3.3)
                  |""".stripMargin
             )

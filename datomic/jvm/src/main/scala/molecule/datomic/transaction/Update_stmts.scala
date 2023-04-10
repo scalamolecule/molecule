@@ -10,17 +10,53 @@ import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.UpdateExtraction
 import molecule.core.transaction.ops.UpdateOps
+import molecule.core.validation.ModelValidation
 import molecule.datomic.facade.DatomicConn_JVM
 import molecule.datomic.query.DatomicModel2Query
+import scala.collection.mutable.ListBuffer
 
 trait Update_stmts extends DatomicTxBase_JVM with UpdateOps with MoleculeLogging { self: UpdateExtraction =>
 
   def getStmts(
     conn: DatomicConn_JVM,
     elements: List[Element],
+    isRpcCall: Boolean = false,
     debug: Boolean = true
   ): Data = {
-    val db                           = conn.peerConn.db()
+    val db = conn.peerConn.db()
+
+    if (isRpcCall) {
+      // Check against db on jvm if rpc from client
+
+      val getCurSetValues: Attr => Set[Any] = (attr: Attr) => {
+        val a = s":${attr.ns}/${attr.attr}"
+        try {
+          val curValues = Peer.q(s"[:find ?vs :where [_ $a ?vs]]", db)
+          if (curValues.isEmpty) {
+            throw ExecutionError(s"While checking to avoid removing the last values of mandatory " +
+              s"attribute ${attr.ns}.${attr.attr} the current Set of values couldn't be found.")
+          }
+          val vs = ListBuffer.empty[Any]
+          curValues.forEach(row => vs.addOne(row.get(0)))
+          vs.toSet
+        } catch {
+          case e: MoleculeError => throw e
+          case t: Throwable     => throw ExecutionError(
+            s"Unexpected error trying to find current values of mandatory attribute ${attr.name}")
+        }
+      }
+
+      val validationErrors = ModelValidation(
+        conn.proxy.nsMap,
+        conn.proxy.attrMap,
+        "update",
+        Some(getCurSetValues)
+      ).check(elements)
+      if (validationErrors.nonEmpty) {
+        throw ValidationErrors(validationErrors)
+      }
+    }
+
     val (eids, filterElements, data) = resolve(elements, Nil, Nil, Nil)
     val (filterQuery, inputs)        = if (eids.isEmpty && filterElements.nonEmpty) {
       val filterElements1 = AttrOneManLong("_Generic", "e", V) +: filterElements

@@ -52,26 +52,27 @@ abstract class RpcHandlers(rpc: MoleculeRpc) extends MoleculeLogging with Serial
     val (proxy, tplElements, tplsSerialized, txElements) =
       Unpickle.apply[(ConnProxy, List[Element], Array[Byte], List[Element])]
         .fromBytes(argsSerialized.asByteBuffer)
-    rpc.insert(proxy, tplElements, tplsSerialized, txElements)
-      .map(either =>
-        Pickle.intoBytes[Either[MoleculeError, TxReport]](either).toArray
-      )
+    rpc.insert(proxy, tplElements, tplsSerialized, txElements).map(either =>
+      Pickle.intoBytes[Either[MoleculeError, TxReport]](either).toArray
+    )
   }
 
   def handleUpdate(argsSerialized: ByteString): Future[Array[Byte]] = handleErrors {
     val (proxy, elements, isUpsert) =
       Unpickle.apply[(ConnProxy, List[Element], Boolean)]
         .fromBytes(argsSerialized.asByteBuffer)
-    rpc.update(proxy, elements, isUpsert)
-      .map(either => Pickle.intoBytes[Either[MoleculeError, TxReport]](either).toArray)
+    rpc.update(proxy, elements, isUpsert).map(either =>
+      Pickle.intoBytes[Either[MoleculeError, TxReport]](either).toArray
+    )
   }
 
   def handleDelete(argsSerialized: ByteString): Future[Array[Byte]] = handleErrors {
     val (proxy, elements) =
       Unpickle.apply[(ConnProxy, List[Element])]
         .fromBytes(argsSerialized.asByteBuffer)
-    rpc.delete(proxy, elements)
-      .map(either => Pickle.intoBytes[Either[MoleculeError, TxReport]](either).toArray)
+    rpc.delete(proxy, elements).map(either =>
+      Pickle.intoBytes[Either[MoleculeError, TxReport]](either).toArray
+    )
   }
 
 
@@ -111,10 +112,10 @@ abstract class RpcHandlers(rpc: MoleculeRpc) extends MoleculeLogging with Serial
     case e: ValidationErrors =>
       logger.trace(e)
       left(e)
-    case e: InsertErrors =>
+    case e: InsertErrors     =>
       logger.trace(e)
       left(e.copy(message = Some(msg + e.msg)))
-    case e: ExecutionError       =>
+    case e: ExecutionError   =>
       logger.trace(e)
       left(e.copy(message = msg + e.message))
     case e: Throwable        =>

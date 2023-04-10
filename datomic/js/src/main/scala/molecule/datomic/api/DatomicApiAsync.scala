@@ -1,13 +1,14 @@
 package molecule.datomic.api
 
 import boopickle.Default._
-import molecule.base.error.ValidationErrors
+import molecule.base.error.{InsertError, InsertErrors, ValidationErrors}
 import molecule.boilerplate.ast.Model._
 import molecule.core.action.Insert
 import molecule.core.api.{ApiAsync, Connection, TxReport}
 import molecule.core.marshalling.serialize.PickleTpls
 import molecule.core.util.FutureUtils
 import molecule.core.validation.ModelValidation
+import molecule.core.validation.insert.InsertValidation
 import molecule.datomic.action._
 import molecule.datomic.facade.DatomicConn_JS
 import scala.concurrent.{ExecutionContext, Future}
@@ -50,7 +51,7 @@ trait DatomicApiAsync extends DatomicAsyncApiBase with ApiAsync with FutureUtils
   }
 
 
-  implicit class datomicSaveApiAsync[Tpl](save: DatomicSave) extends Transaction {
+  implicit class datomicSaveApiAsync[Tpl](save: DatomicSave) extends SaveTransaction {
     override def transact(implicit conn0: Connection, ec: ExecutionContext): Future[TxReport] = {
       val conn = conn0.asInstanceOf[DatomicConn_JS]
       Future(validate) // Future catches exceptions thrown
@@ -64,18 +65,18 @@ trait DatomicApiAsync extends DatomicAsyncApiBase with ApiAsync with FutureUtils
     }
     override def validate(implicit conn: Connection): Map[String, Seq[String]] = {
       val proxy = conn.proxy
-      ModelValidation(proxy.nsMap, proxy.attrMap).check(save.elements)
+      ModelValidation(proxy.nsMap, proxy.attrMap, "save").check(save.elements)
     }
   }
 
 
-  implicit class datomicInsertApiAsync[Tpl](insert0: Insert) extends Transaction {
+  implicit class datomicInsertApiAsync[Tpl](insert0: Insert) extends InsertTransaction {
     val insert = insert0.asInstanceOf[DatomicInsert_JS]
     override def transact(implicit conn0: Connection, ec: ExecutionContext): Future[TxReport] = tryFuture {
       Future(validate) // Future catches exceptions thrown
         .flatMap {
-          case errorMap if errorMap.nonEmpty => throw ValidationErrors(errorMap)
-          case _                             =>
+          case insertErrors if insertErrors.nonEmpty => throw InsertErrors(insertErrors)
+          case _                                     =>
             val conn                      = conn0.asInstanceOf[DatomicConn_JS]
             val (tplElements, txElements) = splitElements(insert.elements)
             val tplsSerialized            = PickleTpls(tplElements, true).pickle(Right(insert.tpls))
@@ -85,14 +86,13 @@ trait DatomicApiAsync extends DatomicAsyncApiBase with ApiAsync with FutureUtils
     override def inspect(implicit conn: Connection, ec: ExecutionContext): Future[Unit] = {
       printInspectTx("INSERT", insert.elements)
     }
-    override def validate(implicit conn: Connection): Map[String, Seq[String]] = {
-      val proxy = conn.proxy
-      ModelValidation(proxy.nsMap, proxy.attrMap, true).check(insert.elements)
+    override def validate(implicit conn: Connection): Seq[(Int, Seq[InsertError])] = {
+      InsertValidation.validate(conn, insert.elements, insert.tpls)
     }
   }
 
 
-  implicit class datomicUpdateApiAsync[Tpl](update: DatomicUpdate) extends Transaction {
+  implicit class datomicUpdateApiAsync[Tpl](update: DatomicUpdate) extends UpdateTransaction {
     override def transact(implicit conn0: Connection, ec: ExecutionContext): Future[TxReport] = {
       Future(validate) // Future catches exceptions thrown
         .flatMap {
@@ -107,12 +107,13 @@ trait DatomicApiAsync extends DatomicAsyncApiBase with ApiAsync with FutureUtils
     }
     override def validate(implicit conn: Connection): Map[String, Seq[String]] = {
       val proxy = conn.proxy
-      ModelValidation(proxy.nsMap, proxy.attrMap).check(update.elements)
+      // Only generic model validation on JS platform
+      ModelValidation(proxy.nsMap, proxy.attrMap, "update").check(update.elements)
     }
   }
 
 
-  implicit class datomicDeleteApiAsync[Tpl](delete: DatomicDelete) extends Transaction {
+  implicit class datomicDeleteApiAsync[Tpl](delete: DatomicDelete) extends DeleteTransaction {
     override def transact(implicit conn0: Connection, ec: ExecutionContext): Future[TxReport] = {
       val conn = conn0.asInstanceOf[DatomicConn_JS]
       conn.rpc.delete(conn.proxy, delete.elements).future

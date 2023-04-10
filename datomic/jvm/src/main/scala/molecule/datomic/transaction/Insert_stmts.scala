@@ -16,7 +16,6 @@ trait Insert_stmts
 
   def getStmts(
     nsMap: Map[String, MetaNs],
-    attrMap: Map[String, (Cardinality, String, Seq[String])],
     elements: List[Element],
     tpls: Seq[Product],
     debug: Boolean = true

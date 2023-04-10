@@ -1,14 +1,16 @@
 package molecule.datomic.test.validation
 
+import boopickle.Default._
 import molecule.base.error._
 import molecule.core.util.Executor._
+import molecule.core.util.SerializationUtils
 import molecule.coreTests.dataModels.core.dsl.Validation._
 import molecule.datomic.async._
 import molecule.datomic.setup.DatomicTestSuite
 import utest._
 import scala.language.implicitConversions
 
-object MandatoryRefs extends DatomicTestSuite {
+object MandatoryRefs extends DatomicTestSuite with SerializationUtils {
 
   override lazy val tests = Tests {
 
@@ -161,8 +163,8 @@ object MandatoryRefs extends DatomicTestSuite {
 
         // Let's add two other entities referencing RefB too
         List(e2, e3) <- MandatoryRefsB.i.refsB.insert(
-          (2, Set(r1)),
-          (3, Set(r1)),
+          (4, Set(r1)),
+          (5, Set(r1)),
         ).transact.map(_.eids)
 
         // Now 3 entities would be rendered invalid if we deleted r1

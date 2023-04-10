@@ -28,22 +28,22 @@ case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuff
   )
   private val dec   = state.dec
 
-  def unpickle: Either[ExecutionError, List[Tpl]] = {
+  def unpickle: Either[MoleculeError, List[Tpl]] = {
     dec.readInt match { // decode Left/Right
       case 2 => Right(unpickleTpls)
-      case _ => Left(Unpickle.apply[ExecutionError].fromState(state))
+      case _ => Left(Unpickle.apply[MoleculeError].fromState(state))
     }
   }
-  def unpickleOffset: Either[ExecutionError, (List[Tpl], Int, Boolean)] = {
+  def unpickleOffset: Either[MoleculeError, (List[Tpl], Int, Boolean)] = {
     dec.readInt match { // decode Left/Right
       case 2 => Right((unpickleTpls, dek.readInt, dek.readBoolean))
-      case _ => Left(Unpickle.apply[ExecutionError].fromState(state))
+      case _ => Left(Unpickle.apply[MoleculeError].fromState(state))
     }
   }
-  def unpickleCursor: Either[ExecutionError, (List[Tpl], String, Boolean)] = {
+  def unpickleCursor: Either[MoleculeError, (List[Tpl], String, Boolean)] = {
     dec.readInt match { // decode Left/Right
       case 2 => Right((unpickleTpls, dek.readString, dek.readBoolean))
-      case _ => Left(Unpickle.apply[ExecutionError].fromState(state))
+      case _ => Left(Unpickle.apply[MoleculeError].fromState(state))
     }
   }
 
@@ -86,7 +86,7 @@ case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuff
                 case a: AttrSetOpt => resolveUnpicklers(tail, unpicklers :+ unpickleAttrSetOpt(a))
                 case _: AttrSetTac => resolveUnpicklers(tail, unpicklers)
               }
-            case a => throw new Exception("Attribute family not implemented for " + a)
+            case a          => throw new Exception("Attribute family not implemented for " + a)
           }
 
         case Ref(_, refAttr, _, _) =>
@@ -163,9 +163,18 @@ case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuff
   object dek {
     def readString = dec.readString
     def readInt = dec.readInt
-    def readLong = dec.readLong
+
+    // todo: Skip brute forcing values to Strings
+    def readLong = dec.readString.toLong
     def readFloat = dec.readString.toFloat
     def readDouble = dec.readString.toDouble
+
+    // todo: how can we make these work instead?
+    //    def readLong = dec.readLong
+    //    def readFloat = dec.readFloat
+    //    def readDouble = dec.readDouble
+
+
     def readBoolean = BooleanPickler.unpickle(state)
     def readBigInt = {
       val len = dec.readInt

@@ -74,7 +74,8 @@ object MutationDelete extends DatomicTestSuite {
 
           // Can't find next page with all 3 unique edge values deleted (or updated)
           _ <- query.from(cur).limit(4).get
-          .map(_ ==> "Unexpected success").recover { case ModelError(msg) =>
+            .map(_ ==> "Unexpected success")
+            .recover { case ModelError(msg) =>
               msg ==> "Couldn't find next page. Edge rows were all deleted/updated."
             }
         } yield ()
@@ -156,9 +157,9 @@ object MutationDelete extends DatomicTestSuite {
 
           // Can't find next page with all 3 unique edge values deleted (or updated)
           _ <- query.from(cur).limit(-4).get
-          .map(_ ==> "Unexpected success").recover { case ModelError(msg) =>
-              msg ==> "Couldn't find next page. Edge rows were all deleted/updated."
-            }
+            .map(_ ==> "Unexpected success").recover { case ModelError(msg) =>
+            msg ==> "Couldn't find next page. Edge rows were all deleted/updated."
+          }
         } yield ()
       }
 

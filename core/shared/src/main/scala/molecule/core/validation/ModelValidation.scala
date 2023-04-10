@@ -11,10 +11,13 @@ import scala.annotation.tailrec
 case class ModelValidation(
   nsMap: Map[String, MetaNs],
   attrMap: Map[String, (Cardinality, String, Seq[String])],
-  isInsert: Boolean = false,
+  action: String,
+//  isInsert: Boolean = false,
   getCurSetValues: Option[Attr => Set[Any]] = None
 ) extends ModelTransformations_ {
-  private lazy val isUpdate = getCurSetValues.isDefined
+  private lazy val isInsert = action == "insert"
+  private lazy val isUpdate = action == "update"
+//  private lazy val isUpdate = getCurSetValues.isDefined
 
   private def dup(element: String) = {
     throw ModelError(s"Can't transact duplicate attribute `$element`.")
@@ -182,7 +185,6 @@ case class ModelValidation(
     }
 
     if (isInsert) {
-      // Validation for inserts are handled in transaction.InsertExtraction_
       Nil
     } else {
       a match {
@@ -263,6 +265,13 @@ case class ModelValidation(
   }
 
   private def checkMandatoryAndRequiredAttrs(): Unit = {
+//    println("---------------------")
+//    println("isUpdate      : " + isUpdate)
+//    println("mandatoryAttrs: " + mandatoryAttrs)
+//    println("mandatoryRefs : " + mandatoryRefs)
+//    println("deletingAttrs : " + deletingAttrs)
+
+
     if (!isUpdate && mandatoryAttrs.nonEmpty) {
       throw ModelError(
         s"""Missing/empty mandatory attributes:
@@ -280,6 +289,8 @@ case class ModelValidation(
            |""".stripMargin
       )
     }
+
+
     if (isUpdate && deletingAttrs.nonEmpty) {
       throw ModelError(
         s"""Can't delete mandatory attributes (or remove last values of card-many attributes):
@@ -307,7 +318,8 @@ case class ModelValidation(
     if (isUpdate) {
       if (
         (a.op == V || a.op == Appl) && deletingAttr(a)
-          || a.op == Remove && removingLastValue(a, getCurSetValues.get(a))
+          || a.op == Remove && getCurSetValues.nonEmpty && removingLastValue(a, getCurSetValues.get(a))
+//          || a.op == Remove && removingLastValue(a, getCurSetValues.get(a))
       ) {
         // Wrongfully trying to delete mandatory attr - add to watchlist
         deletingAttrs += attr
@@ -325,7 +337,7 @@ case class ModelValidation(
     if (isUpdate) {
       if (
         (a.op == V || a.op == Appl) && deletingAttr(a)
-          || a.op == Remove && removingLastValue(a, getCurSetValues.get(a))
+          || a.op == Remove && getCurSetValues.nonEmpty && removingLastValue(a, getCurSetValues.get(a))
       ) {
         // Wrongfully trying to delete mandatory attr - add to watchlist
         deletingAttrs += attr

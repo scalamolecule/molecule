@@ -1,7 +1,6 @@
 package molecule.datomic.api
 
 
-import datomic.Peer
 import molecule.base.error._
 import molecule.boilerplate.ast.Model._
 import molecule.core.action.Insert
@@ -17,12 +16,12 @@ import molecule.datomic.marshalling.DatomicRpcJVM.Data
 import molecule.datomic.query.{DatomicQueryResolveCursor, DatomicQueryResolveOffset}
 import molecule.datomic.subscription.SubscriptionStarter
 import molecule.datomic.transaction.{Delete_stmts, Insert_stmts, Save_stmts, Update_stmts}
-import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
 
 
 trait DatomicApiAsync
-  extends SubscriptionStarter
+  extends JVMDatomicApiBase
+    with SubscriptionStarter
     with DatomicAsyncApiBase
     with ApiAsync
     with FutureUtils {
@@ -63,7 +62,7 @@ trait DatomicApiAsync
   }
 
 
-  implicit class datomicSaveApiAsync[Tpl](save: DatomicSave) extends Transaction {
+  implicit class datomicSaveApiAsync[Tpl](save: DatomicSave) extends SaveTransaction {
     override def transact(implicit conn: Connection, ec: ExecutionContext): Future[TxReport] = tryFuture {
       Future(validate) // Future catches exceptions thrown
         .flatMap {
@@ -80,7 +79,7 @@ trait DatomicApiAsync
     }
     override def validate(implicit conn: Connection): Map[String, Seq[String]] = {
       val proxy = conn.proxy
-      ModelValidation(proxy.nsMap, proxy.attrMap).check(save.elements)
+      ModelValidation(proxy.nsMap, proxy.attrMap, "save").check(save.elements)
     }
   }
 
@@ -102,7 +101,7 @@ trait DatomicApiAsync
     }
     private def getStmts(proxy: ConnProxy): Data = {
       (new InsertExtraction with Insert_stmts)
-        .getStmts(proxy.nsMap, proxy.attrMap, insert.elements, insert.tpls)
+        .getStmts(proxy.nsMap, insert.elements, insert.tpls)
     }
     override def validate(implicit conn: Connection): Seq[(Int, Seq[InsertError])] = {
       InsertValidation.validate(conn, insert.elements, insert.tpls)
@@ -110,7 +109,7 @@ trait DatomicApiAsync
   }
 
 
-  implicit class datomicUpdateApiAsync[Tpl](update: DatomicUpdate) extends Transaction {
+  implicit class datomicUpdateApiAsync[Tpl](update: DatomicUpdate) extends UpdateTransaction {
     override def transact(implicit conn0: Connection, ec: ExecutionContext): Future[TxReport] = tryFuture {
       Future(validate) // Future catches exceptions thrown
         .flatMap {
@@ -127,38 +126,13 @@ trait DatomicApiAsync
       (new UpdateExtraction(conn.proxy.uniqueAttrs, update.isUpsert) with Update_stmts)
         .getStmts(conn, update.elements)
     }
-    override def validate(implicit conn0: Connection): Map[String, Seq[String]] = {
-      val conn                              = conn0.asInstanceOf[DatomicConn_JVM]
-      val proxy                             = conn.proxy
-      val db                                = conn.peerConn.db()
-      val getCurSetValues: Attr => Set[Any] = (attr: Attr) => {
-        val a = s":${attr.ns}/${attr.attr}"
-        try {
-          val curValues = Peer.q(s"[:find ?vs :where [_ $a ?vs]]", db)
-          if (curValues.isEmpty) {
-            throw ExecutionError(s"While checking to avoid removing the last values of mandatory " +
-              s"attribute ${attr.ns}.${attr.attr} the current Set of values couldn't be found.")
-          }
-          val vs = ListBuffer.empty[Any]
-          curValues.forEach(row => vs.addOne(row.get(0)))
-          vs.toSet
-        } catch {
-          case e: MoleculeError => throw e
-          case t: Throwable     => throw ExecutionError(
-            s"Unexpected error trying to find current values of mandatory attribute ${attr.name}")
-        }
-      }
-      ModelValidation(
-        proxy.nsMap,
-        proxy.attrMap,
-        false,
-        Some(getCurSetValues)
-      ).check(update.elements)
+    override def validate(implicit conn: Connection): Map[String, Seq[String]] = {
+      validateUpdate(conn, update.elements)
     }
   }
 
 
-  implicit class datomicDeleteApiAsync[Tpl](delete: DatomicDelete) extends Transaction {
+  implicit class datomicDeleteApiAsync[Tpl](delete: DatomicDelete) extends DeleteTransaction {
     override def transact(implicit conn0: Connection, ec: ExecutionContext): Future[TxReport] = tryFuture {
       val conn = conn0.asInstanceOf[DatomicConn_JVM]
       conn.transact_async(getStmts(conn))

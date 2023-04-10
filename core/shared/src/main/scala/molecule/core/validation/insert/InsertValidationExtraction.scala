@@ -238,8 +238,6 @@ trait InsertValidationExtraction extends InsertValidators_ with ModelUtils { sel
 
     } { validator =>
       (tpl: Product) =>
-        println(mandatory)
-        println(tpl)
         val validate = validator(tpl)
         val set      = tpl.productElement(tplIndex).asInstanceOf[Set[_]]
         if (mandatory && set.isEmpty) {

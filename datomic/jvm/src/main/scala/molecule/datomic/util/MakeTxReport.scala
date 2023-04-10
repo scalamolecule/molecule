@@ -1,11 +1,10 @@
 package molecule.datomic.util
 
-import java.util.{Date, List => jList, Map => jMap}
-import datomic.Connection.{DB_AFTER, DB_BEFORE, TEMPIDS, TX_DATA}
+import java.util.{List => jList, Map => jMap}
+import datomic.Connection.{DB_AFTER, TEMPIDS, TX_DATA}
 import datomic.db.{Datum => PeerDatom}
-import datomic.{Connection => DatomicConnection, Datom => _, _}
+import datomic.{Datom => _, _}
 import molecule.core.api.TxReport
-import molecule.datomic.facade.{Datom, DatomicTxReport}
 import scala.collection.mutable.ListBuffer
 import scala.jdk.CollectionConverters._
 
@@ -13,8 +12,8 @@ object MakeTxReport {
 
   def apply(rawTxReport: jMap[_, _]): TxReport = {
     val dbAfter: Database = rawTxReport.get(DB_AFTER).asInstanceOf[Database]
-    val t           : Long = dbAfter.basisT
-    val tx: Long = Peer.toTx(t).asInstanceOf[Long]
+    val t      : Long     = dbAfter.basisT
+    val tx     : Long     = Peer.toTx(t).asInstanceOf[Long]
 
     val eids: List[Long] = {
       val allIds           = ListBuffer.empty[Long]

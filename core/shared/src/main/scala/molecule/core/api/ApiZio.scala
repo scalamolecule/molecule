@@ -17,7 +17,19 @@ trait ApiZio extends PrintInspect {
   }
 
 
-  trait Transaction extends Inspectable {
+  trait SaveTransaction extends Inspectable {
+    def transact: ZIO[Connection, MoleculeError, TxReport]
+    def validate: ZIO[Connection, MoleculeError, Map[String, Seq[String]]]
+  }
+
+  trait InsertTransaction extends Inspectable {
+    def transact: ZIO[Connection, MoleculeError, TxReport]
+    def validate: ZIO[Connection, MoleculeError, Seq[(Int, Seq[InsertError])]]
+  }
+
+  trait UpdateTransaction extends SaveTransaction
+
+  trait DeleteTransaction extends Inspectable {
     def transact: ZIO[Connection, MoleculeError, TxReport]
   }
 
