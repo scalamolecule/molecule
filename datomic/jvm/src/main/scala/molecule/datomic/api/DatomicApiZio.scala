@@ -28,6 +28,7 @@ trait DatomicApiZio extends JVMDatomicApiBase with SubscriptionStarter with Dato
           .getListFromOffset_async(conn, global).map(_._1)
       )
     }
+
     override def subscribe(callback: List[Tpl] => Unit): ZIO[Connection, Nothing, Unit] = {
       for {
         conn0 <- ZIO.service[Connection]
@@ -36,10 +37,12 @@ trait DatomicApiZio extends JVMDatomicApiBase with SubscriptionStarter with Dato
           .subscribe(datomicConn, getWatcher(datomicConn), callback))
       } yield res
     }
+
     override def inspect: ZIO[Connection, MoleculeError, Unit] = {
       printInspectQuery("QUERY", q.elements)
     }
   }
+
 
   implicit class datomicQueryOffsetApiZio[Tpl](q: DatomicQueryOffset[Tpl]) extends QueryOffsetApi[Tpl] {
     override def get: ZIO[Connection, MoleculeError, (List[Tpl], Int, Boolean)] = {
@@ -48,10 +51,12 @@ trait DatomicApiZio extends JVMDatomicApiBase with SubscriptionStarter with Dato
           .getListFromOffset_async(conn, global)
       )
     }
+
     override def inspect: ZIO[Connection, MoleculeError, Unit] = {
       printInspectQuery("QUERY (offset)", q.elements)
     }
   }
+
 
   implicit class datomicQueryCursorApiZio[Tpl](q: DatomicQueryCursor[Tpl]) extends QueryCursorApi[Tpl] {
     override def get: ZIO[Connection, MoleculeError, (List[Tpl], String, Boolean)] = {
@@ -60,6 +65,7 @@ trait DatomicApiZio extends JVMDatomicApiBase with SubscriptionStarter with Dato
           .getListFromCursor_async(conn, global)
       )
     }
+
     override def inspect: ZIO[Connection, MoleculeError, Unit] = {
       printInspectQuery("QUERY (cursor)", q.elements)
     }
@@ -71,27 +77,31 @@ trait DatomicApiZio extends JVMDatomicApiBase with SubscriptionStarter with Dato
       for {
         conn0 <- ZIO.service[Connection]
         errors <- validate
+        _ <- ZIO.when(errors.nonEmpty)(ZIO.fail(ValidationErrors(errors)))
         conn = conn0.asInstanceOf[DatomicConn_JVM]
         stmts <- ZIO.succeed(getStmts(conn.proxy))
         txReport <- transactStmts(stmts)
       } yield txReport
     }
+
     override def inspect: ZIO[Connection, MoleculeError, Unit] = {
       for {
         conn0 <- ZIO.service[Connection]
         conn = conn0.asInstanceOf[DatomicConn_JVM]
       } yield printInspectTx("SAVE", save.elements, getStmts(conn.proxy))
     }
+
     private def getStmts(proxy: ConnProxy): Data = {
       (new SaveExtraction() with Save_stmts).getStmts(save.elements)
     }
+
     override def validate: ZIO[Connection, MoleculeError, Map[String, Seq[String]]] = {
       for {
         conn0 <- ZIO.service[Connection]
         conn = conn0.asInstanceOf[DatomicConn_JVM]
         proxy = conn.proxy
         errors <- ZIO.succeed[Map[String, Seq[String]]](
-          ModelValidation(proxy.nsMap, proxy.attrMap, "save").check(save.elements)
+          ModelValidation(proxy.nsMap, proxy.attrMap, "save").validate(save.elements)
         )
       } yield errors
     }
@@ -104,11 +114,13 @@ trait DatomicApiZio extends JVMDatomicApiBase with SubscriptionStarter with Dato
       for {
         conn0 <- ZIO.service[Connection]
         errors <- validate
+        _ <- ZIO.when(errors.nonEmpty)(ZIO.fail(InsertErrors(errors)))
         conn = conn0.asInstanceOf[DatomicConn_JVM]
         stmts <- ZIO.succeed(getStmts(conn.proxy))
         txReport <- transactStmts(stmts)
       } yield txReport
     }
+
     override def inspect: ZIO[Connection, MoleculeError, Unit] = {
       for {
         conn0 <- ZIO.service[Connection]
@@ -116,10 +128,12 @@ trait DatomicApiZio extends JVMDatomicApiBase with SubscriptionStarter with Dato
       } yield
         printInspectTx("INSERT", insert.elements, getStmts(conn.proxy))
     }
+
     private def getStmts(proxy: ConnProxy): Data = {
       (new InsertExtraction with Insert_stmts)
         .getStmts(proxy.nsMap, insert.elements, insert.tpls)
     }
+
     override def validate: ZIO[Connection, MoleculeError, Seq[(Int, Seq[InsertError])]] = {
       for {
         conn0 <- ZIO.service[Connection]
@@ -137,11 +151,13 @@ trait DatomicApiZio extends JVMDatomicApiBase with SubscriptionStarter with Dato
       for {
         conn0 <- ZIO.service[Connection]
         errors <- validate
+        _ <- ZIO.when(errors.nonEmpty)(ZIO.fail(ValidationErrors(errors)))
         conn = conn0.asInstanceOf[DatomicConn_JVM]
         stmts <- ZIO.succeed(getStmts(conn))
         txReport <- transactStmtsWithConn(conn, stmts)
       } yield txReport
     }
+
     override def inspect: ZIO[Connection, MoleculeError, Unit] = {
       for {
         conn0 <- ZIO.service[Connection]
@@ -149,10 +165,12 @@ trait DatomicApiZio extends JVMDatomicApiBase with SubscriptionStarter with Dato
         res <- printInspectTx("UPDATE", update.elements, getStmts(conn))
       } yield res
     }
+
     private def getStmts(conn: DatomicConn_JVM): Data = {
       (new UpdateExtraction(conn.proxy.uniqueAttrs, update.isUpsert) with Update_stmts)
         .getStmts(conn, update.elements)
     }
+
     override def validate: ZIO[Connection, MoleculeError, Map[String, Seq[String]]] = {
       for {
         conn0 <- ZIO.service[Connection]
@@ -171,6 +189,7 @@ trait DatomicApiZio extends JVMDatomicApiBase with SubscriptionStarter with Dato
         txReport <- transactStmtsWithConn(conn, stmts)
       } yield txReport
     }
+
     override def inspect: ZIO[Connection, MoleculeError, Unit] = {
       for {
         conn0 <- ZIO.service[Connection]

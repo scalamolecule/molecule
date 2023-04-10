@@ -29,32 +29,17 @@ object Adhoc extends DatomicTestSuite {
 
     "Msg" - validation { implicit conn =>
       for {
-        //        _ <- Constants.errorMsg(4).save.transact
-//        _ <- Variables.errorMsg(1).int1(2).save.transact
-        _ <- Variables.errorMsg(1).int1(2).save.transact
-          .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap) =>
-            errorMap.head._2 ==> Seq(
-              "One-line error msg"
-            )
-        }
+//        _ <- Type.int(3).long_?(Option.empty[Long]).save.transact
+//        _ <- Type.int(3).long_?(Some(1L)).save.inspect
+//        _ <- Type.int(3).long_?(Some(3L)).save.transact
+
+        _ <- Constants.noErrorMsg(3).save.transact
 
 
       } yield ()
     }
 
-    /*
-testOnly molecule.datomic.test.pagination.cursor.subUnique.MutationDelete
-testOnly molecule.datomic.test.sort.SortIndexes
-testOnly molecule.datomic.test.relation.nested.NestedRef
-testOnly molecule.datomic.test.relation.nested.NestedSemantics
-testOnly molecule.datomic.test.pagination.offset.OffsetSemantics
-testOnly molecule.datomic.test.pagination.cursor.SharedSemantics
-testOnly molecule.datomic.test.sort.SortNested
-testOnly molecule.datomic.test.relation.nested.NestedTypes
-testOnly molecule.datomic.test.pagination.cursor.noUnique.MutationDelete
-testOnly molecule.datomic.test.relation.nested.NestedExpr
-     */
+
 
     //    "Compare with other attr value" - validation { implicit conn =>
     //      for {

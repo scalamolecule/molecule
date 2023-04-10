@@ -12,17 +12,15 @@ case class ModelValidation(
   nsMap: Map[String, MetaNs],
   attrMap: Map[String, (Cardinality, String, Seq[String])],
   action: String,
-//  isInsert: Boolean = false,
   getCurSetValues: Option[Attr => Set[Any]] = None
 ) extends ModelTransformations_ {
-  private lazy val isInsert = action == "insert"
-  private lazy val isUpdate = action == "update"
-//  private lazy val isUpdate = getCurSetValues.isDefined
 
   private def dup(element: String) = {
     throw ModelError(s"Can't transact duplicate attribute `$element`.")
   }
 
+  private val isInsert        : Boolean                     = action == "insert"
+  private val isUpdate        : Boolean                     = action == "update"
   private var prev            : Array[Array[Array[String]]] = Array(Array(Array.empty[String]))
   private var level           : Int                         = 0
   private var group           : Int                         = 0
@@ -39,7 +37,7 @@ case class ModelValidation(
 
 
   @tailrec
-  final def check(elements: List[Element]): Map[String, Seq[String]] = {
+  final def validate(elements: List[Element]): Map[String, Seq[String]] = {
     if (prevNs.isEmpty)
       curElements = elements
     elements match {
@@ -55,7 +53,7 @@ case class ModelValidation(
           if (allErrors.nonEmpty)
             validationErrors += attr -> allErrors
 
-          check(tail)
+          validate(tail)
 
         case r: Ref =>
           val refAttr = r.ns + "." + r.refAttr
@@ -68,19 +66,19 @@ case class ModelValidation(
           mandatoryRefs = mandatoryRefs.filterNot(_._1 == refAttr)
           presentAttrs += r.refAttr
           refPath = refPath :+ refAttr
-          check(tail)
+          validate(tail)
 
         case backRef: BackRef =>
           if (group == 0)
             throw ModelError(s"Can't use backref namespace `_${backRef.backRef}` from here.")
           group -= 1
           refPath = refPath.init
-          check(tail)
+          validate(tail)
 
         case Composite(es) =>
           curElements = es
           refPath = Seq.empty[String]
-          check(es ++ tail)
+          validate(es ++ tail)
 
         case Nested(r, es) =>
           curElements = es
@@ -90,7 +88,7 @@ case class ModelValidation(
           prev = prev :+ Array(Array(ref))
           level += 1
           group = 0
-          check(es ++ tail)
+          validate(es ++ tail)
 
         case NestedOpt(r, es) =>
           curElements = es
@@ -100,7 +98,7 @@ case class ModelValidation(
           prev = prev :+ Array(Array(ref))
           level += 1
           group = 0
-          check(es ++ tail)
+          validate(es ++ tail)
 
         case TxMetaData(txElements) =>
           curElements = txElements
@@ -109,7 +107,7 @@ case class ModelValidation(
           group = 0
           refPath = Seq.empty[String]
           isTx = true
-          check(txElements)
+          validate(txElements)
       }
       case Nil          =>
         checkMandatoryAndRequiredAttrs()
@@ -265,11 +263,11 @@ case class ModelValidation(
   }
 
   private def checkMandatoryAndRequiredAttrs(): Unit = {
-//    println("---------------------")
-//    println("isUpdate      : " + isUpdate)
-//    println("mandatoryAttrs: " + mandatoryAttrs)
-//    println("mandatoryRefs : " + mandatoryRefs)
-//    println("deletingAttrs : " + deletingAttrs)
+    //    println("---------------------")
+    //    println("isUpdate      : " + isUpdate)
+    //    println("mandatoryAttrs: " + mandatoryAttrs)
+    //    println("mandatoryRefs : " + mandatoryRefs)
+    //    println("deletingAttrs : " + deletingAttrs)
 
 
     if (!isUpdate && mandatoryAttrs.nonEmpty) {
@@ -319,7 +317,7 @@ case class ModelValidation(
       if (
         (a.op == V || a.op == Appl) && deletingAttr(a)
           || a.op == Remove && getCurSetValues.nonEmpty && removingLastValue(a, getCurSetValues.get(a))
-//          || a.op == Remove && removingLastValue(a, getCurSetValues.get(a))
+      //          || a.op == Remove && removingLastValue(a, getCurSetValues.get(a))
       ) {
         // Wrongfully trying to delete mandatory attr - add to watchlist
         deletingAttrs += attr

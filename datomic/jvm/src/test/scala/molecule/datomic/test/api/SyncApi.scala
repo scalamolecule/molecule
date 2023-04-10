@@ -1,5 +1,6 @@
 package molecule.datomic.test.api
 
+import molecule.base.error._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.datomic.setup.DatomicTestSuite
 import molecule.datomic.sync._
@@ -23,6 +24,40 @@ object SyncApi extends DatomicTestSuite {
         Ns.int.query.get ==> List(3, 10)
       }
 
+      "Error handling" - validation { implicit conn =>
+        import molecule.coreTests.dataModels.core.dsl.Validation.Type
+
+        intercept[ValidationErrors](
+          Type.string("a").save.transact
+        ) match {
+          case ValidationErrors(errorMap) =>
+            errorMap.head._2.head ==>
+              s"""Type.string with value `a` doesn't satisfy validation:
+                 |  _ > "b"
+                 |""".stripMargin
+        }
+        intercept[InsertErrors](
+          Type.string.insert("a").transact
+        ) match {
+          case InsertErrors(errors, _) =>
+            errors.head._2.head.errors.head ==
+              s"""Type.string with value `a` doesn't satisfy validation:
+                 |  _ > "b"
+                 |""".stripMargin
+        }
+
+        val eid = Type.string("c").save.transact.eids.head
+        intercept[ValidationErrors](
+          Type(eid).string("a").update.transact
+        ) match {
+          case ValidationErrors(errorMap) =>
+            errorMap.head._2.head ==>
+              s"""Type.string with value `a` doesn't satisfy validation:
+                 |  _ > "b"
+                 |""".stripMargin
+        }
+      }
+
 
       "Inspection" - types { implicit conn =>
         val List(a, b) = Ns.int.insert(1, 2).transact.eids // Need data for update and delete
@@ -44,7 +79,7 @@ object SyncApi extends DatomicTestSuite {
 
 
       "Cursor query" - unique { implicit conn =>
-        import molecule.coreTests.dataModels.core.dsl.Unique._
+        import molecule.coreTests.dataModels.core.dsl.Unique.Unique
 
         val query = Unique.int.a1.query
         Unique.int.insert(1, 2, 3, 4, 5).transact

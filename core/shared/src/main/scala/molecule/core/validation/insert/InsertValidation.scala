@@ -16,7 +16,7 @@ object InsertValidation extends InsertValidationExtraction with InsertValidation
     val (mainElements, txMetaElements) = splitElements(elements)
 
     // Basic model validation
-    ModelValidation(nsMap, attrMap, "insert").check(mainElements)
+    ModelValidation(nsMap, attrMap, "insert").validate(mainElements)
 
     // Validator to validate each row
     val validate = getInsertValidator(nsMap, mainElements)
@@ -26,7 +26,7 @@ object InsertValidation extends InsertValidationExtraction with InsertValidation
       if (rowErrors.isEmpty) None else Some((rowIndex, rowErrors))
     }
 
-    val txMetaModelErrors = ModelValidation(nsMap, attrMap, "save").check(txMetaElements).toSeq
+    val txMetaModelErrors = ModelValidation(nsMap, attrMap, "save").validate(txMetaElements).toSeq
     val txMetaDataErrors  = if (txMetaModelErrors.isEmpty) Nil else {
       val txMetaInsertErrors = txMetaModelErrors.zipWithIndex.map {
         case ((fullAttr, errors), i) => InsertError(0, i, fullAttr, errors, Nil)

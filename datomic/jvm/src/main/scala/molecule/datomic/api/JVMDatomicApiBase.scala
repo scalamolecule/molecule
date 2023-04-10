@@ -48,6 +48,6 @@ trait JVMDatomicApiBase {
       proxy.attrMap,
       "update",
       Some(getCurSetValues)
-    ).check(elements)
+    ).validate(elements)
   }
 }

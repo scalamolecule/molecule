@@ -51,7 +51,7 @@ trait Update_stmts extends DatomicTxBase_JVM with UpdateOps with MoleculeLogging
         conn.proxy.attrMap,
         "update",
         Some(getCurSetValues)
-      ).check(elements)
+      ).validate(elements)
       if (validationErrors.nonEmpty) {
         throw ValidationErrors(validationErrors)
       }

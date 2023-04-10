@@ -1,8 +1,8 @@
 package molecule.datomic.test.api
 
+import molecule.base.error._
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
-import molecule.coreTests.dataModels.core.dsl.Unique.Unique
 import molecule.datomic.async._
 import molecule.datomic.setup.DatomicTestSuite
 import utest._
@@ -23,6 +23,41 @@ object AsyncApi extends DatomicTestSuite {
           _ <- Ns(a).int(10).update.transact
           _ <- Ns(b).delete.transact
           _ <- Ns.int.query.get.map(_ ==> List(3, 10))
+        } yield ()
+      }
+
+
+      "Error handling" - validation { implicit conn =>
+        import molecule.coreTests.dataModels.core.dsl.Validation.Type
+
+        for {
+          _ <- Type.string("a").save.transact
+            .map(_ ==> "Unexpected success").recover {
+            case ValidationErrors(errorMap) =>
+              errorMap.head._2.head ==>
+                s"""Type.string with value `a` doesn't satisfy validation:
+                   |  _ > "b"
+                   |""".stripMargin
+          }
+
+          _ <- Type.string.insert("a").transact
+            .map(_ ==> "Unexpected success").recover {
+            case InsertErrors(errors, _) =>
+              errors.head._2.head.errors.head ==
+                s"""Type.string with value `a` doesn't satisfy validation:
+                   |  _ > "b"
+                   |""".stripMargin
+          }
+
+          eid <- Type.string("c").save.transact.map(_.eids.head)
+          _ <- Type(eid).string("a").update.transact
+            .map(_ ==> "Unexpected success").recover {
+            case ValidationErrors(errorMap) =>
+              errorMap.head._2.head ==
+                s"""Type.string with value `a` doesn't satisfy validation:
+                   |  _ > "b"
+                   |""".stripMargin
+          }
         } yield ()
       }
 
@@ -51,6 +86,7 @@ object AsyncApi extends DatomicTestSuite {
 
 
       "Cursor query" - unique { implicit conn =>
+        import molecule.coreTests.dataModels.core.dsl.Unique.Unique
         val query = Unique.int.a1.query
         for {
           _ <- Unique.int.insert(1, 2, 3, 4, 5).transact

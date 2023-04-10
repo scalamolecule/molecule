@@ -1,7 +1,6 @@
 package molecule.datomic.api
 
-import molecule.base.ast.SchemaAST.MetaNs
-import molecule.base.error.{InsertError, ModelError}
+import molecule.base.error._
 import molecule.boilerplate.ast.Model._
 import molecule.core.action.Insert
 import molecule.core.api.{ApiSync, Connection, TxReport}
@@ -24,21 +23,25 @@ trait DatomicApiSync extends JVMDatomicApiBase with SubscriptionStarter with Api
       DatomicQueryResolveOffset[Tpl](q.elements, q.limit, None)
         .getListFromOffset_sync(conn.asInstanceOf[DatomicConn_JVM])._1
     }
+
     override def subscribe(callback: List[Tpl] => Unit)(implicit conn: Connection): Unit = {
       val datomicConn = conn.asInstanceOf[DatomicConn_JVM]
       DatomicQueryResolveOffset[Tpl](q.elements, q.limit, None)
         .subscribe(datomicConn, getWatcher(datomicConn), callback)
     }
+
     override def inspect(implicit conn: Connection): Unit = {
       printInspectQuery("QUERY", q.elements)
     }
   }
+
 
   implicit class datomicQueryOffsetApiSync[Tpl](q: DatomicQueryOffset[Tpl]) extends QueryOffsetApi[Tpl] {
     override def get(implicit conn: Connection): (List[Tpl], Int, Boolean) = {
       DatomicQueryResolveOffset[Tpl](q.elements, q.limit, Some(q.offset))
         .getListFromOffset_sync(conn.asInstanceOf[DatomicConn_JVM])
     }
+
     override def inspect(implicit conn: Connection): Unit =
       printInspectQuery("QUERY (offset)", q.elements)
   }
@@ -48,6 +51,7 @@ trait DatomicApiSync extends JVMDatomicApiBase with SubscriptionStarter with Api
       DatomicQueryResolveCursor[Tpl](q.elements, q.limit, Some(q.cursor))
         .getListFromCursor_sync(conn.asInstanceOf[DatomicConn_JVM])
     }
+
     override def inspect(implicit conn: Connection): Unit = {
       printInspectQuery("QUERY (cursor)", q.elements)
     }
@@ -55,35 +59,50 @@ trait DatomicApiSync extends JVMDatomicApiBase with SubscriptionStarter with Api
 
 
   implicit class datomicSaveApiSync[Tpl](save: DatomicSave) extends SaveTransaction {
-    override def transact(implicit conn: Connection): TxReport = catchExecutionError {
-      conn.asInstanceOf[DatomicConn_JVM].transact_sync(getStmts(conn.proxy))
+    override def transact(implicit conn: Connection): TxReport = {
+      val errors = validate
+      if (errors.isEmpty) {
+        conn.asInstanceOf[DatomicConn_JVM].transact_sync(getStmts(conn.proxy))
+      } else {
+        throw ValidationErrors(errors)
+      }
     }
+
     override def inspect(implicit conn: Connection): Unit = {
       printInspectTx("SAVE", save.elements, getStmts(conn.proxy))
     }
+
     private def getStmts(proxy: ConnProxy): Data = {
       (new SaveExtraction() with Save_stmts).getStmts(save.elements)
     }
+
+
     override def validate(implicit conn: Connection): Map[String, Seq[String]] = {
       val proxy = conn.proxy
-      ModelValidation(proxy.nsMap, proxy.attrMap, "save").check(save.elements)
+      ModelValidation(proxy.nsMap, proxy.attrMap, "save").validate(save.elements)
     }
   }
 
 
   implicit class datomicInsertApiSync[Tpl](insert0: Insert) extends InsertTransaction {
     val insert = insert0.asInstanceOf[DatomicInsert_JVM]
-    override def transact(implicit conn: Connection): TxReport = catchExecutionError {
-      validate
-      conn.asInstanceOf[DatomicConn_JVM].transact_sync(getStmts(conn.proxy))
+    override def transact(implicit conn: Connection): TxReport = {
+      val errors = validate
+      if (errors.isEmpty) {
+        conn.asInstanceOf[DatomicConn_JVM].transact_sync(getStmts(conn.proxy))
+      } else {
+        throw InsertErrors(errors)
+      }
     }
     override def inspect(implicit conn: Connection): Unit = {
       printInspectTx("INSERT", insert.elements, getStmts(conn.proxy))
     }
+
     private def getStmts(proxy: ConnProxy): Data = {
       (new InsertExtraction with Insert_stmts)
         .getStmts(proxy.nsMap, insert.elements, insert.tpls)
     }
+
     override def validate(implicit conn: Connection): Seq[(Int, Seq[InsertError])] = {
       InsertValidation.validate(conn, insert.elements, insert.tpls)
     }
@@ -91,11 +110,17 @@ trait DatomicApiSync extends JVMDatomicApiBase with SubscriptionStarter with Api
 
 
   implicit class datomicUpdateApiSync[Tpl](update: DatomicUpdate) extends UpdateTransaction {
-    override def transact(implicit conn0: Connection): TxReport = catchExecutionError {
-      validate(conn0)
-      val conn = conn0.asInstanceOf[DatomicConn_JVM]
-      conn.transact_sync(getStmts(conn))
+    override def transact(implicit conn0: Connection): TxReport = {
+      val errors = validate
+      if (errors.isEmpty) {
+        val conn = conn0.asInstanceOf[DatomicConn_JVM]
+        conn.transact_sync(getStmts(conn))
+      } else {
+        throw ValidationErrors(errors)
+      }
     }
+
+
     override def inspect(implicit conn0: Connection): Unit = {
       printInspectTx("UPDATE", update.elements, getStmts(conn0.asInstanceOf[DatomicConn_JVM]))
     }
@@ -103,6 +128,7 @@ trait DatomicApiSync extends JVMDatomicApiBase with SubscriptionStarter with Api
       (new UpdateExtraction(conn.proxy.uniqueAttrs, update.isUpsert) with Update_stmts)
         .getStmts(conn, update.elements)
     }
+
     override def validate(implicit conn: Connection): Map[String, Seq[String]] = {
       validateUpdate(conn, update.elements)
     }
@@ -110,13 +136,15 @@ trait DatomicApiSync extends JVMDatomicApiBase with SubscriptionStarter with Api
 
 
   implicit class datomicDeleteApiSync[Tpl](delete: DatomicDelete) extends DeleteTransaction {
-    override def transact(implicit conn0: Connection): TxReport = catchExecutionError {
+    override def transact(implicit conn0: Connection): TxReport = {
       val conn = conn0.asInstanceOf[DatomicConn_JVM]
       conn.transact_sync(getStmts(conn))
     }
+
     override def inspect(implicit conn0: Connection): Unit = {
       printInspectTx("DELETE", delete.elements, getStmts(conn0.asInstanceOf[DatomicConn_JVM]))
     }
+
     private def getStmts(conn: DatomicConn_JVM): Data = {
       (new DeleteExtraction with Delete_stmts).getStmtsData(conn, delete.elements)
     }
@@ -130,13 +158,5 @@ trait DatomicApiSync extends JVMDatomicApiBase with SubscriptionStarter with Api
 
   private def printInspectTx(label: String, elements: List[Element], stmts: Data): Unit = {
     printInspect(label, elements, stmts.toArray().toList.mkString("\n"))
-  }
-
-  private def catchExecutionError(tx: => TxReport): TxReport = {
-    try {
-      tx
-    } catch {
-      case t: Throwable => throw ModelError(t.toString)
-    }
   }
 }

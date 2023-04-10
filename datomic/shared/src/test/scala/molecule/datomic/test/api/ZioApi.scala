@@ -1,13 +1,14 @@
 package molecule.datomic.test.api
 
+import molecule.base.error._
 import molecule.coreTests.dataModels.core.dsl.Types._
-import molecule.coreTests.dataModels.core.dsl.Unique.Unique
 import molecule.datomic.setup.DatomicZioSpec
 import molecule.datomic.zio._
 import zio._
 import zio.test.TestAspect._
 import zio.test._
 import scala.annotation.nowarn
+
 
 object ZioApi extends DatomicZioSpec {
 
@@ -27,6 +28,36 @@ object ZioApi extends DatomicZioSpec {
             assertTrue(b == List(3, 10))
         }
       }.provide(types.orDie),
+
+      test("Error handling") {
+        import molecule.coreTests.dataModels.core.dsl.Validation.Type
+
+        Type.string("a").save.transact.flip.map {
+          case ValidationErrors(errorMap) => assertTrue(
+            errorMap.head._2.head ==
+              s"""Type.string with value `a` doesn't satisfy validation:
+                 |  _ > "b"
+                 |""".stripMargin
+          )
+        } && Type.string.insert("a").transact.flip.map {
+          case InsertErrors(errors, _) => assertTrue(
+            errors.head._2.head.errors.head ==
+              s"""Type.string with value `a` doesn't satisfy validation:
+                 |  _ > "b"
+                 |""".stripMargin
+          )
+        } && Type.string("c").save.transact.flatMap { txReport =>
+          val eid = txReport.eids.head
+          Type(eid).string("a").update.transact.flip.map {
+            case ValidationErrors(errorMap) => assertTrue(
+              errorMap.head._2.head ==
+                s"""Type.string with value `a` doesn't satisfy validation:
+                   |  _ > "b"
+                   |""".stripMargin
+            )
+          }
+        }
+      }.provide(validation.orDie),
 
       test("Inspection") {
         for {
@@ -55,6 +86,7 @@ object ZioApi extends DatomicZioSpec {
       ).provide(types.orDie),
 
       test("Cursor query") {
+        import molecule.coreTests.dataModels.core.dsl.Unique.Unique
         val query = Unique.int.a1.query
         for {
           _ <- Unique.int.insert(1, 2, 3, 4, 5).transact
