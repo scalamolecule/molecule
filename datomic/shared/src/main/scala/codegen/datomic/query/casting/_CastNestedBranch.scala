@@ -38,12 +38,16 @@ object _CastNestedBranch extends DatomicGenBase("CastNestedBranch", "/query/cast
        |        val cast = (_: Row, nested: List[Any]) => nested
        |        resolveArities(as, casts, rowIndexTx, rowIndexTx, acc :+ cast)
        |
+       |      // Composite with only tacit attributes
+       |      case ii :: as if ii.isEmpty =>
+       |        resolveArities(as, casts, rowIndex, rowIndexTx, acc)
+       |
        |      // Composite with nested
        |      case ii :: as if ii.last == -1 =>
        |        val n                     = ii.length - 1
        |        val (tplCasts, moreCasts) = casts.splitAt(n)
        |        val cast                  = (row: Row, nested: List[Any]) =>
-       |          castRow2Tpl(ii.map(List(_)), tplCasts, rowIndex, Some(nested))(row)
+       |          castRow2AnyTpl(ii.map(List(_)), tplCasts, rowIndex, Some(nested))(row)
        |        resolveArities(as, moreCasts, rowIndexTx, rowIndexTx, acc :+ cast)
        |
        |      // Composite
@@ -51,7 +55,7 @@ object _CastNestedBranch extends DatomicGenBase("CastNestedBranch", "/query/cast
        |        val n                     = ii.length
        |        val (tplCasts, moreCasts) = casts.splitAt(n)
        |        val cast                  = (row: Row, _: List[Any]) =>
-       |          castRow2Tpl(ii.map(List(_)), tplCasts, rowIndex, None)(row)
+       |          castRow2AnyTpl(ii.map(List(_)), tplCasts, rowIndex, None)(row)
        |        resolveArities(as, moreCasts, rowIndex + n, rowIndexTx, acc :+ cast)
        |
        |      case Nil => acc
@@ -65,7 +69,7 @@ object _CastNestedBranch extends DatomicGenBase("CastNestedBranch", "/query/cast
        |    rowIndexTx: Int
        |  ): (Row, List[Any]) => T = {
        |    val casters = resolveArities(arities, casts, rowIndex, rowIndexTx, Nil)
-       |    arities.length match {
+       |    casters.length match {
        |      case 0 => cast0[T]
        |      $resolveX
        |    }

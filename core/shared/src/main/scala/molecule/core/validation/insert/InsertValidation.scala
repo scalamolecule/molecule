@@ -13,7 +13,7 @@ object InsertValidation extends InsertValidationExtraction with InsertValidation
     tpls: Seq[Product]
   ): Seq[(Int, Seq[InsertError])] = {
     val (nsMap, attrMap)               = (conn.proxy.nsMap, conn.proxy.attrMap)
-    val (mainElements, txMetaElements) = splitElements(elements)
+    val (mainElements, txMetaElements) = separateTxElements(elements)
 
     // Basic model validation
     ModelValidation(nsMap, attrMap, "insert").validate(mainElements)
@@ -26,7 +26,7 @@ object InsertValidation extends InsertValidationExtraction with InsertValidation
       if (rowErrors.isEmpty) None else Some((rowIndex, rowErrors))
     }
 
-    val txMetaModelErrors = ModelValidation(nsMap, attrMap, "save").validate(txMetaElements).toSeq
+    val txMetaModelErrors = ModelValidation(nsMap, attrMap, "insertTx").validate(txMetaElements).toSeq
     val txMetaDataErrors  = if (txMetaModelErrors.isEmpty) Nil else {
       val txMetaInsertErrors = txMetaModelErrors.zipWithIndex.map {
         case ((fullAttr, errors), i) => InsertError(0, i, fullAttr, errors, Nil)

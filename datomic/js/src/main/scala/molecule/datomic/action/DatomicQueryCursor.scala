@@ -1,13 +1,13 @@
 package molecule.datomic.action
 
 import molecule.boilerplate.ast.Model._
-import molecule.core.action.QueryCursor
+import molecule.core.action.{Action, QueryCursor}
 
 case class DatomicQueryCursor[Tpl](
-  elements: List[Element],
+  private val elements0: List[Element],
   limit: Option[Int],
   cursor: String
-) extends QueryCursor[Tpl] {
+) extends Action(elements0) with QueryCursor[Tpl] {
 
   override def limit(l: Int): DatomicQueryCursor[Tpl] = copy(limit = Some(l))
 }

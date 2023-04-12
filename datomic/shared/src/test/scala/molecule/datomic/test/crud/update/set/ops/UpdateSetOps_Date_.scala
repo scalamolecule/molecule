@@ -16,7 +16,7 @@ object UpdateSetOps_Date_ extends DatomicTestSuite {
 
     "apply (replace/add all)" - types { implicit conn =>
       for {
-        eid <- Ns.dates(Set(date1, date2)).save.transact.map(_.eids.head)
+        eid <- Ns.dates(Set(date1, date2)).save.transact.map(_.eid)
 
         _ <- Ns(eid).dates(Set(date3, date4)).update.transact
         _ <- Ns.dates.query.get.map(_.head ==> Set(date3, date4))
@@ -40,7 +40,7 @@ object UpdateSetOps_Date_ extends DatomicTestSuite {
 
     "add" - types { implicit conn =>
       for {
-        eid <- Ns.dates(Set(date1)).save.transact.map(_.eids.head)
+        eid <- Ns.dates(Set(date1)).save.transact.map(_.eid)
 
         // Add value
         _ <- Ns(eid).dates.add(date2).update.transact
@@ -74,7 +74,7 @@ object UpdateSetOps_Date_ extends DatomicTestSuite {
 
     "swap" - types { implicit conn =>
       for {
-        eid <- Ns.dates(Set(date1, date2, date3, date4, date5, date6)).save.transact.map(_.eids.head)
+        eid <- Ns.dates(Set(date1, date2, date3, date4, date5, date6)).save.transact.map(_.eid)
 
         // Replace value
         _ <- Ns(eid).dates.swap(date6 -> date8).update.transact
@@ -117,7 +117,7 @@ object UpdateSetOps_Date_ extends DatomicTestSuite {
 
     "remove" - types { implicit conn =>
       for {
-        eid <- Ns.dates(Set(date1, date2, date3, date4, date5, date6)).save.transact.map(_.eids.head)
+        eid <- Ns.dates(Set(date1, date2, date3, date4, date5, date6)).save.transact.map(_.eid)
 
         // Remove value
         _ <- Ns(eid).dates.remove(date6).update.transact

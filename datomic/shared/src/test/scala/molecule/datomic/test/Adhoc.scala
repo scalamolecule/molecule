@@ -13,20 +13,20 @@ import utest._
 import scala.concurrent.Future
 import scala.language.implicitConversions
 import molecule.boilerplate.ast.Model._
-import scala.collection.immutable.Map
+import scala.collection.immutable.{Map, Nil}
 
 object Adhoc extends DatomicTestSuite {
 
 
   override lazy val tests = Tests {
 
-    //    "types" - types { implicit conn =>
-    //      for {
-    //        _ <- Ns.int(3).save.transact
-    //        _ <- Ns.int.query.get.map(_ ==> List(3))
-    //
-    //      } yield ()
-    //    }
+    "types" - types { implicit conn =>
+      for {
+        _ <- Ns.int(3).save.transact
+        _ <- Ns.int.query.get.map(_ ==> List(3))
+
+      } yield ()
+    }
 
     "validation" - validation { implicit conn =>
       for {

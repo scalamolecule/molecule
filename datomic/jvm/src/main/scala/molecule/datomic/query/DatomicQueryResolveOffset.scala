@@ -30,16 +30,21 @@ case class DatomicQueryResolveOffset[Tpl](
   // Handles both offset- and non-paginated results
   // returns (rows, total count, hasMore)
   def getListFromOffset_async(implicit conn: DatomicConn_JVM, ec: ExecutionContext)
-  : Future[(List[Tpl], Int, Boolean)] = future(getListFromOffset_sync(conn))
+  : Future[(List[Tpl], Int, Boolean)] = {
+    future(getListFromOffset_sync(conn))
+  }
 
   // Datomic querying is synchronous
   def getListFromOffset_sync(implicit conn: DatomicConn_JVM): (List[Tpl], Int, Boolean) = {
     getListFromOffset_sync(None)(conn)
   }
+
   // Optional use of DB_AFTER for subscriptions
   def getListFromOffset_sync(altDb: Option[datomic.Database])(implicit conn: DatomicConn_JVM)
-  : (List[Tpl], Int, Boolean) = try {
-    if (offset.isDefined && limit.isDefined && limit.get >> 31 != offset.get >> 31) {
+  : (List[Tpl], Int, Boolean) = {
+    lazy val limitSign  = limit.get >> 31
+    lazy val offsetSign = offset.get >> 31
+    if (offset.isDefined && limit.isDefined && limitSign != offsetSign) {
       throw ModelError("Limit and offset should both be positive or negative.")
     }
     val rows       = getRawData(conn, altDb = altDb)
@@ -71,9 +76,6 @@ case class DatomicQueryResolveOffset[Tpl](
         (tuples.result(), totalCount, hasMore)
       }
     }
-  } catch {
-    case e: MoleculeError => throw e
-    case t: Throwable     => throw ExecutionError(t.toString)
   }
 
 

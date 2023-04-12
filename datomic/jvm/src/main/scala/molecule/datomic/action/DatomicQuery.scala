@@ -1,12 +1,12 @@
 package molecule.datomic.action
 
 import molecule.boilerplate.ast.Model._
-import molecule.core.action.Query
+import molecule.core.action.{Action, Query}
 
 case class DatomicQuery[Tpl](
-  elements: List[Element],
+  private val elements0: List[Element],
   limit: Option[Int] = None
-) extends Query[Tpl] {
+) extends Action(elements0) with Query[Tpl] {
 
   // Universal api
 
@@ -17,8 +17,8 @@ case class DatomicQuery[Tpl](
   // Datomic special features
 
   // Time
-  def asOf(n: Int): Query[Tpl] = ???
-  def since(n: Int): Query[Tpl] = ???
-  def widh(n: Int): Query[Tpl] = ???
-  def history: Query[Tpl] = ???
+  def asOf(n: Int): DatomicQuery[Tpl] = ???
+  def since(n: Int): DatomicQuery[Tpl] = ???
+  def widh(n: Int): DatomicQuery[Tpl] = ???
+  def history: DatomicQuery[Tpl] = ???
 }

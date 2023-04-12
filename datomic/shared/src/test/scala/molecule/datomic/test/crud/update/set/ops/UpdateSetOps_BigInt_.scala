@@ -15,7 +15,7 @@ object UpdateSetOps_BigInt_ extends DatomicTestSuite {
 
     "apply (replace/add all)" - types { implicit conn =>
       for {
-        eid <- Ns.bigInts(Set(bigInt1, bigInt2)).save.transact.map(_.eids.head)
+        eid <- Ns.bigInts(Set(bigInt1, bigInt2)).save.transact.map(_.eid)
 
         _ <- Ns(eid).bigInts(Set(bigInt3, bigInt4)).update.transact
         _ <- Ns.bigInts.query.get.map(_.head ==> Set(bigInt3, bigInt4))
@@ -39,7 +39,7 @@ object UpdateSetOps_BigInt_ extends DatomicTestSuite {
 
     "add" - types { implicit conn =>
       for {
-        eid <- Ns.bigInts(Set(bigInt1)).save.transact.map(_.eids.head)
+        eid <- Ns.bigInts(Set(bigInt1)).save.transact.map(_.eid)
 
         // Add value
         _ <- Ns(eid).bigInts.add(bigInt2).update.transact
@@ -73,7 +73,7 @@ object UpdateSetOps_BigInt_ extends DatomicTestSuite {
 
     "swap" - types { implicit conn =>
       for {
-        eid <- Ns.bigInts(Set(bigInt1, bigInt2, bigInt3, bigInt4, bigInt5, bigInt6)).save.transact.map(_.eids.head)
+        eid <- Ns.bigInts(Set(bigInt1, bigInt2, bigInt3, bigInt4, bigInt5, bigInt6)).save.transact.map(_.eid)
 
         // Replace value
         _ <- Ns(eid).bigInts.swap(bigInt6 -> bigInt8).update.transact
@@ -116,7 +116,7 @@ object UpdateSetOps_BigInt_ extends DatomicTestSuite {
 
     "remove" - types { implicit conn =>
       for {
-        eid <- Ns.bigInts(Set(bigInt1, bigInt2, bigInt3, bigInt4, bigInt5, bigInt6)).save.transact.map(_.eids.head)
+        eid <- Ns.bigInts(Set(bigInt1, bigInt2, bigInt3, bigInt4, bigInt5, bigInt6)).save.transact.map(_.eid)
 
         // Remove value
         _ <- Ns(eid).bigInts.remove(bigInt6).update.transact

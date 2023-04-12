@@ -17,7 +17,7 @@ object TypesOne extends DatomicTestSuite {
 
     "String" - validation { implicit conn =>
       for {
-        eid <- Type.string("c").save.transact.map(_.eids.head)
+        eid <- Type.string("c").save.transact.map(_.eid)
 
         _ <- Type(eid).string("a").update.transact
           .map(_ ==> "Unexpected success").recover {
@@ -49,7 +49,7 @@ object TypesOne extends DatomicTestSuite {
 
     "Int" - validation { implicit conn =>
       for {
-        eid <- Type.int(3).save.transact.map(_.eids.head)
+        eid <- Type.int(3).save.transact.map(_.eid)
         _ <- Type(eid).int(1).update.transact
           .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
@@ -63,7 +63,7 @@ object TypesOne extends DatomicTestSuite {
 
     "Long" - validation { implicit conn =>
       for {
-        eid <- Type.long(3L).save.transact.map(_.eids.head)
+        eid <- Type.long(3L).save.transact.map(_.eid)
         _ <- Type(eid).long(1L).update.transact
           .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
@@ -77,7 +77,7 @@ object TypesOne extends DatomicTestSuite {
 
     "Float" - validation { implicit conn =>
       for {
-        eid <- Type.float(float3).save.transact.map(_.eids.head)
+        eid <- Type.float(float3).save.transact.map(_.eid)
         _ <- Type(eid).float(float1).update.transact
           .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
@@ -91,7 +91,7 @@ object TypesOne extends DatomicTestSuite {
 
     "Double" - validation { implicit conn =>
       for {
-        eid <- Type.double(double3).save.transact.map(_.eids.head)
+        eid <- Type.double(double3).save.transact.map(_.eid)
         _ <- Type(eid).double(double1).update.transact
           .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
@@ -105,7 +105,7 @@ object TypesOne extends DatomicTestSuite {
 
     "Boolean" - validation { implicit conn =>
       for {
-        eid <- Type.boolean(false).save.transact.map(_.eids.head)
+        eid <- Type.boolean(false).save.transact.map(_.eid)
         _ <- Type(eid).boolean(true).update.transact
           .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
@@ -119,7 +119,7 @@ object TypesOne extends DatomicTestSuite {
 
     "BigInt" - validation { implicit conn =>
       for {
-        eid <- Type.bigInt(bigInt3).save.transact.map(_.eids.head)
+        eid <- Type.bigInt(bigInt3).save.transact.map(_.eid)
         _ <- Type(eid).bigInt(bigInt1).update.transact
           .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
@@ -133,7 +133,7 @@ object TypesOne extends DatomicTestSuite {
 
     "BigDecimal" - validation { implicit conn =>
       for {
-        eid <- Type.bigDecimal(bigDecimal3).save.transact.map(_.eids.head)
+        eid <- Type.bigDecimal(bigDecimal3).save.transact.map(_.eid)
         _ <- Type(eid).bigDecimal(bigDecimal1).update.transact
           .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
@@ -147,7 +147,7 @@ object TypesOne extends DatomicTestSuite {
 
     "Date" - validation { implicit conn =>
       for {
-        eid <- Type.date(date3).save.transact.map(_.eids.head)
+        eid <- Type.date(date3).save.transact.map(_.eid)
         _ <- Type(eid).date(date1).update.transact
           .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
@@ -161,7 +161,7 @@ object TypesOne extends DatomicTestSuite {
 
     "UUID" - validation { implicit conn =>
       for {
-        eid <- Type.uuid(UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-cccccccccccc")).save.transact.map(_.eids.head)
+        eid <- Type.uuid(UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-cccccccccccc")).save.transact.map(_.eid)
         _ <- Type(eid).uuid(UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")).update.transact
           .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
@@ -177,7 +177,7 @@ object TypesOne extends DatomicTestSuite {
       val uri1 = new URI("a")
       val uri4 = new URI("abcd")
       for {
-        eid <- Type.uri(uri4).save.transact.map(_.eids.head)
+        eid <- Type.uri(uri4).save.transact.map(_.eid)
         _ <- Type(eid).uri(uri1).update.transact
           .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
@@ -191,7 +191,7 @@ object TypesOne extends DatomicTestSuite {
 
     "Byte" - validation { implicit conn =>
       for {
-        eid <- Type.byte(byte3).save.transact.map(_.eids.head)
+        eid <- Type.byte(byte3).save.transact.map(_.eid)
         _ <- Type(eid).byte(byte1).update.transact
           .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
@@ -205,7 +205,7 @@ object TypesOne extends DatomicTestSuite {
 
     "Short" - validation { implicit conn =>
       for {
-        eid <- Type.short(short3).save.transact.map(_.eids.head)
+        eid <- Type.short(short3).save.transact.map(_.eid)
         _ <- Type(eid).short(short1).update.transact
           .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
@@ -219,7 +219,7 @@ object TypesOne extends DatomicTestSuite {
 
     "Char" - validation { implicit conn =>
       for {
-        eid <- Type.char('c').save.transact.map(_.eids.head)
+        eid <- Type.char('c').save.transact.map(_.eid)
         _ <- Type(eid).char('a').update.transact
           .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
@@ -233,7 +233,7 @@ object TypesOne extends DatomicTestSuite {
 
     "ref" - validation { implicit conn =>
       for {
-        eid <- Type.ref(3L).save.transact.map(_.eids.head)
+        eid <- Type.ref(3L).save.transact.map(_.eid)
         _ <- Type(eid).ref(1L).update.transact
           .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>

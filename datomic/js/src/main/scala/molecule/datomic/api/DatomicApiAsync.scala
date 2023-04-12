@@ -87,7 +87,7 @@ trait DatomicApiAsync extends DatomicAsyncApiBase with ApiAsync with FutureUtils
       val errors = validate
       if (errors.isEmpty) {
         val conn                      = conn0.asInstanceOf[DatomicConn_JS]
-        val (tplElements, txElements) = splitElements(insert.elements)
+        val (tplElements, txElements) = separateTxElements(insert.elements)
         val tplsSerialized            = PickleTpls(tplElements, true).pickle(Right(insert.tpls))
         conn.rpc.insert(conn.proxy, tplElements, tplsSerialized, txElements).future
       } else {
@@ -104,6 +104,8 @@ trait DatomicApiAsync extends DatomicAsyncApiBase with ApiAsync with FutureUtils
     override def validate(implicit conn: Connection): Seq[(Int, Seq[InsertError])] = {
       InsertValidation.validate(conn, insert.elements, insert.tpls)
     }
+
+
   }
 
 

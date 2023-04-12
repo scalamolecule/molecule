@@ -14,7 +14,7 @@ object Composites extends DatomicTestSuite {
 
     "1 + 1" - validation { implicit conn =>
       for {
-        eid <- (Type.int(3) + Enum.luckyNumber(7)).save.transact.map(_.eids.head)
+        eid <- (Type.int(3) + Enum.luckyNumber(7)).save.transact.map(_.eid)
 
         // Composite sub groups share the same entity id
 

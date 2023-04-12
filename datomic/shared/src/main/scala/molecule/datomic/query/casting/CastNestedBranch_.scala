@@ -3,7 +3,6 @@ package molecule.datomic.query.casting
 
 import molecule.core.query.Model2Query
 import molecule.datomic.query.Base
-import molecule.datomic.query.Base
 import scala.annotation.tailrec
 
 
@@ -27,6 +26,10 @@ trait CastNestedBranch_[Tpl]
       case List(-1) :: as =>
         val cast = (_: Row, nested: List[Any]) => nested
         resolveArities(as, casts, rowIndexTx, rowIndexTx, acc :+ cast)
+
+      // Composite with only tacit attributes
+      case ii :: as if ii.isEmpty =>
+        resolveArities(as, casts, rowIndex, rowIndexTx, acc)
 
       // Composite with nested
       case ii :: as if ii.last == -1 =>
@@ -55,17 +58,17 @@ trait CastNestedBranch_[Tpl]
     rowIndexTx: Int
   ): (Row, List[Any]) => T = {
     val casters = resolveArities(arities, casts, rowIndex, rowIndexTx, Nil)
-    arities.length match {
-      case 0 => cast0[T]
-      case 1 => cast1[T](casters)
-      case 2 => cast2[T](casters)
-      case 3 => cast3[T](casters)
-      case 4 => cast4[T](casters)
-      case 5 => cast5[T](casters)
-      case 6 => cast6[T](casters)
-      case 7 => cast7[T](casters)
-      case 8 => cast8[T](casters)
-      case 9 => cast9[T](casters)
+    casters.length match {
+      case 0  => cast0[T]
+      case 1  => cast1[T](casters)
+      case 2  => cast2[T](casters)
+      case 3  => cast3[T](casters)
+      case 4  => cast4[T](casters)
+      case 5  => cast5[T](casters)
+      case 6  => cast6[T](casters)
+      case 7  => cast7[T](casters)
+      case 8  => cast8[T](casters)
+      case 9  => cast9[T](casters)
       case 10 => cast10[T](casters)
       case 11 => cast11[T](casters)
       case 12 => cast12[T](casters)
@@ -90,7 +93,7 @@ trait CastNestedBranch_[Tpl]
     (row: Row, nested: List[Any]) =>
       (
         c1(row, nested)
-      ).asInstanceOf[T]
+        ).asInstanceOf[T]
   }
 
   final private def cast2[T](casters: List[(Row, List[Any]) => Any]): (Row, List[Any]) => T = {

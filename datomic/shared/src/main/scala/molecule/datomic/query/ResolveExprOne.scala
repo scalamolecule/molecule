@@ -33,7 +33,7 @@ trait ResolveExprOne[Tpl]
 
   protected def resolveAttrOneTac(es: List[Var], attr: AttrOneTac): List[Var] = {
     val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
-    if (isNestedOpt)
+    if (isNestedOpt && !isTxMetaData)
       throw ModelError("Tacit attributes not allowed in optional nested queries. Found: " + a)
     attr match {
       case at: AttrOneTacString     => tac(e, a, at.op, at.vs, resString)

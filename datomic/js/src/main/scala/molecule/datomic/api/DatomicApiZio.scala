@@ -102,7 +102,7 @@ trait DatomicApiZio extends DatomicZioApiBase with ApiZio with FutureUtils {
         conn <- ZIO.service[Connection]
         errors <- validate
         _ <- ZIO.when(errors.nonEmpty)(ZIO.fail(InsertErrors(errors)))
-        (tplElements, txElements) = splitElements(insert.elements)
+        (tplElements, txElements) = separateTxElements(insert.elements)
         tplsSerialized = PickleTpls(tplElements, true).pickle(Right(insert.tpls))
         txReport <- transactStmts(conn.rpc.insert(conn.proxy, tplElements, tplsSerialized, txElements).future)
       } yield txReport

@@ -49,7 +49,7 @@ object AsyncApi extends DatomicTestSuite {
                    |""".stripMargin
           }
 
-          eid <- Type.string("c").save.transact.map(_.eids.head)
+          eid <- Type.string("c").save.transact.map(_.eid)
           _ <- Type(eid).string("a").update.transact
             .map(_ ==> "Unexpected success").recover {
             case ValidationErrors(errorMap) =>

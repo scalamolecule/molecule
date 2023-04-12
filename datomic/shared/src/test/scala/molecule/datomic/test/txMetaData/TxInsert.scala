@@ -1,41 +1,46 @@
-package molecule.datomic.test.crud.insert
+package molecule.datomic.test.txMetaData
 
 import molecule.base.error.ModelError
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Refs._
-import molecule.datomic.setup.DatomicTestSuite
 import molecule.datomic.async._
+import molecule.datomic.setup.DatomicTestSuite
 import utest._
 
-object InsertTxMetaData extends DatomicTestSuite {
+object TxInsert extends DatomicTestSuite {
 
 
   override lazy val tests = Tests {
 
-    "Apply tx meta data to tacit attributes only" - refs { implicit conn =>
+    "Basic" - types { implicit conn =>
+      import molecule.coreTests.dataModels.core.dsl.Types._
       for {
-        _ <- Ns.i.Tx(R2.i).insert(1, 2).transact
-            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==>
-            """Missing applied value for attribute:
-              |AttrOneManInt("R2", "i", V, Seq(), None, Nil, Nil, None, None)""".stripMargin
-        }
+        // Apply tx meta data to tacit tx attribute:
+        _ <- Ns.int.Tx(Ns.string_("a")).insert(0).transact
 
-        _ <- Ns.i.Tx(R2.i_?).insert(1, Some(2)).transact
-            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==>
-            """Missing applied value for attribute:
-              |AttrOneOptInt("R2", "i", V, None, None, Nil, Nil, None, None)""".stripMargin
-        }
-      } yield ()
-    }
+        // Data without tx meta data
+        _ <- Ns.int.insert(1).transact
 
-    "Basic" - refs { implicit conn =>
-      for {
-        _ <- Ns.i.Tx(R2.i_(7)).insert(1).transact
-        _ <- Ns.i.Tx(R2.i).query.get.map(_ ==> List(
-          (1, 7)
-        ))
+        // All base data (without tx meta data)
+        _ <- Ns.int.query.get.map(_ ==> List(1, 0))
+
+        // Data with tx meta data
+        _ <- Ns.int.Tx(Ns.string_).query.get.map(_ ==> List(0))
+
+        // Data without tx meta data
+        _ <- Ns.int.Tx(Ns.string_()).query.get.map(_ ==> List(1))
+
+        // Initial namespace(s) don't need to have a ref to tx meta namespaces
+        _ <- Ns.int.Tx(Ref.s_("b")).insert(2).transact
+        _ <- Ns.int.Tx(Other.s_("c")).insert(3).transact
+
+        _ <- Ns.int.Tx(Ref.s_).query.get.map(_ ==> List(2))
+        _ <- Ns.int.Tx(Other.s_).query.get.map(_ ==> List(3))
+
+        // Base data with tx meta data
+        _ <- Ns.int.Tx(Ns.string).query.get.map(_ ==> List((0, "a")))
+        _ <- Ns.int.Tx(Ref.s).query.get.map(_ ==> List((2, "b")))
+        _ <- Ns.int.Tx(Other.s).query.get.map(_ ==> List((3, "c")))
       } yield ()
     }
 
@@ -340,6 +345,79 @@ object InsertTxMetaData extends DatomicTestSuite {
             .*?(R3.i.s + R4.i))).Tx(R5.s.i + R6.i).query.get.map(_ ==> List(
           ((1, "a"), (2, "b", List(((3, "c"), (4, List(((5, "d"), 6)))))), ("tx", 7), 8)
         ))
+      } yield ()
+    }
+
+
+    "Large tx meta data" - types { implicit conn =>
+      import molecule.coreTests.dataModels.core.dsl.Types._
+      for {
+        _ <- Ns.string.Tx(Ns
+          .int_(int1)
+          .long_(long1)
+          .double_(double1)
+          .boolean_(boolean1)
+          .date_(date1)
+          .uuid_(uuid1)
+        ).insert("With tx meta data").transact
+
+        // Add data without tx meta data
+        _ <- Ns.string.insert("Without tx meta data").transact
+
+        // Data with and without tx meta data created
+        _ <- Ns.string.query.get.map(_ ==> List(
+          "With tx meta data",
+          "Without tx meta data"
+        ))
+
+        // Use transaction meta data to filter
+        _ <- Ns.string.Tx(Ns.int_(int1)).query.get.map(_ ==> List("With tx meta data"))
+        _ <- Ns.string.Tx(Ns.long_(long1)).query.get.map(_ ==> List("With tx meta data"))
+        _ <- Ns.string.Tx(Ns.double_(double1)).query.get.map(_ ==> List("With tx meta data"))
+        _ <- Ns.string.Tx(Ns.boolean_(boolean1)).query.get.map(_ ==> List("With tx meta data"))
+        _ <- Ns.string.Tx(Ns.date_(date1)).query.get.map(_ ==> List("With tx meta data"))
+        _ <- Ns.string.Tx(Ns.uuid_(uuid1)).query.get.map(_ ==> List("With tx meta data"))
+
+        // All tx meta data present
+        _ <- Ns.string.Tx(Ns
+          .int_(int1)
+          .long_(long1)
+          .double_(double1)
+          .boolean_(boolean1)
+          .date_(date1)
+          .uuid_(uuid1)
+        ).query.get.map(_ ==> List("With tx meta data"))
+      } yield ()
+    }
+
+
+    "Apply tx meta data to tacit attributes only" - types { implicit conn =>
+      import molecule.coreTests.dataModels.core.dsl.Types._
+      for {
+        _ <- Ns.int.Tx(Ns.string).insert(0, "a").transact
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+          err ==> s"For inserts, tx meta data must be applied to tacit attributes, like Ns.string_(<metadata>)"
+        }
+
+        _ <- Ns.int.Tx(Ns.string("a")).insert(List((0, "b"))).transact
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+          err ==> s"For inserts, tx meta data must be applied to tacit attributes, like Ns.string_(<metadata>)"
+        }
+
+        _ <- Ns.int.Tx(Ns.string_?).insert(List((0, Some("b")))).transact
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+          err ==> s"For inserts, tx meta data must be applied to tacit attributes, like Ns.string_(<metadata>)"
+        }
+
+        _ <- Ns.int.Tx(Ns.string_?(Some("a"))).insert(List((0, Some("b")))).transact
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+          err ==> s"For inserts, tx meta data must be applied to tacit attributes, like Ns.string_(<metadata>)"
+        }
+
+        _ <- Ns.int.Tx(Ns.string_).insert(0).transact
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+          err ==> s"Missing applied value for attribute Ns.string"
+        }
       } yield ()
     }
   }

@@ -102,7 +102,7 @@ object MandatoryAttrs extends DatomicTestSuite {
 
     "Update, delete attr" - validation { implicit conn =>
       for {
-        eid <- MandatoryAttr.name("Bob").age(42).hobbies(Set("golf", "stamps")).save.transact.map(_.eids.head)
+        eid <- MandatoryAttr.name("Bob").age(42).hobbies(Set("golf", "stamps")).save.transact.map(_.eid)
 
         _ <- MandatoryAttr(eid).name().update.transact
           .map(_ ==> "Unexpected success").recover {
@@ -137,7 +137,7 @@ object MandatoryAttrs extends DatomicTestSuite {
 
     "Update, remove last card-many value" - validation { implicit conn =>
       for {
-        eid <- MandatoryAttr.name("Bob").age(42).hobbies(Set("golf", "stamps")).save.transact.map(_.eids.head)
+        eid <- MandatoryAttr.name("Bob").age(42).hobbies(Set("golf", "stamps")).save.transact.map(_.eid)
 
         // We can remove a value from a Set as long as it's not the last value
         _ <- MandatoryAttr(eid).hobbies.remove("stamps").update.transact

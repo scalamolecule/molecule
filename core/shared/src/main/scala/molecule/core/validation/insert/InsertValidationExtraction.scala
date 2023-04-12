@@ -89,7 +89,10 @@ trait InsertValidationExtraction extends InsertValidators_ with ModelUtils { sel
           getValidators(nsMap, tail, validators :+
             addNested(nsMap, tplIndex, ns, refAttr, nestedElements), 0, tplIndex)
 
-        // TxMetaData is handed separately in Insert_stmts with call to save_stmts
+        case TxMetaData(_) =>
+          // TxMetaData is handled separately in Insert_stmts.
+          // No elements after TxMetaData, so we return validators
+          validators
 
         case other => throw ModelError("Unexpected element: " + other)
       }

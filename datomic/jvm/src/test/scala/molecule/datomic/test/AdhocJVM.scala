@@ -14,22 +14,23 @@ object AdhocJVM extends DatomicTestSuite {
 
     "types" - types { implicit conn =>
       for {
-        // Initial data (not pushed)
-        _ <- Ns.i(1).save.transact
+        _ <- Ns.int(3).save.transact
+        _ <- Ns.int.query.get.map(_ ==> List(3))
 
       } yield ()
     }
 
 
-    //    "refs" - refs { implicit conn =>
-    //
-    //
-    //      //      for {
-    //      //        _ <- Ns.i(7).save.transact
-    //      //
-    //      //      } yield ()
-    //
-    //    }
+    "refs" - refs { implicit conn =>
+      import molecule.coreTests.dataModels.core.dsl.Refs._
+      for {
+        _ <- (R1.i(1).s("a") + R2.i(2).s("b").Tx.apply(R3.i(3).s("c"))).save.transact
+
+        _ <- (R1.i_ + R2.i.s.Tx(R3.i.s)).query.get.map(_ ==> List(((2, "b"), 3, "c")))
+
+      } yield ()
+
+    }
 
     //    "set" - typesSet { implicit conn =>
     //

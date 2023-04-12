@@ -14,7 +14,7 @@ object UpdateOne_eid extends DatomicTestSuite {
 
     "Update/upsert" - types { implicit conn =>
       for {
-        eid <- Ns.int.insert(1).transact.map(_.eids.head)
+        eid <- Ns.int.insert(1).transact.map(_.eid)
         _ <- Ns.int.query.get.map(_ ==> List(1))
 
         // Update existing value
@@ -53,7 +53,7 @@ object UpdateOne_eid extends DatomicTestSuite {
 
     "Delete individual attribute value(s) with update" - types { implicit conn =>
       for {
-        eid <- Ns.int.string.insert(1, "a").transact.map(_.eids.head)
+        eid <- Ns.int.string.insert(1, "a").transact.map(_.eid)
         _ <- Ns.int.string.query.get.map(_ ==> List((1, "a")))
 
         // Apply empty value to delete attribute of entity (entity remains)
@@ -65,7 +65,7 @@ object UpdateOne_eid extends DatomicTestSuite {
 
     "Update multiple attributes" - types { implicit conn =>
       for {
-        eid <- Ns.int.string.insert(1, "a").transact.map(_.eids.head)
+        eid <- Ns.int.string.insert(1, "a").transact.map(_.eid)
         _ <- Ns.int.string.query.get.map(_ ==> List((1, "a")))
 
         // Apply empty value to delete attribute of entity (entity remains)
@@ -77,7 +77,7 @@ object UpdateOne_eid extends DatomicTestSuite {
 
     "Referenced attributes" - types { implicit conn =>
       for {
-        eid <- Ns.i(1).Ref.i(2).save.transact.map(_.eids.head)
+        eid <- Ns.i(1).Ref.i(2).save.transact.map(_.eid)
         _ <- Ns.i.Ref.i.query.get.map(_ ==> List((1, 2)))
 
         _ <- Ns(eid).i(3).Ref.i(4).update.transact
@@ -91,7 +91,7 @@ object UpdateOne_eid extends DatomicTestSuite {
 
     "Update composite attributes" - types { implicit conn =>
       for {
-        eid <- (Ns.int.string + Ref.i.s).insert((1, "a"), (2, "b")).transact.map(_.eids.head)
+        eid <- (Ns.int.string + Ref.i.s).insert((1, "a"), (2, "b")).transact.map(_.eid)
         _ <- (Ns.int.string + Ref.i.s).query.get.map(_ ==> List(((1, "a"), (2, "b"))))
 
         // Composite sub groups share the same entity id
@@ -107,7 +107,7 @@ object UpdateOne_eid extends DatomicTestSuite {
 
     "Update tx meta data" - types { implicit conn =>
       for {
-        eid <- Ns.int.Tx(Other.s_("tx")).insert(1).transact.map(_.eids.head)
+        eid <- Ns.int.Tx(Other.s_("tx")).insert(1).transact.map(_.eid)
         _ <- Ns.int.Tx(Other.s).query.get.map(_ ==> List((1, "tx")))
 
         tx <- Ns(eid).int(2).Tx(Other.s("tx2")).update.transact.map(_.tx)
@@ -116,7 +116,7 @@ object UpdateOne_eid extends DatomicTestSuite {
 
         _ <- Ns(eid).Tx(Other.s("tx3")).update.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> "Can't update tx meta data only."
+          err ==> "Please apply the tx id to the namespace of tx meta data to be updated."
         }
 
         // We can though update the tx entity itself
@@ -128,7 +128,7 @@ object UpdateOne_eid extends DatomicTestSuite {
 
     "Composite + tx meta data" - types { implicit conn =>
       for {
-        eid <- (Ns.int.string + Ref.i.s).Tx(Other.i_(42)).insert((1, "a"), (2, "b")).transact.map(_.eids.head)
+        eid <- (Ns.int.string + Ref.i.s).Tx(Other.i_(42)).insert((1, "a"), (2, "b")).transact.map(_.eid)
         _ <- (Ns.int.string + Ref.i.s).Tx(Other.i).query.get.map(_ ==> List(((1, "a"), (2, "b"), 42)))
 
         // Composite sub groups share the same entity id
@@ -193,15 +193,6 @@ object UpdateOne_eid extends DatomicTestSuite {
           _ <- Ns(42).i(1).Refs.i(2).update.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Can't update attributes in card-many referenced namespaces. Found `Refs`"
-          }
-        } yield ()
-      }
-
-      "Can't update multiple values for one card-one attribute" - types { implicit conn =>
-        for {
-          _ <- Ns(42).int(2, 3).update.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-            err ==> "Can only update one value for attribute `Ns.int`. Found: 2, 3"
           }
         } yield ()
       }

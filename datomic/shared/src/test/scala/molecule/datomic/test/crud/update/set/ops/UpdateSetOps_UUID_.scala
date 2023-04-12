@@ -16,7 +16,7 @@ object UpdateSetOps_UUID_ extends DatomicTestSuite {
 
     "apply (replace/add all)" - types { implicit conn =>
       for {
-        eid <- Ns.uuids(Set(uuid1, uuid2)).save.transact.map(_.eids.head)
+        eid <- Ns.uuids(Set(uuid1, uuid2)).save.transact.map(_.eid)
 
         _ <- Ns(eid).uuids(Set(uuid3, uuid4)).update.transact
         _ <- Ns.uuids.query.get.map(_.head ==> Set(uuid3, uuid4))
@@ -40,7 +40,7 @@ object UpdateSetOps_UUID_ extends DatomicTestSuite {
 
     "add" - types { implicit conn =>
       for {
-        eid <- Ns.uuids(Set(uuid1)).save.transact.map(_.eids.head)
+        eid <- Ns.uuids(Set(uuid1)).save.transact.map(_.eid)
 
         // Add value
         _ <- Ns(eid).uuids.add(uuid2).update.transact
@@ -74,7 +74,7 @@ object UpdateSetOps_UUID_ extends DatomicTestSuite {
 
     "swap" - types { implicit conn =>
       for {
-        eid <- Ns.uuids(Set(uuid1, uuid2, uuid3, uuid4, uuid5, uuid6)).save.transact.map(_.eids.head)
+        eid <- Ns.uuids(Set(uuid1, uuid2, uuid3, uuid4, uuid5, uuid6)).save.transact.map(_.eid)
 
         // Replace value
         _ <- Ns(eid).uuids.swap(uuid6 -> uuid8).update.transact
@@ -117,7 +117,7 @@ object UpdateSetOps_UUID_ extends DatomicTestSuite {
 
     "remove" - types { implicit conn =>
       for {
-        eid <- Ns.uuids(Set(uuid1, uuid2, uuid3, uuid4, uuid5, uuid6)).save.transact.map(_.eids.head)
+        eid <- Ns.uuids(Set(uuid1, uuid2, uuid3, uuid4, uuid5, uuid6)).save.transact.map(_.eid)
 
         // Remove value
         _ <- Ns(eid).uuids.remove(uuid6).update.transact

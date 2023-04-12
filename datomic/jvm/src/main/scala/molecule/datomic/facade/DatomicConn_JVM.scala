@@ -43,7 +43,7 @@ case class DatomicConn_JVM(
   override def transact_async(javaStmts: Data)(implicit ec: ExecutionContext): Future[TxReport] = {
     bridgeDatomicFuture(peerConn.transactAsync(javaStmts))
       .map(MakeTxReport(_))
-      .recover{
+      .recover {
         case e: Throwable => throw e
       }
   }
@@ -67,7 +67,7 @@ case class DatomicConn_JVM(
             p.success(listenF.get())
           } catch {
             case e: ju.concurrent.ExecutionException =>
-              logger.error(
+              logger.debug(
                 "---- ExecutionException: -------------\n" +
                   listenF +
                   javaStmts.fold("")(stmts => "\n---- javaStmts: ----\n" +
@@ -78,7 +78,13 @@ case class DatomicConn_JVM(
                 e.getCause match {
                   //                  case e: TxFnException     => e
                   case e: MoleculeError => e
-                  case e                => ExecutionError(e.getMessage.trim)
+                  case e                =>
+                    e.getMessage.trim match {
+                      case ":db.error/reset-tx-instant You can set :db/txInstant only on the current transaction." =>
+                        ExecutionError("Can't delete transaction id.")
+
+                      case _ => ExecutionError(e.getMessage.trim)
+                    }
                 }
               )
 

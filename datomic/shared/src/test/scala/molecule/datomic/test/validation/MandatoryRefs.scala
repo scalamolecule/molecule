@@ -35,7 +35,7 @@ object MandatoryRefs extends DatomicTestSuite with SerializationUtils {
         }
 
         // Adding ref id satisfy mandatory requirement
-        refBid <- RefB.i(2).save.transact.map(_.eids.head)
+        refBid <- RefB.i(2).save.transact.map(_.eid)
         _ <- MandatoryRefB.i(1).refB(refBid).save.transact
 
         // Or creating the entity and the reference in one go
@@ -57,7 +57,7 @@ object MandatoryRefs extends DatomicTestSuite with SerializationUtils {
         }
 
         // Adding ref id satisfy mandatory requirement
-        refBid <- RefB.i(3).save.transact.map(_.eids.head)
+        refBid <- RefB.i(3).save.transact.map(_.eid)
         _ <- MandatoryRefAB.i(1).RefA.i(2).refB(refBid).save.transact
 
         // Or creating the entity and the reference in one go
@@ -78,7 +78,7 @@ object MandatoryRefs extends DatomicTestSuite with SerializationUtils {
         }
 
         // Adding ref id satisfy mandatory requirement
-        refBid <- RefB.i(2).save.transact.map(_.eids.head)
+        refBid <- RefB.i(2).save.transact.map(_.eid)
         _ <- MandatoryRefsB.i(1).refsB(Set(refBid)).save.transact
 
         // Or creating the entity and the reference in one go
@@ -100,7 +100,7 @@ object MandatoryRefs extends DatomicTestSuite with SerializationUtils {
         }
 
         // Adding ref id satisfy mandatory requirement
-        refBid <- RefB.i(3).save.transact.map(_.eids.head)
+        refBid <- RefB.i(3).save.transact.map(_.eid)
         _ <- MandatoryRefAB.i(1).RefA.i(2).refB(refBid).save.transact
 
         // Or creating the entity and the reference in one go

@@ -59,7 +59,7 @@ object Delete_eid extends DatomicTestSuite {
           e1 <- Ns.i.R1.i.insert(
             (1, 10),
             (2, 20)
-          ).transact.map(_.eids.head)
+          ).transact.map(_.eid)
 
           // 2 entities, each referencing another entity
           _ <- Ns.i.a1.R1.i.query.get.map(_ ==> List(
@@ -85,7 +85,7 @@ object Delete_eid extends DatomicTestSuite {
           e1 <- Ns.i.Rs1.*(R1.i).insert(
             (1, Seq(10, 11)),
             (2, Seq(20, 21))
-          ).transact.map(_.eids.head)
+          ).transact.map(_.eid)
 
           // 2 entities, each with 2 owned sub-entities
           _ <- Ns.i.a1.Rs1.*(R1.i.a1).query.get.map(_ ==> List(
@@ -115,7 +115,7 @@ object Delete_eid extends DatomicTestSuite {
           e1 <- Ns.i.Owned1.i.insert(
             (1, 10),
             (2, 20)
-          ).transact.map(_.eids.head)
+          ).transact.map(_.eid)
 
           // 2 entities, each with an owned sub-entity
           _ <- Ns.i.a1.Owned1.i.query.get.map(_ ==> List(
@@ -139,7 +139,7 @@ object Delete_eid extends DatomicTestSuite {
           e1 <- Ns.i.OwnedMany1.*(R1.i).insert(
             (1, Seq(10, 11)),
             (2, Seq(20, 21))
-          ).transact.map(_.eids.head)
+          ).transact.map(_.eid)
 
           // 2 entities, each with 2 owned sub-entities
           _ <- Ns.i.a1.OwnedMany1.*(R1.i.a1).query.get.map(_ ==> List(

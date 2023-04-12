@@ -15,7 +15,7 @@ object UpdateSetOps_Float_ extends DatomicTestSuite {
 
     "apply (replace/add all)" - types { implicit conn =>
       for {
-        eid <- Ns.floats(Set(float1, float2)).save.transact.map(_.eids.head)
+        eid <- Ns.floats(Set(float1, float2)).save.transact.map(_.eid)
 
         _ <- Ns(eid).floats(Set(float3, float4)).update.transact
         _ <- Ns.floats.query.get.map(_.head ==> Set(float3, float4))
@@ -39,7 +39,7 @@ object UpdateSetOps_Float_ extends DatomicTestSuite {
 
     "add" - types { implicit conn =>
       for {
-        eid <- Ns.floats(Set(float1)).save.transact.map(_.eids.head)
+        eid <- Ns.floats(Set(float1)).save.transact.map(_.eid)
 
         // Add value
         _ <- Ns(eid).floats.add(float2).update.transact
@@ -73,7 +73,7 @@ object UpdateSetOps_Float_ extends DatomicTestSuite {
 
     "swap" - types { implicit conn =>
       for {
-        eid <- Ns.floats(Set(float1, float2, float3, float4, float5, float6)).save.transact.map(_.eids.head)
+        eid <- Ns.floats(Set(float1, float2, float3, float4, float5, float6)).save.transact.map(_.eid)
 
         // Replace value
         _ <- Ns(eid).floats.swap(float6 -> float8).update.transact
@@ -116,7 +116,7 @@ object UpdateSetOps_Float_ extends DatomicTestSuite {
 
     "remove" - types { implicit conn =>
       for {
-        eid <- Ns.floats(Set(float1, float2, float3, float4, float5, float6)).save.transact.map(_.eids.head)
+        eid <- Ns.floats(Set(float1, float2, float3, float4, float5, float6)).save.transact.map(_.eid)
 
         // Remove value
         _ <- Ns(eid).floats.remove(float6).update.transact

@@ -25,10 +25,17 @@ class DataModel2MetaSchema(filePath: String, pkgPath: String, scalaVersion: Stri
   private val tree        = dialect.parse[Source].get
 
   private val reservedAttrNames = List(
-    "a", "e", "v", "t", "tx", "txInstant", "op", // Generic attributes
-    "save", "insert", "update", "delete", // Actions
-    //    "self", // if self-reference keyword is re-introduced
-    "apply", "not", "add", "swap", "remove", // Expressions
+    // Actions
+    "save", "insert", "update", "delete",
+
+    // sorting
+    "sort", "a1", "a2", "a3", "a4", "a5", "d1", "d2", "d3", "d4", "d5",
+
+    // Expressions
+    "apply", "not", "add", "swap", "remove",
+
+    // Generic attributes
+    "a", "e", "v", "t", "tx", "txInstant", "op",
   )
 
   private var backRefs   = Map.empty[String, Seq[String]]

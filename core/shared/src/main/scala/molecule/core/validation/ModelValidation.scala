@@ -19,14 +19,14 @@ case class ModelValidation(
     throw ModelError(s"Can't transact duplicate attribute `$element`.")
   }
 
-  private val isInsert        : Boolean                     = action == "insert"
+  private val isInsert        : Boolean                     = action == "insert" || action == "insertTx"
   private val isUpdate        : Boolean                     = action == "update"
   private var prev            : Array[Array[Array[String]]] = Array(Array(Array.empty[String]))
   private var level           : Int                         = 0
   private var group           : Int                         = 0
   private var refPath         : Seq[String]                 = Seq.empty[String]
   private var prevNs          : String                      = ""
-  private var isTx            : Boolean                     = false
+  private var isTx            : Boolean                     = action == "insertTx"
   private var mandatoryAttrs  : Set[String]                 = Set.empty[String]
   private var mandatoryRefs   : Set[(String, String)]       = Set.empty[(String, String)]
   private var requiredAttrs   : Set[String]                 = Set.empty[String]
@@ -44,15 +44,20 @@ case class ModelValidation(
       case head :: tail => head match {
         case a: Attr =>
           val attr = a.ns + "." + a.attr
-          if (a.ns != "_Generic")
+          if (a.ns != "_Generic") {
             register(a, attr)
+          }
+          if (isTx && isInsert && !(a.isInstanceOf[AttrOneTac] || a.isInstanceOf[AttrSetTac])) {
+            throw ModelError(
+              s"For inserts, tx meta data must be applied to tacit attributes, " +
+                s"like ${attr}_(<metadata>)")
+          }
           checkPath(a, attr)
-
           val valueAttrErrors = if (a.valueAttrs.isEmpty) Nil else valueValidate(a)
           val allErrors       = valueAttrErrors ++ a.errors
-          if (allErrors.nonEmpty)
+          if (allErrors.nonEmpty) {
             validationErrors += attr -> allErrors
-
+          }
           validate(tail)
 
         case r: Ref =>
@@ -69,8 +74,9 @@ case class ModelValidation(
           validate(tail)
 
         case backRef: BackRef =>
-          if (group == 0)
+          if (group == 0) {
             throw ModelError(s"Can't use backref namespace `_${backRef.backRef}` from here.")
+          }
           group -= 1
           refPath = refPath.init
           validate(tail)

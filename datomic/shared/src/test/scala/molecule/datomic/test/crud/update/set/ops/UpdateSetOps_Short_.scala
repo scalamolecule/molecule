@@ -15,7 +15,7 @@ object UpdateSetOps_Short_ extends DatomicTestSuite {
 
     "apply (replace/add all)" - types { implicit conn =>
       for {
-        eid <- Ns.shorts(Set(short1, short2)).save.transact.map(_.eids.head)
+        eid <- Ns.shorts(Set(short1, short2)).save.transact.map(_.eid)
 
         _ <- Ns(eid).shorts(Set(short3, short4)).update.transact
         _ <- Ns.shorts.query.get.map(_.head ==> Set(short3, short4))
@@ -39,7 +39,7 @@ object UpdateSetOps_Short_ extends DatomicTestSuite {
 
     "add" - types { implicit conn =>
       for {
-        eid <- Ns.shorts(Set(short1)).save.transact.map(_.eids.head)
+        eid <- Ns.shorts(Set(short1)).save.transact.map(_.eid)
 
         // Add value
         _ <- Ns(eid).shorts.add(short2).update.transact
@@ -73,7 +73,7 @@ object UpdateSetOps_Short_ extends DatomicTestSuite {
 
     "swap" - types { implicit conn =>
       for {
-        eid <- Ns.shorts(Set(short1, short2, short3, short4, short5, short6)).save.transact.map(_.eids.head)
+        eid <- Ns.shorts(Set(short1, short2, short3, short4, short5, short6)).save.transact.map(_.eid)
 
         // Replace value
         _ <- Ns(eid).shorts.swap(short6 -> short8).update.transact
@@ -116,7 +116,7 @@ object UpdateSetOps_Short_ extends DatomicTestSuite {
 
     "remove" - types { implicit conn =>
       for {
-        eid <- Ns.shorts(Set(short1, short2, short3, short4, short5, short6)).save.transact.map(_.eids.head)
+        eid <- Ns.shorts(Set(short1, short2, short3, short4, short5, short6)).save.transact.map(_.eid)
 
         // Remove value
         _ <- Ns(eid).shorts.remove(short6).update.transact

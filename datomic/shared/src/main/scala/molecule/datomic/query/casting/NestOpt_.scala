@@ -100,6 +100,10 @@ trait NestOpt_[Tpl]
         val cast = (row: Row) => casts.head(row.get(rowIndex))
         resolveArities(as, casts.tail, rowIndexTx, rowIndexTx, acc :+ cast)
 
+      // Composite with only tacit attributes
+      case ii :: as if ii.isEmpty =>
+        resolveArities(as, casts, rowIndex, rowIndexTx, acc)
+
       // Composite branch
       case ii :: as if ii.last == -1 =>
         val n                      = ii.length - 1

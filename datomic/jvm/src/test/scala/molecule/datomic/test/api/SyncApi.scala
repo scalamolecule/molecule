@@ -24,6 +24,7 @@ object SyncApi extends DatomicTestSuite {
         Ns.int.query.get ==> List(3, 10)
       }
 
+
       "Error handling" - validation { implicit conn =>
         import molecule.coreTests.dataModels.core.dsl.Validation.Type
 

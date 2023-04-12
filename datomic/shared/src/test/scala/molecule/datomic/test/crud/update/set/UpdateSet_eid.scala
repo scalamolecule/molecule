@@ -14,7 +14,7 @@ object UpdateSet_eid extends DatomicTestSuite {
 
     "Update/upsert" - types { implicit conn =>
       for {
-        eid <- Ns.ints.insert(Set(1)).transact.map(_.eids.head)
+        eid <- Ns.ints.insert(Set(1)).transact.map(_.eid)
         _ <- Ns.ints.query.get.map(_ ==> List(Set(1)))
 
         _ <- Ns(eid).ints(Set(2)).update.transact
@@ -52,7 +52,7 @@ object UpdateSet_eid extends DatomicTestSuite {
 
     "Delete individual attribute value(s) with update" - types { implicit conn =>
       for {
-        eid <- Ns.ints.strings.insert(Set(1), Set("a")).transact.map(_.eids.head)
+        eid <- Ns.ints.strings.insert(Set(1), Set("a")).transact.map(_.eid)
         _ <- Ns.ints.strings.query.get.map(_ ==> List((Set(1), Set("a"))))
 
         // Apply empty value to delete attribute of entity (entity remains)
@@ -64,7 +64,7 @@ object UpdateSet_eid extends DatomicTestSuite {
 
     "Update multiple attributes" - types { implicit conn =>
       for {
-        eid <- Ns.ints.strings.insert(Set(1), Set("a")).transact.map(_.eids.head)
+        eid <- Ns.ints.strings.insert(Set(1), Set("a")).transact.map(_.eid)
         _ <- Ns.ints.strings.query.get.map(_ ==> List((Set(1), Set("a"))))
 
         // Apply empty value to delete attribute of entity (entity remains)
@@ -76,7 +76,7 @@ object UpdateSet_eid extends DatomicTestSuite {
 
     "Referenced attributes" - types { implicit conn =>
       for {
-        eid <- Ns.ints(Set(1)).Ref.ii(Set(2)).save.transact.map(_.eids.head)
+        eid <- Ns.ints(Set(1)).Ref.ii(Set(2)).save.transact.map(_.eid)
         _ <- Ns.ints.Ref.ii.query.get.map(_ ==> List((Set(1), Set(2))))
 
         _ <- Ns(eid).ints(Set(3)).Ref.ii(Set(4)).update.transact
@@ -91,7 +91,7 @@ object UpdateSet_eid extends DatomicTestSuite {
     "Update composite attributes" - types { implicit conn =>
       for {
         eid <- (Ns.ints.strings + Ref.ii.ss)
-          .insert((Set(1), Set("a")), (Set(2), Set("b"))).transact.map(_.eids.head)
+          .insert((Set(1), Set("a")), (Set(2), Set("b"))).transact.map(_.eid)
         _ <- (Ns.ints.strings + Ref.ii.ss).query.get.map(_.head ==> ((Set(1), Set("a")), (Set(2), Set("b"))))
 
 
@@ -108,7 +108,7 @@ object UpdateSet_eid extends DatomicTestSuite {
 
     "Update tx meta data" - types { implicit conn =>
       for {
-        eid <- Ns.ints.Tx(Other.ss_(Set("tx"))).insert(Set(1)).transact.map(_.eids.head)
+        eid <- Ns.ints.Tx(Other.ss_(Set("tx"))).insert(Set(1)).transact.map(_.eid)
         _ <- Ns.ints.Tx(Other.ss).query.get.map(_.head ==> (Set(1), Set("tx")))
 
         tx <- Ns(eid).ints(2).Tx(Other.ss(Set("tx2"))).update.transact.map(_.tx)
@@ -116,7 +116,7 @@ object UpdateSet_eid extends DatomicTestSuite {
 
         _ <- Ns(eid).Tx(Other.ss(Set("tx3"))).update.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> "Can't update tx meta data only."
+          err ==> "Please apply the tx id to the namespace of tx meta data to be updated."
         }
 
         // We can though update the tx entity itself
@@ -129,7 +129,7 @@ object UpdateSet_eid extends DatomicTestSuite {
     "Composite + tx meta data" - types { implicit conn =>
       for {
         eid <- (Ns.ints.strings + Ref.ii.ss).Tx(Other.ii_(Set(42)))
-          .insert((Set(1), Set("a")), (Set(2), Set("b"))).transact.map(_.eids.head)
+          .insert((Set(1), Set("a")), (Set(2), Set("b"))).transact.map(_.eid)
         _ <- (Ns.ints.strings + Ref.ii.ss).Tx(Other.ii).query.get.map(_.head ==>
           ((Set(1), Set("a")), (Set(2), Set("b")), Set(42)))
 

@@ -88,6 +88,7 @@ trait Update_stmts extends DatomicTxBase_JVM with UpdateOps with MoleculeLogging
     (eid0: AnyRef) => {
       var eid : AnyRef = eid0
       var txId: AnyRef = null
+      var isTx: Boolean = false
       var entity       = db.entity(eid)
       data.foreach {
         case ("add", ns, attr, newValues, retractCur) =>
@@ -102,7 +103,7 @@ trait Update_stmts extends DatomicTxBase_JVM with UpdateOps with MoleculeLogging
                 appendStmt(retract, eid1, a, curValue)
             }
           }
-          if (addNewValues || entity.get(a) != null) {
+          if (addNewValues || entity.get(a) != null || isTx) {
             newValues.foreach(newValue =>
               appendStmt(add, eid, a, newValue)
             )
@@ -139,6 +140,7 @@ trait Update_stmts extends DatomicTxBase_JVM with UpdateOps with MoleculeLogging
           // Get transaction entity id
           txId = Peer.q("[:find ?tx :in $ ?e :where [?e _ _ ?tx]]", db, eid).iterator.next.get(0)
           entity = db.entity(txId)
+          isTx = true
           eid = datomicTx
 
         case other => throw ModelError("Unexpected data in update: " + other)

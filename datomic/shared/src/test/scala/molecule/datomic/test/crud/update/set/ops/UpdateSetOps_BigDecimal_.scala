@@ -15,7 +15,7 @@ object UpdateSetOps_BigDecimal_ extends DatomicTestSuite {
 
     "apply (replace/add all)" - types { implicit conn =>
       for {
-        eid <- Ns.bigDecimals(Set(bigDecimal1, bigDecimal2)).save.transact.map(_.eids.head)
+        eid <- Ns.bigDecimals(Set(bigDecimal1, bigDecimal2)).save.transact.map(_.eid)
 
         _ <- Ns(eid).bigDecimals(Set(bigDecimal3, bigDecimal4)).update.transact
         _ <- Ns.bigDecimals.query.get.map(_.head ==> Set(bigDecimal3, bigDecimal4))
@@ -39,7 +39,7 @@ object UpdateSetOps_BigDecimal_ extends DatomicTestSuite {
 
     "add" - types { implicit conn =>
       for {
-        eid <- Ns.bigDecimals(Set(bigDecimal1)).save.transact.map(_.eids.head)
+        eid <- Ns.bigDecimals(Set(bigDecimal1)).save.transact.map(_.eid)
 
         // Add value
         _ <- Ns(eid).bigDecimals.add(bigDecimal2).update.transact
@@ -73,7 +73,7 @@ object UpdateSetOps_BigDecimal_ extends DatomicTestSuite {
 
     "swap" - types { implicit conn =>
       for {
-        eid <- Ns.bigDecimals(Set(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4, bigDecimal5, bigDecimal6)).save.transact.map(_.eids.head)
+        eid <- Ns.bigDecimals(Set(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4, bigDecimal5, bigDecimal6)).save.transact.map(_.eid)
 
         // Replace value
         _ <- Ns(eid).bigDecimals.swap(bigDecimal6 -> bigDecimal8).update.transact
@@ -116,7 +116,7 @@ object UpdateSetOps_BigDecimal_ extends DatomicTestSuite {
 
     "remove" - types { implicit conn =>
       for {
-        eid <- Ns.bigDecimals(Set(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4, bigDecimal5, bigDecimal6)).save.transact.map(_.eids.head)
+        eid <- Ns.bigDecimals(Set(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4, bigDecimal5, bigDecimal6)).save.transact.map(_.eid)
 
         // Remove value
         _ <- Ns(eid).bigDecimals.remove(bigDecimal6).update.transact

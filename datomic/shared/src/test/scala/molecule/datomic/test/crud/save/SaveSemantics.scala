@@ -16,14 +16,12 @@ object SaveSemantics extends DatomicTestSuite {
       for {
         _ <- (Ns.i + R2.i).save.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> "Missing applied value for attribute:\n" +
-            """AttrOneManInt("Ns", "i", V, Seq(), None, Nil, Nil, None, None)"""
+          err ==> "Missing applied value for attribute Ns.i"
         }
 
         _ <- (Ns.i(1) + R2.i).save.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> "Missing applied value for attribute:\n" +
-            """AttrOneManInt("R2", "i", V, Seq(), None, Nil, Nil, None, None)"""
+          err ==> "Missing applied value for attribute R2.i"
         }
       } yield ()
     }

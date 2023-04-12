@@ -161,7 +161,7 @@ object UpdateOne_uniqueAttr extends DatomicTestSuite {
 
         _ <- Unique.int_(0).Tx(Other.s("tx3")).update.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> "Can't update tx meta data only."
+          err ==> "Please apply the tx id to the namespace of tx meta data to be updated."
         }
 
         // We can though update the tx entity itself if it has a unique value (i has here)

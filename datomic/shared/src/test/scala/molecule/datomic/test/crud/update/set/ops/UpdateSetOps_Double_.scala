@@ -15,7 +15,7 @@ object UpdateSetOps_Double_ extends DatomicTestSuite {
 
     "apply (replace/add all)" - types { implicit conn =>
       for {
-        eid <- Ns.doubles(Set(double1, double2)).save.transact.map(_.eids.head)
+        eid <- Ns.doubles(Set(double1, double2)).save.transact.map(_.eid)
 
         _ <- Ns(eid).doubles(Set(double3, double4)).update.transact
         _ <- Ns.doubles.query.get.map(_.head ==> Set(double3, double4))
@@ -39,7 +39,7 @@ object UpdateSetOps_Double_ extends DatomicTestSuite {
 
     "add" - types { implicit conn =>
       for {
-        eid <- Ns.doubles(Set(double1)).save.transact.map(_.eids.head)
+        eid <- Ns.doubles(Set(double1)).save.transact.map(_.eid)
 
         // Add value
         _ <- Ns(eid).doubles.add(double2).update.transact
@@ -73,7 +73,7 @@ object UpdateSetOps_Double_ extends DatomicTestSuite {
 
     "swap" - types { implicit conn =>
       for {
-        eid <- Ns.doubles(Set(double1, double2, double3, double4, double5, double6)).save.transact.map(_.eids.head)
+        eid <- Ns.doubles(Set(double1, double2, double3, double4, double5, double6)).save.transact.map(_.eid)
 
         // Replace value
         _ <- Ns(eid).doubles.swap(double6 -> double8).update.transact
@@ -116,7 +116,7 @@ object UpdateSetOps_Double_ extends DatomicTestSuite {
 
     "remove" - types { implicit conn =>
       for {
-        eid <- Ns.doubles(Set(double1, double2, double3, double4, double5, double6)).save.transact.map(_.eids.head)
+        eid <- Ns.doubles(Set(double1, double2, double3, double4, double5, double6)).save.transact.map(_.eid)
 
         // Remove value
         _ <- Ns(eid).doubles.remove(double6).update.transact

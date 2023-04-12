@@ -1,9 +1,9 @@
 package molecule.datomic.action
 
 import molecule.boilerplate.ast.Model._
-import molecule.core.action.Update
+import molecule.core.action.{Action, Update}
 
 case class DatomicUpdate(
-  elements: List[Element],
+  private val elements0: List[Element],
   isUpsert: Boolean = false
-) extends Update
+) extends Action(elements0) with Update

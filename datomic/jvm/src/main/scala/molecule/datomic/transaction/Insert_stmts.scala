@@ -21,7 +21,7 @@ trait Insert_stmts
     debug: Boolean = true
   ): Data = {
     initTxBase(elements)
-    val (mainElements, txMetaElements) = splitElements(elements)
+    val (mainElements, txMetaElements) = separateTxElements(elements)
     val row2stmts                      = getResolver(nsMap, mainElements)
     tpls.foreach { tpl =>
       e = newId

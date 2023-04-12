@@ -44,13 +44,5 @@ object SaveRef extends DatomicTestSuite {
         _ <- (Ns.R1.i + R2.i).query.get.map(_ ==> List((1, 2)))
       } yield ()
     }
-
-
-    "TxMetaData" - refs { implicit conn =>
-      for {
-        _ <- Ns.i(1).Tx(R2.i(2)).save.transact
-        _ <- Ns.i.Tx(R2.i).query.get.map(_ ==> List((1, 2)))
-      } yield ()
-    }
   }
 }

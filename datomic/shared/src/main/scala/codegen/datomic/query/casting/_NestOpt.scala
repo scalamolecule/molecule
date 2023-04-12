@@ -92,7 +92,7 @@ object _NestOpt extends DatomicGenBase("NestOpt", "/query/casting") {
        |  }
        |
        |  @tailrec
-       |  final private def resolveArities(
+       |final private def resolveArities(
        |    arities: List[List[Int]],
        |    casts: List[AnyRef => AnyRef],
        |    rowIndex: Int,
@@ -109,6 +109,10 @@ object _NestOpt extends DatomicGenBase("NestOpt", "/query/casting") {
        |        val cast = (row: Row) => casts.head(row.get(rowIndex))
        |        resolveArities(as, casts.tail, rowIndexTx, rowIndexTx, acc :+ cast)
        |
+       |      // Composite with only tacit attributes
+       |      case ii :: as if ii.isEmpty =>
+       |        resolveArities(as, casts, rowIndex, rowIndexTx, acc)
+       |
        |      // Composite branch
        |      case ii :: as if ii.last == -1 =>
        |        val n                      = ii.length - 1
@@ -117,7 +121,7 @@ object _NestOpt extends DatomicGenBase("NestOpt", "/query/casting") {
        |        // Explicitly pull branch in composite tuple
        |        val nested = (row: Row) => pullBranch1(row.get(rowIndex + n).asInstanceOf[jMap[_, _]].values.iterator)
        |        val cast   = (row: Row) =>
-       |          castRow2Tpl(ii.map(List(_)), tplCasts, rowIndex, Some(nested(row)))(row).asInstanceOf[AnyRef]
+       |          castRow2AnyTpl(ii.map(List(_)), tplCasts, rowIndex, Some(nested(row)))(row).asInstanceOf[AnyRef]
        |
        |        // From here on it is tx meta data
        |        val moreCasts = moreCasts0.tail // ignore
@@ -127,7 +131,7 @@ object _NestOpt extends DatomicGenBase("NestOpt", "/query/casting") {
        |      case ii :: as =>
        |        val n                     = ii.length
        |        val (tplCasts, moreCasts) = casts.splitAt(n)
-       |        val tplCaster             = castRow2Tpl(ii.map(List(_)), tplCasts, rowIndex, None)
+       |        val tplCaster             = castRow2AnyTpl(ii.map(List(_)), tplCasts, rowIndex, None)
        |        val cast                  = (row: Row) => tplCaster(row).asInstanceOf[AnyRef]
        |        resolveArities(as, moreCasts, rowIndex + n, rowIndexTx, acc :+ cast)
        |

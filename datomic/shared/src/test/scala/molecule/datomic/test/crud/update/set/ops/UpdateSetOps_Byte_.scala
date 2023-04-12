@@ -15,7 +15,7 @@ object UpdateSetOps_Byte_ extends DatomicTestSuite {
 
     "apply (replace/add all)" - types { implicit conn =>
       for {
-        eid <- Ns.bytes(Set(byte1, byte2)).save.transact.map(_.eids.head)
+        eid <- Ns.bytes(Set(byte1, byte2)).save.transact.map(_.eid)
 
         _ <- Ns(eid).bytes(Set(byte3, byte4)).update.transact
         _ <- Ns.bytes.query.get.map(_.head ==> Set(byte3, byte4))
@@ -39,7 +39,7 @@ object UpdateSetOps_Byte_ extends DatomicTestSuite {
 
     "add" - types { implicit conn =>
       for {
-        eid <- Ns.bytes(Set(byte1)).save.transact.map(_.eids.head)
+        eid <- Ns.bytes(Set(byte1)).save.transact.map(_.eid)
 
         // Add value
         _ <- Ns(eid).bytes.add(byte2).update.transact
@@ -73,7 +73,7 @@ object UpdateSetOps_Byte_ extends DatomicTestSuite {
 
     "swap" - types { implicit conn =>
       for {
-        eid <- Ns.bytes(Set(byte1, byte2, byte3, byte4, byte5, byte6)).save.transact.map(_.eids.head)
+        eid <- Ns.bytes(Set(byte1, byte2, byte3, byte4, byte5, byte6)).save.transact.map(_.eid)
 
         // Replace value
         _ <- Ns(eid).bytes.swap(byte6 -> byte8).update.transact
@@ -116,7 +116,7 @@ object UpdateSetOps_Byte_ extends DatomicTestSuite {
 
     "remove" - types { implicit conn =>
       for {
-        eid <- Ns.bytes(Set(byte1, byte2, byte3, byte4, byte5, byte6)).save.transact.map(_.eids.head)
+        eid <- Ns.bytes(Set(byte1, byte2, byte3, byte4, byte5, byte6)).save.transact.map(_.eid)
 
         // Remove value
         _ <- Ns(eid).bytes.remove(byte6).update.transact

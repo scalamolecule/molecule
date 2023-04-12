@@ -44,19 +44,8 @@ trait FutureUtils extends ModelUtils with MoleculeLogging {
         logger.debug(e)
         throw e
       case e: Throwable     =>
-        logger.error(e.toString + "\n" + e.getStackTrace.toList.mkString("\n"))
-        throw ExecutionError(e.toString)
+        logger.debug(e.toString + "\n" + e.getStackTrace.toList.mkString("\n"))
+        throw e
     }
-  }
-
-  def tryFuture[T](toFuture: => Future[T])(implicit ec: ExecutionContext): Future[T] = try {
-    toFuture
-  } catch {
-    case e: MoleculeError =>
-      logger.debug(e)
-      Future.failed(e)
-    case e: Throwable     =>
-      logger.error(e.toString + "\n" + e.getStackTrace.toList.mkString("\n"))
-      Future.failed(ExecutionError(e.toString))
   }
 }

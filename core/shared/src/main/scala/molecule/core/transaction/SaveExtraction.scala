@@ -18,7 +18,7 @@ class SaveExtraction(isTxMetaData: Boolean = false)
       case element :: tail => element match {
         case a: Attr =>
           if (a.op != Appl) {
-            throw ModelError("Missing applied value for attribute:\n" + a)
+            throw ModelError(s"Missing applied value for attribute ${a.ns}.${a.attr}")
           }
           handleNs(a.ns)
           a match {

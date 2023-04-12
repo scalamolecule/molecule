@@ -39,7 +39,6 @@ case class PickleTpls(
   def pickleOffset(result: Either[MoleculeError, (Seq[Any], Int, Boolean)]): Array[Byte] = {
     result match {
       case Right((tpls, limit, more)) =>
-        //        enk.writeInt(3) // Start Tuple3 with size 3
         pickleTpls(tpls)
         enk.writeInt(limit)
         enk.writeBoolean(more)
@@ -52,26 +51,11 @@ case class PickleTpls(
   def pickleCursor(result: Either[MoleculeError, (Seq[Any], String, Boolean)]): Array[Byte] = {
     result match {
       case Right((tpls, cursor, more)) =>
-        //        enk.writeInt(3) // Start Tuple3 with size 3
         pickleTpls(tpls)
         enk.writeString(cursor)
         enk.writeBoolean(more)
       case Left(err)                   =>
-          LeftPickler[MoleculeError, DummyNotUsed].pickle(Left(err))(state)
-
-//
-//        println("ERR: " + err)
-//        println("ERR: " + err.getClass)
-//
-//
-//        try {
-//
-//        } catch {
-//          case e: Throwable =>
-//            logger.error("PickleTpls.pickleCursor: " +
-//              e.toString + "\n" + e.getStackTrace.toList.mkString("\n"))
-//            throw e
-//        }
+        LeftPickler[MoleculeError, DummyNotUsed].pickle(Left(err))(state)
     }
     state.toByteBuffer.toArray
   }
