@@ -6,7 +6,7 @@ import molecule.base.codegen.render.Dsl
 import utest._
 
 
-object RenderTest extends TestSuite {
+object RenderDSL extends TestSuite {
   val projectRoot = System.getProperty("user.dir")
   //  lazy val scala2path       = projectRoot + "/base/src/test/scala-2/molecule/base/dataModel/"
   //  lazy val scala3path       = projectRoot + "/base/src/test/scala-3/molecule/base/dataModel/"
@@ -20,20 +20,21 @@ object RenderTest extends TestSuite {
 
   override def tests: Tests = Tests {
 
-    "MetaSchema to dsl code" - {
+    "DSL" - {
       //      schemaNss.parts.head.nss(0) ==> "check"
       //      Dsl(schemaNss, "", schemaNss.parts.head.nss(2)).get ==> "check"
-
+      //
       //      Dsl(typesNss, "", typesNss.parts.head.nss(0)).get ==> "check"
-      Dsl(validationNss, "", validationNss.parts.head.nss(4)).get ==> "check"
-
-      //            validationNss ==> "check"
+      //      Dsl(validationNss, "", validationNss.parts.head.nss(4)).get ==> "check"
+      //
+      //      validationNss ==> "check"
       //      validationNss.parts.head.nss(11) ==> "check"
       //      validationNss.parts.head.nss(12) ==> "check"
       //      validationNss.attrMap() ==> "check"
       //      validationNss.parts.head ==> "check"
+
+
+      Dsl(typesNss, "", typesNss.parts.head.nss(0)).get ==> "check"
     }
   }
-
-
 }

@@ -14,6 +14,7 @@ case class Dsl_Arities(schema: MetaSchema, partPrefix: String, namespace: MetaNs
 
   val first = arity == 0
   val last  = arity == schema.maxArity
+  val secondLast  = arity == schema.maxArity - 1
 
   var hasOne = false
   var hasSet = false
@@ -63,9 +64,12 @@ case class Dsl_Arities(schema: MetaSchema, partPrefix: String, namespace: MetaNs
       lazy val elemsO = s"elements :+ ${attr}_opt$padA"
       lazy val elemsT = s"elements :+ ${attr}_tac$padA"
 
-      lazy val exprM = s"Expr${c}Man${_1}[$tpesM, $ns_1]"
-      lazy val exprO = s"Expr${c}Opt${_1}[$tpesO, $ns_1]"
-      lazy val exprT = s"Expr${c}Tac${_0}[$tpesT, $ns_0]"
+      val nextNextNs = if (secondLast) s"Dummy_${arity + 3}" else ns_2
+      val nextNs = if (last) s"Dummy_${arity + 2}" else ns_1
+      
+      lazy val exprM = s"Expr${c}Man${_1}[$tpesM, $ns_1, $nextNextNs]"
+      lazy val exprO = s"Expr${c}Opt${_1}[$tpesO, $ns_1, $nextNextNs]"
+      lazy val exprT = s"Expr${c}Tac${_0}[$tpesT, $ns_0, $nextNs]"
 
       if (!last) {
         man += s"""lazy val $attr  $padA = new $ns_1[$tpesM]($elemsM) with $exprM"""
@@ -141,9 +145,28 @@ case class Dsl_Arities(schema: MetaSchema, partPrefix: String, namespace: MetaNs
   val tacAttrs = tac.result().mkString("\n  ")
 
   val elements = "override val elements: List[Element]"
-  val modelOps = s"ModelOps_$arity[${`A..V, `}t, $ns_0]"
+
+  val lastNs   = if (last) s"Dummy_${arity + 2}" else ns_1
+  val modelOps = s"ModelOps_$arity[${`A..V, `}t, $ns_0, $lastNs]"
 
   val resolvers = res.result().mkString("\n  ")
+
+  val valueAttrs = if (first) {
+    s"""
+       |  override protected def _attrTac[   ns1[_]   , ns2[_, _]   ](op: Op, a: ModelOps_0[   t, ns1, ns2]) = new $ns_0[   t](attrTac(elements, op, a))
+       |  override protected def _attrMan[X, ns1[_, _], ns2[_, _, _]](op: Op, a: ModelOps_1[X, t, ns1, ns2]) = new $ns_1[X, t](attrMan(elements, op, a))""".stripMargin
+  } else if (last) {
+    s"""
+       |  override protected def _attrSortTac[ns1[_], ns2[_, _]](op: Op, a: ModelOps_0[t, ns1, ns2]) = new $ns_0[${`A..V`}, t](attrTac(elements, op, a)) with SortAttrs${_0}[${`A..V`}, t, $ns_0]
+       |  override protected def _attrTac    [ns1[_], ns2[_, _]](op: Op, a: ModelOps_0[t, ns1, ns2]) = new $ns_0[${`A..V`}, t](attrTac(elements, op, a))""".stripMargin
+  } else {
+    s"""
+       |  override protected def _attrSortTac[   ns1[_]   , ns2[_, _]   ](op: Op, a: ModelOps_0[   t, ns1, ns2]) = new $ns_0[${`A..V`},    t](attrTac(elements, op, a)) with SortAttrs${_0}[${`A..V`},    t, $ns_0]
+       |  override protected def _attrTac    [   ns1[_]   , ns2[_, _]   ](op: Op, a: ModelOps_0[   t, ns1, ns2]) = new $ns_0[${`A..V`},    t](attrTac(elements, op, a))
+       |  override protected def _attrSortMan[X, ns1[_, _], ns2[_, _, _]](op: Op, a: ModelOps_1[X, t, ns1, ns2]) = new $ns_1[${`A..V`}, X, t](attrMan(elements, op, a)) with SortAttrs${_1}[${`A..V`}, X, t, $ns_1]
+       |  override protected def _attrMan    [X, ns1[_, _], ns2[_, _, _]](op: Op, a: ModelOps_1[X, t, ns1, ns2]) = new $ns_1[${`A..V`}, X, t](attrMan(elements, op, a))""".stripMargin
+  }
+
 
   val refResult = ref.result()
   val refDefs   = if (refResult.isEmpty) "" else refResult.mkString("\n\n  ", "\n  ", "")
@@ -161,7 +184,8 @@ case class Dsl_Arities(schema: MetaSchema, partPrefix: String, namespace: MetaNs
     s"""class $ns_0[${`A..V, `}t]($elements) extends $ns with $modelOps {
        |  $manAttrs$optAttrs$tacAttrs
        |
-       |  $resolvers$refDefs$backRefDefs
+       |  $resolvers
+       |  $valueAttrs$refDefs$backRefDefs
        |}
        |""".stripMargin
 }

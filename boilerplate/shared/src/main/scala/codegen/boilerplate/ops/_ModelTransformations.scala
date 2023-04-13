@@ -5,11 +5,13 @@ import codegen.BoilerplateGenBase
 object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", "/ops") {
 
   override val content = {
-    s"""package molecule.boilerplate.ops
+    s"""// GENERATED CODE ********************************
+       |package molecule.boilerplate.ops
        |
        |import java.net.URI
        |import java.util.{Date, UUID}
        |import molecule.base.error.ModelError
+       |import molecule.boilerplate.api._
        |import molecule.boilerplate.api.Keywords.Kw
        |import molecule.boilerplate.ast.Model._
        |
@@ -107,6 +109,37 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |    es.init :+ last
        |  }
        |
+       |  protected def attrTac[ns1[_], ns2[_, _]](es: List[Element], op: Op, a: ModelOps_0[_, ns1, ns2]): List[Element] = {
+       |    val attr = a.elements.last match {
+       |      case a: AttrOneTac => a match {
+       |        ${addValueAttrs("One", "Tac")}
+       |      }
+       |      case a: AttrSetTac => a match {
+       |        ${addValueAttrs("Set", "Tac")}
+       |      }
+       |      case a             => unexpected(a)
+       |    }
+       |    es :+ attr
+       |  }
+       |
+       |  protected def attrMan[ns1[_, _], ns2[_, _, _]](es: List[Element], op: Op, a: ModelOps_1[_, _, ns1, ns2]): List[Element] = {
+       |    val attr = a.elements.last match {
+       |      case a: AttrOneMan => a match {
+       |        ${addValueAttrs("One", "Man")}
+       |      }
+       |      case a: AttrOneOpt => a match {
+       |        ${addValueAttrs("One", "Opt")}
+       |      }
+       |      case a: AttrSetMan => a match {
+       |        ${addValueAttrs("Set", "Man")}
+       |      }
+       |      case a: AttrSetOpt => a match {
+       |        ${addValueAttrs("Set", "Opt")}
+       |      }
+       |      case a             => unexpected(a)
+       |    }
+       |    es :+ attr
+       |  }
        |
        |  protected def reverseTopLevelSorting(es: List[Element]): List[Element] = {
        |    es.map {
@@ -183,9 +216,15 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
     ).mkString("\n\n        ")
   }
 
-  private def addSort(mode: String): String = {
+  private def addSort( mode: String): String = {
     baseTypesWithSpaces.map { case (baseType, space) =>
       s"case a: AttrOne$mode$baseType $space=> a.copy(sort = Some(sort))"
+    }.mkString("\n        ")
+  }
+
+  private def addValueAttrs(card: String, mode: String): String = {
+    baseTypesWithSpaces.map { case (baseType, space) =>
+      s"case a: Attr$card$mode$baseType $space=> a.copy(op = op, valueAttrs = Seq(a.name))"
     }.mkString("\n        ")
   }
 

@@ -12,11 +12,11 @@ object _ModelOps extends BoilerplateGenBase("ModelOps", "/api") {
        |import molecule.boilerplate.ops.ModelTransformations_
        |
        |
-       |trait ${fileName}_0[t, Ns[_]]
+       |trait ${fileName}_0[t, Ns1[_], Ns2[_, _]]
        |  extends Molecule_00
        |    with ModelTransformations_
-       |    with ExprOneTacOps_0[t, Ns]
-       |    with ExprSetTacOps_0[t, Ns]
+       |    with ExprOneTacOps_0[t, Ns1, Ns2]
+       |    with ExprSetTacOps_0[t, Ns1, Ns2]
        |    with CompositeInit_0
        |    with NestedOp_0
        |    with Tx_0_
@@ -27,17 +27,17 @@ object _ModelOps extends BoilerplateGenBase("ModelOps", "/api") {
     val nested = if (arity == 22) "" else s"\n    with NestedOp_$arity[${`A..V`}]"
     val body   =
       s"""
-         |trait $fileName_$arity[${`A..V`}, t, Ns[${`_, _`}]]
+         |trait $fileName_$arity[${`A..V`}, t, Ns1[${`_, _`}], Ns2[${`_, _, _`}]]
          |  extends Molecule_$n0[${`A..V`}]
          |    with ModelTransformations_
-         |    with AggregatesOps_$arity[${`A..V`}, t, Ns]
-         |    with ExprOneManOps_$arity[${`A..V`}, t, Ns]
-         |    with ExprOneOptOps_$arity[${`A..V`}, t, Ns]
-         |    with ExprOneTacOps_$arity[${`A..V`}, t, Ns]
-         |    with ExprSetManOps_$arity[${`A..V`}, t, Ns]
-         |    with ExprSetOptOps_$arity[${`A..V`}, t, Ns]
-         |    with ExprSetTacOps_$arity[${`A..V`}, t, Ns]
-         |    with SortAttrsOps_$arity[${`A..V`}, t, Ns]
+         |    with AggregatesOps_$arity[${`A..V`}, t, Ns1]
+         |    with ExprOneManOps_$arity[${`A..V`}, t, Ns1, Ns2]
+         |    with ExprOneOptOps_$arity[${`A..V`}, t, Ns1, Ns2]
+         |    with ExprOneTacOps_$arity[${`A..V`}, t, Ns1, Ns2]
+         |    with ExprSetManOps_$arity[${`A..V`}, t, Ns1, Ns2]
+         |    with ExprSetOptOps_$arity[${`A..V`}, t, Ns1, Ns2]
+         |    with ExprSetTacOps_$arity[${`A..V`}, t, Ns1, Ns2]
+         |    with SortAttrsOps_$arity[${`A..V`}, t, Ns1]
          |    with CompositeInit_$arity[${`A..V`}]$nested
          |    with Tx_${arity}_[${`A..V`}]""".stripMargin
   }

@@ -132,7 +132,7 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
     moleculeDataModelPaths := Seq(
       "molecule/coreTests/dataModels/core"
     ),
-    //    moleculeMakeJars := false,
+    moleculeMakeJars := false,
 
     // Suppress "un-used" keys warning
     Global / excludeLintKeys ++= Set(
@@ -186,8 +186,8 @@ lazy val datomic = crossProject(JSPlatform, JVMPlatform)
         //        sharedTests + "/sort",
         //        sharedTests + "/SyncApi.scala"
         //        sharedTests + "/txMetaData",
-//                sharedTests + "/validation",
-        sharedTests,
+        //        sharedTests + "/validation",
+        //        sharedTests,
         jvmTests + "/AdhocJVM.scala",
         jsTests + "/AdhocJs.scala",
         sharedTests + "/Adhoc.scala",

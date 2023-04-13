@@ -1,36 +1,151 @@
 package molecule.datomic.test
 
+import molecule.boilerplate.api.expression.{ExprOneMan_1, ExprOneMan_2, ExprOneMan_3}
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.datomic.async._
 import molecule.datomic.setup.DatomicTestSuite
 import utest._
+//import molecule.boilerplate.ast.Model._
+import molecule.boilerplate.api._
+import scala.language.implicitConversions
+
 
 object AdhocJVM extends DatomicTestSuite {
 
-
   override lazy val tests = Tests {
-
 
     "types" - types { implicit conn =>
       for {
-        _ <- Ns.int(3).save.transact
-        _ <- Ns.int.query.get.map(_ ==> List(3))
+        _ <- Ns.i.int.insert(
+          (2, 1),
+          (2, 2),
+          (2, 3),
+        ).transact
+
+        _ <- Ns.i.int.>(1).query.get.map(_ ==> List(
+          (2, 2),
+          (2, 3),
+        ))
+
+
+        //        _ <- Ns.int_.>(Ns.i_).string.query.get.map(_ ==> List())
+        //        _ <- Ns.int_.>(Ns.i).string.query.get.map(_ ==> List())
+        //
+        _ = {
+
+          val a1: Ns_1[Int, Int] with ExprOneMan_1[Int, Int, Ns_1, Ns_2]                             = Ns.int
+          val a2: Ns_2[Int, Float, Float] with ExprOneMan_2[Int, Float, Float, Ns_2, Ns_3]           = Ns.int.float
+
+          val a3: Ns_1[Int, Int] with SortAttrs_1[Int, Int, Ns_1]                                    = Ns.int.<(7)
+          val b3: Ns_1[Int, Int] with SortAttrs_1[Int, Int, Ns_1]                                    = Ns.int.<(Ns.i_)
+
+          val a4: Ns_2[Int, Float, Float] with ExprOneMan_2[Int, Float, Float, Ns_2, Ns_3]           = Ns.int.<(7).float
+          val b4: Ns_2[Int, Float, Float] with ExprOneMan_2[Int, Float, Float, Ns_2, Ns_3]           = Ns.int.<(Ns.i_).float
+
+          val a5: Ns_2[Int, Int, Int] with SortAttrs_2[Int, Int, Int, Ns_2]                          = Ns.int.i.<(7)
+          val b5: Ns_2[Int, Int, Int] with SortAttrs_2[Int, Int, Int, Ns_2]                          = Ns.int.<(Ns.i)
+
+          val a6: Ns_3[Int, Int, Float, Float] with ExprOneMan_3[Int, Int, Float, Float, Ns_3, Ns_4] = Ns.int.i.<(7).float
+          val b6: Ns_3[Int, Int, Float, Float] with ExprOneMan_3[Int, Int, Float, Float, Ns_3, Ns_4] = Ns.int.<(Ns.i).float
+        }
+
+
+        _ <- Ns.string.long.float.int.<(Ns.i_).query.get.map(_ ==> List())
+        _ <- Ns.string.long.float.int.<(Ns.i).query.get.map(_ ==> List())
+
+        _ <- Ns.string.long.float.double.int.<(Ns.i_).query.get.map(_ ==> List())
+        _ <- Ns.string.long.float.double.int_.<(Ns.i).query.get.map(_ ==> List())
+//        _ <- Ns.string.long.float.double.int.<(Ns.i).query.get.map(_ ==> List())
+
+//        _ <- Ns.int.string.long.float.<(Ns.i).query.get.map(_ ==> List())
+//        _ <- Ns.int.string.<(Ns.i).query.get.map(_ ==> List())
+        _ <- Ns.int_.<(Ns.i_).long.Ref.i.query.get.map(_ ==> List())
+        _ <- Ns.int_.<(Ns.i.a1).long.Ref.i.query.get.map(_ ==> List())
+
+        _ <- Ns.int.<(Ns.i_).a1.long.Ref.i.query.get.map(_ ==> List())
+        _ <- Ns.int.<(Ns.i.a2).a1.long.Ref.i.query.get.map(_ ==> List())
+
+        _ <- Ns.int_?.<(Ns.i_).a1.long.Ref.i.query.get.map(_ ==> List())
+        _ <- Ns.int_?.<(Ns.i.a2).a1.long.Ref.i.query.get.map(_ ==> List())
+
+
+        _ <- Ns.ints_.<(Ns.i_).long.Ref.i.query.get.map(_ ==> List())
+        _ <- Ns.ints_.<(Ns.i.a1).long.Ref.i.query.get.map(_ ==> List())
+
+        _ <- Ns.ints.<(Ns.i_).long.Ref.i.query.get.map(_ ==> List())
+        _ <- Ns.ints.<(Ns.i.a1).long.Ref.i.query.get.map(_ ==> List())
+
+        _ <- Ns.ints.<(Ns.ints_).long.Ref.i.query.get.map(_ ==> List())
+        _ <- Ns.ints.<(Ns.ints).long.Ref.i.query.get.map(_ ==> List())
+
+
+
+        _ <- Ns.ints_?.<(Ns.i_).long.Ref.i.query.get.map(_ ==> List())
+        _ <- Ns.ints_?.<(Ns.i.a1).long.Ref.i.query.get.map(_ ==> List())
+
+        _ <- Ns.ints_?.<(Ns.ints_).long.Ref.i.query.get.map(_ ==> List())
+        _ <- Ns.ints_?.<(Ns.ints).long.Ref.i.query.get.map(_ ==> List())
+
+
+
+
+
+
+//        _ <- Ns.int.==(Ns.i).long.Ref.i.query.get.map(_ ==> List())
+//
+//        _ <- Ns.int(Ns.i).long.Ref.i.query.get.map(_ ==> List())
+//        _ <- Ns.int.not(Ns.i).long.Ref.i.query.get.map(_ ==> List())
+//        _ <- Ns.int.<(Ns.i).long.Ref.i.query.get.map(_ ==> List())
+//        _ <- Ns.int.<=(Ns.i).long.Ref.i.query.get.map(_ ==> List())
+//        _ <- Ns.int.>(Ns.i).long.Ref.i.query.get.map(_ ==> List())
+//        _ <- Ns.int.>=(Ns.i).long.Ref.i.query.get.map(_ ==> List())
+//
+//        _ <- Ns.int(Ns.i_).long.Ref.i.query.get.map(_ ==> List())
+//        _ <- Ns.int.not(Ns.i_).long.Ref.i.query.get.map(_ ==> List())
+//        _ <- Ns.int.<(Ns.i_).long.Ref.i.query.get.map(_ ==> List())
+//        _ <- Ns.int.<=(Ns.i_).long.Ref.i.query.get.map(_ ==> List())
+//        _ <- Ns.int.>(Ns.i_).long.Ref.i.query.get.map(_ ==> List())
+//        _ <- Ns.int.>=(Ns.i_).long.Ref.i.query.get.map(_ ==> List())
+
+//        _ <- Ns.int.>(Ref.i).long.Ref.i.query.get.map(_ ==> List())
+
+
+//        _ <- Ns.int.>(Ref.i).long.Ref.i.query.get.map(_ ==> List())
+
+//        _ <- Ns.string.>(Ns.i_).long.query.get.map(_ ==> List())
+
+        //        _ <- Ns.int_.>(Ns.i).query.get.map(_ ==> List())
+        //        _ <- Ns.int_.>(Ns.i_).string.query.get.map(_ ==> List())
+        //
+        //        _ <- Ns.i.int.>(Ns.i).query.get.map(_ ==> List())
+        //        _ <- Ns.i.string.>(Ns.string).query.get.map(_ ==> List())
+        //        _ <- Ns.i.uuid.>(Ns.uuid).query.get.map(_ ==> List())
 
       } yield ()
     }
 
+    /*
 
-    "refs" - refs { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Refs._
-      for {
-        _ <- (R1.i(1).s("a") + R2.i(2).s("b").Tx.apply(R3.i(3).s("c"))).save.transact
+    class Ns_0[t](override val elements: List[Element]) extends Ns with ModelOps_0[t, Ns_0, Ns_1] {
+    class Ns_22[t](override val elements: List[Element]) extends Ns with ModelOps_0[t, Ns_22, Dummy_23] {
 
-        _ <- (R1.i_ + R2.i.s.Tx(R3.i.s)).query.get.map(_ ==> List(((2, "b"), 3, "c")))
+    lazy val int           = new Ns_1[Int                    , Int       ](elements :+ int_man        ) with ExprOneMan_1[Int                    , Int       , Ns_1, Ns_2]
 
-      } yield ()
+    override protected def _attrTac(op: Op, a: ModelOps_0[   t, _]) = new Ns_1[   A, t](attrTac(elements, op, a)) with ExprOneTac_1[   A, t, Ns_1, Ns_2]
+    override protected def _attrMan(op: Op, a: ModelOps_1[A, t, _]) = new Ns_2[A, A, t](attrMan(elements, op, a)) with ExprOneMan_2[A, A, t, Ns_2, Ns_3]
+     */
 
-    }
+    //    "refs" - refs { implicit conn =>
+    //      import molecule.coreTests.dataModels.core.dsl.Refs._
+    //      for {
+    //        _ <- (R1.i(1).s("a") + R2.i(2).s("b").Tx.apply(R3.i(3).s("c"))).save.transact
+    //
+    //        _ <- (R1.i_ + R2.i.s.Tx(R3.i.s)).query.get.map(_ ==> List(((2, "b"), 3, "c")))
+    //
+    //      } yield ()
+    //
+    //    }
 
     //    "set" - typesSet { implicit conn =>
     //

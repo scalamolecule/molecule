@@ -7,6 +7,7 @@ abstract class CodeGenTemplate(val fileName: String, dir: String, basePath: Stri
   val fileName_    = if (fileName == "package") "package" else fileName + "_"
 
   class TemplateVals(arity: Int) {
+    lazy val s          = " "
     lazy val V          = ('A' + arity - 1).toChar
     lazy val tpes       = (0 until arity) map (n => (n + 'A').toChar)
     lazy val tpesSmall  = (0 until arity) map (n => (n + 'a').toChar)

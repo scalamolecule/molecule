@@ -48,8 +48,10 @@ class DslFormatting(schema: MetaSchema, namespace: MetaNs, arity: Int = 0) exten
   lazy val tpes     = (0 until arity) map (n => (n + 'A').toChar)
   lazy val _0       = "_" + arity
   lazy val _1       = "_" + (arity + 1)
+  lazy val _2       = "_" + (arity + 2)
   lazy val ns_0     = ns + _0
   lazy val ns_1     = ns + _1
+  lazy val ns_2     = ns + _2
   lazy val `, A`    = if (arity == 0) "" else ", " + tpes.mkString(", ")
   lazy val `A..U`   = if (arity <= 1) "" else tpes.init.mkString("", ", ", ", ")
   lazy val `A..V`   = if (arity == 0) "" else tpes.mkString(", ")
