@@ -112,14 +112,14 @@ trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
   ): Unit = {
     op match {
       case V         => attr(e, a, v)
-      case Appl      => appl(e, a, v, sets, res.tpe, res.toDatalog)
-      case Not       => not(e, a, v, sets, res.tpe, res.toDatalog)
       case Eq        => equal(e, a, v, sets, res.s2j)
       case Neq       => neq(e, a, v, sets, res.s2j)
-      case Lt        => compare(e, a, v, sets.head.head, "<", res.tpe, res.toDatalog)
-      case Gt        => compare(e, a, v, sets.head.head, ">", res.tpe, res.toDatalog)
-      case Le        => compare(e, a, v, sets.head.head, "<=", res.tpe, res.toDatalog)
-      case Ge        => compare(e, a, v, sets.head.head, ">=", res.tpe, res.toDatalog)
+      case Has       => has(e, a, v, sets, res.tpe, res.toDatalog)
+      case HasNo     => hasNo(e, a, v, sets, res.tpe, res.toDatalog)
+      case HasLt     => compare(e, a, v, sets.head.head, "<", res.tpe, res.toDatalog)
+      case HasGt     => compare(e, a, v, sets.head.head, ">", res.tpe, res.toDatalog)
+      case HasLe     => compare(e, a, v, sets.head.head, "<=", res.tpe, res.toDatalog)
+      case HasGe     => compare(e, a, v, sets.head.head, ">=", res.tpe, res.toDatalog)
       case NoValue   => noValue(e, a)
       case Fn(kw, n) => aggr(e, a, v, kw, n, res)
       case other     => unexpectedOp(other)
@@ -137,14 +137,14 @@ trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
     addCast(resOpt.j2s)
     op match {
       case V     => optV(e, a, v)
-      case Appl  => optApply(e, a, v, optSets, resOpt.tpe, resOpt.toDatalog)
-      case Not   => optNot(e, a, v, optSets, resOpt.tpe, resOpt.toDatalog)
       case Eq    => optEq(e, a, v, optSets, resOpt.s2j)
       case Neq   => optNeq(e, a, v, optSets, resOpt.s2j)
-      case Lt    => optCompare(e, a, v, optSets, "<", resOpt.tpe, resOpt.toDatalog)
-      case Gt    => optCompare(e, a, v, optSets, ">", resOpt.tpe, resOpt.toDatalog)
-      case Le    => optCompare(e, a, v, optSets, "<=", resOpt.tpe, resOpt.toDatalog)
-      case Ge    => optCompare(e, a, v, optSets, ">=", resOpt.tpe, resOpt.toDatalog)
+      case Has   => optHas(e, a, v, optSets, resOpt.tpe, resOpt.toDatalog)
+      case HasNo => optHasNo(e, a, v, optSets, resOpt.tpe, resOpt.toDatalog)
+      case HasLt => optCompare(e, a, v, optSets, "<", resOpt.tpe, resOpt.toDatalog)
+      case HasGt => optCompare(e, a, v, optSets, ">", resOpt.tpe, resOpt.toDatalog)
+      case HasLe => optCompare(e, a, v, optSets, "<=", resOpt.tpe, resOpt.toDatalog)
+      case HasGe => optCompare(e, a, v, optSets, ">=", resOpt.tpe, resOpt.toDatalog)
       case other => unexpectedOp(other)
     }
   }
@@ -271,7 +271,7 @@ trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
     }
   }
 
-  private def appl[T: ClassTag](
+  private def has[T: ClassTag](
     e: Var, a: Att, v: Var, sets: Seq[Set[T]], tpe: String, toDatalog: T => String
   ): Unit = {
     where += s"[$e $a $v$tx]" -> wClause
@@ -284,7 +284,7 @@ trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
 
   }
 
-  private def not[T](e: Var, a: Att, v: Var, sets: Seq[Set[T]], tpe: String, toDatalog: T => String): Unit = {
+  private def hasNo[T](e: Var, a: Att, v: Var, sets: Seq[Set[T]], tpe: String, toDatalog: T => String): Unit = {
     // Common for pre-query and main query
     where += s"[$e $a $v$tx]" -> wClause
 
@@ -368,7 +368,7 @@ trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
     where += s"(not [$e $a])" -> wNeqOne
   }
 
-  private def optApply[T: ClassTag](
+  private def optHas[T: ClassTag](
     e: Var,
     a: Att,
     v: Var,
@@ -380,11 +380,11 @@ trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
       none(e, a, v)
     } { sets =>
       find += s"(distinct $v)"
-      appl(e, a, v, sets, tpe, toDatalog)
+      has(e, a, v, sets, tpe, toDatalog)
     }
   }
 
-  private def optNot[T](
+  private def optHasNo[T](
     e: Var,
     a: Att,
     v: Var,
@@ -394,7 +394,7 @@ trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
   ): Unit = {
     find += s"(distinct $v)"
     if (optSets.isDefined) {
-      not(e, a, v, optSets.get, tpe, toDatalog)
+      hasNo(e, a, v, optSets.get, tpe, toDatalog)
     } else {
       where += s"[$e $a $v$tx]" -> wClause
     }

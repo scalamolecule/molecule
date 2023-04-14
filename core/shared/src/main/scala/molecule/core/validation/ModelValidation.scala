@@ -288,7 +288,7 @@ case class ModelValidation(
   private def registerMandatoryAttr(a: Attr, attr: String) = {
     if (isUpdate) {
       if (
-        (a.op == V || a.op == Appl) && deletingAttr(a)
+        (a.op == V || a.op == Eq) && deletingAttr(a)
           || a.op == Remove && getCurSetValues.nonEmpty && removingLastValue(a, getCurSetValues.get(a))
       //          || a.op == Remove && removingLastValue(a, getCurSetValues.get(a))
       ) {
@@ -297,7 +297,7 @@ case class ModelValidation(
       }
     } else if (
       (a.isInstanceOf[Mandatory] || isTx)
-        && !(a.isInstanceOf[AttrSet] && a.op == Appl && deletingAttr(a))
+        && !(a.isInstanceOf[AttrSet] && a.op == Eq && deletingAttr(a))
     ) {
       // Mandatory attribute is ok - remove from watchlist
       mandatoryAttrs -= attr
@@ -307,7 +307,7 @@ case class ModelValidation(
   private def registerMandatoryRefAttr(a: Attr, attr: String) = {
     if (isUpdate) {
       if (
-        (a.op == V || a.op == Appl) && deletingAttr(a)
+        (a.op == V || a.op == Eq) && deletingAttr(a)
           || a.op == Remove && getCurSetValues.nonEmpty && removingLastValue(a, getCurSetValues.get(a))
       ) {
         // Wrongfully trying to delete mandatory attr - add to watchlist
@@ -315,7 +315,7 @@ case class ModelValidation(
       }
     } else if (
       (a.isInstanceOf[Mandatory] || isTx)
-        && !(a.isInstanceOf[AttrSet] && a.op == Appl && deletingAttr(a))
+        && !(a.isInstanceOf[AttrSet] && a.op == Eq && deletingAttr(a))
     ) {
       // Mandatory attribute is ok - remove from watchlist
       mandatoryRefs = mandatoryRefs.filterNot(_._1 == attr)

@@ -212,7 +212,7 @@ object Delete_eid extends DatomicTestSuite {
           _ <- Ns(42).a_("x").delete.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Generic attributes not allowed in update molecule. Found:\n" +
-              """AttrOneTacString("_Generic", "a", Appl, Seq("x"), None, Nil, Nil, None, None)"""
+              """AttrOneTacString("_Generic", "a", Eq, Seq("x"), None, Nil, Nil, None, None)"""
           }
         } yield ()
       }
@@ -222,7 +222,7 @@ object Delete_eid extends DatomicTestSuite {
           _ <- Ns(42).a("x").delete.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Generic attributes not allowed in update molecule. Found:\n" +
-              """AttrOneManString("_Generic", "a", Appl, Seq("x"), None, Nil, Nil, None, None)"""
+              """AttrOneManString("_Generic", "a", Eq, Seq("x"), None, Nil, Nil, None, None)"""
           }
         } yield ()
       }
@@ -241,7 +241,7 @@ object Delete_eid extends DatomicTestSuite {
           _ <- Ns(42).i_?(Some(1)).update.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Can't update optional values. Found:\n" +
-              """AttrOneOptInt("Ns", "i", Appl, Some(Seq(1)), None, Nil, Nil, None, None)"""
+              """AttrOneOptInt("Ns", "i", Eq, Some(Seq(1)), None, Nil, Nil, None, None)"""
           }
         } yield ()
       }

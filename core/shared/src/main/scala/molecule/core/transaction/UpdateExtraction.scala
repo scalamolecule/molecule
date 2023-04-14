@@ -28,7 +28,7 @@ class UpdateExtraction(
           case a: AttrOneTac => oneTac(tail, eids, filterElements, data, a)
           case a: AttrOneMan => oneMan(tail, eids, filterElements, data, a)
           case a: AttrSetMan => a.op match {
-            case Appl   => setApply(tail, eids, filterElements, data, a)
+            case Eq     => setEq(tail, eids, filterElements, data, a)
             case Add    => resolve(tail, eids, filterElements, data :+ setAdd(a))
             case Swap   => resolve(tail, eids, filterElements, data ++ setSwap(a))
             case Remove => resolve(tail, eids, filterElements, data ++ setRemove(a))
@@ -73,7 +73,7 @@ class UpdateExtraction(
     data: Seq[(String, String, String, Seq[AnyRef], Boolean)],
     dataAttr: AttrOneMan
   ): (Seq[AnyRef], List[Element], Seq[(String, String, String, Seq[AnyRef], Boolean)]) = {
-    if (dataAttr.op != Appl)
+    if (dataAttr.op != Eq)
       throw ModelError(s"Can't $update attributes without an applied value. Found:\n" + dataAttr)
     if (isUpsert) {
       // Disregard if value already exists
@@ -121,12 +121,12 @@ class UpdateExtraction(
     filterAttr: AttrOneTac
   ): (Seq[AnyRef], List[Element], Seq[(String, String, String, Seq[AnyRef], Boolean)]) = {
     filterAttr match {
-      case AttrOneTacLong("_Generic", "eids", Appl, eids1, _, _, _, _, _) =>
+      case AttrOneTacLong("_Generic", "eids", Eq, eids1, _, _, _, _, _) =>
         if (eids.nonEmpty)
           throw ModelError(s"Can't apply entity ids twice in $update.")
         resolve(tail, eids1.asInstanceOf[Seq[AnyRef]], filterElements, data)
 
-      case AttrOneTacLong("_Generic", "e", Appl, _, _, _, _, _, _) => throw ModelError(
+      case AttrOneTacLong("_Generic", "e", Eq, _, _, _, _, _, _) => throw ModelError(
         "Can't update by applying entity ids to e_")
 
       case a if a.ns == "_Generic" => throw ModelError(
@@ -146,7 +146,7 @@ class UpdateExtraction(
   }
 
 
-  private def setApply(
+  private def setEq(
     tail: List[Element],
     eids: Seq[AnyRef],
     filterElements: List[Element],

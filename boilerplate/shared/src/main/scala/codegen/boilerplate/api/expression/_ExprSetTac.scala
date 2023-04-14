@@ -16,68 +16,65 @@ object _ExprSetTac extends BoilerplateGenBase("ExprSetTac", "/api/expression") {
   }
 
   case class Trait(arity: Int) extends TemplateVals(arity) {
-    val attrResolvers = if (arity == 22) {
-      s"""
-         |  protected def _attrTac[ns1[_]](op: Op, a: ModelOps_0[t, ns1, Dummy_2]): Ns1[${`A..V`}, t] = ???""".stripMargin
-    } else {
-      s"""
-         |  protected def _attrTac[   ns1[_]   , ns2[_, _]   ](op: Op, a: ModelOps_0[   t, ns1, ns2]): Ns1[${`A..V, `}   t] = ???
-         |  protected def _attrMan[X, ns1[_, _], ns2[_, _, _]](op: Op, a: ModelOps_1[X, t, ns1, ns2]): Ns2[${`A..V, `}X, t] = ???""".stripMargin
-    }
-
     val attrExprs = if (arity == 22) {
       s"""
-         |  def apply[ns1[_]](a: ModelOps_0[t, ns1, Dummy_2]): Ns1[${`A..V`}, t] = _attrTac(Appl, a)
-         |  def not  [ns1[_]](a: ModelOps_0[t, ns1, Dummy_2]): Ns1[${`A..V`}, t] = _attrTac(Not , a)
-         |  def <    [ns1[_]](a: ModelOps_0[t, ns1, Dummy_2]): Ns1[${`A..V`}, t] = _attrTac(Lt  , a)
-         |  def <=   [ns1[_]](a: ModelOps_0[t, ns1, Dummy_2]): Ns1[${`A..V`}, t] = _attrTac(Le  , a)
-         |  def >    [ns1[_]](a: ModelOps_0[t, ns1, Dummy_2]): Ns1[${`A..V`}, t] = _attrTac(Gt  , a)
-         |  def >=   [ns1[_]](a: ModelOps_0[t, ns1, Dummy_2]): Ns1[${`A..V`}, t] = _attrTac(Ge  , a)""".stripMargin
+         |  def apply[ns1[_]](a: ModelOps_0[t, ns1, Dummy_2]): Ns1[${`A..V`}, t] = _attrTac(Eq   , a)
+         |  def not  [ns1[_]](a: ModelOps_0[t, ns1, Dummy_2]): Ns1[${`A..V`}, t] = _attrTac(Neq  , a)
+         |  def has  [ns1[_]](a: ModelOps_0[t, ns1, Dummy_2]): Ns1[${`A..V`}, t] = _attrTac(Has  , a)
+         |  def hasNo[ns1[_]](a: ModelOps_0[t, ns1, Dummy_2]): Ns1[${`A..V`}, t] = _attrTac(HasNo, a)
+         |  def hasLt[ns1[_]](a: ModelOps_0[t, ns1, Dummy_2]): Ns1[${`A..V`}, t] = _attrTac(HasLt, a)
+         |  def hasLe[ns1[_]](a: ModelOps_0[t, ns1, Dummy_2]): Ns1[${`A..V`}, t] = _attrTac(HasLe, a)
+         |  def hasGt[ns1[_]](a: ModelOps_0[t, ns1, Dummy_2]): Ns1[${`A..V`}, t] = _attrTac(HasGt, a)
+         |  def hasGe[ns1[_]](a: ModelOps_0[t, ns1, Dummy_2]): Ns1[${`A..V`}, t] = _attrTac(HasGe, a)""".stripMargin
     } else {
       s"""
-         |  def apply[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2]): Ns1[${`A..V, `}t] = _attrTac(Appl, a)
-         |  def not  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2]): Ns1[${`A..V, `}t] = _attrTac(Not , a)
-         |  def <    [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2]): Ns1[${`A..V, `}t] = _attrTac(Lt  , a)
-         |  def <=   [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2]): Ns1[${`A..V, `}t] = _attrTac(Le  , a)
-         |  def >    [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2]): Ns1[${`A..V, `}t] = _attrTac(Gt  , a)
-         |  def >=   [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2]): Ns1[${`A..V, `}t] = _attrTac(Ge  , a)
+         |  def apply[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2]): Ns1[${`A..V, `}t] = _attrTac(Eq   , a)
+         |  def not  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2]): Ns1[${`A..V, `}t] = _attrTac(Neq  , a)
+         |  def has  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2]): Ns1[${`A..V, `}t] = _attrTac(Has  , a)
+         |  def hasNo[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2]): Ns1[${`A..V, `}t] = _attrTac(HasNo, a)
+         |  def hasLt[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2]): Ns1[${`A..V, `}t] = _attrTac(HasLt, a)
+         |  def hasLe[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2]): Ns1[${`A..V, `}t] = _attrTac(HasLe, a)
+         |  def hasGt[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2]): Ns1[${`A..V, `}t] = _attrTac(HasGt, a)
+         |  def hasGe[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2]): Ns1[${`A..V, `}t] = _attrTac(HasGe, a)
          |
-         |  def apply[X, ns1[_, _], ns2[_, _, _]](a: ModelOps_1[X, t, ns1, ns2]): Ns2[${`A..V, `}X, t] = _attrMan(Appl, a)
-         |  def not  [X, ns1[_, _], ns2[_, _, _]](a: ModelOps_1[X, t, ns1, ns2]): Ns2[${`A..V, `}X, t] = _attrMan(Not , a)
-         |  def <    [X, ns1[_, _], ns2[_, _, _]](a: ModelOps_1[X, t, ns1, ns2]): Ns2[${`A..V, `}X, t] = _attrMan(Lt  , a)
-         |  def <=   [X, ns1[_, _], ns2[_, _, _]](a: ModelOps_1[X, t, ns1, ns2]): Ns2[${`A..V, `}X, t] = _attrMan(Le  , a)
-         |  def >    [X, ns1[_, _], ns2[_, _, _]](a: ModelOps_1[X, t, ns1, ns2]): Ns2[${`A..V, `}X, t] = _attrMan(Gt  , a)
-         |  def >=   [X, ns1[_, _], ns2[_, _, _]](a: ModelOps_1[X, t, ns1, ns2]): Ns2[${`A..V, `}X, t] = _attrMan(Ge  , a)""".stripMargin
+         |  def apply[X, ns1[_, _], ns2[_, _, _]](a: ModelOps_1[X, t, ns1, ns2]): Ns2[${`A..V, `}X, t] = _attrMan(Eq   , a)
+         |  def not  [X, ns1[_, _], ns2[_, _, _]](a: ModelOps_1[X, t, ns1, ns2]): Ns2[${`A..V, `}X, t] = _attrMan(Neq  , a)
+         |  def has  [X, ns1[_, _], ns2[_, _, _]](a: ModelOps_1[X, t, ns1, ns2]): Ns2[${`A..V, `}X, t] = _attrMan(Has  , a)
+         |  def hasNo[X, ns1[_, _], ns2[_, _, _]](a: ModelOps_1[X, t, ns1, ns2]): Ns2[${`A..V, `}X, t] = _attrMan(HasNo, a)
+         |  def hasLt[X, ns1[_, _], ns2[_, _, _]](a: ModelOps_1[X, t, ns1, ns2]): Ns2[${`A..V, `}X, t] = _attrMan(HasLt, a)
+         |  def hasLe[X, ns1[_, _], ns2[_, _, _]](a: ModelOps_1[X, t, ns1, ns2]): Ns2[${`A..V, `}X, t] = _attrMan(HasLe, a)
+         |  def hasGt[X, ns1[_, _], ns2[_, _, _]](a: ModelOps_1[X, t, ns1, ns2]): Ns2[${`A..V, `}X, t] = _attrMan(HasGt, a)
+         |  def hasGe[X, ns1[_, _], ns2[_, _, _]](a: ModelOps_1[X, t, ns1, ns2]): Ns2[${`A..V, `}X, t] = _attrMan(HasGe, a)""".stripMargin
     }
     val body =
       s"""
          |
-         |trait ${fileName}Ops_$arity[${`A..V, `}t, Ns1[${`_, _`}], Ns2[${`_, _, _`}]] extends ExprBase {
+         |trait ${fileName}Ops_$arity[${`A..V, `}t, Ns1[${`_, _`}], Ns2[${`_, _, _`}]] extends ExprAttr_$arity[${`A..V, `}t, Ns1, Ns2] {
          |  protected def _exprSetTac(op: Op, vs: Seq[Set[t]]): Ns1[${`A..V, `}t] = ???
-         |  $attrResolvers
          |}
          |
          |trait $fileName_$arity[${`A..V, `}t, Ns1[${`_, _`}], Ns2[${`_, _, _`}]]
          |  extends ${fileName}Ops_$arity[${`A..V, `}t, Ns1, Ns2] {
          |  def apply (                            )               : Ns1[${`A..V, `}t] = _exprSetTac(NoValue, Nil                       )
-         |  def apply (v    : t, vs: t*            )               : Ns1[${`A..V, `}t] = _exprSetTac(Appl   , (v +: vs).map(v => Set(v)))
-         |  def apply (vs   : Seq[t]               )(implicit x: X): Ns1[${`A..V, `}t] = _exprSetTac(Appl   , vs.map(v => Set(v))       )
-         |  def apply (set  : Set[t], sets: Set[t]*)               : Ns1[${`A..V, `}t] = _exprSetTac(Appl   , set +: sets               )
-         |  def apply (sets : Seq[Set[t]]          )               : Ns1[${`A..V, `}t] = _exprSetTac(Appl   , sets                      )
-         |  def not   (v    : t, vs: t*            )               : Ns1[${`A..V, `}t] = _exprSetTac(Not    , (v +: vs).map(v => Set(v)))
-         |  def not   (vs   : Seq[t]               )(implicit x: X): Ns1[${`A..V, `}t] = _exprSetTac(Not    , vs.map(v => Set(v))       )
-         |  def not   (set  : Set[t], sets: Set[t]*)               : Ns1[${`A..V, `}t] = _exprSetTac(Not    , set +: sets               )
-         |  def not   (sets : Seq[Set[t]]          )               : Ns1[${`A..V, `}t] = _exprSetTac(Not    , sets                      )
-         |  def ==    (set  : Set[t]               )               : Ns1[${`A..V, `}t] = _exprSetTac(Eq     , Seq(set)                  )
-         |  def ==    (set  : Set[t], sets: Set[t]*)               : Ns1[${`A..V, `}t] = _exprSetTac(Eq     , set +: sets               )
-         |  def ==    (sets : Seq[Set[t]]          )               : Ns1[${`A..V, `}t] = _exprSetTac(Eq     , sets                      )
-         |  def !=    (set  : Set[t]               )               : Ns1[${`A..V, `}t] = _exprSetTac(Neq    , Seq(set)                  )
-         |  def !=    (set  : Set[t], sets: Set[t]*)               : Ns1[${`A..V, `}t] = _exprSetTac(Neq    , set +: sets               )
-         |  def !=    (sets : Seq[Set[t]]          )               : Ns1[${`A..V, `}t] = _exprSetTac(Neq    , sets                      )
-         |  def <     (upper: t                    )               : Ns1[${`A..V, `}t] = _exprSetTac(Lt     , Seq(Set(upper))           )
-         |  def <=    (upper: t                    )               : Ns1[${`A..V, `}t] = _exprSetTac(Le     , Seq(Set(upper))           )
-         |  def >     (lower: t                    )               : Ns1[${`A..V, `}t] = _exprSetTac(Gt     , Seq(Set(lower))           )
-         |  def >=    (lower: t                    )               : Ns1[${`A..V, `}t] = _exprSetTac(Ge     , Seq(Set(lower))           )
+         |  def apply (v    : t, vs: t*            )               : Ns1[${`A..V, `}t] = _exprSetTac(Eq     , (v +: vs).map(v => Set(v)))
+         |  def apply (vs   : Seq[t]               )(implicit x: X): Ns1[${`A..V, `}t] = _exprSetTac(Eq     , vs.map(v => Set(v))       )
+         |  def apply (set  : Set[t], sets: Set[t]*)               : Ns1[${`A..V, `}t] = _exprSetTac(Eq     , set +: sets               )
+         |  def apply (sets : Seq[Set[t]]          )               : Ns1[${`A..V, `}t] = _exprSetTac(Eq     , sets                      )
+         |  def not   (set  : Set[t], sets: Set[t]*)               : Ns1[${`A..V, `}t] = _exprSetTac(Neq    , set +: sets               )
+         |  def not   (sets : Seq[Set[t]]          )               : Ns1[${`A..V, `}t] = _exprSetTac(Neq    , sets                      )
+         |  def has   (v    : t, vs: t*            )               : Ns1[${`A..V, `}t] = _exprSetTac(Has    , (v +: vs).map(v => Set(v)))
+         |  def has   (vs   : Seq[t]               )(implicit x: X): Ns1[${`A..V, `}t] = _exprSetTac(Has    , vs.map(v => Set(v))       )
+         |  def has   (set  : Set[t], sets: Set[t]*)               : Ns1[${`A..V, `}t] = _exprSetTac(Has    , set +: sets               )
+         |  def has   (sets : Seq[Set[t]]          )               : Ns1[${`A..V, `}t] = _exprSetTac(Has    , sets                      )
+         |  def hasNo (v    : t, vs: t*            )               : Ns1[${`A..V, `}t] = _exprSetTac(HasNo  , (v +: vs).map(v => Set(v)))
+         |  def hasNo (vs   : Seq[t]               )(implicit x: X): Ns1[${`A..V, `}t] = _exprSetTac(HasNo  , vs.map(v => Set(v))       )
+         |  def hasNo (set  : Set[t], sets: Set[t]*)               : Ns1[${`A..V, `}t] = _exprSetTac(HasNo  , set +: sets               )
+         |  def hasNo (sets : Seq[Set[t]]          )               : Ns1[${`A..V, `}t] = _exprSetTac(HasNo  , sets                      )
+         |  def hasLt (upper: t                    )               : Ns1[${`A..V, `}t] = _exprSetTac(HasLt  , Seq(Set(upper))           )
+         |  def hasLe (upper: t                    )               : Ns1[${`A..V, `}t] = _exprSetTac(HasLe  , Seq(Set(upper))           )
+         |  def hasGt (lower: t                    )               : Ns1[${`A..V, `}t] = _exprSetTac(HasGt  , Seq(Set(lower))           )
+         |  def hasGe (lower: t                    )               : Ns1[${`A..V, `}t] = _exprSetTac(HasGe  , Seq(Set(lower))           )
+         |
          |  def add   (v    : t, vs: t*            )               : Ns1[${`A..V, `}t] = _exprSetTac(Add    , Seq((v +: vs).toSet)      )
          |  def add   (vs   : Iterable[t]          )               : Ns1[${`A..V, `}t] = _exprSetTac(Add    , Seq(vs.toSet)             )
          |  def swap  (ab   : (t, t), abs: (t, t)* )               : Ns1[${`A..V, `}t] = _exprSetTac(Swap   , abs2sets(ab +: abs)       )

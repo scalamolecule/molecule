@@ -18,7 +18,7 @@ object UpdateSet_uniqueAttr extends DatomicTestSuite {
         _ <- Unique.ints_(1).s("b").update.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Can only lookup entity with card-one attribute value. Found:\n" +
-            """AttrSetTacInt("Unique", "ints", Appl, Seq(Set(1)), None, Nil, Nil, None, None)"""
+            """AttrSetTacInt("Unique", "ints", Eq, Seq(Set(1)), None, Nil, Nil, None, None)"""
         }
       } yield ()
     }

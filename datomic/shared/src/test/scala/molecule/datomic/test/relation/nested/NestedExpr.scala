@@ -42,7 +42,7 @@ object NestedExpr extends DatomicTestSuite {
         _ <- Ns.i_.Rs1.*?(R1.i(1)).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Expressions not allowed in optional nested data structure. Found:\n" +
-            """AttrOneManInt("R1", "i", Appl, Seq(1), None, Nil, Nil, None, None)"""
+            """AttrOneManInt("R1", "i", Eq, Seq(1), None, Nil, Nil, None, None)"""
         }
 
         _ <- Ns.i_.Rs1.*?(R1.i.<(2)).query.get

@@ -96,21 +96,25 @@ trait Model extends Validations with Values {
 
 
   sealed trait Op
+  case object NoValue extends Op
   case object V extends Op
-  case object Appl extends Op
-  case object Not extends Op
   case object Eq extends Op
   case object Neq extends Op
   case object Lt extends Op
   case object Le extends Op
   case object Gt extends Op
   case object Ge extends Op
-  case object NoValue extends Op
-  case class Fn(fn: String, n: Option[Int] = None) extends Op
-  case object Unify extends Op
+  case object Has extends Op
+  case object HasNo extends Op
+  case object HasLt extends Op
+  case object HasLe extends Op
+  case object HasGt extends Op
+  case object HasGe extends Op
   case object Add extends Op
   case object Swap extends Op
   case object Remove extends Op
+  case object Unify extends Op
+  case class Fn(fn: String, n: Option[Int] = None) extends Op
 
   // Email regex for validators in boilerplate code
   // todo: make configurable

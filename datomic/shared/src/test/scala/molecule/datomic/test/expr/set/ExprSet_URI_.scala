@@ -27,162 +27,7 @@ object ExprSet_URI_ extends DatomicTestSuite {
       }
 
 
-      "apply" - types { implicit conn =>
-        val a = (1, Set(uri1, uri2))
-        val b = (2, Set(uri2, uri3, uri4))
-        for {
-          _ <- Ns.i.uris.insert(List(a, b)).transact
-
-          // Sets with one or more values matching
-
-          // "Has this value"
-          _ <- Ns.i.a1.uris(uri0).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris(uri1).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris(uri2).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris(uri3).query.get.map(_ ==> List(b))
-          // Same as
-          _ <- Ns.i.a1.uris(Seq(uri0)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris(Seq(uri1)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris(Seq(uri2)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris(Seq(uri3)).query.get.map(_ ==> List(b))
-
-
-          // OR semantics when multiple values
-
-          // "Has this OR that"
-          _ <- Ns.i.a1.uris(uri1, uri2).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris(uri1, uri3).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris(uri2, uri3).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris(uri1, uri2, uri3).query.get.map(_ ==> List(a, b))
-          // Same as
-          _ <- Ns.i.a1.uris(Seq(uri1, uri2)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris(Seq(uri1, uri3)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris(Seq(uri2, uri3)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris(Seq(uri1, uri2, uri3)).query.get.map(_ ==> List(a, b))
-
-
-          // AND semantics when multiple values in a _Set_
-
-          // "Has this AND that"
-          _ <- Ns.i.a1.uris(Set(uri1)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris(Set(uri1, uri2)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris(Set(uri1, uri2, uri3)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris(Set(uri2)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris(Set(uri2, uri3)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris(Set(uri2, uri3, uri4)).query.get.map(_ ==> List(b))
-          // Same as
-          _ <- Ns.i.a1.uris(Seq(Set(uri1))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris(Seq(Set(uri1, uri2))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris(Seq(Set(uri1, uri2, uri3))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris(Seq(Set(uri2))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris(Seq(Set(uri2, uri3))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris(Seq(Set(uri2, uri3, uri4))).query.get.map(_ ==> List(b))
-
-
-          // AND/OR semantics with multiple Sets
-
-          // "(has this AND that) OR (has this AND that)"
-          _ <- Ns.i.a1.uris(Set(uri1, uri2), Set(uri0)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris(Set(uri1, uri2), Set(uri0, uri3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris(Set(uri1, uri2), Set(uri2, uri3)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris(Set(uri1, uri2), Set(uri2, uri3, uri4)).query.get.map(_ ==> List(a, b))
-          // Same as
-          _ <- Ns.i.a1.uris(Seq(Set(uri1, uri2), Set(uri0))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris(Seq(Set(uri1, uri2), Set(uri0, uri3))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris(Seq(Set(uri1, uri2), Set(uri2, uri3))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris(Seq(Set(uri1, uri2), Set(uri2, uri3, uri4))).query.get.map(_ ==> List(a, b))
-
-
-          // Empty Seq/Sets match nothing
-          _ <- Ns.i.a1.uris(Set(uri1, uri2), Set.empty[URI]).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris(Seq.empty[URI]).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris(Set.empty[URI]).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris(Seq.empty[Set[URI]]).query.get.map(_ ==> List())
-        } yield ()
-      }
-
-
-      "not" - types { implicit conn =>
-        val a = (1, Set(uri1, uri2))
-        val b = (2, Set(uri2, uri3, uri4))
-        for {
-          _ <- Ns.i.uris.insert(List(a, b)).transact
-
-          // Sets without one or more values matching
-
-          // "Doesn't have this value"
-          _ <- Ns.i.a1.uris.not(uri0).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris.not(uri1).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris.not(uri2).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris.not(uri3).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris.not(uri4).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris.not(uri5).query.get.map(_ ==> List(a, b))
-          // Same as
-          _ <- Ns.i.a1.uris.not(Seq(uri0)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris.not(Seq(uri1)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris.not(Seq(uri2)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris.not(Seq(uri3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris.not(Seq(uri4)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris.not(Seq(uri5)).query.get.map(_ ==> List(a, b))
-
-
-          // OR semantics when multiple values
-
-          // "Not (has this OR that)"
-          _ <- Ns.i.a1.uris.not(uri1, uri2).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris.not(uri1, uri3).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris.not(uri1, uri4).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris.not(uri1, uri5).query.get.map(_ ==> List(b))
-          // Same as
-          _ <- Ns.i.a1.uris.not(Seq(uri1, uri2)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris.not(Seq(uri1, uri3)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris.not(Seq(uri1, uri4)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris.not(Seq(uri1, uri5)).query.get.map(_ ==> List(b))
-
-
-          // AND semantics when multiple values in a _Set_
-
-          // "Not (has this AND that)"
-          _ <- Ns.i.a1.uris.not(Set(uri1)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris.not(Set(uri1, uri2)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris.not(Set(uri1, uri2, uri3)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris.not(Set(uri2)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris.not(Set(uri2, uri3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris.not(Set(uri2, uri3, uri4)).query.get.map(_ ==> List(a))
-          // Same as
-          _ <- Ns.i.a1.uris.not(Seq(Set(uri1))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris.not(Seq(Set(uri1, uri2))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris.not(Seq(Set(uri1, uri2, uri3))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris.not(Seq(Set(uri2))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris.not(Seq(Set(uri2, uri3))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris.not(Seq(Set(uri2, uri3, uri4))).query.get.map(_ ==> List(a))
-
-
-          // AND/OR semantics with multiple Sets
-
-          // "Not ((has this AND that) OR (has this AND that))"
-          _ <- Ns.i.a1.uris.not(Set(uri1, uri2), Set(uri0)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris.not(Set(uri1, uri2), Set(uri0, uri3)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris.not(Set(uri1, uri2), Set(uri2, uri3)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris.not(Set(uri1, uri2), Set(uri2, uri3, uri4)).query.get.map(_ ==> List())
-          // Same as
-          _ <- Ns.i.a1.uris.not(Seq(Set(uri1, uri2), Set(uri0))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris.not(Seq(Set(uri1, uri2), Set(uri0, uri3))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris.not(Seq(Set(uri1, uri2), Set(uri2, uri3))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris.not(Seq(Set(uri1, uri2), Set(uri2, uri3, uri4))).query.get.map(_ ==> List())
-
-
-          // Negating empty Seqs/Sets has no effect
-          _ <- Ns.i.a1.uris.not(Set(uri1, uri2), Set.empty[URI]).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris.not(Seq.empty[URI]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris.not(Set.empty[URI]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris.not(Seq.empty[Set[URI]]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris.not(Seq(Set.empty[URI])).query.get.map(_ ==> List(a, b))
-        } yield ()
-      }
-
-
-      "==" - types { implicit conn =>
+      "apply (equal)" - types { implicit conn =>
         val a = (1, Set(uri1, uri2))
         val b = (2, Set(uri2, uri3, uri4))
         for {
@@ -192,38 +37,38 @@ object ExprSet_URI_ extends DatomicTestSuite {
 
           // AND semantics
           // "Is exactly this AND that"
-          _ <- Ns.i.a1.uris.==(Set(uri1)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris.==(Set(uri1, uri2)).query.get.map(_ ==> List(a)) // include exact match
-          _ <- Ns.i.a1.uris.==(Set(uri1, uri2, uri3)).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris(Set(uri1)).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris(Set(uri1, uri2)).query.get.map(_ ==> List(a)) // include exact match
+          _ <- Ns.i.a1.uris(Set(uri1, uri2, uri3)).query.get.map(_ ==> List())
           // Same as
-          _ <- Ns.i.a1.uris.==(Seq(Set(uri1))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris.==(Seq(Set(uri1, uri2))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris.==(Seq(Set(uri1, uri2, uri3))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris(Seq(Set(uri1))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris(Seq(Set(uri1, uri2))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris(Seq(Set(uri1, uri2, uri3))).query.get.map(_ ==> List())
 
 
           // AND/OR semantics with multiple Sets
 
           // "(exactly this AND that) OR (exactly this AND that)"
-          _ <- Ns.i.a1.uris.==(Set(uri1), Set(uri2, uri3)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris.==(Set(uri1, uri2), Set(uri2, uri3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris.==(Set(uri1, uri2), Set(uri2, uri3, uri4)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris(Set(uri1), Set(uri2, uri3)).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris(Set(uri1, uri2), Set(uri2, uri3)).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris(Set(uri1, uri2), Set(uri2, uri3, uri4)).query.get.map(_ ==> List(a, b))
           // Same as
-          _ <- Ns.i.a1.uris.==(Seq(Set(uri1), Set(uri2, uri3))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris.==(Seq(Set(uri1, uri2), Set(uri2, uri3))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris.==(Seq(Set(uri1, uri2), Set(uri2, uri3, uri4))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris(Seq(Set(uri1), Set(uri2, uri3))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris(Seq(Set(uri1, uri2), Set(uri2, uri3))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris(Seq(Set(uri1, uri2), Set(uri2, uri3, uri4))).query.get.map(_ ==> List(a, b))
 
 
           // Empty Seq/Sets match nothing
-          _ <- Ns.i.a1.uris.==(Set(uri1, uri2), Set.empty[URI]).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris.==(Set.empty[URI], Set(uri1, uri2)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris.==(Set.empty[URI]).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris.==(Seq.empty[Set[URI]]).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris.==(Seq(Set.empty[URI])).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris(Set(uri1, uri2), Set.empty[URI]).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris(Set.empty[URI], Set(uri1, uri2)).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris(Set.empty[URI]).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris(Seq.empty[Set[URI]]).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris(Seq(Set.empty[URI])).query.get.map(_ ==> List())
         } yield ()
       }
 
 
-      "!=" - types { implicit conn =>
+      "not equal" - types { implicit conn =>
         val a = (1, Set(uri1, uri2))
         val b = (2, Set(uri2, uri3, uri4))
         for {
@@ -233,31 +78,186 @@ object ExprSet_URI_ extends DatomicTestSuite {
 
           // AND semantics
           // "Not (exactly this AND that)"
-          _ <- Ns.i.a1.uris.!=(Set(uri1)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris.!=(Set(uri1, uri2)).query.get.map(_ ==> List(b)) // exclude exact match
-          _ <- Ns.i.a1.uris.!=(Set(uri1, uri2, uri3)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris.not(Set(uri1)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris.not(Set(uri1, uri2)).query.get.map(_ ==> List(b)) // exclude exact match
+          _ <- Ns.i.a1.uris.not(Set(uri1, uri2, uri3)).query.get.map(_ ==> List(a, b))
           // Same as
-          _ <- Ns.i.a1.uris.!=(Seq(Set(uri1))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris.!=(Seq(Set(uri1, uri2))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris.!=(Seq(Set(uri1, uri2, uri3))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris.not(Seq(Set(uri1))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris.not(Seq(Set(uri1, uri2))).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris.not(Seq(Set(uri1, uri2, uri3))).query.get.map(_ ==> List(a, b))
 
 
           // AND/OR semantics with multiple Sets
 
           // "Not (exactly this AND that) OR (exactly this AND that)"
-          _ <- Ns.i.a1.uris.!=(Set(uri1), Set(uri2, uri3)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris.!=(Set(uri1, uri2), Set(uri2, uri3)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris.!=(Set(uri1, uri2), Set(uri2, uri3, uri4)).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris.not(Set(uri1), Set(uri2, uri3)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris.not(Set(uri1, uri2), Set(uri2, uri3)).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris.not(Set(uri1, uri2), Set(uri2, uri3, uri4)).query.get.map(_ ==> List())
           // Same as
-          _ <- Ns.i.a1.uris.!=(Seq(Set(uri1), Set(uri2, uri3))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris.!=(Seq(Set(uri1, uri2), Set(uri2, uri3))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris.!=(Seq(Set(uri1, uri2), Set(uri2, uri3, uri4))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris.not(Seq(Set(uri1), Set(uri2, uri3))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris.not(Seq(Set(uri1, uri2), Set(uri2, uri3))).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris.not(Seq(Set(uri1, uri2), Set(uri2, uri3, uri4))).query.get.map(_ ==> List())
 
 
           // Empty Seq/Sets
-          _ <- Ns.i.a1.uris.!=(Seq(Set(uri1, uri2), Set.empty[URI])).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris.!=(Set.empty[URI]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris.!=(Seq.empty[Set[URI]]).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris.not(Seq(Set(uri1, uri2), Set.empty[URI])).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris.not(Set.empty[URI]).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris.not(Seq.empty[Set[URI]]).query.get.map(_ ==> List(a, b))
+        } yield ()
+      }
+
+
+      "has" - types { implicit conn =>
+        val a = (1, Set(uri1, uri2))
+        val b = (2, Set(uri2, uri3, uri4))
+        for {
+          _ <- Ns.i.uris.insert(List(a, b)).transact
+
+          // Sets with one or more values matching
+
+          // "Has this value"
+          _ <- Ns.i.a1.uris.has(uri0).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris.has(uri1).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris.has(uri2).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris.has(uri3).query.get.map(_ ==> List(b))
+          // Same as
+          _ <- Ns.i.a1.uris.has(Seq(uri0)).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris.has(Seq(uri1)).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris.has(Seq(uri2)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris.has(Seq(uri3)).query.get.map(_ ==> List(b))
+
+
+          // OR semantics when multiple values
+
+          // "Has this OR that"
+          _ <- Ns.i.a1.uris.has(uri1, uri2).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris.has(uri1, uri3).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris.has(uri2, uri3).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris.has(uri1, uri2, uri3).query.get.map(_ ==> List(a, b))
+          // Same as
+          _ <- Ns.i.a1.uris.has(Seq(uri1, uri2)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris.has(Seq(uri1, uri3)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris.has(Seq(uri2, uri3)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris.has(Seq(uri1, uri2, uri3)).query.get.map(_ ==> List(a, b))
+
+
+          // AND semantics when multiple values in a _Set_
+
+          // "Has this AND that"
+          _ <- Ns.i.a1.uris.has(Set(uri1)).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris.has(Set(uri1, uri2)).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris.has(Set(uri1, uri2, uri3)).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris.has(Set(uri2)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris.has(Set(uri2, uri3)).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris.has(Set(uri2, uri3, uri4)).query.get.map(_ ==> List(b))
+          // Same as
+          _ <- Ns.i.a1.uris.has(Seq(Set(uri1))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris.has(Seq(Set(uri1, uri2))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris.has(Seq(Set(uri1, uri2, uri3))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris.has(Seq(Set(uri2))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris.has(Seq(Set(uri2, uri3))).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris.has(Seq(Set(uri2, uri3, uri4))).query.get.map(_ ==> List(b))
+
+
+          // AND/OR semantics with multiple Sets
+
+          // "(has this AND that) OR (has this AND that)"
+          _ <- Ns.i.a1.uris.has(Set(uri1, uri2), Set(uri0)).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris.has(Set(uri1, uri2), Set(uri0, uri3)).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris.has(Set(uri1, uri2), Set(uri2, uri3)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris.has(Set(uri1, uri2), Set(uri2, uri3, uri4)).query.get.map(_ ==> List(a, b))
+          // Same as
+          _ <- Ns.i.a1.uris.has(Seq(Set(uri1, uri2), Set(uri0))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris.has(Seq(Set(uri1, uri2), Set(uri0, uri3))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris.has(Seq(Set(uri1, uri2), Set(uri2, uri3))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris.has(Seq(Set(uri1, uri2), Set(uri2, uri3, uri4))).query.get.map(_ ==> List(a, b))
+
+
+          // Empty Seq/Sets match nothing
+          _ <- Ns.i.a1.uris.has(Set(uri1, uri2), Set.empty[URI]).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris.has(Seq.empty[URI]).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris.has(Set.empty[URI]).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris.has(Seq.empty[Set[URI]]).query.get.map(_ ==> List())
+        } yield ()
+      }
+
+
+      "hasNo" - types { implicit conn =>
+        val a = (1, Set(uri1, uri2))
+        val b = (2, Set(uri2, uri3, uri4))
+        for {
+          _ <- Ns.i.uris.insert(List(a, b)).transact
+
+          // Sets without one or more values matching
+
+          // "Doesn't have this value"
+          _ <- Ns.i.a1.uris.hasNo(uri0).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris.hasNo(uri1).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris.hasNo(uri2).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris.hasNo(uri3).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris.hasNo(uri4).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris.hasNo(uri5).query.get.map(_ ==> List(a, b))
+          // Same as
+          _ <- Ns.i.a1.uris.hasNo(Seq(uri0)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris.hasNo(Seq(uri1)).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris.hasNo(Seq(uri2)).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris.hasNo(Seq(uri3)).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris.hasNo(Seq(uri4)).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris.hasNo(Seq(uri5)).query.get.map(_ ==> List(a, b))
+
+
+          // OR semantics when multiple values
+
+          // "Not (has this OR that)"
+          _ <- Ns.i.a1.uris.hasNo(uri1, uri2).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris.hasNo(uri1, uri3).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris.hasNo(uri1, uri4).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris.hasNo(uri1, uri5).query.get.map(_ ==> List(b))
+          // Same as
+          _ <- Ns.i.a1.uris.hasNo(Seq(uri1, uri2)).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris.hasNo(Seq(uri1, uri3)).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris.hasNo(Seq(uri1, uri4)).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris.hasNo(Seq(uri1, uri5)).query.get.map(_ ==> List(b))
+
+
+          // AND semantics when multiple values in a _Set_
+
+          // "Not (has this AND that)"
+          _ <- Ns.i.a1.uris.hasNo(Set(uri1)).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris.hasNo(Set(uri1, uri2)).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris.hasNo(Set(uri1, uri2, uri3)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris.hasNo(Set(uri2)).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris.hasNo(Set(uri2, uri3)).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris.hasNo(Set(uri2, uri3, uri4)).query.get.map(_ ==> List(a))
+          // Same as
+          _ <- Ns.i.a1.uris.hasNo(Seq(Set(uri1))).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris.hasNo(Seq(Set(uri1, uri2))).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris.hasNo(Seq(Set(uri1, uri2, uri3))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris.hasNo(Seq(Set(uri2))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris.hasNo(Seq(Set(uri2, uri3))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris.hasNo(Seq(Set(uri2, uri3, uri4))).query.get.map(_ ==> List(a))
+
+
+          // AND/OR semantics with multiple Sets
+
+          // "Not ((has this AND that) OR (has this AND that))"
+          _ <- Ns.i.a1.uris.hasNo(Set(uri1, uri2), Set(uri0)).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris.hasNo(Set(uri1, uri2), Set(uri0, uri3)).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris.hasNo(Set(uri1, uri2), Set(uri2, uri3)).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris.hasNo(Set(uri1, uri2), Set(uri2, uri3, uri4)).query.get.map(_ ==> List())
+          // Same as
+          _ <- Ns.i.a1.uris.hasNo(Seq(Set(uri1, uri2), Set(uri0))).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris.hasNo(Seq(Set(uri1, uri2), Set(uri0, uri3))).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris.hasNo(Seq(Set(uri1, uri2), Set(uri2, uri3))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris.hasNo(Seq(Set(uri1, uri2), Set(uri2, uri3, uri4))).query.get.map(_ ==> List())
+
+
+          // Negating empty Seqs/Sets has no effect
+          _ <- Ns.i.a1.uris.hasNo(Set(uri1, uri2), Set.empty[URI]).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris.hasNo(Seq.empty[URI]).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris.hasNo(Set.empty[URI]).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris.hasNo(Seq.empty[Set[URI]]).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris.hasNo(Seq(Set.empty[URI])).query.get.map(_ ==> List(a, b))
         } yield ()
       }
 
@@ -268,25 +268,29 @@ object ExprSet_URI_ extends DatomicTestSuite {
         for {
           _ <- Ns.i.uris.insert(List(a, b)).transact
 
-          _ <- Ns.i.a1.uris.<(uri0).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris.<(uri1).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris.<(uri2).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris.<(uri3).query.get.map(_ ==> List(a, b))
+          // <
+          _ <- Ns.i.a1.uris.hasLt(uri0).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris.hasLt(uri1).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris.hasLt(uri2).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris.hasLt(uri3).query.get.map(_ ==> List(a, b))
 
-          _ <- Ns.i.a1.uris.<=(uri0).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris.<=(uri1).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris.<=(uri2).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris.<=(uri3).query.get.map(_ ==> List(a, b))
+          // <=
+          _ <- Ns.i.a1.uris.hasLe(uri0).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris.hasLe(uri1).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris.hasLe(uri2).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris.hasLe(uri3).query.get.map(_ ==> List(a, b))
 
-          _ <- Ns.i.a1.uris.>(uri0).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris.>(uri1).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris.>(uri2).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris.>(uri3).query.get.map(_ ==> List(b))
+          // >
+          _ <- Ns.i.a1.uris.hasGt(uri0).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris.hasGt(uri1).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris.hasGt(uri2).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris.hasGt(uri3).query.get.map(_ ==> List(b))
 
-          _ <- Ns.i.a1.uris.>=(uri0).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris.>=(uri1).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris.>=(uri2).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris.>=(uri3).query.get.map(_ ==> List(b))
+          // >=
+          _ <- Ns.i.a1.uris.hasGe(uri0).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris.hasGe(uri1).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris.hasGe(uri2).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris.hasGe(uri3).query.get.map(_ ==> List(b))
         } yield ()
       }
     }
@@ -307,166 +311,7 @@ object ExprSet_URI_ extends DatomicTestSuite {
       }
 
 
-      "apply" - types { implicit conn =>
-        val (a, b) = (1, 2)
-        for {
-          _ <- Ns.i.uris.insert(List(
-            (a, Set(uri1, uri2)),
-            (b, Set(uri2, uri3, uri4))
-          )).transact
-
-          // Sets with one or more values matching
-
-          // "Has this value"
-          _ <- Ns.i.a1.uris_(uri0).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_(uri1).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_(uri2).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_(uri3).query.get.map(_ ==> List(b))
-          // Same as
-          _ <- Ns.i.a1.uris_(Seq(uri0)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_(Seq(uri1)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_(Seq(uri2)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_(Seq(uri3)).query.get.map(_ ==> List(b))
-
-
-          // OR semantics when multiple values
-
-          // "Has this OR that"
-          _ <- Ns.i.a1.uris_(uri1, uri2).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_(uri1, uri3).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_(uri2, uri3).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_(uri1, uri2, uri3).query.get.map(_ ==> List(a, b))
-          // Same as
-          _ <- Ns.i.a1.uris_(Seq(uri1, uri2)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_(Seq(uri1, uri3)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_(Seq(uri2, uri3)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_(Seq(uri1, uri2, uri3)).query.get.map(_ ==> List(a, b))
-
-
-          // AND semantics when multiple values in a _Set_
-
-          // "Has this AND that"
-          _ <- Ns.i.a1.uris_(Set(uri1)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_(Set(uri1, uri2)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_(Set(uri1, uri2, uri3)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_(Set(uri2)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_(Set(uri2, uri3)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris_(Set(uri2, uri3, uri4)).query.get.map(_ ==> List(b))
-          // Same as
-          _ <- Ns.i.a1.uris_(Seq(Set(uri1))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_(Seq(Set(uri1, uri2))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_(Seq(Set(uri1, uri2, uri3))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_(Seq(Set(uri2))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_(Seq(Set(uri2, uri3))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris_(Seq(Set(uri2, uri3, uri4))).query.get.map(_ ==> List(b))
-
-
-          // AND/OR semantics with multiple Sets
-
-          // "(has this AND that) OR (has this AND that)"
-          _ <- Ns.i.a1.uris_(Set(uri1, uri2), Set(uri0)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_(Set(uri1, uri2), Set(uri0, uri3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_(Set(uri1, uri2), Set(uri2, uri3)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_(Set(uri1, uri2), Set(uri2, uri3, uri4)).query.get.map(_ ==> List(a, b))
-          // Same as
-          _ <- Ns.i.a1.uris_(Seq(Set(uri1, uri2), Set(uri0))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_(Seq(Set(uri1, uri2), Set(uri0, uri3))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_(Seq(Set(uri1, uri2), Set(uri2, uri3))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_(Seq(Set(uri1, uri2), Set(uri2, uri3, uri4))).query.get.map(_ ==> List(a, b))
-
-
-          // Empty Seq/Sets match nothing
-          _ <- Ns.i.a1.uris_(Set(uri1, uri2), Set.empty[URI]).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_(Seq.empty[URI]).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_(Set.empty[URI]).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_(Seq.empty[Set[URI]]).query.get.map(_ ==> List())
-        } yield ()
-      }
-
-
-      "not" - types { implicit conn =>
-        val (a, b) = (1, 2)
-        for {
-          _ <- Ns.i.uris.insert(List(
-            (a, Set(uri1, uri2)),
-            (b, Set(uri2, uri3, uri4))
-          )).transact
-
-          // Sets without one or more values matching
-
-          // "Doesn't have this value"
-          _ <- Ns.i.a1.uris_.not(uri0).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_.not(uri1).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris_.not(uri2).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_.not(uri3).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_.not(uri4).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_.not(uri5).query.get.map(_ ==> List(a, b))
-          // Same as
-          _ <- Ns.i.a1.uris_.not(Seq(uri0)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_.not(Seq(uri1)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris_.not(Seq(uri2)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_.not(Seq(uri3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_.not(Seq(uri4)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_.not(Seq(uri5)).query.get.map(_ ==> List(a, b))
-
-
-          // OR semantics when multiple values
-
-          // "Not (has this OR that)"
-          _ <- Ns.i.a1.uris_.not(uri1, uri2).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_.not(uri1, uri3).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_.not(uri1, uri4).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_.not(uri1, uri5).query.get.map(_ ==> List(b))
-          // Same as
-          _ <- Ns.i.a1.uris_.not(Seq(uri1, uri2)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_.not(Seq(uri1, uri3)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_.not(Seq(uri1, uri4)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_.not(Seq(uri1, uri5)).query.get.map(_ ==> List(b))
-
-
-          // AND semantics when multiple values in a _Set_
-
-          // "Not (has this AND that)"
-          _ <- Ns.i.a1.uris_.not(Set(uri1)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris_.not(Set(uri1, uri2)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris_.not(Set(uri1, uri2, uri3)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_.not(Set(uri2)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_.not(Set(uri2, uri3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_.not(Set(uri2, uri3, uri4)).query.get.map(_ ==> List(a))
-          // Same as
-          _ <- Ns.i.a1.uris_.not(Seq(Set(uri1))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris_.not(Seq(Set(uri1, uri2))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris_.not(Seq(Set(uri1, uri2, uri3))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_.not(Seq(Set(uri2))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_.not(Seq(Set(uri2, uri3))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_.not(Seq(Set(uri2, uri3, uri4))).query.get.map(_ ==> List(a))
-
-
-          // AND/OR semantics with multiple Sets
-
-          // "Not ((has this AND that) OR (has this AND that))"
-          _ <- Ns.i.a1.uris_.not(Set(uri1, uri2), Set(uri0)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris_.not(Set(uri1, uri2), Set(uri0, uri3)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris_.not(Set(uri1, uri2), Set(uri2, uri3)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_.not(Set(uri1, uri2), Set(uri2, uri3, uri4)).query.get.map(_ ==> List())
-          // Same as
-          _ <- Ns.i.a1.uris_.not(Seq(Set(uri1, uri2), Set(uri0))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris_.not(Seq(Set(uri1, uri2), Set(uri0, uri3))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris_.not(Seq(Set(uri1, uri2), Set(uri2, uri3))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_.not(Seq(Set(uri1, uri2), Set(uri2, uri3, uri4))).query.get.map(_ ==> List())
-
-
-          // Negating empty Seqs/Sets has no effect
-          _ <- Ns.i.a1.uris_.not(Set(uri1, uri2), Set.empty[URI]).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris_.not(Seq.empty[URI]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_.not(Set.empty[URI]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_.not(Seq.empty[Set[URI]]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_.not(Seq(Set.empty[URI])).query.get.map(_ ==> List(a, b))
-        } yield ()
-      }
-
-
-      "==" - types { implicit conn =>
+      "apply (equal)" - types { implicit conn =>
         val (a, b) = (1, 2)
         for {
           _ <- Ns.i.uris.insert(List(
@@ -478,37 +323,37 @@ object ExprSet_URI_ extends DatomicTestSuite {
 
           // AND semantics
           // "Is exactly this AND that"
-          _ <- Ns.i.a1.uris_.==(Set(uri1)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_.==(Set(uri1, uri2)).query.get.map(_ ==> List(a)) // include exact match
-          _ <- Ns.i.a1.uris_.==(Set(uri1, uri2, uri3)).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_(Set(uri1)).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_(Set(uri1, uri2)).query.get.map(_ ==> List(a)) // include exact match
+          _ <- Ns.i.a1.uris_(Set(uri1, uri2, uri3)).query.get.map(_ ==> List())
           // Same as
-          _ <- Ns.i.a1.uris_.==(Seq(Set(uri1))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_.==(Seq(Set(uri1, uri2))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_.==(Seq(Set(uri1, uri2, uri3))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_(Seq(Set(uri1))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_(Seq(Set(uri1, uri2))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris_(Seq(Set(uri1, uri2, uri3))).query.get.map(_ ==> List())
 
 
           // AND/OR semantics with multiple Sets
 
           // "(exactly this AND that) OR (exactly this AND that)"
-          _ <- Ns.i.a1.uris_.==(Set(uri1), Set(uri2, uri3)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_.==(Set(uri1, uri2), Set(uri2, uri3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_.==(Set(uri1, uri2), Set(uri2, uri3, uri4)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_(Set(uri1), Set(uri2, uri3)).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_(Set(uri1, uri2), Set(uri2, uri3)).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris_(Set(uri1, uri2), Set(uri2, uri3, uri4)).query.get.map(_ ==> List(a, b))
           // Same as
-          _ <- Ns.i.a1.uris_.==(Seq(Set(uri1), Set(uri2, uri3))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_.==(Seq(Set(uri1, uri2), Set(uri2, uri3))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_.==(Seq(Set(uri1, uri2), Set(uri2, uri3, uri4))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_(Seq(Set(uri1), Set(uri2, uri3))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_(Seq(Set(uri1, uri2), Set(uri2, uri3))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris_(Seq(Set(uri1, uri2), Set(uri2, uri3, uri4))).query.get.map(_ ==> List(a, b))
 
 
           // Empty Seq/Sets match nothing
-          _ <- Ns.i.a1.uris_.==(Set(uri1, uri2), Set.empty[URI]).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_.==(Set.empty[URI]).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_.==(Seq.empty[Set[URI]]).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_.==(Seq(Set.empty[URI])).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_(Set(uri1, uri2), Set.empty[URI]).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris_(Set.empty[URI]).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_(Seq.empty[Set[URI]]).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_(Seq(Set.empty[URI])).query.get.map(_ ==> List())
         } yield ()
       }
 
 
-      "!=" - types { implicit conn =>
+      "not equal" - types { implicit conn =>
         val (a, b) = (1, 2)
         for {
           _ <- Ns.i.uris.insert(List(
@@ -520,31 +365,190 @@ object ExprSet_URI_ extends DatomicTestSuite {
 
           // AND semantics
           // "Not (exactly this AND that)"
-          _ <- Ns.i.a1.uris_.!=(Set(uri1)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_.!=(Set(uri1, uri2)).query.get.map(_ ==> List(b)) // exclude exact match
-          _ <- Ns.i.a1.uris_.!=(Set(uri1, uri2, uri3)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_.not(Set(uri1)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_.not(Set(uri1, uri2)).query.get.map(_ ==> List(b)) // exclude exact match
+          _ <- Ns.i.a1.uris_.not(Set(uri1, uri2, uri3)).query.get.map(_ ==> List(a, b))
           // Same as
-          _ <- Ns.i.a1.uris_.!=(Seq(Set(uri1))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_.!=(Seq(Set(uri1, uri2))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris_.!=(Seq(Set(uri1, uri2, uri3))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_.not(Seq(Set(uri1))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_.not(Seq(Set(uri1, uri2))).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris_.not(Seq(Set(uri1, uri2, uri3))).query.get.map(_ ==> List(a, b))
 
 
           // AND/OR semantics with multiple Sets
 
           // "Not (exactly this AND that) OR (exactly this AND that)"
-          _ <- Ns.i.a1.uris_.!=(Set(uri1), Set(uri2, uri3)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_.!=(Set(uri1, uri2), Set(uri2, uri3)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris_.!=(Set(uri1, uri2), Set(uri2, uri3, uri4)).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_.not(Set(uri1), Set(uri2, uri3)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_.not(Set(uri1, uri2), Set(uri2, uri3)).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris_.not(Set(uri1, uri2), Set(uri2, uri3, uri4)).query.get.map(_ ==> List())
           // Same as
-          _ <- Ns.i.a1.uris_.!=(Seq(Set(uri1), Set(uri2, uri3))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_.!=(Seq(Set(uri1, uri2), Set(uri2, uri3))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris_.!=(Seq(Set(uri1, uri2), Set(uri2, uri3, uri4))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_.not(Seq(Set(uri1), Set(uri2, uri3))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_.not(Seq(Set(uri1, uri2), Set(uri2, uri3))).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris_.not(Seq(Set(uri1, uri2), Set(uri2, uri3, uri4))).query.get.map(_ ==> List())
 
 
           // Empty Seq/Sets
-          _ <- Ns.i.a1.uris_.!=(Seq(Set(uri1, uri2), Set.empty[URI])).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris_.!=(Set.empty[URI]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_.!=(Seq.empty[Set[URI]]).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_.not(Seq(Set(uri1, uri2), Set.empty[URI])).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris_.not(Set.empty[URI]).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_.not(Seq.empty[Set[URI]]).query.get.map(_ ==> List(a, b))
+        } yield ()
+      }
+
+
+      "has" - types { implicit conn =>
+        val (a, b) = (1, 2)
+        for {
+          _ <- Ns.i.uris.insert(List(
+            (a, Set(uri1, uri2)),
+            (b, Set(uri2, uri3, uri4))
+          )).transact
+
+          // Sets with one or more values matching
+
+          // "Has this value"
+          _ <- Ns.i.a1.uris_.has(uri0).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_.has(uri1).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris_.has(uri2).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_.has(uri3).query.get.map(_ ==> List(b))
+          // Same as
+          _ <- Ns.i.a1.uris_.has(Seq(uri0)).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_.has(Seq(uri1)).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris_.has(Seq(uri2)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_.has(Seq(uri3)).query.get.map(_ ==> List(b))
+
+
+          // OR semantics when multiple values
+
+          // "Has this OR that"
+          _ <- Ns.i.a1.uris_.has(uri1, uri2).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_.has(uri1, uri3).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_.has(uri2, uri3).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_.has(uri1, uri2, uri3).query.get.map(_ ==> List(a, b))
+          // Same as
+          _ <- Ns.i.a1.uris_.has(Seq(uri1, uri2)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_.has(Seq(uri1, uri3)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_.has(Seq(uri2, uri3)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_.has(Seq(uri1, uri2, uri3)).query.get.map(_ ==> List(a, b))
+
+
+          // AND semantics when multiple values in a _Set_
+
+          // "Has this AND that"
+          _ <- Ns.i.a1.uris_.has(Set(uri1)).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris_.has(Set(uri1, uri2)).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris_.has(Set(uri1, uri2, uri3)).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_.has(Set(uri2)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_.has(Set(uri2, uri3)).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris_.has(Set(uri2, uri3, uri4)).query.get.map(_ ==> List(b))
+          // Same as
+          _ <- Ns.i.a1.uris_.has(Seq(Set(uri1))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris_.has(Seq(Set(uri1, uri2))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris_.has(Seq(Set(uri1, uri2, uri3))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_.has(Seq(Set(uri2))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_.has(Seq(Set(uri2, uri3))).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris_.has(Seq(Set(uri2, uri3, uri4))).query.get.map(_ ==> List(b))
+
+
+          // AND/OR semantics with multiple Sets
+
+          // "(has this AND that) OR (has this AND that)"
+          _ <- Ns.i.a1.uris_.has(Set(uri1, uri2), Set(uri0)).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris_.has(Set(uri1, uri2), Set(uri0, uri3)).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris_.has(Set(uri1, uri2), Set(uri2, uri3)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_.has(Set(uri1, uri2), Set(uri2, uri3, uri4)).query.get.map(_ ==> List(a, b))
+          // Same as
+          _ <- Ns.i.a1.uris_.has(Seq(Set(uri1, uri2), Set(uri0))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris_.has(Seq(Set(uri1, uri2), Set(uri0, uri3))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris_.has(Seq(Set(uri1, uri2), Set(uri2, uri3))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_.has(Seq(Set(uri1, uri2), Set(uri2, uri3, uri4))).query.get.map(_ ==> List(a, b))
+
+
+          // Empty Seq/Sets match nothing
+          _ <- Ns.i.a1.uris_.has(Set(uri1, uri2), Set.empty[URI]).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris_.has(Seq.empty[URI]).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_.has(Set.empty[URI]).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_.has(Seq.empty[Set[URI]]).query.get.map(_ ==> List())
+        } yield ()
+      }
+
+
+      "hasNo" - types { implicit conn =>
+        val (a, b) = (1, 2)
+        for {
+          _ <- Ns.i.uris.insert(List(
+            (a, Set(uri1, uri2)),
+            (b, Set(uri2, uri3, uri4))
+          )).transact
+
+          // Sets without one or more values matching
+
+          // "Doesn't have this value"
+          _ <- Ns.i.a1.uris_.hasNo(uri0).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_.hasNo(uri1).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris_.hasNo(uri2).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_.hasNo(uri3).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris_.hasNo(uri4).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris_.hasNo(uri5).query.get.map(_ ==> List(a, b))
+          // Same as
+          _ <- Ns.i.a1.uris_.hasNo(Seq(uri0)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_.hasNo(Seq(uri1)).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris_.hasNo(Seq(uri2)).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_.hasNo(Seq(uri3)).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris_.hasNo(Seq(uri4)).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris_.hasNo(Seq(uri5)).query.get.map(_ ==> List(a, b))
+
+
+          // OR semantics when multiple values
+
+          // "Not (has this OR that)"
+          _ <- Ns.i.a1.uris_.hasNo(uri1, uri2).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_.hasNo(uri1, uri3).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_.hasNo(uri1, uri4).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_.hasNo(uri1, uri5).query.get.map(_ ==> List(b))
+          // Same as
+          _ <- Ns.i.a1.uris_.hasNo(Seq(uri1, uri2)).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_.hasNo(Seq(uri1, uri3)).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_.hasNo(Seq(uri1, uri4)).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_.hasNo(Seq(uri1, uri5)).query.get.map(_ ==> List(b))
+
+
+          // AND semantics when multiple values in a _Set_
+
+          // "Not (has this AND that)"
+          _ <- Ns.i.a1.uris_.hasNo(Set(uri1)).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris_.hasNo(Set(uri1, uri2)).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris_.hasNo(Set(uri1, uri2, uri3)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_.hasNo(Set(uri2)).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_.hasNo(Set(uri2, uri3)).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris_.hasNo(Set(uri2, uri3, uri4)).query.get.map(_ ==> List(a))
+          // Same as
+          _ <- Ns.i.a1.uris_.hasNo(Seq(Set(uri1))).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris_.hasNo(Seq(Set(uri1, uri2))).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris_.hasNo(Seq(Set(uri1, uri2, uri3))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_.hasNo(Seq(Set(uri2))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_.hasNo(Seq(Set(uri2, uri3))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris_.hasNo(Seq(Set(uri2, uri3, uri4))).query.get.map(_ ==> List(a))
+
+
+          // AND/OR semantics with multiple Sets
+
+          // "Not ((has this AND that) OR (has this AND that))"
+          _ <- Ns.i.a1.uris_.hasNo(Set(uri1, uri2), Set(uri0)).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris_.hasNo(Set(uri1, uri2), Set(uri0, uri3)).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris_.hasNo(Set(uri1, uri2), Set(uri2, uri3)).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_.hasNo(Set(uri1, uri2), Set(uri2, uri3, uri4)).query.get.map(_ ==> List())
+          // Same as
+          _ <- Ns.i.a1.uris_.hasNo(Seq(Set(uri1, uri2), Set(uri0))).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris_.hasNo(Seq(Set(uri1, uri2), Set(uri0, uri3))).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris_.hasNo(Seq(Set(uri1, uri2), Set(uri2, uri3))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_.hasNo(Seq(Set(uri1, uri2), Set(uri2, uri3, uri4))).query.get.map(_ ==> List())
+
+
+          // Negating empty Seqs/Sets has no effect
+          _ <- Ns.i.a1.uris_.hasNo(Set(uri1, uri2), Set.empty[URI]).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris_.hasNo(Seq.empty[URI]).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_.hasNo(Set.empty[URI]).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_.hasNo(Seq.empty[Set[URI]]).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_.hasNo(Seq(Set.empty[URI])).query.get.map(_ ==> List(a, b))
         } yield ()
       }
 
@@ -557,25 +561,29 @@ object ExprSet_URI_ extends DatomicTestSuite {
             (b, Set(uri2, uri3, uri4))
           )).transact
 
-          _ <- Ns.i.a1.uris_.<(uri0).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_.<(uri1).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_.<(uri2).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_.<(uri3).query.get.map(_ ==> List(a, b))
+          // <
+          _ <- Ns.i.a1.uris_.hasLt(uri0).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_.hasLt(uri1).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_.hasLt(uri2).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris_.hasLt(uri3).query.get.map(_ ==> List(a, b))
 
-          _ <- Ns.i.a1.uris_.<=(uri0).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_.<=(uri1).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_.<=(uri2).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_.<=(uri3).query.get.map(_ ==> List(a, b))
+          // <=
+          _ <- Ns.i.a1.uris_.hasLe(uri0).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_.hasLe(uri1).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris_.hasLe(uri2).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_.hasLe(uri3).query.get.map(_ ==> List(a, b))
 
-          _ <- Ns.i.a1.uris_.>(uri0).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_.>(uri1).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_.>(uri2).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris_.>(uri3).query.get.map(_ ==> List(b))
+          // >
+          _ <- Ns.i.a1.uris_.hasGt(uri0).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_.hasGt(uri1).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_.hasGt(uri2).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris_.hasGt(uri3).query.get.map(_ ==> List(b))
 
-          _ <- Ns.i.a1.uris_.>=(uri0).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_.>=(uri1).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_.>=(uri2).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_.>=(uri3).query.get.map(_ ==> List(b))
+          // >=
+          _ <- Ns.i.a1.uris_.hasGe(uri0).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_.hasGe(uri1).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_.hasGe(uri2).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_.hasGe(uri3).query.get.map(_ ==> List(b))
         } yield ()
       }
     }
@@ -602,156 +610,7 @@ object ExprSet_URI_ extends DatomicTestSuite {
       }
 
 
-      "apply" - types { implicit conn =>
-        val a = (1, Some(Set(uri1, uri2)))
-        val b = (2, Some(Set(uri2, uri3, uri4)))
-        val c = (3, None)
-        for {
-          _ <- Ns.i.uris_?.insert(a, b, c).transact
-
-          // Sets with one or more values matching
-
-          // "Has this value"
-          _ <- Ns.i.a1.uris_?(Some(uri0)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_?(Some(uri1)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_?(Some(uri2)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_?(Some(uri3)).query.get.map(_ ==> List(b))
-          // Same as
-          _ <- Ns.i.a1.uris_?(Some(Seq(uri0))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_?(Some(Seq(uri1))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_?(Some(Seq(uri2))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_?(Some(Seq(uri3))).query.get.map(_ ==> List(b))
-
-
-          // OR semantics when multiple values
-
-          // "Has this OR that"
-          _ <- Ns.i.a1.uris_?(Some(Seq(uri1, uri2))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_?(Some(Seq(uri1, uri3))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_?(Some(Seq(uri2, uri3))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_?(Some(Seq(uri1, uri2, uri3))).query.get.map(_ ==> List(a, b))
-
-
-          // AND semantics when multiple values in a _Set_
-
-          // "Has this AND that"
-          _ <- Ns.i.a1.uris_?(Some(Set(uri1))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_?(Some(Set(uri1, uri2))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_?(Some(Set(uri1, uri2, uri3))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_?(Some(Set(uri2))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_?(Some(Set(uri2, uri3))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris_?(Some(Set(uri2, uri3, uri4))).query.get.map(_ ==> List(b))
-          // Same as
-          _ <- Ns.i.a1.uris_?(Some(Seq(Set(uri1)))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_?(Some(Seq(Set(uri1, uri2)))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_?(Some(Seq(Set(uri1, uri2, uri3)))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_?(Some(Seq(Set(uri2)))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_?(Some(Seq(Set(uri2, uri3)))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris_?(Some(Seq(Set(uri2, uri3, uri4)))).query.get.map(_ ==> List(b))
-
-
-          // AND/OR semantics with multiple Sets
-
-          // "(has this AND that) OR (has this AND that)"
-          _ <- Ns.i.a1.uris_?(Some(Seq(Set(uri1, uri2), Set(uri0)))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_?(Some(Seq(Set(uri1, uri2), Set(uri0, uri3)))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_?(Some(Seq(Set(uri1, uri2), Set(uri2, uri3)))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_?(Some(Seq(Set(uri1, uri2), Set(uri2, uri3, uri4)))).query.get.map(_ ==> List(a, b))
-
-
-          // Empty Seq/Sets match nothing
-          _ <- Ns.i.a1.uris_?(Some(Seq.empty[URI])).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_?(Some(Set.empty[URI])).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_?(Some(Seq.empty[Set[URI]])).query.get.map(_ ==> List())
-
-
-          // None matches non-asserted values
-          _ <- Ns.i.a1.uris_?(Option.empty[URI]).query.get.map(_ ==> List(c))
-          _ <- Ns.i.a1.uris_?(Option.empty[Seq[URI]]).query.get.map(_ ==> List(c))
-          _ <- Ns.i.a1.uris_?(Option.empty[Set[URI]]).query.get.map(_ ==> List(c))
-          _ <- Ns.i.a1.uris_?(Option.empty[Seq[Set[URI]]]).query.get.map(_ ==> List(c))
-        } yield ()
-      }
-
-
-      "not" - types { implicit conn =>
-        val a = (1, Some(Set(uri1, uri2)))
-        val b = (2, Some(Set(uri2, uri3, uri4)))
-        val c = (3, None)
-        for {
-          _ <- Ns.i.uris_?.insert(a, b, c).transact
-
-          // Sets without one or more values matching
-
-          // "Doesn't have this value"
-          _ <- Ns.i.a1.uris_?.not(Some(uri0)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_?.not(Some(uri1)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris_?.not(Some(uri2)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_?.not(Some(uri3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_?.not(Some(uri4)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_?.not(Some(uri5)).query.get.map(_ ==> List(a, b))
-          // Same as
-          _ <- Ns.i.a1.uris_?.not(Some(Seq(uri0))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_?.not(Some(Seq(uri1))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris_?.not(Some(Seq(uri2))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_?.not(Some(Seq(uri3))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_?.not(Some(Seq(uri4))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_?.not(Some(Seq(uri5))).query.get.map(_ ==> List(a, b))
-
-
-          // OR semantics when multiple values
-
-          // "Not (has this OR that)"
-          _ <- Ns.i.a1.uris_?.not(Some(Seq(uri1, uri2))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_?.not(Some(Seq(uri1, uri3))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_?.not(Some(Seq(uri1, uri4))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_?.not(Some(Seq(uri1, uri5))).query.get.map(_ ==> List(b))
-
-
-          // AND semantics when multiple values in a _Set_
-
-          // "Not (has this AND that)"
-          _ <- Ns.i.a1.uris_?.not(Some(Set(uri1))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris_?.not(Some(Set(uri1, uri2))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris_?.not(Some(Set(uri1, uri2, uri3))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_?.not(Some(Set(uri2))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_?.not(Some(Set(uri2, uri3))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_?.not(Some(Set(uri2, uri3, uri4))).query.get.map(_ ==> List(a))
-          // Same as
-          _ <- Ns.i.a1.uris_?.not(Some(Seq(Set(uri1)))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris_?.not(Some(Seq(Set(uri1, uri2)))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris_?.not(Some(Seq(Set(uri1, uri2, uri3)))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_?.not(Some(Seq(Set(uri2)))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_?.not(Some(Seq(Set(uri2, uri3)))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_?.not(Some(Seq(Set(uri2, uri3, uri4)))).query.get.map(_ ==> List(a))
-
-
-          // AND/OR semantics with multiple Sets
-
-          // "Not ((has this AND that) OR (has this AND that))"
-          _ <- Ns.i.a1.uris_?.not(Some(Seq(Set(uri1, uri2), Set(uri0)))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris_?.not(Some(Seq(Set(uri1, uri2), Set(uri0, uri3)))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris_?.not(Some(Seq(Set(uri1, uri2), Set(uri2, uri3)))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_?.not(Some(Seq(Set(uri1, uri2), Set(uri2, uri3, uri4)))).query.get.map(_ ==> List())
-
-
-          // Negating empty Seqs/Sets has no effect
-          _ <- Ns.i.a1.uris_?.not(Some(Seq.empty[URI])).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_?.not(Some(Set.empty[URI])).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_?.not(Some(Seq.empty[Set[URI]])).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_?.not(Some(Seq(Set.empty[URI]))).query.get.map(_ ==> List(a, b))
-
-
-          // Negating None returns all asserted
-          _ <- Ns.i.a1.uris_?.not(Option.empty[URI]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_?.not(Option.empty[Seq[URI]]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_?.not(Option.empty[Set[URI]]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_?.not(Option.empty[Seq[Set[URI]]]).query.get.map(_ ==> List(a, b))
-        } yield ()
-      }
-
-
-      "==" - types { implicit conn =>
+      "apply (equal)" - types { implicit conn =>
         val a = (1, Some(Set(uri1, uri2)))
         val b = (2, Some(Set(uri2, uri3, uri4)))
         val c = (3, None)
@@ -762,37 +621,37 @@ object ExprSet_URI_ extends DatomicTestSuite {
 
           // AND semantics
           // "Is exactly this AND that"
-          _ <- Ns.i.a1.uris_?.==(Some(Set(uri1))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_?.==(Some(Set(uri1, uri2))).query.get.map(_ ==> List(a)) // include exact match
-          _ <- Ns.i.a1.uris_?.==(Some(Set(uri1, uri2, uri3))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_?(Some(Set(uri1))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_?(Some(Set(uri1, uri2))).query.get.map(_ ==> List(a)) // include exact match
+          _ <- Ns.i.a1.uris_?(Some(Set(uri1, uri2, uri3))).query.get.map(_ ==> List())
           // Same as
-          _ <- Ns.i.a1.uris_?.==(Some(Seq(Set(uri1)))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_?.==(Some(Seq(Set(uri1, uri2)))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_?.==(Some(Seq(Set(uri1, uri2, uri3)))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_?(Some(Seq(Set(uri1)))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_?(Some(Seq(Set(uri1, uri2)))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris_?(Some(Seq(Set(uri1, uri2, uri3)))).query.get.map(_ ==> List())
 
 
           // AND/OR semantics with multiple Sets
 
           // "(exactly this AND that) OR (exactly this AND that)"
-          _ <- Ns.i.a1.uris_?.==(Some(Seq(Set(uri1), Set(uri2, uri3)))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_?.==(Some(Seq(Set(uri1, uri2), Set(uri2, uri3)))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_?.==(Some(Seq(Set(uri1, uri2), Set(uri2, uri3, uri4)))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_?(Some(Seq(Set(uri1), Set(uri2, uri3)))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_?(Some(Seq(Set(uri1, uri2), Set(uri2, uri3)))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris_?(Some(Seq(Set(uri1, uri2), Set(uri2, uri3, uri4)))).query.get.map(_ ==> List(a, b))
 
 
           // Empty Seq/Sets match nothing
-          _ <- Ns.i.a1.uris_?.==(Some(Set.empty[URI])).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_?.==(Some(Seq.empty[Set[URI]])).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_?.==(Some(Seq(Set.empty[URI]))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_?(Some(Set.empty[URI])).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_?(Some(Seq.empty[Set[URI]])).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_?(Some(Seq(Set.empty[URI]))).query.get.map(_ ==> List())
 
 
           // None matches non-asserted values
-          _ <- Ns.i.a1.uris_?.==(Option.empty[Set[URI]]).query.get.map(_ ==> List(c))
-          _ <- Ns.i.a1.uris_?.==(Option.empty[Seq[Set[URI]]]).query.get.map(_ ==> List(c))
+          _ <- Ns.i.a1.uris_?(Option.empty[Set[URI]]).query.get.map(_ ==> List(c))
+          _ <- Ns.i.a1.uris_?(Option.empty[Seq[Set[URI]]]).query.get.map(_ ==> List(c))
         } yield ()
       }
 
 
-      "!=" - types { implicit conn =>
+      "not equal" - types { implicit conn =>
         val a = (1, Some(Set(uri1, uri2)))
         val b = (2, Some(Set(uri2, uri3, uri4)))
         val c = (3, None)
@@ -803,32 +662,181 @@ object ExprSet_URI_ extends DatomicTestSuite {
 
           // AND semantics
           // "Not (exactly this AND that)"
-          _ <- Ns.i.a1.uris_?.!=(Some(Set(uri1))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_?.!=(Some(Set(uri1, uri2))).query.get.map(_ ==> List(b)) // exclude exact match
-          _ <- Ns.i.a1.uris_?.!=(Some(Set(uri1, uri2, uri3))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_?.not(Some(Set(uri1))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_?.not(Some(Set(uri1, uri2))).query.get.map(_ ==> List(b)) // exclude exact match
+          _ <- Ns.i.a1.uris_?.not(Some(Set(uri1, uri2, uri3))).query.get.map(_ ==> List(a, b))
           // Same as
-          _ <- Ns.i.a1.uris_?.!=(Some(Seq(Set(uri1)))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_?.!=(Some(Seq(Set(uri1, uri2)))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris_?.!=(Some(Seq(Set(uri1, uri2, uri3)))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_?.not(Some(Seq(Set(uri1)))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_?.not(Some(Seq(Set(uri1, uri2)))).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris_?.not(Some(Seq(Set(uri1, uri2, uri3)))).query.get.map(_ ==> List(a, b))
 
 
           // AND/OR semantics with multiple Sets
 
           // "Not (exactly this AND that) OR (exactly this AND that)"
-          _ <- Ns.i.a1.uris_?.!=(Some(Seq(Set(uri1), Set(uri2, uri3)))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_?.!=(Some(Seq(Set(uri1, uri2), Set(uri2, uri3)))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris_?.!=(Some(Seq(Set(uri1, uri2), Set(uri2, uri3, uri4)))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_?.not(Some(Seq(Set(uri1), Set(uri2, uri3)))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_?.not(Some(Seq(Set(uri1, uri2), Set(uri2, uri3)))).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris_?.not(Some(Seq(Set(uri1, uri2), Set(uri2, uri3, uri4)))).query.get.map(_ ==> List())
 
 
           // Empty Seq/Sets
-          _ <- Ns.i.a1.uris_?.!=(Some(Seq(Set(uri1, uri2), Set.empty[URI]))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris_?.!=(Some(Set.empty[URI])).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_?.!=(Some(Seq.empty[Set[URI]])).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_?.not(Some(Seq(Set(uri1, uri2), Set.empty[URI]))).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris_?.not(Some(Set.empty[URI])).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_?.not(Some(Seq.empty[Set[URI]])).query.get.map(_ ==> List(a, b))
 
 
           // None matches non-asserted values
-          _ <- Ns.i.a1.uris_?.==(Option.empty[Set[URI]]).query.get.map(_ ==> List(c))
-          _ <- Ns.i.a1.uris_?.==(Option.empty[Seq[Set[URI]]]).query.get.map(_ ==> List(c))
+          _ <- Ns.i.a1.uris_?(Option.empty[Set[URI]]).query.get.map(_ ==> List(c))
+          _ <- Ns.i.a1.uris_?(Option.empty[Seq[Set[URI]]]).query.get.map(_ ==> List(c))
+        } yield ()
+      }
+
+
+      "has" - types { implicit conn =>
+        val a = (1, Some(Set(uri1, uri2)))
+        val b = (2, Some(Set(uri2, uri3, uri4)))
+        val c = (3, None)
+        for {
+          _ <- Ns.i.uris_?.insert(a, b, c).transact
+
+          // Sets with one or more values matching
+
+          // "Has this value"
+          _ <- Ns.i.a1.uris_?.has(Some(uri0)).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_?.has(Some(uri1)).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris_?.has(Some(uri2)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_?.has(Some(uri3)).query.get.map(_ ==> List(b))
+          // Same as
+          _ <- Ns.i.a1.uris_?.has(Some(Seq(uri0))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_?.has(Some(Seq(uri1))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris_?.has(Some(Seq(uri2))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_?.has(Some(Seq(uri3))).query.get.map(_ ==> List(b))
+
+
+          // OR semantics when multiple values
+
+          // "Has this OR that"
+          _ <- Ns.i.a1.uris_?.has(Some(Seq(uri1, uri2))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_?.has(Some(Seq(uri1, uri3))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_?.has(Some(Seq(uri2, uri3))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_?.has(Some(Seq(uri1, uri2, uri3))).query.get.map(_ ==> List(a, b))
+
+
+          // AND semantics when multiple values in a _Set_
+
+          // "Has this AND that"
+          _ <- Ns.i.a1.uris_?.has(Some(Set(uri1))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris_?.has(Some(Set(uri1, uri2))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris_?.has(Some(Set(uri1, uri2, uri3))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_?.has(Some(Set(uri2))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_?.has(Some(Set(uri2, uri3))).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris_?.has(Some(Set(uri2, uri3, uri4))).query.get.map(_ ==> List(b))
+          // Same as
+          _ <- Ns.i.a1.uris_?.has(Some(Seq(Set(uri1)))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris_?.has(Some(Seq(Set(uri1, uri2)))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris_?.has(Some(Seq(Set(uri1, uri2, uri3)))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_?.has(Some(Seq(Set(uri2)))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_?.has(Some(Seq(Set(uri2, uri3)))).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris_?.has(Some(Seq(Set(uri2, uri3, uri4)))).query.get.map(_ ==> List(b))
+
+
+          // AND/OR semantics with multiple Sets
+
+          // "(has this AND that) OR (has this AND that)"
+          _ <- Ns.i.a1.uris_?.has(Some(Seq(Set(uri1, uri2), Set(uri0)))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris_?.has(Some(Seq(Set(uri1, uri2), Set(uri0, uri3)))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris_?.has(Some(Seq(Set(uri1, uri2), Set(uri2, uri3)))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_?.has(Some(Seq(Set(uri1, uri2), Set(uri2, uri3, uri4)))).query.get.map(_ ==> List(a, b))
+
+
+          // Empty Seq/Sets match nothing
+          _ <- Ns.i.a1.uris_?.has(Some(Seq.empty[URI])).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_?.has(Some(Set.empty[URI])).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_?.has(Some(Seq.empty[Set[URI]])).query.get.map(_ ==> List())
+
+
+          // None matches non-asserted values
+          _ <- Ns.i.a1.uris_?.has(Option.empty[URI]).query.get.map(_ ==> List(c))
+          _ <- Ns.i.a1.uris_?.has(Option.empty[Seq[URI]]).query.get.map(_ ==> List(c))
+          _ <- Ns.i.a1.uris_?.has(Option.empty[Set[URI]]).query.get.map(_ ==> List(c))
+          _ <- Ns.i.a1.uris_?.has(Option.empty[Seq[Set[URI]]]).query.get.map(_ ==> List(c))
+        } yield ()
+      }
+
+
+      "hasNo" - types { implicit conn =>
+        val a = (1, Some(Set(uri1, uri2)))
+        val b = (2, Some(Set(uri2, uri3, uri4)))
+        val c = (3, None)
+        for {
+          _ <- Ns.i.uris_?.insert(a, b, c).transact
+
+          // Sets without one or more values matching
+
+          // "Doesn't have this value"
+          _ <- Ns.i.a1.uris_?.hasNo(Some(uri0)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_?.hasNo(Some(uri1)).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris_?.hasNo(Some(uri2)).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_?.hasNo(Some(uri3)).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris_?.hasNo(Some(uri4)).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris_?.hasNo(Some(uri5)).query.get.map(_ ==> List(a, b))
+          // Same as
+          _ <- Ns.i.a1.uris_?.hasNo(Some(Seq(uri0))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_?.hasNo(Some(Seq(uri1))).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris_?.hasNo(Some(Seq(uri2))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_?.hasNo(Some(Seq(uri3))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris_?.hasNo(Some(Seq(uri4))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris_?.hasNo(Some(Seq(uri5))).query.get.map(_ ==> List(a, b))
+
+
+          // OR semantics when multiple values
+
+          // "Not (has this OR that)"
+          _ <- Ns.i.a1.uris_?.hasNo(Some(Seq(uri1, uri2))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_?.hasNo(Some(Seq(uri1, uri3))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_?.hasNo(Some(Seq(uri1, uri4))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_?.hasNo(Some(Seq(uri1, uri5))).query.get.map(_ ==> List(b))
+
+
+          // AND semantics when multiple values in a _Set_
+
+          // "Not (has this AND that)"
+          _ <- Ns.i.a1.uris_?.hasNo(Some(Set(uri1))).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris_?.hasNo(Some(Set(uri1, uri2))).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris_?.hasNo(Some(Set(uri1, uri2, uri3))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_?.hasNo(Some(Set(uri2))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_?.hasNo(Some(Set(uri2, uri3))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris_?.hasNo(Some(Set(uri2, uri3, uri4))).query.get.map(_ ==> List(a))
+          // Same as
+          _ <- Ns.i.a1.uris_?.hasNo(Some(Seq(Set(uri1)))).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris_?.hasNo(Some(Seq(Set(uri1, uri2)))).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris_?.hasNo(Some(Seq(Set(uri1, uri2, uri3)))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_?.hasNo(Some(Seq(Set(uri2)))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_?.hasNo(Some(Seq(Set(uri2, uri3)))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris_?.hasNo(Some(Seq(Set(uri2, uri3, uri4)))).query.get.map(_ ==> List(a))
+
+
+          // AND/OR semantics with multiple Sets
+
+          // "Not ((has this AND that) OR (has this AND that))"
+          _ <- Ns.i.a1.uris_?.hasNo(Some(Seq(Set(uri1, uri2), Set(uri0)))).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris_?.hasNo(Some(Seq(Set(uri1, uri2), Set(uri0, uri3)))).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris_?.hasNo(Some(Seq(Set(uri1, uri2), Set(uri2, uri3)))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_?.hasNo(Some(Seq(Set(uri1, uri2), Set(uri2, uri3, uri4)))).query.get.map(_ ==> List())
+
+
+          // Negating empty Seqs/Sets has no effect
+          _ <- Ns.i.a1.uris_?.hasNo(Some(Seq.empty[URI])).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_?.hasNo(Some(Set.empty[URI])).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_?.hasNo(Some(Seq.empty[Set[URI]])).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_?.hasNo(Some(Seq(Set.empty[URI]))).query.get.map(_ ==> List(a, b))
+
+
+          // Negating None returns all asserted
+          _ <- Ns.i.a1.uris_?.hasNo(Option.empty[URI]).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_?.hasNo(Option.empty[Seq[URI]]).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_?.hasNo(Option.empty[Set[URI]]).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_?.hasNo(Option.empty[Seq[Set[URI]]]).query.get.map(_ ==> List(a, b))
         } yield ()
       }
 
@@ -840,32 +848,36 @@ object ExprSet_URI_ extends DatomicTestSuite {
         for {
           _ <- Ns.i.uris_?.insert(a, b, c).transact
 
-          _ <- Ns.i.a1.uris_?.<(Some(uri0)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_?.<(Some(uri1)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_?.<(Some(uri2)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_?.<(Some(uri3)).query.get.map(_ ==> List(a, b))
+          // <
+          _ <- Ns.i.a1.uris_?.hasLt(Some(uri0)).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_?.hasLt(Some(uri1)).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_?.hasLt(Some(uri2)).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris_?.hasLt(Some(uri3)).query.get.map(_ ==> List(a, b))
 
-          _ <- Ns.i.a1.uris_?.<=(Some(uri0)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_?.<=(Some(uri1)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_?.<=(Some(uri2)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_?.<=(Some(uri3)).query.get.map(_ ==> List(a, b))
+          // <=
+          _ <- Ns.i.a1.uris_?.hasLe(Some(uri0)).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_?.hasLe(Some(uri1)).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris_?.hasLe(Some(uri2)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_?.hasLe(Some(uri3)).query.get.map(_ ==> List(a, b))
 
-          _ <- Ns.i.a1.uris_?.>(Some(uri0)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_?.>(Some(uri1)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_?.>(Some(uri2)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris_?.>(Some(uri3)).query.get.map(_ ==> List(b))
+          // >
+          _ <- Ns.i.a1.uris_?.hasGt(Some(uri0)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_?.hasGt(Some(uri1)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_?.hasGt(Some(uri2)).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris_?.hasGt(Some(uri3)).query.get.map(_ ==> List(b))
 
-          _ <- Ns.i.a1.uris_?.>=(Some(uri0)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_?.>=(Some(uri1)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_?.>=(Some(uri2)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_?.>=(Some(uri3)).query.get.map(_ ==> List(b))
+          // >=
+          _ <- Ns.i.a1.uris_?.hasGe(Some(uri0)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_?.hasGe(Some(uri1)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_?.hasGe(Some(uri2)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_?.hasGe(Some(uri3)).query.get.map(_ ==> List(b))
 
 
-          // None matches any asserted values
-          _ <- Ns.i.a1.uris_?.<(None).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_?.>(None).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_?.<=(None).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_?.>=(None).query.get.map(_ ==> List(a, b))
+          // None comparison matches any asserted values
+          _ <- Ns.i.a1.uris_?.hasLt(None).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_?.hasGt(None).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_?.hasLe(None).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_?.hasGe(None).query.get.map(_ ==> List(a, b))
         } yield ()
       }
     }

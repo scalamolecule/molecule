@@ -153,8 +153,8 @@ trait ResolveExprOne[Tpl]
   ): Unit = {
     op match {
       case V         => attr(e, a, v)
-      case Appl      => appl(e, a, v, args, res.s2j)
-      case Not       => not(e, a, v, args, res.tpe, res.toDatalog)
+      case Eq        => equal(e, a, v, args, res.s2j)
+      case Neq       => neq(e, a, v, args, res.tpe, res.toDatalog)
       case Lt        => compare(e, a, v, args.head, "<", res.s2j)
       case Gt        => compare(e, a, v, args.head, ">", res.s2j)
       case Le        => compare(e, a, v, args.head, "<=", res.s2j)
@@ -178,8 +178,8 @@ trait ResolveExprOne[Tpl]
     addSort(sorter)
     op match {
       case V     => optV(e, a, v)
-      case Appl  => optApply(e, a, v, optArgs, resOpt.s2j)
-      case Not   => optNot(e, a, v, optArgs, resOpt.tpe, resOpt.toDatalog)
+      case Eq    => optEqual(e, a, v, optArgs, resOpt.s2j)
+      case Neq   => optEq(e, a, v, optArgs, resOpt.tpe, resOpt.toDatalog)
       case Lt    => optCompare(e, a, v, optArgs, "<", resOpt.s2j)
       case Gt    => optCompare(e, a, v, optArgs, ">", resOpt.s2j)
       case Le    => optCompare(e, a, v, optArgs, "<=", resOpt.s2j)
@@ -251,13 +251,13 @@ trait ResolveExprOne[Tpl]
     where += s"[$e $a $v$tx]" -> wClause
   }
 
-  private def appl[T: ClassTag](e: Var, a: Att, v: Var, argValues: Seq[T], fromScala: Any => Any): Unit = {
+  private def equal[T: ClassTag](e: Var, a: Att, v: Var, argValues: Seq[T], fromScala: Any => Any): Unit = {
     in += s"[$v ...]"
     where += s"[$e $a $v$tx]" -> wClause
     args += argValues.map(fromScala).toArray
   }
 
-  private def not[T](e: Var, a: Att, v: Var, args: Seq[T], tpe: String, toDatalog: T => String): Unit = {
+  private def neq[T](e: Var, a: Att, v: Var, args: Seq[T], tpe: String, toDatalog: T => String): Unit = {
     where += s"[$e $a $v$tx]" -> wClause
     if (tpe == "URI") {
       args.zipWithIndex.foreach { case (arg, i) =>
@@ -289,7 +289,7 @@ trait ResolveExprOne[Tpl]
     where += s"[(identity $e) $e-$v]" -> wGround
   }
 
-  private def optApply[T: ClassTag](
+  private def optEqual[T: ClassTag](
     e: Var,
     a: Att,
     v: Var,
@@ -302,11 +302,11 @@ trait ResolveExprOne[Tpl]
       where += s"[(identity $e) $e-$v]" -> wGround
     } { vs =>
       find += v
-      appl(e, a, v, vs, fromScala)
+      equal(e, a, v, vs, fromScala)
     }
   }
 
-  private def optNot[T](
+  private def optEq[T](
     e: Var,
     a: Att,
     v: Var,
@@ -317,7 +317,7 @@ trait ResolveExprOne[Tpl]
     find += v
     where += s"[$e $a $v$tx]" -> wClause
     if (optArgs.isDefined && optArgs.get.nonEmpty) {
-      not(e, a, v, optArgs.get, tpe, toDatalog)
+      neq(e, a, v, optArgs.get, tpe, toDatalog)
     }
   }
 
