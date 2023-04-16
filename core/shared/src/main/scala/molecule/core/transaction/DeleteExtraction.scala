@@ -16,7 +16,7 @@ class DeleteExtraction {
     elements match {
       case element :: tail => element match {
         case attr: Attr => attr match {
-          case AttrOneTacLong("_Generic", "eids", Eq, eids1, _, _, _, _, _) =>
+          case AttrOneTacLong("_Generic", "eids", Eq, eids1, _, _, _, _, _, _) =>
             if (eids.nonEmpty)
               throw ExecutionError(s"Can't apply entity ids twice for delete.")
             if (!topLevel)
@@ -24,7 +24,7 @@ class DeleteExtraction {
                 s"Can only apply entity ids to be deleted at top level/first composite group of molecule.")
             resolve(tail, eids1.asInstanceOf[Seq[AnyRef]], filterElements, topLevel)
 
-          case AttrOneTacLong("_Generic", "e", Eq, _, _, _, _, _, _) => throw ModelError(
+          case AttrOneTacLong("_Generic", "e", Eq, _, _, _, _, _, _, _) => throw ModelError(
             "Can't delete by applying entity ids to e_")
 
           case a if a.ns == "_Generic" => throw ModelError(

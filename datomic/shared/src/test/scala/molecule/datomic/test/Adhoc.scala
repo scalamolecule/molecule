@@ -62,7 +62,7 @@ object Adhoc extends DatomicTestSuite {
     //          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
     //          err ==>
     //            """Missing applied value for attribute:
-    //              |AttrOneManInt("R2", "i", V, Seq(), None, Nil, Nil, None, None)""".stripMargin
+    //              |AttrOneManInt("R2", "i", V, Seq(), None, None, Nil, Nil, None, None)""".stripMargin
     //        }
     //      } yield ()
     //    }

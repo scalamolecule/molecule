@@ -88,7 +88,8 @@ case class ModelValidation(
 
         case Nested(r, es) =>
           curElements = es
-          val ref = r.ns + "." + r.refAttr
+//          val ref = r.ns + "." + r.refAttr
+          val ref = r.name
           if (prev(level)(group).contains(ref))
             dup(ref)
           prev = prev :+ Array(Array(ref))
@@ -98,7 +99,8 @@ case class ModelValidation(
 
         case NestedOpt(r, es) =>
           curElements = es
-          val ref = r.ns + "." + r.refAttr
+//          val ref = r.ns + "." + r.refAttr
+          val ref = r.name
           if (prev(level)(group).contains(ref))
             dup(ref)
           prev = prev :+ Array(Array(ref))
@@ -203,39 +205,39 @@ case class ModelValidation(
     } else {
       a match {
         case a1: AttrOneMan                => a1 match {
-          case AttrOneManString(_, _, _, vs, Some(validator), _, _, _, _)     => validator.withAttrs(attrs).validate(one(vs))
-          case AttrOneManInt(_, _, _, vs, Some(validator), _, _, _, _)        => validator.withAttrs(attrs).validate(one(vs))
-          case AttrOneManLong(_, _, _, vs, Some(validator), _, _, _, _)       => validator.withAttrs(attrs).validate(one(vs))
-          case AttrOneManFloat(_, _, _, vs, Some(validator), _, _, _, _)      => validator.withAttrs(attrs).validate(one(vs))
-          case AttrOneManDouble(_, _, _, vs, Some(validator), _, _, _, _)     => validator.withAttrs(attrs).validate(one(vs))
-          case AttrOneManBoolean(_, _, _, vs, Some(validator), _, _, _, _)    => validator.withAttrs(attrs).validate(one(vs))
-          case AttrOneManBigInt(_, _, _, vs, Some(validator), _, _, _, _)     => validator.withAttrs(attrs).validate(one(vs))
-          case AttrOneManBigDecimal(_, _, _, vs, Some(validator), _, _, _, _) => validator.withAttrs(attrs).validate(one(vs))
-          case AttrOneManDate(_, _, _, vs, Some(validator), _, _, _, _)       => validator.withAttrs(attrs).validate(one(vs))
-          case AttrOneManUUID(_, _, _, vs, Some(validator), _, _, _, _)       => validator.withAttrs(attrs).validate(one(vs))
-          case AttrOneManURI(_, _, _, vs, Some(validator), _, _, _, _)        => validator.withAttrs(attrs).validate(one(vs))
-          case AttrOneManByte(_, _, _, vs, Some(validator), _, _, _, _)       => validator.withAttrs(attrs).validate(one(vs))
-          case AttrOneManShort(_, _, _, vs, Some(validator), _, _, _, _)      => validator.withAttrs(attrs).validate(one(vs))
-          case AttrOneManChar(_, _, _, vs, Some(validator), _, _, _, _)       => validator.withAttrs(attrs).validate(one(vs))
+          case AttrOneManString(_, _, _, vs, _, Some(validator), _, _, _, _)     => validator.withAttrs(attrs).validate(one(vs))
+          case AttrOneManInt(_, _, _, vs, _, Some(validator), _, _, _, _)        => validator.withAttrs(attrs).validate(one(vs))
+          case AttrOneManLong(_, _, _, vs, _, Some(validator), _, _, _, _)       => validator.withAttrs(attrs).validate(one(vs))
+          case AttrOneManFloat(_, _, _, vs, _, Some(validator), _, _, _, _)      => validator.withAttrs(attrs).validate(one(vs))
+          case AttrOneManDouble(_, _, _, vs, _, Some(validator), _, _, _, _)     => validator.withAttrs(attrs).validate(one(vs))
+          case AttrOneManBoolean(_, _, _, vs, _, Some(validator), _, _, _, _)    => validator.withAttrs(attrs).validate(one(vs))
+          case AttrOneManBigInt(_, _, _, vs, _, Some(validator), _, _, _, _)     => validator.withAttrs(attrs).validate(one(vs))
+          case AttrOneManBigDecimal(_, _, _, vs, _, Some(validator), _, _, _, _) => validator.withAttrs(attrs).validate(one(vs))
+          case AttrOneManDate(_, _, _, vs, _, Some(validator), _, _, _, _)       => validator.withAttrs(attrs).validate(one(vs))
+          case AttrOneManUUID(_, _, _, vs, _, Some(validator), _, _, _, _)       => validator.withAttrs(attrs).validate(one(vs))
+          case AttrOneManURI(_, _, _, vs, _, Some(validator), _, _, _, _)        => validator.withAttrs(attrs).validate(one(vs))
+          case AttrOneManByte(_, _, _, vs, _, Some(validator), _, _, _, _)       => validator.withAttrs(attrs).validate(one(vs))
+          case AttrOneManShort(_, _, _, vs, _, Some(validator), _, _, _, _)      => validator.withAttrs(attrs).validate(one(vs))
+          case AttrOneManChar(_, _, _, vs, _, Some(validator), _, _, _, _)       => validator.withAttrs(attrs).validate(one(vs))
           case _                                                              => err
         }
         case _: AttrOneTac | _: AttrOneOpt => onlyMandatory(a)
 
         case a: AttrSetMan                 => a match {
-          case AttrSetManString(_, _, _, sets, Some(validator), _, _, _, _)     => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
-          case AttrSetManInt(_, _, _, sets, Some(validator), _, _, _, _)        => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
-          case AttrSetManLong(_, _, _, sets, Some(validator), _, _, _, _)       => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
-          case AttrSetManFloat(_, _, _, sets, Some(validator), _, _, _, _)      => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
-          case AttrSetManDouble(_, _, _, sets, Some(validator), _, _, _, _)     => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
-          case AttrSetManBoolean(_, _, _, sets, Some(validator), _, _, _, _)    => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
-          case AttrSetManBigInt(_, _, _, sets, Some(validator), _, _, _, _)     => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
-          case AttrSetManBigDecimal(_, _, _, sets, Some(validator), _, _, _, _) => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
-          case AttrSetManDate(_, _, _, sets, Some(validator), _, _, _, _)       => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
-          case AttrSetManUUID(_, _, _, sets, Some(validator), _, _, _, _)       => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
-          case AttrSetManURI(_, _, _, sets, Some(validator), _, _, _, _)        => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
-          case AttrSetManByte(_, _, _, sets, Some(validator), _, _, _, _)       => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
-          case AttrSetManShort(_, _, _, sets, Some(validator), _, _, _, _)      => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
-          case AttrSetManChar(_, _, _, sets, Some(validator), _, _, _, _)       => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
+          case AttrSetManString(_, _, _, sets, _, Some(validator), _, _, _, _)     => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
+          case AttrSetManInt(_, _, _, sets, _, Some(validator), _, _, _, _)        => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
+          case AttrSetManLong(_, _, _, sets, _, Some(validator), _, _, _, _)       => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
+          case AttrSetManFloat(_, _, _, sets, _, Some(validator), _, _, _, _)      => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
+          case AttrSetManDouble(_, _, _, sets, _, Some(validator), _, _, _, _)     => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
+          case AttrSetManBoolean(_, _, _, sets, _, Some(validator), _, _, _, _)    => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
+          case AttrSetManBigInt(_, _, _, sets, _, Some(validator), _, _, _, _)     => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
+          case AttrSetManBigDecimal(_, _, _, sets, _, Some(validator), _, _, _, _) => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
+          case AttrSetManDate(_, _, _, sets, _, Some(validator), _, _, _, _)       => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
+          case AttrSetManUUID(_, _, _, sets, _, Some(validator), _, _, _, _)       => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
+          case AttrSetManURI(_, _, _, sets, _, Some(validator), _, _, _, _)        => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
+          case AttrSetManByte(_, _, _, sets, _, Some(validator), _, _, _, _)       => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
+          case AttrSetManShort(_, _, _, sets, _, Some(validator), _, _, _, _)      => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
+          case AttrSetManChar(_, _, _, sets, _, Some(validator), _, _, _, _)       => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
           case _                                                                => err
         }
         case _: AttrSetTac | _: AttrSetOpt => onlyMandatory(a)
@@ -326,72 +328,72 @@ case class ModelValidation(
   private def deletingAttr(a: Attr): Boolean = {
     a match {
       case a: AttrOneMan => a match {
-        case AttrOneManString(_, _, _, Nil, _, _, _, _, _)     => true
-        case AttrOneManInt(_, _, _, Nil, _, _, _, _, _)        => true
-        case AttrOneManLong(_, _, _, Nil, _, _, _, _, _)       => true
-        case AttrOneManFloat(_, _, _, Nil, _, _, _, _, _)      => true
-        case AttrOneManDouble(_, _, _, Nil, _, _, _, _, _)     => true
-        case AttrOneManBoolean(_, _, _, Nil, _, _, _, _, _)    => true
-        case AttrOneManBigInt(_, _, _, Nil, _, _, _, _, _)     => true
-        case AttrOneManBigDecimal(_, _, _, Nil, _, _, _, _, _) => true
-        case AttrOneManDate(_, _, _, Nil, _, _, _, _, _)       => true
-        case AttrOneManUUID(_, _, _, Nil, _, _, _, _, _)       => true
-        case AttrOneManURI(_, _, _, Nil, _, _, _, _, _)        => true
-        case AttrOneManByte(_, _, _, Nil, _, _, _, _, _)       => true
-        case AttrOneManShort(_, _, _, Nil, _, _, _, _, _)      => true
-        case AttrOneManChar(_, _, _, Nil, _, _, _, _, _)       => true
+        case AttrOneManString(_, _, _, Nil, _, _, _, _, _, _)     => true
+        case AttrOneManInt(_, _, _, Nil, _, _, _, _, _, _)        => true
+        case AttrOneManLong(_, _, _, Nil, _, _, _, _, _, _)       => true
+        case AttrOneManFloat(_, _, _, Nil, _, _, _, _, _, _)      => true
+        case AttrOneManDouble(_, _, _, Nil, _, _, _, _, _, _)     => true
+        case AttrOneManBoolean(_, _, _, Nil, _, _, _, _, _, _)    => true
+        case AttrOneManBigInt(_, _, _, Nil, _, _, _, _, _, _)     => true
+        case AttrOneManBigDecimal(_, _, _, Nil, _, _, _, _, _, _) => true
+        case AttrOneManDate(_, _, _, Nil, _, _, _, _, _, _)       => true
+        case AttrOneManUUID(_, _, _, Nil, _, _, _, _, _, _)       => true
+        case AttrOneManURI(_, _, _, Nil, _, _, _, _, _, _)        => true
+        case AttrOneManByte(_, _, _, Nil, _, _, _, _, _, _)       => true
+        case AttrOneManShort(_, _, _, Nil, _, _, _, _, _, _)      => true
+        case AttrOneManChar(_, _, _, Nil, _, _, _, _, _, _)       => true
         case _                                                 => false
       }
       // Tacit tx meta attrs can update
       case a: AttrOneTac => a match {
-        case AttrOneTacString(_, _, _, Nil, _, _, _, _, _)     => true
-        case AttrOneTacInt(_, _, _, Nil, _, _, _, _, _)        => true
-        case AttrOneTacLong(_, _, _, Nil, _, _, _, _, _)       => true
-        case AttrOneTacFloat(_, _, _, Nil, _, _, _, _, _)      => true
-        case AttrOneTacDouble(_, _, _, Nil, _, _, _, _, _)     => true
-        case AttrOneTacBoolean(_, _, _, Nil, _, _, _, _, _)    => true
-        case AttrOneTacBigInt(_, _, _, Nil, _, _, _, _, _)     => true
-        case AttrOneTacBigDecimal(_, _, _, Nil, _, _, _, _, _) => true
-        case AttrOneTacDate(_, _, _, Nil, _, _, _, _, _)       => true
-        case AttrOneTacUUID(_, _, _, Nil, _, _, _, _, _)       => true
-        case AttrOneTacURI(_, _, _, Nil, _, _, _, _, _)        => true
-        case AttrOneTacByte(_, _, _, Nil, _, _, _, _, _)       => true
-        case AttrOneTacShort(_, _, _, Nil, _, _, _, _, _)      => true
-        case AttrOneTacChar(_, _, _, Nil, _, _, _, _, _)       => true
+        case AttrOneTacString(_, _, _, Nil, _, _, _, _, _, _)     => true
+        case AttrOneTacInt(_, _, _, Nil, _, _, _, _, _, _)        => true
+        case AttrOneTacLong(_, _, _, Nil, _, _, _, _, _, _)       => true
+        case AttrOneTacFloat(_, _, _, Nil, _, _, _, _, _, _)      => true
+        case AttrOneTacDouble(_, _, _, Nil, _, _, _, _, _, _)     => true
+        case AttrOneTacBoolean(_, _, _, Nil, _, _, _, _, _, _)    => true
+        case AttrOneTacBigInt(_, _, _, Nil, _, _, _, _, _, _)     => true
+        case AttrOneTacBigDecimal(_, _, _, Nil, _, _, _, _, _, _) => true
+        case AttrOneTacDate(_, _, _, Nil, _, _, _, _, _, _)       => true
+        case AttrOneTacUUID(_, _, _, Nil, _, _, _, _, _, _)       => true
+        case AttrOneTacURI(_, _, _, Nil, _, _, _, _, _, _)        => true
+        case AttrOneTacByte(_, _, _, Nil, _, _, _, _, _, _)       => true
+        case AttrOneTacShort(_, _, _, Nil, _, _, _, _, _, _)      => true
+        case AttrOneTacChar(_, _, _, Nil, _, _, _, _, _, _)       => true
         case _                                                 => false
       }
       case a: AttrSetMan => a match {
-        case AttrSetManString(_, _, _, vs, _, _, _, _, _)     => vs.isEmpty || vs.head.isEmpty
-        case AttrSetManInt(_, _, _, vs, _, _, _, _, _)        => vs.isEmpty || vs.head.isEmpty
-        case AttrSetManLong(_, _, _, vs, _, _, _, _, _)       => vs.isEmpty || vs.head.isEmpty
-        case AttrSetManFloat(_, _, _, vs, _, _, _, _, _)      => vs.isEmpty || vs.head.isEmpty
-        case AttrSetManDouble(_, _, _, vs, _, _, _, _, _)     => vs.isEmpty || vs.head.isEmpty
-        case AttrSetManBoolean(_, _, _, vs, _, _, _, _, _)    => vs.isEmpty || vs.head.isEmpty
-        case AttrSetManBigInt(_, _, _, vs, _, _, _, _, _)     => vs.isEmpty || vs.head.isEmpty
-        case AttrSetManBigDecimal(_, _, _, vs, _, _, _, _, _) => vs.isEmpty || vs.head.isEmpty
-        case AttrSetManDate(_, _, _, vs, _, _, _, _, _)       => vs.isEmpty || vs.head.isEmpty
-        case AttrSetManUUID(_, _, _, vs, _, _, _, _, _)       => vs.isEmpty || vs.head.isEmpty
-        case AttrSetManURI(_, _, _, vs, _, _, _, _, _)        => vs.isEmpty || vs.head.isEmpty
-        case AttrSetManByte(_, _, _, vs, _, _, _, _, _)       => vs.isEmpty || vs.head.isEmpty
-        case AttrSetManShort(_, _, _, vs, _, _, _, _, _)      => vs.isEmpty || vs.head.isEmpty
-        case AttrSetManChar(_, _, _, vs, _, _, _, _, _)       => vs.isEmpty || vs.head.isEmpty
+        case AttrSetManString(_, _, _, vs, _, _, _, _, _, _)     => vs.isEmpty || vs.head.isEmpty
+        case AttrSetManInt(_, _, _, vs, _, _, _, _, _, _)        => vs.isEmpty || vs.head.isEmpty
+        case AttrSetManLong(_, _, _, vs, _, _, _, _, _, _)       => vs.isEmpty || vs.head.isEmpty
+        case AttrSetManFloat(_, _, _, vs, _, _, _, _, _, _)      => vs.isEmpty || vs.head.isEmpty
+        case AttrSetManDouble(_, _, _, vs, _, _, _, _, _, _)     => vs.isEmpty || vs.head.isEmpty
+        case AttrSetManBoolean(_, _, _, vs, _, _, _, _, _, _)    => vs.isEmpty || vs.head.isEmpty
+        case AttrSetManBigInt(_, _, _, vs, _, _, _, _, _, _)     => vs.isEmpty || vs.head.isEmpty
+        case AttrSetManBigDecimal(_, _, _, vs, _, _, _, _, _, _) => vs.isEmpty || vs.head.isEmpty
+        case AttrSetManDate(_, _, _, vs, _, _, _, _, _, _)       => vs.isEmpty || vs.head.isEmpty
+        case AttrSetManUUID(_, _, _, vs, _, _, _, _, _, _)       => vs.isEmpty || vs.head.isEmpty
+        case AttrSetManURI(_, _, _, vs, _, _, _, _, _, _)        => vs.isEmpty || vs.head.isEmpty
+        case AttrSetManByte(_, _, _, vs, _, _, _, _, _, _)       => vs.isEmpty || vs.head.isEmpty
+        case AttrSetManShort(_, _, _, vs, _, _, _, _, _, _)      => vs.isEmpty || vs.head.isEmpty
+        case AttrSetManChar(_, _, _, vs, _, _, _, _, _, _)       => vs.isEmpty || vs.head.isEmpty
         case _                                                => false
       }
       case a: AttrSetTac => a match {
-        case AttrSetTacString(_, _, _, vs, _, _, _, _, _)     => vs.isEmpty || vs.head.isEmpty
-        case AttrSetTacInt(_, _, _, vs, _, _, _, _, _)        => vs.isEmpty || vs.head.isEmpty
-        case AttrSetTacLong(_, _, _, vs, _, _, _, _, _)       => vs.isEmpty || vs.head.isEmpty
-        case AttrSetTacFloat(_, _, _, vs, _, _, _, _, _)      => vs.isEmpty || vs.head.isEmpty
-        case AttrSetTacDouble(_, _, _, vs, _, _, _, _, _)     => vs.isEmpty || vs.head.isEmpty
-        case AttrSetTacBoolean(_, _, _, vs, _, _, _, _, _)    => vs.isEmpty || vs.head.isEmpty
-        case AttrSetTacBigInt(_, _, _, vs, _, _, _, _, _)     => vs.isEmpty || vs.head.isEmpty
-        case AttrSetTacBigDecimal(_, _, _, vs, _, _, _, _, _) => vs.isEmpty || vs.head.isEmpty
-        case AttrSetTacDate(_, _, _, vs, _, _, _, _, _)       => vs.isEmpty || vs.head.isEmpty
-        case AttrSetTacUUID(_, _, _, vs, _, _, _, _, _)       => vs.isEmpty || vs.head.isEmpty
-        case AttrSetTacURI(_, _, _, vs, _, _, _, _, _)        => vs.isEmpty || vs.head.isEmpty
-        case AttrSetTacByte(_, _, _, vs, _, _, _, _, _)       => vs.isEmpty || vs.head.isEmpty
-        case AttrSetTacShort(_, _, _, vs, _, _, _, _, _)      => vs.isEmpty || vs.head.isEmpty
-        case AttrSetTacChar(_, _, _, vs, _, _, _, _, _)       => vs.isEmpty || vs.head.isEmpty
+        case AttrSetTacString(_, _, _, vs, _, _, _, _, _, _)     => vs.isEmpty || vs.head.isEmpty
+        case AttrSetTacInt(_, _, _, vs, _, _, _, _, _, _)        => vs.isEmpty || vs.head.isEmpty
+        case AttrSetTacLong(_, _, _, vs, _, _, _, _, _, _)       => vs.isEmpty || vs.head.isEmpty
+        case AttrSetTacFloat(_, _, _, vs, _, _, _, _, _, _)      => vs.isEmpty || vs.head.isEmpty
+        case AttrSetTacDouble(_, _, _, vs, _, _, _, _, _, _)     => vs.isEmpty || vs.head.isEmpty
+        case AttrSetTacBoolean(_, _, _, vs, _, _, _, _, _, _)    => vs.isEmpty || vs.head.isEmpty
+        case AttrSetTacBigInt(_, _, _, vs, _, _, _, _, _, _)     => vs.isEmpty || vs.head.isEmpty
+        case AttrSetTacBigDecimal(_, _, _, vs, _, _, _, _, _, _) => vs.isEmpty || vs.head.isEmpty
+        case AttrSetTacDate(_, _, _, vs, _, _, _, _, _, _)       => vs.isEmpty || vs.head.isEmpty
+        case AttrSetTacUUID(_, _, _, vs, _, _, _, _, _, _)       => vs.isEmpty || vs.head.isEmpty
+        case AttrSetTacURI(_, _, _, vs, _, _, _, _, _, _)        => vs.isEmpty || vs.head.isEmpty
+        case AttrSetTacByte(_, _, _, vs, _, _, _, _, _, _)       => vs.isEmpty || vs.head.isEmpty
+        case AttrSetTacShort(_, _, _, vs, _, _, _, _, _, _)      => vs.isEmpty || vs.head.isEmpty
+        case AttrSetTacChar(_, _, _, vs, _, _, _, _, _, _)       => vs.isEmpty || vs.head.isEmpty
         case _                                                => false
       }
       case _             => false
@@ -401,37 +403,37 @@ case class ModelValidation(
   private def removingLastValue(a: Attr, curVs: Set[Any]): Boolean = {
     a match {
       case a: AttrSetMan => a match {
-        case AttrSetManString(_, _, _, vs, _, _, _, _, _)     => vs.nonEmpty && vs.head == curVs
-        case AttrSetManInt(_, _, _, vs, _, _, _, _, _)        => vs.nonEmpty && vs.head == curVs
-        case AttrSetManLong(_, _, _, vs, _, _, _, _, _)       => vs.nonEmpty && vs.head == curVs
-        case AttrSetManFloat(_, _, _, vs, _, _, _, _, _)      => vs.nonEmpty && vs.head == curVs
-        case AttrSetManDouble(_, _, _, vs, _, _, _, _, _)     => vs.nonEmpty && vs.head == curVs
-        case AttrSetManBoolean(_, _, _, vs, _, _, _, _, _)    => vs.nonEmpty && vs.head == curVs
-        case AttrSetManBigInt(_, _, _, vs, _, _, _, _, _)     => vs.nonEmpty && vs.head == curVs
-        case AttrSetManBigDecimal(_, _, _, vs, _, _, _, _, _) => vs.nonEmpty && vs.head == curVs
-        case AttrSetManDate(_, _, _, vs, _, _, _, _, _)       => vs.nonEmpty && vs.head == curVs
-        case AttrSetManUUID(_, _, _, vs, _, _, _, _, _)       => vs.nonEmpty && vs.head == curVs
-        case AttrSetManURI(_, _, _, vs, _, _, _, _, _)        => vs.nonEmpty && vs.head == curVs
-        case AttrSetManByte(_, _, _, vs, _, _, _, _, _)       => vs.nonEmpty && vs.head == curVs
-        case AttrSetManShort(_, _, _, vs, _, _, _, _, _)      => vs.nonEmpty && vs.head == curVs
-        case AttrSetManChar(_, _, _, vs, _, _, _, _, _)       => vs.nonEmpty && vs.head == curVs
+        case AttrSetManString(_, _, _, vs, _, _, _, _, _, _)     => vs.nonEmpty && vs.head == curVs
+        case AttrSetManInt(_, _, _, vs, _, _, _, _, _, _)        => vs.nonEmpty && vs.head == curVs
+        case AttrSetManLong(_, _, _, vs, _, _, _, _, _, _)       => vs.nonEmpty && vs.head == curVs
+        case AttrSetManFloat(_, _, _, vs, _, _, _, _, _, _)      => vs.nonEmpty && vs.head == curVs
+        case AttrSetManDouble(_, _, _, vs, _, _, _, _, _, _)     => vs.nonEmpty && vs.head == curVs
+        case AttrSetManBoolean(_, _, _, vs, _, _, _, _, _, _)    => vs.nonEmpty && vs.head == curVs
+        case AttrSetManBigInt(_, _, _, vs, _, _, _, _, _, _)     => vs.nonEmpty && vs.head == curVs
+        case AttrSetManBigDecimal(_, _, _, vs, _, _, _, _, _, _) => vs.nonEmpty && vs.head == curVs
+        case AttrSetManDate(_, _, _, vs, _, _, _, _, _, _)       => vs.nonEmpty && vs.head == curVs
+        case AttrSetManUUID(_, _, _, vs, _, _, _, _, _, _)       => vs.nonEmpty && vs.head == curVs
+        case AttrSetManURI(_, _, _, vs, _, _, _, _, _, _)        => vs.nonEmpty && vs.head == curVs
+        case AttrSetManByte(_, _, _, vs, _, _, _, _, _, _)       => vs.nonEmpty && vs.head == curVs
+        case AttrSetManShort(_, _, _, vs, _, _, _, _, _, _)      => vs.nonEmpty && vs.head == curVs
+        case AttrSetManChar(_, _, _, vs, _, _, _, _, _, _)       => vs.nonEmpty && vs.head == curVs
         case _                                                => false
       }
       case a: AttrSetTac => a match {
-        case AttrSetTacString(_, _, _, vs, _, _, _, _, _)     => vs.nonEmpty && vs.head == curVs
-        case AttrSetTacInt(_, _, _, vs, _, _, _, _, _)        => vs.nonEmpty && vs.head == curVs
-        case AttrSetTacLong(_, _, _, vs, _, _, _, _, _)       => vs.nonEmpty && vs.head == curVs
-        case AttrSetTacFloat(_, _, _, vs, _, _, _, _, _)      => vs.nonEmpty && vs.head == curVs
-        case AttrSetTacDouble(_, _, _, vs, _, _, _, _, _)     => vs.nonEmpty && vs.head == curVs
-        case AttrSetTacBoolean(_, _, _, vs, _, _, _, _, _)    => vs.nonEmpty && vs.head == curVs
-        case AttrSetTacBigInt(_, _, _, vs, _, _, _, _, _)     => vs.nonEmpty && vs.head == curVs
-        case AttrSetTacBigDecimal(_, _, _, vs, _, _, _, _, _) => vs.nonEmpty && vs.head == curVs
-        case AttrSetTacDate(_, _, _, vs, _, _, _, _, _)       => vs.nonEmpty && vs.head == curVs
-        case AttrSetTacUUID(_, _, _, vs, _, _, _, _, _)       => vs.nonEmpty && vs.head == curVs
-        case AttrSetTacURI(_, _, _, vs, _, _, _, _, _)        => vs.nonEmpty && vs.head == curVs
-        case AttrSetTacByte(_, _, _, vs, _, _, _, _, _)       => vs.nonEmpty && vs.head == curVs
-        case AttrSetTacShort(_, _, _, vs, _, _, _, _, _)      => vs.nonEmpty && vs.head == curVs
-        case AttrSetTacChar(_, _, _, vs, _, _, _, _, _)       => vs.nonEmpty && vs.head == curVs
+        case AttrSetTacString(_, _, _, vs, _, _, _, _, _, _)     => vs.nonEmpty && vs.head == curVs
+        case AttrSetTacInt(_, _, _, vs, _, _, _, _, _, _)        => vs.nonEmpty && vs.head == curVs
+        case AttrSetTacLong(_, _, _, vs, _, _, _, _, _, _)       => vs.nonEmpty && vs.head == curVs
+        case AttrSetTacFloat(_, _, _, vs, _, _, _, _, _, _)      => vs.nonEmpty && vs.head == curVs
+        case AttrSetTacDouble(_, _, _, vs, _, _, _, _, _, _)     => vs.nonEmpty && vs.head == curVs
+        case AttrSetTacBoolean(_, _, _, vs, _, _, _, _, _, _)    => vs.nonEmpty && vs.head == curVs
+        case AttrSetTacBigInt(_, _, _, vs, _, _, _, _, _, _)     => vs.nonEmpty && vs.head == curVs
+        case AttrSetTacBigDecimal(_, _, _, vs, _, _, _, _, _, _) => vs.nonEmpty && vs.head == curVs
+        case AttrSetTacDate(_, _, _, vs, _, _, _, _, _, _)       => vs.nonEmpty && vs.head == curVs
+        case AttrSetTacUUID(_, _, _, vs, _, _, _, _, _, _)       => vs.nonEmpty && vs.head == curVs
+        case AttrSetTacURI(_, _, _, vs, _, _, _, _, _, _)        => vs.nonEmpty && vs.head == curVs
+        case AttrSetTacByte(_, _, _, vs, _, _, _, _, _, _)       => vs.nonEmpty && vs.head == curVs
+        case AttrSetTacShort(_, _, _, vs, _, _, _, _, _, _)      => vs.nonEmpty && vs.head == curVs
+        case AttrSetTacChar(_, _, _, vs, _, _, _, _, _, _)       => vs.nonEmpty && vs.head == curVs
         case _                                                => false
       }
       case _             => false

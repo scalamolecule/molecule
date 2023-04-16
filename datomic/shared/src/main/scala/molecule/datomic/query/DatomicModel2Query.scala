@@ -35,29 +35,71 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
   ): (String, String, String) = {
     val elements = if (altElements.isEmpty) elements0 else altElements
 
-    // Add 4th tx var to first attribute datom if tx value is needed
     @tailrec
-    def checkTx(elements: List[Element]): Unit = {
+    def prepare(elements: List[Element], acc: List[Element]): List[Element] = {
       elements match {
         case element :: tail =>
           element match {
-            case _: TxMetaData                                         => addTxVar = true
-            case AttrOneManLong("_Generic", "tx", _, _, _, _, _, _, _) => addTxVar = true
-            case AttrOneTacLong("_Generic", "tx", _, _, _, _, _, _, _) => addTxVar = true
-            case Composite(elements)                                   => checkTx(elements ++ tail)
-            case Nested(_, elements)                                   => checkTx(tail ++ elements)
-            case _                                                     => checkTx(tail)
+            case a: Attr       => prepare(tail, acc ++ prepareAttr(a))
+            case e: Composite  => prepare(tail, acc :+ prepareComposite(e))
+            case n: Nested     => prepare(tail, acc :+ prepareNested(n))
+            case n: NestedOpt  => prepare(tail, acc :+ prepareNestedOpt(n))
+            case t: TxMetaData => prepare(tail, acc :+ prepareTxMetaData(t))
+            case refOrBackRef  => prepare(tail, acc :+ refOrBackRef)
           }
-        case Nil             => ()
+        case Nil             => acc
       }
     }
-    checkTx(elements)
+
+    def prepareAttr(a: Attr): List[Attr] = {
+      if (a.ns == "_Generic" && a.attr == "tx") {
+        addTxVar = true
+        List(a)
+      } else if (a.exprAttr.nonEmpty) {
+        val ea = a.exprAttr.get
+        if (ea.exprAttr.nonEmpty) {
+          throw ModelError(s"Nested expression attributes not allowed in ${a.ns}.${a.attr}")
+        }
+        val exprAttr = ea.name
+        exprAttrVars.get(exprAttr).fold {
+          // Create datomic variable for this expression attribute
+          exprAttrVars = exprAttrVars + (exprAttr -> vv)
+        }(_ =>
+          throw ModelError(s"Can't refer to ambiguous expression attribute $exprAttr")
+        )
+        if (ea.ns == a.ns) {
+          // Add expression attribute after this attribute
+          List(a, ea)
+        } else {
+          // Expect expression attribute in other namespace
+          expectedExprAttrs += ea.name
+          List(a)
+        }
+      } else {
+        // Attribute is available for expressions
+        expectedExprAttrs -= a.name
+        List(a)
+      }
+    }
+    def prepareComposite(composite: Composite): Composite = Composite(prepare(composite.elements, Nil))
+    def prepareNested(nested: Nested): Nested = Nested(nested.ref, prepare(nested.elements, Nil))
+    def prepareNestedOpt(nested: NestedOpt): NestedOpt = NestedOpt(nested.ref, prepare(nested.elements, Nil))
+    def prepareTxMetaData(t: TxMetaData): TxMetaData = {
+      addTxVar = true
+      TxMetaData(prepare(t.elements, Nil))
+    }
+
+    val elements1 = prepare(elements, Nil)
+
+    if (expectedExprAttrs.nonEmpty) {
+      throw ModelError("Please add missing expression attributes:\n  " + expectedExprAttrs.mkString("\n  "))
+    }
 
     // Remember first entity id variable for subsequent composite groups
     firstEid = vv
 
     // Recursively resolve molecule elements. Beware that this is mutational
-    resolve(List(firstEid), elements)
+    resolve(List(firstEid), elements1)
 
     // Build Datomic query string(s)
     val mainQuery = renderQuery(
@@ -82,7 +124,7 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
         case other       => other.toString
       }
     } else Nil
-    val queryStrs    = ((elements :+ "" :+ mainQuery) ++ inputsStrs ++ preQueryStrs).mkString("\n").trim
+    val queryStrs    = ((elements1 :+ "" :+ mainQuery) ++ inputsStrs ++ preQueryStrs).mkString("\n").trim
     logger.debug(queryStrs)
 
     (preQuery, mainQuery, queryStrs)
@@ -118,7 +160,6 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
     if (rules.isEmpty) Nil else Seq(rules.mkString("[\n  ", "\n  ", "\n]"))
   }
 
-
   @tailrec
   final private def resolve(
     es: List[Var],
@@ -129,13 +170,11 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
         case a: AttrOneMan => resolve(resolveAttrOneMan(es, a), tail)
         case a: AttrOneOpt => resolve(resolveAttrOneOpt(es, a), tail)
         case a: AttrOneTac => resolve(resolveAttrOneTac(es, a), tail)
-        case other         => unexpectedElement(other)
       }
       case a: AttrSet                           => a match {
         case a: AttrSetMan => resolve(resolveAttrSetMan(es, a), tail)
         case a: AttrSetOpt => resolve(resolveAttrSetOpt(es, a), tail)
         case a: AttrSetTac => resolve(resolveAttrSetTac(es, a), tail)
-        case other         => unexpectedElement(other)
       }
       case ref: Ref                             => resolve(resolveRef(es, ref), tail)
       case _: BackRef                           => resolve(es.init, tail)

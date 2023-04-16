@@ -14,10 +14,10 @@ object Serialization extends TestSuite {
 
     "No base attrs with tx meta data" - {
       val elements     = List(
-        AttrOneTacInt("R1", "i", V, Seq(), None, Nil, Nil, None, None),
+        AttrOneTacInt("R1", "i", V, Seq(), None, None, Nil, Nil, None, None),
         TxMetaData(List(
-          AttrOneManInt("R2", "i", V, Seq(), None, Nil, Nil, None, None),
-          AttrOneManString("R2", "s", V, Seq(), None, Nil, Nil, None, None))
+          AttrOneManInt("R2", "i", V, Seq(), None, None, Nil, Nil, None, None),
+          AttrOneManString("R2", "s", V, Seq(), None, None, Nil, Nil, None, None))
         )
       )
       val data         = Right(List((2, "b")))
@@ -29,12 +29,12 @@ object Serialization extends TestSuite {
 
     "2" - {
       val elements     = List(
-        AttrOneManInt("R1", "i", V, Seq(), None, Nil, Nil, None, None),
+        AttrOneManInt("R1", "i", V, Seq(), None, None, Nil, Nil, None, None),
         TxMetaData(List(
           Composite(List(
-            AttrOneTacInt("R2", "i", V, Seq(), None, Nil, Nil, None, None))),
+            AttrOneTacInt("R2", "i", V, Seq(), None, None, Nil, Nil, None, None))),
           Composite(List(
-            AttrOneTacInt("R3", "i", V, Seq(), None, Nil, Nil, None, None)))))
+            AttrOneTacInt("R3", "i", V, Seq(), None, None, Nil, Nil, None, None)))))
       )
       val data         = Right(List(1))
       val serialized   = PickleTpls(elements, false).pickle(data)
@@ -46,13 +46,13 @@ object Serialization extends TestSuite {
     "3" - {
       val elements     = List(
         Composite(List(
-          AttrOneTacInt("R1", "i", V, Seq(), None, Nil, Nil, None, None))),
+          AttrOneTacInt("R1", "i", V, Seq(), None, None, Nil, Nil, None, None))),
         Composite(List(
-          AttrOneManInt("R2", "i", V, Seq(), None, Nil, Nil, None, None),
-          AttrOneManString("R2", "s", V, Seq(), None, Nil, Nil, None, None))),
+          AttrOneManInt("R2", "i", V, Seq(), None, None, Nil, Nil, None, None),
+          AttrOneManString("R2", "s", V, Seq(), None, None, Nil, Nil, None, None))),
         TxMetaData(List(
-          AttrOneManInt("R3", "i", V, Seq(), None, Nil, Nil, None, None),
-          AttrOneManString("R3", "s", V, Seq(), None, Nil, Nil, None, None)))
+          AttrOneManInt("R3", "i", V, Seq(), None, None, Nil, Nil, None, None),
+          AttrOneManString("R3", "s", V, Seq(), None, None, Nil, Nil, None, None)))
       )
       val data         = Right(List(((2, "b"), 3, "c")))
       val serialized   = PickleTpls(elements, false).pickle(data)

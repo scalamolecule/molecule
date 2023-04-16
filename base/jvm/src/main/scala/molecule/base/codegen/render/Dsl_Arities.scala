@@ -12,9 +12,9 @@ case class Dsl_Arities(schema: MetaSchema, partPrefix: String, namespace: MetaNs
   val res = List.newBuilder[String]
   val ref = List.newBuilder[String]
 
-  val first = arity == 0
-  val last  = arity == schema.maxArity
-  val secondLast  = arity == schema.maxArity - 1
+  val first      = arity == 0
+  val last       = arity == schema.maxArity
+  val secondLast = arity == schema.maxArity - 1
 
   var hasOne = false
   var hasSet = false
@@ -65,8 +65,8 @@ case class Dsl_Arities(schema: MetaSchema, partPrefix: String, namespace: MetaNs
       lazy val elemsT = s"elements :+ ${attr}_tac$padA"
 
       val nextNextNs = if (secondLast) s"Dummy_${arity + 3}" else ns_2
-      val nextNs = if (last) s"Dummy_${arity + 2}" else ns_1
-      
+      val nextNs     = if (last) s"Dummy_${arity + 2}" else ns_1
+
       lazy val exprM = s"Expr${c}Man${_1}[$tpesM, $ns_1, $nextNextNs]"
       lazy val exprO = s"Expr${c}Opt${_1}[$tpesO, $ns_1, $nextNextNs]"
       lazy val exprT = s"Expr${c}Tac${_0}[$tpesT, $ns_0, $nextNs]"
@@ -153,18 +153,18 @@ case class Dsl_Arities(schema: MetaSchema, partPrefix: String, namespace: MetaNs
 
   val valueAttrs = if (first) {
     s"""
-       |  override protected def _attrTac[   ns1[_]   , ns2[_, _]   ](op: Op, a: ModelOps_0[   t, ns1, ns2]) = new $ns_0[   t](attrTac(elements, op, a))
-       |  override protected def _attrMan[X, ns1[_, _], ns2[_, _, _]](op: Op, a: ModelOps_1[X, t, ns1, ns2]) = new $ns_1[X, t](attrMan(elements, op, a))""".stripMargin
+       |  override protected def _attrTac[   ns1[_]   , ns2[_, _]   ](op: Op, a: ModelOps_0[   t, ns1, ns2]) = new $ns_0[   t](exprAttr(elements, op, a))
+       |  override protected def _attrMan[X, ns1[_, _], ns2[_, _, _]](op: Op, a: ModelOps_1[X, t, ns1, ns2]) = new $ns_1[X, t](exprAttr(elements, op, a))""".stripMargin
   } else if (last) {
     s"""
-       |  override protected def _attrSortTac[ns1[_], ns2[_, _]](op: Op, a: ModelOps_0[t, ns1, ns2]) = new $ns_0[${`A..V`}, t](attrTac(elements, op, a)) with SortAttrs${_0}[${`A..V`}, t, $ns_0]
-       |  override protected def _attrTac    [ns1[_], ns2[_, _]](op: Op, a: ModelOps_0[t, ns1, ns2]) = new $ns_0[${`A..V`}, t](attrTac(elements, op, a))""".stripMargin
+       |  override protected def _attrSortTac[ns1[_], ns2[_, _]](op: Op, a: ModelOps_0[t, ns1, ns2]) = new $ns_0[${`A..V`}, t](exprAttr(elements, op, a)) with SortAttrs${_0}[${`A..V`}, t, $ns_0]
+       |  override protected def _attrTac    [ns1[_], ns2[_, _]](op: Op, a: ModelOps_0[t, ns1, ns2]) = new $ns_0[${`A..V`}, t](exprAttr(elements, op, a))""".stripMargin
   } else {
     s"""
-       |  override protected def _attrSortTac[   ns1[_]   , ns2[_, _]   ](op: Op, a: ModelOps_0[   t, ns1, ns2]) = new $ns_0[${`A..V`},    t](attrTac(elements, op, a)) with SortAttrs${_0}[${`A..V`},    t, $ns_0]
-       |  override protected def _attrTac    [   ns1[_]   , ns2[_, _]   ](op: Op, a: ModelOps_0[   t, ns1, ns2]) = new $ns_0[${`A..V`},    t](attrTac(elements, op, a))
-       |  override protected def _attrSortMan[X, ns1[_, _], ns2[_, _, _]](op: Op, a: ModelOps_1[X, t, ns1, ns2]) = new $ns_1[${`A..V`}, X, t](attrMan(elements, op, a)) with SortAttrs${_1}[${`A..V`}, X, t, $ns_1]
-       |  override protected def _attrMan    [X, ns1[_, _], ns2[_, _, _]](op: Op, a: ModelOps_1[X, t, ns1, ns2]) = new $ns_1[${`A..V`}, X, t](attrMan(elements, op, a))""".stripMargin
+       |  override protected def _attrSortTac[   ns1[_]   , ns2[_, _]   ](op: Op, a: ModelOps_0[   t, ns1, ns2]) = new $ns_0[${`A..V`},    t](exprAttr(elements, op, a)) with SortAttrs${_0}[${`A..V`},    t, $ns_0]
+       |  override protected def _attrTac    [   ns1[_]   , ns2[_, _]   ](op: Op, a: ModelOps_0[   t, ns1, ns2]) = new $ns_0[${`A..V`},    t](exprAttr(elements, op, a))
+       |  override protected def _attrSortMan[X, ns1[_, _], ns2[_, _, _]](op: Op, a: ModelOps_1[X, t, ns1, ns2]) = new $ns_1[${`A..V`}, X, t](exprAttr(elements, op, a)) with SortAttrs${_1}[${`A..V`}, X, t, $ns_1]
+       |  override protected def _attrMan    [X, ns1[_, _], ns2[_, _, _]](op: Op, a: ModelOps_1[X, t, ns1, ns2]) = new $ns_1[${`A..V`}, X, t](exprAttr(elements, op, a))""".stripMargin
   }
 
 

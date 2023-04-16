@@ -12,8 +12,8 @@ trait ExprAttr_0[t, Ns1[_], Ns2[_, _]] extends ExprBase {
 
 trait ExprAttr_1[A, t, Ns1[_, _], Ns2[_, _, _]] extends ExprBase {
   protected def _attrSortTac[   ns1[_]   , ns2[_, _]   ](op: Op, a: ModelOps_0[   t, ns1, ns2]): Ns1[A,    t] with SortAttrs_1[A,    t, Ns1] = ???
-  protected def _attrTac    [   ns1[_]   , ns2[_, _]   ](op: Op, a: ModelOps_0[   t, ns1, ns2]): Ns1[A,    t] = ???
   protected def _attrSortMan[X, ns1[_, _], ns2[_, _, _]](op: Op, a: ModelOps_1[X, t, ns1, ns2]): Ns2[A, X, t] with SortAttrs_2[A, X, t, Ns2] = ???
+  protected def _attrTac    [   ns1[_]   , ns2[_, _]   ](op: Op, a: ModelOps_0[   t, ns1, ns2]): Ns1[A,    t] = ???
   protected def _attrMan    [X, ns1[_, _], ns2[_, _, _]](op: Op, a: ModelOps_1[X, t, ns1, ns2]): Ns2[A, X, t] = ???
 }
 

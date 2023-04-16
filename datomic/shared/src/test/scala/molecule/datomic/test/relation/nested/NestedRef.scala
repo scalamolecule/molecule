@@ -177,14 +177,14 @@ object NestedRef extends DatomicTestSuite {
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==>
             """Tacit attributes not allowed in optional nested data structure. Found:
-              |AttrOneTacInt("R1", "i", V, Seq(), None, Nil, Nil, None, None)""".stripMargin
+              |AttrOneTacInt("R1", "i", V, Seq(), None, None, Nil, Nil, None, None)""".stripMargin
         }
 
         _ <- Ns.i.Rs1.*?(R1.i.R2.i_).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==>
             """Tacit attributes not allowed in optional nested data structure. Found:
-              |AttrOneTacInt("R2", "i", V, Seq(), None, Nil, Nil, None, None)""".stripMargin
+              |AttrOneTacInt("R2", "i", V, Seq(), None, None, Nil, Nil, None, None)""".stripMargin
         }
 
         // Ok:

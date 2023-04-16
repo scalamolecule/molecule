@@ -179,7 +179,7 @@ object UpdateSet_eid extends DatomicTestSuite {
           _ <- Ns(42).ints_?(Some(Set(1))).update.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Can't update optional values. Found:\n" +
-              """AttrSetOptInt("Ns", "ints", Eq, Some(Seq(Set(1))), None, Nil, Nil, None, None)"""
+              """AttrSetOptInt("Ns", "ints", Eq, Some(Seq(Set(1))), None, None, Nil, Nil, None, None)"""
           }
         } yield ()
       }

@@ -80,7 +80,7 @@ class UpdateExtraction(
       resolve(tail, eids, filterElements, data :+ oneApply(dataAttr))
     } else {
       // Make sure current value exists
-      val dummyFilterAttr = AttrOneTacInt(dataAttr.ns, dataAttr.attr, V, Nil, None, Nil, Nil, None, None)
+      val dummyFilterAttr = AttrOneTacInt(dataAttr.ns, dataAttr.attr, V, Nil, None, None, Nil, Nil, None, None)
       resolve(tail, eids, filterElements :+ dummyFilterAttr, data :+ oneApply(dataAttr))
     }
   }
@@ -88,20 +88,20 @@ class UpdateExtraction(
     case a if a.ns == "_Generic" => throw ModelError(
       s"Generic attributes not allowed in update molecule. Found:\n" + a)
 
-    case AttrOneManString(_, _, _, vs, _, _, _, _, _)     => addOneV[String](attr, vs, valueString)
-    case AttrOneManInt(_, _, _, vs, _, _, _, _, _)        => addOneV[Int](attr, vs, valueInt)
-    case AttrOneManLong(_, _, _, vs, _, _, _, _, _)       => addOneV[Long](attr, vs, valueLong)
-    case AttrOneManFloat(_, _, _, vs, _, _, _, _, _)      => addOneV[Float](attr, vs, valueFloat)
-    case AttrOneManDouble(_, _, _, vs, _, _, _, _, _)     => addOneV[Double](attr, vs, valueDouble)
-    case AttrOneManBoolean(_, _, _, vs, _, _, _, _, _)    => addOneV[Boolean](attr, vs, valueBoolean)
-    case AttrOneManBigInt(_, _, _, vs, _, _, _, _, _)     => addOneV[BigInt](attr, vs, valueBigInt)
-    case AttrOneManBigDecimal(_, _, _, vs, _, _, _, _, _) => addOneV[BigDecimal](attr, vs, valueBigDecimal)
-    case AttrOneManDate(_, _, _, vs, _, _, _, _, _)       => addOneV[Date](attr, vs, valueDate)
-    case AttrOneManUUID(_, _, _, vs, _, _, _, _, _)       => addOneV[UUID](attr, vs, valueUUID)
-    case AttrOneManURI(_, _, _, vs, _, _, _, _, _)        => addOneV[URI](attr, vs, valueURI)
-    case AttrOneManByte(_, _, _, vs, _, _, _, _, _)       => addOneV[Byte](attr, vs, valueByte)
-    case AttrOneManShort(_, _, _, vs, _, _, _, _, _)      => addOneV[Short](attr, vs, valueShort)
-    case AttrOneManChar(_, _, _, vs, _, _, _, _, _)       => addOneV[Char](attr, vs, valueChar)
+    case AttrOneManString(_, _, _, vs, _, _, _, _, _, _)     => addOneV[String](attr, vs, valueString)
+    case AttrOneManInt(_, _, _, vs, _, _, _, _, _, _)        => addOneV[Int](attr, vs, valueInt)
+    case AttrOneManLong(_, _, _, vs, _, _, _, _, _, _)       => addOneV[Long](attr, vs, valueLong)
+    case AttrOneManFloat(_, _, _, vs, _, _, _, _, _, _)      => addOneV[Float](attr, vs, valueFloat)
+    case AttrOneManDouble(_, _, _, vs, _, _, _, _, _, _)     => addOneV[Double](attr, vs, valueDouble)
+    case AttrOneManBoolean(_, _, _, vs, _, _, _, _, _, _)    => addOneV[Boolean](attr, vs, valueBoolean)
+    case AttrOneManBigInt(_, _, _, vs, _, _, _, _, _, _)     => addOneV[BigInt](attr, vs, valueBigInt)
+    case AttrOneManBigDecimal(_, _, _, vs, _, _, _, _, _, _) => addOneV[BigDecimal](attr, vs, valueBigDecimal)
+    case AttrOneManDate(_, _, _, vs, _, _, _, _, _, _)       => addOneV[Date](attr, vs, valueDate)
+    case AttrOneManUUID(_, _, _, vs, _, _, _, _, _, _)       => addOneV[UUID](attr, vs, valueUUID)
+    case AttrOneManURI(_, _, _, vs, _, _, _, _, _, _)        => addOneV[URI](attr, vs, valueURI)
+    case AttrOneManByte(_, _, _, vs, _, _, _, _, _, _)       => addOneV[Byte](attr, vs, valueByte)
+    case AttrOneManShort(_, _, _, vs, _, _, _, _, _, _)      => addOneV[Short](attr, vs, valueShort)
+    case AttrOneManChar(_, _, _, vs, _, _, _, _, _, _)       => addOneV[Char](attr, vs, valueChar)
   }
   private def addOneV[T](a: Attr, vs: Seq[T], transform: T => Any): (String, String, String, Seq[AnyRef], Boolean) = {
     vs match {
@@ -121,12 +121,12 @@ class UpdateExtraction(
     filterAttr: AttrOneTac
   ): (Seq[AnyRef], List[Element], Seq[(String, String, String, Seq[AnyRef], Boolean)]) = {
     filterAttr match {
-      case AttrOneTacLong("_Generic", "eids", Eq, eids1, _, _, _, _, _) =>
+      case AttrOneTacLong("_Generic", "eids", Eq, eids1, _, _, _, _, _, _) =>
         if (eids.nonEmpty)
           throw ModelError(s"Can't apply entity ids twice in $update.")
         resolve(tail, eids1.asInstanceOf[Seq[AnyRef]], filterElements, data)
 
-      case AttrOneTacLong("_Generic", "e", Eq, _, _, _, _, _, _) => throw ModelError(
+      case AttrOneTacLong("_Generic", "e", Eq, _, _, _, _, _, _, _) => throw ModelError(
         "Can't update by applying entity ids to e_")
 
       case a if a.ns == "_Generic" => throw ModelError(
@@ -158,7 +158,7 @@ class UpdateExtraction(
       resolve(tail, eids, filterElements, data :+ setAdd(dataAttr, true))
     } else {
       // Make sure current value exists
-      val dummyFilterAttr = AttrOneTacInt(dataAttr.ns, dataAttr.attr, V, Nil, None, Nil, Nil, None, None)
+      val dummyFilterAttr = AttrOneTacInt(dataAttr.ns, dataAttr.attr, V, Nil, None, None, Nil, Nil, None, None)
       resolve(tail, eids, filterElements :+ dummyFilterAttr, data :+ setAdd(dataAttr, true))
     }
   }
@@ -168,20 +168,20 @@ class UpdateExtraction(
     attr: AttrSetMan,
     retractCur: Boolean = false
   ): (String, String, String, Seq[AnyRef], Boolean) = attr match {
-    case AttrSetManString(_, _, _, sets, _, _, _, _, _)     => addSetVs[String](attr, sets, valueString, retractCur)
-    case AttrSetManInt(_, _, _, sets, _, _, _, _, _)        => addSetVs[Int](attr, sets, valueInt, retractCur)
-    case AttrSetManLong(_, _, _, sets, _, _, _, _, _)       => addSetVs[Long](attr, sets, valueLong, retractCur)
-    case AttrSetManFloat(_, _, _, sets, _, _, _, _, _)      => addSetVs[Float](attr, sets, valueFloat, retractCur)
-    case AttrSetManDouble(_, _, _, sets, _, _, _, _, _)     => addSetVs[Double](attr, sets, valueDouble, retractCur)
-    case AttrSetManBoolean(_, _, _, sets, _, _, _, _, _)    => addSetVs[Boolean](attr, sets, valueBoolean, retractCur)
-    case AttrSetManBigInt(_, _, _, sets, _, _, _, _, _)     => addSetVs[BigInt](attr, sets, valueBigInt, retractCur)
-    case AttrSetManBigDecimal(_, _, _, sets, _, _, _, _, _) => addSetVs[BigDecimal](attr, sets, valueBigDecimal, retractCur)
-    case AttrSetManDate(_, _, _, sets, _, _, _, _, _)       => addSetVs[Date](attr, sets, valueDate, retractCur)
-    case AttrSetManUUID(_, _, _, sets, _, _, _, _, _)       => addSetVs[UUID](attr, sets, valueUUID, retractCur)
-    case AttrSetManURI(_, _, _, sets, _, _, _, _, _)        => addSetVs[URI](attr, sets, valueURI, retractCur)
-    case AttrSetManByte(_, _, _, sets, _, _, _, _, _)       => addSetVs[Byte](attr, sets, valueByte, retractCur)
-    case AttrSetManShort(_, _, _, sets, _, _, _, _, _)      => addSetVs[Short](attr, sets, valueShort, retractCur)
-    case AttrSetManChar(_, _, _, sets, _, _, _, _, _)       => addSetVs[Char](attr, sets, valueChar, retractCur)
+    case AttrSetManString(_, _, _, sets, _, _, _, _, _, _)     => addSetVs[String](attr, sets, valueString, retractCur)
+    case AttrSetManInt(_, _, _, sets, _, _, _, _, _, _)        => addSetVs[Int](attr, sets, valueInt, retractCur)
+    case AttrSetManLong(_, _, _, sets, _, _, _, _, _, _)       => addSetVs[Long](attr, sets, valueLong, retractCur)
+    case AttrSetManFloat(_, _, _, sets, _, _, _, _, _, _)      => addSetVs[Float](attr, sets, valueFloat, retractCur)
+    case AttrSetManDouble(_, _, _, sets, _, _, _, _, _, _)     => addSetVs[Double](attr, sets, valueDouble, retractCur)
+    case AttrSetManBoolean(_, _, _, sets, _, _, _, _, _, _)    => addSetVs[Boolean](attr, sets, valueBoolean, retractCur)
+    case AttrSetManBigInt(_, _, _, sets, _, _, _, _, _, _)     => addSetVs[BigInt](attr, sets, valueBigInt, retractCur)
+    case AttrSetManBigDecimal(_, _, _, sets, _, _, _, _, _, _) => addSetVs[BigDecimal](attr, sets, valueBigDecimal, retractCur)
+    case AttrSetManDate(_, _, _, sets, _, _, _, _, _, _)       => addSetVs[Date](attr, sets, valueDate, retractCur)
+    case AttrSetManUUID(_, _, _, sets, _, _, _, _, _, _)       => addSetVs[UUID](attr, sets, valueUUID, retractCur)
+    case AttrSetManURI(_, _, _, sets, _, _, _, _, _, _)        => addSetVs[URI](attr, sets, valueURI, retractCur)
+    case AttrSetManByte(_, _, _, sets, _, _, _, _, _, _)       => addSetVs[Byte](attr, sets, valueByte, retractCur)
+    case AttrSetManShort(_, _, _, sets, _, _, _, _, _, _)      => addSetVs[Short](attr, sets, valueShort, retractCur)
+    case AttrSetManChar(_, _, _, sets, _, _, _, _, _, _)       => addSetVs[Char](attr, sets, valueChar, retractCur)
   }
   private def addSetVs[T](
     a: Attr,
@@ -200,20 +200,20 @@ class UpdateExtraction(
 
 
   private def setSwap(attr: AttrSetMan): Seq[(String, String, String, Seq[AnyRef], Boolean)] = attr match {
-    case AttrSetManString(_, _, _, sets, _, _, _, _, _)     => swapSetVs[String](attr, sets, valueString)
-    case AttrSetManInt(_, _, _, sets, _, _, _, _, _)        => swapSetVs[Int](attr, sets, valueInt)
-    case AttrSetManLong(_, _, _, sets, _, _, _, _, _)       => swapSetVs[Long](attr, sets, valueLong)
-    case AttrSetManFloat(_, _, _, sets, _, _, _, _, _)      => swapSetVs[Float](attr, sets, valueFloat)
-    case AttrSetManDouble(_, _, _, sets, _, _, _, _, _)     => swapSetVs[Double](attr, sets, valueDouble)
-    case AttrSetManBoolean(_, _, _, sets, _, _, _, _, _)    => swapSetVs[Boolean](attr, sets, valueBoolean)
-    case AttrSetManBigInt(_, _, _, sets, _, _, _, _, _)     => swapSetVs[BigInt](attr, sets, valueBigInt)
-    case AttrSetManBigDecimal(_, _, _, sets, _, _, _, _, _) => swapSetVs[BigDecimal](attr, sets, valueBigDecimal)
-    case AttrSetManDate(_, _, _, sets, _, _, _, _, _)       => swapSetVs[Date](attr, sets, valueDate)
-    case AttrSetManUUID(_, _, _, sets, _, _, _, _, _)       => swapSetVs[UUID](attr, sets, valueUUID)
-    case AttrSetManURI(_, _, _, sets, _, _, _, _, _)        => swapSetVs[URI](attr, sets, valueURI)
-    case AttrSetManByte(_, _, _, sets, _, _, _, _, _)       => swapSetVs[Byte](attr, sets, valueByte)
-    case AttrSetManShort(_, _, _, sets, _, _, _, _, _)      => swapSetVs[Short](attr, sets, valueShort)
-    case AttrSetManChar(_, _, _, sets, _, _, _, _, _)       => swapSetVs[Char](attr, sets, valueChar)
+    case AttrSetManString(_, _, _, sets, _, _, _, _, _, _)     => swapSetVs[String](attr, sets, valueString)
+    case AttrSetManInt(_, _, _, sets, _, _, _, _, _, _)        => swapSetVs[Int](attr, sets, valueInt)
+    case AttrSetManLong(_, _, _, sets, _, _, _, _, _, _)       => swapSetVs[Long](attr, sets, valueLong)
+    case AttrSetManFloat(_, _, _, sets, _, _, _, _, _, _)      => swapSetVs[Float](attr, sets, valueFloat)
+    case AttrSetManDouble(_, _, _, sets, _, _, _, _, _, _)     => swapSetVs[Double](attr, sets, valueDouble)
+    case AttrSetManBoolean(_, _, _, sets, _, _, _, _, _, _)    => swapSetVs[Boolean](attr, sets, valueBoolean)
+    case AttrSetManBigInt(_, _, _, sets, _, _, _, _, _, _)     => swapSetVs[BigInt](attr, sets, valueBigInt)
+    case AttrSetManBigDecimal(_, _, _, sets, _, _, _, _, _, _) => swapSetVs[BigDecimal](attr, sets, valueBigDecimal)
+    case AttrSetManDate(_, _, _, sets, _, _, _, _, _, _)       => swapSetVs[Date](attr, sets, valueDate)
+    case AttrSetManUUID(_, _, _, sets, _, _, _, _, _, _)       => swapSetVs[UUID](attr, sets, valueUUID)
+    case AttrSetManURI(_, _, _, sets, _, _, _, _, _, _)        => swapSetVs[URI](attr, sets, valueURI)
+    case AttrSetManByte(_, _, _, sets, _, _, _, _, _, _)       => swapSetVs[Byte](attr, sets, valueByte)
+    case AttrSetManShort(_, _, _, sets, _, _, _, _, _, _)      => swapSetVs[Short](attr, sets, valueShort)
+    case AttrSetManChar(_, _, _, sets, _, _, _, _, _, _)       => swapSetVs[Char](attr, sets, valueChar)
   }
   private def swapSetVs[T](
     a: Attr,
@@ -247,21 +247,21 @@ class UpdateExtraction(
 
 
   private def setRemove(attr: AttrSetMan): Seq[(String, String, String, Seq[AnyRef], Boolean)] = attr match {
-    case AttrSetManString(_, _, _, Seq(set), _, _, _, _, _)     => removeSetVs[String](attr, set, valueString)
-    case AttrSetManInt(_, _, _, Seq(set), _, _, _, _, _)        => removeSetVs[Int](attr, set, valueInt)
-    case AttrSetManLong(_, _, _, Seq(set), _, _, _, _, _)       => removeSetVs[Long](attr, set, valueLong)
-    case AttrSetManFloat(_, _, _, Seq(set), _, _, _, _, _)      => removeSetVs[Float](attr, set, valueFloat)
-    case AttrSetManDouble(_, _, _, Seq(set), _, _, _, _, _)     => removeSetVs[Double](attr, set, valueDouble)
-    case AttrSetManBoolean(_, _, _, Seq(set), _, _, _, _, _)    => removeSetVs[Boolean](attr, set, valueBoolean)
-    case AttrSetManBigInt(_, _, _, Seq(set), _, _, _, _, _)     => removeSetVs[BigInt](attr, set, valueBigInt)
-    case AttrSetManBigDecimal(_, _, _, Seq(set), _, _, _, _, _) => removeSetVs[BigDecimal](attr, set, valueBigDecimal)
-    case AttrSetManDate(_, _, _, Seq(set), _, _, _, _, _)       => removeSetVs[Date](attr, set, valueDate)
-    case AttrSetManUUID(_, _, _, Seq(set), _, _, _, _, _)       => removeSetVs[UUID](attr, set, valueUUID)
-    case AttrSetManURI(_, _, _, Seq(set), _, _, _, _, _)        => removeSetVs[URI](attr, set, valueURI)
-    case AttrSetManByte(_, _, _, Seq(set), _, _, _, _, _)       => removeSetVs[Byte](attr, set, valueByte)
-    case AttrSetManShort(_, _, _, Seq(set), _, _, _, _, _)      => removeSetVs[Short](attr, set, valueShort)
-    case AttrSetManChar(_, _, _, Seq(set), _, _, _, _, _)       => removeSetVs[Char](attr, set, valueChar)
-    case _                                                      => throw ExecutionError(
+    case AttrSetManString(_, _, _, Seq(set), _, _, _, _, _, _)     => removeSetVs[String](attr, set, valueString)
+    case AttrSetManInt(_, _, _, Seq(set), _, _, _, _, _, _)        => removeSetVs[Int](attr, set, valueInt)
+    case AttrSetManLong(_, _, _, Seq(set), _, _, _, _, _, _)       => removeSetVs[Long](attr, set, valueLong)
+    case AttrSetManFloat(_, _, _, Seq(set), _, _, _, _, _, _)      => removeSetVs[Float](attr, set, valueFloat)
+    case AttrSetManDouble(_, _, _, Seq(set), _, _, _, _, _, _)     => removeSetVs[Double](attr, set, valueDouble)
+    case AttrSetManBoolean(_, _, _, Seq(set), _, _, _, _, _, _)    => removeSetVs[Boolean](attr, set, valueBoolean)
+    case AttrSetManBigInt(_, _, _, Seq(set), _, _, _, _, _, _)     => removeSetVs[BigInt](attr, set, valueBigInt)
+    case AttrSetManBigDecimal(_, _, _, Seq(set), _, _, _, _, _, _) => removeSetVs[BigDecimal](attr, set, valueBigDecimal)
+    case AttrSetManDate(_, _, _, Seq(set), _, _, _, _, _, _)       => removeSetVs[Date](attr, set, valueDate)
+    case AttrSetManUUID(_, _, _, Seq(set), _, _, _, _, _, _)       => removeSetVs[UUID](attr, set, valueUUID)
+    case AttrSetManURI(_, _, _, Seq(set), _, _, _, _, _, _)        => removeSetVs[URI](attr, set, valueURI)
+    case AttrSetManByte(_, _, _, Seq(set), _, _, _, _, _, _)       => removeSetVs[Byte](attr, set, valueByte)
+    case AttrSetManShort(_, _, _, Seq(set), _, _, _, _, _, _)      => removeSetVs[Short](attr, set, valueShort)
+    case AttrSetManChar(_, _, _, Seq(set), _, _, _, _, _, _)       => removeSetVs[Char](attr, set, valueChar)
+    case _                                                         => throw ExecutionError(
       s"Can only remove one Set of values for Set attribute `${attr.name}`. Found: $attr"
     )
   }

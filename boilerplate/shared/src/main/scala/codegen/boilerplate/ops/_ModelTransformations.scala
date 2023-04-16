@@ -109,49 +109,47 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |    es.init :+ last
        |  }
        |
-       |  protected def attrTac[ns1[_], ns2[_, _]](es: List[Element], op: Op, a: ModelOps_0[_, ns1, ns2]): List[Element] = {
-       |    val attr = a.elements.last match {
-       |      case a: AttrOneTac => a match {
-       |        ${addValueAttrs("One", "Tac")}
+       |  protected def exprAttr(es: List[Element], op: Op, attrMolecule: Molecule[_]): List[Element] = {
+       |    val exprAttr = attrMolecule.elements.last.asInstanceOf[Attr]
+       |    val attr     = es.last match {
+       |      case a: AttrOne => a match {
+       |        case a: AttrOneMan => a match {
+       |          ${addExprAttr("One", "Man")}
+       |        }
+       |        case a: AttrOneOpt => a match {
+       |          ${addExprAttr("One", "Opt")}
+       |        }
+       |        case a: AttrOneTac => a match {
+       |          ${addExprAttr("One", "Tac")}
+       |        }
        |      }
-       |      case a: AttrSetTac => a match {
-       |        ${addValueAttrs("Set", "Tac")}
+       |      case a: AttrSet => a match {
+       |        case a: AttrSetMan => a match {
+       |          ${addExprAttr("Set", "Man")}
+       |        }
+       |        case a: AttrSetOpt => a match {
+       |          ${addExprAttr("Set", "Opt")}
+       |        }
+       |        case a: AttrSetTac => a match {
+       |          ${addExprAttr("Set", "Tac")}
+       |        }
        |      }
-       |      case a             => unexpected(a)
+       |      case a          => unexpected(a)
        |    }
-       |    es :+ attr
-       |  }
-       |
-       |  protected def attrMan[ns1[_, _], ns2[_, _, _]](es: List[Element], op: Op, a: ModelOps_1[_, _, ns1, ns2]): List[Element] = {
-       |    val attr = a.elements.last match {
-       |      case a: AttrOneMan => a match {
-       |        ${addValueAttrs("One", "Man")}
-       |      }
-       |      case a: AttrOneOpt => a match {
-       |        ${addValueAttrs("One", "Opt")}
-       |      }
-       |      case a: AttrSetMan => a match {
-       |        ${addValueAttrs("Set", "Man")}
-       |      }
-       |      case a: AttrSetOpt => a match {
-       |        ${addValueAttrs("Set", "Opt")}
-       |      }
-       |      case a             => unexpected(a)
-       |    }
-       |    es :+ attr
+       |    es.init :+ attr
        |  }
        |
        |  protected def reverseTopLevelSorting(es: List[Element]): List[Element] = {
        |    es.map {
        |      case attr: AttrOneMan => attr match {
        |        ${reverseTopLevelSorting("Man")}
-       |        case a                                                          => a
+       |        case a                                                             => a
        |      }
        |      case attr: AttrOneOpt => attr match {
        |        ${reverseTopLevelSorting("Opt")}
-       |        case a                                                          => a
+       |        case a                                                             => a
        |      }
-       |      case other         => other
+       |      case other            => other
        |    }
        |  }
        |
@@ -222,15 +220,15 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
     }.mkString("\n        ")
   }
 
-  private def addValueAttrs(card: String, mode: String): String = {
+  private def addExprAttr(card: String, mode: String): String = {
     baseTypesWithSpaces.map { case (baseType, space) =>
-      s"case a: Attr$card$mode$baseType $space=> a.copy(op = op, valueAttrs = Seq(a.name))"
-    }.mkString("\n        ")
+      s"case a: Attr$card$mode$baseType $space=> a.copy(op = op, exprAttr = Some(exprAttr))"
+    }.mkString("\n          ")
   }
 
   private def reverseTopLevelSorting(mode: String): String = {
     baseTypesWithSpaces.map { case (baseType, space) =>
-      s"case a@AttrOne$mode$baseType(_, _, _, _, _, _, _, _, Some(sort)) $space=> a.copy(sort = Some(reverseSort(sort)))"
+      s"case a@AttrOne$mode$baseType(_, _, _, _, _, _, _, _, _, Some(sort)) $space=> a.copy(sort = Some(reverseSort(sort)))"
     }.mkString("\n        ")
   }
 }
