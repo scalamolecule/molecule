@@ -9,6 +9,7 @@ object _ExprSetTac extends BoilerplateGenBase("ExprSetTac", "/api/expression") {
     s"""// GENERATED CODE ********************************
        |package molecule.boilerplate.api.expression
        |
+       |import molecule.base.ast.SchemaAST._
        |import molecule.boilerplate.api._
        |import molecule.boilerplate.ast.Model._
        |$traits
@@ -28,23 +29,23 @@ object _ExprSetTac extends BoilerplateGenBase("ExprSetTac", "/api/expression") {
          |  def hasGe[ns1[_]](a: ModelOps_0[t, ns1, Dummy_2]): Ns1[${`A..V`}, t] = _attrTac(HasGe, a)""".stripMargin
     } else {
       s"""
-         |  def apply[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2]): Ns1[${`A..V, `}t] = _attrTac(Eq   , a)
-         |  def not  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2]): Ns1[${`A..V, `}t] = _attrTac(Neq  , a)
-         |  def has  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2]): Ns1[${`A..V, `}t] = _attrTac(Has  , a)
-         |  def hasNo[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2]): Ns1[${`A..V, `}t] = _attrTac(HasNo, a)
-         |  def hasLt[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2]): Ns1[${`A..V, `}t] = _attrTac(HasLt, a)
-         |  def hasLe[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2]): Ns1[${`A..V, `}t] = _attrTac(HasLe, a)
-         |  def hasGt[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2]): Ns1[${`A..V, `}t] = _attrTac(HasGt, a)
-         |  def hasGe[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2]): Ns1[${`A..V, `}t] = _attrTac(HasGe, a)
+         |  def apply[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet): Ns1[${`A..V, `}t] = _attrTac(Eq   , a)
+         |  def not  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet): Ns1[${`A..V, `}t] = _attrTac(Neq  , a)
+         |  def has  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with Card   ): Ns1[${`A..V, `}t] = _attrTac(Has  , a)
+         |  def hasNo[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with Card   ): Ns1[${`A..V, `}t] = _attrTac(HasNo, a)
+         |  def hasLt[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardOne): Ns1[${`A..V, `}t] = _attrTac(HasLt, a)
+         |  def hasLe[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardOne): Ns1[${`A..V, `}t] = _attrTac(HasLe, a)
+         |  def hasGt[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardOne): Ns1[${`A..V, `}t] = _attrTac(HasGt, a)
+         |  def hasGe[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardOne): Ns1[${`A..V, `}t] = _attrTac(HasGe, a)
          |
-         |  def apply[X, ns1[_, _], ns2[_, _, _]](a: ModelOps_1[X, t, ns1, ns2]): Ns2[${`A..V, `}X, t] = _attrMan(Eq   , a)
-         |  def not  [X, ns1[_, _], ns2[_, _, _]](a: ModelOps_1[X, t, ns1, ns2]): Ns2[${`A..V, `}X, t] = _attrMan(Neq  , a)
-         |  def has  [X, ns1[_, _], ns2[_, _, _]](a: ModelOps_1[X, t, ns1, ns2]): Ns2[${`A..V, `}X, t] = _attrMan(Has  , a)
-         |  def hasNo[X, ns1[_, _], ns2[_, _, _]](a: ModelOps_1[X, t, ns1, ns2]): Ns2[${`A..V, `}X, t] = _attrMan(HasNo, a)
-         |  def hasLt[X, ns1[_, _], ns2[_, _, _]](a: ModelOps_1[X, t, ns1, ns2]): Ns2[${`A..V, `}X, t] = _attrMan(HasLt, a)
-         |  def hasLe[X, ns1[_, _], ns2[_, _, _]](a: ModelOps_1[X, t, ns1, ns2]): Ns2[${`A..V, `}X, t] = _attrMan(HasLe, a)
-         |  def hasGt[X, ns1[_, _], ns2[_, _, _]](a: ModelOps_1[X, t, ns1, ns2]): Ns2[${`A..V, `}X, t] = _attrMan(HasGt, a)
-         |  def hasGe[X, ns1[_, _], ns2[_, _, _]](a: ModelOps_1[X, t, ns1, ns2]): Ns2[${`A..V, `}X, t] = _attrMan(HasGe, a)""".stripMargin
+         |  def apply[   ns1[_, _], ns2[_, _, _]](a: ModelOps_1[Set[t], t, ns1, ns2] with CardSet): Ns2[${`A..V, `}Set[t], t] = _attrMan(Eq   , a)
+         |  def not  [   ns1[_, _], ns2[_, _, _]](a: ModelOps_1[Set[t], t, ns1, ns2] with CardSet): Ns2[${`A..V, `}Set[t], t] = _attrMan(Neq  , a)
+         |  def has  [X, ns1[_, _], ns2[_, _, _]](a: ModelOps_1[X     , t, ns1, ns2] with Card   ): Ns2[${`A..V, `}X     , t] = _attrMan(Has  , a)
+         |  def hasNo[X, ns1[_, _], ns2[_, _, _]](a: ModelOps_1[X     , t, ns1, ns2] with Card   ): Ns2[${`A..V, `}X     , t] = _attrMan(HasNo, a)
+         |  def hasLt[   ns1[_, _], ns2[_, _, _]](a: ModelOps_1[t     , t, ns1, ns2]             ): Ns2[${`A..V, `}t     , t] = _attrMan(HasLt, a)
+         |  def hasLe[   ns1[_, _], ns2[_, _, _]](a: ModelOps_1[t     , t, ns1, ns2]             ): Ns2[${`A..V, `}t     , t] = _attrMan(HasLe, a)
+         |  def hasGt[   ns1[_, _], ns2[_, _, _]](a: ModelOps_1[t     , t, ns1, ns2]             ): Ns2[${`A..V, `}t     , t] = _attrMan(HasGt, a)
+         |  def hasGe[   ns1[_, _], ns2[_, _, _]](a: ModelOps_1[t     , t, ns1, ns2]             ): Ns2[${`A..V, `}t     , t] = _attrMan(HasGe, a)""".stripMargin
     }
     val body =
       s"""

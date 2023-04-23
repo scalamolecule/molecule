@@ -52,6 +52,7 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
     }
 
     def prepareAttr(a: Attr): List[Attr] = {
+      availableAttrs += a.name
       if (a.ns == "_Generic" && a.attr == "tx") {
         addTxVar = true
         List(a)
@@ -68,8 +69,12 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
           throw ModelError(s"Can't refer to ambiguous expression attribute $exprAttr")
         )
         if (ea.ns == a.ns) {
-          // Add expression attribute after this attribute
+          // Add adjacent expression attribute after this attribute
           List(a, ea)
+        } else if (ea.isInstanceOf[Mandatory]) {
+          throw ModelError(s"Expression attribute $exprAttr pointing to other namespace should be tacit.")
+        } else if (ea.op != V) {
+          throw ModelError("Expressions inside cross-namespace attribute expression not allowed. Found:\n  " + ea)
         } else {
           // Expect expression attribute in other namespace
           expectedExprAttrs += ea.name
@@ -77,7 +82,6 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
         }
       } else {
         // Attribute is available for expressions
-        expectedExprAttrs -= a.name
         List(a)
       }
     }
@@ -91,7 +95,14 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
 
     val elements1 = prepare(elements, Nil)
 
-    if (expectedExprAttrs.nonEmpty) {
+    //    availableAttrs.foreach(println)
+    //    println("---------")
+    //    expectedExprAttrs.foreach(println)
+    //    println("---------")
+    //    expectedExprAttrs.intersect(availableAttrs).foreach(println)
+    //    println("--------------------------------------")
+
+    if (expectedExprAttrs.nonEmpty && expectedExprAttrs.intersect(availableAttrs) != expectedExprAttrs) {
       throw ModelError("Please add missing expression attributes:\n  " + expectedExprAttrs.mkString("\n  "))
     }
 
@@ -109,10 +120,10 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
     // Pre-query if needed
     val preQuery = if (preWhere.isEmpty) "" else {
       val preSortIds = ArrayBuffer.empty[String]
-      val preFind    = ArrayBuffer("?a")
+      val preFind1   = ArrayBuffer(preFind)
       val hasRules   = preRules.nonEmpty
       val preQuery   = renderQuery(
-        preSortIds, preFind, widh, in ++ preIn, where ++ preWhere, hasRules, optimized
+        preSortIds, preFind1, widh, in ++ preIn, where ++ preWhere, hasRules, optimized
       )
       preQuery
     }

@@ -1,6 +1,6 @@
 package molecule.core.transaction
 
-import molecule.base.ast.SchemaAST.MetaNs
+import molecule.base.ast.SchemaAST._
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.core.transaction.ops.InsertOps

@@ -4,27 +4,34 @@ import molecule.base.util.BaseHelpers
 
 object SchemaAST extends BaseHelpers {
 
-  sealed trait Cardinality {
+  sealed trait Card {
     def marker: String
     def tpe: String
   }
 
-  case object CardOne extends Cardinality {
+  trait CardOne extends Card {
     override def marker = "One"
     override def tpe = ""
   }
-  case object CardSet extends Cardinality {
+  case object CardOne extends CardOne
+
+  trait CardSet extends Card {
     override def marker = "Set"
     override def tpe = "Set"
   }
-  case object CardArr extends Cardinality {
-    override def marker = "Arr"
-    override def tpe = "Array"
-  }
-  case object CardMap extends Cardinality {
-    override def marker = "Map"
-    override def tpe = "Map"
-  }
+  case object CardSet extends CardSet
+
+  //  trait CardArr extends Card {
+  //    override def marker = "Arr"
+  //    override def tpe = "Array"
+  //  }
+  //  case object CardArr extends CardMap
+  //
+  //  trait CardMap extends Card {
+  //    override def marker = "Map"
+  //    override def tpe = "Map"
+  //  }
+  //  case object CardMap extends CardMap
 
   case class MetaSchema(
     pkg: String,
@@ -144,7 +151,7 @@ object SchemaAST extends BaseHelpers {
 
   case class MetaAttr(
     attr: String,
-    card: Cardinality,
+    card: Card,
     baseTpe: String,
     refNs: Option[String] = None,
     options: Seq[String] = Nil,

@@ -36,7 +36,6 @@ trait SortOne_[Tpl] { self: DatomicModel2Query[Tpl] =>
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
-              // Datomic can return both Integer or Long
               a.get(i).toString.toInt.compareTo(b.get(i).toString.toInt)
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex

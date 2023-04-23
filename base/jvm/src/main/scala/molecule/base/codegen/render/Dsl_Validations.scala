@@ -1,6 +1,6 @@
 package molecule.base.codegen.render
 
-import molecule.base.ast.SchemaAST.{MetaNs, MetaSchema}
+import molecule.base.ast.SchemaAST._
 
 
 case class Dsl_Validations(schema: MetaSchema, namespace: MetaNs)

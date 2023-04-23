@@ -28,13 +28,13 @@ object Adhoc extends DatomicTestSuite {
       } yield ()
     }
 
-    "validation" - validation { implicit conn =>
-      for {
-        _ <- Type.int(3).long(3L).save.transact
 
-      } yield ()
-    }
-
+    //    "validation" - validation { implicit conn =>
+    //      for {
+    //        _ <- Type.int(3).long(3L).save.transact
+    //
+    //      } yield ()
+    //    }
 
 
     //    "Compare with other attr value" - validation { implicit conn =>

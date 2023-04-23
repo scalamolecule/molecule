@@ -1,8 +1,6 @@
 package molecule.core.util
 
 import molecule.base.error.ModelError
-import molecule.boilerplate.ast
-import molecule.boilerplate.ast.Model
 import molecule.boilerplate.ast.Model._
 import scala.annotation.tailrec
 

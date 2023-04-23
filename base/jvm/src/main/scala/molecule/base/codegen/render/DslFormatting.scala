@@ -1,6 +1,6 @@
 package molecule.base.codegen.render
 
-import molecule.base.ast.SchemaAST.{CardOne, MetaAttr, MetaNs, MetaSchema}
+import molecule.base.ast.SchemaAST._
 import molecule.base.util.BaseHelpers
 
 

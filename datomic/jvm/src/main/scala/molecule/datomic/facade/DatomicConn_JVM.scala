@@ -31,6 +31,7 @@ case class DatomicConn_JVM(
   override def db: Database = peerConn.db()
 
   private var optimizeQueries = true
+  //  private var optimizeQueries = false
   def setOptimizeQuery(flag: Boolean): Unit = {
     optimizeQueries = flag
   }

@@ -16,36 +16,6 @@ object _ExprSetOpt extends BoilerplateGenBase( "ExprSetOpt", "/api/expression") 
   }
 
   case class Trait(arity: Int) extends TemplateVals(arity) {
-    val attrExprs = if (arity == 22) {
-      s"""
-         |  def apply[ns1[_]](a: ModelOps_0[t, ns1, Dummy_2]): Ns1[${`A..V`}, t] = _attrTac(Eq   , a)
-         |  def not  [ns1[_]](a: ModelOps_0[t, ns1, Dummy_2]): Ns1[${`A..V`}, t] = _attrTac(Neq  , a)
-         |  def has  [ns1[_]](a: ModelOps_0[t, ns1, Dummy_2]): Ns1[${`A..V`}, t] = _attrTac(Has  , a)
-         |  def hasNo[ns1[_]](a: ModelOps_0[t, ns1, Dummy_2]): Ns1[${`A..V`}, t] = _attrTac(HasNo, a)
-         |  def hasLt[ns1[_]](a: ModelOps_0[t, ns1, Dummy_2]): Ns1[${`A..V`}, t] = _attrTac(HasLt, a)
-         |  def hasLe[ns1[_]](a: ModelOps_0[t, ns1, Dummy_2]): Ns1[${`A..V`}, t] = _attrTac(HasLe, a)
-         |  def hasGt[ns1[_]](a: ModelOps_0[t, ns1, Dummy_2]): Ns1[${`A..V`}, t] = _attrTac(HasGt, a)
-         |  def hasGe[ns1[_]](a: ModelOps_0[t, ns1, Dummy_2]): Ns1[${`A..V`}, t] = _attrTac(HasGe, a)""".stripMargin
-    } else {
-      s"""
-         |  def apply[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2]): Ns1[${`A..V`}, t] = _attrTac(Eq   , a)
-         |  def not  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2]): Ns1[${`A..V`}, t] = _attrTac(Neq  , a)
-         |  def has  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2]): Ns1[${`A..V`}, t] = _attrTac(Has  , a)
-         |  def hasNo[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2]): Ns1[${`A..V`}, t] = _attrTac(HasNo, a)
-         |  def hasLt[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2]): Ns1[${`A..V`}, t] = _attrTac(HasLt, a)
-         |  def hasLe[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2]): Ns1[${`A..V`}, t] = _attrTac(HasLe, a)
-         |  def hasGt[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2]): Ns1[${`A..V`}, t] = _attrTac(HasGt, a)
-         |  def hasGe[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2]): Ns1[${`A..V`}, t] = _attrTac(HasGe, a)
-         |
-         |  def apply[X, ns1[_, _], ns2[_, _, _]](a: ModelOps_1[X, t, ns1, ns2]): Ns2[${`A..V`}, X, t] = _attrMan(Eq   , a)
-         |  def not  [X, ns1[_, _], ns2[_, _, _]](a: ModelOps_1[X, t, ns1, ns2]): Ns2[${`A..V`}, X, t] = _attrMan(Neq  , a)
-         |  def has  [X, ns1[_, _], ns2[_, _, _]](a: ModelOps_1[X, t, ns1, ns2]): Ns2[${`A..V`}, X, t] = _attrMan(Has  , a)
-         |  def hasNo[X, ns1[_, _], ns2[_, _, _]](a: ModelOps_1[X, t, ns1, ns2]): Ns2[${`A..V`}, X, t] = _attrMan(HasNo, a)
-         |  def hasLt[X, ns1[_, _], ns2[_, _, _]](a: ModelOps_1[X, t, ns1, ns2]): Ns2[${`A..V`}, X, t] = _attrMan(HasLt, a)
-         |  def hasLe[X, ns1[_, _], ns2[_, _, _]](a: ModelOps_1[X, t, ns1, ns2]): Ns2[${`A..V`}, X, t] = _attrMan(HasLe, a)
-         |  def hasGt[X, ns1[_, _], ns2[_, _, _]](a: ModelOps_1[X, t, ns1, ns2]): Ns2[${`A..V`}, X, t] = _attrMan(HasGt, a)
-         |  def hasGe[X, ns1[_, _], ns2[_, _, _]](a: ModelOps_1[X, t, ns1, ns2]): Ns2[${`A..V`}, X, t] = _attrMan(HasGe, a)""".stripMargin
-    }
     val body =
       s"""
          |
@@ -73,7 +43,6 @@ object _ExprSetOpt extends BoilerplateGenBase( "ExprSetOpt", "/api/expression") 
          |  def hasLe(upper: Option[t]          )                           : Ns1[${`A..V`}, t] = _exprSetOpt(HasLe, upper.map(v => Seq(Set(v))))
          |  def hasGt(lower: Option[t]          )                           : Ns1[${`A..V`}, t] = _exprSetOpt(HasGt, lower.map(v => Seq(Set(v))))
          |  def hasGe(lower: Option[t]          )                           : Ns1[${`A..V`}, t] = _exprSetOpt(HasGe, lower.map(v => Seq(Set(v))))
-         |  $attrExprs
          |}""".stripMargin
   }
 }

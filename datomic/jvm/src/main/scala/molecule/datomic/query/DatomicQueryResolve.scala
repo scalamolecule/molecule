@@ -31,12 +31,12 @@ abstract class DatomicQueryResolve[Tpl](
 
   lazy val edgeValuesNotFound = "Couldn't find next page. Edge rows were all deleted/updated."
 
-  protected def postAdjustPullCasts() = {
+  protected def postAdjustPullCasts(): Unit = {
     pullCastss = pullCastss :+ pullCasts.toList
     pullSortss = pullSortss :+ pullSorts.sortBy(_._1).map(_._2).toList
   }
 
-  protected def postAdjustAritiess() = {
+  protected def postAdjustAritiess(): Unit = {
     // Remove started composite groups that turned out to have only tacit attributes
     aritiess = aritiess.map(_.filterNot(_.isEmpty))
   }

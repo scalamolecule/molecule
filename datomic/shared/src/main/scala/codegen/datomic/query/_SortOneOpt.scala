@@ -16,7 +16,7 @@ object _SortOneOpt extends DatomicGenBase("SortOneOpt", "/query") {
        |import molecule.boilerplate.ast.Model._
        |
        |
-       |trait $fileName_[Tpl] { self: Base[Tpl] =>
+       |trait $fileName_[Tpl] { self: DatomicModel2Query[Tpl] =>
        |
        |  private def compare(
        |    a: Row,
@@ -36,7 +36,7 @@ object _SortOneOpt extends DatomicGenBase("SortOneOpt", "/query") {
   }
 
   def sorter(tpe: String): String = {
-    val javaTpe = javaTypes(tpe)
+    val cast = if(tpe == "Int") "toString.toInt" else s"asInstanceOf[${javaTypes(tpe)}]"
     s"""
        |  protected def sortOneOpt$tpe(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
        |    attr.sort.map { sort =>
@@ -46,18 +46,16 @@ object _SortOneOpt extends DatomicGenBase("SortOneOpt", "/query") {
        |          case 'a' => (nestedIdsCount: Int) =>
        |            val i = nestedIdsCount + attrIndex
        |            (a: Row, b: Row) =>
-       |              compare(
-       |                a, b, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
-       |                  m1.values.iterator.next.asInstanceOf[$javaTpe].compareTo(
-       |                    m2.values.iterator.next.asInstanceOf[$javaTpe])
+       |              compare(a, b, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+       |                m1.values.iterator.next.$cast.compareTo(
+       |                  m2.values.iterator.next.$cast)
        |              )
        |          case 'd' => (nestedIdsCount: Int) =>
        |            val i = nestedIdsCount + attrIndex
        |            (a: Row, b: Row) =>
-       |              compare(
-       |                b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
-       |                  m1.values.iterator.next.asInstanceOf[$javaTpe].compareTo(
-       |                    m2.values.iterator.next.asInstanceOf[$javaTpe])
+       |              compare(b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+       |                m1.values.iterator.next.$cast.compareTo(
+       |                  m2.values.iterator.next.$cast)
        |              )
        |        }
        |      )

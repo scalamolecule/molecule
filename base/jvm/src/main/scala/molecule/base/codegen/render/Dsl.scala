@@ -9,9 +9,9 @@ case class Dsl(schema: MetaSchema, partPrefix: String, namespace: MetaNs)
   val imports: String = {
     val baseImports = Seq(
       "molecule.base.ast.SchemaAST._",
+      "molecule.boilerplate.api.Keywords._",
       "molecule.boilerplate.api._",
       "molecule.boilerplate.api.expression._",
-      "molecule.boilerplate.api.Keywords._",
       "molecule.boilerplate.ast.Model",
       "molecule.boilerplate.ast.Model._",
     )

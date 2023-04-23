@@ -1,7 +1,7 @@
 // GENERATED CODE ********************************
 package molecule.core.validation.insert
 
-import molecule.base.ast.SchemaAST.MetaNs
+import molecule.base.ast.SchemaAST._
 import molecule.base.error.InsertError
 import molecule.boilerplate.ast.Model._
 

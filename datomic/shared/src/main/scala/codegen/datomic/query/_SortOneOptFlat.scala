@@ -16,7 +16,7 @@ object _SortOneOptFlat extends DatomicGenBase("SortOneOptFlat", "/query") {
        |import molecule.boilerplate.ast.Model._
        |
        |
-       |trait $fileName_[Tpl] { self: Base[Tpl] =>
+       |trait $fileName_[Tpl] extends ResolveBase { self: DatomicModel2Query[Tpl] =>
        |
        |  private def compare(
        |    a: Row,
@@ -36,7 +36,7 @@ object _SortOneOptFlat extends DatomicGenBase("SortOneOptFlat", "/query") {
   }
 
   def sorter(tpe: String): String = {
-    val javaTpe = javaTypes(tpe)
+    val cast = if(tpe == "Int") "toString.toInt" else s"asInstanceOf[${javaTypes(tpe)}]"
     s"""
        |  protected def sortOneOptFlat$tpe(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
        |    attr.sort.map { sort =>
@@ -46,11 +46,12 @@ object _SortOneOptFlat extends DatomicGenBase("SortOneOptFlat", "/query") {
        |          case 'a' => (nestedIdsCount: Int) =>
        |            val i = nestedIdsCount + attrIndex
        |            (a: Row, b: Row) =>
-       |              compare(a, b, i, (v1, v2) => v1.asInstanceOf[$javaTpe].compareTo(v2.asInstanceOf[$javaTpe]))
+       |              compare(a, b, i, (v1, v2) =>
+       |                v1.$cast.compareTo(v2.$cast))
        |          case 'd' => (nestedIdsCount: Int) =>
        |            val i = nestedIdsCount + attrIndex
        |            (a: Row, b: Row) =>
-       |              compare(b, a, i, (v1, v2) => v1.asInstanceOf[$javaTpe].compareTo(v2.asInstanceOf[$javaTpe]))
+       |              compare(b, a, i, (v1, v2) => v1.$cast.compareTo(v2.$cast))
        |        }
        |      )
        |    }

@@ -32,8 +32,8 @@ trait TestData extends DateHandling {
   lazy val (double0, double1, double2, double3, double4, double5, double6, double7, double8, double9) =
     (0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9)
 
-  lazy val (boolean0, boolean1, boolean2) =
-    (false, false, true) // make boolean1 sort before boolean2 (false before true)
+  lazy val (boolean0, boolean1, boolean2, boolean3) =
+    (false, false, true, false) // make boolean1 sort before boolean2 (false before true)
 
   lazy val (date0, date1, date2, date3, date4, date5, date6, date7, date8, date9) =
     (da(0), da(1), da(2), da(3), da(4), da(5), da(6), da(7), da(8), da(9))

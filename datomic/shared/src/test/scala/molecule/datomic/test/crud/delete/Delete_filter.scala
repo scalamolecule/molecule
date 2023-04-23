@@ -57,7 +57,7 @@ object Delete_filter extends DatomicTestSuite {
           (3, "c"),
         ).transact
 
-        _ <- Ns.i.s.query.get.map(_ ==> List(
+        _ <- Ns.i.a1.s.query.get.map(_ ==> List(
           (1, "a"),
           (2, "b"),
           (3, "c"),
@@ -66,7 +66,7 @@ object Delete_filter extends DatomicTestSuite {
         // Update all entities where non-ns attribute i > 1 and s < "c"
         _ <- Ns.i_.>(1).s_.<("c").delete.transact
 
-        _ <- Ns.i.s.query.get.map(_ ==> List(
+        _ <- Ns.i.a1.s.query.get.map(_ ==> List(
           (1, "a"),
           (3, "c"),
         ))

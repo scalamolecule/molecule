@@ -2,6 +2,7 @@ package molecule.datomic.query
 
 import molecule.boilerplate.ast.Model._
 import scala.reflect.ClassTag
+import molecule.base.error.ModelError
 
 trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
 
@@ -10,20 +11,20 @@ trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
     attrIndex += 1
     val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
     attr match {
-      case at: AttrSetManString     => man(e, a, at.op, at.vs, resSetString)
-      case at: AttrSetManInt        => man(e, a, at.op, at.vs, resSetInt)
-      case at: AttrSetManLong       => man(e, a, at.op, at.vs, resSetLong)
-      case at: AttrSetManFloat      => man(e, a, at.op, at.vs, resSetFloat)
-      case at: AttrSetManDouble     => man(e, a, at.op, at.vs, resSetDouble)
-      case at: AttrSetManBoolean    => man(e, a, at.op, at.vs, resSetBoolean)
-      case at: AttrSetManBigInt     => man(e, a, at.op, at.vs, resSetBigInt)
-      case at: AttrSetManBigDecimal => man(e, a, at.op, at.vs, resSetBigDecimal)
-      case at: AttrSetManDate       => man(e, a, at.op, at.vs, resSetDate)
-      case at: AttrSetManUUID       => man(e, a, at.op, at.vs, resSetUUID)
-      case at: AttrSetManURI        => man(e, a, at.op, at.vs, resSetURI)
-      case at: AttrSetManByte       => man(e, a, at.op, at.vs, resSetByte)
-      case at: AttrSetManShort      => man(e, a, at.op, at.vs, resSetShort)
-      case at: AttrSetManChar       => man(e, a, at.op, at.vs, resSetChar)
+      case at: AttrSetManString     => man(attr, e, a, at.vs, resSetString)
+      case at: AttrSetManInt        => man(attr, e, a, at.vs, resSetInt)
+      case at: AttrSetManLong       => man(attr, e, a, at.vs, resSetLong)
+      case at: AttrSetManFloat      => man(attr, e, a, at.vs, resSetFloat)
+      case at: AttrSetManDouble     => man(attr, e, a, at.vs, resSetDouble)
+      case at: AttrSetManBoolean    => man(attr, e, a, at.vs, resSetBoolean)
+      case at: AttrSetManBigInt     => man(attr, e, a, at.vs, resSetBigInt)
+      case at: AttrSetManBigDecimal => man(attr, e, a, at.vs, resSetBigDecimal)
+      case at: AttrSetManDate       => man(attr, e, a, at.vs, resSetDate)
+      case at: AttrSetManUUID       => man(attr, e, a, at.vs, resSetUUID)
+      case at: AttrSetManURI        => man(attr, e, a, at.vs, resSetURI)
+      case at: AttrSetManByte       => man(attr, e, a, at.vs, resSetByte)
+      case at: AttrSetManShort      => man(attr, e, a, at.vs, resSetShort)
+      case at: AttrSetManChar       => man(attr, e, a, at.vs, resSetChar)
     }
     es
   }
@@ -31,20 +32,20 @@ trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
   protected def resolveAttrSetTac(es: List[Var], attr: AttrSetTac): List[Var] = {
     val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
     attr match {
-      case at: AttrSetTacString     => tac(e, a, at.op, at.vs, resSetString)
-      case at: AttrSetTacInt        => tac(e, a, at.op, at.vs, resSetInt)
-      case at: AttrSetTacLong       => tac(e, a, at.op, at.vs, resSetLong)
-      case at: AttrSetTacFloat      => tac(e, a, at.op, at.vs, resSetFloat)
-      case at: AttrSetTacDouble     => tac(e, a, at.op, at.vs, resSetDouble)
-      case at: AttrSetTacBoolean    => tac(e, a, at.op, at.vs, resSetBoolean)
-      case at: AttrSetTacBigInt     => tac(e, a, at.op, at.vs, resSetBigInt)
-      case at: AttrSetTacBigDecimal => tac(e, a, at.op, at.vs, resSetBigDecimal)
-      case at: AttrSetTacDate       => tac(e, a, at.op, at.vs, resSetDate)
-      case at: AttrSetTacUUID       => tac(e, a, at.op, at.vs, resSetUUID)
-      case at: AttrSetTacURI        => tac(e, a, at.op, at.vs, resSetURI)
-      case at: AttrSetTacByte       => tac(e, a, at.op, at.vs, resSetByte)
-      case at: AttrSetTacShort      => tac(e, a, at.op, at.vs, resSetShort)
-      case at: AttrSetTacChar       => tac(e, a, at.op, at.vs, resSetChar)
+      case at: AttrSetTacString     => tac(attr, e, a, at.vs, resSetString)
+      case at: AttrSetTacInt        => tac(attr, e, a, at.vs, resSetInt)
+      case at: AttrSetTacLong       => tac(attr, e, a, at.vs, resSetLong)
+      case at: AttrSetTacFloat      => tac(attr, e, a, at.vs, resSetFloat)
+      case at: AttrSetTacDouble     => tac(attr, e, a, at.vs, resSetDouble)
+      case at: AttrSetTacBoolean    => tac(attr, e, a, at.vs, resSetBoolean)
+      case at: AttrSetTacBigInt     => tac(attr, e, a, at.vs, resSetBigInt)
+      case at: AttrSetTacBigDecimal => tac(attr, e, a, at.vs, resSetBigDecimal)
+      case at: AttrSetTacDate       => tac(attr, e, a, at.vs, resSetDate)
+      case at: AttrSetTacUUID       => tac(attr, e, a, at.vs, resSetUUID)
+      case at: AttrSetTacURI        => tac(attr, e, a, at.vs, resSetURI)
+      case at: AttrSetTacByte       => tac(attr, e, a, at.vs, resSetByte)
+      case at: AttrSetTacShort      => tac(attr, e, a, at.vs, resSetShort)
+      case at: AttrSetTacChar       => tac(attr, e, a, at.vs, resSetChar)
     }
     es
   }
@@ -79,27 +80,43 @@ trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
 
 
   private def man[T: ClassTag](
+    attr: Attr,
     e: Var,
     a: Att,
-    op: Op,
     args: Seq[Set[T]],
     res: ResSet[T],
   ): Unit = {
     val v = vv
     find += s"(distinct $v)"
     addCast(res.j2s)
-    expr(e, a, v, op, args, res)
+    attr.exprAttr.fold {
+      if (exprAttrVars.contains(attr.name) && attr.op != V) {
+        // Runtime check needed since we can't type infer it
+        throw ModelError(s"Cardinality-Set expression attributes can't have expressions. Found:\n  " + attr)
+      }
+      expr(e, a, v, attr.op, args, res)
+      exprAttrVars1 = exprAttrVars1 + (a -> (e, v))
+      exprAttrVars2.get(a).foreach(_(e, v))
+    } { exprAttr =>
+      expr2(e, a, v, attr.op, s":${exprAttr.ns}/${exprAttr.attr}")
+    }
   }
 
   private def tac[T: ClassTag](
+    attr: Attr,
     e: Var,
     a: Att,
-    op: Op,
     args: Seq[Set[T]],
     res: ResSet[T],
   ): Unit = {
     val v = vv
-    expr(e, a, v, op, args, res)
+    attr.exprAttr.fold {
+      expr(e, a, v, attr.op, args, res)
+      exprAttrVars1 = exprAttrVars1 + (a -> (e, v))
+      exprAttrVars2.get(a).foreach(_(e, v))
+    } { exprAttr =>
+      expr2(e, a, v, attr.op, s":${exprAttr.ns}/${exprAttr.attr}")
+    }
   }
 
   private def expr[T: ClassTag](
@@ -123,6 +140,26 @@ trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
       case NoValue   => noValue(e, a)
       case Fn(kw, n) => aggr(e, a, v, kw, n, res)
       case other     => unexpectedOp(other)
+    }
+  }
+
+  private def expr2(
+    e: Var,
+    a: Att,
+    v: Var,
+    op: Op,
+    exprAttr: String
+  ): Unit = {
+    op match {
+      case Eq    => equal2(e, a, v, exprAttr)
+      case Neq   => neq2(e, a, v, exprAttr)
+      case Has   => has2(e, a, v, exprAttr)
+      case HasNo => hasNo2(e, a, v, exprAttr)
+      case HasLt => compare2(e, a, v, "<", exprAttr)
+      case HasGt => compare2(e, a, v, ">", exprAttr)
+      case HasLe => compare2(e, a, v, "<=", exprAttr)
+      case HasGe => compare2(e, a, v, ">=", exprAttr)
+      case other => unexpectedOp(other)
     }
   }
 
@@ -236,71 +273,6 @@ trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
     where += s"[$e $a $v$tx]" -> wClause
   }
 
-  private def mkRules[T](
-    e: Var, a: Att, v: Var, sets: Seq[Set[T]], tpe: String, toDatalog: T => String
-  ): Seq[String] = {
-    tpe match {
-      case "Float" =>
-        sets.flatMap {
-          case set if set.isEmpty => None
-          case set                => Some(
-            set.zipWithIndex.map { case (arg, i) =>
-              // Coerce Datomic float values for correct comparison (don't know why this is necessary)
-              // See example: https://clojurians-log.clojureverse.org/datomic/2019-10-29
-              s"""[$e $a $v$i] [(float $v$i) $v$i-float] [(= $v$i-float (float $arg))]"""
-            }.mkString(s"[(rule$v $e)\n    ", "\n    ", "]")
-          )
-        }
-      case "URI"   =>
-        sets.flatMap {
-          case set if set.isEmpty => None
-          case set                => Some(
-            set.zipWithIndex.map { case (arg, i) =>
-              s"""[(ground (new java.net.URI "$arg")) $v$i-uri] [$e $a $v$i-uri]"""
-            }.mkString(s"[(rule$v $e)\n    ", "\n    ", "]")
-          )
-        }
-      case _       =>
-        sets.flatMap {
-          case set if set.isEmpty => None
-          case set                => Some(
-            set.map(arg => s"[$e $a ${toDatalog(arg)}]")
-              .mkString(s"[(rule$v $e)\n    ", "\n    ", "]")
-          )
-        }
-    }
-  }
-
-  private def has[T: ClassTag](
-    e: Var, a: Att, v: Var, sets: Seq[Set[T]], tpe: String, toDatalog: T => String
-  ): Unit = {
-    where += s"[$e $a $v$tx]" -> wClause
-    if (sets.nonEmpty && sets.flatten.nonEmpty) {
-      where += s"(rule$v $e)" -> wClause
-      rules ++= mkRules(e, a, v, sets, tpe, toDatalog)
-    } else {
-      where += s"[(ground nil) $v]" -> wGround
-    }
-
-  }
-
-  private def hasNo[T](e: Var, a: Att, v: Var, sets: Seq[Set[T]], tpe: String, toDatalog: T => String): Unit = {
-    // Common for pre-query and main query
-    where += s"[$e $a $v$tx]" -> wClause
-
-    if (sets.nonEmpty && sets.flatten.nonEmpty) {
-      // Pre-query
-      preWhere += s"(rule$v $e)" -> wClause
-      preRules ++= mkRules(e, a, v, sets, tpe, toDatalog)
-
-      // Main query
-      val blacklist   = v + "-blacklist"
-      val blacklisted = v + "-blacklisted"
-      inPost += blacklist
-      wherePost += s"[(contains? $blacklist $e) $blacklisted]" -> wClause
-      wherePost += s"[(not $blacklisted)]" -> wClause
-    }
-  }
 
   private def equal[T](e: Var, a: Att, v: Var, sets: Seq[Set[T]], fromScala: Any => Any): Unit = {
     val (set, v1, v2, e1) = (v + "-set", v + 1, v + 2, e + 1)
@@ -314,11 +286,30 @@ trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
     where += s"[(= $v2 $set)]" -> wClause
     args += sets.map(set => set.map(fromScala).asJava).asJava
   }
+  private def equal2(e: Var, a: Att, v: Var, exprAttr: String): Unit = {
+    preFind = e
+
+    where += s"[$e $a $v$tx]" -> wClause
+    where +=
+      s"""[(datomic.api/q
+         |          "[:find (distinct ${v}1)
+         |            :in $$ ${e}1
+         |            :where [${e}1 $a ${v}1]]" $$ $e) [[${v}2]]]""".stripMargin -> wClause
+    val link: (Var, Var) => Unit = (e1: Var, v1: Var) => {
+      where +=
+        s"""[(datomic.api/q
+           |          "[:find (distinct ${v1}1)
+           |            :in $$ ${e1}1
+           |            :where [${e1}1 $exprAttr ${v1}1]]" $$ $e1) [[${v1}2]]]""".stripMargin -> wClause
+      where += s"[(= ${v}2 ${v1}2)]" -> wClause
+    }
+    exprAttrVars1.get(exprAttr).fold {
+      exprAttrVars2 = exprAttrVars2 + (exprAttr -> link)
+    } { case (e, a) => link(e, a) }
+  }
 
   private def neq[T](e: Var, a: Att, v: Var, sets: Seq[Set[T]], fromScala: Any => Any): Unit = {
-    // Common for pre-query and main query
     where += s"[$e $a $v$tx]" -> wClause
-
     if (sets.nonEmpty && sets.flatten.nonEmpty) {
       val blacklist               = v + "-blacklist"
       val blacklisted             = v + "-blacklisted"
@@ -341,6 +332,112 @@ trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
       wherePost += s"[(not $blacklisted)]" -> wClause
     }
   }
+  private def neq2(e: Var, a: Att, v: Var, exprAttr: String): Unit = {
+    where += s"[$e $a $v$tx]" -> wClause
+    val process: (Var, Var) => Unit = (e1: Var, v1: Var) => {
+      val blacklist   = v1 + "-blacklist"
+      val blacklisted = v1 + "-blacklisted"
+
+      // Pre-query
+      preFind = e1
+      preWhere +=
+        s"""[(datomic.api/q
+           |          "[:find (distinct ${v}1)
+           |            :in $$ ${e}1
+           |            :where [${e}1 $a ${v}1]]" $$ $e) [[${v}2]]]""".stripMargin -> wClause
+      preWhere +=
+        s"""[(datomic.api/q
+           |          "[:find (distinct ${v1}1)
+           |            :in $$ ${e1}1
+           |            :where [${e1}1 $exprAttr ${v1}1]]" $$ $e1) [[${v1}2]]]""".stripMargin -> wClause
+      preWhere += s"[(= ${v}2 ${v1}2)]" -> wClause
+
+      // Main query
+      inPost += blacklist
+      wherePost += s"[(contains? $blacklist $e1) $blacklisted]" -> wClause
+      wherePost += s"[(not $blacklisted)]" -> wClause
+    }
+    exprAttrVars1.get(exprAttr).fold {
+      exprAttrVars2 = exprAttrVars2 + (exprAttr -> process)
+    } { case (e, a) =>
+      process(e, a)
+    }
+  }
+
+  private def has[T: ClassTag](
+    e: Var, a: Att, v: Var, sets: Seq[Set[T]], tpe: String, toDatalog: T => String
+  ): Unit = {
+    where += s"[$e $a $v$tx]" -> wClause
+    if (sets.nonEmpty && sets.flatten.nonEmpty) {
+      where += s"(rule$v $e)" -> wClause
+      rules ++= mkRules(e, a, v, sets, tpe, toDatalog)
+    } else {
+      where += s"[(ground nil) $v]" -> wGround
+    }
+  }
+  private def has2(e: Var, a: Att, v: Var, exprAttr: String): Unit = {
+    where += s"[$e $a $v$tx]" -> wClause
+    val process: (Var, Var) => Unit = (e1: Var, v1: Var) => {
+      where +=
+        s"""[(datomic.api/q
+           |          "[:find (distinct ${v}1)
+           |            :in $$ ${e}1
+           |            :where [${e}1 $a ${v}1]]" $$ $e) [[${v}2]]]""".stripMargin -> wClause
+      where +=
+        s"""[(datomic.api/q
+           |          "[:find (distinct ${v1}1)
+           |            :in $$ ${e1}1
+           |            :where [${e1}1 $exprAttr ${v1}1]]" $$ $e1) [[${v1}2]]]""".stripMargin -> wClause
+      where += s"[(clojure.set/intersection ${v}2 ${v1}2) $v1-intersection]" -> wClause
+      where += s"[(= ${v1}2 $v1-intersection)]" -> wClause
+    }
+    exprAttrVars1.get(exprAttr).fold {
+      exprAttrVars2 = exprAttrVars2 + (exprAttr -> process)
+    } { case (e, a) =>
+      process(e, a)
+    }
+  }
+
+  private def hasNo[T](e: Var, a: Att, v: Var, sets: Seq[Set[T]], tpe: String, toDatalog: T => String): Unit = {
+    // Common for pre-query and main query
+    where += s"[$e $a $v$tx]" -> wClause
+
+    if (sets.nonEmpty && sets.flatten.nonEmpty) {
+      // Pre-query
+      preWhere += s"(rule$v $e)" -> wClause
+      preRules ++= mkRules(e, a, v, sets, tpe, toDatalog)
+
+      // Main query
+      val blacklist   = v + "-blacklist"
+      val blacklisted = v + "-blacklisted"
+      inPost += blacklist
+      wherePost += s"[(contains? $blacklist $e) $blacklisted]" -> wClause
+      wherePost += s"[(not $blacklisted)]" -> wClause
+    }
+  }
+  private def hasNo2(e: Var, a: Att, v: Var, exprAttr: String): Unit = {
+    // Common for pre-query and main query
+    where += s"[$e $a $v$tx]" -> wClause
+    val process: (Var, Var) => Unit = (e1: Var, v1: Var) => {
+      where +=
+        s"""[(datomic.api/q
+           |          "[:find (distinct ${v}1)
+           |            :in $$ ${e}1
+           |            :where [${e}1 $a ${v}1]]" $$ $e) [[${v}2]]]""".stripMargin -> wClause
+      where +=
+        s"""[(datomic.api/q
+           |          "[:find (distinct ${v1}1)
+           |            :in $$ ${e1}1
+           |            :where [${e1}1 $exprAttr ${v1}1]]" $$ $e1) [[${v1}2]]]""".stripMargin -> wClause
+      where += s"[(clojure.set/intersection ${v}2 ${v1}2) $v1-intersection]" -> wClause
+      where += s"[(empty? $v1-intersection)]" -> wClause
+    }
+    exprAttrVars1.get(exprAttr).fold {
+      exprAttrVars2 = exprAttrVars2 + (exprAttr -> process)
+    } { case (e, a) =>
+      process(e, a)
+    }
+  }
 
   private def compare[T](e: Var, a: Att, v: Var, arg: T, op: String, tpe: String, toDatalog: T => String): Unit = {
     where += s"[$e $a $v$tx]" -> wClause
@@ -350,6 +447,21 @@ trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
       case "URI"   => s"""[($op $v (new java.net.URI "$arg"))]]"""
       case _       => s"""[($op $v ${toDatalog(arg)})]]"""
     })
+  }
+  private def compare2(e: Var, a: Att, v: Var, op: String, exprAttr: String): Unit = {
+    where += s"[$e $a $v$tx]" -> wClause
+    val process: (Var, Var) => Unit = (e1: Var, v1: Var) => {
+      where +=
+        s"""[(datomic.api/q
+           |          "[:find $e
+           |            :in $$ $e $v1
+           |            :where [$e $a $v][($op $v $v1)]]" $$ $e $v1) [[${e}1]]]""".stripMargin -> wClause
+    }
+    exprAttrVars1.get(exprAttr).fold {
+      exprAttrVars2 = exprAttrVars2 + (exprAttr -> process)
+    } { case (e, a) =>
+      process(e, a)
+    }
   }
 
   private def noValue(e: Var, a: Att): Unit = {
@@ -444,6 +556,42 @@ trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
       where += s"[$e $a $v$tx]" -> wClause
     } { sets =>
       compare(e, a, v, sets.head.head, op, tpe, toDatalog)
+    }
+  }
+
+
+  private def mkRules[T](
+    e: Var, a: Att, v: Var, sets: Seq[Set[T]], tpe: String, toDatalog: T => String
+  ): Seq[String] = {
+    tpe match {
+      case "Float" =>
+        sets.flatMap {
+          case set if set.isEmpty => None
+          case set                => Some(
+            set.zipWithIndex.map { case (arg, i) =>
+              // Coerce Datomic float values for correct comparison (don't know why this is necessary)
+              // See example: https://clojurians-log.clojureverse.org/datomic/2019-10-29
+              s"""[$e $a $v$i] [(float $v$i) $v$i-float] [(= $v$i-float (float $arg))]"""
+            }.mkString(s"[(rule$v $e)\n    ", "\n    ", "]")
+          )
+        }
+      case "URI"   =>
+        sets.flatMap {
+          case set if set.isEmpty => None
+          case set                => Some(
+            set.zipWithIndex.map { case (arg, i) =>
+              s"""[(ground (new java.net.URI "$arg")) $v$i-uri] [$e $a $v$i-uri]"""
+            }.mkString(s"[(rule$v $e)\n    ", "\n    ", "]")
+          )
+        }
+      case _       =>
+        sets.flatMap {
+          case set if set.isEmpty => None
+          case set                => Some(
+            set.map(arg => s"[$e $a ${toDatalog(arg)}]")
+              .mkString(s"[(rule$v $e)\n    ", "\n    ", "]")
+          )
+        }
     }
   }
 }

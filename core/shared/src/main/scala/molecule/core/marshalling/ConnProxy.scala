@@ -2,7 +2,7 @@ package molecule.core.marshalling
 
 import java.util.UUID
 import molecule.base.api.SchemaTransaction
-import molecule.base.ast.SchemaAST.{Cardinality, MetaNs}
+import molecule.base.ast.SchemaAST._
 import molecule.core.marshalling.dbView.DbView
 import molecule.core.util.MetaModelUtils
 
@@ -22,7 +22,7 @@ sealed trait ConnProxy {
    *
    * Attr name -> (Cardinality, type string)
    * */
-  val attrMap: Map[String, (Cardinality, String, Seq[String])]
+  val attrMap: Map[String, (Card, String, Seq[String])]
 
   val uniqueAttrs: List[String]
 
@@ -63,7 +63,7 @@ case class DatomicPeerProxy(
   schema: Seq[String],
   nsMap: Map[String, MetaNs],
   hasMandatoryRefs: Boolean,
-  attrMap: Map[String, (Cardinality, String, Seq[String])],
+  attrMap: Map[String, (Card, String, Seq[String])],
   uniqueAttrs: List[String],
 
   // Internal settings, not intended to be set by user

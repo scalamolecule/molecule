@@ -1,6 +1,6 @@
 package molecule.base
 
-import molecule.base.ast.SchemaAST.MetaSchema
+import molecule.base.ast.SchemaAST._
 import molecule.base.codegen.extract.DataModel2MetaSchema
 import molecule.base.codegen.render.Dsl
 import molecule.base.util.RegexMatching

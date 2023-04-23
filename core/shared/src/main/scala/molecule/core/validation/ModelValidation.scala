@@ -1,8 +1,7 @@
 package molecule.core.validation
 
-import molecule.base.ast.SchemaAST.{Cardinality, MetaNs}
+import molecule.base.ast.SchemaAST._
 import molecule.base.error._
-import molecule.boilerplate.ast.Model
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.ops.ModelTransformations_
 import scala.annotation.tailrec
@@ -10,7 +9,7 @@ import scala.annotation.tailrec
 
 case class ModelValidation(
   nsMap: Map[String, MetaNs],
-  attrMap: Map[String, (Cardinality, String, Seq[String])],
+  attrMap: Map[String, (Card, String, Seq[String])],
   action: String,
   getCurSetValues: Option[Attr => Set[Any]] = None
 ) extends ModelTransformations_ {

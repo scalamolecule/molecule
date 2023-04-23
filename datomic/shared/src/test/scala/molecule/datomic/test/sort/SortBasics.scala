@@ -7,7 +7,7 @@ import molecule.datomic.setup.DatomicTestSuite
 import molecule.datomic.async._
 import utest._
 
-object SortIndexes extends DatomicTestSuite {
+object SortBasics extends DatomicTestSuite {
 
 
   override lazy val tests = Tests {

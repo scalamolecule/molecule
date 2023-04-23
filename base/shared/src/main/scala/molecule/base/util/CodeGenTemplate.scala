@@ -9,6 +9,7 @@ abstract class CodeGenTemplate(val fileName: String, dir: String, basePath: Stri
   class TemplateVals(arity: Int) {
     lazy val s          = " "
     lazy val V          = ('A' + arity - 1).toChar
+    lazy val X          = ('A' + arity - 1).toChar
     lazy val tpes       = (0 until arity) map (n => (n + 'A').toChar)
     lazy val tpesSmall  = (0 until arity) map (n => (n + 'a').toChar)
     lazy val `A..V`     = tpes.mkString(", ")

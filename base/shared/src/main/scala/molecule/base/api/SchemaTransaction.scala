@@ -13,7 +13,7 @@ trait SchemaTransaction {
   val nsMap: Map[String, MetaNs]
 
   /** Attribute name -> (Cardinality, Scala type, Required attributes) */
-  val attrMap: Map[String, (Cardinality, String, Seq[String])]
+  val attrMap: Map[String, (Card, String, Seq[String])]
 
   val uniqueAttrs: List[String]
 

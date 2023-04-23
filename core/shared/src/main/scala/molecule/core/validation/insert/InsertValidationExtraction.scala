@@ -1,6 +1,6 @@
 package molecule.core.validation.insert
 
-import molecule.base.ast.SchemaAST.MetaNs
+import molecule.base.ast.SchemaAST._
 import molecule.base.error.{InsertError, ModelError}
 import molecule.boilerplate.ast.Model._
 import molecule.core.transaction.InsertValidators_

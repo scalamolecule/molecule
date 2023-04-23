@@ -22,10 +22,10 @@ case class Dsl_Arities(schema: MetaSchema, partPrefix: String, namespace: MetaNs
   var hasMap = false
 
   val maxCardPad = attrsAll.map(a => a.card match {
-    case CardOne => hasOne = true; 0
-    case CardSet => hasSet = true; 5
-    case CardArr => hasArr = true; 7
-    case CardMap => hasMap = true; 13
+    case _: CardOne => hasOne = true; 0
+    case _: CardSet => hasSet = true; 5
+    //    case CardArr => hasArr = true; 7
+    //    case CardMap => hasMap = true; 13
   }).max
 
   val pOne = " " * maxCardPad
@@ -45,10 +45,10 @@ case class Dsl_Arities(schema: MetaSchema, partPrefix: String, namespace: MetaNs
       val pad4 = " " * (maxTpeCustom + "Option[]".length + maxCardPad)
 
       val (tM, tO) = card match {
-        case CardOne => (tpe + pOne, s"Option[$tpe]" + pOne)
-        case CardSet => (s"Set[$tpe]" + pSet, s"Option[Set[$tpe]]" + pSet)
-        case CardArr => (s"Array[$tpe]" + pArr, s"Option[Array[$tpe]]" + pArr)
-        case CardMap => (s"Map[String, $tpe]" + pMap, s"Option[Map[String, $tpe]]" + pMap)
+        case _: CardOne => (tpe + pOne, s"Option[$tpe]" + pOne)
+        case _: CardSet => (s"Set[$tpe]" + pSet, s"Option[Set[$tpe]]" + pSet)
+        //        case CardArr => (s"Array[$tpe]" + pArr, s"Option[Array[$tpe]]" + pArr)
+        //        case CardMap => (s"Map[String, $tpe]" + pMap, s"Option[Map[String, $tpe]]" + pMap)
       }
 
       lazy val tpesM = s"${`A..V, `}$tM$pad3, $tpe$pad1"
@@ -72,18 +72,18 @@ case class Dsl_Arities(schema: MetaSchema, partPrefix: String, namespace: MetaNs
       lazy val exprT = s"Expr${c}Tac${_0}[$tpesT, $ns_0, $nextNs]"
 
       if (!last) {
-        man += s"""lazy val $attr  $padA = new $ns_1[$tpesM]($elemsM) with $exprM"""
+        man += s"""lazy val $attr  $padA = new $ns_1[$tpesM]($elemsM) with $exprM with $card"""
         if (!genericAttrs.contains(attr))
-          opt += s"""lazy val ${attr}_?$padA = new $ns_1[$tpesO]($elemsO) with $exprO"""
+          opt += s"""lazy val ${attr}_?$padA = new $ns_1[$tpesO]($elemsO) with $exprO with $card"""
       }
-      tac += s"""lazy val ${attr}_ $padA = new $ns_0[$tpesT]($elemsT) with $exprT"""
+      tac += s"""lazy val ${attr}_ $padA = new $ns_0[$tpesT]($elemsT) with $exprT with $card"""
   }
 
   if (first) {
     if (hasOne)
-      res += s"override protected def _exprOneTac(op: Op, vs: Seq[t]$pOne) = new $ns_0[t](addOne(elements, op, vs))"
+      res += s"override protected def _exprOneTac(op: Op, vs: Seq[t]$pOne) = new $ns_0[t](addOne(elements, op, vs)) with CardOne"
     if (hasSet)
-      res += s"override protected def _exprSetTac(op: Op, vs: Seq[Set[t]]$pSet) = new $ns_0[t](addSet(elements, op, vs))"
+      res += s"override protected def _exprSetTac(op: Op, vs: Seq[Set[t]]$pSet) = new $ns_0[t](addSet(elements, op, vs)) with CardSet"
 
   } else {
     val tInt_ = s"${`A..U`}Int   , Int   "
@@ -117,14 +117,14 @@ case class Dsl_Arities(schema: MetaSchema, partPrefix: String, namespace: MetaNs
       res += s"$agg6[$tA___](asIs     (elements, kw    ))"
     }
     if (hasOne) {
-      res += s"$one1[$tA___](addOne   (elements, op, vs)) with SortAttrs_$arity[$tA___, $ns_0]"
+      res += s"$one1[$tA___](addOne   (elements, op, vs)) with SortAttrs_$arity[$tA___, $ns_0] with CardOne"
       res += s"$one2[$tA___](addOptOne(elements, op, vs)) with SortAttrs_$arity[$tA___, $ns_0]"
-      res += s"$one3[$tA___](addOne   (elements, op, vs))"
+      res += s"$one3[$tA___](addOne   (elements, op, vs)) with CardOne"
     }
     if (hasSet) {
-      res += s"$set1[$tA___](addSet   (elements, op, vs))"
+      res += s"$set1[$tA___](addSet   (elements, op, vs)) with CardSet"
       res += s"$set2[$tA___](addOptSet(elements, op, vs))"
-      res += s"$set3[$tA___](addSet   (elements, op, vs))"
+      res += s"$set3[$tA___](addSet   (elements, op, vs)) with CardSet"
     }
     res += s"$one4[$tA___](addSort  (elements, sort  ))"
   }
@@ -157,14 +157,14 @@ case class Dsl_Arities(schema: MetaSchema, partPrefix: String, namespace: MetaNs
        |  override protected def _attrMan[X, ns1[_, _], ns2[_, _, _]](op: Op, a: ModelOps_1[X, t, ns1, ns2]) = new $ns_1[X, t](exprAttr(elements, op, a))""".stripMargin
   } else if (last) {
     s"""
-       |  override protected def _attrSortTac[ns1[_], ns2[_, _]](op: Op, a: ModelOps_0[t, ns1, ns2]) = new $ns_0[${`A..V`}, t](exprAttr(elements, op, a)) with SortAttrs${_0}[${`A..V`}, t, $ns_0]
-       |  override protected def _attrTac    [ns1[_], ns2[_, _]](op: Op, a: ModelOps_0[t, ns1, ns2]) = new $ns_0[${`A..V`}, t](exprAttr(elements, op, a))""".stripMargin
+       |  override protected def _attrSortTac[ns1[_], ns2[_, _]](op: Op, a: ModelOps_0[t, ns1, ns2] with CardOne) = new $ns_0[${`A..V`}, t](exprAttr(elements, op, a)) with SortAttrs${_0}[${`A..V`}, t, $ns_0]
+       |  override protected def _attrTac    [ns1[_], ns2[_, _]](op: Op, a: ModelOps_0[t, ns1, ns2]             ) = new $ns_0[${`A..V`}, t](exprAttr(elements, op, a))""".stripMargin
   } else {
     s"""
-       |  override protected def _attrSortTac[   ns1[_]   , ns2[_, _]   ](op: Op, a: ModelOps_0[   t, ns1, ns2]) = new $ns_0[${`A..V`},    t](exprAttr(elements, op, a)) with SortAttrs${_0}[${`A..V`},    t, $ns_0]
-       |  override protected def _attrTac    [   ns1[_]   , ns2[_, _]   ](op: Op, a: ModelOps_0[   t, ns1, ns2]) = new $ns_0[${`A..V`},    t](exprAttr(elements, op, a))
-       |  override protected def _attrSortMan[X, ns1[_, _], ns2[_, _, _]](op: Op, a: ModelOps_1[X, t, ns1, ns2]) = new $ns_1[${`A..V`}, X, t](exprAttr(elements, op, a)) with SortAttrs${_1}[${`A..V`}, X, t, $ns_1]
-       |  override protected def _attrMan    [X, ns1[_, _], ns2[_, _, _]](op: Op, a: ModelOps_1[X, t, ns1, ns2]) = new $ns_1[${`A..V`}, X, t](exprAttr(elements, op, a))""".stripMargin
+       |  override protected def _attrSortTac[   ns1[_]   , ns2[_, _]   ](op: Op, a: ModelOps_0[   t, ns1, ns2] with CardOne) = new $ns_0[${`A..V`},    t](exprAttr(elements, op, a)) with SortAttrs${_0}[${`A..V`},    t, $ns_0]
+       |  override protected def _attrSortMan[   ns1[_, _], ns2[_, _, _]](op: Op, a: ModelOps_1[$V, t, ns1, ns2]             ) = new $ns_1[${`A..V`}, $V, t](exprAttr(elements, op, a)) with SortAttrs${_1}[${`A..V`}, $V, t, $ns_1]
+       |  override protected def _attrTac    [   ns1[_]   , ns2[_, _]   ](op: Op, a: ModelOps_0[   t, ns1, ns2]             ) = new $ns_0[${`A..V`},    t](exprAttr(elements, op, a))
+       |  override protected def _attrMan    [X, ns1[_, _], ns2[_, _, _]](op: Op, a: ModelOps_1[X, t, ns1, ns2]             ) = new $ns_1[${`A..V`}, X, t](exprAttr(elements, op, a))""".stripMargin
   }
 
 
