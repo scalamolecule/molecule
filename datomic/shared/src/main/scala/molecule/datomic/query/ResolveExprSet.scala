@@ -89,16 +89,16 @@ trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
     val v = vv
     find += s"(distinct $v)"
     addCast(res.j2s)
-    attr.exprAttr.fold {
-      if (exprAttrVars.contains(attr.name) && attr.op != V) {
+    attr.filterAttr.fold {
+      if (filterAttrVars.contains(attr.name) && attr.op != V) {
         // Runtime check needed since we can't type infer it
-        throw ModelError(s"Cardinality-Set expression attributes can't have expressions. Found:\n  " + attr)
+        throw ModelError(s"Cardinality-set filter attributes not allowed to do additional filtering. Found:\n  " + attr)
       }
       expr(e, a, v, attr.op, args, res)
-      exprAttrVars1 = exprAttrVars1 + (a -> (e, v))
-      exprAttrVars2.get(a).foreach(_(e, v))
-    } { exprAttr =>
-      expr2(e, a, v, attr.op, s":${exprAttr.ns}/${exprAttr.attr}")
+      filterAttrVars1 = filterAttrVars1 + (a -> (e, v))
+      filterAttrVars2.get(a).foreach(_(e, v))
+    } { filterAttr =>
+      expr2(e, a, v, attr.op, s":${filterAttr.ns}/${filterAttr.attr}")
     }
   }
 
@@ -110,12 +110,12 @@ trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
     res: ResSet[T],
   ): Unit = {
     val v = vv
-    attr.exprAttr.fold {
+    attr.filterAttr.fold {
       expr(e, a, v, attr.op, args, res)
-      exprAttrVars1 = exprAttrVars1 + (a -> (e, v))
-      exprAttrVars2.get(a).foreach(_(e, v))
-    } { exprAttr =>
-      expr2(e, a, v, attr.op, s":${exprAttr.ns}/${exprAttr.attr}")
+      filterAttrVars1 = filterAttrVars1 + (a -> (e, v))
+      filterAttrVars2.get(a).foreach(_(e, v))
+    } { filterAttr =>
+      expr2(e, a, v, attr.op, s":${filterAttr.ns}/${filterAttr.attr}")
     }
   }
 
@@ -148,17 +148,17 @@ trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
     a: Att,
     v: Var,
     op: Op,
-    exprAttr: String
+    filterAttr: String
   ): Unit = {
     op match {
-      case Eq    => equal2(e, a, v, exprAttr)
-      case Neq   => neq2(e, a, v, exprAttr)
-      case Has   => has2(e, a, v, exprAttr)
-      case HasNo => hasNo2(e, a, v, exprAttr)
-      case HasLt => compare2(e, a, v, "<", exprAttr)
-      case HasGt => compare2(e, a, v, ">", exprAttr)
-      case HasLe => compare2(e, a, v, "<=", exprAttr)
-      case HasGe => compare2(e, a, v, ">=", exprAttr)
+      case Eq    => equal2(e, a, v, filterAttr)
+      case Neq   => neq2(e, a, v, filterAttr)
+      case Has   => has2(e, a, v, filterAttr)
+      case HasNo => hasNo2(e, a, v, filterAttr)
+      case HasLt => compare2(e, a, v, "<", filterAttr)
+      case HasGt => compare2(e, a, v, ">", filterAttr)
+      case HasLe => compare2(e, a, v, "<=", filterAttr)
+      case HasGe => compare2(e, a, v, ">=", filterAttr)
       case other => unexpectedOp(other)
     }
   }
@@ -286,7 +286,7 @@ trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
     where += s"[(= $v2 $set)]" -> wClause
     args += sets.map(set => set.map(fromScala).asJava).asJava
   }
-  private def equal2(e: Var, a: Att, v: Var, exprAttr: String): Unit = {
+  private def equal2(e: Var, a: Att, v: Var, filterAttr: String): Unit = {
     preFind = e
 
     where += s"[$e $a $v$tx]" -> wClause
@@ -300,11 +300,11 @@ trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
         s"""[(datomic.api/q
            |          "[:find (distinct ${v1}1)
            |            :in $$ ${e1}1
-           |            :where [${e1}1 $exprAttr ${v1}1]]" $$ $e1) [[${v1}2]]]""".stripMargin -> wClause
+           |            :where [${e1}1 $filterAttr ${v1}1]]" $$ $e1) [[${v1}2]]]""".stripMargin -> wClause
       where += s"[(= ${v}2 ${v1}2)]" -> wClause
     }
-    exprAttrVars1.get(exprAttr).fold {
-      exprAttrVars2 = exprAttrVars2 + (exprAttr -> link)
+    filterAttrVars1.get(filterAttr).fold {
+      filterAttrVars2 = filterAttrVars2 + (filterAttr -> link)
     } { case (e, a) => link(e, a) }
   }
 
@@ -332,7 +332,7 @@ trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
       wherePost += s"[(not $blacklisted)]" -> wClause
     }
   }
-  private def neq2(e: Var, a: Att, v: Var, exprAttr: String): Unit = {
+  private def neq2(e: Var, a: Att, v: Var, filterAttr: String): Unit = {
     where += s"[$e $a $v$tx]" -> wClause
     val process: (Var, Var) => Unit = (e1: Var, v1: Var) => {
       val blacklist   = v1 + "-blacklist"
@@ -349,7 +349,7 @@ trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
         s"""[(datomic.api/q
            |          "[:find (distinct ${v1}1)
            |            :in $$ ${e1}1
-           |            :where [${e1}1 $exprAttr ${v1}1]]" $$ $e1) [[${v1}2]]]""".stripMargin -> wClause
+           |            :where [${e1}1 $filterAttr ${v1}1]]" $$ $e1) [[${v1}2]]]""".stripMargin -> wClause
       preWhere += s"[(= ${v}2 ${v1}2)]" -> wClause
 
       // Main query
@@ -357,8 +357,8 @@ trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
       wherePost += s"[(contains? $blacklist $e1) $blacklisted]" -> wClause
       wherePost += s"[(not $blacklisted)]" -> wClause
     }
-    exprAttrVars1.get(exprAttr).fold {
-      exprAttrVars2 = exprAttrVars2 + (exprAttr -> process)
+    filterAttrVars1.get(filterAttr).fold {
+      filterAttrVars2 = filterAttrVars2 + (filterAttr -> process)
     } { case (e, a) =>
       process(e, a)
     }
@@ -375,7 +375,7 @@ trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
       where += s"[(ground nil) $v]" -> wGround
     }
   }
-  private def has2(e: Var, a: Att, v: Var, exprAttr: String): Unit = {
+  private def has2(e: Var, a: Att, v: Var, filterAttr: String): Unit = {
     where += s"[$e $a $v$tx]" -> wClause
     val process: (Var, Var) => Unit = (e1: Var, v1: Var) => {
       where +=
@@ -387,12 +387,12 @@ trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
         s"""[(datomic.api/q
            |          "[:find (distinct ${v1}1)
            |            :in $$ ${e1}1
-           |            :where [${e1}1 $exprAttr ${v1}1]]" $$ $e1) [[${v1}2]]]""".stripMargin -> wClause
+           |            :where [${e1}1 $filterAttr ${v1}1]]" $$ $e1) [[${v1}2]]]""".stripMargin -> wClause
       where += s"[(clojure.set/intersection ${v}2 ${v1}2) $v1-intersection]" -> wClause
       where += s"[(= ${v1}2 $v1-intersection)]" -> wClause
     }
-    exprAttrVars1.get(exprAttr).fold {
-      exprAttrVars2 = exprAttrVars2 + (exprAttr -> process)
+    filterAttrVars1.get(filterAttr).fold {
+      filterAttrVars2 = filterAttrVars2 + (filterAttr -> process)
     } { case (e, a) =>
       process(e, a)
     }
@@ -415,7 +415,7 @@ trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
       wherePost += s"[(not $blacklisted)]" -> wClause
     }
   }
-  private def hasNo2(e: Var, a: Att, v: Var, exprAttr: String): Unit = {
+  private def hasNo2(e: Var, a: Att, v: Var, filterAttr: String): Unit = {
     // Common for pre-query and main query
     where += s"[$e $a $v$tx]" -> wClause
     val process: (Var, Var) => Unit = (e1: Var, v1: Var) => {
@@ -428,12 +428,12 @@ trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
         s"""[(datomic.api/q
            |          "[:find (distinct ${v1}1)
            |            :in $$ ${e1}1
-           |            :where [${e1}1 $exprAttr ${v1}1]]" $$ $e1) [[${v1}2]]]""".stripMargin -> wClause
+           |            :where [${e1}1 $filterAttr ${v1}1]]" $$ $e1) [[${v1}2]]]""".stripMargin -> wClause
       where += s"[(clojure.set/intersection ${v}2 ${v1}2) $v1-intersection]" -> wClause
       where += s"[(empty? $v1-intersection)]" -> wClause
     }
-    exprAttrVars1.get(exprAttr).fold {
-      exprAttrVars2 = exprAttrVars2 + (exprAttr -> process)
+    filterAttrVars1.get(filterAttr).fold {
+      filterAttrVars2 = filterAttrVars2 + (filterAttr -> process)
     } { case (e, a) =>
       process(e, a)
     }
@@ -448,7 +448,7 @@ trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
       case _       => s"""[($op $v ${toDatalog(arg)})]]"""
     })
   }
-  private def compare2(e: Var, a: Att, v: Var, op: String, exprAttr: String): Unit = {
+  private def compare2(e: Var, a: Att, v: Var, op: String, filterAttr: String): Unit = {
     where += s"[$e $a $v$tx]" -> wClause
     val process: (Var, Var) => Unit = (e1: Var, v1: Var) => {
       where +=
@@ -457,8 +457,8 @@ trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
            |            :in $$ $e $v1
            |            :where [$e $a $v][($op $v $v1)]]" $$ $e $v1) [[${e}1]]]""".stripMargin -> wClause
     }
-    exprAttrVars1.get(exprAttr).fold {
-      exprAttrVars2 = exprAttrVars2 + (exprAttr -> process)
+    filterAttrVars1.get(filterAttr).fold {
+      filterAttrVars2 = filterAttrVars2 + (filterAttr -> process)
     } { case (e, a) =>
       process(e, a)
     }

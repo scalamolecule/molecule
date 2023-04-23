@@ -56,28 +56,28 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
       if (a.ns == "_Generic" && a.attr == "tx") {
         addTxVar = true
         List(a)
-      } else if (a.exprAttr.nonEmpty) {
-        val ea = a.exprAttr.get
-        if (ea.exprAttr.nonEmpty) {
-          throw ModelError(s"Nested expression attributes not allowed in ${a.ns}.${a.attr}")
+      } else if (a.filterAttr.nonEmpty) {
+        val fa = a.filterAttr.get
+        if (fa.filterAttr.nonEmpty) {
+          throw ModelError(s"Nested filter attributes not allowed in ${a.ns}.${a.attr}")
         }
-        val exprAttr = ea.name
-        exprAttrVars.get(exprAttr).fold {
+        val filterAttr = fa.name
+        filterAttrVars.get(filterAttr).fold {
           // Create datomic variable for this expression attribute
-          exprAttrVars = exprAttrVars + (exprAttr -> vv)
+          filterAttrVars = filterAttrVars + (filterAttr -> vv)
         }(_ =>
-          throw ModelError(s"Can't refer to ambiguous expression attribute $exprAttr")
+          throw ModelError(s"Can't refer to ambiguous filter attribute $filterAttr")
         )
-        if (ea.ns == a.ns) {
+        if (fa.ns == a.ns) {
           // Add adjacent expression attribute after this attribute
-          List(a, ea)
-        } else if (ea.isInstanceOf[Mandatory]) {
-          throw ModelError(s"Expression attribute $exprAttr pointing to other namespace should be tacit.")
-        } else if (ea.op != V) {
-          throw ModelError("Expressions inside cross-namespace attribute expression not allowed. Found:\n  " + ea)
+          List(a, fa)
+        } else if (fa.isInstanceOf[Mandatory]) {
+          throw ModelError(s"Filter attribute $filterAttr pointing to other namespace should be tacit.")
+        } else if (fa.op != V) {
+          throw ModelError("Filtering inside cross-namespace attribute filter not allowed. Found:\n  " + fa)
         } else {
           // Expect expression attribute in other namespace
-          expectedExprAttrs += ea.name
+          expectedFilterAttrs += fa.name
           List(a)
         }
       } else {
@@ -102,8 +102,8 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
     //    expectedExprAttrs.intersect(availableAttrs).foreach(println)
     //    println("--------------------------------------")
 
-    if (expectedExprAttrs.nonEmpty && expectedExprAttrs.intersect(availableAttrs) != expectedExprAttrs) {
-      throw ModelError("Please add missing expression attributes:\n  " + expectedExprAttrs.mkString("\n  "))
+    if (expectedFilterAttrs.nonEmpty && expectedFilterAttrs.intersect(availableAttrs) != expectedFilterAttrs) {
+      throw ModelError("Please add missing filter attributes:\n  " + expectedFilterAttrs.mkString("\n  "))
     }
 
     // Remember first entity id variable for subsequent composite groups

@@ -10,6 +10,8 @@ import scala.language.implicitConversions
 
 object AdhocJVM extends DatomicTestSuite {
 
+  List(1).take(2).drop(2)
+  List(1).takeRight(2).dropRight(2)
 
   override lazy val tests = Tests {
 

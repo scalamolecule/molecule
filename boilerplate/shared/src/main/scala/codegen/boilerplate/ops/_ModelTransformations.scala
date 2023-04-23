@@ -109,8 +109,8 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |    es.init :+ last
        |  }
        |
-       |  protected def exprAttr(es: List[Element], op: Op, attrMolecule: Molecule[_]): List[Element] = {
-       |    val exprAttr = attrMolecule.elements.last.asInstanceOf[Attr]
+       |  protected def filterAttr(es: List[Element], op: Op, attrMolecule: Molecule[_]): List[Element] = {
+       |    val filterAttr = attrMolecule.elements.last.asInstanceOf[Attr]
        |    val attr     = es.last match {
        |      case a: AttrOne => a match {
        |        case a: AttrOneMan => a match {
@@ -222,7 +222,7 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
 
   private def addExprAttr(card: String, mode: String): String = {
     baseTypesWithSpaces.map { case (baseType, space) =>
-      s"case a: Attr$card$mode$baseType $space=> a.copy(op = op, exprAttr = Some(exprAttr))"
+      s"case a: Attr$card$mode$baseType $space=> a.copy(op = op, filterAttr = Some(filterAttr))"
     }.mkString("\n          ")
   }
 
