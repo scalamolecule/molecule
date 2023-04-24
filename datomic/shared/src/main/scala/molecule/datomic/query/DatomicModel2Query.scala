@@ -95,13 +95,6 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
 
     val elements1 = prepare(elements, Nil)
 
-    //    availableAttrs.foreach(println)
-    //    println("---------")
-    //    expectedExprAttrs.foreach(println)
-    //    println("---------")
-    //    expectedExprAttrs.intersect(availableAttrs).foreach(println)
-    //    println("--------------------------------------")
-
     if (expectedFilterAttrs.nonEmpty && expectedFilterAttrs.intersect(availableAttrs) != expectedFilterAttrs) {
       throw ModelError("Please add missing filter attributes:\n  " + expectedFilterAttrs.mkString("\n  "))
     }
@@ -221,8 +214,12 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
     es: List[Var], nestedRef: Ref, nestedElements: List[Element]
   ): List[Var] = {
     isNestedOpt = true
-    if (isNested)
+    if (isNested) {
       noMixedNestedModes
+    }
+    if (expectedFilterAttrs.nonEmpty) {
+      throw ModelError("Filter attributes not allowed in optional nested data structure.")
+    }
     validateRefNs(nestedRef, nestedElements)
 
     // On top level, move past nested pull date to tx meta data (if any)
