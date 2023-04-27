@@ -9,6 +9,7 @@ object _ExprOneTac extends BoilerplateGenBase("ExprOneTac", "/api/expression") {
     s"""// GENERATED CODE ********************************
        |package molecule.boilerplate.api.expression
        |
+       |import molecule.base.ast.SchemaAST._
        |import molecule.boilerplate.api._
        |import molecule.boilerplate.api.Keywords.unify
        |import molecule.boilerplate.ast.Model._
@@ -62,6 +63,21 @@ object _ExprOneTac extends BoilerplateGenBase("ExprOneTac", "/api/expression") {
          |  def >    (lower: t        ): Ns1[${`A..V, `}t] with CardOne = _exprOneTac(Gt     , Seq(lower))
          |  def >=   (lower: t        ): Ns1[${`A..V, `}t] with CardOne = _exprOneTac(Ge     , Seq(lower))
          |  $attrExprs
+         |}
+         |trait $fileName_${arity}_String[${`A..V, `}t, Ns1[${`_, _`}], Ns2[${`_, _, _`}]] extends $fileName_$arity[${`A..V, `}t, Ns1, Ns2] {
+         |  def startsWith(prefix: t      ): Ns1[${`A..V, `}t] with CardOne = _exprOneTac(StartsWith, Seq(prefix))
+         |  def endsWith  (suffix: t      ): Ns1[${`A..V, `}t] with CardOne = _exprOneTac(EndsWith  , Seq(suffix))
+         |  def contains  (needle: t      ): Ns1[${`A..V, `}t] with CardOne = _exprOneTac(Contains  , Seq(needle))
+         |  def matches   (regex : t      ): Ns1[${`A..V, `}t] with CardOne = _exprOneTac(Matches   , Seq(regex) )
+         |}
+         |trait $fileName_${arity}_Number[${`A..V, `}t, Ns1[${`_, _`}], Ns2[${`_, _, _`}]] extends $fileName_$arity[${`A..V, `}t, Ns1, Ns2] {
+         |  def %(divider: t, remainder: t): Ns1[${`A..V, `}t] with CardOne = _exprOneTac(Remainder , Seq(divider, remainder))
+         |  def even                       : Ns1[${`A..V, `}t] with CardOne = _exprOneTac(Even      , Nil                    )
+         |  def odd                        : Ns1[${`A..V, `}t] with CardOne = _exprOneTac(Odd       , Nil                    )
          |}""".stripMargin
+//         |trait $fileName_${arity}_Decimal[${`A..V, `}t, Ns1[${`_, _`}], Ns2[${`_, _, _`}]] extends $fileName_$arity[${`A..V, `}t, Ns1, Ns2] {
+//         |  def whole                      : Ns1[${`A..V, `}t] with CardOne = _exprOneTac(Whole     , Nil)
+//         |  def fractional                 : Ns1[${`A..V, `}t] with CardOne = _exprOneTac(Fractional, Nil)
+//         |}""".stripMargin
   }
 }

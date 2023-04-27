@@ -18,8 +18,8 @@ case class Dsl_Arities(schema: MetaSchema, partPrefix: String, namespace: MetaNs
 
   var hasOne = false
   var hasSet = false
-  var hasArr = false
-  var hasMap = false
+  //  var hasArr = false
+  //  var hasMap = false
 
   val maxCardPad = attrsAll.map(a => a.card match {
     case _: CardOne => hasOne = true; 0
@@ -34,7 +34,7 @@ case class Dsl_Arities(schema: MetaSchema, partPrefix: String, namespace: MetaNs
   val pMap = " " * (maxCardPad - 13)
 
   attrsAll.foreach {
-    case MetaAttr(attr, card, tpe0, _, _, _, _, _, _, _) =>
+    case MetaAttr(attr, card, tpe0, refNs, _, _, _, _, _, _) =>
       val c   = card.marker
       val tpe = getTpe(tpe0)
 
@@ -67,9 +67,22 @@ case class Dsl_Arities(schema: MetaSchema, partPrefix: String, namespace: MetaNs
       val nextNextNs = if (secondLast) s"Dummy_${arity + 3}" else ns_2
       val nextNs     = if (last) s"Dummy_${arity + 2}" else ns_1
 
-      lazy val exprM = s"Expr${c}Man${_1}[$tpesM, $ns_1, $nextNextNs]"
-      lazy val exprO = s"Expr${c}Opt${_1}[$tpesO, $ns_1, $nextNextNs]"
-      lazy val exprT = s"Expr${c}Tac${_0}[$tpesT, $ns_0, $nextNs]"
+      val filters = if (card == CardOne && !genericAttrs.contains(attr) && refNs.isEmpty) tpe0 match {
+        case "String"     => "_String "
+        case "Int"        => "_Number "
+        case "Long"       => "_Number "
+//        case "Float"      => "_Decimal"
+//        case "Double"     => "_Decimal"
+        case "BigInt"     => "_Number "
+//        case "BigDecimal" => "_Decimal"
+        case "Byte"       => "_Number "
+        case "Short"      => "_Number "
+        case _            => "        "
+      } else "        "
+
+      lazy val exprM = s"Expr${c}Man${_1}$filters[$tpesM, $ns_1, $nextNextNs]"
+      lazy val exprO = s"Expr${c}Opt${_1}        [$tpesO, $ns_1, $nextNextNs]"
+      lazy val exprT = s"Expr${c}Tac${_0}$filters[$tpesT, $ns_0, $nextNs]"
 
       if (!last) {
         man += s"""lazy val $attr  $padA = new $ns_1[$tpesM]($elemsM) with $exprM with $card"""

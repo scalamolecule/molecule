@@ -106,6 +106,23 @@ trait Model extends Validations with Values {
   case object Le extends Op
   case object Gt extends Op
   case object Ge extends Op
+
+  case object StartsWith extends Op
+  case object EndsWith extends Op
+  case object Contains extends Op
+  case object Matches extends Op
+  case object Take extends Op
+  case object TakeRight extends Op
+  case object Drop extends Op
+  case object DropRight extends Op
+  case object SubString extends Op
+  case object Slice extends Op
+
+  case object Remainder extends Op
+  case object Even extends Op
+  case object Odd extends Op
+
+  // Cardinality Set
   case object Has extends Op
   case object HasNo extends Op
   case object HasLt extends Op
@@ -115,6 +132,7 @@ trait Model extends Validations with Values {
   case object Add extends Op
   case object Swap extends Op
   case object Remove extends Op
+
   case object Unify extends Op
   case class Fn(fn: String, n: Option[Int] = None) extends Op
 

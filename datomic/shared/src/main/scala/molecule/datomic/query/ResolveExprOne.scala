@@ -2,6 +2,7 @@ package molecule.datomic.query
 
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
+import scala.math.{max, min}
 import scala.reflect.ClassTag
 
 trait ResolveExprOne[Tpl]
@@ -218,16 +219,29 @@ trait ResolveExprOne[Tpl]
     res: ResOne[T],
   ): Unit = {
     op match {
-      case V         => attr(e, a, v)
-      case Eq        => equal(e, a, v, args, res.s2j)
-      case Neq       => neq(e, a, v, args, res.tpe, res.toDatalog)
-      case Lt        => compare(e, a, v, args.head, "<", res.s2j)
-      case Gt        => compare(e, a, v, args.head, ">", res.s2j)
-      case Le        => compare(e, a, v, args.head, "<=", res.s2j)
-      case Ge        => compare(e, a, v, args.head, ">=", res.s2j)
-      case NoValue   => noValue(e, a)
-      case Fn(kw, n) => aggr(e, a, v, kw, n, res)
-      case other     => unexpectedOp(other)
+      case V          => attr(e, a, v)
+      case Eq         => equal(e, a, v, args, res.s2j)
+      case Neq        => neq(e, a, v, args, res.tpe, res.toDatalog)
+      case Lt         => compare(e, a, v, args.head, "<", res.s2j)
+      case Gt         => compare(e, a, v, args.head, ">", res.s2j)
+      case Le         => compare(e, a, v, args.head, "<=", res.s2j)
+      case Ge         => compare(e, a, v, args.head, ">=", res.s2j)
+      case NoValue    => noValue(e, a)
+      case Fn(kw, n)  => aggr(e, a, v, kw, n, res)
+      case StartsWith => stringOp(e, a, v, args.head, "starts-with?")
+      case EndsWith   => stringOp(e, a, v, args.head, "ends-with?")
+      case Contains   => stringOp(e, a, v, args.head, "includes?")
+      case Matches    => regex(e, a, v, args.head)
+      case Take       => string(e, a, v, args, "take")
+      case TakeRight  => string(e, a, v, args, "takeRight")
+      case Drop       => string(e, a, v, args, "drop")
+      case DropRight  => string(e, a, v, args, "dropRight")
+      case SubString  => string(e, a, v, args, "slice")
+      case Slice      => string(e, a, v, args, "slice")
+      case Remainder  => remainder(e, a, v, args)
+      case Even       => even(e, a, v)
+      case Odd        => odd(e, a, v)
+      case other      => unexpectedOp(other)
     }
   }
   private def expr2(
@@ -245,6 +259,81 @@ trait ResolveExprOne[Tpl]
       case Le    => compare2(e, a, v, w, "<=")
       case Ge    => compare2(e, a, v, w, ">=")
       case other => unexpectedOp(other)
+    }
+  }
+
+
+  private def stringOp[T](e: Var, a: Att, v: Var, arg: T, predicate: String): Unit = {
+    val v1 = v + 1
+    in += v1
+    where += s"[$e $a $v$tx]" -> wClause
+    where += s"[(clojure.string/$predicate $v $v1)]" -> wNeqOne
+    args += arg.asInstanceOf[AnyRef]
+  }
+  private def regex[T](e: Var, a: Att, v: Var, regex: T): Unit = {
+    where += s"[$e $a $v$tx]" -> wClause
+    where += s"""[(re-find #"$regex" $v)]""" -> wNeqOne
+  }
+
+  private def remainder[T](e: Var, a: Att, v: Var, args: Seq[T]): Unit = {
+    where += s"[$e $a $v$tx]" -> wClause
+    where += s"""[(rem $v ${args.head}) $v-rem]""" -> wNeqOne
+    where += s"""[(= $v-rem ${args(1)})]""" -> wNeqOne
+  }
+  private def even(e: Var, a: Att, v: Var): Unit = {
+    where += s"[$e $a $v$tx]" -> wClause
+    where += s"""[(even? $v)]""" -> wNeqOne
+  }
+  private def odd(e: Var, a: Att, v: Var): Unit = {
+    where += s"[$e $a $v$tx]" -> wClause
+    where += s"""[(odd? $v)]""" -> wNeqOne
+  }
+
+
+  private def string[T: ClassTag](e: Var, a: Att, v: Var, args: Seq[T], op: String): Unit = {
+    find -= v
+    where += s"[$e $a $v$tx]" -> wClause
+    op match {
+      case "take" =>
+        find += s"$v-1"
+        where += s"[(max 0 ${args.head}) $v-n]" -> wNeqOne
+        where += s"[(count $v) $v-length]" -> wNeqOne
+        where += s"[(> $v-n 0)]" -> wNeqOne
+        where += s"[(min $v-n $v-length) $v-end]" -> wNeqOne
+        where += s"[(subs $v 0 $v-end) $v-1]" -> wNeqOne
+
+      case "takeRight" =>
+        find += s"$v-1"
+        where += s"[(max 0 ${args.head}) $v-n]" -> wNeqOne
+        where += s"[(count $v) $v-length]" -> wNeqOne
+        where += s"[(> $v-n 0)]" -> wNeqOne
+        where += s"[(- $v-length $v-n) $v-back]" -> wNeqOne
+        where += s"[(max 0 $v-back) $v-begin]" -> wNeqOne
+        where += s"[(subs $v $v-begin $v-length) $v-1]" -> wNeqOne
+
+      case "drop" =>
+        find += s"$v-1"
+        where += s"[(max 0 ${args.head}) $v-n]" -> wNeqOne
+        where += s"[(count $v) $v-length]" -> wNeqOne
+        where += s"[(< $v-n $v-length)]" -> wNeqOne
+        where += s"[(min $v-n $v-length) $v-begin]" -> wNeqOne
+        where += s"[(subs $v $v-begin $v-length) $v-1]" -> wNeqOne
+
+      case "dropRight" =>
+        find += s"$v-1"
+        where += s"[(max 0 ${args.head}) $v-n]" -> wNeqOne
+        where += s"[(count $v) $v-length]" -> wNeqOne
+        where += s"[(< $v-n $v-length)]" -> wNeqOne
+        where += s"[(- $v-length $v-n) $v-end]" -> wNeqOne
+        where += s"[(subs $v 0 $v-end) $v-1]" -> wNeqOne
+
+      case "slice" =>
+        find += s"$v-1"
+        where += s"[(count $v) $v-length]" -> wNeqOne
+        where += s"[(max 0 ${args.head}) $v-from]" -> wNeqOne
+        where += s"[(min $v-length (max 0 ${args(1)})) $v-until]" -> wNeqOne
+        where += s"[(< $v-from $v-until)]" -> wNeqOne
+        where += s"[(subs $v $v-from $v-until) $v-1]" -> wNeqOne
     }
   }
 

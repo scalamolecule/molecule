@@ -1,11 +1,15 @@
 package molecule.datomic.action
 
+import java.util.Date
 import molecule.boilerplate.ast.Model._
 import molecule.core.action.{Action, Query}
+import molecule.core.api.TxReport
+import molecule.core.marshalling.dbView._
 
 case class DatomicQuery[Tpl](
   private val elements0: List[Element],
-  limit: Option[Int] = None
+  limit: Option[Int] = None,
+  dbView: Option[DbView] = None
 ) extends Action(elements0) with Query[Tpl] {
 
   // Universal api
@@ -17,8 +21,15 @@ case class DatomicQuery[Tpl](
   // Datomic special features
 
   // Time
-  def asOf(n: Int): DatomicQuery[Tpl] = ???
-  def since(n: Int): DatomicQuery[Tpl] = ???
-  def widh(n: Int): DatomicQuery[Tpl] = ???
-  def history: DatomicQuery[Tpl] = ???
+  def asOf(d: Date): DatomicQuery[Tpl] = copy(dbView = Some(AsOf(TxDate(d))))
+  def asOf(t: Long): DatomicQuery[Tpl] = copy(dbView = Some(AsOf(TxLong(t))))
+  def asOf(txReport: TxReport): DatomicQuery[Tpl] = copy(dbView = Some(AsOf(TxLong(txReport.tx))))
+
+  def since(d: Date): DatomicQuery[Tpl] = copy(dbView = Some(Since(TxDate(d))))
+  def since(t: Long): DatomicQuery[Tpl] = copy(dbView = Some(Since(TxLong(t))))
+  def since(txReport: TxReport): DatomicQuery[Tpl] = copy(dbView = Some(Since(TxLong(txReport.tx))))
+
+  def widh(txData: Seq[Element]*): DatomicQuery[Tpl] = copy(dbView = Some(With(txData)))
+
+  def history: DatomicQuery[Tpl] = copy(dbView = Some(History))
 }

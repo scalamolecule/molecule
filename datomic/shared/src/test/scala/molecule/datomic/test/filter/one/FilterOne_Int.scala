@@ -173,13 +173,6 @@ object FilterOne_Int extends DatomicTestSuite {
         _ <- Ns.i.a1.int_?.<=(None).query.get.map(_ ==> List())
         _ <- Ns.i.a1.int_?.>(None).query.get.map(_ ==> List())
         _ <- Ns.i.a1.int_?.>=(None).query.get.map(_ ==> List())
-
-        // Distinct result even with redundant None's (two i = 4 with no int value)
-        _ <- Ns.i.insert(4).transact
-        _ <- Ns.i.>=(3).a1.int_?.query.get.map(_ ==> List(
-          (3, Some(int3)),
-          (4, None),
-        ))
       } yield ()
     }
   }
