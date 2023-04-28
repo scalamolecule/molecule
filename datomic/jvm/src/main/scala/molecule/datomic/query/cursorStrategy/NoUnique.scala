@@ -4,6 +4,7 @@ import java.util.Base64
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
+import molecule.core.marshalling.dbView.DbView
 import molecule.core.util.FutureUtils
 import molecule.datomic.facade.DatomicConn_JVM
 import molecule.datomic.query.DatomicQueryResolve
@@ -12,8 +13,9 @@ import molecule.datomic.query.DatomicQueryResolve
 case class NoUnique[Tpl](
   elements: List[Element],
   limit: Option[Int],
-  cursor: String
-) extends DatomicQueryResolve[Tpl](elements, limit)
+  cursor: String,
+  dbView: Option[DbView]
+) extends DatomicQueryResolve[Tpl](elements, limit, dbView)
   with FutureUtils with CursorUtils with MoleculeLogging {
 
   def getPage(allTokens: List[String], limit: Int)

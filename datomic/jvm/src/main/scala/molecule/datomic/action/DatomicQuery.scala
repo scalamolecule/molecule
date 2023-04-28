@@ -10,7 +10,7 @@ case class DatomicQuery[Tpl](
   private val elements0: List[Element],
   limit: Option[Int] = None,
   dbView: Option[DbView] = None
-) extends Action(elements0) with Query[Tpl] {
+) extends Query[Tpl](elements0) {
 
   // Universal api
 
@@ -29,7 +29,8 @@ case class DatomicQuery[Tpl](
   def since(t: Long): DatomicQuery[Tpl] = copy(dbView = Some(Since(TxLong(t))))
   def since(txReport: TxReport): DatomicQuery[Tpl] = copy(dbView = Some(Since(TxLong(txReport.tx))))
 
-  def widh(txData: Seq[Element]*): DatomicQuery[Tpl] = copy(dbView = Some(With(txData)))
+  def widh(txData: Action*): DatomicQuery[Tpl] = ??? // copy(dbView = Some(With(txData)))
+//  def widh(txData: Seq[Element]*): DatomicQuery[Tpl] = copy(dbView = Some(With(txData)))
 
   def history: DatomicQuery[Tpl] = copy(dbView = Some(History))
 }

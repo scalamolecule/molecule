@@ -28,13 +28,13 @@ trait DatomicApiAsync
 
   implicit class datomicQueryApiAsync[Tpl](q: DatomicQuery[Tpl]) extends QueryApi[Tpl] {
     override def get(implicit conn: Connection, ec: ExecutionContext): Future[List[Tpl]] = {
-      DatomicQueryResolveOffset[Tpl](q.elements, q.limit, None)
+      DatomicQueryResolveOffset[Tpl](q.elements, q.limit, None, q.dbView)
         .getListFromOffset_async(conn.asInstanceOf[DatomicConn_JVM], ec).map(_._1)
     }
 
     override def subscribe(callback: List[Tpl] => Unit)(implicit conn: Connection): Unit = {
       val datomicConn = conn.asInstanceOf[DatomicConn_JVM]
-      DatomicQueryResolveOffset[Tpl](q.elements, q.limit, None)
+      DatomicQueryResolveOffset[Tpl](q.elements, q.limit, None, q.dbView)
         .subscribe(datomicConn, getWatcher(datomicConn), callback)
     }
 
@@ -46,7 +46,7 @@ trait DatomicApiAsync
 
   implicit class datomicQueryOffsetApiAsync[Tpl](q: DatomicQueryOffset[Tpl]) extends QueryOffsetApi[Tpl] {
     override def get(implicit conn: Connection, ec: ExecutionContext): Future[(List[Tpl], Int, Boolean)] = {
-      DatomicQueryResolveOffset[Tpl](q.elements, q.limit, Some(q.offset))
+      DatomicQueryResolveOffset[Tpl](q.elements, q.limit, Some(q.offset), q.dbView)
         .getListFromOffset_async(conn.asInstanceOf[DatomicConn_JVM], ec)
     }
 
@@ -58,7 +58,7 @@ trait DatomicApiAsync
 
   implicit class datomicQueryCursorApiAsync[Tpl](q: DatomicQueryCursor[Tpl]) extends QueryCursorApi[Tpl] {
     override def get(implicit conn: Connection, ec: ExecutionContext): Future[(List[Tpl], String, Boolean)] = {
-      DatomicQueryResolveCursor[Tpl](q.elements, q.limit, Some(q.cursor))
+      DatomicQueryResolveCursor[Tpl](q.elements, q.limit, Some(q.cursor), q.dbView)
         .getListFromCursor_async(conn.asInstanceOf[DatomicConn_JVM], ec)
     }
 

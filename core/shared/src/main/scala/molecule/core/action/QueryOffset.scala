@@ -1,5 +1,7 @@
 package molecule.core.action
 
-trait QueryOffset[Tpl] {
+import molecule.boilerplate.ast.Model.Element
+
+abstract class QueryOffset[Tpl](elements0: List[Element]) extends Action(elements0, Nil) {
   def limit(n: Int): QueryOffset[Tpl]
 }

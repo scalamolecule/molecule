@@ -24,7 +24,7 @@ trait DatomicApiZio extends JVMDatomicApiBase with SubscriptionStarter with Dato
   implicit class datomicQueryApiZio[Tpl](q: DatomicQuery[Tpl]) extends QueryApi[Tpl] {
     override def get: ZIO[Connection, MoleculeError, List[Tpl]] = {
       getResult[List[Tpl]]((conn: DatomicConn_JVM) =>
-        DatomicQueryResolveOffset[Tpl](q.elements, q.limit, None)
+        DatomicQueryResolveOffset[Tpl](q.elements, q.limit, None, q.dbView)
           .getListFromOffset_async(conn, global).map(_._1)
       )
     }
@@ -33,7 +33,7 @@ trait DatomicApiZio extends JVMDatomicApiBase with SubscriptionStarter with Dato
       for {
         conn0 <- ZIO.service[Connection]
         datomicConn = conn0.asInstanceOf[DatomicConn_JVM]
-        res <- ZIO.succeed(DatomicQueryResolveOffset[Tpl](q.elements, q.limit, None)
+        res <- ZIO.succeed(DatomicQueryResolveOffset[Tpl](q.elements, q.limit, None, q.dbView)
           .subscribe(datomicConn, getWatcher(datomicConn), callback))
       } yield res
     }
@@ -47,7 +47,7 @@ trait DatomicApiZio extends JVMDatomicApiBase with SubscriptionStarter with Dato
   implicit class datomicQueryOffsetApiZio[Tpl](q: DatomicQueryOffset[Tpl]) extends QueryOffsetApi[Tpl] {
     override def get: ZIO[Connection, MoleculeError, (List[Tpl], Int, Boolean)] = {
       getResult[(List[Tpl], Int, Boolean)]((conn: DatomicConn_JVM) =>
-        DatomicQueryResolveOffset[Tpl](q.elements, q.limit, Some(q.offset))
+        DatomicQueryResolveOffset[Tpl](q.elements, q.limit, Some(q.offset), q.dbView)
           .getListFromOffset_async(conn, global)
       )
     }
@@ -61,7 +61,7 @@ trait DatomicApiZio extends JVMDatomicApiBase with SubscriptionStarter with Dato
   implicit class datomicQueryCursorApiZio[Tpl](q: DatomicQueryCursor[Tpl]) extends QueryCursorApi[Tpl] {
     override def get: ZIO[Connection, MoleculeError, (List[Tpl], String, Boolean)] = {
       getResult[(List[Tpl], String, Boolean)]((conn: DatomicConn_JVM) =>
-        DatomicQueryResolveCursor[Tpl](q.elements, q.limit, Some(q.cursor))
+        DatomicQueryResolveCursor[Tpl](q.elements, q.limit, Some(q.cursor), q.dbView)
           .getListFromCursor_async(conn, global)
       )
     }

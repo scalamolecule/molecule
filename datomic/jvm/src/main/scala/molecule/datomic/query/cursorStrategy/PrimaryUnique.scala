@@ -5,6 +5,7 @@ import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.ops.ModelTransformations_
 import molecule.boilerplate.util.MoleculeLogging
+import molecule.core.marshalling.dbView.DbView
 import molecule.core.util.FutureUtils
 import molecule.datomic.facade.DatomicConn_JVM
 import molecule.datomic.query.DatomicQueryResolve
@@ -24,8 +25,9 @@ import scala.collection.mutable.ListBuffer
 case class PrimaryUnique[Tpl](
   elements: List[Element],
   limit: Option[Int],
-  cursor: String
-) extends DatomicQueryResolve[Tpl](elements, limit)
+  cursor: String,
+  dbView: Option[DbView]
+) extends DatomicQueryResolve[Tpl](elements, limit, dbView)
   with FutureUtils with CursorUtils with ModelTransformations_ with MoleculeLogging {
 
   def getPage(tokens: List[String], limit: Int)

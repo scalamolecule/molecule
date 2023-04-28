@@ -12,13 +12,13 @@ import scala.language.implicitConversions
 
 object AdhocJVM extends DatomicTestSuite {
 
-//  val x = 10 / 1000_000
+  //  val x = 10 / 1000_000
 
   override lazy val tests = Tests {
 
     "types" - types { implicit conn =>
       for {
-        tx1 <- Ns.string.int.insert(
+        tx1 <- Ns.string.int.insert.apply(
           ("Ben", 42),
           ("Liz", 37),
         ).transact
@@ -26,13 +26,13 @@ object AdhocJVM extends DatomicTestSuite {
         tx2 <- Ns(ben).int(43).update.transact
         tx3 <- Ns(ben).delete.transact
 
-//        // See history of Ben
-//        _ <- Ns(ben).int.tx.a1.op.a2.getHistory.map(_ ==> List(
-//          (42, tx1.tx, true), // Insert:  42 asserted
-//          (42, tx2.tx, false), // Update:  42 retracted
-//          (43, tx2.tx, true), //          43 asserted
-//          (43, tx3.tx, false) // Retract: 43 retracted
-//        ))
+        //        // See history of Ben
+        //        _ <- Ns(ben).int.tx.a1.op.a2.getHistory.map(_ ==> List(
+        //          (42, tx1.tx, true), // Insert:  42 asserted
+        //          (42, tx2.tx, false), // Update:  42 retracted
+        //          (43, tx2.tx, true), //          43 asserted
+        //          (43, tx3.tx, false) // Retract: 43 retracted
+        //        ))
 
         // Data after insertion
         _ <- Ns.string.int.query.asOf(tx1).get.map(_ ==> List(
@@ -50,7 +50,6 @@ object AdhocJVM extends DatomicTestSuite {
         _ <- Ns.string.int.query.asOf(tx3).get.map(_ ==> List(
           ("Liz", 37) // Ben gone
         ))
-
 
 
       } yield ()

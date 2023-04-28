@@ -4,6 +4,7 @@ import datomic.Database
 import molecule.base.error._
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
+import molecule.core.marshalling.dbView.DbView
 import molecule.core.util.FutureUtils
 import molecule.datomic.facade.DatomicConn_JVM
 import molecule.datomic.subscription.TxReportWatcher
@@ -22,8 +23,9 @@ import scala.concurrent.{ExecutionContext, Future}
 case class DatomicQueryResolveOffset[Tpl](
   elements: List[Element],
   limit: Option[Int],
-  offset: Option[Int]
-) extends DatomicQueryResolve[Tpl](elements, limit)
+  offset: Option[Int],
+  dbView: Option[DbView]
+) extends DatomicQueryResolve[Tpl](elements, limit, dbView)
   with FutureUtils
   with MoleculeLogging {
 
@@ -87,7 +89,7 @@ case class DatomicQueryResolveOffset[Tpl](
     val allAttrIds   = conn.attrIds
     val queryAttrIds = elements.collect { case a: Attr => allAttrIds(a.name) }
     val dbCallBack   = (dbAfter: Database) => {
-      val freshResult: List[Tpl] = DatomicQueryResolveOffset[Tpl](elements, limit, None)
+      val freshResult: List[Tpl] = DatomicQueryResolveOffset[Tpl](elements, limit, None, None)
         .getListFromOffset_sync(Some(dbAfter))(conn)._1
       callback(freshResult)
     }

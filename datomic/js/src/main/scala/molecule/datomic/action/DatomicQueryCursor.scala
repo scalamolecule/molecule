@@ -7,7 +7,7 @@ case class DatomicQueryCursor[Tpl](
   private val elements0: List[Element],
   limit: Option[Int],
   cursor: String
-) extends Action(elements0) with QueryCursor[Tpl] {
+) extends QueryCursor[Tpl](elements0) {
 
   override def limit(l: Int): DatomicQueryCursor[Tpl] = copy(limit = Some(l))
 }

@@ -5,6 +5,7 @@ import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.ops.ModelTransformations_
 import molecule.boilerplate.util.MoleculeLogging
+import molecule.core.marshalling.dbView.DbView
 import molecule.core.util.FutureUtils
 import molecule.datomic.facade.DatomicConn_JVM
 import molecule.datomic.query.cursorStrategy.{CursorUtils, NoUnique, PrimaryUnique, SubUnique}
@@ -23,8 +24,9 @@ import scala.concurrent.{ExecutionContext, Future}
 case class DatomicQueryResolveCursor[Tpl](
   elements: List[Element],
   limit: Option[Int],
-  cursor: Option[String]
-) extends DatomicQueryResolve[Tpl](elements, limit)
+  cursor: Option[String],
+  dbView: Option[DbView]
+) extends DatomicQueryResolve[Tpl](elements, limit, dbView)
   with FutureUtils
   with CursorUtils
   with ModelTransformations_
@@ -49,9 +51,9 @@ case class DatomicQueryResolveCursor[Tpl](
             throw ModelError("Can only use cursor for un-modified query.")
           } else {
             strategy match {
-              case "1" => PrimaryUnique(elements, limit, cursor).getPage(tokens, l)
-              case "2" => SubUnique(elements, limit, cursor).getPage(tokens, l)
-              case "3" => NoUnique(elements, limit, cursor).getPage(tokens, l)
+              case "1" => PrimaryUnique(elements, limit, cursor, dbView).getPage(tokens, l)
+              case "2" => SubUnique(elements, limit, cursor, dbView).getPage(tokens, l)
+              case "3" => NoUnique(elements, limit, cursor, dbView).getPage(tokens, l)
             }
           }
         case None         => throw ModelError("Unexpected undefined cursor.")

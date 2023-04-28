@@ -7,7 +7,7 @@ case class DatomicQueryOffset[Tpl](
   private val elements0: List[Element],
   limit: Option[Int],
   offset: Int
-) extends Action(elements0) with QueryOffset[Tpl] {
+) extends QueryOffset[Tpl](elements0) {
 
   override def limit(l: Int): DatomicQueryOffset[Tpl] = copy(limit = Some(l))
 }
