@@ -10,6 +10,7 @@ import molecule.base.error._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.api.{Connection, TxReport}
 import molecule.core.marshalling.DatomicPeerProxy
+import molecule.core.marshalling.dbView.{AsOf, TxLong}
 import molecule.datomic.transaction.DatomicDataType_JVM
 import molecule.datomic.util.MakeTxReport
 import scala.collection.mutable
@@ -106,82 +107,6 @@ case class DatomicConn_JVM(
   }
 
 
-  //  final def sync: Conn = usingAdhocDbView(Sync(0))
-  //  final def sync(t: Long): Conn = usingAdhocDbView(Sync(t))
-
-  /**
-   * Request that a background indexing job begin immediately.
-   *
-   * Background indexing will happen asynchronously. You can track indexing
-   * completion with syncIndex(long).
-   */
-  final def requestIndex: Boolean =
-    peerConn.requestIndex()
-  //
-  //  /** Synchronize Peer database to have been indexed through time t.
-  //   *
-  //   * (only implemented for Peer api)
-  //   *
-  //   * Sets a flag with a time t on the connection to do the synchronization
-  //   * on the first subsequent query. Hereafter the flag is removed.
-  //   *
-  //   * The synchronization guarantees a database that has been indexed through time t.
-  //   * The synchronization does not involve calling the transactor.
-  //   *
-  //   * A Future with the synchronized database is returned for the query to use. The future
-  //   * can take arbitrarily long to complete. Waiting code should specify a timeout.
-  //   *
-  //   * Only use `syncIndex` when coordination of multiple peer/client processes is required.
-  //   *
-  //   * @param ec an implicit execution context.
-  //   * @return Peer Connection with synchronization flag set
-  //   */
-  //  final def syncIndex(t: Long): DatomicConn_JVM =
-  //    usingAdhocDbView(SyncIndex(t)).asInstanceOf[DatomicConn_JVM]
-  //
-  //  /** Synchronize Peer database to be aware of all schema changes up to time t.
-  //   *
-  //   * (only implemented for Peer api)
-  //   *
-  //   * Sets a flag with a time t on the connection to do the synchronization
-  //   * on the first subsequent query. Hereafter the flag is removed.
-  //   *
-  //   * The synchronization guarantees a database aware of all schema changes up to
-  //   * time t. The synchronization does not involve calling the transactor.
-  //   *
-  //   * A Future with the synchronized database is returned for the query to use. The future
-  //   * can take arbitrarily long to complete. Waiting code should specify a timeout.
-  //   *
-  //   * Only use `syncSchema` when coordination of multiple peer/client processes is required.
-  //   *
-  //   * @param ec an implicit execution context.
-  //   * @return Connection with synchronization flag set
-  //   */
-  //  final def syncSchema(t: Long): DatomicConn_JVM =
-  //    usingAdhocDbView(SyncSchema(t)).asInstanceOf[DatomicConn_JVM]
-  //
-  //  /** Synchronize Peer database to be aware of all excisions up to time t.
-  //   *
-  //   * (only implemented for Peer api)
-  //   *
-  //   * Sets a flag with a time t on the connection to do the synchronization
-  //   * on the first subsequent query. Hereafter the flag is removed.
-  //   *
-  //   * The synchronization guarantees a database aware of all excisions up to a time t.
-  //   * The synchronization does not involve calling the transactor.
-  //   *
-  //   * A Future with the synchronized database is returned for the query to use. The future
-  //   * can take arbitrarily long to complete. Waiting code should specify a timeout.
-  //   *
-  //   * Only use `syncSchema` when coordination of multiple peer/client processes is required.
-  //   *
-  //   * @param ec an implicit execution context.
-  //   * @return Connection with synchronization flag set
-  //   */
-  //  final def syncExcise(t: Long): DatomicConn_JVM =
-  //    usingAdhocDbView(SyncExcise(t)).asInstanceOf[DatomicConn_JVM]
-
-
   private[molecule] val attrIds = mutable.Map.empty[String, java.lang.Long]
 
   /**
@@ -247,46 +172,4 @@ case class DatomicConn_JVM(
         throw e
     }
   }
-
-  /**
-   * Removes the tx report queue associated with this connection.
-   */
-  final def removeTxReportQueue(): Unit =
-    peerConn.removeTxReportQueue()
-
-  /**
-   * Reclaim storage garbage older than a certain age.
-   *
-   * As part of capacity planning for a Datomic system, you should schedule
-   * regular (e.g daily, weekly) calls to gcStorage.
-   *
-   * @param olderThan
-   */
-  final def gcStorage(olderThan: Date): Unit =
-    peerConn.gcStorage(olderThan)
-
-  /**
-   * Request the release of resources associated with this connection.
-   *
-   * Method returns immediately, resources will be released asynchronously.
-   *
-   * This method should only be called when the entire process is no longer
-   * interested in the connection.
-   *
-   * Note that Datomic connections do not adhere to an acquire/use/release pattern.
-   * They are thread-safe, cached, and long lived. Many processes (e.g. application
-   * servers) will never call release.
-   */
-  final def release(): Unit =
-    peerConn.release()
-}
-
-
-object DatomicConn_JVM {
-  def apply(
-    proxy: DatomicPeerProxy,
-    uri: String,
-    isFreeVersion: Boolean
-  ): DatomicConn_JVM =
-    DatomicConn_JVM(proxy, datomic.Peer.connect(uri), isFreeVersion)
 }

@@ -18,9 +18,10 @@ trait Insert_stmts
     nsMap: Map[String, MetaNs],
     elements: List[Element],
     tpls: Seq[Product],
+    eidIndex: Int = 0,
     debug: Boolean = true
   ): Data = {
-    initTxBase(elements)
+    initTxBase(elements, eidIndex)
     val (mainElements, txMetaElements) = separateTxElements(elements)
     val row2stmts                      = getResolver(nsMap, mainElements)
     tpls.foreach { tpl =>

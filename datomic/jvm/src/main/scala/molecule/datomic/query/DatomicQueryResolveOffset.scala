@@ -25,7 +25,7 @@ case class DatomicQueryResolveOffset[Tpl](
   limit: Option[Int],
   offset: Option[Int],
   dbView: Option[DbView]
-) extends DatomicQueryResolve[Tpl](elements, limit, dbView)
+) extends DatomicQueryResolve[Tpl](elements, dbView)
   with FutureUtils
   with MoleculeLogging {
 

@@ -32,7 +32,7 @@ case class SubUnique[Tpl](
   limit: Option[Int],
   cursor: String,
   dbView: Option[DbView]
-) extends DatomicQueryResolve[Tpl](elements, limit, dbView)
+) extends DatomicQueryResolve[Tpl](elements, dbView)
   with FutureUtils with CursorUtils with MoleculeLogging {
 
   def getPage(allTokens: List[String], limit: Int)

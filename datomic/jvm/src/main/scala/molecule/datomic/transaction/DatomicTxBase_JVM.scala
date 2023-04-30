@@ -15,9 +15,10 @@ import scala.concurrent.Future
 
 trait DatomicTxBase_JVM extends DatomicDataType_JVM with ModelUtils {
 
-  protected def initTxBase(elements: List[Element]): Unit = {
+  protected def initTxBase(elements: List[Element], eidIndex: Int = 0): Unit = {
     nsFull = getInitialNs(elements)
     part = fns.partNs(nsFull).head
+    lowest = eidIndex
   }
 
   // Accumulate java insertion data
@@ -101,7 +102,7 @@ trait DatomicTxBase_JVM extends DatomicDataType_JVM with ModelUtils {
 
   protected def getFreshConn(proxy: ConnProxy): Future[DatomicConn_JVM] = {
     proxy match {
-      case proxy@DatomicPeerProxy(protocol, dbIdentifier, _, _, _, _, _, _, _, _, _, isFreeVersion) =>
+      case proxy@DatomicPeerProxy(protocol, dbIdentifier, _, _, _, _, _, _, _, isFreeVersion) =>
         protocol match {
           case "mem" =>
             DatomicPeer.recreateDbFromEdn(proxy, protocol, dbIdentifier, isFreeVersion)

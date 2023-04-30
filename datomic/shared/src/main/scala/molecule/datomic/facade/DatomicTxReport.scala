@@ -8,16 +8,16 @@ import java.util.Date
  * @param basisTbefore Datomic time point t on before Db
  * @param t            Transaction time t. Same as basis t on after Db
  * @param tx           Transaction entity id (Long).
- * @param txInstant    Transaction instant (Date).
+ * @param txDate    Transaction instant (Date).
  * @param eids         List of affected entity ids from transaction
- * @param txData       Tx report data, a List of [[molecule.datomic.base.api.Datom]]
+ * @param datoms       Tx report data, a List of [[molecule.datomic.base.api.Datom]]
  */
 case class DatomicTxReport(
   basisTbefore: Long,
   t: Long,
   tx: Long,
-  txInstant: Date,
-  txData: List[Datom],
+  txDate: Date,
+  datoms: List[Datom],
   eids: List[Long]
 ) {
 
@@ -38,7 +38,7 @@ case class DatomicTxReport(
     s"""DatomicTxReport {
        |  dbBefore.t: $basisTbefore
        |  dbAfter.t : $t
-       |  txData    : ${txData.mkString(",\n              ")}
+       |  txData    : ${datoms.mkString(",\n              ")}
        |  eids      : $eids
        |}""".stripMargin
   }

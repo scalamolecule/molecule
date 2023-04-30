@@ -27,7 +27,7 @@ case class PrimaryUnique[Tpl](
   limit: Option[Int],
   cursor: String,
   dbView: Option[DbView]
-) extends DatomicQueryResolve[Tpl](elements, limit, dbView)
+) extends DatomicQueryResolve[Tpl](elements, dbView)
   with FutureUtils with CursorUtils with ModelTransformations_ with MoleculeLogging {
 
   def getPage(tokens: List[String], limit: Int)

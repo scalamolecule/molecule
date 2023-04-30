@@ -19,7 +19,8 @@ trait DatomicApiAsync extends DatomicAsyncApiBase with ApiAsync with FutureUtils
   implicit class datomicQueryApiAsync[Tpl](q: DatomicQuery[Tpl]) extends QueryApi[Tpl] {
     override def get(implicit conn0: Connection, ec: ExecutionContext): Future[List[Tpl]] = {
       val conn = conn0.asInstanceOf[DatomicConn_JS]
-      conn.rpc.query[Tpl](conn.proxy, q.elements, q.limit).future
+      val proxy = conn.proxy.copy(dbView = q.dbView)
+      conn.rpc.query[Tpl](proxy, q.elements, q.limit).future
     }
 
     override def subscribe(callback: List[Tpl] => Unit)(implicit conn0: Connection): Unit = {
@@ -36,7 +37,8 @@ trait DatomicApiAsync extends DatomicAsyncApiBase with ApiAsync with FutureUtils
   implicit class datomicQueryOffsetApiAsync[Tpl](q: DatomicQueryOffset[Tpl]) extends QueryOffsetApi[Tpl] {
     override def get(implicit conn0: Connection, ec: ExecutionContext): Future[(List[Tpl], Int, Boolean)] = {
       val conn = conn0.asInstanceOf[DatomicConn_JS]
-      conn.rpc.queryOffset[Tpl](conn.proxy, q.elements, q.limit, q.offset).future
+      val proxy = conn.proxy.copy(dbView = q.dbView)
+      conn.rpc.queryOffset[Tpl](proxy, q.elements, q.limit, q.offset).future
     }
 
     override def inspect(implicit conn: Connection, ec: ExecutionContext): Future[Unit] = {
@@ -48,7 +50,8 @@ trait DatomicApiAsync extends DatomicAsyncApiBase with ApiAsync with FutureUtils
   implicit class datomicQueryCursorApiAsync[Tpl](q: DatomicQueryCursor[Tpl]) extends QueryCursorApi[Tpl] {
     override def get(implicit conn0: Connection, ec: ExecutionContext): Future[(List[Tpl], String, Boolean)] = {
       val conn = conn0.asInstanceOf[DatomicConn_JS]
-      conn.rpc.queryCursor[Tpl](conn.proxy, q.elements, q.limit, q.cursor).future
+      val proxy = conn.proxy.copy(dbView = q.dbView)
+      conn.rpc.queryCursor[Tpl](proxy, q.elements, q.limit, q.cursor).future
     }
 
     override def inspect(implicit conn: Connection, ec: ExecutionContext): Future[Unit] = {

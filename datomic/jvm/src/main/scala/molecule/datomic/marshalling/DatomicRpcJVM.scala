@@ -1,7 +1,7 @@
 package molecule.datomic.marshalling
 
 import java.nio.ByteBuffer
-import molecule.base.error.{ModelError, MoleculeError}
+import molecule.base.error.MoleculeError
 import molecule.boilerplate.ast.Model._
 import molecule.core.api.TxReport
 import molecule.core.marshalling.Boopicklers._
@@ -32,7 +32,31 @@ object DatomicRpcJVM extends MoleculeRpc
   ): Future[Either[MoleculeError, List[Any]]] = either {
     for {
       conn <- getConn(proxy)
-      tpls <- new DatomicQuery[Any](elements, limit).get(conn, global)
+      tpls <- new DatomicQuery[Any](elements, limit, proxy.dbView).get(conn, global)
+    } yield tpls
+  }
+
+  override def queryOffset[Any](
+    proxy: ConnProxy,
+    elements: List[Element],
+    limit: Option[Int],
+    offset: Int
+  ): Future[Either[MoleculeError, (List[Any], Int, Boolean)]] = either {
+    for {
+      conn <- getConn(proxy)
+      tpls <- new DatomicQueryOffset[Any](elements, limit, offset, proxy.dbView).get(conn, global)
+    } yield tpls
+  }
+
+  override def queryCursor[Any](
+    proxy: ConnProxy,
+    elements: List[Element],
+    limit: Option[Int],
+    cursor: String
+  ): Future[Either[MoleculeError, (List[Any], String, Boolean)]] = either {
+    for {
+      conn <- getConn(proxy)
+      tpls <- new DatomicQueryCursor[Any](elements, limit, cursor, proxy.dbView).get(conn, global)
     } yield tpls
   }
 
@@ -45,30 +69,6 @@ object DatomicRpcJVM extends MoleculeRpc
     getConn(proxy).map(conn =>
       new DatomicQuery[Any](elements, limit).subscribe(callback)(conn)
     )
-  }
-
-  override def queryOffset[Any](
-    proxy: ConnProxy,
-    elements: List[Element],
-    limit: Option[Int],
-    offset: Int
-  ): Future[Either[MoleculeError, (List[Any], Int, Boolean)]] = either {
-    for {
-      conn <- getConn(proxy)
-      tpls <- new DatomicQueryOffset[Any](elements, limit, offset).get(conn, global)
-    } yield tpls
-  }
-
-  override def queryCursor[Any](
-    proxy: ConnProxy,
-    elements: List[Element],
-    limit: Option[Int],
-    cursor: String
-  ): Future[Either[MoleculeError, (List[Any], String, Boolean)]] = either {
-    for {
-      conn <- getConn(proxy)
-      tpls <- new DatomicQueryCursor[Any](elements, limit, cursor).get(conn, global)
-    } yield tpls
   }
 
   override def save(
@@ -115,7 +115,7 @@ object DatomicRpcJVM extends MoleculeRpc
     for {
       conn <- getConn(proxy)
       stmts = (new UpdateExtraction(conn.proxy.uniqueAttrs, isUpsert) with Update_stmts)
-        .getStmts(conn, elements, true)
+        .getStmts(conn, elements, debug = true)
       txReport <- conn.transact_async(stmts)
     } yield txReport
   }

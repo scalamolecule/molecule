@@ -30,7 +30,7 @@ case class TxReportWatcher(conn: DatomicConn_JVM) extends Runnable {
         val dbAfter     = rawTxReport.get(DB_AFTER).asInstanceOf[datomic.Database]
         val txReport    = MakeDatomicTxReport(rawTxReport)
         //        println(txReport)
-        val txAttrIds   = txReport.txData.map(_.a)
+        val txAttrIds   = txReport.datoms.map(_.a)
 
         dbCallbacks.foreach { case (queryAttrIds, dbCallback) =>
           // todo: optimize by using bitwise comparison, one bit per attribute - if necessary?

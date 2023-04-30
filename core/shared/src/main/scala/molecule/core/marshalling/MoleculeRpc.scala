@@ -13,13 +13,6 @@ trait MoleculeRpc {
     limit: Option[Int]
   ): Future[Either[MoleculeError, List[Tpl]]]
 
-  def subscribe[Tpl](
-    proxy: ConnProxy,
-    elements: List[Element],
-    limit: Option[Int],
-    callback: List[Tpl] => Unit
-  ): Unit
-
   def queryOffset[Tpl](
     proxy: ConnProxy,
     elements: List[Element],
@@ -33,6 +26,13 @@ trait MoleculeRpc {
     limit: Option[Int],
     cursor: String
   ): Future[Either[MoleculeError, (List[Tpl], String, Boolean)]]
+
+  def subscribe[Tpl](
+    proxy: ConnProxy,
+    elements: List[Element],
+    limit: Option[Int],
+    callback: List[Tpl] => Unit
+  ): Unit
 
   def save(
     proxy: ConnProxy,

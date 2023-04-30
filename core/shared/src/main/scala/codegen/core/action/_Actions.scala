@@ -18,6 +18,7 @@ object _Actions extends CoreGenBase( "Actions", "/action") {
   }
 
   case class Trait(arity: Int) extends TemplateVals(arity) {
+    val p    = if (arity == 1) "   " else if (arity >= 10) "  " else " "
     val body =
       s"""
          |trait $fileName_$n0[${`A..V`}] {

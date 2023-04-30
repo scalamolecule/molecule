@@ -26,7 +26,7 @@ case class DatomicQueryResolveCursor[Tpl](
   limit: Option[Int],
   cursor: Option[String],
   dbView: Option[DbView]
-) extends DatomicQueryResolve[Tpl](elements, limit, dbView)
+) extends DatomicQueryResolve[Tpl](elements, dbView)
   with FutureUtils
   with CursorUtils
   with ModelTransformations_

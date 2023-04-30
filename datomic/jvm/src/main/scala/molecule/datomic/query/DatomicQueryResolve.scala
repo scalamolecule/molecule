@@ -5,32 +5,21 @@ import java.util.{Collections, Comparator, ArrayList => jArrayList, Collection =
 import datomic.{Database, Peer}
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
+import molecule.core.action.Action
 import molecule.core.marshalling.dbView._
+import molecule.datomic.action._
 import molecule.datomic.facade.DatomicConn_JVM
 import molecule.datomic.query.cursorStrategy.CursorUtils
+import molecule.datomic.sync._
 import molecule.datomic.util.DatomicApiLoader
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 
-/**
- *
- * @param elements Molecule model
- * @param limit    When going forward from start, use a positive number.
- *                 And vice versa from end with a negative number. Can't be zero.
- * @param offset   Positive offset from start when going forwards,
- *                 negative offset from end when going backwards
- * @param cursor   Base64 encoded cursor meta information
- * @tparam Tpl Type of each row
- */
-abstract class DatomicQueryResolve[Tpl](
-  elements: List[Element],
-  limit: Option[Int],
-  dbView: Option[DbView]
-) extends DatomicModel2Query[Tpl](elements)
-  with DatomicApiLoader // todo: necessary?
-  with CursorUtils {
 
-  //  private[molecule] var _adhocDbView: Option[DbView] = None
+abstract class DatomicQueryResolve[Tpl](elements: List[Element], dbView: Option[DbView])
+  extends DatomicModel2Query[Tpl](elements)
+    with DatomicApiLoader // todo: necessary?
+    with CursorUtils {
 
   lazy val edgeValuesNotFound = "Couldn't find next page. Edge rows were all deleted/updated."
 
@@ -74,7 +63,6 @@ abstract class DatomicQueryResolve[Tpl](
     altDb: Option[datomic.Database] = None
   ): jCollection[jList[AnyRef]] = {
     isFree = conn.isFreeVersion
-    //    val db = altDb.getOrElse(conn.peerConn.db())
     val db = altDb.getOrElse(getDb(conn))
     getQueries(conn.optimizeQuery, altElements) match {
       case ("", query, _)       =>
@@ -93,60 +81,31 @@ abstract class DatomicQueryResolve[Tpl](
 
   private def getDb(conn: DatomicConn_JVM): Database = {
     dbView.fold(conn.peerConn.db()) {
-      case AsOf(TxLong(tx)) => conn.peerConn.db().asOf(tx)
-      //      case AsOf(TxDate(d)) => conn.peerConn.db().asOf(d)
+      case AsOf(TxLong(tx))  => conn.peerConn.db().asOf(tx)
+      case AsOf(TxDate(d))   => conn.peerConn.db().asOf(d)
       case Since(TxLong(tx)) => conn.peerConn.db().since(tx)
-      //      case Since(TxDate(d)) => conn.peerConn.db().since(d)
-      //      case With(_) => conn.peerConn.db().`with`()
-      //      case History => conn.peerConn.db().asOf(d)
-      case _ => throw new Exception("Not implemented yet...")
+      case Since(TxDate(d))  => conn.peerConn.db().since(d)
+      case With(actions)     => getDbWith(conn, actions)
+//      case History           => throw ModelError("Please see fallback functions for Datomic.")
     }
   }
 
-  //  final def db(implicit ec: ExecutionContext): Future[DatomicDb] = {
-  //    if (_adhocDbView.isDefined) {
-  //      // Adhoc db
-  //      getAdhocDb.map(DatomicDb_Peer)
-  //
-  //    } else if (connProxy.testDbStatus == 1 && _testDb.isEmpty) {
-  //      // Test db
-  //      try {
-  //        val tempDb = connProxy.testDbView.get match {
-  //          case AsOf(TxLong(0))          => Some(peerConn.db) // db as of now
-  //          case AsOf(TxLong(t))          => Some(peerConn.db.asOf(t))
-  //          case AsOf(TxDate(d))          => Some(peerConn.db.asOf(d))
-  //          case Since(TxLong(t))         => Some(peerConn.db.since(t))
-  //          case Since(TxDate(d))         => Some(peerConn.db.since(d))
-  //          case History                  => Some(peerConn.db.history())
-  //          case With(stmtsEdn, uriAttrs) =>
-  //            val txData   = DatomicRpc().getJavaStmts(stmtsEdn, uriAttrs)
-  //            val txReport = TxReport_Peer(peerConn.db.`with`(txData))
-  //            Some(txReport.dbAfter)
-  //          case other                    =>
-  //            throw MoleculeException("Unexpected db DbView: " + other)
-  //        }
-  //        Future(DatomicDb_Peer(tempDb.get))
-  //      } catch {
-  //        case NonFatal(exc) => Future.failed(exc)
-  //      }
-  //
-  //    } else if (connProxy.testDbStatus == -1) {
-  //      // Return to live db
-  //      Future {
-  //        _testDb = None
-  //        updateTestDbView(None, 0)
-  //        DatomicDb_Peer(peerConn.db)
-  //      }
-  //
-  //    } else if (_testDb.isDefined) {
-  //      // Test db
-  //      Future(DatomicDb_Peer(_testDb.get))
-  //
-  //    } else {
-  //      // Live db
-  //      Future(DatomicDb_Peer(peerConn.db))
-  //    }
-  //  }
+  private def getDbWith(conn: DatomicConn_JVM, actions: Seq[Action]): Database = {
+    var eidIndex = 0 // Avoid conflicting entity ids
+    val allStmts = new jArrayList[jList[AnyRef]]()
+    actions.foreach { action =>
+      val actionStmts = action match {
+        case a: DatomicSave       => a.getStmts(eidIndex)
+        case a: DatomicInsert_JVM => a.getStmts(conn, eidIndex)
+        case a: DatomicUpdate     => a.getStmts(conn)
+        case a: DatomicDelete     => a.getStmts(conn)
+      }
+      allStmts.addAll(actionStmts)
+      eidIndex -= actionStmts.size()
+    }
+    conn.peerConn.db().`with`(allStmts).get(datomic.Connection.DB_AFTER).asInstanceOf[Database]
+  }
+
 
   private def distinct(rows: jCollection[jList[AnyRef]]): jCollection[jList[AnyRef]] = {
     if (hasOptAttr)

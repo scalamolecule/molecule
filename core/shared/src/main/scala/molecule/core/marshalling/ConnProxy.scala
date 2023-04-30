@@ -26,19 +26,8 @@ sealed trait ConnProxy {
 
   val uniqueAttrs: List[String]
 
-  /** Internal setting for test db status
-   *
-   * 0 inactive
-   * 1 active
-   * -1 de-activate signal
-   */
-  val testDbStatus: Int
-
-  /** Internal holder of optional current test DbView object */
-  val testDbView: Option[DbView]
-
-  /** Internal holder of optional current ad-hoc DbView object */
-  val adhocDbView: Option[DbView]
+  /** Internal holder of optional alternative Db view (asOf, since, widh) */
+  val dbView: Option[DbView]
 
   /** Unique internal identifier for cached proxy connection on server side */
   val uuid: UUID
@@ -51,9 +40,7 @@ sealed trait ConnProxy {
  * @param dbIdentifier Datomic db identifier, like "localhost:4334/mbrainz-1968-1973"
  * @param schema       Seq of schema transaction data from generated boilerplate code
  * @param attrMap      Map of attribute data from generated boilerplate code
- * @param testDbStatus Internally applied setting, not intended to be set by user
- * @param testDbView   Internally applied setting, not intended to be set by user
- * @param adhocDbView  Internally applied setting, not intended to be set by user
+ * @param dbView       Internally applied setting, not intended to be set by user
  * @param uuid         Internally applied setting, not intended to be set by user
  */
 case class DatomicPeerProxy(
@@ -67,9 +54,7 @@ case class DatomicPeerProxy(
   uniqueAttrs: List[String],
 
   // Internal settings, not intended to be set by user
-  testDbStatus: Int = 0,
-  testDbView: Option[DbView] = None,
-  adhocDbView: Option[DbView] = None,
+  dbView: Option[DbView] = None,
   uuid: UUID = UUID.randomUUID(),
   isFreeVersion: Boolean = true
 ) extends ConnProxy

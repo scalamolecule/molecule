@@ -2,9 +2,11 @@ package molecule.datomic.test
 
 import java.time._
 import java.util.Date
+import datomic.Peer
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.datomic.async._
+import molecule.datomic.facade.DatomicConn_JVM
 import molecule.datomic.setup.DatomicTestSuite
 import utest._
 import scala.language.implicitConversions
@@ -12,79 +14,77 @@ import scala.language.implicitConversions
 
 object AdhocJVM extends DatomicTestSuite {
 
-  //  val x = 10 / 1000_000
 
   override lazy val tests = Tests {
 
     "types" - types { implicit conn =>
       for {
-        tx1 <- Ns.string.int.insert.apply(
-          ("Ben", 42),
-          ("Liz", 37),
-        ).transact
-        List(ben, liz) = tx1.eids
-        tx2 <- Ns(ben).int(43).update.transact
-        tx3 <- Ns(ben).delete.transact
+        _ <- Ns.int(1).save.transact
 
-        //        // See history of Ben
-        //        _ <- Ns(ben).int.tx.a1.op.a2.getHistory.map(_ ==> List(
-        //          (42, tx1.tx, true), // Insert:  42 asserted
-        //          (42, tx2.tx, false), // Update:  42 retracted
-        //          (43, tx2.tx, true), //          43 asserted
-        //          (43, tx3.tx, false) // Retract: 43 retracted
-        //        ))
 
-        // Data after insertion
-        _ <- Ns.string.int.query.asOf(tx1).get.map(_ ==> List(
-          ("Liz", 37),
-          ("Ben", 42)
-        ))
+        _ <- Ns.i.Ref.i.Nss.i.query.get
 
-        // Data after update
-        _ <- Ns.string.int.query.asOf(tx2).get.map(_ ==> List(
-          ("Liz", 37),
-          ("Ben", 43) // Ben now 43
-        ))
-
-        // Data after retraction
-        _ <- Ns.string.int.query.asOf(tx3).get.map(_ ==> List(
-          ("Liz", 37) // Ben gone
-        ))
+        _ <- Ns.ints.hasLt(2).query.inspect
 
 
       } yield ()
     }
 
 
-    //    "validation" - validation { implicit conn =>
-    //      import molecule.coreTests.dataModels.core.dsl.Validation._
-    //
-    //      for {
-    //        _ <- Require.int1.errorMsg.insert(
-    //          (1, 2),
-    //          (2, 2),
-    //          (3, 2),
-    //        ).transact
-    //
-    //        _ <- Variables.int1.errorMsg.query.inspect
-    //        _ <- Variables.int1.<(Variables.errorMsg).query.inspect
-    //        _ <- Variables.int1.<(Variables.errorMsg).query.get.map(_ ==> List())
-    //
-    //
-    //      } yield ()
-    //    }
+    "refs" - refs { implicit conn =>
+      import molecule.coreTests.dataModels.core.dsl.Refs._
+      for {
+        _ <- Ns.i(1).Self.i(2).save.transact
+
+        _ <- Ns.i.Self.i.query.inspect
+
+        _ = {
+          Peer.q(
+            """[:find  ?a ?c ?b ?d
+              | :where [?a :Ns/i ?b]
+              |        [?a :Ns/self ?c]
+              |        [?c :Ns/i ?d]
+              |        ]""".stripMargin,
+            conn.db
+          ).forEach { r => println(r) }
+
+          println("-------")
+          Peer.q(
+            """[:find  ?a ?c ?b ?d
+              | :where [?a :Ns/i ?b]
+              |        [?c :Ns/self ?a]
+              |        [?c :Ns/i ?d]
+              |        ]""".stripMargin,
+            conn.db
+          ).forEach { r => println(r) }
+
+          println("-------")
+          Peer.q(
+            """[:find  ?b ?d
+              | :in $ %
+              | :where [?a :Ns/i ?b]
+              |        (bi-ref-?b ?a ?c)
+              |        [?c :Ns/i ?d]
+              |        ]""".stripMargin,
+            conn.db,
+            """[
+              |  [(bi-ref-?b ?a ?c) [?a :Ns/self ?c]]
+              |  [(bi-ref-?b ?a ?c) [?c :Ns/self ?a]]
+              |]
+              |""".stripMargin
+          ).forEach { r => println(r) }
+
+        }
+        _ <- Ns.i.Self.i.query.get.map(_ ==> List((1, 2)))
+        _ <- Ns.i.Self.i.query.get.map(_ ==> List((1, 2)))
 
 
-    //    "refs" - refs { implicit conn =>
-    //      import molecule.coreTests.dataModels.core.dsl.Refs._
-    //      for {
-    //        _ <- (R1.i(1).s("a") + R2.i(2).s("b").Tx.apply(R3.i(3).s("c"))).save.transact
-    //
-    //        _ <- (R1.i_ + R2.i.s.Tx(R3.i.s)).query.get.map(_ ==> List(((2, "b"), 3, "c")))
-    //
-    //      } yield ()
-    //
-    //    }
+        _ <- Ns.i(1).Self.i.query.get.map(_ ==> List((1, 2)))
+        _ <- Ns.i(2).Self.i.query.get.map(_ ==> List((1, 2)))
+
+      } yield ()
+
+    }
 
     //    "set" - typesSet { implicit conn =>
     //

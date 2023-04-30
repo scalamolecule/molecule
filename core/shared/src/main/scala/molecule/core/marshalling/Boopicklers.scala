@@ -5,15 +5,25 @@ import java.net.URI
 import java.util.Date
 import boopickle.CompositePickler
 import boopickle.Default._
+import molecule.base.ast.SchemaAST.{Card, CardOne, CardSet}
 import molecule.base.error._
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
+import molecule.core.action.{Action, Save}
 
 
 object Boopicklers extends MoleculeLogging {
 
   implicit val pickleDate: Pickler[Date] = transformPickler((t: Long) => new java.util.Date(t))(_.getTime)
   implicit val pickleURI : Pickler[URI]  = transformPickler((t: String) => new URI(t))(_.toString)
+
+  implicit val pickleAction: CompositePickler[Action] = compositePickler[Action]
+  implicit val pickleActionSave: CompositePickler[Save] = compositePickler[Save]
+//  pickleAction.addConcreteType[Save]
+
+  implicit val pickleCard: CompositePickler[Card] = compositePickler[Card]
+  pickleCard.addConcreteType[CardOne.type]
+  pickleCard.addConcreteType[CardSet.type]
 
   implicit val pickleOp: CompositePickler[Op] = compositePickler[Op]
   pickleOp.addConcreteType[NoValue.type]

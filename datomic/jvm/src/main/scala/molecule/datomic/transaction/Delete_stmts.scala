@@ -16,9 +16,10 @@ trait Delete_stmts extends DatomicTxBase_JVM with DeleteOps with MoleculeLogging
   def getStmtsData(
     conn: DatomicConn_JVM,
     elements: List[Element],
+    eidIndex: Int = 0,
     debug: Boolean = true
   ): Data = {
-    initTxBase(elements)
+    initTxBase(elements, eidIndex)
     val (eids, filterElements) = resolve(elements, Nil, Nil, true)
 
     val (filterQuery, inputs) = if (eids.isEmpty && filterElements.nonEmpty) {

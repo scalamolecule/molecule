@@ -2,8 +2,7 @@
 package molecule.core
 
 import molecule.boilerplate.api._
-import molecule.core.action.{Actions_00, Actions_01, Actions_02, Actions_03, Actions_04, Actions_05, Actions_06, Actions_07, Actions_08, Actions_09, Actions_10, Actions_11, Actions_12, Actions_13, Actions_14, Actions_15, Actions_16, Actions_17, Actions_18, Actions_19, Actions_20, Actions_21, Actions_22}
-import molecule.core.api._
+import molecule.core.action._
 import scala.language.implicitConversions
 
 trait MoleculeImplicits_ extends Keywords {

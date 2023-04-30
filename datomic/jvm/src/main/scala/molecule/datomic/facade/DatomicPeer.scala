@@ -35,7 +35,8 @@ trait DatomicPeer extends DatomicApiLoader {
     isFreeVersion: Boolean = true
   ): DatomicConn_JVM = blocking {
     val id = if (dbIdentifier == "") randomUUID().toString else dbIdentifier
-    DatomicConn_JVM(proxy, s"datomic:$protocol://$id", isFreeVersion)
+    val uri = s"datomic:$protocol://$id"
+    DatomicConn_JVM(proxy, Peer.connect(uri), isFreeVersion)
   }
 
   def recreateDbFromEdn(

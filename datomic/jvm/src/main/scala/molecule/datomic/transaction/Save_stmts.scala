@@ -13,10 +13,11 @@ trait Save_stmts extends DatomicTxBase_JVM with SaveOps with MoleculeLogging { s
     elements: List[Element],
     eid: String,
     debug: Boolean = true,
-    init: Boolean = true
+    init: Boolean = true,
+    eidIndex: Int = 0
   ): Data = {
     if (init) {
-      initTxBase(elements)
+      initTxBase(elements, eidIndex)
     }
     e = eid
     e0 = e
@@ -30,8 +31,8 @@ trait Save_stmts extends DatomicTxBase_JVM with SaveOps with MoleculeLogging { s
     stmts
   }
 
-  def getStmts(elements: List[Element]): Data = {
-    initTxBase(elements)
+  def getStmts(elements: List[Element], eidIndex: Int = 0): Data = {
+    initTxBase(elements, eidIndex)
     getRawStmts(elements, newId, init = false)
   }
 

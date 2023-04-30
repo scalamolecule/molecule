@@ -2,7 +2,6 @@ package molecule.datomic.test.time
 
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
-import molecule.datomic.action.DatomicSave
 import molecule.datomic.async._
 import molecule.datomic.setup.DatomicTestSuite
 import utest._
@@ -21,17 +20,9 @@ object GetWith extends DatomicTestSuite {
         _ <- Ns.int.query.get.map(_ ==> List(1))
 
         // Test temporary actions
-//        _ <- Ns.int.query.widh(
-//          Ns.int(2).save,
-//          Ns.int(3).save
-//        ).get.map(_ ==> List(1, 2, 3))
-//
-//        // Current data is unchanged
-//        _ <- Ns.int.query.get.map(_ ==> List(1))
-//
-        // Test temporary actions
         _ <- Ns.int.query.widh(
-          Ns.int.insert.apply(2, 3)
+          Ns.int(2).save,
+          Ns.int(3).save
         ).get.map(_ ==> List(1, 2, 3))
 
         // Current data is unchanged
@@ -49,18 +40,9 @@ object GetWith extends DatomicTestSuite {
 
         // Test temporary actions
         _ <- Ns.int.query.widh(
-          Ns.int(2).save,
-          Ns.int(3).save
-        ).get.map(_ ==> List(1, 2, 3))
-
-        // Current data is unchanged
-        _ <- Ns.int.query.get.map(_ ==> List(1))
-
-        // Test temporary actions
-        _ <- Ns.int.query.widh(
-          Ns.int(2).save,
-          Ns.int(3).save
-        ).get.map(_ ==> List(1, 2, 3))
+          Ns.int.insert(2, 3),
+          Ns.int.insert(4),
+        ).get.map(_ ==> List(1, 2, 3, 4))
 
         // Current data is unchanged
         _ <- Ns.int.query.get.map(_ ==> List(1))
@@ -70,33 +52,56 @@ object GetWith extends DatomicTestSuite {
 
     "update" - types { implicit conn =>
       for {
-        tx1 <- Ns.int(1).save.transact
-        e = tx1.eid
-        tx2 <- Ns(e).int(2).update.transact
-        tx3 <- Ns(e).int(3).update.transact
+        e <- Ns.int(1).save.transact.map(_.eid)
 
-        _ <- Ns.int.query.asOf(tx1).get.map(_ ==> List(1))
-        _ <- Ns.int.query.asOf(tx2).get.map(_ ==> List(2))
-        _ <- Ns.int.query.asOf(tx3).get.map(_ ==> List(3))
+        // Current data
+        _ <- Ns.int.query.get.map(_ ==> List(1))
 
-        // Current state same as of tx3
-        _ <- Ns.int.query.get.map(_ ==> List(3))
+        // Test temporary actions
+        _ <- Ns.int.query.widh(
+          Ns(e).int(2).update,
+        ).get.map(_ ==> List(2))
+
+        // Current data is unchanged
+        _ <- Ns.int.query.get.map(_ ==> List(1))
       } yield ()
     }
 
 
     "delete" - types { implicit conn =>
       for {
-        tx1 <- Ns.int(1).save.transact
-        tx2 <- Ns.int(2).save.transact
-        tx3 <- Ns(tx2.eid).delete.transact
+        e1 <- Ns.int.insert(1, 2).transact.map(_.eid)
 
-        _ <- Ns.int.query.asOf(tx1).get.map(_ ==> List(1))
-        _ <- Ns.int.query.asOf(tx2).get.map(_ ==> List(1, 2))
-        _ <- Ns.int.query.asOf(tx3).get.map(_ ==> List(1))
+        // Current data
+        _ <- Ns.int.query.get.map(_ ==> List(1, 2))
 
-        // Current state same as of tx3
-        _ <- Ns.int.query.get.map(_ ==> List(1))
+        // Test temporary actions
+        _ <- Ns.int.query.widh(
+          Ns(e1).delete,
+        ).get.map(_ ==> List(2))
+
+        // Current data is unchanged
+        _ <- Ns.int.query.get.map(_ ==> List(1, 2))
+      } yield ()
+    }
+
+
+    "Mixing" - types { implicit conn =>
+      for {
+        List(e1, e2) <- Ns.int.insert(1, 2).transact.map(_.eids)
+
+        // Current data
+        _ <- Ns.int.query.get.map(_ ==> List(1, 2))
+
+        // Test temporary actions
+        _ <- Ns.int.a1.query.widh(
+          Ns.int(3).save,
+          Ns(e1).int(0).update,
+          Ns(e2).delete,
+        ).get.map(_ ==> List(0, 3))
+
+        // Current data is unchanged
+        _ <- Ns.int.query.get.map(_ ==> List(1, 2))
       } yield ()
     }
   }

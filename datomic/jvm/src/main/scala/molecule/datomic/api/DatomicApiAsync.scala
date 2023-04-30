@@ -3,7 +3,7 @@ package molecule.datomic.api
 
 import molecule.base.error._
 import molecule.boilerplate.ast.Model._
-import molecule.core.action.Insert
+import molecule.core.action.{Insert, Query}
 import molecule.core.api.{ApiAsync, Connection, TxReport}
 import molecule.core.marshalling.ConnProxy
 import molecule.core.transaction.{DeleteExtraction, InsertExtraction, SaveExtraction, UpdateExtraction}
@@ -42,6 +42,13 @@ trait DatomicApiAsync
       printInspectQuery("QUERY", q.elements)
     }
   }
+
+//  implicit class query2datomicQuery[Tpl](q: Query[Tpl]) {
+//    def asOf(txReport: TxReport): DatomicQuery[Tpl] = {
+////      copy(dbView = Some(AsOf(TxLong(txReport.tx))))
+//      DatomicQuery(q.elements, q.limit, Some(AsOf(TxLong(txReport.tx))))
+//    }
+//  }
 
 
   implicit class datomicQueryOffsetApiAsync[Tpl](q: DatomicQueryOffset[Tpl]) extends QueryOffsetApi[Tpl] {
@@ -84,7 +91,7 @@ trait DatomicApiAsync
       printInspectTx("SAVE", save.elements, getStmts(conn.proxy))
     }
 
-    private def getStmts(proxy: ConnProxy): Data = {
+     def getStmts(proxy: ConnProxy): Data = {
       (new SaveExtraction() with Save_stmts).getStmts(save.elements)
     }
 
