@@ -2,8 +2,8 @@ package molecule.datomic.api
 
 import molecule.base.error.{InsertError, ModelError}
 import molecule.core.action.Insert
-import molecule.core.api.{ApiSync, Connection, TxReport}
-import molecule.datomic.action._
+import molecule.core.api._
+import molecule.core.action._
 
 
 trait DatomicApiSync extends ApiSync {
@@ -12,24 +12,24 @@ trait DatomicApiSync extends ApiSync {
     "Molecule has no synchronous api on the JS platform since RPCs are asynchronous."
   )
 
-  implicit class datomicQueryApiSync[Tpl](q: DatomicQuery[Tpl]) extends QueryApi[Tpl] {
+  implicit class datomicQueryApiSync[Tpl](q: Query[Tpl]) extends QueryApi[Tpl] {
     override def get(implicit conn: Connection): List[Tpl] = noSyncOnJSplatform
     override def subscribe(callback: List[Tpl] => Unit)(implicit conn: Connection): Unit = noSyncOnJSplatform
     override def inspect(implicit conn: Connection): Unit = noSyncOnJSplatform
   }
 
-  implicit class datomicQueryOffsetApiSync[Tpl](q: DatomicQueryOffset[Tpl]) extends QueryOffsetApi[Tpl] {
+  implicit class datomicQueryOffsetApiSync[Tpl](q: QueryOffset[Tpl]) extends QueryOffsetApi[Tpl] {
     override def get(implicit conn: Connection): (List[Tpl], Int, Boolean) = noSyncOnJSplatform
     override def inspect(implicit conn: Connection): Unit = noSyncOnJSplatform
   }
 
-  implicit class datomicQueryCursorApiSync[Tpl](q: DatomicQueryCursor[Tpl]) extends QueryCursorApi[Tpl] {
+  implicit class datomicQueryCursorApiSync[Tpl](q: QueryCursor[Tpl]) extends QueryCursorApi[Tpl] {
     override def get(implicit conn: Connection): (List[Tpl], String, Boolean) = noSyncOnJSplatform
     override def inspect(implicit conn: Connection): Unit = noSyncOnJSplatform
   }
 
 
-  implicit class datomicSaveApiSync[Tpl](save: DatomicSave) extends SaveTransaction {
+  implicit class datomicSaveApiSync[Tpl](save: Save) extends SaveTransaction {
     override def transact(implicit conn: Connection): TxReport = noSyncOnJSplatform
     override def validate(implicit conn: Connection): Map[String, Seq[String]] = noSyncOnJSplatform
     override def inspect(implicit conn: Connection): Unit = noSyncOnJSplatform
@@ -41,13 +41,13 @@ trait DatomicApiSync extends ApiSync {
     override def inspect(implicit conn: Connection): Unit = noSyncOnJSplatform
   }
 
-  implicit class datomicUpdateApiSync[Tpl](update: DatomicUpdate) extends UpdateTransaction {
+  implicit class datomicUpdateApiSync[Tpl](update: Update) extends UpdateTransaction {
     override def transact(implicit conn: Connection): TxReport = noSyncOnJSplatform
     override def validate(implicit conn: Connection): Map[String, Seq[String]] = noSyncOnJSplatform
     override def inspect(implicit conn: Connection): Unit = noSyncOnJSplatform
   }
 
-  implicit class datomicDeleteApiSync[Tpl](delete: DatomicDelete) extends DeleteTransaction {
+  implicit class datomicDeleteApiSync[Tpl](delete: Delete) extends DeleteTransaction {
     override def transact(implicit conn: Connection): TxReport = noSyncOnJSplatform
     override def inspect(implicit conn: Connection): Unit = noSyncOnJSplatform
   }

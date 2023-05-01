@@ -3,23 +3,24 @@ package molecule.datomic.api
 import boopickle.Default._
 import molecule.base.error.{InsertError, InsertErrors, ValidationErrors}
 import molecule.boilerplate.ast.Model._
-import molecule.core.action.Insert
+import molecule.core.action._
 import molecule.core.api.{ApiAsync, Connection, TxReport}
 import molecule.core.marshalling.serialize.PickleTpls
 import molecule.core.util.FutureUtils
 import molecule.core.validation.ModelValidation
 import molecule.core.validation.insert.InsertValidation
-import molecule.datomic.action._
 import molecule.datomic.facade.DatomicConn_JS
 import scala.concurrent.{ExecutionContext, Future}
 
 
 trait DatomicApiAsync extends DatomicAsyncApiBase with ApiAsync with FutureUtils {
 
-  implicit class datomicQueryApiAsync[Tpl](q: DatomicQuery[Tpl]) extends QueryApi[Tpl] {
+  implicit class datomicQueryApiAsync[Tpl](q: Query[Tpl]) extends QueryApi[Tpl] {
     override def get(implicit conn0: Connection, ec: ExecutionContext): Future[List[Tpl]] = {
-      val conn = conn0.asInstanceOf[DatomicConn_JS]
+      val conn  = conn0.asInstanceOf[DatomicConn_JS]
       val proxy = conn.proxy.copy(dbView = q.dbView)
+
+      q.elements.foreach(println)
       conn.rpc.query[Tpl](proxy, q.elements, q.limit).future
     }
 
@@ -34,9 +35,9 @@ trait DatomicApiAsync extends DatomicAsyncApiBase with ApiAsync with FutureUtils
   }
 
 
-  implicit class datomicQueryOffsetApiAsync[Tpl](q: DatomicQueryOffset[Tpl]) extends QueryOffsetApi[Tpl] {
+  implicit class datomicQueryOffsetApiAsync[Tpl](q: QueryOffset[Tpl]) extends QueryOffsetApi[Tpl] {
     override def get(implicit conn0: Connection, ec: ExecutionContext): Future[(List[Tpl], Int, Boolean)] = {
-      val conn = conn0.asInstanceOf[DatomicConn_JS]
+      val conn  = conn0.asInstanceOf[DatomicConn_JS]
       val proxy = conn.proxy.copy(dbView = q.dbView)
       conn.rpc.queryOffset[Tpl](proxy, q.elements, q.limit, q.offset).future
     }
@@ -47,9 +48,9 @@ trait DatomicApiAsync extends DatomicAsyncApiBase with ApiAsync with FutureUtils
   }
 
 
-  implicit class datomicQueryCursorApiAsync[Tpl](q: DatomicQueryCursor[Tpl]) extends QueryCursorApi[Tpl] {
+  implicit class datomicQueryCursorApiAsync[Tpl](q: QueryCursor[Tpl]) extends QueryCursorApi[Tpl] {
     override def get(implicit conn0: Connection, ec: ExecutionContext): Future[(List[Tpl], String, Boolean)] = {
-      val conn = conn0.asInstanceOf[DatomicConn_JS]
+      val conn  = conn0.asInstanceOf[DatomicConn_JS]
       val proxy = conn.proxy.copy(dbView = q.dbView)
       conn.rpc.queryCursor[Tpl](proxy, q.elements, q.limit, q.cursor).future
     }
@@ -60,7 +61,7 @@ trait DatomicApiAsync extends DatomicAsyncApiBase with ApiAsync with FutureUtils
   }
 
 
-  implicit class datomicSaveApiAsync[Tpl](save: DatomicSave) extends SaveTransaction {
+  implicit class datomicSaveApiAsync[Tpl](save: Save) extends SaveTransaction {
     override def transact(implicit conn0: Connection, ec: ExecutionContext): Future[TxReport] = try {
       val errors = validate
       if (errors.isEmpty) {
@@ -85,7 +86,7 @@ trait DatomicApiAsync extends DatomicAsyncApiBase with ApiAsync with FutureUtils
 
 
   implicit class datomicInsertApiAsync[Tpl](insert0: Insert) extends InsertTransaction {
-    val insert = insert0.asInstanceOf[DatomicInsert_JS]
+    val insert = insert0.asInstanceOf[InsertTpls]
     override def transact(implicit conn0: Connection, ec: ExecutionContext): Future[TxReport] = try {
       val errors = validate
       if (errors.isEmpty) {
@@ -112,7 +113,7 @@ trait DatomicApiAsync extends DatomicAsyncApiBase with ApiAsync with FutureUtils
   }
 
 
-  implicit class datomicUpdateApiAsync[Tpl](update: DatomicUpdate) extends UpdateTransaction {
+  implicit class datomicUpdateApiAsync[Tpl](update: Update) extends UpdateTransaction {
     override def transact(implicit conn0: Connection, ec: ExecutionContext): Future[TxReport] = try {
       val errors = validate
       if (errors.isEmpty) {
@@ -137,7 +138,7 @@ trait DatomicApiAsync extends DatomicAsyncApiBase with ApiAsync with FutureUtils
   }
 
 
-  implicit class datomicDeleteApiAsync[Tpl](delete: DatomicDelete) extends DeleteTransaction {
+  implicit class datomicDeleteApiAsync[Tpl](delete: Delete) extends DeleteTransaction {
     override def transact(implicit conn0: Connection, ec: ExecutionContext): Future[TxReport] = try {
       val conn = conn0.asInstanceOf[DatomicConn_JS]
       conn.rpc.delete(conn.proxy, delete.elements).future

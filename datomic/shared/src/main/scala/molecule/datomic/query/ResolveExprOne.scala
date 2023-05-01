@@ -272,7 +272,7 @@ trait ResolveExprOne[Tpl]
   }
   private def regex[T](e: Var, a: Att, v: Var, regex: T): Unit = {
     where += s"[$e $a $v$tx]" -> wClause
-    where += s"""[(re-find #"$regex" $v)]""" -> wNeqOne
+    where += s"""[(re-find (re-pattern "$regex") $v)]""" -> wNeqOne
   }
 
   private def remainder[T](e: Var, a: Att, v: Var, args: Seq[T]): Unit = {

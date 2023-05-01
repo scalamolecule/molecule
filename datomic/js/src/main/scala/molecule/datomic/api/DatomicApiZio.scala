@@ -2,21 +2,20 @@ package molecule.datomic.api
 
 import molecule.base.error._
 import molecule.boilerplate.ast.Model._
-import molecule.core.action.Insert
+import molecule.core.action._
 import molecule.core.api.{ApiZio, Connection, TxReport}
 import molecule.core.marshalling.serialize.PickleTpls
 import molecule.core.util.Executor._
 import molecule.core.util.FutureUtils
 import molecule.core.validation.ModelValidation
 import molecule.core.validation.insert.InsertValidation
-import molecule.datomic.action._
 import molecule.datomic.facade.DatomicConn_JS
 import zio._
 import scala.concurrent.Future
 
 trait DatomicApiZio extends DatomicZioApiBase with ApiZio with FutureUtils {
 
-  implicit class datomicQueryApiZio[Tpl](q: DatomicQuery[Tpl]) extends QueryApi[Tpl] {
+  implicit class datomicQueryApiZio[Tpl](q: Query[Tpl]) extends QueryApi[Tpl] {
     override def get: ZIO[Connection, MoleculeError, List[Tpl]] = {
       getResult((conn: DatomicConn_JS) =>
         conn.rpc.query[Tpl](conn.proxy, q.elements, q.limit).future
@@ -43,7 +42,7 @@ trait DatomicApiZio extends DatomicZioApiBase with ApiZio with FutureUtils {
   }
 
 
-  implicit class datomicQueryOffsetApiZio[Tpl](q: DatomicQueryOffset[Tpl]) extends QueryOffsetApi[Tpl] {
+  implicit class datomicQueryOffsetApiZio[Tpl](q: QueryOffset[Tpl]) extends QueryOffsetApi[Tpl] {
     override def get: ZIO[Connection, MoleculeError, (List[Tpl], Int, Boolean)] = {
       getResult((conn: DatomicConn_JS) =>
         conn.rpc.queryOffset[Tpl](conn.proxy, q.elements, q.limit, q.offset).future
@@ -56,7 +55,7 @@ trait DatomicApiZio extends DatomicZioApiBase with ApiZio with FutureUtils {
   }
 
 
-  implicit class datomicQueryCursorApiZio[Tpl](q: DatomicQueryCursor[Tpl]) extends QueryCursorApi[Tpl] {
+  implicit class datomicQueryCursorApiZio[Tpl](q: QueryCursor[Tpl]) extends QueryCursorApi[Tpl] {
     override def get: ZIO[Connection, MoleculeError, (List[Tpl], String, Boolean)] = {
       getResult((conn: DatomicConn_JS) =>
         conn.rpc.queryCursor[Tpl](conn.proxy, q.elements, q.limit, q.cursor).future
@@ -69,7 +68,7 @@ trait DatomicApiZio extends DatomicZioApiBase with ApiZio with FutureUtils {
   }
 
 
-  implicit class datomicSaveApiZio[Tpl](save: DatomicSave) extends SaveTransaction {
+  implicit class datomicSaveApiZio[Tpl](save: Save) extends SaveTransaction {
     override def transact: ZIO[Connection, MoleculeError, TxReport] = {
       for {
         conn <- ZIO.service[Connection]
@@ -96,7 +95,7 @@ trait DatomicApiZio extends DatomicZioApiBase with ApiZio with FutureUtils {
 
 
   implicit class datomicInsertApiZio[Tpl](insert0: Insert) extends InsertTransaction {
-    val insert = insert0.asInstanceOf[DatomicInsert_JS]
+    val insert = insert0.asInstanceOf[InsertTpls]
     override def transact: ZIO[Connection, MoleculeError, TxReport] = {
       for {
         conn <- ZIO.service[Connection]
@@ -123,7 +122,7 @@ trait DatomicApiZio extends DatomicZioApiBase with ApiZio with FutureUtils {
   }
 
 
-  implicit class datomicUpdateApiZio[Tpl](update: DatomicUpdate) extends UpdateTransaction {
+  implicit class datomicUpdateApiZio[Tpl](update: Update) extends UpdateTransaction {
     override def transact: ZIO[Connection, MoleculeError, TxReport] = {
       for {
         conn <- ZIO.service[Connection]
@@ -149,7 +148,7 @@ trait DatomicApiZio extends DatomicZioApiBase with ApiZio with FutureUtils {
   }
 
 
-  implicit class datomicDeleteApiZio[Tpl](delete: DatomicDelete) extends DeleteTransaction {
+  implicit class datomicDeleteApiZio[Tpl](delete: Delete) extends DeleteTransaction {
     override def transact: ZIO[Connection, MoleculeError, TxReport] = {
       for {
         conn <- ZIO.service[Connection]

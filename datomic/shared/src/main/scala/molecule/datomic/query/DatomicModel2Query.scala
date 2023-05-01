@@ -69,7 +69,7 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
           throw ModelError(s"Can't refer to ambiguous filter attribute $filterAttr")
         )
         if (fa.ns == a.ns) {
-          // Add adjacent expression attribute after this attribute
+          // Add adjacent filter attribute after this attribute
           List(a, fa)
         } else if (fa.isInstanceOf[Mandatory]) {
           throw ModelError(s"Filter attribute $filterAttr pointing to other namespace should be tacit.")
@@ -85,6 +85,7 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
         List(a)
       }
     }
+
     def prepareComposite(composite: Composite): Composite = Composite(prepare(composite.elements, Nil))
     def prepareNested(nested: Nested): Nested = Nested(nested.ref, prepare(nested.elements, Nil))
     def prepareNestedOpt(nested: NestedOpt): NestedOpt = NestedOpt(nested.ref, prepare(nested.elements, Nil))
@@ -94,6 +95,10 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
     }
 
     val elements1 = prepare(elements, Nil)
+
+    println("---------")
+    elements1.foreach(println)
+
 
     if (expectedFilterAttrs.nonEmpty && expectedFilterAttrs.intersect(availableAttrs) != expectedFilterAttrs) {
       throw ModelError("Please add missing filter attributes:\n  " + expectedFilterAttrs.mkString("\n  "))

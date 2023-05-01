@@ -9,14 +9,11 @@ object _Insert extends CoreGenBase( "Insert", "/api") {
     s"""// GENERATED CODE ********************************
        |package molecule.core.api
        |
-       |trait $fileName_ {
-       |  // Implemented for each db and JS/JVM platform
-       |  private[core] def _insertOp(tpls: Seq[Product]): InsertOps
-       |}
+       |import molecule.boilerplate.ast.Model.Element
        |
-       |trait ${fileName}_1[A] extends $fileName_ {
-       |  def apply(a: A, as: A*): InsertOps = _insertOp((a +: as).map(a => Tuple1(a)))
-       |  def apply(tpls: Seq[A]): InsertOps = _insertOp(tpls.map(a => Tuple1(a)))
+       |case class ${fileName}_1[A](elements0: List[Element]) extends $fileName_ {
+       |  final def apply(a: A, as: A*): Insert = InsertTpls(elements0, (a +: as).map(a => Tuple1(a)))
+       |  final def apply(tpls: Seq[A]): Insert = InsertTpls(elements0, tpls.map(a => Tuple1(a)))
        |}
        |$traits
        |""".stripMargin
@@ -26,10 +23,10 @@ object _Insert extends CoreGenBase( "Insert", "/api") {
     val pad = "   " * (arity - 2)
     val body =
       s"""
-         |trait $fileName_$arity[${`A..V`}] extends $fileName_ {
-         |  def apply(${`a:A..v:V`})                : InsertOps = _insertOp(Seq((${`a..v`})))
-         |  def apply(tpl: ${`(A..V)`}, more: ${`(A..V)`}*): InsertOps = _insertOp(tpl +: more)
-         |  def apply(tpls: Seq[${`(A..V)`}])$pad         : InsertOps = _insertOp(tpls)
+         |case class $fileName_$arity[${`A..V`}](elements0: List[Element]) {
+         |  final def apply(${`a:A..v:V`})                : Insert = InsertTpls(elements0, Seq((${`a..v`})))
+         |  final def apply(tpl: ${`(A..V)`}, more: ${`(A..V)`}*): Insert = InsertTpls(elements0, tpl +: more)
+         |  final def apply(tpls: Seq[${`(A..V)`}])$pad         : Insert = InsertTpls(elements0, tpls)
          |}""".stripMargin
   }
 }

@@ -20,8 +20,7 @@ trait DatomicTestSuiteBase extends TestSuite
   val useFree     : Boolean
 
   lazy val platformSystemProtocol = {
-    val dbType = if (protocol == "mem") if (useFree) "(free)" else "(pro)" else ""
-    (if (isJsPlatform) "JS" else "JVM") + s" Peer $protocol $dbType"
+    (if (isJsPlatform) "JS" else "JVM") + s" Peer $protocol"
   }
 
   override def utestFormatter: uFormatter = new uFormatter {

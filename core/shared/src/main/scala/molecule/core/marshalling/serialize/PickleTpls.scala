@@ -15,12 +15,38 @@ import scala.collection.mutable.ListBuffer
 
 
 case class PickleTpls(
-  elements: List[Element],
+  elements0: List[Element],
   allTuples: Boolean
 ) extends PickleTpl_
   with ModelUtils
   with SerializationUtils
   with MoleculeLogging {
+
+  // Separate adjacent filter attributes
+  @tailrec
+  private def prepare(elements: List[Element], acc: List[Element]): List[Element] = {
+    elements match {
+      case element :: tail =>
+        element match {
+          case a: Attr       => prepare(tail, acc ++ prepareAttr(a))
+          case e: Composite  => prepare(tail, acc :+ prepareComposite(e))
+          case n: Nested     => prepare(tail, acc :+ prepareNested(n))
+          case n: NestedOpt  => prepare(tail, acc :+ prepareNestedOpt(n))
+          case t: TxMetaData => prepare(tail, acc :+ prepareTxMetaData(t))
+          case refOrBackRef  => prepare(tail, acc :+ refOrBackRef)
+        }
+      case Nil             => acc
+    }
+  }
+  // Add adjacent filter attribute after this attribute
+  private def prepareAttr(a: Attr): List[Attr] =
+    a.filterAttr.fold(List(a))(fa => if (fa.ns == a.ns) List(a, fa) else List(a))
+  private def prepareComposite(composite: Composite): Composite = Composite(prepare(composite.elements, Nil))
+  private def prepareNested(nested: Nested): Nested = Nested(nested.ref, prepare(nested.elements, Nil))
+  private def prepareNestedOpt(nested: NestedOpt): NestedOpt = NestedOpt(nested.ref, prepare(nested.elements, Nil))
+  private def prepareTxMetaData(t: TxMetaData): TxMetaData = TxMetaData(prepare(t.elements, Nil))
+
+  private val elements = prepare(elements0, Nil)
 
   private val prevRefs: ListBuffer[String] = ListBuffer.empty[String]
 
@@ -89,6 +115,10 @@ case class PickleTpls(
     elements match {
       case element :: tail => element match {
         case a: Attr =>
+          //          val tail1 = a.filterAttr.fold(tail)(_ +: tail)
+
+          //          println("tail1: " + tail1)
+
           a match {
             case a: AttrOne =>
               a match {

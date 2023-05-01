@@ -19,72 +19,22 @@ object AdhocJVM extends DatomicTestSuite {
 
     "types" - types { implicit conn =>
       for {
-        _ <- Ns.int(1).save.transact
-
-
-        _ <- Ns.i.Ref.i.Nss.i.query.get
-
-        _ <- Ns.ints.hasLt(2).query.inspect
+        _ <- Ns.int.insert.apply(1).transact
+        _ <- Ns.int.query.get.map(_ ==> List(1))
 
 
       } yield ()
     }
-
-
-    "refs" - refs { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Refs._
-      for {
-        _ <- Ns.i(1).Self.i(2).save.transact
-
-        _ <- Ns.i.Self.i.query.inspect
-
-        _ = {
-          Peer.q(
-            """[:find  ?a ?c ?b ?d
-              | :where [?a :Ns/i ?b]
-              |        [?a :Ns/self ?c]
-              |        [?c :Ns/i ?d]
-              |        ]""".stripMargin,
-            conn.db
-          ).forEach { r => println(r) }
-
-          println("-------")
-          Peer.q(
-            """[:find  ?a ?c ?b ?d
-              | :where [?a :Ns/i ?b]
-              |        [?c :Ns/self ?a]
-              |        [?c :Ns/i ?d]
-              |        ]""".stripMargin,
-            conn.db
-          ).forEach { r => println(r) }
-
-          println("-------")
-          Peer.q(
-            """[:find  ?b ?d
-              | :in $ %
-              | :where [?a :Ns/i ?b]
-              |        (bi-ref-?b ?a ?c)
-              |        [?c :Ns/i ?d]
-              |        ]""".stripMargin,
-            conn.db,
-            """[
-              |  [(bi-ref-?b ?a ?c) [?a :Ns/self ?c]]
-              |  [(bi-ref-?b ?a ?c) [?c :Ns/self ?a]]
-              |]
-              |""".stripMargin
-          ).forEach { r => println(r) }
-
-        }
-        _ <- Ns.i.Self.i.query.get.map(_ ==> List((1, 2)))
-        _ <- Ns.i.Self.i.query.get.map(_ ==> List((1, 2)))
-
-
-        _ <- Ns.i(1).Self.i.query.get.map(_ ==> List((1, 2)))
-        _ <- Ns.i(2).Self.i.query.get.map(_ ==> List((1, 2)))
-
-      } yield ()
-
-    }
+/*
+testOnly	molecule.datomic.test.validation.MandatoryAttrs
+testOnly	molecule.datomic.test.validation.MandatoryRefs
+testOnly	molecule.datomic.test.filter.oneSpecial.FilterOneSpecial_Number
+testOnly	molecule.datomic.test.filterAttr.set.Adjacent
+testOnly	molecule.datomic.test.filter.oneSpecial.FilterOneSpecial_String
+testOnly	molecule.datomic.test.filterAttr.one.Adjacent
+testOnly	molecule.datomic.test.api.AsyncApi
+testOnly	molecule.datomic.test.filterAttr.one.Sorting
+ */
 
     //    "set" - typesSet { implicit conn =>
     //
@@ -162,20 +112,6 @@ object AdhocJVM extends DatomicTestSuite {
     //      //      )
     //      //      println(txr.get())
     //      //      val db = txr.get().get(datomic.Connection.DB_AFTER)
-    //    }
-
-
-    //    "one" - typesOne { implicit conn =>
-    //      val a = (1, float1)
-    //      val b = (2, float2)
-    //      val c = (3, float3)
-    //      One.n.float.insert(List(a, b, c)).transact
-    //
-    //      // Find all attribute values
-    //      One.n.a1.float.query.get ==> List(a, b, c)
-    //
-    //      One.n.a1.float(float1).query.get ==> List(a)
-    //
     //    }
   }
 }

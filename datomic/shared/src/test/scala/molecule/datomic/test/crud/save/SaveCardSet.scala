@@ -7,11 +7,9 @@ import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.datomic.setup.DatomicTestSuite
 import molecule.datomic.async._
-import molecule.datomic.test.crud.save.SaveCardOne.types
 import utest._
 
 object SaveCardSet extends DatomicTestSuite {
-
 
   override lazy val tests = Tests {
 
@@ -19,19 +17,19 @@ object SaveCardSet extends DatomicTestSuite {
       for {
         // Can't save multiple Sets of values (use insert for that)
         _ <- Ns.ints(Seq(Set(1), Set(2))).save.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
+          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
           err ==> "Can only save one Set of values for Set attribute `Ns.ints`. Found: Set(1), Set(2)"
         }
 
         // Same as
         _ <- Ns.ints(Set(1), Set(2)).save.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
+          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
           err ==> "Can only save one Set of values for Set attribute `Ns.ints`. Found: Set(1), Set(2)"
         }
 
         // Same as
         _ <- Ns.ints(1, 2).save.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
+          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
           err ==> "Can only save one Set of values for Set attribute `Ns.ints`. Found: Set(1), Set(2)"
         }
 
@@ -105,7 +103,7 @@ object SaveCardSet extends DatomicTestSuite {
       for {
         // Can't save multiple Sets of values (use insert for that)
         _ <- Ns.ints_?(Some(Seq(Set(1), Set(2)))).save.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
+          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
           err ==> "Can only save one Set of values for optional Set attribute `Ns.ints`. Found: Set(1), Set(2)"
         }
 
@@ -141,7 +139,7 @@ object SaveCardSet extends DatomicTestSuite {
 
         _ <- Ns.int(6).i(0).booleans_?(Some(Set.empty[Boolean])).save.transact
         _ <- Ns.int(6).i(1).booleans_?(Some(Set(boolean1))).save.transact
-        _ <- Ns.int(6).i(2).booleans_?(Some(Seq(Set(boolean1, boolean2)))).save.transact
+        _ <- Ns.int(6).i(2).booleans_?(Some(Seq(Set(boolean2, boolean3)))).save.transact
         _ <- Ns.int(6).i(3).booleans_?(Option.empty[Set[Boolean]]).save.transact
 
         _ <- Ns.int(7).i(0).bigInts_?(Some(Set.empty[BigInt])).save.transact
@@ -215,22 +213,12 @@ object SaveCardSet extends DatomicTestSuite {
           (2, Some(Set(double2, double3))),
           (3, None)
         ))
-
-        // todo: Bug in Datomic: Set values of `false` not returned
         _ <- Ns.int_(6).i.a1.booleans_?.query.get.map(_ ==> List(
           (0, None),
-          (1, None),
-          (2, Some(Set(boolean2))),
+          (1, Some(Set(boolean1))),
+          (2, Some(Set(boolean2, boolean3))),
           (3, None)
         ))
-        // Should be:
-        //      Ns.int_(6).i.a1.booleans_?.query.get.map(_ ==> List(
-        //        (0, None),
-        //        (1, Some(Set(boolean0))),
-        //        (2, Some(Set(boolean0, boolean1))),
-        //        (3, None)
-        //      )
-
         _ <- Ns.int_(7).i.a1.bigInts_?.query.get.map(_ ==> List(
           (0, None),
           (1, Some(Set(bigInt1))),

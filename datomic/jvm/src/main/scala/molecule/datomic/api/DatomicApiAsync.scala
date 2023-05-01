@@ -3,14 +3,13 @@ package molecule.datomic.api
 
 import molecule.base.error._
 import molecule.boilerplate.ast.Model._
-import molecule.core.action.{Insert, Query}
+import molecule.core.action._
 import molecule.core.api.{ApiAsync, Connection, TxReport}
 import molecule.core.marshalling.ConnProxy
 import molecule.core.transaction.{DeleteExtraction, InsertExtraction, SaveExtraction, UpdateExtraction}
 import molecule.core.util.FutureUtils
 import molecule.core.validation.ModelValidation
 import molecule.core.validation.insert.InsertValidation
-import molecule.datomic.action._
 import molecule.datomic.facade.DatomicConn_JVM
 import molecule.datomic.marshalling.DatomicRpcJVM.Data
 import molecule.datomic.query.{DatomicQueryResolveCursor, DatomicQueryResolveOffset}
@@ -26,7 +25,7 @@ trait DatomicApiAsync
     with ApiAsync
     with FutureUtils {
 
-  implicit class datomicQueryApiAsync[Tpl](q: DatomicQuery[Tpl]) extends QueryApi[Tpl] {
+  implicit class datomicQueryApiAsync[Tpl](q: Query[Tpl]) extends QueryApi[Tpl] {
     override def get(implicit conn: Connection, ec: ExecutionContext): Future[List[Tpl]] = {
       DatomicQueryResolveOffset[Tpl](q.elements, q.limit, None, q.dbView)
         .getListFromOffset_async(conn.asInstanceOf[DatomicConn_JVM], ec).map(_._1)
@@ -43,15 +42,7 @@ trait DatomicApiAsync
     }
   }
 
-//  implicit class query2datomicQuery[Tpl](q: Query[Tpl]) {
-//    def asOf(txReport: TxReport): DatomicQuery[Tpl] = {
-////      copy(dbView = Some(AsOf(TxLong(txReport.tx))))
-//      DatomicQuery(q.elements, q.limit, Some(AsOf(TxLong(txReport.tx))))
-//    }
-//  }
-
-
-  implicit class datomicQueryOffsetApiAsync[Tpl](q: DatomicQueryOffset[Tpl]) extends QueryOffsetApi[Tpl] {
+  implicit class datomicQueryOffsetApiAsync[Tpl](q: QueryOffset[Tpl]) extends QueryOffsetApi[Tpl] {
     override def get(implicit conn: Connection, ec: ExecutionContext): Future[(List[Tpl], Int, Boolean)] = {
       DatomicQueryResolveOffset[Tpl](q.elements, q.limit, Some(q.offset), q.dbView)
         .getListFromOffset_async(conn.asInstanceOf[DatomicConn_JVM], ec)
@@ -63,7 +54,7 @@ trait DatomicApiAsync
   }
 
 
-  implicit class datomicQueryCursorApiAsync[Tpl](q: DatomicQueryCursor[Tpl]) extends QueryCursorApi[Tpl] {
+  implicit class datomicQueryCursorApiAsync[Tpl](q: QueryCursor[Tpl]) extends QueryCursorApi[Tpl] {
     override def get(implicit conn: Connection, ec: ExecutionContext): Future[(List[Tpl], String, Boolean)] = {
       DatomicQueryResolveCursor[Tpl](q.elements, q.limit, Some(q.cursor), q.dbView)
         .getListFromCursor_async(conn.asInstanceOf[DatomicConn_JVM], ec)
@@ -75,11 +66,11 @@ trait DatomicApiAsync
   }
 
 
-  implicit class datomicSaveApiAsync[Tpl](save: DatomicSave) extends SaveTransaction {
+  implicit class datomicSaveApiAsync[Tpl](save: Save) extends SaveTransaction {
     override def transact(implicit conn: Connection, ec: ExecutionContext): Future[TxReport] = try {
       val errors = validate
       if (errors.isEmpty) {
-        conn.asInstanceOf[DatomicConn_JVM].transact_async(getStmts(conn.proxy))
+        conn.asInstanceOf[DatomicConn_JVM].transact_async(getStmts)
       } else {
         Future.failed(ValidationErrors(errors))
       }
@@ -88,10 +79,10 @@ trait DatomicApiAsync
     }
 
     override def inspect(implicit conn: Connection, ec: ExecutionContext): Future[Unit] = {
-      printInspectTx("SAVE", save.elements, getStmts(conn.proxy))
+      printInspectTx("SAVE", save.elements, getStmts)
     }
 
-     def getStmts(proxy: ConnProxy): Data = {
+    private def getStmts: Data = {
       (new SaveExtraction() with Save_stmts).getStmts(save.elements)
     }
 
@@ -103,7 +94,7 @@ trait DatomicApiAsync
 
 
   implicit class datomicInsertApiAsync[Tpl](insert0: Insert) extends InsertTransaction {
-    val insert = insert0.asInstanceOf[DatomicInsert_JVM]
+    val insert = insert0.asInstanceOf[InsertTpls]
     override def transact(implicit conn: Connection, ec: ExecutionContext): Future[TxReport] = try {
       val errors = validate
       if (errors.isEmpty) {
@@ -130,7 +121,7 @@ trait DatomicApiAsync
   }
 
 
-  implicit class datomicUpdateApiAsync[Tpl](update: DatomicUpdate) extends UpdateTransaction {
+  implicit class datomicUpdateApiAsync[Tpl](update: Update) extends UpdateTransaction {
     override def transact(implicit conn0: Connection, ec: ExecutionContext): Future[TxReport] = try {
       val errors = validate
       if (errors.isEmpty) {
@@ -158,7 +149,7 @@ trait DatomicApiAsync
   }
 
 
-  implicit class datomicDeleteApiAsync[Tpl](delete: DatomicDelete) extends DeleteTransaction {
+  implicit class datomicDeleteApiAsync[Tpl](delete: Delete) extends DeleteTransaction {
     override def transact(implicit conn0: Connection, ec: ExecutionContext): Future[TxReport] = try {
       val conn = conn0.asInstanceOf[DatomicConn_JVM]
       conn.transact_async(getStmts(conn))

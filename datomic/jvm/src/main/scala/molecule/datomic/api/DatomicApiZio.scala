@@ -2,14 +2,13 @@ package molecule.datomic.api
 
 import molecule.base.error._
 import molecule.boilerplate.ast.Model._
-import molecule.core.action.Insert
+import molecule.core.action._
 import molecule.core.api.{ApiZio, Connection, TxReport}
 import molecule.core.marshalling.ConnProxy
 import molecule.core.transaction.{DeleteExtraction, InsertExtraction, SaveExtraction, UpdateExtraction}
 import molecule.core.util.Executor._
 import molecule.core.validation.ModelValidation
 import molecule.core.validation.insert.InsertValidation
-import molecule.datomic.action._
 import molecule.datomic.facade.DatomicConn_JVM
 import molecule.datomic.marshalling.DatomicRpcJVM.Data
 import molecule.datomic.query.{DatomicQueryResolveCursor, DatomicQueryResolveOffset}
@@ -21,7 +20,7 @@ import scala.concurrent.Future
 
 trait DatomicApiZio extends JVMDatomicApiBase with SubscriptionStarter with DatomicZioApiBase with ApiZio {
 
-  implicit class datomicQueryApiZio[Tpl](q: DatomicQuery[Tpl]) extends QueryApi[Tpl] {
+  implicit class datomicQueryApiZio[Tpl](q: Query[Tpl]) extends QueryApi[Tpl] {
     override def get: ZIO[Connection, MoleculeError, List[Tpl]] = {
       getResult[List[Tpl]]((conn: DatomicConn_JVM) =>
         DatomicQueryResolveOffset[Tpl](q.elements, q.limit, None, q.dbView)
@@ -44,7 +43,7 @@ trait DatomicApiZio extends JVMDatomicApiBase with SubscriptionStarter with Dato
   }
 
 
-  implicit class datomicQueryOffsetApiZio[Tpl](q: DatomicQueryOffset[Tpl]) extends QueryOffsetApi[Tpl] {
+  implicit class datomicQueryOffsetApiZio[Tpl](q: QueryOffset[Tpl]) extends QueryOffsetApi[Tpl] {
     override def get: ZIO[Connection, MoleculeError, (List[Tpl], Int, Boolean)] = {
       getResult[(List[Tpl], Int, Boolean)]((conn: DatomicConn_JVM) =>
         DatomicQueryResolveOffset[Tpl](q.elements, q.limit, Some(q.offset), q.dbView)
@@ -58,7 +57,7 @@ trait DatomicApiZio extends JVMDatomicApiBase with SubscriptionStarter with Dato
   }
 
 
-  implicit class datomicQueryCursorApiZio[Tpl](q: DatomicQueryCursor[Tpl]) extends QueryCursorApi[Tpl] {
+  implicit class datomicQueryCursorApiZio[Tpl](q: QueryCursor[Tpl]) extends QueryCursorApi[Tpl] {
     override def get: ZIO[Connection, MoleculeError, (List[Tpl], String, Boolean)] = {
       getResult[(List[Tpl], String, Boolean)]((conn: DatomicConn_JVM) =>
         DatomicQueryResolveCursor[Tpl](q.elements, q.limit, Some(q.cursor), q.dbView)
@@ -72,14 +71,14 @@ trait DatomicApiZio extends JVMDatomicApiBase with SubscriptionStarter with Dato
   }
 
 
-  implicit class datomicSaveApiZio[Tpl](save: DatomicSave) extends SaveTransaction {
+  implicit class datomicSaveApiZio[Tpl](save: Save) extends SaveTransaction {
     override def transact: ZIO[Connection, MoleculeError, TxReport] = {
       for {
         conn0 <- ZIO.service[Connection]
         errors <- validate
         _ <- ZIO.when(errors.nonEmpty)(ZIO.fail(ValidationErrors(errors)))
         conn = conn0.asInstanceOf[DatomicConn_JVM]
-        stmts <- ZIO.succeed(getStmts(conn.proxy))
+        stmts <- ZIO.succeed(getStmts)
         txReport <- transactStmts(stmts)
       } yield txReport
     }
@@ -88,10 +87,10 @@ trait DatomicApiZio extends JVMDatomicApiBase with SubscriptionStarter with Dato
       for {
         conn0 <- ZIO.service[Connection]
         conn = conn0.asInstanceOf[DatomicConn_JVM]
-      } yield printInspectTx("SAVE", save.elements, getStmts(conn.proxy))
+      } yield printInspectTx("SAVE", save.elements, getStmts)
     }
 
-    private def getStmts(proxy: ConnProxy): Data = {
+    private def getStmts: Data = {
       (new SaveExtraction() with Save_stmts).getStmts(save.elements)
     }
 
@@ -109,7 +108,7 @@ trait DatomicApiZio extends JVMDatomicApiBase with SubscriptionStarter with Dato
 
 
   implicit class datomicInsertApiZio[Tpl](insert0: Insert) extends InsertTransaction {
-    val insert = insert0.asInstanceOf[DatomicInsert_JVM]
+    val insert = insert0.asInstanceOf[InsertTpls]
     override def transact: ZIO[Connection, MoleculeError, TxReport] = {
       for {
         conn0 <- ZIO.service[Connection]
@@ -146,7 +145,7 @@ trait DatomicApiZio extends JVMDatomicApiBase with SubscriptionStarter with Dato
   }
 
 
-  implicit class datomicUpdateApiZio[Tpl](update: DatomicUpdate) extends UpdateTransaction {
+  implicit class datomicUpdateApiZio[Tpl](update: Update) extends UpdateTransaction {
     override def transact: ZIO[Connection, MoleculeError, TxReport] = {
       for {
         conn0 <- ZIO.service[Connection]
@@ -180,7 +179,7 @@ trait DatomicApiZio extends JVMDatomicApiBase with SubscriptionStarter with Dato
   }
 
 
-  implicit class datomicDeleteApiZio[Tpl](delete: DatomicDelete) extends DeleteTransaction {
+  implicit class datomicDeleteApiZio[Tpl](delete: Delete) extends DeleteTransaction {
     override def transact: ZIO[Connection, MoleculeError, TxReport] = {
       for {
         conn0 <- ZIO.service[Connection]

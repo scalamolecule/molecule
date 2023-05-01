@@ -3,6 +3,7 @@ package molecule.datomic.marshalling
 import java.nio.ByteBuffer
 import molecule.base.error.MoleculeError
 import molecule.boilerplate.ast.Model._
+import molecule.core.action._
 import molecule.core.api.TxReport
 import molecule.core.marshalling.Boopicklers._
 import molecule.core.marshalling._
@@ -10,7 +11,6 @@ import molecule.core.marshalling.deserialize.UnpickleTpls
 import molecule.core.transaction._
 import molecule.core.util.Executor._
 import molecule.core.util.FutureUtils
-import molecule.datomic.action.{DatomicQuery, DatomicQueryCursor, DatomicQueryOffset}
 import molecule.datomic.async._
 import molecule.datomic.transaction._
 import scala.concurrent.Future
@@ -32,7 +32,7 @@ object DatomicRpcJVM extends MoleculeRpc
   ): Future[Either[MoleculeError, List[Any]]] = either {
     for {
       conn <- getConn(proxy)
-      tpls <- new DatomicQuery[Any](elements, limit, proxy.dbView).get(conn, global)
+      tpls <- Query[Any](elements, limit, proxy.dbView).get(conn, global)
     } yield tpls
   }
 
@@ -44,7 +44,7 @@ object DatomicRpcJVM extends MoleculeRpc
   ): Future[Either[MoleculeError, (List[Any], Int, Boolean)]] = either {
     for {
       conn <- getConn(proxy)
-      tpls <- new DatomicQueryOffset[Any](elements, limit, offset, proxy.dbView).get(conn, global)
+      tpls <- QueryOffset[Any](elements, limit, offset, proxy.dbView).get(conn, global)
     } yield tpls
   }
 
@@ -56,7 +56,7 @@ object DatomicRpcJVM extends MoleculeRpc
   ): Future[Either[MoleculeError, (List[Any], String, Boolean)]] = either {
     for {
       conn <- getConn(proxy)
-      tpls <- new DatomicQueryCursor[Any](elements, limit, cursor, proxy.dbView).get(conn, global)
+      tpls <- QueryCursor[Any](elements, limit, cursor, proxy.dbView).get(conn, global)
     } yield tpls
   }
 
@@ -67,7 +67,7 @@ object DatomicRpcJVM extends MoleculeRpc
     callback: List[Any] => Unit
   ): Unit = {
     getConn(proxy).map(conn =>
-      new DatomicQuery[Any](elements, limit).subscribe(callback)(conn)
+      Query[Any](elements, limit).subscribe(callback)(conn)
     )
   }
 

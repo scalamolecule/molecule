@@ -1,16 +1,14 @@
 package molecule.datomic.facade
 
 import java.io.StringReader
-import java.util.{Date, List => jList}
+import java.util.{List => jList}
 import java.{lang => jl, util => ju}
-import com.google.common.util.concurrent.UncheckedExecutionException
 import datomic.Util.readAll
 import datomic.{Connection => DatomicConnection, Datom => _, _}
 import molecule.base.error._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.api.{Connection, TxReport}
 import molecule.core.marshalling.DatomicPeerProxy
-import molecule.core.marshalling.dbView.{AsOf, TxLong}
 import molecule.datomic.transaction.DatomicDataType_JVM
 import molecule.datomic.util.MakeTxReport
 import scala.collection.mutable
@@ -155,7 +153,7 @@ case class DatomicConn_JVM(
       }
       DatomicTxReportQueue(peerConn.txReportQueue())
     } catch {
-      case e: UncheckedExecutionException =>
+      case e: Exception =>
         println(
           """-------------
             |When the http server is terminated with a keyboard stroke and

@@ -12,5 +12,4 @@ object dbView {
   sealed trait DbView
   case class AsOf(tx: PointInTime) extends DbView
   case class Since(tx: PointInTime) extends DbView
-  case class With(actions: Seq[Action]) extends DbView
 }

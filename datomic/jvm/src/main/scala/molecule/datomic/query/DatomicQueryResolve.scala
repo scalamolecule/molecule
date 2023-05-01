@@ -5,12 +5,11 @@ import java.util.{Collections, Comparator, ArrayList => jArrayList, Collection =
 import datomic.{Database, Peer}
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
-import molecule.core.action.Action
+import molecule.core.action._
 import molecule.core.marshalling.dbView._
-import molecule.datomic.action._
+import molecule.datomic.api.DatomicApiSync
 import molecule.datomic.facade.DatomicConn_JVM
 import molecule.datomic.query.cursorStrategy.CursorUtils
-import molecule.datomic.sync._
 import molecule.datomic.util.DatomicApiLoader
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
@@ -18,7 +17,8 @@ import scala.collection.mutable.ListBuffer
 
 abstract class DatomicQueryResolve[Tpl](elements: List[Element], dbView: Option[DbView])
   extends DatomicModel2Query[Tpl](elements)
-    with DatomicApiLoader // todo: necessary?
+    with DatomicApiSync
+//    with DatomicApiLoader // todo: necessary?
     with CursorUtils {
 
   lazy val edgeValuesNotFound = "Couldn't find next page. Edge rows were all deleted/updated."
@@ -85,25 +85,7 @@ abstract class DatomicQueryResolve[Tpl](elements: List[Element], dbView: Option[
       case AsOf(TxDate(d))   => conn.peerConn.db().asOf(d)
       case Since(TxLong(tx)) => conn.peerConn.db().since(tx)
       case Since(TxDate(d))  => conn.peerConn.db().since(d)
-      case With(actions)     => getDbWith(conn, actions)
-//      case History           => throw ModelError("Please see fallback functions for Datomic.")
     }
-  }
-
-  private def getDbWith(conn: DatomicConn_JVM, actions: Seq[Action]): Database = {
-    var eidIndex = 0 // Avoid conflicting entity ids
-    val allStmts = new jArrayList[jList[AnyRef]]()
-    actions.foreach { action =>
-      val actionStmts = action match {
-        case a: DatomicSave       => a.getStmts(eidIndex)
-        case a: DatomicInsert_JVM => a.getStmts(conn, eidIndex)
-        case a: DatomicUpdate     => a.getStmts(conn)
-        case a: DatomicDelete     => a.getStmts(conn)
-      }
-      allStmts.addAll(actionStmts)
-      eidIndex -= actionStmts.size()
-    }
-    conn.peerConn.db().`with`(allStmts).get(datomic.Connection.DB_AFTER).asInstanceOf[Database]
   }
 
 
