@@ -19,8 +19,6 @@ trait DatomicApiAsync extends DatomicAsyncApiBase with ApiAsync with FutureUtils
     override def get(implicit conn0: Connection, ec: ExecutionContext): Future[List[Tpl]] = {
       val conn  = conn0.asInstanceOf[DatomicConn_JS]
       val proxy = conn.proxy.copy(dbView = q.dbView)
-
-      q.elements.foreach(println)
       conn.rpc.query[Tpl](proxy, q.elements, q.limit).future
     }
 

@@ -34,6 +34,12 @@ testOnly	molecule.datomic.test.filter.oneSpecial.FilterOneSpecial_String
 testOnly	molecule.datomic.test.filterAttr.one.Adjacent
 testOnly	molecule.datomic.test.api.AsyncApi
 testOnly	molecule.datomic.test.filterAttr.one.Sorting
+
+
+testOnly molecule.datomic.test.filter.set.FilterSet_BigDecimal_
+testOnly molecule.datomic.test.validation.MandatoryAttrs
+testOnly molecule.datomic.test.validation.MandatoryRefs
+
  */
 
     //    "set" - typesSet { implicit conn =>

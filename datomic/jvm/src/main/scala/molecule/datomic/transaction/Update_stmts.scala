@@ -21,7 +21,6 @@ trait Update_stmts extends DatomicTxBase_JVM with UpdateOps with MoleculeLogging
     conn: DatomicConn_JVM,
     elements: List[Element],
     isRpcCall: Boolean = false,
-    eidIndex: Int = 0,
     debug: Boolean = true
   ): Data = {
     val db = conn.peerConn.db()

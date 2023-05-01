@@ -228,35 +228,10 @@ lazy val datomic = crossProject(JSPlatform, JVMPlatform)
   .jvmSettings(
     // Ensure clojure loads correctly for async tests run from sbt
     Test / classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.Flat,
-//    resolvers += "clojars" at "https://clojars.org/repo",
     libraryDependencies ++= Seq(
-//      "com.datomic" % "datomic-free" % DatomicSettings.freeVersion
       "com.datomic" % "peer" % "1.0.6726"
     )
-//      ++ (CrossVersion.partialVersion(scalaVersion.value) match {
-//      case Some((2, 13)) => Nil
-//      case Some((2, 12)) =>
-//        // For @TxFns macro annotation on Scala 2.12
-//        sbt.compilerPlugin(
-//          "org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full
-//        ) :: Nil
-//      case _             => Nil
-//    })
   )
-//  .jvmSettings(
-//    if (DatomicSettings.useFree)
-//      Nil // Datomic free version is already default in `molecule` module
-//    else
-//      Seq(
-//        // Allow resolving local dependencies if using Datomic proprietary dev-local or pro
-//        resolvers += Resolver.mavenLocal,
-//        // Download Datomic Pro from https://www.datomic.com/get-datomic.html
-//        // and install locally per included instructions
-//        libraryDependencies += "com.datomic" % "datomic-pro" % DatomicSettings.proVersion,
-//        excludeDependencies += ExclusionRule("com.datomic", "datomic-free"),
-//        credentials += Credentials(Path.userHome / ".sbt" / ".credentials")
-//      )
-//  )
   .jsSettings(jsEnvironment)
 
 

@@ -27,56 +27,56 @@ object Sorting extends DatomicTestSuite {
           (2, 3),
         ))
 
-//        // Sort by expression attribute Ns.int
-//        _ <- Ns.i.<(Ns.int.a1).query.get.map(_ ==> List(
-//          (2, 3),
-//          (1, 3),
-//          (1, 4),
-//        ))
-//
-//        // Ns.i primary
-//        _ <- Ns.i.<(Ns.int.a2).a1.query.get.map(_ ==> List(
-//          (1, 3),
-//          (1, 4),
-//          (2, 3),
-//        ))
-//        _ <- Ns.i.<(Ns.int.d2).a1.query.get.map(_ ==> List(
-//          (1, 4),
-//          (1, 3),
-//          (2, 3),
-//        ))
-//        _ <- Ns.i.<(Ns.int.a2).d1.query.get.map(_ ==> List(
-//          (2, 3),
-//          (1, 3),
-//          (1, 4),
-//        ))
-//        _ <- Ns.i.<(Ns.int.d2).d1.query.get.map(_ ==> List(
-//          (2, 3),
-//          (1, 4),
-//          (1, 3),
-//        ))
-//
-//        // Ns.i secondary
-//        _ <- Ns.i.<(Ns.int.a1).a2.query.get.map(_ ==> List(
-//          (1, 3),
-//          (2, 3),
-//          (1, 4),
-//        ))
-//        _ <- Ns.i.<(Ns.int.d1).a2.query.get.map(_ ==> List(
-//          (1, 4),
-//          (1, 3),
-//          (2, 3),
-//        ))
-//        _ <- Ns.i.<(Ns.int.a1).d2.query.get.map(_ ==> List(
-//          (2, 3),
-//          (1, 3),
-//          (1, 4),
-//        ))
-//        _ <- Ns.i.<(Ns.int.d1).d2.query.get.map(_ ==> List(
-//          (1, 4),
-//          (2, 3),
-//          (1, 3),
-//        ))
+        // Sort by expression attribute Ns.int
+        _ <- Ns.i.<(Ns.int.a1).query.get.map(_ ==> List(
+          (2, 3),
+          (1, 3),
+          (1, 4),
+        ))
+
+        // Ns.i primary
+        _ <- Ns.i.<(Ns.int.a2).a1.query.get.map(_ ==> List(
+          (1, 3),
+          (1, 4),
+          (2, 3),
+        ))
+        _ <- Ns.i.<(Ns.int.d2).a1.query.get.map(_ ==> List(
+          (1, 4),
+          (1, 3),
+          (2, 3),
+        ))
+        _ <- Ns.i.<(Ns.int.a2).d1.query.get.map(_ ==> List(
+          (2, 3),
+          (1, 3),
+          (1, 4),
+        ))
+        _ <- Ns.i.<(Ns.int.d2).d1.query.get.map(_ ==> List(
+          (2, 3),
+          (1, 4),
+          (1, 3),
+        ))
+
+        // Ns.i secondary
+        _ <- Ns.i.<(Ns.int.a1).a2.query.get.map(_ ==> List(
+          (1, 3),
+          (2, 3),
+          (1, 4),
+        ))
+        _ <- Ns.i.<(Ns.int.d1).a2.query.get.map(_ ==> List(
+          (1, 4),
+          (1, 3),
+          (2, 3),
+        ))
+        _ <- Ns.i.<(Ns.int.a1).d2.query.get.map(_ ==> List(
+          (2, 3),
+          (1, 3),
+          (1, 4),
+        ))
+        _ <- Ns.i.<(Ns.int.d1).d2.query.get.map(_ ==> List(
+          (1, 4),
+          (2, 3),
+          (1, 3),
+        ))
       } yield ()
     }
   }

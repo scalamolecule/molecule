@@ -40,7 +40,7 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
       elements match {
         case element :: tail =>
           element match {
-            case a: Attr       => prepare(tail, acc ++ prepareAttr(a))
+            case a: Attr       => prepare(tail, acc :+ prepareAttr(a))
             case e: Composite  => prepare(tail, acc :+ prepareComposite(e))
             case n: Nested     => prepare(tail, acc :+ prepareNested(n))
             case n: NestedOpt  => prepare(tail, acc :+ prepareNestedOpt(n))
@@ -50,12 +50,10 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
         case Nil             => acc
       }
     }
-
-    def prepareAttr(a: Attr): List[Attr] = {
+    def prepareAttr(a: Attr): Attr = {
       availableAttrs += a.name
       if (a.ns == "_Generic" && a.attr == "tx") {
         addTxVar = true
-        List(a)
       } else if (a.filterAttr.nonEmpty) {
         val fa = a.filterAttr.get
         if (fa.filterAttr.nonEmpty) {
@@ -65,12 +63,9 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
         filterAttrVars.get(filterAttr).fold {
           // Create datomic variable for this expression attribute
           filterAttrVars = filterAttrVars + (filterAttr -> vv)
-        }(_ =>
-          throw ModelError(s"Can't refer to ambiguous filter attribute $filterAttr")
-        )
+        }(_ => throw ModelError(s"Can't refer to ambiguous filter attribute $filterAttr"))
         if (fa.ns == a.ns) {
-          // Add adjacent filter attribute after this attribute
-          List(a, fa)
+          // Add adjacent filter attribute is lifted...
         } else if (fa.isInstanceOf[Mandatory]) {
           throw ModelError(s"Filter attribute $filterAttr pointing to other namespace should be tacit.")
         } else if (fa.op != V) {
@@ -78,12 +73,9 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
         } else {
           // Expect expression attribute in other namespace
           expectedFilterAttrs += fa.name
-          List(a)
         }
-      } else {
-        // Attribute is available for expressions
-        List(a)
       }
+      a
     }
 
     def prepareComposite(composite: Composite): Composite = Composite(prepare(composite.elements, Nil))
@@ -95,10 +87,6 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
     }
 
     val elements1 = prepare(elements, Nil)
-
-    println("---------")
-    elements1.foreach(println)
-
 
     if (expectedFilterAttrs.nonEmpty && expectedFilterAttrs.intersect(availableAttrs) != expectedFilterAttrs) {
       throw ModelError("Please add missing filter attributes:\n  " + expectedFilterAttrs.mkString("\n  "))

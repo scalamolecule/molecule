@@ -115,7 +115,7 @@ object DatomicRpcJVM extends MoleculeRpc
     for {
       conn <- getConn(proxy)
       stmts = (new UpdateExtraction(conn.proxy.uniqueAttrs, isUpsert) with Update_stmts)
-        .getStmts(conn, elements, debug = true)
+        .getStmts(conn, elements, true)
       txReport <- conn.transact_async(stmts)
     } yield txReport
   }

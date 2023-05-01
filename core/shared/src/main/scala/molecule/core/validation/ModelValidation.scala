@@ -87,7 +87,6 @@ case class ModelValidation(
 
         case Nested(r, es) =>
           curElements = es
-//          val ref = r.ns + "." + r.refAttr
           val ref = r.name
           if (prev(level)(group).contains(ref))
             dup(ref)
@@ -98,7 +97,6 @@ case class ModelValidation(
 
         case NestedOpt(r, es) =>
           curElements = es
-//          val ref = r.ns + "." + r.refAttr
           val ref = r.name
           if (prev(level)(group).contains(ref))
             dup(ref)

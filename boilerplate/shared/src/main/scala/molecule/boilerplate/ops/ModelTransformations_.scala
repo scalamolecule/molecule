@@ -776,7 +776,28 @@ trait ModelTransformations_ {
   }
 
   protected def addSort(es: List[Element], sort: String): List[Element] = {
-    val last = es.last match {
+    es.size match {
+      case 1 =>
+        List(setSort(es.last, sort))
+      case 2 =>
+        val (first, last) = (es.head, es.last)
+        first match {
+          case attr: Attr if attr.filterAttr.nonEmpty => List(setSort(first, sort), last)
+          case _                                      => List(first, setSort(last, sort))
+        }
+
+      case _ =>
+        val (prev, last) = (es.init.last, es.last)
+        val sorted       = prev match {
+          case attr: Attr if attr.filterAttr.nonEmpty => List(setSort(prev, sort), last)
+          case _                                      => List(prev, setSort(last, sort))
+        }
+        es.dropRight(2) ++ sorted
+    }
+  }
+
+  private def setSort(e: Element, sort: String): Element = {
+    e match {
       case a: AttrOneMan => a match {
         case a: AttrOneManString     => a.copy(sort = Some(sort))
         case a: AttrOneManInt        => a.copy(sort = Some(sort))
@@ -809,117 +830,132 @@ trait ModelTransformations_ {
         case a: AttrOneOptShort      => a.copy(sort = Some(sort))
         case a: AttrOneOptChar       => a.copy(sort = Some(sort))
       }
-      case a             => unexpected(a)
+
+      case e => e
     }
-    es.init :+ last
   }
 
-  protected def filterAttr(es: List[Element], op: Op, attrMolecule: Molecule[_]): List[Element] = {
-    val filterAttr = attrMolecule.elements.last.asInstanceOf[Attr]
-    val attr     = es.last match {
-      case a: AttrOne => a match {
-        case a: AttrOneMan => a match {
-          case a: AttrOneManString     => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrOneManInt        => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrOneManLong       => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrOneManFloat      => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrOneManDouble     => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrOneManBoolean    => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrOneManBigInt     => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrOneManBigDecimal => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrOneManDate       => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrOneManUUID       => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrOneManURI        => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrOneManByte       => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrOneManShort      => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrOneManChar       => a.copy(op = op, filterAttr = Some(filterAttr))
+  protected def filterAttr(es: List[Element], op: Op, filterAttrMolecule: Molecule[_]): List[Element] = {
+    val filterAttr0 = filterAttrMolecule.elements.last.asInstanceOf[Attr]
+    val attrs       = es.last match {
+      case a: Attr =>
+        val (filterAttr, adjacent) = if (a.ns == filterAttr0.ns) {
+          // Convert mandatory filter attribute to tacit attribute
+          filterAttr0 match {
+            case a: AttrOneMan => a match {
+              case a: AttrOneManString     => (AttrOneTacString(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.status, a.sort), List(filterAttr0))
+              case a: AttrOneManInt        => (AttrOneTacInt(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.status, a.sort), List(filterAttr0))
+              case a: AttrOneManLong       => (AttrOneTacLong(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.status, a.sort), List(filterAttr0))
+              case a: AttrOneManFloat      => (AttrOneTacFloat(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.status, a.sort), List(filterAttr0))
+              case a: AttrOneManDouble     => (AttrOneTacDouble(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.status, a.sort), List(filterAttr0))
+              case a: AttrOneManBoolean    => (AttrOneTacBoolean(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.status, a.sort), List(filterAttr0))
+              case a: AttrOneManBigInt     => (AttrOneTacBigInt(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.status, a.sort), List(filterAttr0))
+              case a: AttrOneManBigDecimal => (AttrOneTacBigDecimal(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.status, a.sort), List(filterAttr0))
+              case a: AttrOneManDate       => (AttrOneTacDate(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.status, a.sort), List(filterAttr0))
+              case a: AttrOneManUUID       => (AttrOneTacUUID(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.status, a.sort), List(filterAttr0))
+              case a: AttrOneManURI        => (AttrOneTacURI(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.status, a.sort), List(filterAttr0))
+              case a: AttrOneManByte       => (AttrOneTacByte(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.status, a.sort), List(filterAttr0))
+              case a: AttrOneManShort      => (AttrOneTacShort(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.status, a.sort), List(filterAttr0))
+              case a: AttrOneManChar       => (AttrOneTacChar(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.status, a.sort), List(filterAttr0))
+            }
+            case a: AttrSetMan => a match {
+              case a: AttrSetManString     => (AttrSetTacString(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.status, a.sort), List(filterAttr0))
+              case a: AttrSetManInt        => (AttrSetTacInt(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.status, a.sort), List(filterAttr0))
+              case a: AttrSetManLong       => (AttrSetTacLong(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.status, a.sort), List(filterAttr0))
+              case a: AttrSetManFloat      => (AttrSetTacFloat(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.status, a.sort), List(filterAttr0))
+              case a: AttrSetManDouble     => (AttrSetTacDouble(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.status, a.sort), List(filterAttr0))
+              case a: AttrSetManBoolean    => (AttrSetTacBoolean(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.status, a.sort), List(filterAttr0))
+              case a: AttrSetManBigInt     => (AttrSetTacBigInt(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.status, a.sort), List(filterAttr0))
+              case a: AttrSetManBigDecimal => (AttrSetTacBigDecimal(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.status, a.sort), List(filterAttr0))
+              case a: AttrSetManDate       => (AttrSetTacDate(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.status, a.sort), List(filterAttr0))
+              case a: AttrSetManUUID       => (AttrSetTacUUID(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.status, a.sort), List(filterAttr0))
+              case a: AttrSetManURI        => (AttrSetTacURI(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.status, a.sort), List(filterAttr0))
+              case a: AttrSetManByte       => (AttrSetTacByte(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.status, a.sort), List(filterAttr0))
+              case a: AttrSetManShort      => (AttrSetTacShort(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.status, a.sort), List(filterAttr0))
+              case a: AttrSetManChar       => (AttrSetTacChar(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.status, a.sort), List(filterAttr0))
+            }
+            case other         => (other, List(filterAttr0))
+          }
+        } else (filterAttr0, Nil)
+
+        a match {
+          case a: AttrOne => a match {
+            case a: AttrOneMan => a match {
+              case a: AttrOneManString     => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+              case a: AttrOneManInt        => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+              case a: AttrOneManLong       => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+              case a: AttrOneManFloat      => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+              case a: AttrOneManDouble     => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+              case a: AttrOneManBoolean    => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+              case a: AttrOneManBigInt     => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+              case a: AttrOneManBigDecimal => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+              case a: AttrOneManDate       => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+              case a: AttrOneManUUID       => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+              case a: AttrOneManURI        => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+              case a: AttrOneManByte       => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+              case a: AttrOneManShort      => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+              case a: AttrOneManChar       => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+            }
+            case a: AttrOneTac => a match {
+              case a: AttrOneTacString     => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+              case a: AttrOneTacInt        => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+              case a: AttrOneTacLong       => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+              case a: AttrOneTacFloat      => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+              case a: AttrOneTacDouble     => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+              case a: AttrOneTacBoolean    => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+              case a: AttrOneTacBigInt     => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+              case a: AttrOneTacBigDecimal => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+              case a: AttrOneTacDate       => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+              case a: AttrOneTacUUID       => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+              case a: AttrOneTacURI        => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+              case a: AttrOneTacByte       => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+              case a: AttrOneTacShort      => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+              case a: AttrOneTacChar       => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+            }
+            case a             => unexpected(a)
+
+          }
+          case a: AttrSet => a match {
+            case a: AttrSetMan => a match {
+              case a: AttrSetManString     => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+              case a: AttrSetManInt        => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+              case a: AttrSetManLong       => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+              case a: AttrSetManFloat      => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+              case a: AttrSetManDouble     => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+              case a: AttrSetManBoolean    => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+              case a: AttrSetManBigInt     => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+              case a: AttrSetManBigDecimal => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+              case a: AttrSetManDate       => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+              case a: AttrSetManUUID       => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+              case a: AttrSetManURI        => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+              case a: AttrSetManByte       => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+              case a: AttrSetManShort      => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+              case a: AttrSetManChar       => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+            }
+            case a: AttrSetTac => a match {
+              case a: AttrSetTacString     => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+              case a: AttrSetTacInt        => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+              case a: AttrSetTacLong       => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+              case a: AttrSetTacFloat      => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+              case a: AttrSetTacDouble     => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+              case a: AttrSetTacBoolean    => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+              case a: AttrSetTacBigInt     => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+              case a: AttrSetTacBigDecimal => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+              case a: AttrSetTacDate       => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+              case a: AttrSetTacUUID       => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+              case a: AttrSetTacURI        => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+              case a: AttrSetTacByte       => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+              case a: AttrSetTacShort      => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+              case a: AttrSetTacChar       => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
+            }
+            case a             => unexpected(a)
+
+          }
+          case a          => unexpected(a)
         }
-        case a: AttrOneOpt => a match {
-          case a: AttrOneOptString     => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrOneOptInt        => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrOneOptLong       => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrOneOptFloat      => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrOneOptDouble     => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrOneOptBoolean    => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrOneOptBigInt     => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrOneOptBigDecimal => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrOneOptDate       => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrOneOptUUID       => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrOneOptURI        => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrOneOptByte       => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrOneOptShort      => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrOneOptChar       => a.copy(op = op, filterAttr = Some(filterAttr))
-        }
-        case a: AttrOneTac => a match {
-          case a: AttrOneTacString     => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrOneTacInt        => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrOneTacLong       => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrOneTacFloat      => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrOneTacDouble     => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrOneTacBoolean    => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrOneTacBigInt     => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrOneTacBigDecimal => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrOneTacDate       => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrOneTacUUID       => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrOneTacURI        => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrOneTacByte       => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrOneTacShort      => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrOneTacChar       => a.copy(op = op, filterAttr = Some(filterAttr))
-        }
-      }
-      case a: AttrSet => a match {
-        case a: AttrSetMan => a match {
-          case a: AttrSetManString     => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrSetManInt        => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrSetManLong       => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrSetManFloat      => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrSetManDouble     => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrSetManBoolean    => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrSetManBigInt     => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrSetManBigDecimal => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrSetManDate       => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrSetManUUID       => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrSetManURI        => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrSetManByte       => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrSetManShort      => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrSetManChar       => a.copy(op = op, filterAttr = Some(filterAttr))
-        }
-        case a: AttrSetOpt => a match {
-          case a: AttrSetOptString     => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrSetOptInt        => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrSetOptLong       => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrSetOptFloat      => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrSetOptDouble     => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrSetOptBoolean    => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrSetOptBigInt     => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrSetOptBigDecimal => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrSetOptDate       => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrSetOptUUID       => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrSetOptURI        => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrSetOptByte       => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrSetOptShort      => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrSetOptChar       => a.copy(op = op, filterAttr = Some(filterAttr))
-        }
-        case a: AttrSetTac => a match {
-          case a: AttrSetTacString     => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrSetTacInt        => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrSetTacLong       => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrSetTacFloat      => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrSetTacDouble     => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrSetTacBoolean    => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrSetTacBigInt     => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrSetTacBigDecimal => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrSetTacDate       => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrSetTacUUID       => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrSetTacURI        => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrSetTacByte       => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrSetTacShort      => a.copy(op = op, filterAttr = Some(filterAttr))
-          case a: AttrSetTacChar       => a.copy(op = op, filterAttr = Some(filterAttr))
-        }
-      }
-      case a          => unexpected(a)
+      case e       => unexpected(e)
     }
-    es.init :+ attr
+    es.init ++ attrs
   }
 
   protected def reverseTopLevelSorting(es: List[Element]): List[Element] = {
