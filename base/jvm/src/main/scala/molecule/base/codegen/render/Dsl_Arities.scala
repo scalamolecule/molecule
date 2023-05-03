@@ -68,16 +68,16 @@ case class Dsl_Arities(schema: MetaSchema, partPrefix: String, namespace: MetaNs
       val nextNs     = if (last) s"Dummy_${arity + 2}" else ns_1
 
       val filters = if (card == CardOne && !genericAttrs.contains(attr) && refNs.isEmpty) tpe0 match {
-        case "String"     => "_String "
-        case "Int"        => "_Number "
-        case "Long"       => "_Number "
-//        case "Float"      => "_Decimal"
-//        case "Double"     => "_Decimal"
-        case "BigInt"     => "_Number "
-//        case "BigDecimal" => "_Decimal"
-        case "Byte"       => "_Number "
-        case "Short"      => "_Number "
-        case _            => "        "
+        case "String" => "_String "
+        case "Int"    => "_Number "
+        case "Long"   => "_Number "
+        //        case "Float"      => "_Decimal"
+        //        case "Double"     => "_Decimal"
+        case "BigInt" => "_Number "
+        //        case "BigDecimal" => "_Decimal"
+        case "Byte"  => "_Number "
+        case "Short" => "_Number "
+        case _       => "        "
       } else "        "
 
       lazy val exprM = s"Expr${c}Man${_1}$filters[$tpesM, $ns_1, $nextNextNs]"
@@ -147,10 +147,11 @@ case class Dsl_Arities(schema: MetaSchema, partPrefix: String, namespace: MetaNs
       val refCls   = partPrefix + camel(attr)
       val refNs    = partPrefix + refNsOpt.get
       val refObj   = s"""Model.Ref("$ns", "$attr", "$refNs", $card)"""
+      val refObjBi = s"""Model.Ref("$ns", "$attr", "$refNs", $card, true)"""
       val pRefAttr = padRefAttr(attr)
       val pRefNs   = padRefNs(refNs)
       val nested   = if (card == CardOne) "" else s" with Nested${_0}${`[A..V]`}"
-      ref += s"object $refCls$pRefAttr extends $refNs${_0}$pRefNs[${`A..V, `}t](elements :+ $refObj)$nested"
+      ref += s"""object $refCls$pRefAttr extends $refNs${_0}$pRefNs[${`A..V, `}t](elements :+ $refObj)$nested { def apply(biDirectional: bi): $refNs${_0}$pRefNs[${`A..V, `}t] = new $refNs${_0}$pRefNs[${`A..V, `}t](elements.init :+ $refObjBi) }"""
   }
 
   val manAttrs = if (last) "" else man.result().mkString("", "\n  ", "\n\n  ")

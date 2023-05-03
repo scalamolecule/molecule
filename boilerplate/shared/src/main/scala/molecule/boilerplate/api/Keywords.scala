@@ -405,6 +405,8 @@ trait KeywordsStable {
 
 
   trait v1 extends Kw
+
+  trait bi
 }
 
 object Keywords extends KeywordsStable
@@ -459,4 +461,6 @@ trait Keywords {
   object v1 extends Keywords.v1 {
     override def toString = "v1"
   }
+
+  object bi extends Keywords.bi
 }

@@ -132,7 +132,7 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
     moleculeDataModelPaths := Seq(
       "molecule/coreTests/dataModels/core"
     ),
-    //    moleculeMakeJars := false,
+        moleculeMakeJars := false,
 
     // Suppress "un-used" keys warning
     Global / excludeLintKeys ++= Set(
@@ -227,7 +227,7 @@ lazy val datomic = crossProject(JSPlatform, JVMPlatform)
   )
   .jvmSettings(
     // Ensure clojure loads correctly for async tests run from sbt
-    Test / classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.Flat,
+//    Test / classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.Flat,
     libraryDependencies ++= Seq(
       "com.datomic" % "peer" % "1.0.6726"
     )

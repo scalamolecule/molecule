@@ -59,13 +59,13 @@ trait InsertValidationExtraction extends InsertValidators_ with ModelUtils { sel
             case a          => throw new Exception("Attribute family not implemented for " + a)
           }
 
-        case Ref(_, refAttr, _, _) =>
+        case Ref(_, refAttr, _, _, _) =>
           prevRefs += refAttr
           getValidators(nsMap, tail, validators, outerTpl, tplIndex)
 
         case BackRef(backRefNs) =>
           tail.head match {
-            case Ref(_, refAttr, _, _) if prevRefs.contains(refAttr) => throw ModelError(
+            case Ref(_, refAttr, _, _, _) if prevRefs.contains(refAttr) => throw ModelError(
               s"Can't re-use previous namespace ${refAttr.capitalize} after backref _$backRefNs."
             )
             case _                                                   => // ok
@@ -77,13 +77,13 @@ trait InsertValidationExtraction extends InsertValidators_ with ModelUtils { sel
           getValidators(nsMap, tail, validators :+
             addComposite(nsMap, outerTpl, tplIndex, compositeElements), outerTpl + 1, tplIndex + 1)
 
-        case Nested(Ref(ns, refAttr, _, _), nestedElements) =>
+        case Nested(Ref(ns, refAttr, _, _, _), nestedElements) =>
           curElements = nestedElements
           prevRefs.clear()
           getValidators(nsMap, tail, validators :+
             addNested(nsMap, tplIndex, ns, refAttr, nestedElements), 0, tplIndex)
 
-        case NestedOpt(Ref(ns, refAttr, _, _), nestedElements) =>
+        case NestedOpt(Ref(ns, refAttr, _, _, _), nestedElements) =>
           curElements = nestedElements
           prevRefs.clear()
           getValidators(nsMap, tail, validators :+

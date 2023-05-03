@@ -44,7 +44,7 @@ class UpdateExtraction(
         case _: Nested    => throw ModelError(s"Nested data structure not allowed in $update molecule.")
         case _: NestedOpt => throw ModelError(s"Optional nested data structure not allowed in $update molecule.")
 
-        case r@Ref(ns, attr, _, CardOne) => resolve(tail, eids, filterElements :+ r, data :+ ("ref", ns, attr, Nil, false))
+        case r@Ref(ns, attr, _, CardOne, _) => resolve(tail, eids, filterElements :+ r, data :+ ("ref", ns, attr, Nil, false))
         case r: Ref                      => throw ModelError(
           s"Can't $update attributes in card-many referenced namespaces. Found `${r.refAttr.capitalize}`"
         )

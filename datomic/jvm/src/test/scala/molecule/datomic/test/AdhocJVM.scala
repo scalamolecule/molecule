@@ -1,12 +1,9 @@
 package molecule.datomic.test
 
-import java.time._
-import java.util.Date
 import datomic.Peer
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.datomic.async._
-import molecule.datomic.facade.DatomicConn_JVM
 import molecule.datomic.setup.DatomicTestSuite
 import utest._
 import scala.language.implicitConversions
@@ -20,27 +17,82 @@ object AdhocJVM extends DatomicTestSuite {
     "types" - types { implicit conn =>
       for {
         _ <- Ns.int.insert.apply(1).transact
-        _ <- Ns.int.query.get.map(_ ==> List(1))
+//        _ <- Ns.int.query.get.map(_ ==> List(1))
+
+
+
+        _ <- Ns.int.Ref.i.query.inspect
+
+        _ <- Ns.int.Ref(bi).i.query.inspect
+//        _ <- Ns.int.Ref(bi).i.query.get.map(_ ==> List(int1))
+
+//        _ <- Ns.int.RefBi.i.query.get.map(_ ==> List(int1))
 
 
       } yield ()
     }
-/*
-testOnly	molecule.datomic.test.validation.MandatoryAttrs
-testOnly	molecule.datomic.test.validation.MandatoryRefs
-testOnly	molecule.datomic.test.filter.oneSpecial.FilterOneSpecial_Number
-testOnly	molecule.datomic.test.filterAttr.set.Adjacent
-testOnly	molecule.datomic.test.filter.oneSpecial.FilterOneSpecial_String
-testOnly	molecule.datomic.test.filterAttr.one.Adjacent
-testOnly	molecule.datomic.test.api.AsyncApi
-testOnly	molecule.datomic.test.filterAttr.one.Sorting
 
 
-testOnly molecule.datomic.test.filter.set.FilterSet_BigDecimal_
-testOnly molecule.datomic.test.validation.MandatoryAttrs
-testOnly molecule.datomic.test.validation.MandatoryRefs
+    //    "validation" - validation { implicit conn =>
+    //      import molecule.coreTests.dataModels.core.dsl.Validation._
+    //
+    //      for {
+    //        _ <- Require.int1.errorMsg.insert(
+    //          (1, 2),
+    //          (2, 2),
+    //          (3, 2),
+    //        ).transact
+    //
+    //        _ <- Variables.int1.errorMsg.query.inspect
+    //        _ <- Variables.int1.<(Variables.errorMsg).query.inspect
+    //        _ <- Variables.int1.<(Variables.errorMsg).query.get.map(_ ==> List())
+    //
+    //
+    //      } yield ()
+    //    }
 
- */
+
+    "refs" - refs { implicit conn =>
+      import molecule.coreTests.dataModels.core.dsl.Refs._
+      for {
+
+        _ <- Ns.i(1).R1.i(2).Ns1.i(3).save.transact
+
+        // Directional
+        _ <- Ns.i.R1.i.Ns1.i.query.get.map(_ ==> List((1, 2, 3)))
+        _ <- Ns.i(1).R1.i.Ns1.i.query.get.map(_ ==> List((1, 2, 3)))
+        _ <- Ns.i(3).R1.i.Ns1.i.query.get.map(_ ==> List())
+
+        _ = {
+          println("-------")
+          Peer.q(
+            """[:find  ?b ?d ?f
+              | :in    $ %
+              | :where [?a :Ns/i ?b]
+              |        (rule?a ?a ?c)
+              |        [?c :R1/i ?d]
+              |        (rule?c ?c ?e)
+              |        [?e :Ns/i ?f]]""".stripMargin,
+            conn.db,
+            """[
+              |  [(rule?a ?a ?c) [?a :Ns/r1 ?c]]
+              |  [(rule?a ?c ?e) [?c :R1/ns1 ?e]]
+              |
+              |  [(rule?c ?a ?c) [?c :Ns/r1 ?a]]
+              |  [(rule?c ?c ?e) [?e :R1/ns1 ?c]]
+              |]
+              |""".stripMargin
+          ).forEach { r => println(r) }
+        }
+
+        // Bidirectional
+        _ <- Ns.i.a1.Self(bi).i.query.get.map(_ ==> List((1, 2), (2, 1)))
+        _ <- Ns.i(1).Self(bi).i.query.get.map(_ ==> List((1, 2)))
+        _ <- Ns.i(2).Self(bi).i.query.get.map(_ ==> List((2, 1)))
+
+      } yield ()
+
+    }
 
     //    "set" - typesSet { implicit conn =>
     //
@@ -103,6 +155,7 @@ testOnly molecule.datomic.test.validation.MandatoryRefs
     //          Set(int3, int4), // 2 rows coalesced
     //        ))
     //      )
+
     //
     //
     //      //      val e1 = datomic.Peer.tempid(":db.part/user")

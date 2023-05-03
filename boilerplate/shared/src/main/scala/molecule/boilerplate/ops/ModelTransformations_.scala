@@ -4,8 +4,8 @@ package molecule.boilerplate.ops
 import java.net.URI
 import java.util.{Date, UUID}
 import molecule.base.error.ModelError
-import molecule.boilerplate.api._
 import molecule.boilerplate.api.Keywords.Kw
+import molecule.boilerplate.api._
 import molecule.boilerplate.ast.Model._
 
 trait ModelTransformations_ {
@@ -913,7 +913,6 @@ trait ModelTransformations_ {
               case a: AttrOneTacChar       => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
             }
             case a             => unexpected(a)
-
           }
           case a: AttrSet => a match {
             case a: AttrSetMan => a match {
@@ -949,7 +948,6 @@ trait ModelTransformations_ {
               case a: AttrSetTacChar       => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
             }
             case a             => unexpected(a)
-
           }
           case a          => unexpected(a)
         }

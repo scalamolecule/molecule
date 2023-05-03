@@ -211,8 +211,7 @@ trait DataModelApi {
     // Tupled attributes
     def require[T <: Options[_, _, _]](attrs: T*): Self = ???
 
-
-    // hmm, difficult to implement... - possible?
+    // Value accessor for validation code
     val value: Tpe = ???
   }
 

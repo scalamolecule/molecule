@@ -11,8 +11,8 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |import java.net.URI
        |import java.util.{Date, UUID}
        |import molecule.base.error.ModelError
-       |import molecule.boilerplate.api._
        |import molecule.boilerplate.api.Keywords.Kw
+       |import molecule.boilerplate.api._
        |import molecule.boilerplate.ast.Model._
        |
        |trait ModelTransformations_ {
@@ -97,46 +97,80 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |  }
        |
        |  protected def addSort(es: List[Element], sort: String): List[Element] = {
-       |    val last = es.last match {
+       |    es.size match {
+       |      case 1 =>
+       |        List(setSort(es.last, sort))
+       |      case 2 =>
+       |        val (first, last) = (es.head, es.last)
+       |        first match {
+       |          case attr: Attr if attr.filterAttr.nonEmpty => List(setSort(first, sort), last)
+       |          case _                                      => List(first, setSort(last, sort))
+       |        }
+       |
+       |      case _ =>
+       |        val (prev, last) = (es.init.last, es.last)
+       |        val sorted       = prev match {
+       |          case attr: Attr if attr.filterAttr.nonEmpty => List(setSort(prev, sort), last)
+       |          case _                                      => List(prev, setSort(last, sort))
+       |        }
+       |        es.dropRight(2) ++ sorted
+       |    }
+       |  }
+       |
+       |  private def setSort(e: Element, sort: String): Element = {
+       |    e match {
        |      case a: AttrOneMan => a match {
        |        ${addSort("Man")}
        |      }
        |      case a: AttrOneOpt => a match {
        |        ${addSort("Opt")}
        |      }
-       |      case a             => unexpected(a)
+       |
+       |      case e => e
        |    }
-       |    es.init :+ last
        |  }
        |
-       |  protected def filterAttr(es: List[Element], op: Op, attrMolecule: Molecule[_]): List[Element] = {
-       |    val filterAttr = attrMolecule.elements.last.asInstanceOf[Attr]
-       |    val attr     = es.last match {
-       |      case a: AttrOne => a match {
-       |        case a: AttrOneMan => a match {
-       |          ${addExprAttr("One", "Man")}
+       |  protected def filterAttr(es: List[Element], op: Op, filterAttrMolecule: Molecule[_]): List[Element] = {
+       |    val filterAttr0 = filterAttrMolecule.elements.last.asInstanceOf[Attr]
+       |    val attrs       = es.last match {
+       |      case a: Attr =>
+       |        val (filterAttr, adjacent) = if (a.ns == filterAttr0.ns) {
+       |          // Convert mandatory filter attribute to tacit attribute
+       |          filterAttr0 match {
+       |            case a: AttrOneMan => a match {
+       |              ${liftFilterAttr("One")}
+       |            }
+       |            case a: AttrSetMan => a match {
+       |              ${liftFilterAttr("Set")}
+       |            }
+       |            case other         => (other, List(filterAttr0))
+       |          }
+       |        } else (filterAttr0, Nil)
+       |
+       |        a match {
+       |          case a: AttrOne => a match {
+       |            case a: AttrOneMan => a match {
+       |              ${addFilterAttr("One", "Man")}
+       |            }
+       |            case a: AttrOneTac => a match {
+       |              ${addFilterAttr("One", "Tac")}
+       |            }
+       |            case a             => unexpected(a)
+       |          }
+       |          case a: AttrSet => a match {
+       |            case a: AttrSetMan => a match {
+       |              ${addFilterAttr("Set", "Man")}
+       |            }
+       |            case a: AttrSetTac => a match {
+       |              ${addFilterAttr("Set", "Tac")}
+       |            }
+       |            case a             => unexpected(a)
+       |          }
+       |          case a          => unexpected(a)
        |        }
-       |        case a: AttrOneOpt => a match {
-       |          ${addExprAttr("One", "Opt")}
-       |        }
-       |        case a: AttrOneTac => a match {
-       |          ${addExprAttr("One", "Tac")}
-       |        }
-       |      }
-       |      case a: AttrSet => a match {
-       |        case a: AttrSetMan => a match {
-       |          ${addExprAttr("Set", "Man")}
-       |        }
-       |        case a: AttrSetOpt => a match {
-       |          ${addExprAttr("Set", "Opt")}
-       |        }
-       |        case a: AttrSetTac => a match {
-       |          ${addExprAttr("Set", "Tac")}
-       |        }
-       |      }
-       |      case a          => unexpected(a)
+       |      case e       => unexpected(e)
        |    }
-       |    es.init :+ attr
+       |    es.init ++ attrs
        |  }
        |
        |  protected def reverseTopLevelSorting(es: List[Element]): List[Element] = {
@@ -220,10 +254,15 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
     }.mkString("\n        ")
   }
 
-  private def addExprAttr(card: String, mode: String): String = {
+  private def liftFilterAttr(card: String): String = {
     baseTypesWithSpaces.map { case (baseType, space) =>
-      s"case a: Attr$card$mode$baseType $space=> a.copy(op = op, filterAttr = Some(filterAttr))"
-    }.mkString("\n          ")
+      s"case a: Attr${card}Man$baseType $space=> (Attr${card}Tac$baseType(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.status, a.sort), List(filterAttr0))"
+    }.mkString("\n              ")
+  }
+  private def addFilterAttr(card: String, mode: String): String = {
+    baseTypesWithSpaces.map { case (baseType, space) =>
+      s"case a: Attr$card$mode$baseType $space=> a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent"
+    }.mkString("\n              ")
   }
 
   private def reverseTopLevelSorting(mode: String): String = {

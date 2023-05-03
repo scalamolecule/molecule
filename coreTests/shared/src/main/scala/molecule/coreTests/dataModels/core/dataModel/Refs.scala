@@ -19,6 +19,7 @@ object Refs extends DataModel(10) {
   trait R1 {
     val i          = oneInt
     val s          = oneString
+    val ns1        = one[Ns]
     val r2         = one[R2]
     val r2a        = one[R2]
     val rs2        = many[R2]
@@ -30,6 +31,7 @@ object Refs extends DataModel(10) {
     val i   = oneInt
     val s   = oneString
     val ii  = setInt
+    val ns2 = one[Ns]
     val r3  = one[R3]
     val r3a = one[R3]
     val rs3 = many[R3]

@@ -25,6 +25,8 @@ object Adhoc extends DatomicTestSuite {
         _ <- Ns.int(3).save.transact
         _ <- Ns.int.query.get.map(_ ==> List(3))
 
+
+
       } yield ()
     }
 
