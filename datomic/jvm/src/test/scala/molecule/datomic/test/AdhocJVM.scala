@@ -23,7 +23,7 @@ object AdhocJVM extends DatomicTestSuite {
 
         _ <- Ns.int.Ref.i.query.inspect
 
-        _ <- Ns.int.Ref(bi).i.query.inspect
+//        _ <- Ns.int.Ref(bi).i.query.inspect
 //        _ <- Ns.int.Ref(bi).i.query.get.map(_ ==> List(int1))
 
 //        _ <- Ns.int.RefBi.i.query.get.map(_ ==> List(int1))
@@ -86,9 +86,9 @@ object AdhocJVM extends DatomicTestSuite {
         }
 
         // Bidirectional
-        _ <- Ns.i.a1.Self(bi).i.query.get.map(_ ==> List((1, 2), (2, 1)))
-        _ <- Ns.i(1).Self(bi).i.query.get.map(_ ==> List((1, 2)))
-        _ <- Ns.i(2).Self(bi).i.query.get.map(_ ==> List((2, 1)))
+//        _ <- Ns.i.a1.Self(bi).i.query.get.map(_ ==> List((1, 2), (2, 1)))
+//        _ <- Ns.i(1).Self(bi).i.query.get.map(_ ==> List((1, 2)))
+//        _ <- Ns.i(2).Self(bi).i.query.get.map(_ ==> List((2, 1)))
 
       } yield ()
 

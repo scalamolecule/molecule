@@ -142,16 +142,25 @@ case class Dsl_Arities(schema: MetaSchema, partPrefix: String, namespace: MetaNs
     res += s"$one4[$tA___](addSort  (elements, sort  ))"
   }
 
+  val hasCardSet = refs.exists(_.card == CardSet)
+  lazy val withNested    = s" with Nested${_0}${`[A..V]`}"
+  lazy val withNestedOpt = s" with NestedOpt${_0}${`[A..V]`}"
+  lazy val nestedPad     = " " * withNestedOpt.length
   refs.foreach {
     case MetaAttr(attr, card, _, refNsOpt, _, _, _, _, _, _) =>
-      val refCls   = partPrefix + camel(attr)
-      val refNs    = partPrefix + refNsOpt.get
-      val refObj   = s"""Model.Ref("$ns", "$attr", "$refNs", $card)"""
-      val refObjBi = s"""Model.Ref("$ns", "$attr", "$refNs", $card, true)"""
-      val pRefAttr = padRefAttr(attr)
-      val pRefNs   = padRefNs(refNs)
-      val nested   = if (card == CardOne) "" else s" with Nested${_0}${`[A..V]`}"
-      ref += s"""object $refCls$pRefAttr extends $refNs${_0}$pRefNs[${`A..V, `}t](elements :+ $refObj)$nested { def apply(biDirectional: bi): $refNs${_0}$pRefNs[${`A..V, `}t] = new $refNs${_0}$pRefNs[${`A..V, `}t](elements.init :+ $refObjBi) }"""
+      val refCls        = partPrefix + camel(attr)
+      val refNs         = partPrefix + refNsOpt.get
+      val pRefAttr      = padRefAttr(attr)
+      val pRefNs        = padRefNs(refNs)
+      val refObj        = s"""Model.Ref("$ns", "$attr"$pRefAttr, "$refNs"$pRefNs, $card)"""
+      val refObjBi      = s"""Model.Ref("$ns", "$attr", "$refNs", $card, true)"""
+      val nested        = if (hasCardSet) {
+        if (card == CardOne) nestedPad else withNestedOpt
+      } else ""
+      val nestedBi      = if (card == CardOne) "" else withNested
+      val bidirectional = if (ns == refNs)
+        s""" { def apply(makeDirectional: bi) = new $refNs${_0}$pRefNs[${`A..V, `}t](elements.init :+ $refObjBi)$nestedBi }""" else ""
+      ref += s"""object $refCls$pRefAttr extends $refNs${_0}$pRefNs[${`A..V, `}t](elements :+ $refObj)$nested$bidirectional"""
   }
 
   val manAttrs = if (last) "" else man.result().mkString("", "\n  ", "\n\n  ")

@@ -1,4 +1,4 @@
-package molecule.coreTests.dataModels.core.dataModel
+package molecule.base.dataModel
 
 import molecule.DataModel
 

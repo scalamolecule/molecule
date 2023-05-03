@@ -195,7 +195,7 @@ object NestedRef extends DatomicTestSuite {
         _ <- Ns.i.Rs1.*?(R1.i.Rs2.i).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Only cardinality-one refs allowed in optional nested data structures. Found: " +
-            """Ref("R1", "rs2", "R2", CardSet)"""
+            """Ref("R1", "rs2", "R2", CardSet, false)"""
         }
         // Ok:
         _ <- Ns.i.Rs1.*?(R1.i.R2.i).query.get
