@@ -173,5 +173,15 @@ object Semantics extends DatomicTestSuite {
         }
       } yield ()
     }
+
+
+    "Can't filter by same attribute" - types { implicit conn =>
+      for {
+        _ <- Ns.s.i(Ns.i).query.get
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+          err ==> "Can't filter by the same attribute `Ns.i`"
+        }
+      } yield ()
+    }
   }
 }

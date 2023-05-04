@@ -5,21 +5,16 @@ import java.util.{Collections, Comparator, ArrayList => jArrayList, Collection =
 import datomic.{Database, Peer}
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
-import molecule.core.action._
 import molecule.core.marshalling.dbView._
 import molecule.datomic.api.DatomicApiSync
 import molecule.datomic.facade.DatomicConn_JVM
 import molecule.datomic.query.cursorStrategy.CursorUtils
-import molecule.datomic.util.DatomicApiLoader
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 
 
 abstract class DatomicQueryResolve[Tpl](elements: List[Element], dbView: Option[DbView])
-  extends DatomicModel2Query[Tpl](elements)
-    with DatomicApiSync
-//    with DatomicApiLoader // todo: necessary?
-    with CursorUtils {
+  extends DatomicModel2Query[Tpl](elements) with DatomicApiSync with CursorUtils {
 
   lazy val edgeValuesNotFound = "Couldn't find next page. Edge rows were all deleted/updated."
 

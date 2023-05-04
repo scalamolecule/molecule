@@ -7,12 +7,11 @@ import molecule.core.marshalling.DatomicPeerProxy
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.schema._
 import molecule.datomic.facade.DatomicPeer
-import molecule.datomic.util.DatomicApiLoader
 import moleculeBuildInfo.BuildInfo
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 
-trait DatomicTestSuite extends DatomicTestSuiteBase with DatomicApiLoader {
+trait DatomicTestSuite extends DatomicTestSuiteBase {
 
   lazy val isJsPlatform = false
   lazy val protocol     = BuildInfo.datomicProtocol

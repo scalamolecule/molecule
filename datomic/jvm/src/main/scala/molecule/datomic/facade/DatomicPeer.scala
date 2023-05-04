@@ -3,7 +3,6 @@ package molecule.datomic.facade
 import java.util.UUID.randomUUID
 import datomic.Peer
 import molecule.core.marshalling.DatomicPeerProxy
-import molecule.datomic.util.DatomicApiLoader
 import scala.concurrent.{ExecutionContext, Future, blocking}
 
 
@@ -12,7 +11,7 @@ import scala.concurrent.{ExecutionContext, Future, blocking}
  * @groupname database  Database operations
  * @groupprio 10
  * */
-trait DatomicPeer extends DatomicApiLoader {
+trait DatomicPeer {
 
   def createDatabase(
     protocol: String = "mem",

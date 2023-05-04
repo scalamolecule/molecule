@@ -20,8 +20,7 @@ object _NestOpt extends DatomicGenBase("NestOpt", "/query/casting") {
        |  extends CastNestedOptBranch_[Tpl]
        |    with CastNestedOptLeaf_[Tpl]
        |    with CastRow2Tpl_[Tpl]
-       |    with Base[Tpl]
-       |    with Model2Query[Tpl] {
+       |    with Base[Tpl] { self: Model2Query =>
        |
        |  private lazy val levels = pullCastss.length
        |

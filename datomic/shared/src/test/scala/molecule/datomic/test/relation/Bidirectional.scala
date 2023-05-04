@@ -8,7 +8,7 @@ import utest._
 import scala.language.implicitConversions
 
 
-object BidirectionalRef extends DatomicTestSuite {
+object Bidirectional extends DatomicTestSuite {
 
   override lazy val tests = Tests {
 
@@ -37,18 +37,18 @@ object BidirectionalRef extends DatomicTestSuite {
 
     "many" - refs { implicit conn =>
       for {
-        // 1 is friends with 2 and 3
+        // 1 is friend of 2 and 3
         _ <- Ns.i.Friends.*(Ns.i).insert((1, List(2, 3))).transact
 
         // Directional
-        // 1 friends with 2 and 3, but 2 and 3 not friends with 1, duh
+        // 1 friend of 2 and 3, but 2 and 3 not friends of 1, duh
         _ <- Ns.i.Friends.*(Ns.i.a1).query.get.map(_ ==> List((1, List(2, 3))))
         _ <- Ns.i_(1).Friends.*(Ns.i.a1).query.get.map(_ ==> List(List(2, 3)))
         _ <- Ns.i_(2).Friends.*(Ns.i.a1).query.get.map(_ ==> List())
         _ <- Ns.i_(3).Friends.*(Ns.i.a1).query.get.map(_ ==> List())
 
         // Bidirectional
-        // 1 is friend with 2 and 3. So 2 and 3 are both friends with 1
+        // 1 is friend of 2 and 3. So 2 and 3 are both friends of 1
         _ <- Ns.i.a1.Friends(bi).*(Ns.i.a1).query.get.map(_ ==> List(
           (1, List(2, 3)),
           (2, List(1)),
@@ -68,6 +68,11 @@ object BidirectionalRef extends DatomicTestSuite {
       } yield ()
     }
 
-    // Bidirectional marker not available with optional nested data structures (won't type infer)
+
+    "optional nested" - refs { implicit conn =>
+      // Bidirectional marker not available with optional nested data structures (won't type infer)
+      // Ns.i.Friends(bi).*?(Ns.i)
+      compileError("Ns.i.Friends(bi).*?(Ns.i)")
+    }
   }
 }

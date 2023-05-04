@@ -42,7 +42,7 @@ case class ModelValidation(
     elements match {
       case head :: tail => head match {
         case a: Attr =>
-          val attr = a.ns + "." + a.attr
+          val attr = a.name
           if (a.ns != "_Generic") {
             register(a, attr)
           }
@@ -216,7 +216,7 @@ case class ModelValidation(
           case AttrOneManByte(_, _, _, vs, _, Some(validator), _, _, _, _)       => validator.withAttrs(attrs).validate(one(vs))
           case AttrOneManShort(_, _, _, vs, _, Some(validator), _, _, _, _)      => validator.withAttrs(attrs).validate(one(vs))
           case AttrOneManChar(_, _, _, vs, _, Some(validator), _, _, _, _)       => validator.withAttrs(attrs).validate(one(vs))
-          case _                                                              => err
+          case _                                                                 => err
         }
         case _: AttrOneTac | _: AttrOneOpt => onlyMandatory(a)
 
@@ -235,7 +235,7 @@ case class ModelValidation(
           case AttrSetManByte(_, _, _, sets, _, Some(validator), _, _, _, _)       => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
           case AttrSetManShort(_, _, _, sets, _, Some(validator), _, _, _, _)      => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
           case AttrSetManChar(_, _, _, sets, _, Some(validator), _, _, _, _)       => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
-          case _                                                                => err
+          case _                                                                   => err
         }
         case _: AttrSetTac | _: AttrSetOpt => onlyMandatory(a)
         case _                             => err
@@ -339,7 +339,7 @@ case class ModelValidation(
         case AttrOneManByte(_, _, _, Nil, _, _, _, _, _, _)       => true
         case AttrOneManShort(_, _, _, Nil, _, _, _, _, _, _)      => true
         case AttrOneManChar(_, _, _, Nil, _, _, _, _, _, _)       => true
-        case _                                                 => false
+        case _                                                    => false
       }
       // Tacit tx meta attrs can update
       case a: AttrOneTac => a match {
@@ -357,7 +357,7 @@ case class ModelValidation(
         case AttrOneTacByte(_, _, _, Nil, _, _, _, _, _, _)       => true
         case AttrOneTacShort(_, _, _, Nil, _, _, _, _, _, _)      => true
         case AttrOneTacChar(_, _, _, Nil, _, _, _, _, _, _)       => true
-        case _                                                 => false
+        case _                                                    => false
       }
       case a: AttrSetMan => a match {
         case AttrSetManString(_, _, _, vs, _, _, _, _, _, _)     => vs.isEmpty || vs.head.isEmpty
@@ -374,7 +374,7 @@ case class ModelValidation(
         case AttrSetManByte(_, _, _, vs, _, _, _, _, _, _)       => vs.isEmpty || vs.head.isEmpty
         case AttrSetManShort(_, _, _, vs, _, _, _, _, _, _)      => vs.isEmpty || vs.head.isEmpty
         case AttrSetManChar(_, _, _, vs, _, _, _, _, _, _)       => vs.isEmpty || vs.head.isEmpty
-        case _                                                => false
+        case _                                                   => false
       }
       case a: AttrSetTac => a match {
         case AttrSetTacString(_, _, _, vs, _, _, _, _, _, _)     => vs.isEmpty || vs.head.isEmpty
@@ -391,7 +391,7 @@ case class ModelValidation(
         case AttrSetTacByte(_, _, _, vs, _, _, _, _, _, _)       => vs.isEmpty || vs.head.isEmpty
         case AttrSetTacShort(_, _, _, vs, _, _, _, _, _, _)      => vs.isEmpty || vs.head.isEmpty
         case AttrSetTacChar(_, _, _, vs, _, _, _, _, _, _)       => vs.isEmpty || vs.head.isEmpty
-        case _                                                => false
+        case _                                                   => false
       }
       case _             => false
     }
@@ -414,7 +414,7 @@ case class ModelValidation(
         case AttrSetManByte(_, _, _, vs, _, _, _, _, _, _)       => vs.nonEmpty && vs.head == curVs
         case AttrSetManShort(_, _, _, vs, _, _, _, _, _, _)      => vs.nonEmpty && vs.head == curVs
         case AttrSetManChar(_, _, _, vs, _, _, _, _, _, _)       => vs.nonEmpty && vs.head == curVs
-        case _                                                => false
+        case _                                                   => false
       }
       case a: AttrSetTac => a match {
         case AttrSetTacString(_, _, _, vs, _, _, _, _, _, _)     => vs.nonEmpty && vs.head == curVs
@@ -431,7 +431,7 @@ case class ModelValidation(
         case AttrSetTacByte(_, _, _, vs, _, _, _, _, _, _)       => vs.nonEmpty && vs.head == curVs
         case AttrSetTacShort(_, _, _, vs, _, _, _, _, _, _)      => vs.nonEmpty && vs.head == curVs
         case AttrSetTacChar(_, _, _, vs, _, _, _, _, _, _)       => vs.nonEmpty && vs.head == curVs
-        case _                                                => false
+        case _                                                   => false
       }
       case _             => false
     }

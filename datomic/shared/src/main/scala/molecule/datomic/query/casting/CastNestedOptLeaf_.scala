@@ -8,7 +8,7 @@ import scala.annotation.tailrec
 
 
 trait CastNestedOptLeaf_[Tpl]
-  extends CastRow2Tpl_[Tpl] with CastIt2Tpl_ { self: Model2Query[Tpl] with Base[Tpl] =>
+  extends CastRow2Tpl_[Tpl] with CastIt2Tpl_ { self: Model2Query with Base[Tpl] =>
 
   @tailrec
   final private def resolveArities(

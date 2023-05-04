@@ -13,7 +13,6 @@ import utest._
 import scala.concurrent.Future
 import scala.language.implicitConversions
 import molecule.boilerplate.ast.Model._
-import scala.collection.immutable.{Map, Nil}
 
 object Adhoc extends DatomicTestSuite {
 

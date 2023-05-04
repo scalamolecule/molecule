@@ -6,7 +6,7 @@ import molecule.datomic.query.Base
 import scala.annotation.tailrec
 
 
-trait CastRow2Tpl_[Tpl] { self: Model2Query[Tpl] with Base[Tpl] =>
+trait CastRow2Tpl_[Tpl] { self: Model2Query with Base[Tpl] =>
 
   @tailrec
   final private def resolveArities(

@@ -250,16 +250,14 @@ trait ResolveExprOne[Tpl]
     v: Var,
     w: Var,
     op: Op,
-  ): Unit = {
-    op match {
-      case Eq    => equal2(e, a, v, w)
-      case Neq   => neq2(e, a, v, w)
-      case Lt    => compare2(e, a, v, w, "<")
-      case Gt    => compare2(e, a, v, w, ">")
-      case Le    => compare2(e, a, v, w, "<=")
-      case Ge    => compare2(e, a, v, w, ">=")
-      case other => unexpectedOp(other)
-    }
+  ): Unit = op match {
+    case Eq    => equal2(e, a, v, w)
+    case Neq   => neq2(e, a, v, w)
+    case Lt    => compare2(e, a, v, w, "<")
+    case Gt    => compare2(e, a, v, w, ">")
+    case Le    => compare2(e, a, v, w, "<=")
+    case Ge    => compare2(e, a, v, w, ">=")
+    case other => unexpectedOp(other)
   }
 
 

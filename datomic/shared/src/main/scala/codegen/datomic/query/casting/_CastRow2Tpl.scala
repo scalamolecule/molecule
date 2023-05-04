@@ -15,7 +15,7 @@ object _CastRow2Tpl extends DatomicGenBase("CastRow2Tpl", "/query/casting") {
        |import scala.annotation.tailrec
        |
        |
-       |trait $fileName_[Tpl] { self: Model2Query[Tpl] with Base[Tpl] =>
+       |trait $fileName_[Tpl] { self: Model2Query with Base[Tpl] =>
        |
        |  @tailrec
        |  final private def resolveArities(

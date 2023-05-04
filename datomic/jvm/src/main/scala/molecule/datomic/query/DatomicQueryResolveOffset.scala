@@ -12,13 +12,13 @@ import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
 
 /**
- *
  * @param elements Molecule model
  * @param limit    When going forward from start, use a positive number.
  *                 And vice versa from end with a negative number. Can't be zero.
  * @param offset   Positive offset from start when going forwards,
  *                 negative offset from end when going backwards
- * @tparam Tpl Type of each row
+ * @param dbView   Database with a time perspective (Datomic)
+ * @tparam Tpl
  */
 case class DatomicQueryResolveOffset[Tpl](
   elements: List[Element],

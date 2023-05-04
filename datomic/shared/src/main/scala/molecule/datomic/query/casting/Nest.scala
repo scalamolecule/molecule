@@ -6,7 +6,7 @@ import molecule.core.query.Model2Query
 import molecule.datomic.query.Base
 
 
-trait Nest[Tpl] { self: Model2Query[Tpl]
+trait Nest[Tpl] { self: Model2Query
   with Base[Tpl]
   with CastNestedBranch_[Tpl] =>
 

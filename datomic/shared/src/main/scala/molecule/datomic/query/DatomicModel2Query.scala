@@ -10,7 +10,7 @@ import scala.collection.mutable.ArrayBuffer
 
 
 class DatomicModel2Query[Tpl](elements0: List[Element])
-  extends Model2Query[Tpl]
+  extends Model2Query
     with ResolveExprOne[Tpl]
     with ResolveExprSet[Tpl]
     with ResolveRef[Tpl]
@@ -34,6 +34,7 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
     altElements: List[Element] = Nil
   ): (String, String, String) = {
     val elements = if (altElements.isEmpty) elements0 else altElements
+    validateQueryModel(elements)
 
     @tailrec
     def prepare(elements: List[Element], acc: List[Element]): List[Element] = {

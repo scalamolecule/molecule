@@ -1,13 +1,10 @@
 package molecule.datomic.setup
 
-import molecule.core.api.TxReport
 import molecule.core.util.JavaConversions
 import molecule.coreTests.util.{AggrUtils, TestData}
 import org.scalactic.TripleEquals
 import utest._
 import utest.framework.{Formatter => uFormatter}
-import scala.concurrent.Future
-import molecule.core.util.Executor._
 
 trait DatomicTestSuiteBase extends TestSuite
   with TestData

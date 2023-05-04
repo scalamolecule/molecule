@@ -8,12 +8,11 @@ import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.schema._
 import molecule.coreTests.util.TestData
 import molecule.datomic.facade.DatomicPeer
-import molecule.datomic.util.DatomicApiLoader
 import moleculeBuildInfo.BuildInfo
 import zio.test.ZIOSpecDefault
 import zio.{ZIO, ZLayer}
 
-trait DatomicZioSpec extends ZIOSpecDefault with TestData with DatomicApiLoader {
+trait DatomicZioSpec extends ZIOSpecDefault with TestData {
 
   lazy val isJsPlatform = false
   lazy val protocol     = BuildInfo.datomicProtocol
