@@ -188,7 +188,7 @@ lazy val datomic = crossProject(JSPlatform, JVMPlatform)
         //        sharedTests + "/txMetaData",
         //        sharedTests + "/validation",
         //                sharedTests + "/time",
-        sharedTests,
+//        sharedTests,
         jvmTests + "/AdhocJVM.scala",
         jsTests + "/AdhocJs.scala",
         sharedTests + "/Adhoc.scala",
@@ -230,6 +230,27 @@ lazy val datomic = crossProject(JSPlatform, JVMPlatform)
     //    Test / classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.Flat,
     libraryDependencies ++= Seq(
       "com.datomic" % "peer" % "1.0.6726"
+    )
+  )
+  .jsSettings(jsEnvironment)
+
+
+lazy val sqlCore = crossProject(JSPlatform, JVMPlatform)
+  .crossType(CrossType.Full)
+  .in(file("sql/core"))
+  .settings(publish / skip := true)
+  .settings(name := "molecule-sql-core")
+  .dependsOn(coreTests)
+  .settings(
+    testFrameworks := Seq(
+      new TestFramework("utest.runner.Framework"),
+      new TestFramework("zio.test.sbt.ZTestFramework")
+    )
+  )
+  .jvmSettings(
+    libraryDependencies ++= Seq(
+      "com.datomic" % "peer" % "1.0.6726",
+      "com.h2database" % "h2" % "2.1.214" % Provided
     )
   )
   .jsSettings(jsEnvironment)

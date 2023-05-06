@@ -82,3 +82,40 @@ object DatomicPeerProxy extends MetaModelUtils {
     )
   }
 }
+
+case class SqlProxy(
+  url: String,
+
+  schema: Seq[String],
+  nsMap: Map[String, MetaNs],
+  hasMandatoryRefs: Boolean,
+  attrMap: Map[String, (Card, String, Seq[String])],
+  uniqueAttrs: List[String],
+
+  // Internal settings, not intended to be set by user
+  dbView: Option[DbView] = None,
+  uuid: UUID = UUID.randomUUID(),
+  isFreeVersion: Boolean = true
+) extends ConnProxy
+
+
+object SqlProxy extends MetaModelUtils {
+  def apply(
+    url: String,
+    schemaTx: SchemaTransaction
+  ): SqlProxy = {
+    // Use only necessary data from boilerplate
+    SqlProxy(
+      url,
+      Seq(
+        schemaTx.datomicPartitions,
+        schemaTx.datomicSchema,
+        schemaTx.datomicAliases
+      ),
+      schemaTx.nsMap,
+      getHasMandatoryRefs(schemaTx.nsMap),
+      schemaTx.attrMap,
+      schemaTx.uniqueAttrs
+    )
+  }
+}
