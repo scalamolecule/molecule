@@ -6,5 +6,5 @@ abstract class SqlGenBase(fileName: String, dir: String)
   extends CodeGenTemplate(
     fileName,
     dir,
-    "datomic/shared/src/main/scala/molecule/datomic"
+    "datomic/shared/src/main/scala/molecule/datalog/datomic"
   )

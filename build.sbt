@@ -41,8 +41,8 @@ lazy val root = project
     core.jvm,
     coreTests.js,
     coreTests.jvm,
-    datomic.js,
-    datomic.jvm
+    datalogCore.js,
+    datalogCore.jvm
   )
 
 lazy val base = crossProject(JSPlatform, JVMPlatform)
@@ -157,18 +157,36 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
   .jsSettings(jsEnvironment)
 
 
-lazy val datomic = crossProject(JSPlatform, JVMPlatform)
+lazy val datalogCore = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
-  .in(file("datomic"))
+  .in(file("datalog/core"))
   .settings(publish / skip := true)
-  .settings(name := "molecule-datomic")
-  .enablePlugins(BuildInfoPlugin)
+  .settings(name := "molecule-datalog-core")
   .dependsOn(coreTests)
+  .settings(
+    testFrameworks := Seq(
+      new TestFramework("utest.runner.Framework"),
+      new TestFramework("zio.test.sbt.ZTestFramework")
+    )
+  )
+  .jvmSettings(
+    libraryDependencies += "com.datomic" % "peer" % "1.0.6726"
+  )
+  .jsSettings(jsEnvironment)
+
+lazy val datalogDatomic = crossProject(JSPlatform, JVMPlatform)
+  .crossType(CrossType.Full)
+  .in(file("datalog/datomic"))
+  .settings(publish / skip := true)
+  .settings(name := "molecule-datalog-datomic")
+  .enablePlugins(BuildInfoPlugin)
+  .dependsOn(datalogCore)
+//  .dependsOn(coreTests)
   .settings(
     // Temporarily limit number of tests to be compiled by sbt (comment out this whole sbt setting to test all)
     // Note that intellij doesn't recognize this setting - there you can right click on files and exclude
     unmanagedSources / excludeFilter := {
-      val test = "src/test/scala/molecule/datomic/test"
+      val test = "src/test/scala/molecule/datalog/datomic/test"
       def path(platform: String) =
         (baseDirectory.value / s"../$platform/$test").getCanonicalPath
       val jsTests     = path("js")
@@ -188,7 +206,7 @@ lazy val datomic = crossProject(JSPlatform, JVMPlatform)
         //        sharedTests + "/txMetaData",
         //        sharedTests + "/validation",
         //                sharedTests + "/time",
-//        sharedTests,
+        sharedTests,
         jvmTests + "/AdhocJVM.scala",
         jsTests + "/AdhocJs.scala",
         sharedTests + "/Adhoc.scala",
@@ -225,13 +243,11 @@ lazy val datomic = crossProject(JSPlatform, JVMPlatform)
       new TestFramework("zio.test.sbt.ZTestFramework")
     )
   )
-  .jvmSettings(
-    // Ensure clojure loads correctly for async tests run from sbt
-    //    Test / classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.Flat,
-    libraryDependencies ++= Seq(
-      "com.datomic" % "peer" % "1.0.6726"
-    )
-  )
+//  .jvmSettings(
+//    libraryDependencies ++= Seq(
+//      "com.datomic" % "peer" % "1.0.6726"
+//    )
+//  )
   .jsSettings(jsEnvironment)
 
 
@@ -253,6 +269,26 @@ lazy val sqlCore = crossProject(JSPlatform, JVMPlatform)
       "com.h2database" % "h2" % "2.1.214" % Provided
     )
   )
+  .jsSettings(jsEnvironment)
+
+lazy val sqlJdbc = crossProject(JSPlatform, JVMPlatform)
+  .crossType(CrossType.Full)
+  .in(file("sql/jdbc"))
+  .settings(publish / skip := true)
+  .settings(name := "molecule-sql-jdbc")
+  .dependsOn(sqlCore)
+  .settings(
+    testFrameworks := Seq(
+      new TestFramework("utest.runner.Framework"),
+      new TestFramework("zio.test.sbt.ZTestFramework")
+    )
+  )
+//  .jvmSettings(
+//    libraryDependencies ++= Seq(
+//      "com.datomic" % "peer" % "1.0.6726",
+//      "com.h2database" % "h2" % "2.1.214" % Provided
+//    )
+//  )
   .jsSettings(jsEnvironment)
 
 

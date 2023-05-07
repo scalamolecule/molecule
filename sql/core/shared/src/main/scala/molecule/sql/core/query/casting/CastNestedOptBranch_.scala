@@ -4,7 +4,6 @@ package molecule.sql.core.query.casting
 import java.util.{Collections, Comparator, ArrayList => jArrayList, Iterator => jIterator, List => jList, Map => jMap}
 import molecule.core.query.Model2Query
 import molecule.sql.core.query.Base
-import molecule.sql.core.query.Base
 import scala.annotation.tailrec
 
 
