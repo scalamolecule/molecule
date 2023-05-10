@@ -5,13 +5,37 @@ import java.math.{BigDecimal => jBigDecimal, BigInteger => jBigInt}
 import java.net.URI
 import java.util.{Date, UUID, Iterator => jIterator, List => jList, Map => jMap, Set => jSet}
 
-trait LambdasOne extends ResolveBase {
+trait LambdasOne extends ResolveBase { self: Base =>
+
+  protected lazy val j2sString1    : (Row, Int) => AnyRef = (row: Row, n: Int) => row.getString(n)
+  protected lazy val j2sInt1       : (Row, Int) => AnyRef = (row: Row, n: Int) => row.getInt(n).asInstanceOf[AnyRef]
+  protected lazy val j2sLong1      : (Row, Int) => AnyRef = (row: Row, n: Int) => row.getInt(n).asInstanceOf[AnyRef]
+  protected lazy val j2sFloat1     : (Row, Int) => AnyRef = (row: Row, n: Int) => row.getInt(n).asInstanceOf[AnyRef]
+  protected lazy val j2sDouble1    : (Row, Int) => AnyRef = (row: Row, n: Int) => row.getInt(n).asInstanceOf[AnyRef]
+  protected lazy val j2sBoolean1   : (Row, Int) => AnyRef = (row: Row, n: Int) => row.getInt(n).asInstanceOf[AnyRef]
+  protected lazy val j2sBigInt1    : (Row, Int) => AnyRef = (row: Row, n: Int) => row.getInt(n).asInstanceOf[AnyRef]
+  protected lazy val j2sBigDecimal1: (Row, Int) => AnyRef = (row: Row, n: Int) => row.getInt(n).asInstanceOf[AnyRef]
+  protected lazy val j2sDate1      : (Row, Int) => AnyRef = (row: Row, n: Int) => row.getInt(n).asInstanceOf[AnyRef]
+  protected lazy val j2sUUID1      : (Row, Int) => AnyRef = (row: Row, n: Int) => row.getInt(n).asInstanceOf[AnyRef]
+  protected lazy val j2sURI1       : (Row, Int) => AnyRef = (row: Row, n: Int) => row.getInt(n).asInstanceOf[AnyRef]
+  protected lazy val j2sByte1      : (Row, Int) => AnyRef = (row: Row, n: Int) => row.getInt(n).asInstanceOf[AnyRef]
+  protected lazy val j2sShort1     : (Row, Int) => AnyRef = (row: Row, n: Int) => row.getInt(n).asInstanceOf[AnyRef]
+  protected lazy val j2sChar1      : (Row, Int) => AnyRef = (row: Row, n: Int) => row.getInt(n).asInstanceOf[AnyRef]
+
 
   // Datomic Java to Scala
-  protected lazy val j2sString    : AnyRef => AnyRef = identity
+  protected lazy val j2sString: AnyRef => AnyRef = {
+    identity
+  }
+
   // Datomic can return both Integer or Long
-  protected lazy val j2sInt       : AnyRef => AnyRef =
+  protected lazy val j2sInt: AnyRef => AnyRef = {
+
+    val xx = (row: java.sql.ResultSet, n: Int) => row.getInt(n)
+
     (v: AnyRef) => v.toString.toInt.asInstanceOf[AnyRef]
+  }
+
   protected lazy val j2sLong      : AnyRef => AnyRef = identity
   protected lazy val j2sFloat     : AnyRef => AnyRef = {
     case v: jFloat  => v.asInstanceOf[AnyRef]
@@ -103,6 +127,30 @@ trait LambdasOne extends ResolveBase {
 
   case class ResOne[T](
     tpe: String,
+    //    toDatalog: T => String,
+    //    s2j: Any => Any,
+    j2s: (Row, Int) => AnyRef,
+    //    seq2t: (Row, Int) => AnyRef,
+    //    set2set: (Row, Int) => AnyRef,
+    //    vector2set: (Row, Int) => AnyRef
+  )
+  lazy val resString1    : ResOne[String]     = ResOne("String", j2sString1)
+  lazy val resInt1       : ResOne[Int]        = ResOne("Int", j2sInt1)
+  lazy val resLong1      : ResOne[Long]       = ResOne("Long", j2sLong1)
+  lazy val resFloat1     : ResOne[Float]      = ResOne("Float", j2sFloat1)
+  lazy val resDouble1    : ResOne[Double]     = ResOne("Double", j2sDouble1)
+  lazy val resBoolean1   : ResOne[Boolean]    = ResOne("Boolean", j2sBoolean1)
+  lazy val resBigInt1    : ResOne[BigInt]     = ResOne("BigInt", j2sBigInt1)
+  lazy val resBigDecimal1: ResOne[BigDecimal] = ResOne("BigDecimal", j2sBigDecimal1)
+  lazy val resDate1      : ResOne[Date]       = ResOne("Date", j2sDate1)
+  lazy val resUUID1      : ResOne[UUID]       = ResOne("UUID", j2sUUID1)
+  lazy val resURI1       : ResOne[URI]        = ResOne("URI", j2sURI1)
+  lazy val resByte1      : ResOne[Byte]       = ResOne("Byte", j2sByte1)
+  lazy val resShort1     : ResOne[Short]      = ResOne("Short", j2sShort1)
+  lazy val resChar1      : ResOne[Char]       = ResOne("Char", j2sChar1)
+
+  case class ResOneOLD[T](
+    tpe: String,
     toDatalog: T => String,
     s2j: Any => Any,
     j2s: AnyRef => AnyRef,
@@ -111,20 +159,20 @@ trait LambdasOne extends ResolveBase {
     vector2set: AnyRef => AnyRef
   )
 
-  lazy val resString    : ResOne[String]     = ResOne("String", dString, s2jString, j2sString, firstString, set2setString, vector2setString)
-  lazy val resInt       : ResOne[Int]        = ResOne("Int", dInt, s2jInt, j2sInt, firstInt, set2setInt, vector2setInt)
-  lazy val resLong      : ResOne[Long]       = ResOne("Long", dLong, s2jLong, j2sLong, firstLong, set2setLong, vector2setLong)
-  lazy val resFloat     : ResOne[Float]      = ResOne("Float", dFloat, s2jFloat, j2sFloat, firstFloat, set2setFloat, vector2setFloat)
-  lazy val resDouble    : ResOne[Double]     = ResOne("Double", dDouble, s2jDouble, j2sDouble, firstDouble, set2setDouble, vector2setDouble)
-  lazy val resBoolean   : ResOne[Boolean]    = ResOne("Boolean", dBoolean, s2jBoolean, j2sBoolean, firstBoolean, set2setBoolean, vector2setBoolean)
-  lazy val resBigInt    : ResOne[BigInt]     = ResOne("BigInt", dBigInt, s2jBigInt, j2sBigInt, firstBigInt, set2setBigInt, vector2setBigInt)
-  lazy val resBigDecimal: ResOne[BigDecimal] = ResOne("BigDecimal", dBigDecimal, s2jBigDecimal, j2sBigDecimal, firstBigDecimal, set2setBigDecimal, vector2setBigDecimal)
-  lazy val resDate      : ResOne[Date]       = ResOne("Date", dDate, s2jDate, j2sDate, firstDate, set2setDate, vector2setDate)
-  lazy val resUUID      : ResOne[UUID]       = ResOne("UUID", dUUID, s2jUUID, j2sUUID, firstUUID, set2setUUID, vector2setUUID)
-  lazy val resURI       : ResOne[URI]        = ResOne("URI", dURI, s2jURI, j2sURI, firstURI, set2setURI, vector2setURI)
-  lazy val resByte      : ResOne[Byte]       = ResOne("Byte", dByte, s2jByte, j2sByte, firstByte, set2setByte, vector2setByte)
-  lazy val resShort     : ResOne[Short]      = ResOne("Short", dShort, s2jShort, j2sShort, firstShort, set2setShort, vector2setShort)
-  lazy val resChar      : ResOne[Char]       = ResOne("Char", dChar, s2jChar, j2sChar, firstChar, set2setChar, vector2setChar)
+  lazy val resString    : ResOneOLD[String]     = ResOneOLD("String", dString, s2jString, j2sString, firstString, set2setString, vector2setString)
+  lazy val resInt       : ResOneOLD[Int]        = ResOneOLD("Int", dInt, s2jInt, j2sInt, firstInt, set2setInt, vector2setInt)
+  lazy val resLong      : ResOneOLD[Long]       = ResOneOLD("Long", dLong, s2jLong, j2sLong, firstLong, set2setLong, vector2setLong)
+  lazy val resFloat     : ResOneOLD[Float]      = ResOneOLD("Float", dFloat, s2jFloat, j2sFloat, firstFloat, set2setFloat, vector2setFloat)
+  lazy val resDouble    : ResOneOLD[Double]     = ResOneOLD("Double", dDouble, s2jDouble, j2sDouble, firstDouble, set2setDouble, vector2setDouble)
+  lazy val resBoolean   : ResOneOLD[Boolean]    = ResOneOLD("Boolean", dBoolean, s2jBoolean, j2sBoolean, firstBoolean, set2setBoolean, vector2setBoolean)
+  lazy val resBigInt    : ResOneOLD[BigInt]     = ResOneOLD("BigInt", dBigInt, s2jBigInt, j2sBigInt, firstBigInt, set2setBigInt, vector2setBigInt)
+  lazy val resBigDecimal: ResOneOLD[BigDecimal] = ResOneOLD("BigDecimal", dBigDecimal, s2jBigDecimal, j2sBigDecimal, firstBigDecimal, set2setBigDecimal, vector2setBigDecimal)
+  lazy val resDate      : ResOneOLD[Date]       = ResOneOLD("Date", dDate, s2jDate, j2sDate, firstDate, set2setDate, vector2setDate)
+  lazy val resUUID      : ResOneOLD[UUID]       = ResOneOLD("UUID", dUUID, s2jUUID, j2sUUID, firstUUID, set2setUUID, vector2setUUID)
+  lazy val resURI       : ResOneOLD[URI]        = ResOneOLD("URI", dURI, s2jURI, j2sURI, firstURI, set2setURI, vector2setURI)
+  lazy val resByte      : ResOneOLD[Byte]       = ResOneOLD("Byte", dByte, s2jByte, j2sByte, firstByte, set2setByte, vector2setByte)
+  lazy val resShort     : ResOneOLD[Short]      = ResOneOLD("Short", dShort, s2jShort, j2sShort, firstShort, set2setShort, vector2setShort)
+  lazy val resChar      : ResOneOLD[Char]       = ResOneOLD("Char", dChar, s2jChar, j2sChar, firstChar, set2setChar, vector2setChar)
 
 
   private lazy val j2sOptString     = (v: AnyRef) => v match {

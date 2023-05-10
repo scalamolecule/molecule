@@ -7,7 +7,7 @@
 //import molecule.core.util.Executor._
 //import molecule.coreTests.dataModels.core.schema._
 //import molecule.coreTests.util.TestData
-//import molecule.sql.jdbc.facade.SqlHandler
+//import molecule.sql.jdbc.facade.JdbcHandler
 //import moleculeBuildInfo.BuildInfo
 //import zio.test.ZIOSpecDefault
 //import zio.{ZIO, ZLayer}
@@ -26,7 +26,7 @@
 //    val proxy        = DatomicPeerProxy("mem", "", schemaTx)
 //    ZLayer.scoped(
 //      ZIO.fromFuture(
-//        _ => SqlHandler.recreateDbFromEdn(proxy, protocol, dbIdentifier, useFree)
+//        _ => JdbcHandler.recreateDbFromEdn(proxy, protocol, dbIdentifier, useFree)
 //      )
 //    )
 //  }

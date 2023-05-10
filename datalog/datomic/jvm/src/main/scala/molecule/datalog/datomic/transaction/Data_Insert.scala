@@ -7,7 +7,7 @@ import molecule.core.transaction.ops.InsertOps
 import molecule.core.transaction.{InsertExtraction, InsertResolvers_, SaveExtraction}
 import molecule.core.util.ModelUtils
 
-trait Insert_stmts
+trait Data_Insert
   extends DatomicTxBase_JVM
     with InsertOps
     with DatomicDataType_JVM
@@ -31,7 +31,7 @@ trait Insert_stmts
       row2stmts(tpl)
     }
     if (txMetaElements.nonEmpty) {
-      val txMetaStmts = (new SaveExtraction(true) with Save_stmts)
+      val txMetaStmts = (new SaveExtraction(true) with Data_Save)
         .getRawStmts(txMetaElements, datomicTx, false)
       stmts.addAll(txMetaStmts)
     }

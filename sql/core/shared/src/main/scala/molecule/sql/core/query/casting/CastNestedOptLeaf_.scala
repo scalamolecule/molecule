@@ -7,8 +7,8 @@ import molecule.sql.core.query.Base
 import scala.annotation.tailrec
 
 
-trait CastNestedOptLeaf_[Tpl]
-  extends CastRow2Tpl_[Tpl] with CastIt2Tpl_ { self: Model2Query with Base[Tpl] =>
+trait CastNestedOptLeaf_
+  extends CastRow2Tpl_ with CastIt2Tpl_ { self: Model2Query with Base =>
 
   @tailrec
   final private def resolveArities(
@@ -39,14 +39,14 @@ trait CastNestedOptLeaf_[Tpl]
   final protected def pullLeaf(
     arities: List[List[Int]],
     pullCasts0: List[jIterator[_] => Any],
-    pullSorts: List[Int => (Row, Row) => Int]
+    pullSorts: List[Int => (RowOLD, RowOLD) => Int]
   ): jIterator[_] => List[Any] = {
     val optComparator = {
       if (pullSorts.nonEmpty) {
         val n = pullSorts.length
         Some(
-          new Comparator[Row] {
-            override def compare(a: Row, b: Row): Int = {
+          new Comparator[RowOLD] {
+            override def compare(a: RowOLD, b: RowOLD): Int = {
               var i      = 0
               var result = 0
               result = pullSorts(i)(0)(a, b)
@@ -116,7 +116,7 @@ trait CastNestedOptLeaf_[Tpl]
 
   final private def pullLeaf1(
     pullCasts: List[jIterator[_] => Any],
-    optComparator: Option[Comparator[Row]]
+    optComparator: Option[Comparator[RowOLD]]
   ): jIterator[_] => List[Any] = {
     val List(c1) = pullCasts
     val cast     = (it: java.util.Iterator[_]) =>
@@ -134,11 +134,11 @@ trait CastNestedOptLeaf_[Tpl]
           }
       } { comparator =>
         (rows: jList[_]) =>
-          val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
+          val sortedRows: jArrayList[RowOLD] = new jArrayList(rows.size())
           rows.asScala.foreach {
             case row: jMap[_, _] =>
               val list = new jArrayList[Any](1)
-              sortedRows.add(flatten(list, row).asInstanceOf[Row])
+              sortedRows.add(flatten(list, row).asInstanceOf[RowOLD])
           }
           Collections.sort(sortedRows, comparator)
           sortedRows.asScala.map { row => cast(row.iterator) }.toList
@@ -148,7 +148,7 @@ trait CastNestedOptLeaf_[Tpl]
 
   final private def pullLeaf2(
     pullCasts: List[jIterator[_] => Any],
-    optComparator: Option[Comparator[Row]]
+    optComparator: Option[Comparator[RowOLD]]
   ): jIterator[_] => List[Any] = {
     val List(c1, c2) = pullCasts
     val cast         = (it: java.util.Iterator[_]) =>
@@ -167,11 +167,11 @@ trait CastNestedOptLeaf_[Tpl]
           }
       } { comparator =>
         (rows: jList[_]) =>
-          val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
+          val sortedRows: jArrayList[RowOLD] = new jArrayList(rows.size())
           rows.asScala.foreach {
             case row: jMap[_, _] =>
               val list = new jArrayList[Any](2)
-              sortedRows.add(flatten(list, row).asInstanceOf[Row])
+              sortedRows.add(flatten(list, row).asInstanceOf[RowOLD])
           }
           Collections.sort(sortedRows, comparator)
           sortedRows.asScala.map { row => cast(row.iterator) }.toList
@@ -181,7 +181,7 @@ trait CastNestedOptLeaf_[Tpl]
 
   final private def pullLeaf3(
     pullCasts: List[jIterator[_] => Any],
-    optComparator: Option[Comparator[Row]]
+    optComparator: Option[Comparator[RowOLD]]
   ): jIterator[_] => List[Any] = {
     val List(c1, c2, c3) = pullCasts
     val cast             = (it: java.util.Iterator[_]) =>
@@ -201,11 +201,11 @@ trait CastNestedOptLeaf_[Tpl]
           }
       } { comparator =>
         (rows: jList[_]) =>
-          val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
+          val sortedRows: jArrayList[RowOLD] = new jArrayList(rows.size())
           rows.asScala.foreach {
             case row: jMap[_, _] =>
               val list = new jArrayList[Any](3)
-              sortedRows.add(flatten(list, row).asInstanceOf[Row])
+              sortedRows.add(flatten(list, row).asInstanceOf[RowOLD])
           }
           Collections.sort(sortedRows, comparator)
           sortedRows.asScala.map { row => cast(row.iterator) }.toList
@@ -215,7 +215,7 @@ trait CastNestedOptLeaf_[Tpl]
 
   final private def pullLeaf4(
     pullCasts: List[jIterator[_] => Any],
-    optComparator: Option[Comparator[Row]]
+    optComparator: Option[Comparator[RowOLD]]
   ): jIterator[_] => List[Any] = {
     val List(c1, c2, c3, c4) = pullCasts
     val cast                 = (it: java.util.Iterator[_]) =>
@@ -236,11 +236,11 @@ trait CastNestedOptLeaf_[Tpl]
           }
       } { comparator =>
         (rows: jList[_]) =>
-          val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
+          val sortedRows: jArrayList[RowOLD] = new jArrayList(rows.size())
           rows.asScala.foreach {
             case row: jMap[_, _] =>
               val list = new jArrayList[Any](4)
-              sortedRows.add(flatten(list, row).asInstanceOf[Row])
+              sortedRows.add(flatten(list, row).asInstanceOf[RowOLD])
           }
           Collections.sort(sortedRows, comparator)
           sortedRows.asScala.map { row => cast(row.iterator) }.toList
@@ -250,7 +250,7 @@ trait CastNestedOptLeaf_[Tpl]
 
   final private def pullLeaf5(
     pullCasts: List[jIterator[_] => Any],
-    optComparator: Option[Comparator[Row]]
+    optComparator: Option[Comparator[RowOLD]]
   ): jIterator[_] => List[Any] = {
     val List(c1, c2, c3, c4, c5) = pullCasts
     val cast                     = (it: java.util.Iterator[_]) =>
@@ -272,11 +272,11 @@ trait CastNestedOptLeaf_[Tpl]
           }
       } { comparator =>
         (rows: jList[_]) =>
-          val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
+          val sortedRows: jArrayList[RowOLD] = new jArrayList(rows.size())
           rows.asScala.foreach {
             case row: jMap[_, _] =>
               val list = new jArrayList[Any](5)
-              sortedRows.add(flatten(list, row).asInstanceOf[Row])
+              sortedRows.add(flatten(list, row).asInstanceOf[RowOLD])
           }
           Collections.sort(sortedRows, comparator)
           sortedRows.asScala.map { row => cast(row.iterator) }.toList
@@ -286,7 +286,7 @@ trait CastNestedOptLeaf_[Tpl]
 
   final private def pullLeaf6(
     pullCasts: List[jIterator[_] => Any],
-    optComparator: Option[Comparator[Row]]
+    optComparator: Option[Comparator[RowOLD]]
   ): jIterator[_] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6) = pullCasts
     val cast                         = (it: java.util.Iterator[_]) =>
@@ -309,11 +309,11 @@ trait CastNestedOptLeaf_[Tpl]
           }
       } { comparator =>
         (rows: jList[_]) =>
-          val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
+          val sortedRows: jArrayList[RowOLD] = new jArrayList(rows.size())
           rows.asScala.foreach {
             case row: jMap[_, _] =>
               val list = new jArrayList[Any](6)
-              sortedRows.add(flatten(list, row).asInstanceOf[Row])
+              sortedRows.add(flatten(list, row).asInstanceOf[RowOLD])
           }
           Collections.sort(sortedRows, comparator)
           sortedRows.asScala.map { row => cast(row.iterator) }.toList
@@ -323,7 +323,7 @@ trait CastNestedOptLeaf_[Tpl]
 
   final private def pullLeaf7(
     pullCasts: List[jIterator[_] => Any],
-    optComparator: Option[Comparator[Row]]
+    optComparator: Option[Comparator[RowOLD]]
   ): jIterator[_] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7) = pullCasts
     val cast                             = (it: java.util.Iterator[_]) =>
@@ -347,11 +347,11 @@ trait CastNestedOptLeaf_[Tpl]
           }
       } { comparator =>
         (rows: jList[_]) =>
-          val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
+          val sortedRows: jArrayList[RowOLD] = new jArrayList(rows.size())
           rows.asScala.foreach {
             case row: jMap[_, _] =>
               val list = new jArrayList[Any](7)
-              sortedRows.add(flatten(list, row).asInstanceOf[Row])
+              sortedRows.add(flatten(list, row).asInstanceOf[RowOLD])
           }
           Collections.sort(sortedRows, comparator)
           sortedRows.asScala.map { row => cast(row.iterator) }.toList
@@ -361,7 +361,7 @@ trait CastNestedOptLeaf_[Tpl]
 
   final private def pullLeaf8(
     pullCasts: List[jIterator[_] => Any],
-    optComparator: Option[Comparator[Row]]
+    optComparator: Option[Comparator[RowOLD]]
   ): jIterator[_] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8) = pullCasts
     val cast                                 = (it: java.util.Iterator[_]) =>
@@ -386,11 +386,11 @@ trait CastNestedOptLeaf_[Tpl]
           }
       } { comparator =>
         (rows: jList[_]) =>
-          val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
+          val sortedRows: jArrayList[RowOLD] = new jArrayList(rows.size())
           rows.asScala.foreach {
             case row: jMap[_, _] =>
               val list = new jArrayList[Any](8)
-              sortedRows.add(flatten(list, row).asInstanceOf[Row])
+              sortedRows.add(flatten(list, row).asInstanceOf[RowOLD])
           }
           Collections.sort(sortedRows, comparator)
           sortedRows.asScala.map { row => cast(row.iterator) }.toList
@@ -400,7 +400,7 @@ trait CastNestedOptLeaf_[Tpl]
 
   final private def pullLeaf9(
     pullCasts: List[jIterator[_] => Any],
-    optComparator: Option[Comparator[Row]]
+    optComparator: Option[Comparator[RowOLD]]
   ): jIterator[_] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9) = pullCasts
     val cast                                     = (it: java.util.Iterator[_]) =>
@@ -426,11 +426,11 @@ trait CastNestedOptLeaf_[Tpl]
           }
       } { comparator =>
         (rows: jList[_]) =>
-          val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
+          val sortedRows: jArrayList[RowOLD] = new jArrayList(rows.size())
           rows.asScala.foreach {
             case row: jMap[_, _] =>
               val list = new jArrayList[Any](9)
-              sortedRows.add(flatten(list, row).asInstanceOf[Row])
+              sortedRows.add(flatten(list, row).asInstanceOf[RowOLD])
           }
           Collections.sort(sortedRows, comparator)
           sortedRows.asScala.map { row => cast(row.iterator) }.toList
@@ -440,7 +440,7 @@ trait CastNestedOptLeaf_[Tpl]
 
   final private def pullLeaf10(
     pullCasts: List[jIterator[_] => Any],
-    optComparator: Option[Comparator[Row]]
+    optComparator: Option[Comparator[RowOLD]]
   ): jIterator[_] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10) = pullCasts
     val cast                                          = (it: java.util.Iterator[_]) =>
@@ -467,11 +467,11 @@ trait CastNestedOptLeaf_[Tpl]
           }
       } { comparator =>
         (rows: jList[_]) =>
-          val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
+          val sortedRows: jArrayList[RowOLD] = new jArrayList(rows.size())
           rows.asScala.foreach {
             case row: jMap[_, _] =>
               val list = new jArrayList[Any](10)
-              sortedRows.add(flatten(list, row).asInstanceOf[Row])
+              sortedRows.add(flatten(list, row).asInstanceOf[RowOLD])
           }
           Collections.sort(sortedRows, comparator)
           sortedRows.asScala.map { row => cast(row.iterator) }.toList
@@ -481,7 +481,7 @@ trait CastNestedOptLeaf_[Tpl]
 
   final private def pullLeaf11(
     pullCasts: List[jIterator[_] => Any],
-    optComparator: Option[Comparator[Row]]
+    optComparator: Option[Comparator[RowOLD]]
   ): jIterator[_] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11) = pullCasts
     val cast                                               = (it: java.util.Iterator[_]) =>
@@ -509,11 +509,11 @@ trait CastNestedOptLeaf_[Tpl]
           }
       } { comparator =>
         (rows: jList[_]) =>
-          val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
+          val sortedRows: jArrayList[RowOLD] = new jArrayList(rows.size())
           rows.asScala.foreach {
             case row: jMap[_, _] =>
               val list = new jArrayList[Any](11)
-              sortedRows.add(flatten(list, row).asInstanceOf[Row])
+              sortedRows.add(flatten(list, row).asInstanceOf[RowOLD])
           }
           Collections.sort(sortedRows, comparator)
           sortedRows.asScala.map { row => cast(row.iterator) }.toList
@@ -523,7 +523,7 @@ trait CastNestedOptLeaf_[Tpl]
 
   final private def pullLeaf12(
     pullCasts: List[jIterator[_] => Any],
-    optComparator: Option[Comparator[Row]]
+    optComparator: Option[Comparator[RowOLD]]
   ): jIterator[_] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12) = pullCasts
     val cast                                                    = (it: java.util.Iterator[_]) =>
@@ -552,11 +552,11 @@ trait CastNestedOptLeaf_[Tpl]
           }
       } { comparator =>
         (rows: jList[_]) =>
-          val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
+          val sortedRows: jArrayList[RowOLD] = new jArrayList(rows.size())
           rows.asScala.foreach {
             case row: jMap[_, _] =>
               val list = new jArrayList[Any](12)
-              sortedRows.add(flatten(list, row).asInstanceOf[Row])
+              sortedRows.add(flatten(list, row).asInstanceOf[RowOLD])
           }
           Collections.sort(sortedRows, comparator)
           sortedRows.asScala.map { row => cast(row.iterator) }.toList
@@ -566,7 +566,7 @@ trait CastNestedOptLeaf_[Tpl]
 
   final private def pullLeaf13(
     pullCasts: List[jIterator[_] => Any],
-    optComparator: Option[Comparator[Row]]
+    optComparator: Option[Comparator[RowOLD]]
   ): jIterator[_] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13) = pullCasts
     val cast                                                         = (it: java.util.Iterator[_]) =>
@@ -596,11 +596,11 @@ trait CastNestedOptLeaf_[Tpl]
           }
       } { comparator =>
         (rows: jList[_]) =>
-          val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
+          val sortedRows: jArrayList[RowOLD] = new jArrayList(rows.size())
           rows.asScala.foreach {
             case row: jMap[_, _] =>
               val list = new jArrayList[Any](13)
-              sortedRows.add(flatten(list, row).asInstanceOf[Row])
+              sortedRows.add(flatten(list, row).asInstanceOf[RowOLD])
           }
           Collections.sort(sortedRows, comparator)
           sortedRows.asScala.map { row => cast(row.iterator) }.toList
@@ -610,7 +610,7 @@ trait CastNestedOptLeaf_[Tpl]
 
   final private def pullLeaf14(
     pullCasts: List[jIterator[_] => Any],
-    optComparator: Option[Comparator[Row]]
+    optComparator: Option[Comparator[RowOLD]]
   ): jIterator[_] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14) = pullCasts
     val cast                                                              = (it: java.util.Iterator[_]) =>
@@ -641,11 +641,11 @@ trait CastNestedOptLeaf_[Tpl]
           }
       } { comparator =>
         (rows: jList[_]) =>
-          val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
+          val sortedRows: jArrayList[RowOLD] = new jArrayList(rows.size())
           rows.asScala.foreach {
             case row: jMap[_, _] =>
               val list = new jArrayList[Any](14)
-              sortedRows.add(flatten(list, row).asInstanceOf[Row])
+              sortedRows.add(flatten(list, row).asInstanceOf[RowOLD])
           }
           Collections.sort(sortedRows, comparator)
           sortedRows.asScala.map { row => cast(row.iterator) }.toList
@@ -655,7 +655,7 @@ trait CastNestedOptLeaf_[Tpl]
 
   final private def pullLeaf15(
     pullCasts: List[jIterator[_] => Any],
-    optComparator: Option[Comparator[Row]]
+    optComparator: Option[Comparator[RowOLD]]
   ): jIterator[_] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15) = pullCasts
     val cast                                                                   = (it: java.util.Iterator[_]) =>
@@ -687,11 +687,11 @@ trait CastNestedOptLeaf_[Tpl]
           }
       } { comparator =>
         (rows: jList[_]) =>
-          val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
+          val sortedRows: jArrayList[RowOLD] = new jArrayList(rows.size())
           rows.asScala.foreach {
             case row: jMap[_, _] =>
               val list = new jArrayList[Any](15)
-              sortedRows.add(flatten(list, row).asInstanceOf[Row])
+              sortedRows.add(flatten(list, row).asInstanceOf[RowOLD])
           }
           Collections.sort(sortedRows, comparator)
           sortedRows.asScala.map { row => cast(row.iterator) }.toList
@@ -701,7 +701,7 @@ trait CastNestedOptLeaf_[Tpl]
 
   final private def pullLeaf16(
     pullCasts: List[jIterator[_] => Any],
-    optComparator: Option[Comparator[Row]]
+    optComparator: Option[Comparator[RowOLD]]
   ): jIterator[_] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16) = pullCasts
     val cast                                                                        = (it: java.util.Iterator[_]) =>
@@ -734,11 +734,11 @@ trait CastNestedOptLeaf_[Tpl]
           }
       } { comparator =>
         (rows: jList[_]) =>
-          val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
+          val sortedRows: jArrayList[RowOLD] = new jArrayList(rows.size())
           rows.asScala.foreach {
             case row: jMap[_, _] =>
               val list = new jArrayList[Any](16)
-              sortedRows.add(flatten(list, row).asInstanceOf[Row])
+              sortedRows.add(flatten(list, row).asInstanceOf[RowOLD])
           }
           Collections.sort(sortedRows, comparator)
           sortedRows.asScala.map { row => cast(row.iterator) }.toList
@@ -748,7 +748,7 @@ trait CastNestedOptLeaf_[Tpl]
 
   final private def pullLeaf17(
     pullCasts: List[jIterator[_] => Any],
-    optComparator: Option[Comparator[Row]]
+    optComparator: Option[Comparator[RowOLD]]
   ): jIterator[_] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17) = pullCasts
     val cast                                                                             = (it: java.util.Iterator[_]) =>
@@ -782,11 +782,11 @@ trait CastNestedOptLeaf_[Tpl]
           }
       } { comparator =>
         (rows: jList[_]) =>
-          val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
+          val sortedRows: jArrayList[RowOLD] = new jArrayList(rows.size())
           rows.asScala.foreach {
             case row: jMap[_, _] =>
               val list = new jArrayList[Any](17)
-              sortedRows.add(flatten(list, row).asInstanceOf[Row])
+              sortedRows.add(flatten(list, row).asInstanceOf[RowOLD])
           }
           Collections.sort(sortedRows, comparator)
           sortedRows.asScala.map { row => cast(row.iterator) }.toList
@@ -796,7 +796,7 @@ trait CastNestedOptLeaf_[Tpl]
 
   final private def pullLeaf18(
     pullCasts: List[jIterator[_] => Any],
-    optComparator: Option[Comparator[Row]]
+    optComparator: Option[Comparator[RowOLD]]
   ): jIterator[_] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18) = pullCasts
     val cast                                                                                  = (it: java.util.Iterator[_]) =>
@@ -831,11 +831,11 @@ trait CastNestedOptLeaf_[Tpl]
           }
       } { comparator =>
         (rows: jList[_]) =>
-          val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
+          val sortedRows: jArrayList[RowOLD] = new jArrayList(rows.size())
           rows.asScala.foreach {
             case row: jMap[_, _] =>
               val list = new jArrayList[Any](18)
-              sortedRows.add(flatten(list, row).asInstanceOf[Row])
+              sortedRows.add(flatten(list, row).asInstanceOf[RowOLD])
           }
           Collections.sort(sortedRows, comparator)
           sortedRows.asScala.map { row => cast(row.iterator) }.toList
@@ -845,7 +845,7 @@ trait CastNestedOptLeaf_[Tpl]
 
   final private def pullLeaf19(
     pullCasts: List[jIterator[_] => Any],
-    optComparator: Option[Comparator[Row]]
+    optComparator: Option[Comparator[RowOLD]]
   ): jIterator[_] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19) = pullCasts
     val cast                                                                                       = (it: java.util.Iterator[_]) =>
@@ -881,11 +881,11 @@ trait CastNestedOptLeaf_[Tpl]
           }
       } { comparator =>
         (rows: jList[_]) =>
-          val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
+          val sortedRows: jArrayList[RowOLD] = new jArrayList(rows.size())
           rows.asScala.foreach {
             case row: jMap[_, _] =>
               val list = new jArrayList[Any](19)
-              sortedRows.add(flatten(list, row).asInstanceOf[Row])
+              sortedRows.add(flatten(list, row).asInstanceOf[RowOLD])
           }
           Collections.sort(sortedRows, comparator)
           sortedRows.asScala.map { row => cast(row.iterator) }.toList
@@ -895,7 +895,7 @@ trait CastNestedOptLeaf_[Tpl]
 
   final private def pullLeaf20(
     pullCasts: List[jIterator[_] => Any],
-    optComparator: Option[Comparator[Row]]
+    optComparator: Option[Comparator[RowOLD]]
   ): jIterator[_] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20) = pullCasts
     val cast                                                                                            = (it: java.util.Iterator[_]) =>
@@ -932,11 +932,11 @@ trait CastNestedOptLeaf_[Tpl]
           }
       } { comparator =>
         (rows: jList[_]) =>
-          val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
+          val sortedRows: jArrayList[RowOLD] = new jArrayList(rows.size())
           rows.asScala.foreach {
             case row: jMap[_, _] =>
               val list = new jArrayList[Any](20)
-              sortedRows.add(flatten(list, row).asInstanceOf[Row])
+              sortedRows.add(flatten(list, row).asInstanceOf[RowOLD])
           }
           Collections.sort(sortedRows, comparator)
           sortedRows.asScala.map { row => cast(row.iterator) }.toList
@@ -946,7 +946,7 @@ trait CastNestedOptLeaf_[Tpl]
 
   final private def pullLeaf21(
     pullCasts: List[jIterator[_] => Any],
-    optComparator: Option[Comparator[Row]]
+    optComparator: Option[Comparator[RowOLD]]
   ): jIterator[_] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c21) = pullCasts
     val cast                                                                                                 = (it: java.util.Iterator[_]) =>
@@ -984,11 +984,11 @@ trait CastNestedOptLeaf_[Tpl]
           }
       } { comparator =>
         (rows: jList[_]) =>
-          val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
+          val sortedRows: jArrayList[RowOLD] = new jArrayList(rows.size())
           rows.asScala.foreach {
             case row: jMap[_, _] =>
               val list = new jArrayList[Any](21)
-              sortedRows.add(flatten(list, row).asInstanceOf[Row])
+              sortedRows.add(flatten(list, row).asInstanceOf[RowOLD])
           }
           Collections.sort(sortedRows, comparator)
           sortedRows.asScala.map { row => cast(row.iterator) }.toList
@@ -998,7 +998,7 @@ trait CastNestedOptLeaf_[Tpl]
 
   final private def pullLeaf22(
     pullCasts: List[jIterator[_] => Any],
-    optComparator: Option[Comparator[Row]]
+    optComparator: Option[Comparator[RowOLD]]
   ): jIterator[_] => List[Any] = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c21, c22) = pullCasts
     val cast                                                                                                      = (it: java.util.Iterator[_]) =>
@@ -1037,11 +1037,11 @@ trait CastNestedOptLeaf_[Tpl]
           }
       } { comparator =>
         (rows: jList[_]) =>
-          val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
+          val sortedRows: jArrayList[RowOLD] = new jArrayList(rows.size())
           rows.asScala.foreach {
             case row: jMap[_, _] =>
               val list = new jArrayList[Any](22)
-              sortedRows.add(flatten(list, row).asInstanceOf[Row])
+              sortedRows.add(flatten(list, row).asInstanceOf[RowOLD])
           }
           Collections.sort(sortedRows, comparator)
           sortedRows.asScala.map { row => cast(row.iterator) }.toList

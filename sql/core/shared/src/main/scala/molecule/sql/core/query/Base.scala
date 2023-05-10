@@ -7,13 +7,14 @@ import molecule.boilerplate.ast.Model._
 import molecule.core.query.Model2Query
 import molecule.core.util.JavaConversions
 import scala.collection.mutable
-import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 
 
-trait Base[Tpl] extends BaseHelpers with JavaConversions { self: Model2Query =>
+trait Base extends BaseHelpers with JavaConversions { self: Model2Query =>
 
-  // Datomic row type
-  type Row = jList[AnyRef]
+  type Row = java.sql.ResultSet
+
+  type RowOLD = jList[AnyRef]
 
   // Datomic variable (ex ?a)
   type Var = String
@@ -48,31 +49,37 @@ trait Base[Tpl] extends BaseHelpers with JavaConversions { self: Model2Query =>
 
   final protected val nestedIds    = new ArrayBuffer[String]
   final protected val nestedOptIds = new ArrayBuffer[String]
-  final protected val find         = new ArrayBuffer[String]
-  final protected val widh         = new ArrayBuffer[String]
-  final protected val in           = new ArrayBuffer[String]
-  final protected val where        = new ArrayBuffer[(String, Int)]
-  final protected val rules        = new ArrayBuffer[String]
+
+  final protected val select = new ListBuffer[String]
+  final protected val from   = new ListBuffer[String]
+  final protected val where  = new ListBuffer[String]
+
+
+  final protected val widh     = new ArrayBuffer[String]
+  final protected val in       = new ArrayBuffer[String]
+  final protected val whereOLD = new ArrayBuffer[(String, Int)]
+  final protected val rules    = new ArrayBuffer[String]
 
   // In variables and where clauses not shared with pre-query. To be added lastly to main query
   final protected val inPost    = new ArrayBuffer[String]
   final protected val wherePost = new ArrayBuffer[(String, Int)]
 
   // Input args and cast lambdas
-  final protected val preArgs  = new ArrayBuffer[AnyRef]
-  final protected val args     = new ArrayBuffer[AnyRef]
-  final protected var castss   = List(List.empty[AnyRef => AnyRef])
-  final protected var aritiess = List(List.empty[List[Int]])
+  final protected val preArgs   = new ArrayBuffer[AnyRef]
+  final protected val args      = new ArrayBuffer[AnyRef]
+  final protected var castss    = List(List.empty[(Row, Int) => AnyRef])
+  final protected var castssOLD = List(List.empty[AnyRef => AnyRef])
+  final protected var aritiess  = List(List.empty[List[Int]])
 
   // Sorting
-  final protected var sortss    = List(List.empty[(Int, Int => (Row, Row) => Int)])
-  final protected var attrIndex = -1
+  final protected var sortss        = List(List.empty[(Int, Int => (RowOLD, RowOLD) => Int)])
+  final protected var sortAttrIndex = -1
 
   // Pull coordinates
   final protected val pullCasts  = new ArrayBuffer[jIterator[_] => Any]
   final protected var pullCastss = List.empty[List[jIterator[_] => Any]]
-  final protected val pullSorts  = new ArrayBuffer[(Int, Int => (Row, Row) => Int)]
-  final protected var pullSortss = List.empty[List[Int => (Row, Row) => Int]]
+  final protected val pullSorts  = new ArrayBuffer[(Int, Int => (RowOLD, RowOLD) => Int)]
+  final protected var pullSortss = List.empty[List[Int => (RowOLD, RowOLD) => Int]]
   final protected var refDepths  = List(0, 0)
 
   // Ensure distinct result set when possible redundant optional values can occur
@@ -93,23 +100,30 @@ trait Base[Tpl] extends BaseHelpers with JavaConversions { self: Model2Query =>
   // Add 4th tx var to first attribute datom if tx value is needed
   final protected var addTxVar: Boolean = false
 
-  final protected def addCast(cast: AnyRef => AnyRef): Unit = {
+  final protected def addCast(cast: (Row, Int) => AnyRef): Unit = {
     if (isTxMetaData)
       castss = (castss.head :+ cast) :: castss.tail
     else
       castss = castss.init :+ (castss.last :+ cast)
   }
 
+  final protected def addCastOLD(cast: AnyRef => AnyRef): Unit = {
+    if (isTxMetaData)
+      castssOLD = (castssOLD.head :+ cast) :: castssOLD.tail
+    else
+      castssOLD = castssOLD.init :+ (castssOLD.last :+ cast)
+  }
+
   final protected def removeLastCast(): Unit = {
     if (isTxMetaData)
-      castss = castss.head.init :: castss.tail
+      castssOLD = castssOLD.head.init :: castssOLD.tail
     else {
-      castss = castss.init :+ castss.last.init
+      castssOLD = castssOLD.init :+ castssOLD.last.init
     }
   }
   final protected def replaceCast(cast: AnyRef => AnyRef): Unit = {
     removeLastCast()
-    addCast(cast)
+    addCastOLD(cast)
   }
 
   final protected def aritiesNested(): Unit = {
@@ -171,8 +185,8 @@ trait Base[Tpl] extends BaseHelpers with JavaConversions { self: Model2Query =>
   }
 
   final protected def getFlatSorters(
-    sortss: List[List[(Int, Int => (Row, Row) => Int)]]
-  ): List[Int => (Row, Row) => Int] = {
+    sortss: List[List[(Int, Int => (RowOLD, RowOLD) => Int)]]
+  ): List[Int => (RowOLD, RowOLD) => Int] = {
     sortss.flatMap { sorts =>
       val sortsOrdered = sorts.sortBy(_._1)
       // Index 6s are for entity ids on each nested level.

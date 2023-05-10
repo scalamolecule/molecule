@@ -48,86 +48,98 @@ case class JdbcQueryResolveOffset[Tpl](
     if (offset.isDefined && limit.isDefined && limitSign != offsetSign) {
       throw ModelError("Limit and offset should both be positive or negative.")
     }
-    val res       = getRawData2(conn, altDb = altDb)
-//    val row2tpl = castRow2AnyTpl(aritiess.head, castss.head, 0, None)
 
-    val rows = ListBuffer.empty[Int]
-    while(res.next()){
-      rows += res.getInt(1)
+    val rows = getRawData2(conn)
+    val row2tpl = castRow2AnyTpl(aritiess.head, castss.head, 1, None)
+    val tuples  = ListBuffer.empty[Tpl]
+    while (rows.next()) {
+      tuples += row2tpl(rows).asInstanceOf[Tpl]
     }
+    val totalCount = tuples.size
+    val fromUntil  = getFromUntil(totalCount, limit, offset)
+    val hasMore    = fromUntil.fold(totalCount > 0)(_._3)
+    (tuples.result(), totalCount, hasMore)
 
-    (rows.toList.asInstanceOf[List[Tpl]], 1, true)
+
+    ////    val rows       = getRawData(conn, altDb = altDb)
+    //    val sortedRows = sortRows(tuples)
+    //    //    logger.debug(sortedRows.toArray().mkString("\n"))
+    //
+    //    if (isNested) {
+    //      val nestedRows    = rows2nested(sortedRows)
+    //      val toplevelCount = nestedRows.length
+    //      val fromUntil     = getFromUntil(toplevelCount, limit, offset)
+    //      val hasMore       = fromUntil.fold(totalCount > 0)(_._3)
+    //      (offsetList(nestedRows, fromUntil), toplevelCount, hasMore)
+    //
+    //    } else {
+    //      val fromUntil = getFromUntil(totalCount, limit, offset)
+    //      val hasMore   = fromUntil.fold(totalCount > 0)(_._3)
+    //      val tuples    = ListBuffer.empty[Tpl]
+    //
+    //      if (isNestedOpt) {
+    //        postAdjustPullCasts()
+    //        offsetRaw(sortedRows, fromUntil).forEach(row => tuples += pullRow2tpl(row))
+    //        (tuples.result(), totalCount, hasMore)
+    //
+    //      } else {
+    //        postAdjustAritiess()
+    //        val row2tpl = castRow2AnyTpl(aritiess.head, castss.head, 0, None)
+    //        offsetRaw(sortedRows, fromUntil).forEach(row => tuples += row2tpl(row).asInstanceOf[Tpl])
+    //        (tuples.result(), totalCount, hasMore)
+    //      }
+    //    }
 
 
-//    val rows       = getRawData(conn, altDb = altDb)
-//    val totalCount = rows.size
-//    val sortedRows = sortRows(rows)
-//    //    logger.debug(sortedRows.toArray().mkString("\n"))
-//
-//    if (isNested) {
-//      val nestedRows    = rows2nested(sortedRows)
-//      val toplevelCount = nestedRows.length
-//      val fromUntil     = getFromUntil(toplevelCount, limit, offset)
-//      val hasMore       = fromUntil.fold(totalCount > 0)(_._3)
-//      (offsetList(nestedRows, fromUntil), toplevelCount, hasMore)
-//
-//    } else {
-//      val fromUntil = getFromUntil(totalCount, limit, offset)
-//      val hasMore   = fromUntil.fold(totalCount > 0)(_._3)
-//      val tuples    = ListBuffer.empty[Tpl]
-//
-//      if (isNestedOpt) {
-//        postAdjustPullCasts()
-//        offsetRaw(sortedRows, fromUntil).forEach(row => tuples += pullRow2tpl(row))
-//        (tuples.result(), totalCount, hasMore)
-//
-//      } else {
-//        postAdjustAritiess()
-//        val row2tpl = castRow2AnyTpl(aritiess.head, castss.head, 0, None)
-//        offsetRaw(sortedRows, fromUntil).forEach(row => tuples += row2tpl(row).asInstanceOf[Tpl])
-//        (tuples.result(), totalCount, hasMore)
-//      }
-//    }
+    //    val res = getRawData2(conn)
+    //    //    val row2tpl = castRow2AnyTpl(aritiess.head, castss.head, 0, None)
+    //
+    //    val rows = ListBuffer.empty[Int]
+    //    while (res.next()) {
+    //      rows += res.getInt(1)
+    //    }
+    //    //
+    //    (rows.toList.asInstanceOf[List[Tpl]], 1, true)
   }
 
-  // Optional use of DB_AFTER for subscriptions
-  def getListFromOffset_syncOLD(altDb: Option[datomic.Database])(implicit conn: JdbcConn_JVM)
-  : (List[Tpl], Int, Boolean) = {
-    lazy val limitSign  = limit.get >> 31
-    lazy val offsetSign = offset.get >> 31
-    if (offset.isDefined && limit.isDefined && limitSign != offsetSign) {
-      throw ModelError("Limit and offset should both be positive or negative.")
-    }
-    val rows       = getRawData(conn, altDb = altDb)
-    val totalCount = rows.size
-    val sortedRows = sortRows(rows)
-    //    logger.debug(sortedRows.toArray().mkString("\n"))
-
-    if (isNested) {
-      val nestedRows    = rows2nested(sortedRows)
-      val toplevelCount = nestedRows.length
-      val fromUntil     = getFromUntil(toplevelCount, limit, offset)
-      val hasMore       = fromUntil.fold(totalCount > 0)(_._3)
-      (offsetList(nestedRows, fromUntil), toplevelCount, hasMore)
-
-    } else {
-      val fromUntil = getFromUntil(totalCount, limit, offset)
-      val hasMore   = fromUntil.fold(totalCount > 0)(_._3)
-      val tuples    = ListBuffer.empty[Tpl]
-
-      if (isNestedOpt) {
-        postAdjustPullCasts()
-        offsetRaw(sortedRows, fromUntil).forEach(row => tuples += pullRow2tpl(row))
-        (tuples.result(), totalCount, hasMore)
-
-      } else {
-        postAdjustAritiess()
-        val row2tpl = castRow2AnyTpl(aritiess.head, castss.head, 0, None)
-        offsetRaw(sortedRows, fromUntil).forEach(row => tuples += row2tpl(row).asInstanceOf[Tpl])
-        (tuples.result(), totalCount, hasMore)
-      }
-    }
-  }
+  //  // Optional use of DB_AFTER for subscriptions
+  //  def getListFromOffset_syncOLD(altDb: Option[datomic.Database])(implicit conn: JdbcConn_JVM)
+  //  : (List[Tpl], Int, Boolean) = {
+  //    lazy val limitSign  = limit.get >> 31
+  //    lazy val offsetSign = offset.get >> 31
+  //    if (offset.isDefined && limit.isDefined && limitSign != offsetSign) {
+  //      throw ModelError("Limit and offset should both be positive or negative.")
+  //    }
+  //    val rows       = getRawData(conn, altDb = altDb)
+  //    val totalCount = rows.size
+  //    val sortedRows = sortRows(rows)
+  //    //    logger.debug(sortedRows.toArray().mkString("\n"))
+  //
+  //    if (isNested) {
+  //      val nestedRows    = rows2nested(sortedRows)
+  //      val toplevelCount = nestedRows.length
+  //      val fromUntil     = getFromUntil(toplevelCount, limit, offset)
+  //      val hasMore       = fromUntil.fold(totalCount > 0)(_._3)
+  //      (offsetList(nestedRows, fromUntil), toplevelCount, hasMore)
+  //
+  //    } else {
+  //      val fromUntil = getFromUntil(totalCount, limit, offset)
+  //      val hasMore   = fromUntil.fold(totalCount > 0)(_._3)
+  //      val tuples    = ListBuffer.empty[Tpl]
+  //
+  //      if (isNestedOpt) {
+  //        postAdjustPullCasts()
+  //        offsetRaw(sortedRows, fromUntil).forEach(row => tuples += pullRow2tpl(row))
+  //        (tuples.result(), totalCount, hasMore)
+  //
+  //      } else {
+  //        postAdjustAritiess()
+  //        val row2tpl = castRow2AnyTpl(aritiess.head, castss.head, 0, None)
+  //        offsetRaw(sortedRows, fromUntil).forEach(row => tuples += row2tpl(row).asInstanceOf[Tpl])
+  //        (tuples.result(), totalCount, hasMore)
+  //      }
+  //    }
+  //  }
 
 
   def subscribe(
@@ -135,14 +147,14 @@ case class JdbcQueryResolveOffset[Tpl](
     txReportWatcher: TxReportWatcher,
     callback: List[Tpl] => Unit
   ): Unit = {
-//    val allAttrIds   = conn.attrIds
-//    val queryAttrIds = elements.collect { case a: Attr => allAttrIds(a.name) }
-//    val dbCallBack   = (dbAfter: Database) => {
-//      val freshResult: List[Tpl] = SqlQueryResolveOffset[Tpl](elements, limit, None, None)
-//        .getListFromOffset_sync(Some(dbAfter))(conn)._1
-//      callback(freshResult)
-//    }
-//    txReportWatcher.addSubscription(queryAttrIds, dbCallBack)
+    //    val allAttrIds   = conn.attrIds
+    //    val queryAttrIds = elements.collect { case a: Attr => allAttrIds(a.name) }
+    //    val dbCallBack   = (dbAfter: Database) => {
+    //      val freshResult: List[Tpl] = SqlQueryResolveOffset[Tpl](elements, limit, None, None)
+    //        .getListFromOffset_sync(Some(dbAfter))(conn)._1
+    //      callback(freshResult)
+    //    }
+    //    txReportWatcher.addSubscription(queryAttrIds, dbCallBack)
     ???
   }
 }

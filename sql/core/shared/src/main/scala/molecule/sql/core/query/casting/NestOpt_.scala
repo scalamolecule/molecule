@@ -8,10 +8,10 @@ import scala.annotation.tailrec
 
 
 trait NestOpt_[Tpl]
-  extends CastNestedOptBranch_[Tpl]
-    with CastNestedOptLeaf_[Tpl]
-    with CastRow2Tpl_[Tpl]
-    with Base[Tpl]
+  extends CastNestedOptBranch_
+    with CastNestedOptLeaf_
+    with CastRow2Tpl_
+    with Base
     with Model2Query {
 
   private lazy val levels = pullCastss.length
@@ -82,7 +82,7 @@ trait NestOpt_[Tpl]
     (rowValue: AnyRef) => pullBranch1(rowValue.asInstanceOf[jMap[_, _]].values.iterator)
   }
 
-  @tailrec
+//  @tailrec
   final private def resolveArities(
     arities: List[List[Int]],
     casts: List[AnyRef => AnyRef],
@@ -90,49 +90,50 @@ trait NestOpt_[Tpl]
     rowIndexTx: Int,
     acc: List[Row => AnyRef]
   ): List[Row => AnyRef] = {
-    arities match {
-      case List(1) :: as =>
-        val cast = (row: Row) => casts.head(row.get(rowIndex))
-        resolveArities(as, casts.tail, rowIndex + 1, rowIndexTx, acc :+ cast)
-
-      // NestedOpt
-      case List(-1) :: as =>
-        val cast = (row: Row) => casts.head(row.get(rowIndex))
-        resolveArities(as, casts.tail, rowIndexTx, rowIndexTx, acc :+ cast)
-
-      // Composite with only tacit attributes
-      case ii :: as if ii.isEmpty =>
-        resolveArities(as, casts, rowIndex, rowIndexTx, acc)
-
-      // Composite branch
-      case ii :: as if ii.last == -1 =>
-        val n                      = ii.length - 1
-        val (tplCasts, moreCasts0) = casts.splitAt(n)
-
-        // Explicitly pull branch in composite tuple
-        val nested = (row: Row) => pullBranch1(row.get(rowIndex + n).asInstanceOf[jMap[_, _]].values.iterator)
-        val cast   = (row: Row) =>
-          castRow2AnyTpl(ii.map(List(_)), tplCasts, rowIndex, Some(nested(row)))(row).asInstanceOf[AnyRef]
-
-        // From here on it is tx meta data
-        val moreCasts = moreCasts0.tail // ignore
-        resolveArities(as, moreCasts, rowIndexTx, 0, acc :+ cast)
-
-      // Top level composite (can be before nested and after in tx meta data)
-      case ii :: as =>
-        val n                     = ii.length
-        val (tplCasts, moreCasts) = casts.splitAt(n)
-        val tplCaster             = castRow2AnyTpl(ii.map(List(_)), tplCasts, rowIndex, None)
-        val cast                  = (row: Row) => tplCaster(row).asInstanceOf[AnyRef]
-        resolveArities(as, moreCasts, rowIndex + n, rowIndexTx, acc :+ cast)
-
-      case Nil => acc
-    }
+//    arities match {
+//      case List(1) :: as =>
+//        val cast = (row: Row) => casts.head(row.get(rowIndex))
+//        resolveArities(as, casts.tail, rowIndex + 1, rowIndexTx, acc :+ cast)
+//
+//      // NestedOpt
+//      case List(-1) :: as =>
+//        val cast = (row: Row) => casts.head(row.get(rowIndex))
+//        resolveArities(as, casts.tail, rowIndexTx, rowIndexTx, acc :+ cast)
+//
+//      // Composite with only tacit attributes
+//      case ii :: as if ii.isEmpty =>
+//        resolveArities(as, casts, rowIndex, rowIndexTx, acc)
+//
+//      // Composite branch
+//      case ii :: as if ii.last == -1 =>
+//        val n                      = ii.length - 1
+//        val (tplCasts, moreCasts0) = casts.splitAt(n)
+//
+//        // Explicitly pull branch in composite tuple
+//        val nested = (row: Row) => pullBranch1(row.get(rowIndex + n).asInstanceOf[jMap[_, _]].values.iterator)
+//        val cast   = (row: Row) =>
+//          castRow2AnyTpl(ii.map(List(_)), tplCasts, rowIndex, Some(nested(row)))(row).asInstanceOf[AnyRef]
+//
+//        // From here on it is tx meta data
+//        val moreCasts = moreCasts0.tail // ignore
+//        resolveArities(as, moreCasts, rowIndexTx, 0, acc :+ cast)
+//
+//      // Top level composite (can be before nested and after in tx meta data)
+//      case ii :: as =>
+//        val n                     = ii.length
+//        val (tplCasts, moreCasts) = casts.splitAt(n)
+//        val tplCaster             = castRow2AnyTpl(ii.map(List(_)), tplCasts, rowIndex, None)
+//        val cast                  = (row: Row) => tplCaster(row).asInstanceOf[AnyRef]
+//        resolveArities(as, moreCasts, rowIndex + n, rowIndexTx, acc :+ cast)
+//
+//      case Nil => acc
+//    }
+    ???
   }
 
   final protected lazy val pullRow2tpl: Row => Tpl = {
     val arities    = aritiess.head
-    val casts      = castss.head
+    val casts      = castssOLD.head
     val rowIndexTx = arities.flatten.takeWhile(_ != -1).sum + 1
     val casters    = resolveArities(arities, casts, 0, rowIndexTx, Nil)
     casters.length match {

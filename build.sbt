@@ -206,7 +206,7 @@ lazy val datalogDatomic = crossProject(JSPlatform, JVMPlatform)
         //        sharedTests + "/txMetaData",
         //        sharedTests + "/validation",
         //                sharedTests + "/time",
-        sharedTests,
+//        sharedTests,
         jvmTests + "/AdhocJVM.scala",
         jsTests + "/AdhocJs.scala",
         sharedTests + "/Adhoc.scala",

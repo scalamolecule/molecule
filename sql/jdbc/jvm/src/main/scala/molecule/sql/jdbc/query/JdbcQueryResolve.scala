@@ -53,32 +53,16 @@ abstract class JdbcQueryResolve[Tpl](elements: List[Element], dbView: Option[DbV
     }
   }
 
-  protected def getRawData2(
-    conn: JdbcConn_JVM,
-    altElements: List[Element] = Nil,
-    altDb: Option[datomic.Database] = None
-  ): ResultSet = {
-    //    isFree = conn.isFreeVersion
-    //    val db = altDb.getOrElse(getDb(conn))
-    getQueries(conn.optimizeQuery, altElements) match {
-      case ("", query, _) =>
-        //        distinct(Peer.q(query, db +: inputs: _*))
-        val sql = """select int from Ns"""
-        val stmt = conn.sqlConn.prepareStatement(sql)
-        stmt.executeQuery()
+  protected def getRawData2(conn: JdbcConn_JVM): ResultSet = {
+    val sql = getQuery(Nil)
+    //    val sql  = """SELECT int FROM Ns"""
+    println("---- query ----------------\n" + sql)
 
-
-        //      case (preQuery, query, _) =>
-        //        // Pre-query
-        //        val preRows = Peer.q(preQuery, db +: preInputs: _*)
-        //        val preIds  = new java.util.HashSet[Long](preRows.size())
-        //        preRows.forEach { row =>
-        //          preIds.add(row.get(0).asInstanceOf[Long])
-        //        }
-        //        // Main query using entity ids from pre-query
-        //        distinct(Peer.q(query, db +: inputs :+ preIds: _*))
-    }
+    val stmt = conn.sqlConn.prepareStatement(sql)
+    stmt.executeQuery()
   }
+
+
   protected def getRawData(
     conn: JdbcConn_JVM,
     altElements: List[Element] = Nil,
@@ -86,32 +70,10 @@ abstract class JdbcQueryResolve[Tpl](elements: List[Element], dbView: Option[DbV
   ): jCollection[jList[AnyRef]] = {
     //    isFree = conn.isFreeVersion
     //    val db = altDb.getOrElse(getDb(conn))
-    getQueries(conn.optimizeQuery, altElements) match {
-      case ("", query, _) =>
-        //        distinct(Peer.q(query, db +: inputs: _*))
+    val query = getQuery(altElements)
 
 
-        val sql = """select int from Ns"""
-        val stmt = conn.sqlConn.prepareStatement(sql)
-        val res = stmt.executeQuery()
-
-        val rows = ListBuffer.empty
-        while(res.next()){
-
-        }
-
-
-        //      case (preQuery, query, _) =>
-        //        // Pre-query
-        //        val preRows = Peer.q(preQuery, db +: preInputs: _*)
-        //        val preIds  = new java.util.HashSet[Long](preRows.size())
-        //        preRows.forEach { row =>
-        //          preIds.add(row.get(0).asInstanceOf[Long])
-        //        }
-        //        // Main query using entity ids from pre-query
-        //        distinct(Peer.q(query, db +: inputs :+ preIds: _*))
-        ???
-    }
+    ???
   }
   //  private def selectDbData(conn: Connection): Unit = {
   //    val sqlIns         =
@@ -154,8 +116,8 @@ abstract class JdbcQueryResolve[Tpl](elements: List[Element], dbView: Option[DbV
       case n =>
         val nestedIdsCount = nestedIds.length
         val sortedRows     = new jArrayList(rows)
-        val comparator     = new Comparator[Row] {
-          override def compare(a: Row, b: Row): Int = {
+        val comparator     = new Comparator[RowOLD] {
+          override def compare(a: RowOLD, b: RowOLD): Int = {
             var i      = 0
             var result = 0;
             result = sorters(i)(nestedIdsCount)(a, b)
@@ -244,13 +206,13 @@ abstract class JdbcQueryResolve[Tpl](elements: List[Element], dbView: Option[DbV
       (Nil, "", false)
     } else {
       if (isNested) {
-        val nestedTpls     = rows2nested(sortedRows)
-        val totalCount     = nestedTpls.length
-        val count          = getCount(limit, forward, totalCount)
-        val nestedTpls1    = if (forward) nestedTpls else nestedTpls.reverse
-        val (tuples, more) = paginateTpls(count, nestedTpls1, identifiers, identifyTpl)
-        val tpls           = if (forward) tuples else tuples.reverse
-        val cursor         = nextCursor(tpls, allTokens)
+        val nestedTpls: List[Tpl] = ??? //rows2nested(sortedRows)
+        val totalCount            = nestedTpls.length
+        val count                 = getCount(limit, forward, totalCount)
+        val nestedTpls1           = if (forward) nestedTpls else nestedTpls.reverse
+        val (tuples, more)        = paginateTpls(count, nestedTpls1, identifiers, identifyTpl)
+        val tpls                  = if (forward) tuples else tuples.reverse
+        val cursor                = nextCursor(tpls, allTokens)
         (tpls, cursor, more > 0)
 
       } else {
@@ -328,19 +290,20 @@ abstract class JdbcQueryResolve[Tpl](elements: List[Element], dbView: Option[DbV
     var window = false
     var i      = 0
     var more   = 0
-    @tailrec
+    //    @tailrec
     def findFrom(identifiers: List[Any]): Unit = {
       identifiers match {
         case identifier :: remainingidentifiers =>
-          sortedRows.forEach {
-            case row if window && i != count        => i += 1; tuples += row2tpl(row)
-            case row if identify(row) == identifier => window = true
-            case _                                  => if (window) more += 1
-          }
-          if (tuples.isEmpty) {
-            // Recursively try with next identifier
-            findFrom(remainingidentifiers)
-          }
+          //          sortedRows.forEach {
+          //            case row if window && i != count        => i += 1; tuples += row2tpl(row)
+          //            case row if identify(row) == identifier => window = true
+          //            case _                                  => if (window) more += 1
+          //          }
+          //          if (tuples.isEmpty) {
+          //            // Recursively try with next identifier
+          //            findFrom(remainingidentifiers)
+          //          }
+          ???
 
         case Nil => throw ModelError(edgeValuesNotFound)
       }

@@ -11,7 +11,7 @@ import molecule.datalog.datomic.facade.DatomicConn_JVM
 import scala.collection.mutable
 import scala.jdk.CollectionConverters.{CollectionHasAsScala, IterableHasAsJava}
 
-trait Delete_stmts extends DatomicTxBase_JVM with DeleteOps with MoleculeLogging { self: DeleteExtraction =>
+trait Data_Delete extends DatomicTxBase_JVM with DeleteOps with MoleculeLogging { self: DeleteExtraction =>
 
   def getStmtsData(
     conn: DatomicConn_JVM,

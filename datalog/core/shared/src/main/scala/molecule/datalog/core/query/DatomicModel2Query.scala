@@ -35,7 +35,45 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
   ): (String, String, String) = {
     val elements = if (altElements.isEmpty) elements0 else altElements
     validateQueryModel(elements)
+    val elements1 = prepareElements(elements)
 
+    // Remember first entity id variable for subsequent composite groups
+    firstEid = vv
+
+    // Recursively resolve molecule elements
+    resolve(List(firstEid), elements1)
+
+    // Build Datomic query string(s) from mutated query sections
+    val mainQuery = renderQuery(
+      nestedIds, find, widh, in ++ inPost, where ++ wherePost, rules.nonEmpty, optimized
+    )
+
+    // Pre-query if needed
+    val preQuery = if (preWhere.isEmpty) "" else {
+      val preSortIds = ArrayBuffer.empty[String]
+      val preFind1   = ArrayBuffer(preFind)
+      val hasRules   = preRules.nonEmpty
+      val preQuery   = renderQuery(
+        preSortIds, preFind1, widh, in ++ preIn, where ++ preWhere, hasRules, optimized
+      )
+      preQuery
+    }
+
+    val preQueryStrs = if (preQuery.nonEmpty) Seq(s"\nPRE-QUERY:\n$preQuery") else Nil
+    val inputsStrs   = if (inputs.nonEmpty) {
+      "" +: inputs.map {
+        case a: Array[_] => a.toList.toString
+        case other       => other.toString
+      }
+    } else Nil
+    val queryStrs    = ((elements1 :+ "" :+ mainQuery) ++ inputsStrs ++ preQueryStrs).mkString("\n").trim
+    logger.debug(queryStrs)
+
+    (preQuery, mainQuery, queryStrs)
+  }
+
+
+  private def prepareElements(elements: List[Element]): List[Element] = {
     @tailrec
     def prepare(elements: List[Element], acc: List[Element]): List[Element] = {
       elements match {
@@ -93,39 +131,7 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
       throw ModelError("Please add missing filter attributes:\n  " + expectedFilterAttrs.mkString("\n  "))
     }
 
-    // Remember first entity id variable for subsequent composite groups
-    firstEid = vv
-
-    // Recursively resolve molecule elements. Beware that this is mutational
-    resolve(List(firstEid), elements1)
-
-    // Build Datomic query string(s)
-    val mainQuery = renderQuery(
-      nestedIds, find, widh, in ++ inPost, where ++ wherePost, rules.nonEmpty, optimized
-    )
-
-    // Pre-query if needed
-    val preQuery = if (preWhere.isEmpty) "" else {
-      val preSortIds = ArrayBuffer.empty[String]
-      val preFind1   = ArrayBuffer(preFind)
-      val hasRules   = preRules.nonEmpty
-      val preQuery   = renderQuery(
-        preSortIds, preFind1, widh, in ++ preIn, where ++ preWhere, hasRules, optimized
-      )
-      preQuery
-    }
-
-    val preQueryStrs = if (preQuery.nonEmpty) Seq(s"\nPRE-QUERY:\n$preQuery") else Nil
-    val inputsStrs   = if (inputs.nonEmpty) {
-      "" +: inputs.map {
-        case a: Array[_] => a.toList.toString
-        case other       => other.toString
-      }
-    } else Nil
-    val queryStrs    = ((elements1 :+ "" :+ mainQuery) ++ inputsStrs ++ preQueryStrs).mkString("\n").trim
-    logger.debug(queryStrs)
-
-    (preQuery, mainQuery, queryStrs)
+    elements1
   }
 
   final def getEidQueryWithInputs: (Att, Seq[AnyRef]) = {

@@ -22,31 +22,32 @@ case class NoUnique[Tpl](
   def getPage(allTokens: List[String], limit: Int)
              (implicit conn: JdbcConn_JVM)
   : (List[Tpl], String, Boolean) = try {
-    val forward     = limit > 0
-    val attrsTokens = allTokens.drop(2).dropRight(6).grouped(13).toList.sortBy(_(2))
-
-    val rowHashes = {
-      val List(a, b, c, x, y, z) = allTokens.takeRight(6)
-      (if (forward) List(z, y, x) else List(a, b, c)).filter(_.nonEmpty).map(_.toInt)
-    }
-
-    val identifyTpl = (tpl: Tpl) => tpl.hashCode()
-    val identifyRow = (isNestedOpt: Boolean) => if (isNestedOpt)
-      (row: Row) => pullRow2tpl(row).hashCode()
-    else
-      (row: Row) => row2AnyTpl(row).hashCode()
-
-    paginateFromIdentifiers(
-      conn,
-      limit,
-      forward,
-      allTokens,
-      attrsTokens.head,
-      rowHashes,
-      identifyTpl,
-      identifyRow,
-      nextCursorNoUnique
-    )
+//    val forward     = limit > 0
+//    val attrsTokens = allTokens.drop(2).dropRight(6).grouped(13).toList.sortBy(_(2))
+//
+//    val rowHashes = {
+//      val List(a, b, c, x, y, z) = allTokens.takeRight(6)
+//      (if (forward) List(z, y, x) else List(a, b, c)).filter(_.nonEmpty).map(_.toInt)
+//    }
+//
+//    val identifyTpl = (tpl: Tpl) => tpl.hashCode()
+//    val identifyRow = (isNestedOpt: Boolean) => if (isNestedOpt)
+//      (row: RowOLD) => pullRow2tpl(row).hashCode()
+//    else
+//      (row: RowOLD) => row2AnyTpl(row).hashCode()
+//
+//    paginateFromIdentifiers(
+//      conn,
+//      limit,
+//      forward,
+//      allTokens,
+//      attrsTokens.head,
+//      rowHashes,
+//      identifyTpl,
+//      identifyRow,
+//      nextCursorNoUnique
+//    )
+    ???
   } catch {
     case t: Throwable => throw ModelError(t.toString)
   }

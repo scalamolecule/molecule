@@ -11,8 +11,8 @@ import molecule.boilerplate.ast.Model._
 trait SortOneOpt_[Tpl] { self: SqlModel2Query[Tpl] =>
 
   private def compare(
-    a: Row,
-    b: Row,
+    a: RowOLD,
+    b: RowOLD,
     i: Int,
     compareMapValues: (jMap[_, _], jMap[_, _]) => Int
   ): Int = {
@@ -24,21 +24,21 @@ trait SortOneOpt_[Tpl] { self: SqlModel2Query[Tpl] =>
     }
   }
 
-  protected def sortOneOptString(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+  protected def sortOneOptString(attr: Attr, attrIndex: Int): Option[(Int, Int => (RowOLD, RowOLD) => Int)] = {
     attr.sort.map { sort =>
       (
         sort.last.toString.toInt,
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            (a: Row, b: Row) =>
+            (a: RowOLD, b: RowOLD) =>
               compare(a, b, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
                 m1.values.iterator.next.asInstanceOf[String].compareTo(
                   m2.values.iterator.next.asInstanceOf[String])
               )
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            (a: Row, b: Row) =>
+            (a: RowOLD, b: RowOLD) =>
               compare(b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
                 m1.values.iterator.next.asInstanceOf[String].compareTo(
                   m2.values.iterator.next.asInstanceOf[String])
@@ -48,21 +48,21 @@ trait SortOneOpt_[Tpl] { self: SqlModel2Query[Tpl] =>
     }
   }
 
-  protected def sortOneOptInt(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+  protected def sortOneOptInt(attr: Attr, attrIndex: Int): Option[(Int, Int => (RowOLD, RowOLD) => Int)] = {
     attr.sort.map { sort =>
       (
         sort.last.toString.toInt,
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            (a: Row, b: Row) =>
+            (a: RowOLD, b: RowOLD) =>
               compare(a, b, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
                 m1.values.iterator.next.toString.toInt.compareTo(
                   m2.values.iterator.next.toString.toInt)
               )
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            (a: Row, b: Row) =>
+            (a: RowOLD, b: RowOLD) =>
               compare(b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
                 m1.values.iterator.next.toString.toInt.compareTo(
                   m2.values.iterator.next.toString.toInt)
@@ -72,21 +72,21 @@ trait SortOneOpt_[Tpl] { self: SqlModel2Query[Tpl] =>
     }
   }
 
-  protected def sortOneOptLong(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+  protected def sortOneOptLong(attr: Attr, attrIndex: Int): Option[(Int, Int => (RowOLD, RowOLD) => Int)] = {
     attr.sort.map { sort =>
       (
         sort.last.toString.toInt,
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            (a: Row, b: Row) =>
+            (a: RowOLD, b: RowOLD) =>
               compare(a, b, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
                 m1.values.iterator.next.asInstanceOf[jLong].compareTo(
                   m2.values.iterator.next.asInstanceOf[jLong])
               )
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            (a: Row, b: Row) =>
+            (a: RowOLD, b: RowOLD) =>
               compare(b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
                 m1.values.iterator.next.asInstanceOf[jLong].compareTo(
                   m2.values.iterator.next.asInstanceOf[jLong])
@@ -96,21 +96,21 @@ trait SortOneOpt_[Tpl] { self: SqlModel2Query[Tpl] =>
     }
   }
 
-  protected def sortOneOptFloat(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+  protected def sortOneOptFloat(attr: Attr, attrIndex: Int): Option[(Int, Int => (RowOLD, RowOLD) => Int)] = {
     attr.sort.map { sort =>
       (
         sort.last.toString.toInt,
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            (a: Row, b: Row) =>
+            (a: RowOLD, b: RowOLD) =>
               compare(a, b, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
                 m1.values.iterator.next.asInstanceOf[jFloat].compareTo(
                   m2.values.iterator.next.asInstanceOf[jFloat])
               )
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            (a: Row, b: Row) =>
+            (a: RowOLD, b: RowOLD) =>
               compare(b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
                 m1.values.iterator.next.asInstanceOf[jFloat].compareTo(
                   m2.values.iterator.next.asInstanceOf[jFloat])
@@ -120,21 +120,21 @@ trait SortOneOpt_[Tpl] { self: SqlModel2Query[Tpl] =>
     }
   }
 
-  protected def sortOneOptDouble(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+  protected def sortOneOptDouble(attr: Attr, attrIndex: Int): Option[(Int, Int => (RowOLD, RowOLD) => Int)] = {
     attr.sort.map { sort =>
       (
         sort.last.toString.toInt,
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            (a: Row, b: Row) =>
+            (a: RowOLD, b: RowOLD) =>
               compare(a, b, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
                 m1.values.iterator.next.asInstanceOf[jDouble].compareTo(
                   m2.values.iterator.next.asInstanceOf[jDouble])
               )
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            (a: Row, b: Row) =>
+            (a: RowOLD, b: RowOLD) =>
               compare(b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
                 m1.values.iterator.next.asInstanceOf[jDouble].compareTo(
                   m2.values.iterator.next.asInstanceOf[jDouble])
@@ -144,21 +144,21 @@ trait SortOneOpt_[Tpl] { self: SqlModel2Query[Tpl] =>
     }
   }
 
-  protected def sortOneOptBoolean(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+  protected def sortOneOptBoolean(attr: Attr, attrIndex: Int): Option[(Int, Int => (RowOLD, RowOLD) => Int)] = {
     attr.sort.map { sort =>
       (
         sort.last.toString.toInt,
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            (a: Row, b: Row) =>
+            (a: RowOLD, b: RowOLD) =>
               compare(a, b, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
                 m1.values.iterator.next.asInstanceOf[jBoolean].compareTo(
                   m2.values.iterator.next.asInstanceOf[jBoolean])
               )
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            (a: Row, b: Row) =>
+            (a: RowOLD, b: RowOLD) =>
               compare(b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
                 m1.values.iterator.next.asInstanceOf[jBoolean].compareTo(
                   m2.values.iterator.next.asInstanceOf[jBoolean])
@@ -168,21 +168,21 @@ trait SortOneOpt_[Tpl] { self: SqlModel2Query[Tpl] =>
     }
   }
 
-  protected def sortOneOptBigInt(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+  protected def sortOneOptBigInt(attr: Attr, attrIndex: Int): Option[(Int, Int => (RowOLD, RowOLD) => Int)] = {
     attr.sort.map { sort =>
       (
         sort.last.toString.toInt,
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            (a: Row, b: Row) =>
+            (a: RowOLD, b: RowOLD) =>
               compare(a, b, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
                 m1.values.iterator.next.asInstanceOf[jBigInt].compareTo(
                   m2.values.iterator.next.asInstanceOf[jBigInt])
               )
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            (a: Row, b: Row) =>
+            (a: RowOLD, b: RowOLD) =>
               compare(b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
                 m1.values.iterator.next.asInstanceOf[jBigInt].compareTo(
                   m2.values.iterator.next.asInstanceOf[jBigInt])
@@ -192,21 +192,21 @@ trait SortOneOpt_[Tpl] { self: SqlModel2Query[Tpl] =>
     }
   }
 
-  protected def sortOneOptBigDecimal(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+  protected def sortOneOptBigDecimal(attr: Attr, attrIndex: Int): Option[(Int, Int => (RowOLD, RowOLD) => Int)] = {
     attr.sort.map { sort =>
       (
         sort.last.toString.toInt,
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            (a: Row, b: Row) =>
+            (a: RowOLD, b: RowOLD) =>
               compare(a, b, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
                 m1.values.iterator.next.asInstanceOf[jBigDecimal].compareTo(
                   m2.values.iterator.next.asInstanceOf[jBigDecimal])
               )
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            (a: Row, b: Row) =>
+            (a: RowOLD, b: RowOLD) =>
               compare(b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
                 m1.values.iterator.next.asInstanceOf[jBigDecimal].compareTo(
                   m2.values.iterator.next.asInstanceOf[jBigDecimal])
@@ -216,21 +216,21 @@ trait SortOneOpt_[Tpl] { self: SqlModel2Query[Tpl] =>
     }
   }
 
-  protected def sortOneOptDate(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+  protected def sortOneOptDate(attr: Attr, attrIndex: Int): Option[(Int, Int => (RowOLD, RowOLD) => Int)] = {
     attr.sort.map { sort =>
       (
         sort.last.toString.toInt,
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            (a: Row, b: Row) =>
+            (a: RowOLD, b: RowOLD) =>
               compare(a, b, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
                 m1.values.iterator.next.asInstanceOf[Date].compareTo(
                   m2.values.iterator.next.asInstanceOf[Date])
               )
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            (a: Row, b: Row) =>
+            (a: RowOLD, b: RowOLD) =>
               compare(b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
                 m1.values.iterator.next.asInstanceOf[Date].compareTo(
                   m2.values.iterator.next.asInstanceOf[Date])
@@ -240,21 +240,21 @@ trait SortOneOpt_[Tpl] { self: SqlModel2Query[Tpl] =>
     }
   }
 
-  protected def sortOneOptUUID(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+  protected def sortOneOptUUID(attr: Attr, attrIndex: Int): Option[(Int, Int => (RowOLD, RowOLD) => Int)] = {
     attr.sort.map { sort =>
       (
         sort.last.toString.toInt,
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            (a: Row, b: Row) =>
+            (a: RowOLD, b: RowOLD) =>
               compare(a, b, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
                 m1.values.iterator.next.asInstanceOf[UUID].compareTo(
                   m2.values.iterator.next.asInstanceOf[UUID])
               )
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            (a: Row, b: Row) =>
+            (a: RowOLD, b: RowOLD) =>
               compare(b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
                 m1.values.iterator.next.asInstanceOf[UUID].compareTo(
                   m2.values.iterator.next.asInstanceOf[UUID])
@@ -264,21 +264,21 @@ trait SortOneOpt_[Tpl] { self: SqlModel2Query[Tpl] =>
     }
   }
 
-  protected def sortOneOptURI(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+  protected def sortOneOptURI(attr: Attr, attrIndex: Int): Option[(Int, Int => (RowOLD, RowOLD) => Int)] = {
     attr.sort.map { sort =>
       (
         sort.last.toString.toInt,
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            (a: Row, b: Row) =>
+            (a: RowOLD, b: RowOLD) =>
               compare(a, b, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
                 m1.values.iterator.next.asInstanceOf[URI].compareTo(
                   m2.values.iterator.next.asInstanceOf[URI])
               )
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            (a: Row, b: Row) =>
+            (a: RowOLD, b: RowOLD) =>
               compare(b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
                 m1.values.iterator.next.asInstanceOf[URI].compareTo(
                   m2.values.iterator.next.asInstanceOf[URI])
@@ -288,21 +288,21 @@ trait SortOneOpt_[Tpl] { self: SqlModel2Query[Tpl] =>
     }
   }
 
-  protected def sortOneOptByte(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+  protected def sortOneOptByte(attr: Attr, attrIndex: Int): Option[(Int, Int => (RowOLD, RowOLD) => Int)] = {
     attr.sort.map { sort =>
       (
         sort.last.toString.toInt,
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            (a: Row, b: Row) =>
+            (a: RowOLD, b: RowOLD) =>
               compare(a, b, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
                 m1.values.iterator.next.asInstanceOf[jInteger].compareTo(
                   m2.values.iterator.next.asInstanceOf[jInteger])
               )
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            (a: Row, b: Row) =>
+            (a: RowOLD, b: RowOLD) =>
               compare(b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
                 m1.values.iterator.next.asInstanceOf[jInteger].compareTo(
                   m2.values.iterator.next.asInstanceOf[jInteger])
@@ -312,21 +312,21 @@ trait SortOneOpt_[Tpl] { self: SqlModel2Query[Tpl] =>
     }
   }
 
-  protected def sortOneOptShort(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+  protected def sortOneOptShort(attr: Attr, attrIndex: Int): Option[(Int, Int => (RowOLD, RowOLD) => Int)] = {
     attr.sort.map { sort =>
       (
         sort.last.toString.toInt,
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            (a: Row, b: Row) =>
+            (a: RowOLD, b: RowOLD) =>
               compare(a, b, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
                 m1.values.iterator.next.asInstanceOf[jInteger].compareTo(
                   m2.values.iterator.next.asInstanceOf[jInteger])
               )
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            (a: Row, b: Row) =>
+            (a: RowOLD, b: RowOLD) =>
               compare(b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
                 m1.values.iterator.next.asInstanceOf[jInteger].compareTo(
                   m2.values.iterator.next.asInstanceOf[jInteger])
@@ -336,21 +336,21 @@ trait SortOneOpt_[Tpl] { self: SqlModel2Query[Tpl] =>
     }
   }
 
-  protected def sortOneOptChar(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+  protected def sortOneOptChar(attr: Attr, attrIndex: Int): Option[(Int, Int => (RowOLD, RowOLD) => Int)] = {
     attr.sort.map { sort =>
       (
         sort.last.toString.toInt,
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            (a: Row, b: Row) =>
+            (a: RowOLD, b: RowOLD) =>
               compare(a, b, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
                 m1.values.iterator.next.asInstanceOf[String].compareTo(
                   m2.values.iterator.next.asInstanceOf[String])
               )
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            (a: Row, b: Row) =>
+            (a: RowOLD, b: RowOLD) =>
               compare(b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
                 m1.values.iterator.next.asInstanceOf[String].compareTo(
                   m2.values.iterator.next.asInstanceOf[String])

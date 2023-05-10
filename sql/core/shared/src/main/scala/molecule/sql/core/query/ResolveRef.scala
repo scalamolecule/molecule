@@ -6,16 +6,16 @@ import molecule.boilerplate.ast.Model._
 import molecule.sql.core.query.casting.NestOpt_
 
 
-trait ResolveRef[Tpl] { self: Base[Tpl] with NestOpt_[Tpl] =>
+trait ResolveRef[Tpl] { self: NestOpt_[Tpl] with Base =>
 
   protected def resolveRef(es: List[Var], ref: Ref): List[Var] = {
     val (e, refAttr, refId) = (es.last, s":${ref.ns}/${ref.refAttr}", vv)
     if (ref.bidirectional) {
-      where += s"(rule$e $e $refId)" -> wClause
+      whereOLD += s"(rule$e $e $refId)" -> wClause
       rules += s"[(rule$e $e $refId) [$e $refAttr $refId]]"
       rules += s"[(rule$e $e $refId) [$refId $refAttr $e]]"
     } else {
-      where += s"[$e $refAttr $refId]" -> wClause
+      whereOLD += s"[$e $refAttr $refId]" -> wClause
     }
     es :+ refId
   }
@@ -25,21 +25,21 @@ trait ResolveRef[Tpl] { self: Base[Tpl] with NestOpt_[Tpl] =>
     firstEid = refId // for composites in nested
     nestedIds += e
     if (ref.bidirectional) {
-      where += s"(rule$e $e $refId)" -> wClause
+      whereOLD += s"(rule$e $e $refId)" -> wClause
       rules += s"[(rule$e $e $refId) [$e $refAttr $refId]]"
       rules += s"[(rule$e $e $refId) [$refId $refAttr $e]]"
     } else {
-      where += s"[$e $refAttr $refId]" -> wClause
+      whereOLD += s"[$e $refAttr $refId]" -> wClause
     }
     // Start new level of casts
-    castss = castss :+ Nil
+    castssOLD = castssOLD :+ Nil
     sortNestedLevel()
     es :+ refId
   }
 
   private def sortNestedLevel(): Unit = {
     val nestedIndex           = nestedIds.length - 1
-    val levelIdSorter         = (_: Int) => (a: Row, b: Row) =>
+    val levelIdSorter         = (_: Int) => (a: RowOLD, b: RowOLD) =>
       a.get(nestedIndex).asInstanceOf[jLong].compareTo(b.get(nestedIndex).asInstanceOf[jLong])
     val dummyIndexOfNestedEid = 6
     sortss = sortss.init :+ (sortss.last :+ (dummyIndexOfNestedEid, levelIdSorter))
@@ -48,20 +48,20 @@ trait ResolveRef[Tpl] { self: Base[Tpl] with NestOpt_[Tpl] =>
 
   protected def resolveNestedOptRef(e: Var, nestedRef: Ref): Unit = {
     nestedOptIds += e
-    if (where.isEmpty) {
+    if (whereOLD.isEmpty) {
       val Ref(ns, refAttrClean, _, _, _) = nestedRef
       val (refAttr, refId)               = (s":$ns/$refAttrClean", vv)
-      where += s"[$e $refAttr $refId]" -> wClause
+      whereOLD += s"[$e $refAttr $refId]" -> wClause
     }
 
-    if (where.length == 1 && where.head._1.startsWith("[(identity")) {
+    if (whereOLD.length == 1 && whereOLD.head._1.startsWith("[(identity")) {
       throw ModelError("Single optional attribute before optional nested data structure is not allowed.")
     }
 
     // Add nested caster
-    castss = (castss.head :+ pullNestedData) +: castss.tail
+    castssOLD = (castssOLD.head :+ pullNestedData) +: castssOLD.tail
 
     // Start new level of casts
-    castss = castss :+ Nil
+    castssOLD = castssOLD :+ Nil
   }
 }

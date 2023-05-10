@@ -11,23 +11,23 @@ trait ResolveExprOne[Tpl]
 
   protected def resolveAttrOneMan(es: List[Var], attr: AttrOneMan): List[Var] = {
     aritiesAttr()
-    attrIndex += 1
-    val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
+    sortAttrIndex += 1
+    val (e, a) = ("x", s":${attr.ns}/${attr.attr}")
     attr match {
-      case at: AttrOneManString     => man(attr, e, a, at.vs, resString, sortOneString(at, attrIndex))
-      case at: AttrOneManInt        => man(attr, e, a, at.vs, resInt, intSorter(at, attrIndex))
-      case at: AttrOneManLong       => manLong(attr, e, a, at.vs, resLong, sortOneLong(at, attrIndex))
-      case at: AttrOneManFloat      => man(attr, e, a, at.vs, resFloat, floatSorter(at, attrIndex))
-      case at: AttrOneManDouble     => man(attr, e, a, at.vs, resDouble, sortOneDouble(at, attrIndex))
-      case at: AttrOneManBoolean    => man(attr, e, a, at.vs, resBoolean, sortOneBoolean(at, attrIndex))
-      case at: AttrOneManBigInt     => man(attr, e, a, at.vs, resBigInt, bigIntSorter(at, attrIndex))
-      case at: AttrOneManBigDecimal => man(attr, e, a, at.vs, resBigDecimal, sortOneBigDecimal(at, attrIndex))
-      case at: AttrOneManDate       => man(attr, e, a, at.vs, resDate, sortOneDate(at, attrIndex))
-      case at: AttrOneManUUID       => man(attr, e, a, at.vs, resUUID, sortOneUUID(at, attrIndex))
-      case at: AttrOneManURI        => man(attr, e, a, at.vs, resURI, sortOneURI(at, attrIndex))
-      case at: AttrOneManByte       => man(attr, e, a, at.vs, resByte, byteSorter(at, attrIndex))
-      case at: AttrOneManShort      => man(attr, e, a, at.vs, resShort, shortSorter(at, attrIndex))
-      case at: AttrOneManChar       => man(attr, e, a, at.vs, resChar, sortOneChar(at, attrIndex))
+      case at: AttrOneManString     => man(attr, e, a, at.vs, resString1, resString, sortOneString(at, sortAttrIndex))
+      case at: AttrOneManInt        => man(attr, e, a, at.vs, resInt1, resInt, intSorter(at, sortAttrIndex))
+      case at: AttrOneManLong       => manLong(attr, e, a, at.vs, resLong1, resLong, sortOneLong(at, sortAttrIndex))
+      case at: AttrOneManFloat      => man(attr, e, a, at.vs, resFloat1, resFloat, floatSorter(at, sortAttrIndex))
+      case at: AttrOneManDouble     => man(attr, e, a, at.vs, resDouble1, resDouble, sortOneDouble(at, sortAttrIndex))
+      case at: AttrOneManBoolean    => man(attr, e, a, at.vs, resBoolean1, resBoolean, sortOneBoolean(at, sortAttrIndex))
+      case at: AttrOneManBigInt     => man(attr, e, a, at.vs, resBigInt1, resBigInt, bigIntSorter(at, sortAttrIndex))
+      case at: AttrOneManBigDecimal => man(attr, e, a, at.vs, resBigDecimal1, resBigDecimal, sortOneBigDecimal(at, sortAttrIndex))
+      case at: AttrOneManDate       => man(attr, e, a, at.vs, resDate1, resDate, sortOneDate(at, sortAttrIndex))
+      case at: AttrOneManUUID       => man(attr, e, a, at.vs, resUUID1, resUUID, sortOneUUID(at, sortAttrIndex))
+      case at: AttrOneManURI        => man(attr, e, a, at.vs, resURI1, resURI, sortOneURI(at, sortAttrIndex))
+      case at: AttrOneManByte       => man(attr, e, a, at.vs, resByte1, resByte, byteSorter(at, sortAttrIndex))
+      case at: AttrOneManShort      => man(attr, e, a, at.vs, resShort1, resShort, shortSorter(at, sortAttrIndex))
+      case at: AttrOneManChar       => man(attr, e, a, at.vs, resChar1, resChar, sortOneChar(at, sortAttrIndex))
     }
     es
   }
@@ -57,24 +57,24 @@ trait ResolveExprOne[Tpl]
 
   protected def resolveAttrOneOpt(es: List[Var], attr: AttrOneOpt): List[Var] = {
     aritiesAttr()
-    attrIndex += 1
+    sortAttrIndex += 1
     hasOptAttr = true // to avoid redundant None's
     val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
     attr match {
-      case at: AttrOneOptString     => opt(attr, e, a, at.vs, resOptString, sortOneOptString(at, attrIndex), sortOneString(at, attrIndex))
-      case at: AttrOneOptInt        => opt(attr, e, a, at.vs, resOptInt, sortOneOptInt(at, attrIndex), sortOneInt(at, attrIndex))
-      case at: AttrOneOptLong       => opt(attr, e, a, at.vs, resOptLong, sorterOneOptLong(at, attrIndex), sorterOneLong(at, attrIndex))
-      case at: AttrOneOptFloat      => opt(attr, e, a, at.vs, resOptFloat, sortOneOptFloat(at, attrIndex), sortOneFloat(at, attrIndex))
-      case at: AttrOneOptDouble     => opt(attr, e, a, at.vs, resOptDouble, sortOneOptDouble(at, attrIndex), sortOneDouble(at, attrIndex))
-      case at: AttrOneOptBoolean    => opt(attr, e, a, at.vs, resOptBoolean, sortOneOptBoolean(at, attrIndex), sortOneBoolean(at, attrIndex))
-      case at: AttrOneOptBigInt     => opt(attr, e, a, at.vs, resOptBigInt, sortOneOptBigInt(at, attrIndex), sortOneBigInt(at, attrIndex))
-      case at: AttrOneOptBigDecimal => opt(attr, e, a, at.vs, resOptBigDecimal, sortOneOptBigDecimal(at, attrIndex), sortOneBigDecimal(at, attrIndex))
-      case at: AttrOneOptDate       => opt(attr, e, a, at.vs, resOptDate, sortOneOptDate(at, attrIndex), sortOneDate(at, attrIndex))
-      case at: AttrOneOptUUID       => opt(attr, e, a, at.vs, resOptUUID, sortOneOptUUID(at, attrIndex), sortOneUUID(at, attrIndex))
-      case at: AttrOneOptURI        => opt(attr, e, a, at.vs, resOptURI, sortOneOptURI(at, attrIndex), sortOneURI(at, attrIndex))
-      case at: AttrOneOptByte       => opt(attr, e, a, at.vs, resOptByte, sortOneOptByte(at, attrIndex), sortOneByte(at, attrIndex))
-      case at: AttrOneOptShort      => opt(attr, e, a, at.vs, resOptShort, sortOneOptShort(at, attrIndex), sortOneShort(at, attrIndex))
-      case at: AttrOneOptChar       => opt(attr, e, a, at.vs, resOptChar, sortOneOptChar(at, attrIndex), sortOneChar(at, attrIndex))
+      case at: AttrOneOptString     => opt(attr, e, a, at.vs, resOptString, sortOneOptString(at, sortAttrIndex), sortOneString(at, sortAttrIndex))
+      case at: AttrOneOptInt        => opt(attr, e, a, at.vs, resOptInt, sortOneOptInt(at, sortAttrIndex), sortOneInt(at, sortAttrIndex))
+      case at: AttrOneOptLong       => opt(attr, e, a, at.vs, resOptLong, sorterOneOptLong(at, sortAttrIndex), sorterOneLong(at, sortAttrIndex))
+      case at: AttrOneOptFloat      => opt(attr, e, a, at.vs, resOptFloat, sortOneOptFloat(at, sortAttrIndex), sortOneFloat(at, sortAttrIndex))
+      case at: AttrOneOptDouble     => opt(attr, e, a, at.vs, resOptDouble, sortOneOptDouble(at, sortAttrIndex), sortOneDouble(at, sortAttrIndex))
+      case at: AttrOneOptBoolean    => opt(attr, e, a, at.vs, resOptBoolean, sortOneOptBoolean(at, sortAttrIndex), sortOneBoolean(at, sortAttrIndex))
+      case at: AttrOneOptBigInt     => opt(attr, e, a, at.vs, resOptBigInt, sortOneOptBigInt(at, sortAttrIndex), sortOneBigInt(at, sortAttrIndex))
+      case at: AttrOneOptBigDecimal => opt(attr, e, a, at.vs, resOptBigDecimal, sortOneOptBigDecimal(at, sortAttrIndex), sortOneBigDecimal(at, sortAttrIndex))
+      case at: AttrOneOptDate       => opt(attr, e, a, at.vs, resOptDate, sortOneOptDate(at, sortAttrIndex), sortOneDate(at, sortAttrIndex))
+      case at: AttrOneOptUUID       => opt(attr, e, a, at.vs, resOptUUID, sortOneOptUUID(at, sortAttrIndex), sortOneUUID(at, sortAttrIndex))
+      case at: AttrOneOptURI        => opt(attr, e, a, at.vs, resOptURI, sortOneOptURI(at, sortAttrIndex), sortOneURI(at, sortAttrIndex))
+      case at: AttrOneOptByte       => opt(attr, e, a, at.vs, resOptByte, sortOneOptByte(at, sortAttrIndex), sortOneByte(at, sortAttrIndex))
+      case at: AttrOneOptShort      => opt(attr, e, a, at.vs, resOptShort, sortOneOptShort(at, sortAttrIndex), sortOneShort(at, sortAttrIndex))
+      case at: AttrOneOptChar       => opt(attr, e, a, at.vs, resOptChar, sortOneOptChar(at, sortAttrIndex), sortOneChar(at, sortAttrIndex))
     }
     es
   }
@@ -82,7 +82,7 @@ trait ResolveExprOne[Tpl]
   private def sorterOneOptLong(
     at: AttrOneOptLong,
     attrIndex: Int
-  ): Option[(Int, Int => (Row, Row) => Int)] = {
+  ): Option[(Int, Int => (RowOLD, RowOLD) => Int)] = {
     if (at.status.contains("ref"))
       sortOneOptLongRef(at, attrIndex)
     else
@@ -91,22 +91,22 @@ trait ResolveExprOne[Tpl]
   private def sorterOneLong(
     at: AttrOneOptLong,
     attrIndex: Int
-  ): Option[(Int, Int => (Row, Row) => Int)] = {
+  ): Option[(Int, Int => (RowOLD, RowOLD) => Int)] = {
     if (at.status.contains("ref"))
       sortOneLong(at, attrIndex)
     else
       sortOneLong(at, attrIndex)
   }
 
-  protected def dummySorter(attr: Attr): Option[(Int, Int => (Row, Row) => Int)] = {
+  protected def dummySorter(attr: Attr): Option[(Int, Int => (RowOLD, RowOLD) => Int)] = {
     attr.sort.map { sort =>
       (
         sort.last.toString.toInt,
-        (nestedIdsCount: Int) => (a: Row, b: Row) => 0
+        (nestedIdsCount: Int) => (a: RowOLD, b: RowOLD) => 0
       )
     }
   }
-  private def addSort(sorter: Option[(Int, Int => (Row, Row) => Int)]): Unit = {
+  private def addSort(sorter: Option[(Int, Int => (RowOLD, RowOLD) => Int)]): Unit = {
     sorter.foreach {
       case s if isTxMetaData => sortss = (sortss.head :+ s) +: sortss.tail
       case s                 => sortss = sortss.init :+ (sortss.last :+ s)
@@ -119,14 +119,16 @@ trait ResolveExprOne[Tpl]
     a: Att,
     args: Seq[T],
     res: ResOne[T],
-    sorter: Option[(Int, Int => (Row, Row) => Int)]
+    resOLD: ResOneOLD[T],
+    sorter: Option[(Int, Int => (RowOLD, RowOLD) => Int)]
   ): Unit = {
     addCast(res.j2s)
+    addCastOLD(resOLD.j2s)
     addSort(sorter)
     val v = getVar(attr)
-    find += v
+    select += attr.name
     attr.filterAttr.fold {
-      expr(e, a, v, attr.op, args, res)
+      expr(e, a, v, attr.op, args, resOLD)
       filterAttrVars1 = filterAttrVars1 + (a -> (e, v))
       filterAttrVars2.get(a).foreach(_(e, v))
     } { filterAttr =>
@@ -140,19 +142,20 @@ trait ResolveExprOne[Tpl]
     a: Att,
     args: Seq[Long],
     res: ResOne[Long],
-    sorter: Option[(Int, Int => (Row, Row) => Int)]
+    resOLD: ResOneOLD[Long],
+    sorter: Option[(Int, Int => (RowOLD, RowOLD) => Int)]
   ): Unit = {
     a match {
       case ":_Generic/e"  =>
-        find += e
-        addCast(res.j2s)
+        select += e
+        addCastOLD(resOLD.j2s)
         addSort(sorter)
       case ":_Generic/tx" =>
-        find += txVar
-        addCast(res.j2s)
+        select += txVar
+        addCastOLD(resOLD.j2s)
         addSort(sorter)
       case a              =>
-        man(attr, e, a, args, res, sorter)
+        man(attr, e, a, args, res, resOLD, sorter)
     }
   }
 
@@ -161,7 +164,7 @@ trait ResolveExprOne[Tpl]
     e: Var,
     a: Att,
     args: Seq[T],
-    res: ResOne[T],
+    res: ResOneOLD[T],
   ): Unit = {
     val v = getVar(attr)
     attr.filterAttr.fold {
@@ -179,11 +182,11 @@ trait ResolveExprOne[Tpl]
     a: Att,
     optArgs: Option[Seq[T]],
     resOpt: ResOneOpt[T],
-    sortOpt: Option[(Int, Int => (Row, Row) => Int)],
-    sortMan: Option[(Int, Int => (Row, Row) => Int)]
+    sortOpt: Option[(Int, Int => (RowOLD, RowOLD) => Int)],
+    sortMan: Option[(Int, Int => (RowOLD, RowOLD) => Int)]
   ): Unit = {
     val v = getVar(attr)
-    addCast(resOpt.j2s)
+    addCastOLD(resOpt.j2s)
     attr.filterAttr.fold {
       attr.op match {
         case V     => addSort(sortOpt); optV(e, a, v)
@@ -216,7 +219,7 @@ trait ResolveExprOne[Tpl]
     v: Var,
     op: Op,
     args: Seq[T],
-    res: ResOne[T],
+    res: ResOneOLD[T],
   ): Unit = {
     op match {
       case V          => attr(e, a, v)
@@ -264,189 +267,191 @@ trait ResolveExprOne[Tpl]
   private def stringOp[T](e: Var, a: Att, v: Var, arg: T, predicate: String): Unit = {
     val v1 = v + 1
     in += v1
-    where += s"[$e $a $v$tx]" -> wClause
-    where += s"[(clojure.string/$predicate $v $v1)]" -> wNeqOne
+    whereOLD += s"[$e $a $v$tx]" -> wClause
+    whereOLD += s"[(clojure.string/$predicate $v $v1)]" -> wNeqOne
     args += arg.asInstanceOf[AnyRef]
   }
   private def regex[T](e: Var, a: Att, v: Var, regex: T): Unit = {
-    where += s"[$e $a $v$tx]" -> wClause
-    where += s"""[(re-find (re-pattern "$regex") $v)]""" -> wNeqOne
+    whereOLD += s"[$e $a $v$tx]" -> wClause
+    whereOLD += s"""[(re-find (re-pattern "$regex") $v)]""" -> wNeqOne
   }
 
   private def remainder[T](e: Var, a: Att, v: Var, args: Seq[T]): Unit = {
-    where += s"[$e $a $v$tx]" -> wClause
-    where += s"""[(rem $v ${args.head}) $v-rem]""" -> wNeqOne
-    where += s"""[(= $v-rem ${args(1)})]""" -> wNeqOne
+    whereOLD += s"[$e $a $v$tx]" -> wClause
+    whereOLD += s"""[(rem $v ${args.head}) $v-rem]""" -> wNeqOne
+    whereOLD += s"""[(= $v-rem ${args(1)})]""" -> wNeqOne
   }
   private def even(e: Var, a: Att, v: Var): Unit = {
-    where += s"[$e $a $v$tx]" -> wClause
-    where += s"""[(even? $v)]""" -> wNeqOne
+    whereOLD += s"[$e $a $v$tx]" -> wClause
+    whereOLD += s"""[(even? $v)]""" -> wNeqOne
   }
   private def odd(e: Var, a: Att, v: Var): Unit = {
-    where += s"[$e $a $v$tx]" -> wClause
-    where += s"""[(odd? $v)]""" -> wNeqOne
+    whereOLD += s"[$e $a $v$tx]" -> wClause
+    whereOLD += s"""[(odd? $v)]""" -> wNeqOne
   }
 
 
   private def string[T: ClassTag](e: Var, a: Att, v: Var, args: Seq[T], op: String): Unit = {
-    find -= v
-    where += s"[$e $a $v$tx]" -> wClause
+    select -= v
+    whereOLD += s"[$e $a $v$tx]" -> wClause
     op match {
       case "take" =>
-        find += s"$v-1"
-        where += s"[(max 0 ${args.head}) $v-n]" -> wNeqOne
-        where += s"[(count $v) $v-length]" -> wNeqOne
-        where += s"[(> $v-n 0)]" -> wNeqOne
-        where += s"[(min $v-n $v-length) $v-end]" -> wNeqOne
-        where += s"[(subs $v 0 $v-end) $v-1]" -> wNeqOne
+        select += s"$v-1"
+        whereOLD += s"[(max 0 ${args.head}) $v-n]" -> wNeqOne
+        whereOLD += s"[(count $v) $v-length]" -> wNeqOne
+        whereOLD += s"[(> $v-n 0)]" -> wNeqOne
+        whereOLD += s"[(min $v-n $v-length) $v-end]" -> wNeqOne
+        whereOLD += s"[(subs $v 0 $v-end) $v-1]" -> wNeqOne
 
       case "takeRight" =>
-        find += s"$v-1"
-        where += s"[(max 0 ${args.head}) $v-n]" -> wNeqOne
-        where += s"[(count $v) $v-length]" -> wNeqOne
-        where += s"[(> $v-n 0)]" -> wNeqOne
-        where += s"[(- $v-length $v-n) $v-back]" -> wNeqOne
-        where += s"[(max 0 $v-back) $v-begin]" -> wNeqOne
-        where += s"[(subs $v $v-begin $v-length) $v-1]" -> wNeqOne
+        select += s"$v-1"
+        whereOLD += s"[(max 0 ${args.head}) $v-n]" -> wNeqOne
+        whereOLD += s"[(count $v) $v-length]" -> wNeqOne
+        whereOLD += s"[(> $v-n 0)]" -> wNeqOne
+        whereOLD += s"[(- $v-length $v-n) $v-back]" -> wNeqOne
+        whereOLD += s"[(max 0 $v-back) $v-begin]" -> wNeqOne
+        whereOLD += s"[(subs $v $v-begin $v-length) $v-1]" -> wNeqOne
 
       case "drop" =>
-        find += s"$v-1"
-        where += s"[(max 0 ${args.head}) $v-n]" -> wNeqOne
-        where += s"[(count $v) $v-length]" -> wNeqOne
-        where += s"[(< $v-n $v-length)]" -> wNeqOne
-        where += s"[(min $v-n $v-length) $v-begin]" -> wNeqOne
-        where += s"[(subs $v $v-begin $v-length) $v-1]" -> wNeqOne
+        select += s"$v-1"
+        whereOLD += s"[(max 0 ${args.head}) $v-n]" -> wNeqOne
+        whereOLD += s"[(count $v) $v-length]" -> wNeqOne
+        whereOLD += s"[(< $v-n $v-length)]" -> wNeqOne
+        whereOLD += s"[(min $v-n $v-length) $v-begin]" -> wNeqOne
+        whereOLD += s"[(subs $v $v-begin $v-length) $v-1]" -> wNeqOne
 
       case "dropRight" =>
-        find += s"$v-1"
-        where += s"[(max 0 ${args.head}) $v-n]" -> wNeqOne
-        where += s"[(count $v) $v-length]" -> wNeqOne
-        where += s"[(< $v-n $v-length)]" -> wNeqOne
-        where += s"[(- $v-length $v-n) $v-end]" -> wNeqOne
-        where += s"[(subs $v 0 $v-end) $v-1]" -> wNeqOne
+        select += s"$v-1"
+        whereOLD += s"[(max 0 ${args.head}) $v-n]" -> wNeqOne
+        whereOLD += s"[(count $v) $v-length]" -> wNeqOne
+        whereOLD += s"[(< $v-n $v-length)]" -> wNeqOne
+        whereOLD += s"[(- $v-length $v-n) $v-end]" -> wNeqOne
+        whereOLD += s"[(subs $v 0 $v-end) $v-1]" -> wNeqOne
 
       case "slice" =>
-        find += s"$v-1"
-        where += s"[(count $v) $v-length]" -> wNeqOne
-        where += s"[(max 0 ${args.head}) $v-from]" -> wNeqOne
-        where += s"[(min $v-length (max 0 ${args(1)})) $v-until]" -> wNeqOne
-        where += s"[(< $v-from $v-until)]" -> wNeqOne
-        where += s"[(subs $v $v-from $v-until) $v-1]" -> wNeqOne
+        select += s"$v-1"
+        whereOLD += s"[(count $v) $v-length]" -> wNeqOne
+        whereOLD += s"[(max 0 ${args.head}) $v-from]" -> wNeqOne
+        whereOLD += s"[(min $v-length (max 0 ${args(1)})) $v-until]" -> wNeqOne
+        whereOLD += s"[(< $v-from $v-until)]" -> wNeqOne
+        whereOLD += s"[(subs $v $v-from $v-until) $v-1]" -> wNeqOne
     }
   }
 
 
-  private def aggr[T](e: Var, a: Att, v: Var, fn: String, optN: Option[Int], res: ResOne[T]): Unit = {
+  private def aggr[T](e: Var, a: Att, v: Var, fn: String, optN: Option[Int], res: ResOneOLD[T]): Unit = {
     lazy val n = optN.getOrElse(0)
     // Replace find/casting with aggregate function/cast
-    find -= v
+    select -= v
     fn match {
       case "distinct" =>
-        find += s"(distinct $v)"
+        select += s"(distinct $v)"
         replaceCast(res.set2set)
 
       case "mins" =>
-        find += s"(min $n $v)"
+        select += s"(min $n $v)"
         replaceCast(res.vector2set)
 
       case "min" =>
-        find += s"(min $v)"
+        select += s"(min $v)"
 
       case "maxs" =>
-        find += s"(max $n $v)"
+        select += s"(max $n $v)"
         replaceCast(res.vector2set)
 
       case "max" =>
-        find += s"(max $v)"
+        select += s"(max $v)"
 
       case "rands" =>
-        find += s"(rand $n $v)"
+        select += s"(rand $n $v)"
         replaceCast(res.vector2set)
 
       case "rand" =>
-        find += s"(rand $v)"
+        select += s"(rand $v)"
 
       case "samples" =>
-        find += s"(sample $n $v)"
+        select += s"(sample $n $v)"
         replaceCast(res.vector2set)
 
       case "sample" =>
-        find += s"(sample 1 $v)"
+        select += s"(sample 1 $v)"
         replaceCast(res.seq2t)
 
       case "count" =>
-        find += s"(count $v)"
+        select += s"(count $v)"
         widh += e
         replaceCast(toInt)
 
       case "countDistinct" =>
-        find += s"(count-distinct $v)"
+        select += s"(count-distinct $v)"
         widh += e
         replaceCast(toInt)
 
-      case "sum"      => find += s"(sum $v)"
-      case "median"   => find += s"(median $v)"
-      case "avg"      => find += s"(avg $v)"
-      case "variance" => find += s"(variance $v)"
-      case "stddev"   => find += s"(stddev $v)"
+      case "sum"      => select += s"(sum $v)"
+      case "median"   => select += s"(median $v)"
+      case "avg"      => select += s"(avg $v)"
+      case "variance" => select += s"(variance $v)"
+      case "stddev"   => select += s"(stddev $v)"
 
       case other => unexpectedKw(other)
     }
-    where += s"[$e $a $v$tx]" -> wClause
+    whereOLD += s"[$e $a $v$tx]" -> wClause
   }
 
   private def attr(e: Var, a: Att, v: Var): Unit = {
-    where += s"[$e $a $v$tx]" -> wClause
+    whereOLD += s"[$e $a $v$tx]" -> wClause
+
+
   }
 
   private def equal[T: ClassTag](e: Var, a: Att, v: Var, argValues: Seq[T], fromScala: Any => Any): Unit = {
     in += s"[$v ...]"
-    where += s"[$e $a $v$tx]" -> wClause
+    whereOLD += s"[$e $a $v$tx]" -> wClause
     args += argValues.map(fromScala).toArray
   }
   private def equal2(e: Var, a: Att, v: Var, w: Var): Unit = {
-    where += s"[$e $a $w$tx]" -> wClause
-    where += s"[(identity $w) $v]" -> wGround
+    whereOLD += s"[$e $a $w$tx]" -> wClause
+    whereOLD += s"[(identity $w) $v]" -> wGround
   }
 
   private def neq[T](e: Var, a: Att, v: Var, args: Seq[T], tpe: String, toDatalog: T => String): Unit = {
-    where += s"[$e $a $v$tx]" -> wClause
+    whereOLD += s"[$e $a $v$tx]" -> wClause
     if (tpe == "URI") {
       args.zipWithIndex.foreach { case (arg, i) =>
-        where += s"""[(ground (new java.net.URI "$arg")) $v$i]""" -> wNeqOne
-        where += s"[(!= $v $v$i)]" -> wNeqOne
+        whereOLD += s"""[(ground (new java.net.URI "$arg")) $v$i]""" -> wNeqOne
+        whereOLD += s"[(!= $v $v$i)]" -> wNeqOne
       }
     } else {
       args.foreach { arg =>
-        where += s"[(!= $v ${toDatalog(arg)})]" -> wNeqOne
+        whereOLD += s"[(!= $v ${toDatalog(arg)})]" -> wNeqOne
       }
     }
   }
   private def neq2(e: Var, a: Att, v: Var, w: Var): Unit = {
-    where += s"[$e $a $v$tx]" -> wClause
-    where += s"[(!= $v $w)]" -> wNeqOne
+    whereOLD += s"[$e $a $v$tx]" -> wClause
+    whereOLD += s"[(!= $v $w)]" -> wNeqOne
   }
 
   private def compare[T](e: Var, a: Att, v: Var, arg: T, op: String, fromScala: Any => Any): Unit = {
     val v1 = v + 1
     in += v1
-    where += s"[$e $a $v$tx]" -> wClause
-    where += s"[($op $v $v1)]" -> wNeqOne
+    whereOLD += s"[$e $a $v$tx]" -> wClause
+    whereOLD += s"[($op $v $v1)]" -> wNeqOne
     args += fromScala(arg).asInstanceOf[AnyRef]
   }
   private def compare2(e: Var, a: Att, v: Var, w: Var, op: String): Unit = {
-    where += s"[$e $a $v$tx]" -> wClause
-    where += s"[($op $v $w)]" -> wNeqOne
+    whereOLD += s"[$e $a $v$tx]" -> wClause
+    whereOLD += s"[($op $v $w)]" -> wNeqOne
   }
 
   private def noValue(e: Var, a: Att): Unit = {
-    where += s"(not [$e $a])" -> wNeqOne
+    whereOLD += s"(not [$e $a])" -> wNeqOne
   }
 
 
   private def optV(e: Var, a: Att, v: Var): Unit = {
-    find += s"(pull $e-$v [[$a :limit nil]]) "
-    where += s"[(identity $e) $e-$v]" -> wGround
+    select += s"(pull $e-$v [[$a :limit nil]]) "
+    whereOLD += s"[(identity $e) $e-$v]" -> wGround
   }
 
   private def optEqual[T: ClassTag](
@@ -456,16 +461,16 @@ trait ResolveExprOne[Tpl]
     v: Var,
     optArgs: Option[Seq[T]],
     fromScala: Any => Any,
-    sortMan: Option[(Int, Int => (Row, Row) => Int)]
+    sortMan: Option[(Int, Int => (RowOLD, RowOLD) => Int)]
   ): Unit = {
     optArgs.fold[Unit] {
       addSort(dummySorter(attr))
-      find += s"(pull $e-$v [[$a :limit nil]])"
-      where += s"(not [$e $a])" -> wNeqOne
-      where += s"[(identity $e) $e-$v]" -> wGround
+      select += s"(pull $e-$v [[$a :limit nil]])"
+      whereOLD += s"(not [$e $a])" -> wNeqOne
+      whereOLD += s"[(identity $e) $e-$v]" -> wGround
     } { vs =>
       addSort(sortMan)
-      find += v
+      select += v
       equal(e, a, v, vs, fromScala)
     }
   }
@@ -475,7 +480,7 @@ trait ResolveExprOne[Tpl]
     v: Var,
     w: Var
   ): Unit = {
-    find += v
+    select += v
     equal2(e, a, v, w)
   }
 
@@ -487,8 +492,8 @@ trait ResolveExprOne[Tpl]
     tpe: String,
     toDatalog: T => String
   ): Unit = {
-    find += v
-    where += s"[$e $a $v$tx]" -> wClause
+    select += v
+    whereOLD += s"[$e $a $v$tx]" -> wClause
     if (optArgs.isDefined && optArgs.get.nonEmpty) {
       neq(e, a, v, optArgs.get, tpe, toDatalog)
     }
@@ -499,7 +504,7 @@ trait ResolveExprOne[Tpl]
     v: Var,
     w: Var
   ): Unit = {
-    find += v
+    select += v
     neq2(e, a, v, w)
   }
 
@@ -512,10 +517,10 @@ trait ResolveExprOne[Tpl]
     fromScala: Any => Any
   ): Unit = {
     optArgs.fold[Unit] {
-      find += s"$v-nil"
-      where += s"[(ground nil) $v-nil]" -> wGround
+      select += s"$v-nil"
+      whereOLD += s"[(ground nil) $v-nil]" -> wGround
     } { vs =>
-      find += v
+      select += v
       compare(e, a, v, vs.head, op, fromScala)
     }
   }
@@ -526,7 +531,7 @@ trait ResolveExprOne[Tpl]
     w: Var,
     op: String,
   ): Unit = {
-    find += v
+    select += v
     compare2(e, a, v, w, op)
   }
 }

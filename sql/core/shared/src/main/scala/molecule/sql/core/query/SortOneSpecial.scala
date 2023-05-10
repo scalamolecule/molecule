@@ -12,8 +12,8 @@ trait SortOneSpecial[Tpl]
     with ResolveBase { self: SqlModel2Query[Tpl] =>
 
   private def compare(
-    a: Row,
-    b: Row,
+    a: RowOLD,
+    b: RowOLD,
     i: Int,
     compareMapValues: (jMap[_, _], jMap[_, _]) => Int
   ): Int = {
@@ -25,7 +25,7 @@ trait SortOneSpecial[Tpl]
     }
   }
 
-  protected def intSorter(at: AttrOneManInt, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+  protected def intSorter(at: AttrOneManInt, attrIndex: Int): Option[(Int, Int => (RowOLD, RowOLD) => Int)] = {
     at.op match {
       case Fn(kw, _) => kw match {
         case "sum"    => sortOneLong(at, attrIndex)
@@ -36,7 +36,7 @@ trait SortOneSpecial[Tpl]
     }
   }
 
-  protected def floatSorter(at: AttrOneManFloat, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+  protected def floatSorter(at: AttrOneManFloat, attrIndex: Int): Option[(Int, Int => (RowOLD, RowOLD) => Int)] = {
     at.op match {
       case Fn(kw, _) => kw match {
         case "sum"    => sortOneDouble(at, attrIndex)
@@ -47,7 +47,7 @@ trait SortOneSpecial[Tpl]
     }
   }
 
-  protected def bigIntSorter(at: AttrOneManBigInt, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+  protected def bigIntSorter(at: AttrOneManBigInt, attrIndex: Int): Option[(Int, Int => (RowOLD, RowOLD) => Int)] = {
     at.op match {
       case Fn(kw, _) => kw match {
         case "sum"    => sortOneBigDecimalString(at, attrIndex)
@@ -58,7 +58,7 @@ trait SortOneSpecial[Tpl]
     }
   }
 
-  protected def byteSorter(at: AttrOneManByte, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+  protected def byteSorter(at: AttrOneManByte, attrIndex: Int): Option[(Int, Int => (RowOLD, RowOLD) => Int)] = {
     at.op match {
       case Fn(kw, _) => kw match {
         case "sum"    => sortOneLong(at, attrIndex)
@@ -69,7 +69,7 @@ trait SortOneSpecial[Tpl]
     }
   }
 
-  protected def shortSorter(at: AttrOneManShort, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+  protected def shortSorter(at: AttrOneManShort, attrIndex: Int): Option[(Int, Int => (RowOLD, RowOLD) => Int)] = {
     at.op match {
       case Fn(kw, _) => kw match {
         case "sum"    => sortOneLong(at, attrIndex)
@@ -81,68 +81,68 @@ trait SortOneSpecial[Tpl]
   }
 
 
-  private def sortOneBigDecimalString(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+  private def sortOneBigDecimalString(attr: Attr, attrIndex: Int): Option[(Int, Int => (RowOLD, RowOLD) => Int)] = {
     attr.sort.map { sort =>
       (
         sort.last.toString.toInt,
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            (a: Row, b: Row) =>
+            (a: RowOLD, b: RowOLD) =>
               new jBigDecimal(a.get(i).toString).compareTo(new jBigDecimal(b.get(i).toString))
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            (a: Row, b: Row) =>
+            (a: RowOLD, b: RowOLD) =>
               new jBigDecimal(b.get(i).toString).compareTo(new jBigDecimal(a.get(i).toString))
         }
       )
     }
   }
 
-  private def sortOneLongString(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+  private def sortOneLongString(attr: Attr, attrIndex: Int): Option[(Int, Int => (RowOLD, RowOLD) => Int)] = {
     attr.sort.map { sort =>
       (
         sort.last.toString.toInt,
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            (a: Row, b: Row) =>
+            (a: RowOLD, b: RowOLD) =>
               jLong.valueOf(a.get(i).toString).compareTo(jLong.valueOf(b.get(i).toString))
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            (a: Row, b: Row) =>
+            (a: RowOLD, b: RowOLD) =>
               jLong.valueOf(b.get(i).toString).compareTo(jLong.valueOf(a.get(i).toString))
         }
       )
     }
   }
 
-  private def sortOneDoubleString(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+  private def sortOneDoubleString(attr: Attr, attrIndex: Int): Option[(Int, Int => (RowOLD, RowOLD) => Int)] = {
     attr.sort.map { sort =>
       (
         sort.last.toString.toInt,
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            (a: Row, b: Row) =>
+            (a: RowOLD, b: RowOLD) =>
               jDouble.parseDouble(a.get(i).toString).compareTo(jDouble.parseDouble(b.get(i).toString))
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            (a: Row, b: Row) =>
+            (a: RowOLD, b: RowOLD) =>
               jDouble.parseDouble(b.get(i).toString).compareTo(jDouble.parseDouble(a.get(i).toString))
         }
       )
     }
   }
 
-  protected def sortOneOptLongRef(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+  protected def sortOneOptLongRef(attr: Attr, attrIndex: Int): Option[(Int, Int => (RowOLD, RowOLD) => Int)] = {
     attr.sort.map { sort =>
       (
         sort.last.toString.toInt,
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            (a: Row, b: Row) =>
+            (a: RowOLD, b: RowOLD) =>
               compare(
                 a, b, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
                   m1.values.iterator
@@ -154,7 +154,7 @@ trait SortOneSpecial[Tpl]
               )
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            (a: Row, b: Row) =>
+            (a: RowOLD, b: RowOLD) =>
               compare(
                 b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
                   m1.values.iterator
@@ -172,14 +172,14 @@ trait SortOneSpecial[Tpl]
   protected def sortOneBooleanOptNested(
     attr: Attr,
     attrIndex: Int
-  ): Option[(Int, Int => (Row, Row) => Int)] = {
+  ): Option[(Int, Int => (RowOLD, RowOLD) => Int)] = {
     attr.sort.map { sort =>
       (
         sort.last.toString.toInt,
         sort.head match {
           case 'a' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            (a: Row, b: Row) => {
+            (a: RowOLD, b: RowOLD) => {
               val x: jBoolean = a.get(i) match {
                 case bool: jBoolean => bool
                 case `none`         => false
@@ -192,7 +192,7 @@ trait SortOneSpecial[Tpl]
             }
           case 'd' => (nestedIdsCount: Int) =>
             val i = nestedIdsCount + attrIndex
-            (a: Row, b: Row) =>
+            (a: RowOLD, b: RowOLD) =>
               val x: jBoolean = a.get(i) match {
                 case bool: jBoolean => bool
                 case `none`         => false

@@ -1,4 +1,4 @@
-package molecule.sql.jdbc.transaction
+package molecule.datalog.datomic.transaction
 
 import java.util.{Set => jSet}
 import clojure.lang.Keyword
@@ -11,74 +11,73 @@ import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.UpdateExtraction
 import molecule.core.transaction.ops.UpdateOps
 import molecule.core.validation.ModelValidation
-import molecule.sql.core.query.SqlModel2Query
-import molecule.sql.jdbc.facade.JdbcConn_JVM
+import molecule.datalog.core.query.DatomicModel2Query
+import molecule.datalog.datomic.facade.DatomicConn_JVM
 import scala.collection.mutable.ListBuffer
 
-trait Update_stmts extends JdbcTxBase_JVM with UpdateOps with MoleculeLogging { self: UpdateExtraction =>
+trait Data_Update extends DatomicTxBase_JVM with UpdateOps with MoleculeLogging { self: UpdateExtraction =>
 
   def getStmts(
-    conn: JdbcConn_JVM,
+    conn: DatomicConn_JVM,
     elements: List[Element],
     isRpcCall: Boolean = false,
     debug: Boolean = true
   ): Data = {
-//    val db = conn.sqlConn.db()
-//
-//    if (isRpcCall) {
-//      // Check against db on jvm if rpc from client
-//
-//      val getCurSetValues: Attr => Set[Any] = (attr: Attr) => {
-//        val a = s":${attr.ns}/${attr.attr}"
-//        try {
-//          val curValues = Peer.q(s"[:find ?vs :where [_ $a ?vs]]", db)
-//          if (curValues.isEmpty) {
-//            throw ExecutionError(s"While checking to avoid removing the last values of mandatory " +
-//              s"attribute ${attr.ns}.${attr.attr} the current Set of values couldn't be found.")
-//          }
-//          val vs = ListBuffer.empty[Any]
-//          curValues.forEach(row => vs.addOne(row.get(0)))
-//          vs.toSet
-//        } catch {
-//          case e: MoleculeError => throw e
-//          case t: Throwable     => throw ExecutionError(
-//            s"Unexpected error trying to find current values of mandatory attribute ${attr.name}:\n" + t)
-//        }
-//      }
-//
-//      val validationErrors = ModelValidation(
-//        conn.proxy.nsMap,
-//        conn.proxy.attrMap,
-//        "update",
-//        Some(getCurSetValues)
-//      ).validate(elements)
-//      if (validationErrors.nonEmpty) {
-//        throw ValidationErrors(validationErrors)
-//      }
-//    }
-//
-//    val (eids, filterElements, data) = resolve(elements, Nil, Nil, Nil)
-//    val (filterQuery, inputs)        = if (eids.isEmpty && filterElements.nonEmpty) {
-//      val filterElements1 = AttrOneManLong("_Generic", "e", V) +: filterElements
-//      val (query, inputs) = new SqlModel2Query[Any](filterElements1).getEidQueryWithInputs
-//      (Some(query), inputs)
-//    } else {
-//      (None, Nil)
-//    }
-//    filterQuery.fold {
-//      val addStmts = eid2stmts(data, db, isUpsert)
-//      eids.foreach(addStmts)
-//    } { query =>
-//      val eidRows  = Peer.q(query, db +: inputs: _*)
-//      val addStmts = eid2stmts(data, db)
-//      eidRows.forEach(eidRow => addStmts(eidRow.get(0)))
-//    }
-//    if (debug) {
-//      val updateStrs = "UPDATE:" +: elements :+ "" :+ stmts.toArray().mkString("\n")
-//      logger.debug(updateStrs.mkString("\n").trim)
-//    }
-//    stmts
-    ???
+    val db = conn.peerConn.db()
+
+    if (isRpcCall) {
+      // Check against db on jvm if rpc from client
+
+      val getCurSetValues: Attr => Set[Any] = (attr: Attr) => {
+        val a = s":${attr.ns}/${attr.attr}"
+        try {
+          val curValues = Peer.q(s"[:find ?vs :where [_ $a ?vs]]", db)
+          if (curValues.isEmpty) {
+            throw ExecutionError(s"While checking to avoid removing the last values of mandatory " +
+              s"attribute ${attr.ns}.${attr.attr} the current Set of values couldn't be found.")
+          }
+          val vs = ListBuffer.empty[Any]
+          curValues.forEach(row => vs.addOne(row.get(0)))
+          vs.toSet
+        } catch {
+          case e: MoleculeError => throw e
+          case t: Throwable     => throw ExecutionError(
+            s"Unexpected error trying to find current values of mandatory attribute ${attr.name}:\n" + t)
+        }
+      }
+
+      val validationErrors = ModelValidation(
+        conn.proxy.nsMap,
+        conn.proxy.attrMap,
+        "update",
+        Some(getCurSetValues)
+      ).validate(elements)
+      if (validationErrors.nonEmpty) {
+        throw ValidationErrors(validationErrors)
+      }
+    }
+
+    val (eids, filterElements, data) = resolve(elements, Nil, Nil, Nil)
+    val (filterQuery, inputs)        = if (eids.isEmpty && filterElements.nonEmpty) {
+      val filterElements1 = AttrOneManLong("_Generic", "e", V) +: filterElements
+      val (query, inputs) = new DatomicModel2Query[Any](filterElements1).getEidQueryWithInputs
+      (Some(query), inputs)
+    } else {
+      (None, Nil)
+    }
+    filterQuery.fold {
+      val addStmts = eid2stmts(data, db, isUpsert)
+      eids.foreach(addStmts)
+    } { query =>
+      val eidRows  = Peer.q(query, db +: inputs: _*)
+      val addStmts = eid2stmts(data, db)
+      eidRows.forEach(eidRow => addStmts(eidRow.get(0)))
+    }
+    if (debug) {
+      val updateStrs = "UPDATE:" +: elements :+ "" :+ stmts.toArray().mkString("\n")
+      logger.debug(updateStrs.mkString("\n").trim)
+    }
+    stmts
   }
 
   private def eid2stmts(

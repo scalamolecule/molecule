@@ -132,7 +132,7 @@ trait ResolveNestedPull[Tpl]
     }
 
     val (attrs, append) = resolvePullRef(ref, elements, 0, 0, "")
-    find += s"(pull $e [$attrs$append])\n       "
+    select += s"(pull $e [$attrs$append])\n       "
   }
 
 
@@ -141,12 +141,12 @@ trait ResolveNestedPull[Tpl]
   }
 
   private def add(
-    sorter: Option[(Int, Int => (Row, Row) => Int)],
+    sorter: Option[(Int, Int => (RowOLD, RowOLD) => Int)],
     lambda: jIterator[_] => Any,
     lambda2: AnyRef => AnyRef = identity
   ): Unit = {
     pullCasts += lambda
-    addCast(lambda2)
+    addCastOLD(lambda2)
     sorter.foreach(pullSorts += _)
   }
 

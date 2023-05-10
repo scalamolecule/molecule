@@ -37,7 +37,7 @@ class SaveExtraction(isTxMetaData: Boolean = false)
             case a           => throw new Exception("Attribute family not implemented for " + a)
           }
 
-        case Ref(ns, refAttr, _, _, _)       => ref(ns, refAttr); resolve(tail)
+        case Ref(ns, refAttr, _, _, _)    => ref(ns, refAttr); resolve(tail)
         case BackRef(backRefNs)           => backRef(backRefNs); resolve(tail)
         case _: Nested                    => throw ModelError(
           "Nested data structure not allowed in save molecule. Please use insert instead."

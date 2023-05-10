@@ -11,7 +11,7 @@ import molecule.core.validation.ModelValidation
 import molecule.core.validation.insert.InsertValidation
 import molecule.datalog.datomic.facade.DatomicConn_JVM
 import molecule.datalog.datomic.subscription.SubscriptionStarter
-import molecule.datalog.datomic.transaction.{Delete_stmts, Insert_stmts, Save_stmts, Update_stmts}
+import molecule.datalog.datomic.transaction.{Data_Delete, Data_Insert, Data_Save, Data_Update}
 import molecule.datalog.datomic.marshalling.DatomicRpcJVM.Data
 import molecule.datalog.datomic.query.{DatomicQueryResolveCursor, DatomicQueryResolveOffset}
 import zio._
@@ -91,7 +91,7 @@ trait DatomicApiZio extends JVMDatomicApiBase with SubscriptionStarter with Dato
     }
 
     private def getStmts: Data = {
-      (new SaveExtraction() with Save_stmts).getStmts(save.elements)
+      (new SaveExtraction() with Data_Save).getStmts(save.elements)
     }
 
     override def validate: ZIO[Connection, MoleculeError, Map[String, Seq[String]]] = {
@@ -129,7 +129,7 @@ trait DatomicApiZio extends JVMDatomicApiBase with SubscriptionStarter with Dato
     }
 
     private def getStmts(proxy: ConnProxy): Data = {
-      (new InsertExtraction with Insert_stmts)
+      (new InsertExtraction with Data_Insert)
         .getStmts(proxy.nsMap, insert.elements, insert.tpls)
     }
 
@@ -166,7 +166,7 @@ trait DatomicApiZio extends JVMDatomicApiBase with SubscriptionStarter with Dato
     }
 
     private def getStmts(conn: DatomicConn_JVM): Data = {
-      (new UpdateExtraction(conn.proxy.uniqueAttrs, update.isUpsert) with Update_stmts)
+      (new UpdateExtraction(conn.proxy.uniqueAttrs, update.isUpsert) with Data_Update)
         .getStmts(conn, update.elements)
     }
 
@@ -197,7 +197,7 @@ trait DatomicApiZio extends JVMDatomicApiBase with SubscriptionStarter with Dato
       } yield res
     }
     private def getStmts(conn: DatomicConn_JVM): Data = {
-      (new DeleteExtraction with Delete_stmts).getStmtsData(conn, delete.elements)
+      (new DeleteExtraction with Data_Delete).getStmtsData(conn, delete.elements)
     }
   }
 

@@ -2,28 +2,38 @@ package molecule.sql.jdbc.test
 
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
-import molecule.sql.jdbc.async._
+//import molecule.sql.jdbc.async._
+import molecule.sql.jdbc.sync._
 import molecule.sql.jdbc.setup.JdbcTestSuite
 import utest._
 import scala.language.implicitConversions
 
-object AdhocX extends JdbcTestSuite {
+object Adhoc extends JdbcTestSuite {
 
 
   override lazy val tests = Tests {
 
     "types" - types { implicit conn =>
-      for {
-        eid <- Ns.int(3).save.transact.map(_.eid)
-        _ = println(eid)
-        eid2 <- Ns.int(4).save.transact.map(_.eid)
-        _ = println(eid2)
-        _ <- Ns.int.query.get.map(_ ==> List(3, 4))
+//      Ns.int(3).save.transact
+//      Ns.int.query.get ==> List(3)
+      Ns.s("hej").int(3).save.transact
+      Ns.s.int.query.get ==> List(("hej", 3))
+//
 
-
-
-      } yield ()
+//      Ns.int.insert.apply(3).transact
     }
+
+
+
+    //    "types" - types { implicit conn =>
+    //      for {
+    //        eid <- Ns.int(3).save.transact.map(_.eid)
+    //        _ = println(eid)
+    //        eid2 <- Ns.int(4).save.transact.map(_.eid)
+    //        _ = println(eid2)
+    //        _ <- Ns.int.query.get.map(_ ==> List(3, 4))
+    //      } yield ()
+    //    }
 
 
     //    "validation" - validation { implicit conn =>

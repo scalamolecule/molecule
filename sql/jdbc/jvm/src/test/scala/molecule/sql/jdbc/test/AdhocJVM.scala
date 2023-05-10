@@ -14,21 +14,21 @@ object AdhocJVM extends JdbcTestSuite {
   override lazy val tests = Tests {
 
     "types" - types { implicit conn =>
-      for {
-        _ <- Ns.int.insert.apply(1).transact
-//        _ <- Ns.int.query.get.map(_ ==> List(1))
-
-
-
-        _ <- Ns.int.Ref.i.query.inspect
-
-//        _ <- Ns.int.Ref(bi).i.query.inspect
-//        _ <- Ns.int.Ref(bi).i.query.get.map(_ ==> List(int1))
-
-//        _ <- Ns.int.RefBi.i.query.get.map(_ ==> List(int1))
-
-
-      } yield ()
+//      for {
+//        _ <- Ns.int.insert.apply(1).transact
+////        _ <- Ns.int.query.get.map(_ ==> List(1))
+//
+//
+//
+//        _ <- Ns.int.Ref.i.query.inspect
+//
+////        _ <- Ns.int.Ref(bi).i.query.inspect
+////        _ <- Ns.int.Ref(bi).i.query.get.map(_ ==> List(int1))
+//
+////        _ <- Ns.int.RefBi.i.query.get.map(_ ==> List(int1))
+//
+//
+//      } yield ()
     }
 
 
@@ -51,27 +51,27 @@ object AdhocJVM extends JdbcTestSuite {
     //    }
 
 
-    "refs" - refs { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Refs._
-      for {
-
-        _ <- Ns.i(1).R1.i(2).Ns1.i(3).save.transact
-
-        // Directional
-        _ <- Ns.i.R1.i.Ns1.i.query.get.map(_ ==> List((1, 2, 3)))
-        _ <- Ns.i(1).R1.i.Ns1.i.query.get.map(_ ==> List((1, 2, 3)))
-        _ <- Ns.i(3).R1.i.Ns1.i.query.get.map(_ ==> List())
-
-
-
-        // Bidirectional
-//        _ <- Ns.i.a1.Self(bi).i.query.get.map(_ ==> List((1, 2), (2, 1)))
-//        _ <- Ns.i(1).Self(bi).i.query.get.map(_ ==> List((1, 2)))
-//        _ <- Ns.i(2).Self(bi).i.query.get.map(_ ==> List((2, 1)))
-
-      } yield ()
-
-    }
+//    "refs" - refs { implicit conn =>
+//      import molecule.coreTests.dataModels.core.dsl.Refs._
+//      for {
+//
+//        _ <- Ns.i(1).R1.i(2).Ns1.i(3).save.transact
+//
+//        // Directional
+//        _ <- Ns.i.R1.i.Ns1.i.query.get.map(_ ==> List((1, 2, 3)))
+//        _ <- Ns.i(1).R1.i.Ns1.i.query.get.map(_ ==> List((1, 2, 3)))
+//        _ <- Ns.i(3).R1.i.Ns1.i.query.get.map(_ ==> List())
+//
+//
+//
+//        // Bidirectional
+////        _ <- Ns.i.a1.Self(bi).i.query.get.map(_ ==> List((1, 2), (2, 1)))
+////        _ <- Ns.i(1).Self(bi).i.query.get.map(_ ==> List((1, 2)))
+////        _ <- Ns.i(2).Self(bi).i.query.get.map(_ ==> List((2, 1)))
+//
+//      } yield ()
+//
+//    }
 
     //    "set" - typesSet { implicit conn =>
     //

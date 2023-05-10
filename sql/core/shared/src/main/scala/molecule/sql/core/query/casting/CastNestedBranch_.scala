@@ -6,10 +6,10 @@ import molecule.sql.core.query.Base
 import scala.annotation.tailrec
 
 
-trait CastNestedBranch_[Tpl]
-  extends CastRow2Tpl_[Tpl] { self: Model2Query with Base[Tpl] =>
+trait CastNestedBranch_
+  extends CastRow2Tpl_ { self: Model2Query with Base =>
 
-  @tailrec
+//  @tailrec
   final private def resolveArities(
     arities: List[List[Int]],
     casts: List[AnyRef => AnyRef],
@@ -17,38 +17,41 @@ trait CastNestedBranch_[Tpl]
     rowIndexTx: Int,
     acc: List[(Row, List[Any]) => Any]
   ): List[(Row, List[Any]) => Any] = {
-    arities match {
-      case List(1) :: as =>
-        val cast = (row: Row, _: List[Any]) => casts.head(row.get(rowIndex))
-        resolveArities(as, casts.tail, rowIndex + 1, rowIndexTx, acc :+ cast)
-
-      // Nested
-      case List(-1) :: as =>
-        val cast = (_: Row, nested: List[Any]) => nested
-        resolveArities(as, casts, rowIndexTx, rowIndexTx, acc :+ cast)
-
-      // Composite with only tacit attributes
-      case ii :: as if ii.isEmpty =>
-        resolveArities(as, casts, rowIndex, rowIndexTx, acc)
-
-      // Composite with nested
-      case ii :: as if ii.last == -1 =>
-        val n                     = ii.length - 1
-        val (tplCasts, moreCasts) = casts.splitAt(n)
-        val cast                  = (row: Row, nested: List[Any]) =>
-          castRow2AnyTpl(ii.map(List(_)), tplCasts, rowIndex, Some(nested))(row)
-        resolveArities(as, moreCasts, rowIndexTx, rowIndexTx, acc :+ cast)
-
-      // Composite
-      case ii :: as =>
-        val n                     = ii.length
-        val (tplCasts, moreCasts) = casts.splitAt(n)
-        val cast                  = (row: Row, _: List[Any]) =>
-          castRow2AnyTpl(ii.map(List(_)), tplCasts, rowIndex, None)(row)
-        resolveArities(as, moreCasts, rowIndex + n, rowIndexTx, acc :+ cast)
-
-      case Nil => acc
-    }
+//    arities match {
+//      case List(1) :: as =>
+////        val cast = (row: Row, _: List[Any]) => casts.head(row.get(rowIndex))
+////        resolveArities(as, casts.tail, rowIndex + 1, rowIndexTx, acc :+ cast)
+//        // todo
+//        resolveArities(as, casts.tail, rowIndex + 1, rowIndexTx, acc)
+//
+//      // Nested
+//      case List(-1) :: as =>
+//        val cast = (_: Row, nested: List[Any]) => nested
+//        resolveArities(as, casts, rowIndexTx, rowIndexTx, acc :+ cast)
+//
+//      // Composite with only tacit attributes
+//      case ii :: as if ii.isEmpty =>
+//        resolveArities(as, casts, rowIndex, rowIndexTx, acc)
+//
+//      // Composite with nested
+//      case ii :: as if ii.last == -1 =>
+//        val n                     = ii.length - 1
+//        val (tplCasts, moreCasts) = casts.splitAt(n)
+//        val cast                  = (row: Row, nested: List[Any]) =>
+//          castRow2AnyTpl(ii.map(List(_)), tplCasts, rowIndex, Some(nested))(row)
+//        resolveArities(as, moreCasts, rowIndexTx, rowIndexTx, acc :+ cast)
+//
+//      // Composite
+//      case ii :: as =>
+//        val n                     = ii.length
+//        val (tplCasts, moreCasts) = casts.splitAt(n)
+//        val cast                  = (row: Row, _: List[Any]) =>
+//          castRow2AnyTpl(ii.map(List(_)), tplCasts, rowIndex, None)(row)
+//        resolveArities(as, moreCasts, rowIndex + n, rowIndexTx, acc :+ cast)
+//
+//      case Nil => acc
+//    }
+    ???
   }
 
   final protected def castBranch[T](

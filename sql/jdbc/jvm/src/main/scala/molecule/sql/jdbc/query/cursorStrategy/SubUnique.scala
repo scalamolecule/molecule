@@ -39,30 +39,31 @@ case class SubUnique[Tpl](
   def getPage(allTokens: List[String], limit: Int)
              (implicit conn: JdbcConn_JVM)
   : (List[Tpl], String, Boolean) = try {
-    val forward     = limit > 0
-    val attrsTokens = allTokens.drop(2).grouped(13).toList.sortBy(_(2))
-
-    val (uniqueIndex, uniqueValues) = {
-      val List(_, _, _, tpe, _, _, i, a, b, c, x, y, z) = attrsTokens.find(_.head == "UNIQUE").get
-
-      val uniqueValues = (if (forward) List(z, y, x) else List(a, b, c)).filter(_.nonEmpty).map(decoder(tpe))
-      (i.toInt, uniqueValues)
-    }
-
-    val identifyTpl = (tpl: Tpl) => tpl.asInstanceOf[Product].productElement(uniqueIndex)
-    val identifyRow = (_: Boolean) => (row: Row) => row.get(uniqueIndex)
-
-    paginateFromIdentifiers(
-      conn,
-      limit,
-      forward,
-      allTokens,
-      attrsTokens.head,
-      uniqueValues,
-      identifyTpl,
-      identifyRow,
-      nextCursorSubUnique
-    )
+//    val forward     = limit > 0
+//    val attrsTokens = allTokens.drop(2).grouped(13).toList.sortBy(_(2))
+//
+//    val (uniqueIndex, uniqueValues) = {
+//      val List(_, _, _, tpe, _, _, i, a, b, c, x, y, z) = attrsTokens.find(_.head == "UNIQUE").get
+//
+//      val uniqueValues = (if (forward) List(z, y, x) else List(a, b, c)).filter(_.nonEmpty).map(decoder(tpe))
+//      (i.toInt, uniqueValues)
+//    }
+//
+//    val identifyTpl = (tpl: Tpl) => tpl.asInstanceOf[Product].productElement(uniqueIndex)
+//    val identifyRow = (_: Boolean) => (row: RowOLD) => row.get(uniqueIndex)
+//
+//    paginateFromIdentifiers(
+//      conn,
+//      limit,
+//      forward,
+//      allTokens,
+//      attrsTokens.head,
+//      uniqueValues,
+//      identifyTpl,
+//      identifyRow,
+//      nextCursorSubUnique
+//    )
+    ???
   } catch {
     case t: Throwable => throw ModelError(t.toString)
   }

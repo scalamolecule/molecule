@@ -14,7 +14,7 @@ import molecule.sql.jdbc.marshalling.JdbcRpcJVM.Data
 import molecule.sql.jdbc.facade.JdbcConn_JVM
 import molecule.sql.jdbc.query.{JdbcQueryResolveCursor, JdbcQueryResolveOffset}
 import molecule.sql.jdbc.subscription.SubscriptionStarter
-import molecule.sql.jdbc.transaction.{Delete_stmts, Insert_stmts, Save_stmts, Update_stmts}
+import molecule.sql.jdbc.transaction._
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -103,11 +103,14 @@ trait JdbcApiAsync
     }
 
     override def inspect(implicit conn: Connection, ec: ExecutionContext): Future[Unit] = {
-      printInspectTx("SAVE", save.elements, getStmts)
+      printInspectTx("SAVE", save.elements, getPreparedStmt)
     }
 
-    private def getStmts: Data = {
-      (new SaveExtraction() with Save_stmts).getStmts(save.elements)
+    private def getPreparedStmt: Data = {
+//      new SaveExtraction() with Save_stmts {
+//        override protected val ps: PreparedStmt = ???
+//      }.getPrepStmt(save.elements)
+      ???
     }
 
     override def validate(implicit conn: Connection): Map[String, Seq[String]] = {
@@ -146,81 +149,86 @@ trait JdbcApiAsync
   //  }
 
 
-  implicit class datomicInsertApiAsync[Tpl](insert0: Insert) extends InsertTransaction {
-    val insert = insert0.asInstanceOf[InsertTpls]
-    override def transact(implicit conn: Connection, ec: ExecutionContext): Future[TxReport] = try {
-      val errors = validate
-      if (errors.isEmpty) {
-        conn.asInstanceOf[JdbcConn_JVM].transact_async(getStmts(conn.proxy))
-      } else {
-        Future.failed(InsertErrors(errors))
-      }
-    } catch {
-      case e: Throwable => Future.failed(e)
-    }
+//  implicit class datomicInsertApiAsync[Tpl](insert0: Insert) extends InsertTransaction {
+//    val insert = insert0.asInstanceOf[InsertTpls]
+//    override def transact(implicit conn: Connection, ec: ExecutionContext): Future[TxReport] = try {
+//      val errors = validate
+//      if (errors.isEmpty) {
+//        conn.asInstanceOf[JdbcConn_JVM].transact_async(getStmts(conn.proxy))
+//      } else {
+//        Future.failed(InsertErrors(errors))
+//      }
+//    } catch {
+//      case e: Throwable => Future.failed(e)
+//    }
+//
+//    override def inspect(implicit conn: Connection, ec: ExecutionContext): Future[Unit] = {
+//      printInspectTx("INSERT", insert.elements, getStmts(conn.proxy))
+//    }
+//
+//    private def getStmts(proxy: ConnProxy): PreparedStmt = {
+//      new InsertExtraction with Insert_stmts {
+//        override protected val ps: PreparedStmt = ???
+//      }.getStmts(proxy.nsMap, insert.elements, insert.tpls)
+//    }
+//
+//    override def validate(implicit conn: Connection): Seq[(Int, Seq[InsertError])] = {
+//      InsertValidation.validate(conn, insert.elements, insert.tpls)
+//    }
+//  }
+//
+//
+//  implicit class datomicUpdateApiAsync[Tpl](update: Update) extends UpdateTransaction {
+//    override def transact(implicit conn0: Connection, ec: ExecutionContext): Future[TxReport] = try {
+//      val errors = validate
+//      if (errors.isEmpty) {
+//        val conn = conn0.asInstanceOf[JdbcConn_JVM]
+//        conn.transact_async(getStmts(conn))
+//      } else {
+//        Future.failed(ValidationErrors(errors))
+//      }
+//    } catch {
+//      case e: Throwable => Future.failed(e)
+//    }
+//
+//    override def inspect(implicit conn0: Connection, ec: ExecutionContext): Future[Unit] = {
+//      printInspectTx("UPDATE", update.elements, getStmts(conn0.asInstanceOf[JdbcConn_JVM]))
+//    }
+//
+//    private def getStmts(conn: JdbcConn_JVM): PreparedStmt = {
+//      (new UpdateExtraction(conn.proxy.uniqueAttrs, update.isUpsert) with Update_stmts {
+//        override protected val ps: PreparedStmt = ???
+//      })
+//        .getStmts(conn, update.elements)
+//    }
+//
+//    override def validate(implicit conn: Connection): Map[String, Seq[String]] = {
+//      validateUpdate(conn, update.elements)
+//    }
+//  }
+//
+//
+//  implicit class datomicDeleteApiAsync[Tpl](delete: Delete) extends DeleteTransaction {
+//    override def transact(implicit conn0: Connection, ec: ExecutionContext): Future[TxReport] = try {
+//      val conn = conn0.asInstanceOf[JdbcConn_JVM]
+//      conn.transact_async(getStmts(conn))
+//    } catch {
+//      case e: Throwable => Future.failed(e)
+//    }
+//
+//    override def inspect(implicit conn0: Connection, ec: ExecutionContext): Future[Unit] = {
+//      printInspectTx("DELETE", delete.elements, getStmts(conn0.asInstanceOf[JdbcConn_JVM]))
+//    }
+//
+//    private def getStmts(conn: JdbcConn_JVM): PreparedStmt = {
+//      (new DeleteExtraction with Delete_stmts {
+//        override protected val ps: PreparedStmt = ???
+//      }).getStmtsData(conn, delete.elements)
+//    }
+//  }
 
-    override def inspect(implicit conn: Connection, ec: ExecutionContext): Future[Unit] = {
-      printInspectTx("INSERT", insert.elements, getStmts(conn.proxy))
-    }
 
-    private def getStmts(proxy: ConnProxy): Data = {
-      (new InsertExtraction with Insert_stmts)
-        .getStmts(proxy.nsMap, insert.elements, insert.tpls)
-    }
-
-    override def validate(implicit conn: Connection): Seq[(Int, Seq[InsertError])] = {
-      InsertValidation.validate(conn, insert.elements, insert.tpls)
-    }
-  }
-
-
-  implicit class datomicUpdateApiAsync[Tpl](update: Update) extends UpdateTransaction {
-    override def transact(implicit conn0: Connection, ec: ExecutionContext): Future[TxReport] = try {
-      val errors = validate
-      if (errors.isEmpty) {
-        val conn = conn0.asInstanceOf[JdbcConn_JVM]
-        conn.transact_async(getStmts(conn))
-      } else {
-        Future.failed(ValidationErrors(errors))
-      }
-    } catch {
-      case e: Throwable => Future.failed(e)
-    }
-
-    override def inspect(implicit conn0: Connection, ec: ExecutionContext): Future[Unit] = {
-      printInspectTx("UPDATE", update.elements, getStmts(conn0.asInstanceOf[JdbcConn_JVM]))
-    }
-
-    private def getStmts(conn: JdbcConn_JVM): Data = {
-      (new UpdateExtraction(conn.proxy.uniqueAttrs, update.isUpsert) with Update_stmts)
-        .getStmts(conn, update.elements)
-    }
-
-    override def validate(implicit conn: Connection): Map[String, Seq[String]] = {
-      validateUpdate(conn, update.elements)
-    }
-  }
-
-
-  implicit class datomicDeleteApiAsync[Tpl](delete: Delete) extends DeleteTransaction {
-    override def transact(implicit conn0: Connection, ec: ExecutionContext): Future[TxReport] = try {
-      val conn = conn0.asInstanceOf[JdbcConn_JVM]
-      conn.transact_async(getStmts(conn))
-    } catch {
-      case e: Throwable => Future.failed(e)
-    }
-
-    override def inspect(implicit conn0: Connection, ec: ExecutionContext): Future[Unit] = {
-      printInspectTx("DELETE", delete.elements, getStmts(conn0.asInstanceOf[JdbcConn_JVM]))
-    }
-
-    private def getStmts(conn: JdbcConn_JVM): Data = {
-      (new DeleteExtraction with Delete_stmts).getStmtsData(conn, delete.elements)
-    }
-  }
-
-
-  private def printInspectTx(label: String, elements: List[Element], stmts: Data)
+  private def printInspectTx(label: String, elements: List[Element], data: Data)
                             (implicit ec: ExecutionContext): Future[Unit] = {
     //    Future(printInspect(label, elements, stmts.toArray().toList.mkString("\n")))
     ???

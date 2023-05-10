@@ -7,7 +7,7 @@ import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.SaveExtraction
 import molecule.core.transaction.ops.SaveOps
 
-trait Save_stmts extends DatomicTxBase_JVM with SaveOps with MoleculeLogging { self: SaveExtraction =>
+trait Data_Save extends DatomicTxBase_JVM with SaveOps with MoleculeLogging { self: SaveExtraction =>
 
   def getRawStmts(
     elements: List[Element],

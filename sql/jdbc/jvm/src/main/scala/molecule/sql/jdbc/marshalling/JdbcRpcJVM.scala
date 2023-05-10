@@ -19,6 +19,10 @@ object JdbcRpcJVM extends MoleculeRpc
   with JdbcTxBase_JVM
   with FutureUtils {
 
+  // todo
+  override protected val sqlConn: java.sql.Connection = ???
+
+
   /**
    * Tuple type is not marshalled from client to server. So we signal this with
    * the 'Any' type parameter. Model elements are used to pickle the correct types
@@ -75,11 +79,12 @@ object JdbcRpcJVM extends MoleculeRpc
     proxy: ConnProxy,
     elements: List[Element]
   ): Future[Either[MoleculeError, TxReport]] = either {
-    for {
-      conn <- getConn(proxy)
-      stmts = (new SaveExtraction() with Save_stmts).getStmts(elements)
-      txReport <- conn.transact_async(stmts)
-    } yield txReport
+//    for {
+//      conn <- getConn(proxy)
+//      stmts = (new SaveExtraction() with Save_stmts).getPrepStmt(elements)
+//      txReport <- conn.transact_async(stmts)
+//    } yield txReport
+    ???
   }
 
   override def insert(
@@ -88,24 +93,24 @@ object JdbcRpcJVM extends MoleculeRpc
     tplsSerialized: Array[Byte],
     txElements: List[Element],
   ): Future[Either[MoleculeError, TxReport]] = either {
-    for {
-      conn <- getConn(proxy)
-      tplsEither = UnpickleTpls[Any](tplElements, ByteBuffer.wrap(tplsSerialized)).unpickle
-      tplProducts = tplsEither match {
-        case Right(tpls) =>
-          (if (countValueAttrs(tplElements) == 1) {
-            tpls.map(Tuple1(_))
-          } else tpls).asInstanceOf[Seq[Product]]
-        case Left(err)   => throw err // catched in outer either wrapper
-      }
-      stmts = (new InsertExtraction with Insert_stmts).getStmts(proxy.nsMap, tplElements, tplProducts)
-      _ = if (txElements.nonEmpty) {
-        val txStmts = (new SaveExtraction() with Save_stmts).getRawStmts(txElements, datomicTx, false)
+//    for {
+//      conn <- getConn(proxy)
+//      tplsEither = UnpickleTpls[Any](tplElements, ByteBuffer.wrap(tplsSerialized)).unpickle
+//      tplProducts = tplsEither match {
+//        case Right(tpls) =>
+//          (if (countValueAttrs(tplElements) == 1) {
+//            tpls.map(Tuple1(_))
+//          } else tpls).asInstanceOf[Seq[Product]]
+//        case Left(err)   => throw err // catched in outer either wrapper
+//      }
+//      stmts = (new InsertExtraction with Insert_stmts).getStmts(proxy.nsMap, tplElements, tplProducts)
+//      _ = if (txElements.nonEmpty) {
+//        val txStmts = (new SaveExtraction() with Save_stmts).getRawStmts(txElements, datomicTx, false)
 //        stmts.addAll(txStmts)
-        ???
-      }
-      txReport <- conn.transact_async(stmts)
-    } yield txReport
+//      }
+//      txReport <- conn.transact_async(stmts)
+//    } yield txReport
+    ???
   }
 
   override def update(
@@ -113,22 +118,24 @@ object JdbcRpcJVM extends MoleculeRpc
     elements: List[Element],
     isUpsert: Boolean = false
   ): Future[Either[MoleculeError, TxReport]] = either {
-    for {
-      conn <- getConn(proxy)
-      stmts = (new UpdateExtraction(conn.proxy.uniqueAttrs, isUpsert) with Update_stmts)
-        .getStmts(conn, elements, true)
-      txReport <- conn.transact_async(stmts)
-    } yield txReport
+//    for {
+//      conn <- getConn(proxy)
+//      stmts = (new UpdateExtraction(conn.proxy.uniqueAttrs, isUpsert) with Update_stmts)
+//        .getStmts(conn, elements, true)
+//      txReport <- conn.transact_async(stmts)
+//    } yield txReport
+    ???
   }
 
   override def delete(
     proxy: ConnProxy,
     elements: List[Element]
   ): Future[Either[MoleculeError, TxReport]] = either {
-    for {
-      conn <- getConn(proxy)
-      stmts = (new DeleteExtraction with Delete_stmts).getStmtsData(conn, elements)
-      txReport <- conn.transact_async(stmts)
-    } yield txReport
+//    for {
+//      conn <- getConn(proxy)
+//      stmts = (new DeleteExtraction with Delete_stmts).getStmtsData(conn, elements)
+//      txReport <- conn.transact_async(stmts)
+//    } yield txReport
+    ???
   }
 }

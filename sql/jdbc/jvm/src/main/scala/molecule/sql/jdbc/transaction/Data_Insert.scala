@@ -7,14 +7,14 @@ import molecule.core.transaction.ops.InsertOps
 import molecule.core.transaction.{InsertExtraction, InsertResolvers_, SaveExtraction}
 import molecule.core.util.ModelUtils
 
-trait Insert_stmts
+trait Data_Insert
   extends JdbcTxBase_JVM
     with InsertOps
     with JdbcDataType_JVM
     with ModelUtils
     with MoleculeLogging { self: InsertExtraction with InsertResolvers_ =>
 
-  def getStmts(
+  def getData(
     nsMap: Map[String, MetaNs],
     elements: List[Element],
     tpls: Seq[Product],
@@ -173,7 +173,7 @@ trait Insert_stmts
       stmt.add(a)
       e = newId
       stmt.add(e)
-      stmts.add(stmt)
+      stmtsOLD.add(stmt)
   }
 
   override protected def addBackRef(backRefNs: String): Product => Unit = {

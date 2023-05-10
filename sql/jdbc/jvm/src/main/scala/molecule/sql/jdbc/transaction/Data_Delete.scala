@@ -11,14 +11,14 @@ import molecule.sql.jdbc.facade.JdbcConn_JVM
 import scala.collection.mutable
 import scala.jdk.CollectionConverters.{CollectionHasAsScala, IterableHasAsJava}
 
-trait Delete_stmts extends JdbcTxBase_JVM with DeleteOps with MoleculeLogging { self: DeleteExtraction =>
+trait Data_Delete extends JdbcTxBase_JVM with DeleteOps with MoleculeLogging { self: DeleteExtraction =>
 
   def getStmtsData(
     conn: JdbcConn_JVM,
     elements: List[Element],
     eidIndex: Int = 0,
     debug: Boolean = true
-  ): Data = {
+  ): Int = { // todo
 //    initTxBase(elements, eidIndex)
 //    val (eids, filterElements) = resolve(elements, Nil, Nil, true)
 //

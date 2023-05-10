@@ -1,6 +1,7 @@
 package molecule.sql.jdbc.transaction
 
 import java.lang.{Boolean => jBoolean}
+import java.sql.PreparedStatement
 import java.util.{UUID, ArrayList => jArrayList, List => jList}
 import clojure.lang.Keyword
 import molecule.base.error.ExecutionError
@@ -8,12 +9,30 @@ import molecule.boilerplate.ast.Model._
 import molecule.core.marshalling.{ConnProxy, DatomicPeerProxy}
 import molecule.core.util.Executor._
 import molecule.core.util.{ModelUtils, fns}
-import molecule.sql.jdbc.facade.{JdbcConn_JVM, SqlHandler}
+import molecule.sql.jdbc.facade.{JdbcConn_JVM, JdbcHandler}
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
 
 trait JdbcTxBase_JVM extends JdbcDataType_JVM with ModelUtils {
+
+
+  protected val sqlConn: java.sql.Connection //= ???
+
+  // Accumulate data in jdbc PreparedStatement given by connection
+//  protected var ps: PreparedStatement //= ???
+
+
+  var stmts      = List.empty[Stmt]
+  var setters    = List.empty[Setter]
+  var colSetters = List.empty[Setter]
+
+
+  protected var table   = ""
+  protected var columns = ListBuffer.empty[String]
+
+
+  final protected val stmtsOLD: jArrayList[jList[AnyRef]] = new jArrayList[jList[AnyRef]]()
 
   protected def initTxBase(elements: List[Element], eidIndex: Int = 0): Unit = {
     nsFull = getInitialNs(elements)
@@ -21,8 +40,6 @@ trait JdbcTxBase_JVM extends JdbcDataType_JVM with ModelUtils {
     lowest = eidIndex
   }
 
-  // Accumulate java insertion data
-  final protected val stmts: jArrayList[jList[AnyRef]] = new jArrayList[jList[AnyRef]]()
 
   protected var nsFull       : String              = ""
   protected var part         : String              = ""
@@ -48,7 +65,6 @@ trait JdbcTxBase_JVM extends JdbcDataType_JVM with ModelUtils {
   protected lazy val short2java   = (v: Any) => v.asInstanceOf[Short].toInt
   protected lazy val boolean2java = (v: Any) => v.asInstanceOf[Boolean].asInstanceOf[jBoolean]
 
-
   protected def newId: String = {
     tempId = lowest - 1
     lowest = tempId
@@ -63,18 +79,18 @@ trait JdbcTxBase_JVM extends JdbcDataType_JVM with ModelUtils {
     a: Keyword,
     v: AnyRef,
   ): Unit = {
-    val addStmt = stmtList
-    addStmt.add(op)
-    addStmt.add(e)
-    addStmt.add(a)
-    addStmt.add(v)
-    stmts.add(addStmt)
+    //    val addStmt = stmtList
+    //    addStmt.add(op)
+    //    addStmt.add(e)
+    //    addStmt.add(a)
+    //    addStmt.add(v)
+    //    stmts.add(addStmt)
   }
-  protected def addRetractEntityStmt(eid: AnyRef) = {
-    val stmt = new jArrayList[AnyRef](2)
-    stmt.add(retractEntity)
-    stmt.add(eid)
-    stmts.add(stmt)
+  protected def addRetractEntityStmt(eid: AnyRef): Unit = {
+    //    val stmt = new jArrayList[AnyRef](2)
+    //    stmt.add(retractEntity)
+    //    stmt.add(eid)
+    //    stmts.add(stmt)
   }
 
 
@@ -103,23 +119,23 @@ trait JdbcTxBase_JVM extends JdbcDataType_JVM with ModelUtils {
   protected def getFreshConn(proxy: ConnProxy): Future[JdbcConn_JVM] = {
     proxy match {
       case proxy@DatomicPeerProxy(protocol, dbIdentifier, _, _, _, _, _, _, _, isFreeVersion) =>
-//        protocol match {
-//          case "mem" =>
-//            SqlHandler.recreateDbFromEdn(proxy, protocol, dbIdentifier, isFreeVersion)
-//              .recover {
-//                case exc: Throwable => throw ExecutionError(exc.getMessage)
-//              }
-//
-//          case "free" | "dev" | "pro" =>
-//            Future(SqlHandler.connect(proxy, protocol, dbIdentifier))
-//              .recover {
-//                case exc: Throwable => throw ExecutionError(exc.getMessage)
-//              }
-//
-//          case other => Future.failed(
-//            ExecutionError(s"\nCan't serve Peer protocol `$other`.")
-//          )
-//        }
+        //        protocol match {
+        //          case "mem" =>
+        //            JdbcHandler.recreateDbFromEdn(proxy, protocol, dbIdentifier, isFreeVersion)
+        //              .recover {
+        //                case exc: Throwable => throw ExecutionError(exc.getMessage)
+        //              }
+        //
+        //          case "free" | "dev" | "pro" =>
+        //            Future(JdbcHandler.connect(proxy, protocol, dbIdentifier))
+        //              .recover {
+        //                case exc: Throwable => throw ExecutionError(exc.getMessage)
+        //              }
+        //
+        //          case other => Future.failed(
+        //            ExecutionError(s"\nCan't serve Peer protocol `$other`.")
+        //          )
+        //        }
 
         ???
     }

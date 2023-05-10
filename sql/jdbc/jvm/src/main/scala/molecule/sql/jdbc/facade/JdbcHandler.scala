@@ -8,7 +8,7 @@ import scala.concurrent.{ExecutionContext, Future, blocking}
 import scala.util.control.NonFatal
 
 
-trait SqlHandler {
+trait JdbcHandler {
 
   //  def createDatabase(
   //    protocol: String = "mem",
@@ -34,7 +34,8 @@ trait SqlHandler {
     val stmts                    =
       """create table Ns(
         |    id long auto_increment primary key,
-        |    int int not null
+        |    s LONGVARCHAR,
+        |    int INT
         |);
         |""".stripMargin
 //    var conn: SqlConn_JVM        = SqlConn_JVM(proxy, null)
@@ -81,5 +82,5 @@ trait SqlHandler {
 //    }
 }
 
-object SqlHandler extends SqlHandler
+object JdbcHandler extends JdbcHandler
 

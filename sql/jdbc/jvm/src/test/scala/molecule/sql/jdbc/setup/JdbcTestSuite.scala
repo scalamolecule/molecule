@@ -5,7 +5,7 @@ import molecule.core.api.Connection
 import molecule.core.marshalling.SqlProxy
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.schema._
-import molecule.sql.jdbc.facade.{JdbcConn_JVM, SqlHandler}
+import molecule.sql.jdbc.facade.{JdbcConn_JVM, JdbcHandler}
 import moleculeBuildInfo.BuildInfo
 import scala.concurrent.Future
 import scala.util.Random
@@ -23,7 +23,7 @@ trait JdbcTestSuite extends JdbcTestSuiteBase {
     var conn: JdbcConn_JVM = JdbcConn_JVM(proxy, null)
     try {
       Class.forName("org.h2.Driver")
-      conn = SqlHandler.recreateDb(proxy, url)
+      conn = JdbcHandler.recreateDb(proxy, url)
       test(conn)
     } catch {
       case NonFatal(exc) => throw exc
