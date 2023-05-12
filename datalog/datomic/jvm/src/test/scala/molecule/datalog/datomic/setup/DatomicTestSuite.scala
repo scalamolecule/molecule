@@ -1,7 +1,7 @@
 package molecule.datalog.datomic.setup
 
 import java.util.UUID.randomUUID
-import molecule.base.api.SchemaTransaction
+import molecule.base.api.Schema
 import molecule.core.api.Connection
 import molecule.core.marshalling.DatomicPeerProxy
 import molecule.core.util.Executor._
@@ -18,7 +18,7 @@ trait DatomicTestSuite extends DatomicTestSuiteBase {
   lazy val protocol     = BuildInfo.datomicProtocol
   lazy val useFree      = BuildInfo.datomicUseFree
 
-  def inMem[T](test: Connection => T, schemaTx: SchemaTransaction): T = {
+  def inMem[T](test: Connection => T, schemaTx: Schema): T = {
     val dbUri = if (protocol == "mem") "" else {
       println(s"Re-creating live database...")
       "localhost:4334/" + randomUUID().toString

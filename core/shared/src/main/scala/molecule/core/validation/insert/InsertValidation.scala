@@ -12,7 +12,7 @@ object InsertValidation extends InsertValidationExtraction with InsertValidation
     elements: List[Element],
     tpls: Seq[Product]
   ): Seq[(Int, Seq[InsertError])] = {
-    val (nsMap, attrMap)               = (conn.proxy.nsMap, conn.proxy.attrMap)
+    val (nsMap, attrMap)               = (conn.proxy.schema.nsMap, conn.proxy.schema.attrMap)
     val (mainElements, txMetaElements) = separateTxElements(elements)
 
     // Basic model validation

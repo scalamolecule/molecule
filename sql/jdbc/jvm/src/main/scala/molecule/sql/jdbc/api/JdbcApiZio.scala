@@ -100,7 +100,7 @@
 //        conn = conn0.asInstanceOf[JdbcConn_JVM]
 //        proxy = conn.proxy
 //        errors <- ZIO.succeed[Map[String, Seq[String]]](
-//          ModelValidation(proxy.nsMap, proxy.attrMap, "save").validate(save.elements)
+//          ModelValidation(proxy.schemaTx.nsMap, proxy.schemaTx.attrMap, "save").validate(save.elements)
 //        )
 //      } yield errors
 //    }
@@ -130,7 +130,7 @@
 //
 //    private def getStmts(proxy: ConnProxy): PreparedStmt = {
 //      (new InsertExtraction with Insert_stmts)
-//        .getStmts(proxy.nsMap, insert.elements, insert.tpls)
+//        .getStmts(proxy.schemaTx.nsMap, insert.elements, insert.tpls)
 //    }
 //
 //    override def validate: ZIO[Connection, MoleculeError, Seq[(Int, Seq[InsertError])]] = {
@@ -166,7 +166,7 @@
 //    }
 //
 //    private def getStmts(conn: JdbcConn_JVM): PreparedStmt = {
-//      (new UpdateExtraction(conn.proxy.uniqueAttrs, update.isUpsert) with Update_stmts)
+//      (new UpdateExtraction(conn.proxy.schemaTx.uniqueAttrs, update.isUpsert) with Update_stmts)
 //        .getStmts(conn, update.elements)
 //    }
 //

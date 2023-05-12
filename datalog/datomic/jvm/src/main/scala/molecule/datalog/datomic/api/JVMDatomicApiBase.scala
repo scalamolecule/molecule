@@ -33,8 +33,8 @@ trait JVMDatomicApiBase {
       }
     }
     ModelValidation(
-      proxy.nsMap,
-      proxy.attrMap,
+      proxy.schema.nsMap,
+      proxy.schema.attrMap,
       "update",
       Some(getCurSetValues)
     ).validate(elements)

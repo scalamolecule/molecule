@@ -51,14 +51,14 @@ trait DatomicPeer {
     // Ensure each transaction finishes before the next
     for {
       // partitions
-      _ <- if (proxy.schema.head.nonEmpty)
-        conn.transactEdn(proxy.schema.head) else Future.unit
+      _ <- if (proxy.schema.datomicPartitions.nonEmpty)
+        conn.transactEdn(proxy.schema.datomicPartitions) else Future.unit
       // attributes
-      _ <- if (proxy.schema(1).nonEmpty)
-        conn.transactEdn(proxy.schema(1)) else Future.unit
+      _ <- if (proxy.schema.datomicSchema.nonEmpty)
+        conn.transactEdn(proxy.schema.datomicSchema) else Future.unit
       // aliases
-      _ <- if (proxy.schema(2).nonEmpty)
-        conn.transactEdn(proxy.schema(2)) else Future.unit
+      _ <- if (proxy.schema.datomicAliases.nonEmpty)
+        conn.transactEdn(proxy.schema.datomicAliases) else Future.unit
     } yield conn
   }
 }

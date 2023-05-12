@@ -6,12 +6,17 @@ import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.DeleteExtraction
 import molecule.core.transaction.ops.DeleteOps
+import molecule.core.util.MetaModelUtils
 import molecule.datalog.core.query.DatomicModel2Query
 import molecule.datalog.datomic.facade.DatomicConn_JVM
 import scala.collection.mutable
 import scala.jdk.CollectionConverters.{CollectionHasAsScala, IterableHasAsJava}
 
-trait Data_Delete extends DatomicTxBase_JVM with DeleteOps with MoleculeLogging { self: DeleteExtraction =>
+trait Data_Delete
+  extends DatomicTxBase_JVM
+    with DeleteOps
+    with MetaModelUtils
+    with MoleculeLogging { self: DeleteExtraction =>
 
   def getStmtsData(
     conn: DatomicConn_JVM,
@@ -39,7 +44,7 @@ trait Data_Delete extends DatomicTxBase_JVM with DeleteOps with MoleculeLogging 
     eids1.foreach(addRetractEntityStmt)
 
     // Prevent deleting mandatory referenced entities
-    if (conn.proxy.hasMandatoryRefs) {
+    if (getHasMandatoryRefs(conn.proxy.schema.nsMap)) {
       val referrers = Peer.q(
         s"""[:find  ?ns ?attr ?refs
            | :in    $$ [?eids ...]

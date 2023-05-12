@@ -14,11 +14,14 @@ case class Schema(schema: MetaSchema) {
         |* 2. `sbt compile -Dmolecule=true`
         |*/
         |package ${schema.pkg}.schema
-        |import molecule.base.api.SchemaTransaction
+        |
+        |import molecule.base.api.Schema
         |import molecule.base.ast.SchemaAST._
         |
         |
-        |object ${schema.domain}Schema extends SchemaTransaction {
+        |object ${schema.domain}Schema extends Schema
+        |  with ${schema.domain}Schema_Datomic
+        |  with ${schema.domain}Schema_Sql {
         |
         |  val metaSchema: MetaSchema =
         |    ${schema.render(2)}
@@ -31,8 +34,5 @@ case class Schema(schema: MetaSchema) {
         |
         |
         |  val uniqueAttrs: List[String] = ${schema.uniqueAttrs}
-        |
-        |
-        |${Schema_Datomic(schema).get}
         |}""".stripMargin
 }

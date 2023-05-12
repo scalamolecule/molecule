@@ -30,6 +30,7 @@ class SqlModel2Query[Tpl](elements0: List[Element])
     with MoleculeLogging {
 
 
+
   final def getQuery(altElements: List[Element] = Nil): String = {
     val elements = if (altElements.isEmpty) elements0 else altElements
     validateQueryModel(elements)

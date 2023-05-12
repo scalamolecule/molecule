@@ -17,6 +17,9 @@ import scala.collection.mutable.ListBuffer
 abstract class JdbcQueryResolve[Tpl](elements: List[Element], dbView: Option[DbView])
   extends SqlModel2Query[Tpl](elements) with JdbcApiSync with CursorUtils {
 
+//  type Row = java.sql.ResultSet
+
+
   lazy val edgeValuesNotFound = "Couldn't find next page. Edge rows were all deleted/updated."
 
   protected def postAdjustPullCasts(): Unit = {

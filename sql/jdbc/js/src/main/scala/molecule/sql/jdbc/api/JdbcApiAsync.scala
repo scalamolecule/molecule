@@ -78,7 +78,7 @@ trait JdbcApiAsync extends JdbcAsyncApiBase with ApiAsync with FutureUtils {
 
     override def validate(implicit conn: Connection): Map[String, Seq[String]] = {
       val proxy = conn.proxy
-      ModelValidation(proxy.nsMap, proxy.attrMap, "save").validate(save.elements)
+      ModelValidation(proxy.schema.nsMap, proxy.schema.attrMap, "save").validate(save.elements)
     }
   }
 
@@ -131,7 +131,7 @@ trait JdbcApiAsync extends JdbcAsyncApiBase with ApiAsync with FutureUtils {
     override def validate(implicit conn: Connection): Map[String, Seq[String]] = {
       val proxy = conn.proxy
       // Only generic model validation on JS platform
-      ModelValidation(proxy.nsMap, proxy.attrMap, "update").validate(update.elements)
+      ModelValidation(proxy.schema.nsMap, proxy.schema.attrMap, "update").validate(update.elements)
     }
   }
 

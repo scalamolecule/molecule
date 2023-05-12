@@ -1,6 +1,6 @@
 package molecule.datalog.datomic.setup
 
-import molecule.base.api.SchemaTransaction
+import molecule.base.api.Schema
 import molecule.core.api.Connection
 import molecule.core.marshalling.DatomicPeerProxy
 import molecule.coreTests.dataModels.core.schema._
@@ -19,7 +19,7 @@ trait DatomicZioSpec extends ZIOSpecDefault with TestData {
   lazy val protocol     = BuildInfo.datomicProtocol
   lazy val useFree      = BuildInfo.datomicUseFree
 
-  def inMem(schemaTx: SchemaTransaction): ZLayer[Any, Throwable, Connection] = {
+  def inMem(schemaTx: Schema): ZLayer[Any, Throwable, Connection] = {
     val proxy = DatomicPeerProxy("mem", "", schemaTx)
     ZLayer.succeed(DatomicConn_JS(proxy, DatomicRpcRequest.moleculeRpcRequest))
   }

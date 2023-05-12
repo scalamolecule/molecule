@@ -118,7 +118,7 @@ case class DatomicQueryResolveCursor[Tpl](
 
 
   private def initialCursor(conn: DatomicConn_JVM, tpls: List[Tpl]): String = {
-    val unique = conn.proxy.uniqueAttrs
+    val unique = conn.proxy.schema.uniqueAttrs
     @tailrec
     def checkSort(
       elements: List[Element],

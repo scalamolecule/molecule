@@ -10,7 +10,6 @@ import scala.language.implicitConversions
 
 object Adhoc extends JdbcTestSuite {
 
-
   override lazy val tests = Tests {
 
     "types" - types { implicit conn =>

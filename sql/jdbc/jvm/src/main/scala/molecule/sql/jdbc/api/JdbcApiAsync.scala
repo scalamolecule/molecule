@@ -115,7 +115,7 @@ trait JdbcApiAsync
 
     override def validate(implicit conn: Connection): Map[String, Seq[String]] = {
       val proxy = conn.proxy
-      ModelValidation(proxy.nsMap, proxy.attrMap, "save").validate(save.elements)
+      ModelValidation(proxy.schema.nsMap, proxy.schema.attrMap, "save").validate(save.elements)
     }
   }
 
@@ -169,7 +169,7 @@ trait JdbcApiAsync
 //    private def getStmts(proxy: ConnProxy): PreparedStmt = {
 //      new InsertExtraction with Insert_stmts {
 //        override protected val ps: PreparedStmt = ???
-//      }.getStmts(proxy.nsMap, insert.elements, insert.tpls)
+//      }.getStmts(proxy.schemaTx.nsMap, insert.elements, insert.tpls)
 //    }
 //
 //    override def validate(implicit conn: Connection): Seq[(Int, Seq[InsertError])] = {
@@ -196,7 +196,7 @@ trait JdbcApiAsync
 //    }
 //
 //    private def getStmts(conn: JdbcConn_JVM): PreparedStmt = {
-//      (new UpdateExtraction(conn.proxy.uniqueAttrs, update.isUpsert) with Update_stmts {
+//      (new UpdateExtraction(conn.proxy.schemaTx.uniqueAttrs, update.isUpsert) with Update_stmts {
 //        override protected val ps: PreparedStmt = ???
 //      })
 //        .getStmts(conn, update.elements)

@@ -83,7 +83,7 @@ trait JdbcApiSync extends JVMJdbcApiBase with SubscriptionStarter with ApiSync {
 
     override def validate(implicit conn: Connection): Map[String, Seq[String]] = {
       val proxy = conn.proxy
-      ModelValidation(proxy.nsMap, proxy.attrMap, "save").validate(save.elements)
+      ModelValidation(proxy.schema.nsMap, proxy.schema.attrMap, "save").validate(save.elements)
     }
   }
 
@@ -108,7 +108,7 @@ trait JdbcApiSync extends JVMJdbcApiBase with SubscriptionStarter with ApiSync {
   //      (new InsertExtraction with Insert_stmts {
   //        override def getStmts(nsMap: Map[String, SchemaAST.MetaNs], elements: List[Model.Element], tpls: Seq[Product], eidIndex: Int, debug: Boolean): PreparedStmt = super.getStmts(nsMap, elements, tpls, eidIndex, debug)
   //      })
-  //        .getStmts(conn.proxy.nsMap, insert.elements, insert.tpls, eidIndex)
+  //        .getStmts(conn.proxy.schemaTx.nsMap, insert.elements, insert.tpls, eidIndex)
   //    }
   //
   //    override def validate(implicit conn: Connection): Seq[(Int, Seq[InsertError])] = {
@@ -133,7 +133,7 @@ trait JdbcApiSync extends JVMJdbcApiBase with SubscriptionStarter with ApiSync {
   //    }
   //
   //    def getStmts(conn: JdbcConn_JVM): PreparedStmt = {
-  //      (new UpdateExtraction(conn.proxy.uniqueAttrs, update.isUpsert) with Update_stmts {
+  //      (new UpdateExtraction(conn.proxy.schemaTx.uniqueAttrs, update.isUpsert) with Update_stmts {
   //        override protected val ps: PreparedStmt = ???
   //      })
   //        .getStmts(conn, update.elements)

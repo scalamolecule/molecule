@@ -5,6 +5,7 @@ import java.net.URI
 import java.util.Date
 import boopickle.CompositePickler
 import boopickle.Default._
+import molecule.base.api.Schema
 import molecule.base.ast.SchemaAST.{Card, CardOne, CardSet}
 import molecule.base.error._
 import molecule.boilerplate.ast.Model._
@@ -15,7 +16,6 @@ object Boopicklers extends MoleculeLogging {
 
   implicit val pickleDate: Pickler[Date] = transformPickler((t: Long) => new java.util.Date(t))(_.getTime)
   implicit val pickleURI : Pickler[URI]  = transformPickler((t: String) => new URI(t))(_.toString)
-
 
   implicit val pickleCard: CompositePickler[Card] = compositePickler[Card]
   pickleCard.addConcreteType[CardOne.type]
@@ -86,13 +86,6 @@ object Boopicklers extends MoleculeLogging {
   pickleValue.addConcreteType[OneByte]
   pickleValue.addConcreteType[OneShort]
   pickleValue.addConcreteType[OneChar]
-
-
-//  implicit val pickleAttrOneTac: CompositePickler[AttrOneTac] = compositePickler[AttrOneTac]
-//  pickleAttrOneTac.addConcreteType[AttrOneTacInt]
-
-
-//  implicit val pickleX: CompositePickler[AttrOneTacString] = compositePickler[AttrOneTacString]
 
   implicit val pickleAttr: CompositePickler[Attr] = compositePickler[Attr]
   pickleAttr.addConcreteType[AttrOneManString]
@@ -285,7 +278,8 @@ object Boopicklers extends MoleculeLogging {
   pickleElement.addConcreteType[AttrSetTacChar]
 
 
-  implicit val pickleInsertError: CompositePickler[InsertError] = compositePickler[InsertError]
+  implicit val pickleInsertError: CompositePickler[InsertError] =
+    compositePickler[InsertError]
 
   implicit val pickleExceptions: CompositePickler[Throwable] = exceptionPickler
   pickleExceptions
@@ -299,6 +293,10 @@ object Boopicklers extends MoleculeLogging {
     compositePickler[FileNotFoundException]
 
 
-  implicit val pickleConnProxy: CompositePickler[ConnProxy] = compositePickler[ConnProxy]
-    .addConcreteType[DatomicPeerProxy]
+  implicit val pickleConnProxy: CompositePickler[ConnProxy] =
+    compositePickler[ConnProxy]
+      .addConcreteType[DatomicPeerProxy]
+
+  implicit val pickleSchemaTransaction: CompositePickler[Schema] =
+    compositePickler[Schema]
 }

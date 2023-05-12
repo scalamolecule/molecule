@@ -95,11 +95,27 @@ case class Schema_Datomic(schema: MetaSchema) extends BaseHelpers with RegexMatc
         |    \"\"\"""".stripMargin
 
   def get: String =
-    s"""|  val datomicPartitions: String = $datomicPartitions
+    s"""|/*
+        |* AUTO-GENERATED schema boilerplate code
+        |*
+        |* To change:
+        |* 1. edit data model file in `${schema.pkg}.dataModel/`
+        |* 2. `sbt compile -Dmolecule=true`
+        |*/
+        |package ${schema.pkg}.schema
+        |
+        |import molecule.base.api.Schema
+        |import molecule.base.ast.SchemaAST._
+        |
+        |
+        |trait ${schema.domain}Schema_Datomic extends Schema {
+        |
+        |  val datomicPartitions: String = $datomicPartitions
         |
         |
         |  val datomicSchema: String = $datomicSchema
         |
         |
-        |  val datomicAliases: String = $datomicAliases""".stripMargin
+        |  val datomicAliases: String = $datomicAliases
+        |}""".stripMargin
 }

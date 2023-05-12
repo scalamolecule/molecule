@@ -119,7 +119,7 @@ case class JdbcQueryResolveCursor[Tpl](
 
 
   private def initialCursor(conn: JdbcConn_JVM, tpls: List[Tpl]): String = {
-    val unique = conn.proxy.uniqueAttrs
+    val unique = conn.proxy.schema.uniqueAttrs
     @tailrec
     def checkSort(
       elements: List[Element],

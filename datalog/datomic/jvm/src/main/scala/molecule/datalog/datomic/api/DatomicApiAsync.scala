@@ -87,7 +87,7 @@ trait DatomicApiAsync
 
     override def validate(implicit conn: Connection): Map[String, Seq[String]] = {
       val proxy = conn.proxy
-      ModelValidation(proxy.nsMap, proxy.attrMap, "save").validate(save.elements)
+      ModelValidation(proxy.schema.nsMap, proxy.schema.attrMap, "save").validate(save.elements)
     }
   }
 
@@ -111,7 +111,7 @@ trait DatomicApiAsync
 
     private def getStmts(proxy: ConnProxy): Data = {
       (new InsertExtraction with Data_Insert)
-        .getStmts(proxy.nsMap, insert.elements, insert.tpls)
+        .getStmts(proxy.schema.nsMap, insert.elements, insert.tpls)
     }
 
     override def validate(implicit conn: Connection): Seq[(Int, Seq[InsertError])] = {
@@ -138,7 +138,7 @@ trait DatomicApiAsync
     }
 
     private def getStmts(conn: DatomicConn_JVM): Data = {
-      (new UpdateExtraction(conn.proxy.uniqueAttrs, update.isUpsert) with Data_Update)
+      (new UpdateExtraction(conn.proxy.schema.uniqueAttrs, update.isUpsert) with Data_Update)
         .getStmts(conn, update.elements)
     }
 

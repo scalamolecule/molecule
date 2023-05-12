@@ -118,7 +118,7 @@ trait JdbcTxBase_JVM extends JdbcDataType_JVM with ModelUtils {
 
   protected def getFreshConn(proxy: ConnProxy): Future[JdbcConn_JVM] = {
     proxy match {
-      case proxy@DatomicPeerProxy(protocol, dbIdentifier, _, _, _, _, _, _, _, isFreeVersion) =>
+      case proxy@DatomicPeerProxy(protocol, dbIdentifier, _, _, _, isFreeVersion) =>
         //        protocol match {
         //          case "mem" =>
         //            JdbcHandler.recreateDbFromEdn(proxy, protocol, dbIdentifier, isFreeVersion)

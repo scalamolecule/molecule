@@ -87,7 +87,7 @@ trait JdbcApiZio extends JdbcZioApiBase with ApiZio with FutureUtils {
         conn <- ZIO.service[Connection]
         proxy = conn.proxy
         errors <- ZIO.succeed[Map[String, Seq[String]]](
-          ModelValidation(proxy.nsMap, proxy.attrMap, "save").validate(save.elements)
+          ModelValidation(proxy.schema.nsMap, proxy.schema.attrMap, "save").validate(save.elements)
         )
       } yield errors
     }
@@ -141,7 +141,7 @@ trait JdbcApiZio extends JdbcZioApiBase with ApiZio with FutureUtils {
         conn <- ZIO.service[Connection]
         proxy = conn.proxy
         errors <- ZIO.succeed[Map[String, Seq[String]]](
-          ModelValidation(proxy.nsMap, proxy.attrMap, "update").validate(update.elements)
+          ModelValidation(proxy.schema.nsMap, proxy.schema.attrMap, "update").validate(update.elements)
         )
       } yield errors
     }

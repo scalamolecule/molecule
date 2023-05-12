@@ -1,8 +1,7 @@
 package molecule.base.parse
 
-import molecule.base.ast.SchemaAST._
 import molecule.base.codegen.extract.DataModel2MetaSchema
-import molecule.base.codegen.render.Dsl
+import molecule.base.codegen.render._
 import utest._
 
 
@@ -36,7 +35,11 @@ object RenderDSL extends TestSuite {
 
 
       //      Dsl(typesNss, "", typesNss.parts.head.nss(0)).get ==> "check"
-      Dsl(refsNss, "", refsNss.parts.head.nss(0)).get ==> "check"
+//      Dsl(refsNss, "", refsNss.parts.head.nss(0)).get ==> "check"
+
+//      Schema(typesNss).get ==> "check"
+//      Schema_Datomic(typesNss).get ==> "check"
+      Schema_Sql(typesNss).get ==> "check"
     }
   }
 }

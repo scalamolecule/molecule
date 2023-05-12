@@ -1,6 +1,6 @@
 package molecule.sql.jdbc.setup
 
-import molecule.base.api.SchemaTransaction
+import molecule.base.api.Schema
 import molecule.core.api.Connection
 import molecule.core.marshalling.SqlProxy
 import molecule.core.util.Executor._
@@ -17,7 +17,7 @@ trait JdbcTestSuite extends JdbcTestSuiteBase {
   lazy val protocol     = BuildInfo.datomicProtocol
   lazy val useFree      = BuildInfo.datomicUseFree
 
-  def inMem[T](test: Connection => T, schemaTx: SchemaTransaction): T = {
+  def inMem[T](test: Connection => T, schemaTx: Schema): T = {
     val url               = s"jdbc:h2:mem:test_database_" + Random.nextInt()
     val proxy             = SqlProxy(url, schemaTx)
     var conn: JdbcConn_JVM = JdbcConn_JVM(proxy, null)

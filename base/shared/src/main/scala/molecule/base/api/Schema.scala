@@ -5,7 +5,7 @@ import molecule.base.ast.SchemaAST._
 
 /** Schema transaction data interface with data sources for various databases.
   * */
-trait SchemaTransaction {
+trait Schema {
 
   val metaSchema: MetaSchema
 
@@ -17,10 +17,11 @@ trait SchemaTransaction {
 
   val uniqueAttrs: List[String]
 
-
-
   /** Edn data strings to transact Datomic Peer schema. */
-  val datomicSchema    : String
   val datomicPartitions: String
+  val datomicSchema    : String
   val datomicAliases   : String
+
+  /** Database-dependent sql schema */
+  def sqlSchema(db: String): String
 }

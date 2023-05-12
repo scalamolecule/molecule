@@ -1,7 +1,7 @@
 package molecule.datalog.datomic.setup
 
 import java.util.UUID.randomUUID
-import molecule.base.api.SchemaTransaction
+import molecule.base.api.Schema
 import molecule.core.api.Connection
 import molecule.core.marshalling.DatomicPeerProxy
 import molecule.core.util.Executor._
@@ -18,7 +18,7 @@ trait DatomicZioSpec extends ZIOSpecDefault with TestData {
   lazy val protocol     = BuildInfo.datomicProtocol
   lazy val useFree      = BuildInfo.datomicUseFree
 
-  def inMem(schemaTx: SchemaTransaction): ZLayer[Any, Throwable, Connection] = {
+  def inMem(schemaTx: Schema): ZLayer[Any, Throwable, Connection] = {
     val dbIdentifier = if (protocol == "mem") "" else {
       println(s"Re-creating live database...")
       "localhost:4334/" + randomUUID().toString

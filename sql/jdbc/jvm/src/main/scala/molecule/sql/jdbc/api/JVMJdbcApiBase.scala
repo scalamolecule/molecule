@@ -33,8 +33,8 @@ trait JVMJdbcApiBase {
 //      }
 //    }
     ModelValidation(
-      proxy.nsMap,
-      proxy.attrMap,
+      proxy.schema.nsMap,
+      proxy.schema.attrMap,
       "update",
 //      Some(getCurSetValues)
       None
