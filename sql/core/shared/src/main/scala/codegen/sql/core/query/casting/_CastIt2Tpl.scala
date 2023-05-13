@@ -1,6 +1,6 @@
 package codegen.sql.core.query.casting
 
-import codegen.SqlGenBase
+import codegen.sql.SqlGenBase
 
 object _CastIt2Tpl extends SqlGenBase("CastIt2Tpl", "/query/casting") {
 

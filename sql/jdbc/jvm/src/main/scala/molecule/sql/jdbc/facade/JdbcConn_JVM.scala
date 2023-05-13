@@ -35,8 +35,8 @@ case class JdbcConn_JVM(
   override def transact_sync(data: Data): TxReport = {
     val (stmts, setters) = data
 
-    //    println("stmts  : " + stmts)
-    //    println("setters: " + setters)
+    println("stmts  : " + stmts)
+    println("setters: " + setters)
 
     var refIds    = List.empty[Long]
     var accIds    = List.empty[Long]
@@ -47,17 +47,19 @@ case class JdbcConn_JVM(
       sqlConn.setAutoCommit(false)
 
       setters.foreach { setValues =>
-//        println("A " + stmts(stmtIndex))
+        println("------------------------------")
+        println("A " + stmts(stmtIndex))
 
         val ps = sqlConn.prepareStatement(stmts(stmtIndex), Statement.RETURN_GENERATED_KEYS)
         setValues(ps, refIds)
-        ps.executeUpdate()
+//        ps.executeUpdate()
+        ps.executeBatch()
         val resultSet = ps.getGeneratedKeys // is empty if no nested data
         var ids       = List.empty[Long]
         while (resultSet.next()) {
           ids = ids :+ resultSet.getLong(1)
         }
-//        println("ids: " + ids)
+        println("ids: " + ids)
 
         refIds = ids
         accIds = ids ++ accIds
@@ -72,37 +74,27 @@ case class JdbcConn_JVM(
       // transact all
       sqlConn.commit()
 
-
-      //      val stmt = "insert into Ns(int) values (?)"
-      //
-      //      val ps = sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
-      //
-      //      ps.setInt(1, 3)
-      //      ps.execute()
-      //
-      //      val resultSet = ps.getGeneratedKeys // is empty if no nested data
-      //      var ids       = List.empty[Long]
-      //      while (resultSet.next()) {
-      //        ids = ids :+ resultSet.getLong(1)
-      //      }
-      //      println("ids: " + ids)
-
-
       // Tx entity not implemented for sql-jdbc
       TxReport(0, refIds)
     } catch {
       case e: SQLException =>
         try {
           sqlConn.rollback()
-          throw ExecutionError(s"Successfully rolled back unsuccessful save with error: " + e)
+          //          e.printStackTrace()
+          //          throw ExecutionError(s"Successfully rolled back unsuccessful save with error: " + e)
+          logger.warn(s"Successfully rolled back unsuccessful save with error: " + e)
+          throw e // re-throw to keep stacktrace back to original error
         } catch {
           case e: SQLException =>
-            throw ExecutionError("Couldn't roll back unsuccessful save: " + e)
+            //            throw ExecutionError("Couldn't roll back unsuccessful save: " + e)
+            throw e
           //          case NonFatal(e)     =>
           //            throw ExecutionError("Unexpected error from rollback attempt: " + e)
         }
       case NonFatal(e)     =>
-        throw ExecutionError("Unexpected save error: " + e)
+        //        e.printStackTrace()
+        //        throw ExecutionError("Unexpected save error: " + e)
+        throw e
     }
   }
 

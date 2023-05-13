@@ -62,22 +62,23 @@ trait JdbcApiSync extends JVMJdbcApiBase with SubscriptionStarter with ApiSync {
 
 
   implicit class datomicSaveApiSync[Tpl](save: Save) extends SaveTransaction {
-    override def transact(implicit conn: Connection): TxReport = {
+    override def transact(implicit conn0: Connection): TxReport = {
       val errors = validate
       if (errors.isEmpty) {
-        conn.asInstanceOf[JdbcConn_JVM].transact_sync(getData(conn))
+        val conn = conn0.asInstanceOf[JdbcConn_JVM]
+        conn.transact_sync(getData(conn))
       } else {
         throw ValidationErrors(errors)
       }
     }
 
     override def inspect(implicit conn: Connection): Unit = {
-      printInspectTx("SAVE", save.elements, getData(conn))
+      printInspectTx("SAVE", save.elements, getData(conn.asInstanceOf[JdbcConn_JVM]))
     }
 
-    def getData(conn: Connection): Data = {
+    def getData(conn: JdbcConn_JVM): Data = {
       new SaveExtraction() with Data_Save {
-        override protected val sqlConn = conn.asInstanceOf[JdbcConn_JVM].sqlConn
+        override protected val sqlConn = conn.sqlConn
       }.getData(save.elements)
     }
 
@@ -88,34 +89,33 @@ trait JdbcApiSync extends JVMJdbcApiBase with SubscriptionStarter with ApiSync {
   }
 
 
-  //  implicit class datomicInsertApiSync[Tpl](insert0: Insert) extends InsertTransaction {
-  //    val insert = insert0.asInstanceOf[InsertTpls]
-  //    override def transact(implicit conn: Connection): TxReport = {
-  //      val errors = validate
-  //      if (errors.isEmpty) {
-  //        val datomicConn = conn.asInstanceOf[JdbcConn_JVM]
-  //        datomicConn.transact_sync(getStmts(datomicConn))
-  //      } else {
-  //        throw InsertErrors(errors)
-  //      }
-  //    }
-  //    override def inspect(implicit conn: Connection): Unit = {
-  //      val datomicConn = conn.asInstanceOf[JdbcConn_JVM]
-  //      printInspectTx("INSERT", insert.elements, getStmts(datomicConn))
-  //    }
-  //
-  //    def getStmts(conn: JdbcConn_JVM, eidIndex: Int = 0): PreparedStmt = {
-  //      (new InsertExtraction with Insert_stmts {
-  //        override def getStmts(nsMap: Map[String, SchemaAST.MetaNs], elements: List[Model.Element], tpls: Seq[Product], eidIndex: Int, debug: Boolean): PreparedStmt = super.getStmts(nsMap, elements, tpls, eidIndex, debug)
-  //      })
-  //        .getStmts(conn.proxy.schemaTx.nsMap, insert.elements, insert.tpls, eidIndex)
-  //    }
-  //
-  //    override def validate(implicit conn: Connection): Seq[(Int, Seq[InsertError])] = {
-  //      InsertValidation.validate(conn, insert.elements, insert.tpls)
-  //    }
-  //  }
-  //
+    implicit class datomicInsertApiSync[Tpl](insert0: Insert) extends InsertTransaction {
+      val insert = insert0.asInstanceOf[InsertTpls]
+      override def transact(implicit conn0: Connection): TxReport = {
+        val errors = validate
+        if (errors.isEmpty) {
+          val conn = conn0.asInstanceOf[JdbcConn_JVM]
+          conn.transact_sync(getData(conn))
+        } else {
+          throw InsertErrors(errors)
+        }
+      }
+      override def inspect(implicit conn: Connection): Unit = {
+        val datomicConn = conn.asInstanceOf[JdbcConn_JVM]
+        printInspectTx("INSERT", insert.elements, getData(datomicConn))
+      }
+
+      def getData(conn: JdbcConn_JVM, eidIndex: Int = 0): Data = {
+        new InsertExtraction with Data_Insert {
+          override protected val sqlConn: sql.Connection = conn.sqlConn
+        }.getData(conn.proxy.schema.nsMap, insert.elements, insert.tpls, eidIndex)
+      }
+
+      override def validate(implicit conn: Connection): Seq[(Int, Seq[InsertError])] = {
+        InsertValidation.validate(conn, insert.elements, insert.tpls)
+      }
+    }
+
   //
   //  implicit class datomicUpdateApiSync[Tpl](update: Update) extends UpdateTransaction {
   //    override def transact(implicit conn0: Connection): TxReport = {
@@ -133,7 +133,7 @@ trait JdbcApiSync extends JVMJdbcApiBase with SubscriptionStarter with ApiSync {
   //    }
   //
   //    def getStmts(conn: JdbcConn_JVM): PreparedStmt = {
-  //      (new UpdateExtraction(conn.proxy.schemaTx.uniqueAttrs, update.isUpsert) with Update_stmts {
+  //      (new UpdateExtraction(conn.proxy.schema.uniqueAttrs, update.isUpsert) with Update_stmts {
   //        override protected val ps: PreparedStmt = ???
   //      })
   //        .getStmts(conn, update.elements)

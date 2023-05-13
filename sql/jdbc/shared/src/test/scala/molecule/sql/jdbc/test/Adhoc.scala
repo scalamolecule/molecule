@@ -13,11 +13,29 @@ object Adhoc extends JdbcTestSuite {
   override lazy val tests = Tests {
 
     "types" - types { implicit conn =>
-//      Ns.int(3).save.transact
-//      Ns.int.query.get ==> List(3)
-      Ns.s("hej").int(3).save.transact
-      Ns.s.int.query.get ==> List(("hej", 3))
+//      Ns.s("hej").int(3).save.transact
+//      Ns.s.int.query.get ==> List(("hej", 3))
+//      Ns.s.int.insert(
+//        ("hej", 3),
+//        ("bob", 4),
+//      ).transact
+//      Ns.s.int.query.get ==> List(
+//        ("hej", 3),
+//        ("bob", 4),
+//      )
 //
+//      Ns.s("hej").Ref.int(3).save.transact
+//      Ns.s.Ref.int.query.get ==> List(("hej", 3))
+//
+
+      Ns.s.Ref.int.insert(
+        ("hej", 3),
+        ("bob", 4),
+      ).transact
+      Ns.s.Ref.int.query.get ==> List(
+        ("hej", 3),
+        ("bob", 4),
+      )
 
 //      Ns.int.insert.apply(3).transact
     }

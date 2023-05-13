@@ -1,6 +1,6 @@
 package codegen.sql.core.query.casting
 
-import codegen.SqlGenBase
+import codegen.sql.SqlGenBase
 
 object _CastNestedOptBranch extends SqlGenBase("CastNestedOptBranch", "/query/casting") {
 

@@ -9,18 +9,18 @@ trait LambdasOne extends ResolveBase { self: Base =>
 
   protected lazy val j2sString1    : (Row, Int) => AnyRef = (row: Row, n: Int) => row.getString(n)
   protected lazy val j2sInt1       : (Row, Int) => AnyRef = (row: Row, n: Int) => row.getInt(n).asInstanceOf[AnyRef]
-  protected lazy val j2sLong1      : (Row, Int) => AnyRef = (row: Row, n: Int) => row.getInt(n).asInstanceOf[AnyRef]
-  protected lazy val j2sFloat1     : (Row, Int) => AnyRef = (row: Row, n: Int) => row.getInt(n).asInstanceOf[AnyRef]
-  protected lazy val j2sDouble1    : (Row, Int) => AnyRef = (row: Row, n: Int) => row.getInt(n).asInstanceOf[AnyRef]
-  protected lazy val j2sBoolean1   : (Row, Int) => AnyRef = (row: Row, n: Int) => row.getInt(n).asInstanceOf[AnyRef]
-  protected lazy val j2sBigInt1    : (Row, Int) => AnyRef = (row: Row, n: Int) => row.getInt(n).asInstanceOf[AnyRef]
-  protected lazy val j2sBigDecimal1: (Row, Int) => AnyRef = (row: Row, n: Int) => row.getInt(n).asInstanceOf[AnyRef]
-  protected lazy val j2sDate1      : (Row, Int) => AnyRef = (row: Row, n: Int) => row.getInt(n).asInstanceOf[AnyRef]
-  protected lazy val j2sUUID1      : (Row, Int) => AnyRef = (row: Row, n: Int) => row.getInt(n).asInstanceOf[AnyRef]
-  protected lazy val j2sURI1       : (Row, Int) => AnyRef = (row: Row, n: Int) => row.getInt(n).asInstanceOf[AnyRef]
-  protected lazy val j2sByte1      : (Row, Int) => AnyRef = (row: Row, n: Int) => row.getInt(n).asInstanceOf[AnyRef]
-  protected lazy val j2sShort1     : (Row, Int) => AnyRef = (row: Row, n: Int) => row.getInt(n).asInstanceOf[AnyRef]
-  protected lazy val j2sChar1      : (Row, Int) => AnyRef = (row: Row, n: Int) => row.getInt(n).asInstanceOf[AnyRef]
+  protected lazy val j2sLong1      : (Row, Int) => AnyRef = (row: Row, n: Int) => row.getLong(n).asInstanceOf[AnyRef]
+  protected lazy val j2sFloat1     : (Row, Int) => AnyRef = (row: Row, n: Int) => row.getFloat(n).asInstanceOf[AnyRef]
+  protected lazy val j2sDouble1    : (Row, Int) => AnyRef = (row: Row, n: Int) => row.getDouble(n).asInstanceOf[AnyRef]
+  protected lazy val j2sBoolean1   : (Row, Int) => AnyRef = (row: Row, n: Int) => row.getBoolean(n).asInstanceOf[AnyRef]
+  protected lazy val j2sBigInt1    : (Row, Int) => AnyRef = (row: Row, n: Int) => row.getBigDecimal(n)//.asInstanceOf[AnyRef]
+  protected lazy val j2sBigDecimal1: (Row, Int) => AnyRef = (row: Row, n: Int) => row.getBigDecimal(n)//.asInstanceOf[AnyRef]
+  protected lazy val j2sDate1      : (Row, Int) => AnyRef = (row: Row, n: Int) => row.getDate(n)//.asInstanceOf[AnyRef]
+  protected lazy val j2sUUID1      : (Row, Int) => AnyRef = (row: Row, n: Int) => row.getString(n)//.asInstanceOf[AnyRef]
+  protected lazy val j2sURI1       : (Row, Int) => AnyRef = (row: Row, n: Int) => row.getString(n)//.asInstanceOf[AnyRef]
+  protected lazy val j2sByte1      : (Row, Int) => AnyRef = (row: Row, n: Int) => row.getByte(n).asInstanceOf[AnyRef]
+  protected lazy val j2sShort1     : (Row, Int) => AnyRef = (row: Row, n: Int) => row.getShort(n).asInstanceOf[AnyRef]
+  protected lazy val j2sChar1      : (Row, Int) => AnyRef = (row: Row, n: Int) => row.getString(n)//.asInstanceOf[AnyRef]
 
 
   // Datomic Java to Scala

@@ -13,7 +13,7 @@
 //import molecule.sql.jdbc.facade.JdbcConn_JVM
 //import molecule.sql.jdbc.query.{JdbcQueryResolveCursor, JdbcQueryResolveOffset}
 //import molecule.sql.jdbc.subscription.SubscriptionStarter
-//import molecule.sql.jdbc.transaction.{Delete_stmts, Insert_stmts, Save_stmts, Update_stmts}
+//import molecule.sql.jdbc.transaction.{Delete_stmts, Insert_stmts, Data_Save, Update_stmts}
 //import zio._
 //import scala.concurrent.Future
 //
@@ -91,7 +91,7 @@
 //    }
 //
 //    private def getStmts: PreparedStmt = {
-//      (new SaveExtraction() with Save_stmts).getStmts(save.elements)
+//      (new SaveExtraction() with Data_Save).getStmts(save.elements)
 //    }
 //
 //    override def validate: ZIO[Connection, MoleculeError, Map[String, Seq[String]]] = {
@@ -100,7 +100,7 @@
 //        conn = conn0.asInstanceOf[JdbcConn_JVM]
 //        proxy = conn.proxy
 //        errors <- ZIO.succeed[Map[String, Seq[String]]](
-//          ModelValidation(proxy.schemaTx.nsMap, proxy.schemaTx.attrMap, "save").validate(save.elements)
+//          ModelValidation(proxy.schema.nsMap, proxy.schema.attrMap, "save").validate(save.elements)
 //        )
 //      } yield errors
 //    }
@@ -130,7 +130,7 @@
 //
 //    private def getStmts(proxy: ConnProxy): PreparedStmt = {
 //      (new InsertExtraction with Insert_stmts)
-//        .getStmts(proxy.schemaTx.nsMap, insert.elements, insert.tpls)
+//        .getStmts(proxy.schema.nsMap, insert.elements, insert.tpls)
 //    }
 //
 //    override def validate: ZIO[Connection, MoleculeError, Seq[(Int, Seq[InsertError])]] = {
@@ -166,7 +166,7 @@
 //    }
 //
 //    private def getStmts(conn: JdbcConn_JVM): PreparedStmt = {
-//      (new UpdateExtraction(conn.proxy.schemaTx.uniqueAttrs, update.isUpsert) with Update_stmts)
+//      (new UpdateExtraction(conn.proxy.schema.uniqueAttrs, update.isUpsert) with Update_stmts)
 //        .getStmts(conn, update.elements)
 //    }
 //

@@ -19,6 +19,7 @@ trait InsertOps {
     tplIndex: Int,
     ns: String,
     refAttr: String,
+    refNs: String,
     elements: List[Element]
   ): Product => Unit
 
@@ -57,7 +58,8 @@ trait InsertOps {
 
   protected def addRef(
     ns: String,
-    refAttr: String
+    refAttr: String,
+    refNs: String,
   ): Product => Unit
 
   protected def addBackRef(

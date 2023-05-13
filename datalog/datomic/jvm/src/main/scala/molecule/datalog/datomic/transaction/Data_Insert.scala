@@ -66,6 +66,7 @@ trait Data_Insert
     tplIndex: Int,
     ns: String,
     refAttr: String,
+    refNs: String,
     nestedElements: List[Element]
   ): Product => Unit = {
     // Recursively resolve nested data
@@ -78,7 +79,7 @@ trait Data_Insert
           values.foreach { value =>
             e = nestedBaseId
             val nestedTpl = Tuple1(value)
-            addRef(ns, refAttr)(nestedTpl)
+            addRef(ns, refAttr, refNs)(nestedTpl)
             e0 = e
             nested2stmts(nestedTpl)
           }
@@ -89,7 +90,7 @@ trait Data_Insert
           val nestedBaseId = e
           nestedTpls.foreach { nestedTpl =>
             e = nestedBaseId
-            addRef(ns, refAttr)(nestedTpl)
+            addRef(ns, refAttr, refNs)(nestedTpl)
             e0 = e
             nested2stmts(nestedTpl)
           }
@@ -162,7 +163,7 @@ trait Data_Insert
       }
   }
 
-  override protected def addRef(ns: String, refAttr: String): Product => Unit = {
+  override protected def addRef(ns: String, refAttr: String, refNs: String): Product => Unit = {
     val a = kw(ns, refAttr)
     (_: Product) =>
       backRefs = backRefs + (ns -> e)

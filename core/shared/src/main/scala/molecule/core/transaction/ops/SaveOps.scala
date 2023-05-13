@@ -24,7 +24,8 @@ trait SaveOps extends Action2Data {
 
   protected def ref(
     ns: String,
-    refAttr: String
+    refAttr: String,
+    refNs: String
   ): Unit
 
   protected def handleNs(ns: String): Unit

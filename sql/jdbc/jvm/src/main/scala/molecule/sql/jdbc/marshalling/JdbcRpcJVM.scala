@@ -81,7 +81,7 @@ object JdbcRpcJVM extends MoleculeRpc
   ): Future[Either[MoleculeError, TxReport]] = either {
 //    for {
 //      conn <- getConn(proxy)
-//      stmts = (new SaveExtraction() with Save_stmts).getPrepStmt(elements)
+//      stmts = (new SaveExtraction() with Data_Save).getPrepStmt(elements)
 //      txReport <- conn.transact_async(stmts)
 //    } yield txReport
     ???
@@ -103,9 +103,9 @@ object JdbcRpcJVM extends MoleculeRpc
 //          } else tpls).asInstanceOf[Seq[Product]]
 //        case Left(err)   => throw err // catched in outer either wrapper
 //      }
-//      stmts = (new InsertExtraction with Insert_stmts).getStmts(proxy.schemaTx.nsMap, tplElements, tplProducts)
+//      stmts = (new InsertExtraction with Insert_stmts).getStmts(proxy.schema.nsMap, tplElements, tplProducts)
 //      _ = if (txElements.nonEmpty) {
-//        val txStmts = (new SaveExtraction() with Save_stmts).getRawStmts(txElements, datomicTx, false)
+//        val txStmts = (new SaveExtraction() with Data_Save).getRawStmts(txElements, datomicTx, false)
 //        stmts.addAll(txStmts)
 //      }
 //      txReport <- conn.transact_async(stmts)
@@ -120,7 +120,7 @@ object JdbcRpcJVM extends MoleculeRpc
   ): Future[Either[MoleculeError, TxReport]] = either {
 //    for {
 //      conn <- getConn(proxy)
-//      stmts = (new UpdateExtraction(conn.proxy.schemaTx.uniqueAttrs, isUpsert) with Update_stmts)
+//      stmts = (new UpdateExtraction(conn.proxy.schema.uniqueAttrs, isUpsert) with Update_stmts)
 //        .getStmts(conn, elements, true)
 //      txReport <- conn.transact_async(stmts)
 //    } yield txReport

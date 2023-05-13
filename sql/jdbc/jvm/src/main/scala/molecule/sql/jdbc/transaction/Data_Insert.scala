@@ -1,11 +1,14 @@
 package molecule.sql.jdbc.transaction
 
+import java.net.URI
 import molecule.base.ast.SchemaAST._
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.ops.InsertOps
 import molecule.core.transaction.{InsertExtraction, InsertResolvers_, SaveExtraction}
 import molecule.core.util.ModelUtils
+import java.sql.{SQLException, Statement, PreparedStatement => PS}
+import java.util.{Date, UUID}
 
 trait Data_Insert
   extends JdbcTxBase_JVM
@@ -14,6 +17,8 @@ trait Data_Insert
     with ModelUtils
     with MoleculeLogging { self: InsertExtraction with InsertResolvers_ =>
 
+  var colIndex = 0
+
   def getData(
     nsMap: Map[String, MetaNs],
     elements: List[Element],
@@ -21,27 +26,29 @@ trait Data_Insert
     eidIndex: Int = 0,
     debug: Boolean = true
   ): Data = {
-//    initTxBase(elements, eidIndex)
-//    val (mainElements, txMetaElements) = separateTxElements(elements)
-//    val row2stmts                      = getResolver(nsMap, mainElements)
-//    tpls.foreach { tpl =>
-//      e = newId
-//      e0 = e
-//      // populate `stmts`
-//      row2stmts(tpl)
-//    }
-//    if (txMetaElements.nonEmpty) {
-//      val txMetaStmts = (new SaveExtraction(true) with Save_stmts)
-//        .getRawStmts(txMetaElements, datomicTx, false)
-//      stmts.addAll(txMetaStmts)
-//    }
-//    if (debug) {
-//      val insertStrs = "INSERT:" +: elements :+ "" :+ stmts.toArray().mkString("\n")
-//      logger.debug(insertStrs.mkString("\n").trim)
-//    }
-//    stmts
-    ???
+    table = getInitialNs(elements)
+    initTxBase(elements, eidIndex)
+    val (mainElements, txMetaElements) = separateTxElements(elements)
+    val tpl2data                       = getResolver(nsMap, mainElements)
+    tpls.foreach { tpl =>
+      colIndex = 0
+      tpl2data(tpl)
+    }
+    //    if (txMetaElements.nonEmpty) {
+    //      val txMetaStmts = (new SaveExtraction(true) with Data_Save)
+    //        .getRawStmts(txMetaElements, datomicTx, false)
+    //      stmts.addAll(txMetaStmts)
+    //    }
+    //    if (debug) {
+    //      val insertStrs = "INSERT:" +: elements :+ "" :+ stmts.toArray().mkString("\n")
+    //      logger.debug(insertStrs.mkString("\n").trim)
+    //    }
+    //    stmts
+
+    insertNs()
+    (stmts, setters)
   }
+
 
   override protected def addComposite(
     nsMap: Map[String, MetaNs],
@@ -67,6 +74,7 @@ trait Data_Insert
     tplIndex: Int,
     ns: String,
     refAttr: String,
+    refNs: String,
     nestedElements: List[Element]
   ): Product => Unit = {
     // Recursively resolve nested data
@@ -79,7 +87,7 @@ trait Data_Insert
           values.foreach { value =>
             e = nestedBaseId
             val nestedTpl = Tuple1(value)
-            addRef(ns, refAttr)(nestedTpl)
+            addRef(ns, refAttr, refNs)(nestedTpl)
             e0 = e
             nested2stmts(nestedTpl)
           }
@@ -90,7 +98,7 @@ trait Data_Insert
           val nestedBaseId = e
           nestedTpls.foreach { nestedTpl =>
             e = nestedBaseId
-            addRef(ns, refAttr)(nestedTpl)
+            addRef(ns, refAttr, refNs)(nestedTpl)
             e0 = e
             nested2stmts(nestedTpl)
           }
@@ -98,19 +106,6 @@ trait Data_Insert
     }
   }
 
-  override protected def addV[T](
-    ns: String,
-    attr: String,
-    outerTpl: Int,
-    tplIndex: Int,
-    scala2dbTpe: T => Any,
-  ): Product => Unit = {
-    val a = kw(ns, attr)
-    backRefs = backRefs + (ns -> e)
-    (tpl: Product) =>
-      appendStmt(add, e, a,
-        scala2dbTpe(tpl.productElement(tplIndex).asInstanceOf[T]).asInstanceOf[AnyRef])
-  }
 
   override protected def addOptV[T](
     ns: String,
@@ -163,7 +158,7 @@ trait Data_Insert
       }
   }
 
-  override protected def addRef(ns: String, refAttr: String): Product => Unit = {
+  protected def addRefOLD(ns: String, refAttr: String): Product => Unit = {
     val a = kw(ns, refAttr)
     (_: Product) =>
       backRefs = backRefs + (ns -> e)
@@ -175,27 +170,84 @@ trait Data_Insert
       stmt.add(e)
       stmtsOLD.add(stmt)
   }
+  override protected def addRef(ns: String, refAttr: String, refNs: String): Product => Unit = {
+    (_: Product) => {
+      columns += refAttr
+      val j = colIndex + 1
+      colSetters = colSetters :+ ((ps: PS, refIds: List[Long]) => {
+        refIds.size match {
+          case 0 => ()
+          case 1 => ps.setLong(j, refIds.head)
+          case n => throw new Exception(s"todo - save $n refs in join table")
+        }
+      })
+      insertNs()
+      table = refNs
+    }
+  }
+
+  override protected def addV[T](
+    ns: String,
+    attr: String,
+    outerTpl: Int,
+    tplIndex: Int,
+    scala2dbTpe: T => Any,
+  ): Product => Unit = {
+    columns += attr
+    (tpl: Product) => {
+      val tplArity = tpl.productArity
+      colIndex += 1
+      //      println("tplArity: " + tplArity + "  -  " + colIndex)
+      val j = colIndex
+      colSetters = colSetters :+ ((ps: PS, _: List[Long]) => {
+        val value  = tpl.productElement(tplIndex).asInstanceOf[T]
+        val setter = scala2dbTpe(value).asInstanceOf[(PS, Int) => Unit]
+        setter(ps, j)
+        //        println("value: " + value)
+        if (j == tplArity) {
+          //          println("***")
+          ps.addBatch()
+        }
+      })
+    }
+  }
 
   override protected def addBackRef(backRefNs: String): Product => Unit = {
     (_: Product) =>
       e = backRefs(backRefNs)
   }
 
+  def insertNs(): Unit = {
+    val cols = columns.toList
+    val stmt =
+      s"""insert into $table(
+         |  ${cols.mkString(",\n  ")}
+         |) values (${cols.map(_ => "?").mkString(", ")})""".stripMargin
 
-  // Save Int as Long in Datomic since we can't enforce Integers in edn (for JS rpc)
+    println("---- stmt -----------\n" + stmt)
+    stmts = stmt :: stmts
+    val colSetters1    = colSetters
+    val setter: Setter = (ps: PS, refIds: List[Long]) =>
+      colSetters1.foreach { colSetter =>
+        colSetter.apply(ps, refIds)
+      }
+    setters = setter :: setters
+    colIndex = 0
+    columns.clear()
+  }
 
-  override protected lazy val valueString     = identity
-  override protected lazy val valueInt        = (v: Any) => v.asInstanceOf[Int].toLong
-  override protected lazy val valueLong       = identity
-  override protected lazy val valueFloat      = identity
-  override protected lazy val valueDouble     = identity
-  override protected lazy val valueBoolean    = boolean2java
-  override protected lazy val valueBigInt     = bigInt2java
-  override protected lazy val valueBigDecimal = bigDec2java
-  override protected lazy val valueDate       = identity
-  override protected lazy val valueUUID       = identity
-  override protected lazy val valueURI        = identity
-  override protected lazy val valueByte       = byte2java
-  override protected lazy val valueShort      = short2java
-  override protected lazy val valueChar       = char2java
+  override protected lazy val valueString     = (v: String) => (ps: PS, n: Int) => ps.setString(n, v)
+  override protected lazy val valueInt        = (v: Int) => (ps: PS, n: Int) => ps.setInt(n, v)
+  override protected lazy val valueLong       = (v: Long) => (ps: PS, n: Int) => ps.setLong(n, v)
+  override protected lazy val valueFloat      = (v: Float) => (ps: PS, n: Int) => ps.setFloat(n, v)
+  override protected lazy val valueDouble     = (v: Double) => (ps: PS, n: Int) => ps.setDouble(n, v)
+  override protected lazy val valueBoolean    = (v: Boolean) => (ps: PS, n: Int) => ps.setBoolean(n, v)
+  override protected lazy val valueBigInt     = (v: BigInt) => (ps: PS, n: Int) => ps.setBigDecimal(n, BigDecimal(v).bigDecimal)
+  override protected lazy val valueBigDecimal = (v: BigDecimal) => (ps: PS, n: Int) => ps.setBigDecimal(n, v.bigDecimal)
+  override protected lazy val valueDate       = (v: Date) => (ps: PS, n: Int) => ps.setDate(n, new java.sql.Date(v.getTime))
+  override protected lazy val valueUUID       = (v: UUID) => (ps: PS, n: Int) => ps.setString(n, v.toString)
+  override protected lazy val valueURI        = (v: URI) => (ps: PS, n: Int) => ps.setString(n, v.toString)
+  override protected lazy val valueByte       = (v: Byte) => (ps: PS, n: Int) => ps.setByte(n, v)
+  override protected lazy val valueShort      = (v: Short) => (ps: PS, n: Int) => ps.setShort(n, v)
+  override protected lazy val valueChar       = (v: Char) => (ps: PS, n: Int) => ps.setString(n, v.toString)
 }

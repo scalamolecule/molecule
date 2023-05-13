@@ -67,7 +67,7 @@ trait Data_Save extends DatomicTxBase_JVM with SaveOps with MoleculeLogging { se
     e = backRefs(backRefNs)
   }
 
-  override protected def ref(ns: String, refAttr: String): Unit = {
+  override protected def ref(ns: String, refAttr: String, refNs: String): Unit = {
     stmt = stmtList
     stmt.add(add)
     stmt.add(e)

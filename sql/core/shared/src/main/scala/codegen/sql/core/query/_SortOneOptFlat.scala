@@ -1,6 +1,6 @@
 package codegen.sql.core.query
 
-import codegen.SqlGenBase
+import codegen.sql.SqlGenBase
 
 object _SortOneOptFlat extends SqlGenBase("SortOneOptFlat", "/query") {
 

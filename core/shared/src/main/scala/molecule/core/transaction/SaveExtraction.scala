@@ -37,15 +37,15 @@ class SaveExtraction(isTxMetaData: Boolean = false)
             case a           => throw new Exception("Attribute family not implemented for " + a)
           }
 
-        case Ref(ns, refAttr, _, _, _)    => ref(ns, refAttr); resolve(tail)
-        case BackRef(backRefNs)           => backRef(backRefNs); resolve(tail)
-        case _: Nested                    => throw ModelError(
+        case Ref(ns, refAttr, refNs, _, _) => ref(ns, refAttr, refNs); resolve(tail)
+        case BackRef(backRefNs)            => backRef(backRefNs); resolve(tail)
+        case _: Nested                     => throw ModelError(
           "Nested data structure not allowed in save molecule. Please use insert instead."
         )
-        case _: NestedOpt                 => throw ModelError(
+        case _: NestedOpt                  => throw ModelError(
           "Optional nested data structure not allowed in save molecule. Please use insert instead."
         )
-        case Composite(compositeElements) =>
+        case Composite(compositeElements)  =>
           // Start from initial entity id for each composite sub group
           handleComposite(isTxMetaData)
           resolve(compositeElements ++ tail)

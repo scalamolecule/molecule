@@ -107,7 +107,7 @@ trait JdbcApiAsync
     }
 
     private def getPreparedStmt: Data = {
-//      new SaveExtraction() with Save_stmts {
+//      new SaveExtraction() with Data_Save {
 //        override protected val ps: PreparedStmt = ???
 //      }.getPrepStmt(save.elements)
       ???
@@ -169,7 +169,7 @@ trait JdbcApiAsync
 //    private def getStmts(proxy: ConnProxy): PreparedStmt = {
 //      new InsertExtraction with Insert_stmts {
 //        override protected val ps: PreparedStmt = ???
-//      }.getStmts(proxy.schemaTx.nsMap, insert.elements, insert.tpls)
+//      }.getStmts(proxy.schema.nsMap, insert.elements, insert.tpls)
 //    }
 //
 //    override def validate(implicit conn: Connection): Seq[(Int, Seq[InsertError])] = {
@@ -196,7 +196,7 @@ trait JdbcApiAsync
 //    }
 //
 //    private def getStmts(conn: JdbcConn_JVM): PreparedStmt = {
-//      (new UpdateExtraction(conn.proxy.schemaTx.uniqueAttrs, update.isUpsert) with Update_stmts {
+//      (new UpdateExtraction(conn.proxy.schema.uniqueAttrs, update.isUpsert) with Update_stmts {
 //        override protected val ps: PreparedStmt = ???
 //      })
 //        .getStmts(conn, update.elements)

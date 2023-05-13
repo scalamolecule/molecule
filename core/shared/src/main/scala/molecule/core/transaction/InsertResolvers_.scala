@@ -19,8 +19,7 @@ trait InsertResolvers_ {
     elements: List[Element],
     outerTpl: Int = 0
   ): Product => Unit = {
-    val resolvers: List[Product => Unit] =
-      resolve(nsMap, elements, Nil, outerTpl, 0)
+    val resolvers: List[Product => Unit] = resolve(nsMap, elements, Nil, outerTpl, 0)
 
     resolvers.length match {
       case 1 => resolve1(resolvers)

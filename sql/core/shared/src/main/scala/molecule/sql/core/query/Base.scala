@@ -51,8 +51,9 @@ trait Base extends BaseHelpers with JavaConversions { self: Model2Query =>
   final protected val nestedOptIds = new ArrayBuffer[String]
 
   final protected val select = new ListBuffer[String]
-  final protected val from   = new ListBuffer[String]
-  final protected val where  = new ListBuffer[String]
+  final protected var from  = ""
+  final protected val joins = new ListBuffer[(String, String, String)]
+  final protected val where = new ListBuffer[String]
 
 
   final protected val widh     = new ArrayBuffer[String]

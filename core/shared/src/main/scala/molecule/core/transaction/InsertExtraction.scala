@@ -58,9 +58,9 @@ class InsertExtraction extends InsertResolvers_ with InsertValidators_ { self: I
             case a          => throw new Exception("Attribute family not implemented for " + a)
           }
 
-        case Ref(ns, refAttr, _, _, _) =>
+        case Ref(ns, refAttr, refNs, _, _) =>
           prevRefs += refAttr
-          resolve(nsMap, tail, resolvers :+ addRef(ns, refAttr), outerTpl, tplIndex)
+          resolve(nsMap, tail, resolvers :+ addRef(ns, refAttr, refNs), outerTpl, tplIndex)
 
         case BackRef(backRefNs) =>
           tail.head match {
@@ -76,17 +76,17 @@ class InsertExtraction extends InsertResolvers_ with InsertValidators_ { self: I
           resolve(nsMap, tail, resolvers :+
             addComposite(nsMap, outerTpl, tplIndex, compositeElements), outerTpl + 1, tplIndex + 1)
 
-        case Nested(Ref(ns, refAttr, _, _, _), nestedElements) =>
+        case Nested(Ref(ns, refAttr, refNs, _, _), nestedElements) =>
           curElements = nestedElements
           prevRefs.clear()
           resolve(nsMap, tail, resolvers :+
-            addNested(nsMap, tplIndex, ns, refAttr, nestedElements), 0, tplIndex)
+            addNested(nsMap, tplIndex, ns, refAttr, refNs, nestedElements), 0, tplIndex)
 
-        case NestedOpt(Ref(ns, refAttr, _, _, _), nestedElements) =>
+        case NestedOpt(Ref(ns, refAttr, refNs, _, _), nestedElements) =>
           curElements = nestedElements
           prevRefs.clear()
           resolve(nsMap, tail, resolvers :+
-            addNested(nsMap, tplIndex, ns, refAttr, nestedElements), 0, tplIndex)
+            addNested(nsMap, tplIndex, ns, refAttr, refNs, nestedElements), 0, tplIndex)
 
         // TxMetaData is handed separately in Insert_stmts with call to save_stmts
 

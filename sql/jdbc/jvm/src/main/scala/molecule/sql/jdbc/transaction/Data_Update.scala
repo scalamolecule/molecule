@@ -47,8 +47,8 @@ trait Data_Update extends JdbcTxBase_JVM with UpdateOps with MoleculeLogging { s
 //      }
 //
 //      val validationErrors = ModelValidation(
-//        conn.proxy.schemaTx.nsMap,
-//        conn.proxy.schemaTx.attrMap,
+//        conn.proxy.schema.nsMap,
+//        conn.proxy.schema.attrMap,
 //        "update",
 //        Some(getCurSetValues)
 //      ).validate(elements)

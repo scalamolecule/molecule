@@ -16,19 +16,18 @@ class SqlModel2Query[Tpl](elements0: List[Element])
     with ResolveExprOne[Tpl]
     with ResolveExprSet[Tpl]
     with ResolveRef[Tpl]
-//    with ResolveNestedPull[Tpl]
+    //    with ResolveNestedPull[Tpl]
     with Base
-//    with CastNestedBranch_[Tpl]
+    //    with CastNestedBranch_[Tpl]
     with CastRow2Tpl_
-//    with CastNestedOptBranch_[Tpl]
-//    with CastNestedOptLeaf_[Tpl]
-//    with Nest[Tpl]
+    //    with CastNestedOptBranch_[Tpl]
+    //    with CastNestedOptLeaf_[Tpl]
+    //    with Nest[Tpl]
     with NestOpt_[Tpl]
 
     with LambdasOne
     with LambdasSet
     with MoleculeLogging {
-
 
 
   final def getQuery(altElements: List[Element] = Nil): String = {
@@ -42,12 +41,19 @@ class SqlModel2Query[Tpl](elements0: List[Element])
   }
 
   final private def renderQuery: String = {
-    val indent = "        "
-    val select1 = select.mkString(s",\n$indent")
-    val from1   = from.distinct.mkString(s",\n$indent")
-    val where1  = if (where.isEmpty) "" else "\n  WHERE " + where.mkString(s"\n$indent")
-    s"""SELECT  $select1
-       |  FROM  $from1$where1;""".stripMargin
+    val select1 = select.mkString(s",\n  ")
+//    val from1   = from.distinct.mkString(s",\n  ")
+    val joins1  = if (joins.isEmpty) "" else joins.map {
+      case ("inner", refNs, fk) => s"\nINNER JOIN $refNs ON $fk = $refNs.id"
+      case ("left", refNs, fk)  => s"\nLEFT JOIN $refNs ON $fk = $refNs.id"
+      case (other, _, _)        => throw new Exception(
+        "Unexpected sql join type name: " + other
+      )
+    }.mkString("")
+    val where1  = if (where.isEmpty) "" else "\nWHERE\n  " + where.mkString(s"\n  ")
+    s"""SELECT
+       |  $select1
+       |FROM $from$joins1$where1;""".stripMargin
   }
 
   private def prepareElements(elements: List[Element]): List[Element] = {
@@ -119,7 +125,8 @@ class SqlModel2Query[Tpl](elements0: List[Element])
   ): List[Var] = elements match {
     case element :: tail => element match {
       case a: AttrOne                           =>
-        from += a.ns
+        if (from.isEmpty)
+          from += a.ns
         a match {
           case a: AttrOneMan => resolve(resolveAttrOneMan(es, a), tail)
           case a: AttrOneOpt => resolve(resolveAttrOneOpt(es, a), tail)
@@ -178,7 +185,7 @@ class SqlModel2Query[Tpl](elements0: List[Element])
     aritiesNested()
     val e = es.last
     resolveNestedOptRef(e, nestedRef)
-//    resolveNestedOptElements(e, nestedRef, nestedElements)
+    //    resolveNestedOptElements(e, nestedRef, nestedElements)
     es
   }
 
