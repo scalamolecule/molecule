@@ -94,8 +94,7 @@ trait JdbcApiZio extends JdbcZioApiBase with ApiZio with FutureUtils {
   }
 
 
-  implicit class datomicInsertApiZio[Tpl](insert0: Insert) extends InsertTransaction {
-    val insert = insert0.asInstanceOf[InsertTpls]
+  implicit class datomicInsertApiZio[Tpl](insert: Insert) extends InsertTransaction {
     override def transact: ZIO[Connection, MoleculeError, TxReport] = {
       for {
         conn <- ZIO.service[Connection]

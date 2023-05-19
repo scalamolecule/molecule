@@ -44,12 +44,12 @@ trait Data_Insert
 
   override protected def addComposite(
     nsMap: Map[String, MetaNs],
-    tpl: Int,
+    outerTpl: Int,
     tplIndex: Int,
     compositeElements: List[Element]
   ): Product => Unit = {
     hasComposites = true
-    val composite2stmts = getResolver(nsMap, compositeElements, tpl)
+    val composite2stmts = getResolver(nsMap, compositeElements, outerTpl)
     // Start from initial entity id for each composite sub group
     countValueAttrs(compositeElements) match {
       case 1 => (tpl: Product) =>
@@ -79,7 +79,7 @@ trait Data_Insert
           values.foreach { value =>
             e = nestedBaseId
             val nestedTpl = Tuple1(value)
-            addRef(ns, refAttr, refNs)(nestedTpl)
+            addRef(ns, refAttr, refNs, CardOne)(nestedTpl)
             e0 = e
             nested2stmts(nestedTpl)
           }
@@ -90,7 +90,7 @@ trait Data_Insert
           val nestedBaseId = e
           nestedTpls.foreach { nestedTpl =>
             e = nestedBaseId
-            addRef(ns, refAttr, refNs)(nestedTpl)
+            addRef(ns, refAttr, refNs, CardOne)(nestedTpl)
             e0 = e
             nested2stmts(nestedTpl)
           }
@@ -101,30 +101,28 @@ trait Data_Insert
   override protected def addV[T](
     ns: String,
     attr: String,
-    outerTpl: Int,
     tplIndex: Int,
-    scala2dbTpe: T => Any,
+    handleScalaValue: T => Any,
   ): Product => Unit = {
     val a = kw(ns, attr)
     backRefs = backRefs + (ns -> e)
     (tpl: Product) =>
       appendStmt(add, e, a,
-        scala2dbTpe(tpl.productElement(tplIndex).asInstanceOf[T]).asInstanceOf[AnyRef])
+        handleScalaValue(tpl.productElement(tplIndex).asInstanceOf[T]).asInstanceOf[AnyRef])
   }
 
   override protected def addOptV[T](
     ns: String,
     attr: String,
-    outerTpl: Int,
     tplIndex: Int,
-    scala2dbTpe: T => Any,
+    handleScalaValue: T => Any,
   ): Product => Unit = {
     val a = kw(ns, attr)
     backRefs = backRefs + (ns -> e)
     (tpl: Product) =>
       tpl.productElement(tplIndex) match {
         case Some(value) => appendStmt(add, e, a,
-          scala2dbTpe(value.asInstanceOf[T]).asInstanceOf[AnyRef])
+          handleScalaValue(value.asInstanceOf[T]).asInstanceOf[AnyRef])
         case _           => () // no statement to insert
       }
   }
@@ -132,24 +130,22 @@ trait Data_Insert
   override protected def addSet[T](
     ns: String,
     attr: String,
-    outerTpl: Int,
     tplIndex: Int,
-    scala2dbTpe: T => Any,
+    handleScalaValue: T => Any,
   ): Product => Unit = {
     val a = kw(ns, attr)
     backRefs = backRefs + (ns -> e)
     (tpl: Product) =>
       tpl.productElement(tplIndex).asInstanceOf[Set[_]].foreach { value =>
-        appendStmt(add, e, a, scala2dbTpe(value.asInstanceOf[T]).asInstanceOf[AnyRef])
+        appendStmt(add, e, a, handleScalaValue(value.asInstanceOf[T]).asInstanceOf[AnyRef])
       }
   }
 
   override protected def addOptSet[T](
     ns: String,
     attr: String,
-    outerTpl: Int,
     tplIndex: Int,
-    scala2dbTpe: T => Any,
+    handleScalaValue: T => Any,
   ): Product => Unit = {
     val a = kw(ns, attr)
     backRefs = backRefs + (ns -> e)
@@ -157,13 +153,18 @@ trait Data_Insert
       tpl.productElement(tplIndex) match {
         case Some(set: Set[_]) =>
           set.foreach(value =>
-            appendStmt(add, e, a, scala2dbTpe(value.asInstanceOf[T]).asInstanceOf[AnyRef])
+            appendStmt(add, e, a, handleScalaValue(value.asInstanceOf[T]).asInstanceOf[AnyRef])
           )
         case None              => () // no statement to insert
       }
   }
 
-  override protected def addRef(ns: String, refAttr: String, refNs: String): Product => Unit = {
+  override protected def addRef(
+    ns: String,
+    refAttr: String,
+    refNs: String,
+    card: Card
+  ): Product => Unit = {
     val a = kw(ns, refAttr)
     (_: Product) =>
       backRefs = backRefs + (ns -> e)

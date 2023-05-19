@@ -82,8 +82,7 @@ trait DatomicApiSync extends JVMDatomicApiBase with SubscriptionStarter with Api
   }
 
 
-  implicit class datomicInsertApiSync[Tpl](insert0: Insert) extends InsertTransaction {
-    val insert = insert0.asInstanceOf[InsertTpls]
+  implicit class datomicInsertApiSync[Tpl](insert: Insert) extends InsertTransaction {
     override def transact(implicit conn: Connection): TxReport = {
       val errors = validate
       if (errors.isEmpty) {

@@ -10,7 +10,7 @@ import molecule.base.error._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.api.{Connection, TxReport}
 import molecule.core.marshalling.{DatomicPeerProxy, SqlProxy}
-import molecule.sql.jdbc.transaction.JdbcDataType_JVM
+import molecule.sql.jdbc.transaction.{JdbcDataType_JVM, Resolver}
 import molecule.sql.jdbc.util.MakeTxReport
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
@@ -32,71 +32,185 @@ case class JdbcConn_JVM(
     Future(transact_sync(data))
   }
 
-  override def transact_sync(data: Data): TxReport = {
-    val (stmts, setters) = data
+  override def transact_sync(resolvers: Data): TxReport = {
+    //    val (insertStmts, batchSetters) = resolvers
 
-    println("stmts  : " + stmts)
-    println("setters: " + setters)
+    val insertsCount = resolvers.length
+    var insertIndex  = insertsCount
+    //    val pss          = insertStmts.map(sqlConn.prepareStatement(_, Statement.RETURN_GENERATED_KEYS))
+    var ids          = Array.empty[Long]
+    val idLists      = new Array[List[Long]](insertsCount)
+    val allIds       = new ListBuffer[Long]
 
-    var refIds    = List.empty[Long]
-    var accIds    = List.empty[Long]
-    var stmtIndex = 0
-    val stmtCount = stmts.length
+    // Cache ref ids on possible levels (top level + 7 nested levels)
+    //    val refMaps = new Array[Map[String, List[Long]]](8).map(_ => Map.empty[String, List[Long]])
+    var refMap = Map.empty[(Int, String, String), Array[Long]]
+
+    //    println("insertsCount: " + insertsCount)
+    //    println("batchSetters.count: " + batchSetters.length)
+
+
     try {
       // Atomic transaction of all statements
       sqlConn.setAutoCommit(false)
 
-      setters.foreach { setValues =>
-        println("------------------------------")
-        println("A " + stmts(stmtIndex))
+      // Insert statements backwards to obtain ref ids for prepending inserts
+      resolvers.reverse.foreach { case Resolver(level, ns, selfRef, stmt, ps, resolve, nestedCounts) =>
+        insertIndex -= 1
 
-        val ps = sqlConn.prepareStatement(stmts(stmtIndex), Statement.RETURN_GENERATED_KEYS)
-        setValues(ps, refIds)
-//        ps.executeUpdate()
+        // Populate prepared statement
+        println("--------------------------------------------------------------\n" + stmt)
+
+        //        if (insertIndex == 0) {
+        //          refMap.foreach{
+        //            case ((a, b, c), ids) => println(s"$a  $b  $c  " + ids.toList)
+        //          }
+        //          println("------------")
+        //        }
+        resolve(ps, refMap, 0)
+
         ps.executeBatch()
         val resultSet = ps.getGeneratedKeys // is empty if no nested data
-        var ids       = List.empty[Long]
+
+        ids = Array.empty[Long]
         while (resultSet.next()) {
+          //          ids.addOne(resultSet.getLong(1))
           ids = ids :+ resultSet.getLong(1)
         }
-        println("ids: " + ids)
-
-        refIds = ids
-        accIds = ids ++ accIds
         ps.close()
-        if (stmtIndex == stmtCount) {
-          stmtIndex = 0
-        } else {
-          stmtIndex += 1
-        }
+
+        // Cache ref ids for this insert
+        refMap += (level, ns, selfRef) -> ids
       }
+
+      //      batchSetters.reverse.foreach { setBatchValues =>
+      //        insertIndex -= 1
+      //        if (insertIndex == -1) {
+      //          insertIndex = insertsCount - 1
+      //          allIds ++= idLists.flatten
+      //        }
+      //
+      //        println("------------------------------")
+      //        println(insertStmts(insertIndex))
+      //
+      //        val ps = pss(insertIndex)
+      //        // Set values of prepared statement for this insert
+      //        setBatchValues(ps, idLists)
+      //        ps.executeBatch()
+      //        val resultSet = ps.getGeneratedKeys // is empty if no nested data
+      //        ids.clear()
+      //        while (resultSet.next()) {
+      //          ids.addOne(resultSet.getLong(1))
+      //        }
+      //
+      //        idLists(insertIndex) = ids.toList
+      //        println("ids    : " + ids)
+      //        println("idLists: " + idLists.toList)
+      //      }
+      //
+      //      allIds.addAll(idLists.flatten)
+      //      println("-----")
+      //      println("allIds : " + allIds)
+      //
+      //      pss.foreach(_.close())
 
       // transact all
       sqlConn.commit()
 
       // Tx entity not implemented for sql-jdbc
-      TxReport(0, refIds)
+      //      TxReport(0, allIds.toList)
+      TxReport(0, ids.toList) // Use only top-level ids
     } catch {
+      // re-throw errors to keep stacktrace back to original error
       case e: SQLException =>
         try {
           sqlConn.rollback()
-          //          e.printStackTrace()
-          //          throw ExecutionError(s"Successfully rolled back unsuccessful save with error: " + e)
-          logger.warn(s"Successfully rolled back unsuccessful save with error: " + e)
-          throw e // re-throw to keep stacktrace back to original error
+          logger.warn("Successfully rolled back unsuccessful insertion with error: " + e)
+          throw e
         } catch {
           case e: SQLException =>
-            //            throw ExecutionError("Couldn't roll back unsuccessful save: " + e)
+            logger.error("Couldn't roll back unsuccessful insertion: " + e)
             throw e
-          //          case NonFatal(e)     =>
-          //            throw ExecutionError("Unexpected error from rollback attempt: " + e)
         }
       case NonFatal(e)     =>
-        //        e.printStackTrace()
-        //        throw ExecutionError("Unexpected save error: " + e)
+        logger.error("Unexpected insertion error: " + e)
         throw e
     }
   }
+
+  //  def transact_sync1(data: Data): TxReport = {
+  //    val (insertStmts, batchSetters) = data
+  //
+  //    val insertsCount = insertStmts.length
+  //    var insertIndex  = insertsCount
+  //    val pss          = insertStmts.map(sqlConn.prepareStatement(_, Statement.RETURN_GENERATED_KEYS))
+  //    val ids          = new ListBuffer[Long]
+  //    val idLists      = new Array[List[Long]](insertsCount)
+  //    val allIds       = new ListBuffer[Long]
+  //
+  //    println("insertsCount      : " + insertsCount)
+  //    println("batchSetters.count: " + batchSetters.length)
+  //
+  //    try {
+  //      // Atomic transaction of all statements
+  //      sqlConn.setAutoCommit(false)
+  //
+  ////      batchSetters.foreach { setBatchValues =>
+  //
+  //      // Insert in reverse order to have ref ids for foreign keys and join tables
+  //      batchSetters.reverse.foreach { setBatchValues =>
+  //        insertIndex -= 1
+  //        if (insertIndex == -1) {
+  //          insertIndex = insertsCount - 1
+  //          allIds ++= idLists.flatten
+  //        }
+  //
+  //        println("------------------------------")
+  //        println(insertStmts(insertIndex))
+  //
+  //        val ps = pss(insertIndex)
+  //        // Set values of prepared statement for this insert
+  //        setBatchValues(ps, idLists)
+  //        ps.executeBatch()
+  //        val resultSet = ps.getGeneratedKeys // is empty if no nested data
+  //        ids.clear()
+  //        while (resultSet.next()) {
+  //          ids.addOne(resultSet.getLong(1))
+  //        }
+  //
+  //        idLists(insertIndex) = ids.toList
+  //        println("ids    : " + ids)
+  //        println("idLists: " + idLists.toList)
+  //      }
+  //
+  //      allIds.addAll(idLists.flatten)
+  //      println("-----")
+  //      println("allIds : " + allIds)
+  //
+  //      pss.foreach(_.close())
+  //
+  //      // transact all
+  //      sqlConn.commit()
+  //
+  //      // Tx entity not implemented for sql-jdbc
+  //      TxReport(0, allIds.toList)
+  //    } catch {
+  //      // re-throw errors to keep stacktrace back to original error
+  //      case e: SQLException =>
+  //        try {
+  //          sqlConn.rollback()
+  //          logger.warn("Successfully rolled back unsuccessful insertion with error: " + e)
+  //          throw e
+  //        } catch {
+  //          case e: SQLException =>
+  //            logger.error("Couldn't roll back unsuccessful insertion: " + e)
+  //            throw e
+  //        }
+  //      case NonFatal(e)     =>
+  //        logger.error("Unexpected insertion error: " + e)
+  //        throw e
+  //    }
+  //  }
 
 
   //  override def transact_sync2(ps: PreparedStmt): TxReport = {

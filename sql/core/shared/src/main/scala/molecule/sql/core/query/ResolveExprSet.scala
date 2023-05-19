@@ -6,10 +6,10 @@ import molecule.base.error.ModelError
 
 trait ResolveExprSet[Tpl] { self: SqlModel2Query[Tpl] with LambdasSet =>
 
-  protected def resolveAttrSetMan(es: List[Var], attr: AttrSetMan): List[Var] = {
+  protected def resolveAttrSetMan(attr: AttrSetMan): Unit = {
     aritiesAttr()
     sortAttrIndex += 1
-    val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
+    val (e, a) = ("x", s":${attr.ns}/${attr.attr}")
     attr match {
       case at: AttrSetManString     => man(attr, e, a, at.vs, resSetString)
       case at: AttrSetManInt        => man(attr, e, a, at.vs, resSetInt)
@@ -26,11 +26,10 @@ trait ResolveExprSet[Tpl] { self: SqlModel2Query[Tpl] with LambdasSet =>
       case at: AttrSetManShort      => man(attr, e, a, at.vs, resSetShort)
       case at: AttrSetManChar       => man(attr, e, a, at.vs, resSetChar)
     }
-    es
   }
 
-  protected def resolveAttrSetTac(es: List[Var], attr: AttrSetTac): List[Var] = {
-    val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
+  protected def resolveAttrSetTac(attr: AttrSetTac): Unit = {
+    val (e, a) = ("x", s":${attr.ns}/${attr.attr}")
     attr match {
       case at: AttrSetTacString     => tac(attr, e, a, at.vs, resSetString)
       case at: AttrSetTacInt        => tac(attr, e, a, at.vs, resSetInt)
@@ -47,14 +46,13 @@ trait ResolveExprSet[Tpl] { self: SqlModel2Query[Tpl] with LambdasSet =>
       case at: AttrSetTacShort      => tac(attr, e, a, at.vs, resSetShort)
       case at: AttrSetTacChar       => tac(attr, e, a, at.vs, resSetChar)
     }
-    es
   }
 
-  protected def resolveAttrSetOpt(es: List[Var], attr: AttrSetOpt): List[Var] = {
+  protected def resolveAttrSetOpt(attr: AttrSetOpt): Unit = {
     aritiesAttr()
     sortAttrIndex += 1
     hasOptAttr = true // to avoid redundant None's
-    val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
+    val (e, a) = ("x", s":${attr.ns}/${attr.attr}")
     attr match {
       case at: AttrSetOptString     => opt(e, a, at.op, at.vs, resOptSetString)
       case at: AttrSetOptInt        => opt(e, a, at.op, at.vs, resOptSetInt)
@@ -75,7 +73,6 @@ trait ResolveExprSet[Tpl] { self: SqlModel2Query[Tpl] with LambdasSet =>
       case at: AttrSetOptShort      => opt(e, a, at.op, at.vs, resOptSetShort)
       case at: AttrSetOptChar       => opt(e, a, at.op, at.vs, resOptSetChar)
     }
-    es
   }
 
 

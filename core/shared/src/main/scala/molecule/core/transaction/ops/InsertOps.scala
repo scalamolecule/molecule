@@ -26,40 +26,37 @@ trait InsertOps {
   protected def addV[T](
     ns: String,
     attr: String,
-    outerTpl: Int,
     tplIndex: Int,
-    scala2dbTpe: T => Any,
+    handleScalaValue: T => Any,
   ): Product => Unit
 
 
   protected def addOptV[T](
     ns: String,
     attr: String,
-    outerTpl: Int,
     tplIndex: Int,
-    scala2dbTpe: T => Any,
+    handleScalaValue: T => Any,
   ): Product => Unit
 
   protected def addSet[T](
     ns: String,
     attr: String,
-    outerTpl: Int,
     tplIndex: Int,
-    scala2dbTpe: T => Any,
+    handleScalaValue: T => Any,
   ): Product => Unit
 
   protected def addOptSet[T](
     ns: String,
     attr: String,
-    outerTpl: Int,
     tplIndex: Int,
-    scala2dbTpe: T => Any,
+    handleScalaValue: T => Any,
   ): Product => Unit
 
   protected def addRef(
     ns: String,
     refAttr: String,
     refNs: String,
+    card: Card
   ): Product => Unit
 
   protected def addBackRef(

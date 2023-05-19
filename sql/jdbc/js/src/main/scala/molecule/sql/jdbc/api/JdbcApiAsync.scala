@@ -83,8 +83,7 @@ trait JdbcApiAsync extends JdbcAsyncApiBase with ApiAsync with FutureUtils {
   }
 
 
-  implicit class datomicInsertApiAsync[Tpl](insert0: Insert) extends InsertTransaction {
-    val insert = insert0.asInstanceOf[InsertTpls]
+  implicit class datomicInsertApiAsync[Tpl](insert: Insert) extends InsertTransaction {
     override def transact(implicit conn0: Connection, ec: ExecutionContext): Future[TxReport] = try {
       val errors = validate
       if (errors.isEmpty) {

@@ -9,13 +9,13 @@ trait ResolveExprOne[Tpl]
   extends SortOneSpecial[Tpl]
     with SortOneOpt_[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
 
-  protected def resolveAttrOneMan(es: List[Var], attr: AttrOneMan): List[Var] = {
+  protected def resolveAttrOneMan(attr: AttrOneMan, curTable: String): Unit = {
     aritiesAttr()
     sortAttrIndex += 1
     val (e, a) = ("x", s":${attr.ns}/${attr.attr}")
     attr match {
-      case at: AttrOneManString     => man(attr, e, a, at.vs, resString1, resString, sortOneString(at, sortAttrIndex))
-      case at: AttrOneManInt        => man(attr, e, a, at.vs, resInt1, resInt, intSorter(at, sortAttrIndex))
+      case at: AttrOneManString     => man(attr, e, a, at.vs, resString1, resString, sortOneString(at, sortAttrIndex), curTable)
+      case at: AttrOneManInt        => man(attr, e, a, at.vs, resInt1, resInt, intSorter(at, sortAttrIndex), curTable)
       case at: AttrOneManLong       => manLong(attr, e, a, at.vs, resLong1, resLong, sortOneLong(at, sortAttrIndex))
       case at: AttrOneManFloat      => man(attr, e, a, at.vs, resFloat1, resFloat, floatSorter(at, sortAttrIndex))
       case at: AttrOneManDouble     => man(attr, e, a, at.vs, resDouble1, resDouble, sortOneDouble(at, sortAttrIndex))
@@ -29,11 +29,10 @@ trait ResolveExprOne[Tpl]
       case at: AttrOneManShort      => man(attr, e, a, at.vs, resShort1, resShort, shortSorter(at, sortAttrIndex))
       case at: AttrOneManChar       => man(attr, e, a, at.vs, resChar1, resChar, sortOneChar(at, sortAttrIndex))
     }
-    es
   }
 
-  protected def resolveAttrOneTac(es: List[Var], attr: AttrOneTac): List[Var] = {
-    val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
+  protected def resolveAttrOneTac(attr: AttrOneTac): Unit = {
+    val (e, a) = ("x", s":${attr.ns}/${attr.attr}")
     if (isNestedOpt && !isTxMetaData)
       throw ModelError("Tacit attributes not allowed in optional nested queries. Found: " + a)
     attr match {
@@ -52,14 +51,13 @@ trait ResolveExprOne[Tpl]
       case at: AttrOneTacShort      => tac(attr, e, a, at.vs, resShort)
       case at: AttrOneTacChar       => tac(attr, e, a, at.vs, resChar)
     }
-    es
   }
 
-  protected def resolveAttrOneOpt(es: List[Var], attr: AttrOneOpt): List[Var] = {
+  protected def resolveAttrOneOpt(attr: AttrOneOpt): Unit = {
     aritiesAttr()
     sortAttrIndex += 1
     hasOptAttr = true // to avoid redundant None's
-    val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
+    val (e, a) = ("x", s":${attr.ns}/${attr.attr}")
     attr match {
       case at: AttrOneOptString     => opt(attr, e, a, at.vs, resOptString, sortOneOptString(at, sortAttrIndex), sortOneString(at, sortAttrIndex))
       case at: AttrOneOptInt        => opt(attr, e, a, at.vs, resOptInt, sortOneOptInt(at, sortAttrIndex), sortOneInt(at, sortAttrIndex))
@@ -76,7 +74,6 @@ trait ResolveExprOne[Tpl]
       case at: AttrOneOptShort      => opt(attr, e, a, at.vs, resOptShort, sortOneOptShort(at, sortAttrIndex), sortOneShort(at, sortAttrIndex))
       case at: AttrOneOptChar       => opt(attr, e, a, at.vs, resOptChar, sortOneOptChar(at, sortAttrIndex), sortOneChar(at, sortAttrIndex))
     }
-    es
   }
 
   private def sorterOneOptLong(
@@ -120,13 +117,19 @@ trait ResolveExprOne[Tpl]
     args: Seq[T],
     res: ResOne[T],
     resOLD: ResOneOLD[T],
-    sorter: Option[(Int, Int => (RowOLD, RowOLD) => Int)]
+    sorter: Option[(Int, Int => (RowOLD, RowOLD) => Int)],
+    curTable: String = ""
   ): Unit = {
     addCast(res.j2s)
     addCastOLD(resOLD.j2s)
     addSort(sorter)
     val v = getVar(attr)
-    select += attr.name
+
+    val col = if (curTable.isBlank) attr.name else curTable + "." + attr.attr
+//    val col = attr.ns + "." + attr.attr
+    select += col
+    where += ((col, s"IS NOT NULL"))
+
     attr.filterAttr.fold {
       expr(e, a, v, attr.op, args, resOLD)
       filterAttrVars1 = filterAttrVars1 + (a -> (e, v))

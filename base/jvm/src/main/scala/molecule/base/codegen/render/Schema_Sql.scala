@@ -29,20 +29,33 @@ case class Schema_Sql(schema: MetaSchema) extends BaseHelpers with RegexMatching
     "       |  " + a.attr + indent + tpe + options
   }
 
-  private def table(metaNs: MetaNs): String = {
+  private def table(metaNs: MetaNs): Seq[String] = {
     val ns     = metaNs.ns
-    val max    = metaNs.attrs.map(a => a.attr.length).max.max(2)
-    val fields = metaNs.attrs.map(a => field(max, a)).mkString(s",\n|")
+    val attrs  = metaNs.attrs.filterNot(a => a.card == CardSet && a.refNs.nonEmpty)
+    val max    = attrs.map(a => a.attr.length).max.max(2)
+    val fields = attrs.map(a => field(max, a)).mkString(s",\n|")
     val id     = "id" + padS(max, "id") + " $id,"
-    s"""       |CREATE TABLE $ns
-       |       |(
-       |       |  $id
-       |$fields
-       |       |);
-       |       |"""
+    val table  =
+      s"""       |CREATE TABLE $ns (
+         |       |  $id
+         |$fields
+         |       |);
+         |       |"""
+
+    val joinTables = metaNs.attrs.collect {
+      case MetaAttr(refAttr, CardSet, _, Some(refNs), _, _, _, _, _, _) =>
+        val (id1, id2) = if (ns == refNs) ("1_id", "2_id") else ("id", "id")
+        s"""       |CREATE TABLE ${ns}_${refAttr}_$refNs (
+           |       |  ${ns}_$id1 BIGINT,
+           |       |  ${refNs}_$id2 BIGINT
+           |       |);
+           |       |"""
+    }
+
+    table +: joinTables
   }
 
-  private val tables: String = nss.map(table).mkString(s"\n|")
+  private val tables: String = nss.flatMap(table).mkString(s"\n|")
 
   def get: String =
     s"""|/*
@@ -114,7 +127,7 @@ case class Schema_Sql(schema: MetaSchema) extends BaseHelpers with RegexMatching
         |    lazy val short      = tpe("Short")
         |    lazy val char       = tpe("Char")
         |
-        |    lazy val ref = long // + " FK"
+        |    lazy val ref = long
         |
         |    s\"\"\"
         |$tables\"\"\".stripMargin

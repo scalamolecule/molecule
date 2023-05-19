@@ -12,16 +12,55 @@ object InsertSemantics extends DatomicTestSuite {
 
   override lazy val tests = Tests {
 
+
+    "refs and backrefs" - refs { implicit conn =>
+      for {
+        _ <- Ns.i(0).s("a")
+          .R1.i(1).s("b")
+          .Rs2.i(22)._R1
+          .R2.i(2).s("c")._R1._Ns
+          .Rs1.i(11)
+          .save.transact
+
+        _ <- Ns.i.R1.i.query.get.map(_ ==> List((0, 1)))
+        _ <- Ns.i.R1.i._Ns.s.query.get.map(_ ==> List((0, 1, "a")))
+        _ <- Ns.i.R1.i._Ns.Rs1.i.query.get.map(_ ==> List((0, 1, 11)))
+        _ <- Ns.i.R1.i.R2.i._R1.s.query.get.map(_ ==> List((0, 1, 2, "b")))
+        _ <- Ns.i.R1.R2.i._R1.i.query.get.map(_ ==> List((0, 2, 1)))
+        _ <- Ns.i.R1.i.R2.i._R1.Rs2.i.query.get.map(_ ==> List((0, 1, 2, 22)))
+        _ <- Ns.i.R1.R2.i._R1.Rs2.i.query.get.map(_ ==> List((0, 2, 22)))
+        _ <- Ns.i.R1.i.R2.i._R1.s._Ns.s.query.get.map(_ ==> List((0, 1, 2, "b", "a")))
+        _ <- Ns.i.R1.i.R2.i._R1._Ns.s.query.get.map(_ ==> List((0, 1, 2, "a")))
+        _ <- Ns.i.R1.R2.i._R1._Ns.s.query.get.map(_ ==> List((0, 2, "a")))
+        _ <- Ns.i.R1.i.R2.i._R1.s._Ns.Rs1.i.query.get.map(_ ==> List((0, 1, 2, "b", 11)))
+        _ <- Ns.i.R1.i.R2.i._R1._Ns.Rs1.i.query.get.map(_ ==> List((0, 1, 2, 11)))
+        _ <- Ns.i.R1.R2.i._R1._Ns.Rs1.i.query.get.map(_ ==> List((0, 2, 11)))
+        _ <- Ns.R1.R2.s._R1._Ns.Rs1.i.query.get.map(_ ==> List(("c", 11)))
+
+        _ <- Ns.i.s.R1.i.s.Rs2.i._R1.R2.i.s._R1._Ns.Rs1.i.insert(
+          (0, "a", 1, "b", 22, 2, "c", 11),
+          (1, "a", 1, "b", 22, 2, "c", 11),
+        ).transact
+
+        _ <- Ns.i.s.R1.i.s.Rs2.i._R1.R2.i.s._R1._Ns.Rs1.i.query.get.map(_ ==> List(
+          (0, "a", 1, "b", 22, 2, "c", 11),
+          (1, "a", 1, "b", 22, 2, "c", 11),
+        ))
+
+      } yield ()
+    }
+
+
     "Insert not allowed to apply values to attributes" - refs { implicit conn =>
       for {
         _ <- (Ns.i(1) + R2.i(2)).insert(1, 2).transact
-            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Can't insert attributes with an applied value. Found:\n" +
             """AttrOneManInt("Ns", "i", Eq, Seq(1), None, None, Nil, Nil, None, None)"""
         }
 
         _ <- (Ns.i + R2.i(2)).insert(1, 2).transact
-            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Can't insert attributes with an applied value. Found:\n" +
             """AttrOneManInt("R2", "i", Eq, Seq(2), None, None, Nil, Nil, None, None)"""
         }
@@ -164,12 +203,12 @@ object InsertSemantics extends DatomicTestSuite {
     "Backref in nested" - refs { implicit conn =>
       for {
         _ <- Ns.i.Rs1.*(R1.i._Ns.i).insert(1, List((2, 3))).transact
-            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Can't use backref namespace `_Ns` from here."
         }
 
         _ <- Ns.i.Rs1.*?(R1.i._Ns.i).insert(1, List((2, 3))).transact
-            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Can't use backref namespace `_Ns` from here."
         }
 

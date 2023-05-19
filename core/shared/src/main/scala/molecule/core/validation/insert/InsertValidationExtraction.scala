@@ -10,8 +10,7 @@ import scala.collection.mutable.ListBuffer
 
 trait InsertValidationExtraction extends InsertValidators_ with ModelUtils { self: InsertValidationResolvers_ =>
 
-  private var curElements: List[Element]      = List.empty[Element]
-  private val prevRefs   : ListBuffer[AnyRef] = ListBuffer.empty[AnyRef]
+  private var curElements: List[Element] = List.empty[Element]
 
   @tailrec
   final override def getValidators(
@@ -19,10 +18,12 @@ trait InsertValidationExtraction extends InsertValidators_ with ModelUtils { sel
     elements: List[Element],
     validators: List[Product => Seq[InsertError]],
     outerTpl: Int,
-    tplIndex: Int
+    tplIndex: Int,
+    prevRefs: List[String]
   ): List[Product => Seq[InsertError]] = {
-    if (validators.isEmpty)
+    if (validators.isEmpty) {
       curElements = elements
+    }
     elements match {
       case element :: tail => element match {
         case a: Attr =>
@@ -33,10 +34,10 @@ trait InsertValidationExtraction extends InsertValidators_ with ModelUtils { sel
             case a: AttrOne =>
               a match {
                 case a: AttrOneMan => getValidators(nsMap, tail, validators :+
-                  resolveAttrOneMan(a, outerTpl, tplIndex), outerTpl, tplIndex + 1)
+                  resolveAttrOneMan(a, outerTpl, tplIndex), outerTpl, tplIndex + 1, prevRefs)
 
                 case a: AttrOneOpt => getValidators(nsMap, tail, validators :+
-                  resolveAttrOneOpt(a, outerTpl, tplIndex), outerTpl, tplIndex + 1)
+                  resolveAttrOneOpt(a, outerTpl, tplIndex), outerTpl, tplIndex + 1, prevRefs)
 
                 case a: AttrOneTac => throw new Exception(
                   "Can't use tacit attributes in insert molecule (except in tx meta data part). Found: " + a
@@ -47,10 +48,10 @@ trait InsertValidationExtraction extends InsertValidators_ with ModelUtils { sel
                 case a: AttrSetMan =>
                   val mandatory = nsMap(a.ns).mandatoryAttrs.contains(a.attr)
                   getValidators(nsMap, tail, validators :+
-                    resolveAttrSetMan(a, outerTpl, tplIndex, mandatory), outerTpl, tplIndex + 1)
+                    resolveAttrSetMan(a, outerTpl, tplIndex, mandatory), outerTpl, tplIndex + 1, prevRefs)
 
                 case a: AttrSetOpt => getValidators(nsMap, tail, validators :+
-                  resolveAttrSetOpt(a, outerTpl, tplIndex), outerTpl, tplIndex + 1)
+                  resolveAttrSetOpt(a, outerTpl, tplIndex), outerTpl, tplIndex + 1, prevRefs)
 
                 case a: AttrSetTac => throw new Exception(
                   "Can't use tacit attributes in insert molecule (except in tx meta data part). Found: " + a
@@ -60,34 +61,31 @@ trait InsertValidationExtraction extends InsertValidators_ with ModelUtils { sel
           }
 
         case Ref(_, refAttr, _, _, _) =>
-          prevRefs += refAttr
-          getValidators(nsMap, tail, validators, outerTpl, tplIndex)
+          getValidators(nsMap, tail, validators, outerTpl, tplIndex, prevRefs :+ refAttr)
 
         case BackRef(backRefNs) =>
           tail.head match {
             case Ref(_, refAttr, _, _, _) if prevRefs.contains(refAttr) => throw ModelError(
               s"Can't re-use previous namespace ${refAttr.capitalize} after backref _$backRefNs."
             )
-            case _                                                   => // ok
+            case _                                                      => // ok
           }
-          getValidators(nsMap, tail, validators, outerTpl, tplIndex)
+          getValidators(nsMap, tail, validators, outerTpl, tplIndex, prevRefs)
 
         case Composite(compositeElements) =>
           curElements = compositeElements
           getValidators(nsMap, tail, validators :+
-            addComposite(nsMap, outerTpl, tplIndex, compositeElements), outerTpl + 1, tplIndex + 1)
+            addComposite(nsMap, outerTpl, tplIndex, compositeElements), outerTpl + 1, tplIndex + 1, prevRefs)
 
         case Nested(Ref(ns, refAttr, _, _, _), nestedElements) =>
           curElements = nestedElements
-          prevRefs.clear()
           getValidators(nsMap, tail, validators :+
-            addNested(nsMap, tplIndex, ns, refAttr, nestedElements), 0, tplIndex)
+            addNested(nsMap, tplIndex, ns, refAttr, nestedElements), 0, tplIndex, Nil)
 
         case NestedOpt(Ref(ns, refAttr, _, _, _), nestedElements) =>
           curElements = nestedElements
-          prevRefs.clear()
           getValidators(nsMap, tail, validators :+
-            addNested(nsMap, tplIndex, ns, refAttr, nestedElements), 0, tplIndex)
+            addNested(nsMap, tplIndex, ns, refAttr, nestedElements), 0, tplIndex, Nil)
 
         case TxMetaData(_) =>
           // TxMetaData is handled separately in Insert_stmts.

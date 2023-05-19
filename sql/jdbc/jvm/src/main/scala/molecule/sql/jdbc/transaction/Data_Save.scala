@@ -21,7 +21,9 @@ trait Data_Save extends JdbcTxBase_JVM with SaveOps with MoleculeLogging { self:
     // create insert statement
     resolve(elements)
     saveNs()
-    (stmts, setters)
+    (insertStmts, batchSetters)
+
+    ???
   }
 
   override protected def handleNs(ns: String): Unit = {
@@ -38,13 +40,13 @@ trait Data_Save extends JdbcTxBase_JVM with SaveOps with MoleculeLogging { self:
   override protected def addV(ns: String, attr: String, optValue: Option[Any]): Unit = {
     columns += attr
     optValue.fold {
-      colSetters = colSetters :+ ((ps: PS, _: List[Long]) => {
+      colSetters = colSetters :+ ((ps: PS, _: Map[(Int, String, String), Array[Long]], _: Int) => {
         ps.setNull(colIndex, 0)
       })
     } { value =>
       colIndex += 1
       val j = colIndex
-      colSetters = colSetters :+ ((ps: PS, _: List[Long]) => {
+      colSetters = colSetters :+ ((ps: PS, _: Map[(Int, String, String), Array[Long]], _: Int) => {
         value.asInstanceOf[(PS, Int) => Unit](ps, j)
       })
     }
@@ -65,35 +67,39 @@ trait Data_Save extends JdbcTxBase_JVM with SaveOps with MoleculeLogging { self:
 
   override protected def ref(ns: String, refAttr: String, refNs: String): Unit = {
     columns += refAttr
-    val j = colIndex + 1
-    colSetters = colSetters :+ ((ps: PS, refIds: List[Long]) => {
-      refIds.size match {
-        case 0 => ()
-        case 1 => ps.setLong(j, refIds.head)
-        case n => throw new Exception(s"Unexpected found $n ref ids for save of $refAttr. Expected 1 or 0.")
-      }
-    })
+    val j                 = colIndex + 1
+    val colSetter: Setter = (ps: PS, refMap: Map[(Int, String, String), Array[Long]], _: Int) => {
+//      refMap.length match {
+//        case 0 => ()
+//        case 1 => ps.setLong(j, refMap.head.head)
+//        case n => throw new Exception(
+//          s"Unexpected found $n ref ids for save of $refAttr. Expected 1 or 0."
+//        )
+//      }
+      ps.setLong(j, refMap((0, ns, "")).head)
+
+    }
+    colSetters = colSetters :+ colSetter
     saveNs()
     table = refNs
   }
 
   def saveNs(): Unit = {
-    val cols = columns.toList
     val stmt =
       s"""insert into $table(
-         |  ${cols.mkString(",\n  ")}
-         |) values (${cols.map(_ => "?").mkString(", ")})""".stripMargin
+         |  ${columns.mkString(",\n  ")}
+         |) values (${columns.map(_ => "?").mkString(", ")})""".stripMargin
 
     println("---- stmt -----------\n" + stmt)
-    stmts = stmt :: stmts
+    insertStmts = stmt :: insertStmts
     val colSetters1    = colSetters
-    val setter: Setter = (ps: PS, refIds: List[Long]) => {
+    val insert: Setter = (ps: PS, refMap: Map[(Int, String, String), Array[Long]], rowIndex: Int) => {
       colSetters1.foreach { colSetter =>
-        colSetter.apply(ps, refIds)
+        colSetter(ps, refMap, rowIndex)
       }
       ps.addBatch()
     }
-    setters = setter :: setters
+    batchSetters = insert :: batchSetters
     colIndex = 0
     columns.clear()
   }

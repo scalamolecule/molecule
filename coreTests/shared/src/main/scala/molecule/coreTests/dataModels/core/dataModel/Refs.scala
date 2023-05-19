@@ -9,12 +9,17 @@ object Refs extends DataModel(10) {
     val s          = oneString
     val b          = oneBoolean
     val r1         = one[R1]
+    val r2         = one[R2]
+    val r3         = one[R3]
     val rs1        = many[R1]
+    val rs2        = many[R2]
+    val rs3        = many[R3]
+    val ns1        = one[Ns]
+    val nss1       = many[Ns]
     val spouse     = one[Ns]
     val friends    = many[Ns]
     val owned1     = one[R1].owner
     val ownedMany1 = many[R1].owner
-
   }
 
   trait R1 {

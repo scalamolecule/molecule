@@ -4,3 +4,4 @@ trait DataType {
 
   type Data
 }
+

@@ -1,31 +1,45 @@
 package molecule.datalog.datomic.test
 
-import java.util.Date
-import molecule.base.ast.SchemaAST._
-import molecule.base.error._
-import molecule.core.api.TxReport
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
-import molecule.coreTests.dataModels.core.dsl.Validation._
 import molecule.datalog.datomic.async._
-import utest._
-import scala.concurrent.Future
-import scala.language.implicitConversions
-import molecule.boilerplate.ast.Model._
 import molecule.datalog.datomic.setup.DatomicTestSuite
+import utest._
+import scala.language.implicitConversions
 
 object Adhoc extends DatomicTestSuite {
 
+  //  def aa[T](types: (Connection => Future[Unit]) => Unit): Unit = {
+  //    "types" - types { implicit conn =>
+  //      val res: Future[Unit] = for {
+  //        _ <- Ns.int(3).save.transact
+  //        _ <- Ns.int.query.get.map(_ ==> List(3))
+  //      } yield ()
+  //      res
+  //    }
+  //  }
+//  def aa(types: (Connection => Any) => Any): Any = {
+//    types { implicit conn =>
+//      val res: Future[Unit] = for {
+//        _ <- Ns.int(3).save.transact
+//        _ <- Ns.int.query.get.map(_ ==> List(4))
+//      } yield ()
+//      res
+//    }
+//  }
+
+//  import molecule.coreTests.Adhoc._
 
   override lazy val tests = Tests {
+
+    //    aa(types[Future[Unit]])
+
+//    "types0" - aa(types2)
 
     "types" - types { implicit conn =>
       for {
         _ <- Ns.int(3).save.transact
         _ <- Ns.int.query.get.map(_ ==> List(3))
-
-
-
       } yield ()
     }
 

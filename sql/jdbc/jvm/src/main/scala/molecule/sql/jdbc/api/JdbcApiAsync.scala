@@ -149,8 +149,7 @@ trait JdbcApiAsync
   //  }
 
 
-//  implicit class datomicInsertApiAsync[Tpl](insert0: Insert) extends InsertTransaction {
-//    val insert = insert0.asInstanceOf[InsertTpls]
+//  implicit class datomicInsertApiAsync[Tpl](insert: Insert) extends InsertTransaction {
 //    override def transact(implicit conn: Connection, ec: ExecutionContext): Future[TxReport] = try {
 //      val errors = validate
 //      if (errors.isEmpty) {

@@ -36,25 +36,62 @@ class SqlModel2Query[Tpl](elements0: List[Element])
     val elements1 = prepareElements(elements)
 
     // Recursively resolve molecule elements
-    resolve(Nil, elements1)
+    resolve(elements1)
     renderQuery
   }
 
   final private def renderQuery: String = {
     val select1 = select.mkString(s",\n  ")
-//    val from1   = from.distinct.mkString(s",\n  ")
-    val joins1  = if (joins.isEmpty) "" else joins.map {
-      case ("inner", refNs, fk) => s"\nINNER JOIN $refNs ON $fk = $refNs.id"
-      case ("left", refNs, fk)  => s"\nLEFT JOIN $refNs ON $fk = $refNs.id"
-      case (other, _, _)        => throw new Exception(
-        "Unexpected sql join type name: " + other
-      )
-    }.mkString("")
-    val where1  = if (where.isEmpty) "" else "\nWHERE\n  " + where.mkString(s"\n  ")
-    s"""SELECT
+
+    val joins1 = if (joins.isEmpty) "" else {
+      val max1  = joins.map(_._1.length).max
+      val max2  = joins.map(_._2.length).max
+      val max3  = joins.map(_._3.length).max
+      val max4  = joins.map(_._4.length).max
+      val hasAs = joins.exists(_._3.nonEmpty)
+
+      joins.map { case (join, table, as, lft, rgt) =>
+        val join_  = join + padS(max1, join)
+        val table_ = table + padS(max2, table)
+
+        val as_    = if (hasAs) {
+          if (as.isEmpty) padS(max3 + 4, "") else " AS " + as + padS(max3, as)
+        } else ""
+
+        val lft_   = lft + padS(max4, lft)
+        s"$join_ $table_$as_ ON $lft_ = $rgt"
+      }.mkString("\n", "\n", "")
+    }
+
+    val where1 = if (where.isEmpty) "" else {
+      val max = where.map(_._1.length).max
+      where.map { case (col, predicate) =>
+        s"$col " + padS(max, col) + predicate
+      }.mkString("\nWHERE\n  ", s" AND\n  ", "")
+    }
+
+    s"""SELECT DISTINCT
        |  $select1
        |FROM $from$joins1$where1;""".stripMargin
+
+    //    """SELECT DISTINCT
+    //      |  Ns.i,
+    //      |  Ns_r1.s,
+    //      |  R1_r2.i
+    //      |FROM Ns
+    //      |INNER JOIN R1 AS Ns_r1 ON Ns.r1 = Ns_r1.id
+    //      |INNER JOIN R2 AS R1_r2 ON R1.r2 = R1_r2.id
+    //      |WHERE
+    //      |  Ns.i    IS NOT NULL AND
+    //      |  Ns_r1.s IS NOT NULL AND
+    //      |  R1_r2.i IS NOT NULL
+    //      |""".stripMargin
   }
+  /*
+  WHERE
+    Ns.i IS NOT NULL,
+    Ns_spouse.i IS NOT NULL; [42000-214]
+   */
 
   private def prepareElements(elements: List[Element]): List[Element] = {
     @tailrec
@@ -117,59 +154,62 @@ class SqlModel2Query[Tpl](elements0: List[Element])
     elements1
   }
 
+  private var curTable = ""
 
   @tailrec
-  final private def resolve(
-    es: List[Var],
-    elements: List[Element]
-  ): List[Var] = elements match {
+  final private def resolve(elements: List[Element]): Unit = elements match {
     case element :: tail => element match {
       case a: AttrOne                           =>
-        if (from.isEmpty)
+        if (from.isEmpty) {
           from += a.ns
+        }
+        //        curTable = a.ns
         a match {
-          case a: AttrOneMan => resolve(resolveAttrOneMan(es, a), tail)
-          case a: AttrOneOpt => resolve(resolveAttrOneOpt(es, a), tail)
-          case a: AttrOneTac => resolve(resolveAttrOneTac(es, a), tail)
+          case a: AttrOneMan => resolveAttrOneMan(a, curTable); resolve(tail)
+          case a: AttrOneOpt => resolveAttrOneOpt(a); resolve(tail)
+          case a: AttrOneTac => resolveAttrOneTac(a); resolve(tail)
         }
       case a: AttrSet                           => a match {
-        case a: AttrSetMan => resolve(resolveAttrSetMan(es, a), tail)
-        case a: AttrSetOpt => resolve(resolveAttrSetOpt(es, a), tail)
-        case a: AttrSetTac => resolve(resolveAttrSetTac(es, a), tail)
+        case a: AttrSetMan => resolveAttrSetMan(a); resolve(tail)
+        case a: AttrSetOpt => resolveAttrSetOpt(a); resolve(tail)
+        case a: AttrSetTac => resolveAttrSetTac(a); resolve(tail)
       }
-      case ref: Ref                             => resolve(resolveRef(es, ref), tail)
-      case _: BackRef                           => resolve(es.init, tail)
-      case Composite(compositeElements)         => resolve(resolveComposite(compositeElements), tail)
-      case Nested(ref, nestedElements)          => resolve(resolveNested(es, ref, nestedElements), tail)
-      case NestedOpt(nestedRef, nestedElements) => resolve(resolveNestedOpt(es, nestedRef, nestedElements), tail)
+      case ref: Ref                             =>
+        //        curTable = ref.ns + "_" + ref.refAttr
+        //        curTable = ref.ns
+        //        curTable = if (ref.ns == ref.refNs) ref.ns + "_1" else ref.ns
+        curTable = if (ref.ns == ref.refNs) ref.ns + "_1" else ""
+        resolveRef(ref, curTable);
+        resolve(tail)
+      case _: BackRef                           => resolve(tail)
+      case Composite(compositeElements)         => resolveComposite(compositeElements); resolve(tail)
+      case Nested(ref, nestedElements)          => resolveNested(ref, nestedElements); resolve(tail)
+      case NestedOpt(nestedRef, nestedElements) => resolveNestedOpt(nestedRef, nestedElements); resolve(tail)
       case TxMetaData(txElements)               => resolveTxMetaData(txElements)
       case other                                => unexpectedElement(other)
     }
-    case Nil             => es
+    case Nil             => ()
   }
 
 
-  final private def resolveComposite(compositeElements: List[Element]): List[Var] = {
+  final private def resolveComposite(compositeElements: List[Element]): Unit = {
     aritiesComposite()
     // Use first entity id in each composite sub group
-    resolve(List(firstEid), compositeElements)
+    resolve(compositeElements)
   }
 
-  final private def resolveNested(
-    es: List[Var], ref: Ref, nestedElements: List[Element]
-  ): List[Var] = {
+  final private def resolveNested(ref: Ref, nestedElements: List[Element]): Unit = {
     isNested = true
     if (isNestedOpt)
       noMixedNestedModes
     validateRefNs(ref, nestedElements)
 
     aritiesNested()
-    resolve(resolveNestedRef(es, ref), nestedElements)
+    resolveNestedRef(ref)
+    resolve(nestedElements)
   }
 
-  final private def resolveNestedOpt(
-    es: List[Var], nestedRef: Ref, nestedElements: List[Element]
-  ): List[Var] = {
+  final private def resolveNestedOpt(nestedRef: Ref, nestedElements: List[Element]): Unit = {
     isNestedOpt = true
     if (isNested) {
       noMixedNestedModes
@@ -183,17 +223,15 @@ class SqlModel2Query[Tpl](elements0: List[Element])
     sortAttrIndex += 1
 
     aritiesNested()
-    val e = es.last
-    resolveNestedOptRef(e, nestedRef)
+    resolveNestedOptRef(nestedRef)
     //    resolveNestedOptElements(e, nestedRef, nestedElements)
-    es
   }
 
-  final private def resolveTxMetaData(txElements: List[Element]): List[Var] = {
+  final private def resolveTxMetaData(txElements: List[Element]): Unit = {
     isTxMetaData = true
     // Use txVar as first entity id var for composite elements
     firstEid = txVar
-    resolve(List(txVar), txElements)
+    resolve(txElements)
   }
 
   final private def validateRefNs(ref: Ref, nestedElements: List[Element]): Unit = {

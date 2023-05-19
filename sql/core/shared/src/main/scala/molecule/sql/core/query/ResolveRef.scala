@@ -1,6 +1,7 @@
 package molecule.sql.core.query
 
 import java.lang.{Long => jLong}
+import molecule.base.ast.SchemaAST.CardOne
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.sql.core.query.casting.NestOpt_
@@ -8,24 +9,24 @@ import molecule.sql.core.query.casting.NestOpt_
 
 trait ResolveRef[Tpl] { self: NestOpt_[Tpl] with Base =>
 
-  protected def resolveRef(es: List[Var], ref: Ref): List[Var] = {
+  protected def resolveRef(ref: Ref, curTable: String): Unit = {
     val (ns, refAttr, refNs) = (ref.ns, ref.refAttr, ref.refNs)
-    joins.+=(("inner", refNs, s"$ns.$refAttr"))
 
-    //    val (e, refAttr, refId) = (es.last, s":${ref.ns}/${ref.refAttr}", vv)
-    //    if (ref.bidirectional) {
-    //      whereOLD += s"(rule$e $e $refId)" -> wClause
-    //      rules += s"[(rule$e $e $refId) [$e $refAttr $refId]]"
-    //      rules += s"[(rule$e $e $refId) [$refId $refAttr $e]]"
-    //    } else {
-    //      whereOLD += s"[$e $refAttr $refId]" -> wClause
-    //    }
-    //    es :+ refId
-    Nil
+//    println(s"$ns  $refAttr  $refNs")
+
+    val curTable1 = if(curTable.nonEmpty) curTable else refNs
+    if (ref.card == CardOne) {
+      joins += (("INNER JOIN", refNs, curTable, s"$ns.$refAttr", s"$curTable1.id"))
+    } else {
+      val joinTable  = ns + "_" + refAttr + "_" + refNs
+      val (id1, id2) = if (ns == refNs) ("1_id", "2_id") else ("id", "id")
+      joins += (("INNER JOIN", joinTable, "", s"$ns.id", s"$joinTable.${ns}_$id1"))
+      joins += (("INNER JOIN", refNs, curTable, s"$joinTable.${refNs}_$id2", s"$curTable1.id"))
+    }
   }
 
-  protected def resolveNestedRef(es: List[Var], ref: Ref): List[Var] = {
-    val (e, refAttr, refId) = (es.last, s":${ref.ns}/${ref.refAttr}", vv)
+  protected def resolveNestedRef(ref: Ref): Unit = {
+    val (e, refAttr, refId) = ("x", s":${ref.ns}/${ref.refAttr}", vv)
     firstEid = refId // for composites in nested
     nestedIds += e
     if (ref.bidirectional) {
@@ -38,7 +39,6 @@ trait ResolveRef[Tpl] { self: NestOpt_[Tpl] with Base =>
     // Start new level of casts
     castssOLD = castssOLD :+ Nil
     sortNestedLevel()
-    es :+ refId
   }
 
   private def sortNestedLevel(): Unit = {
@@ -50,7 +50,8 @@ trait ResolveRef[Tpl] { self: NestOpt_[Tpl] with Base =>
     sortss = sortss :+ Nil
   }
 
-  protected def resolveNestedOptRef(e: Var, nestedRef: Ref): Unit = {
+  protected def resolveNestedOptRef(nestedRef: Ref): Unit = {
+    val e = "xx"
     nestedOptIds += e
     if (whereOLD.isEmpty) {
       val Ref(ns, refAttrClean, _, _, _) = nestedRef

@@ -2,6 +2,7 @@ package molecule.sql.jdbc.transaction
 
 import java.lang.{Boolean => jBoolean}
 import java.sql.PreparedStatement
+import java.util
 import java.util.{UUID, ArrayList => jArrayList, List => jList}
 import clojure.lang.Keyword
 import molecule.base.error.ExecutionError
@@ -16,29 +17,22 @@ import scala.concurrent.Future
 
 trait JdbcTxBase_JVM extends JdbcDataType_JVM with ModelUtils {
 
+  // Override on instantiation
+  protected val sqlConn: java.sql.Connection
 
-  protected val sqlConn: java.sql.Connection //= ???
-
-  // Accumulate data in jdbc PreparedStatement given by connection
-//  protected var ps: PreparedStatement //= ???
-
-
-  var stmts      = List.empty[Stmt]
-  var setters    = List.empty[Setter]
-  var colSetters = List.empty[Setter]
-
-
+  // todo: replace with the ones underneath
+  var colSetters  = List.empty[Setter]
+  var insertStmts = List.empty[SqlStmt]
   protected var table   = ""
-  protected var columns = ListBuffer.empty[String]
+  protected val columns = ListBuffer.empty[String]
 
-
-  final protected val stmtsOLD: jArrayList[jList[AnyRef]] = new jArrayList[jList[AnyRef]]()
-
-  protected def initTxBase(elements: List[Element], eidIndex: Int = 0): Unit = {
-    nsFull = getInitialNs(elements)
-    part = fns.partNs(nsFull).head
-    lowest = eidIndex
-  }
+  protected var tables         = Array("")
+  protected var columnLists    = Array(Array.empty[String])
+  protected var colSetterLists = Array(Array.empty[Setter])
+  protected var batchSetters   = List.empty[Setter]
+  protected var joinInserts    = List.empty[String]
+  protected var joinSetters    = List.empty[Setter]
+  //  protected var joinColumnLists = List(List.empty[String])
 
 
   protected var nsFull       : String              = ""
@@ -65,14 +59,8 @@ trait JdbcTxBase_JVM extends JdbcDataType_JVM with ModelUtils {
   protected lazy val short2java   = (v: Any) => v.asInstanceOf[Short].toInt
   protected lazy val boolean2java = (v: Any) => v.asInstanceOf[Boolean].asInstanceOf[jBoolean]
 
-  protected def newId: String = {
-    tempId = lowest - 1
-    lowest = tempId
-    "#db/id[" + part + " " + tempId + "]"
-  }
   protected def kw(ns: String, attr: String) = Keyword.intern(ns, attr)
 
-  protected def stmtList = new jArrayList[AnyRef](4)
   protected def appendStmt(
     op: Keyword,
     e: AnyRef,
@@ -131,13 +119,11 @@ trait JdbcTxBase_JVM extends JdbcDataType_JVM with ModelUtils {
         //              .recover {
         //                case exc: Throwable => throw ExecutionError(exc.getMessage)
         //              }
-        //
-        //          case other => Future.failed(
-        //            ExecutionError(s"\nCan't serve Peer protocol `$other`.")
-        //          )
-        //        }
-
         ???
+
+      case other => Future.failed(
+        ExecutionError(s"\nCan't serve Peer protocol `$other`.")
+      )
     }
   }
 }

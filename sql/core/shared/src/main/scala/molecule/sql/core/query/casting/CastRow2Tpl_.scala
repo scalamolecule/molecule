@@ -31,8 +31,9 @@ trait CastRow2Tpl_ { self: Model2Query with Base =>
       //        val (tplCasts, moreCasts) = castsOLD.splitAt(n)
       //        val cast                  = castRow2AnyTpl(ii.map(List(_)), tplCasts, attrIndex, nested)
       //        resolveArities(as, moreCasts, attrIndex + n, acc :+ cast, nested)
-
-      case Nil => acc
+      //
+      //      case Nil => acc
+      case _ => acc
     }
   }
 
@@ -44,15 +45,15 @@ trait CastRow2Tpl_ { self: Model2Query with Base =>
   ): Row => Any = {
     val casters: List[(Row, Int) => Any] = resolveArities(arities, casts, attrIndex, Nil, nested)
     arities.length match {
-      case 1 => cast1(casters, attrIndex)
-      case 2 => cast2(casters, attrIndex)
-      case 3 => cast3(casters, attrIndex)
-      case 4 => cast4(casters, attrIndex)
-      case 5 => cast5(casters, attrIndex)
-      case 6 => cast6(casters, attrIndex)
-      case 7 => cast7(casters, attrIndex)
-      case 8 => cast8(casters, attrIndex)
-      case 9 => cast9(casters, attrIndex)
+      case 1  => cast1(casters, attrIndex)
+      case 2  => cast2(casters, attrIndex)
+      case 3  => cast3(casters, attrIndex)
+      case 4  => cast4(casters, attrIndex)
+      case 5  => cast5(casters, attrIndex)
+      case 6  => cast6(casters, attrIndex)
+      case 7  => cast7(casters, attrIndex)
+      case 8  => cast8(casters, attrIndex)
+      case 9  => cast9(casters, attrIndex)
       case 10 => cast10(casters, attrIndex)
       case 11 => cast11(casters, attrIndex)
       case 12 => cast12(casters, attrIndex)
