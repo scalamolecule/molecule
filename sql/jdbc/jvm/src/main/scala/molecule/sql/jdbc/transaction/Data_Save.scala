@@ -40,13 +40,13 @@ trait Data_Save extends JdbcTxBase_JVM with SaveOps with MoleculeLogging { self:
   override protected def addV(ns: String, attr: String, optValue: Option[Any]): Unit = {
     columns += attr
     optValue.fold {
-      colSetters = colSetters :+ ((ps: PS, _: Map[(Int, String, String), Array[Long]], _: Int) => {
+      colSetters = colSetters :+ ((ps: PS, _: Map[(Int, List[String], String), Array[Long]], _: Int) => {
         ps.setNull(colIndex, 0)
       })
     } { value =>
       colIndex += 1
       val j = colIndex
-      colSetters = colSetters :+ ((ps: PS, _: Map[(Int, String, String), Array[Long]], _: Int) => {
+      colSetters = colSetters :+ ((ps: PS, _: Map[(Int, List[String], String), Array[Long]], _: Int) => {
         value.asInstanceOf[(PS, Int) => Unit](ps, j)
       })
     }
@@ -68,16 +68,8 @@ trait Data_Save extends JdbcTxBase_JVM with SaveOps with MoleculeLogging { self:
   override protected def ref(ns: String, refAttr: String, refNs: String): Unit = {
     columns += refAttr
     val j                 = colIndex + 1
-    val colSetter: Setter = (ps: PS, refMap: Map[(Int, String, String), Array[Long]], _: Int) => {
-//      refMap.length match {
-//        case 0 => ()
-//        case 1 => ps.setLong(j, refMap.head.head)
-//        case n => throw new Exception(
-//          s"Unexpected found $n ref ids for save of $refAttr. Expected 1 or 0."
-//        )
-//      }
-      ps.setLong(j, refMap((0, ns, "")).head)
-
+    val colSetter: Setter = (ps: PS, insertIds: Map[(Int, List[String], String), Array[Long]], _: Int) => {
+      ps.setLong(j, insertIds((0, Nil, ns)).head)
     }
     colSetters = colSetters :+ colSetter
     saveNs()
@@ -93,9 +85,9 @@ trait Data_Save extends JdbcTxBase_JVM with SaveOps with MoleculeLogging { self:
     println("---- stmt -----------\n" + stmt)
     insertStmts = stmt :: insertStmts
     val colSetters1    = colSetters
-    val insert: Setter = (ps: PS, refMap: Map[(Int, String, String), Array[Long]], rowIndex: Int) => {
+    val insert: Setter = (ps: PS, insertIds: Map[(Int, List[String], String), Array[Long]], rowIndex: Int) => {
       colSetters1.foreach { colSetter =>
-        colSetter(ps, refMap, rowIndex)
+        colSetter(ps, insertIds, rowIndex)
       }
       ps.addBatch()
     }

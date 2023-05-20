@@ -22,7 +22,7 @@ trait JdbcTxBase_JVM extends JdbcDataType_JVM with ModelUtils {
 
   // todo: replace with the ones underneath
   var colSetters  = List.empty[Setter]
-  var insertStmts = List.empty[SqlStmt]
+  var insertStmts = List.empty[String]
   protected var table   = ""
   protected val columns = ListBuffer.empty[String]
 

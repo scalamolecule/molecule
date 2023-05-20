@@ -126,8 +126,8 @@ class UpdateExtraction(
           throw ModelError(s"Can't apply entity ids twice in $update.")
         resolve(tail, eids1.asInstanceOf[Seq[AnyRef]], filterElements, data)
 
-      case AttrOneTacLong("_Generic", "e", Eq, _, _, _, _, _, _, _) => throw ModelError(
-        "Can't update by applying entity ids to e_")
+      case AttrOneTacLong("_Generic", "eid", Eq, _, _, _, _, _, _, _) => throw ModelError(
+        "Can't update by applying entity ids to eid_")
 
       case a if a.ns == "_Generic" => throw ModelError(
         s"Generic attributes not allowed in update molecule. Found:\n" + a)

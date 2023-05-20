@@ -6,8 +6,10 @@ import molecule.boilerplate.ast.Model
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.query.Model2Query
+import molecule.core.util.ModelUtils
 import molecule.sql.core.query.casting._
 import scala.annotation.tailrec
+import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
 
@@ -27,11 +29,19 @@ class SqlModel2Query[Tpl](elements0: List[Element])
 
     with LambdasOne
     with LambdasSet
+    with ModelUtils
     with MoleculeLogging {
 
+  private var curTable = ""
 
   final def getQuery(altElements: List[Element] = Nil): String = {
     val elements = if (altElements.isEmpty) elements0 else altElements
+
+    //    elements.foreach(println)
+
+    from = getInitialNs(elements)
+    exts += from -> None
+
     validateQueryModel(elements)
     val elements1 = prepareElements(elements)
 
@@ -54,11 +64,11 @@ class SqlModel2Query[Tpl](elements0: List[Element])
         val join_  = join + padS(max1, join)
         val table_ = table + padS(max2, table)
 
-        val as_    = if (hasAs) {
+        val as_ = if (hasAs) {
           if (as.isEmpty) padS(max3 + 4, "") else " AS " + as + padS(max3, as)
         } else ""
 
-        val lft_   = lft + padS(max4, lft)
+        val lft_ = lft + padS(max4, lft)
         s"$join_ $table_$as_ ON $lft_ = $rgt"
       }.mkString("\n", "\n", "")
     }
@@ -70,28 +80,29 @@ class SqlModel2Query[Tpl](elements0: List[Element])
       }.mkString("\nWHERE\n  ", s" AND\n  ", "")
     }
 
-    s"""SELECT DISTINCT
-       |  $select1
-       |FROM $from$joins1$where1;""".stripMargin
+    val stmt =
+      s"""SELECT DISTINCT
+         |  $select1
+         |FROM $from$joins1$where1;""".stripMargin
 
-    //    """SELECT DISTINCT
-    //      |  Ns.i,
-    //      |  Ns_r1.s,
-    //      |  R1_r2.i
-    //      |FROM Ns
-    //      |INNER JOIN R1 AS Ns_r1 ON Ns.r1 = Ns_r1.id
-    //      |INNER JOIN R2 AS R1_r2 ON R1.r2 = R1_r2.id
-    //      |WHERE
-    //      |  Ns.i    IS NOT NULL AND
-    //      |  Ns_r1.s IS NOT NULL AND
-    //      |  R1_r2.i IS NOT NULL
-    //      |""".stripMargin
+    //    println(s)
+
+    """SELECT DISTINCT
+      |  A.i,
+      |  B.i,
+      |  A.s
+      |FROM A
+      |INNER JOIN A_bb_B       ON A.id        = A_bb_B.A_id
+      |INNER JOIN B            ON A_bb_B.B_id = B.id
+      |WHERE
+      |  A.i IS NOT NULL AND
+      |  B.i IS NOT NULL AND
+      |  A.s IS NOT NULL
+      |""".stripMargin
+
+    stmt
   }
-  /*
-  WHERE
-    Ns.i IS NOT NULL,
-    Ns_spouse.i IS NOT NULL; [42000-214]
-   */
+
 
   private def prepareElements(elements: List[Element]): List[Element] = {
     @tailrec
@@ -111,7 +122,7 @@ class SqlModel2Query[Tpl](elements0: List[Element])
     }
     def prepareAttr(a: Attr): Attr = {
       availableAttrs += a.name
-      if (a.ns == "_Generic" && a.attr == "tx") {
+      if (a.ns == "_Generic" && a.attr == "txId") {
         addTxVar = true
       } else if (a.filterAttr.nonEmpty) {
         val fa = a.filterAttr.get
@@ -154,18 +165,13 @@ class SqlModel2Query[Tpl](elements0: List[Element])
     elements1
   }
 
-  private var curTable = ""
 
   @tailrec
   final private def resolve(elements: List[Element]): Unit = elements match {
     case element :: tail => element match {
       case a: AttrOne                           =>
-        if (from.isEmpty) {
-          from += a.ns
-        }
-        //        curTable = a.ns
         a match {
-          case a: AttrOneMan => resolveAttrOneMan(a, curTable); resolve(tail)
+          case a: AttrOneMan => resolveAttrOneMan(a); resolve(tail)
           case a: AttrOneOpt => resolveAttrOneOpt(a); resolve(tail)
           case a: AttrOneTac => resolveAttrOneTac(a); resolve(tail)
         }
@@ -175,11 +181,8 @@ class SqlModel2Query[Tpl](elements0: List[Element])
         case a: AttrSetTac => resolveAttrSetTac(a); resolve(tail)
       }
       case ref: Ref                             =>
-        //        curTable = ref.ns + "_" + ref.refAttr
-        //        curTable = ref.ns
-        //        curTable = if (ref.ns == ref.refNs) ref.ns + "_1" else ref.ns
-        curTable = if (ref.ns == ref.refNs) ref.ns + "_1" else ""
-        resolveRef(ref, curTable);
+        exts(ref.refNs) = exts.get(ref.refNs).fold(Option.empty[String])(_ => Some("_" + ref.refAttr))
+        resolveRef(ref)
         resolve(tail)
       case _: BackRef                           => resolve(tail)
       case Composite(compositeElements)         => resolveComposite(compositeElements); resolve(tail)

@@ -143,11 +143,11 @@ trait ResolveExprOne[Tpl]
     sorter: Option[(Int, Int => (Row, Row) => Int)]
   ): Unit = {
     a match {
-      case ":_Generic/e"  =>
+      case ":_Generic/eid"  =>
         find += e
         addCast(res.j2s)
         addSort(sorter)
-      case ":_Generic/tx" =>
+      case ":_Generic/txId" =>
         find += txVar
         addCast(res.j2s)
         addSort(sorter)

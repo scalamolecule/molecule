@@ -34,14 +34,14 @@ object UpdateSet_eid extends DatomicTestSuite {
     "Multiple entities updated" - types { implicit conn =>
       for {
         List(a, b, c) <- Ns.ints.insert(Set(1), Set(2), Set(3)).transact.map(_.eids)
-        _ <- Ns.e.a1.ints.query.get.map(_ ==> List(
+        _ <- Ns.eid.a1.ints.query.get.map(_ ==> List(
           (a, Set(1)),
           (b, Set(2)),
           (c, Set(3)),
         ))
 
         _ <- Ns(List(b, c)).ints(4).update.transact
-        _ <- Ns.e.a1.ints.query.get.map(_ ==> List(
+        _ <- Ns.eid.a1.ints.query.get.map(_ ==> List(
           (a, Set(1)),
           (b, Set(4)),
           (c, Set(4)),
@@ -144,11 +144,11 @@ object UpdateSet_eid extends DatomicTestSuite {
 
     "Semantics" - {
 
-      "e_(eid) not allowed" - types { implicit conn =>
+      "eid_(eid) not allowed" - types { implicit conn =>
         for {
-          _ <- Ns.e_(42).ints(2).update.transact
+          _ <- Ns.eid_(42).ints(2).update.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't update by applying entity ids to e_"
+            err ==> "Can't update by applying entity ids to eid_"
           }
         } yield ()
       }

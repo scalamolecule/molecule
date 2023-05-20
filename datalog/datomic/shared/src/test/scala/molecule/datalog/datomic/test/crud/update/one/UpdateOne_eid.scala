@@ -35,14 +35,14 @@ object UpdateOne_eid extends DatomicTestSuite {
     "Multiple entities updated" - types { implicit conn =>
       for {
         List(a, b, c) <- Ns.int.insert(1, 2, 3).transact.map(_.eids)
-        _ <- Ns.e.a1.int.query.get.map(_ ==> List(
+        _ <- Ns.eid.a1.int.query.get.map(_ ==> List(
           (a, 1),
           (b, 2),
           (c, 3),
         ))
 
         _ <- Ns(List(b, c)).int(4).update.transact
-        _ <- Ns.e.a1.int.query.get.map(_ ==> List(
+        _ <- Ns.eid.a1.int.query.get.map(_ ==> List(
           (a, 1),
           (b, 4),
           (c, 4),
@@ -140,31 +140,11 @@ object UpdateOne_eid extends DatomicTestSuite {
 
     "Semantics" - {
 
-      "e_(eid) not allowed" - types { implicit conn =>
+      "eid_(eid) not allowed" - types { implicit conn =>
         for {
-          _ <- Ns.e_(42).int(2).update.transact
+          _ <- Ns.eid_(42).int(2).update.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't update by applying entity ids to e_"
-          }
-        } yield ()
-      }
-
-      "Tacit generic attributes not allowed" - types { implicit conn =>
-        for {
-          _ <- Ns(42).a_("x").update.transact
-            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Generic attributes not allowed in update molecule. Found:\n" +
-              """AttrOneTacString("_Generic", "a", Eq, Seq("x"), None, None, Nil, Nil, None, None)"""
-          }
-        } yield ()
-      }
-
-      "Mandatory generic attributes not allowed" - types { implicit conn =>
-        for {
-          _ <- Ns(42).a("x").update.transact
-            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Generic attributes not allowed in update molecule. Found:\n" +
-              """AttrOneManString("_Generic", "a", Eq, Seq("x"), None, None, Nil, Nil, None, None)"""
+            err ==> "Can't update by applying entity ids to eid_"
           }
         } yield ()
       }

@@ -14,14 +14,14 @@ object SaveSemantics extends DatomicTestSuite {
 
     "Save requires applied values" - refs { implicit conn =>
       for {
-        _ <- (Ns.i + R2.i).save.transact
+        _ <- (A.i + C.i).save.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> "Missing applied value for attribute Ns.i"
+          err ==> "Missing applied value for attribute A.i"
         }
 
-        _ <- (Ns.i(1) + R2.i).save.transact
+        _ <- (A.i(1) + C.i).save.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> "Missing applied value for attribute R2.i"
+          err ==> "Missing applied value for attribute C.i"
         }
       } yield ()
     }
@@ -31,28 +31,28 @@ object SaveSemantics extends DatomicTestSuite {
 
       "Same ns" - refs { implicit conn =>
         for {
-          _ <- Ns.i(1).i(2).save.transact
+          _ <- A.i(1).i(2).save.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `Ns.i`."
+            err ==> "Can't transact duplicate attribute `A.i`."
           }
         } yield ()
       }
 
       "After backref" - refs { implicit conn =>
         for {
-          _ <- Ns.i(1).R1.i(2)._Ns.i(3).save.transact
+          _ <- A.i(1).B.i(2)._A.i(3).save.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `Ns.i`."
+            err ==> "Can't transact duplicate attribute `A.i`."
           }
 
-          _ <- Ns.i(1).R1.i(2).R2.i(3)._R1.i(4).save.transact
+          _ <- A.i(1).B.i(2).C.i(3)._B.i(4).save.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `R1.i`."
+            err ==> "Can't transact duplicate attribute `B.i`."
           }
 
-          _ <- Ns.i(1).R1.i(2).R2.i(3)._R1._Ns.i(4).save.transact
+          _ <- A.i(1).B.i(2).C.i(3)._B._A.i(4).save.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `Ns.i`."
+            err ==> "Can't transact duplicate attribute `A.i`."
           }
         } yield ()
       }
@@ -66,34 +66,34 @@ object SaveSemantics extends DatomicTestSuite {
           // Each sub tuple has same semantics as flat molecule
 
           // Same ns
-          _ <- (R2.i(1) + Ns.i(2).i(3)).save.transact
+          _ <- (C.i(1) + A.i(2).i(3)).save.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `Ns.i`."
+            err ==> "Can't transact duplicate attribute `A.i`."
           }
 
           // After backref
-          _ <- (R2.i(1) + Ns.i(2).R1.i(3)._Ns.i(4)).save.transact
+          _ <- (C.i(1) + A.i(2).B.i(3)._A.i(4)).save.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `Ns.i`."
+            err ==> "Can't transact duplicate attribute `A.i`."
           }
 
-          _ <- (R2.i(1) + Ns.i(2).R1.i(3).R2.i(4)._R1.i(5)).save.transact
+          _ <- (C.i(1) + A.i(2).B.i(3).C.i(4)._B.i(5)).save.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `R1.i`."
+            err ==> "Can't transact duplicate attribute `B.i`."
           }
 
-          _ <- (R2.i(1) + Ns.i(2).R1.i(3).R2.i(4)._R1._Ns.i(5)).save.transact
+          _ <- (C.i(1) + A.i(2).B.i(3).C.i(4)._B._A.i(5)).save.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `Ns.i`."
+            err ==> "Can't transact duplicate attribute `A.i`."
           }
         } yield ()
       }
 
       "Across sub tuples, top level" - refs { implicit conn =>
         for {
-          _ <- (Ns.i(1) + Ns.i(2)).save.transact
+          _ <- (A.i(1) + A.i(2)).save.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `Ns.i`."
+            err ==> "Can't transact duplicate attribute `A.i`."
           }
         } yield ()
       }
@@ -101,26 +101,26 @@ object SaveSemantics extends DatomicTestSuite {
       "Across sub tuples, ref" - refs { implicit conn =>
         for {
           // On different levels is ok
-          _ <- (Ns.i(1).R1.i(2) + R1.i(3)).save.transact
+          _ <- (A.i(1).B.i(2) + B.i(3)).save.transact
 
           // Can't reference same ns twice
-          _ <- (Ns.i(1).R1.i(2) + Ns.s("a").R1.s("b")).save.transact
+          _ <- (A.i(1).B.i(2) + A.s("a").B.s("b")).save.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `Ns.r1`."
+            err ==> "Can't transact duplicate attribute `A.b`."
           }
         } yield ()
       }
 
       "Across sub tuples, after backref" - refs { implicit conn =>
         for {
-          _ <- (Ns.s("a") + Ns.i(1).R1.i(2)._Ns.s("b")).save.transact
+          _ <- (A.s("a") + A.i(1).B.i(2)._A.s("b")).save.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `Ns.s`."
+            err ==> "Can't transact duplicate attribute `A.s`."
           }
 
-          _ <- (Ns.s("a") + Ns.i(1).R1.i(2).R2.i(3)._R1._Ns.s("b")).save.transact
+          _ <- (A.s("a") + A.i(1).B.i(2).C.i(3)._B._A.s("b")).save.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `Ns.s`."
+            err ==> "Can't transact duplicate attribute `A.s`."
           }
         } yield ()
       }
@@ -129,21 +129,21 @@ object SaveSemantics extends DatomicTestSuite {
 
     "Nested data can only be inserted, not saved" - refs { implicit conn =>
       for {
-        _ <- Ns.i(0).Rs1.*(R1.i(1)).save.transact
+        _ <- A.i(0).Bb.*(B.i(1)).save.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Nested data structure not allowed in save molecule. " +
             "Please use insert instead."
         }
 
-        _ <- Ns.i(0).Rs1.*?(R1.i(1)).save.transact
+        _ <- A.i(0).Bb.*?(B.i(1)).save.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Optional nested data structure not allowed in save molecule. " +
             "Please use insert instead."
         }
 
         // ok
-        _ <- Ns.i.Rs1.*(R1.i).insert(0, List(1)).transact
-        _ <- Ns.i.Rs1.*?(R1.i).insert(0, List(1)).transact
+        _ <- A.i.Bb.*(B.i).insert(0, List(1)).transact
+        _ <- A.i.Bb.*?(B.i).insert(0, List(1)).transact
       } yield ()
     }
   }

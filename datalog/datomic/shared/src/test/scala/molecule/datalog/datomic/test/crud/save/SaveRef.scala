@@ -13,35 +13,35 @@ object SaveRef extends DatomicTestSuite {
 
     "Card one" - refs { implicit conn =>
       for {
-        _ <- Ns.i(1).R1.i(2).save.transact
-        _ <- Ns.i.R1.i.query.get.map(_ ==> List((1, 2)))
+        _ <- A.i(1).B.i(2).save.transact
+        _ <- A.i.B.i.query.get.map(_ ==> List((1, 2)))
       } yield ()
     }
 
 
     "Card many" - refs { implicit conn =>
       for {
-        _ <- Ns.i(1).Rs1.i(2).save.transact
-        _ <- Ns.i.Rs1.i.query.get.map(_ ==> List((1, 2)))
+        _ <- A.i(1).Bb.i(2).save.transact
+        _ <- A.i.Bb.i.query.get.map(_ ==> List((1, 2)))
       } yield ()
     }
 
 
     "Backref" - refs { implicit conn =>
       for {
-        _ <- Ns.i(1).Rs1.i(2)._Ns.s("a").save.transact
-        _ <- Ns.i.Rs1.i._Ns.s.query.get.map(_ ==> List((1, 2, "a")))
+        _ <- A.i(1).Bb.i(2)._A.s("a").save.transact
+        _ <- A.i.Bb.i._A.s.query.get.map(_ ==> List((1, 2, "a")))
       } yield ()
     }
 
 
     "Composite" - refs { implicit conn =>
       for {
-        _ <- (Ns.i(1) + R2.i(2)).save.transact
-        _ <- (Ns.i + R2.i).query.get.map(_ ==> List((1, 2)))
+        _ <- (A.i(1) + C.i(2)).save.transact
+        _ <- (A.i + C.i).query.get.map(_ ==> List((1, 2)))
 
-        _ <- (Ns.R1.i(1) + R2.i(2)).save.transact
-        _ <- (Ns.R1.i + R2.i).query.get.map(_ ==> List((1, 2)))
+        _ <- (A.B.i(1) + C.i(2)).save.transact
+        _ <- (A.B.i + C.i).query.get.map(_ ==> List((1, 2)))
       } yield ()
     }
   }

@@ -9,60 +9,20 @@ import utest._
 
 object InsertSemantics extends DatomicTestSuite {
 
-
   override lazy val tests = Tests {
-
-
-    "refs and backrefs" - refs { implicit conn =>
-      for {
-        _ <- Ns.i(0).s("a")
-          .R1.i(1).s("b")
-          .Rs2.i(22)._R1
-          .R2.i(2).s("c")._R1._Ns
-          .Rs1.i(11)
-          .save.transact
-
-        _ <- Ns.i.R1.i.query.get.map(_ ==> List((0, 1)))
-        _ <- Ns.i.R1.i._Ns.s.query.get.map(_ ==> List((0, 1, "a")))
-        _ <- Ns.i.R1.i._Ns.Rs1.i.query.get.map(_ ==> List((0, 1, 11)))
-        _ <- Ns.i.R1.i.R2.i._R1.s.query.get.map(_ ==> List((0, 1, 2, "b")))
-        _ <- Ns.i.R1.R2.i._R1.i.query.get.map(_ ==> List((0, 2, 1)))
-        _ <- Ns.i.R1.i.R2.i._R1.Rs2.i.query.get.map(_ ==> List((0, 1, 2, 22)))
-        _ <- Ns.i.R1.R2.i._R1.Rs2.i.query.get.map(_ ==> List((0, 2, 22)))
-        _ <- Ns.i.R1.i.R2.i._R1.s._Ns.s.query.get.map(_ ==> List((0, 1, 2, "b", "a")))
-        _ <- Ns.i.R1.i.R2.i._R1._Ns.s.query.get.map(_ ==> List((0, 1, 2, "a")))
-        _ <- Ns.i.R1.R2.i._R1._Ns.s.query.get.map(_ ==> List((0, 2, "a")))
-        _ <- Ns.i.R1.i.R2.i._R1.s._Ns.Rs1.i.query.get.map(_ ==> List((0, 1, 2, "b", 11)))
-        _ <- Ns.i.R1.i.R2.i._R1._Ns.Rs1.i.query.get.map(_ ==> List((0, 1, 2, 11)))
-        _ <- Ns.i.R1.R2.i._R1._Ns.Rs1.i.query.get.map(_ ==> List((0, 2, 11)))
-        _ <- Ns.R1.R2.s._R1._Ns.Rs1.i.query.get.map(_ ==> List(("c", 11)))
-
-        _ <- Ns.i.s.R1.i.s.Rs2.i._R1.R2.i.s._R1._Ns.Rs1.i.insert(
-          (0, "a", 1, "b", 22, 2, "c", 11),
-          (1, "a", 1, "b", 22, 2, "c", 11),
-        ).transact
-
-        _ <- Ns.i.s.R1.i.s.Rs2.i._R1.R2.i.s._R1._Ns.Rs1.i.query.get.map(_ ==> List(
-          (0, "a", 1, "b", 22, 2, "c", 11),
-          (1, "a", 1, "b", 22, 2, "c", 11),
-        ))
-
-      } yield ()
-    }
-
 
     "Insert not allowed to apply values to attributes" - refs { implicit conn =>
       for {
-        _ <- (Ns.i(1) + R2.i(2)).insert(1, 2).transact
+        _ <- (A.i(1) + C.i(2)).insert(1, 2).transact
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Can't insert attributes with an applied value. Found:\n" +
-            """AttrOneManInt("Ns", "i", Eq, Seq(1), None, None, Nil, Nil, None, None)"""
+            """AttrOneManInt("A", "i", Eq, Seq(1), None, None, Nil, Nil, None, None)"""
         }
 
-        _ <- (Ns.i + R2.i(2)).insert(1, 2).transact
+        _ <- (A.i + C.i(2)).insert(1, 2).transact
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Can't insert attributes with an applied value. Found:\n" +
-            """AttrOneManInt("R2", "i", Eq, Seq(2), None, None, Nil, Nil, None, None)"""
+            """AttrOneManInt("C", "i", Eq, Seq(2), None, None, Nil, Nil, None, None)"""
         }
       } yield ()
     }
@@ -72,28 +32,28 @@ object InsertSemantics extends DatomicTestSuite {
 
       "Same ns" - refs { implicit conn =>
         for {
-          _ <- Ns.i.i.insert(1, 2).transact
+          _ <- A.i.i.insert(1, 2).transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `Ns.i`."
+            err ==> "Can't transact duplicate attribute `A.i`."
           }
         } yield ()
       }
 
       "After backref" - refs { implicit conn =>
         for {
-          _ <- Ns.i.R1.i._Ns.i.insert(1, 2, 3).transact
+          _ <- A.i.B.i._A.i.insert(1, 2, 3).transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `Ns.i`."
+            err ==> "Can't transact duplicate attribute `A.i`."
           }
 
-          _ <- Ns.i.R1.i.R2.i._R1.i.insert(1, 2, 3, 4).transact
+          _ <- A.i.B.i.C.i._B.i.insert(1, 2, 3, 4).transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `R1.i`."
+            err ==> "Can't transact duplicate attribute `B.i`."
           }
 
-          _ <- Ns.i.R1.i.R2.i._R1._Ns.i.insert(1, 2, 3, 4).transact
+          _ <- A.i.B.i.C.i._B._A.i.insert(1, 2, 3, 4).transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `Ns.i`."
+            err ==> "Can't transact duplicate attribute `A.i`."
           }
         } yield ()
       }
@@ -107,35 +67,35 @@ object InsertSemantics extends DatomicTestSuite {
           // Each sub tuple has same semantics as flat molecule
 
           // Same ns
-          _ <- (R2.i + Ns.i.i).insert(0, (1, 2)).transact
+          _ <- (C.i + A.i.i).insert(0, (1, 2)).transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `Ns.i`."
+            err ==> "Can't transact duplicate attribute `A.i`."
           }
 
           // After backref
 
-          _ <- (R2.i + Ns.i.R1.i._Ns.i).insert(0, (1, 2, 3)).transact
+          _ <- (C.i + A.i.B.i._A.i).insert(0, (1, 2, 3)).transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `Ns.i`."
+            err ==> "Can't transact duplicate attribute `A.i`."
           }
 
-          _ <- (R2.i + Ns.i.R1.i.R2.i._R1.i).insert(0, (1, 2, 3, 4)).transact
+          _ <- (C.i + A.i.B.i.C.i._B.i).insert(0, (1, 2, 3, 4)).transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `R1.i`."
+            err ==> "Can't transact duplicate attribute `B.i`."
           }
           //
-          _ <- (R2.i + Ns.i.R1.i.R2.i._R1._Ns.i).insert(0, (1, 2, 3, 4)).transact
+          _ <- (C.i + A.i.B.i.C.i._B._A.i).insert(0, (1, 2, 3, 4)).transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `Ns.i`."
+            err ==> "Can't transact duplicate attribute `A.i`."
           }
         } yield ()
       }
 
       "Across sub tuples, top level" - refs { implicit conn =>
         for {
-          _ <- (Ns.i + Ns.i).insert(1, 2).transact
+          _ <- (A.i + A.i).insert(1, 2).transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `Ns.i`."
+            err ==> "Can't transact duplicate attribute `A.i`."
           }
         } yield ()
       }
@@ -143,26 +103,26 @@ object InsertSemantics extends DatomicTestSuite {
       "Across sub tuples, ref" - refs { implicit conn =>
         for {
           // On different levels is ok
-          _ <- (Ns.i.R1.i + R1.i).insert((1, 2), 3).transact
+          _ <- (A.i.B.i + B.i).insert((1, 2), 3).transact
 
           // Can't reference same ns twice
-          _ <- (Ns.i.R1.i + Ns.s.R1.s).insert((1, 2), ("a", "b")).transact
+          _ <- (A.i.B.i + A.s.B.s).insert((1, 2), ("a", "b")).transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `Ns.r1`."
+            err ==> "Can't transact duplicate attribute `A.b`."
           }
         } yield ()
       }
 
       "Across sub tuples, after backref" - refs { implicit conn =>
         for {
-          _ <- (Ns.s + Ns.i.R1.i._Ns.s).insert("a", (1, 2, "b")).transact
+          _ <- (A.s + A.i.B.i._A.s).insert("a", (1, 2, "b")).transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `Ns.s`."
+            err ==> "Can't transact duplicate attribute `A.s`."
           }
 
-          _ <- (Ns.s + Ns.i.R1.i.R2.i._R1._Ns.s).insert("a", (1, 2, 3, "b")).transact
+          _ <- (A.s + A.i.B.i.C.i._B._A.s).insert("a", (1, 2, 3, "b")).transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `Ns.s`."
+            err ==> "Can't transact duplicate attribute `A.s`."
           }
         } yield ()
       }
@@ -172,28 +132,28 @@ object InsertSemantics extends DatomicTestSuite {
 
       "Same ns" - refs { implicit conn =>
         for {
-          _ <- Ns.i.Rs1.*(R1.i.i).insert(1, List((2, 3))).transact
+          _ <- A.i.Bb.*(B.i.i).insert(1, List((2, 3))).transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `R1.i`."
+            err ==> "Can't transact duplicate attribute `B.i`."
           }
 
-          _ <- Ns.i.Rs1.*?(R1.i.i).insert(1, List((2, 3))).transact
+          _ <- A.i.Bb.*?(B.i.i).insert(1, List((2, 3))).transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `R1.i`."
+            err ==> "Can't transact duplicate attribute `B.i`."
           }
         } yield ()
       }
 
       "Backref in nested" - refs { implicit conn =>
         for {
-          _ <- Ns.i.Rs1.*(R1.i.R2.i._R1.i).insert(1, List((2, 3, 4))).transact
+          _ <- A.i.Bb.*(B.i.C.i._B.i).insert(1, List((2, 3, 4))).transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `R1.i`."
+            err ==> "Can't transact duplicate attribute `B.i`."
           }
 
-          _ <- Ns.i.Rs1.*?(R1.i.R2.i._R1.i).insert(1, List((2, 3, 4))).transact
+          _ <- A.i.Bb.*?(B.i.C.i._B.i).insert(1, List((2, 3, 4))).transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `R1.i`."
+            err ==> "Can't transact duplicate attribute `B.i`."
           }
         } yield ()
       }
@@ -202,19 +162,19 @@ object InsertSemantics extends DatomicTestSuite {
 
     "Backref in nested" - refs { implicit conn =>
       for {
-        _ <- Ns.i.Rs1.*(R1.i._Ns.i).insert(1, List((2, 3))).transact
+        _ <- A.i.Bb.*(B.i._A.i).insert(1, List((2, 3))).transact
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> "Can't use backref namespace `_Ns` from here."
+          err ==> "Can't use backref namespace `_A` from here."
         }
 
-        _ <- Ns.i.Rs1.*?(R1.i._Ns.i).insert(1, List((2, 3))).transact
+        _ <- A.i.Bb.*?(B.i._A.i).insert(1, List((2, 3))).transact
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> "Can't use backref namespace `_Ns` from here."
+          err ==> "Can't use backref namespace `_A` from here."
         }
 
         // ok
-        _ <- Ns.i.Rs1.*(R1.i.R2.i._R1.s).insert(1, List((2, 3, "a"))).transact
-        _ <- Ns.i.Rs1.*?(R1.i.R2.i._R1.s).insert(1, List((2, 3, "a"))).transact
+        _ <- A.i.Bb.*(B.i.C.i._B.s).insert(1, List((2, 3, "a"))).transact
+        _ <- A.i.Bb.*?(B.i.C.i._B.s).insert(1, List((2, 3, "a"))).transact
       } yield ()
     }
   }

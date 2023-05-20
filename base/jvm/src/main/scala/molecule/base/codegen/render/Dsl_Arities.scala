@@ -30,8 +30,8 @@ case class Dsl_Arities(schema: MetaSchema, partPrefix: String, namespace: MetaNs
 
   val pOne = " " * maxCardPad
   val pSet = " " * (maxCardPad - 5)
-  val pArr = " " * (maxCardPad - 7)
-  val pMap = " " * (maxCardPad - 13)
+  //  val pArr = " " * (maxCardPad - 7)
+  //  val pMap = " " * (maxCardPad - 13)
 
   attrsAll.foreach {
     case MetaAttr(attr, card, tpe0, refNs, _, _, _, _, _, _) =>
@@ -196,15 +196,17 @@ case class Dsl_Arities(schema: MetaSchema, partPrefix: String, namespace: MetaNs
 
   val backRefDefs = if (backRefs.isEmpty) "" else {
     val max = backRefs.map(_.length).max
-    backRefs.map { backRef0 =>
+    backRefs.flatMap { backRef0 =>
       val backRef = partPrefix + backRef0
-      val pad     = padS(max, backRef)
-      s"""object _$backRef$pad extends $backRef${_0}$pad[${`A..V, `}t](elements :+ Model.BackRef("$backRef"))"""
+      if (ns == backRef) None else {
+        val pad = padS(max, backRef)
+        Some(s"""object _$backRef$pad extends $backRef${_0}$pad[${`A..V, `}t](elements :+ Model.BackRef("$backRef", "$ns"))""")
+      }
     }.mkString("\n\n  ", "\n  ", "")
   }
 
   def get: String =
-    s"""class $ns_0[${`A..V, `}t]($elements) extends $ns with $modelOps {
+    s"""class $ns_0[${`A..V, `}t]($elements) extends ${ns}_base with $modelOps {
        |  $manAttrs$optAttrs$tacAttrs
        |
        |  $resolvers

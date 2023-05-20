@@ -38,7 +38,7 @@ class SaveExtraction(isTxMetaData: Boolean = false)
           }
 
         case Ref(ns, refAttr, refNs, _, _) => ref(ns, refAttr, refNs); resolve(tail)
-        case BackRef(backRefNs)            => backRef(backRefNs); resolve(tail)
+        case BackRef(backRefNs, _)            => backRef(backRefNs); resolve(tail)
         case _: Nested                     => throw ModelError(
           "Nested data structure not allowed in save molecule. Please use insert instead."
         )

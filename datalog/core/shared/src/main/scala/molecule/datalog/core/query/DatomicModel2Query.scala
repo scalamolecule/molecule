@@ -91,7 +91,7 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
     }
     def prepareAttr(a: Attr): Attr = {
       availableAttrs += a.name
-      if (a.ns == "_Generic" && a.attr == "tx") {
+      if (a.ns == "_Generic" && a.attr == "txId") {
         addTxVar = true
       } else if (a.filterAttr.nonEmpty) {
         val fa = a.filterAttr.get

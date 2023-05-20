@@ -12,8 +12,8 @@ object Refs extends DataModel(10) {
     val rs1        = many[R1]
     val spouse     = one[Ns]
     val friends    = many[Ns]
-    val owned1     = one[R1].owner
-    val ownedMany1 = many[R1].owner
+    val OwnB     = one[R1].owner
+    val OwnBb = many[R1].owner
 
   }
 

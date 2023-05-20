@@ -333,24 +333,24 @@ object SortNested extends DatomicTestSuite {
 
     "Sort top level" - refs { implicit conn =>
       for {
-        _ <- Ns.s.Rs1.*(R1.i).insert(
+        _ <- A.s.Bb.*(B.i).insert(
           ("A", List(1, 2)),
           ("B", List(1, 2)),
         ).transact
 
-        _ <- Ns.s.a1.Rs1.*(R1.i.a1).query.get.map(_ ==> List(
+        _ <- A.s.a1.Bb.*(B.i.a1).query.get.map(_ ==> List(
           ("A", List(1, 2)),
           ("B", List(1, 2)),
         ))
-        _ <- Ns.s.a1.Rs1.*(R1.i.d1).query.get.map(_ ==> List(
+        _ <- A.s.a1.Bb.*(B.i.d1).query.get.map(_ ==> List(
           ("A", List(2, 1)),
           ("B", List(2, 1)),
         ))
-        _ <- Ns.s.d1.Rs1.*(R1.i.a1).query.get.map(_ ==> List(
+        _ <- A.s.d1.Bb.*(B.i.a1).query.get.map(_ ==> List(
           ("B", List(1, 2)),
           ("A", List(1, 2)),
         ))
-        _ <- Ns.s.d1.Rs1.*(R1.i.d1).query.get.map(_ ==> List(
+        _ <- A.s.d1.Bb.*(B.i.d1).query.get.map(_ ==> List(
           ("B", List(2, 1)),
           ("A", List(2, 1)),
         ))
@@ -360,7 +360,7 @@ object SortNested extends DatomicTestSuite {
 
     "Options" - refs { implicit conn =>
       for {
-        _ <- Ns.i.s_?.Rs1.*(R1.i.s_?).insert(
+        _ <- A.i.s_?.Bb.*(B.i.s_?).insert(
           (1, Some("A"), List(
             (1, Some("a")),
             (1, Some("b")),
@@ -379,7 +379,7 @@ object SortNested extends DatomicTestSuite {
         ).transact
 
         // a1 *? a1/a2
-        _ <- Ns.i.s_?.a1.Rs1.*?(R1.i.a1.s_?.a2).query.get.map(_ ==> List(
+        _ <- A.i.s_?.a1.Bb.*?(B.i.a1.s_?.a2).query.get.map(_ ==> List(
           (4, None, List()),
           (1, Some("A"), List(
             (1, Some("a")),
@@ -398,7 +398,7 @@ object SortNested extends DatomicTestSuite {
         ))
 
         // a1 *? a1/d2
-        _ <- Ns.i.s_?.a1.Rs1.*?(R1.i.a1.s_?.d2).query.get.map(_ ==> List(
+        _ <- A.i.s_?.a1.Bb.*?(B.i.a1.s_?.d2).query.get.map(_ ==> List(
           (4, None, List()),
           (1, Some("A"), List(
             (1, Some("b")),
@@ -417,7 +417,7 @@ object SortNested extends DatomicTestSuite {
         ))
 
         // a1 *? d1/a2
-        _ <- Ns.i.s_?.a1.Rs1.*?(R1.i.d1.s_?.a2).query.get.map(_ ==> List(
+        _ <- A.i.s_?.a1.Bb.*?(B.i.d1.s_?.a2).query.get.map(_ ==> List(
           (4, None, List()),
           (1, Some("A"), List(
             (2, None),
@@ -436,7 +436,7 @@ object SortNested extends DatomicTestSuite {
         ))
 
         // a1 *? d1/d2
-        _ <- Ns.i.s_?.a1.Rs1.*?(R1.i.d1.s_?.d2).query.get.map(_ ==> List(
+        _ <- A.i.s_?.a1.Bb.*?(B.i.d1.s_?.d2).query.get.map(_ ==> List(
           (4, None, List()),
           (1, Some("A"), List(
             (2, Some("b")),
@@ -455,7 +455,7 @@ object SortNested extends DatomicTestSuite {
         ))
 
         // d1 *? d1/d2
-        _ <- Ns.i.s_?.d1.Rs1.*?(R1.i.d1.s_?.d2).query.get.map(_ ==> List(
+        _ <- A.i.s_?.d1.Bb.*?(B.i.d1.s_?.d2).query.get.map(_ ==> List(
           (3, Some("C"), List()),
           (2, Some("B"), List(
             (2, Some("b")),
@@ -474,7 +474,7 @@ object SortNested extends DatomicTestSuite {
         ))
 
         // d1 *? d2/d1
-        _ <- Ns.i.s_?.d1.Rs1.*?(R1.i.d2.s_?.d1).query.get.map(_ ==> List(
+        _ <- A.i.s_?.d1.Bb.*?(B.i.d2.s_?.d1).query.get.map(_ ==> List(
           (3, Some("C"), List()),
           (2, Some("B"), List(
             (2, Some("b")),
@@ -493,7 +493,7 @@ object SortNested extends DatomicTestSuite {
         ))
 
         // d1(expr) *? d2/d1
-        _ <- Ns.i.s.>("A").d1.Rs1.*?(R1.i.d2.s_?.d1).query.get.map(_ ==> List(
+        _ <- A.i.s.>("A").d1.Bb.*?(B.i.d2.s_?.d1).query.get.map(_ ==> List(
           (3, "C", List()),
           (2, "B", List(
             (2, Some("b")),
@@ -504,7 +504,7 @@ object SortNested extends DatomicTestSuite {
         ))
 
         // expr+d1 * a2/d1(expr)
-        _ <- Ns.i.<=(2).s.d1.Rs1.*(R1.i.a2.s.>=("a").d1).query.get.map(_ ==> List(
+        _ <- A.i.<=(2).s.d1.Bb.*(B.i.a2.s.>=("a").d1).query.get.map(_ ==> List(
           (2, "B", List(
             (1, "b"),
             (2, "b"),
@@ -524,7 +524,7 @@ object SortNested extends DatomicTestSuite {
 
     "2 sub levels" - refs { implicit conn =>
       for {
-        _ <- Ns.i.s_?.Rs1.*(R1.i.s_?.Rs2.*(R2.s)).insert(
+        _ <- A.i.s_?.Bb.*(B.i.s_?.Cc.*(C.s)).insert(
           (1, Some("A"), List(
             (1, Some("a"), List("x", "y")),
             (1, Some("b"), List("y", "x")),
@@ -542,7 +542,7 @@ object SortNested extends DatomicTestSuite {
           (4, None, Nil),
         ).transact
 
-        _ <- Ns.i.s_?.a1.Rs1.*?(R1.i.d2.s_?.a1.Rs2.*?(R2.s.d1)).query.get.map(_ ==> List(
+        _ <- A.i.s_?.a1.Bb.*?(B.i.d2.s_?.a1.Cc.*?(C.s.d1)).query.get.map(_ ==> List(
           (4, None, Nil),
           (1, Some("A"), List(
             (2, None, List("y", "x")),
@@ -560,7 +560,7 @@ object SortNested extends DatomicTestSuite {
           (3, Some("C"), Nil),
         ))
 
-        _ <- Ns.i.a1.s_?.Rs1.*(R1.i.d2.s_?.a1.Rs2.*(R2.s.d1)).query.get.map(_ ==> List(
+        _ <- A.i.a1.s_?.Bb.*(B.i.d2.s_?.a1.Cc.*(C.s.d1)).query.get.map(_ ==> List(
           (1, Some("A"), List(
             (2, None, List("y", "x")),
             (2, Some("a"), List("y", "x")),
@@ -575,7 +575,7 @@ object SortNested extends DatomicTestSuite {
           )),
         ))
 
-        _ <- Ns.i.s_?.a1.Rs1.*(R1.i.d2.s_?.a1.Rs2.*(R2.s.d1)).query.get.map(_ ==> List(
+        _ <- A.i.s_?.a1.Bb.*(B.i.d2.s_?.a1.Cc.*(C.s.d1)).query.get.map(_ ==> List(
           (1, Some("A"), List(
             (2, None, List("y", "x")),
             (2, Some("a"), List("y", "x")),

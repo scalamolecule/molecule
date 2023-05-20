@@ -54,7 +54,7 @@ object UpdateSet_filter extends DatomicTestSuite {
 
         // Update all entities where non-unique attribute i is 1
         _ <- Ns.i_(1).ints(Set(4)).update.transact
-        _ <- Ns.e.a1.i.ints_?.query.get.map(_ ==> List(
+        _ <- Ns.eid.a1.i.ints_?.query.get.map(_ ==> List(
           (a, 1, None), // not updated since there were no previous value
           (b, 1, Some(Set(4))), // 2 updated to 4
           (c, 2, Some(Set(3))),
@@ -62,7 +62,7 @@ object UpdateSet_filter extends DatomicTestSuite {
 
         // Upsert all entities where non-unique attribute i is 1
         _ <- Ns.i_(1).ints(Set(5)).upsert.transact
-        _ <- Ns.e.a1.i.ints_?.query.get.map(_ ==> List(
+        _ <- Ns.eid.a1.i.ints_?.query.get.map(_ ==> List(
           (a, 1, Some(Set(5))), // 5 inserted
           (b, 1, Some(Set(5))), // 4 updated to 5
           (c, 2, Some(Set(3))),

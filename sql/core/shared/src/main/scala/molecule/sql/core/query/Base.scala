@@ -55,6 +55,9 @@ trait Base extends BaseHelpers with JavaConversions { self: Model2Query =>
   final protected val joins  = new ListBuffer[(String, String, String, String, String)]
   final protected val where  = new ListBuffer[(String, String)]
 
+  final protected val exts = mutable.Map.empty[String, Option[String]]
+
+
 
   final protected val widh     = new ArrayBuffer[String]
   final protected val in       = new ArrayBuffer[String]

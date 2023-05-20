@@ -4,75 +4,81 @@ import molecule.DataModel
 
 object Refs extends DataModel(10) {
 
-  trait Ns {
-    val i          = oneInt
-    val s          = oneString
-    val b          = oneBoolean
-    val r1         = one[R1]
-    val r2         = one[R2]
-    val r3         = one[R3]
-    val rs1        = many[R1]
-    val rs2        = many[R2]
-    val rs3        = many[R3]
-    val ns1        = one[Ns]
-    val nss1       = many[Ns]
-    val spouse     = one[Ns]
-    val friends    = many[Ns]
-    val owned1     = one[R1].owner
-    val ownedMany1 = many[R1].owner
+  trait A {
+    val i    = oneInt
+    val s    = oneString
+    val bool = oneBoolean
+
+    val a  = one[A]
+    val b  = one[B]
+    val b1 = one[B]
+    val b2 = one[B]
+    val c  = one[C]
+    val d  = one[D]
+
+    val aa = many[A]
+    val bb = many[B]
+    val cc = many[C]
+    val dd = many[D]
+
+    val ownB  = one[B].owner
+    val ownBb = many[B].owner
   }
 
-  trait R1 {
-    val i          = oneInt
-    val s          = oneString
-    val ns1        = one[Ns]
-    val r2         = one[R2]
-    val r2a        = one[R2]
-    val rs2        = many[R2]
-    val owned2     = one[R2].owner
-    val ownedMany2 = many[R2].owner
+  trait B {
+    val i  = oneInt
+    val s  = oneString
+    val a  = one[A]
+    val b  = one[B]
+    val c  = one[C]
+    val c1 = one[C]
+    val d  = one[D]
+    val aa = many[A]
+    val bb = many[B]
+    val cc = many[C]
+    val dd = many[D]
   }
 
-  trait R2 {
-    val i   = oneInt
-    val s   = oneString
-    val ii  = setInt
-    val ns2 = one[Ns]
-    val r3  = one[R3]
-    val r3a = one[R3]
-    val rs3 = many[R3]
+  trait C {
+    val i  = oneInt
+    val s  = oneString
+    val ii = setInt
+    val a  = one[A]
+    val d  = one[D]
+    val dd = many[D]
   }
 
-  trait R3 {
-    val i   = oneInt
-    val s   = oneString
-    val r4  = one[R4]
-    val r4a = one[R4]
-    val rs4 = many[R4]
+
+  trait D {
+    val i  = oneInt
+    val s  = oneString
+    val e  = one[E]
+    val e1 = one[E]
+    val ee = many[E]
   }
 
-  trait R4 {
-    val i   = oneInt
-    val s   = oneString
-    val r5  = one[R5]
-    val rs5 = many[R5]
+  trait E {
+    val i  = oneInt
+    val s  = oneString
+    val f  = one[F]
+    val ff = many[F]
   }
 
-  trait R5 {
-    val i   = oneInt
-    val s   = oneString
-    val r6  = one[R6]
-    val rs6 = many[R6]
+  trait F {
+    val i  = oneInt
+    val s  = oneString
+    val g  = one[G]
+    val gg = many[G]
   }
 
-  trait R6 {
-    val i   = oneInt
-    val s   = oneString
-    val r7  = one[R7]
-    val rs7 = many[R7]
+  trait G {
+    val i  = oneInt
+    val s  = oneString
+    val h  = one[H]
+    val hh = many[H]
   }
 
-  trait R7 {
+  trait H {
     val i = oneInt
     val s = oneString
   }

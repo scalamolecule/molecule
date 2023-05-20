@@ -113,7 +113,7 @@ case class PickleTpls(
           prevRefs += refAttr
           resolvePicklers(tail, picklers, tplIndex)
 
-        case BackRef(backRefNs) =>
+        case BackRef(backRefNs, _) =>
           tail.head match {
             case Ref(_, refAttr, _, _, _) if prevRefs.contains(refAttr) => throw ModelError(
               s"Can't re-use previous namespace ${refAttr.capitalize} after backref _$backRefNs."

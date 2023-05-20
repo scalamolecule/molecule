@@ -59,7 +59,7 @@ trait Data_Update extends JdbcTxBase_JVM with UpdateOps with MoleculeLogging { s
 //
 //    val (eids, filterElements, data) = resolve(elements, Nil, Nil, Nil)
 //    val (filterQuery, inputs)        = if (eids.isEmpty && filterElements.nonEmpty) {
-//      val filterElements1 = AttrOneManLong("_Generic", "e", V) +: filterElements
+//      val filterElements1 = AttrOneManLong("_Generic", "eid", V) +: filterElements
 //      val (query, inputs) = new SqlModel2Query[Any](filterElements1).getEidQueryWithInputs
 //      (Some(query), inputs)
 //    } else {

@@ -35,7 +35,8 @@ class DataModel2MetaSchema(filePath: String, pkgPath: String, scalaVersion: Stri
     "apply", "not", "add", "swap", "remove",
 
     // Generic attributes
-    "a", "e", "v", "t", "tx", "txInstant", "op",
+    //    "a", "e", "v", "t", "tx", "txInstant", "op",
+    "eid", "txId", "txDate",
   )
 
   private var backRefs   = Map.empty[String, Seq[String]]
@@ -134,11 +135,6 @@ class DataModel2MetaSchema(filePath: String, pkgPath: String, scalaVersion: Stri
       val ns = nsTpe.toString
       if (ns.head.isLower) {
         err(s"Please change namespace trait name `$ns` to start with upper case letter.")
-      }
-      if (ns.length == 1) {
-        err(
-          s"Please change namespace trait name `$ns` to have at least 2 characters " +
-            "(to avoid interference with type parameters).")
       }
       if (attrs.isEmpty) {
         err(s"Please define attribute(s) in namespace $ns")

@@ -15,14 +15,14 @@ object NestedSemantics extends DatomicTestSuite {
 
     "Nested namespace must match" - refs { implicit conn =>
       for {
-        _ <- Ns.i.Rs1.*(R4.i).query.get
+        _ <- A.i.Bb.*(E.i).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> "`Rs1` can only nest to `R1`. Found: `R4`"
+          err ==> "`Bb` can only nest to `B`. Found: `E`"
         }
 
-        _ <- Ns.i.Rs1.*?(R4.i).query.get
+        _ <- A.i.Bb.*?(E.i).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> "`Rs1` can only nest to `R1`. Found: `R4`"
+          err ==> "`Bb` can only nest to `B`. Found: `E`"
         }
       } yield ()
     }
@@ -30,12 +30,12 @@ object NestedSemantics extends DatomicTestSuite {
 
     "Mixing *?/* not allowed" - refs { implicit conn =>
       for {
-        _ <- Ns.i.Rs1.*(R1.i.Rs2.*?(R2.i)).query.get
+        _ <- A.i.Bb.*(B.i.Cc.*?(C.i)).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Can't mix mandatory/optional nested data structures."
         }
 
-        _ <- Ns.i.Rs1.*?(R1.i.Rs2.*(R2.i)).query.get
+        _ <- A.i.Bb.*?(B.i.Cc.*(C.i)).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Can't mix mandatory/optional nested data structures."
         }

@@ -46,8 +46,8 @@ object TxInsert extends DatomicTestSuite {
 
     "Multiple attrs" - refs { implicit conn =>
       for {
-        _ <- Ns.i.Tx(R2.i_(7).s_("tx").ii_(Set(8, 9))).insert(1).transact
-        _ <- Ns.i.Tx(R2.i.s.ii).query.get.map(_ ==> List(
+        _ <- A.i.Tx(C.i_(7).s_("tx").ii_(Set(8, 9))).insert(1).transact
+        _ <- A.i.Tx(C.i.s.ii).query.get.map(_ ==> List(
           (1, 7, "tx", Set(8, 9))
         ))
       } yield ()
@@ -55,8 +55,8 @@ object TxInsert extends DatomicTestSuite {
 
     "Tx ref" - refs { implicit conn =>
       for {
-        _ <- Ns.i.Tx(R2.i_(7).R3.i_(8)).insert(1).transact
-        _ <- Ns.i.Tx(R2.i.R3.i).query.get.map(_ ==> List(
+        _ <- A.i.Tx(C.i_(7).D.i_(8)).insert(1).transact
+        _ <- A.i.Tx(C.i.D.i).query.get.map(_ ==> List(
           (1, 7, 8)
         ))
       } yield ()
@@ -64,8 +64,8 @@ object TxInsert extends DatomicTestSuite {
 
     "Tx backref" - refs { implicit conn =>
       for {
-        _ <- Ns.i.Tx(R2.i_(7).R3.i_(8)._R2.s_("tx")).insert(1).transact
-        _ <- Ns.i.Tx(R2.i.R3.i._R2.s).query.get.map(_ ==> List(
+        _ <- A.i.Tx(C.i_(7).D.i_(8)._C.s_("tx")).insert(1).transact
+        _ <- A.i.Tx(C.i.D.i._C.s).query.get.map(_ ==> List(
           (1, 7, 8, "tx")
         ))
       } yield ()
@@ -73,8 +73,8 @@ object TxInsert extends DatomicTestSuite {
 
     "Tx composite" - refs { implicit conn =>
       for {
-        _ <- Ns.i.Tx(R2.i_(7).s_("tx") + R1.i_(8)).insert(1).transact
-        _ <- Ns.i.Tx(R2.i.s + R1.i).query.get.map(_ ==> List(
+        _ <- A.i.Tx(C.i_(7).s_("tx") + B.i_(8)).insert(1).transact
+        _ <- A.i.Tx(C.i.s + B.i).query.get.map(_ ==> List(
           (1, (7, "tx"), 8)
         ))
       } yield ()
@@ -82,11 +82,11 @@ object TxInsert extends DatomicTestSuite {
 
     "Composite + tx" - refs { implicit conn =>
       for {
-        _ <- (Ns.i + R2.i.s).Tx(R4.i_(7).s_("tx")).insert(
+        _ <- (A.i + C.i.s).Tx(E.i_(7).s_("tx")).insert(
           (1, (2, "a"))
         ).transact
 
-        _ <- (Ns.i + R2.i.s).Tx(R4.i.s).query.get.map(_ ==> List(
+        _ <- (A.i + C.i.s).Tx(E.i.s).query.get.map(_ ==> List(
           (1, (2, "a"), 7, "tx")
         ))
       } yield ()
@@ -94,11 +94,11 @@ object TxInsert extends DatomicTestSuite {
 
     "Composite + tx composite" - refs { implicit conn =>
       for {
-        _ <- (Ns.i + R2.i.s).Tx(R3.i_(7).s_("tx") + R4.i_(8)).insert(
+        _ <- (A.i + C.i.s).Tx(D.i_(7).s_("tx") + E.i_(8)).insert(
           (1, (2, "a"))
         ).transact
 
-        _ <- (Ns.i + R2.i.s).Tx(R3.i.s + R4.i).query.get.map(_ ==> List(
+        _ <- (A.i + C.i.s).Tx(D.i.s + E.i).query.get.map(_ ==> List(
           (1, (2, "a"), (7, "tx"), 8)
         ))
       } yield ()
@@ -107,14 +107,14 @@ object TxInsert extends DatomicTestSuite {
 
     "Nested" - refs { implicit conn =>
       for {
-        _ <- Ns.i.Rs1.*(R1.i.s).Tx(R3.s_("tx")).insert(
+        _ <- A.i.Bb.*(B.i.s).Tx(D.s_("tx")).insert(
           (1, List((2, "a")))
         ).transact
 
-        _ <- Ns.i.Rs1.*(R1.i.s).Tx(R3.s).query.get.map(_ ==> List(
+        _ <- A.i.Bb.*(B.i.s).Tx(D.s).query.get.map(_ ==> List(
           (1, List((2, "a")), "tx")
         ))
-        _ <- Ns.i.Rs1.*?(R1.i.s).Tx(R3.s).query.get.map(_ ==> List(
+        _ <- A.i.Bb.*?(B.i.s).Tx(D.s).query.get.map(_ ==> List(
           (1, List((2, "a")), "tx")
         ))
       } yield ()
@@ -123,14 +123,14 @@ object TxInsert extends DatomicTestSuite {
 
     "Nested ref + tx ref" - refs { implicit conn =>
       for {
-        _ <- Ns.i.Rs1.*(R1.i.R2.s).Tx(R3.s_("tx").R4.i_(7)).insert(
+        _ <- A.i.Bb.*(B.i.C.s).Tx(D.s_("tx").E.i_(7)).insert(
           (1, List((2, "a")))
         ).transact
 
-        _ <- Ns.i.Rs1.*(R1.i.R2.s).Tx(R3.s.R4.i).query.get.map(_ ==> List(
+        _ <- A.i.Bb.*(B.i.C.s).Tx(D.s.E.i).query.get.map(_ ==> List(
           (1, List((2, "a")), "tx", 7)
         ))
-        _ <- Ns.i.Rs1.*?(R1.i.R2.s).Tx(R3.s.R4.i).query.get.map(_ ==> List(
+        _ <- A.i.Bb.*?(B.i.C.s).Tx(D.s.E.i).query.get.map(_ ==> List(
           (1, List((2, "a")), "tx", 7)
         ))
       } yield ()
@@ -139,14 +139,14 @@ object TxInsert extends DatomicTestSuite {
 
     "Nested + tx composite" - refs { implicit conn =>
       for {
-        _ <- Ns.i.Rs1.*(R1.i.s).Tx(R3.s_("tx").i_(7) + R4.i_(8)).insert(
+        _ <- A.i.Bb.*(B.i.s).Tx(D.s_("tx").i_(7) + E.i_(8)).insert(
           (1, List((2, "a")))
         ).transact
 
-        _ <- Ns.i.Rs1.*(R1.i.s).Tx(R3.s.i + R4.i).query.get.map(_ ==> List(
+        _ <- A.i.Bb.*(B.i.s).Tx(D.s.i + E.i).query.get.map(_ ==> List(
           (1, List((2, "a")), ("tx", 7), 8)
         ))
-        _ <- Ns.i.Rs1.*?(R1.i.s).Tx(R3.s.i + R4.i).query.get.map(_ ==> List(
+        _ <- A.i.Bb.*?(B.i.s).Tx(D.s.i + E.i).query.get.map(_ ==> List(
           (1, List((2, "a")), ("tx", 7), 8)
         ))
       } yield ()
@@ -155,14 +155,14 @@ object TxInsert extends DatomicTestSuite {
 
     "Nested ref + tx composite" - refs { implicit conn =>
       for {
-        _ <- Ns.i.Rs1.*(R1.i.R2.s).Tx(R3.s_("tx").i_(7) + R4.i_(8)).insert(
+        _ <- A.i.Bb.*(B.i.C.s).Tx(D.s_("tx").i_(7) + E.i_(8)).insert(
           (1, List((2, "a")))
         ).transact
 
-        _ <- Ns.i.Rs1.*(R1.i.R2.s).Tx(R3.s.i + R4.i).query.get.map(_ ==> List(
+        _ <- A.i.Bb.*(B.i.C.s).Tx(D.s.i + E.i).query.get.map(_ ==> List(
           (1, List((2, "a")), ("tx", 7), 8)
         ))
-        _ <- Ns.i.Rs1.*?(R1.i.R2.s).Tx(R3.s.i + R4.i).query.get.map(_ ==> List(
+        _ <- A.i.Bb.*?(B.i.C.s).Tx(D.s.i + E.i).query.get.map(_ ==> List(
           (1, List((2, "a")), ("tx", 7), 8)
         ))
       } yield ()
@@ -171,14 +171,14 @@ object TxInsert extends DatomicTestSuite {
 
     "Nested composite" - refs { implicit conn =>
       for {
-        _ <- Ns.i.Rs1.*(R1.i.s + R2.i).Tx(R3.s_("tx")).insert(
+        _ <- A.i.Bb.*(B.i.s + C.i).Tx(D.s_("tx")).insert(
           (1, List(((2, "a"), 3)))
         ).transact
 
-        _ <- Ns.i.Rs1.*(R1.i.s + R2.i).Tx(R3.s).query.get.map(_ ==> List(
+        _ <- A.i.Bb.*(B.i.s + C.i).Tx(D.s).query.get.map(_ ==> List(
           (1, List(((2, "a"), 3)), "tx")
         ))
-        _ <- Ns.i.Rs1.*?(R1.i.s + R2.i).Tx(R3.s).query.get.map(_ ==> List(
+        _ <- A.i.Bb.*?(B.i.s + C.i).Tx(D.s).query.get.map(_ ==> List(
           (1, List(((2, "a"), 3)), "tx")
         ))
       } yield ()
@@ -187,14 +187,14 @@ object TxInsert extends DatomicTestSuite {
 
     "Nested composite + tx ref" - refs { implicit conn =>
       for {
-        _ <- Ns.i.Rs1.*(R1.i.s + R2.i).Tx(R3.s_("tx").R4.i_(7)).insert(
+        _ <- A.i.Bb.*(B.i.s + C.i).Tx(D.s_("tx").E.i_(7)).insert(
           (1, List(((2, "a"), 3)))
         ).transact
 
-        _ <- Ns.i.Rs1.*(R1.i.s + R2.i).Tx(R3.s.R4.i).query.get.map(_ ==> List(
+        _ <- A.i.Bb.*(B.i.s + C.i).Tx(D.s.E.i).query.get.map(_ ==> List(
           (1, List(((2, "a"), 3)), "tx", 7)
         ))
-        _ <- Ns.i.Rs1.*?(R1.i.s + R2.i).Tx(R3.s.R4.i).query.get.map(_ ==> List(
+        _ <- A.i.Bb.*?(B.i.s + C.i).Tx(D.s.E.i).query.get.map(_ ==> List(
           (1, List(((2, "a"), 3)), "tx", 7)
         ))
       } yield ()
@@ -203,14 +203,14 @@ object TxInsert extends DatomicTestSuite {
 
     "Nested composite + tx composite" - refs { implicit conn =>
       for {
-        _ <- Ns.i.Rs1.*(R1.i.s + R2.i).Tx(R3.s_("tx").i_(7) + R4.i_(8)).insert(
+        _ <- A.i.Bb.*(B.i.s + C.i).Tx(D.s_("tx").i_(7) + E.i_(8)).insert(
           (1, List(((2, "a"), 3)))
         ).transact
 
-        _ <- Ns.i.Rs1.*(R1.i.s + R2.i).Tx(R3.s.i + R4.i).query.get.map(_ ==> List(
+        _ <- A.i.Bb.*(B.i.s + C.i).Tx(D.s.i + E.i).query.get.map(_ ==> List(
           (1, List(((2, "a"), 3)), ("tx", 7), 8)
         ))
-        _ <- Ns.i.Rs1.*?(R1.i.s + R2.i).Tx(R3.s.i + R4.i).query.get.map(_ ==> List(
+        _ <- A.i.Bb.*?(B.i.s + C.i).Tx(D.s.i + E.i).query.get.map(_ ==> List(
           (1, List(((2, "a"), 3)), ("tx", 7), 8)
         ))
       } yield ()
@@ -219,14 +219,14 @@ object TxInsert extends DatomicTestSuite {
 
     "Nested 2 levels composite + tx ref" - refs { implicit conn =>
       for {
-        _ <- Ns.i.Rs1.*(R1.i.Rs2.*(R2.i.s + R4.i)).Tx(R5.s_("tx").R6.i_(7)).insert(
+        _ <- A.i.Bb.*(B.i.Cc.*(C.i.s + E.i)).Tx(F.s_("tx").G.i_(7)).insert(
           (1, List((2, List(((3, "a"), 4)))))
         ).transact
 
-        _ <- Ns.i.Rs1.*(R1.i.Rs2.*(R2.i.s + R4.i)).Tx(R5.s.R6.i).query.get.map(_ ==> List(
+        _ <- A.i.Bb.*(B.i.Cc.*(C.i.s + E.i)).Tx(F.s.G.i).query.get.map(_ ==> List(
           (1, List((2, List(((3, "a"), 4)))), "tx", 7)
         ))
-        _ <- Ns.i.Rs1.*?(R1.i.Rs2.*?(R2.i.s + R4.i)).Tx(R5.s.R6.i).query.get.map(_ ==> List(
+        _ <- A.i.Bb.*?(B.i.Cc.*?(C.i.s + E.i)).Tx(F.s.G.i).query.get.map(_ ==> List(
           (1, List((2, List(((3, "a"), 4)))), "tx", 7)
         ))
       } yield ()
@@ -235,14 +235,14 @@ object TxInsert extends DatomicTestSuite {
 
     "Nested 2 levels composite + tx composite" - refs { implicit conn =>
       for {
-        _ <- Ns.i.Rs1.*(R1.i.Rs2.*(R2.i.s + R4.i)).Tx(R5.s_("tx").i_(7) + R6.i_(8)).insert(
+        _ <- A.i.Bb.*(B.i.Cc.*(C.i.s + E.i)).Tx(F.s_("tx").i_(7) + G.i_(8)).insert(
           (1, List((2, List(((3, "a"), 4)))))
         ).transact
 
-        _ <- Ns.i.Rs1.*(R1.i.Rs2.*(R2.i.s + R4.i)).Tx(R5.s.i + R6.i).query.get.map(_ ==> List(
+        _ <- A.i.Bb.*(B.i.Cc.*(C.i.s + E.i)).Tx(F.s.i + G.i).query.get.map(_ ==> List(
           (1, List((2, List(((3, "a"), 4)))), ("tx", 7), 8)
         ))
-        _ <- Ns.i.Rs1.*?(R1.i.Rs2.*?(R2.i.s + R4.i)).Tx(R5.s.i + R6.i).query.get.map(_ ==> List(
+        _ <- A.i.Bb.*?(B.i.Cc.*?(C.i.s + E.i)).Tx(F.s.i + G.i).query.get.map(_ ==> List(
           (1, List((2, List(((3, "a"), 4)))), ("tx", 7), 8)
         ))
       } yield ()
@@ -251,14 +251,14 @@ object TxInsert extends DatomicTestSuite {
 
     "Composites in branch: 1 + 1" - refs { implicit conn =>
       for {
-        _ <- Ns.i.Rs1.*(R1.i + R2.i.Rs3.*(R3.i)).Tx(R5.s_("tx")).insert(
+        _ <- A.i.Bb.*(B.i + C.i.Dd.*(D.i)).Tx(F.s_("tx")).insert(
           (1, List((2, (3, List(5)))))
         ).transact
 
-        _ <- Ns.i.Rs1.*(R1.i + R2.i.Rs3.*(R3.i)).Tx(R5.s).query.get.map(_ ==> List(
+        _ <- A.i.Bb.*(B.i + C.i.Dd.*(D.i)).Tx(F.s).query.get.map(_ ==> List(
           (1, List((2, (3, List(5)))), "tx")
         ))
-        _ <- Ns.i.Rs1.*?(R1.i + R2.i.Rs3.*?(R3.i)).Tx(R5.s).query.get.map(_ ==> List(
+        _ <- A.i.Bb.*?(B.i + C.i.Dd.*?(D.i)).Tx(F.s).query.get.map(_ ==> List(
           (1, List((2, (3, List(5)))), "tx")
         ))
       } yield ()
@@ -266,14 +266,14 @@ object TxInsert extends DatomicTestSuite {
 
     "Composites in branch: 2 + 1" - refs { implicit conn =>
       for {
-        _ <- Ns.i.Rs1.*(R1.i.s + R2.i.Rs3.*(R3.i)).Tx(R5.s_("tx")).insert(
+        _ <- A.i.Bb.*(B.i.s + C.i.Dd.*(D.i)).Tx(F.s_("tx")).insert(
           (1, List(((2, "a"), (3, List(5)))))
         ).transact
 
-        _ <- Ns.i.Rs1.*(R1.i.s + R2.i.Rs3.*(R3.i)).Tx(R5.s).query.get.map(_ ==> List(
+        _ <- A.i.Bb.*(B.i.s + C.i.Dd.*(D.i)).Tx(F.s).query.get.map(_ ==> List(
           (1, List(((2, "a"), (3, List(5)))), "tx")
         ))
-        _ <- Ns.i.Rs1.*?(R1.i.s + R2.i.Rs3.*?(R3.i)).Tx(R5.s).query.get.map(_ ==> List(
+        _ <- A.i.Bb.*?(B.i.s + C.i.Dd.*?(D.i)).Tx(F.s).query.get.map(_ ==> List(
           (1, List(((2, "a"), (3, List(5)))), "tx")
         ))
       } yield ()
@@ -281,14 +281,14 @@ object TxInsert extends DatomicTestSuite {
 
     "Composites in branch: 2 + 2" - refs { implicit conn =>
       for {
-        _ <- Ns.i.Rs1.*(R1.i.s + R2.i.s.Rs3.*(R3.i)).Tx(R5.s_("tx")).insert(
+        _ <- A.i.Bb.*(B.i.s + C.i.s.Dd.*(D.i)).Tx(F.s_("tx")).insert(
           (1, List(((2, "a"), (3, "b", List(5)))))
         ).transact
 
-        _ <- Ns.i.Rs1.*(R1.i.s + R2.i.s.Rs3.*(R3.i)).Tx(R5.s).query.get.map(_ ==> List(
+        _ <- A.i.Bb.*(B.i.s + C.i.s.Dd.*(D.i)).Tx(F.s).query.get.map(_ ==> List(
           (1, List(((2, "a"), (3, "b", List(5)))), "tx")
         ))
-        _ <- Ns.i.Rs1.*?(R1.i.s + R2.i.s.Rs3.*?(R3.i)).Tx(R5.s).query.get.map(_ ==> List(
+        _ <- A.i.Bb.*?(B.i.s + C.i.s.Dd.*?(D.i)).Tx(F.s).query.get.map(_ ==> List(
           (1, List(((2, "a"), (3, "b", List(5)))), "tx")
         ))
       } yield ()
@@ -296,14 +296,14 @@ object TxInsert extends DatomicTestSuite {
 
     "Composites in branch: 2 + 1 + 2" - refs { implicit conn =>
       for {
-        _ <- Ns.i.Rs1.*(R1.i.s + R4.i + R2.s.Rs3.*(R3.i)).Tx(R5.s_("tx")).insert(
+        _ <- A.i.Bb.*(B.i.s + E.i + C.s.Dd.*(D.i)).Tx(F.s_("tx")).insert(
           (1, List(((2, "a"), 3, ("b", List(5)))))
         ).transact
 
-        _ <- Ns.i.Rs1.*(R1.i.s + R4.i + R2.s.Rs3.*(R3.i)).Tx(R5.s).query.get.map(_ ==> List(
+        _ <- A.i.Bb.*(B.i.s + E.i + C.s.Dd.*(D.i)).Tx(F.s).query.get.map(_ ==> List(
           (1, List(((2, "a"), 3, ("b", List(5)))), "tx")
         ))
-        _ <- Ns.i.Rs1.*?(R1.i.s + R4.i + R2.s.Rs3.*?(R3.i)).Tx(R5.s).query.get.map(_ ==> List(
+        _ <- A.i.Bb.*?(B.i.s + E.i + C.s.Dd.*?(D.i)).Tx(F.s).query.get.map(_ ==> List(
           (1, List(((2, "a"), 3, ("b", List(5)))), "tx")
         ))
       } yield ()
@@ -312,14 +312,14 @@ object TxInsert extends DatomicTestSuite {
 
     "Initial composite + composite in branch" - refs { implicit conn =>
       for {
-        _ <- (Ns.i + R1.i.Rs2.*(R2.i.s + R3.i.Rs4.*(R4.i))).Tx(R5.s_("tx")).insert(
+        _ <- (A.i + B.i.Cc.*(C.i.s + D.i.Ee.*(E.i))).Tx(F.s_("tx")).insert(
           (1, (2, Seq(((3, "a"), (4, List(5))))))
         ).transact
 
-        _ <- (Ns.i + R1.i.Rs2.*(R2.i.s + R3.i.Rs4.*(R4.i))).Tx(R5.s).query.get.map(_ ==> List(
+        _ <- (A.i + B.i.Cc.*(C.i.s + D.i.Ee.*(E.i))).Tx(F.s).query.get.map(_ ==> List(
           (1, (2, Seq(((3, "a"), (4, List(5))))), "tx")
         ))
-        _ <- (Ns.i + R1.i.Rs2.*?(R2.i.s + R3.i.Rs4.*?(R4.i))).Tx(R5.s).query.get.map(_ ==> List(
+        _ <- (A.i + B.i.Cc.*?(C.i.s + D.i.Ee.*?(E.i))).Tx(F.s).query.get.map(_ ==> List(
           (1, (2, Seq(((3, "a"), (4, List(5))))), "tx")
         ))
       } yield ()
@@ -328,21 +328,21 @@ object TxInsert extends DatomicTestSuite {
 
     "Composites everywhere" - refs { implicit conn =>
       for {
-        _ <- (R1.i.s + Ns.i.s.Rs1
-          .*(R1.i.s + R2.i.Rs3
-            .*(R3.i.s + R4.i))).Tx(R5.s_("tx").i_(7) + R6.i_(8)).insert(
+        _ <- (B.i.s + A.i.s.Bb
+          .*(B.i.s + C.i.Dd
+            .*(D.i.s + E.i))).Tx(F.s_("tx").i_(7) + G.i_(8)).insert(
           ((1, "a"), (2, "b", List(((3, "c"), (4, List(((5, "d"), 6)))))))
         ).transact
 
-        _ <- (R1.i.s + Ns.i.s.Rs1
-          .*(R1.i.s + R2.i.Rs3
-            .*(R3.i.s + R4.i))).Tx(R5.s.i + R6.i).query.get.map(_ ==> List(
+        _ <- (B.i.s + A.i.s.Bb
+          .*(B.i.s + C.i.Dd
+            .*(D.i.s + E.i))).Tx(F.s.i + G.i).query.get.map(_ ==> List(
           ((1, "a"), (2, "b", List(((3, "c"), (4, List(((5, "d"), 6)))))), ("tx", 7), 8)
         ))
 
-        _ <- (R1.i.s + Ns.i.s.Rs1
-          .*?(R1.i.s + R2.i.Rs3
-            .*?(R3.i.s + R4.i))).Tx(R5.s.i + R6.i).query.get.map(_ ==> List(
+        _ <- (B.i.s + A.i.s.Bb
+          .*?(B.i.s + C.i.Dd
+            .*?(D.i.s + E.i))).Tx(F.s.i + G.i).query.get.map(_ ==> List(
           ((1, "a"), (2, "b", List(((3, "c"), (4, List(((5, "d"), 6)))))), ("tx", 7), 8)
         ))
       } yield ()

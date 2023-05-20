@@ -9,13 +9,13 @@ trait ResolveExprOne[Tpl]
   extends SortOneSpecial[Tpl]
     with SortOneOpt_[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
 
-  protected def resolveAttrOneMan(attr: AttrOneMan, curTable: String): Unit = {
+  protected def resolveAttrOneMan(attr: AttrOneMan): Unit = {
     aritiesAttr()
     sortAttrIndex += 1
     val (e, a) = ("x", s":${attr.ns}/${attr.attr}")
     attr match {
-      case at: AttrOneManString     => man(attr, e, a, at.vs, resString1, resString, sortOneString(at, sortAttrIndex), curTable)
-      case at: AttrOneManInt        => man(attr, e, a, at.vs, resInt1, resInt, intSorter(at, sortAttrIndex), curTable)
+      case at: AttrOneManString     => man(attr, e, a, at.vs, resString1, resString, sortOneString(at, sortAttrIndex))
+      case at: AttrOneManInt        => man(attr, e, a, at.vs, resInt1, resInt, intSorter(at, sortAttrIndex))
       case at: AttrOneManLong       => manLong(attr, e, a, at.vs, resLong1, resLong, sortOneLong(at, sortAttrIndex))
       case at: AttrOneManFloat      => man(attr, e, a, at.vs, resFloat1, resFloat, floatSorter(at, sortAttrIndex))
       case at: AttrOneManDouble     => man(attr, e, a, at.vs, resDouble1, resDouble, sortOneDouble(at, sortAttrIndex))
@@ -117,19 +117,15 @@ trait ResolveExprOne[Tpl]
     args: Seq[T],
     res: ResOne[T],
     resOLD: ResOneOLD[T],
-    sorter: Option[(Int, Int => (RowOLD, RowOLD) => Int)],
-    curTable: String = ""
+    sorter: Option[(Int, Int => (RowOLD, RowOLD) => Int)]
   ): Unit = {
     addCast(res.j2s)
     addCastOLD(resOLD.j2s)
     addSort(sorter)
-    val v = getVar(attr)
-
-    val col = if (curTable.isBlank) attr.name else curTable + "." + attr.attr
-//    val col = attr.ns + "." + attr.attr
+    val v   = getVar(attr)
+    val col = exts(attr.ns).fold(attr.name)(ext => attr.ns + ext + "." + attr.attr)
     select += col
     where += ((col, s"IS NOT NULL"))
-
     attr.filterAttr.fold {
       expr(e, a, v, attr.op, args, resOLD)
       filterAttrVars1 = filterAttrVars1 + (a -> (e, v))
@@ -149,15 +145,15 @@ trait ResolveExprOne[Tpl]
     sorter: Option[(Int, Int => (RowOLD, RowOLD) => Int)]
   ): Unit = {
     a match {
-      case ":_Generic/e"  =>
+      case ":_Generic/eid"  =>
         select += e
         addCastOLD(resOLD.j2s)
         addSort(sorter)
-      case ":_Generic/tx" =>
+      case ":_Generic/txId" =>
         select += txVar
         addCastOLD(resOLD.j2s)
         addSort(sorter)
-      case a              =>
+      case a                =>
         man(attr, e, a, args, res, resOLD, sorter)
     }
   }

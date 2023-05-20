@@ -61,7 +61,7 @@ case class Dsl(schema: MetaSchema, partPrefix: String, namespace: MetaNs)
     val vas2     = if (vas1.isEmpty) Nil else "" +: vas1
     val attrDefs = (man.result() ++ Seq("") ++ opt.result() ++ Seq("") ++ tac.result() ++ vas2).mkString("\n  ")
 
-    s"""trait $ns extends Generic {
+    s"""trait ${ns}_base extends Generic {
        |  $attrDefs
        |}""".stripMargin
   }

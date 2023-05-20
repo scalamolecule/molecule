@@ -4,10 +4,10 @@ package molecule.sql.jdbc.transaction
 
 case class Resolver(
   level: Int,
+  refPath: List[String],
   ns: String,
-  selfRef: String,
   stmt: String,
   ps: PS,
-  resolve: (PS, Map[(Int, String, String), Array[Long]], Int) => Unit = null,
+  populatePS: (PS, Map[(Int, List[String], String), Array[Long]], Int) => Unit = null,
   nestedArities: List[Int] = Nil
 )

@@ -9,19 +9,17 @@ import molecule.sql.core.query.casting.NestOpt_
 
 trait ResolveRef[Tpl] { self: NestOpt_[Tpl] with Base =>
 
-  protected def resolveRef(ref: Ref, curTable: String): Unit = {
+  protected def resolveRef(ref: Ref): Unit = {
     val (ns, refAttr, refNs) = (ref.ns, ref.refAttr, ref.refNs)
-
-//    println(s"$ns  $refAttr  $refNs")
-
-    val curTable1 = if(curTable.nonEmpty) curTable else refNs
+    val (as, ext)            = exts(ref.refNs).fold(("", ""))(ext => (refNs + ext, ext))
+    //    println(s"====  $ns  $refAttr  $refNs  $as  $ext")
     if (ref.card == CardOne) {
-      joins += (("INNER JOIN", refNs, curTable, s"$ns.$refAttr", s"$curTable1.id"))
+      joins += (("INNER JOIN", refNs, as, s"$ns.$refAttr", s"$refNs$ext.id"))
     } else {
       val joinTable  = ns + "_" + refAttr + "_" + refNs
       val (id1, id2) = if (ns == refNs) ("1_id", "2_id") else ("id", "id")
       joins += (("INNER JOIN", joinTable, "", s"$ns.id", s"$joinTable.${ns}_$id1"))
-      joins += (("INNER JOIN", refNs, curTable, s"$joinTable.${refNs}_$id2", s"$curTable1.id"))
+      joins += (("INNER JOIN", refNs, as, s"$joinTable.${refNs}_$id2", s"$refNs$ext.id"))
     }
   }
 

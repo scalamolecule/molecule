@@ -85,14 +85,14 @@ object UpdateOne_uniqueAttr extends DatomicTestSuite {
           (2, int2),
           (3, int3),
         ).transact.map(_.eids)
-        _ <- Unique.e.a1.i.int.query.get.map(_ ==> List(
+        _ <- Unique.eid.a1.i.int.query.get.map(_ ==> List(
           (a, 1, int1),
           (b, 2, int2),
           (c, 3, int3),
         ))
 
         _ <- Unique.i(4).int_(int2, int3).update.transact
-        _ <- Unique.e.a1.i.query.get.map(_ ==> List(
+        _ <- Unique.eid.a1.i.query.get.map(_ ==> List(
           (a, 1),
           (b, 4),
           (c, 4),

@@ -56,39 +56,39 @@ object AdhocJVM extends DatomicTestSuite {
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
 
-        _ <- Ns.i(1).R1.i(2).Ns1.i(3).save.transact
+        _ <- A.i(1).B.i(2).A.i(3).save.transact
 
         // Directional
-        _ <- Ns.i.R1.i.Ns1.i.query.get.map(_ ==> List((1, 2, 3)))
-        _ <- Ns.i(1).R1.i.Ns1.i.query.get.map(_ ==> List((1, 2, 3)))
-        _ <- Ns.i(3).R1.i.Ns1.i.query.get.map(_ ==> List())
+        _ <- A.i.B.i.A.i.query.get.map(_ ==> List((1, 2, 3)))
+        _ <- A.i(1).B.i.A.i.query.get.map(_ ==> List((1, 2, 3)))
+        _ <- A.i(3).B.i.A.i.query.get.map(_ ==> List())
 
         _ = {
           println("-------")
           Peer.q(
             """[:find  ?b ?d ?f
               | :in    $ %
-              | :where [?a :Ns/i ?b]
+              | :where [?a :A/i ?b]
               |        (rule?a ?a ?c)
-              |        [?c :R1/i ?d]
+              |        [?c :B/i ?d]
               |        (rule?c ?c ?e)
-              |        [?e :Ns/i ?f]]""".stripMargin,
+              |        [?e :A/i ?f]]""".stripMargin,
             conn.db,
             """[
-              |  [(rule?a ?a ?c) [?a :Ns/r1 ?c]]
-              |  [(rule?a ?c ?e) [?c :R1/ns1 ?e]]
+              |  [(rule?a ?a ?c) [?a :A/b ?c]]
+              |  [(rule?a ?c ?e) [?c :B/a ?e]]
               |
-              |  [(rule?c ?a ?c) [?c :Ns/r1 ?a]]
-              |  [(rule?c ?c ?e) [?e :R1/ns1 ?c]]
+              |  [(rule?c ?a ?c) [?c :A/b ?a]]
+              |  [(rule?c ?c ?e) [?e :B/a ?c]]
               |]
               |""".stripMargin
           ).forEach { r => println(r) }
         }
 
         // Bidirectional
-//        _ <- Ns.i.a1.Self(bi).i.query.get.map(_ ==> List((1, 2), (2, 1)))
-//        _ <- Ns.i(1).Self(bi).i.query.get.map(_ ==> List((1, 2)))
-//        _ <- Ns.i(2).Self(bi).i.query.get.map(_ ==> List((2, 1)))
+//        _ <- A.i.a1.Self(bi).i.query.get.map(_ ==> List((1, 2), (2, 1)))
+//        _ <- A.i(1).Self(bi).i.query.get.map(_ ==> List((1, 2)))
+//        _ <- A.i(2).Self(bi).i.query.get.map(_ ==> List((2, 1)))
 
       } yield ()
 

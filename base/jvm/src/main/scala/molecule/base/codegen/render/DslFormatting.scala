@@ -11,15 +11,12 @@ class DslFormatting(schema: MetaSchema, namespace: MetaNs, arity: Int = 0) exten
   val ns           = namespace.ns
   val attrsCustom  = namespace.attrs
   val attrsGeneric = Seq(
-    MetaAttr("e", CardOne, "Long", None, Nil, Some("Entity id"), None, Nil),
-    MetaAttr("a", CardOne, "String", None, Nil, Some("Attribute name"), None, Nil),
-    MetaAttr("v", CardOne, "String", None, Nil, Some("String representation of any type of value"), None, Nil),
-    MetaAttr("tx", CardOne, "Long", None, Nil, Some("Transaction entity id"), None, Nil),
+    MetaAttr("eid", CardOne, "Long", None, Nil, Some("Entity id"), None, Nil),
+    MetaAttr("txId", CardOne, "Long", None, Nil, Some("Transaction entity id"), None, Nil),
     MetaAttr("txDate", CardOne, "Date", None, Nil, Some("Transaction time as java.util.Date"), None, Nil),
-    MetaAttr("txOp", CardOne, "Boolean", None, Nil, Some("Transaction operation (add: True or retract: False"), None, Nil)
   )
   val attrsAll     = attrsCustom ++ attrsGeneric
-  val genericAttrs = Seq("e", "a", "v", "tx", "txDate", "txOp")
+  val genericAttrs = Seq("eid", "txId", "txDate")
   val refs         = attrsCustom.filter(_.refNs.nonEmpty)
   val backRefs     = namespace.backRefNss
 

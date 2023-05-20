@@ -1,15 +1,17 @@
 package molecule.sql.jdbc.transaction
 
+import java.sql.{PreparedStatement => PS}
 import molecule.core.api.DataType
 
 trait JdbcDataType_JVM extends DataType {
 
-  // SQL statement for each related table
-  type SqlStmt = String
+  // (level, refPath, table/ns) -> Array(ids)
+  type InsertIds = Map[(Int, List[String], String), Array[Long]]
+
+  type RowIndex = Int
 
   // Setter to mutate PreparedStatement for each insertion
-  // (level, table/ns) -> Array(ids)
-  type Setter = (java.sql.PreparedStatement, Map[(Int, String, String), Array[Long]], Int) => Unit
+  type Setter = (PS, InsertIds, RowIndex) => Unit
 
   type Data = List[Resolver]
 }

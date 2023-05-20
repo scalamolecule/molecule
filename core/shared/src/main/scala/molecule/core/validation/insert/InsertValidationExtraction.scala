@@ -63,7 +63,7 @@ trait InsertValidationExtraction extends InsertValidators_ with ModelUtils { sel
         case Ref(_, refAttr, _, _, _) =>
           getValidators(nsMap, tail, validators, outerTpl, tplIndex, prevRefs :+ refAttr)
 
-        case BackRef(backRefNs) =>
+        case BackRef(backRefNs, _) =>
           tail.head match {
             case Ref(_, refAttr, _, _, _) if prevRefs.contains(refAttr) => throw ModelError(
               s"Can't re-use previous namespace ${refAttr.capitalize} after backref _$backRefNs."

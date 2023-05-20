@@ -15,7 +15,7 @@ case class ModelValidation(
 ) extends ModelTransformations_ {
 
   private def dup(element: String) = {
-    throw ModelError(s"Can't transact duplicate attribute `$element`.")
+    throw ModelError(s"Can't transact duplicate attribute $element")
   }
 
   private val isInsert        : Boolean                     = action == "insert" || action == "insertTx"
@@ -72,9 +72,14 @@ case class ModelValidation(
           refPath = refPath :+ refAttr
           validate(tail)
 
-        case backRef: BackRef =>
+        case BackRef(prevNs1, curNs) =>
           if (group == 0) {
-            throw ModelError(s"Can't use backref namespace `_${backRef.backRef}` from here.")
+            throw ModelError(s"Can't use backref namespace _$prevNs1 from here")
+          }
+          if (prevNs == prevNs1) {
+            throw ModelError(
+              s"Please add attributes to namespace $curNs before going back to namespace $prevNs1"
+            )
           }
           group -= 1
           refPath = refPath.init

@@ -15,53 +15,53 @@ object SortTxMetaData extends DatomicTestSuite {
     "flat" - refs { implicit conn =>
       for {
         // 2 transactions with different tx meta data
-        _ <- Ns.i.Tx(R1.s_("A")).insert(1, 2).transact
-        _ <- Ns.i.Tx(R1.s_("B")).insert(1, 2).transact
+        _ <- A.i.Tx(B.s_("A")).insert(1, 2).transact
+        _ <- A.i.Tx(B.s_("B")).insert(1, 2).transact
 
-        _ <- Ns.i.a2.Tx(R1.s.a1).query.get.map(_ ==> List(
+        _ <- A.i.a2.Tx(B.s.a1).query.get.map(_ ==> List(
           (1, "A"),
           (2, "A"),
           (1, "B"),
           (2, "B"),
         ))
-        _ <- Ns.i.d2.Tx(R1.s.a1).query.get.map(_ ==> List(
+        _ <- A.i.d2.Tx(B.s.a1).query.get.map(_ ==> List(
           (2, "A"),
           (1, "A"),
           (2, "B"),
           (1, "B"),
         ))
-        _ <- Ns.i.a2.Tx(R1.s.d1).query.get.map(_ ==> List(
+        _ <- A.i.a2.Tx(B.s.d1).query.get.map(_ ==> List(
           (1, "B"),
           (2, "B"),
           (1, "A"),
           (2, "A"),
         ))
-        _ <- Ns.i.d2.Tx(R1.s.d1).query.get.map(_ ==> List(
+        _ <- A.i.d2.Tx(B.s.d1).query.get.map(_ ==> List(
           (2, "B"),
           (1, "B"),
           (2, "A"),
           (1, "A"),
         ))
 
-        _ <- Ns.i.a1.Tx(R1.s.a2).query.get.map(_ ==> List(
+        _ <- A.i.a1.Tx(B.s.a2).query.get.map(_ ==> List(
           (1, "A"),
           (1, "B"),
           (2, "A"),
           (2, "B"),
         ))
-        _ <- Ns.i.d1.Tx(R1.s.a2).query.get.map(_ ==> List(
+        _ <- A.i.d1.Tx(B.s.a2).query.get.map(_ ==> List(
           (2, "A"),
           (2, "B"),
           (1, "A"),
           (1, "B"),
         ))
-        _ <- Ns.i.a1.Tx(R1.s.d2).query.get.map(_ ==> List(
+        _ <- A.i.a1.Tx(B.s.d2).query.get.map(_ ==> List(
           (1, "B"),
           (1, "A"),
           (2, "B"),
           (2, "A"),
         ))
-        _ <- Ns.i.d1.Tx(R1.s.d2).query.get.map(_ ==> List(
+        _ <- A.i.d1.Tx(B.s.d2).query.get.map(_ ==> List(
           (2, "B"),
           (2, "A"),
           (1, "B"),
@@ -73,67 +73,67 @@ object SortTxMetaData extends DatomicTestSuite {
 
     "composites" - refs { implicit conn =>
       for {
-        _ <- (Ns.i.s + R1.s.i).Tx(R3.s_("hello")).insert(
+        _ <- (A.i.s + B.s.i).Tx(D.s_("hello")).insert(
           ((1, "a"), ("aa", 11)),
           ((2, "b"), ("bb", 22))
         ).transact
 
-        _ <- (Ns.i.s + R1.s.i).Tx(R3.s_("world")).insert(
+        _ <- (A.i.s + B.s.i).Tx(D.s_("world")).insert(
           ((3, "a"), ("aa", 11)),
           ((4, "b"), ("bb", 22))
         ).transact
 
-        _ <- (Ns.i.a2.s + R1.s.i).Tx(R3.s.a1).query.get.map(_ ==> List(
+        _ <- (A.i.a2.s + B.s.i).Tx(D.s.a1).query.get.map(_ ==> List(
           ((1, "a"), ("aa", 11), "hello"),
           ((2, "b"), ("bb", 22), "hello"),
           ((3, "a"), ("aa", 11), "world"),
           ((4, "b"), ("bb", 22), "world"),
         ))
-        _ <- (Ns.i.d2.s + R1.s.i).Tx(R3.s.a1).query.get.map(_ ==> List(
+        _ <- (A.i.d2.s + B.s.i).Tx(D.s.a1).query.get.map(_ ==> List(
           ((2, "b"), ("bb", 22), "hello"),
           ((1, "a"), ("aa", 11), "hello"),
           ((4, "b"), ("bb", 22), "world"),
           ((3, "a"), ("aa", 11), "world"),
         ))
-        _ <- (Ns.i.s + R1.s.a2.i).Tx(R3.s.a1).query.get.map(_ ==> List(
+        _ <- (A.i.s + B.s.a2.i).Tx(D.s.a1).query.get.map(_ ==> List(
           ((1, "a"), ("aa", 11), "hello"),
           ((2, "b"), ("bb", 22), "hello"),
           ((3, "a"), ("aa", 11), "world"),
           ((4, "b"), ("bb", 22), "world"),
         ))
-        _ <- (Ns.i.s + R1.s.d2.i).Tx(R3.s.a1).query.get.map(_ ==> List(
+        _ <- (A.i.s + B.s.d2.i).Tx(D.s.a1).query.get.map(_ ==> List(
           ((2, "b"), ("bb", 22), "hello"),
           ((1, "a"), ("aa", 11), "hello"),
           ((4, "b"), ("bb", 22), "world"),
           ((3, "a"), ("aa", 11), "world"),
-        ))
-
-        _ <- (Ns.i.a2.s + R1.s.i).Tx(R3.s.d1).query.get.map(_ ==> List(
-          ((3, "a"), ("aa", 11), "world"),
-          ((4, "b"), ("bb", 22), "world"),
-          ((1, "a"), ("aa", 11), "hello"),
-          ((2, "b"), ("bb", 22), "hello"),
-        ))
-        _ <- (Ns.i.d2.s + R1.s.i).Tx(R3.s.d1).query.get.map(_ ==> List(
-          ((4, "b"), ("bb", 22), "world"),
-          ((3, "a"), ("aa", 11), "world"),
-          ((2, "b"), ("bb", 22), "hello"),
-          ((1, "a"), ("aa", 11), "hello"),
-        ))
-        _ <- (Ns.i.s + R1.s.a2.i).Tx(R3.s.d1).query.get.map(_ ==> List(
-          ((3, "a"), ("aa", 11), "world"),
-          ((4, "b"), ("bb", 22), "world"),
-          ((1, "a"), ("aa", 11), "hello"),
-          ((2, "b"), ("bb", 22), "hello"),
-        ))
-        _ <- (Ns.i.s + R1.s.d2.i).Tx(R3.s.d1).query.get.map(_ ==> List(
-          ((4, "b"), ("bb", 22), "world"),
-          ((3, "a"), ("aa", 11), "world"),
-          ((2, "b"), ("bb", 22), "hello"),
-          ((1, "a"), ("aa", 11), "hello"),
         ))
 
-        _ <- (Ns.i.d4.s.d3 + R1.s.d2.i.d5).Tx(R3.s.d1).query.get.map(_ ==> List(
+        _ <- (A.i.a2.s + B.s.i).Tx(D.s.d1).query.get.map(_ ==> List(
+          ((3, "a"), ("aa", 11), "world"),
+          ((4, "b"), ("bb", 22), "world"),
+          ((1, "a"), ("aa", 11), "hello"),
+          ((2, "b"), ("bb", 22), "hello"),
+        ))
+        _ <- (A.i.d2.s + B.s.i).Tx(D.s.d1).query.get.map(_ ==> List(
+          ((4, "b"), ("bb", 22), "world"),
+          ((3, "a"), ("aa", 11), "world"),
+          ((2, "b"), ("bb", 22), "hello"),
+          ((1, "a"), ("aa", 11), "hello"),
+        ))
+        _ <- (A.i.s + B.s.a2.i).Tx(D.s.d1).query.get.map(_ ==> List(
+          ((3, "a"), ("aa", 11), "world"),
+          ((4, "b"), ("bb", 22), "world"),
+          ((1, "a"), ("aa", 11), "hello"),
+          ((2, "b"), ("bb", 22), "hello"),
+        ))
+        _ <- (A.i.s + B.s.d2.i).Tx(D.s.d1).query.get.map(_ ==> List(
+          ((4, "b"), ("bb", 22), "world"),
+          ((3, "a"), ("aa", 11), "world"),
+          ((2, "b"), ("bb", 22), "hello"),
+          ((1, "a"), ("aa", 11), "hello"),
+        ))
+
+        _ <- (A.i.d4.s.d3 + B.s.d2.i.d5).Tx(D.s.d1).query.get.map(_ ==> List(
           ((4, "b"), ("bb", 22), "world"),
           ((3, "a"), ("aa", 11), "world"),
           ((2, "b"), ("bb", 22), "hello"),
@@ -145,53 +145,53 @@ object SortTxMetaData extends DatomicTestSuite {
 
     "nested" - refs { implicit conn =>
       for {
-        _ <- Ns.s.Rs1.*(R1.i).Tx(R3.s_("X")).insert(
+        _ <- A.s.Bb.*(B.i).Tx(D.s_("X")).insert(
           ("a", List(1, 2)),
           ("b", List(1, 2)),
           ("c", Nil),
         ).transact
 
-        _ <- Ns.s.a1.Rs1.*(R1.i.a1).Tx(R3.s).query.get.map(_ ==> List(
+        _ <- A.s.a1.Bb.*(B.i.a1).Tx(D.s).query.get.map(_ ==> List(
           ("a", List(1, 2), "X"),
           ("b", List(1, 2), "X"),
         ))
-        _ <- Ns.s.d1.Rs1.*(R1.i.d1).Tx(R3.s).query.get.map(_ ==> List(
+        _ <- A.s.d1.Bb.*(B.i.d1).Tx(D.s).query.get.map(_ ==> List(
           ("b", List(2, 1), "X"),
           ("a", List(2, 1), "X"),
         ))
 
-        _ <- Ns.s.Rs1.*(R1.i).Tx(R3.s_("Y")).insert(
+        _ <- A.s.Bb.*(B.i).Tx(D.s_("Y")).insert(
           ("a", List(1, 2)),
           ("b", List(1, 2)),
           ("c", Nil),
         ).transact
 
         // Mandatory nested
-        _ <- Ns.s.a2.Rs1.*(R1.i.a1).Tx(R3.s.a1).query.get.map(_ ==> List(
+        _ <- A.s.a2.Bb.*(B.i.a1).Tx(D.s.a1).query.get.map(_ ==> List(
           ("a", List(1, 2), "X"),
           ("b", List(1, 2), "X"),
           ("a", List(1, 2), "Y"),
           ("b", List(1, 2), "Y"),
         ))
-        _ <- Ns.s.d2.Rs1.*(R1.i.a1).Tx(R3.s.a1).query.get.map(_ ==> List(
+        _ <- A.s.d2.Bb.*(B.i.a1).Tx(D.s.a1).query.get.map(_ ==> List(
           ("b", List(1, 2), "X"),
           ("a", List(1, 2), "X"),
           ("b", List(1, 2), "Y"),
           ("a", List(1, 2), "Y"),
         ))
-        _ <- Ns.s.a2.Rs1.*(R1.i.d1).Tx(R3.s.d1).query.get.map(_ ==> List(
+        _ <- A.s.a2.Bb.*(B.i.d1).Tx(D.s.d1).query.get.map(_ ==> List(
           ("a", List(2, 1), "Y"),
           ("b", List(2, 1), "Y"),
           ("a", List(2, 1), "X"),
           ("b", List(2, 1), "X"),
         ))
-        _ <- Ns.s.d2.Rs1.*(R1.i.d1).Tx(R3.s.d1).query.get.map(_ ==> List(
+        _ <- A.s.d2.Bb.*(B.i.d1).Tx(D.s.d1).query.get.map(_ ==> List(
           ("b", List(2, 1), "Y"),
           ("a", List(2, 1), "Y"),
           ("b", List(2, 1), "X"),
           ("a", List(2, 1), "X"),
         ))
-        _ <- Ns.s.a1.Rs1.*(R1.i.d1).Tx(R3.s.d2).query.get.map(_ ==> List(
+        _ <- A.s.a1.Bb.*(B.i.d1).Tx(D.s.d2).query.get.map(_ ==> List(
           ("a", List(2, 1), "Y"),
           ("a", List(2, 1), "X"),
           ("b", List(2, 1), "Y"),
@@ -199,7 +199,7 @@ object SortTxMetaData extends DatomicTestSuite {
         ))
 
         // Optional nested
-        _ <- Ns.s.a2.Rs1.*?(R1.i.a1).Tx(R3.s.a1).query.get.map(_ ==> List(
+        _ <- A.s.a2.Bb.*?(B.i.a1).Tx(D.s.a1).query.get.map(_ ==> List(
           ("a", List(1, 2), "X"),
           ("b", List(1, 2), "X"),
           ("c", Nil, "X"),
@@ -207,7 +207,7 @@ object SortTxMetaData extends DatomicTestSuite {
           ("b", List(1, 2), "Y"),
           ("c", Nil, "Y"),
         ))
-        _ <- Ns.s.d2.Rs1.*?(R1.i.a1).Tx(R3.s.a1).query.get.map(_ ==> List(
+        _ <- A.s.d2.Bb.*?(B.i.a1).Tx(D.s.a1).query.get.map(_ ==> List(
           ("c", Nil, "X"),
           ("b", List(1, 2), "X"),
           ("a", List(1, 2), "X"),
@@ -215,7 +215,7 @@ object SortTxMetaData extends DatomicTestSuite {
           ("b", List(1, 2), "Y"),
           ("a", List(1, 2), "Y"),
         ))
-        _ <- Ns.s.a2.Rs1.*?(R1.i.d1).Tx(R3.s.d1).query.get.map(_ ==> List(
+        _ <- A.s.a2.Bb.*?(B.i.d1).Tx(D.s.d1).query.get.map(_ ==> List(
           ("a", List(2, 1), "Y"),
           ("b", List(2, 1), "Y"),
           ("c", Nil, "Y"),
@@ -223,7 +223,7 @@ object SortTxMetaData extends DatomicTestSuite {
           ("b", List(2, 1), "X"),
           ("c", Nil, "X"),
         ))
-        _ <- Ns.s.d2.Rs1.*?(R1.i.d1).Tx(R3.s.d1).query.get.map(_ ==> List(
+        _ <- A.s.d2.Bb.*?(B.i.d1).Tx(D.s.d1).query.get.map(_ ==> List(
           ("c", Nil, "Y"),
           ("b", List(2, 1), "Y"),
           ("a", List(2, 1), "Y"),
@@ -231,7 +231,7 @@ object SortTxMetaData extends DatomicTestSuite {
           ("b", List(2, 1), "X"),
           ("a", List(2, 1), "X"),
         ))
-        _ <- Ns.s.a1.Rs1.*?(R1.i.d1).Tx(R3.s.d2).query.get.map(_ ==> List(
+        _ <- A.s.a1.Bb.*?(B.i.d1).Tx(D.s.d2).query.get.map(_ ==> List(
           ("a", List(2, 1), "Y"),
           ("a", List(2, 1), "X"),
           ("b", List(2, 1), "Y"),
@@ -245,8 +245,8 @@ object SortTxMetaData extends DatomicTestSuite {
 
     "nested complex" - refs { implicit conn =>
       for {
-        _ <- Ns.s.Rs1.*(R1.i.R2.i.s.Rs3.*(R3.i))
-          .Tx(R2.s_("x1").i_(111).R3.s_("x2") + Ns.i_(222).b_(true)).insert(
+        _ <- A.s.Bb.*(B.i.C.i.s.Dd.*(D.i))
+          .Tx(C.s_("x1").i_(111).D.s_("x2") + A.i_(222).bool_(true)).insert(
           ("A", List(
             (1, 5, "a", List(10, 11)),
             (2, 6, "b", List(20, 21)),
@@ -254,18 +254,18 @@ object SortTxMetaData extends DatomicTestSuite {
           ("B", Nil)
         ).transact
 
-        _ <- Ns.s.Rs1.*(R1.i.R2.i.s.Rs3.*(R3.i))
-          .Tx(R2.s_("y1").i_(333).R3.s_("y2") + Ns.i_(444).b_(false)).insert(
+        _ <- A.s.Bb.*(B.i.C.i.s.Dd.*(D.i))
+          .Tx(C.s_("y1").i_(333).D.s_("y2") + A.i_(444).bool_(false)).insert(
           ("C", List(
             (4, 5, "d", List(40, 41)))),
         ).transact
 
 
-        // Ns.s ...............................
+        // A.s ...............................
 
         // asc
-        _ <- Ns.s.a1.Rs1.*?(R1.i.R2.i.s.Rs3.*?(R3.i))
-          .Tx(R2.s.i.R3.s + Ns.i.b).query.get.map(_ ==> List(
+        _ <- A.s.a1.Bb.*?(B.i.C.i.s.Dd.*?(D.i))
+          .Tx(C.s.i.D.s + A.i.bool).query.get.map(_ ==> List(
           ("A", List(
             (1, 5, "a", List(10, 11)),
             (2, 6, "b", List(20, 21)),
@@ -277,8 +277,8 @@ object SortTxMetaData extends DatomicTestSuite {
             (4, 5, "d", List(40, 41))),
             ("y1", 333, "y2"), (444, false)),
         ))
-        _ <- Ns.s.a1.Rs1.*(R1.i.R2.i.s.Rs3.*(R3.i))
-          .Tx(R2.s.i.R3.s + Ns.i.b).query.get.map(_ ==> List(
+        _ <- A.s.a1.Bb.*(B.i.C.i.s.Dd.*(D.i))
+          .Tx(C.s.i.D.s + A.i.bool).query.get.map(_ ==> List(
           ("A", List(
             (1, 5, "a", List(10, 11)),
             (2, 6, "b", List(21, 20))),
@@ -289,8 +289,8 @@ object SortTxMetaData extends DatomicTestSuite {
         ))
 
         // desc
-        _ <- Ns.s.d1.Rs1.*?(R1.i.R2.i.s.Rs3.*?(R3.i))
-          .Tx(R2.s.i.R3.s + Ns.i.b).query.get.map(_ ==> List(
+        _ <- A.s.d1.Bb.*?(B.i.C.i.s.Dd.*?(D.i))
+          .Tx(C.s.i.D.s + A.i.bool).query.get.map(_ ==> List(
           ("C", List(
             (4, 5, "d", List(40, 41))),
             ("y1", 333, "y2"), (444, false)),
@@ -302,8 +302,8 @@ object SortTxMetaData extends DatomicTestSuite {
             (3, 7, "c", Nil)),
             ("x1", 111, "x2"), (222, true)),
         ))
-        _ <- Ns.s.d1.Rs1.*(R1.i.R2.i.s.Rs3.*(R3.i))
-          .Tx(R2.s.i.R3.s + Ns.i.b).query.get.map(_ ==> List(
+        _ <- A.s.d1.Bb.*(B.i.C.i.s.Dd.*(D.i))
+          .Tx(C.s.i.D.s + A.i.bool).query.get.map(_ ==> List(
           ("C", List(
             (4, 5, "d", List(40, 41))),
             ("y1", 333, "y2"), (444, false)),
@@ -314,11 +314,11 @@ object SortTxMetaData extends DatomicTestSuite {
         ))
 
 
-        // R1.i ...............................
+        // B.i ...............................
 
         // asc
-        _ <- Ns.s.a1.Rs1.*?(R1.i.a1.R2.i.s.Rs3.*?(R3.i))
-          .Tx(R2.s.i.R3.s + Ns.i.b).query.get.map(_ ==> List(
+        _ <- A.s.a1.Bb.*?(B.i.a1.C.i.s.Dd.*?(D.i))
+          .Tx(C.s.i.D.s + A.i.bool).query.get.map(_ ==> List(
           ("A", List(
             (1, 5, "a", List(10, 11)),
             (2, 6, "b", List(20, 21)),
@@ -330,8 +330,8 @@ object SortTxMetaData extends DatomicTestSuite {
             (4, 5, "d", List(40, 41))),
             ("y1", 333, "y2"), (444, false)),
         ))
-        _ <- Ns.s.a1.Rs1.*(R1.i.a1.R2.i.s.Rs3.*(R3.i))
-          .Tx(R2.s.i.R3.s + Ns.i.b).query.get.map(_ ==> List(
+        _ <- A.s.a1.Bb.*(B.i.a1.C.i.s.Dd.*(D.i))
+          .Tx(C.s.i.D.s + A.i.bool).query.get.map(_ ==> List(
           ("A", List(
             (1, 5, "a", List(10, 11)),
             (2, 6, "b", List(21, 20))),
@@ -342,8 +342,8 @@ object SortTxMetaData extends DatomicTestSuite {
         ))
 
         // desc
-        _ <- Ns.s.a1.Rs1.*?(R1.i.d1.R2.i.s.Rs3.*?(R3.i))
-          .Tx(R2.s.i.R3.s + Ns.i.b).query.get.map(_ ==> List(
+        _ <- A.s.a1.Bb.*?(B.i.d1.C.i.s.Dd.*?(D.i))
+          .Tx(C.s.i.D.s + A.i.bool).query.get.map(_ ==> List(
           ("A", List(
             (3, 7, "c", Nil),
             (2, 6, "b", List(20, 21)),
@@ -355,8 +355,8 @@ object SortTxMetaData extends DatomicTestSuite {
             (4, 5, "d", List(40, 41))),
             ("y1", 333, "y2"), (444, false)),
         ))
-        _ <- Ns.s.a1.Rs1.*(R1.i.d1.R2.i.s.Rs3.*(R3.i))
-          .Tx(R2.s.i.R3.s + Ns.i.b).query.get.map(_ ==> List(
+        _ <- A.s.a1.Bb.*(B.i.d1.C.i.s.Dd.*(D.i))
+          .Tx(C.s.i.D.s + A.i.bool).query.get.map(_ ==> List(
           ("A", List(
             (2, 6, "b", List(21, 20)),
             (1, 5, "a", List(10, 11))),
@@ -367,8 +367,8 @@ object SortTxMetaData extends DatomicTestSuite {
         ))
 
         // + previous
-        _ <- Ns.s.d1.Rs1.*?(R1.i.d1.R2.i.s.Rs3.*?(R3.i))
-          .Tx(R2.s.i.R3.s + Ns.i.b).query.get.map(_ ==> List(
+        _ <- A.s.d1.Bb.*?(B.i.d1.C.i.s.Dd.*?(D.i))
+          .Tx(C.s.i.D.s + A.i.bool).query.get.map(_ ==> List(
           ("C", List(
             (4, 5, "d", List(40, 41))),
             ("y1", 333, "y2"), (444, false)),
@@ -380,8 +380,8 @@ object SortTxMetaData extends DatomicTestSuite {
             (1, 5, "a", List(10, 11))),
             ("x1", 111, "x2"), (222, true)),
         ))
-        _ <- Ns.s.d1.Rs1.*(R1.i.d1.R2.i.s.Rs3.*(R3.i))
-          .Tx(R2.s.i.R3.s + Ns.i.b).query.get.map(_ ==> List(
+        _ <- A.s.d1.Bb.*(B.i.d1.C.i.s.Dd.*(D.i))
+          .Tx(C.s.i.D.s + A.i.bool).query.get.map(_ ==> List(
           ("C", List(
             (4, 5, "d", List(40, 41))),
             ("y1", 333, "y2"), (444, false)),
@@ -392,11 +392,11 @@ object SortTxMetaData extends DatomicTestSuite {
         ))
 
 
-        // R2.i ...............................
+        // C.i ...............................
 
         // asc
-        _ <- Ns.s.a1.Rs1.*?(R1.i.R2.i.a1.s.Rs3.*?(R3.i))
-          .Tx(R2.s.i.R3.s + Ns.i.b).query.get.map(_ ==> List(
+        _ <- A.s.a1.Bb.*?(B.i.C.i.a1.s.Dd.*?(D.i))
+          .Tx(C.s.i.D.s + A.i.bool).query.get.map(_ ==> List(
           ("A", List(
             (1, 5, "a", List(10, 11)),
             (2, 6, "b", List(20, 21)),
@@ -408,8 +408,8 @@ object SortTxMetaData extends DatomicTestSuite {
             (4, 5, "d", List(40, 41))),
             ("y1", 333, "y2"), (444, false)),
         ))
-        _ <- Ns.s.a1.Rs1.*(R1.i.R2.i.a1.s.Rs3.*(R3.i))
-          .Tx(R2.s.i.R3.s + Ns.i.b).query.get.map(_ ==> List(
+        _ <- A.s.a1.Bb.*(B.i.C.i.a1.s.Dd.*(D.i))
+          .Tx(C.s.i.D.s + A.i.bool).query.get.map(_ ==> List(
           ("A", List(
             (1, 5, "a", List(10, 11)),
             (2, 6, "b", List(21, 20))),
@@ -420,8 +420,8 @@ object SortTxMetaData extends DatomicTestSuite {
         ))
 
         // desc
-        _ <- Ns.s.a1.Rs1.*?(R1.i.R2.i.d1.s.Rs3.*?(R3.i))
-          .Tx(R2.s.i.R3.s + Ns.i.b).query.get.map(_ ==> List(
+        _ <- A.s.a1.Bb.*?(B.i.C.i.d1.s.Dd.*?(D.i))
+          .Tx(C.s.i.D.s + A.i.bool).query.get.map(_ ==> List(
           ("A", List(
             (3, 7, "c", Nil),
             (2, 6, "b", List(20, 21)),
@@ -433,8 +433,8 @@ object SortTxMetaData extends DatomicTestSuite {
             (4, 5, "d", List(40, 41))),
             ("y1", 333, "y2"), (444, false)),
         ))
-        _ <- Ns.s.a1.Rs1.*(R1.i.R2.i.d1.s.Rs3.*(R3.i))
-          .Tx(R2.s.i.R3.s + Ns.i.b).query.get.map(_ ==> List(
+        _ <- A.s.a1.Bb.*(B.i.C.i.d1.s.Dd.*(D.i))
+          .Tx(C.s.i.D.s + A.i.bool).query.get.map(_ ==> List(
           ("A", List(
             (2, 6, "b", List(21, 20)),
             (1, 5, "a", List(10, 11))),
@@ -445,8 +445,8 @@ object SortTxMetaData extends DatomicTestSuite {
         ))
 
         // + previous
-        _ <- Ns.s.d1.Rs1.*?(R1.i.d2.R2.i.d1.s.Rs3.*?(R3.i))
-          .Tx(R2.s.i.R3.s + Ns.i.b).query.get.map(_ ==> List(
+        _ <- A.s.d1.Bb.*?(B.i.d2.C.i.d1.s.Dd.*?(D.i))
+          .Tx(C.s.i.D.s + A.i.bool).query.get.map(_ ==> List(
           ("C", List(
             (4, 5, "d", List(40, 41))),
             ("y1", 333, "y2"), (444, false)),
@@ -458,8 +458,8 @@ object SortTxMetaData extends DatomicTestSuite {
             (1, 5, "a", List(10, 11))),
             ("x1", 111, "x2"), (222, true)),
         ))
-        _ <- Ns.s.d1.Rs1.*(R1.i.d2.R2.i.d1.s.Rs3.*(R3.i))
-          .Tx(R2.s.i.R3.s + Ns.i.b).query.get.map(_ ==> List(
+        _ <- A.s.d1.Bb.*(B.i.d2.C.i.d1.s.Dd.*(D.i))
+          .Tx(C.s.i.D.s + A.i.bool).query.get.map(_ ==> List(
           ("C", List(
             (4, 5, "d", List(40, 41))),
             ("y1", 333, "y2"), (444, false)),
@@ -470,11 +470,11 @@ object SortTxMetaData extends DatomicTestSuite {
         ))
 
 
-        // R2.s ...............................
+        // C.s ...............................
 
         // asc
-        _ <- Ns.s.a1.Rs1.*?(R1.i.R2.i.s.a1.Rs3.*?(R3.i))
-          .Tx(R2.s.i.R3.s + Ns.i.b).query.get.map(_ ==> List(
+        _ <- A.s.a1.Bb.*?(B.i.C.i.s.a1.Dd.*?(D.i))
+          .Tx(C.s.i.D.s + A.i.bool).query.get.map(_ ==> List(
           ("A", List(
             (1, 5, "a", List(10, 11)),
             (2, 6, "b", List(20, 21)),
@@ -486,8 +486,8 @@ object SortTxMetaData extends DatomicTestSuite {
             (4, 5, "d", List(40, 41))),
             ("y1", 333, "y2"), (444, false)),
         ))
-        _ <- Ns.s.a1.Rs1.*(R1.i.R2.i.s.a1.Rs3.*(R3.i))
-          .Tx(R2.s.i.R3.s + Ns.i.b).query.get.map(_ ==> List(
+        _ <- A.s.a1.Bb.*(B.i.C.i.s.a1.Dd.*(D.i))
+          .Tx(C.s.i.D.s + A.i.bool).query.get.map(_ ==> List(
           ("A", List(
             (1, 5, "a", List(10, 11)),
             (2, 6, "b", List(21, 20))),
@@ -498,8 +498,8 @@ object SortTxMetaData extends DatomicTestSuite {
         ))
 
         // desc
-        _ <- Ns.s.a1.Rs1.*?(R1.i.R2.i.s.d1.Rs3.*?(R3.i))
-          .Tx(R2.s.i.R3.s + Ns.i.b).query.get.map(_ ==> List(
+        _ <- A.s.a1.Bb.*?(B.i.C.i.s.d1.Dd.*?(D.i))
+          .Tx(C.s.i.D.s + A.i.bool).query.get.map(_ ==> List(
           ("A", List(
             (3, 7, "c", Nil),
             (2, 6, "b", List(20, 21)),
@@ -511,8 +511,8 @@ object SortTxMetaData extends DatomicTestSuite {
             (4, 5, "d", List(40, 41))),
             ("y1", 333, "y2"), (444, false)),
         ))
-        _ <- Ns.s.a1.Rs1.*(R1.i.R2.i.s.d1.Rs3.*(R3.i))
-          .Tx(R2.s.i.R3.s + Ns.i.b).query.get.map(_ ==> List(
+        _ <- A.s.a1.Bb.*(B.i.C.i.s.d1.Dd.*(D.i))
+          .Tx(C.s.i.D.s + A.i.bool).query.get.map(_ ==> List(
           ("A", List(
             (2, 6, "b", List(21, 20)),
             (1, 5, "a", List(10, 11))),
@@ -523,8 +523,8 @@ object SortTxMetaData extends DatomicTestSuite {
         ))
 
         // + previous
-        _ <- Ns.s.d1.Rs1.*?(R1.i.d3.R2.i.d2.s.d1.Rs3.*?(R3.i))
-          .Tx(R2.s.i.R3.s + Ns.i.b).query.get.map(_ ==> List(
+        _ <- A.s.d1.Bb.*?(B.i.d3.C.i.d2.s.d1.Dd.*?(D.i))
+          .Tx(C.s.i.D.s + A.i.bool).query.get.map(_ ==> List(
           ("C", List(
             (4, 5, "d", List(40, 41))),
             ("y1", 333, "y2"), (444, false)),
@@ -536,8 +536,8 @@ object SortTxMetaData extends DatomicTestSuite {
             (1, 5, "a", List(10, 11))),
             ("x1", 111, "x2"), (222, true)),
         ))
-        _ <- Ns.s.d1.Rs1.*(R1.i.d3.R2.i.d2.s.d1.Rs3.*(R3.i))
-          .Tx(R2.s.i.R3.s + Ns.i.b).query.get.map(_ ==> List(
+        _ <- A.s.d1.Bb.*(B.i.d3.C.i.d2.s.d1.Dd.*(D.i))
+          .Tx(C.s.i.D.s + A.i.bool).query.get.map(_ ==> List(
           ("C", List(
             (4, 5, "d", List(40, 41))),
             ("y1", 333, "y2"), (444, false)),
@@ -548,11 +548,11 @@ object SortTxMetaData extends DatomicTestSuite {
         ))
 
 
-        // R3.i ...............................
+        // D.i ...............................
 
         // asc
-        _ <- Ns.s.a1.Rs1.*?(R1.i.R2.i.s.Rs3.*?(R3.i.a1))
-          .Tx(R2.s.i.R3.s + Ns.i.b).query.get.map(_ ==> List(
+        _ <- A.s.a1.Bb.*?(B.i.C.i.s.Dd.*?(D.i.a1))
+          .Tx(C.s.i.D.s + A.i.bool).query.get.map(_ ==> List(
           ("A", List(
             (1, 5, "a", List(10, 11)),
             (2, 6, "b", List(20, 21)),
@@ -564,8 +564,8 @@ object SortTxMetaData extends DatomicTestSuite {
             (4, 5, "d", List(40, 41))),
             ("y1", 333, "y2"), (444, false)),
         ))
-        _ <- Ns.s.a1.Rs1.*(R1.i.R2.i.s.Rs3.*(R3.i.a1))
-          .Tx(R2.s.i.R3.s + Ns.i.b).query.get.map(_ ==> List(
+        _ <- A.s.a1.Bb.*(B.i.C.i.s.Dd.*(D.i.a1))
+          .Tx(C.s.i.D.s + A.i.bool).query.get.map(_ ==> List(
           ("A", List(
             (1, 5, "a", List(10, 11)),
             (2, 6, "b", List(20, 21))),
@@ -576,8 +576,8 @@ object SortTxMetaData extends DatomicTestSuite {
         ))
 
         // desc
-        _ <- Ns.s.a1.Rs1.*?(R1.i.R2.i.s.Rs3.*?(R3.i.d1))
-          .Tx(R2.s.i.R3.s + Ns.i.b).query.get.map(_ ==> List(
+        _ <- A.s.a1.Bb.*?(B.i.C.i.s.Dd.*?(D.i.d1))
+          .Tx(C.s.i.D.s + A.i.bool).query.get.map(_ ==> List(
           ("A", List(
             (1, 5, "a", List(11, 10)),
             (2, 6, "b", List(21, 20)),
@@ -589,8 +589,8 @@ object SortTxMetaData extends DatomicTestSuite {
             (4, 5, "d", List(41, 40))),
             ("y1", 333, "y2"), (444, false)),
         ))
-        _ <- Ns.s.a1.Rs1.*(R1.i.R2.i.s.Rs3.*(R3.i.d1))
-          .Tx(R2.s.i.R3.s + Ns.i.b).query.get.map(_ ==> List(
+        _ <- A.s.a1.Bb.*(B.i.C.i.s.Dd.*(D.i.d1))
+          .Tx(C.s.i.D.s + A.i.bool).query.get.map(_ ==> List(
           ("A", List(
             (1, 5, "a", List(11, 10)),
             (2, 6, "b", List(21, 20))),
@@ -601,8 +601,8 @@ object SortTxMetaData extends DatomicTestSuite {
         ))
 
         // + previous
-        _ <- Ns.s.d1.Rs1.*?(R1.i.d3.R2.i.d2.s.d1.Rs3.*?(R3.i.d1))
-          .Tx(R2.s.i.R3.s + Ns.i.b).query.get.map(_ ==> List(
+        _ <- A.s.d1.Bb.*?(B.i.d3.C.i.d2.s.d1.Dd.*?(D.i.d1))
+          .Tx(C.s.i.D.s + A.i.bool).query.get.map(_ ==> List(
           ("C", List(
             (4, 5, "d", List(41, 40))),
             ("y1", 333, "y2"), (444, false)),
@@ -614,8 +614,8 @@ object SortTxMetaData extends DatomicTestSuite {
             (1, 5, "a", List(11, 10))),
             ("x1", 111, "x2"), (222, true)),
         ))
-        _ <- Ns.s.d1.Rs1.*(R1.i.d3.R2.i.d2.s.d1.Rs3.*(R3.i.d1))
-          .Tx(R2.s.i.R3.s + Ns.i.b).query.get.map(_ ==> List(
+        _ <- A.s.d1.Bb.*(B.i.d3.C.i.d2.s.d1.Dd.*(D.i.d1))
+          .Tx(C.s.i.D.s + A.i.bool).query.get.map(_ ==> List(
           ("C", List(
             (4, 5, "d", List(41, 40))),
             ("y1", 333, "y2"), (444, false)),
@@ -626,11 +626,11 @@ object SortTxMetaData extends DatomicTestSuite {
         ))
 
 
-        // Tx.R2.s ..............................
+        // Tx.C.s ..............................
 
         // asc
-        _ <- Ns.s.Rs1.*?(R1.i.R2.i.s.Rs3.*?(R3.i))
-          .Tx(R2.s.a1.i.R3.s + Ns.i.b).query.get.map(_ ==> List(
+        _ <- A.s.Bb.*?(B.i.C.i.s.Dd.*?(D.i))
+          .Tx(C.s.a1.i.D.s + A.i.bool).query.get.map(_ ==> List(
           ("A", List(
             (1, 5, "a", List(10, 11)),
             (2, 6, "b", List(20, 21)),
@@ -642,8 +642,8 @@ object SortTxMetaData extends DatomicTestSuite {
             (4, 5, "d", List(40, 41))),
             ("y1", 333, "y2"), (444, false)),
         ))
-        _ <- Ns.s.Rs1.*(R1.i.R2.i.s.Rs3.*(R3.i))
-          .Tx(R2.s.a1.i.R3.s + Ns.i.b).query.get.map(_ ==> List(
+        _ <- A.s.Bb.*(B.i.C.i.s.Dd.*(D.i))
+          .Tx(C.s.a1.i.D.s + A.i.bool).query.get.map(_ ==> List(
           ("A", List(
             (1, 5, "a", List(10, 11)),
             (2, 6, "b", List(21, 20))),
@@ -654,8 +654,8 @@ object SortTxMetaData extends DatomicTestSuite {
         ))
 
         // desc
-        _ <- Ns.s.Rs1.*?(R1.i.R2.i.s.Rs3.*?(R3.i))
-          .Tx(R2.s.d1.i.R3.s + Ns.i.b).query.get.map(_ ==> List(
+        _ <- A.s.Bb.*?(B.i.C.i.s.Dd.*?(D.i))
+          .Tx(C.s.d1.i.D.s + A.i.bool).query.get.map(_ ==> List(
           ("C", List(
             (4, 5, "d", List(40, 41))),
             ("y1", 333, "y2"), (444, false)),
@@ -667,8 +667,8 @@ object SortTxMetaData extends DatomicTestSuite {
           ("B", Nil,
             ("x1", 111, "x2"), (222, true)),
         ))
-        _ <- Ns.s.Rs1.*(R1.i.R2.i.s.Rs3.*(R3.i))
-          .Tx(R2.s.d1.i.R3.s + Ns.i.b).query.get.map(_ ==> List(
+        _ <- A.s.Bb.*(B.i.C.i.s.Dd.*(D.i))
+          .Tx(C.s.d1.i.D.s + A.i.bool).query.get.map(_ ==> List(
           ("C", List(
             (4, 5, "d", List(40, 41))),
             ("y1", 333, "y2"), (444, false)),
@@ -681,9 +681,9 @@ object SortTxMetaData extends DatomicTestSuite {
         // + previous
         // Note that attributes before nested and after (in tx meta data) are on the
         // same level. Sort indexes should therefore increase across these attributes.
-        // That's why we start with `Ns.s.d2` which should be sorted after `Tx.R2.s.d1`
-        _ <- Ns.s.d2.Rs1.*?(R1.i.d3.R2.i.d2.s.d1.Rs3.*?(R3.i.d1))
-          .Tx(R2.s.d1.i.R3.s + Ns.i.b).query.get.map(_ ==> List(
+        // That's why we start with `A.s.d2` which should be sorted after `Tx.C.s.d1`
+        _ <- A.s.d2.Bb.*?(B.i.d3.C.i.d2.s.d1.Dd.*?(D.i.d1))
+          .Tx(C.s.d1.i.D.s + A.i.bool).query.get.map(_ ==> List(
           ("C", List(
             (4, 5, "d", List(41, 40))),
             ("y1", 333, "y2"), (444, false)),
@@ -695,8 +695,8 @@ object SortTxMetaData extends DatomicTestSuite {
             (1, 5, "a", List(11, 10))),
             ("x1", 111, "x2"), (222, true)),
         ))
-        _ <- Ns.s.d2.Rs1.*(R1.i.d3.R2.i.d2.s.d1.Rs3.*(R3.i.d1))
-          .Tx(R2.s.d1.i.R3.s + Ns.i.b).query.get.map(_ ==> List(
+        _ <- A.s.d2.Bb.*(B.i.d3.C.i.d2.s.d1.Dd.*(D.i.d1))
+          .Tx(C.s.d1.i.D.s + A.i.bool).query.get.map(_ ==> List(
           ("C", List(
             (4, 5, "d", List(41, 40))),
             ("y1", 333, "y2"), (444, false)),
@@ -707,11 +707,11 @@ object SortTxMetaData extends DatomicTestSuite {
         ))
 
 
-        // Tx.R2.i ..............................
+        // Tx.C.i ..............................
 
         // asc
-        _ <- Ns.s.Rs1.*?(R1.i.R2.i.s.Rs3.*?(R3.i))
-          .Tx(R2.s.i.a1.R3.s + Ns.i.b).query.get.map(_ ==> List(
+        _ <- A.s.Bb.*?(B.i.C.i.s.Dd.*?(D.i))
+          .Tx(C.s.i.a1.D.s + A.i.bool).query.get.map(_ ==> List(
           ("A", List(
             (1, 5, "a", List(10, 11)),
             (2, 6, "b", List(20, 21)),
@@ -723,8 +723,8 @@ object SortTxMetaData extends DatomicTestSuite {
             (4, 5, "d", List(40, 41))),
             ("y1", 333, "y2"), (444, false)),
         ))
-        _ <- Ns.s.Rs1.*(R1.i.R2.i.s.Rs3.*(R3.i))
-          .Tx(R2.s.i.a1.R3.s + Ns.i.b).query.get.map(_ ==> List(
+        _ <- A.s.Bb.*(B.i.C.i.s.Dd.*(D.i))
+          .Tx(C.s.i.a1.D.s + A.i.bool).query.get.map(_ ==> List(
           ("A", List(
             (1, 5, "a", List(10, 11)),
             (2, 6, "b", List(21, 20))),
@@ -735,8 +735,8 @@ object SortTxMetaData extends DatomicTestSuite {
         ))
 
         // desc
-        _ <- Ns.s.Rs1.*?(R1.i.R2.i.s.Rs3.*?(R3.i))
-          .Tx(R2.s.i.d1.R3.s + Ns.i.b).query.get.map(_ ==> List(
+        _ <- A.s.Bb.*?(B.i.C.i.s.Dd.*?(D.i))
+          .Tx(C.s.i.d1.D.s + A.i.bool).query.get.map(_ ==> List(
           ("C", List(
             (4, 5, "d", List(40, 41))),
             ("y1", 333, "y2"), (444, false)),
@@ -748,8 +748,8 @@ object SortTxMetaData extends DatomicTestSuite {
           ("B", Nil,
             ("x1", 111, "x2"), (222, true)),
         ))
-        _ <- Ns.s.Rs1.*(R1.i.R2.i.s.Rs3.*(R3.i))
-          .Tx(R2.s.d1.i.R3.s + Ns.i.b).query.get.map(_ ==> List(
+        _ <- A.s.Bb.*(B.i.C.i.s.Dd.*(D.i))
+          .Tx(C.s.d1.i.D.s + A.i.bool).query.get.map(_ ==> List(
           ("C", List(
             (4, 5, "d", List(40, 41))),
             ("y1", 333, "y2"), (444, false)),
@@ -760,9 +760,9 @@ object SortTxMetaData extends DatomicTestSuite {
         ))
 
         // + previous
-        // Top level Ns.s is now asc and sorted after Tx.R2.i that is also considered on top level.
-        _ <- Ns.s.a2.Rs1.*?(R1.i.d3.R2.i.d2.s.d1.Rs3.*?(R3.i.d1))
-          .Tx(R2.s.i.d1.R3.s + Ns.i.b).query.get.map(_ ==> List(
+        // Top level A.s is now asc and sorted after Tx.C.i that is also considered on top level.
+        _ <- A.s.a2.Bb.*?(B.i.d3.C.i.d2.s.d1.Dd.*?(D.i.d1))
+          .Tx(C.s.i.d1.D.s + A.i.bool).query.get.map(_ ==> List(
           ("C", List(
             (4, 5, "d", List(41, 40))),
             ("y1", 333, "y2"), (444, false)),
@@ -774,8 +774,8 @@ object SortTxMetaData extends DatomicTestSuite {
           ("B", Nil,
             ("x1", 111, "x2"), (222, true)),
         ))
-        _ <- Ns.s.a2.Rs1.*(R1.i.d3.R2.i.d2.s.d1.Rs3.*(R3.i.d1))
-          .Tx(R2.s.i.d1.R3.s + Ns.i.b).query.get.map(_ ==> List(
+        _ <- A.s.a2.Bb.*(B.i.d3.C.i.d2.s.d1.Dd.*(D.i.d1))
+          .Tx(C.s.i.d1.D.s + A.i.bool).query.get.map(_ ==> List(
           ("C", List(
             (4, 5, "d", List(41, 40))),
             ("y1", 333, "y2"), (444, false)),
@@ -786,11 +786,11 @@ object SortTxMetaData extends DatomicTestSuite {
         ))
 
 
-        // Tx.R2.R3.s ...............................
+        // Tx.C.D.s ...............................
 
         // asc
-        _ <- Ns.s.Rs1.*?(R1.i.R2.i.s.Rs3.*?(R3.i))
-          .Tx(R2.s.i.R3.s.a1 + Ns.i.b).query.get.map(_ ==> List(
+        _ <- A.s.Bb.*?(B.i.C.i.s.Dd.*?(D.i))
+          .Tx(C.s.i.D.s.a1 + A.i.bool).query.get.map(_ ==> List(
           ("A", List(
             (1, 5, "a", List(10, 11)),
             (2, 6, "b", List(20, 21)),
@@ -802,8 +802,8 @@ object SortTxMetaData extends DatomicTestSuite {
             (4, 5, "d", List(40, 41))),
             ("y1", 333, "y2"), (444, false)),
         ))
-        _ <- Ns.s.Rs1.*(R1.i.R2.i.s.Rs3.*(R3.i))
-          .Tx(R2.s.i.R3.s.a1 + Ns.i.b).query.get.map(_ ==> List(
+        _ <- A.s.Bb.*(B.i.C.i.s.Dd.*(D.i))
+          .Tx(C.s.i.D.s.a1 + A.i.bool).query.get.map(_ ==> List(
           ("A", List(
             (1, 5, "a", List(10, 11)),
             (2, 6, "b", List(21, 20))),
@@ -814,8 +814,8 @@ object SortTxMetaData extends DatomicTestSuite {
         ))
 
         // desc
-        _ <- Ns.s.Rs1.*?(R1.i.R2.i.s.Rs3.*?(R3.i))
-          .Tx(R2.s.i.R3.s.d1 + Ns.i.b).query.get.map(_ ==> List(
+        _ <- A.s.Bb.*?(B.i.C.i.s.Dd.*?(D.i))
+          .Tx(C.s.i.D.s.d1 + A.i.bool).query.get.map(_ ==> List(
           ("C", List(
             (4, 5, "d", List(40, 41))),
             ("y1", 333, "y2"), (444, false)),
@@ -827,8 +827,8 @@ object SortTxMetaData extends DatomicTestSuite {
           ("B", Nil,
             ("x1", 111, "x2"), (222, true)),
         ))
-        _ <- Ns.s.Rs1.*(R1.i.R2.i.s.Rs3.*(R3.i))
-          .Tx(R2.s.i.R3.s.d1 + Ns.i.b).query.get.map(_ ==> List(
+        _ <- A.s.Bb.*(B.i.C.i.s.Dd.*(D.i))
+          .Tx(C.s.i.D.s.d1 + A.i.bool).query.get.map(_ ==> List(
           ("C", List(
             (4, 5, "d", List(40, 41))),
             ("y1", 333, "y2"), (444, false)),
@@ -839,8 +839,8 @@ object SortTxMetaData extends DatomicTestSuite {
         ))
 
         // + previous
-        _ <- Ns.s.a3.Rs1.*?(R1.i.d3.R2.i.d2.s.d1.Rs3.*?(R3.i.d1))
-          .Tx(R2.s.i.d2.R3.s.d1 + Ns.i.b).query.get.map(_ ==> List(
+        _ <- A.s.a3.Bb.*?(B.i.d3.C.i.d2.s.d1.Dd.*?(D.i.d1))
+          .Tx(C.s.i.d2.D.s.d1 + A.i.bool).query.get.map(_ ==> List(
           ("C", List(
             (4, 5, "d", List(41, 40))),
             ("y1", 333, "y2"), (444, false)),
@@ -852,8 +852,8 @@ object SortTxMetaData extends DatomicTestSuite {
           ("B", Nil,
             ("x1", 111, "x2"), (222, true)),
         ))
-        _ <- Ns.s.a3.Rs1.*(R1.i.d3.R2.i.d2.s.d1.Rs3.*(R3.i.d1))
-          .Tx(R2.s.i.d2.R3.s.d1 + Ns.i.b).query.get.map(_ ==> List(
+        _ <- A.s.a3.Bb.*(B.i.d3.C.i.d2.s.d1.Dd.*(D.i.d1))
+          .Tx(C.s.i.d2.D.s.d1 + A.i.bool).query.get.map(_ ==> List(
           ("C", List(
             (4, 5, "d", List(41, 40))),
             ("y1", 333, "y2"), (444, false)),
@@ -864,10 +864,10 @@ object SortTxMetaData extends DatomicTestSuite {
         ))
 
 
-        // Tx.Ns.int/s ...............................
+        // Tx.A.int/s ...............................
 
-        _ <- Ns.s.Rs1.*?(R1.i.R2.i.s.Rs3.*?(R3.i))
-          .Tx(R2.s.i.R3.s + Ns.i.a1.b).query.get.map(_ ==> List(
+        _ <- A.s.Bb.*?(B.i.C.i.s.Dd.*?(D.i))
+          .Tx(C.s.i.D.s + A.i.a1.bool).query.get.map(_ ==> List(
           ("A", List(
             (1, 5, "a", List(10, 11)),
             (2, 6, "b", List(20, 21)),
@@ -879,8 +879,8 @@ object SortTxMetaData extends DatomicTestSuite {
             (4, 5, "d", List(40, 41))),
             ("y1", 333, "y2"), (444, false)),
         ))
-        _ <- Ns.s.Rs1.*(R1.i.R2.i.s.Rs3.*(R3.i))
-          .Tx(R2.s.i.R3.s + Ns.i.b.d1).query.get.map(_ ==> List(
+        _ <- A.s.Bb.*(B.i.C.i.s.Dd.*(D.i))
+          .Tx(C.s.i.D.s + A.i.bool.d1).query.get.map(_ ==> List(
           ("A", List(
             (1, 5, "a", List(10, 11)),
             (2, 6, "b", List(21, 20))),
@@ -890,8 +890,8 @@ object SortTxMetaData extends DatomicTestSuite {
             ("y1", 333, "y2"), (444, false)),
         ))
 
-        _ <- Ns.s.Rs1.*?(R1.i.R2.i.s.Rs3.*?(R3.i))
-          .Tx(R2.s.i.R3.s + Ns.i.b.a1).query.get.map(_ ==> List(
+        _ <- A.s.Bb.*?(B.i.C.i.s.Dd.*?(D.i))
+          .Tx(C.s.i.D.s + A.i.bool.a1).query.get.map(_ ==> List(
           ("C", List(
             (4, 5, "d", List(40, 41))),
             ("y1", 333, "y2"), (444, false)),
@@ -903,8 +903,8 @@ object SortTxMetaData extends DatomicTestSuite {
           ("B", Nil,
             ("x1", 111, "x2"), (222, true)),
         ))
-        _ <- Ns.s.Rs1.*(R1.i.R2.i.s.Rs3.*(R3.i))
-          .Tx(R2.s.i.R3.s + Ns.i.d1.b).query.get.map(_ ==> List(
+        _ <- A.s.Bb.*(B.i.C.i.s.Dd.*(D.i))
+          .Tx(C.s.i.D.s + A.i.d1.bool).query.get.map(_ ==> List(
           ("C", List(
             (4, 5, "d", List(40, 41))),
             ("y1", 333, "y2"), (444, false)),
@@ -915,8 +915,8 @@ object SortTxMetaData extends DatomicTestSuite {
         ))
 
         // + previous
-        _ <- Ns.s.a4.Rs1.*?(R1.i.d3.R2.i.d2.s.d1.Rs3.*?(R3.i.d1))
-          .Tx(R2.s.i.d3.R3.s.d2 + Ns.i.d1.b).query.get.map(_ ==> List(
+        _ <- A.s.a4.Bb.*?(B.i.d3.C.i.d2.s.d1.Dd.*?(D.i.d1))
+          .Tx(C.s.i.d3.D.s.d2 + A.i.d1.bool).query.get.map(_ ==> List(
           ("C", List(
             (4, 5, "d", List(41, 40))),
             ("y1", 333, "y2"), (444, false)),
@@ -928,8 +928,8 @@ object SortTxMetaData extends DatomicTestSuite {
           ("B", Nil,
             ("x1", 111, "x2"), (222, true)),
         ))
-        _ <- Ns.s.a4.Rs1.*(R1.i.d3.R2.i.d2.s.d1.Rs3.*(R3.i.d1))
-          .Tx(R2.s.i.d3.R3.s.d2 + Ns.i.b.a1).query.get.map(_ ==> List(
+        _ <- A.s.a4.Bb.*(B.i.d3.C.i.d2.s.d1.Dd.*(D.i.d1))
+          .Tx(C.s.i.d3.D.s.d2 + A.i.bool.a1).query.get.map(_ ==> List(
           ("C", List(
             (4, 5, "d", List(41, 40))),
             ("y1", 333, "y2"), (444, false)),

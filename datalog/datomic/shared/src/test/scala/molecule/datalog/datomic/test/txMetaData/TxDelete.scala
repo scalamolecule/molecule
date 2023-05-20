@@ -9,7 +9,7 @@ import utest._
 
 object TxDelete extends DatomicTestSuite {
 
-  lazy val tests = Tests {
+  override lazy val tests = Tests {
 
     "Tx meta data basics" - types { implicit conn =>
       for {
@@ -18,11 +18,11 @@ object TxDelete extends DatomicTestSuite {
 
         // A base entity id is created.
         List(eid) = txReport.eids
-        _ <- Ns.e(eid).int.query.get.map(_.head ==> (eid, 1))
+        _ <- Ns.eid(eid).int.query.get.map(_.head ==> (eid, 1))
 
         // The tx meta data is tied to the transaction id
         tx = txReport.tx
-        _ <- Other.e(tx).i.query.get.map(_.head ==> (tx, 7))
+        _ <- Other.eid(tx).i.query.get.map(_.head ==> (tx, 7))
 
         // Since the base entity is tied to the transaction, we can query entity with tx meta data
         _ <- Ns.int.Tx(Other.i).query.get.map(_.head ==> (1, 7))
@@ -43,7 +43,7 @@ object TxDelete extends DatomicTestSuite {
         // The tx meta data itself is not deleted though since it's tied
         // to the initial transaction entity that still exists.
         _ <- Other.i.query.get.map(_.head ==> 7)
-        _ <- Other.e(tx).i.query.get.map(_.head ==> (tx, 7))
+        _ <- Other.eid(tx).i.query.get.map(_.head ==> (tx, 7))
 
         // We cannot delete a transaction entity
         _ <- Other(tx).delete.transact

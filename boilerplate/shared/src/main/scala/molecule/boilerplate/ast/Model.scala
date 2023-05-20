@@ -53,9 +53,9 @@ trait Model extends Validations with Values {
     def name = ns + "." + refAttr
   }
 
-  case class BackRef(backRef: String) extends Element {
+  case class BackRef(prevNs: String, curNs: String) extends Element {
     override def toString: String = {
-      s"""BackRef("$backRef")"""
+      s"""BackRef("$prevNs", "$curNs")"""
     }
   }
 

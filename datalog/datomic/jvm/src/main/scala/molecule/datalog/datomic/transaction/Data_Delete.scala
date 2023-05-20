@@ -28,7 +28,7 @@ trait Data_Delete
     val (eids, filterElements) = resolve(elements, Nil, Nil, true)
 
     val (filterQuery, inputs) = if (eids.isEmpty && filterElements.nonEmpty) {
-      val filterElements1 = AttrOneManLong("_Generic", "e", V) +: filterElements
+      val filterElements1 = AttrOneManLong("_Generic", "eid", V) +: filterElements
       val (query, inputs) = new DatomicModel2Query[Any](filterElements1).getEidQueryWithInputs
       (Some(query), inputs)
     } else {

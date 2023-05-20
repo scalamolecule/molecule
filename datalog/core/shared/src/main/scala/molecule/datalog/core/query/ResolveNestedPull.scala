@@ -93,7 +93,7 @@ trait ResolveNestedPull[Tpl]
           "Only cardinality-one refs allowed in optional nested data structures. Found: " + ref
         )
 
-        case (acc1, Some(BackRef(backRef)), tail, attrIndex1) =>
+        case (acc1, Some(BackRef(backRef, _)), tail, attrIndex1) =>
           // Finish initialization of previous ref before stepping back
           val prevRef = s"""\n$indent{($refAttr :limit nil :default "$none") [$acc1"""
 
@@ -106,7 +106,7 @@ trait ResolveNestedPull[Tpl]
             case _: BackRef => rec(elements.tail, level1 - 1)
             case a: Attr    => throw ModelError(
               s"Expected ref after backref _$backRef. " +
-                s"Please add attribute :${a.ns}/${a.attr} to initial namespace ${a.ns} " +
+                s"Please add attribute ${a.ns}.${a.attr} to initial namespace ${a.ns} " +
                 s"instead of after backref _$backRef."
             )
             case other      => unexpectedElement(other)

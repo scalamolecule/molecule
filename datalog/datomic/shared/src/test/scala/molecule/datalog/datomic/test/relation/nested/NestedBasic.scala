@@ -14,18 +14,18 @@ object NestedBasic extends DatomicTestSuite {
 
     "Mandatory/optional rows" - refs { implicit conn =>
       for {
-        _ <- Ns.i.Rs1.*(R1.i).insert(
+        _ <- A.i.Bb.*(B.i).insert(
           (1, List(10, 11)),
           (2, Nil),
         ).transact
 
         // Mandatory nested data
-        _ <- Ns.i.Rs1.*(R1.i.a1).query.get.map(_ ==> List(
+        _ <- A.i.Bb.*(B.i.a1).query.get.map(_ ==> List(
           (1, List(10, 11)),
         ))
 
         // Optional nested data
-        _ <- Ns.i.Rs1.*?(R1.i.a1).query.get.map(_ ==> List(
+        _ <- A.i.Bb.*?(B.i.a1).query.get.map(_ ==> List(
           (1, List(10, 11)),
           (2, Nil),
         ))

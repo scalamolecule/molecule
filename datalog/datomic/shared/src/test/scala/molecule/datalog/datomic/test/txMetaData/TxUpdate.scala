@@ -9,7 +9,7 @@ import utest._
 
 object TxUpdate extends DatomicTestSuite {
 
-  lazy val tests = Tests {
+  override lazy val tests = Tests {
 
     "Update base and tx meta data" - types { implicit conn =>
       for {
@@ -35,7 +35,7 @@ object TxUpdate extends DatomicTestSuite {
         _ <- Ns.int.query.get.map(_ ==> List(2))
 
         // Note that the initial tx meta data is still tied to the first transaction entity
-        _ <- Other.e(tx).s.query.get.map(_ ==> List((tx, "meta")))
+        _ <- Other.eid(tx).s.query.get.map(_ ==> List((tx, "meta")))
 
         // OBS: The old tx meta data is no longer associated with the updated base entity.
         // Transaction meta data is tied only to the transaction entity where it was created!
