@@ -2,7 +2,6 @@ package molecule.sql.core.query
 
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
-import scala.math.{max, min}
 import scala.reflect.ClassTag
 
 trait ResolveExprOne[Tpl]
@@ -95,18 +94,17 @@ trait ResolveExprOne[Tpl]
       sortOneLong(at, attrIndex)
   }
 
-  protected def dummySorter(attr: Attr): Option[(Int, Int => (RowOLD, RowOLD) => Int)] = {
-    attr.sort.map { sort =>
-      (
-        sort.last.toString.toInt,
-        (nestedIdsCount: Int) => (a: RowOLD, b: RowOLD) => 0
-      )
-    }
-  }
-  private def addSort(sorter: Option[(Int, Int => (RowOLD, RowOLD) => Int)]): Unit = {
-    sorter.foreach {
-      case s if isTxMetaData => sortss = (sortss.head :+ s) +: sortss.tail
-      case s                 => sortss = sortss.init :+ (sortss.last :+ s)
+  private def addSort(attr: Attr, col: String): Unit = {
+    attr.sort.foreach { sort =>
+      val (dir, arity) = (sort.head, sort.last)
+      if (orderBy.exists(_._1 == arity)) {
+        throw ModelError(s"Sort arity $arity is already used. " +
+          s"Please use distinct continuous sort arities beginning from 1.")
+      }
+      dir match {
+        case 'a' => orderBy += ((arity, col, ""))
+        case 'd' => orderBy += ((arity, col, " DESC"))
+      }
     }
   }
 
@@ -120,12 +118,11 @@ trait ResolveExprOne[Tpl]
     sorter: Option[(Int, Int => (RowOLD, RowOLD) => Int)]
   ): Unit = {
     addCast(res.j2s)
-    addCastOLD(resOLD.j2s)
-    addSort(sorter)
     val v   = getVar(attr)
-    val col = exts(attr.ns).fold(attr.name)(ext => attr.ns + ext + "." + attr.attr)
+    val col = getCol(attr: Attr)
     select += col
     where += ((col, s"IS NOT NULL"))
+    addSort(attr, col)
     attr.filterAttr.fold {
       expr(e, a, v, attr.op, args, resOLD)
       filterAttrVars1 = filterAttrVars1 + (a -> (e, v))
@@ -146,13 +143,13 @@ trait ResolveExprOne[Tpl]
   ): Unit = {
     a match {
       case ":_Generic/eid"  =>
-        select += e
-        addCastOLD(resOLD.j2s)
-        addSort(sorter)
+        select += "id"
+        addCast(res.j2s)
+        addSort(attr, "id")
       case ":_Generic/txId" =>
-        select += txVar
-        addCastOLD(resOLD.j2s)
-        addSort(sorter)
+        //        select += txVar
+        //        addSort(attr "??")
+        throw ModelError("txId not implemented yet for jdbc")
       case a                =>
         man(attr, e, a, args, res, resOLD, sorter)
     }
@@ -175,6 +172,7 @@ trait ResolveExprOne[Tpl]
     }
   }
 
+
   private def opt[T: ClassTag](
     attr: Attr,
     e: Var,
@@ -185,20 +183,21 @@ trait ResolveExprOne[Tpl]
     sortMan: Option[(Int, Int => (RowOLD, RowOLD) => Int)]
   ): Unit = {
     val v = getVar(attr)
+    val col = getCol(attr: Attr)
     addCastOLD(resOpt.j2s)
     attr.filterAttr.fold {
       attr.op match {
-        case V     => addSort(sortOpt); optV(e, a, v)
+        case V     => addSort(attr, col); optV(e, a, v)
         case Eq    => optEqual(attr, e, a, v, optArgs, resOpt.s2j, sortMan)
-        case Neq   => addSort(sortMan); optNeq(e, a, v, optArgs, resOpt.tpe, resOpt.toDatalog)
-        case Lt    => addSort(sortMan); optCompare(e, a, v, optArgs, "<", resOpt.s2j)
-        case Gt    => addSort(sortMan); optCompare(e, a, v, optArgs, ">", resOpt.s2j)
-        case Le    => addSort(sortMan); optCompare(e, a, v, optArgs, "<=", resOpt.s2j)
-        case Ge    => addSort(sortMan); optCompare(e, a, v, optArgs, ">=", resOpt.s2j)
+        case Neq   => addSort(attr, col); optNeq(e, a, v, optArgs, resOpt.tpe, resOpt.toDatalog)
+        case Lt    => addSort(attr, col); optCompare(e, a, v, optArgs, "<", resOpt.s2j)
+        case Gt    => addSort(attr, col); optCompare(e, a, v, optArgs, ">", resOpt.s2j)
+        case Le    => addSort(attr, col); optCompare(e, a, v, optArgs, "<=", resOpt.s2j)
+        case Ge    => addSort(attr, col); optCompare(e, a, v, optArgs, ">=", resOpt.s2j)
         case other => unexpectedOp(other)
       }
     } { filterAttr =>
-      addSort(sortMan)
+      addSort(attr, col)
       val w = getVar(filterAttr)
       attr.op match {
         case Eq    => optEqual2(e, a, v, w)
@@ -462,13 +461,14 @@ trait ResolveExprOne[Tpl]
     fromScala: Any => Any,
     sortMan: Option[(Int, Int => (RowOLD, RowOLD) => Int)]
   ): Unit = {
+      val col = getCol(attr: Attr)
     optArgs.fold[Unit] {
-      addSort(dummySorter(attr))
+      addSort(attr, col)
       select += s"(pull $e-$v [[$a :limit nil]])"
       whereOLD += s"(not [$e $a])" -> wNeqOne
       whereOLD += s"[(identity $e) $e-$v]" -> wGround
     } { vs =>
-      addSort(sortMan)
+      addSort(attr, col)
       select += v
       equal(e, a, v, vs, fromScala)
     }

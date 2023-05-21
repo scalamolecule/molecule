@@ -1,16 +1,12 @@
 package molecule.sql.core.query
 
 import molecule.base.error.ModelError
-import molecule.boilerplate.ast
-import molecule.boilerplate.ast.Model
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.query.Model2Query
 import molecule.core.util.ModelUtils
 import molecule.sql.core.query.casting._
 import scala.annotation.tailrec
-import scala.collection.mutable
-import scala.collection.mutable.ArrayBuffer
 
 
 class SqlModel2Query[Tpl](elements0: List[Element])
@@ -36,13 +32,13 @@ class SqlModel2Query[Tpl](elements0: List[Element])
 
   final def getQuery(altElements: List[Element] = Nil): String = {
     val elements = if (altElements.isEmpty) elements0 else altElements
+    validateQueryModel(elements)
 
-    //    elements.foreach(println)
+    elements.foreach(println)
 
-    from = getInitialNs(elements)
+    from = getInitialNonGenericNs(elements)
     exts += from -> None
 
-    validateQueryModel(elements)
     val elements1 = prepareElements(elements)
 
     // Recursively resolve molecule elements
@@ -51,9 +47,9 @@ class SqlModel2Query[Tpl](elements0: List[Element])
   }
 
   final private def renderQuery: String = {
-    val select1 = select.mkString(s",\n  ")
+    val select_ = select.mkString(s",\n  ")
 
-    val joins1 = if (joins.isEmpty) "" else {
+    val joins_ = if (joins.isEmpty) "" else {
       val max1  = joins.map(_._1.length).max
       val max2  = joins.map(_._2.length).max
       val max3  = joins.map(_._3.length).max
@@ -63,29 +59,33 @@ class SqlModel2Query[Tpl](elements0: List[Element])
       joins.map { case (join, table, as, lft, rgt) =>
         val join_  = join + padS(max1, join)
         val table_ = table + padS(max2, table)
-
-        val as_ = if (hasAs) {
+        val as_    = if (hasAs) {
           if (as.isEmpty) padS(max3 + 4, "") else " AS " + as + padS(max3, as)
         } else ""
-
-        val lft_ = lft + padS(max4, lft)
+        val lft_   = lft + padS(max4, lft)
         s"$join_ $table_$as_ ON $lft_ = $rgt"
       }.mkString("\n", "\n", "")
     }
 
-    val where1 = if (where.isEmpty) "" else {
+    val where_ = if (where.isEmpty) "" else {
       val max = where.map(_._1.length).max
       where.map { case (col, predicate) =>
         s"$col " + padS(max, col) + predicate
       }.mkString("\nWHERE\n  ", s" AND\n  ", "")
     }
 
+    val orderBy_ = if (orderBy.isEmpty) "" else {
+      orderBy.map {
+        case (_, col, dir) => col + dir
+      }.mkString("\nORDER BY ", ", ", "")
+    }
+
     val stmt =
       s"""SELECT DISTINCT
-         |  $select1
-         |FROM $from$joins1$where1;""".stripMargin
+         |  $select_
+         |FROM $from$joins_$where_$orderBy_;""".stripMargin
 
-    //    println(s)
+    //    println(stmt)
 
     """SELECT DISTINCT
       |  A.i,

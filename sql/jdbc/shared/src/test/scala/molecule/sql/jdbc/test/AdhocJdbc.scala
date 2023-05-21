@@ -1,28 +1,21 @@
 package molecule.sql.jdbc.test
 
-import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
 //import molecule.sql.jdbc.async._
-import molecule.sql.jdbc.sync._
 import molecule.sql.jdbc.setup.JdbcTestSuite
+import molecule.sql.jdbc.sync._
 import utest._
 import scala.language.implicitConversions
 
-object Adhoc extends JdbcTestSuite {
+object AdhocJdbc extends JdbcTestSuite {
 
   override lazy val tests = Tests {
 
     "types" - types { implicit conn =>
-      Ns.s.Ref.int.insert(
-        ("a", 3),
-        ("b", 4),
-      ).transact
-
-
-      Ns.s.Ref.int.query.get ==> List(
-        ("a", 3),
-        ("b", 4),
-      )
+      Ns.i.insert(2, 1, 3).transact
+      Ns.i.query.get ==> List(1, 2, 3)
+      Ns.i.a1.query.get ==> List(1, 2, 3)
+      Ns.i.d1.query.get ==> List(3, 2, 1)
     }
 
     //    "types" - types { implicit conn =>
@@ -60,16 +53,16 @@ object Adhoc extends JdbcTestSuite {
     //        }
     //      } yield ()
     //    }
-//
-//
-//    "refs" - refs { implicit conn =>
-//      import molecule.coreTests.dataModels.core.dsl.Refs._
-//
-//      //      Ns.s.i.insert(
-//      //        ("a", 3),
-//      //        ("b", 4),
-//      //      ).transact
-//      //
-//    }
+    //
+    //
+    //    "refs" - refs { implicit conn =>
+    //      import molecule.coreTests.dataModels.core.dsl.Refs._
+    //
+    //      //      Ns.s.i.insert(
+    //      //        ("a", 3),
+    //      //        ("b", 4),
+    //      //      ).transact
+    //      //
+    //    }
   }
 }

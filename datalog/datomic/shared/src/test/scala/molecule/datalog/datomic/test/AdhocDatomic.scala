@@ -7,39 +7,21 @@ import molecule.datalog.datomic.setup.DatomicTestSuite
 import utest._
 import scala.language.implicitConversions
 
-object Adhoc extends DatomicTestSuite {
-
-  //  def aa[T](types: (Connection => Future[Unit]) => Unit): Unit = {
-  //    "types" - types { implicit conn =>
-  //      val res: Future[Unit] = for {
-  //        _ <- Ns.int(3).save.transact
-  //        _ <- Ns.int.query.get.map(_ ==> List(3))
-  //      } yield ()
-  //      res
-  //    }
-  //  }
-//  def aa(types: (Connection => Any) => Any): Any = {
-//    types { implicit conn =>
-//      val res: Future[Unit] = for {
-//        _ <- Ns.int(3).save.transact
-//        _ <- Ns.int.query.get.map(_ ==> List(4))
-//      } yield ()
-//      res
-//    }
-//  }
-
-//  import molecule.coreTests.Adhoc._
+object AdhocDatomic extends DatomicTestSuite {
 
   override lazy val tests = Tests {
 
-    //    aa(types[Future[Unit]])
-
-//    "types0" - aa(types2)
-
     "types" - types { implicit conn =>
       for {
-        _ <- Ns.int(3).save.transact
-        _ <- Ns.int.query.get.map(_ ==> List(3))
+        //        _ <- Ns.int(3).save.transact
+        //        _ <- Ns.int.query.get.map(_ ==> List(3))
+
+
+        _ <- Ns.i.insert(3, 3, 3, 2, 1, 3).transact
+        //        _ <- Ns.i.insert(2, 1, 3).transact
+        _ <- Ns.i.query.get.map(_ ==> List(1, 2, 3))
+        _ <- Ns.i.d1.query.get.map(_ ==> List(3, 2, 1))
+        //        _ <- Ns.eid.i.query.get.map(_ ==> List(1, 2, 3))
       } yield ()
     }
 

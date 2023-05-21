@@ -187,7 +187,7 @@ object UpdateOne_uniqueAttr extends DatomicTestSuite {
       for {
         _ <- Unique.i(1).i(2).int_(1).update.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> "Can't transact duplicate attribute `Unique.i`."
+          err ==> "Can't transact duplicate attribute Unique.i"
         }
 
         _ <- Unique.i_(1).i(2).update.transact

@@ -33,7 +33,7 @@ object SaveSemantics extends DatomicTestSuite {
         for {
           _ <- A.i(1).i(2).save.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `A.i`."
+            err ==> "Can't transact duplicate attribute A.i"
           }
         } yield ()
       }
@@ -42,17 +42,17 @@ object SaveSemantics extends DatomicTestSuite {
         for {
           _ <- A.i(1).B.i(2)._A.i(3).save.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `A.i`."
+            err ==> "Can't transact duplicate attribute A.i"
           }
 
           _ <- A.i(1).B.i(2).C.i(3)._B.i(4).save.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `B.i`."
+            err ==> "Can't transact duplicate attribute B.i"
           }
 
           _ <- A.i(1).B.i(2).C.i(3)._B._A.i(4).save.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `A.i`."
+            err ==> "Can't transact duplicate attribute A.i"
           }
         } yield ()
       }
@@ -68,23 +68,23 @@ object SaveSemantics extends DatomicTestSuite {
           // Same ns
           _ <- (C.i(1) + A.i(2).i(3)).save.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `A.i`."
+            err ==> "Can't transact duplicate attribute A.i"
           }
 
           // After backref
           _ <- (C.i(1) + A.i(2).B.i(3)._A.i(4)).save.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `A.i`."
+            err ==> "Can't transact duplicate attribute A.i"
           }
 
           _ <- (C.i(1) + A.i(2).B.i(3).C.i(4)._B.i(5)).save.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `B.i`."
+            err ==> "Can't transact duplicate attribute B.i"
           }
 
           _ <- (C.i(1) + A.i(2).B.i(3).C.i(4)._B._A.i(5)).save.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `A.i`."
+            err ==> "Can't transact duplicate attribute A.i"
           }
         } yield ()
       }
@@ -93,7 +93,7 @@ object SaveSemantics extends DatomicTestSuite {
         for {
           _ <- (A.i(1) + A.i(2)).save.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `A.i`."
+            err ==> "Can't transact duplicate attribute A.i"
           }
         } yield ()
       }
@@ -106,7 +106,7 @@ object SaveSemantics extends DatomicTestSuite {
           // Can't reference same ns twice
           _ <- (A.i(1).B.i(2) + A.s("a").B.s("b")).save.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `A.b`."
+            err ==> "Can't transact duplicate attribute A.b"
           }
         } yield ()
       }
@@ -115,12 +115,12 @@ object SaveSemantics extends DatomicTestSuite {
         for {
           _ <- (A.s("a") + A.i(1).B.i(2)._A.s("b")).save.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `A.s`."
+            err ==> "Can't transact duplicate attribute A.s"
           }
 
           _ <- (A.s("a") + A.i(1).B.i(2).C.i(3)._B._A.s("b")).save.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `A.s`."
+            err ==> "Can't transact duplicate attribute A.s"
           }
         } yield ()
       }

@@ -34,7 +34,7 @@ object InsertSemantics extends DatomicTestSuite {
         for {
           _ <- A.i.i.insert(1, 2).transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `A.i`."
+            err ==> "Can't transact duplicate attribute A.i"
           }
         } yield ()
       }
@@ -43,17 +43,17 @@ object InsertSemantics extends DatomicTestSuite {
         for {
           _ <- A.i.B.i._A.i.insert(1, 2, 3).transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `A.i`."
+            err ==> "Can't transact duplicate attribute A.i"
           }
 
           _ <- A.i.B.i.C.i._B.i.insert(1, 2, 3, 4).transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `B.i`."
+            err ==> "Can't transact duplicate attribute B.i"
           }
 
           _ <- A.i.B.i.C.i._B._A.i.insert(1, 2, 3, 4).transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `A.i`."
+            err ==> "Can't transact duplicate attribute A.i"
           }
         } yield ()
       }
@@ -69,24 +69,24 @@ object InsertSemantics extends DatomicTestSuite {
           // Same ns
           _ <- (C.i + A.i.i).insert(0, (1, 2)).transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `A.i`."
+            err ==> "Can't transact duplicate attribute A.i"
           }
 
           // After backref
 
           _ <- (C.i + A.i.B.i._A.i).insert(0, (1, 2, 3)).transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `A.i`."
+            err ==> "Can't transact duplicate attribute A.i"
           }
 
           _ <- (C.i + A.i.B.i.C.i._B.i).insert(0, (1, 2, 3, 4)).transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `B.i`."
+            err ==> "Can't transact duplicate attribute B.i"
           }
           //
           _ <- (C.i + A.i.B.i.C.i._B._A.i).insert(0, (1, 2, 3, 4)).transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `A.i`."
+            err ==> "Can't transact duplicate attribute A.i"
           }
         } yield ()
       }
@@ -95,7 +95,7 @@ object InsertSemantics extends DatomicTestSuite {
         for {
           _ <- (A.i + A.i).insert(1, 2).transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `A.i`."
+            err ==> "Can't transact duplicate attribute A.i"
           }
         } yield ()
       }
@@ -108,7 +108,7 @@ object InsertSemantics extends DatomicTestSuite {
           // Can't reference same ns twice
           _ <- (A.i.B.i + A.s.B.s).insert((1, 2), ("a", "b")).transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `A.b`."
+            err ==> "Can't transact duplicate attribute A.b"
           }
         } yield ()
       }
@@ -117,12 +117,12 @@ object InsertSemantics extends DatomicTestSuite {
         for {
           _ <- (A.s + A.i.B.i._A.s).insert("a", (1, 2, "b")).transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `A.s`."
+            err ==> "Can't transact duplicate attribute A.s"
           }
 
           _ <- (A.s + A.i.B.i.C.i._B._A.s).insert("a", (1, 2, 3, "b")).transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `A.s`."
+            err ==> "Can't transact duplicate attribute A.s"
           }
         } yield ()
       }
@@ -134,12 +134,12 @@ object InsertSemantics extends DatomicTestSuite {
         for {
           _ <- A.i.Bb.*(B.i.i).insert(1, List((2, 3))).transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `B.i`."
+            err ==> "Can't transact duplicate attribute B.i"
           }
 
           _ <- A.i.Bb.*?(B.i.i).insert(1, List((2, 3))).transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `B.i`."
+            err ==> "Can't transact duplicate attribute B.i"
           }
         } yield ()
       }
@@ -148,12 +148,12 @@ object InsertSemantics extends DatomicTestSuite {
         for {
           _ <- A.i.Bb.*(B.i.C.i._B.i).insert(1, List((2, 3, 4))).transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `B.i`."
+            err ==> "Can't transact duplicate attribute B.i"
           }
 
           _ <- A.i.Bb.*?(B.i.C.i._B.i).insert(1, List((2, 3, 4))).transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute `B.i`."
+            err ==> "Can't transact duplicate attribute B.i"
           }
         } yield ()
       }
@@ -164,12 +164,12 @@ object InsertSemantics extends DatomicTestSuite {
       for {
         _ <- A.i.Bb.*(B.i._A.i).insert(1, List((2, 3))).transact
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> "Can't use backref namespace `_A` from here."
+          err ==> "Can't use backref namespace _A from here"
         }
 
         _ <- A.i.Bb.*?(B.i._A.i).insert(1, List((2, 3))).transact
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> "Can't use backref namespace `_A` from here."
+          err ==> "Can't use backref namespace _A from here"
         }
 
         // ok

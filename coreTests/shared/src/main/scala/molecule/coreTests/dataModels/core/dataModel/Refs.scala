@@ -28,11 +28,13 @@ object Refs extends DataModel(10) {
   trait B {
     val i  = oneInt
     val s  = oneString
+
     val a  = one[A]
     val b  = one[B]
     val c  = one[C]
     val c1 = one[C]
     val d  = one[D]
+
     val aa = many[A]
     val bb = many[B]
     val cc = many[C]

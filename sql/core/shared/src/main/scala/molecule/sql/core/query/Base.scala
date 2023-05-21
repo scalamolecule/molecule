@@ -50,13 +50,13 @@ trait Base extends BaseHelpers with JavaConversions { self: Model2Query =>
   final protected val nestedIds    = new ArrayBuffer[String]
   final protected val nestedOptIds = new ArrayBuffer[String]
 
-  final protected val select = new ListBuffer[String]
-  final protected var from   = ""
-  final protected val joins  = new ListBuffer[(String, String, String, String, String)]
-  final protected val where  = new ListBuffer[(String, String)]
+  final protected val select  = new ListBuffer[String]
+  final protected var from    = ""
+  final protected val joins   = new ListBuffer[(String, String, String, String, String)]
+  final protected val where   = new ListBuffer[(String, String)]
+  final protected val orderBy = new ListBuffer[(Int, String, String)]
 
   final protected val exts = mutable.Map.empty[String, Option[String]]
-
 
 
   final protected val widh     = new ArrayBuffer[String]
@@ -103,6 +103,14 @@ trait Base extends BaseHelpers with JavaConversions { self: Model2Query =>
 
   // Add 4th tx var to first attribute datom if tx value is needed
   final protected var addTxVar: Boolean = false
+
+
+  final protected def getCol(attr: Attr): String = {
+    exts(attr.ns).fold(attr.name)(ext => attr.ns + ext + "." + attr.attr)
+  }
+
+
+
 
   final protected def addCast(cast: (Row, Int) => AnyRef): Unit = {
     if (isTxMetaData)

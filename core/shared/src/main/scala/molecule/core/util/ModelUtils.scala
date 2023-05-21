@@ -50,6 +50,17 @@ trait ModelUtils {
     }
   }
 
+  @tailrec
+  final protected def getInitialNonGenericNs(elements: List[Element]): String = {
+    elements.head match {
+      case a: Attr if a.ns == "_Generic" => getInitialNonGenericNs(elements.tail)
+      case a: Attr                       => a.ns
+      case b: Ref                        => b.ns
+      case Composite(es)                 => getInitialNonGenericNs(es)
+      case other                         => throw ModelError("Unexpected head element: " + other)
+    }
+  }
+
 
   def separateTxElements(elements: List[Element]): (List[Element], List[Element]) = {
     elements.last match {
