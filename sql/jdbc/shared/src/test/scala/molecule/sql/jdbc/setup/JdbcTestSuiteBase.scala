@@ -6,18 +6,19 @@ import org.scalactic.TripleEquals
 import utest._
 import utest.framework.{Formatter => uFormatter}
 
-trait JdbcTestSuiteBase extends TestSuite
+trait JdbcTestSuiteBase
+  extends TestSuite
   with TestData
   with JavaConversions
   with TripleEquals
   with AggrUtils {
 
   val isJsPlatform: Boolean
-  val protocol    : String
-  val useFree     : Boolean
+//  val protocol    : String
+//  val useFree     : Boolean
 
   lazy val platformSystemProtocol = {
-    (if (isJsPlatform) "JS" else "JVM") + s" Peer $protocol"
+    (if (isJsPlatform) "JS" else "JVM") //+ s" Peer $protocol"
   }
 
   override def utestFormatter: uFormatter = new uFormatter {

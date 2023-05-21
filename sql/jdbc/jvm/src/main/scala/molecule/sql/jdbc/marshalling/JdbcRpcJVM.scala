@@ -1,17 +1,12 @@
 package molecule.sql.jdbc.marshalling
 
-import java.nio.ByteBuffer
 import molecule.base.error.MoleculeError
 import molecule.boilerplate.ast.Model._
-import molecule.core.action._
 import molecule.core.api.TxReport
 import molecule.core.marshalling.Boopicklers._
 import molecule.core.marshalling._
-import molecule.core.marshalling.deserialize.UnpickleTpls
-import molecule.core.transaction._
 import molecule.core.util.Executor._
 import molecule.core.util.FutureUtils
-import molecule.sql.jdbc.async._
 import molecule.sql.jdbc.transaction._
 import scala.concurrent.Future
 
@@ -34,10 +29,11 @@ object JdbcRpcJVM extends MoleculeRpc
     elements: List[Element],
     limit: Option[Int]
   ): Future[Either[MoleculeError, List[Any]]] = either {
-    for {
-      conn <- getConn(proxy)
-      tpls <- Query[Any](elements, limit, proxy.dbView).get(conn, global)
-    } yield tpls
+//    for {
+//      conn <- getConn(proxy)
+//      tpls <- Query[Any](elements, limit, proxy.dbView).get(conn, global)
+//    } yield tpls
+    ???
   }
 
   override def queryOffset[Any](
@@ -46,10 +42,11 @@ object JdbcRpcJVM extends MoleculeRpc
     limit: Option[Int],
     offset: Int
   ): Future[Either[MoleculeError, (List[Any], Int, Boolean)]] = either {
-    for {
-      conn <- getConn(proxy)
-      tpls <- QueryOffset[Any](elements, limit, offset, proxy.dbView).get(conn, global)
-    } yield tpls
+//    for {
+//      conn <- getConn(proxy)
+//      tpls <- QueryOffset[Any](elements, limit, offset, proxy.dbView).get(conn, global)
+//    } yield tpls
+    ???
   }
 
   override def queryCursor[Any](
@@ -58,10 +55,11 @@ object JdbcRpcJVM extends MoleculeRpc
     limit: Option[Int],
     cursor: String
   ): Future[Either[MoleculeError, (List[Any], String, Boolean)]] = either {
-    for {
-      conn <- getConn(proxy)
-      tpls <- QueryCursor[Any](elements, limit, cursor, proxy.dbView).get(conn, global)
-    } yield tpls
+//    for {
+//      conn <- getConn(proxy)
+//      tpls <- QueryCursor[Any](elements, limit, cursor, proxy.dbView).get(conn, global)
+//    } yield tpls
+    ???
   }
 
   override def subscribe[Any](
@@ -70,9 +68,10 @@ object JdbcRpcJVM extends MoleculeRpc
     limit: Option[Int],
     callback: List[Any] => Unit
   ): Unit = {
-    getConn(proxy).map(conn =>
-      Query[Any](elements, limit).subscribe(callback)(conn)
-    )
+//    getConn(proxy).map(conn =>
+//      Query[Any](elements, limit).subscribe(callback)(conn)
+//    )
+    ???
   }
 
   override def save(

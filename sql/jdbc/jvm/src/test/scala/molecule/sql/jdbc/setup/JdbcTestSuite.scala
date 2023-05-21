@@ -3,21 +3,22 @@ package molecule.sql.jdbc.setup
 import molecule.base.api.Schema
 import molecule.core.api.Connection
 import molecule.core.marshalling.SqlProxy
-import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.schema._
+import molecule.coreTests.setup.CoreTestSuite
+import molecule.sql.jdbc.api.JdbcApiAsync
 import molecule.sql.jdbc.facade.{JdbcConn_JVM, JdbcHandler}
-import moleculeBuildInfo.BuildInfo
-import scala.concurrent.Future
 import scala.util.Random
 import scala.util.control.NonFatal
 
-trait JdbcTestSuite extends JdbcTestSuiteBase {
+trait JdbcTestSuite extends CoreTestSuite with JdbcApiAsync {
 
-  lazy val isJsPlatform = false
-  lazy val protocol     = BuildInfo.datomicProtocol
-  lazy val useFree      = BuildInfo.datomicUseFree
+  override lazy val isJsPlatform = false
+//  lazy val protocol     = BuildInfo.datomicProtocol
+//  lazy val useFree      = BuildInfo.datomicUseFree
 
-  def inMem[T](test: Connection => T, schemaTx: Schema): T = {
+  override def inMem[T](test: Connection => T, schemaTx: Schema): T = {
+    println("##########")
+
     val url               = s"jdbc:h2:mem:test_database_" + Random.nextInt()
     val proxy             = SqlProxy(url, schemaTx)
     var conn: JdbcConn_JVM = JdbcConn_JVM(proxy, null)
@@ -32,13 +33,8 @@ trait JdbcTestSuite extends JdbcTestSuiteBase {
     }
   }
 
-  def types[T](test: Connection => T): T = inMem(test, TypesSchema)
-  def refs[T](test: Connection => T): T = inMem(test, RefsSchema)
-  def unique[T](test: Connection => T): T = inMem(test, UniqueSchema)
-  def validation[T](test: Connection => T): T = inMem(test, ValidationSchema)
-
-  def delay[T](ms: Int)(body: => T): Future[T] = Future {
-    Thread.sleep(ms)
-    body
-  }
+  override def types[T](test: Connection => T): T = inMem(test, TypesSchema)
+  override def refs[T](test: Connection => T): T = inMem(test, RefsSchema)
+  override def unique[T](test: Connection => T): T = inMem(test, UniqueSchema)
+  override def validation[T](test: Connection => T): T = inMem(test, ValidationSchema)
 }

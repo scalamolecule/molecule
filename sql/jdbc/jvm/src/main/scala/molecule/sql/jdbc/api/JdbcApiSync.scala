@@ -1,10 +1,7 @@
 package molecule.sql.jdbc.api
 
 import java.sql
-import java.sql.PreparedStatement
-import molecule.base.ast.SchemaAST
 import molecule.base.error._
-import molecule.boilerplate.ast.Model
 import molecule.boilerplate.ast.Model._
 import molecule.core.action._
 import molecule.core.api._
@@ -12,12 +9,14 @@ import molecule.core.transaction._
 import molecule.core.validation.ModelValidation
 import molecule.core.validation.insert.InsertValidation
 import molecule.sql.core.query.SqlModel2Query
-import molecule.sql.jdbc.marshalling.JdbcRpcJVM.Data
 import molecule.sql.jdbc.facade.JdbcConn_JVM
+import molecule.sql.jdbc.marshalling.JdbcRpcJVM.Data
 import molecule.sql.jdbc.query.{JdbcQueryResolveCursor, JdbcQueryResolveOffset}
 import molecule.sql.jdbc.subscription.SubscriptionStarter
 import molecule.sql.jdbc.transaction._
 
+
+object JdbcApiSync extends JdbcApiSync
 
 trait JdbcApiSync extends JVMJdbcApiBase with SubscriptionStarter with ApiSync {
 

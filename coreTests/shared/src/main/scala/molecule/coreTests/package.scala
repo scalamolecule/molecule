@@ -1,11 +1,11 @@
 package molecule
 
 import molecule.core.MoleculeImplicits_
-import molecule.coreTests.api.CoreTestsApiAsync
 
 package object coreTests {
 
-  object async extends MoleculeImplicits_ //with CoreTestsApiAsync
-//  object sync extends MoleculeImplicits_ with ApiSync
+//  object async extends MoleculeImplicits_ with CoreTestsApiAsync
+  object async extends MoleculeImplicits_ //with ApiAsyncDummy with ApiAsync
+//  object sync extends MoleculeImplicits_ with ApiSyncDummy
   //  object zio extends MoleculeImplicits_ with JdbcApiZio
 }

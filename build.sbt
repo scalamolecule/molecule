@@ -162,7 +162,7 @@ lazy val datalogCore = crossProject(JSPlatform, JVMPlatform)
   .in(file("datalog/core"))
   .settings(publish / skip := true)
   .settings(name := "molecule-datalog-core")
-  .dependsOn(coreTests)
+  .dependsOn(coreTests % "compile->compile;test->test")
   .settings(
     testFrameworks := Seq(
       new TestFramework("utest.runner.Framework"),
@@ -180,7 +180,7 @@ lazy val datalogDatomic = crossProject(JSPlatform, JVMPlatform)
   .settings(publish / skip := true)
   .settings(name := "molecule-datalog-datomic")
   .enablePlugins(BuildInfoPlugin)
-  .dependsOn(datalogCore)
+  .dependsOn(datalogCore % "compile->compile;test->test")
 //  .dependsOn(coreTests)
   .settings(
     // Temporarily limit number of tests to be compiled by sbt (comment out this whole sbt setting to test all)
@@ -206,7 +206,7 @@ lazy val datalogDatomic = crossProject(JSPlatform, JVMPlatform)
         //        sharedTests + "/txMetaData",
         //        sharedTests + "/validation",
         //                sharedTests + "/time",
-        sharedTests,
+//        sharedTests,
         jvmTests + "/AdhocJVM.scala",
         jsTests + "/AdhocJs.scala",
         sharedTests + "/Adhoc.scala",
@@ -256,7 +256,7 @@ lazy val sqlCore = crossProject(JSPlatform, JVMPlatform)
   .in(file("sql/core"))
   .settings(publish / skip := true)
   .settings(name := "molecule-sql-core")
-  .dependsOn(coreTests)
+  .dependsOn(coreTests % "compile->compile;test->test")
   .settings(
     testFrameworks := Seq(
       new TestFramework("utest.runner.Framework"),
@@ -276,7 +276,7 @@ lazy val sqlJdbc = crossProject(JSPlatform, JVMPlatform)
   .in(file("sql/jdbc"))
   .settings(publish / skip := true)
   .settings(name := "molecule-sql-jdbc")
-  .dependsOn(sqlCore)
+  .dependsOn(sqlCore % "compile->compile;test->test")
   .settings(
     testFrameworks := Seq(
       new TestFramework("utest.runner.Framework"),

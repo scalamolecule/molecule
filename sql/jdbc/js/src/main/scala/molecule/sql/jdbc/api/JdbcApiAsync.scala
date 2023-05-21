@@ -13,7 +13,10 @@ import molecule.sql.jdbc.facade.JdbcConn_JS
 import scala.concurrent.{ExecutionContext, Future}
 
 
-trait JdbcApiAsync extends JdbcAsyncApiBase with ApiAsync with FutureUtils {
+trait JdbcApiAsync
+  extends JdbcAsyncApiBase
+    with ApiAsync
+    with FutureUtils {
 
   implicit class datomicQueryApiAsync[Tpl](q: Query[Tpl]) extends QueryApi[Tpl] {
     override def get(implicit conn0: Connection, ec: ExecutionContext): Future[List[Tpl]] = {
