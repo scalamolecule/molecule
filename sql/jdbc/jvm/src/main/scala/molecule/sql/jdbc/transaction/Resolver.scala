@@ -1,6 +1,6 @@
 package molecule.sql.jdbc.transaction
 
-  import java.sql.{PreparedStatement => PS}
+import java.sql.{PreparedStatement => PS}
 
 case class Resolver(
   level: Int,

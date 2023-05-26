@@ -2,6 +2,7 @@ package molecule.core.transaction.ops
 
 import java.net.URI
 import java.util.{Date, UUID}
+import molecule.base.ast.SchemaAST.Card
 import molecule.core.transaction.Action2Data
 
 trait SaveOps extends Action2Data {
@@ -18,19 +19,20 @@ trait SaveOps extends Action2Data {
     optSet: Option[Set[T]]
   ): Unit
 
-  protected def backRef(
-    backRefNs: String
-  ): Unit
-
-  protected def ref(
+  protected def addRef(
     ns: String,
     refAttr: String,
-    refNs: String
+    refNs: String,
+    card: Card
+  ): Unit
+
+  protected def addBackRef(
+    backRefNs: String
   ): Unit
 
   protected def handleNs(ns: String): Unit
   protected def handleComposite(isInsertTxData: Boolean): Unit
-  protected def handleTxData(): Unit
+  protected def handleTxData(ns: String): Unit
 
   // Typed input value to expected db type
   protected lazy val valueString    : String => Any     = ???

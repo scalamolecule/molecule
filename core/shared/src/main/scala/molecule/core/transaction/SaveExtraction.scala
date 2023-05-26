@@ -20,7 +20,7 @@ class SaveExtraction(isTxData: Boolean = false)
           if (a.op != Eq) {
             throw ModelError(s"Missing applied value for attribute ${a.ns}.${a.attr}")
           }
-          handleNs(a.ns)
+//          handleNs(a.ns)
           a match {
             case a: AttrOne  =>
               a match {
@@ -37,21 +37,21 @@ class SaveExtraction(isTxData: Boolean = false)
             case a           => throw new Exception("Attribute family not implemented for " + a)
           }
 
-        case Ref(ns, refAttr, refNs, _, _) => ref(ns, refAttr, refNs); resolve(tail)
-        case BackRef(backRefNs, _)            => backRef(backRefNs); resolve(tail)
-        case _: Nested                     => throw ModelError(
+        case Ref(ns, refAttr, refNs, card, _) => addRef(ns, refAttr, refNs, card); resolve(tail)
+        case BackRef(backRefNs, _)            => addBackRef(backRefNs); resolve(tail)
+        case _: Nested                        => throw ModelError(
           "Nested data structure not allowed in save molecule. Please use insert instead."
         )
-        case _: NestedOpt                  => throw ModelError(
+        case _: NestedOpt                     => throw ModelError(
           "Optional nested data structure not allowed in save molecule. Please use insert instead."
         )
-        case Composite(compositeElements)  =>
+        case Composite(compositeElements)     =>
           // Start from initial entity id for each composite sub group
           handleComposite(isTxData)
           resolve(compositeElements ++ tail)
 
         case TxData(txElements) =>
-          handleTxData()
+          handleTxData(getInitialNs(txElements))
           resolve(txElements) // tail is empty (no more attributes possible after Tx)
       }
       case Nil             => ()

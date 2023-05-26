@@ -2,6 +2,7 @@ package molecule.datalog.datomic.transaction
 
 import java.net.URI
 import java.util.{Date, UUID}
+import molecule.base.ast.SchemaAST.Card
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.SaveExtraction
@@ -16,11 +17,14 @@ trait Data_Save extends DatomicTxBase_JVM with SaveOps with MoleculeLogging { se
     init: Boolean = true,
     eidIndex: Int = 0
   ): Data = {
+    //    elements.foreach(println)
     if (init) {
       initTxBase(elements, eidIndex)
     }
     e = eid
     e0 = e
+
+    handleNs(getInitialNs(elements))
 
     // populate `stmts`
     resolve(elements)
@@ -34,18 +38,6 @@ trait Data_Save extends DatomicTxBase_JVM with SaveOps with MoleculeLogging { se
   def getStmts(elements: List[Element], eidIndex: Int = 0): Data = {
     initTxBase(elements, eidIndex)
     getRawStmts(elements, newId, init = false)
-  }
-
-
-  override protected def handleNs(ns: String): Unit = {
-    backRefs = backRefs + (ns -> e)
-  }
-  override protected def handleComposite(isInsertTxData: Boolean): Unit = {
-    e = if (isInsertTxData) datomicTx else e0
-  }
-  override protected def handleTxData(): Unit = {
-    e = datomicTx
-    e0 = datomicTx
   }
 
   override protected def addV(ns: String, attr: String, optValue: Option[Any]): Unit = {
@@ -63,11 +55,7 @@ trait Data_Save extends DatomicTxBase_JVM with SaveOps with MoleculeLogging { se
     }
   }
 
-  override protected def backRef(backRefNs: String): Unit = {
-    e = backRefs(backRefNs)
-  }
-
-  override protected def ref(ns: String, refAttr: String, refNs: String): Unit = {
+  override protected def addRef(ns: String, refAttr: String, refNs: String, card: Card): Unit = {
     stmt = stmtList
     stmt.add(add)
     stmt.add(e)
@@ -75,6 +63,23 @@ trait Data_Save extends DatomicTxBase_JVM with SaveOps with MoleculeLogging { se
     e = newId
     stmt.add(e)
     stmts.add(stmt)
+    handleNs(refNs)
+  }
+
+  override protected def addBackRef(backRefNs: String): Unit = {
+    e = backRefs(backRefNs)
+  }
+
+  override protected def handleNs(ns: String): Unit = {
+    backRefs = backRefs + (ns -> e)
+  }
+  override protected def handleComposite(isInsertTxData: Boolean): Unit = {
+    e = if (isInsertTxData) datomicTx else e0
+  }
+  override protected def handleTxData(ns: String): Unit = {
+    e = datomicTx
+    e0 = datomicTx
+    handleNs(ns)
   }
 
   // Save Int as Long in Datomic

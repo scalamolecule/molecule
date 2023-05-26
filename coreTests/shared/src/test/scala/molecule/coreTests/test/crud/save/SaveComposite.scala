@@ -8,7 +8,7 @@ import molecule.coreTests.setup.CoreTestSuite
 import molecule.core.spi.SpiAsync
 import utest._
 
-trait SaveRef extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
+trait SaveComposite extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
 
 
   override lazy val tests = Tests {

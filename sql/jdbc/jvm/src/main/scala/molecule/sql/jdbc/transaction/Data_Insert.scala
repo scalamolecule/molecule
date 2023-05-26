@@ -18,23 +18,6 @@ trait Data_Insert
     with ModelUtils
     with MoleculeLogging { self: InsertExtraction with InsertResolvers_ =>
 
-  private var level    = 0
-  private var firstRow = true
-
-  // Dynamic ref path of current branch (each backref initiates a new branch)
-  private var curRefPath = List.empty[String]
-
-  // Ordered tables to have data inserted
-  // refPath, ns, selfRef, cols
-  private var tableCols = List.empty[(List[String], String, List[String])]
-
-  // PreparedStatement param indexes for each (table, col) coordinate
-  private var paramIndexes    = Map.empty[(List[String], String, String), Int]
-  private val colSettersMap   = mutable.Map.empty[(List[String], String), List[Setter]]
-  private val rowSettersMap   = mutable.Map.empty[(List[String], String), List[Setter]]
-  private val insertResolvers = mutable.Map.empty[(List[String], String), Resolver]
-
-
   def getData(
     nsMap: Map[String, MetaNs],
     elements: List[Element],
@@ -73,7 +56,6 @@ trait Data_Insert
     if (firstRow) {
       tableCols.foreach {
         case (refPath, ns, cols) =>
-          val ns1  = refPath.last
           val stmt =
             s"""INSERT INTO $ns (
                |  ${cols.mkString(",\n  ")}
@@ -83,7 +65,7 @@ trait Data_Insert
           insertResolvers((refPath, ns)) = Resolver(level, refPath, ns, stmt, ps)
 
           val colSetters = colSettersMap(refPath, ns)
-          //          println(s"----------------------  $ns  ${colSetters.length}  $refPath")
+          //          println(s"----------------------  ${colSetters.length}  $refPath  $ns")
           //          println(stmt)
           colSettersMap((refPath, ns)) = Nil
           val resolveRow = (ps: PS, insertIds: Map[(Int, List[String], String), Array[Long]], _: Int) => {
@@ -151,8 +133,7 @@ trait Data_Insert
 
   override protected def addRef(ns: String, refAttr: String, refNs: String, card: Card): Product => Unit = {
     val joinTable = s"${ns}_${refAttr}_$refNs"
-
-    val refPath = curRefPath
+    val refPath   = curRefPath
     curRefPath = curRefPath ++ List(refAttr, refNs)
     val refPath1 = curRefPath
 
@@ -164,8 +145,7 @@ trait Data_Insert
             paramIndexes = paramIndexes + ((refPath, ns, refAttr) -> (cols.length + 1))
             (refPath, ns, cols :+ refAttr)
 
-          case other =>
-            other
+          case other => other
         }
 
       } else if (card == CardOne) {
@@ -174,7 +154,6 @@ trait Data_Insert
         tableCols = tableCols :+ (refPath, ns, List(refAttr))
 
       } else if (card == CardSet) {
-
         // ref to join table
         // Make card-many ref from current empty namespace
         tableCols = tableCols :+ (refPath, ns, Nil)
@@ -239,31 +218,6 @@ trait Data_Insert
         addColSetter(refPath, joinTable, joinSetter)
       }
     }
-  }
-
-  private def addColSetter(refPath: List[String], ns: String, colSetter: Setter) = {
-    // Cache colSetter for this table
-    colSettersMap.get((refPath, ns)).fold[Unit](
-      colSettersMap.addOne((refPath, ns) -> List(colSetter))
-    )(colSetters =>
-      colSettersMap((refPath, ns)) = colSetters :+ colSetter
-    )
-    //    println("--------")
-    //    println(colSettersMap.map { case (k, v) => (k, v.length) })
-  }
-
-  private def printValue(
-    rowIndex: Int,
-    ns: String,
-    attr: String,
-    tplIndex0: Int,
-    paramIndex: Int,
-    value: Any
-  ): Unit = {
-    val fullAttr = s"$ns.$attr"
-    val pad      = padS(18, fullAttr)
-    val tplIndex = if (tplIndex0 == -1) "-" else tplIndex0
-    println(s"$rowIndex  $fullAttr$pad tplIndex: $tplIndex   paramIndex: $paramIndex   value: " + value)
   }
 
   override protected def addBackRef(backRefNs: String): Product => Unit = {
@@ -389,5 +343,20 @@ trait Data_Insert
           )
         case None              => () // no statement to insert
       }
+  }
+
+
+  private def printValue(
+    rowIndex: Int,
+    ns: String,
+    attr: String,
+    tplIndex0: Int,
+    paramIndex: Int,
+    value: Any
+  ): Unit = {
+    val fullAttr = s"$ns.$attr"
+    val pad      = padS(18, fullAttr)
+    val tplIndex = if (tplIndex0 == -1) "-" else tplIndex0
+    println(s"$rowIndex  $fullAttr$pad tplIndex: $tplIndex   paramIndex: $paramIndex   value: " + value)
   }
 }

@@ -19,9 +19,9 @@ case class JdbcConn_jvm(
 
   private[molecule] var fresh = true
 
-  override def transact_async(data: Data)(implicit ec: ExecutionContext): Future[TxReport] = {
-    Future(transact_sync(data))
-  }
+//  override def transact_async(data: Data)(implicit ec: ExecutionContext): Future[TxReport] = {
+//    Future(transact_sync(data))
+//  }
 
   override def transact_sync(resolvers: Data): TxReport = {
     val insertsCount = resolvers.length
@@ -35,7 +35,7 @@ case class JdbcConn_jvm(
       // Atomic transaction of all statements
       sqlConn.setAutoCommit(false)
 
-      // Insert statements backwards to obtain ref ids for prepending inserts
+      // Insert statements backwards to obtain auto-generated ref ids for prepending inserts
       resolvers.reverse.foreach {
         case Resolver(level, refPath, ns, stmt, ps, populatePS, nestedCounts) =>
           insertIndex -= 1

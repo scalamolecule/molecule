@@ -42,62 +42,6 @@ trait Data_Insert
     stmts
   }
 
-  override protected def addComposite(
-    nsMap: Map[String, MetaNs],
-    outerTpl: Int,
-    tplIndex: Int,
-    compositeElements: List[Element]
-  ): Product => Unit = {
-    hasComposites = true
-    val composite2stmts = getResolver(nsMap, compositeElements, outerTpl)
-    // Start from initial entity id for each composite sub group
-    countValueAttrs(compositeElements) match {
-      case 1 => (tpl: Product) =>
-        e = e0
-        composite2stmts(Tuple1(tpl.productElement(tplIndex)))
-      case _ => (tpl: Product) =>
-        e = e0
-        composite2stmts(tpl.productElement(tplIndex).asInstanceOf[Product])
-    }
-  }
-
-  override protected def addNested(
-    nsMap: Map[String, MetaNs],
-    tplIndex: Int,
-    ns: String,
-    refAttr: String,
-    refNs: String,
-    nestedElements: List[Element]
-  ): Product => Unit = {
-    // Recursively resolve nested data
-    val nested2stmts = getResolver(nsMap, nestedElements)
-    countValueAttrs(nestedElements) match {
-      case 1 => // Nested arity-1 values
-        (tpl: Product) => {
-          val values       = tpl.productElement(tplIndex).asInstanceOf[Seq[Any]]
-          val nestedBaseId = e
-          values.foreach { value =>
-            e = nestedBaseId
-            val nestedTpl = Tuple1(value)
-            addRef(ns, refAttr, refNs, CardOne)(nestedTpl)
-            e0 = e
-            nested2stmts(nestedTpl)
-          }
-        }
-      case _ =>
-        (tpl: Product) => {
-          val nestedTpls   = tpl.productElement(tplIndex).asInstanceOf[Seq[Product]]
-          val nestedBaseId = e
-          nestedTpls.foreach { nestedTpl =>
-            e = nestedBaseId
-            addRef(ns, refAttr, refNs, CardOne)(nestedTpl)
-            e0 = e
-            nested2stmts(nestedTpl)
-          }
-        }
-    }
-  }
-
   override protected def addV[T](
     ns: String,
     attr: String,
@@ -182,6 +126,61 @@ trait Data_Insert
       e = backRefs(backRefNs)
   }
 
+  override protected def addComposite(
+    nsMap: Map[String, MetaNs],
+    outerTpl: Int,
+    tplIndex: Int,
+    compositeElements: List[Element]
+  ): Product => Unit = {
+    hasComposites = true
+    val composite2stmts = getResolver(nsMap, compositeElements, outerTpl)
+    // Start from initial entity id for each composite sub group
+    countValueAttrs(compositeElements) match {
+      case 1 => (tpl: Product) =>
+        e = e0
+        composite2stmts(Tuple1(tpl.productElement(tplIndex)))
+      case _ => (tpl: Product) =>
+        e = e0
+        composite2stmts(tpl.productElement(tplIndex).asInstanceOf[Product])
+    }
+  }
+
+  override protected def addNested(
+    nsMap: Map[String, MetaNs],
+    tplIndex: Int,
+    ns: String,
+    refAttr: String,
+    refNs: String,
+    nestedElements: List[Element]
+  ): Product => Unit = {
+    // Recursively resolve nested data
+    val nested2stmts = getResolver(nsMap, nestedElements)
+    countValueAttrs(nestedElements) match {
+      case 1 => // Nested arity-1 values
+        (tpl: Product) => {
+          val values       = tpl.productElement(tplIndex).asInstanceOf[Seq[Any]]
+          val nestedBaseId = e
+          values.foreach { value =>
+            e = nestedBaseId
+            val nestedTpl = Tuple1(value)
+            addRef(ns, refAttr, refNs, CardOne)(nestedTpl)
+            e0 = e
+            nested2stmts(nestedTpl)
+          }
+        }
+      case _ =>
+        (tpl: Product) => {
+          val nestedTpls   = tpl.productElement(tplIndex).asInstanceOf[Seq[Product]]
+          val nestedBaseId = e
+          nestedTpls.foreach { nestedTpl =>
+            e = nestedBaseId
+            addRef(ns, refAttr, refNs, CardOne)(nestedTpl)
+            e0 = e
+            nested2stmts(nestedTpl)
+          }
+        }
+    }
+  }
 
   // Save Int as Long in Datomic since we can't enforce Integers in edn (for JS rpc)
 

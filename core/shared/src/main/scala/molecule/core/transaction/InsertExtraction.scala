@@ -20,8 +20,9 @@ class InsertExtraction extends InsertResolvers_ with InsertValidators_ { self: I
     outerTpl: Int,
     tplIndex: Int
   ): List[Product => Unit] = {
-    if (resolvers.isEmpty)
+    if (resolvers.isEmpty) {
       curElements = elements
+    }
     elements match {
       case element :: tail => element match {
         case a: Attr =>

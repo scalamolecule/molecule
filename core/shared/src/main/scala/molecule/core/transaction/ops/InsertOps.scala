@@ -7,29 +7,12 @@ import molecule.boilerplate.ast.Model._
 
 trait InsertOps {
 
-  protected def addComposite(
-    nsMap: Map[String, MetaNs],
-    outerTpl: Int,
-    tplIndex: Int,
-    elements: List[Element]
-  ): Product => Unit
-
-  protected def addNested(
-    nsMap: Map[String, MetaNs],
-    tplIndex: Int,
-    ns: String,
-    refAttr: String,
-    refNs: String,
-    elements: List[Element]
-  ): Product => Unit
-
   protected def addV[T](
     ns: String,
     attr: String,
     tplIndex: Int,
     handleScalaValue: T => Any,
   ): Product => Unit
-
 
   protected def addOptV[T](
     ns: String,
@@ -61,6 +44,22 @@ trait InsertOps {
 
   protected def addBackRef(
     backRefNs: String
+  ): Product => Unit
+
+  protected def addComposite(
+    nsMap: Map[String, MetaNs],
+    outerTpl: Int,
+    tplIndex: Int,
+    elements: List[Element]
+  ): Product => Unit
+
+  protected def addNested(
+    nsMap: Map[String, MetaNs],
+    tplIndex: Int,
+    ns: String,
+    refAttr: String,
+    refNs: String,
+    elements: List[Element]
   ): Product => Unit
 
   // Typed input value to expected db type

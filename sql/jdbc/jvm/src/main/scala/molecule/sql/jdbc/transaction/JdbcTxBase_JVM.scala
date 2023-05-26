@@ -20,9 +20,36 @@ trait JdbcTxBase_JVM extends JdbcDataType_JVM with ModelUtils {
   // Override on instantiation
   protected val sqlConn: java.sql.Connection
 
+  protected var level    = 0
+  protected var firstRow = true
+
+  // Dynamic ref path of current branch (each backref initiates a new branch)
+  protected var curRefPath = List.empty[String]
+
+  // Ordered tables to have data inserted
+  // refPath, ns, selfRef, cols
+  protected var tableCols = List.empty[(List[String], String, List[String])]
+
+  // PreparedStatement param indexes for each (table, col) coordinate
+  protected var paramIndexes  = Map.empty[(List[String], String, String), Int]
+  protected val colSettersMap = mutable.Map.empty[(List[String], String), List[Setter]]
+
+  protected def addColSetter(refPath: List[String], ns: String, colSetter: Setter) = {
+    // Cache colSetter for this table
+    colSettersMap.get((refPath, ns)).fold[Unit](
+      colSettersMap.addOne((refPath, ns) -> List(colSetter))
+    )(colSetters =>
+      colSettersMap((refPath, ns)) = colSetters :+ colSetter
+    )
+  }
+
+  protected val rowSettersMap   = mutable.Map.empty[(List[String], String), List[Setter]]
+  protected val insertResolvers = mutable.Map.empty[(List[String], String), Resolver]
+
+
   // todo: replace with the ones underneath
-  var colSetters  = List.empty[Setter]
-  var insertStmts = List.empty[String]
+  //  var colSetters  = List.empty[Setter]
+  //  var insertStmts = List.empty[String]
   protected var table   = ""
   protected val columns = ListBuffer.empty[String]
 

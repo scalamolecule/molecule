@@ -10,13 +10,8 @@ import scala.language.implicitConversions
 import molecule.coreTests.async._
 import molecule.core.util.Executor._
 
-trait InsertFlat extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
 
-  val i1 = 1
-  val i2 = (1, 2)
-  val i3 = (1, 2, 3)
-  val i4 = (1, 2, 3, 4)
-  val i5 = (1, 2, 3, 4, 5)
+trait InsertRefs extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync =>
 
   override lazy val tests = Tests {
 
@@ -32,82 +27,82 @@ trait InsertFlat extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  
           (2, "b"),
         ))
 
-        _ <- A.B.i.insert(i1).transact
-        _ <- A.B.i.query.get.map(_ ==> List(i1))
+        _ <- A.B.i.insert(1).transact
+        _ <- A.B.i.query.get.map(_ ==> List(1))
 
-        _ <- A.i.B.i.insert(i2).transact
-        _ <- A.i.B.i.query.get.map(_ ==> List(i2))
+        _ <- A.i.B.i.insert(1, 2).transact
+        _ <- A.i.B.i.query.get.map(_ ==> List((1, 2)))
 
 
-        _ <- A.B.C.i.insert(i1).transact
-        _ <- A.B.C.i.query.get.map(_ ==> List(i1))
+        _ <- A.B.C.i.insert(1).transact
+        _ <- A.B.C.i.query.get.map(_ ==> List(1))
 
-        _ <- A.B.i.C.i.insert(i2).transact
-        _ <- A.B.i.C.i.query.get.map(_ ==> List(i2))
+        _ <- A.B.i.C.i.insert(1, 2).transact
+        _ <- A.B.i.C.i.query.get.map(_ ==> List((1, 2)))
 
-        _ <- A.i.B.C.i.insert(i2).transact
-        _ <- A.i.B.C.i.query.get.map(_ ==> List(i2))
+        _ <- A.i.B.C.i.insert(1, 2).transact
+        _ <- A.i.B.C.i.query.get.map(_ ==> List((1, 2)))
 
-        _ <- A.i.B.i.C.i.insert(i3).transact
-        _ <- A.i.B.i.C.i.query.get.map(_ ==> List(i3))
+        _ <- A.i.B.i.C.i.insert(1, 2, 3).transact
+        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
       } yield ()
     }
 
 
     "card many" - refs { implicit conn =>
       for {
-        _ <- A.Bb.i.insert(i1).transact
-        _ <- A.Bb.i.query.get.map(_ ==> List(i1))
+        _ <- A.Bb.i.insert(1).transact
+        _ <- A.Bb.i.query.get.map(_ ==> List(1))
 
-        _ <- A.i.Bb.i.insert(i2).transact
-        _ <- A.i.Bb.i.query.get.map(_ ==> List(i2))
+        _ <- A.i.Bb.i.insert(1, 2).transact
+        _ <- A.i.Bb.i.query.get.map(_ ==> List((1, 2)))
 
 
-        _ <- A.Bb.Cc.i.insert(i1).transact
-        _ <- A.Bb.Cc.i.query.get.map(_ ==> List(i1))
+        _ <- A.Bb.Cc.i.insert(1).transact
+        _ <- A.Bb.Cc.i.query.get.map(_ ==> List(1))
 
-        _ <- A.Bb.i.Cc.i.insert(i2).transact
-        _ <- A.Bb.i.Cc.i.query.get.map(_ ==> List(i2))
+        _ <- A.Bb.i.Cc.i.insert(1, 2).transact
+        _ <- A.Bb.i.Cc.i.query.get.map(_ ==> List((1, 2)))
 
-        _ <- A.i.Bb.Cc.i.insert(i2).transact
-        _ <- A.i.Bb.Cc.i.query.get.map(_ ==> List(i2))
+        _ <- A.i.Bb.Cc.i.insert(1, 2).transact
+        _ <- A.i.Bb.Cc.i.query.get.map(_ ==> List((1, 2)))
 
-        _ <- A.i.Bb.i.Cc.i.insert(i3).transact
-        _ <- A.i.Bb.i.Cc.i.query.get.map(_ ==> List(i3))
+        _ <- A.i.Bb.i.Cc.i.insert(1, 2, 3).transact
+        _ <- A.i.Bb.i.Cc.i.query.get.map(_ ==> List((1, 2, 3)))
       } yield ()
     }
 
 
     "card one/many" - refs { implicit conn =>
       for {
-        _ <- A.B.Cc.i.insert(i1).transact
-        _ <- A.B.Cc.i.query.get.map(_ ==> List(i1))
+        _ <- A.B.Cc.i.insert(1).transact
+        _ <- A.B.Cc.i.query.get.map(_ ==> List(1))
 
-        _ <- A.i.B.Cc.i.insert(i2).transact
-        _ <- A.i.B.Cc.i.query.get.map(_ ==> List(i2))
+        _ <- A.i.B.Cc.i.insert(1, 2).transact
+        _ <- A.i.B.Cc.i.query.get.map(_ ==> List((1, 2)))
 
-        _ <- A.B.i.Cc.i.insert(i2).transact
-        _ <- A.B.i.Cc.i.query.get.map(_ ==> List(i2))
+        _ <- A.B.i.Cc.i.insert(1, 2).transact
+        _ <- A.B.i.Cc.i.query.get.map(_ ==> List((1, 2)))
 
-        _ <- A.i.B.i.Cc.i.insert(i3).transact
-        _ <- A.i.B.i.Cc.i.query.get.map(_ ==> List(i3))
+        _ <- A.i.B.i.Cc.i.insert(1, 2, 3).transact
+        _ <- A.i.B.i.Cc.i.query.get.map(_ ==> List((1, 2, 3)))
       } yield ()
     }
 
 
     "card many/one" - refs { implicit conn =>
       for {
-        _ <- A.Bb.C.i.insert(i1).transact
-        _ <- A.Bb.C.i.query.get.map(_ ==> List(i1))
+        _ <- A.Bb.C.i.insert(1).transact
+        _ <- A.Bb.C.i.query.get.map(_ ==> List(1))
 
-        _ <- A.Bb.i.C.i.insert(i2).transact
-        _ <- A.Bb.i.C.i.query.get.map(_ ==> List(i2))
+        _ <- A.Bb.i.C.i.insert(1, 2).transact
+        _ <- A.Bb.i.C.i.query.get.map(_ ==> List((1, 2)))
 
-        _ <- A.i.Bb.C.i.insert(i2).transact
-        _ <- A.i.Bb.C.i.query.get.map(_ ==> List(i2))
+        _ <- A.i.Bb.C.i.insert(1, 2).transact
+        _ <- A.i.Bb.C.i.query.get.map(_ ==> List((1, 2)))
 
-        _ <- A.i.Bb.i.C.i.insert(i3).transact
-        _ <- A.i.Bb.i.C.i.query.get.map(_ ==> List(i3))
+        _ <- A.i.Bb.i.C.i.insert(1, 2, 3).transact
+        _ <- A.i.Bb.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
       } yield ()
     }
 
@@ -192,7 +187,6 @@ trait InsertFlat extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  
 
     "backref, card many" - refs { implicit conn =>
       for {
-
         _ <- A.i.Bb.i._A.s.insert(1, 2, "a").transact
         _ <- A.i.Bb.i._A.s.query.get.map(_ ==> List((1, 2, "a")))
 
@@ -278,19 +272,19 @@ trait InsertFlat extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  
 
     "self-join, one" - refs { implicit conn =>
       for {
-        _ <- A.i.A.i.insert(i2).transact
-        _ <- A.i.A.i.query.get.map(_ ==> List(i2))
+        _ <- A.i.A.i.insert(1, 2).transact
+        _ <- A.i.A.i.query.get.map(_ ==> List((1, 2)))
 
-        _ <- A.i.B.i.B.i.insert(i3).transact
-        _ <- A.i.B.i.B.i.query.get.map(_ ==> List(i3))
+        _ <- A.i.B.i.B.i.insert(1, 2, 3).transact
+        _ <- A.i.B.i.B.i.query.get.map(_ ==> List((1, 2, 3)))
       } yield ()
     }
 
 
     "set self" - refs { implicit conn =>
       for {
-        _ <- A.i.Aa.i.insert(i2).transact
-        _ <- A.i.Aa.i.query.get.map(_ ==> List(i2))
+        _ <- A.i.Aa.i.insert(1, 2).transact
+        _ <- A.i.Aa.i.query.get.map(_ ==> List((1, 2)))
 
         _ <- A.i.Bb.i.B.i.insert(1, 2, 3).transact
         _ <- A.i.Bb.i.B.i.query.get.map(_ ==> List((1, 2, 3)))

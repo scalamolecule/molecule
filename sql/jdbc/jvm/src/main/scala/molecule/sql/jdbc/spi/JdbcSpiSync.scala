@@ -58,6 +58,28 @@ trait JdbcSpiSync
   }
 
 
+  //  override def save_transact(save: Save)(implicit conn0: Conn): TxReport = {
+  //    val errors = save_validate(save)
+  //    if (errors.isEmpty) {
+  //      val conn                  = conn0.asInstanceOf[JdbcConn_jvm]
+  ////      val a = System.nanoTime()
+  //      val (insertElements, tpl) = Save2insert.hydrate(save)
+  ////      val b = System.nanoTime()
+  ////      println("delta: " + (b - a) / 1000)
+  //      val data                  = new InsertExtraction with Data_Insert {
+  //        override protected val sqlConn: sql.Connection = conn.sqlConn
+  //      }.getData(conn.proxy.nsMap, insertElements, List(tpl))
+  //
+  //      val a                     = System.nanoTime()
+  //      val res = conn.transact_sync(data)
+  //      val b                     = System.nanoTime()
+  //      println("delta: " + (b - a) / 1000)
+  //      res
+  //    } else {
+  //      throw ValidationErrors(errors)
+  //    }
+  //  }
+
   override def save_transact(save: Save)(implicit conn0: Conn): TxReport = {
     val errors = save_validate(save)
     if (errors.isEmpty) {
