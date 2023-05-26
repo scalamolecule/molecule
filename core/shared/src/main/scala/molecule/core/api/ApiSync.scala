@@ -1,38 +1,44 @@
 package molecule.core.api
 
 import molecule.base.error.InsertError
+import molecule.core.spi.{Conn, TxReport}
 
-trait ApiSync extends PrintInspect {
+trait ApiSync {
 
-  trait QueryApi[Tpl] extends Inspectable {
-    def get(implicit conn: Connection): List[Tpl]
-    def subscribe(callback: List[Tpl] => Unit)(implicit conn: Connection): Unit
+  trait QueryApiSync[Tpl] {
+    def get(implicit conn: Conn): List[Tpl]
+    def subscribe(callback: List[Tpl] => Unit)(implicit conn: Conn): Unit
+    def inspect(implicit conn: Conn): Unit
   }
-  trait QueryOffsetApi[Tpl] extends Inspectable {
-    def get(implicit conn: Connection): (List[Tpl], Int, Boolean)
+  trait QueryOffsetApiSync[Tpl] {
+    def get(implicit conn: Conn): (List[Tpl], Int, Boolean)
+    def inspect(implicit conn: Conn): Unit
   }
-  trait QueryCursorApi[Tpl] extends Inspectable {
-    def get(implicit conn: Connection): (List[Tpl], String, Boolean)
-  }
-
-
-  trait SaveTransaction extends Inspectable {
-    def transact(implicit conn: Connection): TxReport
-    def validate(implicit conn: Connection): Map[String, Seq[String]]
+  trait QueryCursorApiSync[Tpl] {
+    def get(implicit conn: Conn): (List[Tpl], String, Boolean)
+    def inspect(implicit conn: Conn): Unit
   }
 
-  trait InsertTransaction extends Inspectable {
-    def transact(implicit conn: Connection): TxReport
-    def validate(implicit conn: Connection): Seq[(Int, Seq[InsertError])]
+  trait SaveApiSync {
+    def transact(implicit conn: Conn): TxReport
+    def validate(implicit conn: Conn): Map[String, Seq[String]]
+    def inspect(implicit conn: Conn): Unit
   }
 
-  trait UpdateTransaction extends SaveTransaction
-
-  trait DeleteTransaction extends Inspectable {
-    def transact(implicit conn: Connection): TxReport
+  trait InsertApiSync {
+    def transact(implicit conn: Conn): TxReport
+    def validate(implicit conn: Conn): Seq[(Int, Seq[InsertError])]
+    def inspect(implicit conn: Conn): Unit
   }
 
-  trait Inspectable {
-    def inspect(implicit conn: Connection): Unit
+  trait UpdateApiSync {
+    def transact(implicit conn: Conn): TxReport
+    def validate(implicit conn: Conn): Map[String, Seq[String]]
+    def inspect(implicit conn: Conn): Unit
+  }
+
+  trait DeleteApiSync {
+    def transact(implicit conn: Conn): TxReport
+    def inspect(implicit conn: Conn): Unit
   }
 }

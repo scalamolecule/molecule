@@ -8,14 +8,15 @@ import molecule.boilerplate.ast.Model._
 import molecule.core.marshalling.dbView._
 import molecule.datalog.core.query.cursor.CursorUtils
 import molecule.sql.core.query.SqlModel2Query
-import molecule.sql.jdbc.api.JdbcApiSync
-import molecule.sql.jdbc.facade.JdbcConn_JVM
+import molecule.sql.jdbc.facade.JdbcConn_jvm
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 
 
 abstract class JdbcQueryResolve[Tpl](elements: List[Element], dbView: Option[DbView])
-  extends SqlModel2Query[Tpl](elements) with JdbcApiSync with CursorUtils {
+  extends SqlModel2Query[Tpl](elements)
+//    with JdbcApiSync
+    with CursorUtils {
 
 //  type Row = java.sql.ResultSet
 
@@ -56,7 +57,7 @@ abstract class JdbcQueryResolve[Tpl](elements: List[Element], dbView: Option[DbV
     }
   }
 
-  protected def getRawData2(conn: JdbcConn_JVM): ResultSet = {
+  protected def getRawData2(conn: JdbcConn_jvm): ResultSet = {
     val stmt = getQuery(Nil)
 
     println("--------------------------------------------------------------\n" + stmt)
@@ -67,7 +68,7 @@ abstract class JdbcQueryResolve[Tpl](elements: List[Element], dbView: Option[DbV
 
 
   protected def getRawData(
-    conn: JdbcConn_JVM,
+    conn: JdbcConn_jvm,
     altElements: List[Element] = Nil,
     altDb: Option[datomic.Database] = None
   ): jCollection[jList[AnyRef]] = {
@@ -175,7 +176,7 @@ abstract class JdbcQueryResolve[Tpl](elements: List[Element], dbView: Option[DbV
   lazy val row2AnyTpl = castRow2AnyTpl(aritiess.head, castss.head, 0, None)
 
   def paginateFromIdentifiers(
-    conn: JdbcConn_JVM,
+    conn: JdbcConn_jvm,
     limit: Int,
     forward: Boolean,
     allTokens: List[String],

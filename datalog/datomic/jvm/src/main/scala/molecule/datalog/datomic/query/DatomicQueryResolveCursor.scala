@@ -118,7 +118,7 @@ case class DatomicQueryResolveCursor[Tpl](
 
 
   private def initialCursor(conn: DatomicConn_JVM, tpls: List[Tpl]): String = {
-    val unique = conn.proxy.schema.uniqueAttrs
+    val unique = conn.proxy.uniqueAttrs
     @tailrec
     def checkSort(
       elements: List[Element],
@@ -162,7 +162,7 @@ case class DatomicQueryResolveCursor[Tpl](
                     val (tpe, encode) = tpeEncode(a)
                     val initTokens    = List("1", getHash, tpe, a.ns, a.attr, i.toString)
                     val uniqueValues  = getUniquePair(tpls, i, encode)
-                    // We can use this exclusively. So we don't need more meta data
+                    // We can use this exclusively. So we don't need more data
                     checkSort(Nil, 1, initTokens ++ uniqueValues, -1, Nil)
 
                   } else {
@@ -194,7 +194,7 @@ case class DatomicQueryResolveCursor[Tpl](
 
             case Composite(elements) => checkSort(elements ++ tail, strategy, tokens, i, rowHashes)
 
-            // Only top level sorting - ignore nested and tx meta data
+            // Only top level sorting - ignore nested and tx data
             case _ => checkSort(tail, strategy, tokens, i, rowHashes)
           }
 

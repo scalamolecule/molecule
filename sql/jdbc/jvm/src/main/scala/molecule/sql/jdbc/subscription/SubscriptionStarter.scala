@@ -1,13 +1,13 @@
 package molecule.sql.jdbc.subscription
 
-import molecule.sql.jdbc.facade.JdbcConn_JVM
+import molecule.sql.jdbc.facade.JdbcConn_jvm
 
 
 trait SubscriptionStarter {
 
   private var txReportWatcher: Option[TxReportWatcher] = None
 
-  def getWatcher(conn: JdbcConn_JVM) = {
+  def getWatcher(conn: JdbcConn_jvm) = {
     if (conn.fresh) {
       txReportWatcher = None
       conn.fresh = false

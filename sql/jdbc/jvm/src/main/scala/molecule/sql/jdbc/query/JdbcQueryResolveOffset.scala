@@ -5,7 +5,7 @@ import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.marshalling.dbView.DbView
 import molecule.core.util.FutureUtils
-import molecule.sql.jdbc.facade.JdbcConn_JVM
+import molecule.sql.jdbc.facade.JdbcConn_jvm
 import molecule.sql.jdbc.subscription.TxReportWatcher
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
@@ -30,18 +30,18 @@ case class JdbcQueryResolveOffset[Tpl](
 
   // Handles both offset- and non-paginated results
   // returns (rows, total count, hasMore)
-  def getListFromOffset_async(implicit conn: JdbcConn_JVM, ec: ExecutionContext)
+  def getListFromOffset_async(implicit conn: JdbcConn_jvm, ec: ExecutionContext)
   : Future[(List[Tpl], Int, Boolean)] = {
     future(getListFromOffset_sync(conn))
   }
 
   // Datomic querying is synchronous
-  def getListFromOffset_sync(implicit conn: JdbcConn_JVM): (List[Tpl], Int, Boolean) = {
+  def getListFromOffset_sync(implicit conn: JdbcConn_jvm): (List[Tpl], Int, Boolean) = {
     getListFromOffset_sync(None)(conn)
   }
 
   // Optional use of DB_AFTER for subscriptions
-  def getListFromOffset_sync(altDb: Option[datomic.Database])(implicit conn: JdbcConn_JVM)
+  def getListFromOffset_sync(altDb: Option[datomic.Database])(implicit conn: JdbcConn_jvm)
   : (List[Tpl], Int, Boolean) = {
     lazy val limitSign  = limit.get >> 31
     lazy val offsetSign = offset.get >> 31
@@ -143,7 +143,7 @@ case class JdbcQueryResolveOffset[Tpl](
 
 
   def subscribe(
-    conn: JdbcConn_JVM,
+    conn: JdbcConn_jvm,
     txReportWatcher: TxReportWatcher,
     callback: List[Tpl] => Unit
   ): Unit = {

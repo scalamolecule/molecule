@@ -44,7 +44,7 @@ trait Data_Delete
     eids1.foreach(addRetractEntityStmt)
 
     // Prevent deleting mandatory referenced entities
-    if (getHasMandatoryRefs(conn.proxy.schema.nsMap)) {
+    if (getHasMandatoryRefs(conn.proxy.nsMap)) {
       val referrers = Peer.q(
         s"""[:find  ?ns ?attr ?refs
            | :in    $$ [?eids ...]

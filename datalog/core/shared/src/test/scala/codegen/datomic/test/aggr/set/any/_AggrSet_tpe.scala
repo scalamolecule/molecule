@@ -1,7 +1,7 @@
 package codegen.datomic.test.aggr.set.any
 
 import java.nio.file.{Files, Paths}
-import codegen.DatomicTestGenBase
+import codegen.SpiTestGenBase
 import molecule.base.util.{BaseHelpers, CodeGenBase}
 
 object _AggrSet_tpe extends CodeGenBase with BaseHelpers {
@@ -11,7 +11,7 @@ object _AggrSet_tpe extends CodeGenBase with BaseHelpers {
   }
 
   case class TransformFile(name: String, tpe: String, v: String, imp: String = "")
-    extends DatomicTestGenBase(s"AggrSet_$name", "/test/aggr/set/any") {
+    extends SpiTestGenBase(s"AggrSet_$name", "/test/aggr/set/any") {
 
     val content = {
       val src =

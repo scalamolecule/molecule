@@ -47,8 +47,8 @@ trait Data_Update extends DatomicTxBase_JVM with UpdateOps with MoleculeLogging 
       }
 
       val validationErrors = ModelValidation(
-        conn.proxy.schema.nsMap,
-        conn.proxy.schema.attrMap,
+        conn.proxy.nsMap,
+        conn.proxy.attrMap,
         "update",
         Some(getCurSetValues)
       ).validate(elements)

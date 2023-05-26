@@ -61,7 +61,7 @@ case class InsertErrors(
             error.render(indent + 3, true)
           }.mkString(s",\n$s      ")
           val rowIndexComment = if (rowIndex == -1)
-            "Appended tx meta data errors row "
+            "Appended tx data errors row "
           else
             "Top-level row index"
           val str             =

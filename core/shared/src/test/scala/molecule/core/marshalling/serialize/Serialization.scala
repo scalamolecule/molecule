@@ -12,10 +12,10 @@ object Serialization extends TestSuite {
 
   override lazy val tests = Tests {
 
-    "No base attrs with tx meta data" - {
+    "No base attrs with tx data" - {
       val elements     = List(
         AttrOneTacInt("R1", "i", V, Seq(), None, None, Nil, Nil, None, None),
-        TxMetaData(List(
+        TxData(List(
           AttrOneManInt("R2", "i", V, Seq(), None, None, Nil, Nil, None, None),
           AttrOneManString("R2", "s", V, Seq(), None, None, Nil, Nil, None, None))
         )
@@ -30,7 +30,7 @@ object Serialization extends TestSuite {
     "2" - {
       val elements     = List(
         AttrOneManInt("R1", "i", V, Seq(), None, None, Nil, Nil, None, None),
-        TxMetaData(List(
+        TxData(List(
           Composite(List(
             AttrOneTacInt("R2", "i", V, Seq(), None, None, Nil, Nil, None, None))),
           Composite(List(
@@ -50,7 +50,7 @@ object Serialization extends TestSuite {
         Composite(List(
           AttrOneManInt("R2", "i", V, Seq(), None, None, Nil, Nil, None, None),
           AttrOneManString("R2", "s", V, Seq(), None, None, Nil, Nil, None, None))),
-        TxMetaData(List(
+        TxData(List(
           AttrOneManInt("R3", "i", V, Seq(), None, None, Nil, Nil, None, None),
           AttrOneManString("R3", "s", V, Seq(), None, None, Nil, Nil, None, None)))
       )

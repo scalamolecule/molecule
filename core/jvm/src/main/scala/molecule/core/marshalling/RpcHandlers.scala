@@ -5,9 +5,9 @@ import boopickle.Default._
 import molecule.base.error._
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
-import molecule.core.api.TxReport
 import molecule.core.marshalling.Boopicklers._
 import molecule.core.marshalling.serialize.PickleTpls
+import molecule.core.spi.TxReport
 import molecule.core.util.Executor._
 import molecule.core.util.SerializationUtils
 import scala.concurrent.Future

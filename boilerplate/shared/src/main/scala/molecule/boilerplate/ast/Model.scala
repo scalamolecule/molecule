@@ -89,9 +89,9 @@ trait Model extends Validations with Values {
     override def toString: String = render(0)
   }
 
-  case class TxMetaData(elements: List[Element]) extends Element {
+  case class TxData(elements: List[Element]) extends Element {
     override def render(i: Int): String = {
-      s"""|${"  " * i}TxMetaData(List(
+      s"""|${"  " * i}TxData(List(
           |${renders(elements, i + 1)}))""".stripMargin
     }
     override def toString: String = render(0)

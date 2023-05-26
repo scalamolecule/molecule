@@ -7,10 +7,10 @@ import java.util.{UUID, ArrayList => jArrayList, List => jList}
 import clojure.lang.Keyword
 import molecule.base.error.ExecutionError
 import molecule.boilerplate.ast.Model._
-import molecule.core.marshalling.{ConnProxy, DatomicPeerProxy}
+import molecule.core.marshalling.{ConnProxy, DatomicProxy}
 import molecule.core.util.Executor._
 import molecule.core.util.{ModelUtils, fns}
-import molecule.sql.jdbc.facade.{JdbcConn_JVM, JdbcHandler}
+import molecule.sql.jdbc.facade.{JdbcConn_jvm, JdbcHandler_jvm}
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
@@ -85,14 +85,14 @@ trait JdbcTxBase_JVM extends JdbcDataType_JVM with ModelUtils {
   // Connection pool ---------------------------------------------
 
   // todo: real solution
-  protected val connectionPool = mutable.HashMap.empty[UUID, Future[JdbcConn_JVM]]
+  protected val connectionPool = mutable.HashMap.empty[UUID, Future[JdbcConn_jvm]]
 
   //  override def clearConnPool: Future[Unit] = Future {
   //    // logger.debug(s"Connection pool with ${connectionPool.size} connections cleared.")
   //    connectionPool.clear()
   //  }
 
-  protected def getConn(proxy: ConnProxy): Future[JdbcConn_JVM] = {
+  protected def getConn(proxy: ConnProxy): Future[JdbcConn_jvm] = {
     val futConn             = connectionPool.getOrElse(proxy.uuid, getFreshConn(proxy))
     val futConnTimeAdjusted = futConn.map { conn =>
       //      conn.updateAdhocDbView(proxy.adhocDbView)
@@ -104,12 +104,12 @@ trait JdbcTxBase_JVM extends JdbcDataType_JVM with ModelUtils {
     futConnTimeAdjusted
   }
 
-  protected def getFreshConn(proxy: ConnProxy): Future[JdbcConn_JVM] = {
+  protected def getFreshConn(proxy: ConnProxy): Future[JdbcConn_jvm] = {
     proxy match {
-      case proxy@DatomicPeerProxy(protocol, dbIdentifier, _, _, _, isFreeVersion) =>
+      case proxy@DatomicProxy(protocol, dbIdentifier, _, _, _, _, _, _, _, _, _) =>
         //        protocol match {
         //          case "mem" =>
-        //            JdbcHandler.recreateDbFromEdn(proxy, protocol, dbIdentifier, isFreeVersion)
+        //            JdbcHandler.recreateDbFromEdn(proxy, protocol, dbIdentifier)
         //              .recover {
         //                case exc: Throwable => throw ExecutionError(exc.getMessage)
         //              }

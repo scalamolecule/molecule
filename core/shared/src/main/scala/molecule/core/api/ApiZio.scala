@@ -1,39 +1,45 @@
 package molecule.core.api
 
 import molecule.base.error._
+import molecule.core.spi.{Conn, TxReport}
 import zio.ZIO
 
-trait ApiZio extends PrintInspect {
+trait ApiZio {
 
-  trait QueryApi[Tpl] extends Inspectable {
-    def get: ZIO[Connection, MoleculeError, List[Tpl]]
-    def subscribe(callback: List[Tpl] => Unit): ZIO[Connection, MoleculeError, Unit]
+  trait QueryApiZio[Tpl] {
+    def get: ZIO[Conn, MoleculeError, List[Tpl]]
+    def subscribe(callback: List[Tpl] => Unit): ZIO[Conn, MoleculeError, Unit]
+    def inspect: ZIO[Conn, MoleculeError, Unit]
   }
-  trait QueryOffsetApi[Tpl] extends Inspectable {
-    def get: ZIO[Connection, MoleculeError, (List[Tpl], Int, Boolean)]
+  trait QueryOffsetApiZio[Tpl] {
+    def get: ZIO[Conn, MoleculeError, (List[Tpl], Int, Boolean)]
+    def inspect: ZIO[Conn, MoleculeError, Unit]
   }
-  trait QueryCursorApi[Tpl] extends Inspectable {
-    def get: ZIO[Connection, MoleculeError, (List[Tpl], String, Boolean)]
-  }
-
-
-  trait SaveTransaction extends Inspectable {
-    def transact: ZIO[Connection, MoleculeError, TxReport]
-    def validate: ZIO[Connection, MoleculeError, Map[String, Seq[String]]]
+  trait QueryCursorApiZio[Tpl] {
+    def get: ZIO[Conn, MoleculeError, (List[Tpl], String, Boolean)]
+    def inspect: ZIO[Conn, MoleculeError, Unit]
   }
 
-  trait InsertTransaction extends Inspectable {
-    def transact: ZIO[Connection, MoleculeError, TxReport]
-    def validate: ZIO[Connection, MoleculeError, Seq[(Int, Seq[InsertError])]]
+  trait SaveApiZio {
+    def transact: ZIO[Conn, MoleculeError, TxReport]
+    def validate: ZIO[Conn, MoleculeError, Map[String, Seq[String]]]
+    def inspect: ZIO[Conn, MoleculeError, Unit]
   }
 
-  trait UpdateTransaction extends SaveTransaction
-
-  trait DeleteTransaction extends Inspectable {
-    def transact: ZIO[Connection, MoleculeError, TxReport]
+  trait InsertApiZio {
+    def transact: ZIO[Conn, MoleculeError, TxReport]
+    def validate: ZIO[Conn, MoleculeError, Seq[(Int, Seq[InsertError])]]
+    def inspect: ZIO[Conn, MoleculeError, Unit]
   }
 
-  trait Inspectable {
-    def inspect: ZIO[Connection, MoleculeError, Unit]
+  trait UpdateApiZio {
+    def transact: ZIO[Conn, MoleculeError, TxReport]
+    def validate: ZIO[Conn, MoleculeError, Map[String, Seq[String]]]
+    def inspect: ZIO[Conn, MoleculeError, Unit]
+  }
+
+  trait DeleteApiZio {
+    def transact: ZIO[Conn, MoleculeError, TxReport]
+    def inspect: ZIO[Conn, MoleculeError, Unit]
   }
 }

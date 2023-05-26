@@ -8,7 +8,7 @@ import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.marshalling.dbView.DbView
 import molecule.core.util.FutureUtils
 import molecule.datalog.core.query.cursor.CursorUtils
-import molecule.sql.jdbc.facade.JdbcConn_JVM
+import molecule.sql.jdbc.facade.JdbcConn_jvm
 import molecule.sql.jdbc.query.cursorStrategy.{NoUnique, PrimaryUnique, SubUnique}
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
@@ -34,11 +34,11 @@ case class JdbcQueryResolveCursor[Tpl](
   with MoleculeLogging {
 
 
-  def getListFromCursor_async(implicit conn: JdbcConn_JVM, ec: ExecutionContext)
+  def getListFromCursor_async(implicit conn: JdbcConn_jvm, ec: ExecutionContext)
   : Future[(List[Tpl], String, Boolean)] = future(getListFromCursor_sync)
 
 
-  def getListFromCursor_sync(implicit conn: JdbcConn_JVM)
+  def getListFromCursor_sync(implicit conn: JdbcConn_jvm)
   : (List[Tpl], String, Boolean) = {
     limit match {
       case Some(l) => cursor match {
@@ -64,7 +64,7 @@ case class JdbcQueryResolveCursor[Tpl](
   }
 
 
-  private def getInitialPage(limit: Int)(implicit conn: JdbcConn_JVM)
+  private def getInitialPage(limit: Int)(implicit conn: JdbcConn_jvm)
   : (List[Tpl], String, Boolean) = {
     val forward     = limit > 0
     val altElements = if (forward) elements else reverseTopLevelSorting(elements)
@@ -118,8 +118,8 @@ case class JdbcQueryResolveCursor[Tpl](
   }
 
 
-  private def initialCursor(conn: JdbcConn_JVM, tpls: List[Tpl]): String = {
-    val unique = conn.proxy.schema.uniqueAttrs
+  private def initialCursor(conn: JdbcConn_jvm, tpls: List[Tpl]): String = {
+    val unique = conn.proxy.uniqueAttrs
     @tailrec
     def checkSort(
       elements: List[Element],
@@ -163,7 +163,7 @@ case class JdbcQueryResolveCursor[Tpl](
                     val (tpe, encode) = tpeEncode(a)
                     val initTokens    = List("1", getHash, tpe, a.ns, a.attr, i.toString)
                     val uniqueValues  = getUniquePair(tpls, i, encode)
-                    // We can use this exclusively. So we don't need more meta data
+                    // We can use this exclusively. So we don't need more data
                     checkSort(Nil, 1, initTokens ++ uniqueValues, -1, Nil)
 
                   } else {
@@ -195,7 +195,7 @@ case class JdbcQueryResolveCursor[Tpl](
 
             case Composite(elements) => checkSort(elements ++ tail, strategy, tokens, i, rowHashes)
 
-            // Only top level sorting - ignore nested and tx meta data
+            // Only top level sorting - ignore nested and tx data
             case _ => checkSort(tail, strategy, tokens, i, rowHashes)
           }
 

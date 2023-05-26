@@ -159,11 +159,7 @@
 //      case a: AttrOneManLong       => add(sortOneLong(a, attrIndex), it2Long)
 //      case a: AttrOneManFloat      => add(floatSorter(a, attrIndex), it2Float)
 //      case a: AttrOneManDouble     => add(sortOneDouble(a, attrIndex), it2Double)
-//      case a: AttrOneManBoolean    =>
-//        if (isFree)
-//          datomicFreePullBooleanBug
-//        else
-//          add(sortOneBooleanOptNested(a, attrIndex), it2Boolean)
+//      case a: AttrOneManBoolean    => add(sortOneBooleanOptNested(a, attrIndex), it2Boolean)
 //      case a: AttrOneManBigInt     => add(bigIntSorter(a, attrIndex), it2BigInt)
 //      case a: AttrOneManBigDecimal => add(sortOneBigDecimal(a, attrIndex), it2BigDecimal)
 //      case a: AttrOneManDate       => add(sortOneDate(a, attrIndex), it2Date)
@@ -183,11 +179,7 @@
 //      case _: AttrOneOptLong       => add(sortOneOptFlatLong(a, attrIndex), it2OptLong)
 //      case _: AttrOneOptFloat      => add(sortOneOptFlatFloat(a, attrIndex), it2OptFloat)
 //      case _: AttrOneOptDouble     => add(sortOneOptFlatDouble(a, attrIndex), it2OptDouble)
-//      case _: AttrOneOptBoolean    =>
-//        if (isFree)
-//          datomicFreePullBooleanBug
-//        else
-//          add(sortOneOptFlatBoolean(a, attrIndex), it2Boolean)
+//      case _: AttrOneOptBoolean    => add(sortOneOptFlatBoolean(a, attrIndex), it2Boolean)
 //      case _: AttrOneOptBigInt     => add(sortOneOptFlatBigInt(a, attrIndex), it2OptBigInt)
 //      case _: AttrOneOptBigDecimal => add(sortOneOptFlatBigDecimal(a, attrIndex), it2OptBigDecimal)
 //      case _: AttrOneOptDate       => add(sortOneOptFlatDate(a, attrIndex), it2OptDate)
@@ -207,11 +199,7 @@
 //      case _: AttrSetManLong       => it2SetLong
 //      case _: AttrSetManFloat      => it2SetFloat
 //      case _: AttrSetManDouble     => it2SetDouble
-//      case _: AttrSetManBoolean    =>
-//        if (isFree)
-//          datomicFreePullBooleanBug
-//        else
-//          it2SetBoolean
+//      case _: AttrSetManBoolean    => it2SetBoolean
 //      case _: AttrSetManBigInt     => it2SetBigInt
 //      case _: AttrSetManBigDecimal => it2SetBigDecimal
 //      case _: AttrSetManDate       => it2SetDate
@@ -231,11 +219,7 @@
 //      case _: AttrSetOptLong       => it2OptSetLong
 //      case _: AttrSetOptFloat      => it2OptSetFloat
 //      case _: AttrSetOptDouble     => it2OptSetDouble
-//      case _: AttrSetOptBoolean    =>
-//        if (isFree)
-//          datomicFreePullBooleanBug
-//        else
-//          it2OptSetBoolean
+//      case _: AttrSetOptBoolean    => it2OptSetBoolean
 //      case _: AttrSetOptBigInt     => it2OptSetBigInt
 //      case _: AttrSetOptBigDecimal => it2OptSetBigDecimal
 //      case _: AttrSetOptDate       => it2OptSetDate

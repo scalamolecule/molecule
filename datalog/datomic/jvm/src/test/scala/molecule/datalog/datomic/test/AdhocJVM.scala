@@ -1,6 +1,5 @@
 package molecule.datalog.datomic.test
 
-import datomic.Peer
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.datalog.datomic.async._
@@ -17,16 +16,7 @@ object AdhocJVM extends DatomicTestSuite {
     "types" - types { implicit conn =>
       for {
         _ <- Ns.int.insert.apply(1).transact
-//        _ <- Ns.int.query.get.map(_ ==> List(1))
-
-
-
-        _ <- Ns.int.Ref.i.query.inspect
-
-//        _ <- Ns.int.Ref(bi).i.query.inspect
-//        _ <- Ns.int.Ref(bi).i.query.get.map(_ ==> List(int1))
-
-//        _ <- Ns.int.RefBi.i.query.get.map(_ ==> List(int1))
+        //        _ <- Ns.int.query.get.map(_ ==> List(1))
 
 
       } yield ()
@@ -52,47 +42,46 @@ object AdhocJVM extends DatomicTestSuite {
     //    }
 
 
-    "refs" - refs { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Refs._
-      for {
-
-        _ <- A.i(1).B.i(2).A.i(3).save.transact
-
-        // Directional
-        _ <- A.i.B.i.A.i.query.get.map(_ ==> List((1, 2, 3)))
-        _ <- A.i(1).B.i.A.i.query.get.map(_ ==> List((1, 2, 3)))
-        _ <- A.i(3).B.i.A.i.query.get.map(_ ==> List())
-
-        _ = {
-          println("-------")
-          Peer.q(
-            """[:find  ?b ?d ?f
-              | :in    $ %
-              | :where [?a :A/i ?b]
-              |        (rule?a ?a ?c)
-              |        [?c :B/i ?d]
-              |        (rule?c ?c ?e)
-              |        [?e :A/i ?f]]""".stripMargin,
-            conn.db,
-            """[
-              |  [(rule?a ?a ?c) [?a :A/b ?c]]
-              |  [(rule?a ?c ?e) [?c :B/a ?e]]
-              |
-              |  [(rule?c ?a ?c) [?c :A/b ?a]]
-              |  [(rule?c ?c ?e) [?e :B/a ?c]]
-              |]
-              |""".stripMargin
-          ).forEach { r => println(r) }
-        }
-
-        // Bidirectional
-//        _ <- A.i.a1.Self(bi).i.query.get.map(_ ==> List((1, 2), (2, 1)))
-//        _ <- A.i(1).Self(bi).i.query.get.map(_ ==> List((1, 2)))
-//        _ <- A.i(2).Self(bi).i.query.get.map(_ ==> List((2, 1)))
-
-      } yield ()
-
-    }
+    //    "refs" - refs { implicit conn =>
+    //      import molecule.coreTests.dataModels.core.dsl.Refs._
+    //      for {
+    //
+    //        _ <- A.i(1).B.i(2).A.i(3).save.transact
+    //
+    //        // Directional
+    //        _ <- A.i.B.i.A.i.query.get.map(_ ==> List((1, 2, 3)))
+    //        _ <- A.i(1).B.i.A.i.query.get.map(_ ==> List((1, 2, 3)))
+    //        _ <- A.i(3).B.i.A.i.query.get.map(_ ==> List())
+    //
+    //        _ = {
+    //          println("-------")
+    //          Peer.q(
+    //            """[:find  ?b ?d ?f
+    //              | :in    $ %
+    //              | :where [?a :A/i ?b]
+    //              |        (rule?a ?a ?c)
+    //              |        [?c :B/i ?d]
+    //              |        (rule?c ?c ?e)
+    //              |        [?e :A/i ?f]]""".stripMargin,
+    //            conn.db,
+    //            """[
+    //              |  [(rule?a ?a ?c) [?a :A/b ?c]]
+    //              |  [(rule?a ?c ?e) [?c :B/a ?e]]
+    //              |
+    //              |  [(rule?c ?a ?c) [?c :A/b ?a]]
+    //              |  [(rule?c ?c ?e) [?e :B/a ?c]]
+    //              |]
+    //              |""".stripMargin
+    //          ).forEach { r => println(r) }
+    //        }
+    //
+    //        // Bidirectional
+    ////        _ <- A.i.a1.Self(bi).i.query.get.map(_ ==> List((1, 2), (2, 1)))
+    ////        _ <- A.i(1).Self(bi).i.query.get.map(_ ==> List((1, 2)))
+    ////        _ <- A.i(2).Self(bi).i.query.get.map(_ ==> List((2, 1)))
+    //
+    //      } yield ()
+    //    }
 
     //    "set" - typesSet { implicit conn =>
     //

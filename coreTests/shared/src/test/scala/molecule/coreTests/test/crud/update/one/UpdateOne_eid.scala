@@ -1,0 +1,183 @@
+package molecule.coreTests.test.crud.update.one
+
+import molecule.base.error._
+import molecule.coreTests.api.ApiAsyncImplicits
+import molecule.core.util.Executor._
+import molecule.coreTests.dataModels.core.dsl.Types._
+import molecule.coreTests.async._
+import molecule.coreTests.setup.CoreTestSuite
+import molecule.core.spi.SpiAsync
+import utest._
+
+trait UpdateOne_eid extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
+
+
+  override lazy val tests = Tests {
+
+    "Update/upsert" - types { implicit conn =>
+      for {
+        eid <- Ns.int.insert(1).transact.map(_.eid)
+        _ <- Ns.int.query.get.map(_ ==> List(1))
+
+        // Update existing value
+        _ <- Ns(eid).int(2).update.transact
+        _ <- Ns.int.query.get.map(_ ==> List(2))
+
+        // Updating a non-asserted attribute has no effect
+        _ <- Ns(eid).string("a").update.transact
+        _ <- Ns.int.string_?.query.get.map(_ ==> List((2, None)))
+
+        // Upserting a non-asserted attribute adds the value
+        _ <- Ns(eid).string("a").upsert.transact
+        _ <- Ns.int.string_?.query.get.map(_ ==> List((2, Some("a"))))
+      } yield ()
+    }
+
+
+    "Multiple entities updated" - types { implicit conn =>
+      for {
+        List(a, b, c) <- Ns.int.insert(1, 2, 3).transact.map(_.eids)
+        _ <- Ns.eid.a1.int.query.get.map(_ ==> List(
+          (a, 1),
+          (b, 2),
+          (c, 3),
+        ))
+
+        _ <- Ns(List(b, c)).int(4).update.transact
+        _ <- Ns.eid.a1.int.query.get.map(_ ==> List(
+          (a, 1),
+          (b, 4),
+          (c, 4),
+        ))
+      } yield ()
+    }
+
+
+    "Delete individual attribute value(s) with update" - types { implicit conn =>
+      for {
+        eid <- Ns.int.string.insert(1, "a").transact.map(_.eid)
+        _ <- Ns.int.string.query.get.map(_ ==> List((1, "a")))
+
+        // Apply empty value to delete attribute of entity (entity remains)
+        _ <- Ns(eid).string().update.transact
+        _ <- Ns.int.string_?.query.get.map(_ ==> List((1, None)))
+      } yield ()
+    }
+
+
+    "Update multiple attributes" - types { implicit conn =>
+      for {
+        eid <- Ns.int.string.insert(1, "a").transact.map(_.eid)
+        _ <- Ns.int.string.query.get.map(_ ==> List((1, "a")))
+
+        // Apply empty value to delete attribute of entity (entity remains)
+        _ <- Ns(eid).int(2).string("b").update.transact
+        _ <- Ns.int.string.query.get.map(_ ==> List((2, "b")))
+      } yield ()
+    }
+
+
+    "Referenced attributes" - types { implicit conn =>
+      for {
+        eid <- Ns.i(1).Ref.i(2).save.transact.map(_.eid)
+        _ <- Ns.i.Ref.i.query.get.map(_ ==> List((1, 2)))
+
+        _ <- Ns(eid).i(3).Ref.i(4).update.transact
+        _ <- Ns.i.Ref.i.query.get.map(_ ==> List((3, 4)))
+
+        _ <- Ns(eid).Ref.i(5).update.transact
+        _ <- Ns.i.Ref.i.query.get.map(_ ==> List((3, 5)))
+      } yield ()
+    }
+
+
+    "Update composite attributes" - types { implicit conn =>
+      for {
+        eid <- (Ns.int.string + Ref.i.s).insert((1, "a"), (2, "b")).transact.map(_.eid)
+        _ <- (Ns.int.string + Ref.i.s).query.get.map(_ ==> List(((1, "a"), (2, "b"))))
+
+        // Composite sub groups share the same entity id
+        _ <- (Ns(eid).int(3).string("c") + Ref.i(4).s("d")).update.transact
+        _ <- (Ns.int.string + Ref.i.s).query.get.map(_ ==> List(((3, "c"), (4, "d"))))
+
+        // Updating sub group with same entity id
+        _ <- Ref(eid).i(5).update.transact
+        _ <- (Ns.int.string + Ref.i.s).query.get.map(_ ==> List(((3, "c"), (5, "d"))))
+      } yield ()
+    }
+
+
+    "Update tx data" - types { implicit conn =>
+      for {
+        eid <- Ns.int.Tx(Other.s_("tx")).insert(1).transact.map(_.eid)
+        _ <- Ns.int.Tx(Other.s).query.get.map(_ ==> List((1, "tx")))
+
+        tx <- Ns(eid).int(2).Tx(Other.s("tx2")).update.transact.map(_.tx)
+        _ <- Ns.int.Tx(Other.s).query.get.map(_ ==> List((2, "tx2")))
+
+
+        _ <- Ns(eid).Tx(Other.s("tx3")).update.transact
+            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+          err ==> "Please apply the tx id to the namespace of tx data to be updated."
+        }
+
+        // We can though update the tx entity itself
+        _ <- Other(tx).s("tx3").update.transact
+        _ <- Ns.int.Tx(Other.s).query.get.map(_ ==> List((2, "tx3")))
+      } yield ()
+    }
+
+
+    "Composite + tx data" - types { implicit conn =>
+      for {
+        eid <- (Ns.int.string + Ref.i.s).Tx(Other.i_(42)).insert((1, "a"), (2, "b")).transact.map(_.eid)
+        _ <- (Ns.int.string + Ref.i.s).Tx(Other.i).query.get.map(_ ==> List(((1, "a"), (2, "b"), 42)))
+
+        // Composite sub groups share the same entity id
+        _ <- (Ns(eid).int(3).string("c") + Ref.i(4).s("d")).Tx(Other.i(43)).update.transact
+        _ <- (Ns.int.string + Ref.i.s).Tx(Other.i).query.get.map(_ ==> List(((3, "c"), (4, "d"), 43)))
+      } yield ()
+    }
+
+
+    "Semantics" - {
+
+      "eid_(eid) not allowed" - types { implicit conn =>
+        for {
+          _ <- Ns.eid_(42).int(2).update.transact
+            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+            err ==> "Can't update by applying entity ids to eid_"
+          }
+        } yield ()
+      }
+
+      "Can't update multiple values for one card-one attribute" - types { implicit conn =>
+        for {
+          _ <- Ns(42).int(2, 3).update.transact
+            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
+            err ==> "Can only update one value for attribute `Ns.int`. Found: 2, 3"
+          }
+        } yield ()
+      }
+
+      "Can't update optional values" - types { implicit conn =>
+        for {
+          _ <- Ns(42).int_?(Some(1)).update.transact
+            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+            err ==> "Can't update optional values. Found:\n" +
+              """AttrOneOptInt("Ns", "int", Eq, Some(Seq(1)), None, None, Nil, Nil, None, None)"""
+          }
+        } yield ()
+      }
+
+      "Can't update card-many referenced attributes" - types { implicit conn =>
+        for {
+          _ <- Ns(42).i(1).Refs.i(2).update.transact
+            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+            err ==> "Can't update attributes in card-many referenced namespaces. Found `Refs`"
+          }
+        } yield ()
+      }
+    }
+  }
+}

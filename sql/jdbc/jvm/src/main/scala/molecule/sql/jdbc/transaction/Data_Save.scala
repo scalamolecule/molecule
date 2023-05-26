@@ -29,10 +29,10 @@ trait Data_Save extends JdbcTxBase_JVM with SaveOps with MoleculeLogging { self:
   override protected def handleNs(ns: String): Unit = {
     backRefs = backRefs + (ns -> e)
   }
-  override protected def handleComposite(isInsertTxMetaData: Boolean): Unit = {
-    //    e = if (isInsertTxMetaData) datomicTx else e0
+  override protected def handleComposite(isInsertTxData: Boolean): Unit = {
+    //    e = if (isInsertTxData) datomicTx else e0
   }
-  override protected def handleTxMetaData(): Unit = {
+  override protected def handleTxData(): Unit = {
     //    e = datomicTx
     //    e0 = datomicTx
   }

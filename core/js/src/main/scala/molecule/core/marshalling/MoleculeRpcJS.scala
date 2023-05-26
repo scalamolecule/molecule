@@ -4,10 +4,9 @@ import java.nio.ByteBuffer
 import boopickle.Default._
 import molecule.base.error._
 import molecule.boilerplate.ast.Model._
-import molecule.core.api.TxReport
 import molecule.core.marshalling.Boopicklers._
-import molecule.core.marshalling.dbView.DbView
 import molecule.core.marshalling.deserialize.UnpickleTpls
+import molecule.core.spi.TxReport
 import molecule.core.util.Executor._
 import molecule.core.util.FutureUtils
 import scala.concurrent.Future
@@ -61,7 +60,7 @@ case class MoleculeRpcJS(interface: String, port: Int)
     elements: List[Element],
     limit: Option[Int],
     callback: List[Tpl] => Unit
-  ): Unit = {
+  ): Future[Unit] = Future {
     val argsSerialized      = Pickle.intoBytes((proxy, elements, limit)).typedArray()
     val callbackDeserialize = (resultSerialized: ByteBuffer) => {
       UnpickleTpls[Tpl](elements, resultSerialized).unpickle match {

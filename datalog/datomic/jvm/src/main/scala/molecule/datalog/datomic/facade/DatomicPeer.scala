@@ -2,7 +2,7 @@ package molecule.datalog.datomic.facade
 
 import java.util.UUID.randomUUID
 import datomic.Peer
-import molecule.core.marshalling.DatomicPeerProxy
+import molecule.core.marshalling.DatomicProxy
 import scala.concurrent.{ExecutionContext, Future, blocking}
 
 
@@ -28,37 +28,35 @@ trait DatomicPeer {
   }
 
   private[molecule] def connect(
-    proxy: DatomicPeerProxy,
+    proxy: DatomicProxy,
     protocol: String,
-    dbIdentifier: String = "",
-    isFreeVersion: Boolean = true
+    dbIdentifier: String = ""
   ): DatomicConn_JVM = blocking {
     val id = if (dbIdentifier == "") randomUUID().toString else dbIdentifier
     val uri = s"datomic:$protocol://$id"
-    DatomicConn_JVM(proxy, Peer.connect(uri), isFreeVersion)
+    DatomicConn_JVM(proxy, Peer.connect(uri))
   }
 
   def recreateDbFromEdn(
-    proxy: DatomicPeerProxy,
+    proxy: DatomicProxy,
     protocol: String = "mem",
-    dbIdentifier: String = "",
-    isFreeVersion: Boolean = false
+    dbIdentifier: String = ""
   )(implicit ec: ExecutionContext): Future[DatomicConn_JVM] = blocking {
     val id = if (dbIdentifier == "") randomUUID().toString else dbIdentifier
     deleteDatabase(protocol, id)
     createDatabase(protocol, id)
-    val conn = connect(proxy, protocol, id, isFreeVersion)
+    val conn = connect(proxy, protocol, id)
     // Ensure each transaction finishes before the next
     for {
       // partitions
-      _ <- if (proxy.schema.datomicPartitions.nonEmpty)
-        conn.transactEdn(proxy.schema.datomicPartitions) else Future.unit
+      _ <- if (proxy.datomicPartitions.nonEmpty)
+        conn.transactEdn(proxy.datomicPartitions) else Future.unit
       // attributes
-      _ <- if (proxy.schema.datomicSchema.nonEmpty)
-        conn.transactEdn(proxy.schema.datomicSchema) else Future.unit
+      _ <- if (proxy.datomicSchema.nonEmpty)
+        conn.transactEdn(proxy.datomicSchema) else Future.unit
       // aliases
-      _ <- if (proxy.schema.datomicAliases.nonEmpty)
-        conn.transactEdn(proxy.schema.datomicAliases) else Future.unit
+      _ <- if (proxy.datomicAliases.nonEmpty)
+        conn.transactEdn(proxy.datomicAliases) else Future.unit
     } yield conn
   }
 }

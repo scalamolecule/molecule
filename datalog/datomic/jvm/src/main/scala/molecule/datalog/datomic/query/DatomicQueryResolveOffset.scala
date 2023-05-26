@@ -68,7 +68,9 @@ case class DatomicQueryResolveOffset[Tpl](
 
       if (isNestedOpt) {
         postAdjustPullCasts()
-        offsetRaw(sortedRows, fromUntil).forEach(row => tuples += pullRow2tpl(row))
+        offsetRaw(sortedRows, fromUntil).forEach { row =>
+          tuples += pullRow2tpl(row)
+        }
         (tuples.result(), totalCount, hasMore)
 
       } else {

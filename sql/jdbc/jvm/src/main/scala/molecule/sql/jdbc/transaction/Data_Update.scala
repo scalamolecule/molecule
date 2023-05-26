@@ -12,13 +12,13 @@ import molecule.core.transaction.UpdateExtraction
 import molecule.core.transaction.ops.UpdateOps
 import molecule.core.validation.ModelValidation
 import molecule.sql.core.query.SqlModel2Query
-import molecule.sql.jdbc.facade.JdbcConn_JVM
+import molecule.sql.jdbc.facade.JdbcConn_jvm
 import scala.collection.mutable.ListBuffer
 
 trait Data_Update extends JdbcTxBase_JVM with UpdateOps with MoleculeLogging { self: UpdateExtraction =>
 
   def getStmts(
-    conn: JdbcConn_JVM,
+    conn: JdbcConn_jvm,
     elements: List[Element],
     isRpcCall: Boolean = false,
     debug: Boolean = true
@@ -47,8 +47,8 @@ trait Data_Update extends JdbcTxBase_JVM with UpdateOps with MoleculeLogging { s
 //      }
 //
 //      val validationErrors = ModelValidation(
-//        conn.proxy.schema.nsMap,
-//        conn.proxy.schema.attrMap,
+//        conn.proxy.nsMap,
+//        conn.proxy.attrMap,
 //        "update",
 //        Some(getCurSetValues)
 //      ).validate(elements)

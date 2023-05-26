@@ -2,18 +2,18 @@ package molecule.core.validation.insert
 
 import molecule.base.error._
 import molecule.boilerplate.ast.Model._
-import molecule.core.api.Connection
+import molecule.core.spi.Conn
 import molecule.core.validation.ModelValidation
 
 object InsertValidation extends InsertValidationExtraction with InsertValidationResolvers_ {
 
   def validate(
-    conn: Connection,
+    conn: Conn,
     elements: List[Element],
     tpls: Seq[Product]
   ): Seq[(Int, Seq[InsertError])] = {
-    val (nsMap, attrMap)               = (conn.proxy.schema.nsMap, conn.proxy.schema.attrMap)
-    val (mainElements, txMetaElements) = separateTxElements(elements)
+    val (nsMap, attrMap)               = (conn.proxy.nsMap, conn.proxy.attrMap)
+    val (mainElements, txElements) = separateTxElements(elements)
 
     // Basic model validation
     ModelValidation(nsMap, attrMap, "insert").validate(mainElements)
@@ -26,15 +26,15 @@ object InsertValidation extends InsertValidationExtraction with InsertValidation
       if (rowErrors.isEmpty) None else Some((rowIndex, rowErrors))
     }
 
-    val txMetaModelErrors = ModelValidation(nsMap, attrMap, "insertTx").validate(txMetaElements).toSeq
-    val txMetaDataErrors  = if (txMetaModelErrors.isEmpty) Nil else {
-      val txMetaInsertErrors = txMetaModelErrors.zipWithIndex.map {
+    val txModelErrors = ModelValidation(nsMap, attrMap, "insertTx").validate(txElements).toSeq
+    val txDataErrors  = if (txModelErrors.isEmpty) Nil else {
+      val txInsertErrors = txModelErrors.zipWithIndex.map {
         case ((fullAttr, errors), i) => InsertError(0, i, fullAttr, errors, Nil)
       }
-      // Append a tx meta data errors row (with meta row index -1)
-      Seq((-1, txMetaInsertErrors))
+      // Append a tx data errors row (with meta row index -1)
+      Seq((-1, txInsertErrors))
     }
 
-    rowErrors ++ txMetaDataErrors
+    rowErrors ++ txDataErrors
   }
 }

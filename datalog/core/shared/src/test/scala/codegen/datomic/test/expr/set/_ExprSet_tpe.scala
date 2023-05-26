@@ -1,7 +1,7 @@
 package codegen.datomic.test.expr.set
 
 import java.nio.file.{Files, Paths}
-import codegen.DatomicTestGenBase
+import codegen.SpiTestGenBase
 import molecule.base.util.{BaseHelpers, CodeGenBase}
 
 object _ExprSet_tpe extends CodeGenBase with BaseHelpers {
@@ -11,7 +11,7 @@ object _ExprSet_tpe extends CodeGenBase with BaseHelpers {
   }
 
   case class TransformFile(name: String, tpe: String, v: String, imp: String = "")
-    extends DatomicTestGenBase(s"ExprSet_$name", "/test/expr/set") {
+    extends SpiTestGenBase(s"ExprSet_$name", "/test/expr/set") {
 
     val content = {
       val src =

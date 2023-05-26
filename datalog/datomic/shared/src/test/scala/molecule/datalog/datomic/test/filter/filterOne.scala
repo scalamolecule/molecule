@@ -1,0 +1,20 @@
+package molecule.datalog.datomic.test.filter
+
+import molecule.coreTests.test.filter.one._
+import molecule.datalog.datomic.setup.CoreTestAsync
+
+object FilterOne_String_ extends FilterOne_String_ with CoreTestAsync
+object FilterOne_Int extends FilterOne_Int with CoreTestAsync
+object FilterOne_Long_ extends FilterOne_Long_ with CoreTestAsync
+object FilterOne_Float_ extends FilterOne_Float_ with CoreTestAsync
+object FilterOne_Double_ extends FilterOne_Double_ with CoreTestAsync
+object FilterOne_Boolean extends FilterOne_Boolean with CoreTestAsync
+object FilterOne_BigInt_ extends FilterOne_BigInt_ with CoreTestAsync
+object FilterOne_BigDecimal_ extends FilterOne_BigDecimal_ with CoreTestAsync
+object FilterOne_Date_ extends FilterOne_Date_ with CoreTestAsync
+object FilterOne_UUID_ extends FilterOne_UUID_ with CoreTestAsync
+object FilterOne_URI_ extends FilterOne_URI_ with CoreTestAsync
+object FilterOne_Byte_ extends FilterOne_Byte_ with CoreTestAsync
+object FilterOne_Short_ extends FilterOne_Short_ with CoreTestAsync
+object FilterOne_Char_ extends FilterOne_Char_ with CoreTestAsync
+object FilterOne_ref_ extends FilterOne_ref_ with CoreTestAsync

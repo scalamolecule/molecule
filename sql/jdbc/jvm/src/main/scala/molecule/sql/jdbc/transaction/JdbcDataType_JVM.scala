@@ -1,7 +1,7 @@
 package molecule.sql.jdbc.transaction
 
 import java.sql.{PreparedStatement => PS}
-import molecule.core.api.DataType
+import molecule.core.spi.DataType
 
 trait JdbcDataType_JVM extends DataType {
 

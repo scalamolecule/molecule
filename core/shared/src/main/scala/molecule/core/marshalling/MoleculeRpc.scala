@@ -2,7 +2,7 @@ package molecule.core.marshalling
 
 import molecule.base.error.MoleculeError
 import molecule.boilerplate.ast.Model._
-import molecule.core.api.TxReport
+import molecule.core.spi.TxReport
 import scala.concurrent.Future
 
 trait MoleculeRpc {
@@ -32,7 +32,7 @@ trait MoleculeRpc {
     elements: List[Element],
     limit: Option[Int],
     callback: List[Tpl] => Unit
-  ): Unit
+  ): Future[Unit]
 
   def save(
     proxy: ConnProxy,

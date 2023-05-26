@@ -7,14 +7,14 @@ import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.DeleteExtraction
 import molecule.core.transaction.ops.DeleteOps
 import molecule.sql.core.query.SqlModel2Query
-import molecule.sql.jdbc.facade.JdbcConn_JVM
+import molecule.sql.jdbc.facade.JdbcConn_jvm
 import scala.collection.mutable
 import scala.jdk.CollectionConverters.{CollectionHasAsScala, IterableHasAsJava}
 
 trait Data_Delete extends JdbcTxBase_JVM with DeleteOps with MoleculeLogging { self: DeleteExtraction =>
 
   def getStmtsData(
-    conn: JdbcConn_JVM,
+    conn: JdbcConn_jvm,
     elements: List[Element],
     eidIndex: Int = 0,
     debug: Boolean = true

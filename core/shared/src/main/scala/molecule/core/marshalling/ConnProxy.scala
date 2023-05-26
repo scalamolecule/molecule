@@ -1,14 +1,15 @@
 package molecule.core.marshalling
 
 import java.util.UUID
-import molecule.base.api.Schema
 import molecule.base.ast.SchemaAST._
 import molecule.core.marshalling.dbView.DbView
-import molecule.core.util.MetaModelUtils
 
 sealed trait ConnProxy {
 
-  val schema: Schema
+  val metaSchema : MetaSchema
+  val nsMap      : Map[String, MetaNs]
+  val attrMap    : Map[String, (Card, String, Seq[String])]
+  val uniqueAttrs: List[String]
 
   /** Internal holder of optional alternative Db view (asOf, since, widh) */
   val dbView: Option[DbView]
@@ -18,20 +19,31 @@ sealed trait ConnProxy {
 }
 
 
-case class DatomicPeerProxy(
+case class DatomicProxy(
   protocol: String,
   dbIdentifier: String,
-  schema: Schema,
+
+  datomicPartitions: String,
+  datomicSchema: String,
+  datomicAliases: String,
+
+  metaSchema: MetaSchema,
+  nsMap: Map[String, MetaNs],
+  attrMap: Map[String, (Card, String, Seq[String])],
+  uniqueAttrs: List[String],
   dbView: Option[DbView] = None,
-  uuid: UUID = UUID.randomUUID(),
-  isFreeVersion: Boolean = true
+  uuid: UUID = UUID.randomUUID()
 ) extends ConnProxy
 
 
-case class SqlProxy(
+case class JdbcProxy(
   url: String,
-  schema: Schema,
+  createSchema: String,
+
+  metaSchema: MetaSchema,
+  nsMap: Map[String, MetaNs],
+  attrMap: Map[String, (Card, String, Seq[String])],
+  uniqueAttrs: List[String],
   dbView: Option[DbView] = None,
-  uuid: UUID = UUID.randomUUID(),
-  isFreeVersion: Boolean = true
+  uuid: UUID = UUID.randomUUID()
 ) extends ConnProxy

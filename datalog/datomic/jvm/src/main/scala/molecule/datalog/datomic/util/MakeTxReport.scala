@@ -4,7 +4,7 @@ import java.util.{List => jList, Map => jMap}
 import datomic.Connection.{DB_AFTER, TEMPIDS, TX_DATA}
 import datomic.db.{Datum => PeerDatom}
 import datomic.{Datom => _, _}
-import molecule.core.api.TxReport
+import molecule.core.spi.TxReport
 import scala.collection.mutable.ListBuffer
 import scala.jdk.CollectionConverters._
 
@@ -20,17 +20,17 @@ object MakeTxReport {
       val datoms           = rawTxReport.get(TX_DATA).asInstanceOf[jList[PeerDatom]].iterator
       val tempIds          = rawTxReport.get(TEMPIDS).asInstanceOf[jMap[_, _]].values().asScala.toBuffer
       val tx               = datoms.next().e().asInstanceOf[Long] // Initial txInstant datom
-      var txMetaData       = false
+      var txData       = false
       var datom: PeerDatom = null
       var e                = 0L
-      // Filter out tx meta data assertions
-      while (!txMetaData && datoms.hasNext) {
+      // Filter out tx data assertions
+      while (!txData && datoms.hasNext) {
         datom = datoms.next
         e = datom.e().asInstanceOf[Long]
         if (e == tx)
-          txMetaData = true
+          txData = true
         if (
-          !txMetaData
+          !txData
             && datom.added()
             && !allIds.contains(e)
         ) {

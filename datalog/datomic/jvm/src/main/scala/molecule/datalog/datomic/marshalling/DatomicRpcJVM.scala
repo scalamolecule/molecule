@@ -4,7 +4,7 @@ import java.nio.ByteBuffer
 import molecule.base.error.MoleculeError
 import molecule.boilerplate.ast.Model._
 import molecule.core.action._
-import molecule.core.api.TxReport
+import molecule.core.spi.TxReport
 import molecule.core.marshalling.Boopicklers._
 import molecule.core.marshalling._
 import molecule.core.marshalling.deserialize.UnpickleTpls
@@ -65,9 +65,9 @@ object DatomicRpcJVM extends MoleculeRpc
     elements: List[Element],
     limit: Option[Int],
     callback: List[Any] => Unit
-  ): Unit = {
+  ): Future[Unit] = {
     getConn(proxy).map(conn =>
-      Query[Any](elements, limit).subscribe(callback)(conn)
+      Query[Any](elements, limit).subscribe(callback)(conn, global)
     )
   }
 
@@ -98,7 +98,7 @@ object DatomicRpcJVM extends MoleculeRpc
           } else tpls).asInstanceOf[Seq[Product]]
         case Left(err)   => throw err // catched in outer either wrapper
       }
-      stmts = (new InsertExtraction with Data_Insert).getStmts(proxy.schema.nsMap, tplElements, tplProducts)
+      stmts = (new InsertExtraction with Data_Insert).getStmts(proxy.nsMap, tplElements, tplProducts)
       _ = if (txElements.nonEmpty) {
         val txStmts = (new SaveExtraction() with Data_Save).getRawStmts(txElements, datomicTx, false)
         stmts.addAll(txStmts)
@@ -114,7 +114,7 @@ object DatomicRpcJVM extends MoleculeRpc
   ): Future[Either[MoleculeError, TxReport]] = either {
     for {
       conn <- getConn(proxy)
-      stmts = (new UpdateExtraction(conn.proxy.schema.uniqueAttrs, isUpsert) with Data_Update)
+      stmts = (new UpdateExtraction(conn.proxy.uniqueAttrs, isUpsert) with Data_Update)
         .getStmts(conn, elements, true)
       txReport <- conn.transact_async(stmts)
     } yield txReport

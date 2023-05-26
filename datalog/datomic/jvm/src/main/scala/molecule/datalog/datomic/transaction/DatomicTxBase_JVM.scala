@@ -5,7 +5,7 @@ import java.util.{UUID, ArrayList => jArrayList, List => jList}
 import clojure.lang.Keyword
 import molecule.base.error.ExecutionError
 import molecule.boilerplate.ast.Model._
-import molecule.core.marshalling.{ConnProxy, DatomicPeerProxy}
+import molecule.core.marshalling.{ConnProxy, DatomicProxy}
 import molecule.core.util.Executor._
 import molecule.core.util.{ModelUtils, fns}
 import molecule.datalog.datomic.facade.{DatomicConn_JVM, DatomicPeer}
@@ -102,10 +102,10 @@ trait DatomicTxBase_JVM extends DatomicDataType_JVM with ModelUtils {
 
   protected def getFreshConn(proxy: ConnProxy): Future[DatomicConn_JVM] = {
     proxy match {
-      case proxy@DatomicPeerProxy(protocol, dbIdentifier, _, _, _, isFreeVersion) =>
+      case proxy@DatomicProxy(protocol, dbIdentifier, _, _, _, _, _, _, _, _, _) =>
         protocol match {
           case "mem" =>
-            DatomicPeer.recreateDbFromEdn(proxy, protocol, dbIdentifier, isFreeVersion)
+            DatomicPeer.recreateDbFromEdn(proxy, protocol, dbIdentifier)
               .recover {
                 case exc: Throwable => throw ExecutionError(exc.getMessage)
               }

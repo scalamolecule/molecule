@@ -8,7 +8,7 @@ import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.marshalling.dbView.DbView
 import molecule.core.util.FutureUtils
 import molecule.datalog.core.query.cursor.CursorUtils
-import molecule.sql.jdbc.facade.JdbcConn_JVM
+import molecule.sql.jdbc.facade.JdbcConn_jvm
 import molecule.sql.jdbc.query.JdbcQueryResolve
 import scala.collection.mutable.ListBuffer
 
@@ -32,7 +32,7 @@ case class PrimaryUnique[Tpl](
   with FutureUtils with CursorUtils with ModelTransformations_ with MoleculeLogging {
 
   def getPage(tokens: List[String], limit: Int)
-             (implicit conn: JdbcConn_JVM): (List[Tpl], String, Boolean) = try {
+             (implicit conn: JdbcConn_jvm): (List[Tpl], String, Boolean) = try {
     val List(_, _, tpe, ns, attr, _, a, z) = tokens
 
 //    val forward     = limit > 0

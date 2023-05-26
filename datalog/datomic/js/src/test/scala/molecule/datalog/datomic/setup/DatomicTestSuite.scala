@@ -1,39 +1,27 @@
 package molecule.datalog.datomic.setup
 
 import molecule.base.api.Schema
-import molecule.core.api.Connection
-import molecule.core.marshalling.DatomicPeerProxy
-import molecule.coreTests.dataModels.core.schema._
+import molecule.core.marshalling.{DatomicProxy, RpcRequest}
+import molecule.core.spi.Conn
+import molecule.coreTests.setup.CoreTestSuite
 import molecule.datalog.datomic.facade.DatomicConn_JS
-import molecule.datalog.datomic.setup.DatomicTestSuiteBase
-import moleculeBuildInfo.BuildInfo
-import scala.concurrent.{Future, Promise}
-import scala.scalajs.js.timers.setTimeout
-import scala.util.Try
 
-trait DatomicTestSuite extends DatomicTestSuiteBase {
 
-  lazy val isJsPlatform = true
-  lazy val protocol     = BuildInfo.datomicProtocol
-  lazy val useFree      = BuildInfo.datomicUseFree
+trait DatomicTestSuite extends CoreTestSuite {
 
-  def inMem[T](test: Connection => T, schemaTx: Schema): T = {
-    val proxy = DatomicPeerProxy("mem", "", schemaTx)
-    test(DatomicConn_JS(proxy, DatomicRpcRequest.moleculeRpcRequest))
-  }
+  override val platform = "Datomic js"
 
-  val types2 = (test: Connection => Any) => inMem(test, TypesSchema)
-
-  def types[T](test: Connection => T): T = inMem(test, TypesSchema)
-  def refs[T](test: Connection => T): T = inMem(test, RefsSchema)
-  def unique[T](test: Connection => T): T = inMem(test, UniqueSchema)
-  def validation[T](test: Connection => T): T = inMem(test, ValidationSchema)
-
-  def delay[T](ms: Int)(body: => T): Future[T] = {
-    val promise = Promise[T]()
-    setTimeout(ms)(
-      promise.complete(Try(body))
+  override def inMem[T](test: Conn => T, schema: Schema): T = {
+    val proxy = DatomicProxy(
+      "mem", "",
+      schema.datomicPartitions,
+      schema.datomicSchema,
+      schema.datomicAliases,
+      schema.metaSchema,
+      schema.nsMap,
+      schema.attrMap,
+      schema.uniqueAttrs,
     )
-    promise.future
+    test(DatomicConn_JS(proxy, RpcRequest.request))
   }
 }

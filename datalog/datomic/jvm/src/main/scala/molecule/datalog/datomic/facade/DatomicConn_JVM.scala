@@ -7,8 +7,8 @@ import datomic.Util.readAll
 import datomic.{Connection => DatomicConnection, Datom => _, _}
 import molecule.base.error._
 import molecule.boilerplate.util.MoleculeLogging
-import molecule.core.api.{Connection, TxReport}
-import molecule.core.marshalling.DatomicPeerProxy
+import molecule.core.spi.{Conn, TxReport}
+import molecule.core.marshalling.DatomicProxy
 import molecule.datalog.datomic.transaction.DatomicDataType_JVM
 import molecule.datalog.datomic.util.MakeTxReport
 import scala.collection.mutable
@@ -18,10 +18,9 @@ import scala.jdk.CollectionConverters._
 import scala.util.control.NonFatal
 
 case class DatomicConn_JVM(
-  override val proxy: DatomicPeerProxy,
-  peerConn: DatomicConnection,
-  isFreeVersion: Boolean
-) extends Connection(proxy)
+  override val proxy: DatomicProxy,
+  peerConn: DatomicConnection
+) extends Conn(proxy)
   with DatomicDataType_JVM
   with MoleculeLogging {
 

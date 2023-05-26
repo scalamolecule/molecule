@@ -1,44 +1,33 @@
-//package molecule.sql.jdbc.setup
-//
-//import java.util.UUID.randomUUID
-//import molecule.base.api.SchemaTransaction
-//import molecule.core.api.Connection
-//import molecule.core.marshalling.DatomicPeerProxy
-//import molecule.core.util.Executor._
-//import molecule.coreTests.dataModels.core.schema._
-//import molecule.coreTests.util.TestData
-//import molecule.sql.jdbc.facade.JdbcHandler
-//import moleculeBuildInfo.BuildInfo
-//import zio.test.ZIOSpecDefault
-//import zio.{ZIO, ZLayer}
-//
-//trait JdbcZioSpec extends ZIOSpecDefault with TestData {
-//
-//  lazy val isJsPlatform = false
-//  lazy val protocol     = BuildInfo.datomicProtocol
-//  lazy val useFree      = BuildInfo.datomicUseFree
-//
-//  def inMem(schemaTx: SchemaTransaction): ZLayer[Any, Throwable, Connection] = {
-//    val dbIdentifier = if (protocol == "mem") "" else {
-//      println(s"Re-creating live database...")
-//      "localhost:4334/" + randomUUID().toString
-//    }
-//    val proxy        = DatomicPeerProxy("mem", "", schemaTx)
-//    ZLayer.scoped(
-//      ZIO.fromFuture(
-//        _ => JdbcHandler.recreateDbFromEdn(proxy, protocol, dbIdentifier, useFree)
-//      )
-//    )
-//  }
-//
-//  def types = inMem(TypesSchema)
-//  def refs = inMem(RefsSchema)
-//  def unique = inMem(UniqueSchema)
-//  def validation = inMem(ValidationSchema)
-//
-//
-//  def delay[T](ms: Int)(body: => T): ZIO[Any, Nothing, T] = ZIO.succeed {
-//    Thread.sleep(ms)
-//    body
-//  }
-//}
+package molecule.sql.jdbc.setup
+
+import molecule.base.api.Schema
+import molecule.core.marshalling.JdbcProxy
+import molecule.core.spi.Conn
+import molecule.coreTests.dataModels.core.schema._
+import molecule.coreTests.setup.CoreTestZioSpec
+import molecule.sql.jdbc.facade.JdbcHandler_jvm
+import zio.{ZIO, ZLayer}
+import scala.util.Random
+
+
+trait JdbcZioSpec extends CoreTestZioSpec {
+
+  override val platform = "Jdbc jvm"
+
+  override def inMem[T](schema: Schema): ZLayer[T, Throwable, Conn] = {
+    val url   = s"jdbc:h2:mem:test_database_" + Random.nextInt()
+    val proxy = JdbcProxy(
+      url,
+      schema.sqlSchema("h2"),
+      schema.metaSchema,
+      schema.nsMap,
+      schema.attrMap,
+      schema.uniqueAttrs
+    )
+    ZLayer.scoped(
+      ZIO.attemptBlocking(
+        JdbcHandler_jvm.recreateDb(proxy, url)
+      )
+    )
+  }
+}

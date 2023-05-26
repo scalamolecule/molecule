@@ -1,8 +1,8 @@
 package molecule.sql.core.query
 
+import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import scala.reflect.ClassTag
-import molecule.base.error.ModelError
 
 trait ResolveExprSet[Tpl] { self: SqlModel2Query[Tpl] with LambdasSet =>
 
@@ -59,11 +59,7 @@ trait ResolveExprSet[Tpl] { self: SqlModel2Query[Tpl] with LambdasSet =>
       case at: AttrSetOptLong       => opt(e, a, at.op, at.vs, resOptSetLong)
       case at: AttrSetOptFloat      => opt(e, a, at.op, at.vs, resOptSetFloat)
       case at: AttrSetOptDouble     => opt(e, a, at.op, at.vs, resOptSetDouble)
-      case at: AttrSetOptBoolean    =>
-        if (isFree && isNested)
-          datomicFreePullBooleanBug
-        else
-          opt(e, a, at.op, at.vs, resOptSetBoolean)
+      case at: AttrSetOptBoolean    => opt(e, a, at.op, at.vs, resOptSetBoolean)
       case at: AttrSetOptBigInt     => opt(e, a, at.op, at.vs, resOptSetBigInt)
       case at: AttrSetOptBigDecimal => opt(e, a, at.op, at.vs, resOptSetBigDecimal)
       case at: AttrSetOptDate       => opt(e, a, at.op, at.vs, resOptSetDate)

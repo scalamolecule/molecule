@@ -136,21 +136,21 @@ case class PickleTpls(
             case Seq(pickler) => resolvePicklers(tail, picklers :+ pickler, tplIndex + 1)
           }
 
-        case TxMetaData(txMetaDataElements) =>
-          // Tx meta data is last attribute values in top level tuple
-          // TxMetaData is only pickled for queries. Inserts handle tx meta elements separately after all tpl inserts.
-          picklers ++ pickleTxMeta(txMetaDataElements, tplIndex)
+        case TxData(txDataElements) =>
+          // Tx data is last attribute values in top level tuple
+          // TxData is only pickled for queries. Inserts handle tx elements separately after all tpl inserts.
+          picklers ++ pickleTxData(txDataElements, tplIndex)
       }
       case Nil             => picklers
     }
   }
 
 
-  private def pickleTxMeta(
-    txMetaDataElements: List[Element],
+  private def pickleTxData(
+    txDataElements: List[Element],
     tplIndex: Int
   ): List[Product => Unit] = {
-    resolvePicklers(txMetaDataElements, Nil, tplIndex)
+    resolvePicklers(txDataElements, Nil, tplIndex)
   }
 
   private def pickleComposite(

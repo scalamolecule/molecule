@@ -122,11 +122,11 @@ object _NestOpt extends DatomicGenBase("NestOpt", "/query/casting") {
        |        val cast   = (row: Row) =>
        |          castRow2AnyTpl(ii.map(List(_)), tplCasts, rowIndex, Some(nested(row)))(row).asInstanceOf[AnyRef]
        |
-       |        // From here on it is tx meta data
+       |        // From here on it is tx data
        |        val moreCasts = moreCasts0.tail // ignore
        |        resolveArities(as, moreCasts, rowIndexTx, 0, acc :+ cast)
        |
-       |      // Top level composite (can be before nested and after in tx meta data)
+       |      // Top level composite (can be before nested and after in tx data)
        |      case ii :: as =>
        |        val n                     = ii.length
        |        val (tplCasts, moreCasts) = casts.splitAt(n)

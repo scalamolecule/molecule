@@ -1,7 +1,7 @@
 package molecule.datalog.datomic.transaction
 
 import java.util.{List => jList}
-import molecule.core.api.DataType
+import molecule.core.spi.DataType
 
 trait DatomicDataType_JVM extends DataType {
 

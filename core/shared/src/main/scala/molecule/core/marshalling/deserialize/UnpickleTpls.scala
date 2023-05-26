@@ -113,18 +113,18 @@ case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuff
         case Composite(compositeElements) =>
           resolveUnpicklers(tail, unpicklers ++ unpickleComposite(compositeElements))
 
-        case TxMetaData(txMetaDataElements) =>
-          // Tx meta data is last attribute values in top level tuple
-          unpicklers ++ unpickleTxMetaData(txMetaDataElements)
+        case TxData(txDataElements) =>
+          // tx data is last attribute values in top level tuple
+          unpicklers ++ unpickleTxData(txDataElements)
       }
       case Nil             => unpicklers
     }
   }
 
-  private def unpickleTxMetaData(
-    txMetaDataElements: List[Element]
+  private def unpickleTxData(
+    txDataElements: List[Element]
   ): List[() => Any] = {
-    resolveUnpicklers(txMetaDataElements, Nil)
+    resolveUnpicklers(txDataElements, Nil)
   }
 
   private def unpickleComposite(

@@ -1,15 +1,17 @@
 package molecule.datalog.datomic.test.sort
 
-import molecule.base.error._
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Refs._
 import molecule.datalog.datomic.async._
 import molecule.datalog.datomic.setup.DatomicTestSuite
 import utest._
+import scala.language.implicitConversions
 
 
+// Datomic has a bug pulling nested boolean values. So we copy the copied tests
+// without the lines that cause an error here until the bug is fixed in Datomic.
+// todo: revert when bug is fixed in Datomic
 object SortNested extends DatomicTestSuite {
-
 
   override lazy val tests = Tests {
 
@@ -55,6 +57,10 @@ object SortNested extends DatomicTestSuite {
         _ <- Ref.i_(3).Nss.*?(Ns.long.a1).query.get.map(_ ==> List(List(long1, long2)))
         _ <- Ref.i_(4).Nss.*?(Ns.float.a1).query.get.map(_ ==> List(List(float1, float2)))
         _ <- Ref.i_(5).Nss.*?(Ns.double.a1).query.get.map(_ ==> List(List(double1, double2)))
+
+        // `false` wrongly becomes null
+        // _ <- Ref.i_(6).Nss.*?(Ns.boolean).query.get.map(_ ==> List(List(boolean1, boolean3)))
+
         _ <- Ref.i_(7).Nss.*?(Ns.bigInt.a1).query.get.map(_ ==> List(List(bigInt1, bigInt2)))
         _ <- Ref.i_(8).Nss.*?(Ns.bigDecimal.a1).query.get.map(_ ==> List(List(bigDecimal1, bigDecimal2)))
         _ <- Ref.i_(9).Nss.*?(Ns.date.a1).query.get.map(_ ==> List(List(date1, date2)))
@@ -88,6 +94,10 @@ object SortNested extends DatomicTestSuite {
         _ <- Ref.i_(3).Nss.*?(Ns.long.d1).query.get.map(_ ==> List(List(long2, long1)))
         _ <- Ref.i_(4).Nss.*?(Ns.float.d1).query.get.map(_ ==> List(List(float2, float1)))
         _ <- Ref.i_(5).Nss.*?(Ns.double.d1).query.get.map(_ ==> List(List(double2, double1)))
+
+        // `false` wrongly becomes null
+        // _ <- Ref.i_(6).Nss.*?(Ns.boolean.d1).query.get.map(_ ==> List(List(boolean2, boolean1)))
+
         _ <- Ref.i_(7).Nss.*?(Ns.bigInt.d1).query.get.map(_ ==> List(List(bigInt2, bigInt1)))
         _ <- Ref.i_(8).Nss.*?(Ns.bigDecimal.d1).query.get.map(_ ==> List(List(bigDecimal2, bigDecimal1)))
         _ <- Ref.i_(9).Nss.*?(Ns.date.d1).query.get.map(_ ==> List(List(date2, date1)))
@@ -97,23 +107,6 @@ object SortNested extends DatomicTestSuite {
         _ <- Ref.i_(13).Nss.*?(Ns.short.d1).query.get.map(_ ==> List(List(short2, short1)))
         _ <- Ref.i_(14).Nss.*?(Ns.char.d1).query.get.map(_ ==> List(List(char2, char1)))
         _ <- Ref.i_(15).Nss.*?(Ns.ref.d1).query.get.map(_ ==> List(List(ref2, ref1)))
-
-        _ <- if (useFree) {
-          Ref.i_(6).Nss.*?(Ns.boolean.a1).query.get
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-            err ==> "Datomic Free (not Pro) has a bug that pulls boolean `false` values as nil."
-          }
-        } else {
-          Ref.i_(6).Nss.*?(Ns.boolean).query.get.map(_ ==> List(List(boolean1, boolean2)))
-        }
-        _ <- if (useFree) {
-          Ref.i_(6).Nss.*?(Ns.boolean.d1).query.get
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-            err ==> "Datomic Free (not Pro) has a bug that pulls boolean `false` values as nil."
-          }
-        } else {
-          Ref.i_(6).Nss.*?(Ns.boolean.d1).query.get.map(_ ==> List(List(boolean2, boolean1)))
-        }
       } yield ()
     }
 
@@ -190,26 +183,15 @@ object SortNested extends DatomicTestSuite {
           (2, Some(true)),
           (3, None)))).transact
 
-        _ <- if (useFree) {
-          Ref.i_(6).Nss.*?(Ns.i.a2.boolean_?.a1).query.get
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-            err ==> "Datomic Free (not Pro) has a bug that pulls boolean `false` values as nil."
-          }
-        } else {
-          Ref.i_(6).Nss.*?(Ns.i.a2.boolean_?.a1).query.get.map(_ ==> List(List(
-            (3, None),
-            (2, Some(true)))))
-        }
-        _ <- if (useFree) {
-          Ref.i_(6).Nss.*?(Ns.i.d2.boolean_?.d1).query.get
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-            err ==> "Datomic Free (not Pro) has a bug that pulls boolean `false` values as nil."
-          }
-        } else {
-          Ref.i_(6).Nss.*?(Ns.i.d2.boolean_?.d1).query.get.map(_ ==> List(List(
-            (2, Some(true)),
-            (3, None))))
-        }
+
+        // `false` wrongly becomes null
+
+        //        _ <- Ref.i_(6).Nss.*?(Ns.i.a2.boolean_?.a1).query.get.map(_ ==> List(List(
+        //          (3, None),
+        //          (2, Some(true)))))
+        //        _ <- Ref.i_(6).Nss.*?(Ns.i.d2.boolean_?.d1).query.get.map(_ ==> List(List(
+        //          (2, Some(true)),
+        //          (3, None))))
 
         _ <- Ref.i.Nss.*(Ns.i.bigInt_?).insert((7, List(
           (1, Some(bigInt1)),

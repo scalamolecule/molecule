@@ -4,12 +4,12 @@ import java.lang.{Long => jLong}
 import datomic.Connection.DB_AFTER
 import datomic.Database
 import molecule.base.error.ModelError
-import molecule.sql.jdbc.facade.JdbcConn_JVM
+import molecule.sql.jdbc.facade.JdbcConn_jvm
 import molecule.sql.jdbc.util.MakeJdbcTxReport
 import scala.collection.mutable.ListBuffer
 
 
-case class TxReportWatcher(conn: JdbcConn_JVM) extends Runnable {
+case class TxReportWatcher(conn: JdbcConn_jvm) extends Runnable {
 
 //  private val blockingQueue = conn.txReportQueue.javaQueue
   private val dbCallbacks   = ListBuffer.empty[(List[jLong], Database => Unit)]

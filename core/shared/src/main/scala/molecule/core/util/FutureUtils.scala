@@ -2,7 +2,8 @@ package molecule.core.util
 
 import molecule.base.error._
 import molecule.boilerplate.util.MoleculeLogging
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.duration.{Duration, DurationInt}
+import scala.concurrent.{Await, ExecutionContext, Future}
 
 trait FutureUtils extends ModelUtils with MoleculeLogging {
 
@@ -19,7 +20,9 @@ trait FutureUtils extends ModelUtils with MoleculeLogging {
             throw e
           case e: Throwable     =>
             logger.error(e.toString + "\n" + e.getStackTrace.toList.mkString("\n"))
-            throw ExecutionError(e.toString)
+//            throw ExecutionError(e.toString)
+            // Re-throw to preserve original stacktrace
+            throw e
         }
     }
   }
@@ -47,5 +50,11 @@ trait FutureUtils extends ModelUtils with MoleculeLogging {
         logger.debug(e.toString + "\n" + e.getStackTrace.toList.mkString("\n"))
         throw e
     }
+  }
+
+  def await[T](body: => Future[T], atMost: Duration = 10.seconds): T = try {
+    Await.result(body, atMost)
+  } catch {
+    case t: Throwable => throw ModelError(t.toString)
   }
 }

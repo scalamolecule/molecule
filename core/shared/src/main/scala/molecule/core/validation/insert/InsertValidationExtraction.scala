@@ -6,7 +6,6 @@ import molecule.boilerplate.ast.Model._
 import molecule.core.transaction.InsertValidators_
 import molecule.core.util.ModelUtils
 import scala.annotation.tailrec
-import scala.collection.mutable.ListBuffer
 
 trait InsertValidationExtraction extends InsertValidators_ with ModelUtils { self: InsertValidationResolvers_ =>
 
@@ -40,7 +39,7 @@ trait InsertValidationExtraction extends InsertValidators_ with ModelUtils { sel
                   resolveAttrOneOpt(a, outerTpl, tplIndex), outerTpl, tplIndex + 1, prevRefs)
 
                 case a: AttrOneTac => throw new Exception(
-                  "Can't use tacit attributes in insert molecule (except in tx meta data part). Found: " + a
+                  "Can't use tacit attributes in insert molecule (except in tx data part). Found: " + a
                 )
               }
             case a: AttrSet =>
@@ -54,7 +53,7 @@ trait InsertValidationExtraction extends InsertValidators_ with ModelUtils { sel
                   resolveAttrSetOpt(a, outerTpl, tplIndex), outerTpl, tplIndex + 1, prevRefs)
 
                 case a: AttrSetTac => throw new Exception(
-                  "Can't use tacit attributes in insert molecule (except in tx meta data part). Found: " + a
+                  "Can't use tacit attributes in insert molecule (except in tx data part). Found: " + a
                 )
               }
             case a          => throw new Exception("Attribute family not implemented for " + a)
@@ -87,9 +86,9 @@ trait InsertValidationExtraction extends InsertValidators_ with ModelUtils { sel
           getValidators(nsMap, tail, validators :+
             addNested(nsMap, tplIndex, ns, refAttr, nestedElements), 0, tplIndex, Nil)
 
-        case TxMetaData(_) =>
-          // TxMetaData is handled separately in Insert_stmts.
-          // No elements after TxMetaData, so we return validators
+        case TxData(_) =>
+          // TxData is handled separately in Insert_stmts.
+          // No elements after TxData, so we return validators
           validators
 
         case other => throw ModelError("Unexpected element: " + other)

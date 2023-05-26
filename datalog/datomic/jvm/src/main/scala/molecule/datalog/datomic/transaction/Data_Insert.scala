@@ -22,7 +22,7 @@ trait Data_Insert
     debug: Boolean = true
   ): Data = {
     initTxBase(elements, eidIndex)
-    val (mainElements, txMetaElements) = separateTxElements(elements)
+    val (mainElements, txElements) = separateTxElements(elements)
     val row2stmts                      = getResolver(nsMap, mainElements)
     tpls.foreach { tpl =>
       e = newId
@@ -30,10 +30,10 @@ trait Data_Insert
       // populate `stmts`
       row2stmts(tpl)
     }
-    if (txMetaElements.nonEmpty) {
-      val txMetaStmts = (new SaveExtraction(true) with Data_Save)
-        .getRawStmts(txMetaElements, datomicTx, false)
-      stmts.addAll(txMetaStmts)
+    if (txElements.nonEmpty) {
+      val txStmts = (new SaveExtraction(true) with Data_Save)
+        .getRawStmts(txElements, datomicTx, false)
+      stmts.addAll(txStmts)
     }
     if (debug) {
       val insertStrs = "INSERT:" +: elements :+ "" :+ stmts.toArray().mkString("\n")

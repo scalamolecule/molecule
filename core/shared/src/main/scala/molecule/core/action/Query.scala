@@ -2,8 +2,8 @@ package molecule.core.action
 
 import java.util.Date
 import molecule.boilerplate.ast.Model.Element
-import molecule.core.api.TxReport
 import molecule.core.marshalling.dbView._
+import molecule.core.spi.TxReport
 
 case class Query[Tpl](
   elements0: List[Element],

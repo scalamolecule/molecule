@@ -5,7 +5,6 @@ import java.net.URI
 import java.util.Date
 import boopickle.CompositePickler
 import boopickle.Default._
-import molecule.base.api.Schema
 import molecule.base.ast.SchemaAST.{Card, CardOne, CardSet}
 import molecule.base.error._
 import molecule.boilerplate.ast.Model._
@@ -185,7 +184,7 @@ object Boopicklers extends MoleculeLogging {
   pickleElement.addConcreteType[Composite]
   pickleElement.addConcreteType[Nested]
   pickleElement.addConcreteType[NestedOpt]
-  pickleElement.addConcreteType[TxMetaData]
+  pickleElement.addConcreteType[TxData]
 
   pickleElement.addConcreteType[AttrOneManString]
   pickleElement.addConcreteType[AttrOneManInt]
@@ -295,8 +294,7 @@ object Boopicklers extends MoleculeLogging {
 
   implicit val pickleConnProxy: CompositePickler[ConnProxy] =
     compositePickler[ConnProxy]
-      .addConcreteType[DatomicPeerProxy]
+      .addConcreteType[DatomicProxy]
 
-  implicit val pickleSchemaTransaction: CompositePickler[Schema] =
-    compositePickler[Schema]
+//  implicit val pickleSchemaTransaction: CompositePickler[Schema] = compositePickler[Schema]
 }

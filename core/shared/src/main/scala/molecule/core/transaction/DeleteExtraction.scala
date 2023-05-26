@@ -45,7 +45,7 @@ class DeleteExtraction {
           val (eids1, filters1) = extractSubElements(es, topLevel)
           resolve(tail, eids ++ eids1, filterElements ++ filters1, false)
 
-        case TxMetaData(es) =>
+        case TxData(es) =>
           val (eids1, filters1) = extractSubElements(es, false)
           resolve(tail, eids ++ eids1, filterElements ++ filters1, false)
       }

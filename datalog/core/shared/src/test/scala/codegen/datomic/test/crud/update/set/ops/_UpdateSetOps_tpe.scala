@@ -1,7 +1,7 @@
 package codegen.datomic.test.crud.update.set.ops
 
 import java.nio.file.{Files, Paths}
-import codegen.DatomicTestGenBase
+import codegen.SpiTestGenBase
 import molecule.base.util.{BaseHelpers, CodeGenBase}
 
 object _UpdateSetOps_tpe extends CodeGenBase with BaseHelpers {
@@ -11,7 +11,7 @@ object _UpdateSetOps_tpe extends CodeGenBase with BaseHelpers {
   }
 
   case class TransformFile(name: String, tpe: String, v: String, imp: String = "")
-    extends DatomicTestGenBase(s"UpdateSetOps_$name", "/test/crud/update/set/ops") {
+    extends SpiTestGenBase(s"UpdateSetOps_$name", "/test/crud/update/set/ops") {
 
     val content = {
       val src =

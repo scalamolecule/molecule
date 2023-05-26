@@ -1,7 +1,7 @@
 package codegen.datomic.test.aggr.set.number
 
 import java.nio.file.{Files, Paths}
-import codegen.DatomicTestGenBase
+import codegen.SpiTestGenBase
 import molecule.base.util.{BaseHelpers, CodeGenBase}
 
 object _AggrSetNum extends CodeGenBase with BaseHelpers {
@@ -12,7 +12,7 @@ object _AggrSetNum extends CodeGenBase with BaseHelpers {
 
 
   case class TransformFile(name: String, tpe: String, v: String)
-    extends DatomicTestGenBase(s"AggrSetNum_$name", "/test/aggr/set/number") {
+    extends SpiTestGenBase(s"AggrSetNum_$name", "/test/aggr/set/number") {
 
     val content = {
       new String(Files.readAllBytes(Paths.get(path, "AggrSetNum_Int.scala")), "UTF-8")
