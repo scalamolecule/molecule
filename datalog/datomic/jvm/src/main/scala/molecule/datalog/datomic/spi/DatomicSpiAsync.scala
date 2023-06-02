@@ -64,18 +64,16 @@ trait DatomicSpiAsync
 
   // Save --------------------------------------------------------
 
-  override def save_transact(save: Save)(implicit conn: Conn, ec: EC): Future[TxReport] = Future {
-    try {
-      val errors = save_validate(save)
-      if (errors.isEmpty) {
-        conn.asInstanceOf[DatomicConn_JVM].transact_async(save_getStmts(save))
-      } else {
-        Future.failed(ValidationErrors(errors))
-      }
-    } catch {
-      case e: Throwable => Future.failed(e)
+  override def save_transact(save: Save)(implicit conn: Conn, ec: EC): Future[TxReport] = try {
+    val errors = save_validate(save)
+    if (errors.isEmpty) {
+      conn.asInstanceOf[DatomicConn_JVM].transact_async(save_getStmts(save))
+    } else {
+      Future.failed(ValidationErrors(errors))
     }
-  }.flatten
+  } catch {
+    case e: Throwable => Future.failed(e)
+  }
 
   override def save_inspect(save: Save)(implicit conn: Conn, ec: EC): Future[Unit] = {
     printInspectTx("SAVE", save.elements, save_getStmts(save))
@@ -93,18 +91,16 @@ trait DatomicSpiAsync
 
   // Insert --------------------------------------------------------
 
-  override def insert_transact(insert: Insert)(implicit conn: Conn, ec: EC): Future[TxReport] = Future {
-    try {
-      val errors = insert_validate(insert)
-      if (errors.isEmpty) {
-        conn.asInstanceOf[DatomicConn_JVM].transact_async(insert_getStmts(insert, conn.proxy))
-      } else {
-        Future.failed(InsertErrors(errors))
-      }
-    } catch {
-      case e: Throwable => Future.failed(e)
+  override def insert_transact(insert: Insert)(implicit conn: Conn, ec: EC): Future[TxReport] = try {
+    val errors = insert_validate(insert)
+    if (errors.isEmpty) {
+      conn.asInstanceOf[DatomicConn_JVM].transact_async(insert_getStmts(insert, conn.proxy))
+    } else {
+      Future.failed(InsertErrors(errors))
     }
-  }.flatten
+  } catch {
+    case e: Throwable => Future.failed(e)
+  }
 
   override def insert_inspect(insert: Insert)(implicit conn: Conn, ec: EC): Future[Unit] = {
     printInspectTx("INSERT", insert.elements, insert_getStmts(insert, conn.proxy))
@@ -122,19 +118,17 @@ trait DatomicSpiAsync
 
   // Update --------------------------------------------------------
 
-  override def update_transact(update: Update)(implicit conn0: Conn, ec: EC): Future[TxReport] = Future {
-    try {
-      val errors = update_validate(update)
-      if (errors.isEmpty) {
-        val conn = conn0.asInstanceOf[DatomicConn_JVM]
-        conn.transact_async(update_getStmts(update, conn))
-      } else {
-        Future.failed(ValidationErrors(errors))
-      }
-    } catch {
-      case e: Throwable => Future.failed(e)
+  override def update_transact(update: Update)(implicit conn0: Conn, ec: EC): Future[TxReport] = try {
+    val errors = update_validate(update)
+    if (errors.isEmpty) {
+      val conn = conn0.asInstanceOf[DatomicConn_JVM]
+      conn.transact_async(update_getStmts(update, conn))
+    } else {
+      Future.failed(ValidationErrors(errors))
     }
-  }.flatten
+  } catch {
+    case e: Throwable => Future.failed(e)
+  }
 
   override def update_inspect(update: Update)(implicit conn: Conn, ec: EC): Future[Unit] = {
     printInspectTx("UPDATE", update.elements, update_getStmts(update, conn.asInstanceOf[DatomicConn_JVM]))
@@ -152,14 +146,12 @@ trait DatomicSpiAsync
 
   // Delete --------------------------------------------------------
 
-  override def delete_transact(delete: Delete)(implicit conn0: Conn, ec: EC): Future[TxReport] = Future {
-    try {
-      val conn = conn0.asInstanceOf[DatomicConn_JVM]
-      conn.transact_async(delete_getStmts(delete, conn))
-    } catch {
-      case e: Throwable => Future.failed(e)
-    }
-  }.flatten
+  override def delete_transact(delete: Delete)(implicit conn0: Conn, ec: EC): Future[TxReport] = try {
+    val conn = conn0.asInstanceOf[DatomicConn_JVM]
+    conn.transact_async(delete_getStmts(delete, conn))
+  } catch {
+    case e: Throwable => Future.failed(e)
+  }
 
   override def delete_inspect(delete: Delete)(implicit conn: Conn, ec: EC): Future[Unit] = {
     printInspectTx("DELETE", delete.elements, delete_getStmts(delete, conn.asInstanceOf[DatomicConn_JVM]))

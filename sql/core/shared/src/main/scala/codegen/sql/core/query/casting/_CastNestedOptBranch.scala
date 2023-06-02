@@ -17,7 +17,7 @@ object _CastNestedOptBranch extends SqlGenBase("CastNestedOptBranch", "/query/ca
        |
        |
        |trait $fileName_[Tpl]
-       |  extends CastIt2Tpl_ { self: Model2Query with Base[Tpl] =>
+       |  extends CastIt2Tpl_ { self: Model2Query with Base =>
        |
        |  @tailrec
        |  final private def resolveArities(

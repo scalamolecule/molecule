@@ -7,8 +7,8 @@ import molecule.datalog.core.query.Base
 import scala.annotation.tailrec
 
 
-trait CastNestedOptLeaf_[Tpl]
-  extends CastRow2Tpl_[Tpl] with CastIt2Tpl_ { self: Model2Query with Base[Tpl] =>
+trait CastNestedOptLeaf_
+  extends CastRow2Tpl_ with CastIt2Tpl_ { self: Model2Query with Base =>
 
   @tailrec
   final private def resolveArities(

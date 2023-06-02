@@ -132,7 +132,7 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
     moleculeDataModelPaths := Seq(
       "molecule/coreTests/dataModels/core"
     ),
-//    moleculeMakeJars := false, // default: true
+    //    moleculeMakeJars := false, // default: true
 
     // Suppress "un-used" keys warning
     Global / excludeLintKeys ++= Set(
@@ -181,7 +181,7 @@ lazy val datalogDatomic = crossProject(JSPlatform, JVMPlatform)
   .settings(name := "molecule-datalog-datomic")
   .enablePlugins(BuildInfoPlugin)
   .dependsOn(datalogCore % "compile->compile;test->test")
-//  .dependsOn(coreTests)
+  //  .dependsOn(coreTests)
   .settings(
     // Temporarily limit number of tests to be compiled by sbt (comment out this whole sbt setting to test all)
     // Note that intellij doesn't recognize this setting - there you can right click on files and exclude
@@ -207,9 +207,10 @@ lazy val datalogDatomic = crossProject(JSPlatform, JVMPlatform)
         //        sharedTests + "/validation",
         //                sharedTests + "/time",
         sharedTests,
-        jvmTests + "/AdhocJVM.scala",
-        jsTests + "/AdhocJs.scala",
-        sharedTests + "/Adhoc.scala",
+        jvmTests,
+        jsTests,
+        //        jvmTests + "/AdhocJVM.scala",
+        //        sharedTests + "/Adhoc.scala",
       )
       new SimpleFileFilter(f =>
         (f.getCanonicalPath.startsWith(jsTests)
@@ -243,11 +244,11 @@ lazy val datalogDatomic = crossProject(JSPlatform, JVMPlatform)
       new TestFramework("zio.test.sbt.ZTestFramework")
     )
   )
-//  .jvmSettings(
-//    libraryDependencies ++= Seq(
-//      "com.datomic" % "peer" % "1.0.6726"
-//    )
-//  )
+  //  .jvmSettings(
+  //    libraryDependencies ++= Seq(
+  //      "com.datomic" % "peer" % "1.0.6726"
+  //    )
+  //  )
   .jsSettings(jsEnvironment)
 
 
@@ -283,12 +284,12 @@ lazy val sqlJdbc = crossProject(JSPlatform, JVMPlatform)
       new TestFramework("zio.test.sbt.ZTestFramework")
     )
   )
-//  .jvmSettings(
-//    libraryDependencies ++= Seq(
-//      "com.datomic" % "peer" % "1.0.6726",
-//      "com.h2database" % "h2" % "2.1.214" % Provided
-//    )
-//  )
+  //  .jvmSettings(
+  //    libraryDependencies ++= Seq(
+  //      "com.datomic" % "peer" % "1.0.6726",
+  //      "com.h2database" % "h2" % "2.1.214" % Provided
+  //    )
+  //  )
   .jsSettings(jsEnvironment)
 
 

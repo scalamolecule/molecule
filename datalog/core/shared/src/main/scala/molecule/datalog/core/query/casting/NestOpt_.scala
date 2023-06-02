@@ -8,10 +8,10 @@ import scala.annotation.tailrec
 
 
 trait NestOpt_[Tpl]
-  extends CastNestedOptBranch_[Tpl]
-    with CastNestedOptLeaf_[Tpl]
-    with CastRow2Tpl_[Tpl]
-    with Base[Tpl]
+  extends CastNestedOptBranch_
+    with CastNestedOptLeaf_
+    with CastRow2Tpl_
+    with Base
     with Model2Query {
 
   private lazy val levels = pullCastss.length

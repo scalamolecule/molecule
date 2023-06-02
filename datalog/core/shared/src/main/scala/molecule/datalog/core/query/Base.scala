@@ -10,7 +10,7 @@ import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
 
-trait Base[Tpl] extends BaseHelpers with JavaConversions { self: Model2Query =>
+trait Base extends BaseHelpers with JavaConversions { self: Model2Query =>
 
   // Datomic row type
   type Row = jList[AnyRef]

@@ -15,11 +15,11 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
     with ResolveExprSet[Tpl]
     with ResolveRef[Tpl]
     with ResolveNestedPull[Tpl]
-    with Base[Tpl]
-    with CastNestedBranch_[Tpl]
-    with CastRow2Tpl_[Tpl]
-    with CastNestedOptBranch_[Tpl]
-    with CastNestedOptLeaf_[Tpl]
+    with Base
+    with CastNestedBranch_
+    with CastRow2Tpl_
+    with CastNestedOptBranch_
+    with CastNestedOptLeaf_
     with Nest[Tpl]
     with NestOpt_[Tpl]
     with MoleculeLogging {

@@ -20,7 +20,6 @@ trait FutureUtils extends ModelUtils with MoleculeLogging {
             throw e
           case e: Throwable     =>
             logger.error(e.toString + "\n" + e.getStackTrace.toList.mkString("\n"))
-//            throw ExecutionError(e.toString)
             // Re-throw to preserve original stacktrace
             throw e
         }
@@ -55,6 +54,6 @@ trait FutureUtils extends ModelUtils with MoleculeLogging {
   def await[T](body: => Future[T], atMost: Duration = 10.seconds): T = try {
     Await.result(body, atMost)
   } catch {
-    case t: Throwable => throw ModelError(t.toString)
+    case e: Throwable => throw e
   }
 }

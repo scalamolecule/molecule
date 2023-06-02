@@ -23,6 +23,8 @@ trait JdbcSpiSync
     with SubscriptionStarter
     with PrintInspect {
 
+  // Query --------------------------------------------------------
+
   override def query_get[Tpl](q: Query[Tpl])(implicit conn: Conn): List[Tpl] = {
     JdbcQueryResolveOffset[Tpl](q.elements, q.limit, None, q.dbView)
       .getListFromOffset_sync(conn.asInstanceOf[JdbcConn_jvm])._1
@@ -58,33 +60,14 @@ trait JdbcSpiSync
   }
 
 
-  //  override def save_transact(save: Save)(implicit conn0: Conn): TxReport = {
-  //    val errors = save_validate(save)
-  //    if (errors.isEmpty) {
-  //      val conn                  = conn0.asInstanceOf[JdbcConn_jvm]
-  ////      val a = System.nanoTime()
-  //      val (insertElements, tpl) = Save2insert.hydrate(save)
-  ////      val b = System.nanoTime()
-  ////      println("delta: " + (b - a) / 1000)
-  //      val data                  = new InsertExtraction with Data_Insert {
-  //        override protected val sqlConn: sql.Connection = conn.sqlConn
-  //      }.getData(conn.proxy.nsMap, insertElements, List(tpl))
-  //
-  //      val a                     = System.nanoTime()
-  //      val res = conn.transact_sync(data)
-  //      val b                     = System.nanoTime()
-  //      println("delta: " + (b - a) / 1000)
-  //      res
-  //    } else {
-  //      throw ValidationErrors(errors)
-  //    }
-  //  }
+  // Save --------------------------------------------------------
 
   override def save_transact(save: Save)(implicit conn0: Conn): TxReport = {
     val errors = save_validate(save)
     if (errors.isEmpty) {
       val conn = conn0.asInstanceOf[JdbcConn_jvm]
       conn.transact_sync(save_getData(save, conn))
+      null
     } else {
       throw ValidationErrors(errors)
     }
@@ -106,6 +89,8 @@ trait JdbcSpiSync
   }
 
 
+  // Insert --------------------------------------------------------
+
   override def insert_transact(insert: Insert)(implicit conn0: Conn): TxReport = {
     val errors = insert_validate(insert)
     if (errors.isEmpty) {
@@ -122,6 +107,7 @@ trait JdbcSpiSync
 
   private def insert_getData(insert: Insert, conn: JdbcConn_jvm): Data = {
     new InsertExtraction with Data_Insert {
+//    new InsertExtraction with Data_Insert2 {
       override protected val sqlConn: sql.Connection = conn.sqlConn
     }.getData(conn.proxy.nsMap, insert.elements, insert.tpls)
   }
@@ -130,6 +116,8 @@ trait JdbcSpiSync
     InsertValidation.validate(conn, insert.elements, insert.tpls)
   }
 
+
+  // Update --------------------------------------------------------
 
   override def update_transact(update: Update)(implicit conn0: Conn): TxReport = {
     //        val errors = validate
@@ -158,6 +146,8 @@ trait JdbcSpiSync
     validateUpdate(conn, update.elements)
   }
 
+
+  // Delete --------------------------------------------------------
 
   override def delete_transact(delete: Delete)(implicit conn0: Conn): TxReport = {
     //        val conn = conn0.asInstanceOf[JdbcConn_JVM]

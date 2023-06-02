@@ -61,19 +61,17 @@ trait DatomicSpiAsync
 
   // Save --------------------------------------------------------
 
-  override def save_transact(save: Save)(implicit conn0: Conn, ec: EC): Future[TxReport] = Future {
-    try {
-      val errors = save_validate(save)
-      if (errors.isEmpty) {
-        val conn = conn0.asInstanceOf[DatomicConn_JS]
-        conn.rpc.save(conn.proxy, save.elements).future
-      } else {
-        Future.failed(ValidationErrors(errors))
-      }
-    } catch {
-      case e: Throwable => Future.failed(e)
+  override def save_transact(save: Save)(implicit conn0: Conn, ec: EC): Future[TxReport] = try {
+    val errors = save_validate(save)
+    if (errors.isEmpty) {
+      val conn = conn0.asInstanceOf[DatomicConn_JS]
+      conn.rpc.save(conn.proxy, save.elements).future
+    } else {
+      Future.failed(ValidationErrors(errors))
     }
-  }.flatten
+  } catch {
+    case e: Throwable => Future.failed(e)
+  }
 
   override def save_inspect(save: Save)(implicit conn: Conn, ec: EC): Future[Unit] = {
     printInspectTx("SAVE", save.elements)
@@ -87,22 +85,20 @@ trait DatomicSpiAsync
 
   // Insert --------------------------------------------------------
 
-  override def insert_transact(insert: Insert)(implicit conn0: Conn, ec: EC): Future[TxReport] = Future {
-    try {
-      val conn   = conn0.asInstanceOf[DatomicConn_JS]
-      val errors = insert_validate(insert)(conn)
-      if (errors.isEmpty) {
-        //        val conn                      = conn0.asInstanceOf[DatomicConn_JS]
-        val (tplElements, txElements) = separateTxElements(insert.elements)
-        val tplsSerialized            = PickleTpls(tplElements, true).pickle(Right(insert.tpls))
-        conn.rpc.insert(conn.proxy, tplElements, tplsSerialized, txElements).future
-      } else {
-        Future.failed(InsertErrors(errors))
-      }
-    } catch {
-      case e: Throwable => Future.failed(e)
+  override def insert_transact(insert: Insert)(implicit conn0: Conn, ec: EC): Future[TxReport] = try {
+    val conn   = conn0.asInstanceOf[DatomicConn_JS]
+    val errors = insert_validate(insert)(conn)
+    if (errors.isEmpty) {
+      //        val conn                      = conn0.asInstanceOf[DatomicConn_JS]
+      val (tplElements, txElements) = separateTxElements(insert.elements)
+      val tplsSerialized            = PickleTpls(tplElements, true).pickle(Right(insert.tpls))
+      conn.rpc.insert(conn.proxy, tplElements, tplsSerialized, txElements).future
+    } else {
+      Future.failed(InsertErrors(errors))
     }
-  }.flatten
+  } catch {
+    case e: Throwable => Future.failed(e)
+  }
 
   override def insert_inspect(insert: Insert)(implicit conn: Conn, ec: EC): Future[Unit] = {
     printInspectTx("INSERT", insert.elements)
@@ -115,19 +111,17 @@ trait DatomicSpiAsync
 
   // Update --------------------------------------------------------
 
-  override def update_transact(update: Update)(implicit conn0: Conn, ec: EC): Future[TxReport] = Future {
-    try {
-      val errors = update_validate(update)
-      if (errors.isEmpty) {
-        val conn = conn0.asInstanceOf[DatomicConn_JS]
-        conn.rpc.update(conn.proxy, update.elements, update.isUpsert).future
-      } else {
-        Future.failed(ValidationErrors(errors))
-      }
-    } catch {
-      case e: Throwable => Future.failed(e)
+  override def update_transact(update: Update)(implicit conn0: Conn, ec: EC): Future[TxReport] = try {
+    val errors = update_validate(update)
+    if (errors.isEmpty) {
+      val conn = conn0.asInstanceOf[DatomicConn_JS]
+      conn.rpc.update(conn.proxy, update.elements, update.isUpsert).future
+    } else {
+      Future.failed(ValidationErrors(errors))
     }
-  }.flatten
+  } catch {
+    case e: Throwable => Future.failed(e)
+  }
 
   override def update_inspect(update: Update)(implicit conn: Conn, ec: EC): Future[Unit] = {
     printInspectTx("UPDATE", update.elements)

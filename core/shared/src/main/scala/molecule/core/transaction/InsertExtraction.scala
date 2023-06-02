@@ -89,7 +89,7 @@ class InsertExtraction extends InsertResolvers_ with InsertValidators_ { self: I
           resolve(nsMap, tail, resolvers :+
             addNested(nsMap, tplIndex, ns, refAttr, refNs, nestedElements), 0, tplIndex)
 
-        // TxData is handed separately in Insert_stmts with call to save_stmts
+        // TxData is handled separately in Insert_stmts with call to save_stmts
 
         case other => throw ModelError("Unexpected element: " + other)
       }

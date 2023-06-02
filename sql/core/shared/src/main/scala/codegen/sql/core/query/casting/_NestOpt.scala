@@ -17,10 +17,10 @@ object _NestOpt extends SqlGenBase("NestOpt", "/query/casting") {
        |
        |
        |trait $fileName_[Tpl]
-       |  extends CastNestedOptBranch_[Tpl]
-       |    with CastNestedOptLeaf_[Tpl]
-       |    with CastRow2Tpl_[Tpl]
-       |    with Base[Tpl] { self: Model2Query =>
+       |  extends CastNestedOptBranch_
+       |    with CastNestedOptLeaf_
+       |    with CastRow2Tpl_
+       |    with Base { self: Model2Query =>
        |
        |  private lazy val levels = pullCastss.length
        |

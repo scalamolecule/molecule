@@ -7,8 +7,8 @@ import molecule.datalog.core.query.Base
 
 
 trait Nest[Tpl] { self: Model2Query
-  with Base[Tpl]
-  with CastNestedBranch_[Tpl] =>
+  with Base
+  with CastNestedBranch_ =>
 
   private var row    : Row = new jArrayList[AnyRef]()
   private var prevRow: Row = new jArrayList[AnyRef]()

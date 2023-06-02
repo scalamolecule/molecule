@@ -18,80 +18,241 @@ trait Data_Insert
     with ModelUtils
     with MoleculeLogging { self: InsertExtraction with InsertResolvers_ =>
 
+
   def getData(
     nsMap: Map[String, MetaNs],
     elements: List[Element],
     tpls: Seq[Product],
   ): Data = {
-    //    elements.foreach(println)
+    elements.foreach(println)
+    println("################################################################################################")
 
-    curRefPath = List(getInitialNs(elements))
-    val (mainElements, _) = separateTxElements(elements)
-    val tpl2data          = getResolver(nsMap, mainElements)
+    curRefPath = List(s"$level", getInitialNs(elements))
+    val (mainElements, _)           = separateTxElements(elements)
+    val resolveTpl: Product => Unit = getResolver(nsMap, mainElements)
+    initInserts()
+
+    println(inserts.mkString("--- inserts\n", "\n", ""))
+    println(joins.mkString("--- joins\n", "\n", ""))
 
     // Loop rows of tuples
-    tpls.zipWithIndex.foreach { case (tpl, rowIndex) =>
-      tpl2data(tpl)
-      addRowSetters(rowIndex)
-      firstRow = false
+    var rowIndex = 0
+    tpls.foreach { tpl =>
+      println(s"### $rowIndex ##################################### " + tpl)
+      resolveTpl(tpl)
+      addRowSetterToTableInserts(rowIndex)
+      rowIndex += 1
     }
-    getInsertResolvers
+    //    rightCountsMap.foreach(println)
+    //    val xx = getJoinTableInserts
+    //    xx.foreach(println)
+
+    println(inserts.mkString("--- inserts\n", "\n", ""))
+    (getTableInserts, getJoinTableInserts)
   }
 
-  private def getInsertResolvers: List[Resolver] = {
-    // Add insert resolver to each table insert
-    tableCols.map { case (refPath, ns, _) =>
-      val rowSetters    = rowSettersMap(refPath, ns)
-      val resolveInsert = (ps: PS, insertIds: Map[(Int, List[String], String), Array[Long]], rowIndex: Int) => {
+
+  private def initInserts(): Unit = {
+    inserts.foreach {
+      case (refPath, cols) =>
+        val table = refPath.last
+        val stmt  =
+          s"""INSERT INTO $table (
+             |  ${cols.mkString(",\n  ")}
+             |) VALUES (${cols.map(_ => "?").mkString(", ")})""".stripMargin
+        val ps    = sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
+        tableInserts(refPath) = TableInsert(refPath, stmt, ps)
+        rowSettersMap(refPath) = Nil
+    }
+
+    joins.foreach {
+      case (joinRefPath, id1, id2, leftPath, rightPath) =>
+        val joinTable = joinRefPath.last
+        val stmt      = s"INSERT INTO $joinTable ($id1, $id2) VALUES (?, ?)"
+        val ps        = sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
+        joinTableInserts = joinTableInserts :+ JoinTableInsert(joinRefPath, stmt, ps, leftPath, rightPath)
+    }
+  }
+
+  private def addRowSetterToTableInserts(rowIndex: Int): Unit = {
+    inserts.foreach {
+      case (refPath, cols) =>
+        val colSetters = colSettersMap(refPath)
+        //        println(s"----------------------  ${colSetters.length}  $refPath")
+        //          println(stmt)
+        colSettersMap(refPath) = Nil
+        val rowSetter = (ps: PS, idsMap: IdsMap, _: RowIndex) => {
+          var i        = 0
+          val colCount = cols.length
+          ps.toString
+
+          // Set all column values for this each row of this insert
+          colSetters.foreach { colSetter =>
+            colSetter(ps, idsMap, rowIndex)
+            i += 1
+
+            if (i == colCount) {
+              // Add row for this insert
+              ps.addBatch()
+              i = 0
+            }
+          }
+        }
+        rowSettersMap(refPath) = rowSettersMap(refPath) :+ rowSetter
+    }
+  }
+
+
+  private def getTableInserts: List[TableInsert] = {
+    // Add insert resolver to each insert
+    inserts.map { case (refPath, _) =>
+      val rowSetters = rowSettersMap(refPath)
+      val populatePS = (ps: PS, idsMap: Map[List[String], List[Long]], _: Int) => {
         // Set all column values for this row in this insert/batch
-        rowSetters.foreach(rowSetter =>
-          rowSetter(ps, insertIds, rowIndex)
-        )
+        var rowIndex = 0
+        rowSetters.foreach { rowSetter =>
+          rowSetter(ps, idsMap, rowIndex)
+          rowIndex += 1
+        }
       }
-      insertResolvers((refPath, ns)).copy(populatePS = resolveInsert)
+      tableInserts(refPath).copy(populatePS = populatePS)
+    }
+  }
+  private def getJoinTableInserts: List[JoinTableInsert] = {
+    joins.zip(joinTableInserts).map {
+      case ((joinRefPath, id1, id2, leftPath, rightPath), joinTableInsert) =>
+        //        println("  A ---" + joinRefPath)
+        //        println("  A ---" + rightCountsMap)
+        //        println("  A ---" + rightCountsMap(joinRefPath))
+        joinTableInsert.copy(rightCounts = rightCountsMap(joinRefPath))
     }
   }
 
-  private def addRowSetters(rowIndex: Int): Unit = {
-    if (firstRow) {
-      tableCols.foreach {
-        case (refPath, ns, cols) =>
-          val stmt =
-            s"""INSERT INTO $ns (
-               |  ${cols.mkString(",\n  ")}
-               |) VALUES (${cols.map(_ => "?").mkString(", ")})""".stripMargin
-          val ps   = sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
 
-          insertResolvers((refPath, ns)) = Resolver(level, refPath, ns, stmt, ps)
+  // Pre-process ----------------------------------------------------------------------------------------
 
-          val colSetters = colSettersMap(refPath, ns)
-          //          println(s"----------------------  ${colSetters.length}  $refPath  $ns")
-          //          println(stmt)
-          colSettersMap((refPath, ns)) = Nil
-          val resolveRow = (ps: PS, insertIds: Map[(Int, List[String], String), Array[Long]], _: Int) => {
-            // Set all column values for this row in this insert/batch
-            colSetters.foreach(colSetter =>
-              colSetter(ps, insertIds, rowIndex)
-            )
-            // Complete row
-            ps.addBatch()
+  override protected def addNested(
+    nsMap: Map[String, MetaNs],
+    tplIndex: Int,
+    ns: String,
+    refAttr: String,
+    refNs: String,
+    nestedElements: List[Element]
+  ): Product => Unit = {
+    val joinTable  = s"${ns}_${refAttr}_$refNs"
+    val (id1, id2) = if (ns == refNs) (s"${ns}_1_id", s"${refNs}_2_id") else (s"${ns}_id", s"${refNs}_id")
+    val nextLevel  = level + 1
+    val joinPath   = curRefPath :+ joinTable
+    val leftPath   = curRefPath
+    val rightPath  = List(s"$nextLevel", refNs)
+    joins = joins :+ (joinPath, id1, id2, leftPath, rightPath)
+    rightCountsMap(joinPath) = List.empty[Int]
+
+    // Initiate new level
+    level = nextLevel
+    curRefPath = List(s"$level", refNs)
+
+    // Recursively resolve nested data
+    val nestedResolvers = getResolver(nsMap, nestedElements)
+
+    countValueAttrs(nestedElements) match {
+      case 1 =>
+        (tpl: Product) => {
+          val nestedSingleValues = tpl.productElement(tplIndex).asInstanceOf[Seq[Any]]
+          val length             = nestedSingleValues.length
+          rightCountsMap(joinPath) = rightCountsMap(joinPath) :+ length
+          nestedSingleValues.foreach { nestedSingleValue =>
+            nestedResolvers(Tuple1(nestedSingleValue))
           }
-          rowSettersMap((refPath, ns)) = List(resolveRow)
+        }
+      case _ =>
+        (tpl: Product) => {
+          val nestedTpls = tpl.productElement(tplIndex).asInstanceOf[Seq[Product]]
+          val length     = nestedTpls.length
+          rightCountsMap(joinPath) = rightCountsMap(joinPath) :+ length
+          nestedTpls.foreach { nestedTpl =>
+            nestedResolvers(nestedTpl)
+          }
+        }
+    }
+  }
+
+
+  override protected def addRef(ns: String, refAttr: String, refNs: String, card: Card): Product => Unit = {
+    val joinTable = s"${ns}_${refAttr}_$refNs"
+    val curPath   = curRefPath
+
+    if (inserts.exists(_._1 == curPath)) {
+      // Add ref attribute to current namespace
+      inserts = inserts.map {
+        case (refPath1, cols) if card == CardOne && refPath1 == curPath =>
+          paramIndexes += (curPath, refAttr) -> (cols.length + 1)
+          (curPath, cols :+ refAttr)
+
+        case other => other
       }
+
+    } else if (card == CardOne) {
+      // Make card-one ref from current empty namespace
+      paramIndexes += (curPath, refAttr) -> 1
+      inserts = inserts :+ (curPath, List(refAttr))
+
+    } else if (card == CardSet) {
+      // ref to join table
+      // Make card-many ref from current empty namespace
+      inserts = inserts :+ (curPath, Nil)
+    }
+
+    lazy val joinPath = curPath :+ joinTable
+    if (card == CardSet) {
+      // join table with single row (treated as normal insert since there's only 1 join per row)
+      val (id1, id2) = if (ns == refNs) (s"${ns}_1_id", s"${refNs}_2_id") else (s"${ns}_id", s"${refNs}_id")
+      // When insertion order is reversed, this join table will be set after left and right has been inserted
+      inserts = (joinPath, List(id1, id2)) +: inserts
+    }
+
+    // Start new ref table
+    val refPath = curPath ++ List(refAttr, refNs)
+    curRefPath = refPath
+    inserts = inserts :+ (refPath, Nil)
+
+    if (card == CardOne) {
+      // Card-one ref setter
+      val paramIndex = paramIndexes(curPath, refAttr)
+      (_: Product) => {
+        val colSetter: Setter = (ps: PS, idsMap: IdsMap, rowIndex: RowIndex) => {
+          val refId = idsMap(refPath)(rowIndex)
+          printValue(level, ns, refAttr, -1, paramIndex, refId)
+          ps.setLong(paramIndex, refId)
+        }
+        addColSetter(curPath, colSetter)
+      }
+
     } else {
-      tableCols.foreach {
-        case (refPath, ns, _) =>
-          val colSetters = colSettersMap(refPath, ns)
-          colSettersMap((refPath, ns)) = Nil
-          val resolveRow = (ps: PS, insertIds: Map[(Int, List[String], String), Array[Long]], _: Int) => {
-            // Set all column values for this insert/batch
-            colSetters.foreach(colSetter =>
-              colSetter(ps, insertIds, rowIndex)
-            )
-            // next row
+      (_: Product) => {
+        // Empty row if no attributes in namespace in order to have an id for join table
+        if (!paramIndexes.exists { case ((path, _), _) => path == curPath }) {
+          // If current namespace has no attributes, then add an empty row with
+          // default null values (only to be referenced as the left side of the join table)
+          val emptyRowSetter: Setter = (ps: PS, _: IdsMap, _: RowIndex) => {
             ps.addBatch()
           }
-          rowSettersMap((refPath, ns)) = rowSettersMap((refPath, ns)) :+ resolveRow
+          addColSetter(curPath, emptyRowSetter)
+        }
+
+        // Join table setter
+        //        val joinSetter: Setter = (ps: PS, idss: Array[Array[Long]], rowIndex: Int) => {
+        val joinSetter: Setter = (ps: PS, idsMap: IdsMap, rowIndex: RowIndex) => {
+          val refId1 = idsMap(curPath)(rowIndex)
+          val refId2 = idsMap(refPath)(rowIndex)
+          println("-----------")
+          println("id1: " + refId1)
+          println("id2: " + refId2)
+          ps.setLong(1, refId1)
+          ps.setLong(2, refId2)
+          ps.addBatch()
+        }
+        addColSetter(joinPath, joinSetter)
       }
     }
   }
@@ -102,126 +263,39 @@ trait Data_Insert
     tplIndex: Int,
     handleScalaValue: T => Any,
   ): Product => Unit = {
-    val refPath = curRefPath
+    val curPath = curRefPath
+    if (inserts.exists(_._1 == curPath)) {
+      inserts = inserts.map {
+        case (path, cols) if path == curPath =>
+          paramIndexes += (curPath, attr) -> (cols.length + 1)
+          (path, cols :+ attr)
 
-    if (firstRow) {
-      if (tableCols.exists(_._1 == refPath)) {
-        tableCols = tableCols.map {
-          case (refPath1, ns1, cols) if refPath1 == refPath && ns1 == ns =>
-            paramIndexes = paramIndexes + ((refPath, ns, attr) -> (cols.length + 1))
-            (refPath1, ns, cols :+ attr)
-          case other                                                     =>
-            other
-        }
-      } else {
-        paramIndexes = paramIndexes + ((refPath, ns, attr) -> 1)
-        tableCols = tableCols :+ (refPath, ns, List(attr))
+        case other => other
       }
+    } else {
+      paramIndexes += (curPath, attr) -> 1
+      inserts = inserts :+ (curPath, List(attr))
     }
+    //    println(s"${indent(level)}$insertIndexes")
 
-    val paramIndex = paramIndexes((refPath, ns, attr))
+    val curLevel = level
+    println(s"${indent(level)}$curLevel addV: $curPath  $attr")
+    val paramIndex = paramIndexes(curPath, attr)
     (tpl: Product) => {
+      println(s"${indent(curPath)}$curLevel addV: $curPath  $paramIndex  $attr")
+
       val scalaValue        = tpl.productElement(tplIndex).asInstanceOf[T]
       val valueSetter       = handleScalaValue(scalaValue).asInstanceOf[(PS, Int) => Unit]
-      val colSetter: Setter = (ps: PS, insertIds: Map[(Int, List[String], String), Array[Long]], rowIndex: Int) => {
+      val colSetter: Setter = (ps: PS, _: IdsMap, _: RowIndex) => {
         valueSetter(ps, paramIndex)
-        //        printValue(rowIndex, ns, attr, tplIndex, paramIndex, scalaValue)
+        printValue(curLevel, ns, attr, tplIndex, paramIndex, scalaValue)
       }
-      addColSetter(refPath, ns, colSetter)
-    }
-  }
-
-  override protected def addRef(ns: String, refAttr: String, refNs: String, card: Card): Product => Unit = {
-    val joinTable = s"${ns}_${refAttr}_$refNs"
-    val refPath   = curRefPath
-    curRefPath = curRefPath ++ List(refAttr, refNs)
-    val refPath1 = curRefPath
-
-    if (firstRow) {
-      if (tableCols.exists(_._1 == refPath)) {
-        // Add ref attribute to current namespace
-        tableCols = tableCols.map {
-          case (refPath1, ns1, cols) if card == CardOne && refPath1 == refPath && ns1 == ns =>
-            paramIndexes = paramIndexes + ((refPath, ns, refAttr) -> (cols.length + 1))
-            (refPath, ns, cols :+ refAttr)
-
-          case other => other
-        }
-
-      } else if (card == CardOne) {
-        // Make card-one ref from current empty namespace
-        paramIndexes = paramIndexes + ((refPath, ns, refAttr) -> 1)
-        tableCols = tableCols :+ (refPath, ns, List(refAttr))
-
-      } else if (card == CardSet) {
-        // ref to join table
-        // Make card-many ref from current empty namespace
-        tableCols = tableCols :+ (refPath, ns, Nil)
-      }
-
-      if (card == CardSet) {
-        // join table
-        val (id1, id2) = if (ns == refNs) (s"${ns}_1_id", s"${refNs}_2_id") else (s"${ns}_id", s"${refNs}_id")
-        tableCols = (refPath, joinTable, List(id1, id2)) +: tableCols
-      }
-
-      // Start new ref table
-      tableCols = tableCols :+ (refPath1, refNs, Nil)
-    }
-
-    if (card == CardOne) {
-      // Card-one ref setter
-      val paramIndex = paramIndexes((refPath, ns, refAttr))
-      (_: Product) => {
-        val colSetter: Setter = (ps: PS, insertIds: Map[(Int, List[String], String), Array[Long]], rowIndex: Int) => {
-          //          println("insertIds.length 0: " + insertIds.size)
-          //          insertIds.foreach {
-          //            case ((a, b, c, d), ids) => println(s"$a  $b  $c  $d  " + ids.toList)
-          //          }
-          val refId = insertIds((level, refPath1, refNs))(rowIndex)
-          //          printValue(rowIndex, ns, refAttr, -1, paramIndex, refId)
-          ps.setLong(paramIndex, refId)
-        }
-        addColSetter(refPath, ns, colSetter)
-      }
-
-    } else {
-      (_: Product) => {
-        // Empty row if no attributes in namespace in order to have an ide for join table
-        if (!paramIndexes.exists { case ((refPath2, ns1, _), _) => refPath2 == refPath && ns1 == ns }) {
-          // If current namespace has no attributes, then add an empty row with
-          // default null values (only to be referenced as the left side of the join table)
-          val emptyRowSetter: Setter = (ps: PS, insertIds: Map[(Int, List[String], String), Array[Long]], _: Int) => {
-            //            println("insertIds.length 1: " + insertIds.size)
-            ps.addBatch()
-          }
-          addColSetter(refPath, ns, emptyRowSetter)
-        }
-
-        // Join table setter
-        val joinSetter: Setter = (ps: PS, insertIds: Map[(Int, List[String], String), Array[Long]], rowIndex: Int) => {
-          //          println("insertIds.length 2: " + insertIds.size)
-          //          insertIds.foreach {
-          //            case ((a, b, c, d), ids) => println(s"$a  $b  $c  $d  " + ids.toList)
-          //          }
-          //          println(s"------------ $ns,  $refNs")
-          //          println("  " + refPath)
-          //          println("  " + refPath1)
-          val refId1 = insertIds((level, refPath, ns))(rowIndex)
-          val refId2 = insertIds((level, refPath1, refNs))(rowIndex)
-          //          println("id1: " + refId1)
-          //          println("id2: " + refId2)
-          ps.setLong(1, refId1)
-          ps.setLong(2, refId2)
-          ps.addBatch()
-        }
-        addColSetter(refPath, joinTable, joinSetter)
-      }
+      addColSetter(curPath, colSetter, scalaValue)
     }
   }
 
   override protected def addBackRef(backRefNs: String): Product => Unit = {
-    curRefPath = curRefPath.dropRight(2)
+    curRefPath = curRefPath.dropRight(2) // drop refAttr, refNs
     (_: Product) => ()
   }
 
@@ -256,43 +330,6 @@ trait Data_Insert
       case _ => (tpl: Product) =>
         e = e0
         composite2stmts(tpl.productElement(tplIndex).asInstanceOf[Product])
-    }
-  }
-
-  override protected def addNested(
-    nsMap: Map[String, MetaNs],
-    tplIndex: Int,
-    ns: String,
-    refAttr: String,
-    refNs: String,
-    nestedElements: List[Element]
-  ): Product => Unit = {
-    // Recursively resolve nested data
-    val nested2stmts = getResolver(nsMap, nestedElements)
-    countValueAttrs(nestedElements) match {
-      case 1 => // Nested arity-1 values
-        (tpl: Product) => {
-          val values       = tpl.productElement(tplIndex).asInstanceOf[Seq[Any]]
-          val nestedBaseId = e
-          values.foreach { value =>
-            e = nestedBaseId
-            val nestedTpl = Tuple1(value)
-            addRef(ns, refAttr, refNs, CardOne)(nestedTpl)
-            e0 = e
-            nested2stmts(nestedTpl)
-          }
-        }
-      case _ =>
-        (tpl: Product) => {
-          val nestedTpls   = tpl.productElement(tplIndex).asInstanceOf[Seq[Product]]
-          val nestedBaseId = e
-          nestedTpls.foreach { nestedTpl =>
-            e = nestedBaseId
-            addRef(ns, refAttr, refNs, CardOne)(nestedTpl)
-            e0 = e
-            nested2stmts(nestedTpl)
-          }
-        }
     }
   }
 
@@ -343,20 +380,5 @@ trait Data_Insert
           )
         case None              => () // no statement to insert
       }
-  }
-
-
-  private def printValue(
-    rowIndex: Int,
-    ns: String,
-    attr: String,
-    tplIndex0: Int,
-    paramIndex: Int,
-    value: Any
-  ): Unit = {
-    val fullAttr = s"$ns.$attr"
-    val pad      = padS(18, fullAttr)
-    val tplIndex = if (tplIndex0 == -1) "-" else tplIndex0
-    println(s"$rowIndex  $fullAttr$pad tplIndex: $tplIndex   paramIndex: $paramIndex   value: " + value)
   }
 }

@@ -23,7 +23,7 @@ trait Data_Insert
   ): Data = {
     initTxBase(elements, eidIndex)
     val (mainElements, txElements) = separateTxElements(elements)
-    val row2stmts                      = getResolver(nsMap, mainElements)
+    val row2stmts                  = getResolver(nsMap, mainElements)
     tpls.foreach { tpl =>
       e = newId
       e0 = e

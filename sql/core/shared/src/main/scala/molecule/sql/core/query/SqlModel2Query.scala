@@ -16,10 +16,10 @@ class SqlModel2Query[Tpl](elements0: List[Element])
     with ResolveRef[Tpl]
     //    with ResolveNestedPull[Tpl]
     with Base
-    //    with CastNestedBranch_[Tpl]
+    //    with CastNestedBranch_
     with CastRow2Tpl_
-    //    with CastNestedOptBranch_[Tpl]
-    //    with CastNestedOptLeaf_[Tpl]
+    //    with CastNestedOptBranch_
+    //    with CastNestedOptLeaf_
     //    with Nest[Tpl]
     with NestOpt_[Tpl]
 
@@ -34,7 +34,7 @@ class SqlModel2Query[Tpl](elements0: List[Element])
     val elements = if (altElements.isEmpty) elements0 else altElements
     validateQueryModel(elements)
 
-    elements.foreach(println)
+    //    elements.foreach(println)
 
     from = getInitialNonGenericNs(elements)
     exts += from -> None
@@ -110,12 +110,12 @@ class SqlModel2Query[Tpl](elements0: List[Element])
       elements match {
         case element :: tail =>
           element match {
-            case a: Attr       => prepare(tail, acc :+ prepareAttr(a))
-            case e: Composite  => prepare(tail, acc :+ prepareComposite(e))
-            case n: Nested     => prepare(tail, acc :+ prepareNested(n))
-            case n: NestedOpt  => prepare(tail, acc :+ prepareNestedOpt(n))
-            case t: TxData => prepare(tail, acc :+ prepareTxData(t))
-            case refOrBackRef  => prepare(tail, acc :+ refOrBackRef)
+            case a: Attr      => prepare(tail, acc :+ prepareAttr(a))
+            case e: Composite => prepare(tail, acc :+ prepareComposite(e))
+            case n: Nested    => prepare(tail, acc :+ prepareNested(n))
+            case n: NestedOpt => prepare(tail, acc :+ prepareNestedOpt(n))
+            case t: TxData    => prepare(tail, acc :+ prepareTxData(t))
+            case refOrBackRef => prepare(tail, acc :+ refOrBackRef)
           }
         case Nil             => acc
       }
@@ -188,7 +188,7 @@ class SqlModel2Query[Tpl](elements0: List[Element])
       case Composite(compositeElements)         => resolveComposite(compositeElements); resolve(tail)
       case Nested(ref, nestedElements)          => resolveNested(ref, nestedElements); resolve(tail)
       case NestedOpt(nestedRef, nestedElements) => resolveNestedOpt(nestedRef, nestedElements); resolve(tail)
-      case TxData(txElements)               => resolveTxData(txElements)
+      case TxData(txElements)                   => resolveTxData(txElements)
       case other                                => unexpectedElement(other)
     }
     case Nil             => ()

@@ -15,7 +15,7 @@ trait Data_Save
     with MoleculeLogging { self: SaveExtraction =>
 
   // Resolve after all back refs have been resolved and namespaces grouped
-  var resolvers = List.empty[() => Unit]
+  var postResolvers = List.empty[() => Unit]
 
   def getData(elements: List[Element]): Data = {
     //    elements.foreach(println)
@@ -23,78 +23,81 @@ trait Data_Save
     curRefPath = List(getInitialNs(elements))
     val (mainElements, _) = separateTxElements(elements)
     resolve(mainElements)
-    resolvers.foreach(_())
-    addRowSetters()
-    getInsertResolvers
+    postResolvers.foreach(_())
+    addRowSetterToTableInserts()
+    (getTableInserts, Nil)
   }
 
-  private def getInsertResolvers: List[Resolver] = {
-    // Add insert resolver to each table insert
-    tableCols.map { case (refPath, ns, _) =>
-      val rowSetters    = rowSettersMap(refPath, ns)
-      val resolveInsert = (ps: PS, insertIds: Map[(Int, List[String], String), Array[Long]], rowIndex: Int) => {
-        // Set all column values for this row in this insert/batch
-        rowSetters.foreach(rowSetter =>
-          rowSetter(ps, insertIds, rowIndex)
-        )
-      }
-      insertResolvers((refPath, ns)).copy(populatePS = resolveInsert)
-    }
-  }
-
-  private def addRowSetters(): Unit = {
-    tableCols.foreach {
-      case (refPath, ns, cols) =>
-        val stmt =
-          s"""INSERT INTO $ns (
+  private def addRowSetterToTableInserts(): Unit = {
+    inserts.foreach {
+      case (refPath, cols) =>
+        val table = refPath.last
+        val stmt  =
+          s"""INSERT INTO $table (
              |  ${cols.mkString(",\n  ")}
              |) VALUES (${cols.map(_ => "?").mkString(", ")})""".stripMargin
-        val ps   = sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
+        val ps    = sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
+        tableInserts(refPath) = TableInsert(refPath, stmt, ps)
 
-        insertResolvers((refPath, ns)) = Resolver(level, refPath, ns, stmt, ps)
-
-        val colSetters = colSettersMap(refPath, ns)
+        val colSetters = colSettersMap(refPath)
         //        println(s"----------------------  ${colSetters.length}  $refPath  $ns")
         //          println(stmt)
-        colSettersMap((refPath, ns)) = Nil
-        val resolveRow = (ps: PS, insertIds: Map[(Int, List[String], String), Array[Long]], _: Int) => {
+        colSettersMap(refPath) = Nil
+        val rowSetter = (ps: PS, idsMap: IdsMap, _: RowIndex) => {
           // Set all column values for this row in this insert/batch
           colSetters.foreach(colSetter =>
-            colSetter(ps, insertIds, 0)
+            colSetter(ps, idsMap, 0)
           )
           // Complete row
           ps.addBatch()
         }
-        rowSettersMap((refPath, ns)) = List(resolveRow)
+        rowSettersMap(refPath) = List(rowSetter)
     }
   }
 
+  private def getTableInserts: List[TableInsert] = {
+    // Add insert resolver to each table insert
+    inserts.map { case (refPath, _) =>
+      val rowSetters = rowSettersMap(refPath)
+      val populatePS = (ps: PS, idsMap: IdsMap, rowIndex: RowIndex) => {
+        // Set all column values for this row in this insert/batch
+        rowSetters.foreach(rowSetter =>
+          rowSetter(ps, idsMap, rowIndex)
+        )
+      }
+      tableInserts(refPath).copy(populatePS = populatePS)
+    }
+  }
+
+
   override protected def addV(ns: String, attr: String, optValue: Option[Any]): Unit = {
-    val refPath = curRefPath
-    if (tableCols.exists(_._1 == refPath)) {
-      tableCols = tableCols.map {
-        case (refPath1, ns1, cols) if refPath1 == refPath && ns1 == ns =>
-          paramIndexes = paramIndexes + ((refPath, ns, attr) -> (cols.length + 1))
-          (refPath1, ns, cols :+ attr)
-        case other                                                     =>
-          other
+    val curPath = curRefPath
+    if (inserts.exists(_._1 == curPath)) {
+      inserts = inserts.map {
+        case (path, cols) if path == curPath =>
+          paramIndexes += ((curPath, attr) -> (cols.length + 1))
+          (path, cols :+ attr)
+
+        case other => other
       }
     } else {
-      paramIndexes = paramIndexes + ((refPath, ns, attr) -> 1)
-      tableCols = tableCols :+ (refPath, ns, List(attr))
+      paramIndexes += (curPath, attr) -> 1
+      inserts = inserts :+ (curPath, List(attr))
     }
 
-    val paramIndex        = paramIndexes((refPath, ns, attr))
+    val paramIndex        = paramIndexes(curPath, attr)
     val colSetter: Setter = optValue.fold {
-      (ps: PS, _: Map[(Int, List[String], String), Array[Long]], _: Int) => {
+      (ps: PS, _: IdsMap, _: RowIndex) => {
         ps.setNull(paramIndex, 0)
+        printValue(0, ns, attr, -1, paramIndex, "None")
       }
     } { value =>
-      (ps: PS, _: Map[(Int, List[String], String), Array[Long]], _: Int) => {
+      (ps: PS, _: IdsMap, _: RowIndex) => {
         value.asInstanceOf[(PS, Int) => Unit](ps, paramIndex)
+        printValue(0, ns, attr, -1, paramIndex, value)
       }
     }
-    addColSetter(refPath, ns, colSetter)
+    addColSetter(curPath, colSetter)
   }
 
   override protected def addSet[T](ns: String, attr: String, optSet: Option[Set[T]]): Unit = {
@@ -108,88 +111,79 @@ trait Data_Save
 
   override protected def addRef(ns: String, refAttr: String, refNs: String, card: Card): Unit = {
     val joinTable = s"${ns}_${refAttr}_$refNs"
-    val refPath   = curRefPath
-    curRefPath = curRefPath ++ List(refAttr, refNs)
-    val refPath1 = curRefPath
+    val curPath   = curRefPath
 
-    if (tableCols.exists(_._1 == refPath)) {
+    if (inserts.exists(_._1 == curPath)) {
       // Add ref attribute to current namespace
-      tableCols = tableCols.map {
-        case (refPath1, ns1, cols) if card == CardOne && refPath1 == refPath && ns1 == ns =>
-          paramIndexes = paramIndexes + ((refPath, ns, refAttr) -> (cols.length + 1))
-          (refPath, ns, cols :+ refAttr)
+      inserts = inserts.map {
+        case (path, cols) if card == CardOne && path == curPath =>
+          paramIndexes += (curPath, refAttr) -> (cols.length + 1)
+          (curPath, cols :+ refAttr)
 
         case other => other
       }
 
     } else if (card == CardOne) {
       // Make card-one ref from current empty namespace
-      paramIndexes = paramIndexes + ((refPath, ns, refAttr) -> 1)
-      tableCols = tableCols :+ (refPath, ns, List(refAttr))
+      paramIndexes += (curPath, refAttr) -> 1
+      inserts = inserts :+ (curPath, List(refAttr))
 
     } else if (card == CardSet) {
       // ref to join table
       // Make card-many ref from current empty namespace
-      tableCols = tableCols :+ (refPath, ns, Nil)
+      inserts = inserts :+ (curPath, Nil)
     }
 
+    lazy val joinPath = curPath :+ joinTable
     if (card == CardSet) {
-      // join table
+      // join table with single row (treated as normal insert since there's only 1 join per row)
       val (id1, id2) = if (ns == refNs) (s"${ns}_1_id", s"${refNs}_2_id") else (s"${ns}_id", s"${refNs}_id")
-      tableCols = (refPath, joinTable, List(id1, id2)) +: tableCols
+      // When insertion order is reversed, this join table will be set after left and right has been inserted
+      inserts = (joinPath, List(id1, id2)) +: inserts
     }
 
     // Start new ref table
-    tableCols = tableCols :+ (refPath1, refNs, Nil)
+    val refPath = curRefPath ++ List(refAttr, refNs)
+    curRefPath = refPath
+    inserts = inserts :+ (refPath, Nil)
 
     if (card == CardOne) {
       // Card-one ref setter
-      val paramIndex = paramIndexes((refPath, ns, refAttr))
-      resolvers = resolvers :+ (() => {
-        val colSetter: Setter = (ps: PS, insertIds: Map[(Int, List[String], String), Array[Long]], rowIndex: Int) => {
-          //          println("insertIds.length 0: " + insertIds.size)
-          //          insertIds.foreach {
-          //            case ((a, b, c, d), ids) => println(s"$a  $b  $c  $d  " + ids.toList)
-          //          }
-          val refId = insertIds((level, refPath1, refNs))(rowIndex)
-          //          printValue(rowIndex, ns, refAttr, -1, paramIndex, refId)
+      val paramIndex = paramIndexes(curPath, refAttr)
+      postResolvers = postResolvers :+ (() => {
+        val colSetter: Setter = (ps: PS, idsMap: IdsMap, rowIndex: RowIndex) => {
+          val refId = idsMap(refPath)(rowIndex)
+          printValue(0, ns, refAttr, -1, paramIndex, refId)
           ps.setLong(paramIndex, refId)
         }
-        addColSetter(refPath, ns, colSetter)
+        addColSetter(curPath, colSetter)
       })
 
     } else {
 
-      resolvers = resolvers :+ (() => {
+      postResolvers = postResolvers :+ (() => {
         // Empty row if no attributes in namespace in order to have an id for join table
-        if (!paramIndexes.exists { case ((refPath2, ns1, _), _) => refPath2 == refPath && ns1 == ns }) {
+        if (!paramIndexes.exists { case ((path, _), _) => path == curPath }) {
           // If current namespace has no attributes, then add an empty row with
           // default null values (only to be referenced as the left side of the join table)
-          val emptyRowSetter: Setter = (ps: PS, insertIds: Map[(Int, List[String], String), Array[Long]], _: Int) => {
-            //          println("insertIds.length 1: " + insertIds.size)
+          val emptyRowSetter: Setter = (ps: PS, _: IdsMap, _: RowIndex) => {
             ps.addBatch()
           }
-          addColSetter(refPath, ns, emptyRowSetter)
+          addColSetter(curPath, emptyRowSetter)
         }
 
         // Join table setter
-        val joinSetter: Setter = (ps: PS, insertIds: Map[(Int, List[String], String), Array[Long]], rowIndex: Int) => {
-          //          println("insertIds.length 2: " + insertIds.size)
-          //          insertIds.foreach {
-          //            case ((a, b, c, d), ids) => println(s"$a  $b  $c  $d  " + ids.toList)
-          //          }
-          //          println(s"------------ $ns,  $refNs")
-          //          println("  " + refPath)
-          //          println("  " + refPath1)
-          val refId1 = insertIds((level, refPath, ns))(rowIndex)
-          val refId2 = insertIds((level, refPath1, refNs))(rowIndex)
+        val joinSetter: Setter = (ps: PS, idsMap: IdsMap, rowIndex: RowIndex) => {
+          val refId1 = idsMap(curPath)(rowIndex)
+          val refId2 = idsMap(refPath)(rowIndex)
+          //          println("-----------")
           //          println("id1: " + refId1)
           //          println("id2: " + refId2)
           ps.setLong(1, refId1)
           ps.setLong(2, refId2)
           ps.addBatch()
         }
-        addColSetter(refPath, joinTable, joinSetter)
+        addColSetter(joinPath, joinSetter)
       })
     }
   }

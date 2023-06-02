@@ -7,8 +7,8 @@
 //
 //
 //trait Nest[Tpl] { self: Model2Query
-//  with Base[Tpl]
-//  with CastNestedBranch_[Tpl] =>
+//  with Base
+//  with CastNestedBranch_ =>
 //
 //  private var row    : RowOLD = ??? //new jArrayList[AnyRef]()
 //  private var prevRow: RowOLD = ??? //new jArrayList[AnyRef]()

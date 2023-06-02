@@ -5,13 +5,13 @@ import molecule.core.spi.DataType
 
 trait JdbcDataType_JVM extends DataType {
 
-  // (level, refPath, table/ns) -> Array(ids)
-  type InsertIds = Map[(Int, List[String], String), Array[Long]]
+  // refPath -> Array(ids)
+  type IdsMap = Map[List[String], List[Long]]
 
   type RowIndex = Int
 
   // Setter to mutate PreparedStatement for each insertion
-  type Setter = (PS, InsertIds, RowIndex) => Unit
+  type Setter = (PS, IdsMap, RowIndex) => Unit
 
-  type Data = List[Resolver]
+  type Data = (List[TableInsert], List[JoinTableInsert])
 }

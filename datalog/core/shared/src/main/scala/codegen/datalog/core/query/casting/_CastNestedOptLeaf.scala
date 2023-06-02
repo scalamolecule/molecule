@@ -17,7 +17,7 @@ object _CastNestedOptLeaf extends DatomicGenBase("CastNestedOptLeaf", "/query/ca
        |
        |
        |trait $fileName_[Tpl]
-       |  extends CastRow2Tpl_[Tpl] with CastIt2Tpl_ { self: Model2Query with Base[Tpl] =>
+       |  extends CastRow2Tpl_ with CastIt2Tpl_ { self: Model2Query with Base =>
        |
        |  @tailrec
        |  final private def resolveArities(
