@@ -153,7 +153,7 @@ trait UpdateOne_uniqueAttr extends CoreTestSuite with ApiAsyncImplicits { self: 
     }
 
 
-    "Update tx data" - unique { implicit conn =>
+    "Update tx meta data" - unique { implicit conn =>
       for {
         _ <- Unique.int.i.Tx(Other.i_(42).s_("tx")).insert(0, 1).transact
         _ <- Unique.i.Tx(Other.i.s).query.get.map(_ ==> List((1, 42, "tx")))
@@ -163,7 +163,7 @@ trait UpdateOne_uniqueAttr extends CoreTestSuite with ApiAsyncImplicits { self: 
 
         _ <- Unique.int_(0).Tx(Other.s("tx3")).update.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> "Please apply the tx id to the namespace of tx data to be updated."
+          err ==> "Please apply the tx id to the namespace of tx meta data to be updated."
         }
 
         // We can though update the tx entity itself if it has a unique value (i has here)
@@ -173,7 +173,7 @@ trait UpdateOne_uniqueAttr extends CoreTestSuite with ApiAsyncImplicits { self: 
     }
 
 
-    "Composite + tx data" - unique { implicit conn =>
+    "Composite + tx meta data" - unique { implicit conn =>
       for {
         _ <- (Unique.int.i.s + Ref.i.s).Tx(Other.i_(42).s_("tx")).insert((0, 1, "a"), (2, "b")).transact
         _ <- (Unique.i.s + Ref.i.s).Tx(Other.i.s).query.get.map(_ ==> List(((1, "a"), (2, "b"), 42, "tx")))

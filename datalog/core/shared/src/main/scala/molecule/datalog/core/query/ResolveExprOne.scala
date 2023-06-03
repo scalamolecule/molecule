@@ -34,7 +34,7 @@ trait ResolveExprOne[Tpl]
 
   protected def resolveAttrOneTac(es: List[Var], attr: AttrOneTac): List[Var] = {
     val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
-    if (isNestedOpt && !isTxData)
+    if (isNestedOpt && !isTxMetaData)
       throw ModelError("Tacit attributes not allowed in optional nested queries. Found: " + a)
     attr match {
       case at: AttrOneTacString     => tac(attr, e, a, at.vs, resString)
@@ -108,7 +108,7 @@ trait ResolveExprOne[Tpl]
   }
   private def addSort(sorter: Option[(Int, Int => (Row, Row) => Int)]): Unit = {
     sorter.foreach {
-      case s if isTxData => sortss = (sortss.head :+ s) +: sortss.tail
+      case s if isTxMetaData => sortss = (sortss.head :+ s) +: sortss.tail
       case s                 => sortss = sortss.init :+ (sortss.last :+ s)
     }
   }

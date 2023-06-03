@@ -13,9 +13,9 @@ trait ModelUtils {
       case e :: tail => e match {
         case _: Mandatory@unchecked => count(tail, acc + 1)
         case _: Optional@unchecked  => count(tail, acc + 1)
-        case Composite(es)          => count(tail, acc + countComposite(es))
-        case TxData(es)             => count(tail, acc + countTxDataElements(es))
-        case _: Nested              => count(tail, acc + 1)
+        case Composite(es)  => count(tail, acc + countComposite(es))
+        case TxMetaData(es) => count(tail, acc + countTxMetaDataElements(es))
+        case _: Nested      => count(tail, acc + 1)
         case _: NestedOpt           => count(tail, acc + 1)
         case _                      => count(tail, acc)
       }
@@ -23,19 +23,19 @@ trait ModelUtils {
     }
   }
   private def countComposite(es: List[Element]): Int = count(es, 0).min(1)
-  private def countTxDataElements(es: List[Element]): Int = count(es, 0)
+  private def countTxMetaDataElements(es: List[Element]): Int = count(es, 0)
 
   protected def countValueAttrs(elements: List[Element]): Int = {
     count(elements, 0)
   }
 
 
-  protected def liftTxData(elements: List[Element]): List[Element] = {
+  protected def liftTxMetaData(elements: List[Element]): List[Element] = {
     elements.last match {
-      case Composite(es) if es.last.isInstanceOf[TxData] =>
-        // Lift TxData up to top level
+      case Composite(es) if es.last.isInstanceOf[TxMetaData] =>
+        // Lift TxMetaData up to top level
         elements.init :+ Composite(es.init) :+ es.last
-      case _                                             => elements
+      case _                                                 => elements
     }
   }
 
@@ -64,8 +64,8 @@ trait ModelUtils {
 
   def separateTxElements(elements: List[Element]): (List[Element], List[Element]) = {
     elements.last match {
-      case TxData(txElements) => (elements.init, txElements)
-      case _                  => (elements, Nil)
+      case TxMetaData(txElements) => (elements.init, txElements)
+      case _                      => (elements, Nil)
     }
   }
 }

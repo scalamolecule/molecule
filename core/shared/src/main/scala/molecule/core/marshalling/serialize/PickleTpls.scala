@@ -136,17 +136,17 @@ case class PickleTpls(
             case Seq(pickler) => resolvePicklers(tail, picklers :+ pickler, tplIndex + 1)
           }
 
-        case TxData(txDataElements) =>
-          // Tx data is last attribute values in top level tuple
-          // TxData is only pickled for queries. Inserts handle tx elements separately after all tpl inserts.
-          picklers ++ pickleTxData(txDataElements, tplIndex)
+        case TxMetaData(txDataElements) =>
+          // Tx meta data is last attribute values in top level tuple
+          // TxMetaData is only pickled for queries. Inserts handle tx elements separately after all tpl inserts.
+          picklers ++ pickleTxMetaData(txDataElements, tplIndex)
       }
       case Nil             => picklers
     }
   }
 
 
-  private def pickleTxData(
+  private def pickleTxMetaData(
     txDataElements: List[Element],
     tplIndex: Int
   ): List[Product => Unit] = {

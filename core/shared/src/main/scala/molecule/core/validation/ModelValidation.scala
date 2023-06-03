@@ -48,7 +48,7 @@ case class ModelValidation(
           }
           if (isTx && isInsert && !(a.isInstanceOf[AttrOneTac] || a.isInstanceOf[AttrSetTac])) {
             throw ModelError(
-              s"For inserts, tx data must be applied to tacit attributes, " +
+              s"For inserts, tx meta data must be applied to tacit attributes, " +
                 s"like ${attr}_(<metadata>)")
           }
           checkPath(a, attr)
@@ -110,7 +110,7 @@ case class ModelValidation(
           group = 0
           validate(es ++ tail)
 
-        case TxData(txElements) =>
+        case TxMetaData(txElements) =>
           curElements = txElements
           prev = prev :+ Array(Array.empty[String])
           level += 1

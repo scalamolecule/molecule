@@ -3,7 +3,7 @@ package molecule.sql.core.facade
 import java.util.Date
 
 /**
- * Facade to Datomic transaction report with convenience methods to access tx data.
+ * Facade to Datomic transaction report with convenience methods to access tx meta data.
  *
  * @param basisTbefore Datomic time point t on before Db
  * @param t            Transaction time t. Same as basis t on after Db

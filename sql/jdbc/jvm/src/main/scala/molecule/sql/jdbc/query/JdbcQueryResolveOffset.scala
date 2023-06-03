@@ -48,47 +48,42 @@ case class JdbcQueryResolveOffset[Tpl](
     if (offset.isDefined && limit.isDefined && limitSign != offsetSign) {
       throw ModelError("Limit and offset should both be positive or negative.")
     }
+    val sortedRows: Row = getRawData2(conn)
+    val totalCount = rowCount(sortedRows)
 
-    val rows = getRawData2(conn)
-    val row2tpl = castRow2AnyTpl(aritiess.head, castss.head, 1, None)
-    val tuples  = ListBuffer.empty[Tpl]
-    while (rows.next()) {
-      tuples += row2tpl(rows).asInstanceOf[Tpl]
+    if (isNested) {
+      val nestedRows    = rows2nested(sortedRows)
+      val toplevelCount = nestedRows.length
+      val fromUntil     = getFromUntil(toplevelCount, limit, offset)
+      val hasMore       = fromUntil.fold(totalCount > 0)(_._3)
+      (offsetList(nestedRows, fromUntil), toplevelCount, hasMore)
+
+    } else {
+      //      val fromUntil = getFromUntil(totalCount, limit, offset)
+      //      val hasMore   = fromUntil.fold(totalCount > 0)(_._3)
+      //      val tuples    = ListBuffer.empty[Tpl]
+      //          if (isNestedOpt) {
+      //            postAdjustPullCasts()
+      //            offsetRaw(sortedRows, fromUntil).forEach(row => tuples += pullRow2tpl(row))
+      //            (tuples.result(), totalCount, hasMore)
+      //
+      //          } else {
+      ////            postAdjustAritiess()
+      ////            val row2tpl = castRow2AnyTpl(aritiess.head, castss.head, 0, None)
+      ////            offsetRaw(sortedRows, fromUntil).forEach(row => tuples += row2tpl(row).asInstanceOf[Tpl])
+      ////            (tuples.result(), totalCount, hasMore)
+      //          }
+      val row2tpl = castRow2AnyTpl(aritiess.head, castss.head, 1, None)
+      val tuples  = ListBuffer.empty[Tpl]
+      while (sortedRows.next()) {
+        tuples += row2tpl(sortedRows).asInstanceOf[Tpl]
+      }
+//      val totalCount = tuples.size
+      val fromUntil  = getFromUntil(totalCount, limit, offset)
+      val hasMore    = fromUntil.fold(totalCount > 0)(_._3)
+      (tuples.result(), totalCount, hasMore)
+
     }
-    val totalCount = tuples.size
-    val fromUntil  = getFromUntil(totalCount, limit, offset)
-    val hasMore    = fromUntil.fold(totalCount > 0)(_._3)
-    (tuples.result(), totalCount, hasMore)
-
-
-    ////    val rows       = getRawData(conn, altDb = altDb)
-    //    val sortedRows = sortRows(tuples)
-    //    //    logger.debug(sortedRows.toArray().mkString("\n"))
-    //
-    //    if (isNested) {
-    //      val nestedRows    = rows2nested(sortedRows)
-    //      val toplevelCount = nestedRows.length
-    //      val fromUntil     = getFromUntil(toplevelCount, limit, offset)
-    //      val hasMore       = fromUntil.fold(totalCount > 0)(_._3)
-    //      (offsetList(nestedRows, fromUntil), toplevelCount, hasMore)
-    //
-    //    } else {
-    //      val fromUntil = getFromUntil(totalCount, limit, offset)
-    //      val hasMore   = fromUntil.fold(totalCount > 0)(_._3)
-    //      val tuples    = ListBuffer.empty[Tpl]
-    //
-    //      if (isNestedOpt) {
-    //        postAdjustPullCasts()
-    //        offsetRaw(sortedRows, fromUntil).forEach(row => tuples += pullRow2tpl(row))
-    //        (tuples.result(), totalCount, hasMore)
-    //
-    //      } else {
-    //        postAdjustAritiess()
-    //        val row2tpl = castRow2AnyTpl(aritiess.head, castss.head, 0, None)
-    //        offsetRaw(sortedRows, fromUntil).forEach(row => tuples += row2tpl(row).asInstanceOf[Tpl])
-    //        (tuples.result(), totalCount, hasMore)
-    //      }
-    //    }
 
 
     //    val res = getRawData2(conn)

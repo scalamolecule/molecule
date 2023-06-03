@@ -13,26 +13,26 @@ trait TxDelete extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
 
   override lazy val tests = Tests {
 
-    "tx data basics" - types { implicit conn =>
+    "tx meta data basics" - types { implicit conn =>
       for {
-        // Create entity with tx data.
+        // Create entity with tx meta data.
         txReport <- Ns.int(1).Tx(Other.i_(7)).save.transact
 
         // A base entity id is created.
         List(eid) = txReport.eids
         _ <- Ns.eid(eid).int.query.get.map(_.head ==> (eid, 1))
 
-        // The tx data is tied to the transaction id
+        // The tx meta data is tied to the transaction id
         tx = txReport.tx
         _ <- Other.eid(tx).i.query.get.map(_.head ==> (tx, 7))
 
-        // Since the base entity is tied to the transaction, we can query entity with tx data
+        // Since the base entity is tied to the transaction, we can query entity with tx meta data
         _ <- Ns.int.Tx(Other.i).query.get.map(_.head ==> (1, 7))
 
-        // Query entity without its tx data
+        // Query entity without its tx meta data
         _ <- Ns.int.query.get.map(_.head ==> 1)
 
-        // Query the tx data itself
+        // Query the tx meta data itself
         _ <- Other.i.query.get.map(_.head ==> 7)
 
         // Now delete the base entity
@@ -42,7 +42,7 @@ trait TxDelete extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
         _ <- Ns.int.query.get.map(_ ==> Nil)
         _ <- Ns.int.Tx(Other.i).query.get.map(_ ==> Nil)
 
-        // The tx data itself is not deleted though since it's tied
+        // The tx meta data itself is not deleted though since it's tied
         // to the initial transaction entity that still exists.
         _ <- Other.i.query.get.map(_.head ==> 7)
         _ <- Other.eid(tx).i.query.get.map(_.head ==> (tx, 7))
@@ -53,11 +53,11 @@ trait TxDelete extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
           err.getMessage ==> "Can't delete transaction id."
         }
 
-        // If we really want to delete the tx data, we'll need to delete the involved
+        // If we really want to delete the tx meta data, we'll need to delete the involved
         // attribute values by applying Nothing and then update
         _ <- Other(tx).i().update.transact
 
-        // Now the tx data is gone too
+        // Now the tx meta data is gone too
         _ <- Other.i.query.get.map(_ ==> Nil)
       } yield ()
     }

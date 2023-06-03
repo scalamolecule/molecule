@@ -16,11 +16,11 @@ class SqlModel2Query[Tpl](elements0: List[Element])
     with ResolveRef[Tpl]
     //    with ResolveNestedPull[Tpl]
     with Base
-    //    with CastNestedBranch_
+    with CastNestedBranch_
     with CastRow2Tpl_
-    //    with CastNestedOptBranch_
-    //    with CastNestedOptLeaf_
-    //    with Nest[Tpl]
+    //        with CastNestedOptBranch_
+    //        with CastNestedOptLeaf_
+    with Nest[Tpl]
     with NestOpt_[Tpl]
 
     with LambdasOne
@@ -113,9 +113,9 @@ class SqlModel2Query[Tpl](elements0: List[Element])
             case a: Attr      => prepare(tail, acc :+ prepareAttr(a))
             case e: Composite => prepare(tail, acc :+ prepareComposite(e))
             case n: Nested    => prepare(tail, acc :+ prepareNested(n))
-            case n: NestedOpt => prepare(tail, acc :+ prepareNestedOpt(n))
-            case t: TxData    => prepare(tail, acc :+ prepareTxData(t))
-            case refOrBackRef => prepare(tail, acc :+ refOrBackRef)
+            case n: NestedOpt  => prepare(tail, acc :+ prepareNestedOpt(n))
+            case t: TxMetaData => prepare(tail, acc :+ prepareTxMetaData(t))
+            case refOrBackRef  => prepare(tail, acc :+ refOrBackRef)
           }
         case Nil             => acc
       }
@@ -151,9 +151,9 @@ class SqlModel2Query[Tpl](elements0: List[Element])
     def prepareComposite(composite: Composite): Composite = Composite(prepare(composite.elements, Nil))
     def prepareNested(nested: Nested): Nested = Nested(nested.ref, prepare(nested.elements, Nil))
     def prepareNestedOpt(nested: NestedOpt): NestedOpt = NestedOpt(nested.ref, prepare(nested.elements, Nil))
-    def prepareTxData(t: TxData): TxData = {
+    def prepareTxMetaData(t: TxMetaData): TxMetaData = {
       addTxVar = true
-      TxData(prepare(t.elements, Nil))
+      TxMetaData(prepare(t.elements, Nil))
     }
 
     val elements1 = prepare(elements, Nil)
@@ -188,7 +188,7 @@ class SqlModel2Query[Tpl](elements0: List[Element])
       case Composite(compositeElements)         => resolveComposite(compositeElements); resolve(tail)
       case Nested(ref, nestedElements)          => resolveNested(ref, nestedElements); resolve(tail)
       case NestedOpt(nestedRef, nestedElements) => resolveNestedOpt(nestedRef, nestedElements); resolve(tail)
-      case TxData(txElements)                   => resolveTxData(txElements)
+      case TxMetaData(txElements)               => resolveTxMetaData(txElements)
       case other                                => unexpectedElement(other)
     }
     case Nil             => ()
@@ -222,7 +222,7 @@ class SqlModel2Query[Tpl](elements0: List[Element])
     }
     validateRefNs(nestedRef, nestedElements)
 
-    // On top level, move past nested pull date to tx data (if any)
+    // On top level, move past nested pull date to tx meta data (if any)
     sortAttrIndex += 1
 
     aritiesNested()
@@ -230,8 +230,8 @@ class SqlModel2Query[Tpl](elements0: List[Element])
     //    resolveNestedOptElements(e, nestedRef, nestedElements)
   }
 
-  final private def resolveTxData(txElements: List[Element]): Unit = {
-    isTxData = true
+  final private def resolveTxMetaData(txElements: List[Element]): Unit = {
+    isTxMetaData = true
     // Use txVar as first entity id var for composite elements
     firstEid = txVar
     resolve(txElements)

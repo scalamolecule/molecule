@@ -9,7 +9,7 @@ import molecule.core.transaction.ops.SaveOps
 import molecule.core.util.ModelUtils
 import scala.annotation.tailrec
 
-class SaveExtraction(isTxData: Boolean = false)
+class SaveExtraction(isTxMetaData: Boolean = false)
   extends ModelUtils with MoleculeLogging { self: SaveOps =>
 
   @tailrec
@@ -47,11 +47,11 @@ class SaveExtraction(isTxData: Boolean = false)
         )
         case Composite(compositeElements)     =>
           // Start from initial entity id for each composite sub group
-          handleComposite(isTxData)
+          handleComposite(isTxMetaData)
           resolve(compositeElements ++ tail)
 
-        case TxData(txElements) =>
-          handleTxData(getInitialNs(txElements))
+        case TxMetaData(txElements) =>
+          handleTxMetaData(getInitialNs(txElements))
           resolve(txElements) // tail is empty (no more attributes possible after Tx)
       }
       case Nil             => ()

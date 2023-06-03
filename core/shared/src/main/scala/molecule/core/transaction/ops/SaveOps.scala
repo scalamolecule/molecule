@@ -31,8 +31,8 @@ trait SaveOps extends Action2Data {
   ): Unit
 
   protected def handleNs(ns: String): Unit
-  protected def handleComposite(isInsertTxData: Boolean): Unit
-  protected def handleTxData(ns: String): Unit
+  protected def handleComposite(isInsertTxMetaData: Boolean): Unit
+  protected def handleTxMetaData(ns: String): Unit
 
   // Typed input value to expected db type
   protected lazy val valueString    : String => Any     = ???

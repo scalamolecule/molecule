@@ -107,7 +107,7 @@ trait UpdateOne_eid extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsyn
     }
 
 
-    "Update tx data" - types { implicit conn =>
+    "Update tx meta data" - types { implicit conn =>
       for {
         eid <- Ns.int.Tx(Other.s_("tx")).insert(1).transact.map(_.eid)
         _ <- Ns.int.Tx(Other.s).query.get.map(_ ==> List((1, "tx")))
@@ -118,7 +118,7 @@ trait UpdateOne_eid extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsyn
 
         _ <- Ns(eid).Tx(Other.s("tx3")).update.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> "Please apply the tx id to the namespace of tx data to be updated."
+          err ==> "Please apply the tx id to the namespace of tx meta data to be updated."
         }
 
         // We can though update the tx entity itself
@@ -128,7 +128,7 @@ trait UpdateOne_eid extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsyn
     }
 
 
-    "Composite + tx data" - types { implicit conn =>
+    "Composite + tx meta data" - types { implicit conn =>
       for {
         eid <- (Ns.int.string + Ref.i.s).Tx(Other.i_(42)).insert((1, "a"), (2, "b")).transact.map(_.eid)
         _ <- (Ns.int.string + Ref.i.s).Tx(Other.i).query.get.map(_ ==> List(((1, "a"), (2, "b"), 42)))

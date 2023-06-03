@@ -17,19 +17,19 @@ trait TxInsert extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
     "Basic" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
       for {
-        // Apply tx data to tacit tx attribute:
+        // Apply tx meta data to tacit tx attribute:
         _ <- Ns.int.Tx(Ns.string_("a")).insert(0).transact
 
-        // Data without tx data
+        // Data without tx meta data
         _ <- Ns.int.insert(1).transact
 
-        // All base data (without tx data)
+        // All base data (without tx meta data)
         _ <- Ns.int.query.get.map(_ ==> List(1, 0))
 
-        // Data with tx data
+        // Data with tx meta data
         _ <- Ns.int.Tx(Ns.string_).query.get.map(_ ==> List(0))
 
-        // Data without tx data
+        // Data without tx meta data
         _ <- Ns.int.Tx(Ns.string_()).query.get.map(_ ==> List(1))
 
         // Initial namespace(s) don't need to have a ref to tx namespaces
@@ -39,7 +39,7 @@ trait TxInsert extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
         _ <- Ns.int.Tx(Ref.s_).query.get.map(_ ==> List(2))
         _ <- Ns.int.Tx(Other.s_).query.get.map(_ ==> List(3))
 
-        // Base data with tx data
+        // Base data with tx meta data
         _ <- Ns.int.Tx(Ns.string).query.get.map(_ ==> List((0, "a")))
         _ <- Ns.int.Tx(Ref.s).query.get.map(_ ==> List((2, "b")))
         _ <- Ns.int.Tx(Other.s).query.get.map(_ ==> List((3, "c")))
@@ -351,7 +351,7 @@ trait TxInsert extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
     }
 
 
-    "Large tx data" - types { implicit conn =>
+    "Large tx meta data" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
       for {
         _ <- Ns.string.Tx(Ns
@@ -361,26 +361,26 @@ trait TxInsert extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
           .boolean_(boolean1)
           .date_(date1)
           .uuid_(uuid1)
-        ).insert("With tx data").transact
+        ).insert("With tx meta data").transact
 
-        // Add data without tx data
-        _ <- Ns.string.insert("Without tx data").transact
+        // Add data without tx meta data
+        _ <- Ns.string.insert("Without tx meta data").transact
 
-        // Data with and without tx data created
+        // Data with and without tx meta data created
         _ <- Ns.string.query.get.map(_ ==> List(
-          "Without tx data",
-          "With tx data",
+          "Without tx meta data",
+          "With tx meta data",
         ))
 
-        // Use transaction data to filter
-        _ <- Ns.string.Tx(Ns.int_(int1)).query.get.map(_ ==> List("With tx data"))
-        _ <- Ns.string.Tx(Ns.long_(long1)).query.get.map(_ ==> List("With tx data"))
-        _ <- Ns.string.Tx(Ns.double_(double1)).query.get.map(_ ==> List("With tx data"))
-        _ <- Ns.string.Tx(Ns.boolean_(boolean1)).query.get.map(_ ==> List("With tx data"))
-        _ <- Ns.string.Tx(Ns.date_(date1)).query.get.map(_ ==> List("With tx data"))
-        _ <- Ns.string.Tx(Ns.uuid_(uuid1)).query.get.map(_ ==> List("With tx data"))
+        // Use transaction meta data to filter
+        _ <- Ns.string.Tx(Ns.int_(int1)).query.get.map(_ ==> List("With tx meta data"))
+        _ <- Ns.string.Tx(Ns.long_(long1)).query.get.map(_ ==> List("With tx meta data"))
+        _ <- Ns.string.Tx(Ns.double_(double1)).query.get.map(_ ==> List("With tx meta data"))
+        _ <- Ns.string.Tx(Ns.boolean_(boolean1)).query.get.map(_ ==> List("With tx meta data"))
+        _ <- Ns.string.Tx(Ns.date_(date1)).query.get.map(_ ==> List("With tx meta data"))
+        _ <- Ns.string.Tx(Ns.uuid_(uuid1)).query.get.map(_ ==> List("With tx meta data"))
 
-        // All tx data present
+        // All tx meta data present
         _ <- Ns.string.Tx(Ns
           .int_(int1)
           .long_(long1)
@@ -388,32 +388,32 @@ trait TxInsert extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
           .boolean_(boolean1)
           .date_(date1)
           .uuid_(uuid1)
-        ).query.get.map(_ ==> List("With tx data"))
+        ).query.get.map(_ ==> List("With tx meta data"))
       } yield ()
     }
 
 
-    "Apply tx data to tacit attributes only" - types { implicit conn =>
+    "Apply tx meta data to tacit attributes only" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
       for {
         _ <- Ns.int.Tx(Ns.string).insert(0, "a").transact
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> s"For inserts, tx data must be applied to tacit attributes, like Ns.string_(<metadata>)"
+          err ==> s"For inserts, tx meta data must be applied to tacit attributes, like Ns.string_(<metadata>)"
         }
 
         _ <- Ns.int.Tx(Ns.string("a")).insert(List((0, "b"))).transact
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> s"For inserts, tx data must be applied to tacit attributes, like Ns.string_(<metadata>)"
+          err ==> s"For inserts, tx meta data must be applied to tacit attributes, like Ns.string_(<metadata>)"
         }
 
         _ <- Ns.int.Tx(Ns.string_?).insert(List((0, Some("b")))).transact
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> s"For inserts, tx data must be applied to tacit attributes, like Ns.string_(<metadata>)"
+          err ==> s"For inserts, tx meta data must be applied to tacit attributes, like Ns.string_(<metadata>)"
         }
 
         _ <- Ns.int.Tx(Ns.string_?(Some("a"))).insert(List((0, Some("b")))).transact
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> s"For inserts, tx data must be applied to tacit attributes, like Ns.string_(<metadata>)"
+          err ==> s"For inserts, tx meta data must be applied to tacit attributes, like Ns.string_(<metadata>)"
         }
 
         _ <- Ns.int.Tx(Ns.string_).insert(0).transact

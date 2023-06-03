@@ -31,7 +31,7 @@ object InsertValidation extends InsertValidationExtraction with InsertValidation
       val txInsertErrors = txModelErrors.zipWithIndex.map {
         case ((fullAttr, errors), i) => InsertError(0, i, fullAttr, errors, Nil)
       }
-      // Append a tx data errors row (with meta row index -1)
+      // Append a tx meta data errors row (with meta row index -1)
       Seq((-1, txInsertErrors))
     }
 

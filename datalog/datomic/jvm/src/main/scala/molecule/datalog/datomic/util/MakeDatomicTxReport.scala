@@ -48,7 +48,7 @@ object MakeDatomicTxReport {
       var txData       = false
       var datom: PeerDatom = null
       var e                = 0L
-      // Filter out tx data assertions
+      // Filter out tx meta data assertions
       while (!txData && datoms.hasNext) {
         datom = datoms.next
         e = datom.e().asInstanceOf[Long]

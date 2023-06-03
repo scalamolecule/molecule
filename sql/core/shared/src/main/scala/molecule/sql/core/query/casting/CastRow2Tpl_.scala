@@ -20,20 +20,21 @@ trait CastRow2Tpl_ { self: Model2Query with Base =>
       case List(1) :: as =>
         resolveArities(as, casts.tail, attrIndex + 1, acc :+ casts.head, nested)
 
-      //      // Nested
-      //      case List(-1) :: Nil =>
-      //        val cast = (_: Row) => nested.get
-      //        resolveArities(Nil, castsOLD, 0, acc :+ cast, None)
-      //
-      //      // Composite
-      //      case ii :: as =>
-      //        val n                     = ii.length
-      //        val (tplCasts, moreCasts) = castsOLD.splitAt(n)
-      //        val cast                  = castRow2AnyTpl(ii.map(List(_)), tplCasts, attrIndex, nested)
-      //        resolveArities(as, moreCasts, attrIndex + n, acc :+ cast, nested)
-      //
-      //      case Nil => acc
-      case _ => acc
+      // Nested
+      case List(-1) :: Nil =>
+        val cast = (_: Row, _: Int) => nested.get
+        resolveArities(Nil, casts, 0, acc :+ cast, None)
+
+      // Composite
+      case ii :: as =>
+        val n                          = ii.length
+        val (tplCasts, moreCasts)      = casts.splitAt(n)
+        //        val cast: (Row, Int) => AnyRef = castRow2AnyTpl(ii.map(List(_)), tplCasts, attrIndex, nested)
+        val cast: (Row, Int) => AnyRef = ???
+        resolveArities(as, moreCasts, attrIndex + n, acc :+ cast, nested)
+
+      case Nil => acc
+      //      case _ => acc
     }
   }
 

@@ -10,7 +10,7 @@ import molecule.core.spi.SpiAsync
 import utest._
 import scala.language.implicitConversions
 
-trait TxData extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
+trait TxMetaData extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
 
   override lazy val tests = Tests {
 
@@ -30,7 +30,7 @@ trait TxData extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
               )
         }
 
-        // Tx data invalid
+        // Tx meta data invalid
         _ <- Type.int(3).Tx(Enum.luckyNumber_(0)).save.transact
           .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
@@ -42,7 +42,7 @@ trait TxData extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
               )
         }
 
-        // Main data and tx data invalid
+        // Main data and tx meta data invalid
         _ <- Type.int(0).Tx(Enum.luckyNumber_(0)).save.transact
           .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
@@ -91,7 +91,7 @@ trait TxData extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
             )
         }
 
-        // Tx data invalid
+        // Tx meta data invalid
         _ <- Type.int.Tx(Enum.luckyNumber_(0)).insert(
           10,
           11
@@ -100,7 +100,7 @@ trait TxData extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
           case InsertErrors(indexedInsertErrors, _) =>
             indexedInsertErrors ==> Seq(
               (
-                -1, // Appended tx data errors row
+                -1, // Appended tx meta data errors row
                 Seq(
                   InsertError(
                     0, // Composite tuple index
@@ -117,7 +117,7 @@ trait TxData extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
         }
 
 
-        // Main data and tx data invalid
+        // Main data and tx meta data invalid
         _ <- Type.int.Tx(Enum.luckyNumber_(0)).insert(
           10,
           -1
@@ -142,7 +142,7 @@ trait TxData extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
                 )
               ),
               (
-                -1, // Appended tx data errors row
+                -1, // Appended tx meta data errors row
                 Seq(
                   InsertError(
                     0, // Composite tuple index
@@ -163,10 +163,10 @@ trait TxData extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
 
     "Update" - validation { implicit conn =>
       for {
-        // Save valid tx data and get transaction entity id
+        // Save valid tx meta data and get transaction entity id
         tx <- Type.int(3).Tx(Enum.luckyNumber_(7)).save.transact.map(_.tx)
 
-        // Update transaction data with invalid value
+        // Update transaction meta data with invalid value
         // (like updating any other values)
         _ <- Enum(tx).luckyNumber(2).update.transact
           .map(_ ==> "Unexpected success").recover {

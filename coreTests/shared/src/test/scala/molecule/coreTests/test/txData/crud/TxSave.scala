@@ -53,7 +53,7 @@ trait TxSave extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
     }
 
 
-    "Ref + tx data" - refs { implicit conn =>
+    "Ref + tx meta data" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
         _ <- A.i(0).B.i(1).Tx(C.i(2)).save.transact
@@ -62,7 +62,7 @@ trait TxSave extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
     }
 
 
-    "Refs + tx data" - refs { implicit conn =>
+    "Refs + tx meta data" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
         _ <- A.i(0).B.i(1).C.i(2).Tx(D.i(3)).save.transact
@@ -71,7 +71,7 @@ trait TxSave extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
     }
 
 
-    "Ref + tx data composites" - refs { implicit conn =>
+    "Ref + tx meta data composites" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
         _ <- A.i(0).B.i(1).Tx(C.i(2) + D.i(3)).save.transact
@@ -80,7 +80,7 @@ trait TxSave extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
     }
 
 
-    "Refs + tx data composites" - refs { implicit conn =>
+    "Refs + tx meta data composites" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
         _ <- A.i(0).B.i(1).C.i(2).Tx(D.i(3) + E.i(4)).save.transact
@@ -91,15 +91,15 @@ trait TxSave extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
 
     "Tx refs" - refs { implicit conn =>
       for {
-        // Saving tx data (Ref.s) that references another namespace attribute (Ref1.int1)
+        // Saving tx meta data (Ref.s) that references another namespace attribute (Ref1.int1)
         _ <- A.i(1).Tx(B.s("a").C.i(10)).save.transact
 
-        // tx data with ref attr
+        // tx meta data with ref attr
         _ <- A.i.Tx(B.s.C.i).query.get.map(_ ==> List(
           (1, "a", 10)
         ))
 
-        // tx data
+        // tx meta data
         _ <- A.i.Tx(B.s).query.get.map(_ ==> List(
           (1, "a")
         ))

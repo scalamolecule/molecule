@@ -1,5 +1,6 @@
 package molecule.sql.core.query
 
+import java.sql.ResultSet
 import java.util.{Iterator => jIterator, List => jList}
 import molecule.base.error._
 import molecule.base.util.BaseHelpers
@@ -12,6 +13,8 @@ import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 
 trait Base extends BaseHelpers with JavaConversions { self: Model2Query =>
 
+  // This type represents both all rows and the individual row where the
+  // internal cursor is positioned
   type Row = java.sql.ResultSet
 
   type RowOLD = jList[AnyRef]
@@ -21,6 +24,14 @@ trait Base extends BaseHelpers with JavaConversions { self: Model2Query =>
 
   // Datomic attribute name (ex :Person/name)
   type Att = String
+
+
+  def rowCount(rows: ResultSet): Int = {
+    rows.last()
+    val size = rows.getRow
+    rows.first()
+    size
+  }
 
   // Query clause optimization weights
   final protected val wGround         = 1
@@ -44,7 +55,7 @@ trait Base extends BaseHelpers with JavaConversions { self: Model2Query =>
   final protected var isNested      = false
   final protected var isNestedOpt   = false
   final protected var isComposite   = false
-  final protected var isTxData  = false
+  final protected var isTxMetaData  = false
   final protected var isTxComposite = false
 
   final protected val nestedIds    = new ArrayBuffer[String]
@@ -113,21 +124,21 @@ trait Base extends BaseHelpers with JavaConversions { self: Model2Query =>
 
 
   final protected def addCast(cast: (Row, Int) => AnyRef): Unit = {
-    if (isTxData)
+    if (isTxMetaData)
       castss = (castss.head :+ cast) :: castss.tail
     else
       castss = castss.init :+ (castss.last :+ cast)
   }
 
   final protected def addCastOLD(cast: AnyRef => AnyRef): Unit = {
-    if (isTxData)
+    if (isTxMetaData)
       castssOLD = (castssOLD.head :+ cast) :: castssOLD.tail
     else
       castssOLD = castssOLD.init :+ (castssOLD.last :+ cast)
   }
 
   final protected def removeLastCast(): Unit = {
-    if (isTxData)
+    if (isTxMetaData)
       castssOLD = castssOLD.head.init :: castssOLD.tail
     else {
       castssOLD = castssOLD.init :+ castssOLD.last.init
@@ -151,12 +162,12 @@ trait Base extends BaseHelpers with JavaConversions { self: Model2Query =>
   }
 
   final protected def aritiesComposite(): Unit = {
-    if (isTxData) {
+    if (isTxMetaData) {
       isTxComposite = true
     } else {
       isComposite = true
     }
-    if (isTxData) {
+    if (isTxMetaData) {
       aritiess = (aritiess.head :+ Nil) :: aritiess.tail
     } else {
       aritiess = aritiess.init :+ (aritiess.last :+ Nil)
@@ -164,7 +175,7 @@ trait Base extends BaseHelpers with JavaConversions { self: Model2Query =>
   }
 
   final protected def aritiesAttr(): Unit = {
-    if (isTxData) {
+    if (isTxMetaData) {
       // Top level
       if (isTxComposite) {
         // Increase last arity

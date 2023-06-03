@@ -194,7 +194,7 @@ case class DatomicQueryResolveCursor[Tpl](
 
             case Composite(elements) => checkSort(elements ++ tail, strategy, tokens, i, rowHashes)
 
-            // Only top level sorting - ignore nested and tx data
+            // Only top level sorting - ignore nested and tx meta data
             case _ => checkSort(tail, strategy, tokens, i, rowHashes)
           }
 

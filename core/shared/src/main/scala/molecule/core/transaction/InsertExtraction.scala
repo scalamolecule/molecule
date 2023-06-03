@@ -39,7 +39,7 @@ class InsertExtraction extends InsertResolvers_ with InsertValidators_ { self: I
                   resolveAttrOneOpt(a, tplIndex), outerTpl, tplIndex + 1)
 
                 case a: AttrOneTac => throw new Exception(
-                  "Can't use tacit attributes in insert molecule (except in tx data part). Found: " + a
+                  "Can't use tacit attributes in insert molecule (except in tx meta data part). Found: " + a
                 )
               }
             case a: AttrSet =>
@@ -53,7 +53,7 @@ class InsertExtraction extends InsertResolvers_ with InsertValidators_ { self: I
                   resolveAttrSetOpt(a, tplIndex), outerTpl, tplIndex + 1)
 
                 case a: AttrSetTac => throw new Exception(
-                  "Can't use tacit attributes in insert molecule (except in tx data part). Found: " + a
+                  "Can't use tacit attributes in insert molecule (except in tx meta data part). Found: " + a
                 )
               }
             case a          => throw new Exception("Attribute family not implemented for " + a)
@@ -89,7 +89,7 @@ class InsertExtraction extends InsertResolvers_ with InsertValidators_ { self: I
           resolve(nsMap, tail, resolvers :+
             addNested(nsMap, tplIndex, ns, refAttr, refNs, nestedElements), 0, tplIndex)
 
-        // TxData is handled separately in Insert_stmts with call to save_stmts
+        // TxMetaData is handled separately in Insert_stmts with call to save_stmts
 
         case other => throw ModelError("Unexpected element: " + other)
       }

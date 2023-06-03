@@ -115,8 +115,8 @@ object Save2insert {
           //          es2list(tail, es2, vs, i)
           ???
 
-        case TxData(txElements) =>
-          //          handleTxData()
+        case TxMetaData(txElements) =>
+          //          handleTxMetaData()
           //          resolve(txElements) // tail is empty (no more attributes possible after Tx)
           ???
       }

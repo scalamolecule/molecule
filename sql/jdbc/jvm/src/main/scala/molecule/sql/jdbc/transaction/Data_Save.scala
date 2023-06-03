@@ -195,10 +195,10 @@ trait Data_Save
   override protected def handleNs(ns: String): Unit = {
     //    backRefs = backRefs + (ns -> e)
   }
-  override protected def handleComposite(isInsertTxData: Boolean): Unit = {
-    //    e = if (isInsertTxData) datomicTx else e0
+  override protected def handleComposite(isInsertTxMetaData: Boolean): Unit = {
+    //    e = if (isInsertTxMetaData) datomicTx else e0
   }
-  override protected def handleTxData(ns: String): Unit = {
+  override protected def handleTxMetaData(ns: String): Unit = {
     //    e = datomicTx
     //    e0 = datomicTx
   }

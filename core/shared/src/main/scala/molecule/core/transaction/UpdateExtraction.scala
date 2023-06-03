@@ -54,9 +54,9 @@ class UpdateExtraction(
           val (eids1, filters1, data1) = extractSubElements(es)
           resolve(tail, eids ++ eids1, filterElements ++ filters1, data ++ data1)
 
-        case TxData(es) =>
+        case TxMetaData(es) =>
           if (data.isEmpty) {
-            throw ModelError(s"Please apply the tx id to the namespace of tx data to be updated.")
+            throw ModelError(s"Please apply the tx id to the namespace of tx meta data to be updated.")
           }
           val (eids1, filters1, data1) = extractSubElements(es)
           resolve(tail, eids ++ eids1, filterElements ++ filters1, (data :+ ("tx", null, null, Nil, false)) ++ data1)

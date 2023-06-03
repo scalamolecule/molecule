@@ -43,7 +43,7 @@ trait Base extends BaseHelpers with JavaConversions { self: Model2Query =>
   final protected var isNested      = false
   final protected var isNestedOpt   = false
   final protected var isComposite   = false
-  final protected var isTxData  = false
+  final protected var isTxMetaData  = false
   final protected var isTxComposite = false
 
   final protected val nestedIds    = new ArrayBuffer[String]
@@ -94,14 +94,14 @@ trait Base extends BaseHelpers with JavaConversions { self: Model2Query =>
   final protected var addTxVar: Boolean = false
 
   final protected def addCast(cast: AnyRef => AnyRef): Unit = {
-    if (isTxData)
+    if (isTxMetaData)
       castss = (castss.head :+ cast) :: castss.tail
     else
       castss = castss.init :+ (castss.last :+ cast)
   }
 
   final protected def removeLastCast(): Unit = {
-    if (isTxData)
+    if (isTxMetaData)
       castss = castss.head.init :: castss.tail
     else {
       castss = castss.init :+ castss.last.init
@@ -125,12 +125,12 @@ trait Base extends BaseHelpers with JavaConversions { self: Model2Query =>
   }
 
   final protected def aritiesComposite(): Unit = {
-    if (isTxData) {
+    if (isTxMetaData) {
       isTxComposite = true
     } else {
       isComposite = true
     }
-    if (isTxData) {
+    if (isTxMetaData) {
       aritiess = (aritiess.head :+ Nil) :: aritiess.tail
     } else {
       aritiess = aritiess.init :+ (aritiess.last :+ Nil)
@@ -138,7 +138,7 @@ trait Base extends BaseHelpers with JavaConversions { self: Model2Query =>
   }
 
   final protected def aritiesAttr(): Unit = {
-    if (isTxData) {
+    if (isTxMetaData) {
       // Top level
       if (isTxComposite) {
         // Increase last arity

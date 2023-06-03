@@ -184,7 +184,7 @@ object Boopicklers extends MoleculeLogging {
   pickleElement.addConcreteType[Composite]
   pickleElement.addConcreteType[Nested]
   pickleElement.addConcreteType[NestedOpt]
-  pickleElement.addConcreteType[TxData]
+  pickleElement.addConcreteType[TxMetaData]
 
   pickleElement.addConcreteType[AttrOneManString]
   pickleElement.addConcreteType[AttrOneManInt]

@@ -9,14 +9,14 @@ import molecule.core.spi.SpiAsync
 import utest._
 
 
-trait SortTxData extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
+trait SortTxMetaData extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
 
 
   override lazy val tests = Tests {
 
     "flat" - refs { implicit conn =>
       for {
-        // 2 transactions with different tx data
+        // 2 transactions with different tx meta data
         _ <- A.i.Tx(B.s_("A")).insert(1, 2).transact
         _ <- A.i.Tx(B.s_("B")).insert(1, 2).transact
 
@@ -681,7 +681,7 @@ trait SortTxData extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  
         ))
 
         // + previous
-        // Note that attributes before nested and after (in tx data) are on the
+        // Note that attributes before nested and after (in tx meta data) are on the
         // same level. Sort indexes should therefore increase across these attributes.
         // That's why we start with `A.s.d2` which should be sorted after `Tx.C.s.d1`
         _ <- A.s.d2.Bb.*?(B.i.d3.C.i.d2.s.d1.Dd.*?(D.i.d1))

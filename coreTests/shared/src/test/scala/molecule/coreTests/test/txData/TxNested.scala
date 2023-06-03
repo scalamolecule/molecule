@@ -74,7 +74,7 @@ trait TxNested extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
       } yield ()
     }
 
-    "Nested ref + flat tx data" - refs { implicit conn =>
+    "Nested ref + flat tx meta data" - refs { implicit conn =>
       for {
         _ <- A.s.Bb.*(B.i_?.C.i_?.s).Tx(D.i_(1)).insert(List(
           ("A", List((Some(11), Some(12), "a"))),
@@ -95,7 +95,7 @@ trait TxNested extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
     }
 
 
-    "Nested ref + composite tx data" - refs { implicit conn =>
+    "Nested ref + composite tx meta data" - refs { implicit conn =>
       for {
         _ <- A.s.Bb.*(B.i_?.C.i_?.s).Tx(E.i_(7777) + D.i_(8888).s_("meta")).insert(List(
           ("A", List((Some(11), Some(12), "a"), (None, Some(120), "aa"))),
@@ -123,7 +123,7 @@ trait TxNested extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
     }
 
 
-    "Nested, with empty tx data composites" - refs { implicit conn =>
+    "Nested, with empty tx meta data composites" - refs { implicit conn =>
       for {
         _ <- A.s.i.Bb.*(B.i).Tx(F.s_("x").i_(4) + E.i_(5)).insert(
           "a", 1, List(2, 3)
@@ -184,7 +184,7 @@ trait TxNested extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
     }
 
 
-    "Nested ref + composite tx data with ref" - refs { implicit conn =>
+    "Nested ref + composite tx meta data with ref" - refs { implicit conn =>
       for {
         _ <- m(A.s.Bb.*(B.i.C.i.s.Dd.*(D.i))
           .Tx(F.s_("b").i_(5).G.s_("c") + E.i_(6).s_("d"))).insert(List(

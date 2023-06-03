@@ -11,8 +11,8 @@ import utest._
 trait CompositeBasic extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
 
   // For more complex structures, see:
-  // crud.save.SaveTxData
-  // crud.insert.InsertTxData
+  // crud.save.SaveTxMetaData
+  // crud.insert.InsertTxMetaData
 
   override lazy val tests = Tests {
 

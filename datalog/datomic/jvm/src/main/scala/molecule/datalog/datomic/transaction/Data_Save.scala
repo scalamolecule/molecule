@@ -73,10 +73,10 @@ trait Data_Save extends DatomicTxBase_JVM with SaveOps with MoleculeLogging { se
   override protected def handleNs(ns: String): Unit = {
     backRefs = backRefs + (ns -> e)
   }
-  override protected def handleComposite(isInsertTxData: Boolean): Unit = {
-    e = if (isInsertTxData) datomicTx else e0
+  override protected def handleComposite(isInsertTxMetaData: Boolean): Unit = {
+    e = if (isInsertTxMetaData) datomicTx else e0
   }
-  override protected def handleTxData(ns: String): Unit = {
+  override protected def handleTxMetaData(ns: String): Unit = {
     e = datomicTx
     e0 = datomicTx
     handleNs(ns)
