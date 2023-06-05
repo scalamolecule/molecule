@@ -84,13 +84,8 @@ trait JdbcTxBase_JVM extends JdbcDataType_JVM with ModelUtils {
   protected val rightCountsMap   = mutable.Map.empty[List[String], List[Int]]
 
 
-  protected def addColSetter(
-    refPath: List[String],
-    colSetter: Setter,
-    v: Any = 42
-  ) = {
+  protected def addColSetter(refPath: List[String], colSetter: Setter) = {
     // Cache colSetter for this table
-    //    colSettersMap.get((refPath, ns)).fold[Unit](
     colSettersMap.get(refPath).fold[Unit](
       colSettersMap.addOne(refPath -> List(colSetter))
     )(colSetters =>

@@ -4,14 +4,12 @@ import java.lang.{Long => jLong}
 import java.sql.ResultSet
 import molecule.core.query.Model2Query
 import molecule.sql.core.query.Base
+import scala.collection.immutable.List
 
 
 trait Nest[Tpl] { self: Model2Query
   with Base
   with CastNestedBranch_ =>
-
-  private var row    : Row = _
-  private var prevRow: Row = _
 
   // Previous entity ids on each level
   private var p0: jLong = 0L
@@ -36,8 +34,8 @@ trait Nest[Tpl] { self: Model2Query
   private lazy val nestedLevels = castss.length - 1
   private lazy val txAttrs      = aritiess.head.flatten.dropWhile(_ != -1).tail.sum
 
-  // First row index for each level
-  private lazy val i0 = nestedLevels
+  // First attr index for each level
+  private lazy val i0 = 1 + nestedLevels // 1-based indexes for jdbc ResultSet
   private lazy val i1 = i0 + aritiess.head.flatten.takeWhile(_ != -1).sum
   private lazy val i2 = i1 + aritiess(1).flatten.takeWhile(_ != -1).sum
   private lazy val i3 = i2 + aritiess(2).flatten.takeWhile(_ != -1).sum
@@ -46,14 +44,15 @@ trait Nest[Tpl] { self: Model2Query
   private lazy val i6 = i5 + aritiess(5).flatten.takeWhile(_ != -1).sum
   private lazy val i7 = i6 + aritiess(6).flatten.takeWhile(_ != -1).sum
 
-  private lazy val rowIndexTx                          = rowCount(row) - txAttrs
-  private lazy val tplBranch0: (Row, List[Any]) => Tpl = castBranch[Tpl](aritiess(0), castss(0), i0, rowIndexTx)
-  private lazy val tplBranch1: (Row, List[Any]) => Any = castBranch[Any](aritiess(1), castss(1), i1, 0)
-  private lazy val tplBranch2: (Row, List[Any]) => Any = castBranch[Any](aritiess(2), castss(2), i2, 0)
-  private lazy val tplBranch3: (Row, List[Any]) => Any = castBranch[Any](aritiess(3), castss(3), i3, 0)
-  private lazy val tplBranch4: (Row, List[Any]) => Any = castBranch[Any](aritiess(4), castss(4), i4, 0)
-  private lazy val tplBranch5: (Row, List[Any]) => Any = castBranch[Any](aritiess(5), castss(5), i5, 0)
-  private lazy val tplBranch6: (Row, List[Any]) => Any = castBranch[Any](aritiess(6), castss(6), i6, 0)
+  private var rowCount                                  = -1
+  private lazy val rowIndexTx                           = 1 + rowCount - txAttrs // 1-based indexes for jdbc ResultSet
+  private lazy val tplBranch0: (Row, NestedTpls) => Tpl = castBranch[Tpl](aritiess(0), castss(0), i0, rowIndexTx)
+  private lazy val tplBranch1: (Row, NestedTpls) => Any = castBranch[Any](aritiess(1), castss(1), i1, 0)
+  private lazy val tplBranch2: (Row, NestedTpls) => Any = castBranch[Any](aritiess(2), castss(2), i2, 0)
+  private lazy val tplBranch3: (Row, NestedTpls) => Any = castBranch[Any](aritiess(3), castss(3), i3, 0)
+  private lazy val tplBranch4: (Row, NestedTpls) => Any = castBranch[Any](aritiess(4), castss(4), i4, 0)
+  private lazy val tplBranch5: (Row, NestedTpls) => Any = castBranch[Any](aritiess(5), castss(5), i5, 0)
+  private lazy val tplBranch6: (Row, NestedTpls) => Any = castBranch[Any](aritiess(6), castss(6), i6, 0)
 
   private lazy val tplLeaf1: Row => Any = castRow2AnyTpl(aritiess(1), castss(1), i1, None)
   private lazy val tplLeaf2: Row => Any = castRow2AnyTpl(aritiess(2), castss(2), i2, None)
@@ -87,613 +86,684 @@ trait Nest[Tpl] { self: Model2Query
 
 
   final private def rows2nested1(rows: ResultSet): List[Tpl] = {
-    val size = rowCount(rows)
-    if (size == 1) {
-      rows.next()
-      row = rows
-      List(tplBranch0(row,
-        List(tplLeaf1(row))))
+    rowCount = getRowCount(rows)
+
+    if (rowCount == 1) {
+      rows.first()
+      acc1 = List(tplLeaf1(rows))
+      acc0 = List(tplBranch0(rows, acc1))
 
     } else {
+      rows.afterLast()
       while (rows.previous()) {
-        row = rows
-        e0 = row.getLong(0)
+        e0 = rows.getLong(1)
         if (nextRow) {
-          if (row.isFirst) {
+          if (rows.isFirst) { // last going backwards
             if (e0 != p0) {
-              acc0 = tplBranch0(prevRow, acc1) :: acc0
+              // Use previous row (going backwards)
+              rows.next()
+              acc0 = tplBranch0(rows, acc1) :: acc0
+              rows.previous()
 
-              acc1 = List(tplLeaf1(row))
-              acc0 = tplBranch0(row, acc1) :: acc0
+              acc1 = List(tplLeaf1(rows))
+              acc0 = tplBranch0(rows, acc1) :: acc0
 
             } else /* e1 != p1 */ {
-              acc1 = tplLeaf1(row) :: acc1
-              acc0 = tplBranch0(row, acc1) :: acc0
+              acc1 = tplLeaf1(rows) :: acc1
+              acc0 = tplBranch0(rows, acc1) :: acc0
             }
 
           } else if (e0 != p0) {
-            acc0 = tplBranch0(prevRow, acc1) :: acc0
+            // Use previous row (going backwards)
+            rows.next()
+            acc0 = tplBranch0(rows, acc1) :: acc0
+            rows.previous()
 
-            acc1 = List(tplLeaf1(row))
+            acc1 = List(tplLeaf1(rows))
 
           } else /* e1 != p1 */ {
-            acc1 = tplLeaf1(row) :: acc1
+            acc1 = tplLeaf1(rows) :: acc1
           }
         } else {
-          acc1 = List(tplLeaf1(row))
+          acc1 = List(tplLeaf1(rows))
           nextRow = true
         }
-        prevRow = row
         p0 = e0
       }
-      acc0
     }
+    acc0
   }
 
 
   final private def rows2nested2(rows: ResultSet): List[Tpl] = {
-    val size = rowCount(rows)
-    if (size == 1) {
-      rows.next()
-      row = rows
-      List(tplBranch0(row,
-        List(tplBranch1(row,
-          List(tplLeaf2(row))))))
+    rowCount = getRowCount(rows)
+
+    if (rowCount == 1) {
+      rows.first()
+      acc2 = List(tplLeaf2(rows))
+      acc1 = List(tplBranch1(rows, acc2))
+      acc0 = List(tplBranch0(rows, acc1))
 
     } else {
+      rows.afterLast()
       while (rows.previous()) {
-        row = rows
-        e0 = row.getLong(0)
-        e1 = row.getLong(1)
+        e0 = rows.getLong(1)
+        e1 = rows.getLong(2)
 
         if (nextRow) {
-          if (row.isFirst) {
+          if (rows.isFirst) {
             if (e0 != p0) {
-              acc1 = tplBranch1(prevRow, acc2) :: acc1
-              acc0 = tplBranch0(prevRow, acc1) :: acc0
+              rows.next()
+              acc1 = tplBranch1(rows, acc2) :: acc1
+              acc0 = tplBranch0(rows, acc1) :: acc0
+              rows.previous()
 
-              acc2 = List(tplLeaf2(row))
-              acc1 = List(tplBranch1(row, acc2))
-              acc0 = tplBranch0(row, acc1) :: acc0
+              acc2 = List(tplLeaf2(rows))
+              acc1 = List(tplBranch1(rows, acc2))
+              acc0 = tplBranch0(rows, acc1) :: acc0
 
             } else if (e1 != p1) {
-              acc1 = tplBranch1(prevRow, acc2) :: acc1
+              rows.next()
+              acc1 = tplBranch1(rows, acc2) :: acc1
+              rows.previous()
 
-              acc2 = List(tplLeaf2(row))
-              acc1 = tplBranch1(row, acc2) :: acc1
-              acc0 = tplBranch0(row, acc1) :: acc0
+              acc2 = List(tplLeaf2(rows))
+              acc1 = tplBranch1(rows, acc2) :: acc1
+              acc0 = tplBranch0(rows, acc1) :: acc0
 
             } else /* e2 != p2 */ {
-              acc2 = tplLeaf2(row) :: acc2
-              acc1 = tplBranch1(row, acc2) :: acc1
-              acc0 = tplBranch0(row, acc1) :: acc0
+              acc2 = tplLeaf2(rows) :: acc2
+              acc1 = tplBranch1(rows, acc2) :: acc1
+              acc0 = tplBranch0(rows, acc1) :: acc0
             }
 
           } else if (e0 != p0) {
-            acc1 = tplBranch1(prevRow, acc2) :: acc1
-            acc0 = tplBranch0(prevRow, acc1) :: acc0
+            rows.next()
+            acc1 = tplBranch1(rows, acc2) :: acc1
+            acc0 = tplBranch0(rows, acc1) :: acc0
+            rows.previous()
 
-            acc2 = List(tplLeaf2(row))
+            acc2 = List(tplLeaf2(rows))
             acc1 = Nil
 
           } else if (e1 != p1) {
-            acc1 = tplBranch1(prevRow, acc2) :: acc1
+            rows.next()
+            acc1 = tplBranch1(rows, acc2) :: acc1
+            rows.previous()
 
-            acc2 = List(tplLeaf2(row))
+            acc2 = List(tplLeaf2(rows))
 
           } else /* e2 != p2 */ {
-            acc2 = tplLeaf2(row) :: acc2
+            acc2 = tplLeaf2(rows) :: acc2
           }
         } else {
-          acc2 = List(tplLeaf2(row))
+          acc2 = List(tplLeaf2(rows))
           nextRow = true
         }
 
-        prevRow = row
         p0 = e0
         p1 = e1
       }
-      acc0
     }
+    acc0
   }
 
 
   final private def rows2nested3(rows: ResultSet): List[Tpl] = {
-    val size = rowCount(rows)
-    if (size == 1) {
-      rows.next()
-      row = rows
-      List(tplBranch0(row,
-        List(tplBranch1(row,
-          List(tplBranch2(row,
-            List(tplLeaf3(row))))))))
+    rowCount = getRowCount(rows)
+
+    if (rowCount == 1) {
+      rows.first()
+      acc3 = List(tplLeaf3(rows))
+      acc2 = List(tplBranch2(rows, acc3))
+      acc1 = List(tplBranch1(rows, acc2))
+      acc0 = List(tplBranch0(rows, acc1))
 
     } else {
+      rows.afterLast()
       while (rows.previous()) {
-        row = rows
-        e0 = row.getLong(0)
-        e1 = row.getLong(1)
-        e2 = row.getLong(2)
+        e0 = rows.getLong(1)
+        e1 = rows.getLong(2)
+        e2 = rows.getLong(3)
 
         if (nextRow) {
-          if (row.isFirst) {
+          if (rows.isFirst) {
             if (e0 != p0) {
-              acc2 = tplBranch2(prevRow, acc3) :: acc2
-              acc1 = tplBranch1(prevRow, acc2) :: acc1
-              acc0 = tplBranch0(prevRow, acc1) :: acc0
+              rows.next()
+              acc2 = tplBranch2(rows, acc3) :: acc2
+              acc1 = tplBranch1(rows, acc2) :: acc1
+              acc0 = tplBranch0(rows, acc1) :: acc0
+              rows.previous()
 
-              acc3 = List(tplLeaf3(row))
-              acc2 = List(tplBranch2(row, acc3))
-              acc1 = List(tplBranch1(row, acc2))
-              acc0 = tplBranch0(row, acc1) :: acc0
+              acc3 = List(tplLeaf3(rows))
+              acc2 = List(tplBranch2(rows, acc3))
+              acc1 = List(tplBranch1(rows, acc2))
+              acc0 = tplBranch0(rows, acc1) :: acc0
 
             } else if (e1 != p1) {
-              acc2 = tplBranch2(prevRow, acc3) :: acc2
-              acc1 = tplBranch1(prevRow, acc2) :: acc1
+              rows.next()
+              acc2 = tplBranch2(rows, acc3) :: acc2
+              acc1 = tplBranch1(rows, acc2) :: acc1
+              rows.previous()
 
-              acc3 = List(tplLeaf3(row))
-              acc2 = List(tplBranch2(row, acc3))
-              acc1 = tplBranch1(row, acc2) :: acc1
-              acc0 = tplBranch0(row, acc1) :: acc0
+              acc3 = List(tplLeaf3(rows))
+              acc2 = List(tplBranch2(rows, acc3))
+              acc1 = tplBranch1(rows, acc2) :: acc1
+              acc0 = tplBranch0(rows, acc1) :: acc0
 
             } else if (e2 != p2) {
-              acc2 = tplBranch2(prevRow, acc3) :: acc2
+              rows.next()
+              acc2 = tplBranch2(rows, acc3) :: acc2
+              rows.previous()
 
-              acc3 = List(tplLeaf3(row))
-              acc2 = tplBranch2(row, acc3) :: acc2
-              acc1 = tplBranch1(row, acc2) :: acc1
-              acc0 = tplBranch0(row, acc1) :: acc0
+              acc3 = List(tplLeaf3(rows))
+              acc2 = tplBranch2(rows, acc3) :: acc2
+              acc1 = tplBranch1(rows, acc2) :: acc1
+              acc0 = tplBranch0(rows, acc1) :: acc0
 
             } else /* e3 != p3 */ {
-              acc3 = tplLeaf3(row) :: acc3
-              acc2 = tplBranch2(row, acc3) :: acc2
-              acc1 = tplBranch1(row, acc2) :: acc1
-              acc0 = tplBranch0(row, acc1) :: acc0
+              acc3 = tplLeaf3(rows) :: acc3
+              acc2 = tplBranch2(rows, acc3) :: acc2
+              acc1 = tplBranch1(rows, acc2) :: acc1
+              acc0 = tplBranch0(rows, acc1) :: acc0
             }
 
           } else if (e0 != p0) {
-            acc2 = tplBranch2(prevRow, acc3) :: acc2
-            acc1 = tplBranch1(prevRow, acc2) :: acc1
-            acc0 = tplBranch0(prevRow, acc1) :: acc0
+            rows.next()
+            acc2 = tplBranch2(rows, acc3) :: acc2
+            acc1 = tplBranch1(rows, acc2) :: acc1
+            acc0 = tplBranch0(rows, acc1) :: acc0
+            rows.previous()
 
-            acc3 = List(tplLeaf3(row))
+            acc3 = List(tplLeaf3(rows))
             acc2 = Nil
             acc1 = Nil
 
           } else if (e1 != p1) {
-            acc2 = tplBranch2(prevRow, acc3) :: acc2
-            acc1 = tplBranch1(prevRow, acc2) :: acc1
+            rows.next()
+            acc2 = tplBranch2(rows, acc3) :: acc2
+            acc1 = tplBranch1(rows, acc2) :: acc1
+            rows.previous()
 
-            acc3 = List(tplLeaf3(row))
+            acc3 = List(tplLeaf3(rows))
             acc2 = Nil
 
           } else if (e2 != p2) {
-            acc2 = tplBranch2(prevRow, acc3) :: acc2
+            rows.next()
+            acc2 = tplBranch2(rows, acc3) :: acc2
+            rows.previous()
 
-            acc3 = List(tplLeaf3(row))
+            acc3 = List(tplLeaf3(rows))
 
           } else /* e3 != p3 */ {
-            acc3 = tplLeaf3(row) :: acc3
+            acc3 = tplLeaf3(rows) :: acc3
           }
         } else {
-          acc3 = List(tplLeaf3(row))
+          acc3 = List(tplLeaf3(rows))
           nextRow = true
         }
 
-        prevRow = row
         p0 = e0
         p1 = e1
         p2 = e2
       }
-      acc0
     }
+    acc0
   }
 
 
   final private def rows2nested4(rows: ResultSet): List[Tpl] = {
-    val size = rowCount(rows)
-    if (size == 1) {
-      rows.next()
-      row = rows
-      List(tplBranch0(row,
-        List(tplBranch1(row,
-          List(tplBranch2(row,
-            List(tplBranch3(row,
-              List(tplLeaf4(row))))))))))
+    rowCount = getRowCount(rows)
+
+    if (rowCount == 1) {
+      rows.first()
+      acc4 = List(tplLeaf4(rows))
+      acc3 = List(tplBranch3(rows, acc4))
+      acc2 = List(tplBranch2(rows, acc3))
+      acc1 = List(tplBranch1(rows, acc2))
+      acc0 = List(tplBranch0(rows, acc1))
 
     } else {
+      rows.afterLast()
       while (rows.previous()) {
-        row = rows
-        e0 = row.getLong(0)
-        e1 = row.getLong(1)
-        e2 = row.getLong(2)
-        e3 = row.getLong(3)
+        e0 = rows.getLong(1)
+        e1 = rows.getLong(2)
+        e2 = rows.getLong(3)
+        e3 = rows.getLong(4)
 
         if (nextRow) {
-          if (row.isFirst) {
+          if (rows.isFirst) {
             if (e0 != p0) {
-              acc3 = tplBranch3(prevRow, acc4) :: acc3
-              acc2 = tplBranch2(prevRow, acc3) :: acc2
-              acc1 = tplBranch1(prevRow, acc2) :: acc1
-              acc0 = tplBranch0(prevRow, acc1) :: acc0
+              rows.next()
+              acc3 = tplBranch3(rows, acc4) :: acc3
+              acc2 = tplBranch2(rows, acc3) :: acc2
+              acc1 = tplBranch1(rows, acc2) :: acc1
+              acc0 = tplBranch0(rows, acc1) :: acc0
+              rows.previous()
 
-              acc4 = List(tplLeaf4(row))
-              acc3 = List(tplBranch3(row, acc4))
-              acc2 = List(tplBranch2(row, acc3))
-              acc1 = List(tplBranch1(row, acc2))
-              acc0 = tplBranch0(row, acc1) :: acc0
+              acc4 = List(tplLeaf4(rows))
+              acc3 = List(tplBranch3(rows, acc4))
+              acc2 = List(tplBranch2(rows, acc3))
+              acc1 = List(tplBranch1(rows, acc2))
+              acc0 = tplBranch0(rows, acc1) :: acc0
 
             } else if (e1 != p1) {
-              acc3 = tplBranch3(prevRow, acc4) :: acc3
-              acc2 = tplBranch2(prevRow, acc3) :: acc2
-              acc1 = tplBranch1(prevRow, acc2) :: acc1
+              rows.next()
+              acc3 = tplBranch3(rows, acc4) :: acc3
+              acc2 = tplBranch2(rows, acc3) :: acc2
+              acc1 = tplBranch1(rows, acc2) :: acc1
+              rows.previous()
 
-              acc4 = List(tplLeaf4(row))
-              acc3 = List(tplBranch3(row, acc4))
-              acc2 = List(tplBranch2(row, acc3))
-              acc1 = tplBranch1(row, acc2) :: acc1
-              acc0 = tplBranch0(row, acc1) :: acc0
+              acc4 = List(tplLeaf4(rows))
+              acc3 = List(tplBranch3(rows, acc4))
+              acc2 = List(tplBranch2(rows, acc3))
+              acc1 = tplBranch1(rows, acc2) :: acc1
+              acc0 = tplBranch0(rows, acc1) :: acc0
 
             } else if (e2 != p2) {
-              acc3 = tplBranch3(prevRow, acc4) :: acc3
-              acc2 = tplBranch2(prevRow, acc3) :: acc2
+              rows.next()
+              acc3 = tplBranch3(rows, acc4) :: acc3
+              acc2 = tplBranch2(rows, acc3) :: acc2
+              rows.previous()
 
-              acc4 = List(tplLeaf4(row))
-              acc3 = List(tplBranch3(row, acc4))
-              acc2 = tplBranch2(row, acc3) :: acc2
-              acc1 = tplBranch1(row, acc2) :: acc1
-              acc0 = tplBranch0(row, acc1) :: acc0
+              acc4 = List(tplLeaf4(rows))
+              acc3 = List(tplBranch3(rows, acc4))
+              acc2 = tplBranch2(rows, acc3) :: acc2
+              acc1 = tplBranch1(rows, acc2) :: acc1
+              acc0 = tplBranch0(rows, acc1) :: acc0
 
             } else if (e3 != p3) {
-              acc3 = tplBranch3(prevRow, acc4) :: acc3
+              rows.next()
+              acc3 = tplBranch3(rows, acc4) :: acc3
+              rows.previous()
 
-              acc4 = List(tplLeaf4(row))
-              acc3 = tplBranch3(row, acc4) :: acc3
-              acc2 = tplBranch2(row, acc3) :: acc2
-              acc1 = tplBranch1(row, acc2) :: acc1
-              acc0 = tplBranch0(row, acc1) :: acc0
+              acc4 = List(tplLeaf4(rows))
+              acc3 = tplBranch3(rows, acc4) :: acc3
+              acc2 = tplBranch2(rows, acc3) :: acc2
+              acc1 = tplBranch1(rows, acc2) :: acc1
+              acc0 = tplBranch0(rows, acc1) :: acc0
 
             } else /* e4 != p4 */ {
-              acc4 = tplLeaf4(row) :: acc4
-              acc3 = tplBranch3(row, acc4) :: acc3
-              acc2 = tplBranch2(row, acc3) :: acc2
-              acc1 = tplBranch1(row, acc2) :: acc1
-              acc0 = tplBranch0(row, acc1) :: acc0
+              acc4 = tplLeaf4(rows) :: acc4
+              acc3 = tplBranch3(rows, acc4) :: acc3
+              acc2 = tplBranch2(rows, acc3) :: acc2
+              acc1 = tplBranch1(rows, acc2) :: acc1
+              acc0 = tplBranch0(rows, acc1) :: acc0
             }
 
           } else if (e0 != p0) {
-            acc3 = tplBranch3(prevRow, acc4) :: acc3
-            acc2 = tplBranch2(prevRow, acc3) :: acc2
-            acc1 = tplBranch1(prevRow, acc2) :: acc1
-            acc0 = tplBranch0(prevRow, acc1) :: acc0
+            rows.next()
+            acc3 = tplBranch3(rows, acc4) :: acc3
+            acc2 = tplBranch2(rows, acc3) :: acc2
+            acc1 = tplBranch1(rows, acc2) :: acc1
+            acc0 = tplBranch0(rows, acc1) :: acc0
+            rows.previous()
 
-            acc4 = List(tplLeaf4(row))
+            acc4 = List(tplLeaf4(rows))
             acc3 = Nil
             acc2 = Nil
             acc1 = Nil
 
           } else if (e1 != p1) {
-            acc3 = tplBranch3(prevRow, acc4) :: acc3
-            acc2 = tplBranch2(prevRow, acc3) :: acc2
-            acc1 = tplBranch1(prevRow, acc2) :: acc1
+            rows.next()
+            acc3 = tplBranch3(rows, acc4) :: acc3
+            acc2 = tplBranch2(rows, acc3) :: acc2
+            acc1 = tplBranch1(rows, acc2) :: acc1
+            rows.previous()
 
-            acc4 = List(tplLeaf4(row))
+            acc4 = List(tplLeaf4(rows))
             acc3 = Nil
             acc2 = Nil
 
           } else if (e2 != p2) {
-            acc3 = tplBranch3(prevRow, acc4) :: acc3
-            acc2 = tplBranch2(prevRow, acc3) :: acc2
+            rows.next()
+            acc3 = tplBranch3(rows, acc4) :: acc3
+            acc2 = tplBranch2(rows, acc3) :: acc2
+            rows.previous()
 
-            acc4 = List(tplLeaf4(row))
+            acc4 = List(tplLeaf4(rows))
             acc3 = Nil
 
           } else if (e3 != p3) {
-            acc3 = tplBranch3(prevRow, acc4) :: acc3
+            rows.next()
+            acc3 = tplBranch3(rows, acc4) :: acc3
+            rows.previous()
 
-            acc4 = List(tplLeaf4(row))
+            acc4 = List(tplLeaf4(rows))
 
           } else /* e4 != p4 */ {
-            acc4 = tplLeaf4(row) :: acc4
+            acc4 = tplLeaf4(rows) :: acc4
           }
         } else {
-          acc4 = List(tplLeaf4(row))
+          acc4 = List(tplLeaf4(rows))
           nextRow = true
         }
 
-        prevRow = row
         p0 = e0
         p1 = e1
         p2 = e2
         p3 = e3
       }
-      acc0
     }
+    acc0
   }
 
 
   final private def rows2nested5(rows: ResultSet): List[Tpl] = {
-    val size = rowCount(rows)
-    if (size == 1) {
-      rows.next()
-      row = rows
-      List(tplBranch0(row,
-        List(tplBranch1(row,
-          List(tplBranch2(row,
-            List(tplBranch3(row,
-              List(tplBranch4(row,
-                List(tplLeaf5(row))))))))))))
+    rowCount = getRowCount(rows)
+
+    if (rowCount == 1) {
+      rows.first()
+      acc5 = List(tplLeaf5(rows))
+      acc4 = List(tplBranch4(rows, acc5))
+      acc3 = List(tplBranch3(rows, acc4))
+      acc2 = List(tplBranch2(rows, acc3))
+      acc1 = List(tplBranch1(rows, acc2))
+      acc0 = List(tplBranch0(rows, acc1))
 
     } else {
+      rows.afterLast()
       while (rows.previous()) {
-        row = rows
-        e0 = row.getLong(0)
-        e1 = row.getLong(1)
-        e2 = row.getLong(2)
-        e3 = row.getLong(3)
-        e4 = row.getLong(4)
+        e0 = rows.getLong(1)
+        e1 = rows.getLong(2)
+        e2 = rows.getLong(3)
+        e3 = rows.getLong(4)
+        e4 = rows.getLong(5)
 
         if (nextRow) {
-          if (row.isFirst) {
+          if (rows.isFirst) {
             if (e0 != p0) {
-              acc4 = tplBranch4(prevRow, acc5) :: acc4
-              acc3 = tplBranch3(prevRow, acc4) :: acc3
-              acc2 = tplBranch2(prevRow, acc3) :: acc2
-              acc1 = tplBranch1(prevRow, acc2) :: acc1
-              acc0 = tplBranch0(prevRow, acc1) :: acc0
+              rows.next()
+              acc4 = tplBranch4(rows, acc5) :: acc4
+              acc3 = tplBranch3(rows, acc4) :: acc3
+              acc2 = tplBranch2(rows, acc3) :: acc2
+              acc1 = tplBranch1(rows, acc2) :: acc1
+              acc0 = tplBranch0(rows, acc1) :: acc0
+              rows.previous()
 
-              acc5 = List(tplLeaf5(row))
-              acc4 = List(tplBranch4(row, acc5))
-              acc3 = List(tplBranch3(row, acc4))
-              acc2 = List(tplBranch2(row, acc3))
-              acc1 = List(tplBranch1(row, acc2))
-              acc0 = tplBranch0(row, acc1) :: acc0
+              acc5 = List(tplLeaf5(rows))
+              acc4 = List(tplBranch4(rows, acc5))
+              acc3 = List(tplBranch3(rows, acc4))
+              acc2 = List(tplBranch2(rows, acc3))
+              acc1 = List(tplBranch1(rows, acc2))
+              acc0 = tplBranch0(rows, acc1) :: acc0
 
             } else if (e1 != p1) {
-              acc4 = tplBranch4(prevRow, acc5) :: acc4
-              acc3 = tplBranch3(prevRow, acc4) :: acc3
-              acc2 = tplBranch2(prevRow, acc3) :: acc2
-              acc1 = tplBranch1(prevRow, acc2) :: acc1
+              rows.next()
+              acc4 = tplBranch4(rows, acc5) :: acc4
+              acc3 = tplBranch3(rows, acc4) :: acc3
+              acc2 = tplBranch2(rows, acc3) :: acc2
+              acc1 = tplBranch1(rows, acc2) :: acc1
+              rows.previous()
 
-              acc5 = List(tplLeaf5(row))
-              acc4 = List(tplBranch4(row, acc5))
-              acc3 = List(tplBranch3(row, acc4))
-              acc2 = List(tplBranch2(row, acc3))
-              acc1 = tplBranch1(row, acc2) :: acc1
-              acc0 = tplBranch0(row, acc1) :: acc0
+              acc5 = List(tplLeaf5(rows))
+              acc4 = List(tplBranch4(rows, acc5))
+              acc3 = List(tplBranch3(rows, acc4))
+              acc2 = List(tplBranch2(rows, acc3))
+              acc1 = tplBranch1(rows, acc2) :: acc1
+              acc0 = tplBranch0(rows, acc1) :: acc0
 
             } else if (e2 != p2) {
-              acc4 = tplBranch4(prevRow, acc5) :: acc4
-              acc3 = tplBranch3(prevRow, acc4) :: acc3
-              acc2 = tplBranch2(prevRow, acc3) :: acc2
+              rows.next()
+              acc4 = tplBranch4(rows, acc5) :: acc4
+              acc3 = tplBranch3(rows, acc4) :: acc3
+              acc2 = tplBranch2(rows, acc3) :: acc2
+              rows.previous()
 
-              acc5 = List(tplLeaf5(row))
-              acc4 = List(tplBranch4(row, acc5))
-              acc3 = List(tplBranch3(row, acc4))
-              acc2 = tplBranch2(row, acc3) :: acc2
-              acc1 = tplBranch1(row, acc2) :: acc1
-              acc0 = tplBranch0(row, acc1) :: acc0
+              acc5 = List(tplLeaf5(rows))
+              acc4 = List(tplBranch4(rows, acc5))
+              acc3 = List(tplBranch3(rows, acc4))
+              acc2 = tplBranch2(rows, acc3) :: acc2
+              acc1 = tplBranch1(rows, acc2) :: acc1
+              acc0 = tplBranch0(rows, acc1) :: acc0
 
             } else if (e3 != p3) {
-              acc4 = tplBranch4(prevRow, acc5) :: acc4
-              acc3 = tplBranch3(prevRow, acc4) :: acc3
+              rows.next()
+              acc4 = tplBranch4(rows, acc5) :: acc4
+              acc3 = tplBranch3(rows, acc4) :: acc3
+              rows.previous()
 
-              acc5 = List(tplLeaf5(row))
-              acc4 = List(tplBranch4(row, acc5))
-              acc3 = tplBranch3(row, acc4) :: acc3
-              acc2 = tplBranch2(row, acc3) :: acc2
-              acc1 = tplBranch1(row, acc2) :: acc1
-              acc0 = tplBranch0(row, acc1) :: acc0
+              acc5 = List(tplLeaf5(rows))
+              acc4 = List(tplBranch4(rows, acc5))
+              acc3 = tplBranch3(rows, acc4) :: acc3
+              acc2 = tplBranch2(rows, acc3) :: acc2
+              acc1 = tplBranch1(rows, acc2) :: acc1
+              acc0 = tplBranch0(rows, acc1) :: acc0
 
             } else if (e4 != p4) {
-              acc4 = tplBranch4(prevRow, acc5) :: acc4
+              rows.next()
+              acc4 = tplBranch4(rows, acc5) :: acc4
+              rows.previous()
 
-              acc5 = List(tplLeaf5(row))
-              acc4 = tplBranch4(row, acc5) :: acc4
-              acc3 = tplBranch3(row, acc4) :: acc3
-              acc2 = tplBranch2(row, acc3) :: acc2
-              acc1 = tplBranch1(row, acc2) :: acc1
-              acc0 = tplBranch0(row, acc1) :: acc0
+              acc5 = List(tplLeaf5(rows))
+              acc4 = tplBranch4(rows, acc5) :: acc4
+              acc3 = tplBranch3(rows, acc4) :: acc3
+              acc2 = tplBranch2(rows, acc3) :: acc2
+              acc1 = tplBranch1(rows, acc2) :: acc1
+              acc0 = tplBranch0(rows, acc1) :: acc0
 
             } else /* e5 != p5 */ {
-              acc5 = tplLeaf5(row) :: acc5
-              acc4 = tplBranch4(row, acc5) :: acc4
-              acc3 = tplBranch3(row, acc4) :: acc3
-              acc2 = tplBranch2(row, acc3) :: acc2
-              acc1 = tplBranch1(row, acc2) :: acc1
-              acc0 = tplBranch0(row, acc1) :: acc0
+              acc5 = tplLeaf5(rows) :: acc5
+              acc4 = tplBranch4(rows, acc5) :: acc4
+              acc3 = tplBranch3(rows, acc4) :: acc3
+              acc2 = tplBranch2(rows, acc3) :: acc2
+              acc1 = tplBranch1(rows, acc2) :: acc1
+              acc0 = tplBranch0(rows, acc1) :: acc0
             }
 
           } else if (e0 != p0) {
-            acc4 = tplBranch4(prevRow, acc5) :: acc4
-            acc3 = tplBranch3(prevRow, acc4) :: acc3
-            acc2 = tplBranch2(prevRow, acc3) :: acc2
-            acc1 = tplBranch1(prevRow, acc2) :: acc1
-            acc0 = tplBranch0(prevRow, acc1) :: acc0
+            rows.next()
+            acc4 = tplBranch4(rows, acc5) :: acc4
+            acc3 = tplBranch3(rows, acc4) :: acc3
+            acc2 = tplBranch2(rows, acc3) :: acc2
+            acc1 = tplBranch1(rows, acc2) :: acc1
+            acc0 = tplBranch0(rows, acc1) :: acc0
+            rows.previous()
 
-            acc5 = List(tplLeaf5(row))
+            acc5 = List(tplLeaf5(rows))
             acc4 = Nil
             acc3 = Nil
             acc2 = Nil
             acc1 = Nil
 
           } else if (e1 != p1) {
-            acc4 = tplBranch4(prevRow, acc5) :: acc4
-            acc3 = tplBranch3(prevRow, acc4) :: acc3
-            acc2 = tplBranch2(prevRow, acc3) :: acc2
-            acc1 = tplBranch1(prevRow, acc2) :: acc1
+            rows.next()
+            acc4 = tplBranch4(rows, acc5) :: acc4
+            acc3 = tplBranch3(rows, acc4) :: acc3
+            acc2 = tplBranch2(rows, acc3) :: acc2
+            acc1 = tplBranch1(rows, acc2) :: acc1
+            rows.previous()
 
-            acc5 = List(tplLeaf5(row))
+            acc5 = List(tplLeaf5(rows))
             acc4 = Nil
             acc3 = Nil
             acc2 = Nil
 
           } else if (e2 != p2) {
-            acc4 = tplBranch4(prevRow, acc5) :: acc4
-            acc3 = tplBranch3(prevRow, acc4) :: acc3
-            acc2 = tplBranch2(prevRow, acc3) :: acc2
+            rows.next()
+            acc4 = tplBranch4(rows, acc5) :: acc4
+            acc3 = tplBranch3(rows, acc4) :: acc3
+            acc2 = tplBranch2(rows, acc3) :: acc2
+            rows.previous()
 
-            acc5 = List(tplLeaf5(row))
+            acc5 = List(tplLeaf5(rows))
             acc4 = Nil
             acc3 = Nil
 
           } else if (e3 != p3) {
-            acc4 = tplBranch4(prevRow, acc5) :: acc4
-            acc3 = tplBranch3(prevRow, acc4) :: acc3
+            rows.next()
+            acc4 = tplBranch4(rows, acc5) :: acc4
+            acc3 = tplBranch3(rows, acc4) :: acc3
+            rows.previous()
 
-            acc5 = List(tplLeaf5(row))
+            acc5 = List(tplLeaf5(rows))
             acc4 = Nil
 
           } else if (e4 != p4) {
-            acc4 = tplBranch4(prevRow, acc5) :: acc4
+            rows.next()
+            acc4 = tplBranch4(rows, acc5) :: acc4
+            rows.previous()
 
-            acc5 = List(tplLeaf5(row))
+            acc5 = List(tplLeaf5(rows))
 
           } else /* e5 != p5 */ {
-            acc5 = tplLeaf5(row) :: acc5
+            acc5 = tplLeaf5(rows) :: acc5
           }
         } else {
-          acc5 = List(tplLeaf5(row))
+          acc5 = List(tplLeaf5(rows))
           nextRow = true
         }
 
-        prevRow = row
         p0 = e0
         p1 = e1
         p2 = e2
         p3 = e3
         p4 = e4
       }
-      acc0
     }
+    acc0
   }
 
 
   final private def rows2nested6(rows: ResultSet): List[Tpl] = {
-    val size = rowCount(rows)
-    if (size == 1) {
-      rows.next()
-      row = rows
-      List(tplBranch0(row,
-        List(tplBranch1(row,
-          List(tplBranch2(row,
-            List(tplBranch3(row,
-              List(tplBranch4(row,
-                List(tplBranch5(row,
-                  List(tplLeaf6(row))))))))))))))
+    rowCount = getRowCount(rows)
+
+    if (rowCount == 1) {
+      rows.first()
+      acc6 = List(tplLeaf6(rows))
+      acc5 = List(tplBranch5(rows, acc6))
+      acc4 = List(tplBranch4(rows, acc5))
+      acc3 = List(tplBranch3(rows, acc4))
+      acc2 = List(tplBranch2(rows, acc3))
+      acc1 = List(tplBranch1(rows, acc2))
+      acc0 = List(tplBranch0(rows, acc1))
 
     } else {
+      rows.afterLast()
       while (rows.previous()) {
-        row = rows
-        e0 = row.getLong(0)
-        e1 = row.getLong(1)
-        e2 = row.getLong(2)
-        e3 = row.getLong(3)
-        e4 = row.getLong(4)
-        e5 = row.getLong(5)
+        e0 = rows.getLong(1)
+        e1 = rows.getLong(2)
+        e2 = rows.getLong(3)
+        e3 = rows.getLong(4)
+        e4 = rows.getLong(5)
+        e5 = rows.getLong(6)
 
         if (nextRow) {
-          if (row.isFirst) {
+          if (rows.isFirst) {
             if (e0 != p0) {
-              acc5 = tplBranch5(prevRow, acc6) :: acc5
-              acc4 = tplBranch4(prevRow, acc5) :: acc4
-              acc3 = tplBranch3(prevRow, acc4) :: acc3
-              acc2 = tplBranch2(prevRow, acc3) :: acc2
-              acc1 = tplBranch1(prevRow, acc2) :: acc1
-              acc0 = tplBranch0(prevRow, acc1) :: acc0
+              rows.next()
+              acc5 = tplBranch5(rows, acc6) :: acc5
+              acc4 = tplBranch4(rows, acc5) :: acc4
+              acc3 = tplBranch3(rows, acc4) :: acc3
+              acc2 = tplBranch2(rows, acc3) :: acc2
+              acc1 = tplBranch1(rows, acc2) :: acc1
+              acc0 = tplBranch0(rows, acc1) :: acc0
+              rows.previous()
 
-              acc6 = List(tplLeaf6(row))
-              acc5 = List(tplBranch5(row, acc6))
-              acc4 = List(tplBranch4(row, acc5))
-              acc3 = List(tplBranch3(row, acc4))
-              acc2 = List(tplBranch2(row, acc3))
-              acc1 = List(tplBranch1(row, acc2))
-              acc0 = tplBranch0(row, acc1) :: acc0
+              acc6 = List(tplLeaf6(rows))
+              acc5 = List(tplBranch5(rows, acc6))
+              acc4 = List(tplBranch4(rows, acc5))
+              acc3 = List(tplBranch3(rows, acc4))
+              acc2 = List(tplBranch2(rows, acc3))
+              acc1 = List(tplBranch1(rows, acc2))
+              acc0 = tplBranch0(rows, acc1) :: acc0
 
             } else if (e1 != p1) {
-              acc5 = tplBranch5(prevRow, acc6) :: acc5
-              acc4 = tplBranch4(prevRow, acc5) :: acc4
-              acc3 = tplBranch3(prevRow, acc4) :: acc3
-              acc2 = tplBranch2(prevRow, acc3) :: acc2
-              acc1 = tplBranch1(prevRow, acc2) :: acc1
+              rows.next()
+              acc5 = tplBranch5(rows, acc6) :: acc5
+              acc4 = tplBranch4(rows, acc5) :: acc4
+              acc3 = tplBranch3(rows, acc4) :: acc3
+              acc2 = tplBranch2(rows, acc3) :: acc2
+              acc1 = tplBranch1(rows, acc2) :: acc1
+              rows.previous()
 
-              acc6 = List(tplLeaf6(row))
-              acc5 = List(tplBranch5(row, acc6))
-              acc4 = List(tplBranch4(row, acc5))
-              acc3 = List(tplBranch3(row, acc4))
-              acc2 = List(tplBranch2(row, acc3))
-              acc1 = tplBranch1(row, acc2) :: acc1
-              acc0 = tplBranch0(row, acc1) :: acc0
+              acc6 = List(tplLeaf6(rows))
+              acc5 = List(tplBranch5(rows, acc6))
+              acc4 = List(tplBranch4(rows, acc5))
+              acc3 = List(tplBranch3(rows, acc4))
+              acc2 = List(tplBranch2(rows, acc3))
+              acc1 = tplBranch1(rows, acc2) :: acc1
+              acc0 = tplBranch0(rows, acc1) :: acc0
 
             } else if (e2 != p2) {
-              acc5 = tplBranch5(prevRow, acc6) :: acc5
-              acc4 = tplBranch4(prevRow, acc5) :: acc4
-              acc3 = tplBranch3(prevRow, acc4) :: acc3
-              acc2 = tplBranch2(prevRow, acc3) :: acc2
+              rows.next()
+              acc5 = tplBranch5(rows, acc6) :: acc5
+              acc4 = tplBranch4(rows, acc5) :: acc4
+              acc3 = tplBranch3(rows, acc4) :: acc3
+              acc2 = tplBranch2(rows, acc3) :: acc2
+              rows.previous()
 
-              acc6 = List(tplLeaf6(row))
-              acc5 = List(tplBranch5(row, acc6))
-              acc4 = List(tplBranch4(row, acc5))
-              acc3 = List(tplBranch3(row, acc4))
-              acc2 = tplBranch2(row, acc3) :: acc2
-              acc1 = tplBranch1(row, acc2) :: acc1
-              acc0 = tplBranch0(row, acc1) :: acc0
+              acc6 = List(tplLeaf6(rows))
+              acc5 = List(tplBranch5(rows, acc6))
+              acc4 = List(tplBranch4(rows, acc5))
+              acc3 = List(tplBranch3(rows, acc4))
+              acc2 = tplBranch2(rows, acc3) :: acc2
+              acc1 = tplBranch1(rows, acc2) :: acc1
+              acc0 = tplBranch0(rows, acc1) :: acc0
 
             } else if (e3 != p3) {
-              acc5 = tplBranch5(prevRow, acc6) :: acc5
-              acc4 = tplBranch4(prevRow, acc5) :: acc4
-              acc3 = tplBranch3(prevRow, acc4) :: acc3
+              rows.next()
+              acc5 = tplBranch5(rows, acc6) :: acc5
+              acc4 = tplBranch4(rows, acc5) :: acc4
+              acc3 = tplBranch3(rows, acc4) :: acc3
+              rows.previous()
 
-              acc6 = List(tplLeaf6(row))
-              acc5 = List(tplBranch5(row, acc6))
-              acc4 = List(tplBranch4(row, acc5))
-              acc3 = tplBranch3(row, acc4) :: acc3
-              acc2 = tplBranch2(row, acc3) :: acc2
-              acc1 = tplBranch1(row, acc2) :: acc1
-              acc0 = tplBranch0(row, acc1) :: acc0
+              acc6 = List(tplLeaf6(rows))
+              acc5 = List(tplBranch5(rows, acc6))
+              acc4 = List(tplBranch4(rows, acc5))
+              acc3 = tplBranch3(rows, acc4) :: acc3
+              acc2 = tplBranch2(rows, acc3) :: acc2
+              acc1 = tplBranch1(rows, acc2) :: acc1
+              acc0 = tplBranch0(rows, acc1) :: acc0
 
             } else if (e4 != p4) {
-              acc5 = tplBranch5(prevRow, acc6) :: acc5
-              acc4 = tplBranch4(prevRow, acc5) :: acc4
+              rows.next()
+              acc5 = tplBranch5(rows, acc6) :: acc5
+              acc4 = tplBranch4(rows, acc5) :: acc4
+              rows.previous()
 
-              acc6 = List(tplLeaf6(row))
-              acc5 = List(tplBranch5(row, acc6))
-              acc4 = tplBranch4(row, acc5) :: acc4
-              acc3 = tplBranch3(row, acc4) :: acc3
-              acc2 = tplBranch2(row, acc3) :: acc2
-              acc1 = tplBranch1(row, acc2) :: acc1
-              acc0 = tplBranch0(row, acc1) :: acc0
+              acc6 = List(tplLeaf6(rows))
+              acc5 = List(tplBranch5(rows, acc6))
+              acc4 = tplBranch4(rows, acc5) :: acc4
+              acc3 = tplBranch3(rows, acc4) :: acc3
+              acc2 = tplBranch2(rows, acc3) :: acc2
+              acc1 = tplBranch1(rows, acc2) :: acc1
+              acc0 = tplBranch0(rows, acc1) :: acc0
 
             } else if (e5 != p5) {
-              acc5 = tplBranch5(prevRow, acc6) :: acc5
+              rows.next()
+              acc5 = tplBranch5(rows, acc6) :: acc5
+              rows.previous()
 
-              acc6 = List(tplLeaf6(row))
-              acc5 = tplBranch5(row, acc6) :: acc5
-              acc4 = tplBranch4(row, acc5) :: acc4
-              acc3 = tplBranch3(row, acc4) :: acc3
-              acc2 = tplBranch2(row, acc3) :: acc2
-              acc1 = tplBranch1(row, acc2) :: acc1
-              acc0 = tplBranch0(row, acc1) :: acc0
+              acc6 = List(tplLeaf6(rows))
+              acc5 = tplBranch5(rows, acc6) :: acc5
+              acc4 = tplBranch4(rows, acc5) :: acc4
+              acc3 = tplBranch3(rows, acc4) :: acc3
+              acc2 = tplBranch2(rows, acc3) :: acc2
+              acc1 = tplBranch1(rows, acc2) :: acc1
+              acc0 = tplBranch0(rows, acc1) :: acc0
 
             } else /* e6 != p6 */ {
-              acc6 = tplLeaf6(row) :: acc6
-              acc5 = tplBranch5(row, acc6) :: acc5
-              acc4 = tplBranch4(row, acc5) :: acc4
-              acc3 = tplBranch3(row, acc4) :: acc3
-              acc2 = tplBranch2(row, acc3) :: acc2
-              acc1 = tplBranch1(row, acc2) :: acc1
-              acc0 = tplBranch0(row, acc1) :: acc0
+              acc6 = tplLeaf6(rows) :: acc6
+              acc5 = tplBranch5(rows, acc6) :: acc5
+              acc4 = tplBranch4(rows, acc5) :: acc4
+              acc3 = tplBranch3(rows, acc4) :: acc3
+              acc2 = tplBranch2(rows, acc3) :: acc2
+              acc1 = tplBranch1(rows, acc2) :: acc1
+              acc0 = tplBranch0(rows, acc1) :: acc0
             }
 
           } else if (e0 != p0) {
-            acc5 = tplBranch5(prevRow, acc6) :: acc5
-            acc4 = tplBranch4(prevRow, acc5) :: acc4
-            acc3 = tplBranch3(prevRow, acc4) :: acc3
-            acc2 = tplBranch2(prevRow, acc3) :: acc2
-            acc1 = tplBranch1(prevRow, acc2) :: acc1
-            acc0 = tplBranch0(prevRow, acc1) :: acc0
+            rows.next()
+            acc5 = tplBranch5(rows, acc6) :: acc5
+            acc4 = tplBranch4(rows, acc5) :: acc4
+            acc3 = tplBranch3(rows, acc4) :: acc3
+            acc2 = tplBranch2(rows, acc3) :: acc2
+            acc1 = tplBranch1(rows, acc2) :: acc1
+            acc0 = tplBranch0(rows, acc1) :: acc0
+            rows.previous()
 
-            acc6 = List(tplLeaf6(row))
+            acc6 = List(tplLeaf6(rows))
             acc5 = Nil
             acc4 = Nil
             acc3 = Nil
@@ -701,59 +771,68 @@ trait Nest[Tpl] { self: Model2Query
             acc1 = Nil
 
           } else if (e1 != p1) {
-            acc5 = tplBranch5(prevRow, acc6) :: acc5
-            acc4 = tplBranch4(prevRow, acc5) :: acc4
-            acc3 = tplBranch3(prevRow, acc4) :: acc3
-            acc2 = tplBranch2(prevRow, acc3) :: acc2
-            acc1 = tplBranch1(prevRow, acc2) :: acc1
+            rows.next()
+            acc5 = tplBranch5(rows, acc6) :: acc5
+            acc4 = tplBranch4(rows, acc5) :: acc4
+            acc3 = tplBranch3(rows, acc4) :: acc3
+            acc2 = tplBranch2(rows, acc3) :: acc2
+            acc1 = tplBranch1(rows, acc2) :: acc1
+            rows.previous()
 
-            acc6 = List(tplLeaf6(row))
+            acc6 = List(tplLeaf6(rows))
             acc5 = Nil
             acc4 = Nil
             acc3 = Nil
             acc2 = Nil
 
           } else if (e2 != p2) {
-            acc5 = tplBranch5(prevRow, acc6) :: acc5
-            acc4 = tplBranch4(prevRow, acc5) :: acc4
-            acc3 = tplBranch3(prevRow, acc4) :: acc3
-            acc2 = tplBranch2(prevRow, acc3) :: acc2
+            rows.next()
+            acc5 = tplBranch5(rows, acc6) :: acc5
+            acc4 = tplBranch4(rows, acc5) :: acc4
+            acc3 = tplBranch3(rows, acc4) :: acc3
+            acc2 = tplBranch2(rows, acc3) :: acc2
+            rows.previous()
 
-            acc6 = List(tplLeaf6(row))
+            acc6 = List(tplLeaf6(rows))
             acc5 = Nil
             acc4 = Nil
             acc3 = Nil
 
           } else if (e3 != p3) {
-            acc5 = tplBranch5(prevRow, acc6) :: acc5
-            acc4 = tplBranch4(prevRow, acc5) :: acc4
-            acc3 = tplBranch3(prevRow, acc4) :: acc3
+            rows.next()
+            acc5 = tplBranch5(rows, acc6) :: acc5
+            acc4 = tplBranch4(rows, acc5) :: acc4
+            acc3 = tplBranch3(rows, acc4) :: acc3
+            rows.previous()
 
-            acc6 = List(tplLeaf6(row))
+            acc6 = List(tplLeaf6(rows))
             acc5 = Nil
             acc4 = Nil
 
           } else if (e4 != p4) {
-            acc5 = tplBranch5(prevRow, acc6) :: acc5
-            acc4 = tplBranch4(prevRow, acc5) :: acc4
+            rows.next()
+            acc5 = tplBranch5(rows, acc6) :: acc5
+            acc4 = tplBranch4(rows, acc5) :: acc4
+            rows.previous()
 
-            acc6 = List(tplLeaf6(row))
+            acc6 = List(tplLeaf6(rows))
             acc5 = Nil
 
           } else if (e5 != p5) {
-            acc5 = tplBranch5(prevRow, acc6) :: acc5
+            rows.next()
+            acc5 = tplBranch5(rows, acc6) :: acc5
+            rows.previous()
 
-            acc6 = List(tplLeaf6(row))
+            acc6 = List(tplLeaf6(rows))
 
           } else /* e6 != p6 */ {
-            acc6 = tplLeaf6(row) :: acc6
+            acc6 = tplLeaf6(rows) :: acc6
           }
         } else {
-          acc6 = List(tplLeaf6(row))
+          acc6 = List(tplLeaf6(rows))
           nextRow = true
         }
 
-        prevRow = row
         p0 = e0
         p1 = e1
         p2 = e2
@@ -761,163 +840,179 @@ trait Nest[Tpl] { self: Model2Query
         p4 = e4
         p5 = e5
       }
-      acc0
     }
+    acc0
   }
 
   final private def rows2nested7(rows: ResultSet): List[Tpl] = {
-    val size = rowCount(rows)
-    if (size == 1) {
-      rows.next()
-      row = rows
-      List(tplBranch0(row,
-        List(tplBranch1(row,
-          List(tplBranch2(row,
-            List(tplBranch3(row,
-              List(tplBranch4(row,
-                List(tplBranch5(row,
-                  List(tplBranch6(row,
-                    List(tplLeaf7(row))))))))))))))))
+    rowCount = getRowCount(rows)
+
+    if (rowCount == 1) {
+      rows.first()
+      acc7 = List(tplLeaf7(rows))
+      acc6 = List(tplBranch6(rows, acc7))
+      acc5 = List(tplBranch5(rows, acc6))
+      acc4 = List(tplBranch4(rows, acc5))
+      acc3 = List(tplBranch3(rows, acc4))
+      acc2 = List(tplBranch2(rows, acc3))
+      acc1 = List(tplBranch1(rows, acc2))
+      acc0 = List(tplBranch0(rows, acc1))
 
     } else {
+      rows.afterLast()
       while (rows.previous()) {
-        row = rows
-        e0 = row.getLong(0)
-        e1 = row.getLong(1)
-        e2 = row.getLong(2)
-        e3 = row.getLong(3)
-        e4 = row.getLong(4)
-        e5 = row.getLong(5)
-        e6 = row.getLong(6)
+        e0 = rows.getLong(1)
+        e1 = rows.getLong(2)
+        e2 = rows.getLong(3)
+        e3 = rows.getLong(4)
+        e4 = rows.getLong(5)
+        e5 = rows.getLong(6)
+        e6 = rows.getLong(7)
 
         if (nextRow) {
-          if (row.isFirst) {
+          if (rows.isFirst) {
             if (e0 != p0) {
-              acc6 = tplBranch6(prevRow, acc7) :: acc6
-              acc5 = tplBranch5(prevRow, acc6) :: acc5
-              acc4 = tplBranch4(prevRow, acc5) :: acc4
-              acc3 = tplBranch3(prevRow, acc4) :: acc3
-              acc2 = tplBranch2(prevRow, acc3) :: acc2
-              acc1 = tplBranch1(prevRow, acc2) :: acc1
-              acc0 = tplBranch0(prevRow, acc1) :: acc0
+              rows.next()
+              acc6 = tplBranch6(rows, acc7) :: acc6
+              acc5 = tplBranch5(rows, acc6) :: acc5
+              acc4 = tplBranch4(rows, acc5) :: acc4
+              acc3 = tplBranch3(rows, acc4) :: acc3
+              acc2 = tplBranch2(rows, acc3) :: acc2
+              acc1 = tplBranch1(rows, acc2) :: acc1
+              acc0 = tplBranch0(rows, acc1) :: acc0
+              rows.previous()
 
-              acc7 = List(tplLeaf7(row))
-              acc6 = List(tplBranch6(row, acc7))
-              acc5 = List(tplBranch5(row, acc6))
-              acc4 = List(tplBranch4(row, acc5))
-              acc3 = List(tplBranch3(row, acc4))
-              acc2 = List(tplBranch2(row, acc3))
-              acc1 = List(tplBranch1(row, acc2))
-              acc0 = tplBranch0(row, acc1) :: acc0
+              acc7 = List(tplLeaf7(rows))
+              acc6 = List(tplBranch6(rows, acc7))
+              acc5 = List(tplBranch5(rows, acc6))
+              acc4 = List(tplBranch4(rows, acc5))
+              acc3 = List(tplBranch3(rows, acc4))
+              acc2 = List(tplBranch2(rows, acc3))
+              acc1 = List(tplBranch1(rows, acc2))
+              acc0 = tplBranch0(rows, acc1) :: acc0
 
             } else if (e1 != p1) {
-              acc6 = tplBranch6(prevRow, acc7) :: acc6
-              acc5 = tplBranch5(prevRow, acc6) :: acc5
-              acc4 = tplBranch4(prevRow, acc5) :: acc4
-              acc3 = tplBranch3(prevRow, acc4) :: acc3
-              acc2 = tplBranch2(prevRow, acc3) :: acc2
-              acc1 = tplBranch1(prevRow, acc2) :: acc1
+              rows.next()
+              acc6 = tplBranch6(rows, acc7) :: acc6
+              acc5 = tplBranch5(rows, acc6) :: acc5
+              acc4 = tplBranch4(rows, acc5) :: acc4
+              acc3 = tplBranch3(rows, acc4) :: acc3
+              acc2 = tplBranch2(rows, acc3) :: acc2
+              acc1 = tplBranch1(rows, acc2) :: acc1
+              rows.previous()
 
-              acc7 = List(tplLeaf7(row))
-              acc6 = List(tplBranch6(row, acc7))
-              acc5 = List(tplBranch5(row, acc6))
-              acc4 = List(tplBranch4(row, acc5))
-              acc3 = List(tplBranch3(row, acc4))
-              acc2 = List(tplBranch2(row, acc3))
-              acc1 = tplBranch1(row, acc2) :: acc1
-              acc0 = tplBranch0(row, acc1) :: acc0
+              acc7 = List(tplLeaf7(rows))
+              acc6 = List(tplBranch6(rows, acc7))
+              acc5 = List(tplBranch5(rows, acc6))
+              acc4 = List(tplBranch4(rows, acc5))
+              acc3 = List(tplBranch3(rows, acc4))
+              acc2 = List(tplBranch2(rows, acc3))
+              acc1 = tplBranch1(rows, acc2) :: acc1
+              acc0 = tplBranch0(rows, acc1) :: acc0
 
             } else if (e2 != p2) {
-              acc6 = tplBranch6(prevRow, acc7) :: acc6
-              acc5 = tplBranch5(prevRow, acc6) :: acc5
-              acc4 = tplBranch4(prevRow, acc5) :: acc4
-              acc3 = tplBranch3(prevRow, acc4) :: acc3
-              acc2 = tplBranch2(prevRow, acc3) :: acc2
+              rows.next()
+              acc6 = tplBranch6(rows, acc7) :: acc6
+              acc5 = tplBranch5(rows, acc6) :: acc5
+              acc4 = tplBranch4(rows, acc5) :: acc4
+              acc3 = tplBranch3(rows, acc4) :: acc3
+              acc2 = tplBranch2(rows, acc3) :: acc2
+              rows.previous()
 
-              acc7 = List(tplLeaf7(row))
-              acc6 = List(tplBranch6(row, acc7))
-              acc5 = List(tplBranch5(row, acc6))
-              acc4 = List(tplBranch4(row, acc5))
-              acc3 = List(tplBranch3(row, acc4))
-              acc2 = tplBranch2(row, acc3) :: acc2
-              acc1 = tplBranch1(row, acc2) :: acc1
-              acc0 = tplBranch0(row, acc1) :: acc0
+              acc7 = List(tplLeaf7(rows))
+              acc6 = List(tplBranch6(rows, acc7))
+              acc5 = List(tplBranch5(rows, acc6))
+              acc4 = List(tplBranch4(rows, acc5))
+              acc3 = List(tplBranch3(rows, acc4))
+              acc2 = tplBranch2(rows, acc3) :: acc2
+              acc1 = tplBranch1(rows, acc2) :: acc1
+              acc0 = tplBranch0(rows, acc1) :: acc0
 
             } else if (e3 != p3) {
-              acc6 = tplBranch6(prevRow, acc7) :: acc6
-              acc5 = tplBranch5(prevRow, acc6) :: acc5
-              acc4 = tplBranch4(prevRow, acc5) :: acc4
-              acc3 = tplBranch3(prevRow, acc4) :: acc3
+              rows.next()
+              acc6 = tplBranch6(rows, acc7) :: acc6
+              acc5 = tplBranch5(rows, acc6) :: acc5
+              acc4 = tplBranch4(rows, acc5) :: acc4
+              acc3 = tplBranch3(rows, acc4) :: acc3
+              rows.previous()
 
-              acc7 = List(tplLeaf7(row))
-              acc6 = List(tplBranch6(row, acc7))
-              acc5 = List(tplBranch5(row, acc6))
-              acc4 = List(tplBranch4(row, acc5))
-              acc3 = tplBranch3(row, acc4) :: acc3
-              acc2 = tplBranch2(row, acc3) :: acc2
-              acc1 = tplBranch1(row, acc2) :: acc1
-              acc0 = tplBranch0(row, acc1) :: acc0
+              acc7 = List(tplLeaf7(rows))
+              acc6 = List(tplBranch6(rows, acc7))
+              acc5 = List(tplBranch5(rows, acc6))
+              acc4 = List(tplBranch4(rows, acc5))
+              acc3 = tplBranch3(rows, acc4) :: acc3
+              acc2 = tplBranch2(rows, acc3) :: acc2
+              acc1 = tplBranch1(rows, acc2) :: acc1
+              acc0 = tplBranch0(rows, acc1) :: acc0
 
             } else if (e4 != p4) {
-              acc6 = tplBranch6(prevRow, acc7) :: acc6
-              acc5 = tplBranch5(prevRow, acc6) :: acc5
-              acc4 = tplBranch4(prevRow, acc5) :: acc4
+              rows.next()
+              acc6 = tplBranch6(rows, acc7) :: acc6
+              acc5 = tplBranch5(rows, acc6) :: acc5
+              acc4 = tplBranch4(rows, acc5) :: acc4
+              rows.previous()
 
-              acc7 = List(tplLeaf7(row))
-              acc6 = List(tplBranch6(row, acc7))
-              acc5 = List(tplBranch5(row, acc6))
-              acc4 = tplBranch4(row, acc5) :: acc4
-              acc3 = tplBranch3(row, acc4) :: acc3
-              acc2 = tplBranch2(row, acc3) :: acc2
-              acc1 = tplBranch1(row, acc2) :: acc1
-              acc0 = tplBranch0(row, acc1) :: acc0
+              acc7 = List(tplLeaf7(rows))
+              acc6 = List(tplBranch6(rows, acc7))
+              acc5 = List(tplBranch5(rows, acc6))
+              acc4 = tplBranch4(rows, acc5) :: acc4
+              acc3 = tplBranch3(rows, acc4) :: acc3
+              acc2 = tplBranch2(rows, acc3) :: acc2
+              acc1 = tplBranch1(rows, acc2) :: acc1
+              acc0 = tplBranch0(rows, acc1) :: acc0
 
             } else if (e5 != p5) {
-              acc6 = tplBranch6(prevRow, acc7) :: acc6
-              acc5 = tplBranch5(prevRow, acc6) :: acc5
+              rows.next()
+              acc6 = tplBranch6(rows, acc7) :: acc6
+              acc5 = tplBranch5(rows, acc6) :: acc5
+              rows.previous()
 
-              acc7 = List(tplLeaf7(row))
-              acc6 = List(tplBranch6(row, acc7))
-              acc5 = tplBranch5(row, acc6) :: acc5
-              acc4 = tplBranch4(row, acc5) :: acc4
-              acc3 = tplBranch3(row, acc4) :: acc3
-              acc2 = tplBranch2(row, acc3) :: acc2
-              acc1 = tplBranch1(row, acc2) :: acc1
-              acc0 = tplBranch0(row, acc1) :: acc0
+              acc7 = List(tplLeaf7(rows))
+              acc6 = List(tplBranch6(rows, acc7))
+              acc5 = tplBranch5(rows, acc6) :: acc5
+              acc4 = tplBranch4(rows, acc5) :: acc4
+              acc3 = tplBranch3(rows, acc4) :: acc3
+              acc2 = tplBranch2(rows, acc3) :: acc2
+              acc1 = tplBranch1(rows, acc2) :: acc1
+              acc0 = tplBranch0(rows, acc1) :: acc0
 
             } else if (e6 != p6) {
-              acc6 = tplBranch6(prevRow, acc7) :: acc6
+              rows.next()
+              acc6 = tplBranch6(rows, acc7) :: acc6
+              rows.previous()
 
-              acc7 = List(tplLeaf7(row))
-              acc6 = tplBranch6(row, acc7) :: acc6
-              acc5 = tplBranch5(row, acc6) :: acc5
-              acc4 = tplBranch4(row, acc5) :: acc4
-              acc3 = tplBranch3(row, acc4) :: acc3
-              acc2 = tplBranch2(row, acc3) :: acc2
-              acc1 = tplBranch1(row, acc2) :: acc1
-              acc0 = tplBranch0(row, acc1) :: acc0
+              acc7 = List(tplLeaf7(rows))
+              acc6 = tplBranch6(rows, acc7) :: acc6
+              acc5 = tplBranch5(rows, acc6) :: acc5
+              acc4 = tplBranch4(rows, acc5) :: acc4
+              acc3 = tplBranch3(rows, acc4) :: acc3
+              acc2 = tplBranch2(rows, acc3) :: acc2
+              acc1 = tplBranch1(rows, acc2) :: acc1
+              acc0 = tplBranch0(rows, acc1) :: acc0
 
             } else /* e7 != p7 */ {
-              acc7 = tplLeaf7(row) :: acc7
-              acc6 = tplBranch6(row, acc7) :: acc6
-              acc5 = tplBranch5(row, acc6) :: acc5
-              acc4 = tplBranch4(row, acc5) :: acc4
-              acc3 = tplBranch3(row, acc4) :: acc3
-              acc2 = tplBranch2(row, acc3) :: acc2
-              acc1 = tplBranch1(row, acc2) :: acc1
-              acc0 = tplBranch0(row, acc1) :: acc0
+              acc7 = tplLeaf7(rows) :: acc7
+              acc6 = tplBranch6(rows, acc7) :: acc6
+              acc5 = tplBranch5(rows, acc6) :: acc5
+              acc4 = tplBranch4(rows, acc5) :: acc4
+              acc3 = tplBranch3(rows, acc4) :: acc3
+              acc2 = tplBranch2(rows, acc3) :: acc2
+              acc1 = tplBranch1(rows, acc2) :: acc1
+              acc0 = tplBranch0(rows, acc1) :: acc0
             }
 
           } else if (e0 != p0) {
-            acc6 = tplBranch6(prevRow, acc7) :: acc6
-            acc5 = tplBranch5(prevRow, acc6) :: acc5
-            acc4 = tplBranch4(prevRow, acc5) :: acc4
-            acc3 = tplBranch3(prevRow, acc4) :: acc3
-            acc2 = tplBranch2(prevRow, acc3) :: acc2
-            acc1 = tplBranch1(prevRow, acc2) :: acc1
-            acc0 = tplBranch0(prevRow, acc1) :: acc0
+            rows.next()
+            acc6 = tplBranch6(rows, acc7) :: acc6
+            acc5 = tplBranch5(rows, acc6) :: acc5
+            acc4 = tplBranch4(rows, acc5) :: acc4
+            acc3 = tplBranch3(rows, acc4) :: acc3
+            acc2 = tplBranch2(rows, acc3) :: acc2
+            acc1 = tplBranch1(rows, acc2) :: acc1
+            acc0 = tplBranch0(rows, acc1) :: acc0
+            rows.previous()
 
-            acc7 = List(tplLeaf7(row))
+            acc7 = List(tplLeaf7(rows))
             acc6 = Nil
             acc5 = Nil
             acc4 = Nil
@@ -926,14 +1021,16 @@ trait Nest[Tpl] { self: Model2Query
             acc1 = Nil
 
           } else if (e1 != p1) {
-            acc6 = tplBranch6(prevRow, acc7) :: acc6
-            acc5 = tplBranch5(prevRow, acc6) :: acc5
-            acc4 = tplBranch4(prevRow, acc5) :: acc4
-            acc3 = tplBranch3(prevRow, acc4) :: acc3
-            acc2 = tplBranch2(prevRow, acc3) :: acc2
-            acc1 = tplBranch1(prevRow, acc2) :: acc1
+            rows.next()
+            acc6 = tplBranch6(rows, acc7) :: acc6
+            acc5 = tplBranch5(rows, acc6) :: acc5
+            acc4 = tplBranch4(rows, acc5) :: acc4
+            acc3 = tplBranch3(rows, acc4) :: acc3
+            acc2 = tplBranch2(rows, acc3) :: acc2
+            acc1 = tplBranch1(rows, acc2) :: acc1
+            rows.previous()
 
-            acc7 = List(tplLeaf7(row))
+            acc7 = List(tplLeaf7(rows))
             acc6 = Nil
             acc5 = Nil
             acc4 = Nil
@@ -941,59 +1038,68 @@ trait Nest[Tpl] { self: Model2Query
             acc2 = Nil
 
           } else if (e2 != p2) {
-            acc6 = tplBranch6(prevRow, acc7) :: acc6
-            acc5 = tplBranch5(prevRow, acc6) :: acc5
-            acc4 = tplBranch4(prevRow, acc5) :: acc4
-            acc3 = tplBranch3(prevRow, acc4) :: acc3
-            acc2 = tplBranch2(prevRow, acc3) :: acc2
+            rows.next()
+            acc6 = tplBranch6(rows, acc7) :: acc6
+            acc5 = tplBranch5(rows, acc6) :: acc5
+            acc4 = tplBranch4(rows, acc5) :: acc4
+            acc3 = tplBranch3(rows, acc4) :: acc3
+            acc2 = tplBranch2(rows, acc3) :: acc2
+            rows.previous()
 
-            acc7 = List(tplLeaf7(row))
+            acc7 = List(tplLeaf7(rows))
             acc6 = Nil
             acc5 = Nil
             acc4 = Nil
             acc3 = Nil
 
           } else if (e3 != p3) {
-            acc6 = tplBranch6(prevRow, acc7) :: acc6
-            acc5 = tplBranch5(prevRow, acc6) :: acc5
-            acc4 = tplBranch4(prevRow, acc5) :: acc4
-            acc3 = tplBranch3(prevRow, acc4) :: acc3
+            rows.next()
+            acc6 = tplBranch6(rows, acc7) :: acc6
+            acc5 = tplBranch5(rows, acc6) :: acc5
+            acc4 = tplBranch4(rows, acc5) :: acc4
+            acc3 = tplBranch3(rows, acc4) :: acc3
+            rows.previous()
 
-            acc7 = List(tplLeaf7(row))
+            acc7 = List(tplLeaf7(rows))
             acc6 = Nil
             acc5 = Nil
             acc4 = Nil
 
           } else if (e4 != p4) {
-            acc6 = tplBranch6(prevRow, acc7) :: acc6
-            acc5 = tplBranch5(prevRow, acc6) :: acc5
-            acc4 = tplBranch4(prevRow, acc5) :: acc4
+            rows.next()
+            acc6 = tplBranch6(rows, acc7) :: acc6
+            acc5 = tplBranch5(rows, acc6) :: acc5
+            acc4 = tplBranch4(rows, acc5) :: acc4
+            rows.previous()
 
-            acc7 = List(tplLeaf7(row))
+            acc7 = List(tplLeaf7(rows))
             acc6 = Nil
             acc5 = Nil
 
           } else if (e5 != p5) {
-            acc6 = tplBranch6(prevRow, acc7) :: acc6
-            acc5 = tplBranch5(prevRow, acc6) :: acc5
+            rows.next()
+            acc6 = tplBranch6(rows, acc7) :: acc6
+            acc5 = tplBranch5(rows, acc6) :: acc5
+            rows.previous()
 
-            acc7 = List(tplLeaf7(row))
+            acc7 = List(tplLeaf7(rows))
             acc6 = Nil
 
           } else if (e6 != p6) {
-            acc6 = tplBranch6(prevRow, acc7) :: acc6
+            rows.next()
+            acc6 = tplBranch6(rows, acc7) :: acc6
+            rows.previous()
 
-            acc7 = List(tplLeaf7(row))
+            acc7 = List(tplLeaf7(rows))
 
           } else /* e7 != p7 */ {
-            acc7 = tplLeaf7(row) :: acc7
+            acc7 = tplLeaf7(rows) :: acc7
           }
         } else {
-          acc7 = List(tplLeaf7(row))
+          acc7 = List(tplLeaf7(rows))
           nextRow = true
         }
 
-        prevRow = row
         p0 = e0
         p1 = e1
         p2 = e2
@@ -1002,7 +1108,7 @@ trait Nest[Tpl] { self: Model2Query
         p5 = e5
         p6 = e6
       }
-      acc0
     }
+    acc0
   }
 }

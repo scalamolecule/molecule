@@ -16,6 +16,8 @@ trait Base extends BaseHelpers with JavaConversions { self: Model2Query =>
   // This type represents both all rows and the individual row where the
   // internal cursor is positioned
   type Row = java.sql.ResultSet
+  type AttrIndex = Int
+  type NestedTpls = List[Any]
 
   type RowOLD = jList[AnyRef]
 
@@ -26,10 +28,10 @@ trait Base extends BaseHelpers with JavaConversions { self: Model2Query =>
   type Att = String
 
 
-  def rowCount(rows: ResultSet): Int = {
+  def getRowCount(rows: ResultSet): Int = {
     rows.last()
     val size = rows.getRow
-    rows.first()
+    rows.beforeFirst()
     size
   }
 
@@ -61,11 +63,13 @@ trait Base extends BaseHelpers with JavaConversions { self: Model2Query =>
   final protected val nestedIds    = new ArrayBuffer[String]
   final protected val nestedOptIds = new ArrayBuffer[String]
 
+  final protected var level = 0
+
   final protected val select  = new ListBuffer[String]
   final protected var from    = ""
   final protected val joins   = new ListBuffer[(String, String, String, String, String)]
   final protected val where   = new ListBuffer[(String, String)]
-  final protected val orderBy = new ListBuffer[(Int, String, String)]
+  final protected val orderBy = new ListBuffer[(Int, Int, String, String)]
 
   final protected val exts = mutable.Map.empty[String, Option[String]]
 
@@ -123,11 +127,18 @@ trait Base extends BaseHelpers with JavaConversions { self: Model2Query =>
 
 
 
-  final protected def addCast(cast: (Row, Int) => AnyRef): Unit = {
+//  final protected def addCast(cast: (Row, Int) => AnyRef): Unit = {
+//    if (isTxMetaData)
+//      castss = (castss.head :+ cast) :: castss.tail
+//    else
+//      castss = castss.init :+ (castss.last :+ cast)
+//  }
+
+  final protected def addCast(cast: (Row, Int) => Any): Unit = {
     if (isTxMetaData)
-      castss = (castss.head :+ cast) :: castss.tail
+      castss = (castss.head :+ cast.asInstanceOf[(Row, Int) => AnyRef]) :: castss.tail
     else
-      castss = castss.init :+ (castss.last :+ cast)
+      castss = castss.init :+ (castss.last :+ cast.asInstanceOf[(Row, Int) => AnyRef])
   }
 
   final protected def addCastOLD(cast: AnyRef => AnyRef): Unit = {

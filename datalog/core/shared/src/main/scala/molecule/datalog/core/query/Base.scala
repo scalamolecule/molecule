@@ -14,6 +14,8 @@ trait Base extends BaseHelpers with JavaConversions { self: Model2Query =>
 
   // Datomic row type
   type Row = jList[AnyRef]
+  type AttrIndex = Int
+  type NestedTpls = List[Any]
 
   // Datomic variable (ex ?a)
   type Var = String

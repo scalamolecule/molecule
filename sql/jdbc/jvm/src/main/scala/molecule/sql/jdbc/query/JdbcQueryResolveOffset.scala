@@ -49,10 +49,18 @@ case class JdbcQueryResolveOffset[Tpl](
       throw ModelError("Limit and offset should both be positive or negative.")
     }
     val sortedRows: Row = getRawData2(conn)
-    val totalCount = rowCount(sortedRows)
+    val totalCount      = getRowCount(sortedRows)
+
 
     if (isNested) {
       val nestedRows    = rows2nested(sortedRows)
+      val toplevelCount = nestedRows.length
+      val fromUntil     = getFromUntil(toplevelCount, limit, offset)
+      val hasMore       = fromUntil.fold(totalCount > 0)(_._3)
+      (offsetList(nestedRows, fromUntil), toplevelCount, hasMore)
+
+    } else if (isNestedOpt) {
+      val nestedRows    = rows2nestedOpt(sortedRows)
       val toplevelCount = nestedRows.length
       val fromUntil     = getFromUntil(toplevelCount, limit, offset)
       val hasMore       = fromUntil.fold(totalCount > 0)(_._3)
@@ -78,9 +86,9 @@ case class JdbcQueryResolveOffset[Tpl](
       while (sortedRows.next()) {
         tuples += row2tpl(sortedRows).asInstanceOf[Tpl]
       }
-//      val totalCount = tuples.size
-      val fromUntil  = getFromUntil(totalCount, limit, offset)
-      val hasMore    = fromUntil.fold(totalCount > 0)(_._3)
+      //      val totalCount = tuples.size
+      val fromUntil = getFromUntil(totalCount, limit, offset)
+      val hasMore   = fromUntil.fold(totalCount > 0)(_._3)
       (tuples.result(), totalCount, hasMore)
 
     }

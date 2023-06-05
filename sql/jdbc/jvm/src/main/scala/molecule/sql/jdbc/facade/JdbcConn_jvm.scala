@@ -121,8 +121,8 @@ case class JdbcConn_jvm(override val proxy: JdbcProxy, sqlConn: sql.Connection)
       // Insert statements backwards to obtain auto-generated ref ids for prepending inserts
       tableInserts.reverse.foreach {
         case TableInsert(refPath, stmt, ps, populatePS) =>
-          //          println("--------------------------------------------------------------\n" + stmt)
-          println("--------------------------------------------------------------")
+          println("--------------------------------------------------------------\n" + stmt)
+          //          println("--------------------------------------------------------------")
           //          println(idsMap)
           // Populate prepared statement
           populatePS(ps, idsMap, 0)

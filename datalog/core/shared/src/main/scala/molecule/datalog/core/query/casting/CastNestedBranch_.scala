@@ -13,51 +13,55 @@ trait CastNestedBranch_
   final private def resolveArities(
     arities: List[List[Int]],
     casts: List[AnyRef => AnyRef],
-    rowIndex: Int,
-    rowIndexTx: Int,
-    acc: List[(Row, List[Any]) => Any]
-  ): List[(Row, List[Any]) => Any] = {
+    attrIndex: AttrIndex,
+    attrIndexTx: AttrIndex,
+    acc: List[(Row, NestedTpls) => Any]
+  ): List[(Row, NestedTpls) => Any] = {
     arities match {
       case List(1) :: as =>
-        val cast = (row: Row, _: List[Any]) => casts.head(row.get(rowIndex))
-        resolveArities(as, casts.tail, rowIndex + 1, rowIndexTx, acc :+ cast)
+        val cast = (row: Row, _: NestedTpls) => casts.head(row.get(attrIndex))
+        resolveArities(as, casts.tail, attrIndex + 1, attrIndexTx, acc :+ cast)
 
       // Nested
       case List(-1) :: as =>
-        val cast = (_: Row, nested: List[Any]) => nested
-        resolveArities(as, casts, rowIndexTx, rowIndexTx, acc :+ cast)
+        val cast = (_: Row, nested: NestedTpls) => nested
+        resolveArities(as, casts, attrIndexTx, attrIndexTx, acc :+ cast)
 
       // Composite with only tacit attributes
       case ii :: as if ii.isEmpty =>
-        resolveArities(as, casts, rowIndex, rowIndexTx, acc)
+        resolveArities(as, casts, attrIndex, attrIndexTx, acc)
 
       // Composite with nested
       case ii :: as if ii.last == -1 =>
         val n                     = ii.length - 1
         val (tplCasts, moreCasts) = casts.splitAt(n)
-        val cast                  = (row: Row, nested: List[Any]) =>
-          castRow2AnyTpl(ii.map(List(_)), tplCasts, rowIndex, Some(nested))(row)
-        resolveArities(as, moreCasts, rowIndexTx, rowIndexTx, acc :+ cast)
+        val cast                  = (row: Row, nested: NestedTpls) =>
+          castRow2AnyTpl(ii.map(List(_)), tplCasts, attrIndex, Some(nested))(row)
+        resolveArities(as, moreCasts, attrIndexTx, attrIndexTx, acc :+ cast)
 
       // Composite
       case ii :: as =>
         val n                     = ii.length
         val (tplCasts, moreCasts) = casts.splitAt(n)
-        val cast                  = (row: Row, _: List[Any]) =>
-          castRow2AnyTpl(ii.map(List(_)), tplCasts, rowIndex, None)(row)
-        resolveArities(as, moreCasts, rowIndex + n, rowIndexTx, acc :+ cast)
+        val cast                  = (row: Row, _: NestedTpls) =>
+          castRow2AnyTpl(ii.map(List(_)), tplCasts, attrIndex, None)(row)
+        resolveArities(as, moreCasts, attrIndex + n, attrIndexTx, acc :+ cast)
 
-      case Nil => acc
+      case Nil =>
+        acc
     }
   }
 
   final protected def castBranch[T](
     arities: List[List[Int]],
     casts: List[AnyRef => AnyRef],
-    rowIndex: Int,
-    rowIndexTx: Int
-  ): (Row, List[Any]) => T = {
-    val casters = resolveArities(arities, casts, rowIndex, rowIndexTx, Nil)
+    firstAttrIndex: AttrIndex,
+    firstAttrIndexTx: AttrIndex
+  ): (Row, NestedTpls) => T = {
+    println("arities: " + arities)
+    val casters = resolveArities(arities, casts, firstAttrIndex, firstAttrIndexTx, Nil)
+    println("casters: " + casters)
+    println("casters: " + casters.length)
     casters.length match {
       case 0  => cast0[T]
       case 1  => cast1[T](casters)
@@ -84,30 +88,30 @@ trait CastNestedBranch_
     }
   }
 
-  final private def cast0[T]: (Row, List[Any]) => T = {
-    (_: Row, nested: List[Any]) => nested.asInstanceOf[T]
+  final private def cast0[T]: (Row, NestedTpls) => T = {
+    (_: Row, nested: NestedTpls) => nested.asInstanceOf[T]
   }
 
-  final private def cast1[T](casters: List[(Row, List[Any]) => Any]): (Row, List[Any]) => T = {
+  final private def cast1[T](casters: List[(Row, NestedTpls) => Any]): (Row, NestedTpls) => T = {
     val List(c1) = casters
-    (row: Row, nested: List[Any]) =>
+    (row: Row, nested: NestedTpls) =>
       (
         c1(row, nested)
         ).asInstanceOf[T]
   }
 
-  final private def cast2[T](casters: List[(Row, List[Any]) => Any]): (Row, List[Any]) => T = {
+  final private def cast2[T](casters: List[(Row, NestedTpls) => Any]): (Row, NestedTpls) => T = {
     val List(c1, c2) = casters
-    (row: Row, nested: List[Any]) =>
+    (row: Row, nested: NestedTpls) =>
       (
         c1(row, nested),
         c2(row, nested)
       ).asInstanceOf[T]
   }
 
-  final private def cast3[T](casters: List[(Row, List[Any]) => Any]): (Row, List[Any]) => T = {
+  final private def cast3[T](casters: List[(Row, NestedTpls) => Any]): (Row, NestedTpls) => T = {
     val List(c1, c2, c3) = casters
-    (row: Row, nested: List[Any]) =>
+    (row: Row, nested: NestedTpls) =>
       (
         c1(row, nested),
         c2(row, nested),
@@ -115,9 +119,9 @@ trait CastNestedBranch_
       ).asInstanceOf[T]
   }
 
-  final private def cast4[T](casters: List[(Row, List[Any]) => Any]): (Row, List[Any]) => T = {
+  final private def cast4[T](casters: List[(Row, NestedTpls) => Any]): (Row, NestedTpls) => T = {
     val List(c1, c2, c3, c4) = casters
-    (row: Row, nested: List[Any]) =>
+    (row: Row, nested: NestedTpls) =>
       (
         c1(row, nested),
         c2(row, nested),
@@ -126,9 +130,9 @@ trait CastNestedBranch_
       ).asInstanceOf[T]
   }
 
-  final private def cast5[T](casters: List[(Row, List[Any]) => Any]): (Row, List[Any]) => T = {
+  final private def cast5[T](casters: List[(Row, NestedTpls) => Any]): (Row, NestedTpls) => T = {
     val List(c1, c2, c3, c4, c5) = casters
-    (row: Row, nested: List[Any]) =>
+    (row: Row, nested: NestedTpls) =>
       (
         c1(row, nested),
         c2(row, nested),
@@ -138,9 +142,9 @@ trait CastNestedBranch_
       ).asInstanceOf[T]
   }
 
-  final private def cast6[T](casters: List[(Row, List[Any]) => Any]): (Row, List[Any]) => T = {
+  final private def cast6[T](casters: List[(Row, NestedTpls) => Any]): (Row, NestedTpls) => T = {
     val List(c1, c2, c3, c4, c5, c6) = casters
-    (row: Row, nested: List[Any]) =>
+    (row: Row, nested: NestedTpls) =>
       (
         c1(row, nested),
         c2(row, nested),
@@ -151,9 +155,9 @@ trait CastNestedBranch_
       ).asInstanceOf[T]
   }
 
-  final private def cast7[T](casters: List[(Row, List[Any]) => Any]): (Row, List[Any]) => T = {
+  final private def cast7[T](casters: List[(Row, NestedTpls) => Any]): (Row, NestedTpls) => T = {
     val List(c1, c2, c3, c4, c5, c6, c7) = casters
-    (row: Row, nested: List[Any]) =>
+    (row: Row, nested: NestedTpls) =>
       (
         c1(row, nested),
         c2(row, nested),
@@ -165,9 +169,9 @@ trait CastNestedBranch_
       ).asInstanceOf[T]
   }
 
-  final private def cast8[T](casters: List[(Row, List[Any]) => Any]): (Row, List[Any]) => T = {
+  final private def cast8[T](casters: List[(Row, NestedTpls) => Any]): (Row, NestedTpls) => T = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8) = casters
-    (row: Row, nested: List[Any]) =>
+    (row: Row, nested: NestedTpls) =>
       (
         c1(row, nested),
         c2(row, nested),
@@ -180,9 +184,9 @@ trait CastNestedBranch_
       ).asInstanceOf[T]
   }
 
-  final private def cast9[T](casters: List[(Row, List[Any]) => Any]): (Row, List[Any]) => T = {
+  final private def cast9[T](casters: List[(Row, NestedTpls) => Any]): (Row, NestedTpls) => T = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9) = casters
-    (row: Row, nested: List[Any]) =>
+    (row: Row, nested: NestedTpls) =>
       (
         c1(row, nested),
         c2(row, nested),
@@ -196,9 +200,9 @@ trait CastNestedBranch_
       ).asInstanceOf[T]
   }
 
-  final private def cast10[T](casters: List[(Row, List[Any]) => Any]): (Row, List[Any]) => T = {
+  final private def cast10[T](casters: List[(Row, NestedTpls) => Any]): (Row, NestedTpls) => T = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10) = casters
-    (row: Row, nested: List[Any]) =>
+    (row: Row, nested: NestedTpls) =>
       (
         c1(row, nested),
         c2(row, nested),
@@ -213,9 +217,9 @@ trait CastNestedBranch_
       ).asInstanceOf[T]
   }
 
-  final private def cast11[T](casters: List[(Row, List[Any]) => Any]): (Row, List[Any]) => T = {
+  final private def cast11[T](casters: List[(Row, NestedTpls) => Any]): (Row, NestedTpls) => T = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11) = casters
-    (row: Row, nested: List[Any]) =>
+    (row: Row, nested: NestedTpls) =>
       (
         c1(row, nested),
         c2(row, nested),
@@ -231,9 +235,9 @@ trait CastNestedBranch_
       ).asInstanceOf[T]
   }
 
-  final private def cast12[T](casters: List[(Row, List[Any]) => Any]): (Row, List[Any]) => T = {
+  final private def cast12[T](casters: List[(Row, NestedTpls) => Any]): (Row, NestedTpls) => T = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12) = casters
-    (row: Row, nested: List[Any]) =>
+    (row: Row, nested: NestedTpls) =>
       (
         c1(row, nested),
         c2(row, nested),
@@ -250,9 +254,9 @@ trait CastNestedBranch_
       ).asInstanceOf[T]
   }
 
-  final private def cast13[T](casters: List[(Row, List[Any]) => Any]): (Row, List[Any]) => T = {
+  final private def cast13[T](casters: List[(Row, NestedTpls) => Any]): (Row, NestedTpls) => T = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13) = casters
-    (row: Row, nested: List[Any]) =>
+    (row: Row, nested: NestedTpls) =>
       (
         c1(row, nested),
         c2(row, nested),
@@ -270,9 +274,9 @@ trait CastNestedBranch_
       ).asInstanceOf[T]
   }
 
-  final private def cast14[T](casters: List[(Row, List[Any]) => Any]): (Row, List[Any]) => T = {
+  final private def cast14[T](casters: List[(Row, NestedTpls) => Any]): (Row, NestedTpls) => T = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14) = casters
-    (row: Row, nested: List[Any]) =>
+    (row: Row, nested: NestedTpls) =>
       (
         c1(row, nested),
         c2(row, nested),
@@ -291,9 +295,9 @@ trait CastNestedBranch_
       ).asInstanceOf[T]
   }
 
-  final private def cast15[T](casters: List[(Row, List[Any]) => Any]): (Row, List[Any]) => T = {
+  final private def cast15[T](casters: List[(Row, NestedTpls) => Any]): (Row, NestedTpls) => T = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15) = casters
-    (row: Row, nested: List[Any]) =>
+    (row: Row, nested: NestedTpls) =>
       (
         c1(row, nested),
         c2(row, nested),
@@ -313,9 +317,9 @@ trait CastNestedBranch_
       ).asInstanceOf[T]
   }
 
-  final private def cast16[T](casters: List[(Row, List[Any]) => Any]): (Row, List[Any]) => T = {
+  final private def cast16[T](casters: List[(Row, NestedTpls) => Any]): (Row, NestedTpls) => T = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16) = casters
-    (row: Row, nested: List[Any]) =>
+    (row: Row, nested: NestedTpls) =>
       (
         c1(row, nested),
         c2(row, nested),
@@ -336,9 +340,9 @@ trait CastNestedBranch_
       ).asInstanceOf[T]
   }
 
-  final private def cast17[T](casters: List[(Row, List[Any]) => Any]): (Row, List[Any]) => T = {
+  final private def cast17[T](casters: List[(Row, NestedTpls) => Any]): (Row, NestedTpls) => T = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17) = casters
-    (row: Row, nested: List[Any]) =>
+    (row: Row, nested: NestedTpls) =>
       (
         c1(row, nested),
         c2(row, nested),
@@ -360,9 +364,9 @@ trait CastNestedBranch_
       ).asInstanceOf[T]
   }
 
-  final private def cast18[T](casters: List[(Row, List[Any]) => Any]): (Row, List[Any]) => T = {
+  final private def cast18[T](casters: List[(Row, NestedTpls) => Any]): (Row, NestedTpls) => T = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18) = casters
-    (row: Row, nested: List[Any]) =>
+    (row: Row, nested: NestedTpls) =>
       (
         c1(row, nested),
         c2(row, nested),
@@ -385,9 +389,9 @@ trait CastNestedBranch_
       ).asInstanceOf[T]
   }
 
-  final private def cast19[T](casters: List[(Row, List[Any]) => Any]): (Row, List[Any]) => T = {
+  final private def cast19[T](casters: List[(Row, NestedTpls) => Any]): (Row, NestedTpls) => T = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19) = casters
-    (row: Row, nested: List[Any]) =>
+    (row: Row, nested: NestedTpls) =>
       (
         c1(row, nested),
         c2(row, nested),
@@ -411,9 +415,9 @@ trait CastNestedBranch_
       ).asInstanceOf[T]
   }
 
-  final private def cast20[T](casters: List[(Row, List[Any]) => Any]): (Row, List[Any]) => T = {
+  final private def cast20[T](casters: List[(Row, NestedTpls) => Any]): (Row, NestedTpls) => T = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20) = casters
-    (row: Row, nested: List[Any]) =>
+    (row: Row, nested: NestedTpls) =>
       (
         c1(row, nested),
         c2(row, nested),
@@ -438,9 +442,9 @@ trait CastNestedBranch_
       ).asInstanceOf[T]
   }
 
-  final private def cast21[T](casters: List[(Row, List[Any]) => Any]): (Row, List[Any]) => T = {
+  final private def cast21[T](casters: List[(Row, NestedTpls) => Any]): (Row, NestedTpls) => T = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c21) = casters
-    (row: Row, nested: List[Any]) =>
+    (row: Row, nested: NestedTpls) =>
       (
         c1(row, nested),
         c2(row, nested),

@@ -1,6 +1,6 @@
 package molecule.sql.jdbc.query
 
-import java.sql.ResultSet
+import java.sql.{ResultSet, Statement}
 import java.util
 import java.util.{Collections, Comparator, ArrayList => jArrayList, Collection => jCollection, List => jList}
 import molecule.base.error.ModelError
@@ -62,7 +62,7 @@ abstract class JdbcQueryResolve[Tpl](elements: List[Element], dbView: Option[DbV
 
     println("--------------------------------------------------------------\n" + stmt)
 
-    val ps = conn.sqlConn.prepareStatement(stmt)
+    val ps = conn.sqlConn.prepareStatement(stmt, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)
     ps.executeQuery()
   }
 

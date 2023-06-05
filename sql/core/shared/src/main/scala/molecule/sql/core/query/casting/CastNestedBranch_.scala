@@ -6,464 +6,547 @@ import molecule.sql.core.query.Base
 import scala.annotation.tailrec
 
 
-trait CastNestedBranch_
-  extends CastRow2Tpl_ { self: Model2Query with Base =>
+trait CastNestedBranch_ extends CastRow2Tpl_ { self: Model2Query with Base =>
 
-  @tailrec
+@tailrec
   final private def resolveArities(
     arities: List[List[Int]],
-//    casts: List[AnyRef => AnyRef],
-    casts: List[(Row, Int) => AnyRef],
-    rowIndex: Int,
-    rowIndexTx: Int,
-    acc: List[(Row, List[Any]) => Any]
-  ): List[(Row, List[Any]) => Any] = {
+    casts: List[(Row, AttrIndex) => AnyRef],
+    attrIndex: AttrIndex,
+    attrIndexTx: AttrIndex,
+    acc: List[(Row, AttrIndex, NestedTpls) => Any]
+  ): List[(Row, AttrIndex, NestedTpls) => Any] = {
     arities match {
       case List(1) :: as =>
-        resolveArities(as, casts.tail, rowIndex + 1, rowIndexTx, acc)
+        val cast = (row: Row, attrIndex1: AttrIndex, _: NestedTpls) => casts.head(row, attrIndex1)
+        resolveArities(as, casts.tail, attrIndex + 1, attrIndexTx, acc :+ cast)
 
       // Nested
       case List(-1) :: as =>
-        val cast = (_: Row, nested: List[Any]) => nested
-        resolveArities(as, casts, rowIndexTx, rowIndexTx, acc :+ cast)
+        val cast = (_: Row, _: AttrIndex, nested: NestedTpls) => nested
+        resolveArities(as, casts, attrIndexTx, attrIndexTx, acc :+ cast)
 
       // Composite with only tacit attributes
       case ii :: as if ii.isEmpty =>
-        resolveArities(as, casts, rowIndex, rowIndexTx, acc)
+        resolveArities(as, casts, attrIndex, attrIndexTx, acc)
 
       // Composite with nested
       case ii :: as if ii.last == -1 =>
         val n                     = ii.length - 1
         val (tplCasts, moreCasts) = casts.splitAt(n)
-        val cast                  = (row: Row, nested: List[Any]) =>
-          castRow2AnyTpl(ii.map(List(_)), tplCasts, rowIndex, Some(nested))(row)
-        resolveArities(as, moreCasts, rowIndexTx, rowIndexTx, acc :+ cast)
+        val cast                  = (row: Row, attrIndex1: AttrIndex, nested: NestedTpls) =>
+          castRow2AnyTpl(ii.map(List(_)), tplCasts, attrIndex1, Some(nested))(row)
+        resolveArities(as, moreCasts, attrIndexTx, attrIndexTx, acc :+ cast)
 
       // Composite
       case ii :: as =>
         val n                     = ii.length
         val (tplCasts, moreCasts) = casts.splitAt(n)
-        val cast                  = (row: Row, _: List[Any]) =>
-          castRow2AnyTpl(ii.map(List(_)), tplCasts, rowIndex, None)(row)
-        resolveArities(as, moreCasts, rowIndex + n, rowIndexTx, acc :+ cast)
+        val cast                  = (row: Row, _: AttrIndex, _: NestedTpls) =>
+          castRow2AnyTpl(ii.map(List(_)), tplCasts, attrIndex, None)(row)
+        resolveArities(as, moreCasts, attrIndex + n, attrIndexTx, acc :+ cast)
 
-      case Nil => acc
+      case Nil =>
+        acc
     }
   }
 
   final protected def castBranch[T](
     arities: List[List[Int]],
-    casts: List[(Row, Int) => AnyRef],
-//    casts: List[AnyRef => AnyRef],
-    rowIndex: Int,
-    rowIndexTx: Int
-  ): (Row, List[Any]) => T = {
-    val casters = resolveArities(arities, casts, rowIndex, rowIndexTx, Nil)
+    casts: List[(Row, AttrIndex) => AnyRef],
+    firstAttrIndex: AttrIndex,
+    firstAttrIndexTx: AttrIndex
+  ): (Row, NestedTpls) => T = {
+    val casters = resolveArities(arities, casts, firstAttrIndex, firstAttrIndexTx, Nil)
     casters.length match {
       case 0  => cast0[T]
-      case 1  => cast1[T](casters)
-      case 2  => cast2[T](casters)
-      case 3  => cast3[T](casters)
-      case 4  => cast4[T](casters)
-      case 5  => cast5[T](casters)
-      case 6  => cast6[T](casters)
-      case 7  => cast7[T](casters)
-      case 8  => cast8[T](casters)
-      case 9  => cast9[T](casters)
-      case 10 => cast10[T](casters)
-      case 11 => cast11[T](casters)
-      case 12 => cast12[T](casters)
-      case 13 => cast13[T](casters)
-      case 14 => cast14[T](casters)
-      case 15 => cast15[T](casters)
-      case 16 => cast16[T](casters)
-      case 17 => cast17[T](casters)
-      case 18 => cast18[T](casters)
-      case 19 => cast19[T](casters)
-      case 20 => cast20[T](casters)
-      case 21 => cast21[T](casters)
+      case 1  => cast1[T](casters, firstAttrIndex)
+      case 2  => cast2[T](casters, firstAttrIndex)
+      case 3  => cast3[T](casters, firstAttrIndex)
+      case 4  => cast4[T](casters, firstAttrIndex)
+      case 5  => cast5[T](casters, firstAttrIndex)
+      case 6  => cast6[T](casters, firstAttrIndex)
+      case 7  => cast7[T](casters, firstAttrIndex)
+      case 8  => cast8[T](casters, firstAttrIndex)
+      case 9  => cast9[T](casters, firstAttrIndex)
+      case 10 => cast10[T](casters, firstAttrIndex)
+      case 11 => cast11[T](casters, firstAttrIndex)
+      case 12 => cast12[T](casters, firstAttrIndex)
+      case 13 => cast13[T](casters, firstAttrIndex)
+      case 14 => cast14[T](casters, firstAttrIndex)
+      case 15 => cast15[T](casters, firstAttrIndex)
+      case 16 => cast16[T](casters, firstAttrIndex)
+      case 17 => cast17[T](casters, firstAttrIndex)
+      case 18 => cast18[T](casters, firstAttrIndex)
+      case 19 => cast19[T](casters, firstAttrIndex)
+      case 20 => cast20[T](casters, firstAttrIndex)
+      case 21 => cast21[T](casters, firstAttrIndex)
     }
   }
 
-  final private def cast0[T]: (Row, List[Any]) => T = {
-    (_: Row, nested: List[Any]) => nested.asInstanceOf[T]
+  final private def cast0[T]: (Row, NestedTpls) => T = {
+    (_: Row, nested: NestedTpls) =>
+      nested.asInstanceOf[T]
   }
 
-  final private def cast1[T](casters: List[(Row, List[Any]) => Any]): (Row, List[Any]) => T = {
+  final private def cast1[T](
+    casters: List[(Row, AttrIndex, NestedTpls) => Any],
+    firstAttrIndex: AttrIndex
+  ): (Row, NestedTpls) => T = {
     val List(c1) = casters
-    (row: Row, nested: List[Any]) =>
+    (row: Row, nested: NestedTpls) =>
       (
-        c1(row, nested)
+        c1(row, firstAttrIndex, nested)
         ).asInstanceOf[T]
   }
 
-  final private def cast2[T](casters: List[(Row, List[Any]) => Any]): (Row, List[Any]) => T = {
+  final private def cast2[T](
+    casters: List[(Row, AttrIndex, NestedTpls) => Any],
+    firstAttrIndex: AttrIndex
+  ): (Row, List[Any]) => T = {
     val List(c1, c2) = casters
+    val List(a1, a2) = (firstAttrIndex until firstAttrIndex + 2).toList
     (row: Row, nested: List[Any]) =>
       (
-        c1(row, nested),
-        c2(row, nested)
+        c1(row, a1, nested),
+        c2(row, a2, nested)
       ).asInstanceOf[T]
   }
 
-  final private def cast3[T](casters: List[(Row, List[Any]) => Any]): (Row, List[Any]) => T = {
+  final private def cast3[T](
+    casters: List[(Row, AttrIndex, NestedTpls) => Any],
+    firstAttrIndex: AttrIndex
+  ): (Row, List[Any]) => T = {
     val List(c1, c2, c3) = casters
+    val List(a1, a2, a3) = (firstAttrIndex until firstAttrIndex + 3).toList
     (row: Row, nested: List[Any]) =>
       (
-        c1(row, nested),
-        c2(row, nested),
-        c3(row, nested)
+        c1(row, a1, nested),
+        c2(row, a2, nested),
+        c3(row, a3, nested)
       ).asInstanceOf[T]
   }
 
-  final private def cast4[T](casters: List[(Row, List[Any]) => Any]): (Row, List[Any]) => T = {
+  final private def cast4[T](
+    casters: List[(Row, AttrIndex, NestedTpls) => Any],
+    firstAttrIndex: AttrIndex
+  ): (Row, List[Any]) => T = {
     val List(c1, c2, c3, c4) = casters
+    val List(a1, a2, a3, a4) = (firstAttrIndex until firstAttrIndex + 4).toList
     (row: Row, nested: List[Any]) =>
       (
-        c1(row, nested),
-        c2(row, nested),
-        c3(row, nested),
-        c4(row, nested)
+        c1(row, a1, nested),
+        c2(row, a2, nested),
+        c3(row, a3, nested),
+        c4(row, a4, nested)
       ).asInstanceOf[T]
   }
 
-  final private def cast5[T](casters: List[(Row, List[Any]) => Any]): (Row, List[Any]) => T = {
+  final private def cast5[T](
+    casters: List[(Row, AttrIndex, NestedTpls) => Any],
+    firstAttrIndex: AttrIndex
+  ): (Row, List[Any]) => T = {
     val List(c1, c2, c3, c4, c5) = casters
+    val List(a1, a2, a3, a4, a5) = (firstAttrIndex until firstAttrIndex + 5).toList
     (row: Row, nested: List[Any]) =>
       (
-        c1(row, nested),
-        c2(row, nested),
-        c3(row, nested),
-        c4(row, nested),
-        c5(row, nested)
+        c1(row, a1, nested),
+        c2(row, a2, nested),
+        c3(row, a3, nested),
+        c4(row, a4, nested),
+        c5(row, a5, nested)
       ).asInstanceOf[T]
   }
 
-  final private def cast6[T](casters: List[(Row, List[Any]) => Any]): (Row, List[Any]) => T = {
+  final private def cast6[T](
+    casters: List[(Row, AttrIndex, NestedTpls) => Any],
+    firstAttrIndex: AttrIndex
+  ): (Row, List[Any]) => T = {
     val List(c1, c2, c3, c4, c5, c6) = casters
+    val List(a1, a2, a3, a4, a5, a6) = (firstAttrIndex until firstAttrIndex + 6).toList
     (row: Row, nested: List[Any]) =>
       (
-        c1(row, nested),
-        c2(row, nested),
-        c3(row, nested),
-        c4(row, nested),
-        c5(row, nested),
-        c6(row, nested)
+        c1(row, a1, nested),
+        c2(row, a2, nested),
+        c3(row, a3, nested),
+        c4(row, a4, nested),
+        c5(row, a5, nested),
+        c6(row, a6, nested)
       ).asInstanceOf[T]
   }
 
-  final private def cast7[T](casters: List[(Row, List[Any]) => Any]): (Row, List[Any]) => T = {
+  final private def cast7[T](
+    casters: List[(Row, AttrIndex, NestedTpls) => Any],
+    firstAttrIndex: AttrIndex
+  ): (Row, List[Any]) => T = {
     val List(c1, c2, c3, c4, c5, c6, c7) = casters
+    val List(a1, a2, a3, a4, a5, a6, a7) = (firstAttrIndex until firstAttrIndex + 7).toList
     (row: Row, nested: List[Any]) =>
       (
-        c1(row, nested),
-        c2(row, nested),
-        c3(row, nested),
-        c4(row, nested),
-        c5(row, nested),
-        c6(row, nested),
-        c7(row, nested)
+        c1(row, a1, nested),
+        c2(row, a2, nested),
+        c3(row, a3, nested),
+        c4(row, a4, nested),
+        c5(row, a5, nested),
+        c6(row, a6, nested),
+        c7(row, a7, nested)
       ).asInstanceOf[T]
   }
 
-  final private def cast8[T](casters: List[(Row, List[Any]) => Any]): (Row, List[Any]) => T = {
+  final private def cast8[T](
+    casters: List[(Row, AttrIndex, NestedTpls) => Any],
+    firstAttrIndex: AttrIndex
+  ): (Row, List[Any]) => T = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8) = casters
+    val List(a1, a2, a3, a4, a5, a6, a7, a8) = (firstAttrIndex until firstAttrIndex + 8).toList
     (row: Row, nested: List[Any]) =>
       (
-        c1(row, nested),
-        c2(row, nested),
-        c3(row, nested),
-        c4(row, nested),
-        c5(row, nested),
-        c6(row, nested),
-        c7(row, nested),
-        c8(row, nested)
+        c1(row, a1, nested),
+        c2(row, a2, nested),
+        c3(row, a3, nested),
+        c4(row, a4, nested),
+        c5(row, a5, nested),
+        c6(row, a6, nested),
+        c7(row, a7, nested),
+        c8(row, a8, nested)
       ).asInstanceOf[T]
   }
 
-  final private def cast9[T](casters: List[(Row, List[Any]) => Any]): (Row, List[Any]) => T = {
+  final private def cast9[T](
+    casters: List[(Row, AttrIndex, NestedTpls) => Any],
+    firstAttrIndex: AttrIndex
+  ): (Row, List[Any]) => T = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9) = casters
+    val List(a1, a2, a3, a4, a5, a6, a7, a8, a9) = (firstAttrIndex until firstAttrIndex + 9).toList
     (row: Row, nested: List[Any]) =>
       (
-        c1(row, nested),
-        c2(row, nested),
-        c3(row, nested),
-        c4(row, nested),
-        c5(row, nested),
-        c6(row, nested),
-        c7(row, nested),
-        c8(row, nested),
-        c9(row, nested)
+        c1(row, a1, nested),
+        c2(row, a2, nested),
+        c3(row, a3, nested),
+        c4(row, a4, nested),
+        c5(row, a5, nested),
+        c6(row, a6, nested),
+        c7(row, a7, nested),
+        c8(row, a8, nested),
+        c9(row, a9, nested)
       ).asInstanceOf[T]
   }
 
-  final private def cast10[T](casters: List[(Row, List[Any]) => Any]): (Row, List[Any]) => T = {
+  final private def cast10[T](
+    casters: List[(Row, AttrIndex, NestedTpls) => Any],
+    firstAttrIndex: AttrIndex
+  ): (Row, List[Any]) => T = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10) = casters
+    val List(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10) = (firstAttrIndex until firstAttrIndex + 10).toList
     (row: Row, nested: List[Any]) =>
       (
-        c1(row, nested),
-        c2(row, nested),
-        c3(row, nested),
-        c4(row, nested),
-        c5(row, nested),
-        c6(row, nested),
-        c7(row, nested),
-        c8(row, nested),
-        c9(row, nested),
-        c10(row, nested)
+        c1(row, a1, nested),
+        c2(row, a2, nested),
+        c3(row, a3, nested),
+        c4(row, a4, nested),
+        c5(row, a5, nested),
+        c6(row, a6, nested),
+        c7(row, a7, nested),
+        c8(row, a8, nested),
+        c9(row, a9, nested),
+        c10(row, a10, nested)
       ).asInstanceOf[T]
   }
 
-  final private def cast11[T](casters: List[(Row, List[Any]) => Any]): (Row, List[Any]) => T = {
+  final private def cast11[T](
+    casters: List[(Row, AttrIndex, NestedTpls) => Any],
+    firstAttrIndex: AttrIndex
+  ): (Row, List[Any]) => T = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11) = casters
+    val List(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11) = (firstAttrIndex until firstAttrIndex + 11).toList
     (row: Row, nested: List[Any]) =>
       (
-        c1(row, nested),
-        c2(row, nested),
-        c3(row, nested),
-        c4(row, nested),
-        c5(row, nested),
-        c6(row, nested),
-        c7(row, nested),
-        c8(row, nested),
-        c9(row, nested),
-        c10(row, nested),
-        c11(row, nested)
+        c1(row, a1, nested),
+        c2(row, a2, nested),
+        c3(row, a3, nested),
+        c4(row, a4, nested),
+        c5(row, a5, nested),
+        c6(row, a6, nested),
+        c7(row, a7, nested),
+        c8(row, a8, nested),
+        c9(row, a9, nested),
+        c10(row, a10, nested),
+        c11(row, a11, nested)
       ).asInstanceOf[T]
   }
 
-  final private def cast12[T](casters: List[(Row, List[Any]) => Any]): (Row, List[Any]) => T = {
+  final private def cast12[T](
+    casters: List[(Row, AttrIndex, NestedTpls) => Any],
+    firstAttrIndex: AttrIndex
+  ): (Row, List[Any]) => T = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12) = casters
+    val List(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12) = (firstAttrIndex until firstAttrIndex + 12).toList
     (row: Row, nested: List[Any]) =>
       (
-        c1(row, nested),
-        c2(row, nested),
-        c3(row, nested),
-        c4(row, nested),
-        c5(row, nested),
-        c6(row, nested),
-        c7(row, nested),
-        c8(row, nested),
-        c9(row, nested),
-        c10(row, nested),
-        c11(row, nested),
-        c12(row, nested)
+        c1(row, a1, nested),
+        c2(row, a2, nested),
+        c3(row, a3, nested),
+        c4(row, a4, nested),
+        c5(row, a5, nested),
+        c6(row, a6, nested),
+        c7(row, a7, nested),
+        c8(row, a8, nested),
+        c9(row, a9, nested),
+        c10(row, a10, nested),
+        c11(row, a11, nested),
+        c12(row, a12, nested)
       ).asInstanceOf[T]
   }
 
-  final private def cast13[T](casters: List[(Row, List[Any]) => Any]): (Row, List[Any]) => T = {
+  final private def cast13[T](
+    casters: List[(Row, AttrIndex, NestedTpls) => Any],
+    firstAttrIndex: AttrIndex
+  ): (Row, List[Any]) => T = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13) = casters
+    val List(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13) = (firstAttrIndex until firstAttrIndex + 13).toList
     (row: Row, nested: List[Any]) =>
       (
-        c1(row, nested),
-        c2(row, nested),
-        c3(row, nested),
-        c4(row, nested),
-        c5(row, nested),
-        c6(row, nested),
-        c7(row, nested),
-        c8(row, nested),
-        c9(row, nested),
-        c10(row, nested),
-        c11(row, nested),
-        c12(row, nested),
-        c13(row, nested)
+        c1(row, a1, nested),
+        c2(row, a2, nested),
+        c3(row, a3, nested),
+        c4(row, a4, nested),
+        c5(row, a5, nested),
+        c6(row, a6, nested),
+        c7(row, a7, nested),
+        c8(row, a8, nested),
+        c9(row, a9, nested),
+        c10(row, a10, nested),
+        c11(row, a11, nested),
+        c12(row, a12, nested),
+        c13(row, a13, nested)
       ).asInstanceOf[T]
   }
 
-  final private def cast14[T](casters: List[(Row, List[Any]) => Any]): (Row, List[Any]) => T = {
+  final private def cast14[T](
+    casters: List[(Row, AttrIndex, NestedTpls) => Any],
+    firstAttrIndex: AttrIndex
+  ): (Row, List[Any]) => T = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14) = casters
+    val List(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14) = (firstAttrIndex until firstAttrIndex + 14).toList
     (row: Row, nested: List[Any]) =>
       (
-        c1(row, nested),
-        c2(row, nested),
-        c3(row, nested),
-        c4(row, nested),
-        c5(row, nested),
-        c6(row, nested),
-        c7(row, nested),
-        c8(row, nested),
-        c9(row, nested),
-        c10(row, nested),
-        c11(row, nested),
-        c12(row, nested),
-        c13(row, nested),
-        c14(row, nested)
+        c1(row, a1, nested),
+        c2(row, a2, nested),
+        c3(row, a3, nested),
+        c4(row, a4, nested),
+        c5(row, a5, nested),
+        c6(row, a6, nested),
+        c7(row, a7, nested),
+        c8(row, a8, nested),
+        c9(row, a9, nested),
+        c10(row, a10, nested),
+        c11(row, a11, nested),
+        c12(row, a12, nested),
+        c13(row, a13, nested),
+        c14(row, a14, nested)
       ).asInstanceOf[T]
   }
 
-  final private def cast15[T](casters: List[(Row, List[Any]) => Any]): (Row, List[Any]) => T = {
+  final private def cast15[T](
+    casters: List[(Row, AttrIndex, NestedTpls) => Any],
+    firstAttrIndex: AttrIndex
+  ): (Row, List[Any]) => T = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15) = casters
+    val List(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15) = (firstAttrIndex until firstAttrIndex + 15).toList
     (row: Row, nested: List[Any]) =>
       (
-        c1(row, nested),
-        c2(row, nested),
-        c3(row, nested),
-        c4(row, nested),
-        c5(row, nested),
-        c6(row, nested),
-        c7(row, nested),
-        c8(row, nested),
-        c9(row, nested),
-        c10(row, nested),
-        c11(row, nested),
-        c12(row, nested),
-        c13(row, nested),
-        c14(row, nested),
-        c15(row, nested)
+        c1(row, a1, nested),
+        c2(row, a2, nested),
+        c3(row, a3, nested),
+        c4(row, a4, nested),
+        c5(row, a5, nested),
+        c6(row, a6, nested),
+        c7(row, a7, nested),
+        c8(row, a8, nested),
+        c9(row, a9, nested),
+        c10(row, a10, nested),
+        c11(row, a11, nested),
+        c12(row, a12, nested),
+        c13(row, a13, nested),
+        c14(row, a14, nested),
+        c15(row, a15, nested)
       ).asInstanceOf[T]
   }
 
-  final private def cast16[T](casters: List[(Row, List[Any]) => Any]): (Row, List[Any]) => T = {
+  final private def cast16[T](
+    casters: List[(Row, AttrIndex, NestedTpls) => Any],
+    firstAttrIndex: AttrIndex
+  ): (Row, List[Any]) => T = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16) = casters
+    val List(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16) = (firstAttrIndex until firstAttrIndex + 16).toList
     (row: Row, nested: List[Any]) =>
       (
-        c1(row, nested),
-        c2(row, nested),
-        c3(row, nested),
-        c4(row, nested),
-        c5(row, nested),
-        c6(row, nested),
-        c7(row, nested),
-        c8(row, nested),
-        c9(row, nested),
-        c10(row, nested),
-        c11(row, nested),
-        c12(row, nested),
-        c13(row, nested),
-        c14(row, nested),
-        c15(row, nested),
-        c16(row, nested)
+        c1(row, a1, nested),
+        c2(row, a2, nested),
+        c3(row, a3, nested),
+        c4(row, a4, nested),
+        c5(row, a5, nested),
+        c6(row, a6, nested),
+        c7(row, a7, nested),
+        c8(row, a8, nested),
+        c9(row, a9, nested),
+        c10(row, a10, nested),
+        c11(row, a11, nested),
+        c12(row, a12, nested),
+        c13(row, a13, nested),
+        c14(row, a14, nested),
+        c15(row, a15, nested),
+        c16(row, a16, nested)
       ).asInstanceOf[T]
   }
 
-  final private def cast17[T](casters: List[(Row, List[Any]) => Any]): (Row, List[Any]) => T = {
+  final private def cast17[T](
+    casters: List[(Row, AttrIndex, NestedTpls) => Any],
+    firstAttrIndex: AttrIndex
+  ): (Row, List[Any]) => T = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17) = casters
+    val List(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17) = (firstAttrIndex until firstAttrIndex + 17).toList
     (row: Row, nested: List[Any]) =>
       (
-        c1(row, nested),
-        c2(row, nested),
-        c3(row, nested),
-        c4(row, nested),
-        c5(row, nested),
-        c6(row, nested),
-        c7(row, nested),
-        c8(row, nested),
-        c9(row, nested),
-        c10(row, nested),
-        c11(row, nested),
-        c12(row, nested),
-        c13(row, nested),
-        c14(row, nested),
-        c15(row, nested),
-        c16(row, nested),
-        c17(row, nested)
+        c1(row, a1, nested),
+        c2(row, a2, nested),
+        c3(row, a3, nested),
+        c4(row, a4, nested),
+        c5(row, a5, nested),
+        c6(row, a6, nested),
+        c7(row, a7, nested),
+        c8(row, a8, nested),
+        c9(row, a9, nested),
+        c10(row, a10, nested),
+        c11(row, a11, nested),
+        c12(row, a12, nested),
+        c13(row, a13, nested),
+        c14(row, a14, nested),
+        c15(row, a15, nested),
+        c16(row, a16, nested),
+        c17(row, a17, nested)
       ).asInstanceOf[T]
   }
 
-  final private def cast18[T](casters: List[(Row, List[Any]) => Any]): (Row, List[Any]) => T = {
+  final private def cast18[T](
+    casters: List[(Row, AttrIndex, NestedTpls) => Any],
+    firstAttrIndex: AttrIndex
+  ): (Row, List[Any]) => T = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18) = casters
+    val List(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18) = (firstAttrIndex until firstAttrIndex + 18).toList
     (row: Row, nested: List[Any]) =>
       (
-        c1(row, nested),
-        c2(row, nested),
-        c3(row, nested),
-        c4(row, nested),
-        c5(row, nested),
-        c6(row, nested),
-        c7(row, nested),
-        c8(row, nested),
-        c9(row, nested),
-        c10(row, nested),
-        c11(row, nested),
-        c12(row, nested),
-        c13(row, nested),
-        c14(row, nested),
-        c15(row, nested),
-        c16(row, nested),
-        c17(row, nested),
-        c18(row, nested)
+        c1(row, a1, nested),
+        c2(row, a2, nested),
+        c3(row, a3, nested),
+        c4(row, a4, nested),
+        c5(row, a5, nested),
+        c6(row, a6, nested),
+        c7(row, a7, nested),
+        c8(row, a8, nested),
+        c9(row, a9, nested),
+        c10(row, a10, nested),
+        c11(row, a11, nested),
+        c12(row, a12, nested),
+        c13(row, a13, nested),
+        c14(row, a14, nested),
+        c15(row, a15, nested),
+        c16(row, a16, nested),
+        c17(row, a17, nested),
+        c18(row, a18, nested)
       ).asInstanceOf[T]
   }
 
-  final private def cast19[T](casters: List[(Row, List[Any]) => Any]): (Row, List[Any]) => T = {
+  final private def cast19[T](
+    casters: List[(Row, AttrIndex, NestedTpls) => Any],
+    firstAttrIndex: AttrIndex
+  ): (Row, List[Any]) => T = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19) = casters
+    val List(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19) = (firstAttrIndex until firstAttrIndex + 19).toList
     (row: Row, nested: List[Any]) =>
       (
-        c1(row, nested),
-        c2(row, nested),
-        c3(row, nested),
-        c4(row, nested),
-        c5(row, nested),
-        c6(row, nested),
-        c7(row, nested),
-        c8(row, nested),
-        c9(row, nested),
-        c10(row, nested),
-        c11(row, nested),
-        c12(row, nested),
-        c13(row, nested),
-        c14(row, nested),
-        c15(row, nested),
-        c16(row, nested),
-        c17(row, nested),
-        c18(row, nested),
-        c19(row, nested)
+        c1(row, a1, nested),
+        c2(row, a2, nested),
+        c3(row, a3, nested),
+        c4(row, a4, nested),
+        c5(row, a5, nested),
+        c6(row, a6, nested),
+        c7(row, a7, nested),
+        c8(row, a8, nested),
+        c9(row, a9, nested),
+        c10(row, a10, nested),
+        c11(row, a11, nested),
+        c12(row, a12, nested),
+        c13(row, a13, nested),
+        c14(row, a14, nested),
+        c15(row, a15, nested),
+        c16(row, a16, nested),
+        c17(row, a17, nested),
+        c18(row, a18, nested),
+        c19(row, a19, nested)
       ).asInstanceOf[T]
   }
 
-  final private def cast20[T](casters: List[(Row, List[Any]) => Any]): (Row, List[Any]) => T = {
+  final private def cast20[T](
+    casters: List[(Row, AttrIndex, NestedTpls) => Any],
+    firstAttrIndex: AttrIndex
+  ): (Row, List[Any]) => T = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20) = casters
+    val List(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20) = (firstAttrIndex until firstAttrIndex + 20).toList
     (row: Row, nested: List[Any]) =>
       (
-        c1(row, nested),
-        c2(row, nested),
-        c3(row, nested),
-        c4(row, nested),
-        c5(row, nested),
-        c6(row, nested),
-        c7(row, nested),
-        c8(row, nested),
-        c9(row, nested),
-        c10(row, nested),
-        c11(row, nested),
-        c12(row, nested),
-        c13(row, nested),
-        c14(row, nested),
-        c15(row, nested),
-        c16(row, nested),
-        c17(row, nested),
-        c18(row, nested),
-        c19(row, nested),
-        c20(row, nested)
+        c1(row, a1, nested),
+        c2(row, a2, nested),
+        c3(row, a3, nested),
+        c4(row, a4, nested),
+        c5(row, a5, nested),
+        c6(row, a6, nested),
+        c7(row, a7, nested),
+        c8(row, a8, nested),
+        c9(row, a9, nested),
+        c10(row, a10, nested),
+        c11(row, a11, nested),
+        c12(row, a12, nested),
+        c13(row, a13, nested),
+        c14(row, a14, nested),
+        c15(row, a15, nested),
+        c16(row, a16, nested),
+        c17(row, a17, nested),
+        c18(row, a18, nested),
+        c19(row, a19, nested),
+        c20(row, a20, nested)
       ).asInstanceOf[T]
   }
 
-  final private def cast21[T](casters: List[(Row, List[Any]) => Any]): (Row, List[Any]) => T = {
+  final private def cast21[T](
+    casters: List[(Row, AttrIndex, NestedTpls) => Any],
+    firstAttrIndex: AttrIndex
+  ): (Row, List[Any]) => T = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c21) = casters
+    val List(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20, a21) = (firstAttrIndex until firstAttrIndex + 21).toList
     (row: Row, nested: List[Any]) =>
       (
-        c1(row, nested),
-        c2(row, nested),
-        c3(row, nested),
-        c4(row, nested),
-        c5(row, nested),
-        c6(row, nested),
-        c7(row, nested),
-        c8(row, nested),
-        c9(row, nested),
-        c10(row, nested),
-        c11(row, nested),
-        c12(row, nested),
-        c13(row, nested),
-        c14(row, nested),
-        c15(row, nested),
-        c16(row, nested),
-        c17(row, nested),
-        c18(row, nested),
-        c19(row, nested),
-        c20(row, nested),
-        c21(row, nested)
+        c1(row, a1, nested),
+        c2(row, a2, nested),
+        c3(row, a3, nested),
+        c4(row, a4, nested),
+        c5(row, a5, nested),
+        c6(row, a6, nested),
+        c7(row, a7, nested),
+        c8(row, a8, nested),
+        c9(row, a9, nested),
+        c10(row, a10, nested),
+        c11(row, a11, nested),
+        c12(row, a12, nested),
+        c13(row, a13, nested),
+        c14(row, a14, nested),
+        c15(row, a15, nested),
+        c16(row, a16, nested),
+        c17(row, a17, nested),
+        c18(row, a18, nested),
+        c19(row, a19, nested),
+        c20(row, a20, nested),
+        c21(row, a21, nested)
       ).asInstanceOf[T]
   }
 }

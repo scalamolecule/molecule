@@ -5,6 +5,7 @@ import java.io.{BufferedWriter, File, FileWriter}
 abstract class CodeGenTemplate(val fileName: String, dir: String, basePath: String) extends CodeGenBase {
   val path: String = basePath + dir
   val fileName_    = if (fileName == "package") "package" else fileName + "_"
+  def caseN(n: Int) = if (n < 10) s"$n " else n
 
   class TemplateVals(arity: Int) {
     lazy val s          = " "

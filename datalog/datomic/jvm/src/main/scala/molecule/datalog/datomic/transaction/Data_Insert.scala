@@ -67,7 +67,7 @@ trait Data_Insert
       tpl.productElement(tplIndex) match {
         case Some(value) => appendStmt(add, e, a,
           handleScalaValue(value.asInstanceOf[T]).asInstanceOf[AnyRef])
-        case _           => () // no statement to insert
+        case None           => () // no statement to insert
       }
   }
 

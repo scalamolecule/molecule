@@ -8,19 +8,69 @@ import utest._
 import scala.language.implicitConversions
 
 
-object AdhocJVM extends DatomicTestSuite {
+object AdhocDatomicJVM extends DatomicTestSuite {
 
 
   override lazy val tests = Tests {
 
-    "types" - types { implicit conn =>
-      for {
-        _ <- Ns.int.insert.apply(1).transact
-        //        _ <- Ns.int.query.get.map(_ ==> List(1))
+    "refs" - refs { implicit conn =>
+      import molecule.coreTests.dataModels.core.dsl.Refs._
 
+      for {
+        _ <- A.s.Bb.*(B.i).insert(
+          ("a", List(1, 2)),
+          ("b", List(3)),
+          //          ("a", List(1)),
+          //          ("b", List(2)),
+          //          ("c", List(3)),
+        ).transact
+        //        _ <- A.s.Bb.i.insert(
+        //          ("a", 1),
+        //          ("a", 2),
+        //          ("b", 3),
+        //        ).transact
+        //        _ <- A.s.query.get.map(_ ==> List("a", "b"))
+        //        _ <- B.i.query.get.map(_ ==> List(1, 2, 3))
+        //        _ <- A.s.Bb.i.query.get.map(_ ==> List(
+        //          ("a", 1),
+        //          ("a", 2),
+        //          ("b", 3),
+        //        ))
+        /*
+        SELECT DISTINCT
+          A.s,
+          B.i
+        FROM A
+        INNER JOIN A_bb_B ON A.id        = A_bb_B.A_id
+        INNER JOIN B      ON A_bb_B.B_id = B.id
+        WHERE
+          A.s IS NOT NULL AND
+          B.i IS NOT NULL;
+         */
+
+        //        _ <- A.s.Bb.*(B.i).query.inspect
+        _ <- A.s.Bb.*(B.i_?).query.get
+
+
+        _ <- A.s.Bb.*(B.i).query.get.map(_ ==> List(
+          ("a", List(1, 2)),
+          ("b", List(3)),
+          //          ("a", List(1)),
+          //          ("b", List(2)),
+          //          ("c", List(3)),
+        ))
 
       } yield ()
     }
+
+    //    "types" - types { implicit conn =>
+    //      for {
+    //        _ <- Ns.int.insert.apply(1).transact
+    //        //        _ <- Ns.int.query.get.map(_ ==> List(1))
+    //
+    //
+    //      } yield ()
+    //    }
 
 
     //    "validation" - validation { implicit conn =>

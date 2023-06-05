@@ -13,20 +13,20 @@ trait ResolveExprOne[Tpl]
     sortAttrIndex += 1
     val (e, a) = ("x", s":${attr.ns}/${attr.attr}")
     attr match {
-      case at: AttrOneManString     => man(attr, e, a, at.vs, resString1, resString, sortOneString(at, sortAttrIndex))
-      case at: AttrOneManInt        => man(attr, e, a, at.vs, resInt1, resInt, intSorter(at, sortAttrIndex))
-      case at: AttrOneManLong       => manLong(attr, e, a, at.vs, resLong1, resLong, sortOneLong(at, sortAttrIndex))
-      case at: AttrOneManFloat      => man(attr, e, a, at.vs, resFloat1, resFloat, floatSorter(at, sortAttrIndex))
-      case at: AttrOneManDouble     => man(attr, e, a, at.vs, resDouble1, resDouble, sortOneDouble(at, sortAttrIndex))
-      case at: AttrOneManBoolean    => man(attr, e, a, at.vs, resBoolean1, resBoolean, sortOneBoolean(at, sortAttrIndex))
-      case at: AttrOneManBigInt     => man(attr, e, a, at.vs, resBigInt1, resBigInt, bigIntSorter(at, sortAttrIndex))
-      case at: AttrOneManBigDecimal => man(attr, e, a, at.vs, resBigDecimal1, resBigDecimal, sortOneBigDecimal(at, sortAttrIndex))
-      case at: AttrOneManDate       => man(attr, e, a, at.vs, resDate1, resDate, sortOneDate(at, sortAttrIndex))
-      case at: AttrOneManUUID       => man(attr, e, a, at.vs, resUUID1, resUUID, sortOneUUID(at, sortAttrIndex))
-      case at: AttrOneManURI        => man(attr, e, a, at.vs, resURI1, resURI, sortOneURI(at, sortAttrIndex))
-      case at: AttrOneManByte       => man(attr, e, a, at.vs, resByte1, resByte, byteSorter(at, sortAttrIndex))
-      case at: AttrOneManShort      => man(attr, e, a, at.vs, resShort1, resShort, shortSorter(at, sortAttrIndex))
-      case at: AttrOneManChar       => man(attr, e, a, at.vs, resChar1, resChar, sortOneChar(at, sortAttrIndex))
+      case at: AttrOneManString     => man(attr, e, a, at.vs, resString1, resOptString1)
+      case at: AttrOneManInt        => man(attr, e, a, at.vs, resInt1, resOptInt1)
+      case at: AttrOneManLong       => manLong(attr, e, a, at.vs, resLong1, resOptLong1)
+      case at: AttrOneManFloat      => man(attr, e, a, at.vs, resFloat1, resOptFloat1)
+      case at: AttrOneManDouble     => man(attr, e, a, at.vs, resDouble1, resOptDouble1)
+      case at: AttrOneManBoolean    => man(attr, e, a, at.vs, resBoolean1, resOptBoolean1)
+      case at: AttrOneManBigInt     => man(attr, e, a, at.vs, resBigInt1, resOptBigInt1)
+      case at: AttrOneManBigDecimal => man(attr, e, a, at.vs, resBigDecimal1, resOptBigDecimal1)
+      case at: AttrOneManDate       => man(attr, e, a, at.vs, resDate1, resOptDate1)
+      case at: AttrOneManUUID       => man(attr, e, a, at.vs, resUUID1, resOptUUID1)
+      case at: AttrOneManURI        => man(attr, e, a, at.vs, resURI1, resOptURI1)
+      case at: AttrOneManByte       => man(attr, e, a, at.vs, resByte1, resOptByte1)
+      case at: AttrOneManShort      => man(attr, e, a, at.vs, resShort1, resOptShort1)
+      case at: AttrOneManChar       => man(attr, e, a, at.vs, resChar1, resOptChar1)
     }
   }
 
@@ -35,20 +35,20 @@ trait ResolveExprOne[Tpl]
     if (isNestedOpt && !isTxMetaData)
       throw ModelError("Tacit attributes not allowed in optional nested queries. Found: " + a)
     attr match {
-      case at: AttrOneTacString     => tac(attr, e, a, at.vs, resString)
-      case at: AttrOneTacInt        => tac(attr, e, a, at.vs, resInt)
-      case at: AttrOneTacLong       => tac(attr, e, a, at.vs, resLong)
-      case at: AttrOneTacFloat      => tac(attr, e, a, at.vs, resFloat)
-      case at: AttrOneTacDouble     => tac(attr, e, a, at.vs, resDouble)
-      case at: AttrOneTacBoolean    => tac(attr, e, a, at.vs, resBoolean)
-      case at: AttrOneTacBigInt     => tac(attr, e, a, at.vs, resBigInt)
-      case at: AttrOneTacBigDecimal => tac(attr, e, a, at.vs, resBigDecimal)
-      case at: AttrOneTacDate       => tac(attr, e, a, at.vs, resDate)
-      case at: AttrOneTacUUID       => tac(attr, e, a, at.vs, resUUID)
-      case at: AttrOneTacURI        => tac(attr, e, a, at.vs, resURI)
-      case at: AttrOneTacByte       => tac(attr, e, a, at.vs, resByte)
-      case at: AttrOneTacShort      => tac(attr, e, a, at.vs, resShort)
-      case at: AttrOneTacChar       => tac(attr, e, a, at.vs, resChar)
+      case at: AttrOneTacString     => tac(attr, e, a, at.vs, resString1)
+      case at: AttrOneTacInt        => tac(attr, e, a, at.vs, resInt1)
+      case at: AttrOneTacLong       => tac(attr, e, a, at.vs, resLong1)
+      case at: AttrOneTacFloat      => tac(attr, e, a, at.vs, resFloat1)
+      case at: AttrOneTacDouble     => tac(attr, e, a, at.vs, resDouble1)
+      case at: AttrOneTacBoolean    => tac(attr, e, a, at.vs, resBoolean1)
+      case at: AttrOneTacBigInt     => tac(attr, e, a, at.vs, resBigInt1)
+      case at: AttrOneTacBigDecimal => tac(attr, e, a, at.vs, resBigDecimal1)
+      case at: AttrOneTacDate       => tac(attr, e, a, at.vs, resDate1)
+      case at: AttrOneTacUUID       => tac(attr, e, a, at.vs, resUUID1)
+      case at: AttrOneTacURI        => tac(attr, e, a, at.vs, resURI1)
+      case at: AttrOneTacByte       => tac(attr, e, a, at.vs, resByte1)
+      case at: AttrOneTacShort      => tac(attr, e, a, at.vs, resShort1)
+      case at: AttrOneTacChar       => tac(attr, e, a, at.vs, resChar1)
     }
   }
 
@@ -58,52 +58,33 @@ trait ResolveExprOne[Tpl]
     hasOptAttr = true // to avoid redundant None's
     val (e, a) = ("x", s":${attr.ns}/${attr.attr}")
     attr match {
-      case at: AttrOneOptString     => opt(attr, e, a, at.vs, resOptString, sortOneOptString(at, sortAttrIndex), sortOneString(at, sortAttrIndex))
-      case at: AttrOneOptInt        => opt(attr, e, a, at.vs, resOptInt, sortOneOptInt(at, sortAttrIndex), sortOneInt(at, sortAttrIndex))
-      case at: AttrOneOptLong       => opt(attr, e, a, at.vs, resOptLong, sorterOneOptLong(at, sortAttrIndex), sorterOneLong(at, sortAttrIndex))
-      case at: AttrOneOptFloat      => opt(attr, e, a, at.vs, resOptFloat, sortOneOptFloat(at, sortAttrIndex), sortOneFloat(at, sortAttrIndex))
-      case at: AttrOneOptDouble     => opt(attr, e, a, at.vs, resOptDouble, sortOneOptDouble(at, sortAttrIndex), sortOneDouble(at, sortAttrIndex))
-      case at: AttrOneOptBoolean    => opt(attr, e, a, at.vs, resOptBoolean, sortOneOptBoolean(at, sortAttrIndex), sortOneBoolean(at, sortAttrIndex))
-      case at: AttrOneOptBigInt     => opt(attr, e, a, at.vs, resOptBigInt, sortOneOptBigInt(at, sortAttrIndex), sortOneBigInt(at, sortAttrIndex))
-      case at: AttrOneOptBigDecimal => opt(attr, e, a, at.vs, resOptBigDecimal, sortOneOptBigDecimal(at, sortAttrIndex), sortOneBigDecimal(at, sortAttrIndex))
-      case at: AttrOneOptDate       => opt(attr, e, a, at.vs, resOptDate, sortOneOptDate(at, sortAttrIndex), sortOneDate(at, sortAttrIndex))
-      case at: AttrOneOptUUID       => opt(attr, e, a, at.vs, resOptUUID, sortOneOptUUID(at, sortAttrIndex), sortOneUUID(at, sortAttrIndex))
-      case at: AttrOneOptURI        => opt(attr, e, a, at.vs, resOptURI, sortOneOptURI(at, sortAttrIndex), sortOneURI(at, sortAttrIndex))
-      case at: AttrOneOptByte       => opt(attr, e, a, at.vs, resOptByte, sortOneOptByte(at, sortAttrIndex), sortOneByte(at, sortAttrIndex))
-      case at: AttrOneOptShort      => opt(attr, e, a, at.vs, resOptShort, sortOneOptShort(at, sortAttrIndex), sortOneShort(at, sortAttrIndex))
-      case at: AttrOneOptChar       => opt(attr, e, a, at.vs, resOptChar, sortOneOptChar(at, sortAttrIndex), sortOneChar(at, sortAttrIndex))
+      case at: AttrOneOptString     => opt(attr, e, a, at.vs, resOptString1, resOptString)
+      case at: AttrOneOptInt        => opt(attr, e, a, at.vs, resOptInt1, resOptInt)
+      case at: AttrOneOptLong       => opt(attr, e, a, at.vs, resOptLong1, resOptLong)
+      case at: AttrOneOptFloat      => opt(attr, e, a, at.vs, resOptFloat1, resOptFloat)
+      case at: AttrOneOptDouble     => opt(attr, e, a, at.vs, resOptDouble1, resOptDouble)
+      case at: AttrOneOptBoolean    => opt(attr, e, a, at.vs, resOptBoolean1, resOptBoolean)
+      case at: AttrOneOptBigInt     => opt(attr, e, a, at.vs, resOptBigInt1, resOptBigInt)
+      case at: AttrOneOptBigDecimal => opt(attr, e, a, at.vs, resOptBigDecimal1, resOptBigDecimal)
+      case at: AttrOneOptDate       => opt(attr, e, a, at.vs, resOptDate1, resOptDate)
+      case at: AttrOneOptUUID       => opt(attr, e, a, at.vs, resOptUUID1, resOptUUID)
+      case at: AttrOneOptURI        => opt(attr, e, a, at.vs, resOptURI1, resOptURI)
+      case at: AttrOneOptByte       => opt(attr, e, a, at.vs, resOptByte1, resOptByte)
+      case at: AttrOneOptShort      => opt(attr, e, a, at.vs, resOptShort1, resOptShort)
+      case at: AttrOneOptChar       => opt(attr, e, a, at.vs, resOptChar1, resOptChar)
     }
-  }
-
-  private def sorterOneOptLong(
-    at: AttrOneOptLong,
-    attrIndex: Int
-  ): Option[(Int, Int => (RowOLD, RowOLD) => Int)] = {
-    if (at.status.contains("ref"))
-      sortOneOptLongRef(at, attrIndex)
-    else
-      sortOneOptLong(at, attrIndex)
-  }
-  private def sorterOneLong(
-    at: AttrOneOptLong,
-    attrIndex: Int
-  ): Option[(Int, Int => (RowOLD, RowOLD) => Int)] = {
-    if (at.status.contains("ref"))
-      sortOneLong(at, attrIndex)
-    else
-      sortOneLong(at, attrIndex)
   }
 
   private def addSort(attr: Attr, col: String): Unit = {
     attr.sort.foreach { sort =>
       val (dir, arity) = (sort.head, sort.last)
-      if (orderBy.exists(_._1 == arity)) {
-        throw ModelError(s"Sort arity $arity is already used. " +
+      if (orderBy.exists(ob => ob._1 == level && ob._2 == arity)) {
+        throw ModelError(s"Sort arity $arity is already used on this level. " +
           s"Please use distinct continuous sort arities beginning from 1.")
       }
       dir match {
-        case 'a' => orderBy += ((arity, col, ""))
-        case 'd' => orderBy += ((arity, col, " DESC"))
+        case 'a' => orderBy += ((level, arity, col, ""))
+        case 'd' => orderBy += ((level, arity, col, " DESC"))
       }
     }
   }
@@ -114,22 +95,27 @@ trait ResolveExprOne[Tpl]
     a: Att,
     args: Seq[T],
     res: ResOne[T],
-    resOLD: ResOneOLD[T],
-    sorter: Option[(Int, Int => (RowOLD, RowOLD) => Int)]
+    resOpt: ResOneOpt[T],
   ): Unit = {
-    addCast(res.j2s)
-    val v   = getVar(attr)
+//    val v   = getVar(attr)
     val col = getCol(attr: Attr)
     select += col
-    where += ((col, s"IS NOT NULL"))
-    addSort(attr, col)
-    attr.filterAttr.fold {
-      expr(e, a, v, attr.op, args, resOLD)
-      filterAttrVars1 = filterAttrVars1 + (a -> (e, v))
-      filterAttrVars2.get(a).foreach(_(e, v))
-    } { filterAttr =>
-      expr2(e, a, v, getVar(filterAttr), attr.op)
+    //    println(s"########################### $attr  $isNestedOpt")
+    if (isNestedOpt) {
+      addCast(res.j2sOrNull.asInstanceOf[(Row, AttrIndex) => AnyRef])
+//      addCast(resOpt.j2sOrNull)
+    } else {
+      addCast(res.j2s.asInstanceOf[(Row, AttrIndex) => AnyRef])
+      where += ((col, s"IS NOT NULL"))
     }
+    addSort(attr, col)
+    //    attr.filterAttr.fold {
+    //      expr(e, a, v, attr.op, args, res)
+    //      filterAttrVars1 = filterAttrVars1 + (a -> (e, v))
+    //      filterAttrVars2.get(a).foreach(_(e, v))
+    //    } { filterAttr =>
+    //      expr2(e, a, v, getVar(filterAttr), attr.op)
+    //    }
   }
 
   private def manLong(
@@ -138,8 +124,7 @@ trait ResolveExprOne[Tpl]
     a: Att,
     args: Seq[Long],
     res: ResOne[Long],
-    resOLD: ResOneOLD[Long],
-    sorter: Option[(Int, Int => (RowOLD, RowOLD) => Int)]
+    resOpt: ResOneOpt[Long],
   ): Unit = {
     a match {
       case ":_Generic/eid"  =>
@@ -151,7 +136,7 @@ trait ResolveExprOne[Tpl]
         //        addSort(attr "??")
         throw ModelError("txId not implemented yet for jdbc")
       case a                =>
-        man(attr, e, a, args, res, resOLD, sorter)
+        man(attr, e, a, args, res, resOpt)
     }
   }
 
@@ -160,7 +145,7 @@ trait ResolveExprOne[Tpl]
     e: Var,
     a: Att,
     args: Seq[T],
-    res: ResOneOLD[T],
+    res: ResOne[T],
   ): Unit = {
     val v = getVar(attr)
     attr.filterAttr.fold {
@@ -179,36 +164,40 @@ trait ResolveExprOne[Tpl]
     a: Att,
     optArgs: Option[Seq[T]],
     resOpt: ResOneOpt[T],
-    sortOpt: Option[(Int, Int => (RowOLD, RowOLD) => Int)],
-    sortMan: Option[(Int, Int => (RowOLD, RowOLD) => Int)]
+    resOptOLD: ResOneOptOLD[T],
   ): Unit = {
-    val v = getVar(attr)
+    addCast(resOpt.j2s)
+    val v   = getVar(attr)
     val col = getCol(attr: Attr)
-    addCastOLD(resOpt.j2s)
-    attr.filterAttr.fold {
-      attr.op match {
-        case V     => addSort(attr, col); optV(e, a, v)
-        case Eq    => optEqual(attr, e, a, v, optArgs, resOpt.s2j, sortMan)
-        case Neq   => addSort(attr, col); optNeq(e, a, v, optArgs, resOpt.tpe, resOpt.toDatalog)
-        case Lt    => addSort(attr, col); optCompare(e, a, v, optArgs, "<", resOpt.s2j)
-        case Gt    => addSort(attr, col); optCompare(e, a, v, optArgs, ">", resOpt.s2j)
-        case Le    => addSort(attr, col); optCompare(e, a, v, optArgs, "<=", resOpt.s2j)
-        case Ge    => addSort(attr, col); optCompare(e, a, v, optArgs, ">=", resOpt.s2j)
-        case other => unexpectedOp(other)
-      }
-    } { filterAttr =>
-      addSort(attr, col)
-      val w = getVar(filterAttr)
-      attr.op match {
-        case Eq    => optEqual2(e, a, v, w)
-        case Neq   => optNeq2(e, a, v, w)
-        case Lt    => optCompare2(e, a, v, w, "<")
-        case Gt    => optCompare2(e, a, v, w, ">")
-        case Le    => optCompare2(e, a, v, w, "<=")
-        case Ge    => optCompare2(e, a, v, w, ">=")
-        case other => unexpectedOp(other)
-      }
-    }
+    select += col
+    addSort(attr, col)
+    
+
+    //    addCastOLD(resOptOLD.j2s)
+    //    attr.filterAttr.fold {
+    //      attr.op match {
+    //        case V     => addSort(attr, col); optV(e, a, v)
+    //        case Eq    => optEqual(attr, e, a, v, optArgs, resOptOLD.s2j)
+    //        case Neq   => addSort(attr, col); optNeq(e, a, v, optArgs, resOptOLD.tpe, resOptOLD.toDatalog)
+    //        case Lt    => addSort(attr, col); optCompare(e, a, v, optArgs, "<", resOptOLD.s2j)
+    //        case Gt    => addSort(attr, col); optCompare(e, a, v, optArgs, ">", resOptOLD.s2j)
+    //        case Le    => addSort(attr, col); optCompare(e, a, v, optArgs, "<=", resOptOLD.s2j)
+    //        case Ge    => addSort(attr, col); optCompare(e, a, v, optArgs, ">=", resOptOLD.s2j)
+    //        case other => unexpectedOp(other)
+    //      }
+    //    } { filterAttr =>
+    //      addSort(attr, col)
+    //      val w = getVar(filterAttr)
+    //      attr.op match {
+    //        case Eq    => optEqual2(e, a, v, w)
+    //        case Neq   => optNeq2(e, a, v, w)
+    //        case Lt    => optCompare2(e, a, v, w, "<")
+    //        case Gt    => optCompare2(e, a, v, w, ">")
+    //        case Le    => optCompare2(e, a, v, w, "<=")
+    //        case Ge    => optCompare2(e, a, v, w, ">=")
+    //        case other => unexpectedOp(other)
+    //      }
+    //    }
   }
 
   private def expr[T: ClassTag](
@@ -217,18 +206,19 @@ trait ResolveExprOne[Tpl]
     v: Var,
     op: Op,
     args: Seq[T],
-    res: ResOneOLD[T],
+    res: ResOne[T],
+    resOLD: ResOneOLD[T] = null,
   ): Unit = {
     op match {
       case V          => attr(e, a, v)
-      case Eq         => equal(e, a, v, args, res.s2j)
-      case Neq        => neq(e, a, v, args, res.tpe, res.toDatalog)
-      case Lt         => compare(e, a, v, args.head, "<", res.s2j)
-      case Gt         => compare(e, a, v, args.head, ">", res.s2j)
-      case Le         => compare(e, a, v, args.head, "<=", res.s2j)
-      case Ge         => compare(e, a, v, args.head, ">=", res.s2j)
+      case Eq         => equal(e, a, v, args, resOLD.s2j)
+      case Neq        => neq(e, a, v, args, resOLD.tpe, resOLD.toDatalog)
+      case Lt         => compare(e, a, v, args.head, "<", resOLD.s2j)
+      case Gt         => compare(e, a, v, args.head, ">", resOLD.s2j)
+      case Le         => compare(e, a, v, args.head, "<=", resOLD.s2j)
+      case Ge         => compare(e, a, v, args.head, ">=", resOLD.s2j)
       case NoValue    => noValue(e, a)
-      case Fn(kw, n)  => aggr(e, a, v, kw, n, res)
+      case Fn(kw, n)  => aggr(e, a, v, kw, n, resOLD)
       case StartsWith => stringOp(e, a, v, args.head, "starts-with?")
       case EndsWith   => stringOp(e, a, v, args.head, "ends-with?")
       case Contains   => stringOp(e, a, v, args.head, "includes?")
@@ -459,9 +449,9 @@ trait ResolveExprOne[Tpl]
     v: Var,
     optArgs: Option[Seq[T]],
     fromScala: Any => Any,
-    sortMan: Option[(Int, Int => (RowOLD, RowOLD) => Int)]
+    //    sortMan: Option[(Int, Int => (RowOLD, RowOLD) => Int)]
   ): Unit = {
-      val col = getCol(attr: Attr)
+    val col = getCol(attr: Attr)
     optArgs.fold[Unit] {
       addSort(attr, col)
       select += s"(pull $e-$v [[$a :limit nil]])"

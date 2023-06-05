@@ -36,7 +36,7 @@ trait Nest[Tpl] { self: Model2Query
   private lazy val nestedLevels = castss.length - 1
   private lazy val txAttrs      = aritiess.head.flatten.dropWhile(_ != -1).tail.sum
 
-  // First row index for each level
+  // First attr index for each level
   private lazy val i0 = nestedLevels
   private lazy val i1 = i0 + aritiess.head.flatten.takeWhile(_ != -1).sum
   private lazy val i2 = i1 + aritiess(1).flatten.takeWhile(_ != -1).sum
