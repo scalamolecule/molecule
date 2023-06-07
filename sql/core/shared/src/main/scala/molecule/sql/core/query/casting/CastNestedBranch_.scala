@@ -11,7 +11,8 @@ trait CastNestedBranch_ extends CastRow2Tpl_ { self: Model2Query with Base =>
 @tailrec
   final private def resolveArities(
     arities: List[List[Int]],
-    casts: List[(Row, AttrIndex) => AnyRef],
+//    casts: List[(Row, AttrIndex) => AnyRef],
+    casts: List[(Row, AttrIndex) => Any],
     attrIndex: AttrIndex,
     attrIndexTx: AttrIndex,
     acc: List[(Row, AttrIndex, NestedTpls) => Any]
@@ -53,7 +54,8 @@ trait CastNestedBranch_ extends CastRow2Tpl_ { self: Model2Query with Base =>
 
   final protected def castBranch[T](
     arities: List[List[Int]],
-    casts: List[(Row, AttrIndex) => AnyRef],
+//    casts: List[(Row, AttrIndex) => AnyRef],
+    casts: List[(Row, AttrIndex) => Any],
     firstAttrIndex: AttrIndex,
     firstAttrIndexTx: AttrIndex
   ): (Row, NestedTpls) => T = {

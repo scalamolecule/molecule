@@ -1,8 +1,9 @@
 package molecule.sql.jdbc.test
 
 import molecule.core.util.Executor._
-import molecule.coreTests.dataModels.core.dsl.Refs._
-//import molecule.coreTests.dataModels.core.dsl.Types._
+import scala.collection.immutable.Seq
+//import molecule.coreTests.dataModels.core.dsl.Refs._
+import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.sql.jdbc.async._
 import molecule.sql.jdbc.setup.JdbcTestSuite
 import utest._
@@ -11,108 +12,34 @@ import scala.language.implicitConversions
 
 object AdhocJdbcJVM extends JdbcTestSuite {
 
+  val name   = Map("en" -> "hello", "de" -> "hello", "da" -> "hej")
+  val name_k = Set("en", "de", "da")
+  val name_v = Set("hello", "hej")
+
+  val name_   = 7
+  val name_k_ = 7
+  val name_v_ = 7
+
+  val name_?   = 7
+  val name_k_? = 7
+  val name_v_? = 7
+
+  val ranked   = List("Peter", "Bob", "Mary")
+  val ranked_i = List(0, 1, 2)
+
+  val rankedA   = Array("Peter", "Bob", "Mary")
+  val rankedA_i = Array(0, 1, 2)
+
+
   override lazy val tests = Tests {
 
-    "refs" - refs { implicit conn =>
+    "types" - types { implicit conn =>
       for {
-
-//        _ <- A.s.i_?.insert(
-//          ("a", Some(1)),
-//          ("b", None),
-//        ).transact
-//
-//        //        _ <- A.s.query.get.map(_ ==> List("a", "b"))
-//        //        _ <- A.i.query.get.map(_ ==> List(1))
-//        _ <- A.s.i_?.query.get.map(_ ==> List(
-//          ("a", Some(1)),
-//          ("b", None),
-//        ))
-//
-//
-//        _ <- A.s.Bb.*(B.i).insert(
-//          //          ("a", List(1)),
-//          //          ("a", List(1, 2)),
-//          ("b", Nil),
-//        ).transact
-//        _ <- A.s.Bb.*?(B.i).query.get.map(_ ==> List(
-//          //          ("a", List(1)),
-//          //          ("a", List(1, 2)),
-//          ("b", Nil),
-//        ))
-//
-//        _ <- A.s.Bb.*(B.i_?).insert(
-//          //          ("a", List(1)),
-//          //          ("a", List(1, 2)),
-//          ("b", Nil),
-//        ).transact
-//        _ <- A.s.Bb.*?(B.i_?).query.get.map(_ ==> List(
-//          //          ("a", List(1)),
-//          //          ("a", List(1, 2)),
-//          ("b", Nil),
-//        ))
-//
-//        _ <- A.s.Bb.*(B.i.s).insert(
-//          ("b", Nil),
-//          ("a", List((1, "x"), (2, "y"))),
-//        ).transact
-//        _ <- A.s.Bb.*?(B.i.s).query.get.map(_ ==> List(
-//          ("b", Nil),
-//          ("a", List((1, "x"), (2, "y"))),
-//        ))
-//
-//        _ <- A.s.Bb.*(B.i.s_?).insert(
-//          ("b", Nil),
-//          //          ("a", List((1, Some("x")), (2, None))),
-//          ("a", List((1, None), (2, Some("y")))),
-//        ).transact
-//        _ <- A.s.Bb.*?(B.i.s_?).query.get.map(_ ==> List(
-//          ("b", Nil),
-//          //          ("a", List((1, Some("x")), (2, None))),
-//          ("a", List((1, None), (2, Some("y")))),
-//        ))
-
-
-//        _ <- A.s.Bb.*(B.i_?.s).insert(
-//          ("b", Nil),
-//          ("a", List((Some(1), "x"), (None, "y"))),
-//          //          ("c", List((None, "x"), (Some(2), "y"))),
-//        ).transact
-//        _ <- A.s.Bb.*?(B.i_?.s.a1).query.get.map(_ ==> List(
-//          ("b", Nil),
-//          ("a", List((Some(1), "x"), (None, "y"))),
-//          //          ("c", List((None, "x"), (Some(2), "y"))),
-//        ))
-
-        _ <- A.s.Bb.*(B.i_?).insert(
-          ("a", List(Some(1))),
-          ("b", List(None)),
-          ("c", Nil),
-        ).transact
-
-        _ <- A.s.a1.Bb.*?(B.i_?).query.get.map(_ ==> List(
-          ("a", List(Some(1))),
-          ("b", Nil),
-          ("c", Nil),
-        ))
-
-
-//        List(
-//          (A,List(
-//          (Some(1),a1,List((10,Some(x)), (11,None))),
-//          (None,a2,List((20,None), (21,Some(y)))))),
-//          (B,List((None,null,List()))))
-
-
+        //        _ <- Ns.i(3).save.transact
+        _ <- Ns.i.insert(3).transact
+        _ <- Ns.i.query.get.map(_ ==> List(3))
       } yield ()
     }
-
-    //    "types" - types { implicit conn =>
-    //      for {
-    //        //        _ <- Ns.i(3).save.transact
-    //        _ <- Ns.i.insert(3).transact
-    //        _ <- Ns.i.query.get.map(_ ==> List(3))
-    //      } yield ()
-    //    }
 
 
     //    "validation" - validation { implicit conn =>

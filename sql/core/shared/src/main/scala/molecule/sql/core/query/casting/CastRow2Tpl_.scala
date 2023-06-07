@@ -11,7 +11,8 @@ trait CastRow2Tpl_ { self: Model2Query with Base =>
   @tailrec
   final private def resolveArities(
     arities: List[List[Int]],
-    casts: List[(Row, AttrIndex) => AnyRef],
+//    casts: List[(Row, AttrIndex) => AnyRef],
+    casts: List[(Row, AttrIndex) => Any],
     attrIndex: AttrIndex,
     acc: List[(Row, AttrIndex) => Any],
     nested: Option[NestedTpls]
@@ -42,7 +43,8 @@ trait CastRow2Tpl_ { self: Model2Query with Base =>
 
   final protected def castRow2AnyTpl(
     arities: List[List[Int]],
-    casts: List[(Row, AttrIndex) => AnyRef],
+//    casts: List[(Row, AttrIndex) => AnyRef],
+    casts: List[(Row, AttrIndex) => Any],
     attrIndex: AttrIndex,
     nested: Option[NestedTpls]
   ): Row => Any = {

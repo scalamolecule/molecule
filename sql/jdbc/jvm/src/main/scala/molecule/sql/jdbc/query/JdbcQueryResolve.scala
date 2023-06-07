@@ -225,7 +225,8 @@ abstract class JdbcQueryResolve[Tpl](elements: List[Element], dbView: Option[DbV
           postAdjustPullCasts()
           if (!forward) Collections.reverse(sortedRows)
           val count          = getCount(limit, forward, totalCount)
-          val (tuples, more) = paginateRows(count, sortedRows, identifiers, identifyRow(true), pullRow2tpl)
+//          val (tuples, more) = paginateRows(count, sortedRows, identifiers, identifyRow(true), pullRow2tpl)
+          val (tuples, more) = paginateRows(count, sortedRows, identifiers, identifyRow(true), null)
           val tpls           = if (forward) tuples else tuples.reverse
           val cursor         = nextCursor(tpls, allTokens)
           (tpls, cursor, more > 0)

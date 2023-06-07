@@ -22,9 +22,24 @@ trait ResolveBase extends BaseHelpers {
       )
   }
 
-  // Scala to Java
+
+  // Scala to sql statement
+  protected lazy val s2sqlString    : String => String     = (v: String) => s"'${v.replace("'", "''")}'"
+  protected lazy val s2sqlInt       : Int => String        = (v: Int) => s"$v"
+  protected lazy val s2sqlLong      : Long => String       = (v: Long) => s"$v"
+  protected lazy val s2sqlFloat     : Float => String      = (v: Float) => s"$v"
+  protected lazy val s2sqlDouble    : Double => String     = (v: Double) => s"$v"
+  protected lazy val s2sqlBoolean   : Boolean => String    = (v: Boolean) => s"$v"
+  protected lazy val s2sqlBigInt    : BigInt => String     = (v: BigInt) => s"$v"
+  protected lazy val s2sqlBigDecimal: BigDecimal => String = (v: BigDecimal) => s"$v"
+  protected lazy val s2sqlDate      : Date => String       = (v: Date) => s"'${date2str(v)}'"
+  protected lazy val s2sqlUUID      : UUID => String       = (v: UUID) => s"'${v.toString}'"
+  protected lazy val s2sqlURI       : URI => String        = (v: URI) => s"'${v.toString.replace("'", "''")}'"
+  protected lazy val s2sqlByte      : Byte => String       = (v: Byte) => s"$v"
+  protected lazy val s2sqlShort     : Short => String      = (v: Short) => s"$v"
+  protected lazy val s2sqlChar      : Char => String       = (v: Char) => s"'${v.toString}'"
+
   protected lazy val s2jString    : Any => Any = identity
-  // Save Int as Long in Datomic
   protected lazy val s2jInt       : Any => Any = (v: Any) => v.asInstanceOf[Int].toLong.asInstanceOf[Any]
   protected lazy val s2jLong      : Any => Any = identity
   protected lazy val s2jFloat     : Any => Any = identity
@@ -52,7 +67,7 @@ trait ResolveBase extends BaseHelpers {
   protected lazy val dBoolean   : Boolean => String    = (v: Boolean) => v.toString
   protected lazy val dBigInt    : BigInt => String     = (v: BigInt) => v.toString + "N"
   protected lazy val dBigDecimal: BigDecimal => String = (v: BigDecimal) => v.toString + "M"
-  protected lazy val dDate      : Date => String       = (v: Date) => "#inst \"" + date2datomicStr2(v) + "\""
+  protected lazy val dDate      : Date => String       = (v: Date) => "#inst \"" + date2datomic(v) + "\""
   protected lazy val dUUID      : UUID => String       = (v: UUID) => "#uuid \"" + v.toString + "\""
   protected lazy val dURI       : URI => String        = (v: URI) => v.toString
   protected lazy val dByte      : Byte => String       = (v: Byte) => v.toString

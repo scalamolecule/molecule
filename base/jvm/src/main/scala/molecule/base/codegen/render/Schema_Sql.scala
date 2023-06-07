@@ -9,21 +9,24 @@ case class Schema_Sql(schema: MetaSchema) extends BaseHelpers with RegexMatching
   private val nss: Seq[MetaNs] = schema.parts.flatMap(_.nss)
 
   private def field(max: Int, a: MetaAttr): String = {
-    val options = "" // todo
-    //    val options = a.options.flatMap {
-    //      case "index"          => Seq("")
-    //      case "noHistory"      => Seq("")
-    //      case "unique"         => Seq("")
-    //      case "uniqueIdentity" => Seq("")
-    //      case "fulltext"       => Seq("")
-    //      case "owner"          => Seq("")
-    //      case _                => Nil
-    //    }.mkString(" ")
     val indent  = padS(max, a.attr) + " "
     val t       = a.baseTpe match {
       case "UUID" => "uuid"
       case "URI"  => "uri"
       case other  => "" + other.head.toLower + other.tail
+    }
+    val options = a.baseTpe match {
+      case "BigDecimal" => if (a.options.isEmpty) {
+        // Default precision and modest scale
+        // todo: make default configurable
+        "(65535, 25)"
+      } else {
+        a.options.flatMap {
+          case r"(\d+)$precision,(\d+)$scale" => Some(s"($precision, $scale)")
+          case _                              => None
+        }.mkString("")
+      }
+      case _            => ""
     }
     val tpe     = "$" + (if (a.refNs.isEmpty) t else "ref")
     "       |  " + a.attr + indent + tpe + options
@@ -45,9 +48,11 @@ case class Schema_Sql(schema: MetaSchema) extends BaseHelpers with RegexMatching
     val joinTables = metaNs.attrs.collect {
       case MetaAttr(refAttr, CardSet, _, Some(refNs), _, _, _, _, _, _) =>
         val (id1, id2) = if (ns == refNs) ("1_id", "2_id") else ("id", "id")
+        val (l1, l2)   = (ns.length, refNs.length)
+        val (p1, p2)   = if (l1 > l2) ("", " " * (l1 - l2)) else (" " * (l2 - l1), "")
         s"""       |CREATE TABLE ${ns}_${refAttr}_$refNs (
-           |       |  ${ns}_$id1 BIGINT,
-           |       |  ${refNs}_$id2 BIGINT
+           |       |  ${ns}_$id1$p1 BIGINT,
+           |       |  ${refNs}_$id2$p2 BIGINT
            |       |);
            |       |"""
     }
@@ -88,7 +93,7 @@ case class Schema_Sql(schema: MetaSchema) extends BaseHelpers with RegexMatching
         |    "String"     -> List("LONGVARCHAR", "LONGVARCHAR"),
         |    "Int"        -> List("INT"        , "INT"),
         |    "Long"       -> List("BIGINT"     , "BIGINT"),
-        |    "Float"      -> List("FLOAT"      , "FLOAT"),
+        |    "Float"      -> List("DOUBLE"     , "DOUBLE"),
         |    "Double"     -> List("DOUBLE"     , "DOUBLE"),
         |    "Boolean"    -> List("BOOLEAN"    , "BOOLEAN"),
         |    "BigInt"     -> List("DECIMAL"    , "DECIMAL"),

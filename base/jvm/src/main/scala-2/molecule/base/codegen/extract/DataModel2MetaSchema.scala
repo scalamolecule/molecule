@@ -229,20 +229,25 @@ class DataModel2MetaSchema(filePath: String, pkgPath: String, scalaVersion: Stri
           err(s"Invalid alias for attribute $ns.$a: " + other)
       }
 
-      case q"oneString"     => a.copy(card = CardOne, baseTpe = "String")
-      case q"oneChar"       => a.copy(card = CardOne, baseTpe = "Char")
-      case q"oneByte"       => a.copy(card = CardOne, baseTpe = "Byte")
-      case q"oneShort"      => a.copy(card = CardOne, baseTpe = "Short")
-      case q"oneInt"        => a.copy(card = CardOne, baseTpe = "Int")
-      case q"oneLong"       => a.copy(card = CardOne, baseTpe = "Long")
-      case q"oneFloat"      => a.copy(card = CardOne, baseTpe = "Float")
-      case q"oneDouble"     => a.copy(card = CardOne, baseTpe = "Double")
-      case q"oneBoolean"    => a.copy(card = CardOne, baseTpe = "Boolean")
-      case q"oneBigInt"     => a.copy(card = CardOne, baseTpe = "BigInt")
-      case q"oneBigDecimal" => a.copy(card = CardOne, baseTpe = "BigDecimal")
-      case q"oneDate"       => a.copy(card = CardOne, baseTpe = "Date")
-      case q"oneUUID"       => a.copy(card = CardOne, baseTpe = "UUID")
-      case q"oneURI"        => a.copy(card = CardOne, baseTpe = "URI")
+      case q"oneString"                         => a.copy(card = CardOne, baseTpe = "String")
+      case q"oneChar"                           => a.copy(card = CardOne, baseTpe = "Char")
+      case q"oneByte"                           => a.copy(card = CardOne, baseTpe = "Byte")
+      case q"oneShort"                          => a.copy(card = CardOne, baseTpe = "Short")
+      case q"oneInt"                            => a.copy(card = CardOne, baseTpe = "Int")
+      case q"oneLong"                           => a.copy(card = CardOne, baseTpe = "Long")
+      case q"oneFloat"                          => a.copy(card = CardOne, baseTpe = "Float")
+      case q"oneDouble"                         => a.copy(card = CardOne, baseTpe = "Double")
+      case q"oneBoolean"                        => a.copy(card = CardOne, baseTpe = "Boolean")
+      case q"oneBigInt"                         => a.copy(card = CardOne, baseTpe = "BigInt")
+      case q"oneBigDecimal"                     => a.copy(card = CardOne, baseTpe = "BigDecimal")
+      case q"oneBigDecimal($precision, $scale)" => a.copy(
+        card = CardOne,
+        baseTpe = "BigDecimal",
+        options = a.options :+ s"$precision,$scale"
+      )
+      case q"oneDate"                           => a.copy(card = CardOne, baseTpe = "Date")
+      case q"oneUUID"                           => a.copy(card = CardOne, baseTpe = "UUID")
+      case q"oneURI"                            => a.copy(card = CardOne, baseTpe = "URI")
 
       case q"one[$refNs]" =>
         addBackRef(ns, refNs.toString)

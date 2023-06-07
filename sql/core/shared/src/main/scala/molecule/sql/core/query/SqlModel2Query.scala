@@ -13,17 +13,12 @@ class SqlModel2Query[Tpl](elements0: List[Element])
   extends Model2Query
     with ResolveExprOne[Tpl]
     with ResolveExprSet[Tpl]
-    with ResolveRef[Tpl]
-    //    with ResolveNestedPull[Tpl]
+    with ResolveRef
     with Base
     with CastNestedBranch_
     with CastRow2Tpl_
-    //        with CastNestedOptBranch_
-    //        with CastNestedOptLeaf_
     with Nest[Tpl]
     with NestOpt[Tpl]
-    with NestOpt_[Tpl]
-
     with LambdasOne
     with LambdasSet
     with ModelUtils
@@ -33,7 +28,7 @@ class SqlModel2Query[Tpl](elements0: List[Element])
     val elements = if (altElements.isEmpty) elements0 else altElements
     validateQueryModel(elements)
 
-    //    elements.foreach(println)
+    elements.foreach(println)
 
     from = getInitialNonGenericNs(elements)
     exts += from -> None
@@ -66,9 +61,10 @@ class SqlModel2Query[Tpl](elements0: List[Element])
       }.mkString("\n", "\n", "")
     }
 
-    val where_ = if (where.isEmpty) "" else {
-      val max = where.map(_._1.length).max
-      where.map { case (col, predicate) =>
+    val allWhere = where ++ notNull
+    val where_ = if (allWhere.isEmpty) "" else {
+      val max = allWhere.map(_._1.length).max
+      allWhere.map { case (col, predicate) =>
         s"$col " + padS(max, col) + predicate
       }.mkString("\nWHERE\n  ", s" AND\n  ", "")
     }

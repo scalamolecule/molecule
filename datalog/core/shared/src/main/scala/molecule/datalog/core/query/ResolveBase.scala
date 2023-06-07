@@ -52,7 +52,7 @@ trait ResolveBase extends BaseHelpers {
   protected lazy val dBoolean   : Boolean => String    = (v: Boolean) => v.toString
   protected lazy val dBigInt    : BigInt => String     = (v: BigInt) => v.toString + "N"
   protected lazy val dBigDecimal: BigDecimal => String = (v: BigDecimal) => v.toString + "M"
-  protected lazy val dDate      : Date => String       = (v: Date) => "#inst \"" + date2datomicStr2(v) + "\""
+  protected lazy val dDate      : Date => String       = (v: Date) => "#inst \"" + date2datomic(v) + "\""
   protected lazy val dUUID      : UUID => String       = (v: UUID) => "#uuid \"" + v.toString + "\""
   protected lazy val dURI       : URI => String        = (v: URI) => v.toString
   protected lazy val dByte      : Byte => String       = (v: Byte) => v.toString

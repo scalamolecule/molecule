@@ -69,6 +69,7 @@ trait Base extends BaseHelpers with JavaConversions { self: Model2Query =>
   final protected var from    = ""
   final protected val joins   = new ListBuffer[(String, String, String, String, String)]
   final protected val where   = new ListBuffer[(String, String)]
+  final protected val notNull = new ListBuffer[(String, String)]
   final protected val orderBy = new ListBuffer[(Int, Int, String, String)]
 
   final protected val exts = mutable.Map.empty[String, Option[String]]
@@ -86,7 +87,7 @@ trait Base extends BaseHelpers with JavaConversions { self: Model2Query =>
   // Input args and cast lambdas
   final protected val preArgs   = new ArrayBuffer[AnyRef]
   final protected val args      = new ArrayBuffer[AnyRef]
-  final protected var castss    = List(List.empty[(Row, Int) => AnyRef])
+  final protected var castss    = List(List.empty[(Row, Int) => Any])
   final protected var castssOLD = List(List.empty[AnyRef => AnyRef])
   final protected var aritiess  = List(List.empty[List[Int]])
 
@@ -125,20 +126,11 @@ trait Base extends BaseHelpers with JavaConversions { self: Model2Query =>
   }
 
 
-
-
-//  final protected def addCast(cast: (Row, Int) => AnyRef): Unit = {
-//    if (isTxMetaData)
-//      castss = (castss.head :+ cast) :: castss.tail
-//    else
-//      castss = castss.init :+ (castss.last :+ cast)
-//  }
-
   final protected def addCast(cast: (Row, Int) => Any): Unit = {
     if (isTxMetaData)
-      castss = (castss.head :+ cast.asInstanceOf[(Row, Int) => AnyRef]) :: castss.tail
+      castss = (castss.head :+ cast) :: castss.tail
     else
-      castss = castss.init :+ (castss.last :+ cast.asInstanceOf[(Row, Int) => AnyRef])
+      castss = castss.init :+ (castss.last :+ cast)
   }
 
   final protected def addCastOLD(cast: AnyRef => AnyRef): Unit = {

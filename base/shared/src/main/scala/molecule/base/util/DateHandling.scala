@@ -45,12 +45,8 @@ trait DateHandling extends RegexMatching {
     zdt.format(DateTimeFormatter.ofPattern(pattern))
   }
 
-  def date2datomicStr(date: Date, zoneOffset: ZoneOffset = localZoneOffset): String =
-    getDateStr(date, zoneOffset, "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
-
-  def date2datomicStr2(date: Date, zoneOffset: ZoneOffset = localZoneOffset): String =
+  def date2datomic(date: Date): String =
     getDateStr(date, ZoneOffset.ofTotalSeconds(0), "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
-
 
   def date2str(date: Date,
                zoneOffset: ZoneOffset = localZoneOffset): String = {

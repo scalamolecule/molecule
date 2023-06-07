@@ -4,7 +4,6 @@ import java.lang.{Long => jLong}
 import java.sql.ResultSet
 import molecule.core.query.Model2Query
 import molecule.sql.core.query.Base
-import scala.collection.immutable.List
 
 
 trait Nest[Tpl] { self: Model2Query

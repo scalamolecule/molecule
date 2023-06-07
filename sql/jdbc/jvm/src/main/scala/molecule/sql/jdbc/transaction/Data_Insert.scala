@@ -180,15 +180,15 @@ trait Data_Insert
           val valueSetter = handleScalaValue(scalaValue.asInstanceOf[T]).asInstanceOf[(PS, Int) => Unit]
           val colSetter   = (ps: PS, _: IdsMap, _: RowIndex) => {
             valueSetter(ps, paramIndex)
-            printValue(curLevel, ns, attr, tplIndex, paramIndex, scalaValue)
+            //            printValue(curLevel, ns, attr, tplIndex, paramIndex, scalaValue)
           }
           addColSetter(curPath, colSetter)
 
         case None =>
           val valueSetter = (ps: PS, n: Int) => ps.setNull(n, java.sql.Types.NULL)
-          val colSetter = (ps: PS, _: IdsMap, _: RowIndex) => {
+          val colSetter   = (ps: PS, _: IdsMap, _: RowIndex) => {
             valueSetter(ps, paramIndex)
-            printValue(curLevel, ns, attr, tplIndex, paramIndex, null)
+            //            printValue(curLevel, ns, attr, tplIndex, paramIndex, null)
           }
           addColSetter(curPath, colSetter)
       }
@@ -272,7 +272,7 @@ trait Data_Insert
       (_: Product) => {
         val colSetter: Setter = (ps: PS, idsMap: IdsMap, rowIndex: RowIndex) => {
           val refId = idsMap(refPath)(rowIndex)
-          printValue(level, ns, refAttr, -1, paramIndex, refId)
+          //          printValue(level, ns, refAttr, -1, paramIndex, refId)
           ps.setLong(paramIndex, refId)
         }
         addColSetter(curPath, colSetter)
@@ -384,7 +384,7 @@ trait Data_Insert
   override protected lazy val valueString     = (v: String) => (ps: PS, n: Int) => ps.setString(n, v)
   override protected lazy val valueInt        = (v: Int) => (ps: PS, n: Int) => ps.setInt(n, v)
   override protected lazy val valueLong       = (v: Long) => (ps: PS, n: Int) => ps.setLong(n, v)
-  override protected lazy val valueFloat      = (v: Float) => (ps: PS, n: Int) => ps.setFloat(n, v)
+  override protected lazy val valueFloat      = (v: Float) => (ps: PS, n: Int) => ps.setDouble(n, v.toString.toDouble)
   override protected lazy val valueDouble     = (v: Double) => (ps: PS, n: Int) => ps.setDouble(n, v)
   override protected lazy val valueBoolean    = (v: Boolean) => (ps: PS, n: Int) => ps.setBoolean(n, v)
   override protected lazy val valueBigInt     = (v: BigInt) => (ps: PS, n: Int) => ps.setBigDecimal(n, BigDecimal(v).bigDecimal)

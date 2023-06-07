@@ -1,18 +1,14 @@
 package molecule.sql.core.query
 
-import java.lang.{Long => jLong}
 import molecule.base.ast.SchemaAST.CardOne
-import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
-import molecule.sql.core.query.casting.NestOpt_
 
 
-trait ResolveRef[Tpl] { self: NestOpt_[Tpl] with Base =>
+trait ResolveRef { self: Base =>
 
   protected def resolveRef(ref: Ref): Unit = {
     val (ns, refAttr, refNs) = (ref.ns, ref.refAttr, ref.refNs)
     val (as, ext)            = exts(refNs).fold(("", ""))(ext => (refNs + ext, ext))
-    //    println(s"====  $ns  $refAttr  $refNs  $as  $ext")
     if (ref.card == CardOne) {
       joins += (("INNER JOIN", refNs, as, s"$ns.$refAttr", s"$refNs$ext.id"))
     } else {
@@ -35,25 +31,6 @@ trait ResolveRef[Tpl] { self: NestOpt_[Tpl] with Base =>
   }
 
   protected def resolveNestedOptRef(nestedRef: Ref): Unit = {
-//    val e = "xx"
-//    nestedOptIds += e
-//    if (whereOLD.isEmpty) {
-//      val Ref(ns, refAttrClean, _, _, _) = nestedRef
-//      val (refAttr, refId)               = (s":$ns/$refAttrClean", vv)
-//      whereOLD += s"[$e $refAttr $refId]" -> wClause
-//    }
-//
-//    if (whereOLD.length == 1 && whereOLD.head._1.startsWith("[(identity")) {
-//      throw ModelError("Single optional attribute before optional nested data structure is not allowed.")
-//    }
-//
-//    // Add nested caster
-//    castssOLD = (castssOLD.head :+ pullNestedData) +: castssOLD.tail
-//
-//    // Start new level of casts
-//    castssOLD = castssOLD :+ Nil
-
-
     val Ref(ns, refAttr, refNs, _, _) = nestedRef
     val (as, ext)                     = exts(refNs).fold(("", ""))(ext => (refNs + ext, ext))
     nestedIds += s"$ns.id"

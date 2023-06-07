@@ -110,7 +110,7 @@ trait JdbcTxBase_JVM extends JdbcDataType_JVM with ModelUtils {
     value: Any
   ): Unit = {
     val fullAttr = s"$ns.$attr"
-    val pad      = padS(8, fullAttr)
+    val pad      = padS(14, fullAttr)
     val tplIndex = if (tplIndex0 == -1) "-" else tplIndex0
     println(s"${indent(level)}$fullAttr$pad tplIndex: $tplIndex   paramIndex: $paramIndex   value: " + value)
   }

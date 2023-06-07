@@ -85,7 +85,9 @@ trait DataModelApi {
   object oneDouble extends oneDouble
   object oneBoolean extends oneBoolean
   object oneBigInt extends oneBigInt
-  object oneBigDecimal extends oneBigDecimal
+  object oneBigDecimal extends oneBigDecimal {
+    def apply(precision: Int, scale: Int): oneBigDecimal = ???
+  }
   object oneDate extends oneDate
   object oneUUID extends oneUUID
   object oneURI extends oneURI
@@ -116,13 +118,15 @@ trait DataModelApi {
   object setDouble extends setDouble
   object setBoolean extends setBoolean
   object setBigInt extends setBigInt
-  object setBigDecimal extends setBigDecimal
+  object setBigDecimal extends setBigDecimal {
+    def apply(precision: Int, scale: Int): oneBigDecimal = ???
+  }
   object setDate extends setDate
   object setUUID extends setUUID
   object setURI extends setURI
   object setByte extends setByte
   object setShort extends setShort
-  object setChar extends  setChar
+  object setChar extends setChar
 
   trait setString extends stringOptions[oneString, Set[String]]
   trait setInt extends Options[setInt, Set[Int], Int]
@@ -137,7 +141,7 @@ trait DataModelApi {
   trait setURI extends Options[setURI, Set[URI], URI]
   trait setByte extends Options[setByte, Set[Byte], Byte]
   trait setShort extends Options[setShort, Set[Short], Short]
-  trait setChar extends  Options[setChar, Set[Char], Char]
+  trait setChar extends Options[setChar, Set[Char], Char]
 
 
   // Refs ..................................................

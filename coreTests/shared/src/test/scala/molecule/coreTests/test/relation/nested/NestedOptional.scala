@@ -104,8 +104,9 @@ trait NestedOptional extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsy
           ("a", List(Some(1), Some(2))),
           ("b", List(Some(1), None)),
           ("c", List(None, Some(2))),
-          ("d", Nil),
+          ("d", List(None, None)),
           ("e", Nil),
+          ("f", Nil),
         ).transact
 
         _ <- A.s.a1.Bb.*?(B.i_?).query.get.map(_ ==> List(
@@ -114,8 +115,10 @@ trait NestedOptional extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsy
           ("c", List(Some(2))),
           ("d", Nil),
           ("e", Nil),
+          ("f", Nil),
         ))
         _ <- A.s.d1.Bb.*?(B.i_?).query.get.map(_ ==> List(
+          ("f", Nil),
           ("e", Nil),
           ("d", Nil),
           ("c", List(Some(2))),
