@@ -11,9 +11,9 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
     sortAttrIndex += 1
     val (e, a) = ("x", s":${attr.ns}/${attr.attr}")
     attr match {
-      case at: AttrOneManLong       => manLong(attr, at.vs, resLong1)
       case at: AttrOneManString     => man(attr, at.vs, resString1)
       case at: AttrOneManInt        => man(attr, at.vs, resInt1)
+      case at: AttrOneManLong       => manLong(attr, at.vs, resLong1)
       case at: AttrOneManFloat      => man(attr, at.vs, resFloat1)
       case at: AttrOneManDouble     => man(attr, at.vs, resDouble1)
       case at: AttrOneManBoolean    => man(attr, at.vs, resBoolean1)
@@ -29,24 +29,23 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
   }
 
   protected def resolveAttrOneTac(attr: AttrOneTac): Unit = {
-    val (e, a) = ("x", s":${attr.ns}/${attr.attr}")
     if (isNestedOpt && !isTxMetaData)
-      throw ModelError("Tacit attributes not allowed in optional nested queries. Found: " + a)
+      throw ModelError("Tacit attributes not allowed in optional nested queries. Found: " + attr.name)
     attr match {
-      case at: AttrOneTacString     => tac(attr, e, a, at.vs, resString1)
-      case at: AttrOneTacInt        => tac(attr, e, a, at.vs, resInt1)
-      case at: AttrOneTacLong       => tac(attr, e, a, at.vs, resLong1)
-      case at: AttrOneTacFloat      => tac(attr, e, a, at.vs, resFloat1)
-      case at: AttrOneTacDouble     => tac(attr, e, a, at.vs, resDouble1)
-      case at: AttrOneTacBoolean    => tac(attr, e, a, at.vs, resBoolean1)
-      case at: AttrOneTacBigInt     => tac(attr, e, a, at.vs, resBigInt1)
-      case at: AttrOneTacBigDecimal => tac(attr, e, a, at.vs, resBigDecimal1)
-      case at: AttrOneTacDate       => tac(attr, e, a, at.vs, resDate1)
-      case at: AttrOneTacUUID       => tac(attr, e, a, at.vs, resUUID1)
-      case at: AttrOneTacURI        => tac(attr, e, a, at.vs, resURI1)
-      case at: AttrOneTacByte       => tac(attr, e, a, at.vs, resByte1)
-      case at: AttrOneTacShort      => tac(attr, e, a, at.vs, resShort1)
-      case at: AttrOneTacChar       => tac(attr, e, a, at.vs, resChar1)
+      case at: AttrOneTacString     => tac(attr, at.vs, resString1)
+      case at: AttrOneTacInt        => tac(attr, at.vs, resInt1)
+      case at: AttrOneTacLong       => tac(attr, at.vs, resLong1)
+      case at: AttrOneTacFloat      => tac(attr, at.vs, resFloat1)
+      case at: AttrOneTacDouble     => tac(attr, at.vs, resDouble1)
+      case at: AttrOneTacBoolean    => tac(attr, at.vs, resBoolean1)
+      case at: AttrOneTacBigInt     => tac(attr, at.vs, resBigInt1)
+      case at: AttrOneTacBigDecimal => tac(attr, at.vs, resBigDecimal1)
+      case at: AttrOneTacDate       => tac(attr, at.vs, resDate1)
+      case at: AttrOneTacUUID       => tac(attr, at.vs, resUUID1)
+      case at: AttrOneTacURI        => tac(attr, at.vs, resURI1)
+      case at: AttrOneTacByte       => tac(attr, at.vs, resByte1)
+      case at: AttrOneTacShort      => tac(attr, at.vs, resShort1)
+      case at: AttrOneTacChar       => tac(attr, at.vs, resChar1)
     }
   }
 
@@ -54,22 +53,21 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
     aritiesAttr()
     sortAttrIndex += 1
     hasOptAttr = true // to avoid redundant None's
-    val (e, a) = ("x", s":${attr.ns}/${attr.attr}")
     attr match {
-      case at: AttrOneOptString     => opt(attr, e, a, at.vs, resOptString1)
-      case at: AttrOneOptInt        => opt(attr, e, a, at.vs, resOptInt1)
-      case at: AttrOneOptLong       => opt(attr, e, a, at.vs, resOptLong1)
-      case at: AttrOneOptFloat      => opt(attr, e, a, at.vs, resOptFloat1)
-      case at: AttrOneOptDouble     => opt(attr, e, a, at.vs, resOptDouble1)
-      case at: AttrOneOptBoolean    => opt(attr, e, a, at.vs, resOptBoolean1)
-      case at: AttrOneOptBigInt     => opt(attr, e, a, at.vs, resOptBigInt1)
-      case at: AttrOneOptBigDecimal => opt(attr, e, a, at.vs, resOptBigDecimal1)
-      case at: AttrOneOptDate       => opt(attr, e, a, at.vs, resOptDate1)
-      case at: AttrOneOptUUID       => opt(attr, e, a, at.vs, resOptUUID1)
-      case at: AttrOneOptURI        => opt(attr, e, a, at.vs, resOptURI1)
-      case at: AttrOneOptByte       => opt(attr, e, a, at.vs, resOptByte1)
-      case at: AttrOneOptShort      => opt(attr, e, a, at.vs, resOptShort1)
-      case at: AttrOneOptChar       => opt(attr, e, a, at.vs, resOptChar1)
+      case at: AttrOneOptString     => opt(attr, at.vs, resOptString)
+      case at: AttrOneOptInt        => opt(attr, at.vs, resOptInt)
+      case at: AttrOneOptLong       => opt(attr, at.vs, resOptLong)
+      case at: AttrOneOptFloat      => opt(attr, at.vs, resOptFloat)
+      case at: AttrOneOptDouble     => opt(attr, at.vs, resOptDouble)
+      case at: AttrOneOptBoolean    => opt(attr, at.vs, resOptBoolean)
+      case at: AttrOneOptBigInt     => opt(attr, at.vs, resOptBigInt)
+      case at: AttrOneOptBigDecimal => opt(attr, at.vs, resOptBigDecimal)
+      case at: AttrOneOptDate       => opt(attr, at.vs, resOptDate)
+      case at: AttrOneOptUUID       => opt(attr, at.vs, resOptUUID)
+      case at: AttrOneOptURI        => opt(attr, at.vs, resOptURI)
+      case at: AttrOneOptByte       => opt(attr, at.vs, resOptByte)
+      case at: AttrOneOptShort      => opt(attr, at.vs, resOptShort)
+      case at: AttrOneOptChar       => opt(attr, at.vs, resOptChar)
     }
   }
 
@@ -87,17 +85,13 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
     }
   }
 
-  private def man[T: ClassTag](
-    attr: Attr,
-    args: Seq[T],
-    res: ResOne[T],
-  ): Unit = {
+  private def man[T: ClassTag](attr: Attr, args: Seq[T], res: ResOne[T]): Unit = {
     val col = getCol(attr: Attr)
     select += col
     if (isNestedOpt) {
-      addCast(res.j2sOrNull)
+      addCast(res.sql2oneOrNull)
     } else {
-      addCast(res.j2s)
+      addCast(res.sql2one)
       notNull += col
     }
     addSort(attr, col)
@@ -110,15 +104,11 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
     }
   }
 
-  private def manLong(
-    attr: Attr,
-    args: Seq[Long],
-    res: ResOne[Long],
-  ): Unit = {
+  private def manLong(attr: Attr, args: Seq[Long], res: ResOne[Long]): Unit = {
     attr.name match {
       case "_Generic.eid"  =>
         select += "id"
-        addCast(res.j2s)
+        addCast(res.sql2one)
         addSort(attr, "id")
       case "_Generic.txId" =>
         throw ModelError("txId not implemented yet for jdbc")
@@ -127,20 +117,13 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
     }
   }
 
-  private def tac[T: ClassTag](
-    attr: Attr,
-    e: Var,
-    a: Att,
-    args: Seq[T],
-    res: ResOne[T],
-  ): Unit = {
+  private def tac[T: ClassTag](attr: Attr, args: Seq[T], res: ResOne[T]): Unit = {
     val col = getCol(attr: Attr)
     notNull += col
-    val v = getVar(attr)
     attr.filterAttr.fold {
       expr(col, attr.op, args, res)
-      filterAttrVars1 = filterAttrVars1 + (a -> (e, v))
-      filterAttrVars2.get(a).foreach(_(e, v))
+//      filterAttrVars1 = filterAttrVars1 + (a -> (e, v))
+//      filterAttrVars2.get(a).foreach(_(e, v))
     } { filterAttr =>
       expr2(col, attr.op)
     }
@@ -149,25 +132,22 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
 
   private def opt[T: ClassTag](
     attr: Attr,
-    e: Var,
-    a: Att,
     optArgs: Option[Seq[T]],
     resOpt: ResOneOpt[T],
   ): Unit = {
-    val v   = getVar(attr)
     val col = getCol(attr: Attr)
-    addCast(resOpt.j2s)
-    addSort(attr, col)
     select += col
+    addCast(resOpt.sql2oneOpt)
+    addSort(attr, col)
     attr.filterAttr.fold {
       attr.op match {
         case V     => () // selected col can already be a value or null
-        case Eq    => optEqual(col, optArgs, resOpt.s2sql)
-        case Neq   => optNeq(col, optArgs, resOpt.tpe, resOpt.s2sql)
-        case Lt    => optCompare(col, optArgs, "<", resOpt.s2sql)
-        case Gt    => optCompare(col, optArgs, ">", resOpt.s2sql)
-        case Le    => optCompare(col, optArgs, "<=", resOpt.s2sql)
-        case Ge    => optCompare(col, optArgs, ">=", resOpt.s2sql)
+        case Eq    => optEqual(col, optArgs, resOpt.one2sql)
+        case Neq   => optNeq(col, optArgs, resOpt.tpe, resOpt.one2sql)
+        case Lt    => optCompare(col, optArgs, "<", resOpt.one2sql)
+        case Gt    => optCompare(col, optArgs, ">", resOpt.one2sql)
+        case Le    => optCompare(col, optArgs, "<=", resOpt.one2sql)
+        case Ge    => optCompare(col, optArgs, ">=", resOpt.one2sql)
         case other => unexpectedOp(other)
       }
     } { filterAttr =>
@@ -192,13 +172,13 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
     res: ResOne[T],
   ): Unit = {
     op match {
-      case V          => () //attr(col)
-      case Eq         => equal(col, args, res.s2sql)
-      case Neq        => neq(col, args, res.tpe, res.s2sql)
-      case Lt         => compare(col, args.head, "<", res.s2sql)
-      case Gt         => compare(col, args.head, ">", res.s2sql)
-      case Le         => compare(col, args.head, "<=", res.s2sql)
-      case Ge         => compare(col, args.head, ">=", res.s2sql)
+      case V          => ()
+      case Eq         => equal(col, args, res.one2sql)
+      case Neq        => neq(col, args, res.one2sql)
+      case Lt         => compare(col, args.head, "<", res.one2sql)
+      case Gt         => compare(col, args.head, ">", res.one2sql)
+      case Le         => compare(col, args.head, "<=", res.one2sql)
+      case Ge         => compare(col, args.head, ">=", res.one2sql)
       case NoValue    => noValue(col)
       case Fn(kw, n)  => aggr(col, kw, n, res)
       case StartsWith => startsWith(col, args.head)
@@ -286,7 +266,7 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
       val alias  = col.replace('.', '_')
       val len    = s"LENGTH($col)"
       val length = until - from
-        select += s"SUBSTRING($col, $from, $length) AS $alias"
+      select += s"SUBSTRING($col, $from, $length) AS $alias"
       orderBy = orderBy.map {
         case (level, arity, `col`, dir) =>
           println("###### " + dir)
@@ -302,54 +282,6 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
   private def even(col: String): Unit = where += ((col, s"% 2 = 0"))
   private def odd(col: String): Unit = where += ((col, s"% 2 = 1"))
 
-  private def string[T: ClassTag](col: String, args: Seq[T], op: String): Unit = {
-    //    select -= v
-    //    whereOLD += s"[$e $a $v$tx]" -> wClause
-    op match {
-      case "take" =>
-      //        select += s"$v-1"
-      //        whereOLD += s"[(max 0 ${args.head}) $v-n]" -> wNeqOne
-      //        whereOLD += s"[(count $v) $v-length]" -> wNeqOne
-      //        whereOLD += s"[(> $v-n 0)]" -> wNeqOne
-      //        whereOLD += s"[(min $v-n $v-length) $v-end]" -> wNeqOne
-      //        whereOLD += s"[(subs $v 0 $v-end) $v-1]" -> wNeqOne
-
-      case "takeRight" =>
-      //        select += s"$v-1"
-      //        whereOLD += s"[(max 0 ${args.head}) $v-n]" -> wNeqOne
-      //        whereOLD += s"[(count $v) $v-length]" -> wNeqOne
-      //        whereOLD += s"[(> $v-n 0)]" -> wNeqOne
-      //        whereOLD += s"[(- $v-length $v-n) $v-back]" -> wNeqOne
-      //        whereOLD += s"[(max 0 $v-back) $v-begin]" -> wNeqOne
-      //        whereOLD += s"[(subs $v $v-begin $v-length) $v-1]" -> wNeqOne
-
-      case "drop" =>
-      //        select += s"$v-1"
-      //        whereOLD += s"[(max 0 ${args.head}) $v-n]" -> wNeqOne
-      //        whereOLD += s"[(count $v) $v-length]" -> wNeqOne
-      //        whereOLD += s"[(< $v-n $v-length)]" -> wNeqOne
-      //        whereOLD += s"[(min $v-n $v-length) $v-begin]" -> wNeqOne
-      //        whereOLD += s"[(subs $v $v-begin $v-length) $v-1]" -> wNeqOne
-
-      case "dropRight" =>
-      //        select += s"$v-1"
-      //        whereOLD += s"[(max 0 ${args.head}) $v-n]" -> wNeqOne
-      //        whereOLD += s"[(count $v) $v-length]" -> wNeqOne
-      //        whereOLD += s"[(< $v-n $v-length)]" -> wNeqOne
-      //        whereOLD += s"[(- $v-length $v-n) $v-end]" -> wNeqOne
-      //        whereOLD += s"[(subs $v 0 $v-end) $v-1]" -> wNeqOne
-
-      case "slice" =>
-      //        select += s"$v-1"
-      //        whereOLD += s"[(count $v) $v-length]" -> wNeqOne
-      //        whereOLD += s"[(max 0 ${args.head}) $v-from]" -> wNeqOne
-      //        whereOLD += s"[(min $v-length (max 0 ${args(1)})) $v-until]" -> wNeqOne
-      //        whereOLD += s"[(< $v-from $v-until)]" -> wNeqOne
-      //        whereOLD += s"[(subs $v $v-from $v-until) $v-1]" -> wNeqOne
-    }
-  }
-
-
   private def aggr[T](col: String, fn: String, optN: Option[Int], res: ResOne[T]): Unit = {
     lazy val n = optN.getOrElse(0)
     // Replace find/casting with aggregate function/cast
@@ -358,6 +290,7 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
       case "distinct" =>
       //        select += s"(distinct $v)"
       //        replaceCast(res.set2set)
+
 
       case "mins" =>
       //        select += s"(min $n $v)"
@@ -415,42 +348,30 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
 
   }
 
-  private def equal[T: ClassTag](col: String, argValues: Seq[T], s2sql: T => String): Unit = {
-    if (argValues.length == 1)
-      where += ((col, "= " + s2sql(argValues.head)))
+  private def equal[T: ClassTag](col: String, args: Seq[T], one2sql: T => String): Unit = {
+    if (args.length == 1)
+      where += ((col, "= " + one2sql(args.head)))
     else
-      where += ((col, argValues.map(s2sql).mkString("IN (", ", ", ")")))
+      where += ((col, args.map(one2sql).mkString("IN (", ", ", ")")))
   }
   private def equal2(col: String, w: Var): Unit = {
     //    whereOLD += s"[$e $a $w$tx]" -> wClause
     //    whereOLD += s"[(identity $w) $v]" -> wGround
   }
 
-  private def neq[T](col: String, args: Seq[T], tpe: String, s2sql: T => String): Unit = {
-    //    whereOLD += s"[$e $a $v$tx]" -> wClause
-    //    if (tpe == "URI") {
-    //      args.zipWithIndex.foreach { case (arg, i) =>
-    //        whereOLD += s"""[(ground (new java.net.URI "$arg")) $v$i]""" -> wNeqOne
-    //        whereOLD += s"[(!= $v $v$i)]" -> wNeqOne
-    //      }
-    //    } else {
-    //      args.foreach { arg =>
-    //        whereOLD += s"[(!= $v ${toDatalog(arg)})]" -> wNeqOne
-    //      }
-    //    }
-
+  private def neq[T](col: String, args: Seq[T], one2sql: T => String): Unit = {
     if (args.length == 1)
-      where += ((col, "<> " + s2sql(args.head)))
+      where += ((col, "<> " + one2sql(args.head)))
     else
-      where += ((col, args.map(s2sql).mkString("NOT IN (", ", ", ")")))
+      where += ((col, args.map(one2sql).mkString("NOT IN (", ", ", ")")))
   }
   private def neq2(col: String, w: Var): Unit = {
     //    whereOLD += s"[$e $a $v$tx]" -> wClause
     //    whereOLD += s"[(!= $v $w)]" -> wNeqOne
   }
 
-  private def compare[T](col: String, arg: T, op: String, s2sql: T => String): Unit = {
-    where += ((col, op + " " + s2sql(arg)))
+  private def compare[T](col: String, arg: T, op: String, one2sql: T => String): Unit = {
+    where += ((col, op + " " + one2sql(arg)))
   }
   private def compare2(col: String, w: Var, op: String): Unit = {
     //    whereOLD += s"[$e $a $v$tx]" -> wClause
@@ -467,19 +388,15 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
   private def optEqual[T: ClassTag](
     col: String,
     optArgs: Option[Seq[T]],
-    s2sql: T => String,
+    one2sql: T => String,
   ): Unit = {
     optArgs.fold[Unit] {
       where += ((col, s"IS NULL"))
     } { vs =>
-      equal(col, vs, s2sql)
+      equal(col, vs, one2sql)
     }
   }
   private def optEqual2(
-    //    e: Var,
-    //    a: Att,
-    //    v: Var,
-    //    w: Var
     col: String,
   ): Unit = {
     //    select += v
@@ -490,20 +407,16 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
     col: String,
     optArgs: Option[Seq[T]],
     tpe: String,
-    s2sql: T => String
+    one2sql: T => String
   ): Unit = {
     if (optArgs.isDefined && optArgs.get.nonEmpty) {
-      neq(col, optArgs.get, tpe, s2sql)
+      neq(col, optArgs.get, one2sql)
     } else {
       notNull += col
     }
   }
   private def optNeq2(
-    //    e: Var,
-    //    a: Att,
-    //    v: Var,
     col: String,
-    //    w: Var
   ): Unit = {
     //    select += v
     //    neq2(col, w)
@@ -513,23 +426,19 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
     col: String,
     optArgs: Option[Seq[T]],
     op: String,
-    s2sql: T => String
+    one2sql: T => String
   ): Unit = {
     optArgs.fold[Unit] {
       // Always return empty result when trying to compare None
       where += (("FALSE", ""))
     } { vs =>
-      where += ((col, op + " " + s2sql(vs.head)))
+      where += ((col, op + " " + one2sql(vs.head)))
     }
 
 
   }
   private def optCompare2(
-    //    e: Var,
-    //    a: Att,
-    //    v: Var,
     col: String,
-    //    w: Var,
     op: String,
   ): Unit = {
     //    select += v

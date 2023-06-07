@@ -18,7 +18,7 @@ object Types extends DataModel(5) {
     val double     = oneDouble
     val boolean    = oneBoolean
     val bigInt     = oneBigInt
-    val bigDecimal = oneBigDecimal(100, 20)
+    val bigDecimal = oneBigDecimal
     val date       = oneDate
     val uuid       = oneUUID
     val uri        = oneURI

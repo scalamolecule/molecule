@@ -10,6 +10,7 @@ case class Schema_Sql(schema: MetaSchema) extends BaseHelpers with RegexMatching
 
   private def field(max: Int, a: MetaAttr): String = {
     val indent  = padS(max, a.attr) + " "
+    val array = if(a.card == CardSet) " ARRAY" else ""
     val t       = a.baseTpe match {
       case "UUID" => "uuid"
       case "URI"  => "uri"
@@ -29,7 +30,7 @@ case class Schema_Sql(schema: MetaSchema) extends BaseHelpers with RegexMatching
       case _            => ""
     }
     val tpe     = "$" + (if (a.refNs.isEmpty) t else "ref")
-    "       |  " + a.attr + indent + tpe + options
+    "       |  " + a.attr + indent + tpe + options + array
   }
 
   private def table(metaNs: MetaNs): Seq[String] = {

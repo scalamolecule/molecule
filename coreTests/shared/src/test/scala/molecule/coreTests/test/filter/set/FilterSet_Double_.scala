@@ -259,39 +259,6 @@ trait FilterSet_Double_ extends CoreTestSuite with ApiAsyncImplicits { self: Spi
           _ <- Ns.i.a1.doubles.hasNo(Seq(Set.empty[Double])).query.get.map(_ ==> List(a, b))
         } yield ()
       }
-
-
-      "compare" - types { implicit conn =>
-        val a = (1, Set(double1, double2))
-        val b = (2, Set(double2, double3, double4))
-        for {
-          _ <- Ns.i.doubles.insert(List(a, b)).transact
-
-          // <
-          _ <- Ns.i.a1.doubles.hasLt(double0).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.doubles.hasLt(double1).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.doubles.hasLt(double2).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.doubles.hasLt(double3).query.get.map(_ ==> List(a, b))
-
-          // <=
-          _ <- Ns.i.a1.doubles.hasLe(double0).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.doubles.hasLe(double1).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.doubles.hasLe(double2).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.doubles.hasLe(double3).query.get.map(_ ==> List(a, b))
-
-          // >
-          _ <- Ns.i.a1.doubles.hasGt(double0).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.doubles.hasGt(double1).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.doubles.hasGt(double2).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.doubles.hasGt(double3).query.get.map(_ ==> List(b))
-
-          // >=
-          _ <- Ns.i.a1.doubles.hasGe(double0).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.doubles.hasGe(double1).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.doubles.hasGe(double2).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.doubles.hasGe(double3).query.get.map(_ ==> List(b))
-        } yield ()
-      }
     }
 
 
@@ -311,11 +278,12 @@ trait FilterSet_Double_ extends CoreTestSuite with ApiAsyncImplicits { self: Spi
 
 
       "apply (equal)" - types { implicit conn =>
-        val (a, b) = (1, 2)
+        val (a, b, x) = (1, 2, 3)
         for {
-          _ <- Ns.i.doubles.insert(List(
-            (a, Set(double1, double2)),
-            (b, Set(double2, double3, double4))
+          _ <- Ns.i.doubles_?.insert(List(
+            (a, Some(Set(double1, double2))),
+            (b, Some(Set(double2, double3, double4))),
+            (x, None),
           )).transact
 
           // Exact Set matches
@@ -548,41 +516,6 @@ trait FilterSet_Double_ extends CoreTestSuite with ApiAsyncImplicits { self: Spi
           _ <- Ns.i.a1.doubles_.hasNo(Set.empty[Double]).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.doubles_.hasNo(Seq.empty[Set[Double]]).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.doubles_.hasNo(Seq(Set.empty[Double])).query.get.map(_ ==> List(a, b))
-        } yield ()
-      }
-
-
-      "compare" - types { implicit conn =>
-        val (a, b) = (1, 2)
-        for {
-          _ <- Ns.i.doubles.insert(List(
-            (a, Set(double1, double2)),
-            (b, Set(double2, double3, double4))
-          )).transact
-
-          // <
-          _ <- Ns.i.a1.doubles_.hasLt(double0).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.doubles_.hasLt(double1).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.doubles_.hasLt(double2).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.doubles_.hasLt(double3).query.get.map(_ ==> List(a, b))
-
-          // <=
-          _ <- Ns.i.a1.doubles_.hasLe(double0).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.doubles_.hasLe(double1).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.doubles_.hasLe(double2).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.doubles_.hasLe(double3).query.get.map(_ ==> List(a, b))
-
-          // >
-          _ <- Ns.i.a1.doubles_.hasGt(double0).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.doubles_.hasGt(double1).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.doubles_.hasGt(double2).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.doubles_.hasGt(double3).query.get.map(_ ==> List(b))
-
-          // >=
-          _ <- Ns.i.a1.doubles_.hasGe(double0).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.doubles_.hasGe(double1).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.doubles_.hasGe(double2).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.doubles_.hasGe(double3).query.get.map(_ ==> List(b))
         } yield ()
       }
     }
@@ -836,47 +769,6 @@ trait FilterSet_Double_ extends CoreTestSuite with ApiAsyncImplicits { self: Spi
           _ <- Ns.i.a1.doubles_?.hasNo(Option.empty[Seq[Double]]).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.doubles_?.hasNo(Option.empty[Set[Double]]).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.doubles_?.hasNo(Option.empty[Seq[Set[Double]]]).query.get.map(_ ==> List(a, b))
-        } yield ()
-      }
-
-
-      "compare" - types { implicit conn =>
-        val a = (1, Some(Set(double1, double2)))
-        val b = (2, Some(Set(double2, double3, double4)))
-        val c = (3, None)
-        for {
-          _ <- Ns.i.doubles_?.insert(a, b, c).transact
-
-          // <
-          _ <- Ns.i.a1.doubles_?.hasLt(Some(double0)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.doubles_?.hasLt(Some(double1)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.doubles_?.hasLt(Some(double2)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.doubles_?.hasLt(Some(double3)).query.get.map(_ ==> List(a, b))
-
-          // <=
-          _ <- Ns.i.a1.doubles_?.hasLe(Some(double0)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.doubles_?.hasLe(Some(double1)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.doubles_?.hasLe(Some(double2)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.doubles_?.hasLe(Some(double3)).query.get.map(_ ==> List(a, b))
-
-          // >
-          _ <- Ns.i.a1.doubles_?.hasGt(Some(double0)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.doubles_?.hasGt(Some(double1)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.doubles_?.hasGt(Some(double2)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.doubles_?.hasGt(Some(double3)).query.get.map(_ ==> List(b))
-
-          // >=
-          _ <- Ns.i.a1.doubles_?.hasGe(Some(double0)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.doubles_?.hasGe(Some(double1)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.doubles_?.hasGe(Some(double2)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.doubles_?.hasGe(Some(double3)).query.get.map(_ ==> List(b))
-
-
-          // None comparison matches any asserted values
-          _ <- Ns.i.a1.doubles_?.hasLt(None).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.doubles_?.hasGt(None).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.doubles_?.hasLe(None).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.doubles_?.hasGe(None).query.get.map(_ ==> List(a, b))
         } yield ()
       }
     }

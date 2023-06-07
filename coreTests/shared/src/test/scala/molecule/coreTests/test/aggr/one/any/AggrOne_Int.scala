@@ -27,7 +27,7 @@ trait AggrOne_Int extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync 
           (2, int3),
         ))
 
-        // Distinct values are returned in a List
+        // Distinct values are returned in a Set
         _ <- Ns.i.a1.int(distinct).query.get.map(_ ==> List(
           (1, Set(int1)),
           (2, Set(int2, int3)),

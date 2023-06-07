@@ -1,7 +1,8 @@
 package molecule.sql.jdbc.test
 
+import java.util.Date
 import molecule.core.util.Executor._
-import scala.collection.immutable.Seq
+import scala.collection.immutable.{List, Seq, Set}
 //import molecule.coreTests.dataModels.core.dsl.Refs._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.sql.jdbc.async._
@@ -12,33 +13,59 @@ import scala.language.implicitConversions
 
 object AdhocJdbcJVM extends JdbcTestSuite {
 
-  val name   = Map("en" -> "hello", "de" -> "hello", "da" -> "hej")
-  val name_k = Set("en", "de", "da")
-  val name_v = Set("hello", "hej")
-
-  val name_   = 7
-  val name_k_ = 7
-  val name_v_ = 7
-
-  val name_?   = 7
-  val name_k_? = 7
-  val name_v_? = 7
-
-  val ranked   = List("Peter", "Bob", "Mary")
-  val ranked_i = List(0, 1, 2)
-
-  val rankedA   = Array("Peter", "Bob", "Mary")
-  val rankedA_i = Array(0, 1, 2)
+//  val name   = Map("en" -> "hello", "de" -> "hello", "da" -> "hej")
+//  val name_k = Set("en", "de", "da")
+//  val name_v = Set("hello", "hej")
+//
+//  val name_   = 7
+//  val name_k_ = 7
+//  val name_v_ = 7
+//
+//  val name_?   = 7
+//  val name_k_? = 7
+//  val name_v_? = 7
+//
+//  val ranked   = List("Peter", "Bob", "Mary")
+//  val ranked_i = List(0, 1, 2)
+//
+//  val rankedA   = Array("Peter", "Bob", "Mary")
+//  val rankedA_i = Array(0, 1, 2)
 
 
   override lazy val tests = Tests {
 
     "types" - types { implicit conn =>
+      val a = (1, Set(ref1, ref2))
+      val b = (2, Set(ref2, ref3, ref4))
       for {
-        _ <- Ns.i.string.insert(
-          (1, "Hello"),
-          (2, "friends"),
-        ).transact
+        _ <- Ns.i.refs.insert(List(a, b)).transact
+
+        _ <- Ns.i.a1.refs.query.get.map(_ ==> List(a, b))
+
+
+
+        //        _ <- Ns.i.int.insert(List(
+        //          (1, int1),
+        //          (2, int2),
+        //          (2, int2),
+        //          (2, int3),
+        //        )).transact
+        //
+        //        _ <- Ns.i.a1.int.query.get.map(_.sortBy(_._2) ==> List(
+        //          (1, int1),
+        //          (2, int2), // 2 rows coalesced
+        //          (2, int3),
+        //        ))
+        //
+        //        // Distinct values are returned in a Set
+        //        _ <- Ns.i.a1.int(distinct).query.get.map(_ ==> List(
+        //          (1, Set(int1)),
+        //          (2, Set(int2, int3)),
+        //        ))
+        //
+        //        _ <- Ns.int(distinct).query.get.map(_.head ==> Set(
+        //          int1, int2, int3
+        //        ))
 
       } yield ()
     }

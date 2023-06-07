@@ -42,7 +42,7 @@ trait Data_Insert
     stmts
   }
 
-  override protected def addV[T](
+  override protected def addOne[T](
     ns: String,
     attr: String,
     tplIndex: Int,
@@ -55,7 +55,7 @@ trait Data_Insert
         handleScalaValue(tpl.productElement(tplIndex).asInstanceOf[T]).asInstanceOf[AnyRef])
   }
 
-  override protected def addOptV[T](
+  override protected def addOneOpt[T](
     ns: String,
     attr: String,
     tplIndex: Int,
@@ -85,7 +85,7 @@ trait Data_Insert
       }
   }
 
-  override protected def addOptSet[T](
+  override protected def addSetOpt[T](
     ns: String,
     attr: String,
     tplIndex: Int,

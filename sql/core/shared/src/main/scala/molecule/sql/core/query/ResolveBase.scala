@@ -24,20 +24,22 @@ trait ResolveBase extends BaseHelpers {
 
 
   // Scala to sql statement
-  protected lazy val s2sqlString    : String => String     = (v: String) => s"'${v.replace("'", "''")}'"
-  protected lazy val s2sqlInt       : Int => String        = (v: Int) => s"$v"
-  protected lazy val s2sqlLong      : Long => String       = (v: Long) => s"$v"
-  protected lazy val s2sqlFloat     : Float => String      = (v: Float) => s"$v"
-  protected lazy val s2sqlDouble    : Double => String     = (v: Double) => s"$v"
-  protected lazy val s2sqlBoolean   : Boolean => String    = (v: Boolean) => s"$v"
-  protected lazy val s2sqlBigInt    : BigInt => String     = (v: BigInt) => s"$v"
-  protected lazy val s2sqlBigDecimal: BigDecimal => String = (v: BigDecimal) => s"$v"
-  protected lazy val s2sqlDate      : Date => String       = (v: Date) => s"'${date2str(v)}'"
-  protected lazy val s2sqlUUID      : UUID => String       = (v: UUID) => s"'${v.toString}'"
-  protected lazy val s2sqlURI       : URI => String        = (v: URI) => s"'${v.toString.replace("'", "''")}'"
-  protected lazy val s2sqlByte      : Byte => String       = (v: Byte) => s"$v"
-  protected lazy val s2sqlShort     : Short => String      = (v: Short) => s"$v"
-  protected lazy val s2sqlChar      : Char => String       = (v: Char) => s"'${v.toString}'"
+
+  protected lazy val one2sqlString    : String => String     = (v: String) => s"'${v.replace("'", "''")}'"
+  protected lazy val one2sqlInt       : Int => String        = (v: Int) => s"$v"
+  protected lazy val one2sqlLong      : Long => String       = (v: Long) => s"$v"
+  protected lazy val one2sqlFloat     : Float => String      = (v: Float) => s"$v"
+  protected lazy val one2sqlDouble    : Double => String     = (v: Double) => s"$v"
+  protected lazy val one2sqlBoolean   : Boolean => String    = (v: Boolean) => s"$v"
+  protected lazy val one2sqlBigInt    : BigInt => String     = (v: BigInt) => s"$v"
+  protected lazy val one2sqlBigDecimal: BigDecimal => String = (v: BigDecimal) => s"$v"
+  protected lazy val one2sqlDate      : Date => String       = (v: Date) => s"'${date2str(v)}'"
+  protected lazy val one2sqlUUID      : UUID => String       = (v: UUID) => s"'${v.toString}'"
+  protected lazy val one2sqlURI       : URI => String        = (v: URI) => s"'${v.toString.replace("'", "''")}'"
+  protected lazy val one2sqlByte      : Byte => String       = (v: Byte) => s"$v"
+  protected lazy val one2sqlShort     : Short => String      = (v: Short) => s"$v"
+  protected lazy val one2sqlChar      : Char => String       = (v: Char) => s"'${v.toString}'"
+
 
   protected lazy val s2jString    : Any => Any = identity
   protected lazy val s2jInt       : Any => Any = (v: Any) => v.asInstanceOf[Int].toLong.asInstanceOf[Any]

@@ -7,14 +7,14 @@ import molecule.boilerplate.ast.Model._
 
 trait InsertOps {
 
-  protected def addV[T](
+  protected def addOne[T](
     ns: String,
     attr: String,
     tplIndex: Int,
     handleScalaValue: T => Any,
   ): Product => Unit
 
-  protected def addOptV[T](
+  protected def addOneOpt[T](
     ns: String,
     attr: String,
     tplIndex: Int,
@@ -28,7 +28,7 @@ trait InsertOps {
     handleScalaValue: T => Any,
   ): Product => Unit
 
-  protected def addOptSet[T](
+  protected def addSetOpt[T](
     ns: String,
     attr: String,
     tplIndex: Int,

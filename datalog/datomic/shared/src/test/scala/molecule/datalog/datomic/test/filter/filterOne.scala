@@ -1,6 +1,7 @@
 package molecule.datalog.datomic.test.filter
 
 import molecule.coreTests.test.filter.one._
+import molecule.coreTests.test.filter.one.special._
 import molecule.datalog.datomic.setup.CoreTestAsync
 
 object FilterOne_String_ extends FilterOne_String_ with CoreTestAsync
@@ -18,3 +19,6 @@ object FilterOne_Byte_ extends FilterOne_Byte_ with CoreTestAsync
 object FilterOne_Short_ extends FilterOne_Short_ with CoreTestAsync
 object FilterOne_Char_ extends FilterOne_Char_ with CoreTestAsync
 object FilterOne_ref_ extends FilterOne_ref_ with CoreTestAsync
+
+object FilterOneSpecial_Number extends FilterOneSpecial_Number with CoreTestAsync
+object FilterOneSpecial_String extends FilterOneSpecial_String with CoreTestAsync
