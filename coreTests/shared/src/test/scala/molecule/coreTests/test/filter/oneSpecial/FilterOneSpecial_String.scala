@@ -63,11 +63,15 @@ trait FilterOneSpecial_String extends CoreTestSuite with ApiAsyncImplicits { sel
           (2, "friends"),
         ).transact
 
+        _ <- Ns.string.take(1).a1.query.get.map(_ ==> List("H", "f"))
         _ <- Ns.string.take(3).a1.query.get.map(_ ==> List("Hel", "fri"))
+        _ <- Ns.string.take(5).a1.query.get.map(_ ==> List("Hello", "frien"))
         _ <- Ns.string.take(6).a1.query.get.map(_ ==> List("Hello", "friend"))
+        // Forgiving invalid lengths by returning empty result
         _ <- Ns.string.take(0).a1.query.get.map(_ ==> List())
         _ <- Ns.string.take(-2).a1.query.get.map(_ ==> List())
 
+        _ <- Ns.string.takeRight(1).a1.query.get.map(_ ==> List("o", "s"))
         _ <- Ns.string.takeRight(3).a1.query.get.map(_ ==> List("llo", "nds"))
         _ <- Ns.string.takeRight(5).a1.query.get.map(_ ==> List("Hello", "iends"))
         _ <- Ns.string.takeRight(9).a1.query.get.map(_ ==> List("Hello", "friends"))
@@ -80,13 +84,14 @@ trait FilterOneSpecial_String extends CoreTestSuite with ApiAsyncImplicits { sel
         _ <- Ns.string.drop(0).a1.query.get.map(_ ==> List("Hello", "friends"))
         _ <- Ns.string.drop(-2).a1.query.get.map(_ ==> List("Hello", "friends"))
 
-        _ <- Ns.string.dropRight(3).a1.query.get.map(_ ==> List("He", "frie"))
+        _ <- Ns.string.dropRight(1).a1.query.get.map(_ ==> List("Hell", "friend"))
         _ <- Ns.string.dropRight(5).a1.query.get.map(_ ==> List("fr"))
         _ <- Ns.string.dropRight(9).a1.query.get.map(_ ==> List())
         _ <- Ns.string.dropRight(0).a1.query.get.map(_ ==> List("Hello", "friends"))
         _ <- Ns.string.dropRight(-2).a1.query.get.map(_ ==> List("Hello", "friends"))
 
         _ <- Ns.string.slice(1, 4).a1.query.get.map(_ ==> List("ell", "rie"))
+        _ <- Ns.string.slice(4, 7).a1.query.get.map(_ ==> List("nds", "o"))
         _ <- Ns.string.slice(5, 7).a1.query.get.map(_ ==> List("ds"))
         _ <- Ns.string.slice(0, 3).a1.query.get.map(_ ==> List("Hel", "fri"))
         _ <- Ns.string.slice(-2, 9).a1.query.get.map(_ ==> List("Hello", "friends"))
@@ -95,6 +100,7 @@ trait FilterOneSpecial_String extends CoreTestSuite with ApiAsyncImplicits { sel
 
         // Same forgiving semantics as slice
         _ <- Ns.string.substring(1, 4).a1.query.get.map(_ ==> List("ell", "rie"))
+        _ <- Ns.string.substring(4, 7).a1.query.get.map(_ ==> List("nds", "o"))
         _ <- Ns.string.substring(5, 7).a1.query.get.map(_ ==> List("ds"))
         _ <- Ns.string.substring(0, 3).a1.query.get.map(_ ==> List("Hel", "fri"))
         _ <- Ns.string.substring(-2, 9).a1.query.get.map(_ ==> List("Hello", "friends"))

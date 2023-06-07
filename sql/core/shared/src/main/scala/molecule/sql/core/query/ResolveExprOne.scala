@@ -98,7 +98,7 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
       addCast(res.j2sOrNull)
     } else {
       addCast(res.j2s)
-      notNull += ((col, s"IS NOT NULL"))
+      notNull += col
     }
     addSort(attr, col)
     attr.filterAttr.fold {
@@ -135,7 +135,7 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
     res: ResOne[T],
   ): Unit = {
     val col = getCol(attr: Attr)
-    notNull += ((col, s"IS NOT NULL"))
+    notNull += col
     val v = getVar(attr)
     attr.filterAttr.fold {
       expr(col, attr.op, args, res)
@@ -174,12 +174,12 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
       addSort(attr, col)
       val w = getVar(filterAttr)
       attr.op match {
-        case Eq    => optEqual2(e, a, v, w)
-        case Neq   => optNeq2(e, a, v, w)
-        case Lt    => optCompare2(e, a, v, w, "<")
-        case Gt    => optCompare2(e, a, v, w, ">")
-        case Le    => optCompare2(e, a, v, w, "<=")
-        case Ge    => optCompare2(e, a, v, w, ">=")
+        case Eq    => optEqual2(col)
+        case Neq   => optNeq2(col)
+        case Lt    => optCompare2(col, "<")
+        case Gt    => optCompare2(col, ">")
+        case Le    => optCompare2(col, "<=")
+        case Ge    => optCompare2(col, ">=")
         case other => unexpectedOp(other)
       }
     }
@@ -192,71 +192,115 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
     res: ResOne[T],
   ): Unit = {
     op match {
-      case V       => () //attr(e, a, v)
-      case Eq      => equal(col, args, res.s2sql)
-      case Neq     => neq(col, args, res.tpe, res.s2sql)
-      case Lt      => compare(col, args.head, "<", res.s2sql)
-      case Gt      => compare(col, args.head, ">", res.s2sql)
-      case Le      => compare(col, args.head, "<=", res.s2sql)
-      case Ge      => compare(col, args.head, ">=", res.s2sql)
-      case NoValue => noValue(col)
-      //      case Fn(kw, n)  => aggr(e, a, v, kw, n, resOLD)
-      //      case StartsWith => stringOp(e, a, v, args.head, "starts-with?")
-      //      case EndsWith   => stringOp(e, a, v, args.head, "ends-with?")
-      //      case Contains   => stringOp(e, a, v, args.head, "includes?")
-      //      case Matches    => regex(e, a, v, args.head)
-      //      case Take       => string(e, a, v, args, "take")
-      //      case TakeRight  => string(e, a, v, args, "takeRight")
-      //      case Drop       => string(e, a, v, args, "drop")
-      //      case DropRight  => string(e, a, v, args, "dropRight")
-      //      case SubString  => string(e, a, v, args, "slice")
-      //      case Slice      => string(e, a, v, args, "slice")
-      case Remainder => remainder(col, args)
-      case Even      => even(col)
-      case Odd       => odd(col)
-      case other     => unexpectedOp(other)
+      case V          => () //attr(col)
+      case Eq         => equal(col, args, res.s2sql)
+      case Neq        => neq(col, args, res.tpe, res.s2sql)
+      case Lt         => compare(col, args.head, "<", res.s2sql)
+      case Gt         => compare(col, args.head, ">", res.s2sql)
+      case Le         => compare(col, args.head, "<=", res.s2sql)
+      case Ge         => compare(col, args.head, ">=", res.s2sql)
+      case NoValue    => noValue(col)
+      case Fn(kw, n)  => aggr(col, kw, n, res)
+      case StartsWith => startsWith(col, args.head)
+      case EndsWith   => endsWith(col, args.head)
+      case Contains   => contains(col, args.head)
+      case Matches    => matches(col, args.head)
+      case Take       => take(col, args.head, "LEFT")
+      case TakeRight  => take(col, args.head, "RIGHT")
+      case Drop       => drop(col, args.head, true)
+      case DropRight  => drop(col, args.head, false)
+      case Slice      => slice(col, args)
+      case SubString  => subString(col, args)
+      case Remainder  => remainder(col, args)
+      case Even       => even(col)
+      case Odd        => odd(col)
+      case other      => unexpectedOp(other)
     }
   }
   private def expr2(
     col: String,
     op: Op,
   ): Unit = op match {
-    //    case Eq    => equal2(e, a, v, w)
-    //    case Neq   => neq2(e, a, v, w)
-    //    case Lt    => compare2(e, a, v, w, "<")
-    //    case Gt    => compare2(e, a, v, w, ">")
-    //    case Le    => compare2(e, a, v, w, "<=")
-    //    case Ge    => compare2(e, a, v, w, ">=")
+    //    case Eq    => equal2(col, w)
+    //    case Neq   => neq2(col, w)
+    //    case Lt    => compare2(col, w, "<")
+    //    case Gt    => compare2(col, w, ">")
+    //    case Le    => compare2(col, w, "<=")
+    //    case Ge    => compare2(col, w, ">=")
     case other => unexpectedOp(other)
   }
 
 
-  private def stringOp[T](col: String, arg: T, predicate: String): Unit = {
-    //    val v1 = v + 1
-    //    in += v1
-    //    whereOLD += s"[$e $a $v$tx]" -> wClause
-    //    whereOLD += s"[(clojure.string/$predicate $v $v1)]" -> wNeqOne
-    //    args += arg.asInstanceOf[AnyRef]
-  }
-  private def regex[T](col: String, regex: T): Unit = {
-    //    whereOLD += s"[$e $a $v$tx]" -> wClause
-    //    whereOLD += s"""[(re-find (re-pattern "$regex") $v)]""" -> wNeqOne
+  private def startsWith[T](col: String, arg: T): Unit = where += ((col, s"LIKE '$arg%'"))
+  private def endsWith[T](col: String, arg: T): Unit = where += ((col, s"LIKE '%$arg'"))
+  private def contains[T](col: String, arg: T): Unit = where += ((col, s"LIKE '%$arg%'"))
+  private def matches[T](col: String, regex: T): Unit = where += ((col, s"~ '$regex'"))
+
+  private def take[T](col: String, length: T, fn: String): Unit = {
+    if (length.toString.toInt > 0) {
+      select -= col
+      notNull -= col
+      val alias = col.replace('.', '_')
+      select += s"$fn($col, $length) AS $alias"
+      orderBy = orderBy.map {
+        case (level, arity, `col`, dir) => (level, arity, alias, dir)
+        case other                      => other
+      }
+    } else {
+      // Take nothing
+      where += (("FALSE", ""))
+    }
   }
 
-  private def remainder[T](col: String, args: Seq[T]): Unit = {
-    where += ((col, s"% ${args.head} = ${args(1)}"))
-  }
-  private def even(col: String): Unit = {
-    //    whereOLD += s"[$e $a $v$tx]" -> wClause
-    //    whereOLD += s"""[(even? $v)]""" -> wNeqOne
-    where += ((col, s"% 2 = 0"))
-  }
-  private def odd(col: String): Unit = {
-    //    whereOLD += s"[$e $a $v$tx]" -> wClause
-    //    whereOLD += s"""[(odd? $v)]""" -> wNeqOne
-    where += ((col, s"% 2 = 1"))
+  private def drop[T](col: String, arg: T, left: Boolean): Unit = {
+    val i = arg.toString.toInt
+    if (i > 0) {
+      select -= col
+      notNull -= col
+      val alias           = col.replace('.', '_')
+      val len             = s"LENGTH($col)"
+      val (start, length) = if (left) (i + 1, len) else ("1", s"$len - $i")
+      select += s"SUBSTRING($col, $start, $length) AS $alias"
+      orderBy = orderBy.map {
+        case (level, arity, `col`, dir) => (level, arity, alias, dir)
+        case other                      => other
+      }
+      val clause = if (left) s"$len > $i" else s"$len > $i"
+      where += ((clause, ""))
+    } else {
+      // Drop nothing
+    }
   }
 
+  private def slice[T](col: String, args: Seq[T]): Unit = subString(col, args)
+  private def subString[T](col: String, args: Seq[T]): Unit = {
+    // 1-based string position
+    val from  = args.head.toString.toInt.max(0) + 1
+    val until = args(1).toString.toInt + 1
+    if (from >= until) {
+      where += (("FALSE", ""))
+
+    } else {
+      select -= col
+      notNull -= col
+      val alias  = col.replace('.', '_')
+      val len    = s"LENGTH($col)"
+      val length = until - from
+        select += s"SUBSTRING($col, $from, $length) AS $alias"
+      orderBy = orderBy.map {
+        case (level, arity, `col`, dir) =>
+          println("###### " + dir)
+          (level, arity, alias, dir)
+        case other                      => other
+      }
+      where += ((s"$len >= $from", ""))
+    }
+  }
+
+
+  private def remainder[T](col: String, args: Seq[T]): Unit = where += ((col, s"% ${args.head} = ${args(1)}"))
+  private def even(col: String): Unit = where += ((col, s"% 2 = 0"))
+  private def odd(col: String): Unit = where += ((col, s"% 2 = 1"))
 
   private def string[T: ClassTag](col: String, args: Seq[T], op: String): Unit = {
     //    select -= v
@@ -306,53 +350,53 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
   }
 
 
-  private def aggr[T](col: String, fn: String, optN: Option[Int], res: ResOneOLD[T]): Unit = {
+  private def aggr[T](col: String, fn: String, optN: Option[Int], res: ResOne[T]): Unit = {
     lazy val n = optN.getOrElse(0)
     // Replace find/casting with aggregate function/cast
     //    select -= v
     fn match {
       case "distinct" =>
-        //        select += s"(distinct $v)"
-        replaceCast(res.set2set)
+      //        select += s"(distinct $v)"
+      //        replaceCast(res.set2set)
 
       case "mins" =>
-        //        select += s"(min $n $v)"
-        replaceCast(res.vector2set)
+      //        select += s"(min $n $v)"
+      //        replaceCast(res.vector2set)
 
       case "min" =>
       //        select += s"(min $v)"
 
       case "maxs" =>
-        //        select += s"(max $n $v)"
-        replaceCast(res.vector2set)
+      //        select += s"(max $n $v)"
+      //        replaceCast(res.vector2set)
 
       case "max" =>
       //        select += s"(max $v)"
 
       case "rands" =>
-        //        select += s"(rand $n $v)"
-        replaceCast(res.vector2set)
+      //        select += s"(rand $n $v)"
+      //        replaceCast(res.vector2set)
 
       case "rand" =>
       //        select += s"(rand $v)"
 
       case "samples" =>
-        //        select += s"(sample $n $v)"
-        replaceCast(res.vector2set)
+      //        select += s"(sample $n $v)"
+      //        replaceCast(res.vector2set)
 
       case "sample" =>
-        //        select += s"(sample 1 $v)"
-        replaceCast(res.seq2t)
+      //        select += s"(sample 1 $v)"
+      //        replaceCast(res.seq2t)
 
       case "count" =>
-        //        select += s"(count $v)"
-        //        widh += e
-        replaceCast(toInt)
+      //        select += s"(count $v)"
+      //        widh += e
+      //        replaceCast(toInt)
 
       case "countDistinct" =>
-        //        select += s"(count-distinct $v)"
-        //        widh += e
-        replaceCast(toInt)
+      //        select += s"(count-distinct $v)"
+      //        widh += e
+      //        replaceCast(toInt)
 
       //      case "sum"      => select += s"(sum $v)"
       //      case "median"   => select += s"(median $v)"
@@ -415,7 +459,7 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
 
   private def noValue(col: String): Unit = {
     // Skip tacit not null clause in this special case
-    notNull -= ((col, s"IS NOT NULL"))
+    notNull -= col
     where += ((col, s"IS NULL"))
   }
 
@@ -432,13 +476,14 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
     }
   }
   private def optEqual2(
-    e: Var,
-    a: Att,
-    v: Var,
-    w: Var
+    //    e: Var,
+    //    a: Att,
+    //    v: Var,
+    //    w: Var
+    col: String,
   ): Unit = {
     //    select += v
-    //    equal2(e, a, v, w)
+    //    equal2(col, w)
   }
 
   private def optNeq[T](
@@ -450,17 +495,18 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
     if (optArgs.isDefined && optArgs.get.nonEmpty) {
       neq(col, optArgs.get, tpe, s2sql)
     } else {
-      where += ((col, "IS NOT NULL"))
+      notNull += col
     }
   }
   private def optNeq2(
-    e: Var,
-    a: Att,
-    v: Var,
-    w: Var
+    //    e: Var,
+    //    a: Att,
+    //    v: Var,
+    col: String,
+    //    w: Var
   ): Unit = {
     //    select += v
-    //    neq2(e, a, v, w)
+    //    neq2(col, w)
   }
 
   private def optCompare[T](
@@ -479,13 +525,14 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
 
   }
   private def optCompare2(
-    e: Var,
-    a: Att,
-    v: Var,
-    w: Var,
+    //    e: Var,
+    //    a: Att,
+    //    v: Var,
+    col: String,
+    //    w: Var,
     op: String,
   ): Unit = {
     //    select += v
-    //    compare2(e, a, v, w, op)
+    //    compare2(col, w, op)
   }
 }

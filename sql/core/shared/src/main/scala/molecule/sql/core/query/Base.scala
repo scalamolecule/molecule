@@ -69,8 +69,8 @@ trait Base extends BaseHelpers with JavaConversions { self: Model2Query =>
   final protected var from    = ""
   final protected val joins   = new ListBuffer[(String, String, String, String, String)]
   final protected val where   = new ListBuffer[(String, String)]
-  final protected val notNull = new ListBuffer[(String, String)]
-  final protected val orderBy = new ListBuffer[(Int, Int, String, String)]
+  final protected val notNull = new ListBuffer[String]
+  final protected var orderBy = new ListBuffer[(Int, Int, String, String)]
 
   final protected val exts = mutable.Map.empty[String, Option[String]]
 
@@ -133,6 +133,21 @@ trait Base extends BaseHelpers with JavaConversions { self: Model2Query =>
       castss = castss.init :+ (castss.last :+ cast)
   }
 
+//  final protected def addCast(cast: (Row, Int) => Any): Unit = {
+//    if (isTxMetaData)
+//      castss = (castss.head :+ cast) :: castss.tail
+//    else
+//      castss = castss.init :+ (castss.last :+ cast)
+//  }
+
+  final protected def removeLastCast(): Unit = {
+    if (isTxMetaData)
+      castss = castss.head.init :: castss.tail
+    else {
+      castss = castss.init :+ castss.last.init
+    }
+  }
+
   final protected def addCastOLD(cast: AnyRef => AnyRef): Unit = {
     if (isTxMetaData)
       castssOLD = (castssOLD.head :+ cast) :: castssOLD.tail
@@ -140,16 +155,16 @@ trait Base extends BaseHelpers with JavaConversions { self: Model2Query =>
       castssOLD = castssOLD.init :+ (castssOLD.last :+ cast)
   }
 
-  final protected def removeLastCast(): Unit = {
+  final protected def removeLastCastOLD(): Unit = {
     if (isTxMetaData)
       castssOLD = castssOLD.head.init :: castssOLD.tail
     else {
       castssOLD = castssOLD.init :+ castssOLD.last.init
     }
   }
-  final protected def replaceCast(cast: AnyRef => AnyRef): Unit = {
+  final protected def replaceCast(cast: (Row, Int) => Any): Unit = {
     removeLastCast()
-    addCastOLD(cast)
+    addCast(cast)
   }
 
   final protected def aritiesNested(): Unit = {

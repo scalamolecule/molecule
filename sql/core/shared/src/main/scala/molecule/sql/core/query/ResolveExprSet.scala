@@ -193,69 +193,69 @@ trait ResolveExprSet[Tpl] { self: SqlModel2Query[Tpl] with LambdasSet =>
              |          "[:find (distinct $v1)
              |            :in $$ $e1
              |            :where [$e1 $a $v1]]" $$ $e) [[$v2]]]""".stripMargin -> wClause
-        replaceCast(res.sets)
+//        replaceCast(res.sets)
 
       case "mins" =>
         select += s"(min $n $v)"
-        replaceCast(res.vector2set)
+//        replaceCast(res.vector2set)
 
       case "min" =>
         select += s"(min 1 $v)"
-        replaceCast(res.vector2set)
+//        replaceCast(res.vector2set)
 
       case "maxs" =>
         select += s"(max $n $v)"
-        replaceCast(res.vector2set)
+//        replaceCast(res.vector2set)
 
       case "max" =>
         select += s"(max 1 $v)"
-        replaceCast(res.vector2set)
+//        replaceCast(res.vector2set)
 
       case "rands" =>
         select += s"(rand $n $v)"
-        replaceCast(res.vector2set)
+//        replaceCast(res.vector2set)
 
       case "rand" =>
         select += s"(rand 1 $v)"
-        replaceCast(res.vector2set)
+//        replaceCast(res.vector2set)
 
       case "samples" =>
         select += s"(sample $n $v)"
-        replaceCast(res.vector2set)
+//        replaceCast(res.vector2set)
 
       case "sample" =>
         select += s"(sample 1 $v)"
-        replaceCast(res.vector2set)
+//        replaceCast(res.vector2set)
 
       case "count" =>
         select += s"(count $v)"
         widh += e
-        replaceCast(toInt)
+//        replaceCast(toInt)
 
       case "countDistinct" =>
         select += s"(count-distinct $v)"
         widh += e
-        replaceCast(toInt)
+//        replaceCast(toInt)
 
       case "sum" =>
         select += s"(sum $v)"
-        replaceCast(res.j2sSet)
+//        replaceCast(res.j2sSet)
 
       case "median" =>
         select += s"(median $v)"
-        replaceCast(res.j2sSet)
+//        replaceCast(res.j2sSet)
 
       case "avg" =>
         select += s"(avg $v)"
-        replaceCast(res.j2sSet)
+//        replaceCast(res.j2sSet)
 
       case "variance" =>
         select += s"(variance $v)"
-        replaceCast(res.j2sSet)
+//        replaceCast(res.j2sSet)
 
       case "stddev" =>
         select += s"(stddev $v)"
-        replaceCast(res.j2sSet)
+//        replaceCast(res.j2sSet)
 
       case other => unexpectedKw(other)
     }

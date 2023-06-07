@@ -159,7 +159,7 @@ trait Data_Insert
       val valueSetter = handleScalaValue(scalaValue).asInstanceOf[(PS, Int) => Unit]
       val colSetter   = (ps: PS, _: IdsMap, _: RowIndex) => {
         valueSetter(ps, paramIndex)
-        printValue(curLevel, ns, attr, tplIndex, paramIndex, scalaValue)
+        //        printValue(curLevel, ns, attr, tplIndex, paramIndex, scalaValue)
       }
       addColSetter(curPath, colSetter)
     }

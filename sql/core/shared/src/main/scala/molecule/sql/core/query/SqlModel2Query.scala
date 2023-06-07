@@ -28,7 +28,7 @@ class SqlModel2Query[Tpl](elements0: List[Element])
     val elements = if (altElements.isEmpty) elements0 else altElements
     validateQueryModel(elements)
 
-    elements.foreach(println)
+//    elements.foreach(println)
 
     from = getInitialNonGenericNs(elements)
     exts += from -> None
@@ -61,7 +61,8 @@ class SqlModel2Query[Tpl](elements0: List[Element])
       }.mkString("\n", "\n", "")
     }
 
-    val allWhere = where ++ notNull
+    val notNulls = notNull.map(col => (col, "IS NOT NULL"))
+    val allWhere = where ++ notNulls
     val where_ = if (allWhere.isEmpty) "" else {
       val max = allWhere.map(_._1.length).max
       allWhere.map { case (col, predicate) =>

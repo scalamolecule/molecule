@@ -35,11 +35,21 @@ object AdhocJdbcJVM extends JdbcTestSuite {
 
     "types" - types { implicit conn =>
       for {
-        //        _ <- Ns.i(3).save.transact
-        _ <- Ns.i.insert(3).transact
-        _ <- Ns.i.query.get.map(_ ==> List(3))
+        _ <- Ns.i.string.insert(
+          (1, "Hello"),
+          (2, "friends"),
+        ).transact
+
       } yield ()
     }
+
+    //    "types" - types { implicit conn =>
+    //      for {
+    //        //        _ <- Ns.i(3).save.transact
+    //        _ <- Ns.i.insert(3).transact
+    //        _ <- Ns.i.query.get.map(_ ==> List(3))
+    //      } yield ()
+    //    }
 
 
     //    "validation" - validation { implicit conn =>
