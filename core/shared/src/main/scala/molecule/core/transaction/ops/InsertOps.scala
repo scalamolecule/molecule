@@ -24,6 +24,8 @@ trait InsertOps {
   protected def addSet[T](
     ns: String,
     attr: String,
+    baseTpe: String,
+    refNsOpt: Option[String],
     tplIndex: Int,
     handleScalaValue: T => Any,
   ): Product => Unit
@@ -31,6 +33,8 @@ trait InsertOps {
   protected def addSetOpt[T](
     ns: String,
     attr: String,
+    baseTpe: String,
+    refNsOpt: Option[String],
     tplIndex: Int,
     handleScalaValue: T => Any,
   ): Product => Unit

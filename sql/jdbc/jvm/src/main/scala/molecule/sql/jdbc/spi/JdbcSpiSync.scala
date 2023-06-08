@@ -107,7 +107,6 @@ trait JdbcSpiSync
 
   private def insert_getData(insert: Insert, conn: JdbcConn_jvm): Data = {
     new InsertExtraction with Data_Insert {
-//    new InsertExtraction with Data_Insert2 {
       override protected val sqlConn: sql.Connection = conn.sqlConn
     }.getData(conn.proxy.nsMap, insert.elements, insert.tpls)
   }

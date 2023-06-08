@@ -31,7 +31,7 @@ case class Dsl(schema: MetaSchema, partPrefix: String, namespace: MetaNs)
     val tac = List.newBuilder[String]
     val vas = List.newBuilder[String]
     attrsAll.collect {
-      case MetaAttr(attr, card, tpe, refNs, _, _, _, _, valueAttrs, validations) if !genericAttrs.contains(attr) =>
+      case MetaAttr(attr, card, tpe, refNsOpt, _, _, _, _, valueAttrs, validations) if !genericAttrs.contains(attr) =>
         val valids  = if (validations.nonEmpty) {
           val valueAttrMetas = attrsCustom.collect {
             case MetaAttr(attr1, card1, tpe1, _, _, _, _, _, _, _)
@@ -49,13 +49,13 @@ case class Dsl(schema: MetaSchema, partPrefix: String, namespace: MetaNs)
         } else ""
         val padA    = padAttrCustom(attr)
         val padT0   = padTypeCustom(tpe)
-        val isRef   = if (refNs.isDefined) ", status = Some(\"ref\")" else ""
+        val refNs   = refNsOpt.fold("")(refNs => s""", refNs = Some("$refNs")""")
         val attrMan = "Attr" + card.marker + "Man" + tpe
         val attrOpt = "Attr" + card.marker + "Opt" + tpe
         val attrTac = "Attr" + card.marker + "Tac" + tpe
-        man += s"""protected lazy val ${attr}_man$padA: $attrMan$padT0 = $attrMan$padT0("$ns", "$attr"$padA$isRef$valids)"""
-        opt += s"""protected lazy val ${attr}_opt$padA: $attrOpt$padT0 = $attrOpt$padT0("$ns", "$attr"$padA$isRef$valids)"""
-        tac += s"""protected lazy val ${attr}_tac$padA: $attrTac$padT0 = $attrTac$padT0("$ns", "$attr"$padA$isRef$valids)"""
+        man += s"""protected lazy val ${attr}_man$padA: $attrMan$padT0 = $attrMan$padT0("$ns", "$attr"$padA$refNs$valids)"""
+        opt += s"""protected lazy val ${attr}_opt$padA: $attrOpt$padT0 = $attrOpt$padT0("$ns", "$attr"$padA$refNs$valids)"""
+        tac += s"""protected lazy val ${attr}_tac$padA: $attrTac$padT0 = $attrTac$padT0("$ns", "$attr"$padA$refNs$valids)"""
     }
     val vas1     = vas.result()
     val vas2     = if (vas1.isEmpty) Nil else "" +: vas1

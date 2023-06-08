@@ -83,7 +83,7 @@ trait CodeGenBase extends BaseHelpers {
     ("ref", "Long", "ref"),
   )
 
-  def format(baseType: String, v: String) : String = baseType match {
+  def format(baseTpe: String, v: String) : String = baseTpe match {
     case "String"     => "\"" + escStr(v) + "\""
     case "Int"        => v
     case "Long"       => v + "L"

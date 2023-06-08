@@ -58,10 +58,7 @@ trait CastNestedBranch_
     firstAttrIndex: AttrIndex,
     firstAttrIndexTx: AttrIndex
   ): (Row, NestedTpls) => T = {
-    println("arities: " + arities)
     val casters = resolveArities(arities, casts, firstAttrIndex, firstAttrIndexTx, Nil)
-    println("casters: " + casters)
-    println("casters: " + casters.length)
     casters.length match {
       case 0  => cast0[T]
       case 1  => cast1[T](casters)

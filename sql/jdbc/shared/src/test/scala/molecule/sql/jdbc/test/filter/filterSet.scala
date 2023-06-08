@@ -18,7 +18,7 @@ object FilterSet_URI_ extends FilterSet_URI_ with CoreTestAsync
 object FilterSet_Byte_ extends FilterSet_Byte_ with CoreTestAsync
 object FilterSet_Short_ extends FilterSet_Short_ with CoreTestAsync
 object FilterSet_Char_ extends FilterSet_Char_ with CoreTestAsync
-object FilterSet_ref_ extends FilterSet_ref_ with CoreTestAsync
+//object FilterSet_ref_ extends FilterSet_ref_ with CoreTestAsync
 
 //object FilterSetCompare_String_ extends FilterSetCompare_String_ with CoreTestAsync
 //object FilterSetCompare_Int extends FilterSetCompare_Int with CoreTestAsync

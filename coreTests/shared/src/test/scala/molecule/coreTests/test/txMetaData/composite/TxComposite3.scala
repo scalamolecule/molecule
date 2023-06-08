@@ -1,4 +1,4 @@
-package molecule.coreTests.test.txData.composite
+package molecule.coreTests.test.txMetaData.composite
 
 import molecule.coreTests.api.ApiAsyncImplicits
 import molecule.core.util.Executor._

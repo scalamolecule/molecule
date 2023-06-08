@@ -1,7 +1,7 @@
-package molecule.datalog.datomic.test.txData
+package molecule.sql.jdbc.test.txMetaData
 
-import molecule.coreTests.test.txData.crud._
-import molecule.datalog.datomic.setup.CoreTestAsync
+import molecule.coreTests.test.txMetaData.crud._
+import molecule.sql.jdbc.setup.CoreTestAsync
 
 object TxDelete extends TxDelete with CoreTestAsync
 object TxInsert extends TxInsert with CoreTestAsync

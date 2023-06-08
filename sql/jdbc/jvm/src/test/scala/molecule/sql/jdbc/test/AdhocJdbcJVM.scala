@@ -40,7 +40,38 @@ object AdhocJdbcJVM extends JdbcTestSuite {
       for {
         _ <- Ns.i.refs.insert(List(a, b)).transact
 
-        _ <- Ns.i.a1.refs.query.get.map(_ ==> List(a, b))
+        // Exact Set matches
+
+        // AND semantics
+        // "Is exactly this AND that"
+        _ <- Ns.i.a1.Refs.eid(ref1).query.get.map(_ ==> List())
+        _ <- Ns.i.a1.refs(Set(ref1)).query.get.map(_ ==> List())
+        _ <- Ns.i.a1.refs(Set(ref1, ref2)).query.get.map(_ ==> List(a)) // include exact match
+        _ <- Ns.i.a1.refs(Set(ref1, ref2, ref3)).query.get.map(_ ==> List())
+        // Same as
+        _ <- Ns.i.a1.refs(Seq(Set(ref1))).query.get.map(_ ==> List())
+        _ <- Ns.i.a1.refs(Seq(Set(ref1, ref2))).query.get.map(_ ==> List(a))
+        _ <- Ns.i.a1.refs(Seq(Set(ref1, ref2, ref3))).query.get.map(_ ==> List())
+
+
+        // AND/OR semantics with multiple Sets
+
+        // "(exactly this AND that) OR (exactly this AND that)"
+        _ <- Ns.i.a1.refs(Set(ref1), Set(ref2, ref3)).query.get.map(_ ==> List())
+        _ <- Ns.i.a1.refs(Set(ref1, ref2), Set(ref2, ref3)).query.get.map(_ ==> List(a))
+        _ <- Ns.i.a1.refs(Set(ref1, ref2), Set(ref2, ref3, ref4)).query.get.map(_ ==> List(a, b))
+        // Same as
+        _ <- Ns.i.a1.refs(Seq(Set(ref1), Set(ref2, ref3))).query.get.map(_ ==> List())
+        _ <- Ns.i.a1.refs(Seq(Set(ref1, ref2), Set(ref2, ref3))).query.get.map(_ ==> List(a))
+        _ <- Ns.i.a1.refs(Seq(Set(ref1, ref2), Set(ref2, ref3, ref4))).query.get.map(_ ==> List(a, b))
+
+
+        // Empty Seq/Sets match nothing
+        _ <- Ns.i.a1.refs(Set(ref1, ref2), Set.empty[Long]).query.get.map(_ ==> List(a))
+        _ <- Ns.i.a1.refs(Set.empty[Long], Set(ref1, ref2)).query.get.map(_ ==> List(a))
+        _ <- Ns.i.a1.refs(Set.empty[Long]).query.get.map(_ ==> List())
+        _ <- Ns.i.a1.refs(Seq.empty[Set[Long]]).query.get.map(_ ==> List())
+        _ <- Ns.i.a1.refs(Seq(Set.empty[Long])).query.get.map(_ ==> List())
 
 
 

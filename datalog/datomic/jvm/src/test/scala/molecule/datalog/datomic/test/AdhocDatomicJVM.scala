@@ -5,6 +5,7 @@ import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.datalog.datomic.async._
 import molecule.datalog.datomic.setup.DatomicTestSuite
 import utest._
+import scala.collection.immutable.List
 import scala.language.implicitConversions
 
 
@@ -17,48 +18,141 @@ object AdhocDatomicJVM extends DatomicTestSuite {
       import molecule.coreTests.dataModels.core.dsl.Refs._
 
       for {
-        _ <- A.s.Bb.*(B.i).insert(
-          ("a", List(1, 2)),
-          ("b", List(3)),
-          //          ("a", List(1)),
-          //          ("b", List(2)),
-          //          ("c", List(3)),
-        ).transact
-        //        _ <- A.s.Bb.i.insert(
-        //          ("a", 1),
-        //          ("a", 2),
-        //          ("b", 3),
-        //        ).transact
-        //        _ <- A.s.query.get.map(_ ==> List("a", "b"))
-        //        _ <- B.i.query.get.map(_ ==> List(1, 2, 3))
-        //        _ <- A.s.Bb.i.query.get.map(_ ==> List(
-        //          ("a", 1),
-        //          ("a", 2),
-        //          ("b", 3),
-        //        ))
-        /*
-        SELECT DISTINCT
-          A.s,
-          B.i
-        FROM A
-        INNER JOIN A_bb_B ON A.id        = A_bb_B.A_id
-        INNER JOIN B      ON A_bb_B.B_id = B.id
-        WHERE
-          A.s IS NOT NULL AND
-          B.i IS NOT NULL;
-         */
 
-        //        _ <- A.s.Bb.*(B.i).query.inspect
-        _ <- A.s.Bb.*(B.i_?).query.get
+//        _ <- A.s.Bb.*(B.i_?.s).insert(
+////          ("a", List(Some(1))),
+//          ("b", List((None, "x"))),
+////          ("c", Nil),
+//        ).inspect
+
+//        _ <- A.s.Bb.*(B.i_?).insert(
+////          ("a", List(Some(1))),
+//          ("b", List(None)),
+////          ("c", Nil),
+//        ).inspect
+//
+//        _ <- A.s.Bb.*(B.i_?).insert(
+////          ("a", List(Some(1))),
+//          ("b", List(None)),
+////          ("c", Nil),
+//        ).transact
+
+//        _ <- A.s.Bb.*(B.i).insert(
+//          ("a", List(1, 2)),
+//          ("b", List(3)),
+//        ).transact
+//
+//        _ <- A.s.Bb.*(B.i.a1).query.get.map(_ ==> List(
+//          ("a", List(1, 2)),
+//          ("b", List(3)),
+//        ))
 
 
-        _ <- A.s.Bb.*(B.i).query.get.map(_ ==> List(
-          ("a", List(1, 2)),
-          ("b", List(3)),
-          //          ("a", List(1)),
-          //          ("b", List(2)),
-          //          ("c", List(3)),
+//        _ <- A.s.Bb.*(B.i_?).insert(
+//          ("a", List(Some(1))),
+//          ("b", List(None)),
+//          ("c", Nil),
+//        ).transact
+//
+//        _ <- A.s.a1.Bb.*?(B.i_?).query.get.map(_ ==> List(
+//          ("a", List(Some(1))),
+//          ("b", Nil),
+//          ("c", Nil),
+//        ))
+//        _ <- A.s.d1.Bb.*?(B.i_?).query.get.map(_ ==> List(
+//          ("c", Nil),
+//          ("b", Nil),
+//          ("a", List(Some(1))),
+//        ))
+
+
+//        _ <- A.s.Bb.*(B.i_?).insert(
+////          ("a", List(Some(1))),
+//          ("b", List(None)),
+////          ("c", Nil),
+//        ).transact
+
+//        _ <- A.s.Bb.i_?.insert(
+//          ("b", None),
+//        ).transact
+
+//        _ <- A.s.Bb.i_?.Cc.i_?.insert(
+//          ("b", None, None),
+//        ).transact
+
+//        _ <- A.s.a1.Bb.*?(B.i_?).query.get.map(_ ==> List(
+//          ("a", List(Some(1))),
+//          ("b", Nil),
+//          ("c", Nil),
+//        ))
+//        _ <- A.s.d1.Bb.*?(B.i_?).query.get.map(_ ==> List(
+//          ("c", Nil),
+//          ("b", Nil),
+//          ("a", List(Some(1))),
+//        ))
+
+        _ <- A.s.Bb.*(B.i_?.C.i_?.s).Tx(D.i_(1)).insert(List(
+          ("A", List((Some(11), Some(12), "a"))),
+          ("B", List((Some(13), None, "b"))),
+          ("C", List((None, Some(14), "c"))),
+          ("D", List((None, None, "d"))),
+          ("E", List())
+        )).inspect
+
+        _ <- A.s.Bb.*(B.i_?.C.i_?.s).Tx(D.i_(1)).insert(List(
+          ("A", List((Some(11), Some(12), "a"))),
+          ("B", List((Some(13), None, "b"))),
+          ("C", List((None, Some(14), "c"))),
+          ("D", List((None, None, "d"))),
+          ("E", List())
+        )).transact
+
+        _ <- A.s.a1.Bb.*?(B.i_?.C.i_?.s).Tx(D.i).query.get.map(_ ==> List(
+          ("A", List((Some(11), Some(12), "a")), 1),
+          ("B", List((Some(13), None, "b")), 1),
+          ("C", List((None, Some(14), "c")), 1),
+          ("D", List((None, None, "d")), 1),
+          ("E", List(), 1)
         ))
+
+//        List(
+//          (A,List((Some(11),Some(12),a)),1),
+//          (B,List((Some(13),None,b)),1),
+//          (C,List(),1),
+//          (D,List(),1),
+//          (E,List(),1))
+
+        //        _ <- A.s.Bb.*(B.i.s_?).insert(
+//          ("a", List((1, Some("x")), (2, Some("y")))),
+//          ("b", List((1, Some("x")), (2, None))),
+//          ("c", List((1, None), (2, Some("y")))),
+//          ("d", List((1, None), (2, None))),
+//          ("e", Nil),
+//        ).inspect
+//
+//        _ <- A.s.Bb.*(B.i.s_?).insert(
+//          ("a", List((1, Some("x")), (2, Some("y")))),
+//          ("b", List((1, Some("x")), (2, None))),
+//          ("c", List((1, None), (2, Some("y")))),
+//          ("d", List((1, None), (2, None))),
+//          ("e", Nil),
+//        ).transact
+
+//        _ <- A.s.a1.Bb.*?(B.i.a1.s_?).query.get.map(_ ==> List(
+//          ("a", List((1, Some("x")), (2, Some("y")))),
+//          ("b", List((1, Some("x")), (2, None))),
+//          ("c", List((1, None), (2, Some("y")))),
+//          ("d", List((1, None), (2, None))),
+//          ("e", Nil),
+//        ))
+//        _ <- A.s.d1.Bb.*?(B.i.a1.s_?).query.get.map(_ ==> List(
+//          ("e", Nil),
+//          ("d", List((1, None), (2, None))),
+//          ("c", List((1, None), (2, Some("y")))),
+//          ("b", List((1, Some("x")), (2, None))),
+//          ("a", List((1, Some("x")), (2, Some("y")))),
+//        ))
+
 
       } yield ()
     }

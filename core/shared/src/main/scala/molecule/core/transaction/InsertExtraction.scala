@@ -45,7 +45,6 @@ class InsertExtraction extends InsertResolvers_ with InsertValidators_ { self: I
             case a: AttrSet =>
               a match {
                 case a: AttrSetMan =>
-                  val mandatory = nsMap(a.ns).mandatoryAttrs.contains(a.attr)
                   resolve(nsMap, tail, resolvers :+
                     resolveAttrSetMan(a, tplIndex), outerTpl, tplIndex + 1)
 
@@ -68,7 +67,7 @@ class InsertExtraction extends InsertResolvers_ with InsertValidators_ { self: I
             case Ref(_, refAttr, _, _, _) if prevRefs.contains(refAttr) => throw ModelError(
               s"Can't re-use previous namespace ${refAttr.capitalize} after backref _$backRefNs."
             )
-            case _                                                   => // ok
+            case _                                                      => // ok
           }
           resolve(nsMap, tail, resolvers :+ addBackRef(backRefNs), outerTpl, tplIndex)
 
@@ -139,42 +138,42 @@ class InsertExtraction extends InsertResolvers_ with InsertValidators_ { self: I
   }
 
   private def resolveAttrSetMan(a: AttrSetMan, tplIndex: Int): Product => Unit = {
-    val (ns, attr) = (a.ns, a.attr)
+    val (ns, attr, refNs) = (a.ns, a.attr, a.refNs)
     a match {
-      case _: AttrSetManString     => addSet(ns, attr, tplIndex, valueString)
-      case _: AttrSetManInt        => addSet(ns, attr, tplIndex, valueInt)
-      case _: AttrSetManLong       => addSet(ns, attr, tplIndex, valueLong)
-      case _: AttrSetManFloat      => addSet(ns, attr, tplIndex, valueFloat)
-      case _: AttrSetManDouble     => addSet(ns, attr, tplIndex, valueDouble)
-      case _: AttrSetManBoolean    => addSet(ns, attr, tplIndex, valueBoolean)
-      case _: AttrSetManBigInt     => addSet(ns, attr, tplIndex, valueBigInt)
-      case _: AttrSetManBigDecimal => addSet(ns, attr, tplIndex, valueBigDecimal)
-      case _: AttrSetManDate       => addSet(ns, attr, tplIndex, valueDate)
-      case _: AttrSetManUUID       => addSet(ns, attr, tplIndex, valueUUID)
-      case _: AttrSetManURI        => addSet(ns, attr, tplIndex, valueURI)
-      case _: AttrSetManByte       => addSet(ns, attr, tplIndex, valueByte)
-      case _: AttrSetManShort      => addSet(ns, attr, tplIndex, valueShort)
-      case _: AttrSetManChar       => addSet(ns, attr, tplIndex, valueChar)
+      case _: AttrSetManString     => addSet(ns, attr, "String", refNs, tplIndex, valueString)
+      case _: AttrSetManInt        => addSet(ns, attr, "Int", refNs, tplIndex, valueInt)
+      case _: AttrSetManLong       => addSet(ns, attr, "Long", refNs, tplIndex, valueLong)
+      case _: AttrSetManFloat      => addSet(ns, attr, "Float", refNs, tplIndex, valueFloat)
+      case _: AttrSetManDouble     => addSet(ns, attr, "Double", refNs, tplIndex, valueDouble)
+      case _: AttrSetManBoolean    => addSet(ns, attr, "Boolean", refNs, tplIndex, valueBoolean)
+      case _: AttrSetManBigInt     => addSet(ns, attr, "BigInt", refNs, tplIndex, valueBigInt)
+      case _: AttrSetManBigDecimal => addSet(ns, attr, "BigDecimal", refNs, tplIndex, valueBigDecimal)
+      case _: AttrSetManDate       => addSet(ns, attr, "Date", refNs, tplIndex, valueDate)
+      case _: AttrSetManUUID       => addSet(ns, attr, "UUID", refNs, tplIndex, valueUUID)
+      case _: AttrSetManURI        => addSet(ns, attr, "URI", refNs, tplIndex, valueURI)
+      case _: AttrSetManByte       => addSet(ns, attr, "Byte", refNs, tplIndex, valueByte)
+      case _: AttrSetManShort      => addSet(ns, attr, "Short", refNs, tplIndex, valueShort)
+      case _: AttrSetManChar       => addSet(ns, attr, "Char", refNs, tplIndex, valueChar)
     }
   }
 
   private def resolveAttrSetOpt(a: AttrSetOpt, tplIndex: Int): Product => Unit = {
-    val (ns, attr) = (a.ns, a.attr)
+    val (ns, attr, refNs) = (a.ns, a.attr, a.refNs)
     a match {
-      case _: AttrSetOptString     => addSetOpt(ns, attr, tplIndex, valueString)
-      case _: AttrSetOptInt        => addSetOpt(ns, attr, tplIndex, valueInt)
-      case _: AttrSetOptLong       => addSetOpt(ns, attr, tplIndex, valueLong)
-      case _: AttrSetOptFloat      => addSetOpt(ns, attr, tplIndex, valueFloat)
-      case _: AttrSetOptDouble     => addSetOpt(ns, attr, tplIndex, valueDouble)
-      case _: AttrSetOptBoolean    => addSetOpt(ns, attr, tplIndex, valueBoolean)
-      case _: AttrSetOptBigInt     => addSetOpt(ns, attr, tplIndex, valueBigInt)
-      case _: AttrSetOptBigDecimal => addSetOpt(ns, attr, tplIndex, valueBigDecimal)
-      case _: AttrSetOptDate       => addSetOpt(ns, attr, tplIndex, valueDate)
-      case _: AttrSetOptUUID       => addSetOpt(ns, attr, tplIndex, valueUUID)
-      case _: AttrSetOptURI        => addSetOpt(ns, attr, tplIndex, valueURI)
-      case _: AttrSetOptByte       => addSetOpt(ns, attr, tplIndex, valueByte)
-      case _: AttrSetOptShort      => addSetOpt(ns, attr, tplIndex, valueShort)
-      case _: AttrSetOptChar       => addSetOpt(ns, attr, tplIndex, valueChar)
+      case _: AttrSetOptString     => addSetOpt(ns, attr, "String", refNs, tplIndex, valueString)
+      case _: AttrSetOptInt        => addSetOpt(ns, attr, "Int", refNs, tplIndex, valueInt)
+      case _: AttrSetOptLong       => addSetOpt(ns, attr, "Long", refNs, tplIndex, valueLong)
+      case _: AttrSetOptFloat      => addSetOpt(ns, attr, "Float", refNs, tplIndex, valueFloat)
+      case _: AttrSetOptDouble     => addSetOpt(ns, attr, "Double", refNs, tplIndex, valueDouble)
+      case _: AttrSetOptBoolean    => addSetOpt(ns, attr, "Boolean", refNs, tplIndex, valueBoolean)
+      case _: AttrSetOptBigInt     => addSetOpt(ns, attr, "BigInt", refNs, tplIndex, valueBigInt)
+      case _: AttrSetOptBigDecimal => addSetOpt(ns, attr, "BigDecimal", refNs, tplIndex, valueBigDecimal)
+      case _: AttrSetOptDate       => addSetOpt(ns, attr, "Date", refNs, tplIndex, valueDate)
+      case _: AttrSetOptUUID       => addSetOpt(ns, attr, "UUID", refNs, tplIndex, valueUUID)
+      case _: AttrSetOptURI        => addSetOpt(ns, attr, "URI", refNs, tplIndex, valueURI)
+      case _: AttrSetOptByte       => addSetOpt(ns, attr, "Byte", refNs, tplIndex, valueByte)
+      case _: AttrSetOptShort      => addSetOpt(ns, attr, "Short", refNs, tplIndex, valueShort)
+      case _: AttrSetOptChar       => addSetOpt(ns, attr, "Char", refNs, tplIndex, valueChar)
     }
   }
 }

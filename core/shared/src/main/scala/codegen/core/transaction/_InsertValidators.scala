@@ -19,24 +19,24 @@ object _InsertValidators extends CoreGenBase("InsertValidators", "/transaction")
   }
 
   private def validators: String = {
-    baseTypes.map { baseType =>
+    baseTypes.map { baseTpe =>
       s"""
-         |  protected def validator$baseType(
-         |    optValidator: Option[Validate$baseType],
+         |  protected def validator$baseTpe(
+         |    optValidator: Option[Validate$baseTpe],
          |    a: Attr,
          |    curElements: List[Element]
-         |  ): Option[Product => $baseType => Seq[String]] = {
+         |  ): Option[Product => $baseTpe => Seq[String]] = {
          |    optValidator.fold(
-         |      Option.empty[Product => $baseType => Seq[String]]
+         |      Option.empty[Product => $baseTpe => Seq[String]]
          |    ) { validator =>
          |      if (a.valueAttrs.isEmpty) {
-         |        Some((_: Product) => (v: $baseType) => validator.validate(v))
+         |        Some((_: Product) => (v: $baseTpe) => validator.validate(v))
          |      } else {
          |        val tpl2values = tpl2valueResolver(a, curElements)
          |        Some(
          |          (tpl: Product) => {
          |            val values = tpl2values(tpl)
-         |            (v: $baseType) =>
+         |            (v: $baseTpe) =>
          |              validator.withValues(values).validate(v)
          |          }
          |        )

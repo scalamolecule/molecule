@@ -17,16 +17,13 @@ trait Data_Insert
     with ModelUtils
     with MoleculeLogging { self: InsertExtraction with InsertResolvers_ =>
 
-  var nsMap: Map[String, MetaNs] = Map.empty[String, MetaNs]
-
   def getData(
-    nsMap0: Map[String, MetaNs],
+    nsMap: Map[String, MetaNs],
     elements: List[Element],
     tpls: Seq[Product],
   ): Data = {
-    nsMap = nsMap0
-    //    elements.foreach(println)
-    //    println("################################################################################################")
+//    elements.foreach(println)
+//    println("################################################################################################")
 
     curRefPath = List(s"$level", getInitialNs(elements))
     val (mainElements, _)           = separateTxElements(elements)
@@ -48,12 +45,12 @@ trait Data_Insert
     //    val xx = getJoinTableInserts
     //    xx.foreach(println)
 
-    //    println(inserts.mkString("--- inserts\n", "\n", ""))
     (getTableInserts, getJoinTableInserts)
   }
 
 
   private def initInserts(): Unit = {
+    //    println(inserts.mkString("--- inserts\n", "\n", ""))
     inserts.foreach {
       case (refPath, cols) =>
         val table = refPath.last
@@ -78,6 +75,8 @@ trait Data_Insert
   private def addRowSetterToTableInserts(rowIndex: Int): Unit = {
     inserts.foreach {
       case (refPath, cols) =>
+        //        println(s"---------------------- $refPath")
+        //        colSettersMap.foreach(println)
         val colSetters = colSettersMap(refPath)
         //        println(s"----------------------  ${colSetters.length}  $refPath")
         //          println(stmt)
@@ -194,27 +193,11 @@ trait Data_Insert
     }
   }
 
-  override protected def addSet[T](
-    ns: String,
-    attr: String,
-    tplIndex: Int,
-    handleScalaValue: T => Any,
-  ): Product => Unit = {
-    val (curPath, paramIndex) = updateInsert(attr)
-    (tpl: Product) =>
-      val array     = getArray(ns, attr, tpl.productElement(tplIndex).asInstanceOf[Set[AnyRef]])
-      val colSetter = (ps: PS, _: IdsMap, _: RowIndex) => {
-        val conn = ps.getConnection
-        val arr  = conn.createArrayOf("AnyRef", array)
-        ps.setArray(paramIndex, arr)
-        //        printValue(curLevel, ns, attr, tplIndex, paramIndex, scalaValue)
-      }
-      addColSetter(curPath, colSetter)
-  }
-
   override protected def addSetOpt[T](
     ns: String,
     attr: String,
+    baseTpe: String,
+    refNsOpt: Option[String],
     tplIndex: Int,
     handleScalaValue: T => Any,
   ): Product => Unit = {
@@ -222,7 +205,7 @@ trait Data_Insert
     (tpl: Product) =>
       tpl.productElement(tplIndex) match {
         case Some(set: Set[_]) =>
-          val array     = getArray(ns, attr, set.asInstanceOf[Set[AnyRef]])
+          val array     = getArray(baseTpe, set.asInstanceOf[Set[AnyRef]])
           val colSetter = (ps: PS, _: IdsMap, _: RowIndex) => {
             val conn = ps.getConnection
             val arr  = conn.createArrayOf("AnyRef", array)
@@ -240,9 +223,9 @@ trait Data_Insert
       }
   }
 
-  private def getArray(ns: String, attr: String, set: Set[AnyRef]): Array[AnyRef] = {
-    val array: Array[AnyRef] = set.toArray.asInstanceOf[Array[AnyRef]]
-    nsMap(ns).attrs.find(_.attr == attr).get.baseTpe match {
+  private def getArray(baseTpe: String, set: Set[AnyRef]): Array[AnyRef] = {
+    val array = set.toArray
+    baseTpe match {
       case "Float"      => array.map(_.toString.toDouble.asInstanceOf[AnyRef])
       case "BigInt"     => array.map(v => BigDecimal(v.asInstanceOf[BigInt]).bigDecimal.asInstanceOf[AnyRef])
       case "BigDecimal" => array.map(v => v.asInstanceOf[BigDecimal].bigDecimal.asInstanceOf[AnyRef])
@@ -252,6 +235,65 @@ trait Data_Insert
     }
   }
 
+
+  override protected def addSet[T](
+    ns: String,
+    attr: String,
+    baseTpe: String,
+    refNsOpt: Option[String],
+    tplIndex: Int,
+    handleScalaValue: T => Any,
+  ): Product => Unit = {
+    refNsOpt.fold {
+      val (curPath, paramIndex) = updateInsert(attr)
+      (tpl: Product) =>
+        val array     = getArray(baseTpe, tpl.productElement(tplIndex).asInstanceOf[Set[AnyRef]])
+        val colSetter = (ps: PS, _: IdsMap, _: RowIndex) => {
+          val conn = ps.getConnection
+          val arr  = conn.createArrayOf("AnyRef", array)
+          ps.setArray(paramIndex, arr)
+          //        printValue(curLevel, ns, attr, tplIndex, paramIndex, scalaValue)
+        }
+        addColSetter(curPath, colSetter)
+
+    } { refNs =>
+      val refAttr   = attr
+      val joinTable = s"${ns}_${refAttr}_$refNs"
+      val curPath   = curRefPath
+      val joinPath  = curPath :+ joinTable
+
+      // join table with single row (treated as normal insert since there's only 1 join per row)
+      val (id1, id2) = if (ns == refNs) (s"${ns}_1_id", s"${refNs}_2_id") else (s"${ns}_id", s"${refNs}_id")
+      // When insertion order is reversed, this join table will be set after left and right has been inserted
+      inserts = (joinPath, List(id1, id2)) +: inserts
+
+      (tpl: Product) => {
+
+        val refIds = tpl.productElement(tplIndex).asInstanceOf[Set[Long]]
+
+        // Empty row if no attributes in namespace in order to have an id for join table
+        if (!paramIndexes.exists { case ((path, _), _) => path == curPath }) {
+          // If current namespace has no attributes, then add an empty row with
+          // default null values (only to be referenced as the left side of the join table)
+          val emptyRowSetter: Setter = (ps: PS, _: IdsMap, _: RowIndex) => {
+            ps.addBatch()
+          }
+          addColSetter(curPath, emptyRowSetter)
+        }
+
+        // Join table setter
+        val joinSetter: Setter = (ps: PS, idsMap: IdsMap, rowIndex: RowIndex) => {
+          val refId1 = idsMap(curPath)(rowIndex)
+          refIds.foreach { refId2 =>
+            ps.setLong(1, refId1)
+            ps.setLong(2, refId2)
+            ps.addBatch()
+          }
+        }
+        addColSetter(joinPath, joinSetter)
+      }
+    }
+  }
 
   override protected def addRef(ns: String, refAttr: String, refNs: String, card: Card): Product => Unit = {
     val joinTable = s"${ns}_${refAttr}_$refNs"
@@ -349,10 +391,8 @@ trait Data_Insert
     // Start from initial entity id for each composite sub group
     countValueAttrs(compositeElements) match {
       case 1 => (tpl: Product) =>
-        e = e0
         composite2stmts(Tuple1(tpl.productElement(tplIndex)))
       case _ => (tpl: Product) =>
-        e = e0
         composite2stmts(tpl.productElement(tplIndex).asInstanceOf[Product])
     }
   }
@@ -419,20 +459,4 @@ trait Data_Insert
   override protected lazy val valueByte       = (v: Byte) => (ps: PS, n: Int) => ps.setByte(n, v)
   override protected lazy val valueShort      = (v: Short) => (ps: PS, n: Int) => ps.setShort(n, v)
   override protected lazy val valueChar       = (v: Char) => (ps: PS, n: Int) => ps.setString(n, v.toString)
-
-  protected lazy val arrayString     = (v: String) => (ps: PS, n: Int) => ps.setString(n, v)
-  protected lazy val arrayInt        = (v: Int) => (ps: PS, n: Int) => ps.setInt(n, v)
-  protected lazy val arrayLong       = (v: Long) => (ps: PS, n: Int) => ps.setLong(n, v)
-  protected lazy val arrayFloat      = (v: Float) => (ps: PS, n: Int) => ps.setDouble(n, v.toString.toDouble)
-  protected lazy val arrayDouble     = (v: Double) => (ps: PS, n: Int) => ps.setDouble(n, v)
-  protected lazy val arrayBoolean    = (v: Boolean) => (ps: PS, n: Int) => ps.setBoolean(n, v)
-  protected lazy val arrayBigInt     = (v: BigInt) => (ps: PS, n: Int) => ps.setBigDecimal(n, BigDecimal(v).bigDecimal)
-  protected lazy val arrayBigDecimal = (v: BigDecimal) => (ps: PS, n: Int) => ps.setBigDecimal(n, v.bigDecimal)
-  protected lazy val arrayDate       = (v: Date) => (ps: PS, n: Int) => ps.setDate(n, new java.sql.Date(v.getTime))
-  protected lazy val arrayUUID       = (v: UUID) => (ps: PS, n: Int) => ps.setString(n, v.toString)
-  protected lazy val arrayURI        = (v: URI) => (ps: PS, n: Int) => ps.setString(n, v.toString)
-  protected lazy val arrayByte       = (v: Byte) => (ps: PS, n: Int) => ps.setByte(n, v)
-  protected lazy val arrayShort      = (v: Short) => (ps: PS, n: Int) => ps.setShort(n, v)
-  protected lazy val arrayChar       = (v: Char) => (ps: PS, n: Int) => ps.setString(n, v.toString)
-
 }

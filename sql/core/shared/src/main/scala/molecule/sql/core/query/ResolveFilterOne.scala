@@ -4,12 +4,10 @@ import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import scala.reflect.ClassTag
 
-trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
+trait ResolveFilterOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
 
   protected def resolveAttrOneMan(attr: AttrOneMan): Unit = {
     aritiesAttr()
-    sortAttrIndex += 1
-    val (e, a) = ("x", s":${attr.ns}/${attr.attr}")
     attr match {
       case at: AttrOneManString     => man(attr, at.vs, resString1)
       case at: AttrOneManInt        => man(attr, at.vs, resInt1)
@@ -51,7 +49,6 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
 
   protected def resolveAttrOneOpt(attr: AttrOneOpt): Unit = {
     aritiesAttr()
-    sortAttrIndex += 1
     hasOptAttr = true // to avoid redundant None's
     attr match {
       case at: AttrOneOptString     => opt(attr, at.vs, resOptString)
@@ -107,7 +104,7 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
   private def manLong(attr: Attr, args: Seq[Long], res: ResOne[Long]): Unit = {
     attr.name match {
       case "_Generic.eid"  =>
-        select += "id"
+        select += attr.ns + ".id"
         addCast(res.sql2one)
         addSort(attr, "id")
       case "_Generic.txId" =>
@@ -143,7 +140,7 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
       attr.op match {
         case V     => () // selected col can already be a value or null
         case Eq    => optEqual(col, optArgs, resOpt.one2sql)
-        case Neq   => optNeq(col, optArgs, resOpt.tpe, resOpt.one2sql)
+        case Neq   => optNeq(col, optArgs, resOpt.one2sql)
         case Lt    => optCompare(col, optArgs, "<", resOpt.one2sql)
         case Gt    => optCompare(col, optArgs, ">", resOpt.one2sql)
         case Le    => optCompare(col, optArgs, "<=", resOpt.one2sql)
@@ -379,7 +376,6 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
   }
 
   private def noValue(col: String): Unit = {
-    // Skip tacit not null clause in this special case
     notNull -= col
     where += ((col, s"IS NULL"))
   }
@@ -406,7 +402,6 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
   private def optNeq[T](
     col: String,
     optArgs: Option[Seq[T]],
-    tpe: String,
     one2sql: T => String
   ): Unit = {
     if (optArgs.isDefined && optArgs.get.nonEmpty) {

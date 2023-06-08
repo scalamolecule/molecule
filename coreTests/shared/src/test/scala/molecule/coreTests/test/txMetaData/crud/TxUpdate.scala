@@ -1,4 +1,4 @@
-package molecule.coreTests.test.txData.crud
+package molecule.coreTests.test.txMetaData.crud
 
 import molecule.base.error._
 import molecule.core.spi.SpiAsync

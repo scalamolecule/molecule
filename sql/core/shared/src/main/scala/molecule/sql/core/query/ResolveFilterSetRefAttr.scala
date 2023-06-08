@@ -4,79 +4,49 @@ import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import scala.reflect.ClassTag
 
-trait ResolveExprSet[Tpl] { self: SqlModel2Query[Tpl] with LambdasSet =>
+trait ResolveFilterSetRefAttr[Tpl] { self: SqlModel2Query[Tpl] with LambdasSet =>
 
-  protected def resolveAttrSetMan(attr: AttrSetMan): Unit = {
+  protected def resolveRefAttrSetMan(attr: AttrSetMan): Unit = {
     aritiesAttr()
-    sortAttrIndex += 1
     attr match {
-      case at: AttrSetManString     => man(attr, at.vs, resSetString)
-      case at: AttrSetManInt        => man(attr, at.vs, resSetInt)
-      case at: AttrSetManLong       => man(attr, at.vs, resSetLong)
-      case at: AttrSetManFloat      => man(attr, at.vs, resSetFloat)
-      case at: AttrSetManDouble     => man(attr, at.vs, resSetDouble)
-      case at: AttrSetManBoolean    => man(attr, at.vs, resSetBoolean)
-      case at: AttrSetManBigInt     => man(attr, at.vs, resSetBigInt)
-      case at: AttrSetManBigDecimal => man(attr, at.vs, resSetBigDecimal)
-      case at: AttrSetManDate       => man(attr, at.vs, resSetDate)
-      case at: AttrSetManUUID       => man(attr, at.vs, resSetUUID)
-      case at: AttrSetManURI        => man(attr, at.vs, resSetURI)
-      case at: AttrSetManByte       => man(attr, at.vs, resSetByte)
-      case at: AttrSetManShort      => man(attr, at.vs, resSetShort)
-      case at: AttrSetManChar       => man(attr, at.vs, resSetChar)
+      case at: AttrSetManLong => man(attr, at.vs, resSetLong)
+      case _                  => ()
     }
   }
 
-  protected def resolveAttrSetTac(attr: AttrSetTac): Unit = {
+  protected def resolveRefAttrSetTac(attr: AttrSetTac): Unit = {
     attr match {
-      case at: AttrSetTacString     => tac(attr, at.vs, resSetString)
-      case at: AttrSetTacInt        => tac(attr, at.vs, resSetInt)
-      case at: AttrSetTacLong       => tac(attr, at.vs, resSetLong)
-      case at: AttrSetTacFloat      => tac(attr, at.vs, resSetFloat)
-      case at: AttrSetTacDouble     => tac(attr, at.vs, resSetDouble)
-      case at: AttrSetTacBoolean    => tac(attr, at.vs, resSetBoolean)
-      case at: AttrSetTacBigInt     => tac(attr, at.vs, resSetBigInt)
-      case at: AttrSetTacBigDecimal => tac(attr, at.vs, resSetBigDecimal)
-      case at: AttrSetTacDate       => tac(attr, at.vs, resSetDate)
-      case at: AttrSetTacUUID       => tac(attr, at.vs, resSetUUID)
-      case at: AttrSetTacURI        => tac(attr, at.vs, resSetURI)
-      case at: AttrSetTacByte       => tac(attr, at.vs, resSetByte)
-      case at: AttrSetTacShort      => tac(attr, at.vs, resSetShort)
-      case at: AttrSetTacChar       => tac(attr, at.vs, resSetChar)
+      case at: AttrSetTacLong => tac(attr, at.vs, resSetLong)
+      case _                  => ()
     }
   }
 
-  protected def resolveAttrSetOpt(attr: AttrSetOpt): Unit = {
+  protected def resolveRefAttrSetOpt(attr: AttrSetOpt): Unit = {
     aritiesAttr()
-    sortAttrIndex += 1
     hasOptAttr = true // to avoid redundant None's
     attr match {
-      case at: AttrSetOptString     => opt(at, at.vs, resOptSetString)
-      case at: AttrSetOptInt        => opt(at, at.vs, resOptSetInt)
-      case at: AttrSetOptLong       => opt(at, at.vs, resOptSetLong)
-      case at: AttrSetOptFloat      => opt(at, at.vs, resOptSetFloat)
-      case at: AttrSetOptDouble     => opt(at, at.vs, resOptSetDouble)
-      case at: AttrSetOptBoolean    => opt(at, at.vs, resOptSetBoolean)
-      case at: AttrSetOptBigInt     => opt(at, at.vs, resOptSetBigInt)
-      case at: AttrSetOptBigDecimal => opt(at, at.vs, resOptSetBigDecimal)
-      case at: AttrSetOptDate       => opt(at, at.vs, resOptSetDate)
-      case at: AttrSetOptUUID       => opt(at, at.vs, resOptSetUUID)
-      case at: AttrSetOptURI        => opt(at, at.vs, resOptSetURI)
-      case at: AttrSetOptByte       => opt(at, at.vs, resOptSetByte)
-      case at: AttrSetOptShort      => opt(at, at.vs, resOptSetShort)
-      case at: AttrSetOptChar       => opt(at, at.vs, resOptSetChar)
+      case at: AttrSetOptLong => opt(at, at.vs, resOptSetLong)
+      case _                  => ()
     }
   }
 
 
   private def man[T: ClassTag](attr: Attr, args: Seq[Set[T]], res: ResSet[T]): Unit = {
-    val col = getCol(attr: Attr)
-    select += col
+    val (ns, refAttr, refNs) = (attr.ns, attr.attr, attr.refNs.get)
+    val joinTable            = ns + "_" + refAttr + "_" + refNs
+    val nsId                 = ns + ".id"
+    val ns_id                = ns + "_id"
+    val ref_id               = refNs + "_id"
+    val refIds               = s"${ns}_$refAttr"
+    select += s"ARRAY_AGG($joinTable.$ref_id) $refIds"
+    joins += (("INNER JOIN", joinTable, "", nsId, s"$joinTable.$ns_id"))
+    groupBy += nsId
+
     if (isNestedOpt) {
       addCast(res.sql2setOrNull)
     } else {
       addCast(res.sql2set)
-      notNull += col
+      //      notNull += col
     }
 
     attr.filterAttr.fold {
@@ -84,11 +54,11 @@ trait ResolveExprSet[Tpl] { self: SqlModel2Query[Tpl] with LambdasSet =>
         // Runtime check needed since we can't type infer it
         throw ModelError(s"Cardinality-set filter attributes not allowed to do additional filtering. Found:\n  " + attr)
       }
-      expr(col, attr.op, args, res)
+      expr(refIds, attr.op, args, res)
       //      filterAttrVars1 = filterAttrVars1 + (a -> (e, v))
       //      filterAttrVars2.get(a).foreach(_(e, v))
     } { filterAttr =>
-      expr2(col, attr.op, s":${filterAttr.ns}/${filterAttr.attr}")
+      expr2(refIds, attr.op, s":${filterAttr.ns}/${filterAttr.attr}")
     }
   }
 
@@ -247,12 +217,6 @@ trait ResolveExprSet[Tpl] { self: SqlModel2Query[Tpl] with LambdasSet =>
       case _ =>
         where += ((col, sets1.map(set2sql).mkString("IN (", ", ", ")")))
     }
-    //    if (sets.length == 1)
-    //      where += ((col, "= " + set2sql(sets.head)))
-    //    else
-    //      where += ((col, sets.map(set2sql).mkString("IN (", ", ", ")")))
-
-
   }
   private def equal2(col: String, filterAttr: String): Unit = {
     //    preFind = e
@@ -444,7 +408,6 @@ trait ResolveExprSet[Tpl] { self: SqlModel2Query[Tpl] with LambdasSet =>
   }
 
   private def noValue(col: String): Unit = {
-    // Skip tacit not null clause in this special case
     notNull -= col
     where += ((col, s"IS NULL"))
   }

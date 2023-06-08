@@ -68,8 +68,9 @@ trait Base extends BaseHelpers with JavaConversions { self: Model2Query =>
   final protected val select  = new ListBuffer[String]
   final protected var from    = ""
   final protected val joins   = new ListBuffer[(String, String, String, String, String)]
-  final protected val where   = new ListBuffer[(String, String)]
   final protected val notNull = new ListBuffer[String]
+  final protected val where   = new ListBuffer[(String, String)]
+  final protected val groupBy = new ListBuffer[String]
   final protected var orderBy = new ListBuffer[(Int, Int, String, String)]
 
   final protected val exts = mutable.Map.empty[String, Option[String]]
@@ -93,7 +94,7 @@ trait Base extends BaseHelpers with JavaConversions { self: Model2Query =>
 
   // Sorting
   final protected var sortss        = List(List.empty[(Int, Int => (RowOLD, RowOLD) => Int)])
-  final protected var sortAttrIndex = -1
+//  final protected var sortAttrIndex = -1
 
   // Pull coordinates
   final protected val pullCasts  = new ArrayBuffer[jIterator[_] => Any]

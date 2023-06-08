@@ -1,4 +1,4 @@
-package molecule.coreTests.test.txData.crud
+package molecule.coreTests.test.txMetaData.crud
 
 import molecule.base.error.ModelError
 import molecule.core.spi.SpiAsync
@@ -367,9 +367,9 @@ trait TxInsert extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
         _ <- Ns.string.insert("Without tx meta data").transact
 
         // Data with and without tx meta data created
-        _ <- Ns.string.query.get.map(_ ==> List(
-          "Without tx meta data",
+        _ <- Ns.string.a1.query.get.map(_ ==> List(
           "With tx meta data",
+          "Without tx meta data",
         ))
 
         // Use transaction meta data to filter

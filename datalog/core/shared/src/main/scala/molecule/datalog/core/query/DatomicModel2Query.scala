@@ -11,8 +11,8 @@ import scala.collection.mutable.ArrayBuffer
 
 class DatomicModel2Query[Tpl](elements0: List[Element])
   extends Model2Query
-    with ResolveExprOne[Tpl]
-    with ResolveExprSet[Tpl]
+    with ResolveFilterOne[Tpl]
+    with ResolveFilterSet[Tpl]
     with ResolveRef[Tpl]
     with ResolveNestedPull[Tpl]
     with Base

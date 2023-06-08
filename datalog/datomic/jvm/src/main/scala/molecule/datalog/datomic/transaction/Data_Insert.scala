@@ -1,5 +1,6 @@
 package molecule.datalog.datomic.transaction
 
+import java.util.{ArrayList => jArrayList, List => jList}
 import molecule.base.ast.SchemaAST._
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
@@ -27,19 +28,32 @@ trait Data_Insert
     tpls.foreach { tpl =>
       e = newId
       e0 = e
-      // populate `stmts`
+      // populate stmts
       row2stmts(tpl)
     }
+
+    // Remove orphan ref ids
+    val stmts1 = if (unusedRefIds.isEmpty) stmts else {
+      val stmts1 = new jArrayList[jList[AnyRef]](stmts.size())
+      stmts.forEach { stmt =>
+        if (!unusedRefIds.contains(stmt.get(3))) {
+          stmts1.add(stmt)
+        }
+      }
+      stmts1
+    }
+
+
     if (txElements.nonEmpty) {
       val txStmts = (new SaveExtraction(true) with Data_Save)
         .getRawStmts(txElements, datomicTx, false)
-      stmts.addAll(txStmts)
+      stmts1.addAll(txStmts)
     }
     if (debug) {
-      val insertStrs = "INSERT:" +: elements :+ "" :+ stmts.toArray().mkString("\n")
+      val insertStrs = "INSERT:" +: elements :+ "" :+ stmts1.toArray().mkString("\n")
       logger.debug(insertStrs.mkString("\n").trim)
     }
-    stmts
+    stmts1
   }
 
   override protected def addOne[T](
@@ -51,6 +65,8 @@ trait Data_Insert
     val a = kw(ns, attr)
     backRefs = backRefs + (ns -> e)
     (tpl: Product) =>
+      unusedRefIds -= e
+      usedRefIds += e
       appendStmt(add, e, a,
         handleScalaValue(tpl.productElement(tplIndex).asInstanceOf[T]).asInstanceOf[AnyRef])
   }
@@ -65,21 +81,31 @@ trait Data_Insert
     backRefs = backRefs + (ns -> e)
     (tpl: Product) =>
       tpl.productElement(tplIndex) match {
-        case Some(value) => appendStmt(add, e, a,
-          handleScalaValue(value.asInstanceOf[T]).asInstanceOf[AnyRef])
-        case None           => () // no statement to insert
+        case Some(value) =>
+          unusedRefIds -= e
+          usedRefIds += e
+          appendStmt(add, e, a, handleScalaValue(value.asInstanceOf[T]).asInstanceOf[AnyRef])
+        case None        =>
+          if (!usedRefIds.contains(e)) {
+            unusedRefIds += e
+          }
+          () // no statement to insert
       }
   }
 
   override protected def addSet[T](
     ns: String,
     attr: String,
+    baseTpe: String,
+    refNsOpt: Option[String],
     tplIndex: Int,
     handleScalaValue: T => Any,
   ): Product => Unit = {
     val a = kw(ns, attr)
     backRefs = backRefs + (ns -> e)
     (tpl: Product) =>
+      unusedRefIds -= e
+      usedRefIds += e
       tpl.productElement(tplIndex).asInstanceOf[Set[_]].foreach { value =>
         appendStmt(add, e, a, handleScalaValue(value.asInstanceOf[T]).asInstanceOf[AnyRef])
       }
@@ -88,6 +114,8 @@ trait Data_Insert
   override protected def addSetOpt[T](
     ns: String,
     attr: String,
+    baseTpe: String,
+    refNsOpt: Option[String],
     tplIndex: Int,
     handleScalaValue: T => Any,
   ): Product => Unit = {
@@ -96,10 +124,16 @@ trait Data_Insert
     (tpl: Product) =>
       tpl.productElement(tplIndex) match {
         case Some(set: Set[_]) =>
+          unusedRefIds -= e
+          usedRefIds += e
           set.foreach(value =>
             appendStmt(add, e, a, handleScalaValue(value.asInstanceOf[T]).asInstanceOf[AnyRef])
           )
-        case None              => () // no statement to insert
+        case None              =>
+          if (!usedRefIds.contains(e)) {
+            unusedRefIds += e
+          }
+          () // no statement to insert
       }
   }
 
@@ -112,6 +146,8 @@ trait Data_Insert
     val a = kw(ns, refAttr)
     (_: Product) =>
       backRefs = backRefs + (ns -> e)
+      unusedRefIds -= e
+      usedRefIds += e
       stmt = stmtList
       stmt.add(add)
       stmt.add(e)

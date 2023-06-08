@@ -40,6 +40,15 @@ case class DatomicConn_JVM(
   }
 
   override def transact_async(javaStmts: Data)(implicit ec: ExecutionContext): Future[TxReport] = {
+
+//    println("##########")
+//    val it = javaStmts.iterator()
+//    while(it.hasNext){
+//      println(it.next)
+//    }
+//    javaStmts.forEach(s => println(s))
+
+
     bridgeDatomicFuture(peerConn.transactAsync(javaStmts))
       .map(MakeTxReport(_))
       .recover {
@@ -164,7 +173,7 @@ case class DatomicConn_JVM(
         )
         e.printStackTrace()
         throw e
-      case e: Throwable                   =>
+      case e: Throwable =>
         e.printStackTrace()
         throw e
     }

@@ -11,8 +11,9 @@ import scala.annotation.tailrec
 
 class SqlModel2Query[Tpl](elements0: List[Element])
   extends Model2Query
-    with ResolveExprOne[Tpl]
-    with ResolveExprSet[Tpl]
+    with ResolveFilterOne[Tpl]
+    with ResolveFilterSet[Tpl]
+    with ResolveFilterSetRefAttr[Tpl]
     with ResolveRef
     with Base
     with CastNestedBranch_
@@ -49,7 +50,6 @@ class SqlModel2Query[Tpl](elements0: List[Element])
       val max3  = joins.map(_._3.length).max
       val max4  = joins.map(_._4.length).max
       val hasAs = joins.exists(_._3.nonEmpty)
-
       joins.map { case (join, table, as, lft, rgt) =>
         val join_  = join + padS(max1, join)
         val table_ = table + padS(max2, table)
@@ -71,6 +71,7 @@ class SqlModel2Query[Tpl](elements0: List[Element])
       }.mkString("\nWHERE\n  ", s" AND\n  ", "")
     }
 
+    val groupBy_ = if (groupBy.isEmpty) "" else groupBy.mkString("\nGROUP BY ", ", ", "")
     val orderBy_ = if (orderBy.isEmpty) "" else {
       orderBy.map {
         case (_, _, col, dir) => col + dir
@@ -80,20 +81,22 @@ class SqlModel2Query[Tpl](elements0: List[Element])
     val stmt =
       s"""SELECT DISTINCT
          |  $select_
-         |FROM $from$joins_$where_$orderBy_;""".stripMargin
+         |FROM $from$joins_$where_$groupBy_$orderBy_;""".stripMargin
 
     //    println(stmt)
 
     """SELECT DISTINCT
       |  Ns.i,
-      |  Ns.ints
+      |  ARRAY_AGG(Ns_refs_Ref.Ref_id) Ns_refs
       |FROM Ns
+      |INNER JOIN Ns_refs_Ref ON Ns.id = Ns_refs_Ref.Ns_id
       |WHERE
-      |  Ns.i IS NOT NULL AND
-      |  Ns.ints IS NOT NULL
+      |  Ns_refs = ARRAY [1] AND
+      |  Ns.i    IS NOT NULL
+      |GROUP BY Ns.id
       |ORDER BY Ns.i NULLS FIRST;
-      |
       |""".stripMargin
+//      |  Ns_refs_Ref.Ref_id IN (1) AND
 
     stmt
   }
@@ -169,6 +172,11 @@ class SqlModel2Query[Tpl](elements0: List[Element])
           case a: AttrOneOpt => resolveAttrOneOpt(a); resolve(tail)
           case a: AttrOneTac => resolveAttrOneTac(a); resolve(tail)
         }
+      case a: AttrSet if a.refNs.isDefined      => a match {
+        case a: AttrSetMan => resolveRefAttrSetMan(a); resolve(tail)
+        case a: AttrSetOpt => resolveRefAttrSetOpt(a); resolve(tail)
+        case a: AttrSetTac => resolveRefAttrSetTac(a); resolve(tail)
+      }
       case a: AttrSet                           => a match {
         case a: AttrSetMan => resolveAttrSetMan(a); resolve(tail)
         case a: AttrSetOpt => resolveAttrSetOpt(a); resolve(tail)
@@ -228,9 +236,6 @@ class SqlModel2Query[Tpl](elements0: List[Element])
 
     val Ref(_, refAttr, refNs, _, _) = nestedRef
     exts(refNs) = exts.get(refNs).fold(Option.empty[String])(_ => Some("_" + refAttr))
-
-    // On top level, move past nested pull date to tx meta data (if any)
-    sortAttrIndex += 1
 
     aritiesNested()
     resolveNestedOptRef(nestedRef)

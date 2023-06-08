@@ -40,20 +40,20 @@ object _Model extends BoilerplateGenBase("Model", "/ast") {
 
   private def makeAttrGroup(card: String, mode: String, modeFull: String): String = {
     val cardTpe = card match {
-      case "One"   => (baseType: String) => baseType
-      case "Set"   => (baseType: String) => s"Set[$baseType]"
-      case "Array" => (baseType: String) => s"Array[$baseType]"
-      case "Map"   => (baseType: String) => s"Map[String, $baseType]"
+      case "One"   => (baseTpe: String) => baseTpe
+      case "Set"   => (baseTpe: String) => s"Set[$baseTpe]"
+      case "Array" => (baseTpe: String) => s"Array[$baseTpe]"
+      case "Map"   => (baseTpe: String) => s"Map[String, $baseTpe]"
     }
 
     // Render attribute toString method so that a printout can be directly used as valid Scala code
 
-    def body(baseType: String): String = {
-      val tpe      = cardTpe(baseType)
-      val attrType = s"Attr$card$mode$baseType"
+    def body(baseTpe: String): String = {
+      val tpe      = cardTpe(baseTpe)
+      val attrType = s"Attr$card$mode$baseTpe"
       val vs       = if (mode == "Opt") s"Option[Seq[$tpe]] = None" else s"Seq[$tpe] = Nil"
-      val format_? = !List("Int", "Double", "Boolean").contains(baseType)
-      val format   = baseType match {
+      val format_? = !List("Int", "Double", "Boolean").contains(baseTpe)
+      val format   = baseTpe match {
         case "String"     => """"\"" + escStr(v) + "\"""""
         case "Int"        => "v"
         case "Long"       => """v.toString + "L""""
@@ -73,52 +73,52 @@ object _Model extends BoilerplateGenBase("Model", "/ast") {
         case "One" => mode match {
           case "Opt" =>
             if (format_?)
-              s"""def format(v: $baseType): String = $format
+              s"""def format(v: $baseTpe): String = $format
                  |      def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
-                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${opt(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(status)}, $${oStr(sort)})\"\"\"""".stripMargin
+                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${opt(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)})\"\"\"""".stripMargin
             else
               s"""def vss: String = vs.fold("None")(_.mkString("Some(Seq(", ", ", "))"))
-                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${opt(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(status)}, $${oStr(sort)})\"\"\"""".stripMargin
+                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${opt(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)})\"\"\"""".stripMargin
           case _     =>
             if (format_?)
-              s"""def format(v: $baseType): String = $format
+              s"""def format(v: $baseTpe): String = $format
                  |      def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${opt(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(status)}, $${oStr(sort)})\"\"\"""".stripMargin
+                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${opt(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)})\"\"\"""".stripMargin
             else
               s"""def vss: String = vs.mkString("Seq(", ", ", ")")
-                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${opt(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(status)}, $${oStr(sort)})\"\"\"""".stripMargin
+                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${opt(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)})\"\"\"""".stripMargin
         }
         case "Set" => mode match {
           case "Opt" =>
             if (format_?)
-              s"""def format(v: $baseType): String = $format
+              s"""def format(v: $baseTpe): String = $format
                  |      def vss: String = vs.fold("None")(_.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${opt(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(status)}, $${oStr(sort)})\"\"\"""".stripMargin
+                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${opt(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)})\"\"\"""".stripMargin
             else
               s"""def vss: String = vs.fold("None")(_.map(_.mkString("Set(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${opt(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(status)}, $${oStr(sort)})\"\"\"""".stripMargin
+                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${opt(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)})\"\"\"""".stripMargin
           case _     =>
             if (format_?)
-              s"""def format(v: $baseType): String = $format
+              s"""def format(v: $baseTpe): String = $format
                  |      def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${opt(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(status)}, $${oStr(sort)})\"\"\"""".stripMargin
+                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${opt(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)})\"\"\"""".stripMargin
             else
               s"""def vss: String = vs.map(set => set.mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${opt(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(status)}, $${oStr(sort)})\"\"\"""".stripMargin
+                 |      s\"\"\"$attrType("$$ns", "$$attr", $$op, $$vss, $${opt(filterAttr)}, $${opt(validator)}, $$errs, $$vats, $${oStr(refNs)}, $${oStr(sort)})\"\"\"""".stripMargin
         }
       }
 
       s"""
-         |  case class Attr$card$mode$baseType(
+         |  case class Attr$card$mode$baseTpe(
          |    override val ns: String,
          |    override val attr: String,
          |    override val op: Op = V,
          |    vs: $vs,
          |    override val filterAttr: Option[Attr] = None,
-         |    override val validator: Option[Validate$baseType] = None,
+         |    override val validator: Option[Validate$baseTpe] = None,
          |    override val valueAttrs: Seq[String] = Nil,
          |    override val errors: Seq[String] = Nil,
-         |    override val status: Option[String] = None,
+         |    override val refNs: Option[String] = None,
          |    override val sort: Option[String] = None
          |  ) extends Attr$card$mode {
          |    override def toString: String = {

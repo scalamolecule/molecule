@@ -5,7 +5,7 @@ import molecule.boilerplate.ast.Model._
 import scala.math.{max, min}
 import scala.reflect.ClassTag
 
-trait ResolveExprOne[Tpl]
+trait ResolveFilterOne[Tpl]
   extends SortOneSpecial[Tpl]
     with SortOneOpt_[Tpl] { self: DatomicModel2Query[Tpl] with LambdasOne =>
 
@@ -83,7 +83,7 @@ trait ResolveExprOne[Tpl]
     at: AttrOneOptLong,
     attrIndex: Int
   ): Option[(Int, Int => (Row, Row) => Int)] = {
-    if (at.status.contains("ref"))
+    if (at.refNs.isDefined)
       sortOneOptLongRef(at, attrIndex)
     else
       sortOneOptLong(at, attrIndex)
@@ -92,10 +92,7 @@ trait ResolveExprOne[Tpl]
     at: AttrOneOptLong,
     attrIndex: Int
   ): Option[(Int, Int => (Row, Row) => Int)] = {
-    if (at.status.contains("ref"))
-      sortOneLong(at, attrIndex)
-    else
-      sortOneLong(at, attrIndex)
+    sortOneLong(at, attrIndex)
   }
 
   protected def dummySorter(attr: Attr): Option[(Int, Int => (Row, Row) => Int)] = {
@@ -151,7 +148,7 @@ trait ResolveExprOne[Tpl]
         find += txVar
         addCast(res.j2s)
         addSort(sorter)
-      case a              =>
+      case a                =>
         man(attr, e, a, args, res, sorter)
     }
   }

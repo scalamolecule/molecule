@@ -195,15 +195,15 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
   }
 
   private def asIs(card: String): String = {
-    baseTypesWithSpaces.map { case (baseType, space) =>
-      s"case a: Attr${card}Man$baseType $space=> a.copy(op = Fn(kw.toString, n))"
+    baseTypesWithSpaces.map { case (baseTpe, space) =>
+      s"case a: Attr${card}Man$baseTpe $space=> a.copy(op = Fn(kw.toString, n))"
     }.mkString("\n        ")
   }
 
   private def addOne(mode: String): String = {
-    baseTypes.map(baseType =>
-      s"""case a: AttrOne$mode$baseType =>
-         |          val vs1     = vs.asInstanceOf[Seq[$baseType]]
+    baseTypes.map(baseTpe =>
+      s"""case a: AttrOne$mode$baseTpe =>
+         |          val vs1     = vs.asInstanceOf[Seq[$baseTpe]]
          |          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
          |            val validator = a.validator.get
          |            vs1.flatMap(v => validator.validate(v))
@@ -213,9 +213,9 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
   }
 
   private def addOptOne: String = {
-    baseTypes.map(baseType =>
-      s"""case a: AttrOneOpt$baseType =>
-         |          val vs1     = vs.asInstanceOf[Option[Seq[$baseType]]]
+    baseTypes.map(baseTpe =>
+      s"""case a: AttrOneOpt$baseTpe =>
+         |          val vs1     = vs.asInstanceOf[Option[Seq[$baseTpe]]]
          |          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
          |            val validator = a.validator.get
          |            vs1.get.flatMap(v => validator.validate(v))
@@ -225,9 +225,9 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
   }
 
   private def addSet(mode: String): String = {
-    baseTypes.map(baseType =>
-      s"""case a: AttrSet$mode$baseType =>
-         |          val sets    = vs.asInstanceOf[Seq[Set[$baseType]]]
+    baseTypes.map(baseTpe =>
+      s"""case a: AttrSet$mode$baseTpe =>
+         |          val sets    = vs.asInstanceOf[Seq[Set[$baseTpe]]]
          |          val errors1 = if (sets.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
          |            val validator = a.validator.get
          |            sets.flatMap(set => set.flatMap(v => validator.validate(v)))
@@ -237,9 +237,9 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
   }
 
   private def addOptSet: String = {
-    baseTypes.map(baseType =>
-      s"""case a: AttrSetOpt$baseType =>
-         |          val sets    = vs.asInstanceOf[Option[Seq[Set[$baseType]]]]
+    baseTypes.map(baseTpe =>
+      s"""case a: AttrSetOpt$baseTpe =>
+         |          val sets    = vs.asInstanceOf[Option[Seq[Set[$baseTpe]]]]
          |          val errors1 = if (sets.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
          |            val validator = a.validator.get
          |            sets.get.flatMap(set => set.flatMap(v => validator.validate(v)))
@@ -249,25 +249,25 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
   }
 
   private def addSort( mode: String): String = {
-    baseTypesWithSpaces.map { case (baseType, space) =>
-      s"case a: AttrOne$mode$baseType $space=> a.copy(sort = Some(sort))"
+    baseTypesWithSpaces.map { case (baseTpe, space) =>
+      s"case a: AttrOne$mode$baseTpe $space=> a.copy(sort = Some(sort))"
     }.mkString("\n        ")
   }
 
   private def liftFilterAttr(card: String): String = {
-    baseTypesWithSpaces.map { case (baseType, space) =>
-      s"case a: Attr${card}Man$baseType $space=> (Attr${card}Tac$baseType(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.status, a.sort), List(filterAttr0))"
+    baseTypesWithSpaces.map { case (baseTpe, space) =>
+      s"case a: Attr${card}Man$baseTpe $space=> (Attr${card}Tac$baseTpe(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.refNs, a.sort), List(filterAttr0))"
     }.mkString("\n              ")
   }
   private def addFilterAttr(card: String, mode: String): String = {
-    baseTypesWithSpaces.map { case (baseType, space) =>
-      s"case a: Attr$card$mode$baseType $space=> a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent"
+    baseTypesWithSpaces.map { case (baseTpe, space) =>
+      s"case a: Attr$card$mode$baseTpe $space=> a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent"
     }.mkString("\n              ")
   }
 
   private def reverseTopLevelSorting(mode: String): String = {
-    baseTypesWithSpaces.map { case (baseType, space) =>
-      s"case a@AttrOne$mode$baseType(_, _, _, _, _, _, _, _, _, Some(sort)) $space=> a.copy(sort = Some(reverseSort(sort)))"
+    baseTypesWithSpaces.map { case (baseTpe, space) =>
+      s"case a@AttrOne$mode$baseTpe(_, _, _, _, _, _, _, _, _, Some(sort)) $space=> a.copy(sort = Some(reverseSort(sort)))"
     }.mkString("\n        ")
   }
 }
