@@ -17,7 +17,7 @@ An sbt-molecule plugin generates boilerplate code from your domain data model de
 
 Documentation at [scalamolecule.org](http://scalamolecule.org) still documents the old macro-based version of molecule but will be updated to the new version. Most concepts overlap.
 
-This Molecule library is a complete re-write of old macro-base molecule library that now archived in the molecule-old github repo. The old molecule library has been under active development for several years.
+This Molecule library is a complete re-write of the old macro-base molecule library that is now archived in the molecule-old github repo. The old molecule library has been under active development for several years.
 
 
 ### Examples
