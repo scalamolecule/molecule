@@ -40,15 +40,11 @@ case class DatomicConn_JVM(
   }
 
   override def transact_async(javaStmts: Data)(implicit ec: ExecutionContext): Future[TxReport] = {
-
-//    println("##########")
-//    val it = javaStmts.iterator()
-//    while(it.hasNext){
-//      println(it.next)
-//    }
-//    javaStmts.forEach(s => println(s))
-
-
+    //    println("##########")
+    //    val it = javaStmts.iterator()
+    //    while (it.hasNext) {
+    //      println(it.next)
+    //    }
     bridgeDatomicFuture(peerConn.transactAsync(javaStmts))
       .map(MakeTxReport(_))
       .recover {
@@ -91,7 +87,9 @@ case class DatomicConn_JVM(
                       case ":db.error/reset-tx-instant You can set :db/txInstant only on the current transaction." =>
                         ExecutionError("Can't delete transaction id.")
 
-                      case _ => ExecutionError(e.getMessage.trim)
+                      case _ =>
+                        // e.printStackTrace()
+                        ExecutionError(e.getMessage.trim)
                     }
                 }
               )

@@ -17,14 +17,11 @@ object _ModelOps extends BoilerplateGenBase("ModelOps", "/api") {
        |    with ModelTransformations_
        |    with ExprOneTacOps_0[t, Ns1, Ns2]
        |    with ExprSetTacOps_0[t, Ns1, Ns2]
-       |    with CompositeInit_0
-       |    with NestedOp_0
-       |    with Tx_0_
+       |    with TxMetaData_0
        |$traits""".stripMargin
   }
 
   case class Trait(arity: Int) extends TemplateVals(arity) {
-    val nested = if (arity == 22) "" else s"\n    with NestedOp_$arity[${`A..V`}]"
     val body   =
       s"""
          |trait $fileName_$arity[${`A..V`}, t, Ns1[${`_, _`}], Ns2[${`_, _, _`}]]
@@ -38,7 +35,6 @@ object _ModelOps extends BoilerplateGenBase("ModelOps", "/api") {
          |    with ExprSetOptOps_$arity[${`A..V`}, t, Ns1, Ns2]
          |    with ExprSetTacOps_$arity[${`A..V`}, t, Ns1, Ns2]
          |    with SortAttrsOps_$arity[${`A..V`}, t, Ns1]
-         |    with CompositeInit_$arity[${`A..V`}]$nested
-         |    with Tx_${arity}_[${`A..V`}]""".stripMargin
+         |    with TxMetaData_$arity[${`A..V`}]""".stripMargin
   }
 }

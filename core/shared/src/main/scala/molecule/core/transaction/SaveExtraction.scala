@@ -20,7 +20,7 @@ class SaveExtraction(isTxMetaData: Boolean = false)
           if (a.op != Eq) {
             throw ModelError(s"Missing applied value for attribute ${a.ns}.${a.attr}")
           }
-//          handleNs(a.ns)
+          //          handleNs(a.ns)
           a match {
             case a: AttrOne  =>
               a match {
@@ -36,6 +36,9 @@ class SaveExtraction(isTxMetaData: Boolean = false)
               }
             case a           => throw new Exception("Attribute family not implemented for " + a)
           }
+
+        // todo
+        case Ref(ns, refAttr, "Tx", card, _) => resolve(tail)
 
         case Ref(ns, refAttr, refNs, card, _) => addRef(ns, refAttr, refNs, card); resolve(tail)
         case BackRef(backRefNs, _)            => addBackRef(backRefNs); resolve(tail)

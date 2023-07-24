@@ -51,7 +51,7 @@ object AdhocDatomic extends DatomicTestSuite {
         //        _ <- Ns.i.insert(2, 1, 3).transact
         //        _ <- Ns.i.query.get.map(_ ==> List(1, 2, 3))
         //        _ <- Ns.i.d1.query.get.map(_ ==> List(3, 2, 1))
-        //        _ <- Ns.eid.i.query.get.map(_ ==> List(1, 2, 3))
+        //        _ <- Ns.id.i.query.get.map(_ ==> List(1, 2, 3))
 
 
       } yield ()

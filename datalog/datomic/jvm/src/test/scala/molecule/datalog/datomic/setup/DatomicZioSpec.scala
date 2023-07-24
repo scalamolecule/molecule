@@ -26,7 +26,7 @@ trait DatomicZioSpec extends CoreTestZioSpec {
     )
     ZLayer.scoped(
       ZIO.fromFuture(
-        _ => DatomicPeer.recreateDbFromEdn(proxy)
+        _ => DatomicPeer.recreateDb(proxy)
       )
     )
   }

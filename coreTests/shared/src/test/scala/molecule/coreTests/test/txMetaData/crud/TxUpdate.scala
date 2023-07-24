@@ -15,10 +15,10 @@ trait TxUpdate extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
 
     "Update base and tx meta data" - types { implicit conn =>
       for {
-        eid <- Ns.int.Tx(Other.s_("meta")).insert(1).transact.map(_.eid)
+        id <- Ns.int.Tx(Other.s_("meta")).insert(1).transact.map(_.id)
         _ <- Ns.int.Tx(Other.s).query.get.map(_ ==> List((1, "meta")))
 
-        _ <- Ns(eid).int(2).Tx(Other.s("meta2")).update.transact
+        _ <- Ns(id).int(2).Tx(Other.s("meta2")).update.transact
         _ <- Ns.int.Tx(Other.s).query.get.map(_ ==> List((2, "meta2")))
       } yield ()
     }
@@ -28,23 +28,23 @@ trait TxUpdate extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
       for {
         // Initial entity with tx meta data
         txReport <- Ns.int(1).Tx(Other.s("meta")).save.transact
-        eid = txReport.eid
+        id = txReport.id
         tx = txReport.tx
         _ <- Ns.int.Tx(Other.s).query.get.map(_ ==> List((1, "meta")))
 
         // Update base entity data only
-        _ <- Ns(eid).int(2).update.transact
+        _ <- Ns(id).int(2).update.transact
         _ <- Ns.int.query.get.map(_ ==> List(2))
 
         // Note that the initial tx meta data is still tied to the first transaction entity
-        _ <- Other.eid(tx).s.query.get.map(_ ==> List((tx, "meta")))
+        _ <- Other.id(tx).s.query.get.map(_ ==> List((tx, "meta")))
 
         // OBS: The old tx meta data is no longer associated with the updated base entity.
         // transaction meta data is tied only to the transaction entity where it was created!
         _ <- Ns.int.Tx(Other.s).query.get.map(_ ==> Nil)
 
         // If we instead update both the base value(s) and tx meta data we'll get the expected result
-        _ <- Ns(eid).int(3).Tx(Other.s("meta3")).update.transact
+        _ <- Ns(id).int(3).Tx(Other.s("meta3")).update.transact
         _ <- Ns.int.Tx(Other.s).query.get.map(_ ==> List((3, "meta3")))
       } yield ()
     }
@@ -54,7 +54,7 @@ trait TxUpdate extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
       for {
         // Initial entity with tx meta data
         txReport <- Ns.int(1).Tx(Other.s("meta")).save.transact
-        eid = txReport.eid
+        id = txReport.id
         tx = txReport.tx
         _ <- Ns.int.Tx(Other.s).query.get.map(_ ==> List((1, "meta")))
 
@@ -62,8 +62,8 @@ trait TxUpdate extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
         _ <- Other(tx).s("meta2").update.transact
         _ <- Ns.int.Tx(Other.s).query.get.map(_.head ==> (1, "meta2"))
 
-        // Can't apply base eid without base attribute values too
-        _ <- Ns(eid).Tx(Other.s("meta3")).update.transact
+        // Can't apply base id without base attribute values too
+        _ <- Ns(id).Tx(Other.s("meta3")).update.transact
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Please apply the tx id to the namespace of tx meta data to be updated."
         }

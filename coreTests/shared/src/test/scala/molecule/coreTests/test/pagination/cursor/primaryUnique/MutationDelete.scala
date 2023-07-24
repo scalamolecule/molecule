@@ -20,7 +20,7 @@ trait MutationDelete extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsy
 
       "Delete row before" - unique { implicit conn =>
         for {
-          List(e1, e2, e3, e4) <- Unique.int.insert(1, 2, 3, 4).transact.map(_.eids)
+          List(e1, e2, e3, e4) <- Unique.int.insert(1, 2, 3, 4).transact.map(_.ids)
           c <- query.from("").limit(2).get.map { case (List(1, 2), c, true) => c }
 
           // Delete row before next page
@@ -33,7 +33,7 @@ trait MutationDelete extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsy
 
       "Delete row after" - unique { implicit conn =>
         for {
-          List(e1, e2, e3, e4) <- Unique.int.insert(1, 2, 3, 4).transact.map(_.eids)
+          List(e1, e2, e3, e4) <- Unique.int.insert(1, 2, 3, 4).transact.map(_.ids)
           c <- query.from("").limit(2).get.map { case (List(1, 2), c, true) => c }
 
           // Delete row after this page
@@ -50,7 +50,7 @@ trait MutationDelete extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsy
 
       "Delete row before" - unique { implicit conn =>
         for {
-          List(e1, e2, e3, e4) <- Unique.int.insert(1, 2, 3, 4).transact.map(_.eids)
+          List(e1, e2, e3, e4) <- Unique.int.insert(1, 2, 3, 4).transact.map(_.ids)
           c <- query.from("").limit(-2).get.map { case (List(3, 4), c, true) => c }
 
           // Delete row before next page (backwards)
@@ -63,7 +63,7 @@ trait MutationDelete extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsy
 
       "Delete row after" - unique { implicit conn =>
         for {
-          List(e1, e2, e3, e4) <- Unique.int.insert(1, 2, 3, 4).transact.map(_.eids)
+          List(e1, e2, e3, e4) <- Unique.int.insert(1, 2, 3, 4).transact.map(_.ids)
           c <- query.from("").limit(-2).get.map { case (List(3, 4), c, true) => c }
 
           // Delete row after this page (backwards)

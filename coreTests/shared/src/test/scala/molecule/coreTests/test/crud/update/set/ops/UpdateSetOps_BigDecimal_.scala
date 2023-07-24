@@ -16,23 +16,23 @@ trait UpdateSetOps_BigDecimal_ extends CoreTestSuite with ApiAsyncImplicits { se
 
     "apply (replace/add all)" - types { implicit conn =>
       for {
-        eid <- Ns.bigDecimals(Set(bigDecimal1, bigDecimal2)).save.transact.map(_.eid)
+        id <- Ns.bigDecimals(Set(bigDecimal1, bigDecimal2)).save.transact.map(_.id)
 
-        _ <- Ns(eid).bigDecimals(Set(bigDecimal3, bigDecimal4)).update.transact
+        _ <- Ns(id).bigDecimals(Set(bigDecimal3, bigDecimal4)).update.transact
         _ <- Ns.bigDecimals.query.get.map(_.head ==> Set(bigDecimal3, bigDecimal4))
 
         // Apply Seq of values
-        _ <- Ns(eid).bigDecimals(Set(bigDecimal4, bigDecimal5)).update.transact
+        _ <- Ns(id).bigDecimals(Set(bigDecimal4, bigDecimal5)).update.transact
         _ <- Ns.bigDecimals.query.get.map(_.head ==> Set(bigDecimal4, bigDecimal5))
 
         // Apply empty Seq of values (deleting all values!)
-        _ <- Ns(eid).bigDecimals(Seq.empty[BigDecimal]).update.transact
+        _ <- Ns(id).bigDecimals(Seq.empty[BigDecimal]).update.transact
         _ <- Ns.bigDecimals.query.get.map(_ ==> Nil)
 
-        _ <- Ns(eid).bigDecimals(Set(bigDecimal1, bigDecimal2)).update.transact
+        _ <- Ns(id).bigDecimals(Set(bigDecimal1, bigDecimal2)).update.transact
 
         // Delete all (apply no values)
-        _ <- Ns(eid).bigDecimals().update.transact
+        _ <- Ns(id).bigDecimals().update.transact
         _ <- Ns.bigDecimals.query.get.map(_ ==> Nil)
       } yield ()
     }
@@ -40,33 +40,33 @@ trait UpdateSetOps_BigDecimal_ extends CoreTestSuite with ApiAsyncImplicits { se
 
     "add" - types { implicit conn =>
       for {
-        eid <- Ns.bigDecimals(Set(bigDecimal1)).save.transact.map(_.eid)
+        id <- Ns.bigDecimals(Set(bigDecimal1)).save.transact.map(_.id)
 
         // Add value
-        _ <- Ns(eid).bigDecimals.add(bigDecimal2).update.transact
+        _ <- Ns(id).bigDecimals.add(bigDecimal2).update.transact
         _ <- Ns.bigDecimals.query.get.map(_.head ==> Set(bigDecimal1, bigDecimal2))
 
         // Add existing value (no effect)
-        _ <- Ns(eid).bigDecimals.add(bigDecimal2).update.transact
+        _ <- Ns(id).bigDecimals.add(bigDecimal2).update.transact
         _ <- Ns.bigDecimals.query.get.map(_.head ==> Set(bigDecimal1, bigDecimal2))
 
         // Add multiple values (vararg)
-        _ <- Ns(eid).bigDecimals.add(bigDecimal3, bigDecimal4).update.transact
+        _ <- Ns(id).bigDecimals.add(bigDecimal3, bigDecimal4).update.transact
         _ <- Ns.bigDecimals.query.get.map(_.head ==> Set(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4))
 
         // Add Iterable of values (existing values unaffected)
         // Seq
-        _ <- Ns(eid).bigDecimals.add(Seq(bigDecimal4, bigDecimal5)).update.transact
+        _ <- Ns(id).bigDecimals.add(Seq(bigDecimal4, bigDecimal5)).update.transact
         _ <- Ns.bigDecimals.query.get.map(_.head ==> Set(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4, bigDecimal5))
         // Set
-        _ <- Ns(eid).bigDecimals.add(Set(bigDecimal6)).update.transact
+        _ <- Ns(id).bigDecimals.add(Set(bigDecimal6)).update.transact
         _ <- Ns.bigDecimals.query.get.map(_.head ==> Set(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4, bigDecimal5, bigDecimal6))
         // Iterable
-        _ <- Ns(eid).bigDecimals.add(Iterable(bigDecimal7)).update.transact
+        _ <- Ns(id).bigDecimals.add(Iterable(bigDecimal7)).update.transact
         _ <- Ns.bigDecimals.query.get.map(_.head ==> Set(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4, bigDecimal5, bigDecimal6, bigDecimal7))
 
         // Add empty Seq of values (no effect)
-        _ <- Ns(eid).bigDecimals.add(Seq.empty[BigDecimal]).update.transact
+        _ <- Ns(id).bigDecimals.add(Seq.empty[BigDecimal]).update.transact
         _ <- Ns.bigDecimals.query.get.map(_.head ==> Set(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4, bigDecimal5, bigDecimal6, bigDecimal7))
       } yield ()
     }
@@ -74,30 +74,30 @@ trait UpdateSetOps_BigDecimal_ extends CoreTestSuite with ApiAsyncImplicits { se
 
     "swap" - types { implicit conn =>
       for {
-        eid <- Ns.bigDecimals(Set(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4, bigDecimal5, bigDecimal6)).save.transact.map(_.eid)
+        id <- Ns.bigDecimals(Set(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4, bigDecimal5, bigDecimal6)).save.transact.map(_.id)
 
         // Replace value
-        _ <- Ns(eid).bigDecimals.swap(bigDecimal6 -> bigDecimal8).update.transact
+        _ <- Ns(id).bigDecimals.swap(bigDecimal6 -> bigDecimal8).update.transact
         _ <- Ns.bigDecimals.query.get.map(_.head ==> Set(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4, bigDecimal5, bigDecimal8))
 
         // Replacing value to existing value simply deletes it
-        _ <- Ns(eid).bigDecimals.swap(bigDecimal5 -> bigDecimal8).update.transact
+        _ <- Ns(id).bigDecimals.swap(bigDecimal5 -> bigDecimal8).update.transact
         _ <- Ns.bigDecimals.query.get.map(_.head ==> Set(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4, bigDecimal8))
 
         // Replace multiple values (vararg)
-        _ <- Ns(eid).bigDecimals.swap(bigDecimal3 -> bigDecimal6, bigDecimal4 -> bigDecimal7).update.transact
+        _ <- Ns(id).bigDecimals.swap(bigDecimal3 -> bigDecimal6, bigDecimal4 -> bigDecimal7).update.transact
         _ <- Ns.bigDecimals.query.get.map(_.head ==> Set(bigDecimal1, bigDecimal2, bigDecimal6, bigDecimal7, bigDecimal8))
 
         // Missing old value has no effect. The new value is inserted (upsert semantics)
-        _ <- Ns(eid).bigDecimals.swap(bigDecimal4 -> bigDecimal9).update.transact
+        _ <- Ns(id).bigDecimals.swap(bigDecimal4 -> bigDecimal9).update.transact
         _ <- Ns.bigDecimals.query.get.map(_.head ==> Set(bigDecimal1, bigDecimal2, bigDecimal6, bigDecimal7, bigDecimal8, bigDecimal9))
 
         // Replace with Seq of oldValue->newValue pairs
-        _ <- Ns(eid).bigDecimals.swap(Seq(bigDecimal2 -> bigDecimal5)).update.transact
+        _ <- Ns(id).bigDecimals.swap(Seq(bigDecimal2 -> bigDecimal5)).update.transact
         _ <- Ns.bigDecimals.query.get.map(_.head ==> Set(bigDecimal1, bigDecimal5, bigDecimal6, bigDecimal7, bigDecimal8, bigDecimal9))
 
         // Replacing with empty Seq of oldValue->newValue pairs has no effect
-        _ <- Ns(eid).bigDecimals.swap(Seq.empty[(BigDecimal, BigDecimal)]).update.transact
+        _ <- Ns(id).bigDecimals.swap(Seq.empty[(BigDecimal, BigDecimal)]).update.transact
         _ <- Ns.bigDecimals.query.get.map(_.head ==> Set(bigDecimal1, bigDecimal5, bigDecimal6, bigDecimal7, bigDecimal8, bigDecimal9))
 
 
@@ -117,34 +117,34 @@ trait UpdateSetOps_BigDecimal_ extends CoreTestSuite with ApiAsyncImplicits { se
 
     "remove" - types { implicit conn =>
       for {
-        eid <- Ns.bigDecimals(Set(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4, bigDecimal5, bigDecimal6)).save.transact.map(_.eid)
+        id <- Ns.bigDecimals(Set(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4, bigDecimal5, bigDecimal6)).save.transact.map(_.id)
 
         // Remove value
-        _ <- Ns(eid).bigDecimals.remove(bigDecimal6).update.transact
+        _ <- Ns(id).bigDecimals.remove(bigDecimal6).update.transact
         _ <- Ns.bigDecimals.query.get.map(_.head ==> Set(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4, bigDecimal5))
 
         // Removing non-existing value has no effect
-        _ <- Ns(eid).bigDecimals.remove(bigDecimal7).update.transact
+        _ <- Ns(id).bigDecimals.remove(bigDecimal7).update.transact
         _ <- Ns.bigDecimals.query.get.map(_.head ==> Set(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4, bigDecimal5))
 
         // Removing duplicate values removes the distinct value
-        _ <- Ns(eid).bigDecimals.remove(bigDecimal5, bigDecimal5).update.transact
+        _ <- Ns(id).bigDecimals.remove(bigDecimal5, bigDecimal5).update.transact
         _ <- Ns.bigDecimals.query.get.map(_.head ==> Set(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4))
 
         // Remove multiple values (vararg)
-        _ <- Ns(eid).bigDecimals.remove(bigDecimal3, bigDecimal4).update.transact
+        _ <- Ns(id).bigDecimals.remove(bigDecimal3, bigDecimal4).update.transact
         _ <- Ns.bigDecimals.query.get.map(_.head ==> Set(bigDecimal1, bigDecimal2))
 
         // Remove Seq of values
-        _ <- Ns(eid).bigDecimals.remove(Seq(bigDecimal2)).update.transact
+        _ <- Ns(id).bigDecimals.remove(Seq(bigDecimal2)).update.transact
         _ <- Ns.bigDecimals.query.get.map(_.head ==> Set(bigDecimal1))
 
         // Removing empty Seq of values has no effect
-        _ <- Ns(eid).bigDecimals.remove(Seq.empty[BigDecimal]).update.transact
+        _ <- Ns(id).bigDecimals.remove(Seq.empty[BigDecimal]).update.transact
         _ <- Ns.bigDecimals.query.get.map(_.head ==> Set(bigDecimal1))
 
         // Removing all elements is like deleting the attribute
-        _ <- Ns(eid).bigDecimals.remove(Seq(bigDecimal1)).update.transact
+        _ <- Ns(id).bigDecimals.remove(Seq(bigDecimal1)).update.transact
         _ <- Ns.bigDecimals.query.get.map(_ ==> Nil)
       } yield ()
     }

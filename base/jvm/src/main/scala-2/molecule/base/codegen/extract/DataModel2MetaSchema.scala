@@ -1,7 +1,7 @@
 package molecule.base.codegen.extract
 
 import java.nio.file.{Files, Paths}
-import molecule.base.ast.SchemaAST._
+import molecule.base.ast.SchemaAST.{CardOne, MetaNs, _}
 import molecule.base.error.ModelError
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
@@ -24,7 +24,7 @@ class DataModel2MetaSchema(filePath: String, pkgPath: String, scalaVersion: Stri
   }
   private val tree        = dialect.parse[Source].get
 
-  private val reservedAttrNames = List(
+  private      val reservedAttrNames   = List(
     // Actions
     "save", "insert", "update", "delete",
 
@@ -35,9 +35,33 @@ class DataModel2MetaSchema(filePath: String, pkgPath: String, scalaVersion: Stri
     "apply", "not", "add", "swap", "remove",
 
     // Generic attributes
-    //    "a", "e", "v", "t", "tx", "txInstant", "op",
-    "eid", "txId", "txDate",
+    "id", "tx",
+
+    // Model elements access
+    "elements"
   )
+  private      val reservedTxAttrNames = List(
+    "tx",
+    "id",
+    "created",
+    "updated",
+    //    "deleted",
+    //    "ns",
+    //    "nsId",
+    //    "nss",
+    //    "attrs",
+  )
+  private      val standardTxMetaAttrs = Seq(
+    MetaAttr("id", CardOne, "Long", None, Nil, Some("Transaction id"), None, Nil, Nil, Nil),
+    MetaAttr("created", CardOne, "Long", None, Nil, Some("Creation time"), None, Nil, Nil, Nil),
+    MetaAttr("updated", CardOne, "Long", None, Nil, Some("Update time"), None, Nil, Nil, Nil),
+    //    MetaAttr("deleted", CardOne, "Long", None, Nil, Some("Deletion time"), None, Nil, Nil, Nil),
+    //    MetaAttr("ns", CardOne, "Long", None, Nil, Some("First namespaces involved (could relate to other nss)"), None, Nil, Nil, Nil),
+    //    MetaAttr("nsId", CardOne, "Long", None, Nil, Some("Id of initial namespace row involved"), None, Nil, Nil, Nil),
+    //    MetaAttr("nss", CardOne, "Long", None, Nil, Some("Namespaces involved"), None, Nil, Nil, Nil),
+    //    MetaAttr("attrs", CardOne, "Long", None, Nil, Some("Attributes involved"), None, Nil, Nil, Nil),
+  )
+  private lazy val standardTxMetaNs    = MetaNs("Tx", standardTxMetaAttrs)
 
   private var backRefs   = Map.empty[String, Seq[String]]
   private val valueAttrs = ListBuffer.empty[String]
@@ -75,26 +99,47 @@ class DataModel2MetaSchema(filePath: String, pkgPath: String, scalaVersion: Stri
   }
 
   def schema: MetaSchema = {
-    val parts = body.head match {
-      case q"object $_ { ..$_ }" => body.map {
-        case q"object $part { ..$nss }" => MetaPart(part.toString, getNss(part.toString + "_", nss))
-        case q"trait $ns $template"     => noMix()
+    val hasPartitions = body.exists {
+      case q"object $_ { ..$_ }" => true
+      case _                     => false
+    }
+    val parts         = if (hasPartitions) {
+      var hasCustomTxPartition = false
+      val parts1               = body.map {
+        case q"trait Tx extends TxBase { ..$txAttrs }" =>
+          hasCustomTxPartition = true
+          // Place Tx namespace in no-name partition
+          MetaPart("", Seq(getTxNs(txAttrs)))
+
+        case q"object $part { ..$nss }" =>
+          MetaPart(part.toString, getNss(part.toString + "_", nss))
+
+        case q"trait $ns $template" => noMix()
       }
-      case _                     => Seq(MetaPart("", getNss("", body)))
+      if (hasCustomTxPartition) parts1 else MetaPart("", Seq(standardTxMetaNs)) +: parts1
+    } else {
+      Seq(MetaPart("", getNss("", body)))
     }
     checkCircularMandatoryRefs(parts)
     val parts1 = addBackRefs(parts)
-    MetaSchema(pkg, domain, maxArity, parts1)
+
+    // Add one/many refs in Tx to all other namespaces
+    val (txRefsOne, txRefsMany) = (for {
+      part <- parts1
+      ns <- part.nss if ns.ns != "Tx"
+    } yield (
+      MetaAttr("one" + ns.ns, CardOne, "Long", Some(ns.ns)),
+      MetaAttr("many" + ns.ns, CardSet, "Long", Some(ns.ns))
+    )).unzip
+
+    val firstPart = parts1.head
+    val txNs      = firstPart.nss.head
+    val txNs1     = txNs.copy(attrs = txNs.attrs ++ txRefsOne ++ txRefsMany)
+    val parts2    = firstPart.copy(nss = txNs1 +: firstPart.nss.tail) +: parts1.tail
+
+    MetaSchema(pkg, domain, maxArity, parts2)
   }
 
-  private def addBackRefs(parts: Seq[MetaPart]): Seq[MetaPart] = {
-    parts.map { part =>
-      val nss1 = part.nss.map { ns =>
-        ns.copy(backRefNss = backRefs.getOrElse(ns.ns, Nil).distinct.sorted)
-      }
-      part.copy(nss = nss1)
-    }
-  }
   private def checkCircularMandatoryRefs(parts: Seq[MetaPart]): Unit = {
     val mappings: Map[String, Seq[(String, String)]] = parts
       .flatMap(_.nss
@@ -120,7 +165,6 @@ class DataModel2MetaSchema(filePath: String, pkgPath: String, scalaVersion: Stri
         }
       }
     }
-
     mappings.foreach {
       case (ns, refs) => refs.foreach {
         case (refAttr, refNs) =>
@@ -130,69 +174,123 @@ class DataModel2MetaSchema(filePath: String, pkgPath: String, scalaVersion: Stri
     }
   }
 
-  private def getNss(partPrefix: String, nss: Seq[Stat]): Seq[MetaNs] = nss.map {
-    case q"trait $nsTpe { ..$attrs }" =>
-      val ns = nsTpe.toString
-      if (ns.head.isLower) {
-        err(s"Please change namespace trait name `$ns` to start with upper case letter.")
+  private def addBackRefs(parts: Seq[MetaPart]): Seq[MetaPart] = {
+    parts.map { part =>
+      val nss1 = part.nss.map { ns =>
+        ns.copy(backRefNss = backRefs.getOrElse(ns.ns, Nil).distinct.sorted)
       }
-      if (attrs.isEmpty) {
-        err(s"Please define attribute(s) in namespace $ns")
-      }
-      val metaAttrs      = getAttrs(ns, attrs)
-      val mandatoryAttrs = metaAttrs.collect {
-        case a if a.refNs.isEmpty && a.options.contains("mandatory") => a.attr
-      }
-      val mandatoryRefs  = metaAttrs.collect {
-        case a if a.refNs.nonEmpty && a.options.contains("mandatory") => a.attr -> a.refNs.get
-      }
+      part.copy(nss = nss1)
+    }
+  }
 
-      // Merge required groups with common attributes
-      val reqGroups       = metaAttrs.collect {
-        case a if a.requiredAttrs.nonEmpty => a.requiredAttrs
-      }
-      val reqGroupsMerged = reqGroups.map { group =>
-        reqGroups.flatMap {
-          case otherGroup if otherGroup.intersect(group).nonEmpty => (otherGroup ++ group).distinct.sorted
-          case _                                                  => group
-        }.distinct.sorted
-      }.distinct
+  private def getNss(partPrefix: String, nss: Seq[Stat]): Seq[MetaNs] = {
+    var hasTxNs = false
+    val metaNss = nss.map {
+      case q"trait Tx extends TxBase { ..$txAttrs }" =>
+        if (partPrefix.isEmpty) {
+          hasTxNs = true
+          getTxNs(txAttrs)
+        } else {
+          err("Please define custom Tx namespace trait first in the model (not inside object)")
+        }
+      case q"trait $nsTpe { ..$attrs }"              => getNs(partPrefix, nsTpe, attrs)
+      case q"object $o { ..$_ }"                     => noMix()
+      case other                                     => unexpected(other)
+    }
+    if (!hasTxNs && partPrefix.isEmpty) standardTxMetaNs +: metaNss else metaNss
+  }
 
-      //      metaAttrs.foreach(println)
-      //      println("--------")
-      //      reqGroups.foreach(println)
-      //      println("--------")
-      //      reqGroupsMerged.foreach(println)
+  private def getNs(partPrefix: String, nsTpe: Name, attrs: Seq[Stat]): MetaNs = {
+    val ns = nsTpe.toString
+    if (ns.head.isLower) {
+      err(s"Please change namespace trait name `$ns` to start with upper case letter.")
+    }
+    if (attrs.isEmpty) {
+      err(s"Please define attribute(s) in namespace $ns")
+    }
+    val metaAttrs      = getAttrs(ns, attrs)
+    val mandatoryAttrs = metaAttrs.collect {
+      case a if a.refNs.isEmpty && a.options.contains("mandatory") => a.attr
+    }
+    val mandatoryRefs  = metaAttrs.collect {
+      case a if a.refNs.nonEmpty && a.options.contains("mandatory") => a.attr -> a.refNs.get
+    }
 
-      val reqAttrs   = reqGroupsMerged.flatten
-      val metaAttrs1 = metaAttrs.map { a =>
-        //        val attr = ns + "." + a.attr
-        val attr = a.attr
-        if (reqAttrs.contains(attr)) {
-          val otherAttrs = reqGroupsMerged.collectFirst {
-            case group if group.contains(attr) => group.filterNot(_ == attr)
-          }
-          a.copy(requiredAttrs = otherAttrs.get)
-        } else a
-      }
+    // Merge required groups with common attributes
+    val reqGroups       = metaAttrs.collect {
+      case a if a.requiredAttrs.nonEmpty => a.requiredAttrs
+    }
+    val reqGroupsMerged = reqGroups.map { group =>
+      reqGroups.flatMap {
+        case otherGroup if otherGroup.intersect(group).nonEmpty => (otherGroup ++ group).distinct.sorted
+        case _                                                  => group
+      }.distinct.sorted
+    }.distinct
 
-      MetaNs(partPrefix + ns, metaAttrs1, Nil, mandatoryAttrs, mandatoryRefs)
-    case q"object $o { ..$_ }"        => noMix()
-    case other                        => unexpected(other)
+    val reqAttrs     = reqGroupsMerged.flatten
+    val genericAttrs = Seq(
+      MetaAttr("id", CardOne, "Long"),
+      MetaAttr("tx", CardOne, "Long", Some("Tx")),
+    )
+    val metaAttrs1   = genericAttrs ++ metaAttrs.map { a =>
+      val attr = a.attr
+      if (reqAttrs.contains(attr)) {
+        val otherAttrs = reqGroupsMerged.collectFirst {
+          case group if group.contains(attr) => group.filterNot(_ == attr)
+        }
+        a.copy(requiredAttrs = otherAttrs.get)
+      } else a
+    }
+
+    MetaNs(partPrefix + ns, metaAttrs1, Nil, mandatoryAttrs, mandatoryRefs)
+  }
+
+  private def getTxNs(txAttrs: Seq[Stat]): MetaNs = {
+    if (txAttrs.isEmpty) {
+      err(s"Please define custom attribute(s) in generic Tx namespace (or omit it overall if standard attributes are enough)")
+    }
+    val customTxAttrs = getAttrs("Tx", txAttrs)
+    customTxAttrs.foreach {
+      case a if a.options.nonEmpty
+        || a.alias.nonEmpty
+        || a.requiredAttrs.nonEmpty
+        || a.valueAttrs.nonEmpty
+        || a.validations.nonEmpty =>
+        err("Generic Tx attributes can't have options/required/valueAttrs/validations defined.")
+
+      case _ => ()
+    }
+
+    MetaNs("Tx", standardTxMetaAttrs ++ customTxAttrs, Nil, Nil, Nil)
   }
 
   private def getAttrs(ns: String, attrs: Seq[Stat]): Seq[MetaAttr] = attrs.map {
     case q"val $attr = $defs" =>
       val a = attr.toString
+      if (ns == "Tx" && reservedTxAttrNames.contains(a)) {
+        err(
+          s"Please change attribute name Tx.$a to avoid colliding with reserved Tx attribute names:\n  " +
+            reservedTxAttrNames.mkString("\n  ")
+        )
+      }
       if (reservedAttrNames.contains(a)) {
         err(
-          s"Please change attribute name $ns.$a to avoid colliding with reserved molecule names:\n  " +
+          s"Please change attribute name $ns.$a to avoid colliding with reserved attribute names:\n  " +
             reservedAttrNames.mkString("\n  ")
         )
       }
       acc(ns, defs, MetaAttr(a, CardOne, ""))
 
     case other => unexpected(other)
+  }
+
+  private def saveDescr(ns: String, prev: Tree, a: MetaAttr, attr: String, s: String) = {
+    if (s.isEmpty)
+      err(s"Can't apply empty String as description option for attribute $attr")
+    else if (s.contains("\""))
+      err(s"Description option for attribute $attr can't contain quotation marks.")
+    else
+      acc(ns, prev, a.copy(description = Some(s)))
   }
 
   @tailrec
@@ -207,55 +305,82 @@ class DataModel2MetaSchema(filePath: String, pkgPath: String, scalaVersion: Stri
       case q"$prev.owner"          => acc(ns, prev, a.copy(options = a.options :+ "owner"))
       case q"$prev.mandatory"      => acc(ns, prev, a.copy(options = a.options :+ "mandatory"))
 
-      case q"$prev.description(${Lit.String(s)})" =>
-        if (s.isEmpty)
-          err(s"Can't apply empty String as description option for attribute $ns.$a")
-        else if (s.contains("\""))
-          err(s"Description option for attribute $ns.$a can't contain quotation marks.")
-        else
-          acc(ns, prev, a.copy(description = Some(s)))
+//      case q"$prev.index(${Lit.String(s)})"          => acc(ns, prev, a.copy(options = a.options :+ "index", description = Some(s)))
+//      case q"$prev.noHistory(${Lit.String(s)})"      => acc(ns, prev, a.copy(options = a.options :+ "noHistory", description = Some(s)))
+//      case q"$prev.uniqueIdentity(${Lit.String(s)})" => acc(ns, prev, a.copy(options = a.options :+ "uniqueIdentity", description = Some(s)))
+//      case q"$prev.unique(${Lit.String(s)})"         => acc(ns, prev, a.copy(options = a.options :+ "unique", description = Some(s)))
+//      case q"$prev.fulltext(${Lit.String(s)})"       => acc(ns, prev, a.copy(options = a.options :+ "fulltext", description = Some(s)))
+//      case q"$prev.owner(${Lit.String(s)})"          => acc(ns, prev, a.copy(options = a.options :+ "owner", description = Some(s)))
+//      case q"$prev.mandatory(${Lit.String(s)})"      => acc(ns, prev, a.copy(options = a.options :+ "mandatory", description = Some(s)))
+
+      case q"$prev.descr(${Lit.String(s)})" => saveDescr(ns, prev, a, attr, s)
+      case q"$prev.apply(${Lit.String(s)})" => saveDescr(ns, prev, a, attr, s)
 
       case q"$prev.alias(${Lit.String(s)})" => s match {
         case r"([a-zA-Z0-9]+)$alias" =>
           if (reservedAttrNames.contains(alias)) {
             err(
-              s"Alias `$alias` for attribute $ns.$a can't be any of the reserved molecule attribute names:\n  " +
+              s"Alias `$alias` for attribute $attr can't be any of the reserved molecule attribute names:\n  " +
                 reservedAttrNames.mkString("\n  ")
             )
           } else {
             acc(ns, prev, a.copy(alias = Some(alias)))
           }
         case other                   =>
-          err(s"Invalid alias for attribute $ns.$a: " + other)
+          err(s"Invalid alias for attribute $attr: " + other)
       }
 
-      case q"oneString"                         => a.copy(card = CardOne, baseTpe = "String")
-      case q"oneChar"                           => a.copy(card = CardOne, baseTpe = "Char")
-      case q"oneByte"                           => a.copy(card = CardOne, baseTpe = "Byte")
-      case q"oneShort"                          => a.copy(card = CardOne, baseTpe = "Short")
-      case q"oneInt"                            => a.copy(card = CardOne, baseTpe = "Int")
-      case q"oneLong"                           => a.copy(card = CardOne, baseTpe = "Long")
-      case q"oneFloat"                          => a.copy(card = CardOne, baseTpe = "Float")
-      case q"oneDouble"                         => a.copy(card = CardOne, baseTpe = "Double")
-      case q"oneBoolean"                        => a.copy(card = CardOne, baseTpe = "Boolean")
-      case q"oneBigInt"                         => a.copy(card = CardOne, baseTpe = "BigInt")
-      case q"oneBigDecimal"                     => a.copy(card = CardOne, baseTpe = "BigDecimal")
+      case q"oneString"     => a.copy(card = CardOne, baseTpe = "String")
+      case q"oneChar"       => a.copy(card = CardOne, baseTpe = "Char")
+      case q"oneByte"       => a.copy(card = CardOne, baseTpe = "Byte")
+      case q"oneShort"      => a.copy(card = CardOne, baseTpe = "Short")
+      case q"oneInt"        => a.copy(card = CardOne, baseTpe = "Int")
+      case q"oneLong"       => a.copy(card = CardOne, baseTpe = "Long")
+      case q"oneFloat"      => a.copy(card = CardOne, baseTpe = "Float")
+      case q"oneDouble"     => a.copy(card = CardOne, baseTpe = "Double")
+      case q"oneBoolean"    => a.copy(card = CardOne, baseTpe = "Boolean")
+      case q"oneBigInt"     => a.copy(card = CardOne, baseTpe = "BigInt")
+      case q"oneBigDecimal" => a.copy(card = CardOne, baseTpe = "BigDecimal")
+      case q"oneDate"       => a.copy(card = CardOne, baseTpe = "Date")
+      case q"oneUUID"       => a.copy(card = CardOne, baseTpe = "UUID")
+      case q"oneURI"        => a.copy(card = CardOne, baseTpe = "URI")
+
       case q"oneBigDecimal($precision, $scale)" => a.copy(
         card = CardOne,
         baseTpe = "BigDecimal",
         options = a.options :+ s"$precision,$scale"
       )
-      case q"oneDate"                           => a.copy(card = CardOne, baseTpe = "Date")
-      case q"oneUUID"                           => a.copy(card = CardOne, baseTpe = "UUID")
-      case q"oneURI"                            => a.copy(card = CardOne, baseTpe = "URI")
+
+      case q"oneString(${Lit.String(s)})"     => a.copy(card = CardOne, baseTpe = "String", description = Some(s))
+      case q"oneChar(${Lit.String(s)})"       => a.copy(card = CardOne, baseTpe = "Char", description = Some(s))
+      case q"oneByte(${Lit.String(s)})"       => a.copy(card = CardOne, baseTpe = "Byte", description = Some(s))
+      case q"oneShort(${Lit.String(s)})"      => a.copy(card = CardOne, baseTpe = "Short", description = Some(s))
+      case q"oneInt(${Lit.String(s)})"        => a.copy(card = CardOne, baseTpe = "Int", description = Some(s))
+      case q"oneLong(${Lit.String(s)})"       => a.copy(card = CardOne, baseTpe = "Long", description = Some(s))
+      case q"oneFloat(${Lit.String(s)})"      => a.copy(card = CardOne, baseTpe = "Float", description = Some(s))
+      case q"oneDouble(${Lit.String(s)})"     => a.copy(card = CardOne, baseTpe = "Double", description = Some(s))
+      case q"oneBoolean(${Lit.String(s)})"    => a.copy(card = CardOne, baseTpe = "Boolean", description = Some(s))
+      case q"oneBigInt(${Lit.String(s)})"     => a.copy(card = CardOne, baseTpe = "BigInt", description = Some(s))
+      case q"oneBigDecimal(${Lit.String(s)})" => a.copy(card = CardOne, baseTpe = "BigDecimal", description = Some(s))
+      case q"oneDate(${Lit.String(s)})"       => a.copy(card = CardOne, baseTpe = "Date", description = Some(s))
+      case q"oneUUID(${Lit.String(s)})"       => a.copy(card = CardOne, baseTpe = "UUID", description = Some(s))
+      case q"oneURI(${Lit.String(s)})"        => a.copy(card = CardOne, baseTpe = "URI", description = Some(s))
 
       case q"one[$refNs]" =>
         addBackRef(ns, refNs.toString)
         a.copy(card = CardOne, baseTpe = "Long", refNs = Some(refNs.toString.replace('.', '_')))
 
+      case q"one[$refNs](${Lit.String(s)})" =>
+        addBackRef(ns, refNs.toString)
+        a.copy(card = CardOne, baseTpe = "Long", refNs = Some(refNs.toString.replace('.', '_')), description = Some(s))
+
       case q"many[$refNs]" =>
         addBackRef(ns, refNs.toString)
         a.copy(card = CardSet, baseTpe = "Long", refNs = Some(refNs.toString.replace('.', '_')))
+
+      case q"many[$refNs](${Lit.String(s)})" =>
+        addBackRef(ns, refNs.toString)
+        a.copy(card = CardSet, baseTpe = "Long", refNs = Some(refNs.toString.replace('.', '_')), description = Some(s))
 
       case q"setString"     => a.copy(card = CardSet, baseTpe = "String")
       case q"setChar"       => a.copy(card = CardSet, baseTpe = "Char")
@@ -271,6 +396,21 @@ class DataModel2MetaSchema(filePath: String, pkgPath: String, scalaVersion: Stri
       case q"setDate"       => a.copy(card = CardSet, baseTpe = "Date")
       case q"setUUID"       => a.copy(card = CardSet, baseTpe = "UUID")
       case q"setURI"        => a.copy(card = CardSet, baseTpe = "URI")
+
+      case q"setString(${Lit.String(s)})"     => a.copy(card = CardSet, baseTpe = "String", description = Some(s))
+      case q"setChar(${Lit.String(s)})"       => a.copy(card = CardSet, baseTpe = "Char", description = Some(s))
+      case q"setByte(${Lit.String(s)})"       => a.copy(card = CardSet, baseTpe = "Byte", description = Some(s))
+      case q"setShort(${Lit.String(s)})"      => a.copy(card = CardSet, baseTpe = "Short", description = Some(s))
+      case q"setInt(${Lit.String(s)})"        => a.copy(card = CardSet, baseTpe = "Int", description = Some(s))
+      case q"setLong(${Lit.String(s)})"       => a.copy(card = CardSet, baseTpe = "Long", description = Some(s))
+      case q"setFloat(${Lit.String(s)})"      => a.copy(card = CardSet, baseTpe = "Float", description = Some(s))
+      case q"setDouble(${Lit.String(s)})"     => a.copy(card = CardSet, baseTpe = "Double", description = Some(s))
+      case q"setBoolean(${Lit.String(s)})"    => a.copy(card = CardSet, baseTpe = "Boolean", description = Some(s))
+      case q"setBigInt(${Lit.String(s)})"     => a.copy(card = CardSet, baseTpe = "BigInt", description = Some(s))
+      case q"setBigDecimal(${Lit.String(s)})" => a.copy(card = CardSet, baseTpe = "BigDecimal", description = Some(s))
+      case q"setDate(${Lit.String(s)})"       => a.copy(card = CardSet, baseTpe = "Date", description = Some(s))
+      case q"setUUID(${Lit.String(s)})"       => a.copy(card = CardSet, baseTpe = "UUID", description = Some(s))
+      case q"setURI(${Lit.String(s)})"        => a.copy(card = CardSet, baseTpe = "URI", description = Some(s))
 
 
       // Validations ................................................

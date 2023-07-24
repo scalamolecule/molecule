@@ -11,8 +11,8 @@ object Partitions extends DataModel(3) {
       val ref1   = one[Ref1]
     }
     trait Ref1 {
-      val str1 = oneString.description("foo")
-      val int1 = oneInt.unique.description("bar").alias("hej")
+      val str1 = oneString.descr("foo")
+      val int1 = oneInt.unique.descr("bar").alias("hej")
     }
   }
 
@@ -23,8 +23,8 @@ object Partitions extends DataModel(3) {
       val ref1   = one[Ref1]
     }
     trait Ref1 {
-      val str1 = oneString.description("foo")
-      val int1 = oneInt.unique.description("bar").alias("hej")
+      val str1 = oneString.descr("foo")
+      val int1 = oneInt.unique.descr("bar").alias("hej")
     }
   }
 }

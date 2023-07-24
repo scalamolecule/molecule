@@ -131,7 +131,8 @@ trait DatomicSpiAsync
   }
 
   override def update_inspect(update: Update)(implicit conn: Conn, ec: EC): Future[Unit] = {
-    printInspectTx("UPDATE", update.elements, update_getStmts(update, conn.asInstanceOf[DatomicConn_JVM]))
+    val action = if (update.isUpsert) "UPSERT" else "UPDATE"
+    printInspectTx(action, update.elements, update_getStmts(update, conn.asInstanceOf[DatomicConn_JVM]))
   }
 
   private def update_getStmts(update: Update, conn: DatomicConn_JVM): Data = {

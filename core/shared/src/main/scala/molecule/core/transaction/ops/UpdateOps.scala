@@ -7,7 +7,7 @@ import molecule.core.transaction.Action2Data
 
 trait UpdateOps extends Action2Data {
 
-  protected def uniqueEids(
+  protected def uniqueIds(
     filterAttr: AttrOneTac,
     ns: String,
     attr: String

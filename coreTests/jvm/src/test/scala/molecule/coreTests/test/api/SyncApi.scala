@@ -18,7 +18,7 @@ trait SyncApi extends CoreTestSuite with ApiSyncImplicits { self: SpiSync =>
     "Molecule synchronous api" - {
 
       "Crud actions" - types { implicit conn =>
-        val List(a, b) = Ns.int.insert(1, 2).transact.eids
+        val List(a, b) = Ns.int.insert(1, 2).transact.ids
         Ns.int(3).save.transact
         Ns.int.query.get ==> List(1, 2, 3)
         Ns(a).int(10).update.transact
@@ -49,9 +49,9 @@ trait SyncApi extends CoreTestSuite with ApiSyncImplicits { self: SpiSync =>
                  |""".stripMargin
         }
 
-        val eid = Type.string("c").save.transact.eids.head
+        val id = Type.string("c").save.transact.ids.head
         intercept[ValidationErrors](
-          Type(eid).string("a").update.transact
+          Type(id).string("a").update.transact
         ) match {
           case ValidationErrors(errorMap) =>
             errorMap.head._2.head ==>
@@ -63,7 +63,7 @@ trait SyncApi extends CoreTestSuite with ApiSyncImplicits { self: SpiSync =>
 
 
       "Inspection" - types { implicit conn =>
-        val List(a, b) = Ns.int.insert(1, 2).transact.eids // Need data for update and delete
+        val List(a, b) = Ns.int.insert(1, 2).transact.ids // Need data for update and delete
         Ns.int.insert(1, 2).inspect
         Ns.int(3).save.inspect
         Ns.int.query.inspect

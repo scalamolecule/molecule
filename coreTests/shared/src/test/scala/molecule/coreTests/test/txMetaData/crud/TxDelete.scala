@@ -19,12 +19,12 @@ trait TxDelete extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
         txReport <- Ns.int(1).Tx(Other.i_(7)).save.transact
 
         // A base entity id is created.
-        List(eid) = txReport.eids
-        _ <- Ns.eid(eid).int.query.get.map(_.head ==> (eid, 1))
+        List(id) = txReport.ids
+        _ <- Ns.id(id).int.query.get.map(_.head ==> (id, 1))
 
         // The tx meta data is tied to the transaction id
         tx = txReport.tx
-        _ <- Other.eid(tx).i.query.get.map(_.head ==> (tx, 7))
+        _ <- Other.id(tx).i.query.get.map(_.head ==> (tx, 7))
 
         // Since the base entity is tied to the transaction, we can query entity with tx meta data
         _ <- Ns.int.Tx(Other.i).query.get.map(_.head ==> (1, 7))
@@ -36,7 +36,7 @@ trait TxDelete extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
         _ <- Other.i.query.get.map(_.head ==> 7)
 
         // Now delete the base entity
-        _ <- Ns(eid).delete.transact
+        _ <- Ns(id).delete.transact
 
         // The entity is gone
         _ <- Ns.int.query.get.map(_ ==> Nil)
@@ -45,7 +45,7 @@ trait TxDelete extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
         // The tx meta data itself is not deleted though since it's tied
         // to the initial transaction entity that still exists.
         _ <- Other.i.query.get.map(_.head ==> 7)
-        _ <- Other.eid(tx).i.query.get.map(_.head ==> (tx, 7))
+        _ <- Other.id(tx).i.query.get.map(_.head ==> (tx, 7))
 
         // We cannot delete a transaction entity
         _ <- Other(tx).delete.transact

@@ -13,12 +13,12 @@ import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
 
-trait DatomicTxBase_JVM extends DatomicDataType_JVM with ModelUtils {
+trait DatomicTxMetaData_JVM extends DatomicDataType_JVM with ModelUtils {
 
-  protected def initTxBase(elements: List[Element], eidIndex: Int = 0): Unit = {
+  protected def initTxBase(elements: List[Element], idIndex: Int = 0): Unit = {
     nsFull = getInitialNs(elements)
     part = fns.partNs(nsFull).head
-    lowest = eidIndex
+    lowest = idIndex
   }
 
   // Accumulate java insertion data
@@ -73,10 +73,10 @@ trait DatomicTxBase_JVM extends DatomicDataType_JVM with ModelUtils {
     addStmt.add(v)
     stmts.add(addStmt)
   }
-  protected def addRetractEntityStmt(eid: AnyRef) = {
+  protected def addRetractEntityStmt(id: AnyRef) = {
     val stmt = new jArrayList[AnyRef](2)
     stmt.add(retractEntity)
-    stmt.add(eid)
+    stmt.add(id)
     stmts.add(stmt)
   }
 
@@ -108,7 +108,7 @@ trait DatomicTxBase_JVM extends DatomicDataType_JVM with ModelUtils {
       case proxy@DatomicProxy(protocol, dbIdentifier, _, _, _, _, _, _, _, _, _) =>
         protocol match {
           case "mem" =>
-            DatomicPeer.recreateDbFromEdn(proxy, protocol, dbIdentifier)
+            DatomicPeer.recreateDb(proxy, protocol, dbIdentifier)
               .recover {
                 case exc: Throwable => throw ExecutionError(exc.getMessage)
               }

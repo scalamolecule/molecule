@@ -13,7 +13,7 @@ import scala.collection.mutable
 import scala.jdk.CollectionConverters.{CollectionHasAsScala, IterableHasAsJava}
 
 trait Data_Delete
-  extends DatomicTxBase_JVM
+  extends DatomicTxMetaData_JVM
     with DeleteOps
     with MetaModelUtils
     with MoleculeLogging { self: DeleteExtraction =>
@@ -21,38 +21,41 @@ trait Data_Delete
   def getStmtsData(
     conn: DatomicConn_JVM,
     elements: List[Element],
-    eidIndex: Int = 0,
+    idIndex: Int = 0,
     debug: Boolean = true
   ): Data = {
-    initTxBase(elements, eidIndex)
-    val (eids, filterElements) = resolve(elements, Nil, Nil, true)
+    initTxBase(elements, idIndex)
+    val (ids, filterElements) = resolve(elements, Nil, Nil, true)
 
-    val (filterQuery, inputs) = if (eids.isEmpty && filterElements.nonEmpty) {
-      val filterElements1 = AttrOneManLong("_Generic", "eid", V) +: filterElements
-      val (query, inputs) = new DatomicModel2Query[Any](filterElements1).getEidQueryWithInputs
+    val (filterQuery, inputs) = if (ids.isEmpty && filterElements.nonEmpty) {
+
+      // todo
+      val filterElements1 = AttrOneManLong("TODO", "id", V) +: filterElements
+
+      val (query, inputs) = new DatomicModel2Query[Any](filterElements1).getIdQueryWithInputs
       (Some(query), inputs)
     } else {
       (None, Nil)
     }
 
     lazy val db = conn.peerConn.db()
-    val eids1 = filterQuery.fold(eids)(query =>
+    val ids1 = filterQuery.fold(ids)(query =>
       Peer.q(query, db +: inputs: _*).asScala.toList.map(_.get(0))
     )
 
     // Add retract stmts
-    eids1.foreach(addRetractEntityStmt)
+    ids1.foreach(addRetractEntityStmt)
 
     // Prevent deleting mandatory referenced entities
     if (getHasMandatoryRefs(conn.proxy.nsMap)) {
       val referrers = Peer.q(
         s"""[:find  ?ns ?attr ?refs
-           | :in    $$ [?eids ...]
-           | :where [?refs ?a ?eids]
+           | :in    $$ [?ids ...]
+           | :where [?refs ?a ?ids]
            |        [?a :db/ident ?attrIdent]
            |        [(namespace ?attrIdent) ?ns]
            |        [(name ?attrIdent) ?attr]
-           |]""".stripMargin, db, eids1.asJava
+           |]""".stripMargin, db, ids1.asJava
       )
       if (referrers.size() != 0) {
         val refIds = mutable.Map.empty[String, List[Long]]

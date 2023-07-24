@@ -4,6 +4,10 @@ import molecule.DataModel
 
 object Partitions extends DataModel(3) {
 
+//  trait Tx extends TxBase {
+//    val myTxAttr = oneInt
+//  }
+
   object partA {
     trait Ns {
       val int    = oneInt
@@ -11,8 +15,8 @@ object Partitions extends DataModel(3) {
       val ref1   = one[Ref1]
     }
     trait Ref1 {
-      val str1 = oneString.description("foo")
-      val int1 = oneInt.unique.description("bar").alias("hej")
+      val str1 = oneString("foo")
+      val int1 = oneInt.unique.descr("bar").alias("hej")
     }
   }
 
@@ -23,8 +27,8 @@ object Partitions extends DataModel(3) {
       val ref1   = one[Ref1]
     }
     trait Ref1 {
-      val str1 = oneString.description("foo")
-      val int1 = oneInt.unique.description("bar").alias("hej")
+      val str1 = oneString("foo")
+      val int1 = oneInt.unique.descr("bar").alias("hej")
     }
   }
 }

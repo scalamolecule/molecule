@@ -1,6 +1,6 @@
 package molecule.sql.jdbc.marshalling
 
-import molecule.core.marshalling.MoleculeRpcServer
+import molecule.core.marshalling.MoleculeRpcServer_AkkaHttp
 
 /**
  * Server app serving http requests/ws from client
@@ -9,4 +9,4 @@ import molecule.core.marshalling.MoleculeRpcServer
  *
  *    sbt datomicJVM/run
  */
-object JdbcRpcServer extends MoleculeRpcServer(JdbcRpcJVM) with App
+object JdbcRpcServer extends MoleculeRpcServer_AkkaHttp(JdbcRpcJVM) with App

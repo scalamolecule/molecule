@@ -40,7 +40,7 @@ object MakeJdbcTxReport {
 //      list.result()
 //    }
 //
-//    val eids: List[Long] = {
+//    val ids: List[Long] = {
 //      val allIds           = ListBuffer.empty[Long]
 //      val datoms           = rawTxReport.get(TX_DATA).asInstanceOf[jList[PeerDatom]].iterator
 //      val tempIds          = rawTxReport.get(TEMPIDS).asInstanceOf[jMap[_, _]].values().asScala.toBuffer
@@ -67,7 +67,7 @@ object MakeJdbcTxReport {
 //      allIds.toList
 //    }
 //
-//    SqlTxReport(basisTBefore, t, tx, txInstant, txData, eids)
+//    SqlTxReport(basisTBefore, t, tx, txInstant, txData, ids)
     ???
   }
 }

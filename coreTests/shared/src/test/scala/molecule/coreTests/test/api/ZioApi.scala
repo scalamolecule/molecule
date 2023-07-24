@@ -18,14 +18,14 @@ trait ZioApi extends CoreTestZioSpec with ApiZioImplicits { self: SpiZio  =>
     suite("Molecule ZIO api")(
       test("Crud actions") {
         for {
-          eids <- Ns.int.insert(1, 2).transact.map(_.eids)
+          ids <- Ns.int.insert(1, 2).transact.map(_.ids)
           _ <- Ns.int(3).save.transact
           a <- Ns.int.query.get
-          _ <- Ns(eids(0)).int(10).update.transact
-          _ <- Ns(eids(1)).delete.transact
+          _ <- Ns(ids(0)).int(10).update.transact
+          _ <- Ns(ids(1)).delete.transact
           b <- Ns.int.query.get
         } yield {
-          assertTrue(eids.size == 2) &&
+          assertTrue(ids.size == 2) &&
             assertTrue(a == List(1, 2, 3)) &&
             assertTrue(b == List(3, 10))
         }
@@ -49,8 +49,8 @@ trait ZioApi extends CoreTestZioSpec with ApiZioImplicits { self: SpiZio  =>
                  |""".stripMargin
           )
         } && Type.string("c").save.transact.flatMap { txReport =>
-          val eid = txReport.eids.head
-          Type(eid).string("a").update.transact.flip.map {
+          val id = txReport.ids.head
+          Type(id).string("a").update.transact.flip.map {
             case ValidationErrors(errorMap) => assertTrue(
               errorMap.head._2.head ==
                 s"""Type.string with value `a` doesn't satisfy validation:
@@ -63,13 +63,13 @@ trait ZioApi extends CoreTestZioSpec with ApiZioImplicits { self: SpiZio  =>
 
       test("Inspection") {
         for {
-          eids <- Ns.int.insert(1, 2).transact.map(_.eids) // Need data for update and delete
+          ids <- Ns.int.insert(1, 2).transact.map(_.ids) // Need data for update and delete
           _ <- Ns.int.insert(1, 2).inspect
           _ <- Ns.int(3).save.inspect
           _ <- Ns.int.query.inspect
           _ <- Ns.int.query.get
-          _ <- Ns(eids(0)).int(10).update.inspect
-          _ <- Ns(eids(1)).delete.inspect
+          _ <- Ns(ids(0)).int(10).update.inspect
+          _ <- Ns(ids(1)).delete.inspect
         } yield assertTrue(true)
       }.provide(types.orDie),
 

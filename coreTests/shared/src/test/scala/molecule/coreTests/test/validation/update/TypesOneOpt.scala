@@ -18,9 +18,9 @@ trait TypesOneOpt extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync 
 
     "String" - validation { implicit conn =>
       for {
-        eid <- Type.string("c").save.transact.map(_.eid)
+        id <- Type.string("c").save.transact.map(_.id)
 
-        _ <- Type(eid).string_?(Some("a")).update.transact
+        _ <- Type(id).string_?(Some("a")).update.transact
           .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
             errorMap ==>
@@ -34,7 +34,7 @@ trait TypesOneOpt extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync 
         }
 
         // Focusing on error message only
-        _ <- Type(eid).string_?(Some("a")).update.transact
+        _ <- Type(id).string_?(Some("a")).update.transact
           .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
             errorMap.head._2.head ==>
@@ -50,8 +50,8 @@ trait TypesOneOpt extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync 
 
     "Int" - validation { implicit conn =>
       for {
-        eid <- Type.int(3).save.transact.map(_.eid)
-        _ <- Type(eid).int_?(Some(1)).update.transact
+        id <- Type.int(3).save.transact.map(_.id)
+        _ <- Type(id).int_?(Some(1)).update.transact
           .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
             errorMap.head._2.head ==>
@@ -64,8 +64,8 @@ trait TypesOneOpt extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync 
 
     "Long" - validation { implicit conn =>
       for {
-        eid <- Type.long(3L).save.transact.map(_.eid)
-        _ <- Type(eid).long_?(Some(1L)).update.transact
+        id <- Type.long(3L).save.transact.map(_.id)
+        _ <- Type(id).long_?(Some(1L)).update.transact
           .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
             errorMap.head._2.head ==>
@@ -78,8 +78,8 @@ trait TypesOneOpt extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync 
 
     "Float" - validation { implicit conn =>
       for {
-        eid <- Type.float(float3).save.transact.map(_.eid)
-        _ <- Type(eid).float_?(Some(float1)).update.transact
+        id <- Type.float(float3).save.transact.map(_.id)
+        _ <- Type(id).float_?(Some(float1)).update.transact
           .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
             errorMap.head._2.head ==>
@@ -92,8 +92,8 @@ trait TypesOneOpt extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync 
 
     "Double" - validation { implicit conn =>
       for {
-        eid <- Type.double(double3).save.transact.map(_.eid)
-        _ <- Type(eid).double_?(Some(double1)).update.transact
+        id <- Type.double(double3).save.transact.map(_.id)
+        _ <- Type(id).double_?(Some(double1)).update.transact
           .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
             errorMap.head._2.head ==>
@@ -106,8 +106,8 @@ trait TypesOneOpt extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync 
 
     "Boolean" - validation { implicit conn =>
       for {
-        eid <- Type.boolean(false).save.transact.map(_.eid)
-        _ <- Type(eid).boolean_?(Some(true)).update.transact
+        id <- Type.boolean(false).save.transact.map(_.id)
+        _ <- Type(id).boolean_?(Some(true)).update.transact
           .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
             errorMap.head._2.head ==>
@@ -120,8 +120,8 @@ trait TypesOneOpt extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync 
 
     "BigInt" - validation { implicit conn =>
       for {
-        eid <- Type.bigInt(bigInt3).save.transact.map(_.eid)
-        _ <- Type(eid).bigInt_?(Some(bigInt1)).update.transact
+        id <- Type.bigInt(bigInt3).save.transact.map(_.id)
+        _ <- Type(id).bigInt_?(Some(bigInt1)).update.transact
           .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
             errorMap.head._2.head ==>
@@ -134,8 +134,8 @@ trait TypesOneOpt extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync 
 
     "BigDecimal" - validation { implicit conn =>
       for {
-        eid <- Type.bigDecimal(bigDecimal3).save.transact.map(_.eid)
-        _ <- Type(eid).bigDecimal_?(Some(bigDecimal1)).update.transact
+        id <- Type.bigDecimal(bigDecimal3).save.transact.map(_.id)
+        _ <- Type(id).bigDecimal_?(Some(bigDecimal1)).update.transact
           .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
             errorMap.head._2.head ==>
@@ -148,8 +148,8 @@ trait TypesOneOpt extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync 
 
     "Date" - validation { implicit conn =>
       for {
-        eid <- Type.date(date3).save.transact.map(_.eid)
-        _ <- Type(eid).date_?(Some(date1)).update.transact
+        id <- Type.date(date3).save.transact.map(_.id)
+        _ <- Type(id).date_?(Some(date1)).update.transact
           .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
             errorMap.head._2.head ==>
@@ -162,8 +162,8 @@ trait TypesOneOpt extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync 
 
     "UUID" - validation { implicit conn =>
       for {
-        eid <- Type.uuid(UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-cccccccccccc")).save.transact.map(_.eid)
-        _ <- Type(eid).uuid_?(Some(UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"))).update.transact
+        id <- Type.uuid(UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-cccccccccccc")).save.transact.map(_.id)
+        _ <- Type(id).uuid_?(Some(UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"))).update.transact
           .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
             errorMap.head._2.head ==>
@@ -178,8 +178,8 @@ trait TypesOneOpt extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync 
       val uri1 = new URI("a")
       val uri4 = new URI("abcd")
       for {
-        eid <- Type.uri(uri4).save.transact.map(_.eid)
-        _ <- Type(eid).uri_?(Some(uri1)).update.transact
+        id <- Type.uri(uri4).save.transact.map(_.id)
+        _ <- Type(id).uri_?(Some(uri1)).update.transact
           .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
             errorMap.head._2.head ==>
@@ -192,8 +192,8 @@ trait TypesOneOpt extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync 
 
     "Byte" - validation { implicit conn =>
       for {
-        eid <- Type.byte(byte3).save.transact.map(_.eid)
-        _ <- Type(eid).byte_?(Some(byte1)).update.transact
+        id <- Type.byte(byte3).save.transact.map(_.id)
+        _ <- Type(id).byte_?(Some(byte1)).update.transact
           .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
             errorMap.head._2.head ==>
@@ -206,8 +206,8 @@ trait TypesOneOpt extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync 
 
     "Short" - validation { implicit conn =>
       for {
-        eid <- Type.short(short3).save.transact.map(_.eid)
-        _ <- Type(eid).short_?(Some(short1)).update.transact
+        id <- Type.short(short3).save.transact.map(_.id)
+        _ <- Type(id).short_?(Some(short1)).update.transact
           .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
             errorMap.head._2.head ==>
@@ -220,8 +220,8 @@ trait TypesOneOpt extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync 
 
     "Char" - validation { implicit conn =>
       for {
-        eid <- Type.char('c').save.transact.map(_.eid)
-        _ <- Type(eid).char_?(Some('a')).update.transact
+        id <- Type.char('c').save.transact.map(_.id)
+        _ <- Type(id).char_?(Some('a')).update.transact
           .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
             errorMap.head._2.head ==>
@@ -234,8 +234,8 @@ trait TypesOneOpt extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync 
 
     "ref" - validation { implicit conn =>
       for {
-        eid <- Type.ref(3L).save.transact.map(_.eid)
-        _ <- Type(eid).ref_?(Some(1L)).update.transact
+        id <- Type.ref(3L).save.transact.map(_.id)
+        _ <- Type(id).ref_?(Some(1L)).update.transact
           .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
             errorMap.head._2.head ==>

@@ -85,18 +85,20 @@ class SqlModel2Query[Tpl](elements0: List[Element])
 
     //    println(stmt)
 
+    //      |  ARRAY_AGG(Ns_refs_Ref.Ref_id) Ns_refs
+    //      |  Ns_refs = ARRAY [1] AND
     """SELECT DISTINCT
       |  Ns.i,
-      |  ARRAY_AGG(Ns_refs_Ref.Ref_id) Ns_refs
+      |  GROUP_CONCAT(DISTINCT Ns_refs_Ref.Ref_id SEPARATOR ', ') Ns_Refs
       |FROM Ns
       |INNER JOIN Ns_refs_Ref ON Ns.id = Ns_refs_Ref.Ns_id
       |WHERE
-      |  Ns_refs = ARRAY [1] AND
+      |  Ns_refs = '1, 2' AND
       |  Ns.i    IS NOT NULL
       |GROUP BY Ns.id
       |ORDER BY Ns.i NULLS FIRST;
       |""".stripMargin
-//      |  Ns_refs_Ref.Ref_id IN (1) AND
+    //      |  Ns_refs_Ref.Ref_id IN (1) AND
 
     stmt
   }
@@ -120,7 +122,8 @@ class SqlModel2Query[Tpl](elements0: List[Element])
     }
     def prepareAttr(a: Attr): Attr = {
       availableAttrs += a.name
-      if (a.ns == "_Generic" && a.attr == "txId") {
+      //      if (a.ns == "_Generic" && a.attr == "txId") {
+      if (a.attr == "tx") {
         addTxVar = true
       } else if (a.filterAttr.nonEmpty) {
         val fa = a.filterAttr.get
@@ -247,7 +250,7 @@ class SqlModel2Query[Tpl](elements0: List[Element])
     level += 1 // Treat tx meta data as another level (for separate sort identifiers)
     isTxMetaData = true
     // Use txVar as first entity id var for composite elements
-    firstEid = txVar
+    firstId = txVar
     resolve(txElements)
   }
 

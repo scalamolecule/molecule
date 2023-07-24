@@ -46,7 +46,7 @@ trait UpdateSet_filter extends CoreTestSuite with ApiAsyncImplicits { self: SpiA
           (1, None),
           (1, Some(Set(2))),
           (2, Some(Set(3))),
-        ).transact.map(_.eids)
+        ).transact.map(_.ids)
 
         _ <- Ns.i.ints_?.query.get.map(_ ==> List(
           (1, None),
@@ -56,7 +56,7 @@ trait UpdateSet_filter extends CoreTestSuite with ApiAsyncImplicits { self: SpiA
 
         // Update all entities where non-unique attribute i is 1
         _ <- Ns.i_(1).ints(Set(4)).update.transact
-        _ <- Ns.eid.a1.i.ints_?.query.get.map(_ ==> List(
+        _ <- Ns.id.a1.i.ints_?.query.get.map(_ ==> List(
           (a, 1, None), // not updated since there were no previous value
           (b, 1, Some(Set(4))), // 2 updated to 4
           (c, 2, Some(Set(3))),
@@ -64,7 +64,7 @@ trait UpdateSet_filter extends CoreTestSuite with ApiAsyncImplicits { self: SpiA
 
         // Upsert all entities where non-unique attribute i is 1
         _ <- Ns.i_(1).ints(Set(5)).upsert.transact
-        _ <- Ns.eid.a1.i.ints_?.query.get.map(_ ==> List(
+        _ <- Ns.id.a1.i.ints_?.query.get.map(_ ==> List(
           (a, 1, Some(Set(5))), // 5 inserted
           (b, 1, Some(Set(5))), // 4 updated to 5
           (c, 2, Some(Set(3))),
@@ -90,7 +90,7 @@ trait UpdateSet_filter extends CoreTestSuite with ApiAsyncImplicits { self: SpiA
           (1, Set(1)),
           (2, Set(2)),
           (3, Set(3)),
-        ).transact.map(_.eids)
+        ).transact.map(_.ids)
 
         _ <- Ns.i.a1.ints.query.get.map(_ ==> List(
           (1, Set(1)),

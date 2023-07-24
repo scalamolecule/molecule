@@ -1,5 +1,6 @@
 package molecule.coreTests.test.aggr.one.any
 
+import molecule.base.error.ModelError
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
 import molecule.coreTests.api.ApiAsyncImplicits
@@ -105,6 +106,21 @@ trait AggrOne_Int extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync 
           (1, 1),
           (2, 2)
         ))
+
+        // todo: we can't do this in Datomic but we can with other dbs. Should it be possible? Is it needed?
+        _ <- Ns.id.query.get
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+            err ==> "Can't query for id only. Please add at least one attribute."
+          }
+
+        _ <- Ns.id(count).query.get
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+            err ==> "Can't query for id only. Please add at least one attribute."
+          }
+
+        // todo:
+        //        _ <- Ns.id(count).i_.query.get.map(_ ==> List(4))
+        //        _ <- Ns.id(count).int_.query.get.map(_ ==> List(4))
       } yield ()
     }
   }

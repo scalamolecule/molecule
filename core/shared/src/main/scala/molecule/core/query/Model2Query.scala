@@ -25,12 +25,19 @@ trait Model2Query {
         case Nil             => ()
       }
     }
+
     def validateAttr(a: Attr): Unit = {
       a.filterAttr.foreach { fa =>
         if (fa.name == a.name)
           throw ModelError(s"Can't filter by the same attribute `${a.name}`")
       }
     }
-    validate(elements)
+
+    elements match {
+      case List(a: Attr) if a.attr == "id" =>
+        throw ModelError("Can't query for id only. Please add at least one attribute.")
+
+      case _ => validate(elements)
+    }
   }
 }

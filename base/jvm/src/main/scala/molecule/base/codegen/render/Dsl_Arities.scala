@@ -18,37 +18,29 @@ case class Dsl_Arities(schema: MetaSchema, partPrefix: String, namespace: MetaNs
 
   var hasOne = false
   var hasSet = false
-  //  var hasArr = false
-  //  var hasMap = false
 
-  val maxCardPad = attrsAll.map(a => a.card match {
+  val maxCardPad = attrs.map(a => a.card match {
     case _: CardOne => hasOne = true; 0
     case _: CardSet => hasSet = true; 5
-    //    case CardArr => hasArr = true; 7
-    //    case CardMap => hasMap = true; 13
   }).max
 
   val pOne = " " * maxCardPad
   val pSet = " " * (maxCardPad - 5)
-  //  val pArr = " " * (maxCardPad - 7)
-  //  val pMap = " " * (maxCardPad - 13)
 
-  attrsAll.foreach {
+  attrs.foreach {
     case MetaAttr(attr, card, tpe0, refNs, _, _, _, _, _, _) =>
-      val c   = card.marker
+      val c   = card._marker
       val tpe = getTpe(tpe0)
 
-      val padA = padAttrAll(attr)
-      val pad0 = padTypeCustom(tpe)
-      val pad1 = padTypeAll(tpe)
-      val pad3 = pad1 + " " * (maxTpeCustom + "Option[]".length - maxTpeAll)
-      val pad4 = " " * (maxTpeCustom + "Option[]".length + maxCardPad)
+      val padA = padAttr(attr)
+      val pad0 = padType(tpe)
+      val pad1 = padType(tpe)
+      val pad3 = pad1 + " " * (maxTpe + "Option[]".length - maxTpe)
+      val pad4 = " " * (maxTpe + "Option[]".length + maxCardPad)
 
       val (tM, tO) = card match {
         case _: CardOne => (tpe + pOne, s"Option[$tpe]" + pOne)
         case _: CardSet => (s"Set[$tpe]" + pSet, s"Option[Set[$tpe]]" + pSet)
-        //        case CardArr => (s"Array[$tpe]" + pArr, s"Option[Array[$tpe]]" + pArr)
-        //        case CardMap => (s"Map[String, $tpe]" + pMap, s"Option[Map[String, $tpe]]" + pMap)
       }
 
       lazy val tpesM = s"${`A..V, `}$tM$pad3, $tpe$pad1"
@@ -64,20 +56,17 @@ case class Dsl_Arities(schema: MetaSchema, partPrefix: String, namespace: MetaNs
       lazy val elemsO = s"elements :+ ${attr}_opt$padA"
       lazy val elemsT = s"elements :+ ${attr}_tac$padA"
 
-      val nextNextNs = if (secondLast) s"Dummy_${arity + 3}" else ns_2
-      val nextNs     = if (last) s"Dummy_${arity + 2}" else ns_1
+      val nextNextNs = if (secondLast) s"X${arity + 3}" else ns_2
+      val nextNs     = if (last) s"X${arity + 2}" else ns_1
 
-      val filters = if (card == CardOne && !genericAttrs.contains(attr) && refNs.isEmpty) tpe0 match {
+      val filters = if (card == CardOne && attr != "id" && refNs.isEmpty) tpe0 match {
         case "String" => "_String "
         case "Int"    => "_Number "
         case "Long"   => "_Number "
-        //        case "Float"      => "_Decimal"
-        //        case "Double"     => "_Decimal"
         case "BigInt" => "_Number "
-        //        case "BigDecimal" => "_Decimal"
-        case "Byte"  => "_Number "
-        case "Short" => "_Number "
-        case _       => "        "
+        case "Byte"   => "_Number "
+        case "Short"  => "_Number "
+        case _        => "        "
       } else "        "
 
       lazy val exprM = s"Expr${c}Man${_1}$filters[$tpesM, $ns_1, $nextNextNs]"
@@ -86,7 +75,8 @@ case class Dsl_Arities(schema: MetaSchema, partPrefix: String, namespace: MetaNs
 
       if (!last) {
         man += s"""lazy val $attr  $padA = new $ns_1[$tpesM]($elemsM) with $exprM with $card"""
-        if (!genericAttrs.contains(attr))
+        //        if (!genericAttrs.contains(attr))
+        if (attr != "id")
           opt += s"""lazy val ${attr}_?$padA = new $ns_1[$tpesO]($elemsO) with $exprO with $card"""
       }
       tac += s"""lazy val ${attr}_ $padA = new $ns_0[$tpesT]($elemsT) with $exprT with $card"""
@@ -143,11 +133,10 @@ case class Dsl_Arities(schema: MetaSchema, partPrefix: String, namespace: MetaNs
   }
 
   val hasCardSet = refs.exists(_.card == CardSet)
-  lazy val withNested    = s" with Nested${_0}${`[A..V]`}"
-  lazy val withNestedOpt = s" with NestedOpt${_0}${`[A..V]`}"
-  lazy val nestedPad     = " " * withNestedOpt.length
-  refs.foreach {
-    case MetaAttr(attr, card, _, refNsOpt, _, _, _, _, _, _) =>
+  lazy val withNestedInit = s" with NestedInit"
+  lazy val nestedPad      = " " * withNestedInit.length
+  refs.collect {
+    case MetaAttr(attr, card, _, refNsOpt, _, _, _, _, _, _) if attr != "tx" =>
       val refCls        = partPrefix + camel(attr)
       val refNs         = partPrefix + refNsOpt.get
       val pRefAttr      = padRefAttr(attr)
@@ -155,9 +144,12 @@ case class Dsl_Arities(schema: MetaSchema, partPrefix: String, namespace: MetaNs
       val refObj        = s"""Model.Ref("$ns", "$attr"$pRefAttr, "$refNs"$pRefNs, $card)"""
       val refObjBi      = s"""Model.Ref("$ns", "$attr", "$refNs", $card, true)"""
       val nested        = if (hasCardSet) {
-        if (card == CardOne) nestedPad else withNestedOpt
+        if (arity < maxArity && ns != "Tx")
+          if (card == CardOne) nestedPad else withNestedInit
+        else
+          ""
       } else ""
-      val nestedBi      = if (card == CardOne) "" else withNested
+      val nestedBi      = if (card == CardOne || arity == maxArity) "" else withNestedInit
       val bidirectional = if (ns == refNs)
         s""" { def apply(makeDirectional: bi) = new $refNs${_0}$pRefNs[${`A..V, `}t](elements.init :+ $refObjBi)$nestedBi }""" else ""
       ref += s"""object $refCls$pRefAttr extends $refNs${_0}$pRefNs[${`A..V, `}t](elements :+ $refObj)$nested$bidirectional"""
@@ -169,27 +161,55 @@ case class Dsl_Arities(schema: MetaSchema, partPrefix: String, namespace: MetaNs
 
   val elements = "override val elements: List[Element]"
 
-  val lastNs   = if (last) s"Dummy_${arity + 2}" else ns_1
-  val modelOps = s"ModelOps_$arity[${`A..V, `}t, $ns_0, $lastNs]"
+  val lastNs        = if (last) s"X${arity + 2}" else ns_1
+  val modelOps      = s"ModelOps_$arity[${`A..V, `}t, $ns_0, $lastNs]"
+  val compositeInit = if (custom) s"with CompositeInit_$arity[${`A..V, `}$tx_n]" else s"with TxMetaData_$arity${`[A..V]`}"
 
   val resolvers = res.result().mkString("\n  ")
 
-  val valueAttrs = if (first) {
+  val filterAttrs = if (first) {
     s"""
+       |
        |  override protected def _attrTac[   ns1[_]   , ns2[_, _]   ](op: Op, a: ModelOps_0[   t, ns1, ns2]) = new $ns_0[   t](filterAttr(elements, op, a))
        |  override protected def _attrMan[X, ns1[_, _], ns2[_, _, _]](op: Op, a: ModelOps_1[X, t, ns1, ns2]) = new $ns_1[X, t](filterAttr(elements, op, a))""".stripMargin
   } else if (last) {
     s"""
+       |
        |  override protected def _attrSortTac[ns1[_], ns2[_, _]](op: Op, a: ModelOps_0[t, ns1, ns2] with CardOne) = new $ns_0[${`A..V`}, t](filterAttr(elements, op, a)) with SortAttrs${_0}[${`A..V`}, t, $ns_0]
        |  override protected def _attrTac    [ns1[_], ns2[_, _]](op: Op, a: ModelOps_0[t, ns1, ns2]             ) = new $ns_0[${`A..V`}, t](filterAttr(elements, op, a))""".stripMargin
   } else {
     s"""
+       |
        |  override protected def _attrSortTac[   ns1[_]   , ns2[_, _]   ](op: Op, a: ModelOps_0[   t, ns1, ns2] with CardOne) = new $ns_0[${`A..V`},    t](filterAttr(elements, op, a)) with SortAttrs${_0}[${`A..V`},    t, $ns_0]
        |  override protected def _attrSortMan[   ns1[_, _], ns2[_, _, _]](op: Op, a: ModelOps_1[$V, t, ns1, ns2]             ) = new $ns_1[${`A..V`}, $V, t](filterAttr(elements, op, a)) with SortAttrs${_1}[${`A..V`}, $V, t, $ns_1]
        |  override protected def _attrTac    [   ns1[_]   , ns2[_, _]   ](op: Op, a: ModelOps_0[   t, ns1, ns2]             ) = new $ns_0[${`A..V`},    t](filterAttr(elements, op, a))
        |  override protected def _attrMan    [X, ns1[_, _], ns2[_, _, _]](op: Op, a: ModelOps_1[X, t, ns1, ns2]             ) = new $ns_1[${`A..V`}, X, t](filterAttr(elements, op, a))""".stripMargin
   }
 
+  val compositeInitResolvers = if (custom) {
+    if (first) {
+      s"""
+         |
+         |  override protected def _compositeInit00    (nextMolecule: List[Element]) = Composite_00(List(Composite(elements), Composite(nextMolecule)), new Txs_("$ns"))
+         |  override protected def _compositeInit01[T2](nextMolecule: List[Element]) = Composite_01(List(Composite(elements), Composite(nextMolecule)), new Txs_("$ns"))""".stripMargin
+    } else {
+      s"""
+         |
+         |  override protected def _compositeInit01    (nextMolecule: List[Element]) = Composite_01(List(Composite(elements), Composite(nextMolecule)), new Txs_("$ns"))
+         |  override protected def _compositeInit02[T2](nextMolecule: List[Element]) = Composite_02(List(Composite(elements), Composite(nextMolecule)), new Txs_("$ns"))""".stripMargin
+    }
+  } else ""
+
+  val nested2tx = if (hasCardSet && arity < maxArity) {
+    s"""
+       |
+       |  trait NestedInit extends NestedOp_$arity[${`A..V, `}Tx${_1}] with Nested_$arity[${`A..V, `}Tx${_1}] { self: Elements =>
+       |    override protected def _nestedMan2tx[NestedTpl](nestedElements: List[Element]): Nested2TxInit_$n0[${`A..V, `}NestedTpl, Tx${_1}] = { val es = elements.init :+ Nested   (elements.last.asInstanceOf[Ref], nestedElements); new Nested2TxInit_$n0(es, new Tx${_1}[${`A..V, `}Seq[NestedTpl], Nothing](es)) }
+       |    override protected def _nestedOpt2tx[NestedTpl](nestedElements: List[Element]): Nested2TxInit_$n0[${`A..V, `}NestedTpl, Tx${_1}] = { val es = elements.init :+ NestedOpt(elements.last.asInstanceOf[Ref], nestedElements); new Nested2TxInit_$n0(es, new Tx${_1}[${`A..V, `}Seq[NestedTpl], Nothing](es)) }
+       |  }""".stripMargin
+  } else ""
+
+  val tx = if (custom) s"""\n\n  def Tx = new Tx_$arity[${`A..V, `}t](elements :+ Model.Ref("$ns", "tx", "Tx", CardOne)) with TxMetaData_$arity${`[A..V]`}""" else ""
 
   val refResult = ref.result()
   val refDefs   = if (refResult.isEmpty) "" else refResult.mkString("\n\n  ", "\n  ", "")
@@ -206,11 +226,10 @@ case class Dsl_Arities(schema: MetaSchema, partPrefix: String, namespace: MetaNs
   }
 
   def get: String =
-    s"""class $ns_0[${`A..V, `}t]($elements) extends ${ns}_base with $modelOps {
+    s"""class $ns_0[${`A..V, `}t]($elements) extends ${ns}_base with $modelOps $compositeInit {
        |  $manAttrs$optAttrs$tacAttrs
        |
-       |  $resolvers
-       |  $valueAttrs$refDefs$backRefDefs
+       |  $resolvers$filterAttrs$compositeInitResolvers$nested2tx$tx$refDefs$backRefDefs
        |}
        |""".stripMargin
 }

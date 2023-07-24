@@ -67,7 +67,6 @@ trait JdbcSpiSync
     if (errors.isEmpty) {
       val conn = conn0.asInstanceOf[JdbcConn_jvm]
       conn.transact_sync(save_getData(save, conn))
-      null
     } else {
       throw ValidationErrors(errors)
     }

@@ -16,12 +16,12 @@ trait Composites extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  
 
     "1 + 1" - validation { implicit conn =>
       for {
-        eid <- (Type.int(3) + Enum.luckyNumber(7)).save.transact.map(_.eid)
+        id <- (Type.int(3) + Enum.luckyNumber(7)).save.transact.map(_.id)
 
         // Composite sub groups share the same entity id
 
         // bad, ok
-        _ <- (Type(eid).int(1) + Enum.luckyNumber(9)).update.transact
+        _ <- (Type(id).int(1) + Enum.luckyNumber(9)).update.transact
           .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
             errorMap ==>
@@ -35,7 +35,7 @@ trait Composites extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  
         }
 
         // ok, bad
-        _ <- (Type(eid).int(3) + Enum.luckyNumber(0)).update.transact
+        _ <- (Type(id).int(3) + Enum.luckyNumber(0)).update.transact
           .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
             errorMap ==>
@@ -47,7 +47,7 @@ trait Composites extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  
         }
 
         // bad, bad
-        _ <- (Type(eid).int(1) + Enum.luckyNumber(0)).update.transact
+        _ <- (Type(id).int(1) + Enum.luckyNumber(0)).update.transact
           .map(_ ==> "Unexpected success").recover {
           case ValidationErrors(errorMap) =>
             errorMap ==>

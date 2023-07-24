@@ -10,7 +10,7 @@ import molecule.core.transaction.SaveExtraction
 import molecule.core.transaction.ops.SaveOps
 
 trait Data_Save
-  extends JdbcTxBase_JVM
+  extends JdbcTxMetaData_JVM
     with SaveOps
     with MoleculeLogging { self: SaveExtraction =>
 
@@ -89,12 +89,12 @@ trait Data_Save
     val colSetter: Setter = optValue.fold {
       (ps: PS, _: IdsMap, _: RowIndex) => {
         ps.setNull(paramIndex, 0)
-        printValue(0, ns, attr, -1, paramIndex, "None")
+//        printValue(0, ns, attr, -1, paramIndex, "None")
       }
     } { value =>
       (ps: PS, _: IdsMap, _: RowIndex) => {
         value.asInstanceOf[(PS, Int) => Unit](ps, paramIndex)
-        printValue(0, ns, attr, -1, paramIndex, value)
+//        printValue(0, ns, attr, -1, paramIndex, value)
       }
     }
     addColSetter(curPath, colSetter)
@@ -153,7 +153,7 @@ trait Data_Save
       postResolvers = postResolvers :+ (() => {
         val colSetter: Setter = (ps: PS, idsMap: IdsMap, rowIndex: RowIndex) => {
           val refId = idsMap(refPath)(rowIndex)
-          printValue(0, ns, refAttr, -1, paramIndex, refId)
+//          printValue(0, ns, refAttr, -1, paramIndex, refId)
           ps.setLong(paramIndex, refId)
         }
         addColSetter(curPath, colSetter)

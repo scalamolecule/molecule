@@ -262,7 +262,7 @@ trait InsertRefs extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync =
           (1, "a", 1, "b", 22, 2, "c", 11),
         ).transact
 
-        _ <- A.i.s.B.i.s.Cc.i._B.C.i.s._B._A.Bb.i.query.get.map(_ ==> List(
+        _ <- A.i.a1.s.B.i.s.Cc.i._B.C.i.s._B._A.Bb.i.query.get.map(_ ==> List(
           (0, "a", 1, "b", 22, 2, "c", 11),
           (1, "a", 1, "b", 22, 2, "c", 11),
         ))

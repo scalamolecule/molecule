@@ -15,23 +15,23 @@ trait UpdateSetOps_Int extends CoreTestSuite with ApiAsyncImplicits { self: SpiA
 
     "apply (replace/add all)" - types { implicit conn =>
       for {
-        eid <- Ns.ints(Set(int1, int2)).save.transact.map(_.eid)
+        id <- Ns.ints(Set(int1, int2)).save.transact.map(_.id)
 
-        _ <- Ns(eid).ints(Set(int3, int4)).update.transact
+        _ <- Ns(id).ints(Set(int3, int4)).update.transact
         _ <- Ns.ints.query.get.map(_.head ==> Set(int3, int4))
 
         // Apply Seq of values
-        _ <- Ns(eid).ints(Set(int4, int5)).update.transact
+        _ <- Ns(id).ints(Set(int4, int5)).update.transact
         _ <- Ns.ints.query.get.map(_.head ==> Set(int4, int5))
 
         // Apply empty Seq of values (deleting all values!)
-        _ <- Ns(eid).ints(Seq.empty[Int]).update.transact
+        _ <- Ns(id).ints(Seq.empty[Int]).update.transact
         _ <- Ns.ints.query.get.map(_ ==> Nil)
 
-        _ <- Ns(eid).ints(Set(int1, int2)).update.transact
+        _ <- Ns(id).ints(Set(int1, int2)).update.transact
 
         // Delete all (apply no values)
-        _ <- Ns(eid).ints().update.transact
+        _ <- Ns(id).ints().update.transact
         _ <- Ns.ints.query.get.map(_ ==> Nil)
       } yield ()
     }
@@ -39,33 +39,33 @@ trait UpdateSetOps_Int extends CoreTestSuite with ApiAsyncImplicits { self: SpiA
 
     "add" - types { implicit conn =>
       for {
-        eid <- Ns.ints(Set(int1)).save.transact.map(_.eid)
+        id <- Ns.ints(Set(int1)).save.transact.map(_.id)
 
         // Add value
-        _ <- Ns(eid).ints.add(int2).update.transact
+        _ <- Ns(id).ints.add(int2).update.transact
         _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int2))
 
         // Add existing value (no effect)
-        _ <- Ns(eid).ints.add(int2).update.transact
+        _ <- Ns(id).ints.add(int2).update.transact
         _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int2))
 
         // Add multiple values (vararg)
-        _ <- Ns(eid).ints.add(int3, int4).update.transact
+        _ <- Ns(id).ints.add(int3, int4).update.transact
         _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int2, int3, int4))
 
         // Add Iterable of values (existing values unaffected)
         // Seq
-        _ <- Ns(eid).ints.add(Seq(int4, int5)).update.transact
+        _ <- Ns(id).ints.add(Seq(int4, int5)).update.transact
         _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int2, int3, int4, int5))
         // Set
-        _ <- Ns(eid).ints.add(Set(int6)).update.transact
+        _ <- Ns(id).ints.add(Set(int6)).update.transact
         _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int2, int3, int4, int5, int6))
         // Iterable
-        _ <- Ns(eid).ints.add(Iterable(int7)).update.transact
+        _ <- Ns(id).ints.add(Iterable(int7)).update.transact
         _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int2, int3, int4, int5, int6, int7))
 
         // Add empty Seq of values (no effect)
-        _ <- Ns(eid).ints.add(Seq.empty[Int]).update.transact
+        _ <- Ns(id).ints.add(Seq.empty[Int]).update.transact
         _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int2, int3, int4, int5, int6, int7))
       } yield ()
     }
@@ -73,30 +73,30 @@ trait UpdateSetOps_Int extends CoreTestSuite with ApiAsyncImplicits { self: SpiA
 
     "swap" - types { implicit conn =>
       for {
-        eid <- Ns.ints(Set(int1, int2, int3, int4, int5, int6)).save.transact.map(_.eid)
+        id <- Ns.ints(Set(int1, int2, int3, int4, int5, int6)).save.transact.map(_.id)
 
         // Replace value
-        _ <- Ns(eid).ints.swap(int6 -> int8).update.transact
+        _ <- Ns(id).ints.swap(int6 -> int8).update.transact
         _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int2, int3, int4, int5, int8))
 
         // Replacing value to existing value simply deletes it
-        _ <- Ns(eid).ints.swap(int5 -> int8).update.transact
+        _ <- Ns(id).ints.swap(int5 -> int8).update.transact
         _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int2, int3, int4, int8))
 
         // Replace multiple values (vararg)
-        _ <- Ns(eid).ints.swap(int3 -> int6, int4 -> int7).update.transact
+        _ <- Ns(id).ints.swap(int3 -> int6, int4 -> int7).update.transact
         _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int2, int6, int7, int8))
 
         // Missing old value has no effect. The new value is inserted (upsert semantics)
-        _ <- Ns(eid).ints.swap(int4 -> int9).update.transact
+        _ <- Ns(id).ints.swap(int4 -> int9).update.transact
         _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int2, int6, int7, int8, int9))
 
         // Replace with Seq of oldValue->newValue pairs
-        _ <- Ns(eid).ints.swap(Seq(int2 -> int5)).update.transact
+        _ <- Ns(id).ints.swap(Seq(int2 -> int5)).update.transact
         _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int5, int6, int7, int8, int9))
 
         // Replacing with empty Seq of oldValue->newValue pairs has no effect
-        _ <- Ns(eid).ints.swap(Seq.empty[(Int, Int)]).update.transact
+        _ <- Ns(id).ints.swap(Seq.empty[(Int, Int)]).update.transact
         _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int5, int6, int7, int8, int9))
 
 
@@ -116,34 +116,34 @@ trait UpdateSetOps_Int extends CoreTestSuite with ApiAsyncImplicits { self: SpiA
 
     "remove" - types { implicit conn =>
       for {
-        eid <- Ns.ints(Set(int1, int2, int3, int4, int5, int6)).save.transact.map(_.eid)
+        id <- Ns.ints(Set(int1, int2, int3, int4, int5, int6)).save.transact.map(_.id)
 
         // Remove value
-        _ <- Ns(eid).ints.remove(int6).update.transact
+        _ <- Ns(id).ints.remove(int6).update.transact
         _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int2, int3, int4, int5))
 
         // Removing non-existing value has no effect
-        _ <- Ns(eid).ints.remove(int7).update.transact
+        _ <- Ns(id).ints.remove(int7).update.transact
         _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int2, int3, int4, int5))
 
         // Removing duplicate values removes the distinct value
-        _ <- Ns(eid).ints.remove(int5, int5).update.transact
+        _ <- Ns(id).ints.remove(int5, int5).update.transact
         _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int2, int3, int4))
 
         // Remove multiple values (vararg)
-        _ <- Ns(eid).ints.remove(int3, int4).update.transact
+        _ <- Ns(id).ints.remove(int3, int4).update.transact
         _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int2))
 
         // Remove Seq of values
-        _ <- Ns(eid).ints.remove(Seq(int2)).update.transact
+        _ <- Ns(id).ints.remove(Seq(int2)).update.transact
         _ <- Ns.ints.query.get.map(_.head ==> Set(int1))
 
         // Removing empty Seq of values has no effect
-        _ <- Ns(eid).ints.remove(Seq.empty[Int]).update.transact
+        _ <- Ns(id).ints.remove(Seq.empty[Int]).update.transact
         _ <- Ns.ints.query.get.map(_.head ==> Set(int1))
 
         // Removing all elements is like deleting the attribute
-        _ <- Ns(eid).ints.remove(Seq(int1)).update.transact
+        _ <- Ns(id).ints.remove(Seq(int1)).update.transact
         _ <- Ns.ints.query.get.map(_ ==> Nil)
       } yield ()
     }

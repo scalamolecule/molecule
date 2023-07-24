@@ -11,19 +11,19 @@ import molecule.sql.jdbc.facade.JdbcConn_jvm
 import scala.collection.mutable
 import scala.jdk.CollectionConverters.{CollectionHasAsScala, IterableHasAsJava}
 
-trait Data_Delete extends JdbcTxBase_JVM with DeleteOps with MoleculeLogging { self: DeleteExtraction =>
+trait Data_Delete extends JdbcTxMetaData_JVM with DeleteOps with MoleculeLogging { self: DeleteExtraction =>
 
   def getStmtsData(
     conn: JdbcConn_jvm,
     elements: List[Element],
-    eidIndex: Int = 0,
+    idIndex: Int = 0,
     debug: Boolean = true
   ): Int = { // todo
-//    initTxBase(elements, eidIndex)
-//    val (eids, filterElements) = resolve(elements, Nil, Nil, true)
+//    initTxBase(elements, idIndex)
+//    val (ids, filterElements) = resolve(elements, Nil, Nil, true)
 //
-//    val (filterQuery, inputs) = if (eids.isEmpty && filterElements.nonEmpty) {
-//      val filterElements1 = AttrOneManLong("_Generic", "eid", V) +: filterElements
+//    val (filterQuery, inputs) = if (ids.isEmpty && filterElements.nonEmpty) {
+//      val filterElements1 = AttrOneManLong("_Generic", "id", V) +: filterElements
 //      val (query, inputs) = new SqlModel2Query[Any](filterElements1).getEidQueryWithInputs
 //      (Some(query), inputs)
 //    } else {
@@ -31,23 +31,23 @@ trait Data_Delete extends JdbcTxBase_JVM with DeleteOps with MoleculeLogging { s
 //    }
 //
 //    lazy val db = conn.sqlConn.db()
-//    val eids1 = filterQuery.fold(eids)(query =>
+//    val ids1 = filterQuery.fold(ids)(query =>
 //      Peer.q(query, db +: inputs: _*).asScala.toList.map(_.get(0))
 //    )
 //
 //    // Add retract stmts
-//    eids1.foreach(addRetractEntityStmt)
+//    ids1.foreach(addRetractEntityStmt)
 //
 //    // Prevent deleting mandatory referenced entities
 //    if (conn.proxy.hasMandatoryRefs) {
 //      val referrers = Peer.q(
 //        s"""[:find  ?ns ?attr ?refs
-//           | :in    $$ [?eids ...]
-//           | :where [?refs ?a ?eids]
+//           | :in    $$ [?ids ...]
+//           | :where [?refs ?a ?ids]
 //           |        [?a :db/ident ?attrIdent]
 //           |        [(namespace ?attrIdent) ?ns]
 //           |        [(name ?attrIdent) ?attr]
-//           |]""".stripMargin, db, eids1.asJava
+//           |]""".stripMargin, db, ids1.asJava
 //      )
 //      if (referrers.size() != 0) {
 //        val refIds = mutable.Map.empty[String, List[Long]]

@@ -86,15 +86,15 @@ trait UpdateOne_uniqueAttr extends CoreTestSuite with ApiAsyncImplicits { self: 
           (1, int1),
           (2, int2),
           (3, int3),
-        ).transact.map(_.eids)
-        _ <- Unique.eid.a1.i.int.query.get.map(_ ==> List(
+        ).transact.map(_.ids)
+        _ <- Unique.id.a1.i.int.query.get.map(_ ==> List(
           (a, 1, int1),
           (b, 2, int2),
           (c, 3, int3),
         ))
 
         _ <- Unique.i(4).int_(int2, int3).update.transact
-        _ <- Unique.eid.a1.i.query.get.map(_ ==> List(
+        _ <- Unique.id.a1.i.query.get.map(_ ==> List(
           (a, 1),
           (b, 4),
           (c, 4),

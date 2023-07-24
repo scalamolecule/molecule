@@ -27,6 +27,7 @@ trait CoreTestSuiteBase
   def refs[T](test: Conn => T): T = inMem(test, RefsSchema)
   def unique[T](test: Conn => T): T = inMem(test, UniqueSchema)
   def validation[T](test: Conn => T): T = inMem(test, ValidationSchema)
+//  def orch[T](test: Conn => T): T = inMem(test, OrchestraSchema)
 
   def delay[T](ms: Int)(body: => T): Future[T]
 

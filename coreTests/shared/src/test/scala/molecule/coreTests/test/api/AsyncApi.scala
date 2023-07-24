@@ -18,7 +18,7 @@ trait AsyncApi extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
 
       "Crud actions" - types { implicit conn =>
         for {
-          List(a, b) <- Ns.int.insert(1, 2).transact.map(_.eids)
+          List(a, b) <- Ns.int.insert(1, 2).transact.map(_.ids)
           _ <- Ns.int(3).save.transact
           _ <- Ns.int.query.get.map(_ ==> List(1, 2, 3))
           _ <- Ns(a).int(10).update.transact
@@ -50,8 +50,8 @@ trait AsyncApi extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
                    |""".stripMargin
           }
 
-          eid <- Type.string("c").save.transact.map(_.eid)
-          _ <- Type(eid).string("a").update.transact
+          id <- Type.string("c").save.transact.map(_.id)
+          _ <- Type(id).string("a").update.transact
             .map(_ ==> "Unexpected success").recover {
             case ValidationErrors(errorMap) =>
               errorMap.head._2.head ==
@@ -65,7 +65,7 @@ trait AsyncApi extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
 
       "Inspection" - types { implicit conn =>
         for {
-          List(a, b) <- Ns.int.insert(1, 2).transact.map(_.eids) // Need data for update and delete
+          List(a, b) <- Ns.int.insert(1, 2).transact.map(_.ids) // Need data for update and delete
           _ <- Ns.int.insert(1, 2).inspect
           _ <- Ns.int(3).save.inspect
           _ <- Ns.int.query.inspect

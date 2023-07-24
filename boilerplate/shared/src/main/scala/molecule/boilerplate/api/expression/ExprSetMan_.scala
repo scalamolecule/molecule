@@ -39,7 +39,7 @@ trait ExprSetMan_1[A, t, Ns1[_, _], Ns2[_, _, _]]
   def swap  (abs  : Seq[(t, t)]           )               : Ns1[A, t] = _exprSetMan(Swap  , abs2sets(abs)             )
   def remove(v    : t, vs: t*             )               : Ns1[A, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]           )               : Ns1[A, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
-  
+
   def apply[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet): Ns1[A, t] = _attrTac(Eq   , a)
   def not  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet): Ns1[A, t] = _attrTac(Neq  , a)
   def has  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with Card   ): Ns1[A, t] = _attrTac(Has  , a)
@@ -93,7 +93,7 @@ trait ExprSetMan_2[A, B, t, Ns1[_, _, _], Ns2[_, _, _, _]]
   def swap  (abs  : Seq[(t, t)]           )               : Ns1[A, B, t] = _exprSetMan(Swap  , abs2sets(abs)             )
   def remove(v    : t, vs: t*             )               : Ns1[A, B, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]           )               : Ns1[A, B, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
-  
+
   def apply[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet): Ns1[A, B, t] = _attrTac(Eq   , a)
   def not  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet): Ns1[A, B, t] = _attrTac(Neq  , a)
   def has  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with Card   ): Ns1[A, B, t] = _attrTac(Has  , a)
@@ -147,7 +147,7 @@ trait ExprSetMan_3[A, B, C, t, Ns1[_, _, _, _], Ns2[_, _, _, _, _]]
   def swap  (abs  : Seq[(t, t)]           )               : Ns1[A, B, C, t] = _exprSetMan(Swap  , abs2sets(abs)             )
   def remove(v    : t, vs: t*             )               : Ns1[A, B, C, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
-  
+
   def apply[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet): Ns1[A, B, C, t] = _attrTac(Eq   , a)
   def not  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet): Ns1[A, B, C, t] = _attrTac(Neq  , a)
   def has  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with Card   ): Ns1[A, B, C, t] = _attrTac(Has  , a)
@@ -201,7 +201,7 @@ trait ExprSetMan_4[A, B, C, D, t, Ns1[_, _, _, _, _], Ns2[_, _, _, _, _, _]]
   def swap  (abs  : Seq[(t, t)]           )               : Ns1[A, B, C, D, t] = _exprSetMan(Swap  , abs2sets(abs)             )
   def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
-  
+
   def apply[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet): Ns1[A, B, C, D, t] = _attrTac(Eq   , a)
   def not  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet): Ns1[A, B, C, D, t] = _attrTac(Neq  , a)
   def has  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with Card   ): Ns1[A, B, C, D, t] = _attrTac(Has  , a)
@@ -255,7 +255,7 @@ trait ExprSetMan_5[A, B, C, D, E, t, Ns1[_, _, _, _, _, _], Ns2[_, _, _, _, _, _
   def swap  (abs  : Seq[(t, t)]           )               : Ns1[A, B, C, D, E, t] = _exprSetMan(Swap  , abs2sets(abs)             )
   def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
-  
+
   def apply[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet): Ns1[A, B, C, D, E, t] = _attrTac(Eq   , a)
   def not  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet): Ns1[A, B, C, D, E, t] = _attrTac(Neq  , a)
   def has  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with Card   ): Ns1[A, B, C, D, E, t] = _attrTac(Has  , a)
@@ -309,7 +309,7 @@ trait ExprSetMan_6[A, B, C, D, E, F, t, Ns1[_, _, _, _, _, _, _], Ns2[_, _, _, _
   def swap  (abs  : Seq[(t, t)]           )               : Ns1[A, B, C, D, E, F, t] = _exprSetMan(Swap  , abs2sets(abs)             )
   def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
-  
+
   def apply[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet): Ns1[A, B, C, D, E, F, t] = _attrTac(Eq   , a)
   def not  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet): Ns1[A, B, C, D, E, F, t] = _attrTac(Neq  , a)
   def has  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with Card   ): Ns1[A, B, C, D, E, F, t] = _attrTac(Has  , a)
@@ -363,7 +363,7 @@ trait ExprSetMan_7[A, B, C, D, E, F, G, t, Ns1[_, _, _, _, _, _, _, _], Ns2[_, _
   def swap  (abs  : Seq[(t, t)]           )               : Ns1[A, B, C, D, E, F, G, t] = _exprSetMan(Swap  , abs2sets(abs)             )
   def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
-  
+
   def apply[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet): Ns1[A, B, C, D, E, F, G, t] = _attrTac(Eq   , a)
   def not  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet): Ns1[A, B, C, D, E, F, G, t] = _attrTac(Neq  , a)
   def has  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with Card   ): Ns1[A, B, C, D, E, F, G, t] = _attrTac(Has  , a)
@@ -417,7 +417,7 @@ trait ExprSetMan_8[A, B, C, D, E, F, G, H, t, Ns1[_, _, _, _, _, _, _, _, _], Ns
   def swap  (abs  : Seq[(t, t)]           )               : Ns1[A, B, C, D, E, F, G, H, t] = _exprSetMan(Swap  , abs2sets(abs)             )
   def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
-  
+
   def apply[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet): Ns1[A, B, C, D, E, F, G, H, t] = _attrTac(Eq   , a)
   def not  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet): Ns1[A, B, C, D, E, F, G, H, t] = _attrTac(Neq  , a)
   def has  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with Card   ): Ns1[A, B, C, D, E, F, G, H, t] = _attrTac(Has  , a)
@@ -471,7 +471,7 @@ trait ExprSetMan_9[A, B, C, D, E, F, G, H, I, t, Ns1[_, _, _, _, _, _, _, _, _, 
   def swap  (abs  : Seq[(t, t)]           )               : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetMan(Swap  , abs2sets(abs)             )
   def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
-  
+
   def apply[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet): Ns1[A, B, C, D, E, F, G, H, I, t] = _attrTac(Eq   , a)
   def not  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet): Ns1[A, B, C, D, E, F, G, H, I, t] = _attrTac(Neq  , a)
   def has  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with Card   ): Ns1[A, B, C, D, E, F, G, H, I, t] = _attrTac(Has  , a)
@@ -525,7 +525,7 @@ trait ExprSetMan_10[A, B, C, D, E, F, G, H, I, J, t, Ns1[_, _, _, _, _, _, _, _,
   def swap  (abs  : Seq[(t, t)]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetMan(Swap  , abs2sets(abs)             )
   def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
-  
+
   def apply[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet): Ns1[A, B, C, D, E, F, G, H, I, J, t] = _attrTac(Eq   , a)
   def not  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet): Ns1[A, B, C, D, E, F, G, H, I, J, t] = _attrTac(Neq  , a)
   def has  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with Card   ): Ns1[A, B, C, D, E, F, G, H, I, J, t] = _attrTac(Has  , a)
@@ -579,7 +579,7 @@ trait ExprSetMan_11[A, B, C, D, E, F, G, H, I, J, K, t, Ns1[_, _, _, _, _, _, _,
   def swap  (abs  : Seq[(t, t)]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetMan(Swap  , abs2sets(abs)             )
   def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
-  
+
   def apply[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet): Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _attrTac(Eq   , a)
   def not  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet): Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _attrTac(Neq  , a)
   def has  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with Card   ): Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _attrTac(Has  , a)
@@ -633,7 +633,7 @@ trait ExprSetMan_12[A, B, C, D, E, F, G, H, I, J, K, L, t, Ns1[_, _, _, _, _, _,
   def swap  (abs  : Seq[(t, t)]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetMan(Swap  , abs2sets(abs)             )
   def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
-  
+
   def apply[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _attrTac(Eq   , a)
   def not  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _attrTac(Neq  , a)
   def has  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with Card   ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _attrTac(Has  , a)
@@ -687,7 +687,7 @@ trait ExprSetMan_13[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Ns1[_, _, _, _, _,
   def swap  (abs  : Seq[(t, t)]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetMan(Swap  , abs2sets(abs)             )
   def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
-  
+
   def apply[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _attrTac(Eq   , a)
   def not  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _attrTac(Neq  , a)
   def has  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with Card   ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _attrTac(Has  , a)
@@ -741,7 +741,7 @@ trait ExprSetMan_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Ns1[_, _, _, _,
   def swap  (abs  : Seq[(t, t)]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetMan(Swap  , abs2sets(abs)             )
   def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
-  
+
   def apply[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _attrTac(Eq   , a)
   def not  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _attrTac(Neq  , a)
   def has  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with Card   ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _attrTac(Has  , a)
@@ -795,7 +795,7 @@ trait ExprSetMan_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Ns1[_, _, _,
   def swap  (abs  : Seq[(t, t)]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetMan(Swap  , abs2sets(abs)             )
   def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
-  
+
   def apply[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _attrTac(Eq   , a)
   def not  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _attrTac(Neq  , a)
   def has  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with Card   ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _attrTac(Has  , a)
@@ -849,7 +849,7 @@ trait ExprSetMan_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Ns1[_, _,
   def swap  (abs  : Seq[(t, t)]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetMan(Swap  , abs2sets(abs)             )
   def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
-  
+
   def apply[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _attrTac(Eq   , a)
   def not  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _attrTac(Neq  , a)
   def has  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with Card   ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _attrTac(Has  , a)
@@ -903,7 +903,7 @@ trait ExprSetMan_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Ns1[_,
   def swap  (abs  : Seq[(t, t)]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetMan(Swap  , abs2sets(abs)             )
   def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
-  
+
   def apply[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _attrTac(Eq   , a)
   def not  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _attrTac(Neq  , a)
   def has  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with Card   ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _attrTac(Has  , a)
@@ -957,7 +957,7 @@ trait ExprSetMan_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, Ns1
   def swap  (abs  : Seq[(t, t)]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetMan(Swap  , abs2sets(abs)             )
   def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
-  
+
   def apply[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _attrTac(Eq   , a)
   def not  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _attrTac(Neq  , a)
   def has  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with Card   ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _attrTac(Has  , a)
@@ -1011,7 +1011,7 @@ trait ExprSetMan_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, 
   def swap  (abs  : Seq[(t, t)]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetMan(Swap  , abs2sets(abs)             )
   def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
-  
+
   def apply[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _attrTac(Eq   , a)
   def not  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _attrTac(Neq  , a)
   def has  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with Card   ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _attrTac(Has  , a)
@@ -1065,7 +1065,7 @@ trait ExprSetMan_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, 
   def swap  (abs  : Seq[(t, t)]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetMan(Swap  , abs2sets(abs)             )
   def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
-  
+
   def apply[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _attrTac(Eq   , a)
   def not  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _attrTac(Neq  , a)
   def has  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with Card   ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _attrTac(Has  , a)
@@ -1119,7 +1119,7 @@ trait ExprSetMan_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, 
   def swap  (abs  : Seq[(t, t)]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetMan(Swap  , abs2sets(abs)             )
   def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
-  
+
   def apply[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _attrTac(Eq   , a)
   def not  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _attrTac(Neq  , a)
   def has  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with Card   ): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _attrTac(Has  , a)
@@ -1173,13 +1173,13 @@ trait ExprSetMan_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, 
   def swap  (abs  : Seq[(t, t)]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetMan(Swap  , abs2sets(abs)             )
   def remove(v    : t, vs: t*             )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetMan(Remove, Seq((v +: vs).toSet)      )
   def remove(vs   : Iterable[t]           )               : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetMan(Remove, Seq(vs.toSet)             )
-  
-  def apply[ns1[_]](a: ModelOps_0[t, ns1, Dummy_2]): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _attrTac(Eq   , a)
-  def not  [ns1[_]](a: ModelOps_0[t, ns1, Dummy_2]): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _attrTac(Neq  , a)
-  def has  [ns1[_]](a: ModelOps_0[t, ns1, Dummy_2]): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _attrTac(Has  , a)
-  def hasNo[ns1[_]](a: ModelOps_0[t, ns1, Dummy_2]): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _attrTac(HasNo, a)
-  def hasLt[ns1[_]](a: ModelOps_0[t, ns1, Dummy_2]): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _attrTac(HasLt, a)
-  def hasLe[ns1[_]](a: ModelOps_0[t, ns1, Dummy_2]): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _attrTac(HasLe, a)
-  def hasGt[ns1[_]](a: ModelOps_0[t, ns1, Dummy_2]): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _attrTac(HasGt, a)
-  def hasGe[ns1[_]](a: ModelOps_0[t, ns1, Dummy_2]): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _attrTac(HasGe, a)
+
+  def apply[ns1[_]](a: ModelOps_0[t, ns1, X2]): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _attrTac(Eq   , a)
+  def not  [ns1[_]](a: ModelOps_0[t, ns1, X2]): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _attrTac(Neq  , a)
+  def has  [ns1[_]](a: ModelOps_0[t, ns1, X2]): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _attrTac(Has  , a)
+  def hasNo[ns1[_]](a: ModelOps_0[t, ns1, X2]): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _attrTac(HasNo, a)
+  def hasLt[ns1[_]](a: ModelOps_0[t, ns1, X2]): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _attrTac(HasLt, a)
+  def hasLe[ns1[_]](a: ModelOps_0[t, ns1, X2]): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _attrTac(HasLe, a)
+  def hasGt[ns1[_]](a: ModelOps_0[t, ns1, X2]): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _attrTac(HasGt, a)
+  def hasGe[ns1[_]](a: ModelOps_0[t, ns1, X2]): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _attrTac(HasGe, a)
 }

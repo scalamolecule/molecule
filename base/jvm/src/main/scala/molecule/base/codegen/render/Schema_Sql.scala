@@ -37,7 +37,7 @@ case class Schema_Sql(schema: MetaSchema) extends BaseHelpers with RegexMatching
     val ns     = metaNs.ns
     val attrs  = metaNs.attrs.filterNot(a => a.card == CardSet && a.refNs.nonEmpty)
     val max    = attrs.map(a => a.attr.length).max.max(2)
-    val fields = attrs.map(a => field(max, a)).mkString(s",\n|")
+    val fields = attrs.map(a => field(max, a)).tail.mkString(s",\n|") // without id
     val id     = "id" + padS(max, "id") + " $id,"
     val table  =
       s"""       |CREATE TABLE $ns (

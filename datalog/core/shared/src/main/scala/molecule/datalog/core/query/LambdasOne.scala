@@ -142,11 +142,32 @@ trait LambdasOne extends ResolveBase {
   private lazy val j2sOptLong       = (v: AnyRef) => v match {
     case null          => Option.empty[Long]
     case v: jLong      => Some(v)
-    case v: jMap[_, _] => v.values.iterator.next match {
-      case l: Long => Some(l)
-      // ref
-      case map: jMap[_, _] => Some(map.values.iterator.next.asInstanceOf[Long])
-    }
+    case v: jMap[_, _] =>
+      v.values.iterator.next match {
+        case l: Long => Some(l)
+        // ref
+        case map: jMap[_, _] =>
+          /*
+          // If a ref is owned (:db/isComponent true), Datomic returns all nested values in a pull for an optional
+          // ref value. So, the id can hide anywhere in the map entries and we need to extract it.
+          // We can't call get(<key>) on the map since it needs a clojure.lang.Keyword that we can use in a shared module
+          {:ns/ownedRef {:ns/attr1 6, :ns/attr2 7, :db/id 17592186045419, :ns/attr3 8}}
+          -------
+          // If the ref is not owned, Datomic only returns the id
+          {:ns/ref {:db/id 17592186045422}}
+           */
+          var continue = true
+          var id       = 0L
+          val it       = map.entrySet().iterator()
+          while (it.hasNext && continue) {
+            val pair = it.next()
+            if (pair.getKey.toString == ":db/id") {
+              continue = false
+              id = pair.getValue.asInstanceOf[Long]
+            }
+          }
+          Some(id)
+      }
   }
   private lazy val j2sOptFloat      = (v: AnyRef) => v match {
     case null          => Option.empty[Float]

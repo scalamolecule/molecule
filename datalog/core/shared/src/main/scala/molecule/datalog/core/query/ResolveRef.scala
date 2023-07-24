@@ -22,13 +22,17 @@ trait ResolveRef[Tpl] { self: Base with NestOpt_[Tpl] =>
 
   protected def resolveNestedRef(es: List[Var], ref: Ref): List[Var] = {
     val (e, refAttr, refId) = (es.last, s":${ref.ns}/${ref.refAttr}", vv)
-    firstEid = refId // for composites in nested
-    nestedIds += e
+    firstId = refId // for composites in nested
+    val nestedId = "?id" + nestedIds.size
+    nestedIds += nestedId
+    //    nestedIds += e
     if (ref.bidirectional) {
+      where += s"[(identity $e) $nestedId]" -> wGround
       where += s"(rule$e $e $refId)" -> wClause
       rules += s"[(rule$e $e $refId) [$e $refAttr $refId]]"
       rules += s"[(rule$e $e $refId) [$refId $refAttr $e]]"
     } else {
+      where += s"[(identity $e) $nestedId]" -> wGround
       where += s"[$e $refAttr $refId]" -> wClause
     }
     // Start new level of casts
@@ -38,23 +42,30 @@ trait ResolveRef[Tpl] { self: Base with NestOpt_[Tpl] =>
   }
 
   private def sortNestedLevel(): Unit = {
-    val nestedIndex           = nestedIds.length - 1
-    val levelIdSorter         = (_: Int) => (a: Row, b: Row) =>
+    val nestedIndex          = nestedIds.length - 1
+    val levelIdSorter        = (_: Int) => (a: Row, b: Row) =>
       a.get(nestedIndex).asInstanceOf[jLong].compareTo(b.get(nestedIndex).asInstanceOf[jLong])
-    val dummyIndexOfNestedEid = 6
-    sortss = sortss.init :+ (sortss.last :+ (dummyIndexOfNestedEid, levelIdSorter))
+    val dummyIndexOfNestedId = 6
+    sortss = sortss.init :+ (sortss.last :+ (dummyIndexOfNestedId, levelIdSorter))
     sortss = sortss :+ Nil
   }
 
   protected def resolveNestedOptRef(e: Var, nestedRef: Ref): Unit = {
-    nestedOptIds += e
+    val nestedId = "?id" + nestedIds.size
     if (where.isEmpty) {
       val Ref(ns, refAttrClean, _, _, _) = nestedRef
       val (refAttr, refId)               = (s":$ns/$refAttrClean", vv)
       where += s"[$e $refAttr $refId]" -> wClause
     }
+    where += s"[(identity $e) $nestedId]" -> wGround
 
-    if (where.length == 1 && where.head._1.startsWith("[(identity")) {
+    if (where.length == 2 && where.head._1.startsWith("[(identity")) {
+      /*
+      When only one identity function for single optional attribute and one for identity of pull entity id
+
+      ([(identity ?a) ?a-?b],1)
+      ([(identity ?a) ?id0],1)
+       */
       throw ModelError("Single optional attribute before optional nested data structure is not allowed.")
     }
 

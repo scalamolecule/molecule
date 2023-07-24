@@ -2,9 +2,9 @@ import org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv
 import org.scalajs.linker.interface.ESVersion
 
 
-val scala212 = "2.12.17"
-val scala213 = "2.13.10"
-val scala3   = "3.2.2"
+val scala212 = "2.12.18"
+val scala213 = "2.13.11"
+val scala3   = "3.3.0"
 val allScala = Seq(scala212, scala213, scala3)
 
 val akkaVersion     = "2.8.0-M3"
@@ -17,14 +17,14 @@ inThisBuild(
     organizationName := "ScalaMolecule",
     organizationHomepage := Some(url("http://www.scalamolecule.org")),
     version := "0.1.0-SNAPSHOT",
-    versionScheme := Some("early-semver"),
+    //    versionScheme := Some("early-semver"),
     scalaVersion := scala213,
     //    scalaVersion := scala3,
     crossScalaVersions := allScala,
 
     // Run tests for all systems sequentially to avoid data locks with db
     // Only applies on JVM. On JS platform there's no parallelism anyway.
-    Test / parallelExecution := false
+    Test / parallelExecution := false,
   )
 )
 
@@ -42,7 +42,9 @@ lazy val root = project
     coreTests.js,
     coreTests.jvm,
     datalogCore.js,
-    datalogCore.jvm
+    datalogCore.jvm,
+    datalogDatomic.js,
+    datalogDatomic.jvm
   )
 
 lazy val base = crossProject(JSPlatform, JVMPlatform)
@@ -53,7 +55,10 @@ lazy val base = crossProject(JSPlatform, JVMPlatform)
   .settings(
     libraryDependencies ++= {
       if (scalaVersion.value == scala3) Seq()
-      else Seq("org.scalameta" %% "scalameta" % "4.7.1")
+      else {
+        // Needs to be Provided to avoid reflection issue when debugging projects that use molecule
+        Seq("org.scalameta" %% "scalameta" % "4.7.1" % Provided)
+      }
     },
     libraryDependencies ++= Seq(
       "com.lihaoyi" %%% "utest" % "0.8.1",
@@ -71,6 +76,7 @@ lazy val boilerplate = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .settings(name := "molecule-boilerplate")
   .dependsOn(base)
+  //  .dependsOn(base % "compile->compile;test->test")
   .settings(doPublish)
   .settings(
     libraryDependencies ++= Seq(
@@ -88,6 +94,7 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .settings(name := "molecule-core")
   .dependsOn(boilerplate)
+  //  .dependsOn(boilerplate % "compile->compile;test->test")
   .settings(doPublish)
   .settings(
     libraryDependencies ++= Seq(
@@ -100,7 +107,7 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
   )
   .jsSettings(
     libraryDependencies ++= Seq(
-      "org.scala-js" %%% "scalajs-dom" % "2.4.0",
+      "org.scala-js" %%% "scalajs-dom" % "2.2.0",
       "org.scala-js" %%% "scala-js-macrotask-executor" % "1.1.1",
       "org.scala-js" %%% "scalajs-java-securerandom" % "1.0.0" cross CrossVersion.for3Use2_13
     )
@@ -121,8 +128,9 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
 lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .settings(name := "molecule-coreTests")
-  .settings(publish / skip := true)
   .dependsOn(core)
+  //  .settings(publish / skip := true)
+  .settings(doPublish)
   .enablePlugins(MoleculePlugin)
   .settings(
     // Generate Molecule boilerplate code for tests with `sbt clean compile -Dmolecule=true`
@@ -132,7 +140,7 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
     moleculeDataModelPaths := Seq(
       "molecule/coreTests/dataModels/core"
     ),
-    //    moleculeMakeJars := false, // default: true
+    //   moleculeMakeJars := false, // default: true
 
     // Suppress "un-used" keys warning
     Global / excludeLintKeys ++= Set(
@@ -160,9 +168,11 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
 lazy val datalogCore = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .in(file("datalog/core"))
-  .settings(publish / skip := true)
+  //  .settings(publish / skip := true)
+  .settings(doPublish)
   .settings(name := "molecule-datalog-core")
   .dependsOn(coreTests % "compile->compile;test->test")
+  //  .dependsOn(core % "compile->compile;test->test")
   .settings(
     testFrameworks := Seq(
       new TestFramework("utest.runner.Framework"),
@@ -170,85 +180,58 @@ lazy val datalogCore = crossProject(JSPlatform, JVMPlatform)
     )
   )
   .jvmSettings(
-    libraryDependencies += "com.datomic" % "peer" % "1.0.6726"
+    libraryDependencies += "com.datomic" % "peer" % "1.0.6735"
   )
   .jsSettings(jsEnvironment)
 
 lazy val datalogDatomic = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .in(file("datalog/datomic"))
-  .settings(publish / skip := true)
+  //  .settings(publish / skip := true)
+  .settings(doPublish)
   .settings(name := "molecule-datalog-datomic")
-  .enablePlugins(BuildInfoPlugin)
   .dependsOn(datalogCore % "compile->compile;test->test")
-  //  .dependsOn(coreTests)
   .settings(
     // Temporarily limit number of tests to be compiled by sbt (comment out this whole sbt setting to test all)
     // Note that intellij doesn't recognize this setting - there you can right click on files and exclude
-    unmanagedSources / excludeFilter := {
-      val test = "src/test/scala/molecule/datalog/datomic/test"
-      def path(platform: String) =
-        (baseDirectory.value / s"../$platform/$test").getCanonicalPath
-      val jsTests     = path("js")
-      val jvmTests    = path("jvm")
-      val sharedTests = path("shared")
-      val allowed     = Seq(
-        //        jvmTests + "/restore",
-        //        sharedTests + "/aggr",
-        //        sharedTests + "/api",
-        //        sharedTests + "/composite",
-        //        sharedTests + "/crud",
-        //        sharedTests + "/expr",
-        //        sharedTests + "/pagination",
-        //        sharedTests + "/relation",
-        //        sharedTests + "/sort",
-        //        sharedTests + "/SyncApi.scala"
-        //        sharedTests + "/txMetaData",
-        //        sharedTests + "/validation",
-        //                sharedTests + "/time",
-        sharedTests,
-        jvmTests,
-        jsTests,
-        //        jvmTests + "/AdhocJVM.scala",
-        //        sharedTests + "/Adhoc.scala",
-      )
-      new SimpleFileFilter(f =>
-        (f.getCanonicalPath.startsWith(jsTests)
-          || f.getCanonicalPath.startsWith(jvmTests)
-          || f.getCanonicalPath.startsWith(sharedTests)) &&
-          !allowed.exists(p => f.getCanonicalPath.startsWith(p))
-      )
-    },
-    buildInfoPackage := "moleculeBuildInfo",
-    buildInfoKeys := Seq[BuildInfoKey](
-      name,
-      version,
-      scalaVersion,
-      sbtVersion,
-      "datomicDistributionsDir" -> DatomicSettings.distributionsDir,
-      "datomicHome" -> DatomicSettings.home,
-      "datomicProtocol" -> DatomicSettings.protocol,
-      "datomicUseFree" -> DatomicSettings.useFree,
-      "datomicFreeVersions" -> DatomicSettings.freeVersions,
-      "datomicProVersions" -> DatomicSettings.proVersions,
-      "datomicDevLocalVersions" -> DatomicSettings.devLocalVersions,
-      "datomicFreeVersion" -> DatomicSettings.freeVersion,
-      "datomicProVersion" -> DatomicSettings.proVersion,
-      "datomicDevLocalVersion" -> DatomicSettings.devLocalVersion
-    ),
-
-    // Suppress "un-used" keys warning
-    Global / excludeLintKeys ++= Set(buildInfoPackage, buildInfoKeys),
+    //    unmanagedSources / excludeFilter := {
+    //      val test = "src/test/scala/molecule/datalog/datomic/test"
+    //      def path(platform: String) = (baseDirectory.value / s"../$platform/$test").getCanonicalPath
+    //      val jsTests     = path("js")
+    //      val jvmTests    = path("jvm")
+    //      val sharedTests = path("shared")
+    //      val allowed     = Seq(
+    //        //        jvmTests + "/restore",
+    //        //        sharedTests + "/aggr",
+    //        //        sharedTests + "/api",
+    //        //        sharedTests + "/composite",
+    //        //        sharedTests + "/crud",
+    //        //        sharedTests + "/expr",
+    //        //        sharedTests + "/pagination",
+    //        //        sharedTests + "/relation",
+    //        //        sharedTests + "/sort",
+    //        //        sharedTests + "/SyncApi.scala"
+    //        //        sharedTests + "/txMetaData",
+    //        //        sharedTests + "/validation",
+    //        //                sharedTests + "/time",
+    //        //        sharedTests,
+    //        jvmTests,
+    //        jsTests,
+    //        //        jvmTests + "/AdhocJVM.scala",
+    //        //        sharedTests + "/Adhoc.scala",
+    //      )
+    //      new SimpleFileFilter(f =>
+    //        (f.getCanonicalPath.startsWith(jsTests)
+    //          || f.getCanonicalPath.startsWith(jvmTests)
+    //          || f.getCanonicalPath.startsWith(sharedTests)) &&
+    //          !allowed.exists(p => f.getCanonicalPath.startsWith(p))
+    //      )
+    //    },
     testFrameworks := Seq(
       new TestFramework("utest.runner.Framework"),
       new TestFramework("zio.test.sbt.ZTestFramework")
     )
   )
-  //  .jvmSettings(
-  //    libraryDependencies ++= Seq(
-  //      "com.datomic" % "peer" % "1.0.6726"
-  //    )
-  //  )
   .jsSettings(jsEnvironment)
 
 
@@ -284,12 +267,6 @@ lazy val sqlJdbc = crossProject(JSPlatform, JVMPlatform)
       new TestFramework("zio.test.sbt.ZTestFramework")
     )
   )
-  //  .jvmSettings(
-  //    libraryDependencies ++= Seq(
-  //      "com.datomic" % "peer" % "1.0.6726",
-  //      "com.h2database" % "h2" % "2.1.214" % Provided
-  //    )
-  //  )
   .jsSettings(jsEnvironment)
 
 

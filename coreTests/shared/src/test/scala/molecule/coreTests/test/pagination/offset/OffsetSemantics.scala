@@ -51,12 +51,12 @@ trait OffsetSemantics extends CoreTestSuite with ApiAsyncImplicits { self: SpiAs
 
     "Skipped data" - types { implicit conn =>
       for {
-        eids <- Ns.int.insert(1, 2, 3, 4).transact.map(_.eids)
+        ids <- Ns.int.insert(1, 2, 3, 4).transact.map(_.ids)
 
         _ <- Ns.int.a1.query.limit(2).get.map(_ ==> List(1, 2))
 
         // First row (1) retracted before next page is fetched
-        _ <- Ns(eids.head).delete.transact
+        _ <- Ns(ids.head).delete.transact
 
         // 3 is never shown!
         _ <- Ns.int.a1.query.limit(2).offset(2).get.map(_._1 ==> List(4))

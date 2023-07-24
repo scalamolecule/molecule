@@ -20,12 +20,12 @@ object _ExprOneTac extends BoilerplateGenBase("ExprOneTac", "/api/expression") {
   case class Trait(arity: Int) extends TemplateVals(arity) {
     val attrExprs = if (arity == 22) {
       s"""
-         |  def apply[ns1[_]](a: ModelOps_0[t, ns1, Dummy_2] with CardOne): Ns1[${`A..V`}, t] = _attrTac(Eq , a)
-         |  def not  [ns1[_]](a: ModelOps_0[t, ns1, Dummy_2] with CardOne): Ns1[${`A..V`}, t] = _attrTac(Neq, a)
-         |  def <    [ns1[_]](a: ModelOps_0[t, ns1, Dummy_2] with CardOne): Ns1[${`A..V`}, t] = _attrTac(Lt , a)
-         |  def <=   [ns1[_]](a: ModelOps_0[t, ns1, Dummy_2] with CardOne): Ns1[${`A..V`}, t] = _attrTac(Le , a)
-         |  def >    [ns1[_]](a: ModelOps_0[t, ns1, Dummy_2] with CardOne): Ns1[${`A..V`}, t] = _attrTac(Gt , a)
-         |  def >=   [ns1[_]](a: ModelOps_0[t, ns1, Dummy_2] with CardOne): Ns1[${`A..V`}, t] = _attrTac(Ge , a)""".stripMargin
+         |  def apply[ns1[_]](a: ModelOps_0[t, ns1, X2] with CardOne): Ns1[${`A..V`}, t] = _attrTac(Eq , a)
+         |  def not  [ns1[_]](a: ModelOps_0[t, ns1, X2] with CardOne): Ns1[${`A..V`}, t] = _attrTac(Neq, a)
+         |  def <    [ns1[_]](a: ModelOps_0[t, ns1, X2] with CardOne): Ns1[${`A..V`}, t] = _attrTac(Lt , a)
+         |  def <=   [ns1[_]](a: ModelOps_0[t, ns1, X2] with CardOne): Ns1[${`A..V`}, t] = _attrTac(Le , a)
+         |  def >    [ns1[_]](a: ModelOps_0[t, ns1, X2] with CardOne): Ns1[${`A..V`}, t] = _attrTac(Gt , a)
+         |  def >=   [ns1[_]](a: ModelOps_0[t, ns1, X2] with CardOne): Ns1[${`A..V`}, t] = _attrTac(Ge , a)""".stripMargin
     } else {
       s"""
          |  def apply[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardOne): Ns1[${`A..V, `}t] = _attrTac(Eq , a)

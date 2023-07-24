@@ -16,23 +16,23 @@ trait UpdateSetOps_Byte_ extends CoreTestSuite with ApiAsyncImplicits { self: Sp
 
     "apply (replace/add all)" - types { implicit conn =>
       for {
-        eid <- Ns.bytes(Set(byte1, byte2)).save.transact.map(_.eid)
+        id <- Ns.bytes(Set(byte1, byte2)).save.transact.map(_.id)
 
-        _ <- Ns(eid).bytes(Set(byte3, byte4)).update.transact
+        _ <- Ns(id).bytes(Set(byte3, byte4)).update.transact
         _ <- Ns.bytes.query.get.map(_.head ==> Set(byte3, byte4))
 
         // Apply Seq of values
-        _ <- Ns(eid).bytes(Set(byte4, byte5)).update.transact
+        _ <- Ns(id).bytes(Set(byte4, byte5)).update.transact
         _ <- Ns.bytes.query.get.map(_.head ==> Set(byte4, byte5))
 
         // Apply empty Seq of values (deleting all values!)
-        _ <- Ns(eid).bytes(Seq.empty[Byte]).update.transact
+        _ <- Ns(id).bytes(Seq.empty[Byte]).update.transact
         _ <- Ns.bytes.query.get.map(_ ==> Nil)
 
-        _ <- Ns(eid).bytes(Set(byte1, byte2)).update.transact
+        _ <- Ns(id).bytes(Set(byte1, byte2)).update.transact
 
         // Delete all (apply no values)
-        _ <- Ns(eid).bytes().update.transact
+        _ <- Ns(id).bytes().update.transact
         _ <- Ns.bytes.query.get.map(_ ==> Nil)
       } yield ()
     }
@@ -40,33 +40,33 @@ trait UpdateSetOps_Byte_ extends CoreTestSuite with ApiAsyncImplicits { self: Sp
 
     "add" - types { implicit conn =>
       for {
-        eid <- Ns.bytes(Set(byte1)).save.transact.map(_.eid)
+        id <- Ns.bytes(Set(byte1)).save.transact.map(_.id)
 
         // Add value
-        _ <- Ns(eid).bytes.add(byte2).update.transact
+        _ <- Ns(id).bytes.add(byte2).update.transact
         _ <- Ns.bytes.query.get.map(_.head ==> Set(byte1, byte2))
 
         // Add existing value (no effect)
-        _ <- Ns(eid).bytes.add(byte2).update.transact
+        _ <- Ns(id).bytes.add(byte2).update.transact
         _ <- Ns.bytes.query.get.map(_.head ==> Set(byte1, byte2))
 
         // Add multiple values (vararg)
-        _ <- Ns(eid).bytes.add(byte3, byte4).update.transact
+        _ <- Ns(id).bytes.add(byte3, byte4).update.transact
         _ <- Ns.bytes.query.get.map(_.head ==> Set(byte1, byte2, byte3, byte4))
 
         // Add Iterable of values (existing values unaffected)
         // Seq
-        _ <- Ns(eid).bytes.add(Seq(byte4, byte5)).update.transact
+        _ <- Ns(id).bytes.add(Seq(byte4, byte5)).update.transact
         _ <- Ns.bytes.query.get.map(_.head ==> Set(byte1, byte2, byte3, byte4, byte5))
         // Set
-        _ <- Ns(eid).bytes.add(Set(byte6)).update.transact
+        _ <- Ns(id).bytes.add(Set(byte6)).update.transact
         _ <- Ns.bytes.query.get.map(_.head ==> Set(byte1, byte2, byte3, byte4, byte5, byte6))
         // Iterable
-        _ <- Ns(eid).bytes.add(Iterable(byte7)).update.transact
+        _ <- Ns(id).bytes.add(Iterable(byte7)).update.transact
         _ <- Ns.bytes.query.get.map(_.head ==> Set(byte1, byte2, byte3, byte4, byte5, byte6, byte7))
 
         // Add empty Seq of values (no effect)
-        _ <- Ns(eid).bytes.add(Seq.empty[Byte]).update.transact
+        _ <- Ns(id).bytes.add(Seq.empty[Byte]).update.transact
         _ <- Ns.bytes.query.get.map(_.head ==> Set(byte1, byte2, byte3, byte4, byte5, byte6, byte7))
       } yield ()
     }
@@ -74,30 +74,30 @@ trait UpdateSetOps_Byte_ extends CoreTestSuite with ApiAsyncImplicits { self: Sp
 
     "swap" - types { implicit conn =>
       for {
-        eid <- Ns.bytes(Set(byte1, byte2, byte3, byte4, byte5, byte6)).save.transact.map(_.eid)
+        id <- Ns.bytes(Set(byte1, byte2, byte3, byte4, byte5, byte6)).save.transact.map(_.id)
 
         // Replace value
-        _ <- Ns(eid).bytes.swap(byte6 -> byte8).update.transact
+        _ <- Ns(id).bytes.swap(byte6 -> byte8).update.transact
         _ <- Ns.bytes.query.get.map(_.head ==> Set(byte1, byte2, byte3, byte4, byte5, byte8))
 
         // Replacing value to existing value simply deletes it
-        _ <- Ns(eid).bytes.swap(byte5 -> byte8).update.transact
+        _ <- Ns(id).bytes.swap(byte5 -> byte8).update.transact
         _ <- Ns.bytes.query.get.map(_.head ==> Set(byte1, byte2, byte3, byte4, byte8))
 
         // Replace multiple values (vararg)
-        _ <- Ns(eid).bytes.swap(byte3 -> byte6, byte4 -> byte7).update.transact
+        _ <- Ns(id).bytes.swap(byte3 -> byte6, byte4 -> byte7).update.transact
         _ <- Ns.bytes.query.get.map(_.head ==> Set(byte1, byte2, byte6, byte7, byte8))
 
         // Missing old value has no effect. The new value is inserted (upsert semantics)
-        _ <- Ns(eid).bytes.swap(byte4 -> byte9).update.transact
+        _ <- Ns(id).bytes.swap(byte4 -> byte9).update.transact
         _ <- Ns.bytes.query.get.map(_.head ==> Set(byte1, byte2, byte6, byte7, byte8, byte9))
 
         // Replace with Seq of oldValue->newValue pairs
-        _ <- Ns(eid).bytes.swap(Seq(byte2 -> byte5)).update.transact
+        _ <- Ns(id).bytes.swap(Seq(byte2 -> byte5)).update.transact
         _ <- Ns.bytes.query.get.map(_.head ==> Set(byte1, byte5, byte6, byte7, byte8, byte9))
 
         // Replacing with empty Seq of oldValue->newValue pairs has no effect
-        _ <- Ns(eid).bytes.swap(Seq.empty[(Byte, Byte)]).update.transact
+        _ <- Ns(id).bytes.swap(Seq.empty[(Byte, Byte)]).update.transact
         _ <- Ns.bytes.query.get.map(_.head ==> Set(byte1, byte5, byte6, byte7, byte8, byte9))
 
 
@@ -117,34 +117,34 @@ trait UpdateSetOps_Byte_ extends CoreTestSuite with ApiAsyncImplicits { self: Sp
 
     "remove" - types { implicit conn =>
       for {
-        eid <- Ns.bytes(Set(byte1, byte2, byte3, byte4, byte5, byte6)).save.transact.map(_.eid)
+        id <- Ns.bytes(Set(byte1, byte2, byte3, byte4, byte5, byte6)).save.transact.map(_.id)
 
         // Remove value
-        _ <- Ns(eid).bytes.remove(byte6).update.transact
+        _ <- Ns(id).bytes.remove(byte6).update.transact
         _ <- Ns.bytes.query.get.map(_.head ==> Set(byte1, byte2, byte3, byte4, byte5))
 
         // Removing non-existing value has no effect
-        _ <- Ns(eid).bytes.remove(byte7).update.transact
+        _ <- Ns(id).bytes.remove(byte7).update.transact
         _ <- Ns.bytes.query.get.map(_.head ==> Set(byte1, byte2, byte3, byte4, byte5))
 
         // Removing duplicate values removes the distinct value
-        _ <- Ns(eid).bytes.remove(byte5, byte5).update.transact
+        _ <- Ns(id).bytes.remove(byte5, byte5).update.transact
         _ <- Ns.bytes.query.get.map(_.head ==> Set(byte1, byte2, byte3, byte4))
 
         // Remove multiple values (vararg)
-        _ <- Ns(eid).bytes.remove(byte3, byte4).update.transact
+        _ <- Ns(id).bytes.remove(byte3, byte4).update.transact
         _ <- Ns.bytes.query.get.map(_.head ==> Set(byte1, byte2))
 
         // Remove Seq of values
-        _ <- Ns(eid).bytes.remove(Seq(byte2)).update.transact
+        _ <- Ns(id).bytes.remove(Seq(byte2)).update.transact
         _ <- Ns.bytes.query.get.map(_.head ==> Set(byte1))
 
         // Removing empty Seq of values has no effect
-        _ <- Ns(eid).bytes.remove(Seq.empty[Byte]).update.transact
+        _ <- Ns(id).bytes.remove(Seq.empty[Byte]).update.transact
         _ <- Ns.bytes.query.get.map(_.head ==> Set(byte1))
 
         // Removing all elements is like deleting the attribute
-        _ <- Ns(eid).bytes.remove(Seq(byte1)).update.transact
+        _ <- Ns(id).bytes.remove(Seq(byte1)).update.transact
         _ <- Ns.bytes.query.get.map(_ ==> Nil)
       } yield ()
     }

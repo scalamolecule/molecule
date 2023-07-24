@@ -199,7 +199,13 @@ trait DataModelApi {
      * */
     def alias(altAttrName: String): Self = ???
 
-    def description(s: String): Self = ???
+    /** Description of attribute
+     *
+     * @param s
+     * @return
+     */
+    def descr(s: String): Self = ???
+    def apply(s: String): Self = ???
 
 
     // Validation .................
@@ -238,6 +244,7 @@ trait DataModelApi {
      * @tparam RefNs Ref namespace type
      */
     def apply[RefNs]: Self = ???
+    def apply[RefNs](description: String): Self = ???
 
     /** Owner option.
      *

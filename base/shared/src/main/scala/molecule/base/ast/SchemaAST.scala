@@ -5,19 +5,19 @@ import molecule.base.util.BaseHelpers
 object SchemaAST extends BaseHelpers {
 
   sealed trait Card {
-    def marker: String
-    def tpe: String
+    private[molecule] def _marker: String
+    private[molecule] def _tpe: String
   }
 
   trait CardOne extends Card {
-    override def marker = "One"
-    override def tpe = ""
+    override def _marker = "One"
+    override def _tpe = ""
   }
   case object CardOne extends CardOne
 
   trait CardSet extends Card {
-    override def marker = "Set"
-    override def tpe = "Set"
+    override def _marker = "Set"
+    override def _tpe = "Set"
   }
   case object CardSet extends CardSet
 

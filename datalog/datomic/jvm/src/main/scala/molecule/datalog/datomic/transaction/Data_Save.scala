@@ -8,20 +8,20 @@ import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.SaveExtraction
 import molecule.core.transaction.ops.SaveOps
 
-trait Data_Save extends DatomicTxBase_JVM with SaveOps with MoleculeLogging { self: SaveExtraction =>
+trait Data_Save extends DatomicTxMetaData_JVM with SaveOps with MoleculeLogging { self: SaveExtraction =>
 
   def getRawStmts(
     elements: List[Element],
-    eid: String,
+    id: String,
     debug: Boolean = true,
     init: Boolean = true,
-    eidIndex: Int = 0
+    idIndex: Int = 0
   ): Data = {
     //    elements.foreach(println)
     if (init) {
-      initTxBase(elements, eidIndex)
+      initTxBase(elements, idIndex)
     }
-    e = eid
+    e = id
     e0 = e
 
     handleNs(getInitialNs(elements))
@@ -35,8 +35,8 @@ trait Data_Save extends DatomicTxBase_JVM with SaveOps with MoleculeLogging { se
     stmts
   }
 
-  def getStmts(elements: List[Element], eidIndex: Int = 0): Data = {
-    initTxBase(elements, eidIndex)
+  def getStmts(elements: List[Element], idIndex: Int = 0): Data = {
+    initTxBase(elements, idIndex)
     getRawStmts(elements, newId, init = false)
   }
 

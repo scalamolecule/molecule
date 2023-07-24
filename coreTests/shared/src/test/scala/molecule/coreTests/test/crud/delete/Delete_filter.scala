@@ -25,15 +25,15 @@ trait Delete_filter extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsyn
 
     "Filter by multiple non-ns value" - types { implicit conn =>
       for {
-        List(e1, e2, e3) <- Ns.i.insert(1, 2, 2).transact.map(_.eids)
-        _ <- Ns.eid.a1.i.query.get.map(_ ==> List(
+        List(e1, e2, e3) <- Ns.i.insert(1, 2, 2).transact.map(_.ids)
+        _ <- Ns.id.a1.i.query.get.map(_ ==> List(
           (e1, 1),
           (e2, 2),
           (e3, 2),
         ))
 
         _ <- Ns.i_(2).delete.transact
-        _ <- Ns.eid.i.query.get.map(_ ==> List(
+        _ <- Ns.id.i.query.get.map(_ ==> List(
           (e1, 1),
         ))
       } yield ()

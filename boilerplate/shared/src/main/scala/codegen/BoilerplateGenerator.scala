@@ -18,11 +18,13 @@ object BoilerplateGenerator extends App {
   //
   //  boilerplate.api._Aggregates.generate()
   //  boilerplate.api._Composite.generate()
-  //  boilerplate.api._CompositeInit.generate()
+    boilerplate.api._CompositeInit.generate()
+//    boilerplate.api._CompositeTx.generate()
   //  boilerplate.api._ModelOps.generate()
-    boilerplate.api._Nested.generate()
-    boilerplate.api._NestedOpt.generate()
+//    boilerplate.api._Nested.generate()
+//    boilerplate.api._NestedOpt.generate()
   //  boilerplate.api._SortAttrs.generate()
+//    boilerplate.api._TxInit.generate()
   //
   //  boilerplate.ast._Model.generate()
   //  boilerplate.ops._ModelTransformations.generate()

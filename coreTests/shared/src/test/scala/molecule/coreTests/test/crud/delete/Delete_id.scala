@@ -9,23 +9,25 @@ import molecule.core.util.Executor._
 import molecule.coreTests.setup.CoreTestSuite
 import molecule.core.spi.SpiAsync
 
-trait Delete_eid extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
+trait Delete_id extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
 
   override lazy val tests = Tests {
 
     "1 entity" - refs { implicit conn =>
       for {
-        List(e1, _) <- A.i.insert(1, 2).transact.map(_.eids)
-        _ <- A.i.query.get.map(_ ==> List(1, 2))
+        List(e1, e2, _) <- A.i.insert(1, 2, 3).transact.map(_.ids)
+        _ <- A.i.query.get.map(_ ==> List(1, 2, 3))
         _ <- A(e1).delete.transact
-        _ <- A.i.query.get.map(_ ==> List(2))
+        // or
+        _ <- A.id_(e2).delete.transact
+        _ <- A.i.query.get.map(_ ==> List(3))
       } yield ()
     }
 
 
     "n entities vararg" - refs { implicit conn =>
       for {
-        List(e1, e2, _) <- A.i.insert(1, 2, 3).transact.map(_.eids)
+        List(e1, e2, _) <- A.i.insert(1, 2, 3).transact.map(_.ids)
         _ <- A.i.query.get.map(_ ==> List(1, 2, 3))
         _ <- A(e1, e2).delete.transact
         _ <- A.i.query.get.map(_ ==> List(3))
@@ -34,7 +36,7 @@ trait Delete_eid extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  
 
     "n entities iterable" - refs { implicit conn =>
       for {
-        List(e1, e2, _) <- A.i.insert(1, 2, 3).transact.map(_.eids)
+        List(e1, e2, _) <- A.i.insert(1, 2, 3).transact.map(_.ids)
         _ <- A.i.query.get.map(_ ==> List(1, 2, 3))
         _ <- A(Seq(e1, e2)).delete.transact
         _ <- A.i.query.get.map(_ ==> List(3))
@@ -61,7 +63,7 @@ trait Delete_eid extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  
           e1 <- A.i.B.i.insert(
             (1, 10),
             (2, 20)
-          ).transact.map(_.eid)
+          ).transact.map(_.id)
 
           // 2 entities, each referencing another entity
           _ <- A.i.a1.B.i.query.get.map(_ ==> List(
@@ -87,7 +89,7 @@ trait Delete_eid extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  
           e1 <- A.i.Bb.*(B.i).insert(
             (1, Seq(10, 11)),
             (2, Seq(20, 21))
-          ).transact.map(_.eid)
+          ).transact.map(_.id)
 
           // 2 entities, each with 2 owned sub-entities
           _ <- A.i.a1.Bb.*(B.i.a1).query.get.map(_ ==> List(
@@ -117,7 +119,7 @@ trait Delete_eid extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  
           e1 <- A.i.OwnB.i.insert(
             (1, 10),
             (2, 20)
-          ).transact.map(_.eid)
+          ).transact.map(_.id)
 
           // 2 entities, each with an owned sub-entity
           _ <- A.i.a1.OwnB.i.query.get.map(_ ==> List(
@@ -141,7 +143,7 @@ trait Delete_eid extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  
           e1 <- A.i.OwnBb.*(B.i).insert(
             (1, Seq(10, 11)),
             (2, Seq(20, 21))
-          ).transact.map(_.eid)
+          ).transact.map(_.id)
 
           // 2 entities, each with 2 owned sub-entities
           _ <- A.i.a1.OwnBb.*(B.i.a1).query.get.map(_ ==> List(
@@ -169,7 +171,7 @@ trait Delete_eid extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  
           (1, 10),
           (2, 20),
           (3, 30),
-        ).transact.map(_.eids)
+        ).transact.map(_.ids)
 
         // 3 composite entities, each with 2 attributes from 2 namespaces
         _ <- (A.i.a1 + B.i).query.get.map(_ ==> List(
@@ -194,20 +196,6 @@ trait Delete_eid extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  
 
 
     "Semantics" - {
-
-      "eid_(eid) not allowed" - refs { implicit conn =>
-        for {
-          _ <- A.eid_(42).i(2).delete.transact
-            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't delete by applying entity ids to eid_"
-          }
-
-          _ <- A.eid_(42).i(2).delete.transact
-            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't delete by applying entity ids to eid_"
-          }
-        } yield ()
-      }
 
       "Can't update multiple values for one card-one attribute" - refs { implicit conn =>
         for {

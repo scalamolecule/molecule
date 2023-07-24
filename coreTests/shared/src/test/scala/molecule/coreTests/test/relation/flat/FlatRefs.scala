@@ -69,11 +69,11 @@ trait FlatRefs extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
     "ref attributes" - refs { implicit conn =>
       for {
         // Card one ref attr
-        List(_, e1) <- A.i.B.i.insert(1, 2).transact.map(_.eids)
+        List(_, e1) <- A.i.B.i.insert(1, 2).transact.map(_.ids)
         _ <- A.i.b.query.get.map(_ ==> List((1, e1)))
 
         // Card many ref attr (returned as Set)
-        List(_, e2) <- A.i.Bb.i.insert(1, 2).transact.map(_.eids)
+        List(_, e2) <- A.i.Bb.i.insert(1, 2).transact.map(_.ids)
         _ <- A.i.bb.query.get.map(_ ==> List((1, Set(e2))))
       } yield ()
     }
@@ -82,7 +82,7 @@ trait FlatRefs extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
     "multiple card-many refs" - refs { implicit conn =>
       for {
         // Two entities to be referenced
-        List(b1, b2) <- B.i.insert(1, 2).transact.map(_.eids)
+        List(b1, b2) <- B.i.insert(1, 2).transact.map(_.ids)
 
         // Reference Set of entities
         _ <- A.i(0).bb(Set(b1, b2)).save.transact

@@ -9,7 +9,7 @@ import molecule.core.transaction.{InsertExtraction, InsertResolvers_, SaveExtrac
 import molecule.core.util.ModelUtils
 
 trait Data_Insert
-  extends DatomicTxBase_JVM
+  extends DatomicTxMetaData_JVM
     with InsertOps
     with DatomicDataType_JVM
     with ModelUtils
@@ -19,11 +19,20 @@ trait Data_Insert
     nsMap: Map[String, MetaNs],
     elements: List[Element],
     tpls: Seq[Product],
-    eidIndex: Int = 0,
+    idIndex: Int = 0,
     debug: Boolean = true
   ): Data = {
-    initTxBase(elements, eidIndex)
+    initTxBase(elements, idIndex)
     val (mainElements, txElements) = separateTxElements(elements)
+
+
+//    println("----------")
+//    mainElements.foreach(println)
+//    println("----------")
+//    txElements.foreach(println)
+
+
+
     val row2stmts                  = getResolver(nsMap, mainElements)
     tpls.foreach { tpl =>
       e = newId

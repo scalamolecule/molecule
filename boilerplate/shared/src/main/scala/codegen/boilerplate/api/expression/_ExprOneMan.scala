@@ -19,12 +19,12 @@ object _ExprOneMan extends BoilerplateGenBase("ExprOneMan", "/api/expression") {
   case class Trait(arity: Int) extends TemplateVals(arity) {
     val attrExprs = if (arity == 22) {
       s"""
-         |  def apply[ns1[_]](a: ModelOps_0[t, ns1, Dummy_2] with CardOne): Ns1[${`A..V`}, t] with SortAttrs_22[${`A..V`}, t, Ns1] = _attrSortTac(Eq , a)
-         |  def not  [ns1[_]](a: ModelOps_0[t, ns1, Dummy_2] with CardOne): Ns1[${`A..V`}, t] with SortAttrs_22[${`A..V`}, t, Ns1] = _attrSortTac(Neq, a)
-         |  def <    [ns1[_]](a: ModelOps_0[t, ns1, Dummy_2] with CardOne): Ns1[${`A..V`}, t] with SortAttrs_22[${`A..V`}, t, Ns1] = _attrSortTac(Lt , a)
-         |  def <=   [ns1[_]](a: ModelOps_0[t, ns1, Dummy_2] with CardOne): Ns1[${`A..V`}, t] with SortAttrs_22[${`A..V`}, t, Ns1] = _attrSortTac(Le , a)
-         |  def >    [ns1[_]](a: ModelOps_0[t, ns1, Dummy_2] with CardOne): Ns1[${`A..V`}, t] with SortAttrs_22[${`A..V`}, t, Ns1] = _attrSortTac(Gt , a)
-         |  def >=   [ns1[_]](a: ModelOps_0[t, ns1, Dummy_2] with CardOne): Ns1[${`A..V`}, t] with SortAttrs_22[${`A..V`}, t, Ns1] = _attrSortTac(Ge , a)""".stripMargin
+         |  def apply[ns1[_], tx[_]](a: ModelOps_0[t, ns1, X2] with CardOne): Ns1[${`A..V`}, t] with SortAttrs_22[${`A..V`}, t, Ns1] = _attrSortTac(Eq , a)
+         |  def not  [ns1[_], tx[_]](a: ModelOps_0[t, ns1, X2] with CardOne): Ns1[${`A..V`}, t] with SortAttrs_22[${`A..V`}, t, Ns1] = _attrSortTac(Neq, a)
+         |  def <    [ns1[_], tx[_]](a: ModelOps_0[t, ns1, X2] with CardOne): Ns1[${`A..V`}, t] with SortAttrs_22[${`A..V`}, t, Ns1] = _attrSortTac(Lt , a)
+         |  def <=   [ns1[_], tx[_]](a: ModelOps_0[t, ns1, X2] with CardOne): Ns1[${`A..V`}, t] with SortAttrs_22[${`A..V`}, t, Ns1] = _attrSortTac(Le , a)
+         |  def >    [ns1[_], tx[_]](a: ModelOps_0[t, ns1, X2] with CardOne): Ns1[${`A..V`}, t] with SortAttrs_22[${`A..V`}, t, Ns1] = _attrSortTac(Gt , a)
+         |  def >=   [ns1[_], tx[_]](a: ModelOps_0[t, ns1, X2] with CardOne): Ns1[${`A..V`}, t] with SortAttrs_22[${`A..V`}, t, Ns1] = _attrSortTac(Ge , a)""".stripMargin
     } else {
       s"""
          |  def apply[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardOne): Ns1[${`A..V`}, t] with SortAttrs${_0}[${`A..V`}, t, Ns1] = _attrSortTac(Eq , a)
@@ -81,9 +81,9 @@ object _ExprOneMan extends BoilerplateGenBase("ExprOneMan", "/api/expression") {
          |  def even                               : Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(Even      , Nil                    )
          |  def odd                                : Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(Odd       , Nil                    )
          |}""".stripMargin
-//         |trait $fileName_${arity}_Decimal[${`A..V`}, t, Ns1[${`_, _`}], Ns2[${`_, _, _`}]] extends $fileName_$arity[${`A..V, `}t, Ns1, Ns2] {
-//         |  def whole                              : Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(Whole     , Nil)
-//         |  def fractional                         : Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(Fractional, Nil)
-//         |}""".stripMargin
+    //         |trait $fileName_${arity}_Decimal[${`A..V`}, t, Ns1[${`_, _`}], Ns2[${`_, _, _`}]] extends $fileName_$arity[${`A..V, `}t, Ns1, Ns2] {
+    //         |  def whole                              : Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(Whole     , Nil)
+    //         |  def fractional                         : Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(Fractional, Nil)
+    //         |}""".stripMargin
   }
 }

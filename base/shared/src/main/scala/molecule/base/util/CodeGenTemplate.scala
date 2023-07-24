@@ -7,6 +7,11 @@ abstract class CodeGenTemplate(val fileName: String, dir: String, basePath: Stri
   val fileName_    = if (fileName == "package") "package" else fileName + "_"
   def caseN(n: Int) = if (n < 10) s"$n " else n
 
+  val txs_ = (0 to 22).map(i => s"Tx$i[" + Seq.fill(i + 1)("_").mkString(",") + "]").mkString(", ")
+  val txs  = (0 to 22).map(i => s"Tx$i").mkString(", ")
+  val tns  = (1 to 22).map(i => s"T$i").mkString(", ")
+
+
   class TemplateVals(arity: Int) {
     lazy val s          = " "
     lazy val V          = ('A' + arity - 1).toChar
@@ -22,9 +27,8 @@ abstract class CodeGenTemplate(val fileName: String, dir: String, basePath: Stri
     lazy val `A..U, `   = if (tpes.size <= 1) "" else tpes.init.mkString("", ", ", ", ")
     lazy val `[A..V]`   = if (arity == 0) "" else tpes.mkString("[", ", ", "]")
     lazy val Tn         = if (arity == 0) "" else (1 to arity).map(i => s"T$i").mkString(", ")
+    lazy val `Tn, `     = if (arity == 0) "" else (1 to arity).map(i => s"T$i").mkString("", ", ", ", ")
     lazy val `[Tn]`     = if (arity == 0) "" else s"[$Tn]"
-    lazy val `[T0]`     = if (arity == 0) " " * 68 else s"[$Tn" + (" " * 68) + "]"
-    lazy val `T1, `     = if (arity == 0) "" else s"$Tn, "
 
     val `A..V,` = arity match {
       case 0 => ""
@@ -36,6 +40,7 @@ abstract class CodeGenTemplate(val fileName: String, dir: String, basePath: Stri
       case 1 => s"[A" + (" " * 68) + "]"
       case _ => s"[${`(A..V)`}" + (" " * 68) + "]"
     }
+
     lazy val `_, _`    = Seq.fill(arity + 1)("_").mkString(", ")
     lazy val `_, _, _` = Seq.fill(arity + 2)("_").mkString(", ")
     lazy val _0        = "_" + arity
@@ -47,6 +52,7 @@ abstract class CodeGenTemplate(val fileName: String, dir: String, basePath: Stri
     def padN(n: Int) = if (n < 10) s"0$n" else n
     val n0 = padN(arity)
     val n1 = padN(arity + 1)
+    val n_ = if (arity < 10) s"$arity " else s"$arity"
 
     lazy val `..`  = " " * (if (arity == 1) 3 else 3 * (arity - 1) + 3)
     lazy val `..N` = if (arity >= 10) `..` + " " else `..`

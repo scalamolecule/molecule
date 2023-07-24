@@ -1,7 +1,7 @@
 package molecule.core.spi
 
-case class TxReport(tx: Long, eids: List[Long]) {
+case class TxReport(tx: Long, ids: List[Long]) {
 
   // Convenience method for common need
-  def eid: Long = eids.head
+  def id: Long = ids.head
 }

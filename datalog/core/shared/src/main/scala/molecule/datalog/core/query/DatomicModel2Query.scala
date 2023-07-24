@@ -38,10 +38,10 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
     val elements1 = prepareElements(elements)
 
     // Remember first entity id variable for subsequent composite groups
-    firstEid = vv
+    firstId = vv
 
     // Recursively resolve molecule elements
-    resolve(List(firstEid), elements1)
+    resolve(List(firstId), elements1)
 
     // Build Datomic query string(s) from mutated query sections
     val mainQuery = renderQuery(
@@ -79,19 +79,21 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
       elements match {
         case element :: tail =>
           element match {
-            case a: Attr       => prepare(tail, acc :+ prepareAttr(a))
-            case e: Composite  => prepare(tail, acc :+ prepareComposite(e))
-            case n: Nested     => prepare(tail, acc :+ prepareNested(n))
-            case n: NestedOpt  => prepare(tail, acc :+ prepareNestedOpt(n))
-            case t: TxMetaData => prepare(tail, acc :+ prepareTxMetaData(t))
-            case refOrBackRef  => prepare(tail, acc :+ refOrBackRef)
+            case a: Attr               => prepare(tail, acc :+ prepareAttr(a))
+            case e: Composite          => prepare(tail, acc :+ prepareComposite(e))
+            case n: Nested             => prepare(tail, acc :+ prepareNested(n))
+            case n: NestedOpt          => prepare(tail, acc :+ prepareNestedOpt(n))
+            case t: TxMetaData         => prepare(tail, acc :+ prepareTxMetaData(t))
+            case Ref(_, _, "Tx", _, _) => prepareTxRef(); prepare(tail, acc)
+            case refOrBackRef          => prepare(tail, acc :+ refOrBackRef)
           }
         case Nil             => acc
       }
     }
     def prepareAttr(a: Attr): Attr = {
       availableAttrs += a.name
-      if (a.ns == "_Generic" && a.attr == "txId") {
+      //      if (a.ns == "_Generic" && a.attr == "txId") {
+      if (a.attr == "tx") {
         addTxVar = true
       } else if (a.filterAttr.nonEmpty) {
         val fa = a.filterAttr.get
@@ -120,6 +122,9 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
     def prepareComposite(composite: Composite): Composite = Composite(prepare(composite.elements, Nil))
     def prepareNested(nested: Nested): Nested = Nested(nested.ref, prepare(nested.elements, Nil))
     def prepareNestedOpt(nested: NestedOpt): NestedOpt = NestedOpt(nested.ref, prepare(nested.elements, Nil))
+    def prepareTxRef(): Unit = {
+      addTxVar = true
+    }
     def prepareTxMetaData(t: TxMetaData): TxMetaData = {
       addTxVar = true
       TxMetaData(prepare(t.elements, Nil))
@@ -134,7 +139,7 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
     elements1
   }
 
-  final def getEidQueryWithInputs: (Att, Seq[AnyRef]) = {
+  final def getIdQueryWithInputs: (Att, Seq[AnyRef]) = {
     (getQueries(false)._2, inputs)
   }
 
@@ -195,7 +200,7 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
   final private def resolveComposite(compositeElements: List[Element]): List[Var] = {
     aritiesComposite()
     // Use first entity id in each composite sub group
-    resolve(List(firstEid), compositeElements)
+    resolve(List(firstId), compositeElements)
   }
 
   final private def resolveNested(
@@ -235,7 +240,7 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
   final private def resolveTxMetaData(txElements: List[Element]): List[Var] = {
     isTxMetaData = true
     // Use txVar as first entity id var for composite elements
-    firstEid = txVar
+    firstId = txVar
     resolve(List(txVar), txElements)
   }
 

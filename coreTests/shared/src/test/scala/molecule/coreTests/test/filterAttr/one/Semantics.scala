@@ -13,7 +13,7 @@ trait Semantics extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =
 
   override lazy val tests = Tests {
 
-    "Optional attributes not allowed" - types { implicit conn =>
+    "Optional filter attributes not allowed" - types { implicit conn =>
       // Prevented by type inference
       //      Ns.i.apply(Ns.int_?)
       //      Ns.i_.apply(Ns.int_?)
@@ -89,7 +89,7 @@ trait Semantics extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =
     }
 
 
-    "No card-Set expression attributes" - types { implicit conn =>
+    "No card-Set filter attributes" - types { implicit conn =>
       // Prevented by type inference
       //      Ns.i.apply(Ns.ints)
       //      Ns.i.apply(Ns.ints_)
@@ -153,7 +153,7 @@ trait Semantics extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =
     }
 
 
-    "Missing expression attributes" - types { implicit conn =>
+    "Missing filter attributes" - types { implicit conn =>
       for {
         _ <- Ns.int(Ref.int_).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>

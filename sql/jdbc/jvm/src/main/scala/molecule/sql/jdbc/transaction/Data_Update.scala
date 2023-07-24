@@ -15,7 +15,7 @@ import molecule.sql.core.query.SqlModel2Query
 import molecule.sql.jdbc.facade.JdbcConn_jvm
 import scala.collection.mutable.ListBuffer
 
-trait Data_Update extends JdbcTxBase_JVM with UpdateOps with MoleculeLogging { self: UpdateExtraction =>
+trait Data_Update extends JdbcTxMetaData_JVM with UpdateOps with MoleculeLogging { self: UpdateExtraction =>
 
   def getStmts(
     conn: JdbcConn_jvm,
@@ -57,21 +57,21 @@ trait Data_Update extends JdbcTxBase_JVM with UpdateOps with MoleculeLogging { s
 //      }
 //    }
 //
-//    val (eids, filterElements, data) = resolve(elements, Nil, Nil, Nil)
-//    val (filterQuery, inputs)        = if (eids.isEmpty && filterElements.nonEmpty) {
-//      val filterElements1 = AttrOneManLong("_Generic", "eid", V) +: filterElements
+//    val (ids, filterElements, data) = resolve(elements, Nil, Nil, Nil)
+//    val (filterQuery, inputs)        = if (ids.isEmpty && filterElements.nonEmpty) {
+//      val filterElements1 = AttrOneManLong("_Generic", "id", V) +: filterElements
 //      val (query, inputs) = new SqlModel2Query[Any](filterElements1).getEidQueryWithInputs
 //      (Some(query), inputs)
 //    } else {
 //      (None, Nil)
 //    }
 //    filterQuery.fold {
-//      val addStmts = eid2stmts(data, db, isUpsert)
-//      eids.foreach(addStmts)
+//      val addStmts = id2stmts(data, db, isUpsert)
+//      ids.foreach(addStmts)
 //    } { query =>
-//      val eidRows  = Peer.q(query, db +: inputs: _*)
-//      val addStmts = eid2stmts(data, db)
-//      eidRows.forEach(eidRow => addStmts(eidRow.get(0)))
+//      val idRows  = Peer.q(query, db +: inputs: _*)
+//      val addStmts = id2stmts(data, db)
+//      idRows.forEach(idRow => addStmts(idRow.get(0)))
 //    }
 //    if (debug) {
 //      val updateStrs = "UPDATE:" +: elements :+ "" :+ stmts.toArray().mkString("\n")
@@ -81,32 +81,32 @@ trait Data_Update extends JdbcTxBase_JVM with UpdateOps with MoleculeLogging { s
     ???
   }
 
-  private def eid2stmts(
+  private def id2stmts(
     data: Seq[(String, String, String, Seq[AnyRef], Boolean)],
     db: Database,
     addNewValues: Boolean = true
   ): AnyRef => Unit = {
-    (eid0: AnyRef) => {
-      var eid : AnyRef  = eid0
+    (id0: AnyRef) => {
+      var id : AnyRef  = id0
       var txId: AnyRef  = null
       var isTx: Boolean = false
-      var entity        = db.entity(eid)
+      var entity        = db.entity(id)
       data.foreach {
         case ("add", ns, attr, newValues, retractCur) =>
           val a = kw(ns, attr)
           if (retractCur) {
-            val eid1      = if (txId != null) txId else eid
-            // todo: optimize with one query for all eids
-            val curValues = Peer.q("[:find ?v :in $ ?e ?a :where [?e ?a ?v]]", db, eid1, a)
+            val id1      = if (txId != null) txId else id
+            // todo: optimize with one query for all ids
+            val curValues = Peer.q("[:find ?v :in $ ?e ?a :where [?e ?a ?v]]", db, id1, a)
             curValues.forEach { row =>
               val curValue = row.get(0)
               if (!newValues.contains(curValue))
-                appendStmt(retract, eid1, a, curValue)
+                appendStmt(retract, id1, a, curValue)
             }
           }
           if (addNewValues || entity.get(a) != null || isTx) {
             newValues.foreach(newValue =>
-              appendStmt(add, eid, a, newValue)
+              appendStmt(add, id, a, newValue)
             )
           }
 
@@ -118,31 +118,31 @@ trait Data_Update extends JdbcTxBase_JVM with UpdateOps with MoleculeLogging { s
               cur match {
                 case set: jSet[_] =>
                   set.forEach {
-                    case kw: Keyword          => appendStmt(retract, eid, a, db.entity(kw).get(":db/id"))
-                    case entityMap: EntityMap => appendStmt(retract, eid, a, entityMap.get(":db/id"))
-                    case v                    => appendStmt(retract, eid, a, v.asInstanceOf[AnyRef])
+                    case kw: Keyword          => appendStmt(retract, id, a, db.entity(kw).get(":db/id"))
+                    case entityMap: EntityMap => appendStmt(retract, id, a, entityMap.get(":db/id"))
+                    case v                    => appendStmt(retract, id, a, v.asInstanceOf[AnyRef])
                   }
                 case v            =>
-                  appendStmt(retract, eid, a, v)
+                  appendStmt(retract, id, a, v)
               }
             }
           } else {
             retractValues.foreach(retractValue =>
-              appendStmt(retract, eid, a, retractValue)
+              appendStmt(retract, id, a, retractValue)
             )
           }
 
         case ("ref", ns, refAttr, _, _) =>
           val a = kw(ns, refAttr)
           entity = entity.get(a).asInstanceOf[EntityMap]
-          eid = entity.get(dbId)
+          id = entity.get(dbId)
 
         case ("tx", _, _, _, _) =>
           // Get transaction entity id
-          txId = Peer.q("[:find ?tx :in $ ?e :where [?e _ _ ?tx]]", db, eid).iterator.next.get(0)
+          txId = Peer.q("[:find ?tx :in $ ?e :where [?e _ _ ?tx]]", db, id).iterator.next.get(0)
           entity = db.entity(txId)
           isTx = true
-          eid = datomicTx
+          id = datomicTx
 
         case other => throw ModelError("Unexpected data in update: " + other)
       }
@@ -150,7 +150,7 @@ trait Data_Update extends JdbcTxBase_JVM with UpdateOps with MoleculeLogging { s
   }
 
 
-  override protected def uniqueEids(
+  override protected def uniqueIds(
     filterAttr: AttrOneTac,
     ns: String,
     attr: String

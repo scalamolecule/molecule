@@ -37,7 +37,7 @@ trait MandatoryRefs extends CoreTestSuite with ApiAsyncImplicits with Serializat
         }
 
         // Adding ref id satisfy mandatory requirement
-        refBid <- RefB.i(2).save.transact.map(_.eid)
+        refBid <- RefB.i(2).save.transact.map(_.id)
         _ <- MandatoryRefB.i(1).refB(refBid).save.transact
 
         // Or creating the entity and the reference in one go
@@ -59,7 +59,7 @@ trait MandatoryRefs extends CoreTestSuite with ApiAsyncImplicits with Serializat
         }
 
         // Adding ref id satisfy mandatory requirement
-        refBid <- RefB.i(3).save.transact.map(_.eid)
+        refBid <- RefB.i(3).save.transact.map(_.id)
         _ <- MandatoryRefAB.i(1).RefA.i(2).refB(refBid).save.transact
 
         // Or creating the entity and the reference in one go
@@ -80,7 +80,7 @@ trait MandatoryRefs extends CoreTestSuite with ApiAsyncImplicits with Serializat
         }
 
         // Adding ref id satisfy mandatory requirement
-        refBid <- RefB.i(2).save.transact.map(_.eid)
+        refBid <- RefB.i(2).save.transact.map(_.id)
         _ <- MandatoryRefsB.i(1).refsB(Set(refBid)).save.transact
 
         // Or creating the entity and the reference in one go
@@ -102,7 +102,7 @@ trait MandatoryRefs extends CoreTestSuite with ApiAsyncImplicits with Serializat
         }
 
         // Adding ref id satisfy mandatory requirement
-        refBid <- RefB.i(3).save.transact.map(_.eid)
+        refBid <- RefB.i(3).save.transact.map(_.id)
         _ <- MandatoryRefAB.i(1).RefA.i(2).refB(refBid).save.transact
 
         // Or creating the entity and the reference in one go
@@ -113,9 +113,9 @@ trait MandatoryRefs extends CoreTestSuite with ApiAsyncImplicits with Serializat
 
     "Update, delete ref attr" - validation { implicit conn =>
       for {
-        List(eid, _) <- MandatoryRefB.i(1).RefB.i(2).save.transact.map(_.eids)
+        List(id, _) <- MandatoryRefB.i(1).RefB.i(2).save.transact.map(_.ids)
 
-        _ <- MandatoryRefB(eid).refB().update.transact
+        _ <- MandatoryRefB(id).refB().update.transact
           .map(_ ==> "Unexpected success").recover {
           case ModelError(error) =>
             error ==>
@@ -129,15 +129,15 @@ trait MandatoryRefs extends CoreTestSuite with ApiAsyncImplicits with Serializat
 
     "Update, remove last card-many value" - validation { implicit conn =>
       for {
-        List(r1, r2) <- RefB.i.insert(2, 3).transact.map(_.eids)
+        List(r1, r2) <- RefB.i.insert(2, 3).transact.map(_.ids)
 
-        eid <- MandatoryRefsB.i(1).refsB(Set(r1, r2)).save.transact.map(_.eids)
+        id <- MandatoryRefsB.i(1).refsB(Set(r1, r2)).save.transact.map(_.ids)
 
         // We can remove an entity from a Set of refs as long as it's not the last value
-        _ <- MandatoryRefsB(eid).refsB.remove(r2).update.transact
+        _ <- MandatoryRefsB(id).refsB.remove(r2).update.transact
 
         // Can't remove the last value of a mandatory attribute Set of refs
-        _ <- MandatoryRefsB(eid).refsB.remove(r1).update.transact
+        _ <- MandatoryRefsB(id).refsB.remove(r1).update.transact
           .map(_ ==> "Unexpected success").recover {
           case ModelError(error) =>
             error ==>
@@ -151,7 +151,7 @@ trait MandatoryRefs extends CoreTestSuite with ApiAsyncImplicits with Serializat
 
     "Deleting mandatory ref" - validation { implicit conn =>
       for {
-        List(e1, r1) <- MandatoryRefB.i(1).RefB.i(1).save.transact.map(_.eids)
+        List(e1, r1) <- MandatoryRefB.i(1).RefB.i(1).save.transact.map(_.ids)
 
         // Can't delete r1 since MandatoryRefB.refB is referencing it and is mandatory
         _ <- RefB(r1).delete.transact
@@ -167,7 +167,7 @@ trait MandatoryRefs extends CoreTestSuite with ApiAsyncImplicits with Serializat
         List(e2, e3) <- MandatoryRefsB.i.refsB.insert(
           (4, Set(r1)),
           (5, Set(r1)),
-        ).transact.map(_.eids)
+        ).transact.map(_.ids)
 
         // Now 3 entities would be rendered invalid if we deleted r1
         _ <- RefB(r1).delete.transact

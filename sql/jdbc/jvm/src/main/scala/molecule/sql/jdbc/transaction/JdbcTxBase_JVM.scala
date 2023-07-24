@@ -16,7 +16,7 @@ import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
 
-trait JdbcTxBase_JVM extends JdbcDataType_JVM with ModelUtils {
+trait JdbcTxMetaData_JVM extends JdbcDataType_JVM with ModelUtils {
 
   // Override on instantiation
   protected val sqlConn: java.sql.Connection
@@ -170,10 +170,10 @@ trait JdbcTxBase_JVM extends JdbcDataType_JVM with ModelUtils {
     //    addStmt.add(v)
     //    stmts.add(addStmt)
   }
-  protected def addRetractEntityStmt(eid: AnyRef): Unit = {
+  protected def addRetractEntityStmt(id: AnyRef): Unit = {
     //    val stmt = new jArrayList[AnyRef](2)
     //    stmt.add(retractEntity)
-    //    stmt.add(eid)
+    //    stmt.add(id)
     //    stmts.add(stmt)
   }
 

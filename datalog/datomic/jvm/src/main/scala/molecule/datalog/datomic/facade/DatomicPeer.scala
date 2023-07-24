@@ -27,7 +27,7 @@ trait DatomicPeer {
     Peer.deleteDatabase(s"datomic:$protocol://$dbIdentifier")
   }
 
-  private[molecule] def connect(
+  def connect(
     proxy: DatomicProxy,
     protocol: String,
     dbIdentifier: String = ""
@@ -37,12 +37,16 @@ trait DatomicPeer {
     DatomicConn_JVM(proxy, Peer.connect(uri))
   }
 
-  def recreateDbFromEdn(
+  // OBS: if dbIdentifier is supplied, this database will be deleted entirely! Take care
+  def recreateDb(
     proxy: DatomicProxy,
     protocol: String = "mem",
     dbIdentifier: String = ""
   )(implicit ec: ExecutionContext): Future[DatomicConn_JVM] = blocking {
-    val id = if (dbIdentifier == "") randomUUID().toString else dbIdentifier
+    val id = if (dbIdentifier == "")
+      randomUUID().toString
+    else
+      dbIdentifier
     deleteDatabase(protocol, id)
     createDatabase(protocol, id)
     val conn = connect(proxy, protocol, id)

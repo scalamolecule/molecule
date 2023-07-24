@@ -132,12 +132,16 @@ trait ResolveNestedPull[Tpl]
     }
 
     val (attrs, append) = resolvePullRef(ref, elements, 0, 0, "")
-    find += s"(pull $e [$attrs$append])\n       "
+    val nestedId        = "?id" + nestedIds.size
+    find += s"(pull $nestedId [$attrs$append])\n       "
   }
 
 
   private def renderPull(indent: String, a: Attr): String = {
-    s"""\n$indent(:${a.ns}/${a.attr} :limit nil :default "$none")"""
+    if (a.attr == "id")
+      s"""\n$indent:db/id"""
+    else
+      s"""\n$indent(:${a.ns}/${a.attr} :limit nil :default "$none")"""
   }
 
   private def add(

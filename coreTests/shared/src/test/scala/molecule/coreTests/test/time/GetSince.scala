@@ -34,7 +34,7 @@ trait GetSince extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
     "update" - types { implicit conn =>
       for {
         tx1 <- Ns.int(1).save.transact
-        e = tx1.eid
+        e = tx1.id
         _ <- Ns.int.query.since(tx1).get.map(_ ==> List())
 
         tx2 <- Ns(e).int(2).update.transact
@@ -61,7 +61,7 @@ trait GetSince extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
         _ <- Ns.int.query.since(tx1).get.map(_ ==> List(2))
         _ <- Ns.int.query.since(tx2).get.map(_ ==> List())
 
-        tx3 <- Ns(tx2.eid).delete.transact
+        tx3 <- Ns(tx2.id).delete.transact
         _ <- Ns.int.query.since(tx1).get.map(_ ==> List())
         _ <- Ns.int.query.since(tx2).get.map(_ ==> List())
         _ <- Ns.int.query.since(tx3).get.map(_ ==> List())

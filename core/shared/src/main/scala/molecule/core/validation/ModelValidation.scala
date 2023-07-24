@@ -43,7 +43,7 @@ case class ModelValidation(
       case head :: tail => head match {
         case a: Attr =>
           val attr = a.name
-          if (a.ns != "_Generic") {
+          if (a.attr != "id" || a.attr != "tx") {
             register(a, attr)
           }
           if (isTx && isInsert && !(a.isInstanceOf[AttrOneTac] || a.isInstanceOf[AttrSetTac])) {

@@ -173,8 +173,6 @@ trait NestedRef extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =
 
     "Optional Nested semantics" - refs { implicit conn =>
       for {
-        _ <- Future("start for-comprehension with Future...")
-
         _ <- A.i.Bb.*?(B.s.i_).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==>

@@ -102,14 +102,14 @@ trait ResolveFilterOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
   }
 
   private def manLong(attr: Attr, args: Seq[Long], res: ResOne[Long]): Unit = {
-    attr.name match {
-      case "_Generic.eid"  =>
+    attr.attr match {
+      case "id" =>
         select += attr.ns + ".id"
         addCast(res.sql2one)
         addSort(attr, "id")
-      case "_Generic.txId" =>
+      case "tx" =>
         throw ModelError("txId not implemented yet for jdbc")
-      case a               =>
+      case a    =>
         man(attr, args, res)
     }
   }
@@ -119,8 +119,8 @@ trait ResolveFilterOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
     notNull += col
     attr.filterAttr.fold {
       expr(col, attr.op, args, res)
-//      filterAttrVars1 = filterAttrVars1 + (a -> (e, v))
-//      filterAttrVars2.get(a).foreach(_(e, v))
+      //      filterAttrVars1 = filterAttrVars1 + (a -> (e, v))
+      //      filterAttrVars2.get(a).foreach(_(e, v))
     } { filterAttr =>
       expr2(col, attr.op)
     }

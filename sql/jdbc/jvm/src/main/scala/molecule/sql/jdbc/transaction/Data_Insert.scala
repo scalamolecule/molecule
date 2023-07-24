@@ -11,7 +11,7 @@ import molecule.core.transaction.{InsertExtraction, InsertResolvers_}
 import molecule.core.util.ModelUtils
 
 trait Data_Insert
-  extends JdbcTxBase_JVM
+  extends JdbcTxMetaData_JVM
     with InsertOps
     with JdbcDataType_JVM
     with ModelUtils

@@ -34,7 +34,7 @@ trait GetAsOf extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
     "update" - types { implicit conn =>
       for {
         tx1 <- Ns.int(1).save.transact
-        e = tx1.eid
+        e = tx1.id
         tx2 <- Ns(e).int(2).update.transact
         tx3 <- Ns(e).int(3).update.transact
 
@@ -52,7 +52,7 @@ trait GetAsOf extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
       for {
         tx1 <- Ns.int(1).save.transact
         tx2 <- Ns.int(2).save.transact
-        tx3 <- Ns(tx2.eid).delete.transact
+        tx3 <- Ns(tx2.id).delete.transact
 
         _ <- Ns.int.query.asOf(tx1).get.map(_ ==> List(1))
         _ <- Ns.int.query.asOf(tx2).get.map(_ ==> List(1, 2))

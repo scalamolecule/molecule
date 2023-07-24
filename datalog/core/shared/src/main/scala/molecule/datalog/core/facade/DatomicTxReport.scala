@@ -8,9 +8,9 @@ import java.util.Date
  * @param basisTbefore Datomic time point t on before Db
  * @param t            Transaction time t. Same as basis t on after Db
  * @param tx           Transaction entity id (Long).
- * @param txDate    Transaction instant (Date).
- * @param eids         List of affected entity ids from transaction
- * @param datoms       Tx report data, a List of [[molecule.datomic.base.api.Datom]]
+ * @param txDate       Transaction instant (Date).
+ * @param datoms       Tx report data, a List of [[molecule.datalog.core.facade.Datom]]
+ * @param ids          List of affected entity ids from transaction
  */
 case class DatomicTxReport(
   basisTbefore: Long,
@@ -18,7 +18,7 @@ case class DatomicTxReport(
   tx: Long,
   txDate: Date,
   datoms: List[Datom],
-  eids: List[Long]
+  ids: List[Long]
 ) {
 
   /** Convenience method to get single affected entity id from transaction.
@@ -26,20 +26,20 @@ case class DatomicTxReport(
    * Often useful when you know only one entity was affected:
    * {{{
    * for {
-   *   benId <- Person.name("Ben").map(_.eid)
+   *   benId <- Person.name("Ben").map(_.id)
    * } yield ()
    * }}}
    *
    * @return
    */
-  lazy val eid: Long = eids.head
+  lazy val id: Long = ids.head
 
   override def toString = {
     s"""DatomicTxReport {
        |  dbBefore.t: $basisTbefore
        |  dbAfter.t : $t
        |  txData    : ${datoms.mkString(",\n              ")}
-       |  eids      : $eids
+       |  ids       : $ids
        |}""".stripMargin
   }
 }

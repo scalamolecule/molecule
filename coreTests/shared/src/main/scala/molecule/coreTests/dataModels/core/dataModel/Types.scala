@@ -4,6 +4,10 @@ import molecule.DataModel
 
 object Types extends DataModel(5) {
 
+  trait Tx extends TxBase {
+    val myTxAttr = oneInt
+  }
+
   trait Ns {
     val i  = oneInt
     val ii = setInt

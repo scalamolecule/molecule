@@ -9,42 +9,46 @@ import molecule.coreTests.setup.CoreTestSuite
 import molecule.core.spi.SpiAsync
 import utest._
 
-trait UpdateOne_eid extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
+trait UpdateOne_id extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
 
 
   override lazy val tests = Tests {
 
     "Update/upsert" - types { implicit conn =>
       for {
-        eid <- Ns.int.insert(1).transact.map(_.eid)
+        id <- Ns.int.insert(1).transact.map(_.id)
         _ <- Ns.int.query.get.map(_ ==> List(1))
 
         // Update existing value
-        _ <- Ns(eid).int(2).update.transact
+        _ <- Ns(id).int(2).update.transact
         _ <- Ns.int.query.get.map(_ ==> List(2))
 
+        // Or update using id_
+        _ <- Ns.id_(id).int(3).update.transact
+        _ <- Ns.int.query.get.map(_ ==> List(3))
+
         // Updating a non-asserted attribute has no effect
-        _ <- Ns(eid).string("a").update.transact
-        _ <- Ns.int.string_?.query.get.map(_ ==> List((2, None)))
+        _ <- Ns(id).string("a").update.transact
+        _ <- Ns.int.string_?.query.get.map(_ ==> List((3, None)))
 
         // Upserting a non-asserted attribute adds the value
-        _ <- Ns(eid).string("a").upsert.transact
-        _ <- Ns.int.string_?.query.get.map(_ ==> List((2, Some("a"))))
+        _ <- Ns(id).string("a").upsert.transact
+        _ <- Ns.int.string_?.query.get.map(_ ==> List((3, Some("a"))))
       } yield ()
     }
 
 
     "Multiple entities updated" - types { implicit conn =>
       for {
-        List(a, b, c) <- Ns.int.insert(1, 2, 3).transact.map(_.eids)
-        _ <- Ns.eid.a1.int.query.get.map(_ ==> List(
+        List(a, b, c) <- Ns.int.insert(1, 2, 3).transact.map(_.ids)
+        _ <- Ns.id.a1.int.query.get.map(_ ==> List(
           (a, 1),
           (b, 2),
           (c, 3),
         ))
 
         _ <- Ns(List(b, c)).int(4).update.transact
-        _ <- Ns.eid.a1.int.query.get.map(_ ==> List(
+        _ <- Ns.id.a1.int.query.get.map(_ ==> List(
           (a, 1),
           (b, 4),
           (c, 4),
@@ -55,23 +59,36 @@ trait UpdateOne_eid extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsyn
 
     "Delete individual attribute value(s) with update" - types { implicit conn =>
       for {
-        eid <- Ns.int.string.insert(1, "a").transact.map(_.eid)
+        id <- Ns.int.string.insert(1, "a").transact.map(_.id)
         _ <- Ns.int.string.query.get.map(_ ==> List((1, "a")))
 
         // Apply empty value to delete attribute of entity (entity remains)
-        _ <- Ns(eid).string().update.transact
+        _ <- Ns(id).string().update.transact
         _ <- Ns.int.string_?.query.get.map(_ ==> List((1, None)))
+      } yield ()
+    }
+
+
+    "Delete individual ref value(s) with update" - types { implicit conn =>
+      for {
+        refId <- Ref.int(7).save.transact.map(_.id)
+        id <- Ns.int.ref.insert(1, refId).transact.map(_.id)
+        _ <- Ns.int.ref.query.get.map(_ ==> List((1, refId)))
+
+        // Apply empty value to delete ref id of entity (entity remains)
+        _ <- Ns(id).ref().update.transact
+        _ <- Ns.int.ref_?.query.get.map(_ ==> List((1, None)))
       } yield ()
     }
 
 
     "Update multiple attributes" - types { implicit conn =>
       for {
-        eid <- Ns.int.string.insert(1, "a").transact.map(_.eid)
+        id <- Ns.int.string.insert(1, "a").transact.map(_.id)
         _ <- Ns.int.string.query.get.map(_ ==> List((1, "a")))
 
         // Apply empty value to delete attribute of entity (entity remains)
-        _ <- Ns(eid).int(2).string("b").update.transact
+        _ <- Ns(id).int(2).string("b").update.transact
         _ <- Ns.int.string.query.get.map(_ ==> List((2, "b")))
       } yield ()
     }
@@ -79,13 +96,13 @@ trait UpdateOne_eid extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsyn
 
     "Referenced attributes" - types { implicit conn =>
       for {
-        eid <- Ns.i(1).Ref.i(2).save.transact.map(_.eid)
+        id <- Ns.i(1).Ref.i(2).save.transact.map(_.id)
         _ <- Ns.i.Ref.i.query.get.map(_ ==> List((1, 2)))
 
-        _ <- Ns(eid).i(3).Ref.i(4).update.transact
+        _ <- Ns(id).i(3).Ref.i(4).update.transact
         _ <- Ns.i.Ref.i.query.get.map(_ ==> List((3, 4)))
 
-        _ <- Ns(eid).Ref.i(5).update.transact
+        _ <- Ns(id).Ref.i(5).update.transact
         _ <- Ns.i.Ref.i.query.get.map(_ ==> List((3, 5)))
       } yield ()
     }
@@ -93,15 +110,15 @@ trait UpdateOne_eid extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsyn
 
     "Update composite attributes" - types { implicit conn =>
       for {
-        eid <- (Ns.int.string + Ref.i.s).insert((1, "a"), (2, "b")).transact.map(_.eid)
+        id <- (Ns.int.string + Ref.i.s).insert((1, "a"), (2, "b")).transact.map(_.id)
         _ <- (Ns.int.string + Ref.i.s).query.get.map(_ ==> List(((1, "a"), (2, "b"))))
 
         // Composite sub groups share the same entity id
-        _ <- (Ns(eid).int(3).string("c") + Ref.i(4).s("d")).update.transact
+        _ <- (Ns(id).int(3).string("c") + Ref.i(4).s("d")).update.transact
         _ <- (Ns.int.string + Ref.i.s).query.get.map(_ ==> List(((3, "c"), (4, "d"))))
 
         // Updating sub group with same entity id
-        _ <- Ref(eid).i(5).update.transact
+        _ <- Ref(id).i(5).update.transact
         _ <- (Ns.int.string + Ref.i.s).query.get.map(_ ==> List(((3, "c"), (5, "d"))))
       } yield ()
     }
@@ -109,14 +126,14 @@ trait UpdateOne_eid extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsyn
 
     "Update tx meta data" - types { implicit conn =>
       for {
-        eid <- Ns.int.Tx(Other.s_("tx")).insert(1).transact.map(_.eid)
+        id <- Ns.int.Tx(Other.s_("tx")).insert(1).transact.map(_.id)
         _ <- Ns.int.Tx(Other.s).query.get.map(_ ==> List((1, "tx")))
 
-        tx <- Ns(eid).int(2).Tx(Other.s("tx2")).update.transact.map(_.tx)
+        tx <- Ns(id).int(2).Tx(Other.s("tx2")).update.transact.map(_.tx)
         _ <- Ns.int.Tx(Other.s).query.get.map(_ ==> List((2, "tx2")))
 
 
-        _ <- Ns(eid).Tx(Other.s("tx3")).update.transact
+        _ <- Ns(id).Tx(Other.s("tx3")).update.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Please apply the tx id to the namespace of tx meta data to be updated."
         }
@@ -130,26 +147,17 @@ trait UpdateOne_eid extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsyn
 
     "Composite + tx meta data" - types { implicit conn =>
       for {
-        eid <- (Ns.int.string + Ref.i.s).Tx(Other.i_(42)).insert((1, "a"), (2, "b")).transact.map(_.eid)
+        id <- (Ns.int.string + Ref.i.s).Tx(Other.i_(42)).insert((1, "a"), (2, "b")).transact.map(_.id)
         _ <- (Ns.int.string + Ref.i.s).Tx(Other.i).query.get.map(_ ==> List(((1, "a"), (2, "b"), 42)))
 
         // Composite sub groups share the same entity id
-        _ <- (Ns(eid).int(3).string("c") + Ref.i(4).s("d")).Tx(Other.i(43)).update.transact
+        _ <- (Ns(id).int(3).string("c") + Ref.i(4).s("d")).Tx(Other.i(43)).update.transact
         _ <- (Ns.int.string + Ref.i.s).Tx(Other.i).query.get.map(_ ==> List(((3, "c"), (4, "d"), 43)))
       } yield ()
     }
 
 
     "Semantics" - {
-
-      "eid_(eid) not allowed" - types { implicit conn =>
-        for {
-          _ <- Ns.eid_(42).int(2).update.transact
-            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't update by applying entity ids to eid_"
-          }
-        } yield ()
-      }
 
       "Can't update multiple values for one card-one attribute" - types { implicit conn =>
         for {

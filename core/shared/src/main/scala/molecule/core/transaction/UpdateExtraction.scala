@@ -18,20 +18,20 @@ class UpdateExtraction(
   @tailrec
   final def resolve(
     elements: List[Element],
-    eids: Seq[AnyRef],
+    ids: Seq[AnyRef],
     filterElements: List[Element],
     data: Seq[(String, String, String, Seq[AnyRef], Boolean)]
   ): (Seq[AnyRef], List[Element], Seq[(String, String, String, Seq[AnyRef], Boolean)]) = {
     elements match {
       case element :: tail => element match {
         case a: Attr => a match {
-          case a: AttrOneTac => oneTac(tail, eids, filterElements, data, a)
-          case a: AttrOneMan => oneMan(tail, eids, filterElements, data, a)
+          case a: AttrOneTac => oneTac(tail, ids, filterElements, data, a)
+          case a: AttrOneMan => oneMan(tail, ids, filterElements, data, a)
           case a: AttrSetMan => a.op match {
-            case Eq     => setEq(tail, eids, filterElements, data, a)
-            case Add    => resolve(tail, eids, filterElements, data :+ setAdd(a))
-            case Swap   => resolve(tail, eids, filterElements, data ++ setSwap(a))
-            case Remove => resolve(tail, eids, filterElements, data ++ setRemove(a))
+            case Eq     => setEq(tail, ids, filterElements, data, a)
+            case Add    => resolve(tail, ids, filterElements, data :+ setAdd(a))
+            case Swap   => resolve(tail, ids, filterElements, data ++ setSwap(a))
+            case Remove => resolve(tail, ids, filterElements, data ++ setRemove(a))
             case _      => throw ModelError(s"Unexpected $update operation for card-many attribute. Found:\n" + a)
           }
 
@@ -44,31 +44,35 @@ class UpdateExtraction(
         case _: Nested    => throw ModelError(s"Nested data structure not allowed in $update molecule.")
         case _: NestedOpt => throw ModelError(s"Optional nested data structure not allowed in $update molecule.")
 
-        case r@Ref(ns, attr, _, CardOne, _) => resolve(tail, eids, filterElements :+ r, data :+ ("ref", ns, attr, Nil, false))
-        case r: Ref                      => throw ModelError(
+//        case r@Ref(ns, attr, "Tx", CardOne, _) => resolve(tail, ids, filterElements :+ r, data :+ ("tx", ns, attr, Nil, false))
+        case Ref(_, _, "Tx", CardOne, _) => resolve(tail, ids, filterElements, data)
+
+        case r@Ref(ns, attr, _, CardOne, _) => resolve(tail, ids, filterElements :+ r, data :+ ("ref", ns, attr, Nil, false))
+
+        case r: Ref     => throw ModelError(
           s"Can't $update attributes in card-many referenced namespaces. Found `${r.refAttr.capitalize}`"
         )
-        case b: BackRef                  => resolve(tail, eids, filterElements :+ b, data)
+        case b: BackRef => resolve(tail, ids, filterElements :+ b, data)
 
         case Composite(es) =>
-          val (eids1, filters1, data1) = extractSubElements(es)
-          resolve(tail, eids ++ eids1, filterElements ++ filters1, data ++ data1)
+          val (ids1, filters1, data1) = extractSubElements(es)
+          resolve(tail, ids ++ ids1, filterElements ++ filters1, data ++ data1)
 
         case TxMetaData(es) =>
           if (data.isEmpty) {
             throw ModelError(s"Please apply the tx id to the namespace of tx meta data to be updated.")
           }
-          val (eids1, filters1, data1) = extractSubElements(es)
-          resolve(tail, eids ++ eids1, filterElements ++ filters1, (data :+ ("tx", null, null, Nil, false)) ++ data1)
+          val (ids1, filters1, data1) = extractSubElements(es)
+          resolve(tail, ids ++ ids1, filterElements ++ filters1, (data :+ ("tx", null, null, Nil, false)) ++ data1)
       }
-      case Nil             => (eids, filterElements, data)
+      case Nil             => (ids, filterElements, data)
     }
   }
 
 
   private def oneMan(
     tail: List[Element],
-    eids: Seq[AnyRef],
+    ids: Seq[AnyRef],
     filterElements: List[Element],
     data: Seq[(String, String, String, Seq[AnyRef], Boolean)],
     dataAttr: AttrOneMan
@@ -77,15 +81,16 @@ class UpdateExtraction(
       throw ModelError(s"Can't $update attributes without an applied value. Found:\n" + dataAttr)
     if (isUpsert) {
       // Disregard if value already exists
-      resolve(tail, eids, filterElements, data :+ oneApply(dataAttr))
+      resolve(tail, ids, filterElements, data :+ oneApply(dataAttr))
     } else {
       // Make sure current value exists
       val dummyFilterAttr = AttrOneTacInt(dataAttr.ns, dataAttr.attr, V, Nil, None, None, Nil, Nil, None, None)
-      resolve(tail, eids, filterElements :+ dummyFilterAttr, data :+ oneApply(dataAttr))
+      resolve(tail, ids, filterElements :+ dummyFilterAttr, data :+ oneApply(dataAttr))
     }
   }
   private def oneApply(attr: AttrOneMan): (String, String, String, Seq[AnyRef], Boolean) = attr match {
-    case a if a.ns == "_Generic" => throw ModelError(
+    //    case a if a.ns == "_Generic" => throw ModelError(
+    case a if a.attr == "id" || a.attr == "tx" => throw ModelError(
       s"Generic attributes not allowed in update molecule. Found:\n" + a)
 
     case AttrOneManString(_, _, _, vs, _, _, _, _, _, _)     => addOneV[String](attr, vs, valueString)
@@ -115,51 +120,53 @@ class UpdateExtraction(
 
   private def oneTac(
     tail: List[Element],
-    eids: Seq[AnyRef],
+    ids: Seq[AnyRef],
     filterElements: List[Element],
     data: Seq[(String, String, String, Seq[AnyRef], Boolean)],
     filterAttr: AttrOneTac
   ): (Seq[AnyRef], List[Element], Seq[(String, String, String, Seq[AnyRef], Boolean)]) = {
     filterAttr match {
-      case AttrOneTacLong("_Generic", "eids", Eq, eids1, _, _, _, _, _, _) =>
-        if (eids.nonEmpty)
+      case AttrOneTacLong(_, "id", Eq, ids1, _, _, _, _, _, _) =>
+        if (ids.nonEmpty)
           throw ModelError(s"Can't apply entity ids twice in $update.")
-        resolve(tail, eids1.asInstanceOf[Seq[AnyRef]], filterElements, data)
+        resolve(tail, ids1.asInstanceOf[Seq[AnyRef]], filterElements, data)
 
-      case AttrOneTacLong("_Generic", "eid", Eq, _, _, _, _, _, _, _) => throw ModelError(
-        "Can't update by applying entity ids to eid_")
+      //      case AttrOneTacLong(_, "id", Eq, _, _, _, _, _, _, _) => throw ModelError(
+      //        "Can't update by applying entity ids to id_")
 
-      case a if a.ns == "_Generic" => throw ModelError(
+      // todo
+      //      case a if a.ns == "_Generic" => throw ModelError(
+      case a if a.attr == "id" || a.attr == "tx" => throw ModelError(
         s"Generic attributes not allowed in update molecule. Found:\n" + a)
 
       case uniqueFilterAttr if uniqueAttrs.contains(uniqueFilterAttr.name) =>
-        if (eids.nonEmpty)
+        if (ids.nonEmpty)
           throw ModelError(
             s"Can only apply one unique attribute value for $update. Found:\n" + uniqueFilterAttr
           )
-        val lookupRefs = uniqueEids(filterAttr, uniqueFilterAttr.ns, uniqueFilterAttr.attr)
-        resolve(tail, eids ++ lookupRefs, filterElements, data)
+        val lookupRefs = uniqueIds(filterAttr, uniqueFilterAttr.ns, uniqueFilterAttr.attr)
+        resolve(tail, ids ++ lookupRefs, filterElements, data)
 
       case nonUniqueFilterAttr =>
-        resolve(tail, eids, filterElements :+ nonUniqueFilterAttr, data)
+        resolve(tail, ids, filterElements :+ nonUniqueFilterAttr, data)
     }
   }
 
 
   private def setEq(
     tail: List[Element],
-    eids: Seq[AnyRef],
+    ids: Seq[AnyRef],
     filterElements: List[Element],
     data: Seq[(String, String, String, Seq[AnyRef], Boolean)],
     dataAttr: AttrSetMan
   ): (Seq[AnyRef], List[Element], Seq[(String, String, String, Seq[AnyRef], Boolean)]) = {
     if (isUpsert) {
       // Disregard if value already exists
-      resolve(tail, eids, filterElements, data :+ setAdd(dataAttr, true))
+      resolve(tail, ids, filterElements, data :+ setAdd(dataAttr, true))
     } else {
       // Make sure current value exists
       val dummyFilterAttr = AttrOneTacInt(dataAttr.ns, dataAttr.attr, V, Nil, None, None, Nil, Nil, None, None)
-      resolve(tail, eids, filterElements :+ dummyFilterAttr, data :+ setAdd(dataAttr, true))
+      resolve(tail, ids, filterElements :+ dummyFilterAttr, data :+ setAdd(dataAttr, true))
     }
   }
 

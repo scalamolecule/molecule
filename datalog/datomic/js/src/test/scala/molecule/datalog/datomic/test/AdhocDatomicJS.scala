@@ -8,7 +8,7 @@ import molecule.datalog.datomic.setup.DatomicTestSuite
 import utest._
 
 
-object AdhocJs extends DatomicTestSuite {
+object AdhocDatomicJS extends DatomicTestSuite {
 
   override lazy val tests = Tests {
 

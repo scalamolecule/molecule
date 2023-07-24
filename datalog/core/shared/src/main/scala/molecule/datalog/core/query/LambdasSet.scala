@@ -150,7 +150,29 @@ trait LambdasSet extends ResolveBase with JavaConversions {
       list.head match {
         case _: jLong => Some(list.map(_.asInstanceOf[Long]).toSet)
         // Refs
-        case _: jMap[_, _] => Some(list.map(_.asInstanceOf[jMap[_, _]].values.iterator.next.asInstanceOf[Long]).toSet)
+        case _: jMap[_, _] =>
+          /*
+          // If a ref is owned (:db/isComponent true), Datomic returns all nested values in a pull for an optional
+          // ref value. So, the id can hide anywhere in the map entries and we need to extract it.
+          // We can't call get(<key>) on the map since it needs a clojure.lang.Keyword that we can use in a shared module
+          {:ns/ownedRef {:ns/attr1 6, :ns/attr2 7, :db/id 17592186045419, :ns/attr3 8}}
+          -------
+          // If the ref is not owned, Datomic only returns the id
+          {:ns/ref {:db/id 17592186045422}}
+           */
+          var ids = Set.empty[Long]
+          list.map(_.asInstanceOf[jMap[_, _]]).foreach { m =>
+            var continue = true
+            val it       = m.entrySet().iterator()
+            while (it.hasNext && continue) {
+              val pair = it.next()
+              if (pair.getKey.toString == ":db/id") {
+                continue = false
+                ids = ids + pair.getValue.asInstanceOf[Long]
+              }
+            }
+          }
+          Some(ids)
       }
   }
 

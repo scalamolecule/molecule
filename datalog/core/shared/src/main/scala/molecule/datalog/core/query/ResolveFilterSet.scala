@@ -266,14 +266,35 @@ trait ResolveFilterSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
   }
 
   private def attr(e: Var, a: Att, v: Var): Unit = {
-    where += s"[$e $a $v$tx]" -> wClause
+    val aa = a.split("/").last
+    aa match {
+      case "id" =>
+      case "tx" =>
+      case _    => where += s"[$e $a $v$tx]" -> wClause
+    }
+
+    //    where += s"[$e $a $v$tx]" -> wClause
   }
 
 
   private def equal[T](e: Var, a: Att, v: Var, sets: Seq[Set[T]], fromScala: Any => Any): Unit = {
     val (set, v1, v2, e1) = (v + "-set", v + 1, v + 2, e + 1)
-    in += s"[$set ...]"
-    where += s"[$e $a $v$tx]" -> wClause
+
+    val aa = a.split("/").last
+    aa match {
+      case "id" =>
+        in += s"[$e ...]"
+      case "tx" =>
+        in += s"[$txVar ...]"
+      case _    =>
+        in += s"[$set ...]"
+        where += s"[$e $a $v$tx]" -> wClause
+    }
+
+
+
+    //    in += s"[$set ...]"
+    //    where += s"[$e $a $v$tx]" -> wClause
     where +=
       s"""[(datomic.api/q
          |          "[:find (distinct $v1)

@@ -1,7 +1,7 @@
 package molecule.core.marshalling
 
+import java.nio.ByteBuffer
 import akka.actor.ActorSystem
-import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.HttpEntity
 import akka.http.scaladsl.model.ws._
 import akka.http.scaladsl.server.Directives._
@@ -16,31 +16,22 @@ import molecule.boilerplate.ast.Model._
 import molecule.core.marshalling.Boopicklers._
 import molecule.core.marshalling.serialize.PickleTpls
 import scala.concurrent.{ExecutionContextExecutor, Future}
-import scala.io.StdIn
 import scala.language.implicitConversions
 
-
-/** Akka Http RPC server responding to molecule ajax requests
- *
- * Start this server in terminal with
- *
- * sbt datomicJVM/run
- * */
-abstract class MoleculeRpcServer(rpc: MoleculeRpc) extends RpcHandlers(rpc) {
+abstract class MoleculeRpcServer_AkkaHttp(rpc: MoleculeRpc) extends RpcHandlers(rpc) {
   implicit val system          : ActorSystem              = ActorSystem()
   implicit val executionContext: ExecutionContextExecutor = system.dispatcher
 
-
-  def toRoute(handler: ByteString => Future[Array[Byte]]): Route = {
+  private def toRoute(handler: ByteBuffer => Future[Array[Byte]]): Route = {
     post {
       extractRequest { req =>
         req.entity match {
           case HttpEntity.Strict(_, argsSerialized) => complete(
-            handler(argsSerialized)
+            handler(argsSerialized.asByteBuffer)
           )
           case HttpEntity.Default(_, _, chunks)     => complete(
             chunks.reduce(_ ++ _).runFoldAsync(Array.empty[Byte]) {
-              case (_, argsSerialized) => handler(argsSerialized)
+              case (_, argsSerialized) => handler(argsSerialized.asByteBuffer)
             }
           )
 
@@ -50,7 +41,7 @@ abstract class MoleculeRpcServer(rpc: MoleculeRpc) extends RpcHandlers(rpc) {
     }
   }
 
-  def wsFlow: Flow[Message, Message, _] = {
+  private def wsFlow: Flow[Message, Message, _] = {
     val (queue, source) = Source.queue[Message](
       1, OverflowStrategy.backpressure
     ).preMaterialize()
@@ -60,13 +51,11 @@ abstract class MoleculeRpcServer(rpc: MoleculeRpc) extends RpcHandlers(rpc) {
         // Deserialize query coordinates
         val (proxy, elements, limit) = Unpickle.apply[(ConnProxy, List[Element], Option[Int])]
           .fromBytes(argsSerialized.asByteBuffer)
-        //        println("Elements: " + elements)
 
         // What to do when new query results emerge
         val callback: List[Any] => Unit = { (result: List[Any]) =>
           val resultBytes   = PickleTpls(elements, false).pickle(Right(result))
           val binaryMessage = BinaryMessage(ByteString(resultBytes))
-          //          println("CALLBACK: " + result)
 
           // Offer result to queue
           queue.offer(binaryMessage)
@@ -86,8 +75,8 @@ abstract class MoleculeRpcServer(rpc: MoleculeRpc) extends RpcHandlers(rpc) {
     //          .keepAlive(10.seconds, () => TextMessage.Strict("keep alive..."))
   }
 
-  val prefix = "molecule"
-  val route  = cors() {
+  private val prefix = "molecule"
+  val moleculeRpcRoute = cors() {
     path(prefix / "query")(toRoute(handleQuery)) ~
       path(prefix / "queryOffset")(toRoute(handleQueryOffset)) ~
       path(prefix / "queryCursor")(toRoute(handleQueryCursor)) ~
@@ -97,13 +86,4 @@ abstract class MoleculeRpcServer(rpc: MoleculeRpc) extends RpcHandlers(rpc) {
       path(prefix / "delete")(toRoute(handleDelete)) ~
       path(prefix / "ws" / Remaining)(_ => handleWebSocketMessages(wsFlow))
   }
-
-  Http()
-    .newServerAt("localhost", 8080)
-    .bind(route)
-  //    .map(_.addToCoordinatedShutdown(hardTerminationDeadline = 120.seconds))
-
-  println("Started server at 127.0.0.1:8080, press enter to kill server")
-  StdIn.readLine()
-  system.terminate()
 }

@@ -1,113 +1,51 @@
 package molecule.sql.jdbc.test
 
-import java.util.Date
+import molecule.base.ast.SchemaAST
+import molecule.boilerplate.api._
+import molecule.boilerplate.api.expression.{ExprOneMan_2_Number, ExprOneMan_3_Number, ExprOneMan_4_Number}
+import molecule.core.action.Query
 import molecule.core.util.Executor._
-import scala.collection.immutable.{List, Seq, Set}
-//import molecule.coreTests.dataModels.core.dsl.Refs._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.sql.jdbc.async._
 import molecule.sql.jdbc.setup.JdbcTestSuite
 import utest._
+import scala.concurrent.Future
 import scala.language.implicitConversions
-
 
 object AdhocJdbcJVM extends JdbcTestSuite {
 
-//  val name   = Map("en" -> "hello", "de" -> "hello", "da" -> "hej")
-//  val name_k = Set("en", "de", "da")
-//  val name_v = Set("hello", "hej")
-//
-//  val name_   = 7
-//  val name_k_ = 7
-//  val name_v_ = 7
-//
-//  val name_?   = 7
-//  val name_k_? = 7
-//  val name_v_? = 7
-//
-//  val ranked   = List("Peter", "Bob", "Mary")
-//  val ranked_i = List(0, 1, 2)
-//
-//  val rankedA   = Array("Peter", "Bob", "Mary")
-//  val rankedA_i = Array(0, 1, 2)
+  //  val name   = Map("en" -> "hello", "de" -> "hello", "da" -> "hej")
+  //  val name_k = Set("en", "de", "da")
+  //  val name_v = Set("hello", "hej")
+  //
+  //  val name_   = 7
+  //  val name_k_ = 7
+  //  val name_v_ = 7
+  //
+  //  val name_?   = 7
+  //  val name_k_? = 7
+  //  val name_v_? = 7
+  //
+  //  val ranked   = List("Peter", "Bob", "Mary")
+  //  val ranked_i = List(0, 1, 2)
+  //
+  //  val rankedA   = Array("Peter", "Bob", "Mary")
+  //  val rankedA_i = Array(0, 1, 2)
 
+  //  val x: Instant = ???
+  //  val y: Long    = x.toEpochMilli
 
   override lazy val tests = Tests {
 
     "types" - types { implicit conn =>
-      val a = (1, Set(ref1, ref2))
-      val b = (2, Set(ref2, ref3, ref4))
+      import molecule.coreTests.dataModels.core.dsl.Types._
+
       for {
-        _ <- Ns.i.refs.insert(List(a, b)).transact
-
-        // Exact Set matches
-
-        // AND semantics
-        // "Is exactly this AND that"
-        _ <- Ns.i.a1.Refs.eid(ref1).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.refs(Set(ref1)).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.refs(Set(ref1, ref2)).query.get.map(_ ==> List(a)) // include exact match
-        _ <- Ns.i.a1.refs(Set(ref1, ref2, ref3)).query.get.map(_ ==> List())
-        // Same as
-        _ <- Ns.i.a1.refs(Seq(Set(ref1))).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.refs(Seq(Set(ref1, ref2))).query.get.map(_ ==> List(a))
-        _ <- Ns.i.a1.refs(Seq(Set(ref1, ref2, ref3))).query.get.map(_ ==> List())
-
-
-        // AND/OR semantics with multiple Sets
-
-        // "(exactly this AND that) OR (exactly this AND that)"
-        _ <- Ns.i.a1.refs(Set(ref1), Set(ref2, ref3)).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.refs(Set(ref1, ref2), Set(ref2, ref3)).query.get.map(_ ==> List(a))
-        _ <- Ns.i.a1.refs(Set(ref1, ref2), Set(ref2, ref3, ref4)).query.get.map(_ ==> List(a, b))
-        // Same as
-        _ <- Ns.i.a1.refs(Seq(Set(ref1), Set(ref2, ref3))).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.refs(Seq(Set(ref1, ref2), Set(ref2, ref3))).query.get.map(_ ==> List(a))
-        _ <- Ns.i.a1.refs(Seq(Set(ref1, ref2), Set(ref2, ref3, ref4))).query.get.map(_ ==> List(a, b))
-
-
-        // Empty Seq/Sets match nothing
-        _ <- Ns.i.a1.refs(Set(ref1, ref2), Set.empty[Long]).query.get.map(_ ==> List(a))
-        _ <- Ns.i.a1.refs(Set.empty[Long], Set(ref1, ref2)).query.get.map(_ ==> List(a))
-        _ <- Ns.i.a1.refs(Set.empty[Long]).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.refs(Seq.empty[Set[Long]]).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.refs(Seq(Set.empty[Long])).query.get.map(_ ==> List())
-
-
-
-        //        _ <- Ns.i.int.insert(List(
-        //          (1, int1),
-        //          (2, int2),
-        //          (2, int2),
-        //          (2, int3),
-        //        )).transact
-        //
-        //        _ <- Ns.i.a1.int.query.get.map(_.sortBy(_._2) ==> List(
-        //          (1, int1),
-        //          (2, int2), // 2 rows coalesced
-        //          (2, int3),
-        //        ))
-        //
-        //        // Distinct values are returned in a Set
-        //        _ <- Ns.i.a1.int(distinct).query.get.map(_ ==> List(
-        //          (1, Set(int1)),
-        //          (2, Set(int2, int3)),
-        //        ))
-        //
-        //        _ <- Ns.int(distinct).query.get.map(_.head ==> Set(
-        //          int1, int2, int3
-        //        ))
-
+        _ <- Ns.i(1).save.transact
+        _ <- Ns.i.query.get.map(_ ==> List(1))
       } yield ()
     }
 
-    //    "types" - types { implicit conn =>
-    //      for {
-    //        //        _ <- Ns.i(3).save.transact
-    //        _ <- Ns.i.insert(3).transact
-    //        _ <- Ns.i.query.get.map(_ ==> List(3))
-    //      } yield ()
-    //    }
 
 
     //    "validation" - validation { implicit conn =>
@@ -128,28 +66,93 @@ object AdhocJdbcJVM extends JdbcTestSuite {
     //      } yield ()
     //    }
 
+    "refs" - refs { implicit conn =>
+      import molecule.coreTests.dataModels.core.dsl.Refs._
 
-    //    "refs" - refs { implicit conn =>
-    //      import molecule.coreTests.dataModels.core.dsl.Refs._
-    //      for {
-    //
-    //        _ <- Ns.i(1).R1.i(2).Ns1.i(3).save.transact
-    //
-    //        // Directional
-    //        _ <- Ns.i.R1.i.Ns1.i.query.get.map(_ ==> List((1, 2, 3)))
-    //        _ <- Ns.i(1).R1.i.Ns1.i.query.get.map(_ ==> List((1, 2, 3)))
-    //        _ <- Ns.i(3).R1.i.Ns1.i.query.get.map(_ ==> List())
-    //
-    //
-    //
-    //        // Bidirectional
-    ////        _ <- Ns.i.a1.Self(bi).i.query.get.map(_ ==> List((1, 2), (2, 1)))
-    ////        _ <- Ns.i(1).Self(bi).i.query.get.map(_ ==> List((1, 2)))
-    ////        _ <- Ns.i(2).Self(bi).i.query.get.map(_ ==> List((2, 1)))
-    //
-    //      } yield ()
-    //
-    //    }
+//      val a1: Nested2TxInit_01[Int, (String, Int), Tx_2]              = A.i.Bb.*(B.s.i)
+//      val a1: Query[(Int, Seq[(String, Int)])]                        = A.i.Bb.*(B.s.i).query
+//      val a1: Tx_2[Int, Seq[(String, Int)], Nothing]                  = A.i.Bb.*(B.s.i).Tx
+//      val a1: Tx_3[Int, Seq[(String, Int)], Int, Int]                 = A.i.Bb.*(B.s.i).Tx.myTxAttr
+//      val a1: Molecule_04[Int, Seq[(String, Int)], Int, String]       = A.i.Bb.*(B.s.i).Tx.apply(D.i.s)
+//      val a1: Query[(Int, Seq[(String, Int)], Int, String)]           = A.i.Bb.*(B.s.i).Tx.apply(D.i.s).query
+//      val a2: Query[(Int, Seq[(String, Int)], Int)]                   = A.i.Bb.*(B.s.i).Tx.myTxAttr.query
+//      val a2: Molecule_05[Int, Seq[(String, Int)], Int, Int, String]  = A.i.Bb.*(B.s.i).Tx.myTxAttr.apply(D.i.s)
+//      val a2: Molecule_06[Int, String, Seq[String], Int, Int, String] = A.i.s.Bb.*(B.s).Tx.myTxAttr(D.i.s)
+//      val a1: Molecule_05[Int, Seq[String], Long, Int, String]        = A.i.Bb.*(B.s).Tx.id(D.i.s)
+//      val a3: Molecule_05[Int, Seq[String], Int, Int, String]         = A.i.Bb.*?(B.s).Tx.myTxAttr(D.i.s)
+//
+//      val b1: Molecule_00                        = A.i_.Tx.apply(D.i_)
+//      val b1: Molecule_02[Int, Int]              = A.i_.Tx.apply(D.i + E.i)
+//      val b1: Molecule_01[Int]                   = A.i.Tx.apply(D.i_)
+//      val b1: Molecule_02[Int, Int]              = A.i.Tx.apply(D.i)
+//      val b1: Molecule_03[Int, Int, String]      = A.i.Tx.apply(D.i.s)
+//      val b1: Molecule_03[Int, Long, Int]        = A.i.Tx.id.apply(D.i)
+//      val b2: Molecule_03[Int, Int, Int]         = A.i.Tx.myTxAttr.apply(D.i) // no?
+//      val b2: Molecule_04[Int, Int, Int, String] = A.i.Tx.myTxAttr.apply(D.i.s) // no?
+//      val b2: Molecule_03[Int, Int, Int]         = A.i.Tx.myTxAttr.meta(D.i)
+//      val b3: Molecule_03[Int, Long, Int]        = A.i.Tx.created.apply(D.i)
+//      val b3: Molecule_02[Int, Int]              = A.i.apply(D.i) // filter attr ok
+//      //val b3: Molecule_03[Int, Int, String]      = A.i.apply(D.i.s)
+//      val b4: Molecule_03[Int, Long, Int]        = A.i.Tx.updated(D.i)
+//      val b4: Molecule_03[Int, Long, Int]        = A.i.Tx.updated.>(7).apply(D.i)
+//
+//      val e2: Composite_00[Tx_0, Tx_1, Tx_2, Tx_3, Tx_4, Tx_5, Tx_6, Tx_7, Tx_8, Tx_9, Tx_10, X12, X13, X14, X15, X16, X17, X18, X19, X20, X21, X22, X23]                                                   = A.i_.+(B.s_)
+//      val e2: Composite_01[Int, Tx_0, Tx_1, Tx_2, Tx_3, Tx_4, Tx_5, Tx_6, Tx_7, Tx_8, Tx_9, Tx_10, X12, X13, X14, X15, X16, X17, X18, X19, X20, X21, X22, X23]                                              = A.i.+(B.s_)
+//      val e2: Composite_02[Int, String, Tx_0, Tx_1, Tx_2, Tx_3, Tx_4, Tx_5, Tx_6, Tx_7, Tx_8, Tx_9, Tx_10, X12, X13, X14, X15, X16, X17, X18, X19, X20, X21, X22, X23]                                      = A.i.+(B.s)
+//      val e2: Composite_02[Int, (String, Int), Tx_0, Tx_1, Tx_2, Tx_3, Tx_4, Tx_5, Tx_6, Tx_7, Tx_8, Tx_9, Tx_10, X12, X13, X14, X15, X16, X17, X18, X19, X20, X21, X22, X23]                               = A.i.+(B.s.i)
+//      val e2: Composite_01[(String, Int), Tx_0, Tx_1, Tx_2, Tx_3, Tx_4, Tx_5, Tx_6, Tx_7, Tx_8, Tx_9, Tx_10, X12, X13, X14, X15, X16, X17, X18, X19, X20, X21, X22, X23]                                    = A.i_.+(B.i_).+(C.s.i)
+//      val e2: Composite_02[Int, (String, Int), Tx_0, Tx_1, Tx_2, Tx_3, Tx_4, Tx_5, Tx_6, Tx_7, Tx_8, Tx_9, Tx_10, X12, X13, X14, X15, X16, X17, X18, X19, X20, X21, X22, X23]                               = A.i_.+(B.i).+(C.s.i)
+//      val e2: Composite_02[Int, (String, Int), Tx_0, Tx_1, Tx_2, Tx_3, Tx_4, Tx_5, Tx_6, Tx_7, Tx_8, Tx_9, Tx_10, X12, X13, X14, X15, X16, X17, X18, X19, X20, X21, X22, X23]                               = A.i.+(B.i_).+(C.s.i)
+//      val e2: Composite_03[Int, Int, (String, Int), Tx_0, Tx_1, Tx_2, Tx_3, Tx_4, Tx_5, Tx_6, Tx_7, Tx_8, Tx_9, Tx_10, X12, X13, X14, X15, X16, X17, X18, X19, X20, X21, X22, X23]                          = A.i.+(B.i).+(C.s.i)
+//      val e2: Composite_03[Int, (Int, String), (String, Int), Tx_0, Tx_1, Tx_2, Tx_3, Tx_4, Tx_5, Tx_6, Tx_7, Tx_8, Tx_9, Tx_10, X12, X13, X14, X15, X16, X17, X18, X19, X20, X21, X22, X23]                = A.i.+(B.i.s).+(C.s.i)
+//      val e2: Composite_04[Int, (Int, String), (String, Int), (String, Int), Tx_0, Tx_1, Tx_2, Tx_3, Tx_4, Tx_5, Tx_6, Tx_7, Tx_8, Tx_9, Tx_10, X12, X13, X14, X15, X16, X17, X18, X19, X20, X21, X22, X23] = A.i.+(B.i.s).+(C.s.i).+(D.s.i)
+//
+//      val e2: Tx_0[Nothing]               = A.i_.+(B.s_).Tx
+//      val e2: Molecule_01[Int]            = A.i_.+(B.s_).Tx.apply(D.i)
+//      val e2: Tx_2[Int, String, Nothing]  = A.i.+(B.s).Tx
+//      val e2: Tx_3[Int, String, Int, Int] = A.i.+(B.s).Tx.myTxAttr
+//
+//      val e2: Tx_2[Int, (String, Int), Nothing]              = A.i.+(B.s.i).Tx
+//      val e2: Tx_3[Int, (String, Int), Int, Int]             = A.i.+(B.s.i).Tx.myTxAttr
+//      val e2: Molecule_03[Int, (String, Int), Int]           = A.i.+(B.s.i).Tx.apply(D.i)
+//      val e3: Tx_3[(Int, String), (String, Int), Int, Int]   = A.i.s.+(B.s.i).Tx.myTxAttr
+//      val e2: Molecule_03[(Int, String), (String, Int), Int] = A.i.s.+(B.s.i).Tx.apply(D.i)
+//
+//      val e2: Tx_3[Int, Int, (String, Int), Nothing]                         = A.i.+(B.i).+(C.s.i).Tx
+//      val e2: Tx_4[Int, Int, (String, Int), Int, Int]                        = A.i.+(B.i).+(C.s.i).Tx.myTxAttr
+//      val e2: Molecule_05[Int, Int, (String, Int), Int, Int]                 = A.i.+(B.i).+(C.s.i).Tx.myTxAttr.apply(D.i)
+//      val e2: Molecule_04[Int, Int, (String, Int), Int]                      = A.i.+(B.i).+(C.s.i).Tx.apply(D.i)
+//      val e2: Molecule_04[Int, Int, (String, Int), Int]                      = (A.i + B.i + C.s.i).Tx.apply(D.i)
+//      val e3: Tx_3[Int, (Int, String), (String, Int), Nothing]               = A.i.+(B.i.s).+(C.s.i).Tx
+//      val e2: Tx_4[Int, (Int, String), (String, Int), Int, Int]              = A.i.+(B.i.s).+(C.s.i).Tx.myTxAttr
+//      val e2: Molecule_04[Int, (Int, String), (String, Int), String]         = A.i.+(B.i.s).+(C.s.i).Tx.apply(D.s)
+//      val e2: Molecule_05[Int, (Int, String), (String, Int), String, String] = A.i.+(B.i.s).+(C.s.i).Tx.apply(D.s.s)
+//
+//      val e2: Tx_4[Int, (Int, String), (String, Int), (String, Int), Nothing]               = A.i.+(B.i.s).+(C.s.i).+(D.s.i).Tx
+//      val e2: Tx_5[Int, (Int, String), (String, Int), (String, Int), Long, Long]            = A.i.+(B.i.s).+(C.s.i).+(D.s.i).Tx.id
+//      val e2: Tx_1[Int, Int]                                                                = A.i_.+(B.i_.s_).+(C.s_.i_).+(D.s_.i_).Tx.myTxAttr
+//      val e2: Tx_2[Int, Int, Int]                                                           = A.i_.+(B.i_.s_).+(C.s_.i_).+(D.s_.i).Tx.myTxAttr
+//      val e2: Tx_2[(String, Int), Int, Int]                                                 = A.i_.+(B.i_.s_).+(C.s_.i_).+(D.s.i).Tx.myTxAttr
+//      val e2: Tx_3[Int, (String, Int), Int, Int]                                            = A.i_.+(B.i_.s_).+(C.s_.i).+(D.s.i).Tx.myTxAttr
+//      val e2: Tx_3[(String, Int), (String, Int), Int, Int]                                  = A.i_.+(B.i_.s_).+(C.s.i).+(D.s.i).Tx.myTxAttr
+//      val e2: Tx_4[String, (String, Int), (String, Int), Int, Int]                          = A.i_.+(B.i_.s).+(C.s.i).+(D.s.i).Tx.myTxAttr
+//      val e2: Tx_4[(Int, String), (String, Int), (String, Int), Int, Int]                   = A.i_.+(B.i.s).+(C.s.i).+(D.s.i).Tx.myTxAttr
+//      val e2: Tx_5[Int, (Int, String), (String, Int), (String, Int), Int, Int]              = A.i.+(B.i.s).+(C.s.i).+(D.s.i).Tx.myTxAttr
+//      val e2: Tx_5[Int, (Int, String), (String, Int), String, Int, Int]                     = A.i.+(B.i.s).+(C.s.i).+(D.s.i_).Tx.myTxAttr
+//      val e2: Tx_4[Int, (Int, String), (String, Int), Int, Int]                             = A.i.+(B.i.s).+(C.s.i).+(D.s_.i_).Tx.myTxAttr
+//      val e2: Tx_4[Int, (Int, String), String, Int, Int]                                    = A.i.+(B.i.s).+(C.s.i_).+(D.s_.i_).Tx.myTxAttr
+//      val e2: Tx_3[Int, (Int, String), Int, Int]                                            = A.i.+(B.i.s).+(C.s_.i_).+(D.s_.i_).Tx.myTxAttr
+//      val e2: Tx_3[Int, Int, Int, Int]                                                      = A.i.+(B.i.s_).+(C.s_.i_).+(D.s_.i_).Tx.myTxAttr
+//      val e2: Tx_2[Int, Int, Int]                                                           = A.i.+(B.i_.s_).+(C.s_.i_).+(D.s_.i_).Tx.myTxAttr
+//      val e2: Tx_1[Int, Int]                                                                = A.i_.+(B.i_.s_).+(C.s_.i_).+(D.s_.i_).Tx.myTxAttr
+//      val e2: Molecule_05[Int, (Int, String), (String, Int), (String, Int), String]         = A.i.+(B.i.s).+(C.s.i).+(D.s.i).Tx.apply(D.s)
+//      val e2: Molecule_06[Int, (Int, String), (String, Int), (String, Int), String, String] = A.i.+(B.i.s).+(C.s.i).+(D.s.i).Tx.apply(D.s.s)
+
+      for {
+        _ <- A.i(1).s("a").+(B.i(2).s("b")).Tx(D.i(3).s("c")).save.transact
+        _ <- (A.i.s + B.s.i).Tx(D.i).query.get.map(_ ==> List(((1, "a"), ("b", 2), 3)))
+      } yield ()
+    }
 
     //    "set" - typesSet { implicit conn =>
     //

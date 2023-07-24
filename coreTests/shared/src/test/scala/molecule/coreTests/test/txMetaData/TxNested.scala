@@ -186,8 +186,7 @@ trait TxNested extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
 
     "Nested ref + composite tx meta data with ref" - refs { implicit conn =>
       for {
-        _ <- m(A.s.Bb.*(B.i.C.i.s.Dd.*(D.i))
-          .Tx(F.s_("b").i_(5).G.s_("c") + E.i_(6).s_("d"))).insert(List(
+        _ <- A.s.Bb.*(B.i.C.i.s.Dd.*(D.i)).Tx(F.s_("b").i_(5).G.s_("c") + E.i_(6).s_("d")).insert(List(
           ("A", List(
             (1, 2, "a", List(3, 4)),
             (11, 22, "aa", Nil))),

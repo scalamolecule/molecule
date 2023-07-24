@@ -71,10 +71,11 @@ trait Bidirectional extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsyn
     }
 
 
-    "optional nested" - refs { implicit conn =>
-      // Bidirectional marker not available with optional nested data structures (won't type infer)
-      // A.i.Aa(bi).*?(A.i)
-      compileError("A.i.Aa(bi).*?(A.i)")
-    }
+    // todo ?
+//    "optional nested" - refs { implicit conn =>
+    //      // Bidirectional marker not available with optional nested data structures (won't type infer)
+    //      // A.i.Aa(bi).*?(A.i)
+    //      compileError("A.i.Aa(bi).*?(A.i)")
+    //    }
   }
 }

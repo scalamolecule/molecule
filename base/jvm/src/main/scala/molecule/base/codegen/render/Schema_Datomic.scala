@@ -6,7 +6,8 @@ import molecule.base.util.{BaseHelpers, RegexMatching}
 
 case class Schema_Datomic(schema: MetaSchema) extends BaseHelpers with RegexMatching {
 
-  val flatNss: Seq[MetaNs] = schema.parts.flatMap(_.nss)
+  // Exclude Tx namespace since tx entities are given by Datomic
+  val flatNss: Seq[MetaNs] = schema.parts.flatMap(_.nss).filterNot(_.ns == "Tx")
 
   val datomicPartitions: String = {
     val parts = schema.parts.filterNot(_.part.isEmpty).map(_.part)

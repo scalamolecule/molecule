@@ -45,7 +45,7 @@ trait UpdateOne_filter extends CoreTestSuite with ApiAsyncImplicits { self: SpiA
           (1, None),
           (1, Some(2)),
           (2, Some(3)),
-        ).transact.map(_.eids)
+        ).transact.map(_.ids)
 
         _ <- Ns.i.a1.int_?.a2.query.get.map(_ ==> List(
           (1, None),
@@ -55,7 +55,7 @@ trait UpdateOne_filter extends CoreTestSuite with ApiAsyncImplicits { self: SpiA
 
         // Update all entities where non-unique attribute i is 1
         _ <- Ns.i_(1).int(4).update.transact
-        _ <- Ns.eid.a1.i.int_?.query.get.map(_ ==> List(
+        _ <- Ns.id.a1.i.int_?.query.get.map(_ ==> List(
           (a, 1, None), // not updated since there were no previous value
           (b, 1, Some(4)), // 2 updated to 4
           (c, 2, Some(3)),
@@ -63,7 +63,7 @@ trait UpdateOne_filter extends CoreTestSuite with ApiAsyncImplicits { self: SpiA
 
         // Upsert all entities where non-unique attribute i is 1
         _ <- Ns.i_(1).int(5).upsert.transact
-        _ <- Ns.eid.a1.i.int_?.query.get.map(_ ==> List(
+        _ <- Ns.id.a1.i.int_?.query.get.map(_ ==> List(
           (a, 1, Some(5)), // 5 inserted
           (b, 1, Some(5)), // 4 updated to 5
           (c, 2, Some(3)),
@@ -90,7 +90,7 @@ trait UpdateOne_filter extends CoreTestSuite with ApiAsyncImplicits { self: SpiA
           (1, 1),
           (2, 2),
           (3, 3),
-        ).transact.map(_.eids)
+        ).transact.map(_.ids)
 
         _ <- Ns.i.a1.int.query.get.map(_ ==> List(
           (1, 1),

@@ -17,23 +17,23 @@ trait UpdateSetOps_UUID_ extends CoreTestSuite with ApiAsyncImplicits { self: Sp
 
     "apply (replace/add all)" - types { implicit conn =>
       for {
-        eid <- Ns.uuids(Set(uuid1, uuid2)).save.transact.map(_.eid)
+        id <- Ns.uuids(Set(uuid1, uuid2)).save.transact.map(_.id)
 
-        _ <- Ns(eid).uuids(Set(uuid3, uuid4)).update.transact
+        _ <- Ns(id).uuids(Set(uuid3, uuid4)).update.transact
         _ <- Ns.uuids.query.get.map(_.head ==> Set(uuid3, uuid4))
 
         // Apply Seq of values
-        _ <- Ns(eid).uuids(Set(uuid4, uuid5)).update.transact
+        _ <- Ns(id).uuids(Set(uuid4, uuid5)).update.transact
         _ <- Ns.uuids.query.get.map(_.head ==> Set(uuid4, uuid5))
 
         // Apply empty Seq of values (deleting all values!)
-        _ <- Ns(eid).uuids(Seq.empty[UUID]).update.transact
+        _ <- Ns(id).uuids(Seq.empty[UUID]).update.transact
         _ <- Ns.uuids.query.get.map(_ ==> Nil)
 
-        _ <- Ns(eid).uuids(Set(uuid1, uuid2)).update.transact
+        _ <- Ns(id).uuids(Set(uuid1, uuid2)).update.transact
 
         // Delete all (apply no values)
-        _ <- Ns(eid).uuids().update.transact
+        _ <- Ns(id).uuids().update.transact
         _ <- Ns.uuids.query.get.map(_ ==> Nil)
       } yield ()
     }
@@ -41,33 +41,33 @@ trait UpdateSetOps_UUID_ extends CoreTestSuite with ApiAsyncImplicits { self: Sp
 
     "add" - types { implicit conn =>
       for {
-        eid <- Ns.uuids(Set(uuid1)).save.transact.map(_.eid)
+        id <- Ns.uuids(Set(uuid1)).save.transact.map(_.id)
 
         // Add value
-        _ <- Ns(eid).uuids.add(uuid2).update.transact
+        _ <- Ns(id).uuids.add(uuid2).update.transact
         _ <- Ns.uuids.query.get.map(_.head ==> Set(uuid1, uuid2))
 
         // Add existing value (no effect)
-        _ <- Ns(eid).uuids.add(uuid2).update.transact
+        _ <- Ns(id).uuids.add(uuid2).update.transact
         _ <- Ns.uuids.query.get.map(_.head ==> Set(uuid1, uuid2))
 
         // Add multiple values (vararg)
-        _ <- Ns(eid).uuids.add(uuid3, uuid4).update.transact
+        _ <- Ns(id).uuids.add(uuid3, uuid4).update.transact
         _ <- Ns.uuids.query.get.map(_.head ==> Set(uuid1, uuid2, uuid3, uuid4))
 
         // Add Iterable of values (existing values unaffected)
         // Seq
-        _ <- Ns(eid).uuids.add(Seq(uuid4, uuid5)).update.transact
+        _ <- Ns(id).uuids.add(Seq(uuid4, uuid5)).update.transact
         _ <- Ns.uuids.query.get.map(_.head ==> Set(uuid1, uuid2, uuid3, uuid4, uuid5))
         // Set
-        _ <- Ns(eid).uuids.add(Set(uuid6)).update.transact
+        _ <- Ns(id).uuids.add(Set(uuid6)).update.transact
         _ <- Ns.uuids.query.get.map(_.head ==> Set(uuid1, uuid2, uuid3, uuid4, uuid5, uuid6))
         // Iterable
-        _ <- Ns(eid).uuids.add(Iterable(uuid7)).update.transact
+        _ <- Ns(id).uuids.add(Iterable(uuid7)).update.transact
         _ <- Ns.uuids.query.get.map(_.head ==> Set(uuid1, uuid2, uuid3, uuid4, uuid5, uuid6, uuid7))
 
         // Add empty Seq of values (no effect)
-        _ <- Ns(eid).uuids.add(Seq.empty[UUID]).update.transact
+        _ <- Ns(id).uuids.add(Seq.empty[UUID]).update.transact
         _ <- Ns.uuids.query.get.map(_.head ==> Set(uuid1, uuid2, uuid3, uuid4, uuid5, uuid6, uuid7))
       } yield ()
     }
@@ -75,30 +75,30 @@ trait UpdateSetOps_UUID_ extends CoreTestSuite with ApiAsyncImplicits { self: Sp
 
     "swap" - types { implicit conn =>
       for {
-        eid <- Ns.uuids(Set(uuid1, uuid2, uuid3, uuid4, uuid5, uuid6)).save.transact.map(_.eid)
+        id <- Ns.uuids(Set(uuid1, uuid2, uuid3, uuid4, uuid5, uuid6)).save.transact.map(_.id)
 
         // Replace value
-        _ <- Ns(eid).uuids.swap(uuid6 -> uuid8).update.transact
+        _ <- Ns(id).uuids.swap(uuid6 -> uuid8).update.transact
         _ <- Ns.uuids.query.get.map(_.head ==> Set(uuid1, uuid2, uuid3, uuid4, uuid5, uuid8))
 
         // Replacing value to existing value simply deletes it
-        _ <- Ns(eid).uuids.swap(uuid5 -> uuid8).update.transact
+        _ <- Ns(id).uuids.swap(uuid5 -> uuid8).update.transact
         _ <- Ns.uuids.query.get.map(_.head ==> Set(uuid1, uuid2, uuid3, uuid4, uuid8))
 
         // Replace multiple values (vararg)
-        _ <- Ns(eid).uuids.swap(uuid3 -> uuid6, uuid4 -> uuid7).update.transact
+        _ <- Ns(id).uuids.swap(uuid3 -> uuid6, uuid4 -> uuid7).update.transact
         _ <- Ns.uuids.query.get.map(_.head ==> Set(uuid1, uuid2, uuid6, uuid7, uuid8))
 
         // Missing old value has no effect. The new value is inserted (upsert semantics)
-        _ <- Ns(eid).uuids.swap(uuid4 -> uuid9).update.transact
+        _ <- Ns(id).uuids.swap(uuid4 -> uuid9).update.transact
         _ <- Ns.uuids.query.get.map(_.head ==> Set(uuid1, uuid2, uuid6, uuid7, uuid8, uuid9))
 
         // Replace with Seq of oldValue->newValue pairs
-        _ <- Ns(eid).uuids.swap(Seq(uuid2 -> uuid5)).update.transact
+        _ <- Ns(id).uuids.swap(Seq(uuid2 -> uuid5)).update.transact
         _ <- Ns.uuids.query.get.map(_.head ==> Set(uuid1, uuid5, uuid6, uuid7, uuid8, uuid9))
 
         // Replacing with empty Seq of oldValue->newValue pairs has no effect
-        _ <- Ns(eid).uuids.swap(Seq.empty[(UUID, UUID)]).update.transact
+        _ <- Ns(id).uuids.swap(Seq.empty[(UUID, UUID)]).update.transact
         _ <- Ns.uuids.query.get.map(_.head ==> Set(uuid1, uuid5, uuid6, uuid7, uuid8, uuid9))
 
 
@@ -118,34 +118,34 @@ trait UpdateSetOps_UUID_ extends CoreTestSuite with ApiAsyncImplicits { self: Sp
 
     "remove" - types { implicit conn =>
       for {
-        eid <- Ns.uuids(Set(uuid1, uuid2, uuid3, uuid4, uuid5, uuid6)).save.transact.map(_.eid)
+        id <- Ns.uuids(Set(uuid1, uuid2, uuid3, uuid4, uuid5, uuid6)).save.transact.map(_.id)
 
         // Remove value
-        _ <- Ns(eid).uuids.remove(uuid6).update.transact
+        _ <- Ns(id).uuids.remove(uuid6).update.transact
         _ <- Ns.uuids.query.get.map(_.head ==> Set(uuid1, uuid2, uuid3, uuid4, uuid5))
 
         // Removing non-existing value has no effect
-        _ <- Ns(eid).uuids.remove(uuid7).update.transact
+        _ <- Ns(id).uuids.remove(uuid7).update.transact
         _ <- Ns.uuids.query.get.map(_.head ==> Set(uuid1, uuid2, uuid3, uuid4, uuid5))
 
         // Removing duplicate values removes the distinct value
-        _ <- Ns(eid).uuids.remove(uuid5, uuid5).update.transact
+        _ <- Ns(id).uuids.remove(uuid5, uuid5).update.transact
         _ <- Ns.uuids.query.get.map(_.head ==> Set(uuid1, uuid2, uuid3, uuid4))
 
         // Remove multiple values (vararg)
-        _ <- Ns(eid).uuids.remove(uuid3, uuid4).update.transact
+        _ <- Ns(id).uuids.remove(uuid3, uuid4).update.transact
         _ <- Ns.uuids.query.get.map(_.head ==> Set(uuid1, uuid2))
 
         // Remove Seq of values
-        _ <- Ns(eid).uuids.remove(Seq(uuid2)).update.transact
+        _ <- Ns(id).uuids.remove(Seq(uuid2)).update.transact
         _ <- Ns.uuids.query.get.map(_.head ==> Set(uuid1))
 
         // Removing empty Seq of values has no effect
-        _ <- Ns(eid).uuids.remove(Seq.empty[UUID]).update.transact
+        _ <- Ns(id).uuids.remove(Seq.empty[UUID]).update.transact
         _ <- Ns.uuids.query.get.map(_.head ==> Set(uuid1))
 
         // Removing all elements is like deleting the attribute
-        _ <- Ns(eid).uuids.remove(Seq(uuid1)).update.transact
+        _ <- Ns(id).uuids.remove(Seq(uuid1)).update.transact
         _ <- Ns.uuids.query.get.map(_ ==> Nil)
       } yield ()
     }

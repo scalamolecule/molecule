@@ -104,9 +104,9 @@ trait MandatoryAttrs extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsy
 
     "Update, delete attr" - validation { implicit conn =>
       for {
-        eid <- MandatoryAttr.name("Bob").age(42).hobbies(Set("golf", "stamps")).save.transact.map(_.eid)
+        id <- MandatoryAttr.name("Bob").age(42).hobbies(Set("golf", "stamps")).save.transact.map(_.id)
 
-        _ <- MandatoryAttr(eid).name().update.transact
+        _ <- MandatoryAttr(id).name().update.transact
           .map(_ ==> "Unexpected success").recover {
           case ModelError(error) =>
             error ==>
@@ -115,7 +115,7 @@ trait MandatoryAttrs extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsy
                 |""".stripMargin
         }
 
-        _ <- MandatoryAttr(eid).hobbies().update.transact
+        _ <- MandatoryAttr(id).hobbies().update.transact
           .map(_ ==> "Unexpected success").recover {
           case ModelError(error) =>
             error ==>
@@ -124,7 +124,7 @@ trait MandatoryAttrs extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsy
                 |""".stripMargin
         }
 
-        _ <- MandatoryAttr(eid).name().hobbies().update.transact
+        _ <- MandatoryAttr(id).name().hobbies().update.transact
           .map(_ ==> "Unexpected success").recover {
           case ModelError(error) =>
             error ==>
@@ -139,13 +139,13 @@ trait MandatoryAttrs extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsy
 
     "Update, remove last card-many value" - validation { implicit conn =>
       for {
-        eid <- MandatoryAttr.name("Bob").age(42).hobbies(Set("golf", "stamps")).save.transact.map(_.eid)
+        id <- MandatoryAttr.name("Bob").age(42).hobbies(Set("golf", "stamps")).save.transact.map(_.id)
 
         // We can remove a value from a Set as long as it's not the last value
-        _ <- MandatoryAttr(eid).hobbies.remove("stamps").update.transact
+        _ <- MandatoryAttr(id).hobbies.remove("stamps").update.transact
 
         // Can't remove the last value of a mandatory attribute Set of values
-        _ <- MandatoryAttr(eid).hobbies.remove("golf").update.transact
+        _ <- MandatoryAttr(id).hobbies.remove("golf").update.transact
           .map(_ ==> "Unexpected success").recover {
           case ModelError(error) =>
             error ==>
