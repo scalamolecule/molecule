@@ -143,15 +143,8 @@ object AdhocDatomicJVM extends DatomicTestSuite {
 
       for {
 
-        _ <- Ns.i.int.insert(List(
-          (1, int1),
-          (2, int2),
-          (2, int2),
-          (2, int3),
-        )).transact
-
-//        _ <- Ns.i(count).query.inspect
-        _ <- Ns.i(count).query.get.map(_ ==> List(4))
+        _ <- Ns.i(42).save.transact
+        _ <- Ns.i.query.get.map(_ ==> List(42))
 
       } yield ()
     }
@@ -176,55 +169,55 @@ object AdhocDatomicJVM extends DatomicTestSuite {
     //    }
 
 
-    "refs" - refs { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Refs._
-      for {
-//        _ <- A.s.Bb.*(B.i).insert(
-//          ("a", List(1, 2)),
-//          ("b", Nil),
-//        ).transact
-
-        // Mandatory nested data
-        _ <- A.s.id.Bb.*(B.i.a1).query.inspect
-//        _ <- A.id.s.Bb.*(B.i).query.get.map(_ ==> List(
-//          ("a", List(1, 2)),
-//        ))
-//
-//        // Optional nested data
-//        _ <- A.s.Bb.*?(B.i.a1).query.get.map(_ ==> List(
-//          ("a", List(1, 2)),
-//          ("b", Nil),
-//        ))
-
-        //        _ = {
-        //          println("-------")
-        //          Peer.q(
-        //            """[:find  ?b ?d ?f
-        //              | :in    $ %
-        //              | :where [?a :A/i ?b]
-        //              |        (rule?a ?a ?c)
-        //              |        [?c :B/i ?d]
-        //              |        (rule?c ?c ?e)
-        //              |        [?e :A/i ?f]]""".stripMargin,
-        //            conn.db,
-        //            """[
-        //              |  [(rule?a ?a ?c) [?a :A/b ?c]]
-        //              |  [(rule?a ?c ?e) [?c :B/a ?e]]
-        //              |
-        //              |  [(rule?c ?a ?c) [?c :A/b ?a]]
-        //              |  [(rule?c ?c ?e) [?e :B/a ?c]]
-        //              |]
-        //              |""".stripMargin
-        //          ).forEach { r => println(r) }
-        //        }
-
-        // Bidirectional
-        //        _ <- A.i.a1.Self(bi).i.query.get.map(_ ==> List((1, 2), (2, 1)))
-        //        _ <- A.i(1).Self(bi).i.query.get.map(_ ==> List((1, 2)))
-        //        _ <- A.i(2).Self(bi).i.query.get.map(_ ==> List((2, 1)))
-
-      } yield ()
-    }
+    //    "refs" - refs { implicit conn =>
+    //      import molecule.coreTests.dataModels.core.dsl.Refs._
+    //      for {
+    ////        _ <- A.s.Bb.*(B.i).insert(
+    ////          ("a", List(1, 2)),
+    ////          ("b", Nil),
+    ////        ).transact
+    //
+    //        // Mandatory nested data
+    //        _ <- A.s.id.Bb.*(B.i.a1).query.inspect
+    ////        _ <- A.id.s.Bb.*(B.i).query.get.map(_ ==> List(
+    ////          ("a", List(1, 2)),
+    ////        ))
+    ////
+    ////        // Optional nested data
+    ////        _ <- A.s.Bb.*?(B.i.a1).query.get.map(_ ==> List(
+    ////          ("a", List(1, 2)),
+    ////          ("b", Nil),
+    ////        ))
+    //
+    //        //        _ = {
+    //        //          println("-------")
+    //        //          Peer.q(
+    //        //            """[:find  ?b ?d ?f
+    //        //              | :in    $ %
+    //        //              | :where [?a :A/i ?b]
+    //        //              |        (rule?a ?a ?c)
+    //        //              |        [?c :B/i ?d]
+    //        //              |        (rule?c ?c ?e)
+    //        //              |        [?e :A/i ?f]]""".stripMargin,
+    //        //            conn.db,
+    //        //            """[
+    //        //              |  [(rule?a ?a ?c) [?a :A/b ?c]]
+    //        //              |  [(rule?a ?c ?e) [?c :B/a ?e]]
+    //        //              |
+    //        //              |  [(rule?c ?a ?c) [?c :A/b ?a]]
+    //        //              |  [(rule?c ?c ?e) [?e :B/a ?c]]
+    //        //              |]
+    //        //              |""".stripMargin
+    //        //          ).forEach { r => println(r) }
+    //        //        }
+    //
+    //        // Bidirectional
+    //        //        _ <- A.i.a1.Self(bi).i.query.get.map(_ ==> List((1, 2), (2, 1)))
+    //        //        _ <- A.i(1).Self(bi).i.query.get.map(_ ==> List((1, 2)))
+    //        //        _ <- A.i(2).Self(bi).i.query.get.map(_ ==> List((2, 1)))
+    //
+    //      } yield ()
+    //    }
 
     //    "set" - typesSet { implicit conn =>
     //

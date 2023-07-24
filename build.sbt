@@ -129,7 +129,6 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .settings(name := "molecule-coreTests")
   .dependsOn(core)
-  //  .settings(publish / skip := true)
   .settings(doPublish)
   .enablePlugins(MoleculePlugin)
   .settings(
@@ -168,11 +167,9 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
 lazy val datalogCore = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .in(file("datalog/core"))
-  //  .settings(publish / skip := true)
   .settings(doPublish)
   .settings(name := "molecule-datalog-core")
   .dependsOn(coreTests % "compile->compile;test->test")
-  //  .dependsOn(core % "compile->compile;test->test")
   .settings(
     testFrameworks := Seq(
       new TestFramework("utest.runner.Framework"),
