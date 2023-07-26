@@ -22,13 +22,13 @@ trait AggrOne_UUID_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsyn
           (2, uuid3),
         )).transact
 
-        _ <- Ns.i.a1.uuid.query.get.map(_.sortBy(_._2) ==> List(
+        _ <- Ns.i.uuid.a1.query.get.map(_ ==> List(
           (1, uuid1),
           (2, uuid2), // 2 rows coalesced
           (2, uuid3),
         ))
 
-        // Distinct values are returned in a List
+        // Distinct values are returned in a Set
         _ <- Ns.i.a1.uuid(distinct).query.get.map(_ ==> List(
           (1, Set(uuid1)),
           (2, Set(uuid2, uuid3)),

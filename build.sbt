@@ -30,7 +30,7 @@ inThisBuild(
 
 lazy val root = project
   .in(file("."))
-  .settings(name := "molecule2")
+  .settings(name := "molecule")
   .settings(publish / skip := true)
   .aggregate(
     base.js,

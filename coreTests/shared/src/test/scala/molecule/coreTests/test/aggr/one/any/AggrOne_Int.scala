@@ -22,7 +22,7 @@ trait AggrOne_Int extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync 
           (2, int3),
         )).transact
 
-        _ <- Ns.i.a1.int.query.get.map(_.sortBy(_._2) ==> List(
+        _ <- Ns.i.int.a1.query.get.map(_ ==> List(
           (1, int1),
           (2, int2), // 2 rows coalesced
           (2, int3),
@@ -106,21 +106,6 @@ trait AggrOne_Int extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync 
           (1, 1),
           (2, 2)
         ))
-
-        // todo: we can't do this in Datomic but we can with other dbs. Should it be possible? Is it needed?
-        _ <- Ns.id.query.get
-          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't query for id only. Please add at least one attribute."
-          }
-
-        _ <- Ns.id(count).query.get
-          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't query for id only. Please add at least one attribute."
-          }
-
-        // todo:
-        //        _ <- Ns.id(count).i_.query.get.map(_ ==> List(4))
-        //        _ <- Ns.id(count).int_.query.get.map(_ ==> List(4))
       } yield ()
     }
   }

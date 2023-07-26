@@ -22,13 +22,13 @@ trait AggrOne_Short_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsy
           (2, short3),
         )).transact
 
-        _ <- Ns.i.a1.short.query.get.map(_.sortBy(_._2) ==> List(
+        _ <- Ns.i.short.a1.query.get.map(_ ==> List(
           (1, short1),
           (2, short2), // 2 rows coalesced
           (2, short3),
         ))
 
-        // Distinct values are returned in a List
+        // Distinct values are returned in a Set
         _ <- Ns.i.a1.short(distinct).query.get.map(_ ==> List(
           (1, Set(short1)),
           (2, Set(short2, short3)),

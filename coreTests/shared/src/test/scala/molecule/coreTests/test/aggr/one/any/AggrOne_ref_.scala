@@ -22,13 +22,13 @@ trait AggrOne_ref_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync
           (2, ref3),
         )).transact
 
-        _ <- Ns.i.a1.ref.query.get.map(_.sortBy(_._2) ==> List(
+        _ <- Ns.i.ref.a1.query.get.map(_ ==> List(
           (1, ref1),
           (2, ref2), // 2 rows coalesced
           (2, ref3),
         ))
 
-        // Distinct values are returned in a List
+        // Distinct values are returned in a Set
         _ <- Ns.i.a1.ref(distinct).query.get.map(_ ==> List(
           (1, Set(ref1)),
           (2, Set(ref2, ref3)),

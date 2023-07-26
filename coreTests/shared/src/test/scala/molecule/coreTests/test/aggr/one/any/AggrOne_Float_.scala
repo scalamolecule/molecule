@@ -22,13 +22,13 @@ trait AggrOne_Float_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsy
           (2, float3),
         )).transact
 
-        _ <- Ns.i.a1.float.query.get.map(_.sortBy(_._2) ==> List(
+        _ <- Ns.i.float.a1.query.get.map(_ ==> List(
           (1, float1),
           (2, float2), // 2 rows coalesced
           (2, float3),
         ))
 
-        // Distinct values are returned in a List
+        // Distinct values are returned in a Set
         _ <- Ns.i.a1.float(distinct).query.get.map(_ ==> List(
           (1, Set(float1)),
           (2, Set(float2, float3)),

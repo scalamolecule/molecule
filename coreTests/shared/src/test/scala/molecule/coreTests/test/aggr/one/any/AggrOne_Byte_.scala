@@ -22,13 +22,13 @@ trait AggrOne_Byte_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsyn
           (2, byte3),
         )).transact
 
-        _ <- Ns.i.a1.byte.query.get.map(_.sortBy(_._2) ==> List(
+        _ <- Ns.i.byte.a1.query.get.map(_ ==> List(
           (1, byte1),
           (2, byte2), // 2 rows coalesced
           (2, byte3),
         ))
 
-        // Distinct values are returned in a List
+        // Distinct values are returned in a Set
         _ <- Ns.i.a1.byte(distinct).query.get.map(_ ==> List(
           (1, Set(byte1)),
           (2, Set(byte2, byte3)),

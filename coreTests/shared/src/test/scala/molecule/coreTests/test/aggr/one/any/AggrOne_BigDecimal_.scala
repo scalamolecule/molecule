@@ -22,13 +22,13 @@ trait AggrOne_BigDecimal_ extends CoreTestSuite with ApiAsyncImplicits { self: S
           (2, bigDecimal3),
         )).transact
 
-        _ <- Ns.i.a1.bigDecimal.query.get.map(_.sortBy(_._2) ==> List(
+        _ <- Ns.i.bigDecimal.a1.query.get.map(_ ==> List(
           (1, bigDecimal1),
           (2, bigDecimal2), // 2 rows coalesced
           (2, bigDecimal3),
         ))
 
-        // Distinct values are returned in a List
+        // Distinct values are returned in a Set
         _ <- Ns.i.a1.bigDecimal(distinct).query.get.map(_ ==> List(
           (1, Set(bigDecimal1)),
           (2, Set(bigDecimal2, bigDecimal3)),

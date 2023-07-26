@@ -22,13 +22,13 @@ trait AggrOne_Char_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsyn
           (2, char3),
         )).transact
 
-        _ <- Ns.i.a1.char.query.get.map(_.sortBy(_._2) ==> List(
+        _ <- Ns.i.char.a1.query.get.map(_ ==> List(
           (1, char1),
           (2, char2), // 2 rows coalesced
           (2, char3),
         ))
 
-        // Distinct values are returned in a List
+        // Distinct values are returned in a Set
         _ <- Ns.i.a1.char(distinct).query.get.map(_ ==> List(
           (1, Set(char1)),
           (2, Set(char2, char3)),

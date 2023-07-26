@@ -22,13 +22,13 @@ trait AggrOne_URI_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync
           (2, uri3),
         )).transact
 
-        _ <- Ns.i.a1.uri.query.get.map(_.sortBy(_._2) ==> List(
+        _ <- Ns.i.uri.a1.query.get.map(_ ==> List(
           (1, uri1),
           (2, uri2), // 2 rows coalesced
           (2, uri3),
         ))
 
-        // Distinct values are returned in a List
+        // Distinct values are returned in a Set
         _ <- Ns.i.a1.uri(distinct).query.get.map(_ ==> List(
           (1, Set(uri1)),
           (2, Set(uri2, uri3)),

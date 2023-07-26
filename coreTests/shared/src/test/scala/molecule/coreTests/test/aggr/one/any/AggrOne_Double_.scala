@@ -22,13 +22,13 @@ trait AggrOne_Double_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAs
           (2, double3),
         )).transact
 
-        _ <- Ns.i.a1.double.query.get.map(_.sortBy(_._2) ==> List(
+        _ <- Ns.i.double.a1.query.get.map(_ ==> List(
           (1, double1),
           (2, double2), // 2 rows coalesced
           (2, double3),
         ))
 
-        // Distinct values are returned in a List
+        // Distinct values are returned in a Set
         _ <- Ns.i.a1.double(distinct).query.get.map(_ ==> List(
           (1, Set(double1)),
           (2, Set(double2, double3)),

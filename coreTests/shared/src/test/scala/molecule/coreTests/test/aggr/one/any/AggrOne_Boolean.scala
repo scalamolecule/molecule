@@ -22,13 +22,13 @@ trait AggrOne_Boolean extends CoreTestSuite with ApiAsyncImplicits { self: SpiAs
         )).transact
 
 
-        _ <- Ns.i.a1.boolean.query.get.map(_.sortBy(t => (t._1, t._2)) ==> List(
+        _ <- Ns.i.a1.boolean.a2.query.get.map(_ ==> List(
           (1, true),
           (2, false), // 2 rows coalesced
           (2, true),
         ))
 
-        // Distinct values are returned in a List
+        // Distinct values are returned in a Set
         _ <- Ns.i.a1.boolean(distinct).query.get.map(_ ==> List(
           (1, Set(true)),
           (2, Set(false, true)),

@@ -23,15 +23,15 @@ object AdhocDatomicJVMsync extends DatomicTestSuite {
         ("a", 2.0),
         ("b", 7.5),
       ).transact
-      Ns.s.double(sum).query.get.foreach(println)
+//      Ns.s.double(sum).query.get.foreach(println)
 
     }
 
 
-    "refs" - refs { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Refs._
-      A.s.Bb.*(B.i.a1).query.inspect
-    }
+//    "refs" - refs { implicit conn =>
+//      import molecule.coreTests.dataModels.core.dsl.Refs._
+//      A.s.Bb.*(B.i.a1).query.inspect
+//    }
 
 
   }

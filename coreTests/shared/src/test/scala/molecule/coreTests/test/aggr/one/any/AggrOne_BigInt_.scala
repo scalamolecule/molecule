@@ -22,13 +22,13 @@ trait AggrOne_BigInt_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAs
           (2, bigInt3),
         )).transact
 
-        _ <- Ns.i.a1.bigInt.query.get.map(_.sortBy(_._2) ==> List(
+        _ <- Ns.i.bigInt.a1.query.get.map(_ ==> List(
           (1, bigInt1),
           (2, bigInt2), // 2 rows coalesced
           (2, bigInt3),
         ))
 
-        // Distinct values are returned in a List
+        // Distinct values are returned in a Set
         _ <- Ns.i.a1.bigInt(distinct).query.get.map(_ ==> List(
           (1, Set(bigInt1)),
           (2, Set(bigInt2, bigInt3)),

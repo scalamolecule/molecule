@@ -22,13 +22,13 @@ trait AggrOne_Long_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsyn
           (2, long3),
         )).transact
 
-        _ <- Ns.i.a1.long.query.get.map(_.sortBy(_._2) ==> List(
+        _ <- Ns.i.long.a1.query.get.map(_ ==> List(
           (1, long1),
           (2, long2), // 2 rows coalesced
           (2, long3),
         ))
 
-        // Distinct values are returned in a List
+        // Distinct values are returned in a Set
         _ <- Ns.i.a1.long(distinct).query.get.map(_ ==> List(
           (1, Set(long1)),
           (2, Set(long2, long3)),

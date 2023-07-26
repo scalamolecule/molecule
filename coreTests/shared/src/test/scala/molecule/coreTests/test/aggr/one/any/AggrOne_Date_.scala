@@ -22,13 +22,13 @@ trait AggrOne_Date_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsyn
           (2, date3),
         )).transact
 
-        _ <- Ns.i.a1.date.query.get.map(_.sortBy(_._2) ==> List(
+        _ <- Ns.i.date.a1.query.get.map(_ ==> List(
           (1, date1),
           (2, date2), // 2 rows coalesced
           (2, date3),
         ))
 
-        // Distinct values are returned in a List
+        // Distinct values are returned in a Set
         _ <- Ns.i.a1.date(distinct).query.get.map(_ ==> List(
           (1, Set(date1)),
           (2, Set(date2, date3)),

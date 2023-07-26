@@ -5,7 +5,7 @@ import molecule.boilerplate.ast.Model._
 import scala.math.{max, min}
 import scala.reflect.ClassTag
 
-trait ResolveFilterOne[Tpl]
+trait ResolveExprOne[Tpl]
   extends SortOneSpecial[Tpl]
     with SortOneOpt_[Tpl] { self: DatomicModel2Query[Tpl] with LambdasOne =>
 
@@ -97,7 +97,7 @@ trait ResolveFilterOne[Tpl]
     sortOneLong(at, attrIndex)
   }
 
-  protected def dummySorter(attr: Attr): Option[(Int, Int => (Row, Row) => Int)] = {
+  private def dummySorter(attr: Attr): Option[(Int, Int => (Row, Row) => Int)] = {
     attr.sort.map { sort =>
       (
         sort.last.toString.toInt,

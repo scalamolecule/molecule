@@ -11,8 +11,9 @@ import scala.collection.mutable.ArrayBuffer
 
 class DatomicModel2Query[Tpl](elements0: List[Element])
   extends Model2Query
-    with ResolveFilterOne[Tpl]
-    with ResolveFilterSet[Tpl]
+    with ResolveExprOne[Tpl]
+    with ResolveExprOne_id[Tpl]
+    with ResolveExprSet[Tpl]
     with ResolveRef[Tpl]
     with ResolveNestedPull[Tpl]
     with Base
@@ -175,11 +176,28 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
     elements: List[Element]
   ): List[Var] = elements match {
     case element :: tail => element match {
-      case a: AttrOne                           => a match {
-        case a: AttrOneMan => resolve(resolveAttrOneMan(es, a), tail)
-        case a: AttrOneOpt => resolve(resolveAttrOneOpt(es, a), tail)
-        case a: AttrOneTac => resolve(resolveAttrOneTac(es, a), tail)
-      }
+      case a: AttrOne                           =>
+        a.attr match {
+          case "id" =>
+            if (a.filterAttr.nonEmpty) {
+              throw ModelError("Filter attributes not allowed to involve entity ids.")
+            }
+            a match {
+              case a: AttrOneMan => resolve(resolveIdMan(es, a), tail)
+              case a: AttrOneTac => resolve(resolveIdTac(es, a), tail)
+              case _             => unexpectedElement(a)
+            }
+          //          case "tx" => // todo
+          case _ =>
+            a.filterAttr.collect {
+              case a if a.attr == "id" => throw ModelError("Filter attributes not allowed to involve entity ids.")
+            }
+            a match {
+              case a: AttrOneMan => resolve(resolveAttrOneMan(es, a), tail)
+              case a: AttrOneOpt => resolve(resolveAttrOneOpt(es, a), tail)
+              case a: AttrOneTac => resolve(resolveAttrOneTac(es, a), tail)
+            }
+        }
       case a: AttrSet                           => a match {
         case a: AttrSetMan => resolve(resolveAttrSetMan(es, a), tail)
         case a: AttrSetOpt => resolve(resolveAttrSetOpt(es, a), tail)
