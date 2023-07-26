@@ -33,12 +33,15 @@ object SchemaAST extends BaseHelpers {
   //  }
   //  case object CardMap extends CardMap
 
+
+  sealed trait MetaModel
+
   case class MetaSchema(
     pkg: String,
     domain: String,
     maxArity: Int,
     parts: Seq[MetaPart]
-  ) {
+  ) extends MetaModel {
     def render(tabs: Int = 0): String = {
       val p        = indent(tabs)
       val pad      = s"\n$p  "
@@ -98,7 +101,7 @@ object SchemaAST extends BaseHelpers {
   case class MetaPart(
     part: String,
     nss: Seq[MetaNs]
-  ) {
+  ) extends MetaModel {
     def render(tabs: Int): String = {
       val p      = indent(tabs)
       val pad    = s"\n$p  "
@@ -116,7 +119,7 @@ object SchemaAST extends BaseHelpers {
     backRefNss: Seq[String] = Nil,
     mandatoryAttrs: Seq[String] = Nil,
     mandatoryRefs: Seq[(String, String)] = Nil
-  ) {
+  ) extends MetaModel {
     def render(tabs: Int): String = {
       val maxAttr           = attrs.map(_.attr.length).max
       val maxTpe            = attrs.map(_.baseTpe.length).max
@@ -160,7 +163,7 @@ object SchemaAST extends BaseHelpers {
     requiredAttrs: Seq[String] = Nil,
     valueAttrs: Seq[String] = Nil,
     validations: Seq[(String, String)] = Nil
-  ) {
+  ) extends MetaModel {
     override def toString: String = {
       val validations1 = renderValidations(validations)
       s"""MetaAttr("$attr", $card, "$baseTpe", ${o(refNs)}, ${sq(options)}, ${o(description)}, ${o(alias)}, ${sq(requiredAttrs)}, ${sq(valueAttrs)}, $validations1)"""
@@ -180,7 +183,6 @@ object SchemaAST extends BaseHelpers {
              |              $errorStr
              |            )""".stripMargin
       }.mkString("Seq(\n", ",\n", ")")
-
     }
   }
 }

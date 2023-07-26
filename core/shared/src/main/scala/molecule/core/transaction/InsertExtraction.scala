@@ -55,7 +55,6 @@ class InsertExtraction extends InsertResolvers_ with InsertValidators_ { self: I
                   "Can't use tacit attributes in insert molecule (except in tx meta data part). Found: " + a
                 )
               }
-            case a          => throw new Exception("Attribute family not implemented for " + a)
           }
 
         case Ref(ns, refAttr, refNs, card, _) =>

@@ -18,7 +18,7 @@ case class TxReportWatcher(conn: JdbcConn_jvm) extends Runnable {
     queryAttrIds: List[jLong],
     dbCallback: Database => Unit
   ): ListBuffer[(List[jLong], Database => Unit)] = {
-    dbCallbacks.addOne(queryAttrIds -> dbCallback)
+    dbCallbacks += queryAttrIds -> dbCallback
   }
 
   override def run(): Unit = {

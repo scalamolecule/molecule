@@ -16,9 +16,9 @@ trait AttrOrderOptional extends CoreTestSuite with ApiAsyncImplicits { self: Spi
   final def getTriples(acc: List[(String, Int, Option[Int])]): List[(String, Int, Option[Int])] = {
     if (acc.length != 5) {
       val pair = (
-        ('a' + scala.util.Random.between(0, 2)).toChar.toString, // "a" or "b"
-        Random.between(1, 3), // 1 or 2
-        if (Random.between(1, 3) == 1) Some(Random.between(1, 6)) else None
+        ('a' + scala.util.Random.nextInt(3)).toChar.toString, // "a" or "b"
+        Random.nextInt(3) + 1, // 1 or 2
+        if (Random.nextInt(3) + 1 == 1) Some(Random.nextInt(6) + 1) else None
       )
       // No duplicate rows
       if (!acc.contains(pair)) getTriples(acc :+ pair) else getTriples(acc)

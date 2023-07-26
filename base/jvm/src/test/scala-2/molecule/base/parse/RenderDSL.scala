@@ -26,12 +26,12 @@ object RenderDSL extends TestSuite {
       //      schemaNss.parts.head.nss(0) ==> "check"
       //      Dsl(schemaNss, "", schemaNss.parts.head.nss(2)).get ==> "check"
       //
-      Dsl(typesNss, "", typesNss.parts.head.nss(0)).get ==> "check"
-      //            Dsl(validationNss, "", validationNss.parts.head.nss(4)).get ==> "check"
+      //      Dsl(typesNss, "", typesNss.parts.head.nss(0)).get ==> "check"
+      Dsl(validationNss, "", validationNss.parts.head.nss(1)).get ==> "check"
       //      Dsl(refsNss, "", refsNss.parts.head.nss(0)).get ==> "check"
       //
       //      validationNss ==> "check"
-      //      validationNss.parts.head.nss(11) ==> "check"
+      //      validationNss.parts.head.nss(3) ==> "check"
       //      validationNss.parts.head.nss(12) ==> "check"
       //      validationNss.attrMap() ==> "check"
       //      validationNss.parts.head ==> "check"

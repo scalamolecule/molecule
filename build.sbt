@@ -17,9 +17,10 @@ inThisBuild(
     organizationName := "ScalaMolecule",
     organizationHomepage := Some(url("http://www.scalamolecule.org")),
     version := "0.1.0-SNAPSHOT",
-    //    versionScheme := Some("early-semver"),
-    scalaVersion := scala213,
-    //    scalaVersion := scala3,
+    versionScheme := Some("early-semver"),
+    //    scalaVersion := scala212,
+    //    scalaVersion := scala213,
+    scalaVersion := scala3,
     crossScalaVersions := allScala,
 
     // Run tests for all systems sequentially to avoid data locks with db
@@ -53,13 +54,6 @@ lazy val base = crossProject(JSPlatform, JVMPlatform)
   .settings(compilerArgs)
   .settings(doPublish)
   .settings(
-    libraryDependencies ++= {
-      if (scalaVersion.value == scala3) Seq()
-      else {
-        // Needs to be Provided to avoid reflection issue when debugging projects that use molecule
-        Seq("org.scalameta" %% "scalameta" % "4.7.1" % Provided)
-      }
-    },
     libraryDependencies ++= Seq(
       "com.lihaoyi" %%% "utest" % "0.8.1",
 
@@ -70,13 +64,21 @@ lazy val base = crossProject(JSPlatform, JVMPlatform)
     ),
     testFrameworks += new TestFramework("utest.runner.Framework")
   )
+  .jvmSettings(
+    libraryDependencies ++= {
+      if (scalaVersion.value == scala3) Seq()
+      else {
+        // Needs to be Provided to avoid reflection issue when debugging projects that use molecule
+        Seq("org.scalameta" %% "scalameta" % "4.7.2" % Provided)
+      }
+    },
+  )
 
 
 lazy val boilerplate = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .settings(name := "molecule-boilerplate")
   .dependsOn(base)
-  //  .dependsOn(base % "compile->compile;test->test")
   .settings(doPublish)
   .settings(
     libraryDependencies ++= Seq(
@@ -94,7 +96,6 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .settings(name := "molecule-core")
   .dependsOn(boilerplate)
-  //  .dependsOn(boilerplate % "compile->compile;test->test")
   .settings(doPublish)
   .settings(
     libraryDependencies ++= Seq(
@@ -139,7 +140,7 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
     moleculeDataModelPaths := Seq(
       "molecule/coreTests/dataModels/core"
     ),
-    //   moleculeMakeJars := false, // default: true
+    // moleculeMakeJars := false, // default: true
 
     // Suppress "un-used" keys warning
     Global / excludeLintKeys ++= Set(

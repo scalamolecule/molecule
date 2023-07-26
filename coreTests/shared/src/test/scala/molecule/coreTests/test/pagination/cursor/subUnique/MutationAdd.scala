@@ -19,7 +19,7 @@ trait MutationAdd extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync 
     "Forward" - {
 
       "Add row before" - unique { implicit conn =>
-        val pairs               = (1 to 5).toList.map((Random.between(1, 3), _))
+        val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _))
         val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
         for {
           _ <- Unique.i.int.insert(a, c, e).transact
@@ -34,7 +34,7 @@ trait MutationAdd extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync 
       }
 
       "Add row after" - unique { implicit conn =>
-        val pairs               = (1 to 5).toList.map((Random.between(1, 3), _))
+        val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _))
         val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
         for {
           _ <- Unique.i.int.insert(a, c, e).transact
@@ -53,7 +53,7 @@ trait MutationAdd extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync 
     "Backwards" - {
 
       "Add row before" - unique { implicit conn =>
-        val pairs               = (1 to 5).toList.map((Random.between(1, 3), _))
+        val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _))
         val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
         for {
           _ <- Unique.i.int.insert(a, c, e).transact
@@ -68,7 +68,7 @@ trait MutationAdd extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync 
       }
 
       "Add row after" - unique { implicit conn =>
-        val pairs               = (1 to 5).toList.map((Random.between(1, 3), _))
+        val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _))
         val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
         for {
           _ <- Unique.i.int.insert(a, c, e).transact

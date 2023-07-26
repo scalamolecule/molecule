@@ -161,16 +161,20 @@ trait LambdasSet extends ResolveBase with JavaConversions {
           {:ns/ref {:db/id 17592186045422}}
            */
           var ids = Set.empty[Long]
-          list.map(_.asInstanceOf[jMap[_, _]]).foreach { m =>
-            var continue = true
-            val it       = m.entrySet().iterator()
-            while (it.hasNext && continue) {
-              val pair = it.next()
-              if (pair.getKey.toString == ":db/id") {
-                continue = false
-                ids = ids + pair.getValue.asInstanceOf[Long]
+          list.foreach {
+            case m: jMap[_, _] =>
+              var continue = true
+              val it       = m.entrySet().iterator()
+              while (it.hasNext && continue) {
+                val pair = it.next()
+                if (pair.getKey.toString == ":db/id") {
+                  continue = false
+                  ids = ids + pair.getValue.asInstanceOf[Long]
+                }
               }
-            }
+            case other         => throw new Exception(
+              s"Unexpected set values of type ${other.getClass}: " + other
+            )
           }
           Some(ids)
       }

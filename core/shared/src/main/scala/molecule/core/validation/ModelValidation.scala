@@ -151,7 +151,6 @@ case class ModelValidation(
         case _: AttrSetMan => "man"
         case _: AttrSetOpt => "opt"
         case _: AttrSetTac => "tac"
-        case _             => throw new Exception("Attribute family not implemented for " + a)
       }
       refPath.mkString("-") + "-" + attr + "-" + mode
     } else {
@@ -243,7 +242,6 @@ case class ModelValidation(
           case _                                                                   => err
         }
         case _: AttrSetTac | _: AttrSetOpt => onlyMandatory(a)
-        case _                             => err
       }
     }
   }
@@ -379,7 +377,6 @@ case class ModelValidation(
         case AttrSetManByte(_, _, _, vs, _, _, _, _, _, _)       => vs.isEmpty || vs.head.isEmpty
         case AttrSetManShort(_, _, _, vs, _, _, _, _, _, _)      => vs.isEmpty || vs.head.isEmpty
         case AttrSetManChar(_, _, _, vs, _, _, _, _, _, _)       => vs.isEmpty || vs.head.isEmpty
-        case _                                                   => false
       }
       case a: AttrSetTac => a match {
         case AttrSetTacString(_, _, _, vs, _, _, _, _, _, _)     => vs.isEmpty || vs.head.isEmpty
@@ -396,7 +393,6 @@ case class ModelValidation(
         case AttrSetTacByte(_, _, _, vs, _, _, _, _, _, _)       => vs.isEmpty || vs.head.isEmpty
         case AttrSetTacShort(_, _, _, vs, _, _, _, _, _, _)      => vs.isEmpty || vs.head.isEmpty
         case AttrSetTacChar(_, _, _, vs, _, _, _, _, _, _)       => vs.isEmpty || vs.head.isEmpty
-        case _                                                   => false
       }
       case _             => false
     }
@@ -419,7 +415,6 @@ case class ModelValidation(
         case AttrSetManByte(_, _, _, vs, _, _, _, _, _, _)       => vs.nonEmpty && vs.head == curVs
         case AttrSetManShort(_, _, _, vs, _, _, _, _, _, _)      => vs.nonEmpty && vs.head == curVs
         case AttrSetManChar(_, _, _, vs, _, _, _, _, _, _)       => vs.nonEmpty && vs.head == curVs
-        case _                                                   => false
       }
       case a: AttrSetTac => a match {
         case AttrSetTacString(_, _, _, vs, _, _, _, _, _, _)     => vs.nonEmpty && vs.head == curVs
@@ -436,7 +431,6 @@ case class ModelValidation(
         case AttrSetTacByte(_, _, _, vs, _, _, _, _, _, _)       => vs.nonEmpty && vs.head == curVs
         case AttrSetTacShort(_, _, _, vs, _, _, _, _, _, _)      => vs.nonEmpty && vs.head == curVs
         case AttrSetTacChar(_, _, _, vs, _, _, _, _, _, _)       => vs.nonEmpty && vs.head == curVs
-        case _                                                   => false
       }
       case _             => false
     }

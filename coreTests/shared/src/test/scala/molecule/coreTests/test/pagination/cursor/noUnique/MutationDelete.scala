@@ -16,7 +16,7 @@ trait MutationDelete extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsy
   @tailrec
   final def getPairs(n: Int, acc: List[(Int, Int)]): List[(Int, Int)] = {
     if (acc.length != n) {
-      val pair = (Random.between(1, 3), Random.between(1, n + 1))
+      val pair = (Random.nextInt(3) + 1, Random.nextInt(n + 1) + 1)
       // No duplicate rows
       if (!acc.contains(pair)) getPairs(n, acc :+ pair) else getPairs(n, acc)
     } else {

@@ -56,7 +56,6 @@ trait InsertValidationExtraction extends InsertValidators_ with ModelUtils { sel
                   "Can't use tacit attributes in insert molecule (except in tx meta data part). Found: " + a
                 )
               }
-            case a          => throw new Exception("Attribute family not implemented for " + a)
           }
 
         case Ref(_, refAttr, _, _, _) =>
@@ -90,8 +89,6 @@ trait InsertValidationExtraction extends InsertValidators_ with ModelUtils { sel
           // TxMetaData is handled separately in Insert_stmts.
           // No elements after TxMetaData, so we return validators
           validators
-
-        case other => throw ModelError("Unexpected element: " + other)
       }
       case Nil             => validators
     }

@@ -15,7 +15,7 @@ import molecule.datalog.core.query.DatomicModel2Query
 import molecule.datalog.datomic.facade.DatomicConn_JVM
 import scala.collection.mutable.ListBuffer
 
-trait Data_Update extends DatomicTxMetaData_JVM with UpdateOps with MoleculeLogging { self: UpdateExtraction =>
+trait Data_Update extends DatomicBase_JVM with UpdateOps with MoleculeLogging { self: UpdateExtraction =>
 
   def getStmts(
     conn: DatomicConn_JVM,
@@ -37,7 +37,7 @@ trait Data_Update extends DatomicTxMetaData_JVM with UpdateOps with MoleculeLogg
               s"attribute ${attr.ns}.${attr.attr} the current Set of values couldn't be found.")
           }
           val vs = ListBuffer.empty[Any]
-          curValues.forEach(row => vs.addOne(row.get(0)))
+          curValues.forEach(row => vs += row.get(0))
           vs.toSet
         } catch {
           case e: MoleculeError => throw e

@@ -78,12 +78,12 @@ case class Dsl_Validations(schema: MetaSchema, namespace: MetaNs)
        |          $body
        |        }
        |    }
-       |    override def withAttrs(_attrs: Seq[Attr]): $validator = new $validator(_attrs) {
+       |    override def withAttrs(attrs: Seq[Attr]): $validator = new $validator(attrs) {
        |      $variablesFromMetaAttr
        |      val _validate = _withVariables($variables)
        |      override def validate(v: $baseTpe): Seq[String] = _validate(v)
        |    }
-       |    override def withValues(_values: Seq[Value]): $validator = new $validator(_values = _values) {
+       |    override def withValues(values: Seq[Value]): $validator = new $validator(_values = values) {
        |      $variablesFromValue
        |      val _validate = _withVariables($variables)
        |      override def validate(v: $baseTpe): Seq[String] = _validate(v)

@@ -44,10 +44,11 @@ case class DatomicQueryResolveCursor[Tpl](
       case Some(l) => cursor match {
         case Some("")     => getInitialPage(l)
         case Some(cursor) =>
-          val raw    = new String(Base64.getDecoder.decode(cursor))
-          val tokens = raw.split("\n").toList
+          val raw      = new String(Base64.getDecoder.decode(cursor))
+          val tokens   = raw.split("\n").toList
+          val strategy = tokens.head
+          val hash     = tokens(1)
 
-          val strategy :: hash :: _ = tokens
           if ((elements.hashCode() & 0xFFFFF) != hash.toInt) {
             throw ModelError("Can only use cursor for un-modified query.")
           } else {

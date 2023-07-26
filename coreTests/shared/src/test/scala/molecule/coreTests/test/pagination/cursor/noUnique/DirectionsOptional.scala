@@ -16,8 +16,8 @@ trait DirectionsOptional extends CoreTestSuite with ApiAsyncImplicits { self: Sp
   final def getPairs(acc: List[(Int, Option[Int])]): List[(Int, Option[Int])] = {
     if (acc.length != 5) {
       val pair = (
-        Random.between(1, 3),
-        if (Random.between(1, 3) == 1) Some(Random.between(1, 6)) else None
+        Random.nextInt(3) + 1,
+        if (Random.nextInt(3) + 1 == 1) Some(Random.nextInt(6) + 1) else None
       )
       // No duplicate rows
       if (!acc.contains(pair)) getPairs(acc :+ pair) else getPairs(acc)

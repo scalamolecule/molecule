@@ -10,7 +10,7 @@ import molecule.core.transaction.SaveExtraction
 import molecule.core.transaction.ops.SaveOps
 
 trait Data_Save
-  extends JdbcTxMetaData_JVM
+  extends JdbcBase_JVM
     with SaveOps
     with MoleculeLogging { self: SaveExtraction =>
 

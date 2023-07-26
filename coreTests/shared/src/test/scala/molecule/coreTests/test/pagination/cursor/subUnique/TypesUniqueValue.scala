@@ -16,11 +16,11 @@ trait TypesUniqueValue extends CoreTestSuite with ApiAsyncImplicits { self: SpiA
 
     "String" - unique { implicit conn =>
       val pairs               = List(
-        (Random.between(1, 3), string1),
-        (Random.between(1, 3), string2),
-        (Random.between(1, 3), string3),
-        (Random.between(1, 3), string4),
-        (Random.between(1, 3), string5),
+        (Random.nextInt(3) + 1, string1),
+        (Random.nextInt(3) + 1, string2),
+        (Random.nextInt(3) + 1, string3),
+        (Random.nextInt(3) + 1, string4),
+        (Random.nextInt(3) + 1, string5),
       )
       val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
       val query               = (cursor: String, limit: Int) => Unique.i.a1.string.a2.query.from(cursor).limit(limit)
@@ -36,11 +36,11 @@ trait TypesUniqueValue extends CoreTestSuite with ApiAsyncImplicits { self: SpiA
 
     "Int" - unique { implicit conn =>
       val pairs               = List(
-        (Random.between(1, 3), int1),
-        (Random.between(1, 3), int2),
-        (Random.between(1, 3), int3),
-        (Random.between(1, 3), int4),
-        (Random.between(1, 3), int5),
+        (Random.nextInt(3) + 1, int1),
+        (Random.nextInt(3) + 1, int2),
+        (Random.nextInt(3) + 1, int3),
+        (Random.nextInt(3) + 1, int4),
+        (Random.nextInt(3) + 1, int5),
       )
       val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
       val query               = (cursor: String, limit: Int) => Unique.i.a1.int.a2.query.from(cursor).limit(limit)
@@ -56,11 +56,11 @@ trait TypesUniqueValue extends CoreTestSuite with ApiAsyncImplicits { self: SpiA
 
     "Long" - unique { implicit conn =>
       val pairs               = List(
-        (Random.between(1, 3), long1),
-        (Random.between(1, 3), long2),
-        (Random.between(1, 3), long3),
-        (Random.between(1, 3), long4),
-        (Random.between(1, 3), long5),
+        (Random.nextInt(3) + 1, long1),
+        (Random.nextInt(3) + 1, long2),
+        (Random.nextInt(3) + 1, long3),
+        (Random.nextInt(3) + 1, long4),
+        (Random.nextInt(3) + 1, long5),
       )
       val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
       val query               = (cursor: String, limit: Int) => Unique.i.a1.long.a2.query.from(cursor).limit(limit)
@@ -76,11 +76,11 @@ trait TypesUniqueValue extends CoreTestSuite with ApiAsyncImplicits { self: SpiA
 
     "Float" - unique { implicit conn =>
       val pairs               = List(
-        (Random.between(1, 3), float1),
-        (Random.between(1, 3), float2),
-        (Random.between(1, 3), float3),
-        (Random.between(1, 3), float4),
-        (Random.between(1, 3), float5),
+        (Random.nextInt(3) + 1, float1),
+        (Random.nextInt(3) + 1, float2),
+        (Random.nextInt(3) + 1, float3),
+        (Random.nextInt(3) + 1, float4),
+        (Random.nextInt(3) + 1, float5),
       )
       val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
       val query               = (cursor: String, limit: Int) => Unique.i.a1.float.a2.query.from(cursor).limit(limit)
@@ -96,11 +96,11 @@ trait TypesUniqueValue extends CoreTestSuite with ApiAsyncImplicits { self: SpiA
 
     "Double" - unique { implicit conn =>
       val pairs               = List(
-        (Random.between(1, 3), double1),
-        (Random.between(1, 3), double2),
-        (Random.between(1, 3), double3),
-        (Random.between(1, 3), double4),
-        (Random.between(1, 3), double5),
+        (Random.nextInt(3) + 1, double1),
+        (Random.nextInt(3) + 1, double2),
+        (Random.nextInt(3) + 1, double3),
+        (Random.nextInt(3) + 1, double4),
+        (Random.nextInt(3) + 1, double5),
       )
       val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
       val query               = (cursor: String, limit: Int) => Unique.i.a1.double.a2.query.from(cursor).limit(limit)
@@ -117,8 +117,8 @@ trait TypesUniqueValue extends CoreTestSuite with ApiAsyncImplicits { self: SpiA
     "Boolean" - unique { implicit conn =>
       // Can save only 2 unique boolean values
       val pairs      = List(
-        (Random.between(1, 3), boolean1),
-        (Random.between(1, 3), boolean2),
+        (Random.nextInt(3) + 1, boolean1),
+        (Random.nextInt(3) + 1, boolean2),
       )
       val List(a, b) = pairs.sortBy(p => (p._1, p._2))
       val query      = (cursor: String, limit: Int) => Unique.i.a1.boolean.a2.query.from(cursor).limit(limit)
@@ -132,11 +132,11 @@ trait TypesUniqueValue extends CoreTestSuite with ApiAsyncImplicits { self: SpiA
 
     "BigInt" - unique { implicit conn =>
       val pairs               = List(
-        (Random.between(1, 3), bigInt1),
-        (Random.between(1, 3), bigInt2),
-        (Random.between(1, 3), bigInt3),
-        (Random.between(1, 3), bigInt4),
-        (Random.between(1, 3), bigInt5),
+        (Random.nextInt(3) + 1, bigInt1),
+        (Random.nextInt(3) + 1, bigInt2),
+        (Random.nextInt(3) + 1, bigInt3),
+        (Random.nextInt(3) + 1, bigInt4),
+        (Random.nextInt(3) + 1, bigInt5),
       )
       val pairsx              = List(
         (1, bigInt1),
@@ -159,11 +159,11 @@ trait TypesUniqueValue extends CoreTestSuite with ApiAsyncImplicits { self: SpiA
 
     "BigDecimal" - unique { implicit conn =>
       val pairs               = List(
-        (Random.between(1, 3), bigDecimal1),
-        (Random.between(1, 3), bigDecimal2),
-        (Random.between(1, 3), bigDecimal3),
-        (Random.between(1, 3), bigDecimal4),
-        (Random.between(1, 3), bigDecimal5),
+        (Random.nextInt(3) + 1, bigDecimal1),
+        (Random.nextInt(3) + 1, bigDecimal2),
+        (Random.nextInt(3) + 1, bigDecimal3),
+        (Random.nextInt(3) + 1, bigDecimal4),
+        (Random.nextInt(3) + 1, bigDecimal5),
       )
       val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
       val query               = (cursor: String, limit: Int) => Unique.i.a1.bigDecimal.a2.query.from(cursor).limit(limit)
@@ -179,11 +179,11 @@ trait TypesUniqueValue extends CoreTestSuite with ApiAsyncImplicits { self: SpiA
 
     "Date" - unique { implicit conn =>
       val pairs               = List(
-        (Random.between(1, 3), date1),
-        (Random.between(1, 3), date2),
-        (Random.between(1, 3), date3),
-        (Random.between(1, 3), date4),
-        (Random.between(1, 3), date5),
+        (Random.nextInt(3) + 1, date1),
+        (Random.nextInt(3) + 1, date2),
+        (Random.nextInt(3) + 1, date3),
+        (Random.nextInt(3) + 1, date4),
+        (Random.nextInt(3) + 1, date5),
       )
       val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
       val query               = (cursor: String, limit: Int) => Unique.i.a1.date.a2.query.from(cursor).limit(limit)
@@ -199,11 +199,11 @@ trait TypesUniqueValue extends CoreTestSuite with ApiAsyncImplicits { self: SpiA
 
     "Uuid" - unique { implicit conn =>
       val pairs               = List(
-        (Random.between(1, 3), uuid1),
-        (Random.between(1, 3), uuid2),
-        (Random.between(1, 3), uuid3),
-        (Random.between(1, 3), uuid4),
-        (Random.between(1, 3), uuid5),
+        (Random.nextInt(3) + 1, uuid1),
+        (Random.nextInt(3) + 1, uuid2),
+        (Random.nextInt(3) + 1, uuid3),
+        (Random.nextInt(3) + 1, uuid4),
+        (Random.nextInt(3) + 1, uuid5),
       )
       val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
       val query               = (cursor: String, limit: Int) => Unique.i.a1.uuid.a2.query.from(cursor).limit(limit)
@@ -219,11 +219,11 @@ trait TypesUniqueValue extends CoreTestSuite with ApiAsyncImplicits { self: SpiA
 
     "Uri" - unique { implicit conn =>
       val pairs               = List(
-        (Random.between(1, 3), uri1),
-        (Random.between(1, 3), uri2),
-        (Random.between(1, 3), uri3),
-        (Random.between(1, 3), uri4),
-        (Random.between(1, 3), uri5),
+        (Random.nextInt(3) + 1, uri1),
+        (Random.nextInt(3) + 1, uri2),
+        (Random.nextInt(3) + 1, uri3),
+        (Random.nextInt(3) + 1, uri4),
+        (Random.nextInt(3) + 1, uri5),
       )
       val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
       val query               = (cursor: String, limit: Int) => Unique.i.a1.uri.a2.query.from(cursor).limit(limit)
@@ -239,11 +239,11 @@ trait TypesUniqueValue extends CoreTestSuite with ApiAsyncImplicits { self: SpiA
 
     "Byte" - unique { implicit conn =>
       val pairs               = List(
-        (Random.between(1, 3), byte1),
-        (Random.between(1, 3), byte2),
-        (Random.between(1, 3), byte3),
-        (Random.between(1, 3), byte4),
-        (Random.between(1, 3), byte5),
+        (Random.nextInt(3) + 1, byte1),
+        (Random.nextInt(3) + 1, byte2),
+        (Random.nextInt(3) + 1, byte3),
+        (Random.nextInt(3) + 1, byte4),
+        (Random.nextInt(3) + 1, byte5),
       )
       val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
       val query               = (cursor: String, limit: Int) => Unique.i.a1.byte.a2.query.from(cursor).limit(limit)
@@ -259,11 +259,11 @@ trait TypesUniqueValue extends CoreTestSuite with ApiAsyncImplicits { self: SpiA
 
     "Short" - unique { implicit conn =>
       val pairs               = List(
-        (Random.between(1, 3), short1),
-        (Random.between(1, 3), short2),
-        (Random.between(1, 3), short3),
-        (Random.between(1, 3), short4),
-        (Random.between(1, 3), short5),
+        (Random.nextInt(3) + 1, short1),
+        (Random.nextInt(3) + 1, short2),
+        (Random.nextInt(3) + 1, short3),
+        (Random.nextInt(3) + 1, short4),
+        (Random.nextInt(3) + 1, short5),
       )
       val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
       val query               = (cursor: String, limit: Int) => Unique.i.a1.short.a2.query.from(cursor).limit(limit)
@@ -279,11 +279,11 @@ trait TypesUniqueValue extends CoreTestSuite with ApiAsyncImplicits { self: SpiA
 
     "Char" - unique { implicit conn =>
       val pairs               = List(
-        (Random.between(1, 3), char1),
-        (Random.between(1, 3), char2),
-        (Random.between(1, 3), char3),
-        (Random.between(1, 3), char4),
-        (Random.between(1, 3), char5),
+        (Random.nextInt(3) + 1, char1),
+        (Random.nextInt(3) + 1, char2),
+        (Random.nextInt(3) + 1, char3),
+        (Random.nextInt(3) + 1, char4),
+        (Random.nextInt(3) + 1, char5),
       )
       val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
       val query               = (cursor: String, limit: Int) => Unique.i.a1.char.a2.query.from(cursor).limit(limit)

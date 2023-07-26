@@ -11,7 +11,7 @@ import molecule.core.transaction.{InsertExtraction, InsertResolvers_}
 import molecule.core.util.ModelUtils
 
 trait Data_Insert
-  extends JdbcTxMetaData_JVM
+  extends JdbcBase_JVM
     with InsertOps
     with JdbcDataType_JVM
     with ModelUtils
@@ -418,7 +418,7 @@ trait Data_Insert
     // Initiate new level
     level = nextLevel
     curRefPath = List(s"$level", refNs)
-    colSettersMap.addOne(curRefPath -> Nil)
+    colSettersMap += curRefPath -> Nil
 
     // Recursively resolve nested data
     val nestedResolvers = getResolver(nsMap, nestedElements)

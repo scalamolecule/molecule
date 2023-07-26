@@ -6,17 +6,18 @@ import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.DeleteExtraction
 import molecule.core.transaction.ops.DeleteOps
-import molecule.core.util.MetaModelUtils
+import molecule.core.util.{JavaConversions, MetaModelUtils}
 import molecule.datalog.core.query.DatomicModel2Query
 import molecule.datalog.datomic.facade.DatomicConn_JVM
 import scala.collection.mutable
-import scala.jdk.CollectionConverters.{CollectionHasAsScala, IterableHasAsJava}
 
 trait Data_Delete
-  extends DatomicTxMetaData_JVM
+  extends DatomicBase_JVM
     with DeleteOps
     with MetaModelUtils
-    with MoleculeLogging { self: DeleteExtraction =>
+    with MoleculeLogging
+    with JavaConversions
+     { self: DeleteExtraction =>
 
   def getStmtsData(
     conn: DatomicConn_JVM,
@@ -62,7 +63,7 @@ trait Data_Delete
         referrers.forEach { row =>
           val refAttr = s"${row.get(0)}.${row.get(1)}"
           refIds.get(refAttr).fold[Unit](
-            refIds.addOne(refAttr -> List(row.get(2).asInstanceOf[Long]))
+            refIds += refAttr -> List(row.get(2).asInstanceOf[Long])
           )(curRefIds =>
             refIds(refAttr) = curRefIds :+ row.get(2).asInstanceOf[Long]
           )

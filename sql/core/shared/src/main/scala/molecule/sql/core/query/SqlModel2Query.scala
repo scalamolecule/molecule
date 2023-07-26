@@ -191,7 +191,6 @@ class SqlModel2Query[Tpl](elements0: List[Element])
       case Nested(ref, nestedElements)          => resolveNested(ref, nestedElements, tail)
       case NestedOpt(nestedRef, nestedElements) => resolveNestedOpt(nestedRef, nestedElements, tail)
       case TxMetaData(txElements)               => resolveTxMetaData(txElements)
-      case other                                => unexpectedElement(other)
     }
     case Nil             => ()
   }

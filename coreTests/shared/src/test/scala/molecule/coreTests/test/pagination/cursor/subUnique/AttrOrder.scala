@@ -13,8 +13,8 @@ import scala.util.Random
 trait AttrOrder extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
 
   def getTriples: List[(String, Int, Int)] = (1 to 5).toList.map { int =>
-    val s = ('a' + scala.util.Random.between(0, 2)).toChar.toString // "a" or "b"
-    val i = scala.util.Random.between(1, 3) // 1 or 2
+    val s = ('a' + scala.util.Random.nextInt(3)).toChar.toString // "a" or "b"
+    val i = scala.util.Random.nextInt(3) + 1 // 1 or 2
     (s, i, int)
   }
 

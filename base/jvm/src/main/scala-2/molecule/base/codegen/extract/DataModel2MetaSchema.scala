@@ -5,7 +5,7 @@ import molecule.base.ast.SchemaAST.{CardOne, MetaNs, _}
 import molecule.base.error.ModelError
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
-import scala.meta._
+import scala.meta.{Case, _}
 
 object DataModel2MetaSchema {
   def apply(filePath: String, scalaVersion: String = "3"): MetaSchema = {
@@ -305,14 +305,6 @@ class DataModel2MetaSchema(filePath: String, pkgPath: String, scalaVersion: Stri
       case q"$prev.owner"          => acc(ns, prev, a.copy(options = a.options :+ "owner"))
       case q"$prev.mandatory"      => acc(ns, prev, a.copy(options = a.options :+ "mandatory"))
 
-//      case q"$prev.index(${Lit.String(s)})"          => acc(ns, prev, a.copy(options = a.options :+ "index", description = Some(s)))
-//      case q"$prev.noHistory(${Lit.String(s)})"      => acc(ns, prev, a.copy(options = a.options :+ "noHistory", description = Some(s)))
-//      case q"$prev.uniqueIdentity(${Lit.String(s)})" => acc(ns, prev, a.copy(options = a.options :+ "uniqueIdentity", description = Some(s)))
-//      case q"$prev.unique(${Lit.String(s)})"         => acc(ns, prev, a.copy(options = a.options :+ "unique", description = Some(s)))
-//      case q"$prev.fulltext(${Lit.String(s)})"       => acc(ns, prev, a.copy(options = a.options :+ "fulltext", description = Some(s)))
-//      case q"$prev.owner(${Lit.String(s)})"          => acc(ns, prev, a.copy(options = a.options :+ "owner", description = Some(s)))
-//      case q"$prev.mandatory(${Lit.String(s)})"      => acc(ns, prev, a.copy(options = a.options :+ "mandatory", description = Some(s)))
-
       case q"$prev.descr(${Lit.String(s)})" => saveDescr(ns, prev, a, attr, s)
       case q"$prev.apply(${Lit.String(s)})" => saveDescr(ns, prev, a, attr, s)
 
@@ -416,42 +408,50 @@ class DataModel2MetaSchema(filePath: String, pkgPath: String, scalaVersion: Stri
       // Validations ................................................
 
       case q"$prev.validate { ..case $cases }" =>
-        oneValidationCall(ns, a)
-        val (valueAttrs, validations) = cases.map {
-          case Case(v, Some(test), Lit.String(error)) =>
-            val valueAttrs = extractValueAttrs(ns, a, q"$test")
-            val validation = (indent(s"$v => $test"), error)
-            (valueAttrs, validation)
+        //        oneValidationCall(ns, a)
+        //        val (valueAttrs, validations) = cases.map {
+        //          case Case(v, Some(test), Lit.String(error)) =>
+        //            val valueAttrs = extractValueAttrs(ns, a, q"$test")
+        //            val validation = (indent(s"$v => $test"), error)
+        //            (valueAttrs, validation)
+        //
+        //          case Case(v, Some(test), Term.Select(Lit.String(multilineMsg), Term.Name("stripMargin"))) =>
+        //            val valueAttrs = extractValueAttrs(ns, a, q"$test")
+        //            val validation = (indent(s"$v => $test"), multilineMsg)
+        //            (valueAttrs, validation)
+        //
+        //          case Case(v, Some(test), Term.Interpolate(Term.Name("s"), _, _)) =>
+        //            err(
+        //              s"String interpolation not allowed for validation error messages of `$attr`. " +
+        //                s"Please remove the s prefix."
+        //            )
+        //
+        //          case Case(v, None, Lit.String(error)) =>
+        //            err(s"""Please provide if-expression: case $v if <test..> = "$error"""", ns, a.attr)
+        //
+        //          case other => err("Unexpected validation case: " + other, ns, a.attr)
+        //        }.unzip
+        //
+        //        val valueAttrs1 = valueAttrs.flatten.distinct.sorted
+        //        val valueAttrs2 = if (valueAttrs1.isEmpty) Nil else (a.attr +: valueAttrs1).distinct.sorted
+        //        val reqAttrs1   = a.requiredAttrs ++ valueAttrs2
+        //        acc(ns, prev, a.copy(requiredAttrs = reqAttrs1, valueAttrs = valueAttrs1, validations = validations))
 
-          case Case(v, Some(test), Term.Select(Lit.String(multilineMsg), Term.Name("stripMargin"))) =>
-            val valueAttrs = extractValueAttrs(ns, a, q"$test")
-            val validation = (indent(s"$v => $test"), multilineMsg)
-            (valueAttrs, validation)
-
-          case Case(v, Some(test), Term.Interpolate(Term.Name("s"), _, _)) =>
-            err(
-              s"String interpolation not allowed for validation error messages of `$attr`. " +
-                s"Please remove the s prefix."
-            )
-
-          case Case(v, None, Lit.String(error)) =>
-            err(s"""Please provide if-expression: case $v if <test..> = "$error"""", ns, a.attr)
-
-          case other => err("Unexpected validation case: " + other, ns, a.attr)
-        }.unzip
-
-        val valueAttrs1 = valueAttrs.flatten.distinct.sorted
-        val valueAttrs2 = if (valueAttrs1.isEmpty) Nil else (a.attr +: valueAttrs1).distinct.sorted
-        val reqAttrs1   = a.requiredAttrs ++ valueAttrs2
-        acc(ns, prev, a.copy(requiredAttrs = reqAttrs1, valueAttrs = valueAttrs1, validations = validations))
+        handleValidationCases(prev, ns, a, cases, attr)
 
       case q"$prev.validate($test)" =>
-        oneValidationCall(ns, a)
-        val valueAttrs1  = extractValueAttrs(ns, a, q"$test")
-        val valueAttrs2  = if (valueAttrs1.isEmpty) Nil else (a.attr +: valueAttrs1).distinct.sorted
-        val reqAttrs1    = a.requiredAttrs ++ valueAttrs2
-        val validations1 = Seq(indent(test.toString()) -> "")
-        acc(ns, prev, a.copy(requiredAttrs = reqAttrs1, valueAttrs = valueAttrs1, validations = validations1))
+        test match {
+          case q"{ ..case $cases }: PartialFunction[$_, $_]" =>
+            handleValidationCases(prev, ns, a, cases, attr)
+
+          case _ =>
+            oneValidationCall(ns, a)
+            val valueAttrs1  = extractValueAttrs(ns, a, q"$test")
+            val valueAttrs2  = if (valueAttrs1.isEmpty) Nil else (a.attr +: valueAttrs1).distinct.sorted
+            val reqAttrs1    = a.requiredAttrs ++ valueAttrs2
+            val validations1 = Seq(indent(test.toString()) -> "")
+            acc(ns, prev, a.copy(requiredAttrs = reqAttrs1, valueAttrs = valueAttrs1, validations = validations1))
+        }
 
       case q"$prev.validate($test, ${Lit.String(error)})" =>
         oneValidationCall(ns, a)
@@ -521,6 +521,43 @@ class DataModel2MetaSchema(filePath: String, pkgPath: String, scalaVersion: Stri
         println(other.structure)
         unexpected(other)
     }
+  }
+
+  private def handleValidationCases(
+    prev: Tree,
+    ns: String,
+    a: MetaAttr,
+    cases: Seq[Case],
+    attr: String
+  ) = {
+    oneValidationCall(ns, a)
+    val (valueAttrs, validations) = cases.map {
+      case Case(v, Some(test), Lit.String(error)) =>
+        val valueAttrs = extractValueAttrs(ns, a, q"$test")
+        val validation = (indent(s"$v => $test"), error)
+        (valueAttrs, validation)
+
+      case Case(v, Some(test), Term.Select(Lit.String(multilineMsg), Term.Name("stripMargin"))) =>
+        val valueAttrs = extractValueAttrs(ns, a, q"$test")
+        val validation = (indent(s"$v => $test"), multilineMsg)
+        (valueAttrs, validation)
+
+      case Case(v, Some(test), Term.Interpolate(Term.Name("s"), _, _)) =>
+        err(
+          s"String interpolation not allowed for validation error messages of `$attr`. " +
+            s"Please remove the s prefix."
+        )
+
+      case Case(v, None, Lit.String(error)) =>
+        err(s"""Please provide if-expression: case $v if <test..> = "$error"""", ns, a.attr)
+
+      case other => err("Unexpected validation case: " + other, ns, a.attr)
+    }.unzip
+
+    val valueAttrs1 = valueAttrs.flatten.distinct.sorted
+    val valueAttrs2 = if (valueAttrs1.isEmpty) Nil else (a.attr +: valueAttrs1).distinct.sorted
+    val reqAttrs1   = a.requiredAttrs ++ valueAttrs2
+    acc(ns, prev, a.copy(requiredAttrs = reqAttrs1, valueAttrs = valueAttrs1, validations = validations))
   }
 
   private def oneValidationCall(ns: String, a: MetaAttr) = if (a.validations.nonEmpty) {

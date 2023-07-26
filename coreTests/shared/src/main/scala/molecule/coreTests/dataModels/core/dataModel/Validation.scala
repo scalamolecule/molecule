@@ -125,18 +125,21 @@ object Validation extends DataModel(5) {
       "Value must be an odd number between 3 and 9 but not 7"
     )
 
-    val multipleErrors = oneInt.validate {
-      case v if v > 2  => "Test 1: Number must be bigger than 2. Found: $v"
-      case v if v < 10 => "Test 2: Number must be smaller than 10. Found: $v"
-      case v if v != 7 => "Test 3: Number must not be 7"
-      case v if {
-        // Comments in code blocks are transferred to boilerplate code
-        val divider = 2
-        v % divider == 1
-      }                =>
-        """Test 4: Number must
-          |be odd. Found: $v""".stripMargin
-    }
+    val multipleErrors = oneInt.validate(
+      {
+        case v if v > 2  => "Test 1: Number must be bigger than 2. Found: $v"
+        case v if v < 10 => "Test 2: Number must be smaller than 10. Found: $v"
+        case v if v != 7 => "Test 3: Number must not be 7"
+        case v if {
+          // Comments in code blocks are transferred to boilerplate code
+          val divider = 2
+          v % divider == 1
+        }                =>
+          """Test 4: Number must
+            |be odd. Found: $v""".stripMargin
+      }: PartialFunction[Int, String] // Not needed in Scala 2.13 and 3.x
+    )
+
   }
 
 
@@ -201,31 +204,34 @@ object Validation extends DataModel(5) {
       "Value must be an odd number between 3 and 9 but not `int7` value `$int7`"
     )
 
-    val int8           = oneInt
-    val str            = oneString
-    val ints           = setInt
-    val strs           = setString
-    val multipleErrors = oneInt.validate {
-      case v if v > 4 =>
-        "Test 1: Number must be bigger than 4. Found: $v"
+    val int8 = oneInt
+    val str  = oneString
+    val ints = setInt
+    val strs = setString
 
-      case v if v > int8.value =>
-        "Test 2: Number must be bigger than `int8` value `$int8`. Found: $v"
+    val multipleErrors = oneInt.validate(
+      {
+        case v if v > 4 =>
+          "Test 1: Number must be bigger than 4. Found: $v"
 
-      case v if v < str.value.length * 2 =>
-        "Test 3: Number must be smaller than `str` value `$str` length `${str.length}` * 2. Found: $v"
+        case v if v > int8.value =>
+          "Test 2: Number must be bigger than `int8` value `$int8`. Found: $v"
 
-      case v if {
-        v != ints.value.head - 3
-      } => "Test 4: Number must not be `ints` head value `${ints.head}` minus 3. Found: $v"
+        case v if v < str.value.length * 2 =>
+          "Test 3: Number must be smaller than `str` value `$str` length `${str.length}` * 2. Found: $v"
 
-      case v if {
-        val divider = strs.value.size
-        v % divider == 1
-      } =>
-        """Test 5: Number must
-          |be odd. Found: $v""".stripMargin
-    }
+        case v if {
+          v != ints.value.head - 3
+        } => "Test 4: Number must not be `ints` head value `${ints.head}` minus 3. Found: $v"
+
+        case v if {
+          val divider = strs.value.size
+          v % divider == 1
+        } =>
+          """Test 5: Number must
+            |be odd. Found: $v""".stripMargin
+      }: PartialFunction[Int, String] // Not needed in Scala 2.13 and 3.x
+    )
   }
 
 

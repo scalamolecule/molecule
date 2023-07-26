@@ -5,7 +5,7 @@ import java.net.URI
 import java.util.Date
 import boopickle.CompositePickler
 import boopickle.Default._
-import molecule.base.ast.SchemaAST.{Card, CardOne, CardSet}
+import molecule.base.ast.SchemaAST._
 import molecule.base.error._
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
@@ -19,6 +19,11 @@ object Boopicklers extends MoleculeLogging {
   implicit val pickleCard: CompositePickler[Card] = compositePickler[Card]
   pickleCard.addConcreteType[CardOne.type]
   pickleCard.addConcreteType[CardSet.type]
+
+  implicit val pickleMetaAttrTransaction  : CompositePickler[MetaAttr]   = compositePickler[MetaAttr]
+  implicit val pickleMetaNsTransaction    : CompositePickler[MetaNs]     = compositePickler[MetaNs]
+  implicit val pickleMetaPartTransaction  : CompositePickler[MetaPart]   = compositePickler[MetaPart]
+  implicit val pickleMetaSchemaTransaction: CompositePickler[MetaSchema] = compositePickler[MetaSchema]
 
   implicit val pickleOp: CompositePickler[Op] = compositePickler[Op]
   pickleOp.addConcreteType[NoValue.type]
@@ -295,6 +300,5 @@ object Boopicklers extends MoleculeLogging {
   implicit val pickleConnProxy: CompositePickler[ConnProxy] =
     compositePickler[ConnProxy]
       .addConcreteType[DatomicProxy]
-
-//  implicit val pickleSchemaTransaction: CompositePickler[Schema] = compositePickler[Schema]
+      .addConcreteType[JdbcProxy]
 }

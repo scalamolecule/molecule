@@ -24,7 +24,7 @@ trait JVMDatomicSpiBase {
             s"attribute ${attr.ns}.${attr.attr} the current Set of values couldn't be found.")
         }
         val vs = ListBuffer.empty[Any]
-        curValues.forEach(row => vs.addOne(row.get(0)))
+        curValues.forEach(row => vs += row.get(0))
         vs.toSet
       } catch {
         case e: MoleculeError => throw e

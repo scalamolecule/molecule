@@ -9,9 +9,8 @@ import molecule.core.transaction.ops.DeleteOps
 import molecule.sql.core.query.SqlModel2Query
 import molecule.sql.jdbc.facade.JdbcConn_jvm
 import scala.collection.mutable
-import scala.jdk.CollectionConverters.{CollectionHasAsScala, IterableHasAsJava}
 
-trait Data_Delete extends JdbcTxMetaData_JVM with DeleteOps with MoleculeLogging { self: DeleteExtraction =>
+trait Data_Delete extends JdbcBase_JVM with DeleteOps with MoleculeLogging { self: DeleteExtraction =>
 
   def getStmtsData(
     conn: JdbcConn_jvm,

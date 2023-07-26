@@ -16,9 +16,9 @@ trait AttrOrderMandatory extends CoreTestSuite with ApiAsyncImplicits { self: Sp
   final def getTriples(acc: List[(String, Int, Int)]): List[(String, Int, Int)] = {
     if (acc.length != 5) {
       val pair = (
-        ('a' + scala.util.Random.between(0, 2)).toChar.toString, // "a" or "b"
-        Random.between(1, 3), // 1 or 2
-        Random.between(1, 6) // 1-5
+        ('a' + scala.util.Random.nextInt(3)).toChar.toString, // "a" or "b"
+        Random.nextInt(3) + 1,
+        Random.nextInt(6) + 1,
       )
       // No duplicate rows
       if (!acc.contains(pair)) getTriples(acc :+ pair) else getTriples(acc)

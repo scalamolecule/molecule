@@ -9,11 +9,17 @@ An sbt-molecule plugin generates boilerplate code from your domain data model de
 - Works with [Datomic](http://www.datomic.com) and JDBC-compliant databases (and more to come)
 - Targets Scala 3.3, 2.13 and 2.12
 - Scala and Scalajs platforms
-- All 1450+ Datomic tests pass (jdbc module is wip)
+- All 1500+ Datomic tests pass (jdbc module is wip)
 - No macros
 - No complex type class implicits
 - Maximum type inference
 - Synchronous/Asynchronous/ZIO APIs
+- Nested data structures
+- Associative relationships (composites)
+- Validation
+- Pagination: offset and cursor
+- Advanced sorting
+- Subscriptions
 
 Documentation at [scalamolecule.org](http://scalamolecule.org) still documents the old macro-based version of molecule but will be updated to the new version. Most concepts overlap.
 
@@ -102,22 +108,32 @@ Then in another process/terminal window:
  
 ### Use in your project
 
-The new molecule library is not yet published to Sonatype. Meanwhile, you can publish molecule locally for Scala 2.13:
+The new molecule library is not yet published to Sonatype. Meanwhile, you can publish molecule locally. As soon molecule is published the following steps are not need anymore.
 
-    cd molecule
+First you need to clone the sbt-molecule plugin library and publish locally:
+
+    git clone https://github.com/scalamolecule/sbt-molecule.git
+    cd sbt-molecule
     sbt publishLocal
 
-or for other Scala versions:
+Then clone molecule and publish its `base` module separately to Scala 2.12 (the sbt-molecule plugin depends on this) and then the molecule modules themselves to Scala 2.13:
+
+    git clone https://github.com/scalamolecule/molecule.git
+    cd molecule
+    sbt ++2.12.18 "project baseJVM" publishLocal # is used by the sbt-molecule
+    sbt publishLocal # publishing molecule modules to Scala 2.13
+
+Or you can publish the molecule modules to other Scala versions:
 
     sbt ++3.3.0 publishLocal
     sbt ++2.12.18 publishLocal
 
-To have molecule boilerplate code for your domain generated in jars, compile once with sbt:
+Now you can generate molecule boilerplate code with the sbt-molecule plugin that packages the generated code in jars added to the lib folders in your project. You only need to do this once (or when your data model changes).
 
     cd <your sbt project>
-    sbt compile -Dmolecule=true
+    sbt compile -Dmolecule=true # this flag tells sbt-molecule to generate molecule boilerplate code
 
-See definition of `coreTests` module in `build.sbt` for how to add and configure the Molecule plugin.
+See definition of `coreTests` module in `build.sbt` for how to add and configure the Molecule plugin. There you can also see examples of data model definitions that the sbt-molecule plugin needs to know what boilerplate code to generate.
 
 
 ### License

@@ -15,7 +15,7 @@ import molecule.sql.core.query.SqlModel2Query
 import molecule.sql.jdbc.facade.JdbcConn_jvm
 import scala.collection.mutable.ListBuffer
 
-trait Data_Update extends JdbcTxMetaData_JVM with UpdateOps with MoleculeLogging { self: UpdateExtraction =>
+trait Data_Update extends JdbcBase_JVM with UpdateOps with MoleculeLogging { self: UpdateExtraction =>
 
   def getStmts(
     conn: JdbcConn_jvm,

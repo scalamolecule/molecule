@@ -13,6 +13,7 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
   extends Model2Query
     with ResolveExprOne[Tpl]
     with ResolveExprOne_id[Tpl]
+    with ResolveExprOne_tx[Tpl]
     with ResolveExprSet[Tpl]
     with ResolveRef[Tpl]
     with ResolveNestedPull[Tpl]
@@ -187,10 +188,21 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
               case a: AttrOneTac => resolve(resolveIdTac(es, a), tail)
               case _             => unexpectedElement(a)
             }
-          //          case "tx" => // todo
-          case _ =>
+          case "tx" =>
+            if (a.filterAttr.nonEmpty) {
+              throw ModelError("Filter attributes not allowed to involve transaction entity ids.")
+            }
+            a match {
+              case a: AttrOneMan => resolve(resolveTxMan(es, a), tail)
+              case a: AttrOneTac => resolve(resolveTxTac(es, a), tail)
+              case _             => unexpectedElement(a)
+            }
+          case _    =>
             a.filterAttr.collect {
-              case a if a.attr == "id" => throw ModelError("Filter attributes not allowed to involve entity ids.")
+              case filterAttr if filterAttr.attr == "id" =>
+                throw ModelError("Filter attributes not allowed to involve entity ids.")
+              case filterAttr if filterAttr.attr == "tx" =>
+                throw ModelError("Filter attributes not allowed to involve transaction entity ids.")
             }
             a match {
               case a: AttrOneMan => resolve(resolveAttrOneMan(es, a), tail)
@@ -209,7 +221,6 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
       case Nested(ref, nestedElements)          => resolve(resolveNested(es, ref, nestedElements), tail)
       case NestedOpt(nestedRef, nestedElements) => resolve(resolveNestedOpt(es, nestedRef, nestedElements), tail)
       case TxMetaData(txElements)               => resolveTxMetaData(txElements)
-      case other                                => unexpectedElement(other)
     }
     case Nil             => es
   }

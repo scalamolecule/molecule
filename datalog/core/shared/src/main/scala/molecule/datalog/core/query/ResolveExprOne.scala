@@ -14,7 +14,6 @@ trait ResolveExprOne[Tpl]
     attrIndex += 1
     val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
     attr match {
-      //      case at: AttrOneManLong       => manLong(attr, e, a, at.vs, resLong, sortOneLong(at, attrIndex))
       case at: AttrOneManString     => man(attr, e, a, at.vs, resString, sortOneString(at, attrIndex))
       case at: AttrOneManInt        => man(attr, e, a, at.vs, resInt, intSorter(at, attrIndex))
       case at: AttrOneManLong       => man(attr, e, a, at.vs, resLong, sortOneLong(at, attrIndex))
@@ -38,7 +37,6 @@ trait ResolveExprOne[Tpl]
     if (isNestedOpt && !isTxMetaData)
       throw ModelError("Tacit attributes not allowed in optional nested queries. Found: " + a)
     attr match {
-      //      case at: AttrOneTacLong       => tacLong(attr, e, a, at.vs, resLong)
       case at: AttrOneTacString     => tac(attr, e, a, at.vs, resString)
       case at: AttrOneTacInt        => tac(attr, e, a, at.vs, resInt)
       case at: AttrOneTacLong       => tac(attr, e, a, at.vs, resLong)
@@ -123,12 +121,7 @@ trait ResolveExprOne[Tpl]
     addCast(res.j2s)
     addSort(sorter)
     val v = getVar(attr)
-    find += (attr.attr match {
-      case "id" => e
-      case "tx" => txVar
-      case _    => v
-    })
-    //    find += v
+    find += v
     attr.filterAttr.fold {
       expr(e, a, v, attr.op, args, res)
       filterAttrVars1 = filterAttrVars1 + (a -> (e, v))
@@ -137,28 +130,6 @@ trait ResolveExprOne[Tpl]
       expr2(e, a, v, getVar(filterAttr), attr.op)
     }
   }
-
-  //  private def manLong(
-  //    attr: Attr,
-  //    e: Var,
-  //    a: Att,
-  //    args: Seq[Long],
-  //    res: ResOne[Long],
-  //    sorter: Option[(Int, Int => (Row, Row) => Int)]
-  //  ): Unit = {
-  //    attr.attr match {
-  //      case "id" =>
-  //        find += e
-  //        addCast(res.j2s)
-  //        addSort(sorter)
-  //      case "tx" =>
-  //        find += txVar
-  //        addCast(res.j2s)
-  //        addSort(sorter)
-  //      case _    =>
-  //        man(attr, e, a, args, res, sorter)
-  //    }
-  //  }
 
   private def tac[T: ClassTag](
     attr: Attr,
@@ -176,28 +147,6 @@ trait ResolveExprOne[Tpl]
       expr2(e, a, v, getVar(filterAttr), attr.op)
     }
   }
-
-  //  private def tacLong(
-  //    attr: Attr,
-  //    e: Var,
-  //    a: Att,
-  //    args0: Seq[Long],
-  //    res: ResOne[Long],
-  //  ): Unit = {
-  //    attr.attr match {
-  //      case "id" =>
-  //        addCast(res.j2s)
-  //        in += s"[$e ...]"
-  //        args += args0.toArray
-  //
-  //      case "tx" =>
-  //        addCast(res.j2s)
-  //        in += s"[$txVar ...]"
-  //        args += args0.toArray
-  //
-  //      case _ => tac(attr, e, a, args0, res)
-  //    }
-  //  }
 
   private def opt[T: ClassTag](
     attr: Attr,
@@ -422,33 +371,12 @@ trait ResolveExprOne[Tpl]
   }
 
   private def attr(e: Var, a: Att, v: Var): Unit = {
-    val aa = a.split("/").last
-    aa match {
-      case "id" =>
-      case "tx" =>
-      case _    => where += s"[$e $a $v$tx]" -> wClause
-    }
-    //    where += s"[$e $a $v$tx]" -> wClause
+    where += s"[$e $a $v$tx]" -> wClause
   }
 
   private def equal[T: ClassTag](e: Var, a: Att, v: Var, argValues: Seq[T], fromScala: Any => Any): Unit = {
-    // todo - pass Attr instead of a (build :<Ns>/<attr> from Attr instead)
-    // Also in other expressions...
-    val aa = a.split("/").last
-    aa match {
-      case "id" =>
-        //        find -= v
-        //        find += e
-        in += s"[$e ...]"
-      case "tx" =>
-        //        find -= v
-        //        find += txVar
-        in += s"[$txVar ...]"
-      case _    =>
-        in += s"[$v ...]"
-        where += s"[$e $a $v$tx]" -> wClause
-    }
-    //    where += s"[$e $a $v$tx]" -> wClause
+    in += s"[$v ...]"
+    where += s"[$e $a $v$tx]" -> wClause
     args += argValues.map(fromScala).toArray
   }
   private def equal2(e: Var, a: Att, v: Var, w: Var): Unit = {

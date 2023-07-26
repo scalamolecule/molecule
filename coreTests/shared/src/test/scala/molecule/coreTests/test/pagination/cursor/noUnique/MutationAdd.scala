@@ -15,7 +15,7 @@ trait MutationAdd extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync 
   @tailrec
   final def getPairs(acc: List[(Int, Int)]): List[(Int, Int)] = {
     if (acc.length != 5) {
-      val pair = (Random.between(1, 3), Random.between(1, 6))
+      val pair = (Random.nextInt(3) + 1, Random.nextInt(6) + 1)
       // No duplicate rows
       if (!acc.contains(pair)) getPairs(acc :+ pair) else getPairs(acc)
     } else {

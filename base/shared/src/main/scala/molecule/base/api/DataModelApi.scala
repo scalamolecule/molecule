@@ -204,8 +204,8 @@ trait DataModelApi {
      * @param s
      * @return
      */
-    def descr(s: String): Self = ???
-    def apply(s: String): Self = ???
+    def descr(description: String): Self = ???
+    def apply(description: String): Self = ???
 
 
     // Validation .................
@@ -243,8 +243,8 @@ trait DataModelApi {
      *
      * @tparam RefNs Ref namespace type
      */
-    def apply[RefNs]: Self = ???
-    def apply[RefNs](description: String): Self = ???
+    def apply[RefNs](implicit x: DummyImplicit): refOptions[Self, Tpe] = ???
+    def apply[RefNs](description: String): refOptions[Self, Tpe] = ???
 
     /** Owner option.
      *

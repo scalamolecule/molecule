@@ -54,7 +54,7 @@ case class Dsl(schema: MetaSchema, partPrefix: String, namespace: MetaNs)
         val attrOpt = "Attr" + card._marker + "Opt" + tpe
         val attrTac = "Attr" + card._marker + "Tac" + tpe
         man += s"""protected lazy val ${attr}_man$padA: $attrMan$padT0 = $attrMan$padT0("$ns", "$attr"$padA$refNs$valids)"""
-        if (attr != "id") {
+        if (attr != "id" && attr != "tx") {
           opt += s"""protected lazy val ${attr}_opt$padA: $attrOpt$padT0 = $attrOpt$padT0("$ns", "$attr"$padA$refNs$valids)"""
         }
         tac += s"""protected lazy val ${attr}_tac$padA: $attrTac$padT0 = $attrTac$padT0("$ns", "$attr"$padA$refNs$valids)"""

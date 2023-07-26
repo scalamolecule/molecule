@@ -1,17 +1,12 @@
 package molecule.datalog.datomic.test
 
-import java.util.Date
-import datomic.Peer
-import molecule.base.error.ModelError
 import molecule.core.util.Executor._
 import molecule.datalog.datomic.async._
 import molecule.datalog.datomic.setup.DatomicTestSuite
 import utest._
 import scala.language.implicitConversions
 
-
 object AdhocDatomicJVM extends DatomicTestSuite {
-
 
   override lazy val tests = Tests {
 

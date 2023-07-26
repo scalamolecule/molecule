@@ -44,10 +44,10 @@ case class JdbcQueryResolveCursor[Tpl](
       case Some(l) => cursor match {
         case Some("")     => getInitialPage(l)
         case Some(cursor) =>
-          val raw    = new String(Base64.getDecoder.decode(cursor))
-          val tokens = raw.split("\n").toList
-
-          val strategy :: hash :: _ = tokens
+          val raw      = new String(Base64.getDecoder.decode(cursor))
+          val tokens   = raw.split("\n").toList
+          val strategy = tokens.head
+          val hash     = tokens(1)
           if ((elements.hashCode() & 0xFFFFF) != hash.toInt) {
             throw ModelError("Can only use cursor for un-modified query.")
           } else {
@@ -72,48 +72,48 @@ case class JdbcQueryResolveCursor[Tpl](
     val sortedRows  = sortRows(rows)
     logger.debug(sortedRows.toArray().mkString("\n"))
 
-//    if (isNested) {
-//      val nestedRows    = rows2nested(sortedRows)
-//      val toplevelCount = nestedRows.length
-//      val limitAbs      = limit.abs.min(toplevelCount)
-//      val hasMore       = limitAbs < toplevelCount
-//      val selectedRows  = nestedRows.take(limitAbs)
-//      val tpls          = if (forward) selectedRows else selectedRows.reverse
-//      val cursor        = initialCursor(conn, tpls)
-//      (tpls, cursor, hasMore)
-//
-//    } else {
-//      val totalCount = rows.size
-//      val limitAbs   = limit.abs.min(totalCount)
-//      val hasMore    = limitAbs < totalCount
-//      val tuples     = ListBuffer.empty[Tpl]
-//
-//      if (isNestedOpt) {
-//        postAdjustPullCasts()
-//        if (totalCount == 0) {
-//          (Nil, "", false)
-//        } else {
-//          val selectedRows = sortedRows.subList(0, limitAbs)
-//          selectedRows.forEach(row => tuples += pullRow2tpl(row))
-//          val tpls   = if (forward) tuples.result() else tuples.result().reverse
-//          val cursor = initialCursor(conn, tpls)
-//          (tpls, cursor, hasMore)
-//        }
-//
-//      } else {
-//        postAdjustAritiess()
-//        if (totalCount == 0) {
-//          (Nil, "", false)
-//        } else {
-//          val row2tpl      = castRow2AnyTpl(aritiess.head, castss.head, 0, None)
-//          val selectedRows = sortedRows.subList(0, limitAbs)
-//          selectedRows.forEach(row => tuples += row2tpl(row).asInstanceOf[Tpl])
-//          val tpls   = if (forward) tuples.result() else tuples.result().reverse
-//          val cursor = initialCursor(conn, tpls)
-//          (tpls, cursor, hasMore)
-//        }
-//      }
-//    }
+    //    if (isNested) {
+    //      val nestedRows    = rows2nested(sortedRows)
+    //      val toplevelCount = nestedRows.length
+    //      val limitAbs      = limit.abs.min(toplevelCount)
+    //      val hasMore       = limitAbs < toplevelCount
+    //      val selectedRows  = nestedRows.take(limitAbs)
+    //      val tpls          = if (forward) selectedRows else selectedRows.reverse
+    //      val cursor        = initialCursor(conn, tpls)
+    //      (tpls, cursor, hasMore)
+    //
+    //    } else {
+    //      val totalCount = rows.size
+    //      val limitAbs   = limit.abs.min(totalCount)
+    //      val hasMore    = limitAbs < totalCount
+    //      val tuples     = ListBuffer.empty[Tpl]
+    //
+    //      if (isNestedOpt) {
+    //        postAdjustPullCasts()
+    //        if (totalCount == 0) {
+    //          (Nil, "", false)
+    //        } else {
+    //          val selectedRows = sortedRows.subList(0, limitAbs)
+    //          selectedRows.forEach(row => tuples += pullRow2tpl(row))
+    //          val tpls   = if (forward) tuples.result() else tuples.result().reverse
+    //          val cursor = initialCursor(conn, tpls)
+    //          (tpls, cursor, hasMore)
+    //        }
+    //
+    //      } else {
+    //        postAdjustAritiess()
+    //        if (totalCount == 0) {
+    //          (Nil, "", false)
+    //        } else {
+    //          val row2tpl      = castRow2AnyTpl(aritiess.head, castss.head, 0, None)
+    //          val selectedRows = sortedRows.subList(0, limitAbs)
+    //          selectedRows.forEach(row => tuples += row2tpl(row).asInstanceOf[Tpl])
+    //          val tpls   = if (forward) tuples.result() else tuples.result().reverse
+    //          val cursor = initialCursor(conn, tpls)
+    //          (tpls, cursor, hasMore)
+    //        }
+    //      }
+    //    }
     ???
   }
 

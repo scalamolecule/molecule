@@ -15,7 +15,7 @@ trait DirectionsStandardUnique extends CoreTestSuite with ApiAsyncImplicits { se
   @nowarn lazy val tests = Tests {
 
     "Forward, asc asc" - unique { implicit conn =>
-      val pairs               = (1 to 5).toList.map((Random.between(1, 3), _))
+      val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _))
       val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
       val query               = (cursor: String, limit: Int) => Unique.i.a1.int.a2.query.from(cursor).limit(limit)
       for {
@@ -29,7 +29,7 @@ trait DirectionsStandardUnique extends CoreTestSuite with ApiAsyncImplicits { se
     }
 
     "Forward, desc asc" - unique { implicit conn =>
-      val pairs               = (1 to 5).toList.map((Random.between(1, 3), _))
+      val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _))
       val List(a, b, c, d, e) = pairs.sortBy(p => (-p._1, p._2))
       val query               = (cursor: String, limit: Int) => Unique.i.d1.int.a2.query.from(cursor).limit(limit)
       for {
@@ -43,7 +43,7 @@ trait DirectionsStandardUnique extends CoreTestSuite with ApiAsyncImplicits { se
     }
 
     "Forward, asc desc" - unique { implicit conn =>
-      val pairs               = (1 to 5).toList.map((Random.between(1, 3), _))
+      val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _))
       val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, -p._2))
       val query               = (cursor: String, limit: Int) => Unique.i.a1.int.d2.query.from(cursor).limit(limit)
       for {
@@ -57,7 +57,7 @@ trait DirectionsStandardUnique extends CoreTestSuite with ApiAsyncImplicits { se
     }
 
     "Forward, desc desc" - unique { implicit conn =>
-      val pairs               = (1 to 5).toList.map((Random.between(1, 3), _))
+      val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _))
       val List(a, b, c, d, e) = pairs.sortBy(p => (-p._1, -p._2))
       val query               = (cursor: String, limit: Int) => Unique.i.d1.int.d2.query.from(cursor).limit(limit)
       for {
@@ -72,7 +72,7 @@ trait DirectionsStandardUnique extends CoreTestSuite with ApiAsyncImplicits { se
 
 
     "Backwards, asc asc" - unique { implicit conn =>
-      val pairs               = (1 to 5).toList.map((Random.between(1, 3), _))
+      val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _))
       val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
       val query               = (cursor: String, limit: Int) => Unique.i.a1.int.a2.query.from(cursor).limit(limit)
       for {
@@ -86,7 +86,7 @@ trait DirectionsStandardUnique extends CoreTestSuite with ApiAsyncImplicits { se
     }
 
     "Backwards, desc asc" - unique { implicit conn =>
-      val pairs               = (1 to 5).toList.map((Random.between(1, 3), _))
+      val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _))
       val List(a, b, c, d, e) = pairs.sortBy(p => (-p._1, p._2))
       val query               = (cursor: String, limit: Int) => Unique.i.d1.int.a2.query.from(cursor).limit(limit)
       for {
@@ -100,7 +100,7 @@ trait DirectionsStandardUnique extends CoreTestSuite with ApiAsyncImplicits { se
     }
 
     "Backwards, asc desc" - unique { implicit conn =>
-      val pairs               = (1 to 5).toList.map((Random.between(1, 3), _))
+      val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _))
       val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, -p._2))
       val query               = (cursor: String, limit: Int) => Unique.i.a1.int.d2.query.from(cursor).limit(limit)
       for {
@@ -114,7 +114,7 @@ trait DirectionsStandardUnique extends CoreTestSuite with ApiAsyncImplicits { se
     }
 
     "Backwards, desc desc" - unique { implicit conn =>
-      val pairs               = (1 to 5).toList.map((Random.between(1, 3), _))
+      val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _))
       val List(a, b, c, d, e) = pairs.sortBy(p => (-p._1, -p._2))
       val query               = (cursor: String, limit: Int) => Unique.i.d1.int.d2.query.from(cursor).limit(limit)
       for {

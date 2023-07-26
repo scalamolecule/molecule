@@ -38,7 +38,6 @@ class UpdateExtraction(
           case _: AttrSetTac => throw ModelError("Can only lookup entity with card-one attribute value. Found:\n" + a)
           case _: AttrOneOpt => throw ModelError(s"Can't $update optional values. Found:\n" + a)
           case _: AttrSetOpt => throw ModelError(s"Can't $update optional values. Found:\n" + a)
-          case _             => throw ModelError(s"Not implemented yet. Found:\n" + a)
         }
 
         case _: Nested    => throw ModelError(s"Nested data structure not allowed in $update molecule.")

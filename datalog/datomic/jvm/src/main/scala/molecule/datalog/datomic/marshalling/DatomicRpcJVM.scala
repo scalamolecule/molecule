@@ -16,7 +16,7 @@ import molecule.datalog.datomic.transaction._
 import scala.concurrent.Future
 
 object DatomicRpcJVM extends MoleculeRpc
-  with DatomicTxMetaData_JVM
+  with DatomicBase_JVM
   with FutureUtils {
 
   /**

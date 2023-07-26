@@ -914,6 +914,7 @@ trait ModelTransformations_ {
             }
             case a             => unexpected(a)
           }
+
           case a: AttrSet => a match {
             case a: AttrSetMan => a match {
               case a: AttrSetManString     => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
@@ -947,9 +948,9 @@ trait ModelTransformations_ {
               case a: AttrSetTacShort      => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
               case a: AttrSetTacChar       => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
             }
-            case a             => unexpected(a)
+
+            case a: AttrSetOpt             => unexpected(a)
           }
-          case a          => unexpected(a)
         }
       case e       => unexpected(e)
     }

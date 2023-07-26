@@ -75,8 +75,7 @@ case class Dsl_Arities(schema: MetaSchema, partPrefix: String, namespace: MetaNs
 
       if (!last) {
         man += s"""lazy val $attr  $padA = new $ns_1[$tpesM]($elemsM) with $exprM with $card"""
-        //        if (!genericAttrs.contains(attr))
-        if (attr != "id")
+        if (attr != "id" && attr != "tx")
           opt += s"""lazy val ${attr}_?$padA = new $ns_1[$tpesO]($elemsO) with $exprO with $card"""
       }
       tac += s"""lazy val ${attr}_ $padA = new $ns_0[$tpesT]($elemsT) with $exprT with $card"""
@@ -204,8 +203,8 @@ case class Dsl_Arities(schema: MetaSchema, partPrefix: String, namespace: MetaNs
     s"""
        |
        |  trait NestedInit extends NestedOp_$arity[${`A..V, `}Tx${_1}] with Nested_$arity[${`A..V, `}Tx${_1}] { self: Elements =>
-       |    override protected def _nestedMan2tx[NestedTpl](nestedElements: List[Element]): Nested2TxInit_$n0[${`A..V, `}NestedTpl, Tx${_1}] = { val es = elements.init :+ Nested   (elements.last.asInstanceOf[Ref], nestedElements); new Nested2TxInit_$n0(es, new Tx${_1}[${`A..V, `}Seq[NestedTpl], Nothing](es)) }
-       |    override protected def _nestedOpt2tx[NestedTpl](nestedElements: List[Element]): Nested2TxInit_$n0[${`A..V, `}NestedTpl, Tx${_1}] = { val es = elements.init :+ NestedOpt(elements.last.asInstanceOf[Ref], nestedElements); new Nested2TxInit_$n0(es, new Tx${_1}[${`A..V, `}Seq[NestedTpl], Nothing](es)) }
+       |    override protected def _nestedMan2tx[NestedTpl](nestedElements: List[Element]): Nested2TxInit_$n0[${`A..V, `}NestedTpl, Tx${_1}] = { val es = self.elements.init :+ Nested   (self.elements.last.asInstanceOf[Ref], nestedElements); new Nested2TxInit_$n0(es, new Tx${_1}[${`A..V, `}Seq[NestedTpl], Nothing](es)) }
+       |    override protected def _nestedOpt2tx[NestedTpl](nestedElements: List[Element]): Nested2TxInit_$n0[${`A..V, `}NestedTpl, Tx${_1}] = { val es = self.elements.init :+ NestedOpt(self.elements.last.asInstanceOf[Ref], nestedElements); new Nested2TxInit_$n0(es, new Tx${_1}[${`A..V, `}Seq[NestedTpl], Nothing](es)) }
        |  }""".stripMargin
   } else ""
 

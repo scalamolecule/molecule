@@ -16,7 +16,7 @@ import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
 
-trait JdbcTxMetaData_JVM extends JdbcDataType_JVM with ModelUtils {
+trait JdbcBase_JVM extends JdbcDataType_JVM with ModelUtils {
 
   // Override on instantiation
   protected val sqlConn: java.sql.Connection
@@ -24,51 +24,16 @@ trait JdbcTxMetaData_JVM extends JdbcDataType_JVM with ModelUtils {
   //  protected var level    = 0
   protected var firstRow = true
 
-//  // Dynamic ref path of current level and branch (each backref initiates a new branch)
-//  protected var curRefPath = List("0")
-//
-//  // Ordered tables to have data inserted
-//  // refPath, ns, selfRef, cols
-//  //  protected var inserts = List.empty[(List[String], String, List[String], List[TableInsert])]
-//  //  protected var inserts2 = List.empty[(Int, List[String], String, List[String])]
-//  protected var inserts = List.empty[(List[String], List[String])]
-//  protected var joins   = List.empty[(String, String, String, Int, Int)]
-//
-//
-//  // PreparedStatement param indexes for each (table, col) coordinate
-//  protected val paramIndexes     = mutable.Map.empty[(List[String], String), Int]
-//  protected val colSettersMap    = mutable.Map.empty[List[String], List[Setter]]
-//  protected val rowSettersMap    = mutable.Map.empty[List[String], List[Setter]]
-//  protected val tableInserts     = mutable.Map.empty[List[String], TableInsert]
-//  protected var joinTableInserts = List.empty[JoinTableInsert]
-//  protected val insertIndexes    = mutable.Map.empty[List[String], Int]
-//
-//  protected def addColSetter(refPath: List[String], colSetter: Setter) = {
-//    // Cache colSetter for this table
-//    //    colSettersMap.get((refPath, ns)).fold[Unit](
-//    colSettersMap.get(refPath).fold[Unit](
-//      colSettersMap.addOne(refPath -> List(colSetter))
-//    )(colSetters =>
-//      colSettersMap(refPath) = colSetters :+ colSetter
-//    )
-//  }
-
   var level = 0
-  //  def indent = "  " * level
   def indent(level: Int) = "  " * level
-  def indent(refPath: List[String]) = "  " * refPath.head.toInt
 
 
-  //  var arities = Array.empty[Array[Int]]
   // Dynamic ref path of current level and branch (each backref initiates a new branch)
   protected var curRefPath = List("0")
 
   // Ordered tables to have data inserted
   // refPath, ns, selfRef, cols
-  //  protected var inserts = List.empty[(List[String], String, List[String], List[TableInsert])]
-  //  protected var inserts2 = List.empty[(Int, List[String], String, List[String])]
   protected var inserts = List.empty[(List[String], List[String])]
-  //  protected var joins   = List.empty[(List[String], String, String, String, Int, Int)]
   protected var joins   = List.empty[(List[String], String, String, List[String], List[String])]
 
 
@@ -78,27 +43,17 @@ trait JdbcTxMetaData_JVM extends JdbcDataType_JVM with ModelUtils {
   protected val rowSettersMap    = mutable.Map.empty[List[String], List[Setter]]
   protected val tableInserts     = mutable.Map.empty[List[String], TableInsert]
   protected var joinTableInserts = List.empty[JoinTableInsert]
-  //  protected var insertIndex      = -1
   protected val insertIndexes    = mutable.Map.empty[List[String], Int]
-  //  protected val joinArityMap  = mutable.Map.empty[List[String], Array[Int]]
   protected val rightCountsMap   = mutable.Map.empty[List[String], List[Int]]
 
 
   protected def addColSetter(refPath: List[String], colSetter: Setter) = {
     // Cache colSetter for this table
     colSettersMap.get(refPath).fold[Unit](
-      colSettersMap.addOne(refPath -> List(colSetter))
+      colSettersMap += refPath -> List(colSetter)
     )(colSetters =>
       colSettersMap(refPath) = colSetters :+ colSetter
     )
-  }
-
-
-  def arr[T](a: Array[T]) = {
-    a.map {
-      case a: Array[_] => a.mkString("Array(", ", ", ")")
-      case other       => other
-    }.mkString("Array(", ", ", ")")
   }
 
   protected def printValue(

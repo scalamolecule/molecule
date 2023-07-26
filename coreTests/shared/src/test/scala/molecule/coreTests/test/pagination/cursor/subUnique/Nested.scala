@@ -15,7 +15,7 @@ trait Nested extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
   @nowarn lazy val tests = Tests {
 
     "Forward, asc asc" - unique { implicit conn =>
-      val pairs               = (1 to 5).toList.map((Random.between(1, 3), _, List(1)))
+      val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _, List(1)))
       val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
       val query               = (cursor: String, limit: Int) => 
         Unique.i.a1.int.a2.Refs.*(Ref.i).query.from(cursor).limit(limit)
@@ -30,7 +30,7 @@ trait Nested extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
     }
 
     "Forward, desc asc" - unique { implicit conn =>
-      val pairs               = (1 to 5).toList.map((Random.between(1, 3), _, List(1)))
+      val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _, List(1)))
       val List(a, b, c, d, e) = pairs.sortBy(p => (-p._1, p._2))
       val query               = (cursor: String, limit: Int) =>
         Unique.i.d1.int.a2.Refs.*(Ref.i).query.from(cursor).limit(limit)
@@ -45,7 +45,7 @@ trait Nested extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
     }
 
     "Forward, asc desc" - unique { implicit conn =>
-      val pairs               = (1 to 5).toList.map((Random.between(1, 3), _, List(1)))
+      val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _, List(1)))
       val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, -p._2))
       val query               = (cursor: String, limit: Int) =>
         Unique.i.a1.int.d2.Refs.*(Ref.i).query.from(cursor).limit(limit)
@@ -60,7 +60,7 @@ trait Nested extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
     }
 
     "Forward, desc desc" - unique { implicit conn =>
-      val pairs               = (1 to 5).toList.map((Random.between(1, 3), _, List(1)))
+      val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _, List(1)))
       val List(a, b, c, d, e) = pairs.sortBy(p => (-p._1, -p._2))
       val query               = (cursor: String, limit: Int) =>
         Unique.i.d1.int.d2.Refs.*(Ref.i).query.from(cursor).limit(limit)
@@ -76,7 +76,7 @@ trait Nested extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
 
 
     "Backwards, asc asc" - unique { implicit conn =>
-      val pairs               = (1 to 5).toList.map((Random.between(1, 3), _, List(1)))
+      val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _, List(1)))
       val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
       val query               = (cursor: String, limit: Int) =>
         Unique.i.a1.int.a2.Refs.*(Ref.i).query.from(cursor).limit(limit)
@@ -91,7 +91,7 @@ trait Nested extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
     }
 
     "Backwards, desc asc" - unique { implicit conn =>
-      val pairs               = (1 to 5).toList.map((Random.between(1, 3), _, List(1)))
+      val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _, List(1)))
       val List(a, b, c, d, e) = pairs.sortBy(p => (-p._1, p._2))
       val query               = (cursor: String, limit: Int) =>
         Unique.i.d1.int.a2.Refs.*(Ref.i).query.from(cursor).limit(limit)
@@ -106,7 +106,7 @@ trait Nested extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
     }
 
     "Backwards, asc desc" - unique { implicit conn =>
-      val pairs               = (1 to 5).toList.map((Random.between(1, 3), _, List(1)))
+      val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _, List(1)))
       val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, -p._2))
       val query               = (cursor: String, limit: Int) =>
         Unique.i.a1.int.d2.Refs.*(Ref.i).query.from(cursor).limit(limit)
@@ -121,7 +121,7 @@ trait Nested extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
     }
 
     "Backwards, desc desc" - unique { implicit conn =>
-      val pairs               = (1 to 5).toList.map((Random.between(1, 3), _, List(1)))
+      val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _, List(1)))
       val List(a, b, c, d, e) = pairs.sortBy(p => (-p._1, -p._2))
       val query               = (cursor: String, limit: Int) =>
         Unique.i.d1.int.d2.Refs.*(Ref.i).query.from(cursor).limit(limit)

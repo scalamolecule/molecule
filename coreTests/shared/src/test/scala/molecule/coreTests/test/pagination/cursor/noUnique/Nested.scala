@@ -15,7 +15,7 @@ trait Nested extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
   @tailrec
   final def getData(acc: List[(Int, Int, List[Int])]): List[(Int, Int, List[Int])] = {
     if (acc.length != 5) {
-      val pair = (Random.between(1, 3), Random.between(1, 6), List(1))
+      val pair = (Random.nextInt(3) + 1, Random.nextInt(6) + 1, List(1))
       // No duplicate rows
       if (!acc.contains(pair)) getData(acc :+ pair) else getData(acc)
     } else {

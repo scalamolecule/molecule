@@ -89,10 +89,6 @@ case class PickleTpls(
     elements match {
       case element :: tail => element match {
         case a: Attr =>
-          //          val tail1 = a.filterAttr.fold(tail)(_ +: tail)
-
-          //          println("tail1: " + tail1)
-
           a match {
             case a: AttrOne =>
               a match {
@@ -106,7 +102,6 @@ case class PickleTpls(
                 case a: AttrSetOpt => resolvePicklers(tail, picklers :+ pickleAttrSetOpt(a, tplIndex), tplIndex + 1)
                 case _: AttrSetTac => resolvePicklers(tail, picklers, tplIndex)
               }
-            case a          => throw new Exception("Attribute family not implemented for " + a)
           }
 
         case Ref(_, refAttr, _, _, _) =>

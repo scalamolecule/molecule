@@ -98,7 +98,6 @@ object Save2insert {
                 }
                 case a: AttrSetTac => throw new Exception("Can't save tacit attribute value. Found: " + a)
               }
-            case a           => throw new Exception("Attribute family not implemented for " + a)
           }
 
         case Ref(ns, refAttr, refNs, _, _) => es2list(tail, es2, vs, i)

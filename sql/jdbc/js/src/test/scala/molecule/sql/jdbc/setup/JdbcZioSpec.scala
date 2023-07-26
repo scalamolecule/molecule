@@ -1,18 +1,12 @@
 package molecule.sql.jdbc.setup
 
 import molecule.base.api.Schema
+import molecule.core.marshalling.{JdbcProxy, RpcRequest}
 import molecule.core.spi.Conn
-import molecule.core.marshalling.{DatomicProxy, JdbcProxy, RpcRequest}
-import molecule.coreTests.dataModels.core.schema._
 import molecule.coreTests.setup.CoreTestZioSpecBase
-import molecule.coreTests.util.TestData
 import molecule.sql.jdbc.facade.JdbcConn_js
-import moleculeBuildInfo.BuildInfo
-import zio.test.ZIOSpecDefault
-import zio.{Task, ZIO, ZLayer}
-import scala.concurrent.Promise
-import scala.scalajs.js.timers.setTimeout
-import scala.util.{Random, Try}
+import zio.ZLayer
+import scala.util.Random
 
 
 trait JdbcZioSpec extends CoreTestZioSpecBase {

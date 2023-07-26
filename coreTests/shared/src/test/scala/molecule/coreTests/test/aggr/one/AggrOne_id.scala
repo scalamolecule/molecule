@@ -48,7 +48,7 @@ trait AggrOne_id extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync =
           "b", // 2 rows coalesced
         ))
 
-        // Distinct values are returned in a Set
+        // Distinct entity ids are returned in a Set
         _ <- Ns.id(distinct).s.a1.query.get.map(_ ==> List(
           (Set(x), "a"),
           (Set(y, z), "b"),
@@ -88,7 +88,7 @@ trait AggrOne_id extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync =
           (Set(y), "b"),
         ))
 
-        // "The two first entities of each value s"
+        // "The two first entity ids of each value s"
         _ <- Ns.id(min(2)).s.query.get.map(_ ==> List(
           (Set(x), "a"),
           (Set(y, z), "b"),

@@ -9,7 +9,7 @@ import molecule.core.transaction.{InsertExtraction, InsertResolvers_, SaveExtrac
 import molecule.core.util.ModelUtils
 
 trait Data_Insert
-  extends DatomicTxMetaData_JVM
+  extends DatomicBase_JVM
     with InsertOps
     with DatomicDataType_JVM
     with ModelUtils

@@ -86,7 +86,6 @@ case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuff
                 case a: AttrSetOpt => resolveUnpicklers(tail, unpicklers :+ unpickleAttrSetOpt(a))
                 case _: AttrSetTac => resolveUnpicklers(tail, unpicklers)
               }
-            case a          => throw new Exception("Attribute family not implemented for " + a)
           }
 
         case Ref(_, refAttr, _, _, _) =>

@@ -27,12 +27,12 @@ case class DatomicProxy(
   datomicSchema: String,
   datomicAliases: String,
 
-  metaSchema: MetaSchema,
-  nsMap: Map[String, MetaNs],
-  attrMap: Map[String, (Card, String, Seq[String])],
-  uniqueAttrs: List[String],
-  dbView: Option[DbView] = None,
-  uuid: UUID = UUID.randomUUID()
+  override val metaSchema: MetaSchema,
+  override val nsMap: Map[String, MetaNs],
+  override val attrMap: Map[String, (Card, String, Seq[String])],
+  override val uniqueAttrs: List[String],
+  override val dbView: Option[DbView] = None,
+  override val uuid: UUID = UUID.randomUUID()
 ) extends ConnProxy
 
 
@@ -40,10 +40,10 @@ case class JdbcProxy(
   url: String,
   createSchema: String,
 
-  metaSchema: MetaSchema,
-  nsMap: Map[String, MetaNs],
-  attrMap: Map[String, (Card, String, Seq[String])],
-  uniqueAttrs: List[String],
-  dbView: Option[DbView] = None,
-  uuid: UUID = UUID.randomUUID()
+  override val metaSchema: MetaSchema,
+  override val nsMap: Map[String, MetaNs],
+  override val attrMap: Map[String, (Card, String, Seq[String])],
+  override val uniqueAttrs: List[String],
+  override val dbView: Option[DbView] = None,
+  override val uuid: UUID = UUID.randomUUID()
 ) extends ConnProxy

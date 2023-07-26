@@ -6,14 +6,14 @@ import datomic.{Datom => _}
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.marshalling.JdbcProxy
 import molecule.core.spi.{Conn, TxReport}
-import molecule.sql.jdbc.transaction.{JdbcDataType_JVM, JdbcTxMetaData_JVM, JoinTableInsert, TableInsert}
+import molecule.sql.jdbc.transaction.{JdbcDataType_JVM, JdbcBase_JVM, JoinTableInsert, TableInsert}
 import scala.util.control.NonFatal
 
 case class JdbcConn_jvm(override val proxy: JdbcProxy, override val sqlConn: sql.Connection)
   extends Conn(proxy)
     with JdbcDataType_JVM
     with MoleculeLogging
-    with JdbcTxMetaData_JVM {
+    with JdbcBase_JVM {
 
   private[molecule] var fresh = true
 

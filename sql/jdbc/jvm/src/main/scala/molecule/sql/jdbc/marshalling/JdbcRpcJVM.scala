@@ -11,7 +11,7 @@ import molecule.sql.jdbc.transaction._
 import scala.concurrent.Future
 
 object JdbcRpcJVM extends MoleculeRpc
-  with JdbcTxMetaData_JVM
+  with JdbcBase_JVM
   with FutureUtils {
 
   // todo

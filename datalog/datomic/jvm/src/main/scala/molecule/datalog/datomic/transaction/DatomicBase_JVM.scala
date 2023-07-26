@@ -13,7 +13,7 @@ import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
 
-trait DatomicTxMetaData_JVM extends DatomicDataType_JVM with ModelUtils {
+trait DatomicBase_JVM extends DatomicDataType_JVM with ModelUtils {
 
   protected def initTxBase(elements: List[Element], idIndex: Int = 0): Unit = {
     nsFull = getInitialNs(elements)

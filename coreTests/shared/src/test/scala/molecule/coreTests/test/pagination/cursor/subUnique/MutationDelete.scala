@@ -20,7 +20,7 @@ trait MutationDelete extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsy
     "Forward" - {
 
       "Delete row before" - unique { implicit conn =>
-        val pairs            = (1 to 4).toList.map((Random.between(1, 3), _))
+        val pairs            = (1 to 4).toList.map((Random.nextInt(3) + 1, _))
         val List(a, b, c, d) = pairs.sortBy(p => (p._1, p._2))
         for {
           List(e1, e2, e3, e4) <- Unique.i.int.insert(a, b, c, d).transact.map(_.ids)
@@ -35,7 +35,7 @@ trait MutationDelete extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsy
       }
 
       "Delete last edge row" - unique { implicit conn =>
-        val pairs                  = (1 to 6).toList.map((Random.between(1, 3), _))
+        val pairs                  = (1 to 6).toList.map((Random.nextInt(3) + 1, _))
         val List(a, b, c, d, e, f) = pairs.sortBy(p => (p._1, p._2))
         for {
           List(e1, e2, e3, e4, e5, e6) <- Unique.i.int.insert(a, b, c, d, e, f).transact.map(_.ids)
@@ -50,7 +50,7 @@ trait MutationDelete extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsy
       }
 
       "Delete 2 last edge rows" - unique { implicit conn =>
-        val pairs                  = (1 to 6).toList.map((Random.between(1, 3), _))
+        val pairs                  = (1 to 6).toList.map((Random.nextInt(3) + 1, _))
         val List(a, b, c, d, e, f) = pairs.sortBy(p => (p._1, p._2))
         for {
           List(e1, e2, e3, e4, e5, e6) <- Unique.i.int.insert(a, b, c, d, e, f).transact.map(_.ids)
@@ -65,7 +65,7 @@ trait MutationDelete extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsy
       }
 
       "Delete 3 last edge rows" - unique { implicit conn =>
-        val pairs                  = (1 to 6).toList.map((Random.between(1, 3), _))
+        val pairs                  = (1 to 6).toList.map((Random.nextInt(3) + 1, _))
         val List(a, b, c, d, e, f) = pairs.sortBy(p => (p._1, p._2))
         for {
           List(e1, e2, e3, e4, e5, e6) <- Unique.i.int.insert(a, b, c, d, e, f).transact.map(_.ids)
@@ -84,7 +84,7 @@ trait MutationDelete extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsy
       }
 
       "Delete row after" - unique { implicit conn =>
-        val pairs            = (1 to 4).toList.map((Random.between(1, 3), _))
+        val pairs            = (1 to 4).toList.map((Random.nextInt(3) + 1, _))
         val List(a, b, c, d) = pairs.sortBy(p => (p._1, p._2))
         for {
           List(e1, e2, e3, e4) <- Unique.i.int.insert(a, b, c, d).transact.map(_.ids)
@@ -103,7 +103,7 @@ trait MutationDelete extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsy
     "Backwards" - {
 
       "Delete row before" - unique { implicit conn =>
-        val pairs            = (1 to 4).toList.map((Random.between(1, 3), _))
+        val pairs            = (1 to 4).toList.map((Random.nextInt(3) + 1, _))
         val List(a, b, c, d) = pairs.sortBy(p => (p._1, p._2))
         for {
           List(e1, e2, e3, e4) <- Unique.i.int.insert(a, b, c, d).transact.map(_.ids)
@@ -118,7 +118,7 @@ trait MutationDelete extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsy
       }
 
       "Delete first edge row" - unique { implicit conn =>
-        val pairs                  = (1 to 6).toList.map((Random.between(1, 3), _))
+        val pairs                  = (1 to 6).toList.map((Random.nextInt(3) + 1, _))
         val List(a, b, c, d, e, f) = pairs.sortBy(p => (p._1, p._2))
         for {
           List(e1, e2, e3, e4, e5, e6) <- Unique.i.int.insert(a, b, c, d, e, f).transact.map(_.ids)
@@ -133,7 +133,7 @@ trait MutationDelete extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsy
       }
 
       "Delete 2 first edge rows" - unique { implicit conn =>
-        val pairs                  = (1 to 6).toList.map((Random.between(1, 3), _))
+        val pairs                  = (1 to 6).toList.map((Random.nextInt(3) + 1, _))
         val List(a, b, c, d, e, f) = pairs.sortBy(p => (p._1, p._2))
         for {
           List(e1, e2, e3, e4, e5, e6) <- Unique.i.int.insert(a, b, c, d, e, f).transact.map(_.ids)
@@ -148,7 +148,7 @@ trait MutationDelete extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsy
       }
 
       "Delete 3 first edge rows" - unique { implicit conn =>
-        val pairs                  = (1 to 6).toList.map((Random.between(1, 3), _))
+        val pairs                  = (1 to 6).toList.map((Random.nextInt(3) + 1, _))
         val List(a, b, c, d, e, f) = pairs.sortBy(p => (p._1, p._2))
         for {
           List(e1, e2, e3, e4, e5, e6) <- Unique.i.int.insert(a, b, c, d, e, f).transact.map(_.ids)
@@ -166,7 +166,7 @@ trait MutationDelete extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsy
       }
 
       "Delete row after" - unique { implicit conn =>
-        val pairs            = (1 to 4).toList.map((Random.between(1, 3), _))
+        val pairs            = (1 to 4).toList.map((Random.nextInt(3) + 1, _))
         val List(a, b, c, d) = pairs.sortBy(p => (p._1, p._2))
         for {
           List(e1, e2, e3, e4) <- Unique.i.int.insert(a, b, c, d).transact.map(_.ids)
