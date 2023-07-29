@@ -7,25 +7,26 @@ val scala213 = "2.13.11"
 val scala3   = "3.3.0"
 val allScala = Seq(scala212, scala213, scala3)
 
-val akkaVersion     = "2.8.0-M3"
-val akkaHttpVersion = "10.5.0-M1"
-val zioVersion      = "2.0.8"
+val akkaVersion = "2.8.3"
+val zioVersion  = "2.0.15"
 
 inThisBuild(
   List(
     organization := "org.scalamolecule",
     organizationName := "ScalaMolecule",
     organizationHomepage := Some(url("http://www.scalamolecule.org")),
-    version := "0.1.0-SNAPSHOT",
+    version := "0.1.0",
     versionScheme := Some("early-semver"),
     //    scalaVersion := scala212,
-    //    scalaVersion := scala213,
-    scalaVersion := scala3,
+    scalaVersion := scala213,
+    //    scalaVersion := scala3,
     crossScalaVersions := allScala,
 
     // Run tests for all systems sequentially to avoid data locks with db
     // Only applies on JVM. On JS platform there's no parallelism anyway.
     Test / parallelExecution := false,
+
+    publishTo := Some(releases)
   )
 )
 
@@ -45,7 +46,11 @@ lazy val root = project
     datalogCore.js,
     datalogCore.jvm,
     datalogDatomic.js,
-    datalogDatomic.jvm
+    datalogDatomic.jvm,
+    sqlCore.js,
+    sqlCore.jvm,
+    sqlJdbc.js,
+    sqlJdbc.jvm
   )
 
 lazy val base = crossProject(JSPlatform, JVMPlatform)
@@ -53,26 +58,6 @@ lazy val base = crossProject(JSPlatform, JVMPlatform)
   .settings(name := "molecule-base")
   .settings(compilerArgs)
   .settings(doPublish)
-  .settings(
-    libraryDependencies ++= Seq(
-      "com.lihaoyi" %%% "utest" % "0.8.1",
-
-      // This creates quite a lot of locales code but is needed on the js side.
-      // See https://github.com/cquiroz/scala-java-time/issues/69
-      "io.github.cquiroz" %%% "scala-java-time" % "2.5.0",
-      "io.github.cquiroz" %%% "scala-java-time-tzdb" % "2.5.0"
-    ),
-    testFrameworks += new TestFramework("utest.runner.Framework")
-  )
-  .jvmSettings(
-    libraryDependencies ++= {
-      if (scalaVersion.value == scala3) Seq()
-      else {
-        // Needs to be Provided to avoid reflection issue when debugging projects that use molecule
-        Seq("org.scalameta" %% "scalameta" % "4.7.2" % Provided)
-      }
-    },
-  )
 
 
 lazy val boilerplate = crossProject(JSPlatform, JVMPlatform)
@@ -82,11 +67,13 @@ lazy val boilerplate = crossProject(JSPlatform, JVMPlatform)
   .settings(doPublish)
   .settings(
     libraryDependencies ++= Seq(
+      "com.lihaoyi" %%% "utest" % "0.8.1",
+
       // Logging
-      "com.outr" %%% "scribe" % "3.10.6",
+      "com.outr" %%% "scribe" % "3.11.8",
 
       // Tolerant roundings with triple equal on js platform
-      "org.scalactic" %%% "scalactic" % "3.2.14"
+      "org.scalactic" %%% "scalactic" % "3.2.16"
     ),
     testFrameworks += new TestFramework("utest.runner.Framework")
   )
@@ -108,7 +95,7 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
   )
   .jsSettings(
     libraryDependencies ++= Seq(
-      "org.scala-js" %%% "scalajs-dom" % "2.2.0",
+      "org.scala-js" %%% "scalajs-dom" % "2.6.0",
       "org.scala-js" %%% "scala-js-macrotask-executor" % "1.1.1",
       "org.scala-js" %%% "scalajs-java-securerandom" % "1.0.0" cross CrossVersion.for3Use2_13
     )
@@ -117,8 +104,7 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies ++= Seq(
       "com.typesafe.akka" %% "akka-stream" % akkaVersion cross CrossVersion.for3Use2_13,
       "com.typesafe.akka" %% "akka-actor-typed" % akkaVersion cross CrossVersion.for3Use2_13,
-      "ch.megard" %% "akka-http-cors" % "1.1.3",
-      "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.13.2",
+      "ch.megard" %% "akka-http-cors" % "1.2.0",
       // Enforce one version to avoid warnings of multiple dependency versions when running tests
       "org.slf4j" % "slf4j-api" % "1.7.36",
       "org.slf4j" % "slf4j-nop" % "1.7.36"
@@ -130,7 +116,7 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .settings(name := "molecule-coreTests")
   .dependsOn(core)
-  .settings(doPublish)
+  .settings(publish / skip := true)
   .enablePlugins(MoleculePlugin)
   .settings(
     // Generate Molecule boilerplate code for tests with `sbt clean compile -Dmolecule=true`
@@ -157,10 +143,10 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
       CrossVersion.partialVersion(scalaVersion.value) match {
         case Some((2, 13)) => file(unmanagedBase.value.getPath ++ "/2.13")
         case Some((2, 12)) => file(unmanagedBase.value.getPath ++ "/2.12")
-        case _             => file(unmanagedBase.value.getPath ++ "/3.2")
+        case _             => file(unmanagedBase.value.getPath ++ "/3.3")
       }
     },
-    testFrameworks += new TestFramework("utest.runner.Framework")
+    testFrameworks += new TestFramework("utest.runner.Framework"),
   )
   .jsSettings(jsEnvironment)
 
@@ -168,9 +154,10 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
 lazy val datalogCore = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .in(file("datalog/core"))
-  .settings(doPublish)
   .settings(name := "molecule-datalog-core")
-  .dependsOn(coreTests % "compile->compile;test->test")
+  .settings(doPublish)
+  .dependsOn(core)
+  .dependsOn(coreTests % "test->test")
   .settings(
     testFrameworks := Seq(
       new TestFramework("utest.runner.Framework"),
@@ -185,9 +172,8 @@ lazy val datalogCore = crossProject(JSPlatform, JVMPlatform)
 lazy val datalogDatomic = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .in(file("datalog/datomic"))
-  //  .settings(publish / skip := true)
-  .settings(doPublish)
   .settings(name := "molecule-datalog-datomic")
+  .settings(doPublish)
   .dependsOn(datalogCore % "compile->compile;test->test")
   .settings(
     // Temporarily limit number of tests to be compiled by sbt (comment out this whole sbt setting to test all)
@@ -213,10 +199,10 @@ lazy val datalogDatomic = crossProject(JSPlatform, JVMPlatform)
     //        //        sharedTests + "/validation",
     //        //                sharedTests + "/time",
     //        //        sharedTests,
-    //        jvmTests,
-    //        jsTests,
-    //        //        jvmTests + "/AdhocJVM.scala",
-    //        //        sharedTests + "/Adhoc.scala",
+    //        //        jvmTests,
+    //        //        jsTests,
+    //        jvmTests + "/AdhocJVM.scala",
+    //        sharedTests + "/Adhoc.scala",
     //      )
     //      new SimpleFileFilter(f =>
     //        (f.getCanonicalPath.startsWith(jsTests)
@@ -225,6 +211,7 @@ lazy val datalogDatomic = crossProject(JSPlatform, JVMPlatform)
     //          !allowed.exists(p => f.getCanonicalPath.startsWith(p))
     //      )
     //    },
+
     testFrameworks := Seq(
       new TestFramework("utest.runner.Framework"),
       new TestFramework("zio.test.sbt.ZTestFramework")
@@ -236,9 +223,10 @@ lazy val datalogDatomic = crossProject(JSPlatform, JVMPlatform)
 lazy val sqlCore = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .in(file("sql/core"))
-  .settings(publish / skip := true)
   .settings(name := "molecule-sql-core")
-  .dependsOn(coreTests % "compile->compile;test->test")
+  .settings(doPublish)
+  .dependsOn(core)
+  .dependsOn(coreTests % "test->test")
   .settings(
     testFrameworks := Seq(
       new TestFramework("utest.runner.Framework"),
@@ -247,7 +235,7 @@ lazy val sqlCore = crossProject(JSPlatform, JVMPlatform)
   )
   .jvmSettings(
     libraryDependencies ++= Seq(
-      "com.datomic" % "peer" % "1.0.6726",
+      "com.datomic" % "peer" % "1.0.6735",
       "com.h2database" % "h2" % "2.1.214" % Provided
     )
   )
@@ -256,8 +244,8 @@ lazy val sqlCore = crossProject(JSPlatform, JVMPlatform)
 lazy val sqlJdbc = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .in(file("sql/jdbc"))
-  .settings(publish / skip := true)
   .settings(name := "molecule-sql-jdbc")
+  .settings(doPublish)
   .dependsOn(sqlCore % "compile->compile;test->test")
   .settings(
     testFrameworks := Seq(
@@ -273,7 +261,7 @@ lazy val jsEnvironment = {
     jsEnv := new JSDOMNodeJSEnv(
       JSDOMNodeJSEnv
         .Config()
-        // for some reason still needed with Scala.js 1.9
+        // for some reason still needed...
         // https://github.com/scala-js/scala-js-js-envs/issues/12
         .withArgs(List("--dns-result-order=ipv4first"))
     ),
@@ -357,9 +345,7 @@ lazy val withDocs = Seq(
   ),
   pomIncludeRepository := (_ => false),
   homepage := Some(url("http://scalamolecule.org")),
-  licenses := Seq(
-    "Apache 2" -> url("http://www.apache.org/licenses/LICENSE-2.0.txt")
-  ),
+  licenses := List(License.Apache2),
   scmInfo := Some(
     ScmInfo(
       url("https://github.com/scalamolecule/molecule"),
@@ -382,11 +368,3 @@ lazy val withoutDocs = Seq(
   doc / sources := Seq.empty,
   packageDoc / publishArtifact := false
 )
-
-//lazy val dontPublish = Seq(
-//  publish / skip := true,
-//  publish := ((): Unit),
-//  publishLocal := ((): Unit),
-//  Compile / packageDoc / publishArtifact := false,
-//  Compile / doc / sources := Seq.empty
-//)

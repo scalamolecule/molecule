@@ -1,14 +1,13 @@
 package molecule.coreTests.test.pagination.cursor.noUnique
 
-import molecule.coreTests.api.ApiAsyncImplicits
-import molecule.core.util.Executor._
-import molecule.coreTests.dataModels.core.dsl.Unique._
-import molecule.coreTests.async._
-import molecule.coreTests.setup.CoreTestSuite
 import molecule.core.spi.SpiAsync
+import molecule.core.util.Executor._
+import molecule.coreTests.api.ApiAsyncImplicits
+import molecule.coreTests.async._
+import molecule.coreTests.dataModels.core.dsl.Unique._
+import molecule.coreTests.setup.CoreTestSuite
 import utest._
-import scala.annotation.{nowarn, tailrec}
-import scala.util.Random
+import scala.annotation.nowarn
 
 trait TypesOptional extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
 

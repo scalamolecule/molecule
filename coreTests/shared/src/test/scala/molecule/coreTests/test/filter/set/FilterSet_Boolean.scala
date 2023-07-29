@@ -1,14 +1,13 @@
 // GENERATED CODE ********************************
 package molecule.coreTests.test.filter.set
 
-import molecule.coreTests.api.ApiAsyncImplicits
-import molecule.core.util.Executor._
-import molecule.coreTests.dataModels.core.dsl.Types._
-import molecule.coreTests.async._
-import molecule.coreTests.setup.CoreTestSuite
 import molecule.core.spi.SpiAsync
+import molecule.core.util.Executor._
+import molecule.coreTests.api.ApiAsyncImplicits
+import molecule.coreTests.async._
+import molecule.coreTests.dataModels.core.dsl.Types._
+import molecule.coreTests.setup.CoreTestSuite
 import utest._
-import scala.concurrent.Future
 
 
 trait FilterSet_Boolean extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>

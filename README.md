@@ -17,13 +17,13 @@ An sbt-molecule plugin generates boilerplate code from your domain data model de
 - Nested data structures
 - Associative relationships (composites)
 - Validation
-- Pagination: offset and cursor
-- Advanced sorting
-- Subscriptions
+- Pagination (offset/cursor)
+- Sorting
+- Subscriptions and more...
 
 Documentation at [scalamolecule.org](http://scalamolecule.org) still documents the old macro-based version of molecule but will be updated to the new version. Most concepts overlap.
 
-This Molecule library is a complete re-write of the old macro-base molecule library that is now archived in the molecule-old github repo. The old molecule library has been under active development for several years.
+This Molecule library is a complete re-write of the old macro-base molecule library that is now archived in the molecule-old github repo. The old molecule library has been under active development for several years. 
 
 
 ### Examples
@@ -80,17 +80,59 @@ Delete
 Person(bobId).delete.transact
 ```
 
-See tests in coreTest module for complete examples of use.
+
+## Get started
+
+Please clone [molecule-samples](https://github.com/scalamolecule/molecule-samples) and use one of the template projects to get started.
+
+    git clone https://github.com/scalamolecule/molecule-samples.git
+
+
+### Basic sbt setup
+
+Add the following to your build files:
+
+`project/build.properties`:
+
+```scala
+sbt.version=1.9.3
+```
+
+`project/plugins.sbt`:
+
+```scala
+addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "1.1.0")
+```
+
+`build.sbt`:
+
+```scala
+lazy val yourProject = project.in(file("app"))
+  .enablePlugins(MoleculePlugin)
+  .settings(
+    libraryDependencies ++= Seq(
+      "org.scalamolecule" %% "molecule-datalog-datomic" % "0.1.0",
+      // and/or
+      "org.scalamolecule" %% "molecule-sql-jdbc" % "0.1.0",
+    ),
+    moleculeSchemas := Seq("app") // paths to your data model definitions...
+  )
+```
 
 
 
+## Explore
+
+The `coreTests` module in this repo has sevel data model definitions and more than 1500 tests that you can get inspiration from.
+
+ 
 ### Run jvm tests
 
 Run the same test suite on jvm targeting both Datomic and JDBC-compliant databases (in-memory H2 db here):
 
     sbt datalogDatomicJVM/test
 
-or 
+or
 
     sbt sqlJdbcJVM/test
 
@@ -105,36 +147,25 @@ Then in another process/terminal window:
 
     sbt datalogDatomicJS/test
 
- 
-### Use in your project
+(Scalajs tests don't work with Scala 3.x yet)
 
-The new molecule library is not yet published to Sonatype. Meanwhile, you can publish molecule locally. As soon molecule is published the following steps are not need anymore.
 
-First you need to clone the sbt-molecule plugin library and publish locally:
+### Publish locally
 
-    git clone https://github.com/scalamolecule/sbt-molecule.git
-    cd sbt-molecule
+To be completely up-to-date, you can pull the latest changes from Github and publish molecule locally:
+
+    git pull
     sbt publishLocal
 
-Then clone molecule and publish its `base` module separately to Scala 2.12 (the sbt-molecule plugin depends on this) and then the molecule modules themselves to Scala 2.13:
-
-    git clone https://github.com/scalamolecule/molecule.git
-    cd molecule
-    sbt ++2.12.18 "project baseJVM" publishLocal # is used by the sbt-molecule
-    sbt publishLocal # publishing molecule modules to Scala 2.13
-
-Or you can publish the molecule modules to other Scala versions:
+Or target other Scala versions:
 
     sbt ++3.3.0 publishLocal
     sbt ++2.12.18 publishLocal
 
-Now you can generate molecule boilerplate code with the sbt-molecule plugin that packages the generated code in jars added to the lib folders in your project. You only need to do this once (or when your data model changes).
 
-    cd <your sbt project>
-    sbt compile -Dmolecule=true # this flag tells sbt-molecule to generate molecule boilerplate code
+### Author
 
-See definition of `coreTests` module in `build.sbt` for how to add and configure the Molecule plugin. There you can also see examples of data model definitions that the sbt-molecule plugin needs to know what boilerplate code to generate.
-
+Marc Grue
 
 ### License
 

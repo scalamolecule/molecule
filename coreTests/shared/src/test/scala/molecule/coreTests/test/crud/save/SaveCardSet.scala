@@ -3,12 +3,12 @@ package molecule.coreTests.test.crud.save
 import java.net.URI
 import java.util.{Date, UUID}
 import molecule.base.error._
-import molecule.coreTests.api.ApiAsyncImplicits
-import molecule.core.util.Executor._
-import molecule.coreTests.dataModels.core.dsl.Types._
-import molecule.coreTests.async._
-import molecule.coreTests.setup.CoreTestSuite
 import molecule.core.spi.SpiAsync
+import molecule.core.util.Executor._
+import molecule.coreTests.api.ApiAsyncImplicits
+import molecule.coreTests.async._
+import molecule.coreTests.dataModels.core.dsl.Types._
+import molecule.coreTests.setup.CoreTestSuite
 import utest._
 
 trait SaveCardSet extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>

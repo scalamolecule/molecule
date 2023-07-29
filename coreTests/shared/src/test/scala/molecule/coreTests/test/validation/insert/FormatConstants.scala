@@ -1,14 +1,13 @@
 package molecule.coreTests.test.validation.insert
 
 import molecule.base.error._
-import molecule.coreTests.api.ApiAsyncImplicits
-import molecule.core.util.Executor._
-import molecule.coreTests.dataModels.core.dsl.Validation._
-import molecule.coreTests.async._
-import molecule.coreTests.setup.CoreTestSuite
 import molecule.core.spi.SpiAsync
+import molecule.core.util.Executor._
+import molecule.coreTests.api.ApiAsyncImplicits
+import molecule.coreTests.async._
+import molecule.coreTests.dataModels.core.dsl.Validation._
+import molecule.coreTests.setup.CoreTestSuite
 import utest._
-import scala.concurrent.Future
 import scala.language.implicitConversions
 
 trait FormatConstants extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>

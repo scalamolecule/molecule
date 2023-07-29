@@ -1,12 +1,12 @@
 package molecule.coreTests.test.crud.save
 
 import molecule.base.error.ModelError
-import molecule.coreTests.api.ApiAsyncImplicits
-import molecule.core.util.Executor._
-import molecule.coreTests.dataModels.core.dsl.Refs._
-import molecule.coreTests.async._
-import molecule.coreTests.setup.CoreTestSuite
 import molecule.core.spi.SpiAsync
+import molecule.core.util.Executor._
+import molecule.coreTests.api.ApiAsyncImplicits
+import molecule.coreTests.async._
+import molecule.coreTests.dataModels.core.dsl.Refs._
+import molecule.coreTests.setup.CoreTestSuite
 import utest._
 
 trait SaveSemantics extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>

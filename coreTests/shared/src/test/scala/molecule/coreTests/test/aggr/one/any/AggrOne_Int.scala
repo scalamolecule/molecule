@@ -1,6 +1,5 @@
 package molecule.coreTests.test.aggr.one.any
 
-import molecule.base.error.ModelError
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
 import molecule.coreTests.api.ApiAsyncImplicits

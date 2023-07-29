@@ -1,15 +1,14 @@
 package molecule.coreTests.test.validation.update
 
 import java.net.URI
-import java.util.{Date, UUID}
+import java.util.UUID
 import molecule.base.error.ValidationErrors
-import molecule.coreTests.api.ApiAsyncImplicits
-import molecule.core.util.Executor._
-import molecule.coreTests.dataModels.core.dsl.Types.Ns
-import molecule.coreTests.dataModels.core.dsl.Validation._
-import molecule.coreTests.async._
-import molecule.coreTests.setup.CoreTestSuite
 import molecule.core.spi.SpiAsync
+import molecule.core.util.Executor._
+import molecule.coreTests.api.ApiAsyncImplicits
+import molecule.coreTests.async._
+import molecule.coreTests.dataModels.core.dsl.Validation._
+import molecule.coreTests.setup.CoreTestSuite
 import utest._
 import scala.language.implicitConversions
 

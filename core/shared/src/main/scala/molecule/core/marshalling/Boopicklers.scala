@@ -20,10 +20,16 @@ object Boopicklers extends MoleculeLogging {
   pickleCard.addConcreteType[CardOne.type]
   pickleCard.addConcreteType[CardSet.type]
 
-  implicit val pickleMetaAttrTransaction  : CompositePickler[MetaAttr]   = compositePickler[MetaAttr]
-  implicit val pickleMetaNsTransaction    : CompositePickler[MetaNs]     = compositePickler[MetaNs]
-  implicit val pickleMetaPartTransaction  : CompositePickler[MetaPart]   = compositePickler[MetaPart]
-  implicit val pickleMetaSchemaTransaction: CompositePickler[MetaSchema] = compositePickler[MetaSchema]
+  implicit val pickleMetaAttr  : CompositePickler[MetaAttr]   = compositePickler[MetaAttr]
+  implicit val pickleMetaNs    : CompositePickler[MetaNs]     = compositePickler[MetaNs]
+  implicit val pickleMetaPart  : CompositePickler[MetaPart]   = compositePickler[MetaPart]
+  implicit val pickleMetaSchema: CompositePickler[MetaSchema] = compositePickler[MetaSchema]
+
+  implicit val pickleMetaModel: CompositePickler[MetaModel] = compositePickler[MetaModel]
+  pickleMetaModel.addConcreteType[MetaAttr]
+  pickleMetaModel.addConcreteType[MetaNs]
+  pickleMetaModel.addConcreteType[MetaPart]
+  pickleMetaModel.addConcreteType[MetaSchema]
 
   implicit val pickleOp: CompositePickler[Op] = compositePickler[Op]
   pickleOp.addConcreteType[NoValue.type]
@@ -295,7 +301,6 @@ object Boopicklers extends MoleculeLogging {
 
   implicit val pickleFileNotFoundEception: CompositePickler[FileNotFoundException] =
     compositePickler[FileNotFoundException]
-
 
   implicit val pickleConnProxy: CompositePickler[ConnProxy] =
     compositePickler[ConnProxy]

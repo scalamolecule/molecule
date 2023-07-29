@@ -6,8 +6,8 @@ import molecule.core.util.JavaConversions
 import molecule.coreTests.dataModels.core.schema._
 import molecule.coreTests.util.{AggrUtils, TestData}
 import org.scalactic.TripleEquals
+import utest._
 import utest.framework.Formatter
-import utest.{TestSuite, ufansi}
 import scala.concurrent.Future
 
 
@@ -27,7 +27,6 @@ trait CoreTestSuiteBase
   def refs[T](test: Conn => T): T = inMem(test, RefsSchema)
   def unique[T](test: Conn => T): T = inMem(test, UniqueSchema)
   def validation[T](test: Conn => T): T = inMem(test, ValidationSchema)
-//  def orch[T](test: Conn => T): T = inMem(test, OrchestraSchema)
 
   def delay[T](ms: Int)(body: => T): Future[T]
 

@@ -27,7 +27,7 @@ trait DatomicTestSuite extends CoreTestSuite {
 
     // Block to enable supplying Connection instead of Future[Connection] to tests
     val conn = Await.result(
-      DatomicPeer.recreateDb(proxy),
+      DatomicPeer.recreateDb(proxy, "mem", ""),
       10.second
     )
     test(conn)

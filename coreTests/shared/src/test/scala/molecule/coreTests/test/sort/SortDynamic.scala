@@ -1,12 +1,12 @@
 package molecule.coreTests.test.sort
 
 import molecule.base.error.ModelError
-import molecule.coreTests.api.ApiAsyncImplicits
-import molecule.core.util.Executor._
-import molecule.coreTests.dataModels.core.dsl.Types._
-import molecule.coreTests.async._
-import molecule.coreTests.setup.CoreTestSuite
 import molecule.core.spi.SpiAsync
+import molecule.core.util.Executor._
+import molecule.coreTests.api.ApiAsyncImplicits
+import molecule.coreTests.async._
+import molecule.coreTests.dataModels.core.dsl.Types._
+import molecule.coreTests.setup.CoreTestSuite
 import utest._
 
 trait SortDynamic extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>

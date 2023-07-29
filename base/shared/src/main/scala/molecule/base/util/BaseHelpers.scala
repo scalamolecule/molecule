@@ -67,11 +67,16 @@ trait BaseHelpers extends DateHandling {
     }.mkString("Seq(", ", ", ")")
   }
 
-  private val time0     = System.currentTimeMillis()
+  private var time0     = System.currentTimeMillis()
   private var prevTime  = time0
   private val times     = collection.mutable.Map.empty[Int, Long]
   private val formatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSS")
 
+  protected final def resetTimer(): Unit = {
+    time0     = System.currentTimeMillis()
+    prevTime  = time0
+    times.clear()
+  }
   protected final def time(n: Int, prev: Int = 0): Unit = {
     if (n < 1 || prev < 0)
       throw new IllegalArgumentException(s"Identifiers have to be positive numbers")

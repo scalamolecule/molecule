@@ -60,7 +60,7 @@ abstract class JdbcQueryResolve[Tpl](elements: List[Element], dbView: Option[DbV
   protected def getRawData2(conn: JdbcConn_jvm): ResultSet = {
     val stmt = getQuery(Nil)
 
-    println("--------------------------------------------------------------\n" + stmt)
+//    println("--------------------------------------------------------------\n" + stmt)
 
     val ps = conn.sqlConn.prepareStatement(stmt, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)
     ps.executeQuery()

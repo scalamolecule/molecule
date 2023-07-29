@@ -29,7 +29,7 @@ class SqlModel2Query[Tpl](elements0: List[Element])
     val elements = if (altElements.isEmpty) elements0 else altElements
     validateQueryModel(elements)
 
-    elements.foreach(println)
+//    elements.foreach(println)
 
     from = getInitialNonGenericNs(elements)
     exts += from -> None

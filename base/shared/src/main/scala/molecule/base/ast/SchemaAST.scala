@@ -5,8 +5,8 @@ import molecule.base.util.BaseHelpers
 object SchemaAST extends BaseHelpers {
 
   sealed trait Card {
-    private[molecule] def _marker: String
-    private[molecule] def _tpe: String
+    def _marker: String
+    def _tpe: String
   }
 
   trait CardOne extends Card {

@@ -10,7 +10,7 @@ import molecule.coreTests.setup.CoreTestSuite
 import utest._
 import scala.annotation.nowarn
 
-trait AsyncApi extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
+trait AsyncApi extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync =>
 
   @nowarn override lazy val tests = Tests {
 
@@ -34,31 +34,31 @@ trait AsyncApi extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
         for {
           _ <- Type.string("a").save.transact
             .map(_ ==> "Unexpected success").recover {
-            case ValidationErrors(errorMap) =>
-              errorMap.head._2.head ==>
-                s"""Type.string with value `a` doesn't satisfy validation:
-                   |  _ > "b"
-                   |""".stripMargin
-          }
+              case ValidationErrors(errorMap) =>
+                errorMap.head._2.head ==>
+                  s"""Type.string with value `a` doesn't satisfy validation:
+                     |  _ > "b"
+                     |""".stripMargin
+            }
 
           _ <- Type.string.insert("a").transact
             .map(_ ==> "Unexpected success").recover {
-            case InsertErrors(errors, _) =>
-              errors.head._2.head.errors.head ==
-                s"""Type.string with value `a` doesn't satisfy validation:
-                   |  _ > "b"
-                   |""".stripMargin
-          }
+              case InsertErrors(errors, _) =>
+                errors.head._2.head.errors.head ==
+                  s"""Type.string with value `a` doesn't satisfy validation:
+                     |  _ > "b"
+                     |""".stripMargin
+            }
 
           id <- Type.string("c").save.transact.map(_.id)
           _ <- Type(id).string("a").update.transact
             .map(_ ==> "Unexpected success").recover {
-            case ValidationErrors(errorMap) =>
-              errorMap.head._2.head ==
-                s"""Type.string with value `a` doesn't satisfy validation:
-                   |  _ > "b"
-                   |""".stripMargin
-          }
+              case ValidationErrors(errorMap) =>
+                errorMap.head._2.head ==
+                  s"""Type.string with value `a` doesn't satisfy validation:
+                     |  _ > "b"
+                     |""".stripMargin
+            }
         } yield ()
       }
 

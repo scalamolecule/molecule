@@ -1,7 +1,6 @@
 // GENERATED CODE ********************************
 package molecule.coreTests.test.filter.set.compare
 
-import java.net.URI
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
 import molecule.coreTests.api.ApiAsyncImplicits

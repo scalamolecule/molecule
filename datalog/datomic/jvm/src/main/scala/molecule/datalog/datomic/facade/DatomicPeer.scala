@@ -4,6 +4,8 @@ import java.util.UUID.randomUUID
 import datomic.Peer
 import molecule.core.marshalling.DatomicProxy
 import scala.concurrent.{ExecutionContext, Future, blocking}
+import molecule.base.api.Schema
+import molecule.base.util.BaseHelpers
 
 
 /** Facade to Datomic Peer with selected methods.
@@ -11,7 +13,7 @@ import scala.concurrent.{ExecutionContext, Future, blocking}
  * @groupname database  Database operations
  * @groupprio 10
  * */
-trait DatomicPeer {
+trait DatomicPeer extends BaseHelpers {
 
   def createDatabase(
     protocol: String = "mem",
@@ -30,18 +32,40 @@ trait DatomicPeer {
   def connect(
     proxy: DatomicProxy,
     protocol: String,
-    dbIdentifier: String = ""
+    dbIdentifier: String
   ): DatomicConn_JVM = blocking {
     val id = if (dbIdentifier == "") randomUUID().toString else dbIdentifier
     val uri = s"datomic:$protocol://$id"
     DatomicConn_JVM(proxy, Peer.connect(uri))
   }
 
+  def connect(
+    schema: Schema,
+    protocol: String = "mem",
+    dbIdentifier: String = ""
+  ): DatomicConn_JVM = blocking {
+    connect(
+      DatomicProxy(
+        protocol,
+        dbIdentifier,
+        schema.datomicPartitions,
+        schema.datomicSchema,
+        schema.datomicAliases,
+        schema.metaSchema,
+        schema.nsMap,
+        schema.attrMap,
+        schema.uniqueAttrs,
+      ),
+      protocol,
+      dbIdentifier
+    )
+  }
+
   // OBS: if dbIdentifier is supplied, this database will be deleted entirely! Take care
   def recreateDb(
     proxy: DatomicProxy,
-    protocol: String = "mem",
-    dbIdentifier: String = ""
+    protocol: String,
+    dbIdentifier: String
   )(implicit ec: ExecutionContext): Future[DatomicConn_JVM] = blocking {
     val id = if (dbIdentifier == "")
       randomUUID().toString
@@ -62,6 +86,28 @@ trait DatomicPeer {
       _ <- if (proxy.datomicAliases.nonEmpty)
         conn.transactEdn(proxy.datomicAliases) else Future.unit
     } yield conn
+  }
+
+  def recreateDb(
+    schema: Schema,
+    protocol: String = "mem",
+    dbIdentifier: String = ""
+  )(implicit ec: ExecutionContext): Future[DatomicConn_JVM] = blocking {
+    recreateDb(
+      DatomicProxy(
+        protocol,
+        dbIdentifier,
+        schema.datomicPartitions,
+        schema.datomicSchema,
+        schema.datomicAliases,
+        schema.metaSchema,
+        schema.nsMap,
+        schema.attrMap,
+        schema.uniqueAttrs,
+      ),
+      protocol,
+      dbIdentifier
+    )
   }
 }
 

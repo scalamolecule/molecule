@@ -1,14 +1,14 @@
 package molecule.coreTests.test.crud.insert
 
 import molecule.base.error.ModelError
+import molecule.core.spi.SpiAsync
+import molecule.core.util.Executor._
 import molecule.coreTests.api.ApiAsyncImplicits
+import molecule.coreTests.async._
 import molecule.coreTests.dataModels.core.dsl.Refs._
 import molecule.coreTests.setup.CoreTestSuite
-import molecule.core.spi.SpiAsync
 import utest._
 import scala.language.implicitConversions
-import molecule.coreTests.async._
-import molecule.core.util.Executor._
 
 
 trait InsertRefs extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync =>

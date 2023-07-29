@@ -37,6 +37,7 @@ object AdhocJdbcJVM extends JdbcTestSuite {
       for {
         _ <- Ns.i(1).save.transact
         _ <- Ns.i.query.get.map(_ ==> List(1))
+        _ <- Ns.i.query.inspect
       } yield ()
     }
 

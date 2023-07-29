@@ -1,13 +1,13 @@
 package molecule.coreTests.test.relation.flat
 
 import molecule.base.error._
-import molecule.coreTests.api.ApiAsyncImplicits
-import molecule.coreTests.dataModels.core.dsl.Refs._
-import molecule.coreTests.async._
-import utest._
-import molecule.core.util.Executor._
-import molecule.coreTests.setup.CoreTestSuite
 import molecule.core.spi.SpiAsync
+import molecule.core.util.Executor._
+import molecule.coreTests.api.ApiAsyncImplicits
+import molecule.coreTests.async._
+import molecule.coreTests.dataModels.core.dsl.Refs._
+import molecule.coreTests.setup.CoreTestSuite
+import utest._
 
 
 trait FlatRefs extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
