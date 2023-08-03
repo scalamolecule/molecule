@@ -36,9 +36,55 @@ object AdhocJdbcJVM extends JdbcTestSuite {
       import molecule.coreTests.dataModels.core.dsl.Types._
 
       for {
-        _ <- Ns.i(1).save.transact
-        _ <- Ns.i.query.get.map(_ ==> List(1))
+        //        _ <- Ns.i(1).save.transact
+        //        _ <- Ns.i.query.get.map(_ ==> List(1))
 
+        _ <- Ns.i.int.insert(List(
+          (1, int1),
+          (2, int2),
+          (2, int2),
+          (2, int3),
+        )).transact
+
+        _ = printQuery(
+          """SELECT DISTINCT
+            |  s, i,
+            |  ARRAY_SLICE(
+            |    ARRAY_AGG(Ns.int order by Ns.int)
+            |      FILTER (WHERE Ns.int IS NOT NULL),
+            |    1,
+            |    LEAST(
+            |      2,
+            |      ARRAY_LENGTH(
+            |        ARRAY_AGG(Ns.int)
+            |          FILTER (WHERE Ns.int IS NOT NULL)
+            |      )
+            |    )
+            |  )
+            |FROM Ns
+            |WHERE
+            |  Ns.s   IS NOT NULL AND
+            |  Ns.i   IS NOT NULL AND
+            |  Ns.int IS NOT NULL
+            |group by s, i
+            |""".stripMargin
+        )
+
+        _ <- Ns.i.int.a1.query.get.map(_ ==> List(
+          (1, int1),
+          (2, int2), // 2 rows coalesced
+          (2, int3),
+        ))
+
+        // Distinct values are returned in a Set
+        _ <- Ns.i.a1.int(distinct).query.get.map(_ ==> List(
+          (1, Set(int1)),
+          (2, Set(int2, int3)),
+        ))
+
+        _ <- Ns.int(distinct).query.get.map(_.head ==> Set(
+          int1, int2, int3
+        ))
 
       } yield ()
     }

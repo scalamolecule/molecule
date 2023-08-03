@@ -117,7 +117,7 @@ trait LambdasOne extends ResolveBase { self: Base =>
     one2sql: T => String,
     //    seq2t: (Row, Int) => AnyRef,
     //    set2set: (Row, Int) => AnyRef,
-    vector2set: (Row, Int) => AnyRef
+    array2set: (Row, Int) => AnyRef
   )
   protected lazy val resString1    : ResOne[String]     = ResOne("String", sql2oneString, sql2oneStringOrNull, one2sqlString, vector2setString)
   protected lazy val resInt1       : ResOne[Int]        = ResOne("Int", sql2oneInt, sql2oneIntOrNull, one2sqlInt, vector2setInt)

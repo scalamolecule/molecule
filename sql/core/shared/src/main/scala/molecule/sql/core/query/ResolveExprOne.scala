@@ -268,7 +268,7 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
       select += s"SUBSTRING($col, $from, $length) AS $alias"
       orderBy = orderBy.map {
         case (level, arity, `col`, dir) =>
-//          println("###### " + dir)
+          //          println("###### " + dir)
           (level, arity, alias, dir)
         case other                      => other
       }
@@ -287,9 +287,10 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
     select -= col
     fn match {
       case "distinct" =>
-      //        select += s"(distinct $v)"
-      //        replaceCast(res.set2set)
-
+        select += s"ARRAY_AGG(DISTINCT $col)"
+        groupByCols -= col
+        aggregate = true
+        replaceCast(res.array2set)
 
       case "mins" =>
         select +=
@@ -303,7 +304,7 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
              |)""".stripMargin
         groupByCols -= col
         aggregate = true
-        replaceCast(res.vector2set)
+        replaceCast(res.array2set)
 
       case "min" =>
         select += s"MIN($col)"
@@ -320,7 +321,7 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
              |)""".stripMargin
         groupByCols -= col
         aggregate = true
-        replaceCast(res.vector2set)
+        replaceCast(res.array2set)
 
       case "max" =>
         select += s"MAX($col)"

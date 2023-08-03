@@ -1,6 +1,7 @@
 package molecule.sql.jdbc.setup
 
 import molecule.base.api.Schema
+import molecule.base.util.BaseHelpers
 import molecule.core.marshalling.JdbcProxy
 import molecule.core.spi.Conn
 import molecule.coreTests.dataModels.core.schema._
@@ -10,7 +11,7 @@ import scala.util.Random
 import scala.util.control.NonFatal
 
 
-trait JdbcTestSuite extends CoreTestSuite {
+trait JdbcTestSuite extends CoreTestSuite with BaseHelpers {
 
   override val platform = "Jdbc jvm"
 
@@ -36,6 +37,27 @@ trait JdbcTestSuite extends CoreTestSuite {
       if (conn.sqlConn != null) {
         conn.sqlConn.close()
       }
+    }
+  }
+
+  def printQuery(q: String)(implicit conn: Conn): Unit = {
+    val c             = conn.asInstanceOf[JdbcConn_jvm].sqlConn
+    val statement     = c.createStatement()
+    val resultSet     = statement.executeQuery(q)
+    val rsmd          = resultSet.getMetaData
+    val columnsNumber = rsmd.getColumnCount
+    println("--------------")
+    println(q)
+    while (resultSet.next) {
+      var i = 1
+      while (i <= columnsNumber) {
+        val col         = rsmd.getColumnName(i)
+        val columnValue = resultSet.getString(i)
+        if (columnValue != null)
+          println(col + padS(55, col) + columnValue)
+        i += 1
+      }
+      println("--------------")
     }
   }
 }
