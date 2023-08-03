@@ -41,22 +41,39 @@ trait AggrOne_Float_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsy
     }
 
 
-    "min" - types { implicit conn =>
+    "min/max" - types { implicit conn =>
       for {
-        _ <- Ns.float.insert(List(float1, float2, float3)).transact
+        _ <- Ns.i.float.insert(
+          (1, float1),
+          (1, float2),
+          (1, float3),
+          (2, float4),
+          (2, float5),
+          (2, float6),
+        ).transact
+
         _ <- Ns.float(min).query.get.map(_ ==> List(float1))
         _ <- Ns.float(min(1)).query.get.map(_ ==> List(Set(float1)))
         _ <- Ns.float(min(2)).query.get.map(_ ==> List(Set(float1, float2)))
-      } yield ()
-    }
 
+        _ <- Ns.float(max).query.get.map(_ ==> List(float6))
+        _ <- Ns.float(max(1)).query.get.map(_ ==> List(Set(float6)))
+        _ <- Ns.float(max(2)).query.get.map(_ ==> List(Set(float5, float6)))
 
-    "max" - types { implicit futConn =>
-      for {
-        _ <- Ns.float.insert(List(float1, float2, float3)).transact
-        _ <- Ns.float(max).query.get.map(_ ==> List(float3))
-        _ <- Ns.float(max(1)).query.get.map(_ ==> List(Set(float3)))
-        _ <- Ns.float(max(2)).query.get.map(_ ==> List(Set(float3, float2)))
+        _ <- Ns.i.float(min(2)).query.get.map(_ ==> List(
+          (1, Set(float1, float2)),
+          (2, Set(float4, float5))
+        ))
+
+        _ <- Ns.i.float(max(2)).query.get.map(_ ==> List(
+          (1, Set(float2, float3)),
+          (2, Set(float5, float6))
+        ))
+
+        _ <- Ns.i.float(min(2)).float(max(2)).query.get.map(_ ==> List(
+          (1, Set(float1, float2), Set(float2, float3)),
+          (2, Set(float4, float5), Set(float5, float6))
+        ))
       } yield ()
     }
 

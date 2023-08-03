@@ -41,22 +41,39 @@ trait AggrOne_ref_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync
     }
 
 
-    "min" - types { implicit conn =>
+    "min/max" - types { implicit conn =>
       for {
-        _ <- Ns.ref.insert(List(ref1, ref2, ref3)).transact
+        _ <- Ns.i.ref.insert(
+          (1, ref1),
+          (1, ref2),
+          (1, ref3),
+          (2, ref4),
+          (2, ref5),
+          (2, ref6),
+        ).transact
+
         _ <- Ns.ref(min).query.get.map(_ ==> List(ref1))
         _ <- Ns.ref(min(1)).query.get.map(_ ==> List(Set(ref1)))
         _ <- Ns.ref(min(2)).query.get.map(_ ==> List(Set(ref1, ref2)))
-      } yield ()
-    }
 
+        _ <- Ns.ref(max).query.get.map(_ ==> List(ref6))
+        _ <- Ns.ref(max(1)).query.get.map(_ ==> List(Set(ref6)))
+        _ <- Ns.ref(max(2)).query.get.map(_ ==> List(Set(ref5, ref6)))
 
-    "max" - types { implicit futConn =>
-      for {
-        _ <- Ns.ref.insert(List(ref1, ref2, ref3)).transact
-        _ <- Ns.ref(max).query.get.map(_ ==> List(ref3))
-        _ <- Ns.ref(max(1)).query.get.map(_ ==> List(Set(ref3)))
-        _ <- Ns.ref(max(2)).query.get.map(_ ==> List(Set(ref3, ref2)))
+        _ <- Ns.i.ref(min(2)).query.get.map(_ ==> List(
+          (1, Set(ref1, ref2)),
+          (2, Set(ref4, ref5))
+        ))
+
+        _ <- Ns.i.ref(max(2)).query.get.map(_ ==> List(
+          (1, Set(ref2, ref3)),
+          (2, Set(ref5, ref6))
+        ))
+
+        _ <- Ns.i.ref(min(2)).ref(max(2)).query.get.map(_ ==> List(
+          (1, Set(ref1, ref2), Set(ref2, ref3)),
+          (2, Set(ref4, ref5), Set(ref5, ref6))
+        ))
       } yield ()
     }
 

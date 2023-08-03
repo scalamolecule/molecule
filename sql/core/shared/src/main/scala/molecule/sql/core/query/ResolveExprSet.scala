@@ -4,7 +4,7 @@ import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import scala.reflect.ClassTag
 
-trait ResolveFilterSet[Tpl] { self: SqlModel2Query[Tpl] with LambdasSet =>
+trait ResolveExprSet[Tpl] { self: SqlModel2Query[Tpl] with LambdasSet =>
 
   protected def resolveAttrSetMan(attr: AttrSetMan): Unit = {
     aritiesAttr()

@@ -60,8 +60,7 @@ trait Base extends BaseHelpers with JavaConversions { self: Model2Query =>
   final protected var isTxMetaData  = false
   final protected var isTxComposite = false
 
-  final protected val nestedIds    = new ArrayBuffer[String]
-//  final protected val nestedOptIds = new ArrayBuffer[String]
+  final protected val nestedIds = new ArrayBuffer[String]
 
   final protected var level = 0
 
@@ -70,8 +69,12 @@ trait Base extends BaseHelpers with JavaConversions { self: Model2Query =>
   final protected val joins   = new ListBuffer[(String, String, String, String, String)]
   final protected val notNull = new ListBuffer[String]
   final protected val where   = new ListBuffer[(String, String)]
-  final protected val groupBy = new ListBuffer[String]
+  final protected val groupBy = new mutable.LinkedHashSet[String]
   final protected var orderBy = new ListBuffer[(Int, Int, String, String)]
+  final protected var fetch   = new ListBuffer[String]
+
+  final protected var aggregate   = false
+  final protected val groupByCols = new mutable.LinkedHashSet[String]
 
   final protected val exts = mutable.Map.empty[String, Option[String]]
 
@@ -93,8 +96,7 @@ trait Base extends BaseHelpers with JavaConversions { self: Model2Query =>
   final protected var aritiess  = List(List.empty[List[Int]])
 
   // Sorting
-  final protected var sortss        = List(List.empty[(Int, Int => (RowOLD, RowOLD) => Int)])
-//  final protected var sortAttrIndex = -1
+  final protected var sortss = List(List.empty[(Int, Int => (RowOLD, RowOLD) => Int)])
 
   // Pull coordinates
   final protected val pullCasts  = new ArrayBuffer[jIterator[_] => Any]
@@ -116,7 +118,7 @@ trait Base extends BaseHelpers with JavaConversions { self: Model2Query =>
   final protected val availableAttrs                                   = mutable.Set.empty[String]
 
   final protected var firstId: String = ""
-  final protected val txVar   : String = "?tx"
+  final protected val txVar  : String = "?tx"
 
   // Add 4th tx var to first attribute datom if tx value is needed
   final protected var addTxVar: Boolean = false

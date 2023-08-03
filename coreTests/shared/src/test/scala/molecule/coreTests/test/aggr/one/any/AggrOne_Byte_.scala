@@ -41,22 +41,39 @@ trait AggrOne_Byte_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsyn
     }
 
 
-    "min" - types { implicit conn =>
+    "min/max" - types { implicit conn =>
       for {
-        _ <- Ns.byte.insert(List(byte1, byte2, byte3)).transact
+        _ <- Ns.i.byte.insert(
+          (1, byte1),
+          (1, byte2),
+          (1, byte3),
+          (2, byte4),
+          (2, byte5),
+          (2, byte6),
+        ).transact
+
         _ <- Ns.byte(min).query.get.map(_ ==> List(byte1))
         _ <- Ns.byte(min(1)).query.get.map(_ ==> List(Set(byte1)))
         _ <- Ns.byte(min(2)).query.get.map(_ ==> List(Set(byte1, byte2)))
-      } yield ()
-    }
 
+        _ <- Ns.byte(max).query.get.map(_ ==> List(byte6))
+        _ <- Ns.byte(max(1)).query.get.map(_ ==> List(Set(byte6)))
+        _ <- Ns.byte(max(2)).query.get.map(_ ==> List(Set(byte5, byte6)))
 
-    "max" - types { implicit futConn =>
-      for {
-        _ <- Ns.byte.insert(List(byte1, byte2, byte3)).transact
-        _ <- Ns.byte(max).query.get.map(_ ==> List(byte3))
-        _ <- Ns.byte(max(1)).query.get.map(_ ==> List(Set(byte3)))
-        _ <- Ns.byte(max(2)).query.get.map(_ ==> List(Set(byte3, byte2)))
+        _ <- Ns.i.byte(min(2)).query.get.map(_ ==> List(
+          (1, Set(byte1, byte2)),
+          (2, Set(byte4, byte5))
+        ))
+
+        _ <- Ns.i.byte(max(2)).query.get.map(_ ==> List(
+          (1, Set(byte2, byte3)),
+          (2, Set(byte5, byte6))
+        ))
+
+        _ <- Ns.i.byte(min(2)).byte(max(2)).query.get.map(_ ==> List(
+          (1, Set(byte1, byte2), Set(byte2, byte3)),
+          (2, Set(byte4, byte5), Set(byte5, byte6))
+        ))
       } yield ()
     }
 

@@ -4,8 +4,10 @@ import java.net.URI
 import java.util.{Date, UUID, List => jList}
 import molecule.base.util.BaseHelpers
 import molecule.sql.core.query.casting.NullValueException
+import java.sql.{ResultSet => RS}
 
-trait ResolveBase extends BaseHelpers {
+
+trait ResolveBase extends BaseHelpers { self: Base =>
 
   // dummy value for null
   val none = "__none__"
@@ -82,4 +84,29 @@ trait ResolveBase extends BaseHelpers {
 
   protected def jvector2set(value: AnyRef => Any): AnyRef => AnyRef =
     (v: AnyRef) => v.asInstanceOf[jList[_]].toArray.toSet.map(value)
+
+  protected def sql2set[T](row: Row, n: Int, getValue: RS => T): Set[T] = {
+    val arrayResultSet = row.getArray(n).getResultSet
+    var set            = Set.empty[T]
+    while (arrayResultSet.next()) {
+      set += getValue(arrayResultSet)
+    }
+    set
+  }
+
+  protected lazy val valueString    : RS => String     = (rs: RS) => rs.getString(2)
+  protected lazy val valueInt       : RS => Int        = (rs: RS) => rs.getInt(2)
+  protected lazy val valueLong      : RS => Long       = (rs: RS) => rs.getLong(2)
+  protected lazy val valueFloat     : RS => Float      = (rs: RS) => rs.getFloat(2)
+  protected lazy val valueDouble    : RS => Double     = (rs: RS) => rs.getDouble(2)
+  protected lazy val valueBoolean   : RS => Boolean    = (rs: RS) => rs.getBoolean(2)
+  protected lazy val valueBigInt    : RS => BigInt     = (rs: RS) => rs.getBigDecimal(2).toBigInteger
+  protected lazy val valueBigDecimal: RS => BigDecimal = (rs: RS) => rs.getBigDecimal(2)
+  protected lazy val valueDate      : RS => Date       = (rs: RS) => rs.getDate(2)
+  protected lazy val valueUUID      : RS => UUID       = (rs: RS) => UUID.fromString(rs.getString(2))
+  protected lazy val valueURI       : RS => URI        = (rs: RS) => new URI(rs.getString(2))
+  protected lazy val valueByte      : RS => Byte       = (rs: RS) => rs.getByte(2)
+  protected lazy val valueShort     : RS => Short      = (rs: RS) => rs.getShort(2)
+  protected lazy val valueChar      : RS => Char       = (rs: RS) => rs.getString(2).charAt(0)
+
 }

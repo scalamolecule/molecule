@@ -1,6 +1,7 @@
 // GENERATED CODE ********************************
 package molecule.coreTests.test.aggr.one.any
 
+import java.util.Date
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
 import molecule.coreTests.api.ApiAsyncImplicits
@@ -41,22 +42,39 @@ trait AggrOne_Date_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsyn
     }
 
 
-    "min" - types { implicit conn =>
+    "min/max" - types { implicit conn =>
       for {
-        _ <- Ns.date.insert(List(date1, date2, date3)).transact
+        _ <- Ns.i.date.insert(
+          (1, date1),
+          (1, date2),
+          (1, date3),
+          (2, date4),
+          (2, date5),
+          (2, date6),
+        ).transact
+
         _ <- Ns.date(min).query.get.map(_ ==> List(date1))
         _ <- Ns.date(min(1)).query.get.map(_ ==> List(Set(date1)))
         _ <- Ns.date(min(2)).query.get.map(_ ==> List(Set(date1, date2)))
-      } yield ()
-    }
 
+        _ <- Ns.date(max).query.get.map(_ ==> List(date6))
+        _ <- Ns.date(max(1)).query.get.map(_ ==> List(Set(date6)))
+        _ <- Ns.date(max(2)).query.get.map(_ ==> List(Set(date5, date6)))
 
-    "max" - types { implicit futConn =>
-      for {
-        _ <- Ns.date.insert(List(date1, date2, date3)).transact
-        _ <- Ns.date(max).query.get.map(_ ==> List(date3))
-        _ <- Ns.date(max(1)).query.get.map(_ ==> List(Set(date3)))
-        _ <- Ns.date(max(2)).query.get.map(_ ==> List(Set(date3, date2)))
+        _ <- Ns.i.date(min(2)).query.get.map(_ ==> List(
+          (1, Set(date1, date2)),
+          (2, Set(date4, date5))
+        ))
+
+        _ <- Ns.i.date(max(2)).query.get.map(_ ==> List(
+          (1, Set(date2, date3)),
+          (2, Set(date5, date6))
+        ))
+
+        _ <- Ns.i.date(min(2)).date(max(2)).query.get.map(_ ==> List(
+          (1, Set(date1, date2), Set(date2, date3)),
+          (2, Set(date4, date5), Set(date5, date6))
+        ))
       } yield ()
     }
 

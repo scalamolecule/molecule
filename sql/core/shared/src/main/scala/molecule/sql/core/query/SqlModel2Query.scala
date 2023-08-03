@@ -11,8 +11,8 @@ import scala.annotation.tailrec
 
 class SqlModel2Query[Tpl](elements0: List[Element])
   extends Model2Query
-    with ResolveFilterOne[Tpl]
-    with ResolveFilterSet[Tpl]
+    with ResolveExprOne[Tpl]
+    with ResolveExprSet[Tpl]
     with ResolveFilterSetRefAttr[Tpl]
     with ResolveRef
     with Base
@@ -29,7 +29,7 @@ class SqlModel2Query[Tpl](elements0: List[Element])
     val elements = if (altElements.isEmpty) elements0 else altElements
     validateQueryModel(elements)
 
-//    elements.foreach(println)
+    //    elements.foreach(println)
 
     from = getInitialNonGenericNs(elements)
     exts += from -> None
@@ -71,33 +71,34 @@ class SqlModel2Query[Tpl](elements0: List[Element])
       }.mkString("\nWHERE\n  ", s" AND\n  ", "")
     }
 
-    val groupBy_ = if (groupBy.isEmpty) "" else groupBy.mkString("\nGROUP BY ", ", ", "")
+    val groupBy_ = if (groupBy.isEmpty && !aggregate) "" else {
+      val allGroupByCols = groupBy ++ (if (aggregate) groupByCols else Nil)
+      if (allGroupByCols.isEmpty) "" else allGroupByCols.mkString("\nGROUP BY ", ", ", "")
+    }
+
     val orderBy_ = if (orderBy.isEmpty) "" else {
       orderBy.map {
         case (_, _, col, dir) => col + dir
       }.mkString("\nORDER BY ", ", ", " NULLS FIRST")
     }
+    val fetch_   = if (fetch.isEmpty) "" else fetch.mkString("\nFETCH ", ", ", "")
 
     val stmt =
       s"""SELECT DISTINCT
          |  $select_
-         |FROM $from$joins_$where_$groupBy_$orderBy_;""".stripMargin
+         |FROM $from$joins_$where_$groupBy_$orderBy_$fetch_;""".stripMargin
 
-    //    println(stmt)
+    //        println(stmt)
 
     //      |  ARRAY_AGG(Ns_refs_Ref.Ref_id) Ns_refs
     //      |  Ns_refs = ARRAY [1] AND
+    //      |  MIN(Ns.int)
     """SELECT DISTINCT
-      |  Ns.i,
-      |  GROUP_CONCAT(DISTINCT Ns_refs_Ref.Ref_id SEPARATOR ', ') Ns_Refs
+      |  ARRAY_AGG(Ns.i)
       |FROM Ns
-      |INNER JOIN Ns_refs_Ref ON Ns.id = Ns_refs_Ref.Ns_id
-      |WHERE
-      |  Ns_refs = '1, 2' AND
-      |  Ns.i    IS NOT NULL
-      |GROUP BY Ns.id
-      |ORDER BY Ns.i NULLS FIRST;
       |""".stripMargin
+    //      |WHERE
+    //      |  Ns.int IS NOT NULL
     //      |  Ns_refs_Ref.Ref_id IN (1) AND
 
     stmt

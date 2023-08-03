@@ -9,16 +9,6 @@ import molecule.core.util.JavaConversions
 
 trait LambdasSet extends ResolveBase with JavaConversions { self: Base =>
 
-
-  private def sql2set[T](row: Row, n: Int, getValue: RS => T): Set[T] = {
-    val arrayResultSet = row.getArray(n).getResultSet
-    var set            = Set.empty[T]
-    while (arrayResultSet.next()) {
-      set += getValue(arrayResultSet)
-    }
-    set
-  }
-
   protected lazy val sql2setString    : (Row, Int) => Set[String]     = (row: Row, n: Int) => sql2set[String](row, n, valueString)
   protected lazy val sql2setInt       : (Row, Int) => Set[Int]        = (row: Row, n: Int) => sql2set[Int](row, n, valueInt)
   protected lazy val sql2setLong      : (Row, Int) => Set[Long]       = (row: Row, n: Int) => sql2set[Long](row, n, valueLong)
@@ -33,21 +23,6 @@ trait LambdasSet extends ResolveBase with JavaConversions { self: Base =>
   protected lazy val sql2setByte      : (Row, Int) => Set[Byte]       = (row: Row, n: Int) => sql2set[Byte](row, n, valueByte)
   protected lazy val sql2setShort     : (Row, Int) => Set[Short]      = (row: Row, n: Int) => sql2set[Short](row, n, valueShort)
   protected lazy val sql2setChar      : (Row, Int) => Set[Char]       = (row: Row, n: Int) => sql2set[Char](row, n, valueChar)
-
-  private lazy val valueString    : RS => String     = (rs: RS) => rs.getString(2)
-  private lazy val valueInt       : RS => Int        = (rs: RS) => rs.getInt(2)
-  private lazy val valueLong      : RS => Long       = (rs: RS) => rs.getLong(2)
-  private lazy val valueFloat     : RS => Float      = (rs: RS) => rs.getFloat(2)
-  private lazy val valueDouble    : RS => Double     = (rs: RS) => rs.getDouble(2)
-  private lazy val valueBoolean   : RS => Boolean    = (rs: RS) => rs.getBoolean(2)
-  private lazy val valueBigInt    : RS => BigInt     = (rs: RS) => rs.getBigDecimal(2).toBigInteger
-  private lazy val valueBigDecimal: RS => BigDecimal = (rs: RS) => rs.getBigDecimal(2)
-  private lazy val valueDate      : RS => Date       = (rs: RS) => rs.getDate(2)
-  private lazy val valueUUID      : RS => UUID       = (rs: RS) => UUID.fromString(rs.getString(2))
-  private lazy val valueURI       : RS => URI        = (rs: RS) => new URI(rs.getString(2))
-  private lazy val valueByte      : RS => Byte       = (rs: RS) => rs.getByte(2)
-  private lazy val valueShort     : RS => Short      = (rs: RS) => rs.getShort(2)
-  private lazy val valueChar      : RS => Char       = (rs: RS) => rs.getString(2).charAt(0)
 
 
   protected lazy val j2sSetString    : AnyRef => AnyRef = (v: AnyRef) => Set(v)

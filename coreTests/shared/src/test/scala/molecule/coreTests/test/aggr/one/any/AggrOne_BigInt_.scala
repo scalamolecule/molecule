@@ -41,22 +41,39 @@ trait AggrOne_BigInt_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAs
     }
 
 
-    "min" - types { implicit conn =>
+    "min/max" - types { implicit conn =>
       for {
-        _ <- Ns.bigInt.insert(List(bigInt1, bigInt2, bigInt3)).transact
+        _ <- Ns.i.bigInt.insert(
+          (1, bigInt1),
+          (1, bigInt2),
+          (1, bigInt3),
+          (2, bigInt4),
+          (2, bigInt5),
+          (2, bigInt6),
+        ).transact
+
         _ <- Ns.bigInt(min).query.get.map(_ ==> List(bigInt1))
         _ <- Ns.bigInt(min(1)).query.get.map(_ ==> List(Set(bigInt1)))
         _ <- Ns.bigInt(min(2)).query.get.map(_ ==> List(Set(bigInt1, bigInt2)))
-      } yield ()
-    }
 
+        _ <- Ns.bigInt(max).query.get.map(_ ==> List(bigInt6))
+        _ <- Ns.bigInt(max(1)).query.get.map(_ ==> List(Set(bigInt6)))
+        _ <- Ns.bigInt(max(2)).query.get.map(_ ==> List(Set(bigInt5, bigInt6)))
 
-    "max" - types { implicit futConn =>
-      for {
-        _ <- Ns.bigInt.insert(List(bigInt1, bigInt2, bigInt3)).transact
-        _ <- Ns.bigInt(max).query.get.map(_ ==> List(bigInt3))
-        _ <- Ns.bigInt(max(1)).query.get.map(_ ==> List(Set(bigInt3)))
-        _ <- Ns.bigInt(max(2)).query.get.map(_ ==> List(Set(bigInt3, bigInt2)))
+        _ <- Ns.i.bigInt(min(2)).query.get.map(_ ==> List(
+          (1, Set(bigInt1, bigInt2)),
+          (2, Set(bigInt4, bigInt5))
+        ))
+
+        _ <- Ns.i.bigInt(max(2)).query.get.map(_ ==> List(
+          (1, Set(bigInt2, bigInt3)),
+          (2, Set(bigInt5, bigInt6))
+        ))
+
+        _ <- Ns.i.bigInt(min(2)).bigInt(max(2)).query.get.map(_ ==> List(
+          (1, Set(bigInt1, bigInt2), Set(bigInt2, bigInt3)),
+          (2, Set(bigInt4, bigInt5), Set(bigInt5, bigInt6))
+        ))
       } yield ()
     }
 

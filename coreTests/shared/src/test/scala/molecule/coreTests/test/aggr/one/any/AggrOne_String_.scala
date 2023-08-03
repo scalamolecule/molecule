@@ -41,22 +41,39 @@ trait AggrOne_String_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAs
     }
 
 
-    "min" - types { implicit conn =>
+    "min/max" - types { implicit conn =>
       for {
-        _ <- Ns.string.insert(List(string1, string2, string3)).transact
+        _ <- Ns.i.string.insert(
+          (1, string1),
+          (1, string2),
+          (1, string3),
+          (2, string4),
+          (2, string5),
+          (2, string6),
+        ).transact
+
         _ <- Ns.string(min).query.get.map(_ ==> List(string1))
         _ <- Ns.string(min(1)).query.get.map(_ ==> List(Set(string1)))
         _ <- Ns.string(min(2)).query.get.map(_ ==> List(Set(string1, string2)))
-      } yield ()
-    }
 
+        _ <- Ns.string(max).query.get.map(_ ==> List(string6))
+        _ <- Ns.string(max(1)).query.get.map(_ ==> List(Set(string6)))
+        _ <- Ns.string(max(2)).query.get.map(_ ==> List(Set(string5, string6)))
 
-    "max" - types { implicit futConn =>
-      for {
-        _ <- Ns.string.insert(List(string1, string2, string3)).transact
-        _ <- Ns.string(max).query.get.map(_ ==> List(string3))
-        _ <- Ns.string(max(1)).query.get.map(_ ==> List(Set(string3)))
-        _ <- Ns.string(max(2)).query.get.map(_ ==> List(Set(string3, string2)))
+        _ <- Ns.i.string(min(2)).query.get.map(_ ==> List(
+          (1, Set(string1, string2)),
+          (2, Set(string4, string5))
+        ))
+
+        _ <- Ns.i.string(max(2)).query.get.map(_ ==> List(
+          (1, Set(string2, string3)),
+          (2, Set(string5, string6))
+        ))
+
+        _ <- Ns.i.string(min(2)).string(max(2)).query.get.map(_ ==> List(
+          (1, Set(string1, string2), Set(string2, string3)),
+          (2, Set(string4, string5), Set(string5, string6))
+        ))
       } yield ()
     }
 

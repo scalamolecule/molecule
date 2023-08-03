@@ -1,5 +1,6 @@
 package molecule.sql.jdbc.test
 
+import java.sql.ResultSet
 import molecule.core.util.Executor._
 import molecule.sql.jdbc.async._
 import molecule.sql.jdbc.setup.JdbcTestSuite
@@ -35,9 +36,11 @@ object AdhocJdbcJVM extends JdbcTestSuite {
       import molecule.coreTests.dataModels.core.dsl.Types._
 
       for {
-        _ <- Ns.i(1).save.transact
-        _ <- Ns.i.query.get.map(_ ==> List(1))
-        _ <- Ns.i.query.inspect
+//        _ <- Ns.i(1).save.transact
+//        _ <- Ns.i.query.get.map(_ ==> List(1))
+//        _ <- Ns.i.query.inspect
+
+
       } yield ()
     }
 

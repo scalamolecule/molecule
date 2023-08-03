@@ -41,22 +41,39 @@ trait AggrOne_BigDecimal_ extends CoreTestSuite with ApiAsyncImplicits { self: S
     }
 
 
-    "min" - types { implicit conn =>
+    "min/max" - types { implicit conn =>
       for {
-        _ <- Ns.bigDecimal.insert(List(bigDecimal1, bigDecimal2, bigDecimal3)).transact
+        _ <- Ns.i.bigDecimal.insert(
+          (1, bigDecimal1),
+          (1, bigDecimal2),
+          (1, bigDecimal3),
+          (2, bigDecimal4),
+          (2, bigDecimal5),
+          (2, bigDecimal6),
+        ).transact
+
         _ <- Ns.bigDecimal(min).query.get.map(_ ==> List(bigDecimal1))
         _ <- Ns.bigDecimal(min(1)).query.get.map(_ ==> List(Set(bigDecimal1)))
         _ <- Ns.bigDecimal(min(2)).query.get.map(_ ==> List(Set(bigDecimal1, bigDecimal2)))
-      } yield ()
-    }
 
+        _ <- Ns.bigDecimal(max).query.get.map(_ ==> List(bigDecimal6))
+        _ <- Ns.bigDecimal(max(1)).query.get.map(_ ==> List(Set(bigDecimal6)))
+        _ <- Ns.bigDecimal(max(2)).query.get.map(_ ==> List(Set(bigDecimal5, bigDecimal6)))
 
-    "max" - types { implicit futConn =>
-      for {
-        _ <- Ns.bigDecimal.insert(List(bigDecimal1, bigDecimal2, bigDecimal3)).transact
-        _ <- Ns.bigDecimal(max).query.get.map(_ ==> List(bigDecimal3))
-        _ <- Ns.bigDecimal(max(1)).query.get.map(_ ==> List(Set(bigDecimal3)))
-        _ <- Ns.bigDecimal(max(2)).query.get.map(_ ==> List(Set(bigDecimal3, bigDecimal2)))
+        _ <- Ns.i.bigDecimal(min(2)).query.get.map(_ ==> List(
+          (1, Set(bigDecimal1, bigDecimal2)),
+          (2, Set(bigDecimal4, bigDecimal5))
+        ))
+
+        _ <- Ns.i.bigDecimal(max(2)).query.get.map(_ ==> List(
+          (1, Set(bigDecimal2, bigDecimal3)),
+          (2, Set(bigDecimal5, bigDecimal6))
+        ))
+
+        _ <- Ns.i.bigDecimal(min(2)).bigDecimal(max(2)).query.get.map(_ ==> List(
+          (1, Set(bigDecimal1, bigDecimal2), Set(bigDecimal2, bigDecimal3)),
+          (2, Set(bigDecimal4, bigDecimal5), Set(bigDecimal5, bigDecimal6))
+        ))
       } yield ()
     }
 

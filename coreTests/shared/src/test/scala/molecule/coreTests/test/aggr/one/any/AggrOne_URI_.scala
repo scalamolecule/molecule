@@ -1,6 +1,7 @@
 // GENERATED CODE ********************************
 package molecule.coreTests.test.aggr.one.any
 
+import java.net.URI
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
 import molecule.coreTests.api.ApiAsyncImplicits
@@ -41,22 +42,39 @@ trait AggrOne_URI_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync
     }
 
 
-    "min" - types { implicit conn =>
+    "min/max" - types { implicit conn =>
       for {
-        _ <- Ns.uri.insert(List(uri1, uri2, uri3)).transact
+        _ <- Ns.i.uri.insert(
+          (1, uri1),
+          (1, uri2),
+          (1, uri3),
+          (2, uri4),
+          (2, uri5),
+          (2, uri6),
+        ).transact
+
         _ <- Ns.uri(min).query.get.map(_ ==> List(uri1))
         _ <- Ns.uri(min(1)).query.get.map(_ ==> List(Set(uri1)))
         _ <- Ns.uri(min(2)).query.get.map(_ ==> List(Set(uri1, uri2)))
-      } yield ()
-    }
 
+        _ <- Ns.uri(max).query.get.map(_ ==> List(uri6))
+        _ <- Ns.uri(max(1)).query.get.map(_ ==> List(Set(uri6)))
+        _ <- Ns.uri(max(2)).query.get.map(_ ==> List(Set(uri5, uri6)))
 
-    "max" - types { implicit futConn =>
-      for {
-        _ <- Ns.uri.insert(List(uri1, uri2, uri3)).transact
-        _ <- Ns.uri(max).query.get.map(_ ==> List(uri3))
-        _ <- Ns.uri(max(1)).query.get.map(_ ==> List(Set(uri3)))
-        _ <- Ns.uri(max(2)).query.get.map(_ ==> List(Set(uri3, uri2)))
+        _ <- Ns.i.uri(min(2)).query.get.map(_ ==> List(
+          (1, Set(uri1, uri2)),
+          (2, Set(uri4, uri5))
+        ))
+
+        _ <- Ns.i.uri(max(2)).query.get.map(_ ==> List(
+          (1, Set(uri2, uri3)),
+          (2, Set(uri5, uri6))
+        ))
+
+        _ <- Ns.i.uri(min(2)).uri(max(2)).query.get.map(_ ==> List(
+          (1, Set(uri1, uri2), Set(uri2, uri3)),
+          (2, Set(uri4, uri5), Set(uri5, uri6))
+        ))
       } yield ()
     }
 

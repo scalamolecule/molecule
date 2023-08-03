@@ -138,8 +138,40 @@ object AdhocDatomicJVM extends DatomicTestSuite {
 
       for {
 
-        _ <- Ns.i(42).save.transact
-        _ <- Ns.i.query.get.map(_ ==> List(42))
+//        _ <- Ns.i(42).save.transact
+//        _ <- Ns.i.query.get.map(_ ==> List(42))
+
+        _ <- Ns.i.int.insert(
+          (1, int1),
+          (1, int2),
+          (1, int3),
+          (2, int4),
+          (2, int5),
+          (2, int6),
+        ).transact
+
+        _ <- Ns.int(min).query.get.map(_ ==> List(int1))
+        _ <- Ns.int(min(1)).query.get.map(_ ==> List(Set(int1)))
+        _ <- Ns.int(min(2)).query.get.map(_ ==> List(Set(int1, int2)))
+
+        _ <- Ns.int(max).query.get.map(_ ==> List(int6))
+        _ <- Ns.int(max(1)).query.get.map(_ ==> List(Set(int6)))
+        _ <- Ns.int(max(2)).query.get.map(_ ==> List(Set(int5, int6)))
+
+        _ <- Ns.i.int(min(2)).query.get.map(_ ==> List(
+          (1, Set(int1, int2)),
+          (2, Set(int4, int5))
+        ))
+
+        _ <- Ns.i.int(max(2)).query.get.map(_ ==> List(
+          (1, Set(int2, int3)),
+          (2, Set(int5, int6))
+        ))
+
+        _ <- Ns.i.int(min(2)).int(max(2)).query.get.map(_ ==> List(
+          (1, Set(int1, int2), Set(int2, int3)),
+          (2, Set(int4, int5), Set(int5, int6))
+        ))
 
       } yield ()
     }

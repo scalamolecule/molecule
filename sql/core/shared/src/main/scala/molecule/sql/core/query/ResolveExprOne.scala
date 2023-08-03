@@ -4,7 +4,7 @@ import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import scala.reflect.ClassTag
 
-trait ResolveFilterOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
+trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
 
   protected def resolveAttrOneMan(attr: AttrOneMan): Unit = {
     aritiesAttr()
@@ -85,6 +85,7 @@ trait ResolveFilterOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
   private def man[T: ClassTag](attr: Attr, args: Seq[T], res: ResOne[T]): Unit = {
     val col = getCol(attr: Attr)
     select += col
+    groupByCols += col // if we later need to group by non-aggregated columns
     if (isNestedOpt) {
       addCast(res.sql2oneOrNull)
     } else {
@@ -108,8 +109,8 @@ trait ResolveFilterOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
         addCast(res.sql2one)
         addSort(attr, "id")
       case "tx" =>
-        throw ModelError("txId not implemented yet for jdbc")
-      case a    =>
+        throw ModelError("tx id not implemented yet for jdbc")
+      case _    =>
         man(attr, args, res)
     }
   }
@@ -134,6 +135,7 @@ trait ResolveFilterOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
   ): Unit = {
     val col = getCol(attr: Attr)
     select += col
+    groupByCols += col // if we later need to group by non-aggregated columns
     addCast(resOpt.sql2oneOpt)
     addSort(attr, col)
     attr.filterAttr.fold {
@@ -266,7 +268,7 @@ trait ResolveFilterOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
       select += s"SUBSTRING($col, $from, $length) AS $alias"
       orderBy = orderBy.map {
         case (level, arity, `col`, dir) =>
-          println("###### " + dir)
+//          println("###### " + dir)
           (level, arity, alias, dir)
         case other                      => other
       }
@@ -282,7 +284,7 @@ trait ResolveFilterOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
   private def aggr[T](col: String, fn: String, optN: Option[Int], res: ResOne[T]): Unit = {
     lazy val n = optN.getOrElse(0)
     // Replace find/casting with aggregate function/cast
-    //    select -= v
+    select -= col
     fn match {
       case "distinct" =>
       //        select += s"(distinct $v)"
@@ -290,18 +292,38 @@ trait ResolveFilterOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
 
 
       case "mins" =>
-      //        select += s"(min $n $v)"
-      //        replaceCast(res.vector2set)
+        select +=
+          s"""ARRAY_SLICE(
+             |  ARRAY_AGG($col order by $col ASC),
+             |  1,
+             |  LEAST(
+             |    $n,
+             |    ARRAY_LENGTH(ARRAY_AGG($col))
+             |  )
+             |)""".stripMargin
+        groupByCols -= col
+        aggregate = true
+        replaceCast(res.vector2set)
 
       case "min" =>
-      //        select += s"(min $v)"
+        select += s"MIN($col)"
 
       case "maxs" =>
-      //        select += s"(max $n $v)"
-      //        replaceCast(res.vector2set)
+        select +=
+          s"""ARRAY_SLICE(
+             |  ARRAY_AGG($col order by $col DESC),
+             |  1,
+             |  LEAST(
+             |    $n,
+             |    ARRAY_LENGTH(ARRAY_AGG($col))
+             |  )
+             |)""".stripMargin
+        groupByCols -= col
+        aggregate = true
+        replaceCast(res.vector2set)
 
       case "max" =>
-      //        select += s"(max $v)"
+        select += s"MAX($col)"
 
       case "rands" =>
       //        select += s"(rand $n $v)"

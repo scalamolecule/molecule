@@ -1,6 +1,7 @@
 // GENERATED CODE ********************************
 package molecule.coreTests.test.aggr.one.any
 
+import java.util.UUID
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
 import molecule.coreTests.api.ApiAsyncImplicits
@@ -41,22 +42,39 @@ trait AggrOne_UUID_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsyn
     }
 
 
-    "min" - types { implicit conn =>
+    "min/max" - types { implicit conn =>
       for {
-        _ <- Ns.uuid.insert(List(uuid1, uuid2, uuid3)).transact
+        _ <- Ns.i.uuid.insert(
+          (1, uuid1),
+          (1, uuid2),
+          (1, uuid3),
+          (2, uuid4),
+          (2, uuid5),
+          (2, uuid6),
+        ).transact
+
         _ <- Ns.uuid(min).query.get.map(_ ==> List(uuid1))
         _ <- Ns.uuid(min(1)).query.get.map(_ ==> List(Set(uuid1)))
         _ <- Ns.uuid(min(2)).query.get.map(_ ==> List(Set(uuid1, uuid2)))
-      } yield ()
-    }
 
+        _ <- Ns.uuid(max).query.get.map(_ ==> List(uuid6))
+        _ <- Ns.uuid(max(1)).query.get.map(_ ==> List(Set(uuid6)))
+        _ <- Ns.uuid(max(2)).query.get.map(_ ==> List(Set(uuid5, uuid6)))
 
-    "max" - types { implicit futConn =>
-      for {
-        _ <- Ns.uuid.insert(List(uuid1, uuid2, uuid3)).transact
-        _ <- Ns.uuid(max).query.get.map(_ ==> List(uuid3))
-        _ <- Ns.uuid(max(1)).query.get.map(_ ==> List(Set(uuid3)))
-        _ <- Ns.uuid(max(2)).query.get.map(_ ==> List(Set(uuid3, uuid2)))
+        _ <- Ns.i.uuid(min(2)).query.get.map(_ ==> List(
+          (1, Set(uuid1, uuid2)),
+          (2, Set(uuid4, uuid5))
+        ))
+
+        _ <- Ns.i.uuid(max(2)).query.get.map(_ ==> List(
+          (1, Set(uuid2, uuid3)),
+          (2, Set(uuid5, uuid6))
+        ))
+
+        _ <- Ns.i.uuid(min(2)).uuid(max(2)).query.get.map(_ ==> List(
+          (1, Set(uuid1, uuid2), Set(uuid2, uuid3)),
+          (2, Set(uuid4, uuid5), Set(uuid5, uuid6))
+        ))
       } yield ()
     }
 

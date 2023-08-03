@@ -41,22 +41,39 @@ trait AggrOne_Double_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAs
     }
 
 
-    "min" - types { implicit conn =>
+    "min/max" - types { implicit conn =>
       for {
-        _ <- Ns.double.insert(List(double1, double2, double3)).transact
+        _ <- Ns.i.double.insert(
+          (1, double1),
+          (1, double2),
+          (1, double3),
+          (2, double4),
+          (2, double5),
+          (2, double6),
+        ).transact
+
         _ <- Ns.double(min).query.get.map(_ ==> List(double1))
         _ <- Ns.double(min(1)).query.get.map(_ ==> List(Set(double1)))
         _ <- Ns.double(min(2)).query.get.map(_ ==> List(Set(double1, double2)))
-      } yield ()
-    }
 
+        _ <- Ns.double(max).query.get.map(_ ==> List(double6))
+        _ <- Ns.double(max(1)).query.get.map(_ ==> List(Set(double6)))
+        _ <- Ns.double(max(2)).query.get.map(_ ==> List(Set(double5, double6)))
 
-    "max" - types { implicit futConn =>
-      for {
-        _ <- Ns.double.insert(List(double1, double2, double3)).transact
-        _ <- Ns.double(max).query.get.map(_ ==> List(double3))
-        _ <- Ns.double(max(1)).query.get.map(_ ==> List(Set(double3)))
-        _ <- Ns.double(max(2)).query.get.map(_ ==> List(Set(double3, double2)))
+        _ <- Ns.i.double(min(2)).query.get.map(_ ==> List(
+          (1, Set(double1, double2)),
+          (2, Set(double4, double5))
+        ))
+
+        _ <- Ns.i.double(max(2)).query.get.map(_ ==> List(
+          (1, Set(double2, double3)),
+          (2, Set(double5, double6))
+        ))
+
+        _ <- Ns.i.double(min(2)).double(max(2)).query.get.map(_ ==> List(
+          (1, Set(double1, double2), Set(double2, double3)),
+          (2, Set(double4, double5), Set(double5, double6))
+        ))
       } yield ()
     }
 
