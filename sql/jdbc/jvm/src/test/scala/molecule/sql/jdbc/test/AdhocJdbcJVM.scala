@@ -36,14 +36,30 @@ object AdhocJdbcJVM extends JdbcTestSuite {
       import molecule.coreTests.dataModels.core.dsl.Types._
 
       for {
-        _ <- Ns.i(1).save.transact
-        _ <- Ns.i.query.get.map(_ ==> List(1))
+//        _ <- Ns.i(1).save.transact
+//        _ <- Ns.i.query.get.map(_ ==> List(1))
 
-        _ = printQuery(
-          """SELECT COUNT(Ns.int)
-            |FROM Ns
-            |""".stripMargin
-        )
+
+
+//        _ = printQuery(
+//          """SELECT SUM(Ns.int)
+//            |FROM Ns
+//            |""".stripMargin
+//        )
+
+        _ <- Ns.i.int.insert(List(
+          (1, int1),
+          (2, int2),
+          (2, int4),
+        )).transact
+
+        _ <- Ns.int(stddev).query.get.map(_ === List(
+          stdDevOf(int1, int2, int4)
+        ))
+        _ <- Ns.i.int(stddev).query.get.map(_ === List(
+          (1, stdDevOf(int1)),
+          (2, stdDevOf(int2, int4)),
+        ))
 
       } yield ()
     }

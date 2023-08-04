@@ -21,7 +21,7 @@ trait AggrOneNum_Int extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsy
         )).transact
 
         // Using === for tolerant precision comparison
-        // (only necessary on JS platform with JavaScript imprecision)
+        // (only necessary on JS platform with JavaScript rounding imprecision)
         _ <- Ns.int(sum).query.get.map(_ === List(
           int1 + int2 + int4
         ))

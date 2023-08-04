@@ -381,21 +381,33 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
         select += s"COUNT(DISTINCT $col)"
         replaceCast(toInt)
 
-      //      case "sum"      => select += s"(sum $v)"
-      //      case "median"   => select += s"(median $v)"
-      //      case "avg"      => select += s"(avg $v)"
-      //      case "variance" => select += s"(variance $v)"
-      //      case "stddev"   => select += s"(stddev $v)"
+      case "sum"      =>
+        aggregate = true
+        groupByCols -= col
+        select += s"SUM($col)"
+
+      case "median"   =>
+        aggregate = true
+        groupByCols -= col
+        select += s"MEDIAN($col)"
+
+      case "avg"      =>
+        aggregate = true
+        groupByCols -= col
+        select += s"AVG($col)"
+
+      case "variance" =>
+        aggregate = true
+        groupByCols -= col
+        select += s"VARIANCE($col)"
+
+      case "stddev"   =>
+        aggregate = true
+        groupByCols -= col
+        select += s"STDDEV($col)"
 
       case other => unexpectedKw(other)
     }
-    //    whereOLD += s"[$e $a $v$tx]" -> wClause
-  }
-
-  private def attr(col: String): Unit = {
-    //    whereOLD += s"[$e $a $v$tx]" -> wClause
-
-
   }
 
   private def equal[T: ClassTag](col: String, args: Seq[T], one2sql: T => String): Unit = {
