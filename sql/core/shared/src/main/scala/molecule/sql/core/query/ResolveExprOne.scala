@@ -327,29 +327,59 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
         select += s"MAX($col)"
 
       case "rands" =>
-      //        select += s"(rand $n $v)"
-      //        replaceCast(res.vector2set)
+        select +=
+          s"""ARRAY_SLICE(
+             |  ARRAY_AGG($col order by RAND()),
+             |  1,
+             |  LEAST(
+             |    $n,
+             |    ARRAY_LENGTH(ARRAY_AGG($col))
+             |  )
+             |)""".stripMargin
+        groupByCols -= col
+        aggregate = true
+        replaceCast(res.array2set)
 
       case "rand" =>
-      //        select += s"(rand $v)"
+        distinct = false
+        select += col
+        orderBy += ((level, -1, "RAND()", ""))
+        limitClause = "1"
 
       case "samples" =>
-      //        select += s"(sample $n $v)"
-      //        replaceCast(res.vector2set)
+        select +=
+          s"""ARRAY_SLICE(
+             |  ARRAY_AGG(DISTINCT $col order by RAND()),
+             |  1,
+             |  LEAST(
+             |    $n,
+             |    ARRAY_LENGTH(ARRAY_AGG($col))
+             |  )
+             |)""".stripMargin
+        groupByCols -= col
+        aggregate = true
+        replaceCast(res.array2set)
 
       case "sample" =>
-      //        select += s"(sample 1 $v)"
-      //        replaceCast(res.seq2t)
+        distinct = false
+        select += col
+        orderBy += ((level, -1, "RAND()", ""))
+        limitClause = "1"
 
       case "count" =>
-      //        select += s"(count $v)"
-      //        widh += e
-      //        replaceCast(toInt)
+        aggregate = true
+        groupByCols -= col
+        distinct = false
+        select += s"COUNT($col)"
+        replaceCast(toInt)
+
 
       case "countDistinct" =>
-      //        select += s"(count-distinct $v)"
-      //        widh += e
-      //        replaceCast(toInt)
+        aggregate = true
+        groupByCols -= col
+        distinct = false
+        select += s"COUNT(DISTINCT $col)"
+        replaceCast(toInt)
 
       //      case "sum"      => select += s"(sum $v)"
       //      case "median"   => select += s"(median $v)"

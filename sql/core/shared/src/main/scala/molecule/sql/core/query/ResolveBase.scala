@@ -60,7 +60,7 @@ trait ResolveBase extends BaseHelpers { self: Base =>
 
 
   // Used for aggregate count and countDistinct functions
-  lazy val toInt: AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[Integer].toInt.asInstanceOf[AnyRef]
+  lazy val toInt: (Row, Int) => Int = (row: Row, n: Int) => row.getLong(n).toInt
 
 
   protected lazy val dString    : String => String     = (v: String) => "\"" + escStr(v) + "\""

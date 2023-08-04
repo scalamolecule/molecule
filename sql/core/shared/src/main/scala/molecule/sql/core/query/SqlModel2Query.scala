@@ -42,7 +42,8 @@ class SqlModel2Query[Tpl](elements0: List[Element])
   }
 
   final private def renderQuery: String = {
-    val select_ = (nestedIds ++ select).mkString(s",\n  ")
+    val distinct_ = if (distinct) " DISTINCT" else ""
+    val select_   = (nestedIds ++ select).mkString(s",\n  ")
 
     val joins_ = if (joins.isEmpty) "" else {
       val max1  = joins.map(_._1.length).max
@@ -82,13 +83,14 @@ class SqlModel2Query[Tpl](elements0: List[Element])
       }.mkString("\nORDER BY ", ", ", " NULLS FIRST")
     }
     val fetch_   = if (fetch.isEmpty) "" else fetch.mkString("\nFETCH ", ", ", "")
+    val limit_   = if (limitClause.isBlank) "" else "\nLIMIT " + limitClause
 
     val stmt =
-      s"""SELECT DISTINCT
+      s"""SELECT$distinct_
          |  $select_
-         |FROM $from$joins_$where_$groupBy_$orderBy_$fetch_;""".stripMargin
+         |FROM $from$joins_$where_$groupBy_$orderBy_$fetch_$limit_;""".stripMargin
 
-    //        println(stmt)
+    println(stmt)
 
     //      |  ARRAY_AGG(Ns_refs_Ref.Ref_id) Ns_refs
     //      |  Ns_refs = ARRAY [1] AND
