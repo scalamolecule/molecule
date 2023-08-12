@@ -108,7 +108,7 @@ trait LambdasSet extends ResolveBase with JavaConversions {
     toDatalog: T => String,
     s2j: Any => Any,
     j2s: AnyRef => AnyRef,
-    sets: AnyRef => AnyRef,
+    set2sets: AnyRef => AnyRef,
     vector2set: AnyRef => AnyRef,
     j2sSet: AnyRef => AnyRef
   )
@@ -128,6 +128,10 @@ trait LambdasSet extends ResolveBase with JavaConversions {
   lazy val resSetShort     : ResSet[Short]      = ResSet("Short", dShort, s2jShort, set2setShort, set2setsShort, vector2setShort, j2sSetShort)
   lazy val resSetChar      : ResSet[Char]       = ResSet("Char", dChar, s2jChar, set2setChar, set2setsChar, vector2setChar, j2sSetChar)
 
+
+  lazy val any2double: AnyRef => AnyRef = {
+    ((v: AnyRef) => v.toString.toDouble).asInstanceOf[AnyRef => AnyRef]
+  }
 
   private lazy val j2sOpSetString = (v: AnyRef) => v match {
     case null            => Option.empty[Set[String]]

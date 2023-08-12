@@ -4,9 +4,9 @@ import java.nio.file.{Files, Paths}
 import codegen.SpiTestGenBase
 import molecule.base.util.{BaseHelpers, CodeGenBase}
 
-object _AggrSet_tpe extends CodeGenBase with BaseHelpers {
+object _AggrSet extends CodeGenBase with BaseHelpers {
 
-  def generate(): Unit = tpeVarImp.foreach { case (name, tpe, v, imp) =>
+  def generate(): Unit = tpeVarImp.filterNot(_._1 == "ref").foreach { case (name, tpe, v, imp) =>
     TransformFile(name, tpe, v, imp).generate()
   }
 

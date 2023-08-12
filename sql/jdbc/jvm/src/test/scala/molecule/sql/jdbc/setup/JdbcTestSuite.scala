@@ -16,11 +16,133 @@ trait JdbcTestSuite extends CoreTestSuite with BaseHelpers {
   override val platform = "Jdbc jvm"
 
   override def inMem[T](test: Conn => T, schema: Schema): T = {
-    val url   = s"jdbc:h2:mem:test_database_" + Random.nextInt()
+    val url = s"jdbc:h2:mem:test_database_" + Random.nextInt()
     //    println(schema.sqlSchema("h2"))
+    lazy val sch =
+      """CREATE TABLE Tx (
+        |  id       BIGINT AUTO_INCREMENT PRIMARY KEY,
+        |  created  BIGINT,
+        |  updated  BIGINT,
+        |  myTxAttr INT,
+        |  oneNs    BIGINT,
+        |  oneRef   BIGINT,
+        |  oneOther BIGINT
+        |);
+        |
+        |CREATE TABLE Tx_manyNs_Ns (
+        |  Tx_id BIGINT,
+        |  Ns_id BIGINT
+        |);
+        |
+        |CREATE TABLE Tx_manyRef_Ref (
+        |  Tx_id  BIGINT,
+        |  Ref_id BIGINT
+        |);
+        |
+        |CREATE TABLE Tx_manyOther_Other (
+        |  Tx_id    BIGINT,
+        |  Other_id BIGINT
+        |);
+        |
+        |CREATE TABLE Ns (
+        |  id          BIGINT AUTO_INCREMENT PRIMARY KEY,
+        |  tx          BIGINT,
+        |  i           INT,
+        |  ii          INT ARRAY,
+        |  s           LONGVARCHAR,
+        |  u           INT,
+        |  string      LONGVARCHAR,
+        |  int         INT,
+        |  long        BIGINT,
+        |  float       DOUBLE,
+        |  double      DOUBLE,
+        |  boolean     BOOLEAN,
+        |  bigInt      DECIMAL(100, 0),
+        |  bigDecimal  DECIMAL(65535, 25),
+        |  date        DATE,
+        |  uuid        UUID,
+        |  uri         VARCHAR,
+        |  byte        TINYINT,
+        |  short       SMALLINT,
+        |  char        CHAR,
+        |  ref         BIGINT,
+        |  other       BIGINT,
+        |  strings     LONGVARCHAR ARRAY,
+        |  ints        INT ARRAY,
+        |  longs       BIGINT ARRAY,
+        |  floats      DOUBLE ARRAY,
+        |  doubles     DOUBLE ARRAY,
+        |  booleans    BOOLEAN ARRAY,
+        |  bigInts     DECIMAL(100, 0) ARRAY,
+        |  bigDecimals DECIMAL(65535, 25) ARRAY,
+        |  dates       DATE ARRAY,
+        |  uuids       UUID ARRAY,
+        |  uris        VARCHAR ARRAY,
+        |  bytes       TINYINT ARRAY,
+        |  shorts      SMALLINT ARRAY,
+        |  chars       CHAR ARRAY
+        |);
+        |
+        |CREATE TABLE Ns_refs_Ref (
+        |  Ns_id  BIGINT,
+        |  Ref_id BIGINT
+        |);
+        |
+        |CREATE TABLE Ref (
+        |  id          BIGINT AUTO_INCREMENT PRIMARY KEY,
+        |  tx          BIGINT,
+        |  i           INT,
+        |  s           LONGVARCHAR,
+        |  string      LONGVARCHAR,
+        |  int         INT,
+        |  long        BIGINT,
+        |  float       DOUBLE,
+        |  double      DOUBLE,
+        |  boolean     BOOLEAN,
+        |  bigInt      DECIMAL(100, 0),
+        |  bigDecimal  DECIMAL(65535, 25),
+        |  date        DATE,
+        |  uuid        UUID,
+        |  uri         VARCHAR,
+        |  byte        TINYINT,
+        |  short       SMALLINT,
+        |  char        CHAR,
+        |  ii          INT ARRAY,
+        |  ss          LONGVARCHAR ARRAY,
+        |  strings     LONGVARCHAR ARRAY,
+        |  ints        INT ARRAY,
+        |  longs       BIGINT ARRAY,
+        |  floats      DOUBLE ARRAY,
+        |  doubles     DOUBLE ARRAY,
+        |  booleans    BOOLEAN ARRAY,
+        |  bigInts     DECIMAL(100, 0) ARRAY,
+        |  bigDecimals DECIMAL(65535, 25) ARRAY,
+        |  dates       DATE ARRAY,
+        |  uuids       UUID ARRAY,
+        |  uris        VARCHAR ARRAY,
+        |  bytes       TINYINT ARRAY,
+        |  shorts      SMALLINT ARRAY,
+        |  chars       CHAR ARRAY
+        |);
+        |
+        |CREATE TABLE Ref_nss_Ns (
+        |  Ref_id BIGINT,
+        |  Ns_id  BIGINT
+        |);
+        |
+        |CREATE TABLE Other (
+        |  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+        |  tx BIGINT,
+        |  i  INT,
+        |  s  LONGVARCHAR,
+        |  ii INT ARRAY,
+        |  ss LONGVARCHAR ARRAY
+        |);""".stripMargin
+
     val proxy = JdbcProxy(
       url,
       schema.sqlSchema("h2"),
+      //      sch,
       schema.metaSchema,
       schema.nsMap,
       schema.attrMap,
@@ -46,7 +168,7 @@ trait JdbcTestSuite extends CoreTestSuite with BaseHelpers {
     val resultSet     = statement.executeQuery(q)
     val rsmd          = resultSet.getMetaData
     val columnsNumber = rsmd.getColumnCount
-    println("--------------")
+    println("-----------------------------------------------------------------------------")
     println(q)
     while (resultSet.next) {
       var i = 1

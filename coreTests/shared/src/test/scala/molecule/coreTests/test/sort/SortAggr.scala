@@ -41,9 +41,7 @@ trait SortAggr extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
         _ <- Ns.i.char.insert((1, char1), (1, char2), (1, char2), (2, char2)).transact
         _ <- Ns.i.ref.insert((1, ref1), (1, ref2), (1, ref2), (2, ref2)).transact
 
-        _ <- Ns.i.string(count).a1.query.get.map(_ ==> List(
-          (2, 1),
-          (1, 3)))
+        _ <- Ns.i.string(count).a1.query.get.map(_ ==> List((2, 1), (1, 3)))
         _ <- Ns.i.int(count).a1.query.get.map(_ ==> List((2, 1), (1, 3)))
         _ <- Ns.i.long(count).a1.query.get.map(_ ==> List((2, 1), (1, 3)))
         _ <- Ns.i.float(count).a1.query.get.map(_ ==> List((2, 1), (1, 3)))
@@ -59,9 +57,7 @@ trait SortAggr extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
         _ <- Ns.i.char(count).a1.query.get.map(_ ==> List((2, 1), (1, 3)))
         _ <- Ns.i.ref(count).a1.query.get.map(_ ==> List((2, 1), (1, 3)))
 
-        _ <- Ns.i.string(count).d1.query.get.map(_ ==> List(
-          (1, 3),
-          (2, 1)))
+        _ <- Ns.i.string(count).d1.query.get.map(_ ==> List((1, 3), (2, 1)))
         _ <- Ns.i.int(count).d1.query.get.map(_ ==> List((1, 3), (2, 1)))
         _ <- Ns.i.long(count).d1.query.get.map(_ ==> List((1, 3), (2, 1)))
         _ <- Ns.i.float(count).d1.query.get.map(_ ==> List((1, 3), (2, 1)))
@@ -102,9 +98,7 @@ trait SortAggr extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
         _ <- Ns.i.char.insert((1, char1), (1, char2), (1, char2), (2, char2)).transact
         _ <- Ns.i.ref.insert((1, ref1), (1, ref2), (1, ref2), (2, ref2)).transact
 
-        _ <- Ns.i.string(countDistinct).a1.query.get.map(_ ==> List(
-          (2, 1),
-          (1, 2)))
+        _ <- Ns.i.string(countDistinct).a1.query.get.map(_ ==> List((2, 1), (1, 2)))
         _ <- Ns.i.int(countDistinct).a1.query.get.map(_ ==> List((2, 1), (1, 2)))
         _ <- Ns.i.long(countDistinct).a1.query.get.map(_ ==> List((2, 1), (1, 2)))
         _ <- Ns.i.float(countDistinct).a1.query.get.map(_ ==> List((2, 1), (1, 2)))
@@ -120,9 +114,7 @@ trait SortAggr extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
         _ <- Ns.i.char(countDistinct).a1.query.get.map(_ ==> List((2, 1), (1, 2)))
         _ <- Ns.i.ref(countDistinct).a1.query.get.map(_ ==> List((2, 1), (1, 2)))
 
-        _ <- Ns.i.string(countDistinct).d1.query.get.map(_ ==> List(
-          (1, 2),
-          (2, 1)))
+        _ <- Ns.i.string(countDistinct).d1.query.get.map(_ ==> List((1, 2), (2, 1)))
         _ <- Ns.i.int(countDistinct).d1.query.get.map(_ ==> List((1, 2), (2, 1)))
         _ <- Ns.i.long(countDistinct).d1.query.get.map(_ ==> List((1, 2), (2, 1)))
         _ <- Ns.i.float(countDistinct).d1.query.get.map(_ ==> List((1, 2), (2, 1)))
@@ -156,9 +148,7 @@ trait SortAggr extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
         _ <- Ns.i.short.insert((1, short1), (1, short2), (2, short2)).transact
         _ <- Ns.i.ref.insert((1, ref1), (1, ref2), (2, ref2)).transact
 
-        _ <- Ns.i.int(sum).a1.query.get.map(_ ==> List(
-          (2, 2),
-          (1, 3)))
+        _ <- Ns.i.int(sum).a1.query.get.map(_ ==> List((2, 2), (1, 3)))
         _ <- Ns.i.long(sum).a1.query.get.map(_ ==> List((2, 2), (1, 3)))
         _ <- Ns.i.float(sum).a1.query.get.map(_ ==> List((2, 2), (1, 3)))
         _ <- Ns.i.double(sum).a1.query.get.map(_ ==> List((2, 2), (1, 3)))
@@ -168,9 +158,7 @@ trait SortAggr extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
         _ <- Ns.i.short(sum).a1.query.get.map(_ ==> List((2, 2), (1, 3)))
         _ <- Ns.i.ref(sum).a1.query.get.map(_ ==> List((2, 2), (1, 3)))
 
-        _ <- Ns.i.int(sum).d1.query.get.map(_ ==> List(
-          (1, 3),
-          (2, 2)))
+        _ <- Ns.i.int(sum).d1.query.get.map(_ ==> List((1, 3), (2, 2)))
         _ <- Ns.i.long(sum).d1.query.get.map(_ ==> List((1, 3), (2, 2)))
         _ <- Ns.i.float(sum).d1.query.get.map(_ ==> List((1, 3), (2, 2)))
         _ <- Ns.i.double(sum).d1.query.get.map(_ ==> List((1, 3), (2, 2)))
@@ -199,9 +187,7 @@ trait SortAggr extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
         _ <- Ns.i.short.insert((1, short1), (1, short3), (2, short4)).transact
         _ <- Ns.i.ref.insert((1, ref1), (1, ref3), (2, ref4)).transact
 
-        _ <- Ns.i.int(median).a1.query.get.map(_ ==> List(
-          (1, 2),
-          (2, 4)))
+        _ <- Ns.i.int(median).a1.query.get.map(_ ==> List((1, 2), (2, 4)))
         _ <- Ns.i.long(median).a1.query.get.map(_ ==> List((1, 2), (2, 4)))
         _ <- Ns.i.float(median).a1.query.get.map(_ ==> List((1, 2), (2, 4)))
         _ <- Ns.i.double(median).a1.query.get.map(_ ==> List((1, 2), (2, 4)))
@@ -211,9 +197,7 @@ trait SortAggr extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
         _ <- Ns.i.short(median).a1.query.get.map(_ ==> List((1, 2), (2, 4)))
         _ <- Ns.i.ref(median).a1.query.get.map(_ ==> List((1, 2), (2, 4)))
 
-        _ <- Ns.i.int(median).d1.query.get.map(_ ==> List(
-          (2, 4),
-          (1, 2)))
+        _ <- Ns.i.int(median).d1.query.get.map(_ ==> List((2, 4), (1, 2)))
         _ <- Ns.i.long(median).d1.query.get.map(_ ==> List((2, 4), (1, 2)))
         _ <- Ns.i.float(median).d1.query.get.map(_ ==> List((2, 4), (1, 2)))
         _ <- Ns.i.double(median).d1.query.get.map(_ ==> List((2, 4), (1, 2)))
@@ -242,9 +226,7 @@ trait SortAggr extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
         _ <- Ns.i.short.insert((1, short1), (1, short3), (2, short4)).transact
         _ <- Ns.i.ref.insert((1, ref1), (1, ref3), (2, ref4)).transact
 
-        _ <- Ns.i.int(avg).a1.query.get.map(_ ==> List(
-          (1, 2),
-          (2, 4)))
+        _ <- Ns.i.int(avg).a1.query.get.map(_ ==> List((1, 2), (2, 4)))
         _ <- Ns.i.long(avg).a1.query.get.map(_ ==> List((1, 2), (2, 4)))
         _ <- Ns.i.float(avg).a1.query.get.map(_ ==> List((1, 2), (2, 4)))
         _ <- Ns.i.double(avg).a1.query.get.map(_ ==> List((1, 2), (2, 4)))
@@ -254,9 +236,7 @@ trait SortAggr extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
         _ <- Ns.i.short(avg).a1.query.get.map(_ ==> List((1, 2), (2, 4)))
         _ <- Ns.i.ref(avg).a1.query.get.map(_ ==> List((1, 2), (2, 4)))
 
-        _ <- Ns.i.int(avg).d1.query.get.map(_ ==> List(
-          (2, 4),
-          (1, 2)))
+        _ <- Ns.i.int(avg).d1.query.get.map(_ ==> List((2, 4), (1, 2)))
         _ <- Ns.i.long(avg).d1.query.get.map(_ ==> List((2, 4), (1, 2)))
         _ <- Ns.i.float(avg).d1.query.get.map(_ ==> List((2, 4), (1, 2)))
         _ <- Ns.i.double(avg).d1.query.get.map(_ ==> List((2, 4), (1, 2)))
@@ -285,9 +265,7 @@ trait SortAggr extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
         _ <- Ns.i.short.insert((1, short1), (1, short3), (2, short4)).transact
         _ <- Ns.i.ref.insert((1, ref1), (1, ref3), (2, ref4)).transact
 
-        _ <- Ns.i.int(variance).a1.query.get.map(_ ==> List(
-          (2, 0.0),
-          (1, 1.0)))
+        _ <- Ns.i.int(variance).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
         _ <- Ns.i.long(variance).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
         _ <- Ns.i.float(variance).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
         _ <- Ns.i.double(variance).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
@@ -297,9 +275,7 @@ trait SortAggr extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
         _ <- Ns.i.short(variance).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
         _ <- Ns.i.ref(variance).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
 
-        _ <- Ns.i.int(variance).d1.query.get.map(_ ==> List(
-          (1, 1.0),
-          (2, 0.0)))
+        _ <- Ns.i.int(variance).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
         _ <- Ns.i.long(variance).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
         _ <- Ns.i.float(variance).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
         _ <- Ns.i.double(variance).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
@@ -328,9 +304,7 @@ trait SortAggr extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
         _ <- Ns.i.short.insert((1, short1), (1, short3), (2, short4)).transact
         _ <- Ns.i.ref.insert((1, ref1), (1, ref3), (2, ref4)).transact
 
-        _ <- Ns.i.int(stddev).a1.query.get.map(_ ==> List(
-          (2, 0.0),
-          (1, 1.0)))
+        _ <- Ns.i.int(stddev).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
         _ <- Ns.i.long(stddev).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
         _ <- Ns.i.float(stddev).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
         _ <- Ns.i.double(stddev).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
@@ -340,9 +314,7 @@ trait SortAggr extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
         _ <- Ns.i.short(stddev).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
         _ <- Ns.i.ref(stddev).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
 
-        _ <- Ns.i.int(stddev).d1.query.get.map(_ ==> List(
-          (1, 1.0),
-          (2, 0.0)))
+        _ <- Ns.i.int(stddev).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
         _ <- Ns.i.long(stddev).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
         _ <- Ns.i.float(stddev).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
         _ <- Ns.i.double(stddev).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))

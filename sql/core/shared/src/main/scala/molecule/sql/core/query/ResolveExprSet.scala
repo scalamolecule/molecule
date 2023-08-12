@@ -2,9 +2,10 @@ package molecule.sql.core.query
 
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
+import molecule.core.util.AggrUtils
 import scala.reflect.ClassTag
 
-trait ResolveExprSet[Tpl] { self: SqlModel2Query[Tpl] with LambdasSet =>
+trait ResolveExprSet[Tpl] extends AggrUtils { self: SqlModel2Query[Tpl] with LambdasSet =>
 
   protected def resolveAttrSetMan(attr: AttrSetMan): Unit = {
     aritiesAttr()
@@ -69,7 +70,6 @@ trait ResolveExprSet[Tpl] { self: SqlModel2Query[Tpl] with LambdasSet =>
 
   private def man[T: ClassTag](attr: Attr, args: Seq[Set[T]], res: ResSet[T]): Unit = {
     val col = getCol(attr: Attr)
-    select += col
     if (isNestedOpt) {
       addCast(res.sql2setOrNull)
     } else {
@@ -82,7 +82,7 @@ trait ResolveExprSet[Tpl] { self: SqlModel2Query[Tpl] with LambdasSet =>
         // Runtime check needed since we can't type infer it
         throw ModelError(s"Cardinality-set filter attributes not allowed to do additional filtering. Found:\n  " + attr)
       }
-      expr(col, attr.op, args, res)
+      expr(col, attr.op, args, res, "man")
       //      filterAttrVars1 = filterAttrVars1 + (a -> (e, v))
       //      filterAttrVars2.get(a).foreach(_(e, v))
     } { filterAttr =>
@@ -93,13 +93,15 @@ trait ResolveExprSet[Tpl] { self: SqlModel2Query[Tpl] with LambdasSet =>
   private def tac[T: ClassTag](attr: Attr, args: Seq[Set[T]], res: ResSet[T]): Unit = {
     val col = getCol(attr: Attr)
     attr.filterAttr.fold {
-      expr(col, attr.op, args, res)
+      expr(col, attr.op, args, res, "tac")
       //      filterAttrVars1 = filterAttrVars1 + (a -> (e, v))
       //      filterAttrVars2.get(a).foreach(_(e, v))
     } { filterAttr =>
       expr2(col, attr.op, s":${filterAttr.ns}/${filterAttr.attr}")
     }
+    notNull += col
   }
+
 
   private def opt[T: ClassTag](attr: Attr, optSets: Option[Seq[Set[T]]], resOpt: ResSetOpt[T]): Unit = {
     val col = getCol(attr: Attr)
@@ -107,29 +109,21 @@ trait ResolveExprSet[Tpl] { self: SqlModel2Query[Tpl] with LambdasSet =>
     addCast(resOpt.sql2setOpt)
     attr.op match {
       case V     => ()
-      case Eq    => optEq(col, optSets, resOpt.set2sql)
-      case Neq   => optNeq(col, optSets, resOpt.set2sql)
+      case Eq    => optEqual(col, optSets, resOpt.set2sqls)
+      case Neq   => optNeq(col, optSets, resOpt.set2sqls)
       case Has   => optHas(col, optSets, resOpt.one2sql)
       case HasNo => optHasNo(col, optSets, resOpt.one2sql)
-      case HasLt => optCompare(col, optSets, "<", resOpt.one2sql)
-      case HasGt => optCompare(col, optSets, ">", resOpt.one2sql)
-      case HasLe => optCompare(col, optSets, "<=", resOpt.one2sql)
-      case HasGe => optCompare(col, optSets, ">=", resOpt.one2sql)
       case other => unexpectedOp(other)
     }
   }
 
-  private def expr[T: ClassTag](col: String, op: Op, sets: Seq[Set[T]], res: ResSet[T]): Unit = {
+  private def expr[T: ClassTag](col: String, op: Op, sets: Seq[Set[T]], res: ResSet[T], mode: String): Unit = {
     op match {
-      case V         => ()
-      case Eq        => equal(col, sets, res.set2sql)
-      case Neq       => neq(col, sets, res.set2sql)
+      case V         => attr(col, res, mode)
+      case Eq        => equal(col, sets, res.set2sqls)
+      case Neq       => neq(col, sets, res.set2sqls)
       case Has       => has(col, sets, res.one2sql)
       case HasNo     => hasNo(col, sets, res.one2sql)
-      case HasLt     => compare(col, sets.head.head, "<", res.one2sql)
-      case HasGt     => compare(col, sets.head.head, ">", res.one2sql)
-      case HasLe     => compare(col, sets.head.head, "<=", res.one2sql)
-      case HasGe     => compare(col, sets.head.head, ">=", res.one2sql)
       case NoValue   => noValue(col)
       case Fn(kw, n) => aggr(col, kw, n, res)
       case other     => unexpectedOp(other)
@@ -142,110 +136,262 @@ trait ResolveExprSet[Tpl] { self: SqlModel2Query[Tpl] with LambdasSet =>
       case Neq   => neq2(col, filterAttr)
       case Has   => has2(col, filterAttr)
       case HasNo => hasNo2(col, filterAttr)
-      case HasLt => compare2(col, "<", filterAttr)
-      case HasGt => compare2(col, ">", filterAttr)
-      case HasLe => compare2(col, "<=", filterAttr)
-      case HasGe => compare2(col, ">=", filterAttr)
       case other => unexpectedOp(other)
     }
   }
 
 
+  private def attr[T](col: String, res: ResSet[T], mode: String): Unit = {
+    select += s"ARRAY_AGG($col)"
+    aggregate = true
+    mode match {
+      case "man" => replaceCast(res.nestedArray2coalescedSet)
+      case "tac" => ()
+    }
+  }
+
   private def aggr[T](col: String, fn: String, optN: Option[Int], res: ResSet[T]): Unit = {
     lazy val n = optN.getOrElse(0)
     // Replace find/casting with aggregate function/cast
-    //    select -= s"(distinct $v)"
+    select -= s"ARRAY_AGG($col)"
+
     fn match {
       case "distinct" =>
-      //        val (v1, v2, e1) = (v + 1, v + 2, e + 1)
-      //        select += s"(distinct $v2)"
-      //        whereOLD += s"[$e $a $v$tx]" -> wClause
-      //        whereOLD +=
-      //          s"""[(datomic.api/q
-      //             |          "[:find (distinct $v1)
-      //             |            :in $$ $e1
-      //             |            :where [$e1 $a $v1]]" $$ $e) [[$v2]]]""".stripMargin -> wClause
-      //        replaceCast(res.sets)
+        select += s"ARRAY_AGG(DISTINCT $col)"
+        groupByCols -= col
+        aggregate = true
+        replaceCast(res.nestedArray2nestedSet)
 
       case "mins" =>
-      //        select += s"(min $n $v)"
-      //        replaceCast(res.vector2set)
+        select += s"ARRAY_AGG(DISTINCT $col)"
+        groupByCols -= col
+        aggregate = true
+        replaceCast(res.nestedArray2setAsc(n))
 
       case "min" =>
-      //        select += s"(min 1 $v)"
-      //        replaceCast(res.vector2set)
+        select += s"MIN($col)"
+        groupByCols -= col
+        aggregate = true
+        replaceCast(res.array2setFirst)
 
       case "maxs" =>
-      //        select += s"(max $n $v)"
-      //        replaceCast(res.vector2set)
+        select += s"ARRAY_AGG(DISTINCT $col)"
+        groupByCols -= col
+        aggregate = true
+        replaceCast(res.nestedArray2setDesc(n))
 
       case "max" =>
-      //        select += s"(max 1 $v)"
-      //        replaceCast(res.vector2set)
+        select += s"MAX($col)"
+        groupByCols -= col
+        aggregate = true
+        replaceCast(res.array2setLast)
 
       case "rands" =>
-      //        select += s"(rand $n $v)"
-      //        replaceCast(res.vector2set)
+        select +=
+          s"""ARRAY_SLICE(
+             |    ARRAY_AGG($col order by RAND()),
+             |    1,
+             |    LEAST(
+             |      $n,
+             |      ARRAY_LENGTH(ARRAY_AGG($col))
+             |    )
+             |  )""".stripMargin
+        groupByCols -= col
+        aggregate = true
+        replaceCast(res.nestedArray2coalescedSet)
 
       case "rand" =>
-      //        select += s"(rand 1 $v)"
-      //        replaceCast(res.vector2set)
+        distinct = false
+        select += col
+        orderBy += ((level, -1, "RAND()", ""))
+        limitClause = "1"
+        replaceCast(res.nestedArray2coalescedSet)
+
 
       case "samples" =>
-      //        select += s"(sample $n $v)"
-      //        replaceCast(res.vector2set)
+        select +=
+          s"""ARRAY_SLICE(
+             |    ARRAY_AGG(DISTINCT $col order by RAND()),
+             |    1,
+             |    LEAST(
+             |      $n,
+             |      ARRAY_LENGTH(ARRAY_AGG(DISTINCT $col))
+             |    )
+             |  )""".stripMargin
+        groupByCols -= col
+        aggregate = true
+        replaceCast(res.nestedArray2coalescedSet)
 
       case "sample" =>
-      //        select += s"(sample 1 $v)"
-      //        replaceCast(res.vector2set)
+        distinct = false
+        select += col
+        orderBy += ((level, -1, "RAND()", ""))
+        limitClause = "1"
+        replaceCast(res.nestedArray2coalescedSet)
 
       case "count" =>
-      //        select += s"(count $v)"
-      //        widh += e
-      //        replaceCast(toInt)
+        // Count of all (non-unique) values
+        select += s"ARRAY_AGG($col)"
+        groupByCols -= col
+        aggregate = true
+        replaceCast(
+          (row: Row, n: Int) => {
+            val outerArrayResultSet = row.getArray(n).getResultSet
+            var count               = 0
+            while (outerArrayResultSet.next()) {
+              count += outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]].length
+            }
+            count
+          }
+        )
 
       case "countDistinct" =>
-      //        select += s"(count-distinct $v)"
-      //        widh += e
-      //        replaceCast(toInt)
+        // Count of unique values (Set semantics)
+        select += s"ARRAY_AGG($col)"
+        groupByCols -= col
+        aggregate = true
+        replaceCast(
+          (row: Row, n: Int) => {
+            val outerArrayResultSet = row.getArray(n).getResultSet
+            var set                 = Set.empty[Any]
+            while (outerArrayResultSet.next()) {
+              outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]].foreach { value =>
+                set += value
+              }
+            }
+            set.size
+          }
+        )
 
       case "sum" =>
-      //        select += s"(sum $v)"
-      //        replaceCast(res.j2sSet)
+        // Sum of unique values (Set semantics)
+        select += s"ARRAY_AGG($col)"
+        groupByCols -= col
+        aggregate = true
+        replaceCast(res.array2setSum)
 
       case "median" =>
-      //        select += s"(median $v)"
-      //        replaceCast(res.j2sSet)
+        // Using brute force and collecting all unique values to calculate the median value
+        // Median of unique values (Set semantics)
+        select += s"ARRAY_AGG($col)"
+        groupByCols -= col
+        aggregate = true
+        replaceCast(
+          (row: Row, n: Int) => {
+            val outerArrayResultSet = row.getArray(n).getResultSet
+            var set                 = Set.empty[Double]
+            while (outerArrayResultSet.next()) {
+              val array = outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]]
+              array.foreach(v => set += v.toString.toDouble) // not the most efficient...
+            }
+//            val values = set.toList.sorted
+//            val count  = values.length
+//            if (count % 2 == 1) {
+//              val indexOfMiddleValue = (count - 1) / 2
+//              values(indexOfMiddleValue)
+//            } else {
+//              val i2      = count / 2
+//              val middle1 = values(i2 - 1)
+//              val middle2 = values(i2)
+//              (middle1 + middle2) / 2
+//            }
+            getMedian(set)
+          }
+        )
+        // select += s"MEDIAN(ALL $col)" // other semantics
 
       case "avg" =>
-      //        select += s"(avg $v)"
-      //        replaceCast(res.j2sSet)
+        // Average of unique values (Set semantics)
+        select += s"ARRAY_AGG($col)"
+        groupByCols -= col
+        aggregate = true
+        replaceCast(
+          (row: Row, n: Int) => {
+            val outerArrayResultSet = row.getArray(n).getResultSet
+            var set                 = Set.empty[Double]
+            while (outerArrayResultSet.next()) {
+              val array = outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]]
+              array.foreach(v => set += v.toString.toDouble) // not the most efficient...
+            }
+            set.sum / set.size
+          }
+        )
+        // select += s"AVG(DISTINCT $col)" // other semantics
 
       case "variance" =>
-      //        select += s"(variance $v)"
-      //        replaceCast(res.j2sSet)
+        // Variance of unique values (Set semantics)
+        select += s"ARRAY_AGG($col)"
+        groupByCols -= col
+        aggregate = true
+        replaceCast(
+          (row: Row, n: Int) => {
+            val outerArrayResultSet = row.getArray(n).getResultSet
+            var set                 = Set.empty[Double]
+            while (outerArrayResultSet.next()) {
+              val array = outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]]
+              array.foreach(v => set += v.toString.toDouble) // not the most efficient...
+            }
+            varianceOf(set.toList: _*)
+          }
+        )
+        // select += s"VAR_POP($col)" // other semantics
+        // select += s"VAR_SAMP($col)" // other semantics
 
       case "stddev" =>
-      //        select += s"(stddev $v)"
-      //        replaceCast(res.j2sSet)
+        // Standard deviation of unique values (Set semantics)
+        select += s"ARRAY_AGG($col)"
+        groupByCols -= col
+        aggregate = true
+        replaceCast(
+          (row: Row, n: Int) => {
+            val outerArrayResultSet = row.getArray(n).getResultSet
+            var set                 = Set.empty[Double]
+            while (outerArrayResultSet.next()) {
+              val array = outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]]
+              array.foreach(v => set += v.toString.toDouble) // not the most efficient...
+            }
+            stdDevOf(set.toList: _*)
+          }
+        )
+        // select += s"STDDEV($col)" // other semantics
 
       case other => unexpectedKw(other)
     }
-    //    whereOLD += s"[$e $a $v$tx]" -> wClause
   }
 
+  private def matchSet(set: Set[String], col: String): String = {
+    set
+      .map(v => s"ARRAY_CONTAINS($col, $v)")
+      .mkString("(\n    ", " AND\n    ", s" AND\n    CARDINALITY($col) = ${set.size}\n  )")
+  }
 
-  private def equal[T](col: String, sets: Seq[Set[T]], set2sql: Set[T] => String): Unit = {
-    val sets1 = sets.filterNot(_.isEmpty)
-    sets1.length match {
+  private def matchSets[T](sets: Seq[Set[T]], col: String, set2sqls: Set[T] => Set[String]): String = {
+    sets.map { set =>
+      set2sqls(set)
+        .map(v => s"ARRAY_CONTAINS($col, $v)")
+        .mkString("", " AND\n      ", s" AND\n      CARDINALITY($col) = " + set.size)
+    }.mkString("(\n    (\n      ", "\n    ) OR (\n      ", "\n    )\n  )")
+  }
+
+  private def equal[T](col: String, sets: Seq[Set[T]], set2sqls: Set[T] => Set[String]): Unit = {
+    select += col
+    val setsNonEmpty = sets.filterNot(_.isEmpty)
+    setsNonEmpty.length match {
       case 0 => where += (("FALSE", ""))
-      case 1 =>
-        if (sets1.head.nonEmpty)
-          where += ((col, "= " + set2sql(sets1.head)))
-      case _ =>
-        where += ((col, sets1.map(set2sql).mkString("IN (", ", ", ")")))
+      case 1 => where += (("", matchSet(set2sqls(setsNonEmpty.head), col)))
+      case _ => where += (("", matchSets(setsNonEmpty, col, set2sqls)))
     }
   }
+
+  private def optEqual[T](col: String, optSets: Option[Seq[Set[T]]], set2sqls: Set[T] => Set[String]): Unit = {
+    select += col
+    optSets.fold[Unit] {
+      where += ((col, s"IS NULL"))
+    } { sets =>
+      equal(col, sets, set2sqls)
+    }
+  }
+
   private def equal2(col: String, filterAttr: String): Unit = {
     //    preFind = e
     //    whereOLD += s"[$e $a $v$tx]" -> wClause
@@ -269,14 +415,24 @@ trait ResolveExprSet[Tpl] { self: SqlModel2Query[Tpl] with LambdasSet =>
     //}
   }
 
-  private def neq[T](col: String, sets: Seq[Set[T]], set2sql: Set[T] => String): Unit = {
-    val sets1 = sets.filterNot(_.isEmpty)
-    sets1.length match {
+  private def neq[T](col: String, sets: Seq[Set[T]], set2sqls: Set[T] => Set[String]): Unit = {
+    select += col
+    val setsNonEmpty = sets.filterNot(_.isEmpty)
+    setsNonEmpty.length match {
       case 0 => ()
-      case 1 => where += ((col, "<> " + set2sql(sets1.head)))
-      case _ => where += ((col, sets1.map(set2sql).mkString("NOT IN (", ", ", ")")))
+      case 1 => where += (("", "NOT " + matchSet(set2sqls(setsNonEmpty.head), col)))
+      case _ => where += (("", "NOT " + matchSets(setsNonEmpty, col, set2sqls)))
     }
   }
+
+  private def optNeq[T](col: String, optSets: Option[Seq[Set[T]]], set2sqls: Set[T] => Set[String]): Unit = {
+    select += col
+    if (optSets.isDefined && optSets.get.nonEmpty) {
+      neq(col, optSets.get, set2sqls)
+    }
+    notNull += col
+  }
+
   private def neq2(col: String, filterAttr: String): Unit = {
     //    whereOLD += s"[$e $a $v$tx]" -> wClause
     //    val process: (Var, Var) => Unit = (e1: Var, v1: Var) => {
@@ -312,6 +468,7 @@ trait ResolveExprSet[Tpl] { self: SqlModel2Query[Tpl] with LambdasSet =>
   private def has[T: ClassTag](col: String, sets: Seq[Set[T]], one2sql: T => String): Unit = {
     def contains(v: T): String = s"ARRAY_CONTAINS($col, ${one2sql(v)})"
     def containsSet(set: Set[T]): String = set.map(contains).mkString("(", " AND\n   ", ")")
+    select += col
     sets.length match {
       case 0 => where += (("FALSE", ""))
       case 1 =>
@@ -328,6 +485,21 @@ trait ResolveExprSet[Tpl] { self: SqlModel2Query[Tpl] with LambdasSet =>
         where += (("", expr))
     }
   }
+
+
+  private def optHas[T: ClassTag](
+    col: String,
+    optSets: Option[Seq[Set[T]]],
+    one2sql: T => String
+  ): Unit = {
+    select += col
+    optSets.fold[Unit] {
+      where += ((col, s"IS NULL"))
+    } { sets =>
+      has(col, sets, one2sql)
+    }
+  }
+
   private def has2(col: String, filterAttr: String): Unit = {
     //    whereOLD += s"[$e $a $v$tx]" -> wClause
     //    val process: (Var, Var) => Unit = (e1: Var, v1: Var) => {
@@ -354,12 +526,14 @@ trait ResolveExprSet[Tpl] { self: SqlModel2Query[Tpl] with LambdasSet =>
   private def hasNo[T](col: String, sets: Seq[Set[T]], one2sql: T => String): Unit = {
     def notContains(v: T): String = s"NOT ARRAY_CONTAINS($col, ${one2sql(v)})"
     def notContainsSet(set: Set[T]): String = set.map(notContains).mkString("(", " OR\n   ", ")")
+
+    select += col
     sets.length match {
-      case 0 => //where += (("FALSE", ""))
+      case 0 => ()
       case 1 =>
         val set = sets.head
         set.size match {
-          case 0 => //where += (("FALSE", ""))
+          case 0 => ()
           case 1 => where += (("", notContains(set.head)))
           case _ => where += (("", notContainsSet(set)))
         }
@@ -370,6 +544,25 @@ trait ResolveExprSet[Tpl] { self: SqlModel2Query[Tpl] with LambdasSet =>
         where += (("", expr))
     }
   }
+
+  private def optHasNo[T](
+    col: String,
+    optSets: Option[Seq[Set[T]]],
+    one2sql: T => String
+  ): Unit = {
+    select += col
+    optSets.fold[Unit] {
+      where += ((col, s"IS NOT NULL"))
+    } { sets =>
+      val setsWithValues = sets.filterNot(_.isEmpty)
+      if (setsWithValues.nonEmpty) {
+        hasNo(col, sets.filterNot(_.isEmpty), one2sql)
+      } else {
+        where += ((col, s"IS NOT NULL"))
+      }
+    }
+  }
+
   private def hasNo2(col: String, filterAttr: String): Unit = {
     //    // Common for pre-query and main query
     //    whereOLD += s"[$e $a $v$tx]" -> wClause
@@ -394,148 +587,9 @@ trait ResolveExprSet[Tpl] { self: SqlModel2Query[Tpl] with LambdasSet =>
     //    }
   }
 
-  private def compare[T](col: String, arg: T, op: String, one2sql: T => String): Unit = {
-    //    def contains(v: T): String = s"ARRAY_CONTAINS($col, ${one2sql(v)})"
-    //    def containsSet(set: Set[T]): String = set.map(contains).mkString("(", " AND\n   ", ")")
-    //    sets.length match {
-    //      case 0 => where += (("FALSE", ""))
-    //      case 1 =>
-    //        val set = sets.head
-    //        set.size match {
-    //          case 0 => where += (("FALSE", ""))
-    //          case 1 => where += (("", contains(set.head)))
-    //          case _ => where += (("", containsSet(set)))
-    //        }
-    //      case _ =>
-    //        val expr = sets
-    //          .filterNot(_.isEmpty)
-    //          .map(containsSet).mkString("(", " OR\n   ", ")")
-    //        where += (("", expr))
-    //    }
-
-    //    val expr =  s"${one2sql(arg)} $op ALL($col)"
-    //    val expr =  s"ANY(SELECT * FROM UNNEST($col)) $op ${one2sql(arg)}"
-    //    val expr = s"1 = ANY(SELECT * FROM UNNEST($col))"
-    //    where += (("", expr))
-    noSetCompareYet()
-  }
-  private def compare2(col: String, op: String, filterAttr: String): Unit = {
-    //    whereOLD += s"[$e $a $v$tx]" -> wClause
-    //    val process: (Var, Var) => Unit = (e1: Var, v1: Var) => {
-    //      whereOLD +=
-    //        s"""[(datomic.api/q
-    //           |          "[:find $e
-    //           |            :in $$ $e $v1
-    //           |            :where [$e $a $v][($op $v $v1)]]" $$ $e $v1) [[${e}1]]]""".stripMargin -> wClause
-    //    }
-    //    filterAttrVars1.get(filterAttr).fold {
-    //      filterAttrVars2 = filterAttrVars2 + (filterAttr -> process)
-    //    } { case (e, a) =>
-    //      process(e, a)
-    //    }
-  }
-
   private def noValue(col: String): Unit = {
+    select += col
     notNull -= col
     where += ((col, s"IS NULL"))
-  }
-
-
-  private def optHas[T: ClassTag](
-    col: String,
-    optSets: Option[Seq[Set[T]]],
-    one2sql: T => String
-  ): Unit = {
-    optSets.fold[Unit] {
-      where += ((col, s"IS NULL"))
-    } { sets =>
-      has(col, sets, one2sql)
-    }
-  }
-
-  private def optHasNo[T](
-    col: String,
-    optSets: Option[Seq[Set[T]]],
-    one2sql: T => String
-  ): Unit = {
-    optSets.fold[Unit] {
-      where += ((col, s"IS NOT NULL"))
-    } { sets =>
-      val setsWithValues = sets.filterNot(_.isEmpty)
-      if (setsWithValues.nonEmpty) {
-        hasNo(col, sets.filterNot(_.isEmpty), one2sql)
-      } else {
-        where += ((col, s"IS NOT NULL"))
-      }
-    }
-  }
-
-  private def optEq[T](col: String, optSets: Option[Seq[Set[T]]], set2sql: Set[T] => String): Unit = {
-    optSets.fold[Unit] {
-      where += ((col, s"IS NULL"))
-    } { sets =>
-      equal(col, sets, set2sql)
-    }
-  }
-
-  private def optNeq[T](col: String, optSets: Option[Seq[Set[T]]], set2sql: Set[T] => String): Unit = {
-    if (optSets.isDefined && optSets.get.nonEmpty) {
-      neq(col, optSets.get, set2sql)
-    }
-    notNull += col
-  }
-
-  private def optCompare[T](
-    col: String,
-    optSets: Option[Seq[Set[T]]],
-    op: String,
-    one2sql: T => String
-  ): Unit = {
-    optSets.fold[Unit] {
-      where += (("FALSE", ""))
-    } { sets =>
-      //      compare(col, sets.head.head, op, one2sql)
-      noSetCompareYet()
-    }
-  }
-
-  private def noSetCompareYet(): Unit = {
-    throw ModelError("Comparing values of Arrays in H2 database not supported yet")
-  }
-
-  private def mkRules[T](col: String, sets: Seq[Set[T]], tpe: String, toDatalog: T => String): Seq[String] = {
-    tpe match {
-      case "Float" =>
-        sets.flatMap {
-          case set if set.isEmpty => None
-          case set                => Some(
-            //            set.zipWithIndex.map { case (arg, i) =>
-            //              // Coerce Datomic float values for correct comparison (don't know why this is necessary)
-            //              // See example: https://clojurians-log.clojureverse.org/datomic/2019-10-29
-            //              s"""[$e $a $v$i] [(float $v$i) $v$i-float] [(= $v$i-float (float $arg))]"""
-            //            }.mkString(s"[(rule$v $e)\n    ", "\n    ", "]")
-            "??"
-          )
-        }
-      case "URI"   =>
-        sets.flatMap {
-          case set if set.isEmpty => None
-          case set                => Some(
-            //            set.zipWithIndex.map { case (arg, i) =>
-            //              s"""[(ground (new java.net.URI "$arg")) $v$i-uri] [$e $a $v$i-uri]"""
-            //            }.mkString(s"[(rule$v $e)\n    ", "\n    ", "]")
-            "??"
-          )
-        }
-      case _       =>
-        sets.flatMap {
-          case set if set.isEmpty => None
-          case set                => Some(
-            //            set.map(arg => s"[$e $a ${toDatalog(arg)}]")
-            //              .mkString(s"[(rule$v $e)\n    ", "\n    ", "]")
-            "??"
-          )
-        }
-    }
   }
 }

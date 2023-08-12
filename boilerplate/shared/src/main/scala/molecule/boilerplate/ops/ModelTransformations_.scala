@@ -14,8 +14,8 @@ trait ModelTransformations_ {
 
   protected def toInt(es: List[Element], kw: Kw): List[Element] = {
     val last = es.last match {
-      case a: AttrOneMan => AttrOneManInt(a.ns, a.attr, Fn(kw.toString))
-      case a: AttrSetMan => AttrSetManInt(a.ns, a.attr, Fn(kw.toString))
+      case a: AttrOneMan => AttrOneManInt(a.ns, a.attr, Fn(kw.toString), refNs = a.refNs)
+      case a: AttrSetMan => AttrSetManInt(a.ns, a.attr, Fn(kw.toString), refNs = a.refNs)
       case a             => unexpected(a)
     }
     es.init :+ last
@@ -23,8 +23,8 @@ trait ModelTransformations_ {
 
   protected def toDouble(es: List[Element], kw: Kw): List[Element] = {
     val last = es.last match {
-      case a: AttrOneMan => AttrOneManDouble(a.ns, a.attr, Fn(kw.toString))
-      case a: AttrSetMan => AttrSetManDouble(a.ns, a.attr, Fn(kw.toString))
+      case a: AttrOneMan => AttrOneManDouble(a.ns, a.attr, Fn(kw.toString), refNs = a.refNs)
+      case a: AttrSetMan => AttrSetManDouble(a.ns, a.attr, Fn(kw.toString), refNs = a.refNs)
       case a             => unexpected(a)
     }
     es.init :+ last
@@ -949,7 +949,7 @@ trait ModelTransformations_ {
               case a: AttrSetTacChar       => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
             }
 
-            case a: AttrSetOpt             => unexpected(a)
+            case a: AttrSetOpt => unexpected(a)
           }
         }
       case e       => unexpected(e)

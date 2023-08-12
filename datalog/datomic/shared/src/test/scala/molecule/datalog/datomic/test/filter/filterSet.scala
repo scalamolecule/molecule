@@ -1,7 +1,6 @@
 package molecule.datalog.datomic.test.filter
 
 import molecule.coreTests.test.filter.set._
-import molecule.coreTests.test.filter.set.compare._
 import molecule.datalog.datomic.setup.CoreTestAsync
 
 object FilterSet_String_ extends FilterSet_String_ with CoreTestAsync
@@ -18,20 +17,5 @@ object FilterSet_URI_ extends FilterSet_URI_ with CoreTestAsync
 object FilterSet_Byte_ extends FilterSet_Byte_ with CoreTestAsync
 object FilterSet_Short_ extends FilterSet_Short_ with CoreTestAsync
 object FilterSet_Char_ extends FilterSet_Char_ with CoreTestAsync
-object FilterSet_ref_ extends FilterSet_ref_ with CoreTestAsync
 
-object FilterSetCompare_String_ extends FilterSetCompare_String_ with CoreTestAsync
-object FilterSetCompare_Int extends FilterSetCompare_Int with CoreTestAsync
-object FilterSetCompare_Long_ extends FilterSetCompare_Long_ with CoreTestAsync
-object FilterSetCompare_Float_ extends FilterSetCompare_Float_ with CoreTestAsync
-object FilterSetCompare_Double_ extends FilterSetCompare_Double_ with CoreTestAsync
-object FilterSetCompare_Boolean extends FilterSetCompare_Boolean with CoreTestAsync
-object FilterSetCompare_BigInt_ extends FilterSetCompare_BigInt_ with CoreTestAsync
-object FilterSetCompare_BigDecimal_ extends FilterSetCompare_BigDecimal_ with CoreTestAsync
-object FilterSetCompare_Date_ extends FilterSetCompare_Date_ with CoreTestAsync
-object FilterSetCompare_UUID_ extends FilterSetCompare_UUID_ with CoreTestAsync
-object FilterSetCompare_URI_ extends FilterSetCompare_URI_ with CoreTestAsync
-object FilterSetCompare_Byte_ extends FilterSetCompare_Byte_ with CoreTestAsync
-object FilterSetCompare_Short_ extends FilterSetCompare_Short_ with CoreTestAsync
-object FilterSetCompare_Char_ extends FilterSetCompare_Char_ with CoreTestAsync
-object FilterSetCompare_ref_ extends FilterSetCompare_ref_ with CoreTestAsync
+object FilterSet_ref_ extends FilterSet_ref with CoreTestAsync

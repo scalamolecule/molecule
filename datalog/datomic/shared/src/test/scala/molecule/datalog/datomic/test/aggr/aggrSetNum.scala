@@ -11,4 +11,4 @@ object AggrSetNum_BigInt extends AggrSetNum_BigInt_ with CoreTestAsync
 object AggrSetNum_BigDecimal extends AggrSetNum_BigDecimal_ with CoreTestAsync
 object AggrSetNum_Byte extends AggrSetNum_Byte_ with CoreTestAsync
 object AggrSetNum_Short extends AggrSetNum_Short_ with CoreTestAsync
-object AggrSetNum_ref extends AggrSetNum_ref_ with CoreTestAsync
+object AggrSetNum_ref extends AggrSetNum_ref with CoreTestAsync

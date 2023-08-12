@@ -12,7 +12,6 @@ trait TestData extends DateHandling {
     val month = i % 2 * 6 + 1
     str2date((2000 + i).toString + "-" + month)
   }
-  private def uu: UUID = randomUUID()
   private def ur(i: Int): URI = new URI("uri" + i)
   private def bi(i: Int): BigInt = BigInt(i)
   private def bd(d: Double): BigDecimal = BigDecimal(d)
@@ -48,16 +47,27 @@ trait TestData extends DateHandling {
     (bd(0.0), bd(1.1), bd(2.2), bd(3.3), bd(4.4), bd(5.5), bd(6.6), bd(7.7), bd(8.8), bd(9.9))
 
   lazy val List(uuid0, uuid1, uuid2, uuid3, uuid4, uuid5, uuid6, uuid7, uuid8, uuid9) =
-    List(uu, uu, uu, uu, uu, uu, uu, uu, uu, uu).sorted
+    (0 to 9).toList.map(i => new UUID(0, i))
 
   lazy val (char0, char1, char2, char3, char4, char5, char6, char7, char8, char9)
   : (Char, Char, Char, Char, Char, Char, Char, Char, Char, Char) =
     ('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j')
 
-  lazy val List(byte0, byte1, byte2, byte3, byte4, byte5, byte6, byte7, byte8, byte9) = (0 to 9).toList.map(_.toByte)
+  lazy val List(byte0, byte1, byte2, byte3, byte4, byte5, byte6, byte7, byte8, byte9) =
+    (0 to 9).toList.map(_.toByte)
 
-  lazy val List(short0, short1, short2, short3, short4, short5, short6, short7, short8, short9) = (0 to 9).toList.map(_.toShort)
+  lazy val List(short0, short1, short2, short3, short4, short5, short6, short7, short8, short9) =
+    (0 to 9).toList.map(_.toShort)
 
   lazy val (ref0, ref1, ref2, ref3, ref4, ref5, ref6, ref7, ref8, ref9) =
     (0L, 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L)
+
+  lazy val toleranceBigDecimal: BigDecimal = BigDecimal(0.001)
+  lazy val toleranceDouble    : Double     = 0.001
+  lazy val toleranceFloat     : Float      = 0.001F
+  lazy val toleranceBigInt    : BigInt     = BigInt(0)
+  lazy val toleranceLong      : Long       = 0L
+  lazy val toleranceInt       : Int        = 0
+  lazy val toleranceShort     : Short      = 0.toShort
+  lazy val toleranceByte      : Byte       = 0.toByte
 }

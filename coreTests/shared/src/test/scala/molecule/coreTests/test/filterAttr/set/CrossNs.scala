@@ -66,38 +66,5 @@ trait CrossNs extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
         _ <- Ns.int.ints.Ref.ints.hasNo(Ns.int_).int.query.get.map(_ ==> List())
       } yield ()
     }
-
-
-    "hasLt - Sets with at least one value less than other attribute value" - types { implicit conn =>
-      for {
-        _ <- Ns.int.ints.Ref.ints.int.insert(a, b, c).transact
-        _ <- Ns.int.ints.hasLt(Ref.int_).Ref.ints.int.query.get.map(_ ==> List(a, b))
-        _ <- Ns.int.ints.Ref.ints.hasLt(Ns.int_).int.query.get.map(_ ==> List())
-      } yield ()
-    }
-
-    "hasLe - Sets with at least one value less than or equal to other attribute value" - types { implicit conn =>
-      for {
-        _ <- Ns.int.ints.Ref.ints.int.insert(a, b, c).transact
-        _ <- Ns.int.ints.hasLe(Ref.int_).Ref.ints.int.query.get.map(_ ==> List(a, b, c))
-        _ <- Ns.int.ints.Ref.ints.hasLe(Ns.int_).int.query.get.map(_ ==> List(a, b, c))
-      } yield ()
-    }
-
-    "hasGt - Sets with at least one value greater than other attribute value" - types { implicit conn =>
-      for {
-        _ <- Ns.int.ints.Ref.ints.int.insert(a, b, c).transact
-        _ <- Ns.int.ints.hasGt(Ref.int_).Ref.ints.int.query.get.map(_ ==> List())
-        _ <- Ns.int.ints.Ref.ints.hasGt(Ns.int_).int.query.get.map(_ ==> List(a, b))
-      } yield ()
-    }
-
-    "hasGe - Sets with at least one value greater than or equal to other attribute value" - types { implicit conn =>
-      for {
-        _ <- Ns.int.ints.Ref.ints.int.insert(a, b, c).transact
-        _ <- Ns.int.ints.hasGe(Ref.int_).Ref.ints.int.query.get.map(_ ==> List(a, b, c))
-        _ <- Ns.int.ints.Ref.ints.hasGe(Ns.int_).int.query.get.map(_ ==> List(a, b, c))
-      } yield ()
-    }
   }
 }

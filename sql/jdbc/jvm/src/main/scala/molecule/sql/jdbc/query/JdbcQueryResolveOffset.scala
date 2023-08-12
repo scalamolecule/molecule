@@ -48,6 +48,7 @@ case class JdbcQueryResolveOffset[Tpl](
     if (offset.isDefined && limit.isDefined && limitSign != offsetSign) {
       throw ModelError("Limit and offset should both be positive or negative.")
     }
+
     val sortedRows: Row = getRawData2(conn)
     val totalCount      = getRowCount(sortedRows)
 

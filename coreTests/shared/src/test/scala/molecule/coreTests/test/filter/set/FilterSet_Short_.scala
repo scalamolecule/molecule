@@ -9,7 +9,7 @@ import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 
-trait FilterSet_Short_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
+trait FilterSet_Short_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync =>
 
   override lazy val tests = Tests {
 
@@ -38,10 +38,12 @@ trait FilterSet_Short_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiA
           // "Is exactly this AND that"
           _ <- Ns.i.a1.shorts(Set(short1)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.shorts(Set(short1, short2)).query.get.map(_ ==> List(a)) // include exact match
+          _ <- Ns.i.a1.shorts(Set(short2, short1)).query.get.map(_ ==> List(a)) // include exact match
           _ <- Ns.i.a1.shorts(Set(short1, short2, short3)).query.get.map(_ ==> List())
           // Same as
           _ <- Ns.i.a1.shorts(Seq(Set(short1))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.shorts(Seq(Set(short1, short2))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.shorts(Seq(Set(short2, short1))).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.shorts(Seq(Set(short1, short2, short3))).query.get.map(_ ==> List())
 
 
@@ -50,16 +52,17 @@ trait FilterSet_Short_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiA
           // "(exactly this AND that) OR (exactly this AND that)"
           _ <- Ns.i.a1.shorts(Set(short1), Set(short2, short3)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.shorts(Set(short1, short2), Set(short2, short3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.shorts(Set(short1, short2), Set(short2, short3, short4)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.shorts(Set(short2, short1), Set(short4, short3, short2)).query.get.map(_ ==> List(a, b))
           // Same as
           _ <- Ns.i.a1.shorts(Seq(Set(short1), Set(short2, short3))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.shorts(Seq(Set(short1, short2), Set(short2, short3))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.shorts(Seq(Set(short1, short2), Set(short2, short3, short4))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.shorts(Seq(Set(short2, short1), Set(short4, short3, short2))).query.get.map(_ ==> List(a, b))
 
 
           // Empty Seq/Sets match nothing
           _ <- Ns.i.a1.shorts(Set(short1, short2), Set.empty[Short]).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.shorts(Set.empty[Short], Set(short1, short2)).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.shorts(Set.empty[Short], Set(short2, short1)).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.shorts(Set.empty[Short], Set.empty[Short]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.shorts(Set.empty[Short]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.shorts(Seq.empty[Set[Short]]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.shorts(Seq(Set.empty[Short])).query.get.map(_ ==> List())
@@ -79,23 +82,25 @@ trait FilterSet_Short_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiA
           // "Not (exactly this AND that)"
           _ <- Ns.i.a1.shorts.not(Set(short1)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.shorts.not(Set(short1, short2)).query.get.map(_ ==> List(b)) // exclude exact match
+          _ <- Ns.i.a1.shorts.not(Set(short2, short1)).query.get.map(_ ==> List(b)) // exclude exact match
           _ <- Ns.i.a1.shorts.not(Set(short1, short2, short3)).query.get.map(_ ==> List(a, b))
           // Same as
           _ <- Ns.i.a1.shorts.not(Seq(Set(short1))).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.shorts.not(Seq(Set(short1, short2))).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.shorts.not(Seq(Set(short2, short1))).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.shorts.not(Seq(Set(short1, short2, short3))).query.get.map(_ ==> List(a, b))
 
 
           // AND/OR semantics with multiple Sets
 
-          // "Not (exactly this AND that) OR (exactly this AND that)"
+          // "NEITHER (exactly this AND that) NOR (exactly this AND that)"
           _ <- Ns.i.a1.shorts.not(Set(short1), Set(short2, short3)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.shorts.not(Set(short1, short2), Set(short2, short3)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.shorts.not(Set(short1, short2), Set(short2, short3, short4)).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.shorts.not(Set(short2, short1), Set(short4, short3, short2)).query.get.map(_ ==> List())
           // Same as
           _ <- Ns.i.a1.shorts.not(Seq(Set(short1), Set(short2, short3))).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.shorts.not(Seq(Set(short1, short2), Set(short2, short3))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.shorts.not(Seq(Set(short1, short2), Set(short2, short3, short4))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.shorts.not(Seq(Set(short2, short1), Set(short4, short3, short2))).query.get.map(_ ==> List())
 
 
           // Empty Seq/Sets
@@ -265,25 +270,25 @@ trait FilterSet_Short_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiA
     "Tacit" - {
 
       "attr" - types { implicit conn =>
-        val (a, b) = (1, 2)
         for {
+          _ <- Ns.i(0).save.transact
           _ <- Ns.i.shorts.insert(List(
-            (a, Set(short1, short2)),
-            (b, Set(short2, short3, short4))
+            (1, Set(short1, short2)),
+            (2, Set(short2, short3, short4))
           )).transact
 
-          _ <- Ns.i.a1.shorts_.query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.query.get.map(_ ==> List(0, 1, 2))
+          _ <- Ns.i.a1.shorts_.query.get.map(_ ==> List(1, 2))
         } yield ()
       }
 
 
       "apply (equal)" - types { implicit conn =>
-        val (a, b, x) = (1, 2, 3)
         for {
           _ <- Ns.i.shorts_?.insert(List(
-            (a, Some(Set(short1, short2))),
-            (b, Some(Set(short2, short3, short4))),
-            (x, None),
+            (0, None),
+            (1, Some(Set(short1, short2))),
+            (2, Some(Set(short2, short3, short4))),
           )).transact
 
           // Exact Set matches
@@ -291,11 +296,13 @@ trait FilterSet_Short_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiA
           // AND semantics
           // "Is exactly this AND that"
           _ <- Ns.i.a1.shorts_(Set(short1)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.shorts_(Set(short1, short2)).query.get.map(_ ==> List(a)) // include exact match
+          _ <- Ns.i.a1.shorts_(Set(short1, short2)).query.get.map(_ ==> List(1)) // include exact match
+          _ <- Ns.i.a1.shorts_(Set(short2, short1)).query.get.map(_ ==> List(1)) // include exact match
           _ <- Ns.i.a1.shorts_(Set(short1, short2, short3)).query.get.map(_ ==> List())
           // Same as
           _ <- Ns.i.a1.shorts_(Seq(Set(short1))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.shorts_(Seq(Set(short1, short2))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.shorts_(Seq(Set(short1, short2))).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.shorts_(Seq(Set(short2, short1))).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.shorts_(Seq(Set(short1, short2, short3))).query.get.map(_ ==> List())
 
 
@@ -303,16 +310,16 @@ trait FilterSet_Short_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiA
 
           // "(exactly this AND that) OR (exactly this AND that)"
           _ <- Ns.i.a1.shorts_(Set(short1), Set(short2, short3)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.shorts_(Set(short1, short2), Set(short2, short3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.shorts_(Set(short1, short2), Set(short2, short3, short4)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.shorts_(Set(short1, short2), Set(short2, short3)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.shorts_(Set(short2, short1), Set(short4, short3, short2)).query.get.map(_ ==> List(1, 2))
           // Same as
           _ <- Ns.i.a1.shorts_(Seq(Set(short1), Set(short2, short3))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.shorts_(Seq(Set(short1, short2), Set(short2, short3))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.shorts_(Seq(Set(short1, short2), Set(short2, short3, short4))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.shorts_(Seq(Set(short1, short2), Set(short2, short3))).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.shorts_(Seq(Set(short2, short1), Set(short4, short3, short2))).query.get.map(_ ==> List(1, 2))
 
 
           // Empty Seq/Sets match nothing
-          _ <- Ns.i.a1.shorts_(Set(short1, short2), Set.empty[Short]).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.shorts_(Set(short1, short2), Set.empty[Short]).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.shorts_(Set.empty[Short]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.shorts_(Seq.empty[Set[Short]]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.shorts_(Seq(Set.empty[Short])).query.get.map(_ ==> List())
@@ -321,116 +328,118 @@ trait FilterSet_Short_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiA
 
 
       "not equal" - types { implicit conn =>
-        val (a, b) = (1, 2)
         for {
+          _ <- Ns.i(0).save.transact
           _ <- Ns.i.shorts.insert(List(
-            (a, Set(short1, short2)),
-            (b, Set(short2, short3, short4))
+            (1, Set(short1, short2)),
+            (2, Set(short2, short3, short4))
           )).transact
 
           // Non-exact Set matches
 
           // AND semantics
           // "Not (exactly this AND that)"
-          _ <- Ns.i.a1.shorts_.not(Set(short1)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.shorts_.not(Set(short1, short2)).query.get.map(_ ==> List(b)) // exclude exact match
-          _ <- Ns.i.a1.shorts_.not(Set(short1, short2, short3)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.shorts_.not(Set(short1)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.shorts_.not(Set(short1, short2)).query.get.map(_ ==> List(2)) // exclude exact match
+          _ <- Ns.i.a1.shorts_.not(Set(short2, short1)).query.get.map(_ ==> List(2)) // exclude exact match
+          _ <- Ns.i.a1.shorts_.not(Set(short1, short2, short3)).query.get.map(_ ==> List(1, 2))
           // Same as
-          _ <- Ns.i.a1.shorts_.not(Seq(Set(short1))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.shorts_.not(Seq(Set(short1, short2))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.shorts_.not(Seq(Set(short1, short2, short3))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.shorts_.not(Seq(Set(short1))).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.shorts_.not(Seq(Set(short1, short2))).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.shorts_.not(Seq(Set(short2, short1))).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.shorts_.not(Seq(Set(short1, short2, short3))).query.get.map(_ ==> List(1, 2))
 
 
           // AND/OR semantics with multiple Sets
 
-          // "Not (exactly this AND that) OR (exactly this AND that)"
-          _ <- Ns.i.a1.shorts_.not(Set(short1), Set(short2, short3)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.shorts_.not(Set(short1, short2), Set(short2, short3)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.shorts_.not(Set(short1, short2), Set(short2, short3, short4)).query.get.map(_ ==> List())
+          // "NEITHER (exactly this AND that) NOR (exactly this AND that)"
+          _ <- Ns.i.a1.shorts_.not(Set(short1), Set(short2, short3)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.shorts_.not(Set(short1, short2), Set(short2, short3)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.shorts_.not(Set(short2, short1), Set(short4, short3, short2)).query.get.map(_ ==> List())
           // Same as
-          _ <- Ns.i.a1.shorts_.not(Seq(Set(short1), Set(short2, short3))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.shorts_.not(Seq(Set(short1, short2), Set(short2, short3))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.shorts_.not(Seq(Set(short1, short2), Set(short2, short3, short4))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.shorts_.not(Seq(Set(short1), Set(short2, short3))).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.shorts_.not(Seq(Set(short1, short2), Set(short2, short3))).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.shorts_.not(Seq(Set(short2, short1), Set(short4, short3, short2))).query.get.map(_ ==> List())
 
 
           // Empty Seq/Sets
-          _ <- Ns.i.a1.shorts_.not(Seq(Set(short1, short2), Set.empty[Short])).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.shorts_.not(Set.empty[Short]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.shorts_.not(Seq.empty[Set[Short]]).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.shorts_.not(Seq(Set(short1, short2), Set.empty[Short])).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.shorts_.not(Set.empty[Short]).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.shorts_.not(Seq.empty[Set[Short]]).query.get.map(_ ==> List(1, 2))
         } yield ()
       }
 
 
       "has" - types { implicit conn =>
-        val (a, b) = (1, 2)
         for {
+          _ <- Ns.i(0).save.transact
           _ <- Ns.i.shorts.insert(List(
-            (a, Set(short1, short2)),
-            (b, Set(short2, short3, short4))
+            (1, Set(short1, short2)),
+            (2, Set(short2, short3, short4))
           )).transact
 
           // Sets with one or more values matching
 
           // "Has this value"
           _ <- Ns.i.a1.shorts_.has(short0).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.shorts_.has(short1).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.shorts_.has(short2).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.shorts_.has(short3).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.shorts_.has(short1).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.shorts_.has(short2).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.shorts_.has(short3).query.get.map(_ ==> List(2))
           // Same as
           _ <- Ns.i.a1.shorts_.has(Seq(short0)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.shorts_.has(Seq(short1)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.shorts_.has(Seq(short2)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.shorts_.has(Seq(short3)).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.shorts_.has(Seq(short1)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.shorts_.has(Seq(short2)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.shorts_.has(Seq(short3)).query.get.map(_ ==> List(2))
 
 
           // OR semantics when multiple values
 
           // "Has this OR that"
-          _ <- Ns.i.a1.shorts_.has(short1, short2).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.shorts_.has(short1, short3).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.shorts_.has(short2, short3).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.shorts_.has(short1, short2, short3).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.shorts_.has(short1, short2).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.shorts_.has(short1, short3).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.shorts_.has(short2, short3).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.shorts_.has(short1, short2, short3).query.get.map(_ ==> List(1, 2))
           // Same as
-          _ <- Ns.i.a1.shorts_.has(Seq(short1, short2)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.shorts_.has(Seq(short1, short3)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.shorts_.has(Seq(short2, short3)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.shorts_.has(Seq(short1, short2, short3)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.shorts_.has(Seq(short1, short2)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.shorts_.has(Seq(short1, short3)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.shorts_.has(Seq(short2, short3)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.shorts_.has(Seq(short1, short2, short3)).query.get.map(_ ==> List(1, 2))
 
 
           // AND semantics when multiple values in a _Set_
 
           // "Has this AND that"
-          _ <- Ns.i.a1.shorts_.has(Set(short1)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.shorts_.has(Set(short1, short2)).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.shorts_.has(Set(short1)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.shorts_.has(Set(short1, short2)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.shorts_.has(Set(short1, short2, short3)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.shorts_.has(Set(short2)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.shorts_.has(Set(short2, short3)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.shorts_.has(Set(short2, short3, short4)).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.shorts_.has(Set(short2)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.shorts_.has(Set(short2, short3)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.shorts_.has(Set(short2, short3, short4)).query.get.map(_ ==> List(2))
           // Same as
-          _ <- Ns.i.a1.shorts_.has(Seq(Set(short1))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.shorts_.has(Seq(Set(short1, short2))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.shorts_.has(Seq(Set(short1))).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.shorts_.has(Seq(Set(short1, short2))).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.shorts_.has(Seq(Set(short1, short2, short3))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.shorts_.has(Seq(Set(short2))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.shorts_.has(Seq(Set(short2, short3))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.shorts_.has(Seq(Set(short2, short3, short4))).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.shorts_.has(Seq(Set(short2))).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.shorts_.has(Seq(Set(short2, short3))).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.shorts_.has(Seq(Set(short2, short3, short4))).query.get.map(_ ==> List(2))
 
 
           // AND/OR semantics with multiple Sets
 
           // "(has this AND that) OR (has this AND that)"
-          _ <- Ns.i.a1.shorts_.has(Set(short1, short2), Set(short0)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.shorts_.has(Set(short1, short2), Set(short0, short3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.shorts_.has(Set(short1, short2), Set(short2, short3)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.shorts_.has(Set(short1, short2), Set(short2, short3, short4)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.shorts_.has(Set(short1, short2), Set(short0)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.shorts_.has(Set(short1, short2), Set(short0, short3)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.shorts_.has(Set(short1, short2), Set(short2, short3)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.shorts_.has(Set(short1, short2), Set(short2, short3, short4)).query.get.map(_ ==> List(1, 2))
           // Same as
-          _ <- Ns.i.a1.shorts_.has(Seq(Set(short1, short2), Set(short0))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.shorts_.has(Seq(Set(short1, short2), Set(short0, short3))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.shorts_.has(Seq(Set(short1, short2), Set(short2, short3))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.shorts_.has(Seq(Set(short1, short2), Set(short2, short3, short4))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.shorts_.has(Seq(Set(short1, short2), Set(short0))).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.shorts_.has(Seq(Set(short1, short2), Set(short0, short3))).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.shorts_.has(Seq(Set(short1, short2), Set(short2, short3))).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.shorts_.has(Seq(Set(short1, short2), Set(short2, short3, short4))).query.get.map(_ ==> List(1, 2))
 
 
           // Empty Seq/Sets match nothing
-          _ <- Ns.i.a1.shorts_.has(Set(short1, short2), Set.empty[Short]).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.shorts_.has(Set(short1, short2), Set.empty[Short]).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.shorts_.has(Seq.empty[Short]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.shorts_.has(Set.empty[Short]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.shorts_.has(Seq.empty[Set[Short]]).query.get.map(_ ==> List())
@@ -439,29 +448,29 @@ trait FilterSet_Short_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiA
 
 
       "hasNo" - types { implicit conn =>
-        val (a, b) = (1, 2)
         for {
+          _ <- Ns.i(0).save.transact
           _ <- Ns.i.shorts.insert(List(
-            (a, Set(short1, short2)),
-            (b, Set(short2, short3, short4))
+            (1, Set(short1, short2)),
+            (2, Set(short2, short3, short4))
           )).transact
 
           // Sets without one or more values matching
 
           // "Doesn't have this value"
-          _ <- Ns.i.a1.shorts_.hasNo(short0).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.shorts_.hasNo(short1).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.shorts_.hasNo(short0).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.shorts_.hasNo(short1).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.shorts_.hasNo(short2).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.shorts_.hasNo(short3).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.shorts_.hasNo(short4).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.shorts_.hasNo(short5).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.shorts_.hasNo(short3).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.shorts_.hasNo(short4).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.shorts_.hasNo(short5).query.get.map(_ ==> List(1, 2))
           // Same as
-          _ <- Ns.i.a1.shorts_.hasNo(Seq(short0)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.shorts_.hasNo(Seq(short1)).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.shorts_.hasNo(Seq(short0)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.shorts_.hasNo(Seq(short1)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.shorts_.hasNo(Seq(short2)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.shorts_.hasNo(Seq(short3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.shorts_.hasNo(Seq(short4)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.shorts_.hasNo(Seq(short5)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.shorts_.hasNo(Seq(short3)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.shorts_.hasNo(Seq(short4)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.shorts_.hasNo(Seq(short5)).query.get.map(_ ==> List(1, 2))
 
 
           // OR semantics when multiple values
@@ -470,52 +479,52 @@ trait FilterSet_Short_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiA
           _ <- Ns.i.a1.shorts_.hasNo(short1, short2).query.get.map(_ ==> List())
           _ <- Ns.i.a1.shorts_.hasNo(short1, short3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.shorts_.hasNo(short1, short4).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.shorts_.hasNo(short1, short5).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.shorts_.hasNo(short1, short5).query.get.map(_ ==> List(2))
           // Same as
           _ <- Ns.i.a1.shorts_.hasNo(Seq(short1, short2)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.shorts_.hasNo(Seq(short1, short3)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.shorts_.hasNo(Seq(short1, short4)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.shorts_.hasNo(Seq(short1, short5)).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.shorts_.hasNo(Seq(short1, short5)).query.get.map(_ ==> List(2))
 
 
           // AND semantics when multiple values in a _Set_
 
           // "Not (has this AND that)"
-          _ <- Ns.i.a1.shorts_.hasNo(Set(short1)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.shorts_.hasNo(Set(short1, short2)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.shorts_.hasNo(Set(short1, short2, short3)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.shorts_.hasNo(Set(short1)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.shorts_.hasNo(Set(short1, short2)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.shorts_.hasNo(Set(short1, short2, short3)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.shorts_.hasNo(Set(short2)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.shorts_.hasNo(Set(short2, short3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.shorts_.hasNo(Set(short2, short3, short4)).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.shorts_.hasNo(Set(short2, short3)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.shorts_.hasNo(Set(short2, short3, short4)).query.get.map(_ ==> List(1))
           // Same as
-          _ <- Ns.i.a1.shorts_.hasNo(Seq(Set(short1))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.shorts_.hasNo(Seq(Set(short1, short2))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.shorts_.hasNo(Seq(Set(short1, short2, short3))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.shorts_.hasNo(Seq(Set(short1))).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.shorts_.hasNo(Seq(Set(short1, short2))).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.shorts_.hasNo(Seq(Set(short1, short2, short3))).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.shorts_.hasNo(Seq(Set(short2))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.shorts_.hasNo(Seq(Set(short2, short3))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.shorts_.hasNo(Seq(Set(short2, short3, short4))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.shorts_.hasNo(Seq(Set(short2, short3))).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.shorts_.hasNo(Seq(Set(short2, short3, short4))).query.get.map(_ ==> List(1))
 
 
           // AND/OR semantics with multiple Sets
 
           // "Not ((has this AND that) OR (has this AND that))"
-          _ <- Ns.i.a1.shorts_.hasNo(Set(short1, short2), Set(short0)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.shorts_.hasNo(Set(short1, short2), Set(short0, short3)).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.shorts_.hasNo(Set(short1, short2), Set(short0)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.shorts_.hasNo(Set(short1, short2), Set(short0, short3)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.shorts_.hasNo(Set(short1, short2), Set(short2, short3)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.shorts_.hasNo(Set(short1, short2), Set(short2, short3, short4)).query.get.map(_ ==> List())
           // Same as
-          _ <- Ns.i.a1.shorts_.hasNo(Seq(Set(short1, short2), Set(short0))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.shorts_.hasNo(Seq(Set(short1, short2), Set(short0, short3))).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.shorts_.hasNo(Seq(Set(short1, short2), Set(short0))).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.shorts_.hasNo(Seq(Set(short1, short2), Set(short0, short3))).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.shorts_.hasNo(Seq(Set(short1, short2), Set(short2, short3))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.shorts_.hasNo(Seq(Set(short1, short2), Set(short2, short3, short4))).query.get.map(_ ==> List())
 
 
           // Negating empty Seqs/Sets has no effect
-          _ <- Ns.i.a1.shorts_.hasNo(Set(short1, short2), Set.empty[Short]).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.shorts_.hasNo(Seq.empty[Short]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.shorts_.hasNo(Set.empty[Short]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.shorts_.hasNo(Seq.empty[Set[Short]]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.shorts_.hasNo(Seq(Set.empty[Short])).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.shorts_.hasNo(Set(short1, short2), Set.empty[Short]).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.shorts_.hasNo(Seq.empty[Short]).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.shorts_.hasNo(Set.empty[Short]).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.shorts_.hasNo(Seq.empty[Set[Short]]).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.shorts_.hasNo(Seq(Set.empty[Short])).query.get.map(_ ==> List(1, 2))
         } yield ()
       }
     }
@@ -555,10 +564,12 @@ trait FilterSet_Short_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiA
           // "Is exactly this AND that"
           _ <- Ns.i.a1.shorts_?(Some(Set(short1))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.shorts_?(Some(Set(short1, short2))).query.get.map(_ ==> List(a)) // include exact match
+          _ <- Ns.i.a1.shorts_?(Some(Set(short2, short1))).query.get.map(_ ==> List(a)) // include exact match
           _ <- Ns.i.a1.shorts_?(Some(Set(short1, short2, short3))).query.get.map(_ ==> List())
           // Same as
           _ <- Ns.i.a1.shorts_?(Some(Seq(Set(short1)))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.shorts_?(Some(Seq(Set(short1, short2)))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.shorts_?(Some(Seq(Set(short2, short1)))).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.shorts_?(Some(Seq(Set(short1, short2, short3)))).query.get.map(_ ==> List())
 
 
@@ -567,7 +578,7 @@ trait FilterSet_Short_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiA
           // "(exactly this AND that) OR (exactly this AND that)"
           _ <- Ns.i.a1.shorts_?(Some(Seq(Set(short1), Set(short2, short3)))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.shorts_?(Some(Seq(Set(short1, short2), Set(short2, short3)))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.shorts_?(Some(Seq(Set(short1, short2), Set(short2, short3, short4)))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.shorts_?(Some(Seq(Set(short2, short1), Set(short4, short3, short2)))).query.get.map(_ ==> List(a, b))
 
 
           // Empty Seq/Sets match nothing
@@ -596,19 +607,21 @@ trait FilterSet_Short_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiA
           // "Not (exactly this AND that)"
           _ <- Ns.i.a1.shorts_?.not(Some(Set(short1))).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.shorts_?.not(Some(Set(short1, short2))).query.get.map(_ ==> List(b)) // exclude exact match
+          _ <- Ns.i.a1.shorts_?.not(Some(Set(short2, short1))).query.get.map(_ ==> List(b)) // exclude exact match
           _ <- Ns.i.a1.shorts_?.not(Some(Set(short1, short2, short3))).query.get.map(_ ==> List(a, b))
           // Same as
           _ <- Ns.i.a1.shorts_?.not(Some(Seq(Set(short1)))).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.shorts_?.not(Some(Seq(Set(short1, short2)))).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.shorts_?.not(Some(Seq(Set(short2, short1)))).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.shorts_?.not(Some(Seq(Set(short1, short2, short3)))).query.get.map(_ ==> List(a, b))
 
 
           // AND/OR semantics with multiple Sets
 
-          // "Not (exactly this AND that) OR (exactly this AND that)"
+          // "NEITHER (exactly this AND that) NOR (exactly this AND that)"
           _ <- Ns.i.a1.shorts_?.not(Some(Seq(Set(short1), Set(short2, short3)))).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.shorts_?.not(Some(Seq(Set(short1, short2), Set(short2, short3)))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.shorts_?.not(Some(Seq(Set(short1, short2), Set(short2, short3, short4)))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.shorts_?.not(Some(Seq(Set(short2, short1), Set(short4, short3, short2)))).query.get.map(_ ==> List())
 
 
           // Empty Seq/Sets

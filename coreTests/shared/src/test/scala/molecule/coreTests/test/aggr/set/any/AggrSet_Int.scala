@@ -27,7 +27,7 @@ trait AggrSet_Int extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync 
           (2, Set(int2, int3, int4)), // 3 rows coalesced
         ))
 
-        // Use `distinct` keyword to retrieve unique Sets of values
+        // Use `distinct` keyword to retrieve unique Sets of Sets
         _ <- Ns.i.a1.ints(distinct).query.get.map(_ ==> List(
           (1, Set(Set(int1, int2))),
           (2, Set(

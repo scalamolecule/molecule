@@ -25,10 +25,6 @@ trait ExprSetOpt_1[A, t, Ns1[_, _], Ns2[_, _, _]]
   def hasNo(vs   : Option[Seq[t]]     )(implicit x: X, y: X)      : Ns1[A, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
   def hasNo(set  : Option[Set[t]]     )(implicit x: X, y: X, z: X): Ns1[A, t] = _exprSetOpt(HasNo, set.map(set => Seq(set))   )
   def hasNo(sets : Option[Seq[Set[t]]])                           : Ns1[A, t] = _exprSetOpt(HasNo, sets                       )
-  def hasLt(upper: Option[t]          )                           : Ns1[A, t] = _exprSetOpt(HasLt, upper.map(v => Seq(Set(v))))
-  def hasLe(upper: Option[t]          )                           : Ns1[A, t] = _exprSetOpt(HasLe, upper.map(v => Seq(Set(v))))
-  def hasGt(lower: Option[t]          )                           : Ns1[A, t] = _exprSetOpt(HasGt, lower.map(v => Seq(Set(v))))
-  def hasGe(lower: Option[t]          )                           : Ns1[A, t] = _exprSetOpt(HasGe, lower.map(v => Seq(Set(v))))
 }
 
 
@@ -52,10 +48,6 @@ trait ExprSetOpt_2[A, B, t, Ns1[_, _, _], Ns2[_, _, _, _]]
   def hasNo(vs   : Option[Seq[t]]     )(implicit x: X, y: X)      : Ns1[A, B, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
   def hasNo(set  : Option[Set[t]]     )(implicit x: X, y: X, z: X): Ns1[A, B, t] = _exprSetOpt(HasNo, set.map(set => Seq(set))   )
   def hasNo(sets : Option[Seq[Set[t]]])                           : Ns1[A, B, t] = _exprSetOpt(HasNo, sets                       )
-  def hasLt(upper: Option[t]          )                           : Ns1[A, B, t] = _exprSetOpt(HasLt, upper.map(v => Seq(Set(v))))
-  def hasLe(upper: Option[t]          )                           : Ns1[A, B, t] = _exprSetOpt(HasLe, upper.map(v => Seq(Set(v))))
-  def hasGt(lower: Option[t]          )                           : Ns1[A, B, t] = _exprSetOpt(HasGt, lower.map(v => Seq(Set(v))))
-  def hasGe(lower: Option[t]          )                           : Ns1[A, B, t] = _exprSetOpt(HasGe, lower.map(v => Seq(Set(v))))
 }
 
 
@@ -79,10 +71,6 @@ trait ExprSetOpt_3[A, B, C, t, Ns1[_, _, _, _], Ns2[_, _, _, _, _]]
   def hasNo(vs   : Option[Seq[t]]     )(implicit x: X, y: X)      : Ns1[A, B, C, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
   def hasNo(set  : Option[Set[t]]     )(implicit x: X, y: X, z: X): Ns1[A, B, C, t] = _exprSetOpt(HasNo, set.map(set => Seq(set))   )
   def hasNo(sets : Option[Seq[Set[t]]])                           : Ns1[A, B, C, t] = _exprSetOpt(HasNo, sets                       )
-  def hasLt(upper: Option[t]          )                           : Ns1[A, B, C, t] = _exprSetOpt(HasLt, upper.map(v => Seq(Set(v))))
-  def hasLe(upper: Option[t]          )                           : Ns1[A, B, C, t] = _exprSetOpt(HasLe, upper.map(v => Seq(Set(v))))
-  def hasGt(lower: Option[t]          )                           : Ns1[A, B, C, t] = _exprSetOpt(HasGt, lower.map(v => Seq(Set(v))))
-  def hasGe(lower: Option[t]          )                           : Ns1[A, B, C, t] = _exprSetOpt(HasGe, lower.map(v => Seq(Set(v))))
 }
 
 
@@ -106,10 +94,6 @@ trait ExprSetOpt_4[A, B, C, D, t, Ns1[_, _, _, _, _], Ns2[_, _, _, _, _, _]]
   def hasNo(vs   : Option[Seq[t]]     )(implicit x: X, y: X)      : Ns1[A, B, C, D, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
   def hasNo(set  : Option[Set[t]]     )(implicit x: X, y: X, z: X): Ns1[A, B, C, D, t] = _exprSetOpt(HasNo, set.map(set => Seq(set))   )
   def hasNo(sets : Option[Seq[Set[t]]])                           : Ns1[A, B, C, D, t] = _exprSetOpt(HasNo, sets                       )
-  def hasLt(upper: Option[t]          )                           : Ns1[A, B, C, D, t] = _exprSetOpt(HasLt, upper.map(v => Seq(Set(v))))
-  def hasLe(upper: Option[t]          )                           : Ns1[A, B, C, D, t] = _exprSetOpt(HasLe, upper.map(v => Seq(Set(v))))
-  def hasGt(lower: Option[t]          )                           : Ns1[A, B, C, D, t] = _exprSetOpt(HasGt, lower.map(v => Seq(Set(v))))
-  def hasGe(lower: Option[t]          )                           : Ns1[A, B, C, D, t] = _exprSetOpt(HasGe, lower.map(v => Seq(Set(v))))
 }
 
 
@@ -133,10 +117,6 @@ trait ExprSetOpt_5[A, B, C, D, E, t, Ns1[_, _, _, _, _, _], Ns2[_, _, _, _, _, _
   def hasNo(vs   : Option[Seq[t]]     )(implicit x: X, y: X)      : Ns1[A, B, C, D, E, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
   def hasNo(set  : Option[Set[t]]     )(implicit x: X, y: X, z: X): Ns1[A, B, C, D, E, t] = _exprSetOpt(HasNo, set.map(set => Seq(set))   )
   def hasNo(sets : Option[Seq[Set[t]]])                           : Ns1[A, B, C, D, E, t] = _exprSetOpt(HasNo, sets                       )
-  def hasLt(upper: Option[t]          )                           : Ns1[A, B, C, D, E, t] = _exprSetOpt(HasLt, upper.map(v => Seq(Set(v))))
-  def hasLe(upper: Option[t]          )                           : Ns1[A, B, C, D, E, t] = _exprSetOpt(HasLe, upper.map(v => Seq(Set(v))))
-  def hasGt(lower: Option[t]          )                           : Ns1[A, B, C, D, E, t] = _exprSetOpt(HasGt, lower.map(v => Seq(Set(v))))
-  def hasGe(lower: Option[t]          )                           : Ns1[A, B, C, D, E, t] = _exprSetOpt(HasGe, lower.map(v => Seq(Set(v))))
 }
 
 
@@ -160,10 +140,6 @@ trait ExprSetOpt_6[A, B, C, D, E, F, t, Ns1[_, _, _, _, _, _, _], Ns2[_, _, _, _
   def hasNo(vs   : Option[Seq[t]]     )(implicit x: X, y: X)      : Ns1[A, B, C, D, E, F, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
   def hasNo(set  : Option[Set[t]]     )(implicit x: X, y: X, z: X): Ns1[A, B, C, D, E, F, t] = _exprSetOpt(HasNo, set.map(set => Seq(set))   )
   def hasNo(sets : Option[Seq[Set[t]]])                           : Ns1[A, B, C, D, E, F, t] = _exprSetOpt(HasNo, sets                       )
-  def hasLt(upper: Option[t]          )                           : Ns1[A, B, C, D, E, F, t] = _exprSetOpt(HasLt, upper.map(v => Seq(Set(v))))
-  def hasLe(upper: Option[t]          )                           : Ns1[A, B, C, D, E, F, t] = _exprSetOpt(HasLe, upper.map(v => Seq(Set(v))))
-  def hasGt(lower: Option[t]          )                           : Ns1[A, B, C, D, E, F, t] = _exprSetOpt(HasGt, lower.map(v => Seq(Set(v))))
-  def hasGe(lower: Option[t]          )                           : Ns1[A, B, C, D, E, F, t] = _exprSetOpt(HasGe, lower.map(v => Seq(Set(v))))
 }
 
 
@@ -187,10 +163,6 @@ trait ExprSetOpt_7[A, B, C, D, E, F, G, t, Ns1[_, _, _, _, _, _, _, _], Ns2[_, _
   def hasNo(vs   : Option[Seq[t]]     )(implicit x: X, y: X)      : Ns1[A, B, C, D, E, F, G, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
   def hasNo(set  : Option[Set[t]]     )(implicit x: X, y: X, z: X): Ns1[A, B, C, D, E, F, G, t] = _exprSetOpt(HasNo, set.map(set => Seq(set))   )
   def hasNo(sets : Option[Seq[Set[t]]])                           : Ns1[A, B, C, D, E, F, G, t] = _exprSetOpt(HasNo, sets                       )
-  def hasLt(upper: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, t] = _exprSetOpt(HasLt, upper.map(v => Seq(Set(v))))
-  def hasLe(upper: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, t] = _exprSetOpt(HasLe, upper.map(v => Seq(Set(v))))
-  def hasGt(lower: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, t] = _exprSetOpt(HasGt, lower.map(v => Seq(Set(v))))
-  def hasGe(lower: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, t] = _exprSetOpt(HasGe, lower.map(v => Seq(Set(v))))
 }
 
 
@@ -214,10 +186,6 @@ trait ExprSetOpt_8[A, B, C, D, E, F, G, H, t, Ns1[_, _, _, _, _, _, _, _, _], Ns
   def hasNo(vs   : Option[Seq[t]]     )(implicit x: X, y: X)      : Ns1[A, B, C, D, E, F, G, H, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
   def hasNo(set  : Option[Set[t]]     )(implicit x: X, y: X, z: X): Ns1[A, B, C, D, E, F, G, H, t] = _exprSetOpt(HasNo, set.map(set => Seq(set))   )
   def hasNo(sets : Option[Seq[Set[t]]])                           : Ns1[A, B, C, D, E, F, G, H, t] = _exprSetOpt(HasNo, sets                       )
-  def hasLt(upper: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, t] = _exprSetOpt(HasLt, upper.map(v => Seq(Set(v))))
-  def hasLe(upper: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, t] = _exprSetOpt(HasLe, upper.map(v => Seq(Set(v))))
-  def hasGt(lower: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, t] = _exprSetOpt(HasGt, lower.map(v => Seq(Set(v))))
-  def hasGe(lower: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, t] = _exprSetOpt(HasGe, lower.map(v => Seq(Set(v))))
 }
 
 
@@ -241,10 +209,6 @@ trait ExprSetOpt_9[A, B, C, D, E, F, G, H, I, t, Ns1[_, _, _, _, _, _, _, _, _, 
   def hasNo(vs   : Option[Seq[t]]     )(implicit x: X, y: X)      : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
   def hasNo(set  : Option[Set[t]]     )(implicit x: X, y: X, z: X): Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetOpt(HasNo, set.map(set => Seq(set))   )
   def hasNo(sets : Option[Seq[Set[t]]])                           : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetOpt(HasNo, sets                       )
-  def hasLt(upper: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetOpt(HasLt, upper.map(v => Seq(Set(v))))
-  def hasLe(upper: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetOpt(HasLe, upper.map(v => Seq(Set(v))))
-  def hasGt(lower: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetOpt(HasGt, lower.map(v => Seq(Set(v))))
-  def hasGe(lower: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, t] = _exprSetOpt(HasGe, lower.map(v => Seq(Set(v))))
 }
 
 
@@ -268,10 +232,6 @@ trait ExprSetOpt_10[A, B, C, D, E, F, G, H, I, J, t, Ns1[_, _, _, _, _, _, _, _,
   def hasNo(vs   : Option[Seq[t]]     )(implicit x: X, y: X)      : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
   def hasNo(set  : Option[Set[t]]     )(implicit x: X, y: X, z: X): Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetOpt(HasNo, set.map(set => Seq(set))   )
   def hasNo(sets : Option[Seq[Set[t]]])                           : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetOpt(HasNo, sets                       )
-  def hasLt(upper: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetOpt(HasLt, upper.map(v => Seq(Set(v))))
-  def hasLe(upper: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetOpt(HasLe, upper.map(v => Seq(Set(v))))
-  def hasGt(lower: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetOpt(HasGt, lower.map(v => Seq(Set(v))))
-  def hasGe(lower: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, J, t] = _exprSetOpt(HasGe, lower.map(v => Seq(Set(v))))
 }
 
 
@@ -295,10 +255,6 @@ trait ExprSetOpt_11[A, B, C, D, E, F, G, H, I, J, K, t, Ns1[_, _, _, _, _, _, _,
   def hasNo(vs   : Option[Seq[t]]     )(implicit x: X, y: X)      : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
   def hasNo(set  : Option[Set[t]]     )(implicit x: X, y: X, z: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetOpt(HasNo, set.map(set => Seq(set))   )
   def hasNo(sets : Option[Seq[Set[t]]])                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetOpt(HasNo, sets                       )
-  def hasLt(upper: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetOpt(HasLt, upper.map(v => Seq(Set(v))))
-  def hasLe(upper: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetOpt(HasLe, upper.map(v => Seq(Set(v))))
-  def hasGt(lower: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetOpt(HasGt, lower.map(v => Seq(Set(v))))
-  def hasGe(lower: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, t] = _exprSetOpt(HasGe, lower.map(v => Seq(Set(v))))
 }
 
 
@@ -322,10 +278,6 @@ trait ExprSetOpt_12[A, B, C, D, E, F, G, H, I, J, K, L, t, Ns1[_, _, _, _, _, _,
   def hasNo(vs   : Option[Seq[t]]     )(implicit x: X, y: X)      : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
   def hasNo(set  : Option[Set[t]]     )(implicit x: X, y: X, z: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetOpt(HasNo, set.map(set => Seq(set))   )
   def hasNo(sets : Option[Seq[Set[t]]])                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetOpt(HasNo, sets                       )
-  def hasLt(upper: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetOpt(HasLt, upper.map(v => Seq(Set(v))))
-  def hasLe(upper: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetOpt(HasLe, upper.map(v => Seq(Set(v))))
-  def hasGt(lower: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetOpt(HasGt, lower.map(v => Seq(Set(v))))
-  def hasGe(lower: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, t] = _exprSetOpt(HasGe, lower.map(v => Seq(Set(v))))
 }
 
 
@@ -349,10 +301,6 @@ trait ExprSetOpt_13[A, B, C, D, E, F, G, H, I, J, K, L, M, t, Ns1[_, _, _, _, _,
   def hasNo(vs   : Option[Seq[t]]     )(implicit x: X, y: X)      : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
   def hasNo(set  : Option[Set[t]]     )(implicit x: X, y: X, z: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetOpt(HasNo, set.map(set => Seq(set))   )
   def hasNo(sets : Option[Seq[Set[t]]])                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetOpt(HasNo, sets                       )
-  def hasLt(upper: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetOpt(HasLt, upper.map(v => Seq(Set(v))))
-  def hasLe(upper: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetOpt(HasLe, upper.map(v => Seq(Set(v))))
-  def hasGt(lower: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetOpt(HasGt, lower.map(v => Seq(Set(v))))
-  def hasGe(lower: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, t] = _exprSetOpt(HasGe, lower.map(v => Seq(Set(v))))
 }
 
 
@@ -376,10 +324,6 @@ trait ExprSetOpt_14[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t, Ns1[_, _, _, _,
   def hasNo(vs   : Option[Seq[t]]     )(implicit x: X, y: X)      : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
   def hasNo(set  : Option[Set[t]]     )(implicit x: X, y: X, z: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetOpt(HasNo, set.map(set => Seq(set))   )
   def hasNo(sets : Option[Seq[Set[t]]])                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetOpt(HasNo, sets                       )
-  def hasLt(upper: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetOpt(HasLt, upper.map(v => Seq(Set(v))))
-  def hasLe(upper: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetOpt(HasLe, upper.map(v => Seq(Set(v))))
-  def hasGt(lower: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetOpt(HasGt, lower.map(v => Seq(Set(v))))
-  def hasGe(lower: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, t] = _exprSetOpt(HasGe, lower.map(v => Seq(Set(v))))
 }
 
 
@@ -403,10 +347,6 @@ trait ExprSetOpt_15[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t, Ns1[_, _, _,
   def hasNo(vs   : Option[Seq[t]]     )(implicit x: X, y: X)      : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
   def hasNo(set  : Option[Set[t]]     )(implicit x: X, y: X, z: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetOpt(HasNo, set.map(set => Seq(set))   )
   def hasNo(sets : Option[Seq[Set[t]]])                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetOpt(HasNo, sets                       )
-  def hasLt(upper: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetOpt(HasLt, upper.map(v => Seq(Set(v))))
-  def hasLe(upper: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetOpt(HasLe, upper.map(v => Seq(Set(v))))
-  def hasGt(lower: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetOpt(HasGt, lower.map(v => Seq(Set(v))))
-  def hasGe(lower: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, t] = _exprSetOpt(HasGe, lower.map(v => Seq(Set(v))))
 }
 
 
@@ -430,10 +370,6 @@ trait ExprSetOpt_16[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t, Ns1[_, _,
   def hasNo(vs   : Option[Seq[t]]     )(implicit x: X, y: X)      : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
   def hasNo(set  : Option[Set[t]]     )(implicit x: X, y: X, z: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetOpt(HasNo, set.map(set => Seq(set))   )
   def hasNo(sets : Option[Seq[Set[t]]])                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetOpt(HasNo, sets                       )
-  def hasLt(upper: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetOpt(HasLt, upper.map(v => Seq(Set(v))))
-  def hasLe(upper: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetOpt(HasLe, upper.map(v => Seq(Set(v))))
-  def hasGt(lower: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetOpt(HasGt, lower.map(v => Seq(Set(v))))
-  def hasGe(lower: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, t] = _exprSetOpt(HasGe, lower.map(v => Seq(Set(v))))
 }
 
 
@@ -457,10 +393,6 @@ trait ExprSetOpt_17[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t, Ns1[_,
   def hasNo(vs   : Option[Seq[t]]     )(implicit x: X, y: X)      : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
   def hasNo(set  : Option[Set[t]]     )(implicit x: X, y: X, z: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetOpt(HasNo, set.map(set => Seq(set))   )
   def hasNo(sets : Option[Seq[Set[t]]])                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetOpt(HasNo, sets                       )
-  def hasLt(upper: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetOpt(HasLt, upper.map(v => Seq(Set(v))))
-  def hasLe(upper: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetOpt(HasLe, upper.map(v => Seq(Set(v))))
-  def hasGt(lower: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetOpt(HasGt, lower.map(v => Seq(Set(v))))
-  def hasGe(lower: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, t] = _exprSetOpt(HasGe, lower.map(v => Seq(Set(v))))
 }
 
 
@@ -484,10 +416,6 @@ trait ExprSetOpt_18[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t, Ns1
   def hasNo(vs   : Option[Seq[t]]     )(implicit x: X, y: X)      : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
   def hasNo(set  : Option[Set[t]]     )(implicit x: X, y: X, z: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetOpt(HasNo, set.map(set => Seq(set))   )
   def hasNo(sets : Option[Seq[Set[t]]])                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetOpt(HasNo, sets                       )
-  def hasLt(upper: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetOpt(HasLt, upper.map(v => Seq(Set(v))))
-  def hasLe(upper: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetOpt(HasLe, upper.map(v => Seq(Set(v))))
-  def hasGt(lower: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetOpt(HasGt, lower.map(v => Seq(Set(v))))
-  def hasGe(lower: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, t] = _exprSetOpt(HasGe, lower.map(v => Seq(Set(v))))
 }
 
 
@@ -511,10 +439,6 @@ trait ExprSetOpt_19[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t, 
   def hasNo(vs   : Option[Seq[t]]     )(implicit x: X, y: X)      : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
   def hasNo(set  : Option[Set[t]]     )(implicit x: X, y: X, z: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetOpt(HasNo, set.map(set => Seq(set))   )
   def hasNo(sets : Option[Seq[Set[t]]])                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetOpt(HasNo, sets                       )
-  def hasLt(upper: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetOpt(HasLt, upper.map(v => Seq(Set(v))))
-  def hasLe(upper: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetOpt(HasLe, upper.map(v => Seq(Set(v))))
-  def hasGt(lower: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetOpt(HasGt, lower.map(v => Seq(Set(v))))
-  def hasGe(lower: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, t] = _exprSetOpt(HasGe, lower.map(v => Seq(Set(v))))
 }
 
 
@@ -538,10 +462,6 @@ trait ExprSetOpt_20[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, 
   def hasNo(vs   : Option[Seq[t]]     )(implicit x: X, y: X)      : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
   def hasNo(set  : Option[Set[t]]     )(implicit x: X, y: X, z: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetOpt(HasNo, set.map(set => Seq(set))   )
   def hasNo(sets : Option[Seq[Set[t]]])                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetOpt(HasNo, sets                       )
-  def hasLt(upper: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetOpt(HasLt, upper.map(v => Seq(Set(v))))
-  def hasLe(upper: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetOpt(HasLe, upper.map(v => Seq(Set(v))))
-  def hasGt(lower: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetOpt(HasGt, lower.map(v => Seq(Set(v))))
-  def hasGe(lower: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, t] = _exprSetOpt(HasGe, lower.map(v => Seq(Set(v))))
 }
 
 
@@ -565,10 +485,6 @@ trait ExprSetOpt_21[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, 
   def hasNo(vs   : Option[Seq[t]]     )(implicit x: X, y: X)      : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
   def hasNo(set  : Option[Set[t]]     )(implicit x: X, y: X, z: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetOpt(HasNo, set.map(set => Seq(set))   )
   def hasNo(sets : Option[Seq[Set[t]]])                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetOpt(HasNo, sets                       )
-  def hasLt(upper: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetOpt(HasLt, upper.map(v => Seq(Set(v))))
-  def hasLe(upper: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetOpt(HasLe, upper.map(v => Seq(Set(v))))
-  def hasGt(lower: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetOpt(HasGt, lower.map(v => Seq(Set(v))))
-  def hasGe(lower: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, t] = _exprSetOpt(HasGe, lower.map(v => Seq(Set(v))))
 }
 
 
@@ -592,8 +508,4 @@ trait ExprSetOpt_22[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, 
   def hasNo(vs   : Option[Seq[t]]     )(implicit x: X, y: X)      : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
   def hasNo(set  : Option[Set[t]]     )(implicit x: X, y: X, z: X): Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetOpt(HasNo, set.map(set => Seq(set))   )
   def hasNo(sets : Option[Seq[Set[t]]])                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetOpt(HasNo, sets                       )
-  def hasLt(upper: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetOpt(HasLt, upper.map(v => Seq(Set(v))))
-  def hasLe(upper: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetOpt(HasLe, upper.map(v => Seq(Set(v))))
-  def hasGt(lower: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetOpt(HasGt, lower.map(v => Seq(Set(v))))
-  def hasGe(lower: Option[t]          )                           : Ns1[A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, t] = _exprSetOpt(HasGe, lower.map(v => Seq(Set(v))))
 }

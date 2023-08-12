@@ -39,10 +39,6 @@ object _ExprSetOpt extends BoilerplateGenBase( "ExprSetOpt", "/api/expression") 
          |  def hasNo(vs   : Option[Seq[t]]     )(implicit x: X, y: X)      : Ns1[${`A..V`}, t] = _exprSetOpt(HasNo, vs.map(_.map(v => Set(v))) )
          |  def hasNo(set  : Option[Set[t]]     )(implicit x: X, y: X, z: X): Ns1[${`A..V`}, t] = _exprSetOpt(HasNo, set.map(set => Seq(set))   )
          |  def hasNo(sets : Option[Seq[Set[t]]])                           : Ns1[${`A..V`}, t] = _exprSetOpt(HasNo, sets                       )
-         |  def hasLt(upper: Option[t]          )                           : Ns1[${`A..V`}, t] = _exprSetOpt(HasLt, upper.map(v => Seq(Set(v))))
-         |  def hasLe(upper: Option[t]          )                           : Ns1[${`A..V`}, t] = _exprSetOpt(HasLe, upper.map(v => Seq(Set(v))))
-         |  def hasGt(lower: Option[t]          )                           : Ns1[${`A..V`}, t] = _exprSetOpt(HasGt, lower.map(v => Seq(Set(v))))
-         |  def hasGe(lower: Option[t]          )                           : Ns1[${`A..V`}, t] = _exprSetOpt(HasGe, lower.map(v => Seq(Set(v))))
          |}""".stripMargin
   }
 }

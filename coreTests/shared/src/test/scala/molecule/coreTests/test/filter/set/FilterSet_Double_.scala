@@ -9,7 +9,7 @@ import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 
-trait FilterSet_Double_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
+trait FilterSet_Double_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync =>
 
   override lazy val tests = Tests {
 
@@ -38,10 +38,12 @@ trait FilterSet_Double_ extends CoreTestSuite with ApiAsyncImplicits { self: Spi
           // "Is exactly this AND that"
           _ <- Ns.i.a1.doubles(Set(double1)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.doubles(Set(double1, double2)).query.get.map(_ ==> List(a)) // include exact match
+          _ <- Ns.i.a1.doubles(Set(double2, double1)).query.get.map(_ ==> List(a)) // include exact match
           _ <- Ns.i.a1.doubles(Set(double1, double2, double3)).query.get.map(_ ==> List())
           // Same as
           _ <- Ns.i.a1.doubles(Seq(Set(double1))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.doubles(Seq(Set(double1, double2))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.doubles(Seq(Set(double2, double1))).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.doubles(Seq(Set(double1, double2, double3))).query.get.map(_ ==> List())
 
 
@@ -50,16 +52,17 @@ trait FilterSet_Double_ extends CoreTestSuite with ApiAsyncImplicits { self: Spi
           // "(exactly this AND that) OR (exactly this AND that)"
           _ <- Ns.i.a1.doubles(Set(double1), Set(double2, double3)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.doubles(Set(double1, double2), Set(double2, double3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.doubles(Set(double1, double2), Set(double2, double3, double4)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.doubles(Set(double2, double1), Set(double4, double3, double2)).query.get.map(_ ==> List(a, b))
           // Same as
           _ <- Ns.i.a1.doubles(Seq(Set(double1), Set(double2, double3))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.doubles(Seq(Set(double1, double2), Set(double2, double3))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.doubles(Seq(Set(double1, double2), Set(double2, double3, double4))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.doubles(Seq(Set(double2, double1), Set(double4, double3, double2))).query.get.map(_ ==> List(a, b))
 
 
           // Empty Seq/Sets match nothing
           _ <- Ns.i.a1.doubles(Set(double1, double2), Set.empty[Double]).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.doubles(Set.empty[Double], Set(double1, double2)).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.doubles(Set.empty[Double], Set(double2, double1)).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.doubles(Set.empty[Double], Set.empty[Double]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.doubles(Set.empty[Double]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.doubles(Seq.empty[Set[Double]]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.doubles(Seq(Set.empty[Double])).query.get.map(_ ==> List())
@@ -79,23 +82,25 @@ trait FilterSet_Double_ extends CoreTestSuite with ApiAsyncImplicits { self: Spi
           // "Not (exactly this AND that)"
           _ <- Ns.i.a1.doubles.not(Set(double1)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.doubles.not(Set(double1, double2)).query.get.map(_ ==> List(b)) // exclude exact match
+          _ <- Ns.i.a1.doubles.not(Set(double2, double1)).query.get.map(_ ==> List(b)) // exclude exact match
           _ <- Ns.i.a1.doubles.not(Set(double1, double2, double3)).query.get.map(_ ==> List(a, b))
           // Same as
           _ <- Ns.i.a1.doubles.not(Seq(Set(double1))).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.doubles.not(Seq(Set(double1, double2))).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.doubles.not(Seq(Set(double2, double1))).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.doubles.not(Seq(Set(double1, double2, double3))).query.get.map(_ ==> List(a, b))
 
 
           // AND/OR semantics with multiple Sets
 
-          // "Not (exactly this AND that) OR (exactly this AND that)"
+          // "NEITHER (exactly this AND that) NOR (exactly this AND that)"
           _ <- Ns.i.a1.doubles.not(Set(double1), Set(double2, double3)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.doubles.not(Set(double1, double2), Set(double2, double3)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.doubles.not(Set(double1, double2), Set(double2, double3, double4)).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.doubles.not(Set(double2, double1), Set(double4, double3, double2)).query.get.map(_ ==> List())
           // Same as
           _ <- Ns.i.a1.doubles.not(Seq(Set(double1), Set(double2, double3))).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.doubles.not(Seq(Set(double1, double2), Set(double2, double3))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.doubles.not(Seq(Set(double1, double2), Set(double2, double3, double4))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.doubles.not(Seq(Set(double2, double1), Set(double4, double3, double2))).query.get.map(_ ==> List())
 
 
           // Empty Seq/Sets
@@ -265,25 +270,25 @@ trait FilterSet_Double_ extends CoreTestSuite with ApiAsyncImplicits { self: Spi
     "Tacit" - {
 
       "attr" - types { implicit conn =>
-        val (a, b) = (1, 2)
         for {
+          _ <- Ns.i(0).save.transact
           _ <- Ns.i.doubles.insert(List(
-            (a, Set(double1, double2)),
-            (b, Set(double2, double3, double4))
+            (1, Set(double1, double2)),
+            (2, Set(double2, double3, double4))
           )).transact
 
-          _ <- Ns.i.a1.doubles_.query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.query.get.map(_ ==> List(0, 1, 2))
+          _ <- Ns.i.a1.doubles_.query.get.map(_ ==> List(1, 2))
         } yield ()
       }
 
 
       "apply (equal)" - types { implicit conn =>
-        val (a, b, x) = (1, 2, 3)
         for {
           _ <- Ns.i.doubles_?.insert(List(
-            (a, Some(Set(double1, double2))),
-            (b, Some(Set(double2, double3, double4))),
-            (x, None),
+            (0, None),
+            (1, Some(Set(double1, double2))),
+            (2, Some(Set(double2, double3, double4))),
           )).transact
 
           // Exact Set matches
@@ -291,11 +296,13 @@ trait FilterSet_Double_ extends CoreTestSuite with ApiAsyncImplicits { self: Spi
           // AND semantics
           // "Is exactly this AND that"
           _ <- Ns.i.a1.doubles_(Set(double1)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.doubles_(Set(double1, double2)).query.get.map(_ ==> List(a)) // include exact match
+          _ <- Ns.i.a1.doubles_(Set(double1, double2)).query.get.map(_ ==> List(1)) // include exact match
+          _ <- Ns.i.a1.doubles_(Set(double2, double1)).query.get.map(_ ==> List(1)) // include exact match
           _ <- Ns.i.a1.doubles_(Set(double1, double2, double3)).query.get.map(_ ==> List())
           // Same as
           _ <- Ns.i.a1.doubles_(Seq(Set(double1))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.doubles_(Seq(Set(double1, double2))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.doubles_(Seq(Set(double1, double2))).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.doubles_(Seq(Set(double2, double1))).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.doubles_(Seq(Set(double1, double2, double3))).query.get.map(_ ==> List())
 
 
@@ -303,16 +310,16 @@ trait FilterSet_Double_ extends CoreTestSuite with ApiAsyncImplicits { self: Spi
 
           // "(exactly this AND that) OR (exactly this AND that)"
           _ <- Ns.i.a1.doubles_(Set(double1), Set(double2, double3)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.doubles_(Set(double1, double2), Set(double2, double3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.doubles_(Set(double1, double2), Set(double2, double3, double4)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.doubles_(Set(double1, double2), Set(double2, double3)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.doubles_(Set(double2, double1), Set(double4, double3, double2)).query.get.map(_ ==> List(1, 2))
           // Same as
           _ <- Ns.i.a1.doubles_(Seq(Set(double1), Set(double2, double3))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.doubles_(Seq(Set(double1, double2), Set(double2, double3))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.doubles_(Seq(Set(double1, double2), Set(double2, double3, double4))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.doubles_(Seq(Set(double1, double2), Set(double2, double3))).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.doubles_(Seq(Set(double2, double1), Set(double4, double3, double2))).query.get.map(_ ==> List(1, 2))
 
 
           // Empty Seq/Sets match nothing
-          _ <- Ns.i.a1.doubles_(Set(double1, double2), Set.empty[Double]).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.doubles_(Set(double1, double2), Set.empty[Double]).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.doubles_(Set.empty[Double]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.doubles_(Seq.empty[Set[Double]]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.doubles_(Seq(Set.empty[Double])).query.get.map(_ ==> List())
@@ -321,116 +328,118 @@ trait FilterSet_Double_ extends CoreTestSuite with ApiAsyncImplicits { self: Spi
 
 
       "not equal" - types { implicit conn =>
-        val (a, b) = (1, 2)
         for {
+          _ <- Ns.i(0).save.transact
           _ <- Ns.i.doubles.insert(List(
-            (a, Set(double1, double2)),
-            (b, Set(double2, double3, double4))
+            (1, Set(double1, double2)),
+            (2, Set(double2, double3, double4))
           )).transact
 
           // Non-exact Set matches
 
           // AND semantics
           // "Not (exactly this AND that)"
-          _ <- Ns.i.a1.doubles_.not(Set(double1)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.doubles_.not(Set(double1, double2)).query.get.map(_ ==> List(b)) // exclude exact match
-          _ <- Ns.i.a1.doubles_.not(Set(double1, double2, double3)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.doubles_.not(Set(double1)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.doubles_.not(Set(double1, double2)).query.get.map(_ ==> List(2)) // exclude exact match
+          _ <- Ns.i.a1.doubles_.not(Set(double2, double1)).query.get.map(_ ==> List(2)) // exclude exact match
+          _ <- Ns.i.a1.doubles_.not(Set(double1, double2, double3)).query.get.map(_ ==> List(1, 2))
           // Same as
-          _ <- Ns.i.a1.doubles_.not(Seq(Set(double1))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.doubles_.not(Seq(Set(double1, double2))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.doubles_.not(Seq(Set(double1, double2, double3))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.doubles_.not(Seq(Set(double1))).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.doubles_.not(Seq(Set(double1, double2))).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.doubles_.not(Seq(Set(double2, double1))).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.doubles_.not(Seq(Set(double1, double2, double3))).query.get.map(_ ==> List(1, 2))
 
 
           // AND/OR semantics with multiple Sets
 
-          // "Not (exactly this AND that) OR (exactly this AND that)"
-          _ <- Ns.i.a1.doubles_.not(Set(double1), Set(double2, double3)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.doubles_.not(Set(double1, double2), Set(double2, double3)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.doubles_.not(Set(double1, double2), Set(double2, double3, double4)).query.get.map(_ ==> List())
+          // "NEITHER (exactly this AND that) NOR (exactly this AND that)"
+          _ <- Ns.i.a1.doubles_.not(Set(double1), Set(double2, double3)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.doubles_.not(Set(double1, double2), Set(double2, double3)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.doubles_.not(Set(double2, double1), Set(double4, double3, double2)).query.get.map(_ ==> List())
           // Same as
-          _ <- Ns.i.a1.doubles_.not(Seq(Set(double1), Set(double2, double3))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.doubles_.not(Seq(Set(double1, double2), Set(double2, double3))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.doubles_.not(Seq(Set(double1, double2), Set(double2, double3, double4))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.doubles_.not(Seq(Set(double1), Set(double2, double3))).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.doubles_.not(Seq(Set(double1, double2), Set(double2, double3))).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.doubles_.not(Seq(Set(double2, double1), Set(double4, double3, double2))).query.get.map(_ ==> List())
 
 
           // Empty Seq/Sets
-          _ <- Ns.i.a1.doubles_.not(Seq(Set(double1, double2), Set.empty[Double])).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.doubles_.not(Set.empty[Double]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.doubles_.not(Seq.empty[Set[Double]]).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.doubles_.not(Seq(Set(double1, double2), Set.empty[Double])).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.doubles_.not(Set.empty[Double]).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.doubles_.not(Seq.empty[Set[Double]]).query.get.map(_ ==> List(1, 2))
         } yield ()
       }
 
 
       "has" - types { implicit conn =>
-        val (a, b) = (1, 2)
         for {
+          _ <- Ns.i(0).save.transact
           _ <- Ns.i.doubles.insert(List(
-            (a, Set(double1, double2)),
-            (b, Set(double2, double3, double4))
+            (1, Set(double1, double2)),
+            (2, Set(double2, double3, double4))
           )).transact
 
           // Sets with one or more values matching
 
           // "Has this value"
           _ <- Ns.i.a1.doubles_.has(double0).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.doubles_.has(double1).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.doubles_.has(double2).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.doubles_.has(double3).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.doubles_.has(double1).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.doubles_.has(double2).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.doubles_.has(double3).query.get.map(_ ==> List(2))
           // Same as
           _ <- Ns.i.a1.doubles_.has(Seq(double0)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.doubles_.has(Seq(double1)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.doubles_.has(Seq(double2)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.doubles_.has(Seq(double3)).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.doubles_.has(Seq(double1)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.doubles_.has(Seq(double2)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.doubles_.has(Seq(double3)).query.get.map(_ ==> List(2))
 
 
           // OR semantics when multiple values
 
           // "Has this OR that"
-          _ <- Ns.i.a1.doubles_.has(double1, double2).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.doubles_.has(double1, double3).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.doubles_.has(double2, double3).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.doubles_.has(double1, double2, double3).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.doubles_.has(double1, double2).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.doubles_.has(double1, double3).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.doubles_.has(double2, double3).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.doubles_.has(double1, double2, double3).query.get.map(_ ==> List(1, 2))
           // Same as
-          _ <- Ns.i.a1.doubles_.has(Seq(double1, double2)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.doubles_.has(Seq(double1, double3)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.doubles_.has(Seq(double2, double3)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.doubles_.has(Seq(double1, double2, double3)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.doubles_.has(Seq(double1, double2)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.doubles_.has(Seq(double1, double3)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.doubles_.has(Seq(double2, double3)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.doubles_.has(Seq(double1, double2, double3)).query.get.map(_ ==> List(1, 2))
 
 
           // AND semantics when multiple values in a _Set_
 
           // "Has this AND that"
-          _ <- Ns.i.a1.doubles_.has(Set(double1)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.doubles_.has(Set(double1, double2)).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.doubles_.has(Set(double1)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.doubles_.has(Set(double1, double2)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.doubles_.has(Set(double1, double2, double3)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.doubles_.has(Set(double2)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.doubles_.has(Set(double2, double3)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.doubles_.has(Set(double2, double3, double4)).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.doubles_.has(Set(double2)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.doubles_.has(Set(double2, double3)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.doubles_.has(Set(double2, double3, double4)).query.get.map(_ ==> List(2))
           // Same as
-          _ <- Ns.i.a1.doubles_.has(Seq(Set(double1))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.doubles_.has(Seq(Set(double1, double2))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.doubles_.has(Seq(Set(double1))).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.doubles_.has(Seq(Set(double1, double2))).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.doubles_.has(Seq(Set(double1, double2, double3))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.doubles_.has(Seq(Set(double2))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.doubles_.has(Seq(Set(double2, double3))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.doubles_.has(Seq(Set(double2, double3, double4))).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.doubles_.has(Seq(Set(double2))).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.doubles_.has(Seq(Set(double2, double3))).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.doubles_.has(Seq(Set(double2, double3, double4))).query.get.map(_ ==> List(2))
 
 
           // AND/OR semantics with multiple Sets
 
           // "(has this AND that) OR (has this AND that)"
-          _ <- Ns.i.a1.doubles_.has(Set(double1, double2), Set(double0)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.doubles_.has(Set(double1, double2), Set(double0, double3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.doubles_.has(Set(double1, double2), Set(double2, double3)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.doubles_.has(Set(double1, double2), Set(double2, double3, double4)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.doubles_.has(Set(double1, double2), Set(double0)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.doubles_.has(Set(double1, double2), Set(double0, double3)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.doubles_.has(Set(double1, double2), Set(double2, double3)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.doubles_.has(Set(double1, double2), Set(double2, double3, double4)).query.get.map(_ ==> List(1, 2))
           // Same as
-          _ <- Ns.i.a1.doubles_.has(Seq(Set(double1, double2), Set(double0))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.doubles_.has(Seq(Set(double1, double2), Set(double0, double3))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.doubles_.has(Seq(Set(double1, double2), Set(double2, double3))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.doubles_.has(Seq(Set(double1, double2), Set(double2, double3, double4))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.doubles_.has(Seq(Set(double1, double2), Set(double0))).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.doubles_.has(Seq(Set(double1, double2), Set(double0, double3))).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.doubles_.has(Seq(Set(double1, double2), Set(double2, double3))).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.doubles_.has(Seq(Set(double1, double2), Set(double2, double3, double4))).query.get.map(_ ==> List(1, 2))
 
 
           // Empty Seq/Sets match nothing
-          _ <- Ns.i.a1.doubles_.has(Set(double1, double2), Set.empty[Double]).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.doubles_.has(Set(double1, double2), Set.empty[Double]).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.doubles_.has(Seq.empty[Double]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.doubles_.has(Set.empty[Double]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.doubles_.has(Seq.empty[Set[Double]]).query.get.map(_ ==> List())
@@ -439,29 +448,29 @@ trait FilterSet_Double_ extends CoreTestSuite with ApiAsyncImplicits { self: Spi
 
 
       "hasNo" - types { implicit conn =>
-        val (a, b) = (1, 2)
         for {
+          _ <- Ns.i(0).save.transact
           _ <- Ns.i.doubles.insert(List(
-            (a, Set(double1, double2)),
-            (b, Set(double2, double3, double4))
+            (1, Set(double1, double2)),
+            (2, Set(double2, double3, double4))
           )).transact
 
           // Sets without one or more values matching
 
           // "Doesn't have this value"
-          _ <- Ns.i.a1.doubles_.hasNo(double0).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.doubles_.hasNo(double1).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.doubles_.hasNo(double0).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.doubles_.hasNo(double1).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.doubles_.hasNo(double2).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.doubles_.hasNo(double3).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.doubles_.hasNo(double4).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.doubles_.hasNo(double5).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.doubles_.hasNo(double3).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.doubles_.hasNo(double4).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.doubles_.hasNo(double5).query.get.map(_ ==> List(1, 2))
           // Same as
-          _ <- Ns.i.a1.doubles_.hasNo(Seq(double0)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.doubles_.hasNo(Seq(double1)).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.doubles_.hasNo(Seq(double0)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.doubles_.hasNo(Seq(double1)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.doubles_.hasNo(Seq(double2)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.doubles_.hasNo(Seq(double3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.doubles_.hasNo(Seq(double4)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.doubles_.hasNo(Seq(double5)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.doubles_.hasNo(Seq(double3)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.doubles_.hasNo(Seq(double4)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.doubles_.hasNo(Seq(double5)).query.get.map(_ ==> List(1, 2))
 
 
           // OR semantics when multiple values
@@ -470,52 +479,52 @@ trait FilterSet_Double_ extends CoreTestSuite with ApiAsyncImplicits { self: Spi
           _ <- Ns.i.a1.doubles_.hasNo(double1, double2).query.get.map(_ ==> List())
           _ <- Ns.i.a1.doubles_.hasNo(double1, double3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.doubles_.hasNo(double1, double4).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.doubles_.hasNo(double1, double5).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.doubles_.hasNo(double1, double5).query.get.map(_ ==> List(2))
           // Same as
           _ <- Ns.i.a1.doubles_.hasNo(Seq(double1, double2)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.doubles_.hasNo(Seq(double1, double3)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.doubles_.hasNo(Seq(double1, double4)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.doubles_.hasNo(Seq(double1, double5)).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.doubles_.hasNo(Seq(double1, double5)).query.get.map(_ ==> List(2))
 
 
           // AND semantics when multiple values in a _Set_
 
           // "Not (has this AND that)"
-          _ <- Ns.i.a1.doubles_.hasNo(Set(double1)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.doubles_.hasNo(Set(double1, double2)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.doubles_.hasNo(Set(double1, double2, double3)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.doubles_.hasNo(Set(double1)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.doubles_.hasNo(Set(double1, double2)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.doubles_.hasNo(Set(double1, double2, double3)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.doubles_.hasNo(Set(double2)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.doubles_.hasNo(Set(double2, double3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.doubles_.hasNo(Set(double2, double3, double4)).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.doubles_.hasNo(Set(double2, double3)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.doubles_.hasNo(Set(double2, double3, double4)).query.get.map(_ ==> List(1))
           // Same as
-          _ <- Ns.i.a1.doubles_.hasNo(Seq(Set(double1))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.doubles_.hasNo(Seq(Set(double1, double2))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.doubles_.hasNo(Seq(Set(double1, double2, double3))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.doubles_.hasNo(Seq(Set(double1))).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.doubles_.hasNo(Seq(Set(double1, double2))).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.doubles_.hasNo(Seq(Set(double1, double2, double3))).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.doubles_.hasNo(Seq(Set(double2))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.doubles_.hasNo(Seq(Set(double2, double3))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.doubles_.hasNo(Seq(Set(double2, double3, double4))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.doubles_.hasNo(Seq(Set(double2, double3))).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.doubles_.hasNo(Seq(Set(double2, double3, double4))).query.get.map(_ ==> List(1))
 
 
           // AND/OR semantics with multiple Sets
 
           // "Not ((has this AND that) OR (has this AND that))"
-          _ <- Ns.i.a1.doubles_.hasNo(Set(double1, double2), Set(double0)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.doubles_.hasNo(Set(double1, double2), Set(double0, double3)).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.doubles_.hasNo(Set(double1, double2), Set(double0)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.doubles_.hasNo(Set(double1, double2), Set(double0, double3)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.doubles_.hasNo(Set(double1, double2), Set(double2, double3)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.doubles_.hasNo(Set(double1, double2), Set(double2, double3, double4)).query.get.map(_ ==> List())
           // Same as
-          _ <- Ns.i.a1.doubles_.hasNo(Seq(Set(double1, double2), Set(double0))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.doubles_.hasNo(Seq(Set(double1, double2), Set(double0, double3))).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.doubles_.hasNo(Seq(Set(double1, double2), Set(double0))).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.doubles_.hasNo(Seq(Set(double1, double2), Set(double0, double3))).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.doubles_.hasNo(Seq(Set(double1, double2), Set(double2, double3))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.doubles_.hasNo(Seq(Set(double1, double2), Set(double2, double3, double4))).query.get.map(_ ==> List())
 
 
           // Negating empty Seqs/Sets has no effect
-          _ <- Ns.i.a1.doubles_.hasNo(Set(double1, double2), Set.empty[Double]).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.doubles_.hasNo(Seq.empty[Double]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.doubles_.hasNo(Set.empty[Double]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.doubles_.hasNo(Seq.empty[Set[Double]]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.doubles_.hasNo(Seq(Set.empty[Double])).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.doubles_.hasNo(Set(double1, double2), Set.empty[Double]).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.doubles_.hasNo(Seq.empty[Double]).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.doubles_.hasNo(Set.empty[Double]).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.doubles_.hasNo(Seq.empty[Set[Double]]).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.doubles_.hasNo(Seq(Set.empty[Double])).query.get.map(_ ==> List(1, 2))
         } yield ()
       }
     }
@@ -555,10 +564,12 @@ trait FilterSet_Double_ extends CoreTestSuite with ApiAsyncImplicits { self: Spi
           // "Is exactly this AND that"
           _ <- Ns.i.a1.doubles_?(Some(Set(double1))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.doubles_?(Some(Set(double1, double2))).query.get.map(_ ==> List(a)) // include exact match
+          _ <- Ns.i.a1.doubles_?(Some(Set(double2, double1))).query.get.map(_ ==> List(a)) // include exact match
           _ <- Ns.i.a1.doubles_?(Some(Set(double1, double2, double3))).query.get.map(_ ==> List())
           // Same as
           _ <- Ns.i.a1.doubles_?(Some(Seq(Set(double1)))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.doubles_?(Some(Seq(Set(double1, double2)))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.doubles_?(Some(Seq(Set(double2, double1)))).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.doubles_?(Some(Seq(Set(double1, double2, double3)))).query.get.map(_ ==> List())
 
 
@@ -567,7 +578,7 @@ trait FilterSet_Double_ extends CoreTestSuite with ApiAsyncImplicits { self: Spi
           // "(exactly this AND that) OR (exactly this AND that)"
           _ <- Ns.i.a1.doubles_?(Some(Seq(Set(double1), Set(double2, double3)))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.doubles_?(Some(Seq(Set(double1, double2), Set(double2, double3)))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.doubles_?(Some(Seq(Set(double1, double2), Set(double2, double3, double4)))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.doubles_?(Some(Seq(Set(double2, double1), Set(double4, double3, double2)))).query.get.map(_ ==> List(a, b))
 
 
           // Empty Seq/Sets match nothing
@@ -596,19 +607,21 @@ trait FilterSet_Double_ extends CoreTestSuite with ApiAsyncImplicits { self: Spi
           // "Not (exactly this AND that)"
           _ <- Ns.i.a1.doubles_?.not(Some(Set(double1))).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.doubles_?.not(Some(Set(double1, double2))).query.get.map(_ ==> List(b)) // exclude exact match
+          _ <- Ns.i.a1.doubles_?.not(Some(Set(double2, double1))).query.get.map(_ ==> List(b)) // exclude exact match
           _ <- Ns.i.a1.doubles_?.not(Some(Set(double1, double2, double3))).query.get.map(_ ==> List(a, b))
           // Same as
           _ <- Ns.i.a1.doubles_?.not(Some(Seq(Set(double1)))).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.doubles_?.not(Some(Seq(Set(double1, double2)))).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.doubles_?.not(Some(Seq(Set(double2, double1)))).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.doubles_?.not(Some(Seq(Set(double1, double2, double3)))).query.get.map(_ ==> List(a, b))
 
 
           // AND/OR semantics with multiple Sets
 
-          // "Not (exactly this AND that) OR (exactly this AND that)"
+          // "NEITHER (exactly this AND that) NOR (exactly this AND that)"
           _ <- Ns.i.a1.doubles_?.not(Some(Seq(Set(double1), Set(double2, double3)))).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.doubles_?.not(Some(Seq(Set(double1, double2), Set(double2, double3)))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.doubles_?.not(Some(Seq(Set(double1, double2), Set(double2, double3, double4)))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.doubles_?.not(Some(Seq(Set(double2, double1), Set(double4, double3, double2)))).query.get.map(_ ==> List())
 
 
           // Empty Seq/Sets

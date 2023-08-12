@@ -10,7 +10,7 @@ import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 
-trait FilterSet_Date_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
+trait FilterSet_Date_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync =>
 
   override lazy val tests = Tests {
 
@@ -39,10 +39,12 @@ trait FilterSet_Date_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAs
           // "Is exactly this AND that"
           _ <- Ns.i.a1.dates(Set(date1)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.dates(Set(date1, date2)).query.get.map(_ ==> List(a)) // include exact match
+          _ <- Ns.i.a1.dates(Set(date2, date1)).query.get.map(_ ==> List(a)) // include exact match
           _ <- Ns.i.a1.dates(Set(date1, date2, date3)).query.get.map(_ ==> List())
           // Same as
           _ <- Ns.i.a1.dates(Seq(Set(date1))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.dates(Seq(Set(date1, date2))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.dates(Seq(Set(date2, date1))).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.dates(Seq(Set(date1, date2, date3))).query.get.map(_ ==> List())
 
 
@@ -51,16 +53,17 @@ trait FilterSet_Date_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAs
           // "(exactly this AND that) OR (exactly this AND that)"
           _ <- Ns.i.a1.dates(Set(date1), Set(date2, date3)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.dates(Set(date1, date2), Set(date2, date3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.dates(Set(date1, date2), Set(date2, date3, date4)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.dates(Set(date2, date1), Set(date4, date3, date2)).query.get.map(_ ==> List(a, b))
           // Same as
           _ <- Ns.i.a1.dates(Seq(Set(date1), Set(date2, date3))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.dates(Seq(Set(date1, date2), Set(date2, date3))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.dates(Seq(Set(date1, date2), Set(date2, date3, date4))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.dates(Seq(Set(date2, date1), Set(date4, date3, date2))).query.get.map(_ ==> List(a, b))
 
 
           // Empty Seq/Sets match nothing
           _ <- Ns.i.a1.dates(Set(date1, date2), Set.empty[Date]).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.dates(Set.empty[Date], Set(date1, date2)).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.dates(Set.empty[Date], Set(date2, date1)).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.dates(Set.empty[Date], Set.empty[Date]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.dates(Set.empty[Date]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.dates(Seq.empty[Set[Date]]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.dates(Seq(Set.empty[Date])).query.get.map(_ ==> List())
@@ -80,23 +83,25 @@ trait FilterSet_Date_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAs
           // "Not (exactly this AND that)"
           _ <- Ns.i.a1.dates.not(Set(date1)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.dates.not(Set(date1, date2)).query.get.map(_ ==> List(b)) // exclude exact match
+          _ <- Ns.i.a1.dates.not(Set(date2, date1)).query.get.map(_ ==> List(b)) // exclude exact match
           _ <- Ns.i.a1.dates.not(Set(date1, date2, date3)).query.get.map(_ ==> List(a, b))
           // Same as
           _ <- Ns.i.a1.dates.not(Seq(Set(date1))).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.dates.not(Seq(Set(date1, date2))).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.dates.not(Seq(Set(date2, date1))).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.dates.not(Seq(Set(date1, date2, date3))).query.get.map(_ ==> List(a, b))
 
 
           // AND/OR semantics with multiple Sets
 
-          // "Not (exactly this AND that) OR (exactly this AND that)"
+          // "NEITHER (exactly this AND that) NOR (exactly this AND that)"
           _ <- Ns.i.a1.dates.not(Set(date1), Set(date2, date3)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.dates.not(Set(date1, date2), Set(date2, date3)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.dates.not(Set(date1, date2), Set(date2, date3, date4)).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.dates.not(Set(date2, date1), Set(date4, date3, date2)).query.get.map(_ ==> List())
           // Same as
           _ <- Ns.i.a1.dates.not(Seq(Set(date1), Set(date2, date3))).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.dates.not(Seq(Set(date1, date2), Set(date2, date3))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.dates.not(Seq(Set(date1, date2), Set(date2, date3, date4))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.dates.not(Seq(Set(date2, date1), Set(date4, date3, date2))).query.get.map(_ ==> List())
 
 
           // Empty Seq/Sets
@@ -266,25 +271,25 @@ trait FilterSet_Date_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAs
     "Tacit" - {
 
       "attr" - types { implicit conn =>
-        val (a, b) = (1, 2)
         for {
+          _ <- Ns.i(0).save.transact
           _ <- Ns.i.dates.insert(List(
-            (a, Set(date1, date2)),
-            (b, Set(date2, date3, date4))
+            (1, Set(date1, date2)),
+            (2, Set(date2, date3, date4))
           )).transact
 
-          _ <- Ns.i.a1.dates_.query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.query.get.map(_ ==> List(0, 1, 2))
+          _ <- Ns.i.a1.dates_.query.get.map(_ ==> List(1, 2))
         } yield ()
       }
 
 
       "apply (equal)" - types { implicit conn =>
-        val (a, b, x) = (1, 2, 3)
         for {
           _ <- Ns.i.dates_?.insert(List(
-            (a, Some(Set(date1, date2))),
-            (b, Some(Set(date2, date3, date4))),
-            (x, None),
+            (0, None),
+            (1, Some(Set(date1, date2))),
+            (2, Some(Set(date2, date3, date4))),
           )).transact
 
           // Exact Set matches
@@ -292,11 +297,13 @@ trait FilterSet_Date_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAs
           // AND semantics
           // "Is exactly this AND that"
           _ <- Ns.i.a1.dates_(Set(date1)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.dates_(Set(date1, date2)).query.get.map(_ ==> List(a)) // include exact match
+          _ <- Ns.i.a1.dates_(Set(date1, date2)).query.get.map(_ ==> List(1)) // include exact match
+          _ <- Ns.i.a1.dates_(Set(date2, date1)).query.get.map(_ ==> List(1)) // include exact match
           _ <- Ns.i.a1.dates_(Set(date1, date2, date3)).query.get.map(_ ==> List())
           // Same as
           _ <- Ns.i.a1.dates_(Seq(Set(date1))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.dates_(Seq(Set(date1, date2))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.dates_(Seq(Set(date1, date2))).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.dates_(Seq(Set(date2, date1))).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.dates_(Seq(Set(date1, date2, date3))).query.get.map(_ ==> List())
 
 
@@ -304,16 +311,16 @@ trait FilterSet_Date_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAs
 
           // "(exactly this AND that) OR (exactly this AND that)"
           _ <- Ns.i.a1.dates_(Set(date1), Set(date2, date3)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.dates_(Set(date1, date2), Set(date2, date3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.dates_(Set(date1, date2), Set(date2, date3, date4)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.dates_(Set(date1, date2), Set(date2, date3)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.dates_(Set(date2, date1), Set(date4, date3, date2)).query.get.map(_ ==> List(1, 2))
           // Same as
           _ <- Ns.i.a1.dates_(Seq(Set(date1), Set(date2, date3))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.dates_(Seq(Set(date1, date2), Set(date2, date3))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.dates_(Seq(Set(date1, date2), Set(date2, date3, date4))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.dates_(Seq(Set(date1, date2), Set(date2, date3))).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.dates_(Seq(Set(date2, date1), Set(date4, date3, date2))).query.get.map(_ ==> List(1, 2))
 
 
           // Empty Seq/Sets match nothing
-          _ <- Ns.i.a1.dates_(Set(date1, date2), Set.empty[Date]).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.dates_(Set(date1, date2), Set.empty[Date]).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.dates_(Set.empty[Date]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.dates_(Seq.empty[Set[Date]]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.dates_(Seq(Set.empty[Date])).query.get.map(_ ==> List())
@@ -322,116 +329,118 @@ trait FilterSet_Date_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAs
 
 
       "not equal" - types { implicit conn =>
-        val (a, b) = (1, 2)
         for {
+          _ <- Ns.i(0).save.transact
           _ <- Ns.i.dates.insert(List(
-            (a, Set(date1, date2)),
-            (b, Set(date2, date3, date4))
+            (1, Set(date1, date2)),
+            (2, Set(date2, date3, date4))
           )).transact
 
           // Non-exact Set matches
 
           // AND semantics
           // "Not (exactly this AND that)"
-          _ <- Ns.i.a1.dates_.not(Set(date1)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.dates_.not(Set(date1, date2)).query.get.map(_ ==> List(b)) // exclude exact match
-          _ <- Ns.i.a1.dates_.not(Set(date1, date2, date3)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.dates_.not(Set(date1)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.dates_.not(Set(date1, date2)).query.get.map(_ ==> List(2)) // exclude exact match
+          _ <- Ns.i.a1.dates_.not(Set(date2, date1)).query.get.map(_ ==> List(2)) // exclude exact match
+          _ <- Ns.i.a1.dates_.not(Set(date1, date2, date3)).query.get.map(_ ==> List(1, 2))
           // Same as
-          _ <- Ns.i.a1.dates_.not(Seq(Set(date1))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.dates_.not(Seq(Set(date1, date2))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.dates_.not(Seq(Set(date1, date2, date3))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.dates_.not(Seq(Set(date1))).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.dates_.not(Seq(Set(date1, date2))).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.dates_.not(Seq(Set(date2, date1))).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.dates_.not(Seq(Set(date1, date2, date3))).query.get.map(_ ==> List(1, 2))
 
 
           // AND/OR semantics with multiple Sets
 
-          // "Not (exactly this AND that) OR (exactly this AND that)"
-          _ <- Ns.i.a1.dates_.not(Set(date1), Set(date2, date3)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.dates_.not(Set(date1, date2), Set(date2, date3)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.dates_.not(Set(date1, date2), Set(date2, date3, date4)).query.get.map(_ ==> List())
+          // "NEITHER (exactly this AND that) NOR (exactly this AND that)"
+          _ <- Ns.i.a1.dates_.not(Set(date1), Set(date2, date3)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.dates_.not(Set(date1, date2), Set(date2, date3)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.dates_.not(Set(date2, date1), Set(date4, date3, date2)).query.get.map(_ ==> List())
           // Same as
-          _ <- Ns.i.a1.dates_.not(Seq(Set(date1), Set(date2, date3))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.dates_.not(Seq(Set(date1, date2), Set(date2, date3))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.dates_.not(Seq(Set(date1, date2), Set(date2, date3, date4))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.dates_.not(Seq(Set(date1), Set(date2, date3))).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.dates_.not(Seq(Set(date1, date2), Set(date2, date3))).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.dates_.not(Seq(Set(date2, date1), Set(date4, date3, date2))).query.get.map(_ ==> List())
 
 
           // Empty Seq/Sets
-          _ <- Ns.i.a1.dates_.not(Seq(Set(date1, date2), Set.empty[Date])).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.dates_.not(Set.empty[Date]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.dates_.not(Seq.empty[Set[Date]]).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.dates_.not(Seq(Set(date1, date2), Set.empty[Date])).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.dates_.not(Set.empty[Date]).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.dates_.not(Seq.empty[Set[Date]]).query.get.map(_ ==> List(1, 2))
         } yield ()
       }
 
 
       "has" - types { implicit conn =>
-        val (a, b) = (1, 2)
         for {
+          _ <- Ns.i(0).save.transact
           _ <- Ns.i.dates.insert(List(
-            (a, Set(date1, date2)),
-            (b, Set(date2, date3, date4))
+            (1, Set(date1, date2)),
+            (2, Set(date2, date3, date4))
           )).transact
 
           // Sets with one or more values matching
 
           // "Has this value"
           _ <- Ns.i.a1.dates_.has(date0).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.dates_.has(date1).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.dates_.has(date2).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.dates_.has(date3).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.dates_.has(date1).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.dates_.has(date2).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.dates_.has(date3).query.get.map(_ ==> List(2))
           // Same as
           _ <- Ns.i.a1.dates_.has(Seq(date0)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.dates_.has(Seq(date1)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.dates_.has(Seq(date2)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.dates_.has(Seq(date3)).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.dates_.has(Seq(date1)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.dates_.has(Seq(date2)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.dates_.has(Seq(date3)).query.get.map(_ ==> List(2))
 
 
           // OR semantics when multiple values
 
           // "Has this OR that"
-          _ <- Ns.i.a1.dates_.has(date1, date2).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.dates_.has(date1, date3).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.dates_.has(date2, date3).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.dates_.has(date1, date2, date3).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.dates_.has(date1, date2).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.dates_.has(date1, date3).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.dates_.has(date2, date3).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.dates_.has(date1, date2, date3).query.get.map(_ ==> List(1, 2))
           // Same as
-          _ <- Ns.i.a1.dates_.has(Seq(date1, date2)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.dates_.has(Seq(date1, date3)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.dates_.has(Seq(date2, date3)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.dates_.has(Seq(date1, date2, date3)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.dates_.has(Seq(date1, date2)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.dates_.has(Seq(date1, date3)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.dates_.has(Seq(date2, date3)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.dates_.has(Seq(date1, date2, date3)).query.get.map(_ ==> List(1, 2))
 
 
           // AND semantics when multiple values in a _Set_
 
           // "Has this AND that"
-          _ <- Ns.i.a1.dates_.has(Set(date1)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.dates_.has(Set(date1, date2)).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.dates_.has(Set(date1)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.dates_.has(Set(date1, date2)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.dates_.has(Set(date1, date2, date3)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.dates_.has(Set(date2)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.dates_.has(Set(date2, date3)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.dates_.has(Set(date2, date3, date4)).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.dates_.has(Set(date2)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.dates_.has(Set(date2, date3)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.dates_.has(Set(date2, date3, date4)).query.get.map(_ ==> List(2))
           // Same as
-          _ <- Ns.i.a1.dates_.has(Seq(Set(date1))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.dates_.has(Seq(Set(date1, date2))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.dates_.has(Seq(Set(date1))).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.dates_.has(Seq(Set(date1, date2))).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.dates_.has(Seq(Set(date1, date2, date3))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.dates_.has(Seq(Set(date2))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.dates_.has(Seq(Set(date2, date3))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.dates_.has(Seq(Set(date2, date3, date4))).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.dates_.has(Seq(Set(date2))).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.dates_.has(Seq(Set(date2, date3))).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.dates_.has(Seq(Set(date2, date3, date4))).query.get.map(_ ==> List(2))
 
 
           // AND/OR semantics with multiple Sets
 
           // "(has this AND that) OR (has this AND that)"
-          _ <- Ns.i.a1.dates_.has(Set(date1, date2), Set(date0)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.dates_.has(Set(date1, date2), Set(date0, date3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.dates_.has(Set(date1, date2), Set(date2, date3)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.dates_.has(Set(date1, date2), Set(date2, date3, date4)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.dates_.has(Set(date1, date2), Set(date0)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.dates_.has(Set(date1, date2), Set(date0, date3)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.dates_.has(Set(date1, date2), Set(date2, date3)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.dates_.has(Set(date1, date2), Set(date2, date3, date4)).query.get.map(_ ==> List(1, 2))
           // Same as
-          _ <- Ns.i.a1.dates_.has(Seq(Set(date1, date2), Set(date0))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.dates_.has(Seq(Set(date1, date2), Set(date0, date3))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.dates_.has(Seq(Set(date1, date2), Set(date2, date3))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.dates_.has(Seq(Set(date1, date2), Set(date2, date3, date4))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.dates_.has(Seq(Set(date1, date2), Set(date0))).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.dates_.has(Seq(Set(date1, date2), Set(date0, date3))).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.dates_.has(Seq(Set(date1, date2), Set(date2, date3))).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.dates_.has(Seq(Set(date1, date2), Set(date2, date3, date4))).query.get.map(_ ==> List(1, 2))
 
 
           // Empty Seq/Sets match nothing
-          _ <- Ns.i.a1.dates_.has(Set(date1, date2), Set.empty[Date]).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.dates_.has(Set(date1, date2), Set.empty[Date]).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.dates_.has(Seq.empty[Date]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.dates_.has(Set.empty[Date]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.dates_.has(Seq.empty[Set[Date]]).query.get.map(_ ==> List())
@@ -440,29 +449,29 @@ trait FilterSet_Date_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAs
 
 
       "hasNo" - types { implicit conn =>
-        val (a, b) = (1, 2)
         for {
+          _ <- Ns.i(0).save.transact
           _ <- Ns.i.dates.insert(List(
-            (a, Set(date1, date2)),
-            (b, Set(date2, date3, date4))
+            (1, Set(date1, date2)),
+            (2, Set(date2, date3, date4))
           )).transact
 
           // Sets without one or more values matching
 
           // "Doesn't have this value"
-          _ <- Ns.i.a1.dates_.hasNo(date0).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.dates_.hasNo(date1).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.dates_.hasNo(date0).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.dates_.hasNo(date1).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.dates_.hasNo(date2).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.dates_.hasNo(date3).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.dates_.hasNo(date4).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.dates_.hasNo(date5).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.dates_.hasNo(date3).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.dates_.hasNo(date4).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.dates_.hasNo(date5).query.get.map(_ ==> List(1, 2))
           // Same as
-          _ <- Ns.i.a1.dates_.hasNo(Seq(date0)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.dates_.hasNo(Seq(date1)).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.dates_.hasNo(Seq(date0)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.dates_.hasNo(Seq(date1)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.dates_.hasNo(Seq(date2)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.dates_.hasNo(Seq(date3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.dates_.hasNo(Seq(date4)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.dates_.hasNo(Seq(date5)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.dates_.hasNo(Seq(date3)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.dates_.hasNo(Seq(date4)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.dates_.hasNo(Seq(date5)).query.get.map(_ ==> List(1, 2))
 
 
           // OR semantics when multiple values
@@ -471,52 +480,52 @@ trait FilterSet_Date_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAs
           _ <- Ns.i.a1.dates_.hasNo(date1, date2).query.get.map(_ ==> List())
           _ <- Ns.i.a1.dates_.hasNo(date1, date3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.dates_.hasNo(date1, date4).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.dates_.hasNo(date1, date5).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.dates_.hasNo(date1, date5).query.get.map(_ ==> List(2))
           // Same as
           _ <- Ns.i.a1.dates_.hasNo(Seq(date1, date2)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.dates_.hasNo(Seq(date1, date3)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.dates_.hasNo(Seq(date1, date4)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.dates_.hasNo(Seq(date1, date5)).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.dates_.hasNo(Seq(date1, date5)).query.get.map(_ ==> List(2))
 
 
           // AND semantics when multiple values in a _Set_
 
           // "Not (has this AND that)"
-          _ <- Ns.i.a1.dates_.hasNo(Set(date1)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.dates_.hasNo(Set(date1, date2)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.dates_.hasNo(Set(date1, date2, date3)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.dates_.hasNo(Set(date1)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.dates_.hasNo(Set(date1, date2)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.dates_.hasNo(Set(date1, date2, date3)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.dates_.hasNo(Set(date2)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.dates_.hasNo(Set(date2, date3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.dates_.hasNo(Set(date2, date3, date4)).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.dates_.hasNo(Set(date2, date3)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.dates_.hasNo(Set(date2, date3, date4)).query.get.map(_ ==> List(1))
           // Same as
-          _ <- Ns.i.a1.dates_.hasNo(Seq(Set(date1))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.dates_.hasNo(Seq(Set(date1, date2))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.dates_.hasNo(Seq(Set(date1, date2, date3))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.dates_.hasNo(Seq(Set(date1))).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.dates_.hasNo(Seq(Set(date1, date2))).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.dates_.hasNo(Seq(Set(date1, date2, date3))).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.dates_.hasNo(Seq(Set(date2))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.dates_.hasNo(Seq(Set(date2, date3))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.dates_.hasNo(Seq(Set(date2, date3, date4))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.dates_.hasNo(Seq(Set(date2, date3))).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.dates_.hasNo(Seq(Set(date2, date3, date4))).query.get.map(_ ==> List(1))
 
 
           // AND/OR semantics with multiple Sets
 
           // "Not ((has this AND that) OR (has this AND that))"
-          _ <- Ns.i.a1.dates_.hasNo(Set(date1, date2), Set(date0)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.dates_.hasNo(Set(date1, date2), Set(date0, date3)).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.dates_.hasNo(Set(date1, date2), Set(date0)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.dates_.hasNo(Set(date1, date2), Set(date0, date3)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.dates_.hasNo(Set(date1, date2), Set(date2, date3)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.dates_.hasNo(Set(date1, date2), Set(date2, date3, date4)).query.get.map(_ ==> List())
           // Same as
-          _ <- Ns.i.a1.dates_.hasNo(Seq(Set(date1, date2), Set(date0))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.dates_.hasNo(Seq(Set(date1, date2), Set(date0, date3))).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.dates_.hasNo(Seq(Set(date1, date2), Set(date0))).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.dates_.hasNo(Seq(Set(date1, date2), Set(date0, date3))).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.dates_.hasNo(Seq(Set(date1, date2), Set(date2, date3))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.dates_.hasNo(Seq(Set(date1, date2), Set(date2, date3, date4))).query.get.map(_ ==> List())
 
 
           // Negating empty Seqs/Sets has no effect
-          _ <- Ns.i.a1.dates_.hasNo(Set(date1, date2), Set.empty[Date]).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.dates_.hasNo(Seq.empty[Date]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.dates_.hasNo(Set.empty[Date]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.dates_.hasNo(Seq.empty[Set[Date]]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.dates_.hasNo(Seq(Set.empty[Date])).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.dates_.hasNo(Set(date1, date2), Set.empty[Date]).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.dates_.hasNo(Seq.empty[Date]).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.dates_.hasNo(Set.empty[Date]).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.dates_.hasNo(Seq.empty[Set[Date]]).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.dates_.hasNo(Seq(Set.empty[Date])).query.get.map(_ ==> List(1, 2))
         } yield ()
       }
     }
@@ -556,10 +565,12 @@ trait FilterSet_Date_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAs
           // "Is exactly this AND that"
           _ <- Ns.i.a1.dates_?(Some(Set(date1))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.dates_?(Some(Set(date1, date2))).query.get.map(_ ==> List(a)) // include exact match
+          _ <- Ns.i.a1.dates_?(Some(Set(date2, date1))).query.get.map(_ ==> List(a)) // include exact match
           _ <- Ns.i.a1.dates_?(Some(Set(date1, date2, date3))).query.get.map(_ ==> List())
           // Same as
           _ <- Ns.i.a1.dates_?(Some(Seq(Set(date1)))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.dates_?(Some(Seq(Set(date1, date2)))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.dates_?(Some(Seq(Set(date2, date1)))).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.dates_?(Some(Seq(Set(date1, date2, date3)))).query.get.map(_ ==> List())
 
 
@@ -568,7 +579,7 @@ trait FilterSet_Date_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAs
           // "(exactly this AND that) OR (exactly this AND that)"
           _ <- Ns.i.a1.dates_?(Some(Seq(Set(date1), Set(date2, date3)))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.dates_?(Some(Seq(Set(date1, date2), Set(date2, date3)))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.dates_?(Some(Seq(Set(date1, date2), Set(date2, date3, date4)))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.dates_?(Some(Seq(Set(date2, date1), Set(date4, date3, date2)))).query.get.map(_ ==> List(a, b))
 
 
           // Empty Seq/Sets match nothing
@@ -597,19 +608,21 @@ trait FilterSet_Date_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAs
           // "Not (exactly this AND that)"
           _ <- Ns.i.a1.dates_?.not(Some(Set(date1))).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.dates_?.not(Some(Set(date1, date2))).query.get.map(_ ==> List(b)) // exclude exact match
+          _ <- Ns.i.a1.dates_?.not(Some(Set(date2, date1))).query.get.map(_ ==> List(b)) // exclude exact match
           _ <- Ns.i.a1.dates_?.not(Some(Set(date1, date2, date3))).query.get.map(_ ==> List(a, b))
           // Same as
           _ <- Ns.i.a1.dates_?.not(Some(Seq(Set(date1)))).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.dates_?.not(Some(Seq(Set(date1, date2)))).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.dates_?.not(Some(Seq(Set(date2, date1)))).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.dates_?.not(Some(Seq(Set(date1, date2, date3)))).query.get.map(_ ==> List(a, b))
 
 
           // AND/OR semantics with multiple Sets
 
-          // "Not (exactly this AND that) OR (exactly this AND that)"
+          // "NEITHER (exactly this AND that) NOR (exactly this AND that)"
           _ <- Ns.i.a1.dates_?.not(Some(Seq(Set(date1), Set(date2, date3)))).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.dates_?.not(Some(Seq(Set(date1, date2), Set(date2, date3)))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.dates_?.not(Some(Seq(Set(date1, date2), Set(date2, date3, date4)))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.dates_?.not(Some(Seq(Set(date2, date1), Set(date4, date3, date2)))).query.get.map(_ ==> List())
 
 
           // Empty Seq/Sets

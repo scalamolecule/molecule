@@ -9,7 +9,7 @@ import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 
-trait FilterSet_BigInt_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
+trait FilterSet_BigInt_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync =>
 
   override lazy val tests = Tests {
 
@@ -38,10 +38,12 @@ trait FilterSet_BigInt_ extends CoreTestSuite with ApiAsyncImplicits { self: Spi
           // "Is exactly this AND that"
           _ <- Ns.i.a1.bigInts(Set(bigInt1)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.bigInts(Set(bigInt1, bigInt2)).query.get.map(_ ==> List(a)) // include exact match
+          _ <- Ns.i.a1.bigInts(Set(bigInt2, bigInt1)).query.get.map(_ ==> List(a)) // include exact match
           _ <- Ns.i.a1.bigInts(Set(bigInt1, bigInt2, bigInt3)).query.get.map(_ ==> List())
           // Same as
           _ <- Ns.i.a1.bigInts(Seq(Set(bigInt1))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.bigInts(Seq(Set(bigInt1, bigInt2))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.bigInts(Seq(Set(bigInt2, bigInt1))).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.bigInts(Seq(Set(bigInt1, bigInt2, bigInt3))).query.get.map(_ ==> List())
 
 
@@ -50,16 +52,17 @@ trait FilterSet_BigInt_ extends CoreTestSuite with ApiAsyncImplicits { self: Spi
           // "(exactly this AND that) OR (exactly this AND that)"
           _ <- Ns.i.a1.bigInts(Set(bigInt1), Set(bigInt2, bigInt3)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.bigInts(Set(bigInt1, bigInt2), Set(bigInt2, bigInt3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.bigInts(Set(bigInt1, bigInt2), Set(bigInt2, bigInt3, bigInt4)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.bigInts(Set(bigInt2, bigInt1), Set(bigInt4, bigInt3, bigInt2)).query.get.map(_ ==> List(a, b))
           // Same as
           _ <- Ns.i.a1.bigInts(Seq(Set(bigInt1), Set(bigInt2, bigInt3))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.bigInts(Seq(Set(bigInt1, bigInt2), Set(bigInt2, bigInt3))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.bigInts(Seq(Set(bigInt1, bigInt2), Set(bigInt2, bigInt3, bigInt4))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.bigInts(Seq(Set(bigInt2, bigInt1), Set(bigInt4, bigInt3, bigInt2))).query.get.map(_ ==> List(a, b))
 
 
           // Empty Seq/Sets match nothing
           _ <- Ns.i.a1.bigInts(Set(bigInt1, bigInt2), Set.empty[BigInt]).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.bigInts(Set.empty[BigInt], Set(bigInt1, bigInt2)).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.bigInts(Set.empty[BigInt], Set(bigInt2, bigInt1)).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.bigInts(Set.empty[BigInt], Set.empty[BigInt]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.bigInts(Set.empty[BigInt]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.bigInts(Seq.empty[Set[BigInt]]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.bigInts(Seq(Set.empty[BigInt])).query.get.map(_ ==> List())
@@ -79,23 +82,25 @@ trait FilterSet_BigInt_ extends CoreTestSuite with ApiAsyncImplicits { self: Spi
           // "Not (exactly this AND that)"
           _ <- Ns.i.a1.bigInts.not(Set(bigInt1)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.bigInts.not(Set(bigInt1, bigInt2)).query.get.map(_ ==> List(b)) // exclude exact match
+          _ <- Ns.i.a1.bigInts.not(Set(bigInt2, bigInt1)).query.get.map(_ ==> List(b)) // exclude exact match
           _ <- Ns.i.a1.bigInts.not(Set(bigInt1, bigInt2, bigInt3)).query.get.map(_ ==> List(a, b))
           // Same as
           _ <- Ns.i.a1.bigInts.not(Seq(Set(bigInt1))).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.bigInts.not(Seq(Set(bigInt1, bigInt2))).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.bigInts.not(Seq(Set(bigInt2, bigInt1))).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.bigInts.not(Seq(Set(bigInt1, bigInt2, bigInt3))).query.get.map(_ ==> List(a, b))
 
 
           // AND/OR semantics with multiple Sets
 
-          // "Not (exactly this AND that) OR (exactly this AND that)"
+          // "NEITHER (exactly this AND that) NOR (exactly this AND that)"
           _ <- Ns.i.a1.bigInts.not(Set(bigInt1), Set(bigInt2, bigInt3)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.bigInts.not(Set(bigInt1, bigInt2), Set(bigInt2, bigInt3)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.bigInts.not(Set(bigInt1, bigInt2), Set(bigInt2, bigInt3, bigInt4)).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.bigInts.not(Set(bigInt2, bigInt1), Set(bigInt4, bigInt3, bigInt2)).query.get.map(_ ==> List())
           // Same as
           _ <- Ns.i.a1.bigInts.not(Seq(Set(bigInt1), Set(bigInt2, bigInt3))).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.bigInts.not(Seq(Set(bigInt1, bigInt2), Set(bigInt2, bigInt3))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.bigInts.not(Seq(Set(bigInt1, bigInt2), Set(bigInt2, bigInt3, bigInt4))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.bigInts.not(Seq(Set(bigInt2, bigInt1), Set(bigInt4, bigInt3, bigInt2))).query.get.map(_ ==> List())
 
 
           // Empty Seq/Sets
@@ -265,25 +270,25 @@ trait FilterSet_BigInt_ extends CoreTestSuite with ApiAsyncImplicits { self: Spi
     "Tacit" - {
 
       "attr" - types { implicit conn =>
-        val (a, b) = (1, 2)
         for {
+          _ <- Ns.i(0).save.transact
           _ <- Ns.i.bigInts.insert(List(
-            (a, Set(bigInt1, bigInt2)),
-            (b, Set(bigInt2, bigInt3, bigInt4))
+            (1, Set(bigInt1, bigInt2)),
+            (2, Set(bigInt2, bigInt3, bigInt4))
           )).transact
 
-          _ <- Ns.i.a1.bigInts_.query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.query.get.map(_ ==> List(0, 1, 2))
+          _ <- Ns.i.a1.bigInts_.query.get.map(_ ==> List(1, 2))
         } yield ()
       }
 
 
       "apply (equal)" - types { implicit conn =>
-        val (a, b, x) = (1, 2, 3)
         for {
           _ <- Ns.i.bigInts_?.insert(List(
-            (a, Some(Set(bigInt1, bigInt2))),
-            (b, Some(Set(bigInt2, bigInt3, bigInt4))),
-            (x, None),
+            (0, None),
+            (1, Some(Set(bigInt1, bigInt2))),
+            (2, Some(Set(bigInt2, bigInt3, bigInt4))),
           )).transact
 
           // Exact Set matches
@@ -291,11 +296,13 @@ trait FilterSet_BigInt_ extends CoreTestSuite with ApiAsyncImplicits { self: Spi
           // AND semantics
           // "Is exactly this AND that"
           _ <- Ns.i.a1.bigInts_(Set(bigInt1)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.bigInts_(Set(bigInt1, bigInt2)).query.get.map(_ ==> List(a)) // include exact match
+          _ <- Ns.i.a1.bigInts_(Set(bigInt1, bigInt2)).query.get.map(_ ==> List(1)) // include exact match
+          _ <- Ns.i.a1.bigInts_(Set(bigInt2, bigInt1)).query.get.map(_ ==> List(1)) // include exact match
           _ <- Ns.i.a1.bigInts_(Set(bigInt1, bigInt2, bigInt3)).query.get.map(_ ==> List())
           // Same as
           _ <- Ns.i.a1.bigInts_(Seq(Set(bigInt1))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.bigInts_(Seq(Set(bigInt1, bigInt2))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.bigInts_(Seq(Set(bigInt1, bigInt2))).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.bigInts_(Seq(Set(bigInt2, bigInt1))).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.bigInts_(Seq(Set(bigInt1, bigInt2, bigInt3))).query.get.map(_ ==> List())
 
 
@@ -303,16 +310,16 @@ trait FilterSet_BigInt_ extends CoreTestSuite with ApiAsyncImplicits { self: Spi
 
           // "(exactly this AND that) OR (exactly this AND that)"
           _ <- Ns.i.a1.bigInts_(Set(bigInt1), Set(bigInt2, bigInt3)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.bigInts_(Set(bigInt1, bigInt2), Set(bigInt2, bigInt3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.bigInts_(Set(bigInt1, bigInt2), Set(bigInt2, bigInt3, bigInt4)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.bigInts_(Set(bigInt1, bigInt2), Set(bigInt2, bigInt3)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.bigInts_(Set(bigInt2, bigInt1), Set(bigInt4, bigInt3, bigInt2)).query.get.map(_ ==> List(1, 2))
           // Same as
           _ <- Ns.i.a1.bigInts_(Seq(Set(bigInt1), Set(bigInt2, bigInt3))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.bigInts_(Seq(Set(bigInt1, bigInt2), Set(bigInt2, bigInt3))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.bigInts_(Seq(Set(bigInt1, bigInt2), Set(bigInt2, bigInt3, bigInt4))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.bigInts_(Seq(Set(bigInt1, bigInt2), Set(bigInt2, bigInt3))).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.bigInts_(Seq(Set(bigInt2, bigInt1), Set(bigInt4, bigInt3, bigInt2))).query.get.map(_ ==> List(1, 2))
 
 
           // Empty Seq/Sets match nothing
-          _ <- Ns.i.a1.bigInts_(Set(bigInt1, bigInt2), Set.empty[BigInt]).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.bigInts_(Set(bigInt1, bigInt2), Set.empty[BigInt]).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.bigInts_(Set.empty[BigInt]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.bigInts_(Seq.empty[Set[BigInt]]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.bigInts_(Seq(Set.empty[BigInt])).query.get.map(_ ==> List())
@@ -321,116 +328,118 @@ trait FilterSet_BigInt_ extends CoreTestSuite with ApiAsyncImplicits { self: Spi
 
 
       "not equal" - types { implicit conn =>
-        val (a, b) = (1, 2)
         for {
+          _ <- Ns.i(0).save.transact
           _ <- Ns.i.bigInts.insert(List(
-            (a, Set(bigInt1, bigInt2)),
-            (b, Set(bigInt2, bigInt3, bigInt4))
+            (1, Set(bigInt1, bigInt2)),
+            (2, Set(bigInt2, bigInt3, bigInt4))
           )).transact
 
           // Non-exact Set matches
 
           // AND semantics
           // "Not (exactly this AND that)"
-          _ <- Ns.i.a1.bigInts_.not(Set(bigInt1)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.bigInts_.not(Set(bigInt1, bigInt2)).query.get.map(_ ==> List(b)) // exclude exact match
-          _ <- Ns.i.a1.bigInts_.not(Set(bigInt1, bigInt2, bigInt3)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.bigInts_.not(Set(bigInt1)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.bigInts_.not(Set(bigInt1, bigInt2)).query.get.map(_ ==> List(2)) // exclude exact match
+          _ <- Ns.i.a1.bigInts_.not(Set(bigInt2, bigInt1)).query.get.map(_ ==> List(2)) // exclude exact match
+          _ <- Ns.i.a1.bigInts_.not(Set(bigInt1, bigInt2, bigInt3)).query.get.map(_ ==> List(1, 2))
           // Same as
-          _ <- Ns.i.a1.bigInts_.not(Seq(Set(bigInt1))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.bigInts_.not(Seq(Set(bigInt1, bigInt2))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.bigInts_.not(Seq(Set(bigInt1, bigInt2, bigInt3))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.bigInts_.not(Seq(Set(bigInt1))).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.bigInts_.not(Seq(Set(bigInt1, bigInt2))).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.bigInts_.not(Seq(Set(bigInt2, bigInt1))).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.bigInts_.not(Seq(Set(bigInt1, bigInt2, bigInt3))).query.get.map(_ ==> List(1, 2))
 
 
           // AND/OR semantics with multiple Sets
 
-          // "Not (exactly this AND that) OR (exactly this AND that)"
-          _ <- Ns.i.a1.bigInts_.not(Set(bigInt1), Set(bigInt2, bigInt3)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.bigInts_.not(Set(bigInt1, bigInt2), Set(bigInt2, bigInt3)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.bigInts_.not(Set(bigInt1, bigInt2), Set(bigInt2, bigInt3, bigInt4)).query.get.map(_ ==> List())
+          // "NEITHER (exactly this AND that) NOR (exactly this AND that)"
+          _ <- Ns.i.a1.bigInts_.not(Set(bigInt1), Set(bigInt2, bigInt3)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.bigInts_.not(Set(bigInt1, bigInt2), Set(bigInt2, bigInt3)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.bigInts_.not(Set(bigInt2, bigInt1), Set(bigInt4, bigInt3, bigInt2)).query.get.map(_ ==> List())
           // Same as
-          _ <- Ns.i.a1.bigInts_.not(Seq(Set(bigInt1), Set(bigInt2, bigInt3))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.bigInts_.not(Seq(Set(bigInt1, bigInt2), Set(bigInt2, bigInt3))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.bigInts_.not(Seq(Set(bigInt1, bigInt2), Set(bigInt2, bigInt3, bigInt4))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.bigInts_.not(Seq(Set(bigInt1), Set(bigInt2, bigInt3))).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.bigInts_.not(Seq(Set(bigInt1, bigInt2), Set(bigInt2, bigInt3))).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.bigInts_.not(Seq(Set(bigInt2, bigInt1), Set(bigInt4, bigInt3, bigInt2))).query.get.map(_ ==> List())
 
 
           // Empty Seq/Sets
-          _ <- Ns.i.a1.bigInts_.not(Seq(Set(bigInt1, bigInt2), Set.empty[BigInt])).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.bigInts_.not(Set.empty[BigInt]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.bigInts_.not(Seq.empty[Set[BigInt]]).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.bigInts_.not(Seq(Set(bigInt1, bigInt2), Set.empty[BigInt])).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.bigInts_.not(Set.empty[BigInt]).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.bigInts_.not(Seq.empty[Set[BigInt]]).query.get.map(_ ==> List(1, 2))
         } yield ()
       }
 
 
       "has" - types { implicit conn =>
-        val (a, b) = (1, 2)
         for {
+          _ <- Ns.i(0).save.transact
           _ <- Ns.i.bigInts.insert(List(
-            (a, Set(bigInt1, bigInt2)),
-            (b, Set(bigInt2, bigInt3, bigInt4))
+            (1, Set(bigInt1, bigInt2)),
+            (2, Set(bigInt2, bigInt3, bigInt4))
           )).transact
 
           // Sets with one or more values matching
 
           // "Has this value"
           _ <- Ns.i.a1.bigInts_.has(bigInt0).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.bigInts_.has(bigInt1).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.bigInts_.has(bigInt2).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.bigInts_.has(bigInt3).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.bigInts_.has(bigInt1).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.bigInts_.has(bigInt2).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.bigInts_.has(bigInt3).query.get.map(_ ==> List(2))
           // Same as
           _ <- Ns.i.a1.bigInts_.has(Seq(bigInt0)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.bigInts_.has(Seq(bigInt1)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.bigInts_.has(Seq(bigInt2)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.bigInts_.has(Seq(bigInt3)).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.bigInts_.has(Seq(bigInt1)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.bigInts_.has(Seq(bigInt2)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.bigInts_.has(Seq(bigInt3)).query.get.map(_ ==> List(2))
 
 
           // OR semantics when multiple values
 
           // "Has this OR that"
-          _ <- Ns.i.a1.bigInts_.has(bigInt1, bigInt2).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.bigInts_.has(bigInt1, bigInt3).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.bigInts_.has(bigInt2, bigInt3).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.bigInts_.has(bigInt1, bigInt2, bigInt3).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.bigInts_.has(bigInt1, bigInt2).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.bigInts_.has(bigInt1, bigInt3).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.bigInts_.has(bigInt2, bigInt3).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.bigInts_.has(bigInt1, bigInt2, bigInt3).query.get.map(_ ==> List(1, 2))
           // Same as
-          _ <- Ns.i.a1.bigInts_.has(Seq(bigInt1, bigInt2)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.bigInts_.has(Seq(bigInt1, bigInt3)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.bigInts_.has(Seq(bigInt2, bigInt3)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.bigInts_.has(Seq(bigInt1, bigInt2, bigInt3)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.bigInts_.has(Seq(bigInt1, bigInt2)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.bigInts_.has(Seq(bigInt1, bigInt3)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.bigInts_.has(Seq(bigInt2, bigInt3)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.bigInts_.has(Seq(bigInt1, bigInt2, bigInt3)).query.get.map(_ ==> List(1, 2))
 
 
           // AND semantics when multiple values in a _Set_
 
           // "Has this AND that"
-          _ <- Ns.i.a1.bigInts_.has(Set(bigInt1)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.bigInts_.has(Set(bigInt1, bigInt2)).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.bigInts_.has(Set(bigInt1)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.bigInts_.has(Set(bigInt1, bigInt2)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.bigInts_.has(Set(bigInt1, bigInt2, bigInt3)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.bigInts_.has(Set(bigInt2)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.bigInts_.has(Set(bigInt2, bigInt3)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.bigInts_.has(Set(bigInt2, bigInt3, bigInt4)).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.bigInts_.has(Set(bigInt2)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.bigInts_.has(Set(bigInt2, bigInt3)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.bigInts_.has(Set(bigInt2, bigInt3, bigInt4)).query.get.map(_ ==> List(2))
           // Same as
-          _ <- Ns.i.a1.bigInts_.has(Seq(Set(bigInt1))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.bigInts_.has(Seq(Set(bigInt1, bigInt2))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.bigInts_.has(Seq(Set(bigInt1))).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.bigInts_.has(Seq(Set(bigInt1, bigInt2))).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.bigInts_.has(Seq(Set(bigInt1, bigInt2, bigInt3))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.bigInts_.has(Seq(Set(bigInt2))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.bigInts_.has(Seq(Set(bigInt2, bigInt3))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.bigInts_.has(Seq(Set(bigInt2, bigInt3, bigInt4))).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.bigInts_.has(Seq(Set(bigInt2))).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.bigInts_.has(Seq(Set(bigInt2, bigInt3))).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.bigInts_.has(Seq(Set(bigInt2, bigInt3, bigInt4))).query.get.map(_ ==> List(2))
 
 
           // AND/OR semantics with multiple Sets
 
           // "(has this AND that) OR (has this AND that)"
-          _ <- Ns.i.a1.bigInts_.has(Set(bigInt1, bigInt2), Set(bigInt0)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.bigInts_.has(Set(bigInt1, bigInt2), Set(bigInt0, bigInt3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.bigInts_.has(Set(bigInt1, bigInt2), Set(bigInt2, bigInt3)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.bigInts_.has(Set(bigInt1, bigInt2), Set(bigInt2, bigInt3, bigInt4)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.bigInts_.has(Set(bigInt1, bigInt2), Set(bigInt0)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.bigInts_.has(Set(bigInt1, bigInt2), Set(bigInt0, bigInt3)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.bigInts_.has(Set(bigInt1, bigInt2), Set(bigInt2, bigInt3)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.bigInts_.has(Set(bigInt1, bigInt2), Set(bigInt2, bigInt3, bigInt4)).query.get.map(_ ==> List(1, 2))
           // Same as
-          _ <- Ns.i.a1.bigInts_.has(Seq(Set(bigInt1, bigInt2), Set(bigInt0))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.bigInts_.has(Seq(Set(bigInt1, bigInt2), Set(bigInt0, bigInt3))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.bigInts_.has(Seq(Set(bigInt1, bigInt2), Set(bigInt2, bigInt3))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.bigInts_.has(Seq(Set(bigInt1, bigInt2), Set(bigInt2, bigInt3, bigInt4))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.bigInts_.has(Seq(Set(bigInt1, bigInt2), Set(bigInt0))).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.bigInts_.has(Seq(Set(bigInt1, bigInt2), Set(bigInt0, bigInt3))).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.bigInts_.has(Seq(Set(bigInt1, bigInt2), Set(bigInt2, bigInt3))).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.bigInts_.has(Seq(Set(bigInt1, bigInt2), Set(bigInt2, bigInt3, bigInt4))).query.get.map(_ ==> List(1, 2))
 
 
           // Empty Seq/Sets match nothing
-          _ <- Ns.i.a1.bigInts_.has(Set(bigInt1, bigInt2), Set.empty[BigInt]).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.bigInts_.has(Set(bigInt1, bigInt2), Set.empty[BigInt]).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.bigInts_.has(Seq.empty[BigInt]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.bigInts_.has(Set.empty[BigInt]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.bigInts_.has(Seq.empty[Set[BigInt]]).query.get.map(_ ==> List())
@@ -439,29 +448,29 @@ trait FilterSet_BigInt_ extends CoreTestSuite with ApiAsyncImplicits { self: Spi
 
 
       "hasNo" - types { implicit conn =>
-        val (a, b) = (1, 2)
         for {
+          _ <- Ns.i(0).save.transact
           _ <- Ns.i.bigInts.insert(List(
-            (a, Set(bigInt1, bigInt2)),
-            (b, Set(bigInt2, bigInt3, bigInt4))
+            (1, Set(bigInt1, bigInt2)),
+            (2, Set(bigInt2, bigInt3, bigInt4))
           )).transact
 
           // Sets without one or more values matching
 
           // "Doesn't have this value"
-          _ <- Ns.i.a1.bigInts_.hasNo(bigInt0).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.bigInts_.hasNo(bigInt1).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.bigInts_.hasNo(bigInt0).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.bigInts_.hasNo(bigInt1).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.bigInts_.hasNo(bigInt2).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.bigInts_.hasNo(bigInt3).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.bigInts_.hasNo(bigInt4).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.bigInts_.hasNo(bigInt5).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.bigInts_.hasNo(bigInt3).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.bigInts_.hasNo(bigInt4).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.bigInts_.hasNo(bigInt5).query.get.map(_ ==> List(1, 2))
           // Same as
-          _ <- Ns.i.a1.bigInts_.hasNo(Seq(bigInt0)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.bigInts_.hasNo(Seq(bigInt1)).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.bigInts_.hasNo(Seq(bigInt0)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.bigInts_.hasNo(Seq(bigInt1)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.bigInts_.hasNo(Seq(bigInt2)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.bigInts_.hasNo(Seq(bigInt3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.bigInts_.hasNo(Seq(bigInt4)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.bigInts_.hasNo(Seq(bigInt5)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.bigInts_.hasNo(Seq(bigInt3)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.bigInts_.hasNo(Seq(bigInt4)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.bigInts_.hasNo(Seq(bigInt5)).query.get.map(_ ==> List(1, 2))
 
 
           // OR semantics when multiple values
@@ -470,52 +479,52 @@ trait FilterSet_BigInt_ extends CoreTestSuite with ApiAsyncImplicits { self: Spi
           _ <- Ns.i.a1.bigInts_.hasNo(bigInt1, bigInt2).query.get.map(_ ==> List())
           _ <- Ns.i.a1.bigInts_.hasNo(bigInt1, bigInt3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.bigInts_.hasNo(bigInt1, bigInt4).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.bigInts_.hasNo(bigInt1, bigInt5).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.bigInts_.hasNo(bigInt1, bigInt5).query.get.map(_ ==> List(2))
           // Same as
           _ <- Ns.i.a1.bigInts_.hasNo(Seq(bigInt1, bigInt2)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.bigInts_.hasNo(Seq(bigInt1, bigInt3)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.bigInts_.hasNo(Seq(bigInt1, bigInt4)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.bigInts_.hasNo(Seq(bigInt1, bigInt5)).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.bigInts_.hasNo(Seq(bigInt1, bigInt5)).query.get.map(_ ==> List(2))
 
 
           // AND semantics when multiple values in a _Set_
 
           // "Not (has this AND that)"
-          _ <- Ns.i.a1.bigInts_.hasNo(Set(bigInt1)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.bigInts_.hasNo(Set(bigInt1, bigInt2)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.bigInts_.hasNo(Set(bigInt1, bigInt2, bigInt3)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.bigInts_.hasNo(Set(bigInt1)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.bigInts_.hasNo(Set(bigInt1, bigInt2)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.bigInts_.hasNo(Set(bigInt1, bigInt2, bigInt3)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.bigInts_.hasNo(Set(bigInt2)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.bigInts_.hasNo(Set(bigInt2, bigInt3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.bigInts_.hasNo(Set(bigInt2, bigInt3, bigInt4)).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.bigInts_.hasNo(Set(bigInt2, bigInt3)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.bigInts_.hasNo(Set(bigInt2, bigInt3, bigInt4)).query.get.map(_ ==> List(1))
           // Same as
-          _ <- Ns.i.a1.bigInts_.hasNo(Seq(Set(bigInt1))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.bigInts_.hasNo(Seq(Set(bigInt1, bigInt2))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.bigInts_.hasNo(Seq(Set(bigInt1, bigInt2, bigInt3))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.bigInts_.hasNo(Seq(Set(bigInt1))).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.bigInts_.hasNo(Seq(Set(bigInt1, bigInt2))).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.bigInts_.hasNo(Seq(Set(bigInt1, bigInt2, bigInt3))).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.bigInts_.hasNo(Seq(Set(bigInt2))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.bigInts_.hasNo(Seq(Set(bigInt2, bigInt3))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.bigInts_.hasNo(Seq(Set(bigInt2, bigInt3, bigInt4))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.bigInts_.hasNo(Seq(Set(bigInt2, bigInt3))).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.bigInts_.hasNo(Seq(Set(bigInt2, bigInt3, bigInt4))).query.get.map(_ ==> List(1))
 
 
           // AND/OR semantics with multiple Sets
 
           // "Not ((has this AND that) OR (has this AND that))"
-          _ <- Ns.i.a1.bigInts_.hasNo(Set(bigInt1, bigInt2), Set(bigInt0)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.bigInts_.hasNo(Set(bigInt1, bigInt2), Set(bigInt0, bigInt3)).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.bigInts_.hasNo(Set(bigInt1, bigInt2), Set(bigInt0)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.bigInts_.hasNo(Set(bigInt1, bigInt2), Set(bigInt0, bigInt3)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.bigInts_.hasNo(Set(bigInt1, bigInt2), Set(bigInt2, bigInt3)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.bigInts_.hasNo(Set(bigInt1, bigInt2), Set(bigInt2, bigInt3, bigInt4)).query.get.map(_ ==> List())
           // Same as
-          _ <- Ns.i.a1.bigInts_.hasNo(Seq(Set(bigInt1, bigInt2), Set(bigInt0))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.bigInts_.hasNo(Seq(Set(bigInt1, bigInt2), Set(bigInt0, bigInt3))).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.bigInts_.hasNo(Seq(Set(bigInt1, bigInt2), Set(bigInt0))).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.bigInts_.hasNo(Seq(Set(bigInt1, bigInt2), Set(bigInt0, bigInt3))).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.bigInts_.hasNo(Seq(Set(bigInt1, bigInt2), Set(bigInt2, bigInt3))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.bigInts_.hasNo(Seq(Set(bigInt1, bigInt2), Set(bigInt2, bigInt3, bigInt4))).query.get.map(_ ==> List())
 
 
           // Negating empty Seqs/Sets has no effect
-          _ <- Ns.i.a1.bigInts_.hasNo(Set(bigInt1, bigInt2), Set.empty[BigInt]).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.bigInts_.hasNo(Seq.empty[BigInt]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.bigInts_.hasNo(Set.empty[BigInt]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.bigInts_.hasNo(Seq.empty[Set[BigInt]]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.bigInts_.hasNo(Seq(Set.empty[BigInt])).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.bigInts_.hasNo(Set(bigInt1, bigInt2), Set.empty[BigInt]).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.bigInts_.hasNo(Seq.empty[BigInt]).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.bigInts_.hasNo(Set.empty[BigInt]).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.bigInts_.hasNo(Seq.empty[Set[BigInt]]).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.bigInts_.hasNo(Seq(Set.empty[BigInt])).query.get.map(_ ==> List(1, 2))
         } yield ()
       }
     }
@@ -555,10 +564,12 @@ trait FilterSet_BigInt_ extends CoreTestSuite with ApiAsyncImplicits { self: Spi
           // "Is exactly this AND that"
           _ <- Ns.i.a1.bigInts_?(Some(Set(bigInt1))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.bigInts_?(Some(Set(bigInt1, bigInt2))).query.get.map(_ ==> List(a)) // include exact match
+          _ <- Ns.i.a1.bigInts_?(Some(Set(bigInt2, bigInt1))).query.get.map(_ ==> List(a)) // include exact match
           _ <- Ns.i.a1.bigInts_?(Some(Set(bigInt1, bigInt2, bigInt3))).query.get.map(_ ==> List())
           // Same as
           _ <- Ns.i.a1.bigInts_?(Some(Seq(Set(bigInt1)))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.bigInts_?(Some(Seq(Set(bigInt1, bigInt2)))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.bigInts_?(Some(Seq(Set(bigInt2, bigInt1)))).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.bigInts_?(Some(Seq(Set(bigInt1, bigInt2, bigInt3)))).query.get.map(_ ==> List())
 
 
@@ -567,7 +578,7 @@ trait FilterSet_BigInt_ extends CoreTestSuite with ApiAsyncImplicits { self: Spi
           // "(exactly this AND that) OR (exactly this AND that)"
           _ <- Ns.i.a1.bigInts_?(Some(Seq(Set(bigInt1), Set(bigInt2, bigInt3)))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.bigInts_?(Some(Seq(Set(bigInt1, bigInt2), Set(bigInt2, bigInt3)))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.bigInts_?(Some(Seq(Set(bigInt1, bigInt2), Set(bigInt2, bigInt3, bigInt4)))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.bigInts_?(Some(Seq(Set(bigInt2, bigInt1), Set(bigInt4, bigInt3, bigInt2)))).query.get.map(_ ==> List(a, b))
 
 
           // Empty Seq/Sets match nothing
@@ -596,19 +607,21 @@ trait FilterSet_BigInt_ extends CoreTestSuite with ApiAsyncImplicits { self: Spi
           // "Not (exactly this AND that)"
           _ <- Ns.i.a1.bigInts_?.not(Some(Set(bigInt1))).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.bigInts_?.not(Some(Set(bigInt1, bigInt2))).query.get.map(_ ==> List(b)) // exclude exact match
+          _ <- Ns.i.a1.bigInts_?.not(Some(Set(bigInt2, bigInt1))).query.get.map(_ ==> List(b)) // exclude exact match
           _ <- Ns.i.a1.bigInts_?.not(Some(Set(bigInt1, bigInt2, bigInt3))).query.get.map(_ ==> List(a, b))
           // Same as
           _ <- Ns.i.a1.bigInts_?.not(Some(Seq(Set(bigInt1)))).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.bigInts_?.not(Some(Seq(Set(bigInt1, bigInt2)))).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.bigInts_?.not(Some(Seq(Set(bigInt2, bigInt1)))).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.bigInts_?.not(Some(Seq(Set(bigInt1, bigInt2, bigInt3)))).query.get.map(_ ==> List(a, b))
 
 
           // AND/OR semantics with multiple Sets
 
-          // "Not (exactly this AND that) OR (exactly this AND that)"
+          // "NEITHER (exactly this AND that) NOR (exactly this AND that)"
           _ <- Ns.i.a1.bigInts_?.not(Some(Seq(Set(bigInt1), Set(bigInt2, bigInt3)))).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.bigInts_?.not(Some(Seq(Set(bigInt1, bigInt2), Set(bigInt2, bigInt3)))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.bigInts_?.not(Some(Seq(Set(bigInt1, bigInt2), Set(bigInt2, bigInt3, bigInt4)))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.bigInts_?.not(Some(Seq(Set(bigInt2, bigInt1), Set(bigInt4, bigInt3, bigInt2)))).query.get.map(_ ==> List())
 
 
           // Empty Seq/Sets

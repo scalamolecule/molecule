@@ -1,8 +1,8 @@
 package molecule.datalog.core.query
 
+import java.util.{Set => jSet}
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
-import scala.math.{max, min}
 import scala.reflect.ClassTag
 
 trait ResolveExprOne[Tpl]
@@ -18,7 +18,7 @@ trait ResolveExprOne[Tpl]
       case at: AttrOneManInt        => man(attr, e, a, at.vs, resInt, intSorter(at, attrIndex))
       case at: AttrOneManLong       => man(attr, e, a, at.vs, resLong, sortOneLong(at, attrIndex))
       case at: AttrOneManFloat      => man(attr, e, a, at.vs, resFloat, floatSorter(at, attrIndex))
-      case at: AttrOneManDouble     => man(attr, e, a, at.vs, resDouble, sortOneDouble(at, attrIndex))
+      case at: AttrOneManDouble     => man(attr, e, a, at.vs, resDouble, sortOneDoublePossiblyMedianSet(at, attrIndex))
       case at: AttrOneManBoolean    => man(attr, e, a, at.vs, resBoolean, sortOneBoolean(at, attrIndex))
       case at: AttrOneManBigInt     => man(attr, e, a, at.vs, resBigInt, bigIntSorter(at, attrIndex))
       case at: AttrOneManBigDecimal => man(attr, e, a, at.vs, resBigDecimal, sortOneBigDecimal(at, attrIndex))
@@ -65,7 +65,7 @@ trait ResolveExprOne[Tpl]
       case at: AttrOneOptInt        => opt(attr, e, a, at.vs, resOptInt, sortOneOptInt(at, attrIndex), sortOneInt(at, attrIndex))
       case at: AttrOneOptLong       => opt(attr, e, a, at.vs, resOptLong, sorterOneOptLong(at, attrIndex), sorterOneLong(at, attrIndex))
       case at: AttrOneOptFloat      => opt(attr, e, a, at.vs, resOptFloat, sortOneOptFloat(at, attrIndex), sortOneFloat(at, attrIndex))
-      case at: AttrOneOptDouble     => opt(attr, e, a, at.vs, resOptDouble, sortOneOptDouble(at, attrIndex), sortOneDouble(at, attrIndex))
+      case at: AttrOneOptDouble     => opt(attr, e, a, at.vs, resOptDouble, sortOneOptDouble(at, attrIndex), sortOneDoublePossiblyMedianSet(at, attrIndex))
       case at: AttrOneOptBoolean    => opt(attr, e, a, at.vs, resOptBoolean, sortOneOptBoolean(at, attrIndex), sortOneBoolean(at, attrIndex))
       case at: AttrOneOptBigInt     => opt(attr, e, a, at.vs, resOptBigInt, sortOneOptBigInt(at, attrIndex), sortOneBigInt(at, attrIndex))
       case at: AttrOneOptBigDecimal => opt(attr, e, a, at.vs, resOptBigDecimal, sortOneOptBigDecimal(at, attrIndex), sortOneBigDecimal(at, attrIndex))
@@ -359,8 +359,23 @@ trait ResolveExprOne[Tpl]
         widh += e
         replaceCast(toInt)
 
-      case "sum"      => find += s"(sum $v)"
-      case "median"   => find += s"(median $v)"
+      case "sum" =>
+        find += s"(sum $v)"
+
+      case "median" =>
+        // OBS! Datomic rounds down to nearest whole number
+        // when calculating the median for multiple numbers instead of
+        // following the semantic described on wikipedia:
+        // https://en.wikipedia.org/wiki/Median
+        // See also
+        // https://forum.datomic.com/t/unexpected-median-rounding/517
+        // So we calculate the correct median value manually instead:
+        find += s"(distinct $v)"
+        val medianConverter: AnyRef => Double = {
+          (v: AnyRef) => getMedian(v.asInstanceOf[jSet[_]].toArray.map(_.toString.toDouble).toSet)
+        }
+        replaceCast(medianConverter.asInstanceOf[AnyRef => AnyRef])
+
       case "avg"      => find += s"(avg $v)"
       case "variance" => find += s"(variance $v)"
       case "stddev"   => find += s"(stddev $v)"

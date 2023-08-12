@@ -1,32 +1,23 @@
-package molecule.coreTests.util
+package molecule.core.util
 
 trait AggrUtils {
 
   // Down-casting BigInt/BigDecimal calculations to double just for tests
 
 
-//  trait Median[A] {
-//    def calc(vs: Seq[A]): Double
-//  }
-//  object Median {
-//    implicit val int       : Median[Int]        = (vs: Seq[Int]) => math.sqrt(varianceOf(vs: _*))
-//    implicit val long      : Median[Long]       = (vs: Seq[Long]) => math.sqrt(varianceOf(vs: _*))
-//    implicit val float     : Median[Float]      = (vs: Seq[Float]) => {
-//      val sortedSeq = vs.sortWith(_ < _)
-//      if (vs.size % 2 == 1)
-//        sortedSeq(sortedSeq.size / 2)
-//      else {
-//        val (up, down) = sortedSeq.splitAt(vs.size / 2)
-//        (up.last + down.head) / 2.0f
-//      }
-//    }
-//    implicit val double    : Median[Double]     = (vs: Seq[Double]) => math.sqrt(varianceOf(vs: _*))
-//    implicit val bigInt    : Median[BigInt]     = (vs: Seq[BigInt]) => math.sqrt(varianceOf(vs: _*))
-//    implicit val bigDecimal: Median[BigDecimal] = (vs: Seq[BigDecimal]) => math.sqrt(varianceOf(vs: _*))
-//    implicit val byte      : Median[Byte]       = (vs: Seq[Byte]) => math.sqrt(varianceOf(vs: _*))
-//    implicit val short     : Median[Short]      = (vs: Seq[Short]) => math.sqrt(varianceOf(vs: _*))
-//  }
-//  def medianOf[A](vs: A*)(implicit median: Median[A]): Double = median.calc(vs)
+  def getMedian(set: Set[Double]): Double = {
+    val values = set.toList.sorted
+    val count  = values.length
+    if (count % 2 == 1) {
+      val indexOfMiddleValue = (count - 1) / 2
+      values(indexOfMiddleValue)
+    } else {
+      val i2      = count / 2
+      val middle1 = values(i2 - 1)
+      val middle2 = values(i2)
+      (middle1 + middle2) / 2
+    }
+  }
 
 
   trait Avg[A] {
@@ -37,7 +28,7 @@ trait AggrUtils {
     implicit val long      : Avg[Long]       = (vs: Seq[Long]) => vs.sum.toDouble / vs.size.toDouble
     implicit val float     : Avg[Float]      = (vs: Seq[Float]) => vs.sum / vs.size.toDouble
     implicit val double    : Avg[Double]     = (vs: Seq[Double]) => vs.sum / vs.size.toDouble
-    implicit val bigInt    : Avg[BigInt]     = (vs: Seq[BigInt]) => (vs.sum / vs.size).toDouble
+    implicit val bigInt    : Avg[BigInt]     = (vs: Seq[BigInt]) => vs.sum.toDouble / vs.size.toDouble
     implicit val bigDecimal: Avg[BigDecimal] = (vs: Seq[BigDecimal]) => (vs.sum / vs.size).toDouble
     implicit val byte      : Avg[Byte]       = (vs: Seq[Byte]) => vs.sum / vs.size.toDouble
     implicit val short     : Avg[Short]      = (vs: Seq[Short]) => vs.sum / vs.size.toDouble

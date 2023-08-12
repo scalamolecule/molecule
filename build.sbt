@@ -236,7 +236,7 @@ lazy val sqlCore = crossProject(JSPlatform, JVMPlatform)
   .jvmSettings(
     libraryDependencies ++= Seq(
       "com.datomic" % "peer" % "1.0.6735",
-      "com.h2database" % "h2" % "2.1.214" % Provided
+      "com.h2database" % "h2" % "2.2.220" % Provided
     )
   )
   .jsSettings(jsEnvironment)

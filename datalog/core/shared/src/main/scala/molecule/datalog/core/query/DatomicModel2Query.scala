@@ -210,11 +210,13 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
               case a: AttrOneTac => resolve(resolveAttrOneTac(es, a), tail)
             }
         }
-      case a: AttrSet                           => a match {
-        case a: AttrSetMan => resolve(resolveAttrSetMan(es, a), tail)
-        case a: AttrSetOpt => resolve(resolveAttrSetOpt(es, a), tail)
-        case a: AttrSetTac => resolve(resolveAttrSetTac(es, a), tail)
-      }
+      case a: AttrSet                           =>
+        isRef = a.refNs.isDefined
+        a match {
+          case a: AttrSetMan => resolve(resolveAttrSetMan(es, a), tail)
+          case a: AttrSetOpt => resolve(resolveAttrSetOpt(es, a), tail)
+          case a: AttrSetTac => resolve(resolveAttrSetTac(es, a), tail)
+        }
       case ref: Ref                             => resolve(resolveRef(es, ref), tail)
       case _: BackRef                           => resolve(es.init, tail)
       case Composite(compositeElements)         => resolve(resolveComposite(compositeElements), tail)

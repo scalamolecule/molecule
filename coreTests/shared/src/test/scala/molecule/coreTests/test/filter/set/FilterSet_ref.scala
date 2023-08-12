@@ -1,17 +1,19 @@
-package molecule.sql.jdbc.test.filter
+// GENERATED CODE ********************************
+package molecule.coreTests.test.filter.set
 
+import molecule.base.error.ModelError
+import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
-import molecule.coreTests.dataModels.core.dsl.Types.{Ns, _}
-import molecule.sql.jdbc.async._
-import molecule.sql.jdbc.setup.JdbcTestSuite
+import molecule.coreTests.api.ApiAsyncImplicits
+import molecule.coreTests.async._
+import molecule.coreTests.dataModels.core.dsl.Types._
+import molecule.coreTests.setup.CoreTestSuite
 import utest._
-import scala.collection.immutable.{List, Seq, Set}
-import scala.language.implicitConversions
+import scala.collection.immutable.List
 
+trait FilterSet_ref extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync =>
 
-object FilterSet_ref extends JdbcTestSuite {
-
-  override val tests = Tests {
+  override lazy val tests = Tests {
 
     "Mandatory" - {
 
@@ -37,12 +39,16 @@ object FilterSet_ref extends JdbcTestSuite {
           // AND semantics
           // "Is exactly this AND that"
           _ <- Ns.i.a1.refs(Set(ref1)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.refs(Set(ref1, ref2)).query.get.map(_ ==> List(a)) // include exact match
+          _ <- Ns.i.a1.refs(Set(ref1, ref2)).query.get.map(_ ==> List(a)) // exact match
+          _ <- Ns.i.a1.refs(Set(ref2, ref1)).query.get.map(_ ==> List(a)) // exact match
           _ <- Ns.i.a1.refs(Set(ref1, ref2, ref3)).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.refs(Set(ref2, ref3, ref4)).query.get.map(_ ==> List(b))
           // Same as
           _ <- Ns.i.a1.refs(Seq(Set(ref1))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.refs(Seq(Set(ref1, ref2))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.refs(Seq(Set(ref2, ref1))).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.refs(Seq(Set(ref1, ref2, ref3))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.refs(Seq(Set(ref2, ref3, ref4))).query.get.map(_ ==> List(b))
 
 
           // AND/OR semantics with multiple Sets
@@ -50,16 +56,17 @@ object FilterSet_ref extends JdbcTestSuite {
           // "(exactly this AND that) OR (exactly this AND that)"
           _ <- Ns.i.a1.refs(Set(ref1), Set(ref2, ref3)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.refs(Set(ref1, ref2), Set(ref2, ref3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.refs(Set(ref1, ref2), Set(ref2, ref3, ref4)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.refs(Set(ref2, ref1), Set(ref4, ref3, ref2)).query.get.map(_ ==> List(a, b))
           // Same as
           _ <- Ns.i.a1.refs(Seq(Set(ref1), Set(ref2, ref3))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.refs(Seq(Set(ref1, ref2), Set(ref2, ref3))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.refs(Seq(Set(ref1, ref2), Set(ref2, ref3, ref4))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.refs(Seq(Set(ref2, ref1), Set(ref4, ref3, ref2))).query.get.map(_ ==> List(a, b))
 
 
           // Empty Seq/Sets match nothing
           _ <- Ns.i.a1.refs(Set(ref1, ref2), Set.empty[Long]).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.refs(Set.empty[Long], Set(ref1, ref2)).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.refs(Set.empty[Long], Set(ref2, ref1)).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.refs(Set.empty[Long], Set.empty[Long]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.refs(Set.empty[Long]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.refs(Seq.empty[Set[Long]]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.refs(Seq(Set.empty[Long])).query.get.map(_ ==> List())
@@ -79,23 +86,25 @@ object FilterSet_ref extends JdbcTestSuite {
           // "Not (exactly this AND that)"
           _ <- Ns.i.a1.refs.not(Set(ref1)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.refs.not(Set(ref1, ref2)).query.get.map(_ ==> List(b)) // exclude exact match
+          _ <- Ns.i.a1.refs.not(Set(ref2, ref1)).query.get.map(_ ==> List(b)) // exclude exact match
           _ <- Ns.i.a1.refs.not(Set(ref1, ref2, ref3)).query.get.map(_ ==> List(a, b))
           // Same as
           _ <- Ns.i.a1.refs.not(Seq(Set(ref1))).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.refs.not(Seq(Set(ref1, ref2))).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.refs.not(Seq(Set(ref2, ref1))).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.refs.not(Seq(Set(ref1, ref2, ref3))).query.get.map(_ ==> List(a, b))
 
 
           // AND/OR semantics with multiple Sets
 
-          // "Not (exactly this AND that) OR (exactly this AND that)"
+          // "NEITHER (exactly this AND that) NOR (exactly this AND that)"
           _ <- Ns.i.a1.refs.not(Set(ref1), Set(ref2, ref3)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.refs.not(Set(ref1, ref2), Set(ref2, ref3)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.refs.not(Set(ref1, ref2), Set(ref2, ref3, ref4)).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.refs.not(Set(ref2, ref1), Set(ref4, ref3, ref2)).query.get.map(_ ==> List())
           // Same as
           _ <- Ns.i.a1.refs.not(Seq(Set(ref1), Set(ref2, ref3))).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.refs.not(Seq(Set(ref1, ref2), Set(ref2, ref3))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.refs.not(Seq(Set(ref1, ref2), Set(ref2, ref3, ref4))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.refs.not(Seq(Set(ref2, ref1), Set(ref4, ref3, ref2))).query.get.map(_ ==> List())
 
 
           // Empty Seq/Sets
@@ -265,25 +274,26 @@ object FilterSet_ref extends JdbcTestSuite {
     "Tacit" - {
 
       "attr" - types { implicit conn =>
-        val (a, b) = (1, 2)
         for {
+          _ <- Ns.i(0).save.transact
           _ <- Ns.i.refs.insert(List(
-            (a, Set(ref1, ref2)),
-            (b, Set(ref2, ref3, ref4))
+            (1, Set(ref1, ref2)),
+            (2, Set(ref2, ref3, ref4))
           )).transact
 
-          _ <- Ns.i.a1.refs_.query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.query.get.map(_ ==> List(0, 1, 2))
+          _ <- Ns.i.a1.refs_.query.get.map(_ ==> List(1, 2))
         } yield ()
       }
 
 
       "apply (equal)" - types { implicit conn =>
-        val (a, b, x) = (1, 2, 3)
         for {
+          _ <- Ns.i(0).save.transact
           _ <- Ns.i.refs_?.insert(List(
-            (a, Some(Set(ref1, ref2))),
-            (b, Some(Set(ref2, ref3, ref4))),
-            (x, None),
+            (0, None),
+            (1, Some(Set(ref1, ref2))),
+            (2, Some(Set(ref2, ref3, ref4))),
           )).transact
 
           // Exact Set matches
@@ -291,11 +301,13 @@ object FilterSet_ref extends JdbcTestSuite {
           // AND semantics
           // "Is exactly this AND that"
           _ <- Ns.i.a1.refs_(Set(ref1)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.refs_(Set(ref1, ref2)).query.get.map(_ ==> List(a)) // include exact match
+          _ <- Ns.i.a1.refs_(Set(ref1, ref2)).query.get.map(_ ==> List(1)) // include exact match
+          _ <- Ns.i.a1.refs_(Set(ref2, ref1)).query.get.map(_ ==> List(1)) // include exact match
           _ <- Ns.i.a1.refs_(Set(ref1, ref2, ref3)).query.get.map(_ ==> List())
           // Same as
           _ <- Ns.i.a1.refs_(Seq(Set(ref1))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.refs_(Seq(Set(ref1, ref2))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.refs_(Seq(Set(ref1, ref2))).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.refs_(Seq(Set(ref2, ref1))).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.refs_(Seq(Set(ref1, ref2, ref3))).query.get.map(_ ==> List())
 
 
@@ -303,16 +315,16 @@ object FilterSet_ref extends JdbcTestSuite {
 
           // "(exactly this AND that) OR (exactly this AND that)"
           _ <- Ns.i.a1.refs_(Set(ref1), Set(ref2, ref3)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.refs_(Set(ref1, ref2), Set(ref2, ref3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.refs_(Set(ref1, ref2), Set(ref2, ref3, ref4)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.refs_(Set(ref1, ref2), Set(ref2, ref3)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.refs_(Set(ref2, ref1), Set(ref4, ref3, ref2)).query.get.map(_ ==> List(1, 2))
           // Same as
           _ <- Ns.i.a1.refs_(Seq(Set(ref1), Set(ref2, ref3))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.refs_(Seq(Set(ref1, ref2), Set(ref2, ref3))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.refs_(Seq(Set(ref1, ref2), Set(ref2, ref3, ref4))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.refs_(Seq(Set(ref1, ref2), Set(ref2, ref3))).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.refs_(Seq(Set(ref2, ref1), Set(ref4, ref3, ref2))).query.get.map(_ ==> List(1, 2))
 
 
           // Empty Seq/Sets match nothing
-          _ <- Ns.i.a1.refs_(Set(ref1, ref2), Set.empty[Long]).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.refs_(Set(ref1, ref2), Set.empty[Long]).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.refs_(Set.empty[Long]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.refs_(Seq.empty[Set[Long]]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.refs_(Seq(Set.empty[Long])).query.get.map(_ ==> List())
@@ -321,116 +333,118 @@ object FilterSet_ref extends JdbcTestSuite {
 
 
       "not equal" - types { implicit conn =>
-        val (a, b) = (1, 2)
         for {
+          _ <- Ns.i(0).save.transact
           _ <- Ns.i.refs.insert(List(
-            (a, Set(ref1, ref2)),
-            (b, Set(ref2, ref3, ref4))
+            (1, Set(ref1, ref2)),
+            (2, Set(ref2, ref3, ref4))
           )).transact
 
           // Non-exact Set matches
 
           // AND semantics
           // "Not (exactly this AND that)"
-          _ <- Ns.i.a1.refs_.not(Set(ref1)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.refs_.not(Set(ref1, ref2)).query.get.map(_ ==> List(b)) // exclude exact match
-          _ <- Ns.i.a1.refs_.not(Set(ref1, ref2, ref3)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.refs_.not(Set(ref1)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.refs_.not(Set(ref1, ref2)).query.get.map(_ ==> List(2)) // exclude exact match
+          _ <- Ns.i.a1.refs_.not(Set(ref2, ref1)).query.get.map(_ ==> List(2)) // exclude exact match
+          _ <- Ns.i.a1.refs_.not(Set(ref1, ref2, ref3)).query.get.map(_ ==> List(1, 2))
           // Same as
-          _ <- Ns.i.a1.refs_.not(Seq(Set(ref1))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.refs_.not(Seq(Set(ref1, ref2))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.refs_.not(Seq(Set(ref1, ref2, ref3))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.refs_.not(Seq(Set(ref1))).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.refs_.not(Seq(Set(ref1, ref2))).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.refs_.not(Seq(Set(ref2, ref1))).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.refs_.not(Seq(Set(ref1, ref2, ref3))).query.get.map(_ ==> List(1, 2))
 
 
           // AND/OR semantics with multiple Sets
 
-          // "Not (exactly this AND that) OR (exactly this AND that)"
-          _ <- Ns.i.a1.refs_.not(Set(ref1), Set(ref2, ref3)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.refs_.not(Set(ref1, ref2), Set(ref2, ref3)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.refs_.not(Set(ref1, ref2), Set(ref2, ref3, ref4)).query.get.map(_ ==> List())
+          // "NEITHER (exactly this AND that) NOR (exactly this AND that)"
+          _ <- Ns.i.a1.refs_.not(Set(ref1), Set(ref2, ref3)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.refs_.not(Set(ref1, ref2), Set(ref2, ref3)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.refs_.not(Set(ref2, ref1), Set(ref4, ref3, ref2)).query.get.map(_ ==> List())
           // Same as
-          _ <- Ns.i.a1.refs_.not(Seq(Set(ref1), Set(ref2, ref3))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.refs_.not(Seq(Set(ref1, ref2), Set(ref2, ref3))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.refs_.not(Seq(Set(ref1, ref2), Set(ref2, ref3, ref4))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.refs_.not(Seq(Set(ref1), Set(ref2, ref3))).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.refs_.not(Seq(Set(ref1, ref2), Set(ref2, ref3))).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.refs_.not(Seq(Set(ref2, ref1), Set(ref4, ref3, ref2))).query.get.map(_ ==> List())
 
 
           // Empty Seq/Sets
-          _ <- Ns.i.a1.refs_.not(Seq(Set(ref1, ref2), Set.empty[Long])).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.refs_.not(Set.empty[Long]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.refs_.not(Seq.empty[Set[Long]]).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.refs_.not(Seq(Set(ref1, ref2), Set.empty[Long])).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.refs_.not(Set.empty[Long]).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.refs_.not(Seq.empty[Set[Long]]).query.get.map(_ ==> List(1, 2))
         } yield ()
       }
 
 
       "has" - types { implicit conn =>
-        val (a, b) = (1, 2)
         for {
+          _ <- Ns.i(0).save.transact
           _ <- Ns.i.refs.insert(List(
-            (a, Set(ref1, ref2)),
-            (b, Set(ref2, ref3, ref4))
+            (1, Set(ref1, ref2)),
+            (2, Set(ref2, ref3, ref4))
           )).transact
 
           // Sets with one or more values matching
 
           // "Has this value"
           _ <- Ns.i.a1.refs_.has(ref0).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.refs_.has(ref1).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.refs_.has(ref2).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.refs_.has(ref3).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.refs_.has(ref1).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.refs_.has(ref2).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.refs_.has(ref3).query.get.map(_ ==> List(2))
           // Same as
           _ <- Ns.i.a1.refs_.has(Seq(ref0)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.refs_.has(Seq(ref1)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.refs_.has(Seq(ref2)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.refs_.has(Seq(ref3)).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.refs_.has(Seq(ref1)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.refs_.has(Seq(ref2)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.refs_.has(Seq(ref3)).query.get.map(_ ==> List(2))
 
 
           // OR semantics when multiple values
 
           // "Has this OR that"
-          _ <- Ns.i.a1.refs_.has(ref1, ref2).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.refs_.has(ref1, ref3).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.refs_.has(ref2, ref3).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.refs_.has(ref1, ref2, ref3).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.refs_.has(ref1, ref2).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.refs_.has(ref1, ref3).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.refs_.has(ref2, ref3).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.refs_.has(ref1, ref2, ref3).query.get.map(_ ==> List(1, 2))
           // Same as
-          _ <- Ns.i.a1.refs_.has(Seq(ref1, ref2)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.refs_.has(Seq(ref1, ref3)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.refs_.has(Seq(ref2, ref3)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.refs_.has(Seq(ref1, ref2, ref3)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.refs_.has(Seq(ref1, ref2)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.refs_.has(Seq(ref1, ref3)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.refs_.has(Seq(ref2, ref3)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.refs_.has(Seq(ref1, ref2, ref3)).query.get.map(_ ==> List(1, 2))
 
 
           // AND semantics when multiple values in a _Set_
 
           // "Has this AND that"
-          _ <- Ns.i.a1.refs_.has(Set(ref1)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.refs_.has(Set(ref1, ref2)).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.refs_.has(Set(ref1)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.refs_.has(Set(ref1, ref2)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.refs_.has(Set(ref1, ref2, ref3)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.refs_.has(Set(ref2)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.refs_.has(Set(ref2, ref3)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.refs_.has(Set(ref2, ref3, ref4)).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.refs_.has(Set(ref2)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.refs_.has(Set(ref2, ref3)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.refs_.has(Set(ref2, ref3, ref4)).query.get.map(_ ==> List(2))
           // Same as
-          _ <- Ns.i.a1.refs_.has(Seq(Set(ref1))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.refs_.has(Seq(Set(ref1, ref2))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.refs_.has(Seq(Set(ref1))).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.refs_.has(Seq(Set(ref1, ref2))).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.refs_.has(Seq(Set(ref1, ref2, ref3))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.refs_.has(Seq(Set(ref2))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.refs_.has(Seq(Set(ref2, ref3))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.refs_.has(Seq(Set(ref2, ref3, ref4))).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.refs_.has(Seq(Set(ref2))).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.refs_.has(Seq(Set(ref2, ref3))).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.refs_.has(Seq(Set(ref2, ref3, ref4))).query.get.map(_ ==> List(2))
 
 
           // AND/OR semantics with multiple Sets
 
           // "(has this AND that) OR (has this AND that)"
-          _ <- Ns.i.a1.refs_.has(Set(ref1, ref2), Set(ref0)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.refs_.has(Set(ref1, ref2), Set(ref0, ref3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.refs_.has(Set(ref1, ref2), Set(ref2, ref3)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.refs_.has(Set(ref1, ref2), Set(ref2, ref3, ref4)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.refs_.has(Set(ref1, ref2), Set(ref0)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.refs_.has(Set(ref1, ref2), Set(ref0, ref3)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.refs_.has(Set(ref1, ref2), Set(ref2, ref3)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.refs_.has(Set(ref1, ref2), Set(ref2, ref3, ref4)).query.get.map(_ ==> List(1, 2))
           // Same as
-          _ <- Ns.i.a1.refs_.has(Seq(Set(ref1, ref2), Set(ref0))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.refs_.has(Seq(Set(ref1, ref2), Set(ref0, ref3))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.refs_.has(Seq(Set(ref1, ref2), Set(ref2, ref3))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.refs_.has(Seq(Set(ref1, ref2), Set(ref2, ref3, ref4))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.refs_.has(Seq(Set(ref1, ref2), Set(ref0))).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.refs_.has(Seq(Set(ref1, ref2), Set(ref0, ref3))).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.refs_.has(Seq(Set(ref1, ref2), Set(ref2, ref3))).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.refs_.has(Seq(Set(ref1, ref2), Set(ref2, ref3, ref4))).query.get.map(_ ==> List(1, 2))
 
 
           // Empty Seq/Sets match nothing
-          _ <- Ns.i.a1.refs_.has(Set(ref1, ref2), Set.empty[Long]).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.refs_.has(Set(ref1, ref2), Set.empty[Long]).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.refs_.has(Seq.empty[Long]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.refs_.has(Set.empty[Long]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.refs_.has(Seq.empty[Set[Long]]).query.get.map(_ ==> List())
@@ -439,29 +453,29 @@ object FilterSet_ref extends JdbcTestSuite {
 
 
       "hasNo" - types { implicit conn =>
-        val (a, b) = (1, 2)
         for {
+          _ <- Ns.i(0).save.transact
           _ <- Ns.i.refs.insert(List(
-            (a, Set(ref1, ref2)),
-            (b, Set(ref2, ref3, ref4))
+            (1, Set(ref1, ref2)),
+            (2, Set(ref2, ref3, ref4))
           )).transact
 
           // Sets without one or more values matching
 
           // "Doesn't have this value"
-          _ <- Ns.i.a1.refs_.hasNo(ref0).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.refs_.hasNo(ref1).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.refs_.hasNo(ref0).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.refs_.hasNo(ref1).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.refs_.hasNo(ref2).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.refs_.hasNo(ref3).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.refs_.hasNo(ref4).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.refs_.hasNo(ref5).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.refs_.hasNo(ref3).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.refs_.hasNo(ref4).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.refs_.hasNo(ref5).query.get.map(_ ==> List(1, 2))
           // Same as
-          _ <- Ns.i.a1.refs_.hasNo(Seq(ref0)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.refs_.hasNo(Seq(ref1)).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.refs_.hasNo(Seq(ref0)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.refs_.hasNo(Seq(ref1)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.refs_.hasNo(Seq(ref2)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.refs_.hasNo(Seq(ref3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.refs_.hasNo(Seq(ref4)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.refs_.hasNo(Seq(ref5)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.refs_.hasNo(Seq(ref3)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.refs_.hasNo(Seq(ref4)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.refs_.hasNo(Seq(ref5)).query.get.map(_ ==> List(1, 2))
 
 
           // OR semantics when multiple values
@@ -470,52 +484,52 @@ object FilterSet_ref extends JdbcTestSuite {
           _ <- Ns.i.a1.refs_.hasNo(ref1, ref2).query.get.map(_ ==> List())
           _ <- Ns.i.a1.refs_.hasNo(ref1, ref3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.refs_.hasNo(ref1, ref4).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.refs_.hasNo(ref1, ref5).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.refs_.hasNo(ref1, ref5).query.get.map(_ ==> List(2))
           // Same as
           _ <- Ns.i.a1.refs_.hasNo(Seq(ref1, ref2)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.refs_.hasNo(Seq(ref1, ref3)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.refs_.hasNo(Seq(ref1, ref4)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.refs_.hasNo(Seq(ref1, ref5)).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.refs_.hasNo(Seq(ref1, ref5)).query.get.map(_ ==> List(2))
 
 
           // AND semantics when multiple values in a _Set_
 
           // "Not (has this AND that)"
-          _ <- Ns.i.a1.refs_.hasNo(Set(ref1)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.refs_.hasNo(Set(ref1, ref2)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.refs_.hasNo(Set(ref1, ref2, ref3)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.refs_.hasNo(Set(ref1)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.refs_.hasNo(Set(ref1, ref2)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.refs_.hasNo(Set(ref1, ref2, ref3)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.refs_.hasNo(Set(ref2)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.refs_.hasNo(Set(ref2, ref3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.refs_.hasNo(Set(ref2, ref3, ref4)).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.refs_.hasNo(Set(ref2, ref3)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.refs_.hasNo(Set(ref2, ref3, ref4)).query.get.map(_ ==> List(1))
           // Same as
-          _ <- Ns.i.a1.refs_.hasNo(Seq(Set(ref1))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.refs_.hasNo(Seq(Set(ref1, ref2))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.refs_.hasNo(Seq(Set(ref1, ref2, ref3))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.refs_.hasNo(Seq(Set(ref1))).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.refs_.hasNo(Seq(Set(ref1, ref2))).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.refs_.hasNo(Seq(Set(ref1, ref2, ref3))).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.refs_.hasNo(Seq(Set(ref2))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.refs_.hasNo(Seq(Set(ref2, ref3))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.refs_.hasNo(Seq(Set(ref2, ref3, ref4))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.refs_.hasNo(Seq(Set(ref2, ref3))).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.refs_.hasNo(Seq(Set(ref2, ref3, ref4))).query.get.map(_ ==> List(1))
 
 
           // AND/OR semantics with multiple Sets
 
           // "Not ((has this AND that) OR (has this AND that))"
-          _ <- Ns.i.a1.refs_.hasNo(Set(ref1, ref2), Set(ref0)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.refs_.hasNo(Set(ref1, ref2), Set(ref0, ref3)).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.refs_.hasNo(Set(ref1, ref2), Set(ref0)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.refs_.hasNo(Set(ref1, ref2), Set(ref0, ref3)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.refs_.hasNo(Set(ref1, ref2), Set(ref2, ref3)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.refs_.hasNo(Set(ref1, ref2), Set(ref2, ref3, ref4)).query.get.map(_ ==> List())
           // Same as
-          _ <- Ns.i.a1.refs_.hasNo(Seq(Set(ref1, ref2), Set(ref0))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.refs_.hasNo(Seq(Set(ref1, ref2), Set(ref0, ref3))).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.refs_.hasNo(Seq(Set(ref1, ref2), Set(ref0))).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.refs_.hasNo(Seq(Set(ref1, ref2), Set(ref0, ref3))).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.refs_.hasNo(Seq(Set(ref1, ref2), Set(ref2, ref3))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.refs_.hasNo(Seq(Set(ref1, ref2), Set(ref2, ref3, ref4))).query.get.map(_ ==> List())
 
 
           // Negating empty Seqs/Sets has no effect
-          _ <- Ns.i.a1.refs_.hasNo(Set(ref1, ref2), Set.empty[Long]).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.refs_.hasNo(Seq.empty[Long]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.refs_.hasNo(Set.empty[Long]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.refs_.hasNo(Seq.empty[Set[Long]]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.refs_.hasNo(Seq(Set.empty[Long])).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.refs_.hasNo(Set(ref1, ref2), Set.empty[Long]).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.refs_.hasNo(Seq.empty[Long]).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.refs_.hasNo(Set.empty[Long]).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.refs_.hasNo(Seq.empty[Set[Long]]).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.refs_.hasNo(Seq(Set.empty[Long])).query.get.map(_ ==> List(1, 2))
         } yield ()
       }
     }
@@ -555,10 +569,12 @@ object FilterSet_ref extends JdbcTestSuite {
           // "Is exactly this AND that"
           _ <- Ns.i.a1.refs_?(Some(Set(ref1))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.refs_?(Some(Set(ref1, ref2))).query.get.map(_ ==> List(a)) // include exact match
+          _ <- Ns.i.a1.refs_?(Some(Set(ref2, ref1))).query.get.map(_ ==> List(a)) // include exact match
           _ <- Ns.i.a1.refs_?(Some(Set(ref1, ref2, ref3))).query.get.map(_ ==> List())
           // Same as
           _ <- Ns.i.a1.refs_?(Some(Seq(Set(ref1)))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.refs_?(Some(Seq(Set(ref1, ref2)))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.refs_?(Some(Seq(Set(ref2, ref1)))).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.refs_?(Some(Seq(Set(ref1, ref2, ref3)))).query.get.map(_ ==> List())
 
 
@@ -567,7 +583,7 @@ object FilterSet_ref extends JdbcTestSuite {
           // "(exactly this AND that) OR (exactly this AND that)"
           _ <- Ns.i.a1.refs_?(Some(Seq(Set(ref1), Set(ref2, ref3)))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.refs_?(Some(Seq(Set(ref1, ref2), Set(ref2, ref3)))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.refs_?(Some(Seq(Set(ref1, ref2), Set(ref2, ref3, ref4)))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.refs_?(Some(Seq(Set(ref2, ref1), Set(ref4, ref3, ref2)))).query.get.map(_ ==> List(a, b))
 
 
           // Empty Seq/Sets match nothing
@@ -596,19 +612,21 @@ object FilterSet_ref extends JdbcTestSuite {
           // "Not (exactly this AND that)"
           _ <- Ns.i.a1.refs_?.not(Some(Set(ref1))).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.refs_?.not(Some(Set(ref1, ref2))).query.get.map(_ ==> List(b)) // exclude exact match
+          _ <- Ns.i.a1.refs_?.not(Some(Set(ref2, ref1))).query.get.map(_ ==> List(b)) // exclude exact match
           _ <- Ns.i.a1.refs_?.not(Some(Set(ref1, ref2, ref3))).query.get.map(_ ==> List(a, b))
           // Same as
           _ <- Ns.i.a1.refs_?.not(Some(Seq(Set(ref1)))).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.refs_?.not(Some(Seq(Set(ref1, ref2)))).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.refs_?.not(Some(Seq(Set(ref2, ref1)))).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.refs_?.not(Some(Seq(Set(ref1, ref2, ref3)))).query.get.map(_ ==> List(a, b))
 
 
           // AND/OR semantics with multiple Sets
 
-          // "Not (exactly this AND that) OR (exactly this AND that)"
+          // "NEITHER (exactly this AND that) NOR (exactly this AND that)"
           _ <- Ns.i.a1.refs_?.not(Some(Seq(Set(ref1), Set(ref2, ref3)))).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.refs_?.not(Some(Seq(Set(ref1, ref2), Set(ref2, ref3)))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.refs_?.not(Some(Seq(Set(ref1, ref2), Set(ref2, ref3, ref4)))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.refs_?.not(Some(Seq(Set(ref2, ref1), Set(ref4, ref3, ref2)))).query.get.map(_ ==> List())
 
 
           // Empty Seq/Sets

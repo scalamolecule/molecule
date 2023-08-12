@@ -13,7 +13,7 @@ class SqlModel2Query[Tpl](elements0: List[Element])
   extends Model2Query
     with ResolveExprOne[Tpl]
     with ResolveExprSet[Tpl]
-    with ResolveFilterSetRefAttr[Tpl]
+    with ResolveExprSetRefAttr[Tpl]
     with ResolveRef
     with Base
     with CastNestedBranch_
@@ -90,7 +90,7 @@ class SqlModel2Query[Tpl](elements0: List[Element])
          |  $select_
          |FROM $from$joins_$where_$groupBy_$orderBy_$fetch_$limit_;""".stripMargin
 
-    println(stmt)
+    //    println(stmt)
 
     //      |  ARRAY_AGG(Ns_refs_Ref.Ref_id) Ns_refs
     //      |  Ns_refs = ARRAY [1] AND

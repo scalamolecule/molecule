@@ -26,30 +26,6 @@ trait Semantics extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =
       //      Ns.ii_?.not(Ns.ints)
       //      Ns.ii_?.not(Ns.ints_)
       //      Ns.ii_?.not(Ns.ints_?)
-      //
-      //      Ns.ii.hasLt(Ns.ints_?)
-      //      Ns.ii_.hasLt(Ns.ints_?)
-      //      Ns.ii_?.hasLt(Ns.ints)
-      //      Ns.ii_?.hasLt(Ns.ints_)
-      //      Ns.ii_?.hasLt(Ns.ints_?)
-      //
-      //      Ns.ii.hasLe(Ns.ints_?)
-      //      Ns.ii_.hasLe(Ns.ints_?)
-      //      Ns.ii_?.hasLe(Ns.ints)
-      //      Ns.ii_?.hasLe(Ns.ints_)
-      //      Ns.ii_?.hasLe(Ns.ints_?)
-      //
-      //      Ns.ii.hasGt(Ns.ints_?)
-      //      Ns.ii_.hasGt(Ns.ints_?)
-      //      Ns.ii_?.hasGt(Ns.ints)
-      //      Ns.ii_?.hasGt(Ns.ints_)
-      //      Ns.ii_?.hasGt(Ns.ints_?)
-      //
-      //      Ns.ii.hasGe(Ns.ints_?)
-      //      Ns.ii_.hasGe(Ns.ints_?)
-      //      Ns.ii_?.hasGe(Ns.ints)
-      //      Ns.ii_?.hasGe(Ns.ints_)
-      //      Ns.ii_?.hasGe(Ns.ints_?)
 
       compileError("Ns.ii.apply(Ns.ints_?)")
       compileError("Ns.ii_.apply(Ns.ints_?)")
@@ -62,30 +38,6 @@ trait Semantics extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =
       compileError("Ns.ii_?.not(Ns.ints)")
       compileError("Ns.ii_?.not(Ns.ints_)")
       compileError("Ns.ii_?.not(Ns.ints_?)")
-
-      compileError("Ns.ii.hasLt(Ns.ints_?)")
-      compileError("Ns.ii_.hasLt(Ns.ints_?)")
-      compileError("Ns.ii_?.hasLt(Ns.ints)")
-      compileError("Ns.ii_?.hasLt(Ns.ints_)")
-      compileError("Ns.ii_?.hasLt(Ns.ints_?)")
-
-      compileError("Ns.ii.hasLe(Ns.ints_?)")
-      compileError("Ns.ii_.hasLe(Ns.ints_?)")
-      compileError("Ns.ii_?.hasLe(Ns.ints)")
-      compileError("Ns.ii_?.hasLe(Ns.ints_)")
-      compileError("Ns.ii_?.hasLe(Ns.ints_?)")
-
-      compileError("Ns.ii.hasGt(Ns.ints_?)")
-      compileError("Ns.ii_.hasGt(Ns.ints_?)")
-      compileError("Ns.ii_?.hasGt(Ns.ints)")
-      compileError("Ns.ii_?.hasGt(Ns.ints_)")
-      compileError("Ns.ii_?.hasGt(Ns.ints_?)")
-
-      compileError("Ns.ii.hasGe(Ns.ints_?)")
-      compileError("Ns.ii_.hasGe(Ns.ints_?)")
-      compileError("Ns.ii_?.hasGe(Ns.ints)")
-      compileError("Ns.ii_?.hasGe(Ns.ints_)")
-      compileError("Ns.ii_?.hasGe(Ns.ints_?)")
     }
 
 
@@ -150,59 +102,6 @@ trait Semantics extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =
       compileError("Ns.ii_.hasNo(Ns.ints_.not(Set(1)))")
     }
 
-    "Comparisons accepts only cardinality one" - types { implicit conn =>
-      // Card-one without/with expr ok
-      Ns.ii.hasLt(Ns.int)
-      Ns.ii.hasLt(Ns.int.<(2))
-
-      // Card-set not allowed (prevented by type inference)
-
-      //      Ns.ii.hasLt(Ns.ints)
-      //
-      //      Ns.ii.hasLt(Ns.ints.not(Set(1)))
-      //      Ns.ii.hasLt(Ns.ints_.not(Set(1)))
-      //      Ns.ii_.hasLt(Ns.ints.not(Set(1)))
-      //      Ns.ii_.hasLt(Ns.ints_.not(Set(1)))
-      //
-      //      Ns.ii.hasLe(Ns.ints.not(Set(1)))
-      //      Ns.ii.hasLe(Ns.ints_.not(Set(1)))
-      //      Ns.ii_.hasLe(Ns.ints.not(Set(1)))
-      //      Ns.ii_.hasLe(Ns.ints_.not(Set(1)))
-      //
-      //      Ns.ii.hasGt(Ns.ints.not(Set(1)))
-      //      Ns.ii.hasGt(Ns.ints_.not(Set(1)))
-      //      Ns.ii_.hasGt(Ns.ints.not(Set(1)))
-      //      Ns.ii_.hasGt(Ns.ints_.not(Set(1)))
-      //
-      //      Ns.ii.hasGe(Ns.ints.not(Set(1)))
-      //      Ns.ii.hasGe(Ns.ints_.not(Set(1)))
-      //      Ns.ii_.hasGe(Ns.ints.not(Set(1)))
-      //      Ns.ii_.hasGe(Ns.ints_.not(Set(1)))
-
-      compileError("Ns.ii.hasLt(Ns.ints)")
-
-      compileError("Ns.ii.hasLt(Ns.ints.not(Set(1)))")
-      compileError("Ns.ii.hasLt(Ns.ints_.not(Set(1)))")
-      compileError("Ns.ii_.hasLt(Ns.ints.not(Set(1)))")
-      compileError("Ns.ii_.hasLt(Ns.ints_.not(Set(1)))")
-
-      compileError("Ns.ii.hasLe(Ns.ints.not(Set(1)))")
-      compileError("Ns.ii.hasLe(Ns.ints_.not(Set(1)))")
-      compileError("Ns.ii_.hasLe(Ns.ints.not(Set(1)))")
-      compileError("Ns.ii_.hasLe(Ns.ints_.not(Set(1)))")
-
-      compileError("Ns.ii.hasGt(Ns.ints.not(Set(1)))")
-      compileError("Ns.ii.hasGt(Ns.ints_.not(Set(1)))")
-      compileError("Ns.ii_.hasGt(Ns.ints.not(Set(1)))")
-      compileError("Ns.ii_.hasGt(Ns.ints_.not(Set(1)))")
-
-      compileError("Ns.ii.hasGe(Ns.ints.not(Set(1)))")
-      compileError("Ns.ii.hasGe(Ns.ints_.not(Set(1)))")
-      compileError("Ns.ii_.hasGe(Ns.ints.not(Set(1)))")
-      compileError("Ns.ii_.hasGe(Ns.ints_.not(Set(1)))")
-    }
-
-
     "No expression inside cross-namespace definition" - types { implicit conn =>
       // Prevented by type inference
       //      Ns.i.ints(Ref.ints_(Set(1))).Ref.ints
@@ -211,10 +110,6 @@ trait Semantics extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =
       //      Ns.i.ints(Ref.ints_.has(1)).Ref.ints
       //      Ns.i.ints(Ref.ints_.hasNo(Set(1))).Ref.ints
       //      Ns.i.ints(Ref.ints_.hasNo(1)).Ref.ints
-      //      Ns.i.ints(Ref.ints_.hasLt(1)).Ref.ints
-      //      Ns.i.ints(Ref.ints_.hasLe(1)).Ref.ints
-      //      Ns.i.ints(Ref.ints_.hasGt(1)).Ref.ints
-      //      Ns.i.ints(Ref.ints_.hasGe(1)).Ref.ints
 
       compileError("Ns.i.ints(Ref.ints_.not(Set(1))).Ref.ints")
       compileError("Ns.i.ints(Ref.ints_.not(Set(1))).Ref.ints")
@@ -222,10 +117,6 @@ trait Semantics extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =
       compileError("Ns.i.ints(Ref.ints_.has(1)).Ref.ints")
       compileError("Ns.i.ints(Ref.ints_.hasNo(Set(1))).Ref.ints")
       compileError("Ns.i.ints(Ref.ints_.hasNo(1)).Ref.ints")
-      compileError("Ns.i.ints(Ref.ints_.hasLt(1)).Ref.ints")
-      compileError("Ns.i.ints(Ref.ints_.hasLe(1)).Ref.ints")
-      compileError("Ns.i.ints(Ref.ints_.hasGt(1)).Ref.ints")
-      compileError("Ns.i.ints(Ref.ints_.hasGe(1)).Ref.ints")
     }
 
 

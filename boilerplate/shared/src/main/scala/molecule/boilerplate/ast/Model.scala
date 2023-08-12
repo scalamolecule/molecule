@@ -27,7 +27,7 @@ trait Model extends Validations with Values {
     val validator : Option[Validator]
     val valueAttrs: Seq[String]
     val errors    : Seq[String]
-    val refNs    : Option[String]
+    val refNs     : Option[String]
     val sort      : Option[String]
     def unapply(a: Attr): (String, String, Op) = (a.ns, a.attr, a.op)
     def name = ns + "." + attr
@@ -126,10 +126,6 @@ trait Model extends Validations with Values {
   // Cardinality Set
   case object Has extends Op
   case object HasNo extends Op
-  case object HasLt extends Op
-  case object HasLe extends Op
-  case object HasGt extends Op
-  case object HasGe extends Op
   case object Add extends Op
   case object Swap extends Op
   case object Remove extends Op
@@ -227,7 +223,7 @@ trait Model extends Validations with Values {
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-    vs: Seq[Double] = Nil,
+                 vs: Seq[Double] = Nil,
     override val filterAttr: Option[Attr] = None,
     override val validator: Option[ValidateDouble] = None,
     override val valueAttrs: Seq[String] = Nil,

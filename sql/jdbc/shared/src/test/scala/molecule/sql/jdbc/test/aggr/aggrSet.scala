@@ -17,4 +17,4 @@ object AggrSet_URI extends AggrSet_URI_ with CoreTestAsync
 object AggrSet_Byte extends AggrSet_Byte_ with CoreTestAsync
 object AggrSet_Short extends AggrSet_Short_ with CoreTestAsync
 object AggrSet_Char extends AggrSet_Char_ with CoreTestAsync
-object AggrSet_ref extends AggrSet_ref_ with CoreTestAsync
+object AggrSet_ref extends AggrSet_ref with CoreTestAsync

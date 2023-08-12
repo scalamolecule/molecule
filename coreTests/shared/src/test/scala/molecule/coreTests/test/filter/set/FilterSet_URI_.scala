@@ -10,7 +10,7 @@ import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 
-trait FilterSet_URI_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
+trait FilterSet_URI_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync =>
 
   override lazy val tests = Tests {
 
@@ -39,10 +39,12 @@ trait FilterSet_URI_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsy
           // "Is exactly this AND that"
           _ <- Ns.i.a1.uris(Set(uri1)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.uris(Set(uri1, uri2)).query.get.map(_ ==> List(a)) // include exact match
+          _ <- Ns.i.a1.uris(Set(uri2, uri1)).query.get.map(_ ==> List(a)) // include exact match
           _ <- Ns.i.a1.uris(Set(uri1, uri2, uri3)).query.get.map(_ ==> List())
           // Same as
           _ <- Ns.i.a1.uris(Seq(Set(uri1))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.uris(Seq(Set(uri1, uri2))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris(Seq(Set(uri2, uri1))).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.uris(Seq(Set(uri1, uri2, uri3))).query.get.map(_ ==> List())
 
 
@@ -51,16 +53,17 @@ trait FilterSet_URI_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsy
           // "(exactly this AND that) OR (exactly this AND that)"
           _ <- Ns.i.a1.uris(Set(uri1), Set(uri2, uri3)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.uris(Set(uri1, uri2), Set(uri2, uri3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris(Set(uri1, uri2), Set(uri2, uri3, uri4)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris(Set(uri2, uri1), Set(uri4, uri3, uri2)).query.get.map(_ ==> List(a, b))
           // Same as
           _ <- Ns.i.a1.uris(Seq(Set(uri1), Set(uri2, uri3))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.uris(Seq(Set(uri1, uri2), Set(uri2, uri3))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris(Seq(Set(uri1, uri2), Set(uri2, uri3, uri4))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris(Seq(Set(uri2, uri1), Set(uri4, uri3, uri2))).query.get.map(_ ==> List(a, b))
 
 
           // Empty Seq/Sets match nothing
           _ <- Ns.i.a1.uris(Set(uri1, uri2), Set.empty[URI]).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris(Set.empty[URI], Set(uri1, uri2)).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris(Set.empty[URI], Set(uri2, uri1)).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris(Set.empty[URI], Set.empty[URI]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.uris(Set.empty[URI]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.uris(Seq.empty[Set[URI]]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.uris(Seq(Set.empty[URI])).query.get.map(_ ==> List())
@@ -80,23 +83,25 @@ trait FilterSet_URI_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsy
           // "Not (exactly this AND that)"
           _ <- Ns.i.a1.uris.not(Set(uri1)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.uris.not(Set(uri1, uri2)).query.get.map(_ ==> List(b)) // exclude exact match
+          _ <- Ns.i.a1.uris.not(Set(uri2, uri1)).query.get.map(_ ==> List(b)) // exclude exact match
           _ <- Ns.i.a1.uris.not(Set(uri1, uri2, uri3)).query.get.map(_ ==> List(a, b))
           // Same as
           _ <- Ns.i.a1.uris.not(Seq(Set(uri1))).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.uris.not(Seq(Set(uri1, uri2))).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris.not(Seq(Set(uri2, uri1))).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.uris.not(Seq(Set(uri1, uri2, uri3))).query.get.map(_ ==> List(a, b))
 
 
           // AND/OR semantics with multiple Sets
 
-          // "Not (exactly this AND that) OR (exactly this AND that)"
+          // "NEITHER (exactly this AND that) NOR (exactly this AND that)"
           _ <- Ns.i.a1.uris.not(Set(uri1), Set(uri2, uri3)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.uris.not(Set(uri1, uri2), Set(uri2, uri3)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris.not(Set(uri1, uri2), Set(uri2, uri3, uri4)).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris.not(Set(uri2, uri1), Set(uri4, uri3, uri2)).query.get.map(_ ==> List())
           // Same as
           _ <- Ns.i.a1.uris.not(Seq(Set(uri1), Set(uri2, uri3))).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.uris.not(Seq(Set(uri1, uri2), Set(uri2, uri3))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris.not(Seq(Set(uri1, uri2), Set(uri2, uri3, uri4))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris.not(Seq(Set(uri2, uri1), Set(uri4, uri3, uri2))).query.get.map(_ ==> List())
 
 
           // Empty Seq/Sets
@@ -266,25 +271,25 @@ trait FilterSet_URI_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsy
     "Tacit" - {
 
       "attr" - types { implicit conn =>
-        val (a, b) = (1, 2)
         for {
+          _ <- Ns.i(0).save.transact
           _ <- Ns.i.uris.insert(List(
-            (a, Set(uri1, uri2)),
-            (b, Set(uri2, uri3, uri4))
+            (1, Set(uri1, uri2)),
+            (2, Set(uri2, uri3, uri4))
           )).transact
 
-          _ <- Ns.i.a1.uris_.query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.query.get.map(_ ==> List(0, 1, 2))
+          _ <- Ns.i.a1.uris_.query.get.map(_ ==> List(1, 2))
         } yield ()
       }
 
 
       "apply (equal)" - types { implicit conn =>
-        val (a, b, x) = (1, 2, 3)
         for {
           _ <- Ns.i.uris_?.insert(List(
-            (a, Some(Set(uri1, uri2))),
-            (b, Some(Set(uri2, uri3, uri4))),
-            (x, None),
+            (0, None),
+            (1, Some(Set(uri1, uri2))),
+            (2, Some(Set(uri2, uri3, uri4))),
           )).transact
 
           // Exact Set matches
@@ -292,11 +297,13 @@ trait FilterSet_URI_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsy
           // AND semantics
           // "Is exactly this AND that"
           _ <- Ns.i.a1.uris_(Set(uri1)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_(Set(uri1, uri2)).query.get.map(_ ==> List(a)) // include exact match
+          _ <- Ns.i.a1.uris_(Set(uri1, uri2)).query.get.map(_ ==> List(1)) // include exact match
+          _ <- Ns.i.a1.uris_(Set(uri2, uri1)).query.get.map(_ ==> List(1)) // include exact match
           _ <- Ns.i.a1.uris_(Set(uri1, uri2, uri3)).query.get.map(_ ==> List())
           // Same as
           _ <- Ns.i.a1.uris_(Seq(Set(uri1))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_(Seq(Set(uri1, uri2))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris_(Seq(Set(uri1, uri2))).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.uris_(Seq(Set(uri2, uri1))).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.uris_(Seq(Set(uri1, uri2, uri3))).query.get.map(_ ==> List())
 
 
@@ -304,16 +311,16 @@ trait FilterSet_URI_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsy
 
           // "(exactly this AND that) OR (exactly this AND that)"
           _ <- Ns.i.a1.uris_(Set(uri1), Set(uri2, uri3)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_(Set(uri1, uri2), Set(uri2, uri3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_(Set(uri1, uri2), Set(uri2, uri3, uri4)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_(Set(uri1, uri2), Set(uri2, uri3)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.uris_(Set(uri2, uri1), Set(uri4, uri3, uri2)).query.get.map(_ ==> List(1, 2))
           // Same as
           _ <- Ns.i.a1.uris_(Seq(Set(uri1), Set(uri2, uri3))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_(Seq(Set(uri1, uri2), Set(uri2, uri3))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_(Seq(Set(uri1, uri2), Set(uri2, uri3, uri4))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_(Seq(Set(uri1, uri2), Set(uri2, uri3))).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.uris_(Seq(Set(uri2, uri1), Set(uri4, uri3, uri2))).query.get.map(_ ==> List(1, 2))
 
 
           // Empty Seq/Sets match nothing
-          _ <- Ns.i.a1.uris_(Set(uri1, uri2), Set.empty[URI]).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris_(Set(uri1, uri2), Set.empty[URI]).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.uris_(Set.empty[URI]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.uris_(Seq.empty[Set[URI]]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.uris_(Seq(Set.empty[URI])).query.get.map(_ ==> List())
@@ -322,116 +329,118 @@ trait FilterSet_URI_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsy
 
 
       "not equal" - types { implicit conn =>
-        val (a, b) = (1, 2)
         for {
+          _ <- Ns.i(0).save.transact
           _ <- Ns.i.uris.insert(List(
-            (a, Set(uri1, uri2)),
-            (b, Set(uri2, uri3, uri4))
+            (1, Set(uri1, uri2)),
+            (2, Set(uri2, uri3, uri4))
           )).transact
 
           // Non-exact Set matches
 
           // AND semantics
           // "Not (exactly this AND that)"
-          _ <- Ns.i.a1.uris_.not(Set(uri1)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_.not(Set(uri1, uri2)).query.get.map(_ ==> List(b)) // exclude exact match
-          _ <- Ns.i.a1.uris_.not(Set(uri1, uri2, uri3)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_.not(Set(uri1)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.uris_.not(Set(uri1, uri2)).query.get.map(_ ==> List(2)) // exclude exact match
+          _ <- Ns.i.a1.uris_.not(Set(uri2, uri1)).query.get.map(_ ==> List(2)) // exclude exact match
+          _ <- Ns.i.a1.uris_.not(Set(uri1, uri2, uri3)).query.get.map(_ ==> List(1, 2))
           // Same as
-          _ <- Ns.i.a1.uris_.not(Seq(Set(uri1))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_.not(Seq(Set(uri1, uri2))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris_.not(Seq(Set(uri1, uri2, uri3))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_.not(Seq(Set(uri1))).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.uris_.not(Seq(Set(uri1, uri2))).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.uris_.not(Seq(Set(uri2, uri1))).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.uris_.not(Seq(Set(uri1, uri2, uri3))).query.get.map(_ ==> List(1, 2))
 
 
           // AND/OR semantics with multiple Sets
 
-          // "Not (exactly this AND that) OR (exactly this AND that)"
-          _ <- Ns.i.a1.uris_.not(Set(uri1), Set(uri2, uri3)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_.not(Set(uri1, uri2), Set(uri2, uri3)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris_.not(Set(uri1, uri2), Set(uri2, uri3, uri4)).query.get.map(_ ==> List())
+          // "NEITHER (exactly this AND that) NOR (exactly this AND that)"
+          _ <- Ns.i.a1.uris_.not(Set(uri1), Set(uri2, uri3)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.uris_.not(Set(uri1, uri2), Set(uri2, uri3)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.uris_.not(Set(uri2, uri1), Set(uri4, uri3, uri2)).query.get.map(_ ==> List())
           // Same as
-          _ <- Ns.i.a1.uris_.not(Seq(Set(uri1), Set(uri2, uri3))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_.not(Seq(Set(uri1, uri2), Set(uri2, uri3))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris_.not(Seq(Set(uri1, uri2), Set(uri2, uri3, uri4))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_.not(Seq(Set(uri1), Set(uri2, uri3))).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.uris_.not(Seq(Set(uri1, uri2), Set(uri2, uri3))).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.uris_.not(Seq(Set(uri2, uri1), Set(uri4, uri3, uri2))).query.get.map(_ ==> List())
 
 
           // Empty Seq/Sets
-          _ <- Ns.i.a1.uris_.not(Seq(Set(uri1, uri2), Set.empty[URI])).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris_.not(Set.empty[URI]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_.not(Seq.empty[Set[URI]]).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_.not(Seq(Set(uri1, uri2), Set.empty[URI])).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.uris_.not(Set.empty[URI]).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.uris_.not(Seq.empty[Set[URI]]).query.get.map(_ ==> List(1, 2))
         } yield ()
       }
 
 
       "has" - types { implicit conn =>
-        val (a, b) = (1, 2)
         for {
+          _ <- Ns.i(0).save.transact
           _ <- Ns.i.uris.insert(List(
-            (a, Set(uri1, uri2)),
-            (b, Set(uri2, uri3, uri4))
+            (1, Set(uri1, uri2)),
+            (2, Set(uri2, uri3, uri4))
           )).transact
 
           // Sets with one or more values matching
 
           // "Has this value"
           _ <- Ns.i.a1.uris_.has(uri0).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_.has(uri1).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_.has(uri2).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_.has(uri3).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris_.has(uri1).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.uris_.has(uri2).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.uris_.has(uri3).query.get.map(_ ==> List(2))
           // Same as
           _ <- Ns.i.a1.uris_.has(Seq(uri0)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_.has(Seq(uri1)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_.has(Seq(uri2)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_.has(Seq(uri3)).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris_.has(Seq(uri1)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.uris_.has(Seq(uri2)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.uris_.has(Seq(uri3)).query.get.map(_ ==> List(2))
 
 
           // OR semantics when multiple values
 
           // "Has this OR that"
-          _ <- Ns.i.a1.uris_.has(uri1, uri2).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_.has(uri1, uri3).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_.has(uri2, uri3).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_.has(uri1, uri2, uri3).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_.has(uri1, uri2).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.uris_.has(uri1, uri3).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.uris_.has(uri2, uri3).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.uris_.has(uri1, uri2, uri3).query.get.map(_ ==> List(1, 2))
           // Same as
-          _ <- Ns.i.a1.uris_.has(Seq(uri1, uri2)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_.has(Seq(uri1, uri3)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_.has(Seq(uri2, uri3)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_.has(Seq(uri1, uri2, uri3)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_.has(Seq(uri1, uri2)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.uris_.has(Seq(uri1, uri3)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.uris_.has(Seq(uri2, uri3)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.uris_.has(Seq(uri1, uri2, uri3)).query.get.map(_ ==> List(1, 2))
 
 
           // AND semantics when multiple values in a _Set_
 
           // "Has this AND that"
-          _ <- Ns.i.a1.uris_.has(Set(uri1)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_.has(Set(uri1, uri2)).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris_.has(Set(uri1)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.uris_.has(Set(uri1, uri2)).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.uris_.has(Set(uri1, uri2, uri3)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_.has(Set(uri2)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_.has(Set(uri2, uri3)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris_.has(Set(uri2, uri3, uri4)).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris_.has(Set(uri2)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.uris_.has(Set(uri2, uri3)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.uris_.has(Set(uri2, uri3, uri4)).query.get.map(_ ==> List(2))
           // Same as
-          _ <- Ns.i.a1.uris_.has(Seq(Set(uri1))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_.has(Seq(Set(uri1, uri2))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris_.has(Seq(Set(uri1))).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.uris_.has(Seq(Set(uri1, uri2))).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.uris_.has(Seq(Set(uri1, uri2, uri3))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_.has(Seq(Set(uri2))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_.has(Seq(Set(uri2, uri3))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris_.has(Seq(Set(uri2, uri3, uri4))).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris_.has(Seq(Set(uri2))).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.uris_.has(Seq(Set(uri2, uri3))).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.uris_.has(Seq(Set(uri2, uri3, uri4))).query.get.map(_ ==> List(2))
 
 
           // AND/OR semantics with multiple Sets
 
           // "(has this AND that) OR (has this AND that)"
-          _ <- Ns.i.a1.uris_.has(Set(uri1, uri2), Set(uri0)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_.has(Set(uri1, uri2), Set(uri0, uri3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_.has(Set(uri1, uri2), Set(uri2, uri3)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_.has(Set(uri1, uri2), Set(uri2, uri3, uri4)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_.has(Set(uri1, uri2), Set(uri0)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.uris_.has(Set(uri1, uri2), Set(uri0, uri3)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.uris_.has(Set(uri1, uri2), Set(uri2, uri3)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.uris_.has(Set(uri1, uri2), Set(uri2, uri3, uri4)).query.get.map(_ ==> List(1, 2))
           // Same as
-          _ <- Ns.i.a1.uris_.has(Seq(Set(uri1, uri2), Set(uri0))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_.has(Seq(Set(uri1, uri2), Set(uri0, uri3))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_.has(Seq(Set(uri1, uri2), Set(uri2, uri3))).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_.has(Seq(Set(uri1, uri2), Set(uri2, uri3, uri4))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_.has(Seq(Set(uri1, uri2), Set(uri0))).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.uris_.has(Seq(Set(uri1, uri2), Set(uri0, uri3))).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.uris_.has(Seq(Set(uri1, uri2), Set(uri2, uri3))).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.uris_.has(Seq(Set(uri1, uri2), Set(uri2, uri3, uri4))).query.get.map(_ ==> List(1, 2))
 
 
           // Empty Seq/Sets match nothing
-          _ <- Ns.i.a1.uris_.has(Set(uri1, uri2), Set.empty[URI]).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris_.has(Set(uri1, uri2), Set.empty[URI]).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.uris_.has(Seq.empty[URI]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.uris_.has(Set.empty[URI]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.uris_.has(Seq.empty[Set[URI]]).query.get.map(_ ==> List())
@@ -440,29 +449,29 @@ trait FilterSet_URI_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsy
 
 
       "hasNo" - types { implicit conn =>
-        val (a, b) = (1, 2)
         for {
+          _ <- Ns.i(0).save.transact
           _ <- Ns.i.uris.insert(List(
-            (a, Set(uri1, uri2)),
-            (b, Set(uri2, uri3, uri4))
+            (1, Set(uri1, uri2)),
+            (2, Set(uri2, uri3, uri4))
           )).transact
 
           // Sets without one or more values matching
 
           // "Doesn't have this value"
-          _ <- Ns.i.a1.uris_.hasNo(uri0).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_.hasNo(uri1).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris_.hasNo(uri0).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.uris_.hasNo(uri1).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.uris_.hasNo(uri2).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_.hasNo(uri3).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_.hasNo(uri4).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_.hasNo(uri5).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_.hasNo(uri3).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.uris_.hasNo(uri4).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.uris_.hasNo(uri5).query.get.map(_ ==> List(1, 2))
           // Same as
-          _ <- Ns.i.a1.uris_.hasNo(Seq(uri0)).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_.hasNo(Seq(uri1)).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris_.hasNo(Seq(uri0)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.uris_.hasNo(Seq(uri1)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.uris_.hasNo(Seq(uri2)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_.hasNo(Seq(uri3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_.hasNo(Seq(uri4)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_.hasNo(Seq(uri5)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_.hasNo(Seq(uri3)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.uris_.hasNo(Seq(uri4)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.uris_.hasNo(Seq(uri5)).query.get.map(_ ==> List(1, 2))
 
 
           // OR semantics when multiple values
@@ -471,52 +480,52 @@ trait FilterSet_URI_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsy
           _ <- Ns.i.a1.uris_.hasNo(uri1, uri2).query.get.map(_ ==> List())
           _ <- Ns.i.a1.uris_.hasNo(uri1, uri3).query.get.map(_ ==> List())
           _ <- Ns.i.a1.uris_.hasNo(uri1, uri4).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_.hasNo(uri1, uri5).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris_.hasNo(uri1, uri5).query.get.map(_ ==> List(2))
           // Same as
           _ <- Ns.i.a1.uris_.hasNo(Seq(uri1, uri2)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.uris_.hasNo(Seq(uri1, uri3)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.uris_.hasNo(Seq(uri1, uri4)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_.hasNo(Seq(uri1, uri5)).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris_.hasNo(Seq(uri1, uri5)).query.get.map(_ ==> List(2))
 
 
           // AND semantics when multiple values in a _Set_
 
           // "Not (has this AND that)"
-          _ <- Ns.i.a1.uris_.hasNo(Set(uri1)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris_.hasNo(Set(uri1, uri2)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris_.hasNo(Set(uri1, uri2, uri3)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_.hasNo(Set(uri1)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.uris_.hasNo(Set(uri1, uri2)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.uris_.hasNo(Set(uri1, uri2, uri3)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.uris_.hasNo(Set(uri2)).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_.hasNo(Set(uri2, uri3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_.hasNo(Set(uri2, uri3, uri4)).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris_.hasNo(Set(uri2, uri3)).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.uris_.hasNo(Set(uri2, uri3, uri4)).query.get.map(_ ==> List(1))
           // Same as
-          _ <- Ns.i.a1.uris_.hasNo(Seq(Set(uri1))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris_.hasNo(Seq(Set(uri1, uri2))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris_.hasNo(Seq(Set(uri1, uri2, uri3))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_.hasNo(Seq(Set(uri1))).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.uris_.hasNo(Seq(Set(uri1, uri2))).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.uris_.hasNo(Seq(Set(uri1, uri2, uri3))).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.uris_.hasNo(Seq(Set(uri2))).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.uris_.hasNo(Seq(Set(uri2, uri3))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_.hasNo(Seq(Set(uri2, uri3, uri4))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris_.hasNo(Seq(Set(uri2, uri3))).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.uris_.hasNo(Seq(Set(uri2, uri3, uri4))).query.get.map(_ ==> List(1))
 
 
           // AND/OR semantics with multiple Sets
 
           // "Not ((has this AND that) OR (has this AND that))"
-          _ <- Ns.i.a1.uris_.hasNo(Set(uri1, uri2), Set(uri0)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris_.hasNo(Set(uri1, uri2), Set(uri0, uri3)).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris_.hasNo(Set(uri1, uri2), Set(uri0)).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.uris_.hasNo(Set(uri1, uri2), Set(uri0, uri3)).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.uris_.hasNo(Set(uri1, uri2), Set(uri2, uri3)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.uris_.hasNo(Set(uri1, uri2), Set(uri2, uri3, uri4)).query.get.map(_ ==> List())
           // Same as
-          _ <- Ns.i.a1.uris_.hasNo(Seq(Set(uri1, uri2), Set(uri0))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris_.hasNo(Seq(Set(uri1, uri2), Set(uri0, uri3))).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris_.hasNo(Seq(Set(uri1, uri2), Set(uri0))).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.uris_.hasNo(Seq(Set(uri1, uri2), Set(uri0, uri3))).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.uris_.hasNo(Seq(Set(uri1, uri2), Set(uri2, uri3))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.uris_.hasNo(Seq(Set(uri1, uri2), Set(uri2, uri3, uri4))).query.get.map(_ ==> List())
 
 
           // Negating empty Seqs/Sets has no effect
-          _ <- Ns.i.a1.uris_.hasNo(Set(uri1, uri2), Set.empty[URI]).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris_.hasNo(Seq.empty[URI]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_.hasNo(Set.empty[URI]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_.hasNo(Seq.empty[Set[URI]]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.uris_.hasNo(Seq(Set.empty[URI])).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_.hasNo(Set(uri1, uri2), Set.empty[URI]).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.uris_.hasNo(Seq.empty[URI]).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.uris_.hasNo(Set.empty[URI]).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.uris_.hasNo(Seq.empty[Set[URI]]).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.uris_.hasNo(Seq(Set.empty[URI])).query.get.map(_ ==> List(1, 2))
         } yield ()
       }
     }
@@ -556,10 +565,12 @@ trait FilterSet_URI_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsy
           // "Is exactly this AND that"
           _ <- Ns.i.a1.uris_?(Some(Set(uri1))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.uris_?(Some(Set(uri1, uri2))).query.get.map(_ ==> List(a)) // include exact match
+          _ <- Ns.i.a1.uris_?(Some(Set(uri2, uri1))).query.get.map(_ ==> List(a)) // include exact match
           _ <- Ns.i.a1.uris_?(Some(Set(uri1, uri2, uri3))).query.get.map(_ ==> List())
           // Same as
           _ <- Ns.i.a1.uris_?(Some(Seq(Set(uri1)))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.uris_?(Some(Seq(Set(uri1, uri2)))).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.uris_?(Some(Seq(Set(uri2, uri1)))).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.uris_?(Some(Seq(Set(uri1, uri2, uri3)))).query.get.map(_ ==> List())
 
 
@@ -568,7 +579,7 @@ trait FilterSet_URI_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsy
           // "(exactly this AND that) OR (exactly this AND that)"
           _ <- Ns.i.a1.uris_?(Some(Seq(Set(uri1), Set(uri2, uri3)))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.uris_?(Some(Seq(Set(uri1, uri2), Set(uri2, uri3)))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.uris_?(Some(Seq(Set(uri1, uri2), Set(uri2, uri3, uri4)))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.uris_?(Some(Seq(Set(uri2, uri1), Set(uri4, uri3, uri2)))).query.get.map(_ ==> List(a, b))
 
 
           // Empty Seq/Sets match nothing
@@ -597,19 +608,21 @@ trait FilterSet_URI_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsy
           // "Not (exactly this AND that)"
           _ <- Ns.i.a1.uris_?.not(Some(Set(uri1))).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.uris_?.not(Some(Set(uri1, uri2))).query.get.map(_ ==> List(b)) // exclude exact match
+          _ <- Ns.i.a1.uris_?.not(Some(Set(uri2, uri1))).query.get.map(_ ==> List(b)) // exclude exact match
           _ <- Ns.i.a1.uris_?.not(Some(Set(uri1, uri2, uri3))).query.get.map(_ ==> List(a, b))
           // Same as
           _ <- Ns.i.a1.uris_?.not(Some(Seq(Set(uri1)))).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.uris_?.not(Some(Seq(Set(uri1, uri2)))).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.uris_?.not(Some(Seq(Set(uri2, uri1)))).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.uris_?.not(Some(Seq(Set(uri1, uri2, uri3)))).query.get.map(_ ==> List(a, b))
 
 
           // AND/OR semantics with multiple Sets
 
-          // "Not (exactly this AND that) OR (exactly this AND that)"
+          // "NEITHER (exactly this AND that) NOR (exactly this AND that)"
           _ <- Ns.i.a1.uris_?.not(Some(Seq(Set(uri1), Set(uri2, uri3)))).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.uris_?.not(Some(Seq(Set(uri1, uri2), Set(uri2, uri3)))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.uris_?.not(Some(Seq(Set(uri1, uri2), Set(uri2, uri3, uri4)))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.uris_?.not(Some(Seq(Set(uri2, uri1), Set(uri4, uri3, uri2)))).query.get.map(_ ==> List())
 
 
           // Empty Seq/Sets

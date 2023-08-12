@@ -22,8 +22,8 @@ trait Data_Insert
     elements: List[Element],
     tpls: Seq[Product],
   ): Data = {
-//    elements.foreach(println)
-//    println("################################################################################################")
+    //    elements.foreach(println)
+    //    println("################################################################################################")
 
     curRefPath = List(s"$level", getInitialNs(elements))
     val (mainElements, _)           = separateTxElements(elements)
@@ -41,10 +41,6 @@ trait Data_Insert
       addRowSetterToTableInserts(rowIndex)
       rowIndex += 1
     }
-    //    rightCountsMap.foreach(println)
-    //    val xx = getJoinTableInserts
-    //    xx.foreach(println)
-
     (getTableInserts, getJoinTableInserts)
   }
 
@@ -193,48 +189,6 @@ trait Data_Insert
     }
   }
 
-  override protected def addSetOpt[T](
-    ns: String,
-    attr: String,
-    baseTpe: String,
-    refNsOpt: Option[String],
-    tplIndex: Int,
-    handleScalaValue: T => Any,
-  ): Product => Unit = {
-    val (curPath, paramIndex) = updateInsert(attr)
-    (tpl: Product) =>
-      tpl.productElement(tplIndex) match {
-        case Some(set: Set[_]) =>
-          val array     = getArray(baseTpe, set.asInstanceOf[Set[AnyRef]])
-          val colSetter = (ps: PS, _: IdsMap, _: RowIndex) => {
-            val conn = ps.getConnection
-            val arr  = conn.createArrayOf("AnyRef", array)
-            ps.setArray(paramIndex, arr)
-            //        printValue(curLevel, ns, attr, tplIndex, paramIndex, scalaValue)
-          }
-          addColSetter(curPath, colSetter)
-        case None              =>
-          val valueSetter = (ps: PS, n: Int) => ps.setNull(n, java.sql.Types.NULL)
-          val colSetter   = (ps: PS, _: IdsMap, _: RowIndex) => {
-            valueSetter(ps, paramIndex)
-            //            printValue(curLevel, ns, attr, tplIndex, paramIndex, null)
-          }
-          addColSetter(curPath, colSetter)
-      }
-  }
-
-  private def getArray(baseTpe: String, set: Set[AnyRef]): Array[AnyRef] = {
-    val array = set.toArray
-    baseTpe match {
-      case "Float"      => array.map(_.toString.toDouble.asInstanceOf[AnyRef])
-      case "BigInt"     => array.map(v => BigDecimal(v.asInstanceOf[BigInt]).bigDecimal.asInstanceOf[AnyRef])
-      case "BigDecimal" => array.map(v => v.asInstanceOf[BigDecimal].bigDecimal.asInstanceOf[AnyRef])
-      case "URI"        => array.map(_.toString.asInstanceOf[AnyRef])
-      case _            => array
-
-    }
-  }
-
 
   override protected def addSet[T](
     ns: String,
@@ -268,16 +222,13 @@ trait Data_Insert
       inserts = (joinPath, List(id1, id2)) +: inserts
 
       (tpl: Product) => {
-
         val refIds = tpl.productElement(tplIndex).asInstanceOf[Set[Long]]
 
         // Empty row if no attributes in namespace in order to have an id for join table
         if (!paramIndexes.exists { case ((path, _), _) => path == curPath }) {
           // If current namespace has no attributes, then add an empty row with
           // default null values (only to be referenced as the left side of the join table)
-          val emptyRowSetter: Setter = (ps: PS, _: IdsMap, _: RowIndex) => {
-            ps.addBatch()
-          }
+          val emptyRowSetter: Setter = (ps: PS, _: IdsMap, _: RowIndex) => ps.addBatch()
           addColSetter(curPath, emptyRowSetter)
         }
 
@@ -292,6 +243,91 @@ trait Data_Insert
         }
         addColSetter(joinPath, joinSetter)
       }
+    }
+  }
+
+  override protected def addSetOpt[T](
+    ns: String,
+    attr: String,
+    baseTpe: String,
+    refNsOpt: Option[String],
+    tplIndex: Int,
+    handleScalaValue: T => Any,
+  ): Product => Unit = {
+    refNsOpt.fold {
+      val (curPath, paramIndex) = updateInsert(attr)
+      (tpl: Product) =>
+        tpl.productElement(tplIndex) match {
+          case Some(set: Set[_]) =>
+            val array     = getArray(baseTpe, set.asInstanceOf[Set[AnyRef]])
+            val colSetter = (ps: PS, _: IdsMap, _: RowIndex) => {
+              val conn = ps.getConnection
+              val arr  = conn.createArrayOf("AnyRef", array)
+              ps.setArray(paramIndex, arr)
+              //        printValue(curLevel, ns, attr, tplIndex, paramIndex, scalaValue)
+            }
+            addColSetter(curPath, colSetter)
+
+          case None =>
+            val valueSetter = (ps: PS, n: Int) => ps.setNull(n, java.sql.Types.NULL)
+            val colSetter   = (ps: PS, _: IdsMap, _: RowIndex) => {
+              valueSetter(ps, paramIndex)
+              //            printValue(curLevel, ns, attr, tplIndex, paramIndex, null)
+            }
+            addColSetter(curPath, colSetter)
+        }
+    } { refNs =>
+      val refAttr   = attr
+      val joinTable = s"${ns}_${refAttr}_$refNs"
+      val curPath   = curRefPath
+      val joinPath  = curPath :+ joinTable
+
+      // join table with single row (treated as normal insert since there's only 1 join per row)
+      val (id1, id2) = if (ns == refNs) (s"${ns}_1_id", s"${refNs}_2_id") else (s"${ns}_id", s"${refNs}_id")
+      // When insertion order is reversed, this join table will be set after left and right has been inserted
+      inserts = (joinPath, List(id1, id2)) +: inserts
+
+      (tpl: Product) => {
+        tpl.productElement(tplIndex) match {
+          case Some(set: Set[_]) =>
+            val refIds = set.asInstanceOf[Set[Long]]
+
+            // Empty row if no attributes in namespace in order to have an id for join table
+            if (!paramIndexes.exists { case ((path, _), _) => path == curPath }) {
+              // If current namespace has no attributes, then add an empty row with
+              // default null values (only to be referenced as the left side of the join table)
+              val emptyRowSetter: Setter = (ps: PS, _: IdsMap, _: RowIndex) => ps.addBatch()
+              addColSetter(curPath, emptyRowSetter)
+            }
+
+            // Join table setter
+            val joinSetter: Setter = (ps: PS, idsMap: IdsMap, rowIndex: RowIndex) => {
+              val refId1 = idsMap(curPath)(rowIndex)
+              refIds.foreach { refId2 =>
+                ps.setLong(1, refId1)
+                ps.setLong(2, refId2)
+                ps.addBatch()
+              }
+            }
+            addColSetter(joinPath, joinSetter)
+
+          case None =>
+            val dummySetter: Setter = (_: PS, _: IdsMap, _: RowIndex) => ()
+            addColSetter(joinPath, dummySetter)
+        }
+      }
+    }
+  }
+
+  private def getArray(baseTpe: String, set: Set[AnyRef]): Array[AnyRef] = {
+    val array = set.toArray
+    baseTpe match {
+      case "Float"      => array.map(_.toString.toDouble.asInstanceOf[AnyRef])
+      case "BigInt"     => array.map(v => BigDecimal(v.asInstanceOf[BigInt]).bigDecimal.asInstanceOf[AnyRef])
+      case "BigDecimal" => array.map(v => v.asInstanceOf[BigDecimal].bigDecimal.asInstanceOf[AnyRef])
+      case "URI"        => array.map(_.toString.asInstanceOf[AnyRef])
+      case _            => array
+
     }
   }
 

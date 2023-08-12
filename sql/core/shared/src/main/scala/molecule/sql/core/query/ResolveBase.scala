@@ -85,7 +85,7 @@ trait ResolveBase extends BaseHelpers { self: Base =>
   protected def jvector2set(value: AnyRef => Any): AnyRef => AnyRef =
     (v: AnyRef) => v.asInstanceOf[jList[_]].toArray.toSet.map(value)
 
-  protected def sql2set[T](row: Row, n: Int, getValue: RS => T): Set[T] = {
+  protected def sqlArray2set[T](row: Row, n: Int, getValue: RS => T): Set[T] = {
     val arrayResultSet = row.getArray(n).getResultSet
     var set            = Set.empty[T]
     while (arrayResultSet.next()) {

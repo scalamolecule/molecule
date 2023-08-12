@@ -22,30 +22,18 @@ object _ExprSetMan extends BoilerplateGenBase( "ExprSetMan", "/api/expression") 
          |  def apply[ns1[_]](a: ModelOps_0[t, ns1, X2]): Ns1[${`A..V`}, t] = _attrTac(Eq   , a)
          |  def not  [ns1[_]](a: ModelOps_0[t, ns1, X2]): Ns1[${`A..V`}, t] = _attrTac(Neq  , a)
          |  def has  [ns1[_]](a: ModelOps_0[t, ns1, X2]): Ns1[${`A..V`}, t] = _attrTac(Has  , a)
-         |  def hasNo[ns1[_]](a: ModelOps_0[t, ns1, X2]): Ns1[${`A..V`}, t] = _attrTac(HasNo, a)
-         |  def hasLt[ns1[_]](a: ModelOps_0[t, ns1, X2]): Ns1[${`A..V`}, t] = _attrTac(HasLt, a)
-         |  def hasLe[ns1[_]](a: ModelOps_0[t, ns1, X2]): Ns1[${`A..V`}, t] = _attrTac(HasLe, a)
-         |  def hasGt[ns1[_]](a: ModelOps_0[t, ns1, X2]): Ns1[${`A..V`}, t] = _attrTac(HasGt, a)
-         |  def hasGe[ns1[_]](a: ModelOps_0[t, ns1, X2]): Ns1[${`A..V`}, t] = _attrTac(HasGe, a)""".stripMargin
+         |  def hasNo[ns1[_]](a: ModelOps_0[t, ns1, X2]): Ns1[${`A..V`}, t] = _attrTac(HasNo, a)""".stripMargin
     } else {
       s"""
          |  def apply[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet)(implicit x: X): Ns1[${`A..V`}, t] = _attrTac(Eq   , a)
          |  def not  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardSet)(implicit x: X): Ns1[${`A..V`}, t] = _attrTac(Neq  , a)
          |  def has  [ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with Card   )(implicit x: X): Ns1[${`A..V`}, t] = _attrTac(Has  , a)
          |  def hasNo[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with Card   )(implicit x: X): Ns1[${`A..V`}, t] = _attrTac(HasNo, a)
-         |  def hasLt[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardOne)               : Ns1[${`A..V`}, t] = _attrTac(HasLt, a)
-         |  def hasLe[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardOne)               : Ns1[${`A..V`}, t] = _attrTac(HasLe, a)
-         |  def hasGt[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardOne)               : Ns1[${`A..V`}, t] = _attrTac(HasGt, a)
-         |  def hasGe[ns1[_], ns2[_, _]](a: ModelOps_0[t, ns1, ns2] with CardOne)               : Ns1[${`A..V`}, t] = _attrTac(HasGe, a)
          |
          |  def apply[   ns1[_, _], ns2[_, _, _]](a: ModelOps_1[Set[t], t, ns1, ns2] with CardSet): Ns2[${`A..V`}, Set[t], t] = _attrMan(Eq   , a)
          |  def not  [   ns1[_, _], ns2[_, _, _]](a: ModelOps_1[Set[t], t, ns1, ns2] with CardSet): Ns2[${`A..V`}, Set[t], t] = _attrMan(Neq  , a)
          |  def has  [X, ns1[_, _], ns2[_, _, _]](a: ModelOps_1[X     , t, ns1, ns2] with Card   ): Ns2[${`A..V`}, X     , t] = _attrMan(Has  , a)
-         |  def hasNo[X, ns1[_, _], ns2[_, _, _]](a: ModelOps_1[X     , t, ns1, ns2] with Card   ): Ns2[${`A..V`}, X     , t] = _attrMan(HasNo, a)
-         |  def hasLt[   ns1[_, _], ns2[_, _, _]](a: ModelOps_1[t     , t, ns1, ns2]             ): Ns2[${`A..V`}, t     , t] = _attrMan(HasLt, a)
-         |  def hasLe[   ns1[_, _], ns2[_, _, _]](a: ModelOps_1[t     , t, ns1, ns2]             ): Ns2[${`A..V`}, t     , t] = _attrMan(HasLe, a)
-         |  def hasGt[   ns1[_, _], ns2[_, _, _]](a: ModelOps_1[t     , t, ns1, ns2]             ): Ns2[${`A..V`}, t     , t] = _attrMan(HasGt, a)
-         |  def hasGe[   ns1[_, _], ns2[_, _, _]](a: ModelOps_1[t     , t, ns1, ns2]             ): Ns2[${`A..V`}, t     , t] = _attrMan(HasGe, a)""".stripMargin
+         |  def hasNo[X, ns1[_, _], ns2[_, _, _]](a: ModelOps_1[X     , t, ns1, ns2] with Card   ): Ns2[${`A..V`}, X     , t] = _attrMan(HasNo, a)""".stripMargin
     }
     val body =
       s"""
@@ -72,10 +60,6 @@ object _ExprSetMan extends BoilerplateGenBase( "ExprSetMan", "/api/expression") 
          |  def hasNo (vs   : Seq[t]                )(implicit x: X): Ns1[${`A..V`}, t] = _exprSetMan(HasNo , vs.map(v => Set(v))       )
          |  def hasNo (set  : Set[t], sets: Set[t]* )               : Ns1[${`A..V`}, t] = _exprSetMan(HasNo , set +: sets               )
          |  def hasNo (sets : Seq[Set[t]]           )               : Ns1[${`A..V`}, t] = _exprSetMan(HasNo , sets                      )
-         |  def hasLt (upper: t                     )               : Ns1[${`A..V`}, t] = _exprSetMan(HasLt , Seq(Set(upper))           )
-         |  def hasLe (upper: t                     )               : Ns1[${`A..V`}, t] = _exprSetMan(HasLe , Seq(Set(upper))           )
-         |  def hasGt (lower: t                     )               : Ns1[${`A..V`}, t] = _exprSetMan(HasGt , Seq(Set(lower))           )
-         |  def hasGe (lower: t                     )               : Ns1[${`A..V`}, t] = _exprSetMan(HasGe , Seq(Set(lower))           )
          |
          |  def add   (v    : t, vs: t*             )               : Ns1[${`A..V`}, t] = _exprSetMan(Add   , Seq((v +: vs).toSet)      )
          |  def add   (vs   : Iterable[t]           )               : Ns1[${`A..V`}, t] = _exprSetMan(Add   , Seq(vs.toSet)             )

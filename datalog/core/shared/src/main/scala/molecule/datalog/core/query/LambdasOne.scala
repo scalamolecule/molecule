@@ -84,7 +84,6 @@ trait LambdasOne extends ResolveBase {
   private def set2set(value: AnyRef => Any): AnyRef => AnyRef =
     (v: AnyRef) => v.asInstanceOf[jSet[_]].toArray.map(value).toSet
 
-
   protected lazy val vector2setString    : AnyRef => AnyRef = jvector2set
   protected lazy val vector2setInt       : AnyRef => AnyRef = jvector2set((v: AnyRef) => v.toString.toInt)
   protected lazy val vector2setLong      : AnyRef => AnyRef = jvector2set
@@ -100,7 +99,6 @@ trait LambdasOne extends ResolveBase {
   protected lazy val vector2setShort     : AnyRef => AnyRef = jvector2set((v: AnyRef) => v.asInstanceOf[Integer].toShort)
   protected lazy val vector2setChar      : AnyRef => AnyRef = jvector2set((v: AnyRef) => v.asInstanceOf[String].charAt(0))
 
-
   case class ResOne[T](
     tpe: String,
     toDatalog: T => String,
@@ -108,7 +106,7 @@ trait LambdasOne extends ResolveBase {
     j2s: AnyRef => AnyRef,
     seq2t: AnyRef => AnyRef,
     set2set: AnyRef => AnyRef,
-    vector2set: AnyRef => AnyRef
+    vector2set: AnyRef => AnyRef,
   )
 
   lazy val resString    : ResOne[String]     = ResOne("String", dString, s2jString, j2sString, firstString, set2setString, vector2setString)

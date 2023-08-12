@@ -1,5 +1,6 @@
 package molecule.datalog.datomic.setup
 
+import datomic.Peer
 import molecule.base.api.Schema
 import molecule.core.marshalling.DatomicProxy
 import molecule.core.spi.Conn
@@ -31,5 +32,11 @@ trait DatomicTestSuite extends CoreTestSuite {
       10.second
     )
     test(conn)
+  }
+
+
+  def printQuery(q: String)(implicit conn: Conn): Unit = {
+    println("-------------------------------------")
+    Peer.q(q, conn.db).forEach { r => println(r) }
   }
 }

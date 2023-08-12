@@ -1,8 +1,9 @@
 package molecule.datalog.core.query
 
+import java.util.{Set => jSet}
+import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import scala.reflect.ClassTag
-import molecule.base.error.ModelError
 
 trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
 
@@ -129,12 +130,12 @@ trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
       case Neq       => neq(e, a, v, sets, res.s2j)
       case Has       => has(e, a, v, sets, res.tpe, res.toDatalog)
       case HasNo     => hasNo(e, a, v, sets, res.tpe, res.toDatalog)
-      case HasLt     => compare(e, a, v, sets.head.head, "<", res.tpe, res.toDatalog)
-      case HasGt     => compare(e, a, v, sets.head.head, ">", res.tpe, res.toDatalog)
-      case HasLe     => compare(e, a, v, sets.head.head, "<=", res.tpe, res.toDatalog)
-      case HasGe     => compare(e, a, v, sets.head.head, ">=", res.tpe, res.toDatalog)
       case NoValue   => noValue(e, a)
-      case Fn(kw, n) => aggr(e, a, v, kw, n, res)
+      case Fn(kw, n) =>
+        if (isRef)
+          throw ModelError("Aggregating Sets of ref ids not supported.")
+        else
+          aggr(e, a, v, kw, n, res)
       case other     => unexpectedOp(other)
     }
   }
@@ -151,10 +152,6 @@ trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
       case Neq   => neq2(e, a, v, filterAttr)
       case Has   => has2(e, a, v, filterAttr)
       case HasNo => hasNo2(e, a, v, filterAttr)
-      case HasLt => compare2(e, a, v, "<", filterAttr)
-      case HasGt => compare2(e, a, v, ">", filterAttr)
-      case HasLe => compare2(e, a, v, "<=", filterAttr)
-      case HasGe => compare2(e, a, v, ">=", filterAttr)
       case other => unexpectedOp(other)
     }
   }
@@ -170,14 +167,10 @@ trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
     addCast(resOpt.j2s)
     op match {
       case V     => optV(e, a, v)
-      case Eq    => optEq(e, a, v, optSets, resOpt.s2j)
+      case Eq    => optEqual(e, a, v, optSets, resOpt.s2j)
       case Neq   => optNeq(e, a, v, optSets, resOpt.s2j)
       case Has   => optHas(e, a, v, optSets, resOpt.tpe, resOpt.toDatalog)
       case HasNo => optHasNo(e, a, v, optSets, resOpt.tpe, resOpt.toDatalog)
-      case HasLt => optCompare(e, a, v, optSets, "<", resOpt.tpe, resOpt.toDatalog)
-      case HasGt => optCompare(e, a, v, optSets, ">", resOpt.tpe, resOpt.toDatalog)
-      case HasLe => optCompare(e, a, v, optSets, "<=", resOpt.tpe, resOpt.toDatalog)
-      case HasGe => optCompare(e, a, v, optSets, ">=", resOpt.tpe, resOpt.toDatalog)
       case other => unexpectedOp(other)
     }
   }
@@ -196,7 +189,7 @@ trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
              |          "[:find (distinct $v1)
              |            :in $$ $e1
              |            :where [$e1 $a $v1]]" $$ $e) [[$v2]]]""".stripMargin -> wClause
-        replaceCast(res.sets)
+        replaceCast(res.set2sets)
 
       case "mins" =>
         find += s"(min $n $v)"
@@ -245,20 +238,30 @@ trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
         replaceCast(res.j2sSet)
 
       case "median" =>
-        find += s"(median $v)"
-        replaceCast(res.j2sSet)
+        // OBS! Datomic rounds down to nearest whole number
+        // when calculating the median for multiple numbers instead of
+        // following the semantic described on wikipedia:
+        // https://en.wikipedia.org/wiki/Median
+        // See also
+        // https://forum.datomic.com/t/unexpected-median-rounding/517
+        // So we calculate the correct median value manually instead:
+        find += s"(distinct $v)"
+        val medianConverter: AnyRef => Double = {
+          (v: AnyRef) => getMedian(v.asInstanceOf[jSet[_]].toArray.map(_.toString.toDouble).toSet)
+        }
+        replaceCast(medianConverter.asInstanceOf[AnyRef => AnyRef])
 
       case "avg" =>
         find += s"(avg $v)"
-        replaceCast(res.j2sSet)
+        replaceCast(any2double)
 
       case "variance" =>
         find += s"(variance $v)"
-        replaceCast(res.j2sSet)
+        replaceCast(any2double)
 
       case "stddev" =>
         find += s"(stddev $v)"
-        replaceCast(res.j2sSet)
+        replaceCast(any2double)
 
       case other => unexpectedKw(other)
     }
@@ -266,21 +269,13 @@ trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
   }
 
   private def attr(e: Var, a: Att, v: Var): Unit = {
-    val aa = a.split("/").last
-    aa match {
-      case "id" =>
-      case "tx" =>
-      case _    => where += s"[$e $a $v$tx]" -> wClause
-    }
-
-    //    where += s"[$e $a $v$tx]" -> wClause
+    where += s"[$e $a $v$tx]" -> wClause
   }
 
 
   private def equal[T](e: Var, a: Att, v: Var, sets: Seq[Set[T]], fromScala: Any => Any): Unit = {
     val (set, v1, v2, e1) = (v + "-set", v + 1, v + 2, e + 1)
-
-    val aa = a.split("/").last
+    val aa                = a.split("/").last
     aa match {
       case "id" =>
         in += s"[$e ...]"
@@ -290,11 +285,6 @@ trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
         in += s"[$set ...]"
         where += s"[$e $a $v$tx]" -> wClause
     }
-
-
-
-    //    in += s"[$set ...]"
-    //    where += s"[$e $a $v$tx]" -> wClause
     where +=
       s"""[(datomic.api/q
          |          "[:find (distinct $v1)
@@ -303,6 +293,22 @@ trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
     where += s"[(= $v2 $set)]" -> wClause
     args += sets.map(set => set.map(fromScala).asJava).asJava
   }
+
+  private def optEqual[T](
+    e: Var,
+    a: Att,
+    v: Var,
+    optSets: Option[Seq[Set[T]]],
+    fromScala: Any => Any
+  ): Unit = {
+    optSets.fold[Unit] {
+      none(e, a, v)
+    } { sets =>
+      find += s"(distinct $v)"
+      equal(e, a, v, sets, fromScala)
+    }
+  }
+
   private def equal2(e: Var, a: Att, v: Var, filterAttr: String): Unit = {
     preFind = e
 
@@ -349,6 +355,22 @@ trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
       wherePost += s"[(not $blacklisted)]" -> wClause
     }
   }
+
+  private def optNeq[T](
+    e: Var,
+    a: Att,
+    v: Var,
+    optSets: Option[Seq[Set[T]]],
+    fromScala: Any => Any
+  ): Unit = {
+    optSets.fold[Unit] {
+      none(e, a, v)
+    } { sets =>
+      find += s"(distinct $v)"
+      neq(e, a, v, sets, fromScala)
+    }
+  }
+
   private def neq2(e: Var, a: Att, v: Var, filterAttr: String): Unit = {
     where += s"[$e $a $v$tx]" -> wClause
     val process: (Var, Var) => Unit = (e1: Var, v1: Var) => {
@@ -392,6 +414,23 @@ trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
       where += s"[(ground nil) $v]" -> wGround
     }
   }
+
+  private def optHas[T: ClassTag](
+    e: Var,
+    a: Att,
+    v: Var,
+    optSets: Option[Seq[Set[T]]],
+    tpe: String,
+    toDatalog: T => String
+  ): Unit = {
+    optSets.fold[Unit] {
+      none(e, a, v)
+    } { sets =>
+      find += s"(distinct $v)"
+      has(e, a, v, sets, tpe, toDatalog)
+    }
+  }
+
   private def has2(e: Var, a: Att, v: Var, filterAttr: String): Unit = {
     where += s"[$e $a $v$tx]" -> wClause
     val process: (Var, Var) => Unit = (e1: Var, v1: Var) => {
@@ -432,150 +471,6 @@ trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
       wherePost += s"[(not $blacklisted)]" -> wClause
     }
   }
-  private def hasNo2(e: Var, a: Att, v: Var, filterAttr: String): Unit = {
-    // Common for pre-query and main query
-    where += s"[$e $a $v$tx]" -> wClause
-    val process: (Var, Var) => Unit = (e1: Var, v1: Var) => {
-      where +=
-        s"""[(datomic.api/q
-           |          "[:find (distinct ${v}1)
-           |            :in $$ ${e}1
-           |            :where [${e}1 $a ${v}1]]" $$ $e) [[${v}2]]]""".stripMargin -> wClause
-      where +=
-        s"""[(datomic.api/q
-           |          "[:find (distinct ${v1}1)
-           |            :in $$ ${e1}1
-           |            :where [${e1}1 $filterAttr ${v1}1]]" $$ $e1) [[${v1}2]]]""".stripMargin -> wClause
-      where += s"[(clojure.set/intersection ${v}2 ${v1}2) $v1-intersection]" -> wClause
-      where += s"[(empty? $v1-intersection)]" -> wClause
-    }
-    filterAttrVars1.get(filterAttr).fold {
-      filterAttrVars2 = filterAttrVars2 + (filterAttr -> process)
-    } { case (e, a) =>
-      process(e, a)
-    }
-  }
-
-  private def compare[T](e: Var, a: Att, v: Var, arg: T, op: String, tpe: String, toDatalog: T => String): Unit = {
-    where += s"[$e $a $v$tx]" -> wClause
-    where += s"(rule$v $e)" -> wClause
-    rules += s"[(rule$v $e) [$e $a $v] " + (tpe match {
-      case "Float" => s"""[(float $v) $v-float] [($op $v-float (float $arg))]]""" // compare coerced floats
-      case "URI"   => s"""[($op $v (new java.net.URI "$arg"))]]"""
-      case _       => s"""[($op $v ${toDatalog(arg)})]]"""
-    })
-  }
-  private def compare2(e: Var, a: Att, v: Var, op: String, filterAttr: String): Unit = {
-    where += s"[$e $a $v$tx]" -> wClause
-    val process: (Var, Var) => Unit = (e1: Var, v1: Var) => {
-      where +=
-        s"""[(datomic.api/q
-           |          "[:find $e
-           |            :in $$ $e $v1
-           |            :where [$e $a $v][($op $v $v1)]]" $$ $e $v1) [[${e}1]]]""".stripMargin -> wClause
-    }
-    filterAttrVars1.get(filterAttr).fold {
-      filterAttrVars2 = filterAttrVars2 + (filterAttr -> process)
-    } { case (e, a) =>
-      process(e, a)
-    }
-  }
-
-  private def noValue(e: Var, a: Att): Unit = {
-    where += s"(not [$e $a])" -> wNeqOne
-  }
-
-
-  private def optV(e: Var, a: Att, v: Var): Unit = {
-    find += s"(pull $e-$v [[$a :limit nil]]) "
-    where += s"[(identity $e) $e-$v]" -> wGround
-  }
-
-  private def none(e: Var, a: Att, v: Var): Unit = {
-    find += s"(pull $e-$v [[$a :limit nil]])"
-    where += s"[(identity $e) $e-$v]" -> wGround
-    where += s"(not [$e $a])" -> wNeqOne
-  }
-
-  private def optHas[T: ClassTag](
-    e: Var,
-    a: Att,
-    v: Var,
-    optSets: Option[Seq[Set[T]]],
-    tpe: String,
-    toDatalog: T => String
-  ): Unit = {
-    optSets.fold[Unit] {
-      none(e, a, v)
-    } { sets =>
-      find += s"(distinct $v)"
-      has(e, a, v, sets, tpe, toDatalog)
-    }
-  }
-
-  private def optHasNo[T](
-    e: Var,
-    a: Att,
-    v: Var,
-    optSets: Option[Seq[Set[T]]],
-    tpe: String,
-    toDatalog: T => String
-  ): Unit = {
-    find += s"(distinct $v)"
-    if (optSets.isDefined) {
-      hasNo(e, a, v, optSets.get, tpe, toDatalog)
-    } else {
-      where += s"[$e $a $v$tx]" -> wClause
-    }
-  }
-
-  private def optEq[T](
-    e: Var,
-    a: Att,
-    v: Var,
-    optSets: Option[Seq[Set[T]]],
-    fromScala: Any => Any
-  ): Unit = {
-    optSets.fold[Unit] {
-      none(e, a, v)
-    } { sets =>
-      find += s"(distinct $v)"
-      equal(e, a, v, sets, fromScala)
-    }
-  }
-
-  private def optNeq[T](
-    e: Var,
-    a: Att,
-    v: Var,
-    optSets: Option[Seq[Set[T]]],
-    fromScala: Any => Any
-  ): Unit = {
-    optSets.fold[Unit] {
-      none(e, a, v)
-    } { sets =>
-      find += s"(distinct $v)"
-      neq(e, a, v, sets, fromScala)
-    }
-  }
-
-  private def optCompare[T](
-    e: Var,
-    a: Att,
-    v: Var,
-    optSets: Option[Seq[Set[T]]],
-    op: String,
-    tpe: String,
-    toDatalog: T => String
-  ): Unit = {
-    find += s"(distinct $v)"
-    optSets.fold[Unit] {
-      where += s"[$e $a $v$tx]" -> wClause
-    } { sets =>
-      compare(e, a, v, sets.head.head, op, tpe, toDatalog)
-    }
-  }
-
 
   private def mkRules[T](
     e: Var, a: Att, v: Var, sets: Seq[Set[T]], tpe: String, toDatalog: T => String
@@ -610,5 +505,61 @@ trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
           )
         }
     }
+  }
+
+  private def optHasNo[T](
+    e: Var,
+    a: Att,
+    v: Var,
+    optSets: Option[Seq[Set[T]]],
+    tpe: String,
+    toDatalog: T => String
+  ): Unit = {
+    find += s"(distinct $v)"
+    if (optSets.isDefined) {
+      hasNo(e, a, v, optSets.get, tpe, toDatalog)
+    } else {
+      where += s"[$e $a $v$tx]" -> wClause
+    }
+  }
+
+  private def hasNo2(e: Var, a: Att, v: Var, filterAttr: String): Unit = {
+    // Common for pre-query and main query
+    where += s"[$e $a $v$tx]" -> wClause
+    val process: (Var, Var) => Unit = (e1: Var, v1: Var) => {
+      where +=
+        s"""[(datomic.api/q
+           |          "[:find (distinct ${v}1)
+           |            :in $$ ${e}1
+           |            :where [${e}1 $a ${v}1]]" $$ $e) [[${v}2]]]""".stripMargin -> wClause
+      where +=
+        s"""[(datomic.api/q
+           |          "[:find (distinct ${v1}1)
+           |            :in $$ ${e1}1
+           |            :where [${e1}1 $filterAttr ${v1}1]]" $$ $e1) [[${v1}2]]]""".stripMargin -> wClause
+      where += s"[(clojure.set/intersection ${v}2 ${v1}2) $v1-intersection]" -> wClause
+      where += s"[(empty? $v1-intersection)]" -> wClause
+    }
+    filterAttrVars1.get(filterAttr).fold {
+      filterAttrVars2 = filterAttrVars2 + (filterAttr -> process)
+    } { case (e, a) =>
+      process(e, a)
+    }
+  }
+
+
+  private def noValue(e: Var, a: Att): Unit = {
+    where += s"(not [$e $a])" -> wNeqOne
+  }
+
+  private def optV(e: Var, a: Att, v: Var): Unit = {
+    find += s"(pull $e-$v [[$a :limit nil]]) "
+    where += s"[(identity $e) $e-$v]" -> wGround
+  }
+
+  private def none(e: Var, a: Att, v: Var): Unit = {
+    find += s"(pull $e-$v [[$a :limit nil]])"
+    where += s"[(identity $e) $e-$v]" -> wGround
+    where += s"(not [$e $a])" -> wNeqOne
   }
 }

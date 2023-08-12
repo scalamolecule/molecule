@@ -9,11 +9,12 @@ import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 
-trait AggrSetNum_Short_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
+trait AggrSetNum_Short_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync =>
 
   override lazy val tests = Tests {
 
     "sum" - types { implicit conn =>
+      implicit val tolerant = tolerantShortEquality(toleranceShort)
       for {
         _ <- Ns.i.shorts.insert(List(
           (1, Set(short1, short2)),
@@ -22,18 +23,19 @@ trait AggrSetNum_Short_ extends CoreTestSuite with ApiAsyncImplicits { self: Spi
           (2, Set(short3, short4)),
         )).transact
 
-        _ <- Ns.shorts.apply(sum).query.get.map(_ === List(
-          Set(short1 + short2 + short3 + short4)
-        ))
-        _ <- Ns.i.shorts(sum).query.get.map(_ === List(
-          (1, Set(short1 + short2)),
-          (2, Set(short2 + short3 + short4)),
-        ))
+        // Using tolerant equality so that the test works with decimal number types too
+        _ <- Ns.shorts(sum).query.get.map(_.head.head ==~ short1 + short2 + short3 + short4)
+
+        _ <- Ns.i.shorts(sum).query.get.map(_.map {
+          case (1, setWithSum) => setWithSum.head ==~ short1 + short2
+          case (2, setWithSum) => setWithSum.head ==~ short2 + short3 + short4
+        })
       } yield ()
     }
 
 
     "median" - types { implicit futConn =>
+      implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
         _ <- Ns.i.shorts.insert(List(
           (1, Set(short1, short2)),
@@ -42,24 +44,23 @@ trait AggrSetNum_Short_ extends CoreTestSuite with ApiAsyncImplicits { self: Spi
           (2, Set(short3, short4)),
         )).transact
 
-        _ <- Ns.shorts(median).query.get.map(_ === List(
-          Set(short2)
+        _ <- Ns.shorts.query.get.map(_ ==> List(Set(short1, short2, short3, short4)))
+        _ <- Ns.shorts(median).query.get.map(_.head ==~ (short2 + short3).toDouble / 2.0)
+
+        _ <- Ns.i.shorts.query.get.map(_ ==> List(
+          (1, Set(short1, short2)),
+          (2, Set(short2, short3, short4)),
         ))
-        _ <- Ns.i.shorts(median).query.get.map(_ === List(
-          (1, Set(short1)),
-          (2, Set(3.0)),
-          // OBS! Datomic rounds down to nearest whole number
-          // (when calculating the median for multiple numbers)!
-          // This is another semantic than described on wikipedia:
-          // https://en.wikipedia.org/wiki/Median
-          // See also
-          // https://forum.datomic.com/t/unexpected-median-rounding/517
-        ))
+        _ <- Ns.i.shorts(median).query.get.map(_.map {
+          case (1, median) => median ==~ (short1 + short2).toDouble / 2.0
+          case (2, median) => median ==~ short3.toString.toDouble
+        })
       } yield ()
     }
 
 
     "avg" - types { implicit conn =>
+      implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
         _ <- Ns.i.shorts.insert(List(
           (1, Set(short1, short2)),
@@ -68,18 +69,23 @@ trait AggrSetNum_Short_ extends CoreTestSuite with ApiAsyncImplicits { self: Spi
           (2, Set(short3, short4)),
         )).transact
 
-        _ <- Ns.shorts(avg).query.get.map(_ === List(
-          Set(averageOf(short1, short2, short3, short4))
+        _ <- Ns.shorts.query.get.map(_ ==> List(Set(short1, short2, short3, short4)))
+        _ <- Ns.shorts(avg).query.get.map(_.head ==~ (short1 + short2 + short3 + short4).toDouble / 4.0)
+
+        _ <- Ns.i.shorts.query.get.map(_ ==> List(
+          (1, Set(short1, short2)),
+          (2, Set(short2, short3, short4)),
         ))
-        _ <- Ns.i.shorts(avg).query.get.map(_ === List(
-          (1, Set(averageOf(short1, short2))),
-          (2, Set(averageOf(short2, short3, short4))),
-        ))
+        _ <- Ns.i.shorts(avg).query.get.map(_.map {
+          case (1, avg) => avg ==~ (short1 + short2).toDouble / 2.0
+          case (2, avg) => avg ==~ (short2 + short3 + short4).toDouble / 3.0
+        })
       } yield ()
     }
 
 
     "variance" - types { implicit conn =>
+      implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
         _ <- Ns.i.shorts.insert(List(
           (1, Set(short1, short2)),
@@ -88,18 +94,23 @@ trait AggrSetNum_Short_ extends CoreTestSuite with ApiAsyncImplicits { self: Spi
           (2, Set(short3, short4)),
         )).transact
 
-        _ <- Ns.shorts(variance).query.get.map(_ === List(
-          Set(varianceOf(short1, short2, short3, short4))
+        _ <- Ns.shorts.query.get.map(_ ==> List(Set(short1, short2, short3, short4)))
+        _ <- Ns.shorts(variance).query.get.map(_.head ==~ varianceOf(short1, short2, short3, short4))
+
+        _ <- Ns.i.shorts.query.get.map(_ ==> List(
+          (1, Set(short1, short2)),
+          (2, Set(short2, short3, short4)),
         ))
-        _ <- Ns.i.shorts(variance).query.get.map(_ === List(
-          (1, Set(varianceOf(short1, short2))),
-          (2, Set(varianceOf(short2, short3, short4))),
-        ))
+        _ <- Ns.i.shorts(variance).query.get.map(_.map {
+          case (1, variance) => variance ==~ varianceOf(short1, short2)
+          case (2, variance) => variance ==~ varianceOf(short2, short3, short4)
+        })
       } yield ()
     }
 
 
     "stddev" - types { implicit conn =>
+      implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
         _ <- Ns.i.shorts.insert(List(
           (1, Set(short1, short2)),
@@ -108,13 +119,17 @@ trait AggrSetNum_Short_ extends CoreTestSuite with ApiAsyncImplicits { self: Spi
           (2, Set(short3, short4)),
         )).transact
 
-        _ <- Ns.shorts(stddev).query.get.map(_ === List(
-          Set(stdDevOf(short1, short2, short3, short4))
+        _ <- Ns.shorts.query.get.map(_ ==> List(Set(short1, short2, short3, short4)))
+        _ <- Ns.shorts(stddev).query.get.map(_.head ==~ stdDevOf(short1, short2, short3, short4))
+
+        _ <- Ns.i.shorts.query.get.map(_ ==> List(
+          (1, Set(short1, short2)),
+          (2, Set(short2, short3, short4)),
         ))
-        _ <- Ns.i.shorts(stddev).query.get.map(_ === List(
-          (1, Set(stdDevOf(short1, short2))),
-          (2, Set(stdDevOf(short2, short3, short4))),
-        ))
+        _ <- Ns.i.shorts(stddev).query.get.map(_.map {
+          case (1, stddev) => stddev ==~ stdDevOf(short1, short2)
+          case (2, stddev) => stddev ==~ stdDevOf(short2, short3, short4)
+        })
       } yield ()
     }
   }

@@ -42,19 +42,19 @@ trait Base extends BaseHelpers with JavaConversions { self: Model2Query =>
 
   // Main query
   final protected var isFree        = false
+  final protected var isRef         = false
   final protected var isNested      = false
   final protected var isNestedOpt   = false
   final protected var isComposite   = false
   final protected var isTxMetaData  = false
   final protected var isTxComposite = false
 
-  final protected val nestedIds    = new ArrayBuffer[String]
-//  final protected val nestedOptIds = new ArrayBuffer[String]
-  final protected val find         = new ArrayBuffer[String]
-  final protected val widh         = new ArrayBuffer[String]
-  final protected val in           = new ArrayBuffer[String]
-  final protected val where        = new ArrayBuffer[(String, Int)]
-  final protected val rules        = new ArrayBuffer[String]
+  final protected val nestedIds = new ArrayBuffer[String]
+  final protected val find      = new ArrayBuffer[String]
+  final protected val widh      = new ArrayBuffer[String]
+  final protected val in        = new ArrayBuffer[String]
+  final protected val where     = new ArrayBuffer[(String, Int)]
+  final protected val rules     = new ArrayBuffer[String]
 
   // In variables and where clauses not shared with pre-query. To be added lastly to main query
   final protected val inPost    = new ArrayBuffer[String]
@@ -90,7 +90,7 @@ trait Base extends BaseHelpers with JavaConversions { self: Model2Query =>
   final protected val availableAttrs                                   = mutable.Set.empty[String]
 
   final protected var firstId: String = ""
-  final protected val txVar   : String = "?tx"
+  final protected val txVar  : String = "?tx"
 
   // Add 4th tx var to first attribute datom if tx value is needed
   final protected var addTxVar: Boolean = false

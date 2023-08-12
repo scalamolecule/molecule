@@ -119,20 +119,20 @@ trait LambdasOne extends ResolveBase { self: Base =>
     //    set2set: (Row, Int) => AnyRef,
     array2set: (Row, Int) => AnyRef
   )
-  protected lazy val resString1    : ResOne[String]     = ResOne("String", sql2oneString, sql2oneStringOrNull, one2sqlString, vector2setString)
-  protected lazy val resInt1       : ResOne[Int]        = ResOne("Int", sql2oneInt, sql2oneIntOrNull, one2sqlInt, vector2setInt)
-  protected lazy val resLong1      : ResOne[Long]       = ResOne("Long", sql2oneLong, sql2oneLongOrNull, one2sqlLong, vector2setLong)
-  protected lazy val resFloat1     : ResOne[Float]      = ResOne("Float", sql2oneFloat, sql2oneFloatOrNull, one2sqlFloat, vector2setFloat)
-  protected lazy val resDouble1    : ResOne[Double]     = ResOne("Double", sql2oneDouble, sql2oneDoubleOrNull, one2sqlDouble, vector2setDouble)
-  protected lazy val resBoolean1   : ResOne[Boolean]    = ResOne("Boolean", sql2oneBoolean, sql2oneBooleanOrNull, one2sqlBoolean, vector2setBoolean)
-  protected lazy val resBigInt1    : ResOne[BigInt]     = ResOne("BigInt", sql2oneBigInt, sql2oneBigIntOrNull, one2sqlBigInt, vector2setBigInt)
-  protected lazy val resBigDecimal1: ResOne[BigDecimal] = ResOne("BigDecimal", sql2oneBigDecimal, sql2oneBigDecimalOrNull, one2sqlBigDecimal, vector2setBigDecimal)
-  protected lazy val resDate1      : ResOne[Date]       = ResOne("Date", sql2oneDate, sql2oneDateOrNull, one2sqlDate, vector2setDate)
-  protected lazy val resUUID1      : ResOne[UUID]       = ResOne("UUID", sql2oneUUID, sql2oneUUIDOrNull, one2sqlUUID, vector2setUUID)
-  protected lazy val resURI1       : ResOne[URI]        = ResOne("URI", sql2oneURI, sql2oneURIOrNull, one2sqlURI, vector2setURI)
-  protected lazy val resByte1      : ResOne[Byte]       = ResOne("Byte", sql2oneByte, sql2oneByteOrNull, one2sqlByte, vector2setByte)
-  protected lazy val resShort1     : ResOne[Short]      = ResOne("Short", sql2oneShort, sql2oneShortOrNull, one2sqlShort, vector2setShort)
-  protected lazy val resChar1      : ResOne[Char]       = ResOne("Char", sql2oneChar, sql2oneCharOrNull, one2sqlChar, vector2setChar)
+  protected lazy val resString1    : ResOne[String]     = ResOne("String", sql2oneString, sql2oneStringOrNull, one2sqlString, array2setString)
+  protected lazy val resInt1       : ResOne[Int]        = ResOne("Int", sql2oneInt, sql2oneIntOrNull, one2sqlInt, array2setInt)
+  protected lazy val resLong1      : ResOne[Long]       = ResOne("Long", sql2oneLong, sql2oneLongOrNull, one2sqlLong, array2setLong)
+  protected lazy val resFloat1     : ResOne[Float]      = ResOne("Float", sql2oneFloat, sql2oneFloatOrNull, one2sqlFloat, array2setFloat)
+  protected lazy val resDouble1    : ResOne[Double]     = ResOne("Double", sql2oneDouble, sql2oneDoubleOrNull, one2sqlDouble, array2setDouble)
+  protected lazy val resBoolean1   : ResOne[Boolean]    = ResOne("Boolean", sql2oneBoolean, sql2oneBooleanOrNull, one2sqlBoolean, array2setBoolean)
+  protected lazy val resBigInt1    : ResOne[BigInt]     = ResOne("BigInt", sql2oneBigInt, sql2oneBigIntOrNull, one2sqlBigInt, array2setBigInt)
+  protected lazy val resBigDecimal1: ResOne[BigDecimal] = ResOne("BigDecimal", sql2oneBigDecimal, sql2oneBigDecimalOrNull, one2sqlBigDecimal, array2setBigDecimal)
+  protected lazy val resDate1      : ResOne[Date]       = ResOne("Date", sql2oneDate, sql2oneDateOrNull, one2sqlDate, array2setDate)
+  protected lazy val resUUID1      : ResOne[UUID]       = ResOne("UUID", sql2oneUUID, sql2oneUUIDOrNull, one2sqlUUID, array2setUUID)
+  protected lazy val resURI1       : ResOne[URI]        = ResOne("URI", sql2oneURI, sql2oneURIOrNull, one2sqlURI, array2setURI)
+  protected lazy val resByte1      : ResOne[Byte]       = ResOne("Byte", sql2oneByte, sql2oneByteOrNull, one2sqlByte, array2setByte)
+  protected lazy val resShort1     : ResOne[Short]      = ResOne("Short", sql2oneShort, sql2oneShortOrNull, one2sqlShort, array2setShort)
+  protected lazy val resChar1      : ResOne[Char]       = ResOne("Char", sql2oneChar, sql2oneCharOrNull, one2sqlChar, array2setChar)
 
   private lazy val sql2oneStringOrNull    : (Row, Int) => Any = { (row: Row, n: Int) => val v = row.getString(n); if (row.wasNull()) null else v }
   private lazy val sql2oneIntOrNull       : (Row, Int) => Any = { (row: Row, n: Int) => val v = row.getInt(n); if (row.wasNull()) null else v }
@@ -149,20 +149,20 @@ trait LambdasOne extends ResolveBase { self: Base =>
   private lazy val sql2oneShortOrNull     : (Row, Int) => Any = { (row: Row, n: Int) => val v = row.getShort(n); if (row.wasNull()) null else v }
   private lazy val sql2oneCharOrNull      : (Row, Int) => Any = { (row: Row, n: Int) => val v = row.getString(n); if (row.wasNull()) null else v.charAt(0) }
 
-  private lazy val vector2setString    : (Row, Int) => AnyRef = { (row: Row, n: Int) => val set = sql2set[String](row, n, valueString); if (row.wasNull()) null else set }
-  private lazy val vector2setInt       : (Row, Int) => AnyRef = { (row: Row, n: Int) => val set = sql2set[Int](row, n, valueInt); if (row.wasNull()) null else set }
-  private lazy val vector2setLong      : (Row, Int) => AnyRef = { (row: Row, n: Int) => val set = sql2set[Long](row, n, valueLong); if (row.wasNull()) null else set }
-  private lazy val vector2setFloat     : (Row, Int) => AnyRef = { (row: Row, n: Int) => val set = sql2set[Float](row, n, valueFloat); if (row.wasNull()) null else set }
-  private lazy val vector2setDouble    : (Row, Int) => AnyRef = { (row: Row, n: Int) => val set = sql2set[Double](row, n, valueDouble); if (row.wasNull()) null else set }
-  private lazy val vector2setBoolean   : (Row, Int) => AnyRef = { (row: Row, n: Int) => val set = sql2set[Boolean](row, n, valueBoolean); if (row.wasNull()) null else set }
-  private lazy val vector2setBigInt    : (Row, Int) => AnyRef = { (row: Row, n: Int) => val set = sql2set[BigInt](row, n, valueBigInt); if (row.wasNull()) null else set }
-  private lazy val vector2setBigDecimal: (Row, Int) => AnyRef = { (row: Row, n: Int) => val set = sql2set[BigDecimal](row, n, valueBigDecimal); if (row.wasNull()) null else set }
-  private lazy val vector2setDate      : (Row, Int) => AnyRef = { (row: Row, n: Int) => val set = sql2set[Date](row, n, valueDate); if (row.wasNull()) null else set }
-  private lazy val vector2setUUID      : (Row, Int) => AnyRef = { (row: Row, n: Int) => val set = sql2set[UUID](row, n, valueUUID); if (row.wasNull()) null else set }
-  private lazy val vector2setURI       : (Row, Int) => AnyRef = { (row: Row, n: Int) => val set = sql2set[URI](row, n, valueURI); if (row.wasNull()) null else set }
-  private lazy val vector2setByte      : (Row, Int) => AnyRef = { (row: Row, n: Int) => val set = sql2set[Byte](row, n, valueByte); if (row.wasNull()) null else set }
-  private lazy val vector2setShort     : (Row, Int) => AnyRef = { (row: Row, n: Int) => val set = sql2set[Short](row, n, valueShort); if (row.wasNull()) null else set }
-  private lazy val vector2setChar      : (Row, Int) => AnyRef = { (row: Row, n: Int) => val set = sql2set[Char](row, n, valueChar); if (row.wasNull()) null else set }
+  private lazy val array2setString    : (Row, Int) => AnyRef = { (row: Row, n: Int) => val set = sqlArray2set[String](row, n, valueString); if (row.wasNull()) null else set }
+  private lazy val array2setInt       : (Row, Int) => AnyRef = { (row: Row, n: Int) => val set = sqlArray2set[Int](row, n, valueInt); if (row.wasNull()) null else set }
+  private lazy val array2setLong      : (Row, Int) => AnyRef = { (row: Row, n: Int) => val set = sqlArray2set[Long](row, n, valueLong); if (row.wasNull()) null else set }
+  private lazy val array2setFloat     : (Row, Int) => AnyRef = { (row: Row, n: Int) => val set = sqlArray2set[Float](row, n, valueFloat); if (row.wasNull()) null else set }
+  private lazy val array2setDouble    : (Row, Int) => AnyRef = { (row: Row, n: Int) => val set = sqlArray2set[Double](row, n, valueDouble); if (row.wasNull()) null else set }
+  private lazy val array2setBoolean   : (Row, Int) => AnyRef = { (row: Row, n: Int) => val set = sqlArray2set[Boolean](row, n, valueBoolean); if (row.wasNull()) null else set }
+  private lazy val array2setBigInt    : (Row, Int) => AnyRef = { (row: Row, n: Int) => val set = sqlArray2set[BigInt](row, n, valueBigInt); if (row.wasNull()) null else set }
+  private lazy val array2setBigDecimal: (Row, Int) => AnyRef = { (row: Row, n: Int) => val set = sqlArray2set[BigDecimal](row, n, valueBigDecimal); if (row.wasNull()) null else set }
+  private lazy val array2setDate      : (Row, Int) => AnyRef = { (row: Row, n: Int) => val set = sqlArray2set[Date](row, n, valueDate); if (row.wasNull()) null else set }
+  private lazy val array2setUUID      : (Row, Int) => AnyRef = { (row: Row, n: Int) => val set = sqlArray2set[UUID](row, n, valueUUID); if (row.wasNull()) null else set }
+  private lazy val array2setURI       : (Row, Int) => AnyRef = { (row: Row, n: Int) => val set = sqlArray2set[URI](row, n, valueURI); if (row.wasNull()) null else set }
+  private lazy val array2setByte      : (Row, Int) => AnyRef = { (row: Row, n: Int) => val set = sqlArray2set[Byte](row, n, valueByte); if (row.wasNull()) null else set }
+  private lazy val array2setShort     : (Row, Int) => AnyRef = { (row: Row, n: Int) => val set = sqlArray2set[Short](row, n, valueShort); if (row.wasNull()) null else set }
+  private lazy val array2setChar      : (Row, Int) => AnyRef = { (row: Row, n: Int) => val set = sqlArray2set[Char](row, n, valueChar); if (row.wasNull()) null else set }
 
 
   //  case class ResOneOLD[T](

@@ -267,9 +267,7 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
       val length = until - from
       select += s"SUBSTRING($col, $from, $length) AS $alias"
       orderBy = orderBy.map {
-        case (level, arity, `col`, dir) =>
-          //          println("###### " + dir)
-          (level, arity, alias, dir)
+        case (level, arity, `col`, dir) => (level, arity, alias, dir)
         case other                      => other
       }
       where += ((s"$len >= $from", ""))
@@ -295,13 +293,13 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
       case "mins" =>
         select +=
           s"""ARRAY_SLICE(
-             |  ARRAY_AGG($col order by $col ASC),
-             |  1,
-             |  LEAST(
-             |    $n,
-             |    ARRAY_LENGTH(ARRAY_AGG($col))
-             |  )
-             |)""".stripMargin
+             |    ARRAY_AGG(DISTINCT $col order by $col ASC),
+             |    1,
+             |    LEAST(
+             |      $n,
+             |      ARRAY_LENGTH(ARRAY_AGG(DISTINCT $col))
+             |    )
+             |  )""".stripMargin
         groupByCols -= col
         aggregate = true
         replaceCast(res.array2set)
@@ -312,13 +310,13 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
       case "maxs" =>
         select +=
           s"""ARRAY_SLICE(
-             |  ARRAY_AGG($col order by $col DESC),
-             |  1,
-             |  LEAST(
-             |    $n,
-             |    ARRAY_LENGTH(ARRAY_AGG($col))
-             |  )
-             |)""".stripMargin
+             |    ARRAY_AGG(DISTINCT $col order by $col DESC),
+             |    1,
+             |    LEAST(
+             |      $n,
+             |      ARRAY_LENGTH(ARRAY_AGG(DISTINCT $col))
+             |    )
+             |  )""".stripMargin
         groupByCols -= col
         aggregate = true
         replaceCast(res.array2set)
@@ -329,13 +327,13 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
       case "rands" =>
         select +=
           s"""ARRAY_SLICE(
-             |  ARRAY_AGG($col order by RAND()),
-             |  1,
-             |  LEAST(
-             |    $n,
-             |    ARRAY_LENGTH(ARRAY_AGG($col))
-             |  )
-             |)""".stripMargin
+             |    ARRAY_AGG($col order by RAND()),
+             |    1,
+             |    LEAST(
+             |      $n,
+             |      ARRAY_LENGTH(ARRAY_AGG($col))
+             |    )
+             |  )""".stripMargin
         groupByCols -= col
         aggregate = true
         replaceCast(res.array2set)
@@ -349,13 +347,13 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
       case "samples" =>
         select +=
           s"""ARRAY_SLICE(
-             |  ARRAY_AGG(DISTINCT $col order by RAND()),
-             |  1,
-             |  LEAST(
-             |    $n,
-             |    ARRAY_LENGTH(ARRAY_AGG($col))
-             |  )
-             |)""".stripMargin
+             |    ARRAY_AGG(DISTINCT $col order by RAND()),
+             |    1,
+             |    LEAST(
+             |      $n,
+             |      ARRAY_LENGTH(ARRAY_AGG(DISTINCT $col))
+             |    )
+             |  )""".stripMargin
         groupByCols -= col
         aggregate = true
         replaceCast(res.array2set)
@@ -367,46 +365,58 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
         limitClause = "1"
 
       case "count" =>
-        aggregate = true
-        groupByCols -= col
         distinct = false
-        select += s"COUNT($col)"
+        groupByCols -= col
+        aggregate = true
+        selectWithOrder(col, "COUNT", "")
         replaceCast(toInt)
-
 
       case "countDistinct" =>
-        aggregate = true
-        groupByCols -= col
         distinct = false
-        select += s"COUNT(DISTINCT $col)"
+        groupByCols -= col
+        aggregate = true
+        selectWithOrder(col, "COUNT")
         replaceCast(toInt)
 
-      case "sum"      =>
-        aggregate = true
+      case "sum" =>
         groupByCols -= col
-        select += s"SUM($col)"
+        aggregate = true
+        selectWithOrder(col, "SUM")
 
-      case "median"   =>
-        aggregate = true
+      case "median" =>
         groupByCols -= col
-        select += s"MEDIAN($col)"
+        aggregate = true
+        selectWithOrder(col, "MEDIAN")
 
-      case "avg"      =>
-        aggregate = true
+      case "avg" =>
         groupByCols -= col
-        select += s"AVG($col)"
+        aggregate = true
+        selectWithOrder(col, "AVG")
 
       case "variance" =>
-        aggregate = true
         groupByCols -= col
-        select += s"VARIANCE($col)"
+        aggregate = true
+        selectWithOrder(col, "VAR_POP")
 
-      case "stddev"   =>
-        aggregate = true
+      case "stddev" =>
         groupByCols -= col
-        select += s"STDDEV($col)"
+        aggregate = true
+        selectWithOrder(col, "STDDEV_POP")
 
       case other => unexpectedKw(other)
+    }
+  }
+
+  private def selectWithOrder(col: String, fn: String, distinct: String = "DISTINCT "): Unit = {
+    if (orderBy.nonEmpty && orderBy.last._3 == col) {
+      // order by aggregate alias instead
+      val alias = col.replace('.', '_') + "_" + fn.toLowerCase
+      select += s"$fn($distinct$col) $alias"
+      val (level, _, _, dir) = orderBy.last
+      orderBy.remove(orderBy.size - 1)
+      orderBy += ((level, 1, alias, dir))
+    } else {
+      select += s"$fn($distinct$col)"
     }
   }
 
