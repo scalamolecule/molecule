@@ -14,7 +14,7 @@ trait UpdateOps extends Action2Data {
   def updateOne[T](
     a: AttrOne,
     vs: Seq[T],
-//    transform: T => Any,
+    transformValue: T => Any,
     handleValue: T => Any
   ): Unit
 

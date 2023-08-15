@@ -110,14 +110,15 @@ trait Data_Update extends DatomicBase_JVM with UpdateOps with MoleculeLogging { 
   override def updateOne[T](
     a: AttrOne,
     vs: Seq[T],
-    transform: T => Any
+    transformValue: T => Any,
+    handleValue: T => Any
   ): Unit = {
     if (!isUpsert) {
       val dummyFilterAttr = AttrOneTacInt(a.ns, a.attr, V, Nil, None, None, Nil, Nil, None, None)
       filterElements = filterElements :+ dummyFilterAttr
     }
     vs match {
-      case Seq(v) => data = data :+ (("add", a.ns, a.attr, Seq(transform(v).asInstanceOf[AnyRef]), false))
+      case Seq(v) => data = data :+ (("add", a.ns, a.attr, Seq(transformValue(v).asInstanceOf[AnyRef]), false))
       case Nil    => data = data :+ (("retract", a.ns, a.attr, Nil, false))
       case vs     => throw ExecutionError(
         s"Can only $update one value for attribute `${a.name}`. Found: " + vs.mkString(", ")

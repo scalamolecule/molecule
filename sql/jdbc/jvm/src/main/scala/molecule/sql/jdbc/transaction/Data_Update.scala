@@ -165,12 +165,24 @@ trait Data_Update extends JdbcBase_JVM with UpdateOps with MoleculeLogging { sel
   override def updateOne[T](
     a: AttrOne,
     vs: Seq[T],
+    transformValue: T => Any,
     handleValue: T => Any
   ): Unit = {
     val (curPath, paramIndex) = updateInserts(a.name)
-    val colSetter: Setter     = {
-      (ps: PS, _: IdsMap, _: RowIndex) =>
-        handleValue(vs.head).asInstanceOf[(PS, Int) => Unit](ps, paramIndex)
+    val colSetter: Setter = {
+      vs match {
+        case Seq(v) =>
+          (ps: PS, _: IdsMap, _: RowIndex) => {
+            handleValue(v).asInstanceOf[(PS, Int) => Unit](ps, paramIndex)
+          }
+        case Nil    =>
+          (ps: PS, _: IdsMap, _: RowIndex) => {
+            ps.setNull(paramIndex, 0)
+          }
+        case vs     => throw ExecutionError(
+          s"Can only $update one value for attribute `${a.name}`. Found: " + vs.mkString(", ")
+        )
+      }
     }
     addColSetter(curPath, colSetter)
   }

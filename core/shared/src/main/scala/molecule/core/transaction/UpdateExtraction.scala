@@ -63,28 +63,28 @@ class UpdateExtraction(
 
   private def extractSubElements(elements: List[Element]): Unit = resolve(elements)
 
-  private def resolveAttrOneMan(attr: AttrOneMan): Unit = {
-    attr match {
+  private def resolveAttrOneMan(dataAttr: AttrOneMan): Unit = {
+    dataAttr match {
       case a if a.attr == "id" || a.attr == "tx" => throw ModelError(
         s"Generic attributes not allowed in update molecule. Found:\n" + a)
 
       case a if a.op != Eq => throw ModelError(
         s"Can't $update attributes without an applied value. Found:\n" + a)
 
-      case a: AttrOneManString     => updateOne(a, a.vs, handleString)
-      case a: AttrOneManInt        => updateOne(a, a.vs, handleInt)
-      case a: AttrOneManLong       => updateOne(a, a.vs, handleLong)
-      case a: AttrOneManFloat      => updateOne(a, a.vs, handleFloat)
-      case a: AttrOneManDouble     => updateOne(a, a.vs, handleDouble)
-      case a: AttrOneManBoolean    => updateOne(a, a.vs, handleBoolean)
-      case a: AttrOneManBigInt     => updateOne(a, a.vs, handleBigInt)
-      case a: AttrOneManBigDecimal => updateOne(a, a.vs, handleBigDecimal)
-      case a: AttrOneManDate       => updateOne(a, a.vs, handleDate)
-      case a: AttrOneManUUID       => updateOne(a, a.vs, handleUUID)
-      case a: AttrOneManURI        => updateOne(a, a.vs, handleURI)
-      case a: AttrOneManByte       => updateOne(a, a.vs, handleByte)
-      case a: AttrOneManShort      => updateOne(a, a.vs, handleShort)
-      case a: AttrOneManChar       => updateOne(a, a.vs, handleChar)
+      case a: AttrOneManString     => updateOne(a, a.vs, transformString, handleString)
+      case a: AttrOneManInt        => updateOne(a, a.vs, transformInt, handleInt)
+      case a: AttrOneManLong       => updateOne(a, a.vs, transformLong, handleLong)
+      case a: AttrOneManFloat      => updateOne(a, a.vs, transformFloat, handleFloat)
+      case a: AttrOneManDouble     => updateOne(a, a.vs, transformDouble, handleDouble)
+      case a: AttrOneManBoolean    => updateOne(a, a.vs, transformBoolean, handleBoolean)
+      case a: AttrOneManBigInt     => updateOne(a, a.vs, transformBigInt, handleBigInt)
+      case a: AttrOneManBigDecimal => updateOne(a, a.vs, transformBigDecimal, handleBigDecimal)
+      case a: AttrOneManDate       => updateOne(a, a.vs, transformDate, handleDate)
+      case a: AttrOneManUUID       => updateOne(a, a.vs, transformUUID, handleUUID)
+      case a: AttrOneManURI        => updateOne(a, a.vs, transformURI, handleURI)
+      case a: AttrOneManByte       => updateOne(a, a.vs, transformByte, handleByte)
+      case a: AttrOneManShort      => updateOne(a, a.vs, transformShort, handleShort)
+      case a: AttrOneManChar       => updateOne(a, a.vs, transformChar, handleChar)
     }
   }
 
