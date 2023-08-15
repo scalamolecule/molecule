@@ -3,14 +3,14 @@ package molecule.sql.jdbc.transaction
 import java.sql.{PreparedStatement => PS}
 import molecule.sql.jdbc.marshalling.JdbcRpcJVM._
 
-case class TableInsert(
+case class Table(
   refPath: List[String],
   stmt: String,
   ps: PS,
   populatePS: (PS, IdsMap, RowIndex) => Unit = null
 )
 
-case class JoinTableInsert(
+case class JoinTable(
   joinRefPath: List[String],
   stmt: String,
   ps: PS,

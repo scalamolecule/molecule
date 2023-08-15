@@ -23,6 +23,9 @@ trait Data_Update extends DatomicBase_JVM with UpdateOps with MoleculeLogging { 
     isRpcCall: Boolean = false,
     debug: Boolean = true
   ): Data = {
+    //    println("-------")
+    //    elements.foreach(println)
+
     val db = conn.peerConn.db()
 
     if (isRpcCall) {
@@ -57,9 +60,10 @@ trait Data_Update extends DatomicBase_JVM with UpdateOps with MoleculeLogging { 
       }
     }
 
-    val (ids, filterElements, data) = resolve(elements, Nil, Nil, Nil)
-    val (filterQuery, inputs)       = if (ids.isEmpty && filterElements.nonEmpty) {
-      //      val filterElements1 = AttrOneManLong("_Generic", "id", V) +: filterElements
+    // Resolve the update model (OBS: lots of mutations so don't move around :-)
+    resolve(elements)
+
+    val (filterQuery, inputs) = if (ids.isEmpty && filterElements.nonEmpty) {
       val filterNs        = filterElements.head.asInstanceOf[Attr].ns
       val filterElements1 = AttrOneManLong(filterNs, "id", V) +: filterElements
       val (query, inputs) = new DatomicModel2Query[Any](filterElements1).getIdQueryWithInputs
@@ -82,8 +86,132 @@ trait Data_Update extends DatomicBase_JVM with UpdateOps with MoleculeLogging { 
     stmts
   }
 
+
+  override def handleIds(ids1: Seq[Long]): Unit = {
+    if (ids.nonEmpty) {
+      throw ModelError(s"Can't apply entity ids twice in $update.")
+    }
+    ids = ids ++ ids1.asInstanceOf[Seq[AnyRef]]
+  }
+
+  override def handleUniqueFilterAttr(uniqueFilterAttr: AttrOneTac): Unit = {
+    if (ids.nonEmpty) {
+      throw ModelError(
+        s"Can only apply one unique attribute value for $update. Found:\n" + uniqueFilterAttr
+      )
+    }
+    ids = ids ++ uniqueIds(uniqueFilterAttr, uniqueFilterAttr.ns, uniqueFilterAttr.attr)
+  }
+
+  override def handleFilterAttr(filterAttr: AttrOneTac): Unit = {
+    filterElements = filterElements :+ filterAttr
+  }
+
+  override def updateOne[T](
+    a: Attr,
+    vs: Seq[T],
+    transform: T => Any
+  ): Unit = {
+    if (!isUpsert) {
+      val dummyFilterAttr = AttrOneTacInt(a.ns, a.attr, V, Nil, None, None, Nil, Nil, None, None)
+      filterElements = filterElements :+ dummyFilterAttr
+    }
+    vs match {
+      case Seq(v) => data = data :+ (("add", a.ns, a.attr, Seq(transform(v).asInstanceOf[AnyRef]), false))
+      case Nil    => data = data :+ (("retract", a.ns, a.attr, Nil, false))
+      case vs     => throw ExecutionError(
+        s"Can only $update one value for attribute `${a.name}`. Found: " + vs.mkString(", ")
+      )
+    }
+  }
+
+  override def updateSetEq[T](a: Attr): Unit = {
+    if (!isUpsert) {
+      val dummyFilterAttr = AttrOneTacInt(a.ns, a.attr, V, Nil, None, None, Nil, Nil, None, None)
+      filterElements = filterElements :+ dummyFilterAttr
+    }
+  }
+
+  override def updateSetAdd[T](
+    a: Attr,
+    sets: Seq[Set[T]],
+    transform: T => Any,
+    retractCur: Boolean
+  ): Unit = {
+    sets match {
+      case Seq(set) =>
+        val add = ("add", a.ns, a.attr, set.map(v => transform(v).asInstanceOf[AnyRef]).toSeq, retractCur)
+        data = data :+ add
+
+      case Nil =>
+        data = data :+ (("retract", a.ns, a.attr, Nil, retractCur))
+
+      case vs => throw ExecutionError(
+        s"Can only $update one Set of values for Set attribute `${a.name}`. Found: " + vs.mkString(", ")
+      )
+    }
+  }
+
+  override def updateSetSwab[T](
+    a: Attr,
+    sets: Seq[Set[T]],
+    transform: T => Any
+  ): Unit = {
+    val (retracts0, adds0) = sets.splitAt(sets.length / 2)
+    val (retracts, adds)   = (retracts0.flatten, adds0.flatten)
+    if (retracts.length != retracts.distinct.length)
+      throw ExecutionError(s"Can't swap from duplicate retract values.")
+
+    if (adds.length != adds.distinct.length)
+      throw ExecutionError(s"Can't swap to duplicate replacement values.")
+
+    if (retracts.nonEmpty) {
+      if (retracts.size != adds.size)
+        throw ExecutionError(
+          s"""Can't swap duplicate keys/values:
+             |  RETRACTS: $retracts
+             |  ADDS    : $adds
+             |""".stripMargin
+        )
+
+      data = data ++ Seq(
+        ("retract", a.ns, a.attr, retracts.map(v => transform(v).asInstanceOf[AnyRef]), false),
+        ("add", a.ns, a.attr, adds.map(v => transform(v).asInstanceOf[AnyRef]), false),
+      )
+    }
+  }
+
+  override def updateSetRemove[T](
+    a: Attr,
+    set: Set[T],
+    transform: T => Any
+  ): Unit = {
+    if (set.nonEmpty) {
+      data = data :+ (("retract", a.ns, a.attr, set.map(v => transform(v).asInstanceOf[AnyRef]).toSeq, false))
+      Seq(("retract", a.ns, a.attr, set.map(v => transform(v).asInstanceOf[AnyRef]).toSeq, false))
+    }
+  }
+
+
+  override def handleRefNs(ref: Ref): Unit = {
+    filterElements = filterElements :+ ref
+    data = data :+ (("ref", ref.ns, ref.refAttr, Nil, false))
+  }
+
+  override def handleBackRef(backRef: BackRef): Unit = {
+    filterElements = filterElements :+ backRef
+  }
+
+  override def handleTxMetaData(): Unit = {
+    if (data.isEmpty) {
+      throw ModelError(s"Please apply the tx id to the namespace of tx meta data to be updated.")
+    }
+    data = data :+ (("tx", null, null, Nil, false))
+  }
+
+
   private def id2stmts(
-    data: Seq[(String, String, String, Seq[AnyRef], Boolean)],
+    data: List[(String, String, String, Seq[AnyRef], Boolean)],
     db: Database,
     addNewValues: Boolean = true
   ): AnyRef => Unit = {
@@ -176,18 +304,18 @@ trait Data_Update extends DatomicBase_JVM with UpdateOps with MoleculeLogging { 
     }
   }
 
-  override protected lazy val valueString     = identity
-  override protected lazy val valueInt        = identity
-  override protected lazy val valueLong       = identity
-  override protected lazy val valueFloat      = identity
-  override protected lazy val valueDouble     = identity
-  override protected lazy val valueBoolean    = identity
-  override protected lazy val valueBigInt     = (v: BigInt) => v.bigInteger
-  override protected lazy val valueBigDecimal = (v: BigDecimal) => v.bigDecimal
-  override protected lazy val valueDate       = identity
-  override protected lazy val valueUUID       = identity
-  override protected lazy val valueURI        = identity
-  override protected lazy val valueByte       = (v: Byte) => v.toInt
-  override protected lazy val valueShort      = (v: Short) => v.toInt
-  override protected lazy val valueChar       = (v: Char) => v.toString
+  override protected lazy val transformString     = identity
+  override protected lazy val transformInt        = identity
+  override protected lazy val transformLong       = identity
+  override protected lazy val transformFloat      = identity
+  override protected lazy val transformDouble     = identity
+  override protected lazy val transformBoolean    = identity
+  override protected lazy val transformBigInt     = (v: BigInt) => v.bigInteger
+  override protected lazy val transformBigDecimal = (v: BigDecimal) => v.bigDecimal
+  override protected lazy val transformDate       = identity
+  override protected lazy val transformUUID       = identity
+  override protected lazy val transformURI        = identity
+  override protected lazy val transformByte       = (v: Byte) => v.toInt
+  override protected lazy val transformShort      = (v: Short) => v.toInt
+  override protected lazy val transformChar       = (v: Char) => v.toString
 }

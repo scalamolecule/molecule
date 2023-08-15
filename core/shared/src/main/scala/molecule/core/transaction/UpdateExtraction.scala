@@ -16,274 +16,144 @@ class UpdateExtraction(
   val update = if (isUpsert) "upsert" else "update"
 
   @tailrec
-  final def resolve(
-    elements: List[Element],
-    ids: Seq[AnyRef],
-    filterElements: List[Element],
-    data: Seq[(String, String, String, Seq[AnyRef], Boolean)]
-  ): (Seq[AnyRef], List[Element], Seq[(String, String, String, Seq[AnyRef], Boolean)]) = {
+  final def resolve(elements: List[Element]): Unit = {
     elements match {
       case element :: tail => element match {
         case a: Attr => a match {
-          case a: AttrOneTac => oneTac(tail, ids, filterElements, data, a)
-          case a: AttrOneMan => oneMan(tail, ids, filterElements, data, a)
+          case a: AttrOneTac => resolveAttrOneTac(a); resolve(tail)
+          case a: AttrOneMan => resolveAttrOneMan(a); resolve(tail)
+
           case a: AttrSetMan => a.op match {
-            case Eq     => setEq(tail, ids, filterElements, data, a)
-            case Add    => resolve(tail, ids, filterElements, data :+ setAdd(a))
-            case Swap   => resolve(tail, ids, filterElements, data ++ setSwap(a))
-            case Remove => resolve(tail, ids, filterElements, data ++ setRemove(a))
+            case Eq     => resolveAttrSetMan(a); resolve(tail)
+            case Add    => resolveAttrSetAdd(a); resolve(tail)
+            case Swap   => resolveAttrSetSwap(a); resolve(tail)
+            case Remove => resolveAttrSetRemove(a); resolve(tail)
             case _      => throw ModelError(s"Unexpected $update operation for card-many attribute. Found:\n" + a)
           }
-
-          case _: AttrSetTac => throw ModelError("Can only lookup entity with card-one attribute value. Found:\n" + a)
           case _: AttrOneOpt => throw ModelError(s"Can't $update optional values. Found:\n" + a)
+          case _: AttrSetTac => throw ModelError("Can only lookup entity with card-one attribute value. Found:\n" + a)
           case _: AttrSetOpt => throw ModelError(s"Can't $update optional values. Found:\n" + a)
         }
 
         case _: Nested    => throw ModelError(s"Nested data structure not allowed in $update molecule.")
         case _: NestedOpt => throw ModelError(s"Optional nested data structure not allowed in $update molecule.")
 
-//        case r@Ref(ns, attr, "Tx", CardOne, _) => resolve(tail, ids, filterElements :+ r, data :+ ("tx", ns, attr, Nil, false))
-        case Ref(_, _, "Tx", CardOne, _) => resolve(tail, ids, filterElements, data)
-
-        case r@Ref(ns, attr, _, CardOne, _) => resolve(tail, ids, filterElements :+ r, data :+ ("ref", ns, attr, Nil, false))
-
-        case r: Ref     => throw ModelError(
-          s"Can't $update attributes in card-many referenced namespaces. Found `${r.refAttr.capitalize}`"
+        case Ref(_, _, "Tx", CardOne, _)  => resolve(tail) // todo
+        case ref@Ref(_, _, _, CardOne, _) => handleRefNs(ref); resolve(tail)
+        case ref: Ref                     => throw ModelError(
+          s"Can't $update attributes in card-many referenced namespaces. Found `${ref.refAttr.capitalize}`"
         )
-        case b: BackRef => resolve(tail, ids, filterElements :+ b, data)
+
+        case b: BackRef =>
+          handleBackRef(b)
+          resolve(tail)
 
         case Composite(es) =>
-          val (ids1, filters1, data1) = extractSubElements(es)
-          resolve(tail, ids ++ ids1, filterElements ++ filters1, data ++ data1)
+          extractSubElements(es)
+          resolve(tail)
 
         case TxMetaData(es) =>
-          if (data.isEmpty) {
-            throw ModelError(s"Please apply the tx id to the namespace of tx meta data to be updated.")
-          }
-          val (ids1, filters1, data1) = extractSubElements(es)
-          resolve(tail, ids ++ ids1, filterElements ++ filters1, (data :+ ("tx", null, null, Nil, false)) ++ data1)
+          handleTxMetaData()
+          extractSubElements(es)
+          resolve(tail)
       }
-      case Nil             => (ids, filterElements, data)
+      case Nil             => ()
     }
   }
 
+  private def extractSubElements(elements: List[Element]): Unit = resolve(elements)
 
-  private def oneMan(
-    tail: List[Element],
-    ids: Seq[AnyRef],
-    filterElements: List[Element],
-    data: Seq[(String, String, String, Seq[AnyRef], Boolean)],
-    dataAttr: AttrOneMan
-  ): (Seq[AnyRef], List[Element], Seq[(String, String, String, Seq[AnyRef], Boolean)]) = {
-    if (dataAttr.op != Eq)
-      throw ModelError(s"Can't $update attributes without an applied value. Found:\n" + dataAttr)
-    if (isUpsert) {
-      // Disregard if value already exists
-      resolve(tail, ids, filterElements, data :+ oneApply(dataAttr))
-    } else {
-      // Make sure current value exists
-      val dummyFilterAttr = AttrOneTacInt(dataAttr.ns, dataAttr.attr, V, Nil, None, None, Nil, Nil, None, None)
-      resolve(tail, ids, filterElements :+ dummyFilterAttr, data :+ oneApply(dataAttr))
-    }
-  }
-  private def oneApply(attr: AttrOneMan): (String, String, String, Seq[AnyRef], Boolean) = attr match {
-    //    case a if a.ns == "_Generic" => throw ModelError(
-    case a if a.attr == "id" || a.attr == "tx" => throw ModelError(
-      s"Generic attributes not allowed in update molecule. Found:\n" + a)
-
-    case AttrOneManString(_, _, _, vs, _, _, _, _, _, _)     => addOneV[String](attr, vs, valueString)
-    case AttrOneManInt(_, _, _, vs, _, _, _, _, _, _)        => addOneV[Int](attr, vs, valueInt)
-    case AttrOneManLong(_, _, _, vs, _, _, _, _, _, _)       => addOneV[Long](attr, vs, valueLong)
-    case AttrOneManFloat(_, _, _, vs, _, _, _, _, _, _)      => addOneV[Float](attr, vs, valueFloat)
-    case AttrOneManDouble(_, _, _, vs, _, _, _, _, _, _)     => addOneV[Double](attr, vs, valueDouble)
-    case AttrOneManBoolean(_, _, _, vs, _, _, _, _, _, _)    => addOneV[Boolean](attr, vs, valueBoolean)
-    case AttrOneManBigInt(_, _, _, vs, _, _, _, _, _, _)     => addOneV[BigInt](attr, vs, valueBigInt)
-    case AttrOneManBigDecimal(_, _, _, vs, _, _, _, _, _, _) => addOneV[BigDecimal](attr, vs, valueBigDecimal)
-    case AttrOneManDate(_, _, _, vs, _, _, _, _, _, _)       => addOneV[Date](attr, vs, valueDate)
-    case AttrOneManUUID(_, _, _, vs, _, _, _, _, _, _)       => addOneV[UUID](attr, vs, valueUUID)
-    case AttrOneManURI(_, _, _, vs, _, _, _, _, _, _)        => addOneV[URI](attr, vs, valueURI)
-    case AttrOneManByte(_, _, _, vs, _, _, _, _, _, _)       => addOneV[Byte](attr, vs, valueByte)
-    case AttrOneManShort(_, _, _, vs, _, _, _, _, _, _)      => addOneV[Short](attr, vs, valueShort)
-    case AttrOneManChar(_, _, _, vs, _, _, _, _, _, _)       => addOneV[Char](attr, vs, valueChar)
-  }
-  private def addOneV[T](a: Attr, vs: Seq[T], transform: T => Any): (String, String, String, Seq[AnyRef], Boolean) = {
-    vs match {
-      case Seq(v) => ("add", a.ns, a.attr, Seq(transform(v).asInstanceOf[AnyRef]), false)
-      case Nil    => ("retract", a.ns, a.attr, Nil, false)
-      case vs     => throw ExecutionError(
-        s"Can only $update one value for attribute `${a.name}`. Found: " + vs.mkString(", ")
-      )
-    }
-  }
-
-  private def oneTac(
-    tail: List[Element],
-    ids: Seq[AnyRef],
-    filterElements: List[Element],
-    data: Seq[(String, String, String, Seq[AnyRef], Boolean)],
-    filterAttr: AttrOneTac
-  ): (Seq[AnyRef], List[Element], Seq[(String, String, String, Seq[AnyRef], Boolean)]) = {
-    filterAttr match {
-      case AttrOneTacLong(_, "id", Eq, ids1, _, _, _, _, _, _) =>
-        if (ids.nonEmpty)
-          throw ModelError(s"Can't apply entity ids twice in $update.")
-        resolve(tail, ids1.asInstanceOf[Seq[AnyRef]], filterElements, data)
-
-      //      case AttrOneTacLong(_, "id", Eq, _, _, _, _, _, _, _) => throw ModelError(
-      //        "Can't update by applying entity ids to id_")
-
-      // todo
-      //      case a if a.ns == "_Generic" => throw ModelError(
+  private def resolveAttrOneMan(attr: AttrOneMan): Unit = {
+    attr match {
       case a if a.attr == "id" || a.attr == "tx" => throw ModelError(
         s"Generic attributes not allowed in update molecule. Found:\n" + a)
 
-      case uniqueFilterAttr if uniqueAttrs.contains(uniqueFilterAttr.name) =>
-        if (ids.nonEmpty)
-          throw ModelError(
-            s"Can only apply one unique attribute value for $update. Found:\n" + uniqueFilterAttr
-          )
-        val lookupRefs = uniqueIds(filterAttr, uniqueFilterAttr.ns, uniqueFilterAttr.attr)
-        resolve(tail, ids ++ lookupRefs, filterElements, data)
+      case a if a.op != Eq => throw ModelError(
+        s"Can't $update attributes without an applied value. Found:\n" + a)
 
-      case nonUniqueFilterAttr =>
-        resolve(tail, ids, filterElements :+ nonUniqueFilterAttr, data)
+      case AttrOneManString(_, _, _, vs, _, _, _, _, _, _)     => updateOne[String](attr, vs, transformString)
+      case AttrOneManInt(_, _, _, vs, _, _, _, _, _, _)        => updateOne[Int](attr, vs, transformInt)
+      case AttrOneManLong(_, _, _, vs, _, _, _, _, _, _)       => updateOne[Long](attr, vs, transformLong)
+      case AttrOneManFloat(_, _, _, vs, _, _, _, _, _, _)      => updateOne[Float](attr, vs, transformFloat)
+      case AttrOneManDouble(_, _, _, vs, _, _, _, _, _, _)     => updateOne[Double](attr, vs, transformDouble)
+      case AttrOneManBoolean(_, _, _, vs, _, _, _, _, _, _)    => updateOne[Boolean](attr, vs, transformBoolean)
+      case AttrOneManBigInt(_, _, _, vs, _, _, _, _, _, _)     => updateOne[BigInt](attr, vs, transformBigInt)
+      case AttrOneManBigDecimal(_, _, _, vs, _, _, _, _, _, _) => updateOne[BigDecimal](attr, vs, transformBigDecimal)
+      case AttrOneManDate(_, _, _, vs, _, _, _, _, _, _)       => updateOne[Date](attr, vs, transformDate)
+      case AttrOneManUUID(_, _, _, vs, _, _, _, _, _, _)       => updateOne[UUID](attr, vs, transformUUID)
+      case AttrOneManURI(_, _, _, vs, _, _, _, _, _, _)        => updateOne[URI](attr, vs, transformURI)
+      case AttrOneManByte(_, _, _, vs, _, _, _, _, _, _)       => updateOne[Byte](attr, vs, transformByte)
+      case AttrOneManShort(_, _, _, vs, _, _, _, _, _, _)      => updateOne[Short](attr, vs, transformShort)
+      case AttrOneManChar(_, _, _, vs, _, _, _, _, _, _)       => updateOne[Char](attr, vs, transformChar)
     }
   }
 
+  private def resolveAttrOneTac(filterAttr: AttrOneTac): Unit = filterAttr match {
+    case AttrOneTacLong(_, "id", Eq, ids1, _, _, _, _, _, _)             => handleIds(ids1)
 
-  private def setEq(
-    tail: List[Element],
-    ids: Seq[AnyRef],
-    filterElements: List[Element],
-    data: Seq[(String, String, String, Seq[AnyRef], Boolean)],
-    dataAttr: AttrSetMan
-  ): (Seq[AnyRef], List[Element], Seq[(String, String, String, Seq[AnyRef], Boolean)]) = {
-    if (isUpsert) {
-      // Disregard if value already exists
-      resolve(tail, ids, filterElements, data :+ setAdd(dataAttr, true))
-    } else {
-      // Make sure current value exists
-      val dummyFilterAttr = AttrOneTacInt(dataAttr.ns, dataAttr.attr, V, Nil, None, None, Nil, Nil, None, None)
-      resolve(tail, ids, filterElements :+ dummyFilterAttr, data :+ setAdd(dataAttr, true))
-    }
+    case a if a.attr == "id" || a.attr == "tx" => throw ModelError(
+      s"Generic attributes not allowed in update molecule. Found:\n" + a)
+
+    case uniqueFilterAttr if uniqueAttrs.contains(uniqueFilterAttr.name) => handleUniqueFilterAttr(filterAttr)
+    case _                                                               => handleFilterAttr(filterAttr)
   }
 
-
-  private def setAdd(
-    attr: AttrSetMan,
-    retractCur: Boolean = false
-  ): (String, String, String, Seq[AnyRef], Boolean) = attr match {
-    case AttrSetManString(_, _, _, sets, _, _, _, _, _, _)     => addSetVs[String](attr, sets, valueString, retractCur)
-    case AttrSetManInt(_, _, _, sets, _, _, _, _, _, _)        => addSetVs[Int](attr, sets, valueInt, retractCur)
-    case AttrSetManLong(_, _, _, sets, _, _, _, _, _, _)       => addSetVs[Long](attr, sets, valueLong, retractCur)
-    case AttrSetManFloat(_, _, _, sets, _, _, _, _, _, _)      => addSetVs[Float](attr, sets, valueFloat, retractCur)
-    case AttrSetManDouble(_, _, _, sets, _, _, _, _, _, _)     => addSetVs[Double](attr, sets, valueDouble, retractCur)
-    case AttrSetManBoolean(_, _, _, sets, _, _, _, _, _, _)    => addSetVs[Boolean](attr, sets, valueBoolean, retractCur)
-    case AttrSetManBigInt(_, _, _, sets, _, _, _, _, _, _)     => addSetVs[BigInt](attr, sets, valueBigInt, retractCur)
-    case AttrSetManBigDecimal(_, _, _, sets, _, _, _, _, _, _) => addSetVs[BigDecimal](attr, sets, valueBigDecimal, retractCur)
-    case AttrSetManDate(_, _, _, sets, _, _, _, _, _, _)       => addSetVs[Date](attr, sets, valueDate, retractCur)
-    case AttrSetManUUID(_, _, _, sets, _, _, _, _, _, _)       => addSetVs[UUID](attr, sets, valueUUID, retractCur)
-    case AttrSetManURI(_, _, _, sets, _, _, _, _, _, _)        => addSetVs[URI](attr, sets, valueURI, retractCur)
-    case AttrSetManByte(_, _, _, sets, _, _, _, _, _, _)       => addSetVs[Byte](attr, sets, valueByte, retractCur)
-    case AttrSetManShort(_, _, _, sets, _, _, _, _, _, _)      => addSetVs[Short](attr, sets, valueShort, retractCur)
-    case AttrSetManChar(_, _, _, sets, _, _, _, _, _, _)       => addSetVs[Char](attr, sets, valueChar, retractCur)
-  }
-  private def addSetVs[T](
-    a: Attr,
-    sets: Seq[Set[T]],
-    transform: T => Any,
-    retractCur: Boolean
-  ): (String, String, String, Seq[AnyRef], Boolean) = {
-    sets match {
-      case Seq(set) => ("add", a.ns, a.attr, set.map(v => transform(v).asInstanceOf[AnyRef]).toSeq, retractCur)
-      case Nil      => ("retract", a.ns, a.attr, Nil, retractCur)
-      case vs       => throw ExecutionError(
-        s"Can only $update one Set of values for Set attribute `${a.name}`. Found: " + vs.mkString(", ")
-      )
-    }
+  private def resolveAttrSetMan(dataAttr: AttrSetMan): Unit = {
+    updateSetEq(dataAttr)
+    resolveAttrSetAdd(dataAttr, true)
   }
 
-
-  private def setSwap(attr: AttrSetMan): Seq[(String, String, String, Seq[AnyRef], Boolean)] = attr match {
-    case AttrSetManString(_, _, _, sets, _, _, _, _, _, _)     => swapSetVs[String](attr, sets, valueString)
-    case AttrSetManInt(_, _, _, sets, _, _, _, _, _, _)        => swapSetVs[Int](attr, sets, valueInt)
-    case AttrSetManLong(_, _, _, sets, _, _, _, _, _, _)       => swapSetVs[Long](attr, sets, valueLong)
-    case AttrSetManFloat(_, _, _, sets, _, _, _, _, _, _)      => swapSetVs[Float](attr, sets, valueFloat)
-    case AttrSetManDouble(_, _, _, sets, _, _, _, _, _, _)     => swapSetVs[Double](attr, sets, valueDouble)
-    case AttrSetManBoolean(_, _, _, sets, _, _, _, _, _, _)    => swapSetVs[Boolean](attr, sets, valueBoolean)
-    case AttrSetManBigInt(_, _, _, sets, _, _, _, _, _, _)     => swapSetVs[BigInt](attr, sets, valueBigInt)
-    case AttrSetManBigDecimal(_, _, _, sets, _, _, _, _, _, _) => swapSetVs[BigDecimal](attr, sets, valueBigDecimal)
-    case AttrSetManDate(_, _, _, sets, _, _, _, _, _, _)       => swapSetVs[Date](attr, sets, valueDate)
-    case AttrSetManUUID(_, _, _, sets, _, _, _, _, _, _)       => swapSetVs[UUID](attr, sets, valueUUID)
-    case AttrSetManURI(_, _, _, sets, _, _, _, _, _, _)        => swapSetVs[URI](attr, sets, valueURI)
-    case AttrSetManByte(_, _, _, sets, _, _, _, _, _, _)       => swapSetVs[Byte](attr, sets, valueByte)
-    case AttrSetManShort(_, _, _, sets, _, _, _, _, _, _)      => swapSetVs[Short](attr, sets, valueShort)
-    case AttrSetManChar(_, _, _, sets, _, _, _, _, _, _)       => swapSetVs[Char](attr, sets, valueChar)
-  }
-  private def swapSetVs[T](
-    a: Attr,
-    sets: Seq[Set[T]],
-    transform: T => Any
-  ): Seq[(String, String, String, Seq[AnyRef], Boolean)] = {
-    val (retracts0, adds0) = sets.splitAt(sets.length / 2)
-    val (retracts, adds)   = (retracts0.flatten, adds0.flatten)
-    if (retracts.length != retracts.distinct.length)
-      throw ExecutionError(s"Can't swap from duplicate retract values.")
-
-    if (adds.length != adds.distinct.length)
-      throw ExecutionError(s"Can't swap to duplicate replacement values.")
-
-    if (retracts.isEmpty) {
-      Nil
-    } else {
-      if (retracts.size != adds.size)
-        throw ExecutionError(
-          s"""Can't swap duplicate keys/values:
-             |  RETRACTS: $retracts
-             |  ADDS    : $adds
-             |""".stripMargin
-        )
-      Seq(
-        ("retract", a.ns, a.attr, retracts.map(v => transform(v).asInstanceOf[AnyRef]), false),
-        ("add", a.ns, a.attr, adds.map(v => transform(v).asInstanceOf[AnyRef]), false),
-      )
-    }
+  private def resolveAttrSetAdd(attr: AttrSetMan, retractCur: Boolean = false): Unit = attr match {
+    case AttrSetManString(_, _, _, sets, _, _, _, _, _, _)     => updateSetAdd[String](attr, sets, transformString, retractCur)
+    case AttrSetManInt(_, _, _, sets, _, _, _, _, _, _)        => updateSetAdd[Int](attr, sets, transformInt, retractCur)
+    case AttrSetManLong(_, _, _, sets, _, _, _, _, _, _)       => updateSetAdd[Long](attr, sets, transformLong, retractCur)
+    case AttrSetManFloat(_, _, _, sets, _, _, _, _, _, _)      => updateSetAdd[Float](attr, sets, transformFloat, retractCur)
+    case AttrSetManDouble(_, _, _, sets, _, _, _, _, _, _)     => updateSetAdd[Double](attr, sets, transformDouble, retractCur)
+    case AttrSetManBoolean(_, _, _, sets, _, _, _, _, _, _)    => updateSetAdd[Boolean](attr, sets, transformBoolean, retractCur)
+    case AttrSetManBigInt(_, _, _, sets, _, _, _, _, _, _)     => updateSetAdd[BigInt](attr, sets, transformBigInt, retractCur)
+    case AttrSetManBigDecimal(_, _, _, sets, _, _, _, _, _, _) => updateSetAdd[BigDecimal](attr, sets, transformBigDecimal, retractCur)
+    case AttrSetManDate(_, _, _, sets, _, _, _, _, _, _)       => updateSetAdd[Date](attr, sets, transformDate, retractCur)
+    case AttrSetManUUID(_, _, _, sets, _, _, _, _, _, _)       => updateSetAdd[UUID](attr, sets, transformUUID, retractCur)
+    case AttrSetManURI(_, _, _, sets, _, _, _, _, _, _)        => updateSetAdd[URI](attr, sets, transformURI, retractCur)
+    case AttrSetManByte(_, _, _, sets, _, _, _, _, _, _)       => updateSetAdd[Byte](attr, sets, transformByte, retractCur)
+    case AttrSetManShort(_, _, _, sets, _, _, _, _, _, _)      => updateSetAdd[Short](attr, sets, transformShort, retractCur)
+    case AttrSetManChar(_, _, _, sets, _, _, _, _, _, _)       => updateSetAdd[Char](attr, sets, transformChar, retractCur)
   }
 
+  private def resolveAttrSetSwap(attr: AttrSetMan): Unit = attr match {
+    case AttrSetManString(_, _, _, sets, _, _, _, _, _, _)     => updateSetSwab[String](attr, sets, transformString)
+    case AttrSetManInt(_, _, _, sets, _, _, _, _, _, _)        => updateSetSwab[Int](attr, sets, transformInt)
+    case AttrSetManLong(_, _, _, sets, _, _, _, _, _, _)       => updateSetSwab[Long](attr, sets, transformLong)
+    case AttrSetManFloat(_, _, _, sets, _, _, _, _, _, _)      => updateSetSwab[Float](attr, sets, transformFloat)
+    case AttrSetManDouble(_, _, _, sets, _, _, _, _, _, _)     => updateSetSwab[Double](attr, sets, transformDouble)
+    case AttrSetManBoolean(_, _, _, sets, _, _, _, _, _, _)    => updateSetSwab[Boolean](attr, sets, transformBoolean)
+    case AttrSetManBigInt(_, _, _, sets, _, _, _, _, _, _)     => updateSetSwab[BigInt](attr, sets, transformBigInt)
+    case AttrSetManBigDecimal(_, _, _, sets, _, _, _, _, _, _) => updateSetSwab[BigDecimal](attr, sets, transformBigDecimal)
+    case AttrSetManDate(_, _, _, sets, _, _, _, _, _, _)       => updateSetSwab[Date](attr, sets, transformDate)
+    case AttrSetManUUID(_, _, _, sets, _, _, _, _, _, _)       => updateSetSwab[UUID](attr, sets, transformUUID)
+    case AttrSetManURI(_, _, _, sets, _, _, _, _, _, _)        => updateSetSwab[URI](attr, sets, transformURI)
+    case AttrSetManByte(_, _, _, sets, _, _, _, _, _, _)       => updateSetSwab[Byte](attr, sets, transformByte)
+    case AttrSetManShort(_, _, _, sets, _, _, _, _, _, _)      => updateSetSwab[Short](attr, sets, transformShort)
+    case AttrSetManChar(_, _, _, sets, _, _, _, _, _, _)       => updateSetSwab[Char](attr, sets, transformChar)
+  }
 
-  private def setRemove(attr: AttrSetMan): Seq[(String, String, String, Seq[AnyRef], Boolean)] = attr match {
-    case AttrSetManString(_, _, _, Seq(set), _, _, _, _, _, _)     => removeSetVs[String](attr, set, valueString)
-    case AttrSetManInt(_, _, _, Seq(set), _, _, _, _, _, _)        => removeSetVs[Int](attr, set, valueInt)
-    case AttrSetManLong(_, _, _, Seq(set), _, _, _, _, _, _)       => removeSetVs[Long](attr, set, valueLong)
-    case AttrSetManFloat(_, _, _, Seq(set), _, _, _, _, _, _)      => removeSetVs[Float](attr, set, valueFloat)
-    case AttrSetManDouble(_, _, _, Seq(set), _, _, _, _, _, _)     => removeSetVs[Double](attr, set, valueDouble)
-    case AttrSetManBoolean(_, _, _, Seq(set), _, _, _, _, _, _)    => removeSetVs[Boolean](attr, set, valueBoolean)
-    case AttrSetManBigInt(_, _, _, Seq(set), _, _, _, _, _, _)     => removeSetVs[BigInt](attr, set, valueBigInt)
-    case AttrSetManBigDecimal(_, _, _, Seq(set), _, _, _, _, _, _) => removeSetVs[BigDecimal](attr, set, valueBigDecimal)
-    case AttrSetManDate(_, _, _, Seq(set), _, _, _, _, _, _)       => removeSetVs[Date](attr, set, valueDate)
-    case AttrSetManUUID(_, _, _, Seq(set), _, _, _, _, _, _)       => removeSetVs[UUID](attr, set, valueUUID)
-    case AttrSetManURI(_, _, _, Seq(set), _, _, _, _, _, _)        => removeSetVs[URI](attr, set, valueURI)
-    case AttrSetManByte(_, _, _, Seq(set), _, _, _, _, _, _)       => removeSetVs[Byte](attr, set, valueByte)
-    case AttrSetManShort(_, _, _, Seq(set), _, _, _, _, _, _)      => removeSetVs[Short](attr, set, valueShort)
-    case AttrSetManChar(_, _, _, Seq(set), _, _, _, _, _, _)       => removeSetVs[Char](attr, set, valueChar)
+  private def resolveAttrSetRemove(attr: AttrSetMan): Unit = attr match {
+    case AttrSetManString(_, _, _, Seq(set), _, _, _, _, _, _)     => updateSetRemove[String](attr, set, transformString)
+    case AttrSetManInt(_, _, _, Seq(set), _, _, _, _, _, _)        => updateSetRemove[Int](attr, set, transformInt)
+    case AttrSetManLong(_, _, _, Seq(set), _, _, _, _, _, _)       => updateSetRemove[Long](attr, set, transformLong)
+    case AttrSetManFloat(_, _, _, Seq(set), _, _, _, _, _, _)      => updateSetRemove[Float](attr, set, transformFloat)
+    case AttrSetManDouble(_, _, _, Seq(set), _, _, _, _, _, _)     => updateSetRemove[Double](attr, set, transformDouble)
+    case AttrSetManBoolean(_, _, _, Seq(set), _, _, _, _, _, _)    => updateSetRemove[Boolean](attr, set, transformBoolean)
+    case AttrSetManBigInt(_, _, _, Seq(set), _, _, _, _, _, _)     => updateSetRemove[BigInt](attr, set, transformBigInt)
+    case AttrSetManBigDecimal(_, _, _, Seq(set), _, _, _, _, _, _) => updateSetRemove[BigDecimal](attr, set, transformBigDecimal)
+    case AttrSetManDate(_, _, _, Seq(set), _, _, _, _, _, _)       => updateSetRemove[Date](attr, set, transformDate)
+    case AttrSetManUUID(_, _, _, Seq(set), _, _, _, _, _, _)       => updateSetRemove[UUID](attr, set, transformUUID)
+    case AttrSetManURI(_, _, _, Seq(set), _, _, _, _, _, _)        => updateSetRemove[URI](attr, set, transformURI)
+    case AttrSetManByte(_, _, _, Seq(set), _, _, _, _, _, _)       => updateSetRemove[Byte](attr, set, transformByte)
+    case AttrSetManShort(_, _, _, Seq(set), _, _, _, _, _, _)      => updateSetRemove[Short](attr, set, transformShort)
+    case AttrSetManChar(_, _, _, Seq(set), _, _, _, _, _, _)       => updateSetRemove[Char](attr, set, transformChar)
     case _                                                         => throw ExecutionError(
       s"Can only remove one Set of values for Set attribute `${attr.name}`. Found: $attr"
     )
   }
-  private def removeSetVs[T](
-    a: Attr,
-    set: Set[T],
-    transform: T => Any
-  ): Seq[(String, String, String, Seq[AnyRef], Boolean)] = {
-    if (set.isEmpty) Nil else Seq(("retract", a.ns, a.attr, set.map(v => transform(v).asInstanceOf[AnyRef]).toSeq, false))
-  }
-
-
-  private def extractSubElements(
-    elements: List[Element]
-  ): (Seq[AnyRef], List[Element], Seq[(String, String, String, Seq[AnyRef], Boolean)]) = {
-    resolve(elements, Nil, Nil, Nil)
-  }
-
 }

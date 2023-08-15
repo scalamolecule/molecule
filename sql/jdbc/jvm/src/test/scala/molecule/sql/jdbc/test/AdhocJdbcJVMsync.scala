@@ -22,41 +22,13 @@ object AdhocJdbcJVMsync extends JdbcTestSuite {
       //        _ <- Ns.i.query.get.map(_ ==> List(1))
       //        _ <- Ns.i.query.inspect
 
-      //      val x = Ns.ii(Set(1, 2)).save.transact
-      //      val x = Ns.ii(1).save.transact
 
 
-      //      Ns.i.insert(4, 3, 2).transact
+      val id = Ns.int(1).save.transact.id
+      Ns.int.query.get ==> List(1)
 
-
-      //      Ns.int(1).save.transact.id
-      //      Ns.int.query.get ==> List(1)
-
-
-//      Ns.i.ints.insert((1, Set(int1, int2))).transact
-//      Ns.i(1).ints.query.get ==> List((1, Set(int1, int2)))
-
-//      Ns.i(2).ints(Set(int2, int3)).save.transact
-//      Ns.i(2).ints.query.get ==> List((2, Set(int2, int3)))
-
-
-
-      // Saving empty list of Sets is ignored
-      Ns.ints(Seq.empty[Set[Int]]).save.transact
-      Ns.ints.query.get ==> List(Set())
-
-
-
-
-
-
-
-
-      //      val id = Ns.int(3).save.transact.id
-      //      Ns.int.query.get ==> List(1)
-      //
-      //      Ns(id).int(2).update.transact
-      //      Ns.int.query.get ==> List(2)
+      Ns(id).int(2).update.transact
+      Ns.int.query.get ==> List(2)
 
 
       //      val List(a, b) = Ns.int.insert(1, 2).transact.ids

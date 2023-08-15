@@ -1,8 +1,7 @@
 package molecule.sql.jdbc.transaction
 
-import java.net.URI
 import java.sql.{Statement, PreparedStatement => PS}
-import java.util.{Date, UUID}
+import java.util.Date
 import molecule.base.ast.SchemaAST._
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
@@ -24,24 +23,25 @@ trait Data_Save
     val (mainElements, _) = separateTxElements(elements)
     resolve(mainElements)
     postResolvers.foreach(_())
-    addRowSetterToTableInserts()
-    (getTableInserts, Nil)
+    addRowSetterToTables()
+    (getTables, Nil)
   }
 
-  private def addRowSetterToTableInserts(): Unit = {
+  private def addRowSetterToTables(): Unit = {
     inserts.foreach {
       case (refPath, cols) =>
         val table             = refPath.last
+        val columns           = cols.mkString(",\n  ")
         val inputPlaceholders = cols.map(_ => "?").mkString(", ")
         val stmt              =
           s"""INSERT INTO $table (
-             |  ${cols.mkString(",\n  ")}
+             |  $columns
              |) VALUES ($inputPlaceholders)""".stripMargin
         val ps                = sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
-        tableInserts(refPath) = TableInsert(refPath, stmt, ps)
+        tableDatas(refPath) = Table(refPath, stmt, ps)
 
         val colSetters = colSettersMap(refPath)
-        //        println(s"----------------------  ${colSetters.length}  $refPath  $ns")
+        //        println(s"--- save -------------------  ${colSetters.length}  $refPath")
         //          println(stmt)
         colSettersMap(refPath) = Nil
         val rowSetter = (ps: PS, idsMap: IdsMap, _: RowIndex) => {
@@ -56,7 +56,7 @@ trait Data_Save
     }
   }
 
-  private def getTableInserts: List[TableInsert] = {
+  private def getTables: List[Table] = {
     // Add insert resolver to each table insert
     inserts.map { case (refPath, _) =>
       val rowSetters = rowSettersMap(refPath)
@@ -66,7 +66,7 @@ trait Data_Save
           rowSetter(ps, idsMap, rowIndex)
         )
       }
-      tableInserts(refPath).copy(populatePS = populatePS)
+      tableDatas(refPath).copy(populatePS = populatePS)
     }
   }
 
@@ -219,7 +219,7 @@ trait Data_Save
     curRefPath = curRefPath.dropRight(2)
   }
 
-  override protected def handleNs(ns: String): Unit = {
+  override protected def handleRefNs(refNs: String): Unit = {
     //    backRefs = backRefs + (ns -> e)
   }
   override protected def handleComposite(isInsertTxMetaData: Boolean): Unit = {
@@ -229,21 +229,6 @@ trait Data_Save
     //    e = datomicTx
     //    e0 = datomicTx
   }
-
-  override protected lazy val transformString     = identity
-  override protected lazy val transformInt        = identity
-  override protected lazy val transformLong       = identity
-  override protected lazy val transformFloat      = identity
-  override protected lazy val transformDouble     = identity
-  override protected lazy val transformBoolean    = identity
-  override protected lazy val transformBigInt     = identity
-  override protected lazy val transformBigDecimal = identity
-  override protected lazy val transformDate       = identity
-  override protected lazy val transformUUID       = identity
-  override protected lazy val transformURI        = identity
-  override protected lazy val transformByte       = identity
-  override protected lazy val transformShort      = identity
-  override protected lazy val transformChar       = identity
 
   override protected lazy val handleString     = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.asInstanceOf[String])
   override protected lazy val handleInt        = (v: Any) => (ps: PS, n: Int) => ps.setInt(n, v.asInstanceOf[Int])

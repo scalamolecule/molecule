@@ -6,7 +6,7 @@ import datomic.{Datom => _}
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.marshalling.JdbcProxy
 import molecule.core.spi.{Conn, TxReport}
-import molecule.sql.jdbc.transaction.{JdbcDataType_JVM, JdbcBase_JVM, JoinTableInsert, TableInsert}
+import molecule.sql.jdbc.transaction.{JdbcDataType_JVM, JdbcBase_JVM, JoinTable, Table}
 import scala.util.control.NonFatal
 
 case class JdbcConn_jvm(override val proxy: JdbcProxy, override val sqlConn: sql.Connection)
@@ -30,7 +30,7 @@ case class JdbcConn_jvm(override val proxy: JdbcProxy, override val sqlConn: sql
 
       // Insert statements backwards to obtain auto-generated ref ids for prepending inserts
       tableInserts.reverse.foreach {
-        case TableInsert(refPath, stmt, ps, populatePS) =>
+        case Table(refPath, stmt, ps, populatePS) =>
           //          println("--------------------------------------------------------------\n" + stmt)
           //          println("--------------------------------------------------------------")
           //          println(idsMap)
@@ -49,7 +49,7 @@ case class JdbcConn_jvm(override val proxy: JdbcProxy, override val sqlConn: sql
       }
 
       joinTableInserts.foreach {
-        case JoinTableInsert(refPath, stmt, ps, leftPath, rightPath, rightCounts) =>
+        case JoinTable(refPath, stmt, ps, leftPath, rightPath, rightCounts) =>
           //          println("--------------------------------------------------------------\n" + stmt)
           //          println(rightCounts)
 
@@ -78,7 +78,7 @@ case class JdbcConn_jvm(override val proxy: JdbcProxy, override val sqlConn: sql
       sqlConn.commit()
 
       // Tx entity not implemented for sql-jdbc
-      TxReport(0, ids.toList) // Use only top-level ids (ok?)
+      TxReport(0, ids) // Use only top-level ids (ok?)
     } catch {
       // re-throw errors to keep stacktrace back to original error
       case e: SQLException =>

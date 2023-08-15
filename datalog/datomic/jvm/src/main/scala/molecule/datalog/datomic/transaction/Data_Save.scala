@@ -24,7 +24,7 @@ trait Data_Save extends DatomicBase_JVM with SaveOps with MoleculeLogging { self
     e = id
     e0 = e
 
-    handleNs(getInitialNs(elements))
+    handleRefNs(getInitialNs(elements))
 
     // populate `stmts`
     resolve(elements)
@@ -56,14 +56,11 @@ trait Data_Save extends DatomicBase_JVM with SaveOps with MoleculeLogging { self
     attr: String,
     optSet: Option[Set[T]],
     handleValue: T => Any,
-    //    set2array: Set[T] => Array[AnyRef],
     set2array: Set[Any] => Array[AnyRef],
   ): Unit = {
     optSet.foreach { set =>
       val a = kw(ns, attr)
       set.foreach { v =>
-        //        println(v)
-        //        println(v.getClass)
         appendStmt(add, e, a, v.asInstanceOf[AnyRef])
       }
     }
@@ -82,15 +79,15 @@ trait Data_Save extends DatomicBase_JVM with SaveOps with MoleculeLogging { self
     e = newId
     stmt.add(e)
     stmts.add(stmt)
-    handleNs(refNs)
+    handleRefNs(refNs)
   }
 
   override protected def addBackRef(backRefNs: String): Unit = {
     e = backRefs(backRefNs)
   }
 
-  override protected def handleNs(ns: String): Unit = {
-    backRefs = backRefs + (ns -> e)
+  override protected def handleRefNs(refNs: String): Unit = {
+    backRefs = backRefs + (refNs -> e)
   }
   override protected def handleComposite(isInsertTxMetaData: Boolean): Unit = {
     e = if (isInsertTxMetaData) datomicTx else e0
@@ -98,7 +95,7 @@ trait Data_Save extends DatomicBase_JVM with SaveOps with MoleculeLogging { self
   override protected def handleTxMetaData(ns: String): Unit = {
     e = datomicTx
     e0 = datomicTx
-    handleNs(ns)
+    handleRefNs(ns)
   }
 
   // Save Int as Long in Datomic
@@ -116,34 +113,4 @@ trait Data_Save extends DatomicBase_JVM with SaveOps with MoleculeLogging { self
   override protected lazy val transformByte       = (v: Byte) => v.toInt
   override protected lazy val transformShort      = (v: Short) => v.toInt
   override protected lazy val transformChar       = (v: Char) => v.toString
-
-  override protected lazy val handleString     = (v: Any) => v
-  override protected lazy val handleInt        = (v: Any) => v
-  override protected lazy val handleLong       = (v: Any) => v
-  override protected lazy val handleFloat      = (v: Any) => v
-  override protected lazy val handleDouble     = (v: Any) => v
-  override protected lazy val handleBoolean    = (v: Any) => v
-  override protected lazy val handleBigInt     = (v: Any) => v.asInstanceOf[BigInt].bigInteger
-  override protected lazy val handleBigDecimal = (v: Any) => v.asInstanceOf[BigDecimal].bigDecimal
-  override protected lazy val handleDate       = (v: Any) => v
-  override protected lazy val handleUUID       = (v: Any) => v
-  override protected lazy val handleURI        = (v: Any) => v
-  override protected lazy val handleByte       = (v: Any) => v.asInstanceOf[Byte].toInt
-  override protected lazy val handleShort      = (v: Any) => v.asInstanceOf[Short].toInt
-  override protected lazy val handleChar       = (v: Any) => v.toString
-
-  override protected lazy val set2arrayString    : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
-  override protected lazy val set2arrayInt       : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
-  override protected lazy val set2arrayLong      : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
-  override protected lazy val set2arrayFloat     : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.map(_.toString.toDouble.asInstanceOf[AnyRef]).toArray
-  override protected lazy val set2arrayDouble    : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
-  override protected lazy val set2arrayBoolean   : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
-  override protected lazy val set2arrayBigInt    : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[BigInt]].map(v => BigDecimal(v).bigDecimal.asInstanceOf[AnyRef]).toArray
-  override protected lazy val set2arrayBigDecimal: Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[BigDecimal]].map(v => v.bigDecimal.asInstanceOf[AnyRef]).toArray
-  override protected lazy val set2arrayDate      : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
-  override protected lazy val set2arrayUUID      : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
-  override protected lazy val set2arrayURI       : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.map(_.toString.asInstanceOf[AnyRef]).toArray
-  override protected lazy val set2arrayByte      : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
-  override protected lazy val set2arrayShort     : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
-  override protected lazy val set2arrayChar      : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
 }

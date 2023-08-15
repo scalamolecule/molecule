@@ -1,6 +1,7 @@
 package molecule.sql.jdbc.transaction
 
-import java.util.{Set => jSet}
+import java.sql.{Statement, PreparedStatement => PS}
+import java.util.{Date, Set => jSet}
 import clojure.lang.Keyword
 import datomic.Util.list
 import datomic.query.EntityMap
@@ -10,12 +11,84 @@ import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.UpdateExtraction
 import molecule.core.transaction.ops.UpdateOps
-import molecule.core.validation.ModelValidation
-import molecule.sql.core.query.SqlModel2Query
 import molecule.sql.jdbc.facade.JdbcConn_jvm
-import scala.collection.mutable.ListBuffer
 
 trait Data_Update extends JdbcBase_JVM with UpdateOps with MoleculeLogging { self: UpdateExtraction =>
+
+
+  def getData(elements: List[Element]): Data = {
+    //    elements.foreach(println)
+
+    curRefPath = List(getInitialNs(elements))
+    val (mainElements, _) = separateTxElements(elements)
+    //    resolve(mainElements, Nil, Nil, Nil)
+    resolve(mainElements)
+    //    postResolvers.foreach(_())
+    addRowSetterToTables()
+    (getTables, Nil)
+  }
+
+  var id = 42L
+
+  private def addRowSetterToTables(): Unit = {
+    inserts.foreach {
+      case (refPath, cols) =>
+        val table         = refPath.last
+        val columnSetters = cols.map(col => s"SET $col = ?").mkString(",\n  ")
+        //        val id            = 42
+        val stmt          =
+          s"""UPDATE $table
+             |  $columnSetters
+             |WHERE id = $id""".stripMargin
+        val ps            = sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
+        tableDatas(refPath) = Table(refPath, stmt, ps)
+
+        val colSetters = colSettersMap(refPath)
+        println(s"--- update -------------------  ${colSetters.length}  $refPath")
+        //          println(stmt)
+        colSettersMap(refPath) = Nil
+        val rowSetter = (ps: PS, idsMap: IdsMap, _: RowIndex) => {
+          // Set all column values for this row in this insert/batch
+          colSetters.foreach(colSetter =>
+            colSetter(ps, idsMap, 0)
+          )
+          // Complete row
+          ps.addBatch()
+        }
+        rowSettersMap(refPath) = List(rowSetter)
+    }
+  }
+
+  private def getTables: List[Table] = {
+    // Add insert resolver to each table insert
+    inserts.map { case (refPath, _) =>
+      val rowSetters = rowSettersMap(refPath)
+      val populatePS = (ps: PS, idsMap: IdsMap, rowIndex: RowIndex) => {
+        // Set all column values for this row in this insert/batch
+        rowSetters.foreach(rowSetter =>
+          rowSetter(ps, idsMap, rowIndex)
+        )
+      }
+      tableDatas(refPath).copy(populatePS = populatePS)
+    }
+  }
+
+
+  private def updateInserts(attr: String): (List[String], Int) = {
+    if (inserts.exists(_._1 == curRefPath)) {
+      inserts = inserts.map {
+        case (path, cols) if path == curRefPath =>
+          paramIndexes += (curRefPath, attr) -> (cols.length + 1)
+          (path, cols :+ attr)
+
+        case other => other
+      }
+    } else {
+      paramIndexes += (curRefPath, attr) -> 1
+      inserts = inserts :+ (curRefPath, List(attr))
+    }
+    (curRefPath, paramIndexes(curRefPath, attr))
+  }
 
   def getStmts(
     conn: JdbcConn_jvm,
@@ -23,61 +96,141 @@ trait Data_Update extends JdbcBase_JVM with UpdateOps with MoleculeLogging { sel
     isRpcCall: Boolean = false,
     debug: Boolean = true
   ): Int = { // todo
-//    val db = conn.sqlConn.db()
-//
-//    if (isRpcCall) {
-//      // Check against db on jvm if rpc from client
-//
-//      val getCurSetValues: Attr => Set[Any] = (attr: Attr) => {
-//        val a = s":${attr.ns}/${attr.attr}"
-//        try {
-//          val curValues = Peer.q(s"[:find ?vs :where [_ $a ?vs]]", db)
-//          if (curValues.isEmpty) {
-//            throw ExecutionError(s"While checking to avoid removing the last values of mandatory " +
-//              s"attribute ${attr.ns}.${attr.attr} the current Set of values couldn't be found.")
-//          }
-//          val vs = ListBuffer.empty[Any]
-//          curValues.forEach(row => vs.addOne(row.get(0)))
-//          vs.toSet
-//        } catch {
-//          case e: MoleculeError => throw e
-//          case t: Throwable     => throw ExecutionError(
-//            s"Unexpected error trying to find current values of mandatory attribute ${attr.name}:\n" + t)
-//        }
-//      }
-//
-//      val validationErrors = ModelValidation(
-//        conn.proxy.nsMap,
-//        conn.proxy.attrMap,
-//        "update",
-//        Some(getCurSetValues)
-//      ).validate(elements)
-//      if (validationErrors.nonEmpty) {
-//        throw ValidationErrors(validationErrors)
-//      }
-//    }
-//
-//    val (ids, filterElements, data) = resolve(elements, Nil, Nil, Nil)
-//    val (filterQuery, inputs)        = if (ids.isEmpty && filterElements.nonEmpty) {
-//      val filterElements1 = AttrOneManLong("_Generic", "id", V) +: filterElements
-//      val (query, inputs) = new SqlModel2Query[Any](filterElements1).getEidQueryWithInputs
-//      (Some(query), inputs)
-//    } else {
-//      (None, Nil)
-//    }
-//    filterQuery.fold {
-//      val addStmts = id2stmts(data, db, isUpsert)
-//      ids.foreach(addStmts)
-//    } { query =>
-//      val idRows  = Peer.q(query, db +: inputs: _*)
-//      val addStmts = id2stmts(data, db)
-//      idRows.forEach(idRow => addStmts(idRow.get(0)))
-//    }
-//    if (debug) {
-//      val updateStrs = "UPDATE:" +: elements :+ "" :+ stmts.toArray().mkString("\n")
-//      logger.debug(updateStrs.mkString("\n").trim)
-//    }
-//    stmts
+    //    val db = conn.sqlConn.db()
+    //
+    //    if (isRpcCall) {
+    //      // Check against db on jvm if rpc from client
+    //
+    //      val getCurSetValues: Attr => Set[Any] = (attr: Attr) => {
+    //        val a = s":${attr.ns}/${attr.attr}"
+    //        try {
+    //          val curValues = Peer.q(s"[:find ?vs :where [_ $a ?vs]]", db)
+    //          if (curValues.isEmpty) {
+    //            throw ExecutionError(s"While checking to avoid removing the last values of mandatory " +
+    //              s"attribute ${attr.ns}.${attr.attr} the current Set of values couldn't be found.")
+    //          }
+    //          val vs = ListBuffer.empty[Any]
+    //          curValues.forEach(row => vs.addOne(row.get(0)))
+    //          vs.toSet
+    //        } catch {
+    //          case e: MoleculeError => throw e
+    //          case t: Throwable     => throw ExecutionError(
+    //            s"Unexpected error trying to find current values of mandatory attribute ${attr.name}:\n" + t)
+    //        }
+    //      }
+    //
+    //      val validationErrors = ModelValidation(
+    //        conn.proxy.nsMap,
+    //        conn.proxy.attrMap,
+    //        "update",
+    //        Some(getCurSetValues)
+    //      ).validate(elements)
+    //      if (validationErrors.nonEmpty) {
+    //        throw ValidationErrors(validationErrors)
+    //      }
+    //    }
+    //
+    //    val (ids, filterElements, data) = resolve(elements, Nil, Nil, Nil)
+    //    val (filterQuery, inputs)        = if (ids.isEmpty && filterElements.nonEmpty) {
+    //      val filterElements1 = AttrOneManLong("_Generic", "id", V) +: filterElements
+    //      val (query, inputs) = new SqlModel2Query[Any](filterElements1).getEidQueryWithInputs
+    //      (Some(query), inputs)
+    //    } else {
+    //      (None, Nil)
+    //    }
+    //    filterQuery.fold {
+    //      val addStmts = id2stmts(data, db, isUpsert)
+    //      ids.foreach(addStmts)
+    //    } { query =>
+    //      val idRows  = Peer.q(query, db +: inputs: _*)
+    //      val addStmts = id2stmts(data, db)
+    //      idRows.forEach(idRow => addStmts(idRow.get(0)))
+    //    }
+    //    if (debug) {
+    //      val updateStrs = "UPDATE:" +: elements :+ "" :+ stmts.toArray().mkString("\n")
+    //      logger.debug(updateStrs.mkString("\n").trim)
+    //    }
+    //    stmts
+    ???
+  }
+
+
+  override def handleIds(ids: Seq[Long]): Unit = {
+    id = ids.head
+    //    ???
+  }
+
+  override def handleUniqueFilterAttr(filterAttr: AttrOneTac): Unit = {
+    ???
+  }
+
+  override def handleFilterAttr(filterAttr: AttrOneTac): Unit = {
+    ???
+  }
+
+  override def updateOne[T](
+    a: Attr,
+    vs: Seq[T],
+    transform: T => Any
+  ): Unit = {
+    //    val (curPath, paramIndex) = updateInserts(a.name)
+    //    val colSetter: Setter     = optValue.fold {
+    //      (ps: PS, _: IdsMap, _: RowIndex) => {
+    //        ps.setNull(paramIndex, 0)
+    //        //        printValue(0, ns, attr, -1, paramIndex, "None")
+    //      }
+    //    } { value =>
+    //      (ps: PS, _: IdsMap, _: RowIndex) => {
+    //        handleValue(value).asInstanceOf[(PS, Int) => Unit](ps, paramIndex)
+    //        //        printValue(0, ns, attr, -1, paramIndex, value)
+    //      }
+    //    }
+    //    addColSetter(curPath, colSetter)
+
+    ???
+  }
+
+  override def updateSetEq[T](
+    a: Attr,
+  ): Unit = {
+    ???
+  }
+
+  override def updateSetAdd[T](
+    a: Attr,
+    sets: Seq[Set[T]],
+    transform: T => Any,
+    retractCur: Boolean
+  ): Unit = {
+    ???
+  }
+
+  override def updateSetSwab[T](
+    a: Attr,
+    sets: Seq[Set[T]],
+    transform: T => Any
+  ): Unit = {
+    ???
+  }
+
+  override def updateSetRemove[T](
+    a: Attr,
+    set: Set[T],
+    transform: T => Any
+  ): Unit = {
+    ???
+  }
+
+
+  override def handleRefNs(ref: Ref): Unit = {
+    ???
+  }
+
+  override def handleBackRef(backRef: BackRef): Unit = {
+    ???
+  }
+
+  override def handleTxMetaData(): Unit = {
     ???
   }
 
@@ -174,18 +327,33 @@ trait Data_Update extends JdbcBase_JVM with UpdateOps with MoleculeLogging { sel
     }
   }
 
-  override protected lazy val valueString     = identity
-  override protected lazy val valueInt        = identity
-  override protected lazy val valueLong       = identity
-  override protected lazy val valueFloat      = identity
-  override protected lazy val valueDouble     = identity
-  override protected lazy val valueBoolean    = identity
-  override protected lazy val valueBigInt     = (v: BigInt) => v.bigInteger
-  override protected lazy val valueBigDecimal = (v: BigDecimal) => v.bigDecimal
-  override protected lazy val valueDate       = identity
-  override protected lazy val valueUUID       = identity
-  override protected lazy val valueURI        = identity
-  override protected lazy val valueByte       = (v: Byte) => v.toInt
-  override protected lazy val valueShort      = (v: Short) => v.toInt
-  override protected lazy val valueChar       = (v: Char) => v.toString
+  //  override protected lazy val handleString     = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.asInstanceOf[String])
+  //  override protected lazy val handleInt        = (v: Any) => (ps: PS, n: Int) => ps.setInt(n, v.asInstanceOf[Int])
+  //  override protected lazy val handleLong       = (v: Any) => (ps: PS, n: Int) => ps.setLong(n, v.asInstanceOf[Long])
+  //  override protected lazy val handleFloat      = (v: Any) => (ps: PS, n: Int) => ps.setFloat(n, v.asInstanceOf[Float])
+  //  override protected lazy val handleDouble     = (v: Any) => (ps: PS, n: Int) => ps.setDouble(n, v.asInstanceOf[Double])
+  //  override protected lazy val handleBoolean    = (v: Any) => (ps: PS, n: Int) => ps.setBoolean(n, v.asInstanceOf[Boolean])
+  //  override protected lazy val handleBigInt     = (v: Any) => (ps: PS, n: Int) => ps.setBigDecimal(n, BigDecimal(v.asInstanceOf[BigInt]).bigDecimal)
+  //  override protected lazy val handleBigDecimal = (v: Any) => (ps: PS, n: Int) => ps.setBigDecimal(n, v.asInstanceOf[BigDecimal].bigDecimal)
+  //  override protected lazy val handleDate       = (v: Any) => (ps: PS, n: Int) => ps.setDate(n, new java.sql.Date(v.asInstanceOf[Date].getTime))
+  //  override protected lazy val handleUUID       = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.toString)
+  //  override protected lazy val handleURI        = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.toString)
+  //  override protected lazy val handleByte       = (v: Any) => (ps: PS, n: Int) => ps.setByte(n, v.asInstanceOf[Byte])
+  //  override protected lazy val handleShort      = (v: Any) => (ps: PS, n: Int) => ps.setShort(n, v.asInstanceOf[Short])
+  //  override protected lazy val handleChar       = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.toString)
+  //
+  //  override protected lazy val set2arrayString    : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
+  //  override protected lazy val set2arrayInt       : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
+  //  override protected lazy val set2arrayLong      : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
+  //  override protected lazy val set2arrayFloat     : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.map(_.toString.toDouble.asInstanceOf[AnyRef]).toArray
+  //  override protected lazy val set2arrayDouble    : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
+  //  override protected lazy val set2arrayBoolean   : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
+  //  override protected lazy val set2arrayBigInt    : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[BigInt]].map(v => BigDecimal(v).bigDecimal.asInstanceOf[AnyRef]).toArray
+  //  override protected lazy val set2arrayBigDecimal: Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[BigDecimal]].map(v => v.bigDecimal.asInstanceOf[AnyRef]).toArray
+  //  override protected lazy val set2arrayDate      : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
+  //  override protected lazy val set2arrayUUID      : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
+  //  override protected lazy val set2arrayURI       : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.map(_.toString.asInstanceOf[AnyRef]).toArray
+  //  override protected lazy val set2arrayByte      : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
+  //  override protected lazy val set2arrayShort     : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
+  //  override protected lazy val set2arrayChar      : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
 }

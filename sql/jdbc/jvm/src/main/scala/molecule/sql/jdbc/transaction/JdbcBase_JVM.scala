@@ -22,7 +22,7 @@ trait JdbcBase_JVM extends JdbcDataType_JVM with ModelUtils {
   protected val sqlConn: java.sql.Connection
 
   //  protected var level    = 0
-  protected var firstRow = true
+//  protected var firstRow = true
 
   var level = 0
   def indent(level: Int) = "  " * level
@@ -38,13 +38,13 @@ trait JdbcBase_JVM extends JdbcDataType_JVM with ModelUtils {
 
 
   // PreparedStatement param indexes for each (table, col) coordinate
-  protected val paramIndexes     = mutable.Map.empty[(List[String], String), Int]
-  protected val colSettersMap    = mutable.Map.empty[List[String], List[Setter]]
-  protected val rowSettersMap    = mutable.Map.empty[List[String], List[Setter]]
-  protected val tableInserts     = mutable.Map.empty[List[String], TableInsert]
-  protected var joinTableInserts = List.empty[JoinTableInsert]
-  protected val insertIndexes    = mutable.Map.empty[List[String], Int]
-  protected val rightCountsMap   = mutable.Map.empty[List[String], List[Int]]
+  protected val paramIndexes   = mutable.Map.empty[(List[String], String), Int]
+  protected val colSettersMap  = mutable.Map.empty[List[String], List[Setter]]
+  protected val rowSettersMap  = mutable.Map.empty[List[String], List[Setter]]
+  protected val tableDatas     = mutable.Map.empty[List[String], Table]
+  protected var joinTableDatas = List.empty[JoinTable]
+  protected val insertIndexes  = mutable.Map.empty[List[String], Int]
+  protected val rightCountsMap = mutable.Map.empty[List[String], List[Int]]
 
 
   protected def addColSetter(refPath: List[String], colSetter: Setter) = {
@@ -71,19 +71,6 @@ trait JdbcBase_JVM extends JdbcDataType_JVM with ModelUtils {
   }
 
 
-  // todo: replace with the ones underneath
-  //  var colSetters  = List.empty[Setter]
-  //  var insertStmts = List.empty[String]
-  //  protected var table   = ""
-  //  protected val columns = ListBuffer.empty[String]
-  //
-  //  protected var tables         = Array("")
-  //  protected var columnLists    = Array(Array.empty[String])
-  //  protected var colSetterLists = Array(Array.empty[Setter])
-  //  protected var batchSetters   = List.empty[Setter]
-  //  protected var joinInserts    = List.empty[String]
-  //  protected var joinSetters    = List.empty[Setter]
-  //  protected var joinColumnLists = List(List.empty[String])
 
 
   protected var nsFull       : String              = ""

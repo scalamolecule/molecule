@@ -24,13 +24,18 @@ trait DatomicBase_JVM extends DatomicDataType_JVM with ModelUtils {
   // Accumulate java insertion data
   final protected val stmts: jArrayList[jList[AnyRef]] = new jArrayList[jList[AnyRef]]()
 
-  protected var nsFull       : String              = ""
-  protected var part         : String              = ""
-  protected var tempId       : Int                 = 0
-  protected var lowest       : Int                 = 0
-  protected var e            : AnyRef              = "" // Long or String (#db/id[db.part/user -1])
-  protected var e0           : AnyRef              = ""
-  protected var unusedRefId  : Boolean             = false
+  protected var nsFull     : String  = ""
+  protected var part       : String  = ""
+  protected var tempId     : Int     = 0
+  protected var lowest     : Int     = 0
+  protected var e          : AnyRef  = "" // Long or String (#db/id[db.part/user -1])
+  protected var e0         : AnyRef  = ""
+  protected var unusedRefId: Boolean = false
+
+  var ids            = Seq.empty[AnyRef]
+  var filterElements = List.empty[Element]
+  var data           = List.empty[(String, String, String, Seq[AnyRef], Boolean)]
+
   protected var stmt         : jList[AnyRef]       = null
   protected var backRefs     : Map[String, AnyRef] = Map.empty[String, AnyRef]
   protected val prevRefs     : ListBuffer[AnyRef]  = new ListBuffer[AnyRef]

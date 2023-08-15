@@ -118,14 +118,13 @@ trait JdbcSpiSync
   // Update --------------------------------------------------------
 
   override def update_transact(update: Update)(implicit conn0: Conn): TxReport = {
-    //    val errors = update_validate(update)
-    //    if (errors.isEmpty) {
-    //      val conn = conn0.asInstanceOf[JdbcConn_jvm]
-    //      conn.transact_sync(getStmts(conn))
-    //    } else {
-    //      throw ValidationErrors(errors)
-    //    }
-    ???
+    val errors = update_validate(update)
+    if (errors.isEmpty) {
+      val conn = conn0.asInstanceOf[JdbcConn_jvm]
+      conn.transact_sync(getStmts(conn, update))
+    } else {
+      throw ValidationErrors(errors)
+    }
   }
 
   override def update_inspect(update: Update)(implicit conn0: Conn): Unit = {
@@ -133,12 +132,11 @@ trait JdbcSpiSync
     ???
   }
 
-  //      def getStmts(conn: JdbcConn_JVM): PreparedStmt = {
-  //        (new UpdateExtraction(conn.proxy.uniqueAttrs, update.isUpsert) with Update_stmts {
-  //          override protected val ps: PreparedStmt = ???
-  //        })
-  //          .getStmts(conn, update.elements)
-  //      }
+  def getStmts(conn: JdbcConn_jvm, update: Update): Data = {
+    new UpdateExtraction(conn.proxy.uniqueAttrs, update.isUpsert) with Data_Update {
+      override protected val sqlConn = conn.sqlConn
+    }.getData(update.elements)
+  }
 
   override def update_validate(update: Update)(implicit conn: Conn): Map[String, Seq[String]] = {
     validateUpdate(conn, update.elements)

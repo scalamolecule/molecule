@@ -56,7 +56,7 @@ trait Data_Insert
              |  ${cols.mkString(",\n  ")}
              |) VALUES ($inputPlaceholders)""".stripMargin
         val ps                = sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
-        tableInserts(refPath) = TableInsert(refPath, stmt, ps)
+        tableDatas(refPath) = Table(refPath, stmt, ps)
         rowSettersMap(refPath) = Nil
     }
 
@@ -65,7 +65,7 @@ trait Data_Insert
         val joinTable = joinRefPath.last
         val stmt      = s"INSERT INTO $joinTable ($id1, $id2) VALUES (?, ?)"
         val ps        = sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
-        joinTableInserts = joinTableInserts :+ JoinTableInsert(joinRefPath, stmt, ps, leftPath, rightPath)
+        joinTableDatas = joinTableDatas :+ JoinTable(joinRefPath, stmt, ps, leftPath, rightPath)
     }
   }
 
@@ -100,7 +100,7 @@ trait Data_Insert
   }
 
 
-  private def getTableInserts: List[TableInsert] = {
+  private def getTableInserts: List[Table] = {
     // Add insert resolver to each insert
     inserts.map { case (refPath, _) =>
       val rowSetters = rowSettersMap(refPath)
@@ -112,11 +112,11 @@ trait Data_Insert
           rowIndex += 1
         }
       }
-      tableInserts(refPath).copy(populatePS = populatePS)
+      tableDatas(refPath).copy(populatePS = populatePS)
     }
   }
-  private def getJoinTableInserts: List[JoinTableInsert] = {
-    joins.zip(joinTableInserts).map {
+  private def getJoinTableInserts: List[JoinTable] = {
+    joins.zip(joinTableDatas).map {
       case ((joinRefPath, id1, id2, leftPath, rightPath), joinTableInsert) =>
         joinTableInsert.copy(rightCounts = rightCountsMap(joinRefPath))
     }
@@ -473,35 +473,20 @@ trait Data_Insert
     }
   }
 
-  override protected lazy val transformString     = identity
-  override protected lazy val transformInt        = identity
-  override protected lazy val transformLong       = identity
-  override protected lazy val transformFloat      = identity
-  override protected lazy val transformDouble     = identity
-  override protected lazy val transformBoolean    = identity
-  override protected lazy val transformBigInt     = identity
-  override protected lazy val transformBigDecimal = identity
-  override protected lazy val transformDate       = identity
-  override protected lazy val transformUUID       = identity
-  override protected lazy val transformURI        = identity
-  override protected lazy val transformByte       = identity
-  override protected lazy val transformShort      = identity
-  override protected lazy val transformChar       = identity
-
-  override protected lazy val handleString     = (v: String) => (ps: PS, n: Int) => ps.setString(n, v)
-  override protected lazy val handleInt        = (v: Int) => (ps: PS, n: Int) => ps.setInt(n, v)
-  override protected lazy val handleLong       = (v: Long) => (ps: PS, n: Int) => ps.setLong(n, v)
-  override protected lazy val handleFloat      = (v: Float) => (ps: PS, n: Int) => ps.setDouble(n, v.toString.toDouble)
-  override protected lazy val handleDouble     = (v: Double) => (ps: PS, n: Int) => ps.setDouble(n, v)
-  override protected lazy val handleBoolean    = (v: Boolean) => (ps: PS, n: Int) => ps.setBoolean(n, v)
-  override protected lazy val handleBigInt     = (v: BigInt) => (ps: PS, n: Int) => ps.setBigDecimal(n, BigDecimal(v).bigDecimal)
-  override protected lazy val handleBigDecimal = (v: BigDecimal) => (ps: PS, n: Int) => ps.setBigDecimal(n, v.bigDecimal)
-  override protected lazy val handleDate       = (v: Date) => (ps: PS, n: Int) => ps.setDate(n, new java.sql.Date(v.getTime))
-  override protected lazy val handleUUID       = (v: UUID) => (ps: PS, n: Int) => ps.setString(n, v.toString)
-  override protected lazy val handleURI        = (v: URI) => (ps: PS, n: Int) => ps.setString(n, v.toString)
-  override protected lazy val handleByte       = (v: Byte) => (ps: PS, n: Int) => ps.setByte(n, v)
-  override protected lazy val handleShort      = (v: Short) => (ps: PS, n: Int) => ps.setShort(n, v)
-  override protected lazy val handleChar       = (v: Char) => (ps: PS, n: Int) => ps.setString(n, v.toString)
+  override protected lazy val handleString     = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.asInstanceOf[String])
+  override protected lazy val handleInt        = (v: Any) => (ps: PS, n: Int) => ps.setInt(n, v.asInstanceOf[Int])
+  override protected lazy val handleLong       = (v: Any) => (ps: PS, n: Int) => ps.setLong(n, v.asInstanceOf[Long])
+  override protected lazy val handleFloat      = (v: Any) => (ps: PS, n: Int) => ps.setFloat(n, v.asInstanceOf[Float])
+  override protected lazy val handleDouble     = (v: Any) => (ps: PS, n: Int) => ps.setDouble(n, v.asInstanceOf[Double])
+  override protected lazy val handleBoolean    = (v: Any) => (ps: PS, n: Int) => ps.setBoolean(n, v.asInstanceOf[Boolean])
+  override protected lazy val handleBigInt     = (v: Any) => (ps: PS, n: Int) => ps.setBigDecimal(n, BigDecimal(v.asInstanceOf[BigInt]).bigDecimal)
+  override protected lazy val handleBigDecimal = (v: Any) => (ps: PS, n: Int) => ps.setBigDecimal(n, v.asInstanceOf[BigDecimal].bigDecimal)
+  override protected lazy val handleDate       = (v: Any) => (ps: PS, n: Int) => ps.setDate(n, new java.sql.Date(v.asInstanceOf[Date].getTime))
+  override protected lazy val handleUUID       = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.toString)
+  override protected lazy val handleURI        = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.toString)
+  override protected lazy val handleByte       = (v: Any) => (ps: PS, n: Int) => ps.setByte(n, v.asInstanceOf[Byte])
+  override protected lazy val handleShort      = (v: Any) => (ps: PS, n: Int) => ps.setShort(n, v.asInstanceOf[Short])
+  override protected lazy val handleChar       = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.toString)
 
   override protected lazy val set2arrayString    : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
   override protected lazy val set2arrayInt       : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray

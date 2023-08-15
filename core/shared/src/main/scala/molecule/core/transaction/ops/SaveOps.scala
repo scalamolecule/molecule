@@ -33,53 +33,52 @@ trait SaveOps extends Action2Data {
     backRefNs: String
   ): Unit
 
-  protected def handleNs(ns: String): Unit
+  protected def handleRefNs(refNs: String): Unit
   protected def handleComposite(isInsertTxMetaData: Boolean): Unit
   protected def handleTxMetaData(ns: String): Unit
 
-  // Typed input value to expected db type
-  protected lazy val transformString    : String => Any     = ???
-  protected lazy val transformInt       : Int => Any        = ???
-  protected lazy val transformLong      : Long => Any       = ???
-  protected lazy val transformFloat     : Float => Any      = ???
-  protected lazy val transformDouble    : Double => Any     = ???
-  protected lazy val transformBoolean   : Boolean => Any    = ???
-  protected lazy val transformBigInt    : BigInt => Any     = ???
-  protected lazy val transformBigDecimal: BigDecimal => Any = ???
-  protected lazy val transformDate      : Date => Any       = ???
-  protected lazy val transformUUID      : UUID => Any       = ???
-  protected lazy val transformURI       : URI => Any        = ???
-  protected lazy val transformByte      : Byte => Any       = ???
-  protected lazy val transformShort     : Short => Any      = ???
-  protected lazy val transformChar      : Char => Any       = ???
+  protected lazy val transformString    : String => Any     = identity
+  protected lazy val transformInt       : Int => Any        = identity
+  protected lazy val transformLong      : Long => Any       = identity
+  protected lazy val transformFloat     : Float => Any      = identity
+  protected lazy val transformDouble    : Double => Any     = identity
+  protected lazy val transformBoolean   : Boolean => Any    = identity
+  protected lazy val transformBigInt    : BigInt => Any     = identity
+  protected lazy val transformBigDecimal: BigDecimal => Any = identity
+  protected lazy val transformDate      : Date => Any       = identity
+  protected lazy val transformUUID      : UUID => Any       = identity
+  protected lazy val transformURI       : URI => Any        = identity
+  protected lazy val transformByte      : Byte => Any       = identity
+  protected lazy val transformShort     : Short => Any      = identity
+  protected lazy val transformChar      : Char => Any       = identity
 
-  protected lazy val handleString    : Any => Any = ???
-  protected lazy val handleInt       : Any => Any = ???
-  protected lazy val handleLong      : Any => Any = ???
-  protected lazy val handleFloat     : Any => Any = ???
-  protected lazy val handleDouble    : Any => Any = ???
-  protected lazy val handleBoolean   : Any => Any = ???
-  protected lazy val handleBigInt    : Any => Any = ???
-  protected lazy val handleBigDecimal: Any => Any = ???
-  protected lazy val handleDate      : Any => Any = ???
-  protected lazy val handleUUID      : Any => Any = ???
-  protected lazy val handleURI       : Any => Any = ???
-  protected lazy val handleByte      : Any => Any = ???
-  protected lazy val handleShort     : Any => Any = ???
-  protected lazy val handleChar      : Any => Any = ???
+  protected lazy val handleString    : Any => Any = identity
+  protected lazy val handleInt       : Any => Any = identity
+  protected lazy val handleLong      : Any => Any = identity
+  protected lazy val handleFloat     : Any => Any = identity
+  protected lazy val handleDouble    : Any => Any = identity
+  protected lazy val handleBoolean   : Any => Any = identity
+  protected lazy val handleBigInt    : Any => Any = identity
+  protected lazy val handleBigDecimal: Any => Any = identity
+  protected lazy val handleDate      : Any => Any = identity
+  protected lazy val handleUUID      : Any => Any = identity
+  protected lazy val handleURI       : Any => Any = identity
+  protected lazy val handleByte      : Any => Any = identity
+  protected lazy val handleShort     : Any => Any = identity
+  protected lazy val handleChar      : Any => Any = identity
 
-  protected lazy val set2arrayString    : Set[Any] => Array[AnyRef] = ???
-  protected lazy val set2arrayInt       : Set[Any] => Array[AnyRef] = ???
-  protected lazy val set2arrayLong      : Set[Any] => Array[AnyRef] = ???
-  protected lazy val set2arrayFloat     : Set[Any] => Array[AnyRef] = ???
-  protected lazy val set2arrayDouble    : Set[Any] => Array[AnyRef] = ???
-  protected lazy val set2arrayBoolean   : Set[Any] => Array[AnyRef] = ???
-  protected lazy val set2arrayBigInt    : Set[Any] => Array[AnyRef] = ???
-  protected lazy val set2arrayBigDecimal: Set[Any] => Array[AnyRef] = ???
-  protected lazy val set2arrayDate      : Set[Any] => Array[AnyRef] = ???
-  protected lazy val set2arrayUUID      : Set[Any] => Array[AnyRef] = ???
-  protected lazy val set2arrayURI       : Set[Any] => Array[AnyRef] = ???
-  protected lazy val set2arrayByte      : Set[Any] => Array[AnyRef] = ???
-  protected lazy val set2arrayShort     : Set[Any] => Array[AnyRef] = ???
-  protected lazy val set2arrayChar      : Set[Any] => Array[AnyRef] = ???
+  protected lazy val set2arrayString    : Set[Any] => Array[AnyRef] = (_: Set[Any]) => Array.empty[AnyRef]
+  protected lazy val set2arrayInt       : Set[Any] => Array[AnyRef] = (_: Set[Any]) => Array.empty[AnyRef]
+  protected lazy val set2arrayLong      : Set[Any] => Array[AnyRef] = (_: Set[Any]) => Array.empty[AnyRef]
+  protected lazy val set2arrayFloat     : Set[Any] => Array[AnyRef] = (_: Set[Any]) => Array.empty[AnyRef]
+  protected lazy val set2arrayDouble    : Set[Any] => Array[AnyRef] = (_: Set[Any]) => Array.empty[AnyRef]
+  protected lazy val set2arrayBoolean   : Set[Any] => Array[AnyRef] = (_: Set[Any]) => Array.empty[AnyRef]
+  protected lazy val set2arrayBigInt    : Set[Any] => Array[AnyRef] = (_: Set[Any]) => Array.empty[AnyRef]
+  protected lazy val set2arrayBigDecimal: Set[Any] => Array[AnyRef] = (_: Set[Any]) => Array.empty[AnyRef]
+  protected lazy val set2arrayDate      : Set[Any] => Array[AnyRef] = (_: Set[Any]) => Array.empty[AnyRef]
+  protected lazy val set2arrayUUID      : Set[Any] => Array[AnyRef] = (_: Set[Any]) => Array.empty[AnyRef]
+  protected lazy val set2arrayURI       : Set[Any] => Array[AnyRef] = (_: Set[Any]) => Array.empty[AnyRef]
+  protected lazy val set2arrayByte      : Set[Any] => Array[AnyRef] = (_: Set[Any]) => Array.empty[AnyRef]
+  protected lazy val set2arrayShort     : Set[Any] => Array[AnyRef] = (_: Set[Any]) => Array.empty[AnyRef]
+  protected lazy val set2arrayChar      : Set[Any] => Array[AnyRef] = (_: Set[Any]) => Array.empty[AnyRef]
 }

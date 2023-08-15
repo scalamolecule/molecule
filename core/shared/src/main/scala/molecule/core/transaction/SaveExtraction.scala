@@ -1,7 +1,5 @@
 package molecule.core.transaction
 
-import java.net.URI
-import java.util.{Date, UUID}
 import molecule.base.error._
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
@@ -20,16 +18,15 @@ class SaveExtraction(isTxMetaData: Boolean = false)
           if (a.op != Eq) {
             throw ModelError(s"Missing applied value for attribute ${a.ns}.${a.attr}")
           }
-          //          handleNs(a.ns)
           a match {
-            case a: AttrOne  =>
+            case a: AttrOne =>
               a match {
                 case a: AttrOneMan => resolveAttrOneMan(a); resolve(tail)
                 case a: AttrOneOpt => resolveAttrOneOpt(a); resolve(tail)
                 case a: AttrOneTac => resolveAttrOneTac(a); resolve(tail)
               }
-            case at: AttrSet =>
-              at match {
+            case a: AttrSet =>
+              a match {
                 case a: AttrSetMan => resolveAttrSetMan(a); resolve(tail)
                 case a: AttrSetOpt => resolveAttrSetOpt(a); resolve(tail)
                 case a: AttrSetTac => resolveAttrSetTac(a); resolve(tail)
@@ -37,8 +34,7 @@ class SaveExtraction(isTxMetaData: Boolean = false)
           }
 
         // todo
-        case Ref(ns, refAttr, "Tx", card, _) => resolve(tail)
-
+        case Ref(ns, refAttr, "Tx", card, _)  => resolve(tail)
         case Ref(ns, refAttr, refNs, card, _) => addRef(ns, refAttr, refNs, card); resolve(tail)
         case BackRef(backRefNs, _)            => addBackRef(backRefNs); resolve(tail)
         case _: Nested                        => throw ModelError(

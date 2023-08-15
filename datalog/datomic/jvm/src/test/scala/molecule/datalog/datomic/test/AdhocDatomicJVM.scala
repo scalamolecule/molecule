@@ -1,6 +1,7 @@
 package molecule.datalog.datomic.test
 
 import molecule.core.util.Executor._
+import molecule.coreTests.dataModels.core.dsl.Types.Ns
 import molecule.datalog.datomic.async._
 import molecule.datalog.datomic.setup.DatomicTestSuite
 import utest._
@@ -139,15 +140,12 @@ object AdhocDatomicJVM extends DatomicTestSuite {
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
       for {
+        _ <- Ns.i(42).save.transact
+        _ <- Ns.i.query.get.map(_ ==> List(42))
 
-        _ <- Ns.ints.insert(Seq.empty[Set[Int]]).transact
-        _ <- Ns.ints.query.get.map(_ ==> List())
 
-        _ <- Ns.ints(Seq.empty[Set[Int]]).save.transact
-        _ <- Ns.ints.query.get.map(_ ==> List())
 
-//        _ <- Ns.i(42).save.transact
-//        _ <- Ns.i.query.get.map(_ ==> List(42))
+
       } yield ()
     }
 

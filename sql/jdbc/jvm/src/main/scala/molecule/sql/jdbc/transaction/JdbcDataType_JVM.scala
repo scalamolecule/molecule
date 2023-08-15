@@ -13,5 +13,5 @@ trait JdbcDataType_JVM extends DataType {
   // Setter to mutate PreparedStatement for each insertion
   type Setter = (PS, IdsMap, RowIndex) => Unit
 
-  type Data = (List[TableInsert], List[JoinTableInsert])
+  type Data = (List[Table], List[JoinTable])
 }
