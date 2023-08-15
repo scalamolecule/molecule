@@ -1,12 +1,14 @@
 package molecule.datalog.datomic.transaction
 
-import java.util.{ArrayList => jArrayList, List => jList}
+import java.net.URI
+import java.util.{Date, UUID, ArrayList => jArrayList, List => jList}
 import molecule.base.ast.SchemaAST._
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.ops.InsertOps
 import molecule.core.transaction.{InsertExtraction, InsertResolvers_, SaveExtraction}
 import molecule.core.util.ModelUtils
+import scala.collection.immutable.Set
 
 trait Data_Insert
   extends DatomicBase_JVM
@@ -69,7 +71,8 @@ trait Data_Insert
     ns: String,
     attr: String,
     tplIndex: Int,
-    handleScalaValue: T => Any,
+    transformValue: T => Any,
+    handleValue: T => Any
   ): Product => Unit = {
     val a = kw(ns, attr)
     backRefs = backRefs + (ns -> e)
@@ -77,14 +80,15 @@ trait Data_Insert
       unusedRefIds -= e
       usedRefIds += e
       appendStmt(add, e, a,
-        handleScalaValue(tpl.productElement(tplIndex).asInstanceOf[T]).asInstanceOf[AnyRef])
+        transformValue(tpl.productElement(tplIndex).asInstanceOf[T]).asInstanceOf[AnyRef])
   }
 
   override protected def addOneOpt[T](
     ns: String,
     attr: String,
     tplIndex: Int,
-    handleScalaValue: T => Any,
+    transformValue: T => Any,
+    handleValue: T => Any
   ): Product => Unit = {
     val a = kw(ns, attr)
     backRefs = backRefs + (ns -> e)
@@ -93,7 +97,7 @@ trait Data_Insert
         case Some(value) =>
           unusedRefIds -= e
           usedRefIds += e
-          appendStmt(add, e, a, handleScalaValue(value.asInstanceOf[T]).asInstanceOf[AnyRef])
+          appendStmt(add, e, a, transformValue(value.asInstanceOf[T]).asInstanceOf[AnyRef])
         case None        =>
           if (!usedRefIds.contains(e)) {
             unusedRefIds += e
@@ -105,10 +109,11 @@ trait Data_Insert
   override protected def addSet[T](
     ns: String,
     attr: String,
-    set2array: Set[T] => Array[AnyRef],
+    //    set2array: Set[T] => Array[AnyRef],
+    set2array: Set[Any] => Array[AnyRef],
     refNsOpt: Option[String],
     tplIndex: Int,
-    handleScalaValue: T => Any,
+    transformValue: T => Any,
   ): Product => Unit = {
     val a = kw(ns, attr)
     backRefs = backRefs + (ns -> e)
@@ -116,17 +121,18 @@ trait Data_Insert
       unusedRefIds -= e
       usedRefIds += e
       tpl.productElement(tplIndex).asInstanceOf[Set[_]].foreach { value =>
-        appendStmt(add, e, a, handleScalaValue(value.asInstanceOf[T]).asInstanceOf[AnyRef])
+        appendStmt(add, e, a, transformValue(value.asInstanceOf[T]).asInstanceOf[AnyRef])
       }
   }
 
   override protected def addSetOpt[T](
     ns: String,
     attr: String,
-    set2array: Set[T] => Array[AnyRef],
+    //    set2array: Set[T] => Array[AnyRef],
+    set2array: Set[Any] => Array[AnyRef],
     refNsOpt: Option[String],
     tplIndex: Int,
-    handleScalaValue: T => Any,
+    transformValue: T => Any,
   ): Product => Unit = {
     val a = kw(ns, attr)
     backRefs = backRefs + (ns -> e)
@@ -136,7 +142,7 @@ trait Data_Insert
           unusedRefIds -= e
           usedRefIds += e
           set.foreach(value =>
-            appendStmt(add, e, a, handleScalaValue(value.asInstanceOf[T]).asInstanceOf[AnyRef])
+            appendStmt(add, e, a, transformValue(value.asInstanceOf[T]).asInstanceOf[AnyRef])
           )
         case None              =>
           if (!usedRefIds.contains(e)) {
@@ -229,18 +235,49 @@ trait Data_Insert
 
   // Save Int as Long in Datomic since we can't enforce Integers in edn (for JS rpc)
 
-  override protected lazy val valueString     = identity
-  override protected lazy val valueInt        = (v: Any) => v.asInstanceOf[Int].toLong
-  override protected lazy val valueLong       = identity
-  override protected lazy val valueFloat      = identity
-  override protected lazy val valueDouble     = identity
-  override protected lazy val valueBoolean    = boolean2java
-  override protected lazy val valueBigInt     = bigInt2java
-  override protected lazy val valueBigDecimal = bigDec2java
-  override protected lazy val valueDate       = identity
-  override protected lazy val valueUUID       = identity
-  override protected lazy val valueURI        = identity
-  override protected lazy val valueByte       = byte2java
-  override protected lazy val valueShort      = short2java
-  override protected lazy val valueChar       = char2java
+  override protected lazy val transformString     = identity
+  override protected lazy val transformInt        = (v: Any) => v.asInstanceOf[Int].toLong
+  override protected lazy val transformLong       = identity
+  override protected lazy val transformFloat      = identity
+  override protected lazy val transformDouble     = identity
+  override protected lazy val transformBoolean    = boolean2java
+  override protected lazy val transformBigInt     = bigInt2java
+  override protected lazy val transformBigDecimal = bigDec2java
+  override protected lazy val transformDate       = identity
+  override protected lazy val transformUUID       = identity
+  override protected lazy val transformURI        = identity
+  override protected lazy val transformByte       = byte2java
+  override protected lazy val transformShort      = short2java
+  override protected lazy val transformChar       = char2java
+
+  // Not used for Datomic
+  override protected lazy val handleString     = identity
+  override protected lazy val handleInt        = identity
+  override protected lazy val handleLong       = identity
+  override protected lazy val handleFloat      = identity
+  override protected lazy val handleDouble     = identity
+  override protected lazy val handleBoolean    = identity
+  override protected lazy val handleBigInt     = identity
+  override protected lazy val handleBigDecimal = identity
+  override protected lazy val handleDate       = identity
+  override protected lazy val handleUUID       = identity
+  override protected lazy val handleURI        = identity
+  override protected lazy val handleByte       = identity
+  override protected lazy val handleShort      = identity
+  override protected lazy val handleChar       = identity
+
+  override protected lazy val set2arrayString    : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
+  override protected lazy val set2arrayInt       : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
+  override protected lazy val set2arrayLong      : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
+  override protected lazy val set2arrayFloat     : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.map(_.toString.toDouble.asInstanceOf[AnyRef]).toArray
+  override protected lazy val set2arrayDouble    : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
+  override protected lazy val set2arrayBoolean   : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
+  override protected lazy val set2arrayBigInt    : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[BigInt]].map(v => BigDecimal(v).bigDecimal.asInstanceOf[AnyRef]).toArray
+  override protected lazy val set2arrayBigDecimal: Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[BigDecimal]].map(v => v.bigDecimal.asInstanceOf[AnyRef]).toArray
+  override protected lazy val set2arrayDate      : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
+  override protected lazy val set2arrayUUID      : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
+  override protected lazy val set2arrayURI       : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.map(_.toString.asInstanceOf[AnyRef]).toArray
+  override protected lazy val set2arrayByte      : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
+  override protected lazy val set2arrayShort     : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
+  override protected lazy val set2arrayChar      : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
 }

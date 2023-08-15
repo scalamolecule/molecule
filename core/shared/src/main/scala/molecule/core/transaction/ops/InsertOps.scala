@@ -11,32 +11,34 @@ trait InsertOps {
     ns: String,
     attr: String,
     tplIndex: Int,
-    handleScalaValue: T => Any,
+    transformValue: T => Any,
+    handleValue: T => Any
   ): Product => Unit
 
   protected def addOneOpt[T](
     ns: String,
     attr: String,
     tplIndex: Int,
-    handleScalaValue: T => Any,
+    transformValue: T => Any,
+    handleValue: T => Any
   ): Product => Unit
 
   protected def addSet[T](
     ns: String,
     attr: String,
-    set2array: Set[T] => Array[AnyRef],
+    set2array: Set[Any] => Array[AnyRef],
     refNsOpt: Option[String],
     tplIndex: Int,
-    handleScalaValue: T => Any,
+    transformValue: T => Any,
   ): Product => Unit
 
   protected def addSetOpt[T](
     ns: String,
     attr: String,
-    set2array: Set[T] => Array[AnyRef],
+    set2array: Set[Any] => Array[AnyRef],
     refNsOpt: Option[String],
     tplIndex: Int,
-    handleScalaValue: T => Any,
+    transformValue: T => Any,
   ): Product => Unit
 
   protected def addRef(
@@ -67,33 +69,48 @@ trait InsertOps {
   ): Product => Unit
 
   // Typed input value to expected db type
-  protected lazy val valueString    : String => Any     = ???
-  protected lazy val valueInt       : Int => Any        = ???
-  protected lazy val valueLong      : Long => Any       = ???
-  protected lazy val valueFloat     : Float => Any      = ???
-  protected lazy val valueDouble    : Double => Any     = ???
-  protected lazy val valueBoolean   : Boolean => Any    = ???
-  protected lazy val valueBigInt    : BigInt => Any     = ???
-  protected lazy val valueBigDecimal: BigDecimal => Any = ???
-  protected lazy val valueDate      : Date => Any       = ???
-  protected lazy val valueUUID      : UUID => Any       = ???
-  protected lazy val valueURI       : URI => Any        = ???
-  protected lazy val valueByte      : Byte => Any       = ???
-  protected lazy val valueShort     : Short => Any      = ???
-  protected lazy val valueChar      : Char => Any       = ???
+  protected lazy val transformString    : String => Any     = ???
+  protected lazy val transformInt       : Int => Any        = ???
+  protected lazy val transformLong      : Long => Any       = ???
+  protected lazy val transformFloat     : Float => Any      = ???
+  protected lazy val transformDouble    : Double => Any     = ???
+  protected lazy val transformBoolean   : Boolean => Any    = ???
+  protected lazy val transformBigInt    : BigInt => Any     = ???
+  protected lazy val transformBigDecimal: BigDecimal => Any = ???
+  protected lazy val transformDate      : Date => Any       = ???
+  protected lazy val transformUUID      : UUID => Any       = ???
+  protected lazy val transformURI       : URI => Any        = ???
+  protected lazy val transformByte      : Byte => Any       = ???
+  protected lazy val transformShort     : Short => Any      = ???
+  protected lazy val transformChar      : Char => Any       = ???
 
-  protected lazy val set2arrayString    : Set[String] => Array[AnyRef]     = ???
-  protected lazy val set2arrayInt       : Set[Int] => Array[AnyRef]        = ???
-  protected lazy val set2arrayLong      : Set[Long] => Array[AnyRef]       = ???
-  protected lazy val set2arrayFloat     : Set[Float] => Array[AnyRef]      = ???
-  protected lazy val set2arrayDouble    : Set[Double] => Array[AnyRef]     = ???
-  protected lazy val set2arrayBoolean   : Set[Boolean] => Array[AnyRef]    = ???
-  protected lazy val set2arrayBigInt    : Set[BigInt] => Array[AnyRef]     = ???
-  protected lazy val set2arrayBigDecimal: Set[BigDecimal] => Array[AnyRef] = ???
-  protected lazy val set2arrayDate      : Set[Date] => Array[AnyRef]       = ???
-  protected lazy val set2arrayUUID      : Set[UUID] => Array[AnyRef]       = ???
-  protected lazy val set2arrayURI       : Set[URI] => Array[AnyRef]        = ???
-  protected lazy val set2arrayByte      : Set[Byte] => Array[AnyRef]       = ???
-  protected lazy val set2arrayShort     : Set[Short] => Array[AnyRef]      = ???
-  protected lazy val set2arrayChar      : Set[Char] => Array[AnyRef]       = ???
+  protected lazy val handleString    : String => Any     = ???
+  protected lazy val handleInt       : Int => Any        = ???
+  protected lazy val handleLong      : Long => Any       = ???
+  protected lazy val handleFloat     : Float => Any      = ???
+  protected lazy val handleDouble    : Double => Any     = ???
+  protected lazy val handleBoolean   : Boolean => Any    = ???
+  protected lazy val handleBigInt    : BigInt => Any     = ???
+  protected lazy val handleBigDecimal: BigDecimal => Any = ???
+  protected lazy val handleDate      : Date => Any       = ???
+  protected lazy val handleUUID      : UUID => Any       = ???
+  protected lazy val handleURI       : URI => Any        = ???
+  protected lazy val handleByte      : Byte => Any       = ???
+  protected lazy val handleShort     : Short => Any      = ???
+  protected lazy val handleChar      : Char => Any       = ???
+
+  protected lazy val set2arrayString    : Set[Any] => Array[AnyRef] = ???
+  protected lazy val set2arrayInt       : Set[Any] => Array[AnyRef] = ???
+  protected lazy val set2arrayLong      : Set[Any] => Array[AnyRef] = ???
+  protected lazy val set2arrayFloat     : Set[Any] => Array[AnyRef] = ???
+  protected lazy val set2arrayDouble    : Set[Any] => Array[AnyRef] = ???
+  protected lazy val set2arrayBoolean   : Set[Any] => Array[AnyRef] = ???
+  protected lazy val set2arrayBigInt    : Set[Any] => Array[AnyRef] = ???
+  protected lazy val set2arrayBigDecimal: Set[Any] => Array[AnyRef] = ???
+  protected lazy val set2arrayDate      : Set[Any] => Array[AnyRef] = ???
+  protected lazy val set2arrayUUID      : Set[Any] => Array[AnyRef] = ???
+  protected lazy val set2arrayURI       : Set[Any] => Array[AnyRef] = ???
+  protected lazy val set2arrayByte      : Set[Any] => Array[AnyRef] = ???
+  protected lazy val set2arrayShort     : Set[Any] => Array[AnyRef] = ???
+  protected lazy val set2arrayChar      : Set[Any] => Array[AnyRef] = ???
 }

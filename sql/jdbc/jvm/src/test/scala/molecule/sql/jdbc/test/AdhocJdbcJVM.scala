@@ -1,6 +1,7 @@
 package molecule.sql.jdbc.test
 
 import molecule.core.util.Executor._
+import molecule.coreTests.dataModels.core.dsl.Types.Ns
 import molecule.sql.jdbc.async._
 import molecule.sql.jdbc.setup.JdbcTestSuite
 import utest._

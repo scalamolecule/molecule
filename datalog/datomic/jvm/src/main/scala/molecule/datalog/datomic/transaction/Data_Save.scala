@@ -43,7 +43,8 @@ trait Data_Save extends DatomicBase_JVM with SaveOps with MoleculeLogging { self
   override protected def addOne[T](
     ns: String,
     attr: String,
-    optValue: Option[T]
+    optValue: Option[T],
+    handleValue: T => Any
   ): Unit = {
     optValue.foreach { v =>
       appendStmt(add, e, kw(ns, attr), v.asInstanceOf[AnyRef])
@@ -54,11 +55,15 @@ trait Data_Save extends DatomicBase_JVM with SaveOps with MoleculeLogging { self
     ns: String,
     attr: String,
     optSet: Option[Set[T]],
-    set2array: Set[T] => Array[AnyRef],
+    handleValue: T => Any,
+    //    set2array: Set[T] => Array[AnyRef],
+    set2array: Set[Any] => Array[AnyRef],
   ): Unit = {
     optSet.foreach { set =>
       val a = kw(ns, attr)
       set.foreach { v =>
+        //        println(v)
+        //        println(v.getClass)
         appendStmt(add, e, a, v.asInstanceOf[AnyRef])
       }
     }
@@ -97,18 +102,48 @@ trait Data_Save extends DatomicBase_JVM with SaveOps with MoleculeLogging { self
   }
 
   // Save Int as Long in Datomic
-  override protected lazy val valueString     = (v: String) => v
-  override protected lazy val valueInt        = (v: Int) => v
-  override protected lazy val valueLong       = (v: Long) => v
-  override protected lazy val valueFloat      = (v: Float) => v
-  override protected lazy val valueDouble     = (v: Double) => v
-  override protected lazy val valueBoolean    = (v: Boolean) => v
-  override protected lazy val valueBigInt     = (v: BigInt) => v.bigInteger
-  override protected lazy val valueBigDecimal = (v: BigDecimal) => v.bigDecimal
-  override protected lazy val valueDate       = (v: Date) => v
-  override protected lazy val valueUUID       = (v: UUID) => v
-  override protected lazy val valueURI        = (v: URI) => v
-  override protected lazy val valueByte       = (v: Byte) => v.toInt
-  override protected lazy val valueShort      = (v: Short) => v.toInt
-  override protected lazy val valueChar       = (v: Char) => v.toString
+  override protected lazy val transformString     = (v: String) => v
+  override protected lazy val transformInt        = (v: Int) => v
+  override protected lazy val transformLong       = (v: Long) => v
+  override protected lazy val transformFloat      = (v: Float) => v
+  override protected lazy val transformDouble     = (v: Double) => v
+  override protected lazy val transformBoolean    = (v: Boolean) => v
+  override protected lazy val transformBigInt     = (v: BigInt) => v.bigInteger
+  override protected lazy val transformBigDecimal = (v: BigDecimal) => v.bigDecimal
+  override protected lazy val transformDate       = (v: Date) => v
+  override protected lazy val transformUUID       = (v: UUID) => v
+  override protected lazy val transformURI        = (v: URI) => v
+  override protected lazy val transformByte       = (v: Byte) => v.toInt
+  override protected lazy val transformShort      = (v: Short) => v.toInt
+  override protected lazy val transformChar       = (v: Char) => v.toString
+
+  override protected lazy val handleString     = (v: Any) => v
+  override protected lazy val handleInt        = (v: Any) => v
+  override protected lazy val handleLong       = (v: Any) => v
+  override protected lazy val handleFloat      = (v: Any) => v
+  override protected lazy val handleDouble     = (v: Any) => v
+  override protected lazy val handleBoolean    = (v: Any) => v
+  override protected lazy val handleBigInt     = (v: Any) => v.asInstanceOf[BigInt].bigInteger
+  override protected lazy val handleBigDecimal = (v: Any) => v.asInstanceOf[BigDecimal].bigDecimal
+  override protected lazy val handleDate       = (v: Any) => v
+  override protected lazy val handleUUID       = (v: Any) => v
+  override protected lazy val handleURI        = (v: Any) => v
+  override protected lazy val handleByte       = (v: Any) => v.asInstanceOf[Byte].toInt
+  override protected lazy val handleShort      = (v: Any) => v.asInstanceOf[Short].toInt
+  override protected lazy val handleChar       = (v: Any) => v.toString
+
+  override protected lazy val set2arrayString    : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
+  override protected lazy val set2arrayInt       : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
+  override protected lazy val set2arrayLong      : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
+  override protected lazy val set2arrayFloat     : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.map(_.toString.toDouble.asInstanceOf[AnyRef]).toArray
+  override protected lazy val set2arrayDouble    : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
+  override protected lazy val set2arrayBoolean   : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
+  override protected lazy val set2arrayBigInt    : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[BigInt]].map(v => BigDecimal(v).bigDecimal.asInstanceOf[AnyRef]).toArray
+  override protected lazy val set2arrayBigDecimal: Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[BigDecimal]].map(v => v.bigDecimal.asInstanceOf[AnyRef]).toArray
+  override protected lazy val set2arrayDate      : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
+  override protected lazy val set2arrayUUID      : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
+  override protected lazy val set2arrayURI       : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.map(_.toString.asInstanceOf[AnyRef]).toArray
+  override protected lazy val set2arrayByte      : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
+  override protected lazy val set2arrayShort     : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
+  override protected lazy val set2arrayChar      : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
 }
