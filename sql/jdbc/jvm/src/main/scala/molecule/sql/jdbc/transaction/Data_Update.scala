@@ -15,37 +15,32 @@ import molecule.sql.jdbc.facade.JdbcConn_jvm
 
 trait Data_Update extends JdbcBase_JVM with UpdateOps with MoleculeLogging { self: UpdateExtraction =>
 
-
   def getData(elements: List[Element]): Data = {
-    //    elements.foreach(println)
-
     curRefPath = List(getInitialNs(elements))
     val (mainElements, _) = separateTxElements(elements)
-    //    resolve(mainElements, Nil, Nil, Nil)
     resolve(mainElements)
-    //    postResolvers.foreach(_())
     addRowSetterToTables()
     (getTables, Nil)
   }
-
-  var id = 42L
 
   private def addRowSetterToTables(): Unit = {
     inserts.foreach {
       case (refPath, cols) =>
         val table         = refPath.last
-        val columnSetters = cols.map(col => s"SET $col = ?").mkString(",\n  ")
-        //        val id            = 42
+        val columnSetters = cols.map(col => s"$col = ?").mkString(",\n  ")
+        val ids_          = ids.mkString(", ")
         val stmt          =
-          s"""UPDATE $table
+          s"""UPDATE $table SET
              |  $columnSetters
-             |WHERE id = $id""".stripMargin
+             |WHERE $table.id IN($ids_)""".stripMargin
         val ps            = sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
         tableDatas(refPath) = Table(refPath, stmt, ps)
 
         val colSetters = colSettersMap(refPath)
+
         println(s"--- update -------------------  ${colSetters.length}  $refPath")
-        //          println(stmt)
+        println(stmt)
+
         colSettersMap(refPath) = Nil
         val rowSetter = (ps: PS, idsMap: IdsMap, _: RowIndex) => {
           // Set all column values for this row in this insert/batch
@@ -155,9 +150,8 @@ trait Data_Update extends JdbcBase_JVM with UpdateOps with MoleculeLogging { sel
   }
 
 
-  override def handleIds(ids: Seq[Long]): Unit = {
-    id = ids.head
-    //    ???
+  override def handleIds(ids1: Seq[Long]): Unit = {
+    ids = ids1
   }
 
   override def handleUniqueFilterAttr(filterAttr: AttrOneTac): Unit = {
@@ -169,35 +163,26 @@ trait Data_Update extends JdbcBase_JVM with UpdateOps with MoleculeLogging { sel
   }
 
   override def updateOne[T](
-    a: Attr,
+    a: AttrOne,
     vs: Seq[T],
-    transform: T => Any
+    handleValue: T => Any
   ): Unit = {
-    //    val (curPath, paramIndex) = updateInserts(a.name)
-    //    val colSetter: Setter     = optValue.fold {
-    //      (ps: PS, _: IdsMap, _: RowIndex) => {
-    //        ps.setNull(paramIndex, 0)
-    //        //        printValue(0, ns, attr, -1, paramIndex, "None")
-    //      }
-    //    } { value =>
-    //      (ps: PS, _: IdsMap, _: RowIndex) => {
-    //        handleValue(value).asInstanceOf[(PS, Int) => Unit](ps, paramIndex)
-    //        //        printValue(0, ns, attr, -1, paramIndex, value)
-    //      }
-    //    }
-    //    addColSetter(curPath, colSetter)
-
-    ???
+    val (curPath, paramIndex) = updateInserts(a.name)
+    val colSetter: Setter     = {
+      (ps: PS, _: IdsMap, _: RowIndex) =>
+        handleValue(vs.head).asInstanceOf[(PS, Int) => Unit](ps, paramIndex)
+    }
+    addColSetter(curPath, colSetter)
   }
 
   override def updateSetEq[T](
-    a: Attr,
+    a: AttrSet,
   ): Unit = {
     ???
   }
 
   override def updateSetAdd[T](
-    a: Attr,
+    a: AttrSet,
     sets: Seq[Set[T]],
     transform: T => Any,
     retractCur: Boolean
@@ -206,7 +191,7 @@ trait Data_Update extends JdbcBase_JVM with UpdateOps with MoleculeLogging { sel
   }
 
   override def updateSetSwab[T](
-    a: Attr,
+    a: AttrSet,
     sets: Seq[Set[T]],
     transform: T => Any
   ): Unit = {
@@ -214,7 +199,7 @@ trait Data_Update extends JdbcBase_JVM with UpdateOps with MoleculeLogging { sel
   }
 
   override def updateSetRemove[T](
-    a: Attr,
+    a: AttrSet,
     set: Set[T],
     transform: T => Any
   ): Unit = {
@@ -327,21 +312,21 @@ trait Data_Update extends JdbcBase_JVM with UpdateOps with MoleculeLogging { sel
     }
   }
 
-  //  override protected lazy val handleString     = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.asInstanceOf[String])
-  //  override protected lazy val handleInt        = (v: Any) => (ps: PS, n: Int) => ps.setInt(n, v.asInstanceOf[Int])
-  //  override protected lazy val handleLong       = (v: Any) => (ps: PS, n: Int) => ps.setLong(n, v.asInstanceOf[Long])
-  //  override protected lazy val handleFloat      = (v: Any) => (ps: PS, n: Int) => ps.setFloat(n, v.asInstanceOf[Float])
-  //  override protected lazy val handleDouble     = (v: Any) => (ps: PS, n: Int) => ps.setDouble(n, v.asInstanceOf[Double])
-  //  override protected lazy val handleBoolean    = (v: Any) => (ps: PS, n: Int) => ps.setBoolean(n, v.asInstanceOf[Boolean])
-  //  override protected lazy val handleBigInt     = (v: Any) => (ps: PS, n: Int) => ps.setBigDecimal(n, BigDecimal(v.asInstanceOf[BigInt]).bigDecimal)
-  //  override protected lazy val handleBigDecimal = (v: Any) => (ps: PS, n: Int) => ps.setBigDecimal(n, v.asInstanceOf[BigDecimal].bigDecimal)
-  //  override protected lazy val handleDate       = (v: Any) => (ps: PS, n: Int) => ps.setDate(n, new java.sql.Date(v.asInstanceOf[Date].getTime))
-  //  override protected lazy val handleUUID       = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.toString)
-  //  override protected lazy val handleURI        = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.toString)
-  //  override protected lazy val handleByte       = (v: Any) => (ps: PS, n: Int) => ps.setByte(n, v.asInstanceOf[Byte])
-  //  override protected lazy val handleShort      = (v: Any) => (ps: PS, n: Int) => ps.setShort(n, v.asInstanceOf[Short])
-  //  override protected lazy val handleChar       = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.toString)
-  //
+  override protected lazy val handleString     = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.asInstanceOf[String])
+  override protected lazy val handleInt        = (v: Any) => (ps: PS, n: Int) => ps.setInt(n, v.asInstanceOf[Int])
+  override protected lazy val handleLong       = (v: Any) => (ps: PS, n: Int) => ps.setLong(n, v.asInstanceOf[Long])
+  override protected lazy val handleFloat      = (v: Any) => (ps: PS, n: Int) => ps.setFloat(n, v.asInstanceOf[Float])
+  override protected lazy val handleDouble     = (v: Any) => (ps: PS, n: Int) => ps.setDouble(n, v.asInstanceOf[Double])
+  override protected lazy val handleBoolean    = (v: Any) => (ps: PS, n: Int) => ps.setBoolean(n, v.asInstanceOf[Boolean])
+  override protected lazy val handleBigInt     = (v: Any) => (ps: PS, n: Int) => ps.setBigDecimal(n, BigDecimal(v.asInstanceOf[BigInt]).bigDecimal)
+  override protected lazy val handleBigDecimal = (v: Any) => (ps: PS, n: Int) => ps.setBigDecimal(n, v.asInstanceOf[BigDecimal].bigDecimal)
+  override protected lazy val handleDate       = (v: Any) => (ps: PS, n: Int) => ps.setDate(n, new java.sql.Date(v.asInstanceOf[Date].getTime))
+  override protected lazy val handleUUID       = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.toString)
+  override protected lazy val handleURI        = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.toString)
+  override protected lazy val handleByte       = (v: Any) => (ps: PS, n: Int) => ps.setByte(n, v.asInstanceOf[Byte])
+  override protected lazy val handleShort      = (v: Any) => (ps: PS, n: Int) => ps.setShort(n, v.asInstanceOf[Short])
+  override protected lazy val handleChar       = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.toString)
+
   //  override protected lazy val set2arrayString    : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
   //  override protected lazy val set2arrayInt       : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
   //  override protected lazy val set2arrayLong      : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray

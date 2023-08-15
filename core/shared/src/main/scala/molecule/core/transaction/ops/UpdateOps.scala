@@ -12,30 +12,31 @@ trait UpdateOps extends Action2Data {
   protected def handleFilterAttr(filterAttr: AttrOneTac): Unit
 
   def updateOne[T](
-    a: Attr,
+    a: AttrOne,
     vs: Seq[T],
-    transform: T => Any
+//    transform: T => Any,
+    handleValue: T => Any
   ): Unit
 
   def updateSetEq[T](
-    a: Attr,
+    a: AttrSet,
   ): Unit
 
   def updateSetAdd[T](
-    a: Attr,
+    a: AttrSet,
     sets: Seq[Set[T]],
     transform: T => Any,
     retractCur: Boolean
   ): Unit
 
   def updateSetSwab[T](
-    a: Attr,
+    a: AttrSet,
     sets: Seq[Set[T]],
     transform: T => Any
   ): Unit
 
   def updateSetRemove[T](
-    a: Attr,
+    a: AttrSet,
     set: Set[T],
     transform: T => Any
   ): Unit

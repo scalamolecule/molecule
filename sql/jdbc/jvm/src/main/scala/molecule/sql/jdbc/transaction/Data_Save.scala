@@ -17,8 +17,6 @@ trait Data_Save
   var postResolvers = List.empty[() => Unit]
 
   def getData(elements: List[Element]): Data = {
-    //    elements.foreach(println)
-
     curRefPath = List(getInitialNs(elements))
     val (mainElements, _) = separateTxElements(elements)
     resolve(mainElements)

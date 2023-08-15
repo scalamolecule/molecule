@@ -36,6 +36,7 @@ trait JdbcBase_JVM extends JdbcDataType_JVM with ModelUtils {
   protected var inserts = List.empty[(List[String], List[String])]
   protected var joins   = List.empty[(List[String], String, String, List[String], List[String])]
 
+  protected var ids = Seq.empty[Long]
 
   // PreparedStatement param indexes for each (table, col) coordinate
   protected val paramIndexes   = mutable.Map.empty[(List[String], String), Int]
