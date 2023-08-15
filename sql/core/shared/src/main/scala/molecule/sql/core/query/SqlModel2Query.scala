@@ -77,6 +77,8 @@ class SqlModel2Query[Tpl](elements0: List[Element])
       if (allGroupByCols.isEmpty) "" else allGroupByCols.mkString("\nGROUP BY ", ", ", "")
     }
 
+    val having_ = if (having.isEmpty) "" else having.mkString("\nHAVING ", ", ", "")
+
     val orderBy_ = if (orderBy.isEmpty) "" else {
       orderBy.map {
         case (_, _, col, dir) => col + dir
@@ -88,20 +90,15 @@ class SqlModel2Query[Tpl](elements0: List[Element])
     val stmt =
       s"""SELECT$distinct_
          |  $select_
-         |FROM $from$joins_$where_$groupBy_$orderBy_$fetch_$limit_;""".stripMargin
+         |FROM $from$joins_$where_$groupBy_$having_$orderBy_$fetch_$limit_;""".stripMargin
 
     //    println(stmt)
 
-    //      |  ARRAY_AGG(Ns_refs_Ref.Ref_id) Ns_refs
-    //      |  Ns_refs = ARRAY [1] AND
-    //      |  MIN(Ns.int)
-    """SELECT DISTINCT
-      |  ARRAY_AGG(Ns.i)
+    """SELECT
+      |  Ns.ints
       |FROM Ns
+      |  ;
       |""".stripMargin
-    //      |WHERE
-    //      |  Ns.int IS NOT NULL
-    //      |  Ns_refs_Ref.Ref_id IN (1) AND
 
     stmt
   }

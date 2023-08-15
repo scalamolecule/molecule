@@ -143,6 +143,7 @@ trait ResolveExprSet[Tpl] extends AggrUtils { self: SqlModel2Query[Tpl] with Lam
 
   private def attr[T](col: String, res: ResSet[T], mode: String): Unit = {
     select += s"ARRAY_AGG($col)"
+    having += "COUNT(*) > 0"
     aggregate = true
     mode match {
       case "man" => replaceCast(res.nestedArray2coalescedSet)
@@ -152,9 +153,6 @@ trait ResolveExprSet[Tpl] extends AggrUtils { self: SqlModel2Query[Tpl] with Lam
 
   private def aggr[T](col: String, fn: String, optN: Option[Int], res: ResSet[T]): Unit = {
     lazy val n = optN.getOrElse(0)
-    // Replace find/casting with aggregate function/cast
-    select -= s"ARRAY_AGG($col)"
-
     fn match {
       case "distinct" =>
         select += s"ARRAY_AGG(DISTINCT $col)"

@@ -71,6 +71,7 @@ trait Base extends BaseHelpers with JavaConversions { self: Model2Query =>
   final protected val notNull     = new ListBuffer[String]
   final protected val where       = new ListBuffer[(String, String)]
   final protected val groupBy     = new mutable.LinkedHashSet[String]
+  final protected val having      = new mutable.LinkedHashSet[String]
   final protected var orderBy     = new ListBuffer[(Int, Int, String, String)]
   final protected var fetch       = new ListBuffer[String]
   final protected var limitClause = ""

@@ -49,12 +49,13 @@ trait Data_Insert
     //    println(inserts.mkString("--- inserts\n", "\n", ""))
     inserts.foreach {
       case (refPath, cols) =>
-        val table = refPath.last
-        val stmt  =
+        val table             = refPath.last
+        val inputPlaceholders = cols.map(_ => "?").mkString(", ")
+        val stmt              =
           s"""INSERT INTO $table (
              |  ${cols.mkString(",\n  ")}
-             |) VALUES (${cols.map(_ => "?").mkString(", ")})""".stripMargin
-        val ps    = sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
+             |) VALUES ($inputPlaceholders)""".stripMargin
+        val ps                = sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
         tableInserts(refPath) = TableInsert(refPath, stmt, ps)
         rowSettersMap(refPath) = Nil
     }
@@ -124,7 +125,7 @@ trait Data_Insert
 
   // Pre-process ----------------------------------------------------------------------------------------
 
-  private def updateInsert(attr: String): (List[String], Int) = {
+  private def updateInserts(attr: String): (List[String], Int) = {
     if (inserts.exists(_._1 == curRefPath)) {
       inserts = inserts.map {
         case (path, cols) if path == curRefPath =>
@@ -146,8 +147,8 @@ trait Data_Insert
     tplIndex: Int,
     handleScalaValue: T => Any,
   ): Product => Unit = {
-    val (curPath, paramIndex) = updateInsert(attr)
-    val curLevel              = level
+    val (curPath, paramIndex) = updateInserts(attr)
+    //    val curLevel              = level
     (tpl: Product) => {
       val scalaValue  = tpl.productElement(tplIndex).asInstanceOf[T]
       val valueSetter = handleScalaValue(scalaValue).asInstanceOf[(PS, Int) => Unit]
@@ -166,8 +167,8 @@ trait Data_Insert
     tplIndex: Int,
     handleScalaValue: T => Any,
   ): Product => Unit = {
-    val (curPath, paramIndex) = updateInsert(attr)
-    val curLevel              = level
+    val (curPath, paramIndex) = updateInserts(attr)
+    //    val curLevel              = level
     (tpl: Product) => {
       tpl.productElement(tplIndex) match {
         case Some(scalaValue) =>
@@ -193,20 +194,20 @@ trait Data_Insert
   override protected def addSet[T](
     ns: String,
     attr: String,
-    baseTpe: String,
+    set2array: Set[T] => Array[AnyRef],
     refNsOpt: Option[String],
     tplIndex: Int,
     handleScalaValue: T => Any,
   ): Product => Unit = {
     refNsOpt.fold {
-      val (curPath, paramIndex) = updateInsert(attr)
+      val (curPath, paramIndex) = updateInserts(attr)
       (tpl: Product) =>
-        val array     = getArray(baseTpe, tpl.productElement(tplIndex).asInstanceOf[Set[AnyRef]])
+        val array = set2array(tpl.productElement(tplIndex).asInstanceOf[Set[T]])
         val colSetter = (ps: PS, _: IdsMap, _: RowIndex) => {
           val conn = ps.getConnection
           val arr  = conn.createArrayOf("AnyRef", array)
           ps.setArray(paramIndex, arr)
-          //        printValue(curLevel, ns, attr, tplIndex, paramIndex, scalaValue)
+          //          printValue(level, ns, attr, tplIndex, paramIndex, array.toList)
         }
         addColSetter(curPath, colSetter)
 
@@ -249,17 +250,17 @@ trait Data_Insert
   override protected def addSetOpt[T](
     ns: String,
     attr: String,
-    baseTpe: String,
+    set2array: Set[T] => Array[AnyRef],
     refNsOpt: Option[String],
     tplIndex: Int,
     handleScalaValue: T => Any,
   ): Product => Unit = {
     refNsOpt.fold {
-      val (curPath, paramIndex) = updateInsert(attr)
+      val (curPath, paramIndex) = updateInserts(attr)
       (tpl: Product) =>
         tpl.productElement(tplIndex) match {
           case Some(set: Set[_]) =>
-            val array     = getArray(baseTpe, set.asInstanceOf[Set[AnyRef]])
+            val array = set2array(set.asInstanceOf[Set[T]])
             val colSetter = (ps: PS, _: IdsMap, _: RowIndex) => {
               val conn = ps.getConnection
               val arr  = conn.createArrayOf("AnyRef", array)
@@ -319,17 +320,17 @@ trait Data_Insert
     }
   }
 
-  private def getArray(baseTpe: String, set: Set[AnyRef]): Array[AnyRef] = {
-    val array = set.toArray
-    baseTpe match {
-      case "Float"      => array.map(_.toString.toDouble.asInstanceOf[AnyRef])
-      case "BigInt"     => array.map(v => BigDecimal(v.asInstanceOf[BigInt]).bigDecimal.asInstanceOf[AnyRef])
-      case "BigDecimal" => array.map(v => v.asInstanceOf[BigDecimal].bigDecimal.asInstanceOf[AnyRef])
-      case "URI"        => array.map(_.toString.asInstanceOf[AnyRef])
-      case _            => array
-
-    }
-  }
+  //  private def getArray(baseTpe: String, set: Set[AnyRef]): Array[AnyRef] = {
+  //    val array = set.toArray
+  //    baseTpe match {
+  //      case "Float"      => array.map(_.toString.toDouble.asInstanceOf[AnyRef])
+  //      case "BigInt"     => array.map(v => BigDecimal(v.asInstanceOf[BigInt]).bigDecimal.asInstanceOf[AnyRef])
+  //      case "BigDecimal" => array.map(v => v.asInstanceOf[BigDecimal].bigDecimal.asInstanceOf[AnyRef])
+  //      case "URI"        => array.map(_.toString.asInstanceOf[AnyRef])
+  //      case _            => array
+  //
+  //    }
+  //  }
 
   override protected def addRef(ns: String, refAttr: String, refNs: String, card: Card): Product => Unit = {
     val joinTable = s"${ns}_${refAttr}_$refNs"
@@ -495,4 +496,19 @@ trait Data_Insert
   override protected lazy val valueByte       = (v: Byte) => (ps: PS, n: Int) => ps.setByte(n, v)
   override protected lazy val valueShort      = (v: Short) => (ps: PS, n: Int) => ps.setShort(n, v)
   override protected lazy val valueChar       = (v: Char) => (ps: PS, n: Int) => ps.setString(n, v.toString)
+
+  override protected lazy val set2arrayString    : Set[String] => Array[AnyRef]     = (set: Set[String]) => set.toArray
+  override protected lazy val set2arrayInt       : Set[Int] => Array[AnyRef]        = (set: Set[Int]) => set.asInstanceOf[Set[AnyRef]].toArray
+  override protected lazy val set2arrayLong      : Set[Long] => Array[AnyRef]       = (set: Set[Long]) => set.asInstanceOf[Set[AnyRef]].toArray
+  override protected lazy val set2arrayFloat     : Set[Float] => Array[AnyRef]      = (set: Set[Float]) => set.map(_.toString.toDouble.asInstanceOf[AnyRef]).toArray
+  override protected lazy val set2arrayDouble    : Set[Double] => Array[AnyRef]     = (set: Set[Double]) => set.asInstanceOf[Set[AnyRef]].toArray
+  override protected lazy val set2arrayBoolean   : Set[Boolean] => Array[AnyRef]    = (set: Set[Boolean]) => set.asInstanceOf[Set[AnyRef]].toArray
+  override protected lazy val set2arrayBigInt    : Set[BigInt] => Array[AnyRef]     = (set: Set[BigInt]) => set.map(v => BigDecimal(v).bigDecimal.asInstanceOf[AnyRef]).toArray
+  override protected lazy val set2arrayBigDecimal: Set[BigDecimal] => Array[AnyRef] = (set: Set[BigDecimal]) => set.map(v => v.bigDecimal.asInstanceOf[AnyRef]).toArray
+  override protected lazy val set2arrayDate      : Set[Date] => Array[AnyRef]       = (set: Set[Date]) => set.toArray
+  override protected lazy val set2arrayUUID      : Set[UUID] => Array[AnyRef]       = (set: Set[UUID]) => set.toArray
+  override protected lazy val set2arrayURI       : Set[URI] => Array[AnyRef]        = (set: Set[URI]) => set.map(_.toString.asInstanceOf[AnyRef]).toArray
+  override protected lazy val set2arrayByte      : Set[Byte] => Array[AnyRef]       = (set: Set[Byte]) => set.asInstanceOf[Set[AnyRef]].toArray
+  override protected lazy val set2arrayShort     : Set[Short] => Array[AnyRef]      = (set: Set[Short]) => set.asInstanceOf[Set[AnyRef]].toArray
+  override protected lazy val set2arrayChar      : Set[Char] => Array[AnyRef]       = (set: Set[Char]) => set.asInstanceOf[Set[AnyRef]].toArray
 }

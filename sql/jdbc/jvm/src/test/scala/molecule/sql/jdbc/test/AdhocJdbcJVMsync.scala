@@ -29,33 +29,69 @@ object AdhocJdbcJVMsync extends JdbcTestSuite {
       //      Ns.i.insert(4, 3, 2).transact
 
 
+      //      Ns.int(1).save.transact.id
+      //      Ns.int.query.get ==> List(1)
 
-      printQuery(
-        """SELECT DISTINCT
-          |  s, i,
-          |  ARRAY_SLICE(
-          |    ARRAY_AGG(Ns.int order by Ns.int)
-          |      FILTER (WHERE Ns.int IS NOT NULL),
-          |    1,
-          |    LEAST(
-          |      2,
-          |      ARRAY_LENGTH(
-          |        ARRAY_AGG(Ns.int)
-          |          FILTER (WHERE Ns.int IS NOT NULL)
-          |      )
-          |    )
-          |  )
-          |FROM Ns
-          |WHERE
-          |  Ns.s   IS NOT NULL AND
-          |  Ns.i   IS NOT NULL AND
-          |  Ns.int IS NOT NULL
-          |group by s, i
-          |""".stripMargin
-      )
+
+//      Ns.i.ints.insert((1, Set(int1, int2))).transact
+//      Ns.i(1).ints.query.get ==> List((1, Set(int1, int2)))
+
+//      Ns.i(2).ints(Set(int2, int3)).save.transact
+//      Ns.i(2).ints.query.get ==> List((2, Set(int2, int3)))
+
+
+
+      // Saving empty list of Sets is ignored
+      Ns.ints(Seq.empty[Set[Int]]).save.transact
+      Ns.ints.query.get ==> List(Set())
+
+
+
+
+
+
+
+
+      //      val id = Ns.int(3).save.transact.id
+      //      Ns.int.query.get ==> List(1)
+      //
+      //      Ns(id).int(2).update.transact
+      //      Ns.int.query.get ==> List(2)
+
+
+      //      val List(a, b) = Ns.int.insert(1, 2).transact.ids
+      //      Ns.int(3).save.transact
+      //      Ns.int.query.get ==> List(1, 2, 3)
+      //      Ns(a).int(10).update.transact
+      //      Ns(b).delete.transact
+      //      Ns.int.query.get ==> List(3, 10)
+
+
+      //      printQuery(
+      //        """SELECT DISTINCT
+      //          |  s, i,
+      //          |  ARRAY_SLICE(
+      //          |    ARRAY_AGG(Ns.int order by Ns.int)
+      //          |      FILTER (WHERE Ns.int IS NOT NULL),
+      //          |    1,
+      //          |    LEAST(
+      //          |      2,
+      //          |      ARRAY_LENGTH(
+      //          |        ARRAY_AGG(Ns.int)
+      //          |          FILTER (WHERE Ns.int IS NOT NULL)
+      //          |      )
+      //          |    )
+      //          |  )
+      //          |FROM Ns
+      //          |WHERE
+      //          |  Ns.s   IS NOT NULL AND
+      //          |  Ns.i   IS NOT NULL AND
+      //          |  Ns.int IS NOT NULL
+      //          |group by s, i
+      //          |""".stripMargin
+      //      )
 
       //      Ns.i(min(2)).query.get ==> List(Set(1, 2))
-
 
 
       //      Ns.int.insert(List(int1, int2, int3)).transact
@@ -63,6 +99,5 @@ object AdhocJdbcJVMsync extends JdbcTestSuite {
       //        _ <- Ns.int(min(1)).query.get.map(_ ==> List(Set(int1)))
       //      Ns.int(min(2)).query.get.map(_ ==> List(Set(int1, int2)))
     }
-
   }
 }

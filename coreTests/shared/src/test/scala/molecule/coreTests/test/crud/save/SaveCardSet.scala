@@ -35,8 +35,10 @@ trait SaveCardSet extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync 
           err ==> "Can only save one Set of values for Set attribute `Ns.ints`. Found: Set(1), Set(2)"
         }
 
-        // Saving empty list of Sets is ignored
+        // Empty values are ignored
+        _ <- Ns.ints.query.get.map(_ ==> List())
         _ <- Ns.ints(Seq.empty[Set[Int]]).save.transact
+        _ <- Ns.ints(Seq(Set.empty[Int])).save.transact
         _ <- Ns.ints.query.get.map(_ ==> List())
 
 

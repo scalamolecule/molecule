@@ -52,6 +52,8 @@ case class JdbcQueryResolveOffset[Tpl](
     val sortedRows: Row = getRawData2(conn)
     val totalCount      = getRowCount(sortedRows)
 
+    //    println("sortedRows : " + sortedRows)
+    //    println("total count: " + totalCount)
 
     if (isNested) {
       val nestedRows    = rows2nested(sortedRows)

@@ -86,12 +86,17 @@ trait ResolveBase extends BaseHelpers { self: Base =>
     (v: AnyRef) => v.asInstanceOf[jList[_]].toArray.toSet.map(value)
 
   protected def sqlArray2set[T](row: Row, n: Int, getValue: RS => T): Set[T] = {
-    val arrayResultSet = row.getArray(n).getResultSet
-    var set            = Set.empty[T]
-    while (arrayResultSet.next()) {
-      set += getValue(arrayResultSet)
+    val array = row.getArray(n)
+    if (row.wasNull()) {
+      Set.empty[T]
+    } else {
+      val arrayResultSet = array.getResultSet
+      var set            = Set.empty[T]
+      while (arrayResultSet.next()) {
+        set += getValue(arrayResultSet)
+      }
+      set
     }
-    set
   }
 
   protected lazy val valueString    : RS => String     = (rs: RS) => rs.getString(2)

@@ -31,12 +31,13 @@ trait Data_Save
   private def addRowSetterToTableInserts(): Unit = {
     inserts.foreach {
       case (refPath, cols) =>
-        val table = refPath.last
-        val stmt  =
+        val table             = refPath.last
+        val inputPlaceholders = cols.map(_ => "?").mkString(", ")
+        val stmt              =
           s"""INSERT INTO $table (
              |  ${cols.mkString(",\n  ")}
-             |) VALUES (${cols.map(_ => "?").mkString(", ")})""".stripMargin
-        val ps    = sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
+             |) VALUES ($inputPlaceholders)""".stripMargin
+        val ps                = sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
         tableInserts(refPath) = TableInsert(refPath, stmt, ps)
 
         val colSetters = colSettersMap(refPath)
@@ -70,43 +71,67 @@ trait Data_Save
   }
 
 
-  override protected def addV(ns: String, attr: String, optValue: Option[Any]): Unit = {
-    val curPath = curRefPath
-    if (inserts.exists(_._1 == curPath)) {
+  private def updateInserts(attr: String): (List[String], Int) = {
+    if (inserts.exists(_._1 == curRefPath)) {
       inserts = inserts.map {
-        case (path, cols) if path == curPath =>
-          paramIndexes += ((curPath, attr) -> (cols.length + 1))
+        case (path, cols) if path == curRefPath =>
+          paramIndexes += (curRefPath, attr) -> (cols.length + 1)
           (path, cols :+ attr)
 
         case other => other
       }
     } else {
-      paramIndexes += (curPath, attr) -> 1
-      inserts = inserts :+ (curPath, List(attr))
+      paramIndexes += (curRefPath, attr) -> 1
+      inserts = inserts :+ (curRefPath, List(attr))
     }
+    (curRefPath, paramIndexes(curRefPath, attr))
+  }
 
-    val paramIndex        = paramIndexes(curPath, attr)
-    val colSetter: Setter = optValue.fold {
+  override protected def addOne[T](
+    ns: String,
+    attr: String,
+    optValue: Option[T]
+  ): Unit = {
+    val (curPath, paramIndex) = updateInserts(attr)
+    val colSetter: Setter     = optValue.fold {
       (ps: PS, _: IdsMap, _: RowIndex) => {
         ps.setNull(paramIndex, 0)
-//        printValue(0, ns, attr, -1, paramIndex, "None")
+        //        printValue(0, ns, attr, -1, paramIndex, "None")
       }
     } { value =>
       (ps: PS, _: IdsMap, _: RowIndex) => {
         value.asInstanceOf[(PS, Int) => Unit](ps, paramIndex)
-//        printValue(0, ns, attr, -1, paramIndex, value)
+        //        printValue(0, ns, attr, -1, paramIndex, value)
       }
     }
     addColSetter(curPath, colSetter)
   }
 
-  override protected def addSet[T](ns: String, attr: String, optSet: Option[Set[T]]): Unit = {
-    //    optSet.foreach { set =>
-    //      val a = kw(ns, attr)
-    //      set.foreach { v =>
-    //        appendStmt(add, e, a, v.asInstanceOf[AnyRef])
-    //      }
-    //    }
+  override protected def addSet[T](
+    ns: String,
+    attr: String,
+    optSet: Option[Set[T]],
+    set2array: Set[T] => Array[AnyRef]
+  ): Unit = {
+    val (curPath, paramIndex) = updateInserts(attr)
+    val colSetter: Setter     = optSet.fold {
+      (ps: PS, _: IdsMap, _: RowIndex) => {
+        ps.setNull(paramIndex, 0)
+        //        printValue(0, ns, attr, -1, paramIndex, "None")
+      }
+    } { set =>
+      (ps: PS, _: IdsMap, _: RowIndex) => {
+        if (set.isEmpty) {
+          ps.setNull(paramIndex, 0)
+        } else {
+          val conn = ps.getConnection
+          val arr  = conn.createArrayOf("AnyRef", set2array(set))
+          ps.setArray(paramIndex, arr)
+          //        printValue(level, ns, attr, tplIndex, paramIndex, array)
+        }
+      }
+    }
+    addColSetter(curPath, colSetter)
   }
 
   override protected def addRef(ns: String, refAttr: String, refNs: String, card: Card): Unit = {
@@ -153,7 +178,7 @@ trait Data_Save
       postResolvers = postResolvers :+ (() => {
         val colSetter: Setter = (ps: PS, idsMap: IdsMap, rowIndex: RowIndex) => {
           val refId = idsMap(refPath)(rowIndex)
-//          printValue(0, ns, refAttr, -1, paramIndex, refId)
+          //          printValue(0, ns, refAttr, -1, paramIndex, refId)
           ps.setLong(paramIndex, refId)
         }
         addColSetter(curPath, colSetter)
@@ -217,4 +242,19 @@ trait Data_Save
   override protected lazy val valueByte       = (v: Byte) => (ps: PS, n: Int) => ps.setByte(n, v)
   override protected lazy val valueShort      = (v: Short) => (ps: PS, n: Int) => ps.setShort(n, v)
   override protected lazy val valueChar       = (v: Char) => (ps: PS, n: Int) => ps.setString(n, v.toString)
+
+  override protected lazy val set2arrayString    : Set[String] => Array[AnyRef]     = (set: Set[String]) => set.toArray
+  override protected lazy val set2arrayInt       : Set[Int] => Array[AnyRef]        = (set: Set[Int]) => set.asInstanceOf[Set[AnyRef]].toArray
+  override protected lazy val set2arrayLong      : Set[Long] => Array[AnyRef]       = (set: Set[Long]) => set.asInstanceOf[Set[AnyRef]].toArray
+  override protected lazy val set2arrayFloat     : Set[Float] => Array[AnyRef]      = (set: Set[Float]) => set.map(_.toString.toDouble.asInstanceOf[AnyRef]).toArray
+  override protected lazy val set2arrayDouble    : Set[Double] => Array[AnyRef]     = (set: Set[Double]) => set.asInstanceOf[Set[AnyRef]].toArray
+  override protected lazy val set2arrayBoolean   : Set[Boolean] => Array[AnyRef]    = (set: Set[Boolean]) => set.asInstanceOf[Set[AnyRef]].toArray
+  override protected lazy val set2arrayBigInt    : Set[BigInt] => Array[AnyRef]     = (set: Set[BigInt]) => set.map(v => BigDecimal(v).bigDecimal.asInstanceOf[AnyRef]).toArray
+  override protected lazy val set2arrayBigDecimal: Set[BigDecimal] => Array[AnyRef] = (set: Set[BigDecimal]) => set.map(v => v.bigDecimal.asInstanceOf[AnyRef]).toArray
+  override protected lazy val set2arrayDate      : Set[Date] => Array[AnyRef]       = (set: Set[Date]) => set.toArray
+  override protected lazy val set2arrayUUID      : Set[UUID] => Array[AnyRef]       = (set: Set[UUID]) => set.toArray
+  override protected lazy val set2arrayURI       : Set[URI] => Array[AnyRef]        = (set: Set[URI]) => set.map(_.toString.asInstanceOf[AnyRef]).toArray
+  override protected lazy val set2arrayByte      : Set[Byte] => Array[AnyRef]       = (set: Set[Byte]) => set.asInstanceOf[Set[AnyRef]].toArray
+  override protected lazy val set2arrayShort     : Set[Short] => Array[AnyRef]      = (set: Set[Short]) => set.asInstanceOf[Set[AnyRef]].toArray
+  override protected lazy val set2arrayChar      : Set[Char] => Array[AnyRef]       = (set: Set[Char]) => set.asInstanceOf[Set[AnyRef]].toArray
 }

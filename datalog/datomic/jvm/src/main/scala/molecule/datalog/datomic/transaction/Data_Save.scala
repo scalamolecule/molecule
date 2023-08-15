@@ -40,13 +40,22 @@ trait Data_Save extends DatomicBase_JVM with SaveOps with MoleculeLogging { self
     getRawStmts(elements, newId, init = false)
   }
 
-  override protected def addV(ns: String, attr: String, optValue: Option[Any]): Unit = {
+  override protected def addOne[T](
+    ns: String,
+    attr: String,
+    optValue: Option[T]
+  ): Unit = {
     optValue.foreach { v =>
       appendStmt(add, e, kw(ns, attr), v.asInstanceOf[AnyRef])
     }
   }
 
-  override protected def addSet[T](ns: String, attr: String, optSet: Option[Set[T]]): Unit = {
+  override protected def addSet[T](
+    ns: String,
+    attr: String,
+    optSet: Option[Set[T]],
+    set2array: Set[T] => Array[AnyRef],
+  ): Unit = {
     optSet.foreach { set =>
       val a = kw(ns, attr)
       set.foreach { v =>
@@ -55,7 +64,12 @@ trait Data_Save extends DatomicBase_JVM with SaveOps with MoleculeLogging { self
     }
   }
 
-  override protected def addRef(ns: String, refAttr: String, refNs: String, card: Card): Unit = {
+  override protected def addRef(
+    ns: String,
+    refAttr: String,
+    refNs: String,
+    card: Card
+  ): Unit = {
     stmt = stmtList
     stmt.add(add)
     stmt.add(e)

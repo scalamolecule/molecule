@@ -105,7 +105,7 @@ trait Data_Insert
   override protected def addSet[T](
     ns: String,
     attr: String,
-    baseTpe: String,
+    set2array: Set[T] => Array[AnyRef],
     refNsOpt: Option[String],
     tplIndex: Int,
     handleScalaValue: T => Any,
@@ -123,7 +123,7 @@ trait Data_Insert
   override protected def addSetOpt[T](
     ns: String,
     attr: String,
-    baseTpe: String,
+    set2array: Set[T] => Array[AnyRef],
     refNsOpt: Option[String],
     tplIndex: Int,
     handleScalaValue: T => Any,

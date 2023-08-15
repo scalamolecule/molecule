@@ -87,7 +87,7 @@ trait Data_Update extends JdbcBase_JVM with UpdateOps with MoleculeLogging { sel
     addNewValues: Boolean = true
   ): AnyRef => Unit = {
     (id0: AnyRef) => {
-      var id : AnyRef  = id0
+      var id  : AnyRef  = id0
       var txId: AnyRef  = null
       var isTx: Boolean = false
       var entity        = db.entity(id)
@@ -95,7 +95,7 @@ trait Data_Update extends JdbcBase_JVM with UpdateOps with MoleculeLogging { sel
         case ("add", ns, attr, newValues, retractCur) =>
           val a = kw(ns, attr)
           if (retractCur) {
-            val id1      = if (txId != null) txId else id
+            val id1       = if (txId != null) txId else id
             // todo: optimize with one query for all ids
             val curValues = Peer.q("[:find ?v :in $ ?e ?a :where [?e ?a ?v]]", db, id1, a)
             curValues.forEach { row =>

@@ -15,11 +15,7 @@ import scala.collection.mutable.ListBuffer
 
 abstract class JdbcQueryResolve[Tpl](elements: List[Element], dbView: Option[DbView])
   extends SqlModel2Query[Tpl](elements)
-//    with JdbcApiSync
     with CursorUtils {
-
-//  type Row = java.sql.ResultSet
-
 
   lazy val edgeValuesNotFound = "Couldn't find next page. Edge rows were all deleted/updated."
 
@@ -60,7 +56,7 @@ abstract class JdbcQueryResolve[Tpl](elements: List[Element], dbView: Option[DbV
   protected def getRawData2(conn: JdbcConn_jvm): ResultSet = {
     val stmt = getQuery(Nil)
 
-//    println("--------------------------------------------------------------\n" + stmt)
+    //    println("--------------------------------------------------------------\n" + stmt)
 
     val ps = conn.sqlConn.prepareStatement(stmt, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)
     ps.executeQuery()
@@ -225,7 +221,7 @@ abstract class JdbcQueryResolve[Tpl](elements: List[Element], dbView: Option[DbV
           postAdjustPullCasts()
           if (!forward) Collections.reverse(sortedRows)
           val count          = getCount(limit, forward, totalCount)
-//          val (tuples, more) = paginateRows(count, sortedRows, identifiers, identifyRow(true), pullRow2tpl)
+          //          val (tuples, more) = paginateRows(count, sortedRows, identifiers, identifyRow(true), pullRow2tpl)
           val (tuples, more) = paginateRows(count, sortedRows, identifiers, identifyRow(true), null)
           val tpls           = if (forward) tuples else tuples.reverse
           val cursor         = nextCursor(tpls, allTokens)

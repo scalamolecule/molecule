@@ -118,13 +118,13 @@ trait JdbcSpiSync
   // Update --------------------------------------------------------
 
   override def update_transact(update: Update)(implicit conn0: Conn): TxReport = {
-    //        val errors = validate
-    //        if (errors.isEmpty) {
-    //          val conn = conn0.asInstanceOf[JdbcConn_JVM]
-    //          conn.transact_sync(getStmts(conn))
-    //        } else {
-    //          throw ValidationErrors(errors)
-    //        }
+    //    val errors = update_validate(update)
+    //    if (errors.isEmpty) {
+    //      val conn = conn0.asInstanceOf[JdbcConn_jvm]
+    //      conn.transact_sync(getStmts(conn))
+    //    } else {
+    //      throw ValidationErrors(errors)
+    //    }
     ???
   }
 
