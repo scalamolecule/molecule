@@ -5,7 +5,7 @@ import molecule.boilerplate.ast.Model._
 import molecule.core.action._
 import molecule.core.marshalling.ConnProxy
 import molecule.core.spi.{Conn, SpiZio, TxReport}
-import molecule.core.transaction.{DeleteExtraction, InsertExtraction, SaveExtraction, UpdateExtraction}
+import molecule.core.transaction.{ResolveDelete, ResolveInsert, ResolveSave, ResolveUpdate}
 import molecule.core.util.Executor._
 import molecule.core.validation.ModelValidation
 import molecule.core.validation.insert.InsertValidation
@@ -100,7 +100,7 @@ trait DatomicSpiZio
   }
 
   private def save_getStmts(save: Save): Data = {
-    (new SaveExtraction() with Data_Save).getStmts(save.elements)
+    (new ResolveSave() with Data_Save).getStmts(save.elements)
   }
 
   override def save_validate(save: Save): ZIO[Conn, MoleculeError, Map[String, Seq[String]]] = {
@@ -136,7 +136,7 @@ trait DatomicSpiZio
   }
 
   private def insert_getStmts(insert: Insert, proxy: ConnProxy): Data = {
-    (new InsertExtraction with Data_Insert)
+    (new ResolveInsert with Data_Insert)
       .getStmts(proxy.nsMap, insert.elements, insert.tpls)
   }
 
@@ -173,7 +173,7 @@ trait DatomicSpiZio
   }
 
   private def update_getStmts(update: Update, conn: DatomicConn_JVM): Data = {
-    (new UpdateExtraction(conn.proxy.uniqueAttrs, update.isUpsert) with Data_Update)
+    (new ResolveUpdate(conn.proxy.uniqueAttrs, update.isUpsert) with Data_Update)
       .getStmts(conn, update.elements)
   }
 
@@ -205,7 +205,7 @@ trait DatomicSpiZio
   }
 
   private def delete_getStmts(delete: Delete, conn: DatomicConn_JVM): Data = {
-    (new DeleteExtraction with Data_Delete).getStmtsData(conn, delete.elements)
+    (new ResolveDelete with Data_Delete).getStmtsData(conn, delete.elements)
   }
 
 

@@ -7,7 +7,7 @@ import molecule.base.ast.SchemaAST._
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.ops.InsertOps
-import molecule.core.transaction.{InsertExtraction, InsertResolvers_}
+import molecule.core.transaction.{ResolveInsert, InsertResolvers_}
 import molecule.core.util.ModelUtils
 
 trait Data_Insert
@@ -15,7 +15,7 @@ trait Data_Insert
     with InsertOps
     with JdbcDataType_JVM
     with ModelUtils
-    with MoleculeLogging { self: InsertExtraction with InsertResolvers_ =>
+    with MoleculeLogging { self: ResolveInsert with InsertResolvers_ =>
 
   def getData(
     nsMap: Map[String, MetaNs],

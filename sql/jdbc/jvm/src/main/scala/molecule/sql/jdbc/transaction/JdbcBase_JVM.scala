@@ -22,7 +22,7 @@ trait JdbcBase_JVM extends JdbcDataType_JVM with ModelUtils {
   protected val sqlConn: java.sql.Connection
 
   //  protected var level    = 0
-//  protected var firstRow = true
+  //  protected var firstRow = true
 
   var level = 0
   def indent(level: Int) = "  " * level
@@ -36,7 +36,8 @@ trait JdbcBase_JVM extends JdbcDataType_JVM with ModelUtils {
   protected var inserts = List.empty[(List[String], List[String])]
   protected var joins   = List.empty[(List[String], String, String, List[String], List[String])]
 
-  protected var ids = Seq.empty[Long]
+  protected var ids        = Seq.empty[Long]
+  protected val updateCols = ListBuffer.empty[String]
 
   // PreparedStatement param indexes for each (table, col) coordinate
   protected val paramIndexes   = mutable.Map.empty[(List[String], String), Int]
@@ -70,8 +71,6 @@ trait JdbcBase_JVM extends JdbcDataType_JVM with ModelUtils {
     val tplIndex = if (tplIndex0 == -1) "-" else tplIndex0
     println(s"${indent(level)}$fullAttr$pad tplIndex: $tplIndex   paramIndex: $paramIndex   value: " + value)
   }
-
-
 
 
   protected var nsFull       : String              = ""

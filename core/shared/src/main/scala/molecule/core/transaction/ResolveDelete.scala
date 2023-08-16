@@ -4,7 +4,7 @@ import molecule.base.error._
 import molecule.boilerplate.ast.Model._
 import scala.annotation.tailrec
 
-class DeleteExtraction {
+class ResolveDelete {
 
   @tailrec
   final def resolve(

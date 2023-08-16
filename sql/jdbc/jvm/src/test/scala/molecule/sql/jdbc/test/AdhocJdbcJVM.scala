@@ -43,6 +43,7 @@ object AdhocJdbcJVM extends JdbcTestSuite {
         //        _ <- Ns.i(1).save.transact
         //        _ <- Ns.i.query.get.map(_ ==> List(1))
 
+
         id <- Ns.int.insert(1).transact.map(_.id)
         _ <- Ns.int.query.get.map(_ ==> List(1))
 
@@ -50,14 +51,27 @@ object AdhocJdbcJVM extends JdbcTestSuite {
         _ <- Ns(id).int(2).update.transact
         _ <- Ns.int.query.get.map(_ ==> List(2))
 
+        // Or update using id_
+        _ <- Ns.id_(id).int(3).update.transact
+        _ <- Ns.int.query.get.map(_ ==> List(3))
 
-        //        _ <- Future(printQuery(
-        //          """SELECT DISTINCT
-        //            |  ARRAY_AGG(Ns.ints)
-        //            |FROM Ns
-        //            |WHERE
-        //            |  Ns.ints IS NOT NULL AND CARDINALITY(Ns.ints) > 0;
-        //            |""".stripMargin))
+        // Updating a non-asserted attribute has no effect
+        _ <- Ns(id).string("a").update.inspect
+        _ <- Ns(id).string("a").update.transact
+        _ <- Ns.int.string_?.query.get.map(_ ==> List((3, None)))
+
+        // Upserting a non-asserted attribute adds the value
+        _ <- Ns(id).string("a").upsert.inspect
+        _ <- Ns(id).string("a").upsert.transact
+        _ <- Ns.int.string_?.query.get.map(_ ==> List((3, Some("a"))))
+
+        //                _ <- Future(printQuery(
+        //                  """SELECT DISTINCT
+        //                    |  ARRAY_AGG(Ns.ints)
+        //                    |FROM Ns
+        //                    |WHERE
+        //                    |  Ns.ints IS NOT NULL AND CARDINALITY(Ns.ints) > 0;
+        //                    |""".stripMargin))
 
 
       } yield ()

@@ -2,6 +2,7 @@ package molecule.sql.jdbc.spi
 
 import java.sql
 import molecule.base.error._
+import molecule.base.util.BaseHelpers
 import molecule.boilerplate.ast.Model._
 import molecule.core.action._
 import molecule.core.spi._
@@ -77,7 +78,7 @@ trait JdbcSpiSync
   }
 
   private def save_getData(save: Save, conn: JdbcConn_jvm): Data = {
-    new SaveExtraction() with Data_Save {
+    new ResolveSave() with Data_Save {
       override protected val sqlConn = conn.sqlConn
     }.getData(save.elements)
   }
@@ -105,7 +106,7 @@ trait JdbcSpiSync
   }
 
   private def insert_getData(insert: Insert, conn: JdbcConn_jvm): Data = {
-    new InsertExtraction with Data_Insert {
+    new ResolveInsert with Data_Insert {
       override protected val sqlConn: sql.Connection = conn.sqlConn
     }.getData(conn.proxy.nsMap, insert.elements, insert.tpls)
   }
@@ -121,19 +122,18 @@ trait JdbcSpiSync
     val errors = update_validate(update)
     if (errors.isEmpty) {
       val conn = conn0.asInstanceOf[JdbcConn_jvm]
-      conn.transact_sync(getStmts(conn, update))
+      conn.transact_sync(update_getData(conn, update))
     } else {
       throw ValidationErrors(errors)
     }
   }
 
   override def update_inspect(update: Update)(implicit conn0: Conn): Unit = {
-    //        printInspectTx("UPDATE", update.elements, getStmts(conn0.asInstanceOf[JdbcConn_JVM]))
-    ???
+    printInspectTx("UPDATE", update.elements, update_getData(conn0.asInstanceOf[JdbcConn_jvm], update))
   }
 
-  def getStmts(conn: JdbcConn_jvm, update: Update): Data = {
-    new UpdateExtraction(conn.proxy.uniqueAttrs, update.isUpsert) with Data_Update {
+  private def update_getData(conn: JdbcConn_jvm, update: Update): Data = {
+    new ResolveUpdate(conn.proxy.uniqueAttrs, update.isUpsert) with Data_Update {
       override protected val sqlConn = conn.sqlConn
     }.getData(update.elements)
   }
@@ -146,22 +146,22 @@ trait JdbcSpiSync
   // Delete --------------------------------------------------------
 
   override def delete_transact(delete: Delete)(implicit conn0: Conn): TxReport = {
-    //        val conn = conn0.asInstanceOf[JdbcConn_JVM]
-    //        conn.transact_sync(getStmts(conn))
-    ???
+    val conn = conn0.asInstanceOf[JdbcConn_jvm]
+    conn.transact_sync(delete_getData(conn, delete))
   }
 
   override def delete_inspect(delete: Delete)(implicit conn0: Conn): Unit = {
-    //        printInspectTx("DELETE", delete.elements, getStmts(conn0.asInstanceOf[JdbcConn_JVM]))
-    ???
+    printInspectTx("DELETE", delete.elements, delete_getData(conn0.asInstanceOf[JdbcConn_jvm], delete))
   }
 
-  //      def getStmts(conn: JdbcConn_JVM): PreparedStmt = {
-  //        (new DeleteExtraction with Delete_stmts {
-  //          override protected val ps: PreparedStmt = ???
-  //        }).getStmtsData(conn, delete.elements)
-  //      }
+  private def delete_getData(conn: JdbcConn_jvm, delete: Delete): Data = {
+    new ResolveDelete with Data_Delete {
+      override protected val sqlConn = conn.sqlConn
+    }.getData(conn, delete.elements)
+  }
 
+
+  // Inspect --------------------------------------------------------
 
   private def printInspectQuery(label: String, elements: List[Element]): Unit = {
     val queries = new SqlModel2Query(elements).getQuery(Nil) //._3
@@ -169,7 +169,7 @@ trait JdbcSpiSync
   }
 
   private def printInspectTx(label: String, elements: List[Element], data: Data): Unit = {
-    //    printInspect(label, elements, stmts.toArray().toList.mkString("\n"))
-    ???
+    // Simply print the statement (with no data)
+    printInspect(label, elements, data._1.head.stmt)
   }
 }

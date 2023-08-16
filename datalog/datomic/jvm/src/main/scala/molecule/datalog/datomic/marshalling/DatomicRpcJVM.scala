@@ -77,7 +77,7 @@ object DatomicRpcJVM extends MoleculeRpc
   ): Future[Either[MoleculeError, TxReport]] = either {
     for {
       conn <- getConn(proxy)
-      stmts = (new SaveExtraction() with Data_Save).getStmts(elements)
+      stmts = (new ResolveSave() with Data_Save).getStmts(elements)
       txReport <- conn.transact_async(stmts)
     } yield txReport
   }
@@ -98,9 +98,9 @@ object DatomicRpcJVM extends MoleculeRpc
           } else tpls).asInstanceOf[Seq[Product]]
         case Left(err)   => throw err // catched in outer either wrapper
       }
-      stmts = (new InsertExtraction with Data_Insert).getStmts(proxy.nsMap, tplElements, tplProducts)
+      stmts = (new ResolveInsert with Data_Insert).getStmts(proxy.nsMap, tplElements, tplProducts)
       _ = if (txElements.nonEmpty) {
-        val txStmts = (new SaveExtraction() with Data_Save).getRawStmts(txElements, datomicTx, false)
+        val txStmts = (new ResolveSave() with Data_Save).getRawStmts(txElements, datomicTx, false)
         stmts.addAll(txStmts)
       }
       txReport <- conn.transact_async(stmts)
@@ -114,7 +114,7 @@ object DatomicRpcJVM extends MoleculeRpc
   ): Future[Either[MoleculeError, TxReport]] = either {
     for {
       conn <- getConn(proxy)
-      stmts = (new UpdateExtraction(conn.proxy.uniqueAttrs, isUpsert) with Data_Update)
+      stmts = (new ResolveUpdate(conn.proxy.uniqueAttrs, isUpsert) with Data_Update)
         .getStmts(conn, elements, true)
       txReport <- conn.transact_async(stmts)
     } yield txReport
@@ -126,7 +126,7 @@ object DatomicRpcJVM extends MoleculeRpc
   ): Future[Either[MoleculeError, TxReport]] = either {
     for {
       conn <- getConn(proxy)
-      stmts = (new DeleteExtraction with Data_Delete).getStmtsData(conn, elements)
+      stmts = (new ResolveDelete with Data_Delete).getStmtsData(conn, elements)
       txReport <- conn.transact_async(stmts)
     } yield txReport
   }

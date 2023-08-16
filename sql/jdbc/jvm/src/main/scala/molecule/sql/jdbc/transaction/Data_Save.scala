@@ -5,13 +5,13 @@ import java.util.Date
 import molecule.base.ast.SchemaAST._
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
-import molecule.core.transaction.SaveExtraction
+import molecule.core.transaction.ResolveSave
 import molecule.core.transaction.ops.SaveOps
 
 trait Data_Save
   extends JdbcBase_JVM
     with SaveOps
-    with MoleculeLogging { self: SaveExtraction =>
+    with MoleculeLogging { self: ResolveSave =>
 
   // Resolve after all back refs have been resolved and namespaces grouped
   var postResolvers = List.empty[() => Unit]

@@ -5,10 +5,10 @@ import java.util.{Date, UUID}
 import molecule.base.ast.SchemaAST.Card
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
-import molecule.core.transaction.SaveExtraction
+import molecule.core.transaction.ResolveSave
 import molecule.core.transaction.ops.SaveOps
 
-trait Data_Save extends DatomicBase_JVM with SaveOps with MoleculeLogging { self: SaveExtraction =>
+trait Data_Save extends DatomicBase_JVM with SaveOps with MoleculeLogging { self: ResolveSave =>
 
   def getRawStmts(
     elements: List[Element],

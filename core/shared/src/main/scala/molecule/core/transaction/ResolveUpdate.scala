@@ -8,7 +8,7 @@ import molecule.boilerplate.ast.Model._
 import molecule.core.transaction.ops.UpdateOps
 import scala.annotation.tailrec
 
-class UpdateExtraction(
+class ResolveUpdate(
   uniqueAttrs: List[String],
   val isUpsert: Boolean
 ) { self: UpdateOps =>
@@ -89,13 +89,13 @@ class UpdateExtraction(
   }
 
   private def resolveAttrOneTac(filterAttr: AttrOneTac): Unit = filterAttr match {
-    case AttrOneTacLong(_, "id", Eq, ids1, _, _, _, _, _, _)             => handleIds(ids1)
+    case AttrOneTacLong(_, "id", Eq, ids1, _, _, _, _, _, _) => handleIds(ids1)
 
     case a if a.attr == "id" || a.attr == "tx" => throw ModelError(
       s"Generic attributes not allowed in update molecule. Found:\n" + a)
 
-    case uniqueFilterAttr if uniqueAttrs.contains(uniqueFilterAttr.name) => handleUniqueFilterAttr(filterAttr)
-    case _                                                               => handleFilterAttr(filterAttr)
+    case a if uniqueAttrs.contains(a.name) => handleUniqueFilterAttr(a)
+    case a                                 => handleFilterAttr(a)
   }
 
   private def resolveAttrSetMan(dataAttr: AttrSetMan): Unit = {
@@ -104,20 +104,20 @@ class UpdateExtraction(
   }
 
   private def resolveAttrSetAdd(attr: AttrSetMan, retractCur: Boolean = false): Unit = attr match {
-    case a: AttrSetManString    => updateSetAdd(attr, a.vs, transformString, retractCur)
-    case a: AttrSetManInt       => updateSetAdd(attr, a.vs, transformInt, retractCur)
-    case a: AttrSetManLong      => updateSetAdd(attr, a.vs, transformLong, retractCur)
-    case a: AttrSetManFloat     => updateSetAdd(attr, a.vs, transformFloat, retractCur)
-    case a: AttrSetManDouble    => updateSetAdd(attr, a.vs, transformDouble, retractCur)
-    case a: AttrSetManBoolean   => updateSetAdd(attr, a.vs, transformBoolean, retractCur)
-    case a: AttrSetManBigInt    => updateSetAdd(attr, a.vs, transformBigInt, retractCur)
-    case a: AttrSetManBigDecimal=> updateSetAdd(attr, a.vs, transformBigDecimal, retractCur)
-    case a: AttrSetManDate      => updateSetAdd(attr, a.vs, transformDate, retractCur)
-    case a: AttrSetManUUID      => updateSetAdd(attr, a.vs, transformUUID, retractCur)
-    case a: AttrSetManURI       => updateSetAdd(attr, a.vs, transformURI, retractCur)
-    case a: AttrSetManByte      => updateSetAdd(attr, a.vs, transformByte, retractCur)
-    case a: AttrSetManShort     => updateSetAdd(attr, a.vs, transformShort, retractCur)
-    case a: AttrSetManChar      => updateSetAdd(attr, a.vs, transformChar, retractCur)
+    case a: AttrSetManString     => updateSetAdd(attr, a.vs, transformString, retractCur)
+    case a: AttrSetManInt        => updateSetAdd(attr, a.vs, transformInt, retractCur)
+    case a: AttrSetManLong       => updateSetAdd(attr, a.vs, transformLong, retractCur)
+    case a: AttrSetManFloat      => updateSetAdd(attr, a.vs, transformFloat, retractCur)
+    case a: AttrSetManDouble     => updateSetAdd(attr, a.vs, transformDouble, retractCur)
+    case a: AttrSetManBoolean    => updateSetAdd(attr, a.vs, transformBoolean, retractCur)
+    case a: AttrSetManBigInt     => updateSetAdd(attr, a.vs, transformBigInt, retractCur)
+    case a: AttrSetManBigDecimal => updateSetAdd(attr, a.vs, transformBigDecimal, retractCur)
+    case a: AttrSetManDate       => updateSetAdd(attr, a.vs, transformDate, retractCur)
+    case a: AttrSetManUUID       => updateSetAdd(attr, a.vs, transformUUID, retractCur)
+    case a: AttrSetManURI        => updateSetAdd(attr, a.vs, transformURI, retractCur)
+    case a: AttrSetManByte       => updateSetAdd(attr, a.vs, transformByte, retractCur)
+    case a: AttrSetManShort      => updateSetAdd(attr, a.vs, transformShort, retractCur)
+    case a: AttrSetManChar       => updateSetAdd(attr, a.vs, transformChar, retractCur)
   }
 
   private def resolveAttrSetSwap(attr: AttrSetMan): Unit = attr match {
@@ -138,21 +138,21 @@ class UpdateExtraction(
   }
 
   private def resolveAttrSetRemove(attr: AttrSetMan): Unit = attr match {
-    case a:AttrSetManString    => updateSetRemove(attr, a.vs.head, transformString)
-    case a:AttrSetManInt       => updateSetRemove(attr, a.vs.head, transformInt)
-    case a:AttrSetManLong      => updateSetRemove(attr, a.vs.head, transformLong)
-    case a:AttrSetManFloat     => updateSetRemove(attr, a.vs.head, transformFloat)
-    case a:AttrSetManDouble    => updateSetRemove(attr, a.vs.head, transformDouble)
-    case a:AttrSetManBoolean   => updateSetRemove(attr, a.vs.head, transformBoolean)
-    case a:AttrSetManBigInt    => updateSetRemove(attr, a.vs.head, transformBigInt)
-    case a:AttrSetManBigDecimal=> updateSetRemove(attr, a.vs.head, transformBigDecimal)
-    case a:AttrSetManDate      => updateSetRemove(attr, a.vs.head, transformDate)
-    case a:AttrSetManUUID      => updateSetRemove(attr, a.vs.head, transformUUID)
-    case a:AttrSetManURI       => updateSetRemove(attr, a.vs.head, transformURI)
-    case a:AttrSetManByte      => updateSetRemove(attr, a.vs.head, transformByte)
-    case a:AttrSetManShort     => updateSetRemove(attr, a.vs.head, transformShort)
-    case a:AttrSetManChar      => updateSetRemove(attr, a.vs.head, transformChar)
-    case _                                                         => throw ExecutionError(
+    case a: AttrSetManString     => updateSetRemove(attr, a.vs.head, transformString)
+    case a: AttrSetManInt        => updateSetRemove(attr, a.vs.head, transformInt)
+    case a: AttrSetManLong       => updateSetRemove(attr, a.vs.head, transformLong)
+    case a: AttrSetManFloat      => updateSetRemove(attr, a.vs.head, transformFloat)
+    case a: AttrSetManDouble     => updateSetRemove(attr, a.vs.head, transformDouble)
+    case a: AttrSetManBoolean    => updateSetRemove(attr, a.vs.head, transformBoolean)
+    case a: AttrSetManBigInt     => updateSetRemove(attr, a.vs.head, transformBigInt)
+    case a: AttrSetManBigDecimal => updateSetRemove(attr, a.vs.head, transformBigDecimal)
+    case a: AttrSetManDate       => updateSetRemove(attr, a.vs.head, transformDate)
+    case a: AttrSetManUUID       => updateSetRemove(attr, a.vs.head, transformUUID)
+    case a: AttrSetManURI        => updateSetRemove(attr, a.vs.head, transformURI)
+    case a: AttrSetManByte       => updateSetRemove(attr, a.vs.head, transformByte)
+    case a: AttrSetManShort      => updateSetRemove(attr, a.vs.head, transformShort)
+    case a: AttrSetManChar       => updateSetRemove(attr, a.vs.head, transformChar)
+    case _                       => throw ExecutionError(
       s"Can only remove one Set of values for Set attribute `${attr.name}`. Found: $attr"
     )
   }

@@ -7,7 +7,7 @@ import molecule.core.transaction.ops.InsertOps
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 
-class InsertExtraction extends InsertResolvers_ with InsertValidators_ { self: InsertOps =>
+class ResolveInsert extends InsertResolvers_ with InsertValidators_ { self: InsertOps =>
 
   private var curElements: List[Element]      = List.empty[Element]
   private val prevRefs   : ListBuffer[AnyRef] = ListBuffer.empty[AnyRef]

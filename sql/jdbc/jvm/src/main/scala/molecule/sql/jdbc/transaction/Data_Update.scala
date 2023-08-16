@@ -9,11 +9,11 @@ import datomic.{Database, Peer}
 import molecule.base.error._
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
-import molecule.core.transaction.UpdateExtraction
+import molecule.core.transaction.ResolveUpdate
 import molecule.core.transaction.ops.UpdateOps
 import molecule.sql.jdbc.facade.JdbcConn_jvm
 
-trait Data_Update extends JdbcBase_JVM with UpdateOps with MoleculeLogging { self: UpdateExtraction =>
+trait Data_Update extends JdbcBase_JVM with UpdateOps with MoleculeLogging { self: ResolveUpdate =>
 
   def getData(elements: List[Element]): Data = {
     curRefPath = List(getInitialNs(elements))
@@ -29,17 +29,19 @@ trait Data_Update extends JdbcBase_JVM with UpdateOps with MoleculeLogging { sel
         val table         = refPath.last
         val columnSetters = cols.map(col => s"$col = ?").mkString(",\n  ")
         val ids_          = ids.mkString(", ")
+        val updateCols_ = if(updateCols.isEmpty) "" else
+          updateCols.map(c => s"$c IS NOT NULL").mkString(" AND\n  ", " AND\n  ", "")
         val stmt          =
           s"""UPDATE $table SET
              |  $columnSetters
-             |WHERE $table.id IN($ids_)""".stripMargin
+             |WHERE $table.id IN($ids_)$updateCols_""".stripMargin
         val ps            = sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
         tableDatas(refPath) = Table(refPath, stmt, ps)
 
         val colSetters = colSettersMap(refPath)
 
-        println(s"--- update -------------------  ${colSetters.length}  $refPath")
-        println(stmt)
+        //        println(s"--- update -------------------  ${colSetters.length}  $refPath")
+        //        println(stmt)
 
         colSettersMap(refPath) = Nil
         val rowSetter = (ps: PS, idsMap: IdsMap, _: RowIndex) => {
@@ -151,10 +153,18 @@ trait Data_Update extends JdbcBase_JVM with UpdateOps with MoleculeLogging { sel
 
 
   override def handleIds(ids1: Seq[Long]): Unit = {
+    if (ids.nonEmpty) {
+      throw ModelError(s"Can't apply entity ids twice in $update.")
+    }
     ids = ids1
   }
 
-  override def handleUniqueFilterAttr(filterAttr: AttrOneTac): Unit = {
+  override def handleUniqueFilterAttr(uniqueFilterAttr: AttrOneTac): Unit = {
+    if (ids.nonEmpty) {
+      throw ModelError(
+        s"Can only apply one unique attribute value for $update. Found:\n" + uniqueFilterAttr
+      )
+    }
     ???
   }
 
@@ -169,9 +179,13 @@ trait Data_Update extends JdbcBase_JVM with UpdateOps with MoleculeLogging { sel
     handleValue: T => Any
   ): Unit = {
     val (curPath, paramIndex) = updateInserts(a.name)
-    val colSetter: Setter = {
+    val colSetter: Setter     = {
       vs match {
         case Seq(v) =>
+
+          if (!isUpsert) {
+            updateCols += a.name
+          }
           (ps: PS, _: IdsMap, _: RowIndex) => {
             handleValue(v).asInstanceOf[(PS, Int) => Unit](ps, paramIndex)
           }
@@ -307,20 +321,20 @@ trait Data_Update extends JdbcBase_JVM with UpdateOps with MoleculeLogging { sel
   ): Seq[AnyRef] = {
     val at = s":$ns/$attr"
     filterAttr match {
-      case AttrOneTacString(_, _, _, vs, _, _, _, _, _, _)     => vs.map(v => list(at, v.asInstanceOf[AnyRef]))
-      case AttrOneTacInt(_, _, _, vs, _, _, _, _, _, _)        => vs.map(v => list(at, v.asInstanceOf[AnyRef]))
-      case AttrOneTacLong(_, _, _, vs, _, _, _, _, _, _)       => vs.map(v => list(at, v.asInstanceOf[AnyRef]))
-      case AttrOneTacFloat(_, _, _, vs, _, _, _, _, _, _)      => vs.map(v => list(at, v.asInstanceOf[AnyRef]))
-      case AttrOneTacDouble(_, _, _, vs, _, _, _, _, _, _)     => vs.map(v => list(at, v.asInstanceOf[AnyRef]))
-      case AttrOneTacBoolean(_, _, _, vs, _, _, _, _, _, _)    => vs.map(v => list(at, v.asInstanceOf[AnyRef]))
-      case AttrOneTacBigInt(_, _, _, vs, _, _, _, _, _, _)     => vs.map(v => list(at, v.bigInteger.asInstanceOf[AnyRef]))
-      case AttrOneTacBigDecimal(_, _, _, vs, _, _, _, _, _, _) => vs.map(v => list(at, v.bigDecimal.asInstanceOf[AnyRef]))
-      case AttrOneTacDate(_, _, _, vs, _, _, _, _, _, _)       => vs.map(v => list(at, v.asInstanceOf[AnyRef]))
-      case AttrOneTacUUID(_, _, _, vs, _, _, _, _, _, _)       => vs.map(v => list(at, v.asInstanceOf[AnyRef]))
-      case AttrOneTacURI(_, _, _, vs, _, _, _, _, _, _)        => vs.map(v => list(at, v.asInstanceOf[AnyRef]))
-      case AttrOneTacByte(_, _, _, vs, _, _, _, _, _, _)       => vs.map(v => list(at, v.toInt.asInstanceOf[AnyRef]))
-      case AttrOneTacShort(_, _, _, vs, _, _, _, _, _, _)      => vs.map(v => list(at, v.toInt.asInstanceOf[AnyRef]))
-      case AttrOneTacChar(_, _, _, vs, _, _, _, _, _, _)       => vs.map(v => list(at, v.toString.asInstanceOf[AnyRef]))
+      case a: AttrOneTacString     => a.vs.map(v => list(at, v.asInstanceOf[AnyRef]))
+      case a: AttrOneTacInt        => a.vs.map(v => list(at, v.asInstanceOf[AnyRef]))
+      case a: AttrOneTacLong       => a.vs.map(v => list(at, v.asInstanceOf[AnyRef]))
+      case a: AttrOneTacFloat      => a.vs.map(v => list(at, v.asInstanceOf[AnyRef]))
+      case a: AttrOneTacDouble     => a.vs.map(v => list(at, v.asInstanceOf[AnyRef]))
+      case a: AttrOneTacBoolean    => a.vs.map(v => list(at, v.asInstanceOf[AnyRef]))
+      case a: AttrOneTacBigInt     => a.vs.map(v => list(at, v.bigInteger.asInstanceOf[AnyRef]))
+      case a: AttrOneTacBigDecimal => a.vs.map(v => list(at, v.bigDecimal.asInstanceOf[AnyRef]))
+      case a: AttrOneTacDate       => a.vs.map(v => list(at, v.asInstanceOf[AnyRef]))
+      case a: AttrOneTacUUID       => a.vs.map(v => list(at, v.asInstanceOf[AnyRef]))
+      case a: AttrOneTacURI        => a.vs.map(v => list(at, v.asInstanceOf[AnyRef]))
+      case a: AttrOneTacByte       => a.vs.map(v => list(at, v.toInt.asInstanceOf[AnyRef]))
+      case a: AttrOneTacShort      => a.vs.map(v => list(at, v.toInt.asInstanceOf[AnyRef]))
+      case a: AttrOneTacChar       => a.vs.map(v => list(at, v.toString.asInstanceOf[AnyRef]))
     }
   }
 

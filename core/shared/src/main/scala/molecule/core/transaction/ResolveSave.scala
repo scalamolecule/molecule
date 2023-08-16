@@ -7,7 +7,7 @@ import molecule.core.transaction.ops.SaveOps
 import molecule.core.util.ModelUtils
 import scala.annotation.tailrec
 
-class SaveExtraction(isTxMetaData: Boolean = false)
+class ResolveSave(isTxMetaData: Boolean = false)
   extends ModelUtils with MoleculeLogging { self: SaveOps =>
 
   @tailrec

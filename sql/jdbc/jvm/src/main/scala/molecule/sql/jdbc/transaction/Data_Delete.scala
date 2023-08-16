@@ -4,20 +4,20 @@ import datomic.Peer
 import molecule.base.error.ExecutionError
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
-import molecule.core.transaction.DeleteExtraction
+import molecule.core.transaction.ResolveDelete
 import molecule.core.transaction.ops.DeleteOps
 import molecule.sql.core.query.SqlModel2Query
 import molecule.sql.jdbc.facade.JdbcConn_jvm
 import scala.collection.mutable
 
-trait Data_Delete extends JdbcBase_JVM with DeleteOps with MoleculeLogging { self: DeleteExtraction =>
+trait Data_Delete extends JdbcBase_JVM with DeleteOps with MoleculeLogging { self: ResolveDelete =>
 
-  def getStmtsData(
+  def getData(
     conn: JdbcConn_jvm,
     elements: List[Element],
     idIndex: Int = 0,
     debug: Boolean = true
-  ): Int = { // todo
+  ): Data = { // todo
 //    initTxBase(elements, idIndex)
 //    val (ids, filterElements) = resolve(elements, Nil, Nil, true)
 //

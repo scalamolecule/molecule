@@ -140,11 +140,33 @@ object AdhocDatomicJVM extends DatomicTestSuite {
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
       for {
-        _ <- Ns.i(42).save.transact
-        _ <- Ns.i.query.get.map(_ ==> List(42))
+//        _ <- Ns.i(42).save.transact
+//        _ <- Ns.i.query.get.map(_ ==> List(42))
 
 
 
+
+
+        id <- Ns.int.insert(1).transact.map(_.id)
+        _ <- Ns.int.query.get.map(_ ==> List(1))
+
+        // Update existing value
+        _ <- Ns(id).int(2).update.transact
+        _ <- Ns.int.query.get.map(_ ==> List(2))
+
+        // Or update using id_
+        _ <- Ns.id_(id).int(3).update.transact
+        _ <- Ns.int.query.get.map(_ ==> List(3))
+
+        // Updating a non-asserted attribute has no effect
+        _ <- Ns(id).string("a").update.inspect
+        _ <- Ns(id).string("a").update.transact
+        _ <- Ns.int.string_?.query.get.map(_ ==> List((3, None)))
+
+        // Upserting a non-asserted attribute adds the value
+        _ <- Ns(id).string("a").upsert.inspect
+        _ <- Ns(id).string("a").upsert.transact
+        _ <- Ns.int.string_?.query.get.map(_ ==> List((3, Some("a"))))
 
       } yield ()
     }
