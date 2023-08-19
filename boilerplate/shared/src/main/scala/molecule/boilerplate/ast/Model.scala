@@ -223,7 +223,7 @@ trait Model extends Validations with Values {
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
-                 vs: Seq[Double] = Nil,
+    vs: Seq[Double] = Nil,
     override val filterAttr: Option[Attr] = None,
     override val validator: Option[ValidateDouble] = None,
     override val valueAttrs: Seq[String] = Nil,

@@ -14,7 +14,7 @@ trait PrintInspect {
          |${elements.mkString("\n").trim}
          |
          |$stmtsStr
-         |========================================
+         |----------------------------------------
          |""".stripMargin
     )
 

@@ -5,6 +5,7 @@ import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
 import molecule.coreTests.api.ApiAsyncImplicits
 import molecule.coreTests.async._
+import molecule.coreTests.dataModels.core.dsl.Refs.A
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
@@ -87,23 +88,44 @@ trait UpdateOne_id extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync
         id <- Ns.int.string.insert(1, "a").transact.map(_.id)
         _ <- Ns.int.string.query.get.map(_ ==> List((1, "a")))
 
-        // Apply empty value to delete attribute of entity (entity remains)
         _ <- Ns(id).int(2).string("b").update.transact
         _ <- Ns.int.string.query.get.map(_ ==> List((2, "b")))
       } yield ()
     }
 
 
-    "Referenced attributes" - types { implicit conn =>
+    "Referenced attributes" - refs { implicit conn =>
       for {
-        id <- Ns.i(1).Ref.i(2).save.transact.map(_.id)
-        _ <- Ns.i.Ref.i.query.get.map(_ ==> List((1, 2)))
+        id <- A.i(1).B.i(2).C.i(3).save.transact.map(_.id)
+        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
 
-        _ <- Ns(id).i(3).Ref.i(4).update.transact
-        _ <- Ns.i.Ref.i.query.get.map(_ ==> List((3, 4)))
+        // A
+        _ <- A(id).i(10).update.transact
+        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((10, 2, 3)))
 
-        _ <- Ns(id).Ref.i(5).update.transact
-        _ <- Ns.i.Ref.i.query.get.map(_ ==> List((3, 5)))
+        // A + B
+        _ <- A(id).i(11).B.i(20).update.transact
+        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((11, 20, 3)))
+
+        // B
+        _ <- A(id).B.i(21).update.transact
+        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((11, 21, 3)))
+
+        // A + B + C
+        _ <- A(id).i(12).B.i(22).C.i(30).update.transact
+        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((12, 22, 30)))
+
+        // A + C
+        _ <- A(id).i(13).B.C.i(31).update.transact
+        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((13, 22, 31)))
+
+        // B + C
+        _ <- A(id).B.i(23).C.i(32).update.transact
+        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((13, 23, 32)))
+
+        // C
+        _ <- A(id).B.C.i(33).update.transact
+        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((13, 23, 33)))
       } yield ()
     }
 
@@ -183,6 +205,15 @@ trait UpdateOne_id extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync
           _ <- Ns(42).i(1).Refs.i(2).update.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Can't update attributes in card-many referenced namespaces. Found `Refs`"
+          }
+        } yield ()
+      }
+
+      "Can't upsert referenced attributes" - types { implicit conn =>
+        for {
+          _ <- Ns(42).i(1).Ref.i(2).upsert.transact
+            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+            err ==> "Can't upsert referenced attributes. Please update instead."
           }
         } yield ()
       }

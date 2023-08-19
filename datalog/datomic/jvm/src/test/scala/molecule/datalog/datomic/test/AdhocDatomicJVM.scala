@@ -1,6 +1,7 @@
 package molecule.datalog.datomic.test
 
 import molecule.core.util.Executor._
+import molecule.coreTests.dataModels.core.dsl.Refs.{A, B, D}
 import molecule.coreTests.dataModels.core.dsl.Types.Ns
 import molecule.datalog.datomic.async._
 import molecule.datalog.datomic.setup.DatomicTestSuite
@@ -140,33 +141,74 @@ object AdhocDatomicJVM extends DatomicTestSuite {
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
       for {
-//        _ <- Ns.i(42).save.transact
-//        _ <- Ns.i.query.get.map(_ ==> List(42))
+        //        _ <- Ns.i(42).save.transact
+        //        _ <- Ns.i.query.get.map(_ ==> List(42))
+
+
+        //        id <- Ns.i(1).Ref.i(2).save.transact.map(_.id)
+        //        _ <- Ns.i.Ref.i.query.get.map(_ ==> List((1, 2)))
+        //
+        //        _ <- Ns(id).i(3).Ref.i(4).update.inspect
+        //        _ <- Ns(id).i(3).Ref.i(4).update.transact
+        //        _ <- Ns.i.Ref.i.query.get.map(_ ==> List((3, 4)))
+        //
+        //        _ <- Ns(id).Ref.i(5).update.inspect
+        //        _ <- Ns(id).Ref.i(5).update.transact
+        //        _ <- Ns.i.Ref.i.query.get.map(_ ==> List((3, 5)))
 
 
 
+        id <- Ns.i(1).Ref.i(2).save.transact.map(_.id)
+        _ <- Ns.i.Ref.i.query.get.map(_ ==> List((1, 2)))
+
+        _ <- Ns(id).i(3).Ref.i(4).update.inspect
+        _ <- Ns(id).i(3).Ref.i(4).update.transact
+        _ <- Ns.i.Ref.i.query.get.map(_ ==> List((3, 4)))
+
+        _ <- Ns(id).Ref.i(5).update.inspect
+        _ <- Ns(id).Ref.i(5).update.transact
+        _ <- Ns.i.Ref.i.query.get.map(_ ==> List((3, 5)))
+
+      } yield ()
+    }
+
+    "refs" - refs { implicit conn =>
+      import molecule.coreTests.dataModels.core.dsl.Refs._
+
+      for {
+        id <- A.i(1).B.i(2).C.i(3).save.transact.map(_.id)
+        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
+
+        // A
+        _ <- A(id).i(10).update.transact
+        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((10, 2, 3)))
+
+        // A + B
+        _ <- A(id).i(11).B.i(20).update.transact
+        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((11, 20, 3)))
+
+        // B
+        _ <- A(id).B.i(21).update.transact
+        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((11, 21, 3)))
+
+        // A + B + C
+        _ <- A(id).i(12).B.i(22).C.i(30).update.transact
+        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((12, 22, 30)))
+
+        // A + C
+        _ <- A(id).i(13).B.C.i(31).update.transact
+        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((13, 22, 31)))
+
+        // B + C
+        _ <- A(id).B.i(23).C.i(32).update.transact
+        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((13, 23, 32)))
+
+        // C
+        _ <- A(id).B.C.i(33).update.transact
+        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((13, 23, 33)))
 
 
-        id <- Ns.int.insert(1).transact.map(_.id)
-        _ <- Ns.int.query.get.map(_ ==> List(1))
-
-        // Update existing value
-        _ <- Ns(id).int(2).update.transact
-        _ <- Ns.int.query.get.map(_ ==> List(2))
-
-        // Or update using id_
-        _ <- Ns.id_(id).int(3).update.transact
-        _ <- Ns.int.query.get.map(_ ==> List(3))
-
-        // Updating a non-asserted attribute has no effect
-        _ <- Ns(id).string("a").update.inspect
-        _ <- Ns(id).string("a").update.transact
-        _ <- Ns.int.string_?.query.get.map(_ ==> List((3, None)))
-
-        // Upserting a non-asserted attribute adds the value
-        _ <- Ns(id).string("a").upsert.inspect
-        _ <- Ns(id).string("a").upsert.transact
-        _ <- Ns.int.string_?.query.get.map(_ ==> List((3, Some("a"))))
+        //        _ <- (A.i(1).B.i(2) + B.i(3)).save.transact
 
       } yield ()
     }

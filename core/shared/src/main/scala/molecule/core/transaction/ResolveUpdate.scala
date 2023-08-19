@@ -1,7 +1,5 @@
 package molecule.core.transaction
 
-import java.net.URI
-import java.util.{Date, UUID}
 import molecule.base.ast.SchemaAST._
 import molecule.base.error._
 import molecule.boilerplate.ast.Model._
@@ -19,21 +17,28 @@ class ResolveUpdate(
   final def resolve(elements: List[Element]): Unit = {
     elements match {
       case element :: tail => element match {
-        case a: Attr => a match {
-          case a: AttrOneTac => resolveAttrOneTac(a); resolve(tail)
-          case a: AttrOneMan => resolveAttrOneMan(a); resolve(tail)
+        case a: Attr =>
+          a match {
+            case a: AttrOne =>
+              a match {
+                case a: AttrOneTac => resolveAttrOneTac(a); resolve(tail)
+                case a: AttrOneMan => resolveAttrOneMan(a); resolve(tail)
+                case _: AttrOneOpt => throw ModelError(s"Can't $update optional values. Found:\n" + a)
+              }
 
-          case a: AttrSetMan => a.op match {
-            case Eq     => resolveAttrSetMan(a); resolve(tail)
-            case Add    => resolveAttrSetAdd(a); resolve(tail)
-            case Swap   => resolveAttrSetSwap(a); resolve(tail)
-            case Remove => resolveAttrSetRemove(a); resolve(tail)
-            case _      => throw ModelError(s"Unexpected $update operation for card-many attribute. Found:\n" + a)
+            case a: AttrSet =>
+              a match {
+                case a: AttrSetMan => a.op match {
+                  case Eq     => resolveAttrSetMan(a); resolve(tail)
+                  case Add    => resolveAttrSetAdd(a); resolve(tail)
+                  case Swap   => resolveAttrSetSwap(a); resolve(tail)
+                  case Remove => resolveAttrSetRemove(a); resolve(tail)
+                  case _      => throw ModelError(s"Unexpected $update operation for card-many attribute. Found:\n" + a)
+                }
+                case _: AttrSetTac => throw ModelError("Can only lookup entity with card-one attribute value. Found:\n" + a)
+                case _: AttrSetOpt => throw ModelError(s"Can't $update optional values. Found:\n" + a)
+              }
           }
-          case _: AttrOneOpt => throw ModelError(s"Can't $update optional values. Found:\n" + a)
-          case _: AttrSetTac => throw ModelError("Can only lookup entity with card-one attribute value. Found:\n" + a)
-          case _: AttrSetOpt => throw ModelError(s"Can't $update optional values. Found:\n" + a)
-        }
 
         case _: Nested    => throw ModelError(s"Nested data structure not allowed in $update molecule.")
         case _: NestedOpt => throw ModelError(s"Optional nested data structure not allowed in $update molecule.")

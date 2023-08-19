@@ -2,6 +2,7 @@ package molecule.core.transaction.ops
 
 import java.net.URI
 import java.util.{Date, UUID}
+import molecule.base.ast.SchemaAST.Card
 import molecule.boilerplate.ast.Model._
 import molecule.core.transaction.Action2Data
 
@@ -17,6 +18,16 @@ trait UpdateOps extends Action2Data {
     transformValue: T => Any,
     handleValue: T => Any
   ): Unit
+
+
+  // todo?
+  // For dbs that don't support updating related entities
+  //  protected def addRef(
+  //    ns: String,
+  //    refAttr: String,
+  //    refNs: String,
+  //    card: Card
+  //  ): Product => Unit = ???
 
   def updateSetEq[T](
     a: AttrSet,

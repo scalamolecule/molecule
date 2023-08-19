@@ -16,6 +16,9 @@ import molecule.sql.jdbc.facade.JdbcConn_jvm
 trait Data_Update extends JdbcBase_JVM with UpdateOps with MoleculeLogging { self: ResolveUpdate =>
 
   def getData(elements: List[Element]): Data = {
+    //    println("--- Data_Update ---")
+    //    elements.foreach(println)
+
     curRefPath = List(getInitialNs(elements))
     val (mainElements, _) = separateTxElements(elements)
     resolve(mainElements)
@@ -29,7 +32,7 @@ trait Data_Update extends JdbcBase_JVM with UpdateOps with MoleculeLogging { sel
         val table         = refPath.last
         val columnSetters = cols.map(col => s"$col = ?").mkString(",\n  ")
         val ids_          = ids.mkString(", ")
-        val updateCols_ = if(updateCols.isEmpty) "" else
+        val updateCols_   = if (updateCols.isEmpty) "" else
           updateCols.map(c => s"$c IS NOT NULL").mkString(" AND\n  ", " AND\n  ", "")
         val stmt          =
           s"""UPDATE $table SET
@@ -234,7 +237,14 @@ trait Data_Update extends JdbcBase_JVM with UpdateOps with MoleculeLogging { sel
 
 
   override def handleRefNs(ref: Ref): Unit = {
-    ???
+    // Some sql databases support updating joined tables.
+    // When not (like h2), we have to update each related table.
+    val updateRelatedSupported = false // todo: retrieve sql db dialect from configuration
+    if (updateRelatedSupported) {
+      // todo
+    } else {
+      //      ???
+    }
   }
 
   override def handleBackRef(backRef: BackRef): Unit = {

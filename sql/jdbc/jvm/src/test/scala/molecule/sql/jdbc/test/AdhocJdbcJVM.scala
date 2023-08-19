@@ -1,5 +1,7 @@
 package molecule.sql.jdbc.test
 
+import molecule.base.ast.SchemaAST.CardOne
+import molecule.base.error.ModelError
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Refs.A
 import molecule.coreTests.dataModels.core.dsl.Types.Ns
@@ -33,6 +35,13 @@ object AdhocJdbcJVM extends JdbcTestSuite {
   //  val x: Instant = ???
   //  val y: Long    = x.toEpochMilli
 
+  //  val all = List(
+  //    AttrOneManInt("A", "i", Eq, Seq(1), None, None, Nil, Nil, None, None),
+  //      Ref("A", "b", "B", CardOne, false),
+  //      AttrOneManInt("B", "i", Eq, Seq(2), None, None, Nil, Nil, None, None),
+  //      Ref("B", "c", "C", CardOne, false),
+  //      AttrOneManInt("C", "i", Eq, Seq(3), None, None, Nil, Nil, None, None)
+  //  )
 
   override lazy val tests = Tests {
     implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
@@ -40,30 +49,29 @@ object AdhocJdbcJVM extends JdbcTestSuite {
     "types" - types { implicit conn =>
 
       for {
-        //        _ <- Ns.i(1).save.transact
-        //        _ <- Ns.i.query.get.map(_ ==> List(1))
+//        id <- Ns.i(1).save.transact.map(_.id)
+//        //        _ <- Ns.i.query.get.map(_ ==> List(1))
+//        _ <- Ns(id).i(2).update.transact
+//        _ <- Ns.i.query.get.map(_ ==> List(2))
 
 
-        id <- Ns.int.insert(1).transact.map(_.id)
-        _ <- Ns.int.query.get.map(_ ==> List(1))
+        _ <- Ns(42).i(1).Refs.i(2).update.transact
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+            err ==> "Can't update attributes in card-many referenced namespaces. Found `Refs`"
+          }
 
-        // Update existing value
-        _ <- Ns(id).int(2).update.transact
-        _ <- Ns.int.query.get.map(_ ==> List(2))
 
-        // Or update using id_
-        _ <- Ns.id_(id).int(3).update.transact
-        _ <- Ns.int.query.get.map(_ ==> List(3))
+        //        id <- Ns.i(1).Ref.i(2).save.transact.map(_.id)
+        //        _ <- Ns.i.Ref.i.query.get.map(_ ==> List((1, 2)))
+        //
+        //        _ <- Ns(id).i(3).Ref.i(4).update.inspect
+        //        _ <- Ns(id).i(3).Ref.i(4).update.transact
+        //        _ <- Ns.i.Ref.i.query.get.map(_ ==> List((3, 4)))
+        //
+        //        _ <- Ns(id).Ref.i(5).update.inspect
+        //        _ <- Ns(id).Ref.i(5).update.transact
+        //        _ <- Ns.i.Ref.i.query.get.map(_ ==> List((3, 5)))
 
-        // Updating a non-asserted attribute has no effect
-        _ <- Ns(id).string("a").update.inspect
-        _ <- Ns(id).string("a").update.transact
-        _ <- Ns.int.string_?.query.get.map(_ ==> List((3, None)))
-
-        // Upserting a non-asserted attribute adds the value
-        _ <- Ns(id).string("a").upsert.inspect
-        _ <- Ns(id).string("a").upsert.transact
-        _ <- Ns.int.string_?.query.get.map(_ ==> List((3, Some("a"))))
 
         //                _ <- Future(printQuery(
         //                  """SELECT DISTINCT
@@ -72,8 +80,6 @@ object AdhocJdbcJVM extends JdbcTestSuite {
         //                    |WHERE
         //                    |  Ns.ints IS NOT NULL AND CARDINALITY(Ns.ints) > 0;
         //                    |""".stripMargin))
-
-
       } yield ()
     }
 
@@ -101,11 +107,37 @@ object AdhocJdbcJVM extends JdbcTestSuite {
       import molecule.coreTests.dataModels.core.dsl.Refs._
 
       for {
-        _ <- A.i(1).s("a").+(B.i(2).s("b")).Tx(D.i(3).s("c")).save.transact
-        _ <- (A.i.s + B.s.i).Tx(D.i).query.get.map(_ ==> List(((1, "a"), ("b", 2), 3)))
+        id <- A.i(1).B.i(2).C.i(3).save.transact.map(_.id)
+        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
 
+        // A
+        _ <- A(id).i(10).update.transact.map(_.id)
+        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((10, 2, 3)))
 
-        //        _ <- (A.i(1).B.i(2) + B.i(3)).save.transact
+        // A + B
+        _ <- A(id).i(11).B.i(20).update.transact
+        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((11, 20, 3)))
+
+        // B
+        _ <- A(id).B.i(21).update.transact
+        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((11, 21, 3)))
+
+        // A + B + C
+        _ <- A(id).i(12).B.i(22).C.i(30).update.transact
+        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((12, 22, 30)))
+
+        // A + C
+        _ <- A(id).i(13).B.C.i(31).update.transact
+        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((13, 22, 31)))
+
+        // B + C
+        _ <- A(id).B.i(23).C.i(32).update.transact
+        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((13, 23, 32)))
+
+        // C
+        _ <- A(id).B.C.i(33).update.transact
+        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((13, 23, 33)))
+
 
       } yield ()
     }

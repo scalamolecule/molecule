@@ -15,6 +15,7 @@ import molecule.sql.jdbc.marshalling.JdbcRpcJVM.Data
 import molecule.sql.jdbc.query.{JdbcQueryResolveCursor, JdbcQueryResolveOffset}
 import molecule.sql.jdbc.subscription.SubscriptionStarter
 import molecule.sql.jdbc.transaction._
+import scala.collection.mutable.ListBuffer
 
 object JdbcSpiSync extends JdbcSpiSync
 
@@ -122,7 +123,12 @@ trait JdbcSpiSync
     val errors = update_validate(update)
     if (errors.isEmpty) {
       val conn = conn0.asInstanceOf[JdbcConn_jvm]
-      conn.transact_sync(update_getData(conn, update))
+      if (isRefUpdate(update.elements)) {
+        // Atomic transaction with updates for each ref namespace
+        conn.atomicTransaction(multipleUpdates(update)(conn))
+      } else {
+        conn.transact_sync(update_getData(conn, update))
+      }
     } else {
       throw ValidationErrors(errors)
     }
@@ -136,6 +142,12 @@ trait JdbcSpiSync
     new ResolveUpdate(conn.proxy.uniqueAttrs, update.isUpsert) with Data_Update {
       override protected val sqlConn = conn.sqlConn
     }.getData(update.elements)
+  }
+
+  private def update_getData(conn: JdbcConn_jvm, elements: List[Element], isUpsert: Boolean): Data = {
+    new ResolveUpdate(conn.proxy.uniqueAttrs, isUpsert) with Data_Update {
+      override protected val sqlConn = conn.sqlConn
+    }.getData(elements)
   }
 
   override def update_validate(update: Update)(implicit conn: Conn): Map[String, Seq[String]] = {
@@ -171,5 +183,75 @@ trait JdbcSpiSync
   private def printInspectTx(label: String, elements: List[Element], data: Data): Unit = {
     // Simply print the statement (with no data)
     printInspect(label, elements, data._1.head.stmt)
+  }
+
+
+  // Util --------------------------------------
+
+  private def multipleUpdates(update: Update)(implicit conn: JdbcConn_jvm): () => Map[List[String], List[Long]] = {
+    if (update.isUpsert)
+      throw ModelError("Can't upsert referenced attributes. Please update instead.")
+
+    val (idsModel, updateModels) = prepareMultipleUpdates(update.elements, update.isUpsert)
+    type L = Long
+    val idQuery = updateModels.size match {
+      case 1  => Query[L](idsModel)
+      case 2  => Query[(L, L)](idsModel)
+      case 3  => Query[(L, L, L)](idsModel)
+      case 4  => Query[(L, L, L, L)](idsModel)
+      case 5  => Query[(L, L, L, L, L)](idsModel)
+      case 6  => Query[(L, L, L, L, L, L)](idsModel)
+      case 7  => Query[(L, L, L, L, L, L, L)](idsModel)
+      case 8  => Query[(L, L, L, L, L, L, L, L)](idsModel)
+      case 9  => Query[(L, L, L, L, L, L, L, L, L)](idsModel)
+      case 10 => Query[(L, L, L, L, L, L, L, L, L, L)](idsModel)
+      case 11 => Query[(L, L, L, L, L, L, L, L, L, L, L)](idsModel)
+      case 12 => Query[(L, L, L, L, L, L, L, L, L, L, L, L)](idsModel)
+      case 13 => Query[(L, L, L, L, L, L, L, L, L, L, L, L, L)](idsModel)
+      case 14 => Query[(L, L, L, L, L, L, L, L, L, L, L, L, L, L)](idsModel)
+      case 15 => Query[(L, L, L, L, L, L, L, L, L, L, L, L, L, L, L)](idsModel)
+      case 16 => Query[(L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L)](idsModel)
+      case 17 => Query[(L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L)](idsModel)
+      case 18 => Query[(L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L)](idsModel)
+      case 19 => Query[(L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L)](idsModel)
+      case 20 => Query[(L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L)](idsModel)
+      case 21 => Query[(L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L)](idsModel)
+      case 22 => Query[(L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L)](idsModel)
+    }
+
+    val ids: List[Long] = query_get(idQuery).head match {
+      case a: L                                                                                                                                 => List(0L, a)
+      case (a: L, b: L)                                                                                                                         => List(0L, a, b)
+      case (a: L, b: L, c: L)                                                                                                                   => List(0L, a, b, c)
+      case (a: L, b: L, c: L, d: L)                                                                                                             => List(0L, a, b, c, d)
+      case (a: L, b: L, c: L, d: L, e: L)                                                                                                       => List(0L, a, b, c, d, e)
+      case (a: L, b: L, c: L, d: L, e: L, f: L)                                                                                                 => List(0L, a, b, c, d, e, f)
+      case (a: L, b: L, c: L, d: L, e: L, f: L, g: L)                                                                                           => List(0L, a, b, c, d, e, f, g)
+      case (a: L, b: L, c: L, d: L, e: L, f: L, g: L, h: L)                                                                                     => List(0L, a, b, c, d, e, f, g, h)
+      case (a: L, b: L, c: L, d: L, e: L, f: L, g: L, h: L, i: L)                                                                               => List(0L, a, b, c, d, e, f, g, h, i)
+      case (a: L, b: L, c: L, d: L, e: L, f: L, g: L, h: L, i: L, j: L)                                                                         => List(0L, a, b, c, d, e, f, g, h, i, j)
+      case (a: L, b: L, c: L, d: L, e: L, f: L, g: L, h: L, i: L, j: L, k: L)                                                                   => List(0L, a, b, c, d, e, f, g, h, i, j, k)
+      case (a: L, b: L, c: L, d: L, e: L, f: L, g: L, h: L, i: L, j: L, k: L, l: L)                                                             => List(0L, a, b, c, d, e, f, g, h, i, j, k, l)
+      case (a: L, b: L, c: L, d: L, e: L, f: L, g: L, h: L, i: L, j: L, k: L, l: L, m: L)                                                       => List(0L, a, b, c, d, e, f, g, h, i, j, k, l, m)
+      case (a: L, b: L, c: L, d: L, e: L, f: L, g: L, h: L, i: L, j: L, k: L, l: L, m: L, n: L)                                                 => List(0L, a, b, c, d, e, f, g, h, i, j, k, l, m, n)
+      case (a: L, b: L, c: L, d: L, e: L, f: L, g: L, h: L, i: L, j: L, k: L, l: L, m: L, n: L, o: L)                                           => List(0L, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o)
+      case (a: L, b: L, c: L, d: L, e: L, f: L, g: L, h: L, i: L, j: L, k: L, l: L, m: L, n: L, o: L, p: L)                                     => List(0L, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p)
+      case (a: L, b: L, c: L, d: L, e: L, f: L, g: L, h: L, i: L, j: L, k: L, l: L, m: L, n: L, o: L, p: L, q: L)                               => List(0L, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q)
+      case (a: L, b: L, c: L, d: L, e: L, f: L, g: L, h: L, i: L, j: L, k: L, l: L, m: L, n: L, o: L, p: L, q: L, r: L)                         => List(0L, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r)
+      case (a: L, b: L, c: L, d: L, e: L, f: L, g: L, h: L, i: L, j: L, k: L, l: L, m: L, n: L, o: L, p: L, q: L, r: L, s: L)                   => List(0L, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s)
+      case (a: L, b: L, c: L, d: L, e: L, f: L, g: L, h: L, i: L, j: L, k: L, l: L, m: L, n: L, o: L, p: L, q: L, r: L, s: L, t: L)             => List(0L, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t)
+      case (a: L, b: L, c: L, d: L, e: L, f: L, g: L, h: L, i: L, j: L, k: L, l: L, m: L, n: L, o: L, p: L, q: L, r: L, s: L, t: L, u: L)       => List(0L, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u)
+      case (a: L, b: L, c: L, d: L, e: L, f: L, g: L, h: L, i: L, j: L, k: L, l: L, m: L, n: L, o: L, p: L, q: L, r: L, s: L, t: L, u: L, v: L) => List(0L, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v)
+    }
+
+    () => {
+      val idMaps = ids.zipWithIndex.map {
+        case (id: Long, i) =>
+          val updateModel = updateModels(i)(id)
+          conn.populateStmts(update_getData(conn, updateModel, update.isUpsert))
+      }
+      // Return TxReport with initial update ids
+      idMaps.head
+    }
   }
 }
