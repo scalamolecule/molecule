@@ -16,8 +16,7 @@ trait Data_Delete
     with DeleteOps
     with MetaModelUtils
     with MoleculeLogging
-    with JavaConversions
-     { self: ResolveDelete =>
+    with JavaConversions { self: ResolveDelete =>
 
   def getStmtsData(
     conn: DatomicConn_JVM,
@@ -26,7 +25,9 @@ trait Data_Delete
     debug: Boolean = true
   ): Data = {
     initTxBase(elements, idIndex)
-    val (ids, filterElements) = resolve(elements, Nil, Nil, true)
+
+    // Resolve the delete model
+    resolve(elements, true)
 
     val (filterQuery, inputs) = if (ids.isEmpty && filterElements.nonEmpty) {
 
@@ -85,5 +86,13 @@ trait Data_Delete
       logger.debug(deleteStrs.mkString("\n").trim)
     }
     stmts
+  }
+
+  override def addIds[T](ids1: Seq[T]): Unit = {
+    ids = ids ++ ids1.asInstanceOf[Seq[AnyRef]]
+  }
+
+  override def addFilterElements(elements: Seq[Element]): Unit = {
+    filterElements = filterElements ++ elements
   }
 }

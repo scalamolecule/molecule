@@ -54,19 +54,19 @@ class ResolveUpdate(
           resolve(tail)
 
         case Composite(es) =>
-          extractSubElements(es)
+          resolveSubElements(es)
           resolve(tail)
 
         case TxMetaData(es) =>
           handleTxMetaData()
-          extractSubElements(es)
+          resolveSubElements(es)
           resolve(tail)
       }
       case Nil             => ()
     }
   }
 
-  private def extractSubElements(elements: List[Element]): Unit = resolve(elements)
+  private def resolveSubElements(elements: List[Element]): Unit = resolve(elements)
 
   private def resolveAttrOneMan(dataAttr: AttrOneMan): Unit = {
     dataAttr match {

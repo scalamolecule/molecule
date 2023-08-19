@@ -261,8 +261,8 @@ trait Data_Insert
       val (curPath, paramIndex) = updateInserts(attr)
       (tpl: Product) =>
         tpl.productElement(tplIndex) match {
-          case Some(set: Set[Any]) =>
-            val array     = set2array(set)
+          case Some(set: Set[_]) =>
+            val array     = set2array(set.asInstanceOf[Set[Any]])
             val colSetter = (ps: PS, _: IdsMap, _: RowIndex) => {
               val conn = ps.getConnection
               val arr  = conn.createArrayOf("AnyRef", array)

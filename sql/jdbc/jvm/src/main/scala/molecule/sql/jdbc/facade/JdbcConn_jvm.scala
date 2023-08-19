@@ -54,14 +54,14 @@ case class JdbcConn_jvm(override val proxy: JdbcProxy, override val sqlConn: sql
     }
   }
 
-  def populateStmts(inserts: Data): Map[List[String], List[Long]] = {
-    val tableInserts     = inserts._1
-    val joinTableInserts = inserts._2
-    var idsMap           = Map.empty[List[String], List[Long]]
-    var ids              = List.empty[Long]
+  def populateStmts(data: Data): Map[List[String], List[Long]] = {
+    val tables     = data._1
+    val joinTables = data._2
+    var idsMap     = Map.empty[List[String], List[Long]]
+    var ids        = List.empty[Long]
 
     // Insert statements backwards to obtain auto-generated ref ids for prepending inserts
-    tableInserts.reverse.foreach {
+    tables.reverse.foreach {
       case Table(refPath, stmt, ps, populatePS) =>
         //          println("--------------------------------------------------------------\n" + stmt)
         //          println("--------------------------------------------------------------")
@@ -79,7 +79,7 @@ case class JdbcConn_jvm(override val proxy: JdbcProxy, override val sqlConn: sql
         idsMap = idsMap + (refPath -> ids)
     }
 
-    joinTableInserts.foreach {
+    joinTables.foreach {
       case JoinTable(refPath, stmt, ps, leftPath, rightPath, rightCounts) =>
         //          println("--------------------------------------------------------------\n" + stmt)
         //          println(rightCounts)

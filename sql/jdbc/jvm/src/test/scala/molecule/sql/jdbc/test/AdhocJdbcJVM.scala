@@ -87,9 +87,15 @@ object AdhocJdbcJVM extends JdbcTestSuite {
       import molecule.coreTests.dataModels.core.dsl.Refs._
 
       for {
-        id <- A.i(1).B.i(2).C.i(3).save.transact.map(_.id)
-        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
+        //        id <- A.i(1).B.i(2).C.i(3).save.transact.map(_.id)
+        //        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
 
+        List(e1, e2, _) <- A.i.insert(1, 2, 3).transact.map(_.ids)
+        _ <- A.i.query.get.map(_ ==> List(1, 2, 3))
+        _ <- A(e1).delete.transact
+        // or
+        _ <- A.id_(e2).delete.transact
+        _ <- A.i.query.get.map(_ ==> List(3))
 
       } yield ()
     }

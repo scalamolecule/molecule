@@ -19,7 +19,10 @@ trait Data_Save
   def getData(elements: List[Element]): Data = {
     curRefPath = List(getInitialNs(elements))
     val (mainElements, _) = separateTxElements(elements)
+
+    // Resolve the save model
     resolve(mainElements)
+
     postResolvers.foreach(_())
     addRowSetterToTables()
     (getTables, Nil)

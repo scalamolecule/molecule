@@ -60,7 +60,7 @@ trait Data_Update extends DatomicBase_JVM with UpdateOps with MoleculeLogging { 
       }
     }
 
-    // Resolve the update model (OBS: lots of mutations so don't move around :-)
+    // Resolve the update model
     resolve(elements)
 
     val (filterQuery, inputs) = if (ids.isEmpty && filterElements.nonEmpty) {

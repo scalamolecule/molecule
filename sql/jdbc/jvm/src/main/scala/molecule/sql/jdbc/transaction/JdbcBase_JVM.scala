@@ -38,6 +38,8 @@ trait JdbcBase_JVM extends JdbcDataType_JVM with ModelUtils {
 
   protected var ids        = Seq.empty[Long]
   protected val updateCols = ListBuffer.empty[String]
+  protected var filterElements = List.empty[Element]
+
 
   // PreparedStatement param indexes for each (table, col) coordinate
   protected val paramIndexes   = mutable.Map.empty[(List[String], String), Int]
