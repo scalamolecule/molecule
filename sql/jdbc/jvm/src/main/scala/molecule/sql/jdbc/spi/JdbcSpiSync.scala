@@ -125,7 +125,7 @@ trait JdbcSpiSync
       val conn = conn0.asInstanceOf[JdbcConn_jvm]
       if (isRefUpdate(update.elements)) {
         // Atomic transaction with updates for each ref namespace
-        conn.atomicTransaction(multipleUpdates(update)(conn))
+        conn.atomicTransaction(refUpdates(update)(conn))
       } else {
         conn.transact_sync(update_getData(conn, update))
       }
@@ -151,7 +151,7 @@ trait JdbcSpiSync
   }
 
   override def update_validate(update: Update)(implicit conn: Conn): Map[String, Seq[String]] = {
-    validateUpdate(conn, update.elements)
+    validateUpdate(conn, update)
   }
 
 
@@ -188,7 +188,7 @@ trait JdbcSpiSync
 
   // Util --------------------------------------
 
-  private def multipleUpdates(update: Update)(implicit conn: JdbcConn_jvm): () => Map[List[String], List[Long]] = {
+  private def refUpdates(update: Update)(implicit conn: JdbcConn_jvm): () => Map[List[String], List[Long]] = {
     if (update.isUpsert)
       throw ModelError("Can't upsert referenced attributes. Please update instead.")
 

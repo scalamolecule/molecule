@@ -141,7 +141,7 @@ trait DatomicSpiAsync
   }
 
   override def update_validate(update: Update)(implicit conn: Conn): Map[String, Seq[String]] = {
-    validateUpdate(conn, update.elements)
+    validateUpdate(conn, update)
   }
 
 

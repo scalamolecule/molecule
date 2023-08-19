@@ -3,18 +3,24 @@ package molecule.datalog.datomic.spi
 import datomic.Peer
 import molecule.base.error._
 import molecule.boilerplate.ast.Model._
+import molecule.core.action.Update
 import molecule.core.spi.Conn
+import molecule.core.util.ModelUtils
 import molecule.core.validation.ModelValidation
 import molecule.datalog.datomic.facade.DatomicConn_JVM
 import scala.collection.mutable.ListBuffer
 
 
-trait JVMDatomicSpiBase {
+trait JVMDatomicSpiBase extends ModelUtils {
 
-  def validateUpdate(conn0: Conn, elements: List[Element]): Map[String, Seq[String]] = {
-    val conn                              = conn0.asInstanceOf[DatomicConn_JVM]
-    val proxy                             = conn.proxy
-    val db                                = conn.peerConn.db()
+  def validateUpdate(conn0: Conn, update: Update): Map[String, Seq[String]] = {
+    if (update.isUpsert && isRefUpdate(update.elements))
+      throw ModelError("Can't upsert referenced attributes. Please update instead.")
+
+    val conn  = conn0.asInstanceOf[DatomicConn_JVM]
+    val proxy = conn.proxy
+    val db    = conn.peerConn.db()
+
     val getCurSetValues: Attr => Set[Any] = (attr: Attr) => {
       val a = s":${attr.ns}/${attr.attr}"
       try {
@@ -32,11 +38,12 @@ trait JVMDatomicSpiBase {
           s"Unexpected error trying to find current values of mandatory attribute ${attr.name}")
       }
     }
+
     ModelValidation(
       proxy.nsMap,
       proxy.attrMap,
       "update",
       Some(getCurSetValues)
-    ).validate(elements)
+    ).validate(update.elements)
   }
 }

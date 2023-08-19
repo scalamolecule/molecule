@@ -46,7 +46,7 @@ class ResolveUpdate(
         case Ref(_, _, "Tx", CardOne, _)  => resolve(tail) // todo
         case ref@Ref(_, _, _, CardOne, _) => handleRefNs(ref); resolve(tail)
         case ref: Ref                     => throw ModelError(
-          s"Can't $update attributes in card-many referenced namespaces. Found `${ref.refAttr.capitalize}`"
+          s"Can't $update attributes in card-many referenced namespace `${ref.refAttr.capitalize}`"
         )
 
         case b: BackRef =>

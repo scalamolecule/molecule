@@ -77,4 +77,12 @@ trait ModelUtils {
     //      case _                      => (elements, Nil)
     //    }
   }
+
+
+  def isRefUpdate(elements: List[Element]) = {
+    elements.exists {
+      case _: Ref => true
+      case _      => false
+    }
+  }
 }

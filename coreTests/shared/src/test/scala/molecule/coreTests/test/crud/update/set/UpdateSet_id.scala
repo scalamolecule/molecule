@@ -181,7 +181,7 @@ trait UpdateSet_id extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync
         for {
           _ <- Ns(42).i(1).Refs.i(2).update.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't update attributes in card-many referenced namespaces. Found `Refs`"
+            err ==> "Can't update attributes in card-many referenced namespace `Refs`"
           }
         } yield ()
       }

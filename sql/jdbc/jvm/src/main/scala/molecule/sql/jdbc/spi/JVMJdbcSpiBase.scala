@@ -6,17 +6,18 @@ import molecule.boilerplate
 import molecule.boilerplate.ast
 import molecule.boilerplate.ast.Model
 import molecule.boilerplate.ast.Model._
-import molecule.core.action.Query
+import molecule.core.action.{Query, Update}
 import molecule.core.spi.Conn
+import molecule.core.util.ModelUtils
 import molecule.core.validation.ModelValidation
 import molecule.sql.jdbc.facade.JdbcConn_jvm
 import scala.collection.immutable.List
 import scala.collection.mutable.ListBuffer
 
 
-trait JVMJdbcSpiBase {
+trait JVMJdbcSpiBase extends ModelUtils {
 
-  def validateUpdate(conn0: Conn, elements: List[Element]): Map[String, Seq[String]] = {
+  def validateUpdate(conn0: Conn, update: Update): Map[String, Seq[String]] = {
     val conn  = conn0.asInstanceOf[JdbcConn_jvm]
     val proxy = conn.proxy
     //    val db                                = conn.sqlConn.db()
@@ -43,16 +44,8 @@ trait JVMJdbcSpiBase {
       "update",
       //      Some(getCurSetValues)
       None
-    ).validate(elements)
+    ).validate(update.elements)
   }
-
-  def isRefUpdate(elements: List[Element]) = {
-    elements.exists {
-      case _: Ref => true
-      case _      => false
-    }
-  }
-
 
   def prepareMultipleUpdates(
     elements: List[Element],
@@ -124,7 +117,7 @@ trait JVMJdbcSpiBase {
         updateModel.clear()
 
       case ref: Ref => throw ModelError(
-        s"Can't $update attributes in card-many referenced namespaces. Found `${ref.refAttr.capitalize}`"
+        s"Can't $update attributes in card-many referenced namespace `${ref.refAttr.capitalize}`"
       )
 
       case other => idsModel += other

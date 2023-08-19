@@ -180,7 +180,7 @@ trait DatomicSpiZio
   override def update_validate(update: Update): ZIO[Conn, MoleculeError, Map[String, Seq[String]]] = {
     for {
       conn0 <- ZIO.service[Conn]
-      errors <- ZIO.succeed[Map[String, Seq[String]]](validateUpdate(conn0, update.elements))
+      errors <- ZIO.succeed[Map[String, Seq[String]]](validateUpdate(conn0, update))
     } yield errors
   }
 

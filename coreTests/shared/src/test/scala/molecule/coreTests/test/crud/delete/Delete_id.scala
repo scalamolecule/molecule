@@ -220,7 +220,7 @@ trait Delete_id extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =
         for {
           _ <- A(42).i(1).Bb.i(2).update.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't update attributes in card-many referenced namespaces. Found `Bb`"
+            err ==> "Can't update attributes in card-many referenced namespace `Bb`"
           }
         } yield ()
       }
