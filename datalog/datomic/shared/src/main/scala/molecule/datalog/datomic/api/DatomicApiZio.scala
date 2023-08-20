@@ -51,4 +51,10 @@ trait DatomicApiZio
     override def transact: ZIO[Conn, MoleculeError, TxReport] = delete_transact(delete)
     override def inspect: ZIO[Conn, MoleculeError, Unit] = delete_inspect(delete)
   }
+
+  override def rawQuery(
+    query: String,
+    withNulls: Boolean = false,
+    doPrint: Boolean = true,
+  ): ZIO[Conn, MoleculeError, List[List[Any]]] = fallback_rawQuery(query, withNulls, doPrint)
 }

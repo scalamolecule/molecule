@@ -41,4 +41,10 @@ trait ApiSync {
     def transact(implicit conn: Conn): TxReport
     def inspect(implicit conn: Conn): Unit
   }
+
+  def rawQuery(
+    query: String,
+    withNulls: Boolean = false,
+    doPrint: Boolean = true,
+  )(implicit conn: Conn): List[List[Any]]
 }

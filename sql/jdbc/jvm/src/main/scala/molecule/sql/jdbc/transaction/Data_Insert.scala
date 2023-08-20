@@ -1,13 +1,12 @@
 package molecule.sql.jdbc.transaction
 
-import java.net.URI
 import java.sql.{Statement, PreparedStatement => PS}
-import java.util.{Date, UUID}
+import java.util.Date
 import molecule.base.ast.SchemaAST._
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.ops.InsertOps
-import molecule.core.transaction.{ResolveInsert, InsertResolvers_}
+import molecule.core.transaction.{InsertResolvers_, ResolveInsert}
 import molecule.core.util.ModelUtils
 
 trait Data_Insert
@@ -50,12 +49,15 @@ trait Data_Insert
     inserts.foreach {
       case (refPath, cols) =>
         val table             = refPath.last
+        val columns           = cols.mkString(",\n  ")
         val inputPlaceholders = cols.map(_ => "?").mkString(", ")
-        val stmt              =
+
+        val stmt =
           s"""INSERT INTO $table (
-             |  ${cols.mkString(",\n  ")}
+             |  $columns
              |) VALUES ($inputPlaceholders)""".stripMargin
-        val ps                = sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
+
+        val ps = sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
         tableDatas(refPath) = Table(refPath, stmt, ps)
         rowSettersMap(refPath) = Nil
     }

@@ -23,7 +23,8 @@ trait JdbcSpiSync
   extends SpiSync
     with JVMJdbcSpiBase
     with SubscriptionStarter
-    with PrintInspect {
+    with PrintInspect
+    with BaseHelpers {
 
   // Query --------------------------------------------------------
 
@@ -167,9 +168,11 @@ trait JdbcSpiSync
   }
 
   private def delete_getData(conn: JdbcConn_jvm, delete: Delete): Data = {
+
+
     new ResolveDelete with Data_Delete {
       override protected val sqlConn = conn.sqlConn
-    }.getData(delete.elements)
+    }.getData(delete.elements, conn.proxy.nsMap)
   }
 
 
@@ -254,4 +257,104 @@ trait JdbcSpiSync
       idMaps.head
     }
   }
+
+  override def fallback_rawQuery(
+    query: String,
+    withNulls: Boolean = false,
+    doPrint: Boolean = true,
+  )(implicit conn: Conn): List[List[Any]] = {
+    val c             = conn.asInstanceOf[JdbcConn_jvm].sqlConn
+    val statement     = c.createStatement()
+    val resultSet     = statement.executeQuery(query)
+    val rsmd          = resultSet.getMetaData
+    val columnsNumber = rsmd.getColumnCount
+
+    val debug = if (doPrint) (s: String) => println(s) else (_: String) => ()
+    debug("-----------------------------------------------------------------------------")
+    debug(query)
+
+    val rows = ListBuffer.empty[List[Any]]
+    val row  = ListBuffer.empty[Any]
+
+    def value[T](rawValue: T, baseTpe: String): String = {
+      val isNull = resultSet.wasNull()
+      if (withNulls && isNull) {
+        row += null
+      } else if (!isNull) {
+        row += rawValue
+      }
+      baseTpe
+    }
+    def array(n: Int, baseTpe: String): String = {
+      val arr    = resultSet.getArray(n)
+      val isNull = resultSet.wasNull()
+      if (withNulls && isNull) {
+        row += null
+      } else if (!isNull) {
+        row += arr.getArray.asInstanceOf[Array[_]].toSet
+      }
+      s"Set[$baseTpe]"
+    }
+
+    while (resultSet.next) {
+      var n = 1
+      row.clear()
+      while (n <= columnsNumber) {
+        val col     = rsmd.getColumnName(n)
+        val sqlType = rsmd.getColumnTypeName(n)
+
+        // todo: get types of sql dialect
+        val tpe         = sqlType match {
+          case "CHARACTER VARYING" => value(resultSet.getString(n), "String/URI")
+          case "INTEGER"           => value(resultSet.getInt(n), "Int")
+          case "BIGINT"            => value(resultSet.getLong(n), "Long")
+          case "DOUBLE PRECISION"  => value(resultSet.getDouble(n), "Double/Float")
+          case "BOOLEAN"           => value(resultSet.getBoolean(n), "Boolean")
+          case "DECIMAL"           => value(resultSet.getDouble(n), "BigInt/Decimal")
+          case "DATE"              => value(resultSet.getDate(n), "Date")
+          case "UUID"              => value(resultSet.getString(n), "UUID")
+          case "TINYINT"           => value(resultSet.getShort(n), "Byte")
+          case "SMALLINT"          => value(resultSet.getShort(n), "Short")
+          case "CHARACTER"         => value(resultSet.getString(n), "Char")
+
+          case "CHARACTER VARYING ARRAY"  => array(n, "String/URI")
+          case "INTEGER ARRAY"            => array(n, "Int")
+          case "BIGINT ARRAY"             => array(n, "Long")
+          case "DOUBLE PRECISION ARRAY"   => array(n, "Double/Float")
+          case "BOOLEAN ARRAY"            => array(n, "Boolean")
+          case "DECIMAL(100, 0) ARRAY"    => array(n, "BigInt")
+          case "DECIMAL(65535, 25) ARRAY" => array(n, "BigDecimal")
+          case "DATE ARRAY"               => array(n, "Date")
+          case "UUID ARRAY"               => array(n, "UUID")
+          case "TINYINT ARRAY"            => array(n, "Byte")
+          case "SMALLINT ARRAY"           => array(n, "Short")
+          case "CHARACTER ARRAY"          => array(n, "Char")
+
+          // case "NULL"        => row += "NULL"; "NULL"
+          // case "DOUBLE"      => row += resultSet.getDouble(n); "Double/Float x"
+          // case "BIT"         => row += resultSet.getByte(n); "a"
+          // case "FLOAT"       => row += resultSet.getFloat(n); "e"
+          // case "REAL"        => row += resultSet.getDouble(n); "f"
+          // case "NUMERIC"     => row += resultSet.getDouble(n); "g"
+          // case "CHAR"        => row += resultSet.getString(n).charAt(0); "h"
+          // case "VARCHAR"     => row += resultSet.getString(n).charAt(0); "j"
+          // case "LONGVARCHAR" => row += resultSet.getString(n); "k"
+          // case "BINARY"      => row += resultSet.getByte(n); "l"
+
+          case other => throw new Exception(s"Unexpected/not yet considered sql result type from raw query: " + other)
+        }
+        val columnValue = resultSet.getString(n)
+        if (withNulls && resultSet.wasNull()) {
+          debug(tpe + padS(18, tpe) + col + padS(20, col) + "null")
+        } else if (!resultSet.wasNull()) {
+          debug(tpe + padS(18, tpe) + col + padS(20, col) + columnValue)
+        }
+        n += 1
+      }
+      rows += row.toList
+      debug("-----------------------------------------------")
+    }
+    rows.toList
+  }
+
 }

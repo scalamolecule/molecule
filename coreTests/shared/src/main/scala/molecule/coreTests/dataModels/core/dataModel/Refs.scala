@@ -45,6 +45,9 @@ object Refs extends DataModel(10) {
     val bb = many[B]
     val cc = many[C]
     val dd = many[D]
+
+    val ownC  = one[C].owner
+    val ownCc = many[C].owner
   }
 
   trait C {

@@ -48,4 +48,10 @@ trait DatomicApiSync extends DatomicSpiSync with ApiSync {
     override def transact(implicit conn0: Conn): TxReport = delete_transact(delete)
     override def inspect(implicit conn0: Conn): Unit = delete_inspect(delete)
   }
+
+  override def rawQuery(
+    query: String,
+    withNulls: Boolean = false,
+    doPrint: Boolean = true,
+  )(implicit conn: Conn): List[List[Any]] = fallback_rawQuery(query, withNulls, doPrint)
 }

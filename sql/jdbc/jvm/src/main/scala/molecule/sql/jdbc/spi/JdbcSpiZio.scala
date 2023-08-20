@@ -106,4 +106,18 @@ trait JdbcSpiZio extends SpiZio with JdbcSpiZioBase {
       result <- moleculeError(ZIO.attemptBlocking(query(conn)))
     } yield result
   }
+
+  override def fallback_rawQuery(
+    query: String,
+    withNulls: Boolean = false,
+    doPrint: Boolean = true,
+  ): ZIO[Conn, MoleculeError, List[List[Any]]] = {
+    for {
+      conn0 <- ZIO.service[Conn]
+      conn = conn0.asInstanceOf[JdbcConn_jvm]
+      result <- moleculeError(ZIO.attemptBlocking(
+        JdbcSpiSync.fallback_rawQuery(query, withNulls, doPrint)(conn)
+      ))
+    } yield result
+  }
 }

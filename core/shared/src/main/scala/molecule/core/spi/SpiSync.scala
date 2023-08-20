@@ -50,4 +50,10 @@ trait SpiSync  {
 
   def delete_transact(delete: Delete)(implicit conn: Conn): TxReport = ???
   def delete_inspect(delete: Delete)(implicit conn: Conn): Unit = ???
+
+  def fallback_rawQuery(
+    query: String,
+    withNulls: Boolean = false,
+    doPrint: Boolean = true,
+  )(implicit conn: Conn): List[List[Any]] = ???
 }

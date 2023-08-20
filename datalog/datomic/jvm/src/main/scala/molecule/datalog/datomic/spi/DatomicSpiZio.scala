@@ -239,4 +239,18 @@ trait DatomicSpiZio
       printInspect(label, elements, stmts.toArray().toList.mkString("\n"))
     )
   }
+
+  override def fallback_rawQuery(
+    query: String,
+    withNulls: Boolean = false,
+    doPrint: Boolean = true,
+  ): ZIO[Conn, MoleculeError, List[List[Any]]] = {
+    for {
+      conn0 <- ZIO.service[Conn]
+      conn = conn0.asInstanceOf[DatomicConn_JVM]
+      result <- moleculeError(ZIO.attemptBlocking(
+        DatomicSpiSync.fallback_rawQuery(query, withNulls, doPrint)(conn)
+      ))
+    } yield result
+  }
 }

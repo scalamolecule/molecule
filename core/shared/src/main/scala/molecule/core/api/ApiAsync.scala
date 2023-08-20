@@ -43,4 +43,10 @@ trait ApiAsync {
     def transact(implicit conn: Conn, ec: EC): Future[TxReport]
     def inspect(implicit conn: Conn, ec: EC): Future[Unit]
   }
+
+  def rawQuery(
+    query: String,
+    withNulls: Boolean = false,
+    doPrint: Boolean = true,
+  )(implicit conn: Conn, ec: EC): Future[List[List[Any]]]
 }

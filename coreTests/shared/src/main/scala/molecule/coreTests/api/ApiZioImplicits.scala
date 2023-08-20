@@ -41,9 +41,14 @@ trait ApiZioImplicits { dataProvider: SpiZio =>
     def inspect: ZIO[Conn, MoleculeError, Unit] = update_inspect(update)
   }
 
-
   implicit class DeleteApiAsync[Tpl](delete: Delete) {
     def transact: ZIO[Conn, MoleculeError, TxReport] = delete_transact(delete)
     def inspect: ZIO[Conn, MoleculeError, Unit] = delete_inspect(delete)
   }
+
+  def rawQuery(
+    query: String,
+    withNulls: Boolean = false,
+    doPrint: Boolean = true,
+  ): ZIO[Conn, MoleculeError, List[List[Any]]] = fallback_rawQuery(query, withNulls, doPrint)
 }

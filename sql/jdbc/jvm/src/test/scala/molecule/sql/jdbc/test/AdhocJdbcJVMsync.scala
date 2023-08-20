@@ -39,7 +39,7 @@ object AdhocJdbcJVMsync extends JdbcTestSuite {
       //      Ns.int.query.get ==> List(3, 10)
 
 
-      //      printQuery(
+      //      rawSelect(
       //        """SELECT DISTINCT
       //          |  s, i,
       //          |  ARRAY_SLICE(

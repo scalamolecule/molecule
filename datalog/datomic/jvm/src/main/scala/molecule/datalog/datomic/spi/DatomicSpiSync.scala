@@ -1,10 +1,11 @@
 package molecule.datalog.datomic.spi
 
+import datomic.Peer
 import molecule.base.error.InsertError
 import molecule.boilerplate.ast.Model._
 import molecule.core.action._
-import molecule.core.spi.{PrintInspect, SpiSync, TxReport, Conn}
-import molecule.core.util.FutureUtils
+import molecule.core.spi.{Conn, PrintInspect, SpiSync, TxReport}
+import molecule.core.util.{FutureUtils, JavaConversions}
 import molecule.datalog.core.query.DatomicModel2Query
 import molecule.datalog.datomic.facade.DatomicConn_JVM
 import molecule.datalog.datomic.query.{DatomicQueryResolveCursor, DatomicQueryResolveOffset}
@@ -17,7 +18,8 @@ trait DatomicSpiSync
   extends SpiSync
     with SubscriptionStarter
     with PrintInspect
-    with FutureUtils {
+    with FutureUtils
+    with JavaConversions {
 
   override def query_get[Tpl](q: Query[Tpl])(implicit conn: Conn): List[Tpl] = {
     DatomicQueryResolveOffset[Tpl](q.elements, q.limit, None, q.dbView)
@@ -92,6 +94,18 @@ trait DatomicSpiSync
   private def printInspectQuery(label: String, elements: List[Element]): Unit = {
     val queries = new DatomicModel2Query(elements).getQueries(true)._3
     printInspect(label, elements, queries)
-//    printInspect(label, elements)
+    //    printInspect(label, elements)
+  }
+
+
+  override def fallback_rawQuery(
+    query: String,
+    withNulls: Boolean = false,
+    doPrint: Boolean = true,
+  )(implicit conn: Conn): List[List[Any]] = {
+    if (withNulls)
+      throw new Exception("Null values not part of the semantic model of Datomic.")
+
+    Peer.q(query, conn.db).asScala.toList.map(_.asScala.toList)
   }
 }

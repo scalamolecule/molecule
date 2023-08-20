@@ -51,4 +51,10 @@ trait SpiAsync  {
 
   def delete_transact(delete: Delete)(implicit conn: Conn, ec: EC): Future[TxReport] = ???
   def delete_inspect(delete: Delete)(implicit conn: Conn, ec: EC): Future[Unit] = ???
+
+  def fallback_rawQuery(
+    query: String,
+    withNulls: Boolean = false,
+    doPrint: Boolean = true,
+  )(implicit conn: Conn, ec: EC): Future[List[List[Any]]] = ???
 }

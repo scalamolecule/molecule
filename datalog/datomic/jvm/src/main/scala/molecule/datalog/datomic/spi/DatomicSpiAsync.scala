@@ -4,7 +4,7 @@ import molecule.base.error._
 import molecule.boilerplate.ast.Model._
 import molecule.core.action._
 import molecule.core.marshalling.ConnProxy
-import molecule.core.spi.{SpiAsync, TxReport, Conn}
+import molecule.core.spi.{Conn, SpiAsync, TxReport}
 import molecule.core.transaction.{ResolveDelete, ResolveInsert, ResolveSave, ResolveUpdate}
 import molecule.core.util.FutureUtils
 import molecule.core.validation.ModelValidation
@@ -168,5 +168,13 @@ trait DatomicSpiAsync
   private def printInspectTx(label: String, elements: List[Element], stmts: Data)
                             (implicit ec: EC): Future[Unit] = {
     Future(printInspect(label, elements, stmts.toArray().toList.mkString("\n")))
+  }
+
+  override def fallback_rawQuery(
+    query: String,
+    withNulls: Boolean = false,
+    doPrint: Boolean = true,
+  )(implicit conn: Conn, ec: EC): Future[List[List[Any]]] = Future {
+    DatomicSpiSync.fallback_rawQuery(query, withNulls, doPrint)
   }
 }

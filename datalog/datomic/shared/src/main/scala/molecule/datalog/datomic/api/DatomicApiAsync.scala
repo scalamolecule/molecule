@@ -49,4 +49,10 @@ trait DatomicApiAsync extends DatomicSpiAsync with ApiAsync {
     override def transact(implicit conn: Conn, ec: EC): Future[TxReport] = delete_transact(delete)
     override def inspect(implicit conn: Conn, ec: EC): Future[Unit] = delete_inspect(delete)
   }
+
+  override def rawQuery(
+    query: String,
+    withNulls: Boolean = false,
+    doPrint: Boolean = true,
+  )(implicit conn: Conn, ec: EC): Future[List[List[Any]]] = fallback_rawQuery(query, withNulls, doPrint)
 }

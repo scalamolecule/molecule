@@ -40,9 +40,14 @@ trait ApiSyncImplicits { dataProvider: SpiSync =>
     def validate(implicit conn: Conn): Map[String, Seq[String]] = update_validate(update)
   }
 
-
   implicit class DeleteApiAsync[Tpl](delete: Delete) {
     def transact(implicit conn0: Conn): TxReport = delete_transact(delete)
     def inspect(implicit conn0: Conn): Unit = delete_inspect(delete)
   }
+
+  def rawQuery(
+    query: String,
+    withNulls: Boolean = false,
+    doPrint: Boolean = true,
+  )(implicit conn: Conn): List[List[Any]] = fallback_rawQuery(query, withNulls, doPrint)
 }

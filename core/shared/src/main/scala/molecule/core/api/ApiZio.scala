@@ -3,6 +3,7 @@ package molecule.core.api
 import molecule.base.error._
 import molecule.core.spi.{Conn, TxReport}
 import zio.ZIO
+import scala.concurrent.Future
 
 trait ApiZio {
 
@@ -42,4 +43,11 @@ trait ApiZio {
     def transact: ZIO[Conn, MoleculeError, TxReport]
     def inspect: ZIO[Conn, MoleculeError, Unit]
   }
+
+
+  def rawQuery(
+    query: String,
+    withNulls: Boolean = false,
+    doPrint: Boolean = true,
+  ): ZIO[Conn, MoleculeError, List[List[Any]]]
 }

@@ -77,4 +77,12 @@ trait JdbcSpiAsync extends SpiAsync {
   override def delete_inspect(delete: Delete)(implicit conn: Conn, ec: EC): Future[Unit] = Future {
     JdbcSpiSync.delete_inspect(delete)
   }
+
+  override def fallback_rawQuery(
+    query: String,
+    withNulls: Boolean = false,
+    doPrint: Boolean = true,
+  )(implicit conn: Conn, ec: EC): Future[List[List[Any]]] = Future {
+    JdbcSpiSync.fallback_rawQuery(query, withNulls, doPrint)
+  }
 }

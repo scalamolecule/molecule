@@ -51,4 +51,10 @@ trait SpiZio  {
 
   def delete_transact(delete: Delete): ZIO[Conn, MoleculeError, TxReport] = ???
   def delete_inspect(delete: Delete): ZIO[Conn, MoleculeError, Unit] = ???
+
+  def fallback_rawQuery(
+    query: String,
+    withNulls: Boolean = false,
+    doPrint: Boolean = true,
+  ): ZIO[Conn, MoleculeError, List[List[Any]]] = ???
 }

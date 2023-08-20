@@ -52,14 +52,10 @@ object AdhocJdbcJVM extends JdbcTestSuite {
         _ <- Ns.i(1).save.transact
         _ <- Ns.i.query.get.map(_ ==> List(1))
 
-
-        //                _ <- Future(printQuery(
-        //                  """SELECT DISTINCT
-        //                    |  ARRAY_AGG(Ns.ints)
-        //                    |FROM Ns
-        //                    |WHERE
-        //                    |  Ns.ints IS NOT NULL AND CARDINALITY(Ns.ints) > 0;
-        //                    |""".stripMargin))
+        _ <- rawQuery(
+          """SELECT *
+            |FROM Ns
+            |""".stripMargin, true)
       } yield ()
     }
 
@@ -90,12 +86,44 @@ object AdhocJdbcJVM extends JdbcTestSuite {
         //        id <- A.i(1).B.i(2).C.i(3).save.transact.map(_.id)
         //        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
 
-        List(e1, e2, _) <- A.i.insert(1, 2, 3).transact.map(_.ids)
-        _ <- A.i.query.get.map(_ ==> List(1, 2, 3))
+        e1 <- A.i.Bb.*(B.i).insert(
+          (1, Seq(10, 11)),
+          (2, Seq(20, 21))
+        ).transact.map(_.id)
+
+        _ <- if (platform == "Jdbc jvm") {
+          // 4 join rows from A to B
+          rawQuery("SELECT * FROM A_bb_B").map(_ ==> List(
+            List(1, 1),
+            List(1, 2),
+            List(2, 3),
+            List(2, 4),
+          ))
+        } else Future.unit
+
+        // 2 entities, each with 2 owned sub-entities
+        _ <- A.i.a1.Bb.*(B.i.a1).query.get.map(_ ==> List(
+          (1, Seq(10, 11)),
+          (2, Seq(20, 21))
+        ))
+        // 4 referenced entities
+        _ <- B.i.a1.query.get.map(_ ==> List(10, 11, 20, 21))
+
         _ <- A(e1).delete.transact
-        // or
-        _ <- A.id_(e2).delete.transact
-        _ <- A.i.query.get.map(_ ==> List(3))
+
+        // 1 entity with 2 owned sub-entities left
+        _ <- A.i.Bb.*(B.i.a1).query.get.map(_ ==> List(
+          (2, Seq(20, 21))
+        ))
+        // Referenced are not deleted
+        _ <- B.i.a1.query.get.map(_ ==> List(10, 11, 20, 21))
+
+        _ <- rawQuery("SELECT * FROM A_bb_B").map(_ ==> List(
+          // List(1, 1),
+          // List(1, 2),
+          List(2, 3),
+          List(2, 4),
+        ))
 
       } yield ()
     }

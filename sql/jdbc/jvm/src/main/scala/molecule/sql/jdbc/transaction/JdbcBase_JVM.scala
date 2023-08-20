@@ -1,17 +1,15 @@
 package molecule.sql.jdbc.transaction
 
 import java.lang.{Boolean => jBoolean}
-import java.sql.PreparedStatement
-import java.util
-import java.util.{UUID, ArrayList => jArrayList, List => jList}
+import java.util.{UUID, List => jList}
 import clojure.lang.Keyword
 import molecule.base.ast.SchemaAST.padS
 import molecule.base.error.ExecutionError
 import molecule.boilerplate.ast.Model._
 import molecule.core.marshalling.{ConnProxy, DatomicProxy}
 import molecule.core.util.Executor._
-import molecule.core.util.{ModelUtils, fns}
-import molecule.sql.jdbc.facade.{JdbcConn_jvm, JdbcHandler_jvm}
+import molecule.core.util.ModelUtils
+import molecule.sql.jdbc.facade.JdbcConn_jvm
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future

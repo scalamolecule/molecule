@@ -16,12 +16,11 @@ import molecule.sql.jdbc.facade.JdbcConn_jvm
 trait Data_Update extends JdbcBase_JVM with UpdateOps with MoleculeLogging { self: ResolveUpdate =>
 
   def getData(elements: List[Element]): Data = {
-    //    println("--- Data_Update ---")
-    //    elements.foreach(println)
-
     curRefPath = List(getInitialNs(elements))
-    val (mainElements, _) = separateTxElements(elements)
-    resolve(mainElements)
+    val (updateModel, _) = separateTxElements(elements)
+
+    resolve(updateModel)
+
     addRowSetterToTables()
     (getTables, Nil)
   }
@@ -34,11 +33,13 @@ trait Data_Update extends JdbcBase_JVM with UpdateOps with MoleculeLogging { sel
         val ids_          = ids.mkString(", ")
         val updateCols_   = if (updateCols.isEmpty) "" else
           updateCols.map(c => s"$c IS NOT NULL").mkString(" AND\n  ", " AND\n  ", "")
-        val stmt          =
+
+        val stmt =
           s"""UPDATE $table SET
              |  $columnSetters
              |WHERE $table.id IN($ids_)$updateCols_""".stripMargin
-        val ps            = sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
+
+        val ps = sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
         tableDatas(refPath) = Table(refPath, stmt, ps)
 
         val colSetters = colSettersMap(refPath)

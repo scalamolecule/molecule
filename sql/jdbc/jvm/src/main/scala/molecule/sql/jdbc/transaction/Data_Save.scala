@@ -18,10 +18,9 @@ trait Data_Save
 
   def getData(elements: List[Element]): Data = {
     curRefPath = List(getInitialNs(elements))
-    val (mainElements, _) = separateTxElements(elements)
+    val (saveModel, _) = separateTxElements(elements)
 
-    // Resolve the save model
-    resolve(mainElements)
+    resolve(saveModel)
 
     postResolvers.foreach(_())
     addRowSetterToTables()
@@ -34,11 +33,13 @@ trait Data_Save
         val table             = refPath.last
         val columns           = cols.mkString(",\n  ")
         val inputPlaceholders = cols.map(_ => "?").mkString(", ")
-        val stmt              =
+
+        val stmt =
           s"""INSERT INTO $table (
              |  $columns
              |) VALUES ($inputPlaceholders)""".stripMargin
-        val ps                = sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
+
+        val ps = sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
         tableDatas(refPath) = Table(refPath, stmt, ps)
 
         val colSetters = colSettersMap(refPath)
