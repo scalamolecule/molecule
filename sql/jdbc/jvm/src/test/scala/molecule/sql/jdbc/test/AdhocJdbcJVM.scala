@@ -35,13 +35,6 @@ object AdhocJdbcJVM extends JdbcTestSuite {
   //  val x: Instant = ???
   //  val y: Long    = x.toEpochMilli
 
-  //  val all = List(
-  //    AttrOneManInt("A", "i", Eq, Seq(1), None, None, Nil, Nil, None, None),
-  //      Ref("A", "b", "B", CardOne, false),
-  //      AttrOneManInt("B", "i", Eq, Seq(2), None, None, Nil, Nil, None, None),
-  //      Ref("B", "c", "C", CardOne, false),
-  //      AttrOneManInt("C", "i", Eq, Seq(3), None, None, Nil, Nil, None, None)
-  //  )
 
   override lazy val tests = Tests {
     implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
@@ -86,47 +79,84 @@ object AdhocJdbcJVM extends JdbcTestSuite {
         //        id <- A.i(1).B.i(2).C.i(3).save.transact.map(_.id)
         //        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
 
-        e1 <- A.i.Bb.*(B.i).insert(
-          (1, Seq(10, 11)),
-          (2, Seq(20, 21))
-        ).transact.map(_.id)
 
-        _ <- if (platform == "Jdbc jvm") {
-          // 4 join rows from A to B
-          rawQuery("SELECT * FROM A_bb_B").map(_ ==> List(
-            List(1, 1),
-            List(1, 2),
-            List(2, 3),
-            List(2, 4),
-          ))
-        } else Future.unit
-
-        // 2 entities, each with 2 owned sub-entities
-        _ <- A.i.a1.Bb.*(B.i.a1).query.get.map(_ ==> List(
-          (1, Seq(10, 11)),
-          (2, Seq(20, 21))
-        ))
-        // 4 referenced entities
-        _ <- B.i.a1.query.get.map(_ ==> List(10, 11, 20, 21))
-
-        _ <- A(e1).delete.transact
-
-        // 1 entity with 2 owned sub-entities left
-        _ <- A.i.Bb.*(B.i.a1).query.get.map(_ ==> List(
-          (2, Seq(20, 21))
-        ))
-        // Referenced are not deleted
-        _ <- B.i.a1.query.get.map(_ ==> List(10, 11, 20, 21))
-
-        _ <- rawQuery("SELECT * FROM A_bb_B").map(_ ==> List(
-          // List(1, 1),
-          // List(1, 2),
-          List(2, 3),
-          List(2, 4),
-        ))
+        _ <- rawQuery(
+          s"""SELECT A_ownBb_B.B_id
+             |FROM A_ownBb_B
+             |INNER JOIN A on A.id = A_ownBb_B.A_id
+             |WHERE A.id in (1)
+             |""".stripMargin
+        )
 
       } yield ()
     }
 
   }
 }
+
+/*
+
+Can't use cascading deletes since the semantic model of a
+cardinality-one relationship in molecule (and Datomic) is reversed
+compared to sql. In Molecule, an entity is a parent if it holds
+a reference to another entity. Let's see what problems we get in sql:
+
+
+drop table A if exists;
+drop table B if exists;
+drop table C if exists;
+create table A(
+  id int primary key auto_increment,
+  a int,
+  b_id int
+);
+create table B(
+  id int primary key auto_increment,
+  b int,
+  c_id int
+);
+create table C(
+  id int primary key auto_increment,
+  c int,
+  c_id int
+);
+
+ALTER TABLE A
+  ADD CONSTRAINT Ax
+  FOREIGN KEY (B_id)
+  REFERENCES B(id)
+  ON DELETE CASCADE;
+
+ALTER TABLE B
+  ADD CONSTRAINT Bx
+  FOREIGN KEY (C_id)
+  REFERENCES C(id)
+  ON DELETE CASCADE;
+
+Insert into C(c) values (100), (200);
+Insert into B(b, c_id) values (10, 1), (20, 2);
+Insert into A(a, B_id) values (1, 1), (2, 2);
+
+Select * from A;
+Select * from B;
+Select * from C;
+
+/*
+  In sql we would need to go "backwards" from the deepest owned entity.
+  This breaks down if A has multiple owned refs that need to be deleted -
+  especially if those in turn have other owned entities etc!
+ */
+DELETE FROM C WHERE ID in (
+  select C_id from B
+  inner join A
+  where A.b_id = b.id And
+  A.id = 1
+);
+
+Select * from A;
+Select * from B;
+Select * from C;
+
+*/
+
+

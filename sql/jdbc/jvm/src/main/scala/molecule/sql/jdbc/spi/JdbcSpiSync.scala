@@ -168,8 +168,6 @@ trait JdbcSpiSync
   }
 
   private def delete_getData(conn: JdbcConn_jvm, delete: Delete): Data = {
-
-
     new ResolveDelete with Data_Delete {
       override protected val sqlConn = conn.sqlConn
     }.getData(delete.elements, conn.proxy.nsMap)
