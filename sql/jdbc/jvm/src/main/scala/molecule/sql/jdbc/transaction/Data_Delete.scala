@@ -47,16 +47,12 @@ trait Data_Delete extends JdbcBase_JVM with DeleteOps with MoleculeLogging { sel
             case Nil => deleteOwned(nsTail, ownedTables, nsIds)
 
             case metaAttr :: attrTail if metaAttr.options.contains("owner") =>
-              println(metaNs.attrs.filter(_.options.contains("owner")).mkString("   ----------- " + ns + " -----------\n   ", "\n   ", ""))
-
               val refNs     = metaAttr.refNs.get
               val refAttr   = metaAttr.attr
               val refMetaNs = nsMap(refNs)
 
               metaAttr.card match {
                 case _: CardOne =>
-
-                  println("A     nsIds  " + nsIds)
                   val refIds       = if (nsIds.isEmpty) Nil else {
                     val stmt =
                       s"""SELECT $refNs.id
@@ -64,17 +60,11 @@ trait Data_Delete extends JdbcBase_JVM with DeleteOps with MoleculeLogging { sel
                          |INNER JOIN $ns on $ns.$refAttr = $refNs.id
                          |WHERE $ns.id in (${nsIds.mkString(", ")})
                          |""".stripMargin
-
-                    println("-----")
-                    println(stmt)
-                    println("-----")
-
                     val resultSet = sqlConn.createStatement().executeQuery(stmt)
                     var refIds    = List.empty[Long]
                     while (resultSet.next()) {
                       refIds = refIds :+ resultSet.getLong(1)
                     }
-                    println("A     refIds " + refIds)
                     refIds
                   }
                   val ownedTables1 = if (refIds.nonEmpty) Seq(prepareTable(refNs, "id", refIds)) else Nil
@@ -82,8 +72,6 @@ trait Data_Delete extends JdbcBase_JVM with DeleteOps with MoleculeLogging { sel
 
                 case _: CardSet =>
                   val joinTable = s"${ns}_${metaAttr.attr}_$refNs"
-
-                  println("B     nsIds  " + nsIds)
                   val refIds       = if (nsIds.isEmpty) Nil else {
                     val stmt =
                       s"""SELECT $joinTable.${refNs}_id
@@ -91,17 +79,11 @@ trait Data_Delete extends JdbcBase_JVM with DeleteOps with MoleculeLogging { sel
                          |INNER JOIN $ns on $ns.id = $joinTable.${ns}_id
                          |WHERE $ns.id in (${nsIds.mkString(", ")})
                          |""".stripMargin
-
-                    println("-----")
-                    println(stmt)
-                    println("-----")
-
                     val resultSet = sqlConn.createStatement().executeQuery(stmt)
                     var refIds    = List.empty[Long]
                     while (resultSet.next()) {
                       refIds = refIds :+ resultSet.getLong(1)
                     }
-                    println("B     refIds " + refIds)
                     refIds
                   }
                   val ownedTables1 = if (refIds.isEmpty) Nil else {
@@ -122,15 +104,6 @@ trait Data_Delete extends JdbcBase_JVM with DeleteOps with MoleculeLogging { sel
     // Delete owned entities
     val ownedTables = deleteOwned(Seq(nsMap(baseNs)), Nil, ids)
 
-    println("=====================================================")
-    println(table.stmt)
-    println("-----")
-    joinTables.foreach(t => println(t.stmt))
-    println("-----")
-    ownedTables.foreach(t => println(t.stmt))
-
-    //    (List(table), Nil)
-    //    ((table +: joinTables), Nil)
     ((table +: joinTables) ++ ownedTables, Nil)
   }
 
