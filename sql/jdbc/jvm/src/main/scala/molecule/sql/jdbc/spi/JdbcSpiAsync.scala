@@ -85,4 +85,11 @@ trait JdbcSpiAsync extends SpiAsync {
   )(implicit conn: Conn, ec: EC): Future[List[List[Any]]] = Future {
     JdbcSpiSync.fallback_rawQuery(query, withNulls, doPrint)
   }
+
+  override def fallback_rawTransact(
+    txData: String,
+    doPrint: Boolean = true
+  )(implicit conn: Conn, ec: EC): Future[TxReport] = Future {
+    JdbcSpiSync.fallback_rawTransact(txData, doPrint)
+  }
 }

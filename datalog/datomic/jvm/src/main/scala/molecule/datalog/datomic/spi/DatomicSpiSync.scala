@@ -1,7 +1,7 @@
 package molecule.datalog.datomic.spi
 
 import datomic.Peer
-import molecule.base.error.InsertError
+import molecule.base.error.{InsertError, ModelError}
 import molecule.boilerplate.ast.Model._
 import molecule.core.action._
 import molecule.core.spi.{Conn, PrintInspect, SpiSync, TxReport}
@@ -10,7 +10,9 @@ import molecule.datalog.core.query.DatomicModel2Query
 import molecule.datalog.datomic.facade.DatomicConn_JVM
 import molecule.datalog.datomic.query.{DatomicQueryResolveCursor, DatomicQueryResolveOffset}
 import molecule.datalog.datomic.subscription.SubscriptionStarter
+import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.global
+import scala.concurrent.duration.DurationInt
 
 object DatomicSpiSync extends DatomicSpiSync
 
@@ -108,5 +110,17 @@ trait DatomicSpiSync
 
     // todo: cast result
     Peer.q(query, conn.db).asScala.toList.map(_.asScala.toList)
+  }
+
+  override def fallback_rawTransact(
+    txData: String,
+    doPrint: Boolean = true
+  )(implicit conn: Conn): TxReport = {
+    try {
+      import molecule.core.util.Executor._
+      Await.result(DatomicSpiAsync.fallback_rawTransact(txData, doPrint), 10.seconds)
+    } catch {
+      case t: Throwable => throw ModelError(t.toString)
+    }
   }
 }

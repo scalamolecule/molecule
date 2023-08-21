@@ -54,4 +54,9 @@ trait DatomicApiSync extends DatomicSpiSync with ApiSync {
     withNulls: Boolean = false,
     doPrint: Boolean = true,
   )(implicit conn: Conn): List[List[Any]] = fallback_rawQuery(query, withNulls, doPrint)
+
+  override def rawTransact(
+    txData: String,
+    doPrint: Boolean = true
+  )(implicit conn: Conn): TxReport = fallback_rawTransact(txData, doPrint)
 }

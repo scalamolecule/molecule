@@ -126,7 +126,7 @@ trait Data_Update extends DatomicBase_JVM with UpdateOps with MoleculeLogging { 
     }
   }
 
-  override def updateSetEq[T](a: AttrSet): Unit = {
+  override def updateSetEq(a: AttrSet): Unit = {
     if (!isUpsert) {
       val dummyFilterAttr = AttrOneTacInt(a.ns, a.attr, V, Nil, None, None, Nil, Nil, None, None)
       filterElements = filterElements :+ dummyFilterAttr
@@ -137,6 +137,7 @@ trait Data_Update extends DatomicBase_JVM with UpdateOps with MoleculeLogging { 
     a: AttrSet,
     sets: Seq[Set[T]],
     transform: T => Any,
+    set2array: Set[Any] => Array[AnyRef],
     retractCur: Boolean
   ): Unit = {
     sets match {
@@ -156,7 +157,8 @@ trait Data_Update extends DatomicBase_JVM with UpdateOps with MoleculeLogging { 
   override def updateSetSwab[T](
     a: AttrSet,
     sets: Seq[Set[T]],
-    transform: T => Any
+    transform: T => Any,
+    set2array: Set[Any] => Array[AnyRef],
   ): Unit = {
     val (retracts0, adds0) = sets.splitAt(sets.length / 2)
     val (retracts, adds)   = (retracts0.flatten, adds0.flatten)

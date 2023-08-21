@@ -12,6 +12,7 @@ import molecule.core.validation.insert.InsertValidation
 import molecule.datalog.datomic.facade.DatomicConn_JVM
 import molecule.datalog.datomic.marshalling.DatomicRpcJVM.Data
 import molecule.datalog.datomic.transaction.{Data_Delete, Data_Insert, Data_Save, Data_Update}
+import zio.ZIO
 import scala.concurrent.{Future, ExecutionContext => EC}
 
 object DatomicSpiAsync extends DatomicSpiAsync
@@ -176,5 +177,12 @@ trait DatomicSpiAsync
     doPrint: Boolean = true,
   )(implicit conn: Conn, ec: EC): Future[List[List[Any]]] = Future {
     DatomicSpiSync.fallback_rawQuery(query, withNulls, doPrint)
+  }
+
+  override def fallback_rawTransact(
+    txData: String,
+    doPrint: Boolean = true
+  )(implicit conn: Conn, ec: EC): Future[TxReport] = {
+    conn.asInstanceOf[DatomicConn_JVM].transactEdn(txData, doPrint)
   }
 }

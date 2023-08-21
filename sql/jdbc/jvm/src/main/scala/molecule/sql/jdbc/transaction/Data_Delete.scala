@@ -54,7 +54,7 @@ trait Data_Delete extends JdbcBase_JVM with DeleteOps with MoleculeLogging { sel
               metaAttr.card match {
                 case _: CardOne =>
                   val refIds       = if (nsIds.isEmpty) Nil else {
-                    val stmt =
+                    val stmt      =
                       s"""SELECT $refNs.id
                          |FROM $refNs
                          |INNER JOIN $ns on $ns.$refAttr = $refNs.id
@@ -71,9 +71,9 @@ trait Data_Delete extends JdbcBase_JVM with DeleteOps with MoleculeLogging { sel
                   deleteOwned(MetaNs(ns, attrTail) +: refMetaNs +: nsTail, ownedTables ++ ownedTables1, nsIds)
 
                 case _: CardSet =>
-                  val joinTable = s"${ns}_${metaAttr.attr}_$refNs"
+                  val joinTable    = s"${ns}_${metaAttr.attr}_$refNs"
                   val refIds       = if (nsIds.isEmpty) Nil else {
-                    val stmt =
+                    val stmt      =
                       s"""SELECT $joinTable.${refNs}_id
                          |FROM $joinTable
                          |INNER JOIN $ns on $ns.id = $joinTable.${ns}_id
@@ -92,7 +92,6 @@ trait Data_Delete extends JdbcBase_JVM with DeleteOps with MoleculeLogging { sel
                       prepareTable(refNs, "id", refIds)
                     )
                   }
-
                   deleteOwned(MetaNs(ns, attrTail) +: refMetaNs +: nsTail, ownedTables ++ ownedTables1, nsIds)
               }
 

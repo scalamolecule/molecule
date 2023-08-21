@@ -253,4 +253,17 @@ trait DatomicSpiZio
       ))
     } yield result
   }
+
+  override def fallback_rawTransact(
+    txData: String,
+    doPrint: Boolean = true
+  ): ZIO[Conn, MoleculeError, TxReport] = {
+    for {
+      conn0 <- ZIO.service[Conn]
+      conn = conn0.asInstanceOf[DatomicConn_JVM]
+      result <- moleculeError(ZIO.fromFuture(_ =>
+        DatomicSpiAsync.fallback_rawTransact(txData, doPrint)(conn, global)
+      ))
+    } yield result
+  }
 }

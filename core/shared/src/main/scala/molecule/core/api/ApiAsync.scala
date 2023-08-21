@@ -49,4 +49,9 @@ trait ApiAsync {
     withNulls: Boolean = false,
     doPrint: Boolean = true,
   )(implicit conn: Conn, ec: EC): Future[List[List[Any]]]
+
+  def rawTransact(
+    txData: String,
+    doPrint: Boolean = true
+  )(implicit conn: Conn, ec: EC): Future[TxReport]
 }

@@ -107,6 +107,9 @@ trait JdbcSpiZio extends SpiZio with JdbcSpiZioBase {
     } yield result
   }
 
+
+  // Fallbacks
+
   override def fallback_rawQuery(
     query: String,
     withNulls: Boolean = false,
@@ -117,6 +120,19 @@ trait JdbcSpiZio extends SpiZio with JdbcSpiZioBase {
       conn = conn0.asInstanceOf[JdbcConn_jvm]
       result <- moleculeError(ZIO.attemptBlocking(
         JdbcSpiSync.fallback_rawQuery(query, withNulls, doPrint)(conn)
+      ))
+    } yield result
+  }
+
+  override def fallback_rawTransact(
+    txData: String,
+    doPrint: Boolean = true
+  ): ZIO[Conn, MoleculeError, TxReport] = {
+    for {
+      conn0 <- ZIO.service[Conn]
+      conn = conn0.asInstanceOf[JdbcConn_jvm]
+      result <- moleculeError(ZIO.attemptBlocking(
+        JdbcSpiSync.fallback_rawTransact(txData, doPrint)(conn)
       ))
     } yield result
   }

@@ -1,6 +1,7 @@
 package molecule.sql.jdbc.spi
 
 import java.sql
+import java.sql.Statement
 import molecule.base.error._
 import molecule.base.util.BaseHelpers
 import molecule.boilerplate.ast.Model._
@@ -16,6 +17,7 @@ import molecule.sql.jdbc.query.{JdbcQueryResolveCursor, JdbcQueryResolveOffset}
 import molecule.sql.jdbc.subscription.SubscriptionStarter
 import molecule.sql.jdbc.transaction._
 import scala.collection.mutable.ListBuffer
+import scala.concurrent.Future
 
 object JdbcSpiSync extends JdbcSpiSync
 
@@ -268,7 +270,7 @@ trait JdbcSpiSync
     val columnsNumber = rsmd.getColumnCount
 
     val debug = if (doPrint) (s: String) => println(s) else (_: String) => ()
-    debug("-----------------------------------------------------------------------------")
+    debug("\n=============================================================================")
     debug(query)
 
     val rows = ListBuffer.empty[List[Any]]
@@ -355,4 +357,26 @@ trait JdbcSpiSync
     rows.toList
   }
 
+  override def fallback_rawTransact(
+    txData: String,
+    doPrint: Boolean = true
+  )(implicit conn: Conn): TxReport = {
+    val debug = if (doPrint) (s: String) => println(s) else (_: String) => ()
+    debug("\n=============================================================================")
+    debug(txData)
+
+    val ps = conn.asInstanceOf[JdbcConn_jvm].sqlConn.prepareStatement(txData, Statement.RETURN_GENERATED_KEYS)
+    ps.execute()
+
+    val resultSet = ps.getGeneratedKeys // is empty if no nested data
+    var ids       = List.empty[Long]
+    while (resultSet.next()) {
+      ids = ids :+ resultSet.getLong(1)
+    }
+    ps.close()
+
+    debug("---------------")
+    debug("Ids: " + ids)
+    TxReport(0, ids)
+  }
 }

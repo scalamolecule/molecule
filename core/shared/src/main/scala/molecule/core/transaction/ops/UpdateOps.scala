@@ -29,7 +29,7 @@ trait UpdateOps extends Action2Data {
   //    card: Card
   //  ): Product => Unit = ???
 
-  def updateSetEq[T](
+  def updateSetEq(
     a: AttrSet,
   ): Unit
 
@@ -37,13 +37,15 @@ trait UpdateOps extends Action2Data {
     a: AttrSet,
     sets: Seq[Set[T]],
     transform: T => Any,
+    set2array: Set[Any] => Array[AnyRef],
     retractCur: Boolean
   ): Unit
 
   def updateSetSwab[T](
     a: AttrSet,
     sets: Seq[Set[T]],
-    transform: T => Any
+    transform: T => Any,
+    set2array: Set[Any] => Array[AnyRef],
   ): Unit
 
   def updateSetRemove[T](

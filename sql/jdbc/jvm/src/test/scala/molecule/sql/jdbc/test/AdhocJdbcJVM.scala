@@ -6,6 +6,7 @@ import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Refs.A
 import molecule.coreTests.dataModels.core.dsl.Types.Ns
 import molecule.sql.jdbc.async._
+import molecule.sql.jdbc.facade.JdbcConn_jvm
 import molecule.sql.jdbc.setup.JdbcTestSuite
 import utest._
 import scala.collection.immutable.List
@@ -42,13 +43,53 @@ object AdhocJdbcJVM extends JdbcTestSuite {
     "types" - types { implicit conn =>
 
       for {
-        _ <- Ns.i(1).save.transact
-        _ <- Ns.i.query.get.map(_ ==> List(1))
+        //        _ <- Ns.i(1).save.transact
+        //        _ <- Ns.i.query.get.map(_ ==> List(1))
+
+        id <- Ns.ints(Set(int1)).save.transact.map(_.id)
 
         _ <- rawQuery(
           """SELECT *
             |FROM Ns
-            |""".stripMargin, true)
+            |""".stripMargin)
+
+        _ <- rawTransact(
+          """Insert into Ns(s) values ('Hi')""".stripMargin
+        )
+
+        _ <- rawQuery(
+          """SELECT *
+            |FROM Ns
+            |""".stripMargin)
+
+        // Add value
+        _ <- Ns(id).ints.add(int2).update.transact
+        _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int2))
+
+        // Add existing value (no effect)
+        _ <- Ns(id).ints.add(int2).update.transact
+        _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int2))
+
+        // Add multiple values (vararg)
+        _ <- Ns(id).ints.add(int3, int4).update.transact
+        _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int2, int3, int4))
+
+        // Add Iterable of values (existing values unaffected)
+        // Seq
+        _ <- Ns(id).ints.add(Seq(int4, int5)).update.transact
+        _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int2, int3, int4, int5))
+        // Set
+        _ <- Ns(id).ints.add(Set(int6)).update.transact
+        _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int2, int3, int4, int5, int6))
+        // Iterable
+        _ <- Ns(id).ints.add(Iterable(int7)).update.transact
+        _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int2, int3, int4, int5, int6, int7))
+
+        // Add empty Seq of values (no effect)
+        _ <- Ns(id).ints.add(Seq.empty[Int]).update.transact
+        _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int2, int3, int4, int5, int6, int7))
+
+
       } yield ()
     }
 

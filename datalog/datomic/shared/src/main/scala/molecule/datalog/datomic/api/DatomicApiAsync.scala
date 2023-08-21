@@ -55,4 +55,9 @@ trait DatomicApiAsync extends DatomicSpiAsync with ApiAsync {
     withNulls: Boolean = false,
     doPrint: Boolean = true,
   )(implicit conn: Conn, ec: EC): Future[List[List[Any]]] = fallback_rawQuery(query, withNulls, doPrint)
+
+  override def rawTransact(
+    txData: String,
+    doPrint: Boolean = true
+  )(implicit conn: Conn, ec: EC): Future[TxReport] = fallback_rawTransact(txData, doPrint)
 }

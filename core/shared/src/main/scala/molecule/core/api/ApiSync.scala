@@ -2,6 +2,7 @@ package molecule.core.api
 
 import molecule.base.error.InsertError
 import molecule.core.spi.{Conn, TxReport}
+import scala.concurrent.Future
 
 trait ApiSync {
 
@@ -47,4 +48,9 @@ trait ApiSync {
     withNulls: Boolean = false,
     doPrint: Boolean = true,
   )(implicit conn: Conn): List[List[Any]]
+
+  def rawTransact(
+    txData: String,
+    doPrint: Boolean = true
+  )(implicit conn: Conn): TxReport
 }

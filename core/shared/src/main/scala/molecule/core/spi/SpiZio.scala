@@ -57,4 +57,9 @@ trait SpiZio  {
     withNulls: Boolean = false,
     doPrint: Boolean = true,
   ): ZIO[Conn, MoleculeError, List[List[Any]]] = ???
+
+  def fallback_rawTransact(
+    txData: String,
+    doPrint: Boolean = true
+  ): ZIO[Conn, MoleculeError, TxReport] = ???
 }

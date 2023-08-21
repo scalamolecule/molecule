@@ -56,4 +56,9 @@ trait SpiSync  {
     withNulls: Boolean = false,
     doPrint: Boolean = true,
   )(implicit conn: Conn): List[List[Any]] = ???
+
+  def fallback_rawTransact(
+    txData: String,
+    doPrint: Boolean = true
+  )(implicit conn: Conn): TxReport = ???
 }

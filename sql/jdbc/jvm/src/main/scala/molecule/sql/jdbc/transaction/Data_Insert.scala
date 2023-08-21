@@ -172,7 +172,6 @@ trait Data_Insert
     handleValue: T => Any
   ): Product => Unit = {
     val (curPath, paramIndex) = updateInserts(attr)
-    //    val curLevel              = level
     (tpl: Product) => {
       tpl.productElement(tplIndex) match {
         case Some(scalaValue) =>

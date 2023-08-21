@@ -183,49 +183,104 @@ trait Data_Update extends JdbcBase_JVM with UpdateOps with MoleculeLogging { sel
     handleValue: T => Any
   ): Unit = {
     val (curPath, paramIndex) = updateInserts(a.name)
-    val colSetter: Setter     = {
-      vs match {
-        case Seq(v) =>
+    val colSetter: Setter     = vs match {
+      case Seq(v) =>
+        if (!isUpsert) {
+          updateCols += a.name
+        }
+        (ps: PS, _: IdsMap, _: RowIndex) => handleValue(v).asInstanceOf[(PS, Int) => Unit](ps, paramIndex)
 
-          if (!isUpsert) {
-            updateCols += a.name
-          }
-          (ps: PS, _: IdsMap, _: RowIndex) => {
-            handleValue(v).asInstanceOf[(PS, Int) => Unit](ps, paramIndex)
-          }
-        case Nil    =>
-          (ps: PS, _: IdsMap, _: RowIndex) => {
-            ps.setNull(paramIndex, 0)
-          }
-        case vs     => throw ExecutionError(
-          s"Can only $update one value for attribute `${a.name}`. Found: " + vs.mkString(", ")
-        )
-      }
+      case Nil =>
+        (ps: PS, _: IdsMap, _: RowIndex) => ps.setNull(paramIndex, 0)
+
+      case vs => throw ExecutionError(
+        s"Can only $update one value for attribute `${a.name}`. Found: " + vs.mkString(", ")
+      )
     }
     addColSetter(curPath, colSetter)
   }
 
-  override def updateSetEq[T](
+  override def updateSetEq(
     a: AttrSet,
   ): Unit = {
-    ???
+    if (!isUpsert) {
+      val dummyFilterAttr = AttrOneTacInt(a.ns, a.attr, V, Nil, None, None, Nil, Nil, None, None)
+      filterElements = filterElements :+ dummyFilterAttr
+    }
   }
 
   override def updateSetAdd[T](
     a: AttrSet,
     sets: Seq[Set[T]],
     transform: T => Any,
+    set2array: Set[Any] => Array[AnyRef],
     retractCur: Boolean
   ): Unit = {
-    ???
+    val (curPath, paramIndex) = updateInserts(a.name)
+    val colSetter = sets match {
+      case Seq(set) =>
+        if (!isUpsert) {
+          updateCols += a.name
+        }
+        val array = set2array(set.asInstanceOf[Set[Any]])
+        (ps: PS, _: IdsMap, _: RowIndex) => {
+          val conn = ps.getConnection
+
+          // todo: add to existing values instead of replacing
+
+          val arr  = conn.createArrayOf("AnyRef", array)
+          ps.setArray(paramIndex, arr)
+        }
+
+      case Nil =>
+        (ps: PS, _: IdsMap, _: RowIndex) => {
+          ps.setNull(paramIndex, 0)
+        }
+
+      case vs => throw ExecutionError(
+        s"Can only $update one Set of values for Set attribute `${a.name}`. Found: " + vs.mkString(", ")
+      )
+    }
+    addColSetter(curPath, colSetter)
   }
 
   override def updateSetSwab[T](
     a: AttrSet,
     sets: Seq[Set[T]],
-    transform: T => Any
+    transform: T => Any,
+    set2array: Set[Any] => Array[AnyRef],
   ): Unit = {
-    ???
+    val (retracts0, adds0) = sets.splitAt(sets.length / 2)
+    val (retracts, adds)   = (retracts0.flatten, adds0.flatten)
+    if (retracts.length != retracts.distinct.length)
+      throw ExecutionError(s"Can't swap from duplicate retract values.")
+
+    if (adds.length != adds.distinct.length)
+      throw ExecutionError(s"Can't swap to duplicate replacement values.")
+
+    if (retracts.nonEmpty) {
+      if (retracts.size != adds.size)
+        throw ExecutionError(
+          s"""Can't swap duplicate keys/values:
+             |  RETRACTS: $retracts
+             |  ADDS    : $adds
+             |""".stripMargin
+        )
+
+//      data = data ++ Seq(
+//        ("retract", a.ns, a.attr, retracts.map(v => transform(v).asInstanceOf[AnyRef]), false),
+//        ("add", a.ns, a.attr, adds.map(v => transform(v).asInstanceOf[AnyRef]), false),
+//      )
+
+      val (curPath, paramIndex) = updateInserts(a.name)
+
+      val array = set2array(adds.asInstanceOf[Set[Any]])
+      (ps: PS, _: IdsMap, _: RowIndex) => {
+        val conn = ps.getConnection
+        val arr  = conn.createArrayOf("AnyRef", array)
+        ps.setArray(paramIndex, arr)
+      }
+    }
   }
 
   override def updateSetRemove[T](
@@ -364,18 +419,18 @@ trait Data_Update extends JdbcBase_JVM with UpdateOps with MoleculeLogging { sel
   override protected lazy val handleShort      = (v: Any) => (ps: PS, n: Int) => ps.setShort(n, v.asInstanceOf[Short])
   override protected lazy val handleChar       = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.toString)
 
-  //  override protected lazy val set2arrayString    : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
-  //  override protected lazy val set2arrayInt       : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
-  //  override protected lazy val set2arrayLong      : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
-  //  override protected lazy val set2arrayFloat     : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.map(_.toString.toDouble.asInstanceOf[AnyRef]).toArray
-  //  override protected lazy val set2arrayDouble    : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
-  //  override protected lazy val set2arrayBoolean   : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
-  //  override protected lazy val set2arrayBigInt    : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[BigInt]].map(v => BigDecimal(v).bigDecimal.asInstanceOf[AnyRef]).toArray
-  //  override protected lazy val set2arrayBigDecimal: Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[BigDecimal]].map(v => v.bigDecimal.asInstanceOf[AnyRef]).toArray
-  //  override protected lazy val set2arrayDate      : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
-  //  override protected lazy val set2arrayUUID      : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
-  //  override protected lazy val set2arrayURI       : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.map(_.toString.asInstanceOf[AnyRef]).toArray
-  //  override protected lazy val set2arrayByte      : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
-  //  override protected lazy val set2arrayShort     : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
-  //  override protected lazy val set2arrayChar      : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
+  override protected lazy val set2arrayString    : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
+  override protected lazy val set2arrayInt       : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
+  override protected lazy val set2arrayLong      : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
+  override protected lazy val set2arrayFloat     : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.map(_.toString.toDouble.asInstanceOf[AnyRef]).toArray
+  override protected lazy val set2arrayDouble    : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
+  override protected lazy val set2arrayBoolean   : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
+  override protected lazy val set2arrayBigInt    : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[BigInt]].map(v => BigDecimal(v).bigDecimal.asInstanceOf[AnyRef]).toArray
+  override protected lazy val set2arrayBigDecimal: Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[BigDecimal]].map(v => v.bigDecimal.asInstanceOf[AnyRef]).toArray
+  override protected lazy val set2arrayDate      : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
+  override protected lazy val set2arrayUUID      : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
+  override protected lazy val set2arrayURI       : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.map(_.toString.asInstanceOf[AnyRef]).toArray
+  override protected lazy val set2arrayByte      : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
+  override protected lazy val set2arrayShort     : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
+  override protected lazy val set2arrayChar      : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
 }
