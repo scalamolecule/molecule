@@ -57,7 +57,7 @@ trait LambdasSet extends ResolveBase with JavaConversions { self: Base =>
   protected lazy val set2sqlString    : Set[String] => String     = (set: Set[String]) => set.map(_.replace("'", "''")).mkString("ARRAY ['", "', '", "']")
   protected lazy val set2sqlInt       : Set[Int] => String        = (set: Set[Int]) => set.mkString("ARRAY [", ", ", "]")
   protected lazy val set2sqlLong      : Set[Long] => String       = (set: Set[Long]) => set.mkString("ARRAY [", ", ", "]")
-  protected lazy val set2sqlFloat     : Set[Float] => String      = (set: Set[Float]) => set.map(_.toString.toDouble).mkString("ARRAY [", ", ", "]")
+  protected lazy val set2sqlFloat     : Set[Float] => String      = (set: Set[Float]) => set.mkString("ARRAY [", ", ", "]")
   protected lazy val set2sqlDouble    : Set[Double] => String     = (set: Set[Double]) => set.mkString("ARRAY [", ", ", "]")
   protected lazy val set2sqlBoolean   : Set[Boolean] => String    = (set: Set[Boolean]) => set.mkString("ARRAY [", ", ", "]")
   protected lazy val set2sqlBigInt    : Set[BigInt] => String     = (set: Set[BigInt]) => set.mkString("ARRAY [", ", ", "]")
@@ -119,7 +119,7 @@ trait LambdasSet extends ResolveBase with JavaConversions { self: Base =>
   private lazy val nestedArray2coalescedSetString    : (Row, Int) => Set[String]     = (row: Row, n: Int) => sqlNestedArrays2coalescedSet(row, n, j2String)
   private lazy val nestedArray2coalescedSetInt       : (Row, Int) => Set[Int]        = (row: Row, n: Int) => sqlNestedArrays2coalescedSet(row, n, j2Int)
   private lazy val nestedArray2coalescedSetLong      : (Row, Int) => Set[Long]       = (row: Row, n: Int) => sqlNestedArrays2coalescedSet(row, n, j2Long)
-  private lazy val nestedArray2coalescedSetFloat     : (Row, Int) => Set[Float]      = (row: Row, n: Int) => sqlNestedArrays2coalescedSet(row, n, j2Double).map(_.toFloat)
+  private lazy val nestedArray2coalescedSetFloat     : (Row, Int) => Set[Float]      = (row: Row, n: Int) => sqlNestedArrays2coalescedSet(row, n, j2Float)
   private lazy val nestedArray2coalescedSetDouble    : (Row, Int) => Set[Double]     = (row: Row, n: Int) => sqlNestedArrays2coalescedSet(row, n, j2Double)
   private lazy val nestedArray2coalescedSetBoolean   : (Row, Int) => Set[Boolean]    = (row: Row, n: Int) => sqlNestedArrays2coalescedSet(row, n, j2Boolean)
   private lazy val nestedArray2coalescedSetBigInt    : (Row, Int) => Set[BigInt]     = (row: Row, n: Int) => sqlNestedArrays2coalescedSet(row, n, j2BigInt)
@@ -134,7 +134,7 @@ trait LambdasSet extends ResolveBase with JavaConversions { self: Base =>
   private lazy val nestedArray2setAscString    : Int => (Row, Int) => Set[String]     = (size: Int) => (row: Row, n: Int) => sqlNestedArrays2coalescedSet(row, n, j2String).toList.sorted.take(size).toSet
   private lazy val nestedArray2setAscInt       : Int => (Row, Int) => Set[Int]        = (size: Int) => (row: Row, n: Int) => sqlNestedArrays2coalescedSet(row, n, j2Int).toList.sorted.take(size).toSet
   private lazy val nestedArray2setAscLong      : Int => (Row, Int) => Set[Long]       = (size: Int) => (row: Row, n: Int) => sqlNestedArrays2coalescedSet(row, n, j2Long).toList.sorted.take(size).toSet
-  private lazy val nestedArray2setAscFloat     : Int => (Row, Int) => Set[Float]      = (size: Int) => (row: Row, n: Int) => sqlNestedArrays2coalescedSet(row, n, j2Double).toList.sorted.take(size).map(_.toFloat).toSet
+  private lazy val nestedArray2setAscFloat     : Int => (Row, Int) => Set[Float]      = (size: Int) => (row: Row, n: Int) => sqlNestedArrays2coalescedSet(row, n, j2Float).toList.sorted.take(size).toSet
   private lazy val nestedArray2setAscDouble    : Int => (Row, Int) => Set[Double]     = (size: Int) => (row: Row, n: Int) => sqlNestedArrays2coalescedSet(row, n, j2Double).toList.sorted.take(size).toSet
   private lazy val nestedArray2setAscBoolean   : Int => (Row, Int) => Set[Boolean]    = (size: Int) => (row: Row, n: Int) => sqlNestedArrays2coalescedSet(row, n, j2Boolean).toList.sorted.take(size).toSet
   private lazy val nestedArray2setAscBigInt    : Int => (Row, Int) => Set[BigInt]     = (size: Int) => (row: Row, n: Int) => sqlNestedArrays2coalescedSet(row, n, j2BigInt).toList.sorted.take(size).toSet
@@ -149,7 +149,7 @@ trait LambdasSet extends ResolveBase with JavaConversions { self: Base =>
   private lazy val nestedArray2setDescString    : Int => (Row, Int) => Set[String]     = (size: Int) => (row: Row, n: Int) => sqlNestedArrays2coalescedSet(row, n, j2String).toList.sorted.takeRight(size).toSet
   private lazy val nestedArray2setDescInt       : Int => (Row, Int) => Set[Int]        = (size: Int) => (row: Row, n: Int) => sqlNestedArrays2coalescedSet(row, n, j2Int).toList.sorted.takeRight(size).toSet
   private lazy val nestedArray2setDescLong      : Int => (Row, Int) => Set[Long]       = (size: Int) => (row: Row, n: Int) => sqlNestedArrays2coalescedSet(row, n, j2Long).toList.sorted.takeRight(size).toSet
-  private lazy val nestedArray2setDescFloat     : Int => (Row, Int) => Set[Float]      = (size: Int) => (row: Row, n: Int) => sqlNestedArrays2coalescedSet(row, n, j2Double).toList.sorted.takeRight(size).map(_.toFloat).toSet
+  private lazy val nestedArray2setDescFloat     : Int => (Row, Int) => Set[Float]      = (size: Int) => (row: Row, n: Int) => sqlNestedArrays2coalescedSet(row, n, j2Float).toList.sorted.takeRight(size).toSet
   private lazy val nestedArray2setDescDouble    : Int => (Row, Int) => Set[Double]     = (size: Int) => (row: Row, n: Int) => sqlNestedArrays2coalescedSet(row, n, j2Double).toList.sorted.takeRight(size).toSet
   private lazy val nestedArray2setDescBoolean   : Int => (Row, Int) => Set[Boolean]    = (size: Int) => (row: Row, n: Int) => sqlNestedArrays2coalescedSet(row, n, j2Boolean).toList.sorted.takeRight(size).toSet
   private lazy val nestedArray2setDescBigInt    : Int => (Row, Int) => Set[BigInt]     = (size: Int) => (row: Row, n: Int) => sqlNestedArrays2coalescedSet(row, n, j2BigInt).toList.sorted.takeRight(size).toSet
@@ -166,7 +166,7 @@ trait LambdasSet extends ResolveBase with JavaConversions { self: Base =>
   private lazy val nestedArray2setSumString    : (Row, Int) => Set[String]     = (row: Row, n: Int) => onlyNumbers
   private lazy val nestedArray2setSumInt       : (Row, Int) => Set[Int]        = (row: Row, n: Int) => Set(sqlNestedArrays2coalescedSet[Int](row, n, j2Int).sum)
   private lazy val nestedArray2setSumLong      : (Row, Int) => Set[Long]       = (row: Row, n: Int) => Set(sqlNestedArrays2coalescedSet[Long](row, n, j2Long).sum)
-  private lazy val nestedArray2setSumFloat     : (Row, Int) => Set[Float]      = (row: Row, n: Int) => Set(sqlNestedArrays2coalescedSet[Double](row, n, j2Double).sum.toFloat) // Float saved as Double
+  private lazy val nestedArray2setSumFloat     : (Row, Int) => Set[Float]      = (row: Row, n: Int) => Set(sqlNestedArrays2coalescedSet[Float](row, n, j2Float).sum)
   private lazy val nestedArray2setSumDouble    : (Row, Int) => Set[Double]     = (row: Row, n: Int) => Set(sqlNestedArrays2coalescedSet[Double](row, n, j2Double).sum)
   private lazy val nestedArray2setSumBoolean   : (Row, Int) => Set[Boolean]    = (row: Row, n: Int) => onlyNumbers
   private lazy val nestedArray2setSumBigInt    : (Row, Int) => Set[BigInt]     = (row: Row, n: Int) => Set(sqlNestedArrays2coalescedSet[BigInt](row, n, j2BigInt).sum)
@@ -216,7 +216,7 @@ trait LambdasSet extends ResolveBase with JavaConversions { self: Base =>
   private lazy val nestedArray2nestedSetString    : (Row, Int) => Set[Set[String]]     = (row: Row, n: Int) => sqlNestedArrays2nestedSet(row, n, j2String)
   private lazy val nestedArray2nestedSetInt       : (Row, Int) => Set[Set[Int]]        = (row: Row, n: Int) => sqlNestedArrays2nestedSet(row, n, j2Int)
   private lazy val nestedArray2nestedSetLong      : (Row, Int) => Set[Set[Long]]       = (row: Row, n: Int) => sqlNestedArrays2nestedSet(row, n, j2Long)
-  private lazy val nestedArray2nestedSetFloat     : (Row, Int) => Set[Set[Float]]      = (row: Row, n: Int) => sqlNestedArrays2nestedSet(row, n, (v: Any) => j2Double(v).toFloat)
+  private lazy val nestedArray2nestedSetFloat     : (Row, Int) => Set[Set[Float]]      = (row: Row, n: Int) => sqlNestedArrays2nestedSet(row, n, j2Float)
   private lazy val nestedArray2nestedSetDouble    : (Row, Int) => Set[Set[Double]]     = (row: Row, n: Int) => sqlNestedArrays2nestedSet(row, n, j2Double)
   private lazy val nestedArray2nestedSetBoolean   : (Row, Int) => Set[Set[Boolean]]    = (row: Row, n: Int) => sqlNestedArrays2nestedSet(row, n, j2Boolean)
   private lazy val nestedArray2nestedSetBigInt    : (Row, Int) => Set[Set[BigInt]]     = (row: Row, n: Int) => sqlNestedArrays2nestedSet(row, n, j2BigInt)
@@ -232,7 +232,7 @@ trait LambdasSet extends ResolveBase with JavaConversions { self: Base =>
   private lazy val array2setFirstString    : (Row, Int) => Set[String]     = (row: Row, n: Int) => Set(row.getArray(n).getArray.asInstanceOf[Array[_]].map(j2String).min)
   private lazy val array2setFirstInt       : (Row, Int) => Set[Int]        = (row: Row, n: Int) => Set(row.getArray(n).getArray.asInstanceOf[Array[_]].map(j2Int).min)
   private lazy val array2setFirstLong      : (Row, Int) => Set[Long]       = (row: Row, n: Int) => Set(row.getArray(n).getArray.asInstanceOf[Array[_]].map(j2Long).min)
-  private lazy val array2setFirstFloat     : (Row, Int) => Set[Float]      = (row: Row, n: Int) => Set(row.getArray(n).getArray.asInstanceOf[Array[_]].map(j2Double).min.toFloat) // Float saved as Double
+  private lazy val array2setFirstFloat     : (Row, Int) => Set[Float]      = (row: Row, n: Int) => Set(row.getArray(n).getArray.asInstanceOf[Array[_]].map(j2Float).min)
   private lazy val array2setFirstDouble    : (Row, Int) => Set[Double]     = (row: Row, n: Int) => Set(row.getArray(n).getArray.asInstanceOf[Array[_]].map(j2Double).min)
   private lazy val array2setFirstBoolean   : (Row, Int) => Set[Boolean]    = (row: Row, n: Int) => Set(row.getArray(n).getArray.asInstanceOf[Array[_]].map(j2Boolean).min)
   private lazy val array2setFirstBigInt    : (Row, Int) => Set[BigInt]     = (row: Row, n: Int) => Set(row.getArray(n).getArray.asInstanceOf[Array[_]].map(j2BigInt).min)
@@ -247,7 +247,7 @@ trait LambdasSet extends ResolveBase with JavaConversions { self: Base =>
   private lazy val array2setLastString    : (Row, Int) => Set[String]     = (row: Row, n: Int) => Set(row.getArray(n).getArray.asInstanceOf[Array[_]].map(j2String).max)
   private lazy val array2setLastInt       : (Row, Int) => Set[Int]        = (row: Row, n: Int) => Set(row.getArray(n).getArray.asInstanceOf[Array[_]].map(j2Int).max)
   private lazy val array2setLastLong      : (Row, Int) => Set[Long]       = (row: Row, n: Int) => Set(row.getArray(n).getArray.asInstanceOf[Array[_]].map(j2Long).max)
-  private lazy val array2setLastFloat     : (Row, Int) => Set[Float]      = (row: Row, n: Int) => Set(row.getArray(n).getArray.asInstanceOf[Array[_]].map(j2Double).max.toFloat) // Float saved as Double
+  private lazy val array2setLastFloat     : (Row, Int) => Set[Float]      = (row: Row, n: Int) => Set(row.getArray(n).getArray.asInstanceOf[Array[_]].map(j2Float).max)
   private lazy val array2setLastDouble    : (Row, Int) => Set[Double]     = (row: Row, n: Int) => Set(row.getArray(n).getArray.asInstanceOf[Array[_]].map(j2Double).max)
   private lazy val array2setLastBoolean   : (Row, Int) => Set[Boolean]    = (row: Row, n: Int) => Set(row.getArray(n).getArray.asInstanceOf[Array[_]].map(j2Boolean).max)
   private lazy val array2setLastBigInt    : (Row, Int) => Set[BigInt]     = (row: Row, n: Int) => Set(row.getArray(n).getArray.asInstanceOf[Array[_]].map(j2BigInt).max)
