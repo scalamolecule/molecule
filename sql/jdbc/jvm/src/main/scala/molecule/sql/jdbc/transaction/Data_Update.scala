@@ -40,7 +40,8 @@ trait Data_Update extends JdbcBase_JVM with UpdateOps with MoleculeLogging { sel
           updateCols.map(c => s"$c IS NOT NULL").mkString(" AND\n  ", " AND\n  ", "")
         }
         val stmt          =
-          s"""UPDATE $table SET
+          s"""UPDATE $table
+             |SET
              |  $columnSetters
              |WHERE $clauses_$updateCols_""".stripMargin
 

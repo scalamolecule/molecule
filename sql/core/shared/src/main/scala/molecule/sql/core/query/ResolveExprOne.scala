@@ -105,9 +105,11 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
   private def manLong(attr: Attr, args: Seq[Long], res: ResOne[Long]): Unit = {
     attr.attr match {
       case "id" =>
-        select += attr.ns + ".id"
+        val id = attr.ns + ".id"
+        select += id
+        groupByCols += id // if we later need to group by non-aggregated columns
         addCast(res.sql2one)
-        addSort(attr, "id")
+        addSort(attr, id)
       case "tx" =>
         throw ModelError("tx id not implemented yet for jdbc")
       case _    =>

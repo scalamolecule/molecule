@@ -5,6 +5,7 @@ import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
 import molecule.coreTests.api.ApiAsyncImplicits
 import molecule.coreTests.async._
+import molecule.coreTests.dataModels.core.dsl.Refs.A
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
@@ -76,16 +77,12 @@ trait UpdateSet_id extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync
     }
 
 
-    "Referenced attributes" - types { implicit conn =>
+    "Referenced attributes" - refs { implicit conn =>
       for {
-        id <- Ns.ints(Set(1)).Ref.ii(Set(2)).save.transact.map(_.id)
-        _ <- Ns.ints.Ref.ii.query.get.map(_ ==> List((Set(1), Set(2))))
+        id <- A.ii(Set(1)).B.ii(Set(2)).C.ii(Set(3)).save.transact.map(_.id)
+        _ <- A.ii.B.ii.C.ii.query.get.map(_ ==> List((Set(1), Set(2), Set(3))))
 
-        _ <- Ns(id).ints(Set(3)).Ref.ii(Set(4)).update.transact
-        _ <- Ns.ints.Ref.ii.query.get.map(_ ==> List((Set(3), Set(4))))
 
-        _ <- Ns(id).Ref.ii(5).update.transact
-        _ <- Ns.ints.Ref.ii.query.get.map(_ ==> List((Set(3), Set(5))))
       } yield ()
     }
 

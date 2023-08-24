@@ -119,7 +119,7 @@ trait ResolveExprSet[Tpl] extends AggrUtils { self: SqlModel2Query[Tpl] with Lam
 
   private def expr[T: ClassTag](col: String, op: Op, sets: Seq[Set[T]], res: ResSet[T], mode: String): Unit = {
     op match {
-      case V         => attr(col, res, mode)
+      case V         => if (mode == "man") attr(col, res, mode) else ()
       case Eq        => equal(col, sets, res.set2sqls)
       case Neq       => neq(col, sets, res.set2sqls)
       case Has       => has(col, sets, res.one2sql)
@@ -145,10 +145,7 @@ trait ResolveExprSet[Tpl] extends AggrUtils { self: SqlModel2Query[Tpl] with Lam
     select += s"ARRAY_AGG($col)"
     having += "COUNT(*) > 0"
     aggregate = true
-    mode match {
-      case "man" => replaceCast(res.nestedArray2coalescedSet)
-      case "tac" => ()
-    }
+    replaceCast(res.nestedArray2coalescedSet)
   }
 
   private def aggr[T](col: String, fn: String, optN: Option[Int], res: ResSet[T]): Unit = {
@@ -282,21 +279,21 @@ trait ResolveExprSet[Tpl] extends AggrUtils { self: SqlModel2Query[Tpl] with Lam
               val array = outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]]
               array.foreach(v => set += v.toString.toDouble) // not the most efficient...
             }
-//            val values = set.toList.sorted
-//            val count  = values.length
-//            if (count % 2 == 1) {
-//              val indexOfMiddleValue = (count - 1) / 2
-//              values(indexOfMiddleValue)
-//            } else {
-//              val i2      = count / 2
-//              val middle1 = values(i2 - 1)
-//              val middle2 = values(i2)
-//              (middle1 + middle2) / 2
-//            }
+            //            val values = set.toList.sorted
+            //            val count  = values.length
+            //            if (count % 2 == 1) {
+            //              val indexOfMiddleValue = (count - 1) / 2
+            //              values(indexOfMiddleValue)
+            //            } else {
+            //              val i2      = count / 2
+            //              val middle1 = values(i2 - 1)
+            //              val middle2 = values(i2)
+            //              (middle1 + middle2) / 2
+            //            }
             getMedian(set)
           }
         )
-        // select += s"MEDIAN(ALL $col)" // other semantics
+      // select += s"MEDIAN(ALL $col)" // other semantics
 
       case "avg" =>
         // Average of unique values (Set semantics)
@@ -314,7 +311,7 @@ trait ResolveExprSet[Tpl] extends AggrUtils { self: SqlModel2Query[Tpl] with Lam
             set.sum / set.size
           }
         )
-        // select += s"AVG(DISTINCT $col)" // other semantics
+      // select += s"AVG(DISTINCT $col)" // other semantics
 
       case "variance" =>
         // Variance of unique values (Set semantics)
@@ -332,8 +329,8 @@ trait ResolveExprSet[Tpl] extends AggrUtils { self: SqlModel2Query[Tpl] with Lam
             varianceOf(set.toList: _*)
           }
         )
-        // select += s"VAR_POP($col)" // other semantics
-        // select += s"VAR_SAMP($col)" // other semantics
+      // select += s"VAR_POP($col)" // other semantics
+      // select += s"VAR_SAMP($col)" // other semantics
 
       case "stddev" =>
         // Standard deviation of unique values (Set semantics)
@@ -351,7 +348,7 @@ trait ResolveExprSet[Tpl] extends AggrUtils { self: SqlModel2Query[Tpl] with Lam
             stdDevOf(set.toList: _*)
           }
         )
-        // select += s"STDDEV($col)" // other semantics
+      // select += s"STDDEV($col)" // other semantics
 
       case other => unexpectedKw(other)
     }

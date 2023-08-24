@@ -84,7 +84,23 @@ trait JVMJdbcSpiBase extends ModelUtils {
           case a: AttrSetMan =>
             if (a.op == Eq || a.op == Add || a.op == Swap || a.op == Remove) {
               prevNs = a.ns
-              idsModel += a //
+              a match {
+                case a: AttrSetManString     => idsModel += AttrSetTacString(a.ns, a.attr)
+                case a: AttrSetManInt        => idsModel += AttrSetTacInt(a.ns, a.attr)
+                case a: AttrSetManLong       => idsModel += AttrSetTacLong(a.ns, a.attr)
+                case a: AttrSetManFloat      => idsModel += AttrSetTacFloat(a.ns, a.attr)
+                case a: AttrSetManDouble     => idsModel += AttrSetTacDouble(a.ns, a.attr)
+                case a: AttrSetManBoolean    => idsModel += AttrSetTacBoolean(a.ns, a.attr)
+                case a: AttrSetManBigInt     => idsModel += AttrSetTacBigInt(a.ns, a.attr)
+                case a: AttrSetManBigDecimal => idsModel += AttrSetTacBigDecimal(a.ns, a.attr)
+                case a: AttrSetManDate       => idsModel += AttrSetTacDate(a.ns, a.attr)
+                case a: AttrSetManUUID       => idsModel += AttrSetTacUUID(a.ns, a.attr)
+                case a: AttrSetManURI        => idsModel += AttrSetTacURI(a.ns, a.attr)
+                case a: AttrSetManByte       => idsModel += AttrSetTacByte(a.ns, a.attr)
+                case a: AttrSetManShort      => idsModel += AttrSetTacShort(a.ns, a.attr)
+                case a: AttrSetManChar       => idsModel += AttrSetTacChar(a.ns, a.attr)
+              }
+
             } else {
               throw ModelError(s"Unexpected $update operation for card-many attribute. Found:\n" + a)
             }

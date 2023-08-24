@@ -138,7 +138,29 @@ trait JdbcSpiSync
   }
 
   override def update_inspect(update: Update)(implicit conn0: Conn): Unit = {
-    printInspectTx("UPDATE", update.elements, update_getData(conn0.asInstanceOf[JdbcConn_jvm], update))
+    val conn = conn0.asInstanceOf[JdbcConn_jvm]
+    if (isRefUpdate(update.elements)) {
+      val (idsModel, updateModels) = prepareMultipleUpdates(update.elements, update.isUpsert)
+      val refIds                   =
+        s"""REF IDS MODEL ----------------
+           |${idsModel.mkString("\n")}
+           |
+           |${new SqlModel2Query(idsModel).getQuery(Nil)}
+           |""".stripMargin
+      val updates                  =
+        updateModels
+          .map(_(42))
+          .map { m =>
+            val elements = m.mkString("\n")
+            val tables   = update_getData(conn, m, update.isUpsert)._1
+            tables.headOption.fold(elements)(table => elements + "\n" + table.stmt)
+          }
+          .mkString("UPDATES ----------------------\n", "\n------------\n", "")
+
+      printInspect("UPDATE", update.elements, refIds + "\n" + updates)
+    } else {
+      printInspectTx("UPDATE", update.elements, update_getData(conn, update))
+    }
   }
 
   private def update_getData(conn: JdbcConn_jvm, update: Update): Data = {
@@ -184,8 +206,14 @@ trait JdbcSpiSync
   }
 
   private def printInspectTx(label: String, elements: List[Element], data: Data): Unit = {
-    // Simply print the statement (with no data)
-    printInspect(label, elements, data._1.head.stmt)
+    val (tables, joinTables) = data
+    val tableStmts           = tables.map(_.stmt).mkString("\n--------\n")
+    val joinTableStmts       = if (joinTables.isEmpty) {
+      ""
+    } else {
+      "\n\n--------------\n\n" + joinTables.map(_.stmt).mkString("\n--------\n")
+    }
+    printInspect(label, elements, tableStmts + joinTableStmts)
   }
 
 
@@ -195,34 +223,43 @@ trait JdbcSpiSync
     if (update.isUpsert)
       throw ModelError("Can't upsert referenced attributes. Please update instead.")
 
-    val (idsModel, updateModels) = prepareMultipleUpdates(update.elements, update.isUpsert)
+    val (refIdsModel, updateModels) = prepareMultipleUpdates(update.elements, update.isUpsert)
     type L = Long
     val idQuery = updateModels.size match {
-      case 1  => Query[L](idsModel)
-      case 2  => Query[(L, L)](idsModel)
-      case 3  => Query[(L, L, L)](idsModel)
-      case 4  => Query[(L, L, L, L)](idsModel)
-      case 5  => Query[(L, L, L, L, L)](idsModel)
-      case 6  => Query[(L, L, L, L, L, L)](idsModel)
-      case 7  => Query[(L, L, L, L, L, L, L)](idsModel)
-      case 8  => Query[(L, L, L, L, L, L, L, L)](idsModel)
-      case 9  => Query[(L, L, L, L, L, L, L, L, L)](idsModel)
-      case 10 => Query[(L, L, L, L, L, L, L, L, L, L)](idsModel)
-      case 11 => Query[(L, L, L, L, L, L, L, L, L, L, L)](idsModel)
-      case 12 => Query[(L, L, L, L, L, L, L, L, L, L, L, L)](idsModel)
-      case 13 => Query[(L, L, L, L, L, L, L, L, L, L, L, L, L)](idsModel)
-      case 14 => Query[(L, L, L, L, L, L, L, L, L, L, L, L, L, L)](idsModel)
-      case 15 => Query[(L, L, L, L, L, L, L, L, L, L, L, L, L, L, L)](idsModel)
-      case 16 => Query[(L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L)](idsModel)
-      case 17 => Query[(L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L)](idsModel)
-      case 18 => Query[(L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L)](idsModel)
-      case 19 => Query[(L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L)](idsModel)
-      case 20 => Query[(L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L)](idsModel)
-      case 21 => Query[(L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L)](idsModel)
-      case 22 => Query[(L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L)](idsModel)
+      case 1  => Query[L](refIdsModel)
+      case 2  => Query[(L, L)](refIdsModel)
+      case 3  => Query[(L, L, L)](refIdsModel)
+      case 4  => Query[(L, L, L, L)](refIdsModel)
+      case 5  => Query[(L, L, L, L, L)](refIdsModel)
+      case 6  => Query[(L, L, L, L, L, L)](refIdsModel)
+      case 7  => Query[(L, L, L, L, L, L, L)](refIdsModel)
+      case 8  => Query[(L, L, L, L, L, L, L, L)](refIdsModel)
+      case 9  => Query[(L, L, L, L, L, L, L, L, L)](refIdsModel)
+      case 10 => Query[(L, L, L, L, L, L, L, L, L, L)](refIdsModel)
+      case 11 => Query[(L, L, L, L, L, L, L, L, L, L, L)](refIdsModel)
+      case 12 => Query[(L, L, L, L, L, L, L, L, L, L, L, L)](refIdsModel)
+      case 13 => Query[(L, L, L, L, L, L, L, L, L, L, L, L, L)](refIdsModel)
+      case 14 => Query[(L, L, L, L, L, L, L, L, L, L, L, L, L, L)](refIdsModel)
+      case 15 => Query[(L, L, L, L, L, L, L, L, L, L, L, L, L, L, L)](refIdsModel)
+      case 16 => Query[(L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L)](refIdsModel)
+      case 17 => Query[(L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L)](refIdsModel)
+      case 18 => Query[(L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L)](refIdsModel)
+      case 19 => Query[(L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L)](refIdsModel)
+      case 20 => Query[(L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L)](refIdsModel)
+      case 21 => Query[(L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L)](refIdsModel)
+      case 22 => Query[(L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L, L)](refIdsModel)
     }
 
-    val ids: List[Long] = query_get(idQuery).head match {
+    val refIds: List[Long] = query_get(idQuery).headOption.fold(
+      throw ExecutionError(
+        s"""Couldn't find any ref ids for update:
+           |
+           |${idQuery.elements.mkString("\n")}
+           |
+           |${new SqlModel2Query(idQuery.elements).getQuery(Nil)}
+           |""".stripMargin
+      )
+    ) {
       case a: L                                                                                                                                 => List(0L, a)
       case (a: L, b: L)                                                                                                                         => List(0L, a, b)
       case (a: L, b: L, c: L)                                                                                                                   => List(0L, a, b, c)
@@ -248,13 +285,13 @@ trait JdbcSpiSync
     }
 
     () => {
-      val idMaps = ids.zipWithIndex.map {
-        case (id: Long, i) =>
-          val updateModel = updateModels(i)(id)
+      val refIdMaps = refIds.zipWithIndex.map {
+        case (refId: Long, i) =>
+          val updateModel = updateModels(i)(refId)
           conn.populateStmts(update_getData(conn, updateModel, update.isUpsert))
       }
       // Return TxReport with initial update ids
-      idMaps.head
+      refIdMaps.head
     }
   }
 
@@ -333,8 +370,20 @@ trait JdbcSpiSync
           case "SMALLINT ARRAY"           => array(n, "Short")
           case "CHARACTER ARRAY"          => array(n, "Char")
 
-          // case "NULL"                => row += "NULL"; "NULL"
-          // case "INTEGER ARRAY ARRAY" => row += "INTEGER ARRAY ARRAY"; "INTEGER ARRAY ARRAY"
+          case "NULL"                          => row += "NULL"; "NULL"
+          case "CHARACTER VARYING ARRAY ARRAY" => row += "CHARACTER VARYING ARRAY ARRAY"; "CHARACTER VARYING ARRAY ARRAY"
+          case "INTEGER ARRAY ARRAY"           => row += "INTEGER ARRAY ARRAY"; "INTEGER ARRAY ARRAY"
+          case "BIGINT ARRAY ARRAY"            => row += "BIGINT ARRAY ARRAY"; "BIGINT ARRAY ARRAY"
+          case "REAL ARRAY ARRAY"              => row += "REAL ARRAY ARRAY"; "REAL ARRAY ARRAY"
+          case "DOUBLE PRECISION ARRAY ARRAY"  => row += "DOUBLE PRECISION ARRAY ARRAY"; "DOUBLE PRECISION ARRAY ARRAY"
+          case "BOOLEAN ARRAY ARRAY"           => row += "BOOLEAN ARRAY ARRAY"; "BOOLEAN ARRAY ARRAY"
+          case "DECIMAL ARRAY ARRAY"           => row += "DECIMAL ARRAY ARRAY"; "DECIMAL ARRAY ARRAY"
+          case "DATE ARRAY ARRAY"              => row += "DATE ARRAY ARRAY"; "DATE ARRAY ARRAY"
+          case "UUID ARRAY ARRAY"              => row += "UUID ARRAY ARRAY"; "UUID ARRAY ARRAY"
+          case "TINYINT ARRAY ARRAY"           => row += "TINYINT ARRAY ARRAY"; "TINYINT ARRAY ARRAY"
+          case "SMALLINT ARRAY ARRAY"          => row += "SMALLINT ARRAY ARRAY"; "SMALLINT ARRAY ARRAY"
+          case "CHARACTER ARRAY ARRAY"         => row += "CHARACTER ARRAY ARRAY"; "CHARACTER ARRAY ARRAY"
+
           // case "DOUBLE"      => row += resultSet.getDouble(n); "Double/Float x"
           // case "BIT"         => row += resultSet.getByte(n); "a"
           // case "FLOAT"       => row += resultSet.getFloat(n); "e"
@@ -351,9 +400,9 @@ trait JdbcSpiSync
         }
         val columnValue = resultSet.getString(n)
         if (withNulls && resultSet.wasNull()) {
-          debug(tpe + "   " + padS(18, tpe) + col + padS(20, col) + "null")
+          debug(tpe + "   " + padS(20, tpe) + col + padS(20, col) + "null")
         } else if (!resultSet.wasNull()) {
-          debug(tpe + "   " + padS(18, tpe) + col + padS(20, col) + columnValue)
+          debug(tpe + "   " + padS(20, tpe) + col + padS(20, col) + columnValue)
         }
         n += 1
       }

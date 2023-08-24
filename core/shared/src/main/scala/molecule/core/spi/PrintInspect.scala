@@ -4,25 +4,14 @@ import molecule.boilerplate.ast.Model._
 
 trait PrintInspect {
 
-  protected def printInspect(label: String, elements: List[Element], stmts: String = ""): Unit = {
-    //    val stmtsStr = if (stmts.isEmpty) "" else if (elements.isEmpty) stmts else s"\n\n${stmts}"
-    val stmtsStr = if (stmts.isEmpty) "" else if (elements.isEmpty) stmts else s"${stmts}"
-
+  protected def printInspect(label: String, elements: List[Element], stmts0: String = ""): Unit = {
+    val stmts = if(stmts0.isBlank) "" else s"\n\n$stmts0"
     println(
       s"""========================================
          |$label:
-         |${elements.mkString("\n").trim}
-         |
-         |$stmtsStr
+         |${elements.mkString("\n").trim}$stmts
          |----------------------------------------
          |""".stripMargin
     )
-
-    //    println(
-    //      s"""========================================
-    //         |$label:
-    //         |$stmtsStr
-    //         |""".stripMargin
-    //    )
   }
 }
