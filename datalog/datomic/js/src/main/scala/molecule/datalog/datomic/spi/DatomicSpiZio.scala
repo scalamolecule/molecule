@@ -5,7 +5,7 @@ import molecule.boilerplate.ast.Model._
 import molecule.core.action._
 import molecule.core.api.ApiZio
 import molecule.core.marshalling.serialize.PickleTpls
-import molecule.core.spi.{Conn, SpiAsync, SpiZio, TxReport}
+import molecule.core.spi.{Conn, SpiZio, TxReport}
 import molecule.core.util.Executor._
 import molecule.core.util.FutureUtils
 import molecule.core.validation.ModelValidation

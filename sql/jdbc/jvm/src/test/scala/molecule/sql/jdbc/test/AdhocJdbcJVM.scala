@@ -46,48 +46,219 @@ object AdhocJdbcJVM extends JdbcTestSuite {
         //        _ <- Ns.i(1).save.transact
         //        _ <- Ns.i.query.get.map(_ ==> List(1))
 
-        id <- Ns.ints(Set(int1)).save.transact.map(_.id)
 
-        _ <- rawQuery(
-          """SELECT *
-            |FROM Ns
-            |""".stripMargin)
+/*
 
-        _ <- rawTransact(
-          """Insert into Ns(s) values ('Hi')""".stripMargin
-        )
+How to manipulate array values?
 
-        _ <- rawQuery(
-          """SELECT *
-            |FROM Ns
-            |""".stripMargin)
+How can I retract and update values in an array?
 
-        // Add value
-        _ <- Ns(id).ints.add(int2).update.transact
-        _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int2))
+Since I'm trying to manage a _Set_ of distinct values in an array I don't know the ordinality/position of values in the array and can
+therefore only operate by value and not use the position of values in the array - if possible?
 
-        // Add existing value (no effect)
-        _ <- Ns(id).ints.add(int2).update.transact
-        _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int2))
+I can add a value with concatenation:
+```lang-sql
+DROP TABLE A IF EXISTS;
+CREATE TABLE A(id INT PRIMARY KEY AUTO_INCREMENT, ints INT ARRAY);
+INSERT INTO A(ints) VALUES (ARRAY[1, 2]);
+SELECT ints FROM A WHERE id = 1;
+// [1, 2]
 
-        // Add multiple values (vararg)
-        _ <- Ns(id).ints.add(int3, int4).update.transact
-        _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int2, int3, int4))
+// Concatenate
+UPDATE A SET ints = ints || 3;
+SELECT ints FROM A WHERE id = 1;
+// [1, 2, 3]
+```
 
-        // Add Iterable of values (existing values unaffected)
-        // Seq
-        _ <- Ns(id).ints.add(Seq(int4, int5)).update.transact
-        _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int2, int3, int4, int5))
-        // Set
-        _ <- Ns(id).ints.add(Set(int6)).update.transact
-        _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int2, int3, int4, int5, int6))
-        // Iterable
-        _ <- Ns(id).ints.add(Iterable(int7)).update.transact
-        _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int2, int3, int4, int5, int6, int7))
+But how can I retract a specific value?
 
-        // Add empty Seq of values (no effect)
-        _ <- Ns(id).ints.add(Seq.empty[Int]).update.transact
-        _ <- Ns.ints.query.get.map(_.head ==> Set(int1, int2, int3, int4, int5, int6, int7))
+```lang-sql
+// How to retract 2?
+UPDATE A SET ints = ???;
+UPDATE A SET ints[2] = 7;
+SELECT ints FROM A WHERE id = 1;
+// [1, 3]
+
+// Or, how to retract 1 and 2?
+UPDATE A SET ints = ???;
+SELECT ints FROM A WHERE id = 1;
+// [3]
+```
+
+And how can I update one value to another?
+
+```lang-sql
+// How to replace 1 with 10?
+UPDATE A SET ints = ???;
+SELECT ints FROM A WHERE id = 1;
+// [10, 2, 3]
+
+// Or, how to replace 1 with 10 and 3 with 30?
+UPDATE A SET ints = ???;
+SELECT ints FROM A WHERE id = 1;
+// [10, 2, 30]
+```
+
+I have tried variations on unnesting the values and filter them to exclude (retract) certain valus, then aggregate them back along these (wrong) lines:
+
+```lang-sql
+UPDATE A SET ints = ARRAY_AGG(SELECT * FROM UNNEST((SELECT ints FROM A)) WHERE ? != 2) WHERE id = 1;
+
+
+
+
+
+UPDATE A SET ints = ints filter (where ;
+
+
+
+
+
+array_agg(v order by v desc) filter (where v >= '4')
+
+
+UPDATE A SET ints = ARRAY_AGG(SELECT * FROM UNNEST((SELECT ints FROM A)) WHERE ? != 2) WHERE id = 1;
+```
+
+
+
+SELECT * FROM UNNEST((SELECT ints FROM A)) where c1 > 2;
+SELECT * FROM UNNEST((SELECT ints FROM A)) where c1 != 7;
+SELECT * FROM UNNEST(SELECT ints FROM A) where c1 != 7;
+
+array_agg(v order by v desc) filter (where v >= '4')
+
+select array_agg(SELECT * FROM UNNEST(SELECT ints FROM A) where c1 != 7) from A;
+select array_agg(SELECT * FROM UNNEST(SELECT ints FROM A FETCH FIRST ROW ONLY) where c1 != 7) from A;
+select array_agg((SELECT * FROM UNNEST(SELECT ints FROM A) where c1 != 7 FETCH FIRST ROW ONLY)) from A;
+
+select array_agg(SELECT * FROM UNNEST(SELECT ints FROM A) FETCH FIRST ROW ONLY) from A;
+SELECT * FROM UNNEST(SELECT ints FROM A) FETCH FIRST ROW ONLY;
+SELECT * FROM UNNEST(SELECT ints FROM A);
+
+select array_agg(SELECT * FROM UNNEST(SELECT ints FROM A) where c1 != 7);
+select array_agg((SELECT * FROM UNNEST(SELECT ints FROM A) where c1 != 7)) over ();
+select array_agg((SELECT * FROM UNNEST(SELECT ints FROM A) where c1 != 7)) from A;
+select array_agg(ANY (SELECT * FROM UNNEST(SELECT ints FROM A) where c1 != 7)) from A;
+select array_agg(SELECT * FROM UNNEST(SELECT ints FROM A) where c1 != 7) from A;
+
+SELECT * FROM UNNEST(SELECT ints FROM A) where c1 != 7;
+select concat((SELECT * FROM UNNEST(SELECT ints FROM A) where c1 != 7), ', ');
+select concat((SELECT id FROM A), ', ');
+select concat_ws(', ', (SELECT ints FROM A), 'XXX');
+select concat_ws(', ', array_agg(SELECT * FROM UNNEST(SELECT ints FROM A) where c1 != 7), 'XXX');
+select concat_ws(', ', (SELECT * FROM UNNEST(SELECT ints FROM A) where c1 != 7 FETCH FIRST ROW ONLY), 'XXX');
+select concat_ws(', ', (SELECT * FROM UNNEST(SELECT ints FROM A) where c1 != 7 limit 2), 'XXX');
+select concat_ws(', ', (SELECT * FROM UNNEST(SELECT ints FROM A) where c1 != 7), 'XXX');
+
+select array_agg(SELECT * FROM UNNEST(SELECT ints FROM A) FETCH FIRST ROW ONLY);
+
+select array_agg(SELECT * FROM UNNEST(SELECT ints FROM A) where c1 != 7);
+select array_agg((SELECT ints FROM A));
+
+
+SELECT * FROM UNNEST((SELECT ints FROM A)) where c1 != 7;
+SELECT values(ints) t(a) from A;
+
+select *
+from (values (array[1, 2])) t(a)
+where 1 in (unnest(t.a));
+
+select * from (values (array[1, 2])) t(a) where 1 in (table(i int = t.a));
+select * from (values (array[1, 2])) t(a) where 1 in (UNNEST(t.a));
+
+VALUES ARRAY(SELECT X FROM SYSTEM_RANGE(1, 10));
+VALUES ARRAY(SELECT * FROM SYSTEM_RANGE(1, 10));
+select SYSTEM_RANGE(1, 10);
+
+
+VALUES ARRAY(SELECT * FROM SYSTEM_RANGE(1, 10));
+VALUES ARRAY(SELECT * FROM UNNEST((SELECT ints FROM A)) where c1 != 7);
+VALUES ARRAY(SELECT c1 FROM UNNEST(SELECT ints FROM A));
+select ARRAY(SELECT c1 FROM UNNEST(SELECT ints FROM A));
+
+SELECT X FROM SYSTEM_RANGE(1, 10);
+select array(SELECT X FROM SYSTEM_RANGE(1, 10));
+select (SELECT X FROM SYSTEM_RANGE(1, 10)) FETCH FIRST ROW ONLY;
+SELECT X FROM SYSTEM_RANGE(1, 10) FETCH FIRST ROW ONLY;
+SELECT X FROM SYSTEM_RANGE(1, 10) limit 2;
+
+explain SELECT X FROM SYSTEM_RANGE(1, 10);
+VALUES ARRAY(SELECT * FROM UNNEST(SELECT ints FROM A FETCH FIRST ROW ONLY) where c1 != 7);
+
+select array_agg(SELECT * FROM UNNEST(SELECT ints FROM A) where c1 != 2);
+
+//SELECT * FROM UNNEST(SELECT ints FROM A FETCH FIRST ROW ONLY) where c1 != 7;
+
+
+VALUES ARRAY(SELECT X FROM SYSTEM_RANGE(1, 3));
+// [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+
+UPDATE A SET ints = array[4, 5, 6];
+UPDATE A SET ints = values array(select (1,2,3));
+
+SELECT * FROM UNNEST(SELECT ints FROM A) where c1 != 2;
+// C1
+// 1
+// 3
+VALUES ARRAY(SELECT * FROM UNNEST(SELECT ints FROM A) where c1 != 2);
+// [null, null]
+
+
+DROP TABLE A IF EXISTS;
+CREATE TABLE A(id INT PRIMARY KEY AUTO_INCREMENT, ints INT ARRAY);
+INSERT INTO A(ints) VALUES (ARRAY[1, 2, 3]);
+
+DROP TABLE B IF EXISTS;
+CREATE TABLE B(n INT);
+INSERT INTO B(n) VALUES (1), (2), (4);
+SELECT * FROM B;
+
+SELECT * FROM A;
+UPDATE A SET ints = values array(select n from B);
+SELECT * FROM A;
+
+
+
+SELECT * FROM UNNEST(SELECT ints FROM A) where c1 != 2;
+
+select array_agg(SELECT * FROM UNNEST(SELECT ints FROM A) where c1 != 2);
+select values(SELECT * FROM UNNEST(SELECT ints FROM A) where c1 != 2);
+
+*/
+
+
+
+
+        _ <- Ns.i.insert(1).transact
+//        _ <- Ns.i_.<=(2).int(4).update.transact
+
+
+        _ <- Ns.i.int_?.query.get.map(_ ==> List((1, None)))
+
+        // Update entities with non-unique `i` attribute with value 1
+        // Updating a non-asserted value doesn't insert it (nothing is updated)
+        _ <- Ns.i_(1).int(2).update.transact
+        _ <- Ns.i.int_?.query.get.map(_ ==> List((1, None)))
+
+        // Upserting a non-asserted value inserts it
+        _ <- Ns.i_(1).int(2).upsert.transact
+//        _ <- rawTransact(
+//          """UPDATE Ns SET
+//            |  Ns.int = 2
+//            |WHERE Ns.i = 1""".stripMargin
+//        )
+
+        _ <- Ns.i.int_?.query.get.map(_ ==> List((1, Some(2))))
+
+        // Updating an asserted value updates it
+        _ <- Ns.i_(1).int(3).upsert.transact
+        _ <- Ns.i.int.query.get.map(_ ==> List((1, 3)))
+
+        // Upserting an asserted value updates it
+        _ <- Ns.i_(1).int(4).upsert.transact
+        _ <- Ns.i.int.query.get.map(_ ==> List((1, 4)))
 
 
       } yield ()

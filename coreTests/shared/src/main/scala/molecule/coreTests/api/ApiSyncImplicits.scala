@@ -50,4 +50,9 @@ trait ApiSyncImplicits { dataProvider: SpiSync =>
     withNulls: Boolean = false,
     doPrint: Boolean = true,
   )(implicit conn: Conn): List[List[Any]] = fallback_rawQuery(query, withNulls, doPrint)
+
+  def rawTransact(
+    txData: String,
+    doPrint: Boolean = true
+  )(implicit conn: Conn): TxReport = fallback_rawTransact(txData, doPrint)
 }

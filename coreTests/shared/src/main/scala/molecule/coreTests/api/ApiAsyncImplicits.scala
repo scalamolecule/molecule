@@ -52,4 +52,9 @@ trait ApiAsyncImplicits { dataProvider: SpiAsync =>
     withNulls: Boolean = false,
     doPrint: Boolean = true,
   )(implicit conn: Conn, ec: EC): Future[List[List[Any]]] = fallback_rawQuery(query, withNulls, doPrint)
+
+  def rawTransact(
+    txData: String,
+    doPrint: Boolean = true
+  )(implicit conn: Conn, ec: EC): Future[TxReport] = fallback_rawTransact(txData, doPrint)
 }

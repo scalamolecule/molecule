@@ -100,6 +100,7 @@ trait JVMJdbcSpiBase extends ModelUtils {
         if (firstNs) {
           firstNs = false
           val tacitElements = updateModel.toList
+          // First namespace already has a tacit id attribute
           updateModels = updateModels :+ ((_: Long) => tacitElements)
 
         } else if (prevNs.nonEmpty) {

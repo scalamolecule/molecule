@@ -100,7 +100,7 @@ trait Data_Delete extends JdbcBase_JVM with DeleteOps with MoleculeLogging { sel
       }
     }
 
-    // Delete owned entities
+    // Recursively delete owned entities
     val ownedTables = deleteOwned(Seq(nsMap(baseNs)), Nil, ids)
 
     ((table +: joinTables) ++ ownedTables, Nil)

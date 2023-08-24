@@ -11,6 +11,7 @@ import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.ResolveUpdate
 import molecule.core.transaction.ops.UpdateOps
+import molecule.sql.core.query.SqlModel2Query
 import molecule.sql.jdbc.facade.JdbcConn_jvm
 
 trait Data_Update extends JdbcBase_JVM with UpdateOps with MoleculeLogging { self: ResolveUpdate =>
@@ -18,9 +19,7 @@ trait Data_Update extends JdbcBase_JVM with UpdateOps with MoleculeLogging { sel
   def getData(elements: List[Element]): Data = {
     curRefPath = List(getInitialNs(elements))
     val (updateModel, _) = separateTxElements(elements)
-
     resolve(updateModel)
-
     addRowSetterToTables()
     (getTables, Nil)
   }
@@ -30,14 +29,20 @@ trait Data_Update extends JdbcBase_JVM with UpdateOps with MoleculeLogging { sel
       case (refPath, cols) =>
         val table         = refPath.last
         val columnSetters = cols.map(col => s"$col = ?").mkString(",\n  ")
-        val ids_          = ids.mkString(", ")
-        val updateCols_   = if (updateCols.isEmpty) "" else
+        val clauses_      = if (ids.isEmpty && filterElements.nonEmpty) {
+          new SqlModel2Query(filterElements).getWhereClauses.map {
+            case (attr, expr) => s"$attr $expr"
+          }.mkString(" AND\n  ")
+        } else {
+          s"$table.id IN(${ids.mkString(", ")})"
+        }
+        val updateCols_   = if (updateCols.isEmpty) "" else {
           updateCols.map(c => s"$c IS NOT NULL").mkString(" AND\n  ", " AND\n  ", "")
-
-        val stmt =
+        }
+        val stmt          =
           s"""UPDATE $table SET
              |  $columnSetters
-             |WHERE $table.id IN($ids_)$updateCols_""".stripMargin
+             |WHERE $clauses_$updateCols_""".stripMargin
 
         val ps = sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
         tableDatas(refPath) = Table(refPath, stmt, ps)
@@ -173,7 +178,7 @@ trait Data_Update extends JdbcBase_JVM with UpdateOps with MoleculeLogging { sel
   }
 
   override def handleFilterAttr(filterAttr: AttrOneTac): Unit = {
-    ???
+    filterElements = filterElements :+ filterAttr
   }
 
   override def updateOne[T](
@@ -200,24 +205,14 @@ trait Data_Update extends JdbcBase_JVM with UpdateOps with MoleculeLogging { sel
     addColSetter(curPath, colSetter)
   }
 
-  override def updateSetEq(
-    a: AttrSet,
-  ): Unit = {
-    if (!isUpsert) {
-      val dummyFilterAttr = AttrOneTacInt(a.ns, a.attr, V, Nil, None, None, Nil, Nil, None, None)
-      filterElements = filterElements :+ dummyFilterAttr
-    }
-  }
-
-  override def updateSetAdd[T](
+  override def updateSetEq[T](
     a: AttrSet,
     sets: Seq[Set[T]],
     transform: T => Any,
-    set2array: Set[Any] => Array[AnyRef],
-    retractCur: Boolean
+    set2array: Set[Any] => Array[AnyRef]
   ): Unit = {
     val (curPath, paramIndex) = updateInserts(a.name)
-    val colSetter = sets match {
+    val colSetter             = sets match {
       case Seq(set) =>
         if (!isUpsert) {
           updateCols += a.name
@@ -228,7 +223,41 @@ trait Data_Update extends JdbcBase_JVM with UpdateOps with MoleculeLogging { sel
 
           // todo: add to existing values instead of replacing
 
-          val arr  = conn.createArrayOf("AnyRef", array)
+          val arr = conn.createArrayOf("AnyRef", array)
+          ps.setArray(paramIndex, arr)
+        }
+
+      case Nil =>
+        (ps: PS, _: IdsMap, _: RowIndex) => {
+          ps.setNull(paramIndex, 0)
+        }
+
+      case vs => throw ExecutionError(
+        s"Can only $update one Set of values for Set attribute `${a.name}`. Found: " + vs.mkString(", ")
+      )
+    }
+    addColSetter(curPath, colSetter)
+  }
+
+  override def updateSetAdd[T](
+    a: AttrSet,
+    sets: Seq[Set[T]],
+    transform: T => Any,
+    set2array: Set[Any] => Array[AnyRef]
+  ): Unit = {
+    val (curPath, paramIndex) = updateInserts(a.name)
+    val colSetter             = sets match {
+      case Seq(set) =>
+        if (!isUpsert) {
+          updateCols += a.name
+        }
+        val array = set2array(set.asInstanceOf[Set[Any]])
+        (ps: PS, _: IdsMap, _: RowIndex) => {
+          val conn = ps.getConnection
+
+          // todo: add to existing values instead of replacing
+
+          val arr = conn.createArrayOf("AnyRef", array)
           ps.setArray(paramIndex, arr)
         }
 
@@ -267,10 +296,6 @@ trait Data_Update extends JdbcBase_JVM with UpdateOps with MoleculeLogging { sel
              |""".stripMargin
         )
 
-//      data = data ++ Seq(
-//        ("retract", a.ns, a.attr, retracts.map(v => transform(v).asInstanceOf[AnyRef]), false),
-//        ("add", a.ns, a.attr, adds.map(v => transform(v).asInstanceOf[AnyRef]), false),
-//      )
 
       val (curPath, paramIndex) = updateInserts(a.name)
 

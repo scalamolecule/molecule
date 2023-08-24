@@ -183,6 +183,10 @@ trait DatomicSpiAsync
     txData: String,
     doPrint: Boolean = true
   )(implicit conn: Conn, ec: EC): Future[TxReport] = {
-    conn.asInstanceOf[DatomicConn_JVM].transactEdn(txData, doPrint)
+    val debug = if (doPrint) (s: String) => println(s) else (_: String) => ()
+    debug("\n=============================================================================")
+    debug(txData)
+
+    conn.asInstanceOf[DatomicConn_JVM].transactEdn(txData)
   }
 }

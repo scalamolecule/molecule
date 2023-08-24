@@ -297,6 +297,7 @@ trait JdbcSpiSync
     }
 
     while (resultSet.next) {
+      debug("-----------------------------------------------")
       var n = 1
       row.clear()
       while (n <= columnsNumber) {
@@ -330,7 +331,8 @@ trait JdbcSpiSync
           case "SMALLINT ARRAY"           => array(n, "Short")
           case "CHARACTER ARRAY"          => array(n, "Char")
 
-          // case "NULL"        => row += "NULL"; "NULL"
+          // case "NULL"                => row += "NULL"; "NULL"
+          // case "INTEGER ARRAY ARRAY" => row += "INTEGER ARRAY ARRAY"; "INTEGER ARRAY ARRAY"
           // case "DOUBLE"      => row += resultSet.getDouble(n); "Double/Float x"
           // case "BIT"         => row += resultSet.getByte(n); "a"
           // case "FLOAT"       => row += resultSet.getFloat(n); "e"
@@ -341,18 +343,19 @@ trait JdbcSpiSync
           // case "LONGVARCHAR" => row += resultSet.getString(n); "k"
           // case "BINARY"      => row += resultSet.getByte(n); "l"
 
-          case other => throw new Exception(s"Unexpected/not yet considered sql result type from raw query: " + other)
+          case other => throw new Exception(
+            s"Unexpected/not yet considered sql result type from raw query: " + other
+          )
         }
         val columnValue = resultSet.getString(n)
         if (withNulls && resultSet.wasNull()) {
-          debug(tpe + padS(18, tpe) + col + padS(20, col) + "null")
+          debug(tpe + "   " + padS(18, tpe) + col + padS(20, col) + "null")
         } else if (!resultSet.wasNull()) {
-          debug(tpe + padS(18, tpe) + col + padS(20, col) + columnValue)
+          debug(tpe + "   " + padS(18, tpe) + col + padS(20, col) + columnValue)
         }
         n += 1
       }
       rows += row.toList
-      debug("-----------------------------------------------")
     }
     rows.toList
   }

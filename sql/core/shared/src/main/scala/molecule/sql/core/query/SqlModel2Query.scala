@@ -7,6 +7,7 @@ import molecule.core.query.Model2Query
 import molecule.core.util.ModelUtils
 import molecule.sql.core.query.casting._
 import scala.annotation.tailrec
+import scala.collection.mutable.ListBuffer
 
 
 class SqlModel2Query[Tpl](elements0: List[Element])
@@ -28,7 +29,6 @@ class SqlModel2Query[Tpl](elements0: List[Element])
   final def getQuery(altElements: List[Element] = Nil): String = {
     val elements = if (altElements.isEmpty) elements0 else altElements
     validateQueryModel(elements)
-
     //    elements.foreach(println)
 
     from = getInitialNonGenericNs(elements)
@@ -87,20 +87,16 @@ class SqlModel2Query[Tpl](elements0: List[Element])
     val fetch_   = if (fetch.isEmpty) "" else fetch.mkString("\nFETCH ", ", ", "")
     val limit_   = if (limitClause.isBlank) "" else "\nLIMIT " + limitClause
 
-    val stmt =
-      s"""SELECT$distinct_
-         |  $select_
-         |FROM $from$joins_$where_$groupBy_$having_$orderBy_$fetch_$limit_;""".stripMargin
+    s"""SELECT$distinct_
+       |  $select_
+       |FROM $from$joins_$where_$groupBy_$having_$orderBy_$fetch_$limit_;""".stripMargin
+  }
 
-    //    println(stmt)
-
-    """SELECT
-      |  Ns.ints
-      |FROM Ns
-      |  ;
-      |""".stripMargin
-
-    stmt
+  private[molecule] def getWhereClauses: ListBuffer[(String, String)] = {
+    from = getInitialNonGenericNs(elements0)
+    exts += from -> None
+    resolve(elements0)
+    where
   }
 
 

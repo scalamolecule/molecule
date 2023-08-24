@@ -29,23 +29,25 @@ trait UpdateOps extends Action2Data {
   //    card: Card
   //  ): Product => Unit = ???
 
-  def updateSetEq(
+  def updateSetEq[T](
     a: AttrSet,
+    sets: Seq[Set[T]],
+    transform: T => Any,
+    set2array: Set[Any] => Array[AnyRef]
   ): Unit
 
   def updateSetAdd[T](
     a: AttrSet,
     sets: Seq[Set[T]],
     transform: T => Any,
-    set2array: Set[Any] => Array[AnyRef],
-    retractCur: Boolean
+    set2array: Set[Any] => Array[AnyRef]
   ): Unit
 
   def updateSetSwab[T](
     a: AttrSet,
     sets: Seq[Set[T]],
     transform: T => Any,
-    set2array: Set[Any] => Array[AnyRef],
+    set2array: Set[Any] => Array[AnyRef]
   ): Unit
 
   def updateSetRemove[T](

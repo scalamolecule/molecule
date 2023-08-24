@@ -51,4 +51,9 @@ trait ApiZioImplicits { dataProvider: SpiZio =>
     withNulls: Boolean = false,
     doPrint: Boolean = true,
   ): ZIO[Conn, MoleculeError, List[List[Any]]] = fallback_rawQuery(query, withNulls, doPrint)
+
+  def rawTransact(
+    txData: String,
+    doPrint: Boolean = true
+  ): ZIO[Conn, MoleculeError, TxReport] = fallback_rawTransact(txData, doPrint)
 }

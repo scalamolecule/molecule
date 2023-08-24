@@ -1,14 +1,11 @@
 package molecule.sql.jdbc.setup
 
-import java.util.UUID
 import molecule.base.api.Schema
 import molecule.base.util.BaseHelpers
 import molecule.core.marshalling.JdbcProxy
 import molecule.core.spi.Conn
-import molecule.coreTests.dataModels.core.schema._
 import molecule.coreTests.setup.CoreTestSuite
 import molecule.sql.jdbc.facade.{JdbcConn_jvm, JdbcHandler_jvm}
-import scala.collection.mutable.ListBuffer
 import scala.util.Random
 import scala.util.control.NonFatal
 

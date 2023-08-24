@@ -117,8 +117,8 @@ trait DatomicSpiSync
     doPrint: Boolean = true
   )(implicit conn: Conn): TxReport = {
     try {
-      import molecule.core.util.Executor._
-      Await.result(DatomicSpiAsync.fallback_rawTransact(txData, doPrint), 10.seconds)
+      import molecule.core.util.Executor.global
+      Await.result(DatomicSpiAsync.fallback_rawTransact(txData, doPrint)(conn, global), 10.seconds)
     } catch {
       case t: Throwable => throw ModelError(t.toString)
     }

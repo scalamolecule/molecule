@@ -103,26 +103,38 @@ class ResolveUpdate(
     case a                                 => handleFilterAttr(a)
   }
 
-  private def resolveAttrSetMan(dataAttr: AttrSetMan): Unit = {
-    updateSetEq(dataAttr)
-    resolveAttrSetAdd(dataAttr, true)
+  private def resolveAttrSetMan(dataAttr: AttrSetMan): Unit = dataAttr match {
+    case a: AttrSetManString     => updateSetEq(a, a.vs, transformString, set2arrayString)
+    case a: AttrSetManInt        => updateSetEq(a, a.vs, transformInt, set2arrayInt)
+    case a: AttrSetManLong       => updateSetEq(a, a.vs, transformLong, set2arrayLong)
+    case a: AttrSetManFloat      => updateSetEq(a, a.vs, transformFloat, set2arrayFloat)
+    case a: AttrSetManDouble     => updateSetEq(a, a.vs, transformDouble, set2arrayDouble)
+    case a: AttrSetManBoolean    => updateSetEq(a, a.vs, transformBoolean, set2arrayBoolean)
+    case a: AttrSetManBigInt     => updateSetEq(a, a.vs, transformBigInt, set2arrayBigInt)
+    case a: AttrSetManBigDecimal => updateSetEq(a, a.vs, transformBigDecimal, set2arrayBigDecimal)
+    case a: AttrSetManDate       => updateSetEq(a, a.vs, transformDate, set2arrayDate)
+    case a: AttrSetManUUID       => updateSetEq(a, a.vs, transformUUID, set2arrayUUID)
+    case a: AttrSetManURI        => updateSetEq(a, a.vs, transformURI, set2arrayURI)
+    case a: AttrSetManByte       => updateSetEq(a, a.vs, transformByte, set2arrayByte)
+    case a: AttrSetManShort      => updateSetEq(a, a.vs, transformShort, set2arrayShort)
+    case a: AttrSetManChar       => updateSetEq(a, a.vs, transformChar, set2arrayChar)
   }
 
-  private def resolveAttrSetAdd(attr: AttrSetMan, retractCur: Boolean = false): Unit = attr match {
-    case a: AttrSetManString     => updateSetAdd(a, a.vs, transformString, set2arrayString, retractCur)
-    case a: AttrSetManInt        => updateSetAdd(a, a.vs, transformInt, set2arrayInt, retractCur)
-    case a: AttrSetManLong       => updateSetAdd(a, a.vs, transformLong, set2arrayLong, retractCur)
-    case a: AttrSetManFloat      => updateSetAdd(a, a.vs, transformFloat, set2arrayFloat, retractCur)
-    case a: AttrSetManDouble     => updateSetAdd(a, a.vs, transformDouble, set2arrayDouble, retractCur)
-    case a: AttrSetManBoolean    => updateSetAdd(a, a.vs, transformBoolean, set2arrayBoolean, retractCur)
-    case a: AttrSetManBigInt     => updateSetAdd(a, a.vs, transformBigInt, set2arrayBigInt, retractCur)
-    case a: AttrSetManBigDecimal => updateSetAdd(a, a.vs, transformBigDecimal, set2arrayBigDecimal, retractCur)
-    case a: AttrSetManDate       => updateSetAdd(a, a.vs, transformDate, set2arrayDate, retractCur)
-    case a: AttrSetManUUID       => updateSetAdd(a, a.vs, transformUUID, set2arrayUUID, retractCur)
-    case a: AttrSetManURI        => updateSetAdd(a, a.vs, transformURI, set2arrayURI, retractCur)
-    case a: AttrSetManByte       => updateSetAdd(a, a.vs, transformByte, set2arrayByte, retractCur)
-    case a: AttrSetManShort      => updateSetAdd(a, a.vs, transformShort, set2arrayShort, retractCur)
-    case a: AttrSetManChar       => updateSetAdd(a, a.vs, transformChar, set2arrayChar, retractCur)
+  private def resolveAttrSetAdd(attr: AttrSetMan): Unit = attr match {
+    case a: AttrSetManString     => updateSetAdd(a, a.vs, transformString, set2arrayString)
+    case a: AttrSetManInt        => updateSetAdd(a, a.vs, transformInt, set2arrayInt)
+    case a: AttrSetManLong       => updateSetAdd(a, a.vs, transformLong, set2arrayLong)
+    case a: AttrSetManFloat      => updateSetAdd(a, a.vs, transformFloat, set2arrayFloat)
+    case a: AttrSetManDouble     => updateSetAdd(a, a.vs, transformDouble, set2arrayDouble)
+    case a: AttrSetManBoolean    => updateSetAdd(a, a.vs, transformBoolean, set2arrayBoolean)
+    case a: AttrSetManBigInt     => updateSetAdd(a, a.vs, transformBigInt, set2arrayBigInt)
+    case a: AttrSetManBigDecimal => updateSetAdd(a, a.vs, transformBigDecimal, set2arrayBigDecimal)
+    case a: AttrSetManDate       => updateSetAdd(a, a.vs, transformDate, set2arrayDate)
+    case a: AttrSetManUUID       => updateSetAdd(a, a.vs, transformUUID, set2arrayUUID)
+    case a: AttrSetManURI        => updateSetAdd(a, a.vs, transformURI, set2arrayURI)
+    case a: AttrSetManByte       => updateSetAdd(a, a.vs, transformByte, set2arrayByte)
+    case a: AttrSetManShort      => updateSetAdd(a, a.vs, transformShort, set2arrayShort)
+    case a: AttrSetManChar       => updateSetAdd(a, a.vs, transformChar, set2arrayChar)
   }
 
   private def resolveAttrSetSwap(attr: AttrSetMan): Unit = attr match {

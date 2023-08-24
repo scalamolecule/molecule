@@ -13,6 +13,7 @@ import molecule.core.transaction.ops.UpdateOps
 import molecule.core.validation.ModelValidation
 import molecule.datalog.core.query.DatomicModel2Query
 import molecule.datalog.datomic.facade.DatomicConn_JVM
+import scala.collection.immutable.Set
 import scala.collection.mutable.ListBuffer
 
 trait Data_Update extends DatomicBase_JVM with UpdateOps with MoleculeLogging { self: ResolveUpdate =>
@@ -126,10 +127,27 @@ trait Data_Update extends DatomicBase_JVM with UpdateOps with MoleculeLogging { 
     }
   }
 
-  override def updateSetEq(a: AttrSet): Unit = {
+  override def updateSetEq[T](
+    a: AttrSet,
+    sets: Seq[Set[T]],
+    transform: T => Any,
+    set2array: Set[Any] => Array[AnyRef]
+  ): Unit = {
     if (!isUpsert) {
       val dummyFilterAttr = AttrOneTacInt(a.ns, a.attr, V, Nil, None, None, Nil, Nil, None, None)
       filterElements = filterElements :+ dummyFilterAttr
+    }
+    sets match {
+      case Seq(set) =>
+        val add = ("add", a.ns, a.attr, set.map(v => transform(v).asInstanceOf[AnyRef]).toSeq, true)
+        data = data :+ add
+
+      case Nil =>
+        data = data :+ (("retract", a.ns, a.attr, Nil, true))
+
+      case vs => throw ExecutionError(
+        s"Can only $update one Set of values for Set attribute `${a.name}`. Found: " + vs.mkString(", ")
+      )
     }
   }
 
@@ -137,16 +155,15 @@ trait Data_Update extends DatomicBase_JVM with UpdateOps with MoleculeLogging { 
     a: AttrSet,
     sets: Seq[Set[T]],
     transform: T => Any,
-    set2array: Set[Any] => Array[AnyRef],
-    retractCur: Boolean
+    set2array: Set[Any] => Array[AnyRef]
   ): Unit = {
     sets match {
       case Seq(set) =>
-        val add = ("add", a.ns, a.attr, set.map(v => transform(v).asInstanceOf[AnyRef]).toSeq, retractCur)
+        val add = ("add", a.ns, a.attr, set.map(v => transform(v).asInstanceOf[AnyRef]).toSeq, false)
         data = data :+ add
 
       case Nil =>
-        data = data :+ (("retract", a.ns, a.attr, Nil, retractCur))
+        data = data :+ (("retract", a.ns, a.attr, Nil, false))
 
       case vs => throw ExecutionError(
         s"Can only $update one Set of values for Set attribute `${a.name}`. Found: " + vs.mkString(", ")
