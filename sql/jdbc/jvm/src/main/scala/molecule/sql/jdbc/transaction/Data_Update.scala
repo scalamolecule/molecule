@@ -320,24 +320,11 @@ trait Data_Update extends JdbcBase_JVM with UpdateOps with MoleculeLogging { sel
   }
 
 
-  override def handleRefNs(ref: Ref): Unit = {
-    // Some sql databases support updating joined tables.
-    // When not (like h2), we have to update each related table.
-    val updateRelatedSupported = false // todo: retrieve sql db dialect from configuration
-    if (updateRelatedSupported) {
-      // todo
-    } else {
-      //      ???
-    }
-  }
+  override def handleRefNs(ref: Ref): Unit = ()
 
-  override def handleBackRef(backRef: BackRef): Unit = {
-    ???
-  }
+  override def handleBackRef(backRef: BackRef): Unit = ()
 
-  override def handleTxMetaData(): Unit = {
-    ???
-  }
+  override def handleTxMetaData(): Unit = ()
 
   private def id2stmts(
     data: Seq[(String, String, String, Seq[AnyRef], Boolean)],

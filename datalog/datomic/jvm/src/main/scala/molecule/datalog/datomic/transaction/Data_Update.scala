@@ -214,12 +214,11 @@ trait Data_Update extends DatomicBase_JVM with UpdateOps with MoleculeLogging { 
 
 
   override def handleRefNs(ref: Ref): Unit = {
-    filterElements = filterElements :+ ref
     data = data :+ (("ref", ref.ns, ref.refAttr, Nil, false))
   }
 
   override def handleBackRef(backRef: BackRef): Unit = {
-    filterElements = filterElements :+ backRef
+    data = data :+ (("backref", backRef.prevNs, "", Nil, false))
   }
 
   override def handleTxMetaData(): Unit = {
@@ -236,10 +235,12 @@ trait Data_Update extends DatomicBase_JVM with UpdateOps with MoleculeLogging { 
     addNewValues: Boolean = true
   ): AnyRef => Unit = {
     (id0: AnyRef) => {
-      var id  : AnyRef  = id0
-      var txId: AnyRef  = null
-      var isTx: Boolean = false
-      var entity        = db.entity(id)
+      var id      : AnyRef          = id0
+      var txId    : AnyRef          = null
+      var isTx    : Boolean         = false
+      var entity  : EntityMap       = db.entity(id).asInstanceOf[EntityMap]
+      var entities: List[EntityMap] = List(entity)
+
       data.foreach {
         case ("add", ns, attr, newValues, retractCur) =>
           val a = kw(ns, attr)
@@ -282,15 +283,22 @@ trait Data_Update extends DatomicBase_JVM with UpdateOps with MoleculeLogging { 
             )
           }
 
+        case ("backref", _, _, _, _) =>
+          entities = entities.init
+          entity = entities.last
+          id = entity.get(dbId)
+
         case ("ref", ns, refAttr, _, _) =>
           val a = kw(ns, refAttr)
-          entity = entity.get(a).asInstanceOf[EntityMap]
+          entity = entities.last.get(a).asInstanceOf[EntityMap]
+          entities = entities :+ entity
           id = entity.get(dbId)
 
         case ("tx", _, _, _, _) =>
           // Get transaction entity id
           txId = Peer.q("[:find ?tx :in $ ?e :where [?e _ _ ?tx]]", db, id).iterator.next.get(0)
-          entity = db.entity(txId)
+          entity = db.entity(txId).asInstanceOf[EntityMap]
+          entities = entities :+ entity
           isTx = true
           id = datomicTx
 

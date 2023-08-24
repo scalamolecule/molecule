@@ -63,6 +63,7 @@ object AdhocJdbcJVM extends JdbcTestSuite {
     //    }
   }
 }
+
 /*
 //  val name   = Map("en" -> "hello", "de" -> "hello", "da" -> "hej")
 //  val name_k = Set("en", "de", "da")

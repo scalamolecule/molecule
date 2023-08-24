@@ -142,40 +142,19 @@ object AdhocDatomicJVM extends DatomicTestSuite {
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
       for {
-//        _ <- Ns.i(42).save.transact
-//        _ <- Ns.i.query.get.map(_ ==> List(42))
+        _ <- Ns.i(42).save.transact
+        _ <- Ns.i.query.get.map(_ ==> List(42))
 
-
-        id <- Ns.ints.insert(Set(1)).transact.map(_.id)
-        _ <- Ns.ints.query.get.map(_ ==> List(Set(1)))
-
-        _ <- Ns(id).ints(Set(2)).update.transact
-        _ <- Ns.ints.query.get.map(_ ==> List(Set(2)))
-
-        // Updating a non-asserted attribute has no effect
-        _ <- Ns(id).strings(Set("a")).update.transact
-        _ <- Ns.ints.strings_?.query.get.map(_ ==> List((Set(2), None)))
-
-        // Upserting a non-asserted attribute adds the value
-        _ <- Ns(id).strings(Set("a")).upsert.transact
-        _ <- Ns.ints.strings_?.query.get.map(_ ==> List((Set(2), Some(Set("a")))))
 
       } yield ()
     }
 
+
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
-
       for {
-        //        id <- A.i(1).B.i(2).C.i(3).save.transact.map(_.id)
-        //        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
-
-        List(e1, e2, _) <- A.i.insert(1, 2, 3).transact.map(_.ids)
-        _ <- A.i.query.get.map(_ ==> List(1, 2, 3))
-        _ <- A(e1).delete.transact
-        // or
-        _ <- A.id_(e2).delete.transact
-        _ <- A.i.query.get.map(_ ==> List(3))
+        id <- A.i(1).B.i(2).C.i(3).save.transact.map(_.id)
+        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
 
 
       } yield ()

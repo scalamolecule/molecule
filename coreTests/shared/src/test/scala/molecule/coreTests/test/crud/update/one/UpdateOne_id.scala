@@ -10,7 +10,7 @@ import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 
-trait UpdateOne_id extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
+trait UpdateOne_id extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync =>
 
 
   override lazy val tests = Tests {
@@ -130,6 +130,18 @@ trait UpdateOne_id extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync
     }
 
 
+    "Referenced attributes with backref" - refs { implicit conn =>
+      for {
+        id <- A.i(1).B.i(2)._A.C.i(3).save.transact.map(_.id)
+        _ <- A.i.B.i._A.C.i.query.get.map(_ ==> List((1, 2, 3)))
+
+        // Updating A.B.i and A.C.i
+        _ <- A(id).i(10).B.i(20)._A.C.i(30).update.transact
+        _ <- A.i.B.i._A.C.i.query.get.map(_ ==> List((10, 20, 30)))
+      } yield ()
+    }
+
+
     "Update composite attributes" - types { implicit conn =>
       for {
         id <- (Ns.int.string + Ref.i.s).insert((1, "a"), (2, "b")).transact.map(_.id)
@@ -156,9 +168,9 @@ trait UpdateOne_id extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync
 
 
         _ <- Ns(id).Tx(Other.s("tx3")).update.transact
-            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> "Please apply the tx id to the namespace of tx meta data to be updated."
-        }
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+            err ==> "Please apply the tx id to the namespace of tx meta data to be updated."
+          }
 
         // We can though update the tx entity itself
         _ <- Other(tx).s("tx3").update.transact
@@ -185,8 +197,8 @@ trait UpdateOne_id extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync
         for {
           _ <- Ns(42).int(2, 3).update.transact
             .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-            err ==> "Can only update one value for attribute `Ns.int`. Found: 2, 3"
-          }
+              err ==> "Can only update one value for attribute `Ns.int`. Found: 2, 3"
+            }
         } yield ()
       }
 
@@ -194,9 +206,9 @@ trait UpdateOne_id extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync
         for {
           _ <- Ns(42).int_?(Some(1)).update.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't update optional values. Found:\n" +
-              """AttrOneOptInt("Ns", "int", Eq, Some(Seq(1)), None, None, Nil, Nil, None, None)"""
-          }
+              err ==> "Can't update optional values. Found:\n" +
+                """AttrOneOptInt("Ns", "int", Eq, Some(Seq(1)), None, None, Nil, Nil, None, None)"""
+            }
         } yield ()
       }
 
@@ -204,8 +216,8 @@ trait UpdateOne_id extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync
         for {
           _ <- Ns(42).i(1).Refs.i(2).update.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't update attributes in card-many referenced namespace `Refs`"
-          }
+              err ==> "Can't update attributes in card-many referenced namespace `Refs`"
+            }
         } yield ()
       }
 
@@ -213,8 +225,8 @@ trait UpdateOne_id extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync
         for {
           _ <- Ns(42).i(1).Ref.i(2).upsert.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't upsert referenced attributes. Please update instead."
-          }
+              err ==> "Can't upsert referenced attributes. Please update instead."
+            }
         } yield ()
       }
     }

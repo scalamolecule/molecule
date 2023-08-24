@@ -82,7 +82,45 @@ trait UpdateSet_id extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync
         id <- A.ii(Set(1)).B.ii(Set(2)).C.ii(Set(3)).save.transact.map(_.id)
         _ <- A.ii.B.ii.C.ii.query.get.map(_ ==> List((Set(1), Set(2), Set(3))))
 
+        // A
+        _ <- A(id).ii(Set(10)).update.transact
+        _ <- A.ii.B.ii.C.ii.query.get.map(_ ==> List((Set(10), Set(2), Set(3))))
 
+        // A + B
+        _ <- A(id).ii(Set(11)).B.ii(Set(20)).update.transact
+        _ <- A.ii.B.ii.C.ii.query.get.map(_ ==> List((Set(11), Set(20), Set(3))))
+
+        // B
+        _ <- A(id).B.ii(Set(21)).update.transact
+        _ <- A.ii.B.ii.C.ii.query.get.map(_ ==> List((Set(11), Set(21), Set(3))))
+
+        // A + B + C
+        _ <- A(id).ii(Set(12)).B.ii(Set(22)).C.ii(Set(30)).update.transact
+        _ <- A.ii.B.ii.C.ii.query.get.map(_ ==> List((Set(12), Set(22), Set(30))))
+
+        // A + C
+        _ <- A(id).ii(Set(13)).B.C.ii(Set(31)).update.transact
+        _ <- A.ii.B.ii.C.ii.query.get.map(_ ==> List((Set(13), Set(22), Set(31))))
+
+        // B + C
+        _ <- A(id).B.ii(Set(23)).C.ii(Set(32)).update.transact
+        _ <- A.ii.B.ii.C.ii.query.get.map(_ ==> List((Set(13), Set(23), Set(32))))
+
+        // C
+        _ <- A(id).B.C.ii(Set(33)).update.transact
+        _ <- A.ii.B.ii.C.ii.query.get.map(_ ==> List((Set(13), Set(23), Set(33))))
+      } yield ()
+    }
+
+
+    "Referenced attributes with backref" - refs { implicit conn =>
+      for {
+        id <- A.ii(Set(1)).B.ii(Set(2))._A.C.ii(Set(3)).save.transact.map(_.id)
+        _ <- A.ii.B.ii._A.C.ii.query.get.map(_ ==> List((Set(1), Set(2), Set(3))))
+
+        // Updating A.B.ii and A.C.ii
+        _ <- A(id).ii(Set(10)).B.ii(Set(20))._A.C.ii(Set(30)).update.transact
+        _ <- A.ii.B.ii._A.C.ii.query.get.map(_ ==> List((Set(10), Set(20), Set(30))))
       } yield ()
     }
 
