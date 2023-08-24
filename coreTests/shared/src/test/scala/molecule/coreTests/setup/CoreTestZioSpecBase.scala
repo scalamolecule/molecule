@@ -17,7 +17,7 @@ trait CoreTestZioSpecBase extends ZIOSpecDefault with TestData {
 
   def types[T]: ZLayer[T, Throwable, Conn] = inMem(TypesSchema)
   def refs[T]: ZLayer[T, Throwable, Conn] = inMem(RefsSchema)
-  def unique[T]: ZLayer[T, Throwable, Conn] = inMem(UniqueSchema)
+  def unique[T]: ZLayer[T, Throwable, Conn] = inMem(UniquesSchema)
   def validation[T]: ZLayer[T, Throwable, Conn] = inMem(ValidationSchema)
 
   def delay[T](ms: Int)(body: => T): Task[T]

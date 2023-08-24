@@ -169,12 +169,13 @@ trait Data_Update extends JdbcBase_JVM with UpdateOps with MoleculeLogging { sel
   }
 
   override def handleUniqueFilterAttr(uniqueFilterAttr: AttrOneTac): Unit = {
-    if (ids.nonEmpty) {
+    //    if (ids.nonEmpty) {
+    if (filterElements.nonEmpty) {
       throw ModelError(
         s"Can only apply one unique attribute value for $update. Found:\n" + uniqueFilterAttr
       )
     }
-    ???
+    filterElements = filterElements :+ uniqueFilterAttr
   }
 
   override def handleFilterAttr(filterAttr: AttrOneTac): Unit = {
@@ -299,12 +300,13 @@ trait Data_Update extends JdbcBase_JVM with UpdateOps with MoleculeLogging { sel
 
       val (curPath, paramIndex) = updateInserts(a.name)
 
-      val array = set2array(adds.asInstanceOf[Set[Any]])
-      (ps: PS, _: IdsMap, _: RowIndex) => {
+      val array     = set2array(adds.asInstanceOf[Set[Any]])
+      val colSetter = (ps: PS, _: IdsMap, _: RowIndex) => {
         val conn = ps.getConnection
         val arr  = conn.createArrayOf("AnyRef", array)
         ps.setArray(paramIndex, arr)
       }
+      addColSetter(curPath, colSetter)
     }
   }
 

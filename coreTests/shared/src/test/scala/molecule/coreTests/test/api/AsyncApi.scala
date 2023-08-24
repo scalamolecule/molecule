@@ -87,10 +87,10 @@ trait AsyncApi extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync =>
 
 
       "Cursor query" - unique { implicit conn =>
-        import molecule.coreTests.dataModels.core.dsl.Unique.Unique
-        val query = Unique.int.a1.query
+        import molecule.coreTests.dataModels.core.dsl.Uniques._
+        val query = Uniques.int.a1.query
         for {
-          _ <- Unique.int.insert(1, 2, 3, 4, 5).transact
+          _ <- Uniques.int.insert(1, 2, 3, 4, 5).transact
           c1 <- query.from("").limit(2).get.map { case (List(1, 2), c, true) => c }
           c2 <- query.from(c1).limit(2).get.map { case (List(3, 4), c, true) => c }
           c3 <- query.from(c2).limit(2).get.map { case (List(5), c, false) => c }

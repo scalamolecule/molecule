@@ -80,10 +80,10 @@ object SyncApi extends DatomicTestSuite {
 
 
       "Cursor query" - unique { implicit conn =>
-        import molecule.coreTests.dataModels.core.dsl.Unique.Unique
+        import molecule.coreTests.dataModels.core.dsl.Uniques._
 
-        val query = Unique.int.a1.query
-        Unique.int.insert(1, 2, 3, 4, 5).transact
+        val query = Uniques.int.a1.query
+        Uniques.int.insert(1, 2, 3, 4, 5).transact
         val c1 = query.from("").limit(2).get match {
           case (List(1, 2), c, true) => c
         }

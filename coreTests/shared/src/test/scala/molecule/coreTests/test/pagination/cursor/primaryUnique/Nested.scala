@@ -4,7 +4,7 @@ import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
 import molecule.coreTests.api.ApiAsyncImplicits
 import molecule.coreTests.async._
-import molecule.coreTests.dataModels.core.dsl.Unique._
+import molecule.coreTests.dataModels.core.dsl.Uniques._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 import scala.annotation.nowarn
@@ -22,12 +22,12 @@ trait Nested extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
   @nowarn lazy val tests = Tests {
 
     "Nested" - {
-      val query = Unique.int.a1.Refs.*(Ref.i).query
+      val query = Uniques.int.a1.Refs.*(Ref.i).query
 
       "From start" - unique { implicit conn =>
         for {
-          // Using attribute Unique.int with only unique values
-          _ <- Unique.int.Refs.*(Ref.i).insert(data).transact
+          // Using attribute Uniques.int with only unique values
+          _ <- Uniques.int.Refs.*(Ref.i).insert(data).transact
 
           // Sorted by unique int attribute
           c1 <- query.from(x).limit(2).get.map { case (List(`a`, `b`), cur, true) => cur }
@@ -40,7 +40,7 @@ trait Nested extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
 
       "From end" - unique { implicit conn =>
         for {
-          _ <- Unique.int.Refs.*(Ref.i).insert(data).transact
+          _ <- Uniques.int.Refs.*(Ref.i).insert(data).transact
 
           c1 <- query.from(x).limit(-2).get.map { case (List(`d`, `e`), cur, true) => cur }
           c2 <- query.from(c1).limit(-2).get.map { case (List(`b`, `c`), cur, true) => cur }
@@ -52,11 +52,11 @@ trait Nested extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
     }
 
     "Optional nested" - {
-      val query = Unique.int.a1.Refs.*?(Ref.i).query
+      val query = Uniques.int.a1.Refs.*?(Ref.i).query
 
       "From start" - unique { implicit conn =>
         for {
-          _ <- Unique.int.Refs.*(Ref.i).insert(data).transact
+          _ <- Uniques.int.Refs.*(Ref.i).insert(data).transact
           c1 <- query.from(x).limit(2).get.map { case (List(`a`, `b`), cur, true) => cur }
           c2 <- query.from(c1).limit(2).get.map { case (List(`c`, `d`), cur, true) => cur }
           c3 <- query.from(c2).limit(2).get.map { case (List(`e`), cur, false) => cur }
@@ -67,7 +67,7 @@ trait Nested extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
 
       "From end" - unique { implicit conn =>
         for {
-          _ <- Unique.int.Refs.*(Ref.i).insert(data).transact
+          _ <- Uniques.int.Refs.*(Ref.i).insert(data).transact
           c1 <- query.from(x).limit(-2).get.map { case (List(`d`, `e`), cur, true) => cur }
           c2 <- query.from(c1).limit(-2).get.map { case (List(`b`, `c`), cur, true) => cur }
           c3 <- query.from(c2).limit(-2).get.map { case (List(`a`), cur, false) => cur }

@@ -4,7 +4,7 @@ import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
 import molecule.coreTests.api.ApiAsyncImplicits
 import molecule.coreTests.async._
-import molecule.coreTests.dataModels.core.dsl.Unique._
+import molecule.coreTests.dataModels.core.dsl.Uniques._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 import scala.annotation.nowarn
@@ -23,9 +23,9 @@ trait TypesOptional extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsyn
       )
       val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
       val query               = (cursor: String, limit: Int) =>
-        Unique.i.a1.string_?.a2.query.from(cursor).limit(limit)
+        Uniques.i.a1.string_?.a2.query.from(cursor).limit(limit)
       for {
-        _ <- Unique.i.string_?.insert(pairs).transact
+        _ <- Uniques.i.string_?.insert(pairs).transact
         c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
         c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
         c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
@@ -44,9 +44,9 @@ trait TypesOptional extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsyn
       )
       val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
       val query               = (cursor: String, limit: Int) =>
-        Unique.i.a1.int_?.a2.query.from(cursor).limit(limit)
+        Uniques.i.a1.int_?.a2.query.from(cursor).limit(limit)
       for {
-        _ <- Unique.i.int_?.insert(pairs).transact
+        _ <- Uniques.i.int_?.insert(pairs).transact
         c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
         c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
         c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
@@ -65,9 +65,9 @@ trait TypesOptional extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsyn
       )
       val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
       val query               = (cursor: String, limit: Int) =>
-        Unique.i.a1.long_?.a2.query.from(cursor).limit(limit)
+        Uniques.i.a1.long_?.a2.query.from(cursor).limit(limit)
       for {
-        _ <- Unique.i.long_?.insert(pairs).transact
+        _ <- Uniques.i.long_?.insert(pairs).transact
         c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
         c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
         c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
@@ -86,9 +86,9 @@ trait TypesOptional extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsyn
       )
       val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
       val query               = (cursor: String, limit: Int) =>
-        Unique.i.a1.float_?.a2.query.from(cursor).limit(limit)
+        Uniques.i.a1.float_?.a2.query.from(cursor).limit(limit)
       for {
-        _ <- Unique.i.float_?.insert(pairs).transact
+        _ <- Uniques.i.float_?.insert(pairs).transact
         c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
         c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
         c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
@@ -107,9 +107,9 @@ trait TypesOptional extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsyn
       )
       val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
       val query               = (cursor: String, limit: Int) =>
-        Unique.i.a1.double_?.a2.query.from(cursor).limit(limit)
+        Uniques.i.a1.double_?.a2.query.from(cursor).limit(limit)
       for {
-        _ <- Unique.i.double_?.insert(pairs).transact
+        _ <- Uniques.i.double_?.insert(pairs).transact
         c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
         c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
         c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
@@ -126,9 +126,9 @@ trait TypesOptional extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsyn
       )
       val List(a, b) = pairs.sortBy(p => (p._1, p._2))
       val query      = (cursor: String, limit: Int) =>
-        Unique.i.a1.boolean_?.a2.query.from(cursor).limit(limit)
+        Uniques.i.a1.boolean_?.a2.query.from(cursor).limit(limit)
       for {
-        _ <- Unique.i.boolean_?.insert(pairs).transact
+        _ <- Uniques.i.boolean_?.insert(pairs).transact
         c1 <- query("", 1).get.map { case (List(`a`), cursor, true) => cursor }
         c2 <- query(c1, 1).get.map { case (List(`b`), cursor, false) => cursor }
         _ <- query(c2, -1).get.map { case (List(`a`), _, false) => () }
@@ -152,9 +152,9 @@ trait TypesOptional extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsyn
       )
       val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
       val query               = (cursor: String, limit: Int) =>
-        Unique.i.a1.bigInt_?.a2.query.from(cursor).limit(limit)
+        Uniques.i.a1.bigInt_?.a2.query.from(cursor).limit(limit)
       for {
-        _ <- Unique.i.bigInt_?.insert(pairs).transact
+        _ <- Uniques.i.bigInt_?.insert(pairs).transact
         c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
         c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
         c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
@@ -173,9 +173,9 @@ trait TypesOptional extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsyn
       )
       val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
       val query               = (cursor: String, limit: Int) =>
-        Unique.i.a1.bigDecimal_?.a2.query.from(cursor).limit(limit)
+        Uniques.i.a1.bigDecimal_?.a2.query.from(cursor).limit(limit)
       for {
-        _ <- Unique.i.bigDecimal_?.insert(pairs).transact
+        _ <- Uniques.i.bigDecimal_?.insert(pairs).transact
         c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
         c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
         c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
@@ -194,9 +194,9 @@ trait TypesOptional extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsyn
       )
       val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
       val query               = (cursor: String, limit: Int) =>
-        Unique.i.a1.date_?.a2.query.from(cursor).limit(limit)
+        Uniques.i.a1.date_?.a2.query.from(cursor).limit(limit)
       for {
-        _ <- Unique.i.date_?.insert(pairs).transact
+        _ <- Uniques.i.date_?.insert(pairs).transact
         c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
         c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
         c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
@@ -215,9 +215,9 @@ trait TypesOptional extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsyn
       )
       val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
       val query               = (cursor: String, limit: Int) =>
-        Unique.i.a1.uuid_?.a2.query.from(cursor).limit(limit)
+        Uniques.i.a1.uuid_?.a2.query.from(cursor).limit(limit)
       for {
-        _ <- Unique.i.uuid_?.insert(pairs).transact
+        _ <- Uniques.i.uuid_?.insert(pairs).transact
         c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
         c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
         c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
@@ -236,9 +236,9 @@ trait TypesOptional extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsyn
       )
       val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
       val query               = (cursor: String, limit: Int) =>
-        Unique.i.a1.uri_?.a2.query.from(cursor).limit(limit)
+        Uniques.i.a1.uri_?.a2.query.from(cursor).limit(limit)
       for {
-        _ <- Unique.i.uri_?.insert(pairs).transact
+        _ <- Uniques.i.uri_?.insert(pairs).transact
         c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
         c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
         c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
@@ -257,9 +257,9 @@ trait TypesOptional extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsyn
       )
       val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
       val query               = (cursor: String, limit: Int) =>
-        Unique.i.a1.byte_?.a2.query.from(cursor).limit(limit)
+        Uniques.i.a1.byte_?.a2.query.from(cursor).limit(limit)
       for {
-        _ <- Unique.i.byte_?.insert(pairs).transact
+        _ <- Uniques.i.byte_?.insert(pairs).transact
         c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
         c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
         c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
@@ -278,9 +278,9 @@ trait TypesOptional extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsyn
       )
       val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
       val query               = (cursor: String, limit: Int) =>
-        Unique.i.a1.short_?.a2.query.from(cursor).limit(limit)
+        Uniques.i.a1.short_?.a2.query.from(cursor).limit(limit)
       for {
-        _ <- Unique.i.short_?.insert(pairs).transact
+        _ <- Uniques.i.short_?.insert(pairs).transact
         c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
         c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
         c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
@@ -299,9 +299,9 @@ trait TypesOptional extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsyn
       )
       val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
       val query               = (cursor: String, limit: Int) =>
-        Unique.i.a1.char_?.a2.query.from(cursor).limit(limit)
+        Uniques.i.a1.char_?.a2.query.from(cursor).limit(limit)
       for {
-        _ <- Unique.i.char_?.insert(pairs).transact
+        _ <- Uniques.i.char_?.insert(pairs).transact
         c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
         c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
         c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }

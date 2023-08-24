@@ -4,7 +4,7 @@ import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
 import molecule.coreTests.api.ApiAsyncImplicits
 import molecule.coreTests.async._
-import molecule.coreTests.dataModels.core.dsl.Unique._
+import molecule.coreTests.dataModels.core.dsl.Uniques._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 import scala.annotation.nowarn
@@ -18,9 +18,9 @@ trait NestedOpt extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =
       val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _, List(1)))
       val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
       val query               = (cursor: String, limit: Int) => 
-        Unique.i.a1.int.a2.Refs.*?(Ref.i).query.from(cursor).limit(limit)
+        Uniques.i.a1.int.a2.Refs.*?(Ref.i).query.from(cursor).limit(limit)
       for {
-        _ <- Unique.i.int.Refs.*(Ref.i).insert(pairs).transact
+        _ <- Uniques.i.int.Refs.*(Ref.i).insert(pairs).transact
         c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
         c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
         c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
@@ -33,9 +33,9 @@ trait NestedOpt extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =
       val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _, List(1)))
       val List(a, b, c, d, e) = pairs.sortBy(p => (-p._1, p._2))
       val query               = (cursor: String, limit: Int) =>
-        Unique.i.d1.int.a2.Refs.*?(Ref.i).query.from(cursor).limit(limit)
+        Uniques.i.d1.int.a2.Refs.*?(Ref.i).query.from(cursor).limit(limit)
       for {
-        _ <- Unique.i.int.Refs.*(Ref.i).insert(pairs).transact
+        _ <- Uniques.i.int.Refs.*(Ref.i).insert(pairs).transact
         c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
         c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
         c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
@@ -48,9 +48,9 @@ trait NestedOpt extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =
       val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _, List(1)))
       val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, -p._2))
       val query               = (cursor: String, limit: Int) =>
-        Unique.i.a1.int.d2.Refs.*?(Ref.i).query.from(cursor).limit(limit)
+        Uniques.i.a1.int.d2.Refs.*?(Ref.i).query.from(cursor).limit(limit)
       for {
-        _ <- Unique.i.int.Refs.*(Ref.i).insert(pairs).transact
+        _ <- Uniques.i.int.Refs.*(Ref.i).insert(pairs).transact
         c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
         c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
         c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
@@ -63,9 +63,9 @@ trait NestedOpt extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =
       val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _, List(1)))
       val List(a, b, c, d, e) = pairs.sortBy(p => (-p._1, -p._2))
       val query               = (cursor: String, limit: Int) =>
-        Unique.i.d1.int.d2.Refs.*?(Ref.i).query.from(cursor).limit(limit)
+        Uniques.i.d1.int.d2.Refs.*?(Ref.i).query.from(cursor).limit(limit)
       for {
-        _ <- Unique.i.int.Refs.*(Ref.i).insert(pairs).transact
+        _ <- Uniques.i.int.Refs.*(Ref.i).insert(pairs).transact
         c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
         c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
         c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
@@ -79,9 +79,9 @@ trait NestedOpt extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =
       val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _, List(1)))
       val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
       val query               = (cursor: String, limit: Int) =>
-        Unique.i.a1.int.a2.Refs.*?(Ref.i).query.from(cursor).limit(limit)
+        Uniques.i.a1.int.a2.Refs.*?(Ref.i).query.from(cursor).limit(limit)
       for {
-        _ <- Unique.i.int.Refs.*(Ref.i).insert(pairs).transact
+        _ <- Uniques.i.int.Refs.*(Ref.i).insert(pairs).transact
         c1 <- query("", -2).get.map { case (List(`d`, `e`), cursor, true) => cursor }
         c2 <- query(c1, -2).get.map { case (List(`b`, `c`), cursor, true) => cursor }
         c3 <- query(c2, -2).get.map { case (List(`a`), cursor, false) => cursor }
@@ -94,9 +94,9 @@ trait NestedOpt extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =
       val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _, List(1)))
       val List(a, b, c, d, e) = pairs.sortBy(p => (-p._1, p._2))
       val query               = (cursor: String, limit: Int) =>
-        Unique.i.d1.int.a2.Refs.*?(Ref.i).query.from(cursor).limit(limit)
+        Uniques.i.d1.int.a2.Refs.*?(Ref.i).query.from(cursor).limit(limit)
       for {
-        _ <- Unique.i.int.Refs.*(Ref.i).insert(pairs).transact
+        _ <- Uniques.i.int.Refs.*(Ref.i).insert(pairs).transact
         c1 <- query("", -2).get.map { case (List(`d`, `e`), cursor, true) => cursor }
         c2 <- query(c1, -2).get.map { case (List(`b`, `c`), cursor, true) => cursor }
         c3 <- query(c2, -2).get.map { case (List(`a`), cursor, false) => cursor }
@@ -109,9 +109,9 @@ trait NestedOpt extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =
       val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _, List(1)))
       val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, -p._2))
       val query               = (cursor: String, limit: Int) =>
-        Unique.i.a1.int.d2.Refs.*?(Ref.i).query.from(cursor).limit(limit)
+        Uniques.i.a1.int.d2.Refs.*?(Ref.i).query.from(cursor).limit(limit)
       for {
-        _ <- Unique.i.int.Refs.*(Ref.i).insert(pairs).transact
+        _ <- Uniques.i.int.Refs.*(Ref.i).insert(pairs).transact
         c1 <- query("", -2).get.map { case (List(`d`, `e`), cursor, true) => cursor }
         c2 <- query(c1, -2).get.map { case (List(`b`, `c`), cursor, true) => cursor }
         c3 <- query(c2, -2).get.map { case (List(`a`), cursor, false) => cursor }
@@ -124,9 +124,9 @@ trait NestedOpt extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =
       val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _, List(1)))
       val List(a, b, c, d, e) = pairs.sortBy(p => (-p._1, -p._2))
       val query               = (cursor: String, limit: Int) =>
-        Unique.i.d1.int.d2.Refs.*?(Ref.i).query.from(cursor).limit(limit)
+        Uniques.i.d1.int.d2.Refs.*?(Ref.i).query.from(cursor).limit(limit)
       for {
-        _ <- Unique.i.int.Refs.*(Ref.i).insert(pairs).transact
+        _ <- Uniques.i.int.Refs.*(Ref.i).insert(pairs).transact
         c1 <- query("", -2).get.map { case (List(`d`, `e`), cursor, true) => cursor }
         c2 <- query(c1, -2).get.map { case (List(`b`, `c`), cursor, true) => cursor }
         c3 <- query(c2, -2).get.map { case (List(`a`), cursor, false) => cursor }

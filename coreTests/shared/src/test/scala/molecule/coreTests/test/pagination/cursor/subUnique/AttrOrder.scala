@@ -4,7 +4,7 @@ import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
 import molecule.coreTests.api.ApiAsyncImplicits
 import molecule.coreTests.async._
-import molecule.coreTests.dataModels.core.dsl.Unique._
+import molecule.coreTests.dataModels.core.dsl.Uniques._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 import scala.annotation.nowarn
@@ -24,9 +24,9 @@ trait AttrOrder extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =
       "u3-1-2" - unique { implicit conn =>
         val triples             = getTriples.map(t => (t._3, t._1, t._2))
         val List(a, b, c, d, e) = triples.sortBy(p => (p._2, p._3, p._1))
-        val query               = (c: String, l: Int) => Unique.int.a3.s.a1.i.a2.query.from(c).limit(l)
+        val query               = (c: String, l: Int) => Uniques.int.a3.s.a1.i.a2.query.from(c).limit(l)
         for {
-          _ <- Unique.int.s.i.insert(triples).transact
+          _ <- Uniques.int.s.i.insert(triples).transact
           c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
           c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
           c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
@@ -38,9 +38,9 @@ trait AttrOrder extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =
       "u3-2-1" - unique { implicit conn =>
         val triples             = getTriples.map(t => (t._3, t._1, t._2))
         val List(a, b, c, d, e) = triples.sortBy(p => (p._3, p._2, p._1))
-        val query               = (c: String, l: Int) => Unique.int.a3.s.a2.i.a1.query.from(c).limit(l)
+        val query               = (c: String, l: Int) => Uniques.int.a3.s.a2.i.a1.query.from(c).limit(l)
         for {
-          _ <- Unique.int.s.i.insert(triples).transact
+          _ <- Uniques.int.s.i.insert(triples).transact
           c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
           c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
           c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
@@ -52,9 +52,9 @@ trait AttrOrder extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =
       "u2-1-3" - unique { implicit conn =>
         val triples             = getTriples.map(t => (t._3, t._1, t._2))
         val List(a, b, c, d, e) = triples.sortBy(p => (p._2, p._1, p._3))
-        val query               = (c: String, l: Int) => Unique.int.a2.s.a1.i.a3.query.from(c).limit(l)
+        val query               = (c: String, l: Int) => Uniques.int.a2.s.a1.i.a3.query.from(c).limit(l)
         for {
-          _ <- Unique.int.s.i.insert(triples).transact
+          _ <- Uniques.int.s.i.insert(triples).transact
           c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
           c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
           c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
@@ -66,9 +66,9 @@ trait AttrOrder extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =
       "u2-3-1" - unique { implicit conn =>
         val triples             = getTriples.map(t => (t._3, t._1, t._2))
         val List(a, b, c, d, e) = triples.sortBy(p => (p._3, p._1, p._2))
-        val query               = (c: String, l: Int) => Unique.int.a2.s.a3.i.a1.query.from(c).limit(l)
+        val query               = (c: String, l: Int) => Uniques.int.a2.s.a3.i.a1.query.from(c).limit(l)
         for {
-          _ <- Unique.int.s.i.insert(triples).transact
+          _ <- Uniques.int.s.i.insert(triples).transact
           c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
           c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
           c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
@@ -84,9 +84,9 @@ trait AttrOrder extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =
       "1-u3-2" - unique { implicit conn =>
         val triples             = getTriples.map(t => (t._1, t._3, t._2))
         val List(a, b, c, d, e) = triples.sortBy(p => (p._1, p._3, p._2))
-        val query               = (c: String, l: Int) => Unique.s.a1.int.a3.i.a2.query.from(c).limit(l)
+        val query               = (c: String, l: Int) => Uniques.s.a1.int.a3.i.a2.query.from(c).limit(l)
         for {
-          _ <- Unique.s.int.i.insert(triples).transact
+          _ <- Uniques.s.int.i.insert(triples).transact
           c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
           c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
           c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
@@ -98,9 +98,9 @@ trait AttrOrder extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =
       "2-u3-1" - unique { implicit conn =>
         val triples             = getTriples.map(t => (t._1, t._3, t._2))
         val List(a, b, c, d, e) = triples.sortBy(p => (p._3, p._1, p._2))
-        val query               = (c: String, l: Int) => Unique.s.a2.int.a3.i.a1.query.from(c).limit(l)
+        val query               = (c: String, l: Int) => Uniques.s.a2.int.a3.i.a1.query.from(c).limit(l)
         for {
-          _ <- Unique.s.int.i.insert(triples).transact
+          _ <- Uniques.s.int.i.insert(triples).transact
           c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
           c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
           c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
@@ -112,9 +112,9 @@ trait AttrOrder extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =
       "1-u2-3" - unique { implicit conn =>
         val triples             = getTriples.map(t => (t._1, t._3, t._2))
         val List(a, b, c, d, e) = triples.sortBy(p => (p._1, p._2, p._3))
-        val query               = (c: String, l: Int) => Unique.s.a1.int.a2.i.a3.query.from(c).limit(l)
+        val query               = (c: String, l: Int) => Uniques.s.a1.int.a2.i.a3.query.from(c).limit(l)
         for {
-          _ <- Unique.s.int.i.insert(triples).transact
+          _ <- Uniques.s.int.i.insert(triples).transact
           c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
           c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
           c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
@@ -126,9 +126,9 @@ trait AttrOrder extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =
       "3-u2-1" - unique { implicit conn =>
         val triples             = getTriples.map(t => (t._1, t._3, t._2))
         val List(a, b, c, d, e) = triples.sortBy(p => (p._3, p._2, p._1))
-        val query               = (c: String, l: Int) => Unique.s.a3.int.a2.i.a1.query.from(c).limit(l)
+        val query               = (c: String, l: Int) => Uniques.s.a3.int.a2.i.a1.query.from(c).limit(l)
         for {
-          _ <- Unique.s.int.i.insert(triples).transact
+          _ <- Uniques.s.int.i.insert(triples).transact
           c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
           c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
           c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
@@ -144,9 +144,9 @@ trait AttrOrder extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =
       "1-2-u3" - unique { implicit conn =>
         val triples             = getTriples
         val List(a, b, c, d, e) = triples.sortBy(p => (p._1, p._2, p._3))
-        val query               = (c: String, l: Int) => Unique.s.a1.i.a2.int.a3.query.from(c).limit(l)
+        val query               = (c: String, l: Int) => Uniques.s.a1.i.a2.int.a3.query.from(c).limit(l)
         for {
-          _ <- Unique.s.i.int.insert(triples).transact
+          _ <- Uniques.s.i.int.insert(triples).transact
           c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
           c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
           c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
@@ -158,9 +158,9 @@ trait AttrOrder extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =
       "2-1-u3" - unique { implicit conn =>
         val triples             = getTriples
         val List(a, b, c, d, e) = triples.sortBy(p => (p._2, p._1, p._3))
-        val query               = (c: String, l: Int) => Unique.s.a2.i.a1.int.a3.query.from(c).limit(l)
+        val query               = (c: String, l: Int) => Uniques.s.a2.i.a1.int.a3.query.from(c).limit(l)
         for {
-          _ <- Unique.s.i.int.insert(triples).transact
+          _ <- Uniques.s.i.int.insert(triples).transact
           c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
           c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
           c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
@@ -172,9 +172,9 @@ trait AttrOrder extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =
       "1-3-u2" - unique { implicit conn =>
         val triples             = getTriples
         val List(a, b, c, d, e) = triples.sortBy(p => (p._1, p._3, p._2))
-        val query               = (c: String, l: Int) => Unique.s.a1.i.a3.int.a2.query.from(c).limit(l)
+        val query               = (c: String, l: Int) => Uniques.s.a1.i.a3.int.a2.query.from(c).limit(l)
         for {
-          _ <- Unique.s.i.int.insert(triples).transact
+          _ <- Uniques.s.i.int.insert(triples).transact
           c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
           c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
           c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
@@ -186,9 +186,9 @@ trait AttrOrder extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =
       "3-1-u2" - unique { implicit conn =>
         val triples             = getTriples
         val List(a, b, c, d, e) = triples.sortBy(p => (p._2, p._3, p._1))
-        val query               = (c: String, l: Int) => Unique.s.a3.i.a1.int.a2.query.from(c).limit(l)
+        val query               = (c: String, l: Int) => Uniques.s.a3.i.a1.int.a2.query.from(c).limit(l)
         for {
-          _ <- Unique.s.i.int.insert(triples).transact
+          _ <- Uniques.s.i.int.insert(triples).transact
           c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
           c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
           c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }

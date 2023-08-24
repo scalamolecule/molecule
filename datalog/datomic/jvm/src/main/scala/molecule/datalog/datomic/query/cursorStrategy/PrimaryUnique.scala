@@ -53,7 +53,7 @@ case class PrimaryUnique[Tpl](
         val hasMore       = limitAbs < toplevelCount
         val selectedRows  = nestedRows.take(limitAbs)
         val tpls          = if (forward) selectedRows else selectedRows.reverse
-        val cursor        = nextCursorUnique(tpls, tokens)
+        val cursor        = nextCursorUniques(tpls, tokens)
         (tpls, cursor, hasMore)
 
       } else {
@@ -66,7 +66,7 @@ case class PrimaryUnique[Tpl](
           postAdjustPullCasts()
           sortedRows.subList(0, limitAbs).forEach(row => tuples += pullRow2tpl(row))
           val tpls   = if (forward) tuples.result() else tuples.result().reverse
-          val cursor = nextCursorUnique(tpls, tokens)
+          val cursor = nextCursorUniques(tpls, tokens)
           (tpls, cursor, hasMore)
 
         } else {
@@ -74,7 +74,7 @@ case class PrimaryUnique[Tpl](
           val row2tpl = castRow2AnyTpl(aritiess.head, castss.head, 0, None)
           sortedRows.subList(0, limitAbs).forEach(row => tuples += row2tpl(row).asInstanceOf[Tpl])
           val tpls   = if (forward) tuples.result() else tuples.result().reverse
-          val cursor = nextCursorUnique(tpls, tokens)
+          val cursor = nextCursorUniques(tpls, tokens)
           (tpls, cursor, hasMore)
         }
       }
@@ -84,7 +84,7 @@ case class PrimaryUnique[Tpl](
   }
 
 
-  private def nextCursorUnique(tpls: List[Tpl], tokens: List[String]): String = {
+  private def nextCursorUniques(tpls: List[Tpl], tokens: List[String]): String = {
     val List(_, _, tpe, _, _, i, _, _) = tokens
     val tokens1                        = tokens.dropRight(2) ++ getUniquePair(tpls, i.toInt, encoder(tpe, ""))
     Base64.getEncoder.encodeToString(tokens1.mkString("\n").getBytes)

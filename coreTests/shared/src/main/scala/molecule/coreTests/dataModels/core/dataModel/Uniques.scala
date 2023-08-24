@@ -2,9 +2,9 @@ package molecule.coreTests.dataModels.core.dataModel
 
 import molecule.DataModel
 
-object Unique extends DataModel(3) {
+object Uniques extends DataModel(3) {
 
-  trait Unique {
+  trait Uniques {
     val i = oneInt
     val s = oneString
 

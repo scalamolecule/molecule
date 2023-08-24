@@ -340,9 +340,9 @@ object AdhocDatomicJVM extends DatomicTestSuite {
     //    }
 
     //    "unique" - unique { implicit conn =>
-    //      import molecule.coreTests.dataModels.core.dsl.Unique._
+    //      import molecule.coreTests.dataModels.core.dsl.Uniques._
     //      for {
-    //        _ <- Unique.int.i.Tx(Other.i_(42).s_("tx")).insert(0, 1).inspect
+    //        _ <- Uniques.int.i.Tx(Other.i_(42).s_("tx")).insert(0, 1).inspect
     //        /*
     //        ========================================
     //        INSERT:
@@ -357,7 +357,7 @@ object AdhocDatomicJVM extends DatomicTestSuite {
     //        [:db/add, datomic.tx, :Other/i, 42]
     //        [:db/add, datomic.tx, :Other/s, tx]
     //         */
-    //        _ <- Unique.int.i.Tx(Other.i_(42).s_("tx")).insert(0, 1).transact
+    //        _ <- Uniques.int.i.Tx(Other.i_(42).s_("tx")).insert(0, 1).transact
     //      } yield ()
     //    }
   }

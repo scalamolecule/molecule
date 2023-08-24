@@ -4,7 +4,7 @@ import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
 import molecule.coreTests.api.ApiAsyncImplicits
 import molecule.coreTests.async._
-import molecule.coreTests.dataModels.core.dsl.Unique._
+import molecule.coreTests.dataModels.core.dsl.Uniques._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 import scala.annotation.nowarn
@@ -16,12 +16,12 @@ trait Directions extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  
   @nowarn lazy val tests = Tests {
 
     "Unique primary sort" - {
-      val query = Unique.int.a1.query
+      val query = Uniques.int.a1.query
 
       "From start" - unique { implicit conn =>
         for {
-          // Using attribute Unique.int with only unique values
-          _ <- Unique.int.insert(1, 2, 3, 4, 5).transact
+          // Using attribute Uniques.int with only unique values
+          _ <- Uniques.int.insert(1, 2, 3, 4, 5).transact
 
           // Sorted by unique int attribute
           c1 <- query.from(x).limit(2).get.map { case (List(1, 2), c, true) => c }
@@ -34,7 +34,7 @@ trait Directions extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  
 
       "From end" - unique { implicit conn =>
         for {
-          _ <- Unique.int.insert(1, 2, 3, 4, 5).transact
+          _ <- Uniques.int.insert(1, 2, 3, 4, 5).transact
 
           c1 <- query.from(x).limit(-2).get.map { case (List(4, 5), c, true) => c }
           c2 <- query.from(c1).limit(-2).get.map { case (List(2, 3), c, true) => c }
@@ -52,7 +52,7 @@ trait Directions extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  
 
       "From start" - types { implicit conn =>
         for {
-          // Using attribute Unique.int with only unique values
+          // Using attribute Uniques.int with only unique values
           _ <- Ns.date.insert(date1, date2, date3, date4, date5).transact
 
           // Sorted by unique int attribute

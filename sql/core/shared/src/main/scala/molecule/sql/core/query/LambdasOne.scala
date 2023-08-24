@@ -45,7 +45,7 @@ trait LambdasOne extends ResolveBase { self: Base =>
   private lazy val sql2oneStringOrNull    : (Row, Int) => Any = { (row: Row, n: Int) => val v = row.getString(n); if (row.wasNull()) null else v }
   private lazy val sql2oneIntOrNull       : (Row, Int) => Any = { (row: Row, n: Int) => val v = row.getInt(n); if (row.wasNull()) null else v }
   private lazy val sql2oneLongOrNull      : (Row, Int) => Any = { (row: Row, n: Int) => val v = row.getLong(n); if (row.wasNull()) null else v }
-  private lazy val sql2oneFloatOrNull     : (Row, Int) => Any = { (row: Row, n: Int) => val v = row.getDouble(n); if (row.wasNull()) null else v }
+  private lazy val sql2oneFloatOrNull     : (Row, Int) => Any = { (row: Row, n: Int) => val v = row.getFloat(n); if (row.wasNull()) null else v }
   private lazy val sql2oneDoubleOrNull    : (Row, Int) => Any = { (row: Row, n: Int) => val v = row.getDouble(n); if (row.wasNull()) null else v }
   private lazy val sql2oneBooleanOrNull   : (Row, Int) => Any = { (row: Row, n: Int) => val v = row.getBoolean(n); if (row.wasNull()) null else v }
   private lazy val sql2oneBigIntOrNull    : (Row, Int) => Any = { (row: Row, n: Int) => val v = row.getBigDecimal(n); if (row.wasNull()) null else v.toBigInteger }

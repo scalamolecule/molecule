@@ -144,7 +144,7 @@ trait Delete_filter extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsyn
         _ <- Ns.i.query.get.map(_ ==> List(1, 3))
         _ <- (Ns.i + Ref.i).query.get.map(_ ==> List((3, 30)))
 
-        // Note that Ref.int belongs to the same entity as Unique.int, and is therefore deleted together
+        // Note that Ref.int belongs to the same entity as Uniques.int, and is therefore deleted together
         _ <- Ref.i.query.get.map(_ ==> List(30))
 
         // Ns.i entity has no ref to Ref.i_(42) so nothing is deleted

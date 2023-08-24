@@ -4,7 +4,7 @@ import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
 import molecule.coreTests.api.ApiAsyncImplicits
 import molecule.coreTests.async._
-import molecule.coreTests.dataModels.core.dsl.Unique._
+import molecule.coreTests.dataModels.core.dsl.Uniques._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 import scala.annotation.nowarn
@@ -17,9 +17,9 @@ trait DirectionsUniqueStandard extends CoreTestSuite with ApiAsyncImplicits { se
     "Forward, asc asc" - unique { implicit conn =>
       val pairs               = (1 to 5).toList.map((_, scala.util.Random.nextInt(3) + 1))
       val List(a, b, c, d, e) = pairs.sortBy(p => (p._2, p._1))
-      val query               = (cursor: String, limit: Int) => Unique.int.a2.i.a1.query.from(cursor).limit(limit)
+      val query               = (cursor: String, limit: Int) => Uniques.int.a2.i.a1.query.from(cursor).limit(limit)
       for {
-        _ <- Unique.int.i.insert(pairs).transact
+        _ <- Uniques.int.i.insert(pairs).transact
         c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
         c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
         c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
@@ -31,9 +31,9 @@ trait DirectionsUniqueStandard extends CoreTestSuite with ApiAsyncImplicits { se
     "Forward, desc asc" - unique { implicit conn =>
       val pairs               = (1 to 5).toList.map((_, scala.util.Random.nextInt(3) + 1))
       val List(a, b, c, d, e) = pairs.sortBy(p => (p._2, -p._1))
-      val query               = (cursor: String, limit: Int) => Unique.int.d2.i.a1.query.from(cursor).limit(limit)
+      val query               = (cursor: String, limit: Int) => Uniques.int.d2.i.a1.query.from(cursor).limit(limit)
       for {
-        _ <- Unique.int.i.insert(pairs).transact
+        _ <- Uniques.int.i.insert(pairs).transact
         c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
         c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
         c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
@@ -45,9 +45,9 @@ trait DirectionsUniqueStandard extends CoreTestSuite with ApiAsyncImplicits { se
     "Forward, asc desc" - unique { implicit conn =>
       val pairs               = (1 to 5).toList.map((_, scala.util.Random.nextInt(3) + 1))
       val List(a, b, c, d, e) = pairs.sortBy(p => (-p._2, p._1))
-      val query               = (cursor: String, limit: Int) => Unique.int.a2.i.d1.query.from(cursor).limit(limit)
+      val query               = (cursor: String, limit: Int) => Uniques.int.a2.i.d1.query.from(cursor).limit(limit)
       for {
-        _ <- Unique.int.i.insert(pairs).transact
+        _ <- Uniques.int.i.insert(pairs).transact
         c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
         c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
         c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
@@ -59,9 +59,9 @@ trait DirectionsUniqueStandard extends CoreTestSuite with ApiAsyncImplicits { se
     "Forward, desc desc" - unique { implicit conn =>
       val pairs               = (1 to 5).toList.map((_, scala.util.Random.nextInt(3) + 1))
       val List(a, b, c, d, e) = pairs.sortBy(p => (-p._2, -p._1))
-      val query               = (cursor: String, limit: Int) => Unique.int.d2.i.d1.query.from(cursor).limit(limit)
+      val query               = (cursor: String, limit: Int) => Uniques.int.d2.i.d1.query.from(cursor).limit(limit)
       for {
-        _ <- Unique.int.i.insert(pairs).transact
+        _ <- Uniques.int.i.insert(pairs).transact
         c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
         c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
         c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
@@ -74,9 +74,9 @@ trait DirectionsUniqueStandard extends CoreTestSuite with ApiAsyncImplicits { se
     "Backwards, asc asc" - unique { implicit conn =>
       val pairs               = (1 to 5).toList.map((_, scala.util.Random.nextInt(3) + 1))
       val List(a, b, c, d, e) = pairs.sortBy(p => (p._2, p._1))
-      val query               = (cursor: String, limit: Int) => Unique.int.a2.i.a1.query.from(cursor).limit(limit)
+      val query               = (cursor: String, limit: Int) => Uniques.int.a2.i.a1.query.from(cursor).limit(limit)
       for {
-        _ <- Unique.int.i.insert(pairs).transact
+        _ <- Uniques.int.i.insert(pairs).transact
         c1 <- query("", -2).get.map { case (List(`d`, `e`), cursor, true) => cursor }
         c2 <- query(c1, -2).get.map { case (List(`b`, `c`), cursor, true) => cursor }
         c3 <- query(c2, -2).get.map { case (List(`a`), cursor, false) => cursor }
@@ -88,9 +88,9 @@ trait DirectionsUniqueStandard extends CoreTestSuite with ApiAsyncImplicits { se
     "Backwards, desc asc" - unique { implicit conn =>
       val pairs               = (1 to 5).toList.map((_, scala.util.Random.nextInt(3) + 1))
       val List(a, b, c, d, e) = pairs.sortBy(p => (p._2, -p._1))
-      val query               = (cursor: String, limit: Int) => Unique.int.d2.i.a1.query.from(cursor).limit(limit)
+      val query               = (cursor: String, limit: Int) => Uniques.int.d2.i.a1.query.from(cursor).limit(limit)
       for {
-        _ <- Unique.int.i.insert(pairs).transact
+        _ <- Uniques.int.i.insert(pairs).transact
         c1 <- query("", -2).get.map { case (List(`d`, `e`), cursor, true) => cursor }
         c2 <- query(c1, -2).get.map { case (List(`b`, `c`), cursor, true) => cursor }
         c3 <- query(c2, -2).get.map { case (List(`a`), cursor, false) => cursor }
@@ -102,9 +102,9 @@ trait DirectionsUniqueStandard extends CoreTestSuite with ApiAsyncImplicits { se
     "Backwards, asc desc" - unique { implicit conn =>
       val pairs               = (1 to 5).toList.map((_, scala.util.Random.nextInt(3) + 1))
       val List(a, b, c, d, e) = pairs.sortBy(p => (-p._2, p._1))
-      val query               = (cursor: String, limit: Int) => Unique.int.a2.i.d1.query.from(cursor).limit(limit)
+      val query               = (cursor: String, limit: Int) => Uniques.int.a2.i.d1.query.from(cursor).limit(limit)
       for {
-        _ <- Unique.int.i.insert(pairs).transact
+        _ <- Uniques.int.i.insert(pairs).transact
         c1 <- query("", -2).get.map { case (List(`d`, `e`), cursor, true) => cursor }
         c2 <- query(c1, -2).get.map { case (List(`b`, `c`), cursor, true) => cursor }
         c3 <- query(c2, -2).get.map { case (List(`a`), cursor, false) => cursor }
@@ -116,9 +116,9 @@ trait DirectionsUniqueStandard extends CoreTestSuite with ApiAsyncImplicits { se
     "Backwards, desc desc" - unique { implicit conn =>
       val pairs               = (1 to 5).toList.map((_, scala.util.Random.nextInt(3) + 1))
       val List(a, b, c, d, e) = pairs.sortBy(p => (-p._2, -p._1))
-      val query               = (cursor: String, limit: Int) => Unique.int.d2.i.d1.query.from(cursor).limit(limit)
+      val query               = (cursor: String, limit: Int) => Uniques.int.d2.i.d1.query.from(cursor).limit(limit)
       for {
-        _ <- Unique.int.i.insert(pairs).transact
+        _ <- Uniques.int.i.insert(pairs).transact
         c1 <- query("", -2).get.map { case (List(`d`, `e`), cursor, true) => cursor }
         c2 <- query(c1, -2).get.map { case (List(`b`, `c`), cursor, true) => cursor }
         c3 <- query(c2, -2).get.map { case (List(`a`), cursor, false) => cursor }
