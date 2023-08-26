@@ -94,7 +94,7 @@ trait DatomicSpiSync
   // Util
 
   private def printInspectQuery(label: String, elements: List[Element]): Unit = {
-    val queries = new DatomicModel2Query(elements).getQueries(true)._3
+    val queries = new DatomicModel2Query(elements).getDatomicQueries(true)._3
     printInspect(label, elements, queries)
     //    printInspect(label, elements)
   }

@@ -24,7 +24,7 @@ class ResolveDelete { self: DeleteOps =>
             s"Generic attributes not allowed in delete molecule. Found:\n" + a)
 
           case _: AttrOneTac =>
-            addFilterElements(Seq(element))
+            addFilterElement(element)
             resolve(tail, topLevel)
 
           case _ => throw ModelError(
@@ -32,21 +32,11 @@ class ResolveDelete { self: DeleteOps =>
           )
         }
 
-        case _: Nested      => throw ModelError(s"Nested data structure not allowed in delete molecule.")
-        case _: NestedOpt   => throw ModelError(s"Optional nested data structure not allowed in delete molecule.")
-        case r: Ref         => addFilterElements(Seq(r)); resolve(tail, false)
-        case b: BackRef     => addFilterElements(Seq(b)); resolve(tail, false)
-        case Composite(es)  => resolveSubElements(es, topLevel); resolve(tail, false)
-        case TxMetaData(es) => resolveSubElements(es, false); resolve(tail, false)
+        case _: Nested    => throw ModelError(s"Nested data structure not allowed in delete molecule.")
+        case _: NestedOpt => throw ModelError(s"Optional nested data structure not allowed in delete molecule.")
+        case _            => addFilterElement(element); resolve(tail, false)
       }
       case Nil             => ()
     }
-  }
-
-  private def resolveSubElements(
-    elements: List[Element],
-    topLevel: Boolean
-  ): Unit = {
-    resolve(elements, topLevel)
   }
 }

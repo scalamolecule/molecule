@@ -30,10 +30,7 @@ trait Data_Delete
     resolve(elements, true)
 
     val (filterQuery, inputs) = if (ids.isEmpty && filterElements.nonEmpty) {
-
-      // todo
-      val filterElements1 = AttrOneManLong("TODO", "id", V) +: filterElements
-
+      val filterElements1 = AttrOneManLong("DummyNs", "id", V) +: filterElements
       val (query, inputs) = new DatomicModel2Query[Any](filterElements1).getIdQueryWithInputs
       (Some(query), inputs)
     } else {
@@ -92,7 +89,7 @@ trait Data_Delete
     ids = ids ++ ids1.asInstanceOf[Seq[AnyRef]]
   }
 
-  override def addFilterElements(elements: Seq[Element]): Unit = {
-    filterElements = filterElements ++ elements
+  override def addFilterElement(element: Element): Unit = {
+    filterElements = filterElements :+ element
   }
 }

@@ -6,5 +6,5 @@ trait DeleteOps {
 
   protected def addIds[T](ids: Seq[T]): Unit
 
-  protected def addFilterElements(elements: Seq[Element]): Unit
+  protected def addFilterElement(element: Element): Unit
 }

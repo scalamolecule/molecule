@@ -26,7 +26,7 @@ class SqlModel2Query[Tpl](elements0: List[Element])
     with ModelUtils
     with MoleculeLogging {
 
-  final def getQuery(altElements: List[Element] = Nil): String = {
+  final def getSqlQuery(altElements: List[Element] = Nil): String = {
     val elements = if (altElements.isEmpty) elements0 else altElements
     validateQueryModel(elements)
     //    elements.foreach(println)
@@ -39,10 +39,10 @@ class SqlModel2Query[Tpl](elements0: List[Element])
 
     // Recursively resolve molecule elements
     resolve(elements1)
-    renderQuery
+    renderSqlQuery
   }
 
-  final private def renderQuery: String = {
+  final private def renderSqlQuery: String = {
     val distinct_ = if (distinct) " DISTINCT" else ""
     val select_   = (nestedIds ++ select).mkString(s",\n  ")
 

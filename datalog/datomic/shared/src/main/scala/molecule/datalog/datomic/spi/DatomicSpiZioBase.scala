@@ -19,7 +19,7 @@ trait DatomicSpiZioBase extends PrintInspect {
     label: String,
     elements: List[Element]
   ): ZIO[Conn, MoleculeError, Unit] = ZIO.succeed {
-    val queries = new DatomicModel2Query(elements).getQueries(true)._3
+    val queries = new DatomicModel2Query(elements).getDatomicQueries(true)._3
     printInspect(label, Nil, queries)
   }
 }

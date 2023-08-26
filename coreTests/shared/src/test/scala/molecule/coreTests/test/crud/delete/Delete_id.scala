@@ -290,32 +290,73 @@ trait Delete_id extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync =>
 
 
     "Composite" - refs { implicit conn =>
-      for {
-        List(e1, e2, _) <- (A.i + B.i).insert(
-          (1, 10),
-          (2, 20),
-          (3, 30),
-        ).transact.map(_.ids)
+      // A Datomic composite is one entity while a Sql composite is an entity
+      // for each composite group. So we get different number of generated ids back:
+      if (platform.startsWith("Datomic")) {
+        for {
+          // 3 entities in Datomic
+          List(e1, e2, e3) <- (A.i + B.i).insert(
+            (1, 10),
+            (2, 20),
+            (3, 30),
+          ).transact.map(_.ids)
 
-        // 3 composite entities, each with 2 attributes from 2 namespaces
-        _ <- (A.i.a1 + B.i).query.get.map(_ ==> List(
-          (1, 10),
-          (2, 20),
-          (3, 30),
-        ))
-        // 3 composite sub-groups
-        _ <- B.i.a1.query.get.map(_ ==> List(10, 20, 30))
+          // 3 composite entities, each with 2 attributes from 2 namespaces
+          _ <- (A.i.a1 + B.i).query.get.map(_ ==> List(
+            (1, 10),
+            (2, 20),
+            (3, 30),
+          ))
+          // 3 composite sub-groups
+          _ <- B.i.a1.query.get.map(_ ==> List(10, 20, 30))
 
-        // Delete entity using namespace of first group
-        _ <- A(e1).delete.transact
-        // Delete entity using namespace of second group
-        _ <- B(e2).delete.transact
+          // Delete entity using namespace of first group
+          _ <- A(e1).delete.transact
+          // Delete entity using namespace of second group
+          _ <- B(e2).delete.transact
 
-        // 1 composite entity with 2 attributes from 2 namespaces left
-        _ <- (A.i + B.i).query.get.map(_ ==> List((3, 30)))
-        _ <- B.i.query.get.map(_ ==> List(30))
+          // 1 composite entity with 2 attributes from 2 namespaces left
+          _ <- (A.i + B.i).query.get.map(_ ==> List((3, 30)))
 
-      } yield ()
+          // First and second row are deleted for both ns A and B
+          _ <- A.i.query.get.map(_ ==> List(3))
+          _ <- B.i.query.get.map(_ ==> List(30))
+        } yield ()
+
+      } else {
+        for {
+          // In sql:
+          // 3 entities for A
+          // 3 entities for B
+          List(a1, a2, a3, b1, b2, b3) <- (A.i + B.i).insert(
+            (1, 10),
+            (2, 20),
+            (3, 30),
+          ).transact.map(_.ids)
+
+          // 3 composite entities, each with 2 attributes from 2 namespaces
+          _ <- (A.i.a1 + B.i).query.get.map(_ ==> List(
+            (1, 10),
+            (2, 20),
+            (3, 30),
+          ))
+          // 3 composite sub-groups
+          _ <- B.i.a1.query.get.map(_ ==> List(10, 20, 30))
+
+          // Delete entity using namespace of first group
+          _ <- A(a1).delete.transact
+          // Delete entity using namespace of second group
+          _ <- B(b2).delete.transact
+
+          // 1 composite entity with 2 attributes from 2 namespaces left
+          _ <- (A.i + B.i).query.get.map(_ ==> List((3, 30)))
+
+          // First row is deleted for ns A
+          // Second row is deleted for ns B
+          _ <- A.i.query.get.map(_ ==> List(2, 3))
+          _ <- B.i.query.get.map(_ ==> List(10, 30))
+        } yield ()
+      }
     }
 
 

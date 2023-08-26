@@ -31,7 +31,7 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
 
   // Some specialized expressions require a pre-query to extract entity ids for the main query
   // Returns (preQuery, mainQuery, query string for inspection)
-  final def getQueries(
+  final def getDatomicQueries(
     optimized: Boolean,
     altElements: List[Element] = Nil
   ): (String, String, String) = {
@@ -142,7 +142,7 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
   }
 
   final def getIdQueryWithInputs: (Att, Seq[AnyRef]) = {
-    (getQueries(false)._2, inputs)
+    (getDatomicQueries(false)._2, inputs)
   }
 
   final private def renderQuery(

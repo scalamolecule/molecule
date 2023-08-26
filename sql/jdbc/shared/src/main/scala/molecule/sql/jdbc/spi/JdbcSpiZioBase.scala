@@ -19,7 +19,7 @@ trait JdbcSpiZioBase extends PrintInspect { self: SpiZio =>
     label: String,
     elements: List[Element]
   ): ZIO[Conn, MoleculeError, Unit] = ZIO.succeed {
-    val queries = new SqlModel2Query(elements).getQuery(Nil) //._3
+    val queries = new SqlModel2Query(elements).getSqlQuery(Nil) //._3
     printInspect(label, Nil, queries)
   }
 }

@@ -301,7 +301,6 @@ trait JdbcBase_JVM extends JdbcDataType_JVM with ModelUtils {
         ps.setLong(3, initialId) // All composite groups relate to initial namespace id
         ps.setLong(4, compositeId)
         ps.addBatch()
-
       }
       addColSetter(compositeJoinPath, compositeJoinSetter)
     }

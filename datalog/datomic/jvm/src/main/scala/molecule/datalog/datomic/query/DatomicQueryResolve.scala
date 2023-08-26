@@ -59,7 +59,7 @@ abstract class DatomicQueryResolve[Tpl](elements: List[Element], dbView: Option[
     altDb: Option[datomic.Database] = None
   ): jCollection[jList[AnyRef]] = {
     val db = altDb.getOrElse(getDb(conn))
-    getQueries(conn.optimizeQuery, altElements) match {
+    getDatomicQueries(conn.optimizeQuery, altElements) match {
       case ("", query, _)       =>
         distinct(Peer.q(query, db +: inputs: _*))
       case (preQuery, query, _) =>

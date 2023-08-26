@@ -54,7 +54,7 @@ abstract class JdbcQueryResolve[Tpl](elements: List[Element], dbView: Option[DbV
   }
 
   protected def getRawData2(conn: JdbcConn_jvm): ResultSet = {
-    val stmt = getQuery(Nil)
+    val stmt = getSqlQuery(Nil)
 
     //    println("--------------------------------------------------------------\n" + stmt)
 
@@ -70,7 +70,7 @@ abstract class JdbcQueryResolve[Tpl](elements: List[Element], dbView: Option[DbV
   ): jCollection[jList[AnyRef]] = {
     //    isFree = conn.isFreeVersion
     //    val db = altDb.getOrElse(getDb(conn))
-    val query = getQuery(altElements)
+    val query = getSqlQuery(altElements)
 
 
     ???
