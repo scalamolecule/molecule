@@ -84,6 +84,9 @@ case class JdbcQueryResolveOffset[Tpl](
       ////            offsetRaw(sortedRows, fromUntil).forEach(row => tuples += row2tpl(row).asInstanceOf[Tpl])
       ////            (tuples.result(), totalCount, hasMore)
       //          }
+
+
+      postAdjustAritiess()
       val row2tpl = castRow2AnyTpl(aritiess.head, castss.head, 1, None)
       val tuples  = ListBuffer.empty[Tpl]
       while (sortedRows.next()) {

@@ -12,12 +12,12 @@ object _CastNestedOptLeaf extends DatomicGenBase("CastNestedOptLeaf", "/query/ca
        |
        |import java.util.{Collections, Comparator, ArrayList => jArrayList, Iterator => jIterator, List => jList, Map => jMap}
        |import molecule.core.query.Model2Query
-       |import molecule.datomic.query.Base
+       |import molecule.datomic.query.DatomicQueryBase
        |import scala.annotation.tailrec
        |
        |
        |trait $fileName_[Tpl]
-       |  extends CastRow2Tpl_ with CastIt2Tpl_ { self: Model2Query with Base =>
+       |  extends CastRow2Tpl_ with CastIt2Tpl_ { self: Model2Query with DatomicQueryBase =>
        |
        |  @tailrec
        |  final private def resolveArities(
@@ -58,10 +58,12 @@ object _CastNestedOptLeaf extends DatomicGenBase("CastNestedOptLeaf", "/query/ca
        |            override def compare(a: Row, b: Row): Int = {
        |              var i      = 0
        |              var result = 0
-       |              do {
+       |              result = pullSorts(i)(0)(a, b)
+       |              i += 1
+       |              while (result == 0 && i != n) {
        |                result = pullSorts(i)(0)(a, b)
        |                i += 1
-       |              } while (result == 0 && i != n)
+       |              }
        |              result
        |            }
        |          }

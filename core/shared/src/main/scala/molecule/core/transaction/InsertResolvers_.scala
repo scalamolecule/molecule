@@ -10,17 +10,17 @@ trait InsertResolvers_ {
     nsMap: Map[String, MetaNs],
     elements: List[Element],
     resolvers: List[Product => Unit],
-    tpl: Int,
+    outerTplIndex: Int,
     tplIndex: Int
   ): List[Product => Unit]
 
   def getResolver(
     nsMap: Map[String, MetaNs],
     elements: List[Element],
-    outerTpl: Int = 0
+    outerTplIndex: Int = 0
   ): Product => Unit = {
     val resolvers: List[Product => Unit] =
-      resolve(nsMap, elements, Nil, outerTpl, 0)
+      resolve(nsMap, elements, Nil, outerTplIndex, 0)
 
     resolvers.length match {
       case 1 => resolve1(resolvers)

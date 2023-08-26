@@ -13,30 +13,6 @@ trait SaveComposite extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsyn
 
   override lazy val tests = Tests {
 
-    "Card one" - refs { implicit conn =>
-      for {
-        _ <- A.i(1).B.i(2).save.transact
-        _ <- A.i.B.i.query.get.map(_ ==> List((1, 2)))
-      } yield ()
-    }
-
-
-    "Card many" - refs { implicit conn =>
-      for {
-        _ <- A.i(1).Bb.i(2).save.transact
-        _ <- A.i.Bb.i.query.get.map(_ ==> List((1, 2)))
-      } yield ()
-    }
-
-
-    "Backref" - refs { implicit conn =>
-      for {
-        _ <- A.i(1).Bb.i(2)._A.s("a").save.transact
-        _ <- A.i.Bb.i._A.s.query.get.map(_ ==> List((1, 2, "a")))
-      } yield ()
-    }
-
-
     "Composite" - refs { implicit conn =>
       for {
         _ <- (A.i(1) + C.i(2)).save.transact

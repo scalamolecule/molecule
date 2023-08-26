@@ -5,7 +5,7 @@ import java.sql.{ResultSet => RS}
 import java.util.{Date, UUID}
 import molecule.core.util.JavaConversions
 
-trait LambdasSet extends ResolveBase with JavaConversions { self: Base =>
+trait LambdasSet extends ResolveBase with JavaConversions { self: SqlQueryBase =>
 
   protected lazy val sql2setString    : (Row, Int) => Set[String]     = (row: Row, n: Int) => sqlArray2set(row, n, valueString)
   protected lazy val sql2setInt       : (Row, Int) => Set[Int]        = (row: Row, n: Int) => sqlArray2set(row, n, valueInt)

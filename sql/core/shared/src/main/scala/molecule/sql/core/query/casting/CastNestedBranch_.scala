@@ -2,16 +2,15 @@
 package molecule.sql.core.query.casting
 
 import molecule.core.query.Model2Query
-import molecule.sql.core.query.Base
+import molecule.sql.core.query.SqlQueryBase
 import scala.annotation.tailrec
 
 
-trait CastNestedBranch_ extends CastRow2Tpl_ { self: Model2Query with Base =>
+trait CastNestedBranch_ extends CastRow2Tpl_ { self: Model2Query with SqlQueryBase =>
 
-@tailrec
+  @tailrec
   final private def resolveArities(
     arities: List[List[Int]],
-//    casts: List[(Row, AttrIndex) => AnyRef],
     casts: List[(Row, AttrIndex) => Any],
     attrIndex: AttrIndex,
     attrIndexTx: AttrIndex,
@@ -54,7 +53,6 @@ trait CastNestedBranch_ extends CastRow2Tpl_ { self: Model2Query with Base =>
 
   final protected def castBranch[T](
     arities: List[List[Int]],
-//    casts: List[(Row, AttrIndex) => AnyRef],
     casts: List[(Row, AttrIndex) => Any],
     firstAttrIndex: AttrIndex,
     firstAttrIndexTx: AttrIndex

@@ -9,20 +9,16 @@ import scala.collection.mutable.ListBuffer
 
 class ResolveInsert extends InsertResolvers_ with InsertValidators_ { self: InsertOps =>
 
-  private var curElements: List[Element]      = List.empty[Element]
-  private val prevRefs   : ListBuffer[AnyRef] = ListBuffer.empty[AnyRef]
+  private val prevRefs: ListBuffer[AnyRef] = ListBuffer.empty[AnyRef]
 
   @tailrec
   final override def resolve(
     nsMap: Map[String, MetaNs],
     elements: List[Element],
     resolvers: List[Product => Unit],
-    outerTpl: Int,
+    outerTplIndex: Int,
     tplIndex: Int
   ): List[Product => Unit] = {
-    if (resolvers.isEmpty) {
-      curElements = elements
-    }
     elements match {
       case element :: tail => element match {
         case a: Attr =>
@@ -32,11 +28,13 @@ class ResolveInsert extends InsertResolvers_ with InsertValidators_ { self: Inse
           a match {
             case a: AttrOne =>
               a match {
-                case a: AttrOneMan => resolve(nsMap, tail, resolvers :+
-                  resolveAttrOneMan(a, tplIndex), outerTpl, tplIndex + 1)
+                case a: AttrOneMan =>
+                  val attrOneManResolver = resolveAttrOneMan(a, tplIndex)
+                  resolve(nsMap, tail, resolvers :+ attrOneManResolver, outerTplIndex, tplIndex + 1)
 
-                case a: AttrOneOpt => resolve(nsMap, tail, resolvers :+
-                  resolveAttrOneOpt(a, tplIndex), outerTpl, tplIndex + 1)
+                case a: AttrOneOpt =>
+                  val attrOneOptResolver = resolveAttrOneOpt(a, tplIndex)
+                  resolve(nsMap, tail, resolvers :+ attrOneOptResolver, outerTplIndex, tplIndex + 1)
 
                 case a: AttrOneTac => throw new Exception(
                   "Can't use tacit attributes in insert molecule (except in tx meta data part). Found: " + a
@@ -45,11 +43,12 @@ class ResolveInsert extends InsertResolvers_ with InsertValidators_ { self: Inse
             case a: AttrSet =>
               a match {
                 case a: AttrSetMan =>
-                  resolve(nsMap, tail, resolvers :+
-                    resolveAttrSetMan(a, tplIndex), outerTpl, tplIndex + 1)
+                  val attrsSetManResolver = resolveAttrSetMan(a, tplIndex)
+                  resolve(nsMap, tail, resolvers :+ attrsSetManResolver, outerTplIndex, tplIndex + 1)
 
-                case a: AttrSetOpt => resolve(nsMap, tail, resolvers :+
-                  resolveAttrSetOpt(a, tplIndex), outerTpl, tplIndex + 1)
+                case a: AttrSetOpt =>
+                  val attrSetOptResolver = resolveAttrSetOpt(a, tplIndex)
+                  resolve(nsMap, tail, resolvers :+ attrSetOptResolver, outerTplIndex, tplIndex + 1)
 
                 case a: AttrSetTac => throw new Exception(
                   "Can't use tacit attributes in insert molecule (except in tx meta data part). Found: " + a
@@ -59,7 +58,8 @@ class ResolveInsert extends InsertResolvers_ with InsertValidators_ { self: Inse
 
         case Ref(ns, refAttr, refNs, card, _) =>
           prevRefs += refAttr
-          resolve(nsMap, tail, resolvers :+ addRef(ns, refAttr, refNs, card), outerTpl, tplIndex)
+          val refResolver = addRef(ns, refAttr, refNs, card)
+          resolve(nsMap, tail, resolvers :+ refResolver, outerTplIndex, tplIndex)
 
         case BackRef(backRefNs, _) =>
           tail.head match {
@@ -68,24 +68,22 @@ class ResolveInsert extends InsertResolvers_ with InsertValidators_ { self: Inse
             )
             case _                                                      => // ok
           }
-          resolve(nsMap, tail, resolvers :+ addBackRef(backRefNs), outerTpl, tplIndex)
+          val backRefResolver = addBackRef(backRefNs)
+          resolve(nsMap, tail, resolvers :+ backRefResolver, outerTplIndex, tplIndex)
 
         case Composite(compositeElements) =>
-          curElements = compositeElements
-          resolve(nsMap, tail, resolvers :+
-            addComposite(nsMap, outerTpl, tplIndex, compositeElements), outerTpl + 1, tplIndex + 1)
+          val compositeResolver = addComposite(nsMap, outerTplIndex, tplIndex, compositeElements)
+          resolve(nsMap, tail, resolvers :+ compositeResolver, outerTplIndex + 1, tplIndex + 1)
 
         case Nested(Ref(ns, refAttr, refNs, _, _), nestedElements) =>
-          curElements = nestedElements
           prevRefs.clear()
-          resolve(nsMap, tail, resolvers :+
-            addNested(nsMap, tplIndex, ns, refAttr, refNs, nestedElements), 0, tplIndex)
+          val nestedResolver = addNested(nsMap, tplIndex, ns, refAttr, refNs, nestedElements)
+          resolve(nsMap, tail, resolvers :+ nestedResolver, 0, tplIndex)
 
         case NestedOpt(Ref(ns, refAttr, refNs, _, _), nestedElements) =>
-          curElements = nestedElements
           prevRefs.clear()
-          resolve(nsMap, tail, resolvers :+
-            addNested(nsMap, tplIndex, ns, refAttr, refNs, nestedElements), 0, tplIndex)
+          val optNestedResolver = addNested(nsMap, tplIndex, ns, refAttr, refNs, nestedElements)
+          resolve(nsMap, tail, resolvers :+ optNestedResolver, 0, tplIndex)
 
         // TxMetaData is handled separately in Insert_stmts with call to save_stmts
 

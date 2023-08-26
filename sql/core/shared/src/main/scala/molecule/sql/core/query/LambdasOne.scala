@@ -3,7 +3,7 @@ package molecule.sql.core.query
 import java.net.URI
 import java.util.{Date, UUID}
 
-trait LambdasOne extends ResolveBase { self: Base =>
+trait LambdasOne extends ResolveBase { self: SqlQueryBase =>
 
   protected lazy val sql2oneString    : (Row, Int) => String     = (row: Row, n: Int) => row.getString(n)
   protected lazy val sql2oneInt       : (Row, Int) => Int        = (row: Row, n: Int) => row.getInt(n)

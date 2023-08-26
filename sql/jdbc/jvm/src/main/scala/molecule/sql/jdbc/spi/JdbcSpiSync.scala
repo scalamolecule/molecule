@@ -17,7 +17,7 @@ import molecule.sql.jdbc.query.{JdbcQueryResolveCursor, JdbcQueryResolveOffset}
 import molecule.sql.jdbc.subscription.SubscriptionStarter
 import molecule.sql.jdbc.transaction._
 import scala.collection.mutable.ListBuffer
-import scala.concurrent.Future
+import scala.util.control.NonFatal
 
 object JdbcSpiSync extends JdbcSpiSync
 
@@ -64,6 +64,13 @@ trait JdbcSpiSync
     printInspectQuery("QUERY (cursor)", q.elements)
   }
 
+  private def printInspectQuery(label: String, elements: List[Element]): Unit = {
+    tryInspect("query", elements) {
+      val queries = new SqlModel2Query(elements).getQuery(Nil) //._3
+      printInspect(label, elements, queries)
+    }
+  }
+
 
   // Save --------------------------------------------------------
 
@@ -77,8 +84,11 @@ trait JdbcSpiSync
     }
   }
 
+
   override def save_inspect(save: Save)(implicit conn: Conn): Unit = {
-    printInspectTx("SAVE", save.elements, save_getData(save, conn.asInstanceOf[JdbcConn_jvm]))
+    tryInspect("save", save.elements) {
+      printInspectTx("SAVE", save.elements, save_getData(save, conn.asInstanceOf[JdbcConn_jvm]))
+    }
   }
 
   private def save_getData(save: Save, conn: JdbcConn_jvm): Data = {
@@ -105,8 +115,10 @@ trait JdbcSpiSync
     }
   }
   override def insert_inspect(insert: Insert)(implicit conn: Conn): Unit = {
-    val jdbcConn = conn.asInstanceOf[JdbcConn_jvm]
-    printInspectTx("INSERT", insert.elements, insert_getData(insert, jdbcConn))
+    tryInspect("insert", insert.elements) {
+      val jdbcConn = conn.asInstanceOf[JdbcConn_jvm]
+      printInspectTx("INSERT", insert.elements, insert_getData(insert, jdbcConn))
+    }
   }
 
   private def insert_getData(insert: Insert, conn: JdbcConn_jvm): Data = {
@@ -138,28 +150,30 @@ trait JdbcSpiSync
   }
 
   override def update_inspect(update: Update)(implicit conn0: Conn): Unit = {
-    val conn = conn0.asInstanceOf[JdbcConn_jvm]
-    if (isRefUpdate(update.elements)) {
-      val (idsModel, updateModels) = prepareMultipleUpdates(update.elements, update.isUpsert)
-      val refIds                   =
-        s"""REF IDS MODEL ----------------
-           |${idsModel.mkString("\n")}
-           |
-           |${new SqlModel2Query(idsModel).getQuery(Nil)}
-           |""".stripMargin
-      val updates                  =
-        updateModels
-          .map(_(42))
-          .map { m =>
-            val elements = m.mkString("\n")
-            val tables   = update_getData(conn, m, update.isUpsert)._1
-            tables.headOption.fold(elements)(table => elements + "\n" + table.stmt)
-          }
-          .mkString("UPDATES ----------------------\n", "\n------------\n", "")
+    tryInspect("update", update.elements) {
+      val conn = conn0.asInstanceOf[JdbcConn_jvm]
+      if (isRefUpdate(update.elements)) {
+        val (idsModel, updateModels) = prepareMultipleUpdates(update.elements, update.isUpsert)
+        val refIds                   =
+          s"""REF IDS MODEL ----------------
+             |${idsModel.mkString("\n")}
+             |
+             |${new SqlModel2Query(idsModel).getQuery(Nil)}
+             |""".stripMargin
+        val updates                  =
+          updateModels
+            .map(_(42))
+            .map { m =>
+              val elements = m.mkString("\n")
+              val tables   = update_getData(conn, m, update.isUpsert)._1
+              tables.headOption.fold(elements)(table => elements + "\n" + table.stmt)
+            }
+            .mkString("UPDATES ----------------------\n", "\n------------\n", "")
 
-      printInspect("UPDATE", update.elements, refIds + "\n" + updates)
-    } else {
-      printInspectTx("UPDATE", update.elements, update_getData(conn, update))
+        printInspect("UPDATE", update.elements, refIds + "\n" + updates)
+      } else {
+        printInspectTx("UPDATE", update.elements, update_getData(conn, update))
+      }
     }
   }
 
@@ -188,7 +202,9 @@ trait JdbcSpiSync
   }
 
   override def delete_inspect(delete: Delete)(implicit conn0: Conn): Unit = {
-    printInspectTx("DELETE", delete.elements, delete_getData(conn0.asInstanceOf[JdbcConn_jvm], delete))
+    tryInspect("delete", delete.elements) {
+      printInspectTx("DELETE", delete.elements, delete_getData(conn0.asInstanceOf[JdbcConn_jvm], delete))
+    }
   }
 
   private def delete_getData(conn: JdbcConn_jvm, delete: Delete): Data = {
@@ -200,14 +216,18 @@ trait JdbcSpiSync
 
   // Inspect --------------------------------------------------------
 
-  private def printInspectQuery(label: String, elements: List[Element]): Unit = {
-    val queries = new SqlModel2Query(elements).getQuery(Nil) //._3
-    printInspect(label, elements, queries)
+  private def tryInspect(action: String, elements: List[Element])(body: => Unit): Unit = try {
+    body
+  } catch {
+    case NonFatal(e) =>
+      println(s"\n------------------ Error inspecting $action -----------------------")
+      elements.foreach(println)
+      throw e
   }
 
   private def printInspectTx(label: String, elements: List[Element], data: Data): Unit = {
     val (tables, joinTables) = data
-    val tableStmts           = tables.map(_.stmt).mkString("\n--------\n")
+    val tableStmts           = tables.reverse.map(_.stmt).mkString("\n--------\n")
     val joinTableStmts       = if (joinTables.isEmpty) {
       ""
     } else {

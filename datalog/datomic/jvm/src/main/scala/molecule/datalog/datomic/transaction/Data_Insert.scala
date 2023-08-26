@@ -174,12 +174,12 @@ trait Data_Insert
 
   override protected def addComposite(
     nsMap: Map[String, MetaNs],
-    outerTpl: Int,
+    outerTplIndex: Int,
     tplIndex: Int,
     compositeElements: List[Element]
   ): Product => Unit = {
     hasComposites = true
-    val composite2stmts = getResolver(nsMap, compositeElements, outerTpl)
+    val composite2stmts = getResolver(nsMap, compositeElements, outerTplIndex)
     // Start from initial entity id for each composite sub group
     countValueAttrs(compositeElements) match {
       case 1 => (tpl: Product) =>

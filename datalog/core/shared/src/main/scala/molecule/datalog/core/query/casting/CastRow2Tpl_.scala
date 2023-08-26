@@ -2,11 +2,11 @@
 package molecule.datalog.core.query.casting
 
 import molecule.core.query.Model2Query
-import molecule.datalog.core.query.Base
+import molecule.datalog.core.query.DatomicQueryBase
 import scala.annotation.tailrec
 
 
-trait CastRow2Tpl_ { self: Model2Query with Base =>
+trait CastRow2Tpl_ { self: Model2Query with DatomicQueryBase =>
 
   @tailrec
   final private def resolveArities(

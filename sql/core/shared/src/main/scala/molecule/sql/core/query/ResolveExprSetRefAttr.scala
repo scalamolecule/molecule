@@ -56,7 +56,7 @@ trait ResolveExprSetRefAttr[Tpl] { self: SqlModel2Query[Tpl] with LambdasSet =>
 
   private def man[T: ClassTag](attr: Attr, args: Seq[Set[T]], res: ResSet[T]): Unit = {
     select += s"ARRAY_AGG($joinTable.$ref_id) $refIds"
-    joins += (("INNER JOIN", joinTable, "", nsId, s"$joinTable.$ns_id"))
+    joins += (("INNER JOIN", joinTable, "", s"$nsId = $joinTable.$ns_id"))
     groupBy += nsId
 
     if (isNestedOpt) {
@@ -80,7 +80,7 @@ trait ResolveExprSetRefAttr[Tpl] { self: SqlModel2Query[Tpl] with LambdasSet =>
 
   private def tac[T: ClassTag](attr: Attr, args: Seq[Set[T]], res: ResSet[T]): Unit = {
     val col = getCol(attr: Attr)
-    joins += (("INNER JOIN", joinTable, "", nsId, s"$joinTable.$ns_id"))
+    joins += (("INNER JOIN", joinTable, "", s"$nsId = $joinTable.$ns_id"))
     groupBy += nsId
     attr.filterAttr.fold {
       expr(col, attr.op, args, res)
@@ -95,7 +95,7 @@ trait ResolveExprSetRefAttr[Tpl] { self: SqlModel2Query[Tpl] with LambdasSet =>
   private def opt[T: ClassTag](attr: Attr, optSets: Option[Seq[Set[T]]], resOpt: ResSetOpt[T]): Unit = {
     val col = getCol(attr: Attr)
     select += s"ARRAY_AGG($joinTable.$ref_id) $refIds"
-    joins += (("LEFT JOIN", joinTable, "", nsId, s"$joinTable.$ns_id"))
+    joins += (("LEFT JOIN", joinTable, "", s"$nsId = $joinTable.$ns_id"))
     groupBy += nsId
 
     addCast(resOpt.sql2setOpt)

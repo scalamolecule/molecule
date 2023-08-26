@@ -54,7 +54,7 @@ trait InsertOps {
 
   protected def addComposite(
     nsMap: Map[String, MetaNs],
-    outerTpl: Int,
+    outerTplIndex: Int,
     tplIndex: Int,
     elements: List[Element]
   ): Product => Unit

@@ -1,9 +1,6 @@
 package molecule.datalog.datomic.test
 
-import molecule.base.error.ModelError
 import molecule.core.util.Executor._
-import molecule.coreTests.dataModels.core.dsl.Refs.{A, B, D}
-import molecule.coreTests.dataModels.core.dsl.Types.Ns
 import molecule.datalog.datomic.async._
 import molecule.datalog.datomic.setup.DatomicTestSuite
 import utest._
@@ -153,9 +150,11 @@ object AdhocDatomicJVM extends DatomicTestSuite {
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
-        id <- A.i(1).B.i(2).C.i(3).save.transact.map(_.id)
-        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
+//        id <- A.i(1).B.i(2).C.i(3).save.transact.map(_.id)
+//        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
 
+        _ <- (D.i + A.i.B.i).insert(0, (1, 2)).transact
+        _ <- (D.i + A.B.i_).query.get.map(_ ==> List(0))
 
       } yield ()
     }

@@ -43,9 +43,9 @@ class ResolveSave(isTxMetaData: Boolean = false)
         case _: NestedOpt                     => throw ModelError(
           "Optional nested data structure not allowed in save molecule. Please use insert instead."
         )
+
         case Composite(compositeElements)     =>
-          // Start from initial entity id for each composite sub group
-          handleComposite(isTxMetaData)
+          handleComposite(isTxMetaData, getInitialNs(compositeElements))
           resolve(compositeElements ++ tail)
 
         case TxMetaData(txElements) =>

@@ -11,16 +11,16 @@ object _CastNestedBranch extends SqlGenBase("CastNestedBranch", "/query/casting"
        |package molecule.sql.core.query.casting
        |
        |import molecule.core.query.Model2Query
-       |import molecule.sql.core.query.Base
+       |import molecule.sql.core.query.SqlQueryBase
        |import scala.annotation.tailrec
        |
        |
-       |trait $fileName_ extends CastRow2Tpl_ { self: Model2Query with Base =>
+       |trait $fileName_ extends CastRow2Tpl_ { self: Model2Query with SqlQueryBase =>
        |
-       |@tailrec
+       |  @tailrec
        |  final private def resolveArities(
        |    arities: List[List[Int]],
-       |    casts: List[(Row, AttrIndex) => AnyRef],
+       |    casts: List[(Row, AttrIndex) => Any],
        |    attrIndex: AttrIndex,
        |    attrIndexTx: AttrIndex,
        |    acc: List[(Row, AttrIndex, NestedTpls) => Any]
@@ -62,7 +62,7 @@ object _CastNestedBranch extends SqlGenBase("CastNestedBranch", "/query/casting"
        |
        |  final protected def castBranch[T](
        |    arities: List[List[Int]],
-       |    casts: List[(Row, AttrIndex) => AnyRef],
+       |    casts: List[(Row, AttrIndex) => Any],
        |    firstAttrIndex: AttrIndex,
        |    firstAttrIndexTx: AttrIndex
        |  ): (Row, NestedTpls) => T = {

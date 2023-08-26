@@ -2,16 +2,15 @@
 package molecule.sql.core.query.casting
 
 import molecule.core.query.Model2Query
-import molecule.sql.core.query.Base
+import molecule.sql.core.query.SqlQueryBase
 import scala.annotation.tailrec
 
 
-trait CastRow2Tpl_ { self: Model2Query with Base =>
+trait CastRow2Tpl_ { self: Model2Query with SqlQueryBase =>
 
   @tailrec
   final private def resolveArities(
     arities: List[List[Int]],
-//    casts: List[(Row, AttrIndex) => AnyRef],
     casts: List[(Row, AttrIndex) => Any],
     attrIndex: AttrIndex,
     acc: List[(Row, AttrIndex) => Any],
@@ -19,22 +18,20 @@ trait CastRow2Tpl_ { self: Model2Query with Base =>
   ): List[(Row, AttrIndex) => Any] = {
     arities match {
       case List(1) :: as =>
-        val cast = (row: Row, attrIndex1: AttrIndex) => casts.head(row, attrIndex1)
+        val cast = (row: Row, _: AttrIndex) => casts.head(row, attrIndex)
         resolveArities(as, casts.tail, attrIndex + 1, acc :+ cast, nested)
 
       // Nested
       case List(-1) :: Nil =>
-        //        println(isNestedOpt)
         val cast = (_: Row, _: AttrIndex) => nested.getOrElse(List.empty[Any])
-        //        val cast = (_: Row, _: AttrIndex) => nested.get
         resolveArities(Nil, casts, 0, acc :+ cast, None)
 
       // Composite
       case ii :: as =>
-        val n                                = ii.length
-        val (tplCasts, moreCasts)            = casts.splitAt(n)
-        //        val cast: (Row, AttrIndex) => AnyRef = castRow2AnyTpl(ii.map(List(_)), tplCasts, attrIndex, nested)
-        val cast: (Row, AttrIndex) => AnyRef = ???
+        val n                     = ii.length
+        val (tplCasts, moreCasts) = casts.splitAt(n)
+        val cast                  = (row: Row, _: AttrIndex) =>
+          castRow2AnyTpl(ii.map(List(_)), tplCasts, attrIndex, nested)(row)
         resolveArities(as, moreCasts, attrIndex + n, acc :+ cast, nested)
 
       case Nil => acc
@@ -43,14 +40,10 @@ trait CastRow2Tpl_ { self: Model2Query with Base =>
 
   final protected def castRow2AnyTpl(
     arities: List[List[Int]],
-//    casts: List[(Row, AttrIndex) => AnyRef],
     casts: List[(Row, AttrIndex) => Any],
     attrIndex: AttrIndex,
     nested: Option[NestedTpls]
   ): Row => Any = {
-    //    println("1 --- aritiess: " + aritiess)
-    //    println("1 --- arities : " + arities)
-
     val casters: List[(Row, AttrIndex) => Any] = resolveArities(arities, casts, attrIndex, Nil, nested)
     arities.length match {
       case 1  => cast1(casters, attrIndex)

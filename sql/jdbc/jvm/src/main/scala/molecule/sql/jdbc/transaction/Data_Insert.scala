@@ -16,36 +16,41 @@ trait Data_Insert
     with ModelUtils
     with MoleculeLogging { self: ResolveInsert with InsertResolvers_ =>
 
+  // Print debug data
+  doPrint = false
+
   def getData(
     nsMap: Map[String, MetaNs],
     elements: List[Element],
     tpls: Seq[Product],
   ): Data = {
-    //    elements.foreach(println)
-    //    println("################################################################################################")
+    elements.foreach(debug)
+    debug("### A #############################################################################################")
 
-    curRefPath = List(s"$level", getInitialNs(elements))
+    initialNs = getInitialNs(elements)
+    curRefPath = List(s"$level", initialNs)
     val (mainElements, _)           = separateTxElements(elements)
     val resolveTpl: Product => Unit = getResolver(nsMap, mainElements)
-    initInserts()
 
-    //    println(inserts.mkString("--- inserts\n", "\n", ""))
-    //    println(joins.mkString("--- joins\n", "\n", ""))
+    debug(inserts.mkString("--- inserts\n  ", "\n  ", ""))
+    //    debug(joins.mkString("--- joins\n  ", "\n  ", ""))
+    debug("### B #############################################################################################")
+    initInserts()
+    debug("### C #############################################################################################")
 
     // Loop rows of tuples
     var rowIndex = 0
     tpls.foreach { tpl =>
-      //      println(s"### $rowIndex ##################################### " + tpl)
+      debug(s"###### $rowIndex ##################################### " + tpl)
       resolveTpl(tpl)
       addRowSetterToTableInserts(rowIndex)
       rowIndex += 1
     }
+    debug("### D #############################################################################################")
     (getTableInserts, getJoinTableInserts)
   }
 
-
   private def initInserts(): Unit = {
-    //    println(inserts.mkString("--- inserts\n", "\n", ""))
     inserts.foreach {
       case (refPath, cols) =>
         val table             = refPath.last
@@ -57,6 +62,8 @@ trait Data_Insert
              |  $columns
              |) VALUES ($inputPlaceholders)""".stripMargin
 
+        debug(s"B -------------------- refPath: $refPath")
+        debug(stmt)
         val ps = sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
         tableDatas(refPath) = Table(refPath, stmt, ps)
         rowSettersMap(refPath) = Nil
@@ -74,11 +81,10 @@ trait Data_Insert
   private def addRowSetterToTableInserts(rowIndex: Int): Unit = {
     inserts.foreach {
       case (refPath, cols) =>
-        //        println(s"---------------------- $refPath")
-        //        colSettersMap.foreach(println)
+        debug(s"C ---------------------- $refPath")
+        colSettersMap.foreach(x => debug(s"C ${x._2.size} colSetters: " + x._1))
         val colSetters = colSettersMap(refPath)
-        //        println(s"----------------------  ${colSetters.length}  $refPath")
-        //          println(stmt)
+        debug(s"C ---------------------- ${colSetters.length}  $refPath")
         colSettersMap(refPath) = Nil
         val rowSetter = (ps: PS, idsMap: IdsMap, _: RowIndex) => {
           var i        = 0
@@ -100,7 +106,6 @@ trait Data_Insert
         rowSettersMap(refPath) = rowSettersMap(refPath) :+ rowSetter
     }
   }
-
 
   private def getTableInserts: List[Table] = {
     // Add insert resolver to each insert
@@ -151,18 +156,17 @@ trait Data_Insert
     handleValue: T => Any
   ): Product => Unit = {
     val (curPath, paramIndex) = updateInserts(attr)
-    //    val curLevel              = level
+    val curLevel              = level
     (tpl: Product) => {
       val scalaValue  = tpl.productElement(tplIndex).asInstanceOf[T]
       val valueSetter = handleValue(scalaValue).asInstanceOf[(PS, Int) => Unit]
       val colSetter   = (ps: PS, _: IdsMap, _: RowIndex) => {
         valueSetter(ps, paramIndex)
-        //        printValue(curLevel, ns, attr, tplIndex, paramIndex, scalaValue)
+        printValue(curLevel, ns, attr, tplIndex, paramIndex, scalaValue)
       }
       addColSetter(curPath, colSetter)
     }
   }
-
 
   override protected def addOneOpt[T](
     ns: String,
@@ -192,7 +196,6 @@ trait Data_Insert
       }
     }
   }
-
 
   override protected def addSet[T](
     ns: String,
@@ -323,109 +326,51 @@ trait Data_Insert
     }
   }
 
-
   override protected def addRef(ns: String, refAttr: String, refNs: String, card: Card): Product => Unit = {
-    val joinTable = s"${ns}_${refAttr}_$refNs"
-    val curPath   = curRefPath
-
-    if (inserts.exists(_._1 == curPath)) {
-      // Add ref attribute to current namespace
-      inserts = inserts.map {
-        case (refPath1, cols) if card == CardOne && refPath1 == curPath =>
-          paramIndexes += (curPath, refAttr) -> (cols.length + 1)
-          (curPath, cols :+ refAttr)
-
-        case other => other
-      }
-
-    } else if (card == CardOne) {
-      // Make card-one ref from current empty namespace
-      paramIndexes += (curPath, refAttr) -> 1
-      inserts = inserts :+ (curPath, List(refAttr))
-
-    } else if (card == CardSet) {
-      // ref to join table
-      // Make card-many ref from current empty namespace
-      inserts = inserts :+ (curPath, Nil)
-    }
-
-    lazy val joinPath = curPath :+ joinTable
-    if (card == CardSet) {
-      // join table with single row (treated as normal insert since there's only 1 join per row)
-      val (id1, id2) = if (ns == refNs) (s"${ns}_1_id", s"${refNs}_2_id") else (s"${ns}_id", s"${refNs}_id")
-      // When insertion order is reversed, this join table will be set after left and right has been inserted
-      inserts = (joinPath, List(id1, id2)) +: inserts
-    }
-
-    // Start new ref table
-    val refPath = curPath ++ List(refAttr, refNs)
-    curRefPath = refPath
-    inserts = inserts :+ (refPath, Nil)
-
-    if (card == CardOne) {
-      // Card-one ref setter
-      val paramIndex = paramIndexes(curPath, refAttr)
-      (_: Product) => {
-        val colSetter: Setter = (ps: PS, idsMap: IdsMap, rowIndex: RowIndex) => {
-          val refId = idsMap(refPath)(rowIndex)
-          //          printValue(level, ns, refAttr, -1, paramIndex, refId)
-          ps.setLong(paramIndex, refId)
-        }
-        addColSetter(curPath, colSetter)
-      }
-
-    } else {
-      (_: Product) => {
-        // Empty row if no attributes in namespace in order to have an id for join table
-        if (!paramIndexes.exists { case ((path, _), _) => path == curPath }) {
-          // If current namespace has no attributes, then add an empty row with
-          // default null values (only to be referenced as the left side of the join table)
-          val emptyRowSetter: Setter = (ps: PS, _: IdsMap, _: RowIndex) => {
-            ps.addBatch()
-          }
-          addColSetter(curPath, emptyRowSetter)
-        }
-
-        // Join table setter
-        val joinSetter: Setter = (ps: PS, idsMap: IdsMap, rowIndex: RowIndex) => {
-          val refId1 = idsMap(curPath)(rowIndex)
-          val refId2 = idsMap(refPath)(rowIndex)
-          //          println("-----------")
-          //          println("id1: " + refId1)
-          //          println("id2: " + refId2)
-          ps.setLong(1, refId1)
-          ps.setLong(2, refId2)
-          ps.addBatch()
-        }
-        addColSetter(joinPath, joinSetter)
-      }
-    }
+    getRefResolver[Product](ns, refAttr, refNs, card)
   }
-
 
   override protected def addBackRef(backRefNs: String): Product => Unit = {
     curRefPath = curRefPath.dropRight(2) // drop refAttr, refNs
     (_: Product) => ()
   }
 
-
   override protected def addComposite(
     nsMap: Map[String, MetaNs],
-    outerTpl: Int,
+    outerTplIndex: Int,
     tplIndex: Int,
     compositeElements: List[Element]
   ): Product => Unit = {
+    debug(s"A addComposite  $outerTplIndex  $tplIndex   $curRefPath")
     hasComposites = true
-    val composite2stmts = getResolver(nsMap, compositeElements, outerTpl)
+    compositeGroup += 1
+
+    val compositeJoinResolver = if (compositeGroup == 1) {
+      (_: Product) => ()
+    } else {
+      val compositeNs = getInitialNs(compositeElements)
+      debug("A resolveCompositeJoin... " + compositeNs)
+      getCompositeJoinResolver[Product](compositeNs, List("0", initialNs))
+    }
+
+    val composite2stmts = getResolver(nsMap, compositeElements, outerTplIndex)
+
     // Start from initial entity id for each composite sub group
     countValueAttrs(compositeElements) match {
-      case 1 => (tpl: Product) =>
-        composite2stmts(Tuple1(tpl.productElement(tplIndex)))
-      case _ => (tpl: Product) =>
+      case 1 => (tpl: Product) => {
+        val tuple1 = Tuple1(tpl.productElement(tplIndex))
+        debug(s"C tpl 1 ($tplIndex): " + tuple1)
+        compositeJoinResolver(tpl)
+        composite2stmts(tuple1)
+      }
+
+      case _ => (tpl: Product) => {
+        debug(s"C tpl n: " + tpl)
+        compositeJoinResolver(tpl)
         composite2stmts(tpl.productElement(tplIndex).asInstanceOf[Product])
+      }
     }
   }
-
 
   override protected def addNested(
     nsMap: Map[String, MetaNs],
@@ -450,7 +395,7 @@ trait Data_Insert
     colSettersMap += curRefPath -> Nil
 
     // Recursively resolve nested data
-    val nestedResolvers = getResolver(nsMap, nestedElements)
+    val nestedResolver = getResolver(nsMap, nestedElements)
 
     countValueAttrs(nestedElements) match {
       case 1 =>
@@ -459,7 +404,7 @@ trait Data_Insert
           val length             = nestedSingleValues.length
           rightCountsMap(joinPath) = rightCountsMap(joinPath) :+ length
           nestedSingleValues.foreach { nestedSingleValue =>
-            nestedResolvers(Tuple1(nestedSingleValue))
+            nestedResolver(Tuple1(nestedSingleValue))
           }
         }
       case _ =>
@@ -468,7 +413,7 @@ trait Data_Insert
           val length     = nestedTpls.length
           rightCountsMap(joinPath) = rightCountsMap(joinPath) :+ length
           nestedTpls.foreach { nestedTpl =>
-            nestedResolvers(nestedTpl)
+            nestedResolver(nestedTpl)
           }
         }
     }

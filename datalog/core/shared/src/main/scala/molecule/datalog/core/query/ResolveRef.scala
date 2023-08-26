@@ -6,7 +6,7 @@ import molecule.boilerplate.ast.Model._
 import molecule.datalog.core.query.casting.NestOpt_
 
 
-trait ResolveRef[Tpl] { self: Base with NestOpt_[Tpl] =>
+trait ResolveRef[Tpl] { self: DatomicQueryBase with NestOpt_[Tpl] =>
 
   protected def resolveRef(es: List[Var], ref: Ref): List[Var] = {
     val (e, refAttr, refId) = (es.last, s":${ref.ns}/${ref.refAttr}", vv)

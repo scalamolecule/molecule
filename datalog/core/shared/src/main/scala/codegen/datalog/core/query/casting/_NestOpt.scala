@@ -12,7 +12,7 @@ object _NestOpt extends DatomicGenBase("NestOpt", "/query/casting") {
        |
        |import java.util.{Iterator => jIterator, Map => jMap}
        |import molecule.core.query.Model2Query
-       |import molecule.datomic.query.Base
+       |import molecule.datomic.query.DatomicQueryBase
        |import scala.annotation.tailrec
        |
        |
@@ -20,7 +20,7 @@ object _NestOpt extends DatomicGenBase("NestOpt", "/query/casting") {
        |  extends CastNestedOptBranch_
        |    with CastNestedOptLeaf_
        |    with CastRow2Tpl_
-       |    with Base { self: Model2Query =>
+       |    with DatomicQueryBase { self: Model2Query =>
        |
        |  private lazy val levels = pullCastss.length
        |

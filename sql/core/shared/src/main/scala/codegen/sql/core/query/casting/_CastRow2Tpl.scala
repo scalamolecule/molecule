@@ -11,36 +11,36 @@ object _CastRow2Tpl extends SqlGenBase("CastRow2Tpl", "/query/casting") {
        |package molecule.sql.core.query.casting
        |
        |import molecule.core.query.Model2Query
-       |import molecule.sql.core.query.Base
+       |import molecule.sql.core.query.SqlQueryBase
        |import scala.annotation.tailrec
        |
        |
-       |trait $fileName_ { self: Model2Query with Base =>
+       |trait $fileName_ { self: Model2Query with SqlQueryBase =>
        |
-       |@tailrec
+       |  @tailrec
        |  final private def resolveArities(
        |    arities: List[List[Int]],
-       |    casts: List[(Row, AttrIndex) => AnyRef],
+       |    casts: List[(Row, AttrIndex) => Any],
        |    attrIndex: AttrIndex,
        |    acc: List[(Row, AttrIndex) => Any],
        |    nested: Option[NestedTpls]
        |  ): List[(Row, AttrIndex) => Any] = {
        |    arities match {
        |      case List(1) :: as =>
-       |        val cast = (row: Row, attrIndex1: AttrIndex) => casts.head(row, attrIndex1)
+       |        val cast = (row: Row, _: AttrIndex) => casts.head(row, attrIndex)
        |        resolveArities(as, casts.tail, attrIndex + 1, acc :+ cast, nested)
        |
        |      // Nested
        |      case List(-1) :: Nil =>
-       |        val cast = (_: Row, _: AttrIndex) => nested.get
+       |        val cast = (_: Row, _: AttrIndex) => nested.getOrElse(List.empty[Any])
        |        resolveArities(Nil, casts, 0, acc :+ cast, None)
        |
        |      // Composite
        |      case ii :: as =>
-       |        val n                                = ii.length
-       |        val (tplCasts, moreCasts)            = casts.splitAt(n)
-       |        //        val cast: (Row, AttrIndex) => AnyRef = castRow2AnyTpl(ii.map(List(_)), tplCasts, attrIndex, nested)
-       |        val cast: (Row, AttrIndex) => AnyRef = ???
+       |        val n                     = ii.length
+       |        val (tplCasts, moreCasts) = casts.splitAt(n)
+       |        val cast                  = (row: Row, _: AttrIndex) =>
+       |          castRow2AnyTpl(ii.map(List(_)), tplCasts, attrIndex, nested)(row)
        |        resolveArities(as, moreCasts, attrIndex + n, acc :+ cast, nested)
        |
        |      case Nil => acc
@@ -49,7 +49,7 @@ object _CastRow2Tpl extends SqlGenBase("CastRow2Tpl", "/query/casting") {
        |
        |  final protected def castRow2AnyTpl(
        |    arities: List[List[Int]],
-       |    casts: List[(Row, AttrIndex) => AnyRef],
+       |    casts: List[(Row, AttrIndex) => Any],
        |    attrIndex: AttrIndex,
        |    nested: Option[NestedTpls]
        |  ): Row => Any = {

@@ -16,7 +16,7 @@ class SqlModel2Query[Tpl](elements0: List[Element])
     with ResolveExprSet[Tpl]
     with ResolveExprSetRefAttr[Tpl]
     with ResolveRef
-    with Base
+    with SqlQueryBase
     with CastNestedBranch_
     with CastRow2Tpl_
     with Nest[Tpl]
@@ -31,7 +31,8 @@ class SqlModel2Query[Tpl](elements0: List[Element])
     validateQueryModel(elements)
     //    elements.foreach(println)
 
-    from = getInitialNonGenericNs(elements)
+    initialNs = getInitialNonGenericNs(elements)
+    from = initialNs
     exts += from -> None
 
     val elements1 = prepareElements(elements)
@@ -49,16 +50,14 @@ class SqlModel2Query[Tpl](elements0: List[Element])
       val max1  = joins.map(_._1.length).max
       val max2  = joins.map(_._2.length).max
       val max3  = joins.map(_._3.length).max
-      val max4  = joins.map(_._4.length).max
       val hasAs = joins.exists(_._3.nonEmpty)
-      joins.map { case (join, table, as, lft, rgt) =>
+      joins.map { case (join, table, as, predicates) =>
         val join_  = join + padS(max1, join)
         val table_ = table + padS(max2, table)
         val as_    = if (hasAs) {
           if (as.isEmpty) padS(max3 + 4, "") else " AS " + as + padS(max3, as)
         } else ""
-        val lft_   = lft + padS(max4, lft)
-        s"$join_ $table_$as_ ON $lft_ = $rgt"
+        s"$join_ $table_$as_ ON $predicates"
       }.mkString("\n", "\n", "")
     }
 
@@ -200,8 +199,13 @@ class SqlModel2Query[Tpl](elements0: List[Element])
   }
 
   final private def resolveComposite(compositeElements: List[Element], tail: List[Element]): Unit = {
+    val compositeNs = getInitialNs(compositeElements)
+    exts += compositeNs -> None
+    compositeGroup += 1
     aritiesComposite()
-    // Use first entity id in each composite sub group
+    if (compositeGroup > 1) {
+      resolveCompositeJoin(initialNs, compositeNs, compositeGroup)
+    }
     resolve(compositeElements)
     resolve(tail)
   }

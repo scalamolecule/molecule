@@ -14,10 +14,11 @@ trait Data_Save
     with MoleculeLogging { self: ResolveSave =>
 
   // Resolve after all back refs have been resolved and namespaces grouped
-  var postResolvers = List.empty[() => Unit]
+  var postResolvers = List.empty[Unit => Unit]
 
   def getData(elements: List[Element]): Data = {
-    curRefPath = List(getInitialNs(elements))
+    initialNs = getInitialNs(elements)
+    curRefPath = List(initialNs)
     val (saveModel, _) = separateTxElements(elements)
 
     resolve(saveModel)
@@ -44,7 +45,7 @@ trait Data_Save
 
         val colSetters = colSettersMap(refPath)
         //        println(s"--- save -------------------  ${colSetters.length}  $refPath")
-        //          println(stmt)
+        //        println(stmt)
         colSettersMap(refPath) = Nil
         val rowSetter = (ps: PS, idsMap: IdsMap, _: RowIndex) => {
           // Set all column values for this row in this insert/batch
@@ -71,7 +72,6 @@ trait Data_Save
       tableDatas(refPath).copy(populatePS = populatePS)
     }
   }
-
 
   private def updateInserts(attr: String): (List[String], Int) = {
     if (inserts.exists(_._1 == curRefPath)) {
@@ -139,82 +139,7 @@ trait Data_Save
   }
 
   override protected def addRef(ns: String, refAttr: String, refNs: String, card: Card): Unit = {
-    val joinTable = s"${ns}_${refAttr}_$refNs"
-    val curPath   = curRefPath
-
-    if (inserts.exists(_._1 == curPath)) {
-      // Add ref attribute to current namespace
-      inserts = inserts.map {
-        case (path, cols) if card == CardOne && path == curPath =>
-          paramIndexes += (curPath, refAttr) -> (cols.length + 1)
-          (curPath, cols :+ refAttr)
-
-        case other => other
-      }
-
-    } else if (card == CardOne) {
-      // Make card-one ref from current empty namespace
-      paramIndexes += (curPath, refAttr) -> 1
-      inserts = inserts :+ (curPath, List(refAttr))
-
-    } else if (card == CardSet) {
-      // ref to join table
-      // Make card-many ref from current empty namespace
-      inserts = inserts :+ (curPath, Nil)
-    }
-
-    lazy val joinPath = curPath :+ joinTable
-    if (card == CardSet) {
-      // join table with single row (treated as normal insert since there's only 1 join per row)
-      val (id1, id2) = if (ns == refNs) (s"${ns}_1_id", s"${refNs}_2_id") else (s"${ns}_id", s"${refNs}_id")
-      // When insertion order is reversed, this join table will be set after left and right has been inserted
-      inserts = (joinPath, List(id1, id2)) +: inserts
-    }
-
-    // Start new ref table
-    val refPath = curRefPath ++ List(refAttr, refNs)
-    curRefPath = refPath
-    inserts = inserts :+ (refPath, Nil)
-
-    if (card == CardOne) {
-      // Card-one ref setter
-      val paramIndex = paramIndexes(curPath, refAttr)
-      postResolvers = postResolvers :+ (() => {
-        val colSetter: Setter = (ps: PS, idsMap: IdsMap, rowIndex: RowIndex) => {
-          val refId = idsMap(refPath)(rowIndex)
-          //          printValue(0, ns, refAttr, -1, paramIndex, refId)
-          ps.setLong(paramIndex, refId)
-        }
-        addColSetter(curPath, colSetter)
-      })
-
-    } else {
-
-      postResolvers = postResolvers :+ (() => {
-        // Empty row if no attributes in namespace in order to have an id for join table
-        if (!paramIndexes.exists { case ((path, _), _) => path == curPath }) {
-          // If current namespace has no attributes, then add an empty row with
-          // default null values (only to be referenced as the left side of the join table)
-          val emptyRowSetter: Setter = (ps: PS, _: IdsMap, _: RowIndex) => {
-            ps.addBatch()
-          }
-          addColSetter(curPath, emptyRowSetter)
-        }
-
-        // Join table setter
-        val joinSetter: Setter = (ps: PS, idsMap: IdsMap, rowIndex: RowIndex) => {
-          val refId1 = idsMap(curPath)(rowIndex)
-          val refId2 = idsMap(refPath)(rowIndex)
-          //          println("-----------")
-          //          println("id1: " + refId1)
-          //          println("id2: " + refId2)
-          ps.setLong(1, refId1)
-          ps.setLong(2, refId2)
-          ps.addBatch()
-        }
-        addColSetter(joinPath, joinSetter)
-      })
-    }
+    postResolvers = postResolvers :+ getRefResolver[Unit](ns, refAttr, refNs, card)
   }
 
   override protected def addBackRef(backRefNs: String): Unit = {
@@ -224,9 +149,15 @@ trait Data_Save
   override protected def handleRefNs(refNs: String): Unit = {
     //    backRefs = backRefs + (ns -> e)
   }
-  override protected def handleComposite(isInsertTxMetaData: Boolean): Unit = {
+
+  override protected def handleComposite(isInsertTxMetaData: Boolean, compositeNs: String): Unit = {
     //    e = if (isInsertTxMetaData) datomicTx else e0
+    compositeGroup += 1
+    if (compositeGroup > 1) {
+      postResolvers = postResolvers :+ getCompositeJoinResolver[Unit](compositeNs, List(initialNs))
+    }
   }
+
   override protected def handleTxMetaData(ns: String): Unit = {
     //    e = datomicTx
     //    e0 = datomicTx

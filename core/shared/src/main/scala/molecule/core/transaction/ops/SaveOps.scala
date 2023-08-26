@@ -34,7 +34,7 @@ trait SaveOps extends Action2Data {
   ): Unit
 
   protected def handleRefNs(refNs: String): Unit
-  protected def handleComposite(isInsertTxMetaData: Boolean): Unit
+  protected def handleComposite(isInsertTxMetaData: Boolean, compositeNs: String): Unit
   protected def handleTxMetaData(ns: String): Unit
 
   protected lazy val transformString    : String => Any     = identity

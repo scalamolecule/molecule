@@ -17,7 +17,7 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
     with ResolveExprSet[Tpl]
     with ResolveRef[Tpl]
     with ResolveNestedPull[Tpl]
-    with Base
+    with DatomicQueryBase
     with CastNestedBranch_
     with CastRow2Tpl_
     with CastNestedOptBranch_

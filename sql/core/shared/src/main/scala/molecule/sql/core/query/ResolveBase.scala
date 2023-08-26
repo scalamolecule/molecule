@@ -7,7 +7,7 @@ import molecule.sql.core.query.casting.NullValueException
 import java.sql.{ResultSet => RS}
 
 
-trait ResolveBase extends BaseHelpers { self: Base =>
+trait ResolveBase extends BaseHelpers { self: SqlQueryBase =>
 
   // dummy value for null
   val none = "__none__"

@@ -17,8 +17,8 @@ case class JdbcConn_jvm(override val proxy: JdbcProxy, override val sqlConn: sql
 
   private[molecule] var fresh = true
 
-  override def transact_sync(inserts: Data): TxReport = {
-    atomicTransaction(() => populateStmts(inserts))
+  override def transact_sync(data: Data): TxReport = {
+    atomicTransaction(() => populateStmts(data))
   }
 
   def atomicTransaction(executions: () => Map[List[String], List[Long]]): TxReport = {
@@ -60,12 +60,12 @@ case class JdbcConn_jvm(override val proxy: JdbcProxy, override val sqlConn: sql
     var idsMap     = Map.empty[List[String], List[Long]]
     var ids        = List.empty[Long]
 
+    //    debug("##########################################################################################")
+
     // Insert statements backwards to obtain auto-generated ref ids for prepending inserts
     tables.reverse.foreach {
       case Table(refPath, stmt, ps, populatePS) =>
-        //          println("--------------------------------------------------------------\n" + stmt)
-        //          println("--------------------------------------------------------------")
-        //          println(idsMap)
+        debug("D --- table ----------------------------------------------\n" + stmt)
         // Populate prepared statement
         populatePS(ps, idsMap, 0)
 
@@ -73,17 +73,19 @@ case class JdbcConn_jvm(override val proxy: JdbcProxy, override val sqlConn: sql
         val resultSet = ps.getGeneratedKeys // is empty if no nested data
         ids = List.empty[Long]
         while (resultSet.next()) {
+          //          val id = resultSet.getLong(1)
+          //          debug("D  ################# " + id)
+          //          ids = ids :+ id
           ids = ids :+ resultSet.getLong(1)
         }
         ps.close()
         idsMap = idsMap + (refPath -> ids)
+      //        debug("idsMap: " + idsMap)
     }
 
     joinTables.foreach {
       case JoinTable(refPath, stmt, ps, leftPath, rightPath, rightCounts) =>
-        //          println("--------------------------------------------------------------\n" + stmt)
-        //          println(rightCounts)
-
+        debug("D --- joinTable -------------------------------------------------\n" + stmt)
         val idsLeft    = idsMap(leftPath)
         var idLeft     = 0L
         var leftIndex  = 0
