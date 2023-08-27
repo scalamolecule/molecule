@@ -18,7 +18,8 @@ trait AggrOne_id extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync =
       for {
         _ <- Ns.id.query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "With Datomic we can't query for the entity id only. Please add at least one attribute."
+            err ==> "Querying for the entity id only is not allowed. " +
+              "Please add at least one attribute (can be tacit)."
           }
       } yield ()
     }
@@ -61,7 +62,8 @@ trait AggrOne_id extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync =
 
         _ <- Ns.id(distinct).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "With Datomic we can't query for the entity id only. Please add at least one attribute."
+            err ==> "Querying for the entity id only is not allowed. " +
+              "Please add at least one attribute (can be tacit)."
           }
       } yield ()
     }
@@ -100,12 +102,14 @@ trait AggrOne_id extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync =
 
         _ <- Ns.id(min).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "With Datomic we can't query for the entity id only. Please add at least one attribute."
+            err ==> "Querying for the entity id only is not allowed. " +
+              "Please add at least one attribute (can be tacit)."
           }
 
         _ <- Ns.id(min(1)).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "With Datomic we can't query for the entity id only. Please add at least one attribute."
+            err ==> "Querying for the entity id only is not allowed. " +
+              "Please add at least one attribute (can be tacit)."
           }
 
         // Tacit aggregation on entity ids not allowed.
@@ -148,12 +152,14 @@ trait AggrOne_id extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync =
 
         _ <- Ns.id(max).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "With Datomic we can't query for the entity id only. Please add at least one attribute."
+            err ==> "Querying for the entity id only is not allowed. " +
+              "Please add at least one attribute (can be tacit)."
           }
 
         _ <- Ns.id(max(1)).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "With Datomic we can't query for the entity id only. Please add at least one attribute."
+            err ==> "Querying for the entity id only is not allowed. " +
+              "Please add at least one attribute (can be tacit)."
           }
 
         // Tacit aggregation on entity ids not allowed.
@@ -179,12 +185,14 @@ trait AggrOne_id extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync =
 
         _ <- Ns.id(rand).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "With Datomic we can't query for the entity id only. Please add at least one attribute."
+            err ==> "Querying for the entity id only is not allowed. " +
+              "Please add at least one attribute (can be tacit)."
           }
 
         _ <- Ns.id(rand(1)).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "With Datomic we can't query for the entity id only. Please add at least one attribute."
+            err ==> "Querying for the entity id only is not allowed. " +
+              "Please add at least one attribute (can be tacit)."
           }
 
         // Tacit aggregation on entity ids not allowed.
@@ -210,12 +218,14 @@ trait AggrOne_id extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync =
 
         _ <- Ns.id(sample).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "With Datomic we can't query for the entity id only. Please add at least one attribute."
+            err ==> "Querying for the entity id only is not allowed. " +
+              "Please add at least one attribute (can be tacit)."
           }
 
         _ <- Ns.id(sample(1)).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "With Datomic we can't query for the entity id only. Please add at least one attribute."
+            err ==> "Querying for the entity id only is not allowed. " +
+              "Please add at least one attribute (can be tacit)."
           }
 
         // Tacit aggregation on entity ids not allowed.
@@ -258,17 +268,20 @@ trait AggrOne_id extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync =
 
         _ <- Ns.id.query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "With Datomic we can't query for the entity id only. Please add at least one attribute."
+            err ==> "Querying for the entity id only is not allowed. " +
+              "Please add at least one attribute (can be tacit)."
           }
 
         _ <- Ns.id(count).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "With Datomic we can't query for the entity id only. Please add at least one attribute."
+            err ==> "Querying for the entity id only is not allowed. " +
+              "Please add at least one attribute (can be tacit)."
           }
 
         _ <- Ns.id(countDistinct).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "With Datomic we can't query for the entity id only. Please add at least one attribute."
+            err ==> "Querying for the entity id only is not allowed. " +
+              "Please add at least one attribute (can be tacit)."
           }
       } yield ()
     }
@@ -278,81 +291,96 @@ trait AggrOne_id extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync =
 
     "sum" - types { implicit conn =>
       for {
-        _ <- Ns.id(sum).s.query.get
-          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Aggregating sum for entity ids not implemented."
-          }
+        List(x, y, z) <- Ns.i.insert(List(1, 1, 1)).transact.map(_.ids)
+        _ <- Ns.id.a1.i.query.get.map(_ ==> List(
+          (x, 1),
+          (y, 1),
+          (z, 1),
+        ))
+
+        _ <- Ns.id(sum).i_.query.get.map(_.head ==~ (x + y + z))
 
         _ <- Ns.id(sum).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "With Datomic we can't query for the entity id only. Please add at least one attribute."
+            err ==> "Querying for the entity id only is not allowed. " +
+              "Please add at least one attribute (can be tacit)."
           }
-
-        _ <- Future(compileError("Ns.id_(sum).s"))
       } yield ()
     }
 
     "median" - types { implicit conn =>
       for {
-        _ <- Ns.id(median).s.query.get
-          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Aggregating median for entity ids not implemented."
-          }
+
+        List(x, y, z) <- Ns.i.insert(List(1, 1, 1)).transact.map(_.ids)
+        _ <- Ns.id.a1.i.query.get.map(_ ==> List(
+          (x, 1),
+          (y, 1),
+          (z, 1),
+        ))
+
+        _ <- Ns.id(median).i_.query.get.map(_.head ==~ (x + y + z).toDouble / 3.0)
 
         _ <- Ns.id(median).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "With Datomic we can't query for the entity id only. Please add at least one attribute."
+            err ==> "Querying for the entity id only is not allowed. " +
+              "Please add at least one attribute (can be tacit)."
           }
-
-        _ <- Future(compileError("Ns.id_(median).s"))
       } yield ()
     }
 
     "avg" - types { implicit conn =>
       for {
-        _ <- Ns.id(avg).s.query.get
-          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Aggregating avg for entity ids not implemented."
-          }
+        List(x, y, z) <- Ns.i.insert(List(1, 1, 1)).transact.map(_.ids)
+        _ <- Ns.id.a1.i.query.get.map(_ ==> List(
+          (x, 1),
+          (y, 1),
+          (z, 1),
+        ))
+
+        _ <- Ns.id(avg).i_.query.get.map(_.head ==~ (x + y + z).toDouble / 3.0)
 
         _ <- Ns.id(avg).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "With Datomic we can't query for the entity id only. Please add at least one attribute."
+            err ==> "Querying for the entity id only is not allowed. " +
+              "Please add at least one attribute (can be tacit)."
           }
-
-        _ <- Future(compileError("Ns.id_(avg).s"))
       } yield ()
     }
 
     "variance" - types { implicit conn =>
-      for {
-        _ <- Ns.id(variance).s.query.get
-          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Aggregating variance for entity ids not implemented."
-          }
+      for {List(x, y, z) <- Ns.i.insert(List(1, 1, 1)).transact.map(_.ids)
+           _ <- Ns.id.a1.i.query.get.map(_ ==> List(
+             (x, 1),
+             (y, 1),
+             (z, 1),
+           ))
 
-        _ <- Ns.id(variance).query.get
-          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "With Datomic we can't query for the entity id only. Please add at least one attribute."
-          }
+           _ <- Ns.id(variance).i_.query.get.map(_.head ==~ varianceOf(x, y, z))
 
-        _ <- Future(compileError("Ns.id_(variance).s"))
+           _ <- Ns.id(variance).query.get
+             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+               err ==> "Querying for the entity id only is not allowed. " +
+                 "Please add at least one attribute (can be tacit)."
+             }
       } yield ()
     }
 
     "stddev" - types { implicit conn =>
       for {
-        _ <- Ns.id(stddev).s.query.get
-          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Aggregating stddev for entity ids not implemented."
-          }
+        List(x, y, z) <- Ns.i.insert(List(1, 1, 1)).transact.map(_.ids)
+        _ <- Ns.id.a1.i.query.get.map(_ ==> List(
+          (x, 1),
+          (y, 1),
+          (z, 1),
+        ))
+
+        _ <- Ns.id(stddev).i_.query.get.map(_.head ==~ stdDevOf(x, y, z))
 
         _ <- Ns.id(stddev).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "With Datomic we can't query for the entity id only. Please add at least one attribute."
+            err ==> "Querying for the entity id only is not allowed. " +
+              "Please add at least one attribute (can be tacit)."
           }
-
-        _ <- Future(compileError("Ns.id_(stddev).s"))
       } yield ()
     }
   }

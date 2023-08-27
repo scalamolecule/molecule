@@ -1,5 +1,6 @@
 package molecule.datalog.core.query
 
+import java.util.{Set => jSet}
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import scala.reflect.ClassTag
@@ -132,17 +133,30 @@ trait ResolveExprOne_id[Tpl]
         find += s"(count-distinct $e)"
         replaceCast(toInt)
 
-      case "sum"      => notImpl("sum")
-      case "median"   => notImpl("median")
-      case "avg"      => notImpl("avg")
-      case "variance" => notImpl("variance")
-      case "stddev"   => notImpl("stddev")
-      case other      => unexpectedKw(other)
-    }
-  }
+      case "sum" =>
+        find += s"(sum $e)"
 
-  private def notImpl(fn: String): Unit = {
-    throw ModelError(s"Aggregating $fn for entity ids not implemented.")
+      case "median" =>
+        // OBS! Datomic rounds down to nearest whole number
+        // when calculating the median for multiple numbers instead of
+        // following the semantic described on wikipedia:
+        // https://en.wikipedia.org/wiki/Median
+        // See also
+        // https://forum.datomic.com/t/unexpected-median-rounding/517
+        // So we calculate the correct median value manually instead:
+        find += s"(distinct $e)"
+        val medianConverter: AnyRef => Double = {
+          (v: AnyRef) => getMedian(v.asInstanceOf[jSet[_]].toArray.map(_.toString.toDouble).toSet)
+        }
+        replaceCast(medianConverter.asInstanceOf[AnyRef => AnyRef])
+
+      case "avg"      => find += s"(avg $e)"
+      case "variance" => find += s"(variance $e)"
+      case "stddev"   => find += s"(stddev $e)"
+
+
+      case other => unexpectedKw(other)
+    }
   }
 
   private def equal[T: ClassTag](e: Var, argValues: Seq[T], fromScala: Any => Any): Unit = {

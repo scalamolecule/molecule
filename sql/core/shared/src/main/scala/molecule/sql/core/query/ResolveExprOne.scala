@@ -11,7 +11,7 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
     attr match {
       case at: AttrOneManString     => man(attr, at.vs, resString1)
       case at: AttrOneManInt        => man(attr, at.vs, resInt1)
-      case at: AttrOneManLong       => manLong(attr, at.vs, resLong1)
+      case at: AttrOneManLong       => man(attr, at.vs, resLong1)
       case at: AttrOneManFloat      => man(attr, at.vs, resFloat1)
       case at: AttrOneManDouble     => man(attr, at.vs, resDouble1)
       case at: AttrOneManBoolean    => man(attr, at.vs, resBoolean1)
@@ -102,19 +102,6 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
     }
   }
 
-  private def manLong(attr: Attr, args: Seq[Long], res: ResOne[Long]): Unit = {
-    attr.attr match {
-      case "id" =>
-        val id = attr.ns + ".id"
-        select += id
-        groupByCols += id // if we later need to group by non-aggregated columns
-        addCast(res.sql2one)
-        addSort(attr, id)
-      case _    =>
-        man(attr, args, res)
-    }
-  }
-
   private def tac[T: ClassTag](attr: Attr, args: Seq[T], res: ResOne[T]): Unit = {
     val col = getCol(attr: Attr)
     notNull += col
@@ -151,7 +138,7 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
       }
     } { filterAttr =>
       addSort(attr, col)
-//      val w = getVar(filterAttr)
+      //      val w = getVar(filterAttr)
       attr.op match {
         case Eq    => optEqual2(col)
         case Neq   => optNeq2(col)
@@ -306,6 +293,10 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
 
       case "min" =>
         select += s"MIN($col)"
+        if (col.endsWith(".id")) {
+          groupByCols -= col
+          aggregate = true
+        }
 
       case "maxs" =>
         select +=
@@ -323,6 +314,10 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
 
       case "max" =>
         select += s"MAX($col)"
+        if (col.endsWith(".id")) {
+          groupByCols -= col
+          aggregate = true
+        }
 
       case "rands" =>
         select +=

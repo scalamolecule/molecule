@@ -35,7 +35,8 @@ trait Model2Query {
 
     elements match {
       case List(a: Attr) if a.attr == "id" => throw ModelError(
-        "With Datomic we can't query for the entity id only. Please add at least one attribute.")
+        "Querying for the entity id only is not allowed. " +
+          "Please add at least one attribute (can be tacit).")
 
       case _ => validate(elements)
     }

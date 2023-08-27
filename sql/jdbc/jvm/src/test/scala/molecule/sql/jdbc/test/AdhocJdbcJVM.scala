@@ -1,9 +1,11 @@
 package molecule.sql.jdbc.test
 
+import molecule.base.error.ModelError
 import molecule.core.util.Executor._
 import molecule.sql.jdbc.async._
 import molecule.sql.jdbc.setup.JdbcTestSuite
 import utest._
+import scala.concurrent.Future
 import scala.language.implicitConversions
 
 object AdhocJdbcJVM extends JdbcTestSuite {
@@ -15,7 +17,6 @@ object AdhocJdbcJVM extends JdbcTestSuite {
       for {
         _ <- Ns.i(1).save.transact
         _ <- Ns.i.query.get.map(_ ==> List(1))
-
 
 
       } yield ()
