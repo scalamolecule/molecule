@@ -98,7 +98,7 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
       //      filterAttrVars1 = filterAttrVars1 + (a -> (e, v))
       //      filterAttrVars2.get(a).foreach(_(e, v))
     } { filterAttr =>
-      expr2(col, attr.op)
+      expr2(col, attr.op, filterAttr.name)
     }
   }
 
@@ -110,7 +110,7 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
       //      filterAttrVars1 = filterAttrVars1 + (a -> (e, v))
       //      filterAttrVars2.get(a).foreach(_(e, v))
     } { filterAttr =>
-      expr2(col, attr.op)
+      expr2(col, attr.op, filterAttr.name)
     }
   }
 
@@ -186,13 +186,14 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
   private def expr2(
     col: String,
     op: Op,
+    filterAttr: String
   ): Unit = op match {
-    //    case Eq    => equal2(col, w)
-    //    case Neq   => neq2(col, w)
-    //    case Lt    => compare2(col, w, "<")
-    //    case Gt    => compare2(col, w, ">")
-    //    case Le    => compare2(col, w, "<=")
-    //    case Ge    => compare2(col, w, ">=")
+    case Eq    => equal2(col, filterAttr)
+    case Neq   => neq2(col, filterAttr)
+    case Lt    => compare2(col, "<", filterAttr)
+    case Gt    => compare2(col, ">", filterAttr)
+    case Le    => compare2(col, "<=", filterAttr)
+    case Ge    => compare2(col, ">=", filterAttr)
     case other => unexpectedOp(other)
   }
 
@@ -260,7 +261,6 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
       where += ((s"$len >= $from", ""))
     }
   }
-
 
   private def remainder[T](col: String, args: Seq[T]): Unit = where += ((col, s"% ${args.head} = ${args(1)}"))
   private def even(col: String): Unit = where += ((col, s"% 2 = 0"))
@@ -421,9 +421,8 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
     else
       where += ((col, args.map(one2sql).mkString("IN (", ", ", ")")))
   }
-  private def equal2(col: String, w: String): Unit = {
-    //    whereOLD += s"[$e $a $w$tx]" -> wClause
-    //    whereOLD += s"[(identity $w) $v]" -> wGround
+  private def equal2(col: String, filterAttr: String): Unit = {
+    where += ((col, "= " + filterAttr))
   }
 
   private def neq[T](col: String, args: Seq[T], one2sql: T => String): Unit = {
@@ -432,17 +431,15 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
     else
       where += ((col, args.map(one2sql).mkString("NOT IN (", ", ", ")")))
   }
-  private def neq2(col: String, w: String): Unit = {
-    //    whereOLD += s"[$e $a $v$tx]" -> wClause
-    //    whereOLD += s"[(!= $v $w)]" -> wNeqOne
+  private def neq2(col: String, filterAttr: String): Unit = {
+    where += ((col, " != " + filterAttr))
   }
 
   private def compare[T](col: String, arg: T, op: String, one2sql: T => String): Unit = {
     where += ((col, op + " " + one2sql(arg)))
   }
-  private def compare2(col: String, w: String, op: String): Unit = {
-    //    whereOLD += s"[$e $a $v$tx]" -> wClause
-    //    whereOLD += s"[($op $v $w)]" -> wNeqOne
+  private def compare2(col: String, op: String, filterAttr: String): Unit = {
+    where += ((col, op + " " + filterAttr))
   }
 
   private def noValue(col: String): Unit = {

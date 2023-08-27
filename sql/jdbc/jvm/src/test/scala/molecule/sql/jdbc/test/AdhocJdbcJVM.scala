@@ -10,13 +10,57 @@ import scala.language.implicitConversions
 
 object AdhocJdbcJVM extends JdbcTestSuite {
 
+  val a = ("a", 1, 2)
+  val b = ("b", 3, 3)
+  val c = ("c", 5, 4)
+
   override lazy val tests = Tests {
 
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
       for {
-        _ <- Ns.i(1).save.transact
-        _ <- Ns.i.query.get.map(_ ==> List(1))
+//        _ <- Ns.i(1).save.transact
+//        _ <- Ns.i.query.get.map(_ ==> List(1))
+
+        _ <- Ns.s.i.int.insert(
+          ("a", 1, 2),
+          ("b", 3, 3),
+          ("c", 5, 4),
+        ).transact
+
+        _ <- Ns.s.i(Ns.int).query.get.map(_ ==> List(("b", 3, 3)))
+        _ <- Ns.s.i(Ns.int_).query.get.map(_ ==> List(("b", 3))) // Ns.i
+        _ <- Ns.s.i_(Ns.int).query.get.map(_ ==> List(("b", 3))) // Ns.int
+        _ <- Ns.s.i_(Ns.int_).query.get.map(_ ==> List("b"))
+
+        // Filter compare attribute itself
+        _ <- Ns.s.i(Ns.int(3)).query.get.map(_ ==> List(("b", 3, 3)))
+        _ <- Ns.s.i(Ns.int.not(3)).query.get.map(_ ==> List())
+        _ <- Ns.s.i(Ns.int.>(3)).query.get.map(_ ==> List())
+        _ <- Ns.s.i(Ns.int.>=(3)).query.get.map(_ ==> List(("b", 3, 3)))
+        _ <- Ns.s.i(Ns.int.<(3)).query.get.map(_ ==> List())
+        _ <- Ns.s.i(Ns.int.<=(3)).query.get.map(_ ==> List(("b", 3, 3)))
+
+        _ <- Ns.s.i(Ns.int_(3)).query.get.map(_ ==> List(("b", 3)))
+        _ <- Ns.s.i(Ns.int_.not(3)).query.get.map(_ ==> List())
+        _ <- Ns.s.i(Ns.int_.>(3)).query.get.map(_ ==> List())
+        _ <- Ns.s.i(Ns.int_.>=(3)).query.get.map(_ ==> List(("b", 3)))
+        _ <- Ns.s.i(Ns.int_.<(3)).query.get.map(_ ==> List())
+        _ <- Ns.s.i(Ns.int_.<=(3)).query.get.map(_ ==> List(("b", 3)))
+
+        _ <- Ns.s.i_(Ns.int(3)).query.get.map(_ ==> List(("b", 3)))
+        _ <- Ns.s.i_(Ns.int.not(3)).query.get.map(_ ==> List())
+        _ <- Ns.s.i_(Ns.int.>(3)).query.get.map(_ ==> List())
+        _ <- Ns.s.i_(Ns.int.>=(3)).query.get.map(_ ==> List(("b", 3)))
+        _ <- Ns.s.i_(Ns.int.<(3)).query.get.map(_ ==> List())
+        _ <- Ns.s.i_(Ns.int.<=(3)).query.get.map(_ ==> List(("b", 3)))
+
+        _ <- Ns.s.i_(Ns.int_(3)).query.get.map(_ ==> List("b"))
+        _ <- Ns.s.i_(Ns.int_.not(3)).query.get.map(_ ==> List())
+        _ <- Ns.s.i_(Ns.int_.>(3)).query.get.map(_ ==> List())
+        _ <- Ns.s.i_(Ns.int_.>=(3)).query.get.map(_ ==> List("b"))
+        _ <- Ns.s.i_(Ns.int_.<(3)).query.get.map(_ ==> List())
+        _ <- Ns.s.i_(Ns.int_.<=(3)).query.get.map(_ ==> List("b"))
 
 
       } yield ()

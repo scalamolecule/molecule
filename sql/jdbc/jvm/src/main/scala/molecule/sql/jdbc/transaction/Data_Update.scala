@@ -71,8 +71,8 @@ trait Data_Update
 
         val colSetters = colSettersMap(refPath)
 
-        println(s"--- update -------------------  ${colSetters.length}  $refPath")
-        println(stmt)
+        //        println(s"--- update -------------------  ${colSetters.length}  $refPath")
+        //        println(stmt)
 
         colSettersMap(refPath) = Nil
         val rowSetter = (ps: PS, idsMap: IdsMap, _: RowIndex) => {
@@ -273,8 +273,7 @@ trait Data_Update
   override def handleUniqueFilterAttr(uniqueFilterAttr: AttrOneTac): Unit = {
     if (uniqueFilterElements.nonEmpty) {
       throw ModelError(
-        s"Can only apply one unique attribute value for $update. Found:\n"
-          + (uniqueFilterElements :+ uniqueFilterAttr).mkString(", ")
+        s"Can only apply one unique attribute value for $update. Found:\n" + uniqueFilterAttr
       )
     }
     uniqueFilterElements = uniqueFilterElements :+ uniqueFilterAttr

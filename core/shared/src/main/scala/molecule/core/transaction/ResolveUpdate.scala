@@ -53,7 +53,6 @@ class ResolveUpdate(
     }
   }
 
-  private def resolveSubElements(elements: List[Element]): Unit = resolve(elements)
 
   private def resolveAttrOneMan(dataAttr: AttrOneMan): Unit = {
     dataAttr match {

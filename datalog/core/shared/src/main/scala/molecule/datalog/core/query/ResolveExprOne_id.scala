@@ -81,7 +81,7 @@ trait ResolveExprOne_id[Tpl]
       case Gt        => compare(e, v, args.head, ">", res.s2j)
       case Le        => compare(e, v, args.head, "<=", res.s2j)
       case Ge        => compare(e, v, args.head, ">=", res.s2j)
-      case NoValue   => noValue()
+      case NoValue   => where += s"(not [$e _])" -> wNeqOne
       case Fn(kw, n) => aggr(e, kw, n, res)
       case other     => unexpectedOp(other)
     }
@@ -175,9 +175,5 @@ trait ResolveExprOne_id[Tpl]
     in += v1
     where += s"[($op $e $v1)]" -> wNeqOne
     args += fromScala(arg).asInstanceOf[AnyRef]
-  }
-
-  private def noValue(): Unit = {
-    throw ModelError("Since all entities have an id, asking for those without is not implemented.")
   }
 }

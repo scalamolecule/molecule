@@ -75,11 +75,6 @@ trait FilterOne_id extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync
         _ <- Ns.i.a1.id_.query.get.map(_ ==> List(a, b, c))
         _ <- Ns.i.a1.query.get.map(_ ==> List(a, b, c))
 
-        _ <- Ns.i.a1.id_().query.get
-          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Since all entities have an id, asking for those without is not implemented."
-          }
-
         // Match ids without returning them
         _ <- Ns.i.a1.id_(id0).query.get.map(_ ==> List())
         _ <- Ns.i.a1.id_(id1).query.get.map(_ ==> List(a))
@@ -92,6 +87,7 @@ trait FilterOne_id extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync
         _ <- Ns.i.a1.id_(Seq(id1, id0)).query.get.map(_ ==> List(a))
         // Empty Seq of args matches no ids
         _ <- Ns.i.a1.id_(Seq.empty[Long]).query.get.map(_ ==> List())
+        _ <- Ns.i.a1.id_().query.get.map(_ ==> List())
 
         // Match non-matching ids without returning them
         _ <- Ns.i.a1.id_.not(id0).query.get.map(_ ==> List(a, b, c))
