@@ -77,7 +77,7 @@ object DatomicRpcJVM extends MoleculeRpc
   ): Future[Either[MoleculeError, TxReport]] = either {
     for {
       conn <- getConn(proxy)
-      stmts = (new ResolveSave() with Data_Save).getStmts(elements)
+      stmts = (new ResolveSave with Data_Save).getStmts(elements)
       txReport <- conn.transact_async(stmts)
     } yield txReport
   }
@@ -86,7 +86,6 @@ object DatomicRpcJVM extends MoleculeRpc
     proxy: ConnProxy,
     tplElements: List[Element],
     tplsSerialized: Array[Byte],
-    txElements: List[Element],
   ): Future[Either[MoleculeError, TxReport]] = either {
     for {
       conn <- getConn(proxy)
@@ -99,10 +98,6 @@ object DatomicRpcJVM extends MoleculeRpc
         case Left(err)   => throw err // catched in outer either wrapper
       }
       stmts = (new ResolveInsert with Data_Insert).getStmts(proxy.nsMap, tplElements, tplProducts)
-      _ = if (txElements.nonEmpty) {
-        val txStmts = (new ResolveSave() with Data_Save).getRawStmts(txElements, datomicTx, false)
-        stmts.addAll(txStmts)
-      }
       txReport <- conn.transact_async(stmts)
     } yield txReport
   }

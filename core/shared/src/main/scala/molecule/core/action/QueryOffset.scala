@@ -4,11 +4,11 @@ import molecule.boilerplate.ast.Model.Element
 import molecule.core.marshalling.dbView.DbView
 
 case class QueryOffset[Tpl](
-  elements0: List[Element],
+  elements: List[Element],
   limit: Option[Int],
   offset: Int,
   dbView: Option[DbView] = None
-) extends Action(elements0) {
+) extends Action(elements) {
 
   def limit(l: Int): QueryOffset[Tpl] = copy(limit = Some(l))
 }

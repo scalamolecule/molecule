@@ -1,9 +1,7 @@
 package molecule.sql.jdbc.transaction
 
-import java.lang.{Boolean => jBoolean}
 import java.sql.{PreparedStatement => PS}
-import java.util.{UUID, List => jList}
-import clojure.lang.Keyword
+import java.util.UUID
 import molecule.base.ast.SchemaAST._
 import molecule.base.error.ExecutionError
 import molecule.boilerplate.ast.Model._
@@ -12,7 +10,6 @@ import molecule.core.util.Executor._
 import molecule.core.util.ModelUtils
 import molecule.sql.jdbc.facade.JdbcConn_jvm
 import scala.collection.mutable
-import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
 
 trait JdbcBase_JVM extends JdbcDataType_JVM with ModelUtils {
@@ -20,18 +17,13 @@ trait JdbcBase_JVM extends JdbcDataType_JVM with ModelUtils {
   // Override on instantiation
   protected val sqlConn: java.sql.Connection
 
-  //  protected var level    = 0
-  //  protected var firstRow = true
-
   var level = 0
   def indent(level: Int) = "  " * level
 
   protected var doPrint = false
   protected def debug(s: Any) = if (doPrint) println(s) else ()
 
-  protected var compositeGroup = 0
-  protected var initialId      = 0L
-  protected var initialNs      = ""
+  protected var initialNs = ""
 
   // Dynamic ref path of current level and branch (each backref initiates a new branch)
   protected var curRefPath = List("0")
@@ -41,10 +33,10 @@ trait JdbcBase_JVM extends JdbcDataType_JVM with ModelUtils {
   protected var inserts = List.empty[(List[String], List[String])]
   protected var joins   = List.empty[(List[String], String, String, List[String], List[String])]
 
-  protected var ids            = Seq.empty[Long]
-  protected val updateCols     = ListBuffer.empty[String]
-  protected var filterElements = List.empty[Element]
-
+  protected var ids                  = Seq.empty[Long]
+  protected val updateCols           = mutable.Map.empty[List[String], List[String]]
+  protected var uniqueFilterElements = List.empty[Element]
+  protected var filterElements       = List.empty[Element]
 
   // PreparedStatement param indexes for each (table, col) coordinate
   protected val paramIndexes   = mutable.Map.empty[(List[String], String), Int]
@@ -52,10 +44,7 @@ trait JdbcBase_JVM extends JdbcDataType_JVM with ModelUtils {
   protected val rowSettersMap  = mutable.Map.empty[List[String], List[Setter]]
   protected val tableDatas     = mutable.Map.empty[List[String], Table]
   protected var joinTableDatas = List.empty[JoinTable]
-  protected val insertIndexes  = mutable.Map.empty[List[String], Int]
   protected val rightCountsMap = mutable.Map.empty[List[String], List[Int]]
-
-  //  final protected var aritiess  = List(List.empty[List[Int]])
 
 
   protected def addColSetter(refPath: List[String], colSetter: Setter) = {
@@ -84,56 +73,9 @@ trait JdbcBase_JVM extends JdbcDataType_JVM with ModelUtils {
   }
 
 
-  protected var nsFull       : String              = ""
-  protected var part         : String              = ""
-  protected var tempId       : Int                 = 0
-  protected var lowest       : Int                 = 0
-  protected var e            : AnyRef              = "" // Long or String (#db/id[db.part/user -1])
-  protected var e0           : AnyRef              = ""
-  protected var stmt         : jList[AnyRef]       = null
-  protected var backRefs     : Map[String, AnyRef] = Map.empty[String, AnyRef]
-  protected val prevRefs     : ListBuffer[AnyRef]  = new ListBuffer[AnyRef]
-  protected var hasComposites: Boolean             = false
+  // "Connection pool" ---------------------------------------------
 
-  protected lazy val add           = kw("db", "add")
-  protected lazy val retract       = kw("db", "retract")
-  protected lazy val retractEntity = kw("db", "retractEntity")
-  protected lazy val dbId          = kw("db", "id")
-  protected lazy val datomicTx     = "datomic.tx"
-
-  protected lazy val bigInt2java  = (v: Any) => v.asInstanceOf[BigInt].bigInteger
-  protected lazy val bigDec2java  = (v: Any) => v.asInstanceOf[BigDecimal].bigDecimal
-  protected lazy val char2java    = (v: Any) => v.toString
-  protected lazy val byte2java    = (v: Any) => v.asInstanceOf[Byte].toInt
-  protected lazy val short2java   = (v: Any) => v.asInstanceOf[Short].toInt
-  protected lazy val boolean2java = (v: Any) => v.asInstanceOf[Boolean].asInstanceOf[jBoolean]
-
-  protected def kw(ns: String, attr: String) = Keyword.intern(ns, attr)
-
-  protected def appendStmt(
-    op: Keyword,
-    e: AnyRef,
-    a: Keyword,
-    v: AnyRef,
-  ): Unit = {
-    //    val addStmt = stmtList
-    //    addStmt.add(op)
-    //    addStmt.add(e)
-    //    addStmt.add(a)
-    //    addStmt.add(v)
-    //    stmts.add(addStmt)
-  }
-  protected def addRetractEntityStmt(id: AnyRef): Unit = {
-    //    val stmt = new jArrayList[AnyRef](2)
-    //    stmt.add(retractEntity)
-    //    stmt.add(id)
-    //    stmts.add(stmt)
-  }
-
-
-  // Connection pool ---------------------------------------------
-
-  // todo: real solution
+  // todo: offer real solution
   protected val connectionPool = mutable.HashMap.empty[UUID, Future[JdbcConn_jvm]]
 
   //  override def clearConnPool: Future[Unit] = Future {
@@ -261,48 +203,6 @@ trait JdbcBase_JVM extends JdbcDataType_JVM with ModelUtils {
         }
         addColSetter(joinPath, joinSetter)
       }
-    }
-  }
-
-  protected def getCompositeJoinResolver[T](compositeNs: String, initialRefPath: List[String]): T => Unit = {
-    val curPath = curRefPath
-
-    //    println("curRefPath 0: " + curPath)
-
-    lazy val compositeJoinPath = curPath :+ "CompositeJoin"
-
-    // Start composite join table with single row (treated as normal insert since there's only 1 join per row)
-    // When insertion order is reversed, this join table will be set after left and right has been inserted
-    inserts = (compositeJoinPath, List("a", "b", "a_id", "b_id")) +: inserts
-
-    //    println("joinPath: " + compositeJoinPath)
-
-    // Start new composite table
-    val compositePath = curPath ++ List("CompositeJoin", compositeNs)
-    curRefPath = compositePath
-
-    //    println("curRefPath 1: " + curPath)
-    //    println("-----")
-    //    inserts.foreach(println)
-    //    println("-----")
-
-    (_: T) => {
-      // Composite join table setter
-      val compositeJoinSetter: Setter = (ps: PS, idsMap: IdsMap, rowIndex: RowIndex) => {
-        val initialId   = idsMap(initialRefPath)(rowIndex)
-        val compositeId = idsMap(compositePath)(rowIndex)
-        //        println("----- idsMap: ----------")
-        //        println(idsMap.mkString("\n"))
-        //        println("----------- " + compositePath)
-        //        println("id1: " + initialId)
-        //        println("id2: " + compositeId)
-        ps.setString(1, initialNs) // All composite groups relate to initial namespace
-        ps.setString(2, compositeNs)
-        ps.setLong(3, initialId) // All composite groups relate to initial namespace id
-        ps.setLong(4, compositeId)
-        ps.addBatch()
-      }
-      addColSetter(compositeJoinPath, compositeJoinSetter)
     }
   }
 }

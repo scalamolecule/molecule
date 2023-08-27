@@ -70,7 +70,6 @@ case class PrimaryUnique[Tpl](
           (tpls, cursor, hasMore)
 
         } else {
-          postAdjustAritiess()
           val row2tpl = castRow2AnyTpl(aritiess.head, castss.head, 0, None)
           sortedRows.subList(0, limitAbs).forEach(row => tuples += row2tpl(row).asInstanceOf[Tpl])
           val tpls   = if (forward) tuples.result() else tuples.result().reverse

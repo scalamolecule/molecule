@@ -2,11 +2,10 @@ package molecule.sql.jdbc.facade
 
 import java.sql
 import java.sql.SQLException
-import datomic.{Datom => _}
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.marshalling.JdbcProxy
 import molecule.core.spi.{Conn, TxReport}
-import molecule.sql.jdbc.transaction.{JdbcDataType_JVM, JdbcBase_JVM, JoinTable, Table}
+import molecule.sql.jdbc.transaction.{JdbcBase_JVM, JdbcDataType_JVM, JoinTable, Table}
 import scala.util.control.NonFatal
 
 case class JdbcConn_jvm(override val proxy: JdbcProxy, override val sqlConn: sql.Connection)

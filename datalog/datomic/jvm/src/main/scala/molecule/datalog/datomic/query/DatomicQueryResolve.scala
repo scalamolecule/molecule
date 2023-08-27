@@ -24,12 +24,6 @@ abstract class DatomicQueryResolve[Tpl](elements: List[Element], dbView: Option[
     pullSortss = pullSortss :+ pullSorts.sortBy(_._1).map(_._2).toList
   }
 
-  protected def postAdjustAritiess(): Unit = {
-    // Remove started composite groups that turned out to have only tacit attributes
-    aritiess = aritiess.map(_.filterNot(_.isEmpty))
-  }
-
-
   protected def getUniqueValues(tpls0: List[Tpl], uniqueIndex: Int, encode: Any => String): List[String] = {
     val tpls   = (if (tpls0.head.isInstanceOf[Product]) tpls0 else tpls0.map(Tuple1(_))).asInstanceOf[List[Product]]
     val first3 = tpls.take(3).map(t => encode(t.productElement(uniqueIndex))).padTo(3, "")
@@ -210,7 +204,6 @@ abstract class DatomicQueryResolve[Tpl](elements: List[Element], dbView: Option[
           (tpls, cursor, more > 0)
 
         } else {
-          postAdjustAritiess()
           if (!forward) Collections.reverse(sortedRows)
           val count          = getCount(limit, forward, totalCount)
           val row2tpl        = (row: Row) => row2AnyTpl(row).asInstanceOf[Tpl]

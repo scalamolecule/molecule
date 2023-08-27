@@ -7,8 +7,7 @@ import molecule.core.transaction.ops.SaveOps
 import molecule.core.util.ModelUtils
 import scala.annotation.tailrec
 
-class ResolveSave(isTxMetaData: Boolean = false)
-  extends ModelUtils with MoleculeLogging { self: SaveOps =>
+class ResolveSave extends ModelUtils with MoleculeLogging { self: SaveOps =>
 
   @tailrec
   final def resolve(elements: List[Element]): Unit = {
@@ -33,8 +32,6 @@ class ResolveSave(isTxMetaData: Boolean = false)
               }
           }
 
-        // todo
-        case Ref(ns, refAttr, "Tx", card, _)  => resolve(tail)
         case Ref(ns, refAttr, refNs, card, _) => addRef(ns, refAttr, refNs, card); resolve(tail)
         case BackRef(backRefNs, _)            => addBackRef(backRefNs); resolve(tail)
         case _: Nested                        => throw ModelError(
@@ -43,14 +40,6 @@ class ResolveSave(isTxMetaData: Boolean = false)
         case _: NestedOpt                     => throw ModelError(
           "Optional nested data structure not allowed in save molecule. Please use insert instead."
         )
-
-        case Composite(compositeElements)     =>
-          handleComposite(isTxMetaData, getInitialNs(compositeElements))
-          resolve(compositeElements ++ tail)
-
-        case TxMetaData(txElements) =>
-          handleTxMetaData(getInitialNs(txElements))
-          resolve(txElements) // tail is empty (no more attributes possible after Tx)
       }
       case Nil             => ()
     }

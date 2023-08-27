@@ -89,10 +89,8 @@ trait DatomicSpiAsync
     val conn   = conn0.asInstanceOf[DatomicConn_JS]
     val errors = insert_validate(insert)(conn)
     if (errors.isEmpty) {
-      //        val conn                      = conn0.asInstanceOf[DatomicConn_JS]
-      val (tplElements, txElements) = separateTxElements(insert.elements)
-      val tplsSerialized            = PickleTpls(tplElements, true).pickle(Right(insert.tpls))
-      conn.rpc.insert(conn.proxy, tplElements, tplsSerialized, txElements).future
+      val tplsSerialized = PickleTpls(insert.elements, true).pickle(Right(insert.tpls))
+      conn.rpc.insert(conn.proxy, insert.elements, tplsSerialized).future
     } else {
       Future.failed(InsertErrors(errors))
     }

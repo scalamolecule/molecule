@@ -94,10 +94,9 @@ trait JdbcSpiAsync
   override def insert_transact(insert: Insert)(implicit conn0: Conn, ec: EC): Future[TxReport] = try {
     val errors = insert_validate(insert)
     if (errors.isEmpty) {
-      val conn                      = conn0.asInstanceOf[JdbcConn_js]
-      val (tplElements, txElements) = separateTxElements(insert.elements)
-      val tplsSerialized            = PickleTpls(tplElements, true).pickle(Right(insert.tpls))
-      conn.rpc.insert(conn.proxy, tplElements, tplsSerialized, txElements).future
+      val conn           = conn0.asInstanceOf[JdbcConn_js]
+      val tplsSerialized = PickleTpls(insert.elements, true).pickle(Right(insert.tpls))
+      conn.rpc.insert(conn.proxy, insert.elements, tplsSerialized).future
     } else {
       Future.failed(InsertErrors(errors))
     }

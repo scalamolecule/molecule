@@ -11,7 +11,6 @@ trait InsertValidationResolvers_ {
     nsMap: Map[String, MetaNs],
     elements: List[Element],
     validators: List[Product => Seq[InsertError]],
-    outerTpl: Int,
     tplIndex: Int,
     prevRefs: List[String]
   ): List[Product => Seq[InsertError]]
@@ -19,10 +18,9 @@ trait InsertValidationResolvers_ {
   def getInsertValidator(
     nsMap: Map[String, MetaNs],
     elements: List[Element],
-    outerTpl: Int = 0
   ): Product => Seq[InsertError] = {
     val validators: List[Product => Seq[InsertError]] =
-      getValidators(nsMap, elements, Nil, outerTpl, 0, Nil)
+      getValidators(nsMap, elements, Nil, 0, Nil)
 
     validators.length match {
       case 1  => validate1(validators)

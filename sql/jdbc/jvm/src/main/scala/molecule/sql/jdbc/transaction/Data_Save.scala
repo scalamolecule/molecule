@@ -19,10 +19,7 @@ trait Data_Save
   def getData(elements: List[Element]): Data = {
     initialNs = getInitialNs(elements)
     curRefPath = List(initialNs)
-    val (saveModel, _) = separateTxElements(elements)
-
-    resolve(saveModel)
-
+    resolve(elements)
     postResolvers.foreach(_())
     addRowSetterToTables()
     (getTables, Nil)
@@ -148,19 +145,6 @@ trait Data_Save
 
   override protected def handleRefNs(refNs: String): Unit = {
     //    backRefs = backRefs + (ns -> e)
-  }
-
-  override protected def handleComposite(isInsertTxMetaData: Boolean, compositeNs: String): Unit = {
-    //    e = if (isInsertTxMetaData) datomicTx else e0
-    compositeGroup += 1
-    if (compositeGroup > 1) {
-      postResolvers = postResolvers :+ getCompositeJoinResolver[Unit](compositeNs, List(initialNs))
-    }
-  }
-
-  override protected def handleTxMetaData(ns: String): Unit = {
-    //    e = datomicTx
-    //    e0 = datomicTx
   }
 
   override protected lazy val handleString     = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.asInstanceOf[String])

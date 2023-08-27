@@ -16,21 +16,20 @@ object _InsertValidationResolvers extends CoreGenBase("InsertValidationResolvers
        |
        |trait $fileName_ {
        |
-       |def getValidators(
+       |  def getValidators(
        |    nsMap: Map[String, MetaNs],
        |    elements: List[Element],
        |    validators: List[Product => Seq[InsertError]],
-       |    outerTpl: Int,
-       |    tplIndex: Int
+       |    tplIndex: Int,
+       |    prevRefs: List[String]
        |  ): List[Product => Seq[InsertError]]
        |
        |  def getInsertValidator(
        |    nsMap: Map[String, MetaNs],
        |    elements: List[Element],
-       |    outerTpl: Int = 0
        |  ): Product => Seq[InsertError] = {
        |    val validators: List[Product => Seq[InsertError]] =
-       |      getValidators(nsMap, elements, Nil, outerTpl, 0)
+       |      getValidators(nsMap, elements, Nil, 0, Nil)
        |
        |    validators.length match {
        |      $validateX

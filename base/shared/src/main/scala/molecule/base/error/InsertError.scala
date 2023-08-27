@@ -5,10 +5,9 @@ package molecule.base.error
  * @param tplIndex     Index of attribute value in data tuple
  * @param fullAttr     Full attribute name (Ns.attr)
  * @param errors       Error messages
- * @param nestedErrors Composite or nested errors
+* @param nestedErrors Nested errors
  */
 case class InsertError(
-  outerTpl: Int,
   tplIndex: Int,
   fullAttr: String,
   errors: Seq[String] = Nil,
@@ -58,7 +57,6 @@ case class InsertError(
     }
 
     s"""InsertError(
-       |$s  $outerTpl, // Composite tuple index
        |$s  $tplIndex, // tuple index
        |$s  "$fullAttr",
        |$s  Seq($errorsStr),

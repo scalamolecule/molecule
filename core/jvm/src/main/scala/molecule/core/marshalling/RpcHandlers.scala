@@ -49,10 +49,10 @@ abstract class RpcHandlers(rpc: MoleculeRpc) extends MoleculeLogging with Serial
   }
 
   def handleInsert(argsSerialized: ByteBuffer): Future[Array[Byte]] = handleErrors {
-    val (proxy, tplElements, tplsSerialized, txElements) =
-      Unpickle.apply[(ConnProxy, List[Element], Array[Byte], List[Element])]
+    val (proxy, tplElements, tplsSerialized) =
+      Unpickle.apply[(ConnProxy, List[Element], Array[Byte])]
         .fromBytes(argsSerialized: ByteBuffer)
-    rpc.insert(proxy, tplElements, tplsSerialized, txElements).map(either =>
+    rpc.insert(proxy, tplElements, tplsSerialized).map(either =>
       Pickle.intoBytes[Either[MoleculeError, TxReport]](either).toArray
     )
   }

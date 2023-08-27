@@ -50,17 +50,15 @@ trait ResolveNestedPull[Tpl]
               resolveAttrSetOpt(a)
               addPullAttrs(tail, level, attrIndex + 1, acc + renderPull(i, a))
 
-            case ref: Ref                     => (acc, Some(ref), tail, attrIndex)
-            case backRef: BackRef             => (acc, Some(backRef), tail, attrIndex)
-            case nestedOpt: NestedOpt         => (acc, Some(nestedOpt), Nil, attrIndex)
-            case _: Nested                    => noMixedNestedModes
-            case Composite(compositeElements) =>
-              aritiesComposite()
-              addPullAttrs(compositeElements ++ tail, level, attrIndex, acc)
+            case ref: Ref             => (acc, Some(ref), tail, attrIndex)
+            case backRef: BackRef     => (acc, Some(backRef), tail, attrIndex)
+            case nestedOpt: NestedOpt => (acc, Some(nestedOpt), Nil, attrIndex)
+            case _: Nested            => noMixedNestedModes
 
             case a: AttrOneTac => throw ModelError(
               "Tacit attributes not allowed in optional nested data structure. Found:\n" + a)
-            case other         => throw ModelError(
+
+            case other => throw ModelError(
               "Unexpected element in optional nested molecule: " + other
             )
           }

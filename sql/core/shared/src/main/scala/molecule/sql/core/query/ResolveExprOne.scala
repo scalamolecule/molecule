@@ -27,7 +27,7 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
   }
 
   protected def resolveAttrOneTac(attr: AttrOneTac): Unit = {
-    if (isNestedOpt && !isTxMetaData)
+    if (isNestedOpt)
       throw ModelError("Tacit attributes not allowed in optional nested queries. Found: " + attr.name)
     attr match {
       case at: AttrOneTacString     => tac(attr, at.vs, resString1)
@@ -110,8 +110,6 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
         groupByCols += id // if we later need to group by non-aggregated columns
         addCast(res.sql2one)
         addSort(attr, id)
-      case "tx" =>
-        throw ModelError("tx id not implemented yet for jdbc")
       case _    =>
         man(attr, args, res)
     }
@@ -153,7 +151,7 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
       }
     } { filterAttr =>
       addSort(attr, col)
-      val w = getVar(filterAttr)
+//      val w = getVar(filterAttr)
       attr.op match {
         case Eq    => optEqual2(col)
         case Neq   => optNeq2(col)
@@ -428,7 +426,7 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
     else
       where += ((col, args.map(one2sql).mkString("IN (", ", ", ")")))
   }
-  private def equal2(col: String, w: Var): Unit = {
+  private def equal2(col: String, w: String): Unit = {
     //    whereOLD += s"[$e $a $w$tx]" -> wClause
     //    whereOLD += s"[(identity $w) $v]" -> wGround
   }
@@ -439,7 +437,7 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
     else
       where += ((col, args.map(one2sql).mkString("NOT IN (", ", ", ")")))
   }
-  private def neq2(col: String, w: Var): Unit = {
+  private def neq2(col: String, w: String): Unit = {
     //    whereOLD += s"[$e $a $v$tx]" -> wClause
     //    whereOLD += s"[(!= $v $w)]" -> wNeqOne
   }
@@ -447,7 +445,7 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
   private def compare[T](col: String, arg: T, op: String, one2sql: T => String): Unit = {
     where += ((col, op + " " + one2sql(arg)))
   }
-  private def compare2(col: String, w: Var, op: String): Unit = {
+  private def compare2(col: String, w: String, op: String): Unit = {
     //    whereOLD += s"[$e $a $v$tx]" -> wClause
     //    whereOLD += s"[($op $v $w)]" -> wNeqOne
   }

@@ -37,11 +37,15 @@ case class JdbcQueryResolveOffset[Tpl](
 
   // Datomic querying is synchronous
   def getListFromOffset_sync(implicit conn: JdbcConn_jvm): (List[Tpl], Int, Boolean) = {
-    getListFromOffset_sync(None)(conn)
+    getListFromOffset_sync2(
+//      None
+    )(conn)
   }
 
   // Optional use of DB_AFTER for subscriptions
-  def getListFromOffset_sync(altDb: Option[datomic.Database])(implicit conn: JdbcConn_jvm)
+  private def getListFromOffset_sync2(
+//    altDb: Option[datomic.Database]
+  )(implicit conn: JdbcConn_jvm)
   : (List[Tpl], Int, Boolean) = {
     lazy val limitSign  = limit.get >> 31
     lazy val offsetSign = offset.get >> 31
@@ -86,7 +90,6 @@ case class JdbcQueryResolveOffset[Tpl](
       //          }
 
 
-      postAdjustAritiess()
       val row2tpl = castRow2AnyTpl(aritiess.head, castss.head, 1, None)
       val tuples  = ListBuffer.empty[Tpl]
       while (sortedRows.next()) {

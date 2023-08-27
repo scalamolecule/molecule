@@ -8,26 +8,12 @@ import molecule.core.transaction.Action2Data
 
 trait UpdateOps extends Action2Data {
 
-  protected def handleIds(ids: Seq[Long]): Unit
-  protected def handleUniqueFilterAttr(filterAttr: AttrOneTac): Unit
-  protected def handleFilterAttr(filterAttr: AttrOneTac): Unit
-
   def updateOne[T](
     a: AttrOne,
     vs: Seq[T],
     transformValue: T => Any,
     handleValue: T => Any
   ): Unit
-
-
-  // todo?
-  // For dbs that don't support updating related entities
-  //  protected def addRef(
-  //    ns: String,
-  //    refAttr: String,
-  //    refNs: String,
-  //    card: Card
-  //  ): Product => Unit = ???
 
   def updateSetEq[T](
     a: AttrSet,
@@ -56,9 +42,12 @@ trait UpdateOps extends Action2Data {
     transform: T => Any
   ): Unit
 
+  protected def handleIds(ids: Seq[Long]): Unit
+  protected def handleUniqueFilterAttr(filterAttr: AttrOneTac): Unit
+  protected def handleFilterAttr(filterAttr: AttrOneTac): Unit
+
   protected def handleBackRef(backRef: BackRef): Unit
   protected def handleRefNs(ref: Ref): Unit
-  protected def handleTxMetaData(): Unit
 
   protected def uniqueIds(
     filterAttr: AttrOneTac,

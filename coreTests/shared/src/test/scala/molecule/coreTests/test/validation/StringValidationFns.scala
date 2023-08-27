@@ -27,7 +27,7 @@ trait StringValidationFns extends CoreTestSuite with ApiAsyncImplicits { self: S
         // Same with insert
         _ <- Strings.email.insert("foo@bar").transact
           .map(_ ==> "Unexpected success").recover {
-          case InsertErrors(Seq((_, Seq(InsertError(_, _, _, Seq(error), _)))), _) =>
+          case InsertErrors(Seq((_, Seq(InsertError(_, _, Seq(error), _)))), _) =>
             error ==> "`foo@bar` is not a valid email"
         }
 

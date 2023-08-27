@@ -3,7 +3,6 @@ package molecule.sql.jdbc.test.validation.crud.save
 import molecule.coreTests.test.validation.save._
 import molecule.sql.jdbc.setup.CoreTestAsync
 
-object Composites extends Composites with CoreTestAsync
 object FormatConstants  extends FormatConstants with CoreTestAsync
 object FormatVariables extends FormatVariables with CoreTestAsync
 object Semantics extends Semantics with CoreTestAsync

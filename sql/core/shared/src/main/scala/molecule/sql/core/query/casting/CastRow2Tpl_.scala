@@ -26,15 +26,8 @@ trait CastRow2Tpl_ { self: Model2Query with SqlQueryBase =>
         val cast = (_: Row, _: AttrIndex) => nested.getOrElse(List.empty[Any])
         resolveArities(Nil, casts, 0, acc :+ cast, None)
 
-      // Composite
-      case ii :: as =>
-        val n                     = ii.length
-        val (tplCasts, moreCasts) = casts.splitAt(n)
-        val cast                  = (row: Row, _: AttrIndex) =>
-          castRow2AnyTpl(ii.map(List(_)), tplCasts, attrIndex, nested)(row)
-        resolveArities(as, moreCasts, attrIndex + n, acc :+ cast, nested)
 
-      case Nil => acc
+      case _ => acc
     }
   }
 

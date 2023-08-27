@@ -125,60 +125,6 @@ trait UpdateSet_id extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync
     }
 
 
-    "Update composite attributes" - types { implicit conn =>
-      for {
-        id <- (Ns.ints.strings + Ref.ii.ss)
-          .insert((Set(1), Set("a")), (Set(2), Set("b"))).transact.map(_.id)
-        _ <- (Ns.ints.strings + Ref.ii.ss).query.get.map(_.head ==> ((Set(1), Set("a")), (Set(2), Set("b"))))
-
-
-        // Composite sub groups share the same entity id
-        _ <- (Ns(id).ints(Set(3)).strings(Set("c")) + Ref.ii(Set(4)).ss(Set("d"))).update.transact
-        _ <- (Ns.ints.strings + Ref.ii.ss).query.get.map(_.head ==> ((Set(3), Set("c")), (Set(4), Set("d"))))
-
-        // Updating sub group with same entity id
-        _ <- Ref(id).ii(Set(5)).update.transact
-        _ <- (Ns.ints.strings + Ref.ii.ss).query.get.map(_.head ==> ((Set(3), Set("c")), (Set(5), Set("d"))))
-      } yield ()
-    }
-
-
-    "Update tx meta data" - types { implicit conn =>
-      for {
-        id <- Ns.ints.Tx(Other.ss_(Set("tx"))).insert(Set(1)).transact.map(_.id)
-        _ <- Ns.ints.Tx(Other.ss).query.get.map(_.head ==> (Set(1), Set("tx")))
-
-        tx <- Ns(id).ints(2).Tx(Other.ss(Set("tx2"))).update.transact.map(_.tx)
-        _ <- Ns.ints.Tx(Other.ss).query.get.map(_.head ==> (Set(2), Set("tx2")))
-
-        _ <- Ns(id).Tx(Other.ss(Set("tx3"))).update.transact
-            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> "Please apply the tx id to the namespace of tx meta data to be updated."
-        }
-
-        // We can though update the tx entity itself
-        _ <- Other(tx).ss(Set("tx3")).update.transact
-        _ <- Ns.ints.Tx(Other.ss).query.get.map(_.head ==> (Set(2), Set("tx3")))
-      } yield ()
-    }
-
-
-    "Composite + tx meta data" - types { implicit conn =>
-      for {
-        id <- (Ns.ints.strings + Ref.ii.ss).Tx(Other.ii_(Set(42)))
-          .insert((Set(1), Set("a")), (Set(2), Set("b"))).transact.map(_.id)
-        _ <- (Ns.ints.strings + Ref.ii.ss).Tx(Other.ii).query.get.map(_.head ==>
-          ((Set(1), Set("a")), (Set(2), Set("b")), Set(42)))
-
-        // Composite sub groups share the same entity id
-        _ <- (Ns(id).ints(Set(3)).strings(Set("c")) +
-          Ref.ii(Set(4)).ss(Set("d"))).Tx(Other.ii(Set(43))).update.transact
-        _ <- (Ns.ints.strings + Ref.ii.ss).Tx(Other.ii).query.get.map(_.head ==>
-          ((Set(3), Set("c")), (Set(4), Set("d")), Set(43)))
-      } yield ()
-    }
-
-
     "Semantics" - {
 
       "Can't update multiple values for one card-one attribute" - types { implicit conn =>

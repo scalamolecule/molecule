@@ -40,27 +40,14 @@ class ResolveUpdate(
               }
           }
 
-        case _: Nested    => throw ModelError(s"Nested data structure not allowed in $update molecule.")
-        case _: NestedOpt => throw ModelError(s"Optional nested data structure not allowed in $update molecule.")
+        case r@Ref(_, _, _, CardOne, _) => handleRefNs(r); resolve(tail)
+        case br: BackRef                => handleBackRef(br); resolve(tail)
 
-        case Ref(_, _, "Tx", CardOne, _)  => resolve(tail) // todo
-        case ref@Ref(_, _, _, CardOne, _) => handleRefNs(ref); resolve(tail)
-        case ref: Ref                     => throw ModelError(
+        case ref: Ref     => throw ModelError(
           s"Can't $update attributes in card-many referenced namespace `${ref.refAttr.capitalize}`"
         )
-
-        case b: BackRef =>
-          handleBackRef(b)
-          resolve(tail)
-
-        case Composite(es) =>
-          resolveSubElements(es)
-          resolve(tail)
-
-        case TxMetaData(es) =>
-          handleTxMetaData()
-          resolveSubElements(es)
-          resolve(tail)
+        case _: Nested    => throw ModelError(s"Nested data structure not allowed in $update molecule.")
+        case _: NestedOpt => throw ModelError(s"Optional nested data structure not allowed in $update molecule.")
       }
       case Nil             => ()
     }
@@ -70,8 +57,8 @@ class ResolveUpdate(
 
   private def resolveAttrOneMan(dataAttr: AttrOneMan): Unit = {
     dataAttr match {
-      case a if a.attr == "id" || a.attr == "tx" => throw ModelError(
-        s"Generic attributes not allowed in update molecule. Found:\n" + a)
+      case a if a.attr == "id" => throw ModelError(
+        s"Generic id attribute not allowed in update molecule. Found:\n" + a)
 
       case a if a.op != Eq => throw ModelError(
         s"Can't $update attributes without an applied value. Found:\n" + a)
@@ -96,8 +83,8 @@ class ResolveUpdate(
   private def resolveAttrOneTac(filterAttr: AttrOneTac): Unit = filterAttr match {
     case AttrOneTacLong(_, "id", Eq, ids1, _, _, _, _, _, _) => handleIds(ids1)
 
-    case a if a.attr == "id" || a.attr == "tx" => throw ModelError(
-      s"Generic attributes not allowed in update molecule. Found:\n" + a)
+    case a if a.attr == "id" => throw ModelError(
+      s"Generic id attribute not allowed in update molecule. Found:\n" + a)
 
     case a if uniqueAttrs.contains(a.name) => handleUniqueFilterAttr(a)
     case a                                 => handleFilterAttr(a)

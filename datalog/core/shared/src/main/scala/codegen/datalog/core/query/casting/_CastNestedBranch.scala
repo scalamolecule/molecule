@@ -38,28 +38,7 @@ object _CastNestedBranch extends DatomicGenBase("CastNestedBranch", "/query/cast
        |        val cast = (_: Row, nested: NestedTpls) => nested
        |        resolveArities(as, casts, attrIndexTx, attrIndexTx, acc :+ cast)
        |
-       |      // Composite with only tacit attributes
-       |      case ii :: as if ii.isEmpty =>
-       |        resolveArities(as, casts, attrIndex, attrIndexTx, acc)
-       |
-       |      // Composite with nested
-       |      case ii :: as if ii.last == -1 =>
-       |        val n                     = ii.length - 1
-       |        val (tplCasts, moreCasts) = casts.splitAt(n)
-       |        val cast                  = (row: Row, nested: NestedTpls) =>
-       |          castRow2AnyTpl(ii.map(List(_)), tplCasts, attrIndex, Some(nested))(row)
-       |        resolveArities(as, moreCasts, attrIndexTx, attrIndexTx, acc :+ cast)
-       |
-       |      // Composite
-       |      case ii :: as =>
-       |        val n                     = ii.length
-       |        val (tplCasts, moreCasts) = casts.splitAt(n)
-       |        val cast                  = (row: Row, _: NestedTpls) =>
-       |          castRow2AnyTpl(ii.map(List(_)), tplCasts, attrIndex, None)(row)
-       |        resolveArities(as, moreCasts, attrIndex + n, attrIndexTx, acc :+ cast)
-       |
-       |      case Nil =>
-       |        acc
+       |      case _ => acc
        |    }
        |  }
        |

@@ -13,7 +13,6 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
   extends Model2Query
     with ResolveExprOne[Tpl]
     with ResolveExprOne_id[Tpl]
-    with ResolveExprOne_tx[Tpl]
     with ResolveExprSet[Tpl]
     with ResolveRef[Tpl]
     with ResolveNestedPull[Tpl]
@@ -39,7 +38,7 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
     validateQueryModel(elements)
     val elements1 = prepareElements(elements)
 
-    // Remember first entity id variable for subsequent composite groups
+    // Remember first entity id variable
     firstId = vv
 
     // Recursively resolve molecule elements
@@ -81,23 +80,17 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
       elements match {
         case element :: tail =>
           element match {
-            case a: Attr               => prepare(tail, acc :+ prepareAttr(a))
-            case e: Composite          => prepare(tail, acc :+ prepareComposite(e))
-            case n: Nested             => prepare(tail, acc :+ prepareNested(n))
-            case n: NestedOpt          => prepare(tail, acc :+ prepareNestedOpt(n))
-            case t: TxMetaData         => prepare(tail, acc :+ prepareTxMetaData(t))
-            case Ref(_, _, "Tx", _, _) => prepareTxRef(); prepare(tail, acc)
-            case refOrBackRef          => prepare(tail, acc :+ refOrBackRef)
+            case a: Attr      => prepare(tail, acc :+ prepareAttr(a))
+            case n: Nested    => prepare(tail, acc :+ prepareNested(n))
+            case n: NestedOpt => prepare(tail, acc :+ prepareNestedOpt(n))
+            case refOrBackRef => prepare(tail, acc :+ refOrBackRef)
           }
         case Nil             => acc
       }
     }
     def prepareAttr(a: Attr): Attr = {
       availableAttrs += a.name
-      //      if (a.ns == "_Generic" && a.attr == "txId") {
-      if (a.attr == "tx") {
-        addTxVar = true
-      } else if (a.filterAttr.nonEmpty) {
+      if (a.filterAttr.nonEmpty) {
         val fa = a.filterAttr.get
         if (fa.filterAttr.nonEmpty) {
           throw ModelError(s"Nested filter attributes not allowed in ${a.ns}.${a.attr}")
@@ -107,6 +100,10 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
           // Create datomic variable for this expression attribute
           filterAttrVars = filterAttrVars + (filterAttr -> vv)
         }(_ => throw ModelError(s"Can't refer to ambiguous filter attribute $filterAttr"))
+        //        if (filterAttrVars.contains(filterAttr)) {
+        //          throw ModelError(s"Can't refer to ambiguous filter attribute $filterAttr")
+        //        }
+
         if (fa.ns == a.ns) {
           // Add adjacent filter attribute is lifted...
         } else if (fa.isInstanceOf[Mandatory]) {
@@ -121,16 +118,8 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
       a
     }
 
-    def prepareComposite(composite: Composite): Composite = Composite(prepare(composite.elements, Nil))
     def prepareNested(nested: Nested): Nested = Nested(nested.ref, prepare(nested.elements, Nil))
     def prepareNestedOpt(nested: NestedOpt): NestedOpt = NestedOpt(nested.ref, prepare(nested.elements, Nil))
-    def prepareTxRef(): Unit = {
-      addTxVar = true
-    }
-    def prepareTxMetaData(t: TxMetaData): TxMetaData = {
-      addTxVar = true
-      TxMetaData(prepare(t.elements, Nil))
-    }
 
     val elements1 = prepare(elements, Nil)
 
@@ -188,15 +177,6 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
               case a: AttrOneTac => resolve(resolveIdTac(es, a), tail)
               case _             => unexpectedElement(a)
             }
-          case "tx" =>
-            if (a.filterAttr.nonEmpty) {
-              throw ModelError("Filter attributes not allowed to involve transaction entity ids.")
-            }
-            a match {
-              case a: AttrOneMan => resolve(resolveTxMan(es, a), tail)
-              case a: AttrOneTac => resolve(resolveTxTac(es, a), tail)
-              case _             => unexpectedElement(a)
-            }
           case _    =>
             a.filterAttr.collect {
               case filterAttr if filterAttr.attr == "id" =>
@@ -219,20 +199,12 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
         }
       case ref: Ref                             => resolve(resolveRef(es, ref), tail)
       case _: BackRef                           => resolve(es.init, tail)
-      case Composite(compositeElements)         => resolve(resolveComposite(compositeElements), tail)
       case Nested(ref, nestedElements)          => resolve(resolveNested(es, ref, nestedElements), tail)
       case NestedOpt(nestedRef, nestedElements) => resolve(resolveNestedOpt(es, nestedRef, nestedElements), tail)
-      case TxMetaData(txElements)               => resolveTxMetaData(txElements)
     }
     case Nil             => es
   }
 
-
-  final private def resolveComposite(compositeElements: List[Element]): List[Var] = {
-    aritiesComposite()
-    // Use first entity id in each composite sub group
-    resolve(List(firstId), compositeElements)
-  }
 
   final private def resolveNested(
     es: List[Var], ref: Ref, nestedElements: List[Element]
@@ -268,23 +240,12 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
     es
   }
 
-  final private def resolveTxMetaData(txElements: List[Element]): List[Var] = {
-    isTxMetaData = true
-    // Use txVar as first entity id var for composite elements
-    firstId = txVar
-    resolve(List(txVar), txElements)
-  }
-
   final private def validateRefNs(ref: Ref, nestedElements: List[Element]): Unit = {
     val refName  = ref.refAttr.capitalize
     val nestedNs = nestedElements.head match {
-      case a: Attr       => a.ns
-      case r: Ref        => r.ns
-      case Composite(es) => es.head match {
-        case a: Attr => a.ns
-        case other   => unexpectedElement(other)
-      }
-      case other         => unexpectedElement(other)
+      case a: Attr => a.ns
+      case r: Ref  => r.ns
+      case other   => unexpectedElement(other)
     }
     if (ref.refNs != nestedNs)
       throw ModelError(s"`$refName` can only nest to `${ref.refNs}`. Found: `$nestedNs`")

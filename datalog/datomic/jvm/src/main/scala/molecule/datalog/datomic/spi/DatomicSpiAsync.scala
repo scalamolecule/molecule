@@ -12,7 +12,6 @@ import molecule.core.validation.insert.InsertValidation
 import molecule.datalog.datomic.facade.DatomicConn_JVM
 import molecule.datalog.datomic.marshalling.DatomicRpcJVM.Data
 import molecule.datalog.datomic.transaction.{Data_Delete, Data_Insert, Data_Save, Data_Update}
-import zio.ZIO
 import scala.concurrent.{Future, ExecutionContext => EC}
 
 object DatomicSpiAsync extends DatomicSpiAsync
@@ -81,7 +80,7 @@ trait DatomicSpiAsync
   }
 
   private def save_getStmts(save: Save): Data = {
-    (new ResolveSave() with Data_Save).getStmts(save.elements)
+    (new ResolveSave with Data_Save).getStmts(save.elements)
   }
 
   override def save_validate(save: Save)(implicit conn: Conn): Map[String, Seq[String]] = {

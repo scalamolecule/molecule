@@ -110,8 +110,6 @@ trait JVMJdbcSpiBase extends ModelUtils {
           case _: AttrSetOpt => throw ModelError(s"Can't $update optional values. Found:\n" + a)
         }
 
-      case Ref(_, _, "Tx", CardOne, _)  => throw ModelError("Updating tx meta data not yet implemented...")
-
       case ref@Ref(_, _, _, CardOne, _) =>
         if (firstNs) {
           firstNs = false

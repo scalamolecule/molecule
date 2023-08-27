@@ -81,9 +81,5 @@ object _ExprOneMan extends BoilerplateGenBase("ExprOneMan", "/api/expression") {
          |  def even                               : Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(Even      , Nil                    )
          |  def odd                                : Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(Odd       , Nil                    )
          |}""".stripMargin
-    //         |trait $fileName_${arity}_Decimal[${`A..V`}, t, Ns1[${`_, _`}], Ns2[${`_, _, _`}]] extends $fileName_$arity[${`A..V, `}t, Ns1, Ns2] {
-    //         |  def whole                              : Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(Whole     , Nil)
-    //         |  def fractional                         : Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(Fractional, Nil)
-    //         |}""".stripMargin
   }
 }

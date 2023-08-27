@@ -1,5 +1,6 @@
 package molecule.sql.jdbc.test.aggr
 
+import molecule.coreTests.test.aggr.one.AggrOne_id
 import molecule.coreTests.test.aggr.one.any._
 import molecule.sql.jdbc.setup.CoreTestAsync
 
@@ -18,3 +19,5 @@ object AggrOne_Byte extends AggrOne_Byte_ with CoreTestAsync
 object AggrOne_Short extends AggrOne_Short_ with CoreTestAsync
 object AggrOne_Char extends AggrOne_Char_ with CoreTestAsync
 object AggrOne_ref extends AggrOne_ref_ with CoreTestAsync
+
+object AggrOne_id extends AggrOne_id with CoreTestAsync

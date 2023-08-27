@@ -24,14 +24,7 @@ trait CastNestedOptLeaf_
       case List(-1) :: Nil =>
         resolveArities(Nil, casts.tail, acc :+ casts.head)
 
-      // Composite
-      case ii :: as =>
-        val n                     = ii.length
-        val (tplCasts, moreCasts) = casts.splitAt(n)
-        val tplCaster             = castIt2Tpl(tplCasts)
-        resolveArities(as, moreCasts, acc :+ tplCaster)
-
-      case Nil => acc
+      case _ => acc
     }
   }
 

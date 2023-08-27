@@ -22,7 +22,7 @@ trait ResolveRef[Tpl] { self: DatomicQueryBase with NestOpt_[Tpl] =>
 
   protected def resolveNestedRef(es: List[Var], ref: Ref): List[Var] = {
     val (e, refAttr, refId) = (es.last, s":${ref.ns}/${ref.refAttr}", vv)
-    firstId = refId // for composites in nested
+    firstId = refId
     val nestedId = "?id" + nestedIds.size
     nestedIds += nestedId
     //    nestedIds += e

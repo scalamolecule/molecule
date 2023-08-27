@@ -52,13 +52,6 @@ trait InsertOps {
     backRefNs: String
   ): Product => Unit
 
-  protected def addComposite(
-    nsMap: Map[String, MetaNs],
-    outerTplIndex: Int,
-    tplIndex: Int,
-    elements: List[Element]
-  ): Product => Unit
-
   protected def addNested(
     nsMap: Map[String, MetaNs],
     tplIndex: Int,

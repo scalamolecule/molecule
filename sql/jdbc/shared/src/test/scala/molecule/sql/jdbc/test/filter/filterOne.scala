@@ -1,5 +1,6 @@
 package molecule.sql.jdbc.test.filter
 
+import molecule.coreTests.test.filter.FilterOne_id
 import molecule.coreTests.test.filter.one._
 import molecule.coreTests.test.filter.one.special._
 import molecule.sql.jdbc.setup.CoreTestAsync
@@ -22,3 +23,5 @@ object FilterOne_ref_ extends FilterOne_ref_ with CoreTestAsync
 
 object FilterOneSpecial_Number extends FilterOneSpecial_Number with CoreTestAsync
 object FilterOneSpecial_String extends FilterOneSpecial_String with CoreTestAsync
+
+object FilterOne_id extends FilterOne_id with CoreTestAsync

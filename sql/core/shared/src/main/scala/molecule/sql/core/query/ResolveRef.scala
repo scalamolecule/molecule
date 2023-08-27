@@ -19,12 +19,6 @@ trait ResolveRef { self: SqlQueryBase =>
     }
   }
 
-  protected def resolveCompositeJoin(nsA: String, nsB: String, compositeGroup: Int): Unit = {
-    val cj = "cj" + compositeGroup
-    joins += (("INNER JOIN", "CompositeJoin", cj, s"$cj.a = '$nsA' AND $cj.a_id = $nsA.id"))
-    joins += (("INNER JOIN", nsB, "",             s"$cj.b = '$nsB' AND $cj.b_id = $nsB.id"))
-  }
-
   protected def resolveNestedRef(ref: Ref): Unit = {
     val Ref(ns, refAttr, refNs, _, _) = ref
     val (as, ext)                     = exts(refNs).fold(("", ""))(ext => (refNs + ext, ext))

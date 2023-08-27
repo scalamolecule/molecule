@@ -25,19 +25,7 @@ trait CastNestedOptBranch_
       case List(-1) :: Nil =>
         resolveArities(Nil, Nil, pullNested, acc :+ pullNested)
 
-      // Composite with leaf
-      case ii :: _ if ii.last == -1 =>
-        val tplCaster = castIt2Tpl(casts :+ pullNested)
-        resolveArities(Nil, Nil, pullNested, acc :+ tplCaster)
-
-      // Composite
-      case ii :: as =>
-        val n                     = ii.length
-        val (tplCasts, moreCasts) = casts.splitAt(n)
-        val tplCaster             = castIt2Tpl(tplCasts)
-        resolveArities(as, moreCasts, pullNested, acc :+ tplCaster)
-
-      case Nil => acc
+      case _ => acc
     }
   }
 

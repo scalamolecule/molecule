@@ -183,7 +183,7 @@ trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
       case "distinct" =>
         val (v1, v2, e1) = (v + 1, v + 2, e + 1)
         find += s"(distinct $v2)"
-        where += s"[$e $a $v$tx]" -> wClause
+        where += s"[$e $a $v]" -> wClause
         where +=
           s"""[(datomic.api/q
              |          "[:find (distinct $v1)
@@ -265,11 +265,11 @@ trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
 
       case other => unexpectedKw(other)
     }
-    where += s"[$e $a $v$tx]" -> wClause
+    where += s"[$e $a $v]" -> wClause
   }
 
   private def attr(e: Var, a: Att, v: Var): Unit = {
-    where += s"[$e $a $v$tx]" -> wClause
+    where += s"[$e $a $v]" -> wClause
   }
 
 
@@ -279,11 +279,9 @@ trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
     aa match {
       case "id" =>
         in += s"[$e ...]"
-      case "tx" =>
-        in += s"[$txVar ...]"
       case _    =>
         in += s"[$set ...]"
-        where += s"[$e $a $v$tx]" -> wClause
+        where += s"[$e $a $v]" -> wClause
     }
     where +=
       s"""[(datomic.api/q
@@ -312,7 +310,7 @@ trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
   private def equal2(e: Var, a: Att, v: Var, filterAttr: String): Unit = {
     preFind = e
 
-    where += s"[$e $a $v$tx]" -> wClause
+    where += s"[$e $a $v]" -> wClause
     where +=
       s"""[(datomic.api/q
          |          "[:find (distinct ${v}1)
@@ -332,7 +330,7 @@ trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
   }
 
   private def neq[T](e: Var, a: Att, v: Var, sets: Seq[Set[T]], fromScala: Any => Any): Unit = {
-    where += s"[$e $a $v$tx]" -> wClause
+    where += s"[$e $a $v]" -> wClause
     if (sets.nonEmpty && sets.flatten.nonEmpty) {
       val blacklist               = v + "-blacklist"
       val blacklisted             = v + "-blacklisted"
@@ -372,7 +370,7 @@ trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
   }
 
   private def neq2(e: Var, a: Att, v: Var, filterAttr: String): Unit = {
-    where += s"[$e $a $v$tx]" -> wClause
+    where += s"[$e $a $v]" -> wClause
     val process: (Var, Var) => Unit = (e1: Var, v1: Var) => {
       val blacklist   = v1 + "-blacklist"
       val blacklisted = v1 + "-blacklisted"
@@ -406,7 +404,7 @@ trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
   private def has[T: ClassTag](
     e: Var, a: Att, v: Var, sets: Seq[Set[T]], tpe: String, toDatalog: T => String
   ): Unit = {
-    where += s"[$e $a $v$tx]" -> wClause
+    where += s"[$e $a $v]" -> wClause
     if (sets.nonEmpty && sets.flatten.nonEmpty) {
       where += s"(rule$v $e)" -> wClause
       rules ++= mkRules(e, a, v, sets, tpe, toDatalog)
@@ -432,7 +430,7 @@ trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
   }
 
   private def has2(e: Var, a: Att, v: Var, filterAttr: String): Unit = {
-    where += s"[$e $a $v$tx]" -> wClause
+    where += s"[$e $a $v]" -> wClause
     val process: (Var, Var) => Unit = (e1: Var, v1: Var) => {
       where +=
         s"""[(datomic.api/q
@@ -456,7 +454,7 @@ trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
 
   private def hasNo[T](e: Var, a: Att, v: Var, sets: Seq[Set[T]], tpe: String, toDatalog: T => String): Unit = {
     // Common for pre-query and main query
-    where += s"[$e $a $v$tx]" -> wClause
+    where += s"[$e $a $v]" -> wClause
 
     if (sets.nonEmpty && sets.flatten.nonEmpty) {
       // Pre-query
@@ -519,13 +517,13 @@ trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
     if (optSets.isDefined) {
       hasNo(e, a, v, optSets.get, tpe, toDatalog)
     } else {
-      where += s"[$e $a $v$tx]" -> wClause
+      where += s"[$e $a $v]" -> wClause
     }
   }
 
   private def hasNo2(e: Var, a: Att, v: Var, filterAttr: String): Unit = {
     // Common for pre-query and main query
-    where += s"[$e $a $v$tx]" -> wClause
+    where += s"[$e $a $v]" -> wClause
     val process: (Var, Var) => Unit = (e1: Var, v1: Var) => {
       where +=
         s"""[(datomic.api/q

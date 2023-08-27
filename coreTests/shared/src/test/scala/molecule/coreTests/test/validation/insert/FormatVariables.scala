@@ -28,7 +28,6 @@ trait FormatVariables extends CoreTestSuite with ApiAsyncImplicits { self: SpiAs
                 0, // row index
                 Seq(
                   InsertError(
-                    0, // outer tuple index
                     0, // tuple index
                     "Variables.noErrorMsg",
                     Seq(
@@ -37,7 +36,7 @@ trait FormatVariables extends CoreTestSuite with ApiAsyncImplicits { self: SpiAs
                          |  _ > int
                          |""".stripMargin
                     ),
-                    Nil // composite/nested errors
+                    Nil // nested errors
                   )
                 )
               )

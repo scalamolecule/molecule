@@ -127,56 +127,6 @@ trait Delete_filter extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsyn
     }
 
 
-    "Composite" - types { implicit conn =>
-      for {
-        _ <- Ns.i.insert(1).transact
-        _ <- (Ns.i + Ref.i).insert((2, 20), (3, 30)).transact
-
-        _ <- Ns.i.query.get.map(_ ==> List(1, 2, 3))
-        _ <- Ref.i.query.get.map(_ ==> List(20, 30))
-        _ <- (Ns.i + Ref.i).query.get.map(_ ==> List((2, 20), (3, 30)))
-
-        // Nothing deleted since entity 1 doesn't have a ref
-        _ <- (Ns.i_(1) + Ref.i_).delete.transact
-        _ <- Ns.i.query.get.map(_ ==> List(1, 2, 3))
-        _ <- Ref.i.query.get.map(_ ==> List(20, 30))
-
-        // Second entity has a ref and both will be deleted
-        _ <- (Ns.i_(2) + Ref.i_).delete.transact
-        _ <- Ns.i.query.get.map(_ ==> List(1, 3))
-        _ <- Ref.i.query.get.map(_ ==> List(30))
-        _ <- (Ns.i + Ref.i).query.get.map(_ ==> List((3, 30)))
-
-        // Ns.i entity has no ref to Ref.i_(42) so nothing is deleted
-        _ <- (Ns.i_ + Ref.i_(42)).delete.transact
-        _ <- Ns.i.query.get.map(_ ==> List(1, 3))
-        _ <- Ref.i.query.get.map(_ ==> List(30))
-        _ <- (Ns.i + Ref.i).query.get.map(_ ==> List((3, 30)))
-
-        // Ns.i entity has a ref to Ref.i_(30) so both will be deleted
-        _ <- (Ns.i_ + Ref.i_(30)).delete.transact
-        _ <- Ns.i.query.get.map(_ ==> List(1))
-        _ <- Ref.i.query.get.map(_ ==> List())
-        _ <- (Ns.i + Ref.i).query.get.map(_ ==> List())
-      } yield ()
-    }
-
-
-    "Composite + expr" - types { implicit conn =>
-      for {
-        _ <- (Ns.i + Ref.i).insert((1, 10), (2, 20)).transact
-        _ <- Ns.i.a1.query.get.map(_ ==> List(1, 2))
-        _ <- Ref.i.a1.query.get.map(_ ==> List(10, 20))
-        _ <- (Ns.i.a1 + Ref.i).query.get.map(_ ==> List((1, 10), (2, 20)))
-
-        _ <- (Ns.i_ + Ref.i_.>(15)).delete.transact
-        _ <- Ns.i.query.get.map(_ ==> List(1))
-        _ <- Ref.i.query.get.map(_ ==> List(10))
-        _ <- (Ns.i + Ref.i).query.get.map(_ ==> List((1, 10)))
-      } yield ()
-    }
-
-
     "Semantics" - {
 
       "Only tacit attributes" - types { implicit conn =>

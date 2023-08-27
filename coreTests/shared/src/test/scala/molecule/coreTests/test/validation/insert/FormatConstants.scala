@@ -28,7 +28,6 @@ trait FormatConstants extends CoreTestSuite with ApiAsyncImplicits { self: SpiAs
                 0, // row index
                 Seq(
                   InsertError(
-                    0, // outer tuple index
                     0, // tuple index
                     "Constants.noErrorMsg",
                     Seq(
@@ -36,7 +35,7 @@ trait FormatConstants extends CoreTestSuite with ApiAsyncImplicits { self: SpiAs
                          |  _ > 2
                          |""".stripMargin
                     ),
-                    Nil // composite/nested errors
+                    Nil // nested errors
                   )
                 )
               )
@@ -279,7 +278,6 @@ trait FormatConstants extends CoreTestSuite with ApiAsyncImplicits { self: SpiAs
                 0, // Top-level row index
                 Seq(
                   InsertError(
-                    0, // Composite tuple index
                     0, // tuple index
                     "Constants.multipleErrors",
                     Seq(
@@ -298,7 +296,6 @@ trait FormatConstants extends CoreTestSuite with ApiAsyncImplicits { self: SpiAs
                 2, // Top-level row index
                 Seq(
                   InsertError(
-                    0, // Composite tuple index
                     0, // tuple index
                     "Constants.multipleErrors",
                     Seq(
@@ -324,7 +321,6 @@ trait FormatConstants extends CoreTestSuite with ApiAsyncImplicits { self: SpiAs
           case InsertErrors(errors, _) =>
             errors.head._2 ==> Seq(
               InsertError(
-                0, // Composite tuple index
                 0, // tuple index
                 "Constants.errorMsg",
                 Seq(
@@ -333,7 +329,6 @@ trait FormatConstants extends CoreTestSuite with ApiAsyncImplicits { self: SpiAs
                 Seq()
               ),
               InsertError(
-                0, // Composite tuple index
                 1, // tuple index
                 "Constants.multipleErrors",
                 Seq(
@@ -364,7 +359,6 @@ trait FormatConstants extends CoreTestSuite with ApiAsyncImplicits { self: SpiAs
                 0, // Top-level row index
                 Seq(
                   InsertError(
-                    0, // Composite tuple index
                     0, // tuple index
                     "Constants.errorMsg",
                     Seq(
@@ -382,7 +376,6 @@ trait FormatConstants extends CoreTestSuite with ApiAsyncImplicits { self: SpiAs
                 2, // Top-level row index
                 Seq(
                   InsertError(
-                    0, // Composite tuple index
                     0, // tuple index
                     "Constants.errorMsg",
                     Seq(
@@ -391,7 +384,6 @@ trait FormatConstants extends CoreTestSuite with ApiAsyncImplicits { self: SpiAs
                     Seq()
                   ),
                   InsertError(
-                    0, // Composite tuple index
                     1, // tuple index
                     "Constants.multipleErrors",
 

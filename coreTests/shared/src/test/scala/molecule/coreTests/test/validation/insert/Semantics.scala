@@ -24,7 +24,6 @@ trait Semantics extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =
                 0, // row index
                 Seq(
                   InsertError(
-                    0, // outer tuple index
                     0, // tuple index
                     "Type.int",
                     Seq(
@@ -32,7 +31,7 @@ trait Semantics extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =
                          |  _ > 2
                          |""".stripMargin
                     ),
-                    Nil // composite/nested errors
+                    Nil // nested errors
                   )
                 )
               )
@@ -52,7 +51,6 @@ trait Semantics extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =
                 0, // row index
                 Seq(
                   InsertError(
-                    0, // outer tuple index
                     0, // tuple index, int
                     "Type.int",
                     Seq(
@@ -63,7 +61,6 @@ trait Semantics extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =
                     Nil
                   ),
                   InsertError(
-                    0, // outer tuple index
                     1, // tuple index, long
                     "Type.long",
                     Seq(
@@ -94,7 +91,6 @@ trait Semantics extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =
                 0, // first row
                 Seq(
                   InsertError(
-                    0, // outer tuple index
                     0, // tuple index, int
                     "Type.int",
                     Seq(
@@ -105,7 +101,6 @@ trait Semantics extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =
                     Nil
                   ),
                   InsertError(
-                    0, // outer tuple index
                     1, // tuple index, long
                     "Type.long",
                     Seq(
@@ -121,7 +116,6 @@ trait Semantics extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =
                 1, // second row
                 Seq(
                   InsertError(
-                    0, // outer tuple index
                     0, // tuple index, int
                     "Type.int",
                     Seq(
@@ -132,7 +126,6 @@ trait Semantics extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =
                     Nil
                   ),
                   InsertError(
-                    0, // outer tuple index
                     1, // tuple index, long
                     "Type.long",
                     Seq(
@@ -165,7 +158,6 @@ trait Semantics extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =
                 0,
                 Seq(
                   InsertError(
-                    0, // outer tuple index
                     0, // tuple index, int
                     "Type.int",
                     Seq(
@@ -185,7 +177,6 @@ trait Semantics extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =
                 2,
                 Seq(
                   InsertError(
-                    0, // outer tuple index
                     0, // tuple index, int
                     "Type.int",
                     Seq(
@@ -196,7 +187,6 @@ trait Semantics extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =
                     Nil
                   ),
                   InsertError(
-                    0, // outer tuple index
                     1, // tuple index, long
                     "Type.long",
                     Seq(

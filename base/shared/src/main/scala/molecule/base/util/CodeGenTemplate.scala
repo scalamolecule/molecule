@@ -7,11 +7,6 @@ abstract class CodeGenTemplate(val fileName: String, dir: String, basePath: Stri
   val fileName_    = if (fileName == "package") "package" else fileName + "_"
   def caseN(n: Int) = if (n < 10) s"$n " else n
 
-  val txs_ = (0 to 22).map(i => s"Tx$i[" + Seq.fill(i + 1)("_").mkString(",") + "]").mkString(", ")
-  val txs  = (0 to 22).map(i => s"Tx$i").mkString(", ")
-  val tns  = (1 to 22).map(i => s"T$i").mkString(", ")
-
-
   class TemplateVals(arity: Int) {
     lazy val s          = " "
     lazy val V          = ('A' + arity - 1).toChar

@@ -107,38 +107,5 @@ trait Delete_uniqueAttr extends CoreTestSuite with ApiAsyncImplicits { self: Spi
         _ <- Uniques.int.Ref.int.query.get.map(_ ==> List())
       } yield ()
     }
-
-
-    "Composite" - unique { implicit conn =>
-      for {
-        _ <- Uniques.int.insert(1).transact
-        _ <- (Uniques.int + Ref.int).insert((2, 20), (3, 30)).transact
-
-        _ <- Uniques.int.query.get.map(_ ==> List(1, 2, 3))
-        _ <- (Uniques.int + Ref.int).query.get.map(_ ==> List((2, 20), (3, 30)))
-
-        // Nothing deleted since entity 1 doesn't have a ref
-        _ <- (Uniques.int_(1) + Ref.int_).delete.transact
-        _ <- Uniques.int.query.get.map(_ ==> List(1, 2, 3))
-
-        // Second entity has a ref and will be deleted
-        _ <- (Uniques.int_(2) + Ref.int_).delete.transact
-        _ <- Uniques.int.query.get.map(_ ==> List(1, 3))
-        _ <- (Uniques.int + Ref.int).query.get.map(_ ==> List((3, 30)))
-
-        // Note that Ref.int belongs to the same entity as Uniques.int, and is therefore deleted together
-        _ <- Ref.int.query.get.map(_ ==> List(30))
-
-        // Uniques.int entity has no ref to Ref.int_(42) so nothing is deleted
-        _ <- (Uniques.int_ + Ref.int_(42)).delete.transact
-        _ <- Uniques.int.query.get.map(_ ==> List(1, 3))
-        _ <- (Uniques.int + Ref.int).query.get.map(_ ==> List((3, 30)))
-
-        // Uniques.int entity has a ref to Ref.int_(30) so it will be deleted
-        _ <- (Uniques.int_ + Ref.int_(30)).delete.transact
-        _ <- Uniques.int.query.get.map(_ ==> List(1))
-        _ <- (Uniques.int + Ref.int).query.get.map(_ ==> List())
-      } yield ()
-    }
   }
 }

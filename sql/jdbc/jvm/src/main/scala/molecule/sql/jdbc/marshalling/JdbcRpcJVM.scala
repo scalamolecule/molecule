@@ -90,7 +90,6 @@ object JdbcRpcJVM extends MoleculeRpc
     proxy: ConnProxy,
     tplElements: List[Element],
     tplsSerialized: Array[Byte],
-    txElements: List[Element],
   ): Future[Either[MoleculeError, TxReport]] = either {
 //    for {
 //      conn <- getConn(proxy)

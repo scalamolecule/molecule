@@ -142,55 +142,6 @@ trait UpdateOne_id extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync
     }
 
 
-    "Update composite attributes" - types { implicit conn =>
-      for {
-        id <- (Ns.int.string + Ref.i.s).insert((1, "a"), (2, "b")).transact.map(_.id)
-        _ <- (Ns.int.string + Ref.i.s).query.get.map(_ ==> List(((1, "a"), (2, "b"))))
-
-        // Composite sub groups share the same entity id
-        _ <- (Ns(id).int(3).string("c") + Ref.i(4).s("d")).update.transact
-        _ <- (Ns.int.string + Ref.i.s).query.get.map(_ ==> List(((3, "c"), (4, "d"))))
-
-        // Updating sub group with same entity id
-        _ <- Ref(id).i(5).update.transact
-        _ <- (Ns.int.string + Ref.i.s).query.get.map(_ ==> List(((3, "c"), (5, "d"))))
-      } yield ()
-    }
-
-
-    "Update tx meta data" - types { implicit conn =>
-      for {
-        id <- Ns.int.Tx(Other.s_("tx")).insert(1).transact.map(_.id)
-        _ <- Ns.int.Tx(Other.s).query.get.map(_ ==> List((1, "tx")))
-
-        tx <- Ns(id).int(2).Tx(Other.s("tx2")).update.transact.map(_.tx)
-        _ <- Ns.int.Tx(Other.s).query.get.map(_ ==> List((2, "tx2")))
-
-
-        _ <- Ns(id).Tx(Other.s("tx3")).update.transact
-          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Please apply the tx id to the namespace of tx meta data to be updated."
-          }
-
-        // We can though update the tx entity itself
-        _ <- Other(tx).s("tx3").update.transact
-        _ <- Ns.int.Tx(Other.s).query.get.map(_ ==> List((2, "tx3")))
-      } yield ()
-    }
-
-
-    "Composite + tx meta data" - types { implicit conn =>
-      for {
-        id <- (Ns.int.string + Ref.i.s).Tx(Other.i_(42)).insert((1, "a"), (2, "b")).transact.map(_.id)
-        _ <- (Ns.int.string + Ref.i.s).Tx(Other.i).query.get.map(_ ==> List(((1, "a"), (2, "b"), 42)))
-
-        // Composite sub groups share the same entity id
-        _ <- (Ns(id).int(3).string("c") + Ref.i(4).s("d")).Tx(Other.i(43)).update.transact
-        _ <- (Ns.int.string + Ref.i.s).Tx(Other.i).query.get.map(_ ==> List(((3, "c"), (4, "d"), 43)))
-      } yield ()
-    }
-
-
     "Semantics" - {
 
       "Can't update multiple values for one card-one attribute" - types { implicit conn =>

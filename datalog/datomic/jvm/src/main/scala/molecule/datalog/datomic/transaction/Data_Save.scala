@@ -89,15 +89,6 @@ trait Data_Save extends DatomicBase_JVM with SaveOps with MoleculeLogging { self
   override protected def handleRefNs(refNs: String): Unit = {
     backRefs = backRefs + (refNs -> e)
   }
-  override protected def handleComposite(isInsertTxMetaData: Boolean, compositeNs: String): Unit = {
-    // Start from initial entity id for each composite sub group
-    e = if (isInsertTxMetaData) datomicTx else e0
-  }
-  override protected def handleTxMetaData(ns: String): Unit = {
-    e = datomicTx
-    e0 = datomicTx
-    handleRefNs(ns)
-  }
 
   // Save Int as Long in Datomic
   override protected lazy val transformString     = (v: String) => v

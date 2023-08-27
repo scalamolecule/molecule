@@ -92,7 +92,7 @@ trait JdbcSpiSync
   }
 
   private def save_getData(save: Save, conn: JdbcConn_jvm): Data = {
-    new ResolveSave() with Data_Save {
+    new ResolveSave with Data_Save {
       override protected val sqlConn = conn.sqlConn
     }.getData(save.elements)
   }

@@ -15,13 +15,13 @@ class ResolveDelete { self: DeleteOps =>
           case AttrOneTacLong(_, "id", Eq, ids1, _, _, _, _, _, _) =>
             if (!topLevel)
               throw ModelError(
-                s"Can only apply entity ids to be deleted at top level/first composite group of molecule."
+                s"Can only apply entity ids to be deleted to the initial namespace."
               )
             addIds(ids1)
             resolve(tail, topLevel)
 
-          case a if a.attr == "id" || a.attr == "tx" => throw ModelError(
-            s"Generic attributes not allowed in delete molecule. Found:\n" + a)
+          case a if a.attr == "id" => throw ModelError(
+            s"Generic id attribute not allowed in delete molecule. Found:\n" + a)
 
           case _: AttrOneTac =>
             addFilterElement(element)

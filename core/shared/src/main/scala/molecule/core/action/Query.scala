@@ -6,10 +6,10 @@ import molecule.core.marshalling.dbView._
 import molecule.core.spi.TxReport
 
 case class Query[Tpl](
-  elements0: List[Element],
+  elements: List[Element],
   limit: Option[Int] = None,
   dbView: Option[DbView] = None
-) extends Action(elements0) {
+) extends Action(elements) {
 
   // Common api
 

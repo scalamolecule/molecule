@@ -23,7 +23,7 @@ trait ResolveExprOne_id[Tpl]
 
   protected def resolveIdTac(es: List[Var], attr: AttrOneTac): List[Var] = {
     val e = es.last
-    if (isNestedOpt && !isTxMetaData) {
+    if (isNestedOpt) {
       throw ModelError("Tacit id not allowed in optional nested queries.")
     }
     attr match {
@@ -37,8 +37,7 @@ trait ResolveExprOne_id[Tpl]
 
   private def addSort(sorter: Option[(Int, Int => (Row, Row) => Int)]): Unit = {
     sorter.foreach {
-      case s if isTxMetaData => sortss = (sortss.head :+ s) +: sortss.tail
-      case s                 => sortss = sortss.init :+ (sortss.last :+ s)
+      case s => sortss = sortss.init :+ (sortss.last :+ s)
     }
   }
 

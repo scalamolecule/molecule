@@ -1,6 +1,6 @@
 package molecule.datalog.datomic.test.aggr
 
-import molecule.coreTests.test.aggr.one.{AggrOne_id, AggrOne_tx}
+import molecule.coreTests.test.aggr.one.AggrOne_id
 import molecule.coreTests.test.aggr.one.any._
 import molecule.datalog.datomic.setup.CoreTestAsync
 
@@ -21,4 +21,3 @@ object AggrOne_Char extends AggrOne_Char_ with CoreTestAsync
 object AggrOne_ref extends AggrOne_ref_ with CoreTestAsync
 
 object AggrOne_id extends AggrOne_id with CoreTestAsync
-object AggrOne_tx extends AggrOne_tx with CoreTestAsync

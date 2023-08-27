@@ -43,7 +43,7 @@ case class ModelValidation(
       case head :: tail => head match {
         case a: Attr =>
           val attr = a.name
-          if (a.attr != "id" || a.attr != "tx") {
+          if (a.attr != "id") {
             register(a, attr)
           }
           if (isTx && isInsert && !(a.isInstanceOf[AttrOneTac] || a.isInstanceOf[AttrSetTac])) {
@@ -85,11 +85,6 @@ case class ModelValidation(
           refPath = refPath.init
           validate(tail)
 
-        case Composite(es) =>
-          curElements = es
-          refPath = Seq.empty[String]
-          validate(es ++ tail)
-
         case Nested(r, es) =>
           curElements = es
           val ref = r.name
@@ -109,15 +104,6 @@ case class ModelValidation(
           level += 1
           group = 0
           validate(es ++ tail)
-
-        case TxMetaData(txElements) =>
-          curElements = txElements
-          prev = prev :+ Array(Array.empty[String])
-          level += 1
-          group = 0
-          refPath = Seq.empty[String]
-          isTx = true
-          validate(txElements)
       }
       case Nil          =>
         checkMandatoryAndRequiredAttrs()

@@ -27,7 +27,7 @@ trait Enumerations extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync
         // Same with insert
         _ <- Enum.luckyNumber.insert(8).transact
           .map(_ ==> "Unexpected success").recover {
-          case InsertErrors(Seq((_, Seq(InsertError(_, _, _, Seq(error), _)))), _) =>
+          case InsertErrors(Seq((_, Seq(InsertError(_, _, Seq(error), _)))), _) =>
             error ==> "Value `8` is not one of the allowed values in Seq(7, 9, 13)"
         }
 

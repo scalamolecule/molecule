@@ -107,9 +107,8 @@ trait DatomicSpiZio
       conn <- ZIO.service[Conn]
       errors <- insert_validate(insert)
       _ <- ZIO.when(errors.nonEmpty)(ZIO.fail(InsertErrors(errors)))
-      (tplElements, txElements) = separateTxElements(insert.elements)
-      tplsSerialized = PickleTpls(tplElements, true).pickle(Right(insert.tpls))
-      txReport <- transactStmts(conn.rpc.insert(conn.proxy, tplElements, tplsSerialized, txElements).future)
+      tplsSerialized = PickleTpls(insert.elements, true).pickle(Right(insert.tpls))
+      txReport <- transactStmts(conn.rpc.insert(conn.proxy, insert.elements, tplsSerialized).future)
     } yield txReport
   }
   override def insert_inspect(insert: Insert): ZIO[Conn, MoleculeError, Unit] = {

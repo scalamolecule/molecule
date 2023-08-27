@@ -141,50 +141,6 @@ trait UpdateOne_uniqueAttr extends CoreTestSuite with ApiAsyncImplicits { self: 
     }
 
 
-    "Update composite attributes" - unique { implicit conn =>
-      for {
-        _ <- (Uniques.int.i.s + Ref.i.s).insert((0, 1, "a"), (2, "b")).transact
-        _ <- (Uniques.i.s + Ref.i.s).query.get.map(_ ==> List(((1, "a"), (2, "b"))))
-
-        // Composite sub groups share the same entity id
-        _ <- (Uniques.int_(0).i(3).s("c") + Ref.i(4).s("d")).update.transact
-        _ <- (Uniques.i.s + Ref.i.s).query.get.map(_ ==> List(((3, "c"), (4, "d"))))
-      } yield ()
-    }
-
-
-    "Update tx meta data" - unique { implicit conn =>
-      for {
-        _ <- Uniques.int.i.Tx(Other.i_(42).s_("tx")).insert(0, 1).transact
-        _ <- Uniques.i.Tx(Other.i.s).query.get.map(_ ==> List((1, 42, "tx")))
-
-        _ <- Uniques.int_(0).i(2).Tx(Other.i(43).s("tx2")).update.transact
-        _ <- Uniques.i.Tx(Other.i.s).query.get.map(_ ==> List((2, 43, "tx2")))
-
-        _ <- Uniques.int_(0).Tx(Other.s("tx3")).update.transact
-            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> "Please apply the tx id to the namespace of tx meta data to be updated."
-        }
-
-        // We can though update the tx entity itself if it has a unique value (i has here)
-        _ <- Other.i_(43).i(44).s("tx3").update.transact
-        _ <- Uniques.i.Tx(Other.i.s).query.get.map(_ ==> List((2, 44, "tx3")))
-      } yield ()
-    }
-
-
-    "Composite + tx meta data" - unique { implicit conn =>
-      for {
-        _ <- (Uniques.int.i.s + Ref.i.s).Tx(Other.i_(42).s_("tx")).insert((0, 1, "a"), (2, "b")).transact
-        _ <- (Uniques.i.s + Ref.i.s).Tx(Other.i.s).query.get.map(_ ==> List(((1, "a"), (2, "b"), 42, "tx")))
-
-        // Composite sub groups share the same entity id
-        _ <- (Uniques.int_(0).i(3).s("c") + Ref.i(4).s("d")).Tx(Other.i(43).s("tx2")).update.transact
-        _ <- (Uniques.i.s + Ref.i.s).Tx(Other.i.s).query.get.map(_ ==> List(((3, "c"), (4, "d"), 43, "tx2")))
-      } yield ()
-    }
-
-
     "Semantics" - unique { implicit conn =>
       for {
         _ <- Uniques.i(1).i(2).int_(1).update.transact

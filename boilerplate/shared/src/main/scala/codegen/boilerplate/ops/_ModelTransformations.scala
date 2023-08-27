@@ -130,7 +130,7 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |    }
        |  }
        |
-       |  protected def filterAttr(es: List[Element], op: Op, filterAttrMolecule: Molecule[_]): List[Element] = {
+       |  protected def filterAttr(es: List[Element], op: Op, filterAttrMolecule: Molecule): List[Element] = {
        |    val filterAttr0 = filterAttrMolecule.elements.last.asInstanceOf[Attr]
        |    val attrs       = es.last match {
        |      case a: Attr =>

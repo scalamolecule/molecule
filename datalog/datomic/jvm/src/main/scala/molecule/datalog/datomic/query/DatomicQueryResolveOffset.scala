@@ -74,7 +74,6 @@ case class DatomicQueryResolveOffset[Tpl](
         (tuples.result(), totalCount, hasMore)
 
       } else {
-        postAdjustAritiess()
         val row2tpl = castRow2AnyTpl(aritiess.head, castss.head, 0, None)
         offsetRaw(sortedRows, fromUntil).forEach(row => tuples += row2tpl(row).asInstanceOf[Tpl])
         (tuples.result(), totalCount, hasMore)

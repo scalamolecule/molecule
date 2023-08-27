@@ -18,78 +18,8 @@ trait JdbcTestSuite extends CoreTestSuite with BaseHelpers {
     val url = s"jdbc:h2:mem:test_database_" + Random.nextInt()
     //    println(schema.sqlSchema("h2"))
     lazy val sch =
-      """CREATE TABLE Tx (
-        |  id       BIGINT AUTO_INCREMENT PRIMARY KEY,
-        |  created  BIGINT,
-        |  updated  BIGINT,
-        |  myTxAttr INT,
-        |  category BIGINT,
-        |  oneA     BIGINT,
-        |  oneB     BIGINT,
-        |  oneC     BIGINT,
-        |  oneD     BIGINT,
-        |  oneE     BIGINT,
-        |  oneF     BIGINT,
-        |  oneG     BIGINT,
-        |  oneH     BIGINT
-        |);
-        |
-        |CREATE TABLE Tx_tags_C (
-        |  Tx_id BIGINT,
-        |  C_id  BIGINT
-        |);
-        |
-        |CREATE TABLE Tx_manyA_A (
-        |  Tx_id BIGINT,
-        |  A_id  BIGINT
-        |);
-        |
-        |CREATE TABLE Tx_manyB_B (
-        |  Tx_id BIGINT,
-        |  B_id  BIGINT
-        |);
-        |
-        |CREATE TABLE Tx_manyC_C (
-        |  Tx_id BIGINT,
-        |  C_id  BIGINT
-        |);
-        |
-        |CREATE TABLE Tx_manyD_D (
-        |  Tx_id BIGINT,
-        |  D_id  BIGINT
-        |);
-        |
-        |CREATE TABLE Tx_manyE_E (
-        |  Tx_id BIGINT,
-        |  E_id  BIGINT
-        |);
-        |
-        |CREATE TABLE Tx_manyF_F (
-        |  Tx_id BIGINT,
-        |  F_id  BIGINT
-        |);
-        |
-        |CREATE TABLE Tx_manyG_G (
-        |  Tx_id BIGINT,
-        |  G_id  BIGINT
-        |);
-        |
-        |CREATE TABLE Tx_manyH_H (
-        |  Tx_id BIGINT,
-        |  H_id  BIGINT
-        |);
-        |
-        |CREATE TABLE CompositeJoin (
+      """CREATE TABLE A (
         |  id   BIGINT AUTO_INCREMENT PRIMARY KEY,
-        |  a    VARCHAR,
-        |  b    VARCHAR,
-        |  a_id BIGINT,
-        |  b_id BIGINT
-        |);
-        |
-        |CREATE TABLE A (
-        |  id   BIGINT AUTO_INCREMENT PRIMARY KEY,
-        |  tx   BIGINT,
         |  i    INT,
         |  ii   INT ARRAY,
         |  s    LONGVARCHAR,
@@ -130,7 +60,6 @@ trait JdbcTestSuite extends CoreTestSuite with BaseHelpers {
         |
         |CREATE TABLE B (
         |  id   BIGINT AUTO_INCREMENT PRIMARY KEY,
-        |  tx   BIGINT,
         |  i    INT,
         |  ii   INT ARRAY,
         |  s    LONGVARCHAR,
@@ -169,7 +98,6 @@ trait JdbcTestSuite extends CoreTestSuite with BaseHelpers {
         |
         |CREATE TABLE C (
         |  id BIGINT AUTO_INCREMENT PRIMARY KEY,
-        |  tx BIGINT,
         |  i  INT,
         |  s  LONGVARCHAR,
         |  ii INT ARRAY,
@@ -184,7 +112,6 @@ trait JdbcTestSuite extends CoreTestSuite with BaseHelpers {
         |
         |CREATE TABLE D (
         |  id BIGINT AUTO_INCREMENT PRIMARY KEY,
-        |  tx BIGINT,
         |  i  INT,
         |  s  LONGVARCHAR,
         |  e  BIGINT,
@@ -198,7 +125,6 @@ trait JdbcTestSuite extends CoreTestSuite with BaseHelpers {
         |
         |CREATE TABLE E (
         |  id BIGINT AUTO_INCREMENT PRIMARY KEY,
-        |  tx BIGINT,
         |  i  INT,
         |  s  LONGVARCHAR,
         |  f  BIGINT
@@ -211,7 +137,6 @@ trait JdbcTestSuite extends CoreTestSuite with BaseHelpers {
         |
         |CREATE TABLE F (
         |  id BIGINT AUTO_INCREMENT PRIMARY KEY,
-        |  tx BIGINT,
         |  i  INT,
         |  s  LONGVARCHAR,
         |  g  BIGINT
@@ -224,7 +149,6 @@ trait JdbcTestSuite extends CoreTestSuite with BaseHelpers {
         |
         |CREATE TABLE G (
         |  id BIGINT AUTO_INCREMENT PRIMARY KEY,
-        |  tx BIGINT,
         |  i  INT,
         |  s  LONGVARCHAR,
         |  h  BIGINT
@@ -237,7 +161,6 @@ trait JdbcTestSuite extends CoreTestSuite with BaseHelpers {
         |
         |CREATE TABLE H (
         |  id BIGINT AUTO_INCREMENT PRIMARY KEY,
-        |  tx BIGINT,
         |  i  INT,
         |  s  LONGVARCHAR
         |);

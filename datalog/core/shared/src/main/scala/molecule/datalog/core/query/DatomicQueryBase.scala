@@ -41,13 +41,9 @@ trait DatomicQueryBase extends BaseHelpers with JavaConversions { self: Model2Qu
   final protected val preRules = new ArrayBuffer[String]
 
   // Main query
-  final protected var isFree        = false
-  final protected var isRef         = false
-  final protected var isNested      = false
-  final protected var isNestedOpt   = false
-  final protected var isComposite   = false
-  final protected var isTxMetaData  = false
-  final protected var isTxComposite = false
+  final protected var isRef       = false
+  final protected var isNested    = false
+  final protected var isNestedOpt = false
 
   final protected val nestedIds = new ArrayBuffer[String]
   final protected val find      = new ArrayBuffer[String]
@@ -90,86 +86,30 @@ trait DatomicQueryBase extends BaseHelpers with JavaConversions { self: Model2Qu
   final protected val availableAttrs                                   = mutable.Set.empty[String]
 
   final protected var firstId: String = ""
-  final protected val txVar  : String = "?tx"
-
-  // Add 4th tx var to first attribute datom if tx value is needed
-  final protected var addTxVar: Boolean = false
 
   final protected def addCast(cast: AnyRef => AnyRef): Unit = {
-    if (isTxMetaData)
-      castss = (castss.head :+ cast) :: castss.tail
-    else
-      castss = castss.init :+ (castss.last :+ cast)
+    castss = castss.init :+ (castss.last :+ cast)
   }
 
   final protected def removeLastCast(): Unit = {
-    if (isTxMetaData)
-      castss = castss.head.init :: castss.tail
-    else {
-      castss = castss.init :+ castss.last.init
-    }
+    castss = castss.init :+ castss.last.init
   }
+
   final protected def replaceCast(cast: AnyRef => AnyRef): Unit = {
     removeLastCast()
     addCast(cast)
   }
 
   final protected def aritiesNested(): Unit = {
-    val newLevel = Nil
-    val curLevel = aritiess.last
-    if (isComposite) {
-      val curLevelCompositWithNested = curLevel.init :+ (curLevel.last :+ -1)
-      aritiess = (aritiess.init :+ curLevelCompositWithNested) :+ newLevel
-    } else {
-      val curLevelWithNested = curLevel :+ List(-1)
-      aritiess = (aritiess.init :+ curLevelWithNested) :+ newLevel
-    }
-  }
-
-  final protected def aritiesComposite(): Unit = {
-    if (isTxMetaData) {
-      isTxComposite = true
-    } else {
-      isComposite = true
-    }
-    if (isTxMetaData) {
-      aritiess = (aritiess.head :+ Nil) :: aritiess.tail
-    } else {
-      aritiess = aritiess.init :+ (aritiess.last :+ Nil)
-    }
+    val newLevel           = Nil
+    val curLevel           = aritiess.last
+    val curLevelWithNested = curLevel :+ List(-1)
+    aritiess = (aritiess.init :+ curLevelWithNested) :+ newLevel
   }
 
   final protected def aritiesAttr(): Unit = {
-    if (isTxMetaData) {
-      // Top level
-      if (isTxComposite) {
-        // Increase last arity
-        val topLevel: List[List[Int]] = aritiess.head
-        val arities                   = if (topLevel.isEmpty)
-          List(List(1))
-        else {
-          topLevel.init :+ (topLevel.last :+ 1)
-        }
-        aritiess = arities :: aritiess.tail
-      } else {
-        // Add new arity of 1
-        aritiess = (aritiess.head :+ List(1)) :: aritiess.tail
-      }
-    } else {
-      // Current level
-      if (isComposite) {
-        // Increase last arity
-        val lastLevel = aritiess.last
-        val arities   = if (lastLevel.isEmpty)
-          List(List(1))
-        else
-          lastLevel.init :+ (lastLevel.last :+ 1)
-        aritiess = aritiess.init :+ arities
-      } else {
-        // Add new arity of 1
-        aritiess = aritiess.init :+ (aritiess.last :+ List(1))
-      }
-    }
+    // Add new arity of 1
+    aritiess = aritiess.init :+ (aritiess.last :+ List(1))
   }
 
   final protected def getFlatSorters(
@@ -219,12 +159,5 @@ trait DatomicQueryBase extends BaseHelpers with JavaConversions { self: Model2Qu
   }
   def getVar(attr: Attr) = {
     filterAttrVars.getOrElse(attr.name, vv)
-  }
-
-  final protected def tx: String = {
-    if (addTxVar) {
-      addTxVar = false
-      s" $txVar"
-    } else ""
   }
 }

@@ -59,14 +59,6 @@ trait Model extends Validations with Values {
     }
   }
 
-  case class Composite(elements: List[Element]) extends Element {
-    override def render(i: Int): String = {
-      s"""|${"  " * i}Composite(List(
-          |${renders(elements, i + 1)}))""".stripMargin
-    }
-    override def toString: String = render(0)
-  }
-
   case class Nested(ref: Ref, elements: List[Element]) extends Element {
     override def render(i: Int): String = {
       val indent = "  " * i
@@ -85,14 +77,6 @@ trait Model extends Validations with Values {
           |${indent}  $ref,
           |${indent}  List(
           |${renders(elements, i + 2)}))""".stripMargin
-    }
-    override def toString: String = render(0)
-  }
-
-  case class TxMetaData(elements: List[Element]) extends Element {
-    override def render(i: Int): String = {
-      s"""|${"  " * i}TxMetaData(List(
-          |${renders(elements, i + 1)}))""".stripMargin
     }
     override def toString: String = render(0)
   }

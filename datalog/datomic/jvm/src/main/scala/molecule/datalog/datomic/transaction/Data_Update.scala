@@ -87,27 +87,6 @@ trait Data_Update extends DatomicBase_JVM with UpdateOps with MoleculeLogging { 
     stmts
   }
 
-
-  override def handleIds(ids1: Seq[Long]): Unit = {
-    if (ids.nonEmpty) {
-      throw ModelError(s"Can't apply entity ids twice in $update.")
-    }
-    ids = ids ++ ids1.asInstanceOf[Seq[AnyRef]]
-  }
-
-  override def handleUniqueFilterAttr(uniqueFilterAttr: AttrOneTac): Unit = {
-    if (ids.nonEmpty) {
-      throw ModelError(
-        s"Can only apply one unique attribute value for $update. Found:\n" + uniqueFilterAttr
-      )
-    }
-    ids = ids ++ uniqueIds(uniqueFilterAttr, uniqueFilterAttr.ns, uniqueFilterAttr.attr)
-  }
-
-  override def handleFilterAttr(filterAttr: AttrOneTac): Unit = {
-    filterElements = filterElements :+ filterAttr
-  }
-
   override def updateOne[T](
     a: AttrOne,
     vs: Seq[T],
@@ -213,6 +192,26 @@ trait Data_Update extends DatomicBase_JVM with UpdateOps with MoleculeLogging { 
   }
 
 
+  override def handleIds(ids1: Seq[Long]): Unit = {
+    if (ids.nonEmpty) {
+      throw ModelError(s"Can't apply entity ids twice in $update.")
+    }
+    ids = ids ++ ids1.asInstanceOf[Seq[AnyRef]]
+  }
+
+  override def handleUniqueFilterAttr(uniqueFilterAttr: AttrOneTac): Unit = {
+    if (ids.nonEmpty) {
+      throw ModelError(
+        s"Can only apply one unique attribute value for $update. Found:\n" + uniqueFilterAttr
+      )
+    }
+    ids = ids ++ uniqueIds(uniqueFilterAttr, uniqueFilterAttr.ns, uniqueFilterAttr.attr)
+  }
+
+  override def handleFilterAttr(filterAttr: AttrOneTac): Unit = {
+    filterElements = filterElements :+ filterAttr
+  }
+
   override def handleRefNs(ref: Ref): Unit = {
     data = data :+ (("ref", ref.ns, ref.refAttr, Nil, false))
   }
@@ -220,14 +219,6 @@ trait Data_Update extends DatomicBase_JVM with UpdateOps with MoleculeLogging { 
   override def handleBackRef(backRef: BackRef): Unit = {
     data = data :+ (("backref", backRef.prevNs, "", Nil, false))
   }
-
-  override def handleTxMetaData(): Unit = {
-    if (data.isEmpty) {
-      throw ModelError(s"Please apply the tx id to the namespace of tx meta data to be updated.")
-    }
-    data = data :+ (("tx", null, null, Nil, false))
-  }
-
 
   private def id2stmts(
     data: List[(String, String, String, Seq[AnyRef], Boolean)],
@@ -293,14 +284,6 @@ trait Data_Update extends DatomicBase_JVM with UpdateOps with MoleculeLogging { 
           entity = entities.last.get(a).asInstanceOf[EntityMap]
           entities = entities :+ entity
           id = entity.get(dbId)
-
-        case ("tx", _, _, _, _) =>
-          // Get transaction entity id
-          txId = Peer.q("[:find ?tx :in $ ?e :where [?e _ _ ?tx]]", db, id).iterator.next.get(0)
-          entity = db.entity(txId).asInstanceOf[EntityMap]
-          entities = entities :+ entity
-          isTx = true
-          id = datomicTx
 
         case other => throw ModelError("Unexpected data in update: " + other)
       }

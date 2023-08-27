@@ -124,40 +124,8 @@ case class PickleTpls(
         case NestedOpt(_, nestedElements) =>
           prevRefs.clear()
           resolvePicklers(tail, picklers :+ pickleNested(tplIndex, nestedElements), tplIndex + 1)
-
-        case Composite(compositeElements) =>
-          pickleComposite(tplIndex, compositeElements) match {
-            case Nil          => resolvePicklers(tail, picklers, tplIndex)
-            case Seq(pickler) => resolvePicklers(tail, picklers :+ pickler, tplIndex + 1)
-          }
-
-        case TxMetaData(txDataElements) =>
-          // Tx meta data is last attribute values in top level tuple
-          // TxMetaData is only pickled for queries. Inserts handle tx elements separately after all tpl inserts.
-          picklers ++ pickleTxMetaData(txDataElements, tplIndex)
       }
       case Nil             => picklers
-    }
-  }
-
-
-  private def pickleTxMetaData(
-    txDataElements: List[Element],
-    tplIndex: Int
-  ): List[Product => Unit] = {
-    resolvePicklers(txDataElements, Nil, tplIndex)
-  }
-
-  private def pickleComposite(
-    tplIndex: Int,
-    compositeElements: List[Element]
-  ): Seq[Product => Unit] = {
-    lazy val pickleCompositeData = getPickler(compositeElements)
-    // Start from initial entity id for each composite sub group
-    countValueAttrs(compositeElements) match {
-      case 0 => Nil
-      case 1 => Seq((tpl: Product) => pickleCompositeData(Tuple1(tpl.productElement(tplIndex))))
-      case _ => Seq((tpl: Product) => pickleCompositeData(tpl.productElement(tplIndex).asInstanceOf[Product]))
     }
   }
 

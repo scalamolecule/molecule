@@ -30,7 +30,6 @@ trait DatomicBase_JVM extends DatomicDataType_JVM with ModelUtils {
   protected var lowest     : Int     = 0
   protected var e          : AnyRef  = "" // Long or String (#db/id[db.part/user -1])
   protected var e0         : AnyRef  = ""
-  protected var unusedRefId: Boolean = false
 
   protected var ids            = Seq.empty[AnyRef]
   protected var filterElements = List.empty[Element]
@@ -38,16 +37,13 @@ trait DatomicBase_JVM extends DatomicDataType_JVM with ModelUtils {
 
   protected var stmt         : jList[AnyRef]       = null
   protected var backRefs     : Map[String, AnyRef] = Map.empty[String, AnyRef]
-  protected val prevRefs     : ListBuffer[AnyRef]  = new ListBuffer[AnyRef]
   protected val usedRefIds   : ListBuffer[AnyRef]  = new ListBuffer[AnyRef]
   protected val unusedRefIds : ListBuffer[AnyRef]  = new ListBuffer[AnyRef]
-  protected var hasComposites: Boolean             = false
 
   protected lazy val add           = kw("db", "add")
   protected lazy val retract       = kw("db", "retract")
   protected lazy val retractEntity = kw("db", "retractEntity")
   protected lazy val dbId          = kw("db", "id")
-  protected lazy val datomicTx     = "datomic.tx"
 
   protected lazy val bigInt2java  = (v: Any) => v.asInstanceOf[BigInt].bigInteger
   protected lazy val bigDec2java  = (v: Any) => v.asInstanceOf[BigDecimal].bigDecimal

@@ -108,34 +108,11 @@ case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuff
         case NestedOpt(_, nestedElements) =>
           prevRefs.clear()
           resolveUnpicklers(tail, unpicklers :+ unpickleNested(nestedElements))
-
-        case Composite(compositeElements) =>
-          resolveUnpicklers(tail, unpicklers ++ unpickleComposite(compositeElements))
-
-        case TxMetaData(txDataElements) =>
-          // tx meta data is last attribute values in top level tuple
-          unpicklers ++ unpickleTxMetaData(txDataElements)
       }
       case Nil             => unpicklers
     }
   }
 
-  private def unpickleTxMetaData(
-    txDataElements: List[Element]
-  ): List[() => Any] = {
-    resolveUnpicklers(txDataElements, Nil)
-  }
-
-  private def unpickleComposite(
-    compositeElements: List[Element]
-  ): Seq[() => Any] = {
-    countValueAttrs(compositeElements) match {
-      case 0 => Nil
-      case n =>
-        val unpickleCompositeData = getUnpickler(compositeElements)
-        Seq(() => unpickleCompositeData())
-    }
-  }
 
   private def unpickleNested(
     nestedElements: List[Element]

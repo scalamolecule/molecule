@@ -17,6 +17,7 @@ object AdhocJdbcJVM extends JdbcTestSuite {
         _ <- Ns.i.query.get.map(_ ==> List(1))
 
 
+
       } yield ()
     }
 
@@ -35,9 +36,8 @@ object AdhocJdbcJVM extends JdbcTestSuite {
     "unique" - unique { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Uniques._
       for {
-        _ <- Uniques.i(1).string(string1).save.transact
-        _ <- Uniques.i(1).int(int1).save.transact
-        _ <- Uniques.i(1).long(long1).save.transact
+        _ <- Uniques.int.i.s.insert(0, 1, "a").transact
+        _ <- Uniques.i.s.query.get.map(_ ==> List((1, "a")))
 
 
       } yield ()

@@ -82,7 +82,6 @@ trait MandatoryAttrs extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsy
                 1, // Top-level row index
                 Seq(
                   InsertError(
-                    0, // Composite tuple index
                     2, // tuple index
                     "MandatoryAttr.hobbies",
                     Seq(

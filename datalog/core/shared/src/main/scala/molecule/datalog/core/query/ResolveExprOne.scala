@@ -34,7 +34,7 @@ trait ResolveExprOne[Tpl]
 
   protected def resolveAttrOneTac(es: List[Var], attr: AttrOneTac): List[Var] = {
     val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
-    if (isNestedOpt && !isTxMetaData)
+    if (isNestedOpt)
       throw ModelError("Tacit attributes not allowed in optional nested queries. Found: " + a)
     attr match {
       case at: AttrOneTacString     => tac(attr, e, a, at.vs, resString)
@@ -105,8 +105,7 @@ trait ResolveExprOne[Tpl]
   }
   private def addSort(sorter: Option[(Int, Int => (Row, Row) => Int)]): Unit = {
     sorter.foreach {
-      case s if isTxMetaData => sortss = (sortss.head :+ s) +: sortss.tail
-      case s                 => sortss = sortss.init :+ (sortss.last :+ s)
+      case s => sortss = sortss.init :+ (sortss.last :+ s)
     }
   }
 
@@ -239,33 +238,33 @@ trait ResolveExprOne[Tpl]
   private def stringOp[T](e: Var, a: Att, v: Var, arg: T, predicate: String): Unit = {
     val v1 = v + 1
     in += v1
-    where += s"[$e $a $v$tx]" -> wClause
+    where += s"[$e $a $v]" -> wClause
     where += s"[(clojure.string/$predicate $v $v1)]" -> wNeqOne
     args += arg.asInstanceOf[AnyRef]
   }
   private def regex[T](e: Var, a: Att, v: Var, regex: T): Unit = {
-    where += s"[$e $a $v$tx]" -> wClause
+    where += s"[$e $a $v]" -> wClause
     where += s"""[(re-find (re-pattern "$regex") $v)]""" -> wNeqOne
   }
 
   private def remainder[T](e: Var, a: Att, v: Var, args: Seq[T]): Unit = {
-    where += s"[$e $a $v$tx]" -> wClause
+    where += s"[$e $a $v]" -> wClause
     where += s"""[(rem $v ${args.head}) $v-rem]""" -> wNeqOne
     where += s"""[(= $v-rem ${args(1)})]""" -> wNeqOne
   }
   private def even(e: Var, a: Att, v: Var): Unit = {
-    where += s"[$e $a $v$tx]" -> wClause
+    where += s"[$e $a $v]" -> wClause
     where += s"""[(even? $v)]""" -> wNeqOne
   }
   private def odd(e: Var, a: Att, v: Var): Unit = {
-    where += s"[$e $a $v$tx]" -> wClause
+    where += s"[$e $a $v]" -> wClause
     where += s"""[(odd? $v)]""" -> wNeqOne
   }
 
 
   private def string[T: ClassTag](e: Var, a: Att, v: Var, args: Seq[T], op: String): Unit = {
     find -= v
-    where += s"[$e $a $v$tx]" -> wClause
+    where += s"[$e $a $v]" -> wClause
     op match {
       case "take" =>
         find += s"$v-1"
@@ -382,25 +381,25 @@ trait ResolveExprOne[Tpl]
 
       case other => unexpectedKw(other)
     }
-    where += s"[$e $a $v$tx]" -> wClause
+    where += s"[$e $a $v]" -> wClause
   }
 
   private def attr(e: Var, a: Att, v: Var): Unit = {
-    where += s"[$e $a $v$tx]" -> wClause
+    where += s"[$e $a $v]" -> wClause
   }
 
   private def equal[T: ClassTag](e: Var, a: Att, v: Var, argValues: Seq[T], fromScala: Any => Any): Unit = {
     in += s"[$v ...]"
-    where += s"[$e $a $v$tx]" -> wClause
+    where += s"[$e $a $v]" -> wClause
     args += argValues.map(fromScala).toArray
   }
   private def equal2(e: Var, a: Att, v: Var, w: Var): Unit = {
-    where += s"[$e $a $w$tx]" -> wClause
+    where += s"[$e $a $w]" -> wClause
     where += s"[(identity $w) $v]" -> wGround
   }
 
   private def neq[T](e: Var, a: Att, v: Var, args: Seq[T], tpe: String, toDatalog: T => String): Unit = {
-    where += s"[$e $a $v$tx]" -> wClause
+    where += s"[$e $a $v]" -> wClause
     if (tpe == "URI") {
       args.zipWithIndex.foreach { case (arg, i) =>
         where += s"""[(ground (new java.net.URI "$arg")) $v$i]""" -> wNeqOne
@@ -413,19 +412,19 @@ trait ResolveExprOne[Tpl]
     }
   }
   private def neq2(e: Var, a: Att, v: Var, w: Var): Unit = {
-    where += s"[$e $a $v$tx]" -> wClause
+    where += s"[$e $a $v]" -> wClause
     where += s"[(!= $v $w)]" -> wNeqOne
   }
 
   private def compare[T](e: Var, a: Att, v: Var, arg: T, op: String, fromScala: Any => Any): Unit = {
     val v1 = v + 1
     in += v1
-    where += s"[$e $a $v$tx]" -> wClause
+    where += s"[$e $a $v]" -> wClause
     where += s"[($op $v $v1)]" -> wNeqOne
     args += fromScala(arg).asInstanceOf[AnyRef]
   }
   private def compare2(e: Var, a: Att, v: Var, w: Var, op: String): Unit = {
-    where += s"[$e $a $v$tx]" -> wClause
+    where += s"[$e $a $v]" -> wClause
     where += s"[($op $v $w)]" -> wNeqOne
   }
 
@@ -478,7 +477,7 @@ trait ResolveExprOne[Tpl]
     toDatalog: T => String
   ): Unit = {
     find += v
-    where += s"[$e $a $v$tx]" -> wClause
+    where += s"[$e $a $v]" -> wClause
     if (optArgs.isDefined && optArgs.get.nonEmpty) {
       neq(e, a, v, optArgs.get, tpe, toDatalog)
     }

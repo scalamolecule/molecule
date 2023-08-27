@@ -25,8 +25,6 @@ object RenderBoilerplate extends TestSuite {
       //  codegen.boilerplate.api.expression._ExprMapTac.content ==> 42
 
       //  codegen.boilerplate.api._Aggregates.content ==> 42
-      //  codegen.boilerplate.api._Composite.content ==> 42
-      //  codegen.boilerplate.api._CompositeInit.content ==> 42
       //      codegen.boilerplate.api._ModelOps.content ==> 42
       //  codegen.boilerplate.api._Nested.content ==> 42
       //  codegen.boilerplate.api._SortAttrs.content ==> 42

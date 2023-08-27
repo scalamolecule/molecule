@@ -88,9 +88,8 @@ case class MoleculeRpcJS(interface: String, port: Int)
     proxy: ConnProxy,
     tplElements: List[Element],
     tplsSerialized: Array[Byte],
-    txElements: List[Element],
   ): Future[Either[MoleculeError, TxReport]] = Future {
-    val argsSerialized = Pickle.intoBytes((proxy, tplElements, tplsSerialized, txElements)).typedArray()
+    val argsSerialized = Pickle.intoBytes((proxy, tplElements, tplsSerialized)).typedArray()
     xmlHttpRequest("insert", argsSerialized).map(resultSerialized =>
       Unpickle.apply[Either[MoleculeError, TxReport]].fromBytes(resultSerialized)
     )

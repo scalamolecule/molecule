@@ -1,9 +1,6 @@
 package molecule.sql.jdbc.util
 
 import java.util.{Date, List => jList, Map => jMap}
-import datomic.Connection.{DB_AFTER, DB_BEFORE, TEMPIDS, TX_DATA}
-import datomic.db.{Datum => PeerDatom}
-import datomic.{Connection => DatomicConnection, Datom => _, _}
 import molecule.sql.core.facade.SqlTxReport
 import scala.collection.mutable.ListBuffer
 import scala.jdk.CollectionConverters._

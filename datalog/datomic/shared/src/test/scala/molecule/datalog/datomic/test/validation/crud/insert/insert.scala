@@ -3,7 +3,6 @@ package molecule.datalog.datomic.test.validation.crud.insert
 import molecule.coreTests.test.validation.insert._
 import molecule.datalog.datomic.setup.CoreTestAsync
 
-object Composites extends Composites with CoreTestAsync
 object FormatConstants  extends FormatConstants with CoreTestAsync
 object FormatVariables extends FormatVariables with CoreTestAsync
 object Nested extends Nested with CoreTestAsync

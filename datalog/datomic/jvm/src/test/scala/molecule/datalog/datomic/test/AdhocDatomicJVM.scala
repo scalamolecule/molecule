@@ -11,130 +11,6 @@ object AdhocDatomicJVM extends DatomicTestSuite {
 
   override lazy val tests = Tests {
 
-    //    "refs" - refs { implicit conn =>
-    //      import molecule.coreTests.dataModels.core.dsl.Refs._
-    //      for {
-    //        _ <- A.i.Aa.*(A.i).insert((1, List(2, 3))).transact
-    //
-    //
-    //        //                _ <- A.s.Bb.*(B.i_?.s).insert(
-    //        //        //          ("a", List(Some(1))),
-    //        //                  ("b", List((None, "x"))),
-    //        //        //          ("c", Nil),
-    //        //                ).inspect
-    //        //
-    //        //        _ <- A.s.Bb.*(B.i_?).insert(
-    //        ////          ("a", List(Some(1))),
-    //        //          ("b", List(None)),
-    //        ////          ("c", Nil),
-    //        //        ).inspect
-    //        //
-    //        //        _ <- A.s.Bb.*(B.i_?).insert(
-    //        ////          ("a", List(Some(1))),
-    //        //          ("b", List(None)),
-    //        ////          ("c", Nil),
-    //        //        ).transact
-    //
-    //        //        _ <- A.s.Bb.*(B.i).insert(
-    //        //          ("a", List(1, 2)),
-    //        //          ("b", List(3)),
-    //        //        ).transact
-    //        //
-    //        //        _ <- A.s.Bb.*(B.i.a1).query.get.map(_ ==> List(
-    //        //          ("a", List(1, 2)),
-    //        //          ("b", List(3)),
-    //        //        ))
-    //
-    //
-    //        //        _ <- A.s.Bb.*(B.i_?).insert(
-    //        //          ("a", List(Some(1))),
-    //        //          ("b", List(None)),
-    //        //          ("c", Nil),
-    //        //        ).transact
-    //        //
-    //        //        _ <- A.s.a1.Bb.*?(B.i_?).query.get.map(_ ==> List(
-    //        //          ("a", List(Some(1))),
-    //        //          ("b", Nil),
-    //        //          ("c", Nil),
-    //        //        ))
-    //        //        _ <- A.s.d1.Bb.*?(B.i_?).query.get.map(_ ==> List(
-    //        //          ("c", Nil),
-    //        //          ("b", Nil),
-    //        //          ("a", List(Some(1))),
-    //        //        ))
-    //
-    //
-    //        //        _ <- A.s.Bb.*(B.i_?).insert(
-    //        ////          ("a", List(Some(1))),
-    //        //          ("b", List(None)),
-    //        ////          ("c", Nil),
-    //        //        ).transact
-    //
-    //        //        _ <- A.s.Bb.i_?.insert(
-    //        //          ("b", None),
-    //        //        ).transact
-    //
-    //        //        _ <- A.s.Bb.i_?.Cc.i_?.insert(
-    //        //          ("b", None, None),
-    //        //        ).transact
-    //
-    //        //        _ <- A.s.a1.Bb.*?(B.i_?).query.get.map(_ ==> List(
-    //        //          ("a", List(Some(1))),
-    //        //          ("b", Nil),
-    //        //          ("c", Nil),
-    //        //        ))
-    //        //        _ <- A.s.d1.Bb.*?(B.i_?).query.get.map(_ ==> List(
-    //        //          ("c", Nil),
-    //        //          ("b", Nil),
-    //        //          ("a", List(Some(1))),
-    //        //        ))
-    //
-    //        //        List(
-    //        //          (A,List((Some(11),Some(12),a)),1),
-    //        //          (B,List((Some(13),None,b)),1),
-    //        //          (C,List(),1),
-    //        //          (D,List(),1),
-    //        //          (E,List(),1))
-    //
-    //        //        _ <- A.s.Bb.*(B.i.s_?).insert(
-    //        //          ("a", List((1, Some("x")), (2, Some("y")))),
-    //        //          ("b", List((1, Some("x")), (2, None))),
-    //        //          ("c", List((1, None), (2, Some("y")))),
-    //        //          ("d", List((1, None), (2, None))),
-    //        //          ("e", Nil),
-    //        //        ).inspect
-    //        //
-    //        //        _ <- A.s.Bb.*(B.i.s_?).insert(
-    //        //          ("a", List((1, Some("x")), (2, Some("y")))),
-    //        //          ("b", List((1, Some("x")), (2, None))),
-    //        //          ("c", List((1, None), (2, Some("y")))),
-    //        //          ("d", List((1, None), (2, None))),
-    //        //          ("e", Nil),
-    //        //        ).transact
-    //
-    //        //        _ <- A.s.a1.Bb.*?(B.i.a1.s_?).query.get.map(_ ==> List(
-    //        //          ("a", List((1, Some("x")), (2, Some("y")))),
-    //        //          ("b", List((1, Some("x")), (2, None))),
-    //        //          ("c", List((1, None), (2, Some("y")))),
-    //        //          ("d", List((1, None), (2, None))),
-    //        //          ("e", Nil),
-    //        //        ))
-    //        //        _ <- A.s.d1.Bb.*?(B.i.a1.s_?).query.get.map(_ ==> List(
-    //        //          ("e", Nil),
-    //        //          ("d", List((1, None), (2, None))),
-    //        //          ("c", List((1, None), (2, Some("y")))),
-    //        //          ("b", List((1, Some("x")), (2, None))),
-    //        //          ("a", List((1, Some("x")), (2, Some("y")))),
-    //        //        ))
-    //
-    //
-    //      } yield ()
-    //    }
-
-    //    clojure.lang.Keyword
-    //    clojure.lang.PersistentHashMap
-
-
 
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
@@ -150,11 +26,8 @@ object AdhocDatomicJVM extends DatomicTestSuite {
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
-//        id <- A.i(1).B.i(2).C.i(3).save.transact.map(_.id)
-//        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
-
-        _ <- (D.i + A.i.B.i).insert(0, (1, 2)).transact
-        _ <- (D.i + A.B.i_).query.get.map(_ ==> List(0))
+        id <- A.i(1).B.i(2).C.i(3).save.transact.map(_.id)
+        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
 
       } yield ()
     }
@@ -308,35 +181,5 @@ object AdhocDatomicJVM extends DatomicTestSuite {
     //      //      val db = txr.get().get(datomic.Connection.DB_AFTER)
     //    }
 
-    //    "types" - types { implicit conn =>
-    //      import molecule.coreTests.dataModels.core.dsl.Types._
-    //
-    //      for {
-    //        _ <- Ns.int.Tx(Other.s_("tx")).insert(1).transact.map(_.id)
-    //
-    //      } yield ()
-    //    }
-
-    //    "unique" - unique { implicit conn =>
-    //      import molecule.coreTests.dataModels.core.dsl.Uniques._
-    //      for {
-    //        _ <- Uniques.int.i.Tx(Other.i_(42).s_("tx")).insert(0, 1).inspect
-    //        /*
-    //        ========================================
-    //        INSERT:
-    //        AttrOneManInt("Unique", "int", V, Seq(), None, Nil, Nil, None, None)
-    //        AttrOneManInt("Unique", "i", V, Seq(), None, Nil, Nil, None, None)
-    //        TxMetaData(List(
-    //          AttrOneTacInt("Other", "i", Appl, Seq(42), None, Nil, Nil, None, None),
-    //          AttrOneTacString("Other", "s", Appl, Seq("tx"), None, Nil, Nil, None, None)))
-    //
-    //        [:db/add, #db/id[db.part/user -1], :Unique/int, 0]
-    //        [:db/add, #db/id[db.part/user -1], :Unique/i, 1]
-    //        [:db/add, datomic.tx, :Other/i, 42]
-    //        [:db/add, datomic.tx, :Other/s, tx]
-    //         */
-    //        _ <- Uniques.int.i.Tx(Other.i_(42).s_("tx")).insert(0, 1).transact
-    //      } yield ()
-    //    }
   }
 }

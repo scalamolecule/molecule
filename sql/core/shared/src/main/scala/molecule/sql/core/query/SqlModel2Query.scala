@@ -31,8 +31,7 @@ class SqlModel2Query[Tpl](elements0: List[Element])
     validateQueryModel(elements)
     //    elements.foreach(println)
 
-    initialNs = getInitialNonGenericNs(elements)
-    from = initialNs
+    from = getInitialNonGenericNs(elements)
     exts += from -> None
 
     val elements1 = prepareElements(elements)
@@ -105,22 +104,17 @@ class SqlModel2Query[Tpl](elements0: List[Element])
       elements match {
         case element :: tail =>
           element match {
-            case a: Attr       => prepare(tail, acc :+ prepareAttr(a))
-            case e: Composite  => prepare(tail, acc :+ prepareComposite(e))
-            case n: Nested     => prepare(tail, acc :+ prepareNested(n))
-            case n: NestedOpt  => prepare(tail, acc :+ prepareNestedOpt(n))
-            case t: TxMetaData => prepare(tail, acc :+ prepareTxMetaData(t))
-            case refOrBackRef  => prepare(tail, acc :+ refOrBackRef)
+            case a: Attr      => prepare(tail, acc :+ prepareAttr(a))
+            case n: Nested    => prepare(tail, acc :+ prepareNested(n))
+            case n: NestedOpt => prepare(tail, acc :+ prepareNestedOpt(n))
+            case refOrBackRef => prepare(tail, acc :+ refOrBackRef)
           }
         case Nil             => acc
       }
     }
     def prepareAttr(a: Attr): Attr = {
       availableAttrs += a.name
-      //      if (a.ns == "_Generic" && a.attr == "txId") {
-      if (a.attr == "tx") {
-        addTxVar = true
-      } else if (a.filterAttr.nonEmpty) {
+      if (a.filterAttr.nonEmpty) {
         val fa = a.filterAttr.get
         if (fa.filterAttr.nonEmpty) {
           throw ModelError(s"Nested filter attributes not allowed in ${a.ns}.${a.attr}")
@@ -128,8 +122,12 @@ class SqlModel2Query[Tpl](elements0: List[Element])
         val filterAttr = fa.name
         filterAttrVars.get(filterAttr).fold {
           // Create datomic variable for this expression attribute
-          filterAttrVars = filterAttrVars + (filterAttr -> vv)
+          filterAttrVars = filterAttrVars + (filterAttr -> a.name)
         }(_ => throw ModelError(s"Can't refer to ambiguous filter attribute $filterAttr"))
+        //        if (filterAttrVars.contains(filterAttr)) {
+        //          throw ModelError(s"Can't refer to ambiguous filter attribute $filterAttr")
+        //        }
+
         if (fa.ns == a.ns) {
           // Add adjacent filter attribute is lifted...
         } else if (fa.isInstanceOf[Mandatory]) {
@@ -144,13 +142,8 @@ class SqlModel2Query[Tpl](elements0: List[Element])
       a
     }
 
-    def prepareComposite(composite: Composite): Composite = Composite(prepare(composite.elements, Nil))
     def prepareNested(nested: Nested): Nested = Nested(nested.ref, prepare(nested.elements, Nil))
     def prepareNestedOpt(nested: NestedOpt): NestedOpt = NestedOpt(nested.ref, prepare(nested.elements, Nil))
-    def prepareTxMetaData(t: TxMetaData): TxMetaData = {
-      addTxVar = true
-      TxMetaData(prepare(t.elements, Nil))
-    }
 
     val elements1 = prepare(elements, Nil)
 
@@ -182,10 +175,8 @@ class SqlModel2Query[Tpl](elements0: List[Element])
       }
       case ref: Ref                             => resolveRef0(ref, tail)
       case _: BackRef                           => resolve(tail)
-      case Composite(compositeElements)         => resolveComposite(compositeElements, tail)
       case Nested(ref, nestedElements)          => resolveNested(ref, nestedElements, tail)
       case NestedOpt(nestedRef, nestedElements) => resolveNestedOpt(nestedRef, nestedElements, tail)
-      case TxMetaData(txElements)               => resolveTxMetaData(txElements)
     }
     case Nil             => ()
   }
@@ -195,18 +186,6 @@ class SqlModel2Query[Tpl](elements0: List[Element])
     val Ref(_, refAttr, refNs, _, _) = ref
     exts(refNs) = exts.get(refNs).fold(Option.empty[String])(_ => Some("_" + refAttr))
     resolveRef(ref)
-    resolve(tail)
-  }
-
-  final private def resolveComposite(compositeElements: List[Element], tail: List[Element]): Unit = {
-    val compositeNs = getInitialNs(compositeElements)
-    exts += compositeNs -> None
-    compositeGroup += 1
-    aritiesComposite()
-    if (compositeGroup > 1) {
-      resolveCompositeJoin(initialNs, compositeNs, compositeGroup)
-    }
-    resolve(compositeElements)
     resolve(tail)
   }
 
@@ -245,24 +224,12 @@ class SqlModel2Query[Tpl](elements0: List[Element])
     resolve(tail)
   }
 
-  final private def resolveTxMetaData(txElements: List[Element]): Unit = {
-    level += 1 // Treat tx meta data as another level (for separate sort identifiers)
-    isTxMetaData = true
-    // Use txVar as first entity id var for composite elements
-    firstId = txVar
-    resolve(txElements)
-  }
-
   final private def validateRefNs(ref: Ref, nestedElements: List[Element]): Unit = {
     val refName  = ref.refAttr.capitalize
     val nestedNs = nestedElements.head match {
-      case a: Attr       => a.ns
-      case r: Ref        => r.ns
-      case Composite(es) => es.head match {
-        case a: Attr => a.ns
-        case other   => unexpectedElement(other)
-      }
-      case other         => unexpectedElement(other)
+      case a: Attr => a.ns
+      case r: Ref  => r.ns
+      case other   => unexpectedElement(other)
     }
     if (ref.refNs != nestedNs) {
       throw ModelError(s"`$refName` can only nest to `${ref.refNs}`. Found: `$nestedNs`")

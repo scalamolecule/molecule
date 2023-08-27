@@ -102,7 +102,6 @@ case class DatomicQueryResolveCursor[Tpl](
         }
 
       } else {
-        postAdjustAritiess()
         if (totalCount == 0) {
           (Nil, "", false)
         } else {
@@ -192,8 +191,6 @@ case class DatomicQueryResolveCursor[Tpl](
                 // Non-sorted attribute
                 checkSort(tail, strategy, tokens, i, rowHashes)
               }
-
-            case Composite(elements) => checkSort(elements ++ tail, strategy, tokens, i, rowHashes)
 
             // Only top level sorting - ignore nested and tx meta data
             case _ => checkSort(tail, strategy, tokens, i, rowHashes)

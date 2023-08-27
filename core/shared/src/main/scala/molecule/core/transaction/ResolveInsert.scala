@@ -71,10 +71,6 @@ class ResolveInsert extends InsertResolvers_ with InsertValidators_ { self: Inse
           val backRefResolver = addBackRef(backRefNs)
           resolve(nsMap, tail, resolvers :+ backRefResolver, outerTplIndex, tplIndex)
 
-        case Composite(compositeElements) =>
-          val compositeResolver = addComposite(nsMap, outerTplIndex, tplIndex, compositeElements)
-          resolve(nsMap, tail, resolvers :+ compositeResolver, outerTplIndex + 1, tplIndex + 1)
-
         case Nested(Ref(ns, refAttr, refNs, _, _), nestedElements) =>
           prevRefs.clear()
           val nestedResolver = addNested(nsMap, tplIndex, ns, refAttr, refNs, nestedElements)
@@ -84,8 +80,6 @@ class ResolveInsert extends InsertResolvers_ with InsertValidators_ { self: Inse
           prevRefs.clear()
           val optNestedResolver = addNested(nsMap, tplIndex, ns, refAttr, refNs, nestedElements)
           resolve(nsMap, tail, resolvers :+ optNestedResolver, 0, tplIndex)
-
-        // TxMetaData is handled separately in Insert_stmts with call to save_stmts
 
         case other => throw ModelError("Unexpected element: " + other)
       }

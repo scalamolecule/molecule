@@ -193,8 +193,6 @@ case class JdbcQueryResolveCursor[Tpl](
                 checkSort(tail, strategy, tokens, i, rowHashes)
               }
 
-            case Composite(elements) => checkSort(elements ++ tail, strategy, tokens, i, rowHashes)
-
             // Only top level sorting - ignore nested and tx meta data
             case _ => checkSort(tail, strategy, tokens, i, rowHashes)
           }

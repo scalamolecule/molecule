@@ -100,7 +100,7 @@ trait DatomicSpiZio
   }
 
   private def save_getStmts(save: Save): Data = {
-    (new ResolveSave() with Data_Save).getStmts(save.elements)
+    (new ResolveSave with Data_Save).getStmts(save.elements)
   }
 
   override def save_validate(save: Save): ZIO[Conn, MoleculeError, Map[String, Seq[String]]] = {

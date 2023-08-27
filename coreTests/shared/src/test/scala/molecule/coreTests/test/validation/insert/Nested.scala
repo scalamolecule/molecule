@@ -29,14 +29,15 @@ trait Nested extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
               (
                 0, // Top-level row index
                 Seq(
-                  InsertError(0, 0,
+                  InsertError(
+                    0,
                     "Type.int",
                     Seq(
                       s"""Type.int with value `1` doesn't satisfy validation:
                          |  _ > 2
                          |""".stripMargin
                     ),
-                    Nil // composite/nested errors
+                    Nil // nested errors
                   )
                 )
               )
@@ -57,14 +58,16 @@ trait Nested extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
               (
                 0, // Top-level row index
                 Seq(
-                  InsertError(0, 0,
+                  InsertError(
+                    0,
                     "Type.refs",
                     Nil, // (no errors for ref itself)
                     Seq(
                       (
                         0, // nested row index
                         Seq(
-                          InsertError(0, 0,
+                          InsertError(
+                            0,
                             "Strings.email",
                             Seq(
                               "`a@aa` is not a valid email"
@@ -94,14 +97,16 @@ trait Nested extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
               (
                 0, // Top-level row index
                 Seq(
-                  InsertError(0, 0,
+                  InsertError(
+                    0,
                     "Type.refs",
                     Nil, // (no errors for ref itself)
                     Seq(
                       (
                         1, // nested row index
                         Seq(
-                          InsertError(0, 0,
+                          InsertError(
+                            0,
                             "Strings.email",
                             Seq(
                               "`b@bb` is not a valid email"
@@ -131,23 +136,26 @@ trait Nested extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
               (
                 0, // Top-level row index
                 Seq(
-                  InsertError(0, 0,
+                  InsertError(
+                    0,
                     "Type.int",
                     Seq(
                       s"""Type.int with value `1` doesn't satisfy validation:
                          |  _ > 2
                          |""".stripMargin
                     ),
-                    Nil // composite/nested errors
+                    Nil // nested errors
                   ),
-                  InsertError(0, 0,
+                  InsertError(
+                    0,
                     "Type.refs",
                     Nil, // (no errors for ref itself)
                     Seq(
                       (
                         0, // nested row index
                         Seq(
-                          InsertError(0, 0,
+                          InsertError(
+                            0,
                             "Strings.email",
                             Seq(
                               "`a@aa` is not a valid email"
@@ -177,23 +185,26 @@ trait Nested extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
               (
                 0, // Top-level row index
                 Seq(
-                  InsertError(0, 0,
+                  InsertError(
+                    0,
                     "Type.int",
                     Seq(
                       s"""Type.int with value `1` doesn't satisfy validation:
                          |  _ > 2
                          |""".stripMargin
                     ),
-                    Nil // composite/nested errors
+                    Nil // nested errors
                   ),
-                  InsertError(0, 0,
+                  InsertError(
+                    0,
                     "Type.refs",
                     Nil, // (no errors for ref itself)
                     Seq(
                       (
                         0, // nested row index
                         Seq(
-                          InsertError(0, 0,
+                          InsertError(
+                            0,
                             "Strings.email",
                             Seq(
                               "`a@aa` is not a valid email"
@@ -223,14 +234,16 @@ trait Nested extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
               (
                 0, // Top-level row index
                 Seq(
-                  InsertError(0, 0,
+                  InsertError(
+                    0,
                     "Type.refs",
                     Nil, // (no errors for ref itself)
                     Seq(
                       (
                         0, // nested row index
                         Seq(
-                          InsertError(0, 0,
+                          InsertError(
+                            0,
                             "Strings.email",
                             Seq(
                               "`a@aa` is not a valid email"
@@ -242,7 +255,8 @@ trait Nested extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
                       (
                         1, // nested row index
                         Seq(
-                          InsertError(0, 0,
+                          InsertError(
+                            0,
                             "Strings.email",
                             Seq(
                               "`b@bb` is not a valid email"
@@ -272,23 +286,26 @@ trait Nested extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
               (
                 0, // Top-level row index
                 Seq(
-                  InsertError(0, 0,
+                  InsertError(
+                    0,
                     "Type.int",
                     Seq(
                       s"""Type.int with value `1` doesn't satisfy validation:
                          |  _ > 2
                          |""".stripMargin
                     ),
-                    Nil // composite/nested errors
+                    Nil // nested errors
                   ),
-                  InsertError(0, 0,
+                  InsertError(
+                    0,
                     "Type.refs",
                     Nil, // (no errors for ref itself)
                     Seq(
                       (
                         0, // nested row index
                         Seq(
-                          InsertError(0, 0,
+                          InsertError(
+                            0,
                             "Strings.email",
                             Seq(
                               "`a@aa` is not a valid email"
@@ -300,7 +317,8 @@ trait Nested extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
                       (
                         1, // nested row index
                         Seq(
-                          InsertError(0, 0,
+                          InsertError(
+                            0,
                             "Strings.email",
                             Seq(
                               "`b@bb` is not a valid email"
@@ -334,7 +352,6 @@ trait Nested extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
                 0, // Top-level row index
                 Seq(
                   InsertError(
-                    0, // Outer tuple
                     0, // tuple index
                     "Type.int",
                     Seq(
@@ -345,7 +362,6 @@ trait Nested extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
                     Seq()
                   ),
                   InsertError(
-                    0, // Outer tuple
                     0, // tuple index
                     "Type.refs",
                     Seq(),
@@ -354,7 +370,6 @@ trait Nested extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
                         0, // nested row index
                         Seq(
                           InsertError(
-                            0, // Outer tuple
                             0, // tuple index
                             "Strings.enums",
                             Seq(),
@@ -363,7 +378,6 @@ trait Nested extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
                                 0, // nested row index
                                 Seq(
                                   InsertError(
-                                    0, // Outer tuple
                                     0, // tuple index
                                     "Enum.luckyNumber",
                                     Seq(
@@ -381,7 +395,6 @@ trait Nested extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
                         1, // nested row index
                         Seq(
                           InsertError(
-                            0, // Outer tuple
                             0, // tuple index
                             "Strings.email",
                             Seq(
@@ -390,7 +403,6 @@ trait Nested extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
                             Seq()
                           ),
                           InsertError(
-                            0, // Outer tuple
                             0, // tuple index
                             "Strings.enums",
                             Seq(),
@@ -399,7 +411,6 @@ trait Nested extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
                                 1, // nested row index
                                 Seq(
                                   InsertError(
-                                    0, // Outer tuple
                                     0, // tuple index
                                     "Enum.luckyNumber",
                                     Seq(
@@ -410,84 +421,6 @@ trait Nested extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
                                 )
                               )
                             )
-                          )
-                        )
-                      )
-                    )
-                  )
-                )
-              )
-            )
-        }
-      } yield ()
-    }
-
-
-    "Nested + composite" - validation { implicit conn =>
-      for {
-        _ <- Type.int.Refs.*(Strings.email + Enum.luckyNumber.luckyNumber2).insert(
-          (1, List(
-            ("a@aa", (7, 2)),
-            ("b@bb.com", (0, 13))
-          ))
-        ).transact
-          .map(_ ==> "Unexpected success").recover {
-          case InsertErrors(errors, _) =>
-            errors ==> Seq(
-              (
-                0, // Top-level row index
-                Seq(
-                  InsertError(
-                    0, // Outer tuple
-                    0, // tuple index
-                    "Type.int",
-                    Seq(
-                      s"""Type.int with value `1` doesn't satisfy validation:
-                         |  _ > 2
-                         |""".stripMargin
-                    ),
-                    Seq()
-                  ),
-                  InsertError(
-                    0, // Outer tuple
-                    0, // tuple index
-                    "Type.refs",
-                    Seq(),
-                    Seq(
-                      (
-                        0, // nested row index
-                        Seq(
-                          InsertError(
-                            0, // Outer tuple
-                            0, // tuple index
-                            "Strings.email",
-                            Seq(
-                              """`a@aa` is not a valid email"""
-                            ),
-                            Seq()
-                          ),
-                          InsertError(
-                            1, // Outer tuple
-                            1, // tuple index
-                            "Enum.luckyNumber2",
-                            Seq(
-                              """Lucky number can only be 7, 9 or 13"""
-                            ),
-                            Seq()
-                          )
-                        )
-                      ),
-                      (
-                        1, // nested row index
-                        Seq(
-                          InsertError(
-                            1, // Outer tuple
-                            0, // tuple index
-                            "Enum.luckyNumber",
-                            Seq(
-                              """Value `0` is not one of the allowed values in Seq(7, 9, 13)"""
-                            ),
-                            Seq()
                           )
                         )
                       )

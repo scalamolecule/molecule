@@ -27,7 +27,6 @@ trait TypesOne extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
                   0, // Row index
                   Seq(
                     InsertError(
-                      0, // outerb tuple index
                       0, // tuple index
                       "Type.string",
                       Seq(
@@ -35,7 +34,7 @@ trait TypesOne extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
                            |  _ > "b"
                            |""".stripMargin
                       ),
-                      Nil // composite/nested errors
+                      Nil // nested errors
                     )
                   )
                 )

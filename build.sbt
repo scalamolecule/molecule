@@ -126,7 +126,7 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
     moleculeDataModelPaths := Seq(
       "molecule/coreTests/dataModels/core"
     ),
-    // moleculeMakeJars := false, // default: true
+    //    moleculeMakeJars := false, // default: true
 
     // Suppress "un-used" keys warning
     Global / excludeLintKeys ++= Set(
@@ -235,8 +235,7 @@ lazy val sqlCore = crossProject(JSPlatform, JVMPlatform)
   )
   .jvmSettings(
     libraryDependencies ++= Seq(
-      "com.datomic" % "peer" % "1.0.6735",
-      "com.h2database" % "h2" % "2.2.220" % Provided
+      "com.h2database" % "h2" % "2.2.220"
     )
   )
   .jsSettings(jsEnvironment)

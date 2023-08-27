@@ -26,14 +26,7 @@ trait CastRow2Tpl_ { self: Model2Query with DatomicQueryBase =>
         val cast = (_: Row) => nested.get
         resolveArities(Nil, casts, 0, acc :+ cast, None)
 
-      // Composite
-      case ii :: as =>
-        val n                     = ii.length
-        val (tplCasts, moreCasts) = casts.splitAt(n)
-        val cast                  = castRow2AnyTpl(ii.map(List(_)), tplCasts, attrIndex, nested)
-        resolveArities(as, moreCasts, attrIndex + n, acc :+ cast, nested)
-
-      case Nil => acc
+      case _ => acc
     }
   }
 

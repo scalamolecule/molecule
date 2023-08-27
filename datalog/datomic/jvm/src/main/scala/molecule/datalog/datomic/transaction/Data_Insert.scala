@@ -23,14 +23,13 @@ trait Data_Insert
     debug: Boolean = true
   ): Data = {
     initTxBase(elements, idIndex)
-    val (mainElements, txElements) = separateTxElements(elements)
 
     //    println("----------")
     //    mainElements.foreach(println)
     //    println("----------")
     //    txElements.foreach(println)
 
-    val row2stmts = getResolver(nsMap, mainElements)
+    val row2stmts = getResolver(nsMap, elements)
     tpls.foreach { tpl =>
       e = newId
       e0 = e
@@ -49,12 +48,6 @@ trait Data_Insert
       stmts1
     }
 
-
-    if (txElements.nonEmpty) {
-      val txStmts = (new ResolveSave(true) with Data_Save)
-        .getRawStmts(txElements, datomicTx, false)
-      stmts1.addAll(txStmts)
-    }
     if (debug) {
       val insertStrs = "INSERT:" +: elements :+ "" :+ stmts1.toArray().mkString("\n")
       logger.debug(insertStrs.mkString("\n").trim)
@@ -170,25 +163,6 @@ trait Data_Insert
   override protected def addBackRef(backRefNs: String): Product => Unit = {
     (_: Product) =>
       e = backRefs(backRefNs)
-  }
-
-  override protected def addComposite(
-    nsMap: Map[String, MetaNs],
-    outerTplIndex: Int,
-    tplIndex: Int,
-    compositeElements: List[Element]
-  ): Product => Unit = {
-    hasComposites = true
-    val composite2stmts = getResolver(nsMap, compositeElements, outerTplIndex)
-    // Start from initial entity id for each composite sub group
-    countValueAttrs(compositeElements) match {
-      case 1 => (tpl: Product) =>
-        e = e0
-        composite2stmts(Tuple1(tpl.productElement(tplIndex)))
-      case _ => (tpl: Product) =>
-        e = e0
-        composite2stmts(tpl.productElement(tplIndex).asInstanceOf[Product])
-    }
   }
 
   override protected def addNested(

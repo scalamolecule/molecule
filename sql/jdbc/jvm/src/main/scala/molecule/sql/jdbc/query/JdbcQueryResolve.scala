@@ -1,6 +1,6 @@
 package molecule.sql.jdbc.query
 
-import java.sql.{ResultSet, Statement}
+import java.sql.ResultSet
 import java.util
 import java.util.{Collections, Comparator, ArrayList => jArrayList, Collection => jCollection, List => jList}
 import molecule.base.error.ModelError
@@ -18,17 +18,6 @@ abstract class JdbcQueryResolve[Tpl](elements: List[Element], dbView: Option[DbV
     with CursorUtils {
 
   lazy val edgeValuesNotFound = "Couldn't find next page. Edge rows were all deleted/updated."
-
-  protected def postAdjustPullCasts(): Unit = {
-    pullCastss = pullCastss :+ pullCasts.toList
-    pullSortss = pullSortss :+ pullSorts.sortBy(_._1).map(_._2).toList
-  }
-
-  protected def postAdjustAritiess(): Unit = {
-    // Remove started composite groups that turned out to have only tacit attributes
-    aritiess = aritiess.map(_.filterNot(_.isEmpty))
-  }
-
 
   protected def getUniqueValues(tpls0: List[Tpl], uniqueIndex: Int, encode: Any => String): List[String] = {
     val tpls   = (if (tpls0.head.isInstanceOf[Product]) tpls0 else tpls0.map(Tuple1(_))).asInstanceOf[List[Product]]
@@ -66,7 +55,7 @@ abstract class JdbcQueryResolve[Tpl](elements: List[Element], dbView: Option[DbV
   protected def getRawData(
     conn: JdbcConn_jvm,
     altElements: List[Element] = Nil,
-    altDb: Option[datomic.Database] = None
+//    altDb: Option[datomic.Database] = None
   ): jCollection[jList[AnyRef]] = {
     //    isFree = conn.isFreeVersion
     //    val db = altDb.getOrElse(getDb(conn))

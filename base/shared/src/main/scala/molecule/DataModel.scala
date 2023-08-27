@@ -72,16 +72,4 @@ import molecule.base.api.DataModelApi
  * @groupname edge Bidirectional edge references
  * @groupprio edge 8
  * */
-case class DataModel(maxArity: Int) extends DataModelApi {
-
-  trait TxBase {
-    final val id       = oneLong.descr("Transaction id")
-    final val created  = oneDate.descr("Creation time")
-    final val modified = oneDate.descr("Modified time")
-    //    final val deleted = oneDate.descr("Deletion time")
-    //    final val ns      = oneString.descr("First namespaces involved (could relate to other nss)")
-    //    final val nsId    = oneLong.descr("Id of initial namespace row involved")
-    //    final val nss     = setString.descr("Namespaces involved")
-    //    final val attrs   = setString.descr("Attributes involved")
-  }
-}
+case class DataModel(maxArity: Int) extends DataModelApi

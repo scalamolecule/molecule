@@ -29,8 +29,7 @@ trait Data_Insert
 
     initialNs = getInitialNs(elements)
     curRefPath = List(s"$level", initialNs)
-    val (mainElements, _)           = separateTxElements(elements)
-    val resolveTpl: Product => Unit = getResolver(nsMap, mainElements)
+    val resolveTpl: Product => Unit = getResolver(nsMap, elements)
 
     debug(inserts.mkString("--- inserts\n  ", "\n  ", ""))
     //    debug(joins.mkString("--- joins\n  ", "\n  ", ""))
@@ -333,43 +332,6 @@ trait Data_Insert
   override protected def addBackRef(backRefNs: String): Product => Unit = {
     curRefPath = curRefPath.dropRight(2) // drop refAttr, refNs
     (_: Product) => ()
-  }
-
-  override protected def addComposite(
-    nsMap: Map[String, MetaNs],
-    outerTplIndex: Int,
-    tplIndex: Int,
-    compositeElements: List[Element]
-  ): Product => Unit = {
-    debug(s"A addComposite  $outerTplIndex  $tplIndex   $curRefPath")
-    hasComposites = true
-    compositeGroup += 1
-
-    val compositeJoinResolver = if (compositeGroup == 1) {
-      (_: Product) => ()
-    } else {
-      val compositeNs = getInitialNs(compositeElements)
-      debug("A resolveCompositeJoin... " + compositeNs)
-      getCompositeJoinResolver[Product](compositeNs, List("0", initialNs))
-    }
-
-    val composite2stmts = getResolver(nsMap, compositeElements, outerTplIndex)
-
-    // Start from initial entity id for each composite sub group
-    countValueAttrs(compositeElements) match {
-      case 1 => (tpl: Product) => {
-        val tuple1 = Tuple1(tpl.productElement(tplIndex))
-        debug(s"C tpl 1 ($tplIndex): " + tuple1)
-        compositeJoinResolver(tpl)
-        composite2stmts(tuple1)
-      }
-
-      case _ => (tpl: Product) => {
-        debug(s"C tpl n: " + tpl)
-        compositeJoinResolver(tpl)
-        composite2stmts(tpl.productElement(tplIndex).asInstanceOf[Product])
-      }
-    }
   }
 
   override protected def addNested(

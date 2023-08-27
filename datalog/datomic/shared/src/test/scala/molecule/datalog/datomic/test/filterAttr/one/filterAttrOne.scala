@@ -1,6 +1,6 @@
 package molecule.datalog.datomic.test.filterAttr.one
 
-import molecule.coreTests.test.filterAttr.{FilterAttr_id, FilterAttr_tx}
+import molecule.coreTests.test.filterAttr.FilterAttr_id
 import molecule.coreTests.test.filterAttr.one._
 import molecule.datalog.datomic.setup.CoreTestAsync
 
@@ -11,4 +11,3 @@ object Sorting extends Sorting with CoreTestAsync
 object Types extends Types with CoreTestAsync
 
 object FilterAttr_id extends FilterAttr_id with CoreTestAsync
-object FilterAttr_tx extends FilterAttr_tx with CoreTestAsync
