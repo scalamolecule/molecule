@@ -6,7 +6,7 @@ import molecule.boilerplate.ast.Model._
 import molecule.core.action._
 import molecule.core.spi.{Conn, PrintInspect, SpiSync, TxReport}
 import molecule.core.util.{FutureUtils, JavaConversions}
-import molecule.datalog.core.query.DatomicModel2Query
+import molecule.datalog.core.query.Model2DatomicQuery
 import molecule.datalog.datomic.facade.DatomicConn_JVM
 import molecule.datalog.datomic.query.{DatomicQueryResolveCursor, DatomicQueryResolveOffset}
 import molecule.datalog.datomic.subscription.SubscriptionStarter
@@ -24,6 +24,8 @@ trait DatomicSpiSync
     with JavaConversions {
 
   override def query_get[Tpl](q: Query[Tpl])(implicit conn: Conn): List[Tpl] = {
+    if (q.doInspect)
+      query_inspect(q)
     DatomicQueryResolveOffset[Tpl](q.elements, q.limit, None, q.dbView)
       .getListFromOffset_sync(conn.asInstanceOf[DatomicConn_JVM])._1
   }
@@ -37,6 +39,8 @@ trait DatomicSpiSync
   }
 
   override def queryOffset_get[Tpl](q: QueryOffset[Tpl])(implicit conn: Conn): (List[Tpl], Int, Boolean) = {
+    if (q.doInspect)
+      queryOffset_inspect(q)
     DatomicQueryResolveOffset[Tpl](q.elements, q.limit, Some(q.offset), q.dbView)
       .getListFromOffset_sync(conn.asInstanceOf[DatomicConn_JVM])
   }
@@ -45,6 +49,8 @@ trait DatomicSpiSync
   }
 
   override def queryCursor_get[Tpl](q: QueryCursor[Tpl])(implicit conn: Conn): (List[Tpl], String, Boolean) = {
+    if (q.doInspect)
+      queryCursor_inspect(q)
     DatomicQueryResolveCursor[Tpl](q.elements, q.limit, Some(q.cursor), q.dbView)
       .getListFromCursor_sync(conn.asInstanceOf[DatomicConn_JVM])
   }
@@ -94,7 +100,7 @@ trait DatomicSpiSync
   // Util
 
   private def printInspectQuery(label: String, elements: List[Element]): Unit = {
-    val queries = new DatomicModel2Query(elements).getDatomicQueries(true)._3
+    val queries = new Model2DatomicQuery(elements).getDatomicQueries(true)._3
     printInspect(label, elements, queries)
     //    printInspect(label, elements)
   }

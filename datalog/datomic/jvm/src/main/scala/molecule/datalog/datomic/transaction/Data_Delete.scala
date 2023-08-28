@@ -7,7 +7,7 @@ import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.ResolveDelete
 import molecule.core.transaction.ops.DeleteOps
 import molecule.core.util.{JavaConversions, MetaModelUtils}
-import molecule.datalog.core.query.DatomicModel2Query
+import molecule.datalog.core.query.Model2DatomicQuery
 import molecule.datalog.datomic.facade.DatomicConn_JVM
 import scala.collection.mutable
 
@@ -31,7 +31,7 @@ trait Data_Delete
 
     val (filterQuery, inputs) = if (ids.isEmpty && filterElements.nonEmpty) {
       val filterElements1 = AttrOneManLong("DummyNs", "id", V) +: filterElements
-      val (query, inputs) = new DatomicModel2Query[Any](filterElements1).getIdQueryWithInputs
+      val (query, inputs) = new Model2DatomicQuery[Any](filterElements1).getIdQueryWithInputs
       (Some(query), inputs)
     } else {
       (None, Nil)

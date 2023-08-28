@@ -6,7 +6,7 @@ import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.ResolveDelete
 import molecule.core.transaction.ops.DeleteOps
-import molecule.sql.core.query.SqlModel2Query
+import molecule.sql.core.query.Model2SqlQuery
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 
@@ -53,7 +53,7 @@ trait Data_Delete
     val ns                    = getInitialNs(filterElements)
     val filterElementsWithIds = AttrOneManLong(ns, "id", V) +: filterElements
 
-    val stmt      = new SqlModel2Query[Any](filterElementsWithIds).getSqlQuery(Nil)
+    val stmt      = new Model2SqlQuery[Any](filterElementsWithIds).getSqlQuery(Nil)
     val ps        = sqlConn.prepareStatement(stmt, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)
     val resultSet = ps.executeQuery()
     val ids       = ListBuffer.empty[Long]

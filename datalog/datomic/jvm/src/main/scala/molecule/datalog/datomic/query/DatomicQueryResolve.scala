@@ -6,7 +6,7 @@ import datomic.{Database, Peer}
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.core.marshalling.dbView._
-import molecule.datalog.core.query.DatomicModel2Query
+import molecule.datalog.core.query.Model2DatomicQuery
 import molecule.datalog.core.query.cursor.CursorUtils
 import molecule.datalog.datomic.api.DatomicApiSync
 import molecule.datalog.datomic.facade.DatomicConn_JVM
@@ -15,7 +15,7 @@ import scala.collection.mutable.ListBuffer
 
 
 abstract class DatomicQueryResolve[Tpl](elements: List[Element], dbView: Option[DbView])
-  extends DatomicModel2Query[Tpl](elements) with DatomicApiSync with CursorUtils {
+  extends Model2DatomicQuery[Tpl](elements) with DatomicApiSync with CursorUtils {
 
   lazy val edgeValuesNotFound = "Couldn't find next page. Edge rows were all deleted/updated."
 

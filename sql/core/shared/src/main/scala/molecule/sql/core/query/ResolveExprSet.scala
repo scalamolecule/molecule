@@ -5,7 +5,7 @@ import molecule.boilerplate.ast.Model._
 import molecule.core.util.AggrUtils
 import scala.reflect.ClassTag
 
-trait ResolveExprSet[Tpl] extends AggrUtils { self: SqlModel2Query[Tpl] with LambdasSet =>
+trait ResolveExprSet[Tpl] extends AggrUtils { self: Model2SqlQuery[Tpl] with LambdasSet =>
 
   protected def resolveAttrSetMan(attr: AttrSetMan): Unit = {
     aritiesAttr()

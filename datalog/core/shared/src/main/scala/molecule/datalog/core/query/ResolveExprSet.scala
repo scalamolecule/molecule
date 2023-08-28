@@ -5,7 +5,7 @@ import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import scala.reflect.ClassTag
 
-trait ResolveExprSet[Tpl] { self: DatomicModel2Query[Tpl] with LambdasSet =>
+trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
 
   protected def resolveAttrSetMan(es: List[Var], attr: AttrSetMan): List[Var] = {
     aritiesAttr()

@@ -4,11 +4,15 @@ import molecule.boilerplate.ast.Model.Element
 import molecule.core.marshalling.dbView.DbView
 
 case class QueryOffset[Tpl](
-  elements: List[Element],
-  limit: Option[Int],
-  offset: Int,
-  dbView: Option[DbView] = None
+  private[molecule] val elements: List[Element],
+  private[molecule] val limit: Option[Int],
+  private[molecule] val offset: Int,
+  private[molecule] val dbView: Option[DbView] = None,
+  private[molecule] val doInspect: Boolean = false
 ) extends Action(elements) {
 
   def limit(l: Int): QueryOffset[Tpl] = copy(limit = Some(l))
+
+  // Inspect Query
+  def i: QueryOffset[Tpl] = copy(doInspect = true)
 }

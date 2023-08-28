@@ -11,7 +11,7 @@ import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.ResolveUpdate
 import molecule.core.transaction.ops.UpdateOps
 import molecule.core.validation.ModelValidation
-import molecule.datalog.core.query.DatomicModel2Query
+import molecule.datalog.core.query.Model2DatomicQuery
 import molecule.datalog.datomic.facade.DatomicConn_JVM
 import scala.collection.immutable.Set
 import scala.collection.mutable.ListBuffer
@@ -67,7 +67,7 @@ trait Data_Update extends DatomicBase_JVM with UpdateOps with MoleculeLogging { 
     val (filterQuery, inputs) = if (ids.isEmpty && filterElements.nonEmpty) {
       val filterNs        = filterElements.head.asInstanceOf[Attr].ns
       val filterElements1 = AttrOneManLong(filterNs, "id", V) +: filterElements
-      val (query, inputs) = new DatomicModel2Query[Any](filterElements1).getIdQueryWithInputs
+      val (query, inputs) = new Model2DatomicQuery[Any](filterElements1).getIdQueryWithInputs
       (Some(query), inputs)
     } else {
       (None, Nil)

@@ -9,7 +9,7 @@ import scala.annotation.tailrec
 import scala.collection.mutable.ArrayBuffer
 
 
-class DatomicModel2Query[Tpl](elements0: List[Element])
+class Model2DatomicQuery[Tpl](elements0: List[Element])
   extends Model2Query
     with ResolveExprOne[Tpl]
     with ResolveExprOne_id[Tpl]
@@ -160,6 +160,8 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
     if (rules.isEmpty) Nil else Seq(rules.mkString("[\n  ", "\n  ", "\n]"))
   }
 
+  private lazy val noIdFiltering = "Filter attributes not allowed to involve entity ids."
+
   @tailrec
   final private def resolve(
     es: List[Var],
@@ -169,9 +171,7 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
       case a: AttrOne                           =>
         a.attr match {
           case "id" =>
-            if (a.filterAttr.nonEmpty) {
-              throw ModelError("Filter attributes not allowed to involve entity ids.")
-            }
+            if (a.filterAttr.nonEmpty) throw ModelError(noIdFiltering)
             a match {
               case a: AttrOneMan => resolve(resolveIdMan(es, a), tail)
               case a: AttrOneTac => resolve(resolveIdTac(es, a), tail)
@@ -179,10 +179,7 @@ class DatomicModel2Query[Tpl](elements0: List[Element])
             }
           case _    =>
             a.filterAttr.collect {
-              case filterAttr if filterAttr.attr == "id" =>
-                throw ModelError("Filter attributes not allowed to involve entity ids.")
-              case filterAttr if filterAttr.attr == "tx" =>
-                throw ModelError("Filter attributes not allowed to involve transaction entity ids.")
+              case filterAttr if filterAttr.attr == "id" => throw ModelError(noIdFiltering)
             }
             a match {
               case a: AttrOneMan => resolve(resolveAttrOneMan(es, a), tail)

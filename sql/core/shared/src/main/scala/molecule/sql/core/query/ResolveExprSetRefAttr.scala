@@ -4,7 +4,7 @@ import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import scala.reflect.ClassTag
 
-trait ResolveExprSetRefAttr[Tpl] { self: SqlModel2Query[Tpl] with LambdasSet =>
+trait ResolveExprSetRefAttr[Tpl] { self: Model2SqlQuery[Tpl] with LambdasSet =>
   private var joinTable: String = ""
   private var nsId     : String = ""
   private var ns_id    : String = ""

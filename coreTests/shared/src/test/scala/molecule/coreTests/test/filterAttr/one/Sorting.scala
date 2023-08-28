@@ -22,26 +22,17 @@ trait Sorting extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
           (7, 3)
         ).transact
 
-        // Sort by attribute Ns.i (index marker has to be after expression)
-        _ <- Ns.i.<(Ns.int).a1.query.get.map(_ ==> List(
-          (1, 3),
-          (1, 4),
-          (2, 3),
-        ))
 
-        // Sort by expression attribute Ns.int
-        _ <- Ns.i.<(Ns.int.a1).query.get.map(_ ==> List(
-          (2, 3),
-          (1, 3),
-          (1, 4),
-        ))
+        // Sort by Ns.i ASC, then Ns.int ASC
+        // Index marker for Ns.i is after the expression:
+        //       --------------
+        //      |              |
+        _ <- Ns.i.<(Ns.int.a2).a1.query.get.map(_ ==> List((1, 3), (1, 4), (2, 3)))
+        //              |  |
+        //               --
+        // Index marker for Ns.int is just after the attribute
 
-        // Ns.i primary
-        _ <- Ns.i.<(Ns.int.a2).a1.query.get.map(_ ==> List(
-          (1, 3),
-          (1, 4),
-          (2, 3),
-        ))
+
         _ <- Ns.i.<(Ns.int.d2).a1.query.get.map(_ ==> List(
           (1, 4),
           (1, 3),

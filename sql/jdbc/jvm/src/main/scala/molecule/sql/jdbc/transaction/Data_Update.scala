@@ -7,7 +7,7 @@ import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.ResolveUpdate
 import molecule.core.transaction.ops.UpdateOps
-import molecule.sql.core.query.SqlModel2Query
+import molecule.sql.core.query.Model2SqlQuery
 
 trait Data_Update
   extends JdbcBase_JVM
@@ -44,11 +44,11 @@ trait Data_Update
 
             // todo: if unique filter attributes exists, query to get ids...
 
-            new SqlModel2Query(uniqueFilterElements).getWhereClauses.map {
+            new Model2SqlQuery(uniqueFilterElements).getWhereClauses.map {
               case (attr, expr) => s"$attr $expr"
             }.mkString(" AND\n  ")
           } else {
-            new SqlModel2Query(filterElements).getWhereClauses.map {
+            new Model2SqlQuery(filterElements).getWhereClauses.map {
               case (attr, expr) => s"$attr $expr"
             }.mkString(" AND\n  ")
           }

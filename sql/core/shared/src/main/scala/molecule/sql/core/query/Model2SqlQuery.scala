@@ -10,7 +10,7 @@ import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 
 
-class SqlModel2Query[Tpl](elements0: List[Element])
+class Model2SqlQuery[Tpl](elements0: List[Element])
   extends Model2Query
     with ResolveExprOne[Tpl]
     with ResolveExprSet[Tpl]
@@ -78,7 +78,7 @@ class SqlModel2Query[Tpl](elements0: List[Element])
     val having_ = if (having.isEmpty) "" else having.mkString("\nHAVING ", ", ", "")
 
     val orderBy_ = if (orderBy.isEmpty) "" else {
-      orderBy.map {
+      orderBy.sortBy(t => (t._1, t._2)).map {
         case (_, _, col, dir) => col + dir
       }.mkString("\nORDER BY ", ", ", " NULLS FIRST")
     }
@@ -154,10 +154,14 @@ class SqlModel2Query[Tpl](elements0: List[Element])
     elements1
   }
 
+  lazy val noIdFiltering = "Filter attributes not allowed to involve entity ids."
+
   @tailrec
   final private def resolve(elements: List[Element]): Unit = elements match {
     case element :: tail => element match {
       case a: AttrOne                           =>
+        if(a.attr == "id" && a.filterAttr.nonEmpty || a.attr != "id" && a.filterAttr.exists(_.attr == "id"))
+          throw ModelError(noIdFiltering)
         a match {
           case a: AttrOneMan => resolveAttrOneMan(a); resolve(tail)
           case a: AttrOneOpt => resolveAttrOneOpt(a); resolve(tail)

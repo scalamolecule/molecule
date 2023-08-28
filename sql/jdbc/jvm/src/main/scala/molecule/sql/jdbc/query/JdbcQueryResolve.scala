@@ -7,14 +7,14 @@ import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.core.marshalling.dbView._
 import molecule.datalog.core.query.cursor.CursorUtils
-import molecule.sql.core.query.SqlModel2Query
+import molecule.sql.core.query.Model2SqlQuery
 import molecule.sql.jdbc.facade.JdbcConn_jvm
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 
 
 abstract class JdbcQueryResolve[Tpl](elements: List[Element], dbView: Option[DbView])
-  extends SqlModel2Query[Tpl](elements)
+  extends Model2SqlQuery[Tpl](elements)
     with CursorUtils {
 
   lazy val edgeValuesNotFound = "Couldn't find next page. Edge rows were all deleted/updated."

@@ -10,57 +10,13 @@ import scala.language.implicitConversions
 
 object AdhocJdbcJVM extends JdbcTestSuite {
 
-  val a = ("a", 1, 2)
-  val b = ("b", 3, 3)
-  val c = ("c", 5, 4)
-
   override lazy val tests = Tests {
 
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
       for {
-//        _ <- Ns.i(1).save.transact
-//        _ <- Ns.i.query.get.map(_ ==> List(1))
-
-        _ <- Ns.s.i.int.insert(
-          ("a", 1, 2),
-          ("b", 3, 3),
-          ("c", 5, 4),
-        ).transact
-
-        _ <- Ns.s.i(Ns.int).query.get.map(_ ==> List(("b", 3, 3)))
-        _ <- Ns.s.i(Ns.int_).query.get.map(_ ==> List(("b", 3))) // Ns.i
-        _ <- Ns.s.i_(Ns.int).query.get.map(_ ==> List(("b", 3))) // Ns.int
-        _ <- Ns.s.i_(Ns.int_).query.get.map(_ ==> List("b"))
-
-        // Filter compare attribute itself
-        _ <- Ns.s.i(Ns.int(3)).query.get.map(_ ==> List(("b", 3, 3)))
-        _ <- Ns.s.i(Ns.int.not(3)).query.get.map(_ ==> List())
-        _ <- Ns.s.i(Ns.int.>(3)).query.get.map(_ ==> List())
-        _ <- Ns.s.i(Ns.int.>=(3)).query.get.map(_ ==> List(("b", 3, 3)))
-        _ <- Ns.s.i(Ns.int.<(3)).query.get.map(_ ==> List())
-        _ <- Ns.s.i(Ns.int.<=(3)).query.get.map(_ ==> List(("b", 3, 3)))
-
-        _ <- Ns.s.i(Ns.int_(3)).query.get.map(_ ==> List(("b", 3)))
-        _ <- Ns.s.i(Ns.int_.not(3)).query.get.map(_ ==> List())
-        _ <- Ns.s.i(Ns.int_.>(3)).query.get.map(_ ==> List())
-        _ <- Ns.s.i(Ns.int_.>=(3)).query.get.map(_ ==> List(("b", 3)))
-        _ <- Ns.s.i(Ns.int_.<(3)).query.get.map(_ ==> List())
-        _ <- Ns.s.i(Ns.int_.<=(3)).query.get.map(_ ==> List(("b", 3)))
-
-        _ <- Ns.s.i_(Ns.int(3)).query.get.map(_ ==> List(("b", 3)))
-        _ <- Ns.s.i_(Ns.int.not(3)).query.get.map(_ ==> List())
-        _ <- Ns.s.i_(Ns.int.>(3)).query.get.map(_ ==> List())
-        _ <- Ns.s.i_(Ns.int.>=(3)).query.get.map(_ ==> List(("b", 3)))
-        _ <- Ns.s.i_(Ns.int.<(3)).query.get.map(_ ==> List())
-        _ <- Ns.s.i_(Ns.int.<=(3)).query.get.map(_ ==> List(("b", 3)))
-
-        _ <- Ns.s.i_(Ns.int_(3)).query.get.map(_ ==> List("b"))
-        _ <- Ns.s.i_(Ns.int_.not(3)).query.get.map(_ ==> List())
-        _ <- Ns.s.i_(Ns.int_.>(3)).query.get.map(_ ==> List())
-        _ <- Ns.s.i_(Ns.int_.>=(3)).query.get.map(_ ==> List("b"))
-        _ <- Ns.s.i_(Ns.int_.<(3)).query.get.map(_ ==> List())
-        _ <- Ns.s.i_(Ns.int_.<=(3)).query.get.map(_ ==> List("b"))
+        _ <- Ns.i(1).save.transact
+        _ <- Ns.i.query.get.map(_ ==> List(1))
 
 
       } yield ()
@@ -206,7 +162,118 @@ array_agg(v order by v desc) filter (where v >= '4')
 UPDATE A SET ints = ARRAY_AGG(SELECT * FROM UNNEST((SELECT ints FROM A)) WHERE ? != 2) WHERE id = 1;
 ```
 
+DROP TABLE A IF EXISTS;
+CREATE TABLE A(id INT PRIMARY KEY AUTO_INCREMENT, ints INT ARRAY);
+INSERT INTO A(ints) VALUES (ARRAY[1, 2, 3]);
+SELECT ints FROM A WHERE id = 1;
+// [1, 2, 3]
 
+
+
+
+
+
+DROP TABLE A IF EXISTS;
+CREATE TABLE A(id INT PRIMARY KEY AUTO_INCREMENT, ints INT ARRAY);
+INSERT INTO A(ints) VALUES (ARRAY[1, 2, 3]);
+SELECT ints FROM A WHERE id = 1;
+UPDATE A SET ints = (
+  SELECT ARRAY_AGG(i) FROM (
+    SELECT i FROM UNNEST(SELECT ints FROM A WHERE id = 1) AS i WHERE i != 2
+  )
+) WHERE id = 1;
+SELECT ints FROM A WHERE id = 1;
+
+DROP TABLE A IF EXISTS;
+CREATE TABLE A(id INT PRIMARY KEY AUTO_INCREMENT, ints INT ARRAY);
+INSERT INTO A(ints) VALUES (ARRAY[1, 2, 3]);
+SELECT ints FROM A WHERE id = 1;
+UPDATE A SET ints = (
+  SELECT ARRAY_AGG(CASE WHEN i = 1 THEN 40 ELSE i END) FROM (
+    SELECT i FROM UNNEST(SELECT ints FROM A WHERE id = 1) AS i
+  )
+) WHERE id = 1;
+SELECT ints FROM A WHERE id = 1;
+
+
+DROP TABLE A IF EXISTS;
+CREATE TABLE A(id INT PRIMARY KEY AUTO_INCREMENT, ints INT ARRAY);
+INSERT INTO A(ints) VALUES (ARRAY[1, 2, 3]);
+SELECT ints FROM A WHERE id = 1;
+UPDATE A SET ints = (
+  SELECT ARRAY_AGG(CASE
+    WHEN i = 1 THEN 40
+    WHEN i = 3 THEN 72
+    ELSE i
+    END) FROM (
+    SELECT i FROM UNNEST(SELECT ints FROM A WHERE id = 1) AS i
+  )
+) WHERE id = 1;
+SELECT ints FROM A WHERE id = 1;
+
+
+UPDATE A SET ints = (
+  SELECT ARRAY_AGG(CASE
+    WHEN i = 1 THEN 40
+    WHEN i = 3 THEN 72
+    ELSE i
+    END) FROM (
+    SELECT i FROM UNNEST(SELECT ints FROM A WHERE id = 1) AS i
+  )
+) WHERE id = 1;
+
+
+
+
+
+
+UPDATE A SET ints = (
+  SELECT ARRAY_AGG(i) FROM UNNEST((SELECT ints FROM A)) i WHERE i != 2
+) WHERE id = 1;
+
+UPDATE A SET ints = (
+  SELECT ARRAY_AGG(CASE WHEN i = 1 THEN 40 ELSE i END) FROM UNNEST((SELECT ints FROM A)) as i
+) WHERE id = 1;
+
+UPDATE A SET ints = (
+  SELECT ARRAY_AGG(i) FROM UNNEST(A.ints) i WHERE i != 2
+) WHERE id = 1;
+
+UPDATE A SET ints = (
+  SELECT ARRAY_AGG(CASE
+                     WHEN i = 1 THEN 40
+                     WHEN i = 3 THEN 72
+                     ELSE i
+                   END) FROM UNNEST(SELECT ints FROM A) i
+) WHERE id = 1;
+
+Thanks @Freeman. Unfortunately I can't get any of your suggestions to work. `ints` can't be found, but after replacing that with `SELECT ints FROM A`, `i` is not found.
+
+
+wget https://repo1.maven.org/maven2/com/h2database/h2/2.2.220/h2-2.2.220.jar
+java -cp h2-2.2.220.jar org.h2.tools.Shell
+
+SELECT ints FROM A WHERE id = 1;
+// [1, 3]
+
+UPDATE A SET ints = ints || 2;
+SELECT ints FROM A WHERE id = 1;
+// [1, 3, 2]
+
+UPDATE A SET ints = ARRAY_EXCEPT(ints, ARRAY[1, 2]) WHERE id = 1;
+SELECT ints FROM A WHERE id = 1;
+// [3]
+
+UPDATE A SET ints = ints || array[1, 2];
+SELECT ints FROM A WHERE id = 1;
+// [3, 1, 2]
+
+UPDATE A SET ints = ARRAY_REPLACE(ARRAY_REPLACE(ints, 1, 40), 3, 72) WHERE id = 1;
+SELECT ints FROM A WHERE id = 1;
+// [72, 40, 2]
+
+
+//UPDATE A SET ints = ARRAY_REMOVE(ints, 2) WHERE id = 1;
 
 SELECT * FROM UNNEST((SELECT ints FROM A)) where c1 > 2;
 SELECT * FROM UNNEST((SELECT ints FROM A)) where c1 != 7;

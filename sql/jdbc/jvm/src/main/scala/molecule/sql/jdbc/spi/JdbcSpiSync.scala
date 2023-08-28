@@ -10,7 +10,7 @@ import molecule.core.spi._
 import molecule.core.transaction._
 import molecule.core.validation.ModelValidation
 import molecule.core.validation.insert.InsertValidation
-import molecule.sql.core.query.SqlModel2Query
+import molecule.sql.core.query.Model2SqlQuery
 import molecule.sql.jdbc.facade.JdbcConn_jvm
 import molecule.sql.jdbc.marshalling.JdbcRpcJVM.Data
 import molecule.sql.jdbc.query.{JdbcQueryResolveCursor, JdbcQueryResolveOffset}
@@ -31,6 +31,8 @@ trait JdbcSpiSync
   // Query --------------------------------------------------------
 
   override def query_get[Tpl](q: Query[Tpl])(implicit conn: Conn): List[Tpl] = {
+    if (q.doInspect)
+      query_inspect(q)
     JdbcQueryResolveOffset[Tpl](q.elements, q.limit, None, q.dbView)
       .getListFromOffset_sync(conn.asInstanceOf[JdbcConn_jvm])._1
   }
@@ -47,6 +49,8 @@ trait JdbcSpiSync
 
 
   override def queryOffset_get[Tpl](q: QueryOffset[Tpl])(implicit conn: Conn): (List[Tpl], Int, Boolean) = {
+    if (q.doInspect)
+      queryOffset_inspect(q)
     JdbcQueryResolveOffset[Tpl](q.elements, q.limit, Some(q.offset), q.dbView)
       .getListFromOffset_sync(conn.asInstanceOf[JdbcConn_jvm])
   }
@@ -56,6 +60,8 @@ trait JdbcSpiSync
   }
 
   override def queryCursor_get[Tpl](q: QueryCursor[Tpl])(implicit conn: Conn): (List[Tpl], String, Boolean) = {
+    if (q.doInspect)
+      queryCursor_inspect(q)
     JdbcQueryResolveCursor[Tpl](q.elements, q.limit, Some(q.cursor), q.dbView)
       .getListFromCursor_sync(conn.asInstanceOf[JdbcConn_jvm])
   }
@@ -66,7 +72,7 @@ trait JdbcSpiSync
 
   private def printInspectQuery(label: String, elements: List[Element]): Unit = {
     tryInspect("query", elements) {
-      val queries = new SqlModel2Query(elements).getSqlQuery(Nil) //._3
+      val queries = new Model2SqlQuery(elements).getSqlQuery(Nil) //._3
       printInspect(label, elements, queries)
     }
   }
@@ -158,7 +164,7 @@ trait JdbcSpiSync
           s"""REF IDS MODEL ----------------
              |${idsModel.mkString("\n")}
              |
-             |${new SqlModel2Query(idsModel).getSqlQuery(Nil)}
+             |${new Model2SqlQuery(idsModel).getSqlQuery(Nil)}
              |""".stripMargin
         val updates                  =
           updateModels
@@ -276,7 +282,7 @@ trait JdbcSpiSync
            |
            |${idQuery.elements.mkString("\n")}
            |
-           |${new SqlModel2Query(idQuery.elements).getSqlQuery(Nil)}
+           |${new Model2SqlQuery(idQuery.elements).getSqlQuery(Nil)}
            |""".stripMargin
       )
     ) {

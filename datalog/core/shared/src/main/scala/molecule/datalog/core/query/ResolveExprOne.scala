@@ -7,7 +7,7 @@ import scala.reflect.ClassTag
 
 trait ResolveExprOne[Tpl]
   extends SortOneSpecial[Tpl]
-    with SortOneOpt_[Tpl] { self: DatomicModel2Query[Tpl] with LambdasOne =>
+    with SortOneOpt_[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasOne =>
 
   protected def resolveAttrOneMan(es: List[Var], attr: AttrOneMan): List[Var] = {
     aritiesAttr()

@@ -9,7 +9,7 @@ import molecule.core.util.AggrUtils
 
 trait SortOneSpecial[Tpl]
   extends SortOne_[Tpl]
-    with ResolveBase with AggrUtils { self: DatomicModel2Query[Tpl] =>
+    with ResolveBase with AggrUtils { self: Model2DatomicQuery[Tpl] =>
 
   private def compare(
     a: Row,

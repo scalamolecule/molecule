@@ -4,7 +4,7 @@ import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import scala.reflect.ClassTag
 
-trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
+trait ResolveExprOne[Tpl] { self: Model2SqlQuery[Tpl] with LambdasOne =>
 
   protected def resolveAttrOneMan(attr: AttrOneMan): Unit = {
     aritiesAttr()
@@ -70,7 +70,7 @@ trait ResolveExprOne[Tpl] { self: SqlModel2Query[Tpl] with LambdasOne =>
 
   private def addSort(attr: Attr, col: String): Unit = {
     attr.sort.foreach { sort =>
-      val (dir, arity) = (sort.head, sort.last)
+      val (dir, arity) = (sort.head, sort.takeRight(1).toInt)
       if (orderBy.exists(ob => ob._1 == level && ob._2 == arity)) {
         throw ModelError(s"Sort arity $arity is already used on this level. " +
           s"Please use distinct continuous sort arities beginning from 1.")

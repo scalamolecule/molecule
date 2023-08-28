@@ -8,7 +8,7 @@ import java.util.{Date, UUID}
 import molecule.boilerplate.ast.Model._
 
 
-trait SortOne_[Tpl] { self: DatomicModel2Query[Tpl] =>
+trait SortOne_[Tpl] { self: Model2DatomicQuery[Tpl] =>
 
   protected def sortOneString(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
     attr.sort.map { sort =>

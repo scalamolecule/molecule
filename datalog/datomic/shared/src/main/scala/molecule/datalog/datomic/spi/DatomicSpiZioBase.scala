@@ -3,7 +3,7 @@ package molecule.datalog.datomic.spi
 import molecule.base.error._
 import molecule.boilerplate.ast.Model._
 import molecule.core.spi.{Conn, PrintInspect}
-import molecule.datalog.core.query.DatomicModel2Query
+import molecule.datalog.core.query.Model2DatomicQuery
 import zio.{Task, ZIO}
 
 trait DatomicSpiZioBase extends PrintInspect {
@@ -19,7 +19,7 @@ trait DatomicSpiZioBase extends PrintInspect {
     label: String,
     elements: List[Element]
   ): ZIO[Conn, MoleculeError, Unit] = ZIO.succeed {
-    val queries = new DatomicModel2Query(elements).getDatomicQueries(true)._3
+    val queries = new Model2DatomicQuery(elements).getDatomicQueries(true)._3
     printInspect(label, Nil, queries)
   }
 }
