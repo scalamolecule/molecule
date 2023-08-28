@@ -58,23 +58,19 @@ trait ResolveExprSetRefAttr[Tpl] { self: Model2SqlQuery[Tpl] with LambdasSet =>
     select += s"ARRAY_AGG($joinTable.$ref_id) $refIds"
     joins += (("INNER JOIN", joinTable, "", s"$nsId = $joinTable.$ns_id"))
     groupBy += nsId
-
     if (isNestedOpt) {
       addCast(res.sql2setOrNull)
     } else {
       addCast(res.sql2set)
     }
-
     attr.filterAttr.fold {
       if (filterAttrVars.contains(attr.name) && attr.op != V) {
         // Runtime check needed since we can't type infer it
         throw ModelError(s"Cardinality-set filter attributes not allowed to do additional filtering. Found:\n  " + attr)
       }
       expr(refIds, attr.op, args, res)
-      //      filterAttrVars1 = filterAttrVars1 + (a -> (e, v))
-      //      filterAttrVars2.get(a).foreach(_(e, v))
     } { filterAttr =>
-      expr2(refIds, attr.op, s":${filterAttr.ns}/${filterAttr.attr}")
+      expr2(refIds, attr.op, filterAttr.name)
     }
   }
 
@@ -84,10 +80,8 @@ trait ResolveExprSetRefAttr[Tpl] { self: Model2SqlQuery[Tpl] with LambdasSet =>
     groupBy += nsId
     attr.filterAttr.fold {
       expr(col, attr.op, args, res)
-      //      filterAttrVars1 = filterAttrVars1 + (a -> (e, v))
-      //      filterAttrVars2.get(a).foreach(_(e, v))
     } { filterAttr =>
-      expr2(col, attr.op, s":${filterAttr.ns}/${filterAttr.attr}")
+      expr2(col, attr.op, filterAttr.name)
     }
   }
 
@@ -176,35 +170,16 @@ trait ResolveExprSetRefAttr[Tpl] { self: Model2SqlQuery[Tpl] with LambdasSet =>
     }
   }
 
+  private def equal2(col: String, filterAttr: String): Unit = {
+    where += ((col, "= " + filterAttr))
+  }
+
   private def optEqual[T](optSets: Option[Seq[Set[T]]], set2sqls: Set[T] => Set[String]): Unit = {
     optSets.fold[Unit] {
       where += (("", s"$refIdArray IS NULL"))
     } { sets =>
       equal(sets, set2sqls)
     }
-  }
-
-  private def equal2(col: String, filterAttr: String): Unit = {
-    //    preFind = e
-    //    whereOLD += s"[$e $a $v$tx]" -> wClause
-    //    whereOLD +=
-    //      s"""[(datomic.api/q
-    //         |          "[:find (distinct ${v}1)
-    //         |            :in $$ ${e}1
-    //         |            :where [${e}1 $a ${v}1]]" $$ $e) [[${v}2]]]""".stripMargin -> wClause
-    //    val link: (Var, Var) => Unit = (e1: Var, v1: Var) => {
-    //      whereOLD +=
-    //        s"""[(datomic.api/q
-    //           |          "[:find (distinct ${v1}1)
-    //           |            :in $$ ${e1}1
-    //           |            :where [${e1}1 $filterAttr ${v1}1]]" $$ $e1) [[${v1}2]]]""".stripMargin -> wClause
-    //      whereOLD += s"[(= ${v}2 ${v1}2)]" -> wClause
-    //    }
-    //    filterAttrVars1.get(filterAttr).fold {
-    //      filterAttrVars2 = filterAttrVars2 + (filterAttr -> link)
-    //    } {
-    //  case (e, a) => link(e, a)
-    //}
   }
 
   private def neq[T](sets: Seq[Set[T]], set2sqls: Set[T] => Set[String]): Unit = {
@@ -216,43 +191,15 @@ trait ResolveExprSetRefAttr[Tpl] { self: Model2SqlQuery[Tpl] with LambdasSet =>
     }
   }
 
+  private def neq2(col: String, filterAttr: String): Unit = {
+    where += ((col, "<> " + filterAttr))
+  }
+
   private def optNeq[T](optSets: Option[Seq[Set[T]]], set2sqls: Set[T] => Set[String]): Unit = {
     if (optSets.isDefined && optSets.get.nonEmpty) {
       neq(optSets.get, set2sqls)
     }
     notNull += s"$joinTable.$ns_id"
-  }
-
-  private def neq2(col: String, filterAttr: String): Unit = {
-    //    whereOLD += s"[$e $a $v$tx]" -> wClause
-    //    val process: (Var, Var) => Unit = (e1: Var, v1: Var) => {
-    //      val blacklist   = v1 + "-blacklist"
-    //      val blacklisted = v1 + "-blacklisted"
-    //
-    //      // Pre-query
-    //      preFind = e1
-    //      preWhere +=
-    //        s"""[(datomic.api/q
-    //           |          "[:find (distinct ${v}1)
-    //           |            :in $$ ${e}1
-    //           |            :where [${e}1 $a ${v}1]]" $$ $e) [[${v}2]]]""".stripMargin -> wClause
-    //      preWhere +=
-    //        s"""[(datomic.api/q
-    //           |          "[:find (distinct ${v1}1)
-    //           |            :in $$ ${e1}1
-    //           |            :where [${e1}1 $filterAttr ${v1}1]]" $$ $e1) [[${v1}2]]]""".stripMargin -> wClause
-    //      preWhere += s"[(= ${v}2 ${v1}2)]" -> wClause
-    //
-    //      // Main query
-    //      inPost += blacklist
-    //      wherePost += s"[(contains? $blacklist $e1) $blacklisted]" -> wClause
-    //      wherePost += s"[(not $blacklisted)]" -> wClause
-    //    }
-    //    filterAttrVars1.get(filterAttr).fold {
-    //      filterAttrVars2 = filterAttrVars2 + (filterAttr -> process)
-    //    } { case (e, a) =>
-    //      process(e, a)
-    //    }
   }
 
 
@@ -288,35 +235,16 @@ trait ResolveExprSetRefAttr[Tpl] { self: Model2SqlQuery[Tpl] with LambdasSet =>
     }
   }
 
+  private def has2(col: String, filterAttr: String): Unit = {
+    where += (("", s"ARRAY_CONTAINS($col, $filterAttr)"))
+  }
+
   private def optHas[T: ClassTag](col: String, optSets: Option[Seq[Set[T]]]): Unit = {
     optSets.fold[Unit] {
       where += ((s"$joinTable.$ref_id", s"IS NULL"))
     } { sets =>
       has(sets)
     }
-  }
-
-  private def has2(col: String, filterAttr: String): Unit = {
-    //    whereOLD += s"[$e $a $v$tx]" -> wClause
-    //    val process: (Var, Var) => Unit = (e1: Var, v1: Var) => {
-    //      whereOLD +=
-    //        s"""[(datomic.api/q
-    //           |          "[:find (distinct ${v}1)
-    //           |            :in $$ ${e}1
-    //           |            :where [${e}1 $a ${v}1]]" $$ $e) [[${v}2]]]""".stripMargin -> wClause
-    //      whereOLD +=
-    //        s"""[(datomic.api/q
-    //           |          "[:find (distinct ${v1}1)
-    //           |            :in $$ ${e1}1
-    //           |            :where [${e1}1 $filterAttr ${v1}1]]" $$ $e1) [[${v1}2]]]""".stripMargin -> wClause
-    //      whereOLD += s"[(clojure.set/intersection ${v}2 ${v1}2) $v1-intersection]" -> wClause
-    //      whereOLD += s"[(= ${v1}2 $v1-intersection)]" -> wClause
-    //    }
-    //    filterAttrVars1.get(filterAttr).fold {
-    //      filterAttrVars2 = filterAttrVars2 + (filterAttr -> process)
-    //    } { case (e, a) =>
-    //      process(e, a)
-    //    }
   }
 
   private def hasNo[T](sets: Seq[Set[T]]): Unit = {
@@ -343,6 +271,10 @@ trait ResolveExprSetRefAttr[Tpl] { self: Model2SqlQuery[Tpl] with LambdasSet =>
     }
   }
 
+  private def hasNo2(col: String, filterAttr: String): Unit = {
+    where += (("", s"NOT ARRAY_CONTAINS($col, $filterAttr)"))
+  }
+
   private def optHasNo[T](optSets: Option[Seq[Set[T]]]): Unit = {
     optSets.fold[Unit] {
       where += ((s"$joinTable.$ref_id", s"IS NOT NULL"))
@@ -355,30 +287,6 @@ trait ResolveExprSetRefAttr[Tpl] { self: Model2SqlQuery[Tpl] with LambdasSet =>
         where += ((s"$joinTable.$ref_id", s"IS NOT NULL"))
       }
     }
-  }
-
-  private def hasNo2(col: String, filterAttr: String): Unit = {
-    //    // Common for pre-query and main query
-    //    whereOLD += s"[$e $a $v$tx]" -> wClause
-    //    val process: (Var, Var) => Unit = (e1: Var, v1: Var) => {
-    //      whereOLD +=
-    //        s"""[(datomic.api/q
-    //           |          "[:find (distinct ${v}1)
-    //           |            :in $$ ${e}1
-    //           |            :where [${e}1 $a ${v}1]]" $$ $e) [[${v}2]]]""".stripMargin -> wClause
-    //      whereOLD +=
-    //        s"""[(datomic.api/q
-    //           |          "[:find (distinct ${v1}1)
-    //           |            :in $$ ${e1}1
-    //           |            :where [${e1}1 $filterAttr ${v1}1]]" $$ $e1) [[${v1}2]]]""".stripMargin -> wClause
-    //      whereOLD += s"[(clojure.set/intersection ${v}2 ${v1}2) $v1-intersection]" -> wClause
-    //      whereOLD += s"[(empty? $v1-intersection)]" -> wClause
-    //    }
-    //    filterAttrVars1.get(filterAttr).fold {
-    //      filterAttrVars2 = filterAttrVars2 + (filterAttr -> process)
-    //    } { case (e, a) =>
-    //      process(e, a)
-    //    }
   }
 
   private def noValue(col: String): Unit = {

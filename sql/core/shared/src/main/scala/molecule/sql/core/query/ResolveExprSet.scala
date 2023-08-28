@@ -70,6 +70,7 @@ trait ResolveExprSet[Tpl] extends AggrUtils { self: Model2SqlQuery[Tpl] with Lam
 
   private def man[T: ClassTag](attr: Attr, args: Seq[Set[T]], res: ResSet[T]): Unit = {
     val col = getCol(attr: Attr)
+    select += col
     if (isNestedOpt) {
       addCast(res.sql2setOrNull)
     } else {
@@ -83,10 +84,8 @@ trait ResolveExprSet[Tpl] extends AggrUtils { self: Model2SqlQuery[Tpl] with Lam
         throw ModelError(s"Cardinality-set filter attributes not allowed to do additional filtering. Found:\n  " + attr)
       }
       expr(col, attr.op, args, res, "man")
-      //      filterAttrVars1 = filterAttrVars1 + (a -> (e, v))
-      //      filterAttrVars2.get(a).foreach(_(e, v))
     } { filterAttr =>
-      expr2(col, attr.op, s":${filterAttr.ns}/${filterAttr.attr}")
+      expr2(col, attr.op, filterAttr.name)
     }
   }
 
@@ -94,10 +93,8 @@ trait ResolveExprSet[Tpl] extends AggrUtils { self: Model2SqlQuery[Tpl] with Lam
     val col = getCol(attr: Attr)
     attr.filterAttr.fold {
       expr(col, attr.op, args, res, "tac")
-      //      filterAttrVars1 = filterAttrVars1 + (a -> (e, v))
-      //      filterAttrVars2.get(a).foreach(_(e, v))
     } { filterAttr =>
-      expr2(col, attr.op, s":${filterAttr.ns}/${filterAttr.attr}")
+      expr2(col, attr.op, filterAttr.name)
     }
     notNull += col
   }
@@ -142,6 +139,7 @@ trait ResolveExprSet[Tpl] extends AggrUtils { self: Model2SqlQuery[Tpl] with Lam
 
 
   private def attr[T](col: String, res: ResSet[T], mode: String): Unit = {
+    select -= col
     select += s"ARRAY_AGG($col)"
     having += "COUNT(*) > 0"
     aggregate = true
@@ -149,6 +147,7 @@ trait ResolveExprSet[Tpl] extends AggrUtils { self: Model2SqlQuery[Tpl] with Lam
   }
 
   private def aggr[T](col: String, fn: String, optN: Option[Int], res: ResSet[T]): Unit = {
+    select -= col
     lazy val n = optN.getOrElse(0)
     fn match {
       case "distinct" =>
@@ -369,7 +368,6 @@ trait ResolveExprSet[Tpl] extends AggrUtils { self: Model2SqlQuery[Tpl] with Lam
   }
 
   private def equal[T](col: String, sets: Seq[Set[T]], set2sqls: Set[T] => Set[String]): Unit = {
-    select += col
     val setsNonEmpty = sets.filterNot(_.isEmpty)
     setsNonEmpty.length match {
       case 0 => where += (("FALSE", ""))
@@ -378,8 +376,11 @@ trait ResolveExprSet[Tpl] extends AggrUtils { self: Model2SqlQuery[Tpl] with Lam
     }
   }
 
+  private def equal2(col: String, filterAttr: String): Unit = {
+    where += ((col, "= " + filterAttr))
+  }
+
   private def optEqual[T](col: String, optSets: Option[Seq[Set[T]]], set2sqls: Set[T] => Set[String]): Unit = {
-    select += col
     optSets.fold[Unit] {
       where += ((col, s"IS NULL"))
     } { sets =>
@@ -387,31 +388,7 @@ trait ResolveExprSet[Tpl] extends AggrUtils { self: Model2SqlQuery[Tpl] with Lam
     }
   }
 
-  private def equal2(col: String, filterAttr: String): Unit = {
-    //    preFind = e
-    //    whereOLD += s"[$e $a $v$tx]" -> wClause
-    //    whereOLD +=
-    //      s"""[(datomic.api/q
-    //         |          "[:find (distinct ${v}1)
-    //         |            :in $$ ${e}1
-    //         |            :where [${e}1 $a ${v}1]]" $$ $e) [[${v}2]]]""".stripMargin -> wClause
-    //    val link: (Var, Var) => Unit = (e1: Var, v1: Var) => {
-    //      whereOLD +=
-    //        s"""[(datomic.api/q
-    //           |          "[:find (distinct ${v1}1)
-    //           |            :in $$ ${e1}1
-    //           |            :where [${e1}1 $filterAttr ${v1}1]]" $$ $e1) [[${v1}2]]]""".stripMargin -> wClause
-    //      whereOLD += s"[(= ${v}2 ${v1}2)]" -> wClause
-    //    }
-    //    filterAttrVars1.get(filterAttr).fold {
-    //      filterAttrVars2 = filterAttrVars2 + (filterAttr -> link)
-    //    } {
-    //  case (e, a) => link(e, a)
-    //}
-  }
-
   private def neq[T](col: String, sets: Seq[Set[T]], set2sqls: Set[T] => Set[String]): Unit = {
-    select += col
     val setsNonEmpty = sets.filterNot(_.isEmpty)
     setsNonEmpty.length match {
       case 0 => ()
@@ -420,50 +397,20 @@ trait ResolveExprSet[Tpl] extends AggrUtils { self: Model2SqlQuery[Tpl] with Lam
     }
   }
 
+  private def neq2(col: String, filterAttr: String): Unit = {
+    where += ((col, "<> " + filterAttr))
+  }
+
   private def optNeq[T](col: String, optSets: Option[Seq[Set[T]]], set2sqls: Set[T] => Set[String]): Unit = {
-    select += col
     if (optSets.isDefined && optSets.get.nonEmpty) {
       neq(col, optSets.get, set2sqls)
     }
     notNull += col
   }
 
-  private def neq2(col: String, filterAttr: String): Unit = {
-    //    whereOLD += s"[$e $a $v$tx]" -> wClause
-    //    val process: (Var, Var) => Unit = (e1: Var, v1: Var) => {
-    //      val blacklist   = v1 + "-blacklist"
-    //      val blacklisted = v1 + "-blacklisted"
-    //
-    //      // Pre-query
-    //      preFind = e1
-    //      preWhere +=
-    //        s"""[(datomic.api/q
-    //           |          "[:find (distinct ${v}1)
-    //           |            :in $$ ${e}1
-    //           |            :where [${e}1 $a ${v}1]]" $$ $e) [[${v}2]]]""".stripMargin -> wClause
-    //      preWhere +=
-    //        s"""[(datomic.api/q
-    //           |          "[:find (distinct ${v1}1)
-    //           |            :in $$ ${e1}1
-    //           |            :where [${e1}1 $filterAttr ${v1}1]]" $$ $e1) [[${v1}2]]]""".stripMargin -> wClause
-    //      preWhere += s"[(= ${v}2 ${v1}2)]" -> wClause
-    //
-    //      // Main query
-    //      inPost += blacklist
-    //      wherePost += s"[(contains? $blacklist $e1) $blacklisted]" -> wClause
-    //      wherePost += s"[(not $blacklisted)]" -> wClause
-    //    }
-    //    filterAttrVars1.get(filterAttr).fold {
-    //      filterAttrVars2 = filterAttrVars2 + (filterAttr -> process)
-    //    } { case (e, a) =>
-    //      process(e, a)
-    //    }
-  }
-
   private def has[T: ClassTag](col: String, sets: Seq[Set[T]], one2sql: T => String): Unit = {
     def contains(v: T): String = s"ARRAY_CONTAINS($col, ${one2sql(v)})"
     def containsSet(set: Set[T]): String = set.map(contains).mkString("(", " AND\n   ", ")")
-    select += col
     sets.length match {
       case 0 => where += (("FALSE", ""))
       case 1 =>
@@ -481,13 +428,15 @@ trait ResolveExprSet[Tpl] extends AggrUtils { self: Model2SqlQuery[Tpl] with Lam
     }
   }
 
+  private def has2(col: String, filterAttr: String): Unit = {
+    where += (("", s"ARRAY_CONTAINS($col, $filterAttr)"))
+  }
 
   private def optHas[T: ClassTag](
     col: String,
     optSets: Option[Seq[Set[T]]],
     one2sql: T => String
   ): Unit = {
-    select += col
     optSets.fold[Unit] {
       where += ((col, s"IS NULL"))
     } { sets =>
@@ -495,34 +444,9 @@ trait ResolveExprSet[Tpl] extends AggrUtils { self: Model2SqlQuery[Tpl] with Lam
     }
   }
 
-  private def has2(col: String, filterAttr: String): Unit = {
-    //    whereOLD += s"[$e $a $v$tx]" -> wClause
-    //    val process: (Var, Var) => Unit = (e1: Var, v1: Var) => {
-    //      whereOLD +=
-    //        s"""[(datomic.api/q
-    //           |          "[:find (distinct ${v}1)
-    //           |            :in $$ ${e}1
-    //           |            :where [${e}1 $a ${v}1]]" $$ $e) [[${v}2]]]""".stripMargin -> wClause
-    //      whereOLD +=
-    //        s"""[(datomic.api/q
-    //           |          "[:find (distinct ${v1}1)
-    //           |            :in $$ ${e1}1
-    //           |            :where [${e1}1 $filterAttr ${v1}1]]" $$ $e1) [[${v1}2]]]""".stripMargin -> wClause
-    //      whereOLD += s"[(clojure.set/intersection ${v}2 ${v1}2) $v1-intersection]" -> wClause
-    //      whereOLD += s"[(= ${v1}2 $v1-intersection)]" -> wClause
-    //    }
-    //    filterAttrVars1.get(filterAttr).fold {
-    //      filterAttrVars2 = filterAttrVars2 + (filterAttr -> process)
-    //    } { case (e, a) =>
-    //      process(e, a)
-    //    }
-  }
-
   private def hasNo[T](col: String, sets: Seq[Set[T]], one2sql: T => String): Unit = {
     def notContains(v: T): String = s"NOT ARRAY_CONTAINS($col, ${one2sql(v)})"
     def notContainsSet(set: Set[T]): String = set.map(notContains).mkString("(", " OR\n   ", ")")
-
-    select += col
     sets.length match {
       case 0 => ()
       case 1 =>
@@ -540,12 +464,15 @@ trait ResolveExprSet[Tpl] extends AggrUtils { self: Model2SqlQuery[Tpl] with Lam
     }
   }
 
+  private def hasNo2(col: String, filterAttr: String): Unit = {
+    where += (("", s"NOT ARRAY_CONTAINS($col, $filterAttr)"))
+  }
+
   private def optHasNo[T](
     col: String,
     optSets: Option[Seq[Set[T]]],
     one2sql: T => String
   ): Unit = {
-    select += col
     optSets.fold[Unit] {
       where += ((col, s"IS NOT NULL"))
     } { sets =>
@@ -558,32 +485,7 @@ trait ResolveExprSet[Tpl] extends AggrUtils { self: Model2SqlQuery[Tpl] with Lam
     }
   }
 
-  private def hasNo2(col: String, filterAttr: String): Unit = {
-    //    // Common for pre-query and main query
-    //    whereOLD += s"[$e $a $v$tx]" -> wClause
-    //    val process: (Var, Var) => Unit = (e1: Var, v1: Var) => {
-    //      whereOLD +=
-    //        s"""[(datomic.api/q
-    //           |          "[:find (distinct ${v}1)
-    //           |            :in $$ ${e}1
-    //           |            :where [${e}1 $a ${v}1]]" $$ $e) [[${v}2]]]""".stripMargin -> wClause
-    //      whereOLD +=
-    //        s"""[(datomic.api/q
-    //           |          "[:find (distinct ${v1}1)
-    //           |            :in $$ ${e1}1
-    //           |            :where [${e1}1 $filterAttr ${v1}1]]" $$ $e1) [[${v1}2]]]""".stripMargin -> wClause
-    //      whereOLD += s"[(clojure.set/intersection ${v}2 ${v1}2) $v1-intersection]" -> wClause
-    //      whereOLD += s"[(empty? $v1-intersection)]" -> wClause
-    //    }
-    //    filterAttrVars1.get(filterAttr).fold {
-    //      filterAttrVars2 = filterAttrVars2 + (filterAttr -> process)
-    //    } { case (e, a) =>
-    //      process(e, a)
-    //    }
-  }
-
   private def noValue(col: String): Unit = {
-    select += col
     notNull -= col
     where += ((col, s"IS NULL"))
   }
