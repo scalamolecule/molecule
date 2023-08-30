@@ -27,7 +27,7 @@ trait InsertOps {
     ns: String,
     attr: String,
     set2array: Set[Any] => Array[AnyRef],
-    refNsOpt: Option[String],
+    refNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
   ): Product => Unit
@@ -36,7 +36,7 @@ trait InsertOps {
     ns: String,
     attr: String,
     set2array: Set[Any] => Array[AnyRef],
-    refNsOpt: Option[String],
+    refNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
   ): Product => Unit

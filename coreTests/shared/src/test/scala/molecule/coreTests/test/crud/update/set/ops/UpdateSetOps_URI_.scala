@@ -89,8 +89,12 @@ trait UpdateSetOps_URI_ extends CoreTestSuite with ApiAsyncImplicits { self: Spi
         _ <- Ns(id).uris.swap(uri3 -> uri6, uri4 -> uri7).update.transact
         _ <- Ns.uris.query.get.map(_.head ==> Set(uri1, uri2, uri6, uri7, uri8))
 
-        // Missing old value has no effect. The new value is inserted (upsert semantics)
+        // Updating missing old value (null) has no effect
         _ <- Ns(id).uris.swap(uri4 -> uri9).update.transact
+        _ <- Ns.uris.query.get.map(_.head ==> Set(uri1, uri2, uri6, uri7, uri8))
+
+        // Upserting missing old value (null) inserts the new value
+        _ <- Ns(id).uris.swap(uri4 -> uri9).upsert.transact
         _ <- Ns.uris.query.get.map(_.head ==> Set(uri1, uri2, uri6, uri7, uri8, uri9))
 
         // Replace with Seq of oldValue->newValue pairs
@@ -101,17 +105,16 @@ trait UpdateSetOps_URI_ extends CoreTestSuite with ApiAsyncImplicits { self: Spi
         _ <- Ns(id).uris.swap(Seq.empty[(URI, URI)]).update.transact
         _ <- Ns.uris.query.get.map(_.head ==> Set(uri1, uri5, uri6, uri7, uri8, uri9))
 
-
         // Can't swap duplicate from/to values
         _ <- Ns(42).uris.swap(uri1 -> uri2, uri1 -> uri3).update.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-          err ==> "Can't swap from duplicate retract values."
-        }
+          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
+            err ==> "Can't swap from duplicate retract values."
+          }
 
         _ <- Ns(42).uris.swap(uri1 -> uri3, uri2 -> uri3).update.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-          err ==> "Can't swap to duplicate replacement values."
-        }
+          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
+            err ==> "Can't swap to duplicate replacement values."
+          }
       } yield ()
     }
 

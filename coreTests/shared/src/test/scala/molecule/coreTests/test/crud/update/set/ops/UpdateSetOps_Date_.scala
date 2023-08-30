@@ -89,8 +89,12 @@ trait UpdateSetOps_Date_ extends CoreTestSuite with ApiAsyncImplicits { self: Sp
         _ <- Ns(id).dates.swap(date3 -> date6, date4 -> date7).update.transact
         _ <- Ns.dates.query.get.map(_.head ==> Set(date1, date2, date6, date7, date8))
 
-        // Missing old value has no effect. The new value is inserted (upsert semantics)
+        // Updating missing old value (null) has no effect
         _ <- Ns(id).dates.swap(date4 -> date9).update.transact
+        _ <- Ns.dates.query.get.map(_.head ==> Set(date1, date2, date6, date7, date8))
+
+        // Upserting missing old value (null) inserts the new value
+        _ <- Ns(id).dates.swap(date4 -> date9).upsert.transact
         _ <- Ns.dates.query.get.map(_.head ==> Set(date1, date2, date6, date7, date8, date9))
 
         // Replace with Seq of oldValue->newValue pairs
@@ -101,17 +105,16 @@ trait UpdateSetOps_Date_ extends CoreTestSuite with ApiAsyncImplicits { self: Sp
         _ <- Ns(id).dates.swap(Seq.empty[(Date, Date)]).update.transact
         _ <- Ns.dates.query.get.map(_.head ==> Set(date1, date5, date6, date7, date8, date9))
 
-
         // Can't swap duplicate from/to values
         _ <- Ns(42).dates.swap(date1 -> date2, date1 -> date3).update.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-          err ==> "Can't swap from duplicate retract values."
-        }
+          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
+            err ==> "Can't swap from duplicate retract values."
+          }
 
         _ <- Ns(42).dates.swap(date1 -> date3, date2 -> date3).update.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-          err ==> "Can't swap to duplicate replacement values."
-        }
+          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
+            err ==> "Can't swap to duplicate replacement values."
+          }
       } yield ()
     }
 

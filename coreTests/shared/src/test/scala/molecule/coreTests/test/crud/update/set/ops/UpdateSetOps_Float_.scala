@@ -88,8 +88,12 @@ trait UpdateSetOps_Float_ extends CoreTestSuite with ApiAsyncImplicits { self: S
         _ <- Ns(id).floats.swap(float3 -> float6, float4 -> float7).update.transact
         _ <- Ns.floats.query.get.map(_.head ==> Set(float1, float2, float6, float7, float8))
 
-        // Missing old value has no effect. The new value is inserted (upsert semantics)
+        // Updating missing old value (null) has no effect
         _ <- Ns(id).floats.swap(float4 -> float9).update.transact
+        _ <- Ns.floats.query.get.map(_.head ==> Set(float1, float2, float6, float7, float8))
+
+        // Upserting missing old value (null) inserts the new value
+        _ <- Ns(id).floats.swap(float4 -> float9).upsert.transact
         _ <- Ns.floats.query.get.map(_.head ==> Set(float1, float2, float6, float7, float8, float9))
 
         // Replace with Seq of oldValue->newValue pairs
@@ -100,17 +104,16 @@ trait UpdateSetOps_Float_ extends CoreTestSuite with ApiAsyncImplicits { self: S
         _ <- Ns(id).floats.swap(Seq.empty[(Float, Float)]).update.transact
         _ <- Ns.floats.query.get.map(_.head ==> Set(float1, float5, float6, float7, float8, float9))
 
-
         // Can't swap duplicate from/to values
         _ <- Ns(42).floats.swap(float1 -> float2, float1 -> float3).update.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-          err ==> "Can't swap from duplicate retract values."
-        }
+          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
+            err ==> "Can't swap from duplicate retract values."
+          }
 
         _ <- Ns(42).floats.swap(float1 -> float3, float2 -> float3).update.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-          err ==> "Can't swap to duplicate replacement values."
-        }
+          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
+            err ==> "Can't swap to duplicate replacement values."
+          }
       } yield ()
     }
 

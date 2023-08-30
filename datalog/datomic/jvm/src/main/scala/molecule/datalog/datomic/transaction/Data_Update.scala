@@ -13,7 +13,7 @@ import molecule.core.transaction.ops.UpdateOps
 import molecule.core.validation.ModelValidation
 import molecule.datalog.core.query.Model2DatomicQuery
 import molecule.datalog.datomic.facade.DatomicConn_JVM
-import scala.collection.immutable.Set
+import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
 trait Data_Update extends DatomicBase_JVM with UpdateOps with MoleculeLogging { self: ResolveUpdate =>
@@ -110,7 +110,8 @@ trait Data_Update extends DatomicBase_JVM with UpdateOps with MoleculeLogging { 
     a: AttrSet,
     sets: Seq[Set[T]],
     transform: T => Any,
-    set2array: Set[Any] => Array[AnyRef]
+    set2array: Set[Any] => Array[AnyRef],
+    refNs: Option[String]
   ): Unit = {
     if (!isUpsert) {
       val dummyFilterAttr = AttrOneTacInt(a.ns, a.attr, V, Nil, None, None, Nil, Nil, None, None)
@@ -134,7 +135,8 @@ trait Data_Update extends DatomicBase_JVM with UpdateOps with MoleculeLogging { 
     a: AttrSet,
     sets: Seq[Set[T]],
     transform: T => Any,
-    set2array: Set[Any] => Array[AnyRef]
+    set2array: Set[Any] => Array[AnyRef],
+    refNs: Option[String]
   ): Unit = {
     sets match {
       case Seq(set) =>
@@ -150,32 +152,41 @@ trait Data_Update extends DatomicBase_JVM with UpdateOps with MoleculeLogging { 
     }
   }
 
-  override def updateSetSwab[T](
+  private val new2oldPairs = mutable.Map.empty[Any, Any]
+
+  override def updateSetSwap[T](
     a: AttrSet,
     sets: Seq[Set[T]],
     transform: T => Any,
-    set2array: Set[Any] => Array[AnyRef],
+    handleValue: T => Any,
+    dbType: String,
+    refNs: Option[String]
   ): Unit = {
     val (retracts0, adds0) = sets.splitAt(sets.length / 2)
     val (retracts, adds)   = (retracts0.flatten, adds0.flatten)
-    if (retracts.length != retracts.distinct.length)
+    if (retracts.length != retracts.distinct.length) {
       throw ExecutionError(s"Can't swap from duplicate retract values.")
-
-    if (adds.length != adds.distinct.length)
+    }
+    if (adds.length != adds.distinct.length) {
       throw ExecutionError(s"Can't swap to duplicate replacement values.")
-
+    }
     if (retracts.nonEmpty) {
-      if (retracts.size != adds.size)
+      if (retracts.size != adds.size) {
         throw ExecutionError(
           s"""Can't swap duplicate keys/values:
              |  RETRACTS: $retracts
              |  ADDS    : $adds
              |""".stripMargin
         )
-
+      }
+      val (retracts1, adds1) = adds.zip(retracts).map {
+        case (add, retract) =>
+          new2oldPairs(transform(add)) = transform(retract)
+          (transform(retract).asInstanceOf[AnyRef], transform(add).asInstanceOf[AnyRef])
+      }.unzip
       data = data ++ Seq(
-        ("retract", a.ns, a.attr, retracts.map(v => transform(v).asInstanceOf[AnyRef]), false),
-        ("add", a.ns, a.attr, adds.map(v => transform(v).asInstanceOf[AnyRef]), false),
+        ("retract", a.ns, a.attr, retracts1, false),
+        ("add", a.ns, a.attr, adds1, false),
       )
     }
   }
@@ -183,7 +194,10 @@ trait Data_Update extends DatomicBase_JVM with UpdateOps with MoleculeLogging { 
   override def updateSetRemove[T](
     a: AttrSet,
     set: Set[T],
-    transform: T => Any
+    transform: T => Any,
+    handleValue: T => Any,
+    dbType: String,
+    refNs: Option[String]
   ): Unit = {
     if (set.nonEmpty) {
       data = data :+ (("retract", a.ns, a.attr, set.map(v => transform(v).asInstanceOf[AnyRef]).toSeq, false))
@@ -227,28 +241,33 @@ trait Data_Update extends DatomicBase_JVM with UpdateOps with MoleculeLogging { 
   ): AnyRef => Unit = {
     (id0: AnyRef) => {
       var id      : AnyRef          = id0
-      var txId    : AnyRef          = null
-      var isTx    : Boolean         = false
       var entity  : EntityMap       = db.entity(id).asInstanceOf[EntityMap]
       var entities: List[EntityMap] = List(entity)
-
       data.foreach {
         case ("add", ns, attr, newValues, retractCur) =>
-          val a = kw(ns, attr)
+          val a         = kw(ns, attr)
+          val id1       = id
+          val curValues = ListBuffer.empty[AnyRef]
+          // todo: optimize with one query for all ids
+          Peer.q("[:find ?v :in $ ?e ?a :where [?e ?a ?v]]", db, id1, a).forEach { row =>
+            curValues += row.get(0)
+          }
           if (retractCur) {
-            val id1       = if (txId != null) txId else id
-            // todo: optimize with one query for all ids
-            val curValues = Peer.q("[:find ?v :in $ ?e ?a :where [?e ?a ?v]]", db, id1, a)
-            curValues.forEach { row =>
-              val curValue = row.get(0)
-              if (!newValues.contains(curValue))
+            curValues.foreach { curValue =>
+              if (!newValues.contains(curValue)) {
                 appendStmt(retract, id1, a, curValue)
+              }
             }
           }
-          if (addNewValues || entity.get(a) != null || isTx) {
-            newValues.foreach(newValue =>
-              appendStmt(add, id, a, newValue)
-            )
+          if (addNewValues || entity.get(a) != null) {
+            newValues.foreach { newValue =>
+              if (!isUpsert && new2oldPairs.nonEmpty && !curValues.contains(new2oldPairs(newValue))) {
+                // Don't update/swap to new value if retract value is not already there
+                ()
+              } else {
+                appendStmt(add, id, a, newValue)
+              }
+            }
           }
 
         case ("retract", ns, attr, retractValues, _) =>
@@ -291,7 +310,7 @@ trait Data_Update extends DatomicBase_JVM with UpdateOps with MoleculeLogging { 
   }
 
 
-  override protected def uniqueIds(
+  private def uniqueIds(
     filterAttr: AttrOneTac,
     ns: String,
     attr: String

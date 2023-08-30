@@ -65,6 +65,7 @@ trait DatomicSpiAsync
   // Save --------------------------------------------------------
 
   override def save_transact(save: Save)(implicit conn: Conn, ec: EC): Future[TxReport] = try {
+    if (save.doInspect) save_inspect(save)
     val errors = save_validate(save)
     if (errors.isEmpty) {
       conn.asInstanceOf[DatomicConn_JVM].transact_async(save_getStmts(save))
@@ -92,6 +93,7 @@ trait DatomicSpiAsync
   // Insert --------------------------------------------------------
 
   override def insert_transact(insert: Insert)(implicit conn: Conn, ec: EC): Future[TxReport] = try {
+    if (insert.doInspect) insert_inspect(insert)
     val errors = insert_validate(insert)
     if (errors.isEmpty) {
       conn.asInstanceOf[DatomicConn_JVM].transact_async(insert_getStmts(insert, conn.proxy))
@@ -119,6 +121,7 @@ trait DatomicSpiAsync
   // Update --------------------------------------------------------
 
   override def update_transact(update: Update)(implicit conn0: Conn, ec: EC): Future[TxReport] = try {
+    if (update.doInspect) update_inspect(update)
     val errors = update_validate(update)
     if (errors.isEmpty) {
       val conn = conn0.asInstanceOf[DatomicConn_JVM]
@@ -148,6 +151,7 @@ trait DatomicSpiAsync
   // Delete --------------------------------------------------------
 
   override def delete_transact(delete: Delete)(implicit conn0: Conn, ec: EC): Future[TxReport] = try {
+    if (delete.doInspect) delete_inspect(delete)
     val conn = conn0.asInstanceOf[DatomicConn_JVM]
     conn.transact_async(delete_getStmts(delete, conn))
   } catch {

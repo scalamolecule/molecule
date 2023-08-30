@@ -19,7 +19,8 @@ trait SaveOps extends Action2Data {
     attr: String,
     optSet: Option[Set[T]],
     handleValue: T => Any,
-    set2array: Set[Any] => Array[AnyRef]
+    set2array: Set[Any] => Array[AnyRef],
+    refNs: Option[String]
   ): Unit
 
   protected def addRef(

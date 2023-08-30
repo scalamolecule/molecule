@@ -88,8 +88,12 @@ trait UpdateSetOps_BigDecimal_ extends CoreTestSuite with ApiAsyncImplicits { se
         _ <- Ns(id).bigDecimals.swap(bigDecimal3 -> bigDecimal6, bigDecimal4 -> bigDecimal7).update.transact
         _ <- Ns.bigDecimals.query.get.map(_.head ==> Set(bigDecimal1, bigDecimal2, bigDecimal6, bigDecimal7, bigDecimal8))
 
-        // Missing old value has no effect. The new value is inserted (upsert semantics)
+        // Updating missing old value (null) has no effect
         _ <- Ns(id).bigDecimals.swap(bigDecimal4 -> bigDecimal9).update.transact
+        _ <- Ns.bigDecimals.query.get.map(_.head ==> Set(bigDecimal1, bigDecimal2, bigDecimal6, bigDecimal7, bigDecimal8))
+
+        // Upserting missing old value (null) inserts the new value
+        _ <- Ns(id).bigDecimals.swap(bigDecimal4 -> bigDecimal9).upsert.transact
         _ <- Ns.bigDecimals.query.get.map(_.head ==> Set(bigDecimal1, bigDecimal2, bigDecimal6, bigDecimal7, bigDecimal8, bigDecimal9))
 
         // Replace with Seq of oldValue->newValue pairs
@@ -100,17 +104,16 @@ trait UpdateSetOps_BigDecimal_ extends CoreTestSuite with ApiAsyncImplicits { se
         _ <- Ns(id).bigDecimals.swap(Seq.empty[(BigDecimal, BigDecimal)]).update.transact
         _ <- Ns.bigDecimals.query.get.map(_.head ==> Set(bigDecimal1, bigDecimal5, bigDecimal6, bigDecimal7, bigDecimal8, bigDecimal9))
 
-
         // Can't swap duplicate from/to values
         _ <- Ns(42).bigDecimals.swap(bigDecimal1 -> bigDecimal2, bigDecimal1 -> bigDecimal3).update.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-          err ==> "Can't swap from duplicate retract values."
-        }
+          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
+            err ==> "Can't swap from duplicate retract values."
+          }
 
         _ <- Ns(42).bigDecimals.swap(bigDecimal1 -> bigDecimal3, bigDecimal2 -> bigDecimal3).update.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-          err ==> "Can't swap to duplicate replacement values."
-        }
+          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
+            err ==> "Can't swap to duplicate replacement values."
+          }
       } yield ()
     }
 

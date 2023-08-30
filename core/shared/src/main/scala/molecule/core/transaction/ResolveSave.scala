@@ -149,41 +149,41 @@ class ResolveSave extends ModelUtils with MoleculeLogging { self: SaveOps =>
     }
   }
   private def resolveAttrSetMan(a: AttrSetMan): Unit = {
-    val (ns, attr) = (a.ns, a.attr)
+    val (ns, attr, refNs) = (a.ns, a.attr, a.refNs)
     a match {
-      case a: AttrSetManString     => addSet(ns, attr, oneSet(ns, attr, a.vs, transformString), handleString, set2arrayString)
-      case a: AttrSetManInt        => addSet(ns, attr, oneSet(ns, attr, a.vs, transformInt), handleInt, set2arrayInt)
-      case a: AttrSetManLong       => addSet(ns, attr, oneSet(ns, attr, a.vs, transformLong), handleLong, set2arrayLong)
-      case a: AttrSetManFloat      => addSet(ns, attr, oneSet(ns, attr, a.vs, transformFloat), handleFloat, set2arrayFloat)
-      case a: AttrSetManDouble     => addSet(ns, attr, oneSet(ns, attr, a.vs, transformDouble), handleDouble, set2arrayDouble)
-      case a: AttrSetManBoolean    => addSet(ns, attr, oneSet(ns, attr, a.vs, transformBoolean), handleBoolean, set2arrayBoolean)
-      case a: AttrSetManBigInt     => addSet(ns, attr, oneSet(ns, attr, a.vs, transformBigInt), handleBigInt, set2arrayBigInt)
-      case a: AttrSetManBigDecimal => addSet(ns, attr, oneSet(ns, attr, a.vs, transformBigDecimal), handleBigDecimal, set2arrayBigDecimal)
-      case a: AttrSetManDate       => addSet(ns, attr, oneSet(ns, attr, a.vs, transformDate), handleDate, set2arrayDate)
-      case a: AttrSetManUUID       => addSet(ns, attr, oneSet(ns, attr, a.vs, transformUUID), handleUUID, set2arrayUUID)
-      case a: AttrSetManURI        => addSet(ns, attr, oneSet(ns, attr, a.vs, transformURI), handleURI, set2arrayURI)
-      case a: AttrSetManByte       => addSet(ns, attr, oneSet(ns, attr, a.vs, transformByte), handleByte, set2arrayByte)
-      case a: AttrSetManShort      => addSet(ns, attr, oneSet(ns, attr, a.vs, transformShort), handleShort, set2arrayShort)
-      case a: AttrSetManChar       => addSet(ns, attr, oneSet(ns, attr, a.vs, transformChar), handleChar, set2arrayChar)
+      case a: AttrSetManString     => addSet(ns, attr, oneSet(ns, attr, a.vs, transformString), handleString, set2arrayString, refNs)
+      case a: AttrSetManInt        => addSet(ns, attr, oneSet(ns, attr, a.vs, transformInt), handleInt, set2arrayInt, refNs)
+      case a: AttrSetManLong       => addSet(ns, attr, oneSet(ns, attr, a.vs, transformLong), handleLong, set2arrayLong, refNs)
+      case a: AttrSetManFloat      => addSet(ns, attr, oneSet(ns, attr, a.vs, transformFloat), handleFloat, set2arrayFloat, refNs)
+      case a: AttrSetManDouble     => addSet(ns, attr, oneSet(ns, attr, a.vs, transformDouble), handleDouble, set2arrayDouble, refNs)
+      case a: AttrSetManBoolean    => addSet(ns, attr, oneSet(ns, attr, a.vs, transformBoolean), handleBoolean, set2arrayBoolean, refNs)
+      case a: AttrSetManBigInt     => addSet(ns, attr, oneSet(ns, attr, a.vs, transformBigInt), handleBigInt, set2arrayBigInt, refNs)
+      case a: AttrSetManBigDecimal => addSet(ns, attr, oneSet(ns, attr, a.vs, transformBigDecimal), handleBigDecimal, set2arrayBigDecimal, refNs)
+      case a: AttrSetManDate       => addSet(ns, attr, oneSet(ns, attr, a.vs, transformDate), handleDate, set2arrayDate, refNs)
+      case a: AttrSetManUUID       => addSet(ns, attr, oneSet(ns, attr, a.vs, transformUUID), handleUUID, set2arrayUUID, refNs)
+      case a: AttrSetManURI        => addSet(ns, attr, oneSet(ns, attr, a.vs, transformURI), handleURI, set2arrayURI, refNs)
+      case a: AttrSetManByte       => addSet(ns, attr, oneSet(ns, attr, a.vs, transformByte), handleByte, set2arrayByte, refNs)
+      case a: AttrSetManShort      => addSet(ns, attr, oneSet(ns, attr, a.vs, transformShort), handleShort, set2arrayShort, refNs)
+      case a: AttrSetManChar       => addSet(ns, attr, oneSet(ns, attr, a.vs, transformChar), handleChar, set2arrayChar, refNs)
     }
   }
   private def resolveAttrSetTac(a: AttrSetTac): Unit = {
-    val (ns, attr) = (a.ns, a.attr)
+    val (ns, attr, refNs) = (a.ns, a.attr, a.refNs)
     a match {
-      case a: AttrSetTacString     => addSet(ns, attr, oneSet(ns, attr, a.vs, transformString), handleString, set2arrayString)
-      case a: AttrSetTacInt        => addSet(ns, attr, oneSet(ns, attr, a.vs, transformInt), handleInt, set2arrayInt)
-      case a: AttrSetTacLong       => addSet(ns, attr, oneSet(ns, attr, a.vs, transformLong), handleLong, set2arrayLong)
-      case a: AttrSetTacFloat      => addSet(ns, attr, oneSet(ns, attr, a.vs, transformFloat), handleFloat, set2arrayFloat)
-      case a: AttrSetTacDouble     => addSet(ns, attr, oneSet(ns, attr, a.vs, transformDouble), handleDouble, set2arrayDouble)
-      case a: AttrSetTacBoolean    => addSet(ns, attr, oneSet(ns, attr, a.vs, transformBoolean), handleBoolean, set2arrayBoolean)
-      case a: AttrSetTacBigInt     => addSet(ns, attr, oneSet(ns, attr, a.vs, transformBigInt), handleBigInt, set2arrayBigInt)
-      case a: AttrSetTacBigDecimal => addSet(ns, attr, oneSet(ns, attr, a.vs, transformBigDecimal), handleBigDecimal, set2arrayBigDecimal)
-      case a: AttrSetTacDate       => addSet(ns, attr, oneSet(ns, attr, a.vs, transformDate), handleDate, set2arrayDate)
-      case a: AttrSetTacUUID       => addSet(ns, attr, oneSet(ns, attr, a.vs, transformUUID), handleUUID, set2arrayUUID)
-      case a: AttrSetTacURI        => addSet(ns, attr, oneSet(ns, attr, a.vs, transformURI), handleURI, set2arrayURI)
-      case a: AttrSetTacByte       => addSet(ns, attr, oneSet(ns, attr, a.vs, transformByte), handleByte, set2arrayByte)
-      case a: AttrSetTacShort      => addSet(ns, attr, oneSet(ns, attr, a.vs, transformShort), handleShort, set2arrayShort)
-      case a: AttrSetTacChar       => addSet(ns, attr, oneSet(ns, attr, a.vs, transformChar), handleChar, set2arrayChar)
+      case a: AttrSetTacString     => addSet(ns, attr, oneSet(ns, attr, a.vs, transformString), handleString, set2arrayString, refNs)
+      case a: AttrSetTacInt        => addSet(ns, attr, oneSet(ns, attr, a.vs, transformInt), handleInt, set2arrayInt, refNs)
+      case a: AttrSetTacLong       => addSet(ns, attr, oneSet(ns, attr, a.vs, transformLong), handleLong, set2arrayLong, refNs)
+      case a: AttrSetTacFloat      => addSet(ns, attr, oneSet(ns, attr, a.vs, transformFloat), handleFloat, set2arrayFloat, refNs)
+      case a: AttrSetTacDouble     => addSet(ns, attr, oneSet(ns, attr, a.vs, transformDouble), handleDouble, set2arrayDouble, refNs)
+      case a: AttrSetTacBoolean    => addSet(ns, attr, oneSet(ns, attr, a.vs, transformBoolean), handleBoolean, set2arrayBoolean, refNs)
+      case a: AttrSetTacBigInt     => addSet(ns, attr, oneSet(ns, attr, a.vs, transformBigInt), handleBigInt, set2arrayBigInt, refNs)
+      case a: AttrSetTacBigDecimal => addSet(ns, attr, oneSet(ns, attr, a.vs, transformBigDecimal), handleBigDecimal, set2arrayBigDecimal, refNs)
+      case a: AttrSetTacDate       => addSet(ns, attr, oneSet(ns, attr, a.vs, transformDate), handleDate, set2arrayDate, refNs)
+      case a: AttrSetTacUUID       => addSet(ns, attr, oneSet(ns, attr, a.vs, transformUUID), handleUUID, set2arrayUUID, refNs)
+      case a: AttrSetTacURI        => addSet(ns, attr, oneSet(ns, attr, a.vs, transformURI), handleURI, set2arrayURI, refNs)
+      case a: AttrSetTacByte       => addSet(ns, attr, oneSet(ns, attr, a.vs, transformByte), handleByte, set2arrayByte, refNs)
+      case a: AttrSetTacShort      => addSet(ns, attr, oneSet(ns, attr, a.vs, transformShort), handleShort, set2arrayShort, refNs)
+      case a: AttrSetTacChar       => addSet(ns, attr, oneSet(ns, attr, a.vs, transformChar), handleChar, set2arrayChar, refNs)
     }
   }
 
@@ -202,23 +202,23 @@ class ResolveSave extends ModelUtils with MoleculeLogging { self: SaveOps =>
     }
   }
 
-  private def resolveAttrSetOpt(at: AttrSetOpt): Unit = {
-    val (ns, attr) = (at.ns, at.attr)
-    at match {
-      case a: AttrSetOptString     => addSet(ns, attr, oneOptSet(ns, attr, a.vs, transformString), handleString, set2arrayString)
-      case a: AttrSetOptInt        => addSet(ns, attr, oneOptSet(ns, attr, a.vs, transformInt), handleInt, set2arrayInt)
-      case a: AttrSetOptLong       => addSet(ns, attr, oneOptSet(ns, attr, a.vs, transformLong), handleLong, set2arrayLong)
-      case a: AttrSetOptFloat      => addSet(ns, attr, oneOptSet(ns, attr, a.vs, transformFloat), handleFloat, set2arrayFloat)
-      case a: AttrSetOptDouble     => addSet(ns, attr, oneOptSet(ns, attr, a.vs, transformDouble), handleDouble, set2arrayDouble)
-      case a: AttrSetOptBoolean    => addSet(ns, attr, oneOptSet(ns, attr, a.vs, transformBoolean), handleBoolean, set2arrayBoolean)
-      case a: AttrSetOptBigInt     => addSet(ns, attr, oneOptSet(ns, attr, a.vs, transformBigInt), handleBigInt, set2arrayBigInt)
-      case a: AttrSetOptBigDecimal => addSet(ns, attr, oneOptSet(ns, attr, a.vs, transformBigDecimal), handleBigDecimal, set2arrayBigDecimal)
-      case a: AttrSetOptDate       => addSet(ns, attr, oneOptSet(ns, attr, a.vs, transformDate), handleDate, set2arrayDate)
-      case a: AttrSetOptUUID       => addSet(ns, attr, oneOptSet(ns, attr, a.vs, transformUUID), handleUUID, set2arrayUUID)
-      case a: AttrSetOptURI        => addSet(ns, attr, oneOptSet(ns, attr, a.vs, transformURI), handleURI, set2arrayURI)
-      case a: AttrSetOptByte       => addSet(ns, attr, oneOptSet(ns, attr, a.vs, transformByte), handleByte, set2arrayByte)
-      case a: AttrSetOptShort      => addSet(ns, attr, oneOptSet(ns, attr, a.vs, transformShort), handleShort, set2arrayShort)
-      case a: AttrSetOptChar       => addSet(ns, attr, oneOptSet(ns, attr, a.vs, transformChar), handleChar, set2arrayChar)
+  private def resolveAttrSetOpt(a: AttrSetOpt): Unit = {
+    val (ns, attr, refNs) = (a.ns, a.attr, a.refNs)
+    a match {
+      case a: AttrSetOptString     => addSet(ns, attr, oneOptSet(ns, attr, a.vs, transformString), handleString, set2arrayString, refNs)
+      case a: AttrSetOptInt        => addSet(ns, attr, oneOptSet(ns, attr, a.vs, transformInt), handleInt, set2arrayInt, refNs)
+      case a: AttrSetOptLong       => addSet(ns, attr, oneOptSet(ns, attr, a.vs, transformLong), handleLong, set2arrayLong, refNs)
+      case a: AttrSetOptFloat      => addSet(ns, attr, oneOptSet(ns, attr, a.vs, transformFloat), handleFloat, set2arrayFloat, refNs)
+      case a: AttrSetOptDouble     => addSet(ns, attr, oneOptSet(ns, attr, a.vs, transformDouble), handleDouble, set2arrayDouble, refNs)
+      case a: AttrSetOptBoolean    => addSet(ns, attr, oneOptSet(ns, attr, a.vs, transformBoolean), handleBoolean, set2arrayBoolean, refNs)
+      case a: AttrSetOptBigInt     => addSet(ns, attr, oneOptSet(ns, attr, a.vs, transformBigInt), handleBigInt, set2arrayBigInt, refNs)
+      case a: AttrSetOptBigDecimal => addSet(ns, attr, oneOptSet(ns, attr, a.vs, transformBigDecimal), handleBigDecimal, set2arrayBigDecimal, refNs)
+      case a: AttrSetOptDate       => addSet(ns, attr, oneOptSet(ns, attr, a.vs, transformDate), handleDate, set2arrayDate, refNs)
+      case a: AttrSetOptUUID       => addSet(ns, attr, oneOptSet(ns, attr, a.vs, transformUUID), handleUUID, set2arrayUUID, refNs)
+      case a: AttrSetOptURI        => addSet(ns, attr, oneOptSet(ns, attr, a.vs, transformURI), handleURI, set2arrayURI, refNs)
+      case a: AttrSetOptByte       => addSet(ns, attr, oneOptSet(ns, attr, a.vs, transformByte), handleByte, set2arrayByte, refNs)
+      case a: AttrSetOptShort      => addSet(ns, attr, oneOptSet(ns, attr, a.vs, transformShort), handleShort, set2arrayShort, refNs)
+      case a: AttrSetOptChar       => addSet(ns, attr, oneOptSet(ns, attr, a.vs, transformChar), handleChar, set2arrayChar, refNs)
     }
   }
 }

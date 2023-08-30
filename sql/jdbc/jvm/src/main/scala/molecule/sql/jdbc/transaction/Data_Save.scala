@@ -13,6 +13,8 @@ trait Data_Save
     with SaveOps
     with MoleculeLogging { self: ResolveSave =>
 
+  doPrint = false
+
   // Resolve after all back refs have been resolved and namespaces grouped
   var postResolvers = List.empty[Unit => Unit]
 
@@ -20,7 +22,7 @@ trait Data_Save
     initialNs = getInitialNs(elements)
     curRefPath = List(initialNs)
     resolve(elements)
-    postResolvers.foreach(_())
+    postResolvers.foreach(_(()))
     addRowSetterToTables()
     (getTables, Nil)
   }
@@ -37,12 +39,14 @@ trait Data_Save
              |  $columns
              |) VALUES ($inputPlaceholders)""".stripMargin
 
+        val colSetters = colSettersMap(refPath)
+        debug(s"--- save -------------------  ${colSetters.length}  $refPath")
+        debug(stmt)
+
         val ps = sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
         tableDatas(refPath) = Table(refPath, stmt, ps)
 
-        val colSetters = colSettersMap(refPath)
-        //        println(s"--- save -------------------  ${colSetters.length}  $refPath")
-        //        println(stmt)
+
         colSettersMap(refPath) = Nil
         val rowSetter = (ps: PS, idsMap: IdsMap, _: RowIndex) => {
           // Set all column values for this row in this insert/batch
@@ -70,12 +74,12 @@ trait Data_Save
     }
   }
 
-  private def updateInserts(attr: String): (List[String], Int) = {
+  private def getParamIndex(attr: String, add: Boolean = true): (List[String], Int) = {
     if (inserts.exists(_._1 == curRefPath)) {
       inserts = inserts.map {
         case (path, cols) if path == curRefPath =>
           paramIndexes += (curRefPath, attr) -> (cols.length + 1)
-          (path, cols :+ attr)
+          (path, if (add) cols :+ attr else cols)
 
         case other => other
       }
@@ -92,16 +96,14 @@ trait Data_Save
     optValue: Option[T],
     handleValue: T => Any
   ): Unit = {
-    val (curPath, paramIndex) = updateInserts(attr)
+    val (curPath, paramIndex) = getParamIndex(attr)
     val colSetter: Setter     = optValue.fold {
       (ps: PS, _: IdsMap, _: RowIndex) => {
         ps.setNull(paramIndex, 0)
-        //        printValue(0, ns, attr, -1, paramIndex, "None")
       }
     } { value =>
       (ps: PS, _: IdsMap, _: RowIndex) => {
         handleValue(value).asInstanceOf[(PS, Int) => Unit](ps, paramIndex)
-        //        printValue(0, ns, attr, -1, paramIndex, value)
       }
     }
     addColSetter(curPath, colSetter)
@@ -112,27 +114,71 @@ trait Data_Save
     attr: String,
     optSet: Option[Set[T]],
     handleValue: T => Any,
-    set2array: Set[Any] => Array[AnyRef]
+    set2array: Set[Any] => Array[AnyRef],
+    refNs: Option[String]
   ): Unit = {
-    val (curPath, paramIndex) = updateInserts(attr)
-    val colSetter: Setter     = optSet.fold {
-      (ps: PS, _: IdsMap, _: RowIndex) => {
-        ps.setNull(paramIndex, 0)
-        //        printValue(0, ns, attr, -1, paramIndex, "None")
-      }
-    } { set =>
-      (ps: PS, _: IdsMap, _: RowIndex) => {
-        if (set.isEmpty) {
+    refNs.fold {
+      val (curPath, paramIndex) = getParamIndex(attr)
+      val colSetter: Setter     = optSet.fold {
+        (ps: PS, _: IdsMap, _: RowIndex) => {
           ps.setNull(paramIndex, 0)
+        }
+      } { set =>
+        (ps: PS, _: IdsMap, _: RowIndex) => {
+          if (set.isEmpty) {
+            ps.setNull(paramIndex, 0)
+          } else {
+            val conn  = ps.getConnection
+            val array = conn.createArrayOf("AnyRef", set2array(set.asInstanceOf[Set[Any]]))
+            ps.setArray(paramIndex, array)
+          }
+        }
+      }
+      addColSetter(curPath, colSetter)
+    } { refNs =>
+      val curPath = if (paramIndexes.nonEmpty) curRefPath else List(ns)
+      optSet.fold {
+        // Inserting Option.empty[Set[Long]] adds no join rows
+        val colSetter: Setter = (_: PS, _: IdsMap, _: RowIndex) => ()
+        addColSetter(curPath, colSetter)
+
+      } { set =>
+        if (set.nonEmpty) {
+          val refAttr   = attr
+          val joinTable = s"${ns}_${refAttr}_$refNs"
+          val joinPath  = curPath :+ joinTable
+
+          // join table with single row (treated as normal insert since there's only 1 join per row)
+          val (id1, id2) = if (ns == refNs) (s"${ns}_1_id", s"${refNs}_2_id") else (s"${ns}_id", s"${refNs}_id")
+          // When insertion order is reversed, this join table will be set after left and right has been inserted
+          inserts = (joinPath, List(id1, id2)) +: inserts
+
+          if (paramIndexes.isEmpty) {
+            // If current namespace has no attributes, then add an empty row with
+            // default null values (only to be referenced as the left side of the join table)
+            val emptyRowSetter: Setter = (ps: PS, _: IdsMap, _: RowIndex) => ps.addBatch()
+            addColSetter(curPath, emptyRowSetter)
+            inserts = inserts :+ (curRefPath, List())
+          }
+
+          // Join table setter
+          val refIds             = set.asInstanceOf[Set[Long]]
+          val joinSetter: Setter = (ps: PS, idsMap: IdsMap, rowIndex: RowIndex) => {
+            val refId1 = idsMap(curPath)(rowIndex)
+            refIds.foreach { refId2 =>
+              ps.setLong(1, refId1)
+              ps.setLong(2, refId2)
+              ps.addBatch()
+            }
+          }
+          addColSetter(joinPath, joinSetter)
         } else {
-          val conn = ps.getConnection
-          val arr  = conn.createArrayOf("AnyRef", set2array(set.asInstanceOf[Set[Any]]))
-          ps.setArray(paramIndex, arr)
-          //        printValue(level, ns, attr, tplIndex, paramIndex, array)
+          // Inserting Some(Set.empty[Long]) adds no join rows
+          val colSetter = (_: PS, _: IdsMap, _: RowIndex) => ()
+          addColSetter(curPath, colSetter)
         }
       }
     }
-    addColSetter(curPath, colSetter)
   }
 
   override protected def addRef(ns: String, refAttr: String, refNs: String, card: Card): Unit = {
@@ -143,9 +189,7 @@ trait Data_Save
     curRefPath = curRefPath.dropRight(2)
   }
 
-  override protected def handleRefNs(refNs: String): Unit = {
-    //    backRefs = backRefs + (ns -> e)
-  }
+  override protected def handleRefNs(refNs: String): Unit = ()
 
   override protected lazy val handleString     = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.asInstanceOf[String])
   override protected lazy val handleInt        = (v: Any) => (ps: PS, n: Int) => ps.setInt(n, v.asInstanceOf[Int])

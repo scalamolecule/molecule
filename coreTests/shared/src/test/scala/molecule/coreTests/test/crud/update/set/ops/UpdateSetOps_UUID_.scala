@@ -89,8 +89,12 @@ trait UpdateSetOps_UUID_ extends CoreTestSuite with ApiAsyncImplicits { self: Sp
         _ <- Ns(id).uuids.swap(uuid3 -> uuid6, uuid4 -> uuid7).update.transact
         _ <- Ns.uuids.query.get.map(_.head ==> Set(uuid1, uuid2, uuid6, uuid7, uuid8))
 
-        // Missing old value has no effect. The new value is inserted (upsert semantics)
+        // Updating missing old value (null) has no effect
         _ <- Ns(id).uuids.swap(uuid4 -> uuid9).update.transact
+        _ <- Ns.uuids.query.get.map(_.head ==> Set(uuid1, uuid2, uuid6, uuid7, uuid8))
+
+        // Upserting missing old value (null) inserts the new value
+        _ <- Ns(id).uuids.swap(uuid4 -> uuid9).upsert.transact
         _ <- Ns.uuids.query.get.map(_.head ==> Set(uuid1, uuid2, uuid6, uuid7, uuid8, uuid9))
 
         // Replace with Seq of oldValue->newValue pairs
@@ -101,17 +105,16 @@ trait UpdateSetOps_UUID_ extends CoreTestSuite with ApiAsyncImplicits { self: Sp
         _ <- Ns(id).uuids.swap(Seq.empty[(UUID, UUID)]).update.transact
         _ <- Ns.uuids.query.get.map(_.head ==> Set(uuid1, uuid5, uuid6, uuid7, uuid8, uuid9))
 
-
         // Can't swap duplicate from/to values
         _ <- Ns(42).uuids.swap(uuid1 -> uuid2, uuid1 -> uuid3).update.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-          err ==> "Can't swap from duplicate retract values."
-        }
+          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
+            err ==> "Can't swap from duplicate retract values."
+          }
 
         _ <- Ns(42).uuids.swap(uuid1 -> uuid3, uuid2 -> uuid3).update.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-          err ==> "Can't swap to duplicate replacement values."
-        }
+          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
+            err ==> "Can't swap to duplicate replacement values."
+          }
       } yield ()
     }
 

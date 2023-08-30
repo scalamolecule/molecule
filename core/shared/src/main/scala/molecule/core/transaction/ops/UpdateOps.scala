@@ -19,27 +19,34 @@ trait UpdateOps extends Action2Data {
     a: AttrSet,
     sets: Seq[Set[T]],
     transform: T => Any,
-    set2array: Set[Any] => Array[AnyRef]
+    set2array: Set[Any] => Array[AnyRef],
+    refNs: Option[String]
   ): Unit
 
   def updateSetAdd[T](
     a: AttrSet,
     sets: Seq[Set[T]],
     transform: T => Any,
-    set2array: Set[Any] => Array[AnyRef]
+    set2array: Set[Any] => Array[AnyRef],
+    refNs: Option[String]
   ): Unit
 
-  def updateSetSwab[T](
+  def updateSetSwap[T](
     a: AttrSet,
     sets: Seq[Set[T]],
     transform: T => Any,
-    set2array: Set[Any] => Array[AnyRef]
+    handleValue: T => Any,
+    dbType: String,
+    refNs: Option[String]
   ): Unit
 
   def updateSetRemove[T](
     a: AttrSet,
     set: Set[T],
-    transform: T => Any
+    transform: T => Any,
+    handleValue: T => Any,
+    dbType: String,
+    refNs: Option[String]
   ): Unit
 
   protected def handleIds(ids: Seq[Long]): Unit
@@ -48,12 +55,6 @@ trait UpdateOps extends Action2Data {
 
   protected def handleBackRef(backRef: BackRef): Unit
   protected def handleRefNs(ref: Ref): Unit
-
-  protected def uniqueIds(
-    filterAttr: AttrOneTac,
-    ns: String,
-    attr: String
-  ): Seq[AnyRef]
 
   protected lazy val transformString    : String => Any     = identity
   protected lazy val transformInt       : Int => Any        = identity
@@ -99,4 +100,19 @@ trait UpdateOps extends Action2Data {
   protected lazy val set2arrayByte      : Set[Any] => Array[AnyRef] = (_: Set[Any]) => Array.empty[AnyRef]
   protected lazy val set2arrayShort     : Set[Any] => Array[AnyRef] = (_: Set[Any]) => Array.empty[AnyRef]
   protected lazy val set2arrayChar      : Set[Any] => Array[AnyRef] = (_: Set[Any]) => Array.empty[AnyRef]
+
+  protected lazy val dbTypeString    : String = ""
+  protected lazy val dbTypeInt       : String = ""
+  protected lazy val dbTypeLong      : String = ""
+  protected lazy val dbTypeFloat     : String = ""
+  protected lazy val dbTypeDouble    : String = ""
+  protected lazy val dbTypeBoolean   : String = ""
+  protected lazy val dbTypeBigInt    : String = ""
+  protected lazy val dbTypeBigDecimal: String = ""
+  protected lazy val dbTypeDate      : String = ""
+  protected lazy val dbTypeUUID      : String = ""
+  protected lazy val dbTypeURI       : String = ""
+  protected lazy val dbTypeByte      : String = ""
+  protected lazy val dbTypeShort     : String = ""
+  protected lazy val dbTypeChar      : String = ""
 }

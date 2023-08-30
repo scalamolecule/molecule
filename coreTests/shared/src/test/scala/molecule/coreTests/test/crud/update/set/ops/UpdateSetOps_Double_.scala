@@ -88,8 +88,12 @@ trait UpdateSetOps_Double_ extends CoreTestSuite with ApiAsyncImplicits { self: 
         _ <- Ns(id).doubles.swap(double3 -> double6, double4 -> double7).update.transact
         _ <- Ns.doubles.query.get.map(_.head ==> Set(double1, double2, double6, double7, double8))
 
-        // Missing old value has no effect. The new value is inserted (upsert semantics)
+        // Updating missing old value (null) has no effect
         _ <- Ns(id).doubles.swap(double4 -> double9).update.transact
+        _ <- Ns.doubles.query.get.map(_.head ==> Set(double1, double2, double6, double7, double8))
+
+        // Upserting missing old value (null) inserts the new value
+        _ <- Ns(id).doubles.swap(double4 -> double9).upsert.transact
         _ <- Ns.doubles.query.get.map(_.head ==> Set(double1, double2, double6, double7, double8, double9))
 
         // Replace with Seq of oldValue->newValue pairs
@@ -100,17 +104,16 @@ trait UpdateSetOps_Double_ extends CoreTestSuite with ApiAsyncImplicits { self: 
         _ <- Ns(id).doubles.swap(Seq.empty[(Double, Double)]).update.transact
         _ <- Ns.doubles.query.get.map(_.head ==> Set(double1, double5, double6, double7, double8, double9))
 
-
         // Can't swap duplicate from/to values
         _ <- Ns(42).doubles.swap(double1 -> double2, double1 -> double3).update.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-          err ==> "Can't swap from duplicate retract values."
-        }
+          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
+            err ==> "Can't swap from duplicate retract values."
+          }
 
         _ <- Ns(42).doubles.swap(double1 -> double3, double2 -> double3).update.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-          err ==> "Can't swap to duplicate replacement values."
-        }
+          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
+            err ==> "Can't swap to duplicate replacement values."
+          }
       } yield ()
     }
 

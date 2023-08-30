@@ -21,7 +21,6 @@ object _UpdateSetOps extends CodeGenBase with BaseHelpers {
           .replace("[(Int, Int)]", s"[($tpe, $tpe)]")
           .replace("Int extends", name + "_ extends")
           .replace("int", v)
-          .replace(v + "ersect", "intersect")
 
       if (imp.isEmpty) src else src.replace("\n\nimport", s"\n\nimport $imp\nimport")
     }

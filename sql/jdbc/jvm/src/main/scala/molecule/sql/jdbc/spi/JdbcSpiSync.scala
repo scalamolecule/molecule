@@ -31,8 +31,7 @@ trait JdbcSpiSync
   // Query --------------------------------------------------------
 
   override def query_get[Tpl](q: Query[Tpl])(implicit conn: Conn): List[Tpl] = {
-    if (q.doInspect)
-      query_inspect(q)
+    if (q.doInspect) query_inspect(q)
     JdbcQueryResolveOffset[Tpl](q.elements, q.limit, None, q.dbView)
       .getListFromOffset_sync(conn.asInstanceOf[JdbcConn_jvm])._1
   }
@@ -49,8 +48,7 @@ trait JdbcSpiSync
 
 
   override def queryOffset_get[Tpl](q: QueryOffset[Tpl])(implicit conn: Conn): (List[Tpl], Int, Boolean) = {
-    if (q.doInspect)
-      queryOffset_inspect(q)
+    if (q.doInspect) queryOffset_inspect(q)
     JdbcQueryResolveOffset[Tpl](q.elements, q.limit, Some(q.offset), q.dbView)
       .getListFromOffset_sync(conn.asInstanceOf[JdbcConn_jvm])
   }
@@ -60,8 +58,7 @@ trait JdbcSpiSync
   }
 
   override def queryCursor_get[Tpl](q: QueryCursor[Tpl])(implicit conn: Conn): (List[Tpl], String, Boolean) = {
-    if (q.doInspect)
-      queryCursor_inspect(q)
+    if (q.doInspect) queryCursor_inspect(q)
     JdbcQueryResolveCursor[Tpl](q.elements, q.limit, Some(q.cursor), q.dbView)
       .getListFromCursor_sync(conn.asInstanceOf[JdbcConn_jvm])
   }
@@ -81,6 +78,7 @@ trait JdbcSpiSync
   // Save --------------------------------------------------------
 
   override def save_transact(save: Save)(implicit conn0: Conn): TxReport = {
+    if (save.doInspect) save_inspect(save)
     val errors = save_validate(save)
     if (errors.isEmpty) {
       val conn = conn0.asInstanceOf[JdbcConn_jvm]
@@ -112,6 +110,7 @@ trait JdbcSpiSync
   // Insert --------------------------------------------------------
 
   override def insert_transact(insert: Insert)(implicit conn0: Conn): TxReport = {
+    if (insert.doInspect) insert_inspect(insert)
     val errors = insert_validate(insert)
     if (errors.isEmpty) {
       val conn = conn0.asInstanceOf[JdbcConn_jvm]
@@ -141,6 +140,7 @@ trait JdbcSpiSync
   // Update --------------------------------------------------------
 
   override def update_transact(update: Update)(implicit conn0: Conn): TxReport = {
+    if (update.doInspect) update_inspect(update)
     val errors = update_validate(update)
     if (errors.isEmpty) {
       val conn = conn0.asInstanceOf[JdbcConn_jvm]
@@ -156,7 +156,8 @@ trait JdbcSpiSync
   }
 
   override def update_inspect(update: Update)(implicit conn0: Conn): Unit = {
-    tryInspect("update", update.elements) {
+    val action = if (update.isUpsert) "UPSERT" else "UPDATE"
+    tryInspect(action, update.elements) {
       val conn = conn0.asInstanceOf[JdbcConn_jvm]
       if (isRefUpdate(update.elements)) {
         val (idsModel, updateModels) = prepareMultipleUpdates(update.elements, update.isUpsert)
@@ -174,11 +175,11 @@ trait JdbcSpiSync
               val tables   = update_getData(conn, m, update.isUpsert)._1
               tables.headOption.fold(elements)(table => elements + "\n" + table.stmt)
             }
-            .mkString("UPDATES ----------------------\n", "\n------------\n", "")
+            .mkString(action + "S ----------------------\n", "\n------------\n", "")
 
-        printInspect("UPDATE", update.elements, refIds + "\n" + updates)
+        printInspect(action, update.elements, refIds + "\n" + updates)
       } else {
-        printInspectTx("UPDATE", update.elements, update_getData(conn, update))
+        printInspectTx(action, update.elements, update_getData(conn, update))
       }
     }
   }
@@ -203,6 +204,7 @@ trait JdbcSpiSync
   // Delete --------------------------------------------------------
 
   override def delete_transact(delete: Delete)(implicit conn0: Conn): TxReport = {
+    if (delete.doInspect) delete_inspect(delete)
     val conn = conn0.asInstanceOf[JdbcConn_jvm]
     conn.transact_sync(delete_getData(conn, delete))
   }

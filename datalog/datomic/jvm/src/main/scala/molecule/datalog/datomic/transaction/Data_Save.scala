@@ -57,6 +57,7 @@ trait Data_Save extends DatomicBase_JVM with SaveOps with MoleculeLogging { self
     optSet: Option[Set[T]],
     handleValue: T => Any,
     set2array: Set[Any] => Array[AnyRef],
+    refNs: Option[String]
   ): Unit = {
     optSet.foreach { set =>
       val a = kw(ns, attr)

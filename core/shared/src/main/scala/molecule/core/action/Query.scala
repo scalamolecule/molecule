@@ -6,7 +6,7 @@ import molecule.core.marshalling.dbView._
 import molecule.core.spi.TxReport
 
 case class Query[Tpl](
-  private[molecule] val elements: List[Element],
+  elements: List[Element],
   private[molecule] val limit: Option[Int] = None,
   private[molecule] val dbView: Option[DbView] = None,
   private[molecule] val doInspect: Boolean = false
@@ -29,6 +29,6 @@ case class Query[Tpl](
   def since(t: Long): Query[Tpl] = copy(dbView = Some(Since(TxLong(t))))
   def since(txReport: TxReport): Query[Tpl] = copy(dbView = Some(Since(TxLong(txReport.tx))))
 
-  // Inspect Query
+  // Inspect also
   def i: Query[Tpl] = copy(doInspect = true)
 }

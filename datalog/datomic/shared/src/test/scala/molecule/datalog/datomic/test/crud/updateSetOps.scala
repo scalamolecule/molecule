@@ -16,4 +16,5 @@ object UpdateSetOps_URI_ extends UpdateSetOps_URI_ with CoreTestAsync
 object UpdateSetOps_Byte_ extends UpdateSetOps_Byte_ with CoreTestAsync
 object UpdateSetOps_Short_ extends UpdateSetOps_Short_ with CoreTestAsync
 object UpdateSetOps_Char_ extends UpdateSetOps_Char_ with CoreTestAsync
+
 object UpdateSetOps_ref_ extends UpdateSetOps_ref_ with CoreTestAsync

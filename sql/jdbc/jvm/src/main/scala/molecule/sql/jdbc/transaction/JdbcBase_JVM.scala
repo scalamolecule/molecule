@@ -19,32 +19,26 @@ trait JdbcBase_JVM extends JdbcDataType_JVM with ModelUtils {
 
   var level = 0
   def indent(level: Int) = "  " * level
-
-  protected var doPrint = false
   protected def debug(s: Any) = if (doPrint) println(s) else ()
 
-  protected var initialNs = ""
-
-  // Dynamic ref path of current level and branch (each backref initiates a new branch)
-  protected var curRefPath = List("0")
-
-  // Ordered tables to have data inserted
-  // refPath, ns, selfRef, cols
-  protected var inserts = List.empty[(List[String], List[String])]
-  protected var joins   = List.empty[(List[String], String, String, List[String], List[String])]
-
+  protected var doPrint              = false
+  protected var initialNs            = ""
+  protected var curRefPath           = List("0")
+  protected var inserts              = List.empty[(List[String], List[String])]
+  protected var updates              = List.empty[(List[String], List[String])]
+  protected var placeHolders         = List.empty[String]
+  protected var joins                = List.empty[(List[String], String, String, List[String], List[String])]
   protected var ids                  = Seq.empty[Long]
   protected val updateCols           = mutable.Map.empty[List[String], List[String]]
   protected var uniqueFilterElements = List.empty[Element]
   protected var filterElements       = List.empty[Element]
-
-  // PreparedStatement param indexes for each (table, col) coordinate
-  protected val paramIndexes   = mutable.Map.empty[(List[String], String), Int]
-  protected val colSettersMap  = mutable.Map.empty[List[String], List[Setter]]
-  protected val rowSettersMap  = mutable.Map.empty[List[String], List[Setter]]
-  protected val tableDatas     = mutable.Map.empty[List[String], Table]
-  protected var joinTableDatas = List.empty[JoinTable]
-  protected val rightCountsMap = mutable.Map.empty[List[String], List[Int]]
+  protected val paramIndexes         = mutable.Map.empty[(List[String], String), Int]
+  protected val colSettersMap        = mutable.Map.empty[List[String], List[Setter]]
+  protected val rowSettersMap        = mutable.Map.empty[List[String], List[Setter]]
+  protected val tableDatas           = mutable.Map.empty[List[String], Table]
+  protected var manualTableDatas     = List.empty[Table]
+  protected var joinTableDatas       = List.empty[JoinTable]
+  protected val rightCountsMap       = mutable.Map.empty[List[String], List[Int]]
 
 
   protected def addColSetter(refPath: List[String], colSetter: Setter) = {

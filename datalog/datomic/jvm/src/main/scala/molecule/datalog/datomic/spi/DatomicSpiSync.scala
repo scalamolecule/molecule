@@ -24,8 +24,7 @@ trait DatomicSpiSync
     with JavaConversions {
 
   override def query_get[Tpl](q: Query[Tpl])(implicit conn: Conn): List[Tpl] = {
-    if (q.doInspect)
-      query_inspect(q)
+    if (q.doInspect) query_inspect(q)
     DatomicQueryResolveOffset[Tpl](q.elements, q.limit, None, q.dbView)
       .getListFromOffset_sync(conn.asInstanceOf[DatomicConn_JVM])._1
   }
@@ -39,8 +38,7 @@ trait DatomicSpiSync
   }
 
   override def queryOffset_get[Tpl](q: QueryOffset[Tpl])(implicit conn: Conn): (List[Tpl], Int, Boolean) = {
-    if (q.doInspect)
-      queryOffset_inspect(q)
+    if (q.doInspect) queryOffset_inspect(q)
     DatomicQueryResolveOffset[Tpl](q.elements, q.limit, Some(q.offset), q.dbView)
       .getListFromOffset_sync(conn.asInstanceOf[DatomicConn_JVM])
   }
@@ -49,8 +47,7 @@ trait DatomicSpiSync
   }
 
   override def queryCursor_get[Tpl](q: QueryCursor[Tpl])(implicit conn: Conn): (List[Tpl], String, Boolean) = {
-    if (q.doInspect)
-      queryCursor_inspect(q)
+    if (q.doInspect) queryCursor_inspect(q)
     DatomicQueryResolveCursor[Tpl](q.elements, q.limit, Some(q.cursor), q.dbView)
       .getListFromCursor_sync(conn.asInstanceOf[DatomicConn_JVM])
   }

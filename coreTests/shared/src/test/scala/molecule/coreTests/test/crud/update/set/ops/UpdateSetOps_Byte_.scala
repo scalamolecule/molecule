@@ -88,8 +88,12 @@ trait UpdateSetOps_Byte_ extends CoreTestSuite with ApiAsyncImplicits { self: Sp
         _ <- Ns(id).bytes.swap(byte3 -> byte6, byte4 -> byte7).update.transact
         _ <- Ns.bytes.query.get.map(_.head ==> Set(byte1, byte2, byte6, byte7, byte8))
 
-        // Missing old value has no effect. The new value is inserted (upsert semantics)
+        // Updating missing old value (null) has no effect
         _ <- Ns(id).bytes.swap(byte4 -> byte9).update.transact
+        _ <- Ns.bytes.query.get.map(_.head ==> Set(byte1, byte2, byte6, byte7, byte8))
+
+        // Upserting missing old value (null) inserts the new value
+        _ <- Ns(id).bytes.swap(byte4 -> byte9).upsert.transact
         _ <- Ns.bytes.query.get.map(_.head ==> Set(byte1, byte2, byte6, byte7, byte8, byte9))
 
         // Replace with Seq of oldValue->newValue pairs
@@ -100,17 +104,16 @@ trait UpdateSetOps_Byte_ extends CoreTestSuite with ApiAsyncImplicits { self: Sp
         _ <- Ns(id).bytes.swap(Seq.empty[(Byte, Byte)]).update.transact
         _ <- Ns.bytes.query.get.map(_.head ==> Set(byte1, byte5, byte6, byte7, byte8, byte9))
 
-
         // Can't swap duplicate from/to values
         _ <- Ns(42).bytes.swap(byte1 -> byte2, byte1 -> byte3).update.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-          err ==> "Can't swap from duplicate retract values."
-        }
+          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
+            err ==> "Can't swap from duplicate retract values."
+          }
 
         _ <- Ns(42).bytes.swap(byte1 -> byte3, byte2 -> byte3).update.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-          err ==> "Can't swap to duplicate replacement values."
-        }
+          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
+            err ==> "Can't swap to duplicate replacement values."
+          }
       } yield ()
     }
 

@@ -15,6 +15,7 @@ case class JdbcConn_jvm(override val proxy: JdbcProxy, override val sqlConn: sql
     with JdbcBase_JVM {
 
   private[molecule] var fresh = true
+  doPrint = false
 
   override def transact_sync(data: Data): TxReport = {
     atomicTransaction(() => populateStmts(data))
@@ -59,12 +60,14 @@ case class JdbcConn_jvm(override val proxy: JdbcProxy, override val sqlConn: sql
     var idsMap     = Map.empty[List[String], List[Long]]
     var ids        = List.empty[Long]
 
-    //    debug("##########################################################################################")
+    debug("########################################################################################## " + tables.size)
 
     // Insert statements backwards to obtain auto-generated ref ids for prepending inserts
     tables.reverse.foreach {
       case Table(refPath, stmt, ps, populatePS) =>
-        debug("D --- table ----------------------------------------------\n" + stmt)
+        debug("D --- table ----------------------------------------------")
+        debug("idsMap 1: " + idsMap)
+        debug(stmt)
         // Populate prepared statement
         populatePS(ps, idsMap, 0)
 
@@ -79,7 +82,7 @@ case class JdbcConn_jvm(override val proxy: JdbcProxy, override val sqlConn: sql
         }
         ps.close()
         idsMap = idsMap + (refPath -> ids)
-      //        debug("idsMap: " + idsMap)
+        debug("idsMap 2: " + idsMap)
     }
 
     joinTables.foreach {
