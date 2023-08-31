@@ -86,7 +86,7 @@ case class JdbcConn_jvm(override val proxy: JdbcProxy, override val sqlConn: sql
     }
 
     joinTables.foreach {
-      case JoinTable(refPath, stmt, ps, leftPath, rightPath, rightCounts) =>
+      case JoinTable(stmt, ps, leftPath, rightPath, rightCounts) =>
         debug("D --- joinTable -------------------------------------------------\n" + stmt)
         val idsLeft    = idsMap(leftPath)
         var idLeft     = 0L

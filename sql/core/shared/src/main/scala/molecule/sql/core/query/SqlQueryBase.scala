@@ -106,30 +106,7 @@ trait SqlQueryBase extends BaseHelpers with JavaConversions { self: Model2Query 
   final protected def getFlatSorters(
     sortss: List[List[(Int, Int => (RowOLD, RowOLD) => Int)]]
   ): List[Int => (RowOLD, RowOLD) => Int] = {
-    sortss.flatMap { sorts =>
-      val sortsOrdered = sorts.sortBy(_._1)
-      // Index 6s are for entity ids on each nested level.
-      // Is always last on each level to allow user sort indexes to sort first.
-      sortsOrdered.map(_._1) match {
-        case Nil                    =>
-        case List(6)                =>
-        case List(1)                =>
-        case List(1, 6)             =>
-        case List(1, 2)             =>
-        case List(1, 2, 6)          =>
-        case List(1, 2, 3)          =>
-        case List(1, 2, 3, 6)       =>
-        case List(1, 2, 3, 4)       =>
-        case List(1, 2, 3, 4, 6)    =>
-        case List(1, 2, 3, 4, 5)    =>
-        case List(1, 2, 3, 4, 5, 6) =>
-        case other                  => throw ModelError(
-          s"Sort index 1 should be present and additional indexes continuously increase (in any order). " +
-            s"Found sort index(es): " + other.mkString(", ")
-        )
-      }
-      sortsOrdered.map(_._2)
-    }
+    sortss.flatMap(_.sortBy(_._1).map(_._2))
   }
 
   final protected def unexpectedElement(element: Element) = throw ModelError("Unexpected element: " + element)

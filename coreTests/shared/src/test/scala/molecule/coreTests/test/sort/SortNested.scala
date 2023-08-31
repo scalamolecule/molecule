@@ -56,7 +56,7 @@ trait SortNested extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync =
         _ <- Ref.i_(3).Nss.*?(Ns.long.a1).query.get.map(_ ==> List(List(long1, long2)))
         _ <- Ref.i_(4).Nss.*?(Ns.float.a1).query.get.map(_ ==> List(List(float1, float2)))
         _ <- Ref.i_(5).Nss.*?(Ns.double.a1).query.get.map(_ ==> List(List(double1, double2)))
-        _ <- Ref.i_(6).Nss.*?(Ns.boolean).query.get.map(_ ==> List(List(boolean1, boolean3)))
+        _ <- Ref.i_(6).Nss.*?(Ns.boolean.a1).query.get.map(_ ==> List(List(boolean1, boolean2)))
         _ <- Ref.i_(7).Nss.*?(Ns.bigInt.a1).query.get.map(_ ==> List(List(bigInt1, bigInt2)))
         _ <- Ref.i_(8).Nss.*?(Ns.bigDecimal.a1).query.get.map(_ ==> List(List(bigDecimal1, bigDecimal2)))
         _ <- Ref.i_(9).Nss.*?(Ns.date.a1).query.get.map(_ ==> List(List(date1, date2)))

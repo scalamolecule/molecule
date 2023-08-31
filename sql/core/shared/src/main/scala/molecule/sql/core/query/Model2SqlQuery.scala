@@ -80,7 +80,7 @@ class Model2SqlQuery[Tpl](elements0: List[Element])
     val orderBy_ = if (orderBy.isEmpty) "" else {
       orderBy.sortBy(t => (t._1, t._2)).map {
         case (_, _, col, dir) => col + dir
-      }.mkString("\nORDER BY ", ", ", " NULLS FIRST")
+      }.mkString("\nORDER BY ", ", ", "")
     }
     val fetch_   = if (fetch.isEmpty) "" else fetch.mkString("\nFETCH ", ", ", "")
     val limit_   = if (limitClause.isBlank) "" else "\nLIMIT " + limitClause
@@ -196,8 +196,9 @@ class Model2SqlQuery[Tpl](elements0: List[Element])
   final private def resolveNested(ref: Ref, nestedElements: List[Element], tail: List[Element]): Unit = {
     level += 1
     isNested = true
-    if (isNestedOpt)
+    if (isNestedOpt) {
       noMixedNestedModes
+    }
     validateRefNs(ref, nestedElements)
 
     val Ref(_, refAttr, refNs, _, _) = ref
@@ -221,7 +222,6 @@ class Model2SqlQuery[Tpl](elements0: List[Element])
 
     val Ref(_, refAttr, refNs, _, _) = nestedRef
     exts(refNs) = exts.get(refNs).fold(Option.empty[String])(_ => Some("_" + refAttr))
-
     aritiesNested()
     resolveNestedOptRef(nestedRef)
     resolve(nestedElements)

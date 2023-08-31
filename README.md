@@ -9,7 +9,7 @@ An sbt-molecule plugin generates boilerplate code from your domain data model de
 - Works with [Datomic](http://www.datomic.com) and JDBC-compliant databases (and more to come)
 - Targets Scala 3.3, 2.13 and 2.12
 - Scala and Scalajs platforms
-- All 1500+ Datomic tests pass (jdbc module is wip)
+- All 1300+ Datomic tests pass (jdbc module is wip)
 - No macros
 - No complex type class implicits
 - Maximum type inference

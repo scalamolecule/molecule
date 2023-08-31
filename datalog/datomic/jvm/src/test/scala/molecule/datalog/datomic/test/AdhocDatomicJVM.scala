@@ -1,6 +1,5 @@
 package molecule.datalog.datomic.test
 
-import molecule.base.error.{ExecutionError, ModelError}
 import molecule.core.util.Executor._
 import molecule.datalog.datomic.async._
 import molecule.datalog.datomic.setup.DatomicTestSuite

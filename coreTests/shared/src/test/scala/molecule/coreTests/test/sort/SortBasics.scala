@@ -338,31 +338,31 @@ trait SortBasics extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  
         _ <- Ns.string.a1.int.a1.query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Sort index 1 should be present and additional indexes continuously " +
-            "increase (in any order). Found sort index(es): 1, 1"
+            "increase (in any order). Found non-unique sort index(es): 1, 1"
         }
 
         _ <- Ns.string.d1.int.d2.long.d2.query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Sort index 1 should be present and additional indexes continuously " +
-            "increase (in any order). Found sort index(es): 1, 2, 2"
+            "increase (in any order). Found non-unique sort index(es): 1, 2, 2"
         }
 
         _ <- Ns.string.a1.int.a3.query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Sort index 1 should be present and additional indexes continuously " +
-            "increase (in any order). Found sort index(es): 1, 3"
+            "increase (in any order). Found non-unique sort index(es): 1, 3"
         }
 
         _ <- Ns.string.d3.int.d1.query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Sort index 1 should be present and additional indexes continuously " +
-            "increase (in any order). Found sort index(es): 1, 3"
+            "increase (in any order). Found non-unique sort index(es): 1, 3"
         }
 
         _ <- Ns.string.d2.int.a3.query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Sort index 1 should be present and additional indexes continuously " +
-            "increase (in any order). Found sort index(es): 2, 3"
+            "increase (in any order). Found non-unique sort index(es): 2, 3"
         }
       } yield ()
     }

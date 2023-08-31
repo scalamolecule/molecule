@@ -48,8 +48,8 @@ trait LambdasOne extends ResolveBase { self: SqlQueryBase =>
   private lazy val sql2oneFloatOrNull     : (Row, Int) => Any = { (row: Row, n: Int) => val v = row.getFloat(n); if (row.wasNull()) null else v }
   private lazy val sql2oneDoubleOrNull    : (Row, Int) => Any = { (row: Row, n: Int) => val v = row.getDouble(n); if (row.wasNull()) null else v }
   private lazy val sql2oneBooleanOrNull   : (Row, Int) => Any = { (row: Row, n: Int) => val v = row.getBoolean(n); if (row.wasNull()) null else v }
-  private lazy val sql2oneBigIntOrNull    : (Row, Int) => Any = { (row: Row, n: Int) => val v = row.getBigDecimal(n); if (row.wasNull()) null else v.toBigInteger }
-  private lazy val sql2oneBigDecimalOrNull: (Row, Int) => Any = { (row: Row, n: Int) => val v = row.getBigDecimal(n); if (row.wasNull()) null else v }
+  private lazy val sql2oneBigIntOrNull    : (Row, Int) => Any = { (row: Row, n: Int) => val v = row.getBigDecimal(n); if (row.wasNull()) null else BigInt(v.toBigInteger) }
+  private lazy val sql2oneBigDecimalOrNull: (Row, Int) => Any = { (row: Row, n: Int) => val v = row.getBigDecimal(n); if (row.wasNull()) null else BigDecimal(v) }
   private lazy val sql2oneDateOrNull      : (Row, Int) => Any = { (row: Row, n: Int) => val v = row.getDate(n); if (row.wasNull()) null else v }
   private lazy val sql2oneUUIDOrNull      : (Row, Int) => Any = { (row: Row, n: Int) => val v = row.getString(n); if (row.wasNull()) null else UUID.fromString(v) }
   private lazy val sql2oneURIOrNull       : (Row, Int) => Any = { (row: Row, n: Int) => val v = row.getString(n); if (row.wasNull()) null else new URI(v) }

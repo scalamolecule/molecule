@@ -11,7 +11,6 @@ case class Table(
 )
 
 case class JoinTable(
-  joinRefPath: List[String],
   stmt: String,
   ps: PS,
   leftPath: List[String],

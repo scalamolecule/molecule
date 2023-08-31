@@ -175,31 +175,31 @@ trait SortDynamic extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync 
         _ <- Ns.string.sort(1).int.sort(1).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Sort index 1 should be present and additional indexes continuously " +
-            "increase (in any order). Found sort index(es): 1, 1"
+            "increase (in any order). Found non-unique sort index(es): 1, 1"
         }
 
         _ <- Ns.string.sort(-1).int.sort(-2).long.sort(-2).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Sort index 1 should be present and additional indexes continuously " +
-            "increase (in any order). Found sort index(es): 1, 2, 2"
+            "increase (in any order). Found non-unique sort index(es): 1, 2, 2"
         }
 
         _ <- Ns.string.sort(1).int.sort(3).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Sort index 1 should be present and additional indexes continuously " +
-            "increase (in any order). Found sort index(es): 1, 3"
+            "increase (in any order). Found non-unique sort index(es): 1, 3"
         }
 
         _ <- Ns.string.sort(-3).int.sort(-1).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Sort index 1 should be present and additional indexes continuously " +
-            "increase (in any order). Found sort index(es): 1, 3"
+            "increase (in any order). Found non-unique sort index(es): 1, 3"
         }
 
         _ <- Ns.string.sort(-2).int.sort(3).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
           err ==> "Sort index 1 should be present and additional indexes continuously " +
-            "increase (in any order). Found sort index(es): 2, 3"
+            "increase (in any order). Found non-unique sort index(es): 2, 3"
         }
       } yield ()
     }

@@ -72,7 +72,7 @@ trait Data_Insert
         val joinTable = joinRefPath.last
         val stmt      = s"INSERT INTO $joinTable ($id1, $id2) VALUES (?, ?)"
         val ps        = sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
-        joinTableDatas = joinTableDatas :+ JoinTable(joinRefPath, stmt, ps, leftPath, rightPath)
+        joinTableDatas = joinTableDatas :+ JoinTable(stmt, ps, leftPath, rightPath)
     }
   }
 
@@ -135,7 +135,6 @@ trait Data_Insert
       inserts = inserts.map {
         case (path, cols) if path == curRefPath =>
           paramIndexes += (curRefPath, attr) -> (cols.length + 1)
-          //          (path, cols :+ attr)
           (path, if (add) cols :+ attr else cols)
 
 
@@ -162,7 +161,6 @@ trait Data_Insert
       val valueSetter = handleValue(scalaValue).asInstanceOf[(PS, Int) => Unit]
       val colSetter   = (ps: PS, _: IdsMap, _: RowIndex) => {
         valueSetter(ps, paramIndex)
-//        printValue(curLevel, ns, attr, tplIndex, paramIndex, scalaValue)
       }
       addColSetter(curPath, colSetter)
     }
