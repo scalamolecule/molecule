@@ -31,12 +31,8 @@ trait SqlQueryBase extends BaseHelpers with JavaConversions { self: Model2Query 
   // Main query
   final protected var isNested    = false
   final protected var isNestedOpt = false
-
-  final protected val nestedIds = new ArrayBuffer[String]
-
-  final protected var level = 0
-
-
+  final protected val nestedIds   = new ArrayBuffer[String]
+  final protected var level       = 0
   final protected val select      = new ListBuffer[String]
   final protected var distinct    = true
   final protected var from        = ""
@@ -46,21 +42,16 @@ trait SqlQueryBase extends BaseHelpers with JavaConversions { self: Model2Query 
   final protected val groupBy     = new mutable.LinkedHashSet[String]
   final protected val having      = new mutable.LinkedHashSet[String]
   final protected var orderBy     = new ListBuffer[(Int, Int, String, String)]
-  final protected var fetch       = new ListBuffer[String]
-  final protected var limitClause = ""
-
   final protected var aggregate   = false
   final protected val groupByCols = new mutable.LinkedHashSet[String]
-
-  final protected val exts = mutable.Map.empty[String, Option[String]]
-
-
-  final protected val in = new ArrayBuffer[String]
+  final protected val in          = new ArrayBuffer[String]
+  final protected var hardLimit = 0
 
   // Input args and cast lambdas
   final protected val args     = new ArrayBuffer[AnyRef]
   final protected var castss   = List(List.empty[(Row, Int) => Any])
   final protected var aritiess = List(List.empty[List[Int]])
+  final protected val exts     = mutable.Map.empty[String, Option[String]]
 
   // Sorting
   final protected var sortss = List(List.empty[(Int, Int => (RowOLD, RowOLD) => Int)])

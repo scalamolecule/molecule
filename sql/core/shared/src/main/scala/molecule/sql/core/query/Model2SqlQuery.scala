@@ -10,23 +10,26 @@ import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 
 
-class Model2SqlQuery[Tpl](elements0: List[Element])
-  extends Model2Query
-    with ResolveExprOne[Tpl]
-    with ResolveExprSet[Tpl]
-    with ResolveExprSetRefAttr[Tpl]
-    with ResolveRef
-    with SqlQueryBase
-    with CastNestedBranch_
-    with CastRow2Tpl_
-    with Nest[Tpl]
-    with NestOpt[Tpl]
-    with LambdasOne
-    with LambdasSet
-    with ModelUtils
-    with MoleculeLogging {
+class Model2SqlQuery[Tpl](
+  elements0: List[Element],
+  optLimit: Option[Int] = None,
+  optOffset: Option[Int] = None
+) extends Model2Query
+  with ResolveExprOne[Tpl]
+  with ResolveExprSet[Tpl]
+  with ResolveExprSetRefAttr[Tpl]
+  with ResolveRef
+  with SqlQueryBase
+  with CastNestedBranch_
+  with CastRow2Tpl_
+  with Nest[Tpl]
+  with NestOpt[Tpl]
+  with LambdasOne
+  with LambdasSet
+  with ModelUtils
+  with MoleculeLogging {
 
-  final def getSqlQuery(altElements: List[Element] = Nil): String = {
+  final def getSqlQuery(altElements: List[Element], isNested: Boolean = false): String = {
     val elements = if (altElements.isEmpty) elements0 else altElements
     validateQueryModel(elements)
     //    elements.foreach(println)
@@ -77,18 +80,76 @@ class Model2SqlQuery[Tpl](elements0: List[Element])
 
     val having_ = if (having.isEmpty) "" else having.mkString("\nHAVING ", ", ", "")
 
-    val orderBy_ = if (orderBy.isEmpty) "" else {
-      orderBy.sortBy(t => (t._1, t._2)).map {
-        case (_, _, col, dir) => col + dir
-      }.mkString("\nORDER BY ", ", ", "")
+    val isBackwards = optLimit.isDefined && optLimit.get < 0 || optOffset.isDefined && optOffset.get < 0
+
+    val orderBy_ = if (orderBy.isEmpty) {
+      ""
+    } else {
+      val coordinates = orderBy.sortBy(t => (t._1, t._2))
+      val orderCols   = if (isBackwards) {
+        coordinates.map {
+          case (_, _, col, "DESC") => col
+          case (_, _, col, _)      => col + " DESC"
+        }
+      } else {
+        coordinates.map {
+          case (_, _, col, dir) => col + dir
+        }
+      }
+      orderCols.mkString("\nORDER BY ", ", ", "")
     }
-    val fetch_   = if (fetch.isEmpty) "" else fetch.mkString("\nFETCH ", ", ", "")
-    val limit_   = if (limitClause.isBlank) "" else "\nLIMIT " + limitClause
+
+    val limit_ = if (isNested || isNestedOpt) {
+      ""
+    } else if (hardLimit != 0) {
+      s"\nLIMIT $hardLimit"
+    } else {
+      optLimit.fold("")(limit => s"\nLIMIT " + (if (isBackwards) -limit else limit))
+    }
+
+    val offset_ = if (isNested || isNestedOpt) {
+      ""
+    } else {
+      optOffset.fold("")(offset => s"\nOFFSET " + (if (isBackwards) -offset else offset))
+    }
 
     s"""SELECT$distinct_
        |  $select_
-       |FROM $from$joins_$where_$groupBy_$having_$orderBy_$fetch_$limit_;""".stripMargin
+       |FROM $from$joins_$where_$groupBy_$having_$orderBy_$limit_$offset_;""".stripMargin
   }
+
+
+  final def getTotalCountQuery: String = {
+    val joins_ = if (joins.isEmpty) "" else {
+      val max1  = joins.map(_._1.length).max
+      val max2  = joins.map(_._2.length).max
+      val max3  = joins.map(_._3.length).max
+      val hasAs = joins.exists(_._3.nonEmpty)
+      joins.map { case (join, table, as, predicates) =>
+        val join_  = join + padS(max1, join)
+        val table_ = table + padS(max2, table)
+        val as_    = if (hasAs) {
+          if (as.isEmpty) padS(max3 + 4, "") else " AS " + as + padS(max3, as)
+        } else ""
+        s"$join_ $table_$as_ ON $predicates"
+      }.mkString("\n", "\n", "")
+    }
+
+    val notNulls = notNull.map(col => (col, "IS NOT NULL"))
+    val allWhere = where ++ notNulls
+    val where_   = if (allWhere.isEmpty) "" else {
+      val max = allWhere.map(_._1.length).max
+      allWhere.map {
+        case ("", predicate)  => predicate
+        case (col, predicate) => s"$col " + padS(max, col) + predicate
+      }.mkString("\nWHERE\n  ", s" AND\n  ", "")
+    }
+    val having_  = if (having.isEmpty) "" else having.mkString("\nHAVING ", ", ", "")
+
+    s"""SELECT COUNT($from.id)
+       |FROM $from$joins_$where_$having_;""".stripMargin
+  }
+
 
   private[molecule] def getWhereClauses: ListBuffer[(String, String)] = {
     from = getInitialNonGenericNs(elements0)

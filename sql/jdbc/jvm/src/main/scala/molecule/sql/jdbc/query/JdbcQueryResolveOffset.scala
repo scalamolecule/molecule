@@ -11,147 +11,67 @@ import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
 
 /**
- * @param elements Molecule model
- * @param limit    When going forward from start, use a positive number.
- *                 And vice versa from end with a negative number. Can't be zero.
- * @param offset   Positive offset from start when going forwards,
- *                 negative offset from end when going backwards
- * @param dbView   Database with a time perspective (Datomic)
+ * @param elements  Molecule model
+ * @param optLimit  When going forward from start, use a positive number.
+ *                  And vice versa from end with a negative number. Can't be zero.
+ * @param optOffset Positive offset from start when going forwards,
+ *                  negative offset from end when going backwards
+ * @param dbView    Database with a time perspective (Datomic)
  * @tparam Tpl
  */
 case class JdbcQueryResolveOffset[Tpl](
   elements: List[Element],
-  limit: Option[Int],
-  offset: Option[Int],
-  dbView: Option[DbView]
-) extends JdbcQueryResolve[Tpl](elements, dbView)
+  optLimit: Option[Int],
+  optOffset: Option[Int]
+) extends JdbcQueryResolve[Tpl](elements, optLimit, optOffset)
   with FutureUtils
   with MoleculeLogging {
 
-  // Handles both offset- and non-paginated results
-  // returns (rows, total count, hasMore)
-  def getListFromOffset_async(implicit conn: JdbcConn_jvm, ec: ExecutionContext)
-  : Future[(List[Tpl], Int, Boolean)] = {
-    future(getListFromOffset_sync(conn))
-  }
+  lazy val isBackwards = optLimit.isDefined && optLimit.get < 0 || optOffset.isDefined && optOffset.get < 0
 
-  // Datomic querying is synchronous
-  def getListFromOffset_sync(implicit conn: JdbcConn_jvm): (List[Tpl], Int, Boolean) = {
-    getListFromOffset_sync2(
-//      None
-    )(conn)
-  }
 
-  // Optional use of DB_AFTER for subscriptions
-  private def getListFromOffset_sync2(
-//    altDb: Option[datomic.Database]
-  )(implicit conn: JdbcConn_jvm)
+  def getListFromOffset_sync(implicit conn: JdbcConn_jvm)
   : (List[Tpl], Int, Boolean) = {
-    lazy val limitSign  = limit.get >> 31
-    lazy val offsetSign = offset.get >> 31
-    if (offset.isDefined && limit.isDefined && limitSign != offsetSign) {
+    lazy val limitSign  = optLimit.get >> 31
+    lazy val offsetSign = optOffset.get >> 31
+    if (optOffset.isDefined && optLimit.isDefined && limitSign != offsetSign) {
       throw ModelError("Limit and offset should both be positive or negative.")
     }
-
-    val sortedRows: Row = getRawData2(conn)
-    val totalCount      = getRowCount(sortedRows)
-
+    val sortedRows: Row = getData(conn)
     //    println("sortedRows : " + sortedRows)
     //    println("total count: " + totalCount)
 
     if (isNested) {
-      val nestedRows    = rows2nested(sortedRows)
+      val totalCount    = getRowCount(sortedRows)
+      val nestedRows0   = rows2nested(sortedRows)
+      val nestedRows    = if (isBackwards) nestedRows0.reverse else nestedRows0
       val toplevelCount = nestedRows.length
-      val fromUntil     = getFromUntil(toplevelCount, limit, offset)
+      val fromUntil     = getFromUntil(toplevelCount, optLimit, optOffset)
       val hasMore       = fromUntil.fold(totalCount > 0)(_._3)
       (offsetList(nestedRows, fromUntil), toplevelCount, hasMore)
 
     } else if (isNestedOpt) {
-      val nestedRows    = rows2nestedOpt(sortedRows)
+      val totalCount    = optOffset.fold(getRowCount(sortedRows))(_ => getTotalCount(conn))
+      val nestedRows0    = rows2nestedOpt(sortedRows)
+      val nestedRows    = if (isBackwards) nestedRows0.reverse else nestedRows0
       val toplevelCount = nestedRows.length
-      val fromUntil     = getFromUntil(toplevelCount, limit, offset)
+      val fromUntil     = getFromUntil(toplevelCount, optLimit, optOffset)
       val hasMore       = fromUntil.fold(totalCount > 0)(_._3)
       (offsetList(nestedRows, fromUntil), toplevelCount, hasMore)
 
     } else {
-      //      val fromUntil = getFromUntil(totalCount, limit, offset)
-      //      val hasMore   = fromUntil.fold(totalCount > 0)(_._3)
-      //      val tuples    = ListBuffer.empty[Tpl]
-      //          if (isNestedOpt) {
-      //            postAdjustPullCasts()
-      //            offsetRaw(sortedRows, fromUntil).forEach(row => tuples += pullRow2tpl(row))
-      //            (tuples.result(), totalCount, hasMore)
-      //
-      //          } else {
-      ////            postAdjustAritiess()
-      ////            val row2tpl = castRow2AnyTpl(aritiess.head, castss.head, 0, None)
-      ////            offsetRaw(sortedRows, fromUntil).forEach(row => tuples += row2tpl(row).asInstanceOf[Tpl])
-      ////            (tuples.result(), totalCount, hasMore)
-      //          }
-
-
-      val row2tpl = castRow2AnyTpl(aritiess.head, castss.head, 1, None)
-      val tuples  = ListBuffer.empty[Tpl]
+      val totalCount = optOffset.fold(getRowCount(sortedRows))(_ => getTotalCount(conn))
+      val row2tpl    = castRow2AnyTpl(aritiess.head, castss.head, 1, None)
+      val tuples     = ListBuffer.empty[Tpl]
       while (sortedRows.next()) {
         tuples += row2tpl(sortedRows).asInstanceOf[Tpl]
       }
-      //      val totalCount = tuples.size
-      val fromUntil = getFromUntil(totalCount, limit, offset)
+      val fromUntil = getFromUntil(totalCount, optLimit, optOffset)
       val hasMore   = fromUntil.fold(totalCount > 0)(_._3)
-      (tuples.result(), totalCount, hasMore)
-
+      val result    = if (isBackwards) tuples.result().reverse else tuples.result()
+      (result, totalCount, hasMore)
     }
-
-
-    //    val res = getRawData2(conn)
-    //    //    val row2tpl = castRow2AnyTpl(aritiess.head, castss.head, 0, None)
-    //
-    //    val rows = ListBuffer.empty[Int]
-    //    while (res.next()) {
-    //      rows += res.getInt(1)
-    //    }
-    //    //
-    //    (rows.toList.asInstanceOf[List[Tpl]], 1, true)
   }
-
-  //  // Optional use of DB_AFTER for subscriptions
-  //  def getListFromOffset_syncOLD(altDb: Option[datomic.Database])(implicit conn: JdbcConn_JVM)
-  //  : (List[Tpl], Int, Boolean) = {
-  //    lazy val limitSign  = limit.get >> 31
-  //    lazy val offsetSign = offset.get >> 31
-  //    if (offset.isDefined && limit.isDefined && limitSign != offsetSign) {
-  //      throw ModelError("Limit and offset should both be positive or negative.")
-  //    }
-  //    val rows       = getRawData(conn, altDb = altDb)
-  //    val totalCount = rows.size
-  //    val sortedRows = sortRows(rows)
-  //    //    logger.debug(sortedRows.toArray().mkString("\n"))
-  //
-  //    if (isNested) {
-  //      val nestedRows    = rows2nested(sortedRows)
-  //      val toplevelCount = nestedRows.length
-  //      val fromUntil     = getFromUntil(toplevelCount, limit, offset)
-  //      val hasMore       = fromUntil.fold(totalCount > 0)(_._3)
-  //      (offsetList(nestedRows, fromUntil), toplevelCount, hasMore)
-  //
-  //    } else {
-  //      val fromUntil = getFromUntil(totalCount, limit, offset)
-  //      val hasMore   = fromUntil.fold(totalCount > 0)(_._3)
-  //      val tuples    = ListBuffer.empty[Tpl]
-  //
-  //      if (isNestedOpt) {
-  //        postAdjustPullCasts()
-  //        offsetRaw(sortedRows, fromUntil).forEach(row => tuples += pullRow2tpl(row))
-  //        (tuples.result(), totalCount, hasMore)
-  //
-  //      } else {
-  //        postAdjustAritiess()
-  //        val row2tpl = castRow2AnyTpl(aritiess.head, castss.head, 0, None)
-  //        offsetRaw(sortedRows, fromUntil).forEach(row => tuples += row2tpl(row).asInstanceOf[Tpl])
-  //        (tuples.result(), totalCount, hasMore)
-  //      }
-  //    }
-  //  }
 
 
   def subscribe(

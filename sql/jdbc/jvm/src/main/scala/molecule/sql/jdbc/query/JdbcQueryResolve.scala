@@ -13,9 +13,12 @@ import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 
 
-abstract class JdbcQueryResolve[Tpl](elements: List[Element], dbView: Option[DbView])
-  extends Model2SqlQuery[Tpl](elements)
-    with CursorUtils {
+abstract class JdbcQueryResolve[Tpl](
+  elements: List[Element],
+  optLimit: Option[Int],
+  optOffset: Option[Int]
+) extends Model2SqlQuery[Tpl](elements, optLimit, optOffset)
+  with CursorUtils {
 
   lazy val edgeValuesNotFound = "Couldn't find next page. Edge rows were all deleted/updated."
 
@@ -42,52 +45,33 @@ abstract class JdbcQueryResolve[Tpl](elements: List[Element], dbView: Option[DbV
     }
   }
 
-  protected def getRawData2(conn: JdbcConn_jvm): ResultSet = {
-    val stmt = getSqlQuery(Nil)
+  protected def getData(conn: JdbcConn_jvm, isNested: Boolean = false): ResultSet = {
+    getResultSet(conn, getSqlQuery(Nil))
+  }
 
-    //    println("--------------------------------------------------------------\n" + stmt)
+  protected def getTotalCount(conn: JdbcConn_jvm): Int = {
+    val rs = getResultSet(conn, getTotalCountQuery)
+    rs.next()
+    rs.getInt(1)
+  }
 
-    val ps = conn.sqlConn.prepareStatement(stmt, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)
-    ps.executeQuery()
+  private def getResultSet(conn: JdbcConn_jvm, query: String): ResultSet = {
+    conn.sqlConn.prepareStatement(
+      query,
+      ResultSet.TYPE_SCROLL_INSENSITIVE,
+      ResultSet.CONCUR_READ_ONLY
+    ).executeQuery()
   }
 
 
   protected def getRawData(
     conn: JdbcConn_jvm,
-    altElements: List[Element] = Nil,
-//    altDb: Option[datomic.Database] = None
+    altElements: List[Element] = Nil
   ): jCollection[jList[AnyRef]] = {
-    //    isFree = conn.isFreeVersion
     //    val db = altDb.getOrElse(getDb(conn))
     val query = getSqlQuery(altElements)
-
-
     ???
   }
-  //  private def selectDbData(conn: Connection): Unit = {
-  //    val sqlIns         =
-  //      """select db_url, table_name, dtm from state.dump"""
-  //    val stmt           = conn.prepareStatement(sqlIns)
-  //    val res: ResultSet = stmt.executeQuery()
-  //    while ( {
-  //      res.next
-  //    }) {
-  //      val db_url     = res.getString("db_url")
-  //      val table_name = res.getString("table_name")
-  //      val dtm        = res.getTimestamp("dtm")
-  //      println(db_url + " " + table_name + " " + dtm.toString)
-  //    }
-  //    stmt.close()
-  //  }
-
-  //  private def getDb(conn: SqlConn_JVM): Database = {
-  //    dbView.fold(conn.sqlConn.db()) {
-  //      case AsOf(TxLong(tx))  => conn.sqlConn.db().asOf(tx)
-  //      case AsOf(TxDate(d))   => conn.sqlConn.db().asOf(d)
-  //      case Since(TxLong(tx)) => conn.sqlConn.db().since(tx)
-  //      case Since(TxDate(d))  => conn.sqlConn.db().since(d)
-  //    }
-  //  }
 
 
   private def distinct(rows: jCollection[jList[AnyRef]]): jCollection[jList[AnyRef]] = {
@@ -152,83 +136,83 @@ abstract class JdbcQueryResolve[Tpl](elements: List[Element], dbView: Option[DbV
       case (None, Some(l)) if l > 0    => Some((0, l.min(tc), l < tc))
       case (None, Some(l))             => Some(((tc + l).max(0), tc, (tc + l) > 0))
       case (Some(o), None) if o > 0    => Some((o.min(tc), tc, o < tc))
-      case (Some(o), None)             => Some((-o.max(0), tc, -o < tc))
+      case (Some(o), None)             => Some((0, (tc + o).min(tc), -o < tc))
       case (Some(o), Some(l)) if l > 0 => Some((o.min(tc), (o + l).min(tc), (o + l) < tc))
       case (Some(o), Some(l))          => Some(((tc + o + l).max(0), (tc + o).max(0), (tc + o + l).max(0) > 0))
     }
   }
 
-//  lazy val row2AnyTpl = castRow2AnyTpl(aritiess.head, castss.head, 0, None)
-//
-//  def paginateFromIdentifiers(
-//    conn: JdbcConn_jvm,
-//    limit: Int,
-//    forward: Boolean,
-//    allTokens: List[String],
-//    attrTokens: List[String],
-//    identifiers: List[Any],
-//    identifyTpl: Tpl => Any,
-//    identifyRow: Boolean => Row => Any,
-//    nextCursor: (List[Tpl], List[String]) => String
-//  ): (List[Tpl], String, Boolean) = {
-//    // Filter query by primary non-unique sort attribute
-//    val filterAttr  = {
-//      val List(_, dir, _, tpe, ns, attr, _, a, b, c, x, y, z) = attrTokens
-//
-//      // Filter by most inclusive value
-//      val first   = List(c, b, a).filter(_.nonEmpty).head
-//      val last    = List(x, y, z).filter(_.nonEmpty).head
-//      val (fn, v) = (forward, dir) match {
-//        case (true, "a") => (Ge, last)
-//        case (true, _)   => (Le, first)
-//        case (_, "a")    => (Le, first)
-//        case (_, _)      => (Ge, last)
-//      }
-//      getFilterAttr(tpe, ns, attr, fn, v)
-//    }
-//    val altElements = filterAttr +: elements
-//    val rows        = getRawData(conn, altElements)
-//    val sortedRows  = sortRows(rows)
-//    logger.debug(sortedRows.toArray().mkString("\n"))
-//
-//    if (sortedRows.size() == 0) {
-//      (Nil, "", false)
-//    } else {
-//      if (isNested) {
-//        val nestedTpls: List[Tpl] = ??? //rows2nested(sortedRows)
-//        val totalCount            = nestedTpls.length
-//        val count                 = getCount(limit, forward, totalCount)
-//        val nestedTpls1           = if (forward) nestedTpls else nestedTpls.reverse
-//        val (tuples, more)        = paginateTpls(count, nestedTpls1, identifiers, identifyTpl)
-//        val tpls                  = if (forward) tuples else tuples.reverse
-//        val cursor                = nextCursor(tpls, allTokens)
-//        (tpls, cursor, more > 0)
-//
-//      } else {
-//        val totalCount = rows.size
-//        if (isNestedOpt) {
-//          postAdjustPullCasts()
-//          if (!forward) Collections.reverse(sortedRows)
-//          val count          = getCount(limit, forward, totalCount)
-//          //          val (tuples, more) = paginateRows(count, sortedRows, identifiers, identifyRow(true), pullRow2tpl)
-//          val (tuples, more) = paginateRows(count, sortedRows, identifiers, identifyRow(true), null)
-//          val tpls           = if (forward) tuples else tuples.reverse
-//          val cursor         = nextCursor(tpls, allTokens)
-//          (tpls, cursor, more > 0)
-//
-//        } else {
-//          postAdjustAritiess()
-//          if (!forward) Collections.reverse(sortedRows)
-//          val count          = getCount(limit, forward, totalCount)
-//          val row2tpl        = (row: Row) => row2AnyTpl(row).asInstanceOf[Tpl]
-//          val (tuples, more) = paginateRows(count, sortedRows, identifiers, identifyRow(false), row2tpl)
-//          val tpls           = if (forward) tuples else tuples.reverse
-//          val cursor         = nextCursor(tpls, allTokens)
-//          (tpls, cursor, more > 0)
-//        }
-//      }
-//    }
-//  }
+  //  lazy val row2AnyTpl = castRow2AnyTpl(aritiess.head, castss.head, 0, None)
+  //
+  //  def paginateFromIdentifiers(
+  //    conn: JdbcConn_jvm,
+  //    limit: Int,
+  //    forward: Boolean,
+  //    allTokens: List[String],
+  //    attrTokens: List[String],
+  //    identifiers: List[Any],
+  //    identifyTpl: Tpl => Any,
+  //    identifyRow: Boolean => Row => Any,
+  //    nextCursor: (List[Tpl], List[String]) => String
+  //  ): (List[Tpl], String, Boolean) = {
+  //    // Filter query by primary non-unique sort attribute
+  //    val filterAttr  = {
+  //      val List(_, dir, _, tpe, ns, attr, _, a, b, c, x, y, z) = attrTokens
+  //
+  //      // Filter by most inclusive value
+  //      val first   = List(c, b, a).filter(_.nonEmpty).head
+  //      val last    = List(x, y, z).filter(_.nonEmpty).head
+  //      val (fn, v) = (forward, dir) match {
+  //        case (true, "a") => (Ge, last)
+  //        case (true, _)   => (Le, first)
+  //        case (_, "a")    => (Le, first)
+  //        case (_, _)      => (Ge, last)
+  //      }
+  //      getFilterAttr(tpe, ns, attr, fn, v)
+  //    }
+  //    val altElements = filterAttr +: elements
+  //    val rows        = getRawData(conn, altElements)
+  //    val sortedRows  = sortRows(rows)
+  //    logger.debug(sortedRows.toArray().mkString("\n"))
+  //
+  //    if (sortedRows.size() == 0) {
+  //      (Nil, "", false)
+  //    } else {
+  //      if (isNested) {
+  //        val nestedTpls: List[Tpl] = ??? //rows2nested(sortedRows)
+  //        val totalCount            = nestedTpls.length
+  //        val count                 = getCount(limit, forward, totalCount)
+  //        val nestedTpls1           = if (forward) nestedTpls else nestedTpls.reverse
+  //        val (tuples, more)        = paginateTpls(count, nestedTpls1, identifiers, identifyTpl)
+  //        val tpls                  = if (forward) tuples else tuples.reverse
+  //        val cursor                = nextCursor(tpls, allTokens)
+  //        (tpls, cursor, more > 0)
+  //
+  //      } else {
+  //        val totalCount = rows.size
+  //        if (isNestedOpt) {
+  //          postAdjustPullCasts()
+  //          if (!forward) Collections.reverse(sortedRows)
+  //          val count          = getCount(limit, forward, totalCount)
+  //          //          val (tuples, more) = paginateRows(count, sortedRows, identifiers, identifyRow(true), pullRow2tpl)
+  //          val (tuples, more) = paginateRows(count, sortedRows, identifiers, identifyRow(true), null)
+  //          val tpls           = if (forward) tuples else tuples.reverse
+  //          val cursor         = nextCursor(tpls, allTokens)
+  //          (tpls, cursor, more > 0)
+  //
+  //        } else {
+  //          postAdjustAritiess()
+  //          if (!forward) Collections.reverse(sortedRows)
+  //          val count          = getCount(limit, forward, totalCount)
+  //          val row2tpl        = (row: Row) => row2AnyTpl(row).asInstanceOf[Tpl]
+  //          val (tuples, more) = paginateRows(count, sortedRows, identifiers, identifyRow(false), row2tpl)
+  //          val tpls           = if (forward) tuples else tuples.reverse
+  //          val cursor         = nextCursor(tpls, allTokens)
+  //          (tpls, cursor, more > 0)
+  //        }
+  //      }
+  //    }
+  //  }
 
   private def getCount(limit: Int, forward: Boolean, totalCount: Int) = {
     if (forward)

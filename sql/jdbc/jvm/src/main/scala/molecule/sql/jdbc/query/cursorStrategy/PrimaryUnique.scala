@@ -18,17 +18,16 @@ import scala.collection.mutable.ListBuffer
  * Then we can easily filter by its previous value in either direction.
  *
  * @param elements Molecule model
- * @param limit    When going forward from start, use a positive number.
+ * @param optLimit    When going forward from start, use a positive number.
  *                 And vice versa from end with a negative number. Can't be zero.
  * @param cursor   Base64 encoded cursor meta information
  * @tparam Tpl Type of each row
  */
 case class PrimaryUnique[Tpl](
   elements: List[Element],
-  limit: Option[Int],
-  cursor: String,
-  dbView: Option[DbView]
-) extends JdbcQueryResolve[Tpl](elements, dbView)
+  optLimit: Option[Int],
+  cursor: String
+) extends JdbcQueryResolve[Tpl](elements, optLimit, None)
   with FutureUtils with CursorUtils with ModelTransformations_ with MoleculeLogging {
 
   def getPage(tokens: List[String], limit: Int)

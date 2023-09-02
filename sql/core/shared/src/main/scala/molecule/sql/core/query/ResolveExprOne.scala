@@ -333,7 +333,7 @@ trait ResolveExprOne[Tpl] { self: Model2SqlQuery[Tpl] with LambdasOne =>
         distinct = false
         select += col
         orderBy += ((level, -1, "RAND()", ""))
-        limitClause = "1"
+        hardLimit = 1
 
       case "samples" =>
         select +=
@@ -353,7 +353,7 @@ trait ResolveExprOne[Tpl] { self: Model2SqlQuery[Tpl] with LambdasOne =>
         distinct = false
         select += col
         orderBy += ((level, -1, "RAND()", ""))
-        limitClause = "1"
+        hardLimit = 1
 
       case "count" =>
         distinct = false

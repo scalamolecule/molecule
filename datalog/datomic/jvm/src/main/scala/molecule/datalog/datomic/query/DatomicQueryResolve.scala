@@ -140,7 +140,7 @@ abstract class DatomicQueryResolve[Tpl](elements: List[Element], dbView: Option[
       case (None, Some(l)) if l > 0    => Some((0, l.min(tc), l < tc))
       case (None, Some(l))             => Some(((tc + l).max(0), tc, (tc + l) > 0))
       case (Some(o), None) if o > 0    => Some((o.min(tc), tc, o < tc))
-      case (Some(o), None)             => Some((-o.max(0), tc, -o < tc))
+      case (Some(o), None)             => Some((0, (tc + o).min(tc), -o < tc))
       case (Some(o), Some(l)) if l > 0 => Some((o.min(tc), (o + l).min(tc), (o + l) < tc))
       case (Some(o), Some(l))          => Some(((tc + o + l).max(0), (tc + o).max(0), (tc + o + l).max(0) > 0))
     }

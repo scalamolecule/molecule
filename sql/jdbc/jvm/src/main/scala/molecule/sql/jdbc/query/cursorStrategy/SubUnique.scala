@@ -23,17 +23,16 @@ import molecule.sql.jdbc.query.JdbcQueryResolve
  * Presumes that the row with the previous unique value hasn't been altered.
  *
  * @param elements Molecule model
- * @param limit    When going forward from start, use a positive number.
+ * @param optLimit    When going forward from start, use a positive number.
  *                 And vice versa from end with a negative number. Can't be zero.
  * @param cursor   Base64 encoded cursor meta information, including previous edge values.
  * @tparam Tpl Type of each row
  */
 case class SubUnique[Tpl](
   elements: List[Element],
-  limit: Option[Int],
-  cursor: String,
-  dbView: Option[DbView]
-) extends JdbcQueryResolve[Tpl](elements, dbView)
+  optLimit: Option[Int],
+  cursor: String
+) extends JdbcQueryResolve[Tpl](elements, optLimit, None)
   with FutureUtils with CursorUtils with MoleculeLogging {
 
   def getPage(allTokens: List[String], limit: Int)

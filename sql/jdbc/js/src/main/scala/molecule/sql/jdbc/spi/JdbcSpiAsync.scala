@@ -25,13 +25,13 @@ trait JdbcSpiAsync
   override def query_get[Tpl](q: Query[Tpl])(implicit conn0: Conn, ec: EC): Future[List[Tpl]] = {
     val conn  = conn0.asInstanceOf[JdbcConn_js]
     val proxy = conn.proxy.copy(dbView = q.dbView)
-    conn.rpc.query[Tpl](proxy, q.elements, q.limit).future
+    conn.rpc.query[Tpl](proxy, q.elements, q.optLimit).future
   }
 
   override def query_subscribe[Tpl](q: Query[Tpl], callback: List[Tpl] => Unit)
                                    (implicit conn0: Conn, ec: EC): Future[Unit] = {
     val conn = conn0.asInstanceOf[JdbcConn_js]
-    conn.rpc.subscribe[Tpl](conn.proxy, q.elements, q.limit, callback)
+    conn.rpc.subscribe[Tpl](conn.proxy, q.elements, q.optLimit, callback)
   }
 
   override def query_inspect[Tpl](q: Query[Tpl])(implicit conn: Conn, ec: EC): Future[Unit] = {
@@ -43,7 +43,7 @@ trait JdbcSpiAsync
                                    (implicit conn0: Conn, ec: EC): Future[(List[Tpl], Int, Boolean)] = {
     val conn  = conn0.asInstanceOf[JdbcConn_js]
     val proxy = conn.proxy.copy(dbView = q.dbView)
-    conn.rpc.queryOffset[Tpl](proxy, q.elements, q.limit, q.offset).future
+    conn.rpc.queryOffset[Tpl](proxy, q.elements, q.optLimit, q.offset).future
   }
 
   override def queryOffset_inspect[Tpl](q: QueryOffset[Tpl])
@@ -56,7 +56,7 @@ trait JdbcSpiAsync
                                    (implicit conn0: Conn, ec: EC): Future[(List[Tpl], String, Boolean)] = {
     val conn  = conn0.asInstanceOf[JdbcConn_js]
     val proxy = conn.proxy.copy(dbView = q.dbView)
-    conn.rpc.queryCursor[Tpl](proxy, q.elements, q.limit, q.cursor).future
+    conn.rpc.queryCursor[Tpl](proxy, q.elements, q.optLimit, q.cursor).future
   }
 
   override def queryCursor_inspect[Tpl](q: QueryCursor[Tpl])

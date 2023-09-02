@@ -29,7 +29,7 @@ trait DatomicSpiZio
     q: Query[Tpl]
   ): ZIO[Conn, MoleculeError, List[Tpl]] = {
     getResult[List[Tpl]]((conn: DatomicConn_JVM) =>
-      DatomicQueryResolveOffset[Tpl](q.elements, q.limit, None, q.dbView)
+      DatomicQueryResolveOffset[Tpl](q.elements, q.optLimit, None, q.dbView)
         .getListFromOffset_async(conn, global).map(_._1)
     )
   }
@@ -40,7 +40,7 @@ trait DatomicSpiZio
     for {
       conn0 <- ZIO.service[Conn]
       datomicConn = conn0.asInstanceOf[DatomicConn_JVM]
-      res <- ZIO.succeed(DatomicQueryResolveOffset[Tpl](q.elements, q.limit, None, q.dbView)
+      res <- ZIO.succeed(DatomicQueryResolveOffset[Tpl](q.elements, q.optLimit, None, q.dbView)
         .subscribe(datomicConn, getWatcher(datomicConn), callback))
     } yield res
   }
@@ -56,7 +56,7 @@ trait DatomicSpiZio
     q: QueryOffset[Tpl]
   ): ZIO[Conn, MoleculeError, (List[Tpl], Int, Boolean)] = {
     getResult[(List[Tpl], Int, Boolean)]((conn: DatomicConn_JVM) =>
-      DatomicQueryResolveOffset[Tpl](q.elements, q.limit, Some(q.offset), q.dbView)
+      DatomicQueryResolveOffset[Tpl](q.elements, q.optLimit, Some(q.offset), q.dbView)
         .getListFromOffset_async(conn, global)
     )
   }
@@ -72,7 +72,7 @@ trait DatomicSpiZio
     q: QueryCursor[Tpl]
   ): ZIO[Conn, MoleculeError, (List[Tpl], String, Boolean)] = {
     getResult[(List[Tpl], String, Boolean)]((conn: DatomicConn_JVM) =>
-      DatomicQueryResolveCursor[Tpl](q.elements, q.limit, Some(q.cursor), q.dbView)
+      DatomicQueryResolveCursor[Tpl](q.elements, q.optLimit, Some(q.cursor), q.dbView)
         .getListFromCursor_async(conn, global)
     )
   }

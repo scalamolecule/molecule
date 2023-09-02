@@ -25,12 +25,12 @@ trait DatomicSpiSync
 
   override def query_get[Tpl](q: Query[Tpl])(implicit conn: Conn): List[Tpl] = {
     if (q.doInspect) query_inspect(q)
-    DatomicQueryResolveOffset[Tpl](q.elements, q.limit, None, q.dbView)
+    DatomicQueryResolveOffset[Tpl](q.elements, q.optLimit, None, q.dbView)
       .getListFromOffset_sync(conn.asInstanceOf[DatomicConn_JVM])._1
   }
   override def query_subscribe[Tpl](q: Query[Tpl], callback: List[Tpl] => Unit)(implicit conn: Conn): Unit = {
     val datomicConn = conn.asInstanceOf[DatomicConn_JVM]
-    DatomicQueryResolveOffset[Tpl](q.elements, q.limit, None, q.dbView)
+    DatomicQueryResolveOffset[Tpl](q.elements, q.optLimit, None, q.dbView)
       .subscribe(datomicConn, getWatcher(datomicConn), callback)
   }
   override def query_inspect[Tpl](q: Query[Tpl])(implicit conn: Conn): Unit = {
@@ -39,7 +39,7 @@ trait DatomicSpiSync
 
   override def queryOffset_get[Tpl](q: QueryOffset[Tpl])(implicit conn: Conn): (List[Tpl], Int, Boolean) = {
     if (q.doInspect) queryOffset_inspect(q)
-    DatomicQueryResolveOffset[Tpl](q.elements, q.limit, Some(q.offset), q.dbView)
+    DatomicQueryResolveOffset[Tpl](q.elements, q.optLimit, Some(q.offset), q.dbView)
       .getListFromOffset_sync(conn.asInstanceOf[DatomicConn_JVM])
   }
   override def queryOffset_inspect[Tpl](q: QueryOffset[Tpl])(implicit conn: Conn): Unit = {
@@ -48,7 +48,7 @@ trait DatomicSpiSync
 
   override def queryCursor_get[Tpl](q: QueryCursor[Tpl])(implicit conn: Conn): (List[Tpl], String, Boolean) = {
     if (q.doInspect) queryCursor_inspect(q)
-    DatomicQueryResolveCursor[Tpl](q.elements, q.limit, Some(q.cursor), q.dbView)
+    DatomicQueryResolveCursor[Tpl](q.elements, q.optLimit, Some(q.cursor), q.dbView)
       .getListFromCursor_sync(conn.asInstanceOf[DatomicConn_JVM])
   }
   override def queryCursor_inspect[Tpl](q: QueryCursor[Tpl])(implicit conn: Conn): Unit = {

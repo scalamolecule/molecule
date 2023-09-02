@@ -198,7 +198,7 @@ trait ResolveExprSet[Tpl] extends AggrUtils { self: Model2SqlQuery[Tpl] with Lam
         distinct = false
         select += col
         orderBy += ((level, -1, "RAND()", ""))
-        limitClause = "1"
+        hardLimit = 1
         replaceCast(res.nestedArray2coalescedSet)
 
 
@@ -220,7 +220,7 @@ trait ResolveExprSet[Tpl] extends AggrUtils { self: Model2SqlQuery[Tpl] with Lam
         distinct = false
         select += col
         orderBy += ((level, -1, "RAND()", ""))
-        limitClause = "1"
+        hardLimit = 1
         replaceCast(res.nestedArray2coalescedSet)
 
       case "count" =>

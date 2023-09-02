@@ -13,10 +13,9 @@ import molecule.sql.jdbc.query.JdbcQueryResolve
 
 case class NoUnique[Tpl](
   elements: List[Element],
-  limit: Option[Int],
-  cursor: String,
-  dbView: Option[DbView]
-) extends JdbcQueryResolve[Tpl](elements, dbView)
+  optLimit: Option[Int],
+  cursor: String
+) extends JdbcQueryResolve[Tpl](elements, optLimit, None)
   with FutureUtils with CursorUtils with MoleculeLogging {
 
   def getPage(allTokens: List[String], limit: Int)

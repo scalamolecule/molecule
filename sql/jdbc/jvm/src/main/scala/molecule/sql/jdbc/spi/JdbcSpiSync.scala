@@ -32,44 +32,49 @@ trait JdbcSpiSync
 
   override def query_get[Tpl](q: Query[Tpl])(implicit conn: Conn): List[Tpl] = {
     if (q.doInspect) query_inspect(q)
-    JdbcQueryResolveOffset[Tpl](q.elements, q.limit, None, q.dbView)
+    JdbcQueryResolveOffset[Tpl](q.elements, q.optLimit, None)
       .getListFromOffset_sync(conn.asInstanceOf[JdbcConn_jvm])._1
   }
 
   override def query_subscribe[Tpl](q: Query[Tpl], callback: List[Tpl] => Unit)(implicit conn: Conn): Unit = {
     val jdbcConn = conn.asInstanceOf[JdbcConn_jvm]
-    JdbcQueryResolveOffset[Tpl](q.elements, q.limit, None, q.dbView)
+    JdbcQueryResolveOffset[Tpl](q.elements, q.optLimit, None)
       .subscribe(jdbcConn, getWatcher(jdbcConn), callback)
   }
 
   override def query_inspect[Tpl](q: Query[Tpl])(implicit conn: Conn): Unit = {
-    printInspectQuery("QUERY", q.elements)
+    printInspectQuery("QUERY", q.elements, q.optLimit, None)
   }
 
 
   override def queryOffset_get[Tpl](q: QueryOffset[Tpl])(implicit conn: Conn): (List[Tpl], Int, Boolean) = {
     if (q.doInspect) queryOffset_inspect(q)
-    JdbcQueryResolveOffset[Tpl](q.elements, q.limit, Some(q.offset), q.dbView)
+    JdbcQueryResolveOffset[Tpl](q.elements, q.optLimit, Some(q.offset))
       .getListFromOffset_sync(conn.asInstanceOf[JdbcConn_jvm])
   }
 
   override def queryOffset_inspect[Tpl](q: QueryOffset[Tpl])(implicit conn: Conn): Unit = {
-    printInspectQuery("QUERY (offset)", q.elements)
+    printInspectQuery("QUERY (offset)", q.elements, q.optLimit, Some(q.offset))
   }
 
   override def queryCursor_get[Tpl](q: QueryCursor[Tpl])(implicit conn: Conn): (List[Tpl], String, Boolean) = {
     if (q.doInspect) queryCursor_inspect(q)
-    JdbcQueryResolveCursor[Tpl](q.elements, q.limit, Some(q.cursor), q.dbView)
+    JdbcQueryResolveCursor[Tpl](q.elements, q.optLimit, Some(q.cursor))
       .getListFromCursor_sync(conn.asInstanceOf[JdbcConn_jvm])
   }
 
   override def queryCursor_inspect[Tpl](q: QueryCursor[Tpl])(implicit conn: Conn): Unit = {
-    printInspectQuery("QUERY (cursor)", q.elements)
+    printInspectQuery("QUERY (cursor)", q.elements, q.optLimit, None)
   }
 
-  private def printInspectQuery(label: String, elements: List[Element]): Unit = {
+  private def printInspectQuery(
+    label: String,
+    elements: List[Element],
+    optLimit: Option[Int],
+    optOffset: Option[Int]
+  ): Unit = {
     tryInspect("query", elements) {
-      val queries = new Model2SqlQuery(elements).getSqlQuery(Nil) //._3
+      val queries = new Model2SqlQuery(elements, optLimit, optOffset).getSqlQuery(Nil) //._3
       printInspect(label, elements, queries)
     }
   }

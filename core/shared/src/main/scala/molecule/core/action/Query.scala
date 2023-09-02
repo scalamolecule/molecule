@@ -7,16 +7,16 @@ import molecule.core.spi.TxReport
 
 case class Query[Tpl](
   elements: List[Element],
-  private[molecule] val limit: Option[Int] = None,
+  private[molecule] val optLimit: Option[Int] = None,
   private[molecule] val dbView: Option[DbView] = None,
   private[molecule] val doInspect: Boolean = false
 ) extends Action(elements) {
 
   // Common api
 
-  def limit(l: Int): Query[Tpl] = copy(limit = Some(l))
-  def offset(o: Int): QueryOffset[Tpl] = QueryOffset(elements, limit, o)
-  def from(cursor: String): QueryCursor[Tpl] = QueryCursor(elements, limit, cursor)
+  def limit(l: Int): Query[Tpl] = copy(optLimit = Some(l))
+  def offset(o: Int): QueryOffset[Tpl] = QueryOffset(elements, optLimit, o, dbView, doInspect)
+  def from(cursor: String): QueryCursor[Tpl] = QueryCursor(elements, optLimit, cursor, dbView, doInspect)
 
 
   // Time actions (might be available only for Datomic)

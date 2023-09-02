@@ -17,17 +17,16 @@ import scala.concurrent.{ExecutionContext, Future}
 /**
  *
  * @param elements Molecule model
- * @param limit    When going forward from start, use a positive number.
+ * @param optLimit When going forward from start, use a positive number.
  *                 And vice versa from end with a negative number. Can't be zero.
  * @param cursor   Base64 encoded cursor meta information
  * @tparam Tpl Type of each row
  */
 case class JdbcQueryResolveCursor[Tpl](
   elements: List[Element],
-  limit: Option[Int],
-  cursor: Option[String],
-  dbView: Option[DbView]
-) extends JdbcQueryResolve[Tpl](elements, dbView)
+  optLimit: Option[Int],
+  cursor: Option[String]
+) extends JdbcQueryResolve[Tpl](elements, optLimit, None)
   with FutureUtils
   with CursorUtils
   with ModelTransformations_
@@ -40,7 +39,7 @@ case class JdbcQueryResolveCursor[Tpl](
 
   def getListFromCursor_sync(implicit conn: JdbcConn_jvm)
   : (List[Tpl], String, Boolean) = {
-    limit match {
+    optLimit match {
       case Some(l) => cursor match {
         case Some("")     => getInitialPage(l)
         case Some(cursor) =>
@@ -52,9 +51,9 @@ case class JdbcQueryResolveCursor[Tpl](
             throw ModelError("Can only use cursor for un-modified query.")
           } else {
             strategy match {
-              case "1" => PrimaryUnique(elements, limit, cursor, dbView).getPage(tokens, l)
-              case "2" => SubUnique(elements, limit, cursor, dbView).getPage(tokens, l)
-              case "3" => NoUnique(elements, limit, cursor, dbView).getPage(tokens, l)
+              case "1" => PrimaryUnique(elements, optLimit, cursor).getPage(tokens, l)
+              case "2" => SubUnique(elements, optLimit, cursor).getPage(tokens, l)
+              case "3" => NoUnique(elements, optLimit, cursor).getPage(tokens, l)
             }
           }
         case None         => throw ModelError("Unexpected undefined cursor.")

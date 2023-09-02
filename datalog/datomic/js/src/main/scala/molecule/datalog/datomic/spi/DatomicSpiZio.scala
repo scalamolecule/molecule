@@ -24,7 +24,7 @@ trait DatomicSpiZio
     q: Query[Tpl]
   ): ZIO[Conn, MoleculeError, List[Tpl]] = {
     getResult((conn: DatomicConn_JS) =>
-      conn.rpc.query[Tpl](conn.proxy, q.elements, q.limit).future
+      conn.rpc.query[Tpl](conn.proxy, q.elements, q.optLimit).future
     )
   }
 
@@ -36,7 +36,7 @@ trait DatomicSpiZio
       conn = conn0.asInstanceOf[DatomicConn_JS]
     } yield {
       try {
-        conn.rpc.subscribe[Tpl](conn.proxy, q.elements, q.limit, callback)
+        conn.rpc.subscribe[Tpl](conn.proxy, q.elements, q.optLimit, callback)
       } catch {
         case e: MoleculeError => ZIO.fail(e)
         case e: Throwable     => ZIO.fail(ExecutionError(e.toString))
@@ -55,7 +55,7 @@ trait DatomicSpiZio
     q: QueryOffset[Tpl]
   ): ZIO[Conn, MoleculeError, (List[Tpl], Int, Boolean)] = {
     getResult((conn: DatomicConn_JS) =>
-      conn.rpc.queryOffset[Tpl](conn.proxy, q.elements, q.limit, q.offset).future
+      conn.rpc.queryOffset[Tpl](conn.proxy, q.elements, q.optLimit, q.offset).future
     )
   }
 
@@ -70,7 +70,7 @@ trait DatomicSpiZio
     q: QueryCursor[Tpl]
   ): ZIO[Conn, MoleculeError, (List[Tpl], String, Boolean)] = {
     getResult((conn: DatomicConn_JS) =>
-      conn.rpc.queryCursor[Tpl](conn.proxy, q.elements, q.limit, q.cursor).future
+      conn.rpc.queryCursor[Tpl](conn.proxy, q.elements, q.optLimit, q.cursor).future
     )
   }
 
