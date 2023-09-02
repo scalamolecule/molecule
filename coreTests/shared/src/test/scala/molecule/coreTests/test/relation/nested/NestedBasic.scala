@@ -26,7 +26,7 @@ trait NestedBasic extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync 
         ))
 
         // Optional nested data
-        _ <- A.s.Bb.*?(B.i.a1).query.get.map(_ ==> List(
+        _ <- A.s.a1.Bb.*?(B.i.a1).query.get.map(_ ==> List(
           ("a", List(1, 2)),
           ("b", Nil),
         ))

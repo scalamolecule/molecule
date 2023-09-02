@@ -44,11 +44,10 @@ trait Model extends Validations with Values {
     ns: String,
     refAttr: String,
     refNs: String = "",
-    card: Card = CardOne,
-    bidirectional: Boolean = false
+    card: Card = CardOne
   ) extends Element {
     override def toString: String = {
-      s"""Ref("$ns", "$refAttr", "$refNs", $card, $bidirectional)"""
+      s"""Ref("$ns", "$refAttr", "$refNs", $card)"""
     }
     def name = ns + "." + refAttr
   }

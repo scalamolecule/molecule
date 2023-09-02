@@ -68,10 +68,6 @@ import java.util.{Date, UUID}
  * @groupprio map 5
  * @groupname ref References
  * @groupprio ref 6
- * @groupname bi Bidirectional references
- * @groupprio bi 7
- * @groupname edge Bidirectional edge references
- * @groupprio edge 8
  * */
 object DataModelApi extends DataModelApi
 trait DataModelApi {

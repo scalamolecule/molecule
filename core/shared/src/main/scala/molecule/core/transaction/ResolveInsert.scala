@@ -56,27 +56,27 @@ class ResolveInsert extends InsertResolvers_ with InsertValidators_ { self: Inse
               }
           }
 
-        case Ref(ns, refAttr, refNs, card, _) =>
+        case Ref(ns, refAttr, refNs, card) =>
           prevRefs += refAttr
           val refResolver = addRef(ns, refAttr, refNs, card)
           resolve(nsMap, tail, resolvers :+ refResolver, outerTplIndex, tplIndex)
 
         case BackRef(backRefNs, _) =>
           tail.head match {
-            case Ref(_, refAttr, _, _, _) if prevRefs.contains(refAttr) => throw ModelError(
+            case Ref(_, refAttr, _, _) if prevRefs.contains(refAttr) => throw ModelError(
               s"Can't re-use previous namespace ${refAttr.capitalize} after backref _$backRefNs."
             )
-            case _                                                      => // ok
+            case _                                                   => // ok
           }
           val backRefResolver = addBackRef(backRefNs)
           resolve(nsMap, tail, resolvers :+ backRefResolver, outerTplIndex, tplIndex)
 
-        case Nested(Ref(ns, refAttr, refNs, _, _), nestedElements) =>
+        case Nested(Ref(ns, refAttr, refNs, _), nestedElements) =>
           prevRefs.clear()
           val nestedResolver = addNested(nsMap, tplIndex, ns, refAttr, refNs, nestedElements)
           resolve(nsMap, tail, resolvers :+ nestedResolver, 0, tplIndex)
 
-        case NestedOpt(Ref(ns, refAttr, refNs, _, _), nestedElements) =>
+        case NestedOpt(Ref(ns, refAttr, refNs, _), nestedElements) =>
           prevRefs.clear()
           val optNestedResolver = addNested(nsMap, tplIndex, ns, refAttr, refNs, nestedElements)
           resolve(nsMap, tail, resolvers :+ optNestedResolver, 0, tplIndex)

@@ -67,9 +67,5 @@ import molecule.base.api.DataModelApi
  * @groupprio map 5
  * @groupname ref References
  * @groupprio ref 6
- * @groupname bi Bidirectional references
- * @groupprio bi 7
- * @groupname edge Bidirectional edge references
- * @groupprio edge 8
  * */
 case class DataModel(maxArity: Int) extends DataModelApi

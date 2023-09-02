@@ -160,7 +160,7 @@ class Model2SqlQuery[Tpl](elements0: List[Element])
   final private def resolve(elements: List[Element]): Unit = elements match {
     case element :: tail => element match {
       case a: AttrOne                           =>
-        if(a.attr == "id" && a.filterAttr.nonEmpty || a.attr != "id" && a.filterAttr.exists(_.attr == "id"))
+        if (a.attr == "id" && a.filterAttr.nonEmpty || a.attr != "id" && a.filterAttr.exists(_.attr == "id"))
           throw ModelError(noIdFiltering)
         a match {
           case a: AttrOneMan => resolveAttrOneMan(a); resolve(tail)
@@ -187,7 +187,7 @@ class Model2SqlQuery[Tpl](elements0: List[Element])
 
 
   final private def resolveRef0(ref: Ref, tail: List[Element]): Unit = {
-    val Ref(_, refAttr, refNs, _, _) = ref
+    val Ref(_, refAttr, refNs, _) = ref
     exts(refNs) = exts.get(refNs).fold(Option.empty[String])(_ => Some("_" + refAttr))
     resolveRef(ref)
     resolve(tail)
@@ -201,7 +201,7 @@ class Model2SqlQuery[Tpl](elements0: List[Element])
     }
     validateRefNs(ref, nestedElements)
 
-    val Ref(_, refAttr, refNs, _, _) = ref
+    val Ref(_, refAttr, refNs, _) = ref
     exts(refNs) = exts.get(refNs).fold(Option.empty[String])(_ => Some("_" + refAttr))
     aritiesNested()
     resolveNestedRef(ref)
@@ -220,7 +220,7 @@ class Model2SqlQuery[Tpl](elements0: List[Element])
     }
     validateRefNs(nestedRef, nestedElements)
 
-    val Ref(_, refAttr, refNs, _, _) = nestedRef
+    val Ref(_, refAttr, refNs, _) = nestedRef
     exts(refNs) = exts.get(refNs).fold(Option.empty[String])(_ => Some("_" + refAttr))
     aritiesNested()
     resolveNestedOptRef(nestedRef)

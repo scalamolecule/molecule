@@ -10,13 +10,7 @@ trait ResolveRef[Tpl] { self: DatomicQueryBase with NestOpt_[Tpl] =>
 
   protected def resolveRef(es: List[Var], ref: Ref): List[Var] = {
     val (e, refAttr, refId) = (es.last, s":${ref.ns}/${ref.refAttr}", vv)
-    if (ref.bidirectional) {
-      where += s"(rule$e $e $refId)" -> wClause
-      rules += s"[(rule$e $e $refId) [$e $refAttr $refId]]"
-      rules += s"[(rule$e $e $refId) [$refId $refAttr $e]]"
-    } else {
-      where += s"[$e $refAttr $refId]" -> wClause
-    }
+    where += s"[$e $refAttr $refId]" -> wClause
     es :+ refId
   }
 
@@ -25,16 +19,8 @@ trait ResolveRef[Tpl] { self: DatomicQueryBase with NestOpt_[Tpl] =>
     firstId = refId
     val nestedId = "?id" + nestedIds.size
     nestedIds += nestedId
-    //    nestedIds += e
-    if (ref.bidirectional) {
-      where += s"[(identity $e) $nestedId]" -> wGround
-      where += s"(rule$e $e $refId)" -> wClause
-      rules += s"[(rule$e $e $refId) [$e $refAttr $refId]]"
-      rules += s"[(rule$e $e $refId) [$refId $refAttr $e]]"
-    } else {
-      where += s"[(identity $e) $nestedId]" -> wGround
-      where += s"[$e $refAttr $refId]" -> wClause
-    }
+    where += s"[(identity $e) $nestedId]" -> wGround
+    where += s"[$e $refAttr $refId]" -> wClause
     // Start new level of casts
     castss = castss :+ Nil
     sortNestedLevel()
@@ -53,8 +39,8 @@ trait ResolveRef[Tpl] { self: DatomicQueryBase with NestOpt_[Tpl] =>
   protected def resolveNestedOptRef(e: Var, nestedRef: Ref): Unit = {
     val nestedId = "?id" + nestedIds.size
     if (where.isEmpty) {
-      val Ref(ns, refAttrClean, _, _, _) = nestedRef
-      val (refAttr, refId)               = (s":$ns/$refAttrClean", vv)
+      val Ref(ns, refAttrClean, _, _) = nestedRef
+      val (refAttr, refId)            = (s":$ns/$refAttrClean", vv)
       where += s"[$e $refAttr $refId]" -> wClause
     }
     where += s"[(identity $e) $nestedId]" -> wGround

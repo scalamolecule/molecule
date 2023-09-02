@@ -67,7 +67,7 @@ class Model2DatomicQuery[Tpl](elements0: List[Element])
         case other       => other.toString
       }
     } else Nil
-    val queryStrs    = ((elements1 :+ "" :+ mainQuery) ++ inputsStrs ++ preQueryStrs).mkString("\n").trim
+    val queryStrs    = ((mainQuery +: inputsStrs) ++ preQueryStrs).mkString("\n").trim
     logger.debug(queryStrs)
 
     (preQuery, mainQuery, queryStrs)

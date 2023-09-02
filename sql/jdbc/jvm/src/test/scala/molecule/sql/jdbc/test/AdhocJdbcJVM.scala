@@ -28,7 +28,6 @@ object AdhocJdbcJVM extends JdbcTestSuite {
         id <- A.i(1).B.i(2).C.i(3).save.transact.map(_.id)
         _ <- A.i.B.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
 
-
       } yield ()
     }
 

@@ -110,7 +110,7 @@ trait JVMJdbcSpiBase extends ModelUtils {
           case _: AttrSetOpt => throw ModelError(s"Can't $update optional values. Found:\n" + a)
         }
 
-      case ref@Ref(_, _, _, CardOne, _) =>
+      case ref@Ref(_, _, _, CardOne) =>
         if (firstNs) {
           firstNs = false
           val tacitElements = updateModel.toList

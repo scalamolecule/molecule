@@ -40,8 +40,8 @@ class ResolveUpdate(
               }
           }
 
-        case r@Ref(_, _, _, CardOne, _) => handleRefNs(r); resolve(tail)
-        case br: BackRef                => handleBackRef(br); resolve(tail)
+        case r@Ref(_, _, _, CardOne) => handleRefNs(r); resolve(tail)
+        case br: BackRef             => handleBackRef(br); resolve(tail)
 
         case ref: Ref     => throw ModelError(
           s"Can't $update attributes in card-many referenced namespace `${ref.refAttr.capitalize}`"

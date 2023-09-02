@@ -26,7 +26,7 @@ object AdhocDatomicJVM extends DatomicTestSuite {
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
-        id <- A.i(1).B.i(2).C.i(3).save.transact.map(_.id)
+        id <- A.i.apply(1).B.i(2).C.i(3).save.transact.map(_.id)
         _ <- A.i.B.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
 
       } yield ()
@@ -94,10 +94,6 @@ object AdhocDatomicJVM extends DatomicTestSuite {
     //        //          ).forEach { r => println(r) }
     //        //        }
     //
-    //        // Bidirectional
-    //        //        _ <- A.i.a1.Self(bi).i.query.get.map(_ ==> List((1, 2), (2, 1)))
-    //        //        _ <- A.i(1).Self(bi).i.query.get.map(_ ==> List((1, 2)))
-    //        //        _ <- A.i(2).Self(bi).i.query.get.map(_ ==> List((2, 1)))
     //
     //      } yield ()
     //    }
