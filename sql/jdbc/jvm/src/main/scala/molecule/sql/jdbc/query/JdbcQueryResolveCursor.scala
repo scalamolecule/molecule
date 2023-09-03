@@ -31,10 +31,6 @@ case class JdbcQueryResolveCursor[Tpl](
   with MoleculeLogging {
 
 
-  //  def getListFromCursor_async(implicit conn: JdbcConn_jvm, ec: ExecutionContext)
-  //  : Future[(List[Tpl], String, Boolean)] = future(getListFromCursor_sync)
-
-
   def getListFromCursor_sync(implicit conn: JdbcConn_jvm)
   : (List[Tpl], String, Boolean) = {
     optLimit match {
@@ -65,7 +61,7 @@ case class JdbcQueryResolveCursor[Tpl](
   : (List[Tpl], String, Boolean) = {
     val forward      = limit > 0
     val altElements  = if (forward) elements else reverseTopLevelSorting(elements)
-    val sortedRows   = getRawData(conn, altElements, Some(limit), None)
+    val sortedRows   = getRawData(conn, altElements, Some(limit.abs), None)
     val flatRowCount = getRowCount(sortedRows)
 
     if (flatRowCount == 0) {

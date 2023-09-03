@@ -266,29 +266,15 @@ abstract class DatomicQueryResolve[Tpl](elements: List[Element], dbView: Option[
     var window = false
     var i      = 0
     var more   = 0
-    println("identifiers: " + identifiers)
-
     @tailrec
     def findFrom(identifiers: List[Any]): Unit = {
       identifiers match {
         case identifier :: remainingIdentifiers =>
-          println("identifier: " + identifier)
           sortedRows.forEach {
-            row =>
-              println("  identity(row): " + identity(sortedRows))
-
-              row match {
-                case row if window && i != count        => i += 1; tuples += row2tpl(row)
-                case row if identify(row) == identifier => window = true
-                case _                                  => if (window) more += 1
-              }
+            case row if window && i != count        => i += 1; tuples += row2tpl(row)
+            case row if identify(row) == identifier => window = true
+            case _                                  => if (window) more += 1
           }
-
-//          sortedRows.forEach {
-//            case row if window && i != count        => i += 1; tuples += row2tpl(row)
-//            case row if identify(row) == identifier => window = true
-//            case _                                  => if (window) more += 1
-//          }
           if (tuples.isEmpty) {
             // Recursively try with next identifier
             findFrom(remainingIdentifiers)

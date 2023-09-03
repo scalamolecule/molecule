@@ -10,5 +10,4 @@ object MutationAdd extends MutationAdd with CoreTestAsync
 object MutationDelete extends MutationDelete with CoreTestAsync
 object Nested extends Nested with CoreTestAsync
 object NestedOpt extends NestedOpt with CoreTestAsync
-object TypesFilterAttr extends TypesFilterAttr with CoreTestAsync
 object TypesUniqueValue extends TypesUniqueValue with CoreTestAsync

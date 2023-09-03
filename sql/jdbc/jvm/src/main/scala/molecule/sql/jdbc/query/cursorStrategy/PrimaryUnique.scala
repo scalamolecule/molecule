@@ -37,7 +37,7 @@ case class PrimaryUnique[Tpl](
     val (fn, v)      = if (forward) (Gt, z) else (Lt, a)
     val filterAttr   = getFilterAttr(tpe, ns, attr, fn, v)
     val altElements  = filterAttr +: (if (forward) elements else reverseTopLevelSorting(elements))
-    val sortedRows   = getRawData(conn, altElements, Some(limit), None)
+    val sortedRows   = getRawData(conn, altElements, Some(limit.abs), None)
     val flatRowCount = getRowCount(sortedRows)
 
     if (flatRowCount == 0) {

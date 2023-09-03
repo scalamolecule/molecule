@@ -7,3 +7,4 @@ object Directions extends Directions with CoreTestAsync
 object MutationAdd extends MutationAdd with CoreTestAsync
 object MutationDelete extends MutationDelete with CoreTestAsync
 object Nested extends Nested with CoreTestAsync
+object TypesFilterAttr extends TypesFilterAttr with CoreTestAsync
