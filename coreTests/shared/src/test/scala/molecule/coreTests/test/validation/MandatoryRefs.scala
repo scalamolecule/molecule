@@ -20,21 +20,21 @@ trait MandatoryRefs extends CoreTestSuite with ApiAsyncImplicits with Serializat
       for {
         _ <- MandatoryRefB.i(1).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ModelError(error) =>
-            error ==>
-              """Missing/empty mandatory references:
-                |  MandatoryRefB.refB pointing to namespace RefB
-                |""".stripMargin
-        }
+            case ModelError(error) =>
+              error ==>
+                """Missing/empty mandatory references:
+                  |  MandatoryRefB.refB pointing to namespace RefB
+                  |""".stripMargin
+          }
         // Same error for inserts
         _ <- MandatoryRefB.i.insert(1).transact
           .map(_ ==> "Unexpected success").recover {
-          case ModelError(error) =>
-            error ==>
-              """Missing/empty mandatory references:
-                |  MandatoryRefB.refB pointing to namespace RefB
-                |""".stripMargin
-        }
+            case ModelError(error) =>
+              error ==>
+                """Missing/empty mandatory references:
+                  |  MandatoryRefB.refB pointing to namespace RefB
+                  |""".stripMargin
+          }
 
         // Adding ref id satisfy mandatory requirement
         refBid <- RefB.i(2).save.transact.map(_.id)
@@ -51,12 +51,12 @@ trait MandatoryRefs extends CoreTestSuite with ApiAsyncImplicits with Serializat
         // Ref A still has unset mandatory ref to RefB
         _ <- MandatoryRefAB.i(1).RefA.i(2).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ModelError(error) =>
-            error ==>
-              """Missing/empty mandatory references:
-                |  RefA.refB pointing to namespace RefB
-                |""".stripMargin
-        }
+            case ModelError(error) =>
+              error ==>
+                """Missing/empty mandatory references:
+                  |  RefA.refB pointing to namespace RefB
+                  |""".stripMargin
+          }
 
         // Adding ref id satisfy mandatory requirement
         refBid <- RefB.i(3).save.transact.map(_.id)
@@ -72,12 +72,12 @@ trait MandatoryRefs extends CoreTestSuite with ApiAsyncImplicits with Serializat
       for {
         _ <- MandatoryRefsB.i(1).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ModelError(error) =>
-            error ==>
-              """Missing/empty mandatory references:
-                |  MandatoryRefsB.refsB pointing to namespace RefB
-                |""".stripMargin
-        }
+            case ModelError(error) =>
+              error ==>
+                """Missing/empty mandatory references:
+                  |  MandatoryRefsB.refsB pointing to namespace RefB
+                  |""".stripMargin
+          }
 
         // Adding ref id satisfy mandatory requirement
         refBid <- RefB.i(2).save.transact.map(_.id)
@@ -94,12 +94,12 @@ trait MandatoryRefs extends CoreTestSuite with ApiAsyncImplicits with Serializat
         // Ref A still has unset mandatory ref to RefB
         _ <- MandatoryRefsAB.i(1).RefsA.i(2).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ModelError(error) =>
-            error ==>
-              """Missing/empty mandatory references:
-                |  RefA.refB pointing to namespace RefB
-                |""".stripMargin
-        }
+            case ModelError(error) =>
+              error ==>
+                """Missing/empty mandatory references:
+                  |  RefA.refB pointing to namespace RefB
+                  |""".stripMargin
+          }
 
         // Adding ref id satisfy mandatory requirement
         refBid <- RefB.i(3).save.transact.map(_.id)
@@ -117,12 +117,12 @@ trait MandatoryRefs extends CoreTestSuite with ApiAsyncImplicits with Serializat
 
         _ <- MandatoryRefB(id).refB().update.transact
           .map(_ ==> "Unexpected success").recover {
-          case ModelError(error) =>
-            error ==>
-              """Can't delete mandatory attributes (or remove last values of card-many attributes):
-                |  MandatoryRefB.refB
-                |""".stripMargin
-        }
+            case ModelError(error) =>
+              error ==>
+                """Can't delete mandatory attributes (or remove last values of card-many attributes):
+                  |  MandatoryRefB.refB
+                  |""".stripMargin
+          }
       } yield ()
     }
 
@@ -139,47 +139,55 @@ trait MandatoryRefs extends CoreTestSuite with ApiAsyncImplicits with Serializat
         // Can't remove the last value of a mandatory attribute Set of refs
         _ <- MandatoryRefsB(id).refsB.remove(r1).update.transact
           .map(_ ==> "Unexpected success").recover {
-          case ModelError(error) =>
-            error ==>
-              """Can't delete mandatory attributes (or remove last values of card-many attributes):
-                |  MandatoryRefsB.refsB
-                |""".stripMargin
-        }
+            case ModelError(error) =>
+              error ==>
+                """Can't delete mandatory attributes (or remove last values of card-many attributes):
+                  |  MandatoryRefsB.refsB
+                  |""".stripMargin
+          }
       } yield ()
     }
 
 
+    // todo? This is easily done with Datomic. But from sql it seems that one would have to
+    //  - check every known table having a reference to the ns which, or
+    //  - create some trigger on delete if possible? That would be much better to having the
+    //    db server automatically preventing orphaning mandatory relationships.
+    // So for now, this test is not implemented for Datomic.
+
     "Deleting mandatory ref" - validation { implicit conn =>
-      for {
-        List(e1, r1) <- MandatoryRefB.i(1).RefB.i(1).save.transact.map(_.ids)
+      if (platform.startsWith("Datomic")) {
+        for {
+          List(e1, r1) <- MandatoryRefB.i(1).RefB.i(1).save.transact.map(_.ids)
 
-        // Can't delete r1 since MandatoryRefB.refB is referencing it and is mandatory
-        _ <- RefB(r1).delete.transact
-          .map(_ ==> "Unexpected success").recover {
-          case ExecutionError(err) =>
-            err ==>
-              s"""Can't delete entities referenced by mandatory ref attributes of other entities:
-                 |  MandatoryRefB.refB: List($e1)
-                 |""".stripMargin
-        }
+          // Can't delete r1 since MandatoryRefB.refB is referencing it and is mandatory
+          _ <- RefB(r1).delete.transact
+            .map(_ ==> "Unexpected success").recover {
+              case ExecutionError(err) =>
+                err ==>
+                  s"""Can't delete entities referenced by mandatory ref attributes of other entities:
+                     |  MandatoryRefB.refB: List($e1)
+                     |""".stripMargin
+            }
 
-        // Let's add two other entities referencing RefB too
-        List(e2, e3) <- MandatoryRefsB.i.refsB.insert(
-          (4, Set(r1)),
-          (5, Set(r1)),
-        ).transact.map(_.ids)
+          // Let's add two other entities referencing RefB too
+          List(e2, e3) <- MandatoryRefsB.i.refsB.insert(
+            (4, Set(r1)),
+            (5, Set(r1)),
+          ).transact.map(_.ids)
 
-        // Now 3 entities would be rendered invalid if we deleted r1
-        _ <- RefB(r1).delete.transact
-          .map(_ ==> "Unexpected success").recover {
-          case ExecutionError(error) =>
-            error ==>
-              s"""Can't delete entities referenced by mandatory ref attributes of other entities:
-                 |  MandatoryRefB.refB: List($e1)
-                 |  MandatoryRefsB.refsB: List($e2, $e3)
-                 |""".stripMargin
-        }
-      } yield ()
+          // Now 3 entities would be rendered invalid if we deleted r1
+          _ <- RefB(r1).delete.transact
+            .map(_ ==> "Unexpected success").recover {
+              case ExecutionError(error) =>
+                error ==>
+                  s"""Can't delete entities referenced by mandatory ref attributes of other entities:
+                     |  MandatoryRefB.refB: List($e1)
+                     |  MandatoryRefsB.refsB: List($e2, $e3)
+                     |""".stripMargin
+            }
+        } yield ()
+      }
     }
   }
 }

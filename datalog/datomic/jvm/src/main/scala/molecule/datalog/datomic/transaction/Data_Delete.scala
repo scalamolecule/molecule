@@ -18,7 +18,7 @@ trait Data_Delete
     with MoleculeLogging
     with JavaConversions { self: ResolveDelete =>
 
-  def getStmtsData(
+  def getData(
     conn: DatomicConn_JVM,
     elements: List[Element],
     idIndex: Int = 0,

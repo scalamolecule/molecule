@@ -121,7 +121,7 @@ object DatomicRpcJVM extends MoleculeRpc
   ): Future[Either[MoleculeError, TxReport]] = either {
     for {
       conn <- getConn(proxy)
-      stmts = (new ResolveDelete with Data_Delete).getStmtsData(conn, elements)
+      stmts = (new ResolveDelete with Data_Delete).getData(conn, elements)
       txReport <- conn.transact_async(stmts)
     } yield txReport
   }

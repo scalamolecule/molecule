@@ -1,51 +1,82 @@
 package molecule.sql.jdbc.spi
 
+import java.net.URI
+import java.sql.{ResultSet => RS}
+import java.util.{Date, UUID}
 import molecule.base.ast.SchemaAST.CardOne
-import molecule.base.error.ModelError
-import molecule.boilerplate
-import molecule.boilerplate.ast
-import molecule.boilerplate.ast.Model
+import molecule.base.error.{ExecutionError, ModelError, MoleculeError}
 import molecule.boilerplate.ast.Model._
-import molecule.core.action.{Query, Update}
+import molecule.core.action.Update
 import molecule.core.spi.Conn
 import molecule.core.util.ModelUtils
 import molecule.core.validation.ModelValidation
 import molecule.sql.jdbc.facade.JdbcConn_jvm
-import scala.collection.immutable.List
 import scala.collection.mutable.ListBuffer
 
 
 trait JVMJdbcSpiBase extends ModelUtils {
 
+
   def validateUpdate(conn0: Conn, update: Update): Map[String, Seq[String]] = {
-    val conn  = conn0.asInstanceOf[JdbcConn_jvm]
-    val proxy = conn.proxy
-    //    val db                                = conn.sqlConn.db()
-    //    val getCurSetValues: Attr => Set[Any] = (attr: Attr) => {
-    //      val a = s":${attr.ns}/${attr.attr}"
-    //      try {
-    //        val curValues = Peer.q(s"[:find ?vs :where [_ $a ?vs]]", db)
-    //        if (curValues.isEmpty) {
-    //          throw ExecutionError(s"While checking to avoid removing the last values of mandatory " +
-    //            s"attribute ${attr.ns}.${attr.attr} the current Set of values couldn't be found.")
-    //        }
-    //        val vs = ListBuffer.empty[Any]
-    //        curValues.forEach(row => vs.addOne(row.get(0)))
-    //        vs.toSet
-    //      } catch {
-    //        case e: MoleculeError => throw e
-    //        case t: Throwable     => throw ExecutionError(
-    //          s"Unexpected error trying to find current values of mandatory attribute ${attr.name}")
-    //      }
-    //    }
-    ModelValidation(
-      proxy.nsMap,
-      proxy.attrMap,
-      "update",
-      //      Some(getCurSetValues)
-      None
-    ).validate(update.elements)
+    val conn                              = conn0.asInstanceOf[JdbcConn_jvm]
+    val proxy                             = conn.proxy
+    val getCurSetValues: Attr => Set[Any] = (attr: Attr) => try {
+      val (query, getValue) = resolveValueGetter(attr)
+      val ps                = conn.sqlConn.prepareStatement(query, RS.TYPE_SCROLL_INSENSITIVE, RS.CONCUR_READ_ONLY)
+      val resultSet         = ps.executeQuery()
+      resultSet.next()
+      getValue(resultSet)
+    } catch {
+      case e: MoleculeError => throw e
+      case t: Throwable     =>
+        t.printStackTrace()
+        throw ExecutionError(
+          s"Unexpected error trying to find current values of mandatory attribute ${attr.name}")
+    }
+    ModelValidation(proxy.nsMap, proxy.attrMap, "update", Some(getCurSetValues)).validate(update.elements)
   }
+
+  private def resolveValueGetter(a: Attr): (String, RS => Set[Any]) = {
+    val ns       = a.ns
+    val attr     = a.attr
+    val query    = a.refNs.fold(
+      s"""SELECT DISTINCT
+         |  ARRAY_AGG($ns.$attr)
+         |FROM $ns
+         |WHERE
+         |  $ns.$attr IS NOT NULL
+         |HAVING COUNT(*) > 0;""".stripMargin
+
+    ) { refNs =>
+      val joinTable = s"${ns}_${attr}_$refNs"
+      s"""SELECT DISTINCT
+         |  ARRAY_AGG($joinTable.${refNs}_id)
+         |FROM $ns
+         |INNER JOIN $joinTable ON $ns.id = $joinTable.${ns}_id
+         |GROUP BY $ns.id;""".stripMargin
+    }
+    val getValue = a match {
+      case _: AttrSetManString     => nestedArray2coalescedSetString
+      case _: AttrSetManInt        => nestedArray2coalescedSetInt
+      case _: AttrSetManLong       => nestedArray2coalescedSetLong
+      case _: AttrSetManFloat      => nestedArray2coalescedSetFloat
+      case _: AttrSetManDouble     => nestedArray2coalescedSetDouble
+      case _: AttrSetManBoolean    => nestedArray2coalescedSetBoolean
+      case _: AttrSetManBigInt     => nestedArray2coalescedSetBigInt
+      case _: AttrSetManBigDecimal => nestedArray2coalescedSetBigDecimal
+      case _: AttrSetManDate       => nestedArray2coalescedSetDate
+      case _: AttrSetManUUID       => nestedArray2coalescedSetUUID
+      case _: AttrSetManURI        => nestedArray2coalescedSetURI
+      case _: AttrSetManByte       => nestedArray2coalescedSetByte
+      case _: AttrSetManShort      => nestedArray2coalescedSetShort
+      case _: AttrSetManChar       => nestedArray2coalescedSetChar
+      case other                   => throw ModelError(
+        "Unexpected attribute type for Set validation value retriever:\n" + other
+      )
+    }
+    (query, getValue)
+  }
+
 
   def prepareMultipleUpdates(
     elements: List[Element],
@@ -150,4 +181,50 @@ trait JVMJdbcSpiBase extends ModelUtils {
 
     (idsModel.toList, updateModels)
   }
+
+
+  private def sqlNestedArrays2coalescedSet[T](row: RS, j2s: Any => T): Set[T] = {
+    val array = row.getArray(1)
+    if (row.wasNull()) {
+      Set.empty[T]
+    } else {
+      val outerArrayResultSet = array.getResultSet
+      var set                 = Set.empty[T]
+      while (outerArrayResultSet.next()) {
+        outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]].foreach { value =>
+          set += j2s(value)
+        }
+      }
+      set
+    }
+  }
+  private lazy val j2String    : Any => String     = (v: Any) => v.asInstanceOf[String]
+  private lazy val j2Int       : Any => Int        = (v: Any) => v.toString.toInt
+  private lazy val j2Long      : Any => Long       = (v: Any) => v.asInstanceOf[Long]
+  private lazy val j2Float     : Any => Float      = (v: Any) => v.asInstanceOf[Float]
+  private lazy val j2Double    : Any => Double     = (v: Any) => v.asInstanceOf[Double]
+  private lazy val j2Boolean   : Any => Boolean    = (v: Any) => v.asInstanceOf[Boolean]
+  private lazy val j2BigInt    : Any => BigInt     = (v: Any) => BigInt(v.toString)
+  private lazy val j2BigDecimal: Any => BigDecimal = (v: Any) => BigDecimal(v.toString)
+  private lazy val j2Date      : Any => Date       = (v: Any) => v.asInstanceOf[Date]
+  private lazy val j2UUID      : Any => UUID       = (v: Any) => v.asInstanceOf[UUID]
+  private lazy val j2URI       : Any => URI        = (v: Any) => v.asInstanceOf[URI]
+  private lazy val j2Byte      : Any => Byte       = (v: Any) => v.asInstanceOf[Integer].toByte
+  private lazy val j2Short     : Any => Short      = (v: Any) => v.asInstanceOf[Integer].toShort
+  private lazy val j2Char      : Any => Char       = (v: Any) => v.asInstanceOf[String].charAt(0)
+
+  private lazy val nestedArray2coalescedSetString    : RS => Set[Any] = (rs: RS) => sqlNestedArrays2coalescedSet(rs, j2String)
+  private lazy val nestedArray2coalescedSetInt       : RS => Set[Any] = (rs: RS) => sqlNestedArrays2coalescedSet(rs, j2Int)
+  private lazy val nestedArray2coalescedSetLong      : RS => Set[Any] = (rs: RS) => sqlNestedArrays2coalescedSet(rs, j2Long)
+  private lazy val nestedArray2coalescedSetFloat     : RS => Set[Any] = (rs: RS) => sqlNestedArrays2coalescedSet(rs, j2Float)
+  private lazy val nestedArray2coalescedSetDouble    : RS => Set[Any] = (rs: RS) => sqlNestedArrays2coalescedSet(rs, j2Double)
+  private lazy val nestedArray2coalescedSetBoolean   : RS => Set[Any] = (rs: RS) => sqlNestedArrays2coalescedSet(rs, j2Boolean)
+  private lazy val nestedArray2coalescedSetBigInt    : RS => Set[Any] = (rs: RS) => sqlNestedArrays2coalescedSet(rs, j2BigInt)
+  private lazy val nestedArray2coalescedSetBigDecimal: RS => Set[Any] = (rs: RS) => sqlNestedArrays2coalescedSet(rs, j2BigDecimal)
+  private lazy val nestedArray2coalescedSetDate      : RS => Set[Any] = (rs: RS) => sqlNestedArrays2coalescedSet(rs, j2Date)
+  private lazy val nestedArray2coalescedSetUUID      : RS => Set[Any] = (rs: RS) => sqlNestedArrays2coalescedSet(rs, j2UUID)
+  private lazy val nestedArray2coalescedSetURI       : RS => Set[Any] = (rs: RS) => sqlNestedArrays2coalescedSet(rs, j2String).map(v => new URI(v))
+  private lazy val nestedArray2coalescedSetByte      : RS => Set[Any] = (rs: RS) => sqlNestedArrays2coalescedSet(rs, j2Byte)
+  private lazy val nestedArray2coalescedSetShort     : RS => Set[Any] = (rs: RS) => sqlNestedArrays2coalescedSet(rs, j2Short)
+  private lazy val nestedArray2coalescedSetChar      : RS => Set[Any] = (rs: RS) => sqlNestedArrays2coalescedSet(rs, j2Char)
 }

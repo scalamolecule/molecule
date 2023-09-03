@@ -6,13 +6,16 @@ import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.ResolveDelete
 import molecule.core.transaction.ops.DeleteOps
+import molecule.core.util.MetaModelUtils
 import molecule.sql.core.query.Model2SqlQuery
 import scala.annotation.tailrec
+import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
 trait Data_Delete
   extends JdbcBase_JVM
     with DeleteOps
+    with MetaModelUtils
     with MoleculeLogging { self: ResolveDelete =>
 
 
@@ -29,8 +32,7 @@ trait Data_Delete
 
 
   private def deleteTableData(refPath: List[String], nsMap: Map[String, MetaNs], ids: Seq[Long]): Data = {
-    val ns           = refPath.head
-    val table: Table = prepareTable(refPath, ns, s"$ns.id", ids)
+    val ns = refPath.head
 
     // Delete join rows matching deleted entities
     val joinTables: List[Table] = nsMap(ns).attrs
@@ -45,6 +47,7 @@ trait Data_Delete
     // Recursively delete owned entities
     val ownedTables = deleteOwned(refPath, nsMap, Seq(nsMap(ns)), Nil, ids)
 
+    val table: Table = prepareTable(refPath, ns, s"$ns.id", ids)
     ((table +: joinTables) ++ ownedTables, Nil)
   }
 
@@ -52,11 +55,10 @@ trait Data_Delete
   private def getIds: List[Long] = {
     val ns                    = getInitialNs(filterElements)
     val filterElementsWithIds = AttrOneManLong(ns, "id", V) +: filterElements
-
-    val query      = new Model2SqlQuery[Any](filterElementsWithIds).getSqlQuery(Nil, None, None)
-    val ps        = sqlConn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)
-    val resultSet = ps.executeQuery()
-    val ids       = ListBuffer.empty[Long]
+    val query                 = new Model2SqlQuery[Any](filterElementsWithIds).getSqlQuery(Nil, None, None)
+    val ps                    = sqlConn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)
+    val resultSet             = ps.executeQuery()
+    val ids                   = ListBuffer.empty[Long]
     while (resultSet.next()) {
       ids += resultSet.getLong(1)
     }

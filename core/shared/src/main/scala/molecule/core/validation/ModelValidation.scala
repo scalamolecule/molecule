@@ -25,7 +25,6 @@ case class ModelValidation(
   private var group           : Int                         = 0
   private var refPath         : Seq[String]                 = Seq.empty[String]
   private var prevNs          : String                      = ""
-  private var isTx            : Boolean                     = action == "insertTx"
   private var mandatoryAttrs  : Set[String]                 = Set.empty[String]
   private var mandatoryRefs   : Set[(String, String)]       = Set.empty[(String, String)]
   private var requiredAttrs   : Set[String]                 = Set.empty[String]
@@ -45,11 +44,6 @@ case class ModelValidation(
           val attr = a.name
           if (a.attr != "id") {
             register(a, attr)
-          }
-          if (isTx && isInsert && !(a.isInstanceOf[AttrOneTac] || a.isInstanceOf[AttrSetTac])) {
-            throw ModelError(
-              s"For inserts, tx meta data must be applied to tacit attributes, " +
-                s"like ${attr}_(<metadata>)")
           }
           checkPath(a, attr)
           val valueAttrErrors = if (a.valueAttrs.isEmpty) Nil else valueValidate(a)
@@ -120,9 +114,9 @@ case class ModelValidation(
     requiredAttrs ++= attrMap(attr)._3
     presentAttrs += a.attr
 
-    if (mandatoryAttrs.contains(attr))
+    if (mandatoryAttrs.contains(attr)) {
       registerMandatoryAttr(a, attr)
-
+    }
     if (mandatoryRefs.map(_._1).contains(attr))
       registerMandatoryRefAttr(a, attr)
   }
@@ -250,6 +244,7 @@ case class ModelValidation(
            |""".stripMargin
       )
     }
+
     if (isUpdate && deletingAttrs.nonEmpty) {
       throw ModelError(
         s"""Can't delete mandatory attributes (or remove last values of card-many attributes):
@@ -278,15 +273,11 @@ case class ModelValidation(
       if (
         (a.op == V || a.op == Eq) && deletingAttr(a)
           || a.op == Remove && getCurSetValues.nonEmpty && removingLastValue(a, getCurSetValues.get(a))
-      //          || a.op == Remove && removingLastValue(a, getCurSetValues.get(a))
       ) {
         // Wrongfully trying to delete mandatory attr - add to watchlist
         deletingAttrs += attr
       }
-    } else if (
-      (a.isInstanceOf[Mandatory] || isTx)
-        && !(a.isInstanceOf[AttrSet] && a.op == Eq && deletingAttr(a))
-    ) {
+    } else if (a.isInstanceOf[Mandatory] && !(a.isInstanceOf[AttrSet] && a.op == Eq && deletingAttr(a))) {
       // Mandatory attribute is ok - remove from watchlist
       mandatoryAttrs -= attr
     }
@@ -301,10 +292,7 @@ case class ModelValidation(
         // Wrongfully trying to delete mandatory attr - add to watchlist
         deletingAttrs += attr
       }
-    } else if (
-      (a.isInstanceOf[Mandatory] || isTx)
-        && !(a.isInstanceOf[AttrSet] && a.op == Eq && deletingAttr(a))
-    ) {
+    } else if (a.isInstanceOf[Mandatory] && !(a.isInstanceOf[AttrSet] && a.op == Eq && deletingAttr(a))) {
       // Mandatory attribute is ok - remove from watchlist
       mandatoryRefs = mandatoryRefs.filterNot(_._1 == attr)
     }

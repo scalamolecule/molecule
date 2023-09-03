@@ -163,7 +163,7 @@ trait DatomicSpiAsync
   }
 
   private def delete_getStmts(delete: Delete, conn: DatomicConn_JVM): Data = {
-    (new ResolveDelete with Data_Delete).getStmtsData(conn, delete.elements)
+    (new ResolveDelete with Data_Delete).getData(conn, delete.elements)
   }
 
 
