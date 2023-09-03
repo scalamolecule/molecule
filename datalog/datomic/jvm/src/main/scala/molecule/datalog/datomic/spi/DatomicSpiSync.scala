@@ -1,7 +1,7 @@
 package molecule.datalog.datomic.spi
 
 import datomic.Peer
-import molecule.base.error.{InsertError, ModelError}
+import molecule.base.error.{InsertError, ModelError, MoleculeError}
 import molecule.boilerplate.ast.Model._
 import molecule.core.action._
 import molecule.core.spi.{Conn, PrintInspect, SpiSync, TxReport}
@@ -10,6 +10,7 @@ import molecule.datalog.core.query.Model2DatomicQuery
 import molecule.datalog.datomic.facade.DatomicConn_JVM
 import molecule.datalog.datomic.query.{DatomicQueryResolveCursor, DatomicQueryResolveOffset}
 import molecule.datalog.datomic.subscription.SubscriptionStarter
+import zio.ZIO
 import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.global
 import scala.concurrent.duration.DurationInt
@@ -18,6 +19,7 @@ object DatomicSpiSync extends DatomicSpiSync
 
 trait DatomicSpiSync
   extends SpiSync
+    with DatomicSpiZioBase
     with SubscriptionStarter
     with PrintInspect
     with FutureUtils
@@ -28,11 +30,13 @@ trait DatomicSpiSync
     DatomicQueryResolveOffset[Tpl](q.elements, q.optLimit, None, q.dbView)
       .getListFromOffset_sync(conn.asInstanceOf[DatomicConn_JVM])._1
   }
+
   override def query_subscribe[Tpl](q: Query[Tpl], callback: List[Tpl] => Unit)(implicit conn: Conn): Unit = {
     val datomicConn = conn.asInstanceOf[DatomicConn_JVM]
     DatomicQueryResolveOffset[Tpl](q.elements, q.optLimit, None, q.dbView)
       .subscribe(datomicConn, getWatcher(datomicConn), callback)
   }
+
   override def query_inspect[Tpl](q: Query[Tpl])(implicit conn: Conn): Unit = {
     printInspectQuery("QUERY", q.elements)
   }
@@ -42,6 +46,7 @@ trait DatomicSpiSync
     DatomicQueryResolveOffset[Tpl](q.elements, q.optLimit, Some(q.offset), q.dbView)
       .getListFromOffset_sync(conn.asInstanceOf[DatomicConn_JVM])
   }
+
   override def queryOffset_inspect[Tpl](q: QueryOffset[Tpl])(implicit conn: Conn): Unit = {
     printInspectQuery("QUERY (offset)", q.elements)
   }
@@ -94,14 +99,7 @@ trait DatomicSpiSync
   }
 
 
-  // Util
-
-  private def printInspectQuery(label: String, elements: List[Element]): Unit = {
-    val queries = new Model2DatomicQuery(elements).getDatomicQueries(true)._3
-    printInspect(label, elements, queries)
-    //    printInspect(label, elements)
-  }
-
+  // Fallbacks
 
   override def fallback_rawQuery(
     query: String,
@@ -125,5 +123,16 @@ trait DatomicSpiSync
     } catch {
       case t: Throwable => throw ModelError(t.toString)
     }
+  }
+
+
+  // Util
+
+  protected def sync2zio[T](query: DatomicConn_JVM => T): ZIO[Conn, MoleculeError, T] = {
+    for {
+      conn0 <- ZIO.service[Conn]
+      conn = conn0.asInstanceOf[DatomicConn_JVM]
+      result <- moleculeError(ZIO.attemptBlocking(query(conn)))
+    } yield result
   }
 }

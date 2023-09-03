@@ -5,14 +5,12 @@ import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.ops.ModelTransformations_
 import molecule.boilerplate.util.MoleculeLogging
-import molecule.core.marshalling.dbView.DbView
 import molecule.core.util.FutureUtils
-import molecule.datalog.core.query.cursor.CursorUtils
+import molecule.sql.core.query.cursor.CursorUtils
 import molecule.sql.jdbc.facade.JdbcConn_jvm
 import molecule.sql.jdbc.query.cursorStrategy.{NoUnique, PrimaryUnique, SubUnique}
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
-import scala.concurrent.{ExecutionContext, Future}
 
 /**
  *
@@ -26,22 +24,22 @@ case class JdbcQueryResolveCursor[Tpl](
   elements: List[Element],
   optLimit: Option[Int],
   cursor: Option[String]
-) extends JdbcQueryResolve[Tpl](elements, optLimit, None)
+) extends JdbcQueryResolve[Tpl](elements)
   with FutureUtils
   with CursorUtils
   with ModelTransformations_
   with MoleculeLogging {
 
 
-  def getListFromCursor_async(implicit conn: JdbcConn_jvm, ec: ExecutionContext)
-  : Future[(List[Tpl], String, Boolean)] = future(getListFromCursor_sync)
+  //  def getListFromCursor_async(implicit conn: JdbcConn_jvm, ec: ExecutionContext)
+  //  : Future[(List[Tpl], String, Boolean)] = future(getListFromCursor_sync)
 
 
   def getListFromCursor_sync(implicit conn: JdbcConn_jvm)
   : (List[Tpl], String, Boolean) = {
     optLimit match {
-      case Some(l) => cursor match {
-        case Some("")     => getInitialPage(l)
+      case Some(limit) => cursor match {
+        case Some("")     => getInitialPage(limit)
         case Some(cursor) =>
           val raw      = new String(Base64.getDecoder.decode(cursor))
           val tokens   = raw.split("\n").toList
@@ -51,71 +49,53 @@ case class JdbcQueryResolveCursor[Tpl](
             throw ModelError("Can only use cursor for un-modified query.")
           } else {
             strategy match {
-              case "1" => PrimaryUnique(elements, optLimit, cursor).getPage(tokens, l)
-              case "2" => SubUnique(elements, optLimit, cursor).getPage(tokens, l)
-              case "3" => NoUnique(elements, optLimit, cursor).getPage(tokens, l)
+              case "1" => PrimaryUnique(elements, optLimit, cursor).getPage(tokens, limit)
+              case "2" => SubUnique(elements, optLimit, cursor).getPage(tokens, limit)
+              case "3" => NoUnique(elements, optLimit, cursor).getPage(tokens, limit)
             }
           }
         case None         => throw ModelError("Unexpected undefined cursor.")
       }
-      case None    => throw ModelError("Please set limit to use cursor pagination.")
+      case None        => throw ModelError("Please set limit to use cursor pagination.")
     }
   }
 
 
   private def getInitialPage(limit: Int)(implicit conn: JdbcConn_jvm)
   : (List[Tpl], String, Boolean) = {
-    val forward     = limit > 0
-    val altElements = if (forward) elements else reverseTopLevelSorting(elements)
-    val rows        = getRawData(conn, altElements)
-    val sortedRows  = sortRows(rows)
-    logger.debug(sortedRows.toArray().mkString("\n"))
+    val forward      = limit > 0
+    val altElements  = if (forward) elements else reverseTopLevelSorting(elements)
+    val sortedRows   = getRawData(conn, altElements, Some(limit), None)
+    val flatRowCount = getRowCount(sortedRows)
 
-    //    if (isNested) {
-    //      val nestedRows    = rows2nested(sortedRows)
-    //      val toplevelCount = nestedRows.length
-    //      val limitAbs      = limit.abs.min(toplevelCount)
-    //      val hasMore       = limitAbs < toplevelCount
-    //      val selectedRows  = nestedRows.take(limitAbs)
-    //      val tpls          = if (forward) selectedRows else selectedRows.reverse
-    //      val cursor        = initialCursor(conn, tpls)
-    //      (tpls, cursor, hasMore)
-    //
-    //    } else {
-    //      val totalCount = rows.size
-    //      val limitAbs   = limit.abs.min(totalCount)
-    //      val hasMore    = limitAbs < totalCount
-    //      val tuples     = ListBuffer.empty[Tpl]
-    //
-    //      if (isNestedOpt) {
-    //        postAdjustPullCasts()
-    //        if (totalCount == 0) {
-    //          (Nil, "", false)
-    //        } else {
-    //          val selectedRows = sortedRows.subList(0, limitAbs)
-    //          selectedRows.forEach(row => tuples += pullRow2tpl(row))
-    //          val tpls   = if (forward) tuples.result() else tuples.result().reverse
-    //          val cursor = initialCursor(conn, tpls)
-    //          (tpls, cursor, hasMore)
-    //        }
-    //
-    //      } else {
-    //        postAdjustAritiess()
-    //        if (totalCount == 0) {
-    //          (Nil, "", false)
-    //        } else {
-    //          val row2tpl      = castRow2AnyTpl(aritiess.head, castss.head, 0, None)
-    //          val selectedRows = sortedRows.subList(0, limitAbs)
-    //          selectedRows.forEach(row => tuples += row2tpl(row).asInstanceOf[Tpl])
-    //          val tpls   = if (forward) tuples.result() else tuples.result().reverse
-    //          val cursor = initialCursor(conn, tpls)
-    //          (tpls, cursor, hasMore)
-    //        }
-    //      }
-    //    }
-    ???
+    if (flatRowCount == 0) {
+      (Nil, "", false)
+    } else {
+      if (isNested || isNestedOpt) {
+        val nestedRows    = if (isNested) rows2nested(sortedRows) else rows2nestedOpt(sortedRows)
+        val topLevelCount = nestedRows.length
+        val limitAbs      = limit.abs.min(topLevelCount)
+        val hasMore       = limitAbs < topLevelCount
+        val selectedRows  = nestedRows.take(limitAbs)
+        val tpls          = if (forward) selectedRows else selectedRows.reverse
+        val cursor        = initialCursor(conn, tpls)
+        (tpls, cursor, hasMore)
+
+      } else {
+        val totalCount = getTotalCount(conn)
+        val limitAbs   = limit.abs.min(totalCount)
+        val hasMore    = limitAbs < totalCount
+        val tuples     = ListBuffer.empty[Tpl]
+        val row2tpl    = castRow2AnyTpl(aritiess.head, castss.head, 1, None)
+        while (sortedRows.next()) {
+          tuples += row2tpl(sortedRows).asInstanceOf[Tpl]
+        }
+        val result = if (forward) tuples.result() else tuples.result().reverse
+        val cursor = initialCursor(conn, result)
+        (result, cursor, hasMore)
+      }
+    }
   }
-
 
   private def initialCursor(conn: JdbcConn_jvm, tpls: List[Tpl]): String = {
     val unique = conn.proxy.uniqueAttrs

@@ -1,4 +1,4 @@
-package molecule.datalog.core.query.cursor
+package molecule.sql.core.query.cursor
 
 import java.net.URI
 import java.util.{Date, UUID}

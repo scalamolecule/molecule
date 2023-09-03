@@ -23,14 +23,14 @@ import molecule.datalog.datomic.query.DatomicQueryResolve
  * Presumes that the row with the previous unique value hasn't been altered.
  *
  * @param elements Molecule model
- * @param limit    When going forward from start, use a positive number.
+ * @param optLimit    When going forward from start, use a positive number.
  *                 And vice versa from end with a negative number. Can't be zero.
  * @param cursor   Base64 encoded cursor meta information, including previous edge values.
  * @tparam Tpl Type of each row
  */
 case class SubUnique[Tpl](
   elements: List[Element],
-  limit: Option[Int],
+  optLimit: Option[Int],
   cursor: String,
   dbView: Option[DbView]
 ) extends DatomicQueryResolve[Tpl](elements, dbView)
@@ -51,7 +51,6 @@ case class SubUnique[Tpl](
 
     val identifyTpl = (tpl: Tpl) => tpl.asInstanceOf[Product].productElement(uniqueIndex)
     val identifyRow = (_: Boolean) => (row: Row) => row.get(uniqueIndex)
-
     paginateFromIdentifiers(
       conn,
       limit,

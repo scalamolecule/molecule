@@ -13,7 +13,7 @@ import molecule.datalog.datomic.query.DatomicQueryResolve
 
 case class NoUnique[Tpl](
   elements: List[Element],
-  limit: Option[Int],
+  optLimit: Option[Int],
   cursor: String,
   dbView: Option[DbView]
 ) extends DatomicQueryResolve[Tpl](elements, dbView)

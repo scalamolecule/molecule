@@ -2,7 +2,7 @@
 
 
 Normal restrictions of offset pagination and SQL databases:
-- gets slower and slower for large data sets
+- gets slower and slower the higher the offset is.
 
 
 
@@ -43,14 +43,14 @@ Scenarios with increasing challenges:
 
 
 Normal cursor restrictions:
-- Requires sorting on column(s) with unique values. Timestamps are only near-unique since multiple rows could have been transacted on the same millisecond (the minimum time unit of java.util-Date), so to be sorted correctly even timestamps would need additional data to ensure uniqueness and correct paging.
+- Requires sorting on column(s) with unique values. Timestamps are only near-unique since multiple rows could have been transacted on the same millisecond (the minimum time unit of java.util.Date), so to be sorted correctly even timestamps would need additional data to ensure uniqueness and correct paging.
 - An unchanged index on the sorted attributes should exist (I'm not sure if updates inbetween page loads are updating such an index in other systems, allowing changes to propagate to subsequent pages)
 - A cursor row can't be changed or deleted.
 - Has to be on "top level" to be unique in the output. Wouldn't be unique in output if it was in a joined table
 
 
 
-
+Requirements:
 - No rows should be duplicated or skipped on subsequent pages
 - No intrusion on domain model, no creation/updates of sorting indexes
 - Pagination should be generic to allow any molecule query sorted in any way on any attributes (!)

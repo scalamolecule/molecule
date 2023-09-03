@@ -96,18 +96,6 @@ trait JdbcSpiZio extends SpiZio with JdbcSpiZioBase {
     sync2zio[Unit]((conn: JdbcConn_jvm) => JdbcSpiSync.delete_inspect(delete)(conn))
   }
 
-
-  // Helpers
-
-  protected def sync2zio[T](query: JdbcConn_jvm => T): ZIO[Conn, MoleculeError, T] = {
-    for {
-      conn0 <- ZIO.service[Conn]
-      conn = conn0.asInstanceOf[JdbcConn_jvm]
-      result <- moleculeError(ZIO.attemptBlocking(query(conn)))
-    } yield result
-  }
-
-
   // Fallbacks
 
   override def fallback_rawQuery(
@@ -134,6 +122,18 @@ trait JdbcSpiZio extends SpiZio with JdbcSpiZioBase {
       result <- moleculeError(ZIO.attemptBlocking(
         JdbcSpiSync.fallback_rawTransact(txData, doPrint)(conn)
       ))
+    } yield result
+  }
+
+
+
+  // Helpers
+
+  protected def sync2zio[T](query: JdbcConn_jvm => T): ZIO[Conn, MoleculeError, T] = {
+    for {
+      conn0 <- ZIO.service[Conn]
+      conn = conn0.asInstanceOf[JdbcConn_jvm]
+      result <- moleculeError(ZIO.attemptBlocking(query(conn)))
     } yield result
   }
 }

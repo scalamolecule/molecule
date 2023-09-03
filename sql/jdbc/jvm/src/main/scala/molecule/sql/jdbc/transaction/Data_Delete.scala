@@ -53,8 +53,8 @@ trait Data_Delete
     val ns                    = getInitialNs(filterElements)
     val filterElementsWithIds = AttrOneManLong(ns, "id", V) +: filterElements
 
-    val stmt      = new Model2SqlQuery[Any](filterElementsWithIds).getSqlQuery(Nil)
-    val ps        = sqlConn.prepareStatement(stmt, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)
+    val query      = new Model2SqlQuery[Any](filterElementsWithIds).getSqlQuery(Nil, None, None)
+    val ps        = sqlConn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)
     val resultSet = ps.executeQuery()
     val ids       = ListBuffer.empty[Long]
     while (resultSet.next()) {

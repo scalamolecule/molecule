@@ -13,17 +13,17 @@ import scala.concurrent.{ExecutionContext, Future}
 
 /**
  * @param elements Molecule model
- * @param limit    When going forward from start, use a positive number.
+ * @param optLimit    When going forward from start, use a positive number.
  *                 And vice versa from end with a negative number. Can't be zero.
- * @param offset   Positive offset from start when going forwards,
+ * @param optOffset   Positive offset from start when going forwards,
  *                 negative offset from end when going backwards
  * @param dbView   Database with a time perspective (Datomic)
  * @tparam Tpl
  */
 case class DatomicQueryResolveOffset[Tpl](
   elements: List[Element],
-  limit: Option[Int],
-  offset: Option[Int],
+  optLimit: Option[Int],
+  optOffset: Option[Int],
   dbView: Option[DbView]
 ) extends DatomicQueryResolve[Tpl](elements, dbView)
   with FutureUtils
@@ -31,10 +31,10 @@ case class DatomicQueryResolveOffset[Tpl](
 
   // Handles both offset- and non-paginated results
   // returns (rows, total count, hasMore)
-  def getListFromOffset_async(implicit conn: DatomicConn_JVM, ec: ExecutionContext)
-  : Future[(List[Tpl], Int, Boolean)] = {
-    future(getListFromOffset_sync(conn))
-  }
+//  def getListFromOffset_async(implicit conn: DatomicConn_JVM, ec: ExecutionContext)
+//  : Future[(List[Tpl], Int, Boolean)] = {
+//    future(getListFromOffset_sync(conn))
+//  }
 
   // Datomic querying is synchronous
   def getListFromOffset_sync(implicit conn: DatomicConn_JVM): (List[Tpl], Int, Boolean) = {
@@ -44,9 +44,9 @@ case class DatomicQueryResolveOffset[Tpl](
   // Optional use of DB_AFTER for subscriptions
   def getListFromOffset_sync(altDb: Option[datomic.Database])(implicit conn: DatomicConn_JVM)
   : (List[Tpl], Int, Boolean) = {
-    lazy val limitSign  = limit.get >> 31
-    lazy val offsetSign = offset.get >> 31
-    if (offset.isDefined && limit.isDefined && limitSign != offsetSign) {
+    lazy val limitSign  = optLimit.get >> 31
+    lazy val offsetSign = optOffset.get >> 31
+    if (optOffset.isDefined && optLimit.isDefined && limitSign != offsetSign) {
       throw ModelError("Limit and offset should both be positive or negative.")
     }
     val rows       = getRawData(conn, altDb = altDb)
@@ -56,13 +56,13 @@ case class DatomicQueryResolveOffset[Tpl](
 
     if (isNested) {
       val nestedRows    = rows2nested(sortedRows)
-      val toplevelCount = nestedRows.length
-      val fromUntil     = getFromUntil(toplevelCount, limit, offset)
+      val topLevelCount = nestedRows.length
+      val fromUntil     = getFromUntil(topLevelCount, optLimit, optOffset)
       val hasMore       = fromUntil.fold(totalCount > 0)(_._3)
-      (offsetList(nestedRows, fromUntil), toplevelCount, hasMore)
+      (offsetList(nestedRows, fromUntil), topLevelCount, hasMore)
 
     } else {
-      val fromUntil = getFromUntil(totalCount, limit, offset)
+      val fromUntil = getFromUntil(totalCount, optLimit, optOffset)
       val hasMore   = fromUntil.fold(totalCount > 0)(_._3)
       val tuples    = ListBuffer.empty[Tpl]
 
@@ -90,7 +90,7 @@ case class DatomicQueryResolveOffset[Tpl](
     val allAttrIds   = conn.attrIds
     val queryAttrIds = elements.collect { case a: Attr => allAttrIds(a.name) }
     val dbCallBack   = (dbAfter: Database) => {
-      val freshResult: List[Tpl] = DatomicQueryResolveOffset[Tpl](elements, limit, None, None)
+      val freshResult: List[Tpl] = DatomicQueryResolveOffset[Tpl](elements, optLimit, None, None)
         .getListFromOffset_sync(Some(dbAfter))(conn)._1
       callback(freshResult)
     }

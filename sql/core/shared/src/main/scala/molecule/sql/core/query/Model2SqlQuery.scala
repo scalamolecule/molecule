@@ -10,26 +10,27 @@ import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 
 
-class Model2SqlQuery[Tpl](
-  elements0: List[Element],
-  optLimit: Option[Int] = None,
-  optOffset: Option[Int] = None
-) extends Model2Query
-  with ResolveExprOne[Tpl]
-  with ResolveExprSet[Tpl]
-  with ResolveExprSetRefAttr[Tpl]
-  with ResolveRef
-  with SqlQueryBase
-  with CastNestedBranch_
-  with CastRow2Tpl_
-  with Nest[Tpl]
-  with NestOpt[Tpl]
-  with LambdasOne
-  with LambdasSet
-  with ModelUtils
-  with MoleculeLogging {
+class Model2SqlQuery[Tpl](elements0: List[Element])
+  extends Model2Query
+    with ResolveExprOne[Tpl]
+    with ResolveExprSet[Tpl]
+    with ResolveExprSetRefAttr[Tpl]
+    with ResolveRef
+    with SqlQueryBase
+    with CastNestedBranch_
+    with CastRow2Tpl_
+    with Nest[Tpl]
+    with NestOpt[Tpl]
+    with LambdasOne
+    with LambdasSet
+    with ModelUtils
+    with MoleculeLogging {
 
-  final def getSqlQuery(altElements: List[Element], isNested: Boolean = false): String = {
+  final def getSqlQuery(
+    altElements: List[Element],
+    optLimit: Option[Int],
+    optOffset: Option[Int]
+  ): String = {
     val elements = if (altElements.isEmpty) elements0 else altElements
     validateQueryModel(elements)
     //    elements.foreach(println)
@@ -41,10 +42,13 @@ class Model2SqlQuery[Tpl](
 
     // Recursively resolve molecule elements
     resolve(elements1)
-    renderSqlQuery
+    renderSqlQuery(optLimit, optOffset)
   }
 
-  final private def renderSqlQuery: String = {
+  final private def renderSqlQuery(
+    optLimit: Option[Int],
+    optOffset: Option[Int]
+  ): String = {
     val distinct_ = if (distinct) " DISTINCT" else ""
     val select_   = (nestedIds ++ select).mkString(s",\n  ")
 

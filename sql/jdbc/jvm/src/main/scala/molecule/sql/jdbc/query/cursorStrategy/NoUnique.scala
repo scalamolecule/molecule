@@ -4,9 +4,8 @@ import java.util.Base64
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
-import molecule.core.marshalling.dbView.DbView
 import molecule.core.util.FutureUtils
-import molecule.datalog.core.query.cursor.CursorUtils
+import molecule.sql.core.query.cursor.CursorUtils
 import molecule.sql.jdbc.facade.JdbcConn_jvm
 import molecule.sql.jdbc.query.JdbcQueryResolve
 
@@ -15,7 +14,7 @@ case class NoUnique[Tpl](
   elements: List[Element],
   optLimit: Option[Int],
   cursor: String
-) extends JdbcQueryResolve[Tpl](elements, optLimit, None)
+) extends JdbcQueryResolve[Tpl](elements)
   with FutureUtils with CursorUtils with MoleculeLogging {
 
   def getPage(allTokens: List[String], limit: Int)

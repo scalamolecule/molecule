@@ -23,12 +23,11 @@ case class JdbcQueryResolveOffset[Tpl](
   elements: List[Element],
   optLimit: Option[Int],
   optOffset: Option[Int]
-) extends JdbcQueryResolve[Tpl](elements, optLimit, optOffset)
+) extends JdbcQueryResolve[Tpl](elements)
   with FutureUtils
   with MoleculeLogging {
 
-  lazy val isBackwards = optLimit.isDefined && optLimit.get < 0 || optOffset.isDefined && optOffset.get < 0
-
+  lazy val forward = optLimit.fold(true)(_ >= 0) && optOffset.fold(true)(_ >= 0)
 
   def getListFromOffset_sync(implicit conn: JdbcConn_jvm)
   : (List[Tpl], Int, Boolean) = {
@@ -37,27 +36,24 @@ case class JdbcQueryResolveOffset[Tpl](
     if (optOffset.isDefined && optLimit.isDefined && limitSign != offsetSign) {
       throw ModelError("Limit and offset should both be positive or negative.")
     }
-    val sortedRows: Row = getData(conn)
-    //    println("sortedRows : " + sortedRows)
-    //    println("total count: " + totalCount)
-
+    val sortedRows = getData(conn, optLimit, optOffset)
     if (isNested) {
       val totalCount    = getRowCount(sortedRows)
       val nestedRows0   = rows2nested(sortedRows)
-      val nestedRows    = if (isBackwards) nestedRows0.reverse else nestedRows0
-      val toplevelCount = nestedRows.length
-      val fromUntil     = getFromUntil(toplevelCount, optLimit, optOffset)
+      val nestedRows    = if (forward) nestedRows0 else nestedRows0.reverse
+      val topLevelCount = nestedRows.length
+      val fromUntil     = getFromUntil(topLevelCount, optLimit, optOffset)
       val hasMore       = fromUntil.fold(totalCount > 0)(_._3)
-      (offsetList(nestedRows, fromUntil), toplevelCount, hasMore)
+      (offsetList(nestedRows, fromUntil), topLevelCount, hasMore)
 
     } else if (isNestedOpt) {
       val totalCount    = optOffset.fold(getRowCount(sortedRows))(_ => getTotalCount(conn))
-      val nestedRows0    = rows2nestedOpt(sortedRows)
-      val nestedRows    = if (isBackwards) nestedRows0.reverse else nestedRows0
-      val toplevelCount = nestedRows.length
-      val fromUntil     = getFromUntil(toplevelCount, optLimit, optOffset)
+      val nestedRows0   = rows2nestedOpt(sortedRows)
+      val nestedRows    = if (forward) nestedRows0 else nestedRows0.reverse
+      val topLevelCount = nestedRows.length
+      val fromUntil     = getFromUntil(topLevelCount, optLimit, optOffset)
       val hasMore       = fromUntil.fold(totalCount > 0)(_._3)
-      (offsetList(nestedRows, fromUntil), toplevelCount, hasMore)
+      (offsetList(nestedRows, fromUntil), topLevelCount, hasMore)
 
     } else {
       val totalCount = optOffset.fold(getRowCount(sortedRows))(_ => getTotalCount(conn))
@@ -68,7 +64,7 @@ case class JdbcQueryResolveOffset[Tpl](
       }
       val fromUntil = getFromUntil(totalCount, optLimit, optOffset)
       val hasMore   = fromUntil.fold(totalCount > 0)(_._3)
-      val result    = if (isBackwards) tuples.result().reverse else tuples.result()
+      val result    = if (forward) tuples.result() else tuples.result().reverse
       (result, totalCount, hasMore)
     }
   }

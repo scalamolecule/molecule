@@ -74,8 +74,8 @@ trait JdbcSpiSync
     optOffset: Option[Int]
   ): Unit = {
     tryInspect("query", elements) {
-      val queries = new Model2SqlQuery(elements, optLimit, optOffset).getSqlQuery(Nil) //._3
-      printInspect(label, elements, queries)
+      val query = new Model2SqlQuery(elements).getSqlQuery(Nil, optLimit, optOffset)
+      printInspect(label, elements, query)
     }
   }
 
@@ -170,7 +170,7 @@ trait JdbcSpiSync
           s"""REF IDS MODEL ----------------
              |${idsModel.mkString("\n")}
              |
-             |${new Model2SqlQuery(idsModel).getSqlQuery(Nil)}
+             |${new Model2SqlQuery(idsModel).getSqlQuery(Nil, None, None)}
              |""".stripMargin
         val updates                  =
           updateModels
@@ -289,7 +289,7 @@ trait JdbcSpiSync
            |
            |${idQuery.elements.mkString("\n")}
            |
-           |${new Model2SqlQuery(idQuery.elements).getSqlQuery(Nil)}
+           |${new Model2SqlQuery(idQuery.elements).getSqlQuery(Nil, None, None)}
            |""".stripMargin
       )
     ) {

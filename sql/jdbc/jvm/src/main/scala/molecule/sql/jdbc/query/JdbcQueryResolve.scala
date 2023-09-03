@@ -5,20 +5,16 @@ import java.util
 import java.util.{Collections, Comparator, ArrayList => jArrayList, Collection => jCollection, List => jList}
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
-import molecule.core.marshalling.dbView._
-import molecule.datalog.core.query.cursor.CursorUtils
 import molecule.sql.core.query.Model2SqlQuery
+import molecule.sql.core.query.cursor.CursorUtils
 import molecule.sql.jdbc.facade.JdbcConn_jvm
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 
 
-abstract class JdbcQueryResolve[Tpl](
-  elements: List[Element],
-  optLimit: Option[Int],
-  optOffset: Option[Int]
-) extends Model2SqlQuery[Tpl](elements, optLimit, optOffset)
-  with CursorUtils {
+abstract class JdbcQueryResolve[Tpl](elements: List[Element])
+  extends Model2SqlQuery[Tpl](elements)
+    with CursorUtils {
 
   lazy val edgeValuesNotFound = "Couldn't find next page. Edge rows were all deleted/updated."
 
@@ -45,8 +41,12 @@ abstract class JdbcQueryResolve[Tpl](
     }
   }
 
-  protected def getData(conn: JdbcConn_jvm, isNested: Boolean = false): ResultSet = {
-    getResultSet(conn, getSqlQuery(Nil))
+  protected def getData(
+    conn: JdbcConn_jvm,
+    optLimit: Option[Int],
+    optOffset: Option[Int]
+  ): ResultSet = {
+    getResultSet(conn, getSqlQuery(Nil, optLimit, optOffset))
   }
 
   protected def getTotalCount(conn: JdbcConn_jvm): Int = {
@@ -66,11 +66,12 @@ abstract class JdbcQueryResolve[Tpl](
 
   protected def getRawData(
     conn: JdbcConn_jvm,
-    altElements: List[Element] = Nil
-  ): jCollection[jList[AnyRef]] = {
-    //    val db = altDb.getOrElse(getDb(conn))
-    val query = getSqlQuery(altElements)
-    ???
+    altElements: List[Element],
+    optLimit: Option[Int],
+    optOffset: Option[Int]
+  ): ResultSet = {
+    val query = getSqlQuery(altElements, optLimit, optOffset)
+    getResultSet(conn, query)
   }
 
 
@@ -142,77 +143,83 @@ abstract class JdbcQueryResolve[Tpl](
     }
   }
 
-  //  lazy val row2AnyTpl = castRow2AnyTpl(aritiess.head, castss.head, 0, None)
-  //
-  //  def paginateFromIdentifiers(
-  //    conn: JdbcConn_jvm,
-  //    limit: Int,
-  //    forward: Boolean,
-  //    allTokens: List[String],
-  //    attrTokens: List[String],
-  //    identifiers: List[Any],
-  //    identifyTpl: Tpl => Any,
-  //    identifyRow: Boolean => Row => Any,
-  //    nextCursor: (List[Tpl], List[String]) => String
-  //  ): (List[Tpl], String, Boolean) = {
-  //    // Filter query by primary non-unique sort attribute
-  //    val filterAttr  = {
-  //      val List(_, dir, _, tpe, ns, attr, _, a, b, c, x, y, z) = attrTokens
-  //
-  //      // Filter by most inclusive value
-  //      val first   = List(c, b, a).filter(_.nonEmpty).head
-  //      val last    = List(x, y, z).filter(_.nonEmpty).head
-  //      val (fn, v) = (forward, dir) match {
-  //        case (true, "a") => (Ge, last)
-  //        case (true, _)   => (Le, first)
-  //        case (_, "a")    => (Le, first)
-  //        case (_, _)      => (Ge, last)
-  //      }
-  //      getFilterAttr(tpe, ns, attr, fn, v)
-  //    }
-  //    val altElements = filterAttr +: elements
-  //    val rows        = getRawData(conn, altElements)
-  //    val sortedRows  = sortRows(rows)
-  //    logger.debug(sortedRows.toArray().mkString("\n"))
-  //
-  //    if (sortedRows.size() == 0) {
-  //      (Nil, "", false)
-  //    } else {
-  //      if (isNested) {
-  //        val nestedTpls: List[Tpl] = ??? //rows2nested(sortedRows)
-  //        val totalCount            = nestedTpls.length
-  //        val count                 = getCount(limit, forward, totalCount)
-  //        val nestedTpls1           = if (forward) nestedTpls else nestedTpls.reverse
-  //        val (tuples, more)        = paginateTpls(count, nestedTpls1, identifiers, identifyTpl)
-  //        val tpls                  = if (forward) tuples else tuples.reverse
-  //        val cursor                = nextCursor(tpls, allTokens)
-  //        (tpls, cursor, more > 0)
-  //
-  //      } else {
-  //        val totalCount = rows.size
-  //        if (isNestedOpt) {
-  //          postAdjustPullCasts()
-  //          if (!forward) Collections.reverse(sortedRows)
-  //          val count          = getCount(limit, forward, totalCount)
-  //          //          val (tuples, more) = paginateRows(count, sortedRows, identifiers, identifyRow(true), pullRow2tpl)
-  //          val (tuples, more) = paginateRows(count, sortedRows, identifiers, identifyRow(true), null)
-  //          val tpls           = if (forward) tuples else tuples.reverse
-  //          val cursor         = nextCursor(tpls, allTokens)
-  //          (tpls, cursor, more > 0)
-  //
-  //        } else {
-  //          postAdjustAritiess()
-  //          if (!forward) Collections.reverse(sortedRows)
-  //          val count          = getCount(limit, forward, totalCount)
-  //          val row2tpl        = (row: Row) => row2AnyTpl(row).asInstanceOf[Tpl]
-  //          val (tuples, more) = paginateRows(count, sortedRows, identifiers, identifyRow(false), row2tpl)
-  //          val tpls           = if (forward) tuples else tuples.reverse
-  //          val cursor         = nextCursor(tpls, allTokens)
-  //          (tpls, cursor, more > 0)
-  //        }
-  //      }
-  //    }
+  //  protected def postAdjustPullCasts(): Unit = {
+  //    pullCastss = pullCastss :+ pullCasts.toList
+  //    pullSortss = pullSortss :+ pullSorts.sortBy(_._1).map(_._2).toList
   //  }
+  lazy val row2AnyTpl = castRow2AnyTpl(aritiess.head, castss.head, 0, None)
+
+  def paginateFromIdentifiers(
+    conn: JdbcConn_jvm,
+    limit: Int,
+    forward: Boolean,
+    allTokens: List[String],
+    attrTokens: List[String],
+    identifiers: List[Any],
+    identifyTpl: Tpl => Any,
+    identifyRow: Boolean => Row => Any,
+    nextCursor: (List[Tpl], List[String]) => String
+  ): (List[Tpl], String, Boolean) = {
+    // Filter query by primary non-unique sort attribute
+    val filterAttr   = {
+      val List(_, dir, _, tpe, ns, attr, _, a, b, c, x, y, z) = attrTokens
+
+      // Filter by most inclusive value
+      val first   = List(c, b, a).filter(_.nonEmpty).head
+      val last    = List(x, y, z).filter(_.nonEmpty).head
+      val (fn, v) = (forward, dir) match {
+        case (true, "a") => (Ge, last)
+        case (true, _)   => (Le, first)
+        case (_, "a")    => (Le, first)
+        case (_, _)      => (Ge, last)
+      }
+      getFilterAttr(tpe, ns, attr, fn, v)
+    }
+    val altElements  = filterAttr +: elements
+    val sortedRows   = getRawData(conn, altElements, Some(limit), None)
+    val flatRowCount = getRowCount(sortedRows)
+
+    if (flatRowCount == 0) {
+      (Nil, "", false)
+    } else {
+      if (isNested || isNestedOpt) {
+        //        val nestedTpls     = rows2nested(sortedRows)
+        //        val totalCount     = nestedTpls.length
+        //        val count          = getCount(limit, forward, totalCount)
+        //        val nestedTpls1    = if (forward) nestedTpls else nestedTpls.reverse
+        //        val (tuples, more) = paginateTpls(count, nestedTpls1, identifiers, identifyTpl)
+        //        val tpls           = if (forward) tuples else tuples.reverse
+        //        val cursor         = nextCursor(tpls, allTokens)
+        //        (tpls, cursor, more > 0)
+        ???
+
+      } else {
+        //        val totalCount = rows.size
+        //        val totalCount = flatRowCount
+        val totalCount     = getTotalCount(conn)
+        //        if (isNestedOpt) {
+        //          postAdjustPullCasts()
+        //          if (!forward) Collections.reverse(sortedRows)
+        //          val count          = getCount(limit, forward, totalCount)
+        //          //          val (tuples, more) = paginateRows(count, sortedRows, identifiers, identifyRow(true), pullRow2tpl)
+        //          val (tuples, more) = paginateRows(count, sortedRows, identifiers, identifyRow(true), null)
+        //          val tpls           = if (forward) tuples else tuples.reverse
+        //          val cursor         = nextCursor(tpls, allTokens)
+        //          (tpls, cursor, more > 0)
+        //
+        //        } else {
+        //          postAdjustAritiess()
+        //        if (!forward) Collections.reverse(sortedRows)
+        val count          = getCount(limit, forward, totalCount)
+        val row2tpl        = (row: Row) => row2AnyTpl(row).asInstanceOf[Tpl]
+        val (tuples, more) = paginateRows(count, sortedRows, identifiers, identifyRow(false), row2tpl)
+        val tpls           = if (forward) tuples else tuples.reverse
+        val cursor         = nextCursor(tpls, allTokens)
+        (tpls, cursor, more > 0)
+        //        }
+      }
+    }
+  }
 
   private def getCount(limit: Int, forward: Boolean, totalCount: Int) = {
     if (forward)
@@ -255,29 +262,36 @@ abstract class JdbcQueryResolve[Tpl](
 
   def paginateRows(
     count: Int,
-    sortedRows: jList[jList[AnyRef]],
+    sortedRows: ResultSet,
     identifiers: List[Any],
-    identify: Row => Any,
-    row2tpl: Row => Tpl,
+    identify: ResultSet => Any,
+    row2tpl: ResultSet => Tpl,
   ): (List[Tpl], Int) = {
     val tuples = ListBuffer.empty[Tpl]
     var window = false
     var i      = 0
     var more   = 0
-    //    @tailrec
+//    println("identifiers: " + identifiers)
+    @tailrec
     def findFrom(identifiers: List[Any]): Unit = {
       identifiers match {
-        case identifier :: remainingidentifiers =>
-          //          sortedRows.forEach {
-          //            case row if window && i != count        => i += 1; tuples += row2tpl(row)
-          //            case row if identify(row) == identifier => window = true
-          //            case _                                  => if (window) more += 1
-          //          }
-          //          if (tuples.isEmpty) {
-          //            // Recursively try with next identifier
-          //            findFrom(remainingidentifiers)
-          //          }
-          ???
+        case identifier :: remainingIdentifiers =>
+//          println("identifier: " + identifier)
+          while (sortedRows.next()) {
+
+//            println("  identity(row): " + identity(sortedRows))
+
+
+            sortedRows match {
+              case row if window && i != count        => i += 1; tuples += row2tpl(row)
+              case row if identify(row) == identifier => window = true
+              case _                                  => if (window) more += 1
+            }
+          }
+          if (tuples.isEmpty) {
+            // Recursively try with next identifier
+            findFrom(remainingIdentifiers)
+          }
 
         case Nil => throw ModelError(edgeValuesNotFound)
       }
@@ -285,6 +299,39 @@ abstract class JdbcQueryResolve[Tpl](
     findFrom(identifiers)
     (tuples.result(), more)
   }
+
+  //  def paginateRows2(
+  //    count: Int,
+  //    sortedRows: jList[jList[AnyRef]],
+  //    identifiers: List[Any],
+  //    identify: Row => Any,
+  //    row2tpl: Row => Tpl,
+  //  ): (List[Tpl], Int) = {
+  //    val tuples = ListBuffer.empty[Tpl]
+  //    var window = false
+  //    var i      = 0
+  //    var more   = 0
+  //    //    @tailrec
+  //    def findFrom(identifiers: List[Any]): Unit = {
+  //      identifiers match {
+  //        case identifier :: remainingIdentifiers =>
+  //          sortedRows.forEach {
+  //            case row if window && i != count        => i += 1; tuples += row2tpl(row)
+  //            case row if identify(row) == identifier => window = true
+  //            case _                                  => if (window) more += 1
+  //          }
+  //          if (tuples.isEmpty) {
+  //            // Recursively try with next identifier
+  //            findFrom(remainingIdentifiers)
+  //          }
+  //          ???
+  //
+  //        case Nil => throw ModelError(edgeValuesNotFound)
+  //      }
+  //    }
+  //    findFrom(identifiers)
+  //    (tuples.result(), more)
+  //  }
 
 
   //  def inspect(implicit conn0: DatomicConn_JVM, ec: ExecutionContext): Future[Unit] = {
