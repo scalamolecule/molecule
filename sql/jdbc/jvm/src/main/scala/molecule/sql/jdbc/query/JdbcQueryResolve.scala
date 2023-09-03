@@ -1,8 +1,6 @@
 package molecule.sql.jdbc.query
 
 import java.sql.ResultSet
-import java.util
-import java.util.{Collections, Comparator, ArrayList => jArrayList, Collection => jCollection, List => jList}
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.sql.core.query.Model2SqlQuery
@@ -71,61 +69,7 @@ abstract class JdbcQueryResolve[Tpl](elements: List[Element])
     optOffset: Option[Int]
   ): ResultSet = {
     val query = getSqlQuery(altElements, optLimit, optOffset)
-    //    println(query)
     getResultSet(conn, query)
-  }
-
-
-  private def distinct(rows: jCollection[jList[AnyRef]]): jCollection[jList[AnyRef]] = {
-    if (hasOptAttr)
-      new util.HashSet[jList[AnyRef]](rows)
-    else
-      rows
-  }
-
-
-  protected def sortRows(rows: jCollection[jList[AnyRef]]): jArrayList[jList[AnyRef]] = {
-    val sorters = getFlatSorters(sortss)
-    sorters.length match {
-      case 0 => new jArrayList(rows)
-      case n =>
-        val nestedIdsCount = nestedIds.length
-        val sortedRows     = new jArrayList(rows)
-        val comparator     = new Comparator[RowOLD] {
-          override def compare(a: RowOLD, b: RowOLD): Int = {
-            var i      = 0
-            var result = 0;
-            result = sorters(i)(nestedIdsCount)(a, b)
-            i += 1
-            while (result == 0 && i != n) {
-              result = sorters(i)(nestedIdsCount)(a, b)
-              i += 1
-            }
-            result
-          }
-        }
-        Collections.sort(sortedRows, comparator)
-        sortedRows
-    }
-  }
-
-
-  protected def offsetRaw(
-    sortedRows: jArrayList[jList[AnyRef]],
-    fromUntil: Option[(Int, Int, Boolean)]
-  ): jList[jList[AnyRef]] = {
-    fromUntil.fold[jList[jList[AnyRef]]](sortedRows) {
-      case (from, until, _) => sortedRows.subList(from, until)
-    }
-  }
-
-  protected def offsetList(
-    sortedRows: List[Tpl],
-    fromUntil: Option[(Int, Int, Boolean)]
-  ): List[Tpl] = {
-    fromUntil.fold(sortedRows) {
-      case (from, until, _) => sortedRows.slice(from, until)
-    }
   }
 
   protected def getFromUntil(
@@ -144,11 +88,6 @@ abstract class JdbcQueryResolve[Tpl](elements: List[Element])
     }
   }
 
-  //  protected def postAdjustPullCasts(): Unit = {
-  //    pullCastss = pullCastss :+ pullCasts.toList
-  //    pullSortss = pullSortss :+ pullSorts.sortBy(_._1).map(_._2).toList
-  //  }
-  lazy val row2AnyTpl = castRow2AnyTpl(aritiess.head, castss.head, 1, None)
 
   def paginateFromIdentifiers(
     conn: JdbcConn_jvm,

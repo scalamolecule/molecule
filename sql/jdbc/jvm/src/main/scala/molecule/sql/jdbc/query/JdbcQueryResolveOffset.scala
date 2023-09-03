@@ -85,4 +85,14 @@ case class JdbcQueryResolveOffset[Tpl](
     //    txReportWatcher.addSubscription(queryAttrIds, dbCallBack)
     ???
   }
+
+
+  private def offsetList(
+    sortedRows: List[Tpl],
+    fromUntil: Option[(Int, Int, Boolean)]
+  ): List[Tpl] = {
+    fromUntil.fold(sortedRows) {
+      case (from, until, _) => sortedRows.slice(from, until)
+    }
+  }
 }
