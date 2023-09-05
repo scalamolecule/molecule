@@ -19,8 +19,6 @@ trait SqlQueryBase extends BaseHelpers with JavaConversions { self: Model2Query 
   type AttrIndex = Int
   type NestedTpls = List[Any]
 
-  type RowOLD = jList[AnyRef]
-
   def getRowCount(rows: ResultSet): Int = {
     rows.last()
     val size = rows.getRow
@@ -52,10 +50,6 @@ trait SqlQueryBase extends BaseHelpers with JavaConversions { self: Model2Query 
   final protected var castss   = List(List.empty[(Row, Int) => Any])
   final protected var aritiess = List(List.empty[List[Int]])
   final protected val exts     = mutable.Map.empty[String, Option[String]]
-
-  // Sorting
-  final protected var sortss = List(List.empty[(Int, Int => (RowOLD, RowOLD) => Int)])
-
 
   // Ensure distinct result set when possible redundant optional values can occur
   final protected var hasOptAttr = false
@@ -92,12 +86,6 @@ trait SqlQueryBase extends BaseHelpers with JavaConversions { self: Model2Query 
   final protected def aritiesAttr(): Unit = {
     // Add new arity of 1
     aritiess = aritiess.init :+ (aritiess.last :+ List(1))
-  }
-
-  final protected def getFlatSorters(
-    sortss: List[List[(Int, Int => (RowOLD, RowOLD) => Int)]]
-  ): List[Int => (RowOLD, RowOLD) => Int] = {
-    sortss.flatMap(_.sortBy(_._1).map(_._2))
   }
 
   final protected def unexpectedElement(element: Element) = throw ModelError("Unexpected element: " + element)

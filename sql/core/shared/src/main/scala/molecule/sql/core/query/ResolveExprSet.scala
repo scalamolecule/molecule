@@ -127,7 +127,7 @@ trait ResolveExprSet[Tpl] extends AggrUtils { self: Model2SqlQuery[Tpl] with Lam
     }
   }
 
-  private def expr2(col: String, op: Op, filterAttr: String): Unit = {
+  private def expr2(col: String, op: Op, filterAttr: String, cardOne: Boolean = true): Unit = {
     op match {
       case Eq    => equal2(col, filterAttr)
       case Neq   => neq2(col, filterAttr)
@@ -278,17 +278,6 @@ trait ResolveExprSet[Tpl] extends AggrUtils { self: Model2SqlQuery[Tpl] with Lam
               val array = outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]]
               array.foreach(v => set += v.toString.toDouble) // not the most efficient...
             }
-            //            val values = set.toList.sorted
-            //            val count  = values.length
-            //            if (count % 2 == 1) {
-            //              val indexOfMiddleValue = (count - 1) / 2
-            //              values(indexOfMiddleValue)
-            //            } else {
-            //              val i2      = count / 2
-            //              val middle1 = values(i2 - 1)
-            //              val middle2 = values(i2)
-            //              (middle1 + middle2) / 2
-            //            }
             getMedian(set)
           }
         )

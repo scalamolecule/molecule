@@ -9,15 +9,27 @@ import scala.language.implicitConversions
 
 object AdhocJdbcJVM extends JdbcTestSuite {
 
+  val a = (1, Set(0, 1, 2), Set(1, 2, 3))
+  val b = (2, Set(2, 3), Set(2, 3))
+  val c = (3, Set(4), Set(3))
+
   @nowarn // (Allow pattern matching results without warnings)
   override lazy val tests = Tests {
 
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
       for {
-        _ <- Ns.i(1).save.transact
-        _ <- Ns.i.query.get.map(_ ==> List(1))
+//        _ <- Ns.i(1).save.transact
+//        _ <- Ns.i.query.get.map(_ ==> List(1))
 
+        _ <- Ns.i.ii.ints.insert(a, b, c).transact
+
+        _ <- Ns.i.ii.has(Set(2, 3)).ints.query.i.get.map(_ ==> List(b))
+        _ <- Ns.i.ii.has(Ns.ints).query.i.get.map(_ ==> List(b))
+        _ <- Ns.i.ii.has(Ns.ints).query.get.map(_ ==> List(b))
+//        _ <- Ns.i.ii.has(Ns.ints_).query.get.map(_ ==> List((2, Set(2, 3)))) // Ns.ii
+//        _ <- Ns.i.ii_.has(Ns.ints).query.get.map(_ ==> List((2, Set(2, 3)))) // Ref.ints
+//        _ <- Ns.i.ii_.has(Ns.ints_).query.get.map(_ ==> List(2))
 
       } yield ()
     }
@@ -28,6 +40,7 @@ object AdhocJdbcJVM extends JdbcTestSuite {
       for {
         id <- A.i(1).B.i(2).C.i(3).save.transact.map(_.id)
         _ <- A.i.B.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
+
 
       } yield ()
     }

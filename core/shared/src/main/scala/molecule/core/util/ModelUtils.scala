@@ -36,10 +36,12 @@ trait ModelUtils {
   @tailrec
   final protected def getInitialNonGenericNs(elements: List[Element]): String = {
     elements.head match {
-      case a: Attr if a.attr == "id" => getInitialNonGenericNs(elements.tail)
-      case a: Attr                   => a.ns
-      case b: Ref                    => b.ns
-      case other                     => throw ModelError("Unexpected head element: " + other)
+      case a: Attr if a.attr == "id"      => getInitialNonGenericNs(elements.tail)
+      case a: Attr                        => a.ns
+      case b: Ref                         => b.ns
+      case Nested(Ref(ns, _, _, _), _)    => ns
+      case NestedOpt(Ref(ns, _, _, _), _) => ns
+      case other                          => throw ModelError("Unexpected head element: " + other)
     }
   }
 

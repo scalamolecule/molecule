@@ -31,7 +31,6 @@ trait Subscription extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync
         _ <- Ns.i.insert(3, 4).transact
         _ <- Ns.i.a1.query.get.map(_ ==> List(1, 2, 3, 4))
 
-
         _ <- Ns(id).i(20).update.transact
         _ <- Ns.i.a1.query.get.map(_ ==> List(1, 3, 4, 20))
 

@@ -134,7 +134,6 @@ trait ResolveExprOne[Tpl] { self: Model2SqlQuery[Tpl] with LambdasOne =>
       }
     } { filterAttr =>
       addSort(attr, col)
-      //      val w = getVar(filterAttr)
       attr.op match {
         case Eq    => optEqual2(col)
         case Neq   => optNeq2(col)
