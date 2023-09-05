@@ -14,6 +14,7 @@ trait JdbcApiAsync extends ApiAsync with JdbcSpiAsync {
     override def get(implicit conn: Conn, ec: EC): Future[List[Tpl]] = query_get(q)
     override def subscribe(callback: List[Tpl] => Unit)
                           (implicit conn: Conn, ec: EC): Future[Unit] = query_subscribe(q, callback)
+    override def unsubscribe()(implicit conn: Conn, ec: EC): Future[Unit] = query_unsubscribe(q)
     override def inspect(implicit conn: Conn, ec: EC): Future[Unit] = query_inspect(q)
   }
 

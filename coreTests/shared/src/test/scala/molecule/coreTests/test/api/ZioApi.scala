@@ -112,9 +112,6 @@ trait ZioApi extends CoreTestZioSpec with ApiZioImplicits { self: SpiZio  =>
           _ <- Ns.i.query.subscribe { freshResult =>
             intermediaryResults = intermediaryResults :+ freshResult
           }
-          // Wait for subscription thread to startup to propagate first result
-          _ <- delay(500)(())
-          //          _ <- TestClock.adjust(500.milliseconds) // doesn't work on first run on JS...
 
           // Make changes to generate new results to be pushed
           _ <- Ns.i(2).save.transact
@@ -122,10 +119,6 @@ trait ZioApi extends CoreTestZioSpec with ApiZioImplicits { self: SpiZio  =>
 
           // Not affecting subscription since it doesn't mach subscription query (Ns.i)
           _ <- Ns.string("foo").save.transact
-
-          // Wait for subscription thread to propagate last result to client
-          _ <- delay(50)(())
-          //          _ <- TestClock.adjust(50.milliseconds) // doesn't work on first run on JS...
         } yield {
           assertTrue(intermediaryResults == List(
             List(1, 2), // query result after 2 was added

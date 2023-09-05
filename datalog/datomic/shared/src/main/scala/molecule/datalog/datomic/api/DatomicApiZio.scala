@@ -16,6 +16,7 @@ trait DatomicApiZio
     override def get: ZIO[Conn, MoleculeError, List[Tpl]] = query_get(q)
     override def subscribe(callback: List[Tpl] => Unit)
     : ZIO[Conn, MoleculeError, Unit] = query_subscribe(q, callback)
+    override def unsubscribe(): ZIO[Conn, MoleculeError, Unit] = query_unsubscribe(q)
     override def inspect: ZIO[Conn, MoleculeError, Unit] = query_inspect(q)
   }
 

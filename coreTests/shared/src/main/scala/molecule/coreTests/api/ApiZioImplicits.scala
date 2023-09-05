@@ -10,6 +10,7 @@ trait ApiZioImplicits { dataProvider: SpiZio =>
   implicit class QueryApiAsync[Tpl](q: Query[Tpl]) {
     def get: ZIO[Conn, MoleculeError, List[Tpl]] = query_get(q)
     def subscribe(callback: List[Tpl] => Unit): ZIO[Conn, MoleculeError, Unit] = query_subscribe(q, callback)
+    def unsubscribe(): ZIO[Conn, MoleculeError, Unit] = query_unsubscribe(q)
     def inspect: ZIO[Conn, MoleculeError, Unit] = query_inspect(q)
   }
 

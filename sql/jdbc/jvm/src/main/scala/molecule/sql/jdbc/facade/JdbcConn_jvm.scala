@@ -2,17 +2,21 @@ package molecule.sql.jdbc.facade
 
 import java.sql
 import java.sql.SQLException
+import molecule.boilerplate.ast.Model.Element
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.marshalling.JdbcProxy
 import molecule.core.spi.{Conn, TxReport}
+import molecule.core.util.ModelUtils
 import molecule.sql.jdbc.transaction.{JdbcBase_JVM, JdbcDataType_JVM, JoinTable, Table}
+import scala.collection.mutable
 import scala.util.control.NonFatal
 
 case class JdbcConn_jvm(override val proxy: JdbcProxy, override val sqlConn: sql.Connection)
   extends Conn(proxy)
     with JdbcDataType_JVM
-    with MoleculeLogging
-    with JdbcBase_JVM {
+    with JdbcBase_JVM
+    with ModelUtils
+    with MoleculeLogging {
 
   private[molecule] var fresh = true
   doPrint = false

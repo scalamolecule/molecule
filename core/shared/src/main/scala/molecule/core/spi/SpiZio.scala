@@ -14,6 +14,10 @@ trait SpiZio  {
     q: Query[Tpl], callback: List[Tpl] => Unit
   ): ZIO[Conn, MoleculeError, Unit] = ???
 
+  def query_unsubscribe[Tpl](
+    q: Query[Tpl]
+  ): ZIO[Conn, MoleculeError, Unit] = ???
+
   def query_inspect[Tpl](
     q: Query[Tpl]
   ): ZIO[Conn, MoleculeError, Unit] = ???

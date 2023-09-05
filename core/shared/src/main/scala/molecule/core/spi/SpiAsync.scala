@@ -14,6 +14,10 @@ trait SpiAsync  {
     q: Query[Tpl], callback: List[Tpl] => Unit
   )(implicit conn: Conn, ec: EC): Future[Unit] = ???
 
+  def query_unsubscribe[Tpl](
+    q: Query[Tpl]
+  )(implicit conn: Conn, ec: EC): Future[Unit] = ???
+
   def query_inspect[Tpl](
     q: Query[Tpl]
   )(implicit conn: Conn, ec: EC): Future[Unit] = ???

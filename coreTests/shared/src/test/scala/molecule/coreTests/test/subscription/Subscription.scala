@@ -9,63 +9,67 @@ import molecule.coreTests.setup.CoreTestSuite
 import utest._
 import scala.language.implicitConversions
 
-trait Subscription extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
+trait Subscription extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync =>
 
   override lazy val tests = Tests {
 
-    "Single" - types { implicit conn =>
-      var intermediaryResults = List.empty[List[Int]]
+    "Mutations call back" - types { implicit conn =>
+      var intermediaryCallbackResults = List.empty[List[Int]]
       for {
-        // Initial data (not pushed)
+        // Initial data
         _ <- Ns.i(1).save.transact
 
-        // Start subscription in separate thread on server
+        // Start subscription
         _ = Ns.i.query.subscribe { freshResult =>
-          intermediaryResults = intermediaryResults :+ freshResult
+          intermediaryCallbackResults = intermediaryCallbackResults :+ freshResult
         }
-        // Wait for subscription thread to startup to propagate first result
-        _ <- delay(300)(())
 
-        // Make changes to generate new results to be pushed
-        _ <- Ns.i(2).save.transact
-        _ <- Ns.i(3).save.transact
+        // Mutations to be monitored by subscription
+        id <- Ns.i(2).save.transact.map(_.id)
+        _ <- Ns.i.a1.query.get.map(_ ==> List(1, 2))
 
-        // Non-matching transactions don't trigger callbacks
+        _ <- Ns.i.insert(3, 4).transact
+        _ <- Ns.i.a1.query.get.map(_ ==> List(1, 2, 3, 4))
+
+
+        _ <- Ns(id).i(20).update.transact
+        _ <- Ns.i.a1.query.get.map(_ ==> List(1, 3, 4, 20))
+
+        _ <- Ns(id).delete.transact
+        _ <- Ns.i.a1.query.get.map(_ ==> List(1, 3, 4))
+
+        // Mutations with no callback-involved attributes don't call back
         _ <- Ns.string("foo").save.transact
 
-        // Wait for subscription thread to propagate last result
-        _ <- delay(300)(
-          intermediaryResults ==> List(
-            List(1, 2), // query result after 2 was added
-            List(1, 2, 3), // query result after 3 was added
-          )
+        // Callback catched all intermediary results correctly
+        _ = intermediaryCallbackResults.map(_.sorted) ==> List(
+          List(1, 2), // query result after 2 was saved
+          List(1, 2, 3, 4), // query result after 3 and 4 were inserted
+          List(1, 3, 4, 20), // query result after 2 was updated to 20
+          List(1, 3, 4), // query result after 20 was deleted
         )
       } yield ()
     }
 
 
-    "Multiple" - types { implicit conn =>
-      var intermediaryResults1 = List.empty[List[Int]]
-      var intermediaryResults2 = List.empty[List[String]]
+    "Multiple callbacks and unsubscribe" - types { implicit conn =>
+      var fooResults = List.empty[List[Int]]
+      var barResults = List.empty[List[String]]
       for {
-        // Initial data (not pushed)
+        // Initial data
         _ <- Ns.i(1).save.transact
         _ <- Ns.s("a").save.transact
 
-        // For some reason needed on JVM (concurrency related)
-        _ <- delay(300)(())
-
-        // start subscriptions in separate thread on server
+        // Start subscription for fooResults
         _ = Ns.i.query.subscribe { freshResult =>
-          intermediaryResults1 = intermediaryResults1 :+ freshResult
-        }
-        _ <- delay(300)(())
-        _ = Ns.s.query.subscribe { freshResult =>
-          intermediaryResults2 = intermediaryResults2 :+ freshResult
+          fooResults = fooResults :+ freshResult
         }
 
-        // Wait for subscription thread to startup to propagate first result
-        _ <- delay(300)(())
+        // Start subscription for barResults
+        barQuery = Ns.s.query
+        _ = barQuery.subscribe { freshResult =>
+          barResults = barResults :+ freshResult
+        }
 
         // Transact additional data in any order
         _ <- Ns.i(2).save.transact
@@ -76,17 +80,34 @@ trait Subscription extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync
         // Non-matching transactions don't trigger callbacks
         _ <- Ns.string("foo").save.transact
 
-        // Wait for subscription thread to propagate last result
-        _ <- delay(300)(())
-
         // Intermediary results have been pushed to correct subscriptions
-        _ = intermediaryResults1 ==> List(
+        _ = fooResults ==> List(
           List(1, 2),
           List(1, 2, 3),
         )
-        _ = intermediaryResults2 ==> List(
+        _ = barResults ==> List(
           List("a", "b"),
           List("a", "b", "c"),
+        )
+
+        // Cancel barResults update subscription
+        _ = barQuery.unsubscribe()
+
+        // Mutate some more
+        _ <- Ns.s("x").save.transact
+        _ <- Ns.i(7).save.transact
+
+        // After unsubscribing, barResults is no longer automatically updated (x wasn't added)
+        _ = barResults ==> List(
+          List("a", "b"),
+          List("a", "b", "c"),
+        )
+
+        // fooResults keeps subscribing
+        _ = fooResults ==> List(
+          List(1, 2),
+          List(1, 2, 3),
+          List(1, 2, 3, 7),
         )
       } yield ()
     }

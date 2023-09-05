@@ -7,11 +7,10 @@ import datomic.Util.readAll
 import datomic.{Connection => DatomicConnection, Datom => _, _}
 import molecule.base.error._
 import molecule.boilerplate.util.MoleculeLogging
-import molecule.core.spi.{Conn, TxReport}
 import molecule.core.marshalling.DatomicProxy
+import molecule.core.spi.{Conn, TxReport}
 import molecule.datalog.datomic.transaction.DatomicDataType_JVM
 import molecule.datalog.datomic.util.MakeTxReport
-import scala.collection.mutable
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.{Await, ExecutionContext, Future, Promise}
 import scala.jdk.CollectionConverters._
@@ -23,8 +22,6 @@ case class DatomicConn_JVM(
 ) extends Conn(proxy)
   with DatomicDataType_JVM
   with MoleculeLogging {
-
-  private[molecule] var fresh = true
 
   override def db: Database = peerConn.db()
 
@@ -108,72 +105,5 @@ case class DatomicConn_JVM(
       (arg0: Runnable) => ec.execute(arg0)
     )
     p.future
-  }
-
-
-  private[molecule] val attrIds = mutable.Map.empty[String, java.lang.Long]
-
-  /**
-   * Gets the single transaction report queue associated with this connection,
-   * creating it if necessary.
-   *
-   * The transaction report queue receives reports from all transactions in the
-   * system. Objects on the queue have the same keys as returned by
-   * transact(java.util.List).
-   *
-   * The returned queue may be consumed from more than one thread.
-   *
-   * Note that the returned queue does not block producers, and will consume
-   * memory until you consume the elements from it. Reports will be added to the
-   * queue at some point after the db has been updated.
-   *
-   * If this connection originated the transaction, the transaction future will
-   * be notified first, before a report is placed on the queue.
-   *
-   * Sometimes (!) sbt needs to be restarted if this exception is thrown:
-   * java.lang.ClassCastException: datomic.extensions$eval19 cannot be cast to clojure.lang.IFn
-   *
-   * I'm quessing this is a concurrency issue:
-   *
-   * @see https://clojurians-log.clojureverse.org/luminus/2022-02-11
-   * @return TxReportQueue
-   */
-  final lazy val txReportQueue: DatomicTxReportQueue = {
-    // Get attribute ids for masking tx report datoms that match query attributes
-    // todo: find attribute ids once and cache instead of querying on each subscription
-    try {
-      if (attrIds.isEmpty) {
-        Peer.q(
-          """[:find  ?nsFull ?attr ?attrId
-            | :where [_ :db.install/attribute ?attrId ?tx]
-            |        [?attrId :db/ident ?attrIdent]
-            |        [(namespace ?attrIdent) ?nsFull]
-            |        [(.matches ^String ?nsFull "(db|db.alter|db.excise|db.install|db.part|db.sys|fressian|db.entity|db.attr|-.*)") ?sys]
-            |        [(= ?sys false)]
-            |        [(name ?attrIdent) ?attr]
-            |]""".stripMargin,
-          peerConn.db
-        ).forEach { row =>
-          attrIds += (row.get(0).toString + "." + row.get(1).toString -> row.get(2).asInstanceOf[java.lang.Long])
-        }
-      }
-      DatomicTxReportQueue(peerConn.txReportQueue())
-    } catch {
-      case e: Exception =>
-        println(
-          """-------------
-            |When the http server is terminated with a keyboard stroke and
-            |subscription molecule on client side is called, this error occurs.
-            |Then please ctrl-c the sbt process and restart the server.
-            |TODO: Either skip system.terminated() or find some setting with
-            |Akka Http to avoid this.
-            |-------------""".stripMargin
-        )
-        e.printStackTrace()
-        throw e
-      case e: Throwable =>
-        e.printStackTrace()
-        throw e
-    }
   }
 }

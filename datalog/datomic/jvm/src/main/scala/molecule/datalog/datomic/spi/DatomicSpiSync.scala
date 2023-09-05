@@ -2,14 +2,11 @@ package molecule.datalog.datomic.spi
 
 import datomic.Peer
 import molecule.base.error.{InsertError, ModelError, MoleculeError}
-import molecule.boilerplate.ast.Model._
 import molecule.core.action._
 import molecule.core.spi.{Conn, PrintInspect, SpiSync, TxReport}
 import molecule.core.util.{FutureUtils, JavaConversions}
-import molecule.datalog.core.query.Model2DatomicQuery
 import molecule.datalog.datomic.facade.DatomicConn_JVM
 import molecule.datalog.datomic.query.{DatomicQueryResolveCursor, DatomicQueryResolveOffset}
-import molecule.datalog.datomic.subscription.SubscriptionStarter
 import zio.ZIO
 import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.global
@@ -20,7 +17,6 @@ object DatomicSpiSync extends DatomicSpiSync
 trait DatomicSpiSync
   extends SpiSync
     with DatomicSpiZioBase
-    with SubscriptionStarter
     with PrintInspect
     with FutureUtils
     with JavaConversions {
@@ -34,7 +30,13 @@ trait DatomicSpiSync
   override def query_subscribe[Tpl](q: Query[Tpl], callback: List[Tpl] => Unit)(implicit conn: Conn): Unit = {
     val datomicConn = conn.asInstanceOf[DatomicConn_JVM]
     DatomicQueryResolveOffset[Tpl](q.elements, q.optLimit, None, q.dbView)
-      .subscribe(datomicConn, getWatcher(datomicConn), callback)
+      .subscribe(datomicConn, callback)
+  }
+
+  override def query_unsubscribe[Tpl](q: Query[Tpl])(implicit conn: Conn): Unit = {
+    val datomicConn = conn.asInstanceOf[DatomicConn_JVM]
+    DatomicQueryResolveOffset[Tpl](q.elements, q.optLimit, None, q.dbView)
+      .unsubscribe(datomicConn)
   }
 
   override def query_inspect[Tpl](q: Query[Tpl])(implicit conn: Conn): Unit = {

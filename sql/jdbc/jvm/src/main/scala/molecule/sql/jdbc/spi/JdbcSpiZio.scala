@@ -18,6 +18,10 @@ trait JdbcSpiZio extends SpiZio with JdbcSpiZioBase {
     sync2zio[Unit]((conn: JdbcConn_jvm) => JdbcSpiSync.query_subscribe(q, callback)(conn))
   }
 
+  override def query_unsubscribe[Tpl](q: Query[Tpl]): ZIO[Conn, MoleculeError, Unit] = {
+    sync2zio[Unit]((conn: JdbcConn_jvm) => JdbcSpiSync.query_unsubscribe(q)(conn))
+  }
+
   override def query_inspect[Tpl](q: Query[Tpl]): ZIO[Conn, MoleculeError, Unit] = {
     sync2zio[Unit]((conn: JdbcConn_jvm) => JdbcSpiSync.query_inspect(q)(conn))
   }

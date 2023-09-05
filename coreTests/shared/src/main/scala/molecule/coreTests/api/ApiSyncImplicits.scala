@@ -9,6 +9,7 @@ trait ApiSyncImplicits { dataProvider: SpiSync =>
   implicit class QueryApiAsync[Tpl](q: Query[Tpl]) {
     def get(implicit conn: Conn): List[Tpl] = query_get(q)
     def subscribe(callback: List[Tpl] => Unit)(implicit conn: Conn): Unit = query_subscribe(q, callback)
+    def unsubscribe()(implicit conn: Conn): Unit = query_unsubscribe(q)
     def inspect(implicit conn: Conn): Unit = query_inspect(q)
   }
 

@@ -1,23 +1,20 @@
 package molecule.datalog.datomic.query
 
-import datomic.Database
 import molecule.base.error._
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.marshalling.dbView.DbView
 import molecule.core.util.FutureUtils
 import molecule.datalog.datomic.facade.DatomicConn_JVM
-import molecule.datalog.datomic.subscription.TxReportWatcher
 import scala.collection.mutable.ListBuffer
-import scala.concurrent.{ExecutionContext, Future}
 
 /**
- * @param elements Molecule model
- * @param optLimit    When going forward from start, use a positive number.
- *                 And vice versa from end with a negative number. Can't be zero.
- * @param optOffset   Positive offset from start when going forwards,
- *                 negative offset from end when going backwards
- * @param dbView   Database with a time perspective (Datomic)
+ * @param elements  Molecule model
+ * @param optLimit  When going forward from start, use a positive number.
+ *                  And vice versa from end with a negative number. Can't be zero.
+ * @param optOffset Positive offset from start when going forwards,
+ *                  negative offset from end when going backwards
+ * @param dbView    Database with a time perspective (Datomic)
  * @tparam Tpl
  */
 case class DatomicQueryResolveOffset[Tpl](
@@ -29,12 +26,6 @@ case class DatomicQueryResolveOffset[Tpl](
   with FutureUtils
   with MoleculeLogging {
 
-  // Handles both offset- and non-paginated results
-  // returns (rows, total count, hasMore)
-//  def getListFromOffset_async(implicit conn: DatomicConn_JVM, ec: ExecutionContext)
-//  : Future[(List[Tpl], Int, Boolean)] = {
-//    future(getListFromOffset_sync(conn))
-//  }
 
   // Datomic querying is synchronous
   def getListFromOffset_sync(implicit conn: DatomicConn_JVM): (List[Tpl], Int, Boolean) = {
@@ -52,7 +43,6 @@ case class DatomicQueryResolveOffset[Tpl](
     val rows       = getRawData(conn, altDb = altDb)
     val totalCount = rows.size
     val sortedRows = sortRows(rows)
-    //    logger.debug(sortedRows.toArray().mkString("\n"))
 
     if (isNested) {
       val nestedRows    = rows2nested(sortedRows)
@@ -84,16 +74,25 @@ case class DatomicQueryResolveOffset[Tpl](
 
   def subscribe(
     conn: DatomicConn_JVM,
-    txReportWatcher: TxReportWatcher,
     callback: List[Tpl] => Unit
   ): Unit = {
-    val allAttrIds   = conn.attrIds
-    val queryAttrIds = elements.collect { case a: Attr => allAttrIds(a.name) }
-    val dbCallBack   = (dbAfter: Database) => {
-      val freshResult: List[Tpl] = DatomicQueryResolveOffset[Tpl](elements, optLimit, None, None)
-        .getListFromOffset_sync(Some(dbAfter))(conn)._1
-      callback(freshResult)
+    val involvedAttrs    = getAttrNames(elements)
+    val involvedDeleteNs = getInitialNs(elements)
+    val maybeCallback    = (mutationAttrs: Set[String], isDelete: Boolean) => {
+      if (
+        mutationAttrs.exists(involvedAttrs.contains) ||
+          isDelete && mutationAttrs.head.startsWith(involvedDeleteNs)
+      ) {
+        callback(
+          DatomicQueryResolveOffset(elements, optLimit, None, None)
+            .getListFromOffset_sync(conn)._1
+        )
+      }
     }
-    txReportWatcher.addSubscription(queryAttrIds, dbCallBack)
+    conn.addCallback(elements -> maybeCallback)
+  }
+
+  def unsubscribe(conn: DatomicConn_JVM): Unit = {
+    conn.removeCallback(elements)
   }
 }

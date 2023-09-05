@@ -11,6 +11,7 @@ trait ApiAsyncImplicits { dataProvider: SpiAsync =>
     def get(implicit conn: Conn, ec: EC): Future[List[Tpl]] = query_get(q)
     def subscribe(callback: List[Tpl] => Unit)
                  (implicit conn: Conn, ec: EC): Future[Unit] = query_subscribe(q, callback)
+    def unsubscribe()(implicit conn: Conn, ec: EC): Future[Unit] = query_unsubscribe(q)
     def inspect(implicit conn: Conn, ec: EC): Future[Unit] = query_inspect(q)
   }
 

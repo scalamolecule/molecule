@@ -1,26 +1,15 @@
 package molecule.datalog.datomic.spi
 
 import molecule.base.error._
-import molecule.boilerplate.ast.Model._
 import molecule.core.action._
-import molecule.core.marshalling.ConnProxy
 import molecule.core.spi.{Conn, SpiZio, TxReport}
-import molecule.core.transaction.{ResolveDelete, ResolveInsert, ResolveSave, ResolveUpdate}
 import molecule.core.util.Executor._
-import molecule.core.validation.ModelValidation
-import molecule.core.validation.insert.InsertValidation
 import molecule.datalog.datomic.facade.DatomicConn_JVM
-import molecule.datalog.datomic.marshalling.DatomicRpcJVM.Data
-import molecule.datalog.datomic.query.{DatomicQueryResolveCursor, DatomicQueryResolveOffset}
-import molecule.datalog.datomic.subscription.SubscriptionStarter
-import molecule.datalog.datomic.transaction.{Data_Delete, Data_Insert, Data_Save, Data_Update}
 import zio.ZIO
-import scala.concurrent.Future
 
 trait DatomicSpiZio
   extends SpiZio
     with JVMDatomicSpiBase
-    with SubscriptionStarter
     with DatomicSpiZioBase {
 
   // Query --------------------------------------------------------
@@ -35,6 +24,11 @@ trait DatomicSpiZio
     q: Query[Tpl], callback: List[Tpl] => Unit
   ): ZIO[Conn, MoleculeError, Unit] = {
     sync2zio[Unit]((conn: DatomicConn_JVM) => DatomicSpiSync.query_subscribe(q, callback)(conn))
+  }
+  override def query_unsubscribe[Tpl](
+    q: Query[Tpl]
+  ): ZIO[Conn, MoleculeError, Unit] = {
+    sync2zio[Unit]((conn: DatomicConn_JVM) => DatomicSpiSync.query_unsubscribe(q)(conn))
   }
 
   override def query_inspect[Tpl](

@@ -8,8 +8,8 @@ trait ApiAsync {
 
   trait QueryApiAsync[Tpl] {
     def get(implicit conn: Conn, ec: EC): Future[List[Tpl]]
-    def subscribe(callback: List[Tpl] => Unit)
-                 (implicit conn: Conn, ec: EC): Future[Unit]
+    def subscribe(callback: List[Tpl] => Unit)(implicit conn: Conn, ec: EC): Future[Unit]
+    def unsubscribe()(implicit conn: Conn, ec: EC): Future[Unit]
     def inspect(implicit conn: Conn, ec: EC): Future[Unit]
   }
   trait QueryOffsetApiAsync[Tpl] {

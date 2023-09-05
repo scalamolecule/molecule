@@ -13,6 +13,7 @@ trait JdbcApiSync extends ApiSync with JdbcSpiSync {
     override def get(implicit conn: Conn): List[Tpl] = query_get(q)
     override def subscribe(callback: List[Tpl] => Unit)
                           (implicit conn: Conn): Unit = query_subscribe(q, callback)
+    override def unsubscribe()(implicit conn: Conn): Unit = query_unsubscribe(q)
     override def inspect(implicit conn: Conn): Unit = query_inspect(q)
   }
 

@@ -15,7 +15,7 @@ trait Data_Update
     with MoleculeLogging { self: ResolveUpdate =>
 
   doPrint = false
-  var curParamIndex = 1
+  private var curParamIndex = 1
 
   def getData(elements: List[Element]): Data = {
     curRefPath = List(getInitialNs(elements))

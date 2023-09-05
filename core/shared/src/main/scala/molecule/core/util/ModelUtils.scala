@@ -50,4 +50,18 @@ trait ModelUtils {
       case _      => false
     }
   }
+
+
+  @tailrec
+  final def getAttrNames(elements: List[Element], attrs: Set[String] = Set.empty[String]): Set[String] = {
+    elements match {
+      case element :: tail => element match {
+        case a: Attr          => getAttrNames(tail, attrs + a.name)
+        case Nested(_, es)    => getAttrNames(tail ++ es, attrs)
+        case NestedOpt(_, es) => getAttrNames(tail ++ es, attrs)
+        case _                => getAttrNames(tail, attrs)
+      }
+      case Nil             => attrs
+    }
+  }
 }

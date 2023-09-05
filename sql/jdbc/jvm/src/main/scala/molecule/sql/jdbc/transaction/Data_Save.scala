@@ -16,7 +16,7 @@ trait Data_Save
   doPrint = false
 
   // Resolve after all back refs have been resolved and namespaces grouped
-  var postResolvers = List.empty[Unit => Unit]
+  private var postResolvers = List.empty[Unit => Unit]
 
   def getData(elements: List[Element]): Data = {
     initialNs = getInitialNs(elements)

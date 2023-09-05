@@ -10,6 +10,7 @@ trait ApiZio {
   trait QueryApiZio[Tpl] {
     def get: ZIO[Conn, MoleculeError, List[Tpl]]
     def subscribe(callback: List[Tpl] => Unit): ZIO[Conn, MoleculeError, Unit]
+    def unsubscribe(): ZIO[Conn, MoleculeError, Unit]
     def inspect: ZIO[Conn, MoleculeError, Unit]
   }
   trait QueryOffsetApiZio[Tpl] {

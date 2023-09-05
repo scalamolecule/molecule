@@ -39,7 +39,12 @@ trait JdbcSpiSync
   override def query_subscribe[Tpl](q: Query[Tpl], callback: List[Tpl] => Unit)(implicit conn: Conn): Unit = {
     val jdbcConn = conn.asInstanceOf[JdbcConn_jvm]
     JdbcQueryResolveOffset[Tpl](q.elements, q.optLimit, None)
-      .subscribe(jdbcConn, getWatcher(jdbcConn), callback)
+      .subscribe(jdbcConn, callback)
+  }
+  override def query_unsubscribe[Tpl](q: Query[Tpl])(implicit conn: Conn): Unit = {
+    val jdbcConn = conn.asInstanceOf[JdbcConn_jvm]
+    JdbcQueryResolveOffset[Tpl](q.elements, q.optLimit, None)
+      .unsubscribe(jdbcConn)
   }
 
   override def query_inspect[Tpl](q: Query[Tpl])(implicit conn: Conn): Unit = {
@@ -86,8 +91,10 @@ trait JdbcSpiSync
     if (save.doInspect) save_inspect(save)
     val errors = save_validate(save)
     if (errors.isEmpty) {
-      val conn = conn0.asInstanceOf[JdbcConn_jvm]
-      conn.transact_sync(save_getData(save, conn))
+      val conn     = conn0.asInstanceOf[JdbcConn_jvm]
+      val txReport = conn.transact_sync(save_getData(save, conn))
+      conn.callback(save.elements)
+      txReport
     } else {
       throw ValidationErrors(errors)
     }
@@ -118,8 +125,10 @@ trait JdbcSpiSync
     if (insert.doInspect) insert_inspect(insert)
     val errors = insert_validate(insert)
     if (errors.isEmpty) {
-      val conn = conn0.asInstanceOf[JdbcConn_jvm]
-      conn.transact_sync(insert_getData(insert, conn))
+      val conn     = conn0.asInstanceOf[JdbcConn_jvm]
+      val txReport = conn.transact_sync(insert_getData(insert, conn))
+      conn.callback(insert.elements)
+      txReport
     } else {
       throw InsertErrors(errors)
     }
@@ -148,13 +157,15 @@ trait JdbcSpiSync
     if (update.doInspect) update_inspect(update)
     val errors = update_validate(update)
     if (errors.isEmpty) {
-      val conn = conn0.asInstanceOf[JdbcConn_jvm]
-      if (isRefUpdate(update.elements)) {
+      val conn     = conn0.asInstanceOf[JdbcConn_jvm]
+      val txReport = if (isRefUpdate(update.elements)) {
         // Atomic transaction with updates for each ref namespace
         conn.atomicTransaction(refUpdates(update)(conn))
       } else {
         conn.transact_sync(update_getData(conn, update))
       }
+      conn.callback(update.elements)
+      txReport
     } else {
       throw ValidationErrors(errors)
     }
@@ -210,8 +221,10 @@ trait JdbcSpiSync
 
   override def delete_transact(delete: Delete)(implicit conn0: Conn): TxReport = {
     if (delete.doInspect) delete_inspect(delete)
-    val conn = conn0.asInstanceOf[JdbcConn_jvm]
-    conn.transact_sync(delete_getData(conn, delete))
+    val conn     = conn0.asInstanceOf[JdbcConn_jvm]
+    val txReport = conn.transact_sync(delete_getData(conn, delete))
+    conn.callback(delete.elements, true)
+    txReport
   }
 
   override def delete_inspect(delete: Delete)(implicit conn0: Conn): Unit = {

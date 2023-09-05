@@ -9,6 +9,7 @@ trait ApiSync {
   trait QueryApiSync[Tpl] {
     def get(implicit conn: Conn): List[Tpl]
     def subscribe(callback: List[Tpl] => Unit)(implicit conn: Conn): Unit
+    def unsubscribe()(implicit conn: Conn): Unit
     def inspect(implicit conn: Conn): Unit
   }
   trait QueryOffsetApiSync[Tpl] {

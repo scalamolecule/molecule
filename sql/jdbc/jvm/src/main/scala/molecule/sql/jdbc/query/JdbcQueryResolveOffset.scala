@@ -3,12 +3,9 @@ package molecule.sql.jdbc.query
 import molecule.base.error._
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
-import molecule.core.marshalling.dbView.DbView
-import molecule.core.util.FutureUtils
+import molecule.core.util.{FutureUtils, ModelUtils}
 import molecule.sql.jdbc.facade.JdbcConn_jvm
-import molecule.sql.jdbc.subscription.TxReportWatcher
 import scala.collection.mutable.ListBuffer
-import scala.concurrent.{ExecutionContext, Future}
 
 /**
  * @param elements  Molecule model
@@ -25,6 +22,7 @@ case class JdbcQueryResolveOffset[Tpl](
   optOffset: Option[Int]
 ) extends JdbcQueryResolve[Tpl](elements)
   with FutureUtils
+  with ModelUtils
   with MoleculeLogging {
 
   lazy val forward = optLimit.fold(true)(_ >= 0) && optOffset.fold(true)(_ >= 0)
@@ -37,18 +35,10 @@ case class JdbcQueryResolveOffset[Tpl](
       throw ModelError("Limit and offset should both be positive or negative.")
     }
     val sortedRows = getData(conn, optLimit, optOffset)
-    if (isNested) {
-      val totalCount    = getRowCount(sortedRows)
-      val nestedRows0   = rows2nested(sortedRows)
-      val nestedRows    = if (forward) nestedRows0 else nestedRows0.reverse
-      val topLevelCount = nestedRows.length
-      val fromUntil     = getFromUntil(topLevelCount, optLimit, optOffset)
-      val hasMore       = fromUntil.fold(totalCount > 0)(_._3)
-      (offsetList(nestedRows, fromUntil), topLevelCount, hasMore)
-
-    } else if (isNestedOpt) {
-      val totalCount    = optOffset.fold(getRowCount(sortedRows))(_ => getTotalCount(conn))
-      val nestedRows0   = rows2nestedOpt(sortedRows)
+    if (isNested || isNestedOpt) {
+      val totalCount    = if (isNested) getRowCount(sortedRows) else
+        optOffset.fold(getRowCount(sortedRows))(_ => getTotalCount(conn))
+      val nestedRows0   = if (isNested) rows2nested(sortedRows) else rows2nestedOpt(sortedRows)
       val nestedRows    = if (forward) nestedRows0 else nestedRows0.reverse
       val topLevelCount = nestedRows.length
       val fromUntil     = getFromUntil(topLevelCount, optLimit, optOffset)
@@ -72,18 +62,26 @@ case class JdbcQueryResolveOffset[Tpl](
 
   def subscribe(
     conn: JdbcConn_jvm,
-    txReportWatcher: TxReportWatcher,
     callback: List[Tpl] => Unit
   ): Unit = {
-    //    val allAttrIds   = conn.attrIds
-    //    val queryAttrIds = elements.collect { case a: Attr => allAttrIds(a.name) }
-    //    val dbCallBack   = (dbAfter: Database) => {
-    //      val freshResult: List[Tpl] = SqlQueryResolveOffset[Tpl](elements, limit, None, None)
-    //        .getListFromOffset_sync(Some(dbAfter))(conn)._1
-    //      callback(freshResult)
-    //    }
-    //    txReportWatcher.addSubscription(queryAttrIds, dbCallBack)
-    ???
+    val involvedAttrs    = getAttrNames(elements)
+    val involvedDeleteNs = getInitialNs(elements)
+    val maybeCallback    = (mutationAttrs: Set[String], isDelete: Boolean) => {
+      if (
+        mutationAttrs.exists(involvedAttrs.contains) ||
+          isDelete && mutationAttrs.head.startsWith(involvedDeleteNs)
+      ) {
+        callback(
+          JdbcQueryResolveOffset(elements, optLimit, None)
+            .getListFromOffset_sync(conn)._1
+        )
+      }
+    }
+    conn.addCallback(elements -> maybeCallback)
+  }
+
+  def unsubscribe(conn: JdbcConn_jvm): Unit = {
+    conn.removeCallback(elements)
   }
 
 

@@ -34,6 +34,11 @@ trait DatomicSpiAsync
     future(DatomicSpiSync.query_subscribe(q, callback))
   }
 
+  override def query_unsubscribe[Tpl](q: Query[Tpl])
+                                     (implicit conn: Conn, ec: EC): Future[Unit] = {
+    future(DatomicSpiSync.query_unsubscribe(q))
+  }
+
   override def query_inspect[Tpl](q: Query[Tpl])
                                  (implicit conn: Conn, ec: EC): Future[Unit] = {
     future(DatomicSpiSync.query_inspect(q))
@@ -69,6 +74,10 @@ trait DatomicSpiAsync
     val errors = save_validate(save)
     if (errors.isEmpty) {
       conn.asInstanceOf[DatomicConn_JVM].transact_async(save_getStmts(save))
+        .map { txReport =>
+          conn.callback(save.elements)
+          txReport
+        }
     } else {
       Future.failed(ValidationErrors(errors))
     }
@@ -97,6 +106,10 @@ trait DatomicSpiAsync
     val errors = insert_validate(insert)
     if (errors.isEmpty) {
       conn.asInstanceOf[DatomicConn_JVM].transact_async(insert_getStmts(insert, conn.proxy))
+        .map { txReport =>
+          conn.callback(insert.elements)
+          txReport
+        }
     } else {
       Future.failed(InsertErrors(errors))
     }
@@ -126,6 +139,10 @@ trait DatomicSpiAsync
     if (errors.isEmpty) {
       val conn = conn0.asInstanceOf[DatomicConn_JVM]
       conn.transact_async(update_getStmts(update, conn))
+        .map { txReport =>
+          conn.callback(update.elements)
+          txReport
+        }
     } else {
       Future.failed(ValidationErrors(errors))
     }
@@ -154,6 +171,10 @@ trait DatomicSpiAsync
     if (delete.doInspect) delete_inspect(delete)
     val conn = conn0.asInstanceOf[DatomicConn_JVM]
     conn.transact_async(delete_getStmts(delete, conn))
+      .map { txReport =>
+        conn.callback(delete.elements, true)
+        txReport
+      }
   } catch {
     case e: Throwable => Future.failed(e)
   }

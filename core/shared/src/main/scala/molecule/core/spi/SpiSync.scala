@@ -13,6 +13,10 @@ trait SpiSync  {
     q: Query[Tpl], callback: List[Tpl] => Unit
   )(implicit conn: Conn): Unit = ???
 
+  def query_unsubscribe[Tpl](
+    q: Query[Tpl]
+  )(implicit conn: Conn): Unit = ???
+
   def query_inspect[Tpl](
     q: Query[Tpl]
   )(implicit conn: Conn): Unit = ???

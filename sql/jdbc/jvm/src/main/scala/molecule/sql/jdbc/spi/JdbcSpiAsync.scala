@@ -15,6 +15,10 @@ trait JdbcSpiAsync extends SpiAsync {
                                    (implicit conn: Conn, ec: EC): Future[Unit] = Future {
     JdbcSpiSync.query_subscribe(q, callback)
   }
+  override def query_unsubscribe[Tpl](q: Query[Tpl])
+                                   (implicit conn: Conn, ec: EC): Future[Unit] = Future {
+    JdbcSpiSync.query_unsubscribe(q)
+  }
   override def query_inspect[Tpl](q: Query[Tpl])
                                  (implicit conn: Conn, ec: EC): Future[Unit] = Future {
     JdbcSpiSync.query_inspect(q)

@@ -18,63 +18,57 @@ trait JVMJdbcSpiBase extends ModelUtils {
 
 
   def validateUpdate(conn0: Conn, update: Update): Map[String, Seq[String]] = {
-    val conn                              = conn0.asInstanceOf[JdbcConn_jvm]
-    val proxy                             = conn.proxy
-    val getCurSetValues: Attr => Set[Any] = (attr: Attr) => try {
-      val (query, getValue) = resolveValueGetter(attr)
-      val ps                = conn.sqlConn.prepareStatement(query, RS.TYPE_SCROLL_INSENSITIVE, RS.CONCUR_READ_ONLY)
-      val resultSet         = ps.executeQuery()
+    val conn                           = conn0.asInstanceOf[JdbcConn_jvm]
+    val proxy                          = conn.proxy
+    val curSetValues: Attr => Set[Any] = (a: Attr) => try {
+      val ns        = a.ns
+      val attr      = a.attr
+      val query     = a.refNs.fold(
+        s"""SELECT DISTINCT
+           |  ARRAY_AGG($ns.$attr)
+           |FROM $ns
+           |WHERE
+           |  $ns.$attr IS NOT NULL
+           |HAVING COUNT(*) > 0;""".stripMargin
+
+      ) { refNs =>
+        val joinTable = s"${ns}_${attr}_$refNs"
+        s"""SELECT DISTINCT
+           |  ARRAY_AGG($joinTable.${refNs}_id)
+           |FROM $ns
+           |INNER JOIN $joinTable ON $ns.id = $joinTable.${ns}_id
+           |GROUP BY $ns.id;""".stripMargin
+      }
+      val ps        = conn.sqlConn.prepareStatement(query, RS.TYPE_SCROLL_INSENSITIVE, RS.CONCUR_READ_ONLY)
+      val resultSet = ps.executeQuery()
       resultSet.next()
-      getValue(resultSet)
+      a match {
+        case _: AttrSetManString     => nestedArray2coalescedSetString(resultSet)
+        case _: AttrSetManInt        => nestedArray2coalescedSetInt(resultSet)
+        case _: AttrSetManLong       => nestedArray2coalescedSetLong(resultSet)
+        case _: AttrSetManFloat      => nestedArray2coalescedSetFloat(resultSet)
+        case _: AttrSetManDouble     => nestedArray2coalescedSetDouble(resultSet)
+        case _: AttrSetManBoolean    => nestedArray2coalescedSetBoolean(resultSet)
+        case _: AttrSetManBigInt     => nestedArray2coalescedSetBigInt(resultSet)
+        case _: AttrSetManBigDecimal => nestedArray2coalescedSetBigDecimal(resultSet)
+        case _: AttrSetManDate       => nestedArray2coalescedSetDate(resultSet)
+        case _: AttrSetManUUID       => nestedArray2coalescedSetUUID(resultSet)
+        case _: AttrSetManURI        => nestedArray2coalescedSetURI(resultSet)
+        case _: AttrSetManByte       => nestedArray2coalescedSetByte(resultSet)
+        case _: AttrSetManShort      => nestedArray2coalescedSetShort(resultSet)
+        case _: AttrSetManChar       => nestedArray2coalescedSetChar(resultSet)
+        case other                   => throw ModelError(
+          "Unexpected attribute type for Set validation value retriever:\n" + other
+        )
+      }
     } catch {
       case e: MoleculeError => throw e
       case t: Throwable     =>
         t.printStackTrace()
         throw ExecutionError(
-          s"Unexpected error trying to find current values of mandatory attribute ${attr.name}")
+          s"Unexpected error trying to find current values of mandatory attribute ${a.name}")
     }
-    ModelValidation(proxy.nsMap, proxy.attrMap, "update", Some(getCurSetValues)).validate(update.elements)
-  }
-
-  private def resolveValueGetter(a: Attr): (String, RS => Set[Any]) = {
-    val ns       = a.ns
-    val attr     = a.attr
-    val query    = a.refNs.fold(
-      s"""SELECT DISTINCT
-         |  ARRAY_AGG($ns.$attr)
-         |FROM $ns
-         |WHERE
-         |  $ns.$attr IS NOT NULL
-         |HAVING COUNT(*) > 0;""".stripMargin
-
-    ) { refNs =>
-      val joinTable = s"${ns}_${attr}_$refNs"
-      s"""SELECT DISTINCT
-         |  ARRAY_AGG($joinTable.${refNs}_id)
-         |FROM $ns
-         |INNER JOIN $joinTable ON $ns.id = $joinTable.${ns}_id
-         |GROUP BY $ns.id;""".stripMargin
-    }
-    val getValue = a match {
-      case _: AttrSetManString     => nestedArray2coalescedSetString
-      case _: AttrSetManInt        => nestedArray2coalescedSetInt
-      case _: AttrSetManLong       => nestedArray2coalescedSetLong
-      case _: AttrSetManFloat      => nestedArray2coalescedSetFloat
-      case _: AttrSetManDouble     => nestedArray2coalescedSetDouble
-      case _: AttrSetManBoolean    => nestedArray2coalescedSetBoolean
-      case _: AttrSetManBigInt     => nestedArray2coalescedSetBigInt
-      case _: AttrSetManBigDecimal => nestedArray2coalescedSetBigDecimal
-      case _: AttrSetManDate       => nestedArray2coalescedSetDate
-      case _: AttrSetManUUID       => nestedArray2coalescedSetUUID
-      case _: AttrSetManURI        => nestedArray2coalescedSetURI
-      case _: AttrSetManByte       => nestedArray2coalescedSetByte
-      case _: AttrSetManShort      => nestedArray2coalescedSetShort
-      case _: AttrSetManChar       => nestedArray2coalescedSetChar
-      case other                   => throw ModelError(
-        "Unexpected attribute type for Set validation value retriever:\n" + other
-      )
-    }
-    (query, getValue)
+    ModelValidation(proxy.nsMap, proxy.attrMap, "update", Some(curSetValues)).validate(update.elements)
   }
 
 

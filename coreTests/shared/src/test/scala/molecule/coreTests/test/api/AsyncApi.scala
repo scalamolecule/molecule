@@ -110,8 +110,6 @@ trait AsyncApi extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync =>
           _ <- Ns.i.query.subscribe { freshResult =>
             intermediaryResults = intermediaryResults :+ freshResult
           }
-          // Wait for subscription thread to startup to propagate first result
-          _ <- delay(500)(())
 
           // Make changes to generate new results to be pushed
           _ <- Ns.i(2).save.transact
@@ -119,9 +117,6 @@ trait AsyncApi extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync =>
 
           // Not affecting subscription since it doesn't mach subscription query (Ns.i)
           _ <- Ns.string("foo").save.transact
-
-          // Wait for subscription thread to propagate last result
-          _ <- delay(100)(())
 
           _ = intermediaryResults ==> List(
             List(1, 2), // query result after 2 was added
