@@ -35,7 +35,7 @@ trait ResolveExprOne[Tpl]
   protected def resolveAttrOneTac(es: List[Var], attr: AttrOneTac): List[Var] = {
     val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
     if (isNestedOpt)
-      throw ModelError("Tacit attributes not allowed in optional nested queries. Found: " + a)
+      throw ModelError("Tacit attributes not allowed in optional nested queries. Found: " + attr.name + "_")
     attr match {
       case at: AttrOneTacString     => tac(attr, e, a, at.vs, resString)
       case at: AttrOneTacInt        => tac(attr, e, a, at.vs, resInt)
@@ -158,29 +158,15 @@ trait ResolveExprOne[Tpl]
   ): Unit = {
     val v = getVar(attr)
     addCast(resOpt.j2s)
-    attr.filterAttr.fold {
-      attr.op match {
-        case V     => addSort(sortOpt); optV(e, a, v)
-        case Eq    => optEqual(attr, e, a, v, optArgs, resOpt.s2j, sortMan)
-        case Neq   => addSort(sortMan); optNeq(e, a, v, optArgs, resOpt.tpe, resOpt.toDatalog)
-        case Lt    => addSort(sortMan); optCompare(e, a, v, optArgs, "<", resOpt.s2j)
-        case Gt    => addSort(sortMan); optCompare(e, a, v, optArgs, ">", resOpt.s2j)
-        case Le    => addSort(sortMan); optCompare(e, a, v, optArgs, "<=", resOpt.s2j)
-        case Ge    => addSort(sortMan); optCompare(e, a, v, optArgs, ">=", resOpt.s2j)
-        case other => unexpectedOp(other)
-      }
-    } { filterAttr =>
-      addSort(sortMan)
-      val w = getVar(filterAttr)
-      attr.op match {
-        case Eq    => optEqual2(e, a, v, w)
-        case Neq   => optNeq2(e, a, v, w)
-        case Lt    => optCompare2(e, a, v, w, "<")
-        case Gt    => optCompare2(e, a, v, w, ">")
-        case Le    => optCompare2(e, a, v, w, "<=")
-        case Ge    => optCompare2(e, a, v, w, ">=")
-        case other => unexpectedOp(other)
-      }
+    attr.op match {
+      case V     => addSort(sortOpt); optV(e, a, v)
+      case Eq    => optEqual(attr, e, a, v, optArgs, resOpt.s2j, sortMan)
+      case Neq   => addSort(sortMan); optNeq(e, a, v, optArgs, resOpt.tpe, resOpt.toDatalog)
+      case Lt    => addSort(sortMan); optCompare(e, a, v, optArgs, "<", resOpt.s2j)
+      case Gt    => addSort(sortMan); optCompare(e, a, v, optArgs, ">", resOpt.s2j)
+      case Le    => addSort(sortMan); optCompare(e, a, v, optArgs, "<=", resOpt.s2j)
+      case Ge    => addSort(sortMan); optCompare(e, a, v, optArgs, ">=", resOpt.s2j)
+      case other => unexpectedOp(other)
     }
   }
 
@@ -458,15 +444,6 @@ trait ResolveExprOne[Tpl]
       equal(e, a, v, vs, fromScala)
     }
   }
-  private def optEqual2(
-    e: Var,
-    a: Att,
-    v: Var,
-    w: Var
-  ): Unit = {
-    find += v
-    equal2(e, a, v, w)
-  }
 
   private def optNeq[T](
     e: Var,
@@ -481,15 +458,6 @@ trait ResolveExprOne[Tpl]
     if (optArgs.isDefined && optArgs.get.nonEmpty) {
       neq(e, a, v, optArgs.get, tpe, toDatalog)
     }
-  }
-  private def optNeq2(
-    e: Var,
-    a: Att,
-    v: Var,
-    w: Var
-  ): Unit = {
-    find += v
-    neq2(e, a, v, w)
   }
 
   private def optCompare[T](
@@ -507,15 +475,5 @@ trait ResolveExprOne[Tpl]
       find += v
       compare(e, a, v, vs.head, op, fromScala)
     }
-  }
-  private def optCompare2(
-    e: Var,
-    a: Att,
-    v: Var,
-    w: Var,
-    op: String,
-  ): Unit = {
-    find += v
-    compare2(e, a, v, w, op)
   }
 }

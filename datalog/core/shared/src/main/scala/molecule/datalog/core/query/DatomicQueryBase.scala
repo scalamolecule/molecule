@@ -123,7 +123,7 @@ trait DatomicQueryBase extends BaseHelpers with JavaConversions { self: Model2Qu
   final protected def unexpectedKw(kw: String) = throw ModelError("Unexpected keyword: " + kw)
 
   final protected def noMixedNestedModes = throw ModelError(
-    "Can't mix mandatory/optional nested data structures."
+    "Can't mix mandatory/optional nested queries."
   )
 
   final protected def datomicFreePullBooleanBug: Nothing = {

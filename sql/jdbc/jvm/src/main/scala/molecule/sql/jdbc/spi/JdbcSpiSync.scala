@@ -446,9 +446,9 @@ trait JdbcSpiSync
         }
         val columnValue = resultSet.getString(n)
         if (withNulls && resultSet.wasNull()) {
-          debug(tpe + "   " + padS(20, tpe) + col + padS(20, col) + "null")
+          debug(tpe + "   " + padS(20, tpe) + col + padS(20, col) + "  null")
         } else if (!resultSet.wasNull()) {
-          debug(tpe + "   " + padS(20, tpe) + col + padS(20, col) + columnValue)
+          debug(tpe + "   " + padS(20, tpe) + col + padS(20, col) + "  " +  columnValue)
         }
         n += 1
       }

@@ -131,7 +131,7 @@ trait ResolveExprSet[Tpl] extends AggrUtils { self: Model2SqlQuery[Tpl] with Lam
     op match {
       case Eq    => equal2(col, filterAttr)
       case Neq   => neq2(col, filterAttr)
-      case Has   => has2(col, filterAttr)
+      case Has   => has2(col, filterAttr, cardOne)
       case HasNo => hasNo2(col, filterAttr)
       case other => unexpectedOp(other)
     }
@@ -417,8 +417,12 @@ trait ResolveExprSet[Tpl] extends AggrUtils { self: Model2SqlQuery[Tpl] with Lam
     }
   }
 
-  private def has2(col: String, filterAttr: String): Unit = {
-    where += (("", s"ARRAY_CONTAINS($col, $filterAttr)"))
+  private def has2(col: String, filterAttr: String, cardOne: Boolean): Unit = {
+    if (cardOne) {
+      where += (("", s"ARRAY_CONTAINS($col, $filterAttr)"))
+    } else {
+      where += (("", s"ARRAY_CONTAINS($col, $filterAttr)"))
+    }
   }
 
   private def optHas[T: ClassTag](

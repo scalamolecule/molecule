@@ -56,7 +56,7 @@ trait ResolveNestedPull[Tpl]
             case _: Nested            => noMixedNestedModes
 
             case a: AttrOneTac => throw ModelError(
-              "Tacit attributes not allowed in optional nested data structure. Found:\n" + a)
+              "Tacit attributes not allowed in optional nested queries. Found: " + a.name + "_")
 
             case other => throw ModelError(
               "Unexpected element in optional nested molecule: " + other
@@ -88,7 +88,7 @@ trait ResolveNestedPull[Tpl]
           (res, append + append1)
 
         case (_, Some(ref: Ref), _, _) => throw ModelError(
-          "Only cardinality-one refs allowed in optional nested data structures. Found: " + ref
+          "Only cardinality-one refs allowed in optional nested queries. Found: " + ref
         )
 
         case (acc1, Some(BackRef(backRef, _)), tail, attrIndex1) =>

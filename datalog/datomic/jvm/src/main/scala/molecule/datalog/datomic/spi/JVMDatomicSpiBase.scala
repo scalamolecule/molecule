@@ -34,7 +34,7 @@ trait JVMDatomicSpiBase extends ModelUtils {
         vs.toSet
       } catch {
         case e: MoleculeError => throw e
-        case t: Throwable     => throw ExecutionError(
+        case _: Throwable     => throw ExecutionError(
           s"Unexpected error trying to find current values of mandatory attribute ${attr.name}")
       }
     }

@@ -1,5 +1,6 @@
 package molecule.sql.core.query
 
+import molecule.base.ast.SchemaAST.CardSet
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
@@ -224,7 +225,7 @@ class Model2SqlQuery[Tpl](elements0: List[Element])
   @tailrec
   final private def resolve(elements: List[Element]): Unit = elements match {
     case element :: tail => element match {
-      case a: AttrOne                           =>
+      case a: AttrOne                      =>
         if (a.attr == "id" && a.filterAttr.nonEmpty || a.attr != "id" && a.filterAttr.exists(_.attr == "id"))
           throw ModelError(noIdFiltering)
         a match {
@@ -232,29 +233,49 @@ class Model2SqlQuery[Tpl](elements0: List[Element])
           case a: AttrOneOpt => resolveAttrOneOpt(a); resolve(tail)
           case a: AttrOneTac => resolveAttrOneTac(a); resolve(tail)
         }
-      case a: AttrSet if a.refNs.isDefined      => a match {
+      case a: AttrSet if a.refNs.isDefined => a match {
         case a: AttrSetMan => resolveRefAttrSetMan(a); resolve(tail)
         case a: AttrSetOpt => resolveRefAttrSetOpt(a); resolve(tail)
         case a: AttrSetTac => resolveRefAttrSetTac(a); resolve(tail)
       }
-      case a: AttrSet                           => a match {
+      case a: AttrSet                      => a match {
         case a: AttrSetMan => resolveAttrSetMan(a); resolve(tail)
         case a: AttrSetOpt => resolveAttrSetOpt(a); resolve(tail)
         case a: AttrSetTac => resolveAttrSetTac(a); resolve(tail)
       }
-      case ref: Ref                             => resolveRef0(ref, tail)
-      case _: BackRef                           => resolve(tail)
-      case Nested(ref, nestedElements)          => resolveNested(ref, nestedElements, tail)
-      case NestedOpt(nestedRef, nestedElements) => resolveNestedOpt(nestedRef, nestedElements, tail)
+      case ref: Ref                        => resolveRef0(ref, tail)
+      case backRef: BackRef                => resolveBackRef(backRef, tail)
+      case Nested(ref, nestedElements)     => resolveNested(ref, nestedElements, tail)
+      case NestedOpt(ref, nestedElements)  => resolveNestedOpt(ref, nestedElements, tail)
     }
     case Nil             => ()
   }
 
 
   final private def resolveRef0(ref: Ref, tail: List[Element]): Unit = {
-    val Ref(_, refAttr, refNs, _) = ref
+    val Ref(_, refAttr, refNs, card) = ref
+    if (isNestedOpt && card == CardSet) {
+      throw ModelError(
+        "Only cardinality-one refs allowed in optional nested queries. Found: " + ref
+      )
+    }
     exts(refNs) = exts.get(refNs).fold(Option.empty[String])(_ => Some("_" + refAttr))
     resolveRef(ref)
+    resolve(tail)
+  }
+
+  final private def resolveBackRef(bRef: BackRef, tail: List[Element]): Unit = {
+    if (isNested || isNestedOpt) {
+      val BackRef(backRef, _) = bRef
+      tail.head match {
+        case a: Attr => throw ModelError(
+          s"Expected ref after backref _$backRef. " +
+            s"Please add attribute ${a.ns}.${a.attr} to initial namespace ${a.ns} " +
+            s"instead of after backref _$backRef."
+        )
+        case _       => ()
+      }
+    }
     resolve(tail)
   }
 
@@ -274,7 +295,7 @@ class Model2SqlQuery[Tpl](elements0: List[Element])
     resolve(tail)
   }
 
-  final private def resolveNestedOpt(nestedRef: Ref, nestedElements: List[Element], tail: List[Element]): Unit = {
+  final private def resolveNestedOpt(ref: Ref, nestedElements: List[Element], tail: List[Element]): Unit = {
     level += 1
     isNestedOpt = true
     if (isNested) {
@@ -283,12 +304,12 @@ class Model2SqlQuery[Tpl](elements0: List[Element])
     if (expectedFilterAttrs.nonEmpty) {
       throw ModelError("Filter attributes not allowed in optional nested data structure.")
     }
-    validateRefNs(nestedRef, nestedElements)
+    validateRefNs(ref, nestedElements)
 
-    val Ref(_, refAttr, refNs, _) = nestedRef
+    val Ref(_, refAttr, refNs, _) = ref
     exts(refNs) = exts.get(refNs).fold(Option.empty[String])(_ => Some("_" + refAttr))
     aritiesNested()
-    resolveNestedOptRef(nestedRef)
+    resolveNestedOptRef(ref)
     resolve(nestedElements)
     resolve(tail)
   }

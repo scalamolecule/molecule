@@ -19,14 +19,14 @@ trait Model2Query {
     // We don't do this validation in ModelTransformations_ since we want to catch
     // exceptions within the api action call and not already while composing molecules.
     @tailrec
-    def validate(elements: List[Element]): Unit = {
+    def validate(elements: List[Element], prevElements: List[Element] = Nil): Unit = {
       elements match {
         case element :: tail =>
           element match {
-            case a: Attr          => validateAttr(a); validate(tail)
-            case NestedOpt(_, es) => validateNested(es)
-            case Nested(_, es)    => validateNested(es)
-            case _                => validate(tail)
+            case a: Attr          => validateAttr(a); validate(tail, prevElements :+ a)
+            case Nested(_, es)    => validateNested(es, prevElements)
+            case NestedOpt(_, es) => validateNestedOpt(es, prevElements)
+            case _                => validate(tail, prevElements)
           }
         case Nil             => ()
       }
@@ -42,11 +42,26 @@ trait Model2Query {
       }
     }
 
-    def validateNested(es: List[Element]): Unit = {
+    def validateNested(es: List[Element], prevElements: List[Element]): Unit = {
       level += 1
       sortsPerLevel.addOne(level -> Nil)
       // Nested is the last element, so we can just validate next level elements
-      validate(es)
+      validate(es, prevElements)
+    }
+
+    def validateNestedOpt(es: List[Element], prevElements: List[Element]): Unit = {
+      level += 1
+      sortsPerLevel.addOne(level -> Nil)
+      if (prevElements.length == 1) {
+        prevElements.head match {
+          case _: AttrOneOpt => throw ModelError(
+            s"Single optional attribute before optional nested data structure is not allowed."
+          )
+          case _             => ()
+        }
+      }
+      // Nested is the last element, so we can just validate next level elements
+      validate(es, prevElements)
     }
 
     // Traverse model

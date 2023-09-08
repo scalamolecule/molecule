@@ -75,7 +75,7 @@ trait NestedExpr extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync =
         } yield ()
 
       } else {
-        // In SQL, expressions in optional nested data structures is ok
+        // In SQL, expressions in optional nested queries is ok
         for {
           _ <- A.i.Bb.*(B.i).insert(List((1, List(1, 2, 3)))).transact
 

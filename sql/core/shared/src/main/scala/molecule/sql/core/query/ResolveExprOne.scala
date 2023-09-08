@@ -28,7 +28,7 @@ trait ResolveExprOne[Tpl] { self: Model2SqlQuery[Tpl] with LambdasOne =>
 
   protected def resolveAttrOneTac(attr: AttrOneTac): Unit = {
     if (isNestedOpt)
-      throw ModelError("Tacit attributes not allowed in optional nested queries. Found: " + attr.name)
+      throw ModelError("Tacit attributes not allowed in optional nested queries. Found: " + attr.name + "_")
     attr match {
       case at: AttrOneTacString     => tac(attr, at.vs, resString1)
       case at: AttrOneTacInt        => tac(attr, at.vs, resInt1)
@@ -91,8 +91,6 @@ trait ResolveExprOne[Tpl] { self: Model2SqlQuery[Tpl] with LambdasOne =>
     addSort(attr, col)
     attr.filterAttr.fold {
       expr(col, attr.op, args, res)
-      //      filterAttrVars1 = filterAttrVars1 + (a -> (e, v))
-      //      filterAttrVars2.get(a).foreach(_(e, v))
     } { filterAttr =>
       expr2(col, attr.op, filterAttr.name)
     }
@@ -100,11 +98,10 @@ trait ResolveExprOne[Tpl] { self: Model2SqlQuery[Tpl] with LambdasOne =>
 
   private def tac[T: ClassTag](attr: Attr, args: Seq[T], res: ResOne[T]): Unit = {
     val col = getCol(attr: Attr)
-    notNull += col
+    if (!isNestedOpt)
+      notNull += col
     attr.filterAttr.fold {
       expr(col, attr.op, args, res)
-      //      filterAttrVars1 = filterAttrVars1 + (a -> (e, v))
-      //      filterAttrVars2.get(a).foreach(_(e, v))
     } { filterAttr =>
       expr2(col, attr.op, filterAttr.name)
     }
@@ -121,28 +118,15 @@ trait ResolveExprOne[Tpl] { self: Model2SqlQuery[Tpl] with LambdasOne =>
     groupByCols += col // if we later need to group by non-aggregated columns
     addCast(resOpt.sql2oneOpt)
     addSort(attr, col)
-    attr.filterAttr.fold {
-      attr.op match {
-        case V     => () // selected col can already be a value or null
-        case Eq    => optEqual(col, optArgs, resOpt.one2sql)
-        case Neq   => optNeq(col, optArgs, resOpt.one2sql)
-        case Lt    => optCompare(col, optArgs, "<", resOpt.one2sql)
-        case Gt    => optCompare(col, optArgs, ">", resOpt.one2sql)
-        case Le    => optCompare(col, optArgs, "<=", resOpt.one2sql)
-        case Ge    => optCompare(col, optArgs, ">=", resOpt.one2sql)
-        case other => unexpectedOp(other)
-      }
-    } { filterAttr =>
-      addSort(attr, col)
-      attr.op match {
-        case Eq    => optEqual2(col)
-        case Neq   => optNeq2(col)
-        case Lt    => optCompare2(col, "<")
-        case Gt    => optCompare2(col, ">")
-        case Le    => optCompare2(col, "<=")
-        case Ge    => optCompare2(col, ">=")
-        case other => unexpectedOp(other)
-      }
+    attr.op match {
+      case V     => () // selected col can already be a value or null
+      case Eq    => optEqual(col, optArgs, resOpt.one2sql)
+      case Neq   => optNeq(col, optArgs, resOpt.one2sql)
+      case Lt    => optCompare(col, optArgs, "<", resOpt.one2sql)
+      case Gt    => optCompare(col, optArgs, ">", resOpt.one2sql)
+      case Le    => optCompare(col, optArgs, "<=", resOpt.one2sql)
+      case Ge    => optCompare(col, optArgs, ">=", resOpt.one2sql)
+      case other => unexpectedOp(other)
     }
   }
 
@@ -454,12 +438,6 @@ trait ResolveExprOne[Tpl] { self: Model2SqlQuery[Tpl] with LambdasOne =>
       equal(col, vs, one2sql)
     }
   }
-  private def optEqual2(
-    col: String,
-  ): Unit = {
-    //    select += v
-    //    equal2(col, w)
-  }
 
   private def optNeq[T](
     col: String,
@@ -471,12 +449,6 @@ trait ResolveExprOne[Tpl] { self: Model2SqlQuery[Tpl] with LambdasOne =>
     } else {
       notNull += col
     }
-  }
-  private def optNeq2(
-    col: String,
-  ): Unit = {
-    //    select += v
-    //    neq2(col, w)
   }
 
   private def optCompare[T](
@@ -491,14 +463,5 @@ trait ResolveExprOne[Tpl] { self: Model2SqlQuery[Tpl] with LambdasOne =>
     } { vs =>
       where += ((col, op + " " + one2sql(vs.head)))
     }
-
-
-  }
-  private def optCompare2(
-    col: String,
-    op: String,
-  ): Unit = {
-    //    select += v
-    //    compare2(col, w, op)
   }
 }

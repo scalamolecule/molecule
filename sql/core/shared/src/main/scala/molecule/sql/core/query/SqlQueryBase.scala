@@ -43,7 +43,7 @@ trait SqlQueryBase extends BaseHelpers with JavaConversions { self: Model2Query 
   final protected var aggregate   = false
   final protected val groupByCols = new mutable.LinkedHashSet[String]
   final protected val in          = new ArrayBuffer[String]
-  final protected var hardLimit = 0
+  final protected var hardLimit   = 0
 
   // Input args and cast lambdas
   final protected val args     = new ArrayBuffer[AnyRef]
@@ -93,6 +93,6 @@ trait SqlQueryBase extends BaseHelpers with JavaConversions { self: Model2Query 
   final protected def unexpectedKw(kw: String) = throw ModelError("Unexpected keyword: " + kw)
 
   final protected def noMixedNestedModes = throw ModelError(
-    "Can't mix mandatory/optional nested data structures."
+    "Can't mix mandatory/optional nested queries."
   )
 }

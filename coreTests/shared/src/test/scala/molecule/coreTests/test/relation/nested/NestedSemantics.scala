@@ -34,12 +34,12 @@ trait NestedSemantics extends CoreTestSuite with ApiAsyncImplicits { self: SpiAs
       for {
         _ <- A.i.Bb.*(B.i.Cc.*?(C.i)).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> "Can't mix mandatory/optional nested data structures."
+          err ==> "Can't mix mandatory/optional nested queries."
         }
 
         _ <- A.i.Bb.*?(B.i.Cc.*(C.i)).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> "Can't mix mandatory/optional nested data structures."
+          err ==> "Can't mix mandatory/optional nested queries."
         }
       } yield ()
     }

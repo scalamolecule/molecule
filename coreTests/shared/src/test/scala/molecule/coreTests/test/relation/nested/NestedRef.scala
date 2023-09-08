@@ -174,16 +174,12 @@ trait NestedRef extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =
       for {
         _ <- A.i.Bb.*?(B.s.i_).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==>
-            """Tacit attributes not allowed in optional nested data structure. Found:
-              |AttrOneTacInt("B", "i", V, Seq(), None, None, Nil, Nil, None, None)""".stripMargin
+          err ==> "Tacit attributes not allowed in optional nested queries. Found: B.i_"
         }
 
         _ <- A.i.Bb.*?(B.i.C.i_).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==>
-            """Tacit attributes not allowed in optional nested data structure. Found:
-              |AttrOneTacInt("C", "i", V, Seq(), None, None, Nil, Nil, None, None)""".stripMargin
+          err ==> "Tacit attributes not allowed in optional nested queries. Found: C.i_"
         }
 
         // Ok:
@@ -193,7 +189,7 @@ trait NestedRef extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =
 
         _ <- A.i.Bb.*?(B.i.Cc.i).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> "Only cardinality-one refs allowed in optional nested data structures. Found: " +
+          err ==> "Only cardinality-one refs allowed in optional nested queries. Found: " +
             """Ref("B", "cc", "C", CardSet)"""
         }
         // Ok:

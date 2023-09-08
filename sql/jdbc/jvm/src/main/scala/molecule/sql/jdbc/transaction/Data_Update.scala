@@ -352,7 +352,6 @@ trait Data_Update
 
     } { refNs =>
       // Separate update of ref ids in join table -----------------------------
-
       val ns        = a.ns
       val refAttr   = a.attr
       val joinTable = s"${ns}_${refAttr}_$refNs"
