@@ -10,7 +10,7 @@ import molecule.coreTests.setup.CoreTestSuite
 import utest._
 
 
-trait NestedRef extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
+trait NestedRef extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync =>
 
 
   override lazy val tests = Tests {
@@ -102,12 +102,12 @@ trait NestedRef extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =
     "Backref insert: no ref re-use after" - refs { implicit conn =>
       for {
         _ <- A.i.Bb.*(B.i.C.i._B.C.s).insert(0, List((1, 2, "a"))).transact
-            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Can't re-use previous namespace C after backref _B."
           }
 
         _ <- A.i.Bb.*(B.i.C.i.D.i._C._B.C.s).insert(0, List((1, 2, 3, "a"))).transact
-            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Can't re-use previous namespace C after backref _B."
           }
       } yield ()
@@ -174,13 +174,13 @@ trait NestedRef extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =
       for {
         _ <- A.i.Bb.*?(B.s.i_).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> "Tacit attributes not allowed in optional nested queries. Found: B.i_"
-        }
+            err ==> "Tacit attributes not allowed in optional nested queries. Found: B.i_"
+          }
 
         _ <- A.i.Bb.*?(B.i.C.i_).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> "Tacit attributes not allowed in optional nested queries. Found: C.i_"
-        }
+            err ==> "Tacit attributes not allowed in optional nested queries. Found: C.i_"
+          }
 
         // Ok:
         _ <- A.i.Bb.*?(B.s.i).query.get
@@ -189,26 +189,26 @@ trait NestedRef extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =
 
         _ <- A.i.Bb.*?(B.i.Cc.i).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> "Only cardinality-one refs allowed in optional nested queries. Found: " +
-            """Ref("B", "cc", "C", CardSet)"""
-        }
+            err ==> "Only cardinality-one refs allowed in optional nested queries. Found: " +
+              """Ref("B", "cc", "C", CardSet)"""
+          }
         // Ok:
         _ <- A.i.Bb.*?(B.i.C.i).query.get
 
 
         _ <- A.i.Bb.*?(B.i.C.i._B.s.C1.i).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> "Expected ref after backref _B. " +
-            "Please add attribute B.s to initial namespace B instead of after backref _B."
-        }
+            err ==> "Expected ref after backref _B. " +
+              "Please add attribute B.s to initial namespace B instead of after backref _B."
+          }
         // Ok:
         _ <- A.i.Bb.*?(B.i.s.C.i._B.C1.i).query.get
 
 
         _ <- A.s_?.Bb.*?(B.i.C.i.s_?).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> "Single optional attribute before optional nested data structure is not allowed."
-        }
+            err ==> "Single optional attribute before optional nested data structure is not allowed."
+          }
         // Ok:
         _ <- A.s.Bb.*?(B.i.C.i.s_?).query.get
         _ <- A.s_.Bb.*?(B.i.C.i.s_?).query.get

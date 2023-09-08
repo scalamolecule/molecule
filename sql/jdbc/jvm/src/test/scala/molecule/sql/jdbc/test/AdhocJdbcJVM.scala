@@ -1,5 +1,6 @@
 package molecule.sql.jdbc.test
 
+import molecule.base.error.ModelError
 import molecule.core.util.Executor._
 import molecule.sql.jdbc.async._
 import molecule.sql.jdbc.setup.JdbcTestSuite
@@ -21,7 +22,6 @@ object AdhocJdbcJVM extends JdbcTestSuite {
       for {
         //        _ <- Ns.i(1).save.transact
         //        _ <- Ns.i.query.get.map(_ ==> List(1))
-
 
 
         _ <- Ns.i.ii.ints.insert(a, b, c).transact
@@ -124,8 +124,8 @@ object AdhocJdbcJVM extends JdbcTestSuite {
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
-                id <- A.i(1).B.i(2).C.i(3).save.transact.map(_.id)
-                _ <- A.i.B.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
+        id <- A.i(1).B.i(2).C.i(3).save.transact.map(_.id)
+        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
 
 
       } yield ()

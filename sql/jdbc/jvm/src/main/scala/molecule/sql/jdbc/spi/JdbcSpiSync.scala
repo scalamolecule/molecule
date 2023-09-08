@@ -6,6 +6,7 @@ import molecule.base.error._
 import molecule.base.util.BaseHelpers
 import molecule.boilerplate.ast.Model._
 import molecule.core.action._
+import molecule.core.marshalling.dbView.{AsOf, DbView, Since}
 import molecule.core.spi._
 import molecule.core.transaction._
 import molecule.core.validation.ModelValidation
@@ -31,9 +32,16 @@ trait JdbcSpiSync
   // Query --------------------------------------------------------
 
   override def query_get[Tpl](q: Query[Tpl])(implicit conn: Conn): List[Tpl] = {
-    if (q.doInspect) query_inspect(q)
+    if (q.doInspect) {
+      query_inspect(q)
+    }
+    q.dbView.foreach(noTime)
     JdbcQueryResolveOffset[Tpl](q.elements, q.optLimit, None)
       .getListFromOffset_sync(conn.asInstanceOf[JdbcConn_jvm])._1
+  }
+  private def noTime(dbView: DbView): Unit = dbView match {
+    case _: AsOf  => throw ModelError("Time function 'asOf' is only implemented for Datomic.")
+    case _: Since => throw ModelError("Time function 'since' is only implemented for Datomic.")
   }
 
   override def query_subscribe[Tpl](q: Query[Tpl], callback: List[Tpl] => Unit)(implicit conn: Conn): Unit = {
@@ -54,6 +62,7 @@ trait JdbcSpiSync
 
   override def queryOffset_get[Tpl](q: QueryOffset[Tpl])(implicit conn: Conn): (List[Tpl], Int, Boolean) = {
     if (q.doInspect) queryOffset_inspect(q)
+    q.dbView.foreach(noTime)
     JdbcQueryResolveOffset[Tpl](q.elements, q.optLimit, Some(q.offset))
       .getListFromOffset_sync(conn.asInstanceOf[JdbcConn_jvm])
   }
@@ -64,6 +73,7 @@ trait JdbcSpiSync
 
   override def queryCursor_get[Tpl](q: QueryCursor[Tpl])(implicit conn: Conn): (List[Tpl], String, Boolean) = {
     if (q.doInspect) queryCursor_inspect(q)
+    q.dbView.foreach(noTime)
     JdbcQueryResolveCursor[Tpl](q.elements, q.optLimit, Some(q.cursor))
       .getListFromCursor_sync(conn.asInstanceOf[JdbcConn_jvm])
   }
@@ -448,7 +458,7 @@ trait JdbcSpiSync
         if (withNulls && resultSet.wasNull()) {
           debug(tpe + "   " + padS(20, tpe) + col + padS(20, col) + "  null")
         } else if (!resultSet.wasNull()) {
-          debug(tpe + "   " + padS(20, tpe) + col + padS(20, col) + "  " +  columnValue)
+          debug(tpe + "   " + padS(20, tpe) + col + padS(20, col) + "  " + columnValue)
         }
         n += 1
       }
