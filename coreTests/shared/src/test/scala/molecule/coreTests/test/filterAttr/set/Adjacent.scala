@@ -44,7 +44,7 @@ trait Adjacent extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
       for {
         _ <- Ns.i.ii.ints.insert(a, b, c).transact
 
-        _ <- Ns.i.ii.has(Ns.ints).query.get.map(_ ==> List(b))
+        _ <- Ns.i.ii.has(Ns.ints).query.get.map(_ ==> List(b)) // Ns.ii and Ref.ints
         _ <- Ns.i.ii.has(Ns.ints_).query.get.map(_ ==> List((2, Set(2, 3)))) // Ns.ii
         _ <- Ns.i.ii_.has(Ns.ints).query.get.map(_ ==> List((2, Set(2, 3)))) // Ref.ints
         _ <- Ns.i.ii_.has(Ns.ints_).query.get.map(_ ==> List(2))

@@ -10,39 +10,39 @@ trait ResolveExprSet[Tpl] extends AggrUtils { self: Model2SqlQuery[Tpl] with Lam
   protected def resolveAttrSetMan(attr: AttrSetMan): Unit = {
     aritiesAttr()
     attr match {
-      case at: AttrSetManString     => man(attr, at.vs, resSetString)
-      case at: AttrSetManInt        => man(attr, at.vs, resSetInt)
-      case at: AttrSetManLong       => man(attr, at.vs, resSetLong)
-      case at: AttrSetManFloat      => man(attr, at.vs, resSetFloat)
-      case at: AttrSetManDouble     => man(attr, at.vs, resSetDouble)
-      case at: AttrSetManBoolean    => man(attr, at.vs, resSetBoolean)
-      case at: AttrSetManBigInt     => man(attr, at.vs, resSetBigInt)
-      case at: AttrSetManBigDecimal => man(attr, at.vs, resSetBigDecimal)
-      case at: AttrSetManDate       => man(attr, at.vs, resSetDate)
-      case at: AttrSetManUUID       => man(attr, at.vs, resSetUUID)
-      case at: AttrSetManURI        => man(attr, at.vs, resSetURI)
-      case at: AttrSetManByte       => man(attr, at.vs, resSetByte)
-      case at: AttrSetManShort      => man(attr, at.vs, resSetShort)
-      case at: AttrSetManChar       => man(attr, at.vs, resSetChar)
+      case at: AttrSetManString     => man(attr, "String", at.vs, resSetString)
+      case at: AttrSetManInt        => man(attr, "Int", at.vs, resSetInt)
+      case at: AttrSetManLong       => man(attr, "Long", at.vs, resSetLong)
+      case at: AttrSetManFloat      => man(attr, "Float", at.vs, resSetFloat)
+      case at: AttrSetManDouble     => man(attr, "Double", at.vs, resSetDouble)
+      case at: AttrSetManBoolean    => man(attr, "Boolean", at.vs, resSetBoolean)
+      case at: AttrSetManBigInt     => man(attr, "BigInt", at.vs, resSetBigInt)
+      case at: AttrSetManBigDecimal => man(attr, "BigDecimal", at.vs, resSetBigDecimal)
+      case at: AttrSetManDate       => man(attr, "Date", at.vs, resSetDate)
+      case at: AttrSetManUUID       => man(attr, "UUID", at.vs, resSetUUID)
+      case at: AttrSetManURI        => man(attr, "URI", at.vs, resSetURI)
+      case at: AttrSetManByte       => man(attr, "Byte", at.vs, resSetByte)
+      case at: AttrSetManShort      => man(attr, "Short", at.vs, resSetShort)
+      case at: AttrSetManChar       => man(attr, "Char", at.vs, resSetChar)
     }
   }
 
   protected def resolveAttrSetTac(attr: AttrSetTac): Unit = {
     attr match {
-      case at: AttrSetTacString     => tac(attr, at.vs, resSetString)
-      case at: AttrSetTacInt        => tac(attr, at.vs, resSetInt)
-      case at: AttrSetTacLong       => tac(attr, at.vs, resSetLong)
-      case at: AttrSetTacFloat      => tac(attr, at.vs, resSetFloat)
-      case at: AttrSetTacDouble     => tac(attr, at.vs, resSetDouble)
-      case at: AttrSetTacBoolean    => tac(attr, at.vs, resSetBoolean)
-      case at: AttrSetTacBigInt     => tac(attr, at.vs, resSetBigInt)
-      case at: AttrSetTacBigDecimal => tac(attr, at.vs, resSetBigDecimal)
-      case at: AttrSetTacDate       => tac(attr, at.vs, resSetDate)
-      case at: AttrSetTacUUID       => tac(attr, at.vs, resSetUUID)
-      case at: AttrSetTacURI        => tac(attr, at.vs, resSetURI)
-      case at: AttrSetTacByte       => tac(attr, at.vs, resSetByte)
-      case at: AttrSetTacShort      => tac(attr, at.vs, resSetShort)
-      case at: AttrSetTacChar       => tac(attr, at.vs, resSetChar)
+      case at: AttrSetTacString     => tac(attr, "String",  at.vs, resSetString)
+      case at: AttrSetTacInt        => tac(attr, "Int",  at.vs, resSetInt)
+      case at: AttrSetTacLong       => tac(attr, "Long",  at.vs, resSetLong)
+      case at: AttrSetTacFloat      => tac(attr, "Float",  at.vs, resSetFloat)
+      case at: AttrSetTacDouble     => tac(attr, "Double",  at.vs, resSetDouble)
+      case at: AttrSetTacBoolean    => tac(attr, "Boolean",  at.vs, resSetBoolean)
+      case at: AttrSetTacBigInt     => tac(attr, "BigInt",  at.vs, resSetBigInt)
+      case at: AttrSetTacBigDecimal => tac(attr, "BigDecimal",  at.vs, resSetBigDecimal)
+      case at: AttrSetTacDate       => tac(attr, "Date",  at.vs, resSetDate)
+      case at: AttrSetTacUUID       => tac(attr, "UUID",  at.vs, resSetUUID)
+      case at: AttrSetTacURI        => tac(attr, "URI",  at.vs, resSetURI)
+      case at: AttrSetTacByte       => tac(attr, "Byte",  at.vs, resSetByte)
+      case at: AttrSetTacShort      => tac(attr, "Short",  at.vs, resSetShort)
+      case at: AttrSetTacChar       => tac(attr, "Char",  at.vs, resSetChar)
     }
   }
 
@@ -68,7 +68,7 @@ trait ResolveExprSet[Tpl] extends AggrUtils { self: Model2SqlQuery[Tpl] with Lam
   }
 
 
-  private def man[T: ClassTag](attr: Attr, args: Seq[Set[T]], res: ResSet[T]): Unit = {
+  private def man[T: ClassTag](attr: Attr, tpe: String, args: Seq[Set[T]], res: ResSet[T]): Unit = {
     val col = getCol(attr: Attr)
     select += col
     if (isNestedOpt) {
@@ -84,17 +84,19 @@ trait ResolveExprSet[Tpl] extends AggrUtils { self: Model2SqlQuery[Tpl] with Lam
         throw ModelError(s"Cardinality-set filter attributes not allowed to do additional filtering. Found:\n  " + attr)
       }
       expr(col, attr.op, args, res, "man")
-    } { filterAttr =>
-      expr2(col, attr.op, filterAttr.name)
+    } {
+      case filterAttr: AttrOne => expr2(col, attr.op, filterAttr.name, true)
+      case filterAttr          => expr2(col, attr.op, filterAttr.name, false, tpe)
     }
   }
 
-  private def tac[T: ClassTag](attr: Attr, args: Seq[Set[T]], res: ResSet[T]): Unit = {
+  private def tac[T: ClassTag](attr: Attr, tpe: String, args: Seq[Set[T]], res: ResSet[T]): Unit = {
     val col = getCol(attr: Attr)
     attr.filterAttr.fold {
       expr(col, attr.op, args, res, "tac")
-    } { filterAttr =>
-      expr2(col, attr.op, filterAttr.name)
+    } {
+      case filterAttr: AttrOne => expr2(col, attr.op, filterAttr.name, true)
+      case filterAttr          => expr2(col, attr.op, filterAttr.name, false, tpe)
     }
     notNull += col
   }
@@ -127,12 +129,12 @@ trait ResolveExprSet[Tpl] extends AggrUtils { self: Model2SqlQuery[Tpl] with Lam
     }
   }
 
-  private def expr2(col: String, op: Op, filterAttr: String, cardOne: Boolean = true): Unit = {
+  private def expr2(col: String, op: Op, filterAttr: String, cardOne: Boolean, tpe: String = ""): Unit = {
     op match {
       case Eq    => equal2(col, filterAttr)
       case Neq   => neq2(col, filterAttr)
-      case Has   => has2(col, filterAttr, cardOne)
-      case HasNo => hasNo2(col, filterAttr)
+      case Has   => has2(col, filterAttr, cardOne, tpe)
+      case HasNo => hasNo2(col, filterAttr, cardOne, tpe)
       case other => unexpectedOp(other)
     }
   }
@@ -417,11 +419,11 @@ trait ResolveExprSet[Tpl] extends AggrUtils { self: Model2SqlQuery[Tpl] with Lam
     }
   }
 
-  private def has2(col: String, filterAttr: String, cardOne: Boolean): Unit = {
+  private def has2(col: String, filterAttr: String, cardOne: Boolean, tpe: String): Unit = {
     if (cardOne) {
       where += (("", s"ARRAY_CONTAINS($col, $filterAttr)"))
     } else {
-      where += (("", s"ARRAY_CONTAINS($col, $filterAttr)"))
+      where += (("", s"has_$tpe($col, $filterAttr)"))
     }
   }
 
@@ -457,8 +459,12 @@ trait ResolveExprSet[Tpl] extends AggrUtils { self: Model2SqlQuery[Tpl] with Lam
     }
   }
 
-  private def hasNo2(col: String, filterAttr: String): Unit = {
-    where += (("", s"NOT ARRAY_CONTAINS($col, $filterAttr)"))
+  private def hasNo2(col: String, filterAttr: String, cardOne: Boolean, tpe: String): Unit = {
+    if (cardOne) {
+      where += (("", s"NOT ARRAY_CONTAINS($col, $filterAttr)"))
+    } else {
+      where += (("", s"hasNo_$tpe($col, $filterAttr)"))
+    }
   }
 
   private def optHasNo[T](

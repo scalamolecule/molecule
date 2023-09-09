@@ -223,7 +223,7 @@ class Model2DatomicQuery[Tpl](elements0: List[Element])
       noMixedNestedModes
     }
     if (expectedFilterAttrs.nonEmpty) {
-      throw ModelError("Filter attributes not allowed in optional nested data structure.")
+      throw ModelError("Filter attributes not allowed in optional nested queries.")
     }
     validateRefNs(nestedRef, nestedElements)
 

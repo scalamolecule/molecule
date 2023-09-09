@@ -49,13 +49,13 @@ trait FilterAttrNested extends CoreTestSuite with ApiAsyncImplicits { self: SpiA
       for {
         _ <- Ns.s.i(Ref.int_).Refs.*?(Ref.int).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> "Filter attributes not allowed in optional nested data structure."
+          err ==> "Filter attributes not allowed in optional nested queries."
         }
 
         // Pointing backwards
         _ <- Ns.s.i.Refs.*?(Ref.int(Ns.i_)).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> "Filter attributes not allowed in optional nested data structure."
+          err ==> "Filter attributes not allowed in optional nested queries."
         }
       } yield ()
     }

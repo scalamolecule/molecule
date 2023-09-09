@@ -31,7 +31,7 @@ trait ResolveNestedPull[Tpl]
         case head :: tail =>
           head match {
             case a: Attr if a.op != V => throw ModelError(
-              "Expressions not allowed in optional nested data structure. Found:\n  " + a
+              "Expressions not allowed in optional nested queries. Found:\n  " + a
             )
 
             case a: AttrOneMan =>
