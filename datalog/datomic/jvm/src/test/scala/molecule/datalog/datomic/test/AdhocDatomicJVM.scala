@@ -22,26 +22,26 @@ object AdhocDatomicJVM extends DatomicTestSuite {
     }
 
 
-    "refs" - refs { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Refs._
-      for {
-        id <- A.i.apply(1).B.i(2).C.i(3).save.transact.map(_.id)
-        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
-
-
-      } yield ()
-    }
-
-
-    "unique" - unique { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Uniques._
-      for {
-        _ <- Uniques.int.i.s.insert(0, 1, "a").transact
-        _ <- Uniques.i.s.query.get.map(_ ==> List((1, "a")))
-
-
-      } yield ()
-    }
+    //    "refs" - refs { implicit conn =>
+    //      import molecule.coreTests.dataModels.core.dsl.Refs._
+    //      for {
+    //        id <- A.i.apply(1).B.i(2).C.i(3).save.transact.map(_.id)
+    //        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
+    //
+    //
+    //      } yield ()
+    //    }
+    //
+    //
+    //    "unique" - unique { implicit conn =>
+    //      import molecule.coreTests.dataModels.core.dsl.Uniques._
+    //      for {
+    //        _ <- Uniques.int.i.s.insert(0, 1, "a").transact
+    //        _ <- Uniques.i.s.query.get.map(_ ==> List((1, "a")))
+    //
+    //
+    //      } yield ()
+    //    }
 
 
     //    "validation" - validation { implicit conn =>

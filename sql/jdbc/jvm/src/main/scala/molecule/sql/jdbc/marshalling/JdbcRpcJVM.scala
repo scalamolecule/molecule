@@ -62,18 +62,6 @@ object JdbcRpcJVM extends MoleculeRpc
     ???
   }
 
-  override def subscribe[Any](
-    proxy: ConnProxy,
-    elements: List[Element],
-    limit: Option[Int],
-    callback: List[Any] => Unit
-  ): Future[Unit] = {
-//    getConn(proxy).map(conn =>
-//      Query[Any](elements, limit).subscribe(callback)(conn)
-//    )
-    ???
-  }
-
   override def save(
     proxy: ConnProxy,
     elements: List[Element]

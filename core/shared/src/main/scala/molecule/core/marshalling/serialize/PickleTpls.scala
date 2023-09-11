@@ -317,20 +317,17 @@ case class PickleTpls(
   private def pickleAttrSetMan(a: AttrSetMan, tplIndex: Int): Product => Unit = {
     a.op match {
       case Fn(kw, _) => kw match {
-        case "count" | "countDistinct"             => pickleAttrSetManInt(tplIndex)
-        case "distinct"                            => pickleAttrSetManSet(a, tplIndex)
-        case "mins" | "maxs" | "rands" | "samples" => pickleAttrSetManV(a, tplIndex)
-        case "avg" | "variance" | "stddev"         => pickleAttrSetManDouble(tplIndex)
-        case _                                     => pickleAttrSetManV(a, tplIndex)
+        case "count" | "countDistinct"                => pickleAttrSetManInt(tplIndex)
+        case "distinct"                               => pickleAttrSetManSet(a, tplIndex)
+        case "mins" | "maxs" | "rands" | "samples"    => pickleAttrSetManV(a, tplIndex)
+        case "median" | "avg" | "variance" | "stddev" => pickleAttrOneManDouble(tplIndex)
+        case _                                        => pickleAttrSetManV(a, tplIndex)
       }
       case _         => pickleAttrSetManV(a, tplIndex)
     }
   }
   private def pickleAttrSetManInt(tplIndex: Int): Product => Unit = {
     (tpl: Product) => enk.writeInt(tpl.productElement(tplIndex).toString.toInt)
-  }
-  private def pickleAttrSetManDouble(tplIndex: Int): Product => Unit = {
-    enk.writeSet[Double](tplIndex, enk.writeDouble)
   }
   private def pickleAttrSetManV(a: AttrSetMan, tplIndex: Int): Product => Unit = {
     a match {

@@ -4,7 +4,7 @@ import molecule.base.error._
 import molecule.boilerplate.ast.Model._
 import molecule.core.action._
 import molecule.core.marshalling.serialize.PickleTpls
-import molecule.core.spi.{SpiAsync, TxReport, Conn}
+import molecule.core.spi.{Conn, SpiAsync, TxReport}
 import molecule.core.util.FutureUtils
 import molecule.core.validation.ModelValidation
 import molecule.core.validation.insert.InsertValidation
@@ -14,6 +14,7 @@ import scala.concurrent.{Future, ExecutionContext => EC}
 
 trait DatomicSpiAsync
   extends SpiAsync
+    with DatomicSpi
     with DatomicSpiAsyncBase
     with FutureUtils {
 
@@ -26,11 +27,17 @@ trait DatomicSpiAsync
     conn.rpc.query[Tpl](proxy, q.elements, q.optLimit).future
 
   }
+
   override def query_subscribe[Tpl](q: Query[Tpl], callback: List[Tpl] => Unit)
                                    (implicit conn0: Conn, ec: EC): Future[Unit] = {
-    val conn = conn0.asInstanceOf[DatomicConn_JS]
-    conn.rpc.subscribe[Tpl](conn.proxy, q.elements, q.optLimit, callback)
+    addCallback(q, callback)(conn0, ec)
   }
+
+  override def query_unsubscribe[Tpl](q: Query[Tpl])
+                                     (implicit conn: Conn, ec: EC): Future[Unit] = {
+    Future(conn.removeCallback(q.elements))
+  }
+
   override def query_inspect[Tpl](q: Query[Tpl])
                                  (implicit conn: Conn, ec: EC): Future[Unit] = {
     printInspectQuery("QUERY", q.elements)
@@ -42,6 +49,7 @@ trait DatomicSpiAsync
     val proxy = conn.proxy.copy(dbView = q.dbView)
     conn.rpc.queryOffset[Tpl](proxy, q.elements, q.optLimit, q.offset).future
   }
+
   override def queryOffset_inspect[Tpl](q: QueryOffset[Tpl])
                                        (implicit conn: Conn, ec: EC): Future[Unit] = {
     printInspectQuery("QUERY (offset)", q.elements)
@@ -53,6 +61,7 @@ trait DatomicSpiAsync
     val proxy = conn.proxy.copy(dbView = q.dbView)
     conn.rpc.queryCursor[Tpl](proxy, q.elements, q.optLimit, q.cursor).future
   }
+
   override def queryCursor_inspect[Tpl](q: QueryCursor[Tpl])
                                        (implicit conn: Conn, ec: EC): Future[Unit] = {
     printInspectQuery("QUERY (cursor)", q.elements)
@@ -65,7 +74,10 @@ trait DatomicSpiAsync
     val errors = save_validate(save)
     if (errors.isEmpty) {
       val conn = conn0.asInstanceOf[DatomicConn_JS]
-      conn.rpc.save(conn.proxy, save.elements).future
+      conn.rpc.save(conn.proxy, save.elements).future.map { txReport =>
+        conn.callback(save.elements)
+        txReport
+      }
     } else {
       Future.failed(ValidationErrors(errors))
     }
@@ -90,7 +102,10 @@ trait DatomicSpiAsync
     val errors = insert_validate(insert)(conn)
     if (errors.isEmpty) {
       val tplsSerialized = PickleTpls(insert.elements, true).pickle(Right(insert.tpls))
-      conn.rpc.insert(conn.proxy, insert.elements, tplsSerialized).future
+      conn.rpc.insert(conn.proxy, insert.elements, tplsSerialized).future.map { txReport =>
+        conn.callback(insert.elements)
+        txReport
+      }
     } else {
       Future.failed(InsertErrors(errors))
     }
@@ -113,7 +128,10 @@ trait DatomicSpiAsync
     val errors = update_validate(update)
     if (errors.isEmpty) {
       val conn = conn0.asInstanceOf[DatomicConn_JS]
-      conn.rpc.update(conn.proxy, update.elements, update.isUpsert).future
+      conn.rpc.update(conn.proxy, update.elements, update.isUpsert).future.map { txReport =>
+        conn.callback(update.elements)
+        txReport
+      }
     } else {
       Future.failed(ValidationErrors(errors))
     }
@@ -126,8 +144,9 @@ trait DatomicSpiAsync
   }
 
   override def update_validate(update: Update)(implicit conn: Conn): Map[String, Seq[String]] = {
-    val proxy = conn.proxy
-    // Only generic model validation on JS platform
+    val proxy  = conn.proxy
+    if (update.isUpsert && isRefUpdate(update.elements))
+      throw ModelError("Can't upsert referenced attributes. Please update instead.")
     ModelValidation(proxy.nsMap, proxy.attrMap, "update").validate(update.elements)
   }
 
@@ -136,7 +155,10 @@ trait DatomicSpiAsync
 
   override def delete_transact(delete: Delete)(implicit conn0: Conn, ec: EC): Future[TxReport] = {
     val conn = conn0.asInstanceOf[DatomicConn_JS]
-    conn.rpc.delete(conn.proxy, delete.elements).future
+    conn.rpc.delete(conn.proxy, delete.elements).future.map { txReport =>
+      conn.callback(delete.elements, true)
+      txReport
+    }
   }
 
   override def delete_inspect(delete: Delete)(implicit conn: Conn, ec: EC): Future[Unit] = {

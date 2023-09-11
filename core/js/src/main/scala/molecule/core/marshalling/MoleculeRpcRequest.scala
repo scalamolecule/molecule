@@ -50,39 +50,4 @@ class MoleculeRpcRequest(interface: String, port: Int) extends MoleculeLogging {
         Future(TypedArrayBuffer.wrap(raw))
       }
   }
-
-
-  def websocketSubscription(
-    argsSerialized: Int8Array,
-    callbackDeserialize: ByteBuffer => Unit
-  ): Unit = {
-    // One websocket connection per subscription
-    val uuid   = UUID.randomUUID()
-    val uri    = s"ws://$interface:$port/molecule/ws/$uuid"
-    val socket = new WebSocket(uri)
-    socket.binaryType = "arraybuffer"
-    socket.onerror = {
-      case e: dom.Event =>
-        logger.error(s"WebSocket error: $e!")
-        //        keys(e).toList.foreach(k => println(s"$k -> ${apply(k)}"))
-        socket.close(1000, e.toString)
-    }
-    socket.onclose = {
-      case _: dom.CloseEvent => logger.warn("WebSocket onclose")
-    }
-    socket.onopen = {
-      case _: dom.Event =>
-        logger.trace(s"WebSocket onopen")
-        //        println("WebSocket onopen...")
-        socket.send(argsSerialized.buffer)
-    }
-
-    socket.onmessage = {
-      case e: MessageEvent =>
-        logger.trace(s"WebSocket onmessage")
-        //        println("WebSocket onmessage...")
-        val resultSerialized = TypedArrayBuffer.wrap(e.data.asInstanceOf[ArrayBuffer])
-        callbackDeserialize(resultSerialized)
-    }
-  }
 }

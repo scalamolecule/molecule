@@ -60,17 +60,6 @@ object DatomicRpcJVM extends MoleculeRpc
     } yield tpls
   }
 
-  override def subscribe[Any](
-    proxy: ConnProxy,
-    elements: List[Element],
-    limit: Option[Int],
-    callback: List[Any] => Unit
-  ): Future[Unit] = {
-    getConn(proxy).map(conn =>
-      Query[Any](elements, limit).subscribe(callback)(conn, global)
-    )
-  }
-
   override def save(
     proxy: ConnProxy,
     elements: List[Element]

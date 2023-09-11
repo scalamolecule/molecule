@@ -16,6 +16,7 @@ import scala.concurrent.Future
 
 trait DatomicSpiZio
   extends SpiZio
+    with DatomicSpi
     with DatomicSpiZioBase
     with ApiZio
     with FutureUtils {
@@ -33,10 +34,9 @@ trait DatomicSpiZio
   ): ZIO[Conn, Nothing, Unit] = {
     for {
       conn0 <- ZIO.service[Conn]
-      conn = conn0.asInstanceOf[DatomicConn_JS]
     } yield {
       try {
-        conn.rpc.subscribe[Tpl](conn.proxy, q.elements, q.optLimit, callback)
+        addCallback(q, callback)(conn0, global)
       } catch {
         case e: MoleculeError => ZIO.fail(e)
         case e: Throwable     => ZIO.fail(ExecutionError(e.toString))
@@ -87,6 +87,7 @@ trait DatomicSpiZio
       errors <- save_validate(save)
       _ <- ZIO.when(errors.nonEmpty)(ZIO.fail(ValidationErrors(errors)))
       txReport <- transactStmts(conn.rpc.save(conn.proxy, save.elements).future)
+      _ = conn.callback(save.elements)
     } yield txReport
   }
   override def save_inspect(save: Save): ZIO[Conn, MoleculeError, Unit] = {
@@ -109,6 +110,7 @@ trait DatomicSpiZio
       _ <- ZIO.when(errors.nonEmpty)(ZIO.fail(InsertErrors(errors)))
       tplsSerialized = PickleTpls(insert.elements, true).pickle(Right(insert.tpls))
       txReport <- transactStmts(conn.rpc.insert(conn.proxy, insert.elements, tplsSerialized).future)
+      _ = conn.callback(insert.elements)
     } yield txReport
   }
   override def insert_inspect(insert: Insert): ZIO[Conn, MoleculeError, Unit] = {
@@ -129,6 +131,7 @@ trait DatomicSpiZio
       errors <- update_validate(update)
       _ <- ZIO.when(errors.nonEmpty)(ZIO.fail(ValidationErrors(errors)))
       txReport <- transactStmts(conn.rpc.update(conn.proxy, update.elements, update.isUpsert).future)
+      _ = conn.callback(update.elements)
     } yield txReport
   }
   override def update_inspect(update: Update): ZIO[Conn, MoleculeError, Unit] = {
@@ -148,6 +151,7 @@ trait DatomicSpiZio
     for {
       conn <- ZIO.service[Conn]
       txReport <- transactStmts(conn.rpc.delete(conn.proxy, delete.elements).future)
+      _ = conn.callback(delete.elements, true)
     } yield txReport
   }
   override def delete_inspect(delete: Delete): ZIO[Conn, MoleculeError, Unit] = {

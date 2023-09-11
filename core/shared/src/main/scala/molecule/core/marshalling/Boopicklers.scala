@@ -20,11 +20,6 @@ object Boopicklers extends MoleculeLogging {
   pickleCard.addConcreteType[CardOne.type]
   pickleCard.addConcreteType[CardSet.type]
 
-  implicit val pickleMetaAttr  : CompositePickler[MetaAttr]   = compositePickler[MetaAttr]
-  implicit val pickleMetaNs    : CompositePickler[MetaNs]     = compositePickler[MetaNs]
-  implicit val pickleMetaPart  : CompositePickler[MetaPart]   = compositePickler[MetaPart]
-  implicit val pickleMetaSchema: CompositePickler[MetaSchema] = compositePickler[MetaSchema]
-
   implicit val pickleMetaModel: CompositePickler[MetaModel] = compositePickler[MetaModel]
   pickleMetaModel.addConcreteType[MetaAttr]
   pickleMetaModel.addConcreteType[MetaNs]

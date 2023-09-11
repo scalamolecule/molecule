@@ -53,7 +53,7 @@ trait Data_Update extends DatomicBase_JVM with UpdateOps with MoleculeLogging { 
       val validationErrors = ModelValidation(
         conn.proxy.nsMap,
         conn.proxy.attrMap,
-        "update",
+        if (isUpsert) "upsert" else "update",
         Some(getCurSetValues)
       ).validate(elements)
       if (validationErrors.nonEmpty) {

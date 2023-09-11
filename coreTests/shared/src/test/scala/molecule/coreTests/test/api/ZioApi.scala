@@ -3,7 +3,7 @@ package molecule.coreTests.test.api
 import molecule.base.error._
 import molecule.core.spi.SpiZio
 import molecule.coreTests.api.ApiZioImplicits
-import molecule.coreTests.dataModels.core.dsl.Types._
+import molecule.coreTests.dataModels.core.dsl.Types.{Ns, _}
 import molecule.coreTests.setup.CoreTestZioSpec
 import molecule.coreTests.zio._
 import zio._
@@ -103,26 +103,43 @@ trait ZioApi extends CoreTestZioSpec with ApiZioImplicits { self: SpiZio  =>
       }.provide(unique.orDie),
 
       test("Subscription") {
-        var intermediaryResults = List.empty[List[Int]]
+        var intermediaryCallbackResults = List.empty[List[Int]]
         for {
           // Initial data (not pushed)
           _ <- Ns.i(1).save.transact
 
           // Start subscription in separate thread
           _ <- Ns.i.query.subscribe { freshResult =>
-            intermediaryResults = intermediaryResults :+ freshResult
+            intermediaryCallbackResults = intermediaryCallbackResults :+ freshResult
           }
 
-          // Make changes to generate new results to be pushed
-          _ <- Ns.i(2).save.transact
-          _ <- Ns.i(3).save.transact
+          // Mutations to be monitored by subscription
+          id <- Ns.i(2).save.transact.map(_.id)
 
-          // Not affecting subscription since it doesn't mach subscription query (Ns.i)
+          // For testing purpose, allow each mutation to finish so that we can
+          // catch the intermediary callback result in order
+          _ <- delay(50)(())
+
+          _ <- Ns.i.insert(3, 4).transact
+          _ <- delay(50)(())
+
+          _ <- Ns(id).i(20).update.transact
+          _ <- delay(50)(())
+
+          _ <- Ns(id).delete.transact
+          _ <- delay(50)(())
+
+          // Mutations with no callback-involved attributes don't call back
           _ <- Ns.string("foo").save.transact
+
+          // Allow callbacks running in parallel to finish
+          //          _ <- TestClock.adjust(50.milliseconds) // doesn't work on first run on JS, hmm..
         } yield {
-          assertTrue(intermediaryResults == List(
-            List(1, 2), // query result after 2 was added
-            List(1, 2, 3) // query result after 3 was added
+          assertTrue(intermediaryCallbackResults.map(_.sorted).toSet == Set(
+            List(1, 2), // query result after 2 was saved
+            List(1, 2, 3, 4), // query result after 3 and 4 were inserted
+            List(1, 3, 4, 20), // query result after 2 was updated to 20
+            List(1, 3, 4), // query result after 20 was deleted
           ))
         }
       }.provide(types.orDie),

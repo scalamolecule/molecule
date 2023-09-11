@@ -101,26 +101,45 @@ trait AsyncApi extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync =>
 
 
       "Subscription" - types { implicit conn =>
-        var intermediaryResults = List.empty[List[Int]]
+        var intermediaryCallbackResults = List.empty[List[Int]]
         for {
-          // Initial data (not pushed)
+          // Initial data
           _ <- Ns.i(1).save.transact
 
-          // Start subscription in separate thread on server
-          _ <- Ns.i.query.subscribe { freshResult =>
-            intermediaryResults = intermediaryResults :+ freshResult
+          // Start subscription
+          _ = Ns.i.query.subscribe { freshResult =>
+            intermediaryCallbackResults = intermediaryCallbackResults :+ freshResult
           }
 
-          // Make changes to generate new results to be pushed
-          _ <- Ns.i(2).save.transact
-          _ <- Ns.i(3).save.transact
+          // Mutations to be monitored by subscription
+          id <- Ns.i(2).save.transact.map(_.id)
+          _ <- Ns.i.a1.query.get.map(_ ==> List(1, 2))
 
-          // Not affecting subscription since it doesn't mach subscription query (Ns.i)
+          // For testing purpose, allow each mutation to finish so that we can
+          // catch the intermediary callback result in order
+          _ <- delay(50)(())
+
+          _ <- Ns.i.insert(3, 4).transact
+          _ <- Ns.i.a1.query.get.map(_ ==> List(1, 2, 3, 4))
+          _ <- delay(50)(())
+
+          _ <- Ns(id).i(20).update.transact
+          _ <- Ns.i.a1.query.get.map(_ ==> List(1, 3, 4, 20))
+          _ <- delay(50)(())
+
+          _ <- Ns(id).delete.transact
+          _ <- Ns.i.a1.query.get.map(_ ==> List(1, 3, 4))
+          _ <- delay(50)(())
+
+          // Mutations with no callback-involved attributes don't call back
           _ <- Ns.string("foo").save.transact
 
-          _ = intermediaryResults ==> List(
-            List(1, 2), // query result after 2 was added
-            List(1, 2, 3), // query result after 3 was added
+          // Callback catched all intermediary results correctly
+          _ = intermediaryCallbackResults.map(_.sorted).toSet ==> Set(
+            List(1, 2), // query result after 2 was saved
+            List(1, 2, 3, 4), // query result after 3 and 4 were inserted
+            List(1, 3, 4, 20), // query result after 2 was updated to 20
+            List(1, 3, 4), // query result after 20 was deleted
           )
         } yield ()
       }

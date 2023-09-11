@@ -27,13 +27,6 @@ trait MoleculeRpc {
     cursor: String
   ): Future[Either[MoleculeError, (List[Tpl], String, Boolean)]]
 
-  def subscribe[Tpl](
-    proxy: ConnProxy,
-    elements: List[Element],
-    limit: Option[Int],
-    callback: List[Tpl] => Unit
-  ): Future[Unit]
-
   def save(
     proxy: ConnProxy,
     elements: List[Element]
@@ -55,6 +48,4 @@ trait MoleculeRpc {
     proxy: ConnProxy,
     elements: List[Element]
   ): Future[Either[MoleculeError, TxReport]]
-
-
 }

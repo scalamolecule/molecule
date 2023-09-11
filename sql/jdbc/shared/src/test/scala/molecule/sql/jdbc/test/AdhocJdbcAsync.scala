@@ -20,8 +20,6 @@ object AdhocJdbcAsync extends JdbcTestSuite {
           .long(long3)
           .float(float3)
           .save.transact
-//        _ <- Ns.i(3).save.transact
-//        _ <- Ns.i.insert(3).transact
         _ <- Ns.i.query.get.map(_ ==> List(3))
       } yield ()
     }

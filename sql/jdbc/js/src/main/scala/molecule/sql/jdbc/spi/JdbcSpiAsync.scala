@@ -31,7 +31,8 @@ trait JdbcSpiAsync
   override def query_subscribe[Tpl](q: Query[Tpl], callback: List[Tpl] => Unit)
                                    (implicit conn0: Conn, ec: EC): Future[Unit] = {
     val conn = conn0.asInstanceOf[JdbcConn_js]
-    conn.rpc.subscribe[Tpl](conn.proxy, q.elements, q.optLimit, callback)
+//    conn.rpc.subscribe[Tpl](conn.proxy, q.elements, q.optLimit, callback)
+    ???
   }
 
   override def query_inspect[Tpl](q: Query[Tpl])(implicit conn: Conn, ec: EC): Future[Unit] = {

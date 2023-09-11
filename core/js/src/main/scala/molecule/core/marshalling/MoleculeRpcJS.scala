@@ -54,25 +54,6 @@ case class MoleculeRpcJS(interface: String, port: Int)
     )
   }.flatten
 
-
-  override def subscribe[Tpl](
-    proxy: ConnProxy,
-    elements: List[Element],
-    limit: Option[Int],
-    callback: List[Tpl] => Unit
-  ): Future[Unit] = Future {
-    val argsSerialized      = Pickle.intoBytes((proxy, elements, limit)).typedArray()
-    val callbackDeserialize = (resultSerialized: ByteBuffer) => {
-      UnpickleTpls[Tpl](elements, resultSerialized).unpickle match {
-        case Right(tpls)                      => callback(tpls)
-        case Left(ExecutionError("no match")) => // do nothing
-        case Left(moleculeError)              => logger.warn(moleculeError.toString)
-      }
-    }
-    websocketSubscription(argsSerialized, callbackDeserialize)
-  }
-
-
   override def save(
     proxy: ConnProxy,
     elements: List[Element]
@@ -82,7 +63,6 @@ case class MoleculeRpcJS(interface: String, port: Int)
       Unpickle.apply[Either[MoleculeError, TxReport]].fromBytes(resultSerialized)
     )
   }.flatten
-
 
   override def insert(
     proxy: ConnProxy,
@@ -95,7 +75,6 @@ case class MoleculeRpcJS(interface: String, port: Int)
     )
   }.flatten
 
-
   override def update(
     proxy: ConnProxy,
     elements: List[Element],
@@ -106,7 +85,6 @@ case class MoleculeRpcJS(interface: String, port: Int)
       Unpickle.apply[Either[MoleculeError, TxReport]].fromBytes(resultSerialized)
     )
   }.flatten
-
 
   override def delete(
     proxy: ConnProxy,

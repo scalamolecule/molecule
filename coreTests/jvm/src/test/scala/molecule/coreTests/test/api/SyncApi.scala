@@ -105,32 +105,45 @@ trait SyncApi extends CoreTestSuite with ApiSyncImplicits { self: SpiSync =>
 
 
       "Subscription" - types { implicit conn =>
-        var intermediaryResults = List.empty[List[Int]]
+        var intermediaryCallbackResults = List.empty[List[Int]]
 
-        // Initial data (not pushed)
+        // Initial data
         Ns.i(1).save.transact
 
-        // Start subscription in separate thread on server
+        // Start subscription
         Ns.i.query.subscribe { freshResult =>
-          intermediaryResults = intermediaryResults :+ freshResult
+          intermediaryCallbackResults = intermediaryCallbackResults :+ freshResult
         }
 
-        // Wait for subscription thread to startup to propagate first result
-        Thread.sleep(50)
+        // Mutations to be monitored by subscription
+        val id = Ns.i(2).save.transact.id
+        Ns.i.a1.query.get ==> List(1, 2)
 
-        // Make changes to generate new results to be pushed
-        Ns.i(2).save.transact
-        Ns.i(3).save.transact
+        // For testing purpose, allow each mutation to finish so that we can
+        // catch the intermediary callback result in order
+        delay(50)(())
 
-        // Not affecting subscription since it doesn't mach subscription query (Ns.i)
+        Ns.i.insert(3, 4).transact
+        Ns.i.a1.query.get ==> List(1, 2, 3, 4)
+        delay(50)(())
+
+        Ns(id).i(20).update.transact
+        Ns.i.a1.query.get ==> List(1, 3, 4, 20)
+        delay(50)(())
+
+        Ns(id).delete.transact
+        Ns.i.a1.query.get ==> List(1, 3, 4)
+        delay(50)(())
+
+        // Mutations with no callback-involved attributes don't call back
         Ns.string("foo").save.transact
 
-        // Wait for subscription thread to propagate last result
-        Thread.sleep(50)
-
-        intermediaryResults ==> List(
-          List(1, 2), // query result after 2 was added
-          List(1, 2, 3) // query result after 3 was added
+        // Callback catched all intermediary results correctly
+        intermediaryCallbackResults.map(_.sorted) ==> List(
+          List(1, 2), // query result after 2 was saved
+          List(1, 2, 3, 4), // query result after 3 and 4 were inserted
+          List(1, 3, 4, 20), // query result after 2 was updated to 20
+          List(1, 3, 4), // query result after 20 was deleted
         )
       }
     }

@@ -296,11 +296,11 @@ case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuff
   private def unpickleAttrSetMan(a: AttrSetMan): () => Any = {
     a.op match {
       case Fn(kw, _) => kw match {
-        case "count" | "countDistinct"             => () => dek.readInt
-        case "distinct"                            => unpickleAttrSetManSet(a)
-        case "mins" | "maxs" | "rands" | "samples" => unpickleAttrSetManV(a)
-        case "avg" | "variance" | "stddev"         => () => dek.readSet[Double](dek.readDouble)
-        case _                                     => unpickleAttrSetManV(a)
+        case "count" | "countDistinct"                => () => dek.readInt
+        case "distinct"                               => unpickleAttrSetManSet(a)
+        case "mins" | "maxs" | "rands" | "samples"    => unpickleAttrSetManV(a)
+        case "median" | "avg" | "variance" | "stddev" => () => dek.readDouble
+        case _                                        => unpickleAttrSetManV(a)
       }
       case _         => unpickleAttrSetManV(a)
     }
