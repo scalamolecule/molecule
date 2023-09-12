@@ -1,6 +1,6 @@
 package molecule.core.util
 
-import molecule.base.ast.SchemaAST._
+import molecule.base.ast._
 
 
 trait MetaModelUtils {

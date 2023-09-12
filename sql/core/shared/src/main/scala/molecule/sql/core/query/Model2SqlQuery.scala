@@ -1,6 +1,6 @@
 package molecule.sql.core.query
 
-import molecule.base.ast.SchemaAST.CardSet
+import molecule.base.ast._
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging

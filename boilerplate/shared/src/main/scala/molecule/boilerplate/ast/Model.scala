@@ -2,11 +2,12 @@ package molecule.boilerplate.ast
 
 import java.net.URI
 import java.util.{Date, UUID}
-import molecule.base.ast.SchemaAST._
+import molecule.base.ast._
+import molecule.base.util.BaseHelpers
 
 
 object Model extends Model
-trait Model extends Validations with Values {
+trait Model extends Validations with Values with BaseHelpers {
 
   sealed trait Mode
   trait Mandatory extends Mode

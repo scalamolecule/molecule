@@ -1,30 +1,24 @@
-(work in progress)
-
 ![](project/resources/Molecule-logo.png)
 
-Molecule is a library to write type-inferred Scala code that translates to queries for multiple databases.
+Molecule is a library to write type-inferred Scala code that translates to queries for various databases.
 
 An sbt-molecule plugin generates boilerplate code from your domain data model definition so that you can write intuitive type-inferred queries with the words of your domain.
 
-- Works with [Datomic](http://www.datomic.com) and JDBC-compliant databases (and more to come)
+- Works with [Datomic](http://www.datomic.com) and [H2](https://h2database.com/html/main.html) (more JDBC-compliant databases to come)
 - Targets Scala 3.3, 2.13 and 2.12
 - Scala and Scalajs platforms
-- All 1300+ Datomic tests pass (jdbc module is wip)
+- SPI of 1300+ tests pass for Datomic and H2 databases
 - No macros
 - No complex type class implicits
 - Maximum type inference
 - Synchronous/Asynchronous/ZIO APIs
 - Nested data structures
-- Associative relationships (composites)
 - Validation
 - Pagination (offset/cursor)
 - Sorting
 - Subscriptions and more...
 
 Documentation at [scalamolecule.org](http://scalamolecule.org) still documents the old macro-based version of molecule but will be updated to the new version. Most concepts overlap.
-
-This Molecule library is a complete re-write of the old macro-base molecule library that is now archived in the molecule-old github repo. The old molecule library has been under active development for several years. 
-
 
 ### Examples
 
@@ -36,7 +30,7 @@ import molecule.datalog.datomic.sync._
 val persons: List[(String, Int, String)] = 
   Person.name.age.Adress.street.query.get
 ```
-Synchronous API, JDBC
+Synchronous API, H2
 ```scala
 import molecule.sql.jdbc.sync._
 val persons: List[(String, Int, String)] = 
@@ -95,13 +89,13 @@ Add the following to your build files:
 `project/build.properties`:
 
 ```scala
-sbt.version=1.9.3
+sbt.version=1.9.4
 ```
 
 `project/plugins.sbt`:
 
 ```scala
-addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "1.1.0")
+addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "1.2.0")
 ```
 
 `build.sbt`:
@@ -111,9 +105,9 @@ lazy val yourProject = project.in(file("app"))
   .enablePlugins(MoleculePlugin)
   .settings(
     libraryDependencies ++= Seq(
-      "org.scalamolecule" %% "molecule-datalog-datomic" % "0.1.0",
+      "org.scalamolecule" %% "molecule-datalog-datomic" % "0.2.0",
       // and/or
-      "org.scalamolecule" %% "molecule-sql-jdbc" % "0.1.0",
+      "org.scalamolecule" %% "molecule-sql-jdbc" % "0.2.0",
     ),
     moleculeSchemas := Seq("app") // paths to your data model definitions...
   )
@@ -152,14 +146,14 @@ Then in another process/terminal window:
 
 ### Publish locally
 
-To be completely up-to-date, you can pull the latest changes from Github and publish molecule locally:
+To be completely up-to-date, you can pull the latest changes from Github and publish molecule locally (for Scala 2.13):
 
     git pull
     sbt publishLocal
 
 Or target other Scala versions:
 
-    sbt ++3.3.0 publishLocal
+    sbt ++3.3.1 publishLocal
     sbt ++2.12.18 publishLocal
 
 

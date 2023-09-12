@@ -58,6 +58,21 @@ trait BaseHelpers extends DateHandling {
     case v         => v.toString
   }
 
+  final def renderValidations(validations: Seq[(String, String)]): String = {
+    if (validations.isEmpty) {
+      "Nil"
+    } else {
+      validations.map {
+        case (test, error) =>
+          val errorStr = if (error.isEmpty) "\"\"" else s"""\"\"\"$error\"\"\""""
+          s"""            (
+             |              \"\"\"$test\"\"\",
+             |              $errorStr
+             |            )""".stripMargin
+      }.mkString("Seq(\n", ",\n", ")")
+    }
+  }
+
   final def sq[T](values: Iterable[T]): String = if (values.isEmpty) "Nil" else {
     values.map {
       case set: Set[_] => if (set.isEmpty) "Nil" else set.map(render).mkString("Set(", ", ", ")")

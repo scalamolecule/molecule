@@ -3,8 +3,8 @@ import org.scalajs.linker.interface.ESVersion
 
 
 val scala212 = "2.12.18"
-val scala213 = "2.13.11"
-val scala3   = "3.3.0"
+val scala213 = "2.13.12"
+val scala3   = "3.3.1"
 val allScala = Seq(scala212, scala213, scala3)
 
 val akkaVersion = "2.8.3"
@@ -15,7 +15,7 @@ inThisBuild(
     organization := "org.scalamolecule",
     organizationName := "ScalaMolecule",
     organizationHomepage := Some(url("http://www.scalamolecule.org")),
-    version := "0.2.0-SNAPSHOT",
+    version := "0.2.0",
     versionScheme := Some("early-semver"),
     //    scalaVersion := scala212,
     scalaVersion := scala213,

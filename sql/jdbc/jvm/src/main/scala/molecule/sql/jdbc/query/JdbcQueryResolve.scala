@@ -3,9 +3,10 @@ package molecule.sql.jdbc.query
 import java.sql.ResultSet
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
+import molecule.sql.core.javaSql.ResultSetImpl
 import molecule.sql.core.query.Model2SqlQuery
 import molecule.sql.core.query.cursor.CursorUtils
-import molecule.sql.jdbc.facade.JdbcConn_jvm
+import molecule.sql.jdbc.facade.JdbcConn_JVM
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 
@@ -40,20 +41,20 @@ abstract class JdbcQueryResolve[Tpl](elements: List[Element])
   }
 
   protected def getData(
-    conn: JdbcConn_jvm,
+    conn: JdbcConn_JVM,
     optLimit: Option[Int],
     optOffset: Option[Int]
   ): ResultSet = {
     getResultSet(conn, getSqlQuery(Nil, optLimit, optOffset))
   }
 
-  protected def getTotalCount(conn: JdbcConn_jvm): Int = {
+  protected def getTotalCount(conn: JdbcConn_JVM): Int = {
     val rs = getResultSet(conn, getTotalCountQuery)
     rs.next()
     rs.getInt(1)
   }
 
-  private def getResultSet(conn: JdbcConn_jvm, query: String): ResultSet = {
+  private def getResultSet(conn: JdbcConn_JVM, query: String): ResultSet = {
     conn.sqlConn.prepareStatement(
       query,
       ResultSet.TYPE_SCROLL_INSENSITIVE,
@@ -63,7 +64,7 @@ abstract class JdbcQueryResolve[Tpl](elements: List[Element])
 
 
   protected def getRawData(
-    conn: JdbcConn_jvm,
+    conn: JdbcConn_JVM,
     altElements: List[Element],
     optLimit: Option[Int],
     optOffset: Option[Int]
@@ -90,7 +91,7 @@ abstract class JdbcQueryResolve[Tpl](elements: List[Element])
 
 
   def paginateFromIdentifiers(
-    conn: JdbcConn_jvm,
+    conn: JdbcConn_JVM,
     limit: Int,
     forward: Boolean,
     allTokens: List[String],
@@ -116,13 +117,14 @@ abstract class JdbcQueryResolve[Tpl](elements: List[Element])
     }
     val altElements  = filterAttr +: elements
     val sortedRows   = getRawData(conn, altElements, None, None)
-    val flatRowCount = getRowCount(sortedRows)
+    val sortedRows1  = new ResultSetImpl(sortedRows)
+    val flatRowCount = getRowCount(sortedRows1)
 
     if (flatRowCount == 0) {
       (Nil, "", false)
     } else {
       if (isNested || isNestedOpt) {
-        val nestedTpls     = if (isNested) rows2nested(sortedRows) else rows2nestedOpt(sortedRows)
+        val nestedTpls     = if (isNested) rows2nested(sortedRows1) else rows2nestedOpt(sortedRows1)
         val totalCount     = nestedTpls.length
         val count          = getCount(limit, forward, totalCount)
         val nestedTpls1    = if (forward) nestedTpls else nestedTpls.reverse
@@ -137,7 +139,7 @@ abstract class JdbcQueryResolve[Tpl](elements: List[Element])
         val allTuples  = ListBuffer.empty[Tpl]
         val row2tpl    = castRow2AnyTpl(aritiess.head, castss.head, 1, None)
         while (sortedRows.next()) {
-          allTuples += row2tpl(sortedRows).asInstanceOf[Tpl]
+          allTuples += row2tpl(sortedRows1).asInstanceOf[Tpl]
         }
         val allTuples1     = if (forward) allTuples else allTuples.reverse
         val (tuples, more) = paginateTpls(count, allTuples1.result(), identifiers, identifyTpl)

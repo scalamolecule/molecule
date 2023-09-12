@@ -1,7 +1,7 @@
 package molecule.datalog.datomic.transaction
 
 import java.util.{ArrayList => jArrayList, List => jList}
-import molecule.base.ast.SchemaAST._
+import molecule.base.ast._
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.ops.InsertOps

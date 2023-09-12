@@ -110,9 +110,7 @@ trait DatomicSpiSync
   )(implicit conn: Conn): List[List[Any]] = {
     if (withNulls)
       throw new Exception("Null values not part of the semantic model of Datomic.")
-
-    // todo: cast result
-    Peer.q(query, conn.db).asScala.toList.map(_.asScala.toList)
+    Peer.q(query, conn.db.asInstanceOf[AnyRef]).asScala.toList.map(_.asScala.toList)
   }
 
   override def fallback_rawTransact(

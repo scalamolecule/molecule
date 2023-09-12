@@ -15,9 +15,10 @@ import molecule.datalog.datomic.async._
 import molecule.datalog.datomic.transaction._
 import scala.concurrent.Future
 
-object DatomicRpcJVM extends MoleculeRpc
-  with DatomicBase_JVM
-  with FutureUtils {
+object DatomicRpcJVM
+  extends MoleculeRpc
+    with DatomicBase_JVM
+    with FutureUtils {
 
   /**
    * Tuple type is not marshalled from client to server. So we signal this with

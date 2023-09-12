@@ -37,6 +37,6 @@ trait DatomicTestSuite extends CoreTestSuite {
 
   def printQuery(q: String)(implicit conn: Conn): Unit = {
     println("-------------------------------------")
-    Peer.q(q, conn.db).forEach { r => println(r) }
+    Peer.q(q, conn.db.asInstanceOf[AnyRef]).forEach { r => println(r) }
   }
 }

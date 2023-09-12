@@ -1,6 +1,6 @@
 package molecule.sql.core.query
 
-import molecule.base.ast.SchemaAST.CardOne
+import molecule.base.ast._
 import molecule.boilerplate.ast.Model._
 
 

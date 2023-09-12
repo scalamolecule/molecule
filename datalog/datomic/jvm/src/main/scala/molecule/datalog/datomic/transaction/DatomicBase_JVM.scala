@@ -85,7 +85,7 @@ trait DatomicBase_JVM extends DatomicDataType_JVM with ModelUtils {
   // Connection pool ---------------------------------------------
 
   // todo: real solution
-  protected val connectionPool = mutable.HashMap.empty[UUID, Future[DatomicConn_JVM]]
+  private val connectionPool = mutable.HashMap.empty[UUID, Future[DatomicConn_JVM]]
 
   //  override def clearConnPool: Future[Unit] = Future {
   //    // logger.debug(s"Connection pool with ${connectionPool.size} connections cleared.")
@@ -104,7 +104,7 @@ trait DatomicBase_JVM extends DatomicDataType_JVM with ModelUtils {
     futConnTimeAdjusted
   }
 
-  protected def getFreshConn(proxy: ConnProxy): Future[DatomicConn_JVM] = {
+  private def getFreshConn(proxy: ConnProxy): Future[DatomicConn_JVM] = {
     proxy match {
       case proxy@DatomicProxy(protocol, dbIdentifier, _, _, _, _, _, _, _, _, _) =>
         protocol match {

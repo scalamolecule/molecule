@@ -6,7 +6,7 @@ import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.util.FutureUtils
 import molecule.sql.core.query.cursor.CursorUtils
-import molecule.sql.jdbc.facade.JdbcConn_jvm
+import molecule.sql.jdbc.facade.JdbcConn_JVM
 import molecule.sql.jdbc.query.JdbcQueryResolve
 
 
@@ -18,7 +18,7 @@ case class NoUnique[Tpl](
   with FutureUtils with CursorUtils with MoleculeLogging {
 
   def getPage(allTokens: List[String], limit: Int)
-             (implicit conn: JdbcConn_jvm)
+             (implicit conn: JdbcConn_JVM)
   : (List[Tpl], String, Boolean) = try {
     val forward     = limit > 0
     val attrsTokens = allTokens.drop(2).dropRight(6).grouped(13).toList.sortBy(_(2))

@@ -2,7 +2,7 @@ package molecule.sql.jdbc.transaction
 
 import java.sql.{Statement, PreparedStatement => PS}
 import java.util.Date
-import molecule.base.ast.SchemaAST._
+import molecule.base.ast._
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.ResolveSave

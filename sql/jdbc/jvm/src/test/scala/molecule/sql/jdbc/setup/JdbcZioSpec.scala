@@ -5,7 +5,7 @@ import molecule.core.marshalling.JdbcProxy
 import molecule.core.spi.Conn
 import molecule.coreTests.dataModels.core.schema._
 import molecule.coreTests.setup.CoreTestZioSpec
-import molecule.sql.jdbc.facade.JdbcHandler_jvm
+import molecule.sql.jdbc.facade.JdbcHandler_JVM
 import zio.{ZIO, ZLayer}
 import scala.util.Random
 
@@ -26,7 +26,7 @@ trait JdbcZioSpec extends CoreTestZioSpec {
     )
     ZLayer.scoped(
       ZIO.attemptBlocking(
-        JdbcHandler_jvm.recreateDb(proxy, url)
+        JdbcHandler_JVM.recreateDb(proxy)
       )
     )
   }

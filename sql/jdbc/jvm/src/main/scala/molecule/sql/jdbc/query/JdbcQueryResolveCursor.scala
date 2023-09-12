@@ -6,8 +6,9 @@ import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.ops.ModelTransformations_
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.util.FutureUtils
+import molecule.sql.core.javaSql.ResultSetImpl
 import molecule.sql.core.query.cursor.CursorUtils
-import molecule.sql.jdbc.facade.JdbcConn_jvm
+import molecule.sql.jdbc.facade.JdbcConn_JVM
 import molecule.sql.jdbc.query.cursorStrategy.{NoUnique, PrimaryUnique, SubUnique}
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
@@ -31,7 +32,7 @@ case class JdbcQueryResolveCursor[Tpl](
   with MoleculeLogging {
 
 
-  def getListFromCursor_sync(implicit conn: JdbcConn_jvm)
+  def getListFromCursor_sync(implicit conn: JdbcConn_JVM)
   : (List[Tpl], String, Boolean) = {
     optLimit match {
       case Some(limit) => cursor match {
@@ -57,18 +58,19 @@ case class JdbcQueryResolveCursor[Tpl](
   }
 
 
-  private def getInitialPage(limit: Int)(implicit conn: JdbcConn_jvm)
+  private def getInitialPage(limit: Int)(implicit conn: JdbcConn_JVM)
   : (List[Tpl], String, Boolean) = {
     val forward      = limit > 0
     val altElements  = if (forward) elements else reverseTopLevelSorting(elements)
     val sortedRows   = getRawData(conn, altElements, Some(limit.abs), None)
-    val flatRowCount = getRowCount(sortedRows)
+    val sortedRows1  = new ResultSetImpl(sortedRows)
+    val flatRowCount = getRowCount(sortedRows1)
 
     if (flatRowCount == 0) {
       (Nil, "", false)
     } else {
       if (isNested || isNestedOpt) {
-        val nestedRows    = if (isNested) rows2nested(sortedRows) else rows2nestedOpt(sortedRows)
+        val nestedRows    = if (isNested) rows2nested(sortedRows1) else rows2nestedOpt(sortedRows1)
         val topLevelCount = nestedRows.length
         val limitAbs      = limit.abs.min(topLevelCount)
         val hasMore       = limitAbs < topLevelCount
@@ -84,7 +86,7 @@ case class JdbcQueryResolveCursor[Tpl](
         val tuples     = ListBuffer.empty[Tpl]
         val row2tpl    = castRow2AnyTpl(aritiess.head, castss.head, 1, None)
         while (sortedRows.next()) {
-          tuples += row2tpl(sortedRows).asInstanceOf[Tpl]
+          tuples += row2tpl(sortedRows1).asInstanceOf[Tpl]
         }
         val result = if (forward) tuples.result() else tuples.result().reverse
         val cursor = initialCursor(conn, result)
@@ -93,7 +95,7 @@ case class JdbcQueryResolveCursor[Tpl](
     }
   }
 
-  private def initialCursor(conn: JdbcConn_jvm, tpls: List[Tpl]): String = {
+  private def initialCursor(conn: JdbcConn_JVM, tpls: List[Tpl]): String = {
     val unique = conn.proxy.uniqueAttrs
     @tailrec
     def checkSort(

@@ -2,23 +2,23 @@ package molecule.sql.jdbc.transaction
 
 import java.sql.{PreparedStatement => PS}
 import java.util.UUID
-import molecule.base.ast.SchemaAST._
-import molecule.base.error.ExecutionError
+import molecule.base.ast._
+import molecule.base.util.BaseHelpers
 import molecule.boilerplate.ast.Model._
-import molecule.core.marshalling.{ConnProxy, DatomicProxy}
+import molecule.core.marshalling.{ConnProxy, JdbcProxy}
 import molecule.core.util.Executor._
 import molecule.core.util.ModelUtils
-import molecule.sql.jdbc.facade.JdbcConn_jvm
+import molecule.sql.jdbc.facade.{JdbcConn_JVM, JdbcHandler_JVM}
 import scala.collection.mutable
 import scala.concurrent.Future
 
-trait JdbcBase_JVM extends JdbcDataType_JVM with ModelUtils {
+trait JdbcBase_JVM extends JdbcDataType_JVM with ModelUtils with BaseHelpers {
 
   // Override on instantiation
-  protected val sqlConn: java.sql.Connection
+  lazy val sqlConn: java.sql.Connection = ???
 
   var level = 0
-  def indent(level: Int) = "  " * level
+  override def indent(level: Int) = "  " * level
   protected def debug(s: Any) = if (doPrint) println(s) else ()
 
   protected var doPrint              = false
@@ -70,18 +70,16 @@ trait JdbcBase_JVM extends JdbcDataType_JVM with ModelUtils {
   // "Connection pool" ---------------------------------------------
 
   // todo: offer real solution
-  protected val connectionPool = mutable.HashMap.empty[UUID, Future[JdbcConn_jvm]]
+  private val connectionPool = mutable.HashMap.empty[UUID, Future[JdbcConn_JVM]]
 
   //  override def clearConnPool: Future[Unit] = Future {
   //    // logger.debug(s"Connection pool with ${connectionPool.size} connections cleared.")
   //    connectionPool.clear()
   //  }
 
-  protected def getConn(proxy: ConnProxy): Future[JdbcConn_jvm] = {
+  protected def getConn(proxy: ConnProxy): Future[JdbcConn_JVM] = {
     val futConn             = connectionPool.getOrElse(proxy.uuid, getFreshConn(proxy))
     val futConnTimeAdjusted = futConn.map { conn =>
-      //      conn.updateAdhocDbView(proxy.adhocDbView)
-      //      conn.updateTestDbView(proxy.testDbView, proxy.testDbStatus)
       conn
     }
     connectionPool(proxy.uuid) = futConnTimeAdjusted
@@ -89,27 +87,8 @@ trait JdbcBase_JVM extends JdbcDataType_JVM with ModelUtils {
     futConnTimeAdjusted
   }
 
-  protected def getFreshConn(proxy: ConnProxy): Future[JdbcConn_jvm] = {
-    proxy match {
-      case proxy@DatomicProxy(protocol, dbIdentifier, _, _, _, _, _, _, _, _, _) =>
-        //        protocol match {
-        //          case "mem" =>
-        //            JdbcHandler.recreateDbFromEdn(proxy, protocol, dbIdentifier)
-        //              .recover {
-        //                case exc: Throwable => throw ExecutionError(exc.getMessage)
-        //              }
-        //
-        //          case "free" | "dev" | "pro" =>
-        //            Future(JdbcHandler.connect(proxy, protocol, dbIdentifier))
-        //              .recover {
-        //                case exc: Throwable => throw ExecutionError(exc.getMessage)
-        //              }
-        ???
-
-      case other => Future.failed(
-        ExecutionError(s"\nCan't serve Peer protocol `$other`.")
-      )
-    }
+  private def getFreshConn(proxy: ConnProxy): Future[JdbcConn_JVM] = {
+    Future(JdbcHandler_JVM.recreateDb(proxy.asInstanceOf[JdbcProxy]))
   }
 
   protected def getRefResolver[T](ns: String, refAttr: String, refNs: String, card: Card): T => Unit = {

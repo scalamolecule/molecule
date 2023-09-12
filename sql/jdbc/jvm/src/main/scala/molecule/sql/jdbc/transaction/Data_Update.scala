@@ -194,7 +194,7 @@ trait Data_Update
       val id        = getUpdateId
       sets match {
         case Seq(set) =>
-          // Tables are reversed in JdbcConn_jvm and we want to delete first
+          // Tables are reversed in JdbcConn_JVM and we want to delete first
           manualTableDatas = List(
             addJoins(joinTable, ns_id, refNs_id, id, set.asInstanceOf[Set[Long]]),
             deleteJoins(joinTable, ns_id, id)

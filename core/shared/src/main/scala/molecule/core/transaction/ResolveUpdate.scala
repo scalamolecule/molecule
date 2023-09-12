@@ -1,6 +1,6 @@
 package molecule.core.transaction
 
-import molecule.base.ast.SchemaAST._
+import molecule.base.ast._
 import molecule.base.error._
 import molecule.boilerplate.ast.Model._
 import molecule.core.transaction.ops.UpdateOps
@@ -155,8 +155,5 @@ class ResolveUpdate(
     case a: AttrSetManByte       => updateSetRemove(a, a.vs.head, transformByte, handleByte, dbTypeByte, a.refNs)
     case a: AttrSetManShort      => updateSetRemove(a, a.vs.head, transformShort, handleShort, dbTypeShort, a.refNs)
     case a: AttrSetManChar       => updateSetRemove(a, a.vs.head, transformChar, handleChar, dbTypeChar, a.refNs)
-    case _                       => throw ExecutionError(
-      s"Can only remove one Set of values for Set attribute `${attr.name}`. Found: $attr"
-    )
   }
 }

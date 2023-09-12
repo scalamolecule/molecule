@@ -121,15 +121,6 @@ abstract class DatomicQueryResolve[Tpl](elements: List[Element], dbView: Option[
     }
   }
 
-  protected def offsetList(
-    sortedRows: List[Tpl],
-    fromUntil: Option[(Int, Int, Boolean)]
-  ): List[Tpl] = {
-    fromUntil.fold(sortedRows) {
-      case (from, until, _) => sortedRows.slice(from, until)
-    }
-  }
-
   protected def getFromUntil(
     tc: Int,
     limit: Option[Int],

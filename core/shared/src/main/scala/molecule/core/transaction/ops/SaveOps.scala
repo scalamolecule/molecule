@@ -2,7 +2,7 @@ package molecule.core.transaction.ops
 
 import java.net.URI
 import java.util.{Date, UUID}
-import molecule.base.ast.SchemaAST.Card
+import molecule.base.ast._
 import molecule.core.transaction.Action2Data
 
 trait SaveOps extends Action2Data {

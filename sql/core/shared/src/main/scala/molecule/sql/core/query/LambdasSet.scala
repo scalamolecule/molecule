@@ -1,7 +1,6 @@
 package molecule.sql.core.query
 
 import java.net.URI
-import java.sql.{ResultSet => RS}
 import java.util.{Date, UUID}
 import molecule.core.util.JavaConversions
 
@@ -284,7 +283,7 @@ trait LambdasSet extends ResolveBase with JavaConversions { self: SqlQueryBase =
   lazy val resOptSetChar      : ResSetOpt[Char]       = ResSetOpt("Char", sql2setOptChar, set2sqlChar, set2sqlsChar, one2sqlChar)
 
 
-  private def sql2setOpt[T](row: Row, n: Int, getValue: RS => T): Option[Set[T]] = {
+  private def sql2setOpt[T](row: Row, n: Int, getValue: Row => T): Option[Set[T]] = {
     val array = row.getArray(n)
     if (row.wasNull()) {
       Option.empty[Set[T]]

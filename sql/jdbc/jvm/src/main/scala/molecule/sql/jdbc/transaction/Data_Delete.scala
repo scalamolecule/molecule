@@ -1,7 +1,7 @@
 package molecule.sql.jdbc.transaction
 
 import java.sql.{ResultSet, PreparedStatement => PS}
-import molecule.base.ast.SchemaAST.{CardOne, CardSet, MetaNs}
+import molecule.base.ast._
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.ResolveDelete
@@ -9,7 +9,6 @@ import molecule.core.transaction.ops.DeleteOps
 import molecule.core.util.MetaModelUtils
 import molecule.sql.core.query.Model2SqlQuery
 import scala.annotation.tailrec
-import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
 trait Data_Delete

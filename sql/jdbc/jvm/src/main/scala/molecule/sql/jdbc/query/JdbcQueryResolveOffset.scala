@@ -4,7 +4,8 @@ import molecule.base.error._
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.util.{FutureUtils, ModelUtils}
-import molecule.sql.jdbc.facade.JdbcConn_jvm
+import molecule.sql.core.javaSql.ResultSetImpl
+import molecule.sql.jdbc.facade.JdbcConn_JVM
 import scala.collection.mutable.ListBuffer
 
 /**
@@ -27,7 +28,7 @@ case class JdbcQueryResolveOffset[Tpl](
 
   lazy val forward = optLimit.fold(true)(_ >= 0) && optOffset.fold(true)(_ >= 0)
 
-  def getListFromOffset_sync(implicit conn: JdbcConn_jvm)
+  def getListFromOffset_sync(implicit conn: JdbcConn_JVM)
   : (List[Tpl], Int, Boolean) = {
     lazy val limitSign  = optLimit.get >> 31
     lazy val offsetSign = optOffset.get >> 31
@@ -35,10 +36,11 @@ case class JdbcQueryResolveOffset[Tpl](
       throw ModelError("Limit and offset should both be positive or negative.")
     }
     val sortedRows = getData(conn, optLimit, optOffset)
+    val sortedRows1  = new ResultSetImpl(sortedRows)
     if (isNested || isNestedOpt) {
-      val totalCount    = if (isNested) getRowCount(sortedRows) else
-        optOffset.fold(getRowCount(sortedRows))(_ => getTotalCount(conn))
-      val nestedRows0   = if (isNested) rows2nested(sortedRows) else rows2nestedOpt(sortedRows)
+      val totalCount    = if (isNested) getRowCount(sortedRows1) else
+        optOffset.fold(getRowCount(sortedRows1))(_ => getTotalCount(conn))
+      val nestedRows0   = if (isNested) rows2nested(sortedRows1) else rows2nestedOpt(sortedRows1)
       val nestedRows    = if (forward) nestedRows0 else nestedRows0.reverse
       val topLevelCount = nestedRows.length
       val fromUntil     = getFromUntil(topLevelCount, optLimit, optOffset)
@@ -46,11 +48,11 @@ case class JdbcQueryResolveOffset[Tpl](
       (offsetList(nestedRows, fromUntil), topLevelCount, hasMore)
 
     } else {
-      val totalCount = optOffset.fold(getRowCount(sortedRows))(_ => getTotalCount(conn))
+      val totalCount = optOffset.fold(getRowCount(sortedRows1))(_ => getTotalCount(conn))
       val row2tpl    = castRow2AnyTpl(aritiess.head, castss.head, 1, None)
       val tuples     = ListBuffer.empty[Tpl]
       while (sortedRows.next()) {
-        tuples += row2tpl(sortedRows).asInstanceOf[Tpl]
+        tuples += row2tpl(sortedRows1).asInstanceOf[Tpl]
       }
       val fromUntil = getFromUntil(totalCount, optLimit, optOffset)
       val hasMore   = fromUntil.fold(totalCount > 0)(_._3)
@@ -61,7 +63,7 @@ case class JdbcQueryResolveOffset[Tpl](
 
 
   def subscribe(
-    conn: JdbcConn_jvm,
+    conn: JdbcConn_JVM,
     callback: List[Tpl] => Unit
   ): Unit = {
     val involvedAttrs    = getAttrNames(elements)
@@ -80,7 +82,7 @@ case class JdbcQueryResolveOffset[Tpl](
     conn.addCallback(elements -> maybeCallback)
   }
 
-  def unsubscribe(conn: JdbcConn_jvm): Unit = {
+  def unsubscribe(conn: JdbcConn_JVM): Unit = {
     conn.removeCallback(elements)
   }
 

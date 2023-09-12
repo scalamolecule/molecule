@@ -1,18 +1,13 @@
 package molecule.datalog.datomic.spi
 
 import molecule.base.error._
-import molecule.boilerplate.ast.Model._
 import molecule.core.action._
 import molecule.core.api.ApiZio
-import molecule.core.marshalling.serialize.PickleTpls
 import molecule.core.spi.{Conn, SpiZio, TxReport}
-import molecule.core.util.Executor._
 import molecule.core.util.FutureUtils
-import molecule.core.validation.ModelValidation
-import molecule.core.validation.insert.InsertValidation
 import molecule.datalog.datomic.facade.DatomicConn_JS
 import zio._
-import scala.concurrent.Future
+import scala.concurrent.{Future, ExecutionContext => EC}
 
 trait DatomicSpiZio
   extends SpiZio
@@ -24,159 +19,114 @@ trait DatomicSpiZio
   override def query_get[Tpl](
     q: Query[Tpl]
   ): ZIO[Conn, MoleculeError, List[Tpl]] = {
-    getResult((conn: DatomicConn_JS) =>
-      conn.rpc.query[Tpl](conn.proxy, q.elements, q.optLimit).future
-    )
+    async2zio[List[Tpl]]((conn: DatomicConn_JS, ec: EC) => DatomicSpiAsync.query_get(q)(conn, ec))
   }
 
   override def query_subscribe[Tpl](
     q: Query[Tpl], callback: List[Tpl] => Unit
-  ): ZIO[Conn, Nothing, Unit] = {
-    for {
-      conn0 <- ZIO.service[Conn]
-    } yield {
-      try {
-        addCallback(q, callback)(conn0, global)
-      } catch {
-        case e: MoleculeError => ZIO.fail(e)
-        case e: Throwable     => ZIO.fail(ExecutionError(e.toString))
-      }
-    }
+  ): ZIO[Conn, MoleculeError, Unit] = {
+    async2zio[Unit]((conn: DatomicConn_JS, ec: EC) => DatomicSpiAsync.query_subscribe(q, callback)(conn, ec))
   }
 
   override def query_inspect[Tpl](
     q: Query[Tpl]
   ): ZIO[Conn, MoleculeError, Unit] = {
-    printInspectQuery("QUERY", q.elements)
+    async2zio[Unit]((conn: DatomicConn_JS, ec: EC) => DatomicSpiAsync.query_inspect(q)(conn, ec))
   }
-
 
   override def queryOffset_get[Tpl](
     q: QueryOffset[Tpl]
   ): ZIO[Conn, MoleculeError, (List[Tpl], Int, Boolean)] = {
-    getResult((conn: DatomicConn_JS) =>
-      conn.rpc.queryOffset[Tpl](conn.proxy, q.elements, q.optLimit, q.offset).future
-    )
+    async2zio[(List[Tpl], Int, Boolean)]((conn: DatomicConn_JS, ec: EC) => DatomicSpiAsync.queryOffset_get(q)(conn, ec))
+
   }
 
   override def queryOffset_inspect[Tpl](
     q: QueryOffset[Tpl]
   ): ZIO[Conn, MoleculeError, Unit] = {
-    printInspectQuery("QUERY (offset)", q.elements)
+    async2zio[Unit]((conn: DatomicConn_JS, ec: EC) => DatomicSpiAsync.queryOffset_inspect(q)(conn, ec))
   }
-
 
   override def queryCursor_get[Tpl](
     q: QueryCursor[Tpl]
   ): ZIO[Conn, MoleculeError, (List[Tpl], String, Boolean)] = {
-    getResult((conn: DatomicConn_JS) =>
-      conn.rpc.queryCursor[Tpl](conn.proxy, q.elements, q.optLimit, q.cursor).future
-    )
+    async2zio[(List[Tpl], String, Boolean)]((conn: DatomicConn_JS, ec: EC) => DatomicSpiAsync.queryCursor_get(q)(conn, ec))
   }
 
   override def queryCursor_inspect[Tpl](
     q: QueryCursor[Tpl]
   ): ZIO[Conn, MoleculeError, Unit] = {
-    printInspectQuery("QUERY (cursor)", q.elements)
+    async2zio[Unit]((conn: DatomicConn_JS, ec: EC) => DatomicSpiAsync.queryCursor_inspect(q)(conn, ec))
   }
 
 
   override def save_transact(save: Save): ZIO[Conn, MoleculeError, TxReport] = {
-    for {
-      conn <- ZIO.service[Conn]
-      errors <- save_validate(save)
-      _ <- ZIO.when(errors.nonEmpty)(ZIO.fail(ValidationErrors(errors)))
-      txReport <- transactStmts(conn.rpc.save(conn.proxy, save.elements).future)
-      _ = conn.callback(save.elements)
-    } yield txReport
+    async2zio[TxReport]((conn: DatomicConn_JS, ec: EC) => DatomicSpiAsync.save_transact(save)(conn, ec))
   }
+
   override def save_inspect(save: Save): ZIO[Conn, MoleculeError, Unit] = {
-    printInspectTx("SAVE", save.elements)
+    async2zio[Unit]((conn: DatomicConn_JS, ec: EC) => DatomicSpiAsync.save_inspect(save)(conn, ec))
   }
+
   override def save_validate(save: Save): ZIO[Conn, MoleculeError, Map[String, Seq[String]]] = {
     for {
       conn <- ZIO.service[Conn]
-      proxy = conn.proxy
       errors <- ZIO.succeed[Map[String, Seq[String]]](
-        ModelValidation(proxy.nsMap, proxy.attrMap, "save").validate(save.elements)
+        DatomicSpiAsync.save_validate(save)(conn)
       )
     } yield errors
   }
 
   override def insert_transact(insert: Insert): ZIO[Conn, MoleculeError, TxReport] = {
-    for {
-      conn <- ZIO.service[Conn]
-      errors <- insert_validate(insert)
-      _ <- ZIO.when(errors.nonEmpty)(ZIO.fail(InsertErrors(errors)))
-      tplsSerialized = PickleTpls(insert.elements, true).pickle(Right(insert.tpls))
-      txReport <- transactStmts(conn.rpc.insert(conn.proxy, insert.elements, tplsSerialized).future)
-      _ = conn.callback(insert.elements)
-    } yield txReport
+    async2zio[TxReport]((conn: DatomicConn_JS, ec: EC) => DatomicSpiAsync.insert_transact(insert)(conn, ec))
   }
+
   override def insert_inspect(insert: Insert): ZIO[Conn, MoleculeError, Unit] = {
-    printInspectTx("INSERT", insert.elements)
+    async2zio[Unit]((conn: DatomicConn_JS, ec: EC) => DatomicSpiAsync.insert_inspect(insert)(conn, ec))
   }
+
   override def insert_validate(insert: Insert): ZIO[Conn, MoleculeError, Seq[(Int, Seq[InsertError])]] = {
     for {
       conn <- ZIO.service[Conn]
       errors <- ZIO.succeed[Seq[(Int, Seq[InsertError])]](
-        InsertValidation.validate(conn, insert.elements, insert.tpls)
+        DatomicSpiAsync.insert_validate(insert)(conn)
       )
     } yield errors
   }
 
   override def update_transact(update: Update): ZIO[Conn, MoleculeError, TxReport] = {
-    for {
-      conn <- ZIO.service[Conn]
-      errors <- update_validate(update)
-      _ <- ZIO.when(errors.nonEmpty)(ZIO.fail(ValidationErrors(errors)))
-      txReport <- transactStmts(conn.rpc.update(conn.proxy, update.elements, update.isUpsert).future)
-      _ = conn.callback(update.elements)
-    } yield txReport
+    async2zio[TxReport]((conn: DatomicConn_JS, ec: EC) => DatomicSpiAsync.update_transact(update)(conn, ec))
   }
+
   override def update_inspect(update: Update): ZIO[Conn, MoleculeError, Unit] = {
-    printInspectTx("UPDATE", update.elements)
+    async2zio[Unit]((conn: DatomicConn_JS, ec: EC) => DatomicSpiAsync.update_inspect(update)(conn, ec))
   }
+
   override def update_validate(update: Update): ZIO[Conn, MoleculeError, Map[String, Seq[String]]] = {
     for {
       conn <- ZIO.service[Conn]
-      proxy = conn.proxy
       errors <- ZIO.succeed[Map[String, Seq[String]]](
-        ModelValidation(proxy.nsMap, proxy.attrMap, "update").validate(update.elements)
+        DatomicSpiAsync.update_validate(update)(conn)
       )
     } yield errors
   }
 
   override def delete_transact(delete: Delete): ZIO[Conn, MoleculeError, TxReport] = {
-    for {
-      conn <- ZIO.service[Conn]
-      txReport <- transactStmts(conn.rpc.delete(conn.proxy, delete.elements).future)
-      _ = conn.callback(delete.elements, true)
-    } yield txReport
-  }
-  override def delete_inspect(delete: Delete): ZIO[Conn, MoleculeError, Unit] = {
-    printInspectTx("DELETE", delete.elements)
+    async2zio[TxReport]((conn: DatomicConn_JS, ec: EC) => DatomicSpiAsync.delete_transact(delete)(conn, ec))
   }
 
+  override def delete_inspect(delete: Delete): ZIO[Conn, MoleculeError, Unit] = {
+    async2zio[Unit]((conn: DatomicConn_JS, ec: EC) => DatomicSpiAsync.delete_inspect(delete)(conn, ec))
+  }
 
 
   // Helpers ---------
 
-  private def getResult[T](query: DatomicConn_JS => Future[T]): ZIO[Conn, MoleculeError, T] = {
+  private def async2zio[T](run: (DatomicConn_JS, EC) => Future[T]): ZIO[Conn, MoleculeError, T] = {
     for {
       conn0 <- ZIO.service[Conn]
       conn = conn0.asInstanceOf[DatomicConn_JS]
-      result <- moleculeError(ZIO.fromFuture(_ => query(conn)))
+      result <- moleculeError(ZIO.fromFuture(ec => run(conn, ec)))
     } yield result
-  }
-
-  private def transactStmts(fut: Future[TxReport]): ZIO[Conn, MoleculeError, TxReport] = {
-    moleculeError(ZIO.fromFuture(_ => fut))
-  }
-
-  private def printInspectTx(label: String, elements: List[Element]): ZIO[Conn, MoleculeError, Unit] = {
-    ZIO.succeed(
-      printInspect("RPC " + label, elements)
-    )
   }
 }

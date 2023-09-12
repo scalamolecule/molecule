@@ -60,19 +60,3 @@ object AdhocJdbcJVM extends JdbcTestSuite {
     //    }
   }
 }
-
-/*
-// Possible Map attribute key/value accessors?
-
-//  val name   = Map("en" -> "hello", "de" -> "hello", "da" -> "hej")
-//  val name_k = Set("en", "de", "da") // unique keys
-//  val name_v = Seq("hello", "hej") // non-unique values
-//
-//  val name_
-//  val name_k_
-//  val name_v_
-//
-//  val name_?
-//  val name_k_?
-//  val name_v_?
- */

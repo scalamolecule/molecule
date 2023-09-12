@@ -1,6 +1,6 @@
 package molecule.core.transaction
 
-import molecule.base.ast.SchemaAST._
+import molecule.base.ast._
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.core.transaction.ops.InsertOps
@@ -80,8 +80,6 @@ class ResolveInsert extends InsertResolvers_ with InsertValidators_ { self: Inse
           prevRefs.clear()
           val optNestedResolver = addNested(nsMap, tplIndex, ns, refAttr, refNs, nestedElements)
           resolve(nsMap, tail, resolvers :+ optNestedResolver, 0, tplIndex)
-
-        case other => throw ModelError("Unexpected element: " + other)
       }
       case Nil             => resolvers
     }

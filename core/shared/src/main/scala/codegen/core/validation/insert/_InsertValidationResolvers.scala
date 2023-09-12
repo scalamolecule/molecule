@@ -10,7 +10,7 @@ object _InsertValidationResolvers extends CoreGenBase("InsertValidationResolvers
     s"""// GENERATED CODE ********************************
        |package molecule.core.validation.insert
        |
-       |import molecule.base.ast.SchemaAST._
+       |import molecule.base.ast._
        |import molecule.base.error.InsertError
        |import molecule.boilerplate.ast.Model._
        |

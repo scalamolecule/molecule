@@ -1,25 +1,31 @@
 package molecule.sql.jdbc.facade
 
 import java.sql
-import java.sql.SQLException
-import molecule.boilerplate.ast.Model.Element
+import java.sql.{Connection, SQLException}
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.marshalling.JdbcProxy
 import molecule.core.spi.{Conn, TxReport}
 import molecule.core.util.ModelUtils
 import molecule.sql.jdbc.transaction.{JdbcBase_JVM, JdbcDataType_JVM, JoinTable, Table}
-import scala.collection.mutable
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
-case class JdbcConn_jvm(override val proxy: JdbcProxy, override val sqlConn: sql.Connection)
+case class JdbcConn_JVM(override val proxy: JdbcProxy, private val sqlConn0: sql.Connection)
   extends Conn(proxy)
     with JdbcDataType_JVM
     with JdbcBase_JVM
     with ModelUtils
     with MoleculeLogging {
 
-  private[molecule] var fresh = true
+
+  override lazy val sqlConn: Connection = sqlConn0
+
   doPrint = false
+
+  override def transact_async(data: (List[Table], List[JoinTable]))
+                             (implicit ec: ExecutionContext): Future[TxReport] = {
+    Future(transact_sync(data))
+  }
 
   override def transact_sync(data: Data): TxReport = {
     atomicTransaction(() => populateStmts(data))

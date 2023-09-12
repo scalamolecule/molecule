@@ -1,6 +1,6 @@
 package molecule.base.api
 
-import molecule.base.ast.SchemaAST._
+import molecule.base.ast._
 
 
 /** Schema transaction data interface with data sources for various databases.

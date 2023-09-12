@@ -6,8 +6,9 @@ import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.ops.ModelTransformations_
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.util.FutureUtils
+import molecule.sql.core.javaSql.ResultSetImpl
 import molecule.sql.core.query.cursor.CursorUtils
-import molecule.sql.jdbc.facade.JdbcConn_jvm
+import molecule.sql.jdbc.facade.JdbcConn_JVM
 import molecule.sql.jdbc.query.JdbcQueryResolve
 import scala.collection.mutable.ListBuffer
 
@@ -30,7 +31,7 @@ case class PrimaryUnique[Tpl](
   with FutureUtils with CursorUtils with ModelTransformations_ with MoleculeLogging {
 
   def getPage(tokens: List[String], limit: Int)
-             (implicit conn: JdbcConn_jvm): (List[Tpl], String, Boolean) = try {
+             (implicit conn: JdbcConn_JVM): (List[Tpl], String, Boolean) = try {
     val List(_, _, tpe, ns, attr, _, a, z) = tokens
 
     val forward      = limit > 0
@@ -38,13 +39,14 @@ case class PrimaryUnique[Tpl](
     val filterAttr   = getFilterAttr(tpe, ns, attr, fn, v)
     val altElements  = filterAttr +: (if (forward) elements else reverseTopLevelSorting(elements))
     val sortedRows   = getRawData(conn, altElements, Some(limit.abs), None)
-    val flatRowCount = getRowCount(sortedRows)
+    val sortedRows1  = new ResultSetImpl(sortedRows)
+    val flatRowCount = getRowCount(sortedRows1)
 
     if (flatRowCount == 0) {
       (Nil, "", false)
     } else {
       if (isNested || isNestedOpt) {
-        val nestedRows    = if (isNested) rows2nested(sortedRows) else rows2nestedOpt(sortedRows)
+        val nestedRows    = if (isNested) rows2nested(sortedRows1) else rows2nestedOpt(sortedRows1)
         val topLevelCount = nestedRows.length
         val limitAbs      = limit.abs.min(topLevelCount)
         val hasMore       = limitAbs < topLevelCount
@@ -60,7 +62,7 @@ case class PrimaryUnique[Tpl](
         val tuples     = ListBuffer.empty[Tpl]
         val row2tpl    = castRow2AnyTpl(aritiess.head, castss.head, 1, None)
         while (sortedRows.next()) {
-          tuples += row2tpl(sortedRows).asInstanceOf[Tpl]
+          tuples += row2tpl(sortedRows1).asInstanceOf[Tpl]
         }
         val result = if (forward) tuples.result() else tuples.result().reverse
         val cursor = nextCursorUniques(result, tokens)

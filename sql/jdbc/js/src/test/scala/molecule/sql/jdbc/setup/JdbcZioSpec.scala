@@ -4,7 +4,7 @@ import molecule.base.api.Schema
 import molecule.core.marshalling.{JdbcProxy, RpcRequest}
 import molecule.core.spi.Conn
 import molecule.coreTests.setup.CoreTestZioSpecBase
-import molecule.sql.jdbc.facade.JdbcConn_js
+import molecule.sql.jdbc.facade.JdbcConn_JS
 import zio.ZLayer
 import scala.util.Random
 
@@ -23,6 +23,6 @@ trait JdbcZioSpec extends CoreTestZioSpecBase {
       schema.attrMap,
       schema.uniqueAttrs
     )
-    ZLayer.succeed(JdbcConn_js(proxy, RpcRequest.request))
+    ZLayer.succeed(JdbcConn_JS(proxy, RpcRequest.request))
   }
 }

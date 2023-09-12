@@ -44,14 +44,14 @@ trait Model2Query {
 
     def validateNested(es: List[Element], prevElements: List[Element]): Unit = {
       level += 1
-      sortsPerLevel.addOne(level -> Nil)
+      sortsPerLevel += level -> Nil
       // Nested is the last element, so we can just validate next level elements
       validate(es, prevElements)
     }
 
     def validateNestedOpt(es: List[Element], prevElements: List[Element]): Unit = {
       level += 1
-      sortsPerLevel.addOne(level -> Nil)
+      sortsPerLevel += level -> Nil
       if (prevElements.length == 1) {
         prevElements.head match {
           case _: AttrOneOpt => throw ModelError(

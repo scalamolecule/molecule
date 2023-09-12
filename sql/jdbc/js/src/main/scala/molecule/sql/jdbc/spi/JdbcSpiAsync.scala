@@ -1,7 +1,7 @@
 package molecule.sql.jdbc.spi
 
 import boopickle.Default._
-import molecule.base.error.{InsertError, InsertErrors, ValidationErrors}
+import molecule.base.error.{InsertError, InsertErrors, ModelError, ValidationErrors}
 import molecule.boilerplate.ast.Model._
 import molecule.core.action._
 import molecule.core.marshalling.serialize.PickleTpls
@@ -9,7 +9,7 @@ import molecule.core.spi.{Conn, SpiAsync, TxReport}
 import molecule.core.util.FutureUtils
 import molecule.core.validation.ModelValidation
 import molecule.core.validation.insert.InsertValidation
-import molecule.sql.jdbc.facade.JdbcConn_js
+import molecule.sql.jdbc.facade.JdbcConn_JS
 import scala.concurrent.{Future, ExecutionContext => EC}
 
 
@@ -17,22 +17,26 @@ object JdbcSpiAsync extends JdbcSpiAsync
 
 trait JdbcSpiAsync
   extends SpiAsync
+    with JdbcSpi_JS
+    with JdbcSpi
     with JdbcSpiAsyncBase
     with FutureUtils {
 
   // Query --------------------------------------------------------
 
   override def query_get[Tpl](q: Query[Tpl])(implicit conn0: Conn, ec: EC): Future[List[Tpl]] = {
-    val conn  = conn0.asInstanceOf[JdbcConn_js]
+    val conn  = conn0.asInstanceOf[JdbcConn_JS]
     val proxy = conn.proxy.copy(dbView = q.dbView)
     conn.rpc.query[Tpl](proxy, q.elements, q.optLimit).future
   }
 
   override def query_subscribe[Tpl](q: Query[Tpl], callback: List[Tpl] => Unit)
                                    (implicit conn0: Conn, ec: EC): Future[Unit] = {
-    val conn = conn0.asInstanceOf[JdbcConn_js]
-//    conn.rpc.subscribe[Tpl](conn.proxy, q.elements, q.optLimit, callback)
-    ???
+    addCallback(q, callback)
+  }
+
+  override def query_unsubscribe[Tpl](q: Query[Tpl])(implicit conn0: Conn, ec: EC): Future[Unit] = {
+    removeCallback(q)
   }
 
   override def query_inspect[Tpl](q: Query[Tpl])(implicit conn: Conn, ec: EC): Future[Unit] = {
@@ -42,7 +46,7 @@ trait JdbcSpiAsync
 
   override def queryOffset_get[Tpl](q: QueryOffset[Tpl])
                                    (implicit conn0: Conn, ec: EC): Future[(List[Tpl], Int, Boolean)] = {
-    val conn  = conn0.asInstanceOf[JdbcConn_js]
+    val conn  = conn0.asInstanceOf[JdbcConn_JS]
     val proxy = conn.proxy.copy(dbView = q.dbView)
     conn.rpc.queryOffset[Tpl](proxy, q.elements, q.optLimit, q.offset).future
   }
@@ -55,7 +59,7 @@ trait JdbcSpiAsync
 
   override def queryCursor_get[Tpl](q: QueryCursor[Tpl])
                                    (implicit conn0: Conn, ec: EC): Future[(List[Tpl], String, Boolean)] = {
-    val conn  = conn0.asInstanceOf[JdbcConn_js]
+    val conn  = conn0.asInstanceOf[JdbcConn_JS]
     val proxy = conn.proxy.copy(dbView = q.dbView)
     conn.rpc.queryCursor[Tpl](proxy, q.elements, q.optLimit, q.cursor).future
   }
@@ -71,8 +75,11 @@ trait JdbcSpiAsync
   override def save_transact(save: Save)(implicit conn0: Conn, ec: EC): Future[TxReport] = try {
     val errors = save_validate(save)
     if (errors.isEmpty) {
-      val conn = conn0.asInstanceOf[JdbcConn_js]
-      conn.rpc.save(conn.proxy, save.elements).future
+      val conn = conn0.asInstanceOf[JdbcConn_JS]
+      conn.rpc.save(conn.proxy, save.elements).future.map { txReport =>
+        conn.callback(save.elements)
+        txReport
+      }
     } else {
       Future.failed(ValidationErrors(errors))
     }
@@ -95,9 +102,12 @@ trait JdbcSpiAsync
   override def insert_transact(insert: Insert)(implicit conn0: Conn, ec: EC): Future[TxReport] = try {
     val errors = insert_validate(insert)
     if (errors.isEmpty) {
-      val conn           = conn0.asInstanceOf[JdbcConn_js]
+      val conn           = conn0.asInstanceOf[JdbcConn_JS]
       val tplsSerialized = PickleTpls(insert.elements, true).pickle(Right(insert.tpls))
-      conn.rpc.insert(conn.proxy, insert.elements, tplsSerialized).future
+      conn.rpc.insert(conn.proxy, insert.elements, tplsSerialized).future.map { txReport =>
+        conn.callback(insert.elements)
+        txReport
+      }
     } else {
       Future.failed(InsertErrors(errors))
     }
@@ -117,12 +127,10 @@ trait JdbcSpiAsync
   // Update --------------------------------------------------------
 
   override def update_transact(update: Update)(implicit conn0: Conn, ec: EC): Future[TxReport] = try {
-    val errors = update_validate(update)
-    if (errors.isEmpty) {
-      val conn = conn0.asInstanceOf[JdbcConn_js]
-      conn.rpc.update(conn.proxy, update.elements, update.isUpsert).future
-    } else {
-      Future.failed(ValidationErrors(errors))
+    val conn = conn0.asInstanceOf[JdbcConn_JS]
+    conn.rpc.update(conn.proxy, update.elements, update.isUpsert).future.map { txReport =>
+      conn.callback(update.elements)
+      txReport
     }
   } catch {
     case e: Throwable => Future.failed(e)
@@ -132,18 +140,22 @@ trait JdbcSpiAsync
     printInspectTx("UPDATE", update.elements)
   }
 
-  override def update_validate(update: Update)(implicit conn: Conn): Map[String, Seq[String]] = {
-    val proxy = conn.proxy
-    // Only generic model validation on JS platform
-    ModelValidation(proxy.nsMap, proxy.attrMap, "update").validate(update.elements)
-  }
+  //  override def update_validate(update: Update)(implicit conn: Conn): Map[String, Seq[String]] = {
+  //    val proxy = conn.proxy
+  //    if (update.isUpsert && isRefUpdate(update.elements))
+  //      throw ModelError("Can't upsert referenced attributes. Please update instead.")
+  //    ModelValidation(proxy.nsMap, proxy.attrMap, "update").validate(update.elements)
+  //  }
 
 
   // Delete --------------------------------------------------------
 
   override def delete_transact(delete: Delete)(implicit conn0: Conn, ec: EC): Future[TxReport] = try {
-    val conn = conn0.asInstanceOf[JdbcConn_js]
-    conn.rpc.delete(conn.proxy, delete.elements).future
+    val conn = conn0.asInstanceOf[JdbcConn_JS]
+    conn.rpc.delete(conn.proxy, delete.elements).future.map { txReport =>
+      conn.callback(delete.elements, true)
+      txReport
+    }
   } catch {
     case e: Throwable => Future.failed(e)
   }
@@ -152,6 +164,8 @@ trait JdbcSpiAsync
     printInspectTx("DELETE", delete.elements)
   }
 
+
+  // Util --------------------------------------
 
   private def printInspectTx(label: String, elements: List[Element])
                             (implicit ec: EC): Future[Unit] = {

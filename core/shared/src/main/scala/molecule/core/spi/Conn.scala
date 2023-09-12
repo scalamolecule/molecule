@@ -9,7 +9,6 @@ import molecule.core.util.ModelUtils
 abstract class Conn(val proxy: ConnProxy)
   extends ModelUtils { self: DataType =>
 
-
   def transact_async(data: Data)(implicit ec: ExecutionContext): Future[TxReport] = throw jvmOnly("transact_async")
   def transact_sync(data: Data): TxReport = throw jvmOnly("transact_sync")
 

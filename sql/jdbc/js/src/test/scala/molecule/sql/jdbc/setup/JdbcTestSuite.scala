@@ -4,7 +4,7 @@ import molecule.base.api.Schema
 import molecule.core.marshalling.{JdbcProxy, RpcRequest}
 import molecule.core.spi.Conn
 import molecule.coreTests.setup.CoreTestSuite
-import molecule.sql.jdbc.facade.JdbcConn_js
+import molecule.sql.jdbc.facade.JdbcConn_JS
 import scala.util.Random
 
 
@@ -22,7 +22,7 @@ trait JdbcTestSuite extends CoreTestSuite {
       schema.attrMap,
       schema.uniqueAttrs
     )
-    test(JdbcConn_js(proxy, RpcRequest.request))
+    test(JdbcConn_JS(proxy, RpcRequest.request))
   }
 
 }

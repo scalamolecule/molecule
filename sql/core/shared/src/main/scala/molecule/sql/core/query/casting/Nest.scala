@@ -1,7 +1,6 @@
 package molecule.sql.core.query.casting
 
 import java.lang.{Long => jLong}
-import java.sql.ResultSet
 import molecule.core.query.Model2Query
 import molecule.sql.core.query.SqlQueryBase
 
@@ -34,7 +33,7 @@ trait Nest[Tpl] { self: Model2Query
   private lazy val txAttrs      = aritiess.head.flatten.dropWhile(_ != -1).tail.sum
 
   // First attr index for each level
-  private lazy val i0 = 1 + nestedLevels // 1-based indexes for jdbc ResultSet
+  private lazy val i0 = 1 + nestedLevels // 1-based indexes for jdbc Row
   private lazy val i1 = i0 + aritiess.head.flatten.takeWhile(_ != -1).sum
   private lazy val i2 = i1 + aritiess(1).flatten.takeWhile(_ != -1).sum
   private lazy val i3 = i2 + aritiess(2).flatten.takeWhile(_ != -1).sum
@@ -71,7 +70,7 @@ trait Nest[Tpl] { self: Model2Query
   private var acc7: List[Any] = List.empty[Any]
 
 
-  final protected def rows2nested(rows: ResultSet): List[Tpl] = {
+  final protected def rows2nested(rows: Row): List[Tpl] = {
     nestedLevels match {
       case 1 => rows2nested1(rows)
       case 2 => rows2nested2(rows)
@@ -84,7 +83,7 @@ trait Nest[Tpl] { self: Model2Query
   }
 
 
-  final private def rows2nested1(rows: ResultSet): List[Tpl] = {
+  final private def rows2nested1(rows: Row): List[Tpl] = {
     rowCount = getRowCount(rows)
 
     if (rowCount == 1) {
@@ -134,7 +133,7 @@ trait Nest[Tpl] { self: Model2Query
   }
 
 
-  final private def rows2nested2(rows: ResultSet): List[Tpl] = {
+  final private def rows2nested2(rows: Row): List[Tpl] = {
     rowCount = getRowCount(rows)
 
     if (rowCount == 1) {
@@ -208,7 +207,7 @@ trait Nest[Tpl] { self: Model2Query
   }
 
 
-  final private def rows2nested3(rows: ResultSet): List[Tpl] = {
+  final private def rows2nested3(rows: Row): List[Tpl] = {
     rowCount = getRowCount(rows)
 
     if (rowCount == 1) {
@@ -311,7 +310,7 @@ trait Nest[Tpl] { self: Model2Query
   }
 
 
-  final private def rows2nested4(rows: ResultSet): List[Tpl] = {
+  final private def rows2nested4(rows: Row): List[Tpl] = {
     rowCount = getRowCount(rows)
 
     if (rowCount == 1) {
@@ -448,7 +447,7 @@ trait Nest[Tpl] { self: Model2Query
   }
 
 
-  final private def rows2nested5(rows: ResultSet): List[Tpl] = {
+  final private def rows2nested5(rows: Row): List[Tpl] = {
     rowCount = getRowCount(rows)
 
     if (rowCount == 1) {
@@ -624,7 +623,7 @@ trait Nest[Tpl] { self: Model2Query
   }
 
 
-  final private def rows2nested6(rows: ResultSet): List[Tpl] = {
+  final private def rows2nested6(rows: Row): List[Tpl] = {
     rowCount = getRowCount(rows)
 
     if (rowCount == 1) {
@@ -843,7 +842,7 @@ trait Nest[Tpl] { self: Model2Query
     acc0
   }
 
-  final private def rows2nested7(rows: ResultSet): List[Tpl] = {
+  final private def rows2nested7(rows: Row): List[Tpl] = {
     rowCount = getRowCount(rows)
 
     if (rowCount == 1) {

@@ -9,7 +9,7 @@ object _ExprOneTac extends BoilerplateGenBase("ExprOneTac", "/api/expression") {
     s"""// GENERATED CODE ********************************
        |package molecule.boilerplate.api.expression
        |
-       |import molecule.base.ast.SchemaAST._
+       |import molecule.base.ast._
        |import molecule.boilerplate.api._
        |import molecule.boilerplate.api.Keywords.unify
        |import molecule.boilerplate.ast.Model._

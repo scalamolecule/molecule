@@ -1,7 +1,7 @@
 package molecule.core.marshalling
 
 import java.util.UUID
-import molecule.base.ast.SchemaAST._
+import molecule.base.ast._
 import molecule.core.marshalling.dbView.DbView
 
 sealed trait ConnProxy {

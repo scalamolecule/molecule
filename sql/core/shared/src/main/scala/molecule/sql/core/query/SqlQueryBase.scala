@@ -1,12 +1,11 @@
 package molecule.sql.core.query
 
-import java.sql.ResultSet
-import java.util.{Iterator => jIterator, List => jList}
 import molecule.base.error._
 import molecule.base.util.BaseHelpers
 import molecule.boilerplate.ast.Model._
 import molecule.core.query.Model2Query
 import molecule.core.util.JavaConversions
+import molecule.sql.core.javaSql.ResultSetInterface
 import scala.collection.mutable
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 
@@ -15,14 +14,15 @@ trait SqlQueryBase extends BaseHelpers with JavaConversions { self: Model2Query 
 
   // This type represents both all rows and the individual row where the
   // internal cursor is positioned
-  type Row = java.sql.ResultSet
+//  type Row = java.sql.ResultSet
+  type Row = ResultSetInterface
   type AttrIndex = Int
   type NestedTpls = List[Any]
 
-  def getRowCount(rows: ResultSet): Int = {
-    rows.last()
-    val size = rows.getRow
-    rows.beforeFirst()
+  def getRowCount(resultSet: Row): Int = {
+    resultSet.last()
+    val size = resultSet.getRow
+    resultSet.beforeFirst()
     size
   }
 

@@ -12,6 +12,8 @@ import molecule.datalog.datomic.facade.DatomicConn_JS
 import scala.concurrent.{Future, ExecutionContext => EC}
 
 
+object DatomicSpiAsync extends DatomicSpiAsync
+
 trait DatomicSpiAsync
   extends SpiAsync
     with DatomicSpi
@@ -144,7 +146,7 @@ trait DatomicSpiAsync
   }
 
   override def update_validate(update: Update)(implicit conn: Conn): Map[String, Seq[String]] = {
-    val proxy  = conn.proxy
+    val proxy = conn.proxy
     if (update.isUpsert && isRefUpdate(update.elements))
       throw ModelError("Can't upsert referenced attributes. Please update instead.")
     ModelValidation(proxy.nsMap, proxy.attrMap, "update").validate(update.elements)
