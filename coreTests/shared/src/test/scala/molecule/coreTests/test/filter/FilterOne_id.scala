@@ -1,15 +1,14 @@
 package molecule.coreTests.test.filter
 
-import molecule.base.error.ModelError
+import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
-import molecule.coreTests.api.ApiAsyncImplicits
 import molecule.coreTests.async._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 
-trait FilterOne_id extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync =>
+trait FilterOne_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
   override lazy val tests = Tests {
 
@@ -22,7 +21,7 @@ trait FilterOne_id extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync
         c = (3, id3)
 
         // Find all ids
-        _ <- Ns.i.id.query.get.map(_ ==> List(a, b, c))
+        _ <- Ns.i.a1.id.query.get.map(_ ==> List(a, b, c))
 
         // Find value(s) matching
         _ <- Ns.i.a1.id(id0).query.get.map(_ ==> List())

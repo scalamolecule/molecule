@@ -5,23 +5,27 @@ import java.util.{Collections, Comparator, ArrayList => jArrayList, Collection =
 import datomic.{Database, Peer}
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
+import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.marshalling.dbView._
-import molecule.datalog.core.query.Model2DatomicQuery
 import molecule.datalog.core.query.cursor.CursorUtils
-import molecule.datalog.datomic.api.DatomicApiSync
+import molecule.datalog.core.query.{DatomicQueryBase, Model2DatomicQuery}
 import molecule.datalog.datomic.facade.DatomicConn_JVM
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 
 
-abstract class DatomicQueryResolve[Tpl](elements: List[Element], dbView: Option[DbView])
-  extends Model2DatomicQuery[Tpl](elements) with DatomicApiSync with CursorUtils {
+abstract class DatomicQueryResolve[Tpl](
+  elements: List[Element],
+  dbView: Option[DbView],
+  m2q: Model2DatomicQuery[Tpl] with DatomicQueryBase
+  //) extends Model2DatomicQuery[Tpl](elements) with DatomicApiSync with CursorUtils {
+) extends CursorUtils with MoleculeLogging {
 
   lazy val edgeValuesNotFound = "Couldn't find next page. Edge rows were all deleted/updated."
 
   protected def postAdjustPullCasts(): Unit = {
-    pullCastss = pullCastss :+ pullCasts.toList
-    pullSortss = pullSortss :+ pullSorts.sortBy(_._1).map(_._2).toList
+    m2q.pullCastss = m2q.pullCastss :+ m2q.pullCasts.toList
+    m2q.pullSortss = m2q.pullSortss :+ m2q.pullSorts.sortBy(_._1).map(_._2).toList
   }
 
   protected def getUniqueValues(tpls0: List[Tpl], uniqueIndex: Int, encode: Any => String): List[String] = {
@@ -53,18 +57,18 @@ abstract class DatomicQueryResolve[Tpl](elements: List[Element], dbView: Option[
     altDb: Option[datomic.Database] = None
   ): jCollection[jList[AnyRef]] = {
     val db = altDb.getOrElse(getDb(conn))
-    getDatomicQueries(conn.optimizeQuery, altElements) match {
+    m2q.getDatomicQueries(conn.optimizeQuery, altElements) match {
       case ("", query, _)       =>
-        distinct(Peer.q(query, db +: inputs: _*))
+        distinct(Peer.q(query, db +: m2q.inputs: _*))
       case (preQuery, query, _) =>
         // Pre-query
-        val preRows = Peer.q(preQuery, db +: preInputs: _*)
+        val preRows = Peer.q(preQuery, db +: m2q.preInputs: _*)
         val preIds  = new java.util.HashSet[Long](preRows.size())
         preRows.forEach { row =>
           preIds.add(row.get(0).asInstanceOf[Long])
         }
         // Main query using entity ids from pre-query
-        distinct(Peer.q(query, db +: inputs :+ preIds: _*))
+        distinct(Peer.q(query, db +: m2q.inputs :+ preIds: _*))
     }
   }
 
@@ -79,7 +83,7 @@ abstract class DatomicQueryResolve[Tpl](elements: List[Element], dbView: Option[
 
 
   private def distinct(rows: jCollection[jList[AnyRef]]): jCollection[jList[AnyRef]] = {
-    if (hasOptAttr)
+    if (m2q.hasOptAttr)
       new util.HashSet[jList[AnyRef]](rows)
     else
       rows
@@ -87,14 +91,14 @@ abstract class DatomicQueryResolve[Tpl](elements: List[Element], dbView: Option[
 
 
   protected def sortRows(rows: jCollection[jList[AnyRef]]): jArrayList[jList[AnyRef]] = {
-    val sorters = getFlatSorters(sortss)
+    val sorters = m2q.getFlatSorters(m2q.sortss)
     sorters.length match {
       case 0 => new jArrayList(rows)
       case n =>
-        val nestedIdsCount = nestedIds.length
+        val nestedIdsCount = m2q.nestedIds.length
         val sortedRows     = new jArrayList(rows)
-        val comparator     = new Comparator[Row] {
-          override def compare(a: Row, b: Row): Int = {
+        val comparator     = new Comparator[m2q.Row] {
+          override def compare(a: m2q.Row, b: m2q.Row): Int = {
             var i      = 0
             var result = 0;
             result = sorters(i)(nestedIdsCount)(a, b)
@@ -137,7 +141,7 @@ abstract class DatomicQueryResolve[Tpl](elements: List[Element], dbView: Option[
     }
   }
 
-  lazy val row2AnyTpl = castRow2AnyTpl(aritiess.head, castss.head, 0, None)
+//  lazy val row2AnyTpl = m2q.castRow2AnyTpl(m2q.aritiess.head, m2q.castss.head, 0, None)
 
   def paginateFromIdentifiers(
     conn: DatomicConn_JVM,
@@ -147,7 +151,7 @@ abstract class DatomicQueryResolve[Tpl](elements: List[Element], dbView: Option[
     attrTokens: List[String],
     identifiers: List[Any],
     identifyTpl: Tpl => Any,
-    identifyRow: Boolean => Row => Any,
+    identifyRow: Boolean => m2q.Row => Any,
     nextCursor: (List[Tpl], List[String]) => String
   ): (List[Tpl], String, Boolean) = {
     // Filter query by primary non-unique sort attribute
@@ -173,8 +177,8 @@ abstract class DatomicQueryResolve[Tpl](elements: List[Element], dbView: Option[
     if (sortedRows.size() == 0) {
       (Nil, "", false)
     } else {
-      if (isNested) {
-        val nestedTpls     = rows2nested(sortedRows)
+      if (m2q.isNested) {
+        val nestedTpls     = m2q.rows2nested(sortedRows)
         val totalCount     = nestedTpls.length
         val count          = getCount(limit, forward, totalCount)
         val nestedTpls1    = if (forward) nestedTpls else nestedTpls.reverse
@@ -185,11 +189,11 @@ abstract class DatomicQueryResolve[Tpl](elements: List[Element], dbView: Option[
 
       } else {
         val totalCount = rows.size
-        if (isNestedOpt) {
+        if (m2q.isNestedOpt) {
           postAdjustPullCasts()
           if (!forward) Collections.reverse(sortedRows)
           val count          = getCount(limit, forward, totalCount)
-          val (tuples, more) = paginateRows(count, sortedRows, identifiers, identifyRow(true), pullRow2tpl)
+          val (tuples, more) = paginateRows(count, sortedRows, identifiers, identifyRow(true), m2q.pullRow2tpl)
           val tpls           = if (forward) tuples else tuples.reverse
           val cursor         = nextCursor(tpls, allTokens)
           (tpls, cursor, more > 0)
@@ -197,7 +201,9 @@ abstract class DatomicQueryResolve[Tpl](elements: List[Element], dbView: Option[
         } else {
           if (!forward) Collections.reverse(sortedRows)
           val count          = getCount(limit, forward, totalCount)
-          val row2tpl        = (row: Row) => row2AnyTpl(row).asInstanceOf[Tpl]
+          val row2AnyTpl     = m2q.castRow2AnyTpl(m2q.aritiess.head, m2q.castss.head, 0, None)
+          val row2tpl        = (row: m2q.Row) => row2AnyTpl(row).asInstanceOf[Tpl]
+          //          val row2tpl        = (row: m2q.Row) => m2q.castRow2AnyTpl(m2q.aritiess.head, m2q.castss.head, 0, None)
           val (tuples, more) = paginateRows(count, sortedRows, identifiers, identifyRow(false), row2tpl)
           val tpls           = if (forward) tuples else tuples.reverse
           val cursor         = nextCursor(tpls, allTokens)
@@ -250,8 +256,8 @@ abstract class DatomicQueryResolve[Tpl](elements: List[Element], dbView: Option[
     count: Int,
     sortedRows: jList[jList[AnyRef]],
     identifiers: List[Any],
-    identify: Row => Any,
-    row2tpl: Row => Tpl,
+    identify: m2q.Row => Any,
+    row2tpl: m2q.Row => Tpl,
   ): (List[Tpl], Int) = {
     val tuples = ListBuffer.empty[Tpl]
     var window = false

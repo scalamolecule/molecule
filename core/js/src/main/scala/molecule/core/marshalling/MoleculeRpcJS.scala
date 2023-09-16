@@ -1,6 +1,5 @@
 package molecule.core.marshalling
 
-import java.nio.ByteBuffer
 import boopickle.Default._
 import molecule.base.error._
 import molecule.boilerplate.ast.Model._

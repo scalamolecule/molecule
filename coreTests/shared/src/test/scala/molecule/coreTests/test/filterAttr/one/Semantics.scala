@@ -1,15 +1,15 @@
 package molecule.coreTests.test.filterAttr.one
 
 import molecule.base.error.ModelError
+import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
-import molecule.coreTests.api.ApiAsyncImplicits
 import molecule.coreTests.async._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 
-trait Semantics extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
+trait Semantics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
   override lazy val tests = Tests {
 
@@ -157,10 +157,10 @@ trait Semantics extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =
       for {
         _ <- Ns.int(Ref.int_).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==>
-            """Please add missing filter attributes:
-              |  Ref.int""".stripMargin
-        }
+            err ==>
+              """Please add missing filter attributes:
+                |  Ref.int""".stripMargin
+          }
       } yield ()
     }
 
@@ -169,10 +169,10 @@ trait Semantics extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =
       for {
         _ <- Ns.s.i(Ref.int_.not(3)).Ref.int.query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==>
-            """Filtering inside cross-namespace attribute filter not allowed. Found:
-              |  AttrOneTacInt("Ref", "int", Neq, Seq(3), None, None, Nil, Nil, None, None)""".stripMargin
-        }
+            err ==>
+              """Filtering inside cross-namespace attribute filter not allowed. Found:
+                |  AttrOneTacInt("Ref", "int", Neq, Seq(3), None, None, Nil, Nil, None, None)""".stripMargin
+          }
       } yield ()
     }
 
@@ -181,8 +181,8 @@ trait Semantics extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =
       for {
         _ <- Ns.s.i(Ns.i).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> "Can't filter by the same attribute `Ns.i`"
-        }
+            err ==> "Can't filter by the same attribute `Ns.i`"
+          }
       } yield ()
     }
   }

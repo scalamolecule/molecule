@@ -1,15 +1,15 @@
 package molecule.coreTests.test.pagination.cursor.primaryUnique
 
+import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
-import molecule.coreTests.api.ApiAsyncImplicits
 import molecule.coreTests.async._
 import molecule.coreTests.dataModels.core.dsl.Uniques._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 import scala.annotation.nowarn
 
-trait MutationDelete extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync =>
+trait MutationDelete extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
   val x     = ""
   val query = Uniques.int.a1.query
 

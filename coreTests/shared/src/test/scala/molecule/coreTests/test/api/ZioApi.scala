@@ -1,9 +1,9 @@
 package molecule.coreTests.test.api
 
 import molecule.base.error._
+import molecule.core.api.ApiZio
 import molecule.core.spi.SpiZio
-import molecule.coreTests.api.ApiZioImplicits
-import molecule.coreTests.dataModels.core.dsl.Types.{Ns, _}
+import molecule.coreTests.dataModels.core.dsl.Types.Ns
 import molecule.coreTests.setup.CoreTestZioSpec
 import molecule.coreTests.zio._
 import zio._
@@ -12,7 +12,7 @@ import zio.test._
 import scala.annotation.nowarn
 
 
-trait ZioApi extends CoreTestZioSpec with ApiZioImplicits { self: SpiZio  =>
+trait ZioApi extends CoreTestZioSpec with ApiZio { spi: SpiZio =>
 
   @nowarn override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("Molecule ZIO api")(

@@ -1,7 +1,6 @@
 // GENERATED CODE ********************************
 package molecule.boilerplate.api.expression
 
-import molecule.boilerplate.api._
 import molecule.boilerplate.ast.Model._
 
 

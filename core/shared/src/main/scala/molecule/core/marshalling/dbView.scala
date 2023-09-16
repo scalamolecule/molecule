@@ -1,7 +1,6 @@
 package molecule.core.marshalling
 
 import java.util.Date
-import molecule.core.action.Action
 
 object dbView {
 

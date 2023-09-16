@@ -1,16 +1,16 @@
 package molecule.coreTests.test.relation.flat
 
 import molecule.base.error._
+import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
-import molecule.coreTests.api.ApiAsyncImplicits
 import molecule.coreTests.async._
 import molecule.coreTests.dataModels.core.dsl.Refs._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 
 
-trait FlatRefs extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
+trait FlatRefs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
 
   override lazy val tests = Tests {
@@ -89,10 +89,10 @@ trait FlatRefs extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
 
         // Saving individual ref ids (not in a Set) is not allowed
         _ <- A.i(0).bb(b1, b2).save.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-          err ==> "Can only save one Set of values for Set attribute `A.bb`. " +
-            s"Found: Set($b1), Set($b2)"
-        }
+          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
+            err ==> "Can only save one Set of values for Set attribute `A.bb`. " +
+              s"Found: Set($b1), Set($b2)"
+          }
 
         // Referencing namespace attributes repeat for each referenced entity
         _ <- A.i.Bb.i.query.get.map(_ ==> List(

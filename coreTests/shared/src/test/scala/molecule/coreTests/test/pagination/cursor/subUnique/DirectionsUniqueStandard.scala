@@ -1,15 +1,15 @@
 package molecule.coreTests.test.pagination.cursor.subUnique
 
+import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
-import molecule.coreTests.api.ApiAsyncImplicits
 import molecule.coreTests.async._
 import molecule.coreTests.dataModels.core.dsl.Uniques._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 import scala.annotation.nowarn
 
-trait DirectionsUniqueStandard extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
+trait DirectionsUniqueStandard extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
   // (Allow pattern matching the result without warnings)
   @nowarn lazy val tests = Tests {

@@ -1,9 +1,9 @@
 package molecule.coreTests.test.pagination.cursor.subUnique
 
 import molecule.base.error.ModelError
+import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
-import molecule.coreTests.api.ApiAsyncImplicits
 import molecule.coreTests.async._
 import molecule.coreTests.dataModels.core.dsl.Uniques._
 import molecule.coreTests.setup.CoreTestSuite
@@ -11,7 +11,7 @@ import utest._
 import scala.annotation.nowarn
 import scala.util.Random
 
-trait MutationDelete extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
+trait MutationDelete extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
   val query = Uniques.i.a1.int.a2.query
 
@@ -160,8 +160,8 @@ trait MutationDelete extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsy
           // Can't find next page with all 3 unique edge values deleted (or updated)
           _ <- query.from(cur).limit(-4).get
             .map(_ ==> "Unexpected success").recover { case ModelError(msg) =>
-            msg ==> "Couldn't find next page. Edge rows were all deleted/updated."
-          }
+              msg ==> "Couldn't find next page. Edge rows were all deleted/updated."
+            }
         } yield ()
       }
 

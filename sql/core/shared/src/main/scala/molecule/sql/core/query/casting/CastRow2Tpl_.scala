@@ -31,7 +31,7 @@ trait CastRow2Tpl_ { self: Model2Query with SqlQueryBase =>
     }
   }
 
-  final protected def castRow2AnyTpl(
+  final  def castRow2AnyTpl(
     arities: List[List[Int]],
     casts: List[(Row, AttrIndex) => Any],
     attrIndex: AttrIndex,

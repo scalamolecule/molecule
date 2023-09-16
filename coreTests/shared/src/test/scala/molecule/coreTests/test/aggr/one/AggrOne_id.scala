@@ -1,16 +1,16 @@
 package molecule.coreTests.test.aggr.one
 
 import molecule.base.error.ModelError
+import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
-import molecule.coreTests.api.ApiAsyncImplicits
 import molecule.coreTests.async._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 import scala.concurrent.Future
 
-trait AggrOne_id extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync =>
+trait AggrOne_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
   override lazy val tests = Tests {
 
@@ -362,7 +362,7 @@ trait AggrOne_id extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync =
                err ==> "Querying for the entity id only is not allowed. " +
                  "Please add at least one attribute (can be tacit)."
              }
-      } yield ()
+           } yield ()
     }
 
     "stddev" - types { implicit conn =>

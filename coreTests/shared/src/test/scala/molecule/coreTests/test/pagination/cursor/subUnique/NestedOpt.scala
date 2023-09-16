@@ -1,8 +1,8 @@
 package molecule.coreTests.test.pagination.cursor.subUnique
 
+import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
-import molecule.coreTests.api.ApiAsyncImplicits
 import molecule.coreTests.async._
 import molecule.coreTests.dataModels.core.dsl.Uniques._
 import molecule.coreTests.setup.CoreTestSuite
@@ -10,14 +10,14 @@ import utest._
 import scala.annotation.nowarn
 import scala.util.Random
 
-trait NestedOpt extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
+trait NestedOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
   @nowarn lazy val tests = Tests {
 
     "Forward, asc asc" - unique { implicit conn =>
       val pairs               = (1 to 5).toList.map((Random.nextInt(3) + 1, _, List(1)))
       val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
-      val query               = (cursor: String, limit: Int) => 
+      val query               = (cursor: String, limit: Int) =>
         Uniques.i.a1.int.a2.Refs.*?(Ref.i).query.from(cursor).limit(limit)
       for {
         _ <- Uniques.i.int.Refs.*(Ref.i).insert(pairs).transact

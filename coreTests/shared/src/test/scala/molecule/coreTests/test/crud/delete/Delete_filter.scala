@@ -1,15 +1,15 @@
 package molecule.coreTests.test.crud.delete
 
 import molecule.base.error._
+import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
-import molecule.coreTests.api.ApiAsyncImplicits
 import molecule.coreTests.async._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 
-trait Delete_filter extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
+trait Delete_filter extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
 
   override lazy val tests = Tests {
@@ -133,9 +133,9 @@ trait Delete_filter extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsyn
         for {
           _ <- Ns.i.<=(2).delete.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can only filter delete by values applied to tacit card-one attributes. Found:\n" +
-              """AttrOneManInt("Ns", "i", Le, Seq(2), None, None, Nil, Nil, None, None)"""
-          }
+              err ==> "Can only filter delete by values applied to tacit card-one attributes. Found:\n" +
+                """AttrOneManInt("Ns", "i", Le, Seq(2), None, None, Nil, Nil, None, None)"""
+            }
         } yield ()
       }
 
@@ -143,13 +143,13 @@ trait Delete_filter extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsyn
         for {
           _ <- Ns.i_(1).int(1, 2).update.transact
             .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-            err ==> "Can only update one value for attribute `Ns.int`. Found: 1, 2"
-          }
+              err ==> "Can only update one value for attribute `Ns.int`. Found: 1, 2"
+            }
 
           _ <- Ns.i_(1).int(1, 2).upsert.transact
             .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-            err ==> "Can only upsert one value for attribute `Ns.int`. Found: 1, 2"
-          }
+              err ==> "Can only upsert one value for attribute `Ns.int`. Found: 1, 2"
+            }
         } yield ()
       }
     }

@@ -2,7 +2,6 @@ package molecule.boilerplate.ast
 
 import java.net.URI
 import java.util.{Date, UUID}
-import molecule.boilerplate.ast.Model._
 
 
 trait Values {

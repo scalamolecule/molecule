@@ -1,8 +1,8 @@
 package molecule.coreTests.test.api
 
 import molecule.base.error._
+import molecule.core.api.ApiSync
 import molecule.core.spi.SpiSync
-import molecule.coreTests.api.ApiSyncImplicits
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuite
 import molecule.coreTests.sync._
@@ -11,7 +11,7 @@ import scala.annotation.nowarn
 
 // Testing the synchronous api only on the JVM platform since the JS platform
 // is dependent on asynchronous retrieval of data from the server.
-trait SyncApi extends CoreTestSuite with ApiSyncImplicits { self: SpiSync =>
+trait SyncApi extends CoreTestSuite with ApiSync { spi: SpiSync =>
 
   @nowarn override lazy val tests = Tests {
 

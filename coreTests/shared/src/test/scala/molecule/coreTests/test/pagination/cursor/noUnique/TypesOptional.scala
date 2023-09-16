@@ -1,15 +1,15 @@
 package molecule.coreTests.test.pagination.cursor.noUnique
 
+import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
-import molecule.coreTests.api.ApiAsyncImplicits
 import molecule.coreTests.async._
 import molecule.coreTests.dataModels.core.dsl.Uniques._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 import scala.annotation.nowarn
 
-trait TypesOptional extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
+trait TypesOptional extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
   @nowarn lazy val tests = Tests {
 

@@ -1,8 +1,8 @@
 package molecule.coreTests.test.pagination.cursor.noUnique
 
+import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
-import molecule.coreTests.api.ApiAsyncImplicits
 import molecule.coreTests.async._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuite
@@ -10,7 +10,7 @@ import utest._
 import scala.annotation.{nowarn, tailrec}
 import scala.util.Random
 
-trait AttrOrderOptional extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
+trait AttrOrderOptional extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
   @tailrec
   final def getTriples(acc: List[(String, Int, Option[Int])]): List[(String, Int, Option[Int])] = {
@@ -106,9 +106,9 @@ trait AttrOrderOptional extends CoreTestSuite with ApiAsyncImplicits { self: Spi
       }
 
       "2-u3-1" - types { implicit conn =>
-        val triples = getTriples(Nil).map(t => (t._1, t._3, t._2))
+        val triples             = getTriples(Nil).map(t => (t._1, t._3, t._2))
         val List(a, b, c, d, e) = triples.sortBy(p => (p._3, p._1, p._2))
-        val query = (c: String, l: Int) => Ns.s.a2.int_?.a3.i.a1.query.from(c).limit(l)
+        val query               = (c: String, l: Int) => Ns.s.a2.int_?.a3.i.a1.query.from(c).limit(l)
         for {
           _ <- Ns.s.int_?.i.insert(triples).transact
           c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }

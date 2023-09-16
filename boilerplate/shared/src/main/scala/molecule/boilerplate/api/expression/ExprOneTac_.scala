@@ -2,8 +2,8 @@
 package molecule.boilerplate.api.expression
 
 import molecule.base.ast._
-import molecule.boilerplate.api._
 import molecule.boilerplate.api.Keywords.unify
+import molecule.boilerplate.api._
 import molecule.boilerplate.ast.Model._
 
 

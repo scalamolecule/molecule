@@ -1,16 +1,16 @@
 package molecule.coreTests.test.crud.delete
 
 import molecule.base.error._
+import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
-import molecule.coreTests.api.ApiAsyncImplicits
 import molecule.coreTests.async._
 import molecule.coreTests.dataModels.core.dsl.Refs._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 import scala.concurrent.Future
 
-trait Delete_id extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync =>
+trait Delete_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
   override lazy val tests = Tests {
 

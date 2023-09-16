@@ -3,15 +3,15 @@ package molecule.coreTests.test.crud.update.set.ops
 
 import java.util.Date
 import molecule.base.error._
+import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
-import molecule.coreTests.api.ApiAsyncImplicits
 import molecule.coreTests.async._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 
-trait UpdateSetOps_Date_ extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
+trait UpdateSetOps_Date_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
   override lazy val tests = Tests {
 

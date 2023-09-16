@@ -2,16 +2,16 @@ package molecule.coreTests.test.crud.insert
 
 import java.net.URI
 import java.util.{Date, UUID}
+import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
-import molecule.coreTests.api.ApiAsyncImplicits
 import molecule.coreTests.async._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 import scala.concurrent.Future
 
-trait InsertCardSet extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync =>
+trait InsertCardSet extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
   override lazy val tests = Tests {
 

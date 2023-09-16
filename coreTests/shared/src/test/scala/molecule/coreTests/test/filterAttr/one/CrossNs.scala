@@ -1,14 +1,14 @@
 package molecule.coreTests.test.filterAttr.one
 
+import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
-import molecule.coreTests.api.ApiAsyncImplicits
 import molecule.coreTests.async._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 
-trait CrossNs extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
+trait CrossNs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
   override lazy val tests = Tests {
 
@@ -309,28 +309,28 @@ trait CrossNs extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
         _ <- Ns.s.a1.i_.Ref.int_.<=(Ns.i_).query.get.map(_ ==> List("b", "c"))
 
         // Filter compare attribute itself
-        _ <- Ns.s.i(5).Ref.int.<=(Ns.i_).query.get.map(_    ==> List(("c", 5, 4)))
+        _ <- Ns.s.i(5).Ref.int.<=(Ns.i_).query.get.map(_ ==> List(("c", 5, 4)))
         _ <- Ns.s.i.not(5).Ref.int.<=(Ns.i_).query.get.map(_ ==> List(("b", 3, 3)))
         _ <- Ns.s.i.>(5).Ref.int.<=(Ns.i_).query.get.map(_ ==> List())
         _ <- Ns.s.i.>=(5).Ref.int.<=(Ns.i_).query.get.map(_ ==> List(("c", 5, 4)))
         _ <- Ns.s.i.<(5).Ref.int.<=(Ns.i_).query.get.map(_ ==> List(("b", 3, 3)))
         _ <- Ns.s.i.<=(5).Ref.int.<=(Ns.i_).query.get.map(_ ==> List(("b", 3, 3), ("c", 5, 4)))
 
-        _ <- Ns.s.i(5).Ref.int_.<=(Ns.i_).query.get.map(_    ==> List(("c", 5)))
+        _ <- Ns.s.i(5).Ref.int_.<=(Ns.i_).query.get.map(_ ==> List(("c", 5)))
         _ <- Ns.s.i.not(5).Ref.int_.<=(Ns.i_).query.get.map(_ ==> List(("b", 3)))
         _ <- Ns.s.i.>(5).Ref.int_.<=(Ns.i_).query.get.map(_ ==> List())
         _ <- Ns.s.i.>=(5).Ref.int_.<=(Ns.i_).query.get.map(_ ==> List(("c", 5)))
         _ <- Ns.s.i.<(5).Ref.int_.<=(Ns.i_).query.get.map(_ ==> List(("b", 3)))
         _ <- Ns.s.i.<=(5).Ref.int_.<=(Ns.i_).query.get.map(_ ==> List(("b", 3), ("c", 5)))
 
-        _ <- Ns.s.i_(5).Ref.int.<=(Ns.i_).query.get.map(_    ==> List(("c", 4)))
+        _ <- Ns.s.i_(5).Ref.int.<=(Ns.i_).query.get.map(_ ==> List(("c", 4)))
         _ <- Ns.s.i_.not(5).Ref.int.<=(Ns.i_).query.get.map(_ ==> List(("b", 3)))
         _ <- Ns.s.i_.>(5).Ref.int.<=(Ns.i_).query.get.map(_ ==> List())
         _ <- Ns.s.i_.>=(5).Ref.int.<=(Ns.i_).query.get.map(_ ==> List(("c", 4)))
         _ <- Ns.s.i_.<(5).Ref.int.<=(Ns.i_).query.get.map(_ ==> List(("b", 3)))
         _ <- Ns.s.i_.<=(5).Ref.int.<=(Ns.i_).query.get.map(_ ==> List(("b", 3), ("c", 4)))
 
-        _ <- Ns.s.i_(5).Ref.int_.<=(Ns.i_).query.get.map(_    ==> List("c"))
+        _ <- Ns.s.i_(5).Ref.int_.<=(Ns.i_).query.get.map(_ ==> List("c"))
         _ <- Ns.s.i_.not(5).Ref.int_.<=(Ns.i_).query.get.map(_ ==> List("b"))
         _ <- Ns.s.i_.>(5).Ref.int_.<=(Ns.i_).query.get.map(_ ==> List())
         _ <- Ns.s.i_.>=(5).Ref.int_.<=(Ns.i_).query.get.map(_ ==> List("c"))
@@ -473,28 +473,28 @@ trait CrossNs extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
         _ <- Ns.s.a1.i_.Ref.int_.>=(Ns.i_).query.get.map(_ ==> List("a", "b"))
 
         // Filter compare attribute itself
-        _ <- Ns.s.a1.i(1).Ref.int.>=(Ns.i_).query.get.map(_    ==> List(("a", 1, 2)))
+        _ <- Ns.s.a1.i(1).Ref.int.>=(Ns.i_).query.get.map(_ ==> List(("a", 1, 2)))
         _ <- Ns.s.a1.i.not(1).Ref.int.>=(Ns.i_).query.get.map(_ ==> List(("b", 3, 3)))
         _ <- Ns.s.a1.i.>(1).Ref.int.>=(Ns.i_).query.get.map(_ ==> List(("b", 3, 3)))
         _ <- Ns.s.a1.i.>=(1).Ref.int.>=(Ns.i_).query.get.map(_ ==> List(("a", 1, 2), ("b", 3, 3)))
         _ <- Ns.s.a1.i.<(1).Ref.int.>=(Ns.i_).query.get.map(_ ==> List())
         _ <- Ns.s.a1.i.<=(1).Ref.int.>=(Ns.i_).query.get.map(_ ==> List(("a", 1, 2)))
 
-        _ <- Ns.s.a1.i(1).Ref.int_.>=(Ns.i_).query.get.map(_    ==> List(("a", 1)))
+        _ <- Ns.s.a1.i(1).Ref.int_.>=(Ns.i_).query.get.map(_ ==> List(("a", 1)))
         _ <- Ns.s.a1.i.not(1).Ref.int_.>=(Ns.i_).query.get.map(_ ==> List(("b", 3)))
         _ <- Ns.s.a1.i.>(1).Ref.int_.>=(Ns.i_).query.get.map(_ ==> List(("b", 3)))
         _ <- Ns.s.a1.i.>=(1).Ref.int_.>=(Ns.i_).query.get.map(_ ==> List(("a", 1), ("b", 3)))
         _ <- Ns.s.a1.i.<(1).Ref.int_.>=(Ns.i_).query.get.map(_ ==> List())
         _ <- Ns.s.a1.i.<=(1).Ref.int_.>=(Ns.i_).query.get.map(_ ==> List(("a", 1)))
 
-        _ <- Ns.s.a1.i_(1).Ref.int.>=(Ns.i_).query.get.map(_    ==> List(("a", 2)))
+        _ <- Ns.s.a1.i_(1).Ref.int.>=(Ns.i_).query.get.map(_ ==> List(("a", 2)))
         _ <- Ns.s.a1.i_.not(1).Ref.int.>=(Ns.i_).query.get.map(_ ==> List(("b", 3)))
         _ <- Ns.s.a1.i_.>(1).Ref.int.>=(Ns.i_).query.get.map(_ ==> List(("b", 3)))
         _ <- Ns.s.a1.i_.>=(1).Ref.int.>=(Ns.i_).query.get.map(_ ==> List(("a", 2), ("b", 3)))
         _ <- Ns.s.a1.i_.<(1).Ref.int.>=(Ns.i_).query.get.map(_ ==> List())
         _ <- Ns.s.a1.i_.<=(1).Ref.int.>=(Ns.i_).query.get.map(_ ==> List(("a", 2)))
 
-        _ <- Ns.s.a1.i_(1).Ref.int_.>=(Ns.i_).query.get.map(_    ==> List("a"))
+        _ <- Ns.s.a1.i_(1).Ref.int_.>=(Ns.i_).query.get.map(_ ==> List("a"))
         _ <- Ns.s.a1.i_.not(1).Ref.int_.>=(Ns.i_).query.get.map(_ ==> List("b"))
         _ <- Ns.s.a1.i_.>(1).Ref.int_.>=(Ns.i_).query.get.map(_ ==> List("b"))
         _ <- Ns.s.a1.i_.>=(1).Ref.int_.>=(Ns.i_).query.get.map(_ ==> List("a", "b"))

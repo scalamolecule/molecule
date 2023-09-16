@@ -1,16 +1,16 @@
 package molecule.coreTests.test.crud.update.one
 
 import molecule.base.error.ModelError
+import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
-import molecule.coreTests.api.ApiAsyncImplicits
 import molecule.coreTests.async._
 import molecule.coreTests.dataModels.core.dsl.Uniques._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 
 
-trait UpdateOne_uniqueAttr extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
+trait UpdateOne_uniqueAttr extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
 
   override lazy val tests = Tests {
@@ -144,23 +144,23 @@ trait UpdateOne_uniqueAttr extends CoreTestSuite with ApiAsyncImplicits { self: 
     "Semantics" - unique { implicit conn =>
       for {
         _ <- Uniques.i(1).i(2).int_(1).update.transact
-            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> "Can't transact duplicate attribute Uniques.i"
-        }
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+            err ==> "Can't transact duplicate attribute Uniques.i"
+          }
 
         _ <- Uniques.i_(1).i(2).update.transact
 
         _ <- Uniques.int_(1).string_("x").s("c").update.transact
-            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> "Can only apply one unique attribute value for update. Found:\n" +
-            """AttrOneTacString("Uniques", "string", Eq, Seq("x"), None, None, Nil, Nil, None, None)"""
-        }
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+            err ==> "Can only apply one unique attribute value for update. Found:\n" +
+              """AttrOneTacString("Uniques", "string", Eq, Seq("x"), None, None, Nil, Nil, None, None)"""
+          }
 
         _ <- Uniques.ints_(1).s("b").update.transact
-            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> "Can only lookup entity with card-one attribute value. Found:\n" +
-            """AttrSetTacInt("Uniques", "ints", Eq, Seq(Set(1)), None, None, Nil, Nil, None, None)"""
-        }
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+            err ==> "Can only lookup entity with card-one attribute value. Found:\n" +
+              """AttrSetTacInt("Uniques", "ints", Eq, Seq(Set(1)), None, None, Nil, Nil, None, None)"""
+          }
       } yield ()
     }
   }

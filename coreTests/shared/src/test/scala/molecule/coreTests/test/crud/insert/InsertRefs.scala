@@ -1,9 +1,9 @@
 package molecule.coreTests.test.crud.insert
 
 import molecule.base.error.ModelError
+import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
-import molecule.coreTests.api.ApiAsyncImplicits
 import molecule.coreTests.async._
 import molecule.coreTests.dataModels.core.dsl.Refs._
 import molecule.coreTests.setup.CoreTestSuite
@@ -11,7 +11,7 @@ import utest._
 import scala.language.implicitConversions
 
 
-trait InsertRefs extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync =>
+trait InsertRefs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
   override lazy val tests = Tests {
 
@@ -112,8 +112,8 @@ trait InsertRefs extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync =
         // Can't go back from empty namespaces
         _ <- A.i.B._A.s.insert(1, "a").transact
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> "Please add attributes to namespace B before going back to namespace A"
-        }
+            err ==> "Please add attributes to namespace B before going back to namespace A"
+          }
 
         _ <- A.i.B.i._A.s.insert(1, 2, "a").transact
         _ <- A.i.B.i._A.s.query.get.map(_ ==> List((1, 2, "a")))

@@ -1,15 +1,15 @@
 package molecule.coreTests.test.filterAttr
 
 import molecule.base.error.ModelError
+import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
-import molecule.coreTests.api.ApiAsyncImplicits
 import molecule.coreTests.async._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 
-trait FilterAttrNested extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
+trait FilterAttrNested extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
   override lazy val tests = Tests {
 
@@ -49,14 +49,14 @@ trait FilterAttrNested extends CoreTestSuite with ApiAsyncImplicits { self: SpiA
       for {
         _ <- Ns.s.i(Ref.int_).Refs.*?(Ref.int).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> "Filter attributes not allowed in optional nested queries."
-        }
+            err ==> "Filter attributes not allowed in optional nested queries."
+          }
 
         // Pointing backwards
         _ <- Ns.s.i.Refs.*?(Ref.int(Ns.i_)).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> "Filter attributes not allowed in optional nested queries."
-        }
+            err ==> "Filter attributes not allowed in optional nested queries."
+          }
       } yield ()
     }
   }

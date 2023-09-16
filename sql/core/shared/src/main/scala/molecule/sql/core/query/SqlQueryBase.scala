@@ -3,18 +3,16 @@ package molecule.sql.core.query
 import molecule.base.error._
 import molecule.base.util.BaseHelpers
 import molecule.boilerplate.ast.Model._
-import molecule.core.query.Model2Query
 import molecule.core.util.JavaConversions
 import molecule.sql.core.javaSql.ResultSetInterface
 import scala.collection.mutable
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 
 
-trait SqlQueryBase extends BaseHelpers with JavaConversions { self: Model2Query =>
+trait SqlQueryBase extends BaseHelpers with JavaConversions {
 
   // This type represents both all rows and the individual row where the
   // internal cursor is positioned
-//  type Row = java.sql.ResultSet
   type Row = ResultSetInterface
   type AttrIndex = Int
   type NestedTpls = List[Any]
@@ -27,10 +25,6 @@ trait SqlQueryBase extends BaseHelpers with JavaConversions { self: Model2Query 
   }
 
   // Main query
-  final protected var isNested    = false
-  final protected var isNestedOpt = false
-  final protected val nestedIds   = new ArrayBuffer[String]
-  final protected var level       = 0
   final protected val select      = new ListBuffer[String]
   final protected var distinct    = true
   final protected var from        = ""
@@ -46,10 +40,14 @@ trait SqlQueryBase extends BaseHelpers with JavaConversions { self: Model2Query 
   final protected var hardLimit   = 0
 
   // Input args and cast lambdas
-  final protected val args     = new ArrayBuffer[AnyRef]
-  final protected var castss   = List(List.empty[(Row, Int) => Any])
-  final protected var aritiess = List(List.empty[List[Int]])
-  final protected val exts     = mutable.Map.empty[String, Option[String]]
+  final           var castss      = List(List.empty[(Row, Int) => Any])
+  final           var aritiess    = List(List.empty[List[Int]])
+  final           var isNested    = false
+  final           var isNestedOpt = false
+  final protected val nestedIds   = new ArrayBuffer[String]
+  final protected var level       = 0
+  final protected val args        = new ArrayBuffer[AnyRef]
+  final protected val exts        = mutable.Map.empty[String, Option[String]]
 
   // Ensure distinct result set when possible redundant optional values can occur
   final protected var hasOptAttr = false

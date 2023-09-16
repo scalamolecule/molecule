@@ -11,21 +11,15 @@ import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 
 
-class Model2SqlQuery[Tpl](elements0: List[Element])
+abstract class Model2SqlQuery[Tpl](elements0: List[Element])
   extends Model2Query
-    with ResolveExprOne[Tpl]
-    with ResolveExprSet[Tpl]
-    with ResolveExprSetRefAttr[Tpl]
     with ResolveRef
-    with SqlQueryBase
     with CastNestedBranch_
     with CastRow2Tpl_
     with Nest[Tpl]
     with NestOpt[Tpl]
-    with LambdasOne
-    with LambdasSet
     with ModelUtils
-    with MoleculeLogging {
+    with MoleculeLogging { self: ResolveExpr with SqlQueryBase =>
 
   final def getSqlQuery(
     altElements: List[Element],

@@ -1,14 +1,14 @@
 package molecule.coreTests.test.filter.one.special
 
+import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
-import molecule.coreTests.api.ApiAsyncImplicits
 import molecule.coreTests.async._
 import molecule.coreTests.dataModels.core.dsl.Types.Ns
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 
-trait FilterOneSpecial_String extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
+trait FilterOneSpecial_String extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
   override lazy val tests = Tests {
 
@@ -48,7 +48,7 @@ trait FilterOneSpecial_String extends CoreTestSuite with ApiAsyncImplicits { sel
         _ <- Ns.i.string_.endsWith("lo").query.get.map(_ ==> List(1))
 
         _ <- Ns.i.string_.contains("ll").query.get.map(_ ==> List(1))
-        _ <- Ns.i.string_.contains("e").query.get.map(_ ==> List(1, 2))
+        _ <- Ns.i.a1.string_.contains("e").query.get.map(_ ==> List(1, 2))
 
         _ <- Ns.i.string_.matches("^[A-Z].*").query.get.map(_ ==> List(1))
         _ <- Ns.i.string_.matches("^[a-z].*").query.get.map(_ ==> List(2))

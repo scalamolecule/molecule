@@ -1,15 +1,15 @@
 package molecule.coreTests.test.crud.update.one
 
 import molecule.base.error._
+import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
-import molecule.coreTests.api.ApiAsyncImplicits
 import molecule.coreTests.async._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 
-trait UpdateOne_filter extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
+trait UpdateOne_filter extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
 
   override lazy val tests = Tests {
@@ -116,13 +116,13 @@ trait UpdateOne_filter extends CoreTestSuite with ApiAsyncImplicits { self: SpiA
         for {
           _ <- Ns.i_(1).int(1, 2).update.transact
             .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-            err ==> "Can only update one value for attribute `Ns.int`. Found: 1, 2"
-          }
+              err ==> "Can only update one value for attribute `Ns.int`. Found: 1, 2"
+            }
 
           _ <- Ns.i_(1).int(1, 2).upsert.transact
             .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-            err ==> "Can only upsert one value for attribute `Ns.int`. Found: 1, 2"
-          }
+              err ==> "Can only upsert one value for attribute `Ns.int`. Found: 1, 2"
+            }
         } yield ()
       }
     }

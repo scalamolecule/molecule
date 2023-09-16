@@ -1,10 +1,10 @@
 package molecule.core.spi
 
 import molecule.base.error._
-import molecule.core.marshalling.{ConnProxy, MoleculeRpc}
-import scala.concurrent.{ExecutionContext, Future}
 import molecule.boilerplate.ast.Model._
+import molecule.core.marshalling.{ConnProxy, MoleculeRpc}
 import molecule.core.util.ModelUtils
+import scala.concurrent.{ExecutionContext, Future}
 
 abstract class Conn(val proxy: ConnProxy)
   extends ModelUtils { self: DataType =>

@@ -1,14 +1,14 @@
 package molecule.coreTests.test.filterAttr.one
 
+import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
-import molecule.coreTests.api.ApiAsyncImplicits
 import molecule.coreTests.async._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 
-trait Adjacent extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
+trait Adjacent extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
   val a = ("a", 1, 2)
   val b = ("b", 3, 3)

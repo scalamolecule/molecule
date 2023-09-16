@@ -15,7 +15,7 @@ inThisBuild(
     organization := "org.scalamolecule",
     organizationName := "ScalaMolecule",
     organizationHomepage := Some(url("http://www.scalamolecule.org")),
-    version := "0.2.0",
+    version := "0.3.0-SNAPSHOT",
     versionScheme := Some("early-semver"),
     //    scalaVersion := scala212,
     scalaVersion := scala213,
@@ -49,8 +49,10 @@ lazy val root = project
     datalogDatomic.jvm,
     sqlCore.js,
     sqlCore.jvm,
-    sqlJdbc.js,
-    sqlJdbc.jvm
+    sqlH2.js,
+    sqlH2.jvm,
+    sqlPostgres.js,
+    sqlPostgres.jvm,
   )
 
 lazy val base = crossProject(JSPlatform, JVMPlatform)
@@ -156,8 +158,7 @@ lazy val datalogCore = crossProject(JSPlatform, JVMPlatform)
   .in(file("datalog/core"))
   .settings(name := "molecule-datalog-core")
   .settings(doPublish)
-  .dependsOn(core)
-  .dependsOn(coreTests % "test->test")
+  .dependsOn(coreTests % "compile->compile;test->test")
   .settings(
     testFrameworks := Seq(
       new TestFramework("utest.runner.Framework"),
@@ -225,25 +226,19 @@ lazy val sqlCore = crossProject(JSPlatform, JVMPlatform)
   .in(file("sql/core"))
   .settings(name := "molecule-sql-core")
   .settings(doPublish)
-  .dependsOn(core)
-  .dependsOn(coreTests % "test->test")
+  .dependsOn(coreTests % "compile->compile;test->test")
   .settings(
     testFrameworks := Seq(
       new TestFramework("utest.runner.Framework"),
       new TestFramework("zio.test.sbt.ZTestFramework")
     )
   )
-  .jvmSettings(
-    libraryDependencies ++= Seq(
-      "com.h2database" % "h2" % "2.2.220"
-    )
-  )
   .jsSettings(jsEnvironment)
 
-lazy val sqlJdbc = crossProject(JSPlatform, JVMPlatform)
+lazy val sqlH2 = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
-  .in(file("sql/jdbc"))
-  .settings(name := "molecule-sql-jdbc")
+  .in(file("sql/h2"))
+  .settings(name := "molecule-sql-h2")
   .settings(doPublish)
   .dependsOn(sqlCore % "compile->compile;test->test")
   .settings(
@@ -253,6 +248,32 @@ lazy val sqlJdbc = crossProject(JSPlatform, JVMPlatform)
     )
   )
   .jsSettings(jsEnvironment)
+  .jvmSettings(
+    libraryDependencies ++= Seq(
+      "com.h2database" % "h2" % "2.2.220"
+    )
+  )
+
+lazy val sqlPostgres = crossProject(JSPlatform, JVMPlatform)
+  .crossType(CrossType.Full)
+  .in(file("sql/postgres"))
+  .settings(name := "molecule-sql-postgres")
+  .settings(doPublish)
+  .dependsOn(sqlH2 % "compile->compile;test->test")
+  .settings(
+    testFrameworks := Seq(
+      new TestFramework("utest.runner.Framework"),
+      new TestFramework("zio.test.sbt.ZTestFramework")
+    )
+  )
+  .jsSettings(jsEnvironment)
+  .jvmSettings(
+    libraryDependencies ++= Seq(
+      "com.dimafeng" %% "testcontainers-scala-postgresql" % "0.41.0" % Test,
+      "org.postgresql" % "postgresql" % "42.5.4" % Test
+    ),
+    Test / fork := true
+  )
 
 
 lazy val jsEnvironment = {

@@ -30,7 +30,7 @@ trait CastRow2Tpl_ { self: Model2Query with DatomicQueryBase =>
     }
   }
 
-  final protected def castRow2AnyTpl(
+  final def castRow2AnyTpl(
     arities: List[List[Int]],
     casts: List[AnyRef => AnyRef],
     attrIndex: AttrIndex,

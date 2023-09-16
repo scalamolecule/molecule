@@ -1,15 +1,15 @@
 package molecule.coreTests.test.crud.update.set
 
 import molecule.base.error.ModelError
+import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
-import molecule.coreTests.api.ApiAsyncImplicits
 import molecule.coreTests.async._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 
-trait UpdateSet_filter extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
+trait UpdateSet_filter extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
 
   override lazy val tests = Tests {
@@ -76,10 +76,10 @@ trait UpdateSet_filter extends CoreTestSuite with ApiAsyncImplicits { self: SpiA
     "Update filter value itself" - types { implicit conn =>
       for {
         _ <- Ns.ints_(42).ints(1).update.transact
-            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> "Can only lookup entity with card-one attribute value. Found:\n" +
-            """AttrSetTacInt("Ns", "ints", Eq, Seq(Set(42)), None, None, Nil, Nil, None, None)"""
-        }
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+            err ==> "Can only lookup entity with card-one attribute value. Found:\n" +
+              """AttrSetTacInt("Ns", "ints", Eq, Seq(Set(42)), None, None, Nil, Nil, None, None)"""
+          }
       } yield ()
     }
 

@@ -1,16 +1,16 @@
 package molecule.coreTests.test.crud.update.set
 
 import molecule.base.error._
+import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
-import molecule.coreTests.api.ApiAsyncImplicits
 import molecule.coreTests.async._
 import molecule.coreTests.dataModels.core.dsl.Refs.A
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 
-trait UpdateSet_id extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
+trait UpdateSet_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
 
   override lazy val tests = Tests {
@@ -131,20 +131,20 @@ trait UpdateSet_id extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync
         for {
           _ <- Ns(42).ints(Seq(Set(1), Set(2))).update.transact
             .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-            err ==> "Can only update one Set of values for Set attribute `Ns.ints`. Found: Set(1), Set(2)"
-          }
+              err ==> "Can only update one Set of values for Set attribute `Ns.ints`. Found: Set(1), Set(2)"
+            }
 
           // Same as
           _ <- Ns(42).ints(Set(1), Set(2)).update.transact
             .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-            err ==> "Can only update one Set of values for Set attribute `Ns.ints`. Found: Set(1), Set(2)"
-          }
+              err ==> "Can only update one Set of values for Set attribute `Ns.ints`. Found: Set(1), Set(2)"
+            }
 
           // Same as
           _ <- Ns(42).ints(1, 2).update.transact
             .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-            err ==> "Can only update one Set of values for Set attribute `Ns.ints`. Found: Set(1), Set(2)"
-          }
+              err ==> "Can only update one Set of values for Set attribute `Ns.ints`. Found: Set(1), Set(2)"
+            }
         } yield ()
       }
 
@@ -152,9 +152,9 @@ trait UpdateSet_id extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync
         for {
           _ <- Ns(42).ints_?(Some(Set(1))).update.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't update optional values. Found:\n" +
-              """AttrSetOptInt("Ns", "ints", Eq, Some(Seq(Set(1))), None, None, Nil, Nil, None, None)"""
-          }
+              err ==> "Can't update optional values. Found:\n" +
+                """AttrSetOptInt("Ns", "ints", Eq, Some(Seq(Set(1))), None, None, Nil, Nil, None, None)"""
+            }
         } yield ()
       }
 
@@ -162,8 +162,8 @@ trait UpdateSet_id extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync
         for {
           _ <- Ns(42).i(1).Refs.i(2).update.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't update attributes in card-many referenced namespace `Refs`"
-          }
+              err ==> "Can't update attributes in card-many referenced namespace `Refs`"
+            }
         } yield ()
       }
     }

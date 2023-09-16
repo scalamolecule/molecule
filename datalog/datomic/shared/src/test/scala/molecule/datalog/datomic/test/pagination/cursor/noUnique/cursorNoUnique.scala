@@ -1,14 +1,14 @@
 package molecule.datalog.datomic.test.pagination.cursor.noUnique
 
 import molecule.coreTests.test.pagination.cursor.noUnique._
-import molecule.datalog.datomic.setup.CoreTestAsync
+import molecule.datalog.datomic.setup.TestAsync_datomic
 
-object AttrOrderMandatory extends AttrOrderMandatory with CoreTestAsync
-object AttrOrderOptional extends AttrOrderOptional with CoreTestAsync
-object DirectionsMandatory extends DirectionsMandatory with CoreTestAsync
-object DirectionsOptional extends DirectionsOptional with CoreTestAsync
-object MutationAdd extends MutationAdd with CoreTestAsync
-object MutationDelete extends MutationDelete with CoreTestAsync
-object Nested extends Nested with CoreTestAsync
-object NestedOpt extends NestedOpt with CoreTestAsync
-object TypesOptional extends TypesOptional with CoreTestAsync
+object AttrOrderMandatory extends AttrOrderMandatory with TestAsync_datomic
+object AttrOrderOptional extends AttrOrderOptional with TestAsync_datomic
+object DirectionsMandatory extends DirectionsMandatory with TestAsync_datomic
+object DirectionsOptional extends DirectionsOptional with TestAsync_datomic
+object MutationAdd extends MutationAdd with TestAsync_datomic
+object MutationDelete extends MutationDelete with TestAsync_datomic
+object Nested extends Nested with TestAsync_datomic
+object NestedOpt extends NestedOpt with TestAsync_datomic
+object TypesOptional extends TypesOptional with TestAsync_datomic

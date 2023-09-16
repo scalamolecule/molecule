@@ -8,6 +8,7 @@ import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.marshalling.dbView.DbView
 import molecule.core.util.FutureUtils
 import molecule.datalog.core.query.cursor.CursorUtils
+import molecule.datalog.core.query.{DatomicQueryBase, Model2DatomicQuery}
 import molecule.datalog.datomic.facade.DatomicConn_JVM
 import molecule.datalog.datomic.query.DatomicQueryResolve
 import scala.collection.mutable.ListBuffer
@@ -27,8 +28,9 @@ case class PrimaryUnique[Tpl](
   elements: List[Element],
   optLimit: Option[Int],
   cursor: String,
-  dbView: Option[DbView]
-) extends DatomicQueryResolve[Tpl](elements, dbView)
+  dbView: Option[DbView],
+  m2q: Model2DatomicQuery[Tpl] with DatomicQueryBase
+) extends DatomicQueryResolve[Tpl](elements, dbView, m2q)
   with FutureUtils with CursorUtils with ModelTransformations_ with MoleculeLogging {
 
   def getPage(tokens: List[String], limit: Int)
@@ -46,8 +48,8 @@ case class PrimaryUnique[Tpl](
     if (sortedRows.size() == 0) {
       (Nil, "", false)
     } else {
-      if (isNested) {
-        val nestedRows    = rows2nested(sortedRows)
+      if (m2q.isNested) {
+        val nestedRows    = m2q.rows2nested(sortedRows)
         val toplevelCount = nestedRows.length
         val limitAbs      = limit.abs.min(toplevelCount)
         val hasMore       = limitAbs < toplevelCount
@@ -62,15 +64,15 @@ case class PrimaryUnique[Tpl](
         val hasMore    = limitAbs < totalCount
         val tuples     = ListBuffer.empty[Tpl]
 
-        if (isNestedOpt) {
+        if (m2q.isNestedOpt) {
           postAdjustPullCasts()
-          sortedRows.subList(0, limitAbs).forEach(row => tuples += pullRow2tpl(row))
+          sortedRows.subList(0, limitAbs).forEach(row => tuples += m2q.pullRow2tpl(row))
           val tpls   = if (forward) tuples.result() else tuples.result().reverse
           val cursor = nextCursorUniques(tpls, tokens)
           (tpls, cursor, hasMore)
 
         } else {
-          val row2tpl = castRow2AnyTpl(aritiess.head, castss.head, 0, None)
+          val row2tpl = m2q.castRow2AnyTpl(m2q.aritiess.head, m2q.castss.head, 0, None)
           sortedRows.subList(0, limitAbs).forEach(row => tuples += row2tpl(row).asInstanceOf[Tpl])
           val tpls   = if (forward) tuples.result() else tuples.result().reverse
           val cursor = nextCursorUniques(tpls, tokens)

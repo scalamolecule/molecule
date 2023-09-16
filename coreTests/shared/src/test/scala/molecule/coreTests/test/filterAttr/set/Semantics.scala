@@ -1,15 +1,15 @@
 package molecule.coreTests.test.filterAttr.set
 
 import molecule.base.error.ModelError
+import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
-import molecule.coreTests.api.ApiAsyncImplicits
 import molecule.coreTests.async._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 
-trait Semantics extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
+trait Semantics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
   override lazy val tests = Tests {
 
@@ -124,10 +124,10 @@ trait Semantics extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =
       for {
         _ <- Ns.i.ints(Ref.ints_).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==>
-            """Please add missing filter attributes:
-              |  Ref.ints""".stripMargin
-        }
+            err ==>
+              """Please add missing filter attributes:
+                |  Ref.ints""".stripMargin
+          }
       } yield ()
     }
 
@@ -136,8 +136,8 @@ trait Semantics extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =
       for {
         _ <- Ns.i.ints(Ref.ints).Ref.ints.query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> "Filter attribute Ref.ints pointing to other namespace should be tacit."
-        }
+            err ==> "Filter attribute Ref.ints pointing to other namespace should be tacit."
+          }
       } yield ()
     }
 
@@ -146,55 +146,55 @@ trait Semantics extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =
       for {
         _ <- Ns.int.ints(Ref.ints_).Ref.ints.not(Set(2, 3)).int.query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==>
-            """Cardinality-set filter attributes not allowed to do additional filtering. Found:
-              |  AttrSetManInt("Ref", "ints", Neq, Seq(Set(2, 3)), None, None, Nil, Nil, None, None)""".stripMargin
-        }
+            err ==>
+              """Cardinality-set filter attributes not allowed to do additional filtering. Found:
+                |  AttrSetManInt("Ref", "ints", Neq, Seq(Set(2, 3)), None, None, Nil, Nil, None, None)""".stripMargin
+          }
         _ <- Ns.int.ints.not(Set(2, 3)).Ref.ints(Ns.ints_).int.query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==>
-            """Cardinality-set filter attributes not allowed to do additional filtering. Found:
-              |  AttrSetManInt("Ns", "ints", Neq, Seq(Set(2, 3)), None, None, Nil, Nil, None, None)""".stripMargin
-        }
+            err ==>
+              """Cardinality-set filter attributes not allowed to do additional filtering. Found:
+                |  AttrSetManInt("Ns", "ints", Neq, Seq(Set(2, 3)), None, None, Nil, Nil, None, None)""".stripMargin
+          }
 
         _ <- Ns.int.ints.not(Ref.ints_).Ref.ints.not(Set(2, 3)).int.query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==>
-            """Cardinality-set filter attributes not allowed to do additional filtering. Found:
-              |  AttrSetManInt("Ref", "ints", Neq, Seq(Set(2, 3)), None, None, Nil, Nil, None, None)""".stripMargin
-        }
+            err ==>
+              """Cardinality-set filter attributes not allowed to do additional filtering. Found:
+                |  AttrSetManInt("Ref", "ints", Neq, Seq(Set(2, 3)), None, None, Nil, Nil, None, None)""".stripMargin
+          }
         _ <- Ns.int.ints.not(Set(2, 3)).Ref.ints.not(Ns.ints_).int.query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==>
-            """Cardinality-set filter attributes not allowed to do additional filtering. Found:
-              |  AttrSetManInt("Ns", "ints", Neq, Seq(Set(2, 3)), None, None, Nil, Nil, None, None)""".stripMargin
-        }
+            err ==>
+              """Cardinality-set filter attributes not allowed to do additional filtering. Found:
+                |  AttrSetManInt("Ns", "ints", Neq, Seq(Set(2, 3)), None, None, Nil, Nil, None, None)""".stripMargin
+          }
 
         _ <- Ns.int.ints.has(Ref.ints_).Ref.ints.not(Set(2, 3)).int.query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==>
-            """Cardinality-set filter attributes not allowed to do additional filtering. Found:
-              |  AttrSetManInt("Ref", "ints", Neq, Seq(Set(2, 3)), None, None, Nil, Nil, None, None)""".stripMargin
-        }
+            err ==>
+              """Cardinality-set filter attributes not allowed to do additional filtering. Found:
+                |  AttrSetManInt("Ref", "ints", Neq, Seq(Set(2, 3)), None, None, Nil, Nil, None, None)""".stripMargin
+          }
         _ <- Ns.int.ints.not(Set(2, 3)).Ref.ints.has(Ns.ints_).int.query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==>
-            """Cardinality-set filter attributes not allowed to do additional filtering. Found:
-              |  AttrSetManInt("Ns", "ints", Neq, Seq(Set(2, 3)), None, None, Nil, Nil, None, None)""".stripMargin
-        }
+            err ==>
+              """Cardinality-set filter attributes not allowed to do additional filtering. Found:
+                |  AttrSetManInt("Ns", "ints", Neq, Seq(Set(2, 3)), None, None, Nil, Nil, None, None)""".stripMargin
+          }
 
         _ <- Ns.int.ints.hasNo(Ref.ints_).Ref.ints.not(Set(2, 3)).int.query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==>
-            """Cardinality-set filter attributes not allowed to do additional filtering. Found:
-              |  AttrSetManInt("Ref", "ints", Neq, Seq(Set(2, 3)), None, None, Nil, Nil, None, None)""".stripMargin
-        }
+            err ==>
+              """Cardinality-set filter attributes not allowed to do additional filtering. Found:
+                |  AttrSetManInt("Ref", "ints", Neq, Seq(Set(2, 3)), None, None, Nil, Nil, None, None)""".stripMargin
+          }
         _ <- Ns.int.ints.not(Set(2, 3)).Ref.ints.hasNo(Ns.ints_).int.query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==>
-            """Cardinality-set filter attributes not allowed to do additional filtering. Found:
-              |  AttrSetManInt("Ns", "ints", Neq, Seq(Set(2, 3)), None, None, Nil, Nil, None, None)""".stripMargin
-        }
+            err ==>
+              """Cardinality-set filter attributes not allowed to do additional filtering. Found:
+                |  AttrSetManInt("Ns", "ints", Neq, Seq(Set(2, 3)), None, None, Nil, Nil, None, None)""".stripMargin
+          }
       } yield ()
     }
   }

@@ -8,11 +8,11 @@ import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.marshalling.dbView.DbView
 import molecule.core.util.FutureUtils
 import molecule.datalog.core.query.cursor.CursorUtils
+import molecule.datalog.core.query.{DatomicQueryBase, Model2DatomicQuery}
 import molecule.datalog.datomic.facade.DatomicConn_JVM
 import molecule.datalog.datomic.query.cursorStrategy.{NoUnique, PrimaryUnique, SubUnique}
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
-import scala.concurrent.{ExecutionContext, Future}
 
 /**
  *
@@ -26,8 +26,9 @@ case class DatomicQueryResolveCursor[Tpl](
   elements: List[Element],
   optLimit: Option[Int],
   cursor: Option[String],
-  dbView: Option[DbView]
-) extends DatomicQueryResolve[Tpl](elements, dbView)
+  dbView: Option[DbView],
+  m2q: Model2DatomicQuery[Tpl] with DatomicQueryBase
+) extends DatomicQueryResolve[Tpl](elements, dbView, m2q)
   with FutureUtils
   with CursorUtils
   with ModelTransformations_
@@ -49,9 +50,9 @@ case class DatomicQueryResolveCursor[Tpl](
             throw ModelError("Can only use cursor for un-modified query.")
           } else {
             strategy match {
-              case "1" => PrimaryUnique(elements, optLimit, cursor, dbView).getPage(tokens, limit)
-              case "2" => SubUnique(elements, optLimit, cursor, dbView).getPage(tokens, limit)
-              case "3" => NoUnique(elements, optLimit, cursor, dbView).getPage(tokens, limit)
+              case "1" => PrimaryUnique(elements, optLimit, cursor, dbView, m2q).getPage(tokens, limit)
+              case "2" => SubUnique(elements, optLimit, cursor, dbView, m2q).getPage(tokens, limit)
+              case "3" => NoUnique(elements, optLimit, cursor, dbView, m2q).getPage(tokens, limit)
             }
           }
         case None         => throw ModelError("Unexpected undefined cursor.")
@@ -69,8 +70,8 @@ case class DatomicQueryResolveCursor[Tpl](
     val sortedRows  = sortRows(rows)
     logger.debug(sortedRows.toArray().mkString("\n"))
 
-    if (isNested) {
-      val nestedRows    = rows2nested(sortedRows)
+    if (m2q.isNested) {
+      val nestedRows    = m2q.rows2nested(sortedRows)
       val toplevelCount = nestedRows.length
       val limitAbs      = limit.abs.min(toplevelCount)
       val hasMore       = limitAbs < toplevelCount
@@ -85,13 +86,13 @@ case class DatomicQueryResolveCursor[Tpl](
       val hasMore    = limitAbs < totalCount
       val tuples     = ListBuffer.empty[Tpl]
 
-      if (isNestedOpt) {
+      if (m2q.isNestedOpt) {
         postAdjustPullCasts()
         if (totalCount == 0) {
           (Nil, "", false)
         } else {
           val selectedRows = sortedRows.subList(0, limitAbs)
-          selectedRows.forEach(row => tuples += pullRow2tpl(row))
+          selectedRows.forEach(row => tuples += m2q.pullRow2tpl(row))
           val tpls   = if (forward) tuples.result() else tuples.result().reverse
           val cursor = initialCursor(conn, tpls)
           (tpls, cursor, hasMore)
@@ -101,7 +102,7 @@ case class DatomicQueryResolveCursor[Tpl](
         if (totalCount == 0) {
           (Nil, "", false)
         } else {
-          val row2tpl      = castRow2AnyTpl(aritiess.head, castss.head, 0, None)
+          val row2tpl      = m2q.castRow2AnyTpl(m2q.aritiess.head, m2q.castss.head, 0, None)
           val selectedRows = sortedRows.subList(0, limitAbs)
           selectedRows.forEach(row => tuples += row2tpl(row).asInstanceOf[Tpl])
           val tpls   = if (forward) tuples.result() else tuples.result().reverse

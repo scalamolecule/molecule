@@ -1,9 +1,9 @@
 package molecule.coreTests.test.validation
 
 import molecule.base.error._
+import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
-import molecule.coreTests.api.ApiAsyncImplicits
 import molecule.coreTests.async._
 import molecule.coreTests.dataModels.core.dsl.Validation._
 import molecule.coreTests.setup.CoreTestSuite
@@ -11,7 +11,7 @@ import utest._
 import scala.language.implicitConversions
 
 
-trait StringValidationFns extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
+trait StringValidationFns extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
   override lazy val tests = Tests {
 
@@ -19,33 +19,33 @@ trait StringValidationFns extends CoreTestSuite with ApiAsyncImplicits { self: S
       for {
         _ <- Strings.email("foo@bar").save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap) =>
-            errorMap.head ==> "Strings.email" -> Seq(
-              "`foo@bar` is not a valid email"
-            )
-        }
+            case ValidationErrors(errorMap) =>
+              errorMap.head ==> "Strings.email" -> Seq(
+                "`foo@bar` is not a valid email"
+              )
+          }
         // Same with insert
         _ <- Strings.email.insert("foo@bar").transact
           .map(_ ==> "Unexpected success").recover {
-          case InsertErrors(Seq((_, Seq(InsertError(_, _, Seq(error), _)))), _) =>
-            error ==> "`foo@bar` is not a valid email"
-        }
+            case InsertErrors(Seq((_, Seq(InsertError(_, _, Seq(error), _)))), _) =>
+              error ==> "`foo@bar` is not a valid email"
+          }
 
         _ <- Strings.email("foo@bar", "foo@baz").save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap) =>
-            errorMap.head ==> "Strings.email" -> Seq(
-              "`foo@bar` is not a valid email",
-              "`foo@baz` is not a valid email",
-            )
-        }
+            case ValidationErrors(errorMap) =>
+              errorMap.head ==> "Strings.email" -> Seq(
+                "`foo@bar` is not a valid email",
+                "`foo@baz` is not a valid email",
+              )
+          }
         _ <- Strings.email("foo@bar.com", "foo@bar").save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap) =>
-            errorMap.head ==> "Strings.email" -> Seq(
-              "`foo@bar` is not a valid email"
-            )
-        }
+            case ValidationErrors(errorMap) =>
+              errorMap.head ==> "Strings.email" -> Seq(
+                "`foo@bar` is not a valid email"
+              )
+          }
         // ok
         _ <- Strings.email("foo@bar.com").save.transact
       } yield ()
@@ -55,26 +55,26 @@ trait StringValidationFns extends CoreTestSuite with ApiAsyncImplicits { self: S
       for {
         _ <- Strings.emailWithMsg("foo@bar").save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap) =>
-            errorMap.head ==> "Strings.emailWithMsg" -> Seq(
-              "Please provide a real email"
-            )
-        }
+            case ValidationErrors(errorMap) =>
+              errorMap.head ==> "Strings.emailWithMsg" -> Seq(
+                "Please provide a real email"
+              )
+          }
         _ <- Strings.emailWithMsg("foo@bar", "foo@baz").save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap) =>
-            errorMap.head ==> "Strings.emailWithMsg" -> Seq(
-              "Please provide a real email",
-              "Please provide a real email",
-            )
-        }
+            case ValidationErrors(errorMap) =>
+              errorMap.head ==> "Strings.emailWithMsg" -> Seq(
+                "Please provide a real email",
+                "Please provide a real email",
+              )
+          }
         _ <- Strings.emailWithMsg("foo@bar.com", "foo@bar").save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap) =>
-            errorMap.head ==> "Strings.emailWithMsg" -> Seq(
-              "Please provide a real email"
-            )
-        }
+            case ValidationErrors(errorMap) =>
+              errorMap.head ==> "Strings.emailWithMsg" -> Seq(
+                "Please provide a real email"
+              )
+          }
         _ <- Strings.emailWithMsg("foo@bar.com").save.transact
       } yield ()
     }
@@ -84,11 +84,11 @@ trait StringValidationFns extends CoreTestSuite with ApiAsyncImplicits { self: S
       for {
         _ <- Strings.regex("Ben-hur").save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap) =>
-            errorMap.head ==> "Strings.regex" -> Seq(
-              """"Ben-hur" doesn't match regex pattern: ^[a-zA-Z0-9]+$"""
-            )
-        }
+            case ValidationErrors(errorMap) =>
+              errorMap.head ==> "Strings.regex" -> Seq(
+                """"Ben-hur" doesn't match regex pattern: ^[a-zA-Z0-9]+$"""
+              )
+          }
         _ <- Strings.regex("Benhur").save.transact
       } yield ()
     }
@@ -97,11 +97,11 @@ trait StringValidationFns extends CoreTestSuite with ApiAsyncImplicits { self: S
       for {
         _ <- Strings.regexWithMsg("Ben-hur").save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap) =>
-            errorMap.head ==> "Strings.regexWithMsg" -> Seq(
-              "Username cannot contain special characters."
-            )
-        }
+            case ValidationErrors(errorMap) =>
+              errorMap.head ==> "Strings.regexWithMsg" -> Seq(
+                "Username cannot contain special characters."
+              )
+          }
         _ <- Strings.regexWithMsg("Benhur").save.transact
       } yield ()
     }

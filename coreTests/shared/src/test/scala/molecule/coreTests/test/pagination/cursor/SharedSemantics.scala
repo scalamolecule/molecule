@@ -1,16 +1,16 @@
 package molecule.coreTests.test.pagination.cursor
 
 import molecule.base.error.ModelError
+import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
-import molecule.coreTests.api.ApiAsyncImplicits
 import molecule.coreTests.async._
 import molecule.coreTests.dataModels.core.dsl.Uniques._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 import scala.annotation.nowarn
 
-trait SharedSemantics extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
+trait SharedSemantics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
   @nowarn lazy val tests = Tests {
 
@@ -21,8 +21,8 @@ trait SharedSemantics extends CoreTestSuite with ApiAsyncImplicits { self: SpiAs
         c1 <- Uniques.int.a1.query.from("").limit(2).get.map { case (List(1, 2), c, true) => c }
         _ <- Uniques.i_(1).int.a1.query.from(c1).limit(2).get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-          err ==> "Can only use cursor for un-modified query."
-        }
+            err ==> "Can only use cursor for un-modified query."
+          }
       } yield ()
     }
 

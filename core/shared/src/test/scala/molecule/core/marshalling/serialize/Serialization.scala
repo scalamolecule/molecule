@@ -1,9 +1,9 @@
 package molecule.core.marshalling.serialize
 
 import java.nio.ByteBuffer
+import boopickle.Default._
 import molecule.base.error.MoleculeError
 import molecule.boilerplate.ast.Model._
-import boopickle.Default._
 import molecule.core.marshalling.Boopicklers._
 import utest._
 

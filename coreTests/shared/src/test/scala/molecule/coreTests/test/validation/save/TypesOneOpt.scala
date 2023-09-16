@@ -3,16 +3,16 @@ package molecule.coreTests.test.validation.save
 import java.net.URI
 import java.util.UUID
 import molecule.base.error.ValidationErrors
+import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
-import molecule.coreTests.api.ApiAsyncImplicits
 import molecule.coreTests.async._
 import molecule.coreTests.dataModels.core.dsl.Validation._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 import scala.language.implicitConversions
 
-trait TypesOneOpt extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
+trait TypesOneOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
   override lazy val tests = Tests {
 
@@ -20,26 +20,26 @@ trait TypesOneOpt extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync 
       for {
         _ <- Type.string_?(Some("a")).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap) =>
-            errorMap ==>
-              Map(
-                "Type.string" -> Seq(
-                  s"""Type.string with value `a` doesn't satisfy validation:
-                     |  _ > "b"
-                     |""".stripMargin
+            case ValidationErrors(errorMap) =>
+              errorMap ==>
+                Map(
+                  "Type.string" -> Seq(
+                    s"""Type.string with value `a` doesn't satisfy validation:
+                       |  _ > "b"
+                       |""".stripMargin
+                  )
                 )
-              )
-        }
+          }
         // Focusing only on the first (and only) error message
         // (See ValidationFormatting tests for multi-error validations)
         _ <- Type.string_?(Some("a")).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap) =>
-            errorMap.head._2.head ==>
-              s"""Type.string with value `a` doesn't satisfy validation:
-                 |  _ > "b"
-                 |""".stripMargin
-        }
+            case ValidationErrors(errorMap) =>
+              errorMap.head._2.head ==>
+                s"""Type.string with value `a` doesn't satisfy validation:
+                   |  _ > "b"
+                   |""".stripMargin
+          }
       } yield ()
     }
 
@@ -47,12 +47,12 @@ trait TypesOneOpt extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync 
       for {
         _ <- Type.int_?(Some(1)).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap) =>
-            errorMap.head._2.head ==>
-              s"""Type.int with value `1` doesn't satisfy validation:
-                 |  _ > 2
-                 |""".stripMargin
-        }
+            case ValidationErrors(errorMap) =>
+              errorMap.head._2.head ==>
+                s"""Type.int with value `1` doesn't satisfy validation:
+                   |  _ > 2
+                   |""".stripMargin
+          }
       } yield ()
     }
 
@@ -60,12 +60,12 @@ trait TypesOneOpt extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync 
       for {
         _ <- Type.long_?(Some(1L)).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap) =>
-            errorMap.head._2.head ==>
-              s"""Type.long with value `1` doesn't satisfy validation:
-                 |  _ > 2L
-                 |""".stripMargin
-        }
+            case ValidationErrors(errorMap) =>
+              errorMap.head._2.head ==>
+                s"""Type.long with value `1` doesn't satisfy validation:
+                   |  _ > 2L
+                   |""".stripMargin
+          }
       } yield ()
     }
 
@@ -74,12 +74,12 @@ trait TypesOneOpt extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync 
         // Using float0 to avoid rounding discrepancy on scala.js
         _ <- Type.float_?(Some(float1)).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap) =>
-            errorMap.head._2.head ==>
-              s"""Type.float with value `$float1` doesn't satisfy validation:
-                 |  _ > 2.2f
-                 |""".stripMargin
-        }
+            case ValidationErrors(errorMap) =>
+              errorMap.head._2.head ==>
+                s"""Type.float with value `$float1` doesn't satisfy validation:
+                   |  _ > 2.2f
+                   |""".stripMargin
+          }
       } yield ()
     }
 
@@ -87,12 +87,12 @@ trait TypesOneOpt extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync 
       for {
         _ <- Type.double_?(Some(double1)).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap) =>
-            errorMap.head._2.head ==>
-              s"""Type.double with value `$double1` doesn't satisfy validation:
-                 |  _ > 2.2
-                 |""".stripMargin
-        }
+            case ValidationErrors(errorMap) =>
+              errorMap.head._2.head ==>
+                s"""Type.double with value `$double1` doesn't satisfy validation:
+                   |  _ > 2.2
+                   |""".stripMargin
+          }
       } yield ()
     }
 
@@ -100,12 +100,12 @@ trait TypesOneOpt extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync 
       for {
         _ <- Type.boolean_?(Some(true)).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap) =>
-            errorMap.head._2.head ==>
-              s"""Type.boolean with value `true` doesn't satisfy validation:
-                 |  _ == false
-                 |""".stripMargin
-        }
+            case ValidationErrors(errorMap) =>
+              errorMap.head._2.head ==>
+                s"""Type.boolean with value `true` doesn't satisfy validation:
+                   |  _ == false
+                   |""".stripMargin
+          }
       } yield ()
     }
 
@@ -113,12 +113,12 @@ trait TypesOneOpt extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync 
       for {
         _ <- Type.bigInt_?(Some(bigInt1)).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap) =>
-            errorMap.head._2.head ==>
-              s"""Type.bigInt with value `$bigInt1` doesn't satisfy validation:
-                 |  _ > BigInt(2)
-                 |""".stripMargin
-        }
+            case ValidationErrors(errorMap) =>
+              errorMap.head._2.head ==>
+                s"""Type.bigInt with value `$bigInt1` doesn't satisfy validation:
+                   |  _ > BigInt(2)
+                   |""".stripMargin
+          }
       } yield ()
     }
 
@@ -126,12 +126,12 @@ trait TypesOneOpt extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync 
       for {
         _ <- Type.bigDecimal_?(Some(bigDecimal1)).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap) =>
-            errorMap.head._2.head ==>
-              s"""Type.bigDecimal with value `$bigDecimal1` doesn't satisfy validation:
-                 |  _ > BigDecimal(2.2)
-                 |""".stripMargin
-        }
+            case ValidationErrors(errorMap) =>
+              errorMap.head._2.head ==>
+                s"""Type.bigDecimal with value `$bigDecimal1` doesn't satisfy validation:
+                   |  _ > BigDecimal(2.2)
+                   |""".stripMargin
+          }
       } yield ()
     }
 
@@ -139,12 +139,12 @@ trait TypesOneOpt extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync 
       for {
         _ <- Type.date_?(Some(date1)).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap) =>
-            errorMap.head._2.head ==>
-              s"""Type.date with value `$date1` doesn't satisfy validation:
-                 |  _.after(new Date(993942000000L))
-                 |""".stripMargin
-        }
+            case ValidationErrors(errorMap) =>
+              errorMap.head._2.head ==>
+                s"""Type.date with value `$date1` doesn't satisfy validation:
+                   |  _.after(new Date(993942000000L))
+                   |""".stripMargin
+          }
       } yield ()
     }
 
@@ -152,12 +152,12 @@ trait TypesOneOpt extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync 
       for {
         _ <- Type.uuid_?(Some(UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"))).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap) =>
-            errorMap.head._2.head ==>
-              s"""Type.uuid with value `aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa` doesn't satisfy validation:
-                 |  _.toString != "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
-                 |""".stripMargin
-        }
+            case ValidationErrors(errorMap) =>
+              errorMap.head._2.head ==>
+                s"""Type.uuid with value `aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa` doesn't satisfy validation:
+                   |  _.toString != "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
+                   |""".stripMargin
+          }
       } yield ()
     }
 
@@ -166,12 +166,12 @@ trait TypesOneOpt extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync 
       for {
         _ <- Type.uri_?(Some(uri)).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap) =>
-            errorMap.head._2.head ==>
-              s"""Type.uri with value `x` doesn't satisfy validation:
-                 |  _.toString.length > 2
-                 |""".stripMargin
-        }
+            case ValidationErrors(errorMap) =>
+              errorMap.head._2.head ==>
+                s"""Type.uri with value `x` doesn't satisfy validation:
+                   |  _.toString.length > 2
+                   |""".stripMargin
+          }
       } yield ()
     }
 
@@ -179,12 +179,12 @@ trait TypesOneOpt extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync 
       for {
         _ <- Type.byte_?(Some(byte1)).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap) =>
-            errorMap.head._2.head ==>
-              s"""Type.byte with value `$byte1` doesn't satisfy validation:
-                 |  _ > $byte2
-                 |""".stripMargin
-        }
+            case ValidationErrors(errorMap) =>
+              errorMap.head._2.head ==>
+                s"""Type.byte with value `$byte1` doesn't satisfy validation:
+                   |  _ > $byte2
+                   |""".stripMargin
+          }
       } yield ()
     }
 
@@ -192,12 +192,12 @@ trait TypesOneOpt extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync 
       for {
         _ <- Type.short_?(Some(short1)).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap) =>
-            errorMap.head._2.head ==>
-              s"""Type.short with value `$short1` doesn't satisfy validation:
-                 |  _ > $short2
-                 |""".stripMargin
-        }
+            case ValidationErrors(errorMap) =>
+              errorMap.head._2.head ==>
+                s"""Type.short with value `$short1` doesn't satisfy validation:
+                   |  _ > $short2
+                   |""".stripMargin
+          }
       } yield ()
     }
 
@@ -205,12 +205,12 @@ trait TypesOneOpt extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync 
       for {
         _ <- Type.char_?(Some('a')).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap) =>
-            errorMap.head._2.head ==>
-              s"""Type.char with value `a` doesn't satisfy validation:
-                 |  _ > 'b'
-                 |""".stripMargin
-        }
+            case ValidationErrors(errorMap) =>
+              errorMap.head._2.head ==>
+                s"""Type.char with value `a` doesn't satisfy validation:
+                   |  _ > 'b'
+                   |""".stripMargin
+          }
       } yield ()
     }
 
@@ -218,12 +218,12 @@ trait TypesOneOpt extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync 
       for {
         _ <- Type.ref_?(Some(1L)).save.transact
           .map(_ ==> "Unexpected success").recover {
-          case ValidationErrors(errorMap) =>
-            errorMap.head._2.head ==>
-              s"""Type.ref with value `1` doesn't satisfy validation:
-                 |  _ > 2L
-                 |""".stripMargin
-        }
+            case ValidationErrors(errorMap) =>
+              errorMap.head._2.head ==>
+                s"""Type.ref with value `1` doesn't satisfy validation:
+                   |  _ > 2L
+                   |""".stripMargin
+          }
       } yield ()
     }
   }

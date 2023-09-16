@@ -1,12 +1,11 @@
 package molecule.core.marshalling
 
 import java.nio.ByteBuffer
-import java.util.UUID
 import boopickle.Default._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.util.Executor._
 import org.scalajs.dom
-import org.scalajs.dom.{MessageEvent, WebSocket, XMLHttpRequest}
+import org.scalajs.dom.XMLHttpRequest
 import scala.concurrent.{Future, Promise}
 import scala.scalajs.js.typedarray._
 

@@ -4,8 +4,8 @@ package molecule.boilerplate.ast
 import java.net.URI
 import java.util.{Date, UUID}
 import molecule.boilerplate.ast.Model._
-import utest._
 import org.scalactic.TripleEquals._
+import utest._
 
 
 object AttrToString extends TestSuite with Validations {

@@ -1,57 +1,59 @@
 package molecule.core.api
 
 import molecule.base.error.InsertError
-import molecule.core.spi.{Conn, TxReport}
-import scala.concurrent.Future
+import molecule.core.action._
+import molecule.core.spi.{Conn, SpiSync, TxReport}
 
-trait ApiSync {
+trait ApiSync { spi: SpiSync =>
 
-  trait QueryApiSync[Tpl] {
-    def get(implicit conn: Conn): List[Tpl]
-    def subscribe(callback: List[Tpl] => Unit)(implicit conn: Conn): Unit
-    def unsubscribe()(implicit conn: Conn): Unit
-    def inspect(implicit conn: Conn): Unit
-  }
-  trait QueryOffsetApiSync[Tpl] {
-    def get(implicit conn: Conn): (List[Tpl], Int, Boolean)
-    def inspect(implicit conn: Conn): Unit
-  }
-  trait QueryCursorApiSync[Tpl] {
-    def get(implicit conn: Conn): (List[Tpl], String, Boolean)
-    def inspect(implicit conn: Conn): Unit
+  implicit class QueryApiAsync[Tpl](q: Query[Tpl]) {
+    def get(implicit conn: Conn): List[Tpl] = query_get(q)
+    def subscribe(callback: List[Tpl] => Unit)(implicit conn: Conn): Unit = query_subscribe(q, callback)
+    def unsubscribe()(implicit conn: Conn): Unit = query_unsubscribe(q)
+    def inspect(implicit conn: Conn): Unit = query_inspect(q)
   }
 
-  trait SaveApiSync {
-    def transact(implicit conn: Conn): TxReport
-    def validate(implicit conn: Conn): Map[String, Seq[String]]
-    def inspect(implicit conn: Conn): Unit
+  implicit class QueryOffsetApiAsync[Tpl](q: QueryOffset[Tpl]) {
+    def get(implicit conn: Conn): (List[Tpl], Int, Boolean) = queryOffset_get(q)
+    def inspect(implicit conn: Conn): Unit = queryOffset_inspect(q)
   }
 
-  trait InsertApiSync {
-    def transact(implicit conn: Conn): TxReport
-    def validate(implicit conn: Conn): Seq[(Int, Seq[InsertError])]
-    def inspect(implicit conn: Conn): Unit
+  implicit class QueryCursorApiAsync[Tpl](q: QueryCursor[Tpl]) {
+    def get(implicit conn: Conn): (List[Tpl], String, Boolean) = queryCursor_get(q)
+    def inspect(implicit conn: Conn): Unit = queryCursor_inspect(q)
   }
 
-  trait UpdateApiSync {
-    def transact(implicit conn: Conn): TxReport
-    def validate(implicit conn: Conn): Map[String, Seq[String]]
-    def inspect(implicit conn: Conn): Unit
+  implicit class SaveApiAsync[Tpl](save: Save) {
+    def transact(implicit conn: Conn): TxReport = save_transact(save)
+    def inspect(implicit conn: Conn): Unit = save_inspect(save)
+    def validate(implicit conn: Conn): Map[String, Seq[String]] = save_validate(save)
   }
 
-  trait DeleteApiSync {
-    def transact(implicit conn: Conn): TxReport
-    def inspect(implicit conn: Conn): Unit
+  implicit class InsertApiAsync[Tpl](insert: Insert) {
+    def transact(implicit conn: Conn): TxReport = insert_transact(insert)
+    def inspect(implicit conn: Conn): Unit = insert_inspect(insert)
+    def validate(implicit conn: Conn): Seq[(Int, Seq[InsertError])] = insert_validate(insert)
+  }
+
+  implicit class UpdateApiAsync[Tpl](update: Update) {
+    def transact(implicit conn0: Conn): TxReport = update_transact(update)
+    def inspect(implicit conn0: Conn): Unit = update_inspect(update)
+    def validate(implicit conn: Conn): Map[String, Seq[String]] = update_validate(update)
+  }
+
+  implicit class DeleteApiAsync[Tpl](delete: Delete) {
+    def transact(implicit conn0: Conn): TxReport = delete_transact(delete)
+    def inspect(implicit conn0: Conn): Unit = delete_inspect(delete)
   }
 
   def rawQuery(
     query: String,
     withNulls: Boolean = false,
     doPrint: Boolean = true,
-  )(implicit conn: Conn): List[List[Any]]
+  )(implicit conn: Conn): List[List[Any]] = fallback_rawQuery(query, withNulls, doPrint)
 
   def rawTransact(
     txData: String,
     doPrint: Boolean = true
-  )(implicit conn: Conn): TxReport
+  )(implicit conn: Conn): TxReport = fallback_rawTransact(txData, doPrint)
 }

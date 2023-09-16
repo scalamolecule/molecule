@@ -1,8 +1,8 @@
 package molecule.coreTests.test.pagination.cursor.noUnique
 
+import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
-import molecule.coreTests.api.ApiAsyncImplicits
 import molecule.coreTests.async._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuite
@@ -10,7 +10,7 @@ import utest._
 import scala.annotation.{nowarn, tailrec}
 import scala.util.Random
 
-trait DirectionsOptional extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
+trait DirectionsOptional extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
   @tailrec
   final def getPairs(acc: List[(Int, Option[Int])]): List[(Int, Option[Int])] = {

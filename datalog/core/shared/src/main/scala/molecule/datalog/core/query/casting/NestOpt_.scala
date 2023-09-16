@@ -104,7 +104,7 @@ trait NestOpt_[Tpl]
     }
   }
 
-  final protected lazy val pullRow2tpl: Row => Tpl = {
+  final lazy val pullRow2tpl: Row => Tpl = {
     val arities    = aritiess.head
     val casts      = castss.head
     val rowIndexTx = arities.flatten.takeWhile(_ != -1).sum + 1

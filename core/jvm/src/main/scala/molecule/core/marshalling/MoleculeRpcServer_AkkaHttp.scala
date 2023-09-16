@@ -3,18 +3,11 @@ package molecule.core.marshalling
 import java.nio.ByteBuffer
 import akka.actor.ActorSystem
 import akka.http.scaladsl.model.HttpEntity
-import akka.http.scaladsl.model.ws._
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
-import akka.stream.OverflowStrategy
-import akka.stream.scaladsl.{Flow, Sink, Source}
-import akka.util.ByteString
 import boopickle.Default._
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
-import molecule.base.error.ModelError
-import molecule.boilerplate.ast.Model._
 import molecule.core.marshalling.Boopicklers._
-import molecule.core.marshalling.serialize.PickleTpls
 import scala.concurrent.{ExecutionContextExecutor, Future}
 import scala.language.implicitConversions
 

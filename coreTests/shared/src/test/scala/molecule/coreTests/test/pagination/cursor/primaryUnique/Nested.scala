@@ -1,22 +1,22 @@
 package molecule.coreTests.test.pagination.cursor.primaryUnique
 
+import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
-import molecule.coreTests.api.ApiAsyncImplicits
 import molecule.coreTests.async._
 import molecule.coreTests.dataModels.core.dsl.Uniques._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 import scala.annotation.nowarn
 
-trait Nested extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
-  val x     = ""
-  val a     = (1, List(1))
-  val b     = (2, List(1))
-  val c     = (3, List(1))
-  val d     = (4, List(1))
-  val e     = (5, List(1))
-  val data  = List(a, b, c, d, e)
+trait Nested extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
+  val x    = ""
+  val a    = (1, List(1))
+  val b    = (2, List(1))
+  val c    = (3, List(1))
+  val d    = (4, List(1))
+  val e    = (5, List(1))
+  val data = List(a, b, c, d, e)
 
   // (Allow pattern matching the result without warnings)
   @nowarn lazy val tests = Tests {

@@ -1,14 +1,14 @@
 package molecule.coreTests.test.sort
 
+import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
-import molecule.coreTests.api.ApiAsyncImplicits
 import molecule.coreTests.async._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 
-trait SortAggr extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
+trait SortAggr extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
   // Use whole decimal numbers since only sorting is checked here
   override lazy val (float1, float2, float3, float4)                     = (1.0f, 2.0f, 3.0f, 4.0f)

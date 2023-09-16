@@ -1,15 +1,15 @@
 package molecule.coreTests.test.subscription
 
+import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
-import molecule.coreTests.api.ApiAsyncImplicits
 import molecule.coreTests.async._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 import scala.language.implicitConversions
 
-trait Subscription extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync =>
+trait Subscription extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
   override lazy val tests = Tests {
 

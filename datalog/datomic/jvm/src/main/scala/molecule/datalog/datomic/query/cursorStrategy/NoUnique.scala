@@ -7,6 +7,7 @@ import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.marshalling.dbView.DbView
 import molecule.core.util.FutureUtils
 import molecule.datalog.core.query.cursor.CursorUtils
+import molecule.datalog.core.query.{DatomicQueryBase, Model2DatomicQuery}
 import molecule.datalog.datomic.facade.DatomicConn_JVM
 import molecule.datalog.datomic.query.DatomicQueryResolve
 
@@ -15,8 +16,9 @@ case class NoUnique[Tpl](
   elements: List[Element],
   optLimit: Option[Int],
   cursor: String,
-  dbView: Option[DbView]
-) extends DatomicQueryResolve[Tpl](elements, dbView)
+  dbView: Option[DbView],
+  m2q: Model2DatomicQuery[Tpl] with DatomicQueryBase
+) extends DatomicQueryResolve[Tpl](elements, dbView, m2q)
   with FutureUtils with CursorUtils with MoleculeLogging {
 
   def getPage(allTokens: List[String], limit: Int)
@@ -32,9 +34,11 @@ case class NoUnique[Tpl](
 
     val identifyTpl = (tpl: Tpl) => tpl.hashCode()
     val identifyRow = (isNestedOpt: Boolean) => if (isNestedOpt)
-      (row: Row) => pullRow2tpl(row).hashCode()
-    else
-      (row: Row) => row2AnyTpl(row).hashCode()
+      (row: m2q.Row) => m2q.pullRow2tpl(row).hashCode()
+    else {
+      val row2AnyTpl     = m2q.castRow2AnyTpl(m2q.aritiess.head, m2q.castss.head, 0, None)
+      (row: m2q.Row) => row2AnyTpl(row).hashCode()
+    }
 
     paginateFromIdentifiers(
       conn,

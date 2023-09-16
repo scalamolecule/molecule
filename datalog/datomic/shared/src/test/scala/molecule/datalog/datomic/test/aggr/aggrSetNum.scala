@@ -1,14 +1,14 @@
 package molecule.datalog.datomic.test.aggr
 
 import molecule.coreTests.test.aggr.set.number._
-import molecule.datalog.datomic.setup.CoreTestAsync
+import molecule.datalog.datomic.setup.TestAsync_datomic
 
-object AggrSetNum_Int extends AggrSetNum_Int with CoreTestAsync
-object AggrSetNum_Long extends AggrSetNum_Long_ with CoreTestAsync
-object AggrSetNum_Float extends AggrSetNum_Float_ with CoreTestAsync
-object AggrSetNum_Double extends AggrSetNum_Double_ with CoreTestAsync
-object AggrSetNum_BigInt extends AggrSetNum_BigInt_ with CoreTestAsync
-object AggrSetNum_BigDecimal extends AggrSetNum_BigDecimal_ with CoreTestAsync
-object AggrSetNum_Byte extends AggrSetNum_Byte_ with CoreTestAsync
-object AggrSetNum_Short extends AggrSetNum_Short_ with CoreTestAsync
-object AggrSetNum_ref extends AggrSetNum_ref with CoreTestAsync
+object AggrSetNum_Int extends AggrSetNum_Int with TestAsync_datomic
+object AggrSetNum_Long extends AggrSetNum_Long_ with TestAsync_datomic
+object AggrSetNum_Float extends AggrSetNum_Float_ with TestAsync_datomic
+object AggrSetNum_Double extends AggrSetNum_Double_ with TestAsync_datomic
+object AggrSetNum_BigInt extends AggrSetNum_BigInt_ with TestAsync_datomic
+object AggrSetNum_BigDecimal extends AggrSetNum_BigDecimal_ with TestAsync_datomic
+object AggrSetNum_Byte extends AggrSetNum_Byte_ with TestAsync_datomic
+object AggrSetNum_Short extends AggrSetNum_Short_ with TestAsync_datomic
+object AggrSetNum_ref extends AggrSetNum_ref with TestAsync_datomic

@@ -70,7 +70,7 @@ trait Nest[Tpl] { self: Model2Query
   private var acc7: List[Any] = List.empty[Any]
 
 
-  final protected def rows2nested(rows: Row): List[Tpl] = {
+  final def rows2nested(rows: Row): List[Tpl] = {
     nestedLevels match {
       case 1 => rows2nested1(rows)
       case 2 => rows2nested2(rows)

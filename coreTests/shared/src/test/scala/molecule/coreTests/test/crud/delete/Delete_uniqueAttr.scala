@@ -1,14 +1,14 @@
 package molecule.coreTests.test.crud.delete
 
+import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
-import molecule.coreTests.api.ApiAsyncImplicits
 import molecule.coreTests.async._
 import molecule.coreTests.dataModels.core.dsl.Uniques._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 
-trait Delete_uniqueAttr extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
+trait Delete_uniqueAttr extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
 
   override lazy val tests = Tests {

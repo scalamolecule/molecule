@@ -4,7 +4,7 @@ import molecule.base.ast._
 
 
 /** Schema transaction data interface with data sources for various databases.
-  * */
+ * */
 trait Schema {
 
   val metaSchema: MetaSchema
@@ -22,6 +22,7 @@ trait Schema {
   val datomicSchema    : String
   val datomicAliases   : String
 
-  /** Database-dependent sql schema */
-  def sqlSchema(db: String): String
+  /** sql schemas */
+  val sqlSchema_h2      : String
+  val sqlSchema_postgres: String
 }

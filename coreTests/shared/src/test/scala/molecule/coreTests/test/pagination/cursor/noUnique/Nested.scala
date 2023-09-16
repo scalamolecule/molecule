@@ -1,8 +1,8 @@
 package molecule.coreTests.test.pagination.cursor.noUnique
 
+import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
-import molecule.coreTests.api.ApiAsyncImplicits
 import molecule.coreTests.async._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuite
@@ -10,7 +10,7 @@ import utest._
 import scala.annotation.{nowarn, tailrec}
 import scala.util.Random
 
-trait Nested extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
+trait Nested extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
   @tailrec
   final def getData(acc: List[(Int, Int, List[Int])]): List[(Int, Int, List[Int])] = {
@@ -25,10 +25,10 @@ trait Nested extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
 
   @nowarn lazy val tests = Tests {
 
-    "Forward, asc asc"- types { implicit conn =>
+    "Forward, asc asc" - types { implicit conn =>
       val pairs               = getData(Nil)
       val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
-      val query               = (cursor: String, limit: Int) => 
+      val query               = (cursor: String, limit: Int) =>
         Ns.i.a1.int.a2.Refs.*(Ref.i).query.from(cursor).limit(limit)
       for {
         _ <- Ns.i.int.Refs.*(Ref.i).insert(pairs).transact
@@ -40,7 +40,7 @@ trait Nested extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
       } yield ()
     }
 
-    "Forward, desc asc"- types { implicit conn =>
+    "Forward, desc asc" - types { implicit conn =>
       val pairs               = getData(Nil)
       val List(a, b, c, d, e) = pairs.sortBy(p => (-p._1, p._2))
       val query               = (cursor: String, limit: Int) =>
@@ -55,7 +55,7 @@ trait Nested extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
       } yield ()
     }
 
-    "Forward, asc desc"- types { implicit conn =>
+    "Forward, asc desc" - types { implicit conn =>
       val pairs               = getData(Nil)
       val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, -p._2))
       val query               = (cursor: String, limit: Int) =>
@@ -70,7 +70,7 @@ trait Nested extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
       } yield ()
     }
 
-    "Forward, desc desc"- types { implicit conn =>
+    "Forward, desc desc" - types { implicit conn =>
       val pairs               = getData(Nil)
       val List(a, b, c, d, e) = pairs.sortBy(p => (-p._1, -p._2))
       val query               = (cursor: String, limit: Int) =>
@@ -86,7 +86,7 @@ trait Nested extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
     }
 
 
-    "Backwards, asc asc"- types { implicit conn =>
+    "Backwards, asc asc" - types { implicit conn =>
       val pairs               = getData(Nil)
       val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
       val query               = (cursor: String, limit: Int) =>
@@ -101,7 +101,7 @@ trait Nested extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
       } yield ()
     }
 
-    "Backwards, desc asc"- types { implicit conn =>
+    "Backwards, desc asc" - types { implicit conn =>
       val pairs               = getData(Nil)
       val List(a, b, c, d, e) = pairs.sortBy(p => (-p._1, p._2))
       val query               = (cursor: String, limit: Int) =>
@@ -116,7 +116,7 @@ trait Nested extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
       } yield ()
     }
 
-    "Backwards, asc desc"- types { implicit conn =>
+    "Backwards, asc desc" - types { implicit conn =>
       val pairs               = getData(Nil)
       val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, -p._2))
       val query               = (cursor: String, limit: Int) =>
@@ -131,7 +131,7 @@ trait Nested extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
       } yield ()
     }
 
-    "Backwards, desc desc"- types { implicit conn =>
+    "Backwards, desc desc" - types { implicit conn =>
       val pairs               = getData(Nil)
       val List(a, b, c, d, e) = pairs.sortBy(p => (-p._1, -p._2))
       val query               = (cursor: String, limit: Int) =>

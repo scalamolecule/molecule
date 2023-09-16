@@ -7,6 +7,7 @@ import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.marshalling.dbView.DbView
 import molecule.core.util.FutureUtils
 import molecule.datalog.core.query.cursor.CursorUtils
+import molecule.datalog.core.query.{DatomicQueryBase, Model2DatomicQuery}
 import molecule.datalog.datomic.facade.DatomicConn_JVM
 import molecule.datalog.datomic.query.DatomicQueryResolve
 
@@ -32,8 +33,9 @@ case class SubUnique[Tpl](
   elements: List[Element],
   optLimit: Option[Int],
   cursor: String,
-  dbView: Option[DbView]
-) extends DatomicQueryResolve[Tpl](elements, dbView)
+  dbView: Option[DbView],
+  m2q: Model2DatomicQuery[Tpl] with DatomicQueryBase
+) extends DatomicQueryResolve[Tpl](elements, dbView, m2q)
   with FutureUtils with CursorUtils with MoleculeLogging {
 
   def getPage(allTokens: List[String], limit: Int)
@@ -50,7 +52,7 @@ case class SubUnique[Tpl](
     }
 
     val identifyTpl = (tpl: Tpl) => tpl.asInstanceOf[Product].productElement(uniqueIndex)
-    val identifyRow = (_: Boolean) => (row: Row) => row.get(uniqueIndex)
+    val identifyRow = (_: Boolean) => (row: m2q.Row) => row.get(uniqueIndex)
     paginateFromIdentifiers(
       conn,
       limit,

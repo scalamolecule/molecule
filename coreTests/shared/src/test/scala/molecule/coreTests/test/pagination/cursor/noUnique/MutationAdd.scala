@@ -1,8 +1,8 @@
 package molecule.coreTests.test.pagination.cursor.noUnique
 
+import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
-import molecule.coreTests.api.ApiAsyncImplicits
 import molecule.coreTests.async._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuite
@@ -10,7 +10,7 @@ import utest._
 import scala.annotation.{nowarn, tailrec}
 import scala.util.Random
 
-trait MutationAdd extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
+trait MutationAdd extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
   @tailrec
   final def getPairs(acc: List[(Int, Int)]): List[(Int, Int)] = {
@@ -23,7 +23,7 @@ trait MutationAdd extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync 
     }
   }
 
-  val query =  Ns.i.a1.int.a2.query
+  val query = Ns.i.a1.int.a2.query
 
   @nowarn lazy val tests = Tests {
 
@@ -33,11 +33,11 @@ trait MutationAdd extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync 
         val pairs               = getPairs(Nil)
         val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
         for {
-          _ <-  Ns.i.int.insert(a, c, e).transact
+          _ <- Ns.i.int.insert(a, c, e).transact
           cur <- query.from("").limit(2).get.map { case (List(`a`, `c`), cur, true) => cur }
 
           // Add row before next page
-          _ <-  Ns.i.int.insert(b).transact
+          _ <- Ns.i.int.insert(b).transact
 
           // Next page unaffected
           _ <- query.from(cur).limit(2).get.map { case (List(`e`), _, false) => () }
@@ -48,11 +48,11 @@ trait MutationAdd extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync 
         val pairs               = getPairs(Nil)
         val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
         for {
-          _ <-  Ns.i.int.insert(a, c, e).transact
+          _ <- Ns.i.int.insert(a, c, e).transact
           cur <- query.from("").limit(2).get.map { case (List(`a`, `c`), cur, true) => cur }
 
           // Add row after this page
-          _ <-  Ns.i.int.insert(d).transact
+          _ <- Ns.i.int.insert(d).transact
 
           // Next page includes new row
           _ <- query.from(cur).limit(2).get.map { case (List(`d`, `e`), _, false) => () }
@@ -67,11 +67,11 @@ trait MutationAdd extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync 
         val pairs               = getPairs(Nil)
         val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
         for {
-          _ <-  Ns.i.int.insert(a, c, e).transact
+          _ <- Ns.i.int.insert(a, c, e).transact
           cur <- query.from("").limit(-2).get.map { case (List(`c`, `e`), cur, true) => cur }
 
           // Add row before next page
-          _ <-  Ns.i.int.insert(d).transact
+          _ <- Ns.i.int.insert(d).transact
 
           // Next page unaffected
           _ <- query.from(cur).limit(-2).get.map { case (List(`a`), _, false) => () }
@@ -82,11 +82,11 @@ trait MutationAdd extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync 
         val pairs               = getPairs(Nil)
         val List(a, b, c, d, e) = pairs.sortBy(p => (p._1, p._2))
         for {
-          _ <-  Ns.i.int.insert(a, c, e).transact
+          _ <- Ns.i.int.insert(a, c, e).transact
           cur <- query.from("").limit(-2).get.map { case (List(`c`, `e`), cur, true) => cur }
 
           // Add row after this page
-          _ <-  Ns.i.int.insert(b).transact
+          _ <- Ns.i.int.insert(b).transact
 
           // Next page includes new row
           _ <- query.from(cur).limit(-2).get.map { case (List(`a`, `b`), _, false) => () }

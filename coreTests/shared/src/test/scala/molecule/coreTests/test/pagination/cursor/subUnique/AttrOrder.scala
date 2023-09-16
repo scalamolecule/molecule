@@ -1,15 +1,15 @@
 package molecule.coreTests.test.pagination.cursor.subUnique
 
+import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
-import molecule.coreTests.api.ApiAsyncImplicits
 import molecule.coreTests.async._
 import molecule.coreTests.dataModels.core.dsl.Uniques._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 import scala.annotation.nowarn
 
-trait AttrOrder extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
+trait AttrOrder extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
   def getTriples: List[(String, Int, Int)] = (1 to 5).toList.map { int =>
     val s = ('a' + scala.util.Random.nextInt(3)).toChar.toString // "a" or "b"

@@ -105,9 +105,9 @@ lazy val yourProject = project.in(file("app"))
   .enablePlugins(MoleculePlugin)
   .settings(
     libraryDependencies ++= Seq(
-      "org.scalamolecule" %% "molecule-datalog-datomic" % "0.2.0",
+      "org.scalamolecule" %%% "molecule-datalog-datomic" % "0.2.0",
       // and/or
-      "org.scalamolecule" %% "molecule-sql-jdbc" % "0.2.0",
+      "org.scalamolecule" %%% "molecule-sql-jdbc" % "0.2.0",
     ),
     moleculeSchemas := Seq("app") // paths to your data model definitions...
   )

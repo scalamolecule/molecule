@@ -1,6 +1,6 @@
 package molecule.datalog.datomic.test.api
 
 import molecule.coreTests.test.api.SyncApi
-import molecule.datalog.datomic.setup.CoreTestSync
+import molecule.datalog.datomic.setup.TestSync_datomic
 
-object SyncApi extends SyncApi with CoreTestSync
+object SyncApi extends SyncApi with TestSync_datomic

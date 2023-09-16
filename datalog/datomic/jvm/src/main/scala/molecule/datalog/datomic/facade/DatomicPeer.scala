@@ -2,10 +2,10 @@ package molecule.datalog.datomic.facade
 
 import java.util.UUID.randomUUID
 import datomic.Peer
-import molecule.core.marshalling.DatomicProxy
-import scala.concurrent.{ExecutionContext, Future, blocking}
 import molecule.base.api.Schema
 import molecule.base.util.BaseHelpers
+import molecule.core.marshalling.DatomicProxy
+import scala.concurrent.{ExecutionContext, Future, blocking}
 
 
 /** Facade to Datomic Peer with selected methods.

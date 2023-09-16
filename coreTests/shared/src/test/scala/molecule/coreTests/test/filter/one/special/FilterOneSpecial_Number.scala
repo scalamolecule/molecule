@@ -1,14 +1,14 @@
 package molecule.coreTests.test.filter.one.special
 
+import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
-import molecule.coreTests.api.ApiAsyncImplicits
 import molecule.coreTests.async._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 
-trait FilterOneSpecial_Number extends CoreTestSuite with ApiAsyncImplicits { self: SpiAsync  =>
+trait FilterOneSpecial_Number extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
   override lazy val tests = Tests {
 
@@ -51,10 +51,10 @@ trait FilterOneSpecial_Number extends CoreTestSuite with ApiAsyncImplicits { sel
         _ <- Ns.i.int_.odd.query.get.map(_ ==> List(1, 3, 5, 7, 9))
 
         // Complex filtering with multiple tacit filters
-        _ <- Ns.i.int_.>(2).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8, 9))
-        _ <- Ns.i.int_.>(2).int_.<=(8).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8))
-        _ <- Ns.i.int_.>(2).int_.<=(8).int_.not(4, 5).query.get.map(_ ==> List(3, 6, 7, 8))
-        _ <- Ns.i.int_.>(2).int_.<=(8).int_.not(4, 5).int_.odd.query.get.map(_ ==> List(3, 7))
+        _ <- Ns.i.a1.int_.>(2).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8, 9))
+        _ <- Ns.i.a1.int_.>(2).int_.<=(8).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8))
+        _ <- Ns.i.a1.int_.>(2).int_.<=(8).int_.not(4, 5).query.get.map(_ ==> List(3, 6, 7, 8))
+        _ <- Ns.i.a1.int_.>(2).int_.<=(8).int_.not(4, 5).int_.odd.query.get.map(_ ==> List(3, 7))
       } yield ()
     }
 
@@ -98,10 +98,10 @@ trait FilterOneSpecial_Number extends CoreTestSuite with ApiAsyncImplicits { sel
         _ <- Ns.i.long_.odd.query.get.map(_ ==> List(1, 3, 5, 7, 9))
 
         // Complex filtering with multiple tacit filters
-        _ <- Ns.i.long_.>(2).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8, 9))
-        _ <- Ns.i.long_.>(2).long_.<=(8).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8))
-        _ <- Ns.i.long_.>(2).long_.<=(8).long_.not(4, 5).query.get.map(_ ==> List(3, 6, 7, 8))
-        _ <- Ns.i.long_.>(2).long_.<=(8).long_.not(4, 5).long_.odd.query.get.map(_ ==> List(3, 7))
+        _ <- Ns.i.a1.long_.>(2).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8, 9))
+        _ <- Ns.i.a1.long_.>(2).long_.<=(8).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8))
+        _ <- Ns.i.a1.long_.>(2).long_.<=(8).long_.not(4, 5).query.get.map(_ ==> List(3, 6, 7, 8))
+        _ <- Ns.i.a1.long_.>(2).long_.<=(8).long_.not(4, 5).long_.odd.query.get.map(_ ==> List(3, 7))
       } yield ()
     }
 
@@ -145,10 +145,10 @@ trait FilterOneSpecial_Number extends CoreTestSuite with ApiAsyncImplicits { sel
         _ <- Ns.i.bigInt_.odd.query.get.map(_ ==> List(1, 3, 5, 7, 9))
 
         // Complex filtering with multiple tacit filters
-        _ <- Ns.i.bigInt_.>(2).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8, 9))
-        _ <- Ns.i.bigInt_.>(2).bigInt_.<=(8).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8))
-        _ <- Ns.i.bigInt_.>(2).bigInt_.<=(8).bigInt_.not(4, 5).query.get.map(_ ==> List(3, 6, 7, 8))
-        _ <- Ns.i.bigInt_.>(2).bigInt_.<=(8).bigInt_.not(4, 5).bigInt_.odd.query.get.map(_ ==> List(3, 7))
+        _ <- Ns.i.a1.bigInt_.>(2).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8, 9))
+        _ <- Ns.i.a1.bigInt_.>(2).bigInt_.<=(8).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8))
+        _ <- Ns.i.a1.bigInt_.>(2).bigInt_.<=(8).bigInt_.not(4, 5).query.get.map(_ ==> List(3, 6, 7, 8))
+        _ <- Ns.i.a1.bigInt_.>(2).bigInt_.<=(8).bigInt_.not(4, 5).bigInt_.odd.query.get.map(_ ==> List(3, 7))
       } yield ()
     }
 
@@ -192,10 +192,10 @@ trait FilterOneSpecial_Number extends CoreTestSuite with ApiAsyncImplicits { sel
         _ <- Ns.i.byte_.odd.query.get.map(_ ==> List(1, 3, 5, 7, 9))
 
         // Complex filtering with multiple tacit filters
-        _ <- Ns.i.byte_.>(byte2).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8, 9))
-        _ <- Ns.i.byte_.>(byte2).byte_.<=(byte8).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8))
-        _ <- Ns.i.byte_.>(byte2).byte_.<=(byte8).byte_.not(byte4, byte5).query.get.map(_ ==> List(3, 6, 7, 8))
-        _ <- Ns.i.byte_.>(byte2).byte_.<=(byte8).byte_.not(byte4, byte5).byte_.odd.query.get.map(_ ==> List(3, 7))
+        _ <- Ns.i.a1.byte_.>(byte2).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8, 9))
+        _ <- Ns.i.a1.byte_.>(byte2).byte_.<=(byte8).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8))
+        _ <- Ns.i.a1.byte_.>(byte2).byte_.<=(byte8).byte_.not(byte4, byte5).query.get.map(_ ==> List(3, 6, 7, 8))
+        _ <- Ns.i.a1.byte_.>(byte2).byte_.<=(byte8).byte_.not(byte4, byte5).byte_.odd.query.get.map(_ ==> List(3, 7))
       } yield ()
     }
 
@@ -239,10 +239,10 @@ trait FilterOneSpecial_Number extends CoreTestSuite with ApiAsyncImplicits { sel
         _ <- Ns.i.short_.odd.query.get.map(_ ==> List(1, 3, 5, 7, 9))
 
         // Complex filtering with multiple tacit filters
-        _ <- Ns.i.short_.>(short2).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8, 9))
-        _ <- Ns.i.short_.>(short2).short_.<=(short8).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8))
-        _ <- Ns.i.short_.>(short2).short_.<=(short8).short_.not(short4, short5).query.get.map(_ ==> List(3, 6, 7, 8))
-        _ <- Ns.i.short_.>(short2).short_.<=(short8).short_.not(short4, short5).short_.odd.query.get.map(_ ==> List(3, 7))
+        _ <- Ns.i.a1.short_.>(short2).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8, 9))
+        _ <- Ns.i.a1.short_.>(short2).short_.<=(short8).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8))
+        _ <- Ns.i.a1.short_.>(short2).short_.<=(short8).short_.not(short4, short5).query.get.map(_ ==> List(3, 6, 7, 8))
+        _ <- Ns.i.a1.short_.>(short2).short_.<=(short8).short_.not(short4, short5).short_.odd.query.get.map(_ ==> List(3, 7))
       } yield ()
     }
   }
