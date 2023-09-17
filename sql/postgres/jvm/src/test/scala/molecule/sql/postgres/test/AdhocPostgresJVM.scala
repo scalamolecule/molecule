@@ -13,9 +13,26 @@ object AdhocPostgresJVM extends TestSuite_postgres {
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
       for {
+
+        //        _ <- rawQuery(
+        //          """SELECT DISTINCT
+        //            |  Ns.i,
+        //            |  ARRAY_AGG(Ns_refs_Ref.Ref_id) Ns_refs
+        //            |FROM Ns
+        //            |INNER JOIN Ns_refs_Ref ON Ns.id = Ns_refs_Ref.Ns_id
+        //            |WHERE
+        //            |  (SELECT
+        //            |      1 = ANY(ARRAY_AGG(Ns_refs_Ref.Ref_id))
+        //            |    FROM Ns_refs_Ref
+        //            |    WHERE Ns_refs_Ref.Ns_id = Ns.id
+        //            |  ) AND
+        //            |  Ns.i IS NOT NULL
+        //            |GROUP BY Ns.id
+        //            |ORDER BY Ns.i;""".stripMargin)
+
+
         _ <- Ns.int.insert(1).transact
         _ <- Ns.int.query.get.map(_ ==> List(1))
-
 
       } yield ()
     }

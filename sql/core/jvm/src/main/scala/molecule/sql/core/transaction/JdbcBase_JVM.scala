@@ -24,7 +24,7 @@ trait JdbcBase_JVM extends JdbcDataType_JVM with ModelUtils with BaseHelpers {
   protected var doPrint              = false
   protected var initialNs            = ""
   protected var curRefPath           = List("0")
-  protected var inserts              = List.empty[(List[String], List[String])]
+  protected var inserts              = List.empty[(List[String], List[(String, String)])]
   protected var updates              = List.empty[(List[String], List[String])]
   protected var placeHolders         = List.empty[String]
   protected var joins                = List.empty[(List[String], String, String, List[String], List[String])]
@@ -48,22 +48,6 @@ trait JdbcBase_JVM extends JdbcDataType_JVM with ModelUtils with BaseHelpers {
     )(colSetters =>
       colSettersMap(refPath) = colSetters :+ colSetter
     )
-  }
-
-  protected def printValue(
-    level: Int,
-    ns: String,
-    attr: String,
-    tplIndex0: Int,
-    paramIndex: Int,
-    value: Any
-  ): Unit = {
-    if (doPrint) {
-      val fullAttr = s"$ns.$attr"
-      val pad      = padS(14, fullAttr)
-      val tplIndex = if (tplIndex0 == -1) "-" else tplIndex0
-      println(s"${indent(level)}$fullAttr$pad tplIndex: $tplIndex   paramIndex: $paramIndex   value: " + value)
-    }
   }
 
 
@@ -94,14 +78,13 @@ trait JdbcBase_JVM extends JdbcDataType_JVM with ModelUtils with BaseHelpers {
   protected def getRefResolver[T](ns: String, refAttr: String, refNs: String, card: Card): T => Unit = {
     val joinTable = s"${ns}_${refAttr}_$refNs"
     val curPath   = curRefPath
-    //    println("curRefPath 0: " + curPath)
 
     if (inserts.exists(_._1 == curPath)) {
       // Add ref attribute to current namespace
       inserts = inserts.map {
         case (path, cols) if card == CardOne && path == curPath =>
           paramIndexes += (curPath, refAttr) -> (cols.length + 1)
-          (curPath, cols :+ refAttr)
+          (curPath, cols :+ (refAttr, ""))
 
         case other => other
       }
@@ -109,7 +92,7 @@ trait JdbcBase_JVM extends JdbcDataType_JVM with ModelUtils with BaseHelpers {
     } else if (card == CardOne) {
       // Make card-one ref from current empty namespace
       paramIndexes += (curPath, refAttr) -> 1
-      inserts = inserts :+ (curPath, List(refAttr))
+      inserts = inserts :+ (curPath, List((refAttr, "")))
 
     } else if (card == CardSet) {
       // ref to join table
@@ -119,14 +102,11 @@ trait JdbcBase_JVM extends JdbcDataType_JVM with ModelUtils with BaseHelpers {
 
     lazy val joinPath = curPath :+ joinTable
 
-    //    println("joinPath: " + joinPath)
-
-
     if (card == CardSet) {
       // join table with single row (treated as normal insert since there's only 1 join per row)
       val (id1, id2) = if (ns == refNs) (s"${ns}_1_id", s"${refNs}_2_id") else (s"${ns}_id", s"${refNs}_id")
       // When insertion order is reversed, this join table will be set after left and right has been inserted
-      inserts = (joinPath, List(id1, id2)) +: inserts
+      inserts = (joinPath, List((id1, ""), (id2, ""))) +: inserts
     }
 
     // Start new ref table
@@ -134,18 +114,12 @@ trait JdbcBase_JVM extends JdbcDataType_JVM with ModelUtils with BaseHelpers {
     curRefPath = refPath
     inserts = inserts :+ (refPath, Nil)
 
-    //    println("curRefPath 1: " + curRefPath)
-    //    println("-----")
-    //    inserts.foreach(println)
-    //    println("-----")
-
     if (card == CardOne) {
       // Card-one ref setter
       val paramIndex = paramIndexes(curPath, refAttr)
       (_: T) => {
         val colSetter: Setter = (ps: PS, idsMap: IdsMap, rowIndex: RowIndex) => {
           val refId = idsMap(refPath)(rowIndex)
-          //          printValue(level, ns, refAttr, -1, paramIndex, refId)
           ps.setLong(paramIndex, refId)
         }
         addColSetter(curPath, colSetter)

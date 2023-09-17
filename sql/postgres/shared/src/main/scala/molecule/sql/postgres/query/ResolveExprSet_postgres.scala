@@ -2,73 +2,79 @@ package molecule.sql.postgres.query
 
 import molecule.sql.core.query.SqlQueryBase
 import molecule.sql.h2.query.ResolveExprSet_h2
+import molecule.base.error.ModelError
+import molecule.boilerplate.ast.Model._
+import molecule.core.util.AggrUtils
+import molecule.sql.core.query.{ResolveExpr, SqlQueryBase}
+import scala.reflect.ClassTag
+
 
 trait ResolveExprSet_postgres[Tpl]
   extends ResolveExprSet_h2[Tpl]
     with LambdasSet_postgres { self: SqlQueryBase =>
 
-  //  protected def resolveAttrSetMan(attr: AttrSetMan): Unit = {
+  //  override protected def resolveAttrSetMan(attr: AttrSetMan): Unit = {
   //    aritiesAttr()
   //    attr match {
-  //      case at: AttrSetManString     => man(attr, "String", at.vs, resSetString)
-  //      case at: AttrSetManInt        => man(attr, "Int", at.vs, resSetInt)
-  //      case at: AttrSetManLong       => man(attr, "Long", at.vs, resSetLong)
-  //      case at: AttrSetManFloat      => man(attr, "Float", at.vs, resSetFloat)
-  //      case at: AttrSetManDouble     => man(attr, "Double", at.vs, resSetDouble)
-  //      case at: AttrSetManBoolean    => man(attr, "Boolean", at.vs, resSetBoolean)
-  //      case at: AttrSetManBigInt     => man(attr, "BigInt", at.vs, resSetBigInt)
-  //      case at: AttrSetManBigDecimal => man(attr, "BigDecimal", at.vs, resSetBigDecimal)
-  //      case at: AttrSetManDate       => man(attr, "Date", at.vs, resSetDate)
-  //      case at: AttrSetManUUID       => man(attr, "UUID", at.vs, resSetUUID)
-  //      case at: AttrSetManURI        => man(attr, "URI", at.vs, resSetURI)
-  //      case at: AttrSetManByte       => man(attr, "Byte", at.vs, resSetByte)
-  //      case at: AttrSetManShort      => man(attr, "Short", at.vs, resSetShort)
-  //      case at: AttrSetManChar       => man(attr, "Char", at.vs, resSetChar)
+  //      case at: AttrSetManString     => setMan(attr, "String", at.vs, resSetString)
+  //      case at: AttrSetManInt        => setMan(attr, "Int", at.vs, resSetInt)
+  //      case at: AttrSetManLong       => setMan(attr, "Long", at.vs, resSetLong)
+  //      case at: AttrSetManFloat      => setMan(attr, "Float", at.vs, resSetFloat)
+  //      case at: AttrSetManDouble     => setMan(attr, "Double", at.vs, resSetDouble)
+  //      case at: AttrSetManBoolean    => setMan(attr, "Boolean", at.vs, resSetBoolean)
+  //      case at: AttrSetManBigInt     => setMan(attr, "BigInt", at.vs, resSetBigInt)
+  //      case at: AttrSetManBigDecimal => setMan(attr, "BigDecimal", at.vs, resSetBigDecimal)
+  //      case at: AttrSetManDate       => setMan(attr, "Date", at.vs, resSetDate)
+  //      case at: AttrSetManUUID       => setMan(attr, "UUID", at.vs, resSetUUID)
+  //      case at: AttrSetManURI        => setMan(attr, "URI", at.vs, resSetURI)
+  //      case at: AttrSetManByte       => setMan(attr, "Byte", at.vs, resSetByte)
+  //      case at: AttrSetManShort      => setMan(attr, "Short", at.vs, resSetShort)
+  //      case at: AttrSetManChar       => setMan(attr, "Char", at.vs, resSetChar)
   //    }
   //  }
   //
-  //  protected def resolveAttrSetTac(attr: AttrSetTac): Unit = {
+  //  override protected def resolveAttrSetTac(attr: AttrSetTac): Unit = {
   //    attr match {
-  //      case at: AttrSetTacString     => tac(attr, "String",  at.vs, resSetString)
-  //      case at: AttrSetTacInt        => tac(attr, "Int",  at.vs, resSetInt)
-  //      case at: AttrSetTacLong       => tac(attr, "Long",  at.vs, resSetLong)
-  //      case at: AttrSetTacFloat      => tac(attr, "Float",  at.vs, resSetFloat)
-  //      case at: AttrSetTacDouble     => tac(attr, "Double",  at.vs, resSetDouble)
-  //      case at: AttrSetTacBoolean    => tac(attr, "Boolean",  at.vs, resSetBoolean)
-  //      case at: AttrSetTacBigInt     => tac(attr, "BigInt",  at.vs, resSetBigInt)
-  //      case at: AttrSetTacBigDecimal => tac(attr, "BigDecimal",  at.vs, resSetBigDecimal)
-  //      case at: AttrSetTacDate       => tac(attr, "Date",  at.vs, resSetDate)
-  //      case at: AttrSetTacUUID       => tac(attr, "UUID",  at.vs, resSetUUID)
-  //      case at: AttrSetTacURI        => tac(attr, "URI",  at.vs, resSetURI)
-  //      case at: AttrSetTacByte       => tac(attr, "Byte",  at.vs, resSetByte)
-  //      case at: AttrSetTacShort      => tac(attr, "Short",  at.vs, resSetShort)
-  //      case at: AttrSetTacChar       => tac(attr, "Char",  at.vs, resSetChar)
+  //      case at: AttrSetTacString     => setTac(attr, "String", at.vs, resSetString)
+  //      case at: AttrSetTacInt        => setTac(attr, "Int", at.vs, resSetInt)
+  //      case at: AttrSetTacLong       => setTac(attr, "Long", at.vs, resSetLong)
+  //      case at: AttrSetTacFloat      => setTac(attr, "Float", at.vs, resSetFloat)
+  //      case at: AttrSetTacDouble     => setTac(attr, "Double", at.vs, resSetDouble)
+  //      case at: AttrSetTacBoolean    => setTac(attr, "Boolean", at.vs, resSetBoolean)
+  //      case at: AttrSetTacBigInt     => setTac(attr, "BigInt", at.vs, resSetBigInt)
+  //      case at: AttrSetTacBigDecimal => setTac(attr, "BigDecimal", at.vs, resSetBigDecimal)
+  //      case at: AttrSetTacDate       => setTac(attr, "Date", at.vs, resSetDate)
+  //      case at: AttrSetTacUUID       => setTac(attr, "UUID", at.vs, resSetUUID)
+  //      case at: AttrSetTacURI        => setTac(attr, "URI", at.vs, resSetURI)
+  //      case at: AttrSetTacByte       => setTac(attr, "Byte", at.vs, resSetByte)
+  //      case at: AttrSetTacShort      => setTac(attr, "Short", at.vs, resSetShort)
+  //      case at: AttrSetTacChar       => setTac(attr, "Char", at.vs, resSetChar)
   //    }
   //  }
   //
-  //  protected def resolveAttrSetOpt(attr: AttrSetOpt): Unit = {
+  //  override protected def resolveAttrSetOpt(attr: AttrSetOpt): Unit = {
   //    aritiesAttr()
   //    hasOptAttr = true // to avoid redundant None's
   //    attr match {
-  //      case at: AttrSetOptString     => opt(at, at.vs, resOptSetString)
-  //      case at: AttrSetOptInt        => opt(at, at.vs, resOptSetInt)
-  //      case at: AttrSetOptLong       => opt(at, at.vs, resOptSetLong)
-  //      case at: AttrSetOptFloat      => opt(at, at.vs, resOptSetFloat)
-  //      case at: AttrSetOptDouble     => opt(at, at.vs, resOptSetDouble)
-  //      case at: AttrSetOptBoolean    => opt(at, at.vs, resOptSetBoolean)
-  //      case at: AttrSetOptBigInt     => opt(at, at.vs, resOptSetBigInt)
-  //      case at: AttrSetOptBigDecimal => opt(at, at.vs, resOptSetBigDecimal)
-  //      case at: AttrSetOptDate       => opt(at, at.vs, resOptSetDate)
-  //      case at: AttrSetOptUUID       => opt(at, at.vs, resOptSetUUID)
-  //      case at: AttrSetOptURI        => opt(at, at.vs, resOptSetURI)
-  //      case at: AttrSetOptByte       => opt(at, at.vs, resOptSetByte)
-  //      case at: AttrSetOptShort      => opt(at, at.vs, resOptSetShort)
-  //      case at: AttrSetOptChar       => opt(at, at.vs, resOptSetChar)
+  //      case at: AttrSetOptString     => setOpt(at, at.vs, resOptSetString, resSetString)
+  //      case at: AttrSetOptInt        => setOpt(at, at.vs, resOptSetInt, resSetInt)
+  //      case at: AttrSetOptLong       => setOpt(at, at.vs, resOptSetLong, resSetLong)
+  //      case at: AttrSetOptFloat      => setOpt(at, at.vs, resOptSetFloat, resSetFloat)
+  //      case at: AttrSetOptDouble     => setOpt(at, at.vs, resOptSetDouble, resSetDouble)
+  //      case at: AttrSetOptBoolean    => setOpt(at, at.vs, resOptSetBoolean, resSetBoolean)
+  //      case at: AttrSetOptBigInt     => setOpt(at, at.vs, resOptSetBigInt, resSetBigInt)
+  //      case at: AttrSetOptBigDecimal => setOpt(at, at.vs, resOptSetBigDecimal, resSetBigDecimal)
+  //      case at: AttrSetOptDate       => setOpt(at, at.vs, resOptSetDate, resSetDate)
+  //      case at: AttrSetOptUUID       => setOpt(at, at.vs, resOptSetUUID, resSetUUID)
+  //      case at: AttrSetOptURI        => setOpt(at, at.vs, resOptSetURI, resSetURI)
+  //      case at: AttrSetOptByte       => setOpt(at, at.vs, resOptSetByte, resSetByte)
+  //      case at: AttrSetOptShort      => setOpt(at, at.vs, resOptSetShort, resSetShort)
+  //      case at: AttrSetOptChar       => setOpt(at, at.vs, resOptSetChar, resSetChar)
   //    }
   //  }
   //
   //
-  //  private def man[T: ClassTag](attr: Attr, tpe: String, args: Seq[Set[T]], res: ResSet[T]): Unit = {
+  //  protected def setMan[T: ClassTag](attr: Attr, tpe: String, args: Seq[Set[T]], res: ResSet[T]): Unit = {
   //    val col = getCol(attr: Attr)
   //    select += col
   //    if (isNestedOpt) {
@@ -83,56 +89,56 @@ trait ResolveExprSet_postgres[Tpl]
   //        // Runtime check needed since we can't type infer it
   //        throw ModelError(s"Cardinality-set filter attributes not allowed to do additional filtering. Found:\n  " + attr)
   //      }
-  //      expr(col, attr.op, args, res, "man")
+  //      setExpr(col, attr.op, args, res, "man")
   //    } {
-  //      case filterAttr: AttrOne => expr2(col, attr.op, filterAttr.name, true)
-  //      case filterAttr          => expr2(col, attr.op, filterAttr.name, false, tpe)
+  //      case filterAttr: AttrOne => setExpr2(col, attr.op, filterAttr.name, true)
+  //      case filterAttr          => setExpr2(col, attr.op, filterAttr.name, false, tpe)
   //    }
   //  }
   //
-  //  private def tac[T: ClassTag](attr: Attr, tpe: String, args: Seq[Set[T]], res: ResSet[T]): Unit = {
+  //  protected def setTac[T: ClassTag](attr: Attr, tpe: String, args: Seq[Set[T]], res: ResSet[T]): Unit = {
   //    val col = getCol(attr: Attr)
   //    attr.filterAttr.fold {
-  //      expr(col, attr.op, args, res, "tac")
+  //      setExpr(col, attr.op, args, res, "tac")
   //    } {
-  //      case filterAttr: AttrOne => expr2(col, attr.op, filterAttr.name, true)
-  //      case filterAttr          => expr2(col, attr.op, filterAttr.name, false, tpe)
+  //      case filterAttr: AttrOne => setExpr2(col, attr.op, filterAttr.name, true)
+  //      case filterAttr          => setExpr2(col, attr.op, filterAttr.name, false, tpe)
   //    }
   //    notNull += col
   //  }
   //
   //
-  //  private def opt[T: ClassTag](attr: Attr, optSets: Option[Seq[Set[T]]], resOpt: ResSetOpt[T]): Unit = {
+  //  protected def setOpt[T: ClassTag](attr: Attr, optSets: Option[Seq[Set[T]]], resOpt: ResSetOpt[T]): Unit = {
   //    val col = getCol(attr: Attr)
   //    select += col
   //    addCast(resOpt.sql2setOpt)
   //    attr.op match {
   //      case V     => ()
-  //      case Eq    => optEqual(col, optSets, resOpt.set2sqls)
-  //      case Neq   => optNeq(col, optSets, resOpt.set2sqls)
+  //      case Eq    => setOptEqual(col, optSets, resOpt.set2sqls)
+  //      case Neq   => setOptNeq(col, optSets, resOpt.set2sqls)
   //      case Has   => optHas(col, optSets, resOpt.one2sql)
   //      case HasNo => optHasNo(col, optSets, resOpt.one2sql)
   //      case other => unexpectedOp(other)
   //    }
   //  }
   //
-  //  private def expr[T: ClassTag](col: String, op: Op, sets: Seq[Set[T]], res: ResSet[T], mode: String): Unit = {
+  //  protected def setExpr[T: ClassTag](col: String, op: Op, sets: Seq[Set[T]], res: ResSet[T], mode: String): Unit = {
   //    op match {
-  //      case V         => if (mode == "man") attr(col, res, mode) else ()
-  //      case Eq        => equal(col, sets, res.set2sqls)
-  //      case Neq       => neq(col, sets, res.set2sqls)
+  //      case V         => if (mode == "man") setAttr(col, res) else ()
+  //      case Eq        => setEqual(col, sets, res.set2sqls)
+  //      case Neq       => setNeq(col, sets, res.set2sqls)
   //      case Has       => has(col, sets, res.one2sql)
   //      case HasNo     => hasNo(col, sets, res.one2sql)
-  //      case NoValue   => noValue(col)
-  //      case Fn(kw, n) => aggr(col, kw, n, res)
+  //      case NoValue   => setNoValue(col)
+  //      case Fn(kw, n) => setAggr(col, kw, n, res)
   //      case other     => unexpectedOp(other)
   //    }
   //  }
   //
-  //  private def expr2(col: String, op: Op, filterAttr: String, cardOne: Boolean, tpe: String = ""): Unit = {
+  //  protected def setExpr2(col: String, op: Op, filterAttr: String, cardOne: Boolean, tpe: String = ""): Unit = {
   //    op match {
-  //      case Eq    => equal2(col, filterAttr)
-  //      case Neq   => neq2(col, filterAttr)
+  //      case Eq    => setEqual2(col, filterAttr)
+  //      case Neq   => setNeq2(col, filterAttr)
   //      case Has   => has2(col, filterAttr, cardOne, tpe)
   //      case HasNo => hasNo2(col, filterAttr, cardOne, tpe)
   //      case other => unexpectedOp(other)
@@ -140,7 +146,7 @@ trait ResolveExprSet_postgres[Tpl]
   //  }
   //
   //
-  //  private def attr[T](col: String, res: ResSet[T], mode: String): Unit = {
+  //  protected def setAttr[T](col: String, res: ResSet[T]): Unit = {
   //    select -= col
   //    select += s"ARRAY_AGG($col)"
   //    having += "COUNT(*) > 0"
@@ -148,7 +154,7 @@ trait ResolveExprSet_postgres[Tpl]
   //    replaceCast(res.nestedArray2coalescedSet)
   //  }
   //
-  //  private def aggr[T](col: String, fn: String, optN: Option[Int], res: ResSet[T]): Unit = {
+  //  protected def setAggr[T](col: String, fn: String, optN: Option[Int], res: ResSet[T]): Unit = {
   //    select -= col
   //    lazy val n = optN.getOrElse(0)
   //    fn match {
@@ -344,82 +350,78 @@ trait ResolveExprSet_postgres[Tpl]
   //    }
   //  }
   //
-  //  private def matchSet(set: Set[String], col: String): String = {
-  //    set
-  //      .map(v => s"ARRAY_CONTAINS($col, $v)")
-  //      .mkString("(\n    ", " AND\n    ", s" AND\n    CARDINALITY($col) = ${set.size}\n  )")
-  //  }
+  private def matchArray(sqlArray: (String, Int), col: String): String = {
+    s"(${sqlArray._1} <@ $col AND CARDINALITY($col) = ${sqlArray._2})"
+  }
+
+  private def matchArrays[T](sets: Seq[Set[T]], col: String, set2sqlArray: Set[T] => String): String = {
+    sets.map(set => matchArray((set2sqlArray(set), set.size), col)).mkString("(\n    ", " OR\n    ", "\n  )")
+  }
+
+  override protected def setEqual[T](col: String, sets: Seq[Set[T]], res: ResSet[T]): Unit = {
+    val setsNonEmpty = sets.filterNot(_.isEmpty)
+    setsNonEmpty.length match {
+      case 0 => where += (("FALSE", ""))
+      case 1 => where += (("", matchArray((res.set2sqlArray(setsNonEmpty.head), setsNonEmpty.head.size), col)))
+      case _ => where += (("", matchArrays(setsNonEmpty, col, res.set2sqlArray)))
+    }
+  }
   //
-  //  private def matchSets[T](sets: Seq[Set[T]], col: String, set2sqls: Set[T] => Set[String]): String = {
-  //    sets.map { set =>
-  //      set2sqls(set)
-  //        .map(v => s"ARRAY_CONTAINS($col, $v)")
-  //        .mkString("", " AND\n      ", s" AND\n      CARDINALITY($col) = " + set.size)
-  //    }.mkString("(\n    (\n      ", "\n    ) OR (\n      ", "\n    )\n  )")
-  //  }
-  //
-  //  private def equal[T](col: String, sets: Seq[Set[T]], set2sqls: Set[T] => Set[String]): Unit = {
-  //    val setsNonEmpty = sets.filterNot(_.isEmpty)
-  //    setsNonEmpty.length match {
-  //      case 0 => where += (("FALSE", ""))
-  //      case 1 => where += (("", matchSet(set2sqls(setsNonEmpty.head), col)))
-  //      case _ => where += (("", matchSets(setsNonEmpty, col, set2sqls)))
-  //    }
-  //  }
-  //
-  //  private def equal2(col: String, filterAttr: String): Unit = {
+  //  protected def setEqual2(col: String, filterAttr: String): Unit = {
   //    where += ((col, "= " + filterAttr))
   //  }
   //
-  //  private def optEqual[T](col: String, optSets: Option[Seq[Set[T]]], set2sqls: Set[T] => Set[String]): Unit = {
+  //  protected def setOptEqual[T](col: String, optSets: Option[Seq[Set[T]]], set2sqls: Set[T] => Set[String]): Unit = {
   //    optSets.fold[Unit] {
   //      where += ((col, s"IS NULL"))
   //    } { sets =>
-  //      equal(col, sets, set2sqls)
+  //      setEqual(col, sets, set2sqls)
   //    }
   //  }
+
+  override protected def setNeq[T](col: String, sets: Seq[Set[T]], res: ResSet[T]): Unit = {
+    val setsNonEmpty = sets.filterNot(_.isEmpty)
+    setsNonEmpty.length match {
+      case 0 => ()
+      case 1 => where += (("", "NOT " +
+        matchArray((res.set2sqlArray(setsNonEmpty.head), setsNonEmpty.head.size), col)))
+      case _ => where += (("", "NOT " +
+        matchArrays(setsNonEmpty, col, res.set2sqlArray)))
+    }
+  }
   //
-  //  private def neq[T](col: String, sets: Seq[Set[T]], set2sqls: Set[T] => Set[String]): Unit = {
-  //    val setsNonEmpty = sets.filterNot(_.isEmpty)
-  //    setsNonEmpty.length match {
-  //      case 0 => ()
-  //      case 1 => where += (("", "NOT " + matchSet(set2sqls(setsNonEmpty.head), col)))
-  //      case _ => where += (("", "NOT " + matchSets(setsNonEmpty, col, set2sqls)))
-  //    }
-  //  }
-  //
-  //  private def neq2(col: String, filterAttr: String): Unit = {
+  //  protected def setNeq2(col: String, filterAttr: String): Unit = {
   //    where += ((col, "<> " + filterAttr))
   //  }
   //
-  //  private def optNeq[T](col: String, optSets: Option[Seq[Set[T]]], set2sqls: Set[T] => Set[String]): Unit = {
+  //  protected def setOptNeq[T](col: String, optSets: Option[Seq[Set[T]]], set2sqls: Set[T] => Set[String]): Unit = {
   //    if (optSets.isDefined && optSets.get.nonEmpty) {
-  //      neq(col, optSets.get, set2sqls)
+  //      setNeq(col, optSets.get, set2sqls)
   //    }
   //    notNull += col
   //  }
   //
-  //  private def has[T: ClassTag](col: String, sets: Seq[Set[T]], one2sql: T => String): Unit = {
-  //    def contains(v: T): String = s"ARRAY_CONTAINS($col, ${one2sql(v)})"
-  //    def containsSet(set: Set[T]): String = set.map(contains).mkString("(", " AND\n   ", ")")
-  //    sets.length match {
-  //      case 0 => where += (("FALSE", ""))
-  //      case 1 =>
-  //        val set = sets.head
-  //        set.size match {
-  //          case 0 => where += (("FALSE", ""))
-  //          case 1 => where += (("", contains(set.head)))
-  //          case _ => where += (("", containsSet(set)))
-  //        }
-  //      case _ =>
-  //        val expr = sets
-  //          .filterNot(_.isEmpty)
-  //          .map(containsSet).mkString("(", " OR\n   ", ")")
-  //        where += (("", expr))
-  //    }
-  //  }
+  override protected def has[T: ClassTag](col: String, sets: Seq[Set[T]], one2sql: T => String): Unit = {
+    def contains(v: T): String = s"${one2sql(v)} = ANY($col)"
+    def containsSet(set: Set[T]): String = set.map(contains).mkString(" AND ")
+    sets.length match {
+      case 0 => where += (("FALSE", ""))
+      case 1 =>
+        val set = sets.head
+        set.size match {
+          case 0 => where += (("FALSE", ""))
+          case 1 => where += (("", contains(set.head)))
+          case _ => where += (("", containsSet(set)))
+        }
+      case _ =>
+        val expr = sets
+          .filterNot(_.isEmpty)
+          .map(containsSet).mkString("(\n    ", " OR\n    ", "\n  )")
+        where += (("", expr))
+    }
+  }
   //
-  //  private def has2(col: String, filterAttr: String, cardOne: Boolean, tpe: String): Unit = {
+  //  protected def has2(col: String, filterAttr: String, cardOne: Boolean, tpe: String): Unit = {
   //    if (cardOne) {
   //      where += (("", s"ARRAY_CONTAINS($col, $filterAttr)"))
   //    } else {
@@ -427,7 +429,7 @@ trait ResolveExprSet_postgres[Tpl]
   //    }
   //  }
   //
-  //  private def optHas[T: ClassTag](
+  //  protected def optHas[T: ClassTag](
   //    col: String,
   //    optSets: Option[Seq[Set[T]]],
   //    one2sql: T => String
@@ -439,27 +441,28 @@ trait ResolveExprSet_postgres[Tpl]
   //    }
   //  }
   //
-  //  private def hasNo[T](col: String, sets: Seq[Set[T]], one2sql: T => String): Unit = {
-  //    def notContains(v: T): String = s"NOT ARRAY_CONTAINS($col, ${one2sql(v)})"
-  //    def notContainsSet(set: Set[T]): String = set.map(notContains).mkString("(", " OR\n   ", ")")
-  //    sets.length match {
-  //      case 0 => ()
-  //      case 1 =>
-  //        val set = sets.head
-  //        set.size match {
-  //          case 0 => ()
-  //          case 1 => where += (("", notContains(set.head)))
-  //          case _ => where += (("", notContainsSet(set)))
-  //        }
-  //      case _ =>
-  //        val expr = sets
-  //          .filterNot(_.isEmpty)
-  //          .map(notContainsSet).mkString("(", " AND\n   ", ")")
-  //        where += (("", expr))
-  //    }
-  //  }
-  //
-  //  private def hasNo2(col: String, filterAttr: String, cardOne: Boolean, tpe: String): Unit = {
+  override protected def hasNo[T](col: String, sets: Seq[Set[T]], one2sql: T => String): Unit = {
+    def notContains(v: T): String = s"${one2sql(v)} != ALL($col)"
+    def notContainsSet(set: Set[T]): String = set.map(notContains).mkString("(", " OR ", ")")
+    sets.length match {
+      case 0 => ()
+      case 1 =>
+        val set = sets.head
+        set.size match {
+          case 0 => ()
+          case 1 => where += (("", notContains(set.head)))
+          case _ => where += (("", notContainsSet(set)))
+        }
+      case _ =>
+        val expr = sets
+          .filterNot(_.isEmpty)
+          .map(notContainsSet)
+          .mkString("(\n    ", " AND\n    ", "\n  )")
+        where += (("", expr))
+    }
+  }
+
+  //  protected def hasNo2(col: String, filterAttr: String, cardOne: Boolean, tpe: String): Unit = {
   //    if (cardOne) {
   //      where += (("", s"NOT ARRAY_CONTAINS($col, $filterAttr)"))
   //    } else {
@@ -467,7 +470,7 @@ trait ResolveExprSet_postgres[Tpl]
   //    }
   //  }
   //
-  //  private def optHasNo[T](
+  //  protected def optHasNo[T](
   //    col: String,
   //    optSets: Option[Seq[Set[T]]],
   //    one2sql: T => String
@@ -484,7 +487,7 @@ trait ResolveExprSet_postgres[Tpl]
   //    }
   //  }
   //
-  //  private def noValue(col: String): Unit = {
+  //  protected def setNoValue(col: String): Unit = {
   //    notNull -= col
   //    where += ((col, s"IS NULL"))
   //  }

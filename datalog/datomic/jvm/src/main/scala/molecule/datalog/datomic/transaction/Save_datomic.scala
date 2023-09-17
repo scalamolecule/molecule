@@ -47,7 +47,8 @@ trait Save_datomic
     ns: String,
     attr: String,
     optValue: Option[T],
-    handleValue: T => Any
+    handleValue: T => Any,
+    exts: List[String] = Nil
   ): Unit = {
     optValue.foreach { v =>
       appendStmt(add, e, kw(ns, attr), v.asInstanceOf[AnyRef])
@@ -60,7 +61,8 @@ trait Save_datomic
     optSet: Option[Set[T]],
     handleValue: T => Any,
     set2array: Set[Any] => Array[AnyRef],
-    refNs: Option[String]
+    refNs: Option[String],
+    exts: List[String] = Nil
   ): Unit = {
     optSet.foreach { set =>
       val a = kw(ns, attr)
@@ -109,4 +111,19 @@ trait Save_datomic
   override protected lazy val transformByte       = (v: Byte) => v.toInt
   override protected lazy val transformShort      = (v: Short) => v.toInt
   override protected lazy val transformChar       = (v: Char) => v.toString
+
+  override protected lazy val extsString     = List("", "AnyRef")
+  override protected lazy val extsInt        = List("", "AnyRef")
+  override protected lazy val extsLong       = List("", "AnyRef")
+  override protected lazy val extsFloat      = List("", "AnyRef")
+  override protected lazy val extsDouble     = List("", "AnyRef")
+  override protected lazy val extsBoolean    = List("", "AnyRef")
+  override protected lazy val extsBigInt     = List("", "AnyRef")
+  override protected lazy val extsBigDecimal = List("", "AnyRef")
+  override protected lazy val extsDate       = List("", "AnyRef")
+  override protected lazy val extsUUID       = List("", "AnyRef")
+  override protected lazy val extsURI        = List("", "AnyRef")
+  override protected lazy val extsByte       = List("", "AnyRef")
+  override protected lazy val extsShort      = List("", "AnyRef")
+  override protected lazy val extsChar       = List("", "AnyRef")
 }

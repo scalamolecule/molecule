@@ -11,7 +11,8 @@ trait SaveOps extends Action2Data {
     ns: String,
     attr: String,
     optValue: Option[T],
-    handleValue: T => Any
+    handleValue: T => Any,
+    exts: List[String]
   ): Unit
 
   protected def addSet[T](
@@ -20,7 +21,8 @@ trait SaveOps extends Action2Data {
     optSet: Option[Set[T]],
     handleValue: T => Any,
     set2array: Set[Any] => Array[AnyRef],
-    refNs: Option[String]
+    refNs: Option[String],
+    exts: List[String]
   ): Unit
 
   protected def addRef(
@@ -80,4 +82,19 @@ trait SaveOps extends Action2Data {
   protected lazy val set2arrayByte      : Set[Any] => Array[AnyRef] = (_: Set[Any]) => Array.empty[AnyRef]
   protected lazy val set2arrayShort     : Set[Any] => Array[AnyRef] = (_: Set[Any]) => Array.empty[AnyRef]
   protected lazy val set2arrayChar      : Set[Any] => Array[AnyRef] = (_: Set[Any]) => Array.empty[AnyRef]
+
+  protected lazy val extsString     = List("", "")
+  protected lazy val extsInt        = List("", "")
+  protected lazy val extsLong       = List("", "")
+  protected lazy val extsFloat      = List("", "")
+  protected lazy val extsDouble     = List("", "")
+  protected lazy val extsBoolean    = List("", "")
+  protected lazy val extsBigInt     = List("", "")
+  protected lazy val extsBigDecimal = List("", "")
+  protected lazy val extsDate       = List("", "")
+  protected lazy val extsUUID       = List("", "")
+  protected lazy val extsURI        = List("", "")
+  protected lazy val extsByte       = List("", "")
+  protected lazy val extsShort      = List("", "")
+  protected lazy val extsChar       = List("", "")
 }

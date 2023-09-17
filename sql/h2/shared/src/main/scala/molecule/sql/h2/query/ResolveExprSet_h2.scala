@@ -6,7 +6,7 @@ import molecule.core.util.AggrUtils
 import molecule.sql.core.query.{ResolveExpr, SqlQueryBase}
 import scala.reflect.ClassTag
 
-trait ResolveExprSet_h2[Tpl] extends ResolveExpr with LambdasSet_h2 with AggrUtils  { self: SqlQueryBase =>
+trait ResolveExprSet_h2[Tpl] extends ResolveExpr with LambdasSet_h2 with AggrUtils { self: SqlQueryBase =>
 
   override protected def resolveAttrSetMan(attr: AttrSetMan): Unit = {
     aritiesAttr()
@@ -30,20 +30,20 @@ trait ResolveExprSet_h2[Tpl] extends ResolveExpr with LambdasSet_h2 with AggrUti
 
   override protected def resolveAttrSetTac(attr: AttrSetTac): Unit = {
     attr match {
-      case at: AttrSetTacString     => setTac(attr, "String",  at.vs, resSetString)
-      case at: AttrSetTacInt        => setTac(attr, "Int",  at.vs, resSetInt)
-      case at: AttrSetTacLong       => setTac(attr, "Long",  at.vs, resSetLong)
-      case at: AttrSetTacFloat      => setTac(attr, "Float",  at.vs, resSetFloat)
-      case at: AttrSetTacDouble     => setTac(attr, "Double",  at.vs, resSetDouble)
-      case at: AttrSetTacBoolean    => setTac(attr, "Boolean",  at.vs, resSetBoolean)
-      case at: AttrSetTacBigInt     => setTac(attr, "BigInt",  at.vs, resSetBigInt)
-      case at: AttrSetTacBigDecimal => setTac(attr, "BigDecimal",  at.vs, resSetBigDecimal)
-      case at: AttrSetTacDate       => setTac(attr, "Date",  at.vs, resSetDate)
-      case at: AttrSetTacUUID       => setTac(attr, "UUID",  at.vs, resSetUUID)
-      case at: AttrSetTacURI        => setTac(attr, "URI",  at.vs, resSetURI)
-      case at: AttrSetTacByte       => setTac(attr, "Byte",  at.vs, resSetByte)
-      case at: AttrSetTacShort      => setTac(attr, "Short",  at.vs, resSetShort)
-      case at: AttrSetTacChar       => setTac(attr, "Char",  at.vs, resSetChar)
+      case at: AttrSetTacString     => setTac(attr, "String", at.vs, resSetString)
+      case at: AttrSetTacInt        => setTac(attr, "Int", at.vs, resSetInt)
+      case at: AttrSetTacLong       => setTac(attr, "Long", at.vs, resSetLong)
+      case at: AttrSetTacFloat      => setTac(attr, "Float", at.vs, resSetFloat)
+      case at: AttrSetTacDouble     => setTac(attr, "Double", at.vs, resSetDouble)
+      case at: AttrSetTacBoolean    => setTac(attr, "Boolean", at.vs, resSetBoolean)
+      case at: AttrSetTacBigInt     => setTac(attr, "BigInt", at.vs, resSetBigInt)
+      case at: AttrSetTacBigDecimal => setTac(attr, "BigDecimal", at.vs, resSetBigDecimal)
+      case at: AttrSetTacDate       => setTac(attr, "Date", at.vs, resSetDate)
+      case at: AttrSetTacUUID       => setTac(attr, "UUID", at.vs, resSetUUID)
+      case at: AttrSetTacURI        => setTac(attr, "URI", at.vs, resSetURI)
+      case at: AttrSetTacByte       => setTac(attr, "Byte", at.vs, resSetByte)
+      case at: AttrSetTacShort      => setTac(attr, "Short", at.vs, resSetShort)
+      case at: AttrSetTacChar       => setTac(attr, "Char", at.vs, resSetChar)
     }
   }
 
@@ -51,20 +51,20 @@ trait ResolveExprSet_h2[Tpl] extends ResolveExpr with LambdasSet_h2 with AggrUti
     aritiesAttr()
     hasOptAttr = true // to avoid redundant None's
     attr match {
-      case at: AttrSetOptString     => setOpt(at, at.vs, resOptSetString)
-      case at: AttrSetOptInt        => setOpt(at, at.vs, resOptSetInt)
-      case at: AttrSetOptLong       => setOpt(at, at.vs, resOptSetLong)
-      case at: AttrSetOptFloat      => setOpt(at, at.vs, resOptSetFloat)
-      case at: AttrSetOptDouble     => setOpt(at, at.vs, resOptSetDouble)
-      case at: AttrSetOptBoolean    => setOpt(at, at.vs, resOptSetBoolean)
-      case at: AttrSetOptBigInt     => setOpt(at, at.vs, resOptSetBigInt)
-      case at: AttrSetOptBigDecimal => setOpt(at, at.vs, resOptSetBigDecimal)
-      case at: AttrSetOptDate       => setOpt(at, at.vs, resOptSetDate)
-      case at: AttrSetOptUUID       => setOpt(at, at.vs, resOptSetUUID)
-      case at: AttrSetOptURI        => setOpt(at, at.vs, resOptSetURI)
-      case at: AttrSetOptByte       => setOpt(at, at.vs, resOptSetByte)
-      case at: AttrSetOptShort      => setOpt(at, at.vs, resOptSetShort)
-      case at: AttrSetOptChar       => setOpt(at, at.vs, resOptSetChar)
+      case at: AttrSetOptString     => setOpt(at, at.vs, resOptSetString, resSetString)
+      case at: AttrSetOptInt        => setOpt(at, at.vs, resOptSetInt, resSetInt)
+      case at: AttrSetOptLong       => setOpt(at, at.vs, resOptSetLong, resSetLong)
+      case at: AttrSetOptFloat      => setOpt(at, at.vs, resOptSetFloat, resSetFloat)
+      case at: AttrSetOptDouble     => setOpt(at, at.vs, resOptSetDouble, resSetDouble)
+      case at: AttrSetOptBoolean    => setOpt(at, at.vs, resOptSetBoolean, resSetBoolean)
+      case at: AttrSetOptBigInt     => setOpt(at, at.vs, resOptSetBigInt, resSetBigInt)
+      case at: AttrSetOptBigDecimal => setOpt(at, at.vs, resOptSetBigDecimal, resSetBigDecimal)
+      case at: AttrSetOptDate       => setOpt(at, at.vs, resOptSetDate, resSetDate)
+      case at: AttrSetOptUUID       => setOpt(at, at.vs, resOptSetUUID, resSetUUID)
+      case at: AttrSetOptURI        => setOpt(at, at.vs, resOptSetURI, resSetURI)
+      case at: AttrSetOptByte       => setOpt(at, at.vs, resOptSetByte, resSetByte)
+      case at: AttrSetOptShort      => setOpt(at, at.vs, resOptSetShort, resSetShort)
+      case at: AttrSetOptChar       => setOpt(at, at.vs, resOptSetChar, resSetChar)
     }
   }
 
@@ -103,14 +103,14 @@ trait ResolveExprSet_h2[Tpl] extends ResolveExpr with LambdasSet_h2 with AggrUti
   }
 
 
-  protected def setOpt[T: ClassTag](attr: Attr, optSets: Option[Seq[Set[T]]], resOpt: ResSetOpt[T]): Unit = {
+  protected def setOpt[T: ClassTag](attr: Attr, optSets: Option[Seq[Set[T]]], resOpt: ResSetOpt[T], res: ResSet[T]): Unit = {
     val col = getCol(attr: Attr)
     select += col
     addCast(resOpt.sql2setOpt)
     attr.op match {
       case V     => ()
-      case Eq    => setOptEqual(col, optSets, resOpt.set2sqls)
-      case Neq   => setOptNeq(col, optSets, resOpt.set2sqls)
+      case Eq    => setOptEqual(col, optSets, res)
+      case Neq   => setOptNeq(col, optSets, res)
       case Has   => optHas(col, optSets, resOpt.one2sql)
       case HasNo => optHasNo(col, optSets, resOpt.one2sql)
       case other => unexpectedOp(other)
@@ -119,9 +119,9 @@ trait ResolveExprSet_h2[Tpl] extends ResolveExpr with LambdasSet_h2 with AggrUti
 
   protected def setExpr[T: ClassTag](col: String, op: Op, sets: Seq[Set[T]], res: ResSet[T], mode: String): Unit = {
     op match {
-      case V         => if (mode == "man") setAttr(col, res, mode) else ()
-      case Eq        => setEqual(col, sets, res.set2sqls)
-      case Neq       => setNeq(col, sets, res.set2sqls)
+      case V         => if (mode == "man") setAttr(col, res) else ()
+      case Eq        => setEqual(col, sets, res)
+      case Neq       => setNeq(col, sets, res)
       case Has       => has(col, sets, res.one2sql)
       case HasNo     => hasNo(col, sets, res.one2sql)
       case NoValue   => setNoValue(col)
@@ -141,7 +141,7 @@ trait ResolveExprSet_h2[Tpl] extends ResolveExpr with LambdasSet_h2 with AggrUti
   }
 
 
-  protected def setAttr[T](col: String, res: ResSet[T], mode: String): Unit = {
+  protected def setAttr[T](col: String, res: ResSet[T]): Unit = {
     select -= col
     select += s"ARRAY_AGG($col)"
     having += "COUNT(*) > 0"
@@ -359,12 +359,12 @@ trait ResolveExprSet_h2[Tpl] extends ResolveExpr with LambdasSet_h2 with AggrUti
     }.mkString("(\n    (\n      ", "\n    ) OR (\n      ", "\n    )\n  )")
   }
 
-  protected def setEqual[T](col: String, sets: Seq[Set[T]], set2sqls: Set[T] => Set[String]): Unit = {
+  protected def setEqual[T](col: String, sets: Seq[Set[T]], res: ResSet[T]): Unit = {
     val setsNonEmpty = sets.filterNot(_.isEmpty)
     setsNonEmpty.length match {
       case 0 => where += (("FALSE", ""))
-      case 1 => where += (("", matchSet(set2sqls(setsNonEmpty.head), col)))
-      case _ => where += (("", matchSets(setsNonEmpty, col, set2sqls)))
+      case 1 => where += (("", matchSet(res.set2sqls(setsNonEmpty.head), col)))
+      case _ => where += (("", matchSets(setsNonEmpty, col, res.set2sqls)))
     }
   }
 
@@ -372,20 +372,20 @@ trait ResolveExprSet_h2[Tpl] extends ResolveExpr with LambdasSet_h2 with AggrUti
     where += ((col, "= " + filterAttr))
   }
 
-  protected def setOptEqual[T](col: String, optSets: Option[Seq[Set[T]]], set2sqls: Set[T] => Set[String]): Unit = {
+  protected def setOptEqual[T](col: String, optSets: Option[Seq[Set[T]]], res: ResSet[T]): Unit = {
     optSets.fold[Unit] {
       where += ((col, s"IS NULL"))
     } { sets =>
-      setEqual(col, sets, set2sqls)
+      setEqual(col, sets, res)
     }
   }
 
-  protected def setNeq[T](col: String, sets: Seq[Set[T]], set2sqls: Set[T] => Set[String]): Unit = {
+  protected def setNeq[T](col: String, sets: Seq[Set[T]], res: ResSet[T]): Unit = {
     val setsNonEmpty = sets.filterNot(_.isEmpty)
     setsNonEmpty.length match {
       case 0 => ()
-      case 1 => where += (("", "NOT " + matchSet(set2sqls(setsNonEmpty.head), col)))
-      case _ => where += (("", "NOT " + matchSets(setsNonEmpty, col, set2sqls)))
+      case 1 => where += (("", "NOT " + matchSet(res.set2sqls(setsNonEmpty.head), col)))
+      case _ => where += (("", "NOT " + matchSets(setsNonEmpty, col, res.set2sqls)))
     }
   }
 
@@ -393,9 +393,9 @@ trait ResolveExprSet_h2[Tpl] extends ResolveExpr with LambdasSet_h2 with AggrUti
     where += ((col, "<> " + filterAttr))
   }
 
-  protected def setOptNeq[T](col: String, optSets: Option[Seq[Set[T]]], set2sqls: Set[T] => Set[String]): Unit = {
+  protected def setOptNeq[T](col: String, optSets: Option[Seq[Set[T]]], res: ResSet[T]): Unit = {
     if (optSets.isDefined && optSets.get.nonEmpty) {
-      setNeq(col, optSets.get, set2sqls)
+      setNeq(col, optSets.get, res)
     }
     notNull += col
   }

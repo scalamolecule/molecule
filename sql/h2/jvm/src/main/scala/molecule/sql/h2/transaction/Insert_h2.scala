@@ -1,7 +1,8 @@
 package molecule.sql.h2.transaction
 
+import java.net.URI
 import java.sql.{Statement, PreparedStatement => PS}
-import java.util.Date
+import java.util.{Date, UUID}
 import molecule.base.ast._
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
@@ -19,9 +20,6 @@ trait Insert_h2
 
   doPrint = false
 
-  var x = Map.empty[String, MetaNs]
-  var inputCast = ""
-
   def getData(
     nsMap: Map[String, MetaNs],
     elements: List[Element],
@@ -29,9 +27,6 @@ trait Insert_h2
   ): Data = {
     elements.foreach(debug)
     debug("### A #############################################################################################")
-
-    x = nsMap
-
     initialNs = getInitialNs(elements)
     curRefPath = List(s"$level", initialNs)
     val resolveTpl: Product => Unit = getResolver(nsMap, elements)
@@ -54,32 +49,16 @@ trait Insert_h2
     (getTableInserts, getJoinTableInserts)
   }
 
-  private def initInserts(): Unit = {
+  protected def initInserts(): Unit = {
     inserts.foreach {
       case (refPath, cols) =>
         val table             = refPath.last
-        val columns           = cols.mkString(",\n  ")
-        val inputPlaceholders0 = cols.map(_ => "?").mkString(", ")
-        val inputPlaceholders = cols.map{
-//          case col if x() => "?"
-          col =>
-//            println(s"--- $col   " + x(refPath.last).attrs.exists(a => a.attr == col && a.baseTpe == "UUID"))
-//            println(x(refPath.last).attrs.find(a => a.attr == col && a.baseTpe == "UUID"))
-//            println(refPath)
-//            println(inputCast)
-//            println(col)
-//            println(x.get(refPath.last + "." + col))
-
-//            val cast = if(x(refPath.last).attrs.exists(a => a.attr == col && a.baseTpe == "UUID")) "::uuid" else ""
-            val cast = ""
-            "?" + cast
-        }.mkString(", ")
-
-        val stmt =
+        val columns           = cols.map(_._1).mkString(",\n  ")
+        val inputPlaceholders = cols.map(_ => "?").mkString(", ")
+        val stmt              =
           s"""INSERT INTO $table (
              |  $columns
              |) VALUES ($inputPlaceholders)""".stripMargin
-//             |) VALUES (?, ?::uuid)""".stripMargin
 
         debug(s"B -------------------- refPath: $refPath")
         debug(stmt)
@@ -97,7 +76,7 @@ trait Insert_h2
     }
   }
 
-  private def addRowSetterToTableInserts(rowIndex: Int): Unit = {
+  protected def addRowSetterToTableInserts(rowIndex: Int): Unit = {
     inserts.foreach {
       case (refPath, cols) =>
         debug(s"C ---------------------- $refPath")
@@ -126,7 +105,7 @@ trait Insert_h2
     }
   }
 
-  private def getTableInserts: List[Table] = {
+  protected def getTableInserts: List[Table] = {
     // Add insert resolver to each insert
     inserts.map { case (refPath, _) =>
       val rowSetters = rowSettersMap(refPath)
@@ -141,7 +120,7 @@ trait Insert_h2
       tableDatas(refPath).copy(populatePS = populatePS)
     }
   }
-  private def getJoinTableInserts: List[JoinTable] = {
+  protected def getJoinTableInserts: List[JoinTable] = {
     joins.zip(joinTableDatas).map {
       case ((joinRefPath, _, _, _, _), joinTableInsert) =>
         joinTableInsert.copy(rightCounts = rightCountsMap(joinRefPath))
@@ -151,18 +130,18 @@ trait Insert_h2
 
   // Pre-process ----------------------------------------------------------------------------------------
 
-  private def getParamIndex(attr: String, add: Boolean = true): (List[String], Int) = {
+  protected def getParamIndex(attr: String, add: Boolean = true, castExt: String = ""): (List[String], Int) = {
     if (inserts.exists(_._1 == curRefPath)) {
       inserts = inserts.map {
         case (path, cols) if path == curRefPath =>
           paramIndexes += (curRefPath, attr) -> (cols.length + 1)
-          (path, if (add) cols :+ attr else cols)
+          (path, if (add) cols :+ (attr, castExt) else cols)
 
         case other => other
       }
     } else {
       paramIndexes += (curRefPath, attr) -> 1
-      inserts = inserts :+ (curRefPath, List(attr))
+      inserts = inserts :+ (curRefPath, List((attr, castExt)))
     }
     (curRefPath, paramIndexes(curRefPath, attr))
   }
@@ -172,9 +151,10 @@ trait Insert_h2
     attr: String,
     tplIndex: Int,
     transformValue: T => Any,
-    handleValue: T => Any
+    handleValue: T => Any,
+    exts: List[String] = Nil
   ): Product => Unit = {
-    val (curPath, paramIndex) = getParamIndex(attr)
+    val (curPath, paramIndex) = getParamIndex(attr, castExt = exts.head)
     (tpl: Product) => {
       val scalaValue  = tpl.productElement(tplIndex).asInstanceOf[T]
       val valueSetter = handleValue(scalaValue).asInstanceOf[(PS, Int) => Unit]
@@ -190,9 +170,10 @@ trait Insert_h2
     attr: String,
     tplIndex: Int,
     transformValue: T => Any,
-    handleValue: T => Any
+    handleValue: T => Any,
+    exts: List[String] = Nil
   ): Product => Unit = {
-    val (curPath, paramIndex) = getParamIndex(attr)
+    val (curPath, paramIndex) = getParamIndex(attr, castExt = exts.head)
     (tpl: Product) => {
       val colSetter = tpl.productElement(tplIndex) match {
         case Some(scalaValue) =>
@@ -213,6 +194,7 @@ trait Insert_h2
     refNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
+    exts: List[String] = Nil
   ): Product => Unit = {
     refNs.fold {
       val (curPath, paramIndex) = getParamIndex(attr)
@@ -221,9 +203,7 @@ trait Insert_h2
         val colSetter = if (array.nonEmpty) {
           (ps: PS, _: IdsMap, _: RowIndex) => {
             val conn = ps.getConnection
-//            val arr  = conn.createArrayOf("AnyRef", array)
-//            val arr  = conn.createArrayOf("Int", array)
-            val arr  = conn.createArrayOf("Decimal", array)
+            val arr  = conn.createArrayOf(exts(1), array)
             ps.setArray(paramIndex, arr)
           }
         } else {
@@ -241,7 +221,7 @@ trait Insert_h2
       // join table with single row (treated as normal insert since there's only 1 join per row)
       val (id1, id2) = if (ns == refNs) (s"${ns}_1_id", s"${refNs}_2_id") else (s"${ns}_id", s"${refNs}_id")
       // When insertion order is reversed, this join table will be set after left and right has been inserted
-      inserts = (joinPath, List(id1, id2)) +: inserts
+      inserts = (joinPath, List((id1, ""), (id2, ""))) +: inserts
 
       if (paramIndexes.isEmpty) {
         // If current namespace has no attributes, then add an empty row with
@@ -282,6 +262,7 @@ trait Insert_h2
     refNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
+    exts: List[String] = Nil
   ): Product => Unit = {
     refNs.fold {
       val (curPath, paramIndex) = getParamIndex(attr)
@@ -291,7 +272,7 @@ trait Insert_h2
             val array = set2array(set.asInstanceOf[Set[Any]])
             (ps: PS, _: IdsMap, _: RowIndex) => {
               val conn = ps.getConnection
-              val arr  = conn.createArrayOf("AnyRef", array)
+              val arr  = conn.createArrayOf(exts(1), array)
               ps.setArray(paramIndex, arr)
             }
 
@@ -310,7 +291,7 @@ trait Insert_h2
       // join table with single row (treated as normal insert since there's only 1 join per row)
       val (id1, id2) = if (ns == refNs) (s"${ns}_1_id", s"${refNs}_2_id") else (s"${ns}_id", s"${refNs}_id")
       // When insertion order is reversed, this join table will be set after left and right has been inserted
-      inserts = (joinPath, List(id1, id2)) +: inserts
+      inserts = (joinPath, List((id1, ""), (id2, ""))) +: inserts
 
       (tpl: Product) => {
         val colSetter = tpl.productElement(tplIndex) match {
@@ -410,13 +391,7 @@ trait Insert_h2
   override protected lazy val handleBigInt     = (v: Any) => (ps: PS, n: Int) => ps.setBigDecimal(n, BigDecimal(v.asInstanceOf[BigInt]).bigDecimal)
   override protected lazy val handleBigDecimal = (v: Any) => (ps: PS, n: Int) => ps.setBigDecimal(n, v.asInstanceOf[BigDecimal].bigDecimal)
   override protected lazy val handleDate       = (v: Any) => (ps: PS, n: Int) => ps.setDate(n, new java.sql.Date(v.asInstanceOf[Date].getTime))
-  override protected lazy val handleUUID       = (v: Any) => (ps: PS, n: Int) => {
-
-    println("yeah")
-    inputCast = "::uuid"
-    ps.setString(n, v.toString)
-    inputCast = ""
-  }
+  override protected lazy val handleUUID       = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.toString)
   override protected lazy val handleURI        = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.toString)
   override protected lazy val handleByte       = (v: Any) => (ps: PS, n: Int) => ps.setByte(n, v.asInstanceOf[Byte])
   override protected lazy val handleShort      = (v: Any) => (ps: PS, n: Int) => ps.setShort(n, v.asInstanceOf[Short])
@@ -436,4 +411,19 @@ trait Insert_h2
   override protected lazy val set2arrayByte      : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
   override protected lazy val set2arrayShort     : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
   override protected lazy val set2arrayChar      : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
+
+  override protected lazy val extsString     = List("", "AnyRef")
+  override protected lazy val extsInt        = List("", "AnyRef")
+  override protected lazy val extsLong       = List("", "AnyRef")
+  override protected lazy val extsFloat      = List("", "AnyRef")
+  override protected lazy val extsDouble     = List("", "AnyRef")
+  override protected lazy val extsBoolean    = List("", "AnyRef")
+  override protected lazy val extsBigInt     = List("", "AnyRef")
+  override protected lazy val extsBigDecimal = List("", "AnyRef")
+  override protected lazy val extsDate       = List("", "AnyRef")
+  override protected lazy val extsUUID       = List("", "AnyRef")
+  override protected lazy val extsURI        = List("", "AnyRef")
+  override protected lazy val extsByte       = List("", "AnyRef")
+  override protected lazy val extsShort      = List("", "AnyRef")
+  override protected lazy val extsChar       = List("", "AnyRef")
 }

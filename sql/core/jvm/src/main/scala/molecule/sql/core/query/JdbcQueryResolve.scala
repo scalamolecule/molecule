@@ -55,7 +55,7 @@ abstract class JdbcQueryResolve[Tpl](
   private def getResultSet(conn: JdbcConn_JVM, query: String): ResultSet = {
     println("--- 1 ------------------")
     elements.foreach(println)
-    println("getResultSet: " + query)
+    println("getResultSet:\n" + query)
     conn.sqlConn.prepareStatement(
       query,
       ResultSet.TYPE_SCROLL_INSENSITIVE,

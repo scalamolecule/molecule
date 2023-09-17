@@ -60,7 +60,8 @@ trait Insert_datomic
     attr: String,
     tplIndex: Int,
     transformValue: T => Any,
-    handleValue: T => Any
+    handleValue: T => Any,
+    exts: List[String] = Nil
   ): Product => Unit = {
     val a = kw(ns, attr)
     backRefs = backRefs + (ns -> e)
@@ -76,7 +77,8 @@ trait Insert_datomic
     attr: String,
     tplIndex: Int,
     transformValue: T => Any,
-    handleValue: T => Any
+    handleValue: T => Any,
+    exts: List[String] = Nil
   ): Product => Unit = {
     val a = kw(ns, attr)
     backRefs = backRefs + (ns -> e)
@@ -101,6 +103,7 @@ trait Insert_datomic
     refNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
+    exts: List[String] = Nil
   ): Product => Unit = {
     val a = kw(ns, attr)
     backRefs = backRefs + (ns -> e)
@@ -119,6 +122,7 @@ trait Insert_datomic
     refNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
+    exts: List[String] = Nil
   ): Product => Unit = {
     val a = kw(ns, attr)
     backRefs = backRefs + (ns -> e)

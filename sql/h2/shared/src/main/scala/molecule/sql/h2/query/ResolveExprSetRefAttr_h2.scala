@@ -48,9 +48,9 @@ trait ResolveExprSetRefAttr_h2[Tpl] extends ResolveExpr with LambdasSet_h2 { sel
     aritiesAttr()
     hasOptAttr = true // to avoid redundant None's
     attr match {
-      case at: AttrSetOptInt    => refOpt(at, at.vs, resOptSetInt)
-      case at: AttrSetOptLong   => refOpt(at, at.vs, resOptSetLong)
-      case at: AttrSetOptDouble => refOpt(at, at.vs, resOptSetDouble)
+      case at: AttrSetOptInt    => refOpt(at, at.vs, resOptSetInt, resSetInt)
+      case at: AttrSetOptLong   => refOpt(at, at.vs, resOptSetLong, resSetLong)
+      case at: AttrSetOptDouble => refOpt(at, at.vs, resOptSetDouble, resSetDouble)
       case other                => throw ModelError("Unexpected optional Set type: " + other)
     }
   }
@@ -88,7 +88,12 @@ trait ResolveExprSetRefAttr_h2[Tpl] extends ResolveExpr with LambdasSet_h2 { sel
   }
 
 
-  protected def refOpt[T: ClassTag](attr: Attr, optSets: Option[Seq[Set[T]]], resOpt: ResSetOpt[T]): Unit = {
+  protected def refOpt[T: ClassTag](
+    attr: Attr,
+    optSets: Option[Seq[Set[T]]],
+    resOpt: ResSetOpt[T],
+    res: ResSet[T]
+  ): Unit = {
     val col = getCol(attr: Attr)
     select += s"ARRAY_AGG($joinTable.$ref_id) $refIds"
     joins += (("LEFT JOIN", joinTable, "", s"$nsId = $joinTable.$ns_id"))
@@ -97,8 +102,8 @@ trait ResolveExprSetRefAttr_h2[Tpl] extends ResolveExpr with LambdasSet_h2 { sel
     addCast(resOpt.sql2setOpt)
     attr.op match {
       case V     => ()
-      case Eq    => refOptEqual(optSets, resOpt.set2sqls)
-      case Neq   => refOptNeq(optSets, resOpt.set2sqls)
+      case Eq    => refOptEqual(optSets, res)
+      case Neq   => refOptNeq(optSets, res)
       case Has   => refOptHas(col, optSets)
       case HasNo => refOptHasNo(optSets)
       case other => unexpectedOp(other)
@@ -108,8 +113,8 @@ trait ResolveExprSetRefAttr_h2[Tpl] extends ResolveExpr with LambdasSet_h2 { sel
   protected def refExpr[T: ClassTag](col: String, op: Op, sets: Seq[Set[T]], res: ResSet[T]): Unit = {
     op match {
       case V        => ()
-      case Eq       => refEqual(sets, res.set2sqls)
-      case Neq      => refNeq(sets, res.set2sqls)
+      case Eq       => refEqual(sets, res)
+      case Neq      => refNeq(sets, res)
       case Has      => refHas(sets)
       case HasNo    => refHasNo(sets)
       case NoValue  => refNoValue(col)
@@ -163,12 +168,12 @@ trait ResolveExprSetRefAttr_h2[Tpl] extends ResolveExpr with LambdasSet_h2 { sel
   }
 
 
-  protected def refEqual[T](sets: Seq[Set[T]], set2sqls: Set[T] => Set[String]): Unit = {
+  protected def refEqual[T](sets: Seq[Set[T]], res: ResSet[T]): Unit = {
     val setsNonEmpty = sets.filterNot(_.isEmpty)
     setsNonEmpty.length match {
       case 0 => where += (("FALSE", ""))
-      case 1 => where += (("", refMatchSet(set2sqls(setsNonEmpty.head))))
-      case _ => where += (("", refMatchSets(setsNonEmpty, set2sqls)))
+      case 1 => where += (("", refMatchSet(res.set2sqls(setsNonEmpty.head))))
+      case _ => where += (("", refMatchSets(setsNonEmpty, res.set2sqls)))
     }
   }
 
@@ -176,20 +181,20 @@ trait ResolveExprSetRefAttr_h2[Tpl] extends ResolveExpr with LambdasSet_h2 { sel
     where += ((col, "= " + filterAttr))
   }
 
-  protected def refOptEqual[T](optSets: Option[Seq[Set[T]]], set2sqls: Set[T] => Set[String]): Unit = {
+  protected def refOptEqual[T](optSets: Option[Seq[Set[T]]], res: ResSet[T]): Unit = {
     optSets.fold[Unit] {
       where += (("", s"$refIdArray IS NULL"))
     } { sets =>
-      refEqual(sets, set2sqls)
+      refEqual(sets, res)
     }
   }
 
-  protected def refNeq[T](sets: Seq[Set[T]], set2sqls: Set[T] => Set[String]): Unit = {
+  protected def refNeq[T](sets: Seq[Set[T]], res: ResSet[T]): Unit = {
     val setsNonEmpty = sets.filterNot(_.isEmpty)
     setsNonEmpty.length match {
       case 0 => ()
-      case 1 => where += (("", "NOT " + refMatchSet(set2sqls(setsNonEmpty.head))))
-      case _ => where += (("", "NOT " + refMatchSets(setsNonEmpty, set2sqls)))
+      case 1 => where += (("", "NOT " + refMatchSet(res.set2sqls(setsNonEmpty.head))))
+      case _ => where += (("", "NOT " + refMatchSets(setsNonEmpty, res.set2sqls)))
     }
   }
 
@@ -197,17 +202,18 @@ trait ResolveExprSetRefAttr_h2[Tpl] extends ResolveExpr with LambdasSet_h2 { sel
     where += ((col, "<> " + filterAttr))
   }
 
-  protected def refOptNeq[T](optSets: Option[Seq[Set[T]]], set2sqls: Set[T] => Set[String]): Unit = {
+  protected def refOptNeq[T](optSets: Option[Seq[Set[T]]], res: ResSet[T]): Unit = {
     if (optSets.isDefined && optSets.get.nonEmpty) {
-      refNeq(optSets.get, set2sqls)
+      refNeq(optSets.get, res)
     }
     notNull += s"$joinTable.$ns_id"
   }
 
 
   protected def arrayMatches(arrayContains: String): String = {
-    s"""(SELECT
-       |    $arrayContains
+    s"""(
+       |    SELECT
+       |      $arrayContains
        |    FROM $joinTable
        |    WHERE $joinTable.$ns_id = $nsId
        |  )""".stripMargin
@@ -282,7 +288,6 @@ trait ResolveExprSetRefAttr_h2[Tpl] extends ResolveExpr with LambdasSet_h2 { sel
       where += ((s"$joinTable.$ref_id", s"IS NOT NULL"))
     } { sets =>
       val setsWithValues = sets.filterNot(_.isEmpty)
-      //      if (setsWithValues.nonEmpty && setsWithValues.head.nonEmpty) {
       if (setsWithValues.nonEmpty) {
         refHasNo(sets.filterNot(_.isEmpty))
       } else {

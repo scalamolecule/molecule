@@ -32,7 +32,7 @@ trait Save_h2
     inserts.foreach {
       case (refPath, cols) =>
         val table             = refPath.last
-        val columns           = cols.mkString(",\n  ")
+        val columns           = cols.map(_._1).mkString(",\n  ")
         val inputPlaceholders = cols.map(_ => "?").mkString(", ")
 
         val stmt =
@@ -75,18 +75,18 @@ trait Save_h2
     }
   }
 
-  private def getParamIndex(attr: String, add: Boolean = true): (List[String], Int) = {
+  private def getParamIndex(attr: String, add: Boolean = true, castExt: String = ""): (List[String], Int) = {
     if (inserts.exists(_._1 == curRefPath)) {
       inserts = inserts.map {
         case (path, cols) if path == curRefPath =>
           paramIndexes += (curRefPath, attr) -> (cols.length + 1)
-          (path, if (add) cols :+ attr else cols)
+          (path, if (add) cols :+ (attr, castExt) else cols)
 
         case other => other
       }
     } else {
       paramIndexes += (curRefPath, attr) -> 1
-      inserts = inserts :+ (curRefPath, List(attr))
+      inserts = inserts :+ (curRefPath, List((attr, castExt)))
     }
     (curRefPath, paramIndexes(curRefPath, attr))
   }
@@ -95,9 +95,10 @@ trait Save_h2
     ns: String,
     attr: String,
     optValue: Option[T],
-    handleValue: T => Any
+    handleValue: T => Any,
+    exts: List[String] = Nil
   ): Unit = {
-    val (curPath, paramIndex) = getParamIndex(attr)
+    val (curPath, paramIndex) = getParamIndex(attr, castExt = exts.head)
     val colSetter: Setter     = optValue.fold {
       (ps: PS, _: IdsMap, _: RowIndex) => {
         ps.setNull(paramIndex, 0)
@@ -116,7 +117,8 @@ trait Save_h2
     optSet: Option[Set[T]],
     handleValue: T => Any,
     set2array: Set[Any] => Array[AnyRef],
-    refNs: Option[String]
+    refNs: Option[String],
+    exts: List[String] = Nil
   ): Unit = {
     refNs.fold {
       val (curPath, paramIndex) = getParamIndex(attr)
@@ -130,7 +132,8 @@ trait Save_h2
             ps.setNull(paramIndex, 0)
           } else {
             val conn  = ps.getConnection
-            val array = conn.createArrayOf("AnyRef", set2array(set.asInstanceOf[Set[Any]]))
+//            val array = conn.createArrayOf("AnyRef", set2array(set.asInstanceOf[Set[Any]]))
+            val array = conn.createArrayOf(exts(1), set2array(set.asInstanceOf[Set[Any]]))
             ps.setArray(paramIndex, array)
           }
         }
@@ -152,7 +155,7 @@ trait Save_h2
           // join table with single row (treated as normal insert since there's only 1 join per row)
           val (id1, id2) = if (ns == refNs) (s"${ns}_1_id", s"${refNs}_2_id") else (s"${ns}_id", s"${refNs}_id")
           // When insertion order is reversed, this join table will be set after left and right has been inserted
-          inserts = (joinPath, List(id1, id2)) +: inserts
+          inserts = (joinPath, List((id1, ""), (id2, ""))) +: inserts
 
           if (paramIndexes.isEmpty) {
             // If current namespace has no attributes, then add an empty row with
@@ -221,4 +224,19 @@ trait Save_h2
   override protected lazy val set2arrayByte      : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
   override protected lazy val set2arrayShort     : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
   override protected lazy val set2arrayChar      : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
+
+  override protected lazy val extsString     = List("", "AnyRef")
+  override protected lazy val extsInt        = List("", "AnyRef")
+  override protected lazy val extsLong       = List("", "AnyRef")
+  override protected lazy val extsFloat      = List("", "AnyRef")
+  override protected lazy val extsDouble     = List("", "AnyRef")
+  override protected lazy val extsBoolean    = List("", "AnyRef")
+  override protected lazy val extsBigInt     = List("", "AnyRef")
+  override protected lazy val extsBigDecimal = List("", "AnyRef")
+  override protected lazy val extsDate       = List("", "AnyRef")
+  override protected lazy val extsUUID       = List("", "AnyRef")
+  override protected lazy val extsURI        = List("", "AnyRef")
+  override protected lazy val extsByte       = List("", "AnyRef")
+  override protected lazy val extsShort      = List("", "AnyRef")
+  override protected lazy val extsChar       = List("", "AnyRef")
 }

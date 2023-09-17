@@ -12,7 +12,8 @@ trait InsertOps {
     attr: String,
     tplIndex: Int,
     transformValue: T => Any,
-    handleValue: T => Any
+    handleValue: T => Any,
+    exts: List[String]
   ): Product => Unit
 
   protected def addOneOpt[T](
@@ -20,7 +21,8 @@ trait InsertOps {
     attr: String,
     tplIndex: Int,
     transformValue: T => Any,
-    handleValue: T => Any
+    handleValue: T => Any,
+    exts: List[String]
   ): Product => Unit
 
   protected def addSet[T](
@@ -30,6 +32,7 @@ trait InsertOps {
     refNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
+    exts: List[String]
   ): Product => Unit
 
   protected def addSetOpt[T](
@@ -39,6 +42,7 @@ trait InsertOps {
     refNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
+    exts: List[String]
   ): Product => Unit
 
   protected def addRef(
@@ -105,4 +109,19 @@ trait InsertOps {
   protected lazy val set2arrayByte      : Set[Any] => Array[AnyRef] = (_: Set[Any]) => Array.empty[AnyRef]
   protected lazy val set2arrayShort     : Set[Any] => Array[AnyRef] = (_: Set[Any]) => Array.empty[AnyRef]
   protected lazy val set2arrayChar      : Set[Any] => Array[AnyRef] = (_: Set[Any]) => Array.empty[AnyRef]
+
+  protected lazy val extsString     = List("", "")
+  protected lazy val extsInt        = List("", "")
+  protected lazy val extsLong       = List("", "")
+  protected lazy val extsFloat      = List("", "")
+  protected lazy val extsDouble     = List("", "")
+  protected lazy val extsBoolean    = List("", "")
+  protected lazy val extsBigInt     = List("", "")
+  protected lazy val extsBigDecimal = List("", "")
+  protected lazy val extsDate       = List("", "")
+  protected lazy val extsUUID       = List("", "")
+  protected lazy val extsURI        = List("", "")
+  protected lazy val extsByte       = List("", "")
+  protected lazy val extsShort      = List("", "")
+  protected lazy val extsChar       = List("", "")
 }

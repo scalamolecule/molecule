@@ -41,8 +41,6 @@ trait SpiSync_postgres
       query_inspect(q)
     }
     q.dbView.foreach(noTime)
-    println("C1")
-
     val m2q = new Model2SqlQuery_postgres[Tpl](q.elements)
     JdbcQueryResolveOffset[Tpl](q.elements, q.optLimit, None, m2q)
       .getListFromOffset_sync(conn.asInstanceOf[JdbcConn_JVM])._1
@@ -413,6 +411,9 @@ trait SpiSync_postgres
           // case "VARCHAR"     => row += resultSet.getString(n).charAt(0); "j"
           // case "LONGVARCHAR" => row += resultSet.getString(n); "k"
           // case "BINARY"      => row += resultSet.getByte(n); "l"
+
+          case "_int4" => array(n, "Int")
+          case "_int8" => array(n, "Bigint")
 
           case other => throw new Exception(
             s"Unexpected/not yet considered sql result type from raw query: " + other

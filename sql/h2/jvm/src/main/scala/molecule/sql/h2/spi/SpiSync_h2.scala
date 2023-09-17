@@ -41,8 +41,6 @@ trait SpiSync_h2
       query_inspect(q)
     }
     q.dbView.foreach(noTime)
-    println("C1")
-
     val m2q = new Model2SqlQuery_h2[Tpl](q.elements)
     JdbcQueryResolveOffset[Tpl](q.elements, q.optLimit, None, m2q)
       .getListFromOffset_sync(conn.asInstanceOf[JdbcConn_JVM])._1

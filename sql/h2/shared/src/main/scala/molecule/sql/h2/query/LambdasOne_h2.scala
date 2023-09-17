@@ -4,7 +4,7 @@ import java.net.URI
 import java.util.{Date, UUID}
 import molecule.sql.core.query.{ResolveBase, SqlQueryBase}
 
-trait LambdasOne_h2 extends ResolveBase { self: SqlQueryBase =>
+trait LambdasOne_h2 extends LambdasSet_h2 with ResolveBase { self: SqlQueryBase =>
 
   protected lazy val sql2oneString    : (Row, Int) => String     = (row: Row, n: Int) => row.getString(n)
   protected lazy val sql2oneInt       : (Row, Int) => Int        = (row: Row, n: Int) => row.getInt(n)
@@ -58,20 +58,20 @@ trait LambdasOne_h2 extends ResolveBase { self: SqlQueryBase =>
   protected lazy val sql2oneShortOrNull     : (Row, Int) => Any = { (row: Row, n: Int) => val v = row.getShort(n); if (row.wasNull()) null else v }
   protected lazy val sql2oneCharOrNull      : (Row, Int) => Any = { (row: Row, n: Int) => val v = row.getString(n); if (row.wasNull()) null else v.charAt(0) }
 
-  protected lazy val array2setString    : (Row, Int) => AnyRef = (row: Row, n: Int) => sqlArray2set(row, n, valueString)
-  protected lazy val array2setInt       : (Row, Int) => AnyRef = (row: Row, n: Int) => sqlArray2set(row, n, valueInt)
-  protected lazy val array2setLong      : (Row, Int) => AnyRef = (row: Row, n: Int) => sqlArray2set(row, n, valueLong)
-  protected lazy val array2setFloat     : (Row, Int) => AnyRef = (row: Row, n: Int) => sqlArray2set(row, n, valueFloat)
-  protected lazy val array2setDouble    : (Row, Int) => AnyRef = (row: Row, n: Int) => sqlArray2set(row, n, valueDouble)
-  protected lazy val array2setBoolean   : (Row, Int) => AnyRef = (row: Row, n: Int) => sqlArray2set(row, n, valueBoolean)
-  protected lazy val array2setBigInt    : (Row, Int) => AnyRef = (row: Row, n: Int) => sqlArray2set(row, n, valueBigInt)
-  protected lazy val array2setBigDecimal: (Row, Int) => AnyRef = (row: Row, n: Int) => sqlArray2set(row, n, valueBigDecimal)
-  protected lazy val array2setDate      : (Row, Int) => AnyRef = (row: Row, n: Int) => sqlArray2set(row, n, valueDate)
-  protected lazy val array2setUUID      : (Row, Int) => AnyRef = (row: Row, n: Int) => sqlArray2set(row, n, valueUUID)
-  protected lazy val array2setURI       : (Row, Int) => AnyRef = (row: Row, n: Int) => sqlArray2set(row, n, valueURI)
-  protected lazy val array2setByte      : (Row, Int) => AnyRef = (row: Row, n: Int) => sqlArray2set(row, n, valueByte)
-  protected lazy val array2setShort     : (Row, Int) => AnyRef = (row: Row, n: Int) => sqlArray2set(row, n, valueShort)
-  protected lazy val array2setChar      : (Row, Int) => AnyRef = (row: Row, n: Int) => sqlArray2set(row, n, valueChar)
+//  protected lazy val array2setString    : (Row, Int) => AnyRef = (row: Row, n: Int) => sqlArray2set(row, n, valueString)
+//  protected lazy val array2setInt       : (Row, Int) => AnyRef = (row: Row, n: Int) => sqlArray2set(row, n, valueInt)
+//  protected lazy val array2setLong      : (Row, Int) => AnyRef = (row: Row, n: Int) => sqlArray2set(row, n, valueLong)
+//  protected lazy val array2setFloat     : (Row, Int) => AnyRef = (row: Row, n: Int) => sqlArray2set(row, n, valueFloat)
+//  protected lazy val array2setDouble    : (Row, Int) => AnyRef = (row: Row, n: Int) => sqlArray2set(row, n, valueDouble)
+//  protected lazy val array2setBoolean   : (Row, Int) => AnyRef = (row: Row, n: Int) => sqlArray2set(row, n, valueBoolean)
+//  protected lazy val array2setBigInt    : (Row, Int) => AnyRef = (row: Row, n: Int) => sqlArray2set(row, n, valueBigInt)
+//  protected lazy val array2setBigDecimal: (Row, Int) => AnyRef = (row: Row, n: Int) => sqlArray2set(row, n, valueBigDecimal)
+//  protected lazy val array2setDate      : (Row, Int) => AnyRef = (row: Row, n: Int) => sqlArray2set(row, n, valueDate)
+//  protected lazy val array2setUUID      : (Row, Int) => AnyRef = (row: Row, n: Int) => sqlArray2set(row, n, valueUUID)
+//  protected lazy val array2setURI       : (Row, Int) => AnyRef = (row: Row, n: Int) => sqlArray2set(row, n, valueURI)
+//  protected lazy val array2setByte      : (Row, Int) => AnyRef = (row: Row, n: Int) => sqlArray2set(row, n, valueByte)
+//  protected lazy val array2setShort     : (Row, Int) => AnyRef = (row: Row, n: Int) => sqlArray2set(row, n, valueShort)
+//  protected lazy val array2setChar      : (Row, Int) => AnyRef = (row: Row, n: Int) => sqlArray2set(row, n, valueChar)
 
 
   case class ResOneOpt[T](
