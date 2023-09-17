@@ -119,6 +119,29 @@ object PostgresConnection {
       |  ii INTEGER ARRAY,
       |  ss TEXT ARRAY
       |);
+      |
+      |CREATE OR REPLACE FUNCTION _final_median(numeric[])
+      |   RETURNS numeric AS
+      |$$
+      |   SELECT AVG(val)
+      |   FROM (
+      |     SELECT val
+      |     FROM unnest($1) val
+      |     ORDER BY 1
+      |     LIMIT  2 - MOD(array_upper($1, 1), 2)
+      |     OFFSET CEIL(array_upper($1, 1) / 2.0) - 1
+      |   ) sub;
+      |$$
+      |LANGUAGE 'sql' IMMUTABLE;
+      |
+      |CREATE AGGREGATE median(numeric) (
+      |  SFUNC=array_append,
+      |  STYPE=numeric[],
+      |  FINALFUNC=_final_median,
+      |  INITCOND='{}'
+      |);
+      |
+      |
       |""".stripMargin
 //      println(sqlSchema_postgres1)
 
@@ -128,10 +151,10 @@ object PostgresConnection {
        |${schema.sqlSchema_postgres}
        |""".stripMargin
 
-//    s"""DROP SCHEMA IF EXISTS public CASCADE;
-//       |CREATE SCHEMA public;
-//       |$sqlSchema_postgres1
-//       |""".stripMargin
+    s"""DROP SCHEMA IF EXISTS public CASCADE;
+       |CREATE SCHEMA public;
+       |$sqlSchema_postgres1
+       |""".stripMargin
   }
 
   def proxy(schema: Schema) = JdbcProxy(

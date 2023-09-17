@@ -1,6 +1,7 @@
 // GENERATED CODE ********************************
 package molecule.coreTests.test.aggr.set.any
 
+import java.net.URI
 import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
@@ -28,7 +29,7 @@ trait AggrSet_URI_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(uri2, uri3, uri4)), // 3 rows coalesced
         ))
 
-        // Use `distinct` keyword to retrieve unique Sets of values
+        // Use `distinct` keyword to retrieve unique Sets of Sets
         _ <- Ns.i.a1.uris(distinct).query.get.map(_ ==> List(
           (1, Set(Set(uri1, uri2))),
           (2, Set(
@@ -61,17 +62,17 @@ trait AggrSet_URI_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.uris(min(1)).query.get.map(_ ==> List(Set(uri1)))
         _ <- Ns.uris(min(2)).query.get.map(_ ==> List(Set(uri1, uri2)))
 
-        _ <- Ns.i.uris(min).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.uris(min).query.get.map(_ ==> List(
           (1, Set(uri1)),
           (2, Set(uri2)),
         ))
         // Same as
-        _ <- Ns.i.uris(min(1)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.uris(min(1)).query.get.map(_ ==> List(
           (1, Set(uri1)),
           (2, Set(uri2)),
         ))
 
-        _ <- Ns.i.uris(min(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.uris(min(2)).query.get.map(_ ==> List(
           (1, Set(uri1, uri2)),
           (2, Set(uri2, uri3)),
         ))
@@ -92,17 +93,17 @@ trait AggrSet_URI_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.uris(max(1)).query.get.map(_ ==> List(Set(uri4)))
         _ <- Ns.uris(max(2)).query.get.map(_ ==> List(Set(uri3, uri4)))
 
-        _ <- Ns.i.uris(max).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.uris(max).query.get.map(_ ==> List(
           (1, Set(uri2)),
           (2, Set(uri4)),
         ))
         // Same as
-        _ <- Ns.i.uris(max(1)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.uris(max(1)).query.get.map(_ ==> List(
           (1, Set(uri2)),
           (2, Set(uri4)),
         ))
 
-        _ <- Ns.i.uris(max(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.uris(max(2)).query.get.map(_ ==> List(
           (1, Set(uri1, uri2)),
           (2, Set(uri3, uri4)),
         ))

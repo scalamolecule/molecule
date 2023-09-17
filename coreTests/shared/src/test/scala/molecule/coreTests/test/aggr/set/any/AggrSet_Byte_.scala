@@ -28,7 +28,7 @@ trait AggrSet_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(byte2, byte3, byte4)), // 3 rows coalesced
         ))
 
-        // Use `distinct` keyword to retrieve unique Sets of values
+        // Use `distinct` keyword to retrieve unique Sets of Sets
         _ <- Ns.i.a1.bytes(distinct).query.get.map(_ ==> List(
           (1, Set(Set(byte1, byte2))),
           (2, Set(
@@ -61,17 +61,17 @@ trait AggrSet_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.bytes(min(1)).query.get.map(_ ==> List(Set(byte1)))
         _ <- Ns.bytes(min(2)).query.get.map(_ ==> List(Set(byte1, byte2)))
 
-        _ <- Ns.i.bytes(min).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.bytes(min).query.get.map(_ ==> List(
           (1, Set(byte1)),
           (2, Set(byte2)),
         ))
         // Same as
-        _ <- Ns.i.bytes(min(1)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.bytes(min(1)).query.get.map(_ ==> List(
           (1, Set(byte1)),
           (2, Set(byte2)),
         ))
 
-        _ <- Ns.i.bytes(min(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.bytes(min(2)).query.get.map(_ ==> List(
           (1, Set(byte1, byte2)),
           (2, Set(byte2, byte3)),
         ))
@@ -92,17 +92,17 @@ trait AggrSet_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.bytes(max(1)).query.get.map(_ ==> List(Set(byte4)))
         _ <- Ns.bytes(max(2)).query.get.map(_ ==> List(Set(byte3, byte4)))
 
-        _ <- Ns.i.bytes(max).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.bytes(max).query.get.map(_ ==> List(
           (1, Set(byte2)),
           (2, Set(byte4)),
         ))
         // Same as
-        _ <- Ns.i.bytes(max(1)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.bytes(max(1)).query.get.map(_ ==> List(
           (1, Set(byte2)),
           (2, Set(byte4)),
         ))
 
-        _ <- Ns.i.bytes(max(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.bytes(max(2)).query.get.map(_ ==> List(
           (1, Set(byte1, byte2)),
           (2, Set(byte3, byte4)),
         ))

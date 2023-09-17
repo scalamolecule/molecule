@@ -59,17 +59,17 @@ trait AggrOne_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.int(max(1)).query.get.map(_ ==> List(Set(int6)))
         _ <- Ns.int(max(2)).query.get.map(_ ==> List(Set(int5, int6)))
 
-        _ <- Ns.i.int(min(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.int(min(2)).query.get.map(_ ==> List(
           (1, Set(int1, int2)),
           (2, Set(int4, int5))
         ))
 
-        _ <- Ns.i.int(max(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.int(max(2)).query.get.map(_ ==> List(
           (1, Set(int2, int3)),
           (2, Set(int5, int6))
         ))
 
-        _ <- Ns.i.int(min(2)).int(max(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.int(min(2)).int(max(2)).query.get.map(_ ==> List(
           (1, Set(int1, int2), Set(int2, int3)),
           (2, Set(int4, int5), Set(int5, int6))
         ))

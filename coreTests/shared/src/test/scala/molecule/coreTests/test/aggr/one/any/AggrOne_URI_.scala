@@ -1,6 +1,7 @@
 // GENERATED CODE ********************************
 package molecule.coreTests.test.aggr.one.any
 
+import java.net.URI
 import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
@@ -60,17 +61,17 @@ trait AggrOne_URI_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.uri(max(1)).query.get.map(_ ==> List(Set(uri6)))
         _ <- Ns.uri(max(2)).query.get.map(_ ==> List(Set(uri5, uri6)))
 
-        _ <- Ns.i.uri(min(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.uri(min(2)).query.get.map(_ ==> List(
           (1, Set(uri1, uri2)),
           (2, Set(uri4, uri5))
         ))
 
-        _ <- Ns.i.uri(max(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.uri(max(2)).query.get.map(_ ==> List(
           (1, Set(uri2, uri3)),
           (2, Set(uri5, uri6))
         ))
 
-        _ <- Ns.i.uri(min(2)).uri(max(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.uri(min(2)).uri(max(2)).query.get.map(_ ==> List(
           (1, Set(uri1, uri2), Set(uri2, uri3)),
           (2, Set(uri4, uri5), Set(uri5, uri6))
         ))

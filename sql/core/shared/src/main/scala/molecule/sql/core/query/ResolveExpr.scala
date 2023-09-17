@@ -17,5 +17,4 @@ trait ResolveExpr  {
   protected def resolveRefAttrSetMan(attr: AttrSetMan): Unit
   protected def resolveRefAttrSetTac(attr: AttrSetTac): Unit
   protected def resolveRefAttrSetOpt(attr: AttrSetOpt): Unit
-
 }

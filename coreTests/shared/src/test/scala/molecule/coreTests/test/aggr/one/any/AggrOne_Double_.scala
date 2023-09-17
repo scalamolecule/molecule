@@ -60,17 +60,17 @@ trait AggrOne_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.double(max(1)).query.get.map(_ ==> List(Set(double6)))
         _ <- Ns.double(max(2)).query.get.map(_ ==> List(Set(double5, double6)))
 
-        _ <- Ns.i.double(min(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.double(min(2)).query.get.map(_ ==> List(
           (1, Set(double1, double2)),
           (2, Set(double4, double5))
         ))
 
-        _ <- Ns.i.double(max(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.double(max(2)).query.get.map(_ ==> List(
           (1, Set(double2, double3)),
           (2, Set(double5, double6))
         ))
 
-        _ <- Ns.i.double(min(2)).double(max(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.double(min(2)).double(max(2)).query.get.map(_ ==> List(
           (1, Set(double1, double2), Set(double2, double3)),
           (2, Set(double4, double5), Set(double5, double6))
         ))

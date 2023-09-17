@@ -30,8 +30,8 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
     validateQueryModel(elements)
     //    elements.foreach(println)
 
-    from = getInitialNonGenericNs(elements)
-    exts += from -> None
+    from = List(getInitialNonGenericNs(elements))
+    exts += from.head -> None
 
     val elements1 = prepareElements(elements)
 
@@ -46,6 +46,7 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
   ): String = {
     val distinct_ = if (distinct) " DISTINCT" else ""
     val select_   = (nestedIds ++ select).mkString(s",\n  ")
+    val from_   = from.mkString(s",\n  ")
 
     val joins_ = if (joins.isEmpty) "" else {
       val max1  = joins.map(_._1.length).max
@@ -114,11 +115,12 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
 
     s"""SELECT$distinct_
        |  $select_
-       |FROM $from$joins_$where_$groupBy_$having_$orderBy_$limit_$offset_;""".stripMargin
+       |FROM $from_$joins_$where_$groupBy_$having_$orderBy_$limit_$offset_;""".stripMargin
   }
 
 
   final def getTotalCountQuery: String = {
+    val table = from.head
     val joins_ = if (joins.isEmpty) "" else {
       val max1  = joins.map(_._1.length).max
       val max2  = joins.map(_._2.length).max
@@ -145,14 +147,15 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
     }
     val having_  = if (having.isEmpty) "" else having.mkString("\nHAVING ", ", ", "")
 
-    s"""SELECT COUNT($from.id)
-       |FROM $from$joins_$where_$having_;""".stripMargin
+
+    s"""SELECT COUNT($table.id)
+       |FROM $table$joins_$where_$having_;""".stripMargin
   }
 
 
   private[molecule] def getWhereClauses: ListBuffer[(String, String)] = {
-    from = getInitialNonGenericNs(elements0)
-    exts += from -> None
+    from = List(getInitialNonGenericNs(elements0))
+    exts += from.head -> None
     resolve(elements0)
     where
   }

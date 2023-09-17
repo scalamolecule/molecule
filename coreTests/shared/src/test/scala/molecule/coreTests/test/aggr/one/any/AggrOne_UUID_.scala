@@ -1,6 +1,7 @@
 // GENERATED CODE ********************************
 package molecule.coreTests.test.aggr.one.any
 
+import java.util.UUID
 import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
@@ -60,17 +61,17 @@ trait AggrOne_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.uuid(max(1)).query.get.map(_ ==> List(Set(uuid6)))
         _ <- Ns.uuid(max(2)).query.get.map(_ ==> List(Set(uuid5, uuid6)))
 
-        _ <- Ns.i.uuid(min(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.uuid(min(2)).query.get.map(_ ==> List(
           (1, Set(uuid1, uuid2)),
           (2, Set(uuid4, uuid5))
         ))
 
-        _ <- Ns.i.uuid(max(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.uuid(max(2)).query.get.map(_ ==> List(
           (1, Set(uuid2, uuid3)),
           (2, Set(uuid5, uuid6))
         ))
 
-        _ <- Ns.i.uuid(min(2)).uuid(max(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.uuid(min(2)).uuid(max(2)).query.get.map(_ ==> List(
           (1, Set(uuid1, uuid2), Set(uuid2, uuid3)),
           (2, Set(uuid4, uuid5), Set(uuid5, uuid6))
         ))

@@ -305,34 +305,34 @@ trait ResolveExprOne[Tpl]
         find += s"(distinct $v)"
         replaceCast(res.set2set)
 
-      case "mins" =>
-        find += s"(min $n $v)"
-        replaceCast(res.vector2set)
-
       case "min" =>
         find += s"(min $v)"
 
-      case "maxs" =>
-        find += s"(max $n $v)"
+      case "mins" =>
+        find += s"(min $n $v)"
         replaceCast(res.vector2set)
 
       case "max" =>
         find += s"(max $v)"
 
-      case "rands" =>
-        find += s"(rand $n $v)"
+      case "maxs" =>
+        find += s"(max $n $v)"
         replaceCast(res.vector2set)
 
       case "rand" =>
         find += s"(rand $v)"
 
-      case "samples" =>
-        find += s"(sample $n $v)"
+      case "rands" =>
+        find += s"(rand $n $v)"
         replaceCast(res.vector2set)
 
       case "sample" =>
         find += s"(sample 1 $v)"
         replaceCast(res.seq2t)
+
+      case "samples" =>
+        find += s"(sample $n $v)"
+        replaceCast(res.vector2set)
 
       case "count" =>
         find += s"(count $v)"

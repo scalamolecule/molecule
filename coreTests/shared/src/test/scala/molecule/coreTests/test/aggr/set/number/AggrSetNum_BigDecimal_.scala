@@ -47,7 +47,7 @@ trait AggrSetNum_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
         _ <- Ns.bigDecimals.query.get.map(_ ==> List(Set(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4)))
         _ <- Ns.bigDecimals(median).query.get.map(_.head ==~ (bigDecimal2 + bigDecimal3).toDouble / 2.0)
 
-        _ <- Ns.i.bigDecimals.query.get.map(_ ==> List(
+        _ <- Ns.i.a1.bigDecimals.query.get.map(_ ==> List(
           (1, Set(bigDecimal1, bigDecimal2)),
           (2, Set(bigDecimal2, bigDecimal3, bigDecimal4)),
         ))
@@ -72,7 +72,7 @@ trait AggrSetNum_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
         _ <- Ns.bigDecimals.query.get.map(_ ==> List(Set(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4)))
         _ <- Ns.bigDecimals(avg).query.get.map(_.head ==~ (bigDecimal1 + bigDecimal2 + bigDecimal3 + bigDecimal4).toDouble / 4.0)
 
-        _ <- Ns.i.bigDecimals.query.get.map(_ ==> List(
+        _ <- Ns.i.a1.bigDecimals.query.get.map(_ ==> List(
           (1, Set(bigDecimal1, bigDecimal2)),
           (2, Set(bigDecimal2, bigDecimal3, bigDecimal4)),
         ))
@@ -97,7 +97,7 @@ trait AggrSetNum_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
         _ <- Ns.bigDecimals.query.get.map(_ ==> List(Set(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4)))
         _ <- Ns.bigDecimals(variance).query.get.map(_.head ==~ varianceOf(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4))
 
-        _ <- Ns.i.bigDecimals.query.get.map(_ ==> List(
+        _ <- Ns.i.a1.bigDecimals.query.get.map(_ ==> List(
           (1, Set(bigDecimal1, bigDecimal2)),
           (2, Set(bigDecimal2, bigDecimal3, bigDecimal4)),
         ))
@@ -122,7 +122,7 @@ trait AggrSetNum_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
         _ <- Ns.bigDecimals.query.get.map(_ ==> List(Set(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4)))
         _ <- Ns.bigDecimals(stddev).query.get.map(_.head ==~ stdDevOf(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4))
 
-        _ <- Ns.i.bigDecimals.query.get.map(_ ==> List(
+        _ <- Ns.i.a1.bigDecimals.query.get.map(_ ==> List(
           (1, Set(bigDecimal1, bigDecimal2)),
           (2, Set(bigDecimal2, bigDecimal3, bigDecimal4)),
         ))

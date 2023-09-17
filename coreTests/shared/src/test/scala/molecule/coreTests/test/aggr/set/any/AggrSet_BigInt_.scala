@@ -28,7 +28,7 @@ trait AggrSet_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(bigInt2, bigInt3, bigInt4)), // 3 rows coalesced
         ))
 
-        // Use `distinct` keyword to retrieve unique Sets of values
+        // Use `distinct` keyword to retrieve unique Sets of Sets
         _ <- Ns.i.a1.bigInts(distinct).query.get.map(_ ==> List(
           (1, Set(Set(bigInt1, bigInt2))),
           (2, Set(
@@ -61,17 +61,17 @@ trait AggrSet_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.bigInts(min(1)).query.get.map(_ ==> List(Set(bigInt1)))
         _ <- Ns.bigInts(min(2)).query.get.map(_ ==> List(Set(bigInt1, bigInt2)))
 
-        _ <- Ns.i.bigInts(min).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.bigInts(min).query.get.map(_ ==> List(
           (1, Set(bigInt1)),
           (2, Set(bigInt2)),
         ))
         // Same as
-        _ <- Ns.i.bigInts(min(1)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.bigInts(min(1)).query.get.map(_ ==> List(
           (1, Set(bigInt1)),
           (2, Set(bigInt2)),
         ))
 
-        _ <- Ns.i.bigInts(min(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.bigInts(min(2)).query.get.map(_ ==> List(
           (1, Set(bigInt1, bigInt2)),
           (2, Set(bigInt2, bigInt3)),
         ))
@@ -92,17 +92,17 @@ trait AggrSet_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.bigInts(max(1)).query.get.map(_ ==> List(Set(bigInt4)))
         _ <- Ns.bigInts(max(2)).query.get.map(_ ==> List(Set(bigInt3, bigInt4)))
 
-        _ <- Ns.i.bigInts(max).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.bigInts(max).query.get.map(_ ==> List(
           (1, Set(bigInt2)),
           (2, Set(bigInt4)),
         ))
         // Same as
-        _ <- Ns.i.bigInts(max(1)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.bigInts(max(1)).query.get.map(_ ==> List(
           (1, Set(bigInt2)),
           (2, Set(bigInt4)),
         ))
 
-        _ <- Ns.i.bigInts(max(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.bigInts(max(2)).query.get.map(_ ==> List(
           (1, Set(bigInt1, bigInt2)),
           (2, Set(bigInt3, bigInt4)),
         ))

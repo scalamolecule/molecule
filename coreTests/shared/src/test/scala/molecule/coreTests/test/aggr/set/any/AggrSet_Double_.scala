@@ -28,7 +28,7 @@ trait AggrSet_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(double2, double3, double4)), // 3 rows coalesced
         ))
 
-        // Use `distinct` keyword to retrieve unique Sets of values
+        // Use `distinct` keyword to retrieve unique Sets of Sets
         _ <- Ns.i.a1.doubles(distinct).query.get.map(_ ==> List(
           (1, Set(Set(double1, double2))),
           (2, Set(
@@ -61,17 +61,17 @@ trait AggrSet_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.doubles(min(1)).query.get.map(_ ==> List(Set(double1)))
         _ <- Ns.doubles(min(2)).query.get.map(_ ==> List(Set(double1, double2)))
 
-        _ <- Ns.i.doubles(min).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.doubles(min).query.get.map(_ ==> List(
           (1, Set(double1)),
           (2, Set(double2)),
         ))
         // Same as
-        _ <- Ns.i.doubles(min(1)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.doubles(min(1)).query.get.map(_ ==> List(
           (1, Set(double1)),
           (2, Set(double2)),
         ))
 
-        _ <- Ns.i.doubles(min(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.doubles(min(2)).query.get.map(_ ==> List(
           (1, Set(double1, double2)),
           (2, Set(double2, double3)),
         ))
@@ -92,17 +92,17 @@ trait AggrSet_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.doubles(max(1)).query.get.map(_ ==> List(Set(double4)))
         _ <- Ns.doubles(max(2)).query.get.map(_ ==> List(Set(double3, double4)))
 
-        _ <- Ns.i.doubles(max).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.doubles(max).query.get.map(_ ==> List(
           (1, Set(double2)),
           (2, Set(double4)),
         ))
         // Same as
-        _ <- Ns.i.doubles(max(1)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.doubles(max(1)).query.get.map(_ ==> List(
           (1, Set(double2)),
           (2, Set(double4)),
         ))
 
-        _ <- Ns.i.doubles(max(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.doubles(max(2)).query.get.map(_ ==> List(
           (1, Set(double1, double2)),
           (2, Set(double3, double4)),
         ))

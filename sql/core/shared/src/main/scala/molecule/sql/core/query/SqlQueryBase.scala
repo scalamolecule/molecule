@@ -27,7 +27,7 @@ trait SqlQueryBase extends BaseHelpers with JavaConversions {
   // Main query
   final protected val select      = new ListBuffer[String]
   final protected var distinct    = true
-  final protected var from        = ""
+  final protected var from        = List.empty[String]
   final protected val joins       = new ListBuffer[(String, String, String, String)]
   final protected val notNull     = new ListBuffer[String]
   final protected val where       = new ListBuffer[(String, String)]

@@ -60,17 +60,17 @@ trait AggrOne_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.float(max(1)).query.get.map(_ ==> List(Set(float6)))
         _ <- Ns.float(max(2)).query.get.map(_ ==> List(Set(float5, float6)))
 
-        _ <- Ns.i.float(min(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.float(min(2)).query.get.map(_ ==> List(
           (1, Set(float1, float2)),
           (2, Set(float4, float5))
         ))
 
-        _ <- Ns.i.float(max(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.float(max(2)).query.get.map(_ ==> List(
           (1, Set(float2, float3)),
           (2, Set(float5, float6))
         ))
 
-        _ <- Ns.i.float(min(2)).float(max(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.float(min(2)).float(max(2)).query.get.map(_ ==> List(
           (1, Set(float1, float2), Set(float2, float3)),
           (2, Set(float4, float5), Set(float5, float6))
         ))

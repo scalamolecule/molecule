@@ -60,17 +60,17 @@ trait AggrOne_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.bigDecimal(max(1)).query.get.map(_ ==> List(Set(bigDecimal6)))
         _ <- Ns.bigDecimal(max(2)).query.get.map(_ ==> List(Set(bigDecimal5, bigDecimal6)))
 
-        _ <- Ns.i.bigDecimal(min(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.bigDecimal(min(2)).query.get.map(_ ==> List(
           (1, Set(bigDecimal1, bigDecimal2)),
           (2, Set(bigDecimal4, bigDecimal5))
         ))
 
-        _ <- Ns.i.bigDecimal(max(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.bigDecimal(max(2)).query.get.map(_ ==> List(
           (1, Set(bigDecimal2, bigDecimal3)),
           (2, Set(bigDecimal5, bigDecimal6))
         ))
 
-        _ <- Ns.i.bigDecimal(min(2)).bigDecimal(max(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.bigDecimal(min(2)).bigDecimal(max(2)).query.get.map(_ ==> List(
           (1, Set(bigDecimal1, bigDecimal2), Set(bigDecimal2, bigDecimal3)),
           (2, Set(bigDecimal4, bigDecimal5), Set(bigDecimal5, bigDecimal6))
         ))

@@ -47,7 +47,7 @@ trait AggrSetNum_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.longs.query.get.map(_ ==> List(Set(long1, long2, long3, long4)))
         _ <- Ns.longs(median).query.get.map(_.head ==~ (long2 + long3).toDouble / 2.0)
 
-        _ <- Ns.i.longs.query.get.map(_ ==> List(
+        _ <- Ns.i.a1.longs.query.get.map(_ ==> List(
           (1, Set(long1, long2)),
           (2, Set(long2, long3, long4)),
         ))
@@ -72,7 +72,7 @@ trait AggrSetNum_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.longs.query.get.map(_ ==> List(Set(long1, long2, long3, long4)))
         _ <- Ns.longs(avg).query.get.map(_.head ==~ (long1 + long2 + long3 + long4).toDouble / 4.0)
 
-        _ <- Ns.i.longs.query.get.map(_ ==> List(
+        _ <- Ns.i.a1.longs.query.get.map(_ ==> List(
           (1, Set(long1, long2)),
           (2, Set(long2, long3, long4)),
         ))
@@ -97,7 +97,7 @@ trait AggrSetNum_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.longs.query.get.map(_ ==> List(Set(long1, long2, long3, long4)))
         _ <- Ns.longs(variance).query.get.map(_.head ==~ varianceOf(long1, long2, long3, long4))
 
-        _ <- Ns.i.longs.query.get.map(_ ==> List(
+        _ <- Ns.i.a1.longs.query.get.map(_ ==> List(
           (1, Set(long1, long2)),
           (2, Set(long2, long3, long4)),
         ))
@@ -122,7 +122,7 @@ trait AggrSetNum_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.longs.query.get.map(_ ==> List(Set(long1, long2, long3, long4)))
         _ <- Ns.longs(stddev).query.get.map(_.head ==~ stdDevOf(long1, long2, long3, long4))
 
-        _ <- Ns.i.longs.query.get.map(_ ==> List(
+        _ <- Ns.i.a1.longs.query.get.map(_ ==> List(
           (1, Set(long1, long2)),
           (2, Set(long2, long3, long4)),
         ))

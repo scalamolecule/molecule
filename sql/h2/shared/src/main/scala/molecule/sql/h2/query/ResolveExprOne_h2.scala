@@ -257,6 +257,13 @@ trait ResolveExprOne_h2[Tpl] extends ResolveExpr with LambdasOne_h2 { self: SqlQ
         aggregate = true
         replaceCast(res.array2set)
 
+      case "min" =>
+        select += s"MIN($col)"
+        if (col.endsWith(".id")) {
+          groupByCols -= col
+          aggregate = true
+        }
+
       case "mins" =>
         select +=
           s"""ARRAY_SLICE(
@@ -271,8 +278,8 @@ trait ResolveExprOne_h2[Tpl] extends ResolveExpr with LambdasOne_h2 { self: SqlQ
         aggregate = true
         replaceCast(res.array2set)
 
-      case "min" =>
-        select += s"MIN($col)"
+      case "max" =>
+        select += s"MAX($col)"
         if (col.endsWith(".id")) {
           groupByCols -= col
           aggregate = true
@@ -292,12 +299,11 @@ trait ResolveExprOne_h2[Tpl] extends ResolveExpr with LambdasOne_h2 { self: SqlQ
         aggregate = true
         replaceCast(res.array2set)
 
-      case "max" =>
-        select += s"MAX($col)"
-        if (col.endsWith(".id")) {
-          groupByCols -= col
-          aggregate = true
-        }
+      case "rand" =>
+        distinct = false
+        select += col
+        orderBy += ((level, -1, "RAND()", ""))
+        hardLimit = 1
 
       case "rands" =>
         select +=
@@ -313,7 +319,7 @@ trait ResolveExprOne_h2[Tpl] extends ResolveExpr with LambdasOne_h2 { self: SqlQ
         aggregate = true
         replaceCast(res.array2set)
 
-      case "rand" =>
+      case "sample" =>
         distinct = false
         select += col
         orderBy += ((level, -1, "RAND()", ""))
@@ -332,12 +338,6 @@ trait ResolveExprOne_h2[Tpl] extends ResolveExpr with LambdasOne_h2 { self: SqlQ
         groupByCols -= col
         aggregate = true
         replaceCast(res.array2set)
-
-      case "sample" =>
-        distinct = false
-        select += col
-        orderBy += ((level, -1, "RAND()", ""))
-        hardLimit = 1
 
       case "count" =>
         distinct = false

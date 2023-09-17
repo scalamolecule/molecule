@@ -60,17 +60,17 @@ trait AggrOne_String_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.string(max(1)).query.get.map(_ ==> List(Set(string6)))
         _ <- Ns.string(max(2)).query.get.map(_ ==> List(Set(string5, string6)))
 
-        _ <- Ns.i.string(min(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.string(min(2)).query.get.map(_ ==> List(
           (1, Set(string1, string2)),
           (2, Set(string4, string5))
         ))
 
-        _ <- Ns.i.string(max(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.string(max(2)).query.get.map(_ ==> List(
           (1, Set(string2, string3)),
           (2, Set(string5, string6))
         ))
 
-        _ <- Ns.i.string(min(2)).string(max(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.string(min(2)).string(max(2)).query.get.map(_ ==> List(
           (1, Set(string1, string2), Set(string2, string3)),
           (2, Set(string4, string5), Set(string5, string6))
         ))

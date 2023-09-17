@@ -175,12 +175,23 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
     }
   }
 
+
+  protected def noBooleanSetAggr[T](res: ResSet[T]): Unit = {
+    if (res.tpe == "Boolean")
+      throw ModelError("Aggregate functions not implemented for Sets of boolean values.")
+  }
+  protected def noBooleanSetCounts(n: Int): Unit = {
+    if (n == -1)
+      throw ModelError("Aggregate functions not implemented for Sets of boolean values.")
+  }
+
   private def aggr[T](e: Var, a: Att, v: Var, fn: String, optN: Option[Int], res: ResSet[T]): Unit = {
     lazy val n = optN.getOrElse(0)
     // Replace find/casting with aggregate function/cast
     find -= s"(distinct $v)"
     fn match {
       case "distinct" =>
+        noBooleanSetAggr(res)
         val (v1, v2, e1) = (v + 1, v + 2, e + 1)
         find += s"(distinct $v2)"
         where += s"[$e $a $v]" -> wClause
@@ -191,44 +202,54 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
              |            :where [$e1 $a $v1]]" $$ $e) [[$v2]]]""".stripMargin -> wClause
         replaceCast(res.set2sets)
 
-      case "mins" =>
-        find += s"(min $n $v)"
-        replaceCast(res.vector2set)
-
       case "min" =>
+        noBooleanSetAggr(res)
         find += s"(min 1 $v)"
         replaceCast(res.vector2set)
 
-      case "maxs" =>
-        find += s"(max $n $v)"
+      case "mins" =>
+        noBooleanSetAggr(res)
+        find += s"(min $n $v)"
         replaceCast(res.vector2set)
 
       case "max" =>
+        noBooleanSetAggr(res)
         find += s"(max 1 $v)"
         replaceCast(res.vector2set)
 
-      case "rands" =>
-        find += s"(rand $n $v)"
+      case "maxs" =>
+        noBooleanSetAggr(res)
+        find += s"(max $n $v)"
         replaceCast(res.vector2set)
 
       case "rand" =>
+        noBooleanSetAggr(res)
         find += s"(rand 1 $v)"
         replaceCast(res.vector2set)
 
-      case "samples" =>
-        find += s"(sample $n $v)"
+      case "rands" =>
+        noBooleanSetAggr(res)
+        find += s"(rand $n $v)"
         replaceCast(res.vector2set)
 
       case "sample" =>
+        noBooleanSetAggr(res)
         find += s"(sample 1 $v)"
         replaceCast(res.vector2set)
 
+      case "samples" =>
+        noBooleanSetAggr(res)
+        find += s"(sample $n $v)"
+        replaceCast(res.vector2set)
+
       case "count" =>
+        noBooleanSetCounts(n)
         find += s"(count $v)"
         widh += e
         replaceCast(toInt)
 
       case "countDistinct" =>
+        noBooleanSetCounts(n)
         find += s"(count-distinct $v)"
         widh += e
         replaceCast(toInt)

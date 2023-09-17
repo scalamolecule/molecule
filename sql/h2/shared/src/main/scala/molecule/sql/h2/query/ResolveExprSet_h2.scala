@@ -103,7 +103,12 @@ trait ResolveExprSet_h2[Tpl] extends ResolveExpr with LambdasSet_h2 with AggrUti
   }
 
 
-  protected def setOpt[T: ClassTag](attr: Attr, optSets: Option[Seq[Set[T]]], resOpt: ResSetOpt[T], res: ResSet[T]): Unit = {
+  protected def setOpt[T: ClassTag](
+    attr: Attr,
+    optSets: Option[Seq[Set[T]]],
+    resOpt: ResSetOpt[T],
+    res: ResSet[T]
+  ): Unit = {
     val col = getCol(attr: Attr)
     select += col
     addCast(resOpt.sql2setOpt)
@@ -140,7 +145,6 @@ trait ResolveExprSet_h2[Tpl] extends ResolveExpr with LambdasSet_h2 with AggrUti
     }
   }
 
-
   protected def setAttr[T](col: String, res: ResSet[T]): Unit = {
     select -= col
     select += s"ARRAY_AGG($col)"
@@ -149,41 +153,64 @@ trait ResolveExprSet_h2[Tpl] extends ResolveExpr with LambdasSet_h2 with AggrUti
     replaceCast(res.nestedArray2coalescedSet)
   }
 
+  protected def noBooleanSetAggr[T](res: ResSet[T]): Unit = {
+    if (res.tpe == "Boolean")
+      throw ModelError("Aggregate functions not implemented for Sets of boolean values.")
+  }
+  protected def noBooleanSetCounts(n: Int): Unit = {
+    if (n == -1)
+      throw ModelError("Aggregate functions not implemented for Sets of boolean values.")
+  }
+
   protected def setAggr[T](col: String, fn: String, optN: Option[Int], res: ResSet[T]): Unit = {
     select -= col
     lazy val n = optN.getOrElse(0)
     fn match {
       case "distinct" =>
+        noBooleanSetAggr(res)
         select += s"ARRAY_AGG(DISTINCT $col)"
         groupByCols -= col
         aggregate = true
         replaceCast(res.nestedArray2nestedSet)
 
-      case "mins" =>
-        select += s"ARRAY_AGG(DISTINCT $col)"
-        groupByCols -= col
-        aggregate = true
-        replaceCast(res.nestedArray2setAsc(n))
-
       case "min" =>
+        noBooleanSetAggr(res)
         select += s"MIN($col)"
         groupByCols -= col
         aggregate = true
         replaceCast(res.array2setFirst)
 
-      case "maxs" =>
+      case "mins" =>
+        noBooleanSetAggr(res)
         select += s"ARRAY_AGG(DISTINCT $col)"
         groupByCols -= col
         aggregate = true
-        replaceCast(res.nestedArray2setDesc(n))
+        replaceCast(res.nestedArray2setAsc(n))
 
       case "max" =>
+        noBooleanSetAggr(res)
         select += s"MAX($col)"
         groupByCols -= col
         aggregate = true
         replaceCast(res.array2setLast)
 
+      case "maxs" =>
+        noBooleanSetAggr(res)
+        select += s"ARRAY_AGG(DISTINCT $col)"
+        groupByCols -= col
+        aggregate = true
+        replaceCast(res.nestedArray2setDesc(n))
+
+      case "rand" =>
+        noBooleanSetAggr(res)
+        distinct = false
+        select += col
+        orderBy += ((level, -1, "RAND()", ""))
+        hardLimit = 1
+        replaceCast(res.nestedArray2coalescedSet)
+
       case "rands" =>
+        noBooleanSetAggr(res)
         select +=
           s"""ARRAY_SLICE(
              |    ARRAY_AGG($col order by RAND()),
@@ -197,15 +224,16 @@ trait ResolveExprSet_h2[Tpl] extends ResolveExpr with LambdasSet_h2 with AggrUti
         aggregate = true
         replaceCast(res.nestedArray2coalescedSet)
 
-      case "rand" =>
+      case "sample" =>
+        noBooleanSetAggr(res)
         distinct = false
         select += col
         orderBy += ((level, -1, "RAND()", ""))
         hardLimit = 1
         replaceCast(res.nestedArray2coalescedSet)
 
-
       case "samples" =>
+        noBooleanSetAggr(res)
         select +=
           s"""ARRAY_SLICE(
              |    ARRAY_AGG(DISTINCT $col order by RAND()),
@@ -219,14 +247,8 @@ trait ResolveExprSet_h2[Tpl] extends ResolveExpr with LambdasSet_h2 with AggrUti
         aggregate = true
         replaceCast(res.nestedArray2coalescedSet)
 
-      case "sample" =>
-        distinct = false
-        select += col
-        orderBy += ((level, -1, "RAND()", ""))
-        hardLimit = 1
-        replaceCast(res.nestedArray2coalescedSet)
-
       case "count" =>
+        noBooleanSetCounts(n)
         // Count of all (non-unique) values
         select += s"ARRAY_AGG($col)"
         groupByCols -= col
@@ -243,6 +265,7 @@ trait ResolveExprSet_h2[Tpl] extends ResolveExpr with LambdasSet_h2 with AggrUti
         )
 
       case "countDistinct" =>
+        noBooleanSetCounts(n)
         // Count of unique values (Set semantics)
         select += s"ARRAY_AGG($col)"
         groupByCols -= col

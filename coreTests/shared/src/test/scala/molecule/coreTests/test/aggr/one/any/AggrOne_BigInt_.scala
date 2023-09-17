@@ -60,17 +60,17 @@ trait AggrOne_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.bigInt(max(1)).query.get.map(_ ==> List(Set(bigInt6)))
         _ <- Ns.bigInt(max(2)).query.get.map(_ ==> List(Set(bigInt5, bigInt6)))
 
-        _ <- Ns.i.bigInt(min(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.bigInt(min(2)).query.get.map(_ ==> List(
           (1, Set(bigInt1, bigInt2)),
           (2, Set(bigInt4, bigInt5))
         ))
 
-        _ <- Ns.i.bigInt(max(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.bigInt(max(2)).query.get.map(_ ==> List(
           (1, Set(bigInt2, bigInt3)),
           (2, Set(bigInt5, bigInt6))
         ))
 
-        _ <- Ns.i.bigInt(min(2)).bigInt(max(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.bigInt(min(2)).bigInt(max(2)).query.get.map(_ ==> List(
           (1, Set(bigInt1, bigInt2), Set(bigInt2, bigInt3)),
           (2, Set(bigInt4, bigInt5), Set(bigInt5, bigInt6))
         ))

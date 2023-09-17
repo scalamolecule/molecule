@@ -85,13 +85,13 @@ trait AggrOne_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (y, "b"), // "b" was first asserted with entity id y
         ))
 
-        _ <- Ns.id(min(1)).s.query.get.map(_ ==> List(
+        _ <- Ns.id(min(1)).s.a1.query.get.map(_ ==> List(
           (Set(x), "a"),
           (Set(y), "b"),
         ))
 
         // "The two first entity ids of each value s"
-        _ <- Ns.id(min(2)).s.query.get.map(_ ==> List(
+        _ <- Ns.id(min(2)).s.a1.query.get.map(_ ==> List(
           (Set(x), "a"),
           (Set(y, z), "b"),
         ))

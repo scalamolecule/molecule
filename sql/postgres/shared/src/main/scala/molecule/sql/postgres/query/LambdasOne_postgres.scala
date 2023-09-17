@@ -27,7 +27,7 @@ trait LambdasOne_postgres extends LambdasOne_h2 { self: SqlQueryBase =>
 //    one2sql: T => String,
 //    array2set: (Row, Int) => AnyRef
 //  )
-  override protected lazy val resString1    : ResOne[String]     = ResOne("String", sql2oneString, sql2oneStringOrNull, one2sqlString, array2setString)
+//  override protected lazy val resString1    : ResOne[String]     = ResOne("String", sql2oneString, sql2oneStringOrNull, one2sqlString, array2setString)
 //  protected lazy val resInt1       : ResOne[Int]        = ResOne("Int", sql2oneInt, sql2oneIntOrNull, one2sqlInt, array2setInt)
 //  protected lazy val resLong1      : ResOne[Long]       = ResOne("Long", sql2oneLong, sql2oneLongOrNull, one2sqlLong, array2setLong)
 //  protected lazy val resFloat1     : ResOne[Float]      = ResOne("Float", sql2oneFloat, sql2oneFloatOrNull, one2sqlFloat, array2setFloat)

@@ -46,7 +46,7 @@ trait AggrSetNum_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.ints.query.get.map(_ ==> List(Set(int1, int2, int3, int4)))
         _ <- Ns.ints(median).query.get.map(_.head ==~ (int2 + int3).toDouble / 2.0)
 
-        _ <- Ns.i.ints.query.get.map(_ ==> List(
+        _ <- Ns.i.a1.ints.query.get.map(_ ==> List(
           (1, Set(int1, int2)),
           (2, Set(int2, int3, int4)),
         ))
@@ -71,7 +71,7 @@ trait AggrSetNum_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.ints.query.get.map(_ ==> List(Set(int1, int2, int3, int4)))
         _ <- Ns.ints(avg).query.get.map(_.head ==~ (int1 + int2 + int3 + int4).toDouble / 4.0)
 
-        _ <- Ns.i.ints.query.get.map(_ ==> List(
+        _ <- Ns.i.a1.ints.query.get.map(_ ==> List(
           (1, Set(int1, int2)),
           (2, Set(int2, int3, int4)),
         ))
@@ -96,7 +96,7 @@ trait AggrSetNum_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.ints.query.get.map(_ ==> List(Set(int1, int2, int3, int4)))
         _ <- Ns.ints(variance).query.get.map(_.head ==~ varianceOf(int1, int2, int3, int4))
 
-        _ <- Ns.i.ints.query.get.map(_ ==> List(
+        _ <- Ns.i.a1.ints.query.get.map(_ ==> List(
           (1, Set(int1, int2)),
           (2, Set(int2, int3, int4)),
         ))
@@ -121,7 +121,7 @@ trait AggrSetNum_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.ints.query.get.map(_ ==> List(Set(int1, int2, int3, int4)))
         _ <- Ns.ints(stddev).query.get.map(_.head ==~ stdDevOf(int1, int2, int3, int4))
 
-        _ <- Ns.i.ints.query.get.map(_ ==> List(
+        _ <- Ns.i.a1.ints.query.get.map(_ ==> List(
           (1, Set(int1, int2)),
           (2, Set(int2, int3, int4)),
         ))

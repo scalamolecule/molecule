@@ -28,7 +28,7 @@ trait AggrSet_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(long2, long3, long4)), // 3 rows coalesced
         ))
 
-        // Use `distinct` keyword to retrieve unique Sets of values
+        // Use `distinct` keyword to retrieve unique Sets of Sets
         _ <- Ns.i.a1.longs(distinct).query.get.map(_ ==> List(
           (1, Set(Set(long1, long2))),
           (2, Set(
@@ -61,17 +61,17 @@ trait AggrSet_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.longs(min(1)).query.get.map(_ ==> List(Set(long1)))
         _ <- Ns.longs(min(2)).query.get.map(_ ==> List(Set(long1, long2)))
 
-        _ <- Ns.i.longs(min).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.longs(min).query.get.map(_ ==> List(
           (1, Set(long1)),
           (2, Set(long2)),
         ))
         // Same as
-        _ <- Ns.i.longs(min(1)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.longs(min(1)).query.get.map(_ ==> List(
           (1, Set(long1)),
           (2, Set(long2)),
         ))
 
-        _ <- Ns.i.longs(min(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.longs(min(2)).query.get.map(_ ==> List(
           (1, Set(long1, long2)),
           (2, Set(long2, long3)),
         ))
@@ -92,17 +92,17 @@ trait AggrSet_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.longs(max(1)).query.get.map(_ ==> List(Set(long4)))
         _ <- Ns.longs(max(2)).query.get.map(_ ==> List(Set(long3, long4)))
 
-        _ <- Ns.i.longs(max).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.longs(max).query.get.map(_ ==> List(
           (1, Set(long2)),
           (2, Set(long4)),
         ))
         // Same as
-        _ <- Ns.i.longs(max(1)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.longs(max(1)).query.get.map(_ ==> List(
           (1, Set(long2)),
           (2, Set(long4)),
         ))
 
-        _ <- Ns.i.longs(max(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.longs(max(2)).query.get.map(_ ==> List(
           (1, Set(long1, long2)),
           (2, Set(long3, long4)),
         ))

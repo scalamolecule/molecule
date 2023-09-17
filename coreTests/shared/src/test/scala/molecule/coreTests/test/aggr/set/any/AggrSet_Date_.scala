@@ -1,6 +1,7 @@
 // GENERATED CODE ********************************
 package molecule.coreTests.test.aggr.set.any
 
+import java.util.Date
 import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
@@ -28,7 +29,7 @@ trait AggrSet_Date_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(date2, date3, date4)), // 3 rows coalesced
         ))
 
-        // Use `distinct` keyword to retrieve unique Sets of values
+        // Use `distinct` keyword to retrieve unique Sets of Sets
         _ <- Ns.i.a1.dates(distinct).query.get.map(_ ==> List(
           (1, Set(Set(date1, date2))),
           (2, Set(
@@ -61,17 +62,17 @@ trait AggrSet_Date_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.dates(min(1)).query.get.map(_ ==> List(Set(date1)))
         _ <- Ns.dates(min(2)).query.get.map(_ ==> List(Set(date1, date2)))
 
-        _ <- Ns.i.dates(min).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.dates(min).query.get.map(_ ==> List(
           (1, Set(date1)),
           (2, Set(date2)),
         ))
         // Same as
-        _ <- Ns.i.dates(min(1)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.dates(min(1)).query.get.map(_ ==> List(
           (1, Set(date1)),
           (2, Set(date2)),
         ))
 
-        _ <- Ns.i.dates(min(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.dates(min(2)).query.get.map(_ ==> List(
           (1, Set(date1, date2)),
           (2, Set(date2, date3)),
         ))
@@ -92,17 +93,17 @@ trait AggrSet_Date_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.dates(max(1)).query.get.map(_ ==> List(Set(date4)))
         _ <- Ns.dates(max(2)).query.get.map(_ ==> List(Set(date3, date4)))
 
-        _ <- Ns.i.dates(max).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.dates(max).query.get.map(_ ==> List(
           (1, Set(date2)),
           (2, Set(date4)),
         ))
         // Same as
-        _ <- Ns.i.dates(max(1)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.dates(max(1)).query.get.map(_ ==> List(
           (1, Set(date2)),
           (2, Set(date4)),
         ))
 
-        _ <- Ns.i.dates(max(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.dates(max(2)).query.get.map(_ ==> List(
           (1, Set(date1, date2)),
           (2, Set(date3, date4)),
         ))

@@ -1,11 +1,12 @@
 package molecule.sql.postgres.query
 
+import molecule.core.util.AggrUtils
 import molecule.sql.core.query.SqlQueryBase
 import molecule.sql.h2.query.ResolveExprOne_h2
 
 trait ResolveExprOne_postgres[Tpl]
   extends ResolveExprOne_h2[Tpl]
-    with LambdasOne_postgres { self: SqlQueryBase =>
+    with LambdasOne_postgres with AggrUtils { self: SqlQueryBase =>
 
   //  override protected def resolveAttrOneMan(attr: AttrOneMan): Unit = {
   //    aritiesAttr()
@@ -245,143 +246,207 @@ trait ResolveExprOne_postgres[Tpl]
   //  private def remainder[T](col: String, args: Seq[T]): Unit = where += ((col, s"% ${args.head} = ${args(1)}"))
   //  private def even(col: String): Unit = where += ((col, s"% 2 = 0"))
   //  private def odd(col: String): Unit = where += ((col, s"% 2 = 1"))
-  //
-  //  private def aggr[T](col: String, fn: String, optN: Option[Int], res: ResOne[T]): Unit = {
-  //    lazy val n = optN.getOrElse(0)
-  //    // Replace find/casting with aggregate function/cast
-  //    select -= col
-  //    fn match {
-  //      case "distinct" =>
-  //        select += s"ARRAY_AGG(DISTINCT $col)"
-  //        groupByCols -= col
-  //        aggregate = true
-  //        replaceCast(res.array2set)
-  //
-  //      case "mins" =>
-  //        select +=
-  //          s"""ARRAY_SLICE(
-  //             |    ARRAY_AGG(DISTINCT $col order by $col ASC),
-  //             |    1,
-  //             |    LEAST(
-  //             |      $n,
-  //             |      ARRAY_LENGTH(ARRAY_AGG(DISTINCT $col))
-  //             |    )
-  //             |  )""".stripMargin
-  //        groupByCols -= col
-  //        aggregate = true
-  //        replaceCast(res.array2set)
-  //
-  //      case "min" =>
-  //        select += s"MIN($col)"
-  //        if (col.endsWith(".id")) {
-  //          groupByCols -= col
-  //          aggregate = true
-  //        }
-  //
-  //      case "maxs" =>
-  //        select +=
-  //          s"""ARRAY_SLICE(
-  //             |    ARRAY_AGG(DISTINCT $col order by $col DESC),
-  //             |    1,
-  //             |    LEAST(
-  //             |      $n,
-  //             |      ARRAY_LENGTH(ARRAY_AGG(DISTINCT $col))
-  //             |    )
-  //             |  )""".stripMargin
-  //        groupByCols -= col
-  //        aggregate = true
-  //        replaceCast(res.array2set)
-  //
-  //      case "max" =>
-  //        select += s"MAX($col)"
-  //        if (col.endsWith(".id")) {
-  //          groupByCols -= col
-  //          aggregate = true
-  //        }
-  //
-  //      case "rands" =>
-  //        select +=
-  //          s"""ARRAY_SLICE(
-  //             |    ARRAY_AGG($col order by RAND()),
-  //             |    1,
-  //             |    LEAST(
-  //             |      $n,
-  //             |      ARRAY_LENGTH(ARRAY_AGG($col))
-  //             |    )
-  //             |  )""".stripMargin
-  //        groupByCols -= col
-  //        aggregate = true
-  //        replaceCast(res.array2set)
-  //
-  //      case "rand" =>
-  //        distinct = false
-  //        select += col
-  //        orderBy += ((level, -1, "RAND()", ""))
-  //        hardLimit = 1
-  //
-  //      case "samples" =>
-  //        select +=
-  //          s"""ARRAY_SLICE(
-  //             |    ARRAY_AGG(DISTINCT $col order by RAND()),
-  //             |    1,
-  //             |    LEAST(
-  //             |      $n,
-  //             |      ARRAY_LENGTH(ARRAY_AGG(DISTINCT $col))
-  //             |    )
-  //             |  )""".stripMargin
-  //        groupByCols -= col
-  //        aggregate = true
-  //        replaceCast(res.array2set)
-  //
-  //      case "sample" =>
-  //        distinct = false
-  //        select += col
-  //        orderBy += ((level, -1, "RAND()", ""))
-  //        hardLimit = 1
-  //
-  //      case "count" =>
-  //        distinct = false
-  //        groupByCols -= col
-  //        aggregate = true
-  //        selectWithOrder(col, "COUNT", "")
-  //        replaceCast(toInt)
-  //
-  //      case "countDistinct" =>
-  //        distinct = false
-  //        groupByCols -= col
-  //        aggregate = true
-  //        selectWithOrder(col, "COUNT")
-  //        replaceCast(toInt)
-  //
-  //      case "sum" =>
-  //        groupByCols -= col
-  //        aggregate = true
-  //        selectWithOrder(col, "SUM")
-  //
-  //      case "median" =>
-  //        groupByCols -= col
-  //        aggregate = true
-  //        selectWithOrder(col, "MEDIAN")
-  //
-  //      case "avg" =>
-  //        groupByCols -= col
-  //        aggregate = true
-  //        selectWithOrder(col, "AVG")
-  //
-  //      case "variance" =>
-  //        groupByCols -= col
-  //        aggregate = true
-  //        selectWithOrder(col, "VAR_POP")
-  //
-  //      case "stddev" =>
-  //        groupByCols -= col
-  //        aggregate = true
-  //        selectWithOrder(col, "STDDEV_POP")
-  //
-  //      case other => unexpectedKw(other)
-  //    }
-  //  }
-  //
+
+  private def cast(tpe: String): String = tpe match {
+    case "Boolean" | "UUID" => "::text"
+    case _                  => ""
+  }
+
+  override protected def aggr[T](col: String, fn: String, optN: Option[Int], res: ResOne[T]): Unit = {
+    lazy val n = optN.getOrElse(0)
+    // Replace find/casting with aggregate function/cast
+    select -= col
+    fn match {
+      case "distinct" =>
+        select += s"ARRAY_AGG(DISTINCT $col)"
+        groupByCols -= col
+        aggregate = true
+        replaceCast(res.array2set)
+
+      case "min" =>
+        select += s"MIN($col${cast(res.tpe)})"
+        if (col.endsWith(".id")) {
+          groupByCols -= col
+          aggregate = true
+        }
+
+      case "mins" =>
+        select +=
+          s"""TRIM_ARRAY(
+             |    ARRAY_AGG(DISTINCT $col order by $col ASC),
+             |    GREATEST(
+             |      0,
+             |      ARRAY_LENGTH(ARRAY_AGG(DISTINCT $col), 1) - $n
+             |    )
+             |  )""".stripMargin
+        groupByCols -= col
+        aggregate = true
+        replaceCast(res.array2set)
+
+      case "max" =>
+        select += s"MAX($col${cast(res.tpe)})"
+        if (col.endsWith(".id")) {
+          groupByCols -= col
+          aggregate = true
+        }
+
+      case "maxs" =>
+        select +=
+          s"""TRIM_ARRAY(
+             |    ARRAY_AGG(DISTINCT $col order by $col DESC),
+             |    GREATEST(
+             |      0,
+             |      ARRAY_LENGTH(ARRAY_AGG(DISTINCT $col), 1) - $n
+             |    )
+             |  )""".stripMargin
+        groupByCols -= col
+        aggregate = true
+        replaceCast(res.array2set)
+
+      case "rand" =>
+        distinct = false
+        select += col
+        orderBy += ((level, -1, "RANDOM()", ""))
+        hardLimit = 1
+
+      case "rands" =>
+        select +=
+          s"""TRIM_ARRAY(
+             |    ARRAY_AGG($col order by random()),
+             |    GREATEST(
+             |      0,
+             |      ARRAY_LENGTH(ARRAY_AGG($col), 1) - $n
+             |    )
+             |  )""".stripMargin
+        groupByCols -= col
+        aggregate = true
+        replaceCast(res.array2set)
+
+      case "sample" =>
+        distinct = false
+        select += col
+        orderBy += ((level, -1, "RANDOM()", ""))
+        hardLimit = 1
+
+      case "samples" =>
+        select +=
+          s"""TRIM_ARRAY(
+             |    ARRAY_AGG($col order by random()),
+             |    GREATEST(
+             |      0,
+             |      ARRAY_LENGTH(ARRAY_AGG(DISTINCT $col), 1) - $n
+             |    )
+             |  )""".stripMargin
+        groupByCols -= col
+        aggregate = true
+        replaceCast(res.array2set)
+
+      case "count" =>
+        distinct = false
+        groupByCols -= col
+        aggregate = true
+        selectWithOrder(col, "COUNT", "")
+        replaceCast(toInt)
+
+      case "countDistinct" =>
+        distinct = false
+        groupByCols -= col
+        aggregate = true
+        selectWithOrder(col, "COUNT")
+        replaceCast(toInt)
+
+      case "sum" =>
+        groupByCols -= col
+        aggregate = true
+        selectWithOrder(col, "SUM")
+
+      case "median" =>
+        /*
+        Using percentile_count or custom median function both calculate
+        from non-distinct values (Array semantics instead of Set semantics).
+        See https://wiki.postgresql.org/wiki/Aggregate_Median
+
+        // Some attempts:
+
+        _ <- rawQuery(
+          """select
+            |  (
+            |     select
+            |       percentile_cont(0.5) within group(order by x)
+            |     from (
+            |       select distinct Ns.bigDecimal as x
+            |       from Ns
+            |     ) t
+            |  ) z
+            |from Ns
+            |group by z
+            |""".stripMargin)
+
+        _ <- rawQuery(
+          """select
+            |  Ns.i,
+            |  (
+            |     select
+            |       percentile_cont(0.5) within group(order by x)
+            |     from (
+            |       select distinct _Ns.bigDecimal as x
+            |       from Ns as _Ns
+            |       where _Ns.i = Ns.i
+            |     ) t
+            |  )
+            |from Ns
+            |group by Ns.i
+            |""".stripMargin)
+
+        _ <- rawQuery(
+          """select
+            |  median(Ns.bigDecimal)
+            |from Ns
+            |""".stripMargin)
+
+        _ <- rawQuery(
+          """select
+            |  Ns.i,
+            |  median(Ns.bigDecimal)
+            |from Ns
+            |group by Ns.i
+            |""".stripMargin)
+        */
+        // Using brute force instead (until someone has a better solution) and collecting
+        // all distinct values to calculate the median value of unique values (Set semantics)
+        select += s"ARRAY_AGG($col)"
+        groupByCols -= col
+        aggregate = true
+        replaceCast(
+          (row: Row, n: Int) => {
+            val resultSet = row.getArray(n).getResultSet
+            var set       = Set.empty[Double]
+            while (resultSet.next()) {
+              set += resultSet.getDouble(2)
+            }
+            getMedian(set)
+          }
+        )
+
+      case "avg" =>
+        groupByCols -= col
+        aggregate = true
+        selectWithOrder(col, "AVG")
+
+      case "variance" =>
+        groupByCols -= col
+        aggregate = true
+        selectWithOrder(col, "VAR_POP")
+
+      case "stddev" =>
+        groupByCols -= col
+        aggregate = true
+        selectWithOrder(col, "STDDEV_POP")
+
+      case other => unexpectedKw(other)
+    }
+  }
+
   //  private def selectWithOrder(col: String, fn: String, distinct: String = "DISTINCT "): Unit = {
   //    if (orderBy.nonEmpty && orderBy.last._3 == col) {
   //      // order by aggregate alias instead

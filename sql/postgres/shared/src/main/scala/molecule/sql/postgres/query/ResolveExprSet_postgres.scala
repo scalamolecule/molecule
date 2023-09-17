@@ -146,210 +146,219 @@ trait ResolveExprSet_postgres[Tpl]
   //  }
   //
   //
-  //  protected def setAttr[T](col: String, res: ResSet[T]): Unit = {
-  //    select -= col
-  //    select += s"ARRAY_AGG($col)"
-  //    having += "COUNT(*) > 0"
-  //    aggregate = true
-  //    replaceCast(res.nestedArray2coalescedSet)
-  //  }
-  //
-  //  protected def setAggr[T](col: String, fn: String, optN: Option[Int], res: ResSet[T]): Unit = {
-  //    select -= col
-  //    lazy val n = optN.getOrElse(0)
-  //    fn match {
-  //      case "distinct" =>
-  //        select += s"ARRAY_AGG(DISTINCT $col)"
-  //        groupByCols -= col
-  //        aggregate = true
-  //        replaceCast(res.nestedArray2nestedSet)
-  //
-  //      case "mins" =>
-  //        select += s"ARRAY_AGG(DISTINCT $col)"
-  //        groupByCols -= col
-  //        aggregate = true
-  //        replaceCast(res.nestedArray2setAsc(n))
-  //
-  //      case "min" =>
-  //        select += s"MIN($col)"
-  //        groupByCols -= col
-  //        aggregate = true
-  //        replaceCast(res.array2setFirst)
-  //
-  //      case "maxs" =>
-  //        select += s"ARRAY_AGG(DISTINCT $col)"
-  //        groupByCols -= col
-  //        aggregate = true
-  //        replaceCast(res.nestedArray2setDesc(n))
-  //
-  //      case "max" =>
-  //        select += s"MAX($col)"
-  //        groupByCols -= col
-  //        aggregate = true
-  //        replaceCast(res.array2setLast)
-  //
-  //      case "rands" =>
-  //        select +=
-  //          s"""ARRAY_SLICE(
-  //             |    ARRAY_AGG($col order by RAND()),
-  //             |    1,
-  //             |    LEAST(
-  //             |      $n,
-  //             |      ARRAY_LENGTH(ARRAY_AGG($col))
-  //             |    )
-  //             |  )""".stripMargin
-  //        groupByCols -= col
-  //        aggregate = true
-  //        replaceCast(res.nestedArray2coalescedSet)
-  //
-  //      case "rand" =>
-  //        distinct = false
-  //        select += col
-  //        orderBy += ((level, -1, "RAND()", ""))
-  //        hardLimit = 1
-  //        replaceCast(res.nestedArray2coalescedSet)
-  //
-  //
-  //      case "samples" =>
-  //        select +=
-  //          s"""ARRAY_SLICE(
-  //             |    ARRAY_AGG(DISTINCT $col order by RAND()),
-  //             |    1,
-  //             |    LEAST(
-  //             |      $n,
-  //             |      ARRAY_LENGTH(ARRAY_AGG(DISTINCT $col))
-  //             |    )
-  //             |  )""".stripMargin
-  //        groupByCols -= col
-  //        aggregate = true
-  //        replaceCast(res.nestedArray2coalescedSet)
-  //
-  //      case "sample" =>
-  //        distinct = false
-  //        select += col
-  //        orderBy += ((level, -1, "RAND()", ""))
-  //        hardLimit = 1
-  //        replaceCast(res.nestedArray2coalescedSet)
-  //
-  //      case "count" =>
-  //        // Count of all (non-unique) values
-  //        select += s"ARRAY_AGG($col)"
-  //        groupByCols -= col
-  //        aggregate = true
-  //        replaceCast(
-  //          (row: Row, n: Int) => {
-  //            val outerArrayResultSet = row.getArray(n).getResultSet
-  //            var count               = 0
-  //            while (outerArrayResultSet.next()) {
-  //              count += outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]].length
-  //            }
-  //            count
-  //          }
-  //        )
-  //
-  //      case "countDistinct" =>
-  //        // Count of unique values (Set semantics)
-  //        select += s"ARRAY_AGG($col)"
-  //        groupByCols -= col
-  //        aggregate = true
-  //        replaceCast(
-  //          (row: Row, n: Int) => {
-  //            val outerArrayResultSet = row.getArray(n).getResultSet
-  //            var set                 = Set.empty[Any]
-  //            while (outerArrayResultSet.next()) {
-  //              outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]].foreach { value =>
-  //                set += value
-  //              }
-  //            }
-  //            set.size
-  //          }
-  //        )
-  //
-  //      case "sum" =>
-  //        // Sum of unique values (Set semantics)
-  //        select += s"ARRAY_AGG($col)"
-  //        groupByCols -= col
-  //        aggregate = true
-  //        replaceCast(res.array2setSum)
-  //
-  //      case "median" =>
-  //        // Using brute force and collecting all unique values to calculate the median value
-  //        // Median of unique values (Set semantics)
-  //        select += s"ARRAY_AGG($col)"
-  //        groupByCols -= col
-  //        aggregate = true
-  //        replaceCast(
-  //          (row: Row, n: Int) => {
-  //            val outerArrayResultSet = row.getArray(n).getResultSet
-  //            var set                 = Set.empty[Double]
-  //            while (outerArrayResultSet.next()) {
-  //              val array = outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]]
-  //              array.foreach(v => set += v.toString.toDouble) // not the most efficient...
-  //            }
-  //            getMedian(set)
-  //          }
-  //        )
-  //      // select += s"MEDIAN(ALL $col)" // other semantics
-  //
-  //      case "avg" =>
-  //        // Average of unique values (Set semantics)
-  //        select += s"ARRAY_AGG($col)"
-  //        groupByCols -= col
-  //        aggregate = true
-  //        replaceCast(
-  //          (row: Row, n: Int) => {
-  //            val outerArrayResultSet = row.getArray(n).getResultSet
-  //            var set                 = Set.empty[Double]
-  //            while (outerArrayResultSet.next()) {
-  //              val array = outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]]
-  //              array.foreach(v => set += v.toString.toDouble) // not the most efficient...
-  //            }
-  //            set.sum / set.size
-  //          }
-  //        )
-  //      // select += s"AVG(DISTINCT $col)" // other semantics
-  //
-  //      case "variance" =>
-  //        // Variance of unique values (Set semantics)
-  //        select += s"ARRAY_AGG($col)"
-  //        groupByCols -= col
-  //        aggregate = true
-  //        replaceCast(
-  //          (row: Row, n: Int) => {
-  //            val outerArrayResultSet = row.getArray(n).getResultSet
-  //            var set                 = Set.empty[Double]
-  //            while (outerArrayResultSet.next()) {
-  //              val array = outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]]
-  //              array.foreach(v => set += v.toString.toDouble) // not the most efficient...
-  //            }
-  //            varianceOf(set.toList: _*)
-  //          }
-  //        )
-  //      // select += s"VAR_POP($col)" // other semantics
-  //      // select += s"VAR_SAMP($col)" // other semantics
-  //
-  //      case "stddev" =>
-  //        // Standard deviation of unique values (Set semantics)
-  //        select += s"ARRAY_AGG($col)"
-  //        groupByCols -= col
-  //        aggregate = true
-  //        replaceCast(
-  //          (row: Row, n: Int) => {
-  //            val outerArrayResultSet = row.getArray(n).getResultSet
-  //            var set                 = Set.empty[Double]
-  //            while (outerArrayResultSet.next()) {
-  //              val array = outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]]
-  //              array.foreach(v => set += v.toString.toDouble) // not the most efficient...
-  //            }
-  //            stdDevOf(set.toList: _*)
-  //          }
-  //        )
-  //      // select += s"STDDEV($col)" // other semantics
-  //
-  //      case other => unexpectedKw(other)
-  //    }
-  //  }
-  //
+  override protected def setAttr[T](col: String, res: ResSet[T]): Unit = {
+    select -= col
+    val colAlias = col.replace(".", "_")
+    select += s"ARRAY_AGG(DISTINCT $colAlias)"
+    from = from :+ s"UNNEST($col) AS $colAlias"
+    aggregate = true
+    replaceCast(res.sql2set)
+  }
+
+  override protected def setAggr[T](col: String, fn: String, optN: Option[Int], res: ResSet[T]): Unit = {
+    select -= col
+    lazy val n = optN.getOrElse(0)
+    fn match {
+      case "distinct" =>
+        noBooleanSetAggr(res)
+        groupByCols -= col
+        aggregate = true
+        select += s"ARRAY_AGG(DISTINCT $col)"
+        replaceCast(res.nestedArray2nestedSet)
+
+      case "min" =>
+        noBooleanSetAggr(res)
+        select += s"MIN($col)"
+        groupByCols -= col
+        aggregate = true
+        replaceCast(res.array2setFirst)
+
+      case "mins" =>
+        noBooleanSetAggr(res)
+        select += s"ARRAY_AGG(DISTINCT $col)"
+        groupByCols -= col
+        aggregate = true
+        replaceCast(res.nestedArray2setAsc(n))
+
+      case "max" =>
+        noBooleanSetAggr(res)
+        select += s"MAX($col)"
+        groupByCols -= col
+        aggregate = true
+        replaceCast(res.array2setLast)
+
+      case "maxs" =>
+        noBooleanSetAggr(res)
+        select += s"ARRAY_AGG(DISTINCT $col)"
+        groupByCols -= col
+        aggregate = true
+        replaceCast(res.nestedArray2setDesc(n))
+
+      case "rand" =>
+        noBooleanSetAggr(res)
+        distinct = false
+        select += col
+        orderBy += ((level, -1, "RANDOM()", ""))
+        hardLimit = 1
+        replaceCast(res.sql2set)
+
+      case "rands" =>
+        noBooleanSetAggr(res)
+        select +=
+          s"""TRIM_ARRAY(
+             |    ARRAY_AGG($col order by RANDOM()),
+             |    GREATEST(
+             |      0,
+             |      ARRAY_LENGTH(ARRAY_AGG($col), 1) - $n
+             |    )
+             |  )""".stripMargin
+        groupByCols -= col
+        aggregate = true
+        replaceCast(res.nestedArray2coalescedSet)
+
+      case "sample" =>
+        noBooleanSetAggr(res)
+        distinct = false
+        select += col
+        orderBy += ((level, -1, "RANDOM()", ""))
+        hardLimit = 1
+        replaceCast(res.sql2set)
+
+      case "samples" =>
+        noBooleanSetAggr(res)
+        select +=
+          s"""TRIM_ARRAY(
+             |    ARRAY_AGG($col order by RANDOM()),
+             |    GREATEST(
+             |      0,
+             |      ARRAY_LENGTH(ARRAY_AGG(DISTINCT $col), 1) - $n
+             |    )
+             |  )""".stripMargin
+        groupByCols -= col
+        aggregate = true
+        replaceCast(res.nestedArray2coalescedSet)
+
+      case "count" =>
+        noBooleanSetCounts(n)
+        // Count of all (non-unique) values
+        select += s"ARRAY_AGG($col)"
+        groupByCols -= col
+        aggregate = true
+        replaceCast(
+          (row: Row, n: Int) => {
+            val outerArrayResultSet = row.getArray(n).getResultSet
+            var count               = 0
+            while (outerArrayResultSet.next()) {
+              count += outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]].length
+            }
+            count
+          }
+        )
+
+      case "countDistinct" =>
+        noBooleanSetCounts(n)
+        // Count of unique values (Set semantics)
+        select += s"ARRAY_AGG($col)"
+        groupByCols -= col
+        aggregate = true
+        replaceCast(
+          (row: Row, n: Int) => {
+            val outerArrayResultSet = row.getArray(n).getResultSet
+            var set                 = Set.empty[Any]
+            while (outerArrayResultSet.next()) {
+              outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]].foreach { value =>
+                set += value
+              }
+            }
+            set.size
+          }
+        )
+
+      case "sum" =>
+        // Sum of unique values (Set semantics)
+        select += s"ARRAY_AGG($col)"
+        groupByCols -= col
+        aggregate = true
+        replaceCast(res.array2setSum)
+
+      case "median" =>
+        // Using brute force and collecting all unique values to calculate the median value
+        // Median of unique values (Set semantics)
+        select += s"ARRAY_AGG($col)"
+        groupByCols -= col
+        aggregate = true
+        replaceCast(
+          (row: Row, n: Int) => {
+            val outerArrayResultSet = row.getArray(n).getResultSet
+            var set                 = Set.empty[Double]
+            while (outerArrayResultSet.next()) {
+              val array = outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]]
+              array.foreach(v => set += v.toString.toDouble) // not the most efficient...
+            }
+            getMedian(set)
+          }
+        )
+      // select += s"MEDIAN(ALL $col)" // other semantics
+
+      case "avg" =>
+        // Average of unique values (Set semantics)
+        select += s"ARRAY_AGG($col)"
+        groupByCols -= col
+        aggregate = true
+        replaceCast(
+          (row: Row, n: Int) => {
+            val outerArrayResultSet = row.getArray(n).getResultSet
+            var set                 = Set.empty[Double]
+            while (outerArrayResultSet.next()) {
+              val array = outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]]
+              array.foreach(v => set += v.toString.toDouble) // not the most efficient...
+            }
+            set.sum / set.size
+          }
+        )
+      // select += s"AVG(DISTINCT $col)" // other semantics
+
+      case "variance" =>
+        // Variance of unique values (Set semantics)
+        select += s"ARRAY_AGG($col)"
+        groupByCols -= col
+        aggregate = true
+        replaceCast(
+          (row: Row, n: Int) => {
+            val outerArrayResultSet = row.getArray(n).getResultSet
+            var set                 = Set.empty[Double]
+            while (outerArrayResultSet.next()) {
+              val array = outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]]
+              array.foreach(v => set += v.toString.toDouble) // not the most efficient...
+            }
+            varianceOf(set.toList: _*)
+          }
+        )
+      // select += s"VAR_POP($col)" // other semantics
+      // select += s"VAR_SAMP($col)" // other semantics
+
+      case "stddev" =>
+        // Standard deviation of unique values (Set semantics)
+        select += s"ARRAY_AGG($col)"
+        groupByCols -= col
+        aggregate = true
+        replaceCast(
+          (row: Row, n: Int) => {
+            val outerArrayResultSet = row.getArray(n).getResultSet
+            var set                 = Set.empty[Double]
+            while (outerArrayResultSet.next()) {
+              val array = outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]]
+              array.foreach(v => set += v.toString.toDouble) // not the most efficient...
+            }
+            stdDevOf(set.toList: _*)
+          }
+        )
+      // select += s"STDDEV($col)" // other semantics
+
+      case other => unexpectedKw(other)
+    }
+  }
+
   private def matchArray(sqlArray: (String, Int), col: String): String = {
     s"(${sqlArray._1} <@ $col AND CARDINALITY($col) = ${sqlArray._2})"
   }

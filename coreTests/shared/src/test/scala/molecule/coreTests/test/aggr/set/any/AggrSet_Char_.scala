@@ -28,7 +28,7 @@ trait AggrSet_Char_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(char2, char3, char4)), // 3 rows coalesced
         ))
 
-        // Use `distinct` keyword to retrieve unique Sets of values
+        // Use `distinct` keyword to retrieve unique Sets of Sets
         _ <- Ns.i.a1.chars(distinct).query.get.map(_ ==> List(
           (1, Set(Set(char1, char2))),
           (2, Set(
@@ -61,17 +61,17 @@ trait AggrSet_Char_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.chars(min(1)).query.get.map(_ ==> List(Set(char1)))
         _ <- Ns.chars(min(2)).query.get.map(_ ==> List(Set(char1, char2)))
 
-        _ <- Ns.i.chars(min).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.chars(min).query.get.map(_ ==> List(
           (1, Set(char1)),
           (2, Set(char2)),
         ))
         // Same as
-        _ <- Ns.i.chars(min(1)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.chars(min(1)).query.get.map(_ ==> List(
           (1, Set(char1)),
           (2, Set(char2)),
         ))
 
-        _ <- Ns.i.chars(min(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.chars(min(2)).query.get.map(_ ==> List(
           (1, Set(char1, char2)),
           (2, Set(char2, char3)),
         ))
@@ -92,17 +92,17 @@ trait AggrSet_Char_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.chars(max(1)).query.get.map(_ ==> List(Set(char4)))
         _ <- Ns.chars(max(2)).query.get.map(_ ==> List(Set(char3, char4)))
 
-        _ <- Ns.i.chars(max).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.chars(max).query.get.map(_ ==> List(
           (1, Set(char2)),
           (2, Set(char4)),
         ))
         // Same as
-        _ <- Ns.i.chars(max(1)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.chars(max(1)).query.get.map(_ ==> List(
           (1, Set(char2)),
           (2, Set(char4)),
         ))
 
-        _ <- Ns.i.chars(max(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.chars(max(2)).query.get.map(_ ==> List(
           (1, Set(char1, char2)),
           (2, Set(char3, char4)),
         ))

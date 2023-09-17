@@ -47,7 +47,7 @@ trait AggrSetNum_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.floats.query.get.map(_ ==> List(Set(float1, float2, float3, float4)))
         _ <- Ns.floats(median).query.get.map(_.head ==~ (float2 + float3).toDouble / 2.0)
 
-        _ <- Ns.i.floats.query.get.map(_ ==> List(
+        _ <- Ns.i.a1.floats.query.get.map(_ ==> List(
           (1, Set(float1, float2)),
           (2, Set(float2, float3, float4)),
         ))
@@ -72,7 +72,7 @@ trait AggrSetNum_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.floats.query.get.map(_ ==> List(Set(float1, float2, float3, float4)))
         _ <- Ns.floats(avg).query.get.map(_.head ==~ (float1 + float2 + float3 + float4).toDouble / 4.0)
 
-        _ <- Ns.i.floats.query.get.map(_ ==> List(
+        _ <- Ns.i.a1.floats.query.get.map(_ ==> List(
           (1, Set(float1, float2)),
           (2, Set(float2, float3, float4)),
         ))
@@ -97,7 +97,7 @@ trait AggrSetNum_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.floats.query.get.map(_ ==> List(Set(float1, float2, float3, float4)))
         _ <- Ns.floats(variance).query.get.map(_.head ==~ varianceOf(float1, float2, float3, float4))
 
-        _ <- Ns.i.floats.query.get.map(_ ==> List(
+        _ <- Ns.i.a1.floats.query.get.map(_ ==> List(
           (1, Set(float1, float2)),
           (2, Set(float2, float3, float4)),
         ))
@@ -122,7 +122,7 @@ trait AggrSetNum_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.floats.query.get.map(_ ==> List(Set(float1, float2, float3, float4)))
         _ <- Ns.floats(stddev).query.get.map(_.head ==~ stdDevOf(float1, float2, float3, float4))
 
-        _ <- Ns.i.floats.query.get.map(_ ==> List(
+        _ <- Ns.i.a1.floats.query.get.map(_ ==> List(
           (1, Set(float1, float2)),
           (2, Set(float2, float3, float4)),
         ))

@@ -28,7 +28,7 @@ trait AggrSet_String_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(string2, string3, string4)), // 3 rows coalesced
         ))
 
-        // Use `distinct` keyword to retrieve unique Sets of values
+        // Use `distinct` keyword to retrieve unique Sets of Sets
         _ <- Ns.i.a1.strings(distinct).query.get.map(_ ==> List(
           (1, Set(Set(string1, string2))),
           (2, Set(
@@ -61,17 +61,17 @@ trait AggrSet_String_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.strings(min(1)).query.get.map(_ ==> List(Set(string1)))
         _ <- Ns.strings(min(2)).query.get.map(_ ==> List(Set(string1, string2)))
 
-        _ <- Ns.i.strings(min).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.strings(min).query.get.map(_ ==> List(
           (1, Set(string1)),
           (2, Set(string2)),
         ))
         // Same as
-        _ <- Ns.i.strings(min(1)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.strings(min(1)).query.get.map(_ ==> List(
           (1, Set(string1)),
           (2, Set(string2)),
         ))
 
-        _ <- Ns.i.strings(min(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.strings(min(2)).query.get.map(_ ==> List(
           (1, Set(string1, string2)),
           (2, Set(string2, string3)),
         ))
@@ -92,17 +92,17 @@ trait AggrSet_String_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.strings(max(1)).query.get.map(_ ==> List(Set(string4)))
         _ <- Ns.strings(max(2)).query.get.map(_ ==> List(Set(string3, string4)))
 
-        _ <- Ns.i.strings(max).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.strings(max).query.get.map(_ ==> List(
           (1, Set(string2)),
           (2, Set(string4)),
         ))
         // Same as
-        _ <- Ns.i.strings(max(1)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.strings(max(1)).query.get.map(_ ==> List(
           (1, Set(string2)),
           (2, Set(string4)),
         ))
 
-        _ <- Ns.i.strings(max(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.strings(max(2)).query.get.map(_ ==> List(
           (1, Set(string1, string2)),
           (2, Set(string3, string4)),
         ))

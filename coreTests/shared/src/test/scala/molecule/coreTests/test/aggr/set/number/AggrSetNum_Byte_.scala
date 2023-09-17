@@ -47,7 +47,7 @@ trait AggrSetNum_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.bytes.query.get.map(_ ==> List(Set(byte1, byte2, byte3, byte4)))
         _ <- Ns.bytes(median).query.get.map(_.head ==~ (byte2 + byte3).toDouble / 2.0)
 
-        _ <- Ns.i.bytes.query.get.map(_ ==> List(
+        _ <- Ns.i.a1.bytes.query.get.map(_ ==> List(
           (1, Set(byte1, byte2)),
           (2, Set(byte2, byte3, byte4)),
         ))
@@ -72,7 +72,7 @@ trait AggrSetNum_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.bytes.query.get.map(_ ==> List(Set(byte1, byte2, byte3, byte4)))
         _ <- Ns.bytes(avg).query.get.map(_.head ==~ (byte1 + byte2 + byte3 + byte4).toDouble / 4.0)
 
-        _ <- Ns.i.bytes.query.get.map(_ ==> List(
+        _ <- Ns.i.a1.bytes.query.get.map(_ ==> List(
           (1, Set(byte1, byte2)),
           (2, Set(byte2, byte3, byte4)),
         ))
@@ -97,7 +97,7 @@ trait AggrSetNum_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.bytes.query.get.map(_ ==> List(Set(byte1, byte2, byte3, byte4)))
         _ <- Ns.bytes(variance).query.get.map(_.head ==~ varianceOf(byte1, byte2, byte3, byte4))
 
-        _ <- Ns.i.bytes.query.get.map(_ ==> List(
+        _ <- Ns.i.a1.bytes.query.get.map(_ ==> List(
           (1, Set(byte1, byte2)),
           (2, Set(byte2, byte3, byte4)),
         ))
@@ -122,7 +122,7 @@ trait AggrSetNum_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.bytes.query.get.map(_ ==> List(Set(byte1, byte2, byte3, byte4)))
         _ <- Ns.bytes(stddev).query.get.map(_.head ==~ stdDevOf(byte1, byte2, byte3, byte4))
 
-        _ <- Ns.i.bytes.query.get.map(_ ==> List(
+        _ <- Ns.i.a1.bytes.query.get.map(_ ==> List(
           (1, Set(byte1, byte2)),
           (2, Set(byte2, byte3, byte4)),
         ))

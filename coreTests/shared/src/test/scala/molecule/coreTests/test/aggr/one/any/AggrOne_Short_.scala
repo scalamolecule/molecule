@@ -60,17 +60,17 @@ trait AggrOne_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.short(max(1)).query.get.map(_ ==> List(Set(short6)))
         _ <- Ns.short(max(2)).query.get.map(_ ==> List(Set(short5, short6)))
 
-        _ <- Ns.i.short(min(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.short(min(2)).query.get.map(_ ==> List(
           (1, Set(short1, short2)),
           (2, Set(short4, short5))
         ))
 
-        _ <- Ns.i.short(max(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.short(max(2)).query.get.map(_ ==> List(
           (1, Set(short2, short3)),
           (2, Set(short5, short6))
         ))
 
-        _ <- Ns.i.short(min(2)).short(max(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.short(min(2)).short(max(2)).query.get.map(_ ==> List(
           (1, Set(short1, short2), Set(short2, short3)),
           (2, Set(short4, short5), Set(short5, short6))
         ))

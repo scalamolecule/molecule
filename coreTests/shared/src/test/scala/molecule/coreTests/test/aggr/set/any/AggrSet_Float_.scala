@@ -28,7 +28,7 @@ trait AggrSet_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(float2, float3, float4)), // 3 rows coalesced
         ))
 
-        // Use `distinct` keyword to retrieve unique Sets of values
+        // Use `distinct` keyword to retrieve unique Sets of Sets
         _ <- Ns.i.a1.floats(distinct).query.get.map(_ ==> List(
           (1, Set(Set(float1, float2))),
           (2, Set(
@@ -61,17 +61,17 @@ trait AggrSet_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.floats(min(1)).query.get.map(_ ==> List(Set(float1)))
         _ <- Ns.floats(min(2)).query.get.map(_ ==> List(Set(float1, float2)))
 
-        _ <- Ns.i.floats(min).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.floats(min).query.get.map(_ ==> List(
           (1, Set(float1)),
           (2, Set(float2)),
         ))
         // Same as
-        _ <- Ns.i.floats(min(1)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.floats(min(1)).query.get.map(_ ==> List(
           (1, Set(float1)),
           (2, Set(float2)),
         ))
 
-        _ <- Ns.i.floats(min(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.floats(min(2)).query.get.map(_ ==> List(
           (1, Set(float1, float2)),
           (2, Set(float2, float3)),
         ))
@@ -92,17 +92,17 @@ trait AggrSet_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.floats(max(1)).query.get.map(_ ==> List(Set(float4)))
         _ <- Ns.floats(max(2)).query.get.map(_ ==> List(Set(float3, float4)))
 
-        _ <- Ns.i.floats(max).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.floats(max).query.get.map(_ ==> List(
           (1, Set(float2)),
           (2, Set(float4)),
         ))
         // Same as
-        _ <- Ns.i.floats(max(1)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.floats(max(1)).query.get.map(_ ==> List(
           (1, Set(float2)),
           (2, Set(float4)),
         ))
 
-        _ <- Ns.i.floats(max(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.floats(max(2)).query.get.map(_ ==> List(
           (1, Set(float1, float2)),
           (2, Set(float3, float4)),
         ))

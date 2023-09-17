@@ -28,7 +28,7 @@ trait AggrSet_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(short2, short3, short4)), // 3 rows coalesced
         ))
 
-        // Use `distinct` keyword to retrieve unique Sets of values
+        // Use `distinct` keyword to retrieve unique Sets of Sets
         _ <- Ns.i.a1.shorts(distinct).query.get.map(_ ==> List(
           (1, Set(Set(short1, short2))),
           (2, Set(
@@ -61,17 +61,17 @@ trait AggrSet_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.shorts(min(1)).query.get.map(_ ==> List(Set(short1)))
         _ <- Ns.shorts(min(2)).query.get.map(_ ==> List(Set(short1, short2)))
 
-        _ <- Ns.i.shorts(min).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.shorts(min).query.get.map(_ ==> List(
           (1, Set(short1)),
           (2, Set(short2)),
         ))
         // Same as
-        _ <- Ns.i.shorts(min(1)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.shorts(min(1)).query.get.map(_ ==> List(
           (1, Set(short1)),
           (2, Set(short2)),
         ))
 
-        _ <- Ns.i.shorts(min(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.shorts(min(2)).query.get.map(_ ==> List(
           (1, Set(short1, short2)),
           (2, Set(short2, short3)),
         ))
@@ -92,17 +92,17 @@ trait AggrSet_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.shorts(max(1)).query.get.map(_ ==> List(Set(short4)))
         _ <- Ns.shorts(max(2)).query.get.map(_ ==> List(Set(short3, short4)))
 
-        _ <- Ns.i.shorts(max).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.shorts(max).query.get.map(_ ==> List(
           (1, Set(short2)),
           (2, Set(short4)),
         ))
         // Same as
-        _ <- Ns.i.shorts(max(1)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.shorts(max(1)).query.get.map(_ ==> List(
           (1, Set(short2)),
           (2, Set(short4)),
         ))
 
-        _ <- Ns.i.shorts(max(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.shorts(max(2)).query.get.map(_ ==> List(
           (1, Set(short1, short2)),
           (2, Set(short3, short4)),
         ))

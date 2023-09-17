@@ -60,17 +60,17 @@ trait AggrOne_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.long(max(1)).query.get.map(_ ==> List(Set(long6)))
         _ <- Ns.long(max(2)).query.get.map(_ ==> List(Set(long5, long6)))
 
-        _ <- Ns.i.long(min(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.long(min(2)).query.get.map(_ ==> List(
           (1, Set(long1, long2)),
           (2, Set(long4, long5))
         ))
 
-        _ <- Ns.i.long(max(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.long(max(2)).query.get.map(_ ==> List(
           (1, Set(long2, long3)),
           (2, Set(long5, long6))
         ))
 
-        _ <- Ns.i.long(min(2)).long(max(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.long(min(2)).long(max(2)).query.get.map(_ ==> List(
           (1, Set(long1, long2), Set(long2, long3)),
           (2, Set(long4, long5), Set(long5, long6))
         ))

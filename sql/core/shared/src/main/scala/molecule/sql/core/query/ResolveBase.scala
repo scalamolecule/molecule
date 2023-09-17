@@ -6,7 +6,6 @@ import molecule.base.util.BaseHelpers
 
 
 trait ResolveBase extends BaseHelpers { self: SqlQueryBase =>
-//trait ResolveBase extends SqlQueryBase with BaseHelpers {
 
   protected lazy val one2sqlString    : String => String     = (v: String) => s"'${v.replace("'", "''")}'"
   protected lazy val one2sqlInt       : Int => String        = (v: Int) => s"$v"

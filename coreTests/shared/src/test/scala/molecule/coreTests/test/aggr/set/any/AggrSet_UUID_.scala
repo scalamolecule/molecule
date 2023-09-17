@@ -1,6 +1,7 @@
 // GENERATED CODE ********************************
 package molecule.coreTests.test.aggr.set.any
 
+import java.util.UUID
 import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
@@ -28,7 +29,7 @@ trait AggrSet_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(uuid2, uuid3, uuid4)), // 3 rows coalesced
         ))
 
-        // Use `distinct` keyword to retrieve unique Sets of values
+        // Use `distinct` keyword to retrieve unique Sets of Sets
         _ <- Ns.i.a1.uuids(distinct).query.get.map(_ ==> List(
           (1, Set(Set(uuid1, uuid2))),
           (2, Set(
@@ -61,17 +62,17 @@ trait AggrSet_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.uuids(min(1)).query.get.map(_ ==> List(Set(uuid1)))
         _ <- Ns.uuids(min(2)).query.get.map(_ ==> List(Set(uuid1, uuid2)))
 
-        _ <- Ns.i.uuids(min).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.uuids(min).query.get.map(_ ==> List(
           (1, Set(uuid1)),
           (2, Set(uuid2)),
         ))
         // Same as
-        _ <- Ns.i.uuids(min(1)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.uuids(min(1)).query.get.map(_ ==> List(
           (1, Set(uuid1)),
           (2, Set(uuid2)),
         ))
 
-        _ <- Ns.i.uuids(min(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.uuids(min(2)).query.get.map(_ ==> List(
           (1, Set(uuid1, uuid2)),
           (2, Set(uuid2, uuid3)),
         ))
@@ -92,17 +93,17 @@ trait AggrSet_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.uuids(max(1)).query.get.map(_ ==> List(Set(uuid4)))
         _ <- Ns.uuids(max(2)).query.get.map(_ ==> List(Set(uuid3, uuid4)))
 
-        _ <- Ns.i.uuids(max).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.uuids(max).query.get.map(_ ==> List(
           (1, Set(uuid2)),
           (2, Set(uuid4)),
         ))
         // Same as
-        _ <- Ns.i.uuids(max(1)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.uuids(max(1)).query.get.map(_ ==> List(
           (1, Set(uuid2)),
           (2, Set(uuid4)),
         ))
 
-        _ <- Ns.i.uuids(max(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.uuids(max(2)).query.get.map(_ ==> List(
           (1, Set(uuid1, uuid2)),
           (2, Set(uuid3, uuid4)),
         ))

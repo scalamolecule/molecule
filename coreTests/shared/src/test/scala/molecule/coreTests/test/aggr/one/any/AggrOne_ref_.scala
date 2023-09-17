@@ -60,17 +60,17 @@ trait AggrOne_ref_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.ref(max(1)).query.get.map(_ ==> List(Set(ref6)))
         _ <- Ns.ref(max(2)).query.get.map(_ ==> List(Set(ref5, ref6)))
 
-        _ <- Ns.i.ref(min(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.ref(min(2)).query.get.map(_ ==> List(
           (1, Set(ref1, ref2)),
           (2, Set(ref4, ref5))
         ))
 
-        _ <- Ns.i.ref(max(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.ref(max(2)).query.get.map(_ ==> List(
           (1, Set(ref2, ref3)),
           (2, Set(ref5, ref6))
         ))
 
-        _ <- Ns.i.ref(min(2)).ref(max(2)).query.get.map(_ ==> List(
+        _ <- Ns.i.a1.ref(min(2)).ref(max(2)).query.get.map(_ ==> List(
           (1, Set(ref1, ref2), Set(ref2, ref3)),
           (2, Set(ref4, ref5), Set(ref5, ref6))
         ))
