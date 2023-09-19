@@ -2,9 +2,11 @@ package molecule.sql.postgres.test
 
 import molecule.base.error.ExecutionError
 import molecule.core.util.Executor._
+import molecule.coreTests.dataModels.core.dsl.Refs.A
 import molecule.sql.postgres.async._
 import molecule.sql.postgres.setup.TestSuite_postgres
 import utest._
+import scala.collection.immutable.List
 import scala.language.implicitConversions
 
 object AdhocPostgresJVM extends TestSuite_postgres {

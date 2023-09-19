@@ -81,16 +81,21 @@ case class JdbcConn_JVM(
         debug("idsMap 1: " + idsMap)
         debug(stmt)
 
-        // Populate prepared statement
         populatePS(ps, idsMap, 0)
+
+        // Populate prepared statement
         ps.executeBatch()
-        val resultSet = ps.getGeneratedKeys // is empty if no nested data
+        val resultSet = ps.getGeneratedKeys
+
+        // Don't collect generated ids for join tables
         ids = List.empty[Long]
-        while (resultSet.next()) {
-          //          val id = resultSet.getLong(1)
-          //          debug("D  ################# " + id)
-          //          ids = ids :+ id
-          ids = ids :+ resultSet.getLong(1)
+        if (!refPath.last.contains("_")) {
+          while (resultSet.next()) {
+            val id = resultSet.getLong(1)
+            debug("D  ################# " + id)
+            ids = ids :+ id
+            //          ids = ids :+ resultSet.getLong(1)
+          }
         }
         ps.close()
         idsMap = idsMap + (refPath -> ids)

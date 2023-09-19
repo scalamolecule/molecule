@@ -40,7 +40,7 @@ trait ResolveExprSet_postgres[Tpl]
   override protected def setAttr[T](col: String, res: ResSet[T]): Unit = {
     select -= col
     groupByCols -= col
-    if (res.tpe == "Boolean" && !expectedFilterAttrs.contains(col)) {
+    if (res.tpe == "Boolean" && !expectedFilterAttrs.contains(col) && !isNested && !isNestedOpt) {
       // If we don't apply this hack, Boolean sets throw
       // ERROR: cannot accumulate arrays of different dimensionality
       // https://stackoverflow.com/questions/46849237/postgresql-array-agginteger/46849678#46849678

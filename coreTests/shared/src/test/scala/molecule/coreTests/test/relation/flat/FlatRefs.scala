@@ -95,7 +95,7 @@ trait FlatRefs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           }
 
         // Referencing namespace attributes repeat for each referenced entity
-        _ <- A.i.Bb.i.query.get.map(_ ==> List(
+        _ <- A.i.Bb.i.a1.query.get.map(_ ==> List(
           (0, 1),
           (0, 2), // 0 is repeated
         ))

@@ -11,4 +11,36 @@ class Model2SqlQuery_postgres[Tpl](elements0: List[Element])
     with ResolveExprSetRefAttr_postgres[Tpl]
     with SqlQueryBase {
 
+
+  override protected def resolveNestedRef(ref: Ref): Unit = {
+    val Ref(ns, refAttr, refNs, _) = ref
+    val (as, ext)                  = exts(refNs).fold(("", ""))(ext => (refNs + ext, ext))
+    val nsExt                      = exts(ns).getOrElse("")
+
+    nestedIds += s"$ns.id"
+    groupBy += s"$ns.id"
+    aggregate = true
+
+    val joinTable  = ns + "_" + refAttr + "_" + refNs
+    val (id1, id2) = if (ns == refNs) ("1_id", "2_id") else ("id", "id")
+    joins += (("INNER JOIN", joinTable, "", s"$ns$nsExt.id = $joinTable.${ns}_$id1"))
+    joins += (("INNER JOIN", refNs, as, s"$joinTable.${refNs}_$id2 = $refNs$ext.id"))
+    castss = castss :+ Nil
+  }
+
+  override protected def resolveNestedOptRef(nestedRef: Ref): Unit = {
+    val Ref(ns, refAttr, refNs, _) = nestedRef
+    val (as, ext)                  = exts(refNs).fold(("", ""))(ext => (refNs + ext, ext))
+    val nsExt                      = exts(ns).getOrElse("")
+
+    nestedIds += s"$ns.id"
+    groupBy += s"$ns.id"
+    aggregate = true
+
+    val joinTable  = ns + "_" + refAttr + "_" + refNs
+    val (id1, id2) = if (ns == refNs) ("1_id", "2_id") else ("id", "id")
+    joins += (("LEFT JOIN", joinTable, "", s"$ns$nsExt.id = $joinTable.${ns}_$id1"))
+    joins += (("LEFT JOIN", refNs, as, s"$joinTable.${refNs}_$id2 = $refNs$ext.id"))
+    castss = castss :+ Nil
+  }
 }
