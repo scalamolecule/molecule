@@ -10,7 +10,7 @@ import molecule.sql.core.facade.JdbcConn_JVM
 
 object PostgresConnection {
 
-  val url = "jdbc:tc:postgresql:15://localhost:5432/test"
+  val url = "jdbc:tc:postgresql:15://localhost:5432/test?preparedStatementCacheQueries=0"
 
   val container = PostgreSQLContainer()
   // Fort fast reuse, set testcontainers.reuse.enable=true in ~/.testcontainers.properties
@@ -141,19 +141,18 @@ object PostgresConnection {
       |  INITCOND='{}'
       |);
       |
-      |
       |""".stripMargin
-//      println(sqlSchema_postgres1)
+  //      println(sqlSchema_postgres1)
 
   def recreationStmt(schema: Schema): String = {
+    //    s"""DROP SCHEMA IF EXISTS public CASCADE;
+    //       |CREATE SCHEMA public;
+    //       |$sqlSchema_postgres1
+    //       |""".stripMargin
+
     s"""DROP SCHEMA IF EXISTS public CASCADE;
        |CREATE SCHEMA public;
        |${schema.sqlSchema_postgres}
-       |""".stripMargin
-
-    s"""DROP SCHEMA IF EXISTS public CASCADE;
-       |CREATE SCHEMA public;
-       |$sqlSchema_postgres1
        |""".stripMargin
   }
 

@@ -20,10 +20,10 @@ trait SyncApi extends CoreTestSuite with ApiSync { spi: SpiSync =>
       "Crud actions" - types { implicit conn =>
         val List(a, b) = Ns.int.insert(1, 2).transact.ids
         Ns.int(3).save.transact
-        Ns.int.query.get ==> List(1, 2, 3)
+        Ns.int.a1.query.get ==> List(1, 2, 3)
         Ns(a).int(10).update.transact
         Ns(b).delete.transact
-        Ns.int.query.get ==> List(3, 10)
+        Ns.int.a1.query.get ==> List(3, 10)
       }
 
 
@@ -74,10 +74,10 @@ trait SyncApi extends CoreTestSuite with ApiSync { spi: SpiSync =>
 
       "Offset query" - types { implicit conn =>
         Ns.int.insert(1, 2, 3).transact
-        Ns.int.query.get ==> List(1, 2, 3)
-        Ns.int.query.limit(2).get ==> List(1, 2)
-        Ns.int.query.offset(1).get ==> (List(2, 3), 3, true)
-        Ns.int.query.offset(1).limit(1).get ==> (List(2), 3, true)
+        Ns.int.a1.query.get ==> List(1, 2, 3)
+        Ns.int.a1.query.limit(2).get ==> List(1, 2)
+        Ns.int.a1.query.offset(1).get ==> (List(2, 3), 3, true)
+        Ns.int.a1.query.offset(1).limit(1).get ==> (List(2), 3, true)
       }
 
 

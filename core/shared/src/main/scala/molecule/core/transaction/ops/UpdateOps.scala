@@ -19,7 +19,8 @@ trait UpdateOps extends Action2Data {
     sets: Seq[Set[T]],
     transform: T => Any,
     set2array: Set[Any] => Array[AnyRef],
-    refNs: Option[String]
+    refNs: Option[String],
+    exts: List[String]
   ): Unit
 
   def updateSetAdd[T](
@@ -27,7 +28,8 @@ trait UpdateOps extends Action2Data {
     sets: Seq[Set[T]],
     transform: T => Any,
     set2array: Set[Any] => Array[AnyRef],
-    refNs: Option[String]
+    refNs: Option[String],
+    exts: List[String]
   ): Unit
 
   def updateSetSwap[T](
@@ -35,8 +37,8 @@ trait UpdateOps extends Action2Data {
     sets: Seq[Set[T]],
     transform: T => Any,
     handleValue: T => Any,
-    dbType: String,
-    refNs: Option[String]
+    refNs: Option[String],
+    exts: List[String]
   ): Unit
 
   def updateSetRemove[T](
@@ -44,8 +46,8 @@ trait UpdateOps extends Action2Data {
     set: Set[T],
     transform: T => Any,
     handleValue: T => Any,
-    dbType: String,
-    refNs: Option[String]
+    refNs: Option[String],
+    exts: List[String]
   ): Unit
 
   protected def handleIds(ids: Seq[Long]): Unit
@@ -100,18 +102,18 @@ trait UpdateOps extends Action2Data {
   protected lazy val set2arrayShort     : Set[Any] => Array[AnyRef] = (_: Set[Any]) => Array.empty[AnyRef]
   protected lazy val set2arrayChar      : Set[Any] => Array[AnyRef] = (_: Set[Any]) => Array.empty[AnyRef]
 
-  protected lazy val dbTypeString    : String = ""
-  protected lazy val dbTypeInt       : String = ""
-  protected lazy val dbTypeLong      : String = ""
-  protected lazy val dbTypeFloat     : String = ""
-  protected lazy val dbTypeDouble    : String = ""
-  protected lazy val dbTypeBoolean   : String = ""
-  protected lazy val dbTypeBigInt    : String = ""
-  protected lazy val dbTypeBigDecimal: String = ""
-  protected lazy val dbTypeDate      : String = ""
-  protected lazy val dbTypeUUID      : String = ""
-  protected lazy val dbTypeURI       : String = ""
-  protected lazy val dbTypeByte      : String = ""
-  protected lazy val dbTypeShort     : String = ""
-  protected lazy val dbTypeChar      : String = ""
+  protected lazy val extsString     = List("", "")
+  protected lazy val extsInt        = List("", "")
+  protected lazy val extsLong       = List("", "")
+  protected lazy val extsFloat      = List("", "")
+  protected lazy val extsDouble     = List("", "")
+  protected lazy val extsBoolean    = List("", "")
+  protected lazy val extsBigInt     = List("", "")
+  protected lazy val extsBigDecimal = List("", "")
+  protected lazy val extsDate       = List("", "")
+  protected lazy val extsUUID       = List("", "")
+  protected lazy val extsURI        = List("", "")
+  protected lazy val extsByte       = List("", "")
+  protected lazy val extsShort      = List("", "")
+  protected lazy val extsChar       = List("", "")
 }

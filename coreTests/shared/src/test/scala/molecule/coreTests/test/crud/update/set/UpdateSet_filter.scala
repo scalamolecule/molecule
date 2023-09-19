@@ -48,7 +48,7 @@ trait UpdateSet_filter extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Some(Set(3))),
         ).transact.map(_.ids)
 
-        _ <- Ns.i.ints_?.query.get.map(_ ==> List(
+        _ <- Ns.i.ints_?.query.get.map(_.toSet ==> Set( // (since we can't sort by Sets)
           (1, None),
           (1, Some(Set(2))),
           (2, Some(Set(3))),

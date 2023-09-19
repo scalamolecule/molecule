@@ -13,146 +13,23 @@ trait ResolveExprSet_postgres[Tpl]
   extends ResolveExprSet_h2[Tpl]
     with LambdasSet_postgres { self: SqlQueryBase =>
 
-  //  override protected def resolveAttrSetMan(attr: AttrSetMan): Unit = {
-  //    aritiesAttr()
-  //    attr match {
-  //      case at: AttrSetManString     => setMan(attr, "String", at.vs, resSetString)
-  //      case at: AttrSetManInt        => setMan(attr, "Int", at.vs, resSetInt)
-  //      case at: AttrSetManLong       => setMan(attr, "Long", at.vs, resSetLong)
-  //      case at: AttrSetManFloat      => setMan(attr, "Float", at.vs, resSetFloat)
-  //      case at: AttrSetManDouble     => setMan(attr, "Double", at.vs, resSetDouble)
-  //      case at: AttrSetManBoolean    => setMan(attr, "Boolean", at.vs, resSetBoolean)
-  //      case at: AttrSetManBigInt     => setMan(attr, "BigInt", at.vs, resSetBigInt)
-  //      case at: AttrSetManBigDecimal => setMan(attr, "BigDecimal", at.vs, resSetBigDecimal)
-  //      case at: AttrSetManDate       => setMan(attr, "Date", at.vs, resSetDate)
-  //      case at: AttrSetManUUID       => setMan(attr, "UUID", at.vs, resSetUUID)
-  //      case at: AttrSetManURI        => setMan(attr, "URI", at.vs, resSetURI)
-  //      case at: AttrSetManByte       => setMan(attr, "Byte", at.vs, resSetByte)
-  //      case at: AttrSetManShort      => setMan(attr, "Short", at.vs, resSetShort)
-  //      case at: AttrSetManChar       => setMan(attr, "Char", at.vs, resSetChar)
-  //    }
-  //  }
-  //
-  //  override protected def resolveAttrSetTac(attr: AttrSetTac): Unit = {
-  //    attr match {
-  //      case at: AttrSetTacString     => setTac(attr, "String", at.vs, resSetString)
-  //      case at: AttrSetTacInt        => setTac(attr, "Int", at.vs, resSetInt)
-  //      case at: AttrSetTacLong       => setTac(attr, "Long", at.vs, resSetLong)
-  //      case at: AttrSetTacFloat      => setTac(attr, "Float", at.vs, resSetFloat)
-  //      case at: AttrSetTacDouble     => setTac(attr, "Double", at.vs, resSetDouble)
-  //      case at: AttrSetTacBoolean    => setTac(attr, "Boolean", at.vs, resSetBoolean)
-  //      case at: AttrSetTacBigInt     => setTac(attr, "BigInt", at.vs, resSetBigInt)
-  //      case at: AttrSetTacBigDecimal => setTac(attr, "BigDecimal", at.vs, resSetBigDecimal)
-  //      case at: AttrSetTacDate       => setTac(attr, "Date", at.vs, resSetDate)
-  //      case at: AttrSetTacUUID       => setTac(attr, "UUID", at.vs, resSetUUID)
-  //      case at: AttrSetTacURI        => setTac(attr, "URI", at.vs, resSetURI)
-  //      case at: AttrSetTacByte       => setTac(attr, "Byte", at.vs, resSetByte)
-  //      case at: AttrSetTacShort      => setTac(attr, "Short", at.vs, resSetShort)
-  //      case at: AttrSetTacChar       => setTac(attr, "Char", at.vs, resSetChar)
-  //    }
-  //  }
-  //
-  //  override protected def resolveAttrSetOpt(attr: AttrSetOpt): Unit = {
-  //    aritiesAttr()
-  //    hasOptAttr = true // to avoid redundant None's
-  //    attr match {
-  //      case at: AttrSetOptString     => setOpt(at, at.vs, resOptSetString, resSetString)
-  //      case at: AttrSetOptInt        => setOpt(at, at.vs, resOptSetInt, resSetInt)
-  //      case at: AttrSetOptLong       => setOpt(at, at.vs, resOptSetLong, resSetLong)
-  //      case at: AttrSetOptFloat      => setOpt(at, at.vs, resOptSetFloat, resSetFloat)
-  //      case at: AttrSetOptDouble     => setOpt(at, at.vs, resOptSetDouble, resSetDouble)
-  //      case at: AttrSetOptBoolean    => setOpt(at, at.vs, resOptSetBoolean, resSetBoolean)
-  //      case at: AttrSetOptBigInt     => setOpt(at, at.vs, resOptSetBigInt, resSetBigInt)
-  //      case at: AttrSetOptBigDecimal => setOpt(at, at.vs, resOptSetBigDecimal, resSetBigDecimal)
-  //      case at: AttrSetOptDate       => setOpt(at, at.vs, resOptSetDate, resSetDate)
-  //      case at: AttrSetOptUUID       => setOpt(at, at.vs, resOptSetUUID, resSetUUID)
-  //      case at: AttrSetOptURI        => setOpt(at, at.vs, resOptSetURI, resSetURI)
-  //      case at: AttrSetOptByte       => setOpt(at, at.vs, resOptSetByte, resSetByte)
-  //      case at: AttrSetOptShort      => setOpt(at, at.vs, resOptSetShort, resSetShort)
-  //      case at: AttrSetOptChar       => setOpt(at, at.vs, resOptSetChar, resSetChar)
-  //    }
-  //  }
-  //
-  //
-  //  protected def setMan[T: ClassTag](attr: Attr, tpe: String, args: Seq[Set[T]], res: ResSet[T]): Unit = {
-  //    val col = getCol(attr: Attr)
-  //    select += col
-  //    if (isNestedOpt) {
-  //      addCast(res.sql2setOrNull)
-  //    } else {
-  //      addCast(res.sql2set)
-  //      notNull += col
-  //    }
-  //
-  //    attr.filterAttr.fold {
-  //      if (filterAttrVars.contains(attr.name) && attr.op != V) {
-  //        // Runtime check needed since we can't type infer it
-  //        throw ModelError(s"Cardinality-set filter attributes not allowed to do additional filtering. Found:\n  " + attr)
-  //      }
-  //      setExpr(col, attr.op, args, res, "man")
-  //    } {
-  //      case filterAttr: AttrOne => setExpr2(col, attr.op, filterAttr.name, true)
-  //      case filterAttr          => setExpr2(col, attr.op, filterAttr.name, false, tpe)
-  //    }
-  //  }
-  //
-  //  protected def setTac[T: ClassTag](attr: Attr, tpe: String, args: Seq[Set[T]], res: ResSet[T]): Unit = {
-  //    val col = getCol(attr: Attr)
-  //    attr.filterAttr.fold {
-  //      setExpr(col, attr.op, args, res, "tac")
-  //    } {
-  //      case filterAttr: AttrOne => setExpr2(col, attr.op, filterAttr.name, true)
-  //      case filterAttr          => setExpr2(col, attr.op, filterAttr.name, false, tpe)
-  //    }
-  //    notNull += col
-  //  }
-  //
-  //
-  //  protected def setOpt[T: ClassTag](attr: Attr, optSets: Option[Seq[Set[T]]], resOpt: ResSetOpt[T]): Unit = {
-  //    val col = getCol(attr: Attr)
-  //    select += col
-  //    addCast(resOpt.sql2setOpt)
-  //    attr.op match {
-  //      case V     => ()
-  //      case Eq    => setOptEqual(col, optSets, resOpt.set2sqls)
-  //      case Neq   => setOptNeq(col, optSets, resOpt.set2sqls)
-  //      case Has   => optHas(col, optSets, resOpt.one2sql)
-  //      case HasNo => optHasNo(col, optSets, resOpt.one2sql)
-  //      case other => unexpectedOp(other)
-  //    }
-  //  }
-  //
-  //  protected def setExpr[T: ClassTag](col: String, op: Op, sets: Seq[Set[T]], res: ResSet[T], mode: String): Unit = {
-  //    op match {
-  //      case V         => if (mode == "man") setAttr(col, res) else ()
-  //      case Eq        => setEqual(col, sets, res.set2sqls)
-  //      case Neq       => setNeq(col, sets, res.set2sqls)
-  //      case Has       => has(col, sets, res.one2sql)
-  //      case HasNo     => hasNo(col, sets, res.one2sql)
-  //      case NoValue   => setNoValue(col)
-  //      case Fn(kw, n) => setAggr(col, kw, n, res)
-  //      case other     => unexpectedOp(other)
-  //    }
-  //  }
-  //
-  //  protected def setExpr2(col: String, op: Op, filterAttr: String, cardOne: Boolean, tpe: String = ""): Unit = {
-  //    op match {
-  //      case Eq    => setEqual2(col, filterAttr)
-  //      case Neq   => setNeq2(col, filterAttr)
-  //      case Has   => has2(col, filterAttr, cardOne, tpe)
-  //      case HasNo => hasNo2(col, filterAttr, cardOne, tpe)
-  //      case other => unexpectedOp(other)
-  //    }
-  //  }
-  //
-  //
   override protected def setAttr[T](col: String, res: ResSet[T]): Unit = {
     select -= col
-    val colAlias = col.replace(".", "_")
-    select += s"ARRAY_AGG(DISTINCT $colAlias)"
-    from = from :+ s"UNNEST($col) AS $colAlias"
+    if (res.tpe == "Boolean") {
+      // If we don't apply this hack, Boolean sets throw
+      // ERROR: cannot accumulate arrays of different dimensionality
+      // https://stackoverflow.com/questions/46849237/postgresql-array-agginteger/46849678#46849678
+      val colAlias = col.replace(".", "_")
+      select += s"ARRAY_AGG(DISTINCT $colAlias)"
+      from = from :+ s"UNNEST($col) AS $colAlias"
+      replaceCast(res.sql2set)
+    } else {
+      select += s"ARRAY_AGG($col)"
+      where += (("", s"$col <> '{}'"))
+      replaceCast(res.nestedArray2coalescedSet)
+    }
+    having += "COUNT(*) > 0"
     aggregate = true
-    replaceCast(res.sql2set)
   }
 
   override protected def setAggr[T](col: String, fn: String, optN: Option[Int], res: ResSet[T]): Unit = {

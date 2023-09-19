@@ -22,11 +22,16 @@ trait Delete_postgres
   def getData(elements: List[Element], nsMap: Map[String, MetaNs]): Data = {
     val refPath = List(getInitialNs(elements))
     resolve(elements, true)
-
-    if (ids.isEmpty && filterElements.nonEmpty) {
-      deleteTableData(refPath, nsMap, getIds)
-    } else {
+    if (ids.nonEmpty) {
       deleteTableData(refPath, nsMap, ids)
+    } else if (filterElements.nonEmpty) {
+      ids = getIds
+      if (ids.nonEmpty)
+        deleteTableData(refPath, nsMap, ids)
+      else
+        (Nil, Nil)
+    } else {
+      (Nil, Nil)
     }
   }
 

@@ -20,10 +20,10 @@ trait AsyncApi extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         for {
           List(a, b) <- Ns.int.insert(1, 2).transact.map(_.ids)
           _ <- Ns.int(3).save.transact
-          _ <- Ns.int.query.get.map(_ ==> List(1, 2, 3))
+          _ <- Ns.int.a1.query.get.map(_ ==> List(1, 2, 3))
           _ <- Ns(a).int(10).update.transact
           _ <- Ns(b).delete.transact
-          _ <- Ns.int.query.get.map(_ ==> List(3, 10))
+          _ <- Ns.int.a1.query.get.map(_ ==> List(3, 10))
         } yield ()
       }
 
@@ -78,10 +78,10 @@ trait AsyncApi extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       "Offset query" - types { implicit conn =>
         for {
           _ <- Ns.int.insert(1, 2, 3).transact
-          _ <- Ns.int.query.get.map(_ ==> List(1, 2, 3))
-          _ <- Ns.int.query.limit(2).get.map(_ ==> List(1, 2))
-          _ <- Ns.int.query.offset(1).get.map(_ ==> (List(2, 3), 3, true))
-          _ <- Ns.int.query.offset(1).limit(1).get.map(_ ==> (List(2), 3, true))
+          _ <- Ns.int.a1.query.get.map(_ ==> List(1, 2, 3))
+          _ <- Ns.int.a1.query.limit(2).get.map(_ ==> List(1, 2))
+          _ <- Ns.int.a1.query.offset(1).get.map(_ ==> (List(2, 3), 3, true))
+          _ <- Ns.int.a1.query.offset(1).limit(1).get.map(_ ==> (List(2), 3, true))
         } yield ()
       }
 

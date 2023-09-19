@@ -17,7 +17,7 @@ trait Save_h2
   doPrint = false
 
   // Resolve after all back refs have been resolved and namespaces grouped
-  private var postResolvers = List.empty[Unit => Unit]
+  protected var postResolvers = List.empty[Unit => Unit]
 
   def getData(elements: List[Element]): Data = {
     initialNs = getInitialNs(elements)
@@ -28,19 +28,18 @@ trait Save_h2
     (getTables, Nil)
   }
 
-  private def addRowSetterToTables(): Unit = {
+  protected def addRowSetterToTables(): Unit = {
     inserts.foreach {
       case (refPath, cols) =>
         val table             = refPath.last
         val columns           = cols.map(_._1).mkString(",\n  ")
         val inputPlaceholders = cols.map(_ => "?").mkString(", ")
-
-        val stmt =
+        val stmt              = {
           s"""INSERT INTO $table (
              |  $columns
              |) VALUES ($inputPlaceholders)""".stripMargin
-
-        val colSetters = colSettersMap(refPath)
+        }
+        val colSetters        = colSettersMap(refPath)
         debug(s"--- save -------------------  ${colSetters.length}  $refPath")
         debug(stmt)
 
@@ -61,7 +60,7 @@ trait Save_h2
     }
   }
 
-  private def getTables: List[Table] = {
+  protected def getTables: List[Table] = {
     // Add insert resolver to each table insert
     inserts.map { case (refPath, _) =>
       val rowSetters = rowSettersMap(refPath)
@@ -75,7 +74,7 @@ trait Save_h2
     }
   }
 
-  private def getParamIndex(attr: String, add: Boolean = true, castExt: String = ""): (List[String], Int) = {
+  protected def getParamIndex(attr: String, add: Boolean = true, castExt: String = ""): (List[String], Int) = {
     if (inserts.exists(_._1 == curRefPath)) {
       inserts = inserts.map {
         case (path, cols) if path == curRefPath =>
@@ -132,7 +131,7 @@ trait Save_h2
             ps.setNull(paramIndex, 0)
           } else {
             val conn  = ps.getConnection
-//            val array = conn.createArrayOf("AnyRef", set2array(set.asInstanceOf[Set[Any]]))
+            //            val array = conn.createArrayOf("AnyRef", set2array(set.asInstanceOf[Set[Any]]))
             val array = conn.createArrayOf(exts(1), set2array(set.asInstanceOf[Set[Any]]))
             ps.setArray(paramIndex, array)
           }

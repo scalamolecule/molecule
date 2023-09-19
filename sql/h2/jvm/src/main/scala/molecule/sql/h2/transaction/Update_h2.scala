@@ -16,7 +16,7 @@ trait Update_h2
     with MoleculeLogging { self: ResolveUpdate =>
 
   doPrint = false
-  private var curParamIndex = 1
+  protected var curParamIndex = 1
 
   def getData(elements: List[Element]): Data = {
     curRefPath = List(getInitialNs(elements))
@@ -25,7 +25,7 @@ trait Update_h2
     (manualTableDatas ++ getTables, Nil)
   }
 
-  private def addRowSetterToTables(): Unit = {
+  protected def addRowSetterToTables(): Unit = {
     debug("updates      : " + updates)
     debug("colSettersMap: " + colSettersMap.keys.toList)
     updates.foreach {
@@ -79,7 +79,7 @@ trait Update_h2
     }
   }
 
-  private def getTables: List[Table] = {
+  protected def getTables: List[Table] = {
     // Add insert resolver to each table insert
     updates.map { case (refPath, _) =>
       val rowSetters = rowSettersMap(refPath)
@@ -93,7 +93,7 @@ trait Update_h2
     }
   }
 
-  private def updateCurRefPath(attr: String): (List[String], Int) = {
+  protected def updateCurRefPath(attr: String): (List[String], Int) = {
     if (updates.exists(_._1 == curRefPath)) {
       updates = updates.map {
         case (path, cols) if path == curRefPath =>
@@ -109,7 +109,7 @@ trait Update_h2
     (curRefPath, paramIndexes(curRefPath, attr))
   }
 
-  private def addToUpdateCols(a: Attr) = {
+  protected def addToUpdateCols(a: Attr) = {
     if (!updateCols.contains(curRefPath)) {
       updateCols += curRefPath -> Nil
     }
@@ -123,7 +123,8 @@ trait Update_h2
     transformValue: T => Any,
     handleValue: T => Any
   ): Unit = {
-    val attr = a.name
+    //    val attr = a.name
+    val attr = a.attr
     updateCurRefPath(attr)
     placeHolders = placeHolders :+ s"$attr = ?"
     val colSetter: Setter = vs match {
@@ -155,9 +156,10 @@ trait Update_h2
     sets: Seq[Set[T]],
     transform: T => Any,
     set2array: Set[Any] => Array[AnyRef],
-    refNs: Option[String]
+    refNs: Option[String],
+    exts: List[String]
   ): Unit = {
-    val attr = a.name
+    val attr = a.attr
     refNs.fold {
       updateCurRefPath(attr)
       placeHolders = placeHolders :+ s"$attr = ?"
@@ -169,7 +171,7 @@ trait Update_h2
           val array = set2array(set.asInstanceOf[Set[Any]])
           (ps: PS, _: IdsMap, _: RowIndex) => {
             val conn = ps.getConnection
-            ps.setArray(curParamIndex, conn.createArrayOf("AnyRef", array))
+            ps.setArray(curParamIndex, conn.createArrayOf(exts(1), array))
             curParamIndex += 1
           }
 
@@ -218,9 +220,11 @@ trait Update_h2
     sets: Seq[Set[T]],
     transform: T => Any,
     set2array: Set[Any] => Array[AnyRef],
-    refNs: Option[String]
+    refNs: Option[String],
+    exts: List[String]
   ): Unit = {
-    val attr = a.name
+    //    val attr = a.name
+    val attr = a.attr
     refNs.fold {
       updateCurRefPath(attr)
       val colSetter = sets match {
@@ -232,7 +236,7 @@ trait Update_h2
           val array = set2array(set.asInstanceOf[Set[Any]])
           (ps: PS, _: IdsMap, _: RowIndex) => {
             val conn = ps.getConnection
-            ps.setArray(curParamIndex, conn.createArrayOf("AnyRef", array))
+            ps.setArray(curParamIndex, conn.createArrayOf(exts(1), array))
             curParamIndex += 1
           }
 
@@ -274,8 +278,8 @@ trait Update_h2
     sets: Seq[Set[T]],
     transform: T => Any,
     handleValue: T => Any,
-    dbType: String,
-    refNs: Option[String]
+    refNs: Option[String],
+    exts: List[String]
   ): Unit = {
     val (retracts0, adds0) = sets.splitAt(sets.length / 2)
     val (retracts, adds)   = (retracts0.flatten, adds0.flatten)
@@ -300,6 +304,7 @@ trait Update_h2
     }
     val table = a.ns
     val attr  = a.name
+    val dbType = exts(1)
     refNs.fold {
       updateCurRefPath(attr)
       def setterClauses(indents: Int) = swaps.map(_ => s"WHEN v = ? THEN ?").mkString("\n" + "  " * indents)
@@ -326,9 +331,8 @@ trait Update_h2
             handleValue(add).asInstanceOf[(PS, Int) => Unit](ps, curParamIndex + 1)
             curParamIndex += 2
           }
-          swaps.foreach { case (_, add) =>
+          adds.foreach { add =>
             handleValue(add).asInstanceOf[(PS, Int) => Unit](ps, curParamIndex)
-            curParamIndex += 1
           }
         }
       } else {
@@ -394,11 +398,12 @@ trait Update_h2
     set: Set[T],
     transform: T => Any,
     handleValue: T => Any,
-    dbType: String,
-    refNs: Option[String]
+    refNs: Option[String],
+    exts: List[String]
   ): Unit = {
     val table = a.ns
     val attr  = a.name
+    val dbType = exts(1)
     refNs.fold {
       updateCurRefPath(attr)
       val idClause  = s"$table.id IN (${ids.mkString(", ")})"
@@ -445,16 +450,18 @@ trait Update_h2
       addColSetter(curRefPath, colSetter)
 
     } { refNs =>
-      // Separate update of ref ids in join table -----------------------------
-      val ns         = a.ns
-      val refAttr    = a.attr
-      val joinTable  = s"${ns}_${refAttr}_$refNs"
-      val ns_id      = ns + "_id"
-      val refNs_id   = refNs + "_id"
-      val retractIds = set.mkString(s" AND $refNs_id IN (", ", ", ")")
-      manualTableDatas = List(
-        deleteJoins(joinTable, ns_id, getUpdateId, retractIds)
-      )
+      if (set.nonEmpty) {
+        // Separate update of ref ids in join table -----------------------------
+        val ns         = a.ns
+        val refAttr    = a.attr
+        val joinTable  = s"${ns}_${refAttr}_$refNs"
+        val ns_id      = ns + "_id"
+        val refNs_id   = refNs + "_id"
+        val retractIds = set.mkString(s" AND $refNs_id IN (", ", ", ")")
+        manualTableDatas = List(
+          deleteJoins(joinTable, ns_id, getUpdateId, retractIds)
+        )
+      }
     }
   }
 
@@ -486,7 +493,7 @@ trait Update_h2
 
   // Ref id join handling --------------------------------------------------------------------
 
-  private def deleteJoins(joinTable: String, ns_id: String, id: Long, refIds: String = ""): Table = {
+  protected def deleteJoins(joinTable: String, ns_id: String, id: Long, refIds: String = ""): Table = {
     val deletePath  = List("deleteJoins")
     val deleteJoins = s"DELETE FROM $joinTable WHERE $ns_id = $id" + refIds
     val deletePS    = sqlConn.prepareStatement(deleteJoins)
@@ -494,7 +501,7 @@ trait Update_h2
     Table(deletePath, deleteJoins, deletePS, delete)
   }
 
-  private def addJoins(joinTable: String, ns_id: String, refNs_id: String, id: Long, refIds: Iterable[Long]): Table = {
+  protected def addJoins(joinTable: String, ns_id: String, refNs_id: String, id: Long, refIds: Iterable[Long]): Table = {
     val addPath  = List("addJoins")
     val addJoins = s"INSERT INTO $joinTable($ns_id, $refNs_id) VALUES (?, ?)"
     val addPS    = sqlConn.prepareStatement(addJoins)
@@ -507,7 +514,7 @@ trait Update_h2
     Table(addPath, addJoins, addPS, add)
   }
 
-  private def getUpdateId: Long = {
+  protected def getUpdateId: Long = {
     ids.toList match {
       case List(v) => v
       case other   => throw ModelError("Expected to update one entity. Found multiple ids: " + other)
@@ -544,18 +551,18 @@ trait Update_h2
   override protected lazy val set2arrayShort     : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
   override protected lazy val set2arrayChar      : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
 
-  override protected lazy val dbTypeString    : String = "LONGVARCHAR"
-  override protected lazy val dbTypeInt       : String = "INT"
-  override protected lazy val dbTypeLong      : String = "BIGINT"
-  override protected lazy val dbTypeFloat     : String = "REAL"
-  override protected lazy val dbTypeDouble    : String = "DOUBLE"
-  override protected lazy val dbTypeBoolean   : String = "BOOLEAN"
-  override protected lazy val dbTypeBigInt    : String = "DECIMAL(100, 0)"
-  override protected lazy val dbTypeBigDecimal: String = "DECIMAL(65535, 25)"
-  override protected lazy val dbTypeDate      : String = "DATE"
-  override protected lazy val dbTypeUUID      : String = "UUID"
-  override protected lazy val dbTypeURI       : String = "VARCHAR"
-  override protected lazy val dbTypeByte      : String = "TINYINT"
-  override protected lazy val dbTypeShort     : String = "SMALLINT"
-  override protected lazy val dbTypeChar      : String = "CHAR"
+  override protected lazy val extsString     = List("", "LONGVARCHAR")
+  override protected lazy val extsInt        = List("", "INT")
+  override protected lazy val extsLong       = List("", "BIGINT")
+  override protected lazy val extsFloat      = List("", "REAL")
+  override protected lazy val extsDouble     = List("", "DOUBLE")
+  override protected lazy val extsBoolean    = List("", "BOOLEAN")
+  override protected lazy val extsBigInt     = List("", "DECIMAL(100, 0)")
+  override protected lazy val extsBigDecimal = List("", "DECIMAL(65535, 25)")
+  override protected lazy val extsDate       = List("", "DATE")
+  override protected lazy val extsUUID       = List("", "UUID")
+  override protected lazy val extsURI        = List("", "VARCHAR")
+  override protected lazy val extsByte       = List("", "TINYINT")
+  override protected lazy val extsShort      = List("", "SMALLINT")
+  override protected lazy val extsChar       = List("", "CHAR")
 }

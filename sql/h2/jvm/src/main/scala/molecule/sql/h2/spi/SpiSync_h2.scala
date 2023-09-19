@@ -37,9 +37,7 @@ trait SpiSync_h2
   // Query --------------------------------------------------------
 
   override def query_get[Tpl](q: Query[Tpl])(implicit conn: Conn): List[Tpl] = {
-    if (q.doInspect) {
-      query_inspect(q)
-    }
+    if (q.doInspect) query_inspect(q)
     q.dbView.foreach(noTime)
     val m2q = new Model2SqlQuery_h2[Tpl](q.elements)
     JdbcQueryResolveOffset[Tpl](q.elements, q.optLimit, None, m2q)

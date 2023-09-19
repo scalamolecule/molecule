@@ -81,25 +81,25 @@ trait Delete_filter extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.insert(1).transact
         _ <- Ns.i.Ref.i.insert((2, 20), (3, 30)).transact
 
-        _ <- Ns.i.query.get.map(_ ==> List(1, 2, 3))
+        _ <- Ns.i.a1.query.get.map(_ ==> List(1, 2, 3))
         _ <- Ns.i.Ref.i.query.get.map(_ ==> List((2, 20), (3, 30)))
 
         // Nothing deleted since entity 1 doesn't have a ref
         _ <- Ns.i_(1).Ref.i_.delete.transact
-        _ <- Ns.i.query.get.map(_ ==> List(1, 2, 3))
+        _ <- Ns.i.a1.query.get.map(_ ==> List(1, 2, 3))
 
         // Second entity has a ref and will be deleted
         _ <- Ns.i_(2).Ref.i_.delete.transact
-        _ <- Ns.i.query.get.map(_ ==> List(1, 3))
+        _ <- Ns.i.a1.query.get.map(_ ==> List(1, 3))
         _ <- Ns.i.Ref.i.query.get.map(_ ==> List((3, 30)))
 
         // Note that Ref.int entity is a separate entity and is not deleted.
         // Only the entity of the initial namespace is deleted
-        _ <- Ref.i.query.get.map(_ ==> List(20, 30))
+        _ <- Ref.i.a1.query.get.map(_ ==> List(20, 30))
 
         // Ns.i entity has no ref to Ref.i_(42) so nothing is deleted
         _ <- Ns.i_.Ref.i_(42).delete.transact
-        _ <- Ns.i.query.get.map(_ ==> List(1, 3))
+        _ <- Ns.i.a1.query.get.map(_ ==> List(1, 3))
         _ <- Ns.i.Ref.i.query.get.map(_ ==> List((3, 30)))
 
         // Ns.i entity has a ref to Ref.i_(30) so it will be deleted

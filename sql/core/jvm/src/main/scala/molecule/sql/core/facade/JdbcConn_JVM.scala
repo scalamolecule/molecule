@@ -80,9 +80,9 @@ case class JdbcConn_JVM(
         debug("D --- table ----------------------------------------------")
         debug("idsMap 1: " + idsMap)
         debug(stmt)
+
         // Populate prepared statement
         populatePS(ps, idsMap, 0)
-
         ps.executeBatch()
         val resultSet = ps.getGeneratedKeys // is empty if no nested data
         ids = List.empty[Long]

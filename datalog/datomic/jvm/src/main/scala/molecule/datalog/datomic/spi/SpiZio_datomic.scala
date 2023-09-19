@@ -152,7 +152,7 @@ trait SpiZio_datomic
 
   // Helpers ---------
 
-  protected def sync2zio[T](query: DatomicConn_JVM => T): ZIO[Conn, MoleculeError, T] = {
+  private def sync2zio[T](query: DatomicConn_JVM => T): ZIO[Conn, MoleculeError, T] = {
     for {
       conn0 <- ZIO.service[Conn]
       conn = conn0.asInstanceOf[DatomicConn_JVM]

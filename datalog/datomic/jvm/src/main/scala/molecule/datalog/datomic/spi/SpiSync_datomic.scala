@@ -17,7 +17,7 @@ object SpiSync_datomic extends SpiSync_datomic
 
 trait SpiSync_datomic
   extends SpiSync
-    with DatomicSpiZioBase
+    with DatomicSpiSyncBase
     with PrintInspect
     with FutureUtils
     with JavaConversions {
@@ -129,16 +129,5 @@ trait SpiSync_datomic
     } catch {
       case t: Throwable => throw ModelError(t.toString)
     }
-  }
-
-
-  // Util
-
-  protected def sync2zio[T](query: DatomicConn_JVM => T): ZIO[Conn, MoleculeError, T] = {
-    for {
-      conn0 <- ZIO.service[Conn]
-      conn = conn0.asInstanceOf[DatomicConn_JVM]
-      result <- moleculeError(ZIO.attemptBlocking(query(conn)))
-    } yield result
   }
 }

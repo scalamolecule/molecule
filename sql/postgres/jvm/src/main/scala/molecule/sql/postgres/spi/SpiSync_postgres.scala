@@ -416,6 +416,7 @@ trait SpiSync_postgres
           case "_int8"    => array(n, "Bigint")
           case "float8"   => value(resultSet.getDouble(n), "Double")
           case "text"     => value(resultSet.getString(n), "String/URI")
+          case "_text"    => array(n, "String/URI")
           case "_bool"    => array(n, "Boolean")
           case "_numeric" => array(n, "Bigint")
 

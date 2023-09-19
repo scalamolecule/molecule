@@ -15,10 +15,13 @@ trait Insert_postgres extends Insert_h2 { self: ResolveInsert with InsertResolve
         val table             = refPath.last
         val columns           = cols.map(_._1).mkString(",\n  ")
         val inputPlaceholders = cols.map { case (_, castExt) => s"?$castExt" }.mkString(", ")
-        val stmt              =
+        val stmt              = if (cols.nonEmpty) {
           s"""INSERT INTO $table (
              |  $columns
              |) VALUES ($inputPlaceholders)""".stripMargin
+        } else {
+          s"INSERT INTO $table DEFAULT VALUES"
+        }
 
         debug(s"B -------------------- refPath: $refPath")
         debug(stmt)

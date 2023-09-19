@@ -111,6 +111,7 @@ trait ResolveExprSet_h2[Tpl] extends ResolveExpr with LambdasSet_h2 with AggrUti
   ): Unit = {
     val col = getCol(attr: Attr)
     select += col
+    groupByCols += col // if we later need to group by non-aggregated columns
     addCast(resOpt.sql2setOpt)
     attr.op match {
       case V     => ()

@@ -42,10 +42,10 @@ trait DatomicQueryBase extends BaseHelpers with JavaConversions { self: Model2Qu
 
   // Main query
   final protected var isRef       = false
-  final var isNested    = false
-  final var isNestedOpt = false
+  final           var isNested    = false
+  final           var isNestedOpt = false
 
-  final val nestedIds = new ArrayBuffer[String]
+  final           val nestedIds = new ArrayBuffer[String]
   final protected val find      = new ArrayBuffer[String]
   final protected val widh      = new ArrayBuffer[String]
   final protected val in        = new ArrayBuffer[String]
@@ -57,13 +57,13 @@ trait DatomicQueryBase extends BaseHelpers with JavaConversions { self: Model2Qu
   final protected val wherePost = new ArrayBuffer[(String, Int)]
 
   // Input args and cast lambdas
-  final protected val preArgs  = new ArrayBuffer[AnyRef]
-  final protected val args     = new ArrayBuffer[AnyRef]
-  final var castss   = List(List.empty[AnyRef => AnyRef])
-  final var aritiess = List(List.empty[List[Int]])
+  final protected val preArgs = new ArrayBuffer[AnyRef]
+  final protected val args    = new ArrayBuffer[AnyRef]
+  final var castss            = List(List.empty[AnyRef => AnyRef])
+  final var aritiess          = List(List.empty[List[Int]])
 
   // Sorting
-  final var sortss    = List(List.empty[(Int, Int => (Row, Row) => Int)])
+  final           var sortss    = List(List.empty[(Int, Int => (Row, Row) => Int)])
   final protected var attrIndex = -1
 
   // Pull coordinates

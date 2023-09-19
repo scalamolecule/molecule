@@ -37,9 +37,7 @@ trait ResolveExprOne_id[Tpl]
   }
 
   private def addSort(sorter: Option[(Int, Int => (Row, Row) => Int)]): Unit = {
-    sorter.foreach {
-      case s => sortss = sortss.init :+ (sortss.last :+ s)
-    }
+    sorter.foreach(s => sortss = sortss.init :+ (sortss.last :+ s))
   }
 
   private def man[T: ClassTag](

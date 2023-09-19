@@ -111,7 +111,8 @@ trait Update_datomic extends DatomicBase_JVM with UpdateOps with MoleculeLogging
     sets: Seq[Set[T]],
     transform: T => Any,
     set2array: Set[Any] => Array[AnyRef],
-    refNs: Option[String]
+    refNs: Option[String],
+    exts: List[String]
   ): Unit = {
     if (!isUpsert) {
       val dummyFilterAttr = AttrOneTacInt(a.ns, a.attr, V, Nil, None, None, Nil, Nil, None, None)
@@ -136,7 +137,8 @@ trait Update_datomic extends DatomicBase_JVM with UpdateOps with MoleculeLogging
     sets: Seq[Set[T]],
     transform: T => Any,
     set2array: Set[Any] => Array[AnyRef],
-    refNs: Option[String]
+    refNs: Option[String],
+    exts: List[String]
   ): Unit = {
     sets match {
       case Seq(set) =>
@@ -159,8 +161,8 @@ trait Update_datomic extends DatomicBase_JVM with UpdateOps with MoleculeLogging
     sets: Seq[Set[T]],
     transform: T => Any,
     handleValue: T => Any,
-    dbType: String,
-    refNs: Option[String]
+    refNs: Option[String],
+    exts: List[String]
   ): Unit = {
     val (retracts0, adds0) = sets.splitAt(sets.length / 2)
     val (retracts, adds)   = (retracts0.flatten, adds0.flatten)
@@ -196,8 +198,8 @@ trait Update_datomic extends DatomicBase_JVM with UpdateOps with MoleculeLogging
     set: Set[T],
     transform: T => Any,
     handleValue: T => Any,
-    dbType: String,
-    refNs: Option[String]
+    refNs: Option[String],
+    exts: List[String]
   ): Unit = {
     if (set.nonEmpty) {
       data = data :+ (("retract", a.ns, a.attr, set.map(v => transform(v).asInstanceOf[AnyRef]).toSeq, false))

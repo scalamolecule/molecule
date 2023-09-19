@@ -8,7 +8,6 @@ import scala.language.implicitConversions
 
 object AdhocDatomicJVM extends DatomicTestSuite {
 
-
   override lazy val tests = Tests {
 
     "types" - types { implicit conn =>

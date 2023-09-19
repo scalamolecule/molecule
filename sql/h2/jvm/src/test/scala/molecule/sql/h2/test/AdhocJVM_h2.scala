@@ -12,32 +12,25 @@ object AdhocJVM_h2 extends TestSuite_h2 {
 
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
-      val a = (1, int1)
-      val b = (2, int2)
-      val c = (3, int3)
       for {
-        _ <- Ns.i.int.insert(List(a, b, c)).transact
-
-        // Find all attribute values
-        _ <- Ns.i.a1.int.query.get.map(_ ==> List(a, b, c))
-//        _ <- Ns.i(1).save.transact
-//        _ <- Ns.i.query.get.map(_ ==> List(1))
+        _ <- Ns.int.insert(1).transact
+        _ <- Ns.int.query.get.map(_ ==> List(1))
 
 
       } yield ()
     }
 
-    //    "refs" - refs { implicit conn =>
-    //      import molecule.coreTests.dataModels.core.dsl.Refs._
-    //      for {
-    //        id <- A.i(1).B.i(2).C.i(3).save.transact.map(_.id)
-    //        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
-    //
-    //
-    //      } yield ()
-    //    }
-    //
-    //
+    "refs" - refs { implicit conn =>
+      import molecule.coreTests.dataModels.core.dsl.Refs._
+      for {
+        id <- A.i(1).B.i(2).C.i(3).save.transact.map(_.id)
+        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
+
+
+      } yield ()
+    }
+
+
     //    "unique" - unique { implicit conn =>
     //      import molecule.coreTests.dataModels.core.dsl.Uniques._
     //      for {

@@ -17,7 +17,7 @@ trait Delete_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     "1 entity" - refs { implicit conn =>
       for {
         List(e1, e2, _) <- A.i.insert(1, 2, 3).transact.map(_.ids)
-        _ <- A.i.query.get.map(_ ==> List(1, 2, 3))
+        _ <- A.i.a1.query.get.map(_ ==> List(1, 2, 3))
         _ <- A(e1).delete.transact
         // or
         _ <- A.id_(e2).delete.transact
@@ -29,7 +29,7 @@ trait Delete_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     "n entities vararg" - refs { implicit conn =>
       for {
         List(e1, e2, _) <- A.i.insert(1, 2, 3).transact.map(_.ids)
-        _ <- A.i.query.get.map(_ ==> List(1, 2, 3))
+        _ <- A.i.a1.query.get.map(_ ==> List(1, 2, 3))
         _ <- A(e1, e2).delete.transact
         _ <- A.i.query.get.map(_ ==> List(3))
       } yield ()
@@ -38,7 +38,7 @@ trait Delete_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     "n entities iterable" - refs { implicit conn =>
       for {
         List(e1, e2, _) <- A.i.insert(1, 2, 3).transact.map(_.ids)
-        _ <- A.i.query.get.map(_ ==> List(1, 2, 3))
+        _ <- A.i.a1.query.get.map(_ ==> List(1, 2, 3))
         _ <- A(Seq(e1, e2)).delete.transact
         _ <- A.i.query.get.map(_ ==> List(3))
       } yield ()
@@ -47,12 +47,12 @@ trait Delete_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     "0 entities" - refs { implicit conn =>
       for {
         _ <- A.i.insert(1, 2, 3).transact
-        _ <- A.i.query.get.map(_ ==> List(1, 2, 3))
+        _ <- A.i.a1.query.get.map(_ ==> List(1, 2, 3))
 
         _ <- A(Nil).delete.transact
 
         // No entities deleted
-        _ <- A.i.query.get.map(_ ==> List(1, 2, 3))
+        _ <- A.i.a1.query.get.map(_ ==> List(1, 2, 3))
       } yield ()
     }
 
@@ -235,7 +235,7 @@ trait Delete_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             (12, 22, Seq(33, 34))
           ))
           _ <- B.i.query.get.map(_ ==> List(22)) // 21 deleted
-          _ <- C.i.query.get.map(_ ==> List(33, 34)) // 31, 32 deleted
+          _ <- C.i.a1.query.get.map(_ ==> List(33, 34)) // 31, 32 deleted
         } yield ()
       }
 
