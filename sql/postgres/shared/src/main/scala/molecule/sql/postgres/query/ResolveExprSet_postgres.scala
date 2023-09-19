@@ -1,11 +1,9 @@
 package molecule.sql.postgres.query
 
-import molecule.sql.core.query.SqlQueryBase
-import molecule.sql.h2.query.ResolveExprSet_h2
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
-import molecule.core.util.AggrUtils
-import molecule.sql.core.query.{ResolveExpr, SqlQueryBase}
+import molecule.sql.core.query.SqlQueryBase
+import molecule.sql.h2.query.ResolveExprSet_h2
 import scala.reflect.ClassTag
 
 
@@ -13,9 +11,36 @@ trait ResolveExprSet_postgres[Tpl]
   extends ResolveExprSet_h2[Tpl]
     with LambdasSet_postgres { self: SqlQueryBase =>
 
+
+  override protected def setMan[T: ClassTag](attr: Attr, tpe: String, args: Seq[Set[T]], res: ResSet[T]): Unit = {
+    val col = getCol(attr: Attr)
+    select += col
+    groupByCols += col // if we later need to group by non-aggregated columns
+
+    if (isNestedOpt) {
+      addCast(res.sql2setOrNull)
+    } else {
+      addCast(res.sql2set)
+      notNull += col
+    }
+
+    attr.filterAttr.fold {
+      if (filterAttrVars.contains(attr.name) && attr.op != V) {
+        // Runtime check needed since we can't type infer it
+        throw ModelError(s"Cardinality-set filter attributes not allowed to do additional filtering. Found:\n  " + attr)
+      }
+      setExpr(col, attr.op, args, res, "man")
+    } {
+      case filterAttr: AttrOne => setExpr2(col, attr.op, filterAttr.name, true)
+      case filterAttr          => setExpr2(col, attr.op, filterAttr.name, false, tpe)
+    }
+  }
+
+
   override protected def setAttr[T](col: String, res: ResSet[T]): Unit = {
     select -= col
-    if (res.tpe == "Boolean") {
+    groupByCols -= col
+    if (res.tpe == "Boolean" && !expectedFilterAttrs.contains(col)) {
       // If we don't apply this hack, Boolean sets throw
       // ERROR: cannot accumulate arrays of different dimensionality
       // https://stackoverflow.com/questions/46849237/postgresql-array-agginteger/46849678#46849678
@@ -306,15 +331,15 @@ trait ResolveExprSet_postgres[Tpl]
         where += (("", expr))
     }
   }
-  //
-  //  protected def has2(col: String, filterAttr: String, cardOne: Boolean, tpe: String): Unit = {
-  //    if (cardOne) {
-  //      where += (("", s"ARRAY_CONTAINS($col, $filterAttr)"))
-  //    } else {
-  //      where += (("", s"has_$tpe($col, $filterAttr)"))
-  //    }
-  //  }
-  //
+
+  override protected def has2(col: String, filterAttr: String, cardOne: Boolean, tpe: String): Unit = {
+    if (cardOne) {
+      where += (("", s"$col @> ARRAY(SELECT $filterAttr)"))
+    } else {
+      where += (("", s"$col @> $filterAttr"))
+    }
+  }
+
   //  protected def optHas[T: ClassTag](
   //    col: String,
   //    optSets: Option[Seq[Set[T]]],
@@ -348,14 +373,14 @@ trait ResolveExprSet_postgres[Tpl]
     }
   }
 
-  //  protected def hasNo2(col: String, filterAttr: String, cardOne: Boolean, tpe: String): Unit = {
-  //    if (cardOne) {
-  //      where += (("", s"NOT ARRAY_CONTAINS($col, $filterAttr)"))
-  //    } else {
-  //      where += (("", s"hasNo_$tpe($col, $filterAttr)"))
-  //    }
-  //  }
-  //
+    override protected def hasNo2(col: String, filterAttr: String, cardOne: Boolean, tpe: String): Unit = {
+      if (cardOne) {
+        where += (("", s"ARRAY(SELECT UNNEST($col) INTERSECT SELECT $filterAttr) = '{}'"))
+      } else {
+        where += (("", s"ARRAY(SELECT UNNEST($col) INTERSECT SELECT UNNEST($filterAttr)) = '{}'"))
+      }
+    }
+
   //  protected def optHasNo[T](
   //    col: String,
   //    optSets: Option[Seq[Set[T]]],

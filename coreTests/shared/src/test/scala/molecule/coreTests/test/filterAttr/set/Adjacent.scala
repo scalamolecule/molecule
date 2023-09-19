@@ -32,10 +32,10 @@ trait Adjacent extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.ii.ints.insert(a, b, c).transact
 
-        _ <- Ns.i.ii.not(Ns.ints).query.get.map(_ ==> List(a, c))
-        _ <- Ns.i.ii.not(Ns.ints_).query.get.map(_ ==> List((1, Set(0, 1, 2)), (3, Set(4))))
-        _ <- Ns.i.ii_.not(Ns.ints).query.get.map(_ ==> List((1, Set(1, 2, 3)), (3, Set(3))))
-        _ <- Ns.i.ii_.not(Ns.ints_).query.get.map(_ ==> List(1, 3))
+        _ <- Ns.i.a1.ii.not(Ns.ints).query.get.map(_ ==> List(a, c))
+        _ <- Ns.i.a1.ii.not(Ns.ints_).query.get.map(_ ==> List((1, Set(0, 1, 2)), (3, Set(4))))
+        _ <- Ns.i.a1.ii_.not(Ns.ints).query.get.map(_ ==> List((1, Set(1, 2, 3)), (3, Set(3))))
+        _ <- Ns.i.a1.ii_.not(Ns.ints_).query.get.map(_ ==> List(1, 3))
       } yield ()
     }
 

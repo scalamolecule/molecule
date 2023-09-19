@@ -412,10 +412,12 @@ trait SpiSync_postgres
           // case "LONGVARCHAR" => row += resultSet.getString(n); "k"
           // case "BINARY"      => row += resultSet.getByte(n); "l"
 
-          case "_int4"    => array(n, "Int")
-          case "_int8"    => array(n, "Bigint")
           case "float8"   => value(resultSet.getDouble(n), "Double")
           case "text"     => value(resultSet.getString(n), "String/URI")
+          case "bool"     => value(resultSet.getString(n), "Boolean")
+
+          case "_int4"    => array(n, "Int")
+          case "_int8"    => array(n, "Bigint")
           case "_text"    => array(n, "String/URI")
           case "_bool"    => array(n, "Boolean")
           case "_numeric" => array(n, "Bigint")
