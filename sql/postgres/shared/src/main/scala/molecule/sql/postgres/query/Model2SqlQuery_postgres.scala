@@ -6,9 +6,9 @@ import molecule.sql.core.query._
 
 class Model2SqlQuery_postgres[Tpl](elements0: List[Element])
   extends Model2SqlQuery[Tpl](elements0)
-    with ResolveExprOne_postgres[Tpl]
-    with ResolveExprSet_postgres[Tpl]
-    with ResolveExprSetRefAttr_postgres[Tpl]
+    with ResolveExprOne_postgres
+    with ResolveExprSet_postgres
+    with ResolveExprSetRefAttr_postgres
     with SqlQueryBase {
 
 

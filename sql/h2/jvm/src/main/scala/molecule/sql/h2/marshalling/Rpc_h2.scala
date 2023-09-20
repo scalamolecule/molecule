@@ -15,7 +15,7 @@ import molecule.core.util.FutureUtils
 import molecule.sql.core.facade.JdbcConn_JVM
 import molecule.sql.core.javaSql.ResultSetImpl
 import molecule.sql.core.spi.SpiHelpers
-import molecule.sql.core.transaction.JdbcBase_JVM
+import molecule.sql.core.transaction.{SqlBase_JVM, SqlUpdateValidator}
 import molecule.sql.h2.async._
 import molecule.sql.h2.query.Model2SqlQuery_h2
 import molecule.sql.h2.transaction._
@@ -25,9 +25,9 @@ import scala.concurrent.{Future, ExecutionContext => EC}
 
 object Rpc_h2
   extends MoleculeRpc
-    with JdbcBase_JVM
+    with SqlBase_JVM
     with SpiHelpers
-    with UpdateValidator_h2
+    with SqlUpdateValidator
     with FutureUtils {
 
   override lazy val sqlConn: Connection = ???

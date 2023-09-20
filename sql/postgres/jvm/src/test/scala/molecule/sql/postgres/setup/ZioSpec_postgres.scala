@@ -14,10 +14,11 @@ trait ZioSpec_postgres extends CoreTestZioSpec {
   override val platform = "Postgres jvm"
 
   override def inMem[T](schema: Schema): ZLayer[T, Throwable, Conn] = {
-    val url   = s"jdbc:h2:mem:test_database_" + Random.nextInt()
+    val url = "jdbc:tc:postgresql:15://localhost:5432/test?preparedStatementCacheQueries=0"
+
     val proxy = JdbcProxy(
       url,
-      schema.sqlSchema_h2,
+      schema.sqlSchema_postgres,
       schema.metaSchema,
       schema.nsMap,
       schema.attrMap,

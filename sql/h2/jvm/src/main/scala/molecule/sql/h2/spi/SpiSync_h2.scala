@@ -14,8 +14,9 @@ import molecule.core.validation.ModelValidation
 import molecule.core.validation.insert.InsertValidation
 import molecule.sql.core.facade.JdbcConn_JVM
 import molecule.sql.core.javaSql.ResultSetImpl
-import molecule.sql.core.query.{JdbcQueryResolveCursor, JdbcQueryResolveOffset}
+import molecule.sql.core.query.{SqlQueryResolveCursor, SqlQueryResolveOffset}
 import molecule.sql.core.spi.SpiHelpers
+import molecule.sql.core.transaction.SqlUpdateValidator
 import molecule.sql.h2.marshalling.Rpc_h2.Data
 import molecule.sql.h2.query.Model2SqlQuery_h2
 import molecule.sql.h2.transaction._
@@ -29,7 +30,7 @@ object SpiSync_h2 extends SpiSync_h2
 trait SpiSync_h2
   extends SpiSync
     with SpiHelpers
-    with UpdateValidator_h2
+    with SqlUpdateValidator
     with ModelUtils
     with PrintInspect
     with BaseHelpers {
@@ -40,7 +41,7 @@ trait SpiSync_h2
     if (q.doInspect) query_inspect(q)
     q.dbView.foreach(noTime)
     val m2q = new Model2SqlQuery_h2[Tpl](q.elements)
-    JdbcQueryResolveOffset[Tpl](q.elements, q.optLimit, None, m2q)
+    SqlQueryResolveOffset[Tpl](q.elements, q.optLimit, None, m2q)
       .getListFromOffset_sync(conn.asInstanceOf[JdbcConn_JVM])._1
   }
 
@@ -52,13 +53,13 @@ trait SpiSync_h2
   override def query_subscribe[Tpl](q: Query[Tpl], callback: List[Tpl] => Unit)(implicit conn: Conn): Unit = {
     val jdbcConn = conn.asInstanceOf[JdbcConn_JVM]
     val m2q      = new Model2SqlQuery_h2[Tpl](q.elements)
-    JdbcQueryResolveOffset[Tpl](q.elements, q.optLimit, None, m2q)
+    SqlQueryResolveOffset[Tpl](q.elements, q.optLimit, None, m2q)
       .subscribe(jdbcConn, callback, (elements: List[Element]) => new Model2SqlQuery_h2[Tpl](elements))
   }
   override def query_unsubscribe[Tpl](q: Query[Tpl])(implicit conn: Conn): Unit = {
     val jdbcConn = conn.asInstanceOf[JdbcConn_JVM]
     val m2q      = new Model2SqlQuery_h2[Tpl](q.elements)
-    JdbcQueryResolveOffset[Tpl](q.elements, q.optLimit, None, m2q)
+    SqlQueryResolveOffset[Tpl](q.elements, q.optLimit, None, m2q)
       .unsubscribe(jdbcConn)
   }
 
@@ -71,7 +72,7 @@ trait SpiSync_h2
     if (q.doInspect) queryOffset_inspect(q)
     q.dbView.foreach(noTime)
     val m2q = new Model2SqlQuery_h2[Tpl](q.elements)
-    JdbcQueryResolveOffset[Tpl](q.elements, q.optLimit, Some(q.offset), m2q)
+    SqlQueryResolveOffset[Tpl](q.elements, q.optLimit, Some(q.offset), m2q)
       .getListFromOffset_sync(conn.asInstanceOf[JdbcConn_JVM])
   }
 
@@ -83,7 +84,7 @@ trait SpiSync_h2
     if (q.doInspect) queryCursor_inspect(q)
     q.dbView.foreach(noTime)
     val m2q = new Model2SqlQuery_h2[Tpl](q.elements)
-    JdbcQueryResolveCursor[Tpl](q.elements, q.optLimit, Some(q.cursor), m2q)
+    SqlQueryResolveCursor[Tpl](q.elements, q.optLimit, Some(q.cursor), m2q)
       .getListFromCursor_sync(conn.asInstanceOf[JdbcConn_JVM])
   }
 

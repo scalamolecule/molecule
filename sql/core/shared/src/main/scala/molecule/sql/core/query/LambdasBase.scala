@@ -3,9 +3,10 @@ package molecule.sql.core.query
 import java.net.URI
 import java.util.{Date, UUID}
 import molecule.base.util.BaseHelpers
+import molecule.core.util.AggrUtils
 
 
-trait ResolveBase extends BaseHelpers { self: SqlQueryBase =>
+trait LambdasBase extends BaseHelpers with AggrUtils { self: SqlQueryBase =>
 
   protected lazy val one2sqlString    : String => String     = (v: String) => s"'${v.replace("'", "''")}'"
   protected lazy val one2sqlInt       : Int => String        = (v: Int) => s"$v"
@@ -53,5 +54,22 @@ trait ResolveBase extends BaseHelpers { self: SqlQueryBase =>
   protected lazy val valueByte      : Row => Byte       = (rs: Row) => rs.getByte(2)
   protected lazy val valueShort     : Row => Short      = (rs: Row) => rs.getShort(2)
   protected lazy val valueChar      : Row => Char       = (rs: Row) => rs.getString(2).charAt(0)
+
+
+  protected lazy val array2setString    : (Row, Int) => Set[String]     = (row: Row, n: Int) => sqlArray2set(row, n, valueString)
+  protected lazy val array2setInt       : (Row, Int) => Set[Int]        = (row: Row, n: Int) => sqlArray2set(row, n, valueInt)
+  protected lazy val array2setLong      : (Row, Int) => Set[Long]       = (row: Row, n: Int) => sqlArray2set(row, n, valueLong)
+  protected lazy val array2setFloat     : (Row, Int) => Set[Float]      = (row: Row, n: Int) => sqlArray2set(row, n, valueFloat)
+  protected lazy val array2setDouble    : (Row, Int) => Set[Double]     = (row: Row, n: Int) => sqlArray2set(row, n, valueDouble)
+  protected lazy val array2setBoolean   : (Row, Int) => Set[Boolean]    = (row: Row, n: Int) => sqlArray2set(row, n, valueBoolean)
+  protected lazy val array2setBigInt    : (Row, Int) => Set[BigInt]     = (row: Row, n: Int) => sqlArray2set(row, n, valueBigInt)
+  protected lazy val array2setBigDecimal: (Row, Int) => Set[BigDecimal] = (row: Row, n: Int) => sqlArray2set(row, n, valueBigDecimal)
+  protected lazy val array2setDate      : (Row, Int) => Set[Date]       = (row: Row, n: Int) => sqlArray2set(row, n, valueDate)
+  protected lazy val array2setUUID      : (Row, Int) => Set[UUID]       = (row: Row, n: Int) => sqlArray2set(row, n, valueUUID)
+  protected lazy val array2setURI       : (Row, Int) => Set[URI]        = (row: Row, n: Int) => sqlArray2set(row, n, valueURI)
+  protected lazy val array2setByte      : (Row, Int) => Set[Byte]       = (row: Row, n: Int) => sqlArray2set(row, n, valueByte)
+  protected lazy val array2setShort     : (Row, Int) => Set[Short]      = (row: Row, n: Int) => sqlArray2set(row, n, valueShort)
+  protected lazy val array2setChar      : (Row, Int) => Set[Char]       = (row: Row, n: Int) => sqlArray2set(row, n, valueChar)
+
 
 }

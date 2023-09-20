@@ -13,7 +13,9 @@ trait TestSuite_postgres extends CoreTestSuite {
   override val platform = "Postgres js"
 
   override def inMem[T](test: Conn => T, schema: Schema): T = {
-    val url   = s"jdbc:h2:mem:test_database_" + Random.nextInt()
+//    val url   = s"jdbc:h2:mem:test_database_" + Random.nextInt()
+    val url = "jdbc:tc:postgresql:15://localhost:5432/test?preparedStatementCacheQueries=0"
+
     val proxy = JdbcProxy(
       url,
       schema.sqlSchema_postgres,

@@ -46,7 +46,7 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
   ): String = {
     val distinct_ = if (distinct) " DISTINCT" else ""
     val select_   = (nestedIds ++ select).mkString(s",\n  ")
-    val from_   = from.mkString(s",\n  ")
+    val from_     = from.mkString(s",\n  ")
 
     val joins_ = if (joins.isEmpty) "" else {
       val max1  = joins.map(_._1.length).max
@@ -120,7 +120,7 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
 
 
   final def getTotalCountQuery: String = {
-    val table = from.head
+    val table  = from.head
     val joins_ = if (joins.isEmpty) "" else {
       val max1  = joins.map(_._1.length).max
       val max2  = joins.map(_._2.length).max

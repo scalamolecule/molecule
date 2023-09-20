@@ -1,13 +1,9 @@
 package molecule.sql.postgres.query
 
-import molecule.core.util.AggrUtils
-import molecule.sql.core.query.SqlQueryBase
-import molecule.sql.h2.query.ResolveExprOne_h2
 import molecule.boilerplate.ast.Model._
+import molecule.sql.core.query.{ResolveExprOne, SqlQueryBase}
 
-trait ResolveExprOne_postgres[Tpl]
-  extends ResolveExprOne_h2[Tpl]
-    with LambdasOne_postgres with AggrUtils { self: SqlQueryBase =>
+trait ResolveExprOne_postgres extends ResolveExprOne with LambdasOne_postgres { self: SqlQueryBase =>
 
 
   override protected def addSort(attr: Attr, col: String): Unit = {

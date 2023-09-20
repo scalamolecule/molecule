@@ -2,13 +2,12 @@ package molecule.sql.postgres.query
 
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
-import molecule.sql.core.query.SqlQueryBase
-import molecule.sql.h2.query.ResolveExprSet_h2
+import molecule.sql.core.query.{ResolveExprSet, SqlQueryBase}
 import scala.reflect.ClassTag
 
 
-trait ResolveExprSet_postgres[Tpl]
-  extends ResolveExprSet_h2[Tpl]
+trait ResolveExprSet_postgres
+  extends ResolveExprSet
     with LambdasSet_postgres { self: SqlQueryBase =>
 
 

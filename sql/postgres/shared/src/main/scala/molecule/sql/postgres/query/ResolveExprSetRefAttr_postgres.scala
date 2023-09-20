@@ -1,11 +1,10 @@
 package molecule.sql.postgres.query
 
-import molecule.sql.core.query.SqlQueryBase
-import molecule.sql.h2.query.ResolveExprSetRefAttr_h2
+import molecule.sql.core.query.{ResolveExprSetRefAttr, SqlQueryBase}
 import scala.reflect.ClassTag
 
-trait ResolveExprSetRefAttr_postgres[Tpl]
-  extends ResolveExprSetRefAttr_h2[Tpl]
+trait ResolveExprSetRefAttr_postgres
+  extends ResolveExprSetRefAttr
     with LambdasSet_postgres { self: SqlQueryBase =>
 
   //  protected var joinTable: String = ""

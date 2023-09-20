@@ -3,7 +3,7 @@ package molecule.sql.postgres.test
 import boopickle.Default._
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
-import molecule.sql.h2.async._
+import molecule.sql.postgres.async._
 import molecule.sql.postgres.setup.TestSuite_postgres
 import utest._
 

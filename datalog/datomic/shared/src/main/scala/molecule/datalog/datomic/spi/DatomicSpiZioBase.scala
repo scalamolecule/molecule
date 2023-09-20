@@ -8,13 +8,6 @@ import zio.{Task, ZIO}
 
 trait DatomicSpiZioBase extends PrintInspect {
 
-  protected def moleculeError[T](result: Task[T]): ZIO[Conn, MoleculeError, T] = {
-    result.mapError {
-      case e: MoleculeError => e
-      case e: Throwable     => ExecutionError(e.toString)
-    }
-  }
-
   protected def printInspectQuery(
     label: String,
     elements: List[Element]

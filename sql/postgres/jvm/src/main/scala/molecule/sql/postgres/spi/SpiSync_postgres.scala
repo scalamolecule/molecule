@@ -14,8 +14,9 @@ import molecule.core.validation.ModelValidation
 import molecule.core.validation.insert.InsertValidation
 import molecule.sql.core.facade.JdbcConn_JVM
 import molecule.sql.core.javaSql.ResultSetImpl
-import molecule.sql.core.query.{JdbcQueryResolveCursor, JdbcQueryResolveOffset}
+import molecule.sql.core.query.{SqlQueryResolveCursor, SqlQueryResolveOffset}
 import molecule.sql.core.spi.SpiHelpers
+import molecule.sql.core.transaction.SqlUpdateValidator
 import molecule.sql.postgres.marshalling.Rpc_postgres.Data
 import molecule.sql.postgres.query._
 import molecule.sql.postgres.transaction._
@@ -29,7 +30,7 @@ object SpiSync_postgres extends SpiSync_postgres
 trait SpiSync_postgres
   extends SpiSync
     with SpiHelpers
-    with UpdateValidator_postgres
+    with SqlUpdateValidator
     with ModelUtils
     with PrintInspect
     with BaseHelpers {
@@ -42,7 +43,7 @@ trait SpiSync_postgres
     }
     q.dbView.foreach(noTime)
     val m2q = new Model2SqlQuery_postgres[Tpl](q.elements)
-    JdbcQueryResolveOffset[Tpl](q.elements, q.optLimit, None, m2q)
+    SqlQueryResolveOffset[Tpl](q.elements, q.optLimit, None, m2q)
       .getListFromOffset_sync(conn.asInstanceOf[JdbcConn_JVM])._1
   }
 
@@ -54,13 +55,13 @@ trait SpiSync_postgres
   override def query_subscribe[Tpl](q: Query[Tpl], callback: List[Tpl] => Unit)(implicit conn: Conn): Unit = {
     val jdbcConn = conn.asInstanceOf[JdbcConn_JVM]
     val m2q      = new Model2SqlQuery_postgres[Tpl](q.elements)
-    JdbcQueryResolveOffset[Tpl](q.elements, q.optLimit, None, m2q)
+    SqlQueryResolveOffset[Tpl](q.elements, q.optLimit, None, m2q)
       .subscribe(jdbcConn, callback, (elements: List[Element]) => new Model2SqlQuery_postgres[Tpl](elements))
   }
   override def query_unsubscribe[Tpl](q: Query[Tpl])(implicit conn: Conn): Unit = {
     val jdbcConn = conn.asInstanceOf[JdbcConn_JVM]
     val m2q      = new Model2SqlQuery_postgres[Tpl](q.elements)
-    JdbcQueryResolveOffset[Tpl](q.elements, q.optLimit, None, m2q)
+    SqlQueryResolveOffset[Tpl](q.elements, q.optLimit, None, m2q)
       .unsubscribe(jdbcConn)
   }
 
@@ -73,7 +74,7 @@ trait SpiSync_postgres
     if (q.doInspect) queryOffset_inspect(q)
     q.dbView.foreach(noTime)
     val m2q = new Model2SqlQuery_postgres[Tpl](q.elements)
-    JdbcQueryResolveOffset[Tpl](q.elements, q.optLimit, Some(q.offset), m2q)
+    SqlQueryResolveOffset[Tpl](q.elements, q.optLimit, Some(q.offset), m2q)
       .getListFromOffset_sync(conn.asInstanceOf[JdbcConn_JVM])
   }
 
@@ -85,7 +86,7 @@ trait SpiSync_postgres
     if (q.doInspect) queryCursor_inspect(q)
     q.dbView.foreach(noTime)
     val m2q = new Model2SqlQuery_postgres[Tpl](q.elements)
-    JdbcQueryResolveCursor[Tpl](q.elements, q.optLimit, Some(q.cursor), m2q)
+    SqlQueryResolveCursor[Tpl](q.elements, q.optLimit, Some(q.cursor), m2q)
       .getListFromCursor_sync(conn.asInstanceOf[JdbcConn_JVM])
   }
 

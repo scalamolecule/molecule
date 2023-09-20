@@ -6,7 +6,7 @@ import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.marshalling.JdbcProxy
 import molecule.core.spi.{Conn, TxReport}
 import molecule.core.util.ModelUtils
-import molecule.sql.core.transaction.{JdbcBase_JVM, JdbcDataType_JVM, JoinTable, Table}
+import molecule.sql.core.transaction.{SqlBase_JVM, JdbcDataType_JVM, JoinTable, Table}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
@@ -15,7 +15,7 @@ case class JdbcConn_JVM(
   private val sqlConn0: sql.Connection
 ) extends Conn(proxy)
   with JdbcDataType_JVM
-  with JdbcBase_JVM
+  with SqlBase_JVM
   with ModelUtils
   with MoleculeLogging {
 
@@ -91,10 +91,10 @@ case class JdbcConn_JVM(
         ids = List.empty[Long]
         if (!refPath.last.contains("_")) {
           while (resultSet.next()) {
-            val id = resultSet.getLong(1)
-            debug("D  ################# " + id)
-            ids = ids :+ id
-            //          ids = ids :+ resultSet.getLong(1)
+            //            val id = resultSet.getLong(1)
+            //            debug("D  ################# " + id)
+            //            ids = ids :+ id
+            ids = ids :+ resultSet.getLong(1)
           }
         }
         ps.close()

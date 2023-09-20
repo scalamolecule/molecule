@@ -2,9 +2,6 @@ package molecule.core.util
 
 trait AggrUtils {
 
-  // Down-casting BigInt/BigDecimal calculations to double just for tests
-
-
   def getMedian(set: Set[Double]): Double = {
     val values = set.toList.sorted
     val count  = values.length

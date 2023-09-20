@@ -12,12 +12,12 @@ import molecule.sql.core.query.cursorStrategy.{NoUnique, PrimaryUnique, SubUniqu
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 
-case class JdbcQueryResolveCursor[Tpl](
+case class SqlQueryResolveCursor[Tpl](
   elements: List[Element],
   optLimit: Option[Int],
   cursor: Option[String],
   m2q: Model2SqlQuery[Tpl] with SqlQueryBase
-) extends JdbcQueryResolve[Tpl](elements, m2q)
+) extends SqlQueryResolve[Tpl](elements, m2q)
   with FutureUtils
   with CursorUtils
   with ModelTransformations_

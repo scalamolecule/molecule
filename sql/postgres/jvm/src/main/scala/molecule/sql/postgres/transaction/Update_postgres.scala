@@ -1,19 +1,18 @@
 package molecule.sql.postgres.transaction
 
-import java.sql.{Statement, PreparedStatement => PS}
-import java.util.Date
+import java.sql.{PreparedStatement => PS}
 import molecule.base.error._
 import molecule.boilerplate.ast.Model._
-import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.ResolveUpdate
-import molecule.core.transaction.ops.UpdateOps
-import molecule.sql.core.transaction.{JdbcBase_JVM, Table}
-import molecule.sql.h2.transaction.Update_h2
+import molecule.sql.core.query.Model2SqlQuery
+import molecule.sql.core.transaction.{SqlUpdate, Table}
 import molecule.sql.postgres.query.Model2SqlQuery_postgres
 import scala.annotation.tailrec
 
-trait Update_postgres
-  extends Update_h2 { self: ResolveUpdate =>
+trait Update_postgres extends SqlUpdate { self: ResolveUpdate =>
+
+  override def model2SqlQuery(elements: List[Element]): Model2SqlQuery[Any] =
+    new Model2SqlQuery_postgres[Any](elements)
 
   override def updateSetSwap[T](
     a: AttrSet,

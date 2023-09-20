@@ -8,7 +8,7 @@ import molecule.sql.core.javaSql.ResultSetImpl
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 
-abstract class JdbcQueryResolve[Tpl](
+abstract class SqlQueryResolve[Tpl](
   elements: List[Element],
   m2q: Model2SqlQuery[Tpl] with SqlQueryBase
 ) extends CursorUtils {

@@ -2,7 +2,7 @@ package molecule.core.spi
 
 import molecule.base.error._
 import molecule.core.action._
-import zio.ZIO
+import zio.{Task, ZIO}
 
 trait SpiZio  {
 
@@ -66,4 +66,11 @@ trait SpiZio  {
     txData: String,
     doPrint: Boolean = true
   ): ZIO[Conn, MoleculeError, TxReport] = ???
+
+  protected def moleculeError[T](result: Task[T]): ZIO[Conn, MoleculeError, T] = {
+    result.mapError {
+      case e: MoleculeError => e
+      case e: Throwable     => ExecutionError(e.toString)
+    }
+  }
 }

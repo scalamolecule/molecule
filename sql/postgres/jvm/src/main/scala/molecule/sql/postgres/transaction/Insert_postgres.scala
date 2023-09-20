@@ -2,10 +2,9 @@ package molecule.sql.postgres.transaction
 
 import java.sql.Statement
 import molecule.core.transaction.{InsertResolvers_, ResolveInsert}
-import molecule.sql.core.transaction.{JoinTable, Table}
-import molecule.sql.h2.transaction.Insert_h2
+import molecule.sql.core.transaction.{JoinTable, SqlInsert, Table}
 
-trait Insert_postgres extends Insert_h2 { self: ResolveInsert with InsertResolvers_ =>
+trait Insert_postgres extends SqlInsert { self: ResolveInsert with InsertResolvers_ =>
 
   doPrint = false
 

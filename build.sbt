@@ -259,7 +259,7 @@ lazy val sqlPostgres = crossProject(JSPlatform, JVMPlatform)
   .in(file("sql/postgres"))
   .settings(name := "molecule-sql-postgres")
   .settings(doPublish)
-  .dependsOn(sqlH2 % "compile->compile;test->test")
+  .dependsOn(sqlCore % "compile->compile;test->test")
   .settings(
     testFrameworks := Seq(
       new TestFramework("utest.runner.Framework"),

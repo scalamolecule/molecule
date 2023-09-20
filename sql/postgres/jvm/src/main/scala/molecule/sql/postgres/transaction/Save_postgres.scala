@@ -2,11 +2,11 @@ package molecule.sql.postgres.transaction
 
 import java.sql.{Statement, PreparedStatement => PS}
 import molecule.core.transaction.ResolveSave
-import molecule.sql.core.transaction.Table
-import molecule.sql.h2.transaction.Save_h2
+import molecule.sql.core.transaction.{SqlSave, Table}
 
-trait Save_postgres extends Save_h2 { self: ResolveSave =>
+trait Save_postgres extends SqlSave { self: ResolveSave =>
 
+  doPrint = false
 
   override protected def addRowSetterToTables(): Unit = {
     inserts.foreach {

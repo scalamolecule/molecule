@@ -8,7 +8,7 @@ import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.util.FutureUtils
 import molecule.sql.core.facade.JdbcConn_JVM
 import molecule.sql.core.javaSql.ResultSetImpl
-import molecule.sql.core.query.{CursorUtils, JdbcQueryResolve, Model2SqlQuery, SqlQueryBase}
+import molecule.sql.core.query.{CursorUtils, SqlQueryResolve, Model2SqlQuery, SqlQueryBase}
 import scala.collection.mutable.ListBuffer
 
 /**
@@ -27,7 +27,7 @@ case class PrimaryUnique[Tpl](
   optLimit: Option[Int],
   cursor: String,
   m2q: Model2SqlQuery[Tpl] with SqlQueryBase
-) extends JdbcQueryResolve[Tpl](elements, m2q)
+) extends SqlQueryResolve[Tpl](elements, m2q)
   with FutureUtils with CursorUtils with ModelTransformations_ with MoleculeLogging {
 
   def getPage(tokens: List[String], limit: Int)

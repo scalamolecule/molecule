@@ -1,4 +1,4 @@
-package molecule.sql.postgres.transaction
+package molecule.sql.core.transaction
 
 import molecule.base.error.{ExecutionError, ModelError, MoleculeError}
 import molecule.boilerplate.ast.Model._
@@ -7,7 +7,7 @@ import molecule.core.validation.ModelValidation
 import molecule.sql.core.javaSql.{ResultSetInterface => Row}
 import molecule.sql.core.spi.SpiHelpers
 
-trait UpdateValidator_postgres extends SpiHelpers {
+trait SqlUpdateValidator extends SpiHelpers {
 
   def validateUpdate(
     proxy: ConnProxy,

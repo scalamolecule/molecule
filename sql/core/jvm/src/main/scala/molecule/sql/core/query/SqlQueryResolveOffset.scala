@@ -8,12 +8,12 @@ import molecule.sql.core.facade.JdbcConn_JVM
 import molecule.sql.core.javaSql.ResultSetImpl
 import scala.collection.mutable.ListBuffer
 
-case class JdbcQueryResolveOffset[Tpl](
+case class SqlQueryResolveOffset[Tpl](
   elements: List[Element],
   optLimit: Option[Int],
   optOffset: Option[Int],
   m2q: Model2SqlQuery[Tpl] with SqlQueryBase
-) extends JdbcQueryResolve[Tpl](elements, m2q)
+) extends SqlQueryResolve[Tpl](elements, m2q)
   with FutureUtils
   with ModelUtils
   with MoleculeLogging {
@@ -71,7 +71,7 @@ case class JdbcQueryResolveOffset[Tpl](
           isDelete && mutationAttrs.head.startsWith(involvedDeleteNs)
       ) {
         callback(
-          JdbcQueryResolveOffset(elements, optLimit, None, freshM2q(elements))
+          SqlQueryResolveOffset(elements, optLimit, None, freshM2q(elements))
             .getListFromOffset_sync(conn)._1
         )
       }
