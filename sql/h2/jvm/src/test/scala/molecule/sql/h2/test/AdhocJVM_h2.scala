@@ -1,5 +1,6 @@
 package molecule.sql.h2.test
 
+import molecule.base.error.ModelError
 import molecule.core.util.Executor._
 import molecule.sql.h2.async._
 import molecule.sql.h2.setup.TestSuite_h2
@@ -44,16 +45,7 @@ object AdhocJVM_h2 extends TestSuite_h2 {
     //      import molecule.coreTests.dataModels.core.dsl.Validation._
     //
     //      for {
-    //        _ <- Require.int1.errorMsg.insert(
-    //          (1, 2),
-    //          (2, 2),
-    //          (3, 2),
-    //        ).transact
-    //
-    //        _ <- Variables.int1.errorMsg.query.inspect
-    //        _ <- Variables.int1.<(Variables.errorMsg).query.inspect
-    //        _ <- Variables.int1.<(Variables.errorMsg).query.get.map(_ ==> List())
-    //
+    //        List(r1, r2) <- RefB.i.insert(2, 3).transact.map(_.ids)
     //
     //      } yield ()
     //    }

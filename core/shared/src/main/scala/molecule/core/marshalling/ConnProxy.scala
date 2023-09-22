@@ -45,5 +45,6 @@ case class JdbcProxy(
   override val attrMap: Map[String, (Card, String, Seq[String])],
   override val uniqueAttrs: List[String],
   override val dbView: Option[DbView] = None,
-  override val uuid: UUID = UUID.randomUUID()
+  override val uuid: UUID = UUID.randomUUID(),
+  useTestContainer: Boolean = false
 ) extends ConnProxy

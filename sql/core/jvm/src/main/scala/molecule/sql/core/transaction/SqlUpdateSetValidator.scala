@@ -7,9 +7,9 @@ import molecule.core.validation.ModelValidation
 import molecule.sql.core.javaSql.{ResultSetInterface => Row}
 import molecule.sql.core.spi.SpiHelpers
 
-trait SqlUpdateValidator extends SpiHelpers {
+trait SqlUpdateSetValidator extends SpiHelpers {
 
-  def validateUpdate(
+  def validateUpdateSet(
     proxy: ConnProxy,
     elements: List[Element],
     isUpsert: Boolean,
@@ -37,7 +37,8 @@ trait SqlUpdateValidator extends SpiHelpers {
            |INNER JOIN $joinTable ON $ns.id = $joinTable.${ns}_id
            |GROUP BY $ns.id;""".stripMargin
       }
-      nestedArray2coalescedSet(a, query2resultSet(query))
+
+      nestedArray2coalescedSet(a, query2resultSet(query), a.refNs.isEmpty)
     } catch {
       case e: MoleculeError => throw e
       case t: Throwable     =>

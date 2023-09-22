@@ -18,7 +18,6 @@ trait TestSuite_h2 extends CoreTestSuite with BaseHelpers {
     val url   = "jdbc:h2:mem:test_database_" + Random.nextInt()
     val proxy = JdbcProxy(
       url,
-//      schema.sqlSchema_h2,
       schema.sqlSchema_h2,
       schema.metaSchema,
       schema.nsMap,

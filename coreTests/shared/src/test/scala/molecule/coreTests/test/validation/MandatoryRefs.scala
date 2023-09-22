@@ -133,10 +133,10 @@ trait MandatoryRefs extends CoreTestSuite with ApiAsync with SerializationUtils 
 
         id <- MandatoryRefsB.i(1).refsB(Set(r1, r2)).save.transact.map(_.ids)
 
-        // We can remove an entity from a Set of refs as long as it's not the last value
+        // Mandatory refs can be removed as long as some ref ids remain
         _ <- MandatoryRefsB(id).refsB.remove(r2).update.transact
 
-        // Can't remove the last value of a mandatory attribute Set of refs
+        // Last mandatory ref can't be removed. This can prevent creating orphan relationships.
         _ <- MandatoryRefsB(id).refsB.remove(r1).update.transact
           .map(_ ==> "Unexpected success").recover {
             case ModelError(error) =>

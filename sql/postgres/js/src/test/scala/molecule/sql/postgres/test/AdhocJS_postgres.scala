@@ -8,7 +8,7 @@ import molecule.sql.postgres.setup.TestSuite_postgres
 import utest._
 
 
-object AdhocJdbcJs extends TestSuite_postgres {
+object AdhocJS_postgres extends TestSuite_postgres {
 
   override lazy val tests = Tests {
 

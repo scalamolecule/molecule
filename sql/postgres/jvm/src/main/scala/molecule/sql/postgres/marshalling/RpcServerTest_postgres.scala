@@ -1,4 +1,4 @@
-package molecule.sql.h2.marshalling
+package molecule.sql.postgres.marshalling
 
 import akka.http.scaladsl.Http
 import molecule.core.marshalling.MoleculeRpcServer_AkkaHttp
@@ -9,9 +9,9 @@ import scala.io.StdIn
  *
  * Run with
  *
- * sbt sqlH2JVM/run
+ * sbt sqlPostgresJVM/run
  */
-object RpcServer_h2 extends MoleculeRpcServer_AkkaHttp(Rpc_h2) with App {
+object RpcServerTest_postgres extends MoleculeRpcServer_AkkaHttp(Rpc_postgres(true)) with App {
 
   Http()
     .newServerAt("localhost", 8080)

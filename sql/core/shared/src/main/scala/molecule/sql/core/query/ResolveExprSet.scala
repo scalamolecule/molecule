@@ -247,6 +247,10 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
         aggregate = true
         replaceCast(res.nestedArray2coalescedSet)
 
+
+      // Using brute force in the following aggregate functions to be able to
+      // aggregate _unique_ values (Set semantics instead of Array semantics)
+
       case "count" =>
         noBooleanSetCounts(n)
         // Count of all (non-unique) values
@@ -307,7 +311,6 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
             getMedian(set)
           }
         )
-      // select += s"MEDIAN(ALL $col)" // other semantics
 
       case "avg" =>
         // Average of unique values (Set semantics)
@@ -325,7 +328,6 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
             set.sum / set.size
           }
         )
-      // select += s"AVG(DISTINCT $col)" // other semantics
 
       case "variance" =>
         // Variance of unique values (Set semantics)
@@ -343,8 +345,6 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
             varianceOf(set.toList: _*)
           }
         )
-      // select += s"VAR_POP($col)" // other semantics
-      // select += s"VAR_SAMP($col)" // other semantics
 
       case "stddev" =>
         // Standard deviation of unique values (Set semantics)
@@ -362,7 +362,6 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
             stdDevOf(set.toList: _*)
           }
         )
-      // select += s"STDDEV($col)" // other semantics
 
       case other => unexpectedKw(other)
     }

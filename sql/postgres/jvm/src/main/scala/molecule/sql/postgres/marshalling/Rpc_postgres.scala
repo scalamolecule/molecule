@@ -1,7 +1,8 @@
 package molecule.sql.postgres.marshalling
 
 import java.nio.ByteBuffer
-import java.sql.{Connection, ResultSet => Row}
+import java.sql.{Connection, DriverManager, ResultSet => Row}
+import com.dimafeng.testcontainers.PostgreSQLContainer
 import molecule.base.error.{MoleculeError, ValidationErrors}
 import molecule.boilerplate.ast.Model._
 import molecule.core.action.{Query, QueryCursor, QueryOffset}
@@ -15,7 +16,7 @@ import molecule.core.util.FutureUtils
 import molecule.sql.core.facade.JdbcConn_JVM
 import molecule.sql.core.javaSql.ResultSetImpl
 import molecule.sql.core.spi.SpiHelpers
-import molecule.sql.core.transaction.{SqlBase_JVM, SqlUpdateValidator}
+import molecule.sql.core.transaction.{SqlBase_JVM, SqlUpdateSetValidator}
 import molecule.sql.postgres.async._
 import molecule.sql.postgres.query.Model2SqlQuery_postgres
 import molecule.sql.postgres.transaction._
@@ -23,14 +24,18 @@ import scala.annotation.nowarn
 import scala.concurrent.{Future, ExecutionContext => EC}
 
 
-object Rpc_postgres
+case class Rpc_postgres(startTestContainer: Boolean)
   extends MoleculeRpc
     with SqlBase_JVM
     with SpiHelpers
-    with SqlUpdateValidator
+    with SqlUpdateSetValidator
     with FutureUtils {
 
-  override lazy val sqlConn: Connection = ???
+  if (startTestContainer) {
+    val container = PostgreSQLContainer()
+    Class.forName(container.driverClassName)
+  }
+
 
   /**
    * Tuple type is not marshalled from client to server. So we signal this with
@@ -115,7 +120,7 @@ object Rpc_postgres
   ): Future[Either[MoleculeError, TxReport]] = either {
     for {
       conn <- getConn(proxy)
-      errors = validateUpdate(conn.proxy, elements, isUpsert,
+      errors = validateUpdateSet(conn.proxy, elements, isUpsert,
         (query: String) => {
           val ps        = conn.sqlConn.prepareStatement(
             query, Row.TYPE_SCROLL_INSENSITIVE, Row.CONCUR_READ_ONLY

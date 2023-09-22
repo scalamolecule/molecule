@@ -16,7 +16,7 @@ import molecule.sql.core.facade.JdbcConn_JVM
 import molecule.sql.core.javaSql.ResultSetImpl
 import molecule.sql.core.query.{SqlQueryResolveCursor, SqlQueryResolveOffset}
 import molecule.sql.core.spi.SpiHelpers
-import molecule.sql.core.transaction.SqlUpdateValidator
+import molecule.sql.core.transaction.SqlUpdateSetValidator
 import molecule.sql.h2.marshalling.Rpc_h2.Data
 import molecule.sql.h2.query.Model2SqlQuery_h2
 import molecule.sql.h2.transaction._
@@ -30,7 +30,7 @@ object SpiSync_h2 extends SpiSync_h2
 trait SpiSync_h2
   extends SpiSync
     with SpiHelpers
-    with SqlUpdateValidator
+    with SqlUpdateSetValidator
     with ModelUtils
     with PrintInspect
     with BaseHelpers {
@@ -234,13 +234,12 @@ trait SpiSync_h2
 
   override def update_validate(update: Update)(implicit conn0: Conn): Map[String, Seq[String]] = {
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
-    validateUpdate(conn.proxy, update.elements, update.isUpsert,
+    validateUpdateSet(conn.proxy, update.elements, update.isUpsert,
       (query: String) => {
         val ps        = conn.sqlConn.prepareStatement(
           query, Row.TYPE_SCROLL_INSENSITIVE, Row.CONCUR_READ_ONLY
         )
         val resultSet = ps.executeQuery()
-        resultSet.next()
         new ResultSetImpl(resultSet)
       }
     )
@@ -449,17 +448,5 @@ trait SpiSync_h2
     debug("---------------")
     debug("Ids: " + ids)
     TxReport(0, ids)
-  }
-
-  def validateUpdate(conn0: Conn, update: Update): Map[String, Seq[String]] = {
-    val conn = conn0.asInstanceOf[JdbcConn_JVM]
-    validateUpdate(conn.proxy, update.elements, update.isUpsert,
-      (query: String) => {
-        val ps        = conn.sqlConn.prepareStatement(query, Row.TYPE_SCROLL_INSENSITIVE, Row.CONCUR_READ_ONLY)
-        val resultSet = ps.executeQuery()
-        resultSet.next()
-        new ResultSetImpl(resultSet)
-      }
-    )
   }
 }

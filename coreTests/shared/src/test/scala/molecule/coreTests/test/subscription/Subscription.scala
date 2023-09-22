@@ -21,7 +21,7 @@ trait Subscription extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
         // Start subscription
         _ = Ns.i.query.subscribe { freshResult =>
-          intermediaryCallbackResults = intermediaryCallbackResults :+ freshResult
+          intermediaryCallbackResults = intermediaryCallbackResults :+ freshResult.sorted
         }
 
         // Mutations to be monitored by subscription
@@ -47,8 +47,8 @@ trait Subscription extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         // Mutations with no callback-involved attributes don't call back
         _ <- Ns.string("foo").save.transact
 
-        // Callback catched all intermediary results correctly
-        _ = intermediaryCallbackResults.map(_.sorted) ==> List(
+        // Callback produced all intermediary results correctly
+        _ = intermediaryCallbackResults ==> List(
           List(1, 2), // query result after 2 was saved
           List(1, 2, 3, 4), // query result after 3 and 4 were inserted
           List(1, 3, 4, 20), // query result after 2 was updated to 20
@@ -68,13 +68,13 @@ trait Subscription extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
         // Start subscription for fooResults
         _ = Ns.i.query.subscribe { freshResult =>
-          fooResults = fooResults :+ freshResult
+          fooResults = fooResults :+ freshResult.sorted
         }
 
         // Start subscription for barResults
         barQuery = Ns.s.query
         _ = barQuery.subscribe { freshResult =>
-          barResults = barResults :+ freshResult
+          barResults = barResults :+ freshResult.sorted
         }
 
         // Transact additional data

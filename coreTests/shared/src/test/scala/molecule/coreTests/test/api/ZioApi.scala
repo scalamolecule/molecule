@@ -20,10 +20,10 @@ trait ZioApi extends CoreTestZioSpec with ApiZio { spi: SpiZio =>
         for {
           ids <- Ns.int.insert(1, 2).transact.map(_.ids)
           _ <- Ns.int(3).save.transact
-          a <- Ns.int.query.get
+          a <- Ns.int.a1.query.get
           _ <- Ns(ids(0)).int(10).update.transact
           _ <- Ns(ids(1)).delete.transact
-          b <- Ns.int.query.get
+          b <- Ns.int.a1.query.get
         } yield {
           assertTrue(ids.size == 2) &&
             assertTrue(a == List(1, 2, 3)) &&
@@ -76,10 +76,10 @@ trait ZioApi extends CoreTestZioSpec with ApiZio { spi: SpiZio =>
       test("Offset query")(
         for {
           _ <- Ns.int.insert(1, 2, 3).transact
-          a <- Ns.int.query.get
-          b <- Ns.int.query.limit(2).get
-          c <- Ns.int.query.offset(1).get
-          d <- Ns.int.query.offset(1).limit(1).get
+          a <- Ns.int.a1.query.get
+          b <- Ns.int.a1.query.limit(2).get
+          c <- Ns.int.a1.query.offset(1).get
+          d <- Ns.int.a1.query.offset(1).limit(1).get
         } yield
           assertTrue(a == List(1, 2, 3)) &&
             assertTrue(b == List(1, 2)) &&

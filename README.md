@@ -4,7 +4,9 @@ Molecule is a library to write type-inferred Scala code that translates to queri
 
 An sbt-molecule plugin generates boilerplate code from your domain data model definition so that you can write intuitive type-inferred queries with the words of your domain.
 
-- Works with [Datomic](http://www.datomic.com) and [H2](https://h2database.com/html/main.html) (more JDBC-compliant databases to come)
+- Uniformly works with databases from various query languages:
+  - Datalog: [Datomic](http://www.datomic.com) 
+  - SQL: [H2](https://h2database.com/html/main.html) and [PostgreSQL](https://www.postgresql.org) (more JDBC-compliant databases to come)
 - Targets Scala 3.3, 2.13 and 2.12
 - Scala and Scalajs platforms
 - SPI of 1300+ tests pass for Datomic and H2 databases
@@ -95,7 +97,7 @@ sbt.version=1.9.4
 `project/plugins.sbt`:
 
 ```scala
-addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "1.2.0")
+addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "1.3.0")
 ```
 
 `build.sbt`:
@@ -105,9 +107,10 @@ lazy val yourProject = project.in(file("app"))
   .enablePlugins(MoleculePlugin)
   .settings(
     libraryDependencies ++= Seq(
-      "org.scalamolecule" %%% "molecule-datalog-datomic" % "0.2.0",
-      // and/or
-      "org.scalamolecule" %%% "molecule-sql-jdbc" % "0.2.0",
+      // One or more of:
+      "org.scalamolecule" %%% "molecule-datalog-datomic" % "0.3.0",
+      "org.scalamolecule" %%% "molecule-sql-h2" % "0.3.0",
+      "org.scalamolecule" %%% "molecule-sql-postgres" % "0.3.0",
     ),
     moleculeSchemas := Seq("app") // paths to your data model definitions...
   )

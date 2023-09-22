@@ -381,16 +381,21 @@ trait ResolveExprOne extends ResolveExpr { self: SqlQueryBase with LambdasOne =>
     }
   }
 
-  protected def selectWithOrder(col: String, fn: String, distinct: String = "DISTINCT "): Unit = {
+  protected def selectWithOrder(
+    col: String,
+    fn: String,
+    distinct: String = "DISTINCT ",
+    cast: String = ""
+  ): Unit = {
     if (orderBy.nonEmpty && orderBy.last._3 == col) {
       // order by aggregate alias instead
       val alias = col.replace('.', '_') + "_" + fn.toLowerCase
-      select += s"$fn($distinct$col) $alias"
+      select += s"$fn($distinct$col$cast) $alias"
       val (level, _, _, dir) = orderBy.last
       orderBy.remove(orderBy.size - 1)
       orderBy += ((level, 1, alias, dir))
     } else {
-      select += s"$fn($distinct$col)"
+      select += s"$fn($distinct$col$cast)"
     }
   }
 

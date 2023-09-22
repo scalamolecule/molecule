@@ -9,9 +9,9 @@ import scala.io.StdIn
  *
  * Run with
  *
- * sbt sqlJdbcJVM/run
+ * sbt sqlPostgresJVM/run
  */
-object RpcServer_postgres extends MoleculeRpcServer_AkkaHttp(Rpc_postgres) with App {
+object RpcServer_postgres extends MoleculeRpcServer_AkkaHttp(Rpc_postgres(false)) with App {
 
   Http()
     .newServerAt("localhost", 8080)

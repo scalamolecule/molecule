@@ -12,21 +12,27 @@ trait TestSuite_postgres extends CoreTestSuite {
 
   override val platform = "Postgres js"
 
+  val recreateSchema =
+    s"""DROP SCHEMA IF EXISTS public CASCADE;
+       |CREATE SCHEMA public;
+       |""".stripMargin
+
   override def inMem[T](test: Conn => T, schema: Schema): T = {
-//    val url   = s"jdbc:h2:mem:test_database_" + Random.nextInt()
-    val url = "jdbc:tc:postgresql:15://localhost:5432/test?preparedStatementCacheQueries=0"
+    val n   = Random.nextInt()
+    val url = s"jdbc:tc:postgresql:15://localhost:5432/test$n?preparedStatementCacheQueries=0"
+
+    // Using the same db causes contention between tests since tests are run in parallel with rpc
+    //    val url = s"jdbc:tc:postgresql:15://localhost:5432/test?preparedStatementCacheQueries=0"
 
     val proxy = JdbcProxy(
       url,
-      schema.sqlSchema_postgres,
+      recreateSchema + schema.sqlSchema_postgres,
       schema.metaSchema,
       schema.nsMap,
       schema.attrMap,
-      schema.uniqueAttrs
+      schema.uniqueAttrs,
+      useTestContainer = true
     )
     test(JdbcConn_JS(proxy, RpcRequest.request))
   }
-
-
-
 }

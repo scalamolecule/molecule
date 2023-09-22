@@ -16,11 +16,12 @@ object PostgresConnection {
   // Fort fast reuse, set testcontainers.reuse.enable=true in ~/.testcontainers.properties
   // See https://callistaenterprise.se/blogg/teknik/2020/10/09/speed-up-your-testcontainers-tests/
 
-  // These don't seem necessary:
+  //  // These don't seem to make any difference:
   //  container.container.withReuse(true)
-  //  container.container.withDatabaseName("integration-tests-db")
-  //  container.container.withUsername("sa")
-  //  container.container.withPassword("sa");
+  //  container.container.withDatabaseName("test")
+  ////  container.container.withUsername("sa")
+  ////  container.container.withPassword("sa")
+  //  container.container.withLabel("reuse.UUID", "e06d7a87-7d7d-472e-a047-e6c81f61d2a4");
 
 
   Class.forName(container.driverClassName)
@@ -79,7 +80,7 @@ object PostgresConnection {
       |  int         INTEGER,
       |  long        BIGINT,
       |  float       DECIMAL,
-      |  double      DECIMAL,
+      |  double      double precision,
       |  boolean     BOOLEAN,
       |  bigInt      DECIMAL,
       |  bigDecimal  DECIMAL,
@@ -95,7 +96,7 @@ object PostgresConnection {
       |  ints        INTEGER ARRAY,
       |  longs       BIGINT ARRAY,
       |  floats      DECIMAL ARRAY,
-      |  doubles     DECIMAL ARRAY,
+      |  doubles     double precision ARRAY,
       |  booleans    BOOLEAN ARRAY,
       |  bigInts     DECIMAL ARRAY,
       |  bigDecimals DECIMAL ARRAY,
@@ -134,31 +135,27 @@ object PostgresConnection {
       |$$
       |LANGUAGE 'sql' IMMUTABLE;
       |
-      |CREATE AGGREGATE median(numeric) (
+      |CREATE or replace AGGREGATE median(numeric) (
       |  SFUNC=array_append,
       |  STYPE=numeric[],
       |  FINALFUNC=_final_median,
       |  INITCOND='{}'
       |);
-      |
       |""".stripMargin
-  //      println(sqlSchema_postgres1)
 
-  def recreationStmt(schema: Schema): String = {
-    //    s"""DROP SCHEMA IF EXISTS public CASCADE;
-    //       |CREATE SCHEMA public;
-    //       |$sqlSchema_postgres1
-    //       |""".stripMargin
-
+  val recreateSchema =
     s"""DROP SCHEMA IF EXISTS public CASCADE;
        |CREATE SCHEMA public;
-       |${schema.sqlSchema_postgres}
        |""".stripMargin
+
+  def recreationStmt(schema: Schema): String = {
+    // recreateSchema + sqlSchema_postgres1
+    recreateSchema + schema.sqlSchema_postgres
   }
 
   def proxy(schema: Schema) = JdbcProxy(
     url,
-    schema.sqlSchema_postgres,
+    recreateSchema + schema.sqlSchema_postgres,
     schema.metaSchema,
     schema.nsMap,
     schema.attrMap,

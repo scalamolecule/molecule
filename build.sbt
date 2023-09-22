@@ -15,7 +15,7 @@ inThisBuild(
     organization := "org.scalamolecule",
     organizationName := "ScalaMolecule",
     organizationHomepage := Some(url("http://www.scalamolecule.org")),
-    version := "0.3.0-SNAPSHOT",
+    version := "0.3.0",
     versionScheme := Some("early-semver"),
     //    scalaVersion := scala212,
     scalaVersion := scala213,
@@ -269,8 +269,8 @@ lazy val sqlPostgres = crossProject(JSPlatform, JVMPlatform)
   .jsSettings(jsEnvironment)
   .jvmSettings(
     libraryDependencies ++= Seq(
-      "com.dimafeng" %% "testcontainers-scala-postgresql" % "0.41.0" % Test,
-      "org.postgresql" % "postgresql" % "42.5.4" % Test
+      "com.dimafeng" %% "testcontainers-scala-postgresql" % "0.41.0",
+      "org.postgresql" % "postgresql" % "42.5.4"
     ),
     Test / fork := true
   )

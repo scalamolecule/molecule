@@ -16,8 +16,7 @@ import molecule.sql.core.facade.JdbcConn_JVM
 import molecule.sql.core.javaSql.ResultSetImpl
 import molecule.sql.core.query.{SqlQueryResolveCursor, SqlQueryResolveOffset}
 import molecule.sql.core.spi.SpiHelpers
-import molecule.sql.core.transaction.SqlUpdateValidator
-import molecule.sql.postgres.marshalling.Rpc_postgres.Data
+import molecule.sql.core.transaction.{SqlBase_JVM, SqlUpdateSetValidator}
 import molecule.sql.postgres.query._
 import molecule.sql.postgres.transaction._
 import scala.annotation.nowarn
@@ -29,8 +28,9 @@ object SpiSync_postgres extends SpiSync_postgres
 
 trait SpiSync_postgres
   extends SpiSync
+    with SqlBase_JVM
     with SpiHelpers
-    with SqlUpdateValidator
+    with SqlUpdateSetValidator
     with ModelUtils
     with PrintInspect
     with BaseHelpers {
@@ -236,13 +236,12 @@ trait SpiSync_postgres
 
   override def update_validate(update: Update)(implicit conn0: Conn): Map[String, Seq[String]] = {
     val conn = conn0.asInstanceOf[JdbcConn_JVM]
-    validateUpdate(conn.proxy, update.elements, update.isUpsert,
+    validateUpdateSet(conn.proxy, update.elements, update.isUpsert,
       (query: String) => {
         val ps        = conn.sqlConn.prepareStatement(
           query, Row.TYPE_SCROLL_INSENSITIVE, Row.CONCUR_READ_ONLY
         )
         val resultSet = ps.executeQuery()
-        resultSet.next()
         new ResultSetImpl(resultSet)
       }
     )
@@ -417,6 +416,7 @@ trait SpiSync_postgres
           case "text"      => value(resultSet.getString(n), "String/URI")
           case "bool"      => value(resultSet.getString(n), "Boolean")
           case "bigserial" => value(resultSet.getString(n), "BigInt/Decimal")
+          case "bigint"    => value(resultSet.getString(n), "BigInt/Decimal")
 
           case "_int4"    => array(n, "Int")
           case "_int8"    => array(n, "Bigint")
@@ -462,17 +462,5 @@ trait SpiSync_postgres
     debug("---------------")
     debug("Ids: " + ids)
     TxReport(0, ids)
-  }
-
-  def validateUpdate(conn0: Conn, update: Update): Map[String, Seq[String]] = {
-    val conn = conn0.asInstanceOf[JdbcConn_JVM]
-    validateUpdate(conn.proxy, update.elements, update.isUpsert,
-      (query: String) => {
-        val ps        = conn.sqlConn.prepareStatement(query, Row.TYPE_SCROLL_INSENSITIVE, Row.CONCUR_READ_ONLY)
-        val resultSet = ps.executeQuery()
-        resultSet.next()
-        new ResultSetImpl(resultSet)
-      }
-    )
   }
 }

@@ -191,70 +191,61 @@ trait SpiHelpers extends ModelUtils {
     (idQuery, updateModels)
   }
 
+
+  protected def nestedArray2coalescedSet(a: Attr, rs: Row, isAttr: Boolean = true): Set[Any] = {
+    a match {
+      case _: AttrSetManString     => sql2set(isAttr, rs, (v: Any) => v.asInstanceOf[String])
+      case _: AttrSetManInt        => sql2set(isAttr, rs, (v: Any) => v.toString.toInt)
+      case _: AttrSetManLong       => sql2set(isAttr, rs, (v: Any) => v.asInstanceOf[Long])
+      case _: AttrSetManFloat      => sql2set(isAttr, rs, (v: Any) => v.asInstanceOf[Float])
+      case _: AttrSetManDouble     => sql2set(isAttr, rs, (v: Any) => v.asInstanceOf[Double])
+      case _: AttrSetManBoolean    => sql2set(isAttr, rs, (v: Any) => v.asInstanceOf[Boolean])
+      case _: AttrSetManBigInt     => sql2set(isAttr, rs, (v: Any) => BigInt(v.toString))
+      case _: AttrSetManBigDecimal => sql2set(isAttr, rs, (v: Any) => BigDecimal(v.toString))
+      case _: AttrSetManDate       => sql2set(isAttr, rs, (v: Any) => v.asInstanceOf[Date])
+      case _: AttrSetManUUID       => sql2set(isAttr, rs, (v: Any) => v.asInstanceOf[UUID])
+      case _: AttrSetManURI        => sql2set(isAttr, rs, (v: Any) => v.asInstanceOf[String]).map(v => new URI(v))
+      case _: AttrSetManByte       => sql2set(isAttr, rs, (v: Any) => v.asInstanceOf[Integer].toByte)
+      case _: AttrSetManShort      => sql2set(isAttr, rs, (v: Any) => v.asInstanceOf[Integer].toShort)
+      case _: AttrSetManChar       => sql2set(isAttr, rs, (v: Any) => v.asInstanceOf[String].charAt(0))
+      case other                   => throw ModelError(
+        "Unexpected attribute type for Set validation value retriever:\n" + other
+      )
+    }
+  }
+
+  private def sql2set[T](isAttr: Boolean, row: Row, j2s: Any => T): Set[T] = {
+    if (isAttr)
+      sqlNestedArrays2coalescedSet(row, j2s)
+    else
+      sqlArrays2coalescedSet(row, j2s)
+  }
+
   private def sqlNestedArrays2coalescedSet[T](row: Row, j2s: Any => T): Set[T] = {
+    row.next()
     val array = row.getArray(1)
     if (row.wasNull()) {
       Set.empty[T]
     } else {
-      val outerArrayResultSet = array.getResultSet
-      var set                 = Set.empty[T]
-      while (outerArrayResultSet.next()) {
-        outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]].foreach { value =>
+      val resultSet = array.getResultSet
+      var set       = Set.empty[T]
+      while (resultSet.next()) {
+        resultSet.getArray(2).getArray.asInstanceOf[Array[_]].foreach { value =>
           set += j2s(value)
         }
       }
       set
     }
   }
-  private lazy val j2String    : Any => String     = (v: Any) => v.asInstanceOf[String]
-  private lazy val j2Int       : Any => Int        = (v: Any) => v.toString.toInt
-  private lazy val j2Long      : Any => Long       = (v: Any) => v.asInstanceOf[Long]
-  private lazy val j2Float     : Any => Float      = (v: Any) => v.asInstanceOf[Float]
-  private lazy val j2Double    : Any => Double     = (v: Any) => v.asInstanceOf[Double]
-  private lazy val j2Boolean   : Any => Boolean    = (v: Any) => v.asInstanceOf[Boolean]
-  private lazy val j2BigInt    : Any => BigInt     = (v: Any) => BigInt(v.toString)
-  private lazy val j2BigDecimal: Any => BigDecimal = (v: Any) => BigDecimal(v.toString)
-  private lazy val j2Date      : Any => Date       = (v: Any) => v.asInstanceOf[Date]
-  private lazy val j2UUID      : Any => UUID       = (v: Any) => v.asInstanceOf[UUID]
-  private lazy val j2URI       : Any => URI        = (v: Any) => v.asInstanceOf[URI]
-  private lazy val j2Byte      : Any => Byte       = (v: Any) => v.asInstanceOf[Integer].toByte
-  private lazy val j2Short     : Any => Short      = (v: Any) => v.asInstanceOf[Integer].toShort
-  private lazy val j2Char      : Any => Char       = (v: Any) => v.asInstanceOf[String].charAt(0)
 
-  private lazy val nestedArray2coalescedSetString    : Row => Set[Any] = (rs: Row) => sqlNestedArrays2coalescedSet(rs, j2String)
-  private lazy val nestedArray2coalescedSetInt       : Row => Set[Any] = (rs: Row) => sqlNestedArrays2coalescedSet(rs, j2Int)
-  private lazy val nestedArray2coalescedSetLong      : Row => Set[Any] = (rs: Row) => sqlNestedArrays2coalescedSet(rs, j2Long)
-  private lazy val nestedArray2coalescedSetFloat     : Row => Set[Any] = (rs: Row) => sqlNestedArrays2coalescedSet(rs, j2Float)
-  private lazy val nestedArray2coalescedSetDouble    : Row => Set[Any] = (rs: Row) => sqlNestedArrays2coalescedSet(rs, j2Double)
-  private lazy val nestedArray2coalescedSetBoolean   : Row => Set[Any] = (rs: Row) => sqlNestedArrays2coalescedSet(rs, j2Boolean)
-  private lazy val nestedArray2coalescedSetBigInt    : Row => Set[Any] = (rs: Row) => sqlNestedArrays2coalescedSet(rs, j2BigInt)
-  private lazy val nestedArray2coalescedSetBigDecimal: Row => Set[Any] = (rs: Row) => sqlNestedArrays2coalescedSet(rs, j2BigDecimal)
-  private lazy val nestedArray2coalescedSetDate      : Row => Set[Any] = (rs: Row) => sqlNestedArrays2coalescedSet(rs, j2Date)
-  private lazy val nestedArray2coalescedSetUUID      : Row => Set[Any] = (rs: Row) => sqlNestedArrays2coalescedSet(rs, j2UUID)
-  private lazy val nestedArray2coalescedSetURI       : Row => Set[Any] = (rs: Row) => sqlNestedArrays2coalescedSet(rs, j2String).map(v => new URI(v))
-  private lazy val nestedArray2coalescedSetByte      : Row => Set[Any] = (rs: Row) => sqlNestedArrays2coalescedSet(rs, j2Byte)
-  private lazy val nestedArray2coalescedSetShort     : Row => Set[Any] = (rs: Row) => sqlNestedArrays2coalescedSet(rs, j2Short)
-  private lazy val nestedArray2coalescedSetChar      : Row => Set[Any] = (rs: Row) => sqlNestedArrays2coalescedSet(rs, j2Char)
-
-  protected def nestedArray2coalescedSet(a: Attr, rs: Row) = {
-    a match {
-      case _: AttrSetManString     => nestedArray2coalescedSetString(rs)
-      case _: AttrSetManInt        => nestedArray2coalescedSetInt(rs)
-      case _: AttrSetManLong       => nestedArray2coalescedSetLong(rs)
-      case _: AttrSetManFloat      => nestedArray2coalescedSetFloat(rs)
-      case _: AttrSetManDouble     => nestedArray2coalescedSetDouble(rs)
-      case _: AttrSetManBoolean    => nestedArray2coalescedSetBoolean(rs)
-      case _: AttrSetManBigInt     => nestedArray2coalescedSetBigInt(rs)
-      case _: AttrSetManBigDecimal => nestedArray2coalescedSetBigDecimal(rs)
-      case _: AttrSetManDate       => nestedArray2coalescedSetDate(rs)
-      case _: AttrSetManUUID       => nestedArray2coalescedSetUUID(rs)
-      case _: AttrSetManURI        => nestedArray2coalescedSetURI(rs)
-      case _: AttrSetManByte       => nestedArray2coalescedSetByte(rs)
-      case _: AttrSetManShort      => nestedArray2coalescedSetShort(rs)
-      case _: AttrSetManChar       => nestedArray2coalescedSetChar(rs)
-      case other                   => throw ModelError(
-        "Unexpected attribute type for Set validation value retriever:\n" + other
-      )
+  private def sqlArrays2coalescedSet[T](row: Row, j2s: Any => T): Set[T] = {
+    val resultSet = row
+    var set       = Set.empty[T]
+    while (resultSet.next()) {
+      resultSet.getArray(1).getArray.asInstanceOf[Array[_]].foreach { value =>
+        set += j2s(value)
+      }
     }
+    set
   }
 }

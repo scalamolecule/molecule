@@ -139,6 +139,10 @@ trait ResolveExprSet_postgres
         aggregate = true
         replaceCast(res.nestedArray2coalescedSet)
 
+
+      // Using brute force in the following aggregate functions to be able to
+      // aggregate _unique_ values (Set semantics instead of Array semantics)
+
       case "count" =>
         noBooleanSetCounts(n)
         // Count of all (non-unique) values
@@ -182,9 +186,8 @@ trait ResolveExprSet_postgres
         aggregate = true
         replaceCast(res.array2setSum)
 
+
       case "median" =>
-        // Using brute force and collecting all unique values to calculate the median value
-        // Median of unique values (Set semantics)
         select += s"ARRAY_AGG($col)"
         groupByCols -= col
         aggregate = true
@@ -199,7 +202,6 @@ trait ResolveExprSet_postgres
             getMedian(set)
           }
         )
-      // select += s"MEDIAN(ALL $col)" // other semantics
 
       case "avg" =>
         // Average of unique values (Set semantics)
@@ -217,7 +219,6 @@ trait ResolveExprSet_postgres
             set.sum / set.size
           }
         )
-      // select += s"AVG(DISTINCT $col)" // other semantics
 
       case "variance" =>
         // Variance of unique values (Set semantics)
@@ -235,8 +236,6 @@ trait ResolveExprSet_postgres
             varianceOf(set.toList: _*)
           }
         )
-      // select += s"VAR_POP($col)" // other semantics
-      // select += s"VAR_SAMP($col)" // other semantics
 
       case "stddev" =>
         // Standard deviation of unique values (Set semantics)
@@ -254,7 +253,6 @@ trait ResolveExprSet_postgres
             stdDevOf(set.toList: _*)
           }
         )
-      // select += s"STDDEV($col)" // other semantics
 
       case other => unexpectedKw(other)
     }
@@ -276,18 +274,6 @@ trait ResolveExprSet_postgres
       case _ => where += (("", matchArrays(setsNonEmpty, col, res.set2sqlArray)))
     }
   }
-  //
-  //  protected def setEqual2(col: String, filterAttr: String): Unit = {
-  //    where += ((col, "= " + filterAttr))
-  //  }
-  //
-  //  protected def setOptEqual[T](col: String, optSets: Option[Seq[Set[T]]], set2sqls: Set[T] => Set[String]): Unit = {
-  //    optSets.fold[Unit] {
-  //      where += ((col, s"IS NULL"))
-  //    } { sets =>
-  //      setEqual(col, sets, set2sqls)
-  //    }
-  //  }
 
   override protected def setNeq[T](col: String, sets: Seq[Set[T]], res: ResSet[T]): Unit = {
     val setsNonEmpty = sets.filterNot(_.isEmpty)
@@ -299,18 +285,7 @@ trait ResolveExprSet_postgres
         matchArrays(setsNonEmpty, col, res.set2sqlArray)))
     }
   }
-  //
-  //  protected def setNeq2(col: String, filterAttr: String): Unit = {
-  //    where += ((col, "<> " + filterAttr))
-  //  }
-  //
-  //  protected def setOptNeq[T](col: String, optSets: Option[Seq[Set[T]]], set2sqls: Set[T] => Set[String]): Unit = {
-  //    if (optSets.isDefined && optSets.get.nonEmpty) {
-  //      setNeq(col, optSets.get, set2sqls)
-  //    }
-  //    notNull += col
-  //  }
-  //
+
   override protected def has[T: ClassTag](col: String, sets: Seq[Set[T]], one2sql: T => String): Unit = {
     def contains(v: T): String = s"${one2sql(v)} = ANY($col)"
     def containsSet(set: Set[T]): String = set.map(contains).mkString(" AND ")
@@ -339,18 +314,6 @@ trait ResolveExprSet_postgres
     }
   }
 
-  //  protected def optHas[T: ClassTag](
-  //    col: String,
-  //    optSets: Option[Seq[Set[T]]],
-  //    one2sql: T => String
-  //  ): Unit = {
-  //    optSets.fold[Unit] {
-  //      where += ((col, s"IS NULL"))
-  //    } { sets =>
-  //      has(col, sets, one2sql)
-  //    }
-  //  }
-  //
   override protected def hasNo[T](col: String, sets: Seq[Set[T]], one2sql: T => String): Unit = {
     def notContains(v: T): String = s"${one2sql(v)} != ALL($col)"
     def notContainsSet(set: Set[T]): String = set.map(notContains).mkString("(", " OR ", ")")
@@ -372,33 +335,11 @@ trait ResolveExprSet_postgres
     }
   }
 
-    override protected def hasNo2(col: String, filterAttr: String, cardOne: Boolean, tpe: String): Unit = {
-      if (cardOne) {
-        where += (("", s"ARRAY(SELECT UNNEST($col) INTERSECT SELECT $filterAttr) = '{}'"))
-      } else {
-        where += (("", s"ARRAY(SELECT UNNEST($col) INTERSECT SELECT UNNEST($filterAttr)) = '{}'"))
-      }
+  override protected def hasNo2(col: String, filterAttr: String, cardOne: Boolean, tpe: String): Unit = {
+    if (cardOne) {
+      where += (("", s"ARRAY(SELECT UNNEST($col) INTERSECT SELECT $filterAttr) = '{}'"))
+    } else {
+      where += (("", s"ARRAY(SELECT UNNEST($col) INTERSECT SELECT UNNEST($filterAttr)) = '{}'"))
     }
-
-  //  protected def optHasNo[T](
-  //    col: String,
-  //    optSets: Option[Seq[Set[T]]],
-  //    one2sql: T => String
-  //  ): Unit = {
-  //    optSets.fold[Unit] {
-  //      where += ((col, s"IS NOT NULL"))
-  //    } { sets =>
-  //      val setsWithValues = sets.filterNot(_.isEmpty)
-  //      if (setsWithValues.nonEmpty) {
-  //        hasNo(col, sets.filterNot(_.isEmpty), one2sql)
-  //      } else {
-  //        where += ((col, s"IS NOT NULL"))
-  //      }
-  //    }
-  //  }
-  //
-  //  protected def setNoValue(col: String): Unit = {
-  //    notNull -= col
-  //    where += ((col, s"IS NULL"))
-  //  }
+  }
 }

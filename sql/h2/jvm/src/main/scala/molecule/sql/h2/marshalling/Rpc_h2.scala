@@ -15,7 +15,7 @@ import molecule.core.util.FutureUtils
 import molecule.sql.core.facade.JdbcConn_JVM
 import molecule.sql.core.javaSql.ResultSetImpl
 import molecule.sql.core.spi.SpiHelpers
-import molecule.sql.core.transaction.{SqlBase_JVM, SqlUpdateValidator}
+import molecule.sql.core.transaction.{SqlBase_JVM, SqlUpdateSetValidator}
 import molecule.sql.h2.async._
 import molecule.sql.h2.query.Model2SqlQuery_h2
 import molecule.sql.h2.transaction._
@@ -27,10 +27,10 @@ object Rpc_h2
   extends MoleculeRpc
     with SqlBase_JVM
     with SpiHelpers
-    with SqlUpdateValidator
+    with SqlUpdateSetValidator
     with FutureUtils {
 
-  override lazy val sqlConn: Connection = ???
+//  override lazy val sqlConn: Connection = ???
 
   /**
    * Tuple type is not marshalled from client to server. So we signal this with
@@ -115,7 +115,7 @@ object Rpc_h2
   ): Future[Either[MoleculeError, TxReport]] = either {
     for {
       conn <- getConn(proxy)
-      errors = validateUpdate(conn.proxy, elements, isUpsert,
+      errors = validateUpdateSet(conn.proxy, elements, isUpsert,
         (query: String) => {
           val ps        = conn.sqlConn.prepareStatement(
             query, Row.TYPE_SCROLL_INSENSITIVE, Row.CONCUR_READ_ONLY
