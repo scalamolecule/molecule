@@ -7,9 +7,8 @@ An sbt-molecule plugin generates boilerplate code from your domain data model de
 - Uniformly works with databases from various query languages:
   - Datalog: [Datomic](http://www.datomic.com) 
   - SQL: [H2](https://h2database.com/html/main.html) and [PostgreSQL](https://www.postgresql.org) (more JDBC-compliant databases to come)
-- Targets Scala 3.3, 2.13 and 2.12
-- Scala and Scalajs platforms
-- SPI of 1300+ tests pass for Datomic and H2 databases
+- Targets Scala 3.3, 2.13 and 2.12 on JVM and JS platforms
+- Single SPI of 1300+ tests adhered to by each database implementation 
 - No macros
 - No complex type class implicits
 - Maximum type inference
