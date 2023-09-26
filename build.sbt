@@ -15,7 +15,7 @@ inThisBuild(
     organization := "org.scalamolecule",
     organizationName := "ScalaMolecule",
     organizationHomepage := Some(url("http://www.scalamolecule.org")),
-    version := "0.3.0",
+    version := "0.4.0-SNAPSHOT",
     versionScheme := Some("early-semver"),
     //    scalaVersion := scala212,
     scalaVersion := scala213,
@@ -51,6 +51,8 @@ lazy val root = project
     sqlCore.jvm,
     sqlH2.js,
     sqlH2.jvm,
+    sqlMysql.js,
+    sqlMysql.jvm,
     sqlPostgres.js,
     sqlPostgres.jvm,
   )
@@ -254,6 +256,28 @@ lazy val sqlH2 = crossProject(JSPlatform, JVMPlatform)
     )
   )
 
+lazy val sqlMysql = crossProject(JSPlatform, JVMPlatform)
+  .crossType(CrossType.Full)
+  .in(file("sql/mysql"))
+  .settings(name := "molecule-sql-mysql")
+  .settings(doPublish)
+  .dependsOn(sqlCore % "compile->compile;test->test")
+  .settings(
+    testFrameworks := Seq(
+      new TestFramework("utest.runner.Framework"),
+      new TestFramework("zio.test.sbt.ZTestFramework")
+    )
+  )
+  .jsSettings(jsEnvironment)
+  .jvmSettings(
+    libraryDependencies ++= Seq(
+      "com.dimafeng" %% "testcontainers-scala-mysql" % "0.41.0",
+      //      "com.mysql" % "mysql-connector-j" % "8.1.0"
+      "mysql" % "mysql-connector-java" % "8.0.33"
+    ),
+    Test / fork := true
+  )
+
 lazy val sqlPostgres = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .in(file("sql/postgres"))
@@ -270,7 +294,7 @@ lazy val sqlPostgres = crossProject(JSPlatform, JVMPlatform)
   .jvmSettings(
     libraryDependencies ++= Seq(
       "com.dimafeng" %% "testcontainers-scala-postgresql" % "0.41.0",
-      "org.postgresql" % "postgresql" % "42.5.4"
+      "org.postgresql" % "postgresql" % "42.6.0"
     ),
     Test / fork := true
   )

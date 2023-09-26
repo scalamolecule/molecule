@@ -20,6 +20,15 @@ case class MetaSchema(
 
   override def toString: String = render(0)
 
+  def nss = {
+    for {
+      part <- parts
+      ns <- part.nss
+    } yield {
+      ns.ns
+    }
+  }
+
   def nsMap(tabs: Int = 0): String = {
     val p        = indent(tabs)
     val pad      = s"\n$p  "

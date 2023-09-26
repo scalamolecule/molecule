@@ -21,7 +21,8 @@ trait ZioSpec_h2 extends CoreTestZioSpec {
       schema.metaSchema,
       schema.nsMap,
       schema.attrMap,
-      schema.uniqueAttrs
+      schema.uniqueAttrs,
+      reserved = schema.sqlReserved_h2
     )
     ZLayer.scoped(
       ZIO.attemptBlocking(

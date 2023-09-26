@@ -110,28 +110,27 @@ trait SqlUpdate
     (curRefPath, paramIndexes(curRefPath, attr))
   }
 
-  protected def addToUpdateCols(a: Attr) = {
+  protected def addToUpdateCols(ns: String, attr: String) = {
     if (!updateCols.contains(curRefPath)) {
       updateCols += curRefPath -> Nil
     }
-    updateCols(curRefPath) = updateCols(curRefPath) :+ a.name
+    updateCols(curRefPath) = updateCols(curRefPath) :+ s"$ns.$attr"
   }
 
 
   override def updateOne[T](
-    a: AttrOne,
+    ns: String,
+    attr: String,
     vs: Seq[T],
     transformValue: T => Any,
     handleValue: T => Any
   ): Unit = {
-    //    val attr = a.name
-    val attr = a.attr
     updateCurRefPath(attr)
     placeHolders = placeHolders :+ s"$attr = ?"
     val colSetter: Setter = vs match {
       case Seq(v) =>
         if (!isUpsert) {
-          addToUpdateCols(a)
+          addToUpdateCols(ns, attr)
         }
         (ps: PS, _: IdsMap, _: RowIndex) => {
           handleValue(v).asInstanceOf[(PS, Int) => Unit](ps, curParamIndex)
@@ -145,7 +144,7 @@ trait SqlUpdate
         }
 
       case vs => throw ExecutionError(
-        s"Can only $update one value for attribute `${a.name}`. Found: " + vs.mkString(", ")
+        s"Can only $update one value for attribute `$ns.$attr`. Found: " + vs.mkString(", ")
       )
     }
     addColSetter(curRefPath, colSetter)
@@ -153,21 +152,21 @@ trait SqlUpdate
 
 
   override def updateSetEq[T](
-    a: AttrSet,
+    ns: String,
+    attr: String,
     sets: Seq[Set[T]],
     transform: T => Any,
     set2array: Set[Any] => Array[AnyRef],
     refNs: Option[String],
     exts: List[String]
   ): Unit = {
-    val attr = a.attr
     refNs.fold {
       updateCurRefPath(attr)
       placeHolders = placeHolders :+ s"$attr = ?"
       val colSetter = sets match {
         case Seq(set) =>
           if (!isUpsert) {
-            addToUpdateCols(a)
+            addToUpdateCols(ns, attr)
           }
           val array = set2array(set.asInstanceOf[Set[Any]])
           (ps: PS, _: IdsMap, _: RowIndex) => {
@@ -183,15 +182,14 @@ trait SqlUpdate
           }
 
         case vs => throw ExecutionError(
-          s"Can only $update one Set of values for Set attribute `${a.name}`. Found: " + vs.mkString(", ")
+          s"Can only $update one Set of values for Set attribute `$ns.$attr`. Found: " + vs.mkString(", ")
         )
       }
       addColSetter(curRefPath, colSetter)
 
     } { refNs =>
       // Separate update of ref ids in join table -----------------------------
-      val ns        = a.ns
-      val refAttr   = a.attr
+      val refAttr   = attr
       val joinTable = s"${ns}_${refAttr}_$refNs"
       val ns_id     = ns + "_id"
       val refNs_id  = refNs + "_id"
@@ -209,7 +207,7 @@ trait SqlUpdate
           manualTableDatas = List(deleteJoins(joinTable, ns_id, id))
 
         case vs => throw ExecutionError(
-          s"Can only $update one Set of values for Set attribute `${a.name}`. Found: " + vs.mkString(", ")
+          s"Can only $update one Set of values for Set attribute `$ns.$attr`. Found: " + vs.mkString(", ")
         )
       }
     }
@@ -217,21 +215,20 @@ trait SqlUpdate
 
 
   override def updateSetAdd[T](
-    a: AttrSet,
+    ns: String,
+    attr: String,
     sets: Seq[Set[T]],
     transform: T => Any,
     set2array: Set[Any] => Array[AnyRef],
     refNs: Option[String],
     exts: List[String]
   ): Unit = {
-    //    val attr = a.name
-    val attr = a.attr
     refNs.fold {
       updateCurRefPath(attr)
       val colSetter = sets match {
         case Seq(set) =>
           if (!isUpsert) {
-            addToUpdateCols(a)
+            addToUpdateCols(ns, attr)
           }
           placeHolders = placeHolders :+ s"$attr = $attr || ?"
           val array = set2array(set.asInstanceOf[Set[Any]])
@@ -249,15 +246,14 @@ trait SqlUpdate
           }
 
         case vs => throw ExecutionError(
-          s"Can only $update one Set of values for Set attribute `${a.name}`. Found: " + vs.mkString(", ")
+          s"Can only $update one Set of values for Set attribute `$ns.$attr`. Found: " + vs.mkString(", ")
         )
       }
       addColSetter(curRefPath, colSetter)
 
     } { refNs =>
       // Separate update of ref ids in join table -----------------------------
-      val ns        = a.ns
-      val refAttr   = a.attr
+      val refAttr   = attr
       val joinTable = s"${ns}_${refAttr}_$refNs"
       val ns_id     = ns + "_id"
       val refNs_id  = refNs + "_id"
@@ -267,7 +263,7 @@ trait SqlUpdate
         )
         case Nil      => () // Add no ref ids
         case vs       => throw ExecutionError(
-          s"Can only $update one Set of values for Set attribute `${a.name}`. Found: " + vs.mkString(", ")
+          s"Can only $update one Set of values for Set attribute `$ns.$attr`. Found: " + vs.mkString(", ")
         )
       }
     }
@@ -275,7 +271,8 @@ trait SqlUpdate
 
 
   override def updateSetSwap[T](
-    a: AttrSet,
+    ns: String,
+    attr: String,
     sets: Seq[Set[T]],
     transform: T => Any,
     handleValue: T => Any,
@@ -303,17 +300,17 @@ trait SqlUpdate
            |""".stripMargin
       )
     }
-    val table  = a.ns
-    val attr   = a.name
+    val table  = ns
+    val nsAttr   = s"$ns.$attr"
     val dbType = exts(1)
     refNs.fold {
-      updateCurRefPath(attr)
+      updateCurRefPath(nsAttr)
       def setterClauses(indents: Int) = swaps.map(_ => s"WHEN v = ? THEN ?").mkString("\n" + "  " * indents)
       val idClause  = s"$table.id IN (${ids.mkString(", ")})"
       val colSetter = if (isUpsert) {
         val guaranteedInsertValues = adds.map(_ => s"?::$dbType").mkString(", ")
         placeHolders = placeHolders :+
-          s"""$attr = ARRAY(
+          s"""$nsAttr = ARRAY(
              |    SELECT v
              |    FROM TABLE_DISTINCT(
              |      v $dbType = ARRAY(
@@ -321,7 +318,7 @@ trait SqlUpdate
              |          ${setterClauses(5)}
              |          ELSE v
              |        END
-             |        FROM TABLE(v $dbType = (SELECT $attr FROM $table WHERE $idClause))
+             |        FROM TABLE(v $dbType = (SELECT $nsAttr FROM $table WHERE $idClause))
              |      ) || ARRAY[$guaranteedInsertValues]
              |    )
              |  )""".stripMargin
@@ -338,12 +335,12 @@ trait SqlUpdate
         }
       } else {
         placeHolders = placeHolders :+
-          s"""$attr = ARRAY(
+          s"""$nsAttr = ARRAY(
              |    SELECT CASE
              |      ${setterClauses(3)}
              |      ELSE v
              |    END
-             |    FROM TABLE(v $dbType = (SELECT $attr FROM $table WHERE $idClause))
+             |    FROM TABLE(v $dbType = (SELECT $nsAttr FROM $table WHERE $idClause))
              |  )""".stripMargin
 
         (ps: PS, _: IdsMap, _: RowIndex) => {
@@ -358,8 +355,7 @@ trait SqlUpdate
 
     } { refNs =>
       // Separate update of ref ids in join table -----------------------------
-      val ns        = a.ns
-      val refAttr   = a.attr
+      val refAttr   = attr
       val joinTable = s"${ns}_${refAttr}_$refNs"
       val ns_id     = ns + "_id"
       val refNs_id  = refNs + "_id"
@@ -395,31 +391,32 @@ trait SqlUpdate
   }
 
   override def updateSetRemove[T](
-    a: AttrSet,
+    ns: String,
+    attr: String,
     set: Set[T],
     transform: T => Any,
     handleValue: T => Any,
     refNs: Option[String],
     exts: List[String]
   ): Unit = {
-    val table  = a.ns
-    val attr   = a.name
+    val table  = ns
+    val nsAttr   = s"$ns.$attr"
     val dbType = exts(1)
     refNs.fold {
-      updateCurRefPath(attr)
+      updateCurRefPath(nsAttr)
       val idClause  = s"$table.id IN (${ids.mkString(", ")})"
       val colSetter = if (set.nonEmpty) {
         if (!isUpsert) {
-          addToUpdateCols(a)
+          addToUpdateCols(ns, attr)
         }
         val removeValuePlaceHolders = set.toList.map(_ => "?").mkString(", ")
         placeHolders = placeHolders :+
-          s"""$attr =
+          s"""$nsAttr =
              |  CASE
              |    WHEN
              |      ARRAY(
              |        SELECT v
-             |        FROM TABLE(v $dbType = (SELECT $attr FROM $table WHERE $idClause))
+             |        FROM TABLE(v $dbType = (SELECT $nsAttr FROM $table WHERE $idClause))
              |        WHERE v NOT IN ($removeValuePlaceHolders)
              |      ) = array[]
              |    THEN
@@ -427,7 +424,7 @@ trait SqlUpdate
              |  ELSE
              |    ARRAY(
              |      SELECT v
-             |      FROM TABLE(v $dbType = (SELECT $attr FROM $table WHERE $idClause))
+             |      FROM TABLE(v $dbType = (SELECT $nsAttr FROM $table WHERE $idClause))
              |      WHERE v NOT IN ($removeValuePlaceHolders)
              |    )
              |  END""".stripMargin
@@ -445,7 +442,7 @@ trait SqlUpdate
 
       } else {
         // Keep as is
-        placeHolders = placeHolders :+ s"$attr = $attr"
+        placeHolders = placeHolders :+ s"$nsAttr = $nsAttr"
         (_: PS, _: IdsMap, _: RowIndex) => ()
       }
       addColSetter(curRefPath, colSetter)
@@ -453,8 +450,7 @@ trait SqlUpdate
     } { refNs =>
       if (set.nonEmpty) {
         // Separate update of ref ids in join table -----------------------------
-        val ns         = a.ns
-        val refAttr    = a.attr
+        val refAttr    = attr
         val joinTable  = s"${ns}_${refAttr}_$refNs"
         val ns_id      = ns + "_id"
         val refNs_id   = refNs + "_id"

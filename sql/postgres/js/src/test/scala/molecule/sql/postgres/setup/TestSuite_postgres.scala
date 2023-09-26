@@ -31,6 +31,7 @@ trait TestSuite_postgres extends CoreTestSuite {
       schema.nsMap,
       schema.attrMap,
       schema.uniqueAttrs,
+      reserved = schema.sqlReserved_postgres,
       useTestContainer = true
     )
     test(JdbcConn_JS(proxy, RpcRequest.request))

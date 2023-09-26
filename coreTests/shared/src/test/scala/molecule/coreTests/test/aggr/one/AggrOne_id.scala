@@ -254,7 +254,7 @@ trait AggrOne_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.s(count).query.get.map(_ ==> List(3))
         _ <- Ns.s(countDistinct).query.get.map(_ ==> List(2))
 
-        _ <- Ns.id.apply(count).a1.s_.query.get.map(_ ==> List(3))
+        _ <- Ns.id(count).a1.s_.query.get.map(_ ==> List(3))
         _ <- Ns.id(countDistinct).s_.query.get.map(_ ==> List(3))
 
         _ <- Ns.id(count).s.query.get.map(_ ==> List(

@@ -6,7 +6,7 @@ import molecule.core.spi.Conn
 import molecule.coreTests.dataModels.core.schema._
 import molecule.coreTests.setup.CoreTestSuite
 import molecule.sql.core.facade.JdbcHandler_JVM
-import molecule.sql.postgres.setup.{PostgresConnection => c}
+import molecule.sql.postgres.setup.{Connection_postgres => c}
 
 
 trait TestSuite_postgres extends CoreTestSuite with BaseHelpers {

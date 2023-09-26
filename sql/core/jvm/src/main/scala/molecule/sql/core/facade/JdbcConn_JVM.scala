@@ -6,7 +6,7 @@ import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.marshalling.JdbcProxy
 import molecule.core.spi.{Conn, TxReport}
 import molecule.core.util.ModelUtils
-import molecule.sql.core.transaction.{SqlBase_JVM, JdbcDataType_JVM, JoinTable, Table}
+import molecule.sql.core.transaction.{JdbcDataType_JVM, JoinTable, SqlBase_JVM, Table}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 

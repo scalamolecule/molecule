@@ -78,7 +78,7 @@ trait UpdateSet_filter extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.ints_(42).ints(1).update.transact
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Can only lookup entity with card-one attribute value. Found:\n" +
-              """AttrSetTacInt("Ns", "ints", Eq, Seq(Set(42)), None, None, Nil, Nil, None, None)"""
+              """AttrSetTacInt("Ns", "ints", Eq, Seq(Set(42)), None, None, Nil, Nil, None, None, Seq(0, 22))"""
           }
       } yield ()
     }

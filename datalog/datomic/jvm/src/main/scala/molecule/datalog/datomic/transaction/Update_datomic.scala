@@ -88,26 +88,28 @@ trait Update_datomic extends DatomicBase_JVM with UpdateOps with MoleculeLogging
   }
 
   override def updateOne[T](
-    a: AttrOne,
+    ns: String,
+    attr: String,
     vs: Seq[T],
     transformValue: T => Any,
     handleValue: T => Any
   ): Unit = {
     if (!isUpsert) {
-      val dummyFilterAttr = AttrOneTacInt(a.ns, a.attr, V, Nil, None, None, Nil, Nil, None, None)
+      val dummyFilterAttr = AttrOneTacInt(ns, attr, V, Nil, None, None, Nil, Nil, None, None)
       filterElements = filterElements :+ dummyFilterAttr
     }
     vs match {
-      case Seq(v) => data = data :+ (("add", a.ns, a.attr, Seq(transformValue(v).asInstanceOf[AnyRef]), false))
-      case Nil    => data = data :+ (("retract", a.ns, a.attr, Nil, false))
+      case Seq(v) => data = data :+ (("add", ns, attr, Seq(transformValue(v).asInstanceOf[AnyRef]), false))
+      case Nil    => data = data :+ (("retract", ns, attr, Nil, false))
       case vs     => throw ExecutionError(
-        s"Can only $update one value for attribute `${a.name}`. Found: " + vs.mkString(", ")
+        s"Can only $update one value for attribute `$ns.$attr`. Found: " + vs.mkString(", ")
       )
     }
   }
 
   override def updateSetEq[T](
-    a: AttrSet,
+    ns: String,
+    attr: String,
     sets: Seq[Set[T]],
     transform: T => Any,
     set2array: Set[Any] => Array[AnyRef],
@@ -115,25 +117,26 @@ trait Update_datomic extends DatomicBase_JVM with UpdateOps with MoleculeLogging
     exts: List[String]
   ): Unit = {
     if (!isUpsert) {
-      val dummyFilterAttr = AttrOneTacInt(a.ns, a.attr, V, Nil, None, None, Nil, Nil, None, None)
+      val dummyFilterAttr = AttrOneTacInt(ns, attr, V, Nil, None, None, Nil, Nil, None, None)
       filterElements = filterElements :+ dummyFilterAttr
     }
     sets match {
       case Seq(set) =>
-        val add = ("add", a.ns, a.attr, set.map(v => transform(v).asInstanceOf[AnyRef]).toSeq, true)
+        val add = ("add", ns, attr, set.map(v => transform(v).asInstanceOf[AnyRef]).toSeq, true)
         data = data :+ add
 
       case Nil =>
-        data = data :+ (("retract", a.ns, a.attr, Nil, true))
+        data = data :+ (("retract", ns, attr, Nil, true))
 
       case vs => throw ExecutionError(
-        s"Can only $update one Set of values for Set attribute `${a.name}`. Found: " + vs.mkString(", ")
+        s"Can only $update one Set of values for Set attribute `$ns.$attr`. Found: " + vs.mkString(", ")
       )
     }
   }
 
   override def updateSetAdd[T](
-    a: AttrSet,
+    ns: String,
+    attr: String,
     sets: Seq[Set[T]],
     transform: T => Any,
     set2array: Set[Any] => Array[AnyRef],
@@ -142,14 +145,14 @@ trait Update_datomic extends DatomicBase_JVM with UpdateOps with MoleculeLogging
   ): Unit = {
     sets match {
       case Seq(set) =>
-        val add = ("add", a.ns, a.attr, set.map(v => transform(v).asInstanceOf[AnyRef]).toSeq, false)
+        val add = ("add", ns, attr, set.map(v => transform(v).asInstanceOf[AnyRef]).toSeq, false)
         data = data :+ add
 
       case Nil =>
-        data = data :+ (("retract", a.ns, a.attr, Nil, false))
+        data = data :+ (("retract", ns, attr, Nil, false))
 
       case vs => throw ExecutionError(
-        s"Can only $update one Set of values for Set attribute `${a.name}`. Found: " + vs.mkString(", ")
+        s"Can only $update one Set of values for Set attribute `$ns.$attr`. Found: " + vs.mkString(", ")
       )
     }
   }
@@ -157,7 +160,8 @@ trait Update_datomic extends DatomicBase_JVM with UpdateOps with MoleculeLogging
   private val new2oldPairs = mutable.Map.empty[Any, Any]
 
   override def updateSetSwap[T](
-    a: AttrSet,
+    ns: String,
+    attr: String,
     sets: Seq[Set[T]],
     transform: T => Any,
     handleValue: T => Any,
@@ -187,14 +191,15 @@ trait Update_datomic extends DatomicBase_JVM with UpdateOps with MoleculeLogging
           (transform(retract).asInstanceOf[AnyRef], transform(add).asInstanceOf[AnyRef])
       }.unzip
       data = data ++ Seq(
-        ("retract", a.ns, a.attr, retracts1, false),
-        ("add", a.ns, a.attr, adds1, false),
+        ("retract", ns, attr, retracts1, false),
+        ("add", ns, attr, adds1, false),
       )
     }
   }
 
   override def updateSetRemove[T](
-    a: AttrSet,
+    ns: String,
+    attr: String,
     set: Set[T],
     transform: T => Any,
     handleValue: T => Any,
@@ -202,8 +207,8 @@ trait Update_datomic extends DatomicBase_JVM with UpdateOps with MoleculeLogging
     exts: List[String]
   ): Unit = {
     if (set.nonEmpty) {
-      data = data :+ (("retract", a.ns, a.attr, set.map(v => transform(v).asInstanceOf[AnyRef]).toSeq, false))
-      Seq(("retract", a.ns, a.attr, set.map(v => transform(v).asInstanceOf[AnyRef]).toSeq, false))
+      data = data :+ (("retract", ns, attr, set.map(v => transform(v).asInstanceOf[AnyRef]).toSeq, false))
+      Seq(("retract", ns, attr, set.map(v => transform(v).asInstanceOf[AnyRef]).toSeq, false))
     }
   }
 

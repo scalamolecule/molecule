@@ -12,7 +12,7 @@ trait SpiZioBase_postgres extends PrintInspect { spi: SpiZio =>
     label: String,
     elements: List[Element]
   ): ZIO[Conn, MoleculeError, Unit] = ZIO.succeed {
-    val query = new Model2SqlQuery_postgres(elements).getSqlQuery(Nil, None, None)
+    val query = new Model2SqlQuery_postgres(elements).getSqlQuery(Nil, None, None, None)
     printInspect(label, Nil, query)
   }
 }

@@ -8,14 +8,16 @@ import molecule.core.transaction.Action2Data
 trait UpdateOps extends Action2Data {
 
   def updateOne[T](
-    a: AttrOne,
+    ns: String,
+    attr: String,
     vs: Seq[T],
     transformValue: T => Any,
     handleValue: T => Any
   ): Unit
 
   def updateSetEq[T](
-    a: AttrSet,
+    ns: String,
+    attr: String,
     sets: Seq[Set[T]],
     transform: T => Any,
     set2array: Set[Any] => Array[AnyRef],
@@ -24,7 +26,8 @@ trait UpdateOps extends Action2Data {
   ): Unit
 
   def updateSetAdd[T](
-    a: AttrSet,
+    ns: String,
+    attr: String,
     sets: Seq[Set[T]],
     transform: T => Any,
     set2array: Set[Any] => Array[AnyRef],
@@ -33,7 +36,8 @@ trait UpdateOps extends Action2Data {
   ): Unit
 
   def updateSetSwap[T](
-    a: AttrSet,
+    ns: String,
+    attr: String,
     sets: Seq[Set[T]],
     transform: T => Any,
     handleValue: T => Any,
@@ -42,7 +46,8 @@ trait UpdateOps extends Action2Data {
   ): Unit
 
   def updateSetRemove[T](
-    a: AttrSet,
+    ns: String,
+    attr: String,
     set: Set[T],
     transform: T => Any,
     handleValue: T => Any,

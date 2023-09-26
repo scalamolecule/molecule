@@ -22,7 +22,8 @@ trait TestSuite_h2 extends CoreTestSuite with BaseHelpers {
       schema.metaSchema,
       schema.nsMap,
       schema.attrMap,
-      schema.uniqueAttrs
+      schema.uniqueAttrs,
+      reserved = schema.sqlReserved_h2
     )
     var conn  = JdbcConn_JVM(proxy, null)
     try {

@@ -77,7 +77,7 @@ trait SpiHelpers extends ModelUtils {
           case _: AttrSetOpt => throw ModelError(s"Can't $update optional values. Found:\n" + a)
         }
 
-      case ref@Ref(_, _, _, CardOne) =>
+      case ref@Ref(_, _, _, CardOne, _) =>
         if (firstNs) {
           firstNs = false
           val tacitElements = updateModel.toList

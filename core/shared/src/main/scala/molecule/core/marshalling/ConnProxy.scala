@@ -11,11 +11,13 @@ sealed trait ConnProxy {
   val attrMap    : Map[String, (Card, String, Seq[String])]
   val uniqueAttrs: List[String]
 
-  /** Internal holder of optional alternative Db view (asOf, since, widh) */
+  /** Internal holder of optional alternative Db view (asOf, since, widh). Used by Datomic */
   val dbView: Option[DbView]
 
   /** Unique internal identifier for cached proxy connection on server side */
   val uuid: UUID
+
+  val reserved: Option[Reserved]
 }
 
 
@@ -32,7 +34,8 @@ case class DatomicProxy(
   override val attrMap: Map[String, (Card, String, Seq[String])],
   override val uniqueAttrs: List[String],
   override val dbView: Option[DbView] = None,
-  override val uuid: UUID = UUID.randomUUID()
+  override val uuid: UUID = UUID.randomUUID(),
+  override val reserved: Option[Reserved] = None,
 ) extends ConnProxy
 
 
@@ -46,5 +49,6 @@ case class JdbcProxy(
   override val uniqueAttrs: List[String],
   override val dbView: Option[DbView] = None,
   override val uuid: UUID = UUID.randomUUID(),
+  override val reserved: Option[Reserved] = None,
   useTestContainer: Boolean = false
 ) extends ConnProxy

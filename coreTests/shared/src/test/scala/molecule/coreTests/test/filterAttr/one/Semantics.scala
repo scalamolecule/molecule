@@ -171,7 +171,7 @@ trait Semantics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==>
               """Filtering inside cross-namespace attribute filter not allowed. Found:
-                |  AttrOneTacInt("Ref", "int", Neq, Seq(3), None, None, Nil, Nil, None, None)""".stripMargin
+                |  AttrOneTacInt("Ref", "int", Neq, Seq(3), None, None, Nil, Nil, None, None, Seq(1, 40))""".stripMargin
           }
       } yield ()
     }

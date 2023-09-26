@@ -39,8 +39,8 @@ trait ResolveRef[Tpl] { self: DatomicQueryBase with NestOpt_[Tpl] =>
   protected def resolveNestedOptRef(e: Var, nestedRef: Ref): Unit = {
     val nestedId = "?id" + nestedIds.size
     if (where.isEmpty) {
-      val Ref(ns, refAttrClean, _, _) = nestedRef
-      val (refAttr, refId)            = (s":$ns/$refAttrClean", vv)
+      val Ref(ns, refAttrClean, _, _, _) = nestedRef
+      val (refAttr, refId)               = (s":$ns/$refAttrClean", vv)
       where += s"[$e $refAttr $refId]" -> wClause
     }
     where += s"[(identity $e) $nestedId]" -> wGround

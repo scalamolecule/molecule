@@ -4,6 +4,7 @@ import molecule.base.ast._
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
+import molecule.core.marshalling.ConnProxy
 import molecule.core.query.Model2Query
 import molecule.core.util.ModelUtils
 import molecule.sql.core.query.casting._
@@ -24,7 +25,8 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
   final def getSqlQuery(
     altElements: List[Element],
     optLimit: Option[Int],
-    optOffset: Option[Int]
+    optOffset: Option[Int],
+    proxy: Option[ConnProxy]
   ): String = {
     val elements = if (altElements.isEmpty) elements0 else altElements
     validateQueryModel(elements)
@@ -33,7 +35,7 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
     from = List(getInitialNonGenericNs(elements))
     exts += from.head -> None
 
-    val elements1 = prepareElements(elements)
+    val elements1 = prepareElements(elements, proxy)
 
     // Recursively resolve molecule elements
     resolve(elements1)
@@ -147,7 +149,6 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
     }
     val having_  = if (having.isEmpty) "" else having.mkString("\nHAVING ", ", ", "")
 
-
     s"""SELECT COUNT($table.id)
        |FROM $table$joins_$where_$having_;""".stripMargin
   }
@@ -161,21 +162,25 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
   }
 
 
-  private def prepareElements(elements: List[Element]): List[Element] = {
+  private def prepareElements(elements: List[Element], optProxy: Option[ConnProxy]): List[Element] = {
+    val checkReservedKeywords = optProxy.fold(false)(_.reserved.isDefined)
+
     @tailrec
     def prepare(elements: List[Element], acc: List[Element]): List[Element] = {
       elements match {
         case element :: tail =>
           element match {
             case a: Attr      => prepare(tail, acc :+ prepareAttr(a))
+            case r: Ref       => prepare(tail, acc :+ prepareRef(r))
+            case r: BackRef   => prepare(tail, acc :+ prepareBackRef(r))
             case n: Nested    => prepare(tail, acc :+ prepareNested(n))
             case n: NestedOpt => prepare(tail, acc :+ prepareNestedOpt(n))
-            case refOrBackRef => prepare(tail, acc :+ refOrBackRef)
           }
         case Nil             => acc
       }
     }
-    def prepareAttr(a: Attr): Attr = {
+    def prepareAttr(a0: Attr): Attr = {
+      val a = if (checkReservedKeywords) resolveReservedNames(a0, optProxy.get) else a0
       availableAttrs += a.name
       if (a.filterAttr.nonEmpty) {
         val fa = a.filterAttr.get
@@ -187,9 +192,6 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
           // Create datomic variable for this expression attribute
           filterAttrVars = filterAttrVars + (filterAttr -> a.name)
         }(_ => throw ModelError(s"Can't refer to ambiguous filter attribute $filterAttr"))
-        //        if (filterAttrVars.contains(filterAttr)) {
-        //          throw ModelError(s"Can't refer to ambiguous filter attribute $filterAttr")
-        //        }
 
         if (fa.ns == a.ns) {
           // Add adjacent filter attribute is lifted...
@@ -205,8 +207,27 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
       a
     }
 
-    def prepareNested(nested: Nested): Nested = Nested(nested.ref, prepare(nested.elements, Nil))
-    def prepareNestedOpt(nested: NestedOpt): NestedOpt = NestedOpt(nested.ref, prepare(nested.elements, Nil))
+    def prepareRef(ref: Ref): Ref = {
+      if (checkReservedKeywords) {
+        val (ns, refAttr, refNs) = nonReservedRef(ref, optProxy.get)
+        ref.copy(ns = ns, refAttr = refAttr, refNs = refNs)
+      } else ref
+    }
+
+    def prepareBackRef(backRef: BackRef): BackRef = {
+      if (checkReservedKeywords) {
+        val (prevNs, curNs) = nonReservedBackRef(backRef, optProxy.get)
+        backRef.copy(prevNs = prevNs, curNs = curNs)
+      } else backRef
+    }
+
+    def prepareNested(nested: Nested): Nested = {
+      Nested(nested.ref, prepare(nested.elements, Nil))
+    }
+
+    def prepareNestedOpt(nested: NestedOpt): NestedOpt = {
+      NestedOpt(nested.ref, prepare(nested.elements, Nil))
+    }
 
     val elements1 = prepare(elements, Nil)
 
@@ -217,14 +238,15 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
     elements1
   }
 
-  lazy val noIdFiltering = "Filter attributes not allowed to involve entity ids."
+  private lazy val noIdFiltering = "Filter attributes not allowed to involve entity ids."
 
   @tailrec
   final private def resolve(elements: List[Element]): Unit = elements match {
     case element :: tail => element match {
       case a: AttrOne                      =>
-        if (a.attr == "id" && a.filterAttr.nonEmpty || a.attr != "id" && a.filterAttr.exists(_.attr == "id"))
+        if (a.attr == "id" && a.filterAttr.nonEmpty || a.attr != "id" && a.filterAttr.exists(_.attr == "id")) {
           throw ModelError(noIdFiltering)
+        }
         a match {
           case a: AttrOneMan => resolveAttrOneMan(a); resolve(tail)
           case a: AttrOneOpt => resolveAttrOneOpt(a); resolve(tail)
@@ -250,7 +272,7 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
 
 
   final private def resolveRef0(ref: Ref, tail: List[Element]): Unit = {
-    val Ref(_, refAttr, refNs, card) = ref
+    val Ref(_, refAttr, refNs, card, _) = ref
     if (isNestedOpt && card == CardSet) {
       throw ModelError(
         "Only cardinality-one refs allowed in optional nested queries. Found: " + ref
@@ -263,7 +285,7 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
 
   final private def resolveBackRef(bRef: BackRef, tail: List[Element]): Unit = {
     if (isNested || isNestedOpt) {
-      val BackRef(backRef, _) = bRef
+      val BackRef(backRef, _, _) = bRef
       tail.head match {
         case a: Attr => throw ModelError(
           s"Expected ref after backref _$backRef. " +
@@ -284,7 +306,7 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
     }
     validateRefNs(ref, nestedElements)
 
-    val Ref(_, refAttr, refNs, _) = ref
+    val Ref(_, refAttr, refNs, _, _) = ref
     exts(refNs) = exts.get(refNs).fold(Option.empty[String])(_ => Some("_" + refAttr))
     aritiesNested()
     resolveNestedRef(ref)
@@ -303,7 +325,7 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
     }
     validateRefNs(ref, nestedElements)
 
-    val Ref(_, refAttr, refNs, _) = ref
+    val Ref(_, refAttr, refNs, _, _) = ref
     exts(refNs) = exts.get(refNs).fold(Option.empty[String])(_ => Some("_" + refAttr))
     aritiesNested()
     resolveNestedOptRef(ref)

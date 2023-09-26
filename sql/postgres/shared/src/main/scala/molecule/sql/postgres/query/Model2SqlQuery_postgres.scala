@@ -13,9 +13,9 @@ class Model2SqlQuery_postgres[Tpl](elements0: List[Element])
 
 
   override protected def resolveNestedRef(ref: Ref): Unit = {
-    val Ref(ns, refAttr, refNs, _) = ref
-    val (as, ext)                  = exts(refNs).fold(("", ""))(ext => (refNs + ext, ext))
-    val nsExt                      = exts(ns).getOrElse("")
+    val Ref(ns, refAttr, refNs, _, _) = ref
+    val (as, ext)                     = exts(refNs).fold(("", ""))(ext => (refNs + ext, ext))
+    val nsExt                         = exts(ns).getOrElse("")
 
     nestedIds += s"$ns.id"
     groupBy += s"$ns.id"
@@ -29,9 +29,9 @@ class Model2SqlQuery_postgres[Tpl](elements0: List[Element])
   }
 
   override protected def resolveNestedOptRef(nestedRef: Ref): Unit = {
-    val Ref(ns, refAttr, refNs, _) = nestedRef
-    val (as, ext)                  = exts(refNs).fold(("", ""))(ext => (refNs + ext, ext))
-    val nsExt                      = exts(ns).getOrElse("")
+    val Ref(ns, refAttr, refNs, _, _) = nestedRef
+    val (as, ext)                     = exts(refNs).fold(("", ""))(ext => (refNs + ext, ext))
+    val nsExt                         = exts(ns).getOrElse("")
 
     nestedIds += s"$ns.id"
     groupBy += s"$ns.id"

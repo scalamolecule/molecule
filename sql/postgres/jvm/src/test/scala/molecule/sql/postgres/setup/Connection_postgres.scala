@@ -8,7 +8,7 @@ import molecule.coreTests.dataModels.core.schema._
 import molecule.sql.core.facade.JdbcConn_JVM
 
 
-object PostgresConnection {
+object Connection_postgres {
 
   val url = "jdbc:tc:postgresql:15://localhost:5432/test?preparedStatementCacheQueries=0"
 
@@ -153,14 +153,18 @@ object PostgresConnection {
     recreateSchema + schema.sqlSchema_postgres
   }
 
-  def proxy(schema: Schema) = JdbcProxy(
-    url,
-    recreateSchema + schema.sqlSchema_postgres,
-    schema.metaSchema,
-    schema.nsMap,
-    schema.attrMap,
-    schema.uniqueAttrs
-  )
+  def proxy(schema: Schema) = {
+    JdbcProxy(
+      url,
+      recreateSchema + schema.sqlSchema_postgres,
+      schema.metaSchema,
+      schema.nsMap,
+      schema.attrMap,
+      schema.uniqueAttrs,
+      reserved = schema.sqlReserved_postgres,
+      useTestContainer = true
+    )
+  }
 
   val conn_Types      = JdbcConn_JVM(proxy(TypesSchema), sqlConn)
   val conn_Refs       = JdbcConn_JVM(proxy(RefsSchema), sqlConn)

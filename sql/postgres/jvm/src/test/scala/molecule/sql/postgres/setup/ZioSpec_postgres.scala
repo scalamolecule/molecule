@@ -5,7 +5,7 @@ import molecule.core.spi.Conn
 import molecule.coreTests.dataModels.core.schema._
 import molecule.coreTests.setup.CoreTestZioSpec
 import molecule.sql.core.facade.{JdbcConn_JVM, JdbcHandler_JVM}
-import molecule.sql.postgres.setup.{PostgresConnection => c}
+import molecule.sql.postgres.setup.{Connection_postgres => c}
 import zio.{ZIO, ZLayer}
 
 

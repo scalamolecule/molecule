@@ -15,7 +15,8 @@ trait Update_postgres extends SqlUpdate { self: ResolveUpdate =>
     new Model2SqlQuery_postgres[Any](elements)
 
   override def updateSetSwap[T](
-    a: AttrSet,
+    ns: String,
+    attr: String,
     sets: Seq[Set[T]],
     transform: T => Any,
     handleValue: T => Any,
@@ -44,7 +45,6 @@ trait Update_postgres extends SqlUpdate { self: ResolveUpdate =>
            |""".stripMargin
       )
     }
-    val attr         = a.attr
     val placeholders = adds.map(_ => "?").mkString(", ")
     val dbType       = exts(1)
     refNs.fold {
@@ -90,8 +90,7 @@ trait Update_postgres extends SqlUpdate { self: ResolveUpdate =>
 
     } { refNs =>
       // Separate update of ref ids in join table -----------------------------
-      val ns        = a.ns
-      val refAttr   = a.attr
+      val refAttr   = attr
       val joinTable = s"${ns}_${refAttr}_$refNs"
       val ns_id     = ns + "_id"
       val refNs_id  = refNs + "_id"
@@ -127,19 +126,19 @@ trait Update_postgres extends SqlUpdate { self: ResolveUpdate =>
   }
 
   override def updateSetRemove[T](
-    a: AttrSet,
+    ns: String,
+    attr: String,
     set: Set[T],
     transform: T => Any,
     handleValue: T => Any,
     refNs: Option[String],
     exts: List[String]
   ): Unit = {
-    val attr = a.attr
     refNs.fold {
       updateCurRefPath(attr)
       val colSetter = if (set.nonEmpty) {
         if (!isUpsert) {
-          addToUpdateCols(a)
+          addToUpdateCols(ns, attr)
         }
         val cast = exts.head
         @tailrec
@@ -167,8 +166,7 @@ trait Update_postgres extends SqlUpdate { self: ResolveUpdate =>
     } { refNs =>
       if (set.nonEmpty) {
         // Separate update of ref ids in join table -----------------------------
-        val ns         = a.ns
-        val refAttr    = a.attr
+        val refAttr    = attr
         val joinTable  = s"${ns}_${refAttr}_$refNs"
         val ns_id      = ns + "_id"
         val refNs_id   = refNs + "_id"
@@ -180,18 +178,18 @@ trait Update_postgres extends SqlUpdate { self: ResolveUpdate =>
     }
   }
 
-  override protected lazy val extsString     = List("",       "VARCHAR")
-  override protected lazy val extsInt        = List("",       "INTEGER")
-  override protected lazy val extsLong       = List("",       "BIGINT")
-  override protected lazy val extsFloat      = List("",       "DECIMAL")
-  override protected lazy val extsDouble     = List("",       "DECIMAL")
-  override protected lazy val extsBoolean    = List("",       "BOOLEAN")
-  override protected lazy val extsBigInt     = List("",       "DECIMAL")
-  override protected lazy val extsBigDecimal = List("",       "DECIMAL")
-  override protected lazy val extsDate       = List("",       "DATE")
+  override protected lazy val extsString     = List("", "VARCHAR")
+  override protected lazy val extsInt        = List("", "INTEGER")
+  override protected lazy val extsLong       = List("", "BIGINT")
+  override protected lazy val extsFloat      = List("", "DECIMAL")
+  override protected lazy val extsDouble     = List("", "DECIMAL")
+  override protected lazy val extsBoolean    = List("", "BOOLEAN")
+  override protected lazy val extsBigInt     = List("", "DECIMAL")
+  override protected lazy val extsBigDecimal = List("", "DECIMAL")
+  override protected lazy val extsDate       = List("", "DATE")
   override protected lazy val extsUUID       = List("::uuid", "UUID")
-  override protected lazy val extsURI        = List("",       "VARCHAR")
-  override protected lazy val extsByte       = List("",       "SMALLINT")
-  override protected lazy val extsShort      = List("",       "SMALLINT")
-  override protected lazy val extsChar       = List("",       "TEXT")
+  override protected lazy val extsURI        = List("", "VARCHAR")
+  override protected lazy val extsByte       = List("", "SMALLINT")
+  override protected lazy val extsShort      = List("", "SMALLINT")
+  override protected lazy val extsChar       = List("", "TEXT")
 }

@@ -24,21 +24,21 @@ trait DatomicBase_JVM extends DatomicDataType_JVM with ModelUtils {
   // Accumulate java insertion data
   final protected val stmts: jArrayList[jList[AnyRef]] = new jArrayList[jList[AnyRef]]()
 
-  protected var nsFull     : String  = ""
-  protected var part       : String  = ""
-  protected var tempId     : Int     = 0
-  protected var lowest     : Int     = 0
-  protected var e          : AnyRef  = "" // Long or String (#db/id[db.part/user -1])
-  protected var e0         : AnyRef  = ""
+  protected var nsFull: String = ""
+  protected var part  : String = ""
+  protected var tempId: Int    = 0
+  protected var lowest: Int    = 0
+  protected var e     : AnyRef = "" // Long or String (#db/id[db.part/user -1])
+  protected var e0    : AnyRef = ""
 
   protected var ids            = Seq.empty[AnyRef]
   protected var filterElements = List.empty[Element]
   protected var data           = List.empty[(String, String, String, Seq[AnyRef], Boolean)]
 
-  protected var stmt         : jList[AnyRef]       = null
-  protected var backRefs     : Map[String, AnyRef] = Map.empty[String, AnyRef]
-  protected val usedRefIds   : ListBuffer[AnyRef]  = new ListBuffer[AnyRef]
-  protected val unusedRefIds : ListBuffer[AnyRef]  = new ListBuffer[AnyRef]
+  protected var stmt        : jList[AnyRef]       = null
+  protected var backRefs    : Map[String, AnyRef] = Map.empty[String, AnyRef]
+  protected val usedRefIds  : ListBuffer[AnyRef]  = new ListBuffer[AnyRef]
+  protected val unusedRefIds: ListBuffer[AnyRef]  = new ListBuffer[AnyRef]
 
   protected lazy val add           = kw("db", "add")
   protected lazy val retract       = kw("db", "retract")
@@ -106,7 +106,7 @@ trait DatomicBase_JVM extends DatomicDataType_JVM with ModelUtils {
 
   private def getFreshConn(proxy: ConnProxy): Future[DatomicConn_JVM] = {
     proxy match {
-      case proxy@DatomicProxy(protocol, dbIdentifier, _, _, _, _, _, _, _, _, _) =>
+      case proxy@DatomicProxy(protocol, dbIdentifier, _, _, _, _, _, _, _, _, _, _) =>
         protocol match {
           case "mem" =>
             DatomicPeer.recreateDb(proxy, protocol, dbIdentifier)

@@ -11,8 +11,8 @@ class ResolveDelete { self: DeleteOps =>
   final def resolve(elements: List[Element], topLevel: Boolean): Unit = {
     elements match {
       case element :: tail => element match {
-        case attr: Attr => attr match {
-          case AttrOneTacLong(_, "id", Eq, ids1, _, _, _, _, _, _) =>
+        case a: Attr => a match {
+          case AttrOneTacLong(_, "id", Eq, ids1, _, _, _, _, _, _, _) =>
             if (!topLevel)
               throw ModelError(
                 s"Can only apply entity ids to be deleted to the initial namespace."
@@ -28,7 +28,7 @@ class ResolveDelete { self: DeleteOps =>
             resolve(tail, topLevel)
 
           case _ => throw ModelError(
-            "Can only filter delete by values applied to tacit card-one attributes. Found:\n" + attr
+            "Can only filter delete by values applied to tacit card-one attributes. Found:\n" + a
           )
         }
 

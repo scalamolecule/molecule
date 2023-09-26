@@ -43,7 +43,7 @@ abstract class SqlQueryResolve[Tpl](
     optLimit: Option[Int],
     optOffset: Option[Int]
   ): ResultSet = {
-    getResultSet(conn, m2q.getSqlQuery(Nil, optLimit, optOffset))
+    getResultSet(conn, m2q.getSqlQuery(Nil, optLimit, optOffset, Some(conn.proxy)))
   }
 
   protected def getTotalCount(conn: JdbcConn_JVM): Int = {
@@ -53,9 +53,9 @@ abstract class SqlQueryResolve[Tpl](
   }
 
   private def getResultSet(conn: JdbcConn_JVM, query: String): ResultSet = {
-    //    println("--- 1 ------------------")
-    //    elements.foreach(println)
-    //    println("getResultSet:\n" + query)
+    println("--- 1 ------------------")
+    elements.foreach(println)
+    println("getResultSet:\n" + query)
     conn.sqlConn.prepareStatement(
       query,
       ResultSet.TYPE_SCROLL_INSENSITIVE,
@@ -70,7 +70,7 @@ abstract class SqlQueryResolve[Tpl](
     optLimit: Option[Int],
     optOffset: Option[Int]
   ): ResultSet = {
-    val query = m2q.getSqlQuery(altElements, optLimit, optOffset)
+    val query = m2q.getSqlQuery(altElements, optLimit, optOffset, Some(conn.proxy))
     getResultSet(conn, query)
   }
 

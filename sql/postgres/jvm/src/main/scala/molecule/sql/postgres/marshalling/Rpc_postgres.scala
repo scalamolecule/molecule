@@ -84,7 +84,7 @@ case class Rpc_postgres(startTestContainer: Boolean)
   ): Future[Either[MoleculeError, TxReport]] = either {
     for {
       conn <- getConn(proxy)
-      data = new ResolveSave with Save_postgres {
+      data = new ResolveSave(proxy) with Save_postgres {
         override lazy val sqlConn: Connection = conn.sqlConn
       }.getData(elements)
       txReport <- conn.transact_async(data)
@@ -106,7 +106,7 @@ case class Rpc_postgres(startTestContainer: Boolean)
           } else tpls).asInstanceOf[Seq[Product]]
         case Left(err)   => throw err // catched in outer either wrapper
       }
-      data = new ResolveInsert with Insert_postgres {
+      data = new ResolveInsert(proxy) with Insert_postgres {
         override lazy val sqlConn: Connection = conn.sqlConn
       }.getData(proxy.nsMap, tplElements, tplProducts)
       txReport <- conn.transact_async(data)
@@ -139,7 +139,7 @@ case class Rpc_postgres(startTestContainer: Boolean)
           conn.atomicTransaction(res)
         }
       } else {
-        val data = new ResolveUpdate(conn.proxy.uniqueAttrs, isUpsert) with Update_postgres {
+        val data = new ResolveUpdate(conn.proxy, isUpsert) with Update_postgres {
           override lazy val sqlConn: Connection = conn.sqlConn
         }.getData(elements)
         Future(conn.transact_sync(data))
@@ -155,14 +155,14 @@ case class Rpc_postgres(startTestContainer: Boolean)
     val (idQuery, updateModels) = getIdQuery(elements, isUpsert)
     idQuery.get.map { refIdsResult =>
       val idModel            = idQuery.elements
-      val sqlQuery           = new Model2SqlQuery_postgres(idModel).getSqlQuery(Nil, None, None)
+      val sqlQuery           = new Model2SqlQuery_postgres(idModel).getSqlQuery(Nil, None, None, None)
       val refIds: List[Long] = getRefIds(refIdsResult, idModel, sqlQuery)
 
       () => {
         val refIdMaps = refIds.zipWithIndex.map {
           case (refId: Long, i) =>
             val updateModel = updateModels(i)(refId)
-            val data        = new ResolveUpdate(conn.proxy.uniqueAttrs, isUpsert) with Update_postgres {
+            val data        = new ResolveUpdate(conn.proxy, isUpsert) with Update_postgres {
               override lazy val sqlConn = conn.sqlConn
             }.getData(updateModel)
             conn.populateStmts(data)

@@ -79,7 +79,7 @@ object Rpc_h2
   ): Future[Either[MoleculeError, TxReport]] = either {
     for {
       conn <- getConn(proxy)
-      data = new ResolveSave with Save_h2 {
+      data = new ResolveSave(proxy) with Save_h2 {
         override lazy val sqlConn: Connection = conn.sqlConn
       }.getData(elements)
       txReport <- conn.transact_async(data)
@@ -101,7 +101,7 @@ object Rpc_h2
           } else tpls).asInstanceOf[Seq[Product]]
         case Left(err)   => throw err // catched in outer either wrapper
       }
-      data = new ResolveInsert with Insert_h2 {
+      data = new ResolveInsert(proxy) with Insert_h2 {
         override lazy val sqlConn: Connection = conn.sqlConn
       }.getData(proxy.nsMap, tplElements, tplProducts)
       txReport <- conn.transact_async(data)
@@ -134,7 +134,7 @@ object Rpc_h2
           conn.atomicTransaction(res)
         }
       } else {
-        val data = new ResolveUpdate(conn.proxy.uniqueAttrs, isUpsert) with Update_h2 {
+        val data = new ResolveUpdate(conn.proxy, isUpsert) with Update_h2 {
           override lazy val sqlConn: Connection = conn.sqlConn
         }.getData(elements)
         Future(conn.transact_sync(data))
@@ -150,14 +150,14 @@ object Rpc_h2
     val (idQuery, updateModels) = getIdQuery(elements, isUpsert)
     idQuery.get.map { refIdsResult =>
       val idModel            = idQuery.elements
-      val sqlQuery           = new Model2SqlQuery_h2(idModel).getSqlQuery(Nil, None, None)
+      val sqlQuery           = new Model2SqlQuery_h2(idModel).getSqlQuery(Nil, None, None, None)
       val refIds: List[Long] = getRefIds(refIdsResult, idModel, sqlQuery)
 
       () => {
         val refIdMaps = refIds.zipWithIndex.map {
           case (refId: Long, i) =>
             val updateModel = updateModels(i)(refId)
-            val data        = new ResolveUpdate(conn.proxy.uniqueAttrs, isUpsert) with Update_h2 {
+            val data        = new ResolveUpdate(conn.proxy, isUpsert) with Update_h2 {
               override lazy val sqlConn = conn.sqlConn
             }.getData(updateModel)
             conn.populateStmts(data)
@@ -167,6 +167,8 @@ object Rpc_h2
       }
     }
   }
+
+  List(1).indexOf(1)
 
   override def delete(
     proxy: ConnProxy,

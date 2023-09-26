@@ -20,7 +20,8 @@ trait TestSuite_h2 extends CoreTestSuite {
       schema.metaSchema,
       schema.nsMap,
       schema.attrMap,
-      schema.uniqueAttrs
+      schema.uniqueAttrs,
+      reserved = schema.sqlReserved_h2
     )
     test(JdbcConn_JS(proxy, RpcRequest.request))
   }

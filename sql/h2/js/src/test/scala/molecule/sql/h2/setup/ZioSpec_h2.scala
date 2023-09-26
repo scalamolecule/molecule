@@ -21,7 +21,8 @@ trait ZioSpec_h2 extends CoreTestZioSpecBase {
       schema.metaSchema,
       schema.nsMap,
       schema.attrMap,
-      schema.uniqueAttrs
+      schema.uniqueAttrs,
+      reserved = schema.sqlReserved_h2
     )
     ZLayer.succeed(JdbcConn_JS(proxy, RpcRequest.request))
   }

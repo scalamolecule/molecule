@@ -128,7 +128,6 @@ trait SqlSave
             ps.setNull(paramIndex, 0)
           } else {
             val conn  = ps.getConnection
-            //            val array = conn.createArrayOf("AnyRef", set2array(set.asInstanceOf[Set[Any]]))
             val array = conn.createArrayOf(exts(1), set2array(set.asInstanceOf[Set[Any]]))
             ps.setArray(paramIndex, array)
           }
@@ -137,46 +136,38 @@ trait SqlSave
       addColSetter(curPath, colSetter)
     } { refNs =>
       val curPath = if (paramIndexes.nonEmpty) curRefPath else List(ns)
-      optSet.fold {
-        // Inserting Option.empty[Set[Long]] adds no join rows
-        val colSetter: Setter = (_: PS, _: IdsMap, _: RowIndex) => ()
-        addColSetter(curPath, colSetter)
+      if (optSet.isEmpty || optSet.get.isEmpty) {
+        addColSetter(curPath, (_: PS, _: IdsMap, _: RowIndex) => ())
+      } else {
+        val set       = optSet.get
+        val refAttr   = attr
+        val joinTable = s"${ns}_${refAttr}_$refNs"
+        val joinPath  = curPath :+ joinTable
 
-      } { set =>
-        if (set.nonEmpty) {
-          val refAttr   = attr
-          val joinTable = s"${ns}_${refAttr}_$refNs"
-          val joinPath  = curPath :+ joinTable
+        // join table with single row (treated as normal insert since there's only 1 join per row)
+        val (id1, id2) = if (ns == refNs) (s"${ns}_1_id", s"${refNs}_2_id") else (s"${ns}_id", s"${refNs}_id")
+        // When insertion order is reversed, this join table will be set after left and right has been inserted
+        inserts = (joinPath, List((id1, ""), (id2, ""))) +: inserts
 
-          // join table with single row (treated as normal insert since there's only 1 join per row)
-          val (id1, id2) = if (ns == refNs) (s"${ns}_1_id", s"${refNs}_2_id") else (s"${ns}_id", s"${refNs}_id")
-          // When insertion order is reversed, this join table will be set after left and right has been inserted
-          inserts = (joinPath, List((id1, ""), (id2, ""))) +: inserts
-
-          if (paramIndexes.isEmpty) {
-            // If current namespace has no attributes, then add an empty row with
-            // default null values (only to be referenced as the left side of the join table)
-            val emptyRowSetter: Setter = (ps: PS, _: IdsMap, _: RowIndex) => ps.addBatch()
-            addColSetter(curPath, emptyRowSetter)
-            inserts = inserts :+ (curRefPath, List())
-          }
-
-          // Join table setter
-          val refIds             = set.asInstanceOf[Set[Long]]
-          val joinSetter: Setter = (ps: PS, idsMap: IdsMap, rowIndex: RowIndex) => {
-            val refId1 = idsMap(curPath)(rowIndex)
-            refIds.foreach { refId2 =>
-              ps.setLong(1, refId1)
-              ps.setLong(2, refId2)
-              ps.addBatch()
-            }
-          }
-          addColSetter(joinPath, joinSetter)
-        } else {
-          // Inserting Some(Set.empty[Long]) adds no join rows
-          val colSetter = (_: PS, _: IdsMap, _: RowIndex) => ()
-          addColSetter(curPath, colSetter)
+        if (paramIndexes.isEmpty) {
+          // If current namespace has no attributes, then add an empty row with
+          // default null values (only to be referenced as the left side of the join table)
+          val emptyRowSetter: Setter = (ps: PS, _: IdsMap, _: RowIndex) => ps.addBatch()
+          addColSetter(curPath, emptyRowSetter)
+          inserts = inserts :+ (curRefPath, List())
         }
+
+        // Join table setter
+        val refIds             = set.asInstanceOf[Set[Long]]
+        val joinSetter: Setter = (ps: PS, idsMap: IdsMap, rowIndex: RowIndex) => {
+          val refId1 = idsMap(curPath)(rowIndex)
+          refIds.foreach { refId2 =>
+            ps.setLong(1, refId1)
+            ps.setLong(2, refId2)
+            ps.addBatch()
+          }
+        }
+        addColSetter(joinPath, joinSetter)
       }
     }
   }

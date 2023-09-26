@@ -26,7 +26,7 @@ trait FilterOneSpecial_String extends CoreTestSuite with ApiAsync { spi: SpiAsyn
         _ <- Ns.string.endsWith("lo").query.get.map(_ ==> List("Hello"))
 
         _ <- Ns.string.contains("ll").query.get.map(_ ==> List("Hello"))
-        _ <- Ns.string.contains("e").a1.query.get.map(_ ==> List("Hello", "friends"))
+        _ <- Ns.string.contains("e").query.get.map(_.toSet ==> Set("Hello", "friends"))
 
         // Regex matches
         _ <- Ns.string.matches("^[A-Z].*").query.get.map(_ ==> List("Hello"))

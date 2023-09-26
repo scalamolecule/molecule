@@ -99,7 +99,7 @@ trait SpiSync_h2
     optOffset: Option[Int]
   ): Unit = {
     tryInspect("query", elements) {
-      val query = new Model2SqlQuery_h2(elements).getSqlQuery(Nil, optLimit, optOffset)
+      val query = new Model2SqlQuery_h2(elements).getSqlQuery(Nil, optLimit, optOffset, None)
       printInspect(label, elements, query)
     }
   }
@@ -128,7 +128,7 @@ trait SpiSync_h2
   }
 
   private def save_getData(save: Save, conn: JdbcConn_JVM): Data = {
-    new ResolveSave with Save_h2 {
+    new ResolveSave(conn.proxy) with Save_h2 {
       override lazy val sqlConn = conn.sqlConn
     }.getData(save.elements)
   }
@@ -161,7 +161,7 @@ trait SpiSync_h2
   }
 
   private def insert_getData(insert: Insert, conn: JdbcConn_JVM): Data = {
-    new ResolveInsert with Insert_h2 {
+    new ResolveInsert(conn.proxy) with Insert_h2 {
       override lazy val sqlConn: sql.Connection = conn.sqlConn
     }.getData(conn.proxy.nsMap, insert.elements, insert.tpls)
   }
@@ -201,7 +201,7 @@ trait SpiSync_h2
           s"""REF IDS MODEL ----------------
              |${idsModel.mkString("\n")}
              |
-             |${new Model2SqlQuery_h2(idsModel).getSqlQuery(Nil, None, None)}
+             |${new Model2SqlQuery_h2(idsModel).getSqlQuery(Nil, None, None, None)}
              |""".stripMargin
         val updates                  =
           updateModels
@@ -221,13 +221,13 @@ trait SpiSync_h2
   }
 
   private def update_getData(conn: JdbcConn_JVM, update: Update): Data = {
-    new ResolveUpdate(conn.proxy.uniqueAttrs, update.isUpsert) with Update_h2 {
+    new ResolveUpdate(conn.proxy, update.isUpsert) with Update_h2 {
       override lazy val sqlConn = conn.sqlConn
     }.getData(update.elements)
   }
 
   private def update_getData(conn: JdbcConn_JVM, elements: List[Element], isUpsert: Boolean): Data = {
-    new ResolveUpdate(conn.proxy.uniqueAttrs, isUpsert) with Update_h2 {
+    new ResolveUpdate(conn.proxy, isUpsert) with Update_h2 {
       override lazy val sqlConn = conn.sqlConn
     }.getData(elements)
   }
@@ -298,7 +298,7 @@ trait SpiSync_h2
   private def refUpdates(update: Update)(implicit conn: JdbcConn_JVM): () => Map[List[String], List[Long]] = {
     val (idQuery, updateModels) = getIdQuery(update.elements, update.isUpsert)
     val idModel                 = idQuery.elements
-    val sqlQuery                = new Model2SqlQuery_h2(idModel).getSqlQuery(Nil, None, None)
+    val sqlQuery                = new Model2SqlQuery_h2(idModel).getSqlQuery(Nil, None, None, None)
     val refIds: List[Long]      = getRefIds(query_get(idQuery), idModel, sqlQuery)
     () => {
       val refIdMaps = refIds.zipWithIndex.map {

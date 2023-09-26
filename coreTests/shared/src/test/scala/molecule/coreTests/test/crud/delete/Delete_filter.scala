@@ -134,7 +134,7 @@ trait Delete_filter extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.i.<=(2).delete.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
               err ==> "Can only filter delete by values applied to tacit card-one attributes. Found:\n" +
-                """AttrOneManInt("Ns", "i", Le, Seq(2), None, None, Nil, Nil, None, None)"""
+                """AttrOneManInt("Ns", "i", Le, Seq(2), None, None, Nil, Nil, None, None, Seq(0, 1))"""
             }
         } yield ()
       }

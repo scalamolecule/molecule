@@ -79,7 +79,7 @@ trait SpiAsync_datomic
     if (save.doInspect) save_inspect(save)
     val errors = save_validate(save)
     if (errors.isEmpty) {
-      conn.asInstanceOf[DatomicConn_JVM].transact_async(save_getStmts(save))
+      conn.asInstanceOf[DatomicConn_JVM].transact_async(save_getStmts(save, conn.proxy))
         .map { txReport =>
           conn.callback(save.elements)
           txReport
@@ -92,11 +92,11 @@ trait SpiAsync_datomic
   }
 
   override def save_inspect(save: Save)(implicit conn: Conn, ec: EC): Future[Unit] = {
-    printInspectTx("SAVE", save.elements, save_getStmts(save))
+    printInspectTx("SAVE", save.elements, save_getStmts(save, conn.proxy))
   }
 
-  private def save_getStmts(save: Save): Data = {
-    (new ResolveSave with Save_datomic).getStmts(save.elements)
+  private def save_getStmts(save: Save, proxy: ConnProxy): Data = {
+    (new ResolveSave(proxy) with Save_datomic).getStmts(save.elements)
   }
 
   override def save_validate(save: Save)(implicit conn: Conn): Map[String, Seq[String]] = {
@@ -128,7 +128,7 @@ trait SpiAsync_datomic
   }
 
   private def insert_getStmts(insert: Insert, proxy: ConnProxy): Data = {
-    (new ResolveInsert with Insert_datomic)
+    (new ResolveInsert(proxy) with Insert_datomic)
       .getStmts(proxy.nsMap, insert.elements, insert.tpls)
   }
 
@@ -162,7 +162,7 @@ trait SpiAsync_datomic
   }
 
   private def update_getStmts(update: Update, conn: DatomicConn_JVM): Data = {
-    (new ResolveUpdate(conn.proxy.uniqueAttrs, update.isUpsert) with Update_datomic)
+    (new ResolveUpdate(conn.proxy, update.isUpsert) with Update_datomic)
       .getStmts(conn, update.elements)
   }
 

@@ -304,7 +304,7 @@ trait Delete_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- A(42).i_?(Some(1)).update.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
               err ==> "Can't update optional values. Found:\n" +
-                """AttrOneOptInt("A", "i", Eq, Some(Seq(1)), None, None, Nil, Nil, None, None)"""
+                """AttrOneOptInt("A", "i", Eq, Some(Seq(1)), None, None, Nil, Nil, None, None, Seq(0, 1))"""
             }
         } yield ()
       }

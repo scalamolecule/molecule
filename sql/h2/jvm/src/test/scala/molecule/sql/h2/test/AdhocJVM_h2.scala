@@ -14,9 +14,17 @@ object AdhocJVM_h2 extends TestSuite_h2 {
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
       for {
-        _ <- Ns.int.insert(1).transact
-        _ <- Ns.int.query.get.map(_ ==> List(1))
+        _ <- Ns.int.insert(1).i.transact
+        _ <- Ns.int.query.i.get.map(_ ==> List(1))
 
+
+//        _ <- Ns.int.insert(1, 2).transact
+
+//        _ <- Ns.id(count).a1.s_.query.get.map(_ ==> List(3))
+
+
+//        _ <- Ns.ints(Set(1, 2)).save.transact
+//        _ <- Ns.ints.query.get.map(_ ==> List(Set(1, 2)))
 
       } yield ()
     }
@@ -24,9 +32,28 @@ object AdhocJVM_h2 extends TestSuite_h2 {
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
-        id <- A.i(1).B.i(2).C.i(3).save.transact.map(_.id)
-        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
+//        id <- A.i(1).B.i(2).C.i(3).save.transact.map(_.id)
+//        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
 
+
+        _ <- A.Bb.i.insert(1).transact
+//        _ <- A.Bb.i.query.get.map(_ ==> List(1))
+//
+//        _ <- A.i.Bb.i.insert(1, 2).transact
+//        _ <- A.i.Bb.i.query.get.map(_ ==> List((1, 2)))
+//
+//
+//        _ <- A.Bb.Cc.i.insert(1).transact
+//        _ <- A.Bb.Cc.i.query.get.map(_ ==> List(1))
+//
+//        _ <- A.Bb.i.Cc.i.insert(1, 2).transact
+//        _ <- A.Bb.i.Cc.i.query.get.map(_ ==> List((1, 2)))
+//
+//        _ <- A.i.Bb.Cc.i.insert(1, 2).transact
+//        _ <- A.i.Bb.Cc.i.query.get.map(_ ==> List((1, 2)))
+//
+//        _ <- A.i.Bb.i.Cc.i.insert(1, 2, 3).transact
+//        _ <- A.i.Bb.i.Cc.i.query.get.map(_ ==> List((1, 2, 3)))
 
       } yield ()
     }

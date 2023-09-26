@@ -3,11 +3,17 @@ package molecule.core.transaction
 import molecule.base.ast._
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
+import molecule.core.marshalling.ConnProxy
 import molecule.core.transaction.ops.InsertOps
+import molecule.core.util.ModelUtils
 import scala.annotation.tailrec
-import scala.collection.mutable.ListBuffer
+import scala.collection.mutable
+import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 
-class ResolveInsert extends InsertResolvers_ with InsertValidators_ { self: InsertOps =>
+class ResolveInsert(proxy: ConnProxy)
+  extends InsertResolvers_ with InsertValidators_ with ModelUtils { self: InsertOps =>
+
+  private val checkReservedKeywords = proxy.reserved.isDefined
 
   private val prevRefs: ListBuffer[AnyRef] = ListBuffer.empty[AnyRef]
 
@@ -56,27 +62,27 @@ class ResolveInsert extends InsertResolvers_ with InsertValidators_ { self: Inse
               }
           }
 
-        case Ref(ns, refAttr, refNs, card) =>
+        case Ref(ns, refAttr, refNs, card, _) =>
           prevRefs += refAttr
           val refResolver = addRef(ns, refAttr, refNs, card)
           resolve(nsMap, tail, resolvers :+ refResolver, outerTplIndex, tplIndex)
 
-        case BackRef(backRefNs, _) =>
+        case BackRef(backRefNs, _, _) =>
           tail.head match {
-            case Ref(_, refAttr, _, _) if prevRefs.contains(refAttr) => throw ModelError(
+            case Ref(_, refAttr, _, _, _) if prevRefs.contains(refAttr) => throw ModelError(
               s"Can't re-use previous namespace ${refAttr.capitalize} after backref _$backRefNs."
             )
-            case _                                                   => // ok
+            case _                                                      => // ok
           }
           val backRefResolver = addBackRef(backRefNs)
           resolve(nsMap, tail, resolvers :+ backRefResolver, outerTplIndex, tplIndex)
 
-        case Nested(Ref(ns, refAttr, refNs, _), nestedElements) =>
+        case Nested(Ref(ns, refAttr, refNs, _, _), nestedElements) =>
           prevRefs.clear()
           val nestedResolver = addNested(nsMap, tplIndex, ns, refAttr, refNs, nestedElements)
           resolve(nsMap, tail, resolvers :+ nestedResolver, 0, tplIndex)
 
-        case NestedOpt(Ref(ns, refAttr, refNs, _), nestedElements) =>
+        case NestedOpt(Ref(ns, refAttr, refNs, _, _), nestedElements) =>
           prevRefs.clear()
           val optNestedResolver = addNested(nsMap, tplIndex, ns, refAttr, refNs, nestedElements)
           resolve(nsMap, tail, resolvers :+ optNestedResolver, 0, tplIndex)
@@ -85,9 +91,16 @@ class ResolveInsert extends InsertResolvers_ with InsertValidators_ { self: Inse
     }
   }
 
+  private def attrOneNames(a: Attr): (String, String) = {
+    if (checkReservedKeywords) nonReservedAttr(a, proxy) else (a.ns, a.attr)
+  }
+
+  private def attrSetNames(a: Attr): (String, String, Option[String]) = {
+    if (checkReservedKeywords) nonReservedAttrSet(a, proxy) else (a.ns, a.attr, a.refNs)
+  }
 
   private def resolveAttrOneMan(a: AttrOneMan, tplIndex: Int): Product => Unit = {
-    val (ns, attr) = (a.ns, a.attr)
+    val (ns, attr) = attrOneNames(a)
     a match {
       case _: AttrOneManString     => addOne(ns, attr, tplIndex, transformString, handleString, extsString)
       case _: AttrOneManInt        => addOne(ns, attr, tplIndex, transformInt, handleInt, extsInt)
@@ -107,7 +120,7 @@ class ResolveInsert extends InsertResolvers_ with InsertValidators_ { self: Inse
   }
 
   private def resolveAttrOneOpt(a: AttrOneOpt, tplIndex: Int): Product => Unit = {
-    val (ns, attr) = (a.ns, a.attr)
+    val (ns, attr) = attrOneNames(a)
     a match {
       case _: AttrOneOptString     => addOneOpt(ns, attr, tplIndex, transformString, handleString, extsString)
       case _: AttrOneOptInt        => addOneOpt(ns, attr, tplIndex, transformInt, handleInt, extsInt)
@@ -127,7 +140,7 @@ class ResolveInsert extends InsertResolvers_ with InsertValidators_ { self: Inse
   }
 
   private def resolveAttrSetMan(a: AttrSetMan, tplIndex: Int): Product => Unit = {
-    val (ns, attr, refNs) = (a.ns, a.attr, a.refNs)
+    val (ns, attr, refNs) = attrSetNames(a)
     a match {
       case _: AttrSetManString     => addSet(ns, attr, set2arrayString, refNs, tplIndex, transformString, extsString)
       case _: AttrSetManInt        => addSet(ns, attr, set2arrayInt, refNs, tplIndex, transformInt, extsInt)
@@ -147,7 +160,7 @@ class ResolveInsert extends InsertResolvers_ with InsertValidators_ { self: Inse
   }
 
   private def resolveAttrSetOpt(a: AttrSetOpt, tplIndex: Int): Product => Unit = {
-    val (ns, attr, refNs) = (a.ns, a.attr, a.refNs)
+    val (ns, attr, refNs) = attrSetNames(a)
     a match {
       case _: AttrSetOptString     => addSetOpt(ns, attr, set2arrayString, refNs, tplIndex, transformString, extsString)
       case _: AttrSetOptInt        => addSetOpt(ns, attr, set2arrayInt, refNs, tplIndex, transformInt, extsInt)

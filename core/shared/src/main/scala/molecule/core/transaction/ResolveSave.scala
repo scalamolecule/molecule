@@ -3,11 +3,15 @@ package molecule.core.transaction
 import molecule.base.error._
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
+import molecule.core.marshalling.ConnProxy
 import molecule.core.transaction.ops.SaveOps
 import molecule.core.util.ModelUtils
 import scala.annotation.tailrec
 
-class ResolveSave extends ModelUtils with MoleculeLogging { self: SaveOps =>
+class ResolveSave(proxy: ConnProxy)
+  extends ModelUtils with MoleculeLogging { self: SaveOps =>
+
+  private val checkReservedKeywords = proxy.reserved.isDefined
 
   @tailrec
   final def resolve(elements: List[Element]): Unit = {
@@ -32,17 +36,26 @@ class ResolveSave extends ModelUtils with MoleculeLogging { self: SaveOps =>
               }
           }
 
-        case Ref(ns, refAttr, refNs, card) => addRef(ns, refAttr, refNs, card); resolve(tail)
-        case BackRef(backRefNs, _)         => addBackRef(backRefNs); resolve(tail)
-        case _: Nested                     => throw ModelError(
+        case Ref(ns, refAttr, refNs, card, _) => addRef(ns, refAttr, refNs, card); resolve(tail)
+        case BackRef(backRefNs, _, _)            => addBackRef(backRefNs); resolve(tail)
+        case _: Nested                        => throw ModelError(
           "Nested data structure not allowed in save molecule. Please use insert instead."
         )
-        case _: NestedOpt                  => throw ModelError(
+        case _: NestedOpt                     => throw ModelError(
           "Optional nested data structure not allowed in save molecule. Please use insert instead."
         )
       }
       case Nil             => ()
     }
+  }
+
+
+  private def attrOneNames(a: Attr): (String, String) = {
+    if (checkReservedKeywords) nonReservedAttr(a, proxy) else (a.ns, a.attr)
+  }
+
+  private def attrSetNames(a: Attr): (String, String, Option[String]) = {
+    if (checkReservedKeywords) nonReservedAttrSet(a, proxy) else (a.ns, a.attr, a.refNs)
   }
 
   private def oneV[T](
@@ -60,7 +73,7 @@ class ResolveSave extends ModelUtils with MoleculeLogging { self: SaveOps =>
     }
   }
   private def resolveAttrOneMan(a: AttrOneMan): Unit = {
-    val (ns, attr) = (a.ns, a.attr)
+    val (ns, attr) = attrOneNames(a)
     a match {
       case a: AttrOneManString     => addOne(ns, attr, oneV(ns, attr, a.vs, transformString), handleString, extsString)
       case a: AttrOneManInt        => addOne(ns, attr, oneV(ns, attr, a.vs, transformInt), handleInt, extsInt)
@@ -79,7 +92,7 @@ class ResolveSave extends ModelUtils with MoleculeLogging { self: SaveOps =>
     }
   }
   private def resolveAttrOneTac(a: AttrOneTac): Unit = {
-    val (ns, attr) = (a.ns, a.attr)
+    val (ns, attr) = attrOneNames(a)
     a match {
       case a: AttrOneTacString     => addOne(ns, attr, oneV(ns, attr, a.vs, transformString), handleString, extsString)
       case a: AttrOneTacInt        => addOne(ns, attr, oneV(ns, attr, a.vs, transformInt), handleInt, extsInt)
@@ -114,7 +127,7 @@ class ResolveSave extends ModelUtils with MoleculeLogging { self: SaveOps =>
     }
   }
   private def resolveAttrOneOpt(a: AttrOneOpt): Unit = {
-    val (ns, attr) = (a.ns, a.attr)
+    val (ns, attr) = attrOneNames(a)
     a match {
       case a: AttrOneOptString     => addOne(ns, attr, oneOptV(ns, attr, a.vs, transformString), handleString, extsString)
       case a: AttrOneOptInt        => addOne(ns, attr, oneOptV(ns, attr, a.vs, transformInt), handleInt, extsInt)
@@ -149,7 +162,7 @@ class ResolveSave extends ModelUtils with MoleculeLogging { self: SaveOps =>
     }
   }
   private def resolveAttrSetMan(a: AttrSetMan): Unit = {
-    val (ns, attr, refNs) = (a.ns, a.attr, a.refNs)
+    val (ns, attr, refNs) = attrSetNames(a)
     a match {
       case a: AttrSetManString     => addSet(ns, attr, oneSet(ns, attr, a.vs, transformString), handleString, set2arrayString, refNs, extsString)
       case a: AttrSetManInt        => addSet(ns, attr, oneSet(ns, attr, a.vs, transformInt), handleInt, set2arrayInt, refNs, extsInt)
@@ -168,7 +181,7 @@ class ResolveSave extends ModelUtils with MoleculeLogging { self: SaveOps =>
     }
   }
   private def resolveAttrSetTac(a: AttrSetTac): Unit = {
-    val (ns, attr, refNs) = (a.ns, a.attr, a.refNs)
+    val (ns, attr, refNs) = attrSetNames(a)
     a match {
       case a: AttrSetTacString     => addSet(ns, attr, oneSet(ns, attr, a.vs, transformString), handleString, set2arrayString, refNs, extsString)
       case a: AttrSetTacInt        => addSet(ns, attr, oneSet(ns, attr, a.vs, transformInt), handleInt, set2arrayInt, refNs, extsInt)
@@ -203,7 +216,7 @@ class ResolveSave extends ModelUtils with MoleculeLogging { self: SaveOps =>
   }
 
   private def resolveAttrSetOpt(a: AttrSetOpt): Unit = {
-    val (ns, attr, refNs) = (a.ns, a.attr, a.refNs)
+    val (ns, attr, refNs) = attrSetNames(a)
     a match {
       case a: AttrSetOptString     => addSet(ns, attr, oneOptSet(ns, attr, a.vs, transformString), handleString, set2arrayString, refNs, extsString)
       case a: AttrSetOptInt        => addSet(ns, attr, oneOptSet(ns, attr, a.vs, transformInt), handleInt, set2arrayInt, refNs, extsInt)

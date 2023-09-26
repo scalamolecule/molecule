@@ -80,7 +80,7 @@ trait ResolveNestedPull[Tpl]
           val res = s"""\n$indent{($refAttr :limit nil :default "$none") [$acc1]}"""
           (res, append)
 
-        case (acc1, Some(ref1@Ref(_, _, _, CardOne)), tail, attrIndex1) =>
+        case (acc1, Some(ref1@Ref(_, _, _, CardOne, _)), tail, attrIndex1) =>
           refDepths = refDepths.init :+ refDepths.last + 1
           // Continue increasing attrIndex after refs
           val (attrs, append1) = resolvePullRef(ref1, tail, level + 1, attrIndex1, "")
@@ -91,7 +91,7 @@ trait ResolveNestedPull[Tpl]
           "Only cardinality-one refs allowed in optional nested queries. Found: " + ref
         )
 
-        case (acc1, Some(BackRef(backRef, _)), tail, attrIndex1) =>
+        case (acc1, Some(BackRef(backRef, _, _)), tail, attrIndex1) =>
           // Finish initialization of previous ref before stepping back
           val prevRef = s"""\n$indent{($refAttr :limit nil :default "$none") [$acc1"""
 

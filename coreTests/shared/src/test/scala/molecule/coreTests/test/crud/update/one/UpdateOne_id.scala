@@ -158,7 +158,7 @@ trait UpdateOne_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns(42).int_?(Some(1)).update.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
               err ==> "Can't update optional values. Found:\n" +
-                """AttrOneOptInt("Ns", "int", Eq, Some(Seq(1)), None, None, Nil, Nil, None, None)"""
+                """AttrOneOptInt("Ns", "int", Eq, Some(Seq(1)), None, None, Nil, Nil, None, None, Seq(0, 6))"""
             }
         } yield ()
       }
