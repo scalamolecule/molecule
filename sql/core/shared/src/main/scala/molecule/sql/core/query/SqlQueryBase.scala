@@ -1,5 +1,6 @@
 package molecule.sql.core.query
 
+import molecule.base.ast.{Card, MetaNs}
 import molecule.base.error._
 import molecule.base.util.BaseHelpers
 import molecule.boilerplate.ast.Model._
@@ -23,6 +24,9 @@ trait SqlQueryBase extends BaseHelpers with JavaConversions {
     resultSet.beforeFirst()
     size
   }
+
+  // Used to lookup original type of aggregate attributes
+  final protected var attrMap = Map.empty[String, (Card, String, Seq[String])]
 
   // Main query
   final protected val select      = new ListBuffer[String]

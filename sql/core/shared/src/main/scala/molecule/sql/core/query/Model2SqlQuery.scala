@@ -32,6 +32,8 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
     validateQueryModel(elements)
     //    elements.foreach(println)
 
+    // Set attrMap if available (used to get original type of aggregate attributes)
+    proxy.foreach(p => attrMap = p.attrMap)
     from = List(getInitialNonGenericNs(elements))
     exts += from.head -> None
 

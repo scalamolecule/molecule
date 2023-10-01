@@ -111,23 +111,23 @@ trait ResolveExprOne_mysql extends ResolveExprOne with LambdasOne_mysql { self: 
         })
 
       case "count" =>
+        selectWithOrder(col, "COUNT", "")
         distinct = false
         groupByCols -= col
         aggregate = true
-        selectWithOrder(col, "COUNT", "")
         replaceCast(toInt)
 
       case "countDistinct" =>
+        selectWithOrder(col, "COUNT")
         distinct = false
         groupByCols -= col
         aggregate = true
-        selectWithOrder(col, "COUNT")
         replaceCast(toInt)
 
       case "sum" =>
+        selectWithOrder(col, "SUM")
         groupByCols -= col
         aggregate = true
-        selectWithOrder(col, "SUM")
 
       case "median" =>
         select += s"JSON_ARRAYAGG($col)"
@@ -141,9 +141,9 @@ trait ResolveExprOne_mysql extends ResolveExprOne with LambdasOne_mysql { self: 
         )
 
       case "avg" =>
+        selectWithOrder(col, "AVG")
         groupByCols -= col
         aggregate = true
-        selectWithOrder(col, "AVG")
 
       case "variance" =>
         groupByCols -= col

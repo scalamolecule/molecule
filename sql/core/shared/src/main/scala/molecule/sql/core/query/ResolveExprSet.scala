@@ -159,7 +159,7 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
       throw ModelError("Aggregate functions not implemented for Sets of boolean values.")
   }
 
-  protected def setAggr[T](col: String, fn: String, optN: Option[Int], res: ResSet[T]): Unit = {
+  protected def setAggr[T: ClassTag](col: String, fn: String, optN: Option[Int], res: ResSet[T]): Unit = {
     select -= col
     lazy val n = optN.getOrElse(0)
     fn match {

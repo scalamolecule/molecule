@@ -4,6 +4,7 @@ import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.sql.core.query.{ResolveExprSet, SqlQueryBase}
 import scala.reflect.ClassTag
+import scala.util.Random
 
 
 trait ResolveExprSet_mysql
@@ -71,211 +72,218 @@ trait ResolveExprSet_mysql
   }
 
   override protected def setAttr[T](col: String, res: ResSet[T]): Unit = {
+    select -= col
+    selectWithOrder(col, res.tpeDb, "JSON_ARRAYAGG")
+    groupByCols -= col
+    aggregate = true
     replaceCast((row: Row, paramIndex: Int) => {
       res.json2array(row.getString(paramIndex)).toSet
     })
   }
 
-  override protected def setAggr[T](col: String, fn: String, optN: Option[Int], res: ResSet[T]): Unit = {
+
+  override protected def setAggr[T: ClassTag](col: String, fn: String, optN: Option[Int], res: ResSet[T]): Unit = {
+    lazy val sep     = "0x1D" // Use ascii Group Selector to separate concatenated values
+    lazy val sepChar = 29.toChar
+    lazy val tpeDb   = res.tpeDb
     select -= col
     lazy val n = optN.getOrElse(0)
     fn match {
       case "distinct" =>
         noBooleanSetAggr(res)
+        select += s"JSON_ARRAYAGG($col)"
         groupByCols -= col
-        replaceCast((row: Row, paramIndex: Int) =>
-          res.json2array(row.getString(paramIndex)).toSet
-        )
+        aggregate = true
+        replaceCast((row: Row, paramIndex: Int) => {
+          val json = row.getString(paramIndex)
+          if (row.wasNull()) {
+            Set.empty[Set[T]]
+          } else {
+            // Need res.json2array for various types with/without quotes
+            json //                              "[[1, 2], [3, 4], [5, 6]]"
+              .substring(1, json.length - 1) //  "[1, 2], [3, 4], [5, 6]"
+              .replace("], [", "]], [[") //      "[1, 2]], [[3, 4]], [[5, 6]"
+              .split("], \\[") //                Array("[1, 2]", "[3, 4]", "[5, 6]")
+              .map(res.json2array(_).toSet) //   Array(Set(1, 2), Set(3, 4), Set(5, 6))
+              .toSet //                          Set(Set(1, 2), Set(3, 4), Set(5, 6))
+          }
+        })
 
       case "min" =>
         noBooleanSetAggr(res)
-        select += s"MIN($col)"
+        selectWithOrder(col, tpeDb, "MIN")
         groupByCols -= col
         aggregate = true
-        replaceCast(res.array2setFirst)
+        replaceCast((row: Row, paramIndex: Int) => {
+          Set(res.json2tpe(row.getString(paramIndex)))
+        })
 
       case "mins" =>
         noBooleanSetAggr(res)
-        select += s"ARRAY_AGG(DISTINCT $col)"
         groupByCols -= col
         aggregate = true
-        replaceCast(res.nestedArray2setAsc(n))
+        val i = select.size + 1
+        select += s"GROUP_CONCAT(DISTINCT t_$i.vs SEPARATOR $sep)"
+        from = from :+ s"JSON_TABLE($col, '$$[*]' COLUMNS (vs $tpeDb PATH '$$')) t_$i"
+        replaceCast((row: Row, paramIndex: Int) =>
+          row.getString(paramIndex).split(sepChar).map(res.json2tpe).take(n).toSet
+        )
 
       case "max" =>
         noBooleanSetAggr(res)
-        select += s"MAX($col)"
+        selectWithOrder(col, tpeDb, "MAX")
         groupByCols -= col
         aggregate = true
-        replaceCast(res.array2setLast)
+        replaceCast((row: Row, paramIndex: Int) => {
+          Set(res.json2tpe(row.getString(paramIndex)))
+        })
 
       case "maxs" =>
         noBooleanSetAggr(res)
-        select += s"ARRAY_AGG(DISTINCT $col)"
         groupByCols -= col
         aggregate = true
-        replaceCast(res.nestedArray2setDesc(n))
+        val i = select.size + 1
+        select += s"GROUP_CONCAT(DISTINCT t_$i.vs ORDER BY t_$i.vs DESC SEPARATOR $sep)"
+        from = from :+ s"JSON_TABLE($col, '$$[*]' COLUMNS (vs $tpeDb PATH '$$')) t_$i"
+        replaceCast((row: Row, paramIndex: Int) =>
+          row.getString(paramIndex).split(sepChar).map(res.json2tpe).take(n).toSet
+        )
 
       case "rand" =>
         noBooleanSetAggr(res)
-        distinct = false
-        select += col
-        orderBy += ((level, -1, "RANDOM()", ""))
-        hardLimit = 1
-        replaceCast(res.sql2set)
+        selectWithOrder(col, tpeDb, "JSON_ARRAYAGG")
+        replaceCast((row: Row, paramIndex: Int) => {
+          val array = res.json2array(row.getString(paramIndex))
+          val rnd   = new Random().nextInt(array.length)
+          Set(array(rnd))
+        })
 
       case "rands" =>
         noBooleanSetAggr(res)
-        select +=
-          s"""TRIM_ARRAY(
-             |    ARRAY_AGG($col order by RANDOM()),
-             |    GREATEST(
-             |      0,
-             |      ARRAY_LENGTH(ARRAY_AGG($col), 1) - $n
-             |    )
-             |  )""".stripMargin
-        groupByCols -= col
-        aggregate = true
-        replaceCast(res.nestedArray2coalescedSet)
+        selectWithOrder(col, tpeDb, "JSON_ARRAYAGG")
+        replaceCast((row: Row, paramIndex: Int) => {
+          val array = res.json2array(row.getString(paramIndex))
+          Random.shuffle(array.toSet).take(n)
+        })
 
       case "sample" =>
         noBooleanSetAggr(res)
-        distinct = false
-        select += col
-        orderBy += ((level, -1, "RANDOM()", ""))
-        hardLimit = 1
-        replaceCast(res.sql2set)
+        selectWithOrder(col, tpeDb, "JSON_ARRAYAGG")
+        replaceCast((row: Row, paramIndex: Int) => {
+          val array = res.json2array(row.getString(paramIndex))
+          val rnd   = new Random().nextInt(array.length)
+          Set(array(rnd))
+        })
 
       case "samples" =>
         noBooleanSetAggr(res)
-        select +=
-          s"""TRIM_ARRAY(
-             |    ARRAY_AGG($col order by RANDOM()),
-             |    GREATEST(
-             |      0,
-             |      ARRAY_LENGTH(ARRAY_AGG(DISTINCT $col), 1) - $n
-             |    )
-             |  )""".stripMargin
-        groupByCols -= col
-        aggregate = true
-        replaceCast(res.nestedArray2coalescedSet)
-
-
-      // Using brute force in the following aggregate functions to be able to
-      // aggregate _unique_ values (Set semantics instead of Array semantics)
+        selectWithOrder(col, tpeDb, "JSON_ARRAYAGG")
+        replaceCast((row: Row, paramIndex: Int) => {
+          val array = res.json2array(row.getString(paramIndex))
+          Random.shuffle(array.toSet).take(n)
+        })
 
       case "count" =>
         noBooleanSetCounts(n)
-        // Count of all (non-unique) values
-        select += s"ARRAY_AGG($col)"
+        selectWithOrder(col, dbType(col), "COUNT")
         groupByCols -= col
         aggregate = true
-        replaceCast(
-          (row: Row, paramIndex: Int) => {
-            val outerArrayResultSet = row.getArray(paramIndex).getResultSet
-            var count               = 0
-            while (outerArrayResultSet.next()) {
-              count += outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]].length
-            }
-            count
-          }
-        )
+        replaceCast(toInt)
 
       case "countDistinct" =>
         noBooleanSetCounts(n)
         // Count of unique values (Set semantics)
-        select += s"ARRAY_AGG($col)"
+        selectWithOrder(col, dbType(col), "COUNT", "DISTINCT ")
         groupByCols -= col
         aggregate = true
-        replaceCast(
-          (row: Row, paramIndex: Int) => {
-            val outerArrayResultSet = row.getArray(paramIndex).getResultSet
-            var set                 = Set.empty[Any]
-            while (outerArrayResultSet.next()) {
-              outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]].foreach { value =>
-                set += value
-              }
-            }
-            set.size
-          }
-        )
+        replaceCast(toInt)
 
       case "sum" =>
         // Sum of unique values (Set semantics)
-        select += s"ARRAY_AGG($col)"
+        selectWithOrder(col, tpeDb, "SUM", "DISTINCT ")
         groupByCols -= col
         aggregate = true
-        replaceCast(res.array2setSum)
-
+        replaceCast((row: Row, paramIndex: Int) =>
+          Set(res.json2tpe(row.getString(paramIndex)))
+        )
 
       case "median" =>
-        select += s"ARRAY_AGG($col)"
+        selectWithOrder(col, tpeDb, "JSON_ARRAYAGG")
         groupByCols -= col
         aggregate = true
-        replaceCast(
-          (row: Row, paramIndex: Int) => {
-            val outerArrayResultSet = row.getArray(paramIndex).getResultSet
-            var set                 = Set.empty[Double]
-            while (outerArrayResultSet.next()) {
-              val array = outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]]
-              array.foreach(v => set += v.toString.toDouble) // not the most efficient...
-            }
-            getMedian(set)
-          }
-        )
+        replaceCast((row: Row, paramIndex: Int) => {
+          getMedian(res.json2array(row.getString(paramIndex)).map(_.toString.toDouble).toSet)
+        })
 
       case "avg" =>
         // Average of unique values (Set semantics)
-        select += s"ARRAY_AGG($col)"
+        selectWithOrder(col, tpeDb, "AVG", "DISTINCT ")
         groupByCols -= col
         aggregate = true
-        replaceCast(
-          (row: Row, paramIndex: Int) => {
-            val outerArrayResultSet = row.getArray(paramIndex).getResultSet
-            var set                 = Set.empty[Double]
-            while (outerArrayResultSet.next()) {
-              val array = outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]]
-              array.foreach(v => set += v.toString.toDouble) // not the most efficient...
-            }
-            set.sum / set.size
-          }
+        replaceCast((row: Row, paramIndex: Int) =>
+          row.getString(paramIndex).toDouble
         )
 
       case "variance" =>
         // Variance of unique values (Set semantics)
-        select += s"ARRAY_AGG($col)"
+        selectWithOrder(col, tpeDb, "JSON_ARRAYAGG")
         groupByCols -= col
         aggregate = true
-        replaceCast(
-          (row: Row, paramIndex: Int) => {
-            val outerArrayResultSet = row.getArray(paramIndex).getResultSet
-            var set                 = Set.empty[Double]
-            while (outerArrayResultSet.next()) {
-              val array = outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]]
-              array.foreach(v => set += v.toString.toDouble) // not the most efficient...
-            }
-            varianceOf(set.toList: _*)
-          }
-        )
+        replaceCast((row: Row, paramIndex: Int) => {
+          val doubles = res.json2array(row.getString(paramIndex)).map(_.toString.toDouble).toSet.toList
+          varianceOf(doubles: _*)
+        })
 
       case "stddev" =>
         // Standard deviation of unique values (Set semantics)
-        select += s"ARRAY_AGG($col)"
+        selectWithOrder(col, tpeDb, "JSON_ARRAYAGG")
         groupByCols -= col
         aggregate = true
-        replaceCast(
-          (row: Row, paramIndex: Int) => {
-            val outerArrayResultSet = row.getArray(paramIndex).getResultSet
-            var set                 = Set.empty[Double]
-            while (outerArrayResultSet.next()) {
-              val array = outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]]
-              array.foreach(v => set += v.toString.toDouble) // not the most efficient...
-            }
-            stdDevOf(set.toList: _*)
-          }
-        )
+        replaceCast((row: Row, paramIndex: Int) => {
+          val doubles = res.json2array(row.getString(paramIndex)).map(_.toString.toDouble).toSet.toList
+          stdDevOf(doubles: _*)
+        })
 
       case other => unexpectedKw(other)
     }
+  }
+
+  private def selectWithOrder(
+    col: String,
+    tpeDb: String,
+    fn: String,
+    distinct: String = "",
+  ): Unit = {
+    val i  = select.size + 1
+    val vs = s"t_$i.vs"
+    if (orderBy.nonEmpty && orderBy.last._3 == col) {
+      // order by aggregate alias instead
+      val alias = col.replace('.', '_') + "_" + fn.toLowerCase
+      select += s"$fn($distinct$vs) $alias"
+      val (level, _, _, dir) = orderBy.last
+      orderBy.remove(orderBy.size - 1)
+      orderBy += ((level, 1, alias, dir))
+    } else {
+      select += s"$fn($distinct$vs)"
+    }
+    from = from :+ s"JSON_TABLE($col, '$$[*]' COLUMNS (vs $tpeDb PATH '$$')) t_$i"
+  }
+
+  private def dbType(col: String): String = attrMap(col)._2 match {
+    case "String"     => "LONGTEXT"
+    case "Int"        => "INT"
+    case "Long"       => "BIGINT"
+    case "Float"      => "REAL"
+    case "Double"     => "DOUBLE"
+    case "Boolean"    => "TINYINT(1)"
+    case "BigInt"     => "DECIMAL(65, 0)"
+    case "BigDecimal" => "DECIMAL(65, 30)"
+    case "Date"       => "DATETIME"
+    case "UUID"       => "TINYTEXT"
+    case "URI"        => "TEXT"
+    case "Byte"       => "TINYINT"
+    case "Short"      => "SMALLINT"
+    case "Char"       => "CHAR"
   }
 
   private def matchArray[T](col: String, set: Set[T], one2json: T => String): String = {
