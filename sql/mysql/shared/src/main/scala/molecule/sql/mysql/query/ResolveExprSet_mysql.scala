@@ -15,13 +15,12 @@ trait ResolveExprSet_mysql
     val col = getCol(attr: Attr)
     select += col
     groupByCols += col // if we later need to group by non-aggregated columns
-
-    if (isNestedOpt) {
-      addCast(res.sql2setOrNull)
-    } else {
-      addCast(res.sql2set)
+    if (!isNestedOpt) {
       notNull += col
     }
+    addCast((row: Row, paramIndex: Int) =>
+      res.json2array(row.getString(paramIndex)).toSet
+    )
 
     attr.filterAttr.fold {
       if (filterAttrVars.contains(attr.name) && attr.op != V) {
@@ -35,25 +34,46 @@ trait ResolveExprSet_mysql
     }
   }
 
+  override protected def setOpt[T: ClassTag](
+    attr: Attr,
+    optSets: Option[Seq[Set[T]]],
+    resOpt: ResSetOpt[T],
+    res: ResSet[T]
+  ): Unit = {
+    val col = getCol(attr: Attr)
+    select += col
+    groupByCols += col // if we later need to group by non-aggregated columns
+    addCast((row: Row, paramIndex: Int) => row.getString(paramIndex) match {
+      case null | "[]" => Option.empty[Set[T]]
+      case json        => Some(res.json2array(json).toSet)
+    })
+    attr.op match {
+      case V     => ()
+      case Eq    => setOptEqual(col, optSets, res)
+      case Neq   => setOptNeq(col, optSets, res)
+      case Has   => optHas(col, optSets, resOpt.one2json)
+      case HasNo => optHasNo(col, optSets, resOpt.one2json)
+      case other => unexpectedOp(other)
+    }
+  }
+
+  override protected def setExpr[T: ClassTag](col: String, op: Op, sets: Seq[Set[T]], res: ResSet[T], mode: String): Unit = {
+    op match {
+      case V         => if (mode == "man") setAttr(col, res) else ()
+      case Eq        => setEqual(col, sets, res)
+      case Neq       => setNeq(col, sets, res)
+      case Has       => has(col, sets, res.one2json)
+      case HasNo     => hasNo(col, sets, res.one2json)
+      case NoValue   => setNoValue(col)
+      case Fn(kw, n) => setAggr(col, kw, n, res)
+      case other     => unexpectedOp(other)
+    }
+  }
 
   override protected def setAttr[T](col: String, res: ResSet[T]): Unit = {
-    select -= col
-    groupByCols -= col
-    if (res.tpe == "Boolean" && !expectedFilterAttrs.contains(col) && !isNested && !isNestedOpt) {
-      // If we don't apply this hack, Boolean sets throw
-      // ERROR: cannot accumulate arrays of different dimensionality
-      // https://stackoverflow.com/questions/46849237/postgresql-array-agginteger/46849678#46849678
-      val colAlias = col.replace(".", "_")
-      select += s"ARRAY_AGG(DISTINCT $colAlias)"
-      from = from :+ s"UNNEST($col) AS $colAlias"
-      replaceCast(res.sql2set)
-    } else {
-      select += s"ARRAY_AGG($col)"
-      where += (("", s"$col <> '{}'"))
-      replaceCast(res.nestedArray2coalescedSet)
-    }
-    having += "COUNT(*) > 0"
-    aggregate = true
+    replaceCast((row: Row, paramIndex: Int) => {
+      res.json2array(row.getString(paramIndex)).toSet
+    })
   }
 
   override protected def setAggr[T](col: String, fn: String, optN: Option[Int], res: ResSet[T]): Unit = {
@@ -63,9 +83,9 @@ trait ResolveExprSet_mysql
       case "distinct" =>
         noBooleanSetAggr(res)
         groupByCols -= col
-        aggregate = true
-        select += s"ARRAY_AGG(DISTINCT $col)"
-        replaceCast(res.nestedArray2nestedSet)
+        replaceCast((row: Row, paramIndex: Int) =>
+          res.json2array(row.getString(paramIndex)).toSet
+        )
 
       case "min" =>
         noBooleanSetAggr(res)
@@ -150,8 +170,8 @@ trait ResolveExprSet_mysql
         groupByCols -= col
         aggregate = true
         replaceCast(
-          (row: Row, n: Int) => {
-            val outerArrayResultSet = row.getArray(n).getResultSet
+          (row: Row, paramIndex: Int) => {
+            val outerArrayResultSet = row.getArray(paramIndex).getResultSet
             var count               = 0
             while (outerArrayResultSet.next()) {
               count += outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]].length
@@ -167,8 +187,8 @@ trait ResolveExprSet_mysql
         groupByCols -= col
         aggregate = true
         replaceCast(
-          (row: Row, n: Int) => {
-            val outerArrayResultSet = row.getArray(n).getResultSet
+          (row: Row, paramIndex: Int) => {
+            val outerArrayResultSet = row.getArray(paramIndex).getResultSet
             var set                 = Set.empty[Any]
             while (outerArrayResultSet.next()) {
               outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]].foreach { value =>
@@ -192,8 +212,8 @@ trait ResolveExprSet_mysql
         groupByCols -= col
         aggregate = true
         replaceCast(
-          (row: Row, n: Int) => {
-            val outerArrayResultSet = row.getArray(n).getResultSet
+          (row: Row, paramIndex: Int) => {
+            val outerArrayResultSet = row.getArray(paramIndex).getResultSet
             var set                 = Set.empty[Double]
             while (outerArrayResultSet.next()) {
               val array = outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]]
@@ -209,8 +229,8 @@ trait ResolveExprSet_mysql
         groupByCols -= col
         aggregate = true
         replaceCast(
-          (row: Row, n: Int) => {
-            val outerArrayResultSet = row.getArray(n).getResultSet
+          (row: Row, paramIndex: Int) => {
+            val outerArrayResultSet = row.getArray(paramIndex).getResultSet
             var set                 = Set.empty[Double]
             while (outerArrayResultSet.next()) {
               val array = outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]]
@@ -226,8 +246,8 @@ trait ResolveExprSet_mysql
         groupByCols -= col
         aggregate = true
         replaceCast(
-          (row: Row, n: Int) => {
-            val outerArrayResultSet = row.getArray(n).getResultSet
+          (row: Row, paramIndex: Int) => {
+            val outerArrayResultSet = row.getArray(paramIndex).getResultSet
             var set                 = Set.empty[Double]
             while (outerArrayResultSet.next()) {
               val array = outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]]
@@ -243,8 +263,8 @@ trait ResolveExprSet_mysql
         groupByCols -= col
         aggregate = true
         replaceCast(
-          (row: Row, n: Int) => {
-            val outerArrayResultSet = row.getArray(n).getResultSet
+          (row: Row, paramIndex: Int) => {
+            val outerArrayResultSet = row.getArray(paramIndex).getResultSet
             var set                 = Set.empty[Double]
             while (outerArrayResultSet.next()) {
               val array = outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]]
@@ -258,20 +278,24 @@ trait ResolveExprSet_mysql
     }
   }
 
-  private def matchArray(sqlArray: (String, Int), col: String): String = {
-    s"(${sqlArray._1} <@ $col AND CARDINALITY($col) = ${sqlArray._2})"
+  private def matchArray[T](col: String, set: Set[T], one2json: T => String): String = {
+    val size       = set.size
+    val jsonValues = set.map(one2json).mkString(", ")
+    s"JSON_LENGTH($col) = $size AND JSON_CONTAINS($col, JSON_ARRAY($jsonValues))"
   }
 
-  private def matchArrays[T](sets: Seq[Set[T]], col: String, set2sqlArray: Set[T] => String): String = {
-    sets.map(set => matchArray((set2sqlArray(set), set.size), col)).mkString("(\n    ", " OR\n    ", "\n  )")
+  private def matchArrays[T](col: String, sets: Seq[Set[T]], one2json: T => String): String = {
+    sets.map(set =>
+      matchArray(col, set, one2json)
+    ).mkString("(\n    ", " OR\n    ", "\n  )")
   }
 
   override protected def setEqual[T](col: String, sets: Seq[Set[T]], res: ResSet[T]): Unit = {
     val setsNonEmpty = sets.filterNot(_.isEmpty)
     setsNonEmpty.length match {
       case 0 => where += (("FALSE", ""))
-      case 1 => where += (("", matchArray((res.set2sqlArray(setsNonEmpty.head), setsNonEmpty.head.size), col)))
-      case _ => where += (("", matchArrays(setsNonEmpty, col, res.set2sqlArray)))
+      case 1 => where += (("", matchArray(col, setsNonEmpty.head, res.one2json)))
+      case _ => where += (("", matchArrays(col, setsNonEmpty, res.one2json)))
     }
   }
 
@@ -279,23 +303,23 @@ trait ResolveExprSet_mysql
     val setsNonEmpty = sets.filterNot(_.isEmpty)
     setsNonEmpty.length match {
       case 0 => ()
-      case 1 => where += (("", "NOT " +
-        matchArray((res.set2sqlArray(setsNonEmpty.head), setsNonEmpty.head.size), col)))
-      case _ => where += (("", "NOT " +
-        matchArrays(setsNonEmpty, col, res.set2sqlArray)))
+      case 1 => where += (("", "NOT (" + matchArray(col, setsNonEmpty.head, res.one2json) + ")"))
+      case _ => where += (("", "NOT (" + matchArrays(col, setsNonEmpty, res.one2json) + ")"))
     }
   }
 
-  override protected def has[T: ClassTag](col: String, sets: Seq[Set[T]], one2sql: T => String): Unit = {
-    def contains(v: T): String = s"${one2sql(v)} = ANY($col)"
-    def containsSet(set: Set[T]): String = set.map(contains).mkString(" AND ")
+  override protected def has[T: ClassTag](col: String, sets: Seq[Set[T]], one2json: T => String): Unit = {
+    def containsSet(set: Set[T]): String = {
+      val jsonValues = set.map(one2json).mkString(", ")
+      s"JSON_CONTAINS($col, JSON_ARRAY($jsonValues))"
+    }
     sets.length match {
       case 0 => where += (("FALSE", ""))
       case 1 =>
         val set = sets.head
         set.size match {
           case 0 => where += (("FALSE", ""))
-          case 1 => where += (("", contains(set.head)))
+          case 1 => where += (("", s"JSON_CONTAINS($col, JSON_ARRAY(${one2json(set.head)}))"))
           case _ => where += (("", containsSet(set)))
         }
       case _ =>
@@ -314,9 +338,12 @@ trait ResolveExprSet_mysql
     }
   }
 
-  override protected def hasNo[T](col: String, sets: Seq[Set[T]], one2sql: T => String): Unit = {
-    def notContains(v: T): String = s"${one2sql(v)} != ALL($col)"
-    def notContainsSet(set: Set[T]): String = set.map(notContains).mkString("(", " OR ", ")")
+  override protected def hasNo[T](col: String, sets: Seq[Set[T]], one2json: T => String): Unit = {
+    def notContains(v: T): String = s"NOT JSON_CONTAINS($col, JSON_ARRAY(${one2json(v)}))"
+    def notContainsSet(set: Set[T]): String = {
+      val jsonValues = set.map(one2json).mkString(", ")
+      s"NOT JSON_CONTAINS($col, JSON_ARRAY($jsonValues))"
+    }
     sets.length match {
       case 0 => ()
       case 1 =>

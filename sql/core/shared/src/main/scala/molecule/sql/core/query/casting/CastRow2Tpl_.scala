@@ -11,19 +11,19 @@ trait CastRow2Tpl_ { self: Model2Query with SqlQueryBase =>
   @tailrec
   final private def resolveArities(
     arities: List[List[Int]],
-    casts: List[(Row, AttrIndex) => Any],
-    attrIndex: AttrIndex,
-    acc: List[(Row, AttrIndex) => Any],
+    casts: List[(Row, ParamIndex) => Any],
+    attrIndex: ParamIndex,
+    acc: List[(Row, ParamIndex) => Any],
     nested: Option[NestedTpls]
-  ): List[(Row, AttrIndex) => Any] = {
+  ): List[(Row, ParamIndex) => Any] = {
     arities match {
       case List(1) :: as =>
-        val cast = (row: Row, _: AttrIndex) => casts.head(row, attrIndex)
+        val cast = (row: Row, _: ParamIndex) => casts.head(row, attrIndex)
         resolveArities(as, casts.tail, attrIndex + 1, acc :+ cast, nested)
 
       // Nested
       case List(-1) :: Nil =>
-        val cast = (_: Row, _: AttrIndex) => nested.getOrElse(List.empty[Any])
+        val cast = (_: Row, _: ParamIndex) => nested.getOrElse(List.empty[Any])
         resolveArities(Nil, casts, 0, acc :+ cast, None)
 
 
@@ -33,11 +33,11 @@ trait CastRow2Tpl_ { self: Model2Query with SqlQueryBase =>
 
   final  def castRow2AnyTpl(
     arities: List[List[Int]],
-    casts: List[(Row, AttrIndex) => Any],
-    attrIndex: AttrIndex,
+    casts: List[(Row, ParamIndex) => Any],
+    attrIndex: ParamIndex,
     nested: Option[NestedTpls]
   ): Row => Any = {
-    val casters: List[(Row, AttrIndex) => Any] = resolveArities(arities, casts, attrIndex, Nil, nested)
+    val casters: List[(Row, ParamIndex) => Any] = resolveArities(arities, casts, attrIndex, Nil, nested)
     arities.length match {
       case 1  => cast1(casters, attrIndex)
       case 2  => cast2(casters, attrIndex)
@@ -70,7 +70,7 @@ trait CastRow2Tpl_ { self: Model2Query with SqlQueryBase =>
       c1(row, attrIndex)
   }
 
-  final private def cast2(casters: List[(Row, AttrIndex) => Any], attrIndex: AttrIndex): Row => Any = {
+  final private def cast2(casters: List[(Row, ParamIndex) => Any], attrIndex: ParamIndex): Row => Any = {
     val List(c1, c2) = casters
     val List(a1, a2) = (attrIndex until attrIndex + 2).toList
     (row: Row) =>
@@ -80,7 +80,7 @@ trait CastRow2Tpl_ { self: Model2Query with SqlQueryBase =>
       )
   }
 
-  final private def cast3(casters: List[(Row, AttrIndex) => Any], attrIndex: AttrIndex): Row => Any = {
+  final private def cast3(casters: List[(Row, ParamIndex) => Any], attrIndex: ParamIndex): Row => Any = {
     val List(c1, c2, c3) = casters
     val List(a1, a2, a3) = (attrIndex until attrIndex + 3).toList
     (row: Row) =>
@@ -91,7 +91,7 @@ trait CastRow2Tpl_ { self: Model2Query with SqlQueryBase =>
       )
   }
 
-  final private def cast4(casters: List[(Row, AttrIndex) => Any], attrIndex: AttrIndex): Row => Any = {
+  final private def cast4(casters: List[(Row, ParamIndex) => Any], attrIndex: ParamIndex): Row => Any = {
     val List(c1, c2, c3, c4) = casters
     val List(a1, a2, a3, a4) = (attrIndex until attrIndex + 4).toList
     (row: Row) =>
@@ -103,7 +103,7 @@ trait CastRow2Tpl_ { self: Model2Query with SqlQueryBase =>
       )
   }
 
-  final private def cast5(casters: List[(Row, AttrIndex) => Any], attrIndex: AttrIndex): Row => Any = {
+  final private def cast5(casters: List[(Row, ParamIndex) => Any], attrIndex: ParamIndex): Row => Any = {
     val List(c1, c2, c3, c4, c5) = casters
     val List(a1, a2, a3, a4, a5) = (attrIndex until attrIndex + 5).toList
     (row: Row) =>
@@ -116,7 +116,7 @@ trait CastRow2Tpl_ { self: Model2Query with SqlQueryBase =>
       )
   }
 
-  final private def cast6(casters: List[(Row, AttrIndex) => Any], attrIndex: AttrIndex): Row => Any = {
+  final private def cast6(casters: List[(Row, ParamIndex) => Any], attrIndex: ParamIndex): Row => Any = {
     val List(c1, c2, c3, c4, c5, c6) = casters
     val List(a1, a2, a3, a4, a5, a6) = (attrIndex until attrIndex + 6).toList
     (row: Row) =>
@@ -130,7 +130,7 @@ trait CastRow2Tpl_ { self: Model2Query with SqlQueryBase =>
       )
   }
 
-  final private def cast7(casters: List[(Row, AttrIndex) => Any], attrIndex: AttrIndex): Row => Any = {
+  final private def cast7(casters: List[(Row, ParamIndex) => Any], attrIndex: ParamIndex): Row => Any = {
     val List(c1, c2, c3, c4, c5, c6, c7) = casters
     val List(a1, a2, a3, a4, a5, a6, a7) = (attrIndex until attrIndex + 7).toList
     (row: Row) =>
@@ -145,7 +145,7 @@ trait CastRow2Tpl_ { self: Model2Query with SqlQueryBase =>
       )
   }
 
-  final private def cast8(casters: List[(Row, AttrIndex) => Any], attrIndex: AttrIndex): Row => Any = {
+  final private def cast8(casters: List[(Row, ParamIndex) => Any], attrIndex: ParamIndex): Row => Any = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8) = casters
     val List(a1, a2, a3, a4, a5, a6, a7, a8) = (attrIndex until attrIndex + 8).toList
     (row: Row) =>
@@ -161,7 +161,7 @@ trait CastRow2Tpl_ { self: Model2Query with SqlQueryBase =>
       )
   }
 
-  final private def cast9(casters: List[(Row, AttrIndex) => Any], attrIndex: AttrIndex): Row => Any = {
+  final private def cast9(casters: List[(Row, ParamIndex) => Any], attrIndex: ParamIndex): Row => Any = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9) = casters
     val List(a1, a2, a3, a4, a5, a6, a7, a8, a9) = (attrIndex until attrIndex + 9).toList
     (row: Row) =>
@@ -178,7 +178,7 @@ trait CastRow2Tpl_ { self: Model2Query with SqlQueryBase =>
       )
   }
 
-  final private def cast10(casters: List[(Row, AttrIndex) => Any], attrIndex: AttrIndex): Row => Any = {
+  final private def cast10(casters: List[(Row, ParamIndex) => Any], attrIndex: ParamIndex): Row => Any = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10) = casters
     val List(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10) = (attrIndex until attrIndex + 10).toList
     (row: Row) =>
@@ -196,7 +196,7 @@ trait CastRow2Tpl_ { self: Model2Query with SqlQueryBase =>
       )
   }
 
-  final private def cast11(casters: List[(Row, AttrIndex) => Any], attrIndex: AttrIndex): Row => Any = {
+  final private def cast11(casters: List[(Row, ParamIndex) => Any], attrIndex: ParamIndex): Row => Any = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11) = casters
     val List(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11) = (attrIndex until attrIndex + 11).toList
     (row: Row) =>
@@ -215,7 +215,7 @@ trait CastRow2Tpl_ { self: Model2Query with SqlQueryBase =>
       )
   }
 
-  final private def cast12(casters: List[(Row, AttrIndex) => Any], attrIndex: AttrIndex): Row => Any = {
+  final private def cast12(casters: List[(Row, ParamIndex) => Any], attrIndex: ParamIndex): Row => Any = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12) = casters
     val List(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12) = (attrIndex until attrIndex + 12).toList
     (row: Row) =>
@@ -235,7 +235,7 @@ trait CastRow2Tpl_ { self: Model2Query with SqlQueryBase =>
       )
   }
 
-  final private def cast13(casters: List[(Row, AttrIndex) => Any], attrIndex: AttrIndex): Row => Any = {
+  final private def cast13(casters: List[(Row, ParamIndex) => Any], attrIndex: ParamIndex): Row => Any = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13) = casters
     val List(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13) = (attrIndex until attrIndex + 13).toList
     (row: Row) =>
@@ -256,7 +256,7 @@ trait CastRow2Tpl_ { self: Model2Query with SqlQueryBase =>
       )
   }
 
-  final private def cast14(casters: List[(Row, AttrIndex) => Any], attrIndex: AttrIndex): Row => Any = {
+  final private def cast14(casters: List[(Row, ParamIndex) => Any], attrIndex: ParamIndex): Row => Any = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14) = casters
     val List(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14) = (attrIndex until attrIndex + 14).toList
     (row: Row) =>
@@ -278,7 +278,7 @@ trait CastRow2Tpl_ { self: Model2Query with SqlQueryBase =>
       )
   }
 
-  final private def cast15(casters: List[(Row, AttrIndex) => Any], attrIndex: AttrIndex): Row => Any = {
+  final private def cast15(casters: List[(Row, ParamIndex) => Any], attrIndex: ParamIndex): Row => Any = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15) = casters
     val List(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15) = (attrIndex until attrIndex + 15).toList
     (row: Row) =>
@@ -301,7 +301,7 @@ trait CastRow2Tpl_ { self: Model2Query with SqlQueryBase =>
       )
   }
 
-  final private def cast16(casters: List[(Row, AttrIndex) => Any], attrIndex: AttrIndex): Row => Any = {
+  final private def cast16(casters: List[(Row, ParamIndex) => Any], attrIndex: ParamIndex): Row => Any = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16) = casters
     val List(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16) = (attrIndex until attrIndex + 16).toList
     (row: Row) =>
@@ -325,7 +325,7 @@ trait CastRow2Tpl_ { self: Model2Query with SqlQueryBase =>
       )
   }
 
-  final private def cast17(casters: List[(Row, AttrIndex) => Any], attrIndex: AttrIndex): Row => Any = {
+  final private def cast17(casters: List[(Row, ParamIndex) => Any], attrIndex: ParamIndex): Row => Any = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17) = casters
     val List(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17) = (attrIndex until attrIndex + 17).toList
     (row: Row) =>
@@ -350,7 +350,7 @@ trait CastRow2Tpl_ { self: Model2Query with SqlQueryBase =>
       )
   }
 
-  final private def cast18(casters: List[(Row, AttrIndex) => Any], attrIndex: AttrIndex): Row => Any = {
+  final private def cast18(casters: List[(Row, ParamIndex) => Any], attrIndex: ParamIndex): Row => Any = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18) = casters
     val List(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18) = (attrIndex until attrIndex + 18).toList
     (row: Row) =>
@@ -376,7 +376,7 @@ trait CastRow2Tpl_ { self: Model2Query with SqlQueryBase =>
       )
   }
 
-  final private def cast19(casters: List[(Row, AttrIndex) => Any], attrIndex: AttrIndex): Row => Any = {
+  final private def cast19(casters: List[(Row, ParamIndex) => Any], attrIndex: ParamIndex): Row => Any = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19) = casters
     val List(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19) = (attrIndex until attrIndex + 19).toList
     (row: Row) =>
@@ -403,7 +403,7 @@ trait CastRow2Tpl_ { self: Model2Query with SqlQueryBase =>
       )
   }
 
-  final private def cast20(casters: List[(Row, AttrIndex) => Any], attrIndex: AttrIndex): Row => Any = {
+  final private def cast20(casters: List[(Row, ParamIndex) => Any], attrIndex: ParamIndex): Row => Any = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20) = casters
     val List(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20) = (attrIndex until attrIndex + 20).toList
     (row: Row) =>
@@ -431,7 +431,7 @@ trait CastRow2Tpl_ { self: Model2Query with SqlQueryBase =>
       )
   }
 
-  final private def cast21(casters: List[(Row, AttrIndex) => Any], attrIndex: AttrIndex): Row => Any = {
+  final private def cast21(casters: List[(Row, ParamIndex) => Any], attrIndex: ParamIndex): Row => Any = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c21) = casters
     val List(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20, a21) = (attrIndex until attrIndex + 21).toList
     (row: Row) =>
@@ -460,7 +460,7 @@ trait CastRow2Tpl_ { self: Model2Query with SqlQueryBase =>
       )
   }
 
-  final private def cast22(casters: List[(Row, AttrIndex) => Any], attrIndex: AttrIndex): Row => Any = {
+  final private def cast22(casters: List[(Row, ParamIndex) => Any], attrIndex: ParamIndex): Row => Any = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c21, c22) = casters
     val List(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20, a21, a22) = (attrIndex until attrIndex + 22).toList
     (row: Row) =>

@@ -14,17 +14,17 @@ trait ModelTransformations_ {
 
   protected def toInt(es: List[Element], kw: Kw): List[Element] = {
     val last = es.last match {
-      case a: AttrOneMan => AttrOneManInt(a.ns, a.attr, Fn(kw.toString), refNs = a.refNs)
+      case a: AttrOneMan => AttrOneManInt(a.ns, a.attr, Fn(kw.toString), refNs = a.refNs, coord = a.coord)
       case a: AttrSetMan => a match {
         case _: AttrSetManBoolean =>
           if (kw.isInstanceOf[count] || kw.isInstanceOf[countDistinct]) {
             // Catch unsupported aggregation of Sets of boolean values
-            AttrSetManInt(a.ns, a.attr, Fn(kw.toString, Some(-1)), refNs = a.refNs)
+            AttrSetManInt(a.ns, a.attr, Fn(kw.toString, Some(-1)), refNs = a.refNs, coord = a.coord)
           } else {
-            AttrSetManInt(a.ns, a.attr, Fn(kw.toString), refNs = a.refNs)
+            AttrSetManInt(a.ns, a.attr, Fn(kw.toString), refNs = a.refNs, coord = a.coord)
           }
 
-        case _ => AttrSetManInt(a.ns, a.attr, Fn(kw.toString), refNs = a.refNs)
+        case _ => AttrSetManInt(a.ns, a.attr, Fn(kw.toString), refNs = a.refNs, coord = a.coord)
       }
 
       case a => unexpected(a)
@@ -34,8 +34,8 @@ trait ModelTransformations_ {
 
   protected def toDouble(es: List[Element], kw: Kw): List[Element] = {
     val last = es.last match {
-      case a: AttrOneMan => AttrOneManDouble(a.ns, a.attr, Fn(kw.toString), refNs = a.refNs)
-      case a: AttrSetMan => AttrSetManDouble(a.ns, a.attr, Fn(kw.toString), refNs = a.refNs)
+      case a: AttrOneMan => AttrOneManDouble(a.ns, a.attr, Fn(kw.toString), refNs = a.refNs, coord = a.coord)
+      case a: AttrSetMan => AttrSetManDouble(a.ns, a.attr, Fn(kw.toString), refNs = a.refNs, coord = a.coord)
       case a             => unexpected(a)
     }
     es.init :+ last

@@ -59,11 +59,8 @@ trait ResolveExprSetRefAttr extends ResolveExpr with LambdasSet { self: SqlQuery
     select += s"ARRAY_AGG($joinTable.$ref_id) $refIds"
     joins += (("INNER JOIN", joinTable, "", s"$nsId = $joinTable.$ns_id"))
     groupBy += nsId
-    if (isNestedOpt) {
-      addCast(res.sql2setOrNull)
-    } else {
-      addCast(res.sql2set)
-    }
+    addCast(res.sql2set)
+
     attr.filterAttr.fold {
       if (filterAttrVars.contains(attr.name) && attr.op != V) {
         // Runtime check needed since we can't type infer it
@@ -97,7 +94,6 @@ trait ResolveExprSetRefAttr extends ResolveExpr with LambdasSet { self: SqlQuery
     select += s"ARRAY_AGG($joinTable.$ref_id) $refIds"
     joins += (("LEFT JOIN", joinTable, "", s"$nsId = $joinTable.$ns_id"))
     groupBy += nsId
-
     addCast(resOpt.sql2setOpt)
     attr.op match {
       case V     => ()
@@ -131,16 +127,6 @@ trait ResolveExprSetRefAttr extends ResolveExpr with LambdasSet { self: SqlQuery
       case other => unexpectedOp(other)
     }
   }
-
-  protected lazy val refIdArray =
-    s"""(SELECT
-       |    ARRAY_AGG(
-       |      $joinTable.$ref_id
-       |      ORDER BY $joinTable.$ref_id ASC
-       |    )
-       |    FROM $joinTable
-       |    WHERE $joinTable.$ns_id = $nsId
-       |  )""".stripMargin
 
   protected def contains(v: String): String = {
     s"(SELECT ARRAY_CONTAINS(ARRAY_AGG($joinTable.$ref_id), $v) FROM $joinTable WHERE $joinTable.$ns_id = $nsId)"
@@ -182,7 +168,13 @@ trait ResolveExprSetRefAttr extends ResolveExpr with LambdasSet { self: SqlQuery
 
   protected def refOptEqual[T](optSets: Option[Seq[Set[T]]], res: ResSet[T]): Unit = {
     optSets.fold[Unit] {
-      where += (("", s"$refIdArray IS NULL"))
+      where += (("",
+        s"""(
+           |    SELECT count($joinTable.$ref_id) = 0
+           |    FROM $joinTable
+           |    WHERE $joinTable.$ns_id = $nsId
+           |  )""".stripMargin
+      ))
     } { sets =>
       refEqual(sets, res)
     }

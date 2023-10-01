@@ -68,8 +68,16 @@ trait ModelUtils {
     }
   }
 
+  private def indexes(coord: Seq[Int]): (Int, Int, Option[Int]) = {
+    coord match {
+      case Seq(nsIndex, refAttrIndex, refNsIndex) => (nsIndex, refAttrIndex, Some(refNsIndex))
+      case Seq(nsIndex, refAttrIndex)             => (nsIndex, refAttrIndex, None)
+    }
+  }
+
   final protected def nonReservedAttr(a: Attr, proxy: ConnProxy): (String, String) = {
-    val Seq(nsIndex, attrIndex) = a.coord
+    val (nsIndex, attrIndex, _) = indexes(a.coord)
+//    val Seq(nsIndex, attrIndex) = a.coord
     (
       if (proxy.reserved.get.reservedNss(nsIndex)) a.ns + "_" else a.ns,
       if (proxy.reserved.get.reservedAttrs(attrIndex)) a.attr + "_" else a.attr
@@ -77,13 +85,21 @@ trait ModelUtils {
   }
 
   final protected def nonReservedAttrSet(a: Attr, proxy: ConnProxy): (String, String, Option[String]) = {
-    val Seq(nsIndex, refAttrIndex, refNsIndex) = a.coord
-    val (reservedNss, reservedAttrs)           = (proxy.reserved.get.reservedNss, proxy.reserved.get.reservedAttrs)
-    val refNs                                  = a.refNs.get
+    val (nsIndex, refAttrIndex, optRefNsIndex) = indexes(a.coord)
+//    match {
+//      case Seq(nsIndex, refAttrIndex, refNsIndex) => (nsIndex, refAttrIndex, Some(refNsIndex))
+//      case Seq(nsIndex, refAttrIndex)             => (nsIndex, refAttrIndex, None)
+//    }
+
+    val reservedNss   = proxy.reserved.get.reservedNss
+    val reservedAttrs = proxy.reserved.get.reservedAttrs
     (
       if (reservedNss(nsIndex)) a.ns + "_" else a.ns,
       if (reservedAttrs(refAttrIndex)) a.attr + "_" else a.attr,
-      if (reservedNss(refNsIndex)) Some(refNs + "_") else Some(refNs),
+      optRefNsIndex.fold(Option.empty[String]) { refNsIndex =>
+        val refNs = a.refNs.get
+        if (reservedNss(refNsIndex)) Some(refNs + "_") else Some(refNs)
+      }
     )
   }
 

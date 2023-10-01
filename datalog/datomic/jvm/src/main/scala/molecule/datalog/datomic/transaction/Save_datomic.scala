@@ -58,11 +58,12 @@ trait Save_datomic
   override protected def addSet[T](
     ns: String,
     attr: String,
-    optSet: Option[Set[T]],
-    handleValue: T => Any,
+    optSet: Option[Set[Any]],
+    transformValue: T => Any,
     set2array: Set[Any] => Array[AnyRef],
     refNs: Option[String],
-    exts: List[String] = Nil
+    exts: List[String] = Nil,
+    value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
     optSet.foreach { set =>
       val a = kw(ns, attr)

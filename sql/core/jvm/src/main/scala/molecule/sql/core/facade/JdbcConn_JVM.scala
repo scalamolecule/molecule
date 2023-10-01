@@ -89,7 +89,7 @@ case class JdbcConn_JVM(
 
         // Don't collect generated ids for join tables
         ids = List.empty[Long]
-        if (!refPath.last.contains("_")) {
+        if (!refPath.last.init.contains("_")) { // no join tables, but still "_"-suffixed tables
           while (resultSet.next()) {
             //            val id = resultSet.getLong(1)
             //            debug("D  ################# " + id)

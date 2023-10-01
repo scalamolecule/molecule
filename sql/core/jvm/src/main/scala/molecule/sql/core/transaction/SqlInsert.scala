@@ -118,6 +118,7 @@ trait SqlInsert
       tableDatas(refPath).copy(populatePS = populatePS)
     }
   }
+
   protected def getJoinTableInserts: List[JoinTable] = {
     joins.zip(joinTableDatas).map {
       case ((joinRefPath, _, _, _, _), joinTableInsert) =>
@@ -176,10 +177,12 @@ trait SqlInsert
       val colSetter = tpl.productElement(tplIndex) match {
         case Some(scalaValue) =>
           val valueSetter = handleValue(scalaValue.asInstanceOf[T]).asInstanceOf[(PS, Int) => Unit]
-          (ps: PS, _: IdsMap, _: RowIndex) => valueSetter(ps, paramIndex)
+          (ps: PS, _: IdsMap, _: RowIndex) =>
+            valueSetter(ps, paramIndex)
 
         case None =>
-          (ps: PS, _: IdsMap, _: RowIndex) => ps.setNull(paramIndex, java.sql.Types.NULL)
+          (ps: PS, _: IdsMap, _: RowIndex) =>
+            ps.setNull(paramIndex, java.sql.Types.NULL)
       }
       addColSetter(curPath, colSetter)
     }
@@ -192,7 +195,8 @@ trait SqlInsert
     refNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
-    exts: List[String] = Nil
+    exts: List[String] = Nil,
+    value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
     refNs.fold {
       val (curPath, paramIndex) = getParamIndex(attr)
@@ -260,7 +264,8 @@ trait SqlInsert
     refNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
-    exts: List[String] = Nil
+    exts: List[String] = Nil,
+    value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
     refNs.fold {
       val (curPath, paramIndex) = getParamIndex(attr)

@@ -331,112 +331,60 @@ trait SpiSync_mysql
     val rows = ListBuffer.empty[List[Any]]
     val row  = ListBuffer.empty[Any]
 
-    def value[T](rawValue: T, baseTpe: String): String = {
+    def value[T](rawValue: T, baseTpe: String, isStr: Boolean = false): (Any, String) = {
       val isNull = resultSet.wasNull()
       if (withNulls && isNull) {
         row += null
+        ("null", baseTpe)
       } else if (!isNull) {
-        row += rawValue
+        val value = if(isStr) rawValue.toString.replace(29.toChar, ',') else rawValue
+        row += value
+        (value, baseTpe)
+      } else {
+        ("null", baseTpe)
       }
-      baseTpe
-    }
-    def array(n: Int, baseTpe: String): String = {
-      val arr    = resultSet.getArray(n)
-      val isNull = resultSet.wasNull()
-      if (withNulls && isNull) {
-        row += null
-      } else if (!isNull) {
-        row += arr.getArray.asInstanceOf[Array[_]].toSet
-      }
-      s"Set[$baseTpe]"
+//      baseTpe
     }
 
     while (resultSet.next) {
       debug("-----------------------------------------------")
-      var n = 1
+      var paramIndex = 1
       row.clear()
-      while (n <= columnsNumber) {
-        val col     = rsmd.getColumnName(n)
-        val sqlType = rsmd.getColumnTypeName(n)
+      while (paramIndex <= columnsNumber) {
+        val col         = rsmd.getColumnName(paramIndex)
+        val sqlType     = rsmd.getColumnTypeName(paramIndex)
+        val (columnValue, tpe)         = sqlType match {
+//          case "LONGTEXT" => value(resultSet.getString(paramIndex).replace(29.toChar, ','), "String")
+          case "LONGTEXT" => value(resultSet.getString(paramIndex), "String", true)
+          case "INT"      => value(resultSet.getInt(paramIndex), "Int")
+          case "BIGINT"   => value(resultSet.getLong(paramIndex), "Long")
+          case "REAL"     => value(resultSet.getFloat(paramIndex), "Float")
+          case "DOUBLE"   => value(resultSet.getDouble(paramIndex), "Double")
+          case "TINYINT"  => value(resultSet.getBoolean(paramIndex), "Boolean/Byte")
+          case "DECIMAL"  => value(resultSet.getDouble(paramIndex), "BigInt/Decimal")
+          case "DATETIME" => value(resultSet.getDate(paramIndex), "Date")
+          case "TINYTEXT" => value(resultSet.getString(paramIndex), "UUID")
+//          case "TEXT"     => value(resultSet.getString(paramIndex).replace(29.toChar, ','), "URI", true)
+          case "TEXT"     => value(resultSet.getString(paramIndex), "URI", true)
+          case "SMALLINT" => value(resultSet.getShort(paramIndex), "Short")
+          case "CHAR"     => value(resultSet.getShort(paramIndex), "Char")
+//          case "JSON"     => value(resultSet.getObject(n), "String")
+          case "JSON"     =>
 
-        // todo: get types of sql dialect
-        val tpe         = sqlType match {
-          case "CHARACTER VARYING"            => value(resultSet.getString(n), "String/URI")
-          case "INT"                          => value(resultSet.getInt(n), " Int")
-          case "BIGINT"                       => value(resultSet.getLong(n), "Long")
-          case "REAL" | "float4"              => value(resultSet.getFloat(n), "Float")
-          case "DOUBLE PRECISION" | "numeric" => value(resultSet.getDouble(n), "Double")
-          case "BOOLEAN"                      => value(resultSet.getBoolean(n), "Boolean")
-          case "DECIMAL"                      => value(resultSet.getDouble(n), "BigInt/Decimal")
-          case "DATE"                         => value(resultSet.getDate(n), "Date")
-          case "UUID"                         => value(resultSet.getString(n), "UUID")
-          case "TINYINT"                      => value(resultSet.getShort(n), "Byte")
-          case "SMALLINT"                     => value(resultSet.getShort(n), "Short")
-          case "CHARACTER"                    => value(resultSet.getString(n), "Char")
-//          case "JSON"                         => value(resultSet.getString(n), "String")
-          case "JSON"                         => value(resultSet.getObject(n), "String")
-
-          case "CHARACTER VARYING ARRAY"  => array(n, "String/URI")
-          case "INTEGER ARRAY"            => array(n, "Int")
-          case "BIGINT ARRAY"             => array(n, "Long")
-          case "REAL ARRAY"               => array(n, "Float")
-          case "DOUBLE PRECISION ARRAY"   => array(n, "Double")
-          case "BOOLEAN ARRAY"            => array(n, "Boolean")
-          case "DECIMAL(100, 0) ARRAY"    => array(n, "BigInt")
-          case "DECIMAL(65535, 25) ARRAY" => array(n, "BigDecimal")
-          case "DATE ARRAY"               => array(n, "Date")
-          case "UUID ARRAY"               => array(n, "UUID")
-          case "TINYINT ARRAY"            => array(n, "Byte")
-          case "SMALLINT ARRAY"           => array(n, "Short")
-          case "CHARACTER ARRAY"          => array(n, "Char")
-
-          case "NULL"                          => row += "NULL"; "NULL"
-          case "CHARACTER VARYING ARRAY ARRAY" => row += "CHARACTER VARYING ARRAY ARRAY"; "CHARACTER VARYING ARRAY ARRAY"
-          case "INTEGER ARRAY ARRAY"           => row += "INTEGER ARRAY ARRAY"; "INTEGER ARRAY ARRAY"
-          case "BIGINT ARRAY ARRAY"            => row += "BIGINT ARRAY ARRAY"; "BIGINT ARRAY ARRAY"
-          case "REAL ARRAY ARRAY"              => row += "REAL ARRAY ARRAY"; "REAL ARRAY ARRAY"
-          case "DOUBLE PRECISION ARRAY ARRAY"  => row += "DOUBLE PRECISION ARRAY ARRAY"; "DOUBLE PRECISION ARRAY ARRAY"
-          case "BOOLEAN ARRAY ARRAY"           => row += "BOOLEAN ARRAY ARRAY"; "BOOLEAN ARRAY ARRAY"
-          case "DECIMAL ARRAY ARRAY"           => row += "DECIMAL ARRAY ARRAY"; "DECIMAL ARRAY ARRAY"
-          case "DATE ARRAY ARRAY"              => row += "DATE ARRAY ARRAY"; "DATE ARRAY ARRAY"
-          case "UUID ARRAY ARRAY"              => row += "UUID ARRAY ARRAY"; "UUID ARRAY ARRAY"
-          case "TINYINT ARRAY ARRAY"           => row += "TINYINT ARRAY ARRAY"; "TINYINT ARRAY ARRAY"
-          case "SMALLINT ARRAY ARRAY"          => row += "SMALLINT ARRAY ARRAY"; "SMALLINT ARRAY ARRAY"
-          case "CHARACTER ARRAY ARRAY"         => row += "CHARACTER ARRAY ARRAY"; "CHARACTER ARRAY ARRAY"
-
-          // case "DOUBLE"      => row += resultSet.getDouble(n); "Double/Float x"
-          // case "BIT"         => row += resultSet.getByte(n); "a"
-          // case "FLOAT"       => row += resultSet.getFloat(n); "e"
-          // case "REAL"        => row += resultSet.getDouble(n); "f"
-          // case "NUMERIC"     => row += resultSet.getDouble(n); "g"
-          // case "CHAR"        => row += resultSet.getString(n).charAt(0); "h"
-          // case "VARCHAR"     => row += resultSet.getString(n).charAt(0); "j"
-          // case "LONGVARCHAR" => row += resultSet.getString(n); "k"
-          // case "BINARY"      => row += resultSet.getByte(n); "l"
-
-          case "float8"    => value(resultSet.getDouble(n), "Double")
-          case "text"      => value(resultSet.getString(n), "String/URI")
-          case "bool"      => value(resultSet.getString(n), "Boolean")
-          case "bigserial" => value(resultSet.getString(n), "BigInt/Decimal")
-          case "bigint"    => value(resultSet.getString(n), "BigInt/Decimal")
-
-          case "_int4"    => array(n, "Int")
-          case "_int8"    => array(n, "Bigint")
-          case "_text"    => array(n, "String/URI")
-          case "_bool"    => array(n, "Boolean")
-          case "_numeric" => array(n, "Bigint")
-
-          case other => throw new Exception(
+//            println(s"XX $paramIndex: " + resultSet.getString(paramIndex))
+            value(resultSet.getString(paramIndex), "String", true)
+          case other      => throw new Exception(
             s"Unexpected/not yet considered sql result type from raw query: " + other
           )
         }
-        val columnValue = resultSet.getString(n)
+//        val columnValue = resultSet.getString(paramIndex).replace(29.toChar, ',')
         if (withNulls && resultSet.wasNull()) {
-          debug(tpe + "   " + padS(20, tpe) + col + padS(20, col) + "  null")
+//          debug(tpe + "   " + padS(20, tpe) + col + padS(20, col) + "  null")
+          debug(tpe + "   " + padS(20, tpe) + col + padS(20, col) + "  " + columnValue)
         } else if (!resultSet.wasNull()) {
           debug(tpe + "   " + padS(20, tpe) + col + padS(20, col) + "  " + columnValue)
         }
-        n += 1
+        paramIndex += 1
       }
       rows += row.toList
     }

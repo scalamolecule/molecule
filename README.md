@@ -119,18 +119,16 @@ lazy val yourProject = project.in(file("app"))
 
 ## Explore
 
-The `coreTests` module in this repo has sevel data model definitions and more than 1500 tests that you can get inspiration from.
+The `coreTests` module in this repo has sevel data model definitions and more than 1300 tests that you can get inspiration from.
 
  
 ### Run jvm tests
 
-Run the same test suite on jvm targeting both Datomic and JDBC-compliant databases (in-memory H2 db here):
+Run the same test suite on jvm targeting both Datomic and JDBC-compliant databases:
 
     sbt datalogDatomicJVM/test
-
-or
-
-    sbt sqlJdbcJVM/test
+    sbt sqlH2JVM/test
+    sbt sqlPostgresJVM/test
 
 
 ### Run js tests

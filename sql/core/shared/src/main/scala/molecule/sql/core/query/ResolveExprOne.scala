@@ -149,7 +149,7 @@ trait ResolveExprOne extends ResolveExpr { self: SqlQueryBase with LambdasOne =>
       case StartsWith => startsWith(col, args.head)
       case EndsWith   => endsWith(col, args.head)
       case Contains   => contains(col, args.head)
-      case Matches    => matches(col, args.head)
+      case Matches    => matches(col, args.head.toString)
       case Take       => take(col, args.head, "LEFT")
       case TakeRight  => take(col, args.head, "RIGHT")
       case Drop       => drop(col, args.head, true)
@@ -180,7 +180,10 @@ trait ResolveExprOne extends ResolveExpr { self: SqlQueryBase with LambdasOne =>
   protected def startsWith[T](col: String, arg: T): Unit = where += ((col, s"LIKE '$arg%'"))
   protected def endsWith[T](col: String, arg: T): Unit = where += ((col, s"LIKE '%$arg'"))
   protected def contains[T](col: String, arg: T): Unit = where += ((col, s"LIKE '%$arg%'"))
-  protected def matches[T](col: String, regex: T): Unit = where += ((col, s"~ '$regex'"))
+  protected def matches(col: String, regex: String): Unit = {
+    if (regex.nonEmpty)
+      where += ((col, s"~ '$regex'"))
+  }
 
   protected def take[T](col: String, length: T, fn: String): Unit = {
     if (length.toString.toInt > 0) {
@@ -245,7 +248,7 @@ trait ResolveExprOne extends ResolveExpr { self: SqlQueryBase with LambdasOne =>
   protected def even(col: String): Unit = where += ((col, s"% 2 = 0"))
   protected def odd(col: String): Unit = where += ((col, s"% 2 = 1"))
 
-  protected def aggr[T](col: String, fn: String, optN: Option[Int], res: ResOne[T]): Unit = {
+  protected def aggr[T: ClassTag](col: String, fn: String, optN: Option[Int], res: ResOne[T]): Unit = {
     lazy val n = optN.getOrElse(0)
     // Replace find/casting with aggregate function/cast
     select -= col

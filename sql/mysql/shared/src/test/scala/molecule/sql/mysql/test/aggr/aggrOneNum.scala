@@ -12,3 +12,5 @@ object AggrOneNum_BigDecimal extends AggrOneNum_BigDecimal_ with TestAsync_mysql
 object AggrOneNum_Byte extends AggrOneNum_Byte_ with TestAsync_mysql
 object AggrOneNum_Short extends AggrOneNum_Short_ with TestAsync_mysql
 object AggrOneNum_ref extends AggrOneNum_ref_ with TestAsync_mysql
+
+

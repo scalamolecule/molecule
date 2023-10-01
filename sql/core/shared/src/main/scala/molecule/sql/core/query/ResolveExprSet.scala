@@ -71,13 +71,10 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
   protected def setMan[T: ClassTag](attr: Attr, tpe: String, args: Seq[Set[T]], res: ResSet[T]): Unit = {
     val col = getCol(attr: Attr)
     select += col
-    if (isNestedOpt) {
-      addCast(res.sql2setOrNull)
-    } else {
-      addCast(res.sql2set)
+    if (!isNestedOpt) {
       notNull += col
     }
-
+    addCast(res.sql2set)
     attr.filterAttr.fold {
       if (filterAttrVars.contains(attr.name) && attr.op != V) {
         // Runtime check needed since we can't type infer it
@@ -258,8 +255,8 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
         groupByCols -= col
         aggregate = true
         replaceCast(
-          (row: Row, n: Int) => {
-            val outerArrayResultSet = row.getArray(n).getResultSet
+          (row: Row, paramIndex: Int) => {
+            val outerArrayResultSet = row.getArray(paramIndex).getResultSet
             var count               = 0
             while (outerArrayResultSet.next()) {
               count += outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]].length
@@ -275,8 +272,8 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
         groupByCols -= col
         aggregate = true
         replaceCast(
-          (row: Row, n: Int) => {
-            val outerArrayResultSet = row.getArray(n).getResultSet
+          (row: Row, paramIndex: Int) => {
+            val outerArrayResultSet = row.getArray(paramIndex).getResultSet
             var set                 = Set.empty[Any]
             while (outerArrayResultSet.next()) {
               outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]].foreach { value =>
@@ -301,8 +298,8 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
         groupByCols -= col
         aggregate = true
         replaceCast(
-          (row: Row, n: Int) => {
-            val outerArrayResultSet = row.getArray(n).getResultSet
+          (row: Row, paramIndex: Int) => {
+            val outerArrayResultSet = row.getArray(paramIndex).getResultSet
             var set                 = Set.empty[Double]
             while (outerArrayResultSet.next()) {
               val array = outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]]
@@ -318,8 +315,8 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
         groupByCols -= col
         aggregate = true
         replaceCast(
-          (row: Row, n: Int) => {
-            val outerArrayResultSet = row.getArray(n).getResultSet
+          (row: Row, paramIndex: Int) => {
+            val outerArrayResultSet = row.getArray(paramIndex).getResultSet
             var set                 = Set.empty[Double]
             while (outerArrayResultSet.next()) {
               val array = outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]]
@@ -335,8 +332,8 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
         groupByCols -= col
         aggregate = true
         replaceCast(
-          (row: Row, n: Int) => {
-            val outerArrayResultSet = row.getArray(n).getResultSet
+          (row: Row, paramIndex: Int) => {
+            val outerArrayResultSet = row.getArray(paramIndex).getResultSet
             var set                 = Set.empty[Double]
             while (outerArrayResultSet.next()) {
               val array = outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]]
@@ -352,8 +349,8 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
         groupByCols -= col
         aggregate = true
         replaceCast(
-          (row: Row, n: Int) => {
-            val outerArrayResultSet = row.getArray(n).getResultSet
+          (row: Row, paramIndex: Int) => {
+            val outerArrayResultSet = row.getArray(paramIndex).getResultSet
             var set                 = Set.empty[Double]
             while (outerArrayResultSet.next()) {
               val array = outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]]
@@ -367,13 +364,13 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
     }
   }
 
-  protected def matchSet(set: Set[String], col: String): String = {
+  protected def matchSet(col: String, set: Set[String]): String = {
     set
       .map(v => s"ARRAY_CONTAINS($col, $v)")
       .mkString("(\n    ", " AND\n    ", s" AND\n    CARDINALITY($col) = ${set.size}\n  )")
   }
 
-  protected def matchSets[T](sets: Seq[Set[T]], col: String, set2sqls: Set[T] => Set[String]): String = {
+  protected def matchSets[T](col: String, sets: Seq[Set[T]], set2sqls: Set[T] => Set[String]): String = {
     sets.map { set =>
       set2sqls(set)
         .map(v => s"ARRAY_CONTAINS($col, $v)")
@@ -385,8 +382,8 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
     val setsNonEmpty = sets.filterNot(_.isEmpty)
     setsNonEmpty.length match {
       case 0 => where += (("FALSE", ""))
-      case 1 => where += (("", matchSet(res.set2sqls(setsNonEmpty.head), col)))
-      case _ => where += (("", matchSets(setsNonEmpty, col, res.set2sqls)))
+      case 1 => where += (("", matchSet(col, res.set2sqls(setsNonEmpty.head))))
+      case _ => where += (("", matchSets(col, setsNonEmpty, res.set2sqls)))
     }
   }
 
@@ -406,8 +403,8 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
     val setsNonEmpty = sets.filterNot(_.isEmpty)
     setsNonEmpty.length match {
       case 0 => ()
-      case 1 => where += (("", "NOT " + matchSet(res.set2sqls(setsNonEmpty.head), col)))
-      case _ => where += (("", "NOT " + matchSets(setsNonEmpty, col, res.set2sqls)))
+      case 1 => where += (("", "NOT " + matchSet(col, res.set2sqls(setsNonEmpty.head))))
+      case _ => where += (("", "NOT " + matchSets(col, setsNonEmpty, res.set2sqls)))
     }
   }
 

@@ -2,6 +2,7 @@ package molecule.sql.postgres.query
 
 import molecule.boilerplate.ast.Model._
 import molecule.sql.core.query.{ResolveExprOne, SqlQueryBase}
+import scala.reflect.ClassTag
 
 trait ResolveExprOne_postgres extends ResolveExprOne with LambdasOne_postgres { self: SqlQueryBase =>
 
@@ -21,7 +22,7 @@ trait ResolveExprOne_postgres extends ResolveExprOne with LambdasOne_postgres { 
     case _                  => ""
   }
 
-  override protected def aggr[T](col: String, fn: String, optN: Option[Int], res: ResOne[T]): Unit = {
+  override protected def aggr[T: ClassTag](col: String, fn: String, optN: Option[Int], res: ResOne[T]): Unit = {
     lazy val n = optN.getOrElse(0)
     // Replace find/casting with aggregate function/cast
     select -= col

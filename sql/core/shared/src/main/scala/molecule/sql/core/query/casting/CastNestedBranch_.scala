@@ -11,19 +11,19 @@ trait CastNestedBranch_ extends CastRow2Tpl_ { self: Model2Query with SqlQueryBa
   @tailrec
   final private def resolveArities(
     arities: List[List[Int]],
-    casts: List[(Row, AttrIndex) => Any],
-    attrIndex: AttrIndex,
-    attrIndexTx: AttrIndex,
-    acc: List[(Row, AttrIndex, NestedTpls) => Any]
-  ): List[(Row, AttrIndex, NestedTpls) => Any] = {
+    casts: List[(Row, ParamIndex) => Any],
+    attrIndex: ParamIndex,
+    attrIndexTx: ParamIndex,
+    acc: List[(Row, ParamIndex, NestedTpls) => Any]
+  ): List[(Row, ParamIndex, NestedTpls) => Any] = {
     arities match {
       case List(1) :: as =>
-        val cast = (row: Row, attrIndex1: AttrIndex, _: NestedTpls) => casts.head(row, attrIndex1)
+        val cast = (row: Row, attrIndex1: ParamIndex, _: NestedTpls) => casts.head(row, attrIndex1)
         resolveArities(as, casts.tail, attrIndex + 1, attrIndexTx, acc :+ cast)
 
       // Nested
       case List(-1) :: as =>
-        val cast = (_: Row, _: AttrIndex, nested: NestedTpls) => nested
+        val cast = (_: Row, _: ParamIndex, nested: NestedTpls) => nested
         resolveArities(as, casts, attrIndexTx, attrIndexTx, acc :+ cast)
 
       case _ => acc
@@ -32,9 +32,9 @@ trait CastNestedBranch_ extends CastRow2Tpl_ { self: Model2Query with SqlQueryBa
 
   final protected def castBranch[T](
     arities: List[List[Int]],
-    casts: List[(Row, AttrIndex) => Any],
-    firstAttrIndex: AttrIndex,
-    firstAttrIndexTx: AttrIndex
+    casts: List[(Row, ParamIndex) => Any],
+    firstAttrIndex: ParamIndex,
+    firstAttrIndexTx: ParamIndex
   ): (Row, NestedTpls) => T = {
     val casters = resolveArities(arities, casts, firstAttrIndex, firstAttrIndexTx, Nil)
     casters.length match {
@@ -69,8 +69,8 @@ trait CastNestedBranch_ extends CastRow2Tpl_ { self: Model2Query with SqlQueryBa
   }
 
   final private def cast1[T](
-    casters: List[(Row, AttrIndex, NestedTpls) => Any],
-    firstAttrIndex: AttrIndex
+    casters: List[(Row, ParamIndex, NestedTpls) => Any],
+    firstAttrIndex: ParamIndex
   ): (Row, NestedTpls) => T = {
     val List(c1) = casters
     (row: Row, nested: NestedTpls) =>
@@ -80,8 +80,8 @@ trait CastNestedBranch_ extends CastRow2Tpl_ { self: Model2Query with SqlQueryBa
   }
 
   final private def cast2[T](
-    casters: List[(Row, AttrIndex, NestedTpls) => Any],
-    firstAttrIndex: AttrIndex
+    casters: List[(Row, ParamIndex, NestedTpls) => Any],
+    firstAttrIndex: ParamIndex
   ): (Row, List[Any]) => T = {
     val List(c1, c2) = casters
     val List(a1, a2) = (firstAttrIndex until firstAttrIndex + 2).toList
@@ -93,8 +93,8 @@ trait CastNestedBranch_ extends CastRow2Tpl_ { self: Model2Query with SqlQueryBa
   }
 
   final private def cast3[T](
-    casters: List[(Row, AttrIndex, NestedTpls) => Any],
-    firstAttrIndex: AttrIndex
+    casters: List[(Row, ParamIndex, NestedTpls) => Any],
+    firstAttrIndex: ParamIndex
   ): (Row, List[Any]) => T = {
     val List(c1, c2, c3) = casters
     val List(a1, a2, a3) = (firstAttrIndex until firstAttrIndex + 3).toList
@@ -107,8 +107,8 @@ trait CastNestedBranch_ extends CastRow2Tpl_ { self: Model2Query with SqlQueryBa
   }
 
   final private def cast4[T](
-    casters: List[(Row, AttrIndex, NestedTpls) => Any],
-    firstAttrIndex: AttrIndex
+    casters: List[(Row, ParamIndex, NestedTpls) => Any],
+    firstAttrIndex: ParamIndex
   ): (Row, List[Any]) => T = {
     val List(c1, c2, c3, c4) = casters
     val List(a1, a2, a3, a4) = (firstAttrIndex until firstAttrIndex + 4).toList
@@ -122,8 +122,8 @@ trait CastNestedBranch_ extends CastRow2Tpl_ { self: Model2Query with SqlQueryBa
   }
 
   final private def cast5[T](
-    casters: List[(Row, AttrIndex, NestedTpls) => Any],
-    firstAttrIndex: AttrIndex
+    casters: List[(Row, ParamIndex, NestedTpls) => Any],
+    firstAttrIndex: ParamIndex
   ): (Row, List[Any]) => T = {
     val List(c1, c2, c3, c4, c5) = casters
     val List(a1, a2, a3, a4, a5) = (firstAttrIndex until firstAttrIndex + 5).toList
@@ -138,8 +138,8 @@ trait CastNestedBranch_ extends CastRow2Tpl_ { self: Model2Query with SqlQueryBa
   }
 
   final private def cast6[T](
-    casters: List[(Row, AttrIndex, NestedTpls) => Any],
-    firstAttrIndex: AttrIndex
+    casters: List[(Row, ParamIndex, NestedTpls) => Any],
+    firstAttrIndex: ParamIndex
   ): (Row, List[Any]) => T = {
     val List(c1, c2, c3, c4, c5, c6) = casters
     val List(a1, a2, a3, a4, a5, a6) = (firstAttrIndex until firstAttrIndex + 6).toList
@@ -155,8 +155,8 @@ trait CastNestedBranch_ extends CastRow2Tpl_ { self: Model2Query with SqlQueryBa
   }
 
   final private def cast7[T](
-    casters: List[(Row, AttrIndex, NestedTpls) => Any],
-    firstAttrIndex: AttrIndex
+    casters: List[(Row, ParamIndex, NestedTpls) => Any],
+    firstAttrIndex: ParamIndex
   ): (Row, List[Any]) => T = {
     val List(c1, c2, c3, c4, c5, c6, c7) = casters
     val List(a1, a2, a3, a4, a5, a6, a7) = (firstAttrIndex until firstAttrIndex + 7).toList
@@ -173,8 +173,8 @@ trait CastNestedBranch_ extends CastRow2Tpl_ { self: Model2Query with SqlQueryBa
   }
 
   final private def cast8[T](
-    casters: List[(Row, AttrIndex, NestedTpls) => Any],
-    firstAttrIndex: AttrIndex
+    casters: List[(Row, ParamIndex, NestedTpls) => Any],
+    firstAttrIndex: ParamIndex
   ): (Row, List[Any]) => T = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8) = casters
     val List(a1, a2, a3, a4, a5, a6, a7, a8) = (firstAttrIndex until firstAttrIndex + 8).toList
@@ -192,8 +192,8 @@ trait CastNestedBranch_ extends CastRow2Tpl_ { self: Model2Query with SqlQueryBa
   }
 
   final private def cast9[T](
-    casters: List[(Row, AttrIndex, NestedTpls) => Any],
-    firstAttrIndex: AttrIndex
+    casters: List[(Row, ParamIndex, NestedTpls) => Any],
+    firstAttrIndex: ParamIndex
   ): (Row, List[Any]) => T = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9) = casters
     val List(a1, a2, a3, a4, a5, a6, a7, a8, a9) = (firstAttrIndex until firstAttrIndex + 9).toList
@@ -212,8 +212,8 @@ trait CastNestedBranch_ extends CastRow2Tpl_ { self: Model2Query with SqlQueryBa
   }
 
   final private def cast10[T](
-    casters: List[(Row, AttrIndex, NestedTpls) => Any],
-    firstAttrIndex: AttrIndex
+    casters: List[(Row, ParamIndex, NestedTpls) => Any],
+    firstAttrIndex: ParamIndex
   ): (Row, List[Any]) => T = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10) = casters
     val List(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10) = (firstAttrIndex until firstAttrIndex + 10).toList
@@ -233,8 +233,8 @@ trait CastNestedBranch_ extends CastRow2Tpl_ { self: Model2Query with SqlQueryBa
   }
 
   final private def cast11[T](
-    casters: List[(Row, AttrIndex, NestedTpls) => Any],
-    firstAttrIndex: AttrIndex
+    casters: List[(Row, ParamIndex, NestedTpls) => Any],
+    firstAttrIndex: ParamIndex
   ): (Row, List[Any]) => T = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11) = casters
     val List(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11) = (firstAttrIndex until firstAttrIndex + 11).toList
@@ -255,8 +255,8 @@ trait CastNestedBranch_ extends CastRow2Tpl_ { self: Model2Query with SqlQueryBa
   }
 
   final private def cast12[T](
-    casters: List[(Row, AttrIndex, NestedTpls) => Any],
-    firstAttrIndex: AttrIndex
+    casters: List[(Row, ParamIndex, NestedTpls) => Any],
+    firstAttrIndex: ParamIndex
   ): (Row, List[Any]) => T = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12) = casters
     val List(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12) = (firstAttrIndex until firstAttrIndex + 12).toList
@@ -278,8 +278,8 @@ trait CastNestedBranch_ extends CastRow2Tpl_ { self: Model2Query with SqlQueryBa
   }
 
   final private def cast13[T](
-    casters: List[(Row, AttrIndex, NestedTpls) => Any],
-    firstAttrIndex: AttrIndex
+    casters: List[(Row, ParamIndex, NestedTpls) => Any],
+    firstAttrIndex: ParamIndex
   ): (Row, List[Any]) => T = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13) = casters
     val List(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13) = (firstAttrIndex until firstAttrIndex + 13).toList
@@ -302,8 +302,8 @@ trait CastNestedBranch_ extends CastRow2Tpl_ { self: Model2Query with SqlQueryBa
   }
 
   final private def cast14[T](
-    casters: List[(Row, AttrIndex, NestedTpls) => Any],
-    firstAttrIndex: AttrIndex
+    casters: List[(Row, ParamIndex, NestedTpls) => Any],
+    firstAttrIndex: ParamIndex
   ): (Row, List[Any]) => T = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14) = casters
     val List(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14) = (firstAttrIndex until firstAttrIndex + 14).toList
@@ -327,8 +327,8 @@ trait CastNestedBranch_ extends CastRow2Tpl_ { self: Model2Query with SqlQueryBa
   }
 
   final private def cast15[T](
-    casters: List[(Row, AttrIndex, NestedTpls) => Any],
-    firstAttrIndex: AttrIndex
+    casters: List[(Row, ParamIndex, NestedTpls) => Any],
+    firstAttrIndex: ParamIndex
   ): (Row, List[Any]) => T = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15) = casters
     val List(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15) = (firstAttrIndex until firstAttrIndex + 15).toList
@@ -353,8 +353,8 @@ trait CastNestedBranch_ extends CastRow2Tpl_ { self: Model2Query with SqlQueryBa
   }
 
   final private def cast16[T](
-    casters: List[(Row, AttrIndex, NestedTpls) => Any],
-    firstAttrIndex: AttrIndex
+    casters: List[(Row, ParamIndex, NestedTpls) => Any],
+    firstAttrIndex: ParamIndex
   ): (Row, List[Any]) => T = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16) = casters
     val List(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16) = (firstAttrIndex until firstAttrIndex + 16).toList
@@ -380,8 +380,8 @@ trait CastNestedBranch_ extends CastRow2Tpl_ { self: Model2Query with SqlQueryBa
   }
 
   final private def cast17[T](
-    casters: List[(Row, AttrIndex, NestedTpls) => Any],
-    firstAttrIndex: AttrIndex
+    casters: List[(Row, ParamIndex, NestedTpls) => Any],
+    firstAttrIndex: ParamIndex
   ): (Row, List[Any]) => T = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17) = casters
     val List(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17) = (firstAttrIndex until firstAttrIndex + 17).toList
@@ -408,8 +408,8 @@ trait CastNestedBranch_ extends CastRow2Tpl_ { self: Model2Query with SqlQueryBa
   }
 
   final private def cast18[T](
-    casters: List[(Row, AttrIndex, NestedTpls) => Any],
-    firstAttrIndex: AttrIndex
+    casters: List[(Row, ParamIndex, NestedTpls) => Any],
+    firstAttrIndex: ParamIndex
   ): (Row, List[Any]) => T = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18) = casters
     val List(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18) = (firstAttrIndex until firstAttrIndex + 18).toList
@@ -437,8 +437,8 @@ trait CastNestedBranch_ extends CastRow2Tpl_ { self: Model2Query with SqlQueryBa
   }
 
   final private def cast19[T](
-    casters: List[(Row, AttrIndex, NestedTpls) => Any],
-    firstAttrIndex: AttrIndex
+    casters: List[(Row, ParamIndex, NestedTpls) => Any],
+    firstAttrIndex: ParamIndex
   ): (Row, List[Any]) => T = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19) = casters
     val List(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19) = (firstAttrIndex until firstAttrIndex + 19).toList
@@ -467,8 +467,8 @@ trait CastNestedBranch_ extends CastRow2Tpl_ { self: Model2Query with SqlQueryBa
   }
 
   final private def cast20[T](
-    casters: List[(Row, AttrIndex, NestedTpls) => Any],
-    firstAttrIndex: AttrIndex
+    casters: List[(Row, ParamIndex, NestedTpls) => Any],
+    firstAttrIndex: ParamIndex
   ): (Row, List[Any]) => T = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20) = casters
     val List(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20) = (firstAttrIndex until firstAttrIndex + 20).toList
@@ -498,8 +498,8 @@ trait CastNestedBranch_ extends CastRow2Tpl_ { self: Model2Query with SqlQueryBa
   }
 
   final private def cast21[T](
-    casters: List[(Row, AttrIndex, NestedTpls) => Any],
-    firstAttrIndex: AttrIndex
+    casters: List[(Row, ParamIndex, NestedTpls) => Any],
+    firstAttrIndex: ParamIndex
   ): (Row, List[Any]) => T = {
     val List(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c21) = casters
     val List(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20, a21) = (firstAttrIndex until firstAttrIndex + 21).toList

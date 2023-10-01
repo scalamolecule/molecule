@@ -3,10 +3,11 @@ package molecule.sql.mysql.test
 import molecule.base.error.{ExecutionError, ModelError}
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Refs.A
+import molecule.coreTests.dataModels.core.dsl.Types.Ns
 import molecule.sql.mysql.async._
 import molecule.sql.mysql.setup.TestSuite_mysql
 import utest._
-import scala.collection.immutable.List
+import scala.collection.immutable.{List, Seq, Set}
 import scala.language.implicitConversions
 
 object AdhocJVM_mysql extends TestSuite_mysql {
@@ -15,76 +16,93 @@ object AdhocJVM_mysql extends TestSuite_mysql {
 
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
+      val a = (1, Some(Set(ref1, ref2)))
+      val b = (2, Some(Set(ref2, ref3, ref4)))
+      val c = (3, None)
       for {
-        //        _ <- Ns.int.insert(1).i.transact
-        //        _ <- Ns.int.query.get.map(_ ==> List(1))
+        _ <- Ns.i.refs_?.insert(a, b, c).transact
+
+//        // Exact Set matches
+//
+//        // AND semantics
+//        // "Is exactly this AND that"
+//        _ <- Ns.i.a1.refs_?(Some(Set(ref1))).query.get.map(_ ==> List())
+//        _ <- Ns.i.a1.refs_?(Some(Set(ref1, ref2))).query.get.map(_ ==> List(a)) // include exact match
+//        _ <- Ns.i.a1.refs_?(Some(Set(ref2, ref1))).query.get.map(_ ==> List(a)) // include exact match
+//        _ <- Ns.i.a1.refs_?(Some(Set(ref1, ref2, ref3))).query.get.map(_ ==> List())
+//        // Same as
+//        _ <- Ns.i.a1.refs_?(Some(Seq(Set(ref1)))).query.get.map(_ ==> List())
+//        _ <- Ns.i.a1.refs_?(Some(Seq(Set(ref1, ref2)))).query.get.map(_ ==> List(a))
+//        _ <- Ns.i.a1.refs_?(Some(Seq(Set(ref2, ref1)))).query.get.map(_ ==> List(a))
+//        _ <- Ns.i.a1.refs_?(Some(Seq(Set(ref1, ref2, ref3)))).query.get.map(_ ==> List())
+//
+//
+//        // AND/OR semantics with multiple Sets
+//
+//        // "(exactly this AND that) OR (exactly this AND that)"
+//        _ <- Ns.i.a1.refs_?(Some(Seq(Set(ref1), Set(ref2, ref3)))).query.get.map(_ ==> List())
+//        _ <- Ns.i.a1.refs_?(Some(Seq(Set(ref1, ref2), Set(ref2, ref3)))).query.get.map(_ ==> List(a))
+//        _ <- Ns.i.a1.refs_?(Some(Seq(Set(ref2, ref1), Set(ref4, ref3, ref2)))).query.get.map(_ ==> List(a, b))
+//
+//
+//        // Empty Seq/Sets match nothing
+//        _ <- Ns.i.a1.refs_?(Some(Set.empty[Long])).query.get.map(_ ==> List())
+//        _ <- Ns.i.a1.refs_?(Some(Seq.empty[Set[Long]])).query.get.map(_ ==> List())
+//        _ <- Ns.i.a1.refs_?(Some(Seq(Set.empty[Long]))).query.get.map(_ ==> List())
 
 
-        _ <- Ns.i.int.insert(List(
-          (1, int1),
-          (2, int2),
-          (2, int2),
-          (2, int3),
-        )).transact
+        // None matches non-asserted values
+        _ <- Ns.i.a1.refs_?(Option.empty[Set[Long]]).query.get.map(_ ==> List(c))
+//        _ <- Ns.i.a1.refs_?(Option.empty[Seq[Set[Long]]]).query.get.map(_ ==> List(c))
 
-        _ <- Ns.i.int.a1.query.get.map(_ ==> List(
-          (1, int1),
-          (2, int2), // 2 rows coalesced
-          (2, int3),
-        ))
+//        _ <- rawQuery(
+//          """SELECT DISTINCT
+//            |  Ns.i,
+//            |  JSON_ARRAYAGG(Ns_refs_Ref.Ref_id) Ns_refs
+//            |FROM Ns
+//            |INNER JOIN Ns_refs_Ref ON Ns.id = Ns_refs_Ref.Ns_id
+//            |WHERE
+//            |  (
+//            |    SELECT
+//            |      json_contains(
+//            |        json_ARRAYAGG(Ns_refs_Ref.Ref_id),
+//            |        json_array(2)
+//            |      )
+//            |    FROM Ns_refs_Ref
+//            |    WHERE Ns_refs_Ref.Ns_id = Ns.id
+//            |  ) AND
+//            |  Ns.i IS NOT NULL
+//            |GROUP BY Ns.id
+//            |ORDER BY Ns.i;
+//            |""".stripMargin, true)
+//
+//
+//        _ <- rawQuery(
+//          """SELECT DISTINCT
+//            |  Ns.i,
+//            |  JSON_ARRAYAGG(Ns_refs_Ref.Ref_id) Ns_refs
+//            |FROM Ns
+//            |INNER JOIN Ns_refs_Ref ON Ns.id = Ns_refs_Ref.Ns_id
+//            |WHERE
+//            |  (
+//            |    SELECT
+//            |      json_length(json_ARRAYAGG(Ns_refs_Ref.Ref_id)) = 2 AND
+//            |      json_contains(json_ARRAYAGG(Ns_refs_Ref.Ref_id), json_array(1, 2))
+//            |    FROM Ns_refs_Ref
+//            |    WHERE Ns_refs_Ref.Ns_id = Ns.id
+//            |  ) AND
+//            |  Ns.i IS NOT NULL
+//            |GROUP BY Ns.id
+//            |ORDER BY Ns.i;
+//            |""".stripMargin, true)
 
-        // Distinct values are returned in a Set
-        _ <- Ns.i.a1.int(distinct).query.get.map(_ ==> List(
-          (1, Set(int1)),
-          (2, Set(int2, int3)),
-        ))
 
-        _ <- Ns.int(distinct).query.get.map(_.head ==> Set(
-          int1, int2, int3
-        ))
 
-        //        _ <- rawTransact(
-        //          """insert into Ns_ints(ints) values (3), (4)"""
-        //        )
+
+
+//        _ <- Ns.ints.insert(Set(1, 2)).transact
+//        _ <- Ns.ints.query.get.map(_ ==> List(Set(1, 2)))
         //
-        //        _ <- rawQuery(
-        //          """SELECT
-        //            |     ints
-        //            | FROM Ns_ints
-        //            |""".stripMargin)
-        //
-        //        _ <- rawQuery(
-        //          """SELECT
-        //            |     Ns_id,
-        //            |     Ns_ints_id
-        //            | FROM Ns_ints_
-        //            |""".stripMargin)
-        //
-        //        _ <- rawQuery(
-        //          """SELECT a.*, JSON_ARRAY(b.category_id, b.category_name, b.category_description) AS cat_info
-        //            |FROM product_table a
-        //            |LEFT JOIN category b ON a.category_id = b.category_id
-        //            |WHERE a.id = 17
-        //            |""".stripMargin)
-        //
-        ////        _ <- rawQuery(
-        ////          """SELECT JSON_array(
-        ////            |     ints
-        ////            | ) FROM Ns_ints
-        ////            |
-        ////            |""".stripMargin)
-        //
-        //        _ <- rawQuery(
-        //          """SELECT
-        //            |(SELECT JSON_array(
-        //            |     ints
-        //            | ) FROM Ns_ints ) AS _category
-        //            |
-        //            |;
-        //            |""".stripMargin)
-        //
-        //        _ <- Ns.refs.query.get.map(_ ==> List(Set(1, 2)))
-        //        _ <- Ns.ints.query.get.map(_ ==> List(Set(1, 2)))
 
 
       } yield ()

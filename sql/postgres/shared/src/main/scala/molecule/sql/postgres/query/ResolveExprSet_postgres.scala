@@ -150,11 +150,11 @@ trait ResolveExprSet_postgres
         groupByCols -= col
         aggregate = true
         replaceCast(
-          (row: Row, n: Int) => {
-            val outerArrayResultSet = row.getArray(n).getResultSet
-            var count               = 0
-            while (outerArrayResultSet.next()) {
-              count += outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]].length
+          (row: Row, paramIndex: Int) => {
+            val resultSet = row.getArray(paramIndex).getResultSet
+            var count     = 0
+            while (resultSet.next()) {
+              count += resultSet.getArray(2).getArray.asInstanceOf[Array[_]].length
             }
             count
           }
@@ -167,11 +167,11 @@ trait ResolveExprSet_postgres
         groupByCols -= col
         aggregate = true
         replaceCast(
-          (row: Row, n: Int) => {
-            val outerArrayResultSet = row.getArray(n).getResultSet
-            var set                 = Set.empty[Any]
-            while (outerArrayResultSet.next()) {
-              outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]].foreach { value =>
+          (row: Row, paramIndex: Int) => {
+            val resultSet = row.getArray(paramIndex).getResultSet
+            var set       = Set.empty[Any]
+            while (resultSet.next()) {
+              resultSet.getArray(2).getArray.asInstanceOf[Array[_]].foreach { value =>
                 set += value
               }
             }
@@ -192,11 +192,11 @@ trait ResolveExprSet_postgres
         groupByCols -= col
         aggregate = true
         replaceCast(
-          (row: Row, n: Int) => {
-            val outerArrayResultSet = row.getArray(n).getResultSet
-            var set                 = Set.empty[Double]
-            while (outerArrayResultSet.next()) {
-              val array = outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]]
+          (row: Row, paramIndex: Int) => {
+            val resultSet = row.getArray(paramIndex).getResultSet
+            var set       = Set.empty[Double]
+            while (resultSet.next()) {
+              val array = resultSet.getArray(2).getArray.asInstanceOf[Array[_]]
               array.foreach(v => set += v.toString.toDouble) // not the most efficient...
             }
             getMedian(set)
@@ -209,11 +209,11 @@ trait ResolveExprSet_postgres
         groupByCols -= col
         aggregate = true
         replaceCast(
-          (row: Row, n: Int) => {
-            val outerArrayResultSet = row.getArray(n).getResultSet
-            var set                 = Set.empty[Double]
-            while (outerArrayResultSet.next()) {
-              val array = outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]]
+          (row: Row, paramIndex: Int) => {
+            val resultSet = row.getArray(paramIndex).getResultSet
+            var set       = Set.empty[Double]
+            while (resultSet.next()) {
+              val array = resultSet.getArray(2).getArray.asInstanceOf[Array[_]]
               array.foreach(v => set += v.toString.toDouble) // not the most efficient...
             }
             set.sum / set.size
@@ -226,11 +226,11 @@ trait ResolveExprSet_postgres
         groupByCols -= col
         aggregate = true
         replaceCast(
-          (row: Row, n: Int) => {
-            val outerArrayResultSet = row.getArray(n).getResultSet
-            var set                 = Set.empty[Double]
-            while (outerArrayResultSet.next()) {
-              val array = outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]]
+          (row: Row, paramIndex: Int) => {
+            val resultSet = row.getArray(paramIndex).getResultSet
+            var set       = Set.empty[Double]
+            while (resultSet.next()) {
+              val array = resultSet.getArray(2).getArray.asInstanceOf[Array[_]]
               array.foreach(v => set += v.toString.toDouble) // not the most efficient...
             }
             varianceOf(set.toList: _*)
@@ -243,11 +243,11 @@ trait ResolveExprSet_postgres
         groupByCols -= col
         aggregate = true
         replaceCast(
-          (row: Row, n: Int) => {
-            val outerArrayResultSet = row.getArray(n).getResultSet
-            var set                 = Set.empty[Double]
-            while (outerArrayResultSet.next()) {
-              val array = outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]]
+          (row: Row, paramIndex: Int) => {
+            val resultSet = row.getArray(paramIndex).getResultSet
+            var set       = Set.empty[Double]
+            while (resultSet.next()) {
+              val array = resultSet.getArray(2).getArray.asInstanceOf[Array[_]]
               array.foreach(v => set += v.toString.toDouble) // not the most efficient...
             }
             stdDevOf(set.toList: _*)
@@ -263,7 +263,9 @@ trait ResolveExprSet_postgres
   }
 
   private def matchArrays[T](sets: Seq[Set[T]], col: String, set2sqlArray: Set[T] => String): String = {
-    sets.map(set => matchArray((set2sqlArray(set), set.size), col)).mkString("(\n    ", " OR\n    ", "\n  )")
+    sets.map(set =>
+      matchArray((set2sqlArray(set), set.size), col)
+    ).mkString("(\n    ", " OR\n    ", "\n  )")
   }
 
   override protected def setEqual[T](col: String, sets: Seq[Set[T]], res: ResSet[T]): Unit = {

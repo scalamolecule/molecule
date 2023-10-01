@@ -16,6 +16,8 @@ trait SqlSave
   // Resolve after all back refs have been resolved and namespaces grouped
   protected var postResolvers = List.empty[Unit => Unit]
 
+  doPrint = false
+
   def getData(elements: List[Element]): Data = {
     initialNs = getInitialNs(elements)
     curRefPath = List(initialNs)
@@ -42,14 +44,12 @@ trait SqlSave
 
         val ps = sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
         tableDatas(refPath) = Table(refPath, stmt, ps)
-
-
         colSettersMap(refPath) = Nil
         val rowSetter = (ps: PS, idsMap: IdsMap, _: RowIndex) => {
           // Set all column values for this row in this insert/batch
-          colSetters.foreach(colSetter =>
+          colSetters.foreach { colSetter =>
             colSetter(ps, idsMap, 0)
-          )
+          }
           // Complete row
           ps.addBatch()
         }
@@ -110,11 +110,12 @@ trait SqlSave
   override protected def addSet[T](
     ns: String,
     attr: String,
-    optSet: Option[Set[T]],
-    handleValue: T => Any,
+    optSet: Option[Set[Any]],
+    transformValue: T => Any,
     set2array: Set[Any] => Array[AnyRef],
     refNs: Option[String],
-    exts: List[String] = Nil
+    exts: List[String] = Nil,
+    value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
     refNs.fold {
       val (curPath, paramIndex) = getParamIndex(attr)
@@ -128,7 +129,7 @@ trait SqlSave
             ps.setNull(paramIndex, 0)
           } else {
             val conn  = ps.getConnection
-            val array = conn.createArrayOf(exts(1), set2array(set.asInstanceOf[Set[Any]]))
+            val array = conn.createArrayOf(exts(1), set2array(set))
             ps.setArray(paramIndex, array)
           }
         }
@@ -158,13 +159,15 @@ trait SqlSave
         }
 
         // Join table setter
-        val refIds             = set.asInstanceOf[Set[Long]]
+        val refIds2            = set.iterator.asInstanceOf[Iterator[Long]]
         val joinSetter: Setter = (ps: PS, idsMap: IdsMap, rowIndex: RowIndex) => {
           val refId1 = idsMap(curPath)(rowIndex)
-          refIds.foreach { refId2 =>
+          while (refIds2.hasNext) {
+            val refId2 = refIds2.next()
             ps.setLong(1, refId1)
             ps.setLong(2, refId2)
-            ps.addBatch()
+            if (refIds2.hasNext)
+              ps.addBatch()
           }
         }
         addColSetter(joinPath, joinSetter)

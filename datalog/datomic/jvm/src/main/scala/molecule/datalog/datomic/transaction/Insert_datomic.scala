@@ -103,7 +103,8 @@ trait Insert_datomic
     refNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
-    exts: List[String] = Nil
+    exts: List[String] = Nil,
+    value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
     val a = kw(ns, attr)
     backRefs = backRefs + (ns -> e)
@@ -122,7 +123,8 @@ trait Insert_datomic
     refNs: Option[String],
     tplIndex: Int,
     transformValue: T => Any,
-    exts: List[String] = Nil
+    exts: List[String] = Nil,
+    value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
     val a = kw(ns, attr)
     backRefs = backRefs + (ns -> e)

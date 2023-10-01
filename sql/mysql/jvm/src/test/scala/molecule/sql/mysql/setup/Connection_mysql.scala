@@ -14,43 +14,20 @@ object Connection_mysql {
   val url       = "jdbc:tc:mysql:8.1://localhost:3306/test?allowMultiQueries=true"
   val container = MySQLContainer()
   Class.forName(container.driverClassName)
-  val sqlConn                 = DriverManager.getConnection(url)
-  /*
-  MySQL Type      Java Type
-  ----------      ---------
-  CHAR            String
-  VARCHAR         String
-  LONGVARCHAR     String
-  NUMERIC         java.math.BigDecimal
-  DECIMAL         java.math.BigDecimal
-  BIT             boolean
-  TINYINT         byte
-  SMALLINT        short
-  INTEGER         int
-  BIGINT          long
-  REAL            float
-  FLOAT           double
-  DOUBLE          double
-  BINARY          byte[]
-  VARBINARY       byte[]
-  LONGVARBINARY   byte[]
-  DATE            java.sql.Date
-  TIME            java.sql.Time
-  TIMESTAMP       java.sql.Tiimestamp
+  val sqlConn = DriverManager.getConnection(url)
 
-   */
   val sqlSchema_mysql: String =
     """
       |CREATE TABLE IF NOT EXISTS Ns (
       |  id          BIGINT AUTO_INCREMENT PRIMARY KEY,
       |  i           INT,
       |  ii          JSON,
-      |  s           LONGTEXT,
+      |  s           LONGTEXT COLLATE utf8mb4_0900_as_cs,
       |  u           INT,
       |  string_     LONGTEXT COLLATE utf8mb4_0900_as_cs,
       |  int_        INT,
       |  long_       BIGINT,
-      |  float_      FLOAT,
+      |  float_      REAL,
       |  double_     DOUBLE,
       |  boolean_    TINYINT(1),
       |  bigInt_     DECIMAL(65, 0),
@@ -87,15 +64,15 @@ object Connection_mysql {
       |CREATE TABLE IF NOT EXISTS Ref (
       |  id          BIGINT AUTO_INCREMENT PRIMARY KEY,
       |  i           INT,
-      |  s           LONGTEXT,
-      |  string_     LONGTEXT,
+      |  s           LONGTEXT COLLATE utf8mb4_0900_as_cs,
+      |  string_     LONGTEXT COLLATE utf8mb4_0900_as_cs,
       |  int_        INT,
       |  long_       BIGINT,
-      |  float_      FLOAT,
+      |  float_      REAL,
       |  double_     DOUBLE,
       |  boolean_    TINYINT(1),
-      |  bigInt_     DECIMAL,
-      |  bigDecimal  DECIMAL,
+      |  bigInt_     DECIMAL(65, 0),
+      |  bigDecimal  DECIMAL(65, 30),
       |  date_       DATETIME,
       |  uuid        TINYTEXT,
       |  uri         TEXT,
@@ -128,7 +105,7 @@ object Connection_mysql {
       |CREATE TABLE IF NOT EXISTS Other (
       |  id BIGINT AUTO_INCREMENT PRIMARY KEY,
       |  i  INT,
-      |  s  LONGTEXT,
+      |  s  LONGTEXT COLLATE utf8mb4_0900_as_cs,
       |  ii JSON,
       |  ss JSON
       |);
@@ -142,8 +119,8 @@ object Connection_mysql {
 
 
   def recreationStmt(schema: Schema): String = {
-//        recreateSchema + schema.sqlSchema_mysql
-    recreateSchema + sqlSchema_mysql
+    //    recreateSchema + sqlSchema_mysql
+    recreateSchema + schema.sqlSchema_mysql
   }
 
   def proxy(schema: Schema) = {

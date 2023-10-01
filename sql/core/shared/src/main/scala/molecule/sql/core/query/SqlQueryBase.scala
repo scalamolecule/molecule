@@ -14,7 +14,7 @@ trait SqlQueryBase extends BaseHelpers with JavaConversions {
   // This type represents both all rows and the individual row where the
   // internal cursor is positioned
   type Row = ResultSetInterface
-  type AttrIndex = Int
+  type ParamIndex = Int
   type NestedTpls = List[Any]
 
   def getRowCount(resultSet: Row): Int = {
