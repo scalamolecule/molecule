@@ -130,9 +130,9 @@ trait SpiSync_mysql
   }
 
   private def save_getData(save: Save, conn: JdbcConn_JVM): Data = {
-    new ResolveSave(conn.proxy) with Save_mysql {
+    new ResolveSave with Save_mysql {
       override lazy val sqlConn = conn.sqlConn
-    }.getData(save.elements)
+    }.getData(save.elements, conn.proxy)
   }
 
   override def save_validate(save: Save)(implicit conn: Conn): Map[String, Seq[String]] = {
@@ -163,9 +163,9 @@ trait SpiSync_mysql
   }
 
   private def insert_getData(insert: Insert, conn: JdbcConn_JVM): Data = {
-    new ResolveInsert(conn.proxy) with Insert_mysql {
+    new ResolveInsert with Insert_mysql {
       override lazy val sqlConn: sql.Connection = conn.sqlConn
-    }.getData(conn.proxy.nsMap, insert.elements, insert.tpls)
+    }.getData(conn.proxy, insert.elements, insert.tpls)
   }
 
   override def insert_validate(insert: Insert)(implicit conn: Conn): Seq[(Int, Seq[InsertError])] = {
@@ -225,13 +225,13 @@ trait SpiSync_mysql
   private def update_getData(conn: JdbcConn_JVM, update: Update): Data = {
     new ResolveUpdate(conn.proxy, update.isUpsert) with Update_mysql {
       override lazy val sqlConn = conn.sqlConn
-    }.getData(update.elements)
+    }.getData(update.elements, conn.proxy)
   }
 
   private def update_getData(conn: JdbcConn_JVM, elements: List[Element], isUpsert: Boolean): Data = {
     new ResolveUpdate(conn.proxy, isUpsert) with Update_mysql {
       override lazy val sqlConn = conn.sqlConn
-    }.getData(elements)
+    }.getData(elements, conn.proxy)
   }
 
   override def update_validate(update: Update)(implicit conn0: Conn): Map[String, Seq[String]] = {
@@ -267,7 +267,7 @@ trait SpiSync_mysql
   private def delete_getData(conn: JdbcConn_JVM, delete: Delete): Data = {
     new ResolveDelete with Delete_mysql {
       override lazy val sqlConn = conn.sqlConn
-    }.getData(delete.elements, conn.proxy.nsMap)
+    }.getData(delete.elements, conn.proxy)
   }
 
 
@@ -337,13 +337,13 @@ trait SpiSync_mysql
         row += null
         ("null", baseTpe)
       } else if (!isNull) {
-        val value = if(isStr) rawValue.toString.replace(29.toChar, ',') else rawValue
+        val value = if (isStr) rawValue.toString.replace(29.toChar, ',') else rawValue
         row += value
         (value, baseTpe)
       } else {
         ("null", baseTpe)
       }
-//      baseTpe
+      //      baseTpe
     }
 
     while (resultSet.next) {
@@ -351,10 +351,10 @@ trait SpiSync_mysql
       var paramIndex = 1
       row.clear()
       while (paramIndex <= columnsNumber) {
-        val col         = rsmd.getColumnName(paramIndex)
-        val sqlType     = rsmd.getColumnTypeName(paramIndex)
-        val (columnValue, tpe)         = sqlType match {
-//          case "LONGTEXT" => value(resultSet.getString(paramIndex).replace(29.toChar, ','), "String")
+        val col                = rsmd.getColumnName(paramIndex)
+        val sqlType            = rsmd.getColumnTypeName(paramIndex)
+        val (columnValue, tpe) = sqlType match {
+          //          case "LONGTEXT" => value(resultSet.getString(paramIndex).replace(29.toChar, ','), "String")
           case "LONGTEXT" => value(resultSet.getString(paramIndex), "String", true)
           case "INT"      => value(resultSet.getInt(paramIndex), "Int")
           case "BIGINT"   => value(resultSet.getLong(paramIndex), "Long")
@@ -364,22 +364,21 @@ trait SpiSync_mysql
           case "DECIMAL"  => value(resultSet.getDouble(paramIndex), "BigInt/Decimal")
           case "DATETIME" => value(resultSet.getDate(paramIndex), "Date")
           case "TINYTEXT" => value(resultSet.getString(paramIndex), "UUID")
-//          case "TEXT"     => value(resultSet.getString(paramIndex).replace(29.toChar, ','), "URI", true)
+          //          case "TEXT"     => value(resultSet.getString(paramIndex).replace(29.toChar, ','), "URI", true)
           case "TEXT"     => value(resultSet.getString(paramIndex), "URI", true)
           case "SMALLINT" => value(resultSet.getShort(paramIndex), "Short")
           case "CHAR"     => value(resultSet.getShort(paramIndex), "Char")
-//          case "JSON"     => value(resultSet.getObject(n), "String")
-          case "JSON"     =>
+          //          case "JSON"     => value(resultSet.getObject(n), "String")
+          case "JSON" =>
 
-//            println(s"XX $paramIndex: " + resultSet.getString(paramIndex))
             value(resultSet.getString(paramIndex), "String", true)
-          case other      => throw new Exception(
+          case other  => throw new Exception(
             s"Unexpected/not yet considered sql result type from raw query: " + other
           )
         }
-//        val columnValue = resultSet.getString(paramIndex).replace(29.toChar, ',')
+        //        val columnValue = resultSet.getString(paramIndex).replace(29.toChar, ',')
         if (withNulls && resultSet.wasNull()) {
-//          debug(tpe + "   " + padS(20, tpe) + col + padS(20, col) + "  null")
+          //          debug(tpe + "   " + padS(20, tpe) + col + padS(20, col) + "  null")
           debug(tpe + "   " + padS(20, tpe) + col + padS(20, col) + "  " + columnValue)
         } else if (!resultSet.wasNull()) {
           debug(tpe + "   " + padS(20, tpe) + col + padS(20, col) + "  " + columnValue)

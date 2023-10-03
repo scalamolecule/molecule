@@ -5,6 +5,7 @@ import java.util.Date
 import molecule.base.ast._
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
+import molecule.core.marshalling.ConnProxy
 import molecule.core.transaction.ResolveSave
 import molecule.core.transaction.ops.SaveOps
 
@@ -18,7 +19,8 @@ trait SqlSave
 
   doPrint = false
 
-  def getData(elements: List[Element]): Data = {
+  def getData(elements0: List[Element], proxy: ConnProxy): Data = {
+    val elements = resolveReservedKeywords(elements0, Some(proxy))
     initialNs = getInitialNs(elements)
     curRefPath = List(initialNs)
     resolve(elements)

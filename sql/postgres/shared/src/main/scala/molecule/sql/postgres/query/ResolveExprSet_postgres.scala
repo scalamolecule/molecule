@@ -45,7 +45,7 @@ trait ResolveExprSet_postgres
       // https://stackoverflow.com/questions/46849237/postgresql-array-agginteger/46849678#46849678
       val colAlias = col.replace(".", "_")
       select += s"ARRAY_AGG(DISTINCT $colAlias)"
-      from = from :+ s"UNNEST($col) AS $colAlias"
+      tempTables = tempTables :+ s"UNNEST($col) AS $colAlias"
     } else {
       select += s"ARRAY_AGG($col)"
       where += (("", s"$col <> '{}'"))

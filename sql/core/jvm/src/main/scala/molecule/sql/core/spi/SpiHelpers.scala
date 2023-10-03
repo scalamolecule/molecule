@@ -19,6 +19,7 @@ trait SpiHelpers extends ModelUtils {
     isUpsert: Boolean
   ): (List[Element], List[Long => List[Element]]) = {
     val update       = if (isUpsert) "upsert" else "update"
+    val dummyCoord   = Seq(0, 0) // irrelevant for id columns that will never collide with keywords
     var firstNs      = true
     var prevNs       = ""
     val idsModel     = ListBuffer.empty[Element]
@@ -31,20 +32,20 @@ trait SpiHelpers extends ModelUtils {
           case a: AttrOneMan =>
             prevNs = a.ns
             a match {
-              case a: AttrOneManString     => idsModel += AttrOneTacString(a.ns, a.attr)
-              case a: AttrOneManInt        => idsModel += AttrOneTacInt(a.ns, a.attr)
-              case a: AttrOneManLong       => idsModel += AttrOneTacLong(a.ns, a.attr)
-              case a: AttrOneManFloat      => idsModel += AttrOneTacFloat(a.ns, a.attr)
-              case a: AttrOneManDouble     => idsModel += AttrOneTacDouble(a.ns, a.attr)
-              case a: AttrOneManBoolean    => idsModel += AttrOneTacBoolean(a.ns, a.attr)
-              case a: AttrOneManBigInt     => idsModel += AttrOneTacBigInt(a.ns, a.attr)
-              case a: AttrOneManBigDecimal => idsModel += AttrOneTacBigDecimal(a.ns, a.attr)
-              case a: AttrOneManDate       => idsModel += AttrOneTacDate(a.ns, a.attr)
-              case a: AttrOneManUUID       => idsModel += AttrOneTacUUID(a.ns, a.attr)
-              case a: AttrOneManURI        => idsModel += AttrOneTacURI(a.ns, a.attr)
-              case a: AttrOneManByte       => idsModel += AttrOneTacByte(a.ns, a.attr)
-              case a: AttrOneManShort      => idsModel += AttrOneTacShort(a.ns, a.attr)
-              case a: AttrOneManChar       => idsModel += AttrOneTacChar(a.ns, a.attr)
+              case a: AttrOneManString     => idsModel += AttrOneTacString(a.ns, a.attr, coord = a.coord)
+              case a: AttrOneManInt        => idsModel += AttrOneTacInt(a.ns, a.attr, coord = a.coord)
+              case a: AttrOneManLong       => idsModel += AttrOneTacLong(a.ns, a.attr, coord = a.coord)
+              case a: AttrOneManFloat      => idsModel += AttrOneTacFloat(a.ns, a.attr, coord = a.coord)
+              case a: AttrOneManDouble     => idsModel += AttrOneTacDouble(a.ns, a.attr, coord = a.coord)
+              case a: AttrOneManBoolean    => idsModel += AttrOneTacBoolean(a.ns, a.attr, coord = a.coord)
+              case a: AttrOneManBigInt     => idsModel += AttrOneTacBigInt(a.ns, a.attr, coord = a.coord)
+              case a: AttrOneManBigDecimal => idsModel += AttrOneTacBigDecimal(a.ns, a.attr, coord = a.coord)
+              case a: AttrOneManDate       => idsModel += AttrOneTacDate(a.ns, a.attr, coord = a.coord)
+              case a: AttrOneManUUID       => idsModel += AttrOneTacUUID(a.ns, a.attr, coord = a.coord)
+              case a: AttrOneManURI        => idsModel += AttrOneTacURI(a.ns, a.attr, coord = a.coord)
+              case a: AttrOneManByte       => idsModel += AttrOneTacByte(a.ns, a.attr, coord = a.coord)
+              case a: AttrOneManShort      => idsModel += AttrOneTacShort(a.ns, a.attr, coord = a.coord)
+              case a: AttrOneManChar       => idsModel += AttrOneTacChar(a.ns, a.attr, coord = a.coord)
             }
           case a: AttrOneTac => idsModel += a
 
@@ -52,20 +53,20 @@ trait SpiHelpers extends ModelUtils {
             if (a.op == Eq || a.op == Add || a.op == Swap || a.op == Remove) {
               prevNs = a.ns
               a match {
-                case a: AttrSetManString     => idsModel += AttrSetTacString(a.ns, a.attr)
-                case a: AttrSetManInt        => idsModel += AttrSetTacInt(a.ns, a.attr)
-                case a: AttrSetManLong       => idsModel += AttrSetTacLong(a.ns, a.attr)
-                case a: AttrSetManFloat      => idsModel += AttrSetTacFloat(a.ns, a.attr)
-                case a: AttrSetManDouble     => idsModel += AttrSetTacDouble(a.ns, a.attr)
-                case a: AttrSetManBoolean    => idsModel += AttrSetTacBoolean(a.ns, a.attr)
-                case a: AttrSetManBigInt     => idsModel += AttrSetTacBigInt(a.ns, a.attr)
-                case a: AttrSetManBigDecimal => idsModel += AttrSetTacBigDecimal(a.ns, a.attr)
-                case a: AttrSetManDate       => idsModel += AttrSetTacDate(a.ns, a.attr)
-                case a: AttrSetManUUID       => idsModel += AttrSetTacUUID(a.ns, a.attr)
-                case a: AttrSetManURI        => idsModel += AttrSetTacURI(a.ns, a.attr)
-                case a: AttrSetManByte       => idsModel += AttrSetTacByte(a.ns, a.attr)
-                case a: AttrSetManShort      => idsModel += AttrSetTacShort(a.ns, a.attr)
-                case a: AttrSetManChar       => idsModel += AttrSetTacChar(a.ns, a.attr)
+                case a: AttrSetManString     => idsModel += AttrSetTacString(a.ns, a.attr, coord = a.coord)
+                case a: AttrSetManInt        => idsModel += AttrSetTacInt(a.ns, a.attr, coord = a.coord)
+                case a: AttrSetManLong       => idsModel += AttrSetTacLong(a.ns, a.attr, coord = a.coord)
+                case a: AttrSetManFloat      => idsModel += AttrSetTacFloat(a.ns, a.attr, coord = a.coord)
+                case a: AttrSetManDouble     => idsModel += AttrSetTacDouble(a.ns, a.attr, coord = a.coord)
+                case a: AttrSetManBoolean    => idsModel += AttrSetTacBoolean(a.ns, a.attr, coord = a.coord)
+                case a: AttrSetManBigInt     => idsModel += AttrSetTacBigInt(a.ns, a.attr, coord = a.coord)
+                case a: AttrSetManBigDecimal => idsModel += AttrSetTacBigDecimal(a.ns, a.attr, coord = a.coord)
+                case a: AttrSetManDate       => idsModel += AttrSetTacDate(a.ns, a.attr, coord = a.coord)
+                case a: AttrSetManUUID       => idsModel += AttrSetTacUUID(a.ns, a.attr, coord = a.coord)
+                case a: AttrSetManURI        => idsModel += AttrSetTacURI(a.ns, a.attr, coord = a.coord)
+                case a: AttrSetManByte       => idsModel += AttrSetTacByte(a.ns, a.attr, coord = a.coord)
+                case a: AttrSetManShort      => idsModel += AttrSetTacShort(a.ns, a.attr, coord = a.coord)
+                case a: AttrSetManChar       => idsModel += AttrSetTacChar(a.ns, a.attr, coord = a.coord)
               }
 
             } else {
@@ -77,7 +78,7 @@ trait SpiHelpers extends ModelUtils {
           case _: AttrSetOpt => throw ModelError(s"Can't $update optional values. Found:\n" + a)
         }
 
-      case ref@Ref(_, _, _, CardOne, _) =>
+      case ref@Ref(_, _, _, CardOne, coord) =>
         if (firstNs) {
           firstNs = false
           val tacitElements = updateModel.toList
@@ -86,12 +87,12 @@ trait SpiHelpers extends ModelUtils {
 
         } else if (prevNs.nonEmpty) {
           // Get id
-          idsModel += AttrOneManLong(prevNs, "id")
+          idsModel += AttrOneManLong(prevNs, "id", coord = coord)
 
           // Make update model once we get an id
           val ns            = prevNs
           val tacitElements = updateModel.toList
-          updateModels = updateModels :+ ((id: Long) => AttrOneTacLong(ns, "id", Eq, Seq(id)) +: tacitElements)
+          updateModels = updateModels :+ ((id: Long) => AttrOneTacLong(ns, "id", Eq, Seq(id), coord = coord) +: tacitElements)
         }
 
         idsModel += ref
@@ -108,10 +109,10 @@ trait SpiHelpers extends ModelUtils {
     // Add id to last ref ns
     if (prevNs.nonEmpty) {
       // Get id
-      idsModel += AttrOneManLong(prevNs, "id")
+      idsModel += AttrOneManLong(prevNs, "id", coord = dummyCoord)
 
       // Make update model once we get an id
-      val id2updateModel = (id: Long) => AttrOneTacLong(prevNs, "id", Eq, Seq(id)) +: updateModel.toList
+      val id2updateModel = (id: Long) => AttrOneTacLong(prevNs, "id", Eq, Seq(id), coord = dummyCoord) +: updateModel.toList
       updateModels = updateModels :+ id2updateModel
     }
 

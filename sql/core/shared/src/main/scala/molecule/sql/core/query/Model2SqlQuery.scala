@@ -26,18 +26,17 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
     altElements: List[Element],
     optLimit: Option[Int],
     optOffset: Option[Int],
-    proxy: Option[ConnProxy]
+    optProxy: Option[ConnProxy]
   ): String = {
     val elements = if (altElements.isEmpty) elements0 else altElements
     validateQueryModel(elements)
     //    elements.foreach(println)
 
     // Set attrMap if available (used to get original type of aggregate attributes)
-    proxy.foreach(p => attrMap = p.attrMap)
-    from = List(getInitialNonGenericNs(elements))
-    exts += from.head -> None
-
-    val elements1 = prepareElements(elements, proxy)
+    optProxy.foreach(p => attrMap = p.attrMap)
+    val elements1 = prepareElements(elements, optProxy)
+    from = getInitialNonGenericNs(elements)
+    exts += from -> None
 
     // Recursively resolve molecule elements
     resolve(elements1)
@@ -50,9 +49,8 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
   ): String = {
     val distinct_ = if (distinct) " DISTINCT" else ""
     val select_   = (nestedIds ++ select).mkString(s",\n  ")
-    val from_     = from.mkString(s",\n  ")
 
-    val joins_ = if (joins.isEmpty) "" else {
+    val joins_      = if (joins.isEmpty) "" else {
       val max1  = joins.map(_._1.length).max
       val max2  = joins.map(_._2.length).max
       val max3  = joins.map(_._3.length).max
@@ -64,8 +62,9 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
           if (as.isEmpty) padS(max3 + 4, "") else " AS " + as + padS(max3, as)
         } else ""
         s"$join_ $table_$as_ ON $predicates"
-      }.mkString("\n", "\n", "")
+      }.mkString("\n  ", "\n  ", "")
     }
+    val tempTables_ = if (tempTables.isEmpty) "" else tempTables.mkString(",\n  ", ",\n  ", "")
 
     val notNulls = notNull.map(col => (col, "IS NOT NULL"))
     val allWhere = where ++ notNulls
@@ -119,12 +118,12 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
 
     s"""SELECT$distinct_
        |  $select_
-       |FROM $from_$joins_$where_$groupBy_$having_$orderBy_$limit_$offset_;""".stripMargin
+       |FROM $from$joins_$tempTables_$where_$groupBy_$having_$orderBy_$limit_$offset_;""".stripMargin
   }
 
 
   final def getTotalCountQuery: String = {
-    val table  = from.head
+    val table  = from
     val joins_ = if (joins.isEmpty) "" else {
       val max1  = joins.map(_._1.length).max
       val max2  = joins.map(_._2.length).max
@@ -157,8 +156,8 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
 
 
   private[molecule] def getWhereClauses: ListBuffer[(String, String)] = {
-    from = List(getInitialNonGenericNs(elements0))
-    exts += from.head -> None
+    from = getInitialNonGenericNs(elements0)
+    exts += from -> None
     resolve(elements0)
     where
   }

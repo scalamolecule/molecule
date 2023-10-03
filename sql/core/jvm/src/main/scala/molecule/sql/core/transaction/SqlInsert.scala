@@ -5,6 +5,7 @@ import java.util.Date
 import molecule.base.ast._
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
+import molecule.core.marshalling.ConnProxy
 import molecule.core.transaction.ops.InsertOps
 import molecule.core.transaction.{InsertResolvers_, ResolveInsert}
 import molecule.core.util.ModelUtils
@@ -16,18 +17,19 @@ trait SqlInsert
     with ModelUtils
     with MoleculeLogging { self: ResolveInsert with InsertResolvers_ =>
 
-  doPrint = false
+  doPrint = true
 
   def getData(
-    nsMap: Map[String, MetaNs],
-    elements: List[Element],
+    proxy: ConnProxy,
+    elements0: List[Element],
     tpls: Seq[Product],
   ): Data = {
-    elements.foreach(debug)
+    elements0.foreach(debug)
     debug("### A #############################################################################################")
+    val elements = resolveReservedKeywords(elements0, Some(proxy))
     initialNs = getInitialNs(elements)
     curRefPath = List(s"$level", initialNs)
-    val resolveTpl: Product => Unit = getResolver(nsMap, elements)
+    val resolveTpl: Product => Unit = getResolver(proxy.nsMap, elements)
 
     debug(inserts.mkString("--- inserts\n  ", "\n  ", ""))
     //    debug(joins.mkString("--- joins\n  ", "\n  ", ""))

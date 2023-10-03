@@ -1,18 +1,117 @@
 package molecule.sql.mysql.transaction
 
-import java.sql.{PreparedStatement => PS}
+import java.sql.{Statement, PreparedStatement => PS}
 import molecule.base.error._
 import molecule.boilerplate.ast.Model._
 import molecule.core.transaction.ResolveUpdate
 import molecule.sql.core.query.Model2SqlQuery
 import molecule.sql.core.transaction.{SqlUpdate, Table}
 import molecule.sql.mysql.query.Model2SqlQuery_mysql
-import scala.annotation.tailrec
 
 trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
 
   override def model2SqlQuery(elements: List[Element]): Model2SqlQuery[Any] =
     new Model2SqlQuery_mysql[Any](elements)
+
+
+  override def updateSetEq[T](
+    ns: String,
+    attr: String,
+    sets: Seq[Set[T]],
+    transform: T => Any,
+    set2array: Set[Any] => Array[AnyRef],
+    refNs: Option[String],
+    exts: List[String],
+    value2json: (StringBuffer, T) => StringBuffer
+  ): Unit = {
+    refNs.fold {
+      updateCurRefPath(attr)
+      placeHolders = placeHolders :+ s"$attr = ?"
+      val colSetter = sets match {
+        case Seq(set) =>
+          if (!isUpsert) {
+            addToUpdateCols(ns, attr)
+          }
+          val json = set2json(set, value2json)
+          (ps: PS, _: IdsMap, _: RowIndex) => {
+            ps.setString(curParamIndex, json)
+            curParamIndex += 1
+          }
+        case Nil      =>
+          (ps: PS, _: IdsMap, _: RowIndex) => {
+            ps.setNull(curParamIndex, 0)
+            curParamIndex += 1
+          }
+        case vs       => throw ExecutionError(
+          s"Can only $update one Set of values for Set attribute `$ns.$attr`. Found: " + vs.mkString(", ")
+        )
+      }
+      addColSetter(curRefPath, colSetter)
+
+    } { refNs =>
+      // Separate update of ref ids in join table -----------------------------
+      val refAttr   = attr
+      val joinTable = s"${ns}_${refAttr}_$refNs"
+      val ns_id     = ns + "_id"
+      val refNs_id  = refNs + "_id"
+      val id        = getUpdateId
+      sets match {
+        case Seq(set) =>
+          // Tables are reversed in JdbcConn_JVM and we want to delete first
+          manualTableDatas = List(
+            addJoins(joinTable, ns_id, refNs_id, id, set.asInstanceOf[Set[Long]]),
+            deleteJoins(joinTable, ns_id, id)
+          )
+        case Nil      =>
+          // Delete all joins when no ref ids are applied
+          manualTableDatas = List(deleteJoins(joinTable, ns_id, id))
+        case vs       => throw ExecutionError(
+          s"Can only $update one Set of values for Set attribute `$ns.$attr`. Found: " + vs.mkString(", ")
+        )
+      }
+    }
+  }
+
+  override def updateSetAdd[T](
+    ns: String,
+    attr: String,
+    sets: Seq[Set[T]],
+    transform: T => Any,
+    set2array: Set[Any] => Array[AnyRef],
+    refNs: Option[String],
+    exts: List[String],
+    value2json: (StringBuffer, T) => StringBuffer
+  ): Unit = {
+    refNs.fold {
+      if (sets.nonEmpty && sets.head.nonEmpty) {
+        updateCurRefPath(attr)
+        if (!isUpsert) {
+          addToUpdateCols(ns, attr)
+        }
+        placeHolders = placeHolders :+ s"$attr = JSON_MERGE($attr, ?)"
+        val json = set2json(sets.head, value2json)
+        addColSetter(curRefPath, (ps: PS, _: IdsMap, _: RowIndex) => {
+          ps.setString(curParamIndex, json)
+          curParamIndex += 1
+        })
+      }
+    } { refNs =>
+      // Separate update of ref ids in join table -----------------------------
+      val refAttr   = attr
+      val joinTable = s"${ns}_${refAttr}_$refNs"
+      val ns_id     = ns + "_id"
+      val refNs_id  = refNs + "_id"
+      sets match {
+        case Seq(set) => manualTableDatas = List(
+          addJoins(joinTable, ns_id, refNs_id, getUpdateId, set.asInstanceOf[Set[Long]])
+        )
+        case Nil      => () // Add no ref ids
+        case vs       => throw ExecutionError(
+          s"Can only $update one Set of values for Set attribute `$ns.$attr`. Found: " + vs.mkString(", ")
+        )
+      }
+    }
+  }
 
   override def updateSetSwap[T](
     ns: String,
@@ -21,7 +120,9 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
     transform: T => Any,
     handleValue: T => Any,
     refNs: Option[String],
-    exts: List[String]
+    exts: List[String],
+    value2json: (StringBuffer, T) => StringBuffer,
+    one2json: T => String
   ): Unit = {
     val (retracts0, adds0) = sets.splitAt(sets.length / 2)
     val (retracts, adds)   = (retracts0.flatten, adds0.flatten)
@@ -45,49 +146,36 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
            |""".stripMargin
       )
     }
-    val placeholders = adds.map(_ => "?").mkString(", ")
-    val dbType       = exts(1)
     refNs.fold {
       updateCurRefPath(attr)
-      val colSetter = if (isUpsert) {
+      val valueTable = "table_" + (placeHolders.size + 1)
+      val cast       = exts.head
+      if (isUpsert) {
+        val addValues     = adds.map(one2json).mkString(", ")
+        val retractValues = retracts.map(one2json).mkString(", ")
         placeHolders = placeHolders :+
           s"""$attr = (
-             |    SELECT array(
-             |      SELECT unnest($attr|| array[$placeholders]::$dbType[]) EXCEPT
-             |      SELECT unnest(array[$placeholders]::$dbType[])
-             |    )
+             |    SELECT JSON_MERGE(JSON_ARRAYAGG($valueTable.v), JSON_ARRAY($addValues))
+             |    FROM   JSON_TABLE($ns.$attr, '$$[*]' COLUMNS (v $cast PATH '$$')) $valueTable
+             |    WHERE  $valueTable.v NOT IN ($retractValues)
              |  )""".stripMargin
-
-        (ps: PS, _: IdsMap, _: RowIndex) => {
-          adds.foreach { add =>
-            handleValue(add).asInstanceOf[(PS, Int) => Unit](ps, curParamIndex)
-            curParamIndex += 1
-          }
-          retracts.foreach { retract =>
-            handleValue(retract).asInstanceOf[(PS, Int) => Unit](ps, curParamIndex)
-            curParamIndex += 1
-          }
-        }
       } else {
-        val cast = exts.head
-        @tailrec
-        def replace(swaps: Int, calls: String = "", args: String = ""): String = {
-          if (swaps == 0)
-            s"$calls$attr$args"
-          else
-            replace(swaps - 1, s"ARRAY_REPLACE($calls", s", ?$cast, ?$cast)$args")
-        }
-        placeHolders = placeHolders :+ (s"$attr = " + replace(count))
-        (ps: PS, _: IdsMap, _: RowIndex) => {
-          swaps.foreach { case (retract, add) =>
-            handleValue(retract).asInstanceOf[(PS, Int) => Unit](ps, curParamIndex)
-            handleValue(add).asInstanceOf[(PS, Int) => Unit](ps, curParamIndex + 1)
-            curParamIndex += 2
-          }
-        }
+        val replacements = retracts.zip(adds).map {
+          case (oldV, newV) => s"WHEN $valueTable.v = ${one2json(oldV)} THEN ${one2json(newV)}"
+        }.mkString("\n          ")
+        placeHolders = placeHolders :+
+          s"""$attr = (
+             |    SELECT
+             |      JSON_ARRAYAGG(
+             |        CASE
+             |          $replacements
+             |          ELSE $valueTable.v
+             |        END
+             |      )
+             |    FROM JSON_TABLE($ns.$attr, '$$[*]' COLUMNS (v $cast PATH '$$')) $valueTable
+             |  )""".stripMargin
       }
-      addColSetter(curRefPath, colSetter)
-
+      addColSetter(curRefPath, (_: PS, _: IdsMap, _: RowIndex) => ())
     } { refNs =>
       // Separate update of ref ids in join table -----------------------------
       val refAttr   = attr
@@ -115,7 +203,7 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
              |      ELSE $refNs_id
              |    END
              |WHERE $ns_id = $id""".stripMargin
-        val swapPS    = sqlConn.prepareStatement(swapJoins)
+        val swapPS    = sqlConn.prepareStatement(swapJoins, Statement.RETURN_GENERATED_KEYS)
         val swap      = (ps: PS, _: IdsMap, _: RowIndex) => ps.addBatch()
         val swapPath  = List("swapJoins")
 
@@ -132,37 +220,26 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
     transform: T => Any,
     handleValue: T => Any,
     refNs: Option[String],
-    exts: List[String]
+    exts: List[String],
+    one2json: T => String
   ): Unit = {
     refNs.fold {
-      updateCurRefPath(attr)
-      val colSetter = if (set.nonEmpty) {
+      if (set.nonEmpty) {
+        updateCurRefPath(attr)
         if (!isUpsert) {
           addToUpdateCols(ns, attr)
         }
-        val cast = exts.head
-        @tailrec
-        def remove(swaps: Int, calls: String = "", args: String = ""): String = {
-          if (swaps == 0)
-            s"$calls$attr$args"
-          else
-            remove(swaps - 1, s"ARRAY_REMOVE($calls", s", ?$cast)$args")
-        }
-        placeHolders = placeHolders :+ (s"$attr = " + remove(set.size))
-        (ps: PS, _: IdsMap, _: RowIndex) => {
-          set.foreach { v =>
-            handleValue(v).asInstanceOf[(PS, Int) => Unit](ps, curParamIndex)
-            curParamIndex += 1
-          }
-        }
-
-      } else {
-        // Keep as is
-        placeHolders = placeHolders :+ s"$attr = $attr"
-        (_: PS, _: IdsMap, _: RowIndex) => ()
+        val valueTable    = "table_" + (placeHolders.size + 1)
+        val cast          = exts.head
+        val retractValues = set.map(one2json).mkString(", ")
+        placeHolders = placeHolders :+
+          s"""$attr = (
+             |    SELECT JSON_ARRAYAGG($valueTable.v)
+             |    FROM   JSON_TABLE($ns.$attr, '$$[*]' COLUMNS (v $cast PATH '$$')) $valueTable
+             |    WHERE  $valueTable.v NOT IN ($retractValues)
+             |  )""".stripMargin
+        addColSetter(curRefPath, (_: PS, _: IdsMap, _: RowIndex) => ())
       }
-      addColSetter(curRefPath, colSetter)
-
     } { refNs =>
       if (set.nonEmpty) {
         // Separate update of ref ids in join table -----------------------------
@@ -178,18 +255,18 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
     }
   }
 
-  override protected lazy val extsString     = List("",       "VARCHAR")
-  override protected lazy val extsInt        = List("",       "INTEGER")
-  override protected lazy val extsLong       = List("",       "BIGINT")
-  override protected lazy val extsFloat      = List("",       "DECIMAL")
-  override protected lazy val extsDouble     = List("",       "DECIMAL")
-  override protected lazy val extsBoolean    = List("",       "BOOLEAN")
-  override protected lazy val extsBigInt     = List("",       "DECIMAL")
-  override protected lazy val extsBigDecimal = List("",       "DECIMAL")
-  override protected lazy val extsDate       = List("",       "DATE")
-  override protected lazy val extsUUID       = List("::uuid", "UUID")
-  override protected lazy val extsURI        = List("",       "VARCHAR")
-  override protected lazy val extsByte       = List("",       "SMALLINT")
-  override protected lazy val extsShort      = List("",       "SMALLINT")
-  override protected lazy val extsChar       = List("",       "TEXT")
+  override protected lazy val extsString     = List("LONGTEXT", "")
+  override protected lazy val extsInt        = List("INT", "")
+  override protected lazy val extsLong       = List("BIGINT", "")
+  override protected lazy val extsFloat      = List("REAL", "")
+  override protected lazy val extsDouble     = List("DOUBLE", "")
+  override protected lazy val extsBoolean    = List("TINYINT(1)", "")
+  override protected lazy val extsBigInt     = List("DECIMAL(65, 0)", "")
+  override protected lazy val extsBigDecimal = List("DECIMAL(65, 30)", "")
+  override protected lazy val extsDate       = List("DATETIME", "")
+  override protected lazy val extsUUID       = List("TINYTEXT", "")
+  override protected lazy val extsURI        = List("TEXT", "")
+  override protected lazy val extsByte       = List("TINYINT", "")
+  override protected lazy val extsShort      = List("SMALLINT", "")
+  override protected lazy val extsChar       = List("CHAR", "")
 }

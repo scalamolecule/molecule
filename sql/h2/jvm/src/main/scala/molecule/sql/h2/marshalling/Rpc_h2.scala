@@ -79,9 +79,9 @@ object Rpc_h2
   ): Future[Either[MoleculeError, TxReport]] = either {
     for {
       conn <- getConn(proxy)
-      data = new ResolveSave(proxy) with Save_h2 {
+      data = new ResolveSave with Save_h2 {
         override lazy val sqlConn: Connection = conn.sqlConn
-      }.getData(elements)
+      }.getData(elements, proxy)
       txReport <- conn.transact_async(data)
     } yield txReport
   }
@@ -101,9 +101,9 @@ object Rpc_h2
           } else tpls).asInstanceOf[Seq[Product]]
         case Left(err)   => throw err // catched in outer either wrapper
       }
-      data = new ResolveInsert(proxy) with Insert_h2 {
+      data = new ResolveInsert with Insert_h2 {
         override lazy val sqlConn: Connection = conn.sqlConn
-      }.getData(proxy.nsMap, tplElements, tplProducts)
+      }.getData(proxy, tplElements, tplProducts)
       txReport <- conn.transact_async(data)
     } yield txReport
   }
@@ -136,7 +136,7 @@ object Rpc_h2
       } else {
         val data = new ResolveUpdate(conn.proxy, isUpsert) with Update_h2 {
           override lazy val sqlConn: Connection = conn.sqlConn
-        }.getData(elements)
+        }.getData(elements, conn.proxy)
         Future(conn.transact_sync(data))
       }
     } yield txReport
@@ -159,7 +159,7 @@ object Rpc_h2
             val updateModel = updateModels(i)(refId)
             val data        = new ResolveUpdate(conn.proxy, isUpsert) with Update_h2 {
               override lazy val sqlConn = conn.sqlConn
-            }.getData(updateModel)
+            }.getData(updateModel, conn.proxy)
             conn.populateStmts(data)
         }
         // Return TxReport with initial update ids
@@ -167,8 +167,6 @@ object Rpc_h2
       }
     }
   }
-
-  List(1).indexOf(1)
 
   override def delete(
     proxy: ConnProxy,
@@ -178,7 +176,7 @@ object Rpc_h2
       conn <- getConn(proxy)
       data = new ResolveDelete with Delete_h2 {
         override lazy val sqlConn: Connection = conn.sqlConn
-      }.getData(elements, proxy.nsMap)
+      }.getData(elements, proxy)
       txReport <- conn.transact_async(data)
     } yield txReport
   }

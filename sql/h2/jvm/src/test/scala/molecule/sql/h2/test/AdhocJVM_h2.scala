@@ -17,106 +17,55 @@ object AdhocJVM_h2 extends TestSuite_h2 {
 //        _ <- Ns.int.insert(1).i.transact
 //        _ <- Ns.int.query.i.get.map(_ ==> List(1))
 
-//        List(r1, r2) <- Ref.i.insert(1, 2).transact.map(_.ids)
-//        _ <- Ns.i(7).refs(Set(r1, r2)).save.transact
-        _ <- Ns.i(7).refs(Set(4L, 5L)).save.transact
-//        _ <- Ns.refs(Set(4L, 5L)).save.transact
-        //        _ <- Ns.refs(Set(r1, r2)).save.transact
-//        _ <- Ns.refs(Set(1L, 2L)).save.transact
-        //        _ <- Ns.i(1).refs(Set(r1)).save.transact
-        //        _ <- Ns.i(1).refs(Set(3L, 4L, 5L)).save.transact
+        id <- Ns.refs(Set(ref1, ref2)).save.transact.map(_.id)
 
+        //        _ <- rawQuery(
+        //          """SELECT
+        //            |  JSON_ARRAYAGG(
+        //            |    case
+        //            |      when t1.vs = 6 then 8
+        //            |      else t1.vs
+        //            |    end
+        //            |  )
+        //            |FROM Ns, JSON_TABLE(Ns.ints, '$[*]' COLUMNS (vs int PATH '$')) t1
+        //            |""".stripMargin, true)
+        //
+        //        _ <- rawQuery(
+        //          """SELECT JSON_ARRAYAGG(t1.v)
+        //            |FROM Ns, JSON_TABLE(Ns.ints, '$[*]' COLUMNS (v int PATH '$')) t1
+        //            |WHERE t1.v NOT IN(6)
+        //            |""".stripMargin, true)
 
         //        _ <- rawTransact(
-        //          """insert into Ns(ints) values ('[6,7,8]')"""
-        //        )
-        //        _ <- rawQuery(
-        //          """select ints from Ns"""
-        //        )
-        //        _ <- rawQuery(
-        //          """select refs from Ns"""
-        //        )
-
-        //        _ <- rawQuery(
-        //          """SELECT
-        //            |  Ref_id
-        //            |FROM Ns
-        //            |INNER JOIN Ns_refs_Ref ON Ns.id = Ns_refs_Ref.Ns_id
-        //            |WHERE
-        //            |  Ns.i IS NOT NULL
-        //            |;""".stripMargin, true)
-        //
-        //        _ <- rawQuery(
-        //          """SELECT
-        //            |  id,
-        //            |  i, s
-        //            |FROM Ns
-        //            |;""".stripMargin, true)
-        _ <- rawQuery(
-          """SELECT
-            |  Ns_id,
-            |  Ref_id
-            |FROM Ns_refs_Ref
-            |;""".stripMargin, true)
-
-        _ <- rawQuery(
-          """SELECT
-            |  count(Ns_id)
-            |FROM Ns_refs_Ref
-            |;""".stripMargin, true)
-
-//        _ <- rawQuery(
-//          """SELECT distinct
-//            |  Ns_id,
-//            |  Ref_id
-//            |FROM Ns_refs_Ref
-//            |;""".stripMargin, true)
-//
-//        _ <- rawQuery(
-//          """SELECT
-//            |  Ns.i,
-//            |  ARRAY_AGG(Ns_refs_Ref.Ref_id) Ns_refs
-//            |FROM Ns
-//            |INNER JOIN Ns_refs_Ref ON Ns.id = Ns_refs_Ref.Ns_id
-//            |WHERE
-//            |  Ns.i IS NOT NULL
-//            |GROUP BY Ns.id;""".stripMargin, true)
-//
-//        _ <- rawQuery(
-//          """SELECT DISTINCT
-//            |  Ns.i,
-//            |  ARRAY_AGG(Ns_refs_Ref.Ref_id) Ns_refs
-//            |FROM Ns
-//            |INNER JOIN Ns_refs_Ref ON Ns.id = Ns_refs_Ref.Ns_id
-//            |WHERE
-//            |  Ns.i IS NOT NULL
-//            |GROUP BY Ns.id;""".stripMargin, true)
-
-        //        _ <- rawQuery(
-        //          """SELECT
-        //            |  JSON_ARRAYAGG(Ns_refs_Ref.Ns_id)
-        //            |FROM Ns
-        //            |INNER JOIN Ns_refs_Ref ON Ns.id = Ns_refs_Ref.Ns_id
-        //            |;""".stripMargin, true)
-        //        _ <- rawQuery(
-        //          """SELECT
-        //            |  JSON_ARRAYAGG(Ns_refs_Ref.Ref_id)
-        //            |FROM Ns
-        //            |INNER JOIN Ns_refs_Ref ON Ns.id = Ns_refs_Ref.Ns_id
-        //            |;""".stripMargin, true)
-        //
-        //        _ <- rawQuery(
-        //          """SELECT
-        //            |  Ns.i,
-        //            |  JSON_ARRAYAGG(Ns_refs_Ref.Ref_id) Ns_refs
-        //            |FROM Ns
-        //            |INNER JOIN Ns_refs_Ref ON Ns.id = Ns_refs_Ref.Ns_id
-        //            |WHERE
-        //            |  Ns.i IS NOT NULL
-        //            |GROUP BY Ns.id;""".stripMargin, true)
+        //          """UPDATE Ns SET
+        //            |  ints = (
+        //            |    SELECT JSON_MERGE(JSON_ARRAYAGG(t_1.vs), JSON_ARRAY(8))
+        //            |    FROM JSON_TABLE(Ns.ints, '$[*]' COLUMNS (vs int PATH '$')) t_1
+        //            |    WHERE t_1.vs NOT IN(6)
+        //            |  )
+        //            |WHERE Ns.id IN(1) AND
+        //            |  Ns.ints IS NOT NULL
+        //            |""".stripMargin)
 
 
-//        _ <- Ns.i.refs.query.get.map(_ ==> List((7, Set(r1, r2))))
+
+
+        _ <- Ns(id).refs(Set(ref3, ref4)).update.i.transact
+        _ <- Ns.refs.query.get.map(_.head ==> Set(ref3, ref4))
+
+        // Apply Seq of values
+        _ <- Ns(id).refs(Set(ref4, ref5)).update.transact
+        _ <- Ns.refs.query.get.map(_.head ==> Set(ref4, ref5))
+
+        // Apply empty Seq of values (deleting all values!)
+        _ <- Ns(id).refs(Seq.empty[Long]).update.transact
+        _ <- Ns.refs.query.get.map(_ ==> Nil)
+
+        _ <- Ns(id).refs(Set(ref1, ref2)).update.transact
+
+        // Delete all (apply no values)
+        _ <- Ns(id).refs().update.transact
+        _ <- Ns.refs.query.get.map(_ ==> Nil)
 
       } yield ()
     }

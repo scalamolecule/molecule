@@ -75,10 +75,11 @@ trait ResolveExprSet_mysql
     select -= col
     selectWithOrder(col, res.tpeDb, "JSON_ARRAYAGG")
     groupByCols -= col
+    having += "COUNT(*) > 0"
     aggregate = true
-    replaceCast((row: Row, paramIndex: Int) => {
+    replaceCast((row: Row, paramIndex: Int) =>
       res.json2array(row.getString(paramIndex)).toSet
-    })
+    )
   }
 
 
@@ -124,7 +125,7 @@ trait ResolveExprSet_mysql
         aggregate = true
         val i = select.size + 1
         select += s"GROUP_CONCAT(DISTINCT t_$i.vs SEPARATOR $sep)"
-        from = from :+ s"JSON_TABLE($col, '$$[*]' COLUMNS (vs $tpeDb PATH '$$')) t_$i"
+        tempTables = tempTables :+ s"JSON_TABLE($col, '$$[*]' COLUMNS (vs $tpeDb PATH '$$')) t_$i"
         replaceCast((row: Row, paramIndex: Int) =>
           row.getString(paramIndex).split(sepChar).map(res.json2tpe).take(n).toSet
         )
@@ -144,7 +145,7 @@ trait ResolveExprSet_mysql
         aggregate = true
         val i = select.size + 1
         select += s"GROUP_CONCAT(DISTINCT t_$i.vs ORDER BY t_$i.vs DESC SEPARATOR $sep)"
-        from = from :+ s"JSON_TABLE($col, '$$[*]' COLUMNS (vs $tpeDb PATH '$$')) t_$i"
+        tempTables = tempTables :+ s"JSON_TABLE($col, '$$[*]' COLUMNS (vs $tpeDb PATH '$$')) t_$i"
         replaceCast((row: Row, paramIndex: Int) =>
           row.getString(paramIndex).split(sepChar).map(res.json2tpe).take(n).toSet
         )
@@ -266,7 +267,7 @@ trait ResolveExprSet_mysql
     } else {
       select += s"$fn($distinct$vs)"
     }
-    from = from :+ s"JSON_TABLE($col, '$$[*]' COLUMNS (vs $tpeDb PATH '$$')) t_$i"
+    tempTables = tempTables :+ s"JSON_TABLE($col, '$$[*]' COLUMNS (vs $tpeDb PATH '$$')) t_$i"
   }
 
   private def dbType(col: String): String = attrMap(col)._2 match {

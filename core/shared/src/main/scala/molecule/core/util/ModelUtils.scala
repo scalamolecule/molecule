@@ -68,6 +68,47 @@ trait ModelUtils {
     }
   }
 
+
+  protected def resolveReservedKeywords(elements: List[Element], optProxy: Option[ConnProxy]): List[Element] = {
+    if (optProxy.isEmpty || optProxy.get.reserved.isEmpty)
+      return elements
+
+    @tailrec
+    def prepare(elements: List[Element], acc: List[Element]): List[Element] = {
+      elements match {
+        case element :: tail =>
+          element match {
+            case a: Attr      => prepare(tail, acc :+ prepareAttr(a))
+            case r: Ref       => prepare(tail, acc :+ prepareRef(r))
+            case r: BackRef   => prepare(tail, acc :+ prepareBackRef(r))
+            case n: Nested    => prepare(tail, acc :+ prepareNested(n))
+            case n: NestedOpt => prepare(tail, acc :+ prepareNestedOpt(n))
+          }
+        case Nil             => acc
+      }
+    }
+
+    def prepareAttr(a0: Attr): Attr = {
+      resolveReservedNames(a0, optProxy.get)
+    }
+    def prepareRef(ref: Ref): Ref = {
+      val (ns, refAttr, refNs) = nonReservedRef(ref, optProxy.get)
+      ref.copy(ns = ns, refAttr = refAttr, refNs = refNs)
+    }
+    def prepareBackRef(backRef: BackRef): BackRef = {
+      val (prevNs, curNs) = nonReservedBackRef(backRef, optProxy.get)
+      backRef.copy(prevNs = prevNs, curNs = curNs)
+    }
+    def prepareNested(nested: Nested): Nested = {
+      Nested(nested.ref, prepare(nested.elements, Nil))
+    }
+    def prepareNestedOpt(nested: NestedOpt): NestedOpt = {
+      NestedOpt(nested.ref, prepare(nested.elements, Nil))
+    }
+
+    prepare(elements, Nil)
+  }
+
   private def indexes(coord: Seq[Int]): (Int, Int, Option[Int]) = {
     coord match {
       case Seq(nsIndex, refAttrIndex, refNsIndex) => (nsIndex, refAttrIndex, Some(refNsIndex))
@@ -77,29 +118,9 @@ trait ModelUtils {
 
   final protected def nonReservedAttr(a: Attr, proxy: ConnProxy): (String, String) = {
     val (nsIndex, attrIndex, _) = indexes(a.coord)
-//    val Seq(nsIndex, attrIndex) = a.coord
     (
       if (proxy.reserved.get.reservedNss(nsIndex)) a.ns + "_" else a.ns,
       if (proxy.reserved.get.reservedAttrs(attrIndex)) a.attr + "_" else a.attr
-    )
-  }
-
-  final protected def nonReservedAttrSet(a: Attr, proxy: ConnProxy): (String, String, Option[String]) = {
-    val (nsIndex, refAttrIndex, optRefNsIndex) = indexes(a.coord)
-//    match {
-//      case Seq(nsIndex, refAttrIndex, refNsIndex) => (nsIndex, refAttrIndex, Some(refNsIndex))
-//      case Seq(nsIndex, refAttrIndex)             => (nsIndex, refAttrIndex, None)
-//    }
-
-    val reservedNss   = proxy.reserved.get.reservedNss
-    val reservedAttrs = proxy.reserved.get.reservedAttrs
-    (
-      if (reservedNss(nsIndex)) a.ns + "_" else a.ns,
-      if (reservedAttrs(refAttrIndex)) a.attr + "_" else a.attr,
-      optRefNsIndex.fold(Option.empty[String]) { refNsIndex =>
-        val refNs = a.refNs.get
-        if (reservedNss(refNsIndex)) Some(refNs + "_") else Some(refNs)
-      }
     )
   }
 

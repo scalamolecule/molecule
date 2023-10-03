@@ -21,13 +21,16 @@ trait Save_mysql extends SqlSave { self: ResolveSave =>
     refNs.fold {
       val (curPath, paramIndex) = getParamIndex(attr)
       val colSetter: Setter     = optSet.fold {
-        (ps: PS, _: IdsMap, _: RowIndex) => ps.setNull(paramIndex, 0)
+        (ps: PS, _: IdsMap, _: RowIndex) =>
+          ps.setNull(paramIndex, 0)
       } { set =>
         if (set.nonEmpty) {
           val json = set2json(set.asInstanceOf[Set[T]], value2json)
-          (ps: PS, _: IdsMap, _: RowIndex) => ps.setString(paramIndex, json)
+          (ps: PS, _: IdsMap, _: RowIndex) =>
+            ps.setString(paramIndex, json)
         } else {
-          (ps: PS, _: IdsMap, _: RowIndex) => ps.setNull(paramIndex, 0)
+          (ps: PS, _: IdsMap, _: RowIndex) =>
+            ps.setNull(paramIndex, 0)
         }
       }
       addColSetter(curPath, colSetter)
@@ -70,35 +73,4 @@ trait Save_mysql extends SqlSave { self: ResolveSave =>
       }
     }
   }
-
-  //  override protected lazy val extsString     = List("", "LONGTEXT")
-  //  override protected lazy val extsInt        = List("", "INT")
-  //  override protected lazy val extsLong       = List("", "BIGINT")
-  //  override protected lazy val extsFloat      = List("", "FLOAT")
-  //  override protected lazy val extsDouble     = List("", "DOUBLE")
-  //  override protected lazy val extsBoolean    = List("", "TINYINT(1)")
-  //  override protected lazy val extsBigInt     = List("", "DECIMAL")
-  //  override protected lazy val extsBigDecimal = List("", "DECIMAL")
-  //  override protected lazy val extsDate       = List("", "DATETIME")
-  //  override protected lazy val extsUUID       = List("", "TINYTEXT")
-  //  override protected lazy val extsURI        = List("", "TEXT")
-  //  override protected lazy val extsByte       = List("", "TINYINT")
-  //  override protected lazy val extsShort      = List("", "SMALLINT")
-  //  override protected lazy val extsChar       = List("", "CHAR")
-
-
-  //  override protected lazy val transformString     = (v: String) => "\"" + escStr(v) + "\""
-  //  override protected lazy val transformInt        = (v: Int) => v
-  //  override protected lazy val transformLong       = (v: Long) => v
-  //  override protected lazy val transformFloat      = (v: Float) => v
-  //  override protected lazy val transformDouble     = (v: Double) => v
-  //  override protected lazy val transformBoolean    = (v: Boolean) => v
-  //  override protected lazy val transformBigInt     = (v: BigInt) => v.bigInteger
-  //  override protected lazy val transformBigDecimal = (v: BigDecimal) => v.bigDecimal
-  //  override protected lazy val transformDate       = (v: Date) => "\"" + date2str(v) + "\""
-  //  override protected lazy val transformUUID       = (v: UUID) => v
-  //  override protected lazy val transformURI        = (v: URI) => v
-  //  override protected lazy val transformByte       = (v: Byte) => v.toInt
-  //  override protected lazy val transformShort      = (v: Short) => v.toInt
-  //  override protected lazy val transformChar       = (v: Char) => v.toString
 }

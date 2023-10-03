@@ -81,4 +81,21 @@ trait BaseOps extends JsonBase with BaseHelpers {
   protected lazy val value2jsonByte      : (StringBuffer, Byte) => StringBuffer       = (buf: StringBuffer, v: Byte) => buf.append(v)
   protected lazy val value2jsonShort     : (StringBuffer, Short) => StringBuffer      = (buf: StringBuffer, v: Short) => buf.append(v)
   protected lazy val value2jsonChar      : (StringBuffer, Char) => StringBuffer       = (buf: StringBuffer, v: Char) => quote(buf, v.toString)
+
+
+  protected lazy val one2jsonString    : String => String     = (v: String) => "\"" + escStr(v) + "\""
+  protected lazy val one2jsonInt       : Int => String        = (v: Int) => s"$v"
+  protected lazy val one2jsonLong      : Long => String       = (v: Long) => s"$v"
+  protected lazy val one2jsonFloat     : Float => String      = (v: Float) => s"$v"
+  protected lazy val one2jsonDouble    : Double => String     = (v: Double) => s"$v"
+  protected lazy val one2jsonBoolean   : Boolean => String    = (v: Boolean) => if (v) "1" else "0"
+  protected lazy val one2jsonBigInt    : BigInt => String     = (v: BigInt) => s"$v"
+  protected lazy val one2jsonBigDecimal: BigDecimal => String = (v: BigDecimal) => s"$v"
+  protected lazy val one2jsonDate      : Date => String       = (v: Date) => "\"" + date2str(v) + "\""
+  protected lazy val one2jsonUUID      : UUID => String       = (v: UUID) => "\"" + v.toString + "\""
+  protected lazy val one2jsonURI       : URI => String        = (v: URI) => "\"" + v.toString.replace("'", "''") + "\""
+  protected lazy val one2jsonByte      : Byte => String       = (v: Byte) => s"$v"
+  protected lazy val one2jsonShort     : Short => String      = (v: Short) => s"$v"
+  protected lazy val one2jsonChar      : Char => String       = (v: Char) => "\"" + v.toString + "\""
+
 }

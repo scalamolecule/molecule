@@ -91,10 +91,15 @@ trait Insert_mysql extends SqlInsert { self: ResolveInsert with InsertResolvers_
       (tpl: Product) => {
         val colSetter = tpl.productElement(tplIndex) match {
           case Some(set: Set[_]) =>
-            val json = set2json(set.asInstanceOf[Set[T]], value2json)
-            (ps: PS, _: IdsMap, _: RowIndex) =>
-              ps.setString(paramIndex, json)
-          case None =>
+            if (set.nonEmpty) {
+              val json = set2json(set.asInstanceOf[Set[T]], value2json)
+              (ps: PS, _: IdsMap, _: RowIndex) =>
+                ps.setString(paramIndex, json)
+            } else {
+              (ps: PS, _: IdsMap, _: RowIndex) =>
+                ps.setNull(paramIndex, java.sql.Types.NULL)
+            }
+          case None              =>
             (ps: PS, _: IdsMap, _: RowIndex) =>
               ps.setNull(paramIndex, java.sql.Types.NULL)
         }

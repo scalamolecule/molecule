@@ -5,6 +5,7 @@ import java.util.Date
 import molecule.base.error._
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
+import molecule.core.marshalling.ConnProxy
 import molecule.core.transaction.ResolveUpdate
 import molecule.core.transaction.ops.UpdateOps
 import molecule.sql.core.query.Model2SqlQuery
@@ -19,7 +20,8 @@ trait SqlUpdate
 
   def model2SqlQuery(elements: List[Element]): Model2SqlQuery[Any]
 
-  def getData(elements: List[Element]): Data = {
+  def getData(elements0: List[Element], proxy: ConnProxy): Data = {
+    val elements = resolveReservedKeywords(elements0, Some(proxy))
     curRefPath = List(getInitialNs(elements))
     resolve(elements)
     addRowSetterToTables()
@@ -65,8 +67,6 @@ trait SqlUpdate
 
         val ps = sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
         tableDatas(refPath) = Table(refPath, stmt, ps)
-
-
         colSettersMap(refPath) = Nil
         val rowSetter = (ps: PS, idsMap: IdsMap, _: RowIndex) => {
           // Set all column values for this row in this insert/batch
@@ -136,15 +136,15 @@ trait SqlUpdate
           handleValue(v).asInstanceOf[(PS, Int) => Unit](ps, curParamIndex)
           curParamIndex += 1
         }
-
-      case Nil =>
+      case Nil    =>
         (ps: PS, _: IdsMap, _: RowIndex) => {
           ps.setNull(curParamIndex, 0)
           curParamIndex += 1
         }
-
-      case vs => throw ExecutionError(
-        s"Can only $update one value for attribute `$ns.$attr`. Found: " + vs.mkString(", ")
+      case vs     =>
+        val cleanAttr = attr.replace("_", "")
+        throw ExecutionError(
+        s"Can only $update one value for attribute `$ns.$cleanAttr`. Found: " + vs.mkString(", ")
       )
     }
     addColSetter(curRefPath, colSetter)
@@ -158,7 +158,8 @@ trait SqlUpdate
     transform: T => Any,
     set2array: Set[Any] => Array[AnyRef],
     refNs: Option[String],
-    exts: List[String]
+    exts: List[String],
+    value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
     refNs.fold {
       updateCurRefPath(attr)
@@ -174,14 +175,12 @@ trait SqlUpdate
             ps.setArray(curParamIndex, conn.createArrayOf(exts(1), array))
             curParamIndex += 1
           }
-
-        case Nil =>
+        case Nil      =>
           (ps: PS, _: IdsMap, _: RowIndex) => {
             ps.setNull(curParamIndex, 0)
             curParamIndex += 1
           }
-
-        case vs => throw ExecutionError(
+        case vs       => throw ExecutionError(
           s"Can only $update one Set of values for Set attribute `$ns.$attr`. Found: " + vs.mkString(", ")
         )
       }
@@ -213,7 +212,6 @@ trait SqlUpdate
     }
   }
 
-
   override def updateSetAdd[T](
     ns: String,
     attr: String,
@@ -221,36 +219,23 @@ trait SqlUpdate
     transform: T => Any,
     set2array: Set[Any] => Array[AnyRef],
     refNs: Option[String],
-    exts: List[String]
+    exts: List[String],
+    value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
     refNs.fold {
-      updateCurRefPath(attr)
-      val colSetter = sets match {
-        case Seq(set) =>
-          if (!isUpsert) {
-            addToUpdateCols(ns, attr)
-          }
-          placeHolders = placeHolders :+ s"$attr = $attr || ?"
-          val array = set2array(set.asInstanceOf[Set[Any]])
-          (ps: PS, _: IdsMap, _: RowIndex) => {
-            val conn = ps.getConnection
-            ps.setArray(curParamIndex, conn.createArrayOf(exts(1), array))
-            curParamIndex += 1
-          }
-
-        case Nil =>
-          placeHolders = placeHolders :+ s"$attr = ?"
-          (ps: PS, _: IdsMap, _: RowIndex) => {
-            ps.setNull(curParamIndex, 0)
-            curParamIndex += 1
-          }
-
-        case vs => throw ExecutionError(
-          s"Can only $update one Set of values for Set attribute `$ns.$attr`. Found: " + vs.mkString(", ")
-        )
+      if (sets.nonEmpty && sets.head.nonEmpty) {
+        updateCurRefPath(attr)
+        if (!isUpsert) {
+          addToUpdateCols(ns, attr)
+        }
+        placeHolders = placeHolders :+ s"$attr = $attr || ?"
+        val array = set2array(sets.head.asInstanceOf[Set[Any]])
+        addColSetter(curRefPath, (ps: PS, _: IdsMap, _: RowIndex) => {
+          val conn = ps.getConnection
+          ps.setArray(curParamIndex, conn.createArrayOf(exts(1), array))
+          curParamIndex += 1
+        })
       }
-      addColSetter(curRefPath, colSetter)
-
     } { refNs =>
       // Separate update of ref ids in join table -----------------------------
       val refAttr   = attr
@@ -269,7 +254,6 @@ trait SqlUpdate
     }
   }
 
-
   override def updateSetSwap[T](
     ns: String,
     attr: String,
@@ -277,7 +261,9 @@ trait SqlUpdate
     transform: T => Any,
     handleValue: T => Any,
     refNs: Option[String],
-    exts: List[String]
+    exts: List[String],
+    value2json: (StringBuffer, T) => StringBuffer,
+    one2json: T => String
   ): Unit = {
     val (retracts0, adds0) = sets.splitAt(sets.length / 2)
     val (retracts, adds)   = (retracts0.flatten, adds0.flatten)
@@ -301,7 +287,7 @@ trait SqlUpdate
       )
     }
     val table  = ns
-    val nsAttr   = s"$ns.$attr"
+    val nsAttr = s"$ns.$attr"
     val dbType = exts(1)
     refNs.fold {
       updateCurRefPath(nsAttr)
@@ -352,7 +338,6 @@ trait SqlUpdate
         }
       }
       addColSetter(curRefPath, colSetter)
-
     } { refNs =>
       // Separate update of ref ids in join table -----------------------------
       val refAttr   = attr
@@ -380,7 +365,7 @@ trait SqlUpdate
              |      ELSE $refNs_id
              |    END
              |WHERE $ns_id = $id""".stripMargin
-        val swapPS    = sqlConn.prepareStatement(swapJoins)
+        val swapPS    = sqlConn.prepareStatement(swapJoins, Statement.RETURN_GENERATED_KEYS)
         val swap      = (ps: PS, _: IdsMap, _: RowIndex) => ps.addBatch()
         val swapPath  = List("swapJoins")
 
@@ -397,15 +382,16 @@ trait SqlUpdate
     transform: T => Any,
     handleValue: T => Any,
     refNs: Option[String],
-    exts: List[String]
+    exts: List[String],
+    one2json: T => String
   ): Unit = {
     val table  = ns
-    val nsAttr   = s"$ns.$attr"
+    val nsAttr = s"$ns.$attr"
     val dbType = exts(1)
     refNs.fold {
-      updateCurRefPath(nsAttr)
-      val idClause  = s"$table.id IN (${ids.mkString(", ")})"
-      val colSetter = if (set.nonEmpty) {
+      if (set.nonEmpty) {
+        updateCurRefPath(nsAttr)
+        val idClause = s"$table.id IN (${ids.mkString(", ")})"
         if (!isUpsert) {
           addToUpdateCols(ns, attr)
         }
@@ -429,7 +415,7 @@ trait SqlUpdate
              |    )
              |  END""".stripMargin
 
-        (ps: PS, _: IdsMap, _: RowIndex) => {
+        addColSetter(curRefPath, (ps: PS, _: IdsMap, _: RowIndex) => {
           set.foreach { v =>
             handleValue(v).asInstanceOf[(PS, Int) => Unit](ps, curParamIndex)
             curParamIndex += 1
@@ -438,15 +424,8 @@ trait SqlUpdate
             handleValue(v).asInstanceOf[(PS, Int) => Unit](ps, curParamIndex)
             curParamIndex += 1
           }
-        }
-
-      } else {
-        // Keep as is
-        placeHolders = placeHolders :+ s"$nsAttr = $nsAttr"
-        (_: PS, _: IdsMap, _: RowIndex) => ()
+        })
       }
-      addColSetter(curRefPath, colSetter)
-
     } { refNs =>
       if (set.nonEmpty) {
         // Separate update of ref ids in join table -----------------------------
@@ -493,7 +472,7 @@ trait SqlUpdate
   protected def deleteJoins(joinTable: String, ns_id: String, id: Long, refIds: String = ""): Table = {
     val deletePath  = List("deleteJoins")
     val deleteJoins = s"DELETE FROM $joinTable WHERE $ns_id = $id" + refIds
-    val deletePS    = sqlConn.prepareStatement(deleteJoins)
+    val deletePS    = sqlConn.prepareStatement(deleteJoins, Statement.RETURN_GENERATED_KEYS)
     val delete      = (ps: PS, _: IdsMap, _: RowIndex) => ps.addBatch()
     Table(deletePath, deleteJoins, deletePS, delete)
   }
@@ -501,7 +480,7 @@ trait SqlUpdate
   protected def addJoins(joinTable: String, ns_id: String, refNs_id: String, id: Long, refIds: Iterable[Long]): Table = {
     val addPath  = List("addJoins")
     val addJoins = s"INSERT INTO $joinTable($ns_id, $refNs_id) VALUES (?, ?)"
-    val addPS    = sqlConn.prepareStatement(addJoins)
+    val addPS    = sqlConn.prepareStatement(addJoins, Statement.RETURN_GENERATED_KEYS)
     val add      = (ps: PS, _: IdsMap, _: RowIndex) =>
       refIds.foreach { refId =>
         ps.setLong(1, id)

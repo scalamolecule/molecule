@@ -1,6 +1,6 @@
 package molecule.sql.postgres.transaction
 
-import java.sql.{PreparedStatement => PS}
+import java.sql.{Statement, PreparedStatement => PS}
 import molecule.base.error._
 import molecule.boilerplate.ast.Model._
 import molecule.core.transaction.ResolveUpdate
@@ -21,7 +21,9 @@ trait Update_postgres extends SqlUpdate { self: ResolveUpdate =>
     transform: T => Any,
     handleValue: T => Any,
     refNs: Option[String],
-    exts: List[String]
+    exts: List[String],
+    value2json: (StringBuffer, T) => StringBuffer,
+    one2json: T => String
   ): Unit = {
     val (retracts0, adds0) = sets.splitAt(sets.length / 2)
     val (retracts, adds)   = (retracts0.flatten, adds0.flatten)
@@ -87,7 +89,6 @@ trait Update_postgres extends SqlUpdate { self: ResolveUpdate =>
         }
       }
       addColSetter(curRefPath, colSetter)
-
     } { refNs =>
       // Separate update of ref ids in join table -----------------------------
       val refAttr   = attr
@@ -115,7 +116,7 @@ trait Update_postgres extends SqlUpdate { self: ResolveUpdate =>
              |      ELSE $refNs_id
              |    END
              |WHERE $ns_id = $id""".stripMargin
-        val swapPS    = sqlConn.prepareStatement(swapJoins)
+        val swapPS    = sqlConn.prepareStatement(swapJoins, Statement.RETURN_GENERATED_KEYS)
         val swap      = (ps: PS, _: IdsMap, _: RowIndex) => ps.addBatch()
         val swapPath  = List("swapJoins")
 
@@ -132,11 +133,12 @@ trait Update_postgres extends SqlUpdate { self: ResolveUpdate =>
     transform: T => Any,
     handleValue: T => Any,
     refNs: Option[String],
-    exts: List[String]
+    exts: List[String],
+    one2json: T => String
   ): Unit = {
     refNs.fold {
-      updateCurRefPath(attr)
-      val colSetter = if (set.nonEmpty) {
+      if (set.nonEmpty) {
+        updateCurRefPath(attr)
         if (!isUpsert) {
           addToUpdateCols(ns, attr)
         }
@@ -149,20 +151,13 @@ trait Update_postgres extends SqlUpdate { self: ResolveUpdate =>
             remove(swaps - 1, s"ARRAY_REMOVE($calls", s", ?$cast)$args")
         }
         placeHolders = placeHolders :+ (s"$attr = " + remove(set.size))
-        (ps: PS, _: IdsMap, _: RowIndex) => {
+        addColSetter(curRefPath, (ps: PS, _: IdsMap, _: RowIndex) => {
           set.foreach { v =>
             handleValue(v).asInstanceOf[(PS, Int) => Unit](ps, curParamIndex)
             curParamIndex += 1
           }
-        }
-
-      } else {
-        // Keep as is
-        placeHolders = placeHolders :+ s"$attr = $attr"
-        (_: PS, _: IdsMap, _: RowIndex) => ()
+        })
       }
-      addColSetter(curRefPath, colSetter)
-
     } { refNs =>
       if (set.nonEmpty) {
         // Separate update of ref ids in join table -----------------------------

@@ -10,10 +10,8 @@ import scala.annotation.tailrec
 import scala.collection.mutable
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 
-class ResolveInsert(proxy: ConnProxy)
+class ResolveInsert
   extends InsertResolvers_ with InsertValidators_ with ModelUtils { self: InsertOps =>
-
-  private val checkReservedKeywords = proxy.reserved.isDefined
 
   private val prevRefs: ListBuffer[AnyRef] = ListBuffer.empty[AnyRef]
 
@@ -91,16 +89,9 @@ class ResolveInsert(proxy: ConnProxy)
     }
   }
 
-  private def attrOneNames(a: Attr): (String, String) = {
-    if (checkReservedKeywords) nonReservedAttr(a, proxy) else (a.ns, a.attr)
-  }
-
-  private def attrSetNames(a: Attr): (String, String, Option[String]) = {
-    if (checkReservedKeywords) nonReservedAttrSet(a, proxy) else (a.ns, a.attr, a.refNs)
-  }
 
   private def resolveAttrOneMan(a: AttrOneMan, tplIndex: Int): Product => Unit = {
-    val (ns, attr) = attrOneNames(a)
+    val (ns, attr) = (a.ns, a.attr)
     a match {
       case _: AttrOneManString     => addOne(ns, attr, tplIndex, transformString, handleString, extsString)
       case _: AttrOneManInt        => addOne(ns, attr, tplIndex, transformInt, handleInt, extsInt)
@@ -120,7 +111,7 @@ class ResolveInsert(proxy: ConnProxy)
   }
 
   private def resolveAttrOneOpt(a: AttrOneOpt, tplIndex: Int): Product => Unit = {
-    val (ns, attr) = attrOneNames(a)
+    val (ns, attr) = (a.ns, a.attr)
     a match {
       case _: AttrOneOptString     => addOneOpt(ns, attr, tplIndex, transformString, handleString, extsString)
       case _: AttrOneOptInt        => addOneOpt(ns, attr, tplIndex, transformInt, handleInt, extsInt)
@@ -140,7 +131,7 @@ class ResolveInsert(proxy: ConnProxy)
   }
 
   private def resolveAttrSetMan(a: AttrSetMan, tplIndex: Int): Product => Unit = {
-    val (ns, attr, refNs) = attrSetNames(a)
+    val (ns, attr, refNs) = (a.ns, a.attr, a.refNs)
     a match {
       case _: AttrSetManString     => addSet(ns, attr, set2arrayString, refNs, tplIndex, transformString, extsString, value2jsonString)
       case _: AttrSetManInt        => addSet(ns, attr, set2arrayInt, refNs, tplIndex, transformInt, extsInt, value2jsonInt)
@@ -160,7 +151,7 @@ class ResolveInsert(proxy: ConnProxy)
   }
 
   private def resolveAttrSetOpt(a: AttrSetOpt, tplIndex: Int): Product => Unit = {
-    val (ns, attr, refNs) = attrSetNames(a)
+    val (ns, attr, refNs) = (a.ns, a.attr, a.refNs)
     a match {
       case _: AttrSetOptString     => addSetOpt(ns, attr, set2arrayString, refNs, tplIndex, transformString, extsString, value2jsonString)
       case _: AttrSetOptInt        => addSetOpt(ns, attr, set2arrayInt, refNs, tplIndex, transformInt, extsInt, value2jsonInt)

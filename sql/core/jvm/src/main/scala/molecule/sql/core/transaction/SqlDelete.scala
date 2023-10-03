@@ -1,12 +1,13 @@
 package molecule.sql.core.transaction
 
-import java.sql.{ResultSet, PreparedStatement => PS}
+import java.sql.{ResultSet, Statement, PreparedStatement => PS}
 import molecule.base.ast._
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
+import molecule.core.marshalling.ConnProxy
 import molecule.core.transaction.ResolveDelete
 import molecule.core.transaction.ops.DeleteOps
-import molecule.core.util.MetaModelUtils
+import molecule.core.util.{MetaModelUtils, ModelUtils}
 import molecule.sql.core.query.Model2SqlQuery
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
@@ -15,12 +16,15 @@ trait SqlDelete
   extends SqlBase_JVM
     with DeleteOps
     with MetaModelUtils
+    with ModelUtils
     with MoleculeLogging { self: ResolveDelete =>
 
   def model2SqlQuery(elements: List[Element]): Model2SqlQuery[Any]
 
-  def getData(elements: List[Element], nsMap: Map[String, MetaNs]): Data = {
-    val refPath = List(getInitialNs(elements))
+  def getData(elements0: List[Element], proxy: ConnProxy): Data = {
+    val elements = resolveReservedKeywords(elements0, Some(proxy))
+    val refPath  = List(getInitialNs(elements))
+    val nsMap    = proxy.nsMap
     resolve(elements, true)
     if (ids.nonEmpty) {
       deleteTableData(refPath, nsMap, ids)
@@ -61,7 +65,12 @@ trait SqlDelete
     val ns                    = getInitialNs(filterElements)
     val filterElementsWithIds = AttrOneManLong(ns, "id", V) +: filterElements
     val query                 = model2SqlQuery(filterElementsWithIds).getSqlQuery(Nil, None, None, None)
-    val ps                    = sqlConn.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)
+    val ps                    = sqlConn.prepareStatement(
+      query,
+      ResultSet.TYPE_SCROLL_INSENSITIVE,
+      ResultSet.CONCUR_READ_ONLY,
+      Statement.RETURN_GENERATED_KEYS
+    )
     val resultSet             = ps.executeQuery()
     val ids                   = ListBuffer.empty[Long]
     while (resultSet.next()) {
@@ -74,7 +83,7 @@ trait SqlDelete
   protected def prepareTable(refPath: List[String], table: String, idColumn: String, ids: Seq[Long]): Table = {
     val ids_       = ids.mkString(", ")
     val stmt       = s"DELETE FROM $table WHERE $idColumn IN ($ids_)"
-    val ps         = sqlConn.prepareStatement(stmt)
+    val ps         = sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
     val populatePS = (ps: PS, _: IdsMap, _: RowIndex) => ps.addBatch()
     Table(refPath, stmt, ps, populatePS)
   }

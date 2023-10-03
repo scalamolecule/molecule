@@ -8,10 +8,8 @@ import molecule.core.transaction.ops.SaveOps
 import molecule.core.util.ModelUtils
 import scala.annotation.tailrec
 
-class ResolveSave(proxy: ConnProxy)
+class ResolveSave
   extends ModelUtils with MoleculeLogging { self: SaveOps =>
-
-  private val checkReservedKeywords = proxy.reserved.isDefined
 
   @tailrec
   final def resolve(elements: List[Element]): Unit = {
@@ -49,15 +47,6 @@ class ResolveSave(proxy: ConnProxy)
     }
   }
 
-
-  private def attrOneNames(a: Attr): (String, String) = {
-    if (checkReservedKeywords) nonReservedAttr(a, proxy) else (a.ns, a.attr)
-  }
-
-  private def attrSetNames(a: Attr): (String, String, Option[String]) = {
-    if (checkReservedKeywords) nonReservedAttrSet(a, proxy) else (a.ns, a.attr, a.refNs)
-  }
-
   private def oneV[T](
     ns: String,
     attr: String,
@@ -73,7 +62,7 @@ class ResolveSave(proxy: ConnProxy)
     }
   }
   private def resolveAttrOneMan(a: AttrOneMan): Unit = {
-    val (ns, attr) = attrOneNames(a)
+    val (ns, attr) = (a.ns, a.attr)
     a match {
       case a: AttrOneManString     => addOne(ns, attr, oneV(ns, attr, a.vs, transformString), handleString, extsString)
       case a: AttrOneManInt        => addOne(ns, attr, oneV(ns, attr, a.vs, transformInt), handleInt, extsInt)
@@ -92,7 +81,7 @@ class ResolveSave(proxy: ConnProxy)
     }
   }
   private def resolveAttrOneTac(a: AttrOneTac): Unit = {
-    val (ns, attr) = attrOneNames(a)
+    val (ns, attr) = (a.ns, a.attr)
     a match {
       case a: AttrOneTacString     => addOne(ns, attr, oneV(ns, attr, a.vs, transformString), handleString, extsString)
       case a: AttrOneTacInt        => addOne(ns, attr, oneV(ns, attr, a.vs, transformInt), handleInt, extsInt)
@@ -127,7 +116,7 @@ class ResolveSave(proxy: ConnProxy)
     }
   }
   private def resolveAttrOneOpt(a: AttrOneOpt): Unit = {
-    val (ns, attr) = attrOneNames(a)
+    val (ns, attr) = (a.ns, a.attr)
     a match {
       case a: AttrOneOptString     => addOne(ns, attr, oneOptV(ns, attr, a.vs, transformString), handleString, extsString)
       case a: AttrOneOptInt        => addOne(ns, attr, oneOptV(ns, attr, a.vs, transformInt), handleInt, extsInt)
@@ -162,7 +151,7 @@ class ResolveSave(proxy: ConnProxy)
     }
   }
   private def resolveAttrSetMan(a: AttrSetMan): Unit = {
-    val (ns, attr, refNs) = attrSetNames(a)
+    val (ns, attr, refNs) = (a.ns, a.attr, a.refNs)
     a match {
       case a: AttrSetManString     => addSet(ns, attr, oneSet(ns, attr, a.vs, transformString), transformString, set2arrayString, refNs, extsString, value2jsonString)
       case a: AttrSetManInt        => addSet(ns, attr, oneSet(ns, attr, a.vs, transformInt), transformInt, set2arrayInt, refNs, extsInt, value2jsonInt)
@@ -181,7 +170,7 @@ class ResolveSave(proxy: ConnProxy)
     }
   }
   private def resolveAttrSetTac(a: AttrSetTac): Unit = {
-    val (ns, attr, refNs) = attrSetNames(a)
+    val (ns, attr, refNs) = (a.ns, a.attr, a.refNs)
     a match {
       case a: AttrSetTacString     => addSet(ns, attr, oneSet(ns, attr, a.vs, transformString), transformString, set2arrayString, refNs, extsString, value2jsonString)
       case a: AttrSetTacInt        => addSet(ns, attr, oneSet(ns, attr, a.vs, transformInt), transformInt, set2arrayInt, refNs, extsInt, value2jsonInt)
@@ -216,7 +205,7 @@ class ResolveSave(proxy: ConnProxy)
   }
 
   private def resolveAttrSetOpt(a: AttrSetOpt): Unit = {
-    val (ns, attr, refNs) = attrSetNames(a)
+    val (ns, attr, refNs) = (a.ns, a.attr, a.refNs)
     a match {
       case a: AttrSetOptString     => addSet(ns, attr, oneOptSet(ns, attr, a.vs, transformString), handleString, set2arrayString, refNs, extsString, value2jsonString)
       case a: AttrSetOptInt        => addSet(ns, attr, oneOptSet(ns, attr, a.vs, transformInt), handleInt, set2arrayInt, refNs, extsInt, value2jsonInt)

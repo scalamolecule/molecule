@@ -67,7 +67,7 @@ object Rpc_datomic
   ): Future[Either[MoleculeError, TxReport]] = either {
     for {
       conn <- getConn(proxy)
-      stmts = (new ResolveSave(proxy) with Save_datomic).getStmts(elements)
+      stmts = (new ResolveSave with Save_datomic).getStmts(elements)
       txReport <- conn.transact_async(stmts)
     } yield txReport
   }
@@ -87,7 +87,7 @@ object Rpc_datomic
           } else tpls).asInstanceOf[Seq[Product]]
         case Left(err)   => throw err // catched in outer either wrapper
       }
-      stmts = (new ResolveInsert(proxy) with Insert_datomic).getStmts(proxy.nsMap, tplElements, tplProducts)
+      stmts = (new ResolveInsert with Insert_datomic).getStmts(proxy.nsMap, tplElements, tplProducts)
       txReport <- conn.transact_async(stmts)
     } yield txReport
   }

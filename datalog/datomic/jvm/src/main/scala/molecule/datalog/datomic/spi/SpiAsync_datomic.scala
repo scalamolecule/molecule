@@ -96,7 +96,7 @@ trait SpiAsync_datomic
   }
 
   private def save_getStmts(save: Save, proxy: ConnProxy): Data = {
-    (new ResolveSave(proxy) with Save_datomic).getStmts(save.elements)
+    (new ResolveSave with Save_datomic).getStmts(save.elements)
   }
 
   override def save_validate(save: Save)(implicit conn: Conn): Map[String, Seq[String]] = {
@@ -128,7 +128,7 @@ trait SpiAsync_datomic
   }
 
   private def insert_getStmts(insert: Insert, proxy: ConnProxy): Data = {
-    (new ResolveInsert(proxy) with Insert_datomic)
+    (new ResolveInsert with Insert_datomic)
       .getStmts(proxy.nsMap, insert.elements, insert.tpls)
   }
 

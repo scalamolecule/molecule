@@ -128,9 +128,9 @@ trait SpiSync_h2
   }
 
   private def save_getData(save: Save, conn: JdbcConn_JVM): Data = {
-    new ResolveSave(conn.proxy) with Save_h2 {
+    new ResolveSave with Save_h2 {
       override lazy val sqlConn = conn.sqlConn
-    }.getData(save.elements)
+    }.getData(save.elements, conn.proxy)
   }
 
   override def save_validate(save: Save)(implicit conn: Conn): Map[String, Seq[String]] = {
@@ -161,9 +161,9 @@ trait SpiSync_h2
   }
 
   private def insert_getData(insert: Insert, conn: JdbcConn_JVM): Data = {
-    new ResolveInsert(conn.proxy) with Insert_h2 {
+    new ResolveInsert with Insert_h2 {
       override lazy val sqlConn: sql.Connection = conn.sqlConn
-    }.getData(conn.proxy.nsMap, insert.elements, insert.tpls)
+    }.getData(conn.proxy, insert.elements, insert.tpls)
   }
 
   override def insert_validate(insert: Insert)(implicit conn: Conn): Seq[(Int, Seq[InsertError])] = {
@@ -223,13 +223,13 @@ trait SpiSync_h2
   private def update_getData(conn: JdbcConn_JVM, update: Update): Data = {
     new ResolveUpdate(conn.proxy, update.isUpsert) with Update_h2 {
       override lazy val sqlConn = conn.sqlConn
-    }.getData(update.elements)
+    }.getData(update.elements, conn.proxy)
   }
 
   private def update_getData(conn: JdbcConn_JVM, elements: List[Element], isUpsert: Boolean): Data = {
     new ResolveUpdate(conn.proxy, isUpsert) with Update_h2 {
       override lazy val sqlConn = conn.sqlConn
-    }.getData(elements)
+    }.getData(elements, conn.proxy)
   }
 
   override def update_validate(update: Update)(implicit conn0: Conn): Map[String, Seq[String]] = {
@@ -265,7 +265,7 @@ trait SpiSync_h2
   private def delete_getData(conn: JdbcConn_JVM, delete: Delete): Data = {
     new ResolveDelete with Delete_h2 {
       override lazy val sqlConn = conn.sqlConn
-    }.getData(delete.elements, conn.proxy.nsMap)
+    }.getData(delete.elements, conn.proxy)
   }
 
 
