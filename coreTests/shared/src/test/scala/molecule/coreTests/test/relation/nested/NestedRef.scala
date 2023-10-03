@@ -160,7 +160,7 @@ trait NestedRef extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (Some("d"), 40, List()),
         )).transact
 
-        _ <- A.s_?.Bb.i.a1.Cc.*?(C.i).query.get.map(_ ==> List(
+        _ <- A.s_?.Bb.i.a1.Cc.*?(C.i.a1).query.get.map(_ ==> List(
           (Some("a"), 10, List(1, 2)),
           (Some("b"), 20, List(3)),
           (None, 30, List()),

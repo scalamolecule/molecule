@@ -79,10 +79,10 @@ trait NestedExpr extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         for {
           _ <- A.i.Bb.*(B.i).insert(List((1, List(1, 2, 3)))).transact
 
-          _ <- A.i(1).Bb.*?(B.i).query.get.map(_ ==> List((1, List(1, 2, 3))))
+          _ <- A.i(1).Bb.*?(B.i.a1).query.get.map(_ ==> List((1, List(1, 2, 3))))
           _ <- A.i_.Bb.*?(B.i(1)).query.get.map(_ ==> List(List(1)))
           _ <- A.i_.Bb.*?(B.i.<(2)).query.get.map(_ ==> List(List(1)))
-          _ <- A.i_.Bb.*?(B.i.<=(2)).query.get.map(_ ==> List(List(1, 2)))
+          _ <- A.i_.Bb.*?(B.i.<=(2).a1).query.get.map(_ ==> List(List(1, 2)))
           _ <- A.i_.Bb.*?(B.i.>(2)).query.get.map(_ ==> List(List(3)))
           _ <- A.i_.Bb.*?(B.i.>=(2)).query.get.map(_ ==> List(List(2, 3)))
         } yield ()

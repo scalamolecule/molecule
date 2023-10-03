@@ -65,11 +65,11 @@ trait NestedOptional extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           ("b", Nil),
         ).transact
 
-        _ <- A.s.a1.Bb.*?(B.i).query.get.map(_ ==> List(
+        _ <- A.s.a1.Bb.*?(B.i.a1).query.get.map(_ ==> List(
           ("a", List(1, 2)),
           ("b", Nil),
         ))
-        _ <- A.s.d1.Bb.*?(B.i).query.get.map(_ ==> List(
+        _ <- A.s.d1.Bb.*?(B.i.a1).query.get.map(_ ==> List(
           ("b", Nil),
           ("a", List(1, 2)),
         ))
@@ -109,7 +109,7 @@ trait NestedOptional extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           ("f", Nil),
         ).transact
 
-        _ <- A.s.a1.Bb.*?(B.i_?).query.get.map(_ ==> List(
+        _ <- A.s.a1.Bb.*?(B.i_?.a1).query.get.map(_ ==> List(
           ("a", List(Some(1), Some(2))),
           ("b", List(Some(1))),
           ("c", List(Some(2))),
@@ -117,7 +117,7 @@ trait NestedOptional extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           ("e", Nil),
           ("f", Nil),
         ))
-        _ <- A.s.d1.Bb.*?(B.i_?).query.get.map(_ ==> List(
+        _ <- A.s.d1.Bb.*?(B.i_?.a1).query.get.map(_ ==> List(
           ("f", Nil),
           ("e", Nil),
           ("d", Nil),
@@ -272,10 +272,14 @@ trait NestedOptional extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           ("B", Nil),
         ).transact
 
-        _ <- A.s.a1.Bb.*?(B.i_?.s.Cc.*?(C.i.s_?)).query.get.map(_ ==> List(
+        _ <- A.s.a1.Bb.*?(B.i_?.a1.s.Cc.*?(C.i.a1.s_?)).query.get.map(_ ==> List(
           ("A", List(
-            (Some(1), "a1", List((10, Some("x")), (11, None))),
-            (None, "a2", List((20, None), (21, Some("y"))))
+            (None, "a2", List(
+              (20, None),
+              (21, Some("y")))),
+            (Some(1), "a1", List(
+              (10, Some("x")),
+              (11, None)))
           )),
           ("B", Nil),
         ))
