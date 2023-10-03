@@ -18,8 +18,8 @@ object AdhocJVM_mysql extends TestSuite_mysql {
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
       for {
-//        _ <- Ns.ints.insert(Set(1, 2)).transact
-//        _ <- Ns.ints.query.get.map(_ ==> List(Set(1, 2)))
+        _ <- Ns.ints.insert(Set(1, 2)).transact
+        _ <- Ns.ints.query.get.map(_ ==> List(Set(1, 2)))
 
 
         //        _ <- rawQuery(
@@ -27,12 +27,6 @@ object AdhocJVM_mysql extends TestSuite_mysql {
         //            |FROM Ns, JSON_TABLE(Ns.ints, '$[*]' COLUMNS (v int PATH '$')) t1
         //            |WHERE t1.v NOT IN(6)
         //            |""".stripMargin, true)
-
-        id <- Ns.ii(Set(int1, int2)).ints(Set(int3, int4)).save.transact.map(_.id)
-
-        // Replace value
-        _ <- Ns(id).ii.swap(int2 -> int3).ints.swap(int4 -> int5).update.i.transact
-        _ <- Ns.ii.ints.query.get.map(_ ==> List((Set(1, 3), Set(3, 5))))
 
       } yield ()
     }

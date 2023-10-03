@@ -88,20 +88,29 @@ trait ModelUtils {
       }
     }
 
-    def prepareAttr(a0: Attr): Attr = {
-      resolveReservedNames(a0, optProxy.get)
+    def prepareAttr(a: Attr): Attr = {
+      a.filterAttr.fold {
+        resolveReservedNames(a, optProxy.get)
+      } { filterAttr0 =>
+        val filterAttr = resolveReservedNames(filterAttr0, optProxy.get)
+        resolveReservedNames(a, optProxy.get, Some(filterAttr))
+      }
     }
+
     def prepareRef(ref: Ref): Ref = {
       val (ns, refAttr, refNs) = nonReservedRef(ref, optProxy.get)
       ref.copy(ns = ns, refAttr = refAttr, refNs = refNs)
     }
+
     def prepareBackRef(backRef: BackRef): BackRef = {
       val (prevNs, curNs) = nonReservedBackRef(backRef, optProxy.get)
       backRef.copy(prevNs = prevNs, curNs = curNs)
     }
+
     def prepareNested(nested: Nested): Nested = {
       Nested(nested.ref, prepare(nested.elements, Nil))
     }
+
     def prepareNestedOpt(nested: NestedOpt): NestedOpt = {
       NestedOpt(nested.ref, prepare(nested.elements, Nil))
     }
@@ -144,26 +153,30 @@ trait ModelUtils {
     )
   }
 
-  final protected def resolveReservedNames(a0: Attr, proxy: ConnProxy): Attr = {
+  final protected def resolveReservedNames(
+    a0: Attr,
+    proxy: ConnProxy,
+    optFilterAttr: Option[Attr] = None
+  ): Attr = {
     a0 match {
       case a: AttrOne => a match {
         case a: AttrOneMan =>
-          val (ns, attr) = nonReservedAttr(a, proxy)
+          val (ns, attr1) = nonReservedAttr(a, proxy)
           a match {
-            case a: AttrOneManString     => a.copy(ns = ns, attr = attr)
-            case a: AttrOneManInt        => a.copy(ns = ns, attr = attr)
-            case a: AttrOneManLong       => a.copy(ns = ns, attr = attr)
-            case a: AttrOneManFloat      => a.copy(ns = ns, attr = attr)
-            case a: AttrOneManDouble     => a.copy(ns = ns, attr = attr)
-            case a: AttrOneManBoolean    => a.copy(ns = ns, attr = attr)
-            case a: AttrOneManBigInt     => a.copy(ns = ns, attr = attr)
-            case a: AttrOneManBigDecimal => a.copy(ns = ns, attr = attr)
-            case a: AttrOneManDate       => a.copy(ns = ns, attr = attr)
-            case a: AttrOneManUUID       => a.copy(ns = ns, attr = attr)
-            case a: AttrOneManURI        => a.copy(ns = ns, attr = attr)
-            case a: AttrOneManByte       => a.copy(ns = ns, attr = attr)
-            case a: AttrOneManShort      => a.copy(ns = ns, attr = attr)
-            case a: AttrOneManChar       => a.copy(ns = ns, attr = attr)
+            case a: AttrOneManString     => a.copy(ns = ns, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrOneManInt        => a.copy(ns = ns, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrOneManLong       => a.copy(ns = ns, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrOneManFloat      => a.copy(ns = ns, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrOneManDouble     => a.copy(ns = ns, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrOneManBoolean    => a.copy(ns = ns, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrOneManBigInt     => a.copy(ns = ns, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrOneManBigDecimal => a.copy(ns = ns, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrOneManDate       => a.copy(ns = ns, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrOneManUUID       => a.copy(ns = ns, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrOneManURI        => a.copy(ns = ns, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrOneManByte       => a.copy(ns = ns, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrOneManShort      => a.copy(ns = ns, attr = attr1, filterAttr = optFilterAttr)
+            case a: AttrOneManChar       => a.copy(ns = ns, attr = attr1, filterAttr = optFilterAttr)
           }
         case a: AttrOneOpt =>
           val (ns, attr) = nonReservedAttr(a, proxy)
@@ -186,40 +199,40 @@ trait ModelUtils {
         case a: AttrOneTac =>
           val (ns, attr) = nonReservedAttr(a, proxy)
           a match {
-            case a: AttrOneTacString     => a.copy(ns = ns, attr = attr)
-            case a: AttrOneTacInt        => a.copy(ns = ns, attr = attr)
-            case a: AttrOneTacLong       => a.copy(ns = ns, attr = attr)
-            case a: AttrOneTacFloat      => a.copy(ns = ns, attr = attr)
-            case a: AttrOneTacDouble     => a.copy(ns = ns, attr = attr)
-            case a: AttrOneTacBoolean    => a.copy(ns = ns, attr = attr)
-            case a: AttrOneTacBigInt     => a.copy(ns = ns, attr = attr)
-            case a: AttrOneTacBigDecimal => a.copy(ns = ns, attr = attr)
-            case a: AttrOneTacDate       => a.copy(ns = ns, attr = attr)
-            case a: AttrOneTacUUID       => a.copy(ns = ns, attr = attr)
-            case a: AttrOneTacURI        => a.copy(ns = ns, attr = attr)
-            case a: AttrOneTacByte       => a.copy(ns = ns, attr = attr)
-            case a: AttrOneTacShort      => a.copy(ns = ns, attr = attr)
-            case a: AttrOneTacChar       => a.copy(ns = ns, attr = attr)
+            case a: AttrOneTacString     => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)
+            case a: AttrOneTacInt        => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)
+            case a: AttrOneTacLong       => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)
+            case a: AttrOneTacFloat      => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)
+            case a: AttrOneTacDouble     => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)
+            case a: AttrOneTacBoolean    => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)
+            case a: AttrOneTacBigInt     => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)
+            case a: AttrOneTacBigDecimal => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)
+            case a: AttrOneTacDate       => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)
+            case a: AttrOneTacUUID       => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)
+            case a: AttrOneTacURI        => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)
+            case a: AttrOneTacByte       => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)
+            case a: AttrOneTacShort      => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)
+            case a: AttrOneTacChar       => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)
           }
       }
       case a: AttrSet => a match {
         case a: AttrSetMan =>
           val (ns, attr) = nonReservedAttr(a, proxy)
           a match {
-            case a: AttrSetManString     => a.copy(ns = ns, attr = attr)
-            case a: AttrSetManInt        => a.copy(ns = ns, attr = attr)
-            case a: AttrSetManLong       => a.copy(ns = ns, attr = attr)
-            case a: AttrSetManFloat      => a.copy(ns = ns, attr = attr)
-            case a: AttrSetManDouble     => a.copy(ns = ns, attr = attr)
-            case a: AttrSetManBoolean    => a.copy(ns = ns, attr = attr)
-            case a: AttrSetManBigInt     => a.copy(ns = ns, attr = attr)
-            case a: AttrSetManBigDecimal => a.copy(ns = ns, attr = attr)
-            case a: AttrSetManDate       => a.copy(ns = ns, attr = attr)
-            case a: AttrSetManUUID       => a.copy(ns = ns, attr = attr)
-            case a: AttrSetManURI        => a.copy(ns = ns, attr = attr)
-            case a: AttrSetManByte       => a.copy(ns = ns, attr = attr)
-            case a: AttrSetManShort      => a.copy(ns = ns, attr = attr)
-            case a: AttrSetManChar       => a.copy(ns = ns, attr = attr)
+            case a: AttrSetManString     => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)
+            case a: AttrSetManInt        => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)
+            case a: AttrSetManLong       => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)
+            case a: AttrSetManFloat      => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)
+            case a: AttrSetManDouble     => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)
+            case a: AttrSetManBoolean    => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)
+            case a: AttrSetManBigInt     => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)
+            case a: AttrSetManBigDecimal => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)
+            case a: AttrSetManDate       => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)
+            case a: AttrSetManUUID       => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)
+            case a: AttrSetManURI        => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)
+            case a: AttrSetManByte       => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)
+            case a: AttrSetManShort      => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)
+            case a: AttrSetManChar       => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)
           }
         case a: AttrSetOpt =>
           val (ns, attr) = nonReservedAttr(a, proxy)
@@ -242,20 +255,20 @@ trait ModelUtils {
         case a: AttrSetTac =>
           val (ns, attr) = nonReservedAttr(a, proxy)
           a match {
-            case a: AttrSetTacString     => a.copy(ns = ns, attr = attr)
-            case a: AttrSetTacInt        => a.copy(ns = ns, attr = attr)
-            case a: AttrSetTacLong       => a.copy(ns = ns, attr = attr)
-            case a: AttrSetTacFloat      => a.copy(ns = ns, attr = attr)
-            case a: AttrSetTacDouble     => a.copy(ns = ns, attr = attr)
-            case a: AttrSetTacBoolean    => a.copy(ns = ns, attr = attr)
-            case a: AttrSetTacBigInt     => a.copy(ns = ns, attr = attr)
-            case a: AttrSetTacBigDecimal => a.copy(ns = ns, attr = attr)
-            case a: AttrSetTacDate       => a.copy(ns = ns, attr = attr)
-            case a: AttrSetTacUUID       => a.copy(ns = ns, attr = attr)
-            case a: AttrSetTacURI        => a.copy(ns = ns, attr = attr)
-            case a: AttrSetTacByte       => a.copy(ns = ns, attr = attr)
-            case a: AttrSetTacShort      => a.copy(ns = ns, attr = attr)
-            case a: AttrSetTacChar       => a.copy(ns = ns, attr = attr)
+            case a: AttrSetTacString     => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)
+            case a: AttrSetTacInt        => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)
+            case a: AttrSetTacLong       => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)
+            case a: AttrSetTacFloat      => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)
+            case a: AttrSetTacDouble     => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)
+            case a: AttrSetTacBoolean    => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)
+            case a: AttrSetTacBigInt     => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)
+            case a: AttrSetTacBigDecimal => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)
+            case a: AttrSetTacDate       => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)
+            case a: AttrSetTacUUID       => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)
+            case a: AttrSetTacURI        => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)
+            case a: AttrSetTacByte       => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)
+            case a: AttrSetTacShort      => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)
+            case a: AttrSetTacChar       => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)
           }
       }
     }

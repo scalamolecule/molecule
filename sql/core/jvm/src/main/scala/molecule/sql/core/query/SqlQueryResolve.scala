@@ -3,6 +3,7 @@ package molecule.sql.core.query
 import java.sql.ResultSet
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
+import molecule.core.util.ModelUtils
 import molecule.sql.core.facade.JdbcConn_JVM
 import molecule.sql.core.javaSql.ResultSetImpl
 import scala.annotation.tailrec
@@ -11,7 +12,8 @@ import scala.collection.mutable.ListBuffer
 abstract class SqlQueryResolve[Tpl](
   elements: List[Element],
   m2q: Model2SqlQuery[Tpl] with SqlQueryBase
-) extends CursorUtils {
+) extends CursorUtils
+  with ModelUtils {
 
   lazy val edgeValuesNotFound = "Couldn't find next page. Edge rows were all deleted/updated."
 
@@ -54,8 +56,11 @@ abstract class SqlQueryResolve[Tpl](
 
   private def getResultSet(conn: JdbcConn_JVM, query: String): ResultSet = {
     println("--- 1 ------------------")
-    elements.foreach(println)
-    println("getResultSet:\n" + query)
+    //    elements.foreach(println)
+    //    println("--- 2")
+    resolveReservedKeywords(elements, Some(conn.proxy)).foreach(println)
+    println("---")
+    println(query)
     conn.sqlConn.prepareStatement(
       query,
       ResultSet.TYPE_SCROLL_INSENSITIVE,

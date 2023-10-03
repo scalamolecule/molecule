@@ -34,12 +34,13 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
 
     // Set attrMap if available (used to get original type of aggregate attributes)
     optProxy.foreach(p => attrMap = p.attrMap)
-    val elements1 = prepareElements(elements, optProxy)
-    from = getInitialNonGenericNs(elements)
+    val elements1 = resolveReservedKeywords(elements, optProxy)
+    val elements2 = prepareElements(elements1, optProxy)
+    from = getInitialNonGenericNs(elements2)
     exts += from -> None
 
     // Recursively resolve molecule elements
-    resolve(elements1)
+    resolve(elements2)
     renderSqlQuery(optLimit, optOffset)
   }
 
@@ -164,34 +165,30 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
 
 
   private def prepareElements(elements: List[Element], optProxy: Option[ConnProxy]): List[Element] = {
-    val checkReservedKeywords = optProxy.fold(false)(_.reserved.isDefined)
-
     @tailrec
     def prepare(elements: List[Element], acc: List[Element]): List[Element] = {
       elements match {
         case element :: tail =>
           element match {
             case a: Attr      => prepare(tail, acc :+ prepareAttr(a))
-            case r: Ref       => prepare(tail, acc :+ prepareRef(r))
-            case r: BackRef   => prepare(tail, acc :+ prepareBackRef(r))
             case n: Nested    => prepare(tail, acc :+ prepareNested(n))
             case n: NestedOpt => prepare(tail, acc :+ prepareNestedOpt(n))
+            case other       => prepare(tail, acc :+ other)
           }
         case Nil             => acc
       }
     }
-    def prepareAttr(a0: Attr): Attr = {
-      val a = if (checkReservedKeywords) resolveReservedNames(a0, optProxy.get) else a0
-      availableAttrs += a.name
+    def prepareAttr(a: Attr): Attr = {
+      availableAttrs += a.cleanName
       if (a.filterAttr.nonEmpty) {
         val fa = a.filterAttr.get
         if (fa.filterAttr.nonEmpty) {
           throw ModelError(s"Nested filter attributes not allowed in ${a.ns}.${a.attr}")
         }
-        val filterAttr = fa.name
+        val filterAttr = fa.cleanName
         filterAttrVars.get(filterAttr).fold {
           // Create datomic variable for this expression attribute
-          filterAttrVars = filterAttrVars + (filterAttr -> a.name)
+          filterAttrVars = filterAttrVars + (filterAttr -> a.cleanName)
         }(_ => throw ModelError(s"Can't refer to ambiguous filter attribute $filterAttr"))
 
         if (fa.ns == a.ns) {
@@ -199,27 +196,13 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
         } else if (fa.isInstanceOf[Mandatory]) {
           throw ModelError(s"Filter attribute $filterAttr pointing to other namespace should be tacit.")
         } else if (fa.op != V) {
-          throw ModelError("Filtering inside cross-namespace attribute filter not allowed. Found:\n  " + fa)
+          throw ModelError("Filtering inside cross-namespace attribute filter not allowed.")
         } else {
           // Expect expression attribute in other namespace
-          expectedFilterAttrs += fa.name
+          expectedFilterAttrs += fa.cleanName
         }
       }
       a
-    }
-
-    def prepareRef(ref: Ref): Ref = {
-      if (checkReservedKeywords) {
-        val (ns, refAttr, refNs) = nonReservedRef(ref, optProxy.get)
-        ref.copy(ns = ns, refAttr = refAttr, refNs = refNs)
-      } else ref
-    }
-
-    def prepareBackRef(backRef: BackRef): BackRef = {
-      if (checkReservedKeywords) {
-        val (prevNs, curNs) = nonReservedBackRef(backRef, optProxy.get)
-        backRef.copy(prevNs = prevNs, curNs = curNs)
-      } else backRef
     }
 
     def prepareNested(nested: Nested): Nested = {

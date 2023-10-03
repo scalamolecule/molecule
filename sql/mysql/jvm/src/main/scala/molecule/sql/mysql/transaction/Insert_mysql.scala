@@ -1,6 +1,7 @@
 package molecule.sql.mysql.transaction
 
 import java.sql.{PreparedStatement => PS}
+import java.util.Date
 import molecule.core.transaction.{InsertResolvers_, ResolveInsert}
 import molecule.sql.core.transaction.SqlInsert
 
@@ -149,18 +150,7 @@ trait Insert_mysql extends SqlInsert { self: ResolveInsert with InsertResolvers_
     }
   }
 
-  override protected lazy val extsString     = List("", "VARCHAR")
-  override protected lazy val extsInt        = List("", "INTEGER")
-  override protected lazy val extsLong       = List("", "BIGINT")
-  override protected lazy val extsFloat      = List("", "DECIMAL")
-  override protected lazy val extsDouble     = List("", "DOUBLE")
-  override protected lazy val extsBoolean    = List("", "BOOLEAN")
-  override protected lazy val extsBigInt     = List("", "DECIMAL")
-  override protected lazy val extsBigDecimal = List("", "DECIMAL")
-  override protected lazy val extsDate       = List("", "DATE")
-  override protected lazy val extsUUID       = List("", "UUID")
-  override protected lazy val extsURI        = List("", "VARCHAR")
-  override protected lazy val extsByte       = List("", "SMALLINT")
-  override protected lazy val extsShort      = List("", "SMALLINT")
-  override protected lazy val extsChar       = List("", "CHAR")
+
+  override protected lazy val handleDate =
+    (v: Any) => (ps: PS, n: Int) => ps.setLong(n, v.asInstanceOf[Date].getTime)
 }

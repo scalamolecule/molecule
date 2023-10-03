@@ -30,7 +30,7 @@ trait ResolveExprSet_postgres
       }
       setExpr(col, attr.op, args, res, "man")
     } {
-      case filterAttr: AttrOne => setExpr2(col, attr.op, filterAttr.name, true)
+      case filterAttr: AttrOne => setExpr2(col, attr.op, filterAttr.name, true, tpe)
       case filterAttr          => setExpr2(col, attr.op, filterAttr.name, false, tpe)
     }
   }

@@ -75,7 +75,7 @@ trait BaseOps extends JsonBase with BaseHelpers {
   protected lazy val value2jsonBoolean   : (StringBuffer, Boolean) => StringBuffer    = (buf: StringBuffer, v: Boolean) => buf.append(if (v) "1" else "0")
   protected lazy val value2jsonBigInt    : (StringBuffer, BigInt) => StringBuffer     = (buf: StringBuffer, v: BigInt) => buf.append(v)
   protected lazy val value2jsonBigDecimal: (StringBuffer, BigDecimal) => StringBuffer = (buf: StringBuffer, v: BigDecimal) => buf.append(v)
-  protected lazy val value2jsonDate      : (StringBuffer, Date) => StringBuffer       = (buf: StringBuffer, v: Date) => quote(buf, date2str(v))
+  protected lazy val value2jsonDate      : (StringBuffer, Date) => StringBuffer       = (buf: StringBuffer, v: Date) => buf.append(v.getTime)
   protected lazy val value2jsonUUID      : (StringBuffer, UUID) => StringBuffer       = (buf: StringBuffer, v: UUID) => quote(buf, v.toString)
   protected lazy val value2jsonURI       : (StringBuffer, URI) => StringBuffer        = (buf: StringBuffer, v: URI) => quote(buf, v.toString)
   protected lazy val value2jsonByte      : (StringBuffer, Byte) => StringBuffer       = (buf: StringBuffer, v: Byte) => buf.append(v)
@@ -91,7 +91,7 @@ trait BaseOps extends JsonBase with BaseHelpers {
   protected lazy val one2jsonBoolean   : Boolean => String    = (v: Boolean) => if (v) "1" else "0"
   protected lazy val one2jsonBigInt    : BigInt => String     = (v: BigInt) => s"$v"
   protected lazy val one2jsonBigDecimal: BigDecimal => String = (v: BigDecimal) => s"$v"
-  protected lazy val one2jsonDate      : Date => String       = (v: Date) => "\"" + date2str(v) + "\""
+  protected lazy val one2jsonDate      : Date => String       = (v: Date) => s"${v.getTime}"
   protected lazy val one2jsonUUID      : UUID => String       = (v: UUID) => "\"" + v.toString + "\""
   protected lazy val one2jsonURI       : URI => String        = (v: URI) => "\"" + v.toString.replace("'", "''") + "\""
   protected lazy val one2jsonByte      : Byte => String       = (v: Byte) => s"$v"

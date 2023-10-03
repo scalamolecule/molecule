@@ -89,13 +89,13 @@ class Model2DatomicQuery[Tpl](elements0: List[Element])
       }
     }
     def prepareAttr(a: Attr): Attr = {
-      availableAttrs += a.name
+      availableAttrs += a.cleanName
       if (a.filterAttr.nonEmpty) {
         val fa = a.filterAttr.get
         if (fa.filterAttr.nonEmpty) {
           throw ModelError(s"Nested filter attributes not allowed in ${a.ns}.${a.attr}")
         }
-        val filterAttr = fa.name
+        val filterAttr = fa.cleanName
         filterAttrVars.get(filterAttr).fold {
           // Create datomic variable for this expression attribute
           filterAttrVars = filterAttrVars + (filterAttr -> vv)
@@ -109,10 +109,10 @@ class Model2DatomicQuery[Tpl](elements0: List[Element])
         } else if (fa.isInstanceOf[Mandatory]) {
           throw ModelError(s"Filter attribute $filterAttr pointing to other namespace should be tacit.")
         } else if (fa.op != V) {
-          throw ModelError("Filtering inside cross-namespace attribute filter not allowed. Found:\n  " + fa)
+          throw ModelError("Filtering inside cross-namespace attribute filter not allowed.")
         } else {
           // Expect expression attribute in other namespace
-          expectedFilterAttrs += fa.name
+          expectedFilterAttrs += fa.cleanName
         }
       }
       a

@@ -30,7 +30,7 @@ trait ResolveExprSet_mysql
       }
       setExpr(col, attr.op, args, res, "man")
     } {
-      case filterAttr: AttrOne => setExpr2(col, attr.op, filterAttr.name, true)
+      case filterAttr: AttrOne => setExpr2(col, attr.op, filterAttr.name, true, tpe)
       case filterAttr          => setExpr2(col, attr.op, filterAttr.name, false, tpe)
     }
   }
@@ -279,7 +279,7 @@ trait ResolveExprSet_mysql
     case "Boolean"    => "TINYINT(1)"
     case "BigInt"     => "DECIMAL(65, 0)"
     case "BigDecimal" => "DECIMAL(65, 30)"
-    case "Date"       => "DATETIME"
+    case "Date"       => "BIGINT"
     case "UUID"       => "TINYTEXT"
     case "URI"        => "TEXT"
     case "Byte"       => "TINYINT"
@@ -317,6 +317,10 @@ trait ResolveExprSet_mysql
     }
   }
 
+  override protected def setNeq2(col: String, filterAttr: String): Unit = {
+    where += ((col, "<> " + filterAttr))
+  }
+
   override protected def has[T: ClassTag](col: String, sets: Seq[Set[T]], one2json: T => String): Unit = {
     def containsSet(set: Set[T]): String = {
       val jsonValues = set.map(one2json).mkString(", ")
@@ -341,9 +345,9 @@ trait ResolveExprSet_mysql
 
   override protected def has2(col: String, filterAttr: String, cardOne: Boolean, tpe: String): Unit = {
     if (cardOne) {
-      where += (("", s"$col @> ARRAY(SELECT $filterAttr)"))
+      where += (("", s"JSON_CONTAINS($col, JSON_ARRAY($filterAttr))"))
     } else {
-      where += (("", s"$col @> $filterAttr"))
+      where += (("", s"JSON_CONTAINS($col, $filterAttr)"))
     }
   }
 
@@ -373,9 +377,9 @@ trait ResolveExprSet_mysql
 
   override protected def hasNo2(col: String, filterAttr: String, cardOne: Boolean, tpe: String): Unit = {
     if (cardOne) {
-      where += (("", s"ARRAY(SELECT UNNEST($col) INTERSECT SELECT $filterAttr) = '{}'"))
+      where += (("", s"NOT JSON_CONTAINS($col, JSON_ARRAY($filterAttr))"))
     } else {
-      where += (("", s"ARRAY(SELECT UNNEST($col) INTERSECT SELECT UNNEST($filterAttr)) = '{}'"))
+      where += (("", s"NOT JSON_OVERLAPS($col, $filterAttr)"))
     }
   }
 }

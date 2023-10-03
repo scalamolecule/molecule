@@ -82,7 +82,7 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
       }
       setExpr(col, attr.op, args, res, "man")
     } {
-      case filterAttr: AttrOne => setExpr2(col, attr.op, filterAttr.name, true)
+      case filterAttr: AttrOne => setExpr2(col, attr.op, filterAttr.name, true, tpe)
       case filterAttr          => setExpr2(col, attr.op, filterAttr.name, false, tpe)
     }
   }
@@ -92,7 +92,7 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
     attr.filterAttr.fold {
       setExpr(col, attr.op, args, res, "tac")
     } {
-      case filterAttr: AttrOne => setExpr2(col, attr.op, filterAttr.name, true)
+      case filterAttr: AttrOne => setExpr2(col, attr.op, filterAttr.name, true, tpe)
       case filterAttr          => setExpr2(col, attr.op, filterAttr.name, false, tpe)
     }
     notNull += col
@@ -132,7 +132,7 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
     }
   }
 
-  protected def setExpr2(col: String, op: Op, filterAttr: String, cardOne: Boolean, tpe: String = ""): Unit = {
+  protected def setExpr2(col: String, op: Op, filterAttr: String, cardOne: Boolean, tpe: String): Unit = {
     op match {
       case Eq    => setEqual2(col, filterAttr)
       case Neq   => setNeq2(col, filterAttr)
