@@ -1,5 +1,6 @@
 package molecule.sql.mysql.query
 
+import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.sql.core.query.{ResolveExprOne, SqlQueryBase}
 import scala.reflect.ClassTag
@@ -130,6 +131,9 @@ trait ResolveExprOne_mysql extends ResolveExprOne with LambdasOne_mysql { self: 
         aggregate = true
 
       case "median" =>
+        if (orderBy.last._3 == col) {
+          throw ModelError("Sorting by median not implemented for Mysql.")
+        }
         select += s"JSON_ARRAYAGG($col)"
         groupByCols -= col
         aggregate = true
@@ -146,6 +150,9 @@ trait ResolveExprOne_mysql extends ResolveExprOne with LambdasOne_mysql { self: 
         aggregate = true
 
       case "variance" =>
+        if (orderBy.last._3 == col) {
+          throw ModelError("Sorting by variance not implemented for Mysql.")
+        }
         groupByCols -= col
         aggregate = true
         select += s"JSON_ARRAYAGG($col)"
@@ -158,6 +165,9 @@ trait ResolveExprOne_mysql extends ResolveExprOne with LambdasOne_mysql { self: 
         )
 
       case "stddev" =>
+        if (orderBy.last._3 == col) {
+          throw ModelError("Sorting by standard deviation not implemented for Mysql.")
+        }
         groupByCols -= col
         aggregate = true
         select += s"JSON_ARRAYAGG($col)"

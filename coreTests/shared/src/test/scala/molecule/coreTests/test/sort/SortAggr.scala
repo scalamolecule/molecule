@@ -1,5 +1,6 @@
 package molecule.coreTests.test.sort
 
+import molecule.base.error.ModelError
 import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
@@ -207,6 +208,13 @@ trait SortAggr extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.short(median).d1.query.get.map(_ ==> List((2, 4), (1, 2)))
         _ <- Ns.i.ref(median).d1.query.get.map(_ ==> List((2, 4), (1, 2)))
       } yield ()
+      if (!platform.startsWith("Mysql")) {
+      } else {
+        Ns.i.int(median).a1.query.get
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+            err ==> "Sorting by median not implemented for Mysql."
+          }
+      }
     }
 
 
@@ -250,80 +258,94 @@ trait SortAggr extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
 
     "variance" - types { implicit conn =>
-      for {
-        _ <- Ns.i.int.insert(
-          (1, int1),
-          (1, int3),
-          (2, int4),
-        ).transact
-        _ <- Ns.i.long.insert((1, long1), (1, long3), (2, long4)).transact
-        _ <- Ns.i.float.insert((1, float1), (1, float3), (2, float4)).transact
-        _ <- Ns.i.double.insert((1, double1), (1, double3), (2, double4)).transact
-        _ <- Ns.i.bigInt.insert((1, bigInt1), (1, bigInt3), (2, bigInt4)).transact
-        _ <- Ns.i.bigDecimal.insert((1, bigDecimal1), (1, bigDecimal3), (2, bigDecimal4)).transact
-        _ <- Ns.i.byte.insert((1, byte1), (1, byte3), (2, byte4)).transact
-        _ <- Ns.i.short.insert((1, short1), (1, short3), (2, short4)).transact
-        _ <- Ns.i.ref.insert((1, ref1), (1, ref3), (2, ref4)).transact
+      if (!platform.startsWith("Mysql")) {
+        for {
+          _ <- Ns.i.int.insert(
+            (1, int1),
+            (1, int3),
+            (2, int4),
+          ).transact
+          _ <- Ns.i.long.insert((1, long1), (1, long3), (2, long4)).transact
+          _ <- Ns.i.float.insert((1, float1), (1, float3), (2, float4)).transact
+          _ <- Ns.i.double.insert((1, double1), (1, double3), (2, double4)).transact
+          _ <- Ns.i.bigInt.insert((1, bigInt1), (1, bigInt3), (2, bigInt4)).transact
+          _ <- Ns.i.bigDecimal.insert((1, bigDecimal1), (1, bigDecimal3), (2, bigDecimal4)).transact
+          _ <- Ns.i.byte.insert((1, byte1), (1, byte3), (2, byte4)).transact
+          _ <- Ns.i.short.insert((1, short1), (1, short3), (2, short4)).transact
+          _ <- Ns.i.ref.insert((1, ref1), (1, ref3), (2, ref4)).transact
 
-        _ <- Ns.i.int(variance).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
-        _ <- Ns.i.long(variance).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
-        _ <- Ns.i.float(variance).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
-        _ <- Ns.i.double(variance).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
-        _ <- Ns.i.bigInt(variance).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
-        _ <- Ns.i.bigDecimal(variance).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
-        _ <- Ns.i.byte(variance).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
-        _ <- Ns.i.short(variance).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
-        _ <- Ns.i.ref(variance).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
+          _ <- Ns.i.int(variance).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
+          _ <- Ns.i.long(variance).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
+          _ <- Ns.i.float(variance).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
+          _ <- Ns.i.double(variance).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
+          _ <- Ns.i.bigInt(variance).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
+          _ <- Ns.i.bigDecimal(variance).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
+          _ <- Ns.i.byte(variance).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
+          _ <- Ns.i.short(variance).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
+          _ <- Ns.i.ref(variance).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
 
-        _ <- Ns.i.int(variance).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
-        _ <- Ns.i.long(variance).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
-        _ <- Ns.i.float(variance).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
-        _ <- Ns.i.double(variance).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
-        _ <- Ns.i.bigInt(variance).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
-        _ <- Ns.i.bigDecimal(variance).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
-        _ <- Ns.i.byte(variance).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
-        _ <- Ns.i.short(variance).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
-        _ <- Ns.i.ref(variance).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
-      } yield ()
+          _ <- Ns.i.int(variance).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
+          _ <- Ns.i.long(variance).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
+          _ <- Ns.i.float(variance).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
+          _ <- Ns.i.double(variance).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
+          _ <- Ns.i.bigInt(variance).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
+          _ <- Ns.i.bigDecimal(variance).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
+          _ <- Ns.i.byte(variance).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
+          _ <- Ns.i.short(variance).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
+          _ <- Ns.i.ref(variance).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
+        } yield ()
+      } else {
+        Ns.i.int(variance).a1.query.get
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+            err ==> "Sorting by variance not implemented for Mysql."
+          }
+      }
     }
 
 
     "stddev" - types { implicit conn =>
-      for {
-        _ <- Ns.i.int.insert(
-          (1, int1),
-          (1, int3),
-          (2, int4),
-        ).transact
-        _ <- Ns.i.long.insert((1, long1), (1, long3), (2, long4)).transact
-        _ <- Ns.i.float.insert((1, float1), (1, float3), (2, float4)).transact
-        _ <- Ns.i.double.insert((1, double1), (1, double3), (2, double4)).transact
-        _ <- Ns.i.bigInt.insert((1, bigInt1), (1, bigInt3), (2, bigInt4)).transact
-        _ <- Ns.i.bigDecimal.insert((1, bigDecimal1), (1, bigDecimal3), (2, bigDecimal4)).transact
-        _ <- Ns.i.byte.insert((1, byte1), (1, byte3), (2, byte4)).transact
-        _ <- Ns.i.short.insert((1, short1), (1, short3), (2, short4)).transact
-        _ <- Ns.i.ref.insert((1, ref1), (1, ref3), (2, ref4)).transact
+      if (!platform.startsWith("Mysql")) {
+        for {
+          _ <- Ns.i.int.insert(
+            (1, int1),
+            (1, int3),
+            (2, int4),
+          ).transact
+          _ <- Ns.i.long.insert((1, long1), (1, long3), (2, long4)).transact
+          _ <- Ns.i.float.insert((1, float1), (1, float3), (2, float4)).transact
+          _ <- Ns.i.double.insert((1, double1), (1, double3), (2, double4)).transact
+          _ <- Ns.i.bigInt.insert((1, bigInt1), (1, bigInt3), (2, bigInt4)).transact
+          _ <- Ns.i.bigDecimal.insert((1, bigDecimal1), (1, bigDecimal3), (2, bigDecimal4)).transact
+          _ <- Ns.i.byte.insert((1, byte1), (1, byte3), (2, byte4)).transact
+          _ <- Ns.i.short.insert((1, short1), (1, short3), (2, short4)).transact
+          _ <- Ns.i.ref.insert((1, ref1), (1, ref3), (2, ref4)).transact
 
-        _ <- Ns.i.int(stddev).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
-        _ <- Ns.i.long(stddev).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
-        _ <- Ns.i.float(stddev).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
-        _ <- Ns.i.double(stddev).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
-        _ <- Ns.i.bigInt(stddev).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
-        _ <- Ns.i.bigDecimal(stddev).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
-        _ <- Ns.i.byte(stddev).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
-        _ <- Ns.i.short(stddev).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
-        _ <- Ns.i.ref(stddev).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
+          _ <- Ns.i.int(stddev).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
+          _ <- Ns.i.long(stddev).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
+          _ <- Ns.i.float(stddev).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
+          _ <- Ns.i.double(stddev).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
+          _ <- Ns.i.bigInt(stddev).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
+          _ <- Ns.i.bigDecimal(stddev).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
+          _ <- Ns.i.byte(stddev).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
+          _ <- Ns.i.short(stddev).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
+          _ <- Ns.i.ref(stddev).a1.query.get.map(_ ==> List((2, 0.0), (1, 1.0)))
 
-        _ <- Ns.i.int(stddev).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
-        _ <- Ns.i.long(stddev).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
-        _ <- Ns.i.float(stddev).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
-        _ <- Ns.i.double(stddev).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
-        _ <- Ns.i.bigInt(stddev).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
-        _ <- Ns.i.bigDecimal(stddev).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
-        _ <- Ns.i.byte(stddev).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
-        _ <- Ns.i.short(stddev).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
-        _ <- Ns.i.ref(stddev).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
-      } yield ()
+          _ <- Ns.i.int(stddev).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
+          _ <- Ns.i.long(stddev).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
+          _ <- Ns.i.float(stddev).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
+          _ <- Ns.i.double(stddev).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
+          _ <- Ns.i.bigInt(stddev).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
+          _ <- Ns.i.bigDecimal(stddev).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
+          _ <- Ns.i.byte(stddev).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
+          _ <- Ns.i.short(stddev).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
+          _ <- Ns.i.ref(stddev).d1.query.get.map(_ ==> List((1, 1.0), (2, 0.0)))
+        } yield ()
+      } else {
+        Ns.i.int(stddev).a1.query.get
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+            err ==> "Sorting by standard deviation not implemented for Mysql."
+          }
+      }
     }
   }
 }

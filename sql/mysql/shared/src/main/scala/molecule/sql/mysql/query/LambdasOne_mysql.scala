@@ -15,4 +15,10 @@ trait LambdasOne_mysql extends LambdasOne { self: SqlQueryBase =>
       if (row.wasNull()) Option.empty[Date] else Some(new Date(v))
     }
 
+  override protected lazy val sql2oneDateOrNull: (Row, Int) => Any = {
+    (row: Row, paramIndex: Int) => {
+      val v = row.getLong(paramIndex);
+      if (row.wasNull()) null else new Date(v)
+    }
+  }
 }
