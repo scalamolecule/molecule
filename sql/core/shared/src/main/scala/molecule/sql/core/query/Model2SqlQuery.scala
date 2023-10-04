@@ -28,13 +28,13 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
     optOffset: Option[Int],
     optProxy: Option[ConnProxy]
   ): String = {
-    val elements = if (altElements.isEmpty) elements0 else altElements
-    validateQueryModel(elements)
+    val elements1 = if (altElements.isEmpty) elements0 else altElements
+    validateQueryModel(elements1)
     //    elements.foreach(println)
 
     // Set attrMap if available (used to get original type of aggregate attributes)
     optProxy.foreach(p => attrMap = p.attrMap)
-    val elements1 = resolveReservedKeywords(elements, optProxy)
+//    val elements1 = resolveReservedKeywords(elements, optProxy)
     val elements2 = prepareElements(elements1, optProxy)
     from = getInitialNonGenericNs(elements2)
     exts += from -> None
@@ -92,8 +92,12 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
       val coordinates = orderBy.sortBy(t => (t._1, t._2))
       val orderCols   = if (isBackwards) {
         coordinates.map {
-          case (_, _, col, "DESC") => col
-          case (_, _, col, _)      => col + " DESC"
+          // Switch sort direction on top level
+          case (0, _, col, "DESC") => col
+          case (0, _, col, _)      => col + " DESC"
+          // Nested sorts stay unchanged
+          case (_, _, col, "DESC") => col + " DESC"
+          case (_, _, col, _)      => col
         }
       } else {
         coordinates.map {
@@ -103,6 +107,14 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
       orderCols.mkString("\nORDER BY ", ", ", "")
     }
 
+    val pagination_ = pagination(optLimit, optOffset, isBackwards)
+
+    s"""SELECT$distinct_
+       |  $select_
+       |FROM $from$joins_$tempTables_$where_$groupBy_$having_$orderBy_$pagination_;""".stripMargin
+  }
+
+  def pagination(optLimit: Option[Int], optOffset: Option[Int], isBackwards: Boolean): String = {
     val limit_ = if (isNested || isNestedOpt) {
       ""
     } else if (hardLimit != 0) {
@@ -117,11 +129,8 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
       optOffset.fold("")(offset => s"\nOFFSET " + (if (isBackwards) -offset else offset))
     }
 
-    s"""SELECT$distinct_
-       |  $select_
-       |FROM $from$joins_$tempTables_$where_$groupBy_$having_$orderBy_$limit_$offset_;""".stripMargin
+    s"$limit_$offset_"
   }
-
 
   final def getTotalCountQuery: String = {
     val table  = from
@@ -173,7 +182,7 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
             case a: Attr      => prepare(tail, acc :+ prepareAttr(a))
             case n: Nested    => prepare(tail, acc :+ prepareNested(n))
             case n: NestedOpt => prepare(tail, acc :+ prepareNestedOpt(n))
-            case other       => prepare(tail, acc :+ other)
+            case other        => prepare(tail, acc :+ other)
           }
         case Nil             => acc
       }

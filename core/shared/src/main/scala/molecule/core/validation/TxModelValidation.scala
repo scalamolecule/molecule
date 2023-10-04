@@ -7,7 +7,7 @@ import molecule.boilerplate.ops.ModelTransformations_
 import scala.annotation.tailrec
 
 
-case class ModelValidation(
+case class TxModelValidation(
   nsMap: Map[String, MetaNs],
   attrMap: Map[String, (Card, String, Seq[String])],
   action: String,
@@ -18,7 +18,7 @@ case class ModelValidation(
     throw ModelError(s"Can't transact duplicate attribute $element")
   }
 
-  private val isInsert        : Boolean                     = action == "insert" || action == "insertTx"
+  private val isInsert        : Boolean                     = action == "insert"
   private val isUpdate        : Boolean                     = action == "update"
   private var prev            : Array[Array[Array[String]]] = Array(Array(Array.empty[String]))
   private var level           : Int                         = 0

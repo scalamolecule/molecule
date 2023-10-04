@@ -14,7 +14,6 @@ case class ModelError(message: String) extends MoleculeError {
 
 
 case class ValidationErrors(errorMap: Map[String, Seq[String]]) extends MoleculeError {
-//  override def msg: String = "ValidationErrors with optional message: " + message + "\n" + toString
   override def msg: String = toString
 
   override def toString: String = {

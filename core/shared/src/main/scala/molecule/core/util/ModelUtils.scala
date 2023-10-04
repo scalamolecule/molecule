@@ -69,7 +69,7 @@ trait ModelUtils {
   }
 
 
-  protected def resolveReservedKeywords(elements: List[Element], optProxy: Option[ConnProxy]): List[Element] = {
+  protected def noKeywords(elements: List[Element], optProxy: Option[ConnProxy]): List[Element] = {
     if (optProxy.isEmpty || optProxy.get.reserved.isEmpty)
       return elements
 

@@ -3,7 +3,7 @@ package molecule.core.validation.insert
 import molecule.base.error._
 import molecule.boilerplate.ast.Model._
 import molecule.core.spi.Conn
-import molecule.core.validation.ModelValidation
+import molecule.core.validation.TxModelValidation
 
 object InsertValidation extends InsertValidationExtraction with InsertValidationResolvers_ {
 
@@ -15,7 +15,7 @@ object InsertValidation extends InsertValidationExtraction with InsertValidation
     val (nsMap, attrMap)               = (conn.proxy.nsMap, conn.proxy.attrMap)
 
     // Basic model validation
-    ModelValidation(nsMap, attrMap, "insert").validate(elements)
+    TxModelValidation(nsMap, attrMap, "insert").validate(elements)
 
     // Validator to validate each row
     val validate = getInsertValidator(nsMap, elements)

@@ -10,7 +10,7 @@ import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.ResolveUpdate
 import molecule.core.transaction.ops.UpdateOps
-import molecule.core.validation.ModelValidation
+import molecule.core.validation.TxModelValidation
 import molecule.datalog.core.query.Model2DatomicQuery
 import molecule.datalog.datomic.facade.DatomicConn_JVM
 import scala.collection.mutable
@@ -50,7 +50,7 @@ trait Update_datomic extends DatomicBase_JVM with UpdateOps with MoleculeLogging
         }
       }
 
-      val validationErrors = ModelValidation(
+      val validationErrors = TxModelValidation(
         conn.proxy.nsMap,
         conn.proxy.attrMap,
         if (isUpsert) "upsert" else "update",

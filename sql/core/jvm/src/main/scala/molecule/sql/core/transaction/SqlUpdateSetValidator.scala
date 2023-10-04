@@ -3,7 +3,7 @@ package molecule.sql.core.transaction
 import molecule.base.error.{ExecutionError, ModelError, MoleculeError}
 import molecule.boilerplate.ast.Model._
 import molecule.core.marshalling.ConnProxy
-import molecule.core.validation.ModelValidation
+import molecule.core.validation.TxModelValidation
 import molecule.sql.core.javaSql.{ResultSetInterface => Row}
 import molecule.sql.core.spi.SpiHelpers
 
@@ -46,6 +46,6 @@ trait SqlUpdateSetValidator extends SpiHelpers {
         throw ExecutionError(
           s"Unexpected error trying to find current values of mandatory attribute ${a.name}")
     }
-    ModelValidation(proxy.nsMap, proxy.attrMap, "update", Some(curSetValues)).validate(elements)
+    TxModelValidation(proxy.nsMap, proxy.attrMap, "update", Some(curSetValues)).validate(elements)
   }
 }

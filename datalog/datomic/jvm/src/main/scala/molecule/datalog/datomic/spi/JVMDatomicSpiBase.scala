@@ -6,7 +6,7 @@ import molecule.boilerplate.ast.Model._
 import molecule.core.action.Update
 import molecule.core.spi.Conn
 import molecule.core.util.ModelUtils
-import molecule.core.validation.ModelValidation
+import molecule.core.validation.TxModelValidation
 import molecule.datalog.datomic.facade.DatomicConn_JVM
 import scala.collection.mutable.ListBuffer
 
@@ -39,7 +39,7 @@ trait JVMDatomicSpiBase extends ModelUtils {
       }
     }
 
-    ModelValidation(
+    TxModelValidation(
       proxy.nsMap,
       proxy.attrMap,
       "update",

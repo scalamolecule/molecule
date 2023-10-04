@@ -1,14 +1,13 @@
 package molecule.sql.core.query.cursorStrategy
 
 import java.util.Base64
-import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.ops.ModelTransformations_
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.util.FutureUtils
 import molecule.sql.core.facade.JdbcConn_JVM
 import molecule.sql.core.javaSql.ResultSetImpl
-import molecule.sql.core.query.{CursorUtils, SqlQueryResolve, Model2SqlQuery, SqlQueryBase}
+import molecule.sql.core.query.{CursorUtils, Model2SqlQuery, SqlQueryBase, SqlQueryResolve}
 import scala.collection.mutable.ListBuffer
 
 /**
@@ -31,7 +30,7 @@ case class PrimaryUnique[Tpl](
   with FutureUtils with CursorUtils with ModelTransformations_ with MoleculeLogging {
 
   def getPage(tokens: List[String], limit: Int)
-             (implicit conn: JdbcConn_JVM): (List[Tpl], String, Boolean) = try {
+             (implicit conn: JdbcConn_JVM): (List[Tpl], String, Boolean) = {
     val List(_, _, tpe, ns, attr, _, a, z) = tokens
 
     val forward      = limit > 0
@@ -69,8 +68,6 @@ case class PrimaryUnique[Tpl](
         (result, cursor, hasMore)
       }
     }
-  } catch {
-    case t: Throwable => throw ModelError(t.toString)
   }
 
 

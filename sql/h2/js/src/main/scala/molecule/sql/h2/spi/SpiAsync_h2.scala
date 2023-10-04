@@ -7,7 +7,7 @@ import molecule.core.action._
 import molecule.core.marshalling.serialize.PickleTpls
 import molecule.core.spi.{Conn, PrintInspect, SpiAsync, TxReport}
 import molecule.core.util.FutureUtils
-import molecule.core.validation.ModelValidation
+import molecule.core.validation.TxModelValidation
 import molecule.core.validation.insert.InsertValidation
 import molecule.sql.core.facade.JdbcConn_JS
 import molecule.sql.h2.query.Model2SqlQuery_h2
@@ -89,7 +89,7 @@ trait SpiAsync_h2 extends SpiAsync with PrintInspect with FutureUtils {
 
   override def save_validate(save: Save)(implicit conn: Conn): Map[String, Seq[String]] = {
     val proxy = conn.proxy
-    ModelValidation(proxy.nsMap, proxy.attrMap, "save").validate(save.elements)
+    TxModelValidation(proxy.nsMap, proxy.attrMap, "save").validate(save.elements)
   }
 
 

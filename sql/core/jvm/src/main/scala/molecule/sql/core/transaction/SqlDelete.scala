@@ -21,10 +21,8 @@ trait SqlDelete
 
   def model2SqlQuery(elements: List[Element]): Model2SqlQuery[Any]
 
-  def getData(elements0: List[Element], proxy: ConnProxy): Data = {
-    val elements = resolveReservedKeywords(elements0, Some(proxy))
-    val refPath  = List(getInitialNs(elements))
-    val nsMap    = proxy.nsMap
+  def getData(elements: List[Element], nsMap: Map[String, MetaNs]): Data = {
+    val refPath = List(getInitialNs(elements))
     resolve(elements, true)
     if (ids.nonEmpty) {
       deleteTableData(refPath, nsMap, ids)

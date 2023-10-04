@@ -1,7 +1,7 @@
 package molecule.sql.mysql.test
 
 import java.io.File
-import molecule.base.error.{ExecutionError, ModelError}
+import molecule.base.error.{ExecutionError, ModelError, ValidationErrors}
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Uniques.Uniques
 import molecule.sql.mysql.async._
@@ -32,35 +32,51 @@ object AdhocJVM_mysql extends TestSuite_mysql {
     }
 
 
-    //    "refs" - refs { implicit conn =>
-    //      import molecule.coreTests.dataModels.core.dsl.Refs._
-    //      for {
-    //        id <- A.i(1).B.i(2).C.i(3).save.transact.map(_.id)
-    //        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
-    //
-    //      } yield ()
-    //    }
+    "refs" - refs { implicit conn =>
+      import molecule.coreTests.dataModels.core.dsl.Refs._
+      for {
+        //            id <- A.i(1).B.i(2).C.i(3).save.transact.map(_.id)
+        //            _ <- A.i.B.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
+
+
+        _ <- A.i.i.insert(1, 2).transact
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+            err ==> "Can't transact duplicate attribute A.i"
+          }
+      } yield ()
+    }
     //
     //
     //    "unique" - unique { implicit conn =>
     //      import molecule.coreTests.dataModels.core.dsl.Uniques._
     //      for {
-    //        //            _ <- Uniques.i(1).save.transact
+    //        _ <- Uniques.i(1).save.transact
     //
-    //        //            _ <- Uniques.int.insert(1).transact
-    //        _ <- Uniques.int.Ref.int.insert((2, 20), (3, 30)).i.transact
     //
     //      } yield ()
     //    }
 
 
-    //    "validation" - validation { implicit conn =>
-    //      import molecule.coreTests.dataModels.core.dsl.Validation._
-    //
-    //      for {
-    //        List(r1, r2) <- RefB.i.insert(2, 3).transact.map(_.ids)
-    //
-    //      } yield ()
-    //    }
+    "validation" - validation { implicit conn =>
+      import molecule.coreTests.dataModels.core.dsl.Validation._
+
+      for {
+        //            List(r1, r2) <- RefB.i.insert(2, 3).transact.map(_.ids)
+
+        _ <- Type.string("a").save.transact
+          .map(_ ==> "Unexpected success").recover {
+            case ValidationErrors(errorMap) =>
+              errorMap ==>
+                Map(
+                  "Type.string" -> Seq(
+                    s"""Type.string with value `a` doesn't satisfy validation:
+                       |  _ > "b"
+                       |""".stripMargin
+                  )
+                )
+          }
+
+      } yield ()
+    }
   }
 }

@@ -38,18 +38,17 @@ object AdhocJVM_h2 extends TestSuite_h2 {
       } yield ()
     }
 
-    "refs" - refs { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Refs._
-      for {
-        id <- A.i(1).B.i(2).C.i(3).save.transact.map(_.id)
-        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
-
-
-
-      } yield ()
-    }
-
-
+    //    "refs" - refs { implicit conn =>
+    //      import molecule.coreTests.dataModels.core.dsl.Refs._
+    //      for {
+    //        id <- A.i(1).B.i(2).C.i(3).save.transact.map(_.id)
+    //        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
+    //
+    //
+    //      } yield ()
+    //    }
+    //
+    //
     //    "unique" - unique { implicit conn =>
     //      import molecule.coreTests.dataModels.core.dsl.Uniques._
     //      for {
@@ -57,7 +56,7 @@ object AdhocJVM_h2 extends TestSuite_h2 {
     //
     //      } yield ()
     //    }
-    //
+
 
     //    "validation" - validation { implicit conn =>
     //      import molecule.coreTests.dataModels.core.dsl.Validation._

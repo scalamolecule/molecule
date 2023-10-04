@@ -125,7 +125,7 @@ case class SqlQueryResolveCursor[Tpl](
                   val rowHashes1    = if (rowHashes.nonEmpty) rowHashes else getRowHashes(tpls)
                   checkSort(tail, 3, init ++ attrTokens ++ uniqueValues, i + 1, rowHashes1)
 
-                } else if (isNearUnique || unique.contains(a.name)) {
+                } else if (isNearUnique || unique.contains(a.cleanName)) {
                   if (pos == "1") {
                     // 1. Unique primary sort attribute
                     val (tpe, encode) = tpeEncode(a)

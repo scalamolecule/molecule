@@ -10,7 +10,7 @@ import molecule.core.marshalling.dbView.{AsOf, DbView, Since}
 import molecule.core.spi._
 import molecule.core.transaction._
 import molecule.core.util.ModelUtils
-import molecule.core.validation.ModelValidation
+import molecule.core.validation.TxModelValidation
 import molecule.core.validation.insert.InsertValidation
 import molecule.sql.core.facade.JdbcConn_JVM
 import molecule.sql.core.javaSql.ResultSetImpl
@@ -132,12 +132,12 @@ trait SpiSync_postgres
   private def save_getData(save: Save, conn: JdbcConn_JVM): Data = {
     new ResolveSave with Save_postgres {
       override lazy val sqlConn = conn.sqlConn
-    }.getData(save.elements, conn.proxy)
+    }.getData(save.elements)
   }
 
   override def save_validate(save: Save)(implicit conn: Conn): Map[String, Seq[String]] = {
     val proxy = conn.proxy
-    ModelValidation(proxy.nsMap, proxy.attrMap, "save").validate(save.elements)
+    TxModelValidation(proxy.nsMap, proxy.attrMap, "save").validate(save.elements)
   }
 
 
@@ -165,7 +165,7 @@ trait SpiSync_postgres
   private def insert_getData(insert: Insert, conn: JdbcConn_JVM): Data = {
     new ResolveInsert with Insert_postgres {
       override lazy val sqlConn: sql.Connection = conn.sqlConn
-    }.getData(conn.proxy, insert.elements, insert.tpls)
+    }.getData(conn.proxy.nsMap, insert.elements, insert.tpls)
   }
 
   override def insert_validate(insert: Insert)(implicit conn: Conn): Seq[(Int, Seq[InsertError])] = {
@@ -225,13 +225,13 @@ trait SpiSync_postgres
   private def update_getData(conn: JdbcConn_JVM, update: Update): Data = {
     new ResolveUpdate(conn.proxy, update.isUpsert) with Update_postgres {
       override lazy val sqlConn = conn.sqlConn
-    }.getData(update.elements, conn.proxy)
+    }.getData(update.elements)
   }
 
   private def update_getData(conn: JdbcConn_JVM, elements: List[Element], isUpsert: Boolean): Data = {
     new ResolveUpdate(conn.proxy, isUpsert) with Update_postgres {
       override lazy val sqlConn = conn.sqlConn
-    }.getData(elements, conn.proxy)
+    }.getData(elements)
   }
 
   override def update_validate(update: Update)(implicit conn0: Conn): Map[String, Seq[String]] = {
@@ -267,7 +267,7 @@ trait SpiSync_postgres
   private def delete_getData(conn: JdbcConn_JVM, delete: Delete): Data = {
     new ResolveDelete with Delete_postgres {
       override lazy val sqlConn = conn.sqlConn
-    }.getData(delete.elements, conn.proxy)
+    }.getData(delete.elements, conn.proxy.nsMap)
   }
 
 

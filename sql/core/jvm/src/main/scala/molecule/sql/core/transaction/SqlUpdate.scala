@@ -20,8 +20,7 @@ trait SqlUpdate
 
   def model2SqlQuery(elements: List[Element]): Model2SqlQuery[Any]
 
-  def getData(elements0: List[Element], proxy: ConnProxy): Data = {
-    val elements = resolveReservedKeywords(elements0, Some(proxy))
+  def getData(elements: List[Element]): Data = {
     curRefPath = List(getInitialNs(elements))
     resolve(elements)
     addRowSetterToTables()

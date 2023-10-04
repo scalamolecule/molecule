@@ -56,9 +56,7 @@ abstract class SqlQueryResolve[Tpl](
 
   private def getResultSet(conn: JdbcConn_JVM, query: String): ResultSet = {
     println("--- 1 ------------------")
-    //    elements.foreach(println)
-    //    println("--- 2")
-    resolveReservedKeywords(elements, Some(conn.proxy)).foreach(println)
+    elements.foreach(println)
     println("---")
     println(query)
     conn.sqlConn.prepareStatement(

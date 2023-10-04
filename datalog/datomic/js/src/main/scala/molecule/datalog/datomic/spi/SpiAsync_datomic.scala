@@ -6,7 +6,7 @@ import molecule.core.action._
 import molecule.core.marshalling.serialize.PickleTpls
 import molecule.core.spi.{Conn, SpiAsync, TxReport}
 import molecule.core.util.FutureUtils
-import molecule.core.validation.ModelValidation
+import molecule.core.validation.TxModelValidation
 import molecule.core.validation.insert.InsertValidation
 import molecule.datalog.datomic.facade.DatomicConn_JS
 import scala.concurrent.{Future, ExecutionContext => EC}
@@ -93,7 +93,7 @@ trait SpiAsync_datomic
 
   override def save_validate(save: Save)(implicit conn: Conn): Map[String, Seq[String]] = {
     val proxy = conn.proxy
-    ModelValidation(proxy.nsMap, proxy.attrMap, "save").validate(save.elements)
+    TxModelValidation(proxy.nsMap, proxy.attrMap, "save").validate(save.elements)
   }
 
 
@@ -149,7 +149,7 @@ trait SpiAsync_datomic
     val proxy = conn.proxy
     if (update.isUpsert && isRefUpdate(update.elements))
       throw ModelError("Can't upsert referenced attributes. Please update instead.")
-    ModelValidation(proxy.nsMap, proxy.attrMap, "update").validate(update.elements)
+    TxModelValidation(proxy.nsMap, proxy.attrMap, "update").validate(update.elements)
   }
 
 

@@ -10,7 +10,7 @@ import molecule.core.marshalling.dbView.{AsOf, DbView, Since}
 import molecule.core.spi._
 import molecule.core.transaction._
 import molecule.core.util.ModelUtils
-import molecule.core.validation.ModelValidation
+import molecule.core.validation.TxModelValidation
 import molecule.core.validation.insert.InsertValidation
 import molecule.sql.core.facade.JdbcConn_JVM
 import molecule.sql.core.javaSql.ResultSetImpl
@@ -111,15 +111,10 @@ trait SpiSync_mysql
 
   override def save_transact(save: Save)(implicit conn0: Conn): TxReport = {
     if (save.doInspect) save_inspect(save)
-    val errors = save_validate(save)
-    if (errors.isEmpty) {
-      val conn     = conn0.asInstanceOf[JdbcConn_JVM]
-      val txReport = conn.transact_sync(save_getData(save, conn))
-      conn.callback(save.elements)
-      txReport
-    } else {
-      throw ValidationErrors(errors)
-    }
+    val conn     = conn0.asInstanceOf[JdbcConn_JVM]
+    val txReport = conn.transact_sync(save_getData(save, conn))
+    conn.callback(save.elements)
+    txReport
   }
 
 
@@ -132,12 +127,12 @@ trait SpiSync_mysql
   private def save_getData(save: Save, conn: JdbcConn_JVM): Data = {
     new ResolveSave with Save_mysql {
       override lazy val sqlConn = conn.sqlConn
-    }.getData(save.elements, conn.proxy)
+    }.getData(save.elements)
   }
 
   override def save_validate(save: Save)(implicit conn: Conn): Map[String, Seq[String]] = {
     val proxy = conn.proxy
-    ModelValidation(proxy.nsMap, proxy.attrMap, "save").validate(save.elements)
+    TxModelValidation(proxy.nsMap, proxy.attrMap, "save").validate(save.elements)
   }
 
 
@@ -145,15 +140,10 @@ trait SpiSync_mysql
 
   override def insert_transact(insert: Insert)(implicit conn0: Conn): TxReport = {
     if (insert.doInspect) insert_inspect(insert)
-    val errors = insert_validate(insert)
-    if (errors.isEmpty) {
-      val conn     = conn0.asInstanceOf[JdbcConn_JVM]
-      val txReport = conn.transact_sync(insert_getData(insert, conn))
-      conn.callback(insert.elements)
-      txReport
-    } else {
-      throw InsertErrors(errors)
-    }
+    val conn     = conn0.asInstanceOf[JdbcConn_JVM]
+    val txReport = conn.transact_sync(insert_getData(insert, conn))
+    conn.callback(insert.elements)
+    txReport
   }
   override def insert_inspect(insert: Insert)(implicit conn: Conn): Unit = {
     tryInspect("insert", insert.elements) {
@@ -165,7 +155,7 @@ trait SpiSync_mysql
   private def insert_getData(insert: Insert, conn: JdbcConn_JVM): Data = {
     new ResolveInsert with Insert_mysql {
       override lazy val sqlConn: sql.Connection = conn.sqlConn
-    }.getData(conn.proxy, insert.elements, insert.tpls)
+    }.getData(conn.proxy.nsMap, insert.elements, insert.tpls)
   }
 
   override def insert_validate(insert: Insert)(implicit conn: Conn): Seq[(Int, Seq[InsertError])] = {
@@ -177,20 +167,15 @@ trait SpiSync_mysql
 
   override def update_transact(update: Update)(implicit conn0: Conn): TxReport = {
     if (update.doInspect) update_inspect(update)
-    val errors = update_validate(update)
-    if (errors.isEmpty) {
-      val conn     = conn0.asInstanceOf[JdbcConn_JVM]
-      val txReport = if (isRefUpdate(update.elements)) {
-        // Atomic transaction with updates for each ref namespace
-        conn.atomicTransaction(refUpdates(update)(conn))
-      } else {
-        conn.transact_sync(update_getData(conn, update))
-      }
-      conn.callback(update.elements)
-      txReport
+    val conn     = conn0.asInstanceOf[JdbcConn_JVM]
+    val txReport = if (isRefUpdate(update.elements)) {
+      // Atomic transaction with updates for each ref namespace
+      conn.atomicTransaction(refUpdates(update)(conn))
     } else {
-      throw ValidationErrors(errors)
+      conn.transact_sync(update_getData(conn, update))
     }
+    conn.callback(update.elements)
+    txReport
   }
 
   override def update_inspect(update: Update)(implicit conn0: Conn): Unit = {
@@ -203,7 +188,7 @@ trait SpiSync_mysql
           s"""REF IDS MODEL ----------------
              |${idsModel.mkString("\n")}
              |
-             |${new Model2SqlQuery_mysql(idsModel).getSqlQuery(Nil, None, None, None)}
+             |${new Model2SqlQuery_mysql(idsModel).getSqlQuery(Nil, None, None, Some(conn.proxy))}
              |""".stripMargin
         val updates                  =
           updateModels
@@ -225,13 +210,13 @@ trait SpiSync_mysql
   private def update_getData(conn: JdbcConn_JVM, update: Update): Data = {
     new ResolveUpdate(conn.proxy, update.isUpsert) with Update_mysql {
       override lazy val sqlConn = conn.sqlConn
-    }.getData(update.elements, conn.proxy)
+    }.getData(update.elements)
   }
 
   private def update_getData(conn: JdbcConn_JVM, elements: List[Element], isUpsert: Boolean): Data = {
     new ResolveUpdate(conn.proxy, isUpsert) with Update_mysql {
       override lazy val sqlConn = conn.sqlConn
-    }.getData(elements, conn.proxy)
+    }.getData(elements)
   }
 
   override def update_validate(update: Update)(implicit conn0: Conn): Map[String, Seq[String]] = {
@@ -267,7 +252,7 @@ trait SpiSync_mysql
   private def delete_getData(conn: JdbcConn_JVM, delete: Delete): Data = {
     new ResolveDelete with Delete_mysql {
       override lazy val sqlConn = conn.sqlConn
-    }.getData(delete.elements, conn.proxy)
+    }.getData(delete.elements, conn.proxy.nsMap)
   }
 
 
@@ -300,7 +285,7 @@ trait SpiSync_mysql
   private def refUpdates(update: Update)(implicit conn: JdbcConn_JVM): () => Map[List[String], List[Long]] = {
     val (idQuery, updateModels) = getIdQuery(update.elements, update.isUpsert)
     val idModel                 = idQuery.elements
-    val sqlQuery                = new Model2SqlQuery_mysql(idModel).getSqlQuery(Nil, None, None, None)
+    val sqlQuery                = new Model2SqlQuery_mysql(idModel).getSqlQuery(Nil, None, None, Some(conn.proxy))
     val refIds: List[Long]      = getRefIds(query_get(idQuery), idModel, sqlQuery)
     () => {
       val refIdMaps = refIds.zipWithIndex.map {

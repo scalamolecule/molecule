@@ -19,8 +19,7 @@ trait SqlSave
 
   doPrint = false
 
-  def getData(elements0: List[Element], proxy: ConnProxy): Data = {
-    val elements = resolveReservedKeywords(elements0, Some(proxy))
+  def getData(elements: List[Element]): Data = {
     initialNs = getInitialNs(elements)
     curRefPath = List(initialNs)
     resolve(elements)

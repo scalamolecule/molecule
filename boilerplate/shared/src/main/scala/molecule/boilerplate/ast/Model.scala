@@ -34,8 +34,9 @@ trait Model extends Validations with Values with BaseHelpers {
 
     def unapply(a: Attr): (String, String, Op) = (a.ns, a.attr, a.op)
     def name: String = ns + "." + attr
+    def cleanNs: String = ns.replace("_", "")
     def cleanAttr: String = attr.replace("_", "")
-    def cleanName: String = ns + "." + cleanAttr
+    def cleanName: String = cleanNs + "." + cleanAttr
     protected def errs: String = if (errors.isEmpty) "Nil" else errors.mkString("Seq(\"", "\", \"", "\")")
     protected def vats: String = if (valueAttrs.isEmpty) "Nil" else valueAttrs.mkString("Seq(\"", "\", \"", "\")")
     protected def coords: String = if (coord.isEmpty) "Nil" else coord.mkString("Seq(", ", ", ")")

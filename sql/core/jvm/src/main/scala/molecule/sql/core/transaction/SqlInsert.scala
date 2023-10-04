@@ -19,17 +19,12 @@ trait SqlInsert
 
   doPrint = true
 
-  def getData(
-    proxy: ConnProxy,
-    elements0: List[Element],
-    tpls: Seq[Product],
-  ): Data = {
-    elements0.foreach(debug)
+  def getData(nsMap: Map[String, MetaNs], elements: List[Element], tpls: Seq[Product]): Data = {
+    elements.foreach(debug)
     debug("### A #############################################################################################")
-    val elements = resolveReservedKeywords(elements0, Some(proxy))
     initialNs = getInitialNs(elements)
     curRefPath = List(s"$level", initialNs)
-    val resolveTpl: Product => Unit = getResolver(proxy.nsMap, elements)
+    val resolveTpl: Product => Unit = getResolver(nsMap, elements)
 
     debug(inserts.mkString("--- inserts\n  ", "\n  ", ""))
     //    debug(joins.mkString("--- joins\n  ", "\n  ", ""))

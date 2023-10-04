@@ -7,7 +7,7 @@ import molecule.core.marshalling.ConnProxy
 import molecule.core.spi.{Conn, SpiAsync, TxReport}
 import molecule.core.transaction.{ResolveDelete, ResolveInsert, ResolveSave, ResolveUpdate}
 import molecule.core.util.FutureUtils
-import molecule.core.validation.ModelValidation
+import molecule.core.validation.TxModelValidation
 import molecule.core.validation.insert.InsertValidation
 import molecule.datalog.datomic.facade.DatomicConn_JVM
 import molecule.datalog.datomic.marshalling.Rpc_datomic.Data
@@ -101,7 +101,7 @@ trait SpiAsync_datomic
 
   override def save_validate(save: Save)(implicit conn: Conn): Map[String, Seq[String]] = {
     val proxy = conn.proxy
-    ModelValidation(proxy.nsMap, proxy.attrMap, "save").validate(save.elements)
+    TxModelValidation(proxy.nsMap, proxy.attrMap, "save").validate(save.elements)
   }
 
 

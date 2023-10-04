@@ -30,8 +30,6 @@ object Rpc_h2
     with SqlUpdateSetValidator
     with FutureUtils {
 
-//  override lazy val sqlConn: Connection = ???
-
   /**
    * Tuple type is not marshalled from client to server. So we signal this with
    * the 'Any' type parameter. Model elements are used to pickle the correct types
@@ -81,7 +79,7 @@ object Rpc_h2
       conn <- getConn(proxy)
       data = new ResolveSave with Save_h2 {
         override lazy val sqlConn: Connection = conn.sqlConn
-      }.getData(elements, proxy)
+      }.getData(elements)
       txReport <- conn.transact_async(data)
     } yield txReport
   }
@@ -103,7 +101,7 @@ object Rpc_h2
       }
       data = new ResolveInsert with Insert_h2 {
         override lazy val sqlConn: Connection = conn.sqlConn
-      }.getData(proxy, tplElements, tplProducts)
+      }.getData(proxy.nsMap, tplElements, tplProducts)
       txReport <- conn.transact_async(data)
     } yield txReport
   }
@@ -136,7 +134,7 @@ object Rpc_h2
       } else {
         val data = new ResolveUpdate(conn.proxy, isUpsert) with Update_h2 {
           override lazy val sqlConn: Connection = conn.sqlConn
-        }.getData(elements, conn.proxy)
+        }.getData(elements)
         Future(conn.transact_sync(data))
       }
     } yield txReport
@@ -159,7 +157,7 @@ object Rpc_h2
             val updateModel = updateModels(i)(refId)
             val data        = new ResolveUpdate(conn.proxy, isUpsert) with Update_h2 {
               override lazy val sqlConn = conn.sqlConn
-            }.getData(updateModel, conn.proxy)
+            }.getData(updateModel)
             conn.populateStmts(data)
         }
         // Return TxReport with initial update ids
@@ -176,7 +174,7 @@ object Rpc_h2
       conn <- getConn(proxy)
       data = new ResolveDelete with Delete_h2 {
         override lazy val sqlConn: Connection = conn.sqlConn
-      }.getData(elements, proxy)
+      }.getData(elements, proxy.nsMap)
       txReport <- conn.transact_async(data)
     } yield txReport
   }
