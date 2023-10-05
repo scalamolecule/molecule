@@ -34,7 +34,6 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
 
     // Set attrMap if available (used to get original type of aggregate attributes)
     optProxy.foreach(p => attrMap = p.attrMap)
-//    val elements1 = resolveReservedKeywords(elements, optProxy)
     val elements2 = prepareElements(elements1, optProxy)
     from = getInitialNonGenericNs(elements2)
     exts += from -> None
@@ -113,6 +112,7 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
        |  $select_
        |FROM $from$joins_$tempTables_$where_$groupBy_$having_$orderBy_$pagination_;""".stripMargin
   }
+
 
   def pagination(optLimit: Option[Int], optOffset: Option[Int], isBackwards: Boolean): String = {
     val limit_ = if (isNested || isNestedOpt) {

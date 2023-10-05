@@ -12,17 +12,19 @@ trait TestSuite_mysql extends CoreTestSuite {
 
   override val platform = "Mysql js"
 
-  val recreateSchema =
-    s"""DROP SCHEMA IF EXISTS public CASCADE;
-       |CREATE SCHEMA public;
-       |""".stripMargin
 
   override def inMem[T](test: Conn => T, schema: Schema): T = {
-    val n   = Random.nextInt()
-    val url = s"jdbc:tc:mysql:8.1://localhost:3306/test$n?allowMultiQueries=true"
+    val n              = Random.nextInt().abs
+    val url            = s"jdbc:tc:mysql:8.1://localhost:3306/test$n?allowMultiQueries=true"
+    val recreateSchema =
+      s"""drop database if exists test$n;
+         |create database test$n;
+         |use test$n;
+         |""".stripMargin
 
     // Using the same db causes contention between tests since tests are run in parallel with rpc
-    //    val url = "jdbc:tc:mysql:8.1://localhost:3306/test?allowMultiQueries=true"
+    val url1 = "jdbc:tc:mysql:8.1://localhost:3306/test?allowMultiQueries=true"
+
 
     val proxy = JdbcProxy(
       url,

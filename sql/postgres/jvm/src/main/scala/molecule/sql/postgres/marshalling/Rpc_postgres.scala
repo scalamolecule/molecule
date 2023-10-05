@@ -1,7 +1,7 @@
 package molecule.sql.postgres.marshalling
 
 import java.nio.ByteBuffer
-import java.sql.{Connection, DriverManager, ResultSet => Row}
+import java.sql.{Connection, ResultSet => Row}
 import com.dimafeng.testcontainers.PostgreSQLContainer
 import molecule.base.error.{MoleculeError, ValidationErrors}
 import molecule.boilerplate.ast.Model._
@@ -18,24 +18,20 @@ import molecule.sql.core.javaSql.ResultSetImpl
 import molecule.sql.core.spi.SpiHelpers
 import molecule.sql.core.transaction.{SqlBase_JVM, SqlUpdateSetValidator}
 import molecule.sql.postgres.async._
-import molecule.sql.postgres.query.Model2SqlQuery_postgres
 import molecule.sql.postgres.transaction._
 import scala.annotation.nowarn
 import scala.concurrent.{Future, ExecutionContext => EC}
 
 
-case class Rpc_postgres(startTestContainer: Boolean)
+object Rpc_postgres
   extends MoleculeRpc
     with SqlBase_JVM
     with SpiHelpers
     with SqlUpdateSetValidator
     with FutureUtils {
 
-  if (startTestContainer) {
-    val container = PostgreSQLContainer()
-    Class.forName(container.driverClassName)
-  }
-
+  val container = PostgreSQLContainer()
+  Class.forName(container.driverClassName)
 
   /**
    * Tuple type is not marshalled from client to server. So we signal this with
@@ -154,10 +150,7 @@ case class Rpc_postgres(startTestContainer: Boolean)
   )(implicit conn: JdbcConn_JVM, ec: EC): Future[() => Map[List[String], List[Long]]] = {
     val (idQuery, updateModels) = getIdQuery(elements, isUpsert)
     idQuery.get.map { refIdsResult =>
-      val idModel            = idQuery.elements
-      val sqlQuery           = new Model2SqlQuery_postgres(idModel).getSqlQuery(Nil, None, None, None)
-      val refIds: List[Long] = getRefIds(refIdsResult, idModel, sqlQuery)
-
+      val refIds: List[Long] = getRefIds(refIdsResult)
       () => {
         val refIdMaps = refIds.zipWithIndex.map {
           case (refId: Long, i) =>

@@ -9,12 +9,7 @@ import molecule.datalog.datomic.facade.DatomicConn_JS
 import zio._
 import scala.concurrent.{Future, ExecutionContext => EC}
 
-trait SpiZio_datomic
-  extends SpiZio
-    with Base
-    with DatomicSpiZioBase
-    with ApiZio
-    with FutureUtils {
+trait SpiZio_datomic extends SpiZio with DatomicSpiZioBase with ApiZio with FutureUtils {
 
   override def query_get[Tpl](
     q: Query[Tpl]
@@ -26,6 +21,12 @@ trait SpiZio_datomic
     q: Query[Tpl], callback: List[Tpl] => Unit
   ): ZIO[Conn, MoleculeError, Unit] = {
     async2zio[Unit]((conn: DatomicConn_JS, ec: EC) => SpiAsync_datomic.query_subscribe(q, callback)(conn, ec))
+  }
+
+  override def query_unsubscribe[Tpl](
+    q: Query[Tpl]
+  ): ZIO[Conn, MoleculeError, Unit] = {
+    async2zio[Unit]((conn: DatomicConn_JS, ec: EC) => SpiAsync_datomic.query_unsubscribe(q)(conn, ec))
   }
 
   override def query_inspect[Tpl](
@@ -69,12 +70,9 @@ trait SpiZio_datomic
   }
 
   override def save_validate(save: Save): ZIO[Conn, MoleculeError, Map[String, Seq[String]]] = {
-    for {
-      conn <- ZIO.service[Conn]
-      errors <- ZIO.succeed[Map[String, Seq[String]]](
-        SpiAsync_datomic.save_validate(save)(conn)
-      )
-    } yield errors
+    async2zio[Map[String, Seq[String]]](
+      (conn: DatomicConn_JS, ec: EC) => SpiAsync_datomic.save_validate(save)(conn, ec)
+    )
   }
 
   override def insert_transact(insert: Insert): ZIO[Conn, MoleculeError, TxReport] = {
@@ -86,12 +84,9 @@ trait SpiZio_datomic
   }
 
   override def insert_validate(insert: Insert): ZIO[Conn, MoleculeError, Seq[(Int, Seq[InsertError])]] = {
-    for {
-      conn <- ZIO.service[Conn]
-      errors <- ZIO.succeed[Seq[(Int, Seq[InsertError])]](
-        SpiAsync_datomic.insert_validate(insert)(conn)
-      )
-    } yield errors
+    async2zio[Seq[(Int, Seq[InsertError])]](
+      (conn: DatomicConn_JS, ec: EC) => SpiAsync_datomic.insert_validate(insert)(conn, ec)
+    )
   }
 
   override def update_transact(update: Update): ZIO[Conn, MoleculeError, TxReport] = {
@@ -103,12 +98,9 @@ trait SpiZio_datomic
   }
 
   override def update_validate(update: Update): ZIO[Conn, MoleculeError, Map[String, Seq[String]]] = {
-    for {
-      conn <- ZIO.service[Conn]
-      errors <- ZIO.succeed[Map[String, Seq[String]]](
-        SpiAsync_datomic.update_validate(update)(conn)
-      )
-    } yield errors
+    async2zio[Map[String, Seq[String]]](
+      (conn: DatomicConn_JS, ec: EC) => SpiAsync_datomic.update_validate(update)(conn, ec)
+    )
   }
 
   override def delete_transact(delete: Delete): ZIO[Conn, MoleculeError, TxReport] = {
@@ -120,13 +112,27 @@ trait SpiZio_datomic
   }
 
 
+
+  // Fallbacks --------------------------------------------------------
+
+  override def fallback_rawQuery(
+    query: String,
+    withNulls: Boolean = false,
+    doPrint: Boolean = true,
+  ): ZIO[Conn, MoleculeError, List[List[Any]]] = ??? // todo
+
+  override def fallback_rawTransact(
+    txData: String,
+    doPrint: Boolean = true
+  ): ZIO[Conn, MoleculeError, TxReport] = ??? // todo
+
   // Helpers ---------
 
   private def async2zio[T](run: (DatomicConn_JS, EC) => Future[T]): ZIO[Conn, MoleculeError, T] = {
     for {
       conn0 <- ZIO.service[Conn]
       conn = conn0.asInstanceOf[DatomicConn_JS]
-      result <- moleculeError(ZIO.fromFuture(ec => run(conn, ec)))
+      result <- mapError(ZIO.fromFuture(ec => run(conn, ec)))
     } yield result
   }
 }

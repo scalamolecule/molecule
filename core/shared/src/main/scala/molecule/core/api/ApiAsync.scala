@@ -3,9 +3,10 @@ package molecule.core.api
 import molecule.base.error.InsertError
 import molecule.core.action._
 import molecule.core.spi._
+import molecule.core.util.ModelUtils
 import scala.concurrent.{Future, ExecutionContext => EC}
 
-trait ApiAsync { spi: SpiAsync =>
+trait ApiAsync extends ModelUtils { spi: SpiAsync =>
 
   implicit class QueryApiAsync[Tpl](q: Query[Tpl]) {
     def get(implicit conn: Conn, ec: EC): Future[List[Tpl]] = query_get(q)
@@ -28,19 +29,19 @@ trait ApiAsync { spi: SpiAsync =>
   implicit class SaveApiAsync[Tpl](save: Save) {
     def transact(implicit conn: Conn, ec: EC): Future[TxReport] = save_transact(save)
     def inspect(implicit conn: Conn, ec: EC): Future[Unit] = save_inspect(save)
-    def validate(implicit conn: Conn): Map[String, Seq[String]] = save_validate(save)
+    def validate(implicit conn: Conn, ec: EC): Future[Map[String, Seq[String]]] = save_validate(save)
   }
 
   implicit class InsertApiAsync[Tpl](insert: Insert) {
     def transact(implicit conn: Conn, ec: EC): Future[TxReport] = insert_transact(insert)
     def inspect(implicit conn: Conn, ec: EC): Future[Unit] = insert_inspect(insert)
-    def validate(implicit conn: Conn): Seq[(Int, Seq[InsertError])] = insert_validate(insert)
+    def validate(implicit conn: Conn, ec: EC): Future[Seq[(Int, Seq[InsertError])]] = insert_validate(insert)
   }
 
   implicit class UpdateApiAsync[Tpl](update: Update) {
     def transact(implicit conn0: Conn, ec: EC): Future[TxReport] = update_transact(update)
     def inspect(implicit conn0: Conn, ec: EC): Future[Unit] = update_inspect(update)
-    def validate(implicit conn: Conn): Map[String, Seq[String]] = update_validate(update)
+    def validate(implicit conn: Conn, ec: EC): Future[Map[String, Seq[String]]] = update_validate(update)
   }
 
   implicit class DeleteApiAsync[Tpl](delete: Delete) {

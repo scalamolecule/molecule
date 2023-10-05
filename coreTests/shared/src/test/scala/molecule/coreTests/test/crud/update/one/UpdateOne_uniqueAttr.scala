@@ -152,8 +152,12 @@ trait UpdateOne_uniqueAttr extends CoreTestSuite with ApiAsync { spi: SpiAsync =
 
         _ <- Uniques.int_(1).string_("x").s("c").update.transact
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can only apply one unique attribute value for update. Found:\n" +
-              """AttrOneTacString("Uniques", "string", Eq, Seq("x"), None, None, Nil, Nil, None, None, Seq(0, 3))"""
+            err ==> "Can only apply one unique attribute value for update. Found:\n" + (
+              if (platform.startsWith("Mysql")) {
+                """AttrOneTacString("Uniques", "string_", Eq, Seq("x"), None, None, Nil, Nil, None, None, Seq(0, 3))"""
+              } else {
+                """AttrOneTacString("Uniques", "string", Eq, Seq("x"), None, None, Nil, Nil, None, None, Seq(0, 3))"""
+              })
           }
 
         _ <- Uniques.ints_(1).s("b").update.transact

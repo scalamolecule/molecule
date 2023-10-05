@@ -6,6 +6,7 @@ import molecule.core.spi.{Conn, SpiZio, TxReport}
 import molecule.core.util.Executor._
 import molecule.datalog.datomic.facade.DatomicConn_JVM
 import zio.ZIO
+import scala.concurrent.{Future, ExecutionContext => EC}
 
 trait SpiZio_datomic
   extends SpiZio
@@ -67,7 +68,20 @@ trait SpiZio_datomic
   // Save --------------------------------------------------------
 
   override def save_transact(save: Save): ZIO[Conn, MoleculeError, TxReport] = {
-    sync2zio[TxReport]((conn: DatomicConn_JVM) => SpiSync_datomic.save_transact(save)(conn))
+    for {
+      conn0 <- ZIO.service[Conn]
+      conn = conn0.asInstanceOf[DatomicConn_JVM]
+      txReport <- mapError(
+        ZIO.fromFuture(ec =>
+          SpiSync_datomic.save_validate(save)(conn) match {
+            case errors if errors.isEmpty => SpiAsync_datomic.save_transact(
+              save.copy(elements = noKeywords(save.elements, Some(conn.proxy)))
+            )(conn, ec)
+            case errors                   => throw ValidationErrors(errors)
+          }
+        )
+      )
+    } yield txReport
   }
 
   override def save_inspect(save: Save): ZIO[Conn, MoleculeError, Unit] = {
@@ -82,7 +96,20 @@ trait SpiZio_datomic
   // Insert --------------------------------------------------------
 
   override def insert_transact(insert: Insert): ZIO[Conn, MoleculeError, TxReport] = {
-    sync2zio[TxReport]((conn: DatomicConn_JVM) => SpiSync_datomic.insert_transact(insert)(conn))
+    for {
+      conn0 <- ZIO.service[Conn]
+      conn = conn0.asInstanceOf[DatomicConn_JVM]
+      txReport <- mapError(
+        ZIO.fromFuture(ec =>
+          SpiSync_datomic.insert_validate(insert)(conn) match {
+            case errors if errors.isEmpty => SpiAsync_datomic.insert_transact(
+              insert.copy(elements = noKeywords(insert.elements, Some(conn.proxy)))
+            )(conn, ec)
+            case errors                   => throw InsertErrors(errors)
+          }
+        )
+      )
+    } yield txReport
   }
 
   override def insert_inspect(insert: Insert): ZIO[Conn, MoleculeError, Unit] = {
@@ -97,7 +124,20 @@ trait SpiZio_datomic
   // Update --------------------------------------------------------
 
   override def update_transact(update: Update): ZIO[Conn, MoleculeError, TxReport] = {
-    sync2zio[TxReport]((conn: DatomicConn_JVM) => SpiSync_datomic.update_transact(update)(conn))
+    for {
+      conn0 <- ZIO.service[Conn]
+      conn = conn0.asInstanceOf[DatomicConn_JVM]
+      txReport <- mapError(
+        ZIO.fromFuture(ec =>
+          SpiSync_datomic.update_validate(update)(conn) match {
+            case errors if errors.isEmpty => SpiAsync_datomic.update_transact(
+              update.copy(elements = noKeywords(update.elements, Some(conn.proxy)))
+            )(conn, ec)
+            case errors                   => throw ValidationErrors(errors)
+          }
+        )
+      )
+    } yield txReport
   }
 
   override def update_inspect(update: Update): ZIO[Conn, MoleculeError, Unit] = {
@@ -112,7 +152,17 @@ trait SpiZio_datomic
   // Delete --------------------------------------------------------
 
   override def delete_transact(delete: Delete): ZIO[Conn, MoleculeError, TxReport] = {
-    sync2zio[TxReport]((conn: DatomicConn_JVM) => SpiSync_datomic.delete_transact(delete)(conn))
+    for {
+      conn0 <- ZIO.service[Conn]
+      conn = conn0.asInstanceOf[DatomicConn_JVM]
+      txReport <- mapError(
+        ZIO.fromFuture(ec =>
+          SpiAsync_datomic.delete_transact(
+            delete.copy(elements = noKeywords(delete.elements, Some(conn.proxy)))
+          )(conn, ec)
+        )
+      )
+    } yield txReport
   }
 
   override def delete_inspect(delete: Delete): ZIO[Conn, MoleculeError, Unit] = {
@@ -120,7 +170,7 @@ trait SpiZio_datomic
   }
 
 
-  // Fallbacks ---------
+  // Fallbacks --------------------------------------------------------
 
   override def fallback_rawQuery(
     query: String,
@@ -130,7 +180,7 @@ trait SpiZio_datomic
     for {
       conn0 <- ZIO.service[Conn]
       conn = conn0.asInstanceOf[DatomicConn_JVM]
-      result <- moleculeError(ZIO.attemptBlocking(
+      result <- mapError(ZIO.attemptBlocking(
         SpiSync_datomic.fallback_rawQuery(query, withNulls, doPrint)(conn)
       ))
     } yield result
@@ -143,7 +193,7 @@ trait SpiZio_datomic
     for {
       conn0 <- ZIO.service[Conn]
       conn = conn0.asInstanceOf[DatomicConn_JVM]
-      result <- moleculeError(ZIO.fromFuture(_ =>
+      result <- mapError(ZIO.fromFuture(_ =>
         SpiAsync_datomic.fallback_rawTransact(txData, doPrint)(conn, global)
       ))
     } yield result
@@ -152,12 +202,11 @@ trait SpiZio_datomic
 
   // Helpers ---------
 
-  private def sync2zio[T](query: DatomicConn_JVM => T): ZIO[Conn, MoleculeError, T] = {
+  private def sync2zio[T](process: DatomicConn_JVM => T): ZIO[Conn, MoleculeError, T] = {
     for {
       conn0 <- ZIO.service[Conn]
       conn = conn0.asInstanceOf[DatomicConn_JVM]
-      result <- moleculeError(ZIO.attemptBlocking(query(conn)))
+      result <- mapError(ZIO.attemptBlocking(process(conn)))
     } yield result
   }
-
 }

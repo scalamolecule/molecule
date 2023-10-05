@@ -28,6 +28,9 @@ trait BaseHelpers extends DateHandling {
     if (s.contains(".")) s else s + ".0"
   }
 
+  def ss(a: String, b: String): String = s"${a}_$b".replace("__", "_")
+  def ss(a: String, b: String, c: String): String = s"${a}_${b}_$c".replace("__", "_")
+
   protected def double(arg: Any): String = "__n__" + arg + (if (arg.toString.contains(".")) "" else ".0")
   protected def bigDec(arg: Any): BigDecimal = BigDecimal(withDecimal(arg))
 

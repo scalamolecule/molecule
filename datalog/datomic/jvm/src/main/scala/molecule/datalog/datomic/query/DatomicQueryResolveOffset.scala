@@ -16,7 +16,6 @@ import scala.collection.mutable.ListBuffer
  * @param optOffset Positive offset from start when going forwards,
  *                  negative offset from end when going backwards
  * @param dbView    Database with a time perspective (Datomic)
- * @tparam Tpl
  */
 case class DatomicQueryResolveOffset[Tpl](
   elements: List[Element],

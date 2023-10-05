@@ -1,7 +1,7 @@
 package molecule.sql.mysql.marshalling
 
 import java.nio.ByteBuffer
-import java.sql.{Connection, DriverManager, ResultSet => Row}
+import java.sql.{Connection, ResultSet}
 import com.dimafeng.testcontainers.MySQLContainer
 import molecule.base.error.{MoleculeError, ValidationErrors}
 import molecule.boilerplate.ast.Model._
@@ -17,25 +17,21 @@ import molecule.sql.core.facade.JdbcConn_JVM
 import molecule.sql.core.javaSql.ResultSetImpl
 import molecule.sql.core.spi.SpiHelpers
 import molecule.sql.core.transaction.{SqlBase_JVM, SqlUpdateSetValidator}
-import molecule.sql.mysql.query.Model2SqlQuery_mysql
 import molecule.sql.mysql.async._
 import molecule.sql.mysql.transaction._
 import scala.annotation.nowarn
 import scala.concurrent.{Future, ExecutionContext => EC}
 
 
-case class Rpc_mysql(startTestContainer: Boolean)
+object Rpc_mysql
   extends MoleculeRpc
     with SqlBase_JVM
     with SpiHelpers
     with SqlUpdateSetValidator
     with FutureUtils {
 
-  if (startTestContainer) {
-    val container = MySQLContainer()
-    Class.forName(container.driverClassName)
-  }
-
+  val container = MySQLContainer()
+  Class.forName(container.driverClassName)
 
   /**
    * Tuple type is not marshalled from client to server. So we signal this with
@@ -120,10 +116,10 @@ case class Rpc_mysql(startTestContainer: Boolean)
   ): Future[Either[MoleculeError, TxReport]] = either {
     for {
       conn <- getConn(proxy)
-      errors = validateUpdateSet(conn.proxy, elements, isUpsert,
+      errors = validateUpdateSet2(conn.proxy, elements, isUpsert,
         (query: String) => {
           val ps        = conn.sqlConn.prepareStatement(
-            query, Row.TYPE_SCROLL_INSENSITIVE, Row.CONCUR_READ_ONLY
+            query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY
           )
           val resultSet = ps.executeQuery()
           resultSet.next()
@@ -154,10 +150,7 @@ case class Rpc_mysql(startTestContainer: Boolean)
   )(implicit conn: JdbcConn_JVM, ec: EC): Future[() => Map[List[String], List[Long]]] = {
     val (idQuery, updateModels) = getIdQuery(elements, isUpsert)
     idQuery.get.map { refIdsResult =>
-      val idModel            = idQuery.elements
-      val sqlQuery           = new Model2SqlQuery_mysql(idModel).getSqlQuery(Nil, None, None, None)
-      val refIds: List[Long] = getRefIds(refIdsResult, idModel, sqlQuery)
-
+      val refIds: List[Long] = getRefIds(refIdsResult)
       () => {
         val refIdMaps = refIds.zipWithIndex.map {
           case (refId: Long, i) =>

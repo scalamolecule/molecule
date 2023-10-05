@@ -1,6 +1,7 @@
 package molecule.datalog.datomic.test
 
 import boopickle.Default._
+import molecule.base.error.ExecutionError
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.datalog.datomic.async._
@@ -8,7 +9,7 @@ import molecule.datalog.datomic.setup.DatomicTestSuite
 import utest._
 
 
-object AdhocDatomicJS extends DatomicTestSuite {
+object AdhocJS_datomic extends DatomicTestSuite {
 
   override lazy val tests = Tests {
 

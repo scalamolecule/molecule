@@ -14,10 +14,10 @@ trait ResolveExprSetRefAttr extends ResolveExpr with LambdasSet { self: SqlQuery
 
   protected def setCoords(attr: Attr): Unit = {
     val (ns, refAttr, refNs) = (attr.ns, attr.attr, attr.refNs.get)
-    joinTable = ns + "_" + refAttr + "_" + refNs
+    joinTable = ss(ns, refAttr, refNs)
     nsId = ns + ".id"
-    ns_id = ns + "_id"
-    ref_id = refNs + "_id"
+    ns_id = ss(ns, "id")
+    ref_id = ss(refNs, "id")
     refIds = s"${ns}_$refAttr"
   }
 

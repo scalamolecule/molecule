@@ -3,10 +3,11 @@ package molecule.sql.mysql.spi
 import molecule.base.error._
 import molecule.core.action._
 import molecule.core.spi.{Conn, SpiZio, TxReport}
+import molecule.core.util.ModelUtils
 import molecule.sql.core.facade.JdbcConn_JVM
 import zio.ZIO
 
-trait SpiZio_mysql extends SpiZio with SpiZioBase_mysql {
+trait SpiZio_mysql extends SpiZio with SpiZioBase_mysql with ModelUtils {
 
   // Query --------------------------------------------------------
 
@@ -48,7 +49,21 @@ trait SpiZio_mysql extends SpiZio with SpiZioBase_mysql {
   // Save --------------------------------------------------------
 
   override def save_transact(save: Save): ZIO[Conn, MoleculeError, TxReport] = {
-    sync2zio[TxReport]((conn: JdbcConn_JVM) => SpiSync_mysql.save_transact(save)(conn))
+    for {
+      conn0 <- ZIO.service[Conn]
+      conn = conn0.asInstanceOf[JdbcConn_JVM]
+      errors <- save_validate(save)
+      txReport <- mapError(
+        ZIO.attemptBlocking(
+          errors match {
+            case errors if errors.isEmpty => SpiSync_mysql.save_transact(
+              save.copy(elements = noKeywords(save.elements, Some(conn.proxy)))
+            )(conn)
+            case errors                   => throw ValidationErrors(errors)
+          }
+        )
+      )
+    } yield txReport
   }
 
   override def save_inspect(save: Save): ZIO[Conn, MoleculeError, Unit] = {
@@ -63,7 +78,21 @@ trait SpiZio_mysql extends SpiZio with SpiZioBase_mysql {
   // Insert --------------------------------------------------------
 
   override def insert_transact(insert: Insert): ZIO[Conn, MoleculeError, TxReport] = {
-    sync2zio[TxReport]((conn: JdbcConn_JVM) => SpiSync_mysql.insert_transact(insert)(conn))
+    for {
+      conn0 <- ZIO.service[Conn]
+      conn = conn0.asInstanceOf[JdbcConn_JVM]
+      errors <- insert_validate(insert)
+      txReport <- mapError(
+        ZIO.attemptBlocking(
+          errors match {
+            case errors if errors.isEmpty => SpiSync_mysql.insert_transact(
+              insert.copy(elements = noKeywords(insert.elements, Some(conn.proxy)))
+            )(conn)
+            case errors                   => throw InsertErrors(errors)
+          }
+        )
+      )
+    } yield txReport
   }
 
   override def insert_inspect(insert: Insert): ZIO[Conn, MoleculeError, Unit] = {
@@ -78,7 +107,21 @@ trait SpiZio_mysql extends SpiZio with SpiZioBase_mysql {
   // Update --------------------------------------------------------
 
   override def update_transact(update: Update): ZIO[Conn, MoleculeError, TxReport] = {
-    sync2zio[TxReport]((conn: JdbcConn_JVM) => SpiSync_mysql.update_transact(update)(conn))
+    for {
+      conn0 <- ZIO.service[Conn]
+      conn = conn0.asInstanceOf[JdbcConn_JVM]
+      errors <- update_validate(update)
+      txReport <- mapError(
+        ZIO.attemptBlocking(
+          errors match {
+            case errors if errors.isEmpty => SpiSync_mysql.update_transact(
+              update.copy(elements = noKeywords(update.elements, Some(conn.proxy)))
+            )(conn)
+            case errors                   => throw ValidationErrors(errors)
+          }
+        )
+      )
+    } yield txReport
   }
 
   override def update_inspect(update: Update): ZIO[Conn, MoleculeError, Unit] = {
@@ -93,14 +136,25 @@ trait SpiZio_mysql extends SpiZio with SpiZioBase_mysql {
   // Delete --------------------------------------------------------
 
   override def delete_transact(delete: Delete): ZIO[Conn, MoleculeError, TxReport] = {
-    sync2zio[TxReport]((conn: JdbcConn_JVM) => SpiSync_mysql.delete_transact(delete)(conn))
+    for {
+      conn0 <- ZIO.service[Conn]
+      conn = conn0.asInstanceOf[JdbcConn_JVM]
+      txReport <- mapError(
+        ZIO.attemptBlocking(
+          SpiSync_mysql.delete_transact(
+            delete.copy(elements = noKeywords(delete.elements, Some(conn.proxy)))
+          )(conn)
+        )
+      )
+    } yield txReport
   }
 
   override def delete_inspect(delete: Delete): ZIO[Conn, MoleculeError, Unit] = {
     sync2zio[Unit]((conn: JdbcConn_JVM) => SpiSync_mysql.delete_inspect(delete)(conn))
   }
 
-  // Fallbacks
+
+  // Fallbacks --------------------------------------------------------
 
   override def fallback_rawQuery(
     query: String,
@@ -110,7 +164,7 @@ trait SpiZio_mysql extends SpiZio with SpiZioBase_mysql {
     for {
       conn0 <- ZIO.service[Conn]
       conn = conn0.asInstanceOf[JdbcConn_JVM]
-      result <- moleculeError(ZIO.attemptBlocking(
+      result <- mapError(ZIO.attemptBlocking(
         SpiSync_mysql.fallback_rawQuery(query, withNulls, doPrint)(conn)
       ))
     } yield result
@@ -123,7 +177,7 @@ trait SpiZio_mysql extends SpiZio with SpiZioBase_mysql {
     for {
       conn0 <- ZIO.service[Conn]
       conn = conn0.asInstanceOf[JdbcConn_JVM]
-      result <- moleculeError(ZIO.attemptBlocking(
+      result <- mapError(ZIO.attemptBlocking(
         SpiSync_mysql.fallback_rawTransact(txData, doPrint)(conn)
       ))
     } yield result
@@ -133,11 +187,11 @@ trait SpiZio_mysql extends SpiZio with SpiZioBase_mysql {
 
   // Helpers
 
-  protected def sync2zio[T](query: JdbcConn_JVM => T): ZIO[Conn, MoleculeError, T] = {
+  protected def sync2zio[T](process: JdbcConn_JVM => T): ZIO[Conn, MoleculeError, T] = {
     for {
       conn0 <- ZIO.service[Conn]
       conn = conn0.asInstanceOf[JdbcConn_JVM]
-      result <- moleculeError(ZIO.attemptBlocking(query(conn)))
+      result <- mapError(ZIO.attemptBlocking(process(conn)))
     } yield result
   }
 }

@@ -157,8 +157,13 @@ trait UpdateOne_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         for {
           _ <- Ns(42).int_?(Some(1)).update.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-              err ==> "Can't update optional values. Found:\n" +
-                """AttrOneOptInt("Ns", "int", Eq, Some(Seq(1)), None, None, Nil, Nil, None, None, Seq(0, 6))"""
+              err ==> "Can't update optional values. Found:\n" + (
+                if (platform.startsWith("Mysql")) {
+                  // "int" is reserved in Mysql and is mapped to "int_" by molecle
+                  """AttrOneOptInt("Ns", "int_", Eq, Some(Seq(1)), None, None, Nil, Nil, None, None, Seq(0, 6))"""
+                } else {
+                  """AttrOneOptInt("Ns", "int", Eq, Some(Seq(1)), None, None, Nil, Nil, None, None, Seq(0, 6))"""
+                })
             }
         } yield ()
       }

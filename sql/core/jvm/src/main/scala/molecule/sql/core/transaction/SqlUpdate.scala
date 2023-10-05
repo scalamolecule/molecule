@@ -5,7 +5,6 @@ import java.util.Date
 import molecule.base.error._
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
-import molecule.core.marshalling.ConnProxy
 import molecule.core.transaction.ResolveUpdate
 import molecule.core.transaction.ops.UpdateOps
 import molecule.sql.core.query.Model2SqlQuery
@@ -143,8 +142,8 @@ trait SqlUpdate
       case vs     =>
         val cleanAttr = attr.replace("_", "")
         throw ExecutionError(
-        s"Can only $update one value for attribute `$ns.$cleanAttr`. Found: " + vs.mkString(", ")
-      )
+          s"Can only $update one value for attribute `$ns.$cleanAttr`. Found: " + vs.mkString(", ")
+        )
     }
     addColSetter(curRefPath, colSetter)
   }
@@ -189,8 +188,8 @@ trait SqlUpdate
       // Separate update of ref ids in join table -----------------------------
       val refAttr   = attr
       val joinTable = s"${ns}_${refAttr}_$refNs"
-      val ns_id     = ns + "_id"
-      val refNs_id  = refNs + "_id"
+      val ns_id     = ss(ns, "id")
+      val refNs_id  = ss(refNs, "id")
       val id        = getUpdateId
       sets match {
         case Seq(set) =>
@@ -239,8 +238,8 @@ trait SqlUpdate
       // Separate update of ref ids in join table -----------------------------
       val refAttr   = attr
       val joinTable = s"${ns}_${refAttr}_$refNs"
-      val ns_id     = ns + "_id"
-      val refNs_id  = refNs + "_id"
+      val ns_id     = ss(ns, "id")
+      val refNs_id  = ss(refNs, "id")
       sets match {
         case Seq(set) => manualTableDatas = List(
           addJoins(joinTable, ns_id, refNs_id, getUpdateId, set.asInstanceOf[Set[Long]])
@@ -341,8 +340,8 @@ trait SqlUpdate
       // Separate update of ref ids in join table -----------------------------
       val refAttr   = attr
       val joinTable = s"${ns}_${refAttr}_$refNs"
-      val ns_id     = ns + "_id"
-      val refNs_id  = refNs + "_id"
+      val ns_id     = ss(ns, "id")
+      val refNs_id  = ss(refNs, "id")
       val id        = getUpdateId
       if (isUpsert) {
         val retractIds = retracts.mkString(s" AND $refNs_id IN (", ", ", ")")
@@ -430,8 +429,8 @@ trait SqlUpdate
         // Separate update of ref ids in join table -----------------------------
         val refAttr    = attr
         val joinTable  = s"${ns}_${refAttr}_$refNs"
-        val ns_id      = ns + "_id"
-        val refNs_id   = refNs + "_id"
+        val ns_id      = ss(ns, "id")
+        val refNs_id   = ss(refNs, "id")
         val retractIds = set.mkString(s" AND $refNs_id IN (", ", ", ")")
         manualTableDatas = List(
           deleteJoins(joinTable, ns_id, getUpdateId, retractIds)

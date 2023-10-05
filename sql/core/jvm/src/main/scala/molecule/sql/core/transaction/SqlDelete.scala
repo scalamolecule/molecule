@@ -150,7 +150,7 @@ trait SqlDelete
                 }
                 val ownedTables1 = if (refIds.isEmpty) Nil else {
                   Seq(
-                    prepareTable(refPath, joinTable, ns + "_id", nsIds),
+                    prepareTable(refPath, joinTable, ss(ns, "id"), nsIds),
                     prepareTable(refPath, refNs, "id", refIds)
                   )
                 }

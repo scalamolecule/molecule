@@ -1,12 +1,12 @@
 package molecule.sql.mysql.transaction
 
 import java.sql.{PreparedStatement => PS}
+import java.util.Date
+import molecule.base.util.BaseHelpers
 import molecule.core.transaction.ResolveSave
 import molecule.sql.core.transaction.SqlSave
 
-trait Save_mysql extends SqlSave { self: ResolveSave =>
-
-  doPrint = false
+trait Save_mysql extends SqlSave with BaseHelpers { self: ResolveSave =>
 
   override protected def addSet[T](
     ns: String,
@@ -41,11 +41,15 @@ trait Save_mysql extends SqlSave { self: ResolveSave =>
       } else {
         val set       = optSet.get
         val refAttr   = attr
-        val joinTable = s"${ns}_${refAttr}_$refNs"
+        val joinTable = ss(ns, refAttr, refNs)
         val joinPath  = curPath :+ joinTable
 
         // join table with single row (treated as normal insert since there's only 1 join per row)
-        val (id1, id2) = if (ns == refNs) (s"${ns}_1_id", s"${refNs}_2_id") else (s"${ns}_id", s"${refNs}_id")
+        val (id1, id2) = if (ns == refNs) {
+          (ss(ns, "1_id"), ss(refNs, "2_id"))
+        } else
+          (ss(ns, "id"), ss(refNs, "id"))
+
         // When insertion order is reversed, this join table will be set after left and right has been inserted
         inserts = (joinPath, List((id1, ""), (id2, ""))) +: inserts
 
@@ -73,4 +77,8 @@ trait Save_mysql extends SqlSave { self: ResolveSave =>
       }
     }
   }
+
+  override protected lazy val handleDate =
+    (v: Any) => (ps: PS, n: Int) =>
+      ps.setLong(n, v.asInstanceOf[Date].getTime)
 }

@@ -121,17 +121,8 @@ trait SpiHelpers extends ModelUtils {
 
   private type L = Long
 
-  def getRefIds(refIdsAnyCardinality: List[Any], idModel: List[Element], sqlQuery: String): List[Long] = {
-    refIdsAnyCardinality.headOption.fold(
-      throw ExecutionError(
-        s"""Couldn't find any ref ids for update:
-           |
-           |${idModel.mkString("\n")}
-           |
-           |$sqlQuery
-           |""".stripMargin
-      )
-    ) {
+  def getRefIds(refIdsAnyCardinality: List[Any]): List[Long] = {
+    refIdsAnyCardinality.headOption.fold(List(0L)) {
       case a: L                                                                                                                                 => List(0L, a)
       case (a: L, b: L)                                                                                                                         => List(0L, a, b)
       case (a: L, b: L, c: L)                                                                                                                   => List(0L, a, b, c)
@@ -215,6 +206,7 @@ trait SpiHelpers extends ModelUtils {
     }
   }
 
+
   private def sql2set[T](isAttr: Boolean, row: Row, j2s: Any => T): Set[T] = {
     if (isAttr)
       sqlNestedArrays2coalescedSet(row, j2s)
@@ -248,5 +240,29 @@ trait SpiHelpers extends ModelUtils {
       }
     }
     set
+  }
+
+  protected def jsonArray2coalescedSet(a: Attr, rs: Row): Set[Any] = {
+    rs.next()
+    val json = rs.getString(1)
+    a match {
+      case _: AttrSetManString     => json.substring(2, json.length - 2).split("\", \"").toSet
+      case _: AttrSetManInt        => json.substring(1, json.length - 1).split(", ").map(_.toInt).toSet
+      case _: AttrSetManLong       => json.substring(1, json.length - 1).split(", ").map(_.toLong).toSet
+      case _: AttrSetManFloat      => json.substring(1, json.length - 1).split(", ").map(_.toFloat).toSet
+      case _: AttrSetManDouble     => json.substring(1, json.length - 1).split(", ").map(_.toDouble).toSet
+      case _: AttrSetManBoolean    => json.substring(1, json.length - 1).split(", ").map(_ == "1").toSet
+      case _: AttrSetManBigInt     => json.substring(1, json.length - 1).split(", ").map(BigInt(_)).toSet
+      case _: AttrSetManBigDecimal => json.substring(1, json.length - 1).split(", ").map(BigDecimal(_)).toSet
+      case _: AttrSetManDate       => json.substring(1, json.length - 1).split(", ").map(v => new Date(v.toLong)).toSet
+      case _: AttrSetManUUID       => json.substring(2, json.length - 2).split("\", \"").map(UUID.fromString).toSet
+      case _: AttrSetManURI        => json.substring(2, json.length - 2).split("\", \"").map(new URI(_)).toSet
+      case _: AttrSetManByte       => json.substring(1, json.length - 1).split(", ").map(_.toByte).toSet
+      case _: AttrSetManShort      => json.substring(1, json.length - 1).split(", ").map(_.toShort).toSet
+      case _: AttrSetManChar       => json.substring(2, json.length - 2).split("\", \"").map(_.charAt(0)).toSet
+      case other                   => throw ModelError(
+        "Unexpected attribute type for Set validation value retriever:\n" + other
+      )
+    }
   }
 }

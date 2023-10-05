@@ -52,8 +52,8 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
       // Separate update of ref ids in join table -----------------------------
       val refAttr   = attr
       val joinTable = s"${ns}_${refAttr}_$refNs"
-      val ns_id     = ns + "_id"
-      val refNs_id  = refNs + "_id"
+      val ns_id     = ss(ns, "id")
+      val refNs_id  = ss(refNs, "id")
       val id        = getUpdateId
       sets match {
         case Seq(set) =>
@@ -99,8 +99,8 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
       // Separate update of ref ids in join table -----------------------------
       val refAttr   = attr
       val joinTable = s"${ns}_${refAttr}_$refNs"
-      val ns_id     = ns + "_id"
-      val refNs_id  = refNs + "_id"
+      val ns_id     = ss(ns, "id")
+      val refNs_id  = ss(refNs, "id")
       sets match {
         case Seq(set) => manualTableDatas = List(
           addJoins(joinTable, ns_id, refNs_id, getUpdateId, set.asInstanceOf[Set[Long]])
@@ -180,8 +180,8 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
       // Separate update of ref ids in join table -----------------------------
       val refAttr   = attr
       val joinTable = s"${ns}_${refAttr}_$refNs"
-      val ns_id     = ns + "_id"
-      val refNs_id  = refNs + "_id"
+      val ns_id     = ss(ns, "id")
+      val refNs_id  = ss(refNs, "id")
       val id        = getUpdateId
       if (isUpsert) {
         val retractIds = retracts.mkString(s" AND $refNs_id IN (", ", ", ")")
@@ -245,8 +245,8 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
         // Separate update of ref ids in join table -----------------------------
         val refAttr    = attr
         val joinTable  = s"${ns}_${refAttr}_$refNs"
-        val ns_id      = ns + "_id"
-        val refNs_id   = refNs + "_id"
+        val ns_id      = ss(ns, "id")
+        val refNs_id   = ss(refNs, "id")
         val retractIds = set.mkString(s" AND $refNs_id IN (", ", ", ")")
         manualTableDatas = List(
           deleteJoins(joinTable, ns_id, getUpdateId, retractIds)

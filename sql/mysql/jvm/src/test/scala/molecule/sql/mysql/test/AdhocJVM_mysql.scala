@@ -32,19 +32,14 @@ object AdhocJVM_mysql extends TestSuite_mysql {
     }
 
 
-    "refs" - refs { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Refs._
-      for {
-        //            id <- A.i(1).B.i(2).C.i(3).save.transact.map(_.id)
-        //            _ <- A.i.B.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
-
-
-        _ <- A.i.i.insert(1, 2).transact
-          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can't transact duplicate attribute A.i"
-          }
-      } yield ()
-    }
+    //    "refs" - refs { implicit conn =>
+    //      import molecule.coreTests.dataModels.core.dsl.Refs._
+    //      for {
+    //        id <- A.i(1).B.i(2).C.i(3).save.transact.map(_.id)
+    //        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
+    //
+    //      } yield ()
+    //    }
     //
     //
     //    "unique" - unique { implicit conn =>
@@ -52,29 +47,14 @@ object AdhocJVM_mysql extends TestSuite_mysql {
     //      for {
     //        _ <- Uniques.i(1).save.transact
     //
-    //
     //      } yield ()
     //    }
 
 
     "validation" - validation { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Validation._
-
       for {
-        //            List(r1, r2) <- RefB.i.insert(2, 3).transact.map(_.ids)
-
-        _ <- Type.string("a").save.transact
-          .map(_ ==> "Unexpected success").recover {
-            case ValidationErrors(errorMap) =>
-              errorMap ==>
-                Map(
-                  "Type.string" -> Seq(
-                    s"""Type.string with value `a` doesn't satisfy validation:
-                       |  _ > "b"
-                       |""".stripMargin
-                  )
-                )
-          }
+        List(r1, r2) <- RefB.i.insert(2, 3).transact.map(_.ids)
 
       } yield ()
     }

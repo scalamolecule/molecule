@@ -17,7 +17,6 @@ import molecule.sql.core.javaSql.ResultSetImpl
 import molecule.sql.core.spi.SpiHelpers
 import molecule.sql.core.transaction.{SqlBase_JVM, SqlUpdateSetValidator}
 import molecule.sql.h2.async._
-import molecule.sql.h2.query.Model2SqlQuery_h2
 import molecule.sql.h2.transaction._
 import scala.annotation.nowarn
 import scala.concurrent.{Future, ExecutionContext => EC}
@@ -147,10 +146,7 @@ object Rpc_h2
   )(implicit conn: JdbcConn_JVM, ec: EC): Future[() => Map[List[String], List[Long]]] = {
     val (idQuery, updateModels) = getIdQuery(elements, isUpsert)
     idQuery.get.map { refIdsResult =>
-      val idModel            = idQuery.elements
-      val sqlQuery           = new Model2SqlQuery_h2(idModel).getSqlQuery(Nil, None, None, None)
-      val refIds: List[Long] = getRefIds(refIdsResult, idModel, sqlQuery)
-
+      val refIds: List[Long] = getRefIds(refIdsResult)
       () => {
         val refIdMaps = refIds.zipWithIndex.map {
           case (refId: Long, i) =>

@@ -18,11 +18,11 @@ trait TestSuite_postgres extends CoreTestSuite {
        |""".stripMargin
 
   override def inMem[T](test: Conn => T, schema: Schema): T = {
-    val n   = Random.nextInt()
+    val n   = Random.nextInt().abs
     val url = s"jdbc:tc:postgresql:15://localhost:5432/test$n?preparedStatementCacheQueries=0"
 
     // Using the same db causes contention between tests since tests are run in parallel with rpc
-    //    val url = s"jdbc:tc:postgresql:15://localhost:5432/test?preparedStatementCacheQueries=0"
+    val url1 = s"jdbc:tc:postgresql:15://localhost:5432/test?preparedStatementCacheQueries=0"
 
     val proxy = JdbcProxy(
       url,

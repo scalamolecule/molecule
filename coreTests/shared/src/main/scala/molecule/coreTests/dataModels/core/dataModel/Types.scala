@@ -92,5 +92,9 @@ object Types extends DataModel(5) {
 
     val ii = setInt
     val ss = setString
+
+    // 'select' is a reserved keyword in all sql databases.
+    // Test if it correctly resolves to 'select_'
+    val select = oneInt
   }
 }

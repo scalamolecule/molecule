@@ -76,7 +76,7 @@ trait SqlBase_JVM extends JdbcDataType_JVM with ModelUtils with BaseHelpers {
   }
 
   protected def getRefResolver[T](ns: String, refAttr: String, refNs: String, card: Card): T => Unit = {
-    val joinTable = s"${ns}_${refAttr}_$refNs"
+    val joinTable = ss(ns, refAttr, refNs)
     val curPath   = curRefPath
 
     if (inserts.exists(_._1 == curPath)) {
@@ -104,7 +104,10 @@ trait SqlBase_JVM extends JdbcDataType_JVM with ModelUtils with BaseHelpers {
 
     if (card == CardSet) {
       // join table with single row (treated as normal insert since there's only 1 join per row)
-      val (id1, id2) = if (ns == refNs) (s"${ns}_1_id", s"${refNs}_2_id") else (s"${ns}_id", s"${refNs}_id")
+      val (id1, id2) = if (ns == refNs)
+        (ss(ns, "1_id"), ss(refNs, "2_id"))
+      else
+        (ss(ns, "id"), ss(refNs, "id"))
       // When insertion order is reversed, this join table will be set after left and right has been inserted
       inserts = (joinPath, List((id1, ""), (id2, ""))) +: inserts
     }

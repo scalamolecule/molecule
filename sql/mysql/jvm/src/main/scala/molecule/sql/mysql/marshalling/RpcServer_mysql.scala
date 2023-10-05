@@ -11,7 +11,7 @@ import scala.io.StdIn
  *
  * sbt sqlPostgresJVM/run
  */
-object RpcServer_mysql extends MoleculeRpcServer_AkkaHttp(Rpc_mysql(false)) with App {
+object RpcServer_mysql extends MoleculeRpcServer_AkkaHttp(Rpc_mysql) with App {
 
   Http()
     .newServerAt("localhost", 8080)

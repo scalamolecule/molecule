@@ -10,8 +10,8 @@ Compile to current version only:
 
 Compile to 2.12 only:
 
-    sbt ++2.12.15 compile
-    sbt ++2.12.15 clean compile
+    sbt ++2.12.18 compile
+    sbt ++2.12.18 clean compile
 
 Compile to 3.3 only:
 
@@ -45,6 +45,6 @@ To maven central with docs generated (required)
 
 Publish versions separately
 
-    sbt ++2.12.15 publishLocal
-    sbt ++2.12.15 publishSigned -Ddocs=true
+    sbt ++2.12.18 publishLocal
+    sbt ++2.12.18 publishSigned -Ddocs=true
 

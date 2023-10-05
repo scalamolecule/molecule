@@ -1,14 +1,20 @@
 package molecule.datalog.datomic.spi
 
 import datomic.Peer
-import molecule.base.error.{InsertError, ModelError, MoleculeError}
+import molecule.base.error.{InsertError, ModelError}
+import molecule.boilerplate.ast.Model._
 import molecule.core.action._
+import molecule.core.marshalling.ConnProxy
 import molecule.core.spi.{Conn, PrintInspect, SpiSync, TxReport}
+import molecule.core.transaction.{ResolveDelete, ResolveInsert, ResolveSave, ResolveUpdate}
 import molecule.core.util.{FutureUtils, JavaConversions}
+import molecule.core.validation.TxModelValidation
+import molecule.core.validation.insert.InsertValidation
 import molecule.datalog.core.query.Model2DatomicQuery
 import molecule.datalog.datomic.facade.DatomicConn_JVM
+import molecule.datalog.datomic.marshalling.Rpc_datomic.Data
 import molecule.datalog.datomic.query.{DatomicQueryResolveCursor, DatomicQueryResolveOffset}
-import zio.ZIO
+import molecule.datalog.datomic.transaction.{Delete_datomic, Insert_datomic, Save_datomic, Update_datomic}
 import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.global
 import scala.concurrent.duration.DurationInt
@@ -18,6 +24,7 @@ object SpiSync_datomic extends SpiSync_datomic
 trait SpiSync_datomic
   extends SpiSync
     with DatomicSpiSyncBase
+    with JVMDatomicSpiBase
     with PrintInspect
     with FutureUtils
     with JavaConversions {
@@ -73,41 +80,59 @@ trait SpiSync_datomic
     await(SpiAsync_datomic.save_transact(save)(conn, global))
   }
   override def save_inspect(save: Save)(implicit conn: Conn): Unit = {
-    await(SpiAsync_datomic.save_inspect(save)(conn, global))
+    printInspectTx("SAVE", save.elements, save_getStmts(save))
   }
   override def save_validate(save: Save)(implicit conn: Conn): Map[String, Seq[String]] = {
-    SpiAsync_datomic.save_validate(save)(conn)
+    val proxy = conn.proxy
+    TxModelValidation(proxy.nsMap, proxy.attrMap, "save").validate(save.elements)
+  }
+
+  def save_getStmts(save: Save): Data = {
+    (new ResolveSave with Save_datomic).getStmts(save.elements)
   }
 
   override def insert_transact(insert: Insert)(implicit conn: Conn): TxReport = {
     await(SpiAsync_datomic.insert_transact(insert)(conn, global))
   }
   override def insert_inspect(insert: Insert)(implicit conn: Conn): Unit = {
-    await(SpiAsync_datomic.insert_inspect(insert)(conn, global))
+    printInspectTx("INSERT", insert.elements, insert_getStmts(insert, conn.proxy))
   }
   override def insert_validate(insert: Insert)(implicit conn: Conn): Seq[(Int, Seq[InsertError])] = {
-    SpiAsync_datomic.insert_validate(insert)(conn)
+    InsertValidation.validate(conn, insert.elements, insert.tpls)
+  }
+  def insert_getStmts(insert: Insert, proxy: ConnProxy): Data = {
+    (new ResolveInsert with Insert_datomic)
+      .getStmts(proxy.nsMap, insert.elements, insert.tpls)
   }
 
   override def update_transact(update: Update)(implicit conn: Conn): TxReport = {
     await(SpiAsync_datomic.update_transact(update)(conn, global))
   }
   override def update_inspect(update: Update)(implicit conn: Conn): Unit = {
-    await(SpiAsync_datomic.update_inspect(update)(conn, global))
+    val action = if (update.isUpsert) "UPSERT" else "UPDATE"
+    printInspectTx(action, update.elements, update_getStmts(update, conn.asInstanceOf[DatomicConn_JVM]))
   }
   override def update_validate(update: Update)(implicit conn: Conn): Map[String, Seq[String]] = {
-    SpiAsync_datomic.update_validate(update)
+    validateUpdate(conn, update)
+  }
+  def update_getStmts(update: Update, conn: DatomicConn_JVM): Data = {
+    (new ResolveUpdate(conn.proxy, update.isUpsert) with Update_datomic)
+      .getStmts(conn, update.elements)
   }
 
   override def delete_transact(delete: Delete)(implicit conn: Conn): TxReport = {
     await(SpiAsync_datomic.delete_transact(delete)(conn, global))
   }
   override def delete_inspect(delete: Delete)(implicit conn: Conn): Unit = {
-    await(SpiAsync_datomic.delete_inspect(delete)(conn, global))
+    printInspectTx("DELETE", delete.elements, delete_getStmts(delete, conn.asInstanceOf[DatomicConn_JVM]))
+  }
+
+  def delete_getStmts(delete: Delete, conn: DatomicConn_JVM): Data = {
+    (new ResolveDelete with Delete_datomic).getData(conn, delete.elements)
   }
 
 
-  // Fallbacks
+  // Fallbacks --------------------------------------------------------
 
   override def fallback_rawQuery(
     query: String,
@@ -129,5 +154,10 @@ trait SpiSync_datomic
     } catch {
       case t: Throwable => throw ModelError(t.toString)
     }
+  }
+
+
+  private def printInspectTx(label: String, elements: List[Element], stmts: Data): Unit = {
+    printInspect(label, elements, stmts.toArray().toList.mkString("\n"))
   }
 }

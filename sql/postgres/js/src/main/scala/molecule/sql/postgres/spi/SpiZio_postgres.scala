@@ -57,12 +57,9 @@ trait SpiZio_postgres extends SpiZio with SpiZioBase_postgres {
   }
 
   override def save_validate(save: Save): ZIO[Conn, MoleculeError, Map[String, Seq[String]]] = {
-    for {
-      conn <- ZIO.service[Conn]
-      errors <- ZIO.succeed[Map[String, Seq[String]]](
-        SpiAsync_postgres.save_validate(save)(conn)
-      )
-    } yield errors
+    async2zio[Map[String, Seq[String]]](
+      (conn: JdbcConn_JS, ec: EC) => SpiAsync_postgres.save_validate(save)(conn, ec)
+    )
   }
 
 
@@ -77,12 +74,9 @@ trait SpiZio_postgres extends SpiZio with SpiZioBase_postgres {
   }
 
   override def insert_validate(insert: Insert): ZIO[Conn, MoleculeError, Seq[(Int, Seq[InsertError])]] = {
-    for {
-      conn <- ZIO.service[Conn]
-      errors <- ZIO.succeed[Seq[(Int, Seq[InsertError])]](
-        SpiAsync_postgres.insert_validate(insert)(conn)
-      )
-    } yield errors
+    async2zio[Seq[(Int, Seq[InsertError])]](
+      (conn: JdbcConn_JS, ec: EC) => SpiAsync_postgres.insert_validate(insert)(conn, ec)
+    )
   }
 
 
@@ -97,12 +91,9 @@ trait SpiZio_postgres extends SpiZio with SpiZioBase_postgres {
   }
 
   override def update_validate(update: Update): ZIO[Conn, MoleculeError, Map[String, Seq[String]]] = {
-    for {
-      conn <- ZIO.service[Conn]
-      errors <- ZIO.succeed[Map[String, Seq[String]]](
-        SpiAsync_postgres.update_validate(update)(conn)
-      )
-    } yield errors
+    async2zio[Map[String, Seq[String]]](
+      (conn: JdbcConn_JS, ec: EC) => SpiAsync_postgres.update_validate(update)(conn, ec)
+    )
   }
 
 
@@ -117,13 +108,27 @@ trait SpiZio_postgres extends SpiZio with SpiZioBase_postgres {
   }
 
 
+  // Fallbacks --------------------------------------------------------
+
+  override def fallback_rawQuery(
+    query: String,
+    withNulls: Boolean = false,
+    doPrint: Boolean = true,
+  ): ZIO[Conn, MoleculeError, List[List[Any]]] = ??? // todo
+
+  override def fallback_rawTransact(
+    txData: String,
+    doPrint: Boolean = true
+  ): ZIO[Conn, MoleculeError, TxReport] = ??? // todo
+
+
   // Helpers ---------
 
   private def async2zio[T](run: (JdbcConn_JS, EC) => Future[T]): ZIO[Conn, MoleculeError, T] = {
     for {
       conn0 <- ZIO.service[Conn]
       conn = conn0.asInstanceOf[JdbcConn_JS]
-      result <- moleculeError(ZIO.fromFuture(ec => run(conn, ec)))
+      result <- mapError(ZIO.fromFuture(ec => run(conn, ec)))
     } yield result
   }
 }
