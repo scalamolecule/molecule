@@ -9,7 +9,6 @@ trait Insert_mysql extends SqlInsert { self: ResolveInsert with InsertResolvers_
 
   doPrint = false
 
-
   override protected def addSet[T](
     ns: String,
     attr: String,
@@ -36,7 +35,7 @@ trait Insert_mysql extends SqlInsert { self: ResolveInsert with InsertResolvers_
 
     } { refNs =>
       val refAttr   = attr
-      val joinTable = s"${ns}_${refAttr}_$refNs"
+      val joinTable = ss(ns, refAttr, refNs)
       val curPath   = if (paramIndexes.nonEmpty) curRefPath else List("0", ns)
       val joinPath  = curPath :+ joinTable
 
@@ -111,7 +110,7 @@ trait Insert_mysql extends SqlInsert { self: ResolveInsert with InsertResolvers_
       }
     } { refNs =>
       val refAttr   = attr
-      val joinTable = s"${ns}_${refAttr}_$refNs"
+      val joinTable = ss(ns, refAttr, refNs)
       val curPath   = curRefPath
       val joinPath  = curPath :+ joinTable
 

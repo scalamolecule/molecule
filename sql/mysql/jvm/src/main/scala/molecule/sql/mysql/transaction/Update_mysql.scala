@@ -51,7 +51,7 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
     } { refNs =>
       // Separate update of ref ids in join table -----------------------------
       val refAttr   = attr
-      val joinTable = s"${ns}_${refAttr}_$refNs"
+      val joinTable = ss(ns, refAttr, refNs)
       val ns_id     = ss(ns, "id")
       val refNs_id  = ss(refNs, "id")
       val id        = getUpdateId
@@ -98,7 +98,7 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
     } { refNs =>
       // Separate update of ref ids in join table -----------------------------
       val refAttr   = attr
-      val joinTable = s"${ns}_${refAttr}_$refNs"
+      val joinTable = ss(ns, refAttr, refNs)
       val ns_id     = ss(ns, "id")
       val refNs_id  = ss(refNs, "id")
       sets match {
@@ -179,7 +179,7 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
     } { refNs =>
       // Separate update of ref ids in join table -----------------------------
       val refAttr   = attr
-      val joinTable = s"${ns}_${refAttr}_$refNs"
+      val joinTable = ss(ns, refAttr, refNs)
       val ns_id     = ss(ns, "id")
       val refNs_id  = ss(refNs, "id")
       val id        = getUpdateId
@@ -244,7 +244,7 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
       if (set.nonEmpty) {
         // Separate update of ref ids in join table -----------------------------
         val refAttr    = attr
-        val joinTable  = s"${ns}_${refAttr}_$refNs"
+        val joinTable  = ss(ns, refAttr, refNs)
         val ns_id      = ss(ns, "id")
         val refNs_id   = ss(refNs, "id")
         val retractIds = set.mkString(s" AND $refNs_id IN (", ", ", ")")

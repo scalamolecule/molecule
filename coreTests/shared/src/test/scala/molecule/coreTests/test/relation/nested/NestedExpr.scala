@@ -33,7 +33,7 @@ trait NestedExpr extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
 
     "Expression inside optional nested" - refs { implicit conn =>
-      if (platform.startsWith("Datomic")) {
+      if (database == "Datomic") {
         // Seems not possible to add expressions inside Datomic nested pulls
         for {
           _ <- A.i.Bb.*(B.i).insert(List((1, List(1, 2, 3)))).transact

@@ -17,31 +17,37 @@ trait SqlInsert
     with ModelUtils
     with MoleculeLogging { self: ResolveInsert with InsertResolvers_ =>
 
-  doPrint = true
+  doPrint = false
 
   def getData(nsMap: Map[String, MetaNs], elements: List[Element], tpls: Seq[Product]): Data = {
     elements.foreach(debug)
     debug("### A #############################################################################################")
-    initialNs = getInitialNs(elements)
-    curRefPath = List(s"$level", initialNs)
-    val resolveTpl: Product => Unit = getResolver(nsMap, elements)
+    if (tpls.isEmpty) {
+      debug("Tpls data empty, so no insert...")
+      // No need to handle inserts if no data
+      (Nil, Nil)
+    } else {
+      initialNs = getInitialNs(elements)
+      curRefPath = List(s"$level", initialNs)
+      val resolveTpl: Product => Unit = getResolver(nsMap, elements)
 
-    debug(inserts.mkString("--- inserts\n  ", "\n  ", ""))
-    //    debug(joins.mkString("--- joins\n  ", "\n  ", ""))
-    debug("### B #############################################################################################")
-    initInserts()
-    debug("### C #############################################################################################")
+      debug(inserts.mkString("--- inserts\n  ", "\n  ", ""))
+      //    debug(joins.mkString("--- joins\n  ", "\n  ", ""))
+      debug("### B #############################################################################################")
+      initInserts()
+      debug("### C ############################################################################################# " + tpls)
 
-    // Loop rows of tuples
-    var rowIndex = 0
-    tpls.foreach { tpl =>
-      debug(s"###### $rowIndex ##################################### " + tpl)
-      resolveTpl(tpl)
-      addRowSetterToTableInserts(rowIndex)
-      rowIndex += 1
+      // Loop rows of tuples
+      var rowIndex = 0
+      tpls.foreach { tpl =>
+        debug(s"###### $rowIndex ##################################### " + tpl)
+        resolveTpl(tpl)
+        addRowSetterToTableInserts(rowIndex)
+        rowIndex += 1
+      }
+      debug("### D #############################################################################################")
+      (getTableInserts, getJoinTableInserts)
     }
-    debug("### D #############################################################################################")
-    (getTableInserts, getJoinTableInserts)
   }
 
   protected def initInserts(): Unit = {
@@ -213,7 +219,7 @@ trait SqlInsert
 
     } { refNs =>
       val refAttr   = attr
-      val joinTable = s"${ns}_${refAttr}_$refNs"
+      val joinTable = ss(ns, refAttr, refNs)
       val curPath   = if (paramIndexes.nonEmpty) curRefPath else List("0", ns)
       val joinPath  = curPath :+ joinTable
 
@@ -287,7 +293,7 @@ trait SqlInsert
       }
     } { refNs =>
       val refAttr   = attr
-      val joinTable = s"${ns}_${refAttr}_$refNs"
+      val joinTable = ss(ns, refAttr, refNs)
       val curPath   = curRefPath
       val joinPath  = curPath :+ joinTable
 
@@ -349,7 +355,7 @@ trait SqlInsert
     refNs: String,
     nestedElements: List[Element]
   ): Product => Unit = {
-    val joinTable  = s"${ns}_${refAttr}_$refNs"
+    val joinTable  = ss(ns, refAttr, refNs)
     val (id1, id2) = if (ns == refNs)
       (ss(ns, "1_id"), ss(refNs, "2_id"))
     else

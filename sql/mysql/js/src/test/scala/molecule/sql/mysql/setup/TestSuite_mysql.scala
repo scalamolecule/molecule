@@ -10,8 +10,8 @@ import scala.util.Random
 
 trait TestSuite_mysql extends CoreTestSuite {
 
-  override val platform = "Mysql js"
-
+  override val database = "Mysql"
+  override val platform = "js"
 
   override def inMem[T](test: Conn => T, schema: Schema): T = {
     val n              = Random.nextInt().abs
@@ -21,10 +21,6 @@ trait TestSuite_mysql extends CoreTestSuite {
          |create database test$n;
          |use test$n;
          |""".stripMargin
-
-    // Using the same db causes contention between tests since tests are run in parallel with rpc
-    val url1 = "jdbc:tc:mysql:8.1://localhost:3306/test?allowMultiQueries=true"
-
 
     val proxy = JdbcProxy(
       url,

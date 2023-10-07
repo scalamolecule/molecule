@@ -85,17 +85,25 @@ case class JdbcConn_JVM(
 
         // Populate prepared statement
         ps.executeBatch()
-        val resultSet = ps.getGeneratedKeys
-
-        // Don't collect generated ids for join tables
-        ids = List.empty[Long]
-        if (!refPath.last.init.contains("_")) { // no join tables, but still "_"-suffixed tables
-          while (resultSet.next()) {
-            //            val id = resultSet.getLong(1)
-            //            debug("D  ################# " + id)
-            //            ids = ids :+ id
-            ids = ids :+ resultSet.getLong(1)
+        try {
+          val resultSet = ps.getGeneratedKeys
+          ids = List.empty[Long]
+          if (!refPath.last.init.contains("_")) { // no join tables, but still "_"-suffixed tables
+            while (resultSet.next()) {
+              //              val id = resultSet.getLong(1)
+              //              debug("D  ################# " + id)
+              //              ids = ids :+ id
+              ids = ids :+ resultSet.getLong(1)
+            }
           }
+        } catch {
+          case e: NullPointerException =>
+            // MariaDB can return null instead of empty ResultSet which we simply ignore
+            logger.debug("Resultset was null")
+            ()
+          case NonFatal(e)             =>
+            e.printStackTrace()
+            throw e
         }
         ps.close()
         idsMap = idsMap + (refPath -> ids)

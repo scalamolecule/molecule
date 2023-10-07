@@ -46,8 +46,8 @@ trait SqlDelete
       .filter(attr => attr.refNs.nonEmpty && attr.card == CardSet && !attr.options.contains("owner"))
       .map { metaAttr =>
         val refNs     = metaAttr.refNs.get
-        val joinTable = s"${ns}_${metaAttr.attr}_$refNs"
-        val idCol     = ns + (if (ns == refNs) "_1_id" else "_id")
+        val joinTable = ss(ns, metaAttr.attr, refNs)
+        val idCol     = ss(ns, if (ns == refNs) "1_id" else "id")
         prepareTable(refPath, joinTable, idCol, ids)
       }.toList
 
@@ -133,12 +133,14 @@ trait SqlDelete
                 )
 
               case _: CardSet =>
-                val joinTable    = s"${ns}_${metaAttr.attr}_$refNs"
+                val joinTable    = ss(ns, metaAttr.attr, refNs)
+                val refNs_id     = ss(refNs, "id")
+                val ns_id        = ss(ns, "id")
                 val refIds       = if (nsIds.isEmpty) Nil else {
                   val stmt      =
-                    s"""SELECT $joinTable.${refNs}_id
+                    s"""SELECT $joinTable.$refNs_id
                        |FROM $joinTable
-                       |INNER JOIN $ns on $ns.id = $joinTable.${ns}_id
+                       |INNER JOIN $ns on $ns.id = $joinTable.$ns_id
                        |WHERE $ns.id in (${nsIds.mkString(", ")})
                        |""".stripMargin
                   val resultSet = sqlConn.createStatement().executeQuery(stmt)

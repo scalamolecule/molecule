@@ -156,7 +156,7 @@ trait MandatoryRefs extends CoreTestSuite with ApiAsync with SerializationUtils 
     // So for now, this test is not implemented for Datomic.
 
     "Deleting mandatory ref" - validation { implicit conn =>
-      if (platform.startsWith("Datomic")) {
+      if (database == "Datomic") {
         for {
           List(e1, r1) <- MandatoryRefB.i(1).RefB.i(1).save.transact.map(_.ids)
 

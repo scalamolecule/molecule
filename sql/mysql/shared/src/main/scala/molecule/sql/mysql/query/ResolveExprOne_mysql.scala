@@ -132,7 +132,7 @@ trait ResolveExprOne_mysql extends ResolveExprOne with LambdasOne_mysql { self: 
 
       case "median" =>
         if (orderBy.nonEmpty && orderBy.last._3 == col) {
-          throw ModelError("Sorting by median not implemented for Mysql.")
+          throw ModelError("Sorting by median not implemented for this database.")
         }
         select += s"JSON_ARRAYAGG($col)"
         groupByCols -= col
@@ -151,7 +151,7 @@ trait ResolveExprOne_mysql extends ResolveExprOne with LambdasOne_mysql { self: 
 
       case "variance" =>
         if (orderBy.nonEmpty && orderBy.last._3 == col) {
-          throw ModelError("Sorting by variance not implemented for Mysql.")
+          throw ModelError("Sorting by variance not implemented for this database.")
         }
         groupByCols -= col
         aggregate = true
@@ -166,7 +166,7 @@ trait ResolveExprOne_mysql extends ResolveExprOne with LambdasOne_mysql { self: 
 
       case "stddev" =>
         if (orderBy.nonEmpty && orderBy.last._3 == col) {
-          throw ModelError("Sorting by standard deviation not implemented for Mysql.")
+          throw ModelError("Sorting by standard deviation not implemented for this database.")
         }
         groupByCols -= col
         aggregate = true

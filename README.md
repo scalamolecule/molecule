@@ -6,7 +6,7 @@ An sbt-molecule plugin generates boilerplate code from your domain data model de
 
 - Uniformly works with databases from various query languages:
   - Datalog: [Datomic](http://www.datomic.com) 
-  - SQL: [H2](https://h2database.com/html/main.html), [MySQL](https://www.mysql.com)  and [PostgreSQL](https://www.postgresql.org) (more JDBC-compliant databases to come)
+  - SQL: [H2](https://h2database.com/html/main.html), [MariaDB](https://mariadb.com), [MySQL](https://www.mysql.com)  and [PostgreSQL](https://www.postgresql.org) (more JDBC-compliant databases to come)
 - Targets Scala 3.3, 2.13 and 2.12 on JVM and JS platforms
 - Single SPI of 1300+ tests adhered to by each database implementation 
 - No macros
@@ -90,13 +90,13 @@ Add the following to your build files:
 `project/build.properties`:
 
 ```scala
-sbt.version=1.9.4
+sbt.version=1.9.6
 ```
 
 `project/plugins.sbt`:
 
 ```scala
-addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "1.4.0")
+addSbtPlugin("org.scalamolecule" % "sbt-molecule" % "1.5.0")
 ```
 
 `build.sbt`:
@@ -107,10 +107,11 @@ lazy val yourProject = project.in(file("app"))
   .settings(
     libraryDependencies ++= Seq(
       // One or more of:
-      "org.scalamolecule" %%% "molecule-datalog-datomic" % "0.4.0",
-      "org.scalamolecule" %%% "molecule-sql-h2" % "0.4.0",
-      "org.scalamolecule" %%% "molecule-sql-mysql" % "0.4.0",
-      "org.scalamolecule" %%% "molecule-sql-postgres" % "0.4.0",
+      "org.scalamolecule" %%% "molecule-datalog-datomic" % "0.5.0",
+      "org.scalamolecule" %%% "molecule-sql-h2" % "0.5.0",
+      "org.scalamolecule" %%% "molecule-sql-mariadb" % "0.5.0",
+      "org.scalamolecule" %%% "molecule-sql-mysql" % "0.5.0",
+      "org.scalamolecule" %%% "molecule-sql-postgres" % "0.5.0",
     ),
     moleculeSchemas := Seq("app") // paths to your data model definitions...
   )
@@ -129,6 +130,7 @@ Run the same test suite on jvm targeting both Datomic and JDBC-compliant databas
 
     sbt datalogDatomicJVM/test
     sbt sqlH2JVM/test
+    sbt sqlMariadbJVM/test
     sbt sqlMysqlJVM/test
     sbt sqlPostgresJVM/test
 

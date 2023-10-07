@@ -12,7 +12,8 @@ import scala.util.control.NonFatal
 
 trait TestSuite_h2 extends CoreTestSuite with BaseHelpers {
 
-  override val platform = "H2 jvm"
+  override val database = "H2"
+  override val platform = "jvm"
 
   override def inMem[T](test: Conn => T, schema: Schema): T = {
     val url   = "jdbc:h2:mem:test_database_" + Random.nextInt()

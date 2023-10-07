@@ -18,6 +18,7 @@ trait CoreTestSuiteBase
     with AggrUtils {
 
   val isJsPlatform: Boolean
+  val database    : String
   val platform    : String
 
   def inMem[T](test: Conn => T, schemaTx: Schema): T

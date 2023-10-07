@@ -7,15 +7,17 @@ val scala213 = "2.13.12"
 val scala3   = "3.3.1"
 val allScala = Seq(scala212, scala213, scala3)
 
-val akkaVersion = "2.8.3"
-val zioVersion  = "2.0.15"
+val akkaVersion          = "2.8.3"
+val zioVersion           = "2.0.15"
+val testContainerVersion = "0.41.0"
+val logbackVersion       = "1.3.8"
 
 inThisBuild(
   List(
     organization := "org.scalamolecule",
     organizationName := "ScalaMolecule",
     organizationHomepage := Some(url("http://www.scalamolecule.org")),
-    version := "0.4.0",
+    version := "0.5.0",
     versionScheme := Some("early-semver"),
     //    scalaVersion := scala212,
     scalaVersion := scala213,
@@ -51,6 +53,8 @@ lazy val root = project
     sqlCore.jvm,
     sqlH2.js,
     sqlH2.jvm,
+    sqlMariadb.js,
+    sqlMariadb.jvm,
     sqlMysql.js,
     sqlMysql.jvm,
     sqlPostgres.js,
@@ -236,15 +240,6 @@ lazy val sqlCore = crossProject(JSPlatform, JVMPlatform)
     )
   )
   .jsSettings(jsEnvironment)
-  .jvmSettings(
-    libraryDependencies ++= Seq(
-      "com.dimafeng" %% "testcontainers-scala-postgresql" % "0.41.0",
-      "org.postgresql" % "postgresql" % "42.6.0",
-      "com.dimafeng" %% "testcontainers-scala-mysql" % "0.41.0",
-      "mysql" % "mysql-connector-java" % "8.0.33"
-    ),
-    Test / fork := true
-  )
 
 lazy val sqlH2 = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
@@ -265,6 +260,28 @@ lazy val sqlH2 = crossProject(JSPlatform, JVMPlatform)
     )
   )
 
+lazy val sqlMariadb = crossProject(JSPlatform, JVMPlatform)
+  .crossType(CrossType.Full)
+  .in(file("sql/mariadb"))
+  .settings(name := "molecule-sql-mariadb")
+  .settings(doPublish)
+  .dependsOn(sqlCore % "compile->compile;test->test")
+  .settings(
+    testFrameworks := Seq(
+      new TestFramework("utest.runner.Framework"),
+      new TestFramework("zio.test.sbt.ZTestFramework")
+    )
+  )
+  .jsSettings(jsEnvironment)
+  .jvmSettings(
+    libraryDependencies ++= Seq(
+      "com.dimafeng" %% "testcontainers-scala-mariadb" % testContainerVersion,
+      "org.mariadb.jdbc" % "mariadb-java-client" % "3.2.0",
+      "ch.qos.logback" % "logback-classic" % logbackVersion % Test
+    ),
+    Test / fork := true
+  )
+
 lazy val sqlMysql = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .in(file("sql/mysql"))
@@ -278,7 +295,14 @@ lazy val sqlMysql = crossProject(JSPlatform, JVMPlatform)
     )
   )
   .jsSettings(jsEnvironment)
-  .jvmSettings(Test / fork := true)
+  .jvmSettings(
+    libraryDependencies ++= Seq(
+      "com.dimafeng" %% "testcontainers-scala-mysql" % testContainerVersion,
+      "mysql" % "mysql-connector-java" % "8.0.33",
+    ),
+    Test / fork := true
+  )
+
 
 lazy val sqlPostgres = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
@@ -293,7 +317,14 @@ lazy val sqlPostgres = crossProject(JSPlatform, JVMPlatform)
     )
   )
   .jsSettings(jsEnvironment)
-  .jvmSettings(Test / fork := true)
+  .jvmSettings(
+    libraryDependencies ++= Seq(
+      "com.dimafeng" %% "testcontainers-scala-postgresql" % testContainerVersion,
+      "org.postgresql" % "postgresql" % "42.6.0",
+      "ch.qos.logback" % "logback-classic" % logbackVersion % Test
+    ),
+    Test / fork := true
+  )
 
 
 lazy val jsEnvironment = {

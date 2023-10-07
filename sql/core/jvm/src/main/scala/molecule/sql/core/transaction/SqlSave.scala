@@ -143,7 +143,7 @@ trait SqlSave
       } else {
         val set       = optSet.get
         val refAttr   = attr
-        val joinTable = s"${ns}_${refAttr}_$refNs"
+        val joinTable = ss(ns, refAttr, refNs)
         val joinPath  = curPath :+ joinTable
 
         // join table with single row (treated as normal insert since there's only 1 join per row)

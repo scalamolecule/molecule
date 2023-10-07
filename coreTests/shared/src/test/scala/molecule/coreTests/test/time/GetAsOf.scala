@@ -17,7 +17,7 @@ trait GetAsOf extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
   override lazy val tests = Tests {
 
     "save" - types { implicit conn =>
-      if (platform.startsWith("Datomic")) {
+      if (database == "Datomic") {
         for {
           tx1 <- Ns.int(1).save.transact
           tx2 <- Ns.int(2).save.transact
@@ -40,7 +40,7 @@ trait GetAsOf extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
 
     "update" - types { implicit conn =>
-      if (platform.startsWith("Datomic")) {
+      if (database == "Datomic") {
         for {
           tx1 <- Ns.int(1).save.transact
           e = tx1.id
@@ -64,7 +64,7 @@ trait GetAsOf extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
 
     "delete" - types { implicit conn =>
-      if (platform.startsWith("Datomic")) {
+      if (database == "Datomic") {
         for {
           tx1 <- Ns.int(1).save.transact
           tx2 <- Ns.int(2).save.transact
@@ -87,7 +87,7 @@ trait GetAsOf extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
 
     "Using date" - types { implicit conn =>
-      if (platform.startsWith("Datomic")) {
+      if (database == "Datomic") {
         for {
           _ <- Ns.int(1).save.transact
           d1 = new Date()
@@ -111,7 +111,7 @@ trait GetAsOf extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
     "Using transaction entity id" - types { implicit conn =>
-      if (platform.startsWith("Datomic")) {
+      if (database == "Datomic") {
         for {
           tx1 <- Ns.int(1).save.transact
           tx2 <- Ns.int(2).save.transact

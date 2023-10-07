@@ -11,6 +11,7 @@ import zio.{Task, ZLayer}
 trait CoreTestZioSpecBase extends ZIOSpecDefault with TestData {
 
   val isJsPlatform: Boolean
+  val database    : String
   val platform    : String
 
   def inMem[T](schemaTx: Schema): ZLayer[T, Throwable, Conn]

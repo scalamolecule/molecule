@@ -67,33 +67,33 @@ trait OffsetBackwards extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
         // From end .......................
 
-        _ <- Ns.int.a1.Refs.*(Ref.i).query.limit(-1).get.map(_ ==> List(
+        _ <- Ns.int.a1.Refs.*(Ref.i.a1).query.limit(-1).get.map(_ ==> List(
           (3, List(31, 32)),
         ))
-        _ <- Ns.int.a1.Refs.*(Ref.i).query.limit(-2).get.map(_ ==> List(
+        _ <- Ns.int.a1.Refs.*(Ref.i.a1).query.limit(-2).get.map(_ ==> List(
           (2, List(21, 22)),
           (3, List(31, 32)),
         ))
-        _ <- Ns.int.a1.Refs.*(Ref.i).query.limit(-3).get.map(_ ==> List(
+        _ <- Ns.int.a1.Refs.*(Ref.i.a1).query.limit(-3).get.map(_ ==> List(
           (1, List(11, 12)),
           (2, List(21, 22)),
           (3, List(31, 32)),
         ))
-        _ <- Ns.int.a1.Refs.*(Ref.i).query.limit(-4).get.map(_ ==> List(
+        _ <- Ns.int.a1.Refs.*(Ref.i.a1).query.limit(-4).get.map(_ ==> List(
           (1, List(11, 12)),
           (2, List(21, 22)),
           (3, List(31, 32)),
         ))
 
 
-        _ <- Ns.int.a1.Refs.*(Ref.i).query.limit(-2).offset(-1).get.map(_ ==> (
+        _ <- Ns.int.a1.Refs.*(Ref.i.a1).query.limit(-2).offset(-1).get.map(_ ==> (
           List(
             (1, List(11, 12)),
             (2, List(21, 22)),
           ),
           3, false
         ))
-        _ <- Ns.int.a1.Refs.*(Ref.i).query.limit(-2).offset(-2).get.map(_ ==> (
+        _ <- Ns.int.a1.Refs.*(Ref.i.a1).query.limit(-2).offset(-2).get.map(_ ==> (
           List(
             (1, List(11, 12)),
           ),

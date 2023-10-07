@@ -10,7 +10,8 @@ import scala.util.Random
 
 trait TestSuite_postgres extends CoreTestSuite {
 
-  override val platform = "Postgres js"
+  override val database = "Postgres"
+  override val platform = "js"
 
   val recreateSchema =
     s"""DROP SCHEMA IF EXISTS public CASCADE;

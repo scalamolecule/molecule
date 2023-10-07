@@ -203,8 +203,4 @@ trait SpiAsyncBase extends SpiAsync with PrintInspect with FutureUtils {
 
   protected def printInspectQuery(label: String, elements: List[Element])
                                  (implicit ec: EC): Future[Unit]
-  //  = Future {
-  //    val query = new Model2SqlQuery_postgres(elements).getSqlQuery(Nil, None, None, None)
-  //    printInspect(label, Nil, query)
-  //  }
 }

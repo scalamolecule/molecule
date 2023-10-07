@@ -142,6 +142,11 @@ trait UpdateOne_uniqueAttr extends CoreTestSuite with ApiAsync { spi: SpiAsync =
 
 
     "Semantics" - unique { implicit conn =>
+      // Depends on wether the attribute name is a reserved keyword of the tested database
+      val attr = database match {
+        case "Mysql" => "string_"
+        case _       => "string"
+      }
       for {
         _ <- Uniques.i(1).i(2).int_(1).update.transact
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
@@ -152,12 +157,8 @@ trait UpdateOne_uniqueAttr extends CoreTestSuite with ApiAsync { spi: SpiAsync =
 
         _ <- Uniques.int_(1).string_("x").s("c").update.transact
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Can only apply one unique attribute value for update. Found:\n" + (
-              if (platform.startsWith("Mysql")) {
-                """AttrOneTacString("Uniques", "string_", Eq, Seq("x"), None, None, Nil, Nil, None, None, Seq(0, 3))"""
-              } else {
-                """AttrOneTacString("Uniques", "string", Eq, Seq("x"), None, None, Nil, Nil, None, None, Seq(0, 3))"""
-              })
+            err ==> "Can only apply one unique attribute value for update. Found:\n" +
+              s"""AttrOneTacString("Uniques", "$attr", Eq, Seq("x"), None, None, Nil, Nil, None, None, Seq(0, 3))"""
           }
 
         _ <- Uniques.ints_(1).s("b").update.transact

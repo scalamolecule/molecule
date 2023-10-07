@@ -10,7 +10,8 @@ import zio.ZLayer
 
 trait ZioSpec_postgres extends CoreTestZioSpecBase {
 
-  override val platform = "Postgres js"
+  override val database = "Postgres"
+  override val platform = "js"
 
   override def inMem[T](schema: Schema): ZLayer[T, Throwable, Conn] = {
     val url   = "jdbc:tc:postgresql:15://localhost:5432/test?preparedStatementCacheQueries=0"

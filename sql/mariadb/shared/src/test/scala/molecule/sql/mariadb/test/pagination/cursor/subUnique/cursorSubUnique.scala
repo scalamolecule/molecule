@@ -1,0 +1,13 @@
+package molecule.sql.mariadb.test.pagination.cursor.subUnique
+
+import molecule.coreTests.test.pagination.cursor.subUnique._
+import molecule.sql.mariadb.setup.TestAsync_mariadb
+
+object AttrOrder extends AttrOrder with TestAsync_mariadb
+object DirectionsStandardUnique extends DirectionsStandardUnique with TestAsync_mariadb
+object DirectionsUniqueStandard extends DirectionsUniqueStandard with TestAsync_mariadb
+object MutationAdd extends MutationAdd with TestAsync_mariadb
+object MutationDelete extends MutationDelete with TestAsync_mariadb
+object Nested extends Nested with TestAsync_mariadb
+object NestedOpt extends NestedOpt with TestAsync_mariadb
+object TypesUniqueValue extends TypesUniqueValue with TestAsync_mariadb

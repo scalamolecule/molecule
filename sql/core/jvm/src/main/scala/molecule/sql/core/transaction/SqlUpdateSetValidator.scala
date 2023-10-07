@@ -30,11 +30,13 @@ trait SqlUpdateSetValidator extends SpiHelpers {
            |HAVING COUNT(*) > 0;""".stripMargin
 
       ) { refNs =>
-        val joinTable = s"${ns}_${attr}_$refNs"
+        val joinTable = ss(ns, attr, refNs)
+        val refNs_id  = ss(refNs, "id")
+        val ns_id     = ss(ns, "id")
         s"""SELECT DISTINCT
-           |  ARRAY_AGG($joinTable.${refNs}_id)
+           |  ARRAY_AGG($joinTable.$refNs_id)
            |FROM $ns
-           |INNER JOIN $joinTable ON $ns.id = $joinTable.${ns}_id
+           |INNER JOIN $joinTable ON $ns.id = $joinTable.$ns_id
            |GROUP BY $ns.id;""".stripMargin
       }
 
@@ -73,11 +75,13 @@ trait SqlUpdateSetValidator extends SpiHelpers {
         //           |WHERE $ns.id in ($ids)
         //           |GROUP BY $ns.id
       ) { refNs =>
-        val joinTable = s"${ns}_${attr}_$refNs"
+        val joinTable = ss(ns, attr, refNs)
+        val refNs_id  = ss(refNs, "id")
+        val ns_id     = ss(ns, "id")
         s"""SELECT DISTINCT
-           |  JSON_ARRAYAGG($joinTable.${refNs}_id)
+           |  JSON_ARRAYAGG($joinTable.$refNs_id)
            |FROM $ns
-           |INNER JOIN $joinTable ON $ns.id = $joinTable.${ns}_id
+           |INNER JOIN $joinTable ON $ns.id = $joinTable.$ns_id
            |GROUP BY $ns.id;""".stripMargin
       }
       jsonArray2coalescedSet(a, query2resultSet(query))

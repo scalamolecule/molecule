@@ -12,7 +12,8 @@ import scala.concurrent.duration._
 
 trait DatomicTestSuite extends CoreTestSuite {
 
-  override val platform = "Datomic jvm"
+  override val database = "Datomic"
+  override val platform = "jvm"
 
   override def inMem[T](test: Conn => T, schema: Schema): T = {
     val proxy = DatomicProxy(

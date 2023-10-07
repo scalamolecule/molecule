@@ -11,7 +11,8 @@ import zio.{ZIO, ZLayer}
 
 trait DatomicZioSpec extends CoreTestZioSpec {
 
-  override val platform = "Datomic jvm"
+  override val database = "Datomic"
+  override val platform = "jvm"
 
   override def inMem[T](schema: Schema): ZLayer[T, Throwable, Conn] = {
     val proxy = DatomicProxy(

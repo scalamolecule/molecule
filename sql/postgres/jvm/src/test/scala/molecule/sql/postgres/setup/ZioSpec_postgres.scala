@@ -11,7 +11,8 @@ import zio.{ZIO, ZLayer}
 
 trait ZioSpec_postgres extends CoreTestZioSpec {
 
-  override val platform = "Postgres jvm"
+  override val database = "Postgres"
+  override val platform = "jvm"
 
   override def inMem[T](schema: Schema): ZLayer[T, Throwable, Conn] = {
     def zio(conn: JdbcConn_JVM, recreationStmt: String): ZLayer[Any, Throwable, JdbcConn_JVM] = {
