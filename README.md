@@ -107,11 +107,11 @@ lazy val yourProject = project.in(file("app"))
   .settings(
     libraryDependencies ++= Seq(
       // One or more of:
-      "org.scalamolecule" %%% "molecule-datalog-datomic" % "0.5.0",
-      "org.scalamolecule" %%% "molecule-sql-h2" % "0.5.0",
-      "org.scalamolecule" %%% "molecule-sql-mariadb" % "0.5.0",
-      "org.scalamolecule" %%% "molecule-sql-mysql" % "0.5.0",
-      "org.scalamolecule" %%% "molecule-sql-postgres" % "0.5.0",
+      "org.scalamolecule" %%% "molecule-datalog-datomic" % "0.5.1",
+      "org.scalamolecule" %%% "molecule-sql-h2" % "0.5.1",
+      "org.scalamolecule" %%% "molecule-sql-mariadb" % "0.5.1",
+      "org.scalamolecule" %%% "molecule-sql-mysql" % "0.5.1",
+      "org.scalamolecule" %%% "molecule-sql-postgres" % "0.5.1",
     ),
     moleculeSchemas := Seq("app") // paths to your data model definitions...
   )
@@ -121,7 +121,7 @@ lazy val yourProject = project.in(file("app"))
 
 ## Explore
 
-The `coreTests` module in this repo has sevel data model definitions and more than 1300 tests that you can get inspiration from.
+The `coreTests` module in this repo has several data model definitions and more than 1300 tests that show all details of how molecule can be used.
 
  
 ### Run jvm tests

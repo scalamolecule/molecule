@@ -3,7 +3,6 @@ package molecule.coreTests.setup
 import molecule.base.api.Schema
 import molecule.core.spi.Conn
 import molecule.coreTests.dataModels.core.schema._
-import molecule.coreTests.util.TestData
 import zio.test.ZIOSpecDefault
 import zio.{Task, ZLayer}
 

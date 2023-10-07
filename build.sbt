@@ -17,7 +17,7 @@ inThisBuild(
     organization := "org.scalamolecule",
     organizationName := "ScalaMolecule",
     organizationHomepage := Some(url("http://www.scalamolecule.org")),
-    version := "0.5.0",
+    version := "0.5.1",
     versionScheme := Some("early-semver"),
     //    scalaVersion := scala212,
     scalaVersion := scala213,
@@ -164,7 +164,8 @@ lazy val datalogCore = crossProject(JSPlatform, JVMPlatform)
   .in(file("datalog/core"))
   .settings(name := "molecule-datalog-core")
   .settings(doPublish)
-  .dependsOn(coreTests % "compile->compile;test->test")
+  .dependsOn(core)
+  .dependsOn(coreTests % "test->test")
   .settings(
     testFrameworks := Seq(
       new TestFramework("utest.runner.Framework"),
@@ -181,7 +182,9 @@ lazy val datalogDatomic = crossProject(JSPlatform, JVMPlatform)
   .in(file("datalog/datomic"))
   .settings(name := "molecule-datalog-datomic")
   .settings(doPublish)
-  .dependsOn(datalogCore % "compile->compile;test->test")
+//  .dependsOn(datalogCore % "compile->compile;test->test")
+  .dependsOn(datalogCore)
+  .dependsOn(coreTests % "test->test")
   .settings(
     // Temporarily limit number of tests to be compiled by sbt (comment out this whole sbt setting to test all)
     // Note that intellij doesn't recognize this setting - there you can right click on files and exclude
@@ -232,7 +235,8 @@ lazy val sqlCore = crossProject(JSPlatform, JVMPlatform)
   .in(file("sql/core"))
   .settings(name := "molecule-sql-core")
   .settings(doPublish)
-  .dependsOn(coreTests % "compile->compile;test->test")
+  .dependsOn(core)
+  .dependsOn(coreTests % "test->test")
   .settings(
     testFrameworks := Seq(
       new TestFramework("utest.runner.Framework"),
@@ -246,7 +250,8 @@ lazy val sqlH2 = crossProject(JSPlatform, JVMPlatform)
   .in(file("sql/h2"))
   .settings(name := "molecule-sql-h2")
   .settings(doPublish)
-  .dependsOn(sqlCore % "compile->compile;test->test")
+  .dependsOn(sqlCore )
+  .dependsOn(coreTests % "test->test")
   .settings(
     testFrameworks := Seq(
       new TestFramework("utest.runner.Framework"),
@@ -265,7 +270,8 @@ lazy val sqlMariadb = crossProject(JSPlatform, JVMPlatform)
   .in(file("sql/mariadb"))
   .settings(name := "molecule-sql-mariadb")
   .settings(doPublish)
-  .dependsOn(sqlCore % "compile->compile;test->test")
+  .dependsOn(sqlCore)
+  .dependsOn(coreTests % "test->test")
   .settings(
     testFrameworks := Seq(
       new TestFramework("utest.runner.Framework"),
@@ -287,7 +293,8 @@ lazy val sqlMysql = crossProject(JSPlatform, JVMPlatform)
   .in(file("sql/mysql"))
   .settings(name := "molecule-sql-mysql")
   .settings(doPublish)
-  .dependsOn(sqlCore % "compile->compile;test->test")
+  .dependsOn(sqlCore)
+  .dependsOn(coreTests % "test->test")
   .settings(
     testFrameworks := Seq(
       new TestFramework("utest.runner.Framework"),
@@ -309,7 +316,8 @@ lazy val sqlPostgres = crossProject(JSPlatform, JVMPlatform)
   .in(file("sql/postgres"))
   .settings(name := "molecule-sql-postgres")
   .settings(doPublish)
-  .dependsOn(sqlCore % "compile->compile;test->test")
+  .dependsOn(sqlCore)
+  .dependsOn(coreTests % "test->test")
   .settings(
     testFrameworks := Seq(
       new TestFramework("utest.runner.Framework"),

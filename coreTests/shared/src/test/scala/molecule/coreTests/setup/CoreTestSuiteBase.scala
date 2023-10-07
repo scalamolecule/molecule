@@ -4,7 +4,6 @@ import molecule.base.api.Schema
 import molecule.core.spi.Conn
 import molecule.core.util.{AggrUtils, JavaConversions}
 import molecule.coreTests.dataModels.core.schema._
-import molecule.coreTests.util.TestData
 import utest._
 import utest.framework.Formatter
 import scala.concurrent.Future

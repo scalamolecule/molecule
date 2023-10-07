@@ -1,7 +1,6 @@
-package molecule.coreTests.util
+package molecule.coreTests.setup
 
 import java.net.URI
-import java.util.UUID._
 import java.util.{Date, UUID}
 import molecule.base.util.DateHandling
 
