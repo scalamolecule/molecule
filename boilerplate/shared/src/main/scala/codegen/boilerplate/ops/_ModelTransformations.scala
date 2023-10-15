@@ -9,9 +9,10 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |package molecule.boilerplate.ops
        |
        |import java.net.URI
+       |import java.time._
        |import java.util.{Date, UUID}
        |import molecule.base.error.ModelError
-       |import molecule.boilerplate.api.Keywords.Kw
+       |import molecule.boilerplate.api.Keywords._
        |import molecule.boilerplate.api._
        |import molecule.boilerplate.ast.Model._
        |
@@ -21,17 +22,28 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |
        |  protected def toInt(es: List[Element], kw: Kw): List[Element] = {
        |    val last = es.last match {
-       |      case a: AttrOneMan => AttrOneManInt(a.ns, a.attr, Fn(kw.toString))
-       |      case a: AttrSetMan => AttrSetManInt(a.ns, a.attr, Fn(kw.toString))
-       |      case a             => unexpected(a)
+       |      case a: AttrOneMan => AttrOneManInt(a.ns, a.attr, Fn(kw.toString), refNs = a.refNs, coord = a.coord)
+       |      case a: AttrSetMan => a match {
+       |        case _: AttrSetManBoolean =>
+       |          if (kw.isInstanceOf[count] || kw.isInstanceOf[countDistinct]) {
+       |            // Catch unsupported aggregation of Sets of boolean values
+       |            AttrSetManInt(a.ns, a.attr, Fn(kw.toString, Some(-1)), refNs = a.refNs, coord = a.coord)
+       |          } else {
+       |            AttrSetManInt(a.ns, a.attr, Fn(kw.toString), refNs = a.refNs, coord = a.coord)
+       |          }
+       |
+       |        case _ => AttrSetManInt(a.ns, a.attr, Fn(kw.toString), refNs = a.refNs, coord = a.coord)
+       |      }
+       |
+       |      case a => unexpected(a)
        |    }
        |    es.init :+ last
        |  }
        |
        |  protected def toDouble(es: List[Element], kw: Kw): List[Element] = {
        |    val last = es.last match {
-       |      case a: AttrOneMan => AttrOneManDouble(a.ns, a.attr, Fn(kw.toString))
-       |      case a: AttrSetMan => AttrSetManDouble(a.ns, a.attr, Fn(kw.toString))
+       |      case a: AttrOneMan => AttrOneManDouble(a.ns, a.attr, Fn(kw.toString), refNs = a.refNs, coord = a.coord)
+       |      case a: AttrSetMan => AttrSetManDouble(a.ns, a.attr, Fn(kw.toString), refNs = a.refNs, coord = a.coord)
        |      case a             => unexpected(a)
        |    }
        |    es.init :+ last
@@ -177,11 +189,11 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |    es.map {
        |      case attr: AttrOneMan => attr match {
        |        ${reverseTopLevelSorting("Man")}
-       |        case a                                                             => a
+       |        case a                                                                    => a
        |      }
        |      case attr: AttrOneOpt => attr match {
        |        ${reverseTopLevelSorting("Opt")}
-       |        case a                                                             => a
+       |        case a                                                                    => a
        |      }
        |      case other            => other
        |    }
@@ -256,7 +268,7 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
 
   private def liftFilterAttr(card: String): String = {
     baseTypesWithSpaces.map { case (baseTpe, space) =>
-      s"case a: Attr${card}Man$baseTpe $space=> (Attr${card}Tac$baseTpe(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.refNs, a.sort), List(filterAttr0))"
+      s"case a: Attr${card}Man$baseTpe $space=> (Attr${card}Tac$baseTpe(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.refNs, a.sort, a.coord), List(filterAttr0))"
     }.mkString("\n              ")
   }
   private def addFilterAttr(card: String, mode: String): String = {
@@ -267,7 +279,7 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
 
   private def reverseTopLevelSorting(mode: String): String = {
     baseTypesWithSpaces.map { case (baseTpe, space) =>
-      s"case a@AttrOne$mode$baseTpe(_, _, _, _, _, _, _, _, _, Some(sort)) $space=> a.copy(sort = Some(reverseSort(sort)))"
+      s"case a@AttrOne$mode$baseTpe(_, _, _, _, _, _, _, _, _, Some(sort), _) $space=> a.copy(sort = Some(reverseSort(sort)))"
     }.mkString("\n        ")
   }
 }

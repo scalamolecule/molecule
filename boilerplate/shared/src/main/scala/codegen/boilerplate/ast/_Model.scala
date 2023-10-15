@@ -1,6 +1,7 @@
 package codegen.boilerplate.ast
 
 import java.io.File
+import java.time.Duration
 import codegen.BoilerplateGenBase
 import molecule.base.error._
 import scala.io.Source
@@ -47,27 +48,34 @@ object _Model extends BoilerplateGenBase("Model", "/ast") {
     }
 
     // Render attribute toString method so that a printout can be directly used as valid Scala code
-
     def body(baseTpe: String): String = {
       val tpe      = cardTpe(baseTpe)
       val attrType = s"Attr$card$mode$baseTpe"
       val vs       = if (mode == "Opt") s"Option[Seq[$tpe]] = None" else s"Seq[$tpe] = Nil"
       val format_? = !List("Int", "Double", "Boolean").contains(baseTpe)
       val format   = baseTpe match {
-        case "String"     => """"\"" + escStr(v) + "\"""""
-        case "Int"        => "v"
-        case "Long"       => """v.toString + "L""""
-        case "Float"      => """v.toString + "f""""
-        case "Double"     => "v"
-        case "Boolean"    => "v"
-        case "BigInt"     => """"BigInt(" + v + ")""""
-        case "BigDecimal" => """"BigDecimal(" + v + ")""""
-        case "Date"       => """"new Date(" + v.getTime + ")""""
-        case "UUID"       => """"UUID.fromString(\"" + v.toString + "\")""""
-        case "URI"        => """"new URI(\"" + v.toString + "\")""""
-        case "Byte"       => """s"$v.toByte""""
-        case "Short"      => """s"$v.toShort""""
-        case "Char"       => """s"'$v'""""
+        case "String"         => """"\"" + escStr(v) + "\"""""
+        case "Int"            => "v"
+        case "Long"           => """v.toString + "L""""
+        case "Float"          => """v.toString + "f""""
+        case "Double"         => "v"
+        case "Boolean"        => "v"
+        case "BigInt"         => """"BigInt(" + v + ")""""
+        case "BigDecimal"     => """"BigDecimal(" + v + ")""""
+        case "Date"           => """"new Date(" + v.getTime + ")""""
+        case "Duration"       => """"Duration.ofSeconds(" + v.getSeconds + ", " + v.getNano + ")""""
+        case "Instant"        => """"Instant.ofEpochSecond(" + v.getEpochSecond + ", " + v.getNano + ")""""
+        case "LocalDate"      => """"LocalDate.of(" + v.getYear + ", " + v.getMonth + ", " + v.getDayOfMonth + ")""""
+        case "LocalTime"      => """"LocalTime.of(" + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ")""""
+        case "LocalDateTime"  => """"LocalDateTime.of(" + v.getYear + ", " + v.getMonth + ", " + v.getDayOfMonth + ", " + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ")""""
+        case "OffsetTime"     => """"OffsetTime.of(" + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ", " + v.getOffset + ")""""
+        case "OffsetDateTime" => """"OffsetDateTime.of(" + v.getYear + ", " + v.getMonth + ", " + v.getDayOfMonth + ", " + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ", " + v.getOffset + ")""""
+        case "ZonedDateTime"  => """"ZonedDateTime.of(" + v.getYear + ", " + v.getMonth + ", " + v.getDayOfMonth + ", " + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ", " + v.getZone + ")""""
+        case "UUID"           => """"UUID.fromString(\"" + v.toString + "\")""""
+        case "URI"            => """"new URI(\"" + v.toString + "\")""""
+        case "Byte"           => """s"$v.toByte""""
+        case "Short"          => """s"$v.toShort""""
+        case "Char"           => """s"'$v'""""
       }
       val attrStr  = card match {
         case "One" => mode match {

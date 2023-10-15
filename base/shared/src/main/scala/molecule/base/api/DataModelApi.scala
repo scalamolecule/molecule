@@ -1,6 +1,7 @@
 package molecule.base.api
 
 import java.net.URI
+import java.time._
 import java.util.{Date, UUID}
 
 /** Data Model DSL.
@@ -85,6 +86,14 @@ trait DataModelApi {
     def apply(precision: Int, scale: Int): oneBigDecimal = ???
   }
   object oneDate extends oneDate
+  object oneDuration extends oneDuration
+  object oneInstant extends oneInstant
+  object oneLocalDate extends oneLocalDate
+  object oneLocalTime extends oneLocalTime
+  object oneLocalDateTime extends oneLocalDateTime
+  object oneOffsetTime extends oneOffsetTime
+  object oneOffsetDateTime extends oneOffsetDateTime
+  object oneZonedDateTime extends oneZonedDateTime
   object oneUUID extends oneUUID
   object oneURI extends oneURI
   object oneByte extends oneByte
@@ -100,6 +109,14 @@ trait DataModelApi {
   trait oneBigInt extends Options[oneBigInt, BigInt, BigInt]
   trait oneBigDecimal extends Options[oneBigDecimal, BigDecimal, BigDecimal]
   trait oneDate extends Options[oneDate, Date, Date]
+  trait oneDuration extends Options[oneDuration, Duration, Duration]
+  trait oneInstant extends Options[oneInstant, Instant, Instant]
+  trait oneLocalDate extends Options[oneLocalDate, LocalDate, LocalDate]
+  trait oneLocalTime extends Options[oneLocalTime, LocalTime, LocalTime]
+  trait oneLocalDateTime extends Options[oneLocalDateTime, LocalDateTime, LocalDateTime]
+  trait oneOffsetTime extends Options[oneOffsetTime, OffsetTime, OffsetTime]
+  trait oneOffsetDateTime extends Options[oneOffsetDateTime, OffsetDateTime, OffsetDateTime]
+  trait oneZonedDateTime extends Options[oneZonedDateTime, ZonedDateTime, ZonedDateTime]
   trait oneUUID extends Options[oneUUID, UUID, UUID]
   trait oneURI extends Options[oneURI, URI, URI]
   trait oneByte extends Options[oneByte, Byte, Byte]
@@ -118,6 +135,14 @@ trait DataModelApi {
     def apply(precision: Int, scale: Int): oneBigDecimal = ???
   }
   object setDate extends setDate
+  object setDuration extends setDuration
+  object setInstant extends setInstant
+  object setLocalDate extends setLocalDate
+  object setLocalTime extends setLocalTime
+  object setLocalDateTime extends setLocalDateTime
+  object setOffsetTime extends setOffsetTime
+  object setOffsetDateTime extends setOffsetDateTime
+  object setZonedDateTime extends setZonedDateTime
   object setUUID extends setUUID
   object setURI extends setURI
   object setByte extends setByte
@@ -133,6 +158,14 @@ trait DataModelApi {
   trait setBigInt extends Options[setBigInt, Set[BigInt], BigInt]
   trait setBigDecimal extends Options[setBigDecimal, Set[BigDecimal], BigDecimal]
   trait setDate extends Options[setDate, Set[Date], Date]
+  trait setDuration extends Options[setDuration, Set[Duration], Duration]
+  trait setInstant extends Options[setInstant, Set[Instant], Instant]
+  trait setLocalDate extends Options[setLocalDate, Set[LocalDate], LocalDate]
+  trait setLocalTime extends Options[setLocalTime, Set[LocalTime], LocalTime]
+  trait setLocalDateTime extends Options[setLocalDateTime, Set[LocalDateTime], LocalDateTime]
+  trait setOffsetTime extends Options[setOffsetTime, Set[OffsetTime], OffsetTime]
+  trait setOffsetDateTime extends Options[setOffsetDateTime, Set[OffsetDateTime], OffsetDateTime]
+  trait setZonedDateTime extends Options[setZonedDateTime, Set[ZonedDateTime], ZonedDateTime]
   trait setUUID extends Options[setUUID, Set[UUID], UUID]
   trait setURI extends Options[setURI, Set[URI], URI]
   trait setByte extends Options[setByte, Set[Byte], Byte]

@@ -22,7 +22,6 @@ trait ResolveExprSet_mariadb
     addCast((row: Row, paramIndex: Int) =>
       res.json2array(row.getString(paramIndex)).toSet
     )
-
     attr.filterAttr.fold {
       if (filterAttrVars.contains(attr.name) && attr.op != V) {
         // Runtime check needed since we can't type infer it
@@ -100,52 +99,13 @@ trait ResolveExprSet_mariadb
           if (row.wasNull()) {
             Set.empty[Set[T]]
           } else {
-
-            //            println("-------------------------")
-            //            println("1  '" + json + "'")
-            //            println("2  '" + json.substring(1, json.length - 1) + "'")
-            //            println("3  '" + json.substring(1, json.length - 1).replace("], [", "]], [[") + "'")
-            //            println("4   " + json.substring(1, json.length - 1).replace("], [", "]], [[").split("], \\[").toList.mkString("@"))
-            //            println("5   " + json.substring(1, json.length - 1).replace("], [", "]], [[").split("], \\[").map(res.json2array(_).toSet).toSet.mkString("@"))
-
-
-
-            println("-------------------------")
-            println("1  " + json)
-            println("2  " + json.substring(1, json.length - 1))
-            println("3  " + json.substring(1, json.length - 1).replace("],[", "]],[["))
-            println("4  " + json.substring(1, json.length - 1).replace("],[", "]],[[").split("],\\[").toList.mkString("@"))
-            println("5  " + json.substring(1, json.length - 1).replace("],[", "]],[[").split("],\\[").map(res.json2array(_).toSet).toSet.mkString("@"))
-
-
-            println("-------------------------")
-            println("1  " + json)
-            println("2  " + json.substring(1, json.length - 1))
-            //            println("3  " + json.substring(1, json.length - 1).split("],\\[").toList.mkString("@"))
-            println("3  " + json.substring(1, json.length - 1).replace("\"],[\"", "\"]],[[\""))
-            println("4  " + json.substring(1, json.length - 1).replace("\"],[\"", "\"]],[[\"").split("],\\[").toList.mkString("@"))
-            //            println("5  " + json.substring(1, json.length - 1).replace("\"],[\"", "\"]],[[\"").split("],\\[").map(res.json2array(_).toSet).toSet.mkString("@"))
-
-
-            //            // Need res.json2array for various types with/without quotes
-            //            json //                              "[[1, 2], [3, 4], [5, 6]]"
-            //              .substring(1, json.length - 1) //  "[1, 2], [3, 4], [5, 6]"
-            //              .replace("], [", "]], [[") //      "[1, 2]], [[3, 4]], [[5, 6]"
-            //              .split("],\\[") //                Array("[1, 2]", "[3, 4]", "[5, 6]")
-            //              .map(res.json2array(_).toSet) //   Array(Set(1, 2), Set(3, 4), Set(5, 6))
-            //              .toSet //                          Set(Set(1, 2), Set(3, 4), Set(5, 6))
-
-
             // Need res.json2array for various types with/without quotes
             json //                              "[[1, 2], [3, 4], [5, 6]]"
               .substring(1, json.length - 1) //  "[1, 2], [3, 4], [5, 6]"
-              .replace("],[", "]],[[") //         "[1, 2]], [[3, 4]], [[5, 6]"
-              .split("], ?\\[") //                 Array("[1, 2]", "[3, 4]", "[5, 6]")
+              .replace("],[", "]],[[") //        "[1, 2]], [[3, 4]], [[5, 6]"
+              .split("], ?\\[") //               Array("[1, 2]", "[3, 4]", "[5, 6]")
               .map(res.json2array(_).toSet) //   Array(Set(1, 2), Set(3, 4), Set(5, 6))
               .toSet //                          Set(Set(1, 2), Set(3, 4), Set(5, 6))
-
-            //            json.substring(2, json.length - 2).split("],\\[").toSet
-            //            json.substring(1, json.length - 1).replace("\"],[\"", "\"]],[[\"").split("],\\[").map(res.json2array(_).toSet).toSet
           }
         })
 
@@ -310,20 +270,28 @@ trait ResolveExprSet_mariadb
   }
 
   private def dbType(col: String): String = attrMap(col)._2 match {
-    case "String"     => "LONGTEXT"
-    case "Int"        => "INT"
-    case "Long"       => "BIGINT"
-    case "Float"      => "REAL"
-    case "Double"     => "DOUBLE"
-    case "Boolean"    => "TINYINT(1)"
-    case "BigInt"     => "DECIMAL(65, 0)"
-    case "BigDecimal" => "DECIMAL(65, 30)"
-    case "Date"       => "BIGINT"
-    case "UUID"       => "TINYTEXT"
-    case "URI"        => "TEXT"
-    case "Byte"       => "TINYINT"
-    case "Short"      => "SMALLINT"
-    case "Char"       => "CHAR"
+    case "String"         => "LONGTEXT"
+    case "Int"            => "INT"
+    case "Long"           => "BIGINT"
+    case "Float"          => "REAL"
+    case "Double"         => "DOUBLE"
+    case "Boolean"        => "TINYINT(1)"
+    case "BigInt"         => "DECIMAL(65, 0)"
+    case "BigDecimal"     => "DECIMAL(65, 30)"
+    case "Date"           => "BIGINT"
+    case "Duration"       => "TINYTEXT"
+    case "Instant"        => "TINYTEXT"
+    case "LocalDate"      => "TINYTEXT"
+    case "LocalTime"      => "TINYTEXT"
+    case "LocalDateTime"  => "TINYTEXT"
+    case "OffsetTime"     => "TINYTEXT"
+    case "OffsetDateTime" => "TINYTEXT"
+    case "ZonedDateTime"  => "TINYTEXT"
+    case "UUID"           => "TINYTEXT"
+    case "URI"            => "TEXT"
+    case "Byte"           => "TINYINT"
+    case "Short"          => "SMALLINT"
+    case "Char"           => "CHAR"
   }
 
   private def matchArray[T](col: String, set: Set[T], one2json: T => String): String = {

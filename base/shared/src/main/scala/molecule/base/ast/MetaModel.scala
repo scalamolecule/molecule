@@ -20,15 +20,6 @@ case class MetaSchema(
 
   override def toString: String = render(0)
 
-  def nss = {
-    for {
-      part <- parts
-      ns <- part.nss
-    } yield {
-      ns.ns
-    }
-  }
-
   def nsMap(tabs: Int = 0): String = {
     val p        = indent(tabs)
     val pad      = s"\n$p  "
@@ -56,7 +47,7 @@ case class MetaSchema(
     val attrs    = attrData.map {
       case (a, card, tpe, reqAttrs) =>
         val reqAttrsStr = reqAttrs.map(a => s""""$a"""").mkString(", ")
-        s""""$a"${padS(maxSp, a)} -> ($card, "$tpe"${padS(10, tpe)}, Seq($reqAttrsStr))"""
+        s""""$a"${padS(maxSp, a)} -> ($card, "$tpe"${padS(14, tpe)}, Seq($reqAttrsStr))"""
     }
     val attrsStr = if (attrs.isEmpty) "" else attrs.mkString(pad, s",$pad", s"\n$p")
     s"Map($attrsStr)"

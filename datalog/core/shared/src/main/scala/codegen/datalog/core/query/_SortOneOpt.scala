@@ -7,16 +7,17 @@ object _SortOneOpt extends DatomicGenBase("SortOneOpt", "/query") {
   val content = {
     val sorters = baseTypes.map(sorter).mkString("\n")
     s"""// GENERATED CODE ********************************
-       |package molecule.datomic.query
+       |package molecule.datalog.core.query
        |
        |import java.lang.{Boolean => jBoolean, Double => jDouble, Float => jFloat, Integer => jInteger, Long => jLong}
        |import java.math.{BigDecimal => jBigDecimal, BigInteger => jBigInt}
        |import java.net.URI
+       |import java.time._
        |import java.util.{Date, UUID, Map => jMap}
        |import molecule.boilerplate.ast.Model._
        |
        |
-       |trait $fileName_[Tpl] { self: DatomicModel2Query[Tpl] =>
+       |trait $fileName_[Tpl] { self: Model2DatomicQuery[Tpl] =>
        |
        |  private def compare(
        |    a: Row,
@@ -36,7 +37,18 @@ object _SortOneOpt extends DatomicGenBase("SortOneOpt", "/query") {
   }
 
   def sorter(tpe: String): String = {
-    val cast = if(tpe == "Int") "toString.toInt" else s"asInstanceOf[${javaTypes(tpe)}]"
+    val cast: String => String = tpe match {
+      case "Int"            => (map: String) => s"$map.values.iterator.next.toString.toInt"
+      case "Duration"       => (map: String) => s"Duration.parse($map.values.iterator.next.toString)"
+      case "Instant"        => (map: String) => s"Instant.parse($map.values.iterator.next.toString)"
+      case "LocalDate"      => (map: String) => s"LocalDate.parse($map.values.iterator.next.toString)"
+      case "LocalTime"      => (map: String) => s"LocalTime.parse($map.values.iterator.next.toString)"
+      case "LocalDateTime"  => (map: String) => s"LocalDateTime.parse($map.values.iterator.next.toString)"
+      case "OffsetTime"     => (map: String) => s"OffsetTime.parse($map.values.iterator.next.toString)"
+      case "OffsetDateTime" => (map: String) => s"OffsetDateTime.parse($map.values.iterator.next.toString)"
+      case "ZonedDateTime"  => (map: String) => s"ZonedDateTime.parse($map.values.iterator.next.toString)"
+      case _                => (map: String) => s"$map.values.iterator.next.asInstanceOf[${javaTypes(tpe)}]"
+    }
     s"""
        |  protected def sortOneOpt$tpe(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
        |    attr.sort.map { sort =>
@@ -47,15 +59,15 @@ object _SortOneOpt extends DatomicGenBase("SortOneOpt", "/query") {
        |            val i = nestedIdsCount + attrIndex
        |            (a: Row, b: Row) =>
        |              compare(a, b, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
-       |                m1.values.iterator.next.$cast.compareTo(
-       |                  m2.values.iterator.next.$cast)
+       |                ${cast("m1")}.compareTo(
+       |                  ${cast("m2")})
        |              )
        |          case 'd' => (nestedIdsCount: Int) =>
        |            val i = nestedIdsCount + attrIndex
        |            (a: Row, b: Row) =>
        |              compare(b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
-       |                m1.values.iterator.next.$cast.compareTo(
-       |                  m2.values.iterator.next.$cast)
+       |                ${cast("m1")}.compareTo(
+       |                  ${cast("m2")})
        |              )
        |        }
        |      )

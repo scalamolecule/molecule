@@ -1,6 +1,7 @@
 package molecule.boilerplate.ast
 
 import java.net.URI
+import java.time._
 import java.util.{Date, UUID}
 import molecule.boilerplate.ast.Model._
 
@@ -64,6 +65,54 @@ trait Validations {
     override def withAttrs(_attrs: Seq[Attr]): ValidateDate = ???
     override def withValues(_values: Seq[Value]): ValidateDate = ???
     def validate(v: Date): Seq[String] = ???
+  }
+
+  case class ValidateDuration(_attrs: Seq[Attr] = Nil, _values: Seq[Value] = Nil) extends Validator {
+    override def withAttrs(_attrs: Seq[Attr]): ValidateDuration = ???
+    override def withValues(_values: Seq[Value]): ValidateDuration = ???
+    def validate(v: Duration): Seq[String] = ???
+  }
+
+  case class ValidateInstant(_attrs: Seq[Attr] = Nil, _values: Seq[Value] = Nil) extends Validator {
+    override def withAttrs(_attrs: Seq[Attr]): ValidateInstant = ???
+    override def withValues(_values: Seq[Value]): ValidateInstant = ???
+    def validate(v: Instant): Seq[String] = ???
+  }
+
+  case class ValidateLocalDate(_attrs: Seq[Attr] = Nil, _values: Seq[Value] = Nil) extends Validator {
+    override def withAttrs(_attrs: Seq[Attr]): ValidateLocalDate = ???
+    override def withValues(_values: Seq[Value]): ValidateLocalDate = ???
+    def validate(v: LocalDate): Seq[String] = ???
+  }
+
+  case class ValidateLocalTime(_attrs: Seq[Attr] = Nil, _values: Seq[Value] = Nil) extends Validator {
+    override def withAttrs(_attrs: Seq[Attr]): ValidateLocalTime = ???
+    override def withValues(_values: Seq[Value]): ValidateLocalTime = ???
+    def validate(v: LocalTime): Seq[String] = ???
+  }
+
+  case class ValidateLocalDateTime(_attrs: Seq[Attr] = Nil, _values: Seq[Value] = Nil) extends Validator {
+    override def withAttrs(_attrs: Seq[Attr]): ValidateLocalDateTime = ???
+    override def withValues(_values: Seq[Value]): ValidateLocalDateTime = ???
+    def validate(v: LocalDateTime): Seq[String] = ???
+  }
+
+  case class ValidateOffsetTime(_attrs: Seq[Attr] = Nil, _values: Seq[Value] = Nil) extends Validator {
+    override def withAttrs(_attrs: Seq[Attr]): ValidateOffsetTime = ???
+    override def withValues(_values: Seq[Value]): ValidateOffsetTime = ???
+    def validate(v: OffsetTime): Seq[String] = ???
+  }
+
+  case class ValidateOffsetDateTime(_attrs: Seq[Attr] = Nil, _values: Seq[Value] = Nil) extends Validator {
+    override def withAttrs(_attrs: Seq[Attr]): ValidateOffsetDateTime = ???
+    override def withValues(_values: Seq[Value]): ValidateOffsetDateTime = ???
+    def validate(v: OffsetDateTime): Seq[String] = ???
+  }
+
+  case class ValidateZonedDateTime(_attrs: Seq[Attr] = Nil, _values: Seq[Value] = Nil) extends Validator {
+    override def withAttrs(_attrs: Seq[Attr]): ValidateZonedDateTime = ???
+    override def withValues(_values: Seq[Value]): ValidateZonedDateTime = ???
+    def validate(v: ZonedDateTime): Seq[String] = ???
   }
 
   case class ValidateUUID(_attrs: Seq[Attr] = Nil, _values: Seq[Value] = Nil) extends Validator {

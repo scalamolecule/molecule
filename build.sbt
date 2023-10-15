@@ -1,5 +1,6 @@
 import org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv
 import org.scalajs.linker.interface.ESVersion
+import sbt.Keys.crossScalaVersions
 
 
 val scala212 = "2.12.18"
@@ -17,7 +18,7 @@ inThisBuild(
     organization := "org.scalamolecule",
     organizationName := "ScalaMolecule",
     organizationHomepage := Some(url("http://www.scalamolecule.org")),
-    version := "0.5.1",
+    version := "0.6.0",
     versionScheme := Some("early-semver"),
     //    scalaVersion := scala212,
     scalaVersion := scala213,
@@ -76,12 +77,9 @@ lazy val boilerplate = crossProject(JSPlatform, JVMPlatform)
   .settings(
     libraryDependencies ++= Seq(
       "com.lihaoyi" %%% "utest" % "0.8.1",
-
-      // Logging
-      "com.outr" %%% "scribe" % "3.11.8",
-
-      // Tolerant roundings with triple equal on js platform
-      "org.scalactic" %%% "scalactic" % "3.2.16"
+      "com.outr" %%% "scribe" % "3.11.8", // Logging
+      "org.scalactic" %%% "scalactic" % "3.2.16", // Tolerant roundings with triple equal on js platform
+      "io.github.cquiroz" %%% "scala-java-time" % "2.5.0"
     ),
     testFrameworks += new TestFramework("utest.runner.Framework")
   )
@@ -129,12 +127,13 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
   .settings(
     // Generate Molecule boilerplate code for tests with `sbt clean compile -Dmolecule=true`
     moleculePluginActive := sys.props.get("molecule").contains("true"),
+    moleculeMakeJars := !sys.props.get("moleculeJars").contains("false"), // default: true
+    //    moleculeMakeJars := false, // default: true
 
     // Multiple directories with data models
     moleculeDataModelPaths := Seq(
       "molecule/coreTests/dataModels/core"
     ),
-    //    moleculeMakeJars := false, // default: true
 
     // Suppress "un-used" keys warning
     Global / excludeLintKeys ++= Set(
@@ -182,7 +181,6 @@ lazy val datalogDatomic = crossProject(JSPlatform, JVMPlatform)
   .in(file("datalog/datomic"))
   .settings(name := "molecule-datalog-datomic")
   .settings(doPublish)
-//  .dependsOn(datalogCore % "compile->compile;test->test")
   .dependsOn(datalogCore)
   .dependsOn(coreTests % "test->test")
   .settings(
@@ -250,7 +248,7 @@ lazy val sqlH2 = crossProject(JSPlatform, JVMPlatform)
   .in(file("sql/h2"))
   .settings(name := "molecule-sql-h2")
   .settings(doPublish)
-  .dependsOn(sqlCore )
+  .dependsOn(sqlCore)
   .dependsOn(coreTests % "test->test")
   .settings(
     testFrameworks := Seq(

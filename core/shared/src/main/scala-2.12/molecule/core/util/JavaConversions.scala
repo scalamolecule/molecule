@@ -1,5 +1,6 @@
 package molecule.core.util
 
+import java.time._
 import java.util.{concurrent => juc}
 import java.{lang => jl, util => ju}
 import scala.collection._
@@ -154,4 +155,9 @@ trait JavaConversions {
     /** Converts a Scala `Map` to a Java `Dictionary` */
     def asJavaDictionary: ju.Dictionary[K, V] = JavaConverters.asJavaDictionary(m)
   }
+
+  // Needed for Scala 2.12
+  implicit val localDateOrdering    : Ordering[LocalDate]     = _.compareTo(_)
+  implicit val localDateTimeOrdering: Ordering[LocalDateTime] = _.compareTo(_)
+  implicit val zonedDateTimeOrdering: Ordering[ZonedDateTime] = _.compareTo(_)
 }

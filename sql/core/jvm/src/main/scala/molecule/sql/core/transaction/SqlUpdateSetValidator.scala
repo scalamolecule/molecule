@@ -97,21 +97,29 @@ trait SqlUpdateSetValidator extends SpiHelpers {
 
   // Mysql data types
   private def dbType(a: Attr): String = a match {
-    case _: AttrSetManString     => "LONGTEXT"
-    case _: AttrSetManInt        => "INT"
-    case _: AttrSetManLong       => "BIGINT"
-    case _: AttrSetManFloat      => "REAL"
-    case _: AttrSetManDouble     => "DOUBLE"
-    case _: AttrSetManBoolean    => "TINYINT(1)"
-    case _: AttrSetManBigInt     => "DECIMAL(65, 0)"
-    case _: AttrSetManBigDecimal => "DECIMAL(65, 30)"
-    case _: AttrSetManDate       => "BIGINT"
-    case _: AttrSetManUUID       => "TINYTEXT"
-    case _: AttrSetManURI        => "TEXT"
-    case _: AttrSetManByte       => "TINYINT"
-    case _: AttrSetManShort      => "SMALLINT"
-    case _: AttrSetManChar       => "CHAR"
-    case a                       =>
+    case _: AttrSetManString         => "LONGTEXT"
+    case _: AttrSetManInt            => "INT"
+    case _: AttrSetManLong           => "BIGINT"
+    case _: AttrSetManFloat          => "REAL"
+    case _: AttrSetManDouble         => "DOUBLE"
+    case _: AttrSetManBoolean        => "TINYINT(1)"
+    case _: AttrSetManBigInt         => "DECIMAL(65, 0)"
+    case _: AttrSetManBigDecimal     => "DECIMAL(65, 30)"
+    case _: AttrSetManDate           => "BIGINT"
+    case _: AttrSetManDuration       => "TINYTEXT"
+    case _: AttrSetManInstant        => "TINYTEXT"
+    case _: AttrSetManLocalDate      => "TINYTEXT"
+    case _: AttrSetManLocalTime      => "TINYTEXT"
+    case _: AttrSetManLocalDateTime  => "TINYTEXT"
+    case _: AttrSetManOffsetTime     => "TINYTEXT"
+    case _: AttrSetManOffsetDateTime => "TINYTEXT"
+    case _: AttrSetManZonedDateTime  => "TINYTEXT"
+    case _: AttrSetManUUID           => "TINYTEXT"
+    case _: AttrSetManURI            => "TEXT"
+    case _: AttrSetManByte           => "TINYINT"
+    case _: AttrSetManShort          => "SMALLINT"
+    case _: AttrSetManChar           => "CHAR"
+    case a                           =>
       throw ModelError(s"Unexpected attribute. Found:\n" + a)
   }
 }

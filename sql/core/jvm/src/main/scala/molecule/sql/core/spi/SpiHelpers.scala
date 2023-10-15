@@ -1,9 +1,10 @@
 package molecule.sql.core.spi
 
 import java.net.URI
+import java.time._
 import java.util.{Date, UUID}
 import molecule.base.ast._
-import molecule.base.error.{ExecutionError, ModelError}
+import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.core.action.Query
 import molecule.core.util.ModelUtils
@@ -32,20 +33,28 @@ trait SpiHelpers extends ModelUtils {
           case a: AttrOneMan =>
             prevNs = a.ns
             a match {
-              case a: AttrOneManString     => idsModel += AttrOneTacString(a.ns, a.attr, coord = a.coord)
-              case a: AttrOneManInt        => idsModel += AttrOneTacInt(a.ns, a.attr, coord = a.coord)
-              case a: AttrOneManLong       => idsModel += AttrOneTacLong(a.ns, a.attr, coord = a.coord)
-              case a: AttrOneManFloat      => idsModel += AttrOneTacFloat(a.ns, a.attr, coord = a.coord)
-              case a: AttrOneManDouble     => idsModel += AttrOneTacDouble(a.ns, a.attr, coord = a.coord)
-              case a: AttrOneManBoolean    => idsModel += AttrOneTacBoolean(a.ns, a.attr, coord = a.coord)
-              case a: AttrOneManBigInt     => idsModel += AttrOneTacBigInt(a.ns, a.attr, coord = a.coord)
-              case a: AttrOneManBigDecimal => idsModel += AttrOneTacBigDecimal(a.ns, a.attr, coord = a.coord)
-              case a: AttrOneManDate       => idsModel += AttrOneTacDate(a.ns, a.attr, coord = a.coord)
-              case a: AttrOneManUUID       => idsModel += AttrOneTacUUID(a.ns, a.attr, coord = a.coord)
-              case a: AttrOneManURI        => idsModel += AttrOneTacURI(a.ns, a.attr, coord = a.coord)
-              case a: AttrOneManByte       => idsModel += AttrOneTacByte(a.ns, a.attr, coord = a.coord)
-              case a: AttrOneManShort      => idsModel += AttrOneTacShort(a.ns, a.attr, coord = a.coord)
-              case a: AttrOneManChar       => idsModel += AttrOneTacChar(a.ns, a.attr, coord = a.coord)
+              case a: AttrOneManString         => idsModel += AttrOneTacString(a.ns, a.attr, coord = a.coord)
+              case a: AttrOneManInt            => idsModel += AttrOneTacInt(a.ns, a.attr, coord = a.coord)
+              case a: AttrOneManLong           => idsModel += AttrOneTacLong(a.ns, a.attr, coord = a.coord)
+              case a: AttrOneManFloat          => idsModel += AttrOneTacFloat(a.ns, a.attr, coord = a.coord)
+              case a: AttrOneManDouble         => idsModel += AttrOneTacDouble(a.ns, a.attr, coord = a.coord)
+              case a: AttrOneManBoolean        => idsModel += AttrOneTacBoolean(a.ns, a.attr, coord = a.coord)
+              case a: AttrOneManBigInt         => idsModel += AttrOneTacBigInt(a.ns, a.attr, coord = a.coord)
+              case a: AttrOneManBigDecimal     => idsModel += AttrOneTacBigDecimal(a.ns, a.attr, coord = a.coord)
+              case a: AttrOneManDate           => idsModel += AttrOneTacDate(a.ns, a.attr, coord = a.coord)
+              case a: AttrOneManDuration       => idsModel += AttrOneTacDuration(a.ns, a.attr, coord = a.coord)
+              case a: AttrOneManInstant        => idsModel += AttrOneTacInstant(a.ns, a.attr, coord = a.coord)
+              case a: AttrOneManLocalDate      => idsModel += AttrOneTacLocalDate(a.ns, a.attr, coord = a.coord)
+              case a: AttrOneManLocalTime      => idsModel += AttrOneTacLocalTime(a.ns, a.attr, coord = a.coord)
+              case a: AttrOneManLocalDateTime  => idsModel += AttrOneTacLocalDateTime(a.ns, a.attr, coord = a.coord)
+              case a: AttrOneManOffsetTime     => idsModel += AttrOneTacOffsetTime(a.ns, a.attr, coord = a.coord)
+              case a: AttrOneManOffsetDateTime => idsModel += AttrOneTacOffsetDateTime(a.ns, a.attr, coord = a.coord)
+              case a: AttrOneManZonedDateTime  => idsModel += AttrOneTacZonedDateTime(a.ns, a.attr, coord = a.coord)
+              case a: AttrOneManUUID           => idsModel += AttrOneTacUUID(a.ns, a.attr, coord = a.coord)
+              case a: AttrOneManURI            => idsModel += AttrOneTacURI(a.ns, a.attr, coord = a.coord)
+              case a: AttrOneManByte           => idsModel += AttrOneTacByte(a.ns, a.attr, coord = a.coord)
+              case a: AttrOneManShort          => idsModel += AttrOneTacShort(a.ns, a.attr, coord = a.coord)
+              case a: AttrOneManChar           => idsModel += AttrOneTacChar(a.ns, a.attr, coord = a.coord)
             }
           case a: AttrOneTac => idsModel += a
 
@@ -53,20 +62,28 @@ trait SpiHelpers extends ModelUtils {
             if (a.op == Eq || a.op == Add || a.op == Swap || a.op == Remove) {
               prevNs = a.ns
               a match {
-                case a: AttrSetManString     => idsModel += AttrSetTacString(a.ns, a.attr, coord = a.coord)
-                case a: AttrSetManInt        => idsModel += AttrSetTacInt(a.ns, a.attr, coord = a.coord)
-                case a: AttrSetManLong       => idsModel += AttrSetTacLong(a.ns, a.attr, coord = a.coord)
-                case a: AttrSetManFloat      => idsModel += AttrSetTacFloat(a.ns, a.attr, coord = a.coord)
-                case a: AttrSetManDouble     => idsModel += AttrSetTacDouble(a.ns, a.attr, coord = a.coord)
-                case a: AttrSetManBoolean    => idsModel += AttrSetTacBoolean(a.ns, a.attr, coord = a.coord)
-                case a: AttrSetManBigInt     => idsModel += AttrSetTacBigInt(a.ns, a.attr, coord = a.coord)
-                case a: AttrSetManBigDecimal => idsModel += AttrSetTacBigDecimal(a.ns, a.attr, coord = a.coord)
-                case a: AttrSetManDate       => idsModel += AttrSetTacDate(a.ns, a.attr, coord = a.coord)
-                case a: AttrSetManUUID       => idsModel += AttrSetTacUUID(a.ns, a.attr, coord = a.coord)
-                case a: AttrSetManURI        => idsModel += AttrSetTacURI(a.ns, a.attr, coord = a.coord)
-                case a: AttrSetManByte       => idsModel += AttrSetTacByte(a.ns, a.attr, coord = a.coord)
-                case a: AttrSetManShort      => idsModel += AttrSetTacShort(a.ns, a.attr, coord = a.coord)
-                case a: AttrSetManChar       => idsModel += AttrSetTacChar(a.ns, a.attr, coord = a.coord)
+                case a: AttrSetManString         => idsModel += AttrSetTacString(a.ns, a.attr, coord = a.coord)
+                case a: AttrSetManInt            => idsModel += AttrSetTacInt(a.ns, a.attr, coord = a.coord)
+                case a: AttrSetManLong           => idsModel += AttrSetTacLong(a.ns, a.attr, coord = a.coord)
+                case a: AttrSetManFloat          => idsModel += AttrSetTacFloat(a.ns, a.attr, coord = a.coord)
+                case a: AttrSetManDouble         => idsModel += AttrSetTacDouble(a.ns, a.attr, coord = a.coord)
+                case a: AttrSetManBoolean        => idsModel += AttrSetTacBoolean(a.ns, a.attr, coord = a.coord)
+                case a: AttrSetManBigInt         => idsModel += AttrSetTacBigInt(a.ns, a.attr, coord = a.coord)
+                case a: AttrSetManBigDecimal     => idsModel += AttrSetTacBigDecimal(a.ns, a.attr, coord = a.coord)
+                case a: AttrSetManDate           => idsModel += AttrSetTacDate(a.ns, a.attr, coord = a.coord)
+                case a: AttrSetManDuration       => idsModel += AttrSetTacDuration(a.ns, a.attr, coord = a.coord)
+                case a: AttrSetManInstant        => idsModel += AttrSetTacInstant(a.ns, a.attr, coord = a.coord)
+                case a: AttrSetManLocalDate      => idsModel += AttrSetTacLocalDate(a.ns, a.attr, coord = a.coord)
+                case a: AttrSetManLocalTime      => idsModel += AttrSetTacLocalTime(a.ns, a.attr, coord = a.coord)
+                case a: AttrSetManLocalDateTime  => idsModel += AttrSetTacLocalDateTime(a.ns, a.attr, coord = a.coord)
+                case a: AttrSetManOffsetTime     => idsModel += AttrSetTacOffsetTime(a.ns, a.attr, coord = a.coord)
+                case a: AttrSetManOffsetDateTime => idsModel += AttrSetTacOffsetDateTime(a.ns, a.attr, coord = a.coord)
+                case a: AttrSetManZonedDateTime  => idsModel += AttrSetTacZonedDateTime(a.ns, a.attr, coord = a.coord)
+                case a: AttrSetManUUID           => idsModel += AttrSetTacUUID(a.ns, a.attr, coord = a.coord)
+                case a: AttrSetManURI            => idsModel += AttrSetTacURI(a.ns, a.attr, coord = a.coord)
+                case a: AttrSetManByte           => idsModel += AttrSetTacByte(a.ns, a.attr, coord = a.coord)
+                case a: AttrSetManShort          => idsModel += AttrSetTacShort(a.ns, a.attr, coord = a.coord)
+                case a: AttrSetManChar           => idsModel += AttrSetTacChar(a.ns, a.attr, coord = a.coord)
               }
 
             } else {
@@ -186,21 +203,29 @@ trait SpiHelpers extends ModelUtils {
 
   protected def nestedArray2coalescedSet(a: Attr, rs: Row, isAttr: Boolean = true): Set[Any] = {
     a match {
-      case _: AttrSetManString     => sql2set(isAttr, rs, (v: Any) => v.asInstanceOf[String])
-      case _: AttrSetManInt        => sql2set(isAttr, rs, (v: Any) => v.toString.toInt)
-      case _: AttrSetManLong       => sql2set(isAttr, rs, (v: Any) => v.asInstanceOf[Long])
-      case _: AttrSetManFloat      => sql2set(isAttr, rs, (v: Any) => v.asInstanceOf[Float])
-      case _: AttrSetManDouble     => sql2set(isAttr, rs, (v: Any) => v.asInstanceOf[Double])
-      case _: AttrSetManBoolean    => sql2set(isAttr, rs, (v: Any) => v.asInstanceOf[Boolean])
-      case _: AttrSetManBigInt     => sql2set(isAttr, rs, (v: Any) => BigInt(v.toString))
-      case _: AttrSetManBigDecimal => sql2set(isAttr, rs, (v: Any) => BigDecimal(v.toString))
-      case _: AttrSetManDate       => sql2set(isAttr, rs, (v: Any) => v.asInstanceOf[Date])
-      case _: AttrSetManUUID       => sql2set(isAttr, rs, (v: Any) => v.asInstanceOf[UUID])
-      case _: AttrSetManURI        => sql2set(isAttr, rs, (v: Any) => v.asInstanceOf[String]).map(v => new URI(v))
-      case _: AttrSetManByte       => sql2set(isAttr, rs, (v: Any) => v.asInstanceOf[Integer].toByte)
-      case _: AttrSetManShort      => sql2set(isAttr, rs, (v: Any) => v.asInstanceOf[Integer].toShort)
-      case _: AttrSetManChar       => sql2set(isAttr, rs, (v: Any) => v.asInstanceOf[String].charAt(0))
-      case other                   => throw ModelError(
+      case _: AttrSetManString         => sql2set(isAttr, rs, (v: Any) => v.asInstanceOf[String])
+      case _: AttrSetManInt            => sql2set(isAttr, rs, (v: Any) => v.toString.toInt)
+      case _: AttrSetManLong           => sql2set(isAttr, rs, (v: Any) => v.asInstanceOf[Long])
+      case _: AttrSetManFloat          => sql2set(isAttr, rs, (v: Any) => v.asInstanceOf[Float])
+      case _: AttrSetManDouble         => sql2set(isAttr, rs, (v: Any) => v.asInstanceOf[Double])
+      case _: AttrSetManBoolean        => sql2set(isAttr, rs, (v: Any) => v.asInstanceOf[Boolean])
+      case _: AttrSetManBigInt         => sql2set(isAttr, rs, (v: Any) => BigInt(v.toString))
+      case _: AttrSetManBigDecimal     => sql2set(isAttr, rs, (v: Any) => BigDecimal(v.toString))
+      case _: AttrSetManDate           => sql2set(isAttr, rs, (v: Any) => v.asInstanceOf[Date])
+      case _: AttrSetManDuration       => sql2set(isAttr, rs, (v: Any) => v.asInstanceOf[Duration])
+      case _: AttrSetManInstant        => sql2set(isAttr, rs, (v: Any) => v.asInstanceOf[Instant])
+      case _: AttrSetManLocalDate      => sql2set(isAttr, rs, (v: Any) => v.asInstanceOf[LocalDate])
+      case _: AttrSetManLocalTime      => sql2set(isAttr, rs, (v: Any) => v.asInstanceOf[LocalTime])
+      case _: AttrSetManLocalDateTime  => sql2set(isAttr, rs, (v: Any) => v.asInstanceOf[LocalDateTime])
+      case _: AttrSetManOffsetTime     => sql2set(isAttr, rs, (v: Any) => v.asInstanceOf[OffsetTime])
+      case _: AttrSetManOffsetDateTime => sql2set(isAttr, rs, (v: Any) => v.asInstanceOf[OffsetDateTime])
+      case _: AttrSetManZonedDateTime  => sql2set(isAttr, rs, (v: Any) => v.asInstanceOf[ZonedDateTime])
+      case _: AttrSetManUUID           => sql2set(isAttr, rs, (v: Any) => v.asInstanceOf[UUID])
+      case _: AttrSetManURI            => sql2set(isAttr, rs, (v: Any) => v.asInstanceOf[String]).map(v => new URI(v))
+      case _: AttrSetManByte           => sql2set(isAttr, rs, (v: Any) => v.asInstanceOf[Integer].toByte)
+      case _: AttrSetManShort          => sql2set(isAttr, rs, (v: Any) => v.asInstanceOf[Integer].toShort)
+      case _: AttrSetManChar           => sql2set(isAttr, rs, (v: Any) => v.asInstanceOf[String].charAt(0))
+      case other                       => throw ModelError(
         "Unexpected attribute type for Set validation value retriever:\n" + other
       )
     }
@@ -246,21 +271,29 @@ trait SpiHelpers extends ModelUtils {
     rs.next()
     val json = rs.getString(1)
     a match {
-      case _: AttrSetManString     => json.substring(2, json.length - 2).split("\", ?\"").toSet
-      case _: AttrSetManInt        => json.substring(1, json.length - 1).split(", ?").map(_.toInt).toSet
-      case _: AttrSetManLong       => json.substring(1, json.length - 1).split(", ?").map(_.toLong).toSet
-      case _: AttrSetManFloat      => json.substring(1, json.length - 1).split(", ?").map(_.toFloat).toSet
-      case _: AttrSetManDouble     => json.substring(1, json.length - 1).split(", ?").map(_.toDouble).toSet
-      case _: AttrSetManBoolean    => json.substring(1, json.length - 1).split(", ?").map(_ == "1").toSet
-      case _: AttrSetManBigInt     => json.substring(1, json.length - 1).split(", ?").map(BigInt(_)).toSet
-      case _: AttrSetManBigDecimal => json.substring(1, json.length - 1).split(", ?").map(BigDecimal(_)).toSet
-      case _: AttrSetManDate       => json.substring(1, json.length - 1).split(", ?").map(v => new Date(v.toLong)).toSet
-      case _: AttrSetManUUID       => json.substring(2, json.length - 2).split("\", ?\"").map(UUID.fromString).toSet
-      case _: AttrSetManURI        => json.substring(2, json.length - 2).split("\", ?\"").map(new URI(_)).toSet
-      case _: AttrSetManByte       => json.substring(1, json.length - 1).split(", ?").map(_.toByte).toSet
-      case _: AttrSetManShort      => json.substring(1, json.length - 1).split(", ?").map(_.toShort).toSet
-      case _: AttrSetManChar       => json.substring(2, json.length - 2).split("\", ?\"").map(_.charAt(0)).toSet
-      case other                   => throw ModelError(
+      case _: AttrSetManString         => json.substring(2, json.length - 2).split("\", ?\"").toSet
+      case _: AttrSetManInt            => json.substring(1, json.length - 1).split(", ?").map(_.toInt).toSet
+      case _: AttrSetManLong           => json.substring(1, json.length - 1).split(", ?").map(_.toLong).toSet
+      case _: AttrSetManFloat          => json.substring(1, json.length - 1).split(", ?").map(_.toFloat).toSet
+      case _: AttrSetManDouble         => json.substring(1, json.length - 1).split(", ?").map(_.toDouble).toSet
+      case _: AttrSetManBoolean        => json.substring(1, json.length - 1).split(", ?").map(_ == "1").toSet
+      case _: AttrSetManBigInt         => json.substring(1, json.length - 1).split(", ?").map(BigInt(_)).toSet
+      case _: AttrSetManBigDecimal     => json.substring(1, json.length - 1).split(", ?").map(BigDecimal(_)).toSet
+      case _: AttrSetManDate           => json.substring(1, json.length - 1).split(", ?").map(v => new Date(v.toLong)).toSet
+      case _: AttrSetManDuration       => json.substring(1, json.length - 1).split(", ?").map(v => Duration.parse(v)).toSet
+      case _: AttrSetManInstant        => json.substring(1, json.length - 1).split(", ?").map(v => Instant.parse(v)).toSet
+      case _: AttrSetManLocalDate      => json.substring(1, json.length - 1).split(", ?").map(v => LocalDate.parse(v)).toSet
+      case _: AttrSetManLocalTime      => json.substring(1, json.length - 1).split(", ?").map(v => LocalTime.parse(v)).toSet
+      case _: AttrSetManLocalDateTime  => json.substring(1, json.length - 1).split(", ?").map(v => LocalDateTime.parse(v)).toSet
+      case _: AttrSetManOffsetTime     => json.substring(1, json.length - 1).split(", ?").map(v => OffsetTime.parse(v)).toSet
+      case _: AttrSetManOffsetDateTime => json.substring(1, json.length - 1).split(", ?").map(v => OffsetDateTime.parse(v)).toSet
+      case _: AttrSetManZonedDateTime  => json.substring(1, json.length - 1).split(", ?").map(v => ZonedDateTime.parse(v)).toSet
+      case _: AttrSetManUUID           => json.substring(2, json.length - 2).split("\", ?\"").map(UUID.fromString).toSet
+      case _: AttrSetManURI            => json.substring(2, json.length - 2).split("\", ?\"").map(new URI(_)).toSet
+      case _: AttrSetManByte           => json.substring(1, json.length - 1).split(", ?").map(_.toByte).toSet
+      case _: AttrSetManShort          => json.substring(1, json.length - 1).split(", ?").map(_.toShort).toSet
+      case _: AttrSetManChar           => json.substring(2, json.length - 2).split("\", ?\"").map(_.charAt(0)).toSet
+      case other                       => throw ModelError(
         "Unexpected attribute type for Set validation value retriever:\n" + other
       )
     }

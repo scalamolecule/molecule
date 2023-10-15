@@ -30,41 +30,57 @@ object Connection_postgres {
   val sqlSchema_postgres1: String =
     """
       |CREATE TABLE IF NOT EXISTS Ns (
-      |  id          BIGSERIAL PRIMARY KEY,
-      |  i           INTEGER,
-      |  ii          INTEGER ARRAY,
-      |  s           TEXT COLLATE ucs_basic,
-      |  u           INTEGER,
-      |  string      TEXT COLLATE ucs_basic,
-      |  int         INTEGER,
-      |  long        BIGINT,
-      |  float       decimal,
-      |  double      double precision,
-      |  boolean     BOOLEAN,
-      |  bigInt      DECIMAL,
-      |  bigDecimal  DECIMAL,
-      |  date        DATE,
-      |  uuid        UUID,
-      |  uri         VARCHAR,
-      |  byte        SMALLINT,
-      |  short       SMALLINT,
-      |  char        CHAR(1),
-      |  ref         BIGINT,
-      |  other       BIGINT,
-      |  strings     TEXT ARRAY,
-      |  ints        INTEGER ARRAY,
-      |  longs       BIGINT ARRAY,
-      |  floats      decimal ARRAY,
-      |  doubles     double precision ARRAY,
-      |  booleans    BOOLEAN ARRAY,
-      |  bigInts     DECIMAL ARRAY,
-      |  bigDecimals DECIMAL ARRAY,
-      |  dates       DATE ARRAY,
-      |  uuids       UUID ARRAY,
-      |  uris        VARCHAR ARRAY,
-      |  bytes       SMALLINT ARRAY,
-      |  shorts      SMALLINT ARRAY,
-      |  chars       CHAR(1) ARRAY
+      |  id              BIGSERIAL PRIMARY KEY,
+      |  i               INTEGER,
+      |  ii              INTEGER ARRAY,
+      |  s               TEXT COLLATE ucs_basic,
+      |  u               INTEGER,
+      |  string          TEXT COLLATE ucs_basic,
+      |  int             INTEGER,
+      |  long            BIGINT,
+      |  float           DECIMAL,
+      |  double          DOUBLE PRECISION,
+      |  boolean         BOOLEAN,
+      |  bigInt          DECIMAL,
+      |  bigDecimal      DECIMAL,
+      |  date            DATE,
+      |  duration        VARCHAR,
+      |  instant         VARCHAR,
+      |  localDate       VARCHAR,
+      |  localTime_      VARCHAR,
+      |  localDateTime   VARCHAR,
+      |  offsetTime      VARCHAR,
+      |  offsetDateTime  VARCHAR,
+      |  zonedDateTime   VARCHAR,
+      |  uuid            UUID,
+      |  uri             VARCHAR,
+      |  byte            SMALLINT,
+      |  short           SMALLINT,
+      |  char            CHAR(1),
+      |  ref             BIGINT,
+      |  other           BIGINT,
+      |  strings         TEXT ARRAY,
+      |  ints            INTEGER ARRAY,
+      |  longs           BIGINT ARRAY,
+      |  floats          DECIMAL ARRAY,
+      |  doubles         DOUBLE PRECISION ARRAY,
+      |  booleans        BOOLEAN ARRAY,
+      |  bigInts         DECIMAL ARRAY,
+      |  bigDecimals     DECIMAL ARRAY,
+      |  dates           DATE ARRAY,
+      |  durations       VARCHAR ARRAY,
+      |  instants        TEXT ARRAY,
+      |  localDates      TEXT ARRAY,
+      |  localTimes      TEXT ARRAY,
+      |  localDateTimes  TEXT ARRAY,
+      |  offsetTimes     TEXT ARRAY,
+      |  offsetDateTimes TEXT ARRAY,
+      |  zonedDateTimes  TEXT ARRAY,
+      |  uuids           UUID ARRAY,
+      |  uris            VARCHAR ARRAY,
+      |  bytes           SMALLINT ARRAY,
+      |  shorts          SMALLINT ARRAY,
+      |  chars           CHAR(1) ARRAY
       |);
       |
       |CREATE TABLE IF NOT EXISTS Ns_refs_Ref (
@@ -73,39 +89,55 @@ object Connection_postgres {
       |);
       |
       |CREATE TABLE IF NOT EXISTS Ref (
-      |  id          BIGSERIAL PRIMARY KEY,
-      |  i           INTEGER,
-      |  s           TEXT COLLATE ucs_basic,
-      |  string      TEXT COLLATE ucs_basic,
-      |  int         INTEGER,
-      |  long        BIGINT,
-      |  float       DECIMAL,
-      |  double      double precision,
-      |  boolean     BOOLEAN,
-      |  bigInt      DECIMAL,
-      |  bigDecimal  DECIMAL,
-      |  date        DATE,
-      |  uuid        UUID,
-      |  uri         VARCHAR,
-      |  byte        SMALLINT,
-      |  short       SMALLINT,
-      |  char        CHAR(1),
-      |  ii          INTEGER ARRAY,
-      |  ss          TEXT ARRAY,
-      |  strings     TEXT ARRAY,
-      |  ints        INTEGER ARRAY,
-      |  longs       BIGINT ARRAY,
-      |  floats      DECIMAL ARRAY,
-      |  doubles     double precision ARRAY,
-      |  booleans    BOOLEAN ARRAY,
-      |  bigInts     DECIMAL ARRAY,
-      |  bigDecimals DECIMAL ARRAY,
-      |  dates       DATE ARRAY,
-      |  uuids       UUID ARRAY,
-      |  uris        VARCHAR ARRAY,
-      |  bytes       SMALLINT ARRAY,
-      |  shorts      SMALLINT ARRAY,
-      |  chars       CHAR(1) ARRAY
+      |  id              BIGSERIAL PRIMARY KEY,
+      |  i               INTEGER,
+      |  s               TEXT COLLATE ucs_basic,
+      |  string          TEXT COLLATE ucs_basic,
+      |  int             INTEGER,
+      |  long            BIGINT,
+      |  float           DECIMAL,
+      |  double          DOUBLE PRECISION,
+      |  boolean         BOOLEAN,
+      |  bigInt          DECIMAL,
+      |  bigDecimal      DECIMAL,
+      |  date            DATE,
+      |  duration        VARCHAR,
+      |  instant         VARCHAR,
+      |  localDate       VARCHAR,
+      |  localTime_      VARCHAR,
+      |  localDateTime   VARCHAR,
+      |  offsetTime      VARCHAR,
+      |  offsetDateTime  VARCHAR,
+      |  zonedDateTime   VARCHAR,
+      |  uuid            UUID,
+      |  uri             VARCHAR,
+      |  byte            SMALLINT,
+      |  short           SMALLINT,
+      |  char            CHAR(1),
+      |  ii              INTEGER ARRAY,
+      |  ss              TEXT ARRAY,
+      |  strings         TEXT ARRAY,
+      |  ints            INTEGER ARRAY,
+      |  longs           BIGINT ARRAY,
+      |  floats          DECIMAL ARRAY,
+      |  doubles         DOUBLE PRECISION ARRAY,
+      |  booleans        BOOLEAN ARRAY,
+      |  bigInts         DECIMAL ARRAY,
+      |  bigDecimals     DECIMAL ARRAY,
+      |  dates           DATE ARRAY,
+      |  durations       TEXT ARRAY,
+      |  instants        TEXT ARRAY,
+      |  localDates      TEXT ARRAY,
+      |  localTimes      TEXT ARRAY,
+      |  localDateTimes  TEXT ARRAY,
+      |  offsetTimes     TEXT ARRAY,
+      |  offsetDateTimes TEXT ARRAY,
+      |  zonedDateTimes  TEXT ARRAY,
+      |  uuids           UUID ARRAY,
+      |  uris            VARCHAR ARRAY,
+      |  bytes           SMALLINT ARRAY,
+      |  shorts          SMALLINT ARRAY,
+      |  chars           CHAR(1) ARRAY
       |);
       |
       |CREATE TABLE IF NOT EXISTS Ref_nss_Ns (
@@ -114,11 +146,12 @@ object Connection_postgres {
       |);
       |
       |CREATE TABLE IF NOT EXISTS Other (
-      |  id BIGSERIAL PRIMARY KEY,
-      |  i  INTEGER,
-      |  s  TEXT COLLATE ucs_basic,
-      |  ii INTEGER ARRAY,
-      |  ss TEXT ARRAY
+      |  id      BIGSERIAL PRIMARY KEY,
+      |  i       INTEGER,
+      |  s       TEXT COLLATE ucs_basic,
+      |  ii      INTEGER ARRAY,
+      |  ss      TEXT ARRAY,
+      |  select_ INTEGER
       |);
       |
       |CREATE OR REPLACE FUNCTION _final_median(numeric[])
@@ -126,7 +159,7 @@ object Connection_postgres {
       |$$
       |   SELECT AVG(val)
       |   FROM (
-      |     SELECT val
+      |     SELECT DISTINCT val
       |     FROM unnest($1) val
       |     ORDER BY 1
       |     LIMIT  2 - MOD(array_upper($1, 1), 2)
@@ -135,7 +168,7 @@ object Connection_postgres {
       |$$
       |LANGUAGE 'sql' IMMUTABLE;
       |
-      |CREATE or replace AGGREGATE median(numeric) (
+      |CREATE AGGREGATE median(numeric) (
       |  SFUNC=array_append,
       |  STYPE=numeric[],
       |  FINALFUNC=_final_median,
@@ -149,7 +182,7 @@ object Connection_postgres {
        |""".stripMargin
 
   def recreationStmt(schema: Schema): String = {
-    // recreateSchema + sqlSchema_postgres1
+    //     recreateSchema + sqlSchema_postgres1
     recreateSchema + schema.sqlSchema_postgres
   }
 

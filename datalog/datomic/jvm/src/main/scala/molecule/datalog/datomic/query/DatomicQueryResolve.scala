@@ -18,10 +18,8 @@ abstract class DatomicQueryResolve[Tpl](
   elements: List[Element],
   dbView: Option[DbView],
   m2q: Model2DatomicQuery[Tpl] with DatomicQueryBase
-  //) extends Model2DatomicQuery[Tpl](elements) with DatomicApiSync with CursorUtils {
 ) extends CursorUtils with MoleculeLogging {
 
-  lazy val edgeValuesNotFound = "Couldn't find next page. Edge rows were all deleted/updated."
 
   protected def postAdjustPullCasts(): Unit = {
     m2q.pullCastss = m2q.pullCastss :+ m2q.pullCasts.toList
@@ -141,8 +139,6 @@ abstract class DatomicQueryResolve[Tpl](
     }
   }
 
-//  lazy val row2AnyTpl = m2q.castRow2AnyTpl(m2q.aritiess.head, m2q.castss.head, 0, None)
-
   def paginateFromIdentifiers(
     conn: DatomicConn_JVM,
     limit: Int,
@@ -203,7 +199,6 @@ abstract class DatomicQueryResolve[Tpl](
           val count          = getCount(limit, forward, totalCount)
           val row2AnyTpl     = m2q.castRow2AnyTpl(m2q.aritiess.head, m2q.castss.head, 0, None)
           val row2tpl        = (row: m2q.Row) => row2AnyTpl(row).asInstanceOf[Tpl]
-          //          val row2tpl        = (row: m2q.Row) => m2q.castRow2AnyTpl(m2q.aritiess.head, m2q.castss.head, 0, None)
           val (tuples, more) = paginateRows(count, sortedRows, identifiers, identifyRow(false), row2tpl)
           val tpls           = if (forward) tuples else tuples.reverse
           val cursor         = nextCursor(tpls, allTokens)
@@ -244,7 +239,7 @@ abstract class DatomicQueryResolve[Tpl](
             findFrom(remainingIdentifiers)
           }
 
-        case Nil => throw ModelError(edgeValuesNotFound)
+        case Nil => throw ModelError("Couldn't find next page. Edge row tuples were all deleted/updated.")
       }
     }
     findFrom(identifiers)
@@ -277,7 +272,7 @@ abstract class DatomicQueryResolve[Tpl](
             findFrom(remainingIdentifiers)
           }
 
-        case Nil => throw ModelError(edgeValuesNotFound)
+        case Nil => throw ModelError("Couldn't find next page. Edge rows were all deleted/updated.")
       }
     }
     findFrom(identifiers)

@@ -156,84 +156,116 @@ trait ResolveNestedPull[Tpl]
   private def resolveAttrOneMan(a: AttrOneMan, attrIndex: Int): Unit = {
     aritiesAttr()
     a match {
-      case a: AttrOneManString     => add(sortOneString(a, attrIndex), it2String, it2String2)
-      case a: AttrOneManInt        => add(intSorter(a, attrIndex), it2Int, it2Int2)
-      case a: AttrOneManLong       => add(sortOneLong(a, attrIndex), it2Long)
-      case a: AttrOneManFloat      => add(floatSorter(a, attrIndex), it2Float)
-      case a: AttrOneManDouble     => add(sortOneDouble(a, attrIndex), it2Double)
-      case a: AttrOneManBoolean    =>
+      case a: AttrOneManString         => add(sortOneString(a, attrIndex), it2String, it2String2)
+      case a: AttrOneManInt            => add(intSorter(a, attrIndex), it2Int, it2Int2)
+      case a: AttrOneManLong           => add(sortOneLong(a, attrIndex), it2Long)
+      case a: AttrOneManFloat          => add(floatSorter(a, attrIndex), it2Float)
+      case a: AttrOneManDouble         => add(sortOneDouble(a, attrIndex), it2Double)
+      case a: AttrOneManBoolean        =>
         // add(sortOneBooleanOptNested(a, attrIndex), it2Boolean)
         datomicFreePullBooleanBug
-      case a: AttrOneManBigInt     => add(bigIntSorter(a, attrIndex), it2BigInt)
-      case a: AttrOneManBigDecimal => add(sortOneBigDecimal(a, attrIndex), it2BigDecimal)
-      case a: AttrOneManDate       => add(sortOneDate(a, attrIndex), it2Date)
-      case a: AttrOneManUUID       => add(sortOneUUID(a, attrIndex), it2UUID)
-      case a: AttrOneManURI        => add(sortOneURI(a, attrIndex), it2URI)
-      case a: AttrOneManByte       => add(byteSorter(a, attrIndex), it2Byte)
-      case a: AttrOneManShort      => add(shortSorter(a, attrIndex), it2Short)
-      case a: AttrOneManChar       => add(sortOneChar(a, attrIndex), it2Char)
+      case a: AttrOneManBigInt         => add(bigIntSorter(a, attrIndex), it2BigInt)
+      case a: AttrOneManBigDecimal     => add(sortOneBigDecimal(a, attrIndex), it2BigDecimal)
+      case a: AttrOneManDate           => add(sortOneDate(a, attrIndex), it2Date)
+      case a: AttrOneManDuration       => add(sortOneDuration(a, attrIndex), it2Duration)
+      case a: AttrOneManInstant        => add(sortOneInstant(a, attrIndex), it2Instant)
+      case a: AttrOneManLocalDate      => add(sortOneLocalDate(a, attrIndex), it2LocalDate)
+      case a: AttrOneManLocalTime      => add(sortOneLocalTime(a, attrIndex), it2LocalTime)
+      case a: AttrOneManLocalDateTime  => add(sortOneLocalDateTime(a, attrIndex), it2LocalDateTime)
+      case a: AttrOneManOffsetTime     => add(sortOneOffsetTime(a, attrIndex), it2OffsetTime)
+      case a: AttrOneManOffsetDateTime => add(sortOneOffsetDateTime(a, attrIndex), it2OffsetDateTime)
+      case a: AttrOneManZonedDateTime  => add(sortOneZonedDateTime(a, attrIndex), it2ZonedDateTime)
+      case a: AttrOneManUUID           => add(sortOneUUID(a, attrIndex), it2UUID)
+      case a: AttrOneManURI            => add(sortOneURI(a, attrIndex), it2URI)
+      case a: AttrOneManByte           => add(byteSorter(a, attrIndex), it2Byte)
+      case a: AttrOneManShort          => add(shortSorter(a, attrIndex), it2Short)
+      case a: AttrOneManChar           => add(sortOneChar(a, attrIndex), it2Char)
     }
   }
 
   private def resolveAttrOneOpt(a: AttrOneOpt, attrIndex: Int): Unit = {
     aritiesAttr()
     a match {
-      case _: AttrOneOptString     => add(sortOneOptFlatString(a, attrIndex), it2OptString)
-      case _: AttrOneOptInt        => add(sortOneOptFlatInt(a, attrIndex), it2OptInt)
-      case _: AttrOneOptLong       => add(sortOneOptFlatLong(a, attrIndex), it2OptLong)
-      case _: AttrOneOptFloat      => add(sortOneOptFlatFloat(a, attrIndex), it2OptFloat)
-      case _: AttrOneOptDouble     => add(sortOneOptFlatDouble(a, attrIndex), it2OptDouble)
-      case _: AttrOneOptBoolean    =>
+      case _: AttrOneOptString         => add(sortOneOptFlatString(a, attrIndex), it2OptString)
+      case _: AttrOneOptInt            => add(sortOneOptFlatInt(a, attrIndex), it2OptInt)
+      case _: AttrOneOptLong           => add(sortOneOptFlatLong(a, attrIndex), it2OptLong)
+      case _: AttrOneOptFloat          => add(sortOneOptFlatFloat(a, attrIndex), it2OptFloat)
+      case _: AttrOneOptDouble         => add(sortOneOptFlatDouble(a, attrIndex), it2OptDouble)
+      case _: AttrOneOptBoolean        =>
         // add(sortOneOptFlatBoolean(a, attrIndex), it2Boolean)
         datomicFreePullBooleanBug
-      case _: AttrOneOptBigInt     => add(sortOneOptFlatBigInt(a, attrIndex), it2OptBigInt)
-      case _: AttrOneOptBigDecimal => add(sortOneOptFlatBigDecimal(a, attrIndex), it2OptBigDecimal)
-      case _: AttrOneOptDate       => add(sortOneOptFlatDate(a, attrIndex), it2OptDate)
-      case _: AttrOneOptUUID       => add(sortOneOptFlatUUID(a, attrIndex), it2OptUUID)
-      case _: AttrOneOptURI        => add(sortOneOptFlatURI(a, attrIndex), it2OptURI)
-      case _: AttrOneOptByte       => add(sortOneOptFlatByte(a, attrIndex), it2OptByte)
-      case _: AttrOneOptShort      => add(sortOneOptFlatShort(a, attrIndex), it2OptShort)
-      case _: AttrOneOptChar       => add(sortOneOptFlatChar(a, attrIndex), it2OptChar)
+      case _: AttrOneOptBigInt         => add(sortOneOptFlatBigInt(a, attrIndex), it2OptBigInt)
+      case _: AttrOneOptBigDecimal     => add(sortOneOptFlatBigDecimal(a, attrIndex), it2OptBigDecimal)
+      case _: AttrOneOptDate           => add(sortOneOptFlatDate(a, attrIndex), it2OptDate)
+      case _: AttrOneOptDuration       => add(sortOneOptFlatDuration(a, attrIndex), it2OptDuration)
+      case _: AttrOneOptInstant        => add(sortOneOptFlatInstant(a, attrIndex), it2OptInstant)
+      case _: AttrOneOptLocalDate      => add(sortOneOptFlatLocalDate(a, attrIndex), it2OptLocalDate)
+      case _: AttrOneOptLocalTime      => add(sortOneOptFlatLocalTime(a, attrIndex), it2OptLocalTime)
+      case _: AttrOneOptLocalDateTime  => add(sortOneOptFlatLocalDateTime(a, attrIndex), it2OptLocalDateTime)
+      case _: AttrOneOptOffsetTime     => add(sortOneOptFlatOffsetTime(a, attrIndex), it2OptOffsetTime)
+      case _: AttrOneOptOffsetDateTime => add(sortOneOptFlatOffsetDateTime(a, attrIndex), it2OptOffsetDateTime)
+      case _: AttrOneOptZonedDateTime  => add(sortOneOptFlatZonedDateTime(a, attrIndex), it2OptZonedDateTime)
+      case _: AttrOneOptUUID           => add(sortOneOptFlatUUID(a, attrIndex), it2OptUUID)
+      case _: AttrOneOptURI            => add(sortOneOptFlatURI(a, attrIndex), it2OptURI)
+      case _: AttrOneOptByte           => add(sortOneOptFlatByte(a, attrIndex), it2OptByte)
+      case _: AttrOneOptShort          => add(sortOneOptFlatShort(a, attrIndex), it2OptShort)
+      case _: AttrOneOptChar           => add(sortOneOptFlatChar(a, attrIndex), it2OptChar)
     }
   }
 
   private def resolveAttrSetMan(a: AttrSetMan): Unit = {
     aritiesAttr()
     pullCasts += (a match {
-      case _: AttrSetManString     => it2SetString
-      case _: AttrSetManInt        => it2SetInt
-      case _: AttrSetManLong       => it2SetLong
-      case _: AttrSetManFloat      => it2SetFloat
-      case _: AttrSetManDouble     => it2SetDouble
-      case _: AttrSetManBoolean    => it2SetBoolean
-      case _: AttrSetManBigInt     => it2SetBigInt
-      case _: AttrSetManBigDecimal => it2SetBigDecimal
-      case _: AttrSetManDate       => it2SetDate
-      case _: AttrSetManUUID       => it2SetUUID
-      case _: AttrSetManURI        => it2SetURI
-      case _: AttrSetManByte       => it2SetByte
-      case _: AttrSetManShort      => it2SetShort
-      case _: AttrSetManChar       => it2SetChar
+      case _: AttrSetManString         => it2SetString
+      case _: AttrSetManInt            => it2SetInt
+      case _: AttrSetManLong           => it2SetLong
+      case _: AttrSetManFloat          => it2SetFloat
+      case _: AttrSetManDouble         => it2SetDouble
+      case _: AttrSetManBoolean        => it2SetBoolean
+      case _: AttrSetManBigInt         => it2SetBigInt
+      case _: AttrSetManBigDecimal     => it2SetBigDecimal
+      case _: AttrSetManDate           => it2SetDate
+      case _: AttrSetManDuration       => it2SetDuration
+      case _: AttrSetManInstant        => it2SetInstant
+      case _: AttrSetManLocalDate      => it2SetLocalDate
+      case _: AttrSetManLocalTime      => it2SetLocalTime
+      case _: AttrSetManLocalDateTime  => it2SetLocalDateTime
+      case _: AttrSetManOffsetTime     => it2SetOffsetTime
+      case _: AttrSetManOffsetDateTime => it2SetOffsetDateTime
+      case _: AttrSetManZonedDateTime  => it2SetZonedDateTime
+      case _: AttrSetManUUID           => it2SetUUID
+      case _: AttrSetManURI            => it2SetURI
+      case _: AttrSetManByte           => it2SetByte
+      case _: AttrSetManShort          => it2SetShort
+      case _: AttrSetManChar           => it2SetChar
     })
   }
 
   private def resolveAttrSetOpt(a: AttrSetOpt): Unit = {
     aritiesAttr()
     pullCasts += (a match {
-      case _: AttrSetOptString     => it2OptSetString
-      case _: AttrSetOptInt        => it2OptSetInt
-      case _: AttrSetOptLong       => it2OptSetLong
-      case _: AttrSetOptFloat      => it2OptSetFloat
-      case _: AttrSetOptDouble     => it2OptSetDouble
-      case _: AttrSetOptBoolean    => it2OptSetBoolean
-      case _: AttrSetOptBigInt     => it2OptSetBigInt
-      case _: AttrSetOptBigDecimal => it2OptSetBigDecimal
-      case _: AttrSetOptDate       => it2OptSetDate
-      case _: AttrSetOptUUID       => it2OptSetUUID
-      case _: AttrSetOptURI        => it2OptSetURI
-      case _: AttrSetOptByte       => it2OptSetByte
-      case _: AttrSetOptShort      => it2OptSetShort
-      case _: AttrSetOptChar       => it2OptSetChar
+      case _: AttrSetOptString         => it2OptSetString
+      case _: AttrSetOptInt            => it2OptSetInt
+      case _: AttrSetOptLong           => it2OptSetLong
+      case _: AttrSetOptFloat          => it2OptSetFloat
+      case _: AttrSetOptDouble         => it2OptSetDouble
+      case _: AttrSetOptBoolean        => it2OptSetBoolean
+      case _: AttrSetOptBigInt         => it2OptSetBigInt
+      case _: AttrSetOptBigDecimal     => it2OptSetBigDecimal
+      case _: AttrSetOptDate           => it2OptSetDate
+      case _: AttrSetOptDuration       => it2OptSetDuration
+      case _: AttrSetOptInstant        => it2OptSetInstant
+      case _: AttrSetOptLocalDate      => it2OptSetLocalDate
+      case _: AttrSetOptLocalTime      => it2OptSetLocalTime
+      case _: AttrSetOptLocalDateTime  => it2OptSetLocalDateTime
+      case _: AttrSetOptOffsetTime     => it2OptSetOffsetTime
+      case _: AttrSetOptOffsetDateTime => it2OptSetOffsetDateTime
+      case _: AttrSetOptZonedDateTime  => it2OptSetZonedDateTime
+      case _: AttrSetOptUUID           => it2OptSetUUID
+      case _: AttrSetOptURI            => it2OptSetURI
+      case _: AttrSetOptByte           => it2OptSetByte
+      case _: AttrSetOptShort          => it2OptSetShort
+      case _: AttrSetOptChar           => it2OptSetChar
     })
   }
 }

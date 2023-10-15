@@ -11,7 +11,7 @@ import molecule.sql.core.facade.JdbcConn_JVM
 import molecule.sql.core.javaSql.ResultSetImpl
 import molecule.sql.core.spi.SpiSyncBase
 import molecule.sql.mysql.query.Model2SqlQuery_mysql
-import molecule.sql.mysql.transaction.{Delete_mysql, Insert_mysql, Save_mysql, Update_mysql}
+import molecule.sql.mysql.transaction._
 import scala.collection.mutable.ListBuffer
 
 

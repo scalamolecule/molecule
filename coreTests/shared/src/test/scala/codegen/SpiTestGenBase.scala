@@ -6,6 +6,6 @@ abstract class SpiTestGenBase(fileName: String, dir: String)
   extends CodeGenTemplate(
     fileName,
     dir,
-    "coreTests/shared/src/test/scala/molecule/coreTests/test"
+    "coreTests/shared/src/test/scala/molecule/coreTests/spi"
   )
 

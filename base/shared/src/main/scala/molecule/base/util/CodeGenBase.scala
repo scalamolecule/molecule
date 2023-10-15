@@ -13,6 +13,14 @@ trait CodeGenBase extends BaseHelpers {
     "BigInt",
     "BigDecimal",
     "Date",
+    "Duration",
+    "Instant",
+    "LocalDate",
+    "LocalTime",
+    "LocalDateTime",
+    "OffsetTime",
+    "OffsetDateTime",
+    "ZonedDateTime",
     "UUID",
     "URI",
     "Byte",
@@ -21,22 +29,30 @@ trait CodeGenBase extends BaseHelpers {
   )
 
   val baseTypesWithSpaces = Seq(
-    "String" -> "    ",
-    "Int" -> "       ",
-    "Long" -> "      ",
-    "Float" -> "     ",
-    "Double" -> "    ",
-    "Boolean" -> "   ",
-    "BigInt" -> "    ",
-    "BigDecimal" -> "",
-    "Date" -> "      ",
-    "UUID" -> "      ",
-    "URI" -> "       ",
-    "Byte" -> "      ",
-    "Short" -> "     ",
-    "Char" -> "      ",
+    "String" -> "        ",
+    "Int" -> "           ",
+    "Long" -> "          ",
+    "Float" -> "         ",
+    "Double" -> "        ",
+    "Boolean" -> "       ",
+    "BigInt" -> "        ",
+    "BigDecimal" -> "    ",
+    "Date" -> "          ",
+    "Duration" -> "      ",
+    "Instant" -> "       ",
+    "LocalDate" -> "     ",
+    "LocalTime" -> "     ",
+    "LocalDateTime" -> " ",
+    "OffsetTime" -> "    ",
+    "OffsetDateTime" -> "",
+    "ZonedDateTime" -> " ",
+    "UUID" -> "          ",
+    "URI" -> "           ",
+    "Byte" -> "          ",
+    "Short" -> "         ",
+    "Char" -> "          ",
   )
-  
+
   val javaTypes = Map(
     "String" -> "String",
     "Int" -> "jInteger",
@@ -47,6 +63,14 @@ trait CodeGenBase extends BaseHelpers {
     "BigInt" -> "jBigInt",
     "BigDecimal" -> "jBigDecimal",
     "Date" -> "Date",
+    "Duration" -> "Duration",
+    "Instant" -> "Instant",
+    "LocalDate" -> "LocalDate",
+    "LocalTime" -> "LocalTime",
+    "LocalDateTime" -> "LocalDateTime",
+    "OffsetTime" -> "OffsetTime",
+    "OffsetDateTime" -> "OffsetDateTime",
+    "ZonedDateTime" -> "ZonedDateTime",
     "UUID" -> "UUID",
     "URI" -> "URI",
     "Byte" -> "jInteger",
@@ -63,6 +87,14 @@ trait CodeGenBase extends BaseHelpers {
     ("BigInt", "BigInt", "bigInt", ""),
     ("BigDecimal", "BigDecimal", "bigDecimal", ""),
     ("Date", "Date", "date", "java.util.Date"),
+    ("Duration", "Duration", "duration", "java.time.Duration"),
+    ("Instant", "Instant", "instant", "java.time.Instant"),
+    ("LocalDate", "LocalDate", "localDate", "java.time.LocalDate"),
+    ("LocalTime", "LocalTime", "localTime", "java.time.LocalTime"),
+    ("LocalDateTime", "LocalDateTime", "localDateTime", "java.time.LocalDateTime"),
+    ("OffsetTime", "OffsetTime", "offsetTime", "java.time.OffsetTime"),
+    ("OffsetDateTime", "OffsetDateTime", "offsetDateTime", "java.time.OffsetDateTime"),
+    ("ZonedDateTime", "ZonedDateTime", "zonedDateTime", "java.time.ZonedDateTime"),
     ("UUID", "UUID", "uuid", "java.util.UUID"),
     ("URI", "URI", "uri", "java.net.URI"),
     ("Byte", "Byte", "byte", ""),
@@ -82,21 +114,4 @@ trait CodeGenBase extends BaseHelpers {
     ("Short", "Short", "short"),
     ("ref", "Long", "ref"),
   )
-
-  def format(baseTpe: String, v: String) : String = baseTpe match {
-    case "String"     => "\"" + escStr(v) + "\""
-    case "Int"        => v
-    case "Long"       => v + "L"
-    case "Float"      => v + "f"
-    case "Double"     => v
-    case "Boolean"    => v
-    case "BigInt"     => "BigInt(" + v + ")"
-    case "BigDecimal" => "BigDecimal(" + v + ")"
-    case "Date"       => "new Date(" + v.toLong + ")"
-    case "UUID"       => "UUID.fromString(\"" + v + "\")"
-    case "URI"        => "new URI(\"" + v + "\")"
-    case "Byte"       => v
-    case "Short"      => v
-    case "Char"       => "'" + v + "'"
-  }
 }

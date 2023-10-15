@@ -1,6 +1,7 @@
 package molecule.boilerplate.ast
 
 import java.net.URI
+import java.time._
 import java.util.{Date, UUID}
 import molecule.base.ast._
 import molecule.base.util.BaseHelpers
@@ -318,6 +319,166 @@ trait Model extends Validations with Values with BaseHelpers {
     }
   }
 
+  case class AttrOneManDuration(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Seq[Duration] = Nil,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateDuration] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrOneMan {
+    override def toString: String = {
+      def format(v: Duration): String = "Duration.ofSeconds(" + v.getSeconds + ", " + v.getNano + ")"
+      def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
+      s"""AttrOneManDuration("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
+  case class AttrOneManInstant(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Seq[Instant] = Nil,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateInstant] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrOneMan {
+    override def toString: String = {
+      def format(v: Instant): String = "Instant.ofEpochSecond(" + v.getEpochSecond + ", " + v.getNano + ")"
+      def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
+      s"""AttrOneManInstant("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
+  case class AttrOneManLocalDate(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Seq[LocalDate] = Nil,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateLocalDate] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrOneMan {
+    override def toString: String = {
+      def format(v: LocalDate): String = "LocalDate.of(" + v.getYear + ", " + v.getMonth + ", " + v.getDayOfMonth + ")"
+      def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
+      s"""AttrOneManLocalDate("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
+  case class AttrOneManLocalTime(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Seq[LocalTime] = Nil,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateLocalTime] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrOneMan {
+    override def toString: String = {
+      def format(v: LocalTime): String = "LocalTime.of(" + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ")"
+      def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
+      s"""AttrOneManLocalTime("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
+  case class AttrOneManLocalDateTime(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Seq[LocalDateTime] = Nil,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateLocalDateTime] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrOneMan {
+    override def toString: String = {
+      def format(v: LocalDateTime): String = "LocalDateTime.of(" + v.getYear + ", " + v.getMonth + ", " + v.getDayOfMonth + ", " + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ")"
+      def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
+      s"""AttrOneManLocalDateTime("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
+  case class AttrOneManOffsetTime(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Seq[OffsetTime] = Nil,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateOffsetTime] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrOneMan {
+    override def toString: String = {
+      def format(v: OffsetTime): String = "OffsetTime.of(" + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ", " + v.getOffset + ")"
+      def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
+      s"""AttrOneManOffsetTime("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
+  case class AttrOneManOffsetDateTime(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Seq[OffsetDateTime] = Nil,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateOffsetDateTime] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrOneMan {
+    override def toString: String = {
+      def format(v: OffsetDateTime): String = "OffsetDateTime.of(" + v.getYear + ", " + v.getMonth + ", " + v.getDayOfMonth + ", " + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ", " + v.getOffset + ")"
+      def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
+      s"""AttrOneManOffsetDateTime("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
+  case class AttrOneManZonedDateTime(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Seq[ZonedDateTime] = Nil,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateZonedDateTime] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrOneMan {
+    override def toString: String = {
+      def format(v: ZonedDateTime): String = "ZonedDateTime.of(" + v.getYear + ", " + v.getMonth + ", " + v.getDayOfMonth + ", " + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ", " + v.getZone + ")"
+      def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
+      s"""AttrOneManZonedDateTime("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
   case class AttrOneManUUID(
     override val ns: String,
     override val attr: String,
@@ -595,6 +756,166 @@ trait Model extends Validations with Values with BaseHelpers {
       def format(v: Date): String = "new Date(" + v.getTime + ")"
       def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
       s"""AttrOneOptDate("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
+  case class AttrOneOptDuration(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Option[Seq[Duration]] = None,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateDuration] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrOneOpt {
+    override def toString: String = {
+      def format(v: Duration): String = "Duration.ofSeconds(" + v.getSeconds + ", " + v.getNano + ")"
+      def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
+      s"""AttrOneOptDuration("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
+  case class AttrOneOptInstant(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Option[Seq[Instant]] = None,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateInstant] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrOneOpt {
+    override def toString: String = {
+      def format(v: Instant): String = "Instant.ofEpochSecond(" + v.getEpochSecond + ", " + v.getNano + ")"
+      def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
+      s"""AttrOneOptInstant("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
+  case class AttrOneOptLocalDate(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Option[Seq[LocalDate]] = None,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateLocalDate] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrOneOpt {
+    override def toString: String = {
+      def format(v: LocalDate): String = "LocalDate.of(" + v.getYear + ", " + v.getMonth + ", " + v.getDayOfMonth + ")"
+      def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
+      s"""AttrOneOptLocalDate("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
+  case class AttrOneOptLocalTime(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Option[Seq[LocalTime]] = None,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateLocalTime] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrOneOpt {
+    override def toString: String = {
+      def format(v: LocalTime): String = "LocalTime.of(" + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ")"
+      def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
+      s"""AttrOneOptLocalTime("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
+  case class AttrOneOptLocalDateTime(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Option[Seq[LocalDateTime]] = None,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateLocalDateTime] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrOneOpt {
+    override def toString: String = {
+      def format(v: LocalDateTime): String = "LocalDateTime.of(" + v.getYear + ", " + v.getMonth + ", " + v.getDayOfMonth + ", " + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ")"
+      def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
+      s"""AttrOneOptLocalDateTime("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
+  case class AttrOneOptOffsetTime(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Option[Seq[OffsetTime]] = None,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateOffsetTime] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrOneOpt {
+    override def toString: String = {
+      def format(v: OffsetTime): String = "OffsetTime.of(" + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ", " + v.getOffset + ")"
+      def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
+      s"""AttrOneOptOffsetTime("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
+  case class AttrOneOptOffsetDateTime(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Option[Seq[OffsetDateTime]] = None,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateOffsetDateTime] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrOneOpt {
+    override def toString: String = {
+      def format(v: OffsetDateTime): String = "OffsetDateTime.of(" + v.getYear + ", " + v.getMonth + ", " + v.getDayOfMonth + ", " + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ", " + v.getOffset + ")"
+      def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
+      s"""AttrOneOptOffsetDateTime("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
+  case class AttrOneOptZonedDateTime(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Option[Seq[ZonedDateTime]] = None,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateZonedDateTime] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrOneOpt {
+    override def toString: String = {
+      def format(v: ZonedDateTime): String = "ZonedDateTime.of(" + v.getYear + ", " + v.getMonth + ", " + v.getDayOfMonth + ", " + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ", " + v.getZone + ")"
+      def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
+      s"""AttrOneOptZonedDateTime("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
@@ -878,6 +1199,166 @@ trait Model extends Validations with Values with BaseHelpers {
     }
   }
 
+  case class AttrOneTacDuration(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Seq[Duration] = Nil,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateDuration] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrOneTac {
+    override def toString: String = {
+      def format(v: Duration): String = "Duration.ofSeconds(" + v.getSeconds + ", " + v.getNano + ")"
+      def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
+      s"""AttrOneTacDuration("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
+  case class AttrOneTacInstant(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Seq[Instant] = Nil,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateInstant] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrOneTac {
+    override def toString: String = {
+      def format(v: Instant): String = "Instant.ofEpochSecond(" + v.getEpochSecond + ", " + v.getNano + ")"
+      def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
+      s"""AttrOneTacInstant("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
+  case class AttrOneTacLocalDate(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Seq[LocalDate] = Nil,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateLocalDate] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrOneTac {
+    override def toString: String = {
+      def format(v: LocalDate): String = "LocalDate.of(" + v.getYear + ", " + v.getMonth + ", " + v.getDayOfMonth + ")"
+      def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
+      s"""AttrOneTacLocalDate("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
+  case class AttrOneTacLocalTime(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Seq[LocalTime] = Nil,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateLocalTime] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrOneTac {
+    override def toString: String = {
+      def format(v: LocalTime): String = "LocalTime.of(" + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ")"
+      def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
+      s"""AttrOneTacLocalTime("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
+  case class AttrOneTacLocalDateTime(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Seq[LocalDateTime] = Nil,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateLocalDateTime] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrOneTac {
+    override def toString: String = {
+      def format(v: LocalDateTime): String = "LocalDateTime.of(" + v.getYear + ", " + v.getMonth + ", " + v.getDayOfMonth + ", " + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ")"
+      def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
+      s"""AttrOneTacLocalDateTime("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
+  case class AttrOneTacOffsetTime(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Seq[OffsetTime] = Nil,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateOffsetTime] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrOneTac {
+    override def toString: String = {
+      def format(v: OffsetTime): String = "OffsetTime.of(" + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ", " + v.getOffset + ")"
+      def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
+      s"""AttrOneTacOffsetTime("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
+  case class AttrOneTacOffsetDateTime(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Seq[OffsetDateTime] = Nil,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateOffsetDateTime] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrOneTac {
+    override def toString: String = {
+      def format(v: OffsetDateTime): String = "OffsetDateTime.of(" + v.getYear + ", " + v.getMonth + ", " + v.getDayOfMonth + ", " + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ", " + v.getOffset + ")"
+      def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
+      s"""AttrOneTacOffsetDateTime("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
+  case class AttrOneTacZonedDateTime(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Seq[ZonedDateTime] = Nil,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateZonedDateTime] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrOneTac {
+    override def toString: String = {
+      def format(v: ZonedDateTime): String = "ZonedDateTime.of(" + v.getYear + ", " + v.getMonth + ", " + v.getDayOfMonth + ", " + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ", " + v.getZone + ")"
+      def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
+      s"""AttrOneTacZonedDateTime("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
   case class AttrOneTacUUID(
     override val ns: String,
     override val attr: String,
@@ -1155,6 +1636,166 @@ trait Model extends Validations with Values with BaseHelpers {
       def format(v: Date): String = "new Date(" + v.getTime + ")"
       def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
       s"""AttrSetManDate("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
+  case class AttrSetManDuration(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Seq[Set[Duration]] = Nil,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateDuration] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrSetMan {
+    override def toString: String = {
+      def format(v: Duration): String = "Duration.ofSeconds(" + v.getSeconds + ", " + v.getNano + ")"
+      def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSetManDuration("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
+  case class AttrSetManInstant(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Seq[Set[Instant]] = Nil,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateInstant] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrSetMan {
+    override def toString: String = {
+      def format(v: Instant): String = "Instant.ofEpochSecond(" + v.getEpochSecond + ", " + v.getNano + ")"
+      def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSetManInstant("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
+  case class AttrSetManLocalDate(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Seq[Set[LocalDate]] = Nil,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateLocalDate] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrSetMan {
+    override def toString: String = {
+      def format(v: LocalDate): String = "LocalDate.of(" + v.getYear + ", " + v.getMonth + ", " + v.getDayOfMonth + ")"
+      def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSetManLocalDate("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
+  case class AttrSetManLocalTime(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Seq[Set[LocalTime]] = Nil,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateLocalTime] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrSetMan {
+    override def toString: String = {
+      def format(v: LocalTime): String = "LocalTime.of(" + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ")"
+      def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSetManLocalTime("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
+  case class AttrSetManLocalDateTime(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Seq[Set[LocalDateTime]] = Nil,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateLocalDateTime] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrSetMan {
+    override def toString: String = {
+      def format(v: LocalDateTime): String = "LocalDateTime.of(" + v.getYear + ", " + v.getMonth + ", " + v.getDayOfMonth + ", " + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ")"
+      def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSetManLocalDateTime("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
+  case class AttrSetManOffsetTime(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Seq[Set[OffsetTime]] = Nil,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateOffsetTime] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrSetMan {
+    override def toString: String = {
+      def format(v: OffsetTime): String = "OffsetTime.of(" + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ", " + v.getOffset + ")"
+      def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSetManOffsetTime("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
+  case class AttrSetManOffsetDateTime(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Seq[Set[OffsetDateTime]] = Nil,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateOffsetDateTime] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrSetMan {
+    override def toString: String = {
+      def format(v: OffsetDateTime): String = "OffsetDateTime.of(" + v.getYear + ", " + v.getMonth + ", " + v.getDayOfMonth + ", " + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ", " + v.getOffset + ")"
+      def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSetManOffsetDateTime("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
+  case class AttrSetManZonedDateTime(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Seq[Set[ZonedDateTime]] = Nil,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateZonedDateTime] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrSetMan {
+    override def toString: String = {
+      def format(v: ZonedDateTime): String = "ZonedDateTime.of(" + v.getYear + ", " + v.getMonth + ", " + v.getDayOfMonth + ", " + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ", " + v.getZone + ")"
+      def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSetManZonedDateTime("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 
@@ -1438,6 +2079,166 @@ trait Model extends Validations with Values with BaseHelpers {
     }
   }
 
+  case class AttrSetOptDuration(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Option[Seq[Set[Duration]]] = None,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateDuration] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrSetOpt {
+    override def toString: String = {
+      def format(v: Duration): String = "Duration.ofSeconds(" + v.getSeconds + ", " + v.getNano + ")"
+      def vss: String = vs.fold("None")(_.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
+      s"""AttrSetOptDuration("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
+  case class AttrSetOptInstant(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Option[Seq[Set[Instant]]] = None,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateInstant] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrSetOpt {
+    override def toString: String = {
+      def format(v: Instant): String = "Instant.ofEpochSecond(" + v.getEpochSecond + ", " + v.getNano + ")"
+      def vss: String = vs.fold("None")(_.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
+      s"""AttrSetOptInstant("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
+  case class AttrSetOptLocalDate(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Option[Seq[Set[LocalDate]]] = None,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateLocalDate] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrSetOpt {
+    override def toString: String = {
+      def format(v: LocalDate): String = "LocalDate.of(" + v.getYear + ", " + v.getMonth + ", " + v.getDayOfMonth + ")"
+      def vss: String = vs.fold("None")(_.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
+      s"""AttrSetOptLocalDate("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
+  case class AttrSetOptLocalTime(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Option[Seq[Set[LocalTime]]] = None,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateLocalTime] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrSetOpt {
+    override def toString: String = {
+      def format(v: LocalTime): String = "LocalTime.of(" + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ")"
+      def vss: String = vs.fold("None")(_.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
+      s"""AttrSetOptLocalTime("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
+  case class AttrSetOptLocalDateTime(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Option[Seq[Set[LocalDateTime]]] = None,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateLocalDateTime] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrSetOpt {
+    override def toString: String = {
+      def format(v: LocalDateTime): String = "LocalDateTime.of(" + v.getYear + ", " + v.getMonth + ", " + v.getDayOfMonth + ", " + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ")"
+      def vss: String = vs.fold("None")(_.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
+      s"""AttrSetOptLocalDateTime("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
+  case class AttrSetOptOffsetTime(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Option[Seq[Set[OffsetTime]]] = None,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateOffsetTime] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrSetOpt {
+    override def toString: String = {
+      def format(v: OffsetTime): String = "OffsetTime.of(" + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ", " + v.getOffset + ")"
+      def vss: String = vs.fold("None")(_.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
+      s"""AttrSetOptOffsetTime("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
+  case class AttrSetOptOffsetDateTime(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Option[Seq[Set[OffsetDateTime]]] = None,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateOffsetDateTime] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrSetOpt {
+    override def toString: String = {
+      def format(v: OffsetDateTime): String = "OffsetDateTime.of(" + v.getYear + ", " + v.getMonth + ", " + v.getDayOfMonth + ", " + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ", " + v.getOffset + ")"
+      def vss: String = vs.fold("None")(_.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
+      s"""AttrSetOptOffsetDateTime("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
+  case class AttrSetOptZonedDateTime(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Option[Seq[Set[ZonedDateTime]]] = None,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateZonedDateTime] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrSetOpt {
+    override def toString: String = {
+      def format(v: ZonedDateTime): String = "ZonedDateTime.of(" + v.getYear + ", " + v.getMonth + ", " + v.getDayOfMonth + ", " + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ", " + v.getZone + ")"
+      def vss: String = vs.fold("None")(_.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
+      s"""AttrSetOptZonedDateTime("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
   case class AttrSetOptUUID(
     override val ns: String,
     override val attr: String,
@@ -1715,6 +2516,166 @@ trait Model extends Validations with Values with BaseHelpers {
       def format(v: Date): String = "new Date(" + v.getTime + ")"
       def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
       s"""AttrSetTacDate("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
+  case class AttrSetTacDuration(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Seq[Set[Duration]] = Nil,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateDuration] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrSetTac {
+    override def toString: String = {
+      def format(v: Duration): String = "Duration.ofSeconds(" + v.getSeconds + ", " + v.getNano + ")"
+      def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSetTacDuration("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
+  case class AttrSetTacInstant(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Seq[Set[Instant]] = Nil,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateInstant] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrSetTac {
+    override def toString: String = {
+      def format(v: Instant): String = "Instant.ofEpochSecond(" + v.getEpochSecond + ", " + v.getNano + ")"
+      def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSetTacInstant("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
+  case class AttrSetTacLocalDate(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Seq[Set[LocalDate]] = Nil,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateLocalDate] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrSetTac {
+    override def toString: String = {
+      def format(v: LocalDate): String = "LocalDate.of(" + v.getYear + ", " + v.getMonth + ", " + v.getDayOfMonth + ")"
+      def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSetTacLocalDate("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
+  case class AttrSetTacLocalTime(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Seq[Set[LocalTime]] = Nil,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateLocalTime] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrSetTac {
+    override def toString: String = {
+      def format(v: LocalTime): String = "LocalTime.of(" + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ")"
+      def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSetTacLocalTime("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
+  case class AttrSetTacLocalDateTime(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Seq[Set[LocalDateTime]] = Nil,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateLocalDateTime] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrSetTac {
+    override def toString: String = {
+      def format(v: LocalDateTime): String = "LocalDateTime.of(" + v.getYear + ", " + v.getMonth + ", " + v.getDayOfMonth + ", " + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ")"
+      def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSetTacLocalDateTime("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
+  case class AttrSetTacOffsetTime(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Seq[Set[OffsetTime]] = Nil,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateOffsetTime] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrSetTac {
+    override def toString: String = {
+      def format(v: OffsetTime): String = "OffsetTime.of(" + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ", " + v.getOffset + ")"
+      def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSetTacOffsetTime("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
+  case class AttrSetTacOffsetDateTime(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Seq[Set[OffsetDateTime]] = Nil,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateOffsetDateTime] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrSetTac {
+    override def toString: String = {
+      def format(v: OffsetDateTime): String = "OffsetDateTime.of(" + v.getYear + ", " + v.getMonth + ", " + v.getDayOfMonth + ", " + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ", " + v.getOffset + ")"
+      def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSetTacOffsetDateTime("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
+  case class AttrSetTacZonedDateTime(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Seq[Set[ZonedDateTime]] = Nil,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateZonedDateTime] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrSetTac {
+    override def toString: String = {
+      def format(v: ZonedDateTime): String = "ZonedDateTime.of(" + v.getYear + ", " + v.getMonth + ", " + v.getDayOfMonth + ", " + v.getHour + ", " + v.getMinute + ", " + v.getSecond + ", " + v.getNano + ", " + v.getZone + ")"
+      def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSetTacZonedDateTime("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
     }
   }
 

@@ -4,6 +4,7 @@ package molecule.datalog.core.query
 import java.lang.{Boolean => jBoolean, Double => jDouble, Float => jFloat, Integer => jInteger, Long => jLong}
 import java.math.{BigDecimal => jBigDecimal, BigInteger => jBigInt}
 import java.net.URI
+import java.time._
 import java.util.{Date, UUID, Map => jMap}
 import molecule.boilerplate.ast.Model._
 
@@ -234,6 +235,198 @@ trait SortOneOpt_[Tpl] { self: Model2DatomicQuery[Tpl] =>
               compare(b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
                 m1.values.iterator.next.asInstanceOf[Date].compareTo(
                   m2.values.iterator.next.asInstanceOf[Date])
+              )
+        }
+      )
+    }
+  }
+
+  protected def sortOneOptDuration(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+    attr.sort.map { sort =>
+      (
+        sort.last.toString.toInt,
+        sort.head match {
+          case 'a' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            (a: Row, b: Row) =>
+              compare(a, b, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+                Duration.parse(m1.values.iterator.next.toString).compareTo(
+                  Duration.parse(m2.values.iterator.next.toString))
+              )
+          case 'd' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            (a: Row, b: Row) =>
+              compare(b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+                Duration.parse(m1.values.iterator.next.toString).compareTo(
+                  Duration.parse(m2.values.iterator.next.toString))
+              )
+        }
+      )
+    }
+  }
+
+  protected def sortOneOptInstant(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+    attr.sort.map { sort =>
+      (
+        sort.last.toString.toInt,
+        sort.head match {
+          case 'a' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            (a: Row, b: Row) =>
+              compare(a, b, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+                Instant.parse(m1.values.iterator.next.toString).compareTo(
+                  Instant.parse(m2.values.iterator.next.toString))
+              )
+          case 'd' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            (a: Row, b: Row) =>
+              compare(b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+                Instant.parse(m1.values.iterator.next.toString).compareTo(
+                  Instant.parse(m2.values.iterator.next.toString))
+              )
+        }
+      )
+    }
+  }
+
+  protected def sortOneOptLocalDate(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+    attr.sort.map { sort =>
+      (
+        sort.last.toString.toInt,
+        sort.head match {
+          case 'a' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            (a: Row, b: Row) =>
+              compare(a, b, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+                LocalDate.parse(m1.values.iterator.next.toString).compareTo(
+                  LocalDate.parse(m2.values.iterator.next.toString))
+              )
+          case 'd' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            (a: Row, b: Row) =>
+              compare(b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+                LocalDate.parse(m1.values.iterator.next.toString).compareTo(
+                  LocalDate.parse(m2.values.iterator.next.toString))
+              )
+        }
+      )
+    }
+  }
+
+  protected def sortOneOptLocalTime(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+    attr.sort.map { sort =>
+      (
+        sort.last.toString.toInt,
+        sort.head match {
+          case 'a' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            (a: Row, b: Row) =>
+              compare(a, b, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+                LocalTime.parse(m1.values.iterator.next.toString).compareTo(
+                  LocalTime.parse(m2.values.iterator.next.toString))
+              )
+          case 'd' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            (a: Row, b: Row) =>
+              compare(b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+                LocalTime.parse(m1.values.iterator.next.toString).compareTo(
+                  LocalTime.parse(m2.values.iterator.next.toString))
+              )
+        }
+      )
+    }
+  }
+
+  protected def sortOneOptLocalDateTime(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+    attr.sort.map { sort =>
+      (
+        sort.last.toString.toInt,
+        sort.head match {
+          case 'a' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            (a: Row, b: Row) =>
+              compare(a, b, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+                LocalDateTime.parse(m1.values.iterator.next.toString).compareTo(
+                  LocalDateTime.parse(m2.values.iterator.next.toString))
+              )
+          case 'd' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            (a: Row, b: Row) =>
+              compare(b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+                LocalDateTime.parse(m1.values.iterator.next.toString).compareTo(
+                  LocalDateTime.parse(m2.values.iterator.next.toString))
+              )
+        }
+      )
+    }
+  }
+
+  protected def sortOneOptOffsetTime(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+    attr.sort.map { sort =>
+      (
+        sort.last.toString.toInt,
+        sort.head match {
+          case 'a' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            (a: Row, b: Row) =>
+              compare(a, b, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+                OffsetTime.parse(m1.values.iterator.next.toString).compareTo(
+                  OffsetTime.parse(m2.values.iterator.next.toString))
+              )
+          case 'd' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            (a: Row, b: Row) =>
+              compare(b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+                OffsetTime.parse(m1.values.iterator.next.toString).compareTo(
+                  OffsetTime.parse(m2.values.iterator.next.toString))
+              )
+        }
+      )
+    }
+  }
+
+  protected def sortOneOptOffsetDateTime(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+    attr.sort.map { sort =>
+      (
+        sort.last.toString.toInt,
+        sort.head match {
+          case 'a' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            (a: Row, b: Row) =>
+              compare(a, b, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+                OffsetDateTime.parse(m1.values.iterator.next.toString).compareTo(
+                  OffsetDateTime.parse(m2.values.iterator.next.toString))
+              )
+          case 'd' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            (a: Row, b: Row) =>
+              compare(b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+                OffsetDateTime.parse(m1.values.iterator.next.toString).compareTo(
+                  OffsetDateTime.parse(m2.values.iterator.next.toString))
+              )
+        }
+      )
+    }
+  }
+
+  protected def sortOneOptZonedDateTime(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+    attr.sort.map { sort =>
+      (
+        sort.last.toString.toInt,
+        sort.head match {
+          case 'a' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            (a: Row, b: Row) =>
+              compare(a, b, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+                ZonedDateTime.parse(m1.values.iterator.next.toString).compareTo(
+                  ZonedDateTime.parse(m2.values.iterator.next.toString))
+              )
+          case 'd' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            (a: Row, b: Row) =>
+              compare(b, a, i, (m1: jMap[_, _], m2: jMap[_, _]) =>
+                ZonedDateTime.parse(m1.values.iterator.next.toString).compareTo(
+                  ZonedDateTime.parse(m2.values.iterator.next.toString))
               )
         }
       )

@@ -9,6 +9,7 @@ object _InsertValidators extends CoreGenBase("InsertValidators", "/transaction")
        |package molecule.core.transaction
        |
        |import java.net.URI
+       |import java.time._
        |import java.util.{Date, UUID}
        |import molecule.boilerplate.ast.Model._
        |import molecule.core.validation.insert.InsertValueResolvers_

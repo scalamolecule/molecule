@@ -1,5 +1,6 @@
 package molecule.datalog.datomic.transaction
 
+import java.time._
 import java.util.{Set => jSet}
 import clojure.lang.Keyword
 import datomic.Util.list
@@ -329,35 +330,51 @@ trait Update_datomic extends DatomicBase_JVM with UpdateOps with MoleculeLogging
   ): Seq[AnyRef] = {
     val at = s":$ns/$attr"
     filterAttr match {
-      case a: AttrOneTacString     => a.vs.map(v => list(at, v.asInstanceOf[AnyRef]))
-      case a: AttrOneTacInt        => a.vs.map(v => list(at, v.asInstanceOf[AnyRef]))
-      case a: AttrOneTacLong       => a.vs.map(v => list(at, v.asInstanceOf[AnyRef]))
-      case a: AttrOneTacFloat      => a.vs.map(v => list(at, v.asInstanceOf[AnyRef]))
-      case a: AttrOneTacDouble     => a.vs.map(v => list(at, v.asInstanceOf[AnyRef]))
-      case a: AttrOneTacBoolean    => a.vs.map(v => list(at, v.asInstanceOf[AnyRef]))
-      case a: AttrOneTacBigInt     => a.vs.map(v => list(at, v.bigInteger.asInstanceOf[AnyRef]))
-      case a: AttrOneTacBigDecimal => a.vs.map(v => list(at, v.bigDecimal.asInstanceOf[AnyRef]))
-      case a: AttrOneTacDate       => a.vs.map(v => list(at, v.asInstanceOf[AnyRef]))
-      case a: AttrOneTacUUID       => a.vs.map(v => list(at, v.asInstanceOf[AnyRef]))
-      case a: AttrOneTacURI        => a.vs.map(v => list(at, v.asInstanceOf[AnyRef]))
-      case a: AttrOneTacByte       => a.vs.map(v => list(at, v.toInt.asInstanceOf[AnyRef]))
-      case a: AttrOneTacShort      => a.vs.map(v => list(at, v.toInt.asInstanceOf[AnyRef]))
-      case a: AttrOneTacChar       => a.vs.map(v => list(at, v.toString.asInstanceOf[AnyRef]))
+      case a: AttrOneTacString         => a.vs.map(v => list(at, v.asInstanceOf[AnyRef]))
+      case a: AttrOneTacInt            => a.vs.map(v => list(at, v.asInstanceOf[AnyRef]))
+      case a: AttrOneTacLong           => a.vs.map(v => list(at, v.asInstanceOf[AnyRef]))
+      case a: AttrOneTacFloat          => a.vs.map(v => list(at, v.asInstanceOf[AnyRef]))
+      case a: AttrOneTacDouble         => a.vs.map(v => list(at, v.asInstanceOf[AnyRef]))
+      case a: AttrOneTacBoolean        => a.vs.map(v => list(at, v.asInstanceOf[AnyRef]))
+      case a: AttrOneTacBigInt         => a.vs.map(v => list(at, v.bigInteger.asInstanceOf[AnyRef]))
+      case a: AttrOneTacBigDecimal     => a.vs.map(v => list(at, v.bigDecimal.asInstanceOf[AnyRef]))
+      case a: AttrOneTacDate           => a.vs.map(v => list(at, v.asInstanceOf[AnyRef]))
+      case a: AttrOneTacDuration       => a.vs.map(v => list(at, v.asInstanceOf[AnyRef]))
+      case a: AttrOneTacInstant        => a.vs.map(v => list(at, v.asInstanceOf[AnyRef]))
+      case a: AttrOneTacLocalDate      => a.vs.map(v => list(at, v.asInstanceOf[AnyRef]))
+      case a: AttrOneTacLocalTime      => a.vs.map(v => list(at, v.asInstanceOf[AnyRef]))
+      case a: AttrOneTacLocalDateTime  => a.vs.map(v => list(at, v.asInstanceOf[AnyRef]))
+      case a: AttrOneTacOffsetTime     => a.vs.map(v => list(at, v.asInstanceOf[AnyRef]))
+      case a: AttrOneTacOffsetDateTime => a.vs.map(v => list(at, v.asInstanceOf[AnyRef]))
+      case a: AttrOneTacZonedDateTime  => a.vs.map(v => list(at, v.asInstanceOf[AnyRef]))
+      case a: AttrOneTacUUID           => a.vs.map(v => list(at, v.asInstanceOf[AnyRef]))
+      case a: AttrOneTacURI            => a.vs.map(v => list(at, v.asInstanceOf[AnyRef]))
+      case a: AttrOneTacByte           => a.vs.map(v => list(at, v.toInt.asInstanceOf[AnyRef]))
+      case a: AttrOneTacShort          => a.vs.map(v => list(at, v.toInt.asInstanceOf[AnyRef]))
+      case a: AttrOneTacChar           => a.vs.map(v => list(at, v.toString.asInstanceOf[AnyRef]))
     }
   }
 
-  override protected lazy val transformString     = identity
-  override protected lazy val transformInt        = identity
-  override protected lazy val transformLong       = identity
-  override protected lazy val transformFloat      = identity
-  override protected lazy val transformDouble     = identity
-  override protected lazy val transformBoolean    = identity
-  override protected lazy val transformBigInt     = (v: BigInt) => v.bigInteger
-  override protected lazy val transformBigDecimal = (v: BigDecimal) => v.bigDecimal
-  override protected lazy val transformDate       = identity
-  override protected lazy val transformUUID       = identity
-  override protected lazy val transformURI        = identity
-  override protected lazy val transformByte       = (v: Byte) => v.toInt
-  override protected lazy val transformShort      = (v: Short) => v.toInt
-  override protected lazy val transformChar       = (v: Char) => v.toString
+  override protected lazy val transformString         = identity
+  override protected lazy val transformInt            = identity
+  override protected lazy val transformLong           = identity
+  override protected lazy val transformFloat          = identity
+  override protected lazy val transformDouble         = identity
+  override protected lazy val transformBoolean        = identity
+  override protected lazy val transformBigInt         = (v: BigInt) => v.bigInteger
+  override protected lazy val transformBigDecimal     = (v: BigDecimal) => v.bigDecimal
+  override protected lazy val transformDate           = identity
+  override protected lazy val transformDuration       = (v: Duration) => v.toString
+  override protected lazy val transformInstant        = (v: Instant) => v.toString
+  override protected lazy val transformLocalDate      = (v: LocalDate) => v.toString
+  override protected lazy val transformLocalTime      = (v: LocalTime) => v.toString
+  override protected lazy val transformLocalDateTime  = (v: LocalDateTime) => v.toString
+  override protected lazy val transformOffsetTime     = (v: OffsetTime) => v.toString
+  override protected lazy val transformOffsetDateTime = (v: OffsetDateTime) => v.toString
+  override protected lazy val transformZonedDateTime  = (v: ZonedDateTime) => v.toString
+  override protected lazy val transformUUID           = identity
+  override protected lazy val transformURI            = identity
+  override protected lazy val transformByte           = (v: Byte) => v.toInt
+  override protected lazy val transformShort          = (v: Short) => v.toInt
+  override protected lazy val transformChar           = (v: Char) => v.toString
 }

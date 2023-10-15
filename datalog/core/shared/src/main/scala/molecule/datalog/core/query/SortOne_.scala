@@ -4,6 +4,7 @@ package molecule.datalog.core.query
 import java.lang.{Boolean => jBoolean, Double => jDouble, Float => jFloat, Integer => jInteger, Long => jLong}
 import java.math.{BigDecimal => jBigDecimal, BigInteger => jBigInt}
 import java.net.URI
+import java.time._
 import java.util.{Date, UUID}
 import molecule.boilerplate.ast.Model._
 
@@ -167,6 +168,150 @@ trait SortOne_[Tpl] { self: Model2DatomicQuery[Tpl] =>
             val i = nestedIdsCount + attrIndex
             (a: Row, b: Row) =>
               b.get(i).asInstanceOf[Date].compareTo(a.get(i).asInstanceOf[Date])
+        }
+      )
+    }
+  }
+
+  protected def sortOneDuration(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+    attr.sort.map { sort =>
+      (
+        sort.last.toString.toInt,
+        sort.head match {
+          case 'a' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            (a: Row, b: Row) =>
+              Duration.parse(a.get(i).toString).compareTo(Duration.parse(b.get(i).toString))
+          case 'd' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            (a: Row, b: Row) =>
+              Duration.parse(b.get(i).toString).compareTo(Duration.parse(a.get(i).toString))
+        }
+      )
+    }
+  }
+
+  protected def sortOneInstant(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+    attr.sort.map { sort =>
+      (
+        sort.last.toString.toInt,
+        sort.head match {
+          case 'a' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            (a: Row, b: Row) =>
+              Instant.parse(a.get(i).toString).compareTo(Instant.parse(b.get(i).toString))
+          case 'd' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            (a: Row, b: Row) =>
+              Instant.parse(b.get(i).toString).compareTo(Instant.parse(a.get(i).toString))
+        }
+      )
+    }
+  }
+
+  protected def sortOneLocalDate(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+    attr.sort.map { sort =>
+      (
+        sort.last.toString.toInt,
+        sort.head match {
+          case 'a' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            (a: Row, b: Row) =>
+              LocalDate.parse(a.get(i).toString).compareTo(LocalDate.parse(b.get(i).toString))
+          case 'd' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            (a: Row, b: Row) =>
+              LocalDate.parse(b.get(i).toString).compareTo(LocalDate.parse(a.get(i).toString))
+        }
+      )
+    }
+  }
+
+  protected def sortOneLocalTime(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+    attr.sort.map { sort =>
+      (
+        sort.last.toString.toInt,
+        sort.head match {
+          case 'a' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            (a: Row, b: Row) =>
+              LocalTime.parse(a.get(i).toString).compareTo(LocalTime.parse(b.get(i).toString))
+          case 'd' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            (a: Row, b: Row) =>
+              LocalTime.parse(b.get(i).toString).compareTo(LocalTime.parse(a.get(i).toString))
+        }
+      )
+    }
+  }
+
+  protected def sortOneLocalDateTime(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+    attr.sort.map { sort =>
+      (
+        sort.last.toString.toInt,
+        sort.head match {
+          case 'a' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            (a: Row, b: Row) =>
+              LocalDateTime.parse(a.get(i).toString).compareTo(LocalDateTime.parse(b.get(i).toString))
+          case 'd' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            (a: Row, b: Row) =>
+              LocalDateTime.parse(b.get(i).toString).compareTo(LocalDateTime.parse(a.get(i).toString))
+        }
+      )
+    }
+  }
+
+  protected def sortOneOffsetTime(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+    attr.sort.map { sort =>
+      (
+        sort.last.toString.toInt,
+        sort.head match {
+          case 'a' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            (a: Row, b: Row) =>
+              OffsetTime.parse(a.get(i).toString).compareTo(OffsetTime.parse(b.get(i).toString))
+          case 'd' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            (a: Row, b: Row) =>
+              OffsetTime.parse(b.get(i).toString).compareTo(OffsetTime.parse(a.get(i).toString))
+        }
+      )
+    }
+  }
+
+  protected def sortOneOffsetDateTime(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+    attr.sort.map { sort =>
+      (
+        sort.last.toString.toInt,
+        sort.head match {
+          case 'a' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            (a: Row, b: Row) =>
+              OffsetDateTime.parse(a.get(i).toString).compareTo(OffsetDateTime.parse(b.get(i).toString))
+          case 'd' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            (a: Row, b: Row) =>
+              OffsetDateTime.parse(b.get(i).toString).compareTo(OffsetDateTime.parse(a.get(i).toString))
+        }
+      )
+    }
+  }
+
+  protected def sortOneZonedDateTime(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+    attr.sort.map { sort =>
+      (
+        sort.last.toString.toInt,
+        sort.head match {
+          case 'a' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            (a: Row, b: Row) =>
+              ZonedDateTime.parse(a.get(i).toString).compareTo(ZonedDateTime.parse(b.get(i).toString))
+          case 'd' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            (a: Row, b: Row) =>
+              ZonedDateTime.parse(b.get(i).toString).compareTo(ZonedDateTime.parse(a.get(i).toString))
         }
       )
     }

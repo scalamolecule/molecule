@@ -1,22 +1,24 @@
 package codegen.datalog.core.query
 
 import codegen.DatomicGenBase
+import codegen.datalog.core.query._SortOneOpt.javaTypes
 
 object _SortOneOptFlat extends DatomicGenBase("SortOneOptFlat", "/query") {
 
   val content = {
     val sorters = baseTypes.map(sorter).mkString("\n")
     s"""// GENERATED CODE ********************************
-       |package molecule.datomic.query
+       |package molecule.datalog.core.query
        |
        |import java.lang.{Boolean => jBoolean, Double => jDouble, Float => jFloat, Integer => jInteger, Long => jLong}
        |import java.math.{BigDecimal => jBigDecimal, BigInteger => jBigInt}
        |import java.net.URI
+       |import java.time._
        |import java.util.{Date, UUID}
        |import molecule.boilerplate.ast.Model._
        |
        |
-       |trait $fileName_[Tpl] extends ResolveBase { self: DatomicModel2Query[Tpl] =>
+       |trait $fileName_[Tpl] extends ResolveBase { self: Model2DatomicQuery[Tpl] =>
        |
        |  private def compare(
        |    a: Row,
@@ -36,7 +38,18 @@ object _SortOneOptFlat extends DatomicGenBase("SortOneOptFlat", "/query") {
   }
 
   def sorter(tpe: String): String = {
-    val cast = if(tpe == "Int") "toString.toInt" else s"asInstanceOf[${javaTypes(tpe)}]"
+    val cast: String => String = tpe match {
+      case "Int"            => (v: String) => s"$v.toString.toInt"
+      case "Duration"       => (v: String) => s"Duration.parse($v.toString)"
+      case "Instant"        => (v: String) => s"Instant.parse($v.toString)"
+      case "LocalDate"      => (v: String) => s"LocalDate.parse($v.toString)"
+      case "LocalTime"      => (v: String) => s"LocalTime.parse($v.toString)"
+      case "LocalDateTime"  => (v: String) => s"LocalDateTime.parse($v.toString)"
+      case "OffsetTime"     => (v: String) => s"OffsetTime.parse($v.toString)"
+      case "OffsetDateTime" => (v: String) => s"OffsetDateTime.parse($v.toString)"
+      case "ZonedDateTime"  => (v: String) => s"ZonedDateTime.parse($v.toString)"
+      case _                => (v: String) => s"$v.asInstanceOf[${javaTypes(tpe)}]"
+    }
     s"""
        |  protected def sortOneOptFlat$tpe(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
        |    attr.sort.map { sort =>
@@ -47,11 +60,12 @@ object _SortOneOptFlat extends DatomicGenBase("SortOneOptFlat", "/query") {
        |            val i = nestedIdsCount + attrIndex
        |            (a: Row, b: Row) =>
        |              compare(a, b, i, (v1, v2) =>
-       |                v1.$cast.compareTo(v2.$cast))
+       |                ${cast("v1")}.compareTo(${cast("v2")}))
        |          case 'd' => (nestedIdsCount: Int) =>
        |            val i = nestedIdsCount + attrIndex
        |            (a: Row, b: Row) =>
-       |              compare(b, a, i, (v1, v2) => v1.$cast.compareTo(v2.$cast))
+       |              compare(b, a, i, (v1, v2) =>
+       |                ${cast("v1")}.compareTo(${cast("v2")}))
        |        }
        |      )
        |    }

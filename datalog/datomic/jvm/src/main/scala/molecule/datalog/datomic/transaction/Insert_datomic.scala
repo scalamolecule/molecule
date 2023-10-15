@@ -1,5 +1,6 @@
 package molecule.datalog.datomic.transaction
 
+import java.time._
 import java.util.{ArrayList => jArrayList, List => jList}
 import molecule.base.ast._
 import molecule.boilerplate.ast.Model._
@@ -207,18 +208,26 @@ trait Insert_datomic
   }
 
   // Save Int as Long in Datomic
-  override protected lazy val transformString     = identity
-  override protected lazy val transformInt        = (v: Any) => v.asInstanceOf[Int].toLong
-  override protected lazy val transformLong       = identity
-  override protected lazy val transformFloat      = identity
-  override protected lazy val transformDouble     = identity
-  override protected lazy val transformBoolean    = boolean2java
-  override protected lazy val transformBigInt     = bigInt2java
-  override protected lazy val transformBigDecimal = bigDec2java
-  override protected lazy val transformDate       = identity
-  override protected lazy val transformUUID       = identity
-  override protected lazy val transformURI        = identity
-  override protected lazy val transformByte       = byte2java
-  override protected lazy val transformShort      = short2java
-  override protected lazy val transformChar       = char2java
+  override protected lazy val transformString         = identity
+  override protected lazy val transformInt            = (v: Any) => v.asInstanceOf[Int].toLong
+  override protected lazy val transformLong           = identity
+  override protected lazy val transformFloat          = identity
+  override protected lazy val transformDouble         = identity
+  override protected lazy val transformBoolean        = boolean2java
+  override protected lazy val transformBigInt         = bigInt2java
+  override protected lazy val transformBigDecimal     = bigDec2java
+  override protected lazy val transformDate           = identity
+  override protected lazy val transformDuration       = (v: Any) => v.asInstanceOf[Duration].toString
+  override protected lazy val transformInstant        = (v: Any) => v.asInstanceOf[Instant].toString
+  override protected lazy val transformLocalDate      = (v: Any) => v.asInstanceOf[LocalDate].toString
+  override protected lazy val transformLocalTime      = (v: Any) => v.asInstanceOf[LocalTime].toString
+  override protected lazy val transformLocalDateTime  = (v: Any) => v.asInstanceOf[LocalDateTime].toString
+  override protected lazy val transformOffsetTime     = (v: Any) => v.asInstanceOf[OffsetTime].toString
+  override protected lazy val transformOffsetDateTime = (v: Any) => v.asInstanceOf[OffsetDateTime].toString
+  override protected lazy val transformZonedDateTime  = (v: Any) => v.asInstanceOf[ZonedDateTime].toString
+  override protected lazy val transformUUID           = identity
+  override protected lazy val transformURI            = identity
+  override protected lazy val transformByte           = byte2java
+  override protected lazy val transformShort          = short2java
+  override protected lazy val transformChar           = char2java
 }

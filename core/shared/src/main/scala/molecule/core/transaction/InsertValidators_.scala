@@ -2,6 +2,7 @@
 package molecule.core.transaction
 
 import java.net.URI
+import java.time._
 import java.util.{Date, UUID}
 import molecule.boilerplate.ast.Model._
 import molecule.core.validation.insert.InsertValueResolvers_
@@ -208,6 +209,190 @@ trait InsertValidators_ extends InsertValueResolvers_ {
           (tpl: Product) => {
             val values = tpl2values(tpl)
             (v: Date) =>
+              validator.withValues(values).validate(v)
+          }
+        )
+      }
+    }
+  }
+
+  protected def validatorDuration(
+    optValidator: Option[ValidateDuration],
+    a: Attr,
+    curElements: List[Element]
+  ): Option[Product => Duration => Seq[String]] = {
+    optValidator.fold(
+      Option.empty[Product => Duration => Seq[String]]
+    ) { validator =>
+      if (a.valueAttrs.isEmpty) {
+        Some((_: Product) => (v: Duration) => validator.validate(v))
+      } else {
+        val tpl2values = tpl2valueResolver(a, curElements)
+        Some(
+          (tpl: Product) => {
+            val values = tpl2values(tpl)
+            (v: Duration) =>
+              validator.withValues(values).validate(v)
+          }
+        )
+      }
+    }
+  }
+
+  protected def validatorInstant(
+    optValidator: Option[ValidateInstant],
+    a: Attr,
+    curElements: List[Element]
+  ): Option[Product => Instant => Seq[String]] = {
+    optValidator.fold(
+      Option.empty[Product => Instant => Seq[String]]
+    ) { validator =>
+      if (a.valueAttrs.isEmpty) {
+        Some((_: Product) => (v: Instant) => validator.validate(v))
+      } else {
+        val tpl2values = tpl2valueResolver(a, curElements)
+        Some(
+          (tpl: Product) => {
+            val values = tpl2values(tpl)
+            (v: Instant) =>
+              validator.withValues(values).validate(v)
+          }
+        )
+      }
+    }
+  }
+
+  protected def validatorLocalDate(
+    optValidator: Option[ValidateLocalDate],
+    a: Attr,
+    curElements: List[Element]
+  ): Option[Product => LocalDate => Seq[String]] = {
+    optValidator.fold(
+      Option.empty[Product => LocalDate => Seq[String]]
+    ) { validator =>
+      if (a.valueAttrs.isEmpty) {
+        Some((_: Product) => (v: LocalDate) => validator.validate(v))
+      } else {
+        val tpl2values = tpl2valueResolver(a, curElements)
+        Some(
+          (tpl: Product) => {
+            val values = tpl2values(tpl)
+            (v: LocalDate) =>
+              validator.withValues(values).validate(v)
+          }
+        )
+      }
+    }
+  }
+
+  protected def validatorLocalTime(
+    optValidator: Option[ValidateLocalTime],
+    a: Attr,
+    curElements: List[Element]
+  ): Option[Product => LocalTime => Seq[String]] = {
+    optValidator.fold(
+      Option.empty[Product => LocalTime => Seq[String]]
+    ) { validator =>
+      if (a.valueAttrs.isEmpty) {
+        Some((_: Product) => (v: LocalTime) => validator.validate(v))
+      } else {
+        val tpl2values = tpl2valueResolver(a, curElements)
+        Some(
+          (tpl: Product) => {
+            val values = tpl2values(tpl)
+            (v: LocalTime) =>
+              validator.withValues(values).validate(v)
+          }
+        )
+      }
+    }
+  }
+
+  protected def validatorLocalDateTime(
+    optValidator: Option[ValidateLocalDateTime],
+    a: Attr,
+    curElements: List[Element]
+  ): Option[Product => LocalDateTime => Seq[String]] = {
+    optValidator.fold(
+      Option.empty[Product => LocalDateTime => Seq[String]]
+    ) { validator =>
+      if (a.valueAttrs.isEmpty) {
+        Some((_: Product) => (v: LocalDateTime) => validator.validate(v))
+      } else {
+        val tpl2values = tpl2valueResolver(a, curElements)
+        Some(
+          (tpl: Product) => {
+            val values = tpl2values(tpl)
+            (v: LocalDateTime) =>
+              validator.withValues(values).validate(v)
+          }
+        )
+      }
+    }
+  }
+
+  protected def validatorOffsetTime(
+    optValidator: Option[ValidateOffsetTime],
+    a: Attr,
+    curElements: List[Element]
+  ): Option[Product => OffsetTime => Seq[String]] = {
+    optValidator.fold(
+      Option.empty[Product => OffsetTime => Seq[String]]
+    ) { validator =>
+      if (a.valueAttrs.isEmpty) {
+        Some((_: Product) => (v: OffsetTime) => validator.validate(v))
+      } else {
+        val tpl2values = tpl2valueResolver(a, curElements)
+        Some(
+          (tpl: Product) => {
+            val values = tpl2values(tpl)
+            (v: OffsetTime) =>
+              validator.withValues(values).validate(v)
+          }
+        )
+      }
+    }
+  }
+
+  protected def validatorOffsetDateTime(
+    optValidator: Option[ValidateOffsetDateTime],
+    a: Attr,
+    curElements: List[Element]
+  ): Option[Product => OffsetDateTime => Seq[String]] = {
+    optValidator.fold(
+      Option.empty[Product => OffsetDateTime => Seq[String]]
+    ) { validator =>
+      if (a.valueAttrs.isEmpty) {
+        Some((_: Product) => (v: OffsetDateTime) => validator.validate(v))
+      } else {
+        val tpl2values = tpl2valueResolver(a, curElements)
+        Some(
+          (tpl: Product) => {
+            val values = tpl2values(tpl)
+            (v: OffsetDateTime) =>
+              validator.withValues(values).validate(v)
+          }
+        )
+      }
+    }
+  }
+
+  protected def validatorZonedDateTime(
+    optValidator: Option[ValidateZonedDateTime],
+    a: Attr,
+    curElements: List[Element]
+  ): Option[Product => ZonedDateTime => Seq[String]] = {
+    optValidator.fold(
+      Option.empty[Product => ZonedDateTime => Seq[String]]
+    ) { validator =>
+      if (a.valueAttrs.isEmpty) {
+        Some((_: Product) => (v: ZonedDateTime) => validator.validate(v))
+      } else {
+        val tpl2values = tpl2valueResolver(a, curElements)
+        Some(
+          (tpl: Product) => {
+            val values = tpl2values(tpl)
+            (v: ZonedDateTime) =>
               validator.withValues(values).validate(v)
           }
         )

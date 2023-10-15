@@ -1,6 +1,7 @@
 package molecule.sql.h2
 
 import java.math.{BigDecimal => jBigDecimal}
+import java.time._
 import java.util.Date
 import java.{lang => ja}
 
@@ -15,6 +16,14 @@ object functions {
   def has_BigInt(array1: Array[jBigDecimal], array2: Array[jBigDecimal]): Boolean = has(array1, array2)
   def has_BigDecimal(array1: Array[jBigDecimal], array2: Array[jBigDecimal]): Boolean = has(array1, array2)
   def has_Date(array1: Array[Date], array2: Array[Date]): Boolean = has(array1, array2)
+  def has_Duration(array1: Array[String], array2: Array[String]): Boolean = has(array1, array2)
+  def has_Instant(array1: Array[String], array2: Array[String]): Boolean = has(array1, array2)
+  def has_LocalDate(array1: Array[String], array2: Array[String]): Boolean = has(array1, array2)
+  def has_LocalTime(array1: Array[String], array2: Array[String]): Boolean = has(array1, array2)
+  def has_LocalDateTime(array1: Array[String], array2: Array[String]): Boolean = has(array1, array2)
+  def has_OffsetTime(array1: Array[String], array2: Array[String]): Boolean = has(array1, array2)
+  def has_OffsetDateTime(array1: Array[String], array2: Array[String]): Boolean = has(array1, array2)
+  def has_ZonedDateTime(array1: Array[String], array2: Array[String]): Boolean = has(array1, array2)
   def has_UUID(array1: Array[String], array2: Array[String]): Boolean = has(array1, array2)
   def has_URI(array1: Array[String], array2: Array[String]): Boolean = has(array1, array2)
   def has_Byte(array1: Array[ja.Byte], array2: Array[ja.Byte]): Boolean = has(array1, array2)
@@ -57,6 +66,14 @@ object functions {
   def hasNo_BigInt(array1: Array[jBigDecimal], array2: Array[jBigDecimal]): Boolean = hasNo(array1, array2)
   def hasNo_BigDecimal(array1: Array[jBigDecimal], array2: Array[jBigDecimal]): Boolean = hasNo(array1, array2)
   def hasNo_Date(array1: Array[Date], array2: Array[Date]): Boolean = hasNo(array1, array2)
+  def hasNo_Duration(array1: Array[String], array2: Array[String]): Boolean = hasNo(array1, array2)
+  def hasNo_Instant(array1: Array[String], array2: Array[String]): Boolean = hasNo(array1, array2)
+  def hasNo_LocalDate(array1: Array[String], array2: Array[String]): Boolean = hasNo(array1, array2)
+  def hasNo_LocalTime(array1: Array[String], array2: Array[String]): Boolean = hasNo(array1, array2)
+  def hasNo_LocalDateTime(array1: Array[String], array2: Array[String]): Boolean = hasNo(array1, array2)
+  def hasNo_OffsetTime(array1: Array[String], array2: Array[String]): Boolean = hasNo(array1, array2)
+  def hasNo_OffsetDateTime(array1: Array[String], array2: Array[String]): Boolean = hasNo(array1, array2)
+  def hasNo_ZonedDateTime(array1: Array[String], array2: Array[String]): Boolean = hasNo(array1, array2)
   def hasNo_UUID(array1: Array[String], array2: Array[String]): Boolean = hasNo(array1, array2)
   def hasNo_URI(array1: Array[String], array2: Array[String]): Boolean = hasNo(array1, array2)
   def hasNo_Byte(array1: Array[ja.Byte], array2: Array[ja.Byte]): Boolean = hasNo(array1, array2)

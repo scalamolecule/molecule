@@ -1,6 +1,7 @@
 package molecule.datalog.datomic.transaction
 
 import java.net.URI
+import java.time._
 import java.util.{Date, UUID}
 import molecule.base.ast._
 import molecule.boilerplate.ast.Model._
@@ -98,33 +99,26 @@ trait Save_datomic
   }
 
   // Save Int as Long in Datomic
-  override protected lazy val transformString     = (v: String) => v
-  override protected lazy val transformInt        = (v: Int) => v
-  override protected lazy val transformLong       = (v: Long) => v
-  override protected lazy val transformFloat      = (v: Float) => v
-  override protected lazy val transformDouble     = (v: Double) => v
-  override protected lazy val transformBoolean    = (v: Boolean) => v
-  override protected lazy val transformBigInt     = (v: BigInt) => v.bigInteger
-  override protected lazy val transformBigDecimal = (v: BigDecimal) => v.bigDecimal
-  override protected lazy val transformDate       = (v: Date) => v
-  override protected lazy val transformUUID       = (v: UUID) => v
-  override protected lazy val transformURI        = (v: URI) => v
-  override protected lazy val transformByte       = (v: Byte) => v.toInt
-  override protected lazy val transformShort      = (v: Short) => v.toInt
-  override protected lazy val transformChar       = (v: Char) => v.toString
-
-  override protected lazy val extsString     = List("", "AnyRef")
-  override protected lazy val extsInt        = List("", "AnyRef")
-  override protected lazy val extsLong       = List("", "AnyRef")
-  override protected lazy val extsFloat      = List("", "AnyRef")
-  override protected lazy val extsDouble     = List("", "AnyRef")
-  override protected lazy val extsBoolean    = List("", "AnyRef")
-  override protected lazy val extsBigInt     = List("", "AnyRef")
-  override protected lazy val extsBigDecimal = List("", "AnyRef")
-  override protected lazy val extsDate       = List("", "AnyRef")
-  override protected lazy val extsUUID       = List("", "AnyRef")
-  override protected lazy val extsURI        = List("", "AnyRef")
-  override protected lazy val extsByte       = List("", "AnyRef")
-  override protected lazy val extsShort      = List("", "AnyRef")
-  override protected lazy val extsChar       = List("", "AnyRef")
+  override protected lazy val transformString         = (v: String) => v
+  override protected lazy val transformInt            = (v: Int) => v
+  override protected lazy val transformLong           = (v: Long) => v
+  override protected lazy val transformFloat          = (v: Float) => v
+  override protected lazy val transformDouble         = (v: Double) => v
+  override protected lazy val transformBoolean        = (v: Boolean) => v
+  override protected lazy val transformBigInt         = (v: BigInt) => v.bigInteger
+  override protected lazy val transformBigDecimal     = (v: BigDecimal) => v.bigDecimal
+  override protected lazy val transformDate           = (v: Date) => v
+  override protected lazy val transformDuration       = (v: Duration) => v.toString
+  override protected lazy val transformInstant        = (v: Instant) => v.toString
+  override protected lazy val transformLocalDate      = (v: LocalDate) => v.toString
+  override protected lazy val transformLocalTime      = (v: LocalTime) => v.toString
+  override protected lazy val transformLocalDateTime  = (v: LocalDateTime) => v.toString
+  override protected lazy val transformOffsetTime     = (v: OffsetTime) => v.toString
+  override protected lazy val transformOffsetDateTime = (v: OffsetDateTime) => v.toString
+  override protected lazy val transformZonedDateTime  = (v: ZonedDateTime) => v.toString
+  override protected lazy val transformUUID           = (v: UUID) => v
+  override protected lazy val transformURI            = (v: URI) => v
+  override protected lazy val transformByte           = (v: Byte) => v.toInt
+  override protected lazy val transformShort          = (v: Short) => v.toInt
+  override protected lazy val transformChar           = (v: Char) => v.toString
 }
