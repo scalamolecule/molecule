@@ -1,6 +1,6 @@
 package molecule.sql.mysql.compliance.pagination.cursor.subUnique
 
-import molecule.coreTests.compliance.pagination.cursor.subUnique._
+import molecule.coreTests.spi.pagination.cursor.subUnique._
 import molecule.sql.mysql.setup.TestAsync_mysql
 
 object AttrOrder extends AttrOrder with TestAsync_mysql

@@ -1,4 +1,4 @@
-package molecule.coreTests.compliance.crud.delete
+package molecule.coreTests.spi.crud.delete
 
 import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync

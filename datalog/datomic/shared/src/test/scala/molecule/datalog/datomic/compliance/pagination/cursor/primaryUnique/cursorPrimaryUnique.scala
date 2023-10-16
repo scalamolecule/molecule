@@ -1,6 +1,6 @@
 package molecule.datalog.datomic.compliance.pagination.cursor.primaryUnique
 
-import molecule.coreTests.compliance.pagination.cursor.primaryUnique._
+import molecule.coreTests.spi.pagination.cursor.primaryUnique._
 import molecule.datalog.datomic.setup.TestAsync_datomic
 
 object Directions extends Directions with TestAsync_datomic

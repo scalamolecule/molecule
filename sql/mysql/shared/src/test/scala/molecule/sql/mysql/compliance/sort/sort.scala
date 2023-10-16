@@ -1,6 +1,6 @@
 package molecule.sql.mysql.compliance.sort
 
-import molecule.coreTests.compliance.sort._
+import molecule.coreTests.spi.sort._
 import molecule.sql.mysql.setup.TestAsync_mysql
 
 object SortAggr extends SortAggr with TestAsync_mysql

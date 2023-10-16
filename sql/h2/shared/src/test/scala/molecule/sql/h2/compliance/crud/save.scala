@@ -1,6 +1,6 @@
 package molecule.sql.h2.compliance.crud
 
-import molecule.coreTests.compliance.crud.save._
+import molecule.coreTests.spi.crud.save._
 import molecule.sql.h2.setup.TestAsync_h2
 
 object SaveCardOne extends SaveCardOne with TestAsync_h2

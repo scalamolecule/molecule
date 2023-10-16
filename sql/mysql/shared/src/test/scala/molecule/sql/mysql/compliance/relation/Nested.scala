@@ -1,6 +1,6 @@
 package molecule.sql.mysql.compliance.relation
 
-import molecule.coreTests.compliance.relation.nested._
+import molecule.coreTests.spi.relation.nested._
 import molecule.sql.mysql.setup.TestAsync_mysql
 
 object NestedBasic extends NestedBasic with TestAsync_mysql

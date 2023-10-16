@@ -17,11 +17,6 @@ object AdhocJVM_h2 extends TestSuite_h2 {
         _ <- Ns.int.insert(1).i.transact
         _ <- Ns.int.query.i.get.map(_ ==> List(1))
 
-        //        _ <- rawQuery(
-        //          """SELECT JSON_ARRAYAGG(t1.v)
-        //            |FROM Ns, JSON_TABLE(Ns.ints, '$[*]' COLUMNS (v int PATH '$')) t1
-        //            |WHERE t1.v NOT IN(6)
-        //            |""".stripMargin, true)
 
         //        _ <- rawTransact(
         //          """UPDATE Ns SET
@@ -34,6 +29,13 @@ object AdhocJVM_h2 extends TestSuite_h2 {
         //            |  Ns.ints IS NOT NULL
         //            |""".stripMargin)
 
+        //        _ <- rawQuery(
+        //          """SELECT DISTINCT
+        //            |  SUM(DISTINCT Ns.double)
+        //            |FROM Ns
+        //            |WHERE
+        //            |  Ns.double IS NOT NULL;
+        //            |""".stripMargin, true)
 
       } yield ()
     }

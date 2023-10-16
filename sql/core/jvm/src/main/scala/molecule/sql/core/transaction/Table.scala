@@ -1,7 +1,7 @@
 package molecule.sql.core.transaction
 
 import java.sql.{PreparedStatement => PS}
-import molecule.sql.core.transaction.JdbcDataType_JVM._
+import molecule.sql.core.transaction.SqlDataType_JVM._
 
 case class Table(
   refPath: List[String],

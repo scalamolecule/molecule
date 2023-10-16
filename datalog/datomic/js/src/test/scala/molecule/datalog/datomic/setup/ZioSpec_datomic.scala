@@ -1,18 +1,17 @@
 package molecule.datalog.datomic.setup
 
 import molecule.base.api.Schema
-import molecule.core.marshalling.DatomicProxy
+import molecule.core.marshalling.{DatomicProxy, RpcRequest}
 import molecule.core.spi.Conn
-import molecule.core.util.Executor._
 import molecule.coreTests.setup.CoreTestZioSpec
-import molecule.datalog.datomic.facade.DatomicPeer
-import zio.{ZIO, ZLayer}
+import molecule.datalog.datomic.facade.DatomicConn_JS
+import zio.ZLayer
 
 
-trait DatomicZioSpec extends CoreTestZioSpec {
+trait ZioSpec_datomic extends CoreTestZioSpec {
 
   override val database = "Datomic"
-  override val platform = "jvm"
+  override val platform = "js"
 
   override def inMem[T](schema: Schema): ZLayer[T, Throwable, Conn] = {
     val proxy = DatomicProxy(
@@ -25,10 +24,6 @@ trait DatomicZioSpec extends CoreTestZioSpec {
       schema.attrMap,
       schema.uniqueAttrs,
     )
-    ZLayer.scoped(
-      ZIO.fromFuture(
-        _ => DatomicPeer.recreateDb(proxy, "mem", "")
-      )
-    )
+    ZLayer.succeed(DatomicConn_JS(proxy, RpcRequest.request))
   }
 }

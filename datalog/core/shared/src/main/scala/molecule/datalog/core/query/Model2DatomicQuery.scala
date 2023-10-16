@@ -100,9 +100,6 @@ class Model2DatomicQuery[Tpl](elements0: List[Element])
           // Create datomic variable for this expression attribute
           filterAttrVars = filterAttrVars + (filterAttr -> vv)
         }(_ => throw ModelError(s"Can't refer to ambiguous filter attribute $filterAttr"))
-        //        if (filterAttrVars.contains(filterAttr)) {
-        //          throw ModelError(s"Can't refer to ambiguous filter attribute $filterAttr")
-        //        }
 
         if (fa.ns == a.ns) {
           // Add adjacent filter attribute is lifted...

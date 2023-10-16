@@ -1,6 +1,6 @@
 package molecule.sql.postgres.compliance.pagination.cursor.primaryUnique
 
-import molecule.coreTests.compliance.pagination.cursor.primaryUnique._
+import molecule.coreTests.spi.pagination.cursor.primaryUnique._
 import molecule.sql.postgres.setup.TestAsync_postgres
 
 object Directions extends Directions with TestAsync_postgres

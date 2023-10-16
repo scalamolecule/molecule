@@ -1,6 +1,6 @@
 package molecule.sql.mariadb.compliance.crud
 
-import molecule.coreTests.compliance.crud.insert._
+import molecule.coreTests.spi.crud.insert._
 import molecule.sql.mariadb.setup.TestAsync_mariadb
 
 object InsertCardOne extends InsertCardOne with TestAsync_mariadb

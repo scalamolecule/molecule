@@ -1,8 +1,8 @@
 package molecule.sql.mariadb.compliance.filter
 
-import molecule.coreTests.compliance.filter.FilterOne_id
-import molecule.coreTests.compliance.filter.one._
-import molecule.coreTests.compliance.filter.one.special._
+import molecule.coreTests.spi.filter.FilterOne_id
+import molecule.coreTests.spi.filter.one._
+import molecule.coreTests.spi.filter.one.special._
 import molecule.sql.mariadb.setup.TestAsync_mariadb
 
 object FilterOne_String_ extends FilterOne_String_ with TestAsync_mariadb

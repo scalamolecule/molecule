@@ -1,4 +1,4 @@
-package molecule.coreTests.compliance.relation.flat
+package molecule.coreTests.spi.relation.flat
 
 import molecule.base.error._
 import molecule.core.api.ApiAsync

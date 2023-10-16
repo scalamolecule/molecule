@@ -1,4 +1,4 @@
-package molecule.coreTests.compliance.filterAttr.set
+package molecule.coreTests.spi.filterAttr.set
 
 import molecule.base.error.ModelError
 import molecule.core.api.ApiAsync

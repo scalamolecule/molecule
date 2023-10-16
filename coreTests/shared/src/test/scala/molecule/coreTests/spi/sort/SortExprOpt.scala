@@ -1,4 +1,4 @@
-package molecule.coreTests.compliance.sort
+package molecule.coreTests.spi.sort
 
 import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync

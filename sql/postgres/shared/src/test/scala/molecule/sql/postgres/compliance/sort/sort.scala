@@ -1,6 +1,6 @@
 package molecule.sql.postgres.compliance.sort
 
-import molecule.coreTests.compliance.sort._
+import molecule.coreTests.spi.sort._
 import molecule.sql.postgres.setup.TestAsync_postgres
 
 object SortAggr extends SortAggr with TestAsync_postgres

@@ -1,6 +1,6 @@
 package molecule.sql.postgres.compliance.relation
 
-import molecule.coreTests.compliance.relation.nested._
+import molecule.coreTests.spi.relation.nested._
 import molecule.sql.postgres.setup.TestAsync_postgres
 
 object NestedBasic extends NestedBasic with TestAsync_postgres

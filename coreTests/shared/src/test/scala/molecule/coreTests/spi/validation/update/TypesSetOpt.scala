@@ -1,4 +1,4 @@
-package molecule.coreTests.compliance.validation.update
+package molecule.coreTests.spi.validation.update
 
 import java.net.URI
 import java.util.UUID

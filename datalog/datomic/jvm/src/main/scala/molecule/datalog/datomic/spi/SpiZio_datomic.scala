@@ -174,27 +174,26 @@ trait SpiZio_datomic
 
   override def fallback_rawQuery(
     query: String,
-    withNulls: Boolean = false,
-    doPrint: Boolean = true,
+    debug: Boolean = false,
   ): ZIO[Conn, MoleculeError, List[List[Any]]] = {
     for {
       conn0 <- ZIO.service[Conn]
       conn = conn0.asInstanceOf[DatomicConn_JVM]
       result <- mapError(ZIO.attemptBlocking(
-        SpiSync_datomic.fallback_rawQuery(query, withNulls, doPrint)(conn)
+        SpiSync_datomic.fallback_rawQuery(query, debug)(conn)
       ))
     } yield result
   }
 
   override def fallback_rawTransact(
     txData: String,
-    doPrint: Boolean = true
+    debug: Boolean = false
   ): ZIO[Conn, MoleculeError, TxReport] = {
     for {
       conn0 <- ZIO.service[Conn]
       conn = conn0.asInstanceOf[DatomicConn_JVM]
       result <- mapError(ZIO.fromFuture(_ =>
-        SpiAsync_datomic.fallback_rawTransact(txData, doPrint)(conn, global)
+        SpiAsync_datomic.fallback_rawTransact(txData, debug)(conn, global)
       ))
     } yield result
   }

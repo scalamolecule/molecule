@@ -1,6 +1,6 @@
 package molecule.sql.postgres.compliance.validation.crud.update
 
-import molecule.coreTests.compliance.validation.update._
+import molecule.coreTests.spi.validation.update._
 import molecule.sql.postgres.setup.TestAsync_postgres
 
 object TypesOne extends TypesOne with TestAsync_postgres

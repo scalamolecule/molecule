@@ -1,4 +1,4 @@
-package molecule.coreTests.compliance.filter.one.special
+package molecule.coreTests.spi.filter.one.special
 
 import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync

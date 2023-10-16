@@ -179,17 +179,16 @@ trait SpiAsync_datomic
 
   override def fallback_rawQuery(
     query: String,
-    withNulls: Boolean = false,
-    doPrint: Boolean = true,
+    debug: Boolean = false,
   )(implicit conn: Conn, ec: EC): Future[List[List[Any]]] = future {
-    SpiSync_datomic.fallback_rawQuery(query, withNulls, doPrint)
+    SpiSync_datomic.fallback_rawQuery(query, debug)
   }
 
   override def fallback_rawTransact(
     txData: String,
-    doPrint: Boolean = true
+    debugFlag: Boolean = false
   )(implicit conn: Conn, ec: EC): Future[TxReport] = {
-    val debug = if (doPrint) (s: String) => println(s) else (_: String) => ()
+    val debug = if (debugFlag) (s: String) => println(s) else (_: String) => ()
     debug("\n=============================================================================")
     debug(txData)
     conn.asInstanceOf[DatomicConn_JVM].transactEdn(txData)

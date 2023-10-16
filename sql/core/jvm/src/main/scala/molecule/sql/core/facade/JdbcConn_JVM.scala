@@ -6,7 +6,7 @@ import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.marshalling.JdbcProxy
 import molecule.core.spi.{Conn, TxReport}
 import molecule.core.util.ModelUtils
-import molecule.sql.core.transaction.{JdbcDataType_JVM, JoinTable, SqlBase_JVM, Table}
+import molecule.sql.core.transaction.{SqlDataType_JVM, JoinTable, SqlBase_JVM, Table}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
@@ -14,7 +14,7 @@ case class JdbcConn_JVM(
   override val proxy: JdbcProxy,
   private val sqlConn0: sql.Connection
 ) extends Conn(proxy)
-  with JdbcDataType_JVM
+  with SqlDataType_JVM
   with SqlBase_JVM
   with ModelUtils
   with MoleculeLogging {

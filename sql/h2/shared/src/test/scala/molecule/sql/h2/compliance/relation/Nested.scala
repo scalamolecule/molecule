@@ -1,6 +1,6 @@
 package molecule.sql.h2.compliance.relation
 
-import molecule.coreTests.compliance.relation.nested._
+import molecule.coreTests.spi.relation.nested._
 import molecule.sql.h2.setup.TestAsync_h2
 
 object NestedBasic extends NestedBasic with TestAsync_h2

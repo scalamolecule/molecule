@@ -51,12 +51,11 @@ trait ApiAsync extends ModelUtils { spi: SpiAsync =>
 
   def rawQuery(
     query: String,
-    withNulls: Boolean = false,
-    doPrint: Boolean = true,
-  )(implicit conn: Conn, ec: EC): Future[List[List[Any]]] = fallback_rawQuery(query, withNulls, doPrint)
+    doPrint: Boolean = false,
+  )(implicit conn: Conn, ec: EC): Future[List[List[Any]]] = fallback_rawQuery(query, doPrint)
 
   def rawTransact(
     txData: String,
-    doPrint: Boolean = true
+    doPrint: Boolean = false
   )(implicit conn: Conn, ec: EC): Future[TxReport] = fallback_rawTransact(txData, doPrint)
 }

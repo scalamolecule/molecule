@@ -1,4 +1,4 @@
-package molecule.coreTests.compliance.pagination.offset
+package molecule.coreTests.spi.pagination.offset
 
 import molecule.base.error.ModelError
 import molecule.core.api.ApiAsync

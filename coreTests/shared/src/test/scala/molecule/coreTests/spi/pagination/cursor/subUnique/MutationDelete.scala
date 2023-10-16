@@ -1,4 +1,4 @@
-package molecule.coreTests.compliance.pagination.cursor.subUnique
+package molecule.coreTests.spi.pagination.cursor.subUnique
 
 import molecule.base.error.ModelError
 import molecule.core.api.ApiAsync

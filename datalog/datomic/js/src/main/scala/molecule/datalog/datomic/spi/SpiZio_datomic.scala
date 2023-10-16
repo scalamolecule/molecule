@@ -117,13 +117,12 @@ trait SpiZio_datomic extends SpiZio with DatomicSpiZioBase with ApiZio with Futu
 
   override def fallback_rawQuery(
     query: String,
-    withNulls: Boolean = false,
-    doPrint: Boolean = true,
+    debug: Boolean = false,
   ): ZIO[Conn, MoleculeError, List[List[Any]]] = ??? // todo
 
   override def fallback_rawTransact(
     txData: String,
-    doPrint: Boolean = true
+    debug: Boolean = false
   ): ZIO[Conn, MoleculeError, TxReport] = ??? // todo
 
   // Helpers ---------

@@ -1,6 +1,6 @@
 package molecule.sql.mysql.compliance.filterAttr.set
 
-import molecule.coreTests.compliance.filterAttr.set._
+import molecule.coreTests.spi.filterAttr.set._
 import molecule.sql.mysql.setup.TestAsync_mysql
 
 object Adjacent extends Adjacent with TestAsync_mysql

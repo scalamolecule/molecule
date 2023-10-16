@@ -1,4 +1,4 @@
-package molecule.coreTests.compliance.relation.nested
+package molecule.coreTests.spi.relation.nested
 
 import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync

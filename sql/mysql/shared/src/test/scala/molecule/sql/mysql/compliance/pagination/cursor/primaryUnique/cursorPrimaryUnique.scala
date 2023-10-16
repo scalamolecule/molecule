@@ -1,6 +1,6 @@
 package molecule.sql.mysql.compliance.pagination.cursor.primaryUnique
 
-import molecule.coreTests.compliance.pagination.cursor.primaryUnique._
+import molecule.coreTests.spi.pagination.cursor.primaryUnique._
 import molecule.sql.mysql.setup.TestAsync_mysql
 
 object Directions extends Directions with TestAsync_mysql

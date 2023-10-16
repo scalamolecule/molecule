@@ -1,6 +1,6 @@
 package molecule.sql.postgres.compliance.crud
 
-import molecule.coreTests.compliance.crud.delete._
+import molecule.coreTests.spi.crud.delete._
 import molecule.sql.postgres.setup.TestAsync_postgres
 
 object Delete_id extends Delete_id with TestAsync_postgres

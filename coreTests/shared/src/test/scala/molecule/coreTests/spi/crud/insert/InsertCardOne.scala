@@ -1,4 +1,4 @@
-package molecule.coreTests.compliance.crud.insert
+package molecule.coreTests.spi.crud.insert
 
 import java.net.URI
 import java.time._

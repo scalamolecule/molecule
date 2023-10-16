@@ -1,6 +1,6 @@
 package molecule.datalog.datomic.compliance.sort
 
-import molecule.coreTests.compliance.sort._
+import molecule.coreTests.spi.sort._
 import molecule.datalog.datomic.setup.TestAsync_datomic
 
 object SortAggr extends SortAggr with TestAsync_datomic

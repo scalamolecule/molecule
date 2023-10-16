@@ -1,6 +1,6 @@
 package molecule.sql.mariadb.compliance.pagination.cursor.subUnique
 
-import molecule.coreTests.compliance.pagination.cursor.subUnique._
+import molecule.coreTests.spi.pagination.cursor.subUnique._
 import molecule.sql.mariadb.setup.TestAsync_mariadb
 
 object AttrOrder extends AttrOrder with TestAsync_mariadb

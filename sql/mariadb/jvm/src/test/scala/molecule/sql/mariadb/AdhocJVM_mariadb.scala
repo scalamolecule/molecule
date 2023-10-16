@@ -13,15 +13,34 @@ object AdhocJVM_mariadb extends TestSuite_mariadb {
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
       for {
-        _ <- Ns.int.insert(1).transact
+        //        _ <- Ns.int.insert(1).i.inspect
+        _ <- Ns.int.insert(1).i.transact
         _ <- Ns.int.query.get.map(_ ==> List(1))
 
+        _ <- {
+          Ns.string.int.insert(("a", 1), ("b", 2)).inspect.map(_ ==>
+            """========================================
+              |INSERT:
+              |AttrOneManString("Ns", "string", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 5))
+              |AttrOneManInt("Ns", "int_", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 6))
+              |
+              |INSERT INTO Ns (
+              |  string,
+              |  int_
+              |) VALUES (?, ?)
+              |
+              |(a,1)
+              |(b,2)
+              |----------------------------------------""".stripMargin
+          )
+//          Ns.string.int.insert(("a", 1), ("b", 2)).inspect
+        }
 
-        //        _ <- rawQuery(
-        //          """SELECT JSON_ARRAYAGG(t1.v)
-        //            |FROM Ns, JSON_TABLE(Ns.ints, '$[*]' COLUMNS (v int PATH '$')) t1
-        //            |WHERE t1.v NOT IN(6)
-        //            |""".stripMargin, true)
+        _ <- rawQuery(
+          """SELECT JSON_ARRAYAGG(t1.v)
+            |FROM Ns, JSON_TABLE(Ns.ints, '$[*]' COLUMNS (v int PATH '$')) t1
+            |WHERE t1.v NOT IN(6)
+            |""".stripMargin, true).map(_ ==> 42)
 
 
       } yield ()

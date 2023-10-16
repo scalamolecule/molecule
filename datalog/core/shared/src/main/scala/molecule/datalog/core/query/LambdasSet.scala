@@ -66,8 +66,14 @@ trait LambdasSet extends ResolveBase with JavaConversions {
   private lazy val set2setZonedDateTime : AnyRef => AnyRef = jset2set((v: AnyRef) => ZonedDateTime.parse(v.asInstanceOf[String]))
   private lazy val set2setUUID          : AnyRef => AnyRef = jset2set
   private lazy val set2setURI           : AnyRef => AnyRef = jset2set
-  private lazy val set2setByte          : AnyRef => AnyRef = jset2set((v: AnyRef) => v.asInstanceOf[Integer].toByte)
-  private lazy val set2setShort         : AnyRef => AnyRef = jset2set((v: AnyRef) => v.asInstanceOf[Integer].toShort)
+  private lazy val set2setByte          : AnyRef => AnyRef = jset2set({
+    case v: Integer => v.toByte
+    case v: jLong   => v.toByte
+  })
+  private lazy val set2setShort         : AnyRef => AnyRef = jset2set({
+    case v: Integer => v.toByte
+    case v: jLong   => v.toByte
+  })
   private lazy val set2setChar          : AnyRef => AnyRef = jset2set((v: AnyRef) => v.asInstanceOf[String].charAt(0))
 
   private def jset2set: AnyRef => AnyRef =

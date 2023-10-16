@@ -1,6 +1,6 @@
 package molecule.sql.mariadb.compliance.sort
 
-import molecule.coreTests.compliance.sort._
+import molecule.coreTests.spi.sort._
 import molecule.sql.mariadb.setup.TestAsync_mariadb
 
 object SortAggr extends SortAggr with TestAsync_mariadb

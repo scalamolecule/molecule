@@ -21,6 +21,7 @@ import molecule.sql.core.spi.{SpiHelpers, SpiSyncBase}
 import molecule.sql.core.transaction.{SqlBase_JVM, SqlUpdateSetValidator}
 import molecule.sql.postgres.query._
 import molecule.sql.postgres.transaction._
+import org.postgresql.util.PSQLException
 import scala.annotation.nowarn
 import scala.collection.mutable.ListBuffer
 import scala.util.control.NonFatal
@@ -80,16 +81,15 @@ trait SpiSync_postgres extends SpiSyncBase {
 
   override def fallback_rawQuery(
     query: String,
-    withNulls: Boolean = false,
-    doPrint: Boolean = true,
+    debugFlag: Boolean = false,
   )(implicit conn: Conn): List[List[Any]] = {
     val c             = conn.asInstanceOf[JdbcConn_JVM].sqlConn
     val statement     = c.createStatement()
-    val resultSet     = statement.executeQuery(query)
-    val rsmd          = resultSet.getMetaData
+    val rowsResultSet = statement.executeQuery(query)
+    val rsmd          = rowsResultSet.getMetaData
     val columnsNumber = rsmd.getColumnCount
 
-    val debug = if (doPrint) (s: String) => println(s) else (_: String) => ()
+    val debug = if (debugFlag) (s: String) => println(s) else (_: String) => ()
     debug("\n=============================================================================")
     debug(query)
 
@@ -97,107 +97,105 @@ trait SpiSync_postgres extends SpiSyncBase {
     val row  = ListBuffer.empty[Any]
 
     def value[T](rawValue: T, baseTpe: String): String = {
-      val isNull = resultSet.wasNull()
-      if (withNulls && isNull) {
+      if (rowsResultSet.wasNull()) {
         row += null
-      } else if (!isNull) {
+      } else {
         row += rawValue
       }
       baseTpe
     }
+
     def array(n: Int, baseTpe: String): String = {
-      val arr    = resultSet.getArray(n)
-      val isNull = resultSet.wasNull()
-      if (withNulls && isNull) {
-        row += null
-      } else if (!isNull) {
-        row += arr.getArray.asInstanceOf[Array[_]].toSet
+      try {
+        val arrayN = rowsResultSet.getArray(n)
+        if (arrayN == null) {
+          debug("  A  " + arrayN)
+          row += null
+        } else {
+          val arrayRS = arrayN.getResultSet
+          if (arrayRS.wasNull()) {
+            debug("  B  " + arrayRS)
+            row += null
+          } else {
+            debug("  C  " + arrayRS)
+            arrayRS.next()
+            val array2 = arrayRS.getArray(2)
+            if (array2 == null) {
+              debug("  C1  null")
+              row += null
+            } else {
+              val set = arrayRS.getArray(2).getArray.asInstanceOf[Array[_]].toSet
+              debug("  C2  " + set)
+              row += set
+            }
+          }
+        }
+      } catch {
+        case e: PSQLException =>
+          if (e.getMessage.contains("No results were returned by the query")) {
+            val arrayN = rowsResultSet.getArray(n)
+            if (rowsResultSet.wasNull()) {
+              debug("  D  null")
+              row += null
+            } else {
+              val set = arrayN.getArray.asInstanceOf[Array[_]].toSet
+              //              debug("@@@@@@@@@ " + set)
+              //              debug("@@@@@@@@@ " + set.head.getClass)
+              debug("  E  " + set)
+              row += set
+            }
+          } else if (e.getMessage.contains("perhaps you need to call next")) {
+            debug("  F  null")
+            row += null
+          } else {
+            throw new Exception("Unexpected error from Postgres: " + e)
+          }
+        case NonFatal(e)      => throw e
       }
       s"Set[$baseTpe]"
     }
 
-    while (resultSet.next) {
+    while (rowsResultSet.next) {
       debug("-----------------------------------------------")
       var n = 1
       row.clear()
       while (n <= columnsNumber) {
         val col     = rsmd.getColumnName(n)
         val sqlType = rsmd.getColumnTypeName(n)
-
-        // todo: get types of sql dialect
+        //        debug("TPE: " + sqlType)
         val tpe         = sqlType match {
-          case "CHARACTER VARYING"            => value(resultSet.getString(n), "String/URI")
-          case "INTEGER" | "int4"             => value(resultSet.getInt(n), "Int")
-          case "BIGINT"                       => value(resultSet.getLong(n), "Long")
-          case "REAL" | "float4"              => value(resultSet.getFloat(n), "Float")
-          case "DOUBLE PRECISION" | "numeric" => value(resultSet.getDouble(n), "Double")
-          case "BOOLEAN"                      => value(resultSet.getBoolean(n), "Boolean")
-          case "DECIMAL"                      => value(resultSet.getDouble(n), "BigInt/Decimal")
-          case "DATE"                         => value(resultSet.getDate(n), "Date")
-          case "UUID"                         => value(resultSet.getString(n), "UUID")
-          case "TINYINT"                      => value(resultSet.getShort(n), "Byte")
-          case "SMALLINT"                     => value(resultSet.getShort(n), "Short")
-          case "CHARACTER"                    => value(resultSet.getString(n), "Char")
-
-          case "CHARACTER VARYING ARRAY"  => array(n, "String/URI")
-          case "INTEGER ARRAY"            => array(n, "Int")
-          case "BIGINT ARRAY"             => array(n, "Long")
-          case "REAL ARRAY"               => array(n, "Float")
-          case "DOUBLE PRECISION ARRAY"   => array(n, "Double")
-          case "BOOLEAN ARRAY"            => array(n, "Boolean")
-          case "DECIMAL(100, 0) ARRAY"    => array(n, "BigInt")
-          case "DECIMAL(65535, 25) ARRAY" => array(n, "BigDecimal")
-          case "DATE ARRAY"               => array(n, "Date")
-          case "UUID ARRAY"               => array(n, "UUID")
-          case "TINYINT ARRAY"            => array(n, "Byte")
-          case "SMALLINT ARRAY"           => array(n, "Short")
-          case "CHARACTER ARRAY"          => array(n, "Char")
-
-          case "NULL"                          => row += "NULL"; "NULL"
-          case "CHARACTER VARYING ARRAY ARRAY" => row += "CHARACTER VARYING ARRAY ARRAY"; "CHARACTER VARYING ARRAY ARRAY"
-          case "INTEGER ARRAY ARRAY"           => row += "INTEGER ARRAY ARRAY"; "INTEGER ARRAY ARRAY"
-          case "BIGINT ARRAY ARRAY"            => row += "BIGINT ARRAY ARRAY"; "BIGINT ARRAY ARRAY"
-          case "REAL ARRAY ARRAY"              => row += "REAL ARRAY ARRAY"; "REAL ARRAY ARRAY"
-          case "DOUBLE PRECISION ARRAY ARRAY"  => row += "DOUBLE PRECISION ARRAY ARRAY"; "DOUBLE PRECISION ARRAY ARRAY"
-          case "BOOLEAN ARRAY ARRAY"           => row += "BOOLEAN ARRAY ARRAY"; "BOOLEAN ARRAY ARRAY"
-          case "DECIMAL ARRAY ARRAY"           => row += "DECIMAL ARRAY ARRAY"; "DECIMAL ARRAY ARRAY"
-          case "DATE ARRAY ARRAY"              => row += "DATE ARRAY ARRAY"; "DATE ARRAY ARRAY"
-          case "UUID ARRAY ARRAY"              => row += "UUID ARRAY ARRAY"; "UUID ARRAY ARRAY"
-          case "TINYINT ARRAY ARRAY"           => row += "TINYINT ARRAY ARRAY"; "TINYINT ARRAY ARRAY"
-          case "SMALLINT ARRAY ARRAY"          => row += "SMALLINT ARRAY ARRAY"; "SMALLINT ARRAY ARRAY"
-          case "CHARACTER ARRAY ARRAY"         => row += "CHARACTER ARRAY ARRAY"; "CHARACTER ARRAY ARRAY"
-
-          // case "DOUBLE"      => row += resultSet.getDouble(n); "Double/Float x"
-          // case "BIT"         => row += resultSet.getByte(n); "a"
-          // case "FLOAT"       => row += resultSet.getFloat(n); "e"
-          // case "REAL"        => row += resultSet.getDouble(n); "f"
-          // case "NUMERIC"     => row += resultSet.getDouble(n); "g"
-          // case "CHAR"        => row += resultSet.getString(n).charAt(0); "h"
-          // case "VARCHAR"     => row += resultSet.getString(n).charAt(0); "j"
-          // case "LONGVARCHAR" => row += resultSet.getString(n); "k"
-          // case "BINARY"      => row += resultSet.getByte(n); "l"
-
-          case "float8"    => value(resultSet.getDouble(n), "Double")
-          case "text"      => value(resultSet.getString(n), "String/URI")
-          case "bool"      => value(resultSet.getString(n), "Boolean")
-          case "bigserial" => value(resultSet.getString(n), "BigInt/Decimal")
-          case "bigint"    => value(resultSet.getString(n), "BigInt/Decimal")
+          case "text"      => value(rowsResultSet.getString(n), "String/URI")
+          case "int4"      => value(rowsResultSet.getInt(n), "Int")
+          case "int8"      => value(rowsResultSet.getLong(n), "Long")
+          case "numeric"   => value(rowsResultSet.getBigDecimal(n), "Float/BigInt/BigDecimal")
+          case "float8"    => value(rowsResultSet.getDouble(n), "Double")
+          case "bool"      => value(rowsResultSet.getBoolean(n), "Boolean")
+          case "date"      => value(rowsResultSet.getDate(n), "Date")
+          case "varchar"   => value(rowsResultSet.getString(n), "java.time text")
+          case "uuid"      => value(rowsResultSet.getString(n), "UUID")
+          case "int2"      => value(rowsResultSet.getInt(n), "Byte")
+          case "bpchar"    => value(rowsResultSet.getString(n), "Char")
+          case "bigserial" => value(rowsResultSet.getLong(n), "Long id")
 
           case "_int4"    => array(n, "Int")
-          case "_int8"    => array(n, "Bigint")
-          case "_text"    => array(n, "String/URI")
+          case "_text"    => array(n, "String")
+          case "_int8"    => array(n, "Long")
+          case "_numeric" => array(n, "Float/BigInt/BigDecimal")
+          case "_float8"  => array(n, "Double")
           case "_bool"    => array(n, "Boolean")
-          case "_numeric" => array(n, "Bigint")
+          case "_date"    => array(n, "Date")
+          case "_varchar" => array(n, "java.time text/URI")
+          case "_uuid"    => array(n, "UUID")
+          case "_int2"    => array(n, "Byte/Short")
+          case "_bpchar"  => array(n, "Char")
 
-          case other => throw new Exception(
-            s"Unexpected/not yet considered sql result type from raw query: " + other
-          )
+          case other => throw new Exception(s"Unexpected sql result type from raw query: " + other)
         }
-        val columnValue = resultSet.getString(n)
-        if (withNulls && resultSet.wasNull()) {
+        val columnStringValue = rowsResultSet.getString(n)
+        if (rowsResultSet.wasNull()) {
           debug(tpe + "   " + padS(20, tpe) + col + padS(20, col) + "  null")
-        } else if (!resultSet.wasNull()) {
-          debug(tpe + "   " + padS(20, tpe) + col + padS(20, col) + "  " + columnValue)
+        } else {
+          debug(tpe + "   " + padS(20, tpe) + col + padS(20, col) + "  " + columnStringValue)
         }
         n += 1
       }

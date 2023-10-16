@@ -186,13 +186,12 @@ trait SpiAsync_datomic extends SpiAsync with DatomicSpiAsyncBase with FutureUtil
 
   override def fallback_rawQuery(
     query: String,
-    withNulls: Boolean = false,
-    doPrint: Boolean = true,
+    debug: Boolean = false,
   )(implicit conn: Conn, ec: EC): Future[List[List[Any]]] = ??? // todo
 
   override def fallback_rawTransact(
     txData: String,
-    doPrint: Boolean = true
+    debug: Boolean = false
   )(implicit conn: Conn, ec: EC): Future[TxReport] = ??? // todo
 
 
@@ -200,6 +199,6 @@ trait SpiAsync_datomic extends SpiAsync with DatomicSpiAsyncBase with FutureUtil
 
   private def printInspectTx(label: String, elements: List[Element])
                             (implicit ec: EC): Future[Unit] = {
-    Future(printInspect("RPC " + label, elements))
+    Future(printRaw("RPC " + label, elements))
   }
 }

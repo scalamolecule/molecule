@@ -1,6 +1,6 @@
 package molecule.sql.postgres.compliance.validation.crud.save
 
-import molecule.coreTests.compliance.validation.save._
+import molecule.coreTests.spi.validation.save._
 import molecule.sql.postgres.setup.TestAsync_postgres
 
 object FormatConstants extends FormatConstants with TestAsync_postgres

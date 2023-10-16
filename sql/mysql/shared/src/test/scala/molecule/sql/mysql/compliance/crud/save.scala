@@ -1,6 +1,6 @@
 package molecule.sql.mysql.compliance.crud
 
-import molecule.coreTests.compliance.crud.save._
+import molecule.coreTests.spi.crud.save._
 import molecule.sql.mysql.setup.TestAsync_mysql
 
 object SaveCardOne extends SaveCardOne with TestAsync_mysql

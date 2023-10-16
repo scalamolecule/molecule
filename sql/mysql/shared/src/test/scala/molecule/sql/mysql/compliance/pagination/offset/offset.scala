@@ -1,6 +1,6 @@
 package molecule.sql.mysql.compliance.pagination.offset
 
-import molecule.coreTests.compliance.pagination.offset._
+import molecule.coreTests.spi.pagination.offset._
 import molecule.sql.mysql.setup.TestAsync_mysql
 
 object OffsetBackwards extends OffsetBackwards with TestAsync_mysql

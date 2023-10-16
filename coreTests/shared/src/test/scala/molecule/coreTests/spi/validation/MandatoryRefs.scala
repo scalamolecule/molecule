@@ -1,4 +1,4 @@
-package molecule.coreTests.compliance.validation
+package molecule.coreTests.spi.validation
 
 import boopickle.Default._
 import molecule.base.error._

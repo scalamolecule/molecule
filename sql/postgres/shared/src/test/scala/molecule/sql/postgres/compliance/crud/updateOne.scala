@@ -1,6 +1,6 @@
 package molecule.sql.postgres.compliance.crud
 
-import molecule.coreTests.compliance.crud.update.one._
+import molecule.coreTests.spi.crud.update.one._
 import molecule.sql.postgres.setup.TestAsync_postgres
 
 object UpdateOne_id extends UpdateOne_id with TestAsync_postgres

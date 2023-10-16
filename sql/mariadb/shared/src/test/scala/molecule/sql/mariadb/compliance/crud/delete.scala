@@ -1,6 +1,6 @@
 package molecule.sql.mariadb.compliance.crud
 
-import molecule.coreTests.compliance.crud.delete._
+import molecule.coreTests.spi.crud.delete._
 import molecule.sql.mariadb.setup.TestAsync_mariadb
 
 object Delete_id extends Delete_id with TestAsync_mariadb

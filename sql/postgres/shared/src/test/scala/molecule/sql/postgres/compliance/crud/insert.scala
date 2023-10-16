@@ -1,6 +1,6 @@
 package molecule.sql.postgres.compliance.crud
 
-import molecule.coreTests.compliance.crud.insert._
+import molecule.coreTests.spi.crud.insert._
 import molecule.sql.postgres.setup.TestAsync_postgres
 
 object InsertCardOne extends InsertCardOne with TestAsync_postgres

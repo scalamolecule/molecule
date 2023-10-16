@@ -4,12 +4,12 @@ import java.time.Duration
 import molecule.base.error.ExecutionError
 import molecule.core.util.Executor._
 import molecule.datalog.datomic.async._
-import molecule.datalog.datomic.setup.DatomicTestSuite
+import molecule.datalog.datomic.setup.TestSuite_datomic
 import utest._
 import scala.language.implicitConversions
 import scala.util.Random
 
-object AdhocJVM_datomic extends DatomicTestSuite {
+object AdhocJVM_datomic extends TestSuite_datomic {
 
   override lazy val tests = Tests {
 

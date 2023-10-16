@@ -158,27 +158,26 @@ trait SpiZio_postgres extends SpiZio with SpiZioBase_postgres with ModelUtils {
 
   override def fallback_rawQuery(
     query: String,
-    withNulls: Boolean = false,
-    doPrint: Boolean = true,
+    debug: Boolean = false,
   ): ZIO[Conn, MoleculeError, List[List[Any]]] = {
     for {
       conn0 <- ZIO.service[Conn]
       conn = conn0.asInstanceOf[JdbcConn_JVM]
       result <- mapError(ZIO.attemptBlocking(
-        SpiSync_postgres.fallback_rawQuery(query, withNulls, doPrint)(conn)
+        SpiSync_postgres.fallback_rawQuery(query, debug)(conn)
       ))
     } yield result
   }
 
   override def fallback_rawTransact(
     txData: String,
-    doPrint: Boolean = true
+    debug: Boolean = false
   ): ZIO[Conn, MoleculeError, TxReport] = {
     for {
       conn0 <- ZIO.service[Conn]
       conn = conn0.asInstanceOf[JdbcConn_JVM]
       result <- mapError(ZIO.attemptBlocking(
-        SpiSync_postgres.fallback_rawTransact(txData, doPrint)(conn)
+        SpiSync_postgres.fallback_rawTransact(txData, debug)(conn)
       ))
     } yield result
   }

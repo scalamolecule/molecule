@@ -1,6 +1,6 @@
 package molecule.sql.postgres.compliance.crud
 
-import molecule.coreTests.compliance.crud.update.set.ops._
+import molecule.coreTests.spi.crud.update.set.ops._
 import molecule.sql.postgres.setup.TestAsync_postgres
 
 object UpdateSetOps_String_ extends UpdateSetOps_String_ with TestAsync_postgres

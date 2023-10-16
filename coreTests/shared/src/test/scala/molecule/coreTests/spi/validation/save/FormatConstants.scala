@@ -1,4 +1,4 @@
-package molecule.coreTests.compliance.validation.save
+package molecule.coreTests.spi.validation.save
 
 import molecule.base.error._
 import molecule.core.api.ApiAsync

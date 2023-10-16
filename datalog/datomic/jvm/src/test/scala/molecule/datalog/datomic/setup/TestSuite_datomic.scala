@@ -10,7 +10,7 @@ import molecule.datalog.datomic.facade.DatomicPeer
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
-trait DatomicTestSuite extends CoreTestSuite {
+trait TestSuite_datomic extends CoreTestSuite {
 
   override val database = "Datomic"
   override val platform = "jvm"

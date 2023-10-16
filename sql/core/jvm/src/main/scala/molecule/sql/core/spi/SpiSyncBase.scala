@@ -24,7 +24,7 @@ trait SpiSyncBase
     with SpiHelpers
     with SqlUpdateSetValidator
     with ModelUtils
-    with PrintInspect
+    with Renderer
     with BaseHelpers {
 
   // Query --------------------------------------------------------
@@ -112,7 +112,7 @@ trait SpiSyncBase
   ): Unit = {
     tryInspect("query", elements) {
       val query = getModel2SqlQuery[Any](elements).getSqlQuery(Nil, optLimit, optOffset, None)
-      printInspect(label, elements, query)
+      printRaw(label, elements, query)
     }
   }
 
@@ -169,7 +169,7 @@ trait SpiSyncBase
   override def insert_inspect(insert: Insert)(implicit conn: Conn): Unit = {
     tryInspect("insert", insert.elements) {
       val jdbcConn = conn.asInstanceOf[JdbcConn_JVM]
-      printInspectTx("INSERT", insert.elements, insert_getData(insert, jdbcConn))
+      printInspectTx("INSERT", insert.elements, insert_getData(insert, jdbcConn), insert.tpls)
     }
   }
 
@@ -227,7 +227,7 @@ trait SpiSyncBase
             }
             .mkString(action + "S ----------------------\n", "\n------------\n", "")
 
-        printInspect(action, update.elements, refIds + "\n" + updates)
+        printRaw(action, update.elements, refIds + "\n" + updates)
       } else {
         printInspectTx(action, update.elements, update_getData(conn, update))
       }
@@ -273,15 +273,15 @@ trait SpiSyncBase
       throw e
   }
 
-  private def printInspectTx(label: String, elements: List[Element], data: Data): Unit = {
-    val (tables, joinTables) = data
+  private def printInspectTx(label: String, elements: List[Element], stmts: Data, tpls: Seq[Product] = Nil): Unit = {
+    val (tables, joinTables) = stmts
     val tableStmts           = tables.reverse.map(_.stmt).mkString("\n--------\n")
     val joinTableStmts       = if (joinTables.isEmpty) {
       ""
     } else {
       "\n\n--------------\n\n" + joinTables.map(_.stmt).mkString("\n--------\n")
     }
-    printInspect(label, elements, tableStmts + joinTableStmts)
+    printRaw(label, elements, tableStmts + joinTableStmts, tpls.mkString("\n"))
   }
 
 
@@ -304,7 +304,7 @@ trait SpiSyncBase
 
   override def fallback_rawTransact(
     txData: String,
-    doPrint: Boolean = true
+    doPrint: Boolean = false
   )(implicit conn0: Conn): TxReport = {
     val conn  = conn0.asInstanceOf[JdbcConn_JVM]
     val debug = if (doPrint) (s: String) => println(s) else (_: String) => ()

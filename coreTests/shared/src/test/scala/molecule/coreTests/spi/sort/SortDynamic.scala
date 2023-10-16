@@ -1,4 +1,4 @@
-package molecule.coreTests.compliance.sort
+package molecule.coreTests.spi.sort
 
 import molecule.base.error.ModelError
 import molecule.core.api.ApiAsync

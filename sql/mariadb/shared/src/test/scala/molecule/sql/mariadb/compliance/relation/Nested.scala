@@ -1,6 +1,6 @@
 package molecule.sql.mariadb.compliance.relation
 
-import molecule.coreTests.compliance.relation.nested._
+import molecule.coreTests.spi.relation.nested._
 import molecule.sql.mariadb.setup.TestAsync_mariadb
 
 object NestedBasic extends NestedBasic with TestAsync_mariadb

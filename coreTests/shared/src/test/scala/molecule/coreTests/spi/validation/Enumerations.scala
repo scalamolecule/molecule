@@ -1,4 +1,4 @@
-package molecule.coreTests.compliance.validation
+package molecule.coreTests.spi.validation
 
 import molecule.base.error.{InsertError, InsertErrors, ValidationErrors}
 import molecule.core.api.ApiAsync

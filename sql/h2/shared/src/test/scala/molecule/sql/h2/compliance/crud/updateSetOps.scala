@@ -1,6 +1,6 @@
 package molecule.sql.h2.compliance.crud
 
-import molecule.coreTests.compliance.crud.update.set.ops._
+import molecule.coreTests.spi.crud.update.set.ops._
 import molecule.sql.h2.setup.TestAsync_h2
 
 object UpdateSetOps_String_ extends UpdateSetOps_String_ with TestAsync_h2

@@ -5,7 +5,7 @@ import molecule.base.error.{InsertError, InsertErrors, ModelError, ValidationErr
 import molecule.boilerplate.ast.Model._
 import molecule.core.action._
 import molecule.core.marshalling.serialize.PickleTpls
-import molecule.core.spi.{Conn, PrintInspect, SpiAsync, TxReport}
+import molecule.core.spi.{Conn, Renderer, SpiAsync, TxReport}
 import molecule.core.util.FutureUtils
 import molecule.core.validation.TxModelValidation
 import molecule.core.validation.insert.InsertValidation
@@ -13,7 +13,7 @@ import molecule.sql.core.facade.JdbcConn_JS
 import scala.concurrent.{Future, ExecutionContext => EC}
 
 
-trait SpiAsyncBase extends SpiAsync with PrintInspect with FutureUtils {
+trait SpiAsyncBase extends SpiAsync with Renderer with FutureUtils {
 
   // Query --------------------------------------------------------
 
@@ -185,20 +185,19 @@ trait SpiAsyncBase extends SpiAsync with PrintInspect with FutureUtils {
 
   override def fallback_rawQuery(
     query: String,
-    withNulls: Boolean = false,
-    doPrint: Boolean = true,
-  )(implicit conn: Conn, ec: EC): Future[List[List[Any]]] = ??? // todo
+    debug: Boolean = false,
+  )(implicit conn: Conn, ec: EC): Future[List[List[Any]]] = ???
 
   override def fallback_rawTransact(
     txData: String,
-    doPrint: Boolean = true
-  )(implicit conn: Conn, ec: EC): Future[TxReport] = ??? // todo
+    debug: Boolean = false
+  )(implicit conn: Conn, ec: EC): Future[TxReport] = ???
 
   // Util --------------------------------------
 
   private def printInspectTx(label: String, elements: List[Element])
                             (implicit ec: EC): Future[Unit] = {
-    Future(printInspect("RPC " + label, elements))
+    Future(printRaw("RPC " + label, elements))
   }
 
   protected def printInspectQuery(label: String, elements: List[Element])

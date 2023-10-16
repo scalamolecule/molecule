@@ -69,8 +69,7 @@ trait SpiSync_mysql extends SpiSyncBase {
 
   override def fallback_rawQuery(
     query: String,
-    withNulls: Boolean = false,
-    doPrint: Boolean = true,
+    debugFlag: Boolean = false,
   )(implicit conn: Conn): List[List[Any]] = {
     val c             = conn.asInstanceOf[JdbcConn_JVM].sqlConn
     val statement     = c.createStatement()
@@ -78,7 +77,7 @@ trait SpiSync_mysql extends SpiSyncBase {
     val rsmd          = resultSet.getMetaData
     val columnsNumber = rsmd.getColumnCount
 
-    val debug = if (doPrint) (s: String) => println(s) else (_: String) => ()
+    val debug = if (debugFlag) (s: String) => println(s) else (_: String) => ()
     debug("\n=============================================================================")
     debug(query)
 
@@ -86,16 +85,33 @@ trait SpiSync_mysql extends SpiSyncBase {
     val row  = ListBuffer.empty[Any]
 
     def value[T](rawValue: T, baseTpe: String, isStr: Boolean = false): (Any, String) = {
-      val isNull = resultSet.wasNull()
-      if (withNulls && isNull) {
+      if (resultSet.wasNull()) {
         row += null
         ("null", baseTpe)
-      } else if (!isNull) {
+      } else {
         val value = if (isStr) rawValue.toString.replace(29.toChar, ',') else rawValue
+        //        debug("######### " + value)
+        //        debug("######### " + value.getClass)
         row += value
         (value, baseTpe)
-      } else {
+      }
+    }
+
+    def json(value0: String, baseTpe: String): (Any, String) = {
+      if (resultSet.wasNull()) {
+        row += null
         ("null", baseTpe)
+      } else {
+        val value = if (value0(1) == '"') {
+          value0.substring(2, value0.length - 2).split("\", ?\"").toSet
+        } else {
+          value0.substring(1, value0.length - 1).split(", ?").toSet
+        }
+        //        debug("@@@@@@@@@ " + value)
+        //        debug("@@@@@@@@@ " + value.head.getClass)
+        //        debug("######### " + value.getClass)
+        row += value
+        (value, baseTpe)
       }
     }
 
@@ -107,26 +123,27 @@ trait SpiSync_mysql extends SpiSyncBase {
         val col                = rsmd.getColumnName(paramIndex)
         val sqlType            = rsmd.getColumnTypeName(paramIndex)
         val (columnValue, tpe) = sqlType match {
-          case "LONGTEXT" | "VARCHAR" => value(resultSet.getString(paramIndex), "String", true)
-          case "INT"                  => value(resultSet.getInt(paramIndex), "Int")
-          case "BIGINT"               => value(resultSet.getLong(paramIndex), "Long")
-          case "REAL"                 => value(resultSet.getFloat(paramIndex), "Float")
-          case "DOUBLE"               => value(resultSet.getDouble(paramIndex), "Double")
-          case "TINYINT"              => value(resultSet.getBoolean(paramIndex), "Boolean/Byte")
-          case "DECIMAL"              => value(resultSet.getDouble(paramIndex), "BigInt/Decimal")
-          case "DATETIME"             => value(resultSet.getDate(paramIndex), "Date")
-          case "TINYTEXT"             => value(resultSet.getString(paramIndex), "UUID")
-          case "TEXT"                 => value(resultSet.getString(paramIndex), "URI", true)
-          case "SMALLINT"             => value(resultSet.getShort(paramIndex), "Short")
-          case "CHAR"                 => value(resultSet.getShort(paramIndex), "Char")
-          case "JSON"                 =>
+          case "LONGTEXT"   => value(resultSet.getString(paramIndex), "String", true)
+          case "INT"        => value(resultSet.getInt(paramIndex), "Int")
+          case "BIGINT"     => value(resultSet.getLong(paramIndex), "Long")
+          case "DOUBLE"     => value(resultSet.getDouble(paramIndex), "Float/Double")
+          case "BIT"        => value(resultSet.getByte(paramIndex), "Boolean")
+          case "DECIMAL"    => value(resultSet.getDouble(paramIndex), "BigInt/Decimal")
+          case "TINYTEXT"   => value(resultSet.getString(paramIndex), "java.time text, UUID")
+          case "TEXT"       => value(resultSet.getString(paramIndex), "URI", true)
+          case "TINYINT"    => value(resultSet.getByte(paramIndex), "Byte")
+          case "SMALLINT"   => value(resultSet.getShort(paramIndex), "Short")
+          case "CHAR"       => value(resultSet.getString(paramIndex), "Char")
+          case "MEDIUMTEXT" => value(resultSet.getString(paramIndex), "MEDIUMTEXT")
+          case "VARCHAR"    => value(resultSet.getString(paramIndex), "VARCHAR")
 
-            value(resultSet.getString(paramIndex), "String", true)
-          case other                  => throw new Exception(
-            s"Unexpected/not yet considered sql result type from raw query: " + other
+          case "JSON" => json(resultSet.getString(paramIndex), "JSON")
+
+          case other => throw new Exception(
+            s"Unexpected sql result type from raw query: " + other
           )
         }
-        if (withNulls && resultSet.wasNull()) {
+        if (resultSet.wasNull()) {
           debug(tpe + "   " + padS(20, tpe) + col + padS(20, col) + "  " + columnValue)
         } else if (!resultSet.wasNull()) {
           debug(tpe + "   " + padS(20, tpe) + col + padS(20, col) + "  " + columnValue)

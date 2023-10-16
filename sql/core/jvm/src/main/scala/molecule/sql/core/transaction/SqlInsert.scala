@@ -14,7 +14,7 @@ import molecule.core.util.ModelUtils
 trait SqlInsert
   extends SqlBase_JVM
     with InsertOps
-    with JdbcDataType_JVM
+    with SqlDataType_JVM
     with ModelUtils
     with MoleculeLogging { self: ResolveInsert with InsertResolvers_ =>
 

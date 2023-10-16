@@ -1,6 +1,6 @@
 package molecule.datalog.datomic.compliance.pagination.cursor.noUnique
 
-import molecule.coreTests.compliance.pagination.cursor.noUnique._
+import molecule.coreTests.spi.pagination.cursor.noUnique._
 import molecule.datalog.datomic.setup.TestAsync_datomic
 
 object AttrOrderMandatory extends AttrOrderMandatory with TestAsync_datomic

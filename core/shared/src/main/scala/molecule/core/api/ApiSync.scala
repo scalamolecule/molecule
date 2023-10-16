@@ -48,12 +48,11 @@ trait ApiSync { spi: SpiSync =>
 
   def rawQuery(
     query: String,
-    withNulls: Boolean = false,
-    doPrint: Boolean = true,
-  )(implicit conn: Conn): List[List[Any]] = fallback_rawQuery(query, withNulls, doPrint)
+    debug: Boolean = false,
+  )(implicit conn: Conn): List[List[Any]] = fallback_rawQuery(query, debug)
 
   def rawTransact(
     txData: String,
-    doPrint: Boolean = true
-  )(implicit conn: Conn): TxReport = fallback_rawTransact(txData, doPrint)
+    debug: Boolean = false
+  )(implicit conn: Conn): TxReport = fallback_rawTransact(txData, debug)
 }

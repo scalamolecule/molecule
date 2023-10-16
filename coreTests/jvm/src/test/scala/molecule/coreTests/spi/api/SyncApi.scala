@@ -1,4 +1,4 @@
-package molecule.coreTests.compliance.api
+package molecule.coreTests.spi.api
 
 import molecule.base.error._
 import molecule.core.api.ApiSync

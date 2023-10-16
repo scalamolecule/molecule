@@ -1,6 +1,6 @@
 package molecule.datalog.datomic.compliance.validation.crud.save
 
-import molecule.coreTests.compliance.validation.save._
+import molecule.coreTests.spi.validation.save._
 import molecule.datalog.datomic.setup.TestAsync_datomic
 
 object FormatConstants  extends FormatConstants with TestAsync_datomic

@@ -58,12 +58,11 @@ trait SpiAsync  {
 
   def fallback_rawQuery(
     query: String,
-    withNulls: Boolean = false,
-    doPrint: Boolean = true,
+    debug: Boolean = false,
   )(implicit conn: Conn, ec: EC): Future[List[List[Any]]]
 
   def fallback_rawTransact(
     txData: String,
-    doPrint: Boolean = true
+    debug: Boolean = false
   )(implicit conn: Conn, ec: EC): Future[TxReport]
 }

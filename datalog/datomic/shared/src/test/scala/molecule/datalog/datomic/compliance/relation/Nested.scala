@@ -1,6 +1,6 @@
 package molecule.datalog.datomic.compliance.relation
 
-import molecule.coreTests.compliance.relation.nested._
+import molecule.coreTests.spi.relation.nested._
 import molecule.datalog.datomic.setup.TestAsync_datomic
 
 object NestedBasic extends NestedBasic with TestAsync_datomic

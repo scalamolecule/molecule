@@ -18,10 +18,9 @@ style (see examples below).
         - [MariaDB](https://mariadb.com)
         - [H2](https://h2database.com/html/main.html)
 - Targets Scala 3.3, 2.13 and 2.12 on JVM and JS platforms
-- Database RPC from Client/ScalaJS transparently marshalled with fast [Boopickle](https://boopickle.suzaku.io) binary
-  serialization to typed output on the Client side (a simple Akka Http server setup responds to molecule requests from
-  Client)
-- Single SPI of 1600+ tests adhered to by each database implementation
+- Typed database calls directly from Client with no need for Server implementation or JSON encoding/decoding
+- Fast transparent binary serialization between Client and Server with [Boopickle](https://boopickle.suzaku.io) (no manual setup)
+- Single SPI of 1700+ tests adhered to by each database implementation
 - No macros
 - No complex type class implicits
 - Maximum type inference
@@ -58,7 +57,8 @@ style (see examples below).
 - Validation
 - Pagination (offset/cursor)
 - Sorting
-- Subscriptions and more...
+- Subscriptions 
+- Fallback API for native database inspection/query/transaction
 
 Documentation at [scalamolecule.org](http://scalamolecule.org) still documents the old macro-based version of molecule
 but will be updated to the new version. Most concepts overlap.

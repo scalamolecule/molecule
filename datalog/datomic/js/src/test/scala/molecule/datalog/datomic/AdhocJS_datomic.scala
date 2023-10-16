@@ -5,11 +5,11 @@ import molecule.base.error.ExecutionError
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.datalog.datomic.async._
-import molecule.datalog.datomic.setup.DatomicTestSuite
+import molecule.datalog.datomic.setup.TestSuite_datomic
 import utest._
 
 
-object AdhocJS_datomic extends DatomicTestSuite {
+object AdhocJS_datomic extends TestSuite_datomic {
 
   override lazy val tests = Tests {
 

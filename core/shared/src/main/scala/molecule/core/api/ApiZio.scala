@@ -49,12 +49,11 @@ trait ApiZio { spi: SpiZio =>
 
   def rawQuery(
     query: String,
-    withNulls: Boolean = false,
-    doPrint: Boolean = true,
-  ): ZIO[Conn, MoleculeError, List[List[Any]]] = fallback_rawQuery(query, withNulls, doPrint)
+    debug: Boolean = false,
+  ): ZIO[Conn, MoleculeError, List[List[Any]]] = fallback_rawQuery(query, debug)
 
   def rawTransact(
     txData: String,
-    doPrint: Boolean = true
-  ): ZIO[Conn, MoleculeError, TxReport] = fallback_rawTransact(txData, doPrint)
+    debug: Boolean = false
+  ): ZIO[Conn, MoleculeError, TxReport] = fallback_rawTransact(txData, debug)
 }

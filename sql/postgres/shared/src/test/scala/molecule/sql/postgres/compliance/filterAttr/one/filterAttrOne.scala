@@ -1,7 +1,7 @@
 package molecule.sql.postgres.compliance.filterAttr.one
 
-import molecule.coreTests.compliance.filterAttr.FilterAttr_id
-import molecule.coreTests.compliance.filterAttr.one._
+import molecule.coreTests.spi.filterAttr.FilterAttr_id
+import molecule.coreTests.spi.filterAttr.one._
 import molecule.sql.postgres.setup.TestAsync_postgres
 
 object Adjacent extends Adjacent with TestAsync_postgres

@@ -1,6 +1,6 @@
 package molecule.sql.mariadb.compliance.crud
 
-import molecule.coreTests.compliance.crud.update.set.ops._
+import molecule.coreTests.spi.crud.update.set.ops._
 import molecule.sql.mariadb.setup.TestAsync_mariadb
 
 object UpdateSetOps_String_ extends UpdateSetOps_String_ with TestAsync_mariadb

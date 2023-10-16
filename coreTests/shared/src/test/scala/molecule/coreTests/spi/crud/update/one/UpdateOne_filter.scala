@@ -1,4 +1,4 @@
-package molecule.coreTests.compliance.crud.update.one
+package molecule.coreTests.spi.crud.update.one
 
 import molecule.base.error._
 import molecule.core.api.ApiAsync

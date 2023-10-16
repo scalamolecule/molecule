@@ -58,13 +58,12 @@ trait SpiZio  {
 
   def fallback_rawQuery(
     query: String,
-    withNulls: Boolean = false,
-    doPrint: Boolean = true,
+    debug: Boolean = false,
   ): ZIO[Conn, MoleculeError, List[List[Any]]]
 
   def fallback_rawTransact(
     txData: String,
-    doPrint: Boolean = true
+    debug: Boolean = false
   ): ZIO[Conn, MoleculeError, TxReport]
 
   protected def mapError[T](result: Task[T]): ZIO[Conn, MoleculeError, T] = {

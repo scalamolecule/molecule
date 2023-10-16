@@ -60,12 +60,11 @@ trait SpiSync  {
 
   def fallback_rawQuery(
     query: String,
-    withNulls: Boolean = false,
-    doPrint: Boolean = true,
+    debug: Boolean = false,
   )(implicit conn: Conn): List[List[Any]] = noJS("fallback_rawQuery")
 
   def fallback_rawTransact(
     txData: String,
-    doPrint: Boolean = true
+    debug: Boolean = false
   )(implicit conn: Conn): TxReport = noJS("fallback_rawTransact")
 }

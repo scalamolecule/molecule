@@ -1,4 +1,4 @@
-package molecule.coreTests.compliance.time
+package molecule.coreTests.spi.time
 
 import java.util.Date
 import molecule.base.error.ModelError

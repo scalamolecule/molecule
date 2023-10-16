@@ -1,6 +1,6 @@
 package molecule.sql.mysql.compliance.crud
 
-import molecule.coreTests.compliance.crud.delete._
+import molecule.coreTests.spi.crud.delete._
 import molecule.sql.mysql.setup.TestAsync_mysql
 
 object Delete_id extends Delete_id with TestAsync_mysql

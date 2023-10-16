@@ -1,6 +1,6 @@
 package molecule.sql.mariadb.compliance.crud
 
-import molecule.coreTests.compliance.crud.update.one._
+import molecule.coreTests.spi.crud.update.one._
 import molecule.sql.mariadb.setup.TestAsync_mariadb
 
 object UpdateOne_id extends UpdateOne_id with TestAsync_mariadb

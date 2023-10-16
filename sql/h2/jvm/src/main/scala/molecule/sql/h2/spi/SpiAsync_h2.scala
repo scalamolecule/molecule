@@ -10,8 +10,15 @@ trait SpiAsync_h2 extends SpiAsync with ModelUtils {
 
   override def query_get[Tpl](q: Query[Tpl])
                              (implicit conn: Conn, ec: EC): Future[List[Tpl]] = Future {
+    //    // Check that rawQuery can handle all SPI queries
+    //    val q1    = q.copy(elements = noKeywords(q.elements, Some(conn.proxy)))
+    //    val m2q = getModel2SqlQuery[Tpl](q1.elements)
+    //    val qu = m2q.getSqlQuery(q1.elements, None, None, Some(conn.proxy))
+    //    SpiSync_h2.fallback_rawQuery(qu, true, true)
+
     SpiSync_h2.query_get(q)
   }
+
   override def query_subscribe[Tpl](q: Query[Tpl], callback: List[Tpl] => Unit)
                                    (implicit conn: Conn, ec: EC): Future[Unit] = Future {
     SpiSync_h2.query_subscribe(q, callback)
@@ -85,16 +92,15 @@ trait SpiAsync_h2 extends SpiAsync with ModelUtils {
 
   override def fallback_rawQuery(
     query: String,
-    withNulls: Boolean = false,
-    doPrint: Boolean = true,
+    debug: Boolean = false,
   )(implicit conn: Conn, ec: EC): Future[List[List[Any]]] = Future {
-    SpiSync_h2.fallback_rawQuery(query, withNulls, doPrint)
+    SpiSync_h2.fallback_rawQuery(query, debug)
   }
 
   override def fallback_rawTransact(
     txData: String,
-    doPrint: Boolean = true
+    debug: Boolean = false
   )(implicit conn: Conn, ec: EC): Future[TxReport] = Future {
-    SpiSync_h2.fallback_rawTransact(txData, doPrint)
+    SpiSync_h2.fallback_rawTransact(txData, debug)
   }
 }

@@ -1,4 +1,4 @@
-package molecule.coreTests.compliance.crud.save
+package molecule.coreTests.spi.crud.save
 
 import molecule.base.error.ModelError
 import molecule.core.api.ApiAsync

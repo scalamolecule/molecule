@@ -1,6 +1,6 @@
 package molecule.sql.h2.compliance.crud
 
-import molecule.coreTests.compliance.crud.update.one._
+import molecule.coreTests.spi.crud.update.one._
 import molecule.sql.h2.setup.TestAsync_h2
 
 object UpdateOne_id extends UpdateOne_id with TestAsync_h2

@@ -2,12 +2,12 @@ package molecule.datalog.datomic
 
 import molecule.core.util.Executor._
 import molecule.datalog.datomic.async._
-import molecule.datalog.datomic.setup.DatomicTestSuite
+import molecule.datalog.datomic.setup.TestSuite_datomic
 import utest._
 import scala.language.implicitConversions
 
 
-object AdhocDatomic extends DatomicTestSuite {
+object AdhocDatomic extends TestSuite_datomic {
 
   override lazy val tests = Tests {
 

@@ -1,4 +1,4 @@
-package molecule.coreTests.compliance.pagination.cursor.noUnique
+package molecule.coreTests.spi.pagination.cursor.noUnique
 
 import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync

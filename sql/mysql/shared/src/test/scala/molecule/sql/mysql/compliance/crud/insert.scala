@@ -1,6 +1,6 @@
 package molecule.sql.mysql.compliance.crud
 
-import molecule.coreTests.compliance.crud.insert._
+import molecule.coreTests.spi.crud.insert._
 import molecule.sql.mysql.setup.TestAsync_mysql
 
 object InsertCardOne extends InsertCardOne with TestAsync_mysql

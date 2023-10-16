@@ -1,6 +1,6 @@
 package molecule.sql.mysql.compliance.validation.crud.update
 
-import molecule.coreTests.compliance.validation.update._
+import molecule.coreTests.spi.validation.update._
 import molecule.sql.mysql.setup.TestAsync_mysql
 
 object TypesOne extends TypesOne with TestAsync_mysql

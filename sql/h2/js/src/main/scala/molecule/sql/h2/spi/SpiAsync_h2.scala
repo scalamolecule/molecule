@@ -14,6 +14,6 @@ trait SpiAsync_h2 extends SpiAsyncBase {
   override protected def printInspectQuery(label: String, elements: List[Element])
                                           (implicit ec: EC): Future[Unit] = Future {
     val query = new Model2SqlQuery_h2(elements).getSqlQuery(Nil, None, None, None)
-    printInspect(label, Nil, query)
+    printRaw(label, Nil, query)
   }
 }

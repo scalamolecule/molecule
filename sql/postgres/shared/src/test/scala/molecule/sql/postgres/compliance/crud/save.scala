@@ -1,6 +1,6 @@
 package molecule.sql.postgres.compliance.crud
 
-import molecule.coreTests.compliance.crud.save._
+import molecule.coreTests.spi.crud.save._
 import molecule.sql.postgres.setup.TestAsync_postgres
 
 object SaveCardOne extends SaveCardOne with TestAsync_postgres

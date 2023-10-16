@@ -1,5 +1,5 @@
 // GENERATED CODE ********************************
-package molecule.coreTests.compliance.crud.update.set.ops
+package molecule.coreTests.spi.crud.update.set.ops
 
 import java.time.OffsetTime
 import molecule.base.error._

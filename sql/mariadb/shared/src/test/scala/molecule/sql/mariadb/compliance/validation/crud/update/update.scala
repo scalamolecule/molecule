@@ -1,6 +1,6 @@
 package molecule.sql.mariadb.compliance.validation.crud.update
 
-import molecule.coreTests.compliance.validation.update._
+import molecule.coreTests.spi.validation.update._
 import molecule.sql.mariadb.setup.TestAsync_mariadb
 
 object TypesOne extends TypesOne with TestAsync_mariadb

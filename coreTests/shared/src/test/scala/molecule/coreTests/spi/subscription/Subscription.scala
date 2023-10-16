@@ -1,4 +1,4 @@
-package molecule.coreTests.compliance.subscription
+package molecule.coreTests.spi.subscription
 
 import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync

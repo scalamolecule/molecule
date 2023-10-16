@@ -1,6 +1,6 @@
 package molecule.sql.h2.compliance.filter
 
-import molecule.coreTests.compliance.filter.set._
+import molecule.coreTests.spi.filter.set._
 import molecule.sql.h2.setup.TestAsync_h2
 
 object FilterSet_String_ extends FilterSet_String_ with TestAsync_h2

@@ -1,6 +1,6 @@
 package molecule.datalog.datomic.compliance.crud
 
-import molecule.coreTests.compliance.crud.update.set._
+import molecule.coreTests.spi.crud.update.set._
 import molecule.datalog.datomic.setup.TestAsync_datomic
 
 object UpdateSet_id extends UpdateSet_id with TestAsync_datomic

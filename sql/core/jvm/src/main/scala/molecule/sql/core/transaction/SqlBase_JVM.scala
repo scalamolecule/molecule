@@ -12,7 +12,7 @@ import molecule.sql.core.facade.{JdbcConn_JVM, JdbcHandler_JVM}
 import scala.collection.mutable
 import scala.concurrent.Future
 
-trait SqlBase_JVM extends JdbcDataType_JVM with ModelUtils with BaseHelpers {
+trait SqlBase_JVM extends SqlDataType_JVM with ModelUtils with BaseHelpers {
 
   // Override on instantiation
   lazy val sqlConn: java.sql.Connection = ???

@@ -1,6 +1,6 @@
 package molecule.sql.h2.compliance.sort
 
-import molecule.coreTests.compliance.sort._
+import molecule.coreTests.spi.sort._
 import molecule.sql.h2.setup.TestAsync_h2
 
 object SortAggr extends SortAggr with TestAsync_h2

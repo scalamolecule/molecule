@@ -1,5 +1,5 @@
 // GENERATED CODE ********************************
-package molecule.coreTests.compliance.filter.set
+package molecule.coreTests.spi.filter.set
 
 import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync

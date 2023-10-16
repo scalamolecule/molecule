@@ -1,5 +1,5 @@
 // GENERATED CODE ********************************
-package molecule.coreTests.compliance.filter.one
+package molecule.coreTests.spi.filter.one
 
 import java.time.OffsetDateTime
 import molecule.core.api.ApiAsync

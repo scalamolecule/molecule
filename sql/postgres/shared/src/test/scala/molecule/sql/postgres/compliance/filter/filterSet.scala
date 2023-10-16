@@ -1,6 +1,6 @@
 package molecule.sql.postgres.compliance.filter
 
-import molecule.coreTests.compliance.filter.set._
+import molecule.coreTests.spi.filter.set._
 import molecule.sql.postgres.setup.TestAsync_postgres
 
 object FilterSet_String_ extends FilterSet_String_ with TestAsync_postgres

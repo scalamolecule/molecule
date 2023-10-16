@@ -1,6 +1,6 @@
 package molecule.datalog.datomic.compliance.validation.crud.update
 
-import molecule.coreTests.compliance.validation.update._
+import molecule.coreTests.spi.validation.update._
 import molecule.datalog.datomic.setup.TestAsync_datomic
 
 object TypesOne extends TypesOne with TestAsync_datomic

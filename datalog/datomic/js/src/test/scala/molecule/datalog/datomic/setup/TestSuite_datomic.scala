@@ -7,7 +7,7 @@ import molecule.coreTests.setup.CoreTestSuite
 import molecule.datalog.datomic.facade.DatomicConn_JS
 
 
-trait DatomicTestSuite extends CoreTestSuite {
+trait TestSuite_datomic extends CoreTestSuite {
 
   override val database = "Datomic"
   override val platform = "js"

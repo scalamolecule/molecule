@@ -1,6 +1,6 @@
 package molecule.sql.h2.compliance.pagination.cursor.noUnique
 
-import molecule.coreTests.compliance.pagination.cursor.noUnique._
+import molecule.coreTests.spi.pagination.cursor.noUnique._
 import molecule.sql.h2.setup.TestAsync_h2
 
 object AttrOrderMandatory extends AttrOrderMandatory with TestAsync_h2

@@ -1,6 +1,6 @@
 package molecule.datalog.datomic.compliance.filterAttr.set
 
-import molecule.coreTests.compliance.filterAttr.set._
+import molecule.coreTests.spi.filterAttr.set._
 import molecule.datalog.datomic.setup.TestAsync_datomic
 
 object Adjacent extends Adjacent with TestAsync_datomic

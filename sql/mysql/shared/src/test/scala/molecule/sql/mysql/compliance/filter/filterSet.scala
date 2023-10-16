@@ -1,6 +1,6 @@
 package molecule.sql.mysql.compliance.filter
 
-import molecule.coreTests.compliance.filter.set._
+import molecule.coreTests.spi.filter.set._
 import molecule.sql.mysql.setup.TestAsync_mysql
 
 object FilterSet_String_ extends FilterSet_String_ with TestAsync_mysql

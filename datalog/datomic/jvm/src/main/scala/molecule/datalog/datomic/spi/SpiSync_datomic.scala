@@ -1,11 +1,12 @@
 package molecule.datalog.datomic.spi
 
+import java.util.{Date, UUID, Collection => jCollection}
 import datomic.Peer
 import molecule.base.error.{InsertError, ModelError}
 import molecule.boilerplate.ast.Model._
 import molecule.core.action._
 import molecule.core.marshalling.ConnProxy
-import molecule.core.spi.{Conn, PrintInspect, SpiSync, TxReport}
+import molecule.core.spi.{Conn, Renderer, SpiSync, TxReport}
 import molecule.core.transaction.{ResolveDelete, ResolveInsert, ResolveSave, ResolveUpdate}
 import molecule.core.util.{FutureUtils, JavaConversions}
 import molecule.core.validation.TxModelValidation
@@ -15,6 +16,7 @@ import molecule.datalog.datomic.facade.DatomicConn_JVM
 import molecule.datalog.datomic.marshalling.Rpc_datomic.Data
 import molecule.datalog.datomic.query.{DatomicQueryResolveCursor, DatomicQueryResolveOffset}
 import molecule.datalog.datomic.transaction.{Delete_datomic, Insert_datomic, Save_datomic, Update_datomic}
+import scala.annotation.tailrec
 import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.global
 import scala.concurrent.duration.DurationInt
@@ -25,7 +27,7 @@ trait SpiSync_datomic
   extends SpiSync
     with DatomicSpiSyncBase
     with JVMDatomicSpiBase
-    with PrintInspect
+    with Renderer
     with FutureUtils
     with JavaConversions {
 
@@ -136,21 +138,77 @@ trait SpiSync_datomic
 
   override def fallback_rawQuery(
     query: String,
-    withNulls: Boolean = false,
-    doPrint: Boolean = true,
+    debug: Boolean = false,
   )(implicit conn: Conn): List[List[Any]] = {
-    if (withNulls)
-      throw new Exception("Null values not part of the semantic model of Datomic.")
-    Peer.q(query, conn.db.asInstanceOf[AnyRef]).asScala.toList.map(_.asScala.toList)
+    Peer.q(query, conn.db.asInstanceOf[AnyRef]).asScala.toList.map(_.asScala.toList.map(toScala(_)))
   }
+
+  private def toScala(
+    value: Any,
+    depth: Int = 1,
+    maxDepth: Int = 5,
+  ): Any = {
+    def retrieve(value: Any): Any = value match {
+      case v: java.lang.String                => v
+      case v: java.lang.Integer               => v.toLong: Long
+      case v: java.lang.Long                  => v: Long
+      case v: java.lang.Float                 => v: Float
+      case v: java.lang.Double                => v: Double
+      case v: java.lang.Boolean               => v: Boolean
+      case v: Date                            => v
+      case v: UUID                            => v
+      case v: java.net.URI                    => v
+      case v: clojure.lang.BigInt             => BigInt(v.toString)
+      case v: java.math.BigInteger            => BigInt(v)
+      case v: java.math.BigDecimal            => BigDecimal(v)
+      case vs: Array[Byte]                    => vs
+      case kw: clojure.lang.Keyword           => kw.toString
+      case vs: clojure.lang.PersistentHashSet => vs.asInstanceOf[java.util.Collection[_]].asScala.map(retrieve).toSet
+      case vs: clojure.lang.PersistentVector  => vs.asInstanceOf[java.util.Collection[_]].asScala.map(retrieve).toSet
+
+      case vs: clojure.lang.PersistentArrayMap =>
+        @tailrec
+        def flat(set: Set[Any]): Set[Any] = {
+          set.head match {
+            case _: Set[_] => flat(set.asInstanceOf[Set[Set[Any]]].flatten)
+            case _         => set
+          }
+        }
+        // Flatten single Set
+        flat(vs.values.asScala.map(retrieve).toSet)
+
+      case col: jCollection[_] =>
+        new Iterable[Any] {
+          override def iterator: Iterator[Any] = new Iterator[Any] {
+            private val jIter = col.iterator.asInstanceOf[java.util.Iterator[AnyRef]]
+            override def hasNext = jIter.hasNext
+            override def next(): Any = if (depth < maxDepth)
+              retrieve(jIter.next())
+            else
+              jIter.next()
+          }
+          override def isEmpty = col.isEmpty
+          override def size: Int = col.size
+          override def toString = col.toString
+        }
+
+      case None       => None
+      case null       => null
+      case unexpected => new Exception(
+        "Unexpected Datalog type to convert: " + unexpected.getClass.toString
+      )
+    }
+    retrieve(value)
+  }
+
 
   override def fallback_rawTransact(
     txData: String,
-    doPrint: Boolean = true
+    debug: Boolean = false
   )(implicit conn: Conn): TxReport = {
     try {
       import molecule.core.util.Executor.global
-      Await.result(SpiAsync_datomic.fallback_rawTransact(txData, doPrint)(conn, global), 10.seconds)
+      Await.result(SpiAsync_datomic.fallback_rawTransact(txData, debug)(conn, global), 10.seconds)
     } catch {
       case t: Throwable => throw ModelError(t.toString)
     }
@@ -158,6 +216,7 @@ trait SpiSync_datomic
 
 
   private def printInspectTx(label: String, elements: List[Element], stmts: Data): Unit = {
-    printInspect(label, elements, stmts.toArray().toList.mkString("\n"))
+    val edn = stmts.asScala.map(_.asScala.mkString("  [", " ", "]")).toList.mkString("[\n", "\n", "\n]")
+    printRaw(label, elements, edn)
   }
 }

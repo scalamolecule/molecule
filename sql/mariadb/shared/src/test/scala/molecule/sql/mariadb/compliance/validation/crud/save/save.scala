@@ -1,6 +1,6 @@
 package molecule.sql.mariadb.compliance.validation.crud.save
 
-import molecule.coreTests.compliance.validation.save._
+import molecule.coreTests.spi.validation.save._
 import molecule.sql.mariadb.setup.TestAsync_mariadb
 
 object FormatConstants extends FormatConstants with TestAsync_mariadb
