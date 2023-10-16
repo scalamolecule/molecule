@@ -161,11 +161,11 @@ lazy val yourProject = project.in(file("app"))
   .settings(
     libraryDependencies ++= Seq(
       // One or more of:
-      "org.scalamolecule" %%% "molecule-datalog-datomic" % "0.6.0",
-      "org.scalamolecule" %%% "molecule-sql-postgres" % "0.6.0",
-      "org.scalamolecule" %%% "molecule-sql-mysql" % "0.6.0",
-      "org.scalamolecule" %%% "molecule-sql-mariadb" % "0.6.0",
-      "org.scalamolecule" %%% "molecule-sql-h2" % "0.6.0",
+      "org.scalamolecule" %%% "molecule-datalog-datomic" % "0.7.0",
+      "org.scalamolecule" %%% "molecule-sql-postgres" % "0.7.0",
+      "org.scalamolecule" %%% "molecule-sql-mysql" % "0.7.0",
+      "org.scalamolecule" %%% "molecule-sql-mariadb" % "0.7.0",
+      "org.scalamolecule" %%% "molecule-sql-h2" % "0.7.0",
     ),
     moleculeSchemas := Seq("app") // paths to your data model definitions...
   )
