@@ -26,7 +26,7 @@ trait ResolveExprOne_mariadb extends ResolveExprOne with LambdasOne_mariadb { se
 
 
   override protected def aggr[T: ClassTag](col: String, fn: String, optN: Option[Int], res: ResOne[T]): Unit = {
-    lazy val sep     = "0x1D" // Use ascii Group Selector to separate concatenated values
+    lazy val sep     = "0x1D" // Use invisible ascii Group Selector to separate concatenated values
     lazy val sepChar = 29.toChar
     lazy val n       = optN.getOrElse(0)
 
@@ -36,9 +36,7 @@ trait ResolveExprOne_mariadb extends ResolveExprOne with LambdasOne_mariadb { se
         select += s"JSON_ARRAYAGG($col)"
         groupByCols -= col
         aggregate = true
-        replaceCast((row: Row, paramIndex: Int) =>
-          res.json2array(row.getString(paramIndex)).toSet
-        )
+        replaceCast((row: Row, paramIndex: Int) => res.json2array(row.getString(paramIndex)).toSet)
 
       case "min" =>
         select += s"MIN($col)"

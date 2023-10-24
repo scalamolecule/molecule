@@ -1,6 +1,5 @@
 package molecule.datalog.datomic.compliance.aggr
 
-import molecule.coreTests.spi.aggr.one.AggrOne_id
 import molecule.coreTests.spi.aggr.one.any._
 import molecule.datalog.datomic.setup.TestAsync_datomic
 
@@ -27,5 +26,3 @@ object AggrOne_Byte extends AggrOne_Byte_ with TestAsync_datomic
 object AggrOne_Short extends AggrOne_Short_ with TestAsync_datomic
 object AggrOne_Char extends AggrOne_Char_ with TestAsync_datomic
 object AggrOne_ref extends AggrOne_ref_ with TestAsync_datomic
-
-object AggrOne_id extends AggrOne_id with TestAsync_datomic

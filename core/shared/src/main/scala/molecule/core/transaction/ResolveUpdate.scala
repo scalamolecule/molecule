@@ -66,6 +66,7 @@ class ResolveUpdate(
       case a if a.op != Eq => throw ModelError(
         s"Can't $update attributes without an applied value. Found:\n" + a)
 
+      case a: AttrOneManID             => updateOne(ns, attr, a.vs, transformId, handleId)
       case a: AttrOneManString         => updateOne(ns, attr, a.vs, transformString, handleString)
       case a: AttrOneManInt            => updateOne(ns, attr, a.vs, transformInt, handleInt)
       case a: AttrOneManLong           => updateOne(ns, attr, a.vs, transformLong, handleLong)
@@ -93,7 +94,7 @@ class ResolveUpdate(
 
   private def resolveAttrOneTac(a: AttrOneTac): Unit = {
     a match {
-      case AttrOneTacLong(_, "id", Eq, ids1, _, _, _, _, _, _, _) => handleIds(ids1)
+      case AttrOneTacID(_, "id", Eq, ids1, _, _, _, _, _, _, _) => handleIds(ids1)
 
       case a if a.attr == "id" => throw ModelError(
         s"Generic id attribute not allowed in update molecule. Found:\n" + a)
@@ -106,6 +107,7 @@ class ResolveUpdate(
   private def resolveAttrSetMan(a: AttrSetMan): Unit = {
     val (ns, attr) = (a.ns, a.attr)
     a match {
+      case a: AttrSetManID             => updateSetEq(ns, attr, a.vs, transformId, set2arrayId, a.refNs, extsId, value2jsonId)
       case a: AttrSetManString         => updateSetEq(ns, attr, a.vs, transformString, set2arrayString, a.refNs, extsString, value2jsonString)
       case a: AttrSetManInt            => updateSetEq(ns, attr, a.vs, transformInt, set2arrayInt, a.refNs, extsInt, value2jsonInt)
       case a: AttrSetManLong           => updateSetEq(ns, attr, a.vs, transformLong, set2arrayLong, a.refNs, extsLong, value2jsonLong)
@@ -134,6 +136,7 @@ class ResolveUpdate(
   private def resolveAttrSetAdd(a: AttrSetMan): Unit = {
     val (ns, attr) = (a.ns, a.attr)
     a match {
+      case a: AttrSetManID             => updateSetAdd(ns, attr, a.vs, transformId, set2arrayId, a.refNs, extsId, value2jsonId)
       case a: AttrSetManString         => updateSetAdd(ns, attr, a.vs, transformString, set2arrayString, a.refNs, extsString, value2jsonString)
       case a: AttrSetManInt            => updateSetAdd(ns, attr, a.vs, transformInt, set2arrayInt, a.refNs, extsInt, value2jsonInt)
       case a: AttrSetManLong           => updateSetAdd(ns, attr, a.vs, transformLong, set2arrayLong, a.refNs, extsLong, value2jsonLong)
@@ -162,6 +165,7 @@ class ResolveUpdate(
   private def resolveAttrSetSwap(a: AttrSetMan): Unit = {
     val (ns, attr) = (a.ns, a.attr)
     a match {
+      case a: AttrSetManID             => updateSetSwap(ns, attr, a.vs, transformId, handleId, a.refNs, extsId, value2jsonId, one2jsonId)
       case a: AttrSetManString         => updateSetSwap(ns, attr, a.vs, transformString, handleString, a.refNs, extsString, value2jsonString, one2jsonString)
       case a: AttrSetManInt            => updateSetSwap(ns, attr, a.vs, transformInt, handleInt, a.refNs, extsInt, value2jsonInt, one2jsonInt)
       case a: AttrSetManLong           => updateSetSwap(ns, attr, a.vs, transformLong, handleLong, a.refNs, extsLong, value2jsonLong, one2jsonLong)
@@ -190,6 +194,7 @@ class ResolveUpdate(
   private def resolveAttrSetRemove(a: AttrSetMan): Unit = {
     val (ns, attr) = (a.ns, a.attr)
     a match {
+      case a: AttrSetManID             => updateSetRemove(ns, attr, a.vs.head, transformId, handleId, a.refNs, extsId, one2jsonId)
       case a: AttrSetManString         => updateSetRemove(ns, attr, a.vs.head, transformString, handleString, a.refNs, extsString, one2jsonString)
       case a: AttrSetManInt            => updateSetRemove(ns, attr, a.vs.head, transformInt, handleInt, a.refNs, extsInt, one2jsonInt)
       case a: AttrSetManLong           => updateSetRemove(ns, attr, a.vs.head, transformLong, handleLong, a.refNs, extsLong, one2jsonLong)

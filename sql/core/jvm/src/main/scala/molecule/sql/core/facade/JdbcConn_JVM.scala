@@ -6,7 +6,7 @@ import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.marshalling.JdbcProxy
 import molecule.core.spi.{Conn, TxReport}
 import molecule.core.util.ModelUtils
-import molecule.sql.core.transaction.{SqlDataType_JVM, JoinTable, SqlBase_JVM, Table}
+import molecule.sql.core.transaction.{JoinTable, SqlBase_JVM, SqlDataType_JVM, Table}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
@@ -45,9 +45,7 @@ case class JdbcConn_JVM(
       sqlConn.commit()
 
       val entityIdsInvolved = idsMap.values.toList.reverse.flatten
-
-      // Tx entity not implemented for sql-jdbc
-      TxReport(0, entityIdsInvolved)
+      TxReport(entityIdsInvolved.map(_.toString))
     } catch {
       // re-throw errors to keep stacktrace back to original error
       case e: SQLException =>

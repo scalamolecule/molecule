@@ -204,8 +204,8 @@ object RawQuery extends TestSuite_datomic {
     "Optional Set of refs" - types { implicit conn =>
       for {
         _ <- Ns.i.refs_?.insert(
-          (1, Option.empty[Set[Long]]),
-          (2, Some(Set.empty[Long])),
+          (1, Option.empty[Set[String]]),
+          (2, Some(Set.empty[String])),
           (3, Some(Set(ref1, ref2))),
         ).transact
 
@@ -225,7 +225,7 @@ object RawQuery extends TestSuite_datomic {
         ).map(_ ==> List(
           List(1, null),
           List(2, null),
-          List(3, Set(ref1, ref2))
+          List(3, Set(1L, 2L))
         ))
       } yield ()
     }

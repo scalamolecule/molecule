@@ -1,6 +1,5 @@
 package molecule.sql.mariadb.compliance.aggr
 
-import molecule.coreTests.spi.aggr.one.AggrOne_id
 import molecule.coreTests.spi.aggr.one.any._
 import molecule.sql.mariadb.setup.TestAsync_mariadb
 
@@ -27,5 +26,3 @@ object AggrOne_Byte extends AggrOne_Byte_ with TestAsync_mariadb
 object AggrOne_Short extends AggrOne_Short_ with TestAsync_mariadb
 object AggrOne_Char extends AggrOne_Char_ with TestAsync_mariadb
 object AggrOne_ref extends AggrOne_ref_ with TestAsync_mariadb
-
-object AggrOne_id extends AggrOne_id with TestAsync_mariadb

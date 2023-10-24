@@ -106,12 +106,12 @@ trait UpdateSetOps_ZonedDateTime_ extends CoreTestSuite with ApiAsync { spi: Spi
         _ <- Ns.zonedDateTimes.query.get.map(_.head ==> Set(zonedDateTime1, zonedDateTime5, zonedDateTime6, zonedDateTime7, zonedDateTime8, zonedDateTime9))
 
         // Can't swap duplicate from/to values
-        _ <- Ns(42).zonedDateTimes.swap(zonedDateTime1 -> zonedDateTime2, zonedDateTime1 -> zonedDateTime3).update.transact
+        _ <- Ns("42").zonedDateTimes.swap(zonedDateTime1 -> zonedDateTime2, zonedDateTime1 -> zonedDateTime3).update.transact
           .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
             err ==> "Can't swap from duplicate retract values."
           }
 
-        _ <- Ns(42).zonedDateTimes.swap(zonedDateTime1 -> zonedDateTime3, zonedDateTime2 -> zonedDateTime3).update.transact
+        _ <- Ns("42").zonedDateTimes.swap(zonedDateTime1 -> zonedDateTime3, zonedDateTime2 -> zonedDateTime3).update.transact
           .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
             err ==> "Can't swap to duplicate replacement values."
           }

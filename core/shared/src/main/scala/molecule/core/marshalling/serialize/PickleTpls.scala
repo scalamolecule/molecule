@@ -269,6 +269,7 @@ case class PickleTpls(
   }
   private def pickleAttrOneManV(a: AttrOneMan, tplIndex: Int): Product => Unit = {
     a match {
+      case _: AttrOneManID             => (tpl: Product) => enk.writeString(tpl.productElement(tplIndex).asInstanceOf[String])
       case _: AttrOneManString         => (tpl: Product) => enk.writeString(tpl.productElement(tplIndex).asInstanceOf[String])
       case _: AttrOneManInt            => (tpl: Product) => enk.writeInt(tpl.productElement(tplIndex).toString.toInt)
       case _: AttrOneManLong           => (tpl: Product) => enk.writeLong(tpl.productElement(tplIndex).asInstanceOf[Long])
@@ -296,6 +297,7 @@ case class PickleTpls(
 
   private def pickleAttrOneManSet(a: AttrOneMan, tplIndex: Int): Product => Unit = {
     a match {
+      case _: AttrOneManID             => enk.writeSet[String](tplIndex, enk.writeString)
       case _: AttrOneManString         => enk.writeSet[String](tplIndex, enk.writeString)
       case _: AttrOneManInt            => enk.writeSet[Int](tplIndex, enk.writeInt)
       case _: AttrOneManLong           => enk.writeSet[Long](tplIndex, enk.writeLong)
@@ -323,6 +325,7 @@ case class PickleTpls(
 
   private def pickleAttrOneOpt(a: AttrOneOpt, tplIndex: Int): Product => Unit = {
     a match {
+      case _: AttrOneOptID             => enk.writeOpt[String](tplIndex, enk.writeString)
       case _: AttrOneOptString         => enk.writeOpt[String](tplIndex, enk.writeString)
       case _: AttrOneOptInt            => enk.writeOpt[Int](tplIndex, enk.writeInt)
       case _: AttrOneOptLong           => enk.writeOpt[Long](tplIndex, enk.writeLong)
@@ -365,6 +368,7 @@ case class PickleTpls(
   }
   private def pickleAttrSetManV(a: AttrSetMan, tplIndex: Int): Product => Unit = {
     a match {
+      case _: AttrSetManID             => enk.writeSet[String](tplIndex, enk.writeString)
       case _: AttrSetManString         => enk.writeSet[String](tplIndex, enk.writeString)
       case _: AttrSetManInt            => enk.writeSet[Int](tplIndex, enk.writeInt)
       case _: AttrSetManLong           => enk.writeSet[Long](tplIndex, enk.writeLong)
@@ -391,6 +395,7 @@ case class PickleTpls(
   }
   private def pickleAttrSetManSet(a: AttrSetMan, tplIndex: Int): Product => Unit = {
     a match {
+      case _: AttrSetManID             => enk.writeSets[String](tplIndex, enk.writeString)
       case _: AttrSetManString         => enk.writeSets[String](tplIndex, enk.writeString)
       case _: AttrSetManInt            => enk.writeSets[Int](tplIndex, enk.writeInt)
       case _: AttrSetManLong           => enk.writeSets[Long](tplIndex, enk.writeLong)
@@ -418,6 +423,7 @@ case class PickleTpls(
 
   private def pickleAttrSetOpt(a: AttrSetOpt, tplIndex: Int): Product => Unit = {
     a match {
+      case _: AttrSetOptID             => enk.writeOptSet[String](tplIndex, enk.writeString)
       case _: AttrSetOptString         => enk.writeOptSet[String](tplIndex, enk.writeString)
       case _: AttrSetOptInt            => enk.writeOptSet[Int](tplIndex, enk.writeInt)
       case _: AttrSetOptLong           => enk.writeOptSet[Long](tplIndex, enk.writeLong)

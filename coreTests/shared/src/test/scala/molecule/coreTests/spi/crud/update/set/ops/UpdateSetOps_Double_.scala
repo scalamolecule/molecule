@@ -105,12 +105,12 @@ trait UpdateSetOps_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =
         _ <- Ns.doubles.query.get.map(_.head ==> Set(double1, double5, double6, double7, double8, double9))
 
         // Can't swap duplicate from/to values
-        _ <- Ns(42).doubles.swap(double1 -> double2, double1 -> double3).update.transact
+        _ <- Ns("42").doubles.swap(double1 -> double2, double1 -> double3).update.transact
           .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
             err ==> "Can't swap from duplicate retract values."
           }
 
-        _ <- Ns(42).doubles.swap(double1 -> double3, double2 -> double3).update.transact
+        _ <- Ns("42").doubles.swap(double1 -> double3, double2 -> double3).update.transact
           .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
             err ==> "Can't swap to duplicate replacement values."
           }

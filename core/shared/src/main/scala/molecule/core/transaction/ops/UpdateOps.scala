@@ -60,7 +60,7 @@ trait UpdateOps extends Action2Data with BaseOps {
     one2json: T => String
   ): Unit
 
-  protected def handleIds(ids: Seq[Long]): Unit
+  protected def handleIds(ids: Seq[String]): Unit
   protected def handleUniqueFilterAttr(filterAttr: AttrOneTac): Unit
   protected def handleFilterAttr(filterAttr: AttrOneTac): Unit
 

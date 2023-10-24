@@ -106,12 +106,12 @@ trait UpdateSetOps_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: Spi
         _ <- Ns.localDateTimes.query.get.map(_.head ==> Set(localDateTime1, localDateTime5, localDateTime6, localDateTime7, localDateTime8, localDateTime9))
 
         // Can't swap duplicate from/to values
-        _ <- Ns(42).localDateTimes.swap(localDateTime1 -> localDateTime2, localDateTime1 -> localDateTime3).update.transact
+        _ <- Ns("42").localDateTimes.swap(localDateTime1 -> localDateTime2, localDateTime1 -> localDateTime3).update.transact
           .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
             err ==> "Can't swap from duplicate retract values."
           }
 
-        _ <- Ns(42).localDateTimes.swap(localDateTime1 -> localDateTime3, localDateTime2 -> localDateTime3).update.transact
+        _ <- Ns("42").localDateTimes.swap(localDateTime1 -> localDateTime3, localDateTime2 -> localDateTime3).update.transact
           .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
             err ==> "Can't swap to duplicate replacement values."
           }

@@ -9,6 +9,7 @@ trait ResolveExprOne extends ResolveExpr { self: SqlQueryBase with LambdasOne =>
   override protected def resolveAttrOneMan(attr: AttrOneMan): Unit = {
     aritiesAttr()
     attr match {
+      case at: AttrOneManID             => man(attr, at.vs, resId1)
       case at: AttrOneManString         => man(attr, at.vs, resString1)
       case at: AttrOneManInt            => man(attr, at.vs, resInt1)
       case at: AttrOneManLong           => man(attr, at.vs, resLong1)
@@ -38,6 +39,7 @@ trait ResolveExprOne extends ResolveExpr { self: SqlQueryBase with LambdasOne =>
     if (isNestedOpt)
       throw ModelError("Tacit attributes not allowed in optional nested queries. Found: " + attr.name + "_")
     attr match {
+      case at: AttrOneTacID             => tac(attr, at.vs, resId1)
       case at: AttrOneTacString         => tac(attr, at.vs, resString1)
       case at: AttrOneTacInt            => tac(attr, at.vs, resInt1)
       case at: AttrOneTacLong           => tac(attr, at.vs, resLong1)
@@ -67,6 +69,7 @@ trait ResolveExprOne extends ResolveExpr { self: SqlQueryBase with LambdasOne =>
     aritiesAttr()
     hasOptAttr = true // to avoid redundant None's
     attr match {
+      case at: AttrOneOptID             => opt(attr, at.vs, resOptId)
       case at: AttrOneOptString         => opt(attr, at.vs, resOptString)
       case at: AttrOneOptInt            => opt(attr, at.vs, resOptInt)
       case at: AttrOneOptLong           => opt(attr, at.vs, resOptLong)

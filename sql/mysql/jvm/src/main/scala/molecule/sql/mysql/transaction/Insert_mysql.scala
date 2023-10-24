@@ -65,12 +65,12 @@ trait Insert_mysql extends SqlInsert { self: ResolveInsert with InsertResolvers_
         }
 
         // Join table setter
-        val refIds             = tpl.productElement(tplIndex).asInstanceOf[Set[Long]]
+        val refIds             = tpl.productElement(tplIndex).asInstanceOf[Set[String]]
         val joinSetter: Setter = (ps: PS, idsMap: IdsMap, rowIndex: RowIndex) => {
           val id = idsMap(curPath)(rowIndex)
           refIds.foreach { refId =>
             ps.setLong(1, id)
-            ps.setLong(2, refId)
+            ps.setLong(2, refId.toLong)
             ps.addBatch()
           }
         }
@@ -135,12 +135,12 @@ trait Insert_mysql extends SqlInsert { self: ResolveInsert with InsertResolvers_
               }
 
               // Join table setter
-              val refIds = set.asInstanceOf[Set[Long]]
+              val refIds = set.asInstanceOf[Set[String]]
               (ps: PS, idsMap: IdsMap, rowIndex: RowIndex) => {
                 val id = idsMap(curPath)(rowIndex)
                 refIds.foreach { refId =>
                   ps.setLong(1, id)
-                  ps.setLong(2, refId)
+                  ps.setLong(2, refId.toLong)
                   ps.addBatch()
                 }
               }

@@ -14,6 +14,7 @@ trait ResolveExprOne_id[Tpl]
     attrIndex += 1
     val e = es.last
     attr match {
+      case at: AttrOneManID     => man(attr, e, at.vs, resId, sortOneID(at, attrIndex))
       case at: AttrOneManInt    => man(attr, e, at.vs, resInt, intSorter(at, attrIndex))
       case at: AttrOneManLong   => man(attr, e, at.vs, resLong, sortOneLong(at, attrIndex))
       case at: AttrOneManDouble => man(attr, e, at.vs, resDouble, sortOneDouble(at, attrIndex))
@@ -28,6 +29,7 @@ trait ResolveExprOne_id[Tpl]
       throw ModelError("Tacit id not allowed in optional nested queries.")
     }
     attr match {
+      case at: AttrOneTacID     => tac(attr, e, at.vs, resId)
       case at: AttrOneTacInt    => tac(attr, e, at.vs, resInt)
       case at: AttrOneTacLong   => tac(attr, e, at.vs, resLong)
       case at: AttrOneTacDouble => tac(attr, e, at.vs, resDouble)

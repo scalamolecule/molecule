@@ -49,7 +49,7 @@ trait Delete_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- A.i.insert(1, 2, 3).transact
         _ <- A.i.a1.query.get.map(_ ==> List(1, 2, 3))
 
-        _ <- A(Nil).delete.transact
+        _ <- A(Seq.empty[String]).delete.transact
 
         // No entities deleted
         _ <- A.i.a1.query.get.map(_ ==> List(1, 2, 3))
@@ -292,7 +292,7 @@ trait Delete_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
       "Can't update multiple values for one card-one attribute" - refs { implicit conn =>
         for {
-          _ <- A(42).i(2, 3).update.transact
+          _ <- A("42").i(2, 3).update.transact
             .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
               err ==> "Can only update one value for attribute `A.i`. Found: 2, 3"
             }
@@ -301,7 +301,7 @@ trait Delete_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
       "Can't update optional values" - refs { implicit conn =>
         for {
-          _ <- A(42).i_?(Some(1)).update.transact
+          _ <- A("42").i_?(Some(1)).update.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
               err ==> "Can't update optional values. Found:\n" +
                 """AttrOneOptInt("A", "i", Eq, Some(Seq(1)), None, None, Nil, Nil, None, None, Seq(0, 1))"""
@@ -311,7 +311,7 @@ trait Delete_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
       "Can't update card-many referenced attributes" - refs { implicit conn =>
         for {
-          _ <- A(42).i(1).Bb.i(2).update.transact
+          _ <- A("42").i(1).Bb.i(2).update.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
               err ==> "Can't update attributes in card-many referenced namespace `Bb`"
             }

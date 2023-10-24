@@ -64,6 +64,7 @@ class ResolveSave
   private def resolveAttrOneMan(a: AttrOneMan): Unit = {
     val (ns, attr) = (a.ns, a.attr)
     a match {
+      case a: AttrOneManID             => addOne(ns, attr, oneV(ns, attr, a.vs, transformId), handleId, extsId)
       case a: AttrOneManString         => addOne(ns, attr, oneV(ns, attr, a.vs, transformString), handleString, extsString)
       case a: AttrOneManInt            => addOne(ns, attr, oneV(ns, attr, a.vs, transformInt), handleInt, extsInt)
       case a: AttrOneManLong           => addOne(ns, attr, oneV(ns, attr, a.vs, transformLong), handleLong, extsLong)
@@ -91,6 +92,7 @@ class ResolveSave
   private def resolveAttrOneTac(a: AttrOneTac): Unit = {
     val (ns, attr) = (a.ns, a.attr)
     a match {
+      case a: AttrOneTacID             => addOne(ns, attr, oneV(ns, attr, a.vs, transformId), handleId, extsId)
       case a: AttrOneTacString         => addOne(ns, attr, oneV(ns, attr, a.vs, transformString), handleString, extsString)
       case a: AttrOneTacInt            => addOne(ns, attr, oneV(ns, attr, a.vs, transformInt), handleInt, extsInt)
       case a: AttrOneTacLong           => addOne(ns, attr, oneV(ns, attr, a.vs, transformLong), handleLong, extsLong)
@@ -134,6 +136,7 @@ class ResolveSave
   private def resolveAttrOneOpt(a: AttrOneOpt): Unit = {
     val (ns, attr) = (a.ns, a.attr)
     a match {
+      case a: AttrOneOptID             => addOne(ns, attr, oneOptV(ns, attr, a.vs, transformId), handleId, extsId)
       case a: AttrOneOptString         => addOne(ns, attr, oneOptV(ns, attr, a.vs, transformString), handleString, extsString)
       case a: AttrOneOptInt            => addOne(ns, attr, oneOptV(ns, attr, a.vs, transformInt), handleInt, extsInt)
       case a: AttrOneOptLong           => addOne(ns, attr, oneOptV(ns, attr, a.vs, transformLong), handleLong, extsLong)
@@ -177,6 +180,7 @@ class ResolveSave
   private def resolveAttrSetMan(a: AttrSetMan): Unit = {
     val (ns, attr, refNs) = (a.ns, a.attr, a.refNs)
     a match {
+      case a: AttrSetManID             => addSet(ns, attr, oneSet(ns, attr, a.vs, transformId), transformId, set2arrayId, refNs, extsId, value2jsonId)
       case a: AttrSetManString         => addSet(ns, attr, oneSet(ns, attr, a.vs, transformString), transformString, set2arrayString, refNs, extsString, value2jsonString)
       case a: AttrSetManInt            => addSet(ns, attr, oneSet(ns, attr, a.vs, transformInt), transformInt, set2arrayInt, refNs, extsInt, value2jsonInt)
       case a: AttrSetManLong           => addSet(ns, attr, oneSet(ns, attr, a.vs, transformLong), transformLong, set2arrayLong, refNs, extsLong, value2jsonLong)
@@ -204,6 +208,7 @@ class ResolveSave
   private def resolveAttrSetTac(a: AttrSetTac): Unit = {
     val (ns, attr, refNs) = (a.ns, a.attr, a.refNs)
     a match {
+      case a: AttrSetTacID             => addSet(ns, attr, oneSet(ns, attr, a.vs, transformId), transformId, set2arrayId, refNs, extsId, value2jsonId)
       case a: AttrSetTacString         => addSet(ns, attr, oneSet(ns, attr, a.vs, transformString), transformString, set2arrayString, refNs, extsString, value2jsonString)
       case a: AttrSetTacInt            => addSet(ns, attr, oneSet(ns, attr, a.vs, transformInt), transformInt, set2arrayInt, refNs, extsInt, value2jsonInt)
       case a: AttrSetTacLong           => addSet(ns, attr, oneSet(ns, attr, a.vs, transformLong), transformLong, set2arrayLong, refNs, extsLong, value2jsonLong)
@@ -247,6 +252,7 @@ class ResolveSave
   private def resolveAttrSetOpt(a: AttrSetOpt): Unit = {
     val (ns, attr, refNs) = (a.ns, a.attr, a.refNs)
     a match {
+      case a: AttrSetOptID             => addSet(ns, attr, oneOptSet(ns, attr, a.vs, transformId), handleId, set2arrayId, refNs, extsId, value2jsonId)
       case a: AttrSetOptString         => addSet(ns, attr, oneOptSet(ns, attr, a.vs, transformString), handleString, set2arrayString, refNs, extsString, value2jsonString)
       case a: AttrSetOptInt            => addSet(ns, attr, oneOptSet(ns, attr, a.vs, transformInt), handleInt, set2arrayInt, refNs, extsInt, value2jsonInt)
       case a: AttrSetOptLong           => addSet(ns, attr, oneOptSet(ns, attr, a.vs, transformLong), handleLong, set2arrayLong, refNs, extsLong, value2jsonLong)

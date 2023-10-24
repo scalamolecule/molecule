@@ -48,12 +48,14 @@ object _Model extends BoilerplateGenBase("Model", "/ast") {
     }
 
     // Render attribute toString method so that a printout can be directly used as valid Scala code
-    def body(baseTpe: String): String = {
+    def body(baseTpe0: String): String = {
+      val baseTpe  = if (baseTpe0 == "ID") "String" else baseTpe0
       val tpe      = cardTpe(baseTpe)
-      val attrType = s"Attr$card$mode$baseTpe"
+      val attrType = s"Attr$card$mode$baseTpe0"
       val vs       = if (mode == "Opt") s"Option[Seq[$tpe]] = None" else s"Seq[$tpe] = Nil"
       val format_? = !List("Int", "Double", "Boolean").contains(baseTpe)
       val format   = baseTpe match {
+        case "Id"             => """"\"" + escStr(v) + "\"""""
         case "String"         => """"\"" + escStr(v) + "\"""""
         case "Int"            => "v"
         case "Long"           => """v.toString + "L""""
@@ -117,13 +119,13 @@ object _Model extends BoilerplateGenBase("Model", "/ast") {
       }
 
       s"""
-         |  case class Attr$card$mode$baseTpe(
+         |  case class Attr$card$mode$baseTpe0(
          |    override val ns: String,
          |    override val attr: String,
          |    override val op: Op = V,
          |    vs: $vs,
          |    override val filterAttr: Option[Attr] = None,
-         |    override val validator: Option[Validate$baseTpe] = None,
+         |    override val validator: Option[Validate$baseTpe0] = None,
          |    override val valueAttrs: Seq[String] = Nil,
          |    override val errors: Seq[String] = Nil,
          |    override val refNs: Option[String] = None,
@@ -136,7 +138,7 @@ object _Model extends BoilerplateGenBase("Model", "/ast") {
          |  }""".stripMargin
     }
 
-    val attrClasses = baseTypes.map(body).mkString("\n")
+    val attrClasses = ("ID" +: baseTypes).map(body).mkString("\n")
     s"""
        |  sealed trait Attr$card$mode extends Attr$card with $modeFull
        |  $attrClasses

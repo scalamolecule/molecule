@@ -134,6 +134,7 @@ trait InsertValidationExtraction extends InsertValidators_ with ModelUtils { sel
   private def resolveAttrOneMan(a: AttrOneMan, tplIndex: Int): Product => Seq[InsertError] = {
     val (ns, attr) = (a.ns, a.attr)
     a match {
+      case a: AttrOneManID             => validatorV(ns, attr, tplIndex, validatorID(a.validator, a, curElements))
       case a: AttrOneManString         => validatorV(ns, attr, tplIndex, validatorString(a.validator, a, curElements))
       case a: AttrOneManInt            => validatorV(ns, attr, tplIndex, validatorInt(a.validator, a, curElements))
       case a: AttrOneManLong           => validatorV(ns, attr, tplIndex, validatorLong(a.validator, a, curElements))
@@ -180,6 +181,7 @@ trait InsertValidationExtraction extends InsertValidators_ with ModelUtils { sel
   private def resolveAttrOneOpt(a: AttrOneOpt, tplIndex: Int): Product => Seq[InsertError] = {
     val (ns, attr) = (a.ns, a.attr)
     a match {
+      case a: AttrOneOptID             => validatorOptV(ns, attr, tplIndex, validatorID(a.validator, a, curElements))
       case a: AttrOneOptString         => validatorOptV(ns, attr, tplIndex, validatorString(a.validator, a, curElements))
       case a: AttrOneOptInt            => validatorOptV(ns, attr, tplIndex, validatorInt(a.validator, a, curElements))
       case a: AttrOneOptLong           => validatorOptV(ns, attr, tplIndex, validatorLong(a.validator, a, curElements))
@@ -238,6 +240,7 @@ trait InsertValidationExtraction extends InsertValidators_ with ModelUtils { sel
   private def resolveAttrSetMan(a: AttrSetMan, tplIndex: Int, mandatory: Boolean): Product => Seq[InsertError] = {
     val (ns, attr) = (a.ns, a.attr)
     a match {
+      case a: AttrSetManID             => validatorSet(ns, attr, tplIndex, mandatory, validatorID(a.validator, a, curElements))
       case a: AttrSetManString         => validatorSet(ns, attr, tplIndex, mandatory, validatorString(a.validator, a, curElements))
       case a: AttrSetManInt            => validatorSet(ns, attr, tplIndex, mandatory, validatorInt(a.validator, a, curElements))
       case a: AttrSetManLong           => validatorSet(ns, attr, tplIndex, mandatory, validatorLong(a.validator, a, curElements))
@@ -284,6 +287,7 @@ trait InsertValidationExtraction extends InsertValidators_ with ModelUtils { sel
   private def resolveAttrSetOpt(a: AttrSetOpt, tplIndex: Int): Product => Seq[InsertError] = {
     val (ns, attr) = (a.ns, a.attr)
     a match {
+      case a: AttrSetOptID             => validatorOptSet(ns, attr, tplIndex, validatorID(a.validator, a, curElements))
       case a: AttrSetOptString         => validatorOptSet(ns, attr, tplIndex, validatorString(a.validator, a, curElements))
       case a: AttrSetOptInt            => validatorOptSet(ns, attr, tplIndex, validatorInt(a.validator, a, curElements))
       case a: AttrSetOptLong           => validatorOptSet(ns, attr, tplIndex, validatorLong(a.validator, a, curElements))

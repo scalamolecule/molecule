@@ -9,6 +9,29 @@ import molecule.core.validation.insert.InsertValueResolvers_
 
 trait InsertValidators_ extends InsertValueResolvers_ {
   
+  protected def validatorID(
+    optValidator: Option[ValidateId],
+    a: Attr,
+    curElements: List[Element]
+  ): Option[Product => String => Seq[String]] = {
+    optValidator.fold(
+      Option.empty[Product => String => Seq[String]]
+    ) { validator =>
+      if (a.valueAttrs.isEmpty) {
+        Some((_: Product) => (v: String) => validator.validate(v))
+      } else {
+        val tpl2values = tpl2valueResolver(a, curElements)
+        Some(
+          (tpl: Product) => {
+            val values = tpl2values(tpl)
+            (v: String) =>
+              validator.withValues(values).validate(v)
+          }
+        )
+      }
+    }
+  }
+
   protected def validatorString(
     optValidator: Option[ValidateString],
     a: Attr,

@@ -172,8 +172,8 @@ trait InsertCardSet extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.int_(22).i.a1.chars_?.query.get.map(_ ==> List((1, None), (2, None), (3, Some(Set(char1, char2)))))
 
         List(r1, r2) <- Ref.i.insert(1, 2).transact.map(_.ids)
-        _ <- Ns.int.i.refs_?.insert(23, 1, Option.empty[Set[Long]]).transact
-        _ <- Ns.int.i.refs_?.insert(23, 2, Some(Set.empty[Long])).transact
+        _ <- Ns.int.i.refs_?.insert(23, 1, Option.empty[Set[String]]).transact
+        _ <- Ns.int.i.refs_?.insert(23, 2, Some(Set.empty[String])).transact
         _ <- Ns.int.i.refs_?.insert(23, 3, Some(Set(r1, r2))).transact
         _ <- Ns.int_(23).i.a1.refs_?.query.get.map(_ ==> List((1, None), (2, None), (3, Some(Set(r1, r2)))))
       } yield ()

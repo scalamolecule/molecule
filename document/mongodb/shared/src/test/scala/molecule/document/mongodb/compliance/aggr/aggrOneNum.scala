@@ -1,0 +1,14 @@
+package molecule.document.mongodb.compliance.aggr
+
+import molecule.coreTests.spi.aggr.one.number._
+import molecule.document.mongodb.setup.TestAsync_mongodb
+
+object AggrOneNum_Int extends AggrOneNum_Int with TestAsync_mongodb
+object AggrOneNum_Long extends AggrOneNum_Long_ with TestAsync_mongodb
+object AggrOneNum_Float extends AggrOneNum_Float_ with TestAsync_mongodb
+object AggrOneNum_Double extends AggrOneNum_Double_ with TestAsync_mongodb
+object AggrOneNum_BigInt extends AggrOneNum_BigInt_ with TestAsync_mongodb
+object AggrOneNum_BigDecimal extends AggrOneNum_BigDecimal_ with TestAsync_mongodb
+object AggrOneNum_Byte extends AggrOneNum_Byte_ with TestAsync_mongodb
+object AggrOneNum_Short extends AggrOneNum_Short_ with TestAsync_mongodb
+object AggrOneNum_ref extends AggrOneNum_ref_ with TestAsync_mongodb

@@ -106,12 +106,12 @@ trait UpdateSetOps_Duration_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
         _ <- Ns.durations.query.get.map(_.head ==> Set(duration1, duration5, duration6, duration7, duration8, duration9))
 
         // Can't swap duplicate from/to values
-        _ <- Ns(42).durations.swap(duration1 -> duration2, duration1 -> duration3).update.transact
+        _ <- Ns("42").durations.swap(duration1 -> duration2, duration1 -> duration3).update.transact
           .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
             err ==> "Can't swap from duplicate retract values."
           }
 
-        _ <- Ns(42).durations.swap(duration1 -> duration3, duration2 -> duration3).update.transact
+        _ <- Ns("42").durations.swap(duration1 -> duration3, duration2 -> duration3).update.transact
           .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
             err ==> "Can't swap to duplicate replacement values."
           }

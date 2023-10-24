@@ -16,6 +16,7 @@ trait LambdasOne extends LambdasBase { self: SqlQueryBase =>
     json2array: String => Array[T]
   )
 
+  protected lazy val sql2oneId            : (Row, Int) => String         = (row: Row, paramIndex: Int) => row.getLong(paramIndex).toString
   protected lazy val sql2oneString        : (Row, Int) => String         = (row: Row, paramIndex: Int) => row.getString(paramIndex)
   protected lazy val sql2oneInt           : (Row, Int) => Int            = (row: Row, paramIndex: Int) => row.getInt(paramIndex)
   protected lazy val sql2oneLong          : (Row, Int) => Long           = (row: Row, paramIndex: Int) => row.getLong(paramIndex)
@@ -39,6 +40,7 @@ trait LambdasOne extends LambdasBase { self: SqlQueryBase =>
   protected lazy val sql2oneShort         : (Row, Int) => Short          = (row: Row, paramIndex: Int) => row.getShort(paramIndex)
   protected lazy val sql2oneChar          : (Row, Int) => Char           = (row: Row, paramIndex: Int) => row.getString(paramIndex).charAt(0)
 
+  protected lazy val resId1            : ResOne[String]         = ResOne("String", sql2oneId, sql2oneIdOrNull, one2sqlId, array2setId, json2oneId, json2arrayId)
   protected lazy val resString1        : ResOne[String]         = ResOne("String", sql2oneString, sql2oneStringOrNull, one2sqlString, array2setString, json2oneString, json2arrayString)
   protected lazy val resInt1           : ResOne[Int]            = ResOne("Int", sql2oneInt, sql2oneIntOrNull, one2sqlInt, array2setInt, json2oneInt, json2arrayInt)
   protected lazy val resLong1          : ResOne[Long]           = ResOne("Long", sql2oneLong, sql2oneLongOrNull, one2sqlLong, array2setLong, json2oneLong, json2arrayLong)
@@ -62,6 +64,7 @@ trait LambdasOne extends LambdasBase { self: SqlQueryBase =>
   protected lazy val resShort1         : ResOne[Short]          = ResOne("Short", sql2oneShort, sql2oneShortOrNull, one2sqlShort, array2setShort, json2oneShort, json2arrayShort)
   protected lazy val resChar1          : ResOne[Char]           = ResOne("Char", sql2oneChar, sql2oneCharOrNull, one2sqlChar, array2setChar, json2oneChar, json2arrayChar)
 
+  protected lazy val sql2oneIdOrNull            : (Row, Int) => Any = { (row: Row, paramIndex: Int) => val v = row.getLong(paramIndex); if (row.wasNull()) null else v.toString }
   protected lazy val sql2oneStringOrNull        : (Row, Int) => Any = { (row: Row, paramIndex: Int) => val v = row.getString(paramIndex); if (row.wasNull()) null else v }
   protected lazy val sql2oneIntOrNull           : (Row, Int) => Any = { (row: Row, paramIndex: Int) => val v = row.getInt(paramIndex); if (row.wasNull()) null else v }
   protected lazy val sql2oneLongOrNull          : (Row, Int) => Any = { (row: Row, paramIndex: Int) => val v = row.getLong(paramIndex); if (row.wasNull()) null else v }
@@ -91,6 +94,7 @@ trait LambdasOne extends LambdasBase { self: SqlQueryBase =>
     one2sql: T => String
   )
 
+  lazy val resOptId            : ResOneOpt[String]         = ResOneOpt("String", sql2oneOptId, one2sqlId)
   lazy val resOptString        : ResOneOpt[String]         = ResOneOpt("String", sql2oneOptString, one2sqlString)
   lazy val resOptInt           : ResOneOpt[Int]            = ResOneOpt("Int", sql2oneOptInt, one2sqlInt)
   lazy val resOptLong          : ResOneOpt[Long]           = ResOneOpt("Long", sql2oneOptLong, one2sqlLong)
@@ -115,6 +119,10 @@ trait LambdasOne extends LambdasBase { self: SqlQueryBase =>
   lazy val resOptChar          : ResOneOpt[Char]           = ResOneOpt("Char", sql2oneOptChar, one2sqlChar)
 
 
+  protected lazy val sql2oneOptId            : (Row, Int) => Option[String]         = (row: Row, paramIndex: Int) => {
+    val v = row.getLong(paramIndex)
+    if (row.wasNull()) Option.empty[String] else Some(v.toString)
+  }
   protected lazy val sql2oneOptString        : (Row, Int) => Option[String]         = (row: Row, paramIndex: Int) => {
     val v = row.getString(paramIndex)
     if (row.wasNull()) Option.empty[String] else Some(v)

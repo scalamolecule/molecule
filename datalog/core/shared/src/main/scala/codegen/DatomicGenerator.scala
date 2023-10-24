@@ -16,5 +16,5 @@ object DatomicGenerator extends App {
 
   //  codegen.datalog.core.query._SortOne.generate()
   //  codegen.datalog.core.query._SortOneOpt.generate()
-  //  codegen.datalog.core.query._SortOneOptFlat.generate()
+  //    codegen.datalog.core.query._SortOneOptFlat.generate()
 }

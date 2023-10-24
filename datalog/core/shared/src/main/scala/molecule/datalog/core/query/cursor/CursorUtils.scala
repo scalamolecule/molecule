@@ -13,6 +13,7 @@ trait CursorUtils extends BaseHelpers {
     element match {
       case a: AttrOneMan =>
         a match {
+          case _: AttrOneManID             => ("String", (v: Any) => escStr(v.toString))
           case _: AttrOneManString         => ("String", (v: Any) => escStr(v.toString))
           case _: AttrOneManInt            => ("Int", (v: Any) => v.toString)
           case _: AttrOneManLong           => ("Long", (v: Any) => v.toString)
@@ -38,6 +39,7 @@ trait CursorUtils extends BaseHelpers {
         }
       case a: AttrOneOpt =>
         a match {
+          case _: AttrOneOptID             => ("String", (v: Any) => escStr(v.toString))
           case _: AttrOneOptString         => ("String", (v: Any) => escStr(v.toString))
           case _: AttrOneOptInt            => ("Int", (v: Any) => v.toString)
           case _: AttrOneOptLong           => ("Long", (v: Any) => v.toString)

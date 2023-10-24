@@ -22,7 +22,7 @@ trait InsertRefs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, "b"),
         ).transact
 
-        _ <- A.i.B.s.query.get.map(_ ==> List(
+        _ <- A.i.a1.B.s.query.get.map(_ ==> List(
           (1, "a"),
           (2, "b"),
         ))

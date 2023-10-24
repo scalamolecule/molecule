@@ -146,7 +146,7 @@ trait UpdateOne_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
       "Can't update multiple values for one card-one attribute" - types { implicit conn =>
         for {
-          _ <- Ns(42).int(2, 3).update.transact
+          _ <- Ns("42").int(2, 3).update.transact
             .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
               err ==> "Can only update one value for attribute `Ns.int`. Found: 2, 3"
             }
@@ -160,7 +160,7 @@ trait UpdateOne_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           case _                   => "int"
         }
         for {
-          _ <- Ns(42).int_?(Some(1)).update.transact
+          _ <- Ns("42").int_?(Some(1)).update.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
               err ==> "Can't update optional values. Found:\n" +
                 s"""AttrOneOptInt("Ns", "$attr", Eq, Some(Seq(1)), None, None, Nil, Nil, None, None, Seq(0, 6))"""
@@ -170,7 +170,7 @@ trait UpdateOne_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
       "Can't update card-many referenced attributes" - types { implicit conn =>
         for {
-          _ <- Ns(42).i(1).Refs.i(2).update.transact
+          _ <- Ns("42").i(1).Refs.i(2).update.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
               err ==> "Can't update attributes in card-many referenced namespace `Refs`"
             }
@@ -179,7 +179,7 @@ trait UpdateOne_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
       "Can't upsert referenced attributes" - types { implicit conn =>
         for {
-          _ <- Ns(42).i(1).Ref.i(2).upsert.transact
+          _ <- Ns("42").i(1).Ref.i(2).upsert.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
               err ==> "Can't upsert referenced attributes. Please update instead."
             }

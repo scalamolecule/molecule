@@ -60,8 +60,6 @@ trait SqlUpdateSetValidator extends SpiHelpers {
     if (isUpsert && isRefUpdate(elements))
       throw ModelError("Can't upsert referenced attributes. Please update instead.")
 
-    //    val ids = elements.head.asInstanceOf[AttrOneTacLong].vs.mkString(", ")
-
     val curSetValues: Attr => Set[Any] = (a: Attr) => try {
       val ns    = a.ns
       val attr  = a.attr
@@ -72,8 +70,6 @@ trait SqlUpdateSetValidator extends SpiHelpers {
            |FROM MandatoryAttr,
            |  JSON_TABLE($ns.$attr, '$$[*]' columns(vs $tpe path '$$')) t_1
            |""".stripMargin
-        //           |WHERE $ns.id in ($ids)
-        //           |GROUP BY $ns.id
       ) { refNs =>
         val joinTable = ss(ns, attr, refNs)
         val refNs_id  = ss(refNs, "id")
@@ -97,6 +93,7 @@ trait SqlUpdateSetValidator extends SpiHelpers {
 
   // Mysql data types
   private def dbType(a: Attr): String = a match {
+    case _: AttrSetManID             => "BIGINT"
     case _: AttrSetManString         => "LONGTEXT"
     case _: AttrSetManInt            => "INT"
     case _: AttrSetManLong           => "BIGINT"
@@ -119,7 +116,6 @@ trait SqlUpdateSetValidator extends SpiHelpers {
     case _: AttrSetManByte           => "TINYINT"
     case _: AttrSetManShort          => "SMALLINT"
     case _: AttrSetManChar           => "CHAR"
-    case a                           =>
-      throw ModelError(s"Unexpected attribute. Found:\n" + a)
+    case a                           => throw ModelError(s"Unexpected attribute. Found:\n" + a)
   }
 }

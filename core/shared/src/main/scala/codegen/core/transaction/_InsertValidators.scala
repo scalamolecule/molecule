@@ -20,10 +20,11 @@ object _InsertValidators extends CoreGenBase("InsertValidators", "/transaction")
   }
 
   private def validators: String = {
-    baseTypes.map { baseTpe =>
+    baseTypes.map { baseTpe0 =>
+      val baseTpe = if (baseTpe0 == "ID") "String" else baseTpe0
       s"""
-         |  protected def validator$baseTpe(
-         |    optValidator: Option[Validate$baseTpe],
+         |  protected def validator$baseTpe0(
+         |    optValidator: Option[Validate$baseTpe0],
          |    a: Attr,
          |    curElements: List[Element]
          |  ): Option[Product => $baseTpe => Seq[String]] = {

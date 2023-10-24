@@ -62,12 +62,12 @@ trait FilterSet_ref extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
 
           // Empty Seq/Sets match nothing
-          _ <- Ns.i.a1.refs(Set(ref1, ref2), Set.empty[Long]).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.refs(Set.empty[Long], Set(ref2, ref1)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.refs(Set.empty[Long], Set.empty[Long]).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.refs(Set.empty[Long]).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.refs(Seq.empty[Set[Long]]).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.refs(Seq(Set.empty[Long])).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.refs(Set(ref1, ref2), Set.empty[String]).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.refs(Set.empty[String], Set(ref2, ref1)).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.refs(Set.empty[String], Set.empty[String]).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.refs(Set.empty[String]).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.refs(Seq.empty[Set[String]]).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.refs(Seq(Set.empty[String])).query.get.map(_ ==> List())
         } yield ()
       }
 
@@ -106,9 +106,9 @@ trait FilterSet_ref extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
 
           // Empty Seq/Sets
-          _ <- Ns.i.a1.refs.not(Seq(Set(ref1, ref2), Set.empty[Long])).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.refs.not(Set.empty[Long]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.refs.not(Seq.empty[Set[Long]]).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.refs.not(Seq(Set(ref1, ref2), Set.empty[String])).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.refs.not(Set.empty[String]).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.refs.not(Seq.empty[Set[String]]).query.get.map(_ ==> List(a, b))
         } yield ()
       }
 
@@ -180,10 +180,10 @@ trait FilterSet_ref extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
 
           // Empty Seq/Sets match nothing
-          _ <- Ns.i.a1.refs.has(Set(ref1, ref2), Set.empty[Long]).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.refs.has(Seq.empty[Long]).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.refs.has(Set.empty[Long]).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.refs.has(Seq.empty[Set[Long]]).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.refs.has(Set(ref1, ref2), Set.empty[String]).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.refs.has(Seq.empty[String]).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.refs.has(Set.empty[String]).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.refs.has(Seq.empty[Set[String]]).query.get.map(_ ==> List())
         } yield ()
       }
 
@@ -259,11 +259,11 @@ trait FilterSet_ref extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
 
           // Negating empty Seqs/Sets has no effect
-          _ <- Ns.i.a1.refs.hasNo(Set(ref1, ref2), Set.empty[Long]).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.refs.hasNo(Seq.empty[Long]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.refs.hasNo(Set.empty[Long]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.refs.hasNo(Seq.empty[Set[Long]]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.refs.hasNo(Seq(Set.empty[Long])).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.refs.hasNo(Set(ref1, ref2), Set.empty[String]).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.refs.hasNo(Seq.empty[String]).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.refs.hasNo(Set.empty[String]).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.refs.hasNo(Seq.empty[Set[String]]).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.refs.hasNo(Seq(Set.empty[String])).query.get.map(_ ==> List(a, b))
         } yield ()
       }
     }
@@ -322,10 +322,10 @@ trait FilterSet_ref extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
 
           // Empty Seq/Sets match nothing
-          _ <- Ns.i.a1.refs_(Set(ref1, ref2), Set.empty[Long]).query.get.map(_ ==> List(1))
-          _ <- Ns.i.a1.refs_(Set.empty[Long]).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.refs_(Seq.empty[Set[Long]]).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.refs_(Seq(Set.empty[Long])).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.refs_(Set(ref1, ref2), Set.empty[String]).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.refs_(Set.empty[String]).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.refs_(Seq.empty[Set[String]]).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.refs_(Seq(Set.empty[String])).query.get.map(_ ==> List())
         } yield ()
       }
 
@@ -366,9 +366,9 @@ trait FilterSet_ref extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
 
           // Empty Seq/Sets
-          _ <- Ns.i.a1.refs_.not(Seq(Set(ref1, ref2), Set.empty[Long])).query.get.map(_ ==> List(2))
-          _ <- Ns.i.a1.refs_.not(Set.empty[Long]).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.refs_.not(Seq.empty[Set[Long]]).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.refs_.not(Seq(Set(ref1, ref2), Set.empty[String])).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.refs_.not(Set.empty[String]).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.refs_.not(Seq.empty[Set[String]]).query.get.map(_ ==> List(1, 2))
         } yield ()
       }
 
@@ -442,10 +442,10 @@ trait FilterSet_ref extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
 
           // Empty Seq/Sets match nothing
-          _ <- Ns.i.a1.refs_.has(Set(ref1, ref2), Set.empty[Long]).query.get.map(_ ==> List(1))
-          _ <- Ns.i.a1.refs_.has(Seq.empty[Long]).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.refs_.has(Set.empty[Long]).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.refs_.has(Seq.empty[Set[Long]]).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.refs_.has(Set(ref1, ref2), Set.empty[String]).query.get.map(_ ==> List(1))
+          _ <- Ns.i.a1.refs_.has(Seq.empty[String]).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.refs_.has(Set.empty[String]).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.refs_.has(Seq.empty[Set[String]]).query.get.map(_ ==> List())
         } yield ()
       }
 
@@ -523,11 +523,11 @@ trait FilterSet_ref extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
 
           // Negating empty Seqs/Sets has no effect
-          _ <- Ns.i.a1.refs_.hasNo(Set(ref1, ref2), Set.empty[Long]).query.get.map(_ ==> List(2))
-          _ <- Ns.i.a1.refs_.hasNo(Seq.empty[Long]).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.refs_.hasNo(Set.empty[Long]).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.refs_.hasNo(Seq.empty[Set[Long]]).query.get.map(_ ==> List(1, 2))
-          _ <- Ns.i.a1.refs_.hasNo(Seq(Set.empty[Long])).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.refs_.hasNo(Set(ref1, ref2), Set.empty[String]).query.get.map(_ ==> List(2))
+          _ <- Ns.i.a1.refs_.hasNo(Seq.empty[String]).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.refs_.hasNo(Set.empty[String]).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.refs_.hasNo(Seq.empty[Set[String]]).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.refs_.hasNo(Seq(Set.empty[String])).query.get.map(_ ==> List(1, 2))
         } yield ()
       }
     }
@@ -585,14 +585,14 @@ trait FilterSet_ref extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
 
           // Empty Seq/Sets match nothing
-          _ <- Ns.i.a1.refs_?(Some(Set.empty[Long])).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.refs_?(Some(Seq.empty[Set[Long]])).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.refs_?(Some(Seq(Set.empty[Long]))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.refs_?(Some(Set.empty[String])).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.refs_?(Some(Seq.empty[Set[String]])).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.refs_?(Some(Seq(Set.empty[String]))).query.get.map(_ ==> List())
 
 
           // None matches non-asserted values
-          _ <- Ns.i.a1.refs_?(Option.empty[Set[Long]]).query.get.map(_ ==> List(c))
-          _ <- Ns.i.a1.refs_?(Option.empty[Seq[Set[Long]]]).query.get.map(_ ==> List(c))
+          _ <- Ns.i.a1.refs_?(Option.empty[Set[String]]).query.get.map(_ ==> List(c))
+          _ <- Ns.i.a1.refs_?(Option.empty[Seq[Set[String]]]).query.get.map(_ ==> List(c))
         } yield ()
       }
 
@@ -628,14 +628,14 @@ trait FilterSet_ref extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
 
           // Empty Seq/Sets
-          _ <- Ns.i.a1.refs_?.not(Some(Seq(Set(ref1, ref2), Set.empty[Long]))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.refs_?.not(Some(Set.empty[Long])).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.refs_?.not(Some(Seq.empty[Set[Long]])).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.refs_?.not(Some(Seq(Set(ref1, ref2), Set.empty[String]))).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.refs_?.not(Some(Set.empty[String])).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.refs_?.not(Some(Seq.empty[Set[String]])).query.get.map(_ ==> List(a, b))
 
 
           // None matches non-asserted values
-          _ <- Ns.i.a1.refs_?(Option.empty[Set[Long]]).query.get.map(_ ==> List(c))
-          _ <- Ns.i.a1.refs_?(Option.empty[Seq[Set[Long]]]).query.get.map(_ ==> List(c))
+          _ <- Ns.i.a1.refs_?(Option.empty[Set[String]]).query.get.map(_ ==> List(c))
+          _ <- Ns.i.a1.refs_?(Option.empty[Seq[Set[String]]]).query.get.map(_ ==> List(c))
         } yield ()
       }
 
@@ -698,16 +698,16 @@ trait FilterSet_ref extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
 
           // Empty Seq/Sets match nothing
-          _ <- Ns.i.a1.refs_?.has(Some(Seq.empty[Long])).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.refs_?.has(Some(Set.empty[Long])).query.get.map(_ ==> List())
-          _ <- Ns.i.a1.refs_?.has(Some(Seq.empty[Set[Long]])).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.refs_?.has(Some(Seq.empty[String])).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.refs_?.has(Some(Set.empty[String])).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.refs_?.has(Some(Seq.empty[Set[String]])).query.get.map(_ ==> List())
 
 
           // None matches non-asserted values
-          _ <- Ns.i.a1.refs_?.has(Option.empty[Long]).query.get.map(_ ==> List(c))
-          _ <- Ns.i.a1.refs_?.has(Option.empty[Seq[Long]]).query.get.map(_ ==> List(c))
-          _ <- Ns.i.a1.refs_?.has(Option.empty[Set[Long]]).query.get.map(_ ==> List(c))
-          _ <- Ns.i.a1.refs_?.has(Option.empty[Seq[Set[Long]]]).query.get.map(_ ==> List(c))
+          _ <- Ns.i.a1.refs_?.has(Option.empty[String]).query.get.map(_ ==> List(c))
+          _ <- Ns.i.a1.refs_?.has(Option.empty[Seq[String]]).query.get.map(_ ==> List(c))
+          _ <- Ns.i.a1.refs_?.has(Option.empty[Set[String]]).query.get.map(_ ==> List(c))
+          _ <- Ns.i.a1.refs_?.has(Option.empty[Seq[Set[String]]]).query.get.map(_ ==> List(c))
         } yield ()
       }
 
@@ -774,17 +774,17 @@ trait FilterSet_ref extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
 
           // Negating empty Seqs/Sets has no effect
-          _ <- Ns.i.a1.refs_?.hasNo(Some(Seq.empty[Long])).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.refs_?.hasNo(Some(Set.empty[Long])).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.refs_?.hasNo(Some(Seq.empty[Set[Long]])).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.refs_?.hasNo(Some(Seq(Set.empty[Long]))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.refs_?.hasNo(Some(Seq.empty[String])).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.refs_?.hasNo(Some(Set.empty[String])).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.refs_?.hasNo(Some(Seq.empty[Set[String]])).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.refs_?.hasNo(Some(Seq(Set.empty[String]))).query.get.map(_ ==> List(a, b))
 
 
           // Negating None returns all asserted
-          _ <- Ns.i.a1.refs_?.hasNo(Option.empty[Long]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.refs_?.hasNo(Option.empty[Seq[Long]]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.refs_?.hasNo(Option.empty[Set[Long]]).query.get.map(_ ==> List(a, b))
-          _ <- Ns.i.a1.refs_?.hasNo(Option.empty[Seq[Set[Long]]]).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.refs_?.hasNo(Option.empty[String]).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.refs_?.hasNo(Option.empty[Seq[String]]).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.refs_?.hasNo(Option.empty[Set[String]]).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.refs_?.hasNo(Option.empty[Seq[Set[String]]]).query.get.map(_ ==> List(a, b))
         } yield ()
       }
     }

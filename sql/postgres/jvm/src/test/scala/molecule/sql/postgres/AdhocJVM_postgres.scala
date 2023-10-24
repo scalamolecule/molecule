@@ -4,6 +4,7 @@ import molecule.base.error.{ExecutionError, ModelError}
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Refs.A
 import molecule.sql.postgres.async._
+import molecule.sql.postgres.compliance.fallback.RawQuery.{ref1, ref2}
 import molecule.sql.postgres.setup.TestSuite_postgres
 import utest._
 import scala.collection.immutable.List
@@ -15,9 +16,19 @@ object AdhocJVM_postgres extends TestSuite_postgres {
 
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
+      val a = (1, Set(ref1, ref2))
+      val b = (2, Set(ref2, ref3, ref4))
       for {
-        _ <- Ns.int.insert(1).transact
-        _ <- Ns.int.query.get.map(_ ==> List(1))
+        _ <- Ns.i.refs.insert(List(a, b)).transact
+
+        // Exact Set matches
+
+        // AND semantics
+        // "Is exactly this AND that"
+        _ <- Ns.i.a1.refs(Set(ref1)).query.i.get.map(_ ==> List())
+
+//        _ <- Ns.int.insert(1).transact
+//        _ <- Ns.int.query.get.map(_ ==> List(1))
 
         //        _ <- rawQuery(
         //          """SELECT DISTINCT

@@ -178,7 +178,6 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |            }
        |            case a             => unexpected(a)
        |          }
-       |          case a          => unexpected(a)
        |        }
        |      case e       => unexpected(e)
        |    }
@@ -207,60 +206,64 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
   }
 
   private def asIs(card: String): String = {
-    baseTypesWithSpaces.map { case (baseTpe, space) =>
-      s"case a: Attr${card}Man$baseTpe $space=> a.copy(op = Fn(kw.toString, n))"
+    baseTypesWithSpaces.map {
+      case (baseTpe, space) => s"case a: Attr${card}Man$baseTpe $space=> a.copy(op = Fn(kw.toString, n))"
     }.mkString("\n        ")
   }
 
   private def addOne(mode: String): String = {
-    baseTypes.map(baseTpe =>
+    baseTypes.map { baseTpe =>
+      val tpe = if (baseTpe == "ID") "String" else baseTpe
       s"""case a: AttrOne$mode$baseTpe =>
-         |          val vs1     = vs.asInstanceOf[Seq[$baseTpe]]
+         |          val vs1     = vs.asInstanceOf[Seq[$tpe]]
          |          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
          |            val validator = a.validator.get
          |            vs1.flatMap(v => validator.validate(v))
          |          }
          |          a.copy(op = op, vs = vs1, errors = errors1)""".stripMargin
-    ).mkString("\n\n        ")
+    }.mkString("\n\n        ")
   }
 
   private def addOptOne: String = {
-    baseTypes.map(baseTpe =>
+    baseTypes.map { baseTpe =>
+      val tpe = if (baseTpe == "ID") "String" else baseTpe
       s"""case a: AttrOneOpt$baseTpe =>
-         |          val vs1     = vs.asInstanceOf[Option[Seq[$baseTpe]]]
+         |          val vs1     = vs.asInstanceOf[Option[Seq[$tpe]]]
          |          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
          |            val validator = a.validator.get
          |            vs1.get.flatMap(v => validator.validate(v))
          |          }
          |          a.copy(op = op, vs = vs1, errors = errors1)""".stripMargin
-    ).mkString("\n\n        ")
+    }.mkString("\n\n        ")
   }
 
   private def addSet(mode: String): String = {
-    baseTypes.map(baseTpe =>
+    baseTypes.map { baseTpe =>
+      val tpe = if (baseTpe == "ID") "String" else baseTpe
       s"""case a: AttrSet$mode$baseTpe =>
-         |          val sets    = vs.asInstanceOf[Seq[Set[$baseTpe]]]
+         |          val sets    = vs.asInstanceOf[Seq[Set[$tpe]]]
          |          val errors1 = if (sets.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
          |            val validator = a.validator.get
          |            sets.flatMap(set => set.flatMap(v => validator.validate(v)))
          |          }
          |          a.copy(op = op, vs = sets, errors = errors1)""".stripMargin
-    ).mkString("\n\n        ")
+    }.mkString("\n\n        ")
   }
 
   private def addOptSet: String = {
-    baseTypes.map(baseTpe =>
+    baseTypes.map { baseTpe =>
+      val tpe = if (baseTpe == "ID") "String" else baseTpe
       s"""case a: AttrSetOpt$baseTpe =>
-         |          val sets    = vs.asInstanceOf[Option[Seq[Set[$baseTpe]]]]
+         |          val sets    = vs.asInstanceOf[Option[Seq[Set[$tpe]]]]
          |          val errors1 = if (sets.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
          |            val validator = a.validator.get
          |            sets.get.flatMap(set => set.flatMap(v => validator.validate(v)))
          |          }
          |          a.copy(op = op, vs = sets, errors = errors1)""".stripMargin
-    ).mkString("\n\n        ")
+    }.mkString("\n\n        ")
   }
 
-  private def addSort( mode: String): String = {
+  private def addSort(mode: String): String = {
     baseTypesWithSpaces.map { case (baseTpe, space) =>
       s"case a: AttrOne$mode$baseTpe $space=> a.copy(sort = Some(sort))"
     }.mkString("\n        ")

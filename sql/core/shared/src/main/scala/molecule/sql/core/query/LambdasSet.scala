@@ -7,6 +7,7 @@ import molecule.core.util.JavaConversions
 
 trait LambdasSet extends LambdasBase with JavaConversions { self: SqlQueryBase =>
 
+  private lazy val sql2setId            : (Row, Int) => Set[String]         = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueId)
   private lazy val sql2setString        : (Row, Int) => Set[String]         = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueString)
   private lazy val sql2setInt           : (Row, Int) => Set[Int]            = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueInt)
   private lazy val sql2setLong          : (Row, Int) => Set[Long]           = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueLong)
@@ -51,6 +52,7 @@ trait LambdasSet extends LambdasBase with JavaConversions { self: SqlQueryBase =
     one2json: T => String
   )
 
+  lazy val resSetId            : ResSet[String]         = ResSet("String", tpeDbId, sql2setId, null, set2sqlArrayId, set2sqlsId, one2sqlId, array2setId, nestedArray2coalescedSetId, nestedArray2nestedSetId, array2setFirstId, array2setLastId, nestedArray2setAscId, nestedArray2setDescId, nestedArray2setSumId, json2oneId, json2arrayId, one2jsonId)
   lazy val resSetString        : ResSet[String]         = ResSet("String", tpeDbString, sql2setString, null, set2sqlArrayString, set2sqlsString, one2sqlString, array2setString, nestedArray2coalescedSetString, nestedArray2nestedSetString, array2setFirstString, array2setLastString, nestedArray2setAscString, nestedArray2setDescString, nestedArray2setSumString, json2oneString, json2arrayString, one2jsonString)
   lazy val resSetInt           : ResSet[Int]            = ResSet("Int", tpeDbInt, sql2setInt, null, set2sqlArrayInt, set2sqlsInt, one2sqlInt, array2setInt, nestedArray2coalescedSetInt, nestedArray2nestedSetInt, array2setFirstInt, array2setLastInt, nestedArray2setAscInt, nestedArray2setDescInt, nestedArray2setSumInt, json2oneInt, json2arrayInt, one2jsonInt)
   lazy val resSetLong          : ResSet[Long]           = ResSet("Long", tpeDbLong, sql2setLong, null, set2sqlArrayLong, set2sqlsLong, one2sqlLong, array2setLong, nestedArray2coalescedSetLong, nestedArray2nestedSetLong, array2setFirstLong, array2setLastLong, nestedArray2setAscLong, nestedArray2setDescLong, nestedArray2setSumLong, json2oneLong, json2arrayLong, one2jsonLong)
@@ -74,29 +76,31 @@ trait LambdasSet extends LambdasBase with JavaConversions { self: SqlQueryBase =
   lazy val resSetShort         : ResSet[Short]          = ResSet("Short", tpeDbShort, sql2setShort, null, set2sqlArrayShort, set2sqlsShort, one2sqlShort, array2setShort, nestedArray2coalescedSetShort, nestedArray2nestedSetShort, array2setFirstShort, array2setLastShort, nestedArray2setAscShort, nestedArray2setDescShort, nestedArray2setSumShort, json2oneShort, json2arrayShort, one2jsonShort)
   lazy val resSetChar          : ResSet[Char]           = ResSet("Char", tpeDbChar, sql2setChar, null, set2sqlArrayChar, set2sqlsChar, one2sqlChar, array2setChar, nestedArray2coalescedSetChar, nestedArray2nestedSetChar, array2setFirstChar, array2setLastChar, nestedArray2setAscChar, nestedArray2setDescChar, nestedArray2setSumChar, json2oneChar, json2arrayChar, one2jsonChar)
 
-  protected lazy val set2sqlArrayString        : Set[String] => String         = (set: Set[String]) => set.map(_.replace("'", "''")).mkString("ARRAY ['", "', '", "']")
-  protected lazy val set2sqlArrayInt           : Set[Int] => String            = (set: Set[Int]) => set.mkString("ARRAY [", ", ", "]")
-  protected lazy val set2sqlArrayLong          : Set[Long] => String           = (set: Set[Long]) => set.mkString("ARRAY [", ", ", "]")
-  protected lazy val set2sqlArrayFloat         : Set[Float] => String          = (set: Set[Float]) => set.mkString("ARRAY [", ", ", "]")
-  protected lazy val set2sqlArrayDouble        : Set[Double] => String         = (set: Set[Double]) => set.mkString("ARRAY [", ", ", "]")
-  protected lazy val set2sqlArrayBoolean       : Set[Boolean] => String        = (set: Set[Boolean]) => set.mkString("ARRAY [", ", ", "]")
-  protected lazy val set2sqlArrayBigInt        : Set[BigInt] => String         = (set: Set[BigInt]) => set.mkString("ARRAY [", ", ", "]")
-  protected lazy val set2sqlArrayBigDecimal    : Set[BigDecimal] => String     = (set: Set[BigDecimal]) => set.mkString("ARRAY [", ", ", "]")
-  protected lazy val set2sqlArrayDate          : Set[Date] => String           = (set: Set[Date]) => set.map(date2str(_)).mkString("ARRAY ['", "', '", "']")
-  protected lazy val set2sqlArrayDuration      : Set[Duration] => String       = (set: Set[Duration]) => set.mkString("ARRAY ['", "', '", "']")
-  protected lazy val set2sqlArrayInstant       : Set[Instant] => String        = (set: Set[Instant]) => set.mkString("ARRAY ['", "', '", "']")
-  protected lazy val set2sqlArrayLocalDate     : Set[LocalDate] => String      = (set: Set[LocalDate]) => set.mkString("ARRAY ['", "', '", "']")
-  protected lazy val set2sqlArrayLocalTime     : Set[LocalTime] => String      = (set: Set[LocalTime]) => set.mkString("ARRAY ['", "', '", "']")
-  protected lazy val set2sqlArrayLocalDateTime : Set[LocalDateTime] => String  = (set: Set[LocalDateTime]) => set.mkString("ARRAY ['", "', '", "']")
-  protected lazy val set2sqlArrayOffsetTime    : Set[OffsetTime] => String     = (set: Set[OffsetTime]) => set.mkString("ARRAY ['", "', '", "']")
-  protected lazy val set2sqlArrayOffsetDateTime: Set[OffsetDateTime] => String = (set: Set[OffsetDateTime]) => set.mkString("ARRAY ['", "', '", "']")
-  protected lazy val set2sqlArrayZonedDateTime : Set[ZonedDateTime] => String  = (set: Set[ZonedDateTime]) => set.mkString("ARRAY ['", "', '", "']")
-  protected lazy val set2sqlArrayUUID          : Set[UUID] => String           = (set: Set[UUID]) => set.mkString("ARRAY ['", "', '", "']")
-  protected lazy val set2sqlArrayURI           : Set[URI] => String            = (set: Set[URI]) => set.map(_.toString.replace("'", "''")).mkString("ARRAY ['", "', '", "']")
-  protected lazy val set2sqlArrayByte          : Set[Byte] => String           = (set: Set[Byte]) => set.mkString("ARRAY [", ", ", "]")
-  protected lazy val set2sqlArrayShort         : Set[Short] => String          = (set: Set[Short]) => set.mkString("ARRAY [", ", ", "]")
-  protected lazy val set2sqlArrayChar          : Set[Char] => String           = (set: Set[Char]) => set.mkString("ARRAY ['", "', '", "']")
+  protected lazy val set2sqlArrayId            : Set[String] => String         = (set: Set[String]) => set.mkString("ARRAY[", ", ", "]::bigint[]")
+  protected lazy val set2sqlArrayString        : Set[String] => String         = (set: Set[String]) => set.map(_.replace("'", "''")).mkString("ARRAY['", "', '", "']::text[]")
+  protected lazy val set2sqlArrayInt           : Set[Int] => String            = (set: Set[Int]) => set.mkString("ARRAY[", ", ", "]::integer[]")
+  protected lazy val set2sqlArrayLong          : Set[Long] => String           = (set: Set[Long]) => set.mkString("ARRAY[", ", ", "]::bigint[]")
+  protected lazy val set2sqlArrayFloat         : Set[Float] => String          = (set: Set[Float]) => set.mkString("ARRAY[", ", ", "]::decimal[]")
+  protected lazy val set2sqlArrayDouble        : Set[Double] => String         = (set: Set[Double]) => set.mkString("ARRAY[", ", ", "]::double precision[]")
+  protected lazy val set2sqlArrayBoolean       : Set[Boolean] => String        = (set: Set[Boolean]) => set.mkString("ARRAY[", ", ", "]::boolean[]")
+  protected lazy val set2sqlArrayBigInt        : Set[BigInt] => String         = (set: Set[BigInt]) => set.mkString("ARRAY[", ", ", "]::numeric[]")
+  protected lazy val set2sqlArrayBigDecimal    : Set[BigDecimal] => String     = (set: Set[BigDecimal]) => set.mkString("ARRAY[", ", ", "]::numeric[]")
+  protected lazy val set2sqlArrayDate          : Set[Date] => String           = (set: Set[Date]) => set.map(date2str(_)).mkString("ARRAY['", "', '", "']::date[]")
+  protected lazy val set2sqlArrayDuration      : Set[Duration] => String       = (set: Set[Duration]) => set.mkString("ARRAY['", "', '", "']::varchar[]")
+  protected lazy val set2sqlArrayInstant       : Set[Instant] => String        = (set: Set[Instant]) => set.mkString("ARRAY['", "', '", "']::varchar[]")
+  protected lazy val set2sqlArrayLocalDate     : Set[LocalDate] => String      = (set: Set[LocalDate]) => set.mkString("ARRAY['", "', '", "']::varchar[]")
+  protected lazy val set2sqlArrayLocalTime     : Set[LocalTime] => String      = (set: Set[LocalTime]) => set.mkString("ARRAY['", "', '", "']::varchar[]")
+  protected lazy val set2sqlArrayLocalDateTime : Set[LocalDateTime] => String  = (set: Set[LocalDateTime]) => set.mkString("ARRAY['", "', '", "']::varchar[]")
+  protected lazy val set2sqlArrayOffsetTime    : Set[OffsetTime] => String     = (set: Set[OffsetTime]) => set.mkString("ARRAY['", "', '", "']::varchar[]")
+  protected lazy val set2sqlArrayOffsetDateTime: Set[OffsetDateTime] => String = (set: Set[OffsetDateTime]) => set.mkString("ARRAY['", "', '", "']::varchar[]")
+  protected lazy val set2sqlArrayZonedDateTime : Set[ZonedDateTime] => String  = (set: Set[ZonedDateTime]) => set.mkString("ARRAY['", "', '", "']::varchar[]")
+  protected lazy val set2sqlArrayUUID          : Set[UUID] => String           = (set: Set[UUID]) => set.mkString("ARRAY['", "', '", "']::uuid[]")
+  protected lazy val set2sqlArrayURI           : Set[URI] => String            = (set: Set[URI]) => set.map(_.toString.replace("'", "''")).mkString("ARRAY['", "', '", "']::varchar[]")
+  protected lazy val set2sqlArrayByte          : Set[Byte] => String           = (set: Set[Byte]) => set.mkString("ARRAY[", ", ", "]::smallint[]")
+  protected lazy val set2sqlArrayShort         : Set[Short] => String          = (set: Set[Short]) => set.mkString("ARRAY[", ", ", "]::smallint[]")
+  protected lazy val set2sqlArrayChar          : Set[Char] => String           = (set: Set[Char]) => set.mkString("ARRAY['", "', '", "']::char[]")
 
+  private lazy val set2sqlsId            : Set[String] => Set[String]         = (set: Set[String]) => set.map(_.replace("'", "''")).map(v => s"'$v'")
   private lazy val set2sqlsString        : Set[String] => Set[String]         = (set: Set[String]) => set.map(_.replace("'", "''")).map(v => s"'$v'")
   private lazy val set2sqlsInt           : Set[Int] => Set[String]            = (set: Set[Int]) => set.map(_.toString)
   private lazy val set2sqlsLong          : Set[Long] => Set[String]           = (set: Set[Long]) => set.map(_.toString)
@@ -136,6 +140,8 @@ trait LambdasSet extends LambdasBase with JavaConversions { self: SqlQueryBase =
       set
     }
   }
+
+  private lazy val nestedArray2coalescedSetId            : (Row, Int) => Set[String]         = (row: Row, paramIndex: Int) => sqlNestedArrays2coalescedSet(row, paramIndex, j2Id)
   private lazy val nestedArray2coalescedSetString        : (Row, Int) => Set[String]         = (row: Row, paramIndex: Int) => sqlNestedArrays2coalescedSet(row, paramIndex, j2String)
   private lazy val nestedArray2coalescedSetInt           : (Row, Int) => Set[Int]            = (row: Row, paramIndex: Int) => sqlNestedArrays2coalescedSet(row, paramIndex, j2Int)
   private lazy val nestedArray2coalescedSetLong          : (Row, Int) => Set[Long]           = (row: Row, paramIndex: Int) => sqlNestedArrays2coalescedSet(row, paramIndex, j2Long)
@@ -159,6 +165,7 @@ trait LambdasSet extends LambdasBase with JavaConversions { self: SqlQueryBase =
   private lazy val nestedArray2coalescedSetShort         : (Row, Int) => Set[Short]          = (row: Row, paramIndex: Int) => sqlNestedArrays2coalescedSet(row, paramIndex, j2Short)
   private lazy val nestedArray2coalescedSetChar          : (Row, Int) => Set[Char]           = (row: Row, paramIndex: Int) => sqlNestedArrays2coalescedSet(row, paramIndex, j2Char)
 
+  private lazy val nestedArray2setAscId            : Int => (Row, Int) => Set[String]         = (size: Int) => (row: Row, paramIndex: Int) => sqlNestedArrays2coalescedSet(row, paramIndex, j2Id).toList.sorted.take(size).toSet
   private lazy val nestedArray2setAscString        : Int => (Row, Int) => Set[String]         = (size: Int) => (row: Row, paramIndex: Int) => sqlNestedArrays2coalescedSet(row, paramIndex, j2String).toList.sorted.take(size).toSet
   private lazy val nestedArray2setAscInt           : Int => (Row, Int) => Set[Int]            = (size: Int) => (row: Row, paramIndex: Int) => sqlNestedArrays2coalescedSet(row, paramIndex, j2Int).toList.sorted.take(size).toSet
   private lazy val nestedArray2setAscLong          : Int => (Row, Int) => Set[Long]           = (size: Int) => (row: Row, paramIndex: Int) => sqlNestedArrays2coalescedSet(row, paramIndex, j2Long).toList.sorted.take(size).toSet
@@ -182,6 +189,7 @@ trait LambdasSet extends LambdasBase with JavaConversions { self: SqlQueryBase =
   private lazy val nestedArray2setAscShort         : Int => (Row, Int) => Set[Short]          = (size: Int) => (row: Row, paramIndex: Int) => sqlNestedArrays2coalescedSet(row, paramIndex, j2Short).toList.sorted.take(size).toSet
   private lazy val nestedArray2setAscChar          : Int => (Row, Int) => Set[Char]           = (size: Int) => (row: Row, paramIndex: Int) => sqlNestedArrays2coalescedSet(row, paramIndex, j2Char).toList.sorted.take(size).toSet
 
+  private lazy val nestedArray2setDescId            : Int => (Row, Int) => Set[String]         = (size: Int) => (row: Row, paramIndex: Int) => sqlNestedArrays2coalescedSet(row, paramIndex, j2Id).toList.sorted.takeRight(size).toSet
   private lazy val nestedArray2setDescString        : Int => (Row, Int) => Set[String]         = (size: Int) => (row: Row, paramIndex: Int) => sqlNestedArrays2coalescedSet(row, paramIndex, j2String).toList.sorted.takeRight(size).toSet
   private lazy val nestedArray2setDescInt           : Int => (Row, Int) => Set[Int]            = (size: Int) => (row: Row, paramIndex: Int) => sqlNestedArrays2coalescedSet(row, paramIndex, j2Int).toList.sorted.takeRight(size).toSet
   private lazy val nestedArray2setDescLong          : Int => (Row, Int) => Set[Long]           = (size: Int) => (row: Row, paramIndex: Int) => sqlNestedArrays2coalescedSet(row, paramIndex, j2Long).toList.sorted.takeRight(size).toSet
@@ -207,6 +215,7 @@ trait LambdasSet extends LambdasBase with JavaConversions { self: SqlQueryBase =
 
   protected def onlyNumbers = throw new Exception("Casting only for numbers.")
 
+  private lazy val nestedArray2setSumId            : (Row, Int) => Set[String]         = (row: Row, paramIndex: Int) => onlyNumbers
   private lazy val nestedArray2setSumString        : (Row, Int) => Set[String]         = (row: Row, paramIndex: Int) => onlyNumbers
   private lazy val nestedArray2setSumInt           : (Row, Int) => Set[Int]            = (row: Row, paramIndex: Int) => Set(sqlNestedArrays2coalescedSet[Int](row, paramIndex, j2Int).sum)
   private lazy val nestedArray2setSumLong          : (Row, Int) => Set[Long]           = (row: Row, paramIndex: Int) => Set(sqlNestedArrays2coalescedSet[Long](row, paramIndex, j2Long).sum)
@@ -231,6 +240,7 @@ trait LambdasSet extends LambdasBase with JavaConversions { self: SqlQueryBase =
   private lazy val nestedArray2setSumChar          : (Row, Int) => Set[Char]           = (row: Row, paramIndex: Int) => Set(sqlNestedArrays2coalescedSet[Char](row, paramIndex, j2Char).sum)
 
 
+  protected lazy val j2Id            : Any => String         = (v: Any) => v.asInstanceOf[Long].toString
   protected lazy val j2String        : Any => String         = (v: Any) => v.asInstanceOf[String]
   protected lazy val j2Int           : Any => Int            = (v: Any) => v.toString.toInt
   protected lazy val j2Long          : Any => Long           = (v: Any) => v.asInstanceOf[Long]
@@ -273,6 +283,7 @@ trait LambdasSet extends LambdasBase with JavaConversions { self: SqlQueryBase =
     }
   }
 
+  private lazy val nestedArray2nestedSetId            : (Row, Int) => Set[Set[String]]         = (row: Row, paramIndex: Int) => sqlNestedArrays2nestedSet(row, paramIndex, j2Id)
   private lazy val nestedArray2nestedSetString        : (Row, Int) => Set[Set[String]]         = (row: Row, paramIndex: Int) => sqlNestedArrays2nestedSet(row, paramIndex, j2String)
   private lazy val nestedArray2nestedSetInt           : (Row, Int) => Set[Set[Int]]            = (row: Row, paramIndex: Int) => sqlNestedArrays2nestedSet(row, paramIndex, j2Int)
   private lazy val nestedArray2nestedSetLong          : (Row, Int) => Set[Set[Long]]           = (row: Row, paramIndex: Int) => sqlNestedArrays2nestedSet(row, paramIndex, j2Long)
@@ -297,6 +308,7 @@ trait LambdasSet extends LambdasBase with JavaConversions { self: SqlQueryBase =
   private lazy val nestedArray2nestedSetChar          : (Row, Int) => Set[Set[Char]]           = (row: Row, paramIndex: Int) => sqlNestedArrays2nestedSet(row, paramIndex, j2Char)
 
 
+  private lazy val array2setFirstId            : (Row, Int) => Set[String]         = (row: Row, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2Id).min)
   private lazy val array2setFirstString        : (Row, Int) => Set[String]         = (row: Row, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2String).min)
   private lazy val array2setFirstInt           : (Row, Int) => Set[Int]            = (row: Row, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2Int).min)
   private lazy val array2setFirstLong          : (Row, Int) => Set[Long]           = (row: Row, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2Long).min)
@@ -320,6 +332,7 @@ trait LambdasSet extends LambdasBase with JavaConversions { self: SqlQueryBase =
   private lazy val array2setFirstShort         : (Row, Int) => Set[Short]          = (row: Row, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2Short).min)
   private lazy val array2setFirstChar          : (Row, Int) => Set[Char]           = (row: Row, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2Char).min)
 
+  private lazy val array2setLastId            : (Row, Int) => Set[String]         = (row: Row, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2Id).max)
   private lazy val array2setLastString        : (Row, Int) => Set[String]         = (row: Row, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2String).max)
   private lazy val array2setLastInt           : (Row, Int) => Set[Int]            = (row: Row, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2Int).max)
   private lazy val array2setLastLong          : (Row, Int) => Set[Long]           = (row: Row, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2Long).max)
@@ -353,6 +366,7 @@ trait LambdasSet extends LambdasBase with JavaConversions { self: SqlQueryBase =
     one2json: T => String
   )
 
+  lazy val resOptSetId            : ResSetOpt[String]         = ResSetOpt("String", sql2setOptId, set2sqlArrayId, set2sqlsId, one2sqlId, one2jsonId)
   lazy val resOptSetString        : ResSetOpt[String]         = ResSetOpt("String", sql2setOptString, set2sqlArrayString, set2sqlsString, one2sqlString, one2jsonString)
   lazy val resOptSetInt           : ResSetOpt[Int]            = ResSetOpt("Int", sql2setOptInt, set2sqlArrayInt, set2sqlsInt, one2sqlInt, one2jsonInt)
   lazy val resOptSetLong          : ResSetOpt[Long]           = ResSetOpt("Long", sql2setOptLong, set2sqlArrayLong, set2sqlsLong, one2sqlLong, one2jsonLong)
@@ -387,10 +401,11 @@ trait LambdasSet extends LambdasBase with JavaConversions { self: SqlQueryBase =
       while (arrayResultSet.next()) {
         set += getValue(arrayResultSet)
       }
-      if (set.isEmpty || set == Set(0L)) Option.empty[Set[T]] else Some(set)
+      if (set.isEmpty || set == Set("0")) Option.empty[Set[T]] else Some(set)
     }
   }
 
+  private lazy val sql2setOptId            : (Row, Int) => Option[Set[String]]         = (row: Row, paramIndex: Int) => sql2setOpt(row, paramIndex, valueId)
   private lazy val sql2setOptString        : (Row, Int) => Option[Set[String]]         = (row: Row, paramIndex: Int) => sql2setOpt(row, paramIndex, valueString)
   private lazy val sql2setOptInt           : (Row, Int) => Option[Set[Int]]            = (row: Row, paramIndex: Int) => sql2setOpt(row, paramIndex, valueInt)
   private lazy val sql2setOptLong          : (Row, Int) => Option[Set[Long]]           = (row: Row, paramIndex: Int) => sql2setOpt(row, paramIndex, valueLong)

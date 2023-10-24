@@ -33,6 +33,7 @@ trait SpiHelpers extends ModelUtils {
           case a: AttrOneMan =>
             prevNs = a.ns
             a match {
+              case a: AttrOneManID             => idsModel += AttrOneTacID(a.ns, a.attr, coord = a.coord)
               case a: AttrOneManString         => idsModel += AttrOneTacString(a.ns, a.attr, coord = a.coord)
               case a: AttrOneManInt            => idsModel += AttrOneTacInt(a.ns, a.attr, coord = a.coord)
               case a: AttrOneManLong           => idsModel += AttrOneTacLong(a.ns, a.attr, coord = a.coord)
@@ -62,6 +63,7 @@ trait SpiHelpers extends ModelUtils {
             if (a.op == Eq || a.op == Add || a.op == Swap || a.op == Remove) {
               prevNs = a.ns
               a match {
+                case a: AttrSetManID             => idsModel += AttrSetTacID(a.ns, a.attr, coord = a.coord)
                 case a: AttrSetManString         => idsModel += AttrSetTacString(a.ns, a.attr, coord = a.coord)
                 case a: AttrSetManInt            => idsModel += AttrSetTacInt(a.ns, a.attr, coord = a.coord)
                 case a: AttrSetManLong           => idsModel += AttrSetTacLong(a.ns, a.attr, coord = a.coord)
@@ -104,12 +106,12 @@ trait SpiHelpers extends ModelUtils {
 
         } else if (prevNs.nonEmpty) {
           // Get id
-          idsModel += AttrOneManLong(prevNs, "id", coord = coord)
+          idsModel += AttrOneManID(prevNs, "id", coord = coord)
 
           // Make update model once we get an id
           val ns            = prevNs
           val tacitElements = updateModel.toList
-          updateModels = updateModels :+ ((id: Long) => AttrOneTacLong(ns, "id", Eq, Seq(id), coord = coord) +: tacitElements)
+          updateModels = updateModels :+ ((id: Long) => AttrOneTacID(ns, "id", Eq, Seq(id.toString), coord = coord) +: tacitElements)
         }
 
         idsModel += ref
@@ -126,10 +128,10 @@ trait SpiHelpers extends ModelUtils {
     // Add id to last ref ns
     if (prevNs.nonEmpty) {
       // Get id
-      idsModel += AttrOneManLong(prevNs, "id", coord = dummyCoord)
+      idsModel += AttrOneManID(prevNs, "id", coord = dummyCoord)
 
       // Make update model once we get an id
-      val id2updateModel = (id: Long) => AttrOneTacLong(prevNs, "id", Eq, Seq(id), coord = dummyCoord) +: updateModel.toList
+      val id2updateModel = (id: Long) => AttrOneTacID(prevNs, "id", Eq, Seq(id.toString), coord = dummyCoord) +: updateModel.toList
       updateModels = updateModels :+ id2updateModel
     }
 
@@ -137,31 +139,32 @@ trait SpiHelpers extends ModelUtils {
   }
 
   private type L = Long
+  private type S = String
 
   def getRefIds(refIdsAnyCardinality: List[Any]): List[Long] = {
     refIdsAnyCardinality.headOption.fold(List(0L)) {
-      case a: L                                                                                                                                 => List(0L, a)
-      case (a: L, b: L)                                                                                                                         => List(0L, a, b)
-      case (a: L, b: L, c: L)                                                                                                                   => List(0L, a, b, c)
-      case (a: L, b: L, c: L, d: L)                                                                                                             => List(0L, a, b, c, d)
-      case (a: L, b: L, c: L, d: L, e: L)                                                                                                       => List(0L, a, b, c, d, e)
-      case (a: L, b: L, c: L, d: L, e: L, f: L)                                                                                                 => List(0L, a, b, c, d, e, f)
-      case (a: L, b: L, c: L, d: L, e: L, f: L, g: L)                                                                                           => List(0L, a, b, c, d, e, f, g)
-      case (a: L, b: L, c: L, d: L, e: L, f: L, g: L, h: L)                                                                                     => List(0L, a, b, c, d, e, f, g, h)
-      case (a: L, b: L, c: L, d: L, e: L, f: L, g: L, h: L, i: L)                                                                               => List(0L, a, b, c, d, e, f, g, h, i)
-      case (a: L, b: L, c: L, d: L, e: L, f: L, g: L, h: L, i: L, j: L)                                                                         => List(0L, a, b, c, d, e, f, g, h, i, j)
-      case (a: L, b: L, c: L, d: L, e: L, f: L, g: L, h: L, i: L, j: L, k: L)                                                                   => List(0L, a, b, c, d, e, f, g, h, i, j, k)
-      case (a: L, b: L, c: L, d: L, e: L, f: L, g: L, h: L, i: L, j: L, k: L, l: L)                                                             => List(0L, a, b, c, d, e, f, g, h, i, j, k, l)
-      case (a: L, b: L, c: L, d: L, e: L, f: L, g: L, h: L, i: L, j: L, k: L, l: L, m: L)                                                       => List(0L, a, b, c, d, e, f, g, h, i, j, k, l, m)
-      case (a: L, b: L, c: L, d: L, e: L, f: L, g: L, h: L, i: L, j: L, k: L, l: L, m: L, n: L)                                                 => List(0L, a, b, c, d, e, f, g, h, i, j, k, l, m, n)
-      case (a: L, b: L, c: L, d: L, e: L, f: L, g: L, h: L, i: L, j: L, k: L, l: L, m: L, n: L, o: L)                                           => List(0L, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o)
-      case (a: L, b: L, c: L, d: L, e: L, f: L, g: L, h: L, i: L, j: L, k: L, l: L, m: L, n: L, o: L, p: L)                                     => List(0L, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p)
-      case (a: L, b: L, c: L, d: L, e: L, f: L, g: L, h: L, i: L, j: L, k: L, l: L, m: L, n: L, o: L, p: L, q: L)                               => List(0L, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q)
-      case (a: L, b: L, c: L, d: L, e: L, f: L, g: L, h: L, i: L, j: L, k: L, l: L, m: L, n: L, o: L, p: L, q: L, r: L)                         => List(0L, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r)
-      case (a: L, b: L, c: L, d: L, e: L, f: L, g: L, h: L, i: L, j: L, k: L, l: L, m: L, n: L, o: L, p: L, q: L, r: L, s: L)                   => List(0L, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s)
-      case (a: L, b: L, c: L, d: L, e: L, f: L, g: L, h: L, i: L, j: L, k: L, l: L, m: L, n: L, o: L, p: L, q: L, r: L, s: L, t: L)             => List(0L, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t)
-      case (a: L, b: L, c: L, d: L, e: L, f: L, g: L, h: L, i: L, j: L, k: L, l: L, m: L, n: L, o: L, p: L, q: L, r: L, s: L, t: L, u: L)       => List(0L, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u)
-      case (a: L, b: L, c: L, d: L, e: L, f: L, g: L, h: L, i: L, j: L, k: L, l: L, m: L, n: L, o: L, p: L, q: L, r: L, s: L, t: L, u: L, v: L) => List(0L, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v)
+      case a: S                                                                                                                                 => 0L +: List(a).map(_.toLong)
+      case (a: S, b: S)                                                                                                                         => 0L +: List(a, b).map(_.toLong)
+      case (a: S, b: S, c: S)                                                                                                                   => 0L +: List(a, b, c).map(_.toLong)
+      case (a: S, b: S, c: S, d: S)                                                                                                             => 0L +: List(a, b, c, d).map(_.toLong)
+      case (a: S, b: S, c: S, d: S, e: S)                                                                                                       => 0L +: List(a, b, c, d, e).map(_.toLong)
+      case (a: S, b: S, c: S, d: S, e: S, f: S)                                                                                                 => 0L +: List(a, b, c, d, e, f).map(_.toLong)
+      case (a: S, b: S, c: S, d: S, e: S, f: S, g: S)                                                                                           => 0L +: List(a, b, c, d, e, f, g).map(_.toLong)
+      case (a: S, b: S, c: S, d: S, e: S, f: S, g: S, h: S)                                                                                     => 0L +: List(a, b, c, d, e, f, g, h).map(_.toLong)
+      case (a: S, b: S, c: S, d: S, e: S, f: S, g: S, h: S, i: S)                                                                               => 0L +: List(a, b, c, d, e, f, g, h, i).map(_.toLong)
+      case (a: S, b: S, c: S, d: S, e: S, f: S, g: S, h: S, i: S, j: S)                                                                         => 0L +: List(a, b, c, d, e, f, g, h, i, j).map(_.toLong)
+      case (a: S, b: S, c: S, d: S, e: S, f: S, g: S, h: S, i: S, j: S, k: S)                                                                   => 0L +: List(a, b, c, d, e, f, g, h, i, j, k).map(_.toLong)
+      case (a: S, b: S, c: S, d: S, e: S, f: S, g: S, h: S, i: S, j: S, k: S, l: S)                                                             => 0L +: List(a, b, c, d, e, f, g, h, i, j, k, l).map(_.toLong)
+      case (a: S, b: S, c: S, d: S, e: S, f: S, g: S, h: S, i: S, j: S, k: S, l: S, m: S)                                                       => 0L +: List(a, b, c, d, e, f, g, h, i, j, k, l, m).map(_.toLong)
+      case (a: S, b: S, c: S, d: S, e: S, f: S, g: S, h: S, i: S, j: S, k: S, l: S, m: S, n: S)                                                 => 0L +: List(a, b, c, d, e, f, g, h, i, j, k, l, m, n).map(_.toLong)
+      case (a: S, b: S, c: S, d: S, e: S, f: S, g: S, h: S, i: S, j: S, k: S, l: S, m: S, n: S, o: S)                                           => 0L +: List(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o).map(_.toLong)
+      case (a: S, b: S, c: S, d: S, e: S, f: S, g: S, h: S, i: S, j: S, k: S, l: S, m: S, n: S, o: S, p: S)                                     => 0L +: List(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p).map(_.toLong)
+      case (a: S, b: S, c: S, d: S, e: S, f: S, g: S, h: S, i: S, j: S, k: S, l: S, m: S, n: S, o: S, p: S, q: S)                               => 0L +: List(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q).map(_.toLong)
+      case (a: S, b: S, c: S, d: S, e: S, f: S, g: S, h: S, i: S, j: S, k: S, l: S, m: S, n: S, o: S, p: S, q: S, r: S)                         => 0L +: List(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r).map(_.toLong)
+      case (a: S, b: S, c: S, d: S, e: S, f: S, g: S, h: S, i: S, j: S, k: S, l: S, m: S, n: S, o: S, p: S, q: S, r: S, s: S)                   => 0L +: List(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s).map(_.toLong)
+      case (a: S, b: S, c: S, d: S, e: S, f: S, g: S, h: S, i: S, j: S, k: S, l: S, m: S, n: S, o: S, p: S, q: S, r: S, s: S, t: S)             => 0L +: List(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t).map(_.toLong)
+      case (a: S, b: S, c: S, d: S, e: S, f: S, g: S, h: S, i: S, j: S, k: S, l: S, m: S, n: S, o: S, p: S, q: S, r: S, s: S, t: S, u: S)       => 0L +: List(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u).map(_.toLong)
+      case (a: S, b: S, c: S, d: S, e: S, f: S, g: S, h: S, i: S, j: S, k: S, l: S, m: S, n: S, o: S, p: S, q: S, r: S, s: S, t: S, u: S, v: S) => 0L +: List(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v).map(_.toLong)
     }
   }
 
@@ -203,6 +206,7 @@ trait SpiHelpers extends ModelUtils {
 
   protected def nestedArray2coalescedSet(a: Attr, rs: Row, isAttr: Boolean = true): Set[Any] = {
     a match {
+      case _: AttrSetManID             => sql2set(isAttr, rs, (v: Any) => v.toString)
       case _: AttrSetManString         => sql2set(isAttr, rs, (v: Any) => v.asInstanceOf[String])
       case _: AttrSetManInt            => sql2set(isAttr, rs, (v: Any) => v.toString.toInt)
       case _: AttrSetManLong           => sql2set(isAttr, rs, (v: Any) => v.asInstanceOf[Long])
@@ -271,6 +275,7 @@ trait SpiHelpers extends ModelUtils {
     rs.next()
     val json = rs.getString(1)
     a match {
+      case _: AttrSetManID             => json.substring(1, json.length - 1).split(", ?").toSet
       case _: AttrSetManString         => json.substring(2, json.length - 2).split("\", ?\"").toSet
       case _: AttrSetManInt            => json.substring(1, json.length - 1).split(", ?").map(_.toInt).toSet
       case _: AttrSetManLong           => json.substring(1, json.length - 1).split(", ?").map(_.toLong).toSet

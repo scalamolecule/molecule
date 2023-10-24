@@ -106,12 +106,12 @@ trait UpdateSetOps_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync 
         _ <- Ns.instants.query.get.map(_.head ==> Set(instant1, instant5, instant6, instant7, instant8, instant9))
 
         // Can't swap duplicate from/to values
-        _ <- Ns(42).instants.swap(instant1 -> instant2, instant1 -> instant3).update.transact
+        _ <- Ns("42").instants.swap(instant1 -> instant2, instant1 -> instant3).update.transact
           .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
             err ==> "Can't swap from duplicate retract values."
           }
 
-        _ <- Ns(42).instants.swap(instant1 -> instant3, instant2 -> instant3).update.transact
+        _ <- Ns("42").instants.swap(instant1 -> instant3, instant2 -> instant3).update.transact
           .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
             err ==> "Can't swap to duplicate replacement values."
           }

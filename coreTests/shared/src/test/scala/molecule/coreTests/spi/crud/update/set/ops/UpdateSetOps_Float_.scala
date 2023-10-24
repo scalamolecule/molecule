@@ -105,12 +105,12 @@ trait UpdateSetOps_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.floats.query.get.map(_.head ==> Set(float1, float5, float6, float7, float8, float9))
 
         // Can't swap duplicate from/to values
-        _ <- Ns(42).floats.swap(float1 -> float2, float1 -> float3).update.transact
+        _ <- Ns("42").floats.swap(float1 -> float2, float1 -> float3).update.transact
           .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
             err ==> "Can't swap from duplicate retract values."
           }
 
-        _ <- Ns(42).floats.swap(float1 -> float3, float2 -> float3).update.transact
+        _ <- Ns("42").floats.swap(float1 -> float3, float2 -> float3).update.transact
           .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
             err ==> "Can't swap to duplicate replacement values."
           }

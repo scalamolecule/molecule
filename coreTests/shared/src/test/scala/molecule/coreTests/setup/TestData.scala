@@ -165,7 +165,7 @@ trait TestData extends DateHandling {
     (0 to 9).toList.map(_.toShort)
 
   lazy val (ref0, ref1, ref2, ref3, ref4, ref5, ref6, ref7, ref8, ref9) =
-    (0L, 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L)
+    ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9")
 
   lazy val toleranceBigDecimal: BigDecimal = BigDecimal(0.001)
   lazy val toleranceDouble    : Double     = 0.001

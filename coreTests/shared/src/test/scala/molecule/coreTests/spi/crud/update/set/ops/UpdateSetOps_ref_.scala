@@ -26,7 +26,7 @@ trait UpdateSetOps_ref_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.refs.query.get.map(_.head ==> Set(ref4, ref5))
 
         // Apply empty Seq of values (deleting all values!)
-        _ <- Ns(id).refs(Seq.empty[Long]).update.transact
+        _ <- Ns(id).refs(Seq.empty[String]).update.transact
         _ <- Ns.refs.query.get.map(_ ==> Nil)
 
         _ <- Ns(id).refs(Set(ref1, ref2)).update.transact
@@ -66,7 +66,7 @@ trait UpdateSetOps_ref_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.refs.query.get.map(_.head ==> Set(ref1, ref2, ref3, ref4, ref5, ref6, ref7))
 
         // Add empty Seq of values (no effect)
-        _ <- Ns(id).refs.add(Seq.empty[Long]).update.transact
+        _ <- Ns(id).refs.add(Seq.empty[String]).update.transact
         _ <- Ns.refs.query.get.map(_.head ==> Set(ref1, ref2, ref3, ref4, ref5, ref6, ref7))
       } yield ()
     }
@@ -101,16 +101,16 @@ trait UpdateSetOps_ref_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.refs.query.get.map(_.head ==> Set(ref1, ref5, ref6, ref7, ref8, ref9))
 
         // Replacing with empty Seq of oldValue->newValue pairs has no effect
-        _ <- Ns(id).refs.swap(Seq.empty[(Long, Long)]).update.transact
+        _ <- Ns(id).refs.swap(Seq.empty[(String, String)]).update.transact
         _ <- Ns.refs.query.get.map(_.head ==> Set(ref1, ref5, ref6, ref7, ref8, ref9))
 
         // Can't swap duplicate from/to values
-        _ <- Ns(42).refs.swap(ref1 -> ref2, ref1 -> ref3).update.transact
+        _ <- Ns("42").refs.swap(ref1 -> ref2, ref1 -> ref3).update.transact
           .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
             err ==> "Can't swap from duplicate retract values."
           }
 
-        _ <- Ns(42).refs.swap(ref1 -> ref3, ref2 -> ref3).update.transact
+        _ <- Ns("42").refs.swap(ref1 -> ref3, ref2 -> ref3).update.transact
           .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
             err ==> "Can't swap to duplicate replacement values."
           }
@@ -143,7 +143,7 @@ trait UpdateSetOps_ref_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.refs.query.get.map(_.head ==> Set(ref1))
 
         // Removing empty Seq of values has no effect
-        _ <- Ns(id).refs.remove(Seq.empty[Long]).update.transact
+        _ <- Ns(id).refs.remove(Seq.empty[String]).update.transact
         _ <- Ns.refs.query.get.map(_.head ==> Set(ref1))
 
         // Removing all elements is like deleting the attribute

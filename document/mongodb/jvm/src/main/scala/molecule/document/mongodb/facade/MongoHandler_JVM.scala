@@ -1,0 +1,24 @@
+package molecule.document.mongodb.facade
+
+import com.mongodb.client.{MongoClient, MongoClients, MongoDatabase}
+import molecule.core.marshalling.MongoProxy
+import scala.concurrent.blocking
+
+
+object MongoHandler_JVM {
+
+  def recreateDb(proxy: MongoProxy): MongoDBConn_JVM = blocking {
+    val mongoClient: MongoClient   = MongoClients.create(proxy.connectionString)
+    val mongoDb    : MongoDatabase = mongoClient.getDatabase(proxy.dbName)
+    mongoDb.drop()
+    val conn = MongoDBConn_JVM(proxy, mongoDb)
+    conn
+  }
+
+  // For docker test containers
+  def recreateDb(conn: MongoDBConn_JVM): MongoDBConn_JVM = blocking {
+    // Simply drop the current database
+    conn.mongoDb.drop()
+    conn
+  }
+}

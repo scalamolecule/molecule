@@ -106,12 +106,12 @@ trait UpdateSetOps_Date_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.dates.query.get.map(_.head ==> Set(date1, date5, date6, date7, date8, date9))
 
         // Can't swap duplicate from/to values
-        _ <- Ns(42).dates.swap(date1 -> date2, date1 -> date3).update.transact
+        _ <- Ns("42").dates.swap(date1 -> date2, date1 -> date3).update.transact
           .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
             err ==> "Can't swap from duplicate retract values."
           }
 
-        _ <- Ns(42).dates.swap(date1 -> date3, date2 -> date3).update.transact
+        _ <- Ns("42").dates.swap(date1 -> date3, date2 -> date3).update.transact
           .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
             err ==> "Can't swap to duplicate replacement values."
           }

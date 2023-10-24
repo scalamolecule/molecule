@@ -25,6 +25,7 @@ trait ResolveExprSetRefAttr extends ResolveExpr with LambdasSet { self: SqlQuery
     setCoords(attr)
     aritiesAttr()
     attr match {
+      case at: AttrSetManID     => refMan(attr, at.vs, resSetId)
       case at: AttrSetManInt    => refMan(attr, at.vs, resSetInt)
       case at: AttrSetManLong   => refMan(attr, at.vs, resSetLong)
       case at: AttrSetManDouble => refMan(attr, at.vs, resSetDouble)
@@ -35,6 +36,7 @@ trait ResolveExprSetRefAttr extends ResolveExpr with LambdasSet { self: SqlQuery
   override protected def resolveRefAttrSetTac(attr: AttrSetTac): Unit = {
     setCoords(attr)
     attr match {
+      case at: AttrSetTacID     => refTac(attr, at.vs, resSetId)
       case at: AttrSetTacInt    => refTac(attr, at.vs, resSetInt)
       case at: AttrSetTacLong   => refTac(attr, at.vs, resSetLong)
       case at: AttrSetTacDouble => refTac(attr, at.vs, resSetDouble)
@@ -47,6 +49,7 @@ trait ResolveExprSetRefAttr extends ResolveExpr with LambdasSet { self: SqlQuery
     aritiesAttr()
     hasOptAttr = true // to avoid redundant None's
     attr match {
+      case at: AttrSetOptID     => refOpt(at, at.vs, resOptSetId, resSetId)
       case at: AttrSetOptInt    => refOpt(at, at.vs, resOptSetInt, resSetInt)
       case at: AttrSetOptLong   => refOpt(at, at.vs, resOptSetLong, resSetLong)
       case at: AttrSetOptDouble => refOpt(at, at.vs, resOptSetDouble, resSetDouble)

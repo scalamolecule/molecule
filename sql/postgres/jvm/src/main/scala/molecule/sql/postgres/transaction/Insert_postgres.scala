@@ -38,6 +38,7 @@ trait Insert_postgres extends SqlInsert { self: ResolveInsert with InsertResolve
     }
   }
 
+  override protected lazy val extsId             = List("", "BIGINT")
   override protected lazy val extsString         = List("", "VARCHAR")
   override protected lazy val extsInt            = List("", "INTEGER")
   override protected lazy val extsLong           = List("", "BIGINT")

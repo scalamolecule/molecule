@@ -105,12 +105,12 @@ trait UpdateSetOps_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.bytes.query.get.map(_.head ==> Set(byte1, byte5, byte6, byte7, byte8, byte9))
 
         // Can't swap duplicate from/to values
-        _ <- Ns(42).bytes.swap(byte1 -> byte2, byte1 -> byte3).update.transact
+        _ <- Ns("42").bytes.swap(byte1 -> byte2, byte1 -> byte3).update.transact
           .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
             err ==> "Can't swap from duplicate retract values."
           }
 
-        _ <- Ns(42).bytes.swap(byte1 -> byte3, byte2 -> byte3).update.transact
+        _ <- Ns("42").bytes.swap(byte1 -> byte3, byte2 -> byte3).update.transact
           .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
             err ==> "Can't swap to duplicate replacement values."
           }

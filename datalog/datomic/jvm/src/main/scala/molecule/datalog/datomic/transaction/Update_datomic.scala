@@ -67,7 +67,7 @@ trait Update_datomic extends DatomicBase_JVM with UpdateOps with MoleculeLogging
 
     val (filterQuery, inputs) = if (ids.isEmpty && filterElements.nonEmpty) {
       val filterNs        = filterElements.head.asInstanceOf[Attr].ns
-      val filterElements1 = AttrOneManLong(filterNs, "id", V) +: filterElements
+      val filterElements1 = AttrOneManID(filterNs, "id", V) +: filterElements
       val (query, inputs) = new Model2DatomicQuery[Any](filterElements1).getIdQueryWithInputs
       (Some(query), inputs)
     } else {
@@ -219,11 +219,11 @@ trait Update_datomic extends DatomicBase_JVM with UpdateOps with MoleculeLogging
   }
 
 
-  override def handleIds(ids1: Seq[Long]): Unit = {
+  override def handleIds(ids1: Seq[String]): Unit = {
     if (ids.nonEmpty) {
       throw ModelError(s"Can't apply entity ids twice in $update.")
     }
-    ids = ids ++ ids1.asInstanceOf[Seq[AnyRef]]
+    ids = ids ++ ids1.map(_.toLong).asInstanceOf[Seq[AnyRef]]
   }
 
   override def handleUniqueFilterAttr(uniqueFilterAttr: AttrOneTac): Unit = {
@@ -330,6 +330,7 @@ trait Update_datomic extends DatomicBase_JVM with UpdateOps with MoleculeLogging
   ): Seq[AnyRef] = {
     val at = s":$ns/$attr"
     filterAttr match {
+      case a: AttrOneTacID             => a.vs.map(v => list(at, v.asInstanceOf[AnyRef]))
       case a: AttrOneTacString         => a.vs.map(v => list(at, v.asInstanceOf[AnyRef]))
       case a: AttrOneTacInt            => a.vs.map(v => list(at, v.asInstanceOf[AnyRef]))
       case a: AttrOneTacLong           => a.vs.map(v => list(at, v.asInstanceOf[AnyRef]))
@@ -355,6 +356,7 @@ trait Update_datomic extends DatomicBase_JVM with UpdateOps with MoleculeLogging
     }
   }
 
+  override protected lazy val transformId             = (v: String) => v.toLong
   override protected lazy val transformString         = identity
   override protected lazy val transformInt            = identity
   override protected lazy val transformLong           = identity

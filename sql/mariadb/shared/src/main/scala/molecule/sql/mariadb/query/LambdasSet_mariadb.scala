@@ -6,6 +6,7 @@ import molecule.sql.core.query.{LambdasSet, SqlQueryBase}
 
 trait LambdasSet_mariadb extends LambdasSet { self: SqlQueryBase =>
 
+  override protected lazy val tpeDbId            : String = "BIGINT"
   override protected lazy val tpeDbString        : String = "LONGTEXT"
   override protected lazy val tpeDbInt           : String = "INT"
   override protected lazy val tpeDbLong          : String = "BIGINT"

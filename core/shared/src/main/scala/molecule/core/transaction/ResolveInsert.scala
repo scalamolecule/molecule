@@ -93,6 +93,7 @@ class ResolveInsert
   private def resolveAttrOneMan(a: AttrOneMan, tplIndex: Int): Product => Unit = {
     val (ns, attr) = (a.ns, a.attr)
     a match {
+      case _: AttrOneManID             => addOne(ns, attr, tplIndex, transformId, handleId, extsId)
       case _: AttrOneManString         => addOne(ns, attr, tplIndex, transformString, handleString, extsString)
       case _: AttrOneManInt            => addOne(ns, attr, tplIndex, transformInt, handleInt, extsInt)
       case _: AttrOneManLong           => addOne(ns, attr, tplIndex, transformLong, handleLong, extsLong)
@@ -121,6 +122,7 @@ class ResolveInsert
   private def resolveAttrOneOpt(a: AttrOneOpt, tplIndex: Int): Product => Unit = {
     val (ns, attr) = (a.ns, a.attr)
     a match {
+      case _: AttrOneOptID             => addOneOpt(ns, attr, tplIndex, transformId, handleId, extsId)
       case _: AttrOneOptString         => addOneOpt(ns, attr, tplIndex, transformString, handleString, extsString)
       case _: AttrOneOptInt            => addOneOpt(ns, attr, tplIndex, transformInt, handleInt, extsInt)
       case _: AttrOneOptLong           => addOneOpt(ns, attr, tplIndex, transformLong, handleLong, extsLong)
@@ -149,6 +151,7 @@ class ResolveInsert
   private def resolveAttrSetMan(a: AttrSetMan, tplIndex: Int): Product => Unit = {
     val (ns, attr, refNs) = (a.ns, a.attr, a.refNs)
     a match {
+      case _: AttrSetManID             => addSet(ns, attr, set2arrayId, refNs, tplIndex, transformId, extsId, value2jsonId)
       case _: AttrSetManString         => addSet(ns, attr, set2arrayString, refNs, tplIndex, transformString, extsString, value2jsonString)
       case _: AttrSetManInt            => addSet(ns, attr, set2arrayInt, refNs, tplIndex, transformInt, extsInt, value2jsonInt)
       case _: AttrSetManLong           => addSet(ns, attr, set2arrayLong, refNs, tplIndex, transformLong, extsLong, value2jsonLong)
@@ -177,6 +180,7 @@ class ResolveInsert
   private def resolveAttrSetOpt(a: AttrSetOpt, tplIndex: Int): Product => Unit = {
     val (ns, attr, refNs) = (a.ns, a.attr, a.refNs)
     a match {
+      case _: AttrSetOptID             => addSetOpt(ns, attr, set2arrayId, refNs, tplIndex, transformId, extsId, value2jsonId)
       case _: AttrSetOptString         => addSetOpt(ns, attr, set2arrayString, refNs, tplIndex, transformString, extsString, value2jsonString)
       case _: AttrSetOptInt            => addSetOpt(ns, attr, set2arrayInt, refNs, tplIndex, transformInt, extsInt, value2jsonInt)
       case _: AttrSetOptLong           => addSetOpt(ns, attr, set2arrayLong, refNs, tplIndex, transformLong, extsLong, value2jsonLong)

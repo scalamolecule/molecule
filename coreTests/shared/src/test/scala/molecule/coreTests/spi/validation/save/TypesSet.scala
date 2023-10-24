@@ -407,22 +407,5 @@ trait TypesSet extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           }
       } yield ()
     }
-
-    "ref" - validation { implicit conn =>
-      for {
-        _ <- Type.refs(Set(1L, 2L, 4L)).save.transact
-          .map(_ ==> "Unexpected success").recover {
-            case ValidationErrors(errorMap) =>
-              errorMap.head._2 ==> Seq(
-                s"""Type.refs with value `1` doesn't satisfy validation:
-                   |  _ > 3L
-                   |""".stripMargin,
-                s"""Type.refs with value `2` doesn't satisfy validation:
-                   |  _ > 3L
-                   |""".stripMargin
-              )
-          }
-      } yield ()
-    }
   }
 }

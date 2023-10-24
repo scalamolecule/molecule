@@ -250,12 +250,12 @@ trait SqlInsert
         }
 
         // Join table setter
-        val refIds             = tpl.productElement(tplIndex).asInstanceOf[Set[Long]]
+        val refIds             = tpl.productElement(tplIndex).asInstanceOf[Set[String]]
         val joinSetter: Setter = (ps: PS, idsMap: IdsMap, rowIndex: RowIndex) => {
           val id = idsMap(curPath)(rowIndex)
           refIds.foreach { refId =>
             ps.setLong(1, id)
-            ps.setLong(2, refId)
+            ps.setLong(2, refId.toLong)
             ps.addBatch()
           }
         }
@@ -319,12 +319,12 @@ trait SqlInsert
               }
 
               // Join table setter
-              val refIds = set.asInstanceOf[Set[Long]]
+              val refIds = set.asInstanceOf[Set[String]]
               (ps: PS, idsMap: IdsMap, rowIndex: RowIndex) => {
                 val id = idsMap(curPath)(rowIndex)
                 refIds.foreach { refId =>
                   ps.setLong(1, id)
-                  ps.setLong(2, refId)
+                  ps.setLong(2, refId.toLong)
                   ps.addBatch()
                 }
               }
@@ -398,6 +398,8 @@ trait SqlInsert
     }
   }
 
+//  override protected lazy val handleId             = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.toString)
+  override protected lazy val handleId             = (v: Any) => (ps: PS, n: Int) => ps.setLong(n, v.asInstanceOf[String].toLong)
   override protected lazy val handleString         = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.asInstanceOf[String])
   override protected lazy val handleInt            = (v: Any) => (ps: PS, n: Int) => ps.setInt(n, v.asInstanceOf[Int])
   override protected lazy val handleLong           = (v: Any) => (ps: PS, n: Int) => ps.setLong(n, v.asInstanceOf[Long])

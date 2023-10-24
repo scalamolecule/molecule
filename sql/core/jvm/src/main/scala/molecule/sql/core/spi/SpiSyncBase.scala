@@ -219,7 +219,7 @@ trait SpiSyncBase
              |""".stripMargin
         val updates                  =
           updateModels
-            .map(_(42))
+            .map(_(42L)) // dummy value
             .map { m =>
               val elements = m.mkString("\n")
               val tables   = update_getData(conn, m, update.isUpsert)._1
@@ -315,14 +315,15 @@ trait SpiSyncBase
     ps.execute()
 
     val resultSet = ps.getGeneratedKeys // is empty if no nested data
-    var ids       = List.empty[Long]
+//    var ids       = List.empty[Long]
+    var ids       = List.empty[String]
     while (resultSet.next()) {
-      ids = ids :+ resultSet.getLong(1)
+      ids = ids :+ resultSet.getLong(1).toString
     }
     ps.close()
 
     debug("---------------")
     debug("Ids: " + ids)
-    TxReport(0, ids)
+    TxReport(ids)
   }
 }

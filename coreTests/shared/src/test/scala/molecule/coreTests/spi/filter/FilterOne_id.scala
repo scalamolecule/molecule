@@ -13,7 +13,7 @@ trait FilterOne_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
   override lazy val tests = Tests {
 
     "Mandatory" - types { implicit conn =>
-      val id0 = 42L
+      val id0 = "42"
       for {
         List(id1, id2, id3) <- Ns.i.insert(1, 2, 3).transact.map(_.ids)
         a = (1, id1)
@@ -34,7 +34,7 @@ trait FilterOne_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.id(Seq(id1, id2)).query.get.map(_ ==> List(a, b))
         _ <- Ns.i.a1.id(Seq(id1, id0)).query.get.map(_ ==> List(a))
         // Empty Seq of args matches no ids
-        _ <- Ns.i.a1.id(Seq.empty[Long]).query.get.map(_ ==> List())
+        _ <- Ns.i.a1.id(Seq.empty[String]).query.get.map(_ ==> List())
 
         // Find ids not matching
         _ <- Ns.i.a1.id.not(id0).query.get.map(_ ==> List(a, b, c))
@@ -53,7 +53,7 @@ trait FilterOne_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.id.not(Seq(id1, id2)).query.get.map(_ ==> List(c))
         _ <- Ns.i.a1.id.not(Seq(id2, id3)).query.get.map(_ ==> List(a))
         // Empty Seq of negation args matches all ids
-        _ <- Ns.i.a1.id.not(Seq.empty[Long]).query.get.map(_ ==> List(a, b, c))
+        _ <- Ns.i.a1.id.not(Seq.empty[String]).query.get.map(_ ==> List(a, b, c))
 
         // Find ids in range
         _ <- Ns.i.a1.id.<(id2).query.get.map(_ ==> List(a))
@@ -66,7 +66,7 @@ trait FilterOne_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "Tacit" - types { implicit conn =>
       val (a, b, c) = (1, 2, 3)
-      val id0       = 42L
+      val id0       = "42"
       for {
         List(id1, id2, id3) <- Ns.i.insert(1, 2, 3).transact.map(_.ids)
 
@@ -85,7 +85,7 @@ trait FilterOne_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.id_(Seq(id1, id2)).query.get.map(_ ==> List(a, b))
         _ <- Ns.i.a1.id_(Seq(id1, id0)).query.get.map(_ ==> List(a))
         // Empty Seq of args matches no ids
-        _ <- Ns.i.a1.id_(Seq.empty[Long]).query.get.map(_ ==> List())
+        _ <- Ns.i.a1.id_(Seq.empty[String]).query.get.map(_ ==> List())
         _ <- Ns.i.a1.id_().query.get.map(_ ==> List())
 
         // Match non-matching ids without returning them
@@ -105,7 +105,7 @@ trait FilterOne_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.id_.not(Seq(id1, id2)).query.get.map(_ ==> List(c))
         _ <- Ns.i.a1.id_.not(Seq(id2, id3)).query.get.map(_ ==> List(a))
         // Empty Seq of negation args matches all ids (non-null)
-        _ <- Ns.i.a1.id_.not(Seq.empty[Long]).query.get.map(_ ==> List(a, b, c))
+        _ <- Ns.i.a1.id_.not(Seq.empty[String]).query.get.map(_ ==> List(a, b, c))
 
         // Match value ranges without returning them
         _ <- Ns.i.a1.id_.<(id2).query.get.map(_ ==> List(a))

@@ -129,19 +129,19 @@ trait UpdateSet_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
       "Can't update multiple values for one card-one attribute" - types { implicit conn =>
         for {
-          _ <- Ns(42).ints(Seq(Set(1), Set(2))).update.transact
+          _ <- Ns("42").ints(Seq(Set(1), Set(2))).update.transact
             .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
               err ==> "Can only update one Set of values for Set attribute `Ns.ints`. Found: Set(1), Set(2)"
             }
 
           // Same as
-          _ <- Ns(42).ints(Set(1), Set(2)).update.transact
+          _ <- Ns("42").ints(Set(1), Set(2)).update.transact
             .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
               err ==> "Can only update one Set of values for Set attribute `Ns.ints`. Found: Set(1), Set(2)"
             }
 
           // Same as
-          _ <- Ns(42).ints(1, 2).update.transact
+          _ <- Ns("42").ints(1, 2).update.transact
             .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
               err ==> "Can only update one Set of values for Set attribute `Ns.ints`. Found: Set(1), Set(2)"
             }
@@ -150,7 +150,7 @@ trait UpdateSet_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
       "Can't update optional values" - types { implicit conn =>
         for {
-          _ <- Ns(42).ints_?(Some(Set(1))).update.transact
+          _ <- Ns("42").ints_?(Some(Set(1))).update.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
               err ==> "Can't update optional values. Found:\n" +
                 """AttrSetOptInt("Ns", "ints", Eq, Some(Seq(Set(1))), None, None, Nil, Nil, None, None, Seq(0, 30))"""
@@ -160,7 +160,7 @@ trait UpdateSet_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
       "Can't update card-many referenced attributes" - types { implicit conn =>
         for {
-          _ <- Ns(42).i(1).Refs.i(2).update.transact
+          _ <- Ns("42").i(1).Refs.i(2).update.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
               err ==> "Can't update attributes in card-many referenced namespace `Refs`"
             }

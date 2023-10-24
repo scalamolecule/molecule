@@ -164,13 +164,13 @@ trait SqlSave
         }
 
         // Join table setter
-        val refIds2            = set.iterator.asInstanceOf[Iterator[Long]]
+        val refIds2            = set.iterator.asInstanceOf[Iterator[String]]
         val joinSetter: Setter = (ps: PS, idsMap: IdsMap, rowIndex: RowIndex) => {
           val refId1 = idsMap(curPath)(rowIndex)
           while (refIds2.hasNext) {
             val refId2 = refIds2.next()
             ps.setLong(1, refId1)
-            ps.setLong(2, refId2)
+            ps.setLong(2, refId2.toLong)
             if (refIds2.hasNext)
               ps.addBatch()
           }
@@ -190,6 +190,8 @@ trait SqlSave
 
   override protected def handleRefNs(refNs: String): Unit = ()
 
+  override protected lazy val handleId             = (v: Any) => (ps: PS, n: Int) => ps.setLong(n, v.asInstanceOf[String].toLong)
+//  override protected lazy val handleId             = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.toString)
   override protected lazy val handleString         = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.asInstanceOf[String])
   override protected lazy val handleInt            = (v: Any) => (ps: PS, n: Int) => ps.setInt(n, v.asInstanceOf[Int])
   override protected lazy val handleLong           = (v: Any) => (ps: PS, n: Int) => ps.setLong(n, v.asInstanceOf[Long])

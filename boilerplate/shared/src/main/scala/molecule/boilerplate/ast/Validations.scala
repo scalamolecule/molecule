@@ -13,6 +13,12 @@ trait Validations {
     def withValues(_values: Seq[Value]): Validator
   }
 
+  case class ValidateId(_attrs: Seq[Attr] = Nil, _values: Seq[Value] = Nil) extends Validator {
+    override def withAttrs(_attrs: Seq[Attr]): ValidateId = ???
+    override def withValues(_values: Seq[Value]): ValidateId = ???
+    def validate(v: String): Seq[String] = ???
+  }
+
   case class ValidateString(_attrs: Seq[Attr] = Nil, _values: Seq[Value] = Nil) extends Validator {
     override def withAttrs(_attrs: Seq[Attr]): ValidateString = ???
     override def withValues(_values: Seq[Value]): ValidateString = ???

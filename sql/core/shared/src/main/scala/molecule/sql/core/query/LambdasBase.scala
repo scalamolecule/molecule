@@ -9,6 +9,7 @@ import molecule.core.util.AggrUtils
 
 trait LambdasBase extends BaseHelpers with AggrUtils { self: SqlQueryBase =>
 
+  protected lazy val one2sqlId            : String => String         = (v: String) => s"'${v.replace("'", "''")}'"
   protected lazy val one2sqlString        : String => String         = (v: String) => s"'${v.replace("'", "''")}'"
   protected lazy val one2sqlInt           : Int => String            = (v: Int) => s"$v"
   protected lazy val one2sqlLong          : Long => String           = (v: Long) => s"$v"
@@ -49,6 +50,7 @@ trait LambdasBase extends BaseHelpers with AggrUtils { self: SqlQueryBase =>
     }
   }
 
+  protected lazy val valueId            : Row => String         = (rs: Row) => rs.getLong(2).toString
   protected lazy val valueString        : Row => String         = (rs: Row) => rs.getString(2)
   protected lazy val valueInt           : Row => Int            = (rs: Row) => rs.getInt(2)
   protected lazy val valueLong          : Row => Long           = (rs: Row) => rs.getLong(2)
@@ -73,6 +75,7 @@ trait LambdasBase extends BaseHelpers with AggrUtils { self: SqlQueryBase =>
   protected lazy val valueChar          : Row => Char           = (rs: Row) => rs.getString(2).charAt(0)
 
 
+  protected lazy val array2setId            : (Row, Int) => Set[String]         = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueId)
   protected lazy val array2setString        : (Row, Int) => Set[String]         = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueString)
   protected lazy val array2setInt           : (Row, Int) => Set[Int]            = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueInt)
   protected lazy val array2setLong          : (Row, Int) => Set[Long]           = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueLong)
@@ -97,6 +100,7 @@ trait LambdasBase extends BaseHelpers with AggrUtils { self: SqlQueryBase =>
   protected lazy val array2setChar          : (Row, Int) => Set[Char]           = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueChar)
 
 
+  protected lazy val json2oneId            : String => String         = (v: String) => v
   protected lazy val json2oneString        : String => String         = (v: String) => v
   protected lazy val json2oneInt           : String => Int            = (v: String) => v.toInt
   protected lazy val json2oneLong          : String => Long           = (v: String) => v.toLong
@@ -120,6 +124,7 @@ trait LambdasBase extends BaseHelpers with AggrUtils { self: SqlQueryBase =>
   protected lazy val json2oneShort         : String => Short          = (v: String) => v.toShort
   protected lazy val json2oneChar          : String => Char           = (v: String) => v.charAt(0)
 
+  protected lazy val json2arrayId            : String => Array[String]         = (json: String) => json.substring(1, json.length - 1).split(", ?").map(json2oneId)
   protected lazy val json2arrayString        : String => Array[String]         = (json: String) => json.substring(2, json.length - 2).split("\", ?\"").map(json2oneString)
   protected lazy val json2arrayInt           : String => Array[Int]            = (json: String) => json.substring(1, json.length - 1).split(", ?").map(json2oneInt)
   protected lazy val json2arrayLong          : String => Array[Long]           = (json: String) => json.substring(1, json.length - 1).split(", ?").map(json2oneLong)
@@ -144,6 +149,7 @@ trait LambdasBase extends BaseHelpers with AggrUtils { self: SqlQueryBase =>
   protected lazy val json2arrayChar          : String => Array[Char]           = (json: String) => json.substring(2, json.length - 2).split("\", ?\"").map(json2oneChar)
 
 
+  protected lazy val one2jsonId            : String => String         = (v: String) => v
   protected lazy val one2jsonString        : String => String         = (v: String) => "\"" + escStr(v) + "\""
   protected lazy val one2jsonInt           : Int => String            = (v: Int) => s"$v"
   protected lazy val one2jsonLong          : Long => String           = (v: Long) => s"$v"
@@ -167,6 +173,7 @@ trait LambdasBase extends BaseHelpers with AggrUtils { self: SqlQueryBase =>
   protected lazy val one2jsonShort         : Short => String          = (v: Short) => s"$v"
   protected lazy val one2jsonChar          : Char => String           = (v: Char) => "\"" + v.toString + "\""
 
+  protected lazy val tpeDbId            : String = ""
   protected lazy val tpeDbString        : String = ""
   protected lazy val tpeDbInt           : String = ""
   protected lazy val tpeDbLong          : String = ""

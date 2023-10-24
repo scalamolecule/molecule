@@ -62,13 +62,13 @@ trait Save_mysql extends SqlSave with BaseHelpers { self: ResolveSave =>
         }
 
         // Join table setter
-        val refIds2            = set.iterator.asInstanceOf[Iterator[Long]]
+        val refIds2            = set.iterator.asInstanceOf[Iterator[String]]
         val joinSetter: Setter = (ps: PS, idsMap: IdsMap, rowIndex: RowIndex) => {
           val refId1 = idsMap(curPath)(rowIndex)
           while (refIds2.hasNext) {
             val refId2 = refIds2.next()
             ps.setLong(1, refId1)
-            ps.setLong(2, refId2)
+            ps.setLong(2, refId2.toLong)
             if (refIds2.hasNext)
               ps.addBatch()
           }

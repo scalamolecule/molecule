@@ -317,18 +317,5 @@ trait TypesOne extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           }
       } yield ()
     }
-
-    "ref" - validation { implicit conn =>
-      for {
-        _ <- Type.ref(1L).save.transact
-          .map(_ ==> "Unexpected success").recover {
-            case ValidationErrors(errorMap) =>
-              errorMap.head._2.head ==>
-                s"""Type.ref with value `1` doesn't satisfy validation:
-                   |  _ > 2L
-                   |""".stripMargin
-          }
-      } yield ()
-    }
   }
 }

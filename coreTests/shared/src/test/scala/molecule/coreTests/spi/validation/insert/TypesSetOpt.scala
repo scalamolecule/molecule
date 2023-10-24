@@ -418,22 +418,5 @@ trait TypesSetOpt extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           }
       } yield ()
     }
-
-    "ref" - validation { implicit conn =>
-      for {
-        _ <- Type.refs_?.insert(Some(Set(1L, 2L, 4L))).transact
-          .map(_ ==> "Unexpected success").recover {
-            case InsertErrors(errors, _) =>
-              errors.head._2.head.errors ==> Seq(
-                s"""Type.refs with value `1` doesn't satisfy validation:
-                   |  _ > 3L
-                   |""".stripMargin,
-                s"""Type.refs with value `2` doesn't satisfy validation:
-                   |  _ > 3L
-                   |""".stripMargin
-              )
-          }
-      } yield ()
-    }
   }
 }

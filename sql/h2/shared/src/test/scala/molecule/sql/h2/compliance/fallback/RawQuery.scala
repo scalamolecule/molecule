@@ -224,8 +224,8 @@ object RawQuery extends TestSuite_h2 {
     "Optional Set of refs" - types { implicit conn =>
       for {
         _ <- Ns.i.refs_?.insert(
-          (1, Option.empty[Set[Long]]),
-          (2, Some(Set.empty[Long])),
+          (1, Option.empty[Set[String]]),
+          (2, Some(Set.empty[String])),
           (3, Some(Set(ref1, ref2))),
         ).transact
 
@@ -250,7 +250,7 @@ object RawQuery extends TestSuite_h2 {
         ).map(_ ==> List(
           List(1, Set(null)), // Notice Set
           List(2, Set(null)), // Notice Set
-          List(3, Set(ref1, ref2))
+          List(3, Set(1, 2)) // Ids are numbers in SQL
         ))
       } yield ()
     }

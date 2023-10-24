@@ -25,6 +25,26 @@ trait SortOneOptFlat_[Tpl] extends ResolveBase { self: Model2DatomicQuery[Tpl] =
     }
   }
 
+  protected def sortOneOptFlatId(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+    attr.sort.map { sort =>
+      (
+        sort.last.toString.toInt,
+        sort.head match {
+          case 'a' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            (a: Row, b: Row) =>
+              compare(a, b, i, (v1, v2) =>
+                v1.toString.toLong.compareTo(v2.toString.toLong))
+          case 'd' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            (a: Row, b: Row) =>
+              compare(b, a, i, (v1, v2) =>
+                v1.toString.toLong.compareTo(v2.toString.toLong))
+        }
+      )
+    }
+  }
+
   protected def sortOneOptFlatString(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
     attr.sort.map { sort =>
       (

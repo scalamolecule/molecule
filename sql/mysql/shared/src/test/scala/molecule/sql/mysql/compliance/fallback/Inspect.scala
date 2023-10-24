@@ -201,7 +201,7 @@ object Inspect extends TestSuite_mysql {
           /*
           ========================================
           UPDATE:
-          AttrOneTacLong("Ns", "id", Eq, Seq(1L), None, None, Nil, Nil, None, None, Seq(0, 0))
+          AttrOneTacID("Ns", "id", Eq, Seq("1"), None, None, Nil, Nil, None, None, Seq(0, 0))
           AttrOneManString("Ns", "string", Eq, Seq("ZZZ"), None, None, Nil, Nil, None, None, Seq(0, 5))
 
           UPDATE Ns
@@ -225,7 +225,7 @@ object Inspect extends TestSuite_mysql {
           /*
           ========================================
           UPDATE:
-          AttrOneTacLong("Ns", "id", Eq, Seq(1L), None, None, Nil, Nil, None, None, Seq(0, 0))
+          AttrOneTacID("Ns", "id", Eq, Seq("1"), None, None, Nil, Nil, None, None, Seq(0, 0))
           AttrOneManString("Ns", "string", Eq, Seq("ZZZ"), None, None, Nil, Nil, None, None, Seq(0, 5))
 
           UPDATE Ns
@@ -249,7 +249,7 @@ object Inspect extends TestSuite_mysql {
           /*
           ========================================
           UPDATE:
-          AttrOneTacLong("Ns", "id", Eq, Seq(1L), None, None, Nil, Nil, None, None, Seq(0, 0))
+          AttrOneTacID("Ns", "id", Eq, Seq("1"), None, None, Nil, Nil, None, None, Seq(0, 0))
           AttrSetManInt("Ns", "ints", Swap, Seq(Set(3), Set(4), Set(6), Set(7)), None, None, Nil, Nil, None, None, Seq(0, 30))
 
           UPDATE Ns
@@ -285,7 +285,7 @@ object Inspect extends TestSuite_mysql {
           /*
           ========================================
           DELETE:
-          AttrOneTacLong("Ns", "id", Eq, Seq(1L), None, None, Nil, Nil, None, None, Seq(0, 0))
+          AttrOneTacID("Ns", "id", Eq, Seq("1"), None, None, Nil, Nil, None, None, Seq(0, 0))
 
           DELETE FROM Ns_refs_Ref WHERE Ns_id IN (1)
           --------
@@ -305,7 +305,7 @@ object Inspect extends TestSuite_mysql {
           /*
           ========================================
           DELETE:
-          AttrOneTacLong("Ns", "id", Eq, Seq(1L), None, None, Nil, Nil, None, None, Seq(0, 0))
+          AttrOneTacID("Ns", "id", Eq, Seq("1"), None, None, Nil, Nil, None, None, Seq(0, 0))
 
           DELETE FROM Ns_refs_Ref WHERE Ns_id IN (1)
           --------

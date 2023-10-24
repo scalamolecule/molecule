@@ -70,7 +70,6 @@ import java.util.{Date, UUID}
  * @groupname ref References
  * @groupprio ref 6
  * */
-object DataModelApi extends DataModelApi
 trait DataModelApi {
 
   // Types ..................................................
@@ -178,17 +177,19 @@ trait DataModelApi {
   object one extends one
   object many extends many
 
-  trait one extends refOptions[one, Long]
-  trait many extends refOptions[many, Set[Long]]
+  trait one extends refOptions[one]
+  trait many extends refOptions[many]
 
 
   // Options ..................................................
+
+  trait Requierable
 
   /** Attribute options.
    *
    * @group opt
    */
-  sealed trait Options[Self, Tpe, BaseTpe] {
+  sealed trait Options[Self, Tpe, BaseTpe] extends Requierable {
 
     /** Index option (defaults to true).
      * <br><br>
@@ -248,7 +249,7 @@ trait DataModelApi {
     def enums(vs: Seq[BaseTpe], failureMsg: String): Self = ???
 
     // Tupled attributes
-    def require[T <: Options[_, _, _]](attrs: T*): Self = ???
+    def require(attrs: Requierable*): Self = ???
 
     // Value accessor for validation code
     val value: Tpe = ???
@@ -266,14 +267,22 @@ trait DataModelApi {
   }
 
 
-  trait refOptions[Self, Tpe] extends Options[Self, Tpe, Long] {
+  trait refOptions[Self] extends Requierable {
 
     /** Apply namespace type to reference.
      *
      * @tparam RefNs Ref namespace type
      */
-    def apply[RefNs](implicit x: DummyImplicit): refOptions[Self, Tpe] = ???
-    def apply[RefNs](description: String): refOptions[Self, Tpe] = ???
+    def apply[RefNs](implicit x: DummyImplicit): refOptions[Self] = ???
+
+
+    /**
+     *
+     * @param description
+     * @tparam RefNs
+     * @return
+     */
+    def apply[RefNs](description: String): refOptions[Self] = ???
 
     /** Owner option.
      *
@@ -292,6 +301,12 @@ trait DataModelApi {
      * When you get the graph of an entity, all its subcomponent entities are fetched recursively.
      */
     lazy val owner: Self = ???
+
+    lazy val mandatory: Self = ???
+
+    // Tupled attributes
+    def require(attrs: Requierable*): Self = ???
+
   }
 }
 

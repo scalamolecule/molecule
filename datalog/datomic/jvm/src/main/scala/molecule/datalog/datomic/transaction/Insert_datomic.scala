@@ -70,7 +70,8 @@ trait Insert_datomic
       unusedRefIds -= e
       usedRefIds += e
       appendStmt(add, e, a,
-        transformValue(tpl.productElement(tplIndex).asInstanceOf[T]).asInstanceOf[AnyRef])
+        transformValue(tpl.productElement(tplIndex).asInstanceOf[T]).asInstanceOf[AnyRef]
+      )
   }
 
   override protected def addOneOpt[T](
@@ -207,7 +208,7 @@ trait Insert_datomic
     }
   }
 
-  // Save Int as Long in Datomic
+  override protected lazy val transformId             = (v: Any) => v.asInstanceOf[String].toLong
   override protected lazy val transformString         = identity
   override protected lazy val transformInt            = (v: Any) => v.asInstanceOf[Int].toLong
   override protected lazy val transformLong           = identity

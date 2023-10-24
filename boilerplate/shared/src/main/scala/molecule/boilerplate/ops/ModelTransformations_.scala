@@ -45,6 +45,7 @@ trait ModelTransformations_ {
   protected def asIs(es: List[Element], kw: Kw, n: Option[Int] = None): List[Element] = {
     val last = es.last match {
       case a: AttrOneMan => a match {
+        case a: AttrOneManID             => a.copy(op = Fn(kw.toString, n))
         case a: AttrOneManString         => a.copy(op = Fn(kw.toString, n))
         case a: AttrOneManInt            => a.copy(op = Fn(kw.toString, n))
         case a: AttrOneManLong           => a.copy(op = Fn(kw.toString, n))
@@ -69,6 +70,7 @@ trait ModelTransformations_ {
         case a: AttrOneManChar           => a.copy(op = Fn(kw.toString, n))
       }
       case a: AttrSetMan => a match {
+        case a: AttrSetManID             => a.copy(op = Fn(kw.toString, n))
         case a: AttrSetManString         => a.copy(op = Fn(kw.toString, n))
         case a: AttrSetManInt            => a.copy(op = Fn(kw.toString, n))
         case a: AttrSetManLong           => a.copy(op = Fn(kw.toString, n))
@@ -100,6 +102,14 @@ trait ModelTransformations_ {
   protected def addOne[T](es: List[Element], op: Op, vs: Seq[T]): List[Element] = {
     val last = es.last match {
       case a: AttrOneMan => a match {
+        case a: AttrOneManID =>
+          val vs1     = vs.asInstanceOf[Seq[String]]
+          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+            val validator = a.validator.get
+            vs1.flatMap(v => validator.validate(v))
+          }
+          a.copy(op = op, vs = vs1, errors = errors1)
+
         case a: AttrOneManString =>
           val vs1     = vs.asInstanceOf[Seq[String]]
           val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
@@ -277,6 +287,14 @@ trait ModelTransformations_ {
           a.copy(op = op, vs = vs1, errors = errors1)
       }
       case a: AttrOneTac => a match {
+        case a: AttrOneTacID =>
+          val vs1     = vs.asInstanceOf[Seq[String]]
+          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+            val validator = a.validator.get
+            vs1.flatMap(v => validator.validate(v))
+          }
+          a.copy(op = op, vs = vs1, errors = errors1)
+
         case a: AttrOneTacString =>
           val vs1     = vs.asInstanceOf[Seq[String]]
           val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
@@ -461,6 +479,14 @@ trait ModelTransformations_ {
   protected def addOptOne[T](es: List[Element], op: Op, vs: Option[Seq[T]]): List[Element] = {
     val last = es.last match {
       case a: AttrOneOpt => a match {
+        case a: AttrOneOptID =>
+          val vs1     = vs.asInstanceOf[Option[Seq[String]]]
+          val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+            val validator = a.validator.get
+            vs1.get.flatMap(v => validator.validate(v))
+          }
+          a.copy(op = op, vs = vs1, errors = errors1)
+
         case a: AttrOneOptString =>
           val vs1     = vs.asInstanceOf[Option[Seq[String]]]
           val errors1 = if (vs1.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
@@ -645,6 +671,14 @@ trait ModelTransformations_ {
   protected def addSet[T](es: List[Element], op: Op, vs: Seq[Set[T]]): List[Element] = {
     val last = es.last match {
       case a: AttrSetMan => a match {
+        case a: AttrSetManID =>
+          val sets    = vs.asInstanceOf[Seq[Set[String]]]
+          val errors1 = if (sets.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+            val validator = a.validator.get
+            sets.flatMap(set => set.flatMap(v => validator.validate(v)))
+          }
+          a.copy(op = op, vs = sets, errors = errors1)
+
         case a: AttrSetManString =>
           val sets    = vs.asInstanceOf[Seq[Set[String]]]
           val errors1 = if (sets.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
@@ -822,6 +856,14 @@ trait ModelTransformations_ {
           a.copy(op = op, vs = sets, errors = errors1)
       }
       case a: AttrSetTac => a match {
+        case a: AttrSetTacID =>
+          val sets    = vs.asInstanceOf[Seq[Set[String]]]
+          val errors1 = if (sets.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+            val validator = a.validator.get
+            sets.flatMap(set => set.flatMap(v => validator.validate(v)))
+          }
+          a.copy(op = op, vs = sets, errors = errors1)
+
         case a: AttrSetTacString =>
           val sets    = vs.asInstanceOf[Seq[Set[String]]]
           val errors1 = if (sets.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
@@ -1006,6 +1048,14 @@ trait ModelTransformations_ {
   protected def addOptSet[T](es: List[Element], op: Op, vs: Option[Seq[Set[T]]]): List[Element] = {
     val last = es.last match {
       case a: AttrSetOpt => a match {
+        case a: AttrSetOptID =>
+          val sets    = vs.asInstanceOf[Option[Seq[Set[String]]]]
+          val errors1 = if (sets.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
+            val validator = a.validator.get
+            sets.get.flatMap(set => set.flatMap(v => validator.validate(v)))
+          }
+          a.copy(op = op, vs = sets, errors = errors1)
+
         case a: AttrSetOptString =>
           val sets    = vs.asInstanceOf[Option[Seq[Set[String]]]]
           val errors1 = if (sets.isEmpty || a.validator.isEmpty || a.valueAttrs.nonEmpty) Nil else {
@@ -1211,6 +1261,7 @@ trait ModelTransformations_ {
   private def setSort(e: Element, sort: String): Element = {
     e match {
       case a: AttrOneMan => a match {
+        case a: AttrOneManID             => a.copy(sort = Some(sort))
         case a: AttrOneManString         => a.copy(sort = Some(sort))
         case a: AttrOneManInt            => a.copy(sort = Some(sort))
         case a: AttrOneManLong           => a.copy(sort = Some(sort))
@@ -1235,6 +1286,7 @@ trait ModelTransformations_ {
         case a: AttrOneManChar           => a.copy(sort = Some(sort))
       }
       case a: AttrOneOpt => a match {
+        case a: AttrOneOptID             => a.copy(sort = Some(sort))
         case a: AttrOneOptString         => a.copy(sort = Some(sort))
         case a: AttrOneOptInt            => a.copy(sort = Some(sort))
         case a: AttrOneOptLong           => a.copy(sort = Some(sort))
@@ -1271,6 +1323,7 @@ trait ModelTransformations_ {
           // Convert mandatory filter attribute to tacit attribute
           filterAttr0 match {
             case a: AttrOneMan => a match {
+              case a: AttrOneManID             => (AttrOneTacID(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.refNs, a.sort, a.coord), List(filterAttr0))
               case a: AttrOneManString         => (AttrOneTacString(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.refNs, a.sort, a.coord), List(filterAttr0))
               case a: AttrOneManInt            => (AttrOneTacInt(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.refNs, a.sort, a.coord), List(filterAttr0))
               case a: AttrOneManLong           => (AttrOneTacLong(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.refNs, a.sort, a.coord), List(filterAttr0))
@@ -1295,6 +1348,7 @@ trait ModelTransformations_ {
               case a: AttrOneManChar           => (AttrOneTacChar(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.refNs, a.sort, a.coord), List(filterAttr0))
             }
             case a: AttrSetMan => a match {
+              case a: AttrSetManID             => (AttrSetTacID(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.refNs, a.sort, a.coord), List(filterAttr0))
               case a: AttrSetManString         => (AttrSetTacString(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.refNs, a.sort, a.coord), List(filterAttr0))
               case a: AttrSetManInt            => (AttrSetTacInt(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.refNs, a.sort, a.coord), List(filterAttr0))
               case a: AttrSetManLong           => (AttrSetTacLong(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.refNs, a.sort, a.coord), List(filterAttr0))
@@ -1325,6 +1379,7 @@ trait ModelTransformations_ {
         a match {
           case a: AttrOne => a match {
             case a: AttrOneMan => a match {
+              case a: AttrOneManID             => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
               case a: AttrOneManString         => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
               case a: AttrOneManInt            => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
               case a: AttrOneManLong           => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
@@ -1349,6 +1404,7 @@ trait ModelTransformations_ {
               case a: AttrOneManChar           => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
             }
             case a: AttrOneTac => a match {
+              case a: AttrOneTacID             => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
               case a: AttrOneTacString         => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
               case a: AttrOneTacInt            => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
               case a: AttrOneTacLong           => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
@@ -1376,6 +1432,7 @@ trait ModelTransformations_ {
           }
           case a: AttrSet => a match {
             case a: AttrSetMan => a match {
+              case a: AttrSetManID             => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
               case a: AttrSetManString         => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
               case a: AttrSetManInt            => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
               case a: AttrSetManLong           => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
@@ -1400,6 +1457,7 @@ trait ModelTransformations_ {
               case a: AttrSetManChar           => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
             }
             case a: AttrSetTac => a match {
+              case a: AttrSetTacID             => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
               case a: AttrSetTacString         => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
               case a: AttrSetTacInt            => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
               case a: AttrSetTacLong           => a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent
@@ -1434,6 +1492,7 @@ trait ModelTransformations_ {
   protected def reverseTopLevelSorting(es: List[Element]): List[Element] = {
     es.map {
       case attr: AttrOneMan => attr match {
+        case a@AttrOneManID(_, _, _, _, _, _, _, _, _, Some(sort), _)             => a.copy(sort = Some(reverseSort(sort)))
         case a@AttrOneManString(_, _, _, _, _, _, _, _, _, Some(sort), _)         => a.copy(sort = Some(reverseSort(sort)))
         case a@AttrOneManInt(_, _, _, _, _, _, _, _, _, Some(sort), _)            => a.copy(sort = Some(reverseSort(sort)))
         case a@AttrOneManLong(_, _, _, _, _, _, _, _, _, Some(sort), _)           => a.copy(sort = Some(reverseSort(sort)))
@@ -1459,6 +1518,7 @@ trait ModelTransformations_ {
         case a                                                                    => a
       }
       case attr: AttrOneOpt => attr match {
+        case a@AttrOneOptID(_, _, _, _, _, _, _, _, _, Some(sort), _)             => a.copy(sort = Some(reverseSort(sort)))
         case a@AttrOneOptString(_, _, _, _, _, _, _, _, _, Some(sort), _)         => a.copy(sort = Some(reverseSort(sort)))
         case a@AttrOneOptInt(_, _, _, _, _, _, _, _, _, Some(sort), _)            => a.copy(sort = Some(reverseSort(sort)))
         case a@AttrOneOptLong(_, _, _, _, _, _, _, _, _, Some(sort), _)           => a.copy(sort = Some(reverseSort(sort)))

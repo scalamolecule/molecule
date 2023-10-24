@@ -105,12 +105,12 @@ trait UpdateSetOps_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
         _ <- Ns.bigDecimals.query.get.map(_.head ==> Set(bigDecimal1, bigDecimal5, bigDecimal6, bigDecimal7, bigDecimal8, bigDecimal9))
 
         // Can't swap duplicate from/to values
-        _ <- Ns(42).bigDecimals.swap(bigDecimal1 -> bigDecimal2, bigDecimal1 -> bigDecimal3).update.transact
+        _ <- Ns("42").bigDecimals.swap(bigDecimal1 -> bigDecimal2, bigDecimal1 -> bigDecimal3).update.transact
           .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
             err ==> "Can't swap from duplicate retract values."
           }
 
-        _ <- Ns(42).bigDecimals.swap(bigDecimal1 -> bigDecimal3, bigDecimal2 -> bigDecimal3).update.transact
+        _ <- Ns("42").bigDecimals.swap(bigDecimal1 -> bigDecimal3, bigDecimal2 -> bigDecimal3).update.transact
           .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
             err ==> "Can't swap to duplicate replacement values."
           }

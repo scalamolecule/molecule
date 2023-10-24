@@ -37,7 +37,7 @@ trait ModelUtils {
   @tailrec
   final protected def getInitialNonGenericNs(elements: List[Element]): String = {
     elements.head match {
-      case a: Attr if a.attr == "id"         => getInitialNonGenericNs(elements.tail)
+      case a: Attr if a.attr == "id"        => getInitialNonGenericNs(elements.tail)
       case a: Attr                           => a.ns
       case b: Ref                            => b.ns
       case Nested(Ref(ns, _, _, _, _), _)    => ns
@@ -163,6 +163,7 @@ trait ModelUtils {
         case a: AttrOneMan =>
           val (ns, attr1) = nonReservedAttr(a, proxy)
           a match {
+            case a: AttrOneManID             => a.copy(ns = ns, attr = attr1, filterAttr = optFilterAttr)
             case a: AttrOneManString         => a.copy(ns = ns, attr = attr1, filterAttr = optFilterAttr)
             case a: AttrOneManInt            => a.copy(ns = ns, attr = attr1, filterAttr = optFilterAttr)
             case a: AttrOneManLong           => a.copy(ns = ns, attr = attr1, filterAttr = optFilterAttr)
@@ -189,6 +190,7 @@ trait ModelUtils {
         case a: AttrOneOpt =>
           val (ns, attr) = nonReservedAttr(a, proxy)
           a match {
+            case a: AttrOneOptID             => a.copy(ns = ns, attr = attr)
             case a: AttrOneOptString         => a.copy(ns = ns, attr = attr)
             case a: AttrOneOptInt            => a.copy(ns = ns, attr = attr)
             case a: AttrOneOptLong           => a.copy(ns = ns, attr = attr)
@@ -215,6 +217,7 @@ trait ModelUtils {
         case a: AttrOneTac =>
           val (ns, attr) = nonReservedAttr(a, proxy)
           a match {
+            case a: AttrOneTacID             => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)
             case a: AttrOneTacString         => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)
             case a: AttrOneTacInt            => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)
             case a: AttrOneTacLong           => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)
@@ -243,6 +246,7 @@ trait ModelUtils {
         case a: AttrSetMan =>
           val (ns, attr) = nonReservedAttr(a, proxy)
           a match {
+            case a: AttrSetManID             => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)
             case a: AttrSetManString         => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)
             case a: AttrSetManInt            => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)
             case a: AttrSetManLong           => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)
@@ -269,6 +273,7 @@ trait ModelUtils {
         case a: AttrSetOpt =>
           val (ns, attr) = nonReservedAttr(a, proxy)
           a match {
+            case a: AttrSetOptID             => a.copy(ns = ns, attr = attr)
             case a: AttrSetOptString         => a.copy(ns = ns, attr = attr)
             case a: AttrSetOptInt            => a.copy(ns = ns, attr = attr)
             case a: AttrSetOptLong           => a.copy(ns = ns, attr = attr)
@@ -295,6 +300,7 @@ trait ModelUtils {
         case a: AttrSetTac =>
           val (ns, attr) = nonReservedAttr(a, proxy)
           a match {
+            case a: AttrSetTacID             => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)
             case a: AttrSetTacString         => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)
             case a: AttrSetTacInt            => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)
             case a: AttrSetTacLong           => a.copy(ns = ns, attr = attr, filterAttr = optFilterAttr)

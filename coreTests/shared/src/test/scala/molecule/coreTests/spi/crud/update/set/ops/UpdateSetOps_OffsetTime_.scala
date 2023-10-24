@@ -106,12 +106,12 @@ trait UpdateSetOps_OffsetTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsy
         _ <- Ns.offsetTimes.query.get.map(_.head ==> Set(offsetTime1, offsetTime5, offsetTime6, offsetTime7, offsetTime8, offsetTime9))
 
         // Can't swap duplicate from/to values
-        _ <- Ns(42).offsetTimes.swap(offsetTime1 -> offsetTime2, offsetTime1 -> offsetTime3).update.transact
+        _ <- Ns("42").offsetTimes.swap(offsetTime1 -> offsetTime2, offsetTime1 -> offsetTime3).update.transact
           .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
             err ==> "Can't swap from duplicate retract values."
           }
 
-        _ <- Ns(42).offsetTimes.swap(offsetTime1 -> offsetTime3, offsetTime2 -> offsetTime3).update.transact
+        _ <- Ns("42").offsetTimes.swap(offsetTime1 -> offsetTime3, offsetTime2 -> offsetTime3).update.transact
           .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
             err ==> "Can't swap to duplicate replacement values."
           }

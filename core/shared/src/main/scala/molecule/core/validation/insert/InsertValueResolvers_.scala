@@ -8,7 +8,7 @@ import molecule.boilerplate.ast.Model._
 
 trait InsertValueResolvers_ {
 
-def tpl2valueResolver(a: Attr, curElements: List[Element]): Product => Seq[Value] = {
+  def tpl2valueResolver(a: Attr, curElements: List[Element]): Product => Seq[Value] = {
     val valueResolvers: Seq[Product => Value] = a.valueAttrs.flatMap { attr =>
       curElements.zipWithIndex.collectFirst {
         case (a1: Attr, i) if a1.attr == attr => (attr, a1, i)
@@ -16,6 +16,7 @@ def tpl2valueResolver(a: Attr, curElements: List[Element]): Product => Seq[Value
     }.sortBy(_._1).map { case (_, a, i) =>
       a match {
         case a: AttrOneMan => a match {
+          case _: AttrOneManID             => (tpl: Product) => OneString(tpl.productElement(i).asInstanceOf[String])
           case _: AttrOneManString         => (tpl: Product) => OneString(tpl.productElement(i).asInstanceOf[String])
           case _: AttrOneManInt            => (tpl: Product) => OneInt(tpl.productElement(i).asInstanceOf[Int])
           case _: AttrOneManLong           => (tpl: Product) => OneLong(tpl.productElement(i).asInstanceOf[Long])
@@ -41,6 +42,7 @@ def tpl2valueResolver(a: Attr, curElements: List[Element]): Product => Seq[Value
         }
 
         case a: AttrSetMan => a match {
+          case _: AttrSetManID             => (tpl: Product) => SetString(tpl.productElement(i).asInstanceOf[Set[String]])
           case _: AttrSetManString         => (tpl: Product) => SetString(tpl.productElement(i).asInstanceOf[Set[String]])
           case _: AttrSetManInt            => (tpl: Product) => SetInt(tpl.productElement(i).asInstanceOf[Set[Int]])
           case _: AttrSetManLong           => (tpl: Product) => SetLong(tpl.productElement(i).asInstanceOf[Set[Long]])
@@ -70,15 +72,15 @@ def tpl2valueResolver(a: Attr, curElements: List[Element]): Product => Seq[Value
     }
 
     valueResolvers.length match {
-      case 1 => resolve1(valueResolvers)
-      case 2 => resolve2(valueResolvers)
-      case 3 => resolve3(valueResolvers)
-      case 4 => resolve4(valueResolvers)
-      case 5 => resolve5(valueResolvers)
-      case 6 => resolve6(valueResolvers)
-      case 7 => resolve7(valueResolvers)
-      case 8 => resolve8(valueResolvers)
-      case 9 => resolve9(valueResolvers)
+      case 1  => resolve1(valueResolvers)
+      case 2  => resolve2(valueResolvers)
+      case 3  => resolve3(valueResolvers)
+      case 4  => resolve4(valueResolvers)
+      case 5  => resolve5(valueResolvers)
+      case 6  => resolve6(valueResolvers)
+      case 7  => resolve7(valueResolvers)
+      case 8  => resolve8(valueResolvers)
+      case 9  => resolve9(valueResolvers)
       case 10 => resolve10(valueResolvers)
       case 11 => resolve11(valueResolvers)
       case 12 => resolve12(valueResolvers)

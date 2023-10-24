@@ -156,6 +156,7 @@ trait ResolveNestedPull[Tpl]
   private def resolveAttrOneMan(a: AttrOneMan, attrIndex: Int): Unit = {
     aritiesAttr()
     a match {
+      case a: AttrOneManID             => add(sortOneID(a, attrIndex), it2Id, it2Id2)
       case a: AttrOneManString         => add(sortOneString(a, attrIndex), it2String, it2String2)
       case a: AttrOneManInt            => add(intSorter(a, attrIndex), it2Int, it2Int2)
       case a: AttrOneManLong           => add(sortOneLong(a, attrIndex), it2Long)
@@ -186,6 +187,7 @@ trait ResolveNestedPull[Tpl]
   private def resolveAttrOneOpt(a: AttrOneOpt, attrIndex: Int): Unit = {
     aritiesAttr()
     a match {
+      case _: AttrOneOptID             => add(sortOneOptFlatId(a, attrIndex), it2OptId)
       case _: AttrOneOptString         => add(sortOneOptFlatString(a, attrIndex), it2OptString)
       case _: AttrOneOptInt            => add(sortOneOptFlatInt(a, attrIndex), it2OptInt)
       case _: AttrOneOptLong           => add(sortOneOptFlatLong(a, attrIndex), it2OptLong)
@@ -216,6 +218,7 @@ trait ResolveNestedPull[Tpl]
   private def resolveAttrSetMan(a: AttrSetMan): Unit = {
     aritiesAttr()
     pullCasts += (a match {
+      case _: AttrSetManID             => it2SetId
       case _: AttrSetManString         => it2SetString
       case _: AttrSetManInt            => it2SetInt
       case _: AttrSetManLong           => it2SetLong
@@ -244,6 +247,7 @@ trait ResolveNestedPull[Tpl]
   private def resolveAttrSetOpt(a: AttrSetOpt): Unit = {
     aritiesAttr()
     pullCasts += (a match {
+      case _: AttrSetOptID             => it2OptSetId
       case _: AttrSetOptString         => it2OptSetString
       case _: AttrSetOptInt            => it2OptSetInt
       case _: AttrSetOptLong           => it2OptSetLong

@@ -200,8 +200,8 @@ trait SaveCardSet extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.int_(22).i.a1.chars_?.query.get.map(_ ==> List((1, None), (2, None), (3, Some(Set(char1, char2)))))
 
         List(r1, r2) <- Ref.i.insert(1, 2).transact.map(_.ids)
-        _ <- Ns.int(23).i(1).refs_?(Option.empty[Set[Long]]).save.transact
-        _ <- Ns.int(23).i(2).refs_?(Some(Set.empty[Long])).save.transact
+        _ <- Ns.int(23).i(1).refs_?(Option.empty[Set[String]]).save.transact
+        _ <- Ns.int(23).i(2).refs_?(Some(Set.empty[String])).save.transact
         _ <- Ns.int(23).i(3).refs_?(Some(Set(r1, r2))).save.transact
         _ <- Ns.int_(23).i.a1.refs_?.query.get.map(_ ==> List((1, None), (2, None), (3, Some(Set(r1, r2)))))
       } yield ()

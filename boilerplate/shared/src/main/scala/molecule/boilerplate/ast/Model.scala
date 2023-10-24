@@ -43,10 +43,12 @@ trait Model extends Validations with Values with BaseHelpers {
     protected def coords: String = if (coord.isEmpty) "Nil" else coord.mkString("Seq(", ", ", ")")
   }
 
+
   sealed trait AttrOne extends Attr
   sealed trait AttrSet extends Attr
   //  trait AttrArray extends Attr
   //  trait AttrMap extends Attr
+
 
   case class Ref(
     ns: String,
@@ -142,6 +144,26 @@ trait Model extends Validations with Values with BaseHelpers {
   
   sealed trait AttrOneMan extends AttrOne with Mandatory
   
+  case class AttrOneManID(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Seq[String] = Nil,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateId] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrOneMan {
+    override def toString: String = {
+      def format(v: String): String = "\"" + escStr(v) + "\""
+      def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
+      s"""AttrOneManID("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
   case class AttrOneManString(
     override val ns: String,
     override val attr: String,
@@ -582,6 +604,26 @@ trait Model extends Validations with Values with BaseHelpers {
 
   sealed trait AttrOneOpt extends AttrOne with Optional
   
+  case class AttrOneOptID(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Option[Seq[String]] = None,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateId] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrOneOpt {
+    override def toString: String = {
+      def format(v: String): String = "\"" + escStr(v) + "\""
+      def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
+      s"""AttrOneOptID("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
   case class AttrOneOptString(
     override val ns: String,
     override val attr: String,
@@ -1022,6 +1064,26 @@ trait Model extends Validations with Values with BaseHelpers {
 
   sealed trait AttrOneTac extends AttrOne with Tacit
   
+  case class AttrOneTacID(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Seq[String] = Nil,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateId] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrOneTac {
+    override def toString: String = {
+      def format(v: String): String = "\"" + escStr(v) + "\""
+      def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
+      s"""AttrOneTacID("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
   case class AttrOneTacString(
     override val ns: String,
     override val attr: String,
@@ -1462,6 +1524,26 @@ trait Model extends Validations with Values with BaseHelpers {
 
   sealed trait AttrSetMan extends AttrSet with Mandatory
   
+  case class AttrSetManID(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Seq[Set[String]] = Nil,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateId] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrSetMan {
+    override def toString: String = {
+      def format(v: String): String = "\"" + escStr(v) + "\""
+      def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSetManID("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
   case class AttrSetManString(
     override val ns: String,
     override val attr: String,
@@ -1902,6 +1984,26 @@ trait Model extends Validations with Values with BaseHelpers {
 
   sealed trait AttrSetOpt extends AttrSet with Optional
   
+  case class AttrSetOptID(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Option[Seq[Set[String]]] = None,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateId] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrSetOpt {
+    override def toString: String = {
+      def format(v: String): String = "\"" + escStr(v) + "\""
+      def vss: String = vs.fold("None")(_.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
+      s"""AttrSetOptID("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
   case class AttrSetOptString(
     override val ns: String,
     override val attr: String,
@@ -2342,6 +2444,26 @@ trait Model extends Validations with Values with BaseHelpers {
 
   sealed trait AttrSetTac extends AttrSet with Tacit
   
+  case class AttrSetTacID(
+    override val ns: String,
+    override val attr: String,
+    override val op: Op = V,
+    vs: Seq[Set[String]] = Nil,
+    override val filterAttr: Option[Attr] = None,
+    override val validator: Option[ValidateId] = None,
+    override val valueAttrs: Seq[String] = Nil,
+    override val errors: Seq[String] = Nil,
+    override val refNs: Option[String] = None,
+    override val sort: Option[String] = None,
+    override val coord: Seq[Int] = Nil
+  ) extends AttrSetTac {
+    override def toString: String = {
+      def format(v: String): String = "\"" + escStr(v) + "\""
+      def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
+      s"""AttrSetTacID("$ns", "$attr", $op, $vss, ${opt(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+    }
+  }
+
   case class AttrSetTacString(
     override val ns: String,
     override val attr: String,

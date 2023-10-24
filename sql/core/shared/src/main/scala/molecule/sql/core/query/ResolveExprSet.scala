@@ -10,6 +10,7 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
   override protected def resolveAttrSetMan(attr: AttrSetMan): Unit = {
     aritiesAttr()
     attr match {
+      case at: AttrSetManID             => setMan(attr, "String", at.vs, resSetId)
       case at: AttrSetManString         => setMan(attr, "String", at.vs, resSetString)
       case at: AttrSetManInt            => setMan(attr, "Int", at.vs, resSetInt)
       case at: AttrSetManLong           => setMan(attr, "Long", at.vs, resSetLong)
@@ -37,6 +38,7 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
 
   override protected def resolveAttrSetTac(attr: AttrSetTac): Unit = {
     attr match {
+      case at: AttrSetTacID             => setTac(attr, "String", at.vs, resSetId)
       case at: AttrSetTacString         => setTac(attr, "String", at.vs, resSetString)
       case at: AttrSetTacInt            => setTac(attr, "Int", at.vs, resSetInt)
       case at: AttrSetTacLong           => setTac(attr, "Long", at.vs, resSetLong)
@@ -66,6 +68,7 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
     aritiesAttr()
     hasOptAttr = true // to avoid redundant None's
     attr match {
+      case at: AttrSetOptID             => setOpt(at, at.vs, resOptSetId, resSetId)
       case at: AttrSetOptString         => setOpt(at, at.vs, resOptSetString, resSetString)
       case at: AttrSetOptInt            => setOpt(at, at.vs, resOptSetInt, resSetInt)
       case at: AttrSetOptLong           => setOpt(at, at.vs, resOptSetLong, resSetLong)

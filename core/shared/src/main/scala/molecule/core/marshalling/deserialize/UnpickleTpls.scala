@@ -248,6 +248,7 @@ case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuff
   }
   private def unpickleAttrOneManV(a: AttrOneMan): () => Any = {
     a match {
+      case _: AttrOneManID             => () => dek.readString
       case _: AttrOneManString         => () => dek.readString
       case _: AttrOneManInt            => () => dek.readInt
       case _: AttrOneManLong           => () => dek.readLong
@@ -274,6 +275,7 @@ case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuff
   }
   private def unpickleAttrOneManSet(a: AttrOneMan): () => Any = {
     a match {
+      case _: AttrOneManID             => dek.readSet[String](dek.readString)
       case _: AttrOneManString         => dek.readSet[String](dek.readString)
       case _: AttrOneManInt            => dek.readSet[Int](dek.readInt)
       case _: AttrOneManLong           => dek.readSet[Long](dek.readLong)
@@ -301,6 +303,7 @@ case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuff
 
   private def unpickleAttrOneOpt(a: AttrOneOpt): () => Any = {
     a match {
+      case _: AttrOneOptID             => dek.readOpt[String](dek.readString)
       case _: AttrOneOptString         => dek.readOpt[String](dek.readString)
       case _: AttrOneOptInt            => dek.readOpt[Int](dek.readInt)
       case _: AttrOneOptLong           => dek.readOpt[Long](dek.readLong)
@@ -340,6 +343,7 @@ case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuff
   }
   private def unpickleAttrSetManV(a: AttrSetMan): () => Any = {
     a match {
+      case _: AttrSetManID             => dek.readSet[String](dek.readString)
       case _: AttrSetManString         => dek.readSet[String](dek.readString)
       case _: AttrSetManInt            => dek.readSet[Int](dek.readInt)
       case _: AttrSetManLong           => dek.readSet[Long](dek.readLong)
@@ -366,6 +370,7 @@ case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuff
   }
   private def unpickleAttrSetManSet(a: AttrSetMan): () => Any = {
     a match {
+      case _: AttrSetManID             => dek.readSets[String](dek.readString)
       case _: AttrSetManString         => dek.readSets[String](dek.readString)
       case _: AttrSetManInt            => dek.readSets[Int](dek.readInt)
       case _: AttrSetManLong           => dek.readSets[Long](dek.readLong)
@@ -393,6 +398,7 @@ case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuff
 
   private def unpickleAttrSetOpt(a: AttrSetOpt): () => Any = {
     a match {
+      case _: AttrSetOptID             => dek.readOptSet(dek.readString)
       case _: AttrSetOptString         => dek.readOptSet(dek.readString)
       case _: AttrSetOptInt            => dek.readOptSet(dek.readInt)
       case _: AttrSetOptLong           => dek.readOptSet(dek.readLong)

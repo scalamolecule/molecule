@@ -1,6 +1,5 @@
 package molecule.sql.h2.compliance.aggr
 
-import molecule.coreTests.spi.aggr.one.AggrOne_id
 import molecule.coreTests.spi.aggr.one.any._
 import molecule.sql.h2.setup.TestAsync_h2
 
@@ -27,5 +26,3 @@ object AggrOne_Byte extends AggrOne_Byte_ with TestAsync_h2
 object AggrOne_Short extends AggrOne_Short_ with TestAsync_h2
 object AggrOne_Char extends AggrOne_Char_ with TestAsync_h2
 object AggrOne_ref extends AggrOne_ref_ with TestAsync_h2
-
-object AggrOne_id extends AggrOne_id with TestAsync_h2

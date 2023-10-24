@@ -15,22 +15,22 @@ trait FilterAttr_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "equal (apply)" - types { implicit conn =>
       for {
-        _ <- Ns.s.id(Ns.long).query.get
+        _ <- Ns.s.id(Ns.string).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Filter attributes not allowed to involve entity ids."
           }
 
-        _ <- Ns.s.long(Ns.id).query.get
+        _ <- Ns.s.string(Ns.id).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Filter attributes not allowed to involve entity ids."
           }
 
         // Cross reference filter attributes not allowed either
-        _ <- Ns.s.long(Ref.id_).Ref.id.query.get
+        _ <- Ns.s.string(Ref.id_).Ref.id.query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Filter attributes not allowed to involve entity ids."
           }
-        _ <- Ns.s.long_(Ref.id_).Ref.id.query.get
+        _ <- Ns.s.string_(Ref.id_).Ref.id.query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Filter attributes not allowed to involve entity ids."
           }
@@ -40,12 +40,12 @@ trait FilterAttr_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "not equal" - types { implicit conn =>
       for {
-        _ <- Ns.s.id.not(Ns.long).query.get
+        _ <- Ns.s.id.not(Ns.string).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Filter attributes not allowed to involve entity ids."
           }
 
-        _ <- Ns.s.long.not(Ns.id).query.get
+        _ <- Ns.s.string.not(Ns.id).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Filter attributes not allowed to involve entity ids."
           }
@@ -55,12 +55,12 @@ trait FilterAttr_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "<" - types { implicit conn =>
       for {
-        _ <- Ns.s.id.<(Ns.long).query.get
+        _ <- Ns.s.id.<(Ns.string).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Filter attributes not allowed to involve entity ids."
           }
 
-        _ <- Ns.s.long.<(Ns.id).query.get
+        _ <- Ns.s.string.<(Ns.id).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Filter attributes not allowed to involve entity ids."
           }
@@ -70,12 +70,12 @@ trait FilterAttr_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "<=" - types { implicit conn =>
       for {
-        _ <- Ns.s.id.<=(Ns.long).query.get
+        _ <- Ns.s.id.<=(Ns.string).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Filter attributes not allowed to involve entity ids."
           }
 
-        _ <- Ns.s.long.<=(Ns.id).query.get
+        _ <- Ns.s.string.<=(Ns.id).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Filter attributes not allowed to involve entity ids."
           }
@@ -85,12 +85,12 @@ trait FilterAttr_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     ">" - types { implicit conn =>
       for {
-        _ <- Ns.s.id.>(Ns.long).query.get
+        _ <- Ns.s.id.>(Ns.string).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Filter attributes not allowed to involve entity ids."
           }
 
-        _ <- Ns.s.long.>(Ns.id).query.get
+        _ <- Ns.s.string.>(Ns.id).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Filter attributes not allowed to involve entity ids."
           }
@@ -100,12 +100,12 @@ trait FilterAttr_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     ">=" - types { implicit conn =>
       for {
-        _ <- Ns.s.id.>=(Ns.long).query.get
+        _ <- Ns.s.id.>=(Ns.string).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Filter attributes not allowed to involve entity ids."
           }
 
-        _ <- Ns.s.long.>=(Ns.id).query.get
+        _ <- Ns.s.string.>=(Ns.id).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Filter attributes not allowed to involve entity ids."
           }

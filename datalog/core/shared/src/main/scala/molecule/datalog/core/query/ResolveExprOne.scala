@@ -14,6 +14,7 @@ trait ResolveExprOne[Tpl]
     attrIndex += 1
     val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
     attr match {
+      case at: AttrOneManID             => man(attr, e, a, at.vs, resId, sortOneID(at, attrIndex))
       case at: AttrOneManString         => man(attr, e, a, at.vs, resString, sortOneString(at, attrIndex))
       case at: AttrOneManInt            => man(attr, e, a, at.vs, resInt, intSorter(at, attrIndex))
       case at: AttrOneManLong           => man(attr, e, a, at.vs, resLong, sortOneLong(at, attrIndex))
@@ -45,6 +46,7 @@ trait ResolveExprOne[Tpl]
     if (isNestedOpt)
       throw ModelError("Tacit attributes not allowed in optional nested queries. Found: " + attr.name + "_")
     attr match {
+      case at: AttrOneTacID             => tac(attr, e, a, at.vs, resId)
       case at: AttrOneTacString         => tac(attr, e, a, at.vs, resString)
       case at: AttrOneTacInt            => tac(attr, e, a, at.vs, resInt)
       case at: AttrOneTacLong           => tac(attr, e, a, at.vs, resLong)
@@ -77,6 +79,7 @@ trait ResolveExprOne[Tpl]
     hasOptAttr = true // to avoid redundant None's
     val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
     attr match {
+      case at: AttrOneOptID             => opt(attr, e, a, at.vs, resOptId, sortOneOptId(at, attrIndex), sortOneID(at, attrIndex))
       case at: AttrOneOptString         => opt(attr, e, a, at.vs, resOptString, sortOneOptString(at, attrIndex), sortOneString(at, attrIndex))
       case at: AttrOneOptInt            => opt(attr, e, a, at.vs, resOptInt, sortOneOptInt(at, attrIndex), sortOneInt(at, attrIndex))
       case at: AttrOneOptLong           => opt(attr, e, a, at.vs, resOptLong, sorterOneOptLong(at, attrIndex), sorterOneLong(at, attrIndex))

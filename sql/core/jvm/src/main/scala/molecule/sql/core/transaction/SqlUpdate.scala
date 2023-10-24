@@ -196,7 +196,7 @@ trait SqlUpdate
         case Seq(set) =>
           // Tables are reversed in JdbcConn_JVM and we want to delete first
           manualTableDatas = List(
-            addJoins(joinTable, ns_id, refNs_id, id, set.asInstanceOf[Set[Long]]),
+            addJoins(joinTable, ns_id, refNs_id, id, set.map(_.asInstanceOf[String].toLong)),
             deleteJoins(joinTable, ns_id, id)
           )
 
@@ -243,7 +243,7 @@ trait SqlUpdate
       val refNs_id  = ss(refNs, "id")
       sets match {
         case Seq(set) => manualTableDatas = List(
-          addJoins(joinTable, ns_id, refNs_id, getUpdateId, set.asInstanceOf[Set[Long]])
+          addJoins(joinTable, ns_id, refNs_id, getUpdateId, set.map(_.asInstanceOf[String].toLong))
         )
         case Nil      => () // Add no ref ids
         case vs       => throw ExecutionError(
@@ -348,7 +348,7 @@ trait SqlUpdate
         val retractIds = retracts.mkString(s" AND $refNs_id IN (", ", ", ")")
         manualTableDatas = List(
           // Add joins regardless if the old ref id was present
-          addJoins(joinTable, ns_id, refNs_id, id, adds.asInstanceOf[Seq[Long]]),
+          addJoins(joinTable, ns_id, refNs_id, id, adds.map(_.asInstanceOf[String].toLong)),
           deleteJoins(joinTable, ns_id, id, retractIds)
         )
       } else {
@@ -441,11 +441,11 @@ trait SqlUpdate
   }
 
 
-  override def handleIds(ids1: Seq[Long]): Unit = {
+  override def handleIds(ids1: Seq[String]): Unit = {
     if (ids.nonEmpty) {
       throw ModelError(s"Can't apply entity ids twice in $update.")
     }
-    ids = ids1
+    ids = ids1.map(_.toLong)
   }
 
   override def handleUniqueFilterAttr(uniqueFilterAttr: AttrOneTac): Unit = {
@@ -496,6 +496,7 @@ trait SqlUpdate
     }
   }
 
+  override protected lazy val handleId             = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.toString)
   override protected lazy val handleString         = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.asInstanceOf[String])
   override protected lazy val handleInt            = (v: Any) => (ps: PS, n: Int) => ps.setInt(n, v.asInstanceOf[Int])
   override protected lazy val handleLong           = (v: Any) => (ps: PS, n: Int) => ps.setLong(n, v.asInstanceOf[Long])
@@ -519,6 +520,7 @@ trait SqlUpdate
   override protected lazy val handleShort          = (v: Any) => (ps: PS, n: Int) => ps.setShort(n, v.asInstanceOf[Short])
   override protected lazy val handleChar           = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.toString)
 
+  override protected lazy val extsId             = List("", "BIGINT")
   override protected lazy val extsString         = List("", "LONGVARCHAR")
   override protected lazy val extsInt            = List("", "INT")
   override protected lazy val extsLong           = List("", "BIGINT")

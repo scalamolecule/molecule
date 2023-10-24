@@ -9,10 +9,10 @@ import java.util.{Date, UUID, Iterator => jIterator, List => jList, Map => jMap,
 trait LambdasOne extends ResolveBase {
 
   // Datomic Java to Scala
+  protected lazy val j2sId            : AnyRef => AnyRef =  (v: AnyRef) => v.toString
   protected lazy val j2sString        : AnyRef => AnyRef = identity
   // Datomic can return both Integer or Long
-  protected lazy val j2sInt           : AnyRef => AnyRef =
-    (v: AnyRef) => v.toString.toInt.asInstanceOf[AnyRef]
+  protected lazy val j2sInt           : AnyRef => AnyRef = (v: AnyRef) => v.toString.toInt.asInstanceOf[AnyRef]
   protected lazy val j2sLong          : AnyRef => AnyRef = identity
   protected lazy val j2sFloat         : AnyRef => AnyRef = {
     case v: jFloat  => v.asInstanceOf[AnyRef]
@@ -50,6 +50,7 @@ trait LambdasOne extends ResolveBase {
 
 
   // Single sample value extracted from clojure LazySeq
+  protected lazy val firstIdx           : AnyRef => AnyRef = first((v: Any) => v.toString)
   protected lazy val firstString        : AnyRef => AnyRef = first
   protected lazy val firstInt           : AnyRef => AnyRef = first
   protected lazy val firstLong          : AnyRef => AnyRef = first
@@ -80,6 +81,7 @@ trait LambdasOne extends ResolveBase {
     (v: AnyRef) => value(v.asInstanceOf[jList[_]].get(0)).asInstanceOf[AnyRef]
 
 
+  protected lazy val set2setId            : AnyRef => AnyRef = set2set((v: AnyRef) => v.toString)
   protected lazy val set2setString        : AnyRef => AnyRef = set2set
   protected lazy val set2setInt           : AnyRef => AnyRef = set2set((v: AnyRef) => v.toString.toInt)
   protected lazy val set2setLong          : AnyRef => AnyRef = set2set
@@ -109,6 +111,7 @@ trait LambdasOne extends ResolveBase {
   private def set2set(value: AnyRef => Any): AnyRef => AnyRef =
     (v: AnyRef) => v.asInstanceOf[jSet[_]].toArray.map(value).toSet
 
+  protected lazy val vector2setId            : AnyRef => AnyRef = jvector2set((v: AnyRef) => v.toString)
   protected lazy val vector2setString        : AnyRef => AnyRef = jvector2set
   protected lazy val vector2setInt           : AnyRef => AnyRef = jvector2set((v: AnyRef) => v.toString.toInt)
   protected lazy val vector2setLong          : AnyRef => AnyRef = jvector2set
@@ -142,6 +145,7 @@ trait LambdasOne extends ResolveBase {
     vector2set: AnyRef => AnyRef,
   )
 
+  lazy val resId            : ResOne[String]         = ResOne("String", dId, s2jId, j2sId, firstIdx, set2setId, vector2setId)
   lazy val resString        : ResOne[String]         = ResOne("String", dString, s2jString, j2sString, firstString, set2setString, vector2setString)
   lazy val resInt           : ResOne[Int]            = ResOne("Int", dInt, s2jInt, j2sInt, firstInt, set2setInt, vector2setInt)
   lazy val resLong          : ResOne[Long]           = ResOne("Long", dLong, s2jLong, j2sLong, firstLong, set2setLong, vector2setLong)
@@ -166,6 +170,36 @@ trait LambdasOne extends ResolveBase {
   lazy val resChar          : ResOne[Char]           = ResOne("Char", dChar, s2jChar, j2sChar, firstChar, set2setChar, vector2setChar)
 
 
+  private lazy val j2sOptId             = (v: AnyRef) => v match {
+    case null          => Option.empty[String]
+    case v: jLong      => Some(v.toString)
+    case v: jMap[_, _] =>
+      v.values.iterator.next match {
+        case l: Long => Some(l.toString)
+        // ref
+        case map: jMap[_, _] =>
+          /*
+          // If a ref is owned (:db/isComponent true), Datomic returns all nested values in a pull for an optional
+          // ref value. So, the id can hide anywhere in the map entries and we need to extract it.
+          // We can't call get(<key>) on the map since it needs a clojure.lang.Keyword that we can't use in a shared module
+          {:ns/ownedRef {:ns/attr1 6, :ns/attr2 7, :db/id 17592186045419, :ns/attr3 8}}
+          -------
+          // If the ref is not owned, Datomic only returns the id
+          {:ns/ref {:db/id 17592186045422}}
+           */
+          var continue = true
+          var id       = ""
+          val it       = map.entrySet().iterator()
+          while (it.hasNext && continue) {
+            val pair = it.next()
+            if (pair.getKey.toString == ":db/id") {
+              continue = false
+              id = pair.getValue.toString
+            }
+          }
+          Some(id)
+      }
+  }
   private lazy val j2sOptString         = (v: AnyRef) => v match {
     case null          => Option.empty[String]
     case v: String     => Some(v) // attr_?(<expr>))
@@ -189,7 +223,7 @@ trait LambdasOne extends ResolveBase {
           /*
           // If a ref is owned (:db/isComponent true), Datomic returns all nested values in a pull for an optional
           // ref value. So, the id can hide anywhere in the map entries and we need to extract it.
-          // We can't call get(<key>) on the map since it needs a clojure.lang.Keyword that we can use in a shared module
+          // We can't call get(<key>) on the map since it needs a clojure.lang.Keyword that we can't use in a shared module
           {:ns/ownedRef {:ns/attr1 6, :ns/attr2 7, :db/id 17592186045419, :ns/attr3 8}}
           -------
           // If the ref is not owned, Datomic only returns the id
@@ -312,6 +346,7 @@ trait LambdasOne extends ResolveBase {
     j2s: AnyRef => AnyRef
   )
 
+  lazy val resOptId            : ResOneOpt[String]         = ResOneOpt("String", dId, s2jId, j2sOptId)
   lazy val resOptString        : ResOneOpt[String]         = ResOneOpt("String", dString, s2jString, j2sOptString)
   lazy val resOptInt           : ResOneOpt[Int]            = ResOneOpt("Int", dInt, s2jInt, j2sOptInt)
   lazy val resOptLong          : ResOneOpt[Long]           = ResOneOpt("Long", dLong, s2jLong, j2sOptLong)
@@ -338,6 +373,11 @@ trait LambdasOne extends ResolveBase {
 
   // Nested opt ---------------------------------------------------------------------
 
+  lazy val it2Id2    : AnyRef => AnyRef = {
+    case v: jLong => v.toString.asInstanceOf[AnyRef]
+    case `none`   => nullValue
+    case other    => unexpectedValue(other)
+  }
   lazy val it2String2: AnyRef => AnyRef = {
     case `none`    => nullValue
     case v: String => v.asInstanceOf[AnyRef]
@@ -352,6 +392,11 @@ trait LambdasOne extends ResolveBase {
   }
 
 
+  lazy val it2Id            : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case `none`   => nullValue
+    case v: jLong => v.toString
+    case other    => unexpectedValue(other)
+  }
   lazy val it2String        : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
     case `none`    => nullValue
     case v: String => v
@@ -466,6 +511,10 @@ trait LambdasOne extends ResolveBase {
   }
 
 
+  lazy val it2OptId            : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case `none` => None
+    case v      => Some(v.toString)
+  }
   lazy val it2OptString        : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
     case `none` => None
     case v      => Some(v.toString)

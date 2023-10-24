@@ -89,7 +89,7 @@ trait RequiredAttrs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           }
 
         // Required ref applied
-        _ <- Require.int(1).refB(42L).save.transact
+        _ <- Require.int(1).refB("42").save.transact
 
         // Required ref constructed
         _ <- Require.int(1).RefB.i(2).save.transact
@@ -99,7 +99,7 @@ trait RequiredAttrs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "Ref/ref" - validation { implicit conn =>
       for {
-        _ <- Require.ref1(1L).save.transact
+        _ <- Require.ref1("1").save.transact
           .map(_ ==> "Unexpected success").recover {
             case ModelError(error) =>
               error ==>
@@ -111,10 +111,10 @@ trait RequiredAttrs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           }
 
         // 2 required refs applied
-        _ <- Require.ref1(1L).ref2(2L).save.transact
+        _ <- Require.ref1("1").ref2("2").save.transact
 
         // 1 required ref applied, 1 constructed
-        _ <- Require.ref1(1L).Ref2.luckyNumber(7).save.transact
+        _ <- Require.ref1("1").Ref2.luckyNumber(7).save.transact
 
         // 2 required refs constructed
         _ <- Require.i(0).Ref1.i(1)._Require.Ref2.luckyNumber(7).save.transact

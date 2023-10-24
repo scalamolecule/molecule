@@ -34,7 +34,7 @@ trait FilterOne_ref_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.ref(Seq(ref1, ref2)).query.get.map(_ ==> List(a, b))
         _ <- Ns.i.a1.ref(Seq(ref1, ref0)).query.get.map(_ ==> List(a))
         // Empty Seq of args matches no values
-        _ <- Ns.i.a1.ref(Seq.empty[Long]).query.get.map(_ ==> List())
+        _ <- Ns.i.a1.ref(Seq.empty[String]).query.get.map(_ ==> List())
 
         // Find values not matching
         _ <- Ns.i.a1.ref.not(ref0).query.get.map(_ ==> List(a, b, c))
@@ -53,7 +53,7 @@ trait FilterOne_ref_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.ref.not(Seq(ref1, ref2)).query.get.map(_ ==> List(c))
         _ <- Ns.i.a1.ref.not(Seq(ref2, ref3)).query.get.map(_ ==> List(a))
         // Empty Seq of negation args matches all values
-        _ <- Ns.i.a1.ref.not(Seq.empty[Long]).query.get.map(_ ==> List(a, b, c))
+        _ <- Ns.i.a1.ref.not(Seq.empty[String]).query.get.map(_ ==> List(a, b, c))
 
         // Find values in range
         _ <- Ns.i.a1.ref.<(ref2).query.get.map(_ ==> List(a))
@@ -91,7 +91,7 @@ trait FilterOne_ref_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.ref_(Seq(ref1, ref2)).query.get.map(_ ==> List(a, b))
         _ <- Ns.i.a1.ref_(Seq(ref1, ref0)).query.get.map(_ ==> List(a))
         // Empty Seq of args matches no values
-        _ <- Ns.i.a1.ref_(Seq.empty[Long]).query.get.map(_ ==> List())
+        _ <- Ns.i.a1.ref_(Seq.empty[String]).query.get.map(_ ==> List())
 
         // Match non-matching values without returning them
         _ <- Ns.i.a1.ref_.not(ref0).query.get.map(_ ==> List(a, b, c))
@@ -110,7 +110,7 @@ trait FilterOne_ref_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.ref_.not(Seq(ref1, ref2)).query.get.map(_ ==> List(c))
         _ <- Ns.i.a1.ref_.not(Seq(ref2, ref3)).query.get.map(_ ==> List(a))
         // Empty Seq of negation args matches all asserted values (non-null)
-        _ <- Ns.i.a1.ref_.not(Seq.empty[Long]).query.get.map(_ ==> List(a, b, c))
+        _ <- Ns.i.a1.ref_.not(Seq.empty[String]).query.get.map(_ ==> List(a, b, c))
 
         // Match value ranges without returning them
         _ <- Ns.i.a1.ref_.<(ref2).query.get.map(_ ==> List(a))
@@ -125,7 +125,7 @@ trait FilterOne_ref_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       val a = (1, Some(ref1))
       val b = (2, Some(ref2))
       val c = (3, Some(ref3))
-      val x = (4, Option.empty[Long])
+      val x = (4, Option.empty[String])
       for {
         _ <- Ns.i.ref_?.insert(List(a, b, c, x)).transact
 
@@ -141,10 +141,10 @@ trait FilterOne_ref_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.ref_?(Some(Seq(ref1, ref2))).query.get.map(_ ==> List(a, b))
         _ <- Ns.i.a1.ref_?(Some(Seq(ref1, ref0))).query.get.map(_ ==> List(a))
         // Empty Seq of args matches no values
-        _ <- Ns.i.a1.ref_?(Some(Seq.empty[Long])).query.get.map(_ ==> List())
+        _ <- Ns.i.a1.ref_?(Some(Seq.empty[String])).query.get.map(_ ==> List())
         // None matches non-asserted/null values
-        _ <- Ns.i.a1.ref_?(Option.empty[Long]).query.get.map(_ ==> List(x))
-        _ <- Ns.i.a1.ref_?(Option.empty[Seq[Long]]).query.get.map(_ ==> List(x))
+        _ <- Ns.i.a1.ref_?(Option.empty[String]).query.get.map(_ ==> List(x))
+        _ <- Ns.i.a1.ref_?(Option.empty[Seq[String]]).query.get.map(_ ==> List(x))
 
         // Find optional values not matching
         _ <- Ns.i.a1.ref_?.not(Some(ref0)).query.get.map(_ ==> List(a, b, c))
@@ -160,10 +160,10 @@ trait FilterOne_ref_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.ref_?.not(Some(Seq(ref1, ref2))).query.get.map(_ ==> List(c))
         _ <- Ns.i.a1.ref_?.not(Some(Seq(ref2, ref3))).query.get.map(_ ==> List(a))
         // Empty Seq of negation args matches all asserted values (non-null)
-        _ <- Ns.i.a1.ref_?.not(Some(Seq.empty[Long])).query.get.map(_ ==> List(a, b, c))
+        _ <- Ns.i.a1.ref_?.not(Some(Seq.empty[String])).query.get.map(_ ==> List(a, b, c))
         // Negating None matches all asserted values (non-null)
-        _ <- Ns.i.a1.ref_?.not(Option.empty[Long]).query.get.map(_ ==> List(a, b, c))
-        _ <- Ns.i.a1.ref_?.not(Option.empty[Seq[Long]]).query.get.map(_ ==> List(a, b, c))
+        _ <- Ns.i.a1.ref_?.not(Option.empty[String]).query.get.map(_ ==> List(a, b, c))
+        _ <- Ns.i.a1.ref_?.not(Option.empty[Seq[String]]).query.get.map(_ ==> List(a, b, c))
 
         // Find optional values in range
         _ <- Ns.i.a1.ref_?.<(Some(ref2)).query.get.map(_ ==> List(a))

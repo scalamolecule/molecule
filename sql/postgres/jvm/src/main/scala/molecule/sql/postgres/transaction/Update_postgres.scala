@@ -100,7 +100,7 @@ trait Update_postgres extends SqlUpdate { self: ResolveUpdate =>
         val retractIds = retracts.mkString(s" AND $refNs_id IN (", ", ", ")")
         manualTableDatas = List(
           // Add joins regardless if the old ref id was present
-          addJoins(joinTable, ns_id, refNs_id, id, adds.asInstanceOf[Seq[Long]]),
+          addJoins(joinTable, ns_id, refNs_id, id, adds.map(_.asInstanceOf[String].toLong)),
           deleteJoins(joinTable, ns_id, id, retractIds)
         )
       } else {

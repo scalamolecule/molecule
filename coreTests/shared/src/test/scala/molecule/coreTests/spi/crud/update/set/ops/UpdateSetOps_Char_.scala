@@ -105,12 +105,12 @@ trait UpdateSetOps_Char_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.chars.query.get.map(_.head ==> Set(char1, char5, char6, char7, char8, char9))
 
         // Can't swap duplicate from/to values
-        _ <- Ns(42).chars.swap(char1 -> char2, char1 -> char3).update.transact
+        _ <- Ns("42").chars.swap(char1 -> char2, char1 -> char3).update.transact
           .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
             err ==> "Can't swap from duplicate retract values."
           }
 
-        _ <- Ns(42).chars.swap(char1 -> char3, char2 -> char3).update.transact
+        _ <- Ns("42").chars.swap(char1 -> char3, char2 -> char3).update.transact
           .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
             err ==> "Can't swap to duplicate replacement values."
           }

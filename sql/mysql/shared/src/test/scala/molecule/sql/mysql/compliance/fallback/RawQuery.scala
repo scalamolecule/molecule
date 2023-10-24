@@ -223,8 +223,8 @@ object RawQuery extends TestSuite_mysql {
     "Optional Set of refs" - types { implicit conn =>
       for {
         _ <- Ns.i.refs_?.insert(
-          (1, Option.empty[Set[Long]]),
-          (2, Some(Set.empty[Long])),
+          (1, Option.empty[Set[String]]),
+          (2, Some(Set.empty[String])),
           (3, Some(Set(ref1, ref2))),
         ).transact
 

@@ -59,7 +59,7 @@ trait Update_mariadb extends SqlUpdate { self: ResolveUpdate =>
         case Seq(set) =>
           // Tables are reversed in JdbcConn_JVM and we want to delete first
           manualTableDatas = List(
-            addJoins(joinTable, ns_id, refNs_id, id, set.asInstanceOf[Set[Long]]),
+            addJoins(joinTable, ns_id, refNs_id, id, set.map(_.asInstanceOf[String].toLong)),
             deleteJoins(joinTable, ns_id, id)
           )
         case Nil      =>
@@ -103,7 +103,7 @@ trait Update_mariadb extends SqlUpdate { self: ResolveUpdate =>
       val refNs_id  = ss(refNs, "id")
       sets match {
         case Seq(set) => manualTableDatas = List(
-          addJoins(joinTable, ns_id, refNs_id, getUpdateId, set.asInstanceOf[Set[Long]])
+          addJoins(joinTable, ns_id, refNs_id, getUpdateId, set.map(_.asInstanceOf[String].toLong))
         )
         case Nil      => () // Add no ref ids
         case vs       => throw ExecutionError(
@@ -187,7 +187,7 @@ trait Update_mariadb extends SqlUpdate { self: ResolveUpdate =>
         val retractIds = retracts.mkString(s" AND $refNs_id IN (", ", ", ")")
         manualTableDatas = List(
           // Add joins regardless if the old ref id was present
-          addJoins(joinTable, ns_id, refNs_id, id, adds.asInstanceOf[Seq[Long]]),
+          addJoins(joinTable, ns_id, refNs_id, id, adds.map(_.asInstanceOf[String].toLong)),
           deleteJoins(joinTable, ns_id, id, retractIds)
         )
       } else {

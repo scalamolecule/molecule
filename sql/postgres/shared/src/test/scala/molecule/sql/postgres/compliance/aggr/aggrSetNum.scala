@@ -11,4 +11,3 @@ object AggrSetNum_BigInt extends AggrSetNum_BigInt_ with TestAsync_postgres
 object AggrSetNum_BigDecimal extends AggrSetNum_BigDecimal_ with TestAsync_postgres
 object AggrSetNum_Byte extends AggrSetNum_Byte_ with TestAsync_postgres
 object AggrSetNum_Short extends AggrSetNum_Short_ with TestAsync_postgres
-object AggrSetNum_ref extends AggrSetNum_ref with TestAsync_postgres

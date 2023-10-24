@@ -2,9 +2,11 @@ package molecule.sql.h2
 
 import molecule.base.error.ModelError
 import molecule.core.util.Executor._
+import molecule.coreTests.dataModels.core.dsl.Types.Ns
 import molecule.sql.h2.async._
 import molecule.sql.h2.setup.TestSuite_h2
 import utest._
+import scala.collection.immutable.List
 import scala.language.implicitConversions
 
 object AdhocJVM_h2 extends TestSuite_h2 {
@@ -18,25 +20,6 @@ object AdhocJVM_h2 extends TestSuite_h2 {
         _ <- Ns.int.query.i.get.map(_ ==> List(1))
 
 
-        //        _ <- rawTransact(
-        //          """UPDATE Ns SET
-        //            |  ints = (
-        //            |    SELECT JSON_MERGE(JSON_ARRAYAGG(t_1.vs), JSON_ARRAY(8))
-        //            |    FROM JSON_TABLE(Ns.ints, '$[*]' COLUMNS (vs int PATH '$')) t_1
-        //            |    WHERE t_1.vs NOT IN(6)
-        //            |  )
-        //            |WHERE Ns.id IN(1) AND
-        //            |  Ns.ints IS NOT NULL
-        //            |""".stripMargin)
-
-        //        _ <- rawQuery(
-        //          """SELECT DISTINCT
-        //            |  SUM(DISTINCT Ns.double)
-        //            |FROM Ns
-        //            |WHERE
-        //            |  Ns.double IS NOT NULL;
-        //            |""".stripMargin, true)
-
       } yield ()
     }
 
@@ -46,7 +29,13 @@ object AdhocJVM_h2 extends TestSuite_h2 {
     //        id <- A.i(1).B.i(2).C.i(3).save.transact.map(_.id)
     //        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
     //
+    //        // A
+    //        _ <- A(id).i(10).update.transact
+    //        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((10, 2, 3)))
     //
+    //        // A + B
+    //        _ <- A(id).i(11).B.i(20).update.transact
+    //        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((11, 20, 3)))
     //      } yield ()
     //    }
     //
@@ -58,13 +47,13 @@ object AdhocJVM_h2 extends TestSuite_h2 {
     //
     //      } yield ()
     //    }
-
-
+    //
+    //
     //    "validation" - validation { implicit conn =>
     //      import molecule.coreTests.dataModels.core.dsl.Validation._
-    //
     //      for {
     //        List(r1, r2) <- RefB.i.insert(2, 3).transact.map(_.ids)
+    //
     //
     //      } yield ()
     //    }

@@ -12,6 +12,7 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
     attrIndex += 1
     val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
     attr match {
+      case at: AttrSetManID             => man(attr, e, a, at.vs, resSetId)
       case at: AttrSetManString         => man(attr, e, a, at.vs, resSetString)
       case at: AttrSetManInt            => man(attr, e, a, at.vs, resSetInt)
       case at: AttrSetManLong           => man(attr, e, a, at.vs, resSetLong)
@@ -41,6 +42,7 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
   protected def resolveAttrSetTac(es: List[Var], attr: AttrSetTac): List[Var] = {
     val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
     attr match {
+      case at: AttrSetTacID             => tac(attr, e, a, at.vs, resSetId)
       case at: AttrSetTacString         => tac(attr, e, a, at.vs, resSetString)
       case at: AttrSetTacInt            => tac(attr, e, a, at.vs, resSetInt)
       case at: AttrSetTacLong           => tac(attr, e, a, at.vs, resSetLong)
@@ -73,6 +75,7 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
     hasOptAttr = true // to avoid redundant None's
     val (e, a) = (es.last, s":${attr.ns}/${attr.attr}")
     attr match {
+      case at: AttrSetOptID             => opt(e, a, at.op, at.vs, resOptSetId)
       case at: AttrSetOptString         => opt(e, a, at.op, at.vs, resOptSetString)
       case at: AttrSetOptInt            => opt(e, a, at.op, at.vs, resOptSetInt)
       case at: AttrSetOptLong           => opt(e, a, at.op, at.vs, resOptSetLong)

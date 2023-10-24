@@ -1,8 +1,9 @@
 package molecule.datalog.datomic
 
 import java.time.Duration
-import molecule.base.error.ExecutionError
+import molecule.base.error.{ExecutionError, ModelError}
 import molecule.core.util.Executor._
+import molecule.coreTests.dataModels.core.dsl.Refs.A
 import molecule.datalog.datomic.async._
 import molecule.datalog.datomic.setup.TestSuite_datomic
 import utest._
@@ -19,7 +20,6 @@ object AdhocJVM_datomic extends TestSuite_datomic {
         _ <- Ns.i(42).save.transact
         _ <- Ns.i.query.get.map(_ ==> List(42))
 
-
       } yield ()
     }
 
@@ -29,7 +29,6 @@ object AdhocJVM_datomic extends TestSuite_datomic {
     //      for {
     //        id <- A.i.apply(1).B.i(2).C.i(3).save.transact.map(_.id)
     //        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
-    //
     //
     //      } yield ()
     //    }
@@ -48,18 +47,24 @@ object AdhocJVM_datomic extends TestSuite_datomic {
 
     //    "validation" - validation { implicit conn =>
     //      import molecule.coreTests.dataModels.core.dsl.Validation._
-    //
     //      for {
-    //        _ <- Require.int1.errorMsg.insert(
-    //          (1, 2),
-    //          (2, 2),
-    //          (3, 2),
-    //        ).transact
     //
-    //        _ <- Variables.int1.errorMsg.query.inspect
-    //        _ <- Variables.int1.<(Variables.errorMsg).query.inspect
-    //        _ <- Variables.int1.<(Variables.errorMsg).query.get.map(_ ==> List())
+    //        List(r1, r2) <- RefB.i.insert(2, 3).transact.map(_.ids)
     //
+    //        id <- MandatoryRefsB.i(1).refsB(Set(r1, r2)).save.transact.map(_.ids)
+    //
+    //        // Mandatory refs can be removed as long as some ref ids remain
+    //        _ <- MandatoryRefsB(id).refsB.remove(r2).update.transact
+    //
+    //        // Last mandatory ref can't be removed. This can prevent creating orphan relationships.
+    //        _ <- MandatoryRefsB(id).refsB.remove(r1).update.i.transact
+    //          .map(_ ==> "Unexpected success").recover {
+    //            case ModelError(error) =>
+    //              error ==>
+    //                """Can't delete mandatory attributes (or remove last values of card-many attributes):
+    //                  |  MandatoryRefsB.refsB
+    //                  |""".stripMargin
+    //          }
     //
     //      } yield ()
     //    }

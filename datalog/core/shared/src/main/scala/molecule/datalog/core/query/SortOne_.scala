@@ -11,6 +11,24 @@ import molecule.boilerplate.ast.Model._
 
 trait SortOne_[Tpl] { self: Model2DatomicQuery[Tpl] =>
 
+  protected def sortOneID(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
+    attr.sort.map { sort =>
+      (
+        sort.last.toString.toInt,
+        sort.head match {
+          case 'a' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            (a: Row, b: Row) =>
+              a.get(i).asInstanceOf[jLong].compareTo(b.get(i).asInstanceOf[jLong])
+          case 'd' => (nestedIdsCount: Int) =>
+            val i = nestedIdsCount + attrIndex
+            (a: Row, b: Row) =>
+              b.get(i).asInstanceOf[jLong].compareTo(a.get(i).asInstanceOf[jLong])
+        }
+      )
+    }
+  }
+
   protected def sortOneString(attr: Attr, attrIndex: Int): Option[(Int, Int => (Row, Row) => Int)] = {
     attr.sort.map { sort =>
       (

@@ -9,6 +9,7 @@ import molecule.core.util.JavaConversions
 
 trait LambdasSet extends ResolveBase with JavaConversions {
 
+  protected lazy val j2sSetId            : AnyRef => AnyRef = (v: AnyRef) => Set(v.toString)
   protected lazy val j2sSetString        : AnyRef => AnyRef = (v: AnyRef) => Set(v)
   // Datomic can return both Integer or Long
   protected lazy val j2sSetInt           : AnyRef => AnyRef = (v: AnyRef) => Set(v.toString.toInt)
@@ -47,6 +48,7 @@ trait LambdasSet extends ResolveBase with JavaConversions {
   protected lazy val j2sSetChar          : AnyRef => AnyRef =
     (v: AnyRef) => Set(v.asInstanceOf[String].charAt(0))
 
+  private lazy val set2setId            : AnyRef => AnyRef = jset2set((v: AnyRef) => v.toString)
   private lazy val set2setString        : AnyRef => AnyRef = jset2set
   private lazy val set2setInt           : AnyRef => AnyRef = jset2set((v: AnyRef) => v.toString.toInt)
   private lazy val set2setLong          : AnyRef => AnyRef = jset2set
@@ -83,6 +85,7 @@ trait LambdasSet extends ResolveBase with JavaConversions {
     (v: AnyRef) => v.asInstanceOf[jSet[_]].toArray.map(value).toSet
 
 
+  private lazy val set2setsId            : AnyRef => AnyRef = jset2setsT[String](_.asInstanceOf[String])
   private lazy val set2setsString        : AnyRef => AnyRef = jset2setsT[String](_.asInstanceOf[String])
   private lazy val set2setsInt           : AnyRef => AnyRef = jset2setsT[Int](_.toString.toInt)
   private lazy val set2setsLong          : AnyRef => AnyRef = jset2setsT[Long](_.asInstanceOf[Long])
@@ -118,6 +121,7 @@ trait LambdasSet extends ResolveBase with JavaConversions {
   }
 
 
+  private lazy val vector2setId            : AnyRef => AnyRef = jvector2set((v: AnyRef) => v.toString)
   private lazy val vector2setString        : AnyRef => AnyRef = jvector2set
   private lazy val vector2setInt           : AnyRef => AnyRef = jvector2set((v: AnyRef) => v.toString.toInt)
   private lazy val vector2setLong          : AnyRef => AnyRef = jvector2set
@@ -152,6 +156,7 @@ trait LambdasSet extends ResolveBase with JavaConversions {
     j2sSet: AnyRef => AnyRef
   )
 
+  lazy val resSetId            : ResSet[String]         = ResSet("String", dId, s2jId, set2setId, set2setsId, vector2setId, j2sSetId)
   lazy val resSetString        : ResSet[String]         = ResSet("String", dString, s2jString, set2setString, set2setsString, vector2setString, j2sSetString)
   lazy val resSetInt           : ResSet[Int]            = ResSet("Int", dInt, s2jInt, set2setInt, set2setsInt, vector2setInt, j2sSetInt)
   lazy val resSetLong          : ResSet[Long]           = ResSet("Long", dLong, s2jLong, set2setLong, set2setsLong, vector2setLong, j2sSetLong)
@@ -178,6 +183,45 @@ trait LambdasSet extends ResolveBase with JavaConversions {
 
   lazy val any2double: AnyRef => AnyRef = {
     ((v: AnyRef) => v.toString.toDouble).asInstanceOf[AnyRef => AnyRef]
+  }
+
+  private lazy val j2sOpSetId = (v: AnyRef) => v match {
+    case null            => Option.empty[Set[String]]
+    case set: jSet[_]    => Some(set.asScala.map(_.toString))
+    case map: jMap[_, _] =>
+      val list = map.values.iterator.next.asInstanceOf[jList[_]].asScala
+      list.head match {
+        case _: jLong => Some(list.map(_.toString).toSet)
+        // Refs
+        case _: jMap[_, _] =>
+          /*
+          // If a ref is owned (:db/isComponent true), Datomic returns all nested values in a pull for an optional
+          // ref value. So, the id can hide anywhere in the map entries and we need to extract it.
+          // We can't call get(<key>) on the map since it needs a clojure.lang.Keyword that we can use in a shared module
+          {:ns/ownedRef {:ns/attr1 6, :ns/attr2 7, :db/id 17592186045419, :ns/attr3 8}}
+          -------
+          // If the ref is not owned, Datomic only returns the id
+          {:ns/ref {:db/id 17592186045422}}
+           */
+          //          var ids = Set.empty[Long]
+          var ids = Set.empty[String]
+          list.foreach {
+            case m: jMap[_, _] =>
+              var continue = true
+              val it       = m.entrySet().iterator()
+              while (it.hasNext && continue) {
+                val pair = it.next()
+                if (pair.getKey.toString == ":db/id") {
+                  continue = false
+                  ids = ids + pair.getValue.toString
+                }
+              }
+            case other         => throw new Exception(
+              s"Unexpected set values of type ${other.getClass}: " + other
+            )
+          }
+          Some(ids)
+      }
   }
 
   private lazy val j2sOpSetString = (v: AnyRef) => v match {
@@ -335,6 +379,7 @@ trait LambdasSet extends ResolveBase with JavaConversions {
     j2s: AnyRef => AnyRef,
   )
 
+  lazy val resOptSetId            : ResSetOpt[String]         = ResSetOpt("String", dId, s2jId, j2sOpSetId)
   lazy val resOptSetString        : ResSetOpt[String]         = ResSetOpt("String", dString, s2jString, j2sOpSetString)
   lazy val resOptSetInt           : ResSetOpt[Int]            = ResSetOpt("Int", dInt, s2jInt, j2sOpSetInt)
   lazy val resOptSetLong          : ResSetOpt[Long]           = ResSetOpt("Long", dLong, s2jLong, j2sOpSetLong)
@@ -361,6 +406,11 @@ trait LambdasSet extends ResolveBase with JavaConversions {
 
   // Nested opt ---------------------------------------------------------------------
 
+  lazy val it2SetId            : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case vs: jList[_] => vs.asScala.map(v => v.asInstanceOf[Long]).toSet
+    case `none`       => nullValue
+    case other        => unexpectedValue(other)
+  }
   lazy val it2SetString        : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
     case `none`       => nullValue
     case vs: jList[_] => vs.asScala.map(v => v.toString).toSet
@@ -474,6 +524,10 @@ trait LambdasSet extends ResolveBase with JavaConversions {
   }
 
 
+  lazy val it2OptSetId            : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case `none`       => None
+    case vs: jList[_] => Some(vs.asScala.map(v => v.asInstanceOf[Long]).toSet)
+  }
   lazy val it2OptSetString        : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
     case `none`       => None
     case vs: jList[_] => Some(vs.asScala.map(v => v.asInstanceOf[String]).toSet)
