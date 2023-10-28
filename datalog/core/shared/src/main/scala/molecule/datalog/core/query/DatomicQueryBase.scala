@@ -4,13 +4,13 @@ import java.util.{Iterator => jIterator, List => jList}
 import molecule.base.error._
 import molecule.base.util.BaseHelpers
 import molecule.boilerplate.ast.Model._
-import molecule.core.query.Model2Query
+import molecule.core.query.Model2QueryBase
 import molecule.core.util.JavaConversions
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
 
-trait DatomicQueryBase extends BaseHelpers with JavaConversions { self: Model2Query =>
+trait DatomicQueryBase extends BaseHelpers with JavaConversions { self: Model2QueryBase =>
 
   // Datomic row type
   type Row = jList[AnyRef]

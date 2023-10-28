@@ -4,7 +4,7 @@ import molecule.base.api.Schema
 import molecule.core.marshalling.{JdbcProxy, MongoProxy, RpcRequest}
 import molecule.core.spi.Conn
 import molecule.coreTests.setup.CoreTestSuite
-import molecule.document.mongodb.facade.JdbcConn_JS
+import molecule.document.mongodb.facade.MongoConn_JS
 import scala.util.Random
 
 

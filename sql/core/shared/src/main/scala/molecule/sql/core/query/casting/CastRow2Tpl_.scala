@@ -1,12 +1,12 @@
 // GENERATED CODE ********************************
 package molecule.sql.core.query.casting
 
-import molecule.core.query.Model2Query
+import molecule.core.query.Model2QueryBase
 import molecule.sql.core.query.SqlQueryBase
 import scala.annotation.tailrec
 
 
-trait CastRow2Tpl_ { self: Model2Query with SqlQueryBase =>
+trait CastRow2Tpl_ { self: Model2QueryBase with SqlQueryBase =>
 
   @tailrec
   final private def resolveArities(

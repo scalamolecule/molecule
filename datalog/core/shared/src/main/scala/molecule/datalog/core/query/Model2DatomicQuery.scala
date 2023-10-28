@@ -3,14 +3,14 @@ package molecule.datalog.core.query
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
-import molecule.core.query.Model2Query
+import molecule.core.query.Model2QueryBase
 import molecule.datalog.core.query.casting._
 import scala.annotation.tailrec
 import scala.collection.mutable.ArrayBuffer
 
 
 class Model2DatomicQuery[Tpl](elements0: List[Element])
-  extends Model2Query
+  extends Model2QueryBase
     with ResolveExprOne[Tpl]
     with ResolveExprOne_id[Tpl]
     with ResolveExprSet[Tpl]

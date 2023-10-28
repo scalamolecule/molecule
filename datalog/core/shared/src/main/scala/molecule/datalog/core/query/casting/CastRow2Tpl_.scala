@@ -1,12 +1,12 @@
 // GENERATED CODE ********************************
 package molecule.datalog.core.query.casting
 
-import molecule.core.query.Model2Query
+import molecule.core.query.Model2QueryBase
 import molecule.datalog.core.query.DatomicQueryBase
 import scala.annotation.tailrec
 
 
-trait CastRow2Tpl_ { self: Model2Query with DatomicQueryBase =>
+trait CastRow2Tpl_ { self: Model2QueryBase with DatomicQueryBase =>
 
   @tailrec
   final private def resolveArities(

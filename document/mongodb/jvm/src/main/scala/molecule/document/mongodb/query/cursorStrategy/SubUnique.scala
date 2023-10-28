@@ -5,8 +5,8 @@ import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.util.FutureUtils
-import molecule.document.mongodb.facade.MongoDBConn_JVM
-import molecule.document.mongodb.query.{CursorUtils, SqlQueryResolve, Model2SqlQuery, SqlQueryBase}
+import molecule.document.mongodb.facade.MongoConn_JVM
+import molecule.document.mongodb.query.{CursorUtils, Model2MongoQuery, QueryResolve_mongodb}
 
 /**
  * Molecule has a unique attribute that is not sorted first.
@@ -30,12 +30,12 @@ case class SubUnique[Tpl](
   elements: List[Element],
   optLimit: Option[Int],
   cursor: String,
-  m2q: Model2SqlQuery[Tpl] with SqlQueryBase
-) extends SqlQueryResolve[Tpl](elements, m2q)
+  m2q: Model2MongoQuery[Tpl]
+) extends QueryResolve_mongodb[Tpl](elements, m2q)
   with FutureUtils with CursorUtils with MoleculeLogging {
 
   def getPage(allTokens: List[String], limit: Int)
-             (implicit conn: MongoDBConn_JVM)
+             (implicit conn: MongoConn_JVM)
   : (List[Tpl], String, Boolean) = try {
     val forward     = limit > 0
     val attrsTokens = allTokens.drop(2).grouped(13).toList.sortBy(_(2))

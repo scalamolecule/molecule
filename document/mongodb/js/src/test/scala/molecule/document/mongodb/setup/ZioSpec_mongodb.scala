@@ -4,7 +4,7 @@ import molecule.base.api.Schema
 import molecule.core.marshalling.{JdbcProxy, RpcRequest}
 import molecule.core.spi.Conn
 import molecule.coreTests.setup.CoreTestZioSpecBase
-import molecule.document.mongodb.facade.JdbcConn_JS
+import molecule.document.mongodb.facade.MongoConn_JS
 import zio.ZLayer
 import scala.util.Random
 

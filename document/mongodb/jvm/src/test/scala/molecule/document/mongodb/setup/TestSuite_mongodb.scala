@@ -1,6 +1,5 @@
 package molecule.document.mongodb.setup
 
-//import com.dimafeng.testcontainers.MongoDBContainer
 
 import molecule.base.api.Schema
 import molecule.base.util.BaseHelpers
@@ -9,8 +8,6 @@ import molecule.coreTests.dataModels.core.schema._
 import molecule.coreTests.setup.CoreTestSuite
 import molecule.document.mongodb.facade.MongoHandler_JVM
 import molecule.document.mongodb.setup.{Connection_mongodb => c}
-//import org.mongodb.scala.MongoClient
-//import org.mongodb.scala.bson.BsonDocument
 
 
 trait TestSuite_mongodb extends CoreTestSuite with BaseHelpers {
@@ -21,12 +18,12 @@ trait TestSuite_mongodb extends CoreTestSuite with BaseHelpers {
 
   override def utestAfterAll(): Unit = {
     println("====== closing MongoDB client ======")
-    //    c.mongoClient.close()
+    c.mongoClient.close()
   }
 
 
   override def inMem[T](test: Conn => T, schema: Schema): T = {
-//        c.collection.drop()
+    //        c.collection.drop()
 
     val conn = schema match {
       case TypesSchema      => MongoHandler_JVM.recreateDb(c.conn_Types)

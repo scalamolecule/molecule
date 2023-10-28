@@ -1,8 +1,8 @@
 package molecule.document.mongodb.marshalling
 
 import java.nio.ByteBuffer
-import java.sql.{Connection, ResultSet => Row}
-import molecule.base.error.{MoleculeError, ValidationErrors}
+import java.sql.Connection
+import molecule.base.error.MoleculeError
 import molecule.boilerplate.ast.Model._
 import molecule.core.action.{Query, QueryCursor, QueryOffset}
 import molecule.core.marshalling.Boopicklers._
@@ -12,11 +12,8 @@ import molecule.core.spi.TxReport
 import molecule.core.transaction._
 import molecule.core.util.Executor._
 import molecule.core.util.FutureUtils
-import molecule.document.mongodb.facade.MongoDBConn_JVM
-import molecule.document.mongodb.javaSql.ResultSetImpl
-import molecule.document.mongodb.spi.SpiHelpers
-import molecule.document.mongodb.transaction.{SqlBase_JVM, SqlUpdateSetValidator}
 import molecule.document.mongodb.async._
+import molecule.document.mongodb.facade.MongoConn_JVM
 import molecule.document.mongodb.transaction._
 import scala.annotation.nowarn
 import scala.concurrent.{Future, ExecutionContext => EC}
@@ -24,9 +21,7 @@ import scala.concurrent.{Future, ExecutionContext => EC}
 
 object Rpc_mongodb
   extends MoleculeRpc
-    with SqlBase_JVM
-    with SpiHelpers
-    with SqlUpdateSetValidator
+    with Base_JVM_mongodb
     with FutureUtils {
 
   /**
@@ -77,7 +72,7 @@ object Rpc_mongodb
     for {
       conn <- getConn(proxy)
       data = new ResolveSave with Save_mongodb {
-        override lazy val sqlConn: Connection = conn.sqlConn
+//        override lazy val sqlConn: Connection = conn.sqlConn
       }.getData(elements)
       txReport <- conn.transact_async(data)
     } yield txReport
@@ -99,7 +94,7 @@ object Rpc_mongodb
         case Left(err)   => throw err // catched in outer either wrapper
       }
       data = new ResolveInsert with Insert_mongodb {
-        override lazy val sqlConn: Connection = conn.sqlConn
+//        override lazy val sqlConn: Connection = conn.sqlConn
       }.getData(proxy.nsMap, tplElements, tplProducts)
       txReport <- conn.transact_async(data)
     } yield txReport
@@ -145,7 +140,7 @@ object Rpc_mongodb
   private def refUpdates(
     elements: List[Element],
     isUpsert: Boolean = false
-  )(implicit conn: MongoDBConn_JVM, ec: EC): Future[() => Map[List[String], List[Long]]] = {
+  )(implicit conn: MongoConn_JVM, ec: EC): Future[() => Map[List[String], List[Long]]] = {
 //    val (idQuery, updateModels) = getIdQuery(elements, isUpsert)
 //    idQuery.get.map { refIdsResult =>
 //      val refIds: List[Long] = getRefIds(refIdsResult)
@@ -172,7 +167,7 @@ object Rpc_mongodb
     for {
       conn <- getConn(proxy)
       data = new ResolveDelete with Delete_mongodb {
-        override lazy val sqlConn: Connection = conn.sqlConn
+//        override lazy val sqlConn: Connection = conn.sqlConn
       }.getData(elements, proxy.nsMap)
       txReport <- conn.transact_async(data)
     } yield txReport

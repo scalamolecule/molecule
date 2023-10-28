@@ -2,11 +2,11 @@ package molecule.datalog.core.query.casting
 
 import java.lang.{Long => jLong}
 import java.util.{ArrayList => jArrayList}
-import molecule.core.query.Model2Query
+import molecule.core.query.Model2QueryBase
 import molecule.datalog.core.query.DatomicQueryBase
 
 
-trait Nest[Tpl] { self: Model2Query
+trait Nest[Tpl] { self: Model2QueryBase
   with DatomicQueryBase
   with CastNestedBranch_ =>
 

@@ -4,7 +4,7 @@ import com.mongodb.client.{MongoClient, MongoClients, MongoDatabase}
 import molecule.base.api.Schema
 import molecule.core.marshalling.MongoProxy
 import molecule.coreTests.dataModels.core.schema._
-import molecule.document.mongodb.facade.MongoDBConn_JVM
+import molecule.document.mongodb.facade.MongoConn_JVM
 import org.testcontainers.containers.MongoDBContainer
 import org.testcontainers.utility.DockerImageName
 
@@ -36,8 +36,8 @@ object Connection_mongodb {
   }
 
   // Use same test database for all tests
-  val conn_Types      = MongoDBConn_JVM(proxy(TypesSchema), mongoDb)
-  val conn_Refs       = MongoDBConn_JVM(proxy(RefsSchema), mongoDb)
-  val conn_Uniques    = MongoDBConn_JVM(proxy(UniquesSchema), mongoDb)
-  val conn_Validation = MongoDBConn_JVM(proxy(ValidationSchema), mongoDb)
+  val conn_Types      = MongoConn_JVM(proxy(TypesSchema), mongoDb)
+  val conn_Refs       = MongoConn_JVM(proxy(RefsSchema), mongoDb)
+  val conn_Uniques    = MongoConn_JVM(proxy(UniquesSchema), mongoDb)
+  val conn_Validation = MongoConn_JVM(proxy(ValidationSchema), mongoDb)
 }

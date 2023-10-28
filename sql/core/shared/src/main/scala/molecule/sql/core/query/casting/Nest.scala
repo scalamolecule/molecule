@@ -1,11 +1,11 @@
 package molecule.sql.core.query.casting
 
 import java.lang.{Long => jLong}
-import molecule.core.query.Model2Query
+import molecule.core.query.Model2QueryBase
 import molecule.sql.core.query.SqlQueryBase
 
 
-trait Nest[Tpl] { self: Model2Query
+trait Nest[Tpl] { self: Model2QueryBase
   with SqlQueryBase
   with CastNestedBranch_ =>
 

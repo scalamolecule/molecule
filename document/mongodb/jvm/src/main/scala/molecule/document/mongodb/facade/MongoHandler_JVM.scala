@@ -7,17 +7,17 @@ import scala.concurrent.blocking
 
 object MongoHandler_JVM {
 
-  def recreateDb(proxy: MongoProxy): MongoDBConn_JVM = blocking {
+  def recreateDb(proxy: MongoProxy): MongoConn_JVM = blocking {
     val mongoClient: MongoClient   = MongoClients.create(proxy.connectionString)
     val mongoDb    : MongoDatabase = mongoClient.getDatabase(proxy.dbName)
     mongoDb.drop()
-    val conn = MongoDBConn_JVM(proxy, mongoDb)
+    val conn = MongoConn_JVM(proxy, mongoDb)
     conn
   }
 
   // For docker test containers
-  def recreateDb(conn: MongoDBConn_JVM): MongoDBConn_JVM = blocking {
-    // Simply drop the current database
+  def recreateDb(conn: MongoConn_JVM): MongoConn_JVM = blocking {
+    // Start with empty database for each test
     conn.mongoDb.drop()
     conn
   }
