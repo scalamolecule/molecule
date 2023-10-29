@@ -2,14 +2,6 @@ package molecule.document.mongodb.query
 
 import java.util
 import com.mongodb.client.model.Projections
-import molecule.base.error.ModelError
-import molecule.boilerplate.ast.Model._
-import molecule.core.marshalling.ConnProxy
-import molecule.core.query.Model2QueryBase
-import molecule.core.util.ModelUtils
-import molecule.document.mongodb.query._
-import scala.annotation.tailrec
-import scala.collection.mutable.ListBuffer
 import molecule.base.ast._
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
@@ -18,7 +10,6 @@ import molecule.core.marshalling.ConnProxy
 import molecule.core.query.Model2QueryBase
 import molecule.core.util.ModelUtils
 import molecule.document.mongodb.query.casting._
-import org.bson.BsonDocument
 import org.bson.conversions.Bson
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
@@ -32,6 +23,7 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
     //    with NestOpt[Tpl]
     with ModelUtils
     with ResolveExprOne
+    with ResolveExprOneID
     with ResolveExprSet
     with ResolveExprSetRefAttr
     with MongoQueryBase
@@ -43,7 +35,7 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
     optLimit: Option[Int],
     optOffset: Option[Int],
     optProxy: Option[ConnProxy]
-  ): (String, util.ArrayList[Bson], util.ArrayList[Bson]) = {
+  ): (String, util.ArrayList[Bson], util.ArrayList[Bson], util.ArrayList[Bson]) = {
     val elements1 = if (altElements.isEmpty) elements0 else altElements
     validateQueryModel(elements1)
     //    elements.foreach(println)
@@ -52,19 +44,14 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
     optProxy.foreach(p => attrMap = p.attrMap)
     val elements2 = prepareElements(elements1, optProxy)
 
-    from = getInitialNonGenericNs(elements2)
-//    exts += from -> None
-
     // Recursively resolve molecule elements
     resolve(elements2)
 
-    val projections = new util.ArrayList[Bson]
-    fields.foreach(field => projections.add(Projections.include(field)))
     if (!idField) {
-      projections.add(Projections.excludeId())
+      fields.add(Projections.excludeId())
     }
 
-    (from, filters, projections)
+    (getInitialNonGenericNs(elements2), filters, fields, sorts)
   }
 
   final private def renderSqlQuery(
@@ -158,43 +145,46 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
   }
 
   final def getTotalCountQuery: String = {
-    val table  = from
-    val joins_ = if (joins.isEmpty) "" else {
-      val max1  = joins.map(_._1.length).max
-      val max2  = joins.map(_._2.length).max
-      val max3  = joins.map(_._3.length).max
-      val hasAs = joins.exists(_._3.nonEmpty)
-      joins.map { case (join, table, as, predicates) =>
-        val join_  = join + padS(max1, join)
-        val table_ = table + padS(max2, table)
-        val as_    = if (hasAs) {
-          if (as.isEmpty) padS(max3 + 4, "") else " AS " + as + padS(max3, as)
-        } else ""
-        s"$join_ $table_$as_ ON $predicates"
-      }.mkString("\n", "\n", "")
-    }
+    //    val table  = from
+    //    val joins_ = if (joins.isEmpty) "" else {
+    //      val max1  = joins.map(_._1.length).max
+    //      val max2  = joins.map(_._2.length).max
+    //      val max3  = joins.map(_._3.length).max
+    //      val hasAs = joins.exists(_._3.nonEmpty)
+    //      joins.map { case (join, table, as, predicates) =>
+    //        val join_  = join + padS(max1, join)
+    //        val table_ = table + padS(max2, table)
+    //        val as_    = if (hasAs) {
+    //          if (as.isEmpty) padS(max3 + 4, "") else " AS " + as + padS(max3, as)
+    //        } else ""
+    //        s"$join_ $table_$as_ ON $predicates"
+    //      }.mkString("\n", "\n", "")
+    //    }
+    //
+    //    val notNulls = notNull.map(col => (col, "IS NOT NULL"))
+    //    val allWhere = where ++ notNulls
+    //    val where_   = if (allWhere.isEmpty) "" else {
+    //      val max = allWhere.map(_._1.length).max
+    //      allWhere.map {
+    //        case ("", predicate)  => predicate
+    //        case (col, predicate) => s"$col " + padS(max, col) + predicate
+    //      }.mkString("\nWHERE\n  ", s" AND\n  ", "")
+    //    }
+    //    val having_  = if (having.isEmpty) "" else having.mkString("\nHAVING ", ", ", "")
+    //
+    //    s"""SELECT COUNT($table.id)
+    //       |FROM $table$joins_$where_$having_;""".stripMargin
 
-    val notNulls = notNull.map(col => (col, "IS NOT NULL"))
-    val allWhere = where ++ notNulls
-    val where_   = if (allWhere.isEmpty) "" else {
-      val max = allWhere.map(_._1.length).max
-      allWhere.map {
-        case ("", predicate)  => predicate
-        case (col, predicate) => s"$col " + padS(max, col) + predicate
-      }.mkString("\nWHERE\n  ", s" AND\n  ", "")
-    }
-    val having_  = if (having.isEmpty) "" else having.mkString("\nHAVING ", ", ", "")
-
-    s"""SELECT COUNT($table.id)
-       |FROM $table$joins_$where_$having_;""".stripMargin
+    ???
   }
 
 
   private[molecule] def getWhereClauses: ListBuffer[(String, String)] = {
-    from = getInitialNonGenericNs(elements0)
-    exts += from -> None
-    resolve(elements0)
-    where
+    //    from = getInitialNonGenericNs(elements0)
+    //    exts += from -> None
+    //    resolve(elements0)
+    //    where
+    ???
   }
 
 
@@ -265,10 +255,19 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
         if (a.attr == "id" && a.filterAttr.nonEmpty || a.attr != "id" && a.filterAttr.exists(_.attr == "id")) {
           throw ModelError(noIdFiltering)
         }
-        a match {
-          case a: AttrOneMan => resolveAttrOneMan(a); resolve(tail)
-          case a: AttrOneOpt => resolveAttrOneOpt(a); resolve(tail)
-          case a: AttrOneTac => resolveAttrOneTac(a); resolve(tail)
+        if (a.attr == "id") {
+          idField = true
+          a match {
+            case a: AttrOneMan => resolveAttrOneManID(a); resolve(tail)
+            case a: AttrOneTac => resolveAttrOneTacID(a); resolve(tail)
+            case _             => throw new Exception("Unexpected optional ID")
+          }
+        } else {
+          a match {
+            case a: AttrOneMan => resolveAttrOneMan(a); resolve(tail)
+            case a: AttrOneOpt => resolveAttrOneOpt(a); resolve(tail)
+            case a: AttrOneTac => resolveAttrOneTac(a); resolve(tail)
+          }
         }
       case a: AttrSet if a.refNs.isDefined => a match {
         case a: AttrSetMan => resolveRefAttrSetMan(a); resolve(tail)

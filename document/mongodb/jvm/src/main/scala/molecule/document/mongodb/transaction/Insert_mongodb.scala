@@ -1,15 +1,13 @@
 package molecule.document.mongodb.transaction
 
-import java.sql.{Statement, PreparedStatement => PS}
-import java.time._
-import java.util.Date
+import java.util
 import molecule.base.ast._
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
-import molecule.core.marshalling.ConnProxy
 import molecule.core.transaction.ops.InsertOps
 import molecule.core.transaction.{InsertResolvers_, ResolveInsert}
 import molecule.core.util.ModelUtils
+import org.bson._
 
 trait Insert_mongodb
   extends Base_JVM_mongodb
@@ -21,38 +19,16 @@ trait Insert_mongodb
   doPrint = false
 
   def getData(nsMap: Map[String, MetaNs], elements: List[Element], tpls: Seq[Product]): Data = {
-    elements.foreach(debug)
-    //    debug("### A #############################################################################################")
-    //    if (tpls.isEmpty) {
-    //      debug("Tpls data empty, so no insert...")
-    //      // No need to handle inserts if no data
-    //      (Nil, Nil)
-    //    } else {
-    //      initialNs = getInitialNs(elements)
-    //      curRefPath = List(s"$level", initialNs)
-    //      val resolveTpl: Product => Unit = getResolver(nsMap, elements)
-    //
-    //      debug(inserts.mkString("--- inserts\n  ", "\n  ", ""))
-    //      //    debug(joins.mkString("--- joins\n  ", "\n  ", ""))
-    //      debug("### B #############################################################################################")
-    //      initInserts()
-    //      debug("### C ############################################################################################# " + tpls)
-    //
-    //      // Loop rows of tuples
-    //      var rowIndex = 0
-    //      tpls.foreach { tpl =>
-    //        debug(s"###### $rowIndex ##################################### " + tpl)
-    //        resolveTpl(tpl)
-    //        addRowSetterToTableInserts(rowIndex)
-    //        rowIndex += 1
-    //      }
-    //      debug("### D #############################################################################################")
-    //      (getTableInserts, getJoinTableInserts)
-    //    }
-
-    ???
+    val tpl2bson   = getResolver(nsMap, elements)
+    val insertDocs = new util.ArrayList[BsonDocument]()
+    tpls.foreach { tpl =>
+      // Build new Bson saveDoc from each entity tuple
+      saveDoc = new BsonDocument()
+      tpl2bson(tpl)
+      insertDocs.add(saveDoc)
+    }
+    (getInitialNs(elements), insertDocs)
   }
-
 
 
   override protected def addOne[T](
@@ -63,15 +39,11 @@ trait Insert_mongodb
     handleValue: T => Any,
     exts: List[String] = Nil
   ): Product => Unit = {
-    //    val (curPath, paramIndex) = getParamIndex(attr, castExt = exts.head)
     (tpl: Product) => {
-      //      val scalaValue  = tpl.productElement(tplIndex).asInstanceOf[T]
-      //      val valueSetter = handleValue(scalaValue).asInstanceOf[(PS, Int) => Unit]
-      //      val colSetter   = (ps: PS, _: IdsMap, _: RowIndex) => {
-      //        valueSetter(ps, paramIndex)
-      //      }
-      //      addColSetter(curPath, colSetter)
-      ???
+      saveDoc.append(
+        attr,
+        handleValue(tpl.productElement(tplIndex).asInstanceOf[T]).asInstanceOf[BsonValue]
+      )
     }
   }
 
@@ -83,20 +55,11 @@ trait Insert_mongodb
     handleValue: T => Any,
     exts: List[String] = Nil
   ): Product => Unit = {
-    //    val (curPath, paramIndex) = getParamIndex(attr, castExt = exts.head)
     (tpl: Product) => {
-      //      val colSetter = tpl.productElement(tplIndex) match {
-      //        case Some(scalaValue) =>
-      //          val valueSetter = handleValue(scalaValue.asInstanceOf[T]).asInstanceOf[(PS, Int) => Unit]
-      //          (ps: PS, _: IdsMap, _: RowIndex) =>
-      //            valueSetter(ps, paramIndex)
-      //
-      //        case None =>
-      //          (ps: PS, _: IdsMap, _: RowIndex) =>
-      //            ps.setNull(paramIndex, java.sql.Types.NULL)
-      //      }
-      //      addColSetter(curPath, colSetter)
-      ???
+      saveDoc.append(attr, tpl.productElement(tplIndex) match {
+        case Some(scalaValue) => handleValue(scalaValue.asInstanceOf[T]).asInstanceOf[BsonValue]
+        case None             => new BsonNull()
+      })
     }
   }
 
@@ -111,22 +74,17 @@ trait Insert_mongodb
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
     refNs.fold {
-      //      val (curPath, paramIndex) = getParamIndex(attr)
-      (tpl: Product) =>
-        //        val array     = set2array(tpl.productElement(tplIndex).asInstanceOf[Set[Any]])
-        //        val colSetter = if (array.nonEmpty) {
-        //          (ps: PS, _: IdsMap, _: RowIndex) => {
-        //            val conn = ps.getConnection
-        //            val arr  = conn.createArrayOf(exts(1), array)
-        //            ps.setArray(paramIndex, arr)
-        //          }
-        //        } else {
-        //          (ps: PS, _: IdsMap, _: RowIndex) =>
-        //            ps.setNull(paramIndex, java.sql.Types.NULL)
-        //        }
-        //        addColSetter(curPath, colSetter)
-        ???
+      (tpl: Product) => {
+        tpl.productElement(tplIndex).asInstanceOf[Set[T]] match {
+          case set if set.nonEmpty =>
+            val array: util.ArrayList[BsonValue] = new util.ArrayList[BsonValue]()
+            set.map(bsonValue => array.add(bsonValue.asInstanceOf[BsonValue]))
+            saveDoc.append(attr, new BsonArray(array))
 
+          case _ => saveDoc.append(attr, new BsonNull())
+        }
+        () // saveDoc mutated
+      }
     } { refNs =>
       //      val refAttr   = attr
       //      val joinTable = ss(ns, refAttr, refNs)
@@ -185,24 +143,17 @@ trait Insert_mongodb
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
     refNs.fold {
-      //      val (curPath, paramIndex) = getParamIndex(attr)
-      //      (tpl: Product) => {
-      //        val colSetter = tpl.productElement(tplIndex) match {
-      //          case Some(set: Set[_]) =>
-      //            val array = set2array(set.asInstanceOf[Set[Any]])
-      //            (ps: PS, _: IdsMap, _: RowIndex) => {
-      //              val conn = ps.getConnection
-      //              val arr  = conn.createArrayOf(exts(1), array)
-      //              ps.setArray(paramIndex, arr)
-      //            }
-      //
-      //          case None =>
-      //            (ps: PS, _: IdsMap, _: RowIndex) =>
-      //              ps.setNull(paramIndex, java.sql.Types.NULL)
-      //        }
-      //        addColSetter(curPath, colSetter)
-      //      }
-      ???
+      (tpl: Product) => {
+        tpl.productElement(tplIndex) match {
+          case Some(set: Set[_]) if set.nonEmpty =>
+            val array: util.ArrayList[BsonValue] = new util.ArrayList[BsonValue]()
+            set.map(bsonValue => array.add(bsonValue.asInstanceOf[BsonValue]))
+            saveDoc.append(attr, new BsonArray(array))
+
+          case _ => saveDoc.append(attr, new BsonNull())
+        }
+        ()
+      }
     } { refNs =>
       //      val refAttr   = attr
       //      val joinTable = ss(ns, refAttr, refNs)
@@ -314,26 +265,26 @@ trait Insert_mongodb
     ???
   }
 
-  override protected lazy val handleString         = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.asInstanceOf[String])
-  override protected lazy val handleInt            = (v: Any) => (ps: PS, n: Int) => ps.setInt(n, v.asInstanceOf[Int])
-  override protected lazy val handleLong           = (v: Any) => (ps: PS, n: Int) => ps.setLong(n, v.asInstanceOf[Long])
-  override protected lazy val handleFloat          = (v: Any) => (ps: PS, n: Int) => ps.setFloat(n, v.asInstanceOf[Float])
-  override protected lazy val handleDouble         = (v: Any) => (ps: PS, n: Int) => ps.setDouble(n, v.asInstanceOf[Double])
-  override protected lazy val handleBoolean        = (v: Any) => (ps: PS, n: Int) => ps.setBoolean(n, v.asInstanceOf[Boolean])
-  override protected lazy val handleBigInt         = (v: Any) => (ps: PS, n: Int) => ps.setBigDecimal(n, BigDecimal(v.asInstanceOf[BigInt]).bigDecimal)
-  override protected lazy val handleBigDecimal     = (v: Any) => (ps: PS, n: Int) => ps.setBigDecimal(n, v.asInstanceOf[BigDecimal].bigDecimal)
-  override protected lazy val handleDate           = (v: Any) => (ps: PS, n: Int) => ps.setDate(n, new java.sql.Date(v.asInstanceOf[Date].getTime))
-  override protected lazy val handleDuration       = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.asInstanceOf[Duration].toString)
-  override protected lazy val handleInstant        = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.asInstanceOf[Instant].toString)
-  override protected lazy val handleLocalDate      = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.asInstanceOf[LocalDate].toString)
-  override protected lazy val handleLocalTime      = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.asInstanceOf[LocalTime].toString)
-  override protected lazy val handleLocalDateTime  = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.asInstanceOf[LocalDateTime].toString)
-  override protected lazy val handleOffsetTime     = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.asInstanceOf[OffsetTime].toString)
-  override protected lazy val handleOffsetDateTime = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.asInstanceOf[OffsetDateTime].toString)
-  override protected lazy val handleZonedDateTime  = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.asInstanceOf[ZonedDateTime].toString)
-  override protected lazy val handleUUID           = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.toString)
-  override protected lazy val handleURI            = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.toString)
-  override protected lazy val handleByte           = (v: Any) => (ps: PS, n: Int) => ps.setByte(n, v.asInstanceOf[Byte])
-  override protected lazy val handleShort          = (v: Any) => (ps: PS, n: Int) => ps.setShort(n, v.asInstanceOf[Short])
-  override protected lazy val handleChar           = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.toString)
+  //  override protected lazy val handleString         = (v: Any) => new BsonString(v.asInstanceOf[String])
+  //  override protected lazy val handleInt            = (v: Any) => new BsonInt32(v.asInstanceOf[Int])
+  //  override protected lazy val handleLong           = (v: Any) => new BsonInt64(v.asInstanceOf[Long])
+  //  override protected lazy val handleFloat          = (v: Any) => new BsonDouble(v.asInstanceOf[Float])
+  //  override protected lazy val handleDouble         = (v: Any) => new BsonDouble(v.asInstanceOf[Double])
+  //  override protected lazy val handleBoolean        = (v: Any) => new BsonBoolean(v.asInstanceOf[Boolean])
+  //  override protected lazy val handleBigInt         = (v: Any) => new BsonDecimal128(new Decimal128(BigDecimal(v.asInstanceOf[BigInt]).bigDecimal))
+  //  override protected lazy val handleBigDecimal     = (v: Any) => new BsonDecimal128(new Decimal128(v.asInstanceOf[BigDecimal].bigDecimal))
+  //  override protected lazy val handleDate           = (v: Any) => new BsonDateTime(v.asInstanceOf[Date].getTime)
+  //  override protected lazy val handleDuration       = (v: Any) => new BsonString(v.asInstanceOf[Duration].toString)
+  //  override protected lazy val handleInstant        = (v: Any) => new BsonString(v.asInstanceOf[Instant].toString)
+  //  override protected lazy val handleLocalDate      = (v: Any) => new BsonString(v.asInstanceOf[LocalDate].toString)
+  //  override protected lazy val handleLocalTime      = (v: Any) => new BsonString(v.asInstanceOf[LocalTime].toString)
+  //  override protected lazy val handleLocalDateTime  = (v: Any) => new BsonString(v.asInstanceOf[LocalDateTime].toString)
+  //  override protected lazy val handleOffsetTime     = (v: Any) => new BsonString(v.asInstanceOf[OffsetTime].toString)
+  //  override protected lazy val handleOffsetDateTime = (v: Any) => new BsonString(v.asInstanceOf[OffsetDateTime].toString)
+  //  override protected lazy val handleZonedDateTime  = (v: Any) => new BsonString(v.asInstanceOf[ZonedDateTime].toString)
+  //  override protected lazy val handleUUID           = (v: Any) => new BsonString(v.asInstanceOf[UUID].toString)
+  //  override protected lazy val handleURI            = (v: Any) => new BsonString(v.asInstanceOf[URI].toString)
+  //  override protected lazy val handleByte           = (v: Any) => new BsonInt32(v.asInstanceOf[Byte])
+  //  override protected lazy val handleShort          = (v: Any) => new BsonInt32(v.asInstanceOf[Short])
+  //  override protected lazy val handleChar           = (v: Any) => new BsonString(v.asInstanceOf[Char].toString)
 }

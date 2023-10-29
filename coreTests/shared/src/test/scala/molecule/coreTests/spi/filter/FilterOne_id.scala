@@ -13,7 +13,7 @@ trait FilterOne_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
   override lazy val tests = Tests {
 
     "Mandatory" - types { implicit conn =>
-      val id0 = "42"
+      val id0 = "a23456789012345678901234"
       for {
         List(id1, id2, id3) <- Ns.i.insert(1, 2, 3).transact.map(_.ids)
         a = (1, id1)
@@ -66,7 +66,7 @@ trait FilterOne_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "Tacit" - types { implicit conn =>
       val (a, b, c) = (1, 2, 3)
-      val id0       = "42"
+      val id0       = "a23456789012345678901234"
       for {
         List(id1, id2, id3) <- Ns.i.insert(1, 2, 3).transact.map(_.ids)
 

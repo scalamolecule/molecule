@@ -174,9 +174,7 @@ trait SpiSync_mongodb
 
   // Implement for each sql database
   def insert_getData(insert: Insert, conn: MongoConn_JVM): Data = {
-    new ResolveInsert with Insert_mongodb {
-      //      override lazy val sqlConn: sql.Connection = conn.sqlConn
-    }.getData(conn.proxy.nsMap, insert.elements, insert.tpls)
+    new ResolveInsert with Insert_mongodb().getData(conn.proxy.nsMap, insert.elements, insert.tpls)
   }
 
   override def insert_validate(insert: Insert)(implicit conn: Conn): Seq[(Int, Seq[InsertError])] = {

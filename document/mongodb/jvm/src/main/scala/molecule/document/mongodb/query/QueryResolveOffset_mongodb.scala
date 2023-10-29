@@ -1,6 +1,6 @@
 package molecule.document.mongodb.query
 
-import com.mongodb.client.FindIterable
+import com.mongodb.client.{AggregateIterable, FindIterable}
 import molecule.base.error._
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
@@ -31,10 +31,13 @@ case class QueryResolveOffset_mongodb[Tpl](
     if (optOffset.isDefined && optLimit.isDefined && limitSign != offsetSign) {
       throw ModelError("Limit and offset should both be positive or negative.")
     }
-    val bsonDocs: FindIterable[BsonDocument] = getData(conn, optLimit, optOffset)
+    val bsonDocs: AggregateIterable[BsonDocument] = getData(conn, optLimit, optOffset)
 
     val pretty: JsonWriterSettings = JsonWriterSettings.builder().indent(true).build()
+
+    println("RESULT ---------------------------------------------")
     bsonDocs.forEach(d => println(d.toJson(pretty)))
+    println("")
 
     // Cast Bson document to entity tuple
     val tuples   = ListBuffer.empty[Tpl]

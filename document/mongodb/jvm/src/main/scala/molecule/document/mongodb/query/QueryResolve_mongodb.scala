@@ -2,17 +2,19 @@ package molecule.document.mongodb.query
 
 import java.sql.ResultSet
 import java.util
-import com.mongodb.client.FindIterable
-import com.mongodb.client.model.{Filters, Projections}
+import com.mongodb.client.AggregateIterable
+import com.mongodb.client.model.Aggregates._
+import com.mongodb.client.model.{Aggregates, Filters, Projections, Sorts}
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.core.util.ModelUtils
 import molecule.document.mongodb.facade.MongoConn_JVM
 import org.bson.BsonDocument
 import org.bson.conversions.Bson
-//import molecule.document.mongodb.javaSql.ResultSetImpl
+import org.bson.json.JsonWriterSettings
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
+
 
 abstract class QueryResolve_mongodb[Tpl](
   elements: List[Element],
@@ -49,12 +51,33 @@ abstract class QueryResolve_mongodb[Tpl](
     conn: MongoConn_JVM,
     optLimit: Option[Int],
     optOffset: Option[Int]
-  ): FindIterable[BsonDocument] = {
-    val (ns, filters, fields) = m2q.getBsonQuery(Nil, optLimit, optOffset, Some(conn.proxy))
+  ): AggregateIterable[BsonDocument] = {
+    val (ns, filters, fields, sorts) = m2q.getBsonQuery(Nil, optLimit, optOffset, Some(conn.proxy))
 
-    val c        = conn.mongoDb.getCollection(ns, classOf[BsonDocument])
-    val filtered = if (filters.isEmpty) c.find() else c.find(Filters.and(filters))
-    filtered.projection(Projections.fields(fields))
+    val collection = conn.mongoDb.getCollection(ns, classOf[BsonDocument])
+
+    val query = new util.ArrayList[Bson]()
+
+    if (!filters.isEmpty)
+      query.add(Aggregates.`match`(Filters.and(filters)))
+
+    if (!fields.isEmpty)
+      query.add(project(Projections.fields(fields)))
+
+    if (!sorts.isEmpty)
+      query.add(sort(Sorts.orderBy(sorts)))
+
+    //    val group_   = if (filters.isEmpty) asList[Bson]() else asList[Bson](group(Filters.and(filters)))
+    //    if (!filters.isEmpty) query.add(Filters.and(filters))
+    //    if (!filters.isEmpty) query.add(Filters.and(filters))
+
+    println("QUERY ----------------------------------------------")
+    elements.foreach(println)
+    val pretty: JsonWriterSettings = JsonWriterSettings.builder().indent(true).build()
+    query.forEach(d => println(d.toBsonDocument.toJson(pretty)))
+    println("")
+
+    collection.aggregate(query)
   }
 
   protected def getTotalCount(conn: MongoConn_JVM): Int = {

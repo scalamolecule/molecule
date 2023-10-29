@@ -21,9 +21,9 @@ case class MongoConn_JVM(
   with ModelUtils
   with MoleculeLogging {
 
-//  def use(collectionName: String): Unit = {
-//    mongoDb.
-//  }
+  //  def use(collectionName: String): Unit = {
+  //    mongoDb.
+  //  }
 
   override def transact_async(data: Data)(implicit ec: ExecutionContext): Future[TxReport] = {
     Future(transact_sync(data))
@@ -32,6 +32,11 @@ case class MongoConn_JVM(
   override def transact_sync(data: Data): TxReport = {
     val (collectionName, documents) = data
     val collection                  = mongoDb.getCollection(collectionName, classOf[BsonDocument])
+
+    println("INSERT ----------------------------------------")
+    documents.forEach(d => println(d))
+    println("")
+
     if (documents.size() == 1) {
       val result      = collection.insertOne(documents.get(0))
       val idHexString = result.getInsertedId.asInstanceOf[BsonObjectId].getValue.toHexString

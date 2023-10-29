@@ -27,7 +27,7 @@ trait FilterOne_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.int(int1).query.get.map(_ ==> List(a))
         _ <- Ns.i.a1.int(Seq(int0)).query.get.map(_ ==> List())
         _ <- Ns.i.a1.int(Seq(int1)).query.get.map(_ ==> List(a))
-        // OR semantics for multiple args
+        // OR semantics for multiple args ("is this or that")
         _ <- Ns.i.a1.int(int1, int2).query.get.map(_ ==> List(a, b))
         _ <- Ns.i.a1.int(int1, int0).query.get.map(_ ==> List(a))
         _ <- Ns.i.a1.int(Seq(int1, int2)).query.get.map(_ ==> List(a, b))
@@ -84,7 +84,7 @@ trait FilterOne_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.int_(int1).query.get.map(_ ==> List(a))
         _ <- Ns.i.a1.int_(Seq(int0)).query.get.map(_ ==> List())
         _ <- Ns.i.a1.int_(Seq(int1)).query.get.map(_ ==> List(a))
-        // OR semantics for multiple args
+        // OR semantics for multiple args ("is this or that")
         _ <- Ns.i.a1.int_(int1, int2).query.get.map(_ ==> List(a, b))
         _ <- Ns.i.a1.int_(int1, int0).query.get.map(_ ==> List(a))
         _ <- Ns.i.a1.int_(Seq(int1, int2)).query.get.map(_ ==> List(a, b))
@@ -136,7 +136,7 @@ trait FilterOne_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.int_?(Some(int1)).query.get.map(_ ==> List(a))
         _ <- Ns.i.a1.int_?(Some(Seq(int0))).query.get.map(_ ==> List())
         _ <- Ns.i.a1.int_?(Some(Seq(int1))).query.get.map(_ ==> List(a))
-        // OR semantics for Ses of multiple args
+        // OR semantics for Seq of multiple args ("is this or that")
         _ <- Ns.i.a1.int_?(Some(Seq(int1, int2))).query.get.map(_ ==> List(a, b))
         _ <- Ns.i.a1.int_?(Some(Seq(int1, int0))).query.get.map(_ ==> List(a))
         // Empty Seq of args matches no values
@@ -154,7 +154,7 @@ trait FilterOne_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.int_?.not(Some(Seq(int1))).query.get.map(_ ==> List(b, c))
         _ <- Ns.i.a1.int_?.not(Some(Seq(int2))).query.get.map(_ ==> List(a, c))
         _ <- Ns.i.a1.int_?.not(Some(Seq(int3))).query.get.map(_ ==> List(a, b))
-        // OR semantics for multiple negation args
+        // OR semantics for multiple negation args ("is not this and not that")
         _ <- Ns.i.a1.int_?.not(Some(Seq(int0, int1))).query.get.map(_ ==> List(b, c))
         _ <- Ns.i.a1.int_?.not(Some(Seq(int1, int2))).query.get.map(_ ==> List(c))
         _ <- Ns.i.a1.int_?.not(Some(Seq(int2, int3))).query.get.map(_ ==> List(a))

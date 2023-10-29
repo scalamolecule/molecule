@@ -27,9 +27,15 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
     ???
   }
 
-  var idField = false
-  val fields  = ListBuffer.empty[String]
+  var idField   = false
+  val manFields = ListBuffer.empty[String]
+  val tacFields = ListBuffer.empty[String]
+  val optFields = ListBuffer.empty[String]
+
+  val fields  = new java.util.ArrayList[Bson]
   val filters = new java.util.ArrayList[Bson]
+  val group   = new java.util.ArrayList[Bson]
+  val sorts   = new java.util.ArrayList[Bson]
 
   var castss = List(List.empty[BsonDocument => Any])
 

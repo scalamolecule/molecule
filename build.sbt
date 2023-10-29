@@ -129,7 +129,7 @@ lazy val coreTests = crossProject(JSPlatform, JVMPlatform)
   .settings(
     // Generate Molecule boilerplate code for tests with `sbt clean compile -Dmolecule=true`
     moleculePluginActive := sys.props.get("molecule").contains("true"),
-    moleculeMakeJars := !sys.props.get("moleculeJars").contains("false"), // default: true
+    //    moleculeMakeJars := !sys.props.get("moleculeJars").contains("false"), // default: true
     //    moleculeMakeJars := false, // default: true
 
     // Multiple directories with data models
