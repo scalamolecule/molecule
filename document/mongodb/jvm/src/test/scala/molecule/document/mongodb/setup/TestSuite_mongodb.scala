@@ -18,7 +18,7 @@ trait TestSuite_mongodb extends CoreTestSuite with BaseHelpers {
 
   override def utestAfterAll(): Unit = {
     println("====== closing MongoDB client ======")
-    c.mongoClient.close()
+//    c.mongoClient.close()
   }
 
 

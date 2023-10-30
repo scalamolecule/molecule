@@ -260,7 +260,7 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
           a match {
             case a: AttrOneMan => resolveAttrOneManID(a); resolve(tail)
             case a: AttrOneTac => resolveAttrOneTacID(a); resolve(tail)
-            case _             => throw new Exception("Unexpected optional ID")
+            case _             => throw new Exception("Unexpected optional id")
           }
         } else {
           a match {
@@ -269,11 +269,11 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
             case a: AttrOneTac => resolveAttrOneTac(a); resolve(tail)
           }
         }
-      case a: AttrSet if a.refNs.isDefined => a match {
-        case a: AttrSetMan => resolveRefAttrSetMan(a); resolve(tail)
-        case a: AttrSetOpt => resolveRefAttrSetOpt(a); resolve(tail)
-        case a: AttrSetTac => resolveRefAttrSetTac(a); resolve(tail)
-      }
+//      case a: AttrSet if a.refNs.isDefined => a match {
+//        case a: AttrSetMan => resolveRefAttrSetMan(a); resolve(tail)
+//        case a: AttrSetOpt => resolveRefAttrSetOpt(a); resolve(tail)
+//        case a: AttrSetTac => resolveRefAttrSetTac(a); resolve(tail)
+//      }
       case a: AttrSet                      => a match {
         case a: AttrSetMan => resolveAttrSetMan(a); resolve(tail)
         case a: AttrSetOpt => resolveAttrSetOpt(a); resolve(tail)

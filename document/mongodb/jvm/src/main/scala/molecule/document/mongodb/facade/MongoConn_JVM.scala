@@ -8,6 +8,7 @@ import molecule.core.marshalling.MongoProxy
 import molecule.core.spi.{Conn, TxReport}
 import molecule.core.util.ModelUtils
 import molecule.document.mongodb.transaction.{Base_JVM_mongodb, DataType_JVM_mongodb}
+import org.bson.json.JsonWriterSettings
 import org.bson.{BsonDocument, BsonObjectId, BsonValue}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -33,8 +34,10 @@ case class MongoConn_JVM(
     val (collectionName, documents) = data
     val collection                  = mongoDb.getCollection(collectionName, classOf[BsonDocument])
 
-    println("INSERT ----------------------------------------")
-    documents.forEach(d => println(d))
+    println("TRANSACT ----------------------------------------")
+    val pretty: JsonWriterSettings = JsonWriterSettings.builder().indent(true).build()
+    documents.forEach(d => println(d.toBsonDocument.toJson(pretty)))
+    //    documents.forEach(d => println(d))
     println("")
 
     if (documents.size() == 1) {

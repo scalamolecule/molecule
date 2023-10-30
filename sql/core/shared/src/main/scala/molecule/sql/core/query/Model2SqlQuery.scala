@@ -5,7 +5,7 @@ import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.marshalling.ConnProxy
-import molecule.core.query.Model2QueryBase
+import molecule.core.query.{Model2QueryBase, ResolveExpr}
 import molecule.core.util.ModelUtils
 import molecule.sql.core.query.casting._
 import scala.annotation.tailrec

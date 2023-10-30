@@ -26,4 +26,5 @@ object FilterSet_Byte_ extends FilterSet_Byte_ with TestAsync_mongodb
 object FilterSet_Short_ extends FilterSet_Short_ with TestAsync_mongodb
 object FilterSet_Char_ extends FilterSet_Char_ with TestAsync_mongodb
 
-object FilterSet_ref_ extends FilterSet_ref with TestAsync_mongodb
+// Embedded documents don't have entity ids
+//object FilterSet_ref_ extends FilterSet_ref with TestAsync_mongodb

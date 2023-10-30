@@ -22,7 +22,7 @@ trait LambdasOne {
     ge: (String, T) => Bson,
   )
 
-  protected lazy val resId             = ResOne[String](castID, castOptString, eqID, neqID, ltID, gtID, leID, geID)
+  protected lazy val resId             = ResOne(castID, castOptString, eqID, neqID, ltID, gtID, leID, geID)
   protected lazy val resString         = ResOne(castString, castOptString, eqString, neqString, ltString, gtString, leString, geString)
   protected lazy val resInt            = ResOne(castInt, castOptInt, eqInt, neqInt, ltInt, gtInt, leInt, geInt)
   protected lazy val resLong           = ResOne(castLong, castOptLong, eqLong, neqLong, ltLong, gtLong, leLong, geLong)
@@ -80,7 +80,7 @@ trait LambdasOne {
     Filters.eq[BsonObjectId](field, if (v == null) null else oid)
   }
   protected lazy val eqString         = (field: String, v: String) => Filters.eq[String](field, v)
-  protected lazy val eqInt            = (field: String, v: Int) => Filters.eq[Int](field, v)
+  protected lazy val eqInt            = (field: String, v: Int) => Filters.eq(field, v)
   protected lazy val eqLong           = (field: String, v: Long) => Filters.eq[Long](field, v)
   protected lazy val eqFloat          = (field: String, v: Float) => Filters.eq[Float](field, v)
   protected lazy val eqDouble         = (field: String, v: Double) => Filters.eq[Double](field, v)

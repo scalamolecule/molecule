@@ -67,15 +67,18 @@ abstract class QueryResolve_mongodb[Tpl](
     if (!sorts.isEmpty)
       query.add(sort(Sorts.orderBy(sorts)))
 
-    //    val group_   = if (filters.isEmpty) asList[Bson]() else asList[Bson](group(Filters.and(filters)))
-    //    if (!filters.isEmpty) query.add(Filters.and(filters))
-    //    if (!filters.isEmpty) query.add(Filters.and(filters))
 
-    println("QUERY ----------------------------------------------")
-    elements.foreach(println)
-    val pretty: JsonWriterSettings = JsonWriterSettings.builder().indent(true).build()
-    query.forEach(d => println(d.toBsonDocument.toJson(pretty)))
-    println("")
+//    println("QUERY ----------------------------------------------")
+    //    elements.foreach(println)
+    //    val pretty: JsonWriterSettings = JsonWriterSettings.builder().indent(true).build()
+    //    query.forEach(d => println(d.toBsonDocument.toJson(pretty)))
+    //    println("")
+
+    //    val bsonDocs = collection.find()
+    //    println("RESULT ---------------------------------------------")
+    ////    val pretty: JsonWriterSettings = JsonWriterSettings.builder().indent(true).build()
+    //    bsonDocs.forEach(d => println(d.toJson(pretty)))
+    //    println("")
 
     collection.aggregate(query)
   }

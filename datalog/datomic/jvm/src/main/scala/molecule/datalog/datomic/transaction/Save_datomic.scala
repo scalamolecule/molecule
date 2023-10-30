@@ -99,8 +99,8 @@ trait Save_datomic
   }
 
   // Save Int as Long in Datomic
-  override protected lazy val transformId             = (v: String) => v.toLong
-  override protected lazy val transformString         = (v: String) => v
+  override protected lazy val transformID     = (v: String) => v.toLong
+  override protected lazy val transformString = (v: String) => v
   override protected lazy val transformInt            = (v: Int) => v
   override protected lazy val transformLong           = (v: Long) => v
   override protected lazy val transformFloat          = (v: Float) => v

@@ -4,6 +4,7 @@ import com.mongodb.client.model.mql.MqlValues._
 import com.mongodb.client.model.{Filters, Projections, Sorts}
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
+import molecule.core.query.ResolveExpr
 import org.bson._
 import org.bson.conversions.Bson
 
@@ -62,23 +63,23 @@ trait ResolveExprOneID extends ResolveExpr with LambdasOne { self: MongoQueryBas
   }
 
 
-  private def opt[T](attr: Attr, optArgs: Option[Seq[T]], res: ResOne[T]): Unit = {
-    val field = attr.attr
-    fields.add(Projections.include(field))
-    addCast(res.castOpt(field))
-    addSort(attr, field)
-    val filter = attr.op match {
-      case V     => Filters.empty() // selected field can already be a value or null
-      case Eq    => optEqual(field, optArgs, res)
-      case Neq   => optNeq(field, optArgs, res)
-      case Lt    => optCompare(field, optArgs, res.lt)
-      case Gt    => optCompare(field, optArgs, res.gt)
-      case Le    => optCompare(field, optArgs, res.le)
-      case Ge    => optCompare(field, optArgs, res.ge)
-      case other => unexpectedOp(other)
-    }
-    filters.add(filter)
-  }
+//  private def opt[T](attr: Attr, optArgs: Option[Seq[T]], res: ResOne[T]): Unit = {
+//    val field = attr.attr
+//    fields.add(Projections.include(field))
+//    addCast(res.castOpt(field))
+//    addSort(attr, field)
+//    val filter = attr.op match {
+//      case V     => Filters.empty() // selected field can already be a value or null
+//      case Eq    => optEqual(field, optArgs, res)
+//      case Neq   => optNeq(field, optArgs, res)
+//      case Lt    => optCompare(field, optArgs, res.lt)
+//      case Gt    => optCompare(field, optArgs, res.gt)
+//      case Le    => optCompare(field, optArgs, res.le)
+//      case Ge    => optCompare(field, optArgs, res.ge)
+//      case other => unexpectedOp(other)
+//    }
+//    filters.add(filter)
+//  }
 
 
   private def expr[T](field: String, op: Op, args: Seq[T], res: ResOne[T]): Unit = {
@@ -106,7 +107,6 @@ trait ResolveExprOneID extends ResolveExpr with LambdasOne { self: MongoQueryBas
       case Even       => even(field)
       case Odd        => odd(field)
       case other      => unexpectedOp(other)
-      case _          => ()
     }
 
   }

@@ -66,7 +66,7 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
   final           var isNestedOpt = false
   final protected val nestedIds   = new ArrayBuffer[String]
   final protected var level       = 0
-  final protected val args        = new ArrayBuffer[AnyRef]
+//  final protected val args        = new ArrayBuffer[AnyRef]
   final protected val exts        = mutable.Map.empty[String, Option[String]]
 
   // Ensure distinct result set when possible redundant optional values can occur

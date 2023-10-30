@@ -2,6 +2,7 @@ package molecule.sql.core.query
 
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
+import molecule.core.query.ResolveExpr
 import scala.reflect.ClassTag
 
 trait ResolveExprSetRefAttr extends ResolveExpr with LambdasSet { self: SqlQueryBase =>

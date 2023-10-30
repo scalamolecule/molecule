@@ -356,8 +356,8 @@ trait Update_datomic extends DatomicBase_JVM with UpdateOps with MoleculeLogging
     }
   }
 
-  override protected lazy val transformId             = (v: String) => v.toLong
-  override protected lazy val transformString         = identity
+  override protected lazy val transformID     = (v: String) => v.toLong
+  override protected lazy val transformString = identity
   override protected lazy val transformInt            = identity
   override protected lazy val transformLong           = identity
   override protected lazy val transformFloat          = identity

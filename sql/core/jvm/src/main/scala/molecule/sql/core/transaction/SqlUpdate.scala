@@ -496,8 +496,8 @@ trait SqlUpdate
     }
   }
 
-  override protected lazy val handleId             = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.toString)
-  override protected lazy val handleString         = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.asInstanceOf[String])
+  override protected lazy val handleID     = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.toString)
+  override protected lazy val handleString = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.asInstanceOf[String])
   override protected lazy val handleInt            = (v: Any) => (ps: PS, n: Int) => ps.setInt(n, v.asInstanceOf[Int])
   override protected lazy val handleLong           = (v: Any) => (ps: PS, n: Int) => ps.setLong(n, v.asInstanceOf[Long])
   override protected lazy val handleFloat          = (v: Any) => (ps: PS, n: Int) => ps.setFloat(n, v.asInstanceOf[Float])
@@ -520,8 +520,8 @@ trait SqlUpdate
   override protected lazy val handleShort          = (v: Any) => (ps: PS, n: Int) => ps.setShort(n, v.asInstanceOf[Short])
   override protected lazy val handleChar           = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.toString)
 
-  override protected lazy val extsId             = List("", "BIGINT")
-  override protected lazy val extsString         = List("", "LONGVARCHAR")
+  override protected lazy val extsID     = List("", "BIGINT")
+  override protected lazy val extsString = List("", "LONGVARCHAR")
   override protected lazy val extsInt            = List("", "INT")
   override protected lazy val extsLong           = List("", "BIGINT")
   override protected lazy val extsFloat          = List("", "REAL")

@@ -33,9 +33,9 @@ case class QueryResolveOffset_mongodb[Tpl](
     }
     val bsonDocs: AggregateIterable[BsonDocument] = getData(conn, optLimit, optOffset)
 
-    val pretty: JsonWriterSettings = JsonWriterSettings.builder().indent(true).build()
 
     println("RESULT ---------------------------------------------")
+    val pretty: JsonWriterSettings = JsonWriterSettings.builder().indent(true).build()
     bsonDocs.forEach(d => println(d.toJson(pretty)))
     println("")
 
@@ -45,9 +45,13 @@ case class QueryResolveOffset_mongodb[Tpl](
     bsonDocs.forEach { bsonDoc =>
       tuples += bson2tpl(bsonDoc).asInstanceOf[Tpl]
     }
+    // Since a MongoDB field can both have the value null and not exist in the
+    // document, we need to coalesce the possible two optional None value alternatives.
+    val entities = tuples.distinct.toList
+
     //    println("tuples: ---------------------- ")
     //    tuples.foreach(println)
-    (tuples.toList, tuples.length, false)
+    (entities, entities.length, false)
   }
 
 

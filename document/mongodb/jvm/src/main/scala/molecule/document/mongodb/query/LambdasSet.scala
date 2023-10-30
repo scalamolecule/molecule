@@ -5,6 +5,7 @@ import java.time._
 import java.util.{Date, UUID}
 import molecule.core.util.JavaConversions
 import org.bson._
+import org.bson.types.Decimal128
 
 trait LambdasSet extends LambdasBase with JavaConversions { self: MongoQueryBase =>
 
@@ -32,7 +33,11 @@ trait LambdasSet extends LambdasBase with JavaConversions { self: MongoQueryBase
   //  private lazy val sql2setChar          : (Row, Int) => Set[Char]           = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueChar)
 
   case class ResSet[T](
+    tpe: String,
     castSet: String => BsonDocument => Set[T],
+    castOptSet: String => BsonDocument => Option[Set[T]],
+    v2bson: T => BsonValue,
+
     //    tpe: String,
     //    tpeDb: String,
     //    sql2set: (Row, ParamIndex) => Set[T],
@@ -53,35 +58,38 @@ trait LambdasSet extends LambdasBase with JavaConversions { self: MongoQueryBase
     //    one2json: T => String
   )
 
-  lazy val resSetString        : ResSet[String]         = ResSet(castSetString)
-  lazy val resSetInt           : ResSet[Int]            = ResSet(castSetInt)
-  lazy val resSetLong          : ResSet[Long]           = ResSet(castSetLong)
-  lazy val resSetFloat         : ResSet[Float]          = ResSet(castSetFloat)
-  lazy val resSetDouble        : ResSet[Double]         = ResSet(castSetDouble)
-  lazy val resSetBoolean       : ResSet[Boolean]        = ResSet(castSetBoolean)
-  lazy val resSetBigInt        : ResSet[BigInt]         = ResSet(castSetBigInt)
-  lazy val resSetBigDecimal    : ResSet[BigDecimal]     = ResSet(castSetBigDecimal)
-  lazy val resSetDate          : ResSet[Date]           = ResSet(castSetDate)
-  lazy val resSetDuration      : ResSet[Duration]       = ResSet(castSetDuration)
-  lazy val resSetInstant       : ResSet[Instant]        = ResSet(castSetInstant)
-  lazy val resSetLocalDate     : ResSet[LocalDate]      = ResSet(castSetLocalDate)
-  lazy val resSetLocalTime     : ResSet[LocalTime]      = ResSet(castSetLocalTime)
-  lazy val resSetLocalDateTime : ResSet[LocalDateTime]  = ResSet(castSetLocalDateTime)
-  lazy val resSetOffsetTime    : ResSet[OffsetTime]     = ResSet(castSetOffsetTime)
-  lazy val resSetOffsetDateTime: ResSet[OffsetDateTime] = ResSet(castSetOffsetDateTime)
-  lazy val resSetZonedDateTime : ResSet[ZonedDateTime]  = ResSet(castSetZonedDateTime)
-  lazy val resSetUUID          : ResSet[UUID]           = ResSet(castSetUUID)
-  lazy val resSetURI           : ResSet[URI]            = ResSet(castSetURI)
-  lazy val resSetByte          : ResSet[Byte]           = ResSet(castSetByte)
-  lazy val resSetShort         : ResSet[Short]          = ResSet(castSetShort)
-  lazy val resSetChar          : ResSet[Char]           = ResSet(castSetChar)
+
+  lazy val resSetID            : ResSet[String]         = ResSet("String", castSetString, castOptSetString, v2bsonID)
+  lazy val resSetString        : ResSet[String]         = ResSet("String", castSetString, castOptSetString, v2bsonString)
+  lazy val resSetInt           : ResSet[Int]            = ResSet("Int", castSetInt, castOptSetInt, v2bsonInt)
+  lazy val resSetLong          : ResSet[Long]           = ResSet("Long", castSetLong, castOptSetLong, v2bsonLong)
+  lazy val resSetFloat         : ResSet[Float]          = ResSet("Float", castSetFloat, castOptSetFloat, v2bsonFloat)
+  lazy val resSetDouble        : ResSet[Double]         = ResSet("Double", castSetDouble, castOptSetDouble, v2bsonDouble)
+  lazy val resSetBoolean       : ResSet[Boolean]        = ResSet("Boolean", castSetBoolean, castOptSetBoolean, v2bsonBoolean)
+  lazy val resSetBigInt        : ResSet[BigInt]         = ResSet("BigInt", castSetBigInt, castOptSetBigInt, v2bsonBigInt)
+  lazy val resSetBigDecimal    : ResSet[BigDecimal]     = ResSet("BigDecimal", castSetBigDecimal, castOptSetBigDecimal, v2bsonBigDecimal)
+  lazy val resSetDate          : ResSet[Date]           = ResSet("Date", castSetDate, castOptSetDate, v2bsonDate)
+  lazy val resSetDuration      : ResSet[Duration]       = ResSet("Duration", castSetDuration, castOptSetDuration, v2bsonDuration)
+  lazy val resSetInstant       : ResSet[Instant]        = ResSet("Instant", castSetInstant, castOptSetInstant, v2bsonInstant)
+  lazy val resSetLocalDate     : ResSet[LocalDate]      = ResSet("LocalDate", castSetLocalDate, castOptSetLocalDate, v2bsonLocalDate)
+  lazy val resSetLocalTime     : ResSet[LocalTime]      = ResSet("LocalTime", castSetLocalTime, castOptSetLocalTime, v2bsonLocalTime)
+  lazy val resSetLocalDateTime : ResSet[LocalDateTime]  = ResSet("LocalDateTime", castSetLocalDateTime, castOptSetLocalDateTime, v2bsonLocalDateTime)
+  lazy val resSetOffsetTime    : ResSet[OffsetTime]     = ResSet("OffsetTime", castSetOffsetTime, castOptSetOffsetTime, v2bsonOffsetTime)
+  lazy val resSetOffsetDateTime: ResSet[OffsetDateTime] = ResSet("OffsetDateTime", castSetOffsetDateTime, castOptSetOffsetDateTime, v2bsonOffsetDateTime)
+  lazy val resSetZonedDateTime : ResSet[ZonedDateTime]  = ResSet("ZonedDateTime", castSetZonedDateTime, castOptSetZonedDateTime, v2bsonZonedDateTime)
+  lazy val resSetUUID          : ResSet[UUID]           = ResSet("UUID", castSetUUID, castOptSetUUID, v2bsonUUID)
+  lazy val resSetURI           : ResSet[URI]            = ResSet("URI", castSetURI, castOptSetURI, v2bsonURI)
+  lazy val resSetByte          : ResSet[Byte]           = ResSet("Byte", castSetByte, castOptSetByte, v2bsonByte)
+  lazy val resSetShort         : ResSet[Short]          = ResSet("Short", castSetShort, castOptSetShort, v2bsonShort)
+  lazy val resSetChar          : ResSet[Char]           = ResSet("Char", castSetChar, castOptSetChar, v2bsonChar)
 
 
-  protected def mkSet[T](doc: BsonDocument, field: String, value: BsonValue => T): Set[T] = {
+  protected def castSet[T](doc: BsonDocument, field: String, value: BsonValue => T): Set[T] = {
     val raw = doc.get(field)
     if (raw == null) {
       Set.empty[T]
     } else {
+      println(raw.getClass)
       val array = raw.asArray().iterator()
       var set   = Set.empty[T]
       while (array.hasNext) {
@@ -91,51 +99,77 @@ trait LambdasSet extends LambdasBase with JavaConversions { self: MongoQueryBase
     }
   }
 
-  protected lazy val castSetString         = (field: String) => (doc: BsonDocument) => mkSet[String](doc, field, (bv: BsonValue) => bv.asString().getValue)
-  protected lazy val castSetInt            = (field: String) => (doc: BsonDocument) => mkSet[Int](doc, field, (bv: BsonValue) => bv.asInt32.getValue)
-  protected lazy val castSetLong           = (field: String) => (doc: BsonDocument) => mkSet[Long](doc, field, (bv: BsonValue) => bv.asInt64.getValue)
-  protected lazy val castSetFloat          = (field: String) => (doc: BsonDocument) => mkSet[Float](doc, field, (bv: BsonValue) => bv.asDouble.getValue.toFloat)
-  protected lazy val castSetDouble         = (field: String) => (doc: BsonDocument) => mkSet[Double](doc, field, (bv: BsonValue) => bv.asDouble.getValue)
-  protected lazy val castSetBoolean        = (field: String) => (doc: BsonDocument) => mkSet[Boolean](doc, field, (bv: BsonValue) => bv.asBoolean.getValue)
-  protected lazy val castSetBigInt         = (field: String) => (doc: BsonDocument) => mkSet[BigInt](doc, field, (bv: BsonValue) => BigInt(bv.asDecimal128().getValue.bigDecimalValue().toBigInteger))
-  protected lazy val castSetBigDecimal     = (field: String) => (doc: BsonDocument) => mkSet[BigDecimal](doc, field, (bv: BsonValue) => BigDecimal(bv.asDecimal128().getValue.bigDecimalValue()))
-  protected lazy val castSetDate           = (field: String) => (doc: BsonDocument) => mkSet[Date](doc, field, (bv: BsonValue) => new Date(bv.asDateTime.getValue))
-  protected lazy val castSetDuration       = (field: String) => (doc: BsonDocument) => mkSet[Duration](doc, field, (bv: BsonValue) => Duration.parse(bv.asString.getValue))
-  protected lazy val castSetInstant        = (field: String) => (doc: BsonDocument) => mkSet[Instant](doc, field, (bv: BsonValue) => Instant.parse(bv.asString.getValue))
-  protected lazy val castSetLocalDate      = (field: String) => (doc: BsonDocument) => mkSet[LocalDate](doc, field, (bv: BsonValue) => LocalDate.parse(bv.asString.getValue))
-  protected lazy val castSetLocalTime      = (field: String) => (doc: BsonDocument) => mkSet[LocalTime](doc, field, (bv: BsonValue) => LocalTime.parse(bv.asString.getValue))
-  protected lazy val castSetLocalDateTime  = (field: String) => (doc: BsonDocument) => mkSet[LocalDateTime](doc, field, (bv: BsonValue) => LocalDateTime.parse(bv.asString.getValue))
-  protected lazy val castSetOffsetTime     = (field: String) => (doc: BsonDocument) => mkSet[OffsetTime](doc, field, (bv: BsonValue) => OffsetTime.parse(bv.asString.getValue))
-  protected lazy val castSetOffsetDateTime = (field: String) => (doc: BsonDocument) => mkSet[OffsetDateTime](doc, field, (bv: BsonValue) => OffsetDateTime.parse(bv.asString.getValue))
-  protected lazy val castSetZonedDateTime  = (field: String) => (doc: BsonDocument) => mkSet[ZonedDateTime](doc, field, (bv: BsonValue) => ZonedDateTime.parse(bv.asString.getValue))
-  protected lazy val castSetUUID           = (field: String) => (doc: BsonDocument) => mkSet[UUID](doc, field, (bv: BsonValue) => UUID.fromString(bv.asString.getValue))
-  protected lazy val castSetURI            = (field: String) => (doc: BsonDocument) => mkSet[URI](doc, field, (bv: BsonValue) => new URI(bv.asString.getValue))
-  protected lazy val castSetByte           = (field: String) => (doc: BsonDocument) => mkSet[Byte](doc, field, (bv: BsonValue) => bv.asInt32.getValue.toByte)
-  protected lazy val castSetShort          = (field: String) => (doc: BsonDocument) => mkSet[Short](doc, field, (bv: BsonValue) => bv.asInt32.getValue.toShort)
-  protected lazy val castSetChar           = (field: String) => (doc: BsonDocument) => mkSet[Char](doc, field, (bv: BsonValue) => bv.asString.getValue.charAt(0))
+  protected lazy val castSetID             = (field: String) => (doc: BsonDocument) => castSet[String](doc, field, (bv: BsonValue) => bv.asString().getValue)
+  protected lazy val castSetString         = (field: String) => (doc: BsonDocument) => castSet[String](doc, field, (bv: BsonValue) => bv.asString().getValue)
+  protected lazy val castSetInt            = (field: String) => (doc: BsonDocument) => castSet[Int](doc, field, (bv: BsonValue) => bv.asInt32.getValue)
+  protected lazy val castSetLong           = (field: String) => (doc: BsonDocument) => castSet[Long](doc, field, (bv: BsonValue) => bv.asInt64.getValue)
+  protected lazy val castSetFloat          = (field: String) => (doc: BsonDocument) => castSet[Float](doc, field, (bv: BsonValue) => bv.asDouble.getValue.toFloat)
+  protected lazy val castSetDouble         = (field: String) => (doc: BsonDocument) => castSet[Double](doc, field, (bv: BsonValue) => bv.asDouble.getValue)
+  protected lazy val castSetBoolean        = (field: String) => (doc: BsonDocument) => castSet[Boolean](doc, field, (bv: BsonValue) => bv.asBoolean.getValue)
+  protected lazy val castSetBigInt         = (field: String) => (doc: BsonDocument) => castSet[BigInt](doc, field, (bv: BsonValue) => BigInt(bv.asDecimal128().getValue.bigDecimalValue().toBigInteger))
+  protected lazy val castSetBigDecimal     = (field: String) => (doc: BsonDocument) => castSet[BigDecimal](doc, field, (bv: BsonValue) => BigDecimal(bv.asDecimal128().getValue.bigDecimalValue()))
+  protected lazy val castSetDate           = (field: String) => (doc: BsonDocument) => castSet[Date](doc, field, (bv: BsonValue) => new Date(bv.asDateTime.getValue))
+  protected lazy val castSetDuration       = (field: String) => (doc: BsonDocument) => castSet[Duration](doc, field, (bv: BsonValue) => Duration.parse(bv.asString.getValue))
+  protected lazy val castSetInstant        = (field: String) => (doc: BsonDocument) => castSet[Instant](doc, field, (bv: BsonValue) => Instant.parse(bv.asString.getValue))
+  protected lazy val castSetLocalDate      = (field: String) => (doc: BsonDocument) => castSet[LocalDate](doc, field, (bv: BsonValue) => LocalDate.parse(bv.asString.getValue))
+  protected lazy val castSetLocalTime      = (field: String) => (doc: BsonDocument) => castSet[LocalTime](doc, field, (bv: BsonValue) => LocalTime.parse(bv.asString.getValue))
+  protected lazy val castSetLocalDateTime  = (field: String) => (doc: BsonDocument) => castSet[LocalDateTime](doc, field, (bv: BsonValue) => LocalDateTime.parse(bv.asString.getValue))
+  protected lazy val castSetOffsetTime     = (field: String) => (doc: BsonDocument) => castSet[OffsetTime](doc, field, (bv: BsonValue) => OffsetTime.parse(bv.asString.getValue))
+  protected lazy val castSetOffsetDateTime = (field: String) => (doc: BsonDocument) => castSet[OffsetDateTime](doc, field, (bv: BsonValue) => OffsetDateTime.parse(bv.asString.getValue))
+  protected lazy val castSetZonedDateTime  = (field: String) => (doc: BsonDocument) => castSet[ZonedDateTime](doc, field, (bv: BsonValue) => ZonedDateTime.parse(bv.asString.getValue))
+  protected lazy val castSetUUID           = (field: String) => (doc: BsonDocument) => castSet[UUID](doc, field, (bv: BsonValue) => UUID.fromString(bv.asString.getValue))
+  protected lazy val castSetURI            = (field: String) => (doc: BsonDocument) => castSet[URI](doc, field, (bv: BsonValue) => new URI(bv.asString.getValue))
+  protected lazy val castSetByte           = (field: String) => (doc: BsonDocument) => castSet[Byte](doc, field, (bv: BsonValue) => bv.asInt32.getValue.toByte)
+  protected lazy val castSetShort          = (field: String) => (doc: BsonDocument) => castSet[Short](doc, field, (bv: BsonValue) => bv.asInt32.getValue.toShort)
+  protected lazy val castSetChar           = (field: String) => (doc: BsonDocument) => castSet[Char](doc, field, (bv: BsonValue) => bv.asString.getValue.charAt(0))
 
-//  protected lazy val castString         = (field: String) => (doc: BsonDocument) => doc.get(field).asString.getValue
-//  protected lazy val castInt            = (field: String) => (doc: BsonDocument) => doc.get(field).asInt32.getValue
-//  protected lazy val castLong           = (field: String) => (doc: BsonDocument) => doc.get(field).asInt64.getValue
-//  protected lazy val castFloat          = (field: String) => (doc: BsonDocument) => doc.get(field).asDouble.getValue.toFloat
-//  protected lazy val castDouble         = (field: String) => (doc: BsonDocument) => doc.get(field).asDouble.getValue
-//  protected lazy val castBoolean        = (field: String) => (doc: BsonDocument) => doc.get(field).asBoolean.getValue
-//  protected lazy val castBigInt         = (field: String) => (doc: BsonDocument) => BigInt(doc.get(field).asDecimal128().getValue.bigDecimalValue().toBigInteger)
-//  protected lazy val castBigDecimal     = (field: String) => (doc: BsonDocument) => BigDecimal(doc.get(field).asDecimal128().getValue.bigDecimalValue())
-//  protected lazy val castDate           = (field: String) => (doc: BsonDocument) => new Date(doc.get(field).asDateTime.getValue)
-//  protected lazy val castDuration       = (field: String) => (doc: BsonDocument) => Duration.parse(doc.get(field).asString.getValue)
-//  protected lazy val castInstant        = (field: String) => (doc: BsonDocument) => Instant.parse(doc.get(field).asString.getValue)
-//  protected lazy val castLocalDate      = (field: String) => (doc: BsonDocument) => LocalDate.parse(doc.get(field).asString.getValue)
-//  protected lazy val castLocalTime      = (field: String) => (doc: BsonDocument) => LocalTime.parse(doc.get(field).asString.getValue)
-//  protected lazy val castLocalDateTime  = (field: String) => (doc: BsonDocument) => LocalDateTime.parse(doc.get(field).asString.getValue)
-//  protected lazy val castOffsetTime     = (field: String) => (doc: BsonDocument) => OffsetTime.parse(doc.get(field).asString.getValue)
-//  protected lazy val castOffsetDateTime = (field: String) => (doc: BsonDocument) => OffsetDateTime.parse(doc.get(field).asString.getValue)
-//  protected lazy val castZonedDateTime  = (field: String) => (doc: BsonDocument) => ZonedDateTime.parse(doc.get(field).asString.getValue)
-//  protected lazy val castUUID           = (field: String) => (doc: BsonDocument) => UUID.fromString(doc.get(field).asString.getValue)
-//  protected lazy val castURI            = (field: String) => (doc: BsonDocument) => new URI(doc.get(field).asString.getValue)
-//  protected lazy val castByte           = (field: String) => (doc: BsonDocument) => doc.get(field).asInt32.getValue.toByte
-//  protected lazy val castShort          = (field: String) => (doc: BsonDocument) => doc.get(field).asInt32.getValue.toShort
-//  protected lazy val castChar           = (field: String) => (doc: BsonDocument) => doc.get(field).asString.getValue.charAt(0)
+
+  protected lazy val v2bsonID            : String => BsonValue         = (v: String) => new BsonString(v)
+  protected lazy val v2bsonString        : String => BsonValue         = (v: String) => new BsonString(v)
+  protected lazy val v2bsonInt           : Int => BsonValue            = (v: Int) => new BsonInt32(v)
+  protected lazy val v2bsonLong          : Long => BsonValue           = (v: Long) => new BsonInt64(v)
+  protected lazy val v2bsonFloat         : Float => BsonValue          = (v: Float) => new BsonDouble(v)
+  protected lazy val v2bsonDouble        : Double => BsonValue         = (v: Double) => new BsonDouble(v)
+  protected lazy val v2bsonBoolean       : Boolean => BsonValue        = (v: Boolean) => new BsonBoolean(v)
+  protected lazy val v2bsonBigInt        : BigInt => BsonValue         = (v: BigInt) => new BsonDecimal128(new Decimal128(BigDecimal(v).bigDecimal))
+  protected lazy val v2bsonBigDecimal    : BigDecimal => BsonValue     = (v: BigDecimal) => new BsonDecimal128(new Decimal128(v.bigDecimal))
+  protected lazy val v2bsonDate          : Date => BsonValue           = (v: Date) => new BsonDateTime(v.getTime)
+  protected lazy val v2bsonDuration      : Duration => BsonValue       = (v: Duration) => new BsonString(v.toString)
+  protected lazy val v2bsonInstant       : Instant => BsonValue        = (v: Instant) => new BsonString(v.toString)
+  protected lazy val v2bsonLocalDate     : LocalDate => BsonValue      = (v: LocalDate) => new BsonString(v.toString)
+  protected lazy val v2bsonLocalTime     : LocalTime => BsonValue      = (v: LocalTime) => new BsonString(v.toString)
+  protected lazy val v2bsonLocalDateTime : LocalDateTime => BsonValue  = (v: LocalDateTime) => new BsonString(v.toString)
+  protected lazy val v2bsonOffsetTime    : OffsetTime => BsonValue     = (v: OffsetTime) => new BsonString(v.toString)
+  protected lazy val v2bsonOffsetDateTime: OffsetDateTime => BsonValue = (v: OffsetDateTime) => new BsonString(v.toString)
+  protected lazy val v2bsonZonedDateTime : ZonedDateTime => BsonValue  = (v: ZonedDateTime) => new BsonString(v.toString)
+  protected lazy val v2bsonUUID          : UUID => BsonValue           = (v: UUID) => new BsonString(v.toString)
+  protected lazy val v2bsonURI           : URI => BsonValue            = (v: URI) => new BsonString(v.toString)
+  protected lazy val v2bsonByte          : Byte => BsonValue           = (v: Byte) => new BsonInt32(v)
+  protected lazy val v2bsonShort         : Short => BsonValue          = (v: Short) => new BsonInt32(v)
+  protected lazy val v2bsonChar          : Char => BsonValue           = (v: Char) => new BsonString(v.toString)
+
+  //  protected lazy val castString         = (field: String) => (doc: BsonDocument) => doc.get(field).asString.getValue
+  //  protected lazy val castInt            = (field: String) => (doc: BsonDocument) => doc.get(field).asInt32.getValue
+  //  protected lazy val castLong           = (field: String) => (doc: BsonDocument) => doc.get(field).asInt64.getValue
+  //  protected lazy val castFloat          = (field: String) => (doc: BsonDocument) => doc.get(field).asDouble.getValue.toFloat
+  //  protected lazy val castDouble         = (field: String) => (doc: BsonDocument) => doc.get(field).asDouble.getValue
+  //  protected lazy val castBoolean        = (field: String) => (doc: BsonDocument) => doc.get(field).asBoolean.getValue
+  //  protected lazy val castBigInt         = (field: String) => (doc: BsonDocument) => BigInt(doc.get(field).asDecimal128().getValue.bigDecimalValue().toBigInteger)
+  //  protected lazy val castBigDecimal     = (field: String) => (doc: BsonDocument) => BigDecimal(doc.get(field).asDecimal128().getValue.bigDecimalValue())
+  //  protected lazy val castDate           = (field: String) => (doc: BsonDocument) => new Date(doc.get(field).asDateTime.getValue)
+  //  protected lazy val castDuration       = (field: String) => (doc: BsonDocument) => Duration.parse(doc.get(field).asString.getValue)
+  //  protected lazy val castInstant        = (field: String) => (doc: BsonDocument) => Instant.parse(doc.get(field).asString.getValue)
+  //  protected lazy val castLocalDate      = (field: String) => (doc: BsonDocument) => LocalDate.parse(doc.get(field).asString.getValue)
+  //  protected lazy val castLocalTime      = (field: String) => (doc: BsonDocument) => LocalTime.parse(doc.get(field).asString.getValue)
+  //  protected lazy val castLocalDateTime  = (field: String) => (doc: BsonDocument) => LocalDateTime.parse(doc.get(field).asString.getValue)
+  //  protected lazy val castOffsetTime     = (field: String) => (doc: BsonDocument) => OffsetTime.parse(doc.get(field).asString.getValue)
+  //  protected lazy val castOffsetDateTime = (field: String) => (doc: BsonDocument) => OffsetDateTime.parse(doc.get(field).asString.getValue)
+  //  protected lazy val castZonedDateTime  = (field: String) => (doc: BsonDocument) => ZonedDateTime.parse(doc.get(field).asString.getValue)
+  //  protected lazy val castUUID           = (field: String) => (doc: BsonDocument) => UUID.fromString(doc.get(field).asString.getValue)
+  //  protected lazy val castURI            = (field: String) => (doc: BsonDocument) => new URI(doc.get(field).asString.getValue)
+  //  protected lazy val castByte           = (field: String) => (doc: BsonDocument) => doc.get(field).asInt32.getValue.toByte
+  //  protected lazy val castShort          = (field: String) => (doc: BsonDocument) => doc.get(field).asInt32.getValue.toShort
+  //  protected lazy val castChar           = (field: String) => (doc: BsonDocument) => doc.get(field).asString.getValue.charAt(0)
 
   //  lazy val resSetString        : ResSet[String]         = ResSet("String", tpeDbString, sql2setString, null, set2sqlArrayString, set2sqlsString, one2sqlString, array2setString, nestedArray2coalescedSetString, nestedArray2nestedSetString, array2setFirstString, array2setLastString, nestedArray2setAscString, nestedArray2setDescString, nestedArray2setSumString, json2oneString, json2arrayString, one2jsonString)
   //  lazy val resSetInt           : ResSet[Int]            = ResSet("Int", tpeDbInt, sql2setInt, null, set2sqlArrayInt, set2sqlsInt, one2sqlInt, array2setInt, nestedArray2coalescedSetInt, nestedArray2nestedSetInt, array2setFirstInt, array2setLastInt, nestedArray2setAscInt, nestedArray2setDescInt, nestedArray2setSumInt, json2oneInt, json2arrayInt, one2jsonInt)
@@ -432,43 +466,43 @@ trait LambdasSet extends LambdasBase with JavaConversions { self: MongoQueryBase
   //  private lazy val array2setLastChar          : (Row, Int) => Set[Char]           = ??? //(row: Row, paramIndex: Int) => Set(row.getArray(paramIndex).getArray.asInstanceOf[Array[_]].map(j2Char).max)
 
 
-  case class ResSetOpt[T](
-    castOptSet: String => BsonDocument => Option[Set[T]],
-    //    tpe: String,
-    //    sql2setOpt: (Row, ParamIndex) => Option[Set[T]],
-    //    set2sqlArray: Set[T] => String,
-    //    set2sqls: Set[T] => Set[String],
-    //    one2sql: T => String,
-    //    one2json: T => String
-  )
+  //  case class ResSetOpt[T](
+  //    castOptSet: String => BsonDocument => Option[Set[T]],
+  //    //    tpe: String,
+  //    //    sql2setOpt: (Row, ParamIndex) => Option[Set[T]],
+  //    //    set2sqlArray: Set[T] => String,
+  //    //    set2sqls: Set[T] => Set[String],
+  //    //    one2sql: T => String,
+  //    //    one2json: T => String
+  //  )
+  //
+  //  lazy val resOptSetString        : ResSetOpt[String]         = ResSetOpt(castOptSetString)
+  //  lazy val resOptSetInt           : ResSetOpt[Int]            = ResSetOpt(castOptSetInt)
+  //  lazy val resOptSetLong          : ResSetOpt[Long]           = ResSetOpt(castOptSetLong)
+  //  lazy val resOptSetFloat         : ResSetOpt[Float]          = ResSetOpt(castOptSetFloat)
+  //  lazy val resOptSetDouble        : ResSetOpt[Double]         = ResSetOpt(castOptSetDouble)
+  //  lazy val resOptSetBoolean       : ResSetOpt[Boolean]        = ResSetOpt(castOptSetBoolean)
+  //  lazy val resOptSetBigInt        : ResSetOpt[BigInt]         = ResSetOpt(castOptSetBigInt)
+  //  lazy val resOptSetBigDecimal    : ResSetOpt[BigDecimal]     = ResSetOpt(castOptSetBigDecimal)
+  //  lazy val resOptSetDate          : ResSetOpt[Date]           = ResSetOpt(castOptSetDate)
+  //  lazy val resOptSetDuration      : ResSetOpt[Duration]       = ResSetOpt(castOptSetDuration)
+  //  lazy val resOptSetInstant       : ResSetOpt[Instant]        = ResSetOpt(castOptSetInstant)
+  //  lazy val resOptSetLocalDate     : ResSetOpt[LocalDate]      = ResSetOpt(castOptSetLocalDate)
+  //  lazy val resOptSetLocalTime     : ResSetOpt[LocalTime]      = ResSetOpt(castOptSetLocalTime)
+  //  lazy val resOptSetLocalDateTime : ResSetOpt[LocalDateTime]  = ResSetOpt(castOptSetLocalDateTime)
+  //  lazy val resOptSetOffsetTime    : ResSetOpt[OffsetTime]     = ResSetOpt(castOptSetOffsetTime)
+  //  lazy val resOptSetOffsetDateTime: ResSetOpt[OffsetDateTime] = ResSetOpt(castOptSetOffsetDateTime)
+  //  lazy val resOptSetZonedDateTime : ResSetOpt[ZonedDateTime]  = ResSetOpt(castOptSetZonedDateTime)
+  //  lazy val resOptSetUUID          : ResSetOpt[UUID]           = ResSetOpt(castOptSetUUID)
+  //  lazy val resOptSetURI           : ResSetOpt[URI]            = ResSetOpt(castOptSetURI)
+  //  lazy val resOptSetByte          : ResSetOpt[Byte]           = ResSetOpt(castOptSetByte)
+  //  lazy val resOptSetShort         : ResSetOpt[Short]          = ResSetOpt(castOptSetShort)
+  //  lazy val resOptSetChar          : ResSetOpt[Char]           = ResSetOpt(castOptSetChar)
 
-  lazy val resOptSetString        : ResSetOpt[String]         = ResSetOpt(castOptSetString)
-  lazy val resOptSetInt           : ResSetOpt[Int]            = ResSetOpt(castOptSetInt)
-  lazy val resOptSetLong          : ResSetOpt[Long]           = ResSetOpt(castOptSetLong)
-  lazy val resOptSetFloat         : ResSetOpt[Float]          = ResSetOpt(castOptSetFloat)
-  lazy val resOptSetDouble        : ResSetOpt[Double]         = ResSetOpt(castOptSetDouble)
-  lazy val resOptSetBoolean       : ResSetOpt[Boolean]        = ResSetOpt(castOptSetBoolean)
-  lazy val resOptSetBigInt        : ResSetOpt[BigInt]         = ResSetOpt(castOptSetBigInt)
-  lazy val resOptSetBigDecimal    : ResSetOpt[BigDecimal]     = ResSetOpt(castOptSetBigDecimal)
-  lazy val resOptSetDate          : ResSetOpt[Date]           = ResSetOpt(castOptSetDate)
-  lazy val resOptSetDuration      : ResSetOpt[Duration]       = ResSetOpt(castOptSetDuration)
-  lazy val resOptSetInstant       : ResSetOpt[Instant]        = ResSetOpt(castOptSetInstant)
-  lazy val resOptSetLocalDate     : ResSetOpt[LocalDate]      = ResSetOpt(castOptSetLocalDate)
-  lazy val resOptSetLocalTime     : ResSetOpt[LocalTime]      = ResSetOpt(castOptSetLocalTime)
-  lazy val resOptSetLocalDateTime : ResSetOpt[LocalDateTime]  = ResSetOpt(castOptSetLocalDateTime)
-  lazy val resOptSetOffsetTime    : ResSetOpt[OffsetTime]     = ResSetOpt(castOptSetOffsetTime)
-  lazy val resOptSetOffsetDateTime: ResSetOpt[OffsetDateTime] = ResSetOpt(castOptSetOffsetDateTime)
-  lazy val resOptSetZonedDateTime : ResSetOpt[ZonedDateTime]  = ResSetOpt(castOptSetZonedDateTime)
-  lazy val resOptSetUUID          : ResSetOpt[UUID]           = ResSetOpt(castOptSetUUID)
-  lazy val resOptSetURI           : ResSetOpt[URI]            = ResSetOpt(castOptSetURI)
-  lazy val resOptSetByte          : ResSetOpt[Byte]           = ResSetOpt(castOptSetByte)
-  lazy val resOptSetShort         : ResSetOpt[Short]          = ResSetOpt(castOptSetShort)
-  lazy val resOptSetChar          : ResSetOpt[Char]           = ResSetOpt(castOptSetChar)
 
-
-  protected def mkOptSet[T](doc: BsonDocument, field: String, value: BsonValue => T): Option[Set[T]] = {
+  protected def castOptSet[T](doc: BsonDocument, field: String, value: BsonValue => T): Option[Set[T]] = {
     val raw = doc.get(field)
-    if (raw == null) {
+    if (raw == null || raw == BsonNull.VALUE) {
       Option.empty[Set[T]]
     } else {
       val array = raw.asArray().iterator()
@@ -480,28 +514,28 @@ trait LambdasSet extends LambdasBase with JavaConversions { self: MongoQueryBase
     }
   }
 
-  protected lazy val castOptSetString         = (field: String) => (doc: BsonDocument) => mkOptSet[String](doc, field, (bv: BsonValue) => bv.asString().getValue)
-  protected lazy val castOptSetInt            = (field: String) => (doc: BsonDocument) => mkOptSet[Int](doc, field, (bv: BsonValue) => bv.asInt32.getValue)
-  protected lazy val castOptSetLong           = (field: String) => (doc: BsonDocument) => mkOptSet[Long](doc, field, (bv: BsonValue) => bv.asInt64.getValue)
-  protected lazy val castOptSetFloat          = (field: String) => (doc: BsonDocument) => mkOptSet[Float](doc, field, (bv: BsonValue) => bv.asDouble.getValue.toFloat)
-  protected lazy val castOptSetDouble         = (field: String) => (doc: BsonDocument) => mkOptSet[Double](doc, field, (bv: BsonValue) => bv.asDouble.getValue)
-  protected lazy val castOptSetBoolean        = (field: String) => (doc: BsonDocument) => mkOptSet[Boolean](doc, field, (bv: BsonValue) => bv.asBoolean.getValue)
-  protected lazy val castOptSetBigInt         = (field: String) => (doc: BsonDocument) => mkOptSet[BigInt](doc, field, (bv: BsonValue) => BigInt(bv.asDecimal128().getValue.bigDecimalValue().toBigInteger))
-  protected lazy val castOptSetBigDecimal     = (field: String) => (doc: BsonDocument) => mkOptSet[BigDecimal](doc, field, (bv: BsonValue) => BigDecimal(bv.asDecimal128().getValue.bigDecimalValue()))
-  protected lazy val castOptSetDate           = (field: String) => (doc: BsonDocument) => mkOptSet[Date](doc, field, (bv: BsonValue) => new Date(bv.asDateTime.getValue))
-  protected lazy val castOptSetDuration       = (field: String) => (doc: BsonDocument) => mkOptSet[Duration](doc, field, (bv: BsonValue) => Duration.parse(bv.asString.getValue))
-  protected lazy val castOptSetInstant        = (field: String) => (doc: BsonDocument) => mkOptSet[Instant](doc, field, (bv: BsonValue) => Instant.parse(bv.asString.getValue))
-  protected lazy val castOptSetLocalDate      = (field: String) => (doc: BsonDocument) => mkOptSet[LocalDate](doc, field, (bv: BsonValue) => LocalDate.parse(bv.asString.getValue))
-  protected lazy val castOptSetLocalTime      = (field: String) => (doc: BsonDocument) => mkOptSet[LocalTime](doc, field, (bv: BsonValue) => LocalTime.parse(bv.asString.getValue))
-  protected lazy val castOptSetLocalDateTime  = (field: String) => (doc: BsonDocument) => mkOptSet[LocalDateTime](doc, field, (bv: BsonValue) => LocalDateTime.parse(bv.asString.getValue))
-  protected lazy val castOptSetOffsetTime     = (field: String) => (doc: BsonDocument) => mkOptSet[OffsetTime](doc, field, (bv: BsonValue) => OffsetTime.parse(bv.asString.getValue))
-  protected lazy val castOptSetOffsetDateTime = (field: String) => (doc: BsonDocument) => mkOptSet[OffsetDateTime](doc, field, (bv: BsonValue) => OffsetDateTime.parse(bv.asString.getValue))
-  protected lazy val castOptSetZonedDateTime  = (field: String) => (doc: BsonDocument) => mkOptSet[ZonedDateTime](doc, field, (bv: BsonValue) => ZonedDateTime.parse(bv.asString.getValue))
-  protected lazy val castOptSetUUID           = (field: String) => (doc: BsonDocument) => mkOptSet[UUID](doc, field, (bv: BsonValue) => UUID.fromString(bv.asString.getValue))
-  protected lazy val castOptSetURI            = (field: String) => (doc: BsonDocument) => mkOptSet[URI](doc, field, (bv: BsonValue) => new URI(bv.asString.getValue))
-  protected lazy val castOptSetByte           = (field: String) => (doc: BsonDocument) => mkOptSet[Byte](doc, field, (bv: BsonValue) => bv.asInt32.getValue.toByte)
-  protected lazy val castOptSetShort          = (field: String) => (doc: BsonDocument) => mkOptSet[Short](doc, field, (bv: BsonValue) => bv.asInt32.getValue.toShort)
-  protected lazy val castOptSetChar           = (field: String) => (doc: BsonDocument) => mkOptSet[Char](doc, field, (bv: BsonValue) => bv.asString.getValue.charAt(0))
+  protected lazy val castOptSetString         = (field: String) => (doc: BsonDocument) => castOptSet[String](doc, field, (bv: BsonValue) => bv.asString().getValue)
+  protected lazy val castOptSetInt            = (field: String) => (doc: BsonDocument) => castOptSet[Int](doc, field, (bv: BsonValue) => bv.asInt32.getValue)
+  protected lazy val castOptSetLong           = (field: String) => (doc: BsonDocument) => castOptSet[Long](doc, field, (bv: BsonValue) => bv.asInt64.getValue)
+  protected lazy val castOptSetFloat          = (field: String) => (doc: BsonDocument) => castOptSet[Float](doc, field, (bv: BsonValue) => bv.asDouble.getValue.toFloat)
+  protected lazy val castOptSetDouble         = (field: String) => (doc: BsonDocument) => castOptSet[Double](doc, field, (bv: BsonValue) => bv.asDouble.getValue)
+  protected lazy val castOptSetBoolean        = (field: String) => (doc: BsonDocument) => castOptSet[Boolean](doc, field, (bv: BsonValue) => bv.asBoolean.getValue)
+  protected lazy val castOptSetBigInt         = (field: String) => (doc: BsonDocument) => castOptSet[BigInt](doc, field, (bv: BsonValue) => BigInt(bv.asDecimal128().getValue.bigDecimalValue().toBigInteger))
+  protected lazy val castOptSetBigDecimal     = (field: String) => (doc: BsonDocument) => castOptSet[BigDecimal](doc, field, (bv: BsonValue) => BigDecimal(bv.asDecimal128().getValue.bigDecimalValue()))
+  protected lazy val castOptSetDate           = (field: String) => (doc: BsonDocument) => castOptSet[Date](doc, field, (bv: BsonValue) => new Date(bv.asDateTime.getValue))
+  protected lazy val castOptSetDuration       = (field: String) => (doc: BsonDocument) => castOptSet[Duration](doc, field, (bv: BsonValue) => Duration.parse(bv.asString.getValue))
+  protected lazy val castOptSetInstant        = (field: String) => (doc: BsonDocument) => castOptSet[Instant](doc, field, (bv: BsonValue) => Instant.parse(bv.asString.getValue))
+  protected lazy val castOptSetLocalDate      = (field: String) => (doc: BsonDocument) => castOptSet[LocalDate](doc, field, (bv: BsonValue) => LocalDate.parse(bv.asString.getValue))
+  protected lazy val castOptSetLocalTime      = (field: String) => (doc: BsonDocument) => castOptSet[LocalTime](doc, field, (bv: BsonValue) => LocalTime.parse(bv.asString.getValue))
+  protected lazy val castOptSetLocalDateTime  = (field: String) => (doc: BsonDocument) => castOptSet[LocalDateTime](doc, field, (bv: BsonValue) => LocalDateTime.parse(bv.asString.getValue))
+  protected lazy val castOptSetOffsetTime     = (field: String) => (doc: BsonDocument) => castOptSet[OffsetTime](doc, field, (bv: BsonValue) => OffsetTime.parse(bv.asString.getValue))
+  protected lazy val castOptSetOffsetDateTime = (field: String) => (doc: BsonDocument) => castOptSet[OffsetDateTime](doc, field, (bv: BsonValue) => OffsetDateTime.parse(bv.asString.getValue))
+  protected lazy val castOptSetZonedDateTime  = (field: String) => (doc: BsonDocument) => castOptSet[ZonedDateTime](doc, field, (bv: BsonValue) => ZonedDateTime.parse(bv.asString.getValue))
+  protected lazy val castOptSetUUID           = (field: String) => (doc: BsonDocument) => castOptSet[UUID](doc, field, (bv: BsonValue) => UUID.fromString(bv.asString.getValue))
+  protected lazy val castOptSetURI            = (field: String) => (doc: BsonDocument) => castOptSet[URI](doc, field, (bv: BsonValue) => new URI(bv.asString.getValue))
+  protected lazy val castOptSetByte           = (field: String) => (doc: BsonDocument) => castOptSet[Byte](doc, field, (bv: BsonValue) => bv.asInt32.getValue.toByte)
+  protected lazy val castOptSetShort          = (field: String) => (doc: BsonDocument) => castOptSet[Short](doc, field, (bv: BsonValue) => bv.asInt32.getValue.toShort)
+  protected lazy val castOptSetChar           = (field: String) => (doc: BsonDocument) => castOptSet[Char](doc, field, (bv: BsonValue) => bv.asString.getValue.charAt(0))
 
 
   //  lazy val resOptSetString        : ResSetOpt[String]         = ResSetOpt("String", sql2setOptString, set2sqlArrayString, set2sqlsString, one2sqlString, one2jsonString)

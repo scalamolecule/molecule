@@ -1,8 +1,8 @@
-package molecule.sql.core.query
+package molecule.core.query
 
 import molecule.boilerplate.ast.Model._
 
-trait ResolveExpr  {
+trait ResolveExpr {
 
   // Implemented in database modules
 

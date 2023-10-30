@@ -18,7 +18,8 @@ trait Save_mongodb
     initialNs = getInitialNs(elements)
     resolve(elements)
     val saveDocs = new util.ArrayList[BsonDocument]()
-    saveDocs.add(saveDoc)
+    saveDocs.add(curDoc)
+//    saveDocs.add(parentDoc)
     (initialNs, saveDocs)
   }
 
@@ -31,9 +32,9 @@ trait Save_mongodb
     exts: List[String] = Nil
   ): Unit = {
     optBsonValue.fold {
-      saveDoc.append(attr, new BsonNull())
+      curDoc.append(attr, new BsonNull())
     } { bsonValue =>
-      saveDoc.append(attr, bsonValue.asInstanceOf[BsonValue])
+      curDoc.append(attr, bsonValue.asInstanceOf[BsonValue])
     }
   }
 
@@ -49,14 +50,15 @@ trait Save_mongodb
   ): Unit = {
     refNs.fold {
       optSet.fold {
-        saveDoc.append(attr, new BsonNull())
+        curDoc.append(attr, new BsonNull())
       } {
         case set if set.nonEmpty =>
           val array: util.ArrayList[BsonValue] = new util.ArrayList[BsonValue]()
+          // Values have already been transformed in ResolveSave
           set.map(bsonValue => array.add(bsonValue.asInstanceOf[BsonValue]))
-          saveDoc.append(attr, new BsonArray(array))
+          curDoc.append(attr, new BsonArray(array))
 
-        case _ => saveDoc.append(attr, new BsonNull())
+        case _ => curDoc.append(attr, new BsonNull())
       }
     } { refNs =>
       //      val curPath = if (paramIndexes.nonEmpty) curRefPath else List(ns)
@@ -105,7 +107,10 @@ trait Save_mongodb
 
   override protected def addRef(ns: String, refAttr: String, refNs: String, card: Card): Unit = {
     //    postResolvers = postResolvers :+ getRefResolver[Unit](ns, refAttr, refNs, card)
-    ???
+    //    ???
+    parentDoc = curDoc
+    curDoc = new BsonDocument()
+    parentDoc.append(refAttr, curDoc)
   }
 
   override protected def addBackRef(backRefNs: String): Unit = {

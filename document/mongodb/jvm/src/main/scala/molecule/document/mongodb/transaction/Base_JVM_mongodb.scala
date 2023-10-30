@@ -28,7 +28,8 @@ trait Base_JVM_mongodb extends DataType_JVM_mongodb with ModelUtils with BaseHel
   protected var filterElements       = List.empty[Element]
 
 
-  protected var saveDoc = new BsonDocument()
+  protected var parentDoc = new BsonDocument()
+  protected var curDoc    = new BsonDocument()
 
 
 
@@ -60,7 +61,7 @@ trait Base_JVM_mongodb extends DataType_JVM_mongodb with ModelUtils with BaseHel
     Future(MongoHandler_JVM.recreateDb(proxy.asInstanceOf[MongoProxy]))
   }
 
-  override protected lazy val handleId         = (v: Any) => new BsonString(v.asInstanceOf[String])
+  override protected lazy val handleID             = (v: Any) => new BsonString(v.asInstanceOf[String])
   override protected lazy val handleString         = (v: Any) => new BsonString(v.asInstanceOf[String])
   override protected lazy val handleInt            = (v: Any) => new BsonInt32(v.asInstanceOf[Int])
   override protected lazy val handleLong           = (v: Any) => new BsonInt64(v.asInstanceOf[Long])
@@ -85,7 +86,7 @@ trait Base_JVM_mongodb extends DataType_JVM_mongodb with ModelUtils with BaseHel
   override protected lazy val handleChar           = (v: Any) => new BsonString(v.asInstanceOf[Char].toString)
 
 
-  override protected lazy val transformId        : String => Any         = (v: String) => new BsonString(v)
+  override protected lazy val transformID            : String => Any         = (v: String) => new BsonString(v)
   override protected lazy val transformString        : String => Any         = (v: String) => new BsonString(v)
   override protected lazy val transformInt           : Int => Any            = (v: Int) => new BsonInt32(v)
   override protected lazy val transformLong          : Long => Any           = (v: Long) => new BsonInt64(v)

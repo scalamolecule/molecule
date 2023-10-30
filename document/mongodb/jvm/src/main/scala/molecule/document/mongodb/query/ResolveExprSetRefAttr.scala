@@ -2,6 +2,7 @@ package molecule.document.mongodb.query
 
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
+import molecule.core.query.ResolveExpr
 import scala.reflect.ClassTag
 
 trait ResolveExprSetRefAttr extends ResolveExpr with LambdasSet { self: MongoQueryBase =>
@@ -47,9 +48,9 @@ trait ResolveExprSetRefAttr extends ResolveExpr with LambdasSet { self: MongoQue
     aritiesAttr()
     hasOptAttr = true // to avoid redundant None's
     attr match {
-      case at: AttrSetOptInt    => refOpt(at, at.vs, resOptSetInt, resSetInt)
-      case at: AttrSetOptLong   => refOpt(at, at.vs, resOptSetLong, resSetLong)
-      case at: AttrSetOptDouble => refOpt(at, at.vs, resOptSetDouble, resSetDouble)
+      case at: AttrSetOptInt    => refOpt(at, at.vs, resSetInt)
+      case at: AttrSetOptLong   => refOpt(at, at.vs, resSetLong)
+      case at: AttrSetOptDouble => refOpt(at, at.vs, resSetDouble)
       case other                => throw ModelError("Unexpected optional Set type: " + other)
     }
   }
@@ -89,7 +90,7 @@ trait ResolveExprSetRefAttr extends ResolveExpr with LambdasSet { self: MongoQue
   protected def refOpt[T: ClassTag](
     attr: Attr,
     optSets: Option[Seq[Set[T]]],
-    resOpt: ResSetOpt[T],
+//    resOpt: ResSetOpt[T],
     res: ResSet[T]
   ): Unit = {
 //    val col = getCol(attr: Attr)

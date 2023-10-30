@@ -2,6 +2,7 @@ package molecule.sql.core.query
 
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
+import molecule.core.query.ResolveExpr
 import molecule.core.util.AggrUtils
 import scala.reflect.ClassTag
 
