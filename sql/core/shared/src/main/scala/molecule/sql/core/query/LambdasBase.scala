@@ -18,7 +18,7 @@ trait LambdasBase extends BaseHelpers with AggrUtils { self: SqlQueryBase =>
   protected lazy val one2sqlBoolean       : Boolean => String        = (v: Boolean) => s"$v"
   protected lazy val one2sqlBigInt        : BigInt => String         = (v: BigInt) => s"$v"
   protected lazy val one2sqlBigDecimal    : BigDecimal => String     = (v: BigDecimal) => s"$v"
-  protected lazy val one2sqlDate          : Date => String           = (v: Date) => s"'${date2str(v)}'"
+  protected lazy val one2sqlDate          : Date => String           = (v: Date) => s"${v.getTime}"
   protected lazy val one2sqlDuration      : Duration => String       = (v: Duration) => s"'${v.toString}'"
   protected lazy val one2sqlInstant       : Instant => String        = (v: Instant) => s"'${v.toString}'"
   protected lazy val one2sqlLocalDate     : LocalDate => String      = (v: LocalDate) => s"'${v.toString}'"
@@ -59,7 +59,7 @@ trait LambdasBase extends BaseHelpers with AggrUtils { self: SqlQueryBase =>
   protected lazy val valueBoolean       : Row => Boolean        = (rs: Row) => rs.getBoolean(2)
   protected lazy val valueBigInt        : Row => BigInt         = (rs: Row) => rs.getBigDecimal(2).toBigInteger
   protected lazy val valueBigDecimal    : Row => BigDecimal     = (rs: Row) => rs.getBigDecimal(2)
-  protected lazy val valueDate          : Row => Date           = (rs: Row) => rs.getDate(2)
+  protected lazy val valueDate          : Row => Date           = (rs: Row) => new Date(rs.getLong(2))
   protected lazy val valueDuration      : Row => Duration       = (rs: Row) => Duration.parse(rs.getString(2))
   protected lazy val valueInstant       : Row => Instant        = (rs: Row) => Instant.parse(rs.getString(2))
   protected lazy val valueLocalDate     : Row => LocalDate      = (rs: Row) => LocalDate.parse(rs.getString(2))
@@ -109,7 +109,7 @@ trait LambdasBase extends BaseHelpers with AggrUtils { self: SqlQueryBase =>
   protected lazy val json2oneBoolean       : String => Boolean        = (v: String) => v == "1"
   protected lazy val json2oneBigInt        : String => BigInt         = (v: String) => BigInt(v)
   protected lazy val json2oneBigDecimal    : String => BigDecimal     = (v: String) => BigDecimal(v)
-  protected lazy val json2oneDate          : String => Date           = (v: String) => str2date(v)
+  protected lazy val json2oneDate          : String => Date           = (v: String) => new Date(v.toLong)
   protected lazy val json2oneDuration      : String => Duration       = (v: String) => Duration.parse(v)
   protected lazy val json2oneInstant       : String => Instant        = (v: String) => Instant.parse(v)
   protected lazy val json2oneLocalDate     : String => LocalDate      = (v: String) => LocalDate.parse(v)
@@ -133,7 +133,7 @@ trait LambdasBase extends BaseHelpers with AggrUtils { self: SqlQueryBase =>
   protected lazy val json2arrayBoolean       : String => Array[Boolean]        = (json: String) => json.substring(1, json.length - 1).split(", ?").map(json2oneBoolean)
   protected lazy val json2arrayBigInt        : String => Array[BigInt]         = (json: String) => json.substring(1, json.length - 1).split(", ?").map(json2oneBigInt)
   protected lazy val json2arrayBigDecimal    : String => Array[BigDecimal]     = (json: String) => json.substring(1, json.length - 1).split(", ?").map(json2oneBigDecimal)
-  protected lazy val json2arrayDate          : String => Array[Date]           = (json: String) => json.substring(2, json.length - 2).replace("000000", "000").split("\", ?\"").map(json2oneDate)
+  protected lazy val json2arrayDate          : String => Array[Date]           = (json: String) => json.substring(1, json.length - 1).split(", ?").map(json2oneDate)
   protected lazy val json2arrayDuration      : String => Array[Duration]       = (json: String) => json.substring(2, json.length - 2).split("\", ?\"").map(json2oneDuration)
   protected lazy val json2arrayInstant       : String => Array[Instant]        = (json: String) => json.substring(2, json.length - 2).split("\", ?\"").map(json2oneInstant)
   protected lazy val json2arrayLocalDate     : String => Array[LocalDate]      = (json: String) => json.substring(2, json.length - 2).split("\", ?\"").map(json2oneLocalDate)
@@ -158,7 +158,7 @@ trait LambdasBase extends BaseHelpers with AggrUtils { self: SqlQueryBase =>
   protected lazy val one2jsonBoolean       : Boolean => String        = (v: Boolean) => if (v) "1" else "0"
   protected lazy val one2jsonBigInt        : BigInt => String         = (v: BigInt) => s"$v"
   protected lazy val one2jsonBigDecimal    : BigDecimal => String     = (v: BigDecimal) => s"$v"
-  protected lazy val one2jsonDate          : Date => String           = (v: Date) => "\"" + date2str(v) + "\""
+  protected lazy val one2jsonDate          : Date => String           = (v: Date) => s"$v"
   protected lazy val one2jsonDuration      : Duration => String       = (v: Duration) => "\"" + v.toString + "\""
   protected lazy val one2jsonInstant       : Instant => String        = (v: Instant) => "\"" + v.toString + "\""
   protected lazy val one2jsonLocalDate     : LocalDate => String      = (v: LocalDate) => "\"" + v.toString + "\""

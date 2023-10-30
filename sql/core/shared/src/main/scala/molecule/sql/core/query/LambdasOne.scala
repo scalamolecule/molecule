@@ -25,7 +25,7 @@ trait LambdasOne extends LambdasBase { self: SqlQueryBase =>
   protected lazy val sql2oneBoolean       : (Row, Int) => Boolean        = (row: Row, paramIndex: Int) => row.getBoolean(paramIndex)
   protected lazy val sql2oneBigInt        : (Row, Int) => BigInt         = (row: Row, paramIndex: Int) => row.getBigDecimal(paramIndex).toBigInteger
   protected lazy val sql2oneBigDecimal    : (Row, Int) => BigDecimal     = (row: Row, paramIndex: Int) => row.getBigDecimal(paramIndex)
-  protected lazy val sql2oneDate          : (Row, Int) => Date           = (row: Row, paramIndex: Int) => row.getDate(paramIndex)
+  protected lazy val sql2oneDate          : (Row, Int) => Date           = (row: Row, paramIndex: Int) => new Date(row.getLong(paramIndex))
   protected lazy val sql2oneDuration      : (Row, Int) => Duration       = (row: Row, paramIndex: Int) => Duration.parse(row.getString(paramIndex))
   protected lazy val sql2oneInstant       : (Row, Int) => Instant        = (row: Row, paramIndex: Int) => Instant.parse(row.getString(paramIndex))
   protected lazy val sql2oneLocalDate     : (Row, Int) => LocalDate      = (row: Row, paramIndex: Int) => LocalDate.parse(row.getString(paramIndex))
@@ -73,7 +73,7 @@ trait LambdasOne extends LambdasBase { self: SqlQueryBase =>
   protected lazy val sql2oneBooleanOrNull       : (Row, Int) => Any = { (row: Row, paramIndex: Int) => val v = row.getBoolean(paramIndex); if (row.wasNull()) null else v }
   protected lazy val sql2oneBigIntOrNull        : (Row, Int) => Any = { (row: Row, paramIndex: Int) => val v = row.getBigDecimal(paramIndex); if (row.wasNull()) null else BigInt(v.toBigInteger) }
   protected lazy val sql2oneBigDecimalOrNull    : (Row, Int) => Any = { (row: Row, paramIndex: Int) => val v = row.getBigDecimal(paramIndex); if (row.wasNull()) null else BigDecimal(v) }
-  protected lazy val sql2oneDateOrNull          : (Row, Int) => Any = { (row: Row, paramIndex: Int) => val v = row.getDate(paramIndex); if (row.wasNull()) null else v }
+  protected lazy val sql2oneDateOrNull          : (Row, Int) => Any = { (row: Row, paramIndex: Int) => val v = row.getLong(paramIndex); if (row.wasNull()) null else new Date(v) }
   protected lazy val sql2oneDurationOrNull      : (Row, Int) => Any = { (row: Row, paramIndex: Int) => val v = row.getString(paramIndex); if (row.wasNull()) null else Duration.parse(v) }
   protected lazy val sql2oneInstantOrNull       : (Row, Int) => Any = { (row: Row, paramIndex: Int) => val v = row.getString(paramIndex); if (row.wasNull()) null else Instant.parse(v) }
   protected lazy val sql2oneLocalDateOrNull     : (Row, Int) => Any = { (row: Row, paramIndex: Int) => val v = row.getString(paramIndex); if (row.wasNull()) null else LocalDate.parse(v) }
@@ -156,8 +156,8 @@ trait LambdasOne extends LambdasBase { self: SqlQueryBase =>
     if (row.wasNull()) Option.empty[BigDecimal] else Some(v)
   }
   protected lazy val sql2oneOptDate          : (Row, Int) => Option[Date]           = (row: Row, paramIndex: Int) => {
-    val v = row.getDate(paramIndex)
-    if (row.wasNull()) Option.empty[Date] else Some(v)
+    val v = row.getLong(paramIndex)
+    if (row.wasNull()) Option.empty[Date] else Some(new Date(v))
   }
   protected lazy val sql2oneOptDuration      : (Row, Int) => Option[Duration]       = (row: Row, paramIndex: Int) => {
     val v = row.getString(paramIndex)

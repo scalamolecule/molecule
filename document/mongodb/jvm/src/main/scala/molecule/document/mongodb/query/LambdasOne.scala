@@ -136,8 +136,6 @@ trait LambdasOne {
   protected lazy val ltBigInt         = (field: String, v: BigInt) => Filters.lt[Decimal128](field, if (v == null) null else new Decimal128(BigDecimal(v).bigDecimal))
   protected lazy val ltBigDecimal     = (field: String, v: BigDecimal) => Filters.lt[Decimal128](field, if (v == null) null else new Decimal128(v.bigDecimal))
   protected lazy val ltDate           = (field: String, v: Date) => Filters.lt[BsonDateTime](field, if (v == null) null else new BsonDateTime(v.getTime))
-  // Comparing string representation of all java.time types
-  // todo: Maybe a codec or computed field comparison is needed
   protected lazy val ltDuration       = (field: String, v: Duration) => Filters.lt[String](field, if (v == null) null else v.toString)
   protected lazy val ltInstant        = (field: String, v: Instant) => Filters.lt[String](field, if (v == null) null else v.toString)
   protected lazy val ltLocalDate      = (field: String, v: LocalDate) => Filters.lt[String](field, if (v == null) null else v.toString)

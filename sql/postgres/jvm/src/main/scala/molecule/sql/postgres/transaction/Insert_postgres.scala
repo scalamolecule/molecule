@@ -47,7 +47,7 @@ trait Insert_postgres extends SqlInsert { self: ResolveInsert with InsertResolve
   override protected lazy val extsBoolean        = List("", "BOOLEAN")
   override protected lazy val extsBigInt         = List("", "DECIMAL")
   override protected lazy val extsBigDecimal     = List("", "DECIMAL")
-  override protected lazy val extsDate           = List("", "DATE")
+  override protected lazy val extsDate           = List("", "BIGINT")
   override protected lazy val extsDuration       = List("", "VARCHAR")
   override protected lazy val extsInstant        = List("", "VARCHAR")
   override protected lazy val extsLocalDate      = List("", "VARCHAR")

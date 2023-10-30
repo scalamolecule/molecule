@@ -120,6 +120,7 @@ trait SpiSync_h2 extends SpiSyncBase {
       while (n <= columnsNumber) {
         val col         = rsmd.getColumnName(n)
         val sqlType     = rsmd.getColumnTypeName(n)
+
         val tpe         = sqlType match {
           case "CHARACTER VARYING" => value(resultSet.getString(n), "String/URI")
           case "INTEGER"           => value(resultSet.getInt(n), "Int")
@@ -128,7 +129,7 @@ trait SpiSync_h2 extends SpiSyncBase {
           case "DOUBLE PRECISION"  => value(resultSet.getDouble(n), "Double")
           case "BOOLEAN"           => value(resultSet.getBoolean(n), "Boolean")
           case "DECIMAL"           => value(resultSet.getDouble(n), "BigInt/Decimal")
-          case "DATE"              => value(resultSet.getDate(n), "Date")
+          case "DATE"              => value(resultSet.getLong(n), "Long")
           case "UUID"              => value(resultSet.getString(n), "UUID")
           case "TINYINT"           => value(resultSet.getShort(n), "Byte")
           case "SMALLINT"          => value(resultSet.getShort(n), "Short")
@@ -145,7 +146,7 @@ trait SpiSync_h2 extends SpiSyncBase {
           case "BOOLEAN ARRAY"            => array(n, "Boolean")
           case "DECIMAL(100, 0) ARRAY"    => array(n, "BigInt")
           case "DECIMAL(65535, 25) ARRAY" => array(n, "BigDecimal")
-          case "DATE ARRAY"               => array(n, "Date")
+          case "DATE ARRAY"               => array(n, "Long")
           case "UUID ARRAY"               => array(n, "UUID")
           case "TINYINT ARRAY"            => array(n, "Byte")
           case "SMALLINT ARRAY"           => array(n, "Short")
@@ -160,7 +161,7 @@ trait SpiSync_h2 extends SpiSyncBase {
           case "BOOLEAN ARRAY ARRAY"            => nestedArray(n, "Boolean")
           case "DECIMAL(100, 0) ARRAY ARRAY"    => nestedArray(n, "BigInt")
           case "DECIMAL(65535, 25) ARRAY ARRAY" => nestedArray(n, "BigDecimal")
-          case "DATE ARRAY ARRAY"               => nestedArray(n, "Date")
+          case "DATE ARRAY ARRAY"               => nestedArray(n, "Long")
           case "UUID ARRAY ARRAY"               => nestedArray(n, "UUID")
           case "TINYINT ARRAY ARRAY"            => nestedArray(n, "Byte")
           case "SMALLINT ARRAY ARRAY"           => nestedArray(n, "Short")

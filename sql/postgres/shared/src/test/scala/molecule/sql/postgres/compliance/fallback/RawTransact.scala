@@ -45,7 +45,7 @@ object RawTransact extends TestSuite_postgres {
         _ <- rawTransact(s"insert into Ns (boolean       ) values ($boolean1)")
         _ <- rawTransact(s"insert into Ns (bigInt        ) values ($bigInt1)")
         _ <- rawTransact(s"insert into Ns (bigDecimal    ) values ($bigDecimal1)")
-        _ <- rawTransact(s"insert into Ns (date          ) values ('2001-07-01')") // Date as String
+        _ <- rawTransact(s"insert into Ns (date          ) values (${date1.getTime})") // epoch time saved
         _ <- rawTransact(s"insert into Ns (duration      ) values ('${duration1.toString}')")
         _ <- rawTransact(s"insert into Ns (instant       ) values ('${instant1.toString}')")
         _ <- rawTransact(s"insert into Ns (localDate     ) values ('${localDate1.toString}')")
@@ -97,7 +97,7 @@ object RawTransact extends TestSuite_postgres {
         _ <- rawTransact(s"insert into Ns (booleans       ) values (array[$boolean1, $boolean2])")
         _ <- rawTransact(s"insert into Ns (bigInts        ) values (array[$bigInt1, $bigInt2])")
         _ <- rawTransact(s"insert into Ns (bigDecimals    ) values (array[$bigDecimal1, $bigDecimal2])")
-        _ <- rawTransact(s"insert into Ns (dates          ) values (array['2001-07-01', '2002-01-01']::date[])")
+        _ <- rawTransact(s"insert into Ns (dates          ) values (array[${date1.getTime}, ${date2.getTime}])")
         _ <- rawTransact(s"insert into Ns (durations      ) values (array['${duration1.toString}', '${duration2.toString}'])")
         _ <- rawTransact(s"insert into Ns (instants       ) values (array['${instant1.toString}', '${instant2.toString}'])")
         _ <- rawTransact(s"insert into Ns (localDates     ) values (array['${localDate1.toString}', '${localDate2.toString}'])")
@@ -174,7 +174,7 @@ object RawTransact extends TestSuite_postgres {
         _ <- rawTransact(s"update Ns set boolean        = $boolean2                     where id = $id6")
         _ <- rawTransact(s"update Ns set bigInt         = $bigInt2                      where id = $id7")
         _ <- rawTransact(s"update Ns set bigDecimal     = $bigDecimal2                  where id = $id8")
-        _ <- rawTransact(s"update Ns set date           = '2002-01-01'                  where id = $id9")
+        _ <- rawTransact(s"update Ns set date           = ${date2.getTime}              where id = $id9")
         _ <- rawTransact(s"update Ns set duration       = '${duration2.toString}'       where id = $id10")
         _ <- rawTransact(s"update Ns set instant        = '${instant2.toString}'        where id = $id11")
         _ <- rawTransact(s"update Ns set localDate      = '${localDate2.toString}'      where id = $id12")

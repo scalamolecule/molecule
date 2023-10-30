@@ -65,7 +65,7 @@ trait BaseOps extends JsonBase with BaseHelpers {
   protected lazy val set2arrayBoolean       : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
   protected lazy val set2arrayBigInt        : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[BigInt]].map(v => BigDecimal(v).bigDecimal.asInstanceOf[AnyRef]).toArray
   protected lazy val set2arrayBigDecimal    : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[BigDecimal]].map(v => v.bigDecimal.asInstanceOf[AnyRef]).toArray
-  protected lazy val set2arrayDate          : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[AnyRef]].toArray
+  protected lazy val set2arrayDate          : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[Date]].map(_.getTime.asInstanceOf[AnyRef]).toArray
   protected lazy val set2arrayDuration      : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[Duration]].map(_.toString.asInstanceOf[AnyRef]).toArray
   protected lazy val set2arrayInstant       : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[Instant]].map(_.toString.asInstanceOf[AnyRef]).toArray
   protected lazy val set2arrayLocalDate     : Set[Any] => Array[AnyRef] = (set: Set[Any]) => set.asInstanceOf[Set[LocalDate]].map(_.toString.asInstanceOf[AnyRef]).toArray

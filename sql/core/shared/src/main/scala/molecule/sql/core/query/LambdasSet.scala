@@ -85,7 +85,7 @@ trait LambdasSet extends LambdasBase with JavaConversions { self: SqlQueryBase =
   protected lazy val set2sqlArrayBoolean       : Set[Boolean] => String        = (set: Set[Boolean]) => set.mkString("ARRAY[", ", ", "]::boolean[]")
   protected lazy val set2sqlArrayBigInt        : Set[BigInt] => String         = (set: Set[BigInt]) => set.mkString("ARRAY[", ", ", "]::numeric[]")
   protected lazy val set2sqlArrayBigDecimal    : Set[BigDecimal] => String     = (set: Set[BigDecimal]) => set.mkString("ARRAY[", ", ", "]::numeric[]")
-  protected lazy val set2sqlArrayDate          : Set[Date] => String           = (set: Set[Date]) => set.map(date2str(_)).mkString("ARRAY['", "', '", "']::date[]")
+  protected lazy val set2sqlArrayDate          : Set[Date] => String           = (set: Set[Date]) => set.map(_.getTime).mkString("ARRAY[", ", ", "]::bigint[]")
   protected lazy val set2sqlArrayDuration      : Set[Duration] => String       = (set: Set[Duration]) => set.mkString("ARRAY['", "', '", "']::varchar[]")
   protected lazy val set2sqlArrayInstant       : Set[Instant] => String        = (set: Set[Instant]) => set.mkString("ARRAY['", "', '", "']::varchar[]")
   protected lazy val set2sqlArrayLocalDate     : Set[LocalDate] => String      = (set: Set[LocalDate]) => set.mkString("ARRAY['", "', '", "']::varchar[]")
@@ -109,7 +109,7 @@ trait LambdasSet extends LambdasBase with JavaConversions { self: SqlQueryBase =
   private lazy val set2sqlsBoolean       : Set[Boolean] => Set[String]        = (set: Set[Boolean]) => set.map(_.toString)
   private lazy val set2sqlsBigInt        : Set[BigInt] => Set[String]         = (set: Set[BigInt]) => set.map(_.toString)
   private lazy val set2sqlsBigDecimal    : Set[BigDecimal] => Set[String]     = (set: Set[BigDecimal]) => set.map(_.toString)
-  private lazy val set2sqlsDate          : Set[Date] => Set[String]           = (set: Set[Date]) => set.map(d => "'" + date2str(d) + "'")
+  private lazy val set2sqlsDate          : Set[Date] => Set[String]           = (set: Set[Date]) => set.map(_.getTime.toString)
   private lazy val set2sqlsDuration      : Set[Duration] => Set[String]       = (set: Set[Duration]) => set.map(v => s"'$v'")
   private lazy val set2sqlsInstant       : Set[Instant] => Set[String]        = (set: Set[Instant]) => set.map(v => s"'$v'")
   private lazy val set2sqlsLocalDate     : Set[LocalDate] => Set[String]      = (set: Set[LocalDate]) => set.map(v => s"'$v'")
@@ -249,7 +249,7 @@ trait LambdasSet extends LambdasBase with JavaConversions { self: SqlQueryBase =
   protected lazy val j2Boolean       : Any => Boolean        = (v: Any) => v.asInstanceOf[Boolean]
   protected lazy val j2BigInt        : Any => BigInt         = (v: Any) => BigInt(v.toString)
   protected lazy val j2BigDecimal    : Any => BigDecimal     = (v: Any) => BigDecimal(v.toString)
-  protected lazy val j2Date          : Any => Date           = (v: Any) => v.asInstanceOf[Date]
+  protected lazy val j2Date          : Any => Date           = (v: Any) => new Date(v.asInstanceOf[Long])
   protected lazy val j2Duration      : Any => Duration       = (v: Any) => Duration.parse(v.asInstanceOf[String])
   protected lazy val j2Instant       : Any => Instant        = (v: Any) => Instant.parse(v.asInstanceOf[String])
   protected lazy val j2LocalDate     : Any => LocalDate      = (v: Any) => LocalDate.parse(v.asInstanceOf[String])

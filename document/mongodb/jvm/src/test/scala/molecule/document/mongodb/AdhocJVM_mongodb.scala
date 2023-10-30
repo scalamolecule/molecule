@@ -12,31 +12,33 @@ import scala.language.implicitConversions
 
 object AdhocJVM_mongodb extends TestSuite_mongodb {
 
-
   override lazy val tests = Tests {
 
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
-
-
+      //      val id0 = "123456789012345678901234"
+      val id0 = "1234567890"
       for {
-        _ <- Ns.i(0).save.transact
-        _ <- Ns.i.ints.insert(List(
-          (1, Set(int1, int2)),
-          (2, Set(int2, int3, int4))
-        )).transact
+        List(id1, id2, id3) <- Ns.i.insert(1, 2, 3).transact.map(_.ids)
+        a = (1, id1)
+        b = (2, id2)
+        c = (3, id3)
 
-        _ <- Ns.i.a1.query.get.map(_ ==> List(0, 1, 2))
-        _ <- Ns.i.a1.ints_.query.get.map(_ ==> List(1, 2))
+        // Find all ids
+        _ <- Ns.i.a1.id.query.get.map(_ ==> List(a, b, c))
 
-
-//      val a = (1, Set(ref1, ref2))
-//      val b = (2, Set(ref2, ref3, ref4))
-//      for {
-//        _ <- Ns.i.refs.insert(List(a, b)).transact
-//
-//        _ <- Ns.i.a1.refs.query.get.map(_ ==> List(a, b))
-
+        // Find value(s) matching
+        _ <- Ns.i.a1.id(id0).query.get.map(_ ==> List())
+        _ <- Ns.i.a1.id(id1).query.get.map(_ ==> List(a))
+        _ <- Ns.i.a1.id(Seq(id0)).query.get.map(_ ==> List())
+        _ <- Ns.i.a1.id(Seq(id1)).query.get.map(_ ==> List(a))
+        // OR semantics for multiple args
+        _ <- Ns.i.a1.id(id1, id2).query.get.map(_ ==> List(a, b))
+        _ <- Ns.i.a1.id(id1, id0).query.get.map(_ ==> List(a))
+        _ <- Ns.i.a1.id(Seq(id1, id2)).query.get.map(_ ==> List(a, b))
+        _ <- Ns.i.a1.id(Seq(id1, id0)).query.get.map(_ ==> List(a))
+        // Empty Seq of args matches no ids
+        _ <- Ns.i.a1.id(Seq.empty[String]).query.get.map(_ ==> List())
 
       } yield ()
     }
