@@ -2,6 +2,8 @@ package molecule.document.mongodb.query
 
 import java.sql.ResultSet
 import java.util
+import java.util.Arrays.asList
+import java.util.Map
 import com.mongodb.client.AggregateIterable
 import com.mongodb.client.model.Aggregates._
 import com.mongodb.client.model.{Aggregates, Filters, Projections, Sorts}
@@ -9,7 +11,8 @@ import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.core.util.ModelUtils
 import molecule.document.mongodb.facade.MongoConn_JVM
-import org.bson.BsonDocument
+import molecule.document.mongodb.util.BsonUtils
+import org.bson.{BsonArray, BsonDocument, BsonValue, Document}
 import org.bson.conversions.Bson
 import org.bson.json.JsonWriterSettings
 import scala.annotation.tailrec
@@ -20,7 +23,8 @@ abstract class QueryResolve_mongodb[Tpl](
   elements: List[Element],
   m2q: Model2MongoQuery[Tpl]
 ) extends CursorUtils
-  with ModelUtils {
+  with ModelUtils
+  with BsonUtils {
 
   lazy val edgeValuesNotFound = "Couldn't find next page. Edge rows were all deleted/updated."
 
@@ -52,35 +56,12 @@ abstract class QueryResolve_mongodb[Tpl](
     optLimit: Option[Int],
     optOffset: Option[Int]
   ): AggregateIterable[BsonDocument] = {
-    val (ns, filters, fields, sorts) = m2q.getBsonQuery(Nil, optLimit, optOffset, Some(conn.proxy))
-
-    val collection = conn.mongoDb.getCollection(ns, classOf[BsonDocument])
-
-    val query = new util.ArrayList[Bson]()
-
-    if (!filters.isEmpty)
-      query.add(Aggregates.`match`(Filters.and(filters)))
-
-    if (!fields.isEmpty)
-      query.add(project(Projections.fields(fields)))
-
-    if (!sorts.isEmpty)
-      query.add(sort(Sorts.orderBy(sorts)))
-
-
-//    println("QUERY ----------------------------------------------")
+    val (col, pipeline) = m2q.getBsonQuery(Nil, optLimit, optOffset, Some(conn.proxy))
+    val collection      = conn.mongoDb.getCollection(col, classOf[BsonDocument])
+    //    println("QUERY ----------------------------------------------")
     //    elements.foreach(println)
-    //    val pretty: JsonWriterSettings = JsonWriterSettings.builder().indent(true).build()
-    //    query.forEach(d => println(d.toBsonDocument.toJson(pretty)))
-    //    println("")
-
-    //    val bsonDocs = collection.find()
-    //    println("RESULT ---------------------------------------------")
-    ////    val pretty: JsonWriterSettings = JsonWriterSettings.builder().indent(true).build()
-    //    bsonDocs.forEach(d => println(d.toJson(pretty)))
-    //    println("")
-
-    collection.aggregate(query)
+    //    print(pipeline)
+    collection.aggregate(pipeline)
   }
 
   protected def getTotalCount(conn: MongoConn_JVM): Int = {

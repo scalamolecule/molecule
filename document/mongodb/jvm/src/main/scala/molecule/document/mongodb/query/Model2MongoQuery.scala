@@ -1,7 +1,7 @@
 package molecule.document.mongodb.query
 
 import java.util
-import com.mongodb.client.model.Projections
+import com.mongodb.client.model._
 import molecule.base.ast._
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
@@ -35,7 +35,8 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
     optLimit: Option[Int],
     optOffset: Option[Int],
     optProxy: Option[ConnProxy]
-  ): (String, util.ArrayList[Bson], util.ArrayList[Bson], util.ArrayList[Bson]) = {
+    //  ): (String, util.ArrayList[Bson], util.ArrayList[Bson], util.ArrayList[Bson]) = {
+  ): (String, util.ArrayList[Bson]) = {
     val elements1 = if (altElements.isEmpty) elements0 else altElements
     validateQueryModel(elements1)
     //    elements.foreach(println)
@@ -51,7 +52,13 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
       fields.add(Projections.excludeId())
     }
 
-    (getInitialNonGenericNs(elements2), filters, fields, sorts)
+    val pipeline = new util.ArrayList[Bson]()
+    if (!filters.isEmpty) pipeline.add(Aggregates.`match`(Filters.and(filters)))
+    if (!fields.isEmpty) pipeline.add(Aggregates.project(Projections.fields(fields)))
+    if (!sorts.isEmpty) pipeline.add(Aggregates.sort(Sorts.orderBy(sorts)))
+
+
+    (getInitialNonGenericNs(elements2), pipeline)
   }
 
   final private def renderSqlQuery(
@@ -251,7 +258,7 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
   @tailrec
   final private def resolve(elements: List[Element]): Unit = elements match {
     case element :: tail => element match {
-      case a: AttrOne                      =>
+      case a: AttrOne =>
         if (a.attr == "id" && a.filterAttr.nonEmpty || a.attr != "id" && a.filterAttr.exists(_.attr == "id")) {
           throw ModelError(noIdFiltering)
         }
@@ -269,20 +276,20 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
             case a: AttrOneTac => resolveAttrOneTac(a); resolve(tail)
           }
         }
-//      case a: AttrSet if a.refNs.isDefined => a match {
-//        case a: AttrSetMan => resolveRefAttrSetMan(a); resolve(tail)
-//        case a: AttrSetOpt => resolveRefAttrSetOpt(a); resolve(tail)
-//        case a: AttrSetTac => resolveRefAttrSetTac(a); resolve(tail)
-//      }
-      case a: AttrSet                      => a match {
+      //      case a: AttrSet if a.refNs.isDefined => a match {
+      //        case a: AttrSetMan => resolveRefAttrSetMan(a); resolve(tail)
+      //        case a: AttrSetOpt => resolveRefAttrSetOpt(a); resolve(tail)
+      //        case a: AttrSetTac => resolveRefAttrSetTac(a); resolve(tail)
+      //      }
+      case a: AttrSet                     => a match {
         case a: AttrSetMan => resolveAttrSetMan(a); resolve(tail)
         case a: AttrSetOpt => resolveAttrSetOpt(a); resolve(tail)
         case a: AttrSetTac => resolveAttrSetTac(a); resolve(tail)
       }
-      case ref: Ref                        => resolveRef0(ref, tail)
-      case backRef: BackRef                => resolveBackRef(backRef, tail)
-      case Nested(ref, nestedElements)     => resolveNested(ref, nestedElements, tail)
-      case NestedOpt(ref, nestedElements)  => resolveNestedOpt(ref, nestedElements, tail)
+      case ref: Ref                       => resolveRef0(ref, tail)
+      case backRef: BackRef               => resolveBackRef(backRef, tail)
+      case Nested(ref, nestedElements)    => resolveNested(ref, nestedElements, tail)
+      case NestedOpt(ref, nestedElements) => resolveNestedOpt(ref, nestedElements, tail)
     }
     case Nil             => ()
   }

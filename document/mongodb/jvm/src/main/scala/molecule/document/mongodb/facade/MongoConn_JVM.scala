@@ -34,11 +34,10 @@ case class MongoConn_JVM(
     val (collectionName, documents) = data
     val collection                  = mongoDb.getCollection(collectionName, classOf[BsonDocument])
 
-    println("TRANSACT ----------------------------------------")
-    val pretty: JsonWriterSettings = JsonWriterSettings.builder().indent(true).build()
-    documents.forEach(d => println(d.toBsonDocument.toJson(pretty)))
-    //    documents.forEach(d => println(d))
-    println("")
+//    println("TRANSACT ----------------------------------------")
+//    val pretty: JsonWriterSettings = JsonWriterSettings.builder().indent(true).build()
+//    documents.forEach(d => println(d.toBsonDocument.toJson(pretty)))
+//    println("")
 
     if (documents.size() == 1) {
       val result      = collection.insertOne(documents.get(0))

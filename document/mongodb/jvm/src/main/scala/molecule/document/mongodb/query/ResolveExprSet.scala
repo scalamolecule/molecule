@@ -184,7 +184,7 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
 
   private def expr[T](field: String, op: Op, sets: Seq[Set[T]], res: ResSet[T]): Unit = {
     op match {
-      case V         => ()
+      case V         => filters.add(Filters.ne(field, null.asInstanceOf[T]))
       case Eq        => equal(field, sets, res)
       case Neq       => neq(field, sets, res)
       case Has       => has(field, sets, res)

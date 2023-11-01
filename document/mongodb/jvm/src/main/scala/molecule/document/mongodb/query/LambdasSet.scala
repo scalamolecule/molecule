@@ -90,7 +90,7 @@ trait LambdasSet extends LambdasBase with JavaConversions { self: MongoQueryBase
       Set.empty[T]
     } else {
       println(raw.getClass)
-      val array = raw.asArray().iterator()
+      val array = raw.asArray.iterator
       var set   = Set.empty[T]
       while (array.hasNext) {
         set += value(array.next)
@@ -99,15 +99,15 @@ trait LambdasSet extends LambdasBase with JavaConversions { self: MongoQueryBase
     }
   }
 
-  protected lazy val castSetID             = (field: String) => (doc: BsonDocument) => castSet[String](doc, field, (bv: BsonValue) => bv.asString().getValue)
-  protected lazy val castSetString         = (field: String) => (doc: BsonDocument) => castSet[String](doc, field, (bv: BsonValue) => bv.asString().getValue)
+  protected lazy val castSetID             = (field: String) => (doc: BsonDocument) => castSet[String](doc, field, (bv: BsonValue) => bv.asString.getValue)
+  protected lazy val castSetString         = (field: String) => (doc: BsonDocument) => castSet[String](doc, field, (bv: BsonValue) => bv.asString.getValue)
   protected lazy val castSetInt            = (field: String) => (doc: BsonDocument) => castSet[Int](doc, field, (bv: BsonValue) => bv.asInt32.getValue)
   protected lazy val castSetLong           = (field: String) => (doc: BsonDocument) => castSet[Long](doc, field, (bv: BsonValue) => bv.asInt64.getValue)
   protected lazy val castSetFloat          = (field: String) => (doc: BsonDocument) => castSet[Float](doc, field, (bv: BsonValue) => bv.asDouble.getValue.toFloat)
   protected lazy val castSetDouble         = (field: String) => (doc: BsonDocument) => castSet[Double](doc, field, (bv: BsonValue) => bv.asDouble.getValue)
   protected lazy val castSetBoolean        = (field: String) => (doc: BsonDocument) => castSet[Boolean](doc, field, (bv: BsonValue) => bv.asBoolean.getValue)
-  protected lazy val castSetBigInt         = (field: String) => (doc: BsonDocument) => castSet[BigInt](doc, field, (bv: BsonValue) => BigInt(bv.asDecimal128().getValue.bigDecimalValue().toBigInteger))
-  protected lazy val castSetBigDecimal     = (field: String) => (doc: BsonDocument) => castSet[BigDecimal](doc, field, (bv: BsonValue) => BigDecimal(bv.asDecimal128().getValue.bigDecimalValue()))
+  protected lazy val castSetBigInt         = (field: String) => (doc: BsonDocument) => castSet[BigInt](doc, field, (bv: BsonValue) => BigInt(bv.asDecimal128.getValue.bigDecimalValue.toBigInteger))
+  protected lazy val castSetBigDecimal     = (field: String) => (doc: BsonDocument) => castSet[BigDecimal](doc, field, (bv: BsonValue) => BigDecimal(bv.asDecimal128.getValue.bigDecimalValue))
   protected lazy val castSetDate           = (field: String) => (doc: BsonDocument) => castSet[Date](doc, field, (bv: BsonValue) => new Date(bv.asDateTime.getValue))
   protected lazy val castSetDuration       = (field: String) => (doc: BsonDocument) => castSet[Duration](doc, field, (bv: BsonValue) => Duration.parse(bv.asString.getValue))
   protected lazy val castSetInstant        = (field: String) => (doc: BsonDocument) => castSet[Instant](doc, field, (bv: BsonValue) => Instant.parse(bv.asString.getValue))
@@ -154,8 +154,8 @@ trait LambdasSet extends LambdasBase with JavaConversions { self: MongoQueryBase
   //  protected lazy val castFloat          = (field: String) => (doc: BsonDocument) => doc.get(field).asDouble.getValue.toFloat
   //  protected lazy val castDouble         = (field: String) => (doc: BsonDocument) => doc.get(field).asDouble.getValue
   //  protected lazy val castBoolean        = (field: String) => (doc: BsonDocument) => doc.get(field).asBoolean.getValue
-  //  protected lazy val castBigInt         = (field: String) => (doc: BsonDocument) => BigInt(doc.get(field).asDecimal128().getValue.bigDecimalValue().toBigInteger)
-  //  protected lazy val castBigDecimal     = (field: String) => (doc: BsonDocument) => BigDecimal(doc.get(field).asDecimal128().getValue.bigDecimalValue())
+  //  protected lazy val castBigInt         = (field: String) => (doc: BsonDocument) => BigInt(doc.get(field).asDecimal128.getValue.bigDecimalValue.toBigInteger)
+  //  protected lazy val castBigDecimal     = (field: String) => (doc: BsonDocument) => BigDecimal(doc.get(field).asDecimal128.getValue.bigDecimalValue)
   //  protected lazy val castDate           = (field: String) => (doc: BsonDocument) => new Date(doc.get(field).asDateTime.getValue)
   //  protected lazy val castDuration       = (field: String) => (doc: BsonDocument) => Duration.parse(doc.get(field).asString.getValue)
   //  protected lazy val castInstant        = (field: String) => (doc: BsonDocument) => Instant.parse(doc.get(field).asString.getValue)
@@ -505,7 +505,7 @@ trait LambdasSet extends LambdasBase with JavaConversions { self: MongoQueryBase
     if (raw == null || raw == BsonNull.VALUE) {
       Option.empty[Set[T]]
     } else {
-      val array = raw.asArray().iterator()
+      val array = raw.asArray.iterator
       var set   = Set.empty[T]
       while (array.hasNext) {
         set += value(array.next)
@@ -514,14 +514,14 @@ trait LambdasSet extends LambdasBase with JavaConversions { self: MongoQueryBase
     }
   }
 
-  protected lazy val castOptSetString         = (field: String) => (doc: BsonDocument) => castOptSet[String](doc, field, (bv: BsonValue) => bv.asString().getValue)
+  protected lazy val castOptSetString         = (field: String) => (doc: BsonDocument) => castOptSet[String](doc, field, (bv: BsonValue) => bv.asString.getValue)
   protected lazy val castOptSetInt            = (field: String) => (doc: BsonDocument) => castOptSet[Int](doc, field, (bv: BsonValue) => bv.asInt32.getValue)
   protected lazy val castOptSetLong           = (field: String) => (doc: BsonDocument) => castOptSet[Long](doc, field, (bv: BsonValue) => bv.asInt64.getValue)
   protected lazy val castOptSetFloat          = (field: String) => (doc: BsonDocument) => castOptSet[Float](doc, field, (bv: BsonValue) => bv.asDouble.getValue.toFloat)
   protected lazy val castOptSetDouble         = (field: String) => (doc: BsonDocument) => castOptSet[Double](doc, field, (bv: BsonValue) => bv.asDouble.getValue)
   protected lazy val castOptSetBoolean        = (field: String) => (doc: BsonDocument) => castOptSet[Boolean](doc, field, (bv: BsonValue) => bv.asBoolean.getValue)
-  protected lazy val castOptSetBigInt         = (field: String) => (doc: BsonDocument) => castOptSet[BigInt](doc, field, (bv: BsonValue) => BigInt(bv.asDecimal128().getValue.bigDecimalValue().toBigInteger))
-  protected lazy val castOptSetBigDecimal     = (field: String) => (doc: BsonDocument) => castOptSet[BigDecimal](doc, field, (bv: BsonValue) => BigDecimal(bv.asDecimal128().getValue.bigDecimalValue()))
+  protected lazy val castOptSetBigInt         = (field: String) => (doc: BsonDocument) => castOptSet[BigInt](doc, field, (bv: BsonValue) => BigInt(bv.asDecimal128.getValue.bigDecimalValue.toBigInteger))
+  protected lazy val castOptSetBigDecimal     = (field: String) => (doc: BsonDocument) => castOptSet[BigDecimal](doc, field, (bv: BsonValue) => BigDecimal(bv.asDecimal128.getValue.bigDecimalValue))
   protected lazy val castOptSetDate           = (field: String) => (doc: BsonDocument) => castOptSet[Date](doc, field, (bv: BsonValue) => new Date(bv.asDateTime.getValue))
   protected lazy val castOptSetDuration       = (field: String) => (doc: BsonDocument) => castOptSet[Duration](doc, field, (bv: BsonValue) => Duration.parse(bv.asString.getValue))
   protected lazy val castOptSetInstant        = (field: String) => (doc: BsonDocument) => castOptSet[Instant](doc, field, (bv: BsonValue) => Instant.parse(bv.asString.getValue))

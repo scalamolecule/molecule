@@ -16,29 +16,48 @@ object AdhocJVM_mongodb extends TestSuite_mongodb {
 
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
-      //      val id0 = "123456789012345678901234"
-      val id0 = "1234567890"
       for {
-        List(id1, id2, id3) <- Ns.i.insert(1, 2, 3).transact.map(_.ids)
-        a = (1, id1)
-        b = (2, id2)
-        c = (3, id3)
+        _ <- Ns.i.s.insert((1, "a"), (2, "b")).i.transact
 
-        // Find all ids
-        _ <- Ns.i.a1.id.query.get.map(_ ==> List(a, b, c))
+//        _ <- rawTransact(
+//          """{
+//            |  "collection": "Ns",
+//            |  "data": [
+//            |    {
+//            |      "i": 1,
+//            |      "s": "a"
+//            |    },
+//            |    {
+//            |      "i": 2,
+//            |      "s": "b"
+//            |    },
+//            |  ]
+//            |}
+//            |""".stripMargin)
 
-        // Find value(s) matching
-        _ <- Ns.i.a1.id(id0).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.id(id1).query.get.map(_ ==> List(a))
-        _ <- Ns.i.a1.id(Seq(id0)).query.get.map(_ ==> List())
-        _ <- Ns.i.a1.id(Seq(id1)).query.get.map(_ ==> List(a))
-        // OR semantics for multiple args
-        _ <- Ns.i.a1.id(id1, id2).query.get.map(_ ==> List(a, b))
-        _ <- Ns.i.a1.id(id1, id0).query.get.map(_ ==> List(a))
-        _ <- Ns.i.a1.id(Seq(id1, id2)).query.get.map(_ ==> List(a, b))
-        _ <- Ns.i.a1.id(Seq(id1, id0)).query.get.map(_ ==> List(a))
-        // Empty Seq of args matches no ids
-        _ <- Ns.i.a1.id(Seq.empty[String]).query.get.map(_ ==> List())
+//        _ <- rawQuery(
+//          """{
+//            |  "collection": "Ns",
+//            |  "$match": {
+//            |    "$and": [
+//            |      {
+//            |        "i": 1
+//            |      },
+//            |      {
+//            |        "s": "a"
+//            |      }
+//            |    ]
+//            |  },
+//            |  "$project": {
+//            |    "i": 1,
+//            |    "s": 1,
+//            |    "_id": 0
+//            |  }
+//            |}
+//            |""".stripMargin).map(_.foreach(println))
+
+        _ <- Ns.i(1).s("a").query.get.map(_ ==> List((1, "a")))
+
 
       } yield ()
     }
@@ -49,11 +68,28 @@ object AdhocJVM_mongodb extends TestSuite_mongodb {
         _ <- A.i(1).B.i(2).save.transact
 //        _ <- A.i.B.i.insert(1, 2).transact
 
-//        _ <- rawQuery(
-//          """{
-//            |  "i": 1
-//            |}""".stripMargin
-//        )
+        _ <- rawQuery(
+          """{
+            |  "$match": {
+            |    "$and": [
+            |      {
+            |        "i": {
+            |          "$ne": null
+            |        }
+            |      },
+            |      {
+            |        "i": {
+            |          "$ne": null
+            |        }
+            |      }
+            |    ]
+            |  },
+            |  "$project": {
+            |    "i": 1,
+            |    "_id": 0
+            |  }
+            |}""".stripMargin
+        )
 
 //        _ <- A.i.query.get.map(_ ==> List(1))
 //        _ <- B.i.query.get.map(_ ==> List(2))

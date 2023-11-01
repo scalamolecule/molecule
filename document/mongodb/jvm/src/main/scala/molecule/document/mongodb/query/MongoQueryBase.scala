@@ -35,6 +35,7 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
   val fields  = new java.util.ArrayList[Bson]
   val filters = new java.util.ArrayList[Bson]
   val group   = new java.util.ArrayList[Bson]
+  val limit   = new java.util.ArrayList[Bson]
   val sorts   = new java.util.ArrayList[Bson]
 
   var castss = List(List.empty[BsonDocument => Any])

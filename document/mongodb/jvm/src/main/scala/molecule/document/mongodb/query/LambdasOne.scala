@@ -47,15 +47,15 @@ trait LambdasOne {
   protected lazy val resChar           = ResOne(castChar, castOptChar, eqChar, neqChar, ltChar, gtChar, leChar, geChar)
 
 
-  protected lazy val castID             = (field: String) => (doc: BsonDocument) => doc.get(field).asObjectId().getValue.toString
+  protected lazy val castID             = (field: String) => (doc: BsonDocument) => doc.get(field).asObjectId.getValue.toString
   protected lazy val castString         = (field: String) => (doc: BsonDocument) => doc.get(field).asString.getValue
   protected lazy val castInt            = (field: String) => (doc: BsonDocument) => doc.get(field).asInt32.getValue
   protected lazy val castLong           = (field: String) => (doc: BsonDocument) => doc.get(field).asInt64.getValue
   protected lazy val castFloat          = (field: String) => (doc: BsonDocument) => doc.get(field).asDouble.getValue.toFloat
   protected lazy val castDouble         = (field: String) => (doc: BsonDocument) => doc.get(field).asDouble.getValue
   protected lazy val castBoolean        = (field: String) => (doc: BsonDocument) => doc.get(field).asBoolean.getValue
-  protected lazy val castBigInt         = (field: String) => (doc: BsonDocument) => BigInt(doc.get(field).asDecimal128().getValue.bigDecimalValue().toBigInteger)
-  protected lazy val castBigDecimal     = (field: String) => (doc: BsonDocument) => BigDecimal(doc.get(field).asDecimal128().getValue.bigDecimalValue())
+  protected lazy val castBigInt         = (field: String) => (doc: BsonDocument) => BigInt(doc.get(field).asDecimal128.getValue.bigDecimalValue.toBigInteger)
+  protected lazy val castBigDecimal     = (field: String) => (doc: BsonDocument) => BigDecimal(doc.get(field).asDecimal128.getValue.bigDecimalValue)
   protected lazy val castDate           = (field: String) => (doc: BsonDocument) => new Date(doc.get(field).asDateTime.getValue)
   protected lazy val castDuration       = (field: String) => (doc: BsonDocument) => Duration.parse(doc.get(field).asString.getValue)
   protected lazy val castInstant        = (field: String) => (doc: BsonDocument) => Instant.parse(doc.get(field).asString.getValue)
@@ -262,13 +262,13 @@ trait LambdasOne {
   protected lazy val castOptBigInt: String => BsonDocument => Option[BigInt] =
     (field: String) => (doc: BsonDocument) => doc.get(field) match {
       case _: BsonNull | null => Option.empty[BigInt]
-      case v                  => Some(BigInt(v.asDecimal128().getValue.bigDecimalValue().toBigInteger))
+      case v                  => Some(BigInt(v.asDecimal128.getValue.bigDecimalValue.toBigInteger))
     }
 
   protected lazy val castOptBigDecimal: String => BsonDocument => Option[BigDecimal] =
     (field: String) => (doc: BsonDocument) => doc.get(field) match {
       case _: BsonNull | null => Option.empty[BigDecimal]
-      case v                  => Some(BigDecimal(v.asDecimal128().getValue.bigDecimalValue()))
+      case v                  => Some(BigDecimal(v.asDecimal128.getValue.bigDecimalValue))
     }
 
   protected lazy val castOptDate: String => BsonDocument => Option[Date] =

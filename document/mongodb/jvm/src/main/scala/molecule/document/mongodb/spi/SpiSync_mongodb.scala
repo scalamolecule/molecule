@@ -14,7 +14,10 @@ import molecule.core.validation.insert.InsertValidation
 import molecule.document.mongodb.facade.MongoConn_JVM
 import molecule.document.mongodb.query.{Model2MongoQuery, QueryResolveCursor_mongodb, QueryResolveOffset_mongodb}
 import molecule.document.mongodb.transaction._
+import molecule.document.mongodb.util.BsonUtils
+import org.bson._
 import scala.annotation.nowarn
+import scala.collection.mutable.ListBuffer
 import scala.util.control.NonFatal
 
 
@@ -25,7 +28,8 @@ trait SpiSync_mongodb
     with Base_JVM_mongodb
     with ModelUtils
     with Renderer
-    with BaseHelpers {
+    with BaseHelpers
+    with BsonUtils {
 
   // Query --------------------------------------------------------
 
@@ -107,12 +111,10 @@ trait SpiSync_mongodb
     optLimit: Option[Int],
     optOffset: Option[Int]
   ): Unit = {
-//    tryInspect("query", elements) {
-//      val query = getModel2SqlQuery[Any](elements).getBsonQuery(Nil, optLimit, optOffset, None)
-//      printRaw(label, elements, query)
-//    }
-
-    ???
+    tryInspect("query", elements) {
+      val (ns, pipeline) = getModel2SqlQuery[Any](elements).getBsonQuery(Nil, optLimit, optOffset, None)
+      printRaw(label, elements, pipeline2json(pipeline, Some(ns)))
+    }
   }
 
 
@@ -165,10 +167,10 @@ trait SpiSync_mongodb
       throw InsertErrors(errors)
     }
   }
-  override def insert_inspect(insert: Insert)(implicit conn: Conn): Unit = {
+  override def insert_inspect(insert: Insert)(implicit conn0: Conn): Unit = {
     tryInspect("insert", insert.elements) {
-      val jdbcConn = conn.asInstanceOf[MongoConn_JVM]
-      printInspectTx("INSERT", insert.elements, insert_getData(insert, jdbcConn), insert.tpls)
+      val conn = conn0.asInstanceOf[MongoConn_JVM]
+      printInspectTx("INSERT", insert.elements, insert_getData(insert, conn), insert.tpls)
     }
   }
 
@@ -206,7 +208,7 @@ trait SpiSync_mongodb
   }
 
   def refIdsQuery(idsModel: List[Element], proxy: ConnProxy): String = {
-//    new Model2MongoQuery(idsModel).getBsonQuery(Nil, None, None, Some(proxy))
+    //    new Model2MongoQuery(idsModel).getBsonQuery(Nil, None, None, Some(proxy))
     ???
   }
 
@@ -304,16 +306,8 @@ trait SpiSync_mongodb
       throw e
   }
 
-  private def printInspectTx(label: String, elements: List[Element], stmts: Data, tpls: Seq[Product] = Nil): Unit = {
-    //    val (tables, joinTables) = stmts
-    //    val tableStmts           = tables.reverse.map(_.stmt).mkString("\n--------\n")
-    //    val joinTableStmts       = if (joinTables.isEmpty) {
-    //      ""
-    //    } else {
-    //      "\n\n--------------\n\n" + joinTables.map(_.stmt).mkString("\n--------\n")
-    //    }
-    //    printRaw(label, elements, tableStmts + joinTableStmts, tpls.mkString("\n"))
-    ???
+  private def printInspectTx(label: String, elements: List[Element], data: Data, tpls: Seq[Product] = Nil): Unit = {
+    printRaw(label, elements, data2json(data), tpls.mkString("\n"))
   }
 
 
@@ -338,143 +332,29 @@ trait SpiSync_mongodb
   override def fallback_rawTransact(
     txData: String,
     doPrint: Boolean = false
-  )(implicit conn0: Conn): TxReport = {
-    val conn  = conn0.asInstanceOf[MongoConn_JVM]
-    val debug = if (doPrint) (s: String) => println(s) else (_: String) => ()
-    debug("\n=============================================================================")
-    debug(txData)
-
-    //    val ps = conn.sqlConn.prepareStatement(txData, Statement.RETURN_GENERATED_KEYS)
-    //    ps.execute()
-    //
-    //    val resultSet = ps.getGeneratedKeys // is empty if no nested data
-    //    var ids       = List.empty[String]
-    //    while (resultSet.next()) {
-    //      ids = ids :+ resultSet.getLong(1).toString
-    //    }
-    //    ps.close()
-    //
-    //    debug("---------------")
-    //    debug("Ids: " + ids)
-    //    TxReport(ids)
-    ???
+  )(implicit conn: Conn): TxReport = {
+    conn.asInstanceOf[MongoConn_JVM].transact_sync(json2data(txData, conn.proxy.nsMap))
   }
 
   override def fallback_rawQuery(
     query: String,
     debugFlag: Boolean = false,
   )(implicit conn: Conn): List[List[Any]] = {
-//    val c             = conn.asInstanceOf[MongoDBConn_JVM].sqlConn
-//    val statement     = c.createStatement()
-//    val resultSet     = statement.executeQuery(query)
-//    val rsmd          = resultSet.getMetaData
-//    val columnsNumber = rsmd.getColumnCount
-
-    val debug = if (debugFlag) (s: String) => println(s) else (_: String) => ()
-    debug("\n=============================================================================")
-    debug(query)
-
-    //    val rows = ListBuffer.empty[List[Any]]
-    //    val row  = ListBuffer.empty[Any]
-    //
-    //    def value[T](rawValue: T, baseTpe: String): String = {
-    //      if (resultSet.wasNull()) {
-    //        row += null
-    //      } else {
-    //        row += rawValue
-    //      }
-    //      baseTpe
-    //    }
-    //    def array(n: Int, baseTpe: String): String = {
-    //      val arr = resultSet.getArray(n)
-    //      if (resultSet.wasNull()) {
-    //        row += null
-    //      } else {
-    //        row += arr.getArray.asInstanceOf[Array[_]].toSet
-    //      }
-    //      s"Set[$baseTpe]"
-    //    }
-    //
-    //    def nestedArray(n: Int, baseTpe: String): String = {
-    //      val arr = resultSet.getArray(n).getResultSet
-    //      if (arr.wasNull()) {
-    //        row += null
-    //      } else {
-    //        arr.next()
-    //        row += arr.getArray(2).getArray.asInstanceOf[Array[_]].toSet
-    //      }
-    //      s"Set[$baseTpe]"
-    //    }
-    //
-    //    while (resultSet.next) {
-    //      debug("-----------------------------------------------")
-    //      var n = 1
-    //      row.clear()
-    //      while (n <= columnsNumber) {
-    //        val col         = rsmd.getColumnName(n)
-    //        val sqlType     = rsmd.getColumnTypeName(n)
-    //        val tpe         = sqlType match {
-    //          case "CHARACTER VARYING" => value(resultSet.getString(n), "String/URI")
-    //          case "INTEGER"           => value(resultSet.getInt(n), "Int")
-    //          case "BIGINT"            => value(resultSet.getLong(n), "Long")
-    //          case "REAL"              => value(resultSet.getFloat(n), "Float")
-    //          case "DOUBLE PRECISION"  => value(resultSet.getDouble(n), "Double")
-    //          case "BOOLEAN"           => value(resultSet.getBoolean(n), "Boolean")
-    //          case "DECIMAL"           => value(resultSet.getDouble(n), "BigInt/Decimal")
-    //          case "DATE"              => value(resultSet.getDate(n), "Date")
-    //          case "UUID"              => value(resultSet.getString(n), "UUID")
-    //          case "TINYINT"           => value(resultSet.getShort(n), "Byte")
-    //          case "SMALLINT"          => value(resultSet.getShort(n), "Short")
-    //          case "CHARACTER"         => value(resultSet.getString(n), "Char")
-    //
-    //          case "NUMERIC"  => value(resultSet.getString(n), "NUMERIC")
-    //          case "DECFLOAT" => value(resultSet.getString(n), "DECFLOAT")
-    //
-    //          case "CHARACTER VARYING ARRAY"  => array(n, "String/URI")
-    //          case "INTEGER ARRAY"            => array(n, "Int")
-    //          case "BIGINT ARRAY"             => array(n, "Long")
-    //          case "REAL ARRAY"               => array(n, "Float")
-    //          case "DOUBLE PRECISION ARRAY"   => array(n, "Double")
-    //          case "BOOLEAN ARRAY"            => array(n, "Boolean")
-    //          case "DECIMAL(100, 0) ARRAY"    => array(n, "BigInt")
-    //          case "DECIMAL(65535, 25) ARRAY" => array(n, "BigDecimal")
-    //          case "DATE ARRAY"               => array(n, "Date")
-    //          case "UUID ARRAY"               => array(n, "UUID")
-    //          case "TINYINT ARRAY"            => array(n, "Byte")
-    //          case "SMALLINT ARRAY"           => array(n, "Short")
-    //          case "CHARACTER ARRAY"          => array(n, "Char")
-    //
-    //          case "NULL"                           => nestedArray(n, "null")
-    //          case "CHARACTER VARYING ARRAY ARRAY"  => nestedArray(n, "String/URI")
-    //          case "INTEGER ARRAY ARRAY"            => nestedArray(n, "Int")
-    //          case "BIGINT ARRAY ARRAY"             => nestedArray(n, "Long")
-    //          case "REAL ARRAY ARRAY"               => nestedArray(n, "Float")
-    //          case "DOUBLE PRECISION ARRAY ARRAY"   => nestedArray(n, "Double")
-    //          case "BOOLEAN ARRAY ARRAY"            => nestedArray(n, "Boolean")
-    //          case "DECIMAL(100, 0) ARRAY ARRAY"    => nestedArray(n, "BigInt")
-    //          case "DECIMAL(65535, 25) ARRAY ARRAY" => nestedArray(n, "BigDecimal")
-    //          case "DATE ARRAY ARRAY"               => nestedArray(n, "Date")
-    //          case "UUID ARRAY ARRAY"               => nestedArray(n, "UUID")
-    //          case "TINYINT ARRAY ARRAY"            => nestedArray(n, "Byte")
-    //          case "SMALLINT ARRAY ARRAY"           => nestedArray(n, "Short")
-    //          case "CHARACTER ARRAY ARRAY"          => nestedArray(n, "Char")
-    //
-    //          case other => throw new Exception(
-    //            s"Unexpected sql result type from raw query: " + other
-    //          )
-    //        }
-    //        val columnValue = resultSet.getString(n)
-    //        if (resultSet.wasNull()) {
-    //          debug(tpe + "   " + padS(20, tpe) + col + padS(20, col) + "  null")
-    //        } else if (!resultSet.wasNull()) {
-    //          debug(tpe + "   " + padS(20, tpe) + col + padS(20, col) + "  " + columnValue)
-    //        }
-    //        n += 1
-    //      }
-    //      rows += row.toList
-    //    }
-    //    rows.toList
-
-    ???
+    val (ns, pipeline) = json2pipeline(query)
+    val collection     = conn.asInstanceOf[MongoConn_JVM].mongoDb.getCollection(ns, classOf[BsonDocument])
+    val bsonDocs       = collection.aggregate(pipeline)
+    val rows           = ListBuffer.empty[List[Any]]
+    val row            = ListBuffer.empty[Any]
+    val cast           = caster(conn.proxy.nsMap.get(ns))
+    bsonDocs.forEach { doc =>
+      val docIterator = doc.asDocument().entrySet().iterator()
+      while (docIterator.hasNext) {
+        val pair           = docIterator.next()
+        val (field, value) = (pair.getKey, pair.getValue)
+        row += cast(field, value)
+      }
+      rows += row.toList
+    }
+    rows.toList
   }
 }
