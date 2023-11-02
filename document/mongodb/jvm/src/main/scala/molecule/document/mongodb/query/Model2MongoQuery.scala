@@ -35,7 +35,6 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
     optLimit: Option[Int],
     optOffset: Option[Int],
     optProxy: Option[ConnProxy]
-    //  ): (String, util.ArrayList[Bson], util.ArrayList[Bson], util.ArrayList[Bson]) = {
   ): (String, util.ArrayList[Bson]) = {
     val elements1 = if (altElements.isEmpty) elements0 else altElements
     validateQueryModel(elements1)
@@ -49,14 +48,20 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
     resolve(elements2)
 
     if (!idField) {
-      fields.add(Projections.excludeId())
+      curFields.add(0, Projections.excludeId())
     }
 
     val pipeline = new util.ArrayList[Bson]()
-    if (!filters.isEmpty) pipeline.add(Aggregates.`match`(Filters.and(filters)))
-    if (!fields.isEmpty) pipeline.add(Aggregates.project(Projections.fields(fields)))
-    if (!sorts.isEmpty) pipeline.add(Aggregates.sort(Sorts.orderBy(sorts)))
 
+    if (!filters.isEmpty) {
+      pipeline.add(Aggregates.`match`(Filters.and(filters)))
+    }
+    if (!curFields.isEmpty) {
+      pipeline.add(Aggregates.project(Projections.fields(curFields)))
+    }
+    if (!sorts.isEmpty) {
+      pipeline.add(Aggregates.sort(Sorts.orderBy(sorts)))
+    }
 
     (getInitialNonGenericNs(elements2), pipeline)
   }
@@ -270,6 +275,8 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
             case _             => throw new Exception("Unexpected optional id")
           }
         } else {
+          if (a.refNs.nonEmpty)
+            throw ModelError("Can't query for non-existing ids of embedded documents in MongoDB.")
           a match {
             case a: AttrOneMan => resolveAttrOneMan(a); resolve(tail)
             case a: AttrOneOpt => resolveAttrOneOpt(a); resolve(tail)
@@ -277,15 +284,22 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
           }
         }
       //      case a: AttrSet if a.refNs.isDefined => a match {
-      //        case a: AttrSetMan => resolveRefAttrSetMan(a); resolve(tail)
+      //        case a: AttrSetMan =>
+      //
+      //          throw ModelError("bam!!!!")
+      //          resolveRefAttrSetMan(a);
+      //          resolve(tail)
       //        case a: AttrSetOpt => resolveRefAttrSetOpt(a); resolve(tail)
       //        case a: AttrSetTac => resolveRefAttrSetTac(a); resolve(tail)
       //      }
-      case a: AttrSet                     => a match {
-        case a: AttrSetMan => resolveAttrSetMan(a); resolve(tail)
-        case a: AttrSetOpt => resolveAttrSetOpt(a); resolve(tail)
-        case a: AttrSetTac => resolveAttrSetTac(a); resolve(tail)
-      }
+      case a: AttrSet                     =>
+        if (a.refNs.nonEmpty)
+          throw ModelError("Can't query for non-existing set of ids of embedded documents in MongoDB.")
+        a match {
+          case a: AttrSetMan => resolveAttrSetMan(a); resolve(tail)
+          case a: AttrSetOpt => resolveAttrSetOpt(a); resolve(tail)
+          case a: AttrSetTac => resolveAttrSetTac(a); resolve(tail)
+        }
       case ref: Ref                       => resolveRef0(ref, tail)
       case backRef: BackRef               => resolveBackRef(backRef, tail)
       case Nested(ref, nestedElements)    => resolveNested(ref, nestedElements, tail)
@@ -302,7 +316,15 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
         "Only cardinality-one refs allowed in optional nested queries. Found: " + ref
       )
     }
-    exts(refNs) = exts.get(refNs).fold(Option.empty[String])(_ => Some("_" + refAttr))
+    path = path + refAttr + "."
+
+    //    println(castss.mkString("\n=================================================================\n", "\n---\n", ""))
+    castss = castss.init :+ castss.last.copy(casts = curCasts)
+    //    println(castss.mkString("\n================= 1\n", "\n---\n", ""))
+    castss = castss :+ CastNs(refAttr, Nil)
+    //    println(castss.mkString("\n================= 2\n", "\n---\n", ""))
+    curCasts = Nil
+
     resolveRef(ref)
     resolve(tail)
   }
@@ -319,6 +341,24 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
         case _       => ()
       }
     }
+
+    path = {
+      val nss = path.init.split('.').init
+      if (nss.isEmpty) "" else nss.mkString(".") + "."
+    }
+
+    // Step back to previous namespace
+    castss = castss.init :+ castss.last.copy(casts = curCasts)
+
+    //    println(castss.mkString("\n##########################################################################\n", "\n---\n", ""))
+    val curChild      = castss.last
+    val parent        = castss.init.last
+    val updatedParent = parent.copy(casts = parent.casts :+ curChild)
+    castss = castss.dropRight(2) :+ updatedParent
+    //    println(castss.mkString("\n#################### 2\n", "\n---\n", ""))
+
+    curCasts = updatedParent.casts
+
     resolve(tail)
   }
 
@@ -329,9 +369,11 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
       noMixedNestedModes
     }
     validateRefNs(ref, nestedElements)
-
     val Ref(_, refAttr, refNs, _, _) = ref
-    exts(refNs) = exts.get(refNs).fold(Option.empty[String])(_ => Some("_" + refAttr))
+
+    castss = castss.init :+ castss.last.copy(casts = curCasts) :+ CastNs(refAttr, Nil, true)
+    curCasts = Nil
+
     aritiesNested()
     resolveNestedRef(ref)
     resolve(nestedElements)
@@ -350,7 +392,6 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
     validateRefNs(ref, nestedElements)
 
     val Ref(_, refAttr, refNs, _, _) = ref
-    exts(refNs) = exts.get(refNs).fold(Option.empty[String])(_ => Some("_" + refAttr))
     aritiesNested()
     resolveNestedOptRef(ref)
     resolve(nestedElements)

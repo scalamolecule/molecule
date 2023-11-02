@@ -15,7 +15,7 @@ import org.bson.types.Decimal128
 
 trait BsonUtils extends DataType_JVM_mongodb {
 
-  private lazy val pretty = JsonWriterSettings.builder().indent(true).build()
+  lazy val pretty = JsonWriterSettings.builder().indent(true).build()
 
   private lazy val actions = List("insert", "update", "delete")
 
@@ -45,6 +45,7 @@ trait BsonUtils extends DataType_JVM_mongodb {
       // If the collection name is the namespace name we can map the correct attribute types
       nsMap.get(collection).fold(Map.empty[String, BsonValue => BsonValue]) { metaNs =>
         metaNs.attrs.collect {
+          case MetaAttr(attr, CardOne, "ID", Some(_), _, _, _, _, _, _)       => attr -> ((v: BsonValue) => v.asDocument)
           case MetaAttr(attr, CardOne, "ID", _, _, _, _, _, _, _)             => attr -> ((v: BsonValue) => v.asString)
           case MetaAttr(attr, CardOne, "String", _, _, _, _, _, _, _)         => attr -> ((v: BsonValue) => v.asString)
           case MetaAttr(attr, CardOne, "Int", _, _, _, _, _, _, _)            => attr -> ((v: BsonValue) => v.asInt32)
@@ -160,6 +161,7 @@ trait BsonUtils extends DataType_JVM_mongodb {
   def caster(metaNs: Option[MetaNs]): (String, BsonValue) => Any = {
     val casts = metaNs.fold(Map.empty[String, BsonValue => Any]) { metaNs =>
       metaNs.attrs.collect {
+        case MetaAttr(attr, CardOne, "ID", Some(_), _, _, _, _, _, _)       => attr -> ((v: BsonValue) => v.asDocument.toString)
         case MetaAttr(attr, CardOne, "ID", _, _, _, _, _, _, _)             => attr -> ((v: BsonValue) => v.asString.getValue)
         case MetaAttr(attr, CardOne, "String", _, _, _, _, _, _, _)         => attr -> ((v: BsonValue) => v.asString.getValue)
         case MetaAttr(attr, CardOne, "Int", _, _, _, _, _, _, _)            => attr -> ((v: BsonValue) => v.asInt32.getValue)
@@ -184,7 +186,14 @@ trait BsonUtils extends DataType_JVM_mongodb {
         case MetaAttr(attr, CardOne, "Short", _, _, _, _, _, _, _)          => attr -> ((v: BsonValue) => v.asInt32.getValue.toShort)
         case MetaAttr(attr, CardOne, "Char", _, _, _, _, _, _, _)           => attr -> ((v: BsonValue) => v.asString.getValue.charAt(0))
 
-        case MetaAttr(attr, CardSet, "ID", _, _, _, _, _, _, _)             => attr -> {var set = Set.empty[String]; (v: BsonValue) => {v.asArray.getValues.forEach(v => set += v.asString.getValue); set} }
+        case MetaAttr(attr, CardSet, "ID", _, _, _, _, _, _, _)             => attr -> {
+          var set = Set.empty[String]
+          (v: BsonValue) => {
+//            v.asArray.getValues.forEach(v => set += v.asString.getValue)
+//            v.asDocument().getValues.forEach(v => set += v.asString.getValue)
+            set
+          }
+        }
         case MetaAttr(attr, CardSet, "String", _, _, _, _, _, _, _)         => attr -> {var set = Set.empty[String]; (v: BsonValue) => {v.asArray.getValues.forEach(v => set += v.asString.getValue); set} }
         case MetaAttr(attr, CardSet, "Int", _, _, _, _, _, _, _)            => attr -> {var set = Set.empty[Int]; (v: BsonValue) => {v.asArray.getValues.forEach(v => set += v.asInt32.getValue); set} }
         case MetaAttr(attr, CardSet, "Long", _, _, _, _, _, _, _)           => attr -> {var set = Set.empty[Long]; (v: BsonValue) => {v.asArray.getValues.forEach(v => set += v.asInt64.getValue); set} }
@@ -210,6 +219,7 @@ trait BsonUtils extends DataType_JVM_mongodb {
       }.toMap
     }
     def genericType(bson: BsonValue): Any = bson match {
+      case v: BsonObjectId   => v.getValue
       case v: BsonString     => v.getValue
       case v: BsonInt32      => v.asInt32.getValue
       case v: BsonInt64      => v.asInt64.getValue
@@ -222,6 +232,7 @@ trait BsonUtils extends DataType_JVM_mongodb {
         var set = Set.empty[Any]
         v.getValues.forEach(v => set += genericType(v))
         set
+      case v                 => v
     }
 
     (field: String, value: BsonValue) => casts.get(field).fold[Any](genericType(value))(cast => cast(value))

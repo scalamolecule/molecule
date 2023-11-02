@@ -9,30 +9,39 @@ trait CastBsonDoc_ {
 
   @tailrec
   final private def resolveCastss(
-    castss: List[List[BsonDocument => Any]],
-    acc: List[BsonDocument => Any]
+    acc: List[BsonDocument => Any],
+    castss: List[Cast],
   ): List[BsonDocument => Any] = {
     castss match {
-      case (cast :: casts) :: Nil => resolveCastss(casts :: Nil, acc :+ cast)
+      case CastAttr(_, cast) :: more => resolveCastss(acc :+ cast, more)
 
-      case (cast :: Nil) :: nested =>
-        val nestedDocCaster: BsonDocument => Any = documentCaster(nested)
-        val resolveNested  : BsonDocument => Any = (outerDoc: BsonDocument) => {
-          cast(outerDoc).asInstanceOf[BsonArray].toArray.toList.map {
-            case nestedDoc: BsonDocument => nestedDocCaster(nestedDoc)
-            case other                   => throw new Exception("Unexpected nested Bson type: " + other)
-          }
+      // Ref
+      case CastNs(refAttr, casts, false) :: more =>
+        resolveCastss(acc ++ refCasts(refAttr, casts), more)
+
+      // Nested
+      case CastNs(refAttr, casts, true) :: more =>
+        val refCasts = documentCaster(casts)
+        val ref      = (doc: BsonDocument) => {
+          refCasts(doc.get(refAttr).asDocument())
         }
-        acc :+ resolveNested
-
-      case (cast :: casts) :: nested => resolveCastss(casts :: nested, acc :+ cast)
+        resolveCastss(acc :+ ref, more)
 
       case _ => acc
     }
   }
 
-  final def documentCaster(castss: List[List[BsonDocument => Any]]): BsonDocument => Any = {
-    val casters = resolveCastss(castss, Nil)
+  private def refCasts(refAttr: String, casts: List[Cast]): List[BsonDocument => Any] = {
+    resolveCastss(Nil, casts).map { refCast =>
+      (curDoc: BsonDocument) => {
+        refCast(curDoc.get(refAttr).asDocument())
+      }
+    }
+  }
+
+
+  final def documentCaster(castss: List[Cast]): BsonDocument => Any = {
+    val casters = resolveCastss(Nil, castss)
     casters.length match {
       case 1  => cast1(casters)
       case 2  => cast2(casters)
@@ -59,12 +68,13 @@ trait CastBsonDoc_ {
     }
   }
 
+
   final private def cast1(casters: List[BsonDocument => Any]): BsonDocument => Any = {
     val List(c1) = casters
     (doc: BsonDocument) =>
       (
         c1(doc)
-      )
+        )
   }
 
   final private def cast2(casters: List[BsonDocument => Any]): BsonDocument => Any = {

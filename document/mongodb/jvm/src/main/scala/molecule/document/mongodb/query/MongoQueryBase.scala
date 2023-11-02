@@ -1,20 +1,19 @@
 package molecule.document.mongodb.query
 
+import com.mongodb.client.model.Projections
 import molecule.base.ast.Card
 import molecule.base.error._
 import molecule.base.util.BaseHelpers
 import molecule.boilerplate.ast.Model._
 import molecule.core.util.JavaConversions
-import org.bson.BsonDocument
+import molecule.document.mongodb.query.casting._
+import org.bson.{BsonDocument, BsonInt32}
 import org.bson.conversions.Bson
 import scala.collection.mutable
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 
 trait MongoQueryBase extends BaseHelpers with JavaConversions {
 
-  // This type represents both all rows and the individual row where the
-  // internal cursor is positioned
-  //  type Row = BsonDocument
   type Row = List[Any]
   type ParamIndex = Int
   type NestedTpls = List[Any]
@@ -27,19 +26,35 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
     ???
   }
 
-  var idField   = false
-  val manFields = ListBuffer.empty[String]
-  val tacFields = ListBuffer.empty[String]
-  val optFields = ListBuffer.empty[String]
+  var idField = false
 
-  val fields  = new java.util.ArrayList[Bson]
+  var path    = ""
   val filters = new java.util.ArrayList[Bson]
-  val group   = new java.util.ArrayList[Bson]
-  val limit   = new java.util.ArrayList[Bson]
-  val sorts   = new java.util.ArrayList[Bson]
 
-  var castss = List(List.empty[BsonDocument => Any])
+  var curFields     = new java.util.ArrayList[Bson]
+  var levelNsFields = List(List(curFields))
 
+  val group = new java.util.ArrayList[Bson]
+  val limit = new java.util.ArrayList[Bson]
+  val sorts = new java.util.ArrayList[Bson]
+
+  var castss   = List(CastNs("", Nil))
+  var curCasts = List.empty[Cast]
+
+  def root(castss: List[CastNs]): CastNs = {
+    castss match {
+      case child :: Nil           => child
+      case parent :: child :: Nil => parent.copy(casts = parent.casts :+ child)
+      case _                      =>
+        val child  = castss.last
+        val parent = castss.init.last
+        root(castss.drop(2) :+ parent.copy(casts = parent.casts :+ child))
+    }
+  }
+
+  def updatedCasts = {
+    root(castss.init :+ castss.last.copy(casts = curCasts))
+  }
 
   // Used to lookup original type of aggregate attributes
   final protected var attrMap = Map.empty[String, (Card, String, Seq[String])]
@@ -61,38 +76,31 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
   final protected var hardLimit   = 0
 
   // Input args and cast lambdas
-  //  final           var castss      = List(List.empty[(Row, Int) => Any])
   final           var aritiess    = List(List.empty[List[Int]])
   final           var isNested    = false
   final           var isNestedOpt = false
   final protected val nestedIds   = new ArrayBuffer[String]
   final protected var level       = 0
-//  final protected val args        = new ArrayBuffer[AnyRef]
-  final protected val exts        = mutable.Map.empty[String, Option[String]]
 
   // Ensure distinct result set when possible redundant optional values can occur
   final protected var hasOptAttr = false
 
   // Query variables
-  final protected var filterAttrVars: Map[String, String] = Map.empty[String, String]
-  final protected val expectedFilterAttrs                 = mutable.Set.empty[String]
-  final protected val availableAttrs                      = mutable.Set.empty[String]
+  final protected var filterAttrVars      = Map.empty[String, String]
+  final protected val expectedFilterAttrs = mutable.Set.empty[String]
+  final protected val availableAttrs      = mutable.Set.empty[String]
 
-  final protected def getCol(attr: Attr): String = {
-    exts(attr.ns).fold(attr.name)(ext => attr.ns + ext + "." + attr.attr)
+
+  def fullField(field: String) = {
+    if (path.isEmpty) field else path.mkString(".") + "." + field
   }
 
-  final protected def addCast(cast: BsonDocument => Any): Unit = {
-    castss = castss.init :+ (castss.last :+ cast)
+  final protected def addProjection(field: String): Unit = {
+    curFields.add(Projections.include(path + field))
   }
 
-  final protected def removeLastCast(): Unit = {
-    castss = castss.init :+ castss.last.init
-  }
-
-  final protected def replaceCast(cast: BsonDocument => Any): Unit = {
-    removeLastCast()
-    addCast(cast)
+  final protected def addCast(field: String, cast: BsonDocument => Any): Unit = {
+    curCasts = curCasts :+ CastAttr(field, cast)
   }
 
   final protected def aritiesNested(): Unit = {

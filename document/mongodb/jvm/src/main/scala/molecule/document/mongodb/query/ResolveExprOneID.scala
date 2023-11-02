@@ -41,8 +41,8 @@ trait ResolveExprOneID extends ResolveExpr with LambdasOne { self: MongoQueryBas
 
   private def man(attr: Attr, args: Seq[String], res: ResOne[String]): Unit = {
     val field = attr.attr
-    fields.add(Projections.include(field))
-    addCast(res.cast(field))
+    curFields.add(Projections.include(field))
+    addCast(field, res.cast(field))
     addSort(attr, field)
 
     attr.filterAttr.fold(
@@ -54,7 +54,6 @@ trait ResolveExprOneID extends ResolveExpr with LambdasOne { self: MongoQueryBas
 
   private def tac[T](attr: Attr, args: Seq[T], res: ResOne[T]): Unit = {
     val field = attr.attr
-    tacFields += field
     attr.filterAttr.fold {
       expr(field, attr.op, args, res)
     } { filterAttr =>
@@ -63,26 +62,27 @@ trait ResolveExprOneID extends ResolveExpr with LambdasOne { self: MongoQueryBas
   }
 
 
-//  private def opt[T](attr: Attr, optArgs: Option[Seq[T]], res: ResOne[T]): Unit = {
-//    val field = attr.attr
-//    fields.add(Projections.include(field))
-//    addCast(res.castOpt(field))
-//    addSort(attr, field)
-//    val filter = attr.op match {
-//      case V     => Filters.empty() // selected field can already be a value or null
-//      case Eq    => optEqual(field, optArgs, res)
-//      case Neq   => optNeq(field, optArgs, res)
-//      case Lt    => optCompare(field, optArgs, res.lt)
-//      case Gt    => optCompare(field, optArgs, res.gt)
-//      case Le    => optCompare(field, optArgs, res.le)
-//      case Ge    => optCompare(field, optArgs, res.ge)
-//      case other => unexpectedOp(other)
-//    }
-//    filters.add(filter)
-//  }
+  //  private def opt[T](attr: Attr, optArgs: Option[Seq[T]], res: ResOne[T]): Unit = {
+  //    val field = attr.attr
+  //    fields.add(Projections.include(field))
+  //    addCast(res.castOpt(field))
+  //    addSort(attr, field)
+  //    val filter = attr.op match {
+  //      case V     => Filters.empty() // selected field can already be a value or null
+  //      case Eq    => optEqual(field, optArgs, res)
+  //      case Neq   => optNeq(field, optArgs, res)
+  //      case Lt    => optCompare(field, optArgs, res.lt)
+  //      case Gt    => optCompare(field, optArgs, res.gt)
+  //      case Le    => optCompare(field, optArgs, res.le)
+  //      case Ge    => optCompare(field, optArgs, res.ge)
+  //      case other => unexpectedOp(other)
+  //    }
+  //    filters.add(filter)
+  //  }
 
 
-  private def expr[T](field: String, op: Op, args: Seq[T], res: ResOne[T]): Unit = {
+  private def expr[T](field0: String, op: Op, args: Seq[T], res: ResOne[T]): Unit = {
+    val field = path + field0
     op match {
       case V          => filters.add(Filters.ne(field, null))
       case Eq         => filters.add(equal(field, args, res))
@@ -200,7 +200,7 @@ trait ResolveExprOneID extends ResolveExpr with LambdasOne { self: MongoQueryBas
   private def take(field: String, n: Int): Unit = {
     if (n > 0) {
       // Empty result string discarded
-      fields.add(Projections.computed(field, current().getString(field).substr(0, n)))
+      curFields.add(Projections.computed(field, current().getString(field).substr(0, n)))
     } else {
       // Take nothing
       filters.add(Filters.eq("_id", -1))
@@ -211,7 +211,7 @@ trait ResolveExprOneID extends ResolveExpr with LambdasOne { self: MongoQueryBas
     if (n > 0) {
       // Skip if trying to drop more than string length
       filters.add(Filters.expr(current().getString(field).length().gt(of(n))))
-      fields.add(Projections.computed(field, current().getString(field).substr(n, Int.MaxValue)))
+      curFields.add(Projections.computed(field, current().getString(field).substr(n, Int.MaxValue)))
     } else {
       // Drop nothing
     }
@@ -219,7 +219,7 @@ trait ResolveExprOneID extends ResolveExpr with LambdasOne { self: MongoQueryBas
 
   private def takeRight(field: String, n: Int): Unit = {
     if (n > 0) {
-      fields.add(
+      curFields.add(
         Projections.computed(
           field,
           current().getString(field).substr(
@@ -238,7 +238,7 @@ trait ResolveExprOneID extends ResolveExpr with LambdasOne { self: MongoQueryBas
     if (n > 0) {
       // Skip if trying to drop more than string length
       filters.add(Filters.expr(current().getString(field).length().gt(of(n))))
-      fields.add(
+      curFields.add(
         Projections.computed(
           field,
           current().getString(field).substr(
@@ -261,7 +261,7 @@ trait ResolveExprOneID extends ResolveExpr with LambdasOne { self: MongoQueryBas
       val length = until - from
       // Skip if from is greater than string length
       filters.add(Filters.expr(current().getString(field).length().gt(of(from))))
-      fields.add(Projections.computed(field, current().getString(field).substr(from, length)))
+      curFields.add(Projections.computed(field, current().getString(field).substr(from, length)))
     } else {
       // Drop nothing
     }

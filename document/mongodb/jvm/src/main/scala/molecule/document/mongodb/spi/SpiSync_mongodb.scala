@@ -329,11 +329,18 @@ trait SpiSync_mongodb
     ???
   }
 
+
   override def fallback_rawTransact(
-    txData: String,
+    json: String,
     doPrint: Boolean = false
   )(implicit conn: Conn): TxReport = {
-    conn.asInstanceOf[MongoConn_JVM].transact_sync(json2data(txData, conn.proxy.nsMap))
+    val debug = if (doPrint) (s: String) => println(s) else (_: String) => ()
+    debug("\nRAW TRANSACT ======================================================")
+    val (_, rows) = json2data(json, conn.proxy.nsMap)
+    if (doPrint) {
+      rows.forEach(row => debug(row.toJson(pretty)))
+    }
+    conn.asInstanceOf[MongoConn_JVM].transact_sync(json2data(json, conn.proxy.nsMap))
   }
 
   override def fallback_rawQuery(
@@ -346,7 +353,13 @@ trait SpiSync_mongodb
     val rows           = ListBuffer.empty[List[Any]]
     val row            = ListBuffer.empty[Any]
     val cast           = caster(conn.proxy.nsMap.get(ns))
+
+    val debug = if (debugFlag) (s: String) => println(s) else (_: String) => ()
+    debug("\nRAW QUERY RESULT ==================================================")
+
     bsonDocs.forEach { doc =>
+      debug(doc.toJson(pretty))
+      row.clear
       val docIterator = doc.asDocument().entrySet().iterator()
       while (docIterator.hasNext) {
         val pair           = docIterator.next()
@@ -355,6 +368,7 @@ trait SpiSync_mongodb
       }
       rows += row.toList
     }
+    debug("")
     rows.toList
   }
 }

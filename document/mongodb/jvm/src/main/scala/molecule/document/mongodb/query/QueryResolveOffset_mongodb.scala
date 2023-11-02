@@ -1,14 +1,14 @@
 package molecule.document.mongodb.query
 
-import com.mongodb.client.{AggregateIterable, FindIterable}
+import com.mongodb.client.AggregateIterable
 import molecule.base.error._
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.util.{FutureUtils, ModelUtils}
 import molecule.document.mongodb.facade.MongoConn_JVM
-import molecule.document.mongodb.query.casting.CastBsonDoc_
+import molecule.document.mongodb.query.casting._
+import molecule.document.mongodb.util.BsonUtils
 import org.bson._
-import org.bson.json.JsonWriterSettings
 import scala.collection.mutable.ListBuffer
 
 case class QueryResolveOffset_mongodb[Tpl](
@@ -20,6 +20,7 @@ case class QueryResolveOffset_mongodb[Tpl](
   with CastBsonDoc_
   with FutureUtils
   with ModelUtils
+  with BsonUtils
   with MoleculeLogging {
 
   lazy val forward = optLimit.fold(true)(_ >= 0) && optOffset.fold(true)(_ >= 0)
@@ -33,16 +34,16 @@ case class QueryResolveOffset_mongodb[Tpl](
     }
     val bsonDocs: AggregateIterable[BsonDocument] = getData(conn, optLimit, optOffset)
 
+    if (bsonDocs.iterator().hasNext) {
+      println("RESULT ---------------------------------------------")
+      bsonDocs.forEach(d => println(d.toJson(pretty)))
+      println("")
+    }
 
-    println("RESULT ---------------------------------------------")
-    val pretty: JsonWriterSettings = JsonWriterSettings.builder().indent(true).build()
-    bsonDocs.forEach(d => println(d.toJson(pretty)))
-    println("")
-
-    // Cast Bson document to entity tuple
     val tuples   = ListBuffer.empty[Tpl]
-    val bson2tpl = documentCaster(m2q.castss)
+    val bson2tpl = documentCaster(m2q.updatedCasts.casts)
     bsonDocs.forEach { bsonDoc =>
+      // Cast Bson document to entity tuple
       tuples += bson2tpl(bsonDoc).asInstanceOf[Tpl]
     }
     // Since a MongoDB field can both have the value null and not exist in the

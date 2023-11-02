@@ -41,11 +41,9 @@ trait FlatRefs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "complex" - refs { implicit conn =>
       for {
-        _ <- A.i(0).s("a")
-          .B.i(1).s("b")
-          .Cc.i(22)._B
-          .C.i(2).s("c")._B._A
-          .Bb.i(11)
+        _ <- A.i(0).s("a").B.i(1).s("b").Cc.i(22)
+          ._B.C.i(2).s("c")
+          ._B._A.Bb.i(11)
           .save.transact
 
         _ <- A.i.B.i.query.get.map(_ ==> List((0, 1)))
@@ -67,42 +65,66 @@ trait FlatRefs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
 
     "ref attributes" - refs { implicit conn =>
-      for {
-        // Card one ref attr
-        List(_, e1) <- A.i.B.i.insert(1, 2).transact.map(_.ids)
-        _ <- A.i.b.query.get.map(_ ==> List((1, e1)))
+      if (database == "MongoDB") {
+        // Can't query for non-existing ids of embedded documents in MongoDB
+        for {
+          // Card one ref attr
+          _ <- A.i.b.query.get
+            .map(_ ==> "Unexpected success")
+            .recover { case ModelError(err) =>
+              err ==> "Can't query for non-existing ids of embedded documents in MongoDB."
+            }
 
-        // Card many ref attr (returned as Set)
-        List(_, e2) <- A.i.Bb.i.insert(1, 2).transact.map(_.ids)
-        _ <- A.i.bb.query.get.map(_ ==> List((1, Set(e2))))
-      } yield ()
+          // Card many ref attr
+          _ <- A.i.bb.query.get
+            .map(_ ==> "Unexpected success")
+            .recover { case ModelError(err) =>
+              err ==> "Can't query for non-existing set of ids of embedded documents in MongoDB."
+            }
+        } yield ()
+
+      } else {
+        for {
+          // Card one ref attr
+          List(_, e1) <- A.i.B.i.insert(1, 2).transact.map(_.ids)
+          _ <- A.i.b.query.get.map(_ ==> List((1, e1)))
+
+          // Card many ref attr (returned as Set)
+          List(_, e2) <- A.i.Bb.i.insert(1, 2).transact.map(_.ids)
+          _ <- A.i.bb.query.get.map(_ ==> List((1, Set(e2))))
+        } yield ()
+      }
     }
 
 
     "multiple card-many refs" - refs { implicit conn =>
-      for {
-        // Two entities to be referenced
-        List(b1, b2) <- B.i.insert(1, 2).transact.map(_.ids)
+      // Can't query for non-existing ids of embedded documents in MongoDB
+      if (database != "MongoDB") {
 
-        // Reference Set of entities
-        _ <- A.i(0).bb(Set(b1, b2)).save.transact
+        for {
+          // Two entities to be referenced
+          List(b1, b2) <- B.i.insert(1, 2).transact.map(_.ids)
 
-        // Saving individual ref ids (not in a Set) is not allowed
-        _ <- A.i(0).bb(b1, b2).save.transact
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-            err ==> "Can only save one Set of values for Set attribute `A.bb`. " +
-              s"Found: Set($b1), Set($b2)"
-          }
+          // Reference Set of entities
+          _ <- A.i(0).bb(Set(b1, b2)).save.transact
 
-        // Referencing namespace attributes repeat for each referenced entity
-        _ <- A.i.Bb.i.a1.query.get.map(_ ==> List(
-          (0, 1),
-          (0, 2), // 0 is repeated
-        ))
+          // Saving individual ref ids (not in a Set) is not allowed
+          _ <- A.i(0).bb(b1, b2).save.transact
+            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
+              err ==> "Can only save one Set of values for Set attribute `A.bb`. " +
+                s"Found: Set($b1), Set($b2)"
+            }
 
-        // Card many ref attributes return Set of ref ids
-        _ <- A.i.bb.query.get.map(_ ==> List((0, Set(b1, b2))))
-      } yield ()
+          // Referencing namespace attributes repeat for each referenced entity
+          _ <- A.i.Bb.i.a1.query.get.map(_ ==> List(
+            (0, 1),
+            (0, 2), // 0 is repeated
+          ))
+
+          // Card many ref attributes return Set of ref ids
+          _ <- A.i.bb.query.get.map(_ ==> List((0, Set(b1, b2))))
+        } yield ()
+      }
     }
   }
 }

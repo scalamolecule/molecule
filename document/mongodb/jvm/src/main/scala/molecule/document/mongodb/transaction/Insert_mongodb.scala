@@ -23,9 +23,11 @@ trait Insert_mongodb
     val insertDocs = new util.ArrayList[BsonDocument]()
     tpls.foreach { tpl =>
       // Build new Bson saveDoc from each entity tuple
-      curDoc = new BsonDocument()
+      curData = new BsonDocument()
+      levelNsData = List(List(curData))
       tpl2bson(tpl)
-      insertDocs.add(curDoc)
+      //      insertDocs.add(curDoc)
+      insertDocs.add(levelNsData.head.head)
     }
     (getInitialNs(elements), insertDocs)
   }
@@ -40,7 +42,7 @@ trait Insert_mongodb
     exts: List[String] = Nil
   ): Product => Unit = {
     (tpl: Product) => {
-      curDoc.append(
+      curData.append(
         attr,
         handleValue(tpl.productElement(tplIndex).asInstanceOf[T]).asInstanceOf[BsonValue]
       )
@@ -56,7 +58,7 @@ trait Insert_mongodb
     exts: List[String] = Nil
   ): Product => Unit = {
     (tpl: Product) => {
-      curDoc.append(attr, tpl.productElement(tplIndex) match {
+      curData.append(attr, tpl.productElement(tplIndex) match {
         case Some(scalaValue) => handleValue(scalaValue.asInstanceOf[T]).asInstanceOf[BsonValue]
         case None             => new BsonNull()
       })
@@ -80,9 +82,9 @@ trait Insert_mongodb
             println(set.head.getClass)
             val array: util.ArrayList[BsonValue] = new util.ArrayList[BsonValue]()
             set.map(scalaValue => array.add(transformValue(scalaValue).asInstanceOf[BsonValue]))
-            curDoc.append(attr, new BsonArray(array))
+            curData.append(attr, new BsonArray(array))
 
-          case _ => curDoc.append(attr, new BsonNull())
+          case _ => curData.append(attr, new BsonNull())
         }
         () // saveDoc mutated
       }
@@ -149,9 +151,9 @@ trait Insert_mongodb
           case Some(set: Set[_]) if set.nonEmpty =>
             val array: util.ArrayList[BsonValue] = new util.ArrayList[BsonValue]()
             set.asInstanceOf[Set[T]].map(scalaValue => array.add(transformValue(scalaValue).asInstanceOf[BsonValue]))
-            curDoc.append(attr, new BsonArray(array))
+            curData.append(attr, new BsonArray(array))
 
-          case _ => curDoc.append(attr, new BsonNull())
+          case _ => curData.append(attr, new BsonNull())
         }
         ()
       }
@@ -204,18 +206,22 @@ trait Insert_mongodb
   }
 
   override protected def addRef(ns: String, refAttr: String, refNs: String, card: Card): Product => Unit = {
-    //        getRefResolver[Product](ns, refAttr, refNs, card)
-    //    ???
-
-    (tpl: Product) =>
-      curDoc.append(refAttr, new BsonNull())
+    (_: Product) => {
+      val newDoc = new BsonDocument()
+      // Make relationship
+      curData.append(refAttr, newDoc)
+      // Step into related namespace
+      levelNsData = levelNsData.init :+ (levelNsData.last :+ newDoc)
+      // Work on in new namespace
+      curData = newDoc
+    }
   }
 
   override protected def addBackRef(backRefNs: String): Product => Unit = {
-    //    curRefPath = curRefPath.dropRight(2) // drop refAttr, refNs
-
-
-    (_: Product) => ()
+    (_: Product) =>
+      // Step back to previous namespace
+      curData = levelNsData.last.init.last
+      levelNsData = levelNsData.init :+ levelNsData.last.init
   }
 
   override protected def addNested(

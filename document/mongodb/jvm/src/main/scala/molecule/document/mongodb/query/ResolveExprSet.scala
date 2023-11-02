@@ -117,8 +117,8 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
     //    }
 
     val field = attr.attr
-    fields.add(Projections.include(field))
-    addCast(resSet.castSet(field))
+    curFields.add(Projections.include(field))
+    addCast(field, resSet.castSet(field))
 
     attr.filterAttr.fold {
       if (filterAttrVars.contains(attr.name) && attr.op != V) {
@@ -153,7 +153,6 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
     //    notNull += field
 
     val field = attr.attr
-    tacFields += field
     filters.add(Filters.exists(field))
     attr.filterAttr.fold {
       expr(field, attr.op, args, res)
@@ -170,8 +169,8 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
     res: ResSet[T],
   ): Unit = {
     val field = attr.attr
-    fields.add(Projections.include(field))
-    addCast(res.castOptSet(field))
+    curFields.add(Projections.include(field))
+    addCast(field, res.castOptSet(field))
     attr.op match {
       case V     => ()
       case Eq    => optEqual(field, optSets, res)
