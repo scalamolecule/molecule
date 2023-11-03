@@ -20,7 +20,6 @@ class ResolveInsert
     nsMap: Map[String, MetaNs],
     elements: List[Element],
     resolvers: List[Product => Unit],
-    outerTplIndex: Int,
     tplIndex: Int
   ): List[Product => Unit] = {
     elements match {
@@ -34,11 +33,11 @@ class ResolveInsert
               a match {
                 case a: AttrOneMan =>
                   val attrOneManResolver = resolveAttrOneMan(a, tplIndex)
-                  resolve(nsMap, tail, resolvers :+ attrOneManResolver, outerTplIndex, tplIndex + 1)
+                  resolve(nsMap, tail, resolvers :+ attrOneManResolver, tplIndex + 1)
 
                 case a: AttrOneOpt =>
                   val attrOneOptResolver = resolveAttrOneOpt(a, tplIndex)
-                  resolve(nsMap, tail, resolvers :+ attrOneOptResolver, outerTplIndex, tplIndex + 1)
+                  resolve(nsMap, tail, resolvers :+ attrOneOptResolver, tplIndex + 1)
 
                 case a: AttrOneTac => throw new Exception(
                   "Can't use tacit attributes in insert molecule (except in tx meta data part). Found: " + a
@@ -48,11 +47,11 @@ class ResolveInsert
               a match {
                 case a: AttrSetMan =>
                   val attrsSetManResolver = resolveAttrSetMan(a, tplIndex)
-                  resolve(nsMap, tail, resolvers :+ attrsSetManResolver, outerTplIndex, tplIndex + 1)
+                  resolve(nsMap, tail, resolvers :+ attrsSetManResolver, tplIndex + 1)
 
                 case a: AttrSetOpt =>
                   val attrSetOptResolver = resolveAttrSetOpt(a, tplIndex)
-                  resolve(nsMap, tail, resolvers :+ attrSetOptResolver, outerTplIndex, tplIndex + 1)
+                  resolve(nsMap, tail, resolvers :+ attrSetOptResolver, tplIndex + 1)
 
                 case a: AttrSetTac => throw new Exception(
                   "Can't use tacit attributes in insert molecule (except in tx meta data part). Found: " + a
@@ -63,7 +62,7 @@ class ResolveInsert
         case Ref(ns, refAttr, refNs, card, _) =>
           prevRefs += refAttr
           val refResolver = addRef(ns, refAttr, refNs, card)
-          resolve(nsMap, tail, resolvers :+ refResolver, outerTplIndex, tplIndex)
+          resolve(nsMap, tail, resolvers :+ refResolver, tplIndex)
 
         case BackRef(backRefNs, _, _) =>
           tail.head match {
@@ -73,17 +72,17 @@ class ResolveInsert
             case _                                                      => // ok
           }
           val backRefResolver = addBackRef(backRefNs)
-          resolve(nsMap, tail, resolvers :+ backRefResolver, outerTplIndex, tplIndex)
+          resolve(nsMap, tail, resolvers :+ backRefResolver, tplIndex)
 
         case Nested(Ref(ns, refAttr, refNs, _, _), nestedElements) =>
           prevRefs.clear()
           val nestedResolver = addNested(nsMap, tplIndex, ns, refAttr, refNs, nestedElements)
-          resolve(nsMap, tail, resolvers :+ nestedResolver, 0, tplIndex)
+          resolve(nsMap, tail, resolvers :+ nestedResolver, tplIndex)
 
         case NestedOpt(Ref(ns, refAttr, refNs, _, _), nestedElements) =>
           prevRefs.clear()
           val optNestedResolver = addNested(nsMap, tplIndex, ns, refAttr, refNs, nestedElements)
-          resolve(nsMap, tail, resolvers :+ optNestedResolver, 0, tplIndex)
+          resolve(nsMap, tail, resolvers :+ optNestedResolver, tplIndex)
       }
       case Nil             => resolvers
     }

@@ -5,7 +5,7 @@ import codegen.DatomicGenBase
 object _CastNestedOptBranch extends DatomicGenBase("CastNestedOptBranch", "/query/casting") {
 
   val content = {
-    val pullBranchX    = (1 to 21).map(i => s"case $i => pullBranch$i(pullCasts, optComparator, refDepth)").mkString("\n      ")
+    val pullBranchX    = (1 to 21).map(i => s"case ${caseN(i)} => pullBranch$i(pullCasts, optComparator, refDepth)").mkString("\n      ")
     val resolveMethods = (1 to 21).map(arity => Chunk(arity).body).mkString("\n")
     s"""// GENERATED CODE ********************************
        |package molecule.datomic.query.casting

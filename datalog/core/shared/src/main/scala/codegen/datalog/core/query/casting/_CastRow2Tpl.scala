@@ -5,7 +5,7 @@ import codegen.DatomicGenBase
 object _CastRow2Tpl extends DatomicGenBase("CastRow2Tpl", "/query/casting") {
 
   val content = {
-    val resolveX       = (1 to 22).map(i => s"case $i => cast$i(casters)").mkString("\n      ")
+    val resolveX       = (1 to 22).map(i => s"case ${caseN(i)} => cast$i(casters)").mkString("\n      ")
     val resolveMethods = (1 to 22).map(arity => Chunk(arity).body).mkString("\n")
     s"""// GENERATED CODE ********************************
        |package molecule.datomic.query.casting

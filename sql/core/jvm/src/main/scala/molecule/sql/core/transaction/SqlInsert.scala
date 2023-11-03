@@ -373,7 +373,7 @@ trait SqlInsert
     colSettersMap += curRefPath -> Nil
 
     // Recursively resolve nested data
-    val nestedResolver = getResolver(nsMap, nestedElements)
+    val resolveNested = getResolver(nsMap, nestedElements)
 
     countValueAttrs(nestedElements) match {
       case 1 =>
@@ -382,7 +382,7 @@ trait SqlInsert
           val length             = nestedSingleValues.length
           rightCountsMap(joinPath) = rightCountsMap(joinPath) :+ length
           nestedSingleValues.foreach { nestedSingleValue =>
-            nestedResolver(Tuple1(nestedSingleValue))
+            resolveNested(Tuple1(nestedSingleValue))
           }
         }
       case _ =>
@@ -391,7 +391,7 @@ trait SqlInsert
           val length     = nestedTpls.length
           rightCountsMap(joinPath) = rightCountsMap(joinPath) :+ length
           nestedTpls.foreach { nestedTpl =>
-            nestedResolver(nestedTpl)
+            resolveNested(nestedTpl)
           }
         }
     }

@@ -27,18 +27,15 @@ trait BsonUtils extends DataType_JVM_mongodb {
         """Missing action field "<insert/update/delete>": "<collection>"""" +
           " as first field-value pair in transact json.")
 
-    val collection = {
-      bson.get(action) match {
-        case null => throw ModelError("""Missing "collection": "<collection name>" in raw transaction json.""")
-        case col  => col.asString.getValue
-      }
-    }
-    val rawRows    = {
+    val collection = bson.get(action).asString.getValue
+
+    val rawRows = {
       bson.get("data") match {
         case null => throw ModelError("""Missing "data": [<rows>] in raw transaction json.""")
         case data => data.asArray
       }
     }
+
 
     val rows : util.ArrayList[BsonDocument]        = new util.ArrayList[BsonDocument]()
     val casts: Map[String, BsonValue => BsonValue] = {
@@ -70,7 +67,20 @@ trait BsonUtils extends DataType_JVM_mongodb {
           case MetaAttr(attr, CardOne, "Short", _, _, _, _, _, _, _)          => attr -> ((v: BsonValue) => v.asInt32)
           case MetaAttr(attr, CardOne, "Char", _, _, _, _, _, _, _)           => attr -> ((v: BsonValue) => v.asString)
 
-          case MetaAttr(attr, CardSet, "ID", _, _, _, _, _, _, _)             => attr -> {val array = new BsonArray(); (v: BsonValue) => {v.asArray.getValues.forEach(v => array.add(v.asString)); array} }
+          case MetaAttr(attr, CardSet, "ID", _, _, _, _, _, _, _)             => attr -> {
+            (v: BsonValue) => {
+              val array = new BsonArray()
+              val vs    = v.asArray.getValues
+              if (!vs.get(0).isDocument) {
+                throw ModelError("Can't add non-existing ids of embedded documents in MongoDB. " +
+                  "Please save embedded document together with main document.")
+              }
+              v.asArray.getValues.forEach(v =>
+                array.add(v.asDocument)
+              )
+              array
+            }
+          }
           case MetaAttr(attr, CardSet, "String", _, _, _, _, _, _, _)         => attr -> {val array = new BsonArray(); (v: BsonValue) => {v.asArray.getValues.forEach(v => array.add(v.asString)); array} }
           case MetaAttr(attr, CardSet, "Int", _, _, _, _, _, _, _)            => attr -> {val array = new BsonArray(); (v: BsonValue) => {v.asArray.getValues.forEach(v => array.add(v.asInt32)); array} }
           case MetaAttr(attr, CardSet, "Long", _, _, _, _, _, _, _)           => attr -> {val array = new BsonArray(); (v: BsonValue) => {v.asArray.getValues.forEach(v => array.add(v match { case _: BsonInt32 => new BsonInt64(v.asInt32().getValue); case _: BsonInt64 => v })); array} }
@@ -145,9 +155,11 @@ trait BsonUtils extends DataType_JVM_mongodb {
       val (stageName, params) = (stagePair.getKey, stagePair.getValue)
       stageName match {
         case "collection" => collection = params.asString().getValue
+        case "$unwind"    => pipeline.add(Aggregates.unwind(params.asString.getValue))
         case "$match"     => pipeline.add(Aggregates.`match`(params.asDocument()))
         case "$project"   => pipeline.add(Aggregates.project(params.asDocument()))
         case "$sort"      => pipeline.add(Aggregates.sort(params.asDocument()))
+        case "$group"     => pipeline.add(Aggregates.group(params.asDocument()))
         case other        => throw ModelError("Unexpected field in raw query json: " + other)
       }
     }
@@ -189,8 +201,8 @@ trait BsonUtils extends DataType_JVM_mongodb {
         case MetaAttr(attr, CardSet, "ID", _, _, _, _, _, _, _)             => attr -> {
           var set = Set.empty[String]
           (v: BsonValue) => {
-//            v.asArray.getValues.forEach(v => set += v.asString.getValue)
-//            v.asDocument().getValues.forEach(v => set += v.asString.getValue)
+            //            v.asArray.getValues.forEach(v => set += v.asString.getValue)
+            //            v.asDocument().getValues.forEach(v => set += v.asString.getValue)
             set
           }
         }

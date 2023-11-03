@@ -5,7 +5,7 @@ import codegen.CoreGenBase
 object _PickleTpl extends CoreGenBase("PickleTpl", "/marshalling/serialize") {
 
   val content = {
-    val unpackX       = (1 to 22).map(i => s"case $i => resolve$i(picklers)").mkString("\n      ")
+    val unpackX       = (1 to 22).map(i => s"case ${caseN(i)} => resolve$i(picklers)").mkString("\n      ")
     val unpackMethods = (1 to 22).map(arity => Chunk(arity).body).mkString("\n")
     s"""// GENERATED CODE ********************************
        |package molecule.core.marshalling.serialize

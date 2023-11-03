@@ -2,6 +2,7 @@ package molecule.document.mongodb.transaction
 
 import java.util
 import molecule.base.ast._
+import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.ops.InsertOps
@@ -18,20 +19,28 @@ trait Insert_mongodb
 
   doPrint = false
 
+  def deb(obj: Any, s: String = ""): Unit = if (false) {
+    val id  = System.identityHashCode(obj)
+    val idP = id + padS(10, id.toString)
+    val txt = s + padS(12, s)
+    println(s"$idP  $txt  $obj")
+  }
+
   def getData(nsMap: Map[String, MetaNs], elements: List[Element], tpls: Seq[Product]): Data = {
     val tpl2bson   = getResolver(nsMap, elements)
     val insertDocs = new util.ArrayList[BsonDocument]()
     tpls.foreach { tpl =>
       // Build new Bson saveDoc from each entity tuple
-      curData = new BsonDocument()
-      levelNsData = List(List(curData))
+      doc = new BsonDocument()
+      docs = List(List(doc))
       tpl2bson(tpl)
-      //      insertDocs.add(curDoc)
-      insertDocs.add(levelNsData.head.head)
+      val topDoc = docs.head.head
+      //      val row = docs.last
+      deb(topDoc, "result")
+      insertDocs.add(topDoc)
     }
     (getInitialNs(elements), insertDocs)
   }
-
 
   override protected def addOne[T](
     ns: String,
@@ -42,10 +51,11 @@ trait Insert_mongodb
     exts: List[String] = Nil
   ): Product => Unit = {
     (tpl: Product) => {
-      curData.append(
+      doc.append(
         attr,
         handleValue(tpl.productElement(tplIndex).asInstanceOf[T]).asInstanceOf[BsonValue]
       )
+      deb(doc, "add")
     }
   }
 
@@ -58,7 +68,7 @@ trait Insert_mongodb
     exts: List[String] = Nil
   ): Product => Unit = {
     (tpl: Product) => {
-      curData.append(attr, tpl.productElement(tplIndex) match {
+      doc.append(attr, tpl.productElement(tplIndex) match {
         case Some(scalaValue) => handleValue(scalaValue.asInstanceOf[T]).asInstanceOf[BsonValue]
         case None             => new BsonNull()
       })
@@ -75,63 +85,20 @@ trait Insert_mongodb
     exts: List[String] = Nil,
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
-    refNs.fold {
-      (tpl: Product) => {
-        tpl.productElement(tplIndex).asInstanceOf[Set[T]] match {
-          case set if set.nonEmpty =>
-            println(set.head.getClass)
-            val array: util.ArrayList[BsonValue] = new util.ArrayList[BsonValue]()
-            set.map(scalaValue => array.add(transformValue(scalaValue).asInstanceOf[BsonValue]))
-            curData.append(attr, new BsonArray(array))
+    if (refNs.isDefined) {
+      throw ModelError("Can't add non-existing ids of embedded documents in MongoDB. " +
+        "Please save embedded document together with main document.")
+    }
+    (tpl: Product) => {
+      tpl.productElement(tplIndex).asInstanceOf[Set[T]] match {
+        case set if set.nonEmpty =>
+          val array: util.ArrayList[BsonValue] = new util.ArrayList[BsonValue]()
+          set.map(scalaValue => array.add(transformValue(scalaValue).asInstanceOf[BsonValue]))
+          doc.append(attr, new BsonArray(array))
 
-          case _ => curData.append(attr, new BsonNull())
-        }
-        () // saveDoc mutated
+        case _ => doc.append(attr, new BsonNull())
       }
-    } { refNs =>
-      //      val refAttr   = attr
-      //      val joinTable = ss(ns, refAttr, refNs)
-      //      val curPath   = if (paramIndexes.nonEmpty) curRefPath else List("0", ns)
-      //      val joinPath  = curPath :+ joinTable
-      //
-      //      // join table with single row (treated as normal insert since there's only 1 join per row)
-      //      val (id1, id2) = if (ns == refNs)
-      //        (ss(ns, "1_id"), ss(refNs, "2_id"))
-      //      else
-      //        (ss(ns, "id"), ss(refNs, "id"))
-      //      // When insertion order is reversed, this join table will be set after left and right has been inserted
-      //      inserts = (joinPath, List((id1, ""), (id2, ""))) +: inserts
-      //
-      //      if (paramIndexes.isEmpty) {
-      //        // If current namespace has no attributes, then add an empty row with
-      //        // default null values (only to be referenced as the left side of the join table)
-      //        val emptyRowSetter: Setter = (ps: PS, _: IdsMap, _: RowIndex) => ps.addBatch()
-      //        addColSetter(curPath, emptyRowSetter)
-      //        inserts = inserts :+ (curRefPath, List())
-      //      }
-      //
-      (tpl: Product) => {
-        //        // Empty row if no attributes in namespace in order to have an id for join table left side
-        //        if (!paramIndexes.exists { case ((path, _), _) => path == curPath }) {
-        //          // If current namespace has no attributes, then add an empty row with
-        //          // default null values (only to be referenced as the left side of the join table)
-        //          val emptyRowSetter: Setter = (ps: PS, _: IdsMap, _: RowIndex) => ps.addBatch()
-        //          addColSetter(curPath, emptyRowSetter)
-        //        }
-        //
-        //        // Join table setter
-        //        val refIds             = tpl.productElement(tplIndex).asInstanceOf[Set[Long]]
-        //        val joinSetter: Setter = (ps: PS, idsMap: IdsMap, rowIndex: RowIndex) => {
-        //          val id = idsMap(curPath)(rowIndex)
-        //          refIds.foreach { refId =>
-        //            ps.setLong(1, id)
-        //            ps.setLong(2, refId)
-        //            ps.addBatch()
-        //          }
-        //        }
-        //        addColSetter(joinPath, joinSetter)
-        ???
-      }
+      () // saveDoc mutated
     }
   }
 
@@ -145,83 +112,42 @@ trait Insert_mongodb
     exts: List[String] = Nil,
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
-    refNs.fold {
-      (tpl: Product) => {
-        tpl.productElement(tplIndex) match {
-          case Some(set: Set[_]) if set.nonEmpty =>
-            val array: util.ArrayList[BsonValue] = new util.ArrayList[BsonValue]()
-            set.asInstanceOf[Set[T]].map(scalaValue => array.add(transformValue(scalaValue).asInstanceOf[BsonValue]))
-            curData.append(attr, new BsonArray(array))
+    if (refNs.isDefined) {
+      throw ModelError("Can't add non-existing ids of embedded documents in MongoDB. " +
+        "Please save embedded document together with main document.")
+    }
+    (tpl: Product) => {
+      tpl.productElement(tplIndex) match {
+        case Some(set: Set[_]) if set.nonEmpty =>
+          val array: util.ArrayList[BsonValue] = new util.ArrayList[BsonValue]()
+          set.asInstanceOf[Set[T]].map(scalaValue => array.add(transformValue(scalaValue).asInstanceOf[BsonValue]))
+          doc.append(attr, new BsonArray(array))
 
-          case _ => curData.append(attr, new BsonNull())
-        }
-        ()
+        case _ => doc.append(attr, new BsonNull())
       }
-    } { refNs =>
-      //      val refAttr   = attr
-      //      val joinTable = ss(ns, refAttr, refNs)
-      //      val curPath   = curRefPath
-      //      val joinPath  = curPath :+ joinTable
-      //
-      //      // join table with single row (treated as normal insert since there's only 1 join per row)
-      //      val (id1, id2) = if (ns == refNs)
-      //        (ss(ns, "1_id"), ss(refNs, "2_id"))
-      //      else
-      //        (ss(ns, "id"), ss(refNs, "id"))
-      //      // When insertion order is reversed, this join table will be set after left and right has been inserted
-      //      inserts = (joinPath, List((id1, ""), (id2, ""))) +: inserts
-      //
-      //      (tpl: Product) => {
-      //        val colSetter = tpl.productElement(tplIndex) match {
-      //          case Some(set: Set[_]) =>
-      //            if (set.nonEmpty) {
-      //              // Empty row if no attributes in namespace in order to have an id for join table
-      //              if (!paramIndexes.exists { case ((path, _), _) => path == curPath }) {
-      //                // If current namespace has no attributes, then add an empty row with
-      //                // default null values (only to be referenced as the left side of the join table)
-      //                val emptyRowSetter: Setter = (ps: PS, _: IdsMap, _: RowIndex) => ps.addBatch()
-      //                addColSetter(curPath, emptyRowSetter)
-      //              }
-      //
-      //              // Join table setter
-      //              val refIds = set.asInstanceOf[Set[Long]]
-      //              (ps: PS, idsMap: IdsMap, rowIndex: RowIndex) => {
-      //                val id = idsMap(curPath)(rowIndex)
-      //                refIds.foreach { refId =>
-      //                  ps.setLong(1, id)
-      //                  ps.setLong(2, refId)
-      //                  ps.addBatch()
-      //                }
-      //              }
-      //            } else {
-      //              (_: PS, _: IdsMap, _: RowIndex) => ()
-      //            }
-      //
-      //          case None => (_: PS, _: IdsMap, _: RowIndex) => ()
-      //        }
-      //        addColSetter(joinPath, colSetter)
-      //      }
-      ???
+      ()
     }
   }
 
   override protected def addRef(ns: String, refAttr: String, refNs: String, card: Card): Product => Unit = {
     (_: Product) => {
-      val newDoc = new BsonDocument()
+      val refDoc = new BsonDocument()
       // Make relationship
-      curData.append(refAttr, newDoc)
+      doc.append(refAttr, refDoc)
       // Step into related namespace
-      levelNsData = levelNsData.init :+ (levelNsData.last :+ newDoc)
+      docs = docs.init :+ (docs.last :+ refDoc)
       // Work on in new namespace
-      curData = newDoc
+      deb(doc, "add ref")
+      doc = refDoc
+      deb(refDoc, "ref")
     }
   }
 
   override protected def addBackRef(backRefNs: String): Product => Unit = {
     (_: Product) =>
-      // Step back to previous namespace
-      curData = levelNsData.last.init.last
-      levelNsData = levelNsData.init :+ levelNsData.last.init
+      // Step back to previous namespace/doc
+      doc = docs.last.init.last
+      docs = docs.init :+ docs.last.init
   }
 
   override protected def addNested(
@@ -248,53 +174,34 @@ trait Insert_mongodb
     //    level = nextLevel
     //    curRefPath = List(s"$level", refNs)
     //    colSettersMap += curRefPath -> Nil
-    //
-    //    // Recursively resolve nested data
-    //    val nestedResolver = getResolver(nsMap, nestedElements)
-    //
-    //    countValueAttrs(nestedElements) match {
-    //      case 1 =>
-    //        (tpl: Product) => {
-    //          val nestedSingleValues = tpl.productElement(tplIndex).asInstanceOf[Seq[Any]]
-    //          val length             = nestedSingleValues.length
-    //          rightCountsMap(joinPath) = rightCountsMap(joinPath) :+ length
-    //          nestedSingleValues.foreach { nestedSingleValue =>
-    //            nestedResolver(Tuple1(nestedSingleValue))
-    //          }
-    //        }
-    //      case _ =>
-    //        (tpl: Product) => {
-    //          val nestedTpls = tpl.productElement(tplIndex).asInstanceOf[Seq[Product]]
-    //          val length     = nestedTpls.length
-    //          rightCountsMap(joinPath) = rightCountsMap(joinPath) :+ length
-    //          nestedTpls.foreach { nestedTpl =>
-    //            nestedResolver(nestedTpl)
-    //          }
-    //        }
-    //    }
-    ???
-  }
+    // Recursively resolve nested data
+    val resolveNested = getResolver(nsMap, nestedElements)
 
-  //  override protected lazy val handleString         = (v: Any) => new BsonString(v.asInstanceOf[String])
-  //  override protected lazy val handleInt            = (v: Any) => new BsonInt32(v.asInstanceOf[Int])
-  //  override protected lazy val handleLong           = (v: Any) => new BsonInt64(v.asInstanceOf[Long])
-  //  override protected lazy val handleFloat          = (v: Any) => new BsonDouble(v.asInstanceOf[Float])
-  //  override protected lazy val handleDouble         = (v: Any) => new BsonDouble(v.asInstanceOf[Double])
-  //  override protected lazy val handleBoolean        = (v: Any) => new BsonBoolean(v.asInstanceOf[Boolean])
-  //  override protected lazy val handleBigInt         = (v: Any) => new BsonDecimal128(new Decimal128(BigDecimal(v.asInstanceOf[BigInt]).bigDecimal))
-  //  override protected lazy val handleBigDecimal     = (v: Any) => new BsonDecimal128(new Decimal128(v.asInstanceOf[BigDecimal].bigDecimal))
-  //  override protected lazy val handleDate           = (v: Any) => new BsonDateTime(v.asInstanceOf[Date].getTime)
-  //  override protected lazy val handleDuration       = (v: Any) => new BsonString(v.asInstanceOf[Duration].toString)
-  //  override protected lazy val handleInstant        = (v: Any) => new BsonString(v.asInstanceOf[Instant].toString)
-  //  override protected lazy val handleLocalDate      = (v: Any) => new BsonString(v.asInstanceOf[LocalDate].toString)
-  //  override protected lazy val handleLocalTime      = (v: Any) => new BsonString(v.asInstanceOf[LocalTime].toString)
-  //  override protected lazy val handleLocalDateTime  = (v: Any) => new BsonString(v.asInstanceOf[LocalDateTime].toString)
-  //  override protected lazy val handleOffsetTime     = (v: Any) => new BsonString(v.asInstanceOf[OffsetTime].toString)
-  //  override protected lazy val handleOffsetDateTime = (v: Any) => new BsonString(v.asInstanceOf[OffsetDateTime].toString)
-  //  override protected lazy val handleZonedDateTime  = (v: Any) => new BsonString(v.asInstanceOf[ZonedDateTime].toString)
-  //  override protected lazy val handleUUID           = (v: Any) => new BsonString(v.asInstanceOf[UUID].toString)
-  //  override protected lazy val handleURI            = (v: Any) => new BsonString(v.asInstanceOf[URI].toString)
-  //  override protected lazy val handleByte           = (v: Any) => new BsonInt32(v.asInstanceOf[Byte])
-  //  override protected lazy val handleShort          = (v: Any) => new BsonInt32(v.asInstanceOf[Short])
-  //  override protected lazy val handleChar           = (v: Any) => new BsonString(v.asInstanceOf[Char].toString)
+    val tupled = countValueAttrs(nestedElements) match {
+      case 1 => (tpl: Product) => tpl.productElement(tplIndex).asInstanceOf[Seq[Any]].map(Tuple1(_))
+      case _ => (tpl: Product) => tpl.productElement(tplIndex).asInstanceOf[Seq[Product]]
+    }
+
+    (tpl: Product) => {
+      val nestedTuples = tupled(tpl)
+      val nestedArray  = new BsonArray()
+      doc.append(refAttr, nestedArray)
+      val outerDoc = doc
+
+      // Initiate nested level
+      docs = docs :+ Nil
+
+      nestedTuples.foreach { nestedTpl =>
+        deb("", "------------------------------------------------")
+        // Start from new namespace on this level
+        doc = new BsonDocument()
+        docs = docs.init :+ List(doc)
+        resolveNested(nestedTpl)
+        //        deb(doc, "tplB")
+        nestedArray.add(docs.last.head.clone())
+      }
+      deb("", "------------------------------------------------")
+      deb(outerDoc, "outer")
+    }
+  }
 }

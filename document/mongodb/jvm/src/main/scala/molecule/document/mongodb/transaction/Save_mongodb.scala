@@ -19,7 +19,7 @@ trait Save_mongodb
     initialNs = getInitialNs(elements)
     resolve(elements)
     val saveDocs = new util.ArrayList[BsonDocument]()
-    saveDocs.add(levelNsData.head.head)
+    saveDocs.add(docs.head.head)
     (initialNs, saveDocs)
   }
 
@@ -32,9 +32,9 @@ trait Save_mongodb
     exts: List[String] = Nil
   ): Unit = {
     optBsonValue.fold {
-      curData.append(attr, new BsonNull())
+      doc.append(attr, new BsonNull())
     } { bsonValue =>
-      curData.append(attr, bsonValue.asInstanceOf[BsonValue])
+      doc.append(attr, bsonValue.asInstanceOf[BsonValue])
     }
   }
 
@@ -53,33 +53,33 @@ trait Save_mongodb
         "Please save embedded document together with main document.")
     }
     optSet.fold {
-      curData.append(attr, new BsonNull())
+      doc.append(attr, new BsonNull())
     } {
       case set if set.nonEmpty =>
         val array: util.ArrayList[BsonValue] = new util.ArrayList[BsonValue]()
         // Values have already been transformed in ResolveSave
         set.map(bsonValue => array.add(bsonValue.asInstanceOf[BsonValue]))
-        curData.append(attr, new BsonArray(array))
+        doc.append(attr, new BsonArray(array))
 
-      case _ => curData.append(attr, new BsonNull())
+      case _ => doc.append(attr, new BsonNull())
     }
   }
 
 
   override protected def addRef(ns: String, refAttr: String, refNs: String, card: Card): Unit = {
-    val refData = new BsonDocument()
+    val refDoc = new BsonDocument()
     // Make relationship
-    curData.append(refAttr, refData)
+    doc.append(refAttr, refDoc)
     // Step into related namespace
-    levelNsData = levelNsData.init :+ (levelNsData.last :+ refData)
+    docs = docs.init :+ (docs.last :+ refDoc)
     // New namespace ready to append field-value pairs
-    curData = refData
+    doc = refDoc
   }
 
   override protected def addBackRef(backRefNs: String): Unit = {
     // Step back to previous namespace
-    curData = levelNsData.last.init.last
-    levelNsData = levelNsData.init :+ levelNsData.last.init
+    doc = docs.last.init.last
+    docs = docs.init :+ docs.last.init
   }
 
   override protected def handleRefNs(refNs: String): Unit = ()

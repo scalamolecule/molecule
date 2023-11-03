@@ -5,7 +5,7 @@ import codegen.CoreGenBase
 object _InsertValueResolvers extends CoreGenBase("InsertValueResolvers", "/validation/insert") {
 
   val content = {
-    val resolveX       = (1 to 22).map(i => s"case $i => resolve$i(valueResolvers)").mkString("\n      ")
+    val resolveX       = (1 to 22).map(i => s"case ${caseN(i)} => resolve$i(valueResolvers)").mkString("\n      ")
     val resolveMethods = (1 to 22).map(arity => Chunk(arity).body).mkString("\n")
     s"""// GENERATED CODE ********************************
        |package molecule.core.validation.insert

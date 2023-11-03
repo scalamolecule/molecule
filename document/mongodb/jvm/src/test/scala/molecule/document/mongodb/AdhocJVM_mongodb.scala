@@ -23,7 +23,7 @@ object AdhocJVM_mongodb extends TestSuite_mongodb {
           (1, "a"),
           (2, "b"),
           (3, "c"),
-        ).i.transact
+        ).transact
 
         //        _ <- rawTransact(
         //          """{
@@ -65,81 +65,129 @@ object AdhocJVM_mongodb extends TestSuite_mongodb {
         //        _ <- rawQuery("""{"collection": "Ns"}""", true)
 
         _ <- Ns.i(1).s("a").query.get.map(_ ==> List((1, "a")))
-
-
       } yield ()
     }
 
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
-        // Two entities to be referenced
-        List(b1, b2) <- B.i.insert(1, 2).transact.map(_.ids)
 
-        // Reference Set of entities
-        _ <- A.i(0).bb(Set(b1, b2)).save.transact
+        //        _ <- A.i.B.i.insert(1, 2).i.transact
 
-        // Saving individual ref ids (not in a Set) is not allowed
-        _ <- A.i(0).bb(b1, b2).save.transact
-          .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-            err ==> "Can only save one Set of values for Set attribute `A.bb`. " +
-              s"Found: Set($b1), Set($b2)"
-          }
+        //        _ <- A.s.Bb.*(B.i).insert(
+        //          ("a", List(1, 2)),
+        //          ("b", List(3)),
+        //          //          ("b", Nil),
+        //        ).i.transact
 
-        // Referencing namespace attributes repeat for each referenced entity
-        _ <- A.i.Bb.i.a1.query.get.map(_ ==> List(
-          (0, 1),
-          (0, 2), // 0 is repeated
-        ))
+        _ <- A.s.Bb.*(B.i).insert(("a", List(1, 2))).i.transact
+        //        _ <- A.s.Bb.*(B.i.C.s).insert(("a", List((1, "x")))).i.transact
+        //        _ <- A.s.Bb.*(B.i.s).insert(("a", List((1, "x"), (2, "y")))).i.transact
+        //        _ <- A.s.Bb.*(B.i.C.s).insert(("a", List((1, "x"), (2, "y")))).i.transact
+        //        _ <- A.s.Bb.*(B.s.C.i).insert(("A", List(("x", 1), ("y", 2)))).i.transact
 
-        // Card many ref attributes return Set of ref ids
-        _ <- A.i.bb.query.get.map(_ ==> List((0, Set(b1, b2))))
+        //                _ <- rawTransact(
+        //                  """{
+        //                    |  "insert": "A",
+        //                    |  "data": [
+        //                    |    {
+        //                    |      "s": "a",
+        //                    |      "bb": [
+        //                    |        {
+        //                    |          "i": 1,
+        //                    |          "c": {
+        //                    |            "s": "x"
+        //                    |          }
+        //                    |        },
+        //                    |        {
+        //                    |          "i": 2,
+        //                    |          "c": {
+        //                    |            "s": "y"
+        //                    |          }
+        //                    |        }
+        //                    |      ]
+        //                    |    },
+        //                    |    {
+        //                    |      "s": "b",
+        //                    |      "bb": [
+        //                    |        {
+        //                    |          "i": 3,
+        //                    |          "c": {
+        //                    |            "s": "z"
+        //                    |          }
+        //                    |        }
+        //                    |      ]
+        //                    |    }
+        //                    |  ]
+        //                    |}
+        //                    |""".stripMargin)
+        //
+        //        _ <- rawQuery(
+        //          """{
+        //            |  "collection": "A",
+        //            |  "$match": {
+        //            |    "$and": [
+        //            |      {
+        //            |        "s": {
+        //            |          "$ne": null
+        //            |        }
+        //            |      }
+        //            |    ]
+        //            |  },
+        //            |  "$project": {
+        //            |    "_id": 0,
+        //            |    "s": 1,
+        //            |    "bb.i": 1,
+        //            |  }
+        //            |}
+        //            |""".stripMargin, true)
+
+        _ <- rawQuery(
+          """{
+            |  "collection": "A",
+            |  "$match": {
+            |    "$and": [
+            |      {
+            |        "s": {
+            |          "$ne": null
+            |        }
+            |      }
+            |    ]
+            |  }
+            |}
+            |""".stripMargin, true)
+
+
+        //        _ <- rawTransact(
+        //          """{
+        //            |  "insert": "A",
+        //            |  "data": [
+        //            |    {
+        //            |      "s": "a",
+        //            |      "bb": [
+        //            |        {
+        //            |          "i": 1
+        //            |        },
+        //            |        {
+        //            |          "i": 2
+        //            |        }
+        //            |      ]
+        //            |    }
+        //            |  ]
+        //            |}
+        //            |""".stripMargin)
+
+
+        //        // Mandatory nested data
+        //        _ <- A.s.query.i.get.map(_ ==> List("a", "b"))
+        _ <- A.s.Bb.*(B.i).query.i.get.map(_ ==> List(("a", List(1, 2))))
+        //
+        //        // Optional nested data
+        //        _ <- A.s.a1.Bb.*?(B.i.a1).query.get.map(_ ==> List(
+        //          ("a", List(1, 2)),
+        //          ("b", Nil),
+        //        ))
       } yield ()
-
-
-      if (database == "MongoDB") {
-        // Can't query for non-existing ids of embedded documents in MongoDB
-        for {
-          // Card one ref attr
-          _ <- A.i.b.query.get
-            .map(_ ==> "Unexpected success")
-            .recover { case ModelError(err) =>
-              err ==> "Can't query for non-existing ids of embedded documents in MongoDB."
-            }
-
-          // Card many ref attr
-          _ <- A.i.bb.query.get
-            .map(_ ==> "Unexpected success")
-            .recover { case ModelError(err) =>
-              err ==> "Can't query for non-existing set of ids of embedded documents in MongoDB."
-            }
-        } yield ()
-
-      } else {
-        for {
-          // Two entities to be referenced
-          List(b1, b2) <- B.i.insert(1, 2).transact.map(_.ids)
-
-          // Reference Set of entities
-          _ <- A.i(0).bb(Set(b1, b2)).save.transact
-
-          // Saving individual ref ids (not in a Set) is not allowed
-          _ <- A.i(0).bb(b1, b2).save.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-              err ==> "Can only save one Set of values for Set attribute `A.bb`. " +
-                s"Found: Set($b1), Set($b2)"
-            }
-
-          // Referencing namespace attributes repeat for each referenced entity
-          _ <- A.i.Bb.i.a1.query.get.map(_ ==> List(
-            (0, 1),
-            (0, 2), // 0 is repeated
-          ))
-
-          // Card many ref attributes return Set of ref ids
-          _ <- A.i.bb.query.get.map(_ ==> List((0, Set(b1, b2))))
-        } yield ()
-      }
     }
 
 

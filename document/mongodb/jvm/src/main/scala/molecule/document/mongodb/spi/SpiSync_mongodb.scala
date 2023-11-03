@@ -336,11 +336,11 @@ trait SpiSync_mongodb
   )(implicit conn: Conn): TxReport = {
     val debug = if (doPrint) (s: String) => println(s) else (_: String) => ()
     debug("\nRAW TRANSACT ======================================================")
-    val (_, rows) = json2data(json, conn.proxy.nsMap)
+    val (col, rows) = json2data(json, conn.proxy.nsMap)
     if (doPrint) {
       rows.forEach(row => debug(row.toJson(pretty)))
     }
-    conn.asInstanceOf[MongoConn_JVM].transact_sync(json2data(json, conn.proxy.nsMap))
+    conn.asInstanceOf[MongoConn_JVM].transact_sync((col, rows))
   }
 
   override def fallback_rawQuery(

@@ -5,7 +5,7 @@ import codegen.CoreGenBase
 object _InsertResolvers extends CoreGenBase("InsertResolvers", "/transaction") {
 
   val content = {
-    val resolveX       = (1 to 22).map(i => s"case $i => resolve$i(resolvers)").mkString("\n      ")
+    val resolveX       = (1 to 22).map(i => s"case ${caseN(i)} => resolve$i(resolvers)").mkString("\n      ")
     val resolveMethods = (1 to 22).map(arity => Chunk(arity).body).mkString("\n")
     s"""// GENERATED CODE ********************************
        |package molecule.core.transaction
@@ -19,17 +19,15 @@ object _InsertResolvers extends CoreGenBase("InsertResolvers", "/transaction") {
        |    nsMap: Map[String, MetaNs],
        |    elements: List[Element],
        |    resolvers: List[Product => Unit],
-       |    tpl: Int,
        |    tplIndex: Int
        |  ): List[Product => Unit]
        |
        |  def getResolver(
        |    nsMap: Map[String, MetaNs],
-       |    elements: List[Element],
-       |    outerTpl: Int = 0
+       |    elements: List[Element]
        |  ): Product => Unit = {
        |    val resolvers: List[Product => Unit] =
-       |      resolve(nsMap, elements, Nil, outerTpl, 0)
+       |      resolve(nsMap, elements, Nil, 0)
        |
        |    resolvers.length match {
        |      $resolveX
