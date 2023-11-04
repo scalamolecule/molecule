@@ -10,6 +10,7 @@ import molecule.core.marshalling.ConnProxy
 import molecule.core.query.Model2QueryBase
 import molecule.core.util.ModelUtils
 import molecule.document.mongodb.query.casting._
+import org.bson.BsonArray
 import org.bson.conversions.Bson
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
@@ -48,16 +49,16 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
     resolve(elements2)
 
     if (!idField) {
-      curFields.add(0, Projections.excludeId())
+      curProjections.add(0, Projections.excludeId())
     }
 
     val pipeline = new util.ArrayList[Bson]()
 
-    if (!filters.isEmpty) {
-      pipeline.add(Aggregates.`match`(Filters.and(filters)))
+    if (!matches.isEmpty) {
+      pipeline.add(Aggregates.`match`(Filters.and(matches)))
     }
-    if (!curFields.isEmpty) {
-      pipeline.add(Aggregates.project(Projections.fields(curFields)))
+    if (!curProjections.isEmpty) {
+      pipeline.add(Aggregates.project(Projections.fields(curProjections)))
     }
     if (!sorts.isEmpty) {
       pipeline.add(Aggregates.sort(Sorts.orderBy(sorts)))
@@ -371,11 +372,15 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
     validateRefNs(ref, nestedElements)
     val Ref(_, refAttr, refNs, _, _) = ref
 
+    // No empty nested arrays
+    matches.add(Filters.ne(refAttr, new BsonArray()))
+
+    path = path + refAttr + "."
+
+    // Initiate first nested namespace (simply continue using this linear list of nss)
     castss = castss.init :+ castss.last.copy(casts = curCasts) :+ CastNs(refAttr, Nil, true)
     curCasts = Nil
 
-    aritiesNested()
-    resolveNestedRef(ref)
     resolve(nestedElements)
     resolve(tail)
   }
@@ -390,10 +395,14 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
       throw ModelError("Filter attributes not allowed in optional nested queries.")
     }
     validateRefNs(ref, nestedElements)
-
     val Ref(_, refAttr, refNs, _, _) = ref
-    aritiesNested()
-    resolveNestedOptRef(ref)
+
+    path = path + refAttr + "."
+
+    // Initiate first nested namespace (simply continue using this linear list of nss)
+    castss = castss.init :+ castss.last.copy(casts = curCasts) :+ CastNs(refAttr, Nil, true)
+    curCasts = Nil
+
     resolve(nestedElements)
     resolve(tail)
   }

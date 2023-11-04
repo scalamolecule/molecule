@@ -3,6 +3,7 @@ package molecule.document.mongodb.query.casting
 
 import org.bson._
 import scala.annotation.tailrec
+import scala.collection.mutable.ListBuffer
 
 
 trait CastBsonDoc_ {
@@ -13,21 +14,10 @@ trait CastBsonDoc_ {
     castss: List[Cast],
   ): List[BsonDocument => Any] = {
     castss match {
-      case CastAttr(_, cast) :: more => resolveCastss(acc :+ cast, more)
-
-      // Ref
-      case CastNs(refAttr, casts, false) :: more =>
-        resolveCastss(acc ++ refCasts(refAttr, casts), more)
-
-      // Nested
-      case CastNs(refAttr, casts, true) :: more =>
-        val refCasts = documentCaster(casts)
-        val ref      = (doc: BsonDocument) => {
-          refCasts(doc.get(refAttr).asDocument())
-        }
-        resolveCastss(acc :+ ref, more)
-
-      case _ => acc
+      case CastAttr(_, cast) :: more             => resolveCastss(acc :+ cast, more)
+      case CastNs(refAttr, casts, false) :: more => resolveCastss(acc ++ refCasts(refAttr, casts), more)
+      case CastNs(refAttr, casts, true) :: more  => resolveCastss(acc :+ nestedCast(refAttr, casts), more)
+      case _                                     => acc
     }
   }
 
@@ -36,6 +26,17 @@ trait CastBsonDoc_ {
       (curDoc: BsonDocument) => {
         refCast(curDoc.get(refAttr).asDocument())
       }
+    }
+  }
+
+  private def nestedCast(refAttr: String, casts: List[Cast]): BsonDocument => Any = {
+    val innerCasts = documentCaster(casts)
+    (doc: BsonDocument) => {
+      val inner = ListBuffer.empty[Any]
+      doc.get(refAttr).asArray().forEach(nestedRow =>
+        inner += innerCasts(nestedRow.asDocument())
+      )
+      inner.toList
     }
   }
 

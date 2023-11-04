@@ -114,7 +114,7 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne { self: MongoQueryBase 
 
   private def man[T](attr: Attr, args: Seq[T], res: ResOne[T]): Unit = {
     val field = attr.attr
-    addProjection(field)
+    addField(field)
     addCast(field, res.cast(field))
     addSort(attr, field)
 
@@ -137,7 +137,7 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne { self: MongoQueryBase 
 
   private def opt[T](attr: Attr, optArgs: Option[Seq[T]], res: ResOne[T]): Unit = {
     val field = attr.attr
-    addProjection(field)
+    addField(field)
     addCast(field, res.castOpt(field))
     addSort(attr, field)
     val filter = attr.op match {
@@ -150,26 +150,26 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne { self: MongoQueryBase 
       case Ge    => optCompare(field, optArgs, res.ge)
       case other => unexpectedOp(other)
     }
-    filters.add(filter)
+    matches.add(filter)
   }
 
 
   private def expr[T](field0: String, op: Op, args: Seq[T], res: ResOne[T]): Unit = {
     val field = path + field0
     op match {
-      case V          => filters.add(Filters.ne(field, null.asInstanceOf[T]))
-      case Eq         => filters.add(equal(field, args, res))
-      case Neq        => filters.add(neq(field, args, res))
-      case Lt         => filters.add(res.lt(field, args.head))
-      case Gt         => filters.add(res.gt(field, args.head))
-      case Le         => filters.add(res.le(field, args.head))
-      case Ge         => filters.add(res.ge(field, args.head))
-      case NoValue    => filters.add(noValue(field))
+      case V          => matches.add(Filters.ne(field, null.asInstanceOf[T]))
+      case Eq         => matches.add(equal(field, args, res))
+      case Neq        => matches.add(neq(field, args, res))
+      case Lt         => matches.add(res.lt(field, args.head))
+      case Gt         => matches.add(res.gt(field, args.head))
+      case Le         => matches.add(res.le(field, args.head))
+      case Ge         => matches.add(res.ge(field, args.head))
+      case NoValue    => matches.add(noValue(field))
       case Fn(kw, n)  => aggr(field, kw, n, res)
-      case StartsWith => filters.add(startsWith(field, args.head))
-      case EndsWith   => filters.add(endsWith(field, args.head))
-      case Contains   => filters.add(contains(field, args.head))
-      case Matches    => filters.add(matches(field, args.head.toString))
+      case StartsWith => matches.add(startsWith(field, args.head))
+      case EndsWith   => matches.add(endsWith(field, args.head))
+      case Contains   => matches.add(contains(field, args.head))
+      case Matches    => matches.add(matches(field, args.head.toString))
       case Take       => take(field, args.head.toString.toInt)
       case TakeRight  => takeRight(field, args.head.toString.toInt)
       case Drop       => drop(field, args.head.toString.toInt)
@@ -275,18 +275,18 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne { self: MongoQueryBase 
   private def take(field: String, n: Int): Unit = {
     if (n > 0) {
       // Empty result string discarded
-      curFields.add(Projections.computed(field, current().getString(field).substr(0, n)))
+      curProjections.add(Projections.computed(field, current().getString(field).substr(0, n)))
     } else {
       // Take nothing
-      filters.add(Filters.eq("_id", -1))
+      matches.add(Filters.eq("_id", -1))
     }
   }
 
   private def drop(field: String, n: Int): Unit = {
     if (n > 0) {
       // Skip if trying to drop more than string length
-      filters.add(Filters.expr(current().getString(field).length().gt(of(n))))
-      curFields.add(Projections.computed(field, current().getString(field).substr(n, Int.MaxValue)))
+      matches.add(Filters.expr(current().getString(field).length().gt(of(n))))
+      curProjections.add(Projections.computed(field, current().getString(field).substr(n, Int.MaxValue)))
     } else {
       // Drop nothing
     }
@@ -294,7 +294,7 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne { self: MongoQueryBase 
 
   private def takeRight(field: String, n: Int): Unit = {
     if (n > 0) {
-      curFields.add(
+      curProjections.add(
         Projections.computed(
           field,
           current().getString(field).substr(
@@ -305,15 +305,15 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne { self: MongoQueryBase 
       )
     } else {
       // Take nothing
-      filters.add(Filters.eq("_id", -1))
+      matches.add(Filters.eq("_id", -1))
     }
   }
 
   private def dropRight(field: String, n: Int): Unit = {
     if (n > 0) {
       // Skip if trying to drop more than string length
-      filters.add(Filters.expr(current().getString(field).length().gt(of(n))))
-      curFields.add(
+      matches.add(Filters.expr(current().getString(field).length().gt(of(n))))
+      curProjections.add(
         Projections.computed(
           field,
           current().getString(field).substr(
@@ -331,12 +331,12 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne { self: MongoQueryBase 
     val Seq(from, until) = args.asInstanceOf[Seq[String]].map(_.toInt)
     if (from >= until) {
       // Take nothing
-      filters.add(Filters.eq("_id", -1))
+      matches.add(Filters.eq("_id", -1))
     } else if (from >= 0) {
       val length = until - from
       // Skip if from is greater than string length
-      filters.add(Filters.expr(current().getString(field).length().gt(of(from))))
-      curFields.add(Projections.computed(field, current().getString(field).substr(from, length)))
+      matches.add(Filters.expr(current().getString(field).length().gt(of(from))))
+      curProjections.add(Projections.computed(field, current().getString(field).substr(from, length)))
     } else {
       // Drop nothing
     }
@@ -367,15 +367,15 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne { self: MongoQueryBase 
 
   private def remainder[T](field: String, args: Seq[T]): Unit = {
     val Seq(divisor, remainder) = args.map(_.toString.toInt)
-    filters.add(Filters.mod(field, divisor, remainder))
+    matches.add(Filters.mod(field, divisor, remainder))
   }
 
   private def even(field: String): Unit = {
-    filters.add(Filters.mod(field, 2, 0))
+    matches.add(Filters.mod(field, 2, 0))
   }
 
   private def odd(field: String): Unit = {
-    filters.add(Filters.mod(field, 2, 1))
+    matches.add(Filters.mod(field, 2, 1))
   }
 
   private def aggr[T](field: String, fn: String, optN: Option[Int], res: ResOne[T]): Unit = {

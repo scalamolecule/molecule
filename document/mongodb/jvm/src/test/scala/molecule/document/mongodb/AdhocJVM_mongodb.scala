@@ -3,7 +3,7 @@ package molecule.document.mongodb
 import java.time.LocalTime
 import molecule.base.error.{ExecutionError, ModelError}
 import molecule.core.util.Executor._
-import molecule.coreTests.dataModels.core.dsl.Refs.A
+import molecule.coreTests.dataModels.core.dsl.Refs.{A, B}
 import molecule.coreTests.dataModels.core.dsl.Types.Ns
 import molecule.document.mongodb.async._
 import molecule.document.mongodb.setup.TestSuite_mongodb
@@ -72,121 +72,130 @@ object AdhocJVM_mongodb extends TestSuite_mongodb {
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
 
-        //        _ <- A.i.B.i.insert(1, 2).i.transact
 
-        //        _ <- A.s.Bb.*(B.i).insert(
-        //          ("a", List(1, 2)),
-        //          ("b", List(3)),
-        //          //          ("b", Nil),
-        //        ).i.transact
+//        _ <- rawQuery(
+//          """{
+//            |  "collection": "A",
+//            |  "$match": {
+//            |    "$and": [
+//            |      {
+//            |        "s": {
+//            |          "$ne": null
+//            |        }
+//            |      }
+//            |    ]
+//            |  }
+//            |}
+//            |""".stripMargin, true)
 
-        _ <- A.s.Bb.*(B.i).insert(("a", List(1, 2))).i.transact
-        //        _ <- A.s.Bb.*(B.i.C.s).insert(("a", List((1, "x")))).i.transact
-        //        _ <- A.s.Bb.*(B.i.s).insert(("a", List((1, "x"), (2, "y")))).i.transact
-        //        _ <- A.s.Bb.*(B.i.C.s).insert(("a", List((1, "x"), (2, "y")))).i.transact
-        //        _ <- A.s.Bb.*(B.s.C.i).insert(("A", List(("x", 1), ("y", 2)))).i.transact
+//        _ <- A.i(1).save.transact
+//        _ <- A.i(2).query.i.get.map(_ ==> List(1))
 
-        //                _ <- rawTransact(
-        //                  """{
-        //                    |  "insert": "A",
-        //                    |  "data": [
-        //                    |    {
-        //                    |      "s": "a",
-        //                    |      "bb": [
-        //                    |        {
-        //                    |          "i": 1,
-        //                    |          "c": {
-        //                    |            "s": "x"
-        //                    |          }
-        //                    |        },
-        //                    |        {
-        //                    |          "i": 2,
-        //                    |          "c": {
-        //                    |            "s": "y"
-        //                    |          }
-        //                    |        }
-        //                    |      ]
-        //                    |    },
-        //                    |    {
-        //                    |      "s": "b",
-        //                    |      "bb": [
-        //                    |        {
-        //                    |          "i": 3,
-        //                    |          "c": {
-        //                    |            "s": "z"
-        //                    |          }
-        //                    |        }
-        //                    |      ]
-        //                    |    }
-        //                    |  ]
-        //                    |}
-        //                    |""".stripMargin)
-        //
-        //        _ <- rawQuery(
-        //          """{
-        //            |  "collection": "A",
-        //            |  "$match": {
-        //            |    "$and": [
-        //            |      {
-        //            |        "s": {
-        //            |          "$ne": null
-        //            |        }
-        //            |      }
-        //            |    ]
-        //            |  },
-        //            |  "$project": {
-        //            |    "_id": 0,
-        //            |    "s": 1,
-        //            |    "bb.i": 1,
-        //            |  }
-        //            |}
-        //            |""".stripMargin, true)
+        _ <- A.i.Bb.*(B.i).insert(List((7, List(1, 2, 3)))).transact
+/*
+db.subscriptions.aggregate([
+  {
+    $match: { _id: ObjectId('5f9a4f3170bd08b002498d44') },
+  },
+  {
+    $unwind: {
+      path: '$subscriptions',
+    },
+  },
+  {
+    $match: {
+      'subscriptions.active.email': true,
+    },
+  },
+  {
+    $project: {
+      activeUserId: '$subscriptions.user',
+      _id: 0,
+    },
+  },
+])
+ */
 
+//        _ <- rawQuery(
+//          """{
+//            |  "collection": "A",
+//            |  "$unwind": "$bb",
+//            |  "$match": {
+//            |    "$and": [
+//            |      {
+//            |        "i": {
+//            |          "$ne": null
+//            |        }
+//            |      },
+//            |      {
+//            |        "bb.i": 1
+//            |      }
+//            |    ]
+//            |  },
+//            |
+//            |  "$project": {
+//            |    "_id": 0,
+//            |    "i": 1
+//            |    "bb.i": 1
+//            |  }
+//            |}
+//            |""".stripMargin, true)
+/*
+
+db.sales.aggregate( [
+   {
+      $project: {
+         items: {
+            $filter: {
+               input: "$items",
+               as: "item",
+               cond: { $gte: [ "$$item.price", 100 ] }
+            }
+         }
+      }
+   }
+] )
+ */
         _ <- rawQuery(
           """{
             |  "collection": "A",
             |  "$match": {
             |    "$and": [
             |      {
-            |        "s": {
+            |        "i": {
             |          "$ne": null
+            |        }
+            |      },
+            |      {
+            |        "bb": {
+            |          "$ne": []
             |        }
             |      }
             |    ]
+            |  },
+            |
+            |  "$project": {
+            |    "_id": 0,
+            |    "i": 1
+            |    "bb": {
+            |      "$filter": {
+            |        input: "$bb",
+            |        cond: { "$eq": [ "$$this.i", 1 ] }
+            |      }
+            |    }
             |  }
             |}
             |""".stripMargin, true)
 
-
-        //        _ <- rawTransact(
-        //          """{
-        //            |  "insert": "A",
-        //            |  "data": [
-        //            |    {
-        //            |      "s": "a",
-        //            |      "bb": [
-        //            |        {
-        //            |          "i": 1
-        //            |        },
-        //            |        {
-        //            |          "i": 2
-        //            |        }
-        //            |      ]
-        //            |    }
-        //            |  ]
-        //            |}
-        //            |""".stripMargin)
-
-
-        //        // Mandatory nested data
-        //        _ <- A.s.query.i.get.map(_ ==> List("a", "b"))
-        _ <- A.s.Bb.*(B.i).query.i.get.map(_ ==> List(("a", List(1, 2))))
-        //
-        //        // Optional nested data
-        //        _ <- A.s.a1.Bb.*?(B.i.a1).query.get.map(_ ==> List(
-        //          ("a", List(1, 2)),
-        //          ("b", Nil),
-        //        ))
+//        _ <- A.i_.Bb.*(B.i.a1).query.i.get.map(_ ==> List(List(1, 2, 3)))
+        _ <- A.i_.Bb.*(B.i(1).a1).query.i.get.map(_ ==> List(List(1)))
+//        _ <- A.i_.Bb.*(B.i(1, 2).a1).query.get.map(_ ==> List(List(1, 2)))
+//        _ <- A.i_.Bb.*(B.i.not(1).a1).query.get.map(_ ==> List(List(2, 3)))
+//        _ <- A.i_.Bb.*(B.i.not(1, 2).a1).query.get.map(_ ==> List(List(3)))
+//        _ <- A.i_.Bb.*(B.i.<(2).a1).query.get.map(_ ==> List(List(1)))
+//        _ <- A.i_.Bb.*(B.i.<=(2).a1).query.get.map(_ ==> List(List(1, 2)))
+//        _ <- A.i_.Bb.*(B.i.>(2).a1).query.get.map(_ ==> List(List(3)))
+//        _ <- A.i_.Bb.*(B.i.>=(2).a1).query.get.map(_ ==> List(List(2, 3)))
       } yield ()
     }
 

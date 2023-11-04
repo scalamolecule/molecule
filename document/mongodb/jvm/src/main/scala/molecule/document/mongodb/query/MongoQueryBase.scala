@@ -29,10 +29,10 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
   var idField = false
 
   var path    = ""
-  val filters = new java.util.ArrayList[Bson]
+  val matches = new java.util.ArrayList[Bson]
 
-  var curFields     = new java.util.ArrayList[Bson]
-  var levelNsFields = List(List(curFields))
+  var curProjections = new java.util.ArrayList[Bson]
+  var levelNsFields  = List(List(curProjections))
 
   val group = new java.util.ArrayList[Bson]
   val limit = new java.util.ArrayList[Bson]
@@ -95,8 +95,8 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
     if (path.isEmpty) field else path.mkString(".") + "." + field
   }
 
-  final protected def addProjection(field: String): Unit = {
-    curFields.add(Projections.include(path + field))
+  final protected def addField(field: String): Unit = {
+    curProjections.add(Projections.include(path + field))
   }
 
   final protected def addCast(field: String, cast: BsonDocument => Any): Unit = {
