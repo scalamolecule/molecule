@@ -60,6 +60,7 @@ object AdhocJVM_mongodb extends TestSuite_mongodb {
         //        _ <- rawQuery("""{"collection": "Ns"}""", true)
 
         _ <- Ns.i(1).s("a").query.get.map(_ ==> List((1, "a")))
+
       } yield ()
     }
 

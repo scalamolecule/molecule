@@ -4,6 +4,7 @@ import java.net.URI
 import java.time._
 import java.util
 import java.util.{Date, UUID}
+import com.mongodb.MongoClientSettings
 import molecule.base.ast.{CardOne, CardSet, MetaAttr, MetaNs}
 import molecule.base.error.ModelError
 import molecule.document.mongodb.transaction.DataType_JVM_mongodb
@@ -141,7 +142,7 @@ trait BsonUtils extends DataType_JVM_mongodb {
     )
     val array = new BsonArray()
     pipeline.forEach { stage =>
-      array.add(stage.toBsonDocument)
+      array.add(stage.toBsonDocument(classOf[Bson], MongoClientSettings.getDefaultCodecRegistry))
     }
     doc.append("pipeline", array)
     doc.toJson(pretty)

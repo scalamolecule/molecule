@@ -1,6 +1,7 @@
 package molecule.document.mongodb.query
 
 import java.util
+import com.mongodb.MongoClientSettings
 import com.mongodb.client.model._
 import molecule.base.ast._
 import molecule.base.error.ModelError
@@ -10,16 +11,16 @@ import molecule.core.marshalling.ConnProxy
 import molecule.core.query.Model2QueryBase
 import molecule.core.util.ModelUtils
 import molecule.document.mongodb.query.casting._
-import org.bson.{BsonArray, BsonDocument}
+import org.bson._
 import org.bson.conversions.Bson
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 
 class Model2MongoQuery[Tpl](elements0: List[Element])
   extends Model2QueryBase
-    with ResolveRef
-    with CastNestedBranch_
-    with CastRow2Tpl_
+    //    with ResolveRef
+    //    with CastNestedBranch_
+    //    with CastRow2Tpl_
     //    with Nest[Tpl]
     //    with NestOpt[Tpl]
     with ModelUtils
@@ -54,7 +55,9 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
 
     val pipeline = new util.ArrayList[Bson]()
     def addStage(name: String, params: Bson): Boolean = {
-      pipeline.add(new BsonDocument().append(name, params.toBsonDocument))
+      // Add codec for MQL expressions
+      val doc = params.toBsonDocument(classOf[Bson], MongoClientSettings.getDefaultCodecRegistry)
+      pipeline.add(new BsonDocument().append(name, doc))
     }
 
     if (!matches.isEmpty) {
