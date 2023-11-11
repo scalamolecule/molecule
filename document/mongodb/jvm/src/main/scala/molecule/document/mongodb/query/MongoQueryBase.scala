@@ -9,6 +9,7 @@ import molecule.core.util.JavaConversions
 import molecule.document.mongodb.query.casting._
 import org.bson.{BsonDocument, BsonInt32}
 import org.bson.conversions.Bson
+import scala.annotation.tailrec
 import scala.collection.mutable
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 
@@ -31,29 +32,51 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
   var path    = ""
   val matches = new java.util.ArrayList[Bson]
 
-  var curProjections = new java.util.ArrayList[Bson]
-  var levelNsFields  = List(List(curProjections))
+  var projections      = new java.util.ArrayList[Bson]
+  var levelProjections = List(List(projections))
 
   val group = new java.util.ArrayList[Bson]
   val limit = new java.util.ArrayList[Bson]
   val sorts = new java.util.ArrayList[Bson]
 
-  var castss   = List(CastNs("", Nil))
-  var curCasts = List.empty[Cast]
+  var casts = ListBuffer( // nested levels
+    ListBuffer( // nss
+      (ListBuffer.empty[String], ListBuffer.empty[(String, BsonDocument => Any)]) // ns path -> (attribute, cast)
+    )
+  )
 
-  def root(castss: List[CastNs]): CastNs = {
-    castss match {
-      case child :: Nil           => child
-      case parent :: child :: Nil => parent.copy(casts = parent.casts :+ child)
-      case _                      =>
-        val child  = castss.last
-        val parent = castss.init.last
-        root(castss.drop(2) :+ parent.copy(casts = parent.casts :+ child))
+  def immutableCastss = casts.map(
+    _.toList.map {
+      case (path, casts) => (path.toList, casts.toList)
     }
+  ).toList
+
+  def printCasts(label: String = ""): Unit = {
+    println("------------ " + label)
+    immutableCastss.map(nss =>
+      nss.map {
+        case (path, casts) => s"$path -> ${casts.map(_._1)}"
+      }.mkString("List(\n  ", "\n  ", ")")
+    ).foreach(println)
   }
 
+  final protected def addCast(field: String, cast: BsonDocument => Any): Unit = {
+    val curNs = casts.last.last
+    curNs._2 += (field -> cast)
+    //    printCasts("ATTR " + field)
+  }
+
+
   def updatedCasts = {
-    root(castss.init :+ castss.last.copy(casts = curCasts))
+    //    println(castss.mkString(s"\n================= CASTSS\n", "\n---\n", ""))
+    //    println(curCasts.mkString(s"\n================= curCasts\n", "\n---\n", ""))
+
+    //    val res = root(castss.init :+ castss.last.copy(casts = curCasts))
+    //
+    //    //    println(res.casts.mkString(s"\n================= RESULT\n", "\n---\n", ""))
+    //    res
+
+    ???
   }
 
   // Used to lookup original type of aggregate attributes
@@ -96,12 +119,9 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
   }
 
   final protected def addField(field: String): Unit = {
-    curProjections.add(Projections.include(path + field))
+    projections.add(Projections.include(path + field))
   }
 
-  final protected def addCast(field: String, cast: BsonDocument => Any): Unit = {
-    curCasts = curCasts :+ CastAttr(field, cast)
-  }
 
   final protected def aritiesNested(): Unit = {
     val newLevel           = Nil

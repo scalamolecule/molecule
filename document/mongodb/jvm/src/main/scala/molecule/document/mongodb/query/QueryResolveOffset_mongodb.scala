@@ -40,8 +40,14 @@ case class QueryResolveOffset_mongodb[Tpl](
       println("")
     }
 
-    val tuples   = ListBuffer.empty[Tpl]
-    val bson2tpl = documentCaster(m2q.updatedCasts.casts)
+    val tuples = ListBuffer.empty[Tpl]
+    //    val casts  = m2q.updatedCasts.casts
+    //    casts.foreach(println)
+
+
+    //    val bson2tpl = documentCaster(m2q.updatedCasts.casts)
+
+    val bson2tpl = documentCaster(m2q.immutableCastss)
     bsonDocs.forEach { bsonDoc =>
       // Cast Bson document to entity tuple
       tuples += bson2tpl(bsonDoc).asInstanceOf[Tpl]

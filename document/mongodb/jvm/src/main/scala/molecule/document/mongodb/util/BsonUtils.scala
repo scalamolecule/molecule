@@ -4,13 +4,12 @@ import java.net.URI
 import java.time._
 import java.util
 import java.util.{Date, UUID}
-import com.mongodb.client.model.Aggregates
 import molecule.base.ast.{CardOne, CardSet, MetaAttr, MetaNs}
 import molecule.base.error.ModelError
 import molecule.document.mongodb.transaction.DataType_JVM_mongodb
+import org.bson._
 import org.bson.conversions.Bson
 import org.bson.json.JsonWriterSettings
-import org.bson._
 import org.bson.types.Decimal128
 
 trait BsonUtils extends DataType_JVM_mongodb {
@@ -133,39 +132,36 @@ trait BsonUtils extends DataType_JVM_mongodb {
     bson.toJson(pretty)
   }
 
-
   def pipeline2json(pipeline: util.ArrayList[Bson], optCol: Option[String] = None): String = {
-    val bson = new BsonDocument()
-    optCol.map(col => bson.put("collection", new BsonString(col)))
+    val doc = new BsonDocument()
+    optCol.fold(
+      throw ModelError("""Missing "collection": "<collection name>" in raw query json.""")
+    )(col =>
+      doc.append("collection", new BsonString(col))
+    )
+    val array = new BsonArray()
     pipeline.forEach { stage =>
-      val stagePair           = stage.toBsonDocument.entrySet().iterator().next()
-      val (stageName, params) = (stagePair.getKey, stagePair.getValue)
-      bson.put(stageName, params.asDocument())
+      array.add(stage.toBsonDocument)
     }
-    bson.toJson(pretty)
+    doc.append("pipeline", array)
+    doc.toJson(pretty)
   }
 
-
   def json2pipeline(json: String): (String, util.ArrayList[Bson]) = {
-    val curStages  = BsonDocument.parse(json).entrySet().iterator()
-    val pipeline   = new util.ArrayList[Bson]()
-    var collection = ""
-    while (curStages.hasNext) {
-      val stagePair           = curStages.next()
-      val (stageName, params) = (stagePair.getKey, stagePair.getValue)
-      stageName match {
-        case "collection" => collection = params.asString().getValue
-        case "$unwind"    => pipeline.add(Aggregates.unwind(params.asString.getValue))
-        case "$match"     => pipeline.add(Aggregates.`match`(params.asDocument()))
-        case "$project"   => pipeline.add(Aggregates.project(params.asDocument()))
-        case "$sort"      => pipeline.add(Aggregates.sort(params.asDocument()))
-        case "$group"     => pipeline.add(Aggregates.group(params.asDocument()))
-        case other        => throw ModelError("Unexpected field in raw query json: " + other)
-      }
+    val doc                   = BsonDocument.parse(json)
+    val collection: String    = doc.get("collection") match {
+      case null => throw ModelError("""Missing "collection": "<collection name>" in raw query json.""")
+      case col  => col.asString.getValue
     }
-    if (collection.isEmpty)
-      throw ModelError("""Missing "collection": "<collection name>" in raw query json.""")
-
+    val bsonArray : BsonArray = doc.get("pipeline") match {
+      case null  => throw ModelError("""Missing "pipeline": [ <stages...> ] in raw query json.""")
+      case array => array.asArray()
+    }
+    val pipeline              = new util.ArrayList[Bson]()
+    val it                    = bsonArray.iterator
+    while (it.hasNext) {
+      pipeline.add(it.next.asDocument)
+    }
     (collection, pipeline)
   }
 

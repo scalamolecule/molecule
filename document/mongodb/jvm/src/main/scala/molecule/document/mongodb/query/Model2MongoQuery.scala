@@ -10,7 +10,7 @@ import molecule.core.marshalling.ConnProxy
 import molecule.core.query.Model2QueryBase
 import molecule.core.util.ModelUtils
 import molecule.document.mongodb.query.casting._
-import org.bson.BsonArray
+import org.bson.{BsonArray, BsonDocument}
 import org.bson.conversions.Bson
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
@@ -49,19 +49,22 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
     resolve(elements2)
 
     if (!idField) {
-      curProjections.add(0, Projections.excludeId())
+      projections.add(0, Projections.excludeId())
     }
 
     val pipeline = new util.ArrayList[Bson]()
+    def addStage(name: String, params: Bson): Boolean = {
+      pipeline.add(new BsonDocument().append(name, params.toBsonDocument))
+    }
 
     if (!matches.isEmpty) {
-      pipeline.add(Aggregates.`match`(Filters.and(matches)))
+      addStage("$match", Filters.and(matches))
     }
-    if (!curProjections.isEmpty) {
-      pipeline.add(Aggregates.project(Projections.fields(curProjections)))
+    if (!projections.isEmpty) {
+      addStage("$project", Projections.fields(projections))
     }
     if (!sorts.isEmpty) {
-      pipeline.add(Aggregates.sort(Sorts.orderBy(sorts)))
+      addStage("$sort", Sorts.orderBy(sorts))
     }
 
     (getInitialNonGenericNs(elements2), pipeline)
@@ -319,14 +322,13 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
     }
     path = path + refAttr + "."
 
-    //    println(castss.mkString("\n=================================================================\n", "\n---\n", ""))
-    castss = castss.init :+ castss.last.copy(casts = curCasts)
-    //    println(castss.mkString("\n================= 1\n", "\n---\n", ""))
-    castss = castss :+ CastNs(refAttr, Nil)
-    //    println(castss.mkString("\n================= 2\n", "\n---\n", ""))
-    curCasts = Nil
+    // Continue from ref namespace
+    val nss     = casts.last
+    val curPath = nss.last
+    nss += ((ListBuffer.empty[String].addAll(curPath._1.toList :+ refAttr), ListBuffer.empty[(String, BsonDocument => Any)]))
+    //    printCasts("REF " + refAttr)
 
-    resolveRef(ref)
+
     resolve(tail)
   }
 
@@ -349,16 +351,10 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
     }
 
     // Step back to previous namespace
-    castss = castss.init :+ castss.last.copy(casts = curCasts)
-
-    //    println(castss.mkString("\n##########################################################################\n", "\n---\n", ""))
-    val curChild      = castss.last
-    val parent        = castss.init.last
-    val updatedParent = parent.copy(casts = parent.casts :+ curChild)
-    castss = castss.dropRight(2) :+ updatedParent
-    //    println(castss.mkString("\n#################### 2\n", "\n---\n", ""))
-
-    curCasts = updatedParent.casts
+    val nss     = casts.last
+    val curPath = nss.last
+    nss += ((ListBuffer.empty[String].addAll(curPath._1.toList.init), ListBuffer.empty[(String, BsonDocument => Any)]))
+    //    printCasts("BACKREF")
 
     resolve(tail)
   }
@@ -372,14 +368,19 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
     validateRefNs(ref, nestedElements)
     val Ref(_, refAttr, refNs, _, _) = ref
 
-    // No empty nested arrays
+    // No empty nested arrays when asking for mandatory nested data
     matches.add(Filters.ne(refAttr, new BsonArray()))
 
     path = path + refAttr + "."
 
-    // Initiate first nested namespace (simply continue using this linear list of nss)
-    castss = castss.init :+ castss.last.copy(casts = curCasts) :+ CastNs(refAttr, Nil, true)
-    curCasts = Nil
+    // Initiate nested namespace
+    casts += ListBuffer(
+      (
+        ListBuffer.empty[String].addAll(casts.last.last._1.toList :+ refAttr),
+        ListBuffer.empty[(String, BsonDocument => Any)]
+      )
+    )
+    //    printCasts("NEST " + refAttr)
 
     resolve(nestedElements)
     resolve(tail)
@@ -399,9 +400,14 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
 
     path = path + refAttr + "."
 
-    // Initiate first nested namespace (simply continue using this linear list of nss)
-    castss = castss.init :+ castss.last.copy(casts = curCasts) :+ CastNs(refAttr, Nil, true)
-    curCasts = Nil
+    // Initiate (optional) nested namespace
+    casts += ListBuffer(
+      (
+        ListBuffer.empty[String].addAll(casts.last.last._1.toList :+ refAttr),
+        ListBuffer.empty[(String, BsonDocument => Any)]
+      )
+    )
+    //    printCasts("OPT NEST " + refAttr)
 
     resolve(nestedElements)
     resolve(tail)

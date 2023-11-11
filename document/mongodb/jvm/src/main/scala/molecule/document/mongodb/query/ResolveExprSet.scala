@@ -117,7 +117,7 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
     //    }
 
     val field = attr.attr
-    curProjections.add(Projections.include(field))
+    projections.add(Projections.include(field))
     addCast(field, resSet.castSet(field))
 
     attr.filterAttr.fold {
@@ -169,7 +169,7 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
     res: ResSet[T],
   ): Unit = {
     val field = attr.attr
-    curProjections.add(Projections.include(field))
+    projections.add(Projections.include(field))
     addCast(field, res.castOptSet(field))
     attr.op match {
       case V     => ()

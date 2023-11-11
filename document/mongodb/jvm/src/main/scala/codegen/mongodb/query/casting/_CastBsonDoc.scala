@@ -16,33 +16,70 @@ object _CastBsonDoc extends MongoGenBase("CastBsonDoc", "/query/casting") {
        |
        |trait $fileName_ {
        |
+       |  private type NsCasts = (List[String], List[(String, BsonDocument => Any)])
+       |  private type NssCasts = List[NsCasts]
+       |  private type Casts = List[NssCasts]
+       |
+       |  private val curLevelDocs = mutable.Map.empty[List[String], BsonDocument]
+       |
        |  @tailrec
-       |  final private def resolveCastss(
-       |    castss: List[List[BsonDocument => Any]],
-       |    acc: List[BsonDocument => Any]
+       |  private def castLevel(
+       |    acc: List[BsonDocument => Any],
+       |    levelCasts: NssCasts,
+       |    nestedCasts: Casts,
+       |    isNested: Boolean
        |  ): List[BsonDocument => Any] = {
-       |    castss match {
-       |      case (cast :: casts) :: Nil => resolveCastss(casts :: Nil, acc :+ cast)
+       |    levelCasts match {
+       |      case (_ :: Nil, casts) :: refs if isNested =>
+       |        castLevel(acc ++ casts.map(_._2), refs, nestedCasts, isNested)
        |
-       |      case (cast :: Nil) :: nested =>
-       |        val nestedDocCaster: BsonDocument => Any = documentCaster(nested)
-       |        val resolveNested  : BsonDocument => Any = (outerDoc: BsonDocument) => {
-       |          cast(outerDoc).asInstanceOf[BsonArray].toArray.toList.map {
-       |            case nestedDoc: BsonDocument => nestedDocCaster(nestedDoc)
-       |            case other                   => throw new Exception("Unexpected nested Bson type: " + other)
-       |          }
-       |        }
-       |        acc :+ resolveNested
+       |      case (Nil, casts) :: refs =>
+       |        castLevel(acc ++ casts.map(_._2), refs, nestedCasts, isNested)
        |
-       |      case (cast :: casts) :: nested => resolveCastss(casts :: nested, acc :+ cast)
+       |      case (path, casts) :: refs if nestedCasts.isEmpty =>
+       |        val curPath = if(isNested) path.tail else path
+       |        castLevel(acc ++ castRefNs(curPath, casts), refs, nestedCasts, isNested)
        |
-       |      case _ => acc
+       |      case Nil if nestedCasts.nonEmpty =>
+       |        curLevelDocs.clear()
+       |        acc :+ nestedCast(nestedCasts)
+       |
+       |      case Nil => acc
        |    }
        |  }
        |
-       |  final def documentCaster(castss: List[List[BsonDocument => Any]]): BsonDocument => Any = {
-       |    val casters = resolveCastss(castss, Nil)
-       |    castss.length match {
+       |  private def castRefNs(path: List[String], casts: List[(String, BsonDocument => Any)]): List[BsonDocument => Any] = {
+       |    casts.map { case (attr, cast) =>
+       |      (outerDoc: BsonDocument) => {
+       |        // Maybe this could be done in a smarter way with recursion only..
+       |        val doc = curLevelDocs.getOrElse(path,
+       |          path.foldLeft(outerDoc) {
+       |            case (acc, ns) => acc.get(ns).asDocument()
+       |          }
+       |        )
+       |        curLevelDocs(path) = doc
+       |        cast(doc)
+       |      }
+       |    }
+       |  }
+       |
+       |  private def nestedCast(nested: Casts): BsonDocument => Any = {
+       |    val refAttr    = nested.head.head._1.head
+       |    val innerCasts = documentCaster(nested, true)
+       |    (doc: BsonDocument) => {
+       |      val inner = ListBuffer.empty[Any]
+       |      doc.get(refAttr).asArray().forEach(nestedRow =>
+       |        inner += innerCasts(
+       |          nestedRow.asDocument()
+       |        )
+       |      )
+       |      inner.toList
+       |    }
+       |  }
+       |
+       |  final def documentCaster(casts: Casts, isNested: Boolean = false): BsonDocument => Any = {
+       |    val casters = castLevel(Nil, casts.head, casts.tail, isNested)
+       |    casters.length match {
        |      $resolveX
        |    }
        |  }

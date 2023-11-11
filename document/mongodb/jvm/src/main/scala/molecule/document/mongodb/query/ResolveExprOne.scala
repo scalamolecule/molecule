@@ -275,7 +275,7 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne { self: MongoQueryBase 
   private def take(field: String, n: Int): Unit = {
     if (n > 0) {
       // Empty result string discarded
-      curProjections.add(Projections.computed(field, current().getString(field).substr(0, n)))
+      projections.add(Projections.computed(field, current().getString(field).substr(0, n)))
     } else {
       // Take nothing
       matches.add(Filters.eq("_id", -1))
@@ -286,7 +286,7 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne { self: MongoQueryBase 
     if (n > 0) {
       // Skip if trying to drop more than string length
       matches.add(Filters.expr(current().getString(field).length().gt(of(n))))
-      curProjections.add(Projections.computed(field, current().getString(field).substr(n, Int.MaxValue)))
+      projections.add(Projections.computed(field, current().getString(field).substr(n, Int.MaxValue)))
     } else {
       // Drop nothing
     }
@@ -294,7 +294,7 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne { self: MongoQueryBase 
 
   private def takeRight(field: String, n: Int): Unit = {
     if (n > 0) {
-      curProjections.add(
+      projections.add(
         Projections.computed(
           field,
           current().getString(field).substr(
@@ -313,7 +313,7 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne { self: MongoQueryBase 
     if (n > 0) {
       // Skip if trying to drop more than string length
       matches.add(Filters.expr(current().getString(field).length().gt(of(n))))
-      curProjections.add(
+      projections.add(
         Projections.computed(
           field,
           current().getString(field).substr(
@@ -336,7 +336,7 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne { self: MongoQueryBase 
       val length = until - from
       // Skip if from is greater than string length
       matches.add(Filters.expr(current().getString(field).length().gt(of(from))))
-      curProjections.add(Projections.computed(field, current().getString(field).substr(from, length)))
+      projections.add(Projections.computed(field, current().getString(field).substr(from, length)))
     } else {
       // Drop nothing
     }
