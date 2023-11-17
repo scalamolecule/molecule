@@ -9,7 +9,7 @@ import org.bson._
 import org.bson.conversions.Bson
 import org.bson.types.{Decimal128, ObjectId}
 
-trait LambdasOne {
+trait LambdasOne extends LambdasSet {
 
   protected case class ResOne[T](
     cast: String => BsonDocument => T,
@@ -20,31 +20,32 @@ trait LambdasOne {
     gt: (String, T) => Bson,
     le: (String, T) => Bson,
     ge: (String, T) => Bson,
+    castSet: String => BsonDocument => Set[T],
   )
 
-  protected lazy val resId             = ResOne(castID, castOptString, eqID, neqID, ltID, gtID, leID, geID)
-  protected lazy val resString         = ResOne(castString, castOptString, eqString, neqString, ltString, gtString, leString, geString)
-  protected lazy val resInt            = ResOne(castInt, castOptInt, eqInt, neqInt, ltInt, gtInt, leInt, geInt)
-  protected lazy val resLong           = ResOne(castLong, castOptLong, eqLong, neqLong, ltLong, gtLong, leLong, geLong)
-  protected lazy val resFloat          = ResOne(castFloat, castOptFloat, eqFloat, neqFloat, ltFloat, gtFloat, leFloat, geFloat)
-  protected lazy val resDouble         = ResOne(castDouble, castOptDouble, eqDouble, neqDouble, ltDouble, gtDouble, leDouble, geDouble)
-  protected lazy val resBoolean        = ResOne(castBoolean, castOptBoolean, eqBoolean, neqBoolean, ltBoolean, gtBoolean, leBoolean, geBoolean)
-  protected lazy val resBigInt         = ResOne(castBigInt, castOptBigInt, eqBigInt, neqBigInt, ltBigInt, gtBigInt, leBigInt, geBigInt)
-  protected lazy val resBigDecimal     = ResOne(castBigDecimal, castOptBigDecimal, eqBigDecimal, neqBigDecimal, ltBigDecimal, gtBigDecimal, leBigDecimal, geBigDecimal)
-  protected lazy val resDate           = ResOne(castDate, castOptDate, eqDate, neqDate, ltDate, gtDate, leDate, geDate)
-  protected lazy val resDuration       = ResOne(castDuration, castOptDuration, eqDuration, neqDuration, ltDuration, gtDuration, leDuration, geDuration)
-  protected lazy val resInstant        = ResOne(castInstant, castOptInstant, eqInstant, neqInstant, ltInstant, gtInstant, leInstant, geInstant)
-  protected lazy val resLocalDate      = ResOne(castLocalDate, castOptLocalDate, eqLocalDate, neqLocalDate, ltLocalDate, gtLocalDate, leLocalDate, geLocalDate)
-  protected lazy val resLocalTime      = ResOne(castLocalTime, castOptLocalTime, eqLocalTime, neqLocalTime, ltLocalTime, gtLocalTime, leLocalTime, geLocalTime)
-  protected lazy val resLocalDateTime  = ResOne(castLocalDateTime, castOptLocalDateTime, eqLocalDateTime, neqLocalDateTime, ltLocalDateTime, gtLocalDateTime, leLocalDateTime, geLocalDateTime)
-  protected lazy val resOffsetTime     = ResOne(castOffsetTime, castOptOffsetTime, eqOffsetTime, neqOffsetTime, ltOffsetTime, gtOffsetTime, leOffsetTime, geOffsetTime)
-  protected lazy val resOffsetDateTime = ResOne(castOffsetDateTime, castOptOffsetDateTime, eqOffsetDateTime, neqOffsetDateTime, ltOffsetDateTime, gtOffsetDateTime, leOffsetDateTime, geOffsetDateTime)
-  protected lazy val resZonedDateTime  = ResOne(castZonedDateTime, castOptZonedDateTime, eqZonedDateTime, neqZonedDateTime, ltZonedDateTime, gtZonedDateTime, leZonedDateTime, geZonedDateTime)
-  protected lazy val resUUID           = ResOne(castUUID, castOptUUID, eqUUID, neqUUID, ltUUID, gtUUID, leUUID, geUUID)
-  protected lazy val resURI            = ResOne(castURI, castOptURI, eqURI, neqURI, ltURI, gtURI, leURI, geURI)
-  protected lazy val resByte           = ResOne(castByte, castOptByte, eqByte, neqByte, ltByte, gtByte, leByte, geByte)
-  protected lazy val resShort          = ResOne(castShort, castOptShort, eqShort, neqShort, ltShort, gtShort, leShort, geShort)
-  protected lazy val resChar           = ResOne(castChar, castOptChar, eqChar, neqChar, ltChar, gtChar, leChar, geChar)
+  protected lazy val resId             = ResOne(castID, castOptString, eqID, neqID, ltID, gtID, leID, geID, castSetString)
+  protected lazy val resString         = ResOne(castString, castOptString, eqString, neqString, ltString, gtString, leString, geString, castSetString)
+  protected lazy val resInt            = ResOne(castInt, castOptInt, eqInt, neqInt, ltInt, gtInt, leInt, geInt, castSetInt)
+  protected lazy val resLong           = ResOne(castLong, castOptLong, eqLong, neqLong, ltLong, gtLong, leLong, geLong, castSetLong)
+  protected lazy val resFloat          = ResOne(castFloat, castOptFloat, eqFloat, neqFloat, ltFloat, gtFloat, leFloat, geFloat, castSetFloat)
+  protected lazy val resDouble         = ResOne(castDouble, castOptDouble, eqDouble, neqDouble, ltDouble, gtDouble, leDouble, geDouble, castSetDouble)
+  protected lazy val resBoolean        = ResOne(castBoolean, castOptBoolean, eqBoolean, neqBoolean, ltBoolean, gtBoolean, leBoolean, geBoolean, castSetBoolean)
+  protected lazy val resBigInt         = ResOne(castBigInt, castOptBigInt, eqBigInt, neqBigInt, ltBigInt, gtBigInt, leBigInt, geBigInt, castSetBigInt)
+  protected lazy val resBigDecimal     = ResOne(castBigDecimal, castOptBigDecimal, eqBigDecimal, neqBigDecimal, ltBigDecimal, gtBigDecimal, leBigDecimal, geBigDecimal, castSetBigDecimal)
+  protected lazy val resDate           = ResOne(castDate, castOptDate, eqDate, neqDate, ltDate, gtDate, leDate, geDate, castSetDate)
+  protected lazy val resDuration       = ResOne(castDuration, castOptDuration, eqDuration, neqDuration, ltDuration, gtDuration, leDuration, geDuration, castSetDuration)
+  protected lazy val resInstant        = ResOne(castInstant, castOptInstant, eqInstant, neqInstant, ltInstant, gtInstant, leInstant, geInstant, castSetInstant)
+  protected lazy val resLocalDate      = ResOne(castLocalDate, castOptLocalDate, eqLocalDate, neqLocalDate, ltLocalDate, gtLocalDate, leLocalDate, geLocalDate, castSetLocalDate)
+  protected lazy val resLocalTime      = ResOne(castLocalTime, castOptLocalTime, eqLocalTime, neqLocalTime, ltLocalTime, gtLocalTime, leLocalTime, geLocalTime, castSetLocalTime)
+  protected lazy val resLocalDateTime  = ResOne(castLocalDateTime, castOptLocalDateTime, eqLocalDateTime, neqLocalDateTime, ltLocalDateTime, gtLocalDateTime, leLocalDateTime, geLocalDateTime, castSetLocalDateTime)
+  protected lazy val resOffsetTime     = ResOne(castOffsetTime, castOptOffsetTime, eqOffsetTime, neqOffsetTime, ltOffsetTime, gtOffsetTime, leOffsetTime, geOffsetTime, castSetOffsetTime)
+  protected lazy val resOffsetDateTime = ResOne(castOffsetDateTime, castOptOffsetDateTime, eqOffsetDateTime, neqOffsetDateTime, ltOffsetDateTime, gtOffsetDateTime, leOffsetDateTime, geOffsetDateTime, castSetOffsetDateTime)
+  protected lazy val resZonedDateTime  = ResOne(castZonedDateTime, castOptZonedDateTime, eqZonedDateTime, neqZonedDateTime, ltZonedDateTime, gtZonedDateTime, leZonedDateTime, geZonedDateTime, castSetZonedDateTime)
+  protected lazy val resUUID           = ResOne(castUUID, castOptUUID, eqUUID, neqUUID, ltUUID, gtUUID, leUUID, geUUID, castSetUUID)
+  protected lazy val resURI            = ResOne(castURI, castOptURI, eqURI, neqURI, ltURI, gtURI, leURI, geURI, castSetURI)
+  protected lazy val resByte           = ResOne(castByte, castOptByte, eqByte, neqByte, ltByte, gtByte, leByte, geByte, castSetByte)
+  protected lazy val resShort          = ResOne(castShort, castOptShort, eqShort, neqShort, ltShort, gtShort, leShort, geShort, castSetShort)
+  protected lazy val resChar           = ResOne(castChar, castOptChar, eqChar, neqChar, ltChar, gtChar, leChar, geChar, castSetChar)
 
 
   protected lazy val castID             = (field: String) => (doc: BsonDocument) => doc.get(field).asObjectId.getValue.toString

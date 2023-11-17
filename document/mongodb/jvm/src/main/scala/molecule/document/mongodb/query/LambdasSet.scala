@@ -7,7 +7,7 @@ import molecule.core.util.JavaConversions
 import org.bson._
 import org.bson.types.Decimal128
 
-trait LambdasSet extends LambdasBase with JavaConversions { self: MongoQueryBase =>
+trait LambdasSet extends LambdasBase with JavaConversions {
 
   //  private lazy val sql2setString        : (Row, Int) => Set[String]         = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueString)
   //  private lazy val sql2setInt           : (Row, Int) => Set[Int]            = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueInt)

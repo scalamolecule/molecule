@@ -63,9 +63,35 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
     if (!matches.isEmpty) {
       addStage("$match", Filters.and(matches))
     }
+
+    if (group.isEmpty) {
+      // Prefix fields to allow multiple appearances
+      val addFieldsDoc = new BsonDocument()
+      groupByFields.foreach { case (field, indexField) =>
+        addFieldsDoc.put(indexField, new BsonString("$" + field))
+      }
+      pipeline.add(new BsonDocument().append("$addFields", addFieldsDoc))
+    } else {
+      val groupByFieldsDoc = new BsonDocument()
+      groupByFields.foreach { case (field, indexField) =>
+        groupByFieldsDoc.put(indexField, new BsonString("$" + field))
+      }
+      val groupDoc = new BsonDocument()
+      groupDoc.append("_id", groupByFieldsDoc)
+      group.foreach { case (field, bson) => groupDoc.put(field, bson) }
+      pipeline.add(new BsonDocument().append("$group", groupDoc))
+
+      val addFieldsDoc = new BsonDocument()
+      groupByFields.foreach { case (field, indexField) =>
+        addFieldsDoc.put(indexField, new BsonString("$_id." + indexField))
+      }
+      pipeline.add(new BsonDocument().append("$addFields", addFieldsDoc))
+    }
+
     if (!projections.isEmpty) {
       addStage("$project", Projections.fields(projections))
     }
+
     if (!sorts.isEmpty) {
       addStage("$sort", Sorts.orderBy(sorts))
     }

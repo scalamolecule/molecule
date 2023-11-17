@@ -9,12 +9,15 @@ import molecule.core.query.ResolveExpr
 import org.bson._
 import org.bson.conversions.Bson
 
-trait ResolveExprOne extends ResolveExpr with LambdasOne { self: MongoQueryBase =>
+trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self: MongoQueryBase =>
+
+  var indexField = ""
 
   override protected def resolveAttrOneMan(attr: AttrOneMan): Unit = {
     aritiesAttr()
+    fieldIndex += 1
     attr match {
-//      case at: AttrOneManID             => man(attr, at.vs, resId) // refs??
+      //      case at: AttrOneManID             => man(attr, at.vs, resId) // refs??
       case at: AttrOneManID             => man(attr, at.vs, resString) // refs??
       case at: AttrOneManString         => man(attr, at.vs, resString)
       case at: AttrOneManInt            => man(attr, at.vs, resInt)
@@ -74,6 +77,7 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne { self: MongoQueryBase 
   override protected def resolveAttrOneOpt(attr: AttrOneOpt): Unit = {
     aritiesAttr()
     hasOptAttr = true // to avoid redundant None's
+    fieldIndex += 1
     attr match {
       case at: AttrOneOptID             => opt(attr, at.vs, resString)
       case at: AttrOneOptString         => opt(attr, at.vs, resString)
@@ -115,9 +119,17 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne { self: MongoQueryBase 
 
   private def man[T](attr: Attr, args: Seq[T], res: ResOne[T]): Unit = {
     val field = attr.attr
-    addField(field)
-    addCast(field, res.cast(field))
-    addSort(attr, field)
+    indexField = fieldIndex + "_" + field
+    groupByFields += field -> indexField
+    //    addField(field)
+    //    addCast(field, res.cast(field))
+    //    addSort(attr, field)
+    addField(indexField)
+    addCast(indexField, res.cast(indexField))
+    addSort(attr, indexField)
+
+    //    groupByFields += field
+
 
     attr.filterAttr.fold(
       expr(field, attr.op, args, res)
@@ -138,9 +150,14 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne { self: MongoQueryBase 
 
   private def opt[T](attr: Attr, optArgs: Option[Seq[T]], res: ResOne[T]): Unit = {
     val field = attr.attr
+    indexField = fieldIndex + "_" + field
+    groupByFields += field -> indexField
+
     addField(field)
     addCast(field, res.castOpt(field))
     addSort(attr, field)
+
+
     val filter = attr.op match {
       case V     => Filters.empty() // selected field can already be a value or null
       case Eq    => optEqual(field, optArgs, res)
@@ -235,7 +252,7 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne { self: MongoQueryBase 
       Filters.eq(field, new BsonNull())
     } {
       case Nil =>
-//        res.eq(field, null.asInstanceOf[T])
+        //        res.eq(field, null.asInstanceOf[T])
         Filters.eq("_id", -1)
       case vs  => equal(field, vs, res)
     }
@@ -383,136 +400,121 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne { self: MongoQueryBase 
     lazy val n = optN.getOrElse(0)
     // Replace find/casting with aggregate function/cast
     select -= field
-    //      fn match {
-    //        case "distinct" =>
-    //          select += s"ARRAY_AGG(DISTINCT $field)"
-    //          groupByCols -= field
-    //          aggregate = true
-    //          replaceCast(res.array2set)
-    //
-    //        case "min" =>
-    //          select += s"MIN($field)"
-    //          if (field.endsWith(".id")) {
-    //            groupByCols -= field
-    //            aggregate = true
-    //          }
-    //
-    //        case "mins" =>
-    //          select +=
-    //            s"""ARRAY_SLICE(
-    //               |    ARRAY_AGG(DISTINCT $field order by $field ASC),
-    //               |    1,
-    //               |    LEAST(
-    //               |      $n,
-    //               |      ARRAY_LENGTH(ARRAY_AGG(DISTINCT $field))
-    //               |    )
-    //               |  )""".stripMargin
-    //          groupByCols -= field
-    //          aggregate = true
-    //          replaceCast(res.array2set)
-    //
-    //        case "max" =>
-    //          select += s"MAX($field)"
-    //          if (field.endsWith(".id")) {
-    //            groupByCols -= field
-    //            aggregate = true
-    //          }
-    //
-    //        case "maxs" =>
-    //          select +=
-    //            s"""ARRAY_SLICE(
-    //               |    ARRAY_AGG(DISTINCT $field order by $field DESC),
-    //               |    1,
-    //               |    LEAST(
-    //               |      $n,
-    //               |      ARRAY_LENGTH(ARRAY_AGG(DISTINCT $field))
-    //               |    )
-    //               |  )""".stripMargin
-    //          groupByCols -= field
-    //          aggregate = true
-    //          replaceCast(res.array2set)
-    //
-    //        case "rand" =>
-    //          distinct = false
-    //          select += field
-    //          orderBy += ((level, -1, "RAND()", ""))
-    //          hardLimit = 1
-    //
-    //        case "rands" =>
-    //          select +=
-    //            s"""ARRAY_SLICE(
-    //               |    ARRAY_AGG($field order by RAND()),
-    //               |    1,
-    //               |    LEAST(
-    //               |      $n,
-    //               |      ARRAY_LENGTH(ARRAY_AGG($field))
-    //               |    )
-    //               |  )""".stripMargin
-    //          groupByCols -= field
-    //          aggregate = true
-    //          replaceCast(res.array2set)
-    //
-    //        case "sample" =>
-    //          distinct = false
-    //          select += field
-    //          orderBy += ((level, -1, "RAND()", ""))
-    //          hardLimit = 1
-    //
-    //        case "samples" =>
-    //          select +=
-    //            s"""ARRAY_SLICE(
-    //               |    ARRAY_AGG(DISTINCT $field order by RAND()),
-    //               |    1,
-    //               |    LEAST(
-    //               |      $n,
-    //               |      ARRAY_LENGTH(ARRAY_AGG(DISTINCT $field))
-    //               |    )
-    //               |  )""".stripMargin
-    //          groupByCols -= field
-    //          aggregate = true
-    //          replaceCast(res.array2set)
-    //
-    //        case "count" =>
-    //          distinct = false
-    //          groupByCols -= field
-    //          aggregate = true
-    //          selectWithOrder(field, "COUNT", "")
-    //          replaceCast(toInt)
-    //
-    //        case "countDistinct" =>
-    //          distinct = false
-    //          groupByCols -= field
-    //          aggregate = true
-    //          selectWithOrder(field, "COUNT")
-    //          replaceCast(toInt)
-    //
-    //        case "sum" =>
-    //          groupByCols -= field
-    //          aggregate = true
-    //          selectWithOrder(field, "SUM")
-    //
-    //        case "median" =>
-    //          groupByCols -= field
-    //          aggregate = true
-    //          selectWithOrder(field, "MEDIAN")
-    //
-    //        case "avg" =>
-    //          groupByCols -= field
-    //          aggregate = true
-    //          selectWithOrder(field, "AVG")
-    //
-    //        case "variance" =>
-    //          groupByCols -= field
-    //          aggregate = true
-    //          selectWithOrder(field, "VAR_POP")
-    //
-    //        case "stddev" =>
-    //          groupByCols -= field
-    //          aggregate = true
-    //          selectWithOrder(field, "STDDEV_POP")
-    //
-    //        case other => unexpectedKw(other)
-    //      }
+    groupByFields -= (field -> indexField)
+
+    fn match {
+      case "distinct" =>
+        group += ((indexField, new BsonDocument().append("$addToSet", new BsonString("$" + field))))
+        replaceCast(indexField, res.castSet(indexField))
+
+      case "min" =>
+        group += ((indexField, new BsonDocument().append("$min", new BsonString("$" + field))))
+
+      case "mins" =>
+        group += ((indexField,
+          new BsonDocument().append("$minN",
+            new BsonDocument()
+              .append("input", new BsonString("$" + field))
+              .append("n", new BsonInt32(n))
+          )))
+        replaceCast(indexField, res.castSet(indexField))
+
+      case "max" =>
+        group += ((indexField, new BsonDocument().append("$max", new BsonString("$" + field))))
+
+      case "maxs" =>
+        group += ((indexField,
+          new BsonDocument().append("$maxN",
+            new BsonDocument()
+              .append("input", new BsonString("$" + field))
+              .append("n", new BsonInt32(n))
+          )))
+        replaceCast(indexField, res.castSet(indexField))
+
+
+      case "rand" =>
+//        distinct = false
+//        select += field
+//        orderBy += ((level, -1, "RAND()", ""))
+//        hardLimit = 1
+        group += ((indexField, new BsonDocument().append("$min", new BsonString("$" + field))))
+
+
+      //      case "rands" =>
+      //        select +=
+      //          s"""ARRAY_SLICE(
+      //             |    ARRAY_AGG($field order by RAND()),
+      //             |    1,
+      //             |    LEAST(
+      //             |      $n,
+      //             |      ARRAY_LENGTH(ARRAY_AGG($field))
+      //             |    )
+      //             |  )""".stripMargin
+      //        groupByCols -= field
+      //        aggregate = true
+      //        replaceCast(res.array2set)
+      //
+      //      case "sample" =>
+      //        distinct = false
+      //        select += field
+      //        orderBy += ((level, -1, "RAND()", ""))
+      //        hardLimit = 1
+      //
+      //      case "samples" =>
+      //        select +=
+      //          s"""ARRAY_SLICE(
+      //             |    ARRAY_AGG(DISTINCT $field order by RAND()),
+      //             |    1,
+      //             |    LEAST(
+      //             |      $n,
+      //             |      ARRAY_LENGTH(ARRAY_AGG(DISTINCT $field))
+      //             |    )
+      //             |  )""".stripMargin
+      //        groupByCols -= field
+      //        aggregate = true
+      //        replaceCast(res.array2set)
+      //
+      //      case "count" =>
+      //        distinct = false
+      //        groupByCols -= field
+      //        aggregate = true
+      //        selectWithOrder(field, "COUNT", "")
+      //        replaceCast(toInt)
+      //
+      //      case "countDistinct" =>
+      //        distinct = false
+      //        groupByCols -= field
+      //        aggregate = true
+      //        selectWithOrder(field, "COUNT")
+      //        replaceCast(toInt)
+      //
+      //      case "sum" =>
+      //        groupByCols -= field
+      //        aggregate = true
+      //        selectWithOrder(field, "SUM")
+      //
+      //      case "median" =>
+      //        groupByCols -= field
+      //        aggregate = true
+      //        selectWithOrder(field, "MEDIAN")
+      //
+      //      case "avg" =>
+      //        groupByCols -= field
+      //        aggregate = true
+      //        selectWithOrder(field, "AVG")
+      //
+      //      case "variance" =>
+      //        groupByCols -= field
+      //        aggregate = true
+      //        selectWithOrder(field, "VAR_POP")
+      //
+      //      case "stddev" =>
+      //        groupByCols -= field
+      //        aggregate = true
+      //        selectWithOrder(field, "STDDEV_POP")
+
+      case other => unexpectedKw(other)
+    }
   }
 
   private def selectWithOrder(

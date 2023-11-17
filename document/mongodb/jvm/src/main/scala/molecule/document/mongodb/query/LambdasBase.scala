@@ -6,7 +6,7 @@ import java.util.{Date, UUID}
 import molecule.base.util.BaseHelpers
 import molecule.core.util.AggrUtils
 
-trait LambdasBase extends BaseHelpers with AggrUtils { self: MongoQueryBase =>
+trait LambdasBase extends BaseHelpers with AggrUtils with MongoQueryBase {
 
   protected lazy val one2sqlString        : String => String         = (v: String) => s"'${v.replace("'", "''")}'"
   protected lazy val one2sqlInt           : Int => String            = (v: Int) => s"$v"

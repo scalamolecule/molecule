@@ -1,15 +1,14 @@
 package molecule.document.mongodb.query
 
+import java.util
 import com.mongodb.client.model.Projections
 import molecule.base.ast.Card
 import molecule.base.error._
 import molecule.base.util.BaseHelpers
 import molecule.boilerplate.ast.Model._
 import molecule.core.util.JavaConversions
-import molecule.document.mongodb.query.casting._
-import org.bson.{BsonDocument, BsonInt32}
 import org.bson.conversions.Bson
-import scala.annotation.tailrec
+import org.bson.{BsonDocument, BsonValue}
 import scala.collection.mutable
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 
@@ -30,14 +29,19 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
   var idField = false
 
   var path    = ""
-  val matches = new java.util.ArrayList[Bson]
+  val matches = new util.ArrayList[Bson]
 
-  var projections      = new java.util.ArrayList[Bson]
+  var projections      = new util.ArrayList[Bson]
+  var projections2     = ListBuffer.empty[String]
   var levelProjections = List(List(projections))
 
-  val group = new java.util.ArrayList[Bson]
-  val limit = new java.util.ArrayList[Bson]
-  val sorts = new java.util.ArrayList[Bson]
+  final protected val groupByFields = new mutable.LinkedHashSet[(String, String)]
+
+  var fieldIndex = 0
+  val group      = ListBuffer.empty[(String, BsonValue)]
+
+  val limit = new util.ArrayList[Bson]
+  val sorts = new util.ArrayList[Bson]
 
   var casts = ListBuffer( // nested levels
     ListBuffer( // nss
@@ -61,8 +65,7 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
   }
 
   final protected def addCast(field: String, cast: BsonDocument => Any): Unit = {
-    val curNs = casts.last.last
-    curNs._2 += (field -> cast)
+    casts.last.last._2 += (field -> cast)
     //    printCasts("ATTR " + field)
   }
 
@@ -79,24 +82,41 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
     ???
   }
 
+  //  final protected def addCast(field: String, cast: BsonDocument => Any): Unit = {
+  //    castssOLD = castssOLD.init :+ (castssOLD.last :+ cast)
+  //    curCasts = curCasts :+ CastAttr(field, cast)
+  //
+  //    //    println("  CAST ")
+  //    curCasts.foreach(c => println("  --- " + c))
+  //  }
+
+  final protected def removeLastCast(): Unit = {
+    val x: ListBuffer[(String, BsonDocument => Any)] = casts.last.last._2
+    x.remove(x.size - 1)
+  }
+
+  final protected def replaceCast(field: String, cast: BsonDocument => Any): Unit = {
+    removeLastCast()
+    addCast(field, cast)
+  }
+
   // Used to lookup original type of aggregate attributes
   final protected var attrMap = Map.empty[String, (Card, String, Seq[String])]
 
   // Main query
-  final protected val select      = new ListBuffer[String]
-  final protected var distinct    = true
-  final protected var from        = ""
-  final protected val joins       = new ListBuffer[(String, String, String, String)]
-  final protected var tempTables  = List.empty[String]
-  final protected val notNull     = new ListBuffer[String]
-  final protected val where       = new ListBuffer[(String, String)]
-  final protected val groupBy     = new mutable.LinkedHashSet[String]
-  final protected val having      = new mutable.LinkedHashSet[String]
-  final protected var orderBy     = new ListBuffer[(Int, Int, String, String)]
-  final protected var aggregate   = false
-  final protected val groupByCols = new mutable.LinkedHashSet[String]
-  final protected val in          = new ArrayBuffer[String]
-  final protected var hardLimit   = 0
+  final protected val select     = new ListBuffer[String]
+  final protected var distinct   = true
+  final protected var from       = ""
+  final protected val joins      = new ListBuffer[(String, String, String, String)]
+  final protected var tempTables = List.empty[String]
+  final protected val notNull    = new ListBuffer[String]
+  final protected val where      = new ListBuffer[(String, String)]
+  final protected val groupBy    = new mutable.LinkedHashSet[String]
+  final protected val having     = new mutable.LinkedHashSet[String]
+  final protected var orderBy    = new ListBuffer[(Int, Int, String, String)]
+  final protected var aggregate  = false
+  final protected val in         = new ArrayBuffer[String]
+  final protected var hardLimit  = 0
 
   // Input args and cast lambdas
   final           var aritiess    = List(List.empty[List[Int]])

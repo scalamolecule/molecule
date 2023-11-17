@@ -167,33 +167,82 @@ trait BsonUtils extends DataType_JVM_mongodb {
   }
 
 
+  private lazy val castID            : BsonValue => Any = (v: BsonValue) => v.asString.getValue
+  private lazy val castString        : BsonValue => Any = (v: BsonValue) => v.asString.getValue
+  private lazy val castInt           : BsonValue => Any = (v: BsonValue) => v.asInt32.getValue
+  private lazy val castLong          : BsonValue => Any = (v: BsonValue) => v.asInt64.getValue
+  private lazy val castFloat         : BsonValue => Any = (v: BsonValue) => v.asDouble.getValue.toFloat
+  private lazy val castDouble        : BsonValue => Any = (v: BsonValue) => v.asDouble.getValue
+  private lazy val castBoolean       : BsonValue => Any = (v: BsonValue) => v.asBoolean.getValue
+  private lazy val castBigInt        : BsonValue => Any = (v: BsonValue) => BigInt(v.asDecimal128.getValue.bigDecimalValue.toBigInteger)
+  private lazy val castBigDecimal    : BsonValue => Any = (v: BsonValue) => BigDecimal(v.asDecimal128.getValue.bigDecimalValue)
+  private lazy val castDate          : BsonValue => Any = (v: BsonValue) => new Date(v.asDateTime.getValue)
+  private lazy val castDuration      : BsonValue => Any = (v: BsonValue) => Duration.parse(v.asString.getValue)
+  private lazy val castInstant       : BsonValue => Any = (v: BsonValue) => Instant.parse(v.asString.getValue)
+  private lazy val castLocalDate     : BsonValue => Any = (v: BsonValue) => LocalDate.parse(v.asString.getValue)
+  private lazy val castLocalTime     : BsonValue => Any = (v: BsonValue) => LocalTime.parse(v.asString.getValue)
+  private lazy val castLocalDateTime : BsonValue => Any = (v: BsonValue) => LocalDateTime.parse(v.asString.getValue)
+  private lazy val castOffsetTime    : BsonValue => Any = (v: BsonValue) => OffsetTime.parse(v.asString.getValue)
+  private lazy val castOffsetDateTime: BsonValue => Any = (v: BsonValue) => OffsetDateTime.parse(v.asString.getValue)
+  private lazy val castZonedDateTime : BsonValue => Any = (v: BsonValue) => ZonedDateTime.parse(v.asString.getValue)
+  private lazy val castUUID          : BsonValue => Any = (v: BsonValue) => UUID.fromString(v.asString.getValue)
+  private lazy val castURI           : BsonValue => Any = (v: BsonValue) => new URI(v.asString.getValue)
+  private lazy val castByte          : BsonValue => Any = (v: BsonValue) => v.asInt32.getValue.toByte
+  private lazy val castShort         : BsonValue => Any = (v: BsonValue) => v.asInt32.getValue.toShort
+  private lazy val castChar          : BsonValue => Any = (v: BsonValue) => v.asString.getValue.charAt(0)
+
+
+  private lazy val castAnyID            : BsonValue => Any = (v: BsonValue) => if (v.isArray) {var set = Set.empty[Any]; v.asArray.forEach(v => set += castID(v)); set} else castID(v)
+  private lazy val castAnyString        : BsonValue => Any = (v: BsonValue) => if (v.isArray) {var set = Set.empty[Any]; v.asArray.forEach(v => set += castString(v)); set} else castString(v)
+  private lazy val castAnyInt           : BsonValue => Any = (v: BsonValue) => if (v.isArray) {var set = Set.empty[Any]; v.asArray.forEach(v => set += castInt(v)); set} else castInt(v)
+  private lazy val castAnyLong          : BsonValue => Any = (v: BsonValue) => if (v.isArray) {var set = Set.empty[Any]; v.asArray.forEach(v => set += castLong(v)); set} else castLong(v)
+  private lazy val castAnyFloat         : BsonValue => Any = (v: BsonValue) => if (v.isArray) {var set = Set.empty[Any]; v.asArray.forEach(v => set += castFloat(v)); set} else castFloat(v)
+  private lazy val castAnyDouble        : BsonValue => Any = (v: BsonValue) => if (v.isArray) {var set = Set.empty[Any]; v.asArray.forEach(v => set += castDouble(v)); set} else castDouble(v)
+  private lazy val castAnyBoolean       : BsonValue => Any = (v: BsonValue) => if (v.isArray) {var set = Set.empty[Any]; v.asArray.forEach(v => set += castBoolean(v)); set} else castBoolean(v)
+  private lazy val castAnyBigInt        : BsonValue => Any = (v: BsonValue) => if (v.isArray) {var set = Set.empty[Any]; v.asArray.forEach(v => set += castBigInt(v)); set} else castBigInt(v)
+  private lazy val castAnyBigDecimal    : BsonValue => Any = (v: BsonValue) => if (v.isArray) {var set = Set.empty[Any]; v.asArray.forEach(v => set += castBigDecimal(v)); set} else castBigDecimal(v)
+  private lazy val castAnyDate          : BsonValue => Any = (v: BsonValue) => if (v.isArray) {var set = Set.empty[Any]; v.asArray.forEach(v => set += castDate(v)); set} else castDate(v)
+  private lazy val castAnyDuration      : BsonValue => Any = (v: BsonValue) => if (v.isArray) {var set = Set.empty[Any]; v.asArray.forEach(v => set += castDuration(v)); set} else castDuration(v)
+  private lazy val castAnyInstant       : BsonValue => Any = (v: BsonValue) => if (v.isArray) {var set = Set.empty[Any]; v.asArray.forEach(v => set += castInstant(v)); set} else castInstant(v)
+  private lazy val castAnyLocalDate     : BsonValue => Any = (v: BsonValue) => if (v.isArray) {var set = Set.empty[Any]; v.asArray.forEach(v => set += castLocalDate(v)); set} else castLocalDate(v)
+  private lazy val castAnyLocalTime     : BsonValue => Any = (v: BsonValue) => if (v.isArray) {var set = Set.empty[Any]; v.asArray.forEach(v => set += castLocalTime(v)); set} else castLocalTime(v)
+  private lazy val castAnyLocalDateTime : BsonValue => Any = (v: BsonValue) => if (v.isArray) {var set = Set.empty[Any]; v.asArray.forEach(v => set += castLocalDateTime(v)); set} else castLocalDateTime(v)
+  private lazy val castAnyOffsetTime    : BsonValue => Any = (v: BsonValue) => if (v.isArray) {var set = Set.empty[Any]; v.asArray.forEach(v => set += castOffsetTime(v)); set} else castOffsetTime(v)
+  private lazy val castAnyOffsetDateTime: BsonValue => Any = (v: BsonValue) => if (v.isArray) {var set = Set.empty[Any]; v.asArray.forEach(v => set += castOffsetDateTime(v)); set} else castOffsetDateTime(v)
+  private lazy val castAnyZonedDateTime : BsonValue => Any = (v: BsonValue) => if (v.isArray) {var set = Set.empty[Any]; v.asArray.forEach(v => set += castZonedDateTime(v)); set} else castZonedDateTime(v)
+  private lazy val castAnyUUID          : BsonValue => Any = (v: BsonValue) => if (v.isArray) {var set = Set.empty[Any]; v.asArray.forEach(v => set += castUUID(v)); set} else castUUID(v)
+  private lazy val castAnyURI           : BsonValue => Any = (v: BsonValue) => if (v.isArray) {var set = Set.empty[Any]; v.asArray.forEach(v => set += castURI(v)); set} else castURI(v)
+  private lazy val castAnyByte          : BsonValue => Any = (v: BsonValue) => if (v.isArray) {var set = Set.empty[Any]; v.asArray.forEach(v => set += castByte(v)); set} else castByte(v)
+  private lazy val castAnyShort         : BsonValue => Any = (v: BsonValue) => if (v.isArray) {var set = Set.empty[Any]; v.asArray.forEach(v => set += castShort(v)); set} else castShort(v)
+  private lazy val castAnyChar          : BsonValue => Any = (v: BsonValue) => if (v.isArray) {var set = Set.empty[Any]; v.asArray.forEach(v => set += castChar(v)); set} else castChar(v)
+
   def caster(metaNs: Option[MetaNs]): (String, BsonValue) => Any = {
     val casts = metaNs.fold(Map.empty[String, BsonValue => Any]) { metaNs =>
       metaNs.attrs.collect {
         case MetaAttr(attr, CardOne, "ID", Some(_), _, _, _, _, _, _)       => attr -> ((v: BsonValue) => v.asDocument.toString)
-        case MetaAttr(attr, CardOne, "ID", _, _, _, _, _, _, _)             => attr -> ((v: BsonValue) => v.asString.getValue)
-        case MetaAttr(attr, CardOne, "String", _, _, _, _, _, _, _)         => attr -> ((v: BsonValue) => v.asString.getValue)
-        case MetaAttr(attr, CardOne, "Int", _, _, _, _, _, _, _)            => attr -> ((v: BsonValue) => v.asInt32.getValue)
-        case MetaAttr(attr, CardOne, "Long", _, _, _, _, _, _, _)           => attr -> ((v: BsonValue) => v.asInt64.getValue)
-        case MetaAttr(attr, CardOne, "Float", _, _, _, _, _, _, _)          => attr -> ((v: BsonValue) => v.asDouble.getValue.toFloat)
-        case MetaAttr(attr, CardOne, "Double", _, _, _, _, _, _, _)         => attr -> ((v: BsonValue) => v.asDouble.getValue)
-        case MetaAttr(attr, CardOne, "Boolean", _, _, _, _, _, _, _)        => attr -> ((v: BsonValue) => v.asBoolean.getValue)
-        case MetaAttr(attr, CardOne, "BigInt", _, _, _, _, _, _, _)         => attr -> ((v: BsonValue) => BigInt(v.asDecimal128.getValue.bigDecimalValue.toBigInteger))
-        case MetaAttr(attr, CardOne, "BigDecimal", _, _, _, _, _, _, _)     => attr -> ((v: BsonValue) => BigDecimal(v.asDecimal128.getValue.bigDecimalValue))
-        case MetaAttr(attr, CardOne, "Date", _, _, _, _, _, _, _)           => attr -> ((v: BsonValue) => new Date(v.asDateTime.getValue))
-        case MetaAttr(attr, CardOne, "Duration", _, _, _, _, _, _, _)       => attr -> ((v: BsonValue) => Duration.parse(v.asString.getValue))
-        case MetaAttr(attr, CardOne, "Instant", _, _, _, _, _, _, _)        => attr -> ((v: BsonValue) => Instant.parse(v.asString.getValue))
-        case MetaAttr(attr, CardOne, "LocalDate", _, _, _, _, _, _, _)      => attr -> ((v: BsonValue) => LocalDate.parse(v.asString.getValue))
-        case MetaAttr(attr, CardOne, "LocalTime", _, _, _, _, _, _, _)      => attr -> ((v: BsonValue) => LocalTime.parse(v.asString.getValue))
-        case MetaAttr(attr, CardOne, "LocalDateTime", _, _, _, _, _, _, _)  => attr -> ((v: BsonValue) => LocalDateTime.parse(v.asString.getValue))
-        case MetaAttr(attr, CardOne, "OffsetTime", _, _, _, _, _, _, _)     => attr -> ((v: BsonValue) => OffsetTime.parse(v.asString.getValue))
-        case MetaAttr(attr, CardOne, "OffsetDateTime", _, _, _, _, _, _, _) => attr -> ((v: BsonValue) => OffsetDateTime.parse(v.asString.getValue))
-        case MetaAttr(attr, CardOne, "ZonedDateTime", _, _, _, _, _, _, _)  => attr -> ((v: BsonValue) => ZonedDateTime.parse(v.asString.getValue))
-        case MetaAttr(attr, CardOne, "UUID", _, _, _, _, _, _, _)           => attr -> ((v: BsonValue) => UUID.fromString(v.asString.getValue))
-        case MetaAttr(attr, CardOne, "URI", _, _, _, _, _, _, _)            => attr -> ((v: BsonValue) => new URI(v.asString.getValue))
-        case MetaAttr(attr, CardOne, "Byte", _, _, _, _, _, _, _)           => attr -> ((v: BsonValue) => v.asInt32.getValue.toByte)
-        case MetaAttr(attr, CardOne, "Short", _, _, _, _, _, _, _)          => attr -> ((v: BsonValue) => v.asInt32.getValue.toShort)
-        case MetaAttr(attr, CardOne, "Char", _, _, _, _, _, _, _)           => attr -> ((v: BsonValue) => v.asString.getValue.charAt(0))
+        case MetaAttr(attr, CardOne, "ID", _, _, _, _, _, _, _)             => attr -> ((v: BsonValue) => castAnyID(v))
+        case MetaAttr(attr, CardOne, "String", _, _, _, _, _, _, _)         => attr -> ((v: BsonValue) => castAnyString(v))
+        case MetaAttr(attr, CardOne, "Int", _, _, _, _, _, _, _)            => attr -> ((v: BsonValue) => castAnyInt(v))
+        case MetaAttr(attr, CardOne, "Long", _, _, _, _, _, _, _)           => attr -> ((v: BsonValue) => castAnyLong(v))
+        case MetaAttr(attr, CardOne, "Float", _, _, _, _, _, _, _)          => attr -> ((v: BsonValue) => castAnyFloat(v))
+        case MetaAttr(attr, CardOne, "Double", _, _, _, _, _, _, _)         => attr -> ((v: BsonValue) => castAnyDouble(v))
+        case MetaAttr(attr, CardOne, "Boolean", _, _, _, _, _, _, _)        => attr -> ((v: BsonValue) => castAnyBoolean(v))
+        case MetaAttr(attr, CardOne, "BigInt", _, _, _, _, _, _, _)         => attr -> ((v: BsonValue) => castAnyBigInt(v))
+        case MetaAttr(attr, CardOne, "BigDecimal", _, _, _, _, _, _, _)     => attr -> ((v: BsonValue) => castAnyBigDecimal(v))
+        case MetaAttr(attr, CardOne, "Date", _, _, _, _, _, _, _)           => attr -> ((v: BsonValue) => castAnyDate(v))
+        case MetaAttr(attr, CardOne, "Duration", _, _, _, _, _, _, _)       => attr -> ((v: BsonValue) => castAnyDuration(v))
+        case MetaAttr(attr, CardOne, "Instant", _, _, _, _, _, _, _)        => attr -> ((v: BsonValue) => castAnyInstant(v))
+        case MetaAttr(attr, CardOne, "LocalDate", _, _, _, _, _, _, _)      => attr -> ((v: BsonValue) => castAnyLocalDate(v))
+        case MetaAttr(attr, CardOne, "LocalTime", _, _, _, _, _, _, _)      => attr -> ((v: BsonValue) => castAnyLocalTime(v))
+        case MetaAttr(attr, CardOne, "LocalDateTime", _, _, _, _, _, _, _)  => attr -> ((v: BsonValue) => castAnyLocalDateTime(v))
+        case MetaAttr(attr, CardOne, "OffsetTime", _, _, _, _, _, _, _)     => attr -> ((v: BsonValue) => castAnyOffsetTime(v))
+        case MetaAttr(attr, CardOne, "OffsetDateTime", _, _, _, _, _, _, _) => attr -> ((v: BsonValue) => castAnyOffsetDateTime(v))
+        case MetaAttr(attr, CardOne, "ZonedDateTime", _, _, _, _, _, _, _)  => attr -> ((v: BsonValue) => castAnyZonedDateTime(v))
+        case MetaAttr(attr, CardOne, "UUID", _, _, _, _, _, _, _)           => attr -> ((v: BsonValue) => castAnyUUID(v))
+        case MetaAttr(attr, CardOne, "URI", _, _, _, _, _, _, _)            => attr -> ((v: BsonValue) => castAnyURI(v))
+        case MetaAttr(attr, CardOne, "Byte", _, _, _, _, _, _, _)           => attr -> ((v: BsonValue) => castAnyByte(v))
+        case MetaAttr(attr, CardOne, "Short", _, _, _, _, _, _, _)          => attr -> ((v: BsonValue) => castAnyShort(v))
+        case MetaAttr(attr, CardOne, "Char", _, _, _, _, _, _, _)           => attr -> ((v: BsonValue) => castAnyChar(v))
 
         case MetaAttr(attr, CardSet, "ID", _, _, _, _, _, _, _)             => attr -> {
           var set = Set.empty[String]
