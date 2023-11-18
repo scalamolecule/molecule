@@ -21,7 +21,7 @@ trait AggrOne_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, int3),
         )).transact
 
-        _ <- Ns.i.int.a1.query.get.map(_ ==> List(
+        _ <- Ns.i.int.a1.query.i.get.map(_ ==> List(
           (1, int1),
           (2, int2), // 2 rows coalesced
           (2, int3),
@@ -52,10 +52,40 @@ trait AggrOne_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         ).transact
 
         _ <- Ns.int(min).query.get.map(_ ==> List(int1))
+        _ <- Ns.int(max).query.get.map(_ ==> List(int6))
+        _ <- Ns.int(min).int(max).query.get.map(_ ==> List((int1, int6)))
+
+        _ <- Ns.i.a1.int(min).query.get.map(_ ==> List(
+          (1, int1),
+          (2, int4)
+        ))
+
+        _ <- Ns.i.a1.int(max).query.get.map(_ ==> List(
+          (1, int3),
+          (2, int6)
+        ))
+
+        _ <- Ns.i.a1.int(min).int(max).query.get.map(_ ==> List(
+          (1, int1, int3),
+          (2, int4, int6)
+        ))
+      } yield ()
+    }
+
+    "min/max n" - types { implicit conn =>
+      for {
+        _ <- Ns.i.int.insert(
+          (1, int1),
+          (1, int2),
+          (1, int3),
+          (2, int4),
+          (2, int5),
+          (2, int6),
+        ).transact
+
         _ <- Ns.int(min(1)).query.get.map(_ ==> List(Set(int1)))
         _ <- Ns.int(min(2)).query.get.map(_ ==> List(Set(int1, int2)))
 
-        _ <- Ns.int(max).query.get.map(_ ==> List(int6))
         _ <- Ns.int(max(1)).query.get.map(_ ==> List(Set(int6)))
         _ <- Ns.int(max(2)).query.get.map(_ ==> List(Set(int5, int6)))
 
@@ -82,6 +112,13 @@ trait AggrOne_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.int.insert(List(int1, int2, int3)).transact
         all = Set(int1, int2, int3, int4)
         _ <- Ns.int(rand).query.get.map(res => all.contains(res.head) ==> true)
+      } yield ()
+    }
+
+    "rand n" - types { implicit conn =>
+      for {
+        _ <- Ns.int.insert(List(int1, int2, int3)).transact
+        all = Set(int1, int2, int3, int4)
         _ <- Ns.int(rand(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
         _ <- Ns.int(rand(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
       } yield ()
@@ -93,13 +130,20 @@ trait AggrOne_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.int.insert(List(int1, int2, int3)).transact
         all = Set(int1, int2, int3, int4)
         _ <- Ns.int(sample).query.get.map(res => all.contains(res.head) ==> true)
+      } yield ()
+    }
+
+    "sample n" - types { implicit futConn =>
+      for {
+        _ <- Ns.int.insert(List(int1, int2, int3)).transact
+        all = Set(int1, int2, int3, int4)
         _ <- Ns.int(sample(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
         _ <- Ns.int(sample(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
       } yield ()
     }
 
 
-    "count, countDistinct" - types { implicit conn =>
+    "count" - types { implicit conn =>
       for {
         _ <- Ns.i.int.insert(List(
           (1, int1),
@@ -108,16 +152,36 @@ trait AggrOne_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, int3),
         )).transact
 
-        _ <- Ns.i(count).query.get.map(_ ==> List(4))
-        _ <- Ns.i(countDistinct).query.get.map(_ ==> List(2))
-
         _ <- Ns.int(count).query.get.map(_ ==> List(4))
-        _ <- Ns.int(countDistinct).query.get.map(_ ==> List(3))
-
         _ <- Ns.i.a1.int(count).query.get.map(_ ==> List(
           (1, 1),
           (2, 3)
         ))
+
+        _ <- Ns.i.Ref.int.insert(List(
+          (1, int1),
+          (2, int2),
+          (2, int2),
+          (2, int3),
+        )).transact
+
+        _ <- Ns.i.a1.Ref.int(count).query.get.map(_ ==> List(
+          (1, 1),
+          (2, 3)
+        ))
+      } yield ()
+    }
+
+    "count distinct" - types { implicit conn =>
+      for {
+        _ <- Ns.i.int.insert(List(
+          (1, int1),
+          (2, int2),
+          (2, int2),
+          (2, int3),
+        )).transact
+
+        _ <- Ns.int(countDistinct).query.get.map(_ ==> List(3))
         _ <- Ns.i.a1.int(countDistinct).query.get.map(_ ==> List(
           (1, 1),
           (2, 2)

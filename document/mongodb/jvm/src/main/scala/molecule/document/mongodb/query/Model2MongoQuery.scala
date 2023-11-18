@@ -60,32 +60,100 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
       pipeline.add(new BsonDocument().append(name, doc))
     }
 
+    if (sampleSize > 0) {
+      pipeline.add(
+        new BsonDocument().append("$sample",
+          new BsonDocument().append("size", new BsonInt32(sampleSize)))
+      )
+    }
+
     if (!matches.isEmpty) {
       addStage("$match", Filters.and(matches))
     }
 
-    if (group.isEmpty) {
+    if (groupExprs.isEmpty) {
       // Prefix fields to allow multiple appearances
       val addFieldsDoc = new BsonDocument()
-      groupByFields.foreach { case (field, indexField) =>
+      groupFields.foreach { case (field, indexField) =>
         addFieldsDoc.put(indexField, new BsonString("$" + field))
       }
       pipeline.add(new BsonDocument().append("$addFields", addFieldsDoc))
-    } else {
+
+    } else if (preGroupByFields.nonEmpty) {
+      // pre-$group
+      val preGroupByFieldsDoc = new BsonDocument()
+      groupFields.++(preGroupByFields).foreach { case (field, indexField) =>
+        preGroupByFieldsDoc.put(indexField, new BsonString("$" + field))
+      }
+      val preGroupDoc = new BsonDocument()
+      preGroupDoc.append("_id", preGroupByFieldsDoc)
+      pipeline.add(new BsonDocument().append("$group", preGroupDoc))
+
+      // $group
       val groupByFieldsDoc = new BsonDocument()
-      groupByFields.foreach { case (field, indexField) =>
+      groupFields.foreach { case (field, indexField) =>
+        groupByFieldsDoc.put(indexField, new BsonString("$_id." + indexField))
+      }
+      val groupExprsDoc = new BsonDocument()
+      groupExprsDoc.append("_id", groupByFieldsDoc)
+      groupExprs.foreach { case (field, bson) => groupExprsDoc.put(field, bson) }
+      pipeline.add(new BsonDocument().append("$group", groupExprsDoc))
+
+      // $addFields
+      if (groupFields.nonEmpty) {
+        val addFieldsDoc = new BsonDocument()
+        groupFields.foreach { case (field, indexField) =>
+          addFieldsDoc.put(indexField, new BsonString("$_id." + indexField))
+        }
+        pipeline.add(new BsonDocument().append("$addFields", addFieldsDoc))
+      }
+
+      //      if (addFields.nonEmpty) {
+      //        val addFieldsDoc = new BsonDocument()
+      //        addFields.foreach { case (indexField, expr) =>
+      //          addFieldsDoc.put(indexField, expr)
+      //        }
+      //        pipeline.add(new BsonDocument().append("$addFields", addFieldsDoc))
+      //      }
+
+    } else {
+      // $group
+      val groupByFieldsDoc = new BsonDocument()
+      groupFields.foreach { case (field, indexField) =>
         groupByFieldsDoc.put(indexField, new BsonString("$" + field))
       }
-      val groupDoc = new BsonDocument()
-      groupDoc.append("_id", groupByFieldsDoc)
-      group.foreach { case (field, bson) => groupDoc.put(field, bson) }
-      pipeline.add(new BsonDocument().append("$group", groupDoc))
+      val groupExprsDoc = new BsonDocument()
+      groupExprsDoc.append("_id", groupByFieldsDoc)
+      groupExprs.foreach { case (field, bson) => groupExprsDoc.put(field, bson) }
+      pipeline.add(new BsonDocument().append("$group", groupExprsDoc))
 
-      val addFieldsDoc = new BsonDocument()
-      groupByFields.foreach { case (field, indexField) =>
-        addFieldsDoc.put(indexField, new BsonString("$_id." + indexField))
+      // $addFields
+      if (groupFields.nonEmpty) {
+        val addFieldsDoc = new BsonDocument()
+        groupFields.foreach { case (field, indexField) =>
+          addFieldsDoc.put(indexField, new BsonString("$_id." + indexField))
+        }
+        pipeline.add(new BsonDocument().append("$addFields", addFieldsDoc))
       }
-      pipeline.add(new BsonDocument().append("$addFields", addFieldsDoc))
+
+      //      if (addFields.nonEmpty) {
+      //        val addFieldsDoc = new BsonDocument()
+      //        addFields.foreach { case (indexField, expr) =>
+      //          addFieldsDoc.put(indexField, expr)
+      //        }
+      //        pipeline.add(new BsonDocument().append("$addFields", addFieldsDoc))
+      //      }
+    }
+
+    if (countFields.nonEmpty) {
+      val countFieldsDoc      = new BsonDocument()
+      val (field, indexField) = countFields.head
+      pipeline.add(new BsonDocument().append("$count", new BsonString(indexField)))
+
+      //      countFields.foreach { case (field, indexField) =>
+      //        countFieldsDoc.put(indexField, new BsonString("$" + field))
+      //      }
+      //      pipeline.add(new BsonDocument().append("$count", countFieldsDoc))
     }
 
     if (!projections.isEmpty) {

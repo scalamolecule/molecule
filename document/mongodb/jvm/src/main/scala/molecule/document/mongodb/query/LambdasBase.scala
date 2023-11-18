@@ -5,6 +5,7 @@ import java.time._
 import java.util.{Date, UUID}
 import molecule.base.util.BaseHelpers
 import molecule.core.util.AggrUtils
+import org.bson.BsonDocument
 
 trait LambdasBase extends BaseHelpers with AggrUtils with MongoQueryBase {
 
@@ -32,7 +33,7 @@ trait LambdasBase extends BaseHelpers with AggrUtils with MongoQueryBase {
   protected lazy val one2sqlChar          : Char => String           = (v: Char) => s"'${v.toString}'"
 
 
-  lazy val toInt: (Row, Int) => Int = (row: Row, paramIndex: Int) => ??? //row.getLong(paramIndex).toInt
+//  lazy val toInt: BsonDocument => Int = (doc: BsonDocument) =>
 
   protected def sqlArray2set[T](row: Row, paramIndex: Int, getValue: Row => T): Set[T] = {
     //    val array = row.getArray(paramIndex)

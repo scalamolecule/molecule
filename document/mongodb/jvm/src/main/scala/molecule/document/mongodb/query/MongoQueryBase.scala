@@ -35,10 +35,17 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
   var projections2     = ListBuffer.empty[String]
   var levelProjections = List(List(projections))
 
-  final protected val groupByFields = new mutable.LinkedHashSet[(String, String)]
+  final protected val preGroupByFields = ListBuffer.empty[(String, String)]
+  final protected val groupFields      = ListBuffer.empty[(String, String)]
+  final protected val groupExprs       = ListBuffer.empty[(String, BsonValue)]
+  final protected val countFields      = ListBuffer.empty[(String, String)]
 
+  var sampleSize = 0
   var fieldIndex = 0
-  val group      = ListBuffer.empty[(String, BsonValue)]
+  //  var addFields  = List.empty[(String, BsonValue)]
+
+  //  val addFieldsDoc = new BsonDocument()
+
 
   val limit = new util.ArrayList[Bson]
   val sorts = new util.ArrayList[Bson]
@@ -48,6 +55,8 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
       (ListBuffer.empty[String], ListBuffer.empty[(String, BsonDocument => Any)]) // ns path -> (attribute, cast)
     )
   )
+
+  def path2 = path.replace('.', '_')
 
   def immutableCastss = casts.map(
     _.toList.map {
@@ -134,12 +143,18 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
   final protected val availableAttrs      = mutable.Set.empty[String]
 
 
-  def fullField(field: String) = {
-    if (path.isEmpty) field else path.mkString(".") + "." + field
-  }
+//  def fullField(field: String) = {
+////    if (path.isEmpty) field else path.mkString(".") + "." + field
+//    if (path.isEmpty) field else path.mkString(".") + "." + field
+//  }
 
   final protected def addField(field: String): Unit = {
-    projections.add(Projections.include(path + field))
+//    projections.add(Projections.include(path + field))
+    projections.add(Projections.include(field))
+  }
+  final protected def removeField(field: String): Unit = {
+//    projections.add(Projections.include(path + field))
+    projections.remove(Projections.include(path + field))
   }
 
 

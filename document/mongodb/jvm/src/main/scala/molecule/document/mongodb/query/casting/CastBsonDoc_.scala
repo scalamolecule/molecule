@@ -44,10 +44,16 @@ trait CastBsonDoc_ {
   private def castRefNs(path: List[String], casts: List[(String, BsonDocument => Any)]): List[BsonDocument => Any] = {
     casts.map { case (attr, cast) =>
       (outerDoc: BsonDocument) => {
+
+        println(outerDoc)
+
         // Maybe this could be done in a smarter way with recursion only..
         val doc = curLevelDocs.getOrElse(path,
           path.foldLeft(outerDoc) {
-            case (acc, ns) => acc.get(ns).asDocument()
+            case (acc, ns) =>
+              println(s"------ $ns ")
+
+              acc.get(ns).asDocument()
           }
         )
         curLevelDocs(path) = doc

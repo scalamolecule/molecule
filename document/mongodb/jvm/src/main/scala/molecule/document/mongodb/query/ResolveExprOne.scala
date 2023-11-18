@@ -120,7 +120,20 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
   private def man[T](attr: Attr, args: Seq[T], res: ResOne[T]): Unit = {
     val field = attr.attr
     indexField = fieldIndex + "_" + field
-    groupByFields += field -> indexField
+//    indexField = path2 + fieldIndex + "_" + field
+
+//    groupFields += field -> indexField
+
+//    println(field)
+//    println(path)
+
+    groupFields += (path + field) -> indexField
+//    groupFields += (path2 + field) -> indexField
+
+    //    addFieldsDoc.put(indexField, new BsonString("$" + field))
+    //    addFieldsDoc.put(indexField, new BsonString("$_id." + indexField))
+
+//    addFields = addFields :+ indexField -> new BsonString("$_id." + indexField)
     //    addField(field)
     //    addCast(field, res.cast(field))
     //    addSort(attr, field)
@@ -151,7 +164,12 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
   private def opt[T](attr: Attr, optArgs: Option[Seq[T]], res: ResOne[T]): Unit = {
     val field = attr.attr
     indexField = fieldIndex + "_" + field
-    groupByFields += field -> indexField
+
+    groupFields += field -> indexField
+    //    addFieldsDoc.put(indexField, new BsonString("$" + field))
+    //    addFieldsDoc.put(indexField, new BsonString("$_id." + field))
+
+//    addFields = addFields :+ indexField -> new BsonString("$_id." + indexField)
 
     addField(field)
     addCast(field, res.castOpt(field))
@@ -293,7 +311,10 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
   private def take(field: String, n: Int): Unit = {
     if (n > 0) {
       // Empty result string discarded
-      projections.add(Projections.computed(field, current().getString(field).substr(0, n)))
+//      projections.add(Projections.computed(field, current().getString(field).substr(0, n)))
+      projections.add(
+        Projections.computed(indexField, current().getString(indexField).substr(0, n))
+      )
     } else {
       // Take nothing
       matches.add(Filters.eq("_id", -1))
@@ -304,7 +325,10 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
     if (n > 0) {
       // Skip if trying to drop more than string length
       matches.add(Filters.expr(current().getString(field).length().gt(of(n))))
-      projections.add(Projections.computed(field, current().getString(field).substr(n, Int.MaxValue)))
+//      projections.add(Projections.computed(field, current().getString(field).substr(n, Int.MaxValue)))
+      projections.add(
+        Projections.computed(indexField, current().getString(indexField).substr(n, Int.MaxValue))
+      )
     } else {
       // Drop nothing
     }
@@ -312,11 +336,20 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
 
   private def takeRight(field: String, n: Int): Unit = {
     if (n > 0) {
+//      projections.add(
+//        Projections.computed(
+//          field,
+//          current().getString(field).substr(
+//            current().getString(field).length().subtract(n).max(of(0)),
+//            of(Int.MaxValue)
+//          )
+//        )
+//      )
       projections.add(
         Projections.computed(
-          field,
-          current().getString(field).substr(
-            current().getString(field).length().subtract(n).max(of(0)),
+          indexField,
+          current().getString(indexField).substr(
+            current().getString(indexField).length().subtract(n).max(of(0)),
             of(Int.MaxValue)
           )
         )
@@ -331,12 +364,21 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
     if (n > 0) {
       // Skip if trying to drop more than string length
       matches.add(Filters.expr(current().getString(field).length().gt(of(n))))
+//      projections.add(
+//        Projections.computed(
+//          field,
+//          current().getString(field).substr(
+//            of(0),
+//            current().getString(field).length().subtract(n).max(of(0))
+//          )
+//        )
+//      )
       projections.add(
         Projections.computed(
-          field,
-          current().getString(field).substr(
+          indexField,
+          current().getString(indexField).substr(
             of(0),
-            current().getString(field).length().subtract(n).max(of(0))
+            current().getString(indexField).length().subtract(n).max(of(0))
           )
         )
       )
@@ -354,7 +396,8 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
       val length = until - from
       // Skip if from is greater than string length
       matches.add(Filters.expr(current().getString(field).length().gt(of(from))))
-      projections.add(Projections.computed(field, current().getString(field).substr(from, length)))
+//      projections.add(Projections.computed(field, current().getString(field).substr(from, length)))
+      projections.add(Projections.computed(indexField, current().getString(indexField).substr(from, length)))
     } else {
       // Drop nothing
     }
@@ -400,18 +443,25 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
     lazy val n = optN.getOrElse(0)
     // Replace find/casting with aggregate function/cast
     select -= field
-    groupByFields -= (field -> indexField)
+
+//    println(s"---------------  $field   $indexField")
+//    groupFields.foreach(println)
+
+//    groupFields -= (field -> indexField)
+    groupFields -= (field -> indexField)
+
+    //    addFields += (field -> indexField)
 
     fn match {
       case "distinct" =>
-        group += ((indexField, new BsonDocument().append("$addToSet", new BsonString("$" + field))))
+        groupExprs += ((indexField, new BsonDocument().append("$addToSet", new BsonString("$" + field))))
         replaceCast(indexField, res.castSet(indexField))
 
       case "min" =>
-        group += ((indexField, new BsonDocument().append("$min", new BsonString("$" + field))))
+        groupExprs += ((indexField, new BsonDocument().append("$min", new BsonString("$" + field))))
 
       case "mins" =>
-        group += ((indexField,
+        groupExprs += ((indexField,
           new BsonDocument().append("$minN",
             new BsonDocument()
               .append("input", new BsonString("$" + field))
@@ -420,10 +470,10 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
         replaceCast(indexField, res.castSet(indexField))
 
       case "max" =>
-        group += ((indexField, new BsonDocument().append("$max", new BsonString("$" + field))))
+        groupExprs += ((indexField, new BsonDocument().append("$max", new BsonString("$" + field))))
 
       case "maxs" =>
-        group += ((indexField,
+        groupExprs += ((indexField,
           new BsonDocument().append("$maxN",
             new BsonDocument()
               .append("input", new BsonString("$" + field))
@@ -431,63 +481,39 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
           )))
         replaceCast(indexField, res.castSet(indexField))
 
-
       case "rand" =>
-//        distinct = false
-//        select += field
-//        orderBy += ((level, -1, "RAND()", ""))
-//        hardLimit = 1
-        group += ((indexField, new BsonDocument().append("$min", new BsonString("$" + field))))
+        select += field
+        groupFields += (field -> indexField)
+        sampleSize = 1
 
+      case "rands" =>
+        sampleSize = n
+        groupExprs += ((indexField, new BsonDocument().append("$addToSet", new BsonString("$" + field))))
+        replaceCast(indexField, res.castSet(indexField))
 
-      //      case "rands" =>
-      //        select +=
-      //          s"""ARRAY_SLICE(
-      //             |    ARRAY_AGG($field order by RAND()),
-      //             |    1,
-      //             |    LEAST(
-      //             |      $n,
-      //             |      ARRAY_LENGTH(ARRAY_AGG($field))
-      //             |    )
-      //             |  )""".stripMargin
-      //        groupByCols -= field
-      //        aggregate = true
-      //        replaceCast(res.array2set)
-      //
-      //      case "sample" =>
-      //        distinct = false
-      //        select += field
-      //        orderBy += ((level, -1, "RAND()", ""))
-      //        hardLimit = 1
-      //
-      //      case "samples" =>
-      //        select +=
-      //          s"""ARRAY_SLICE(
-      //             |    ARRAY_AGG(DISTINCT $field order by RAND()),
-      //             |    1,
-      //             |    LEAST(
-      //             |      $n,
-      //             |      ARRAY_LENGTH(ARRAY_AGG(DISTINCT $field))
-      //             |    )
-      //             |  )""".stripMargin
-      //        groupByCols -= field
-      //        aggregate = true
-      //        replaceCast(res.array2set)
-      //
-      //      case "count" =>
-      //        distinct = false
-      //        groupByCols -= field
-      //        aggregate = true
-      //        selectWithOrder(field, "COUNT", "")
-      //        replaceCast(toInt)
-      //
-      //      case "countDistinct" =>
-      //        distinct = false
-      //        groupByCols -= field
-      //        aggregate = true
-      //        selectWithOrder(field, "COUNT")
-      //        replaceCast(toInt)
-      //
+      case "sample" =>
+        select += field
+        groupFields += (field -> indexField)
+        sampleSize = 1
+
+      case "samples" =>
+        sampleSize = n
+        groupExprs += ((indexField, new BsonDocument().append("$addToSet", new BsonString("$" + field))))
+        replaceCast(indexField, res.castSet(indexField))
+
+      case "count" =>
+        removeField(indexField)
+//        addField(indexField)
+        projections.add(Projections.include(indexField))
+
+        groupExprs += ((indexField, new BsonDocument().append("$sum", new BsonInt32(1))))
+        replaceCast(indexField, castInt(indexField))
+
+      case "countDistinct" =>
+        preGroupByFields += (field -> indexField)
+        groupExprs += ((indexField, new BsonDocument().append("$sum", new BsonInt32(1))))
+        replaceCast(indexField, castInt(indexField))
+
       //      case "sum" =>
       //        groupByCols -= field
       //        aggregate = true
