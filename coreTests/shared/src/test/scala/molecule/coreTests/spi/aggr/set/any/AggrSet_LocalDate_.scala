@@ -111,22 +111,6 @@ trait AggrSet_LocalDate_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "rand" - types { implicit conn =>
-      for {
-        _ <- Ns.i.localDates.insert(List(
-          (1, Set(localDate1, localDate2)),
-          (2, Set(localDate2, localDate3)),
-          (2, Set(localDate3, localDate4)),
-          (2, Set(localDate3, localDate4)),
-        )).transact
-        all = Set(localDate1, localDate2, localDate3, localDate4)
-        _ <- Ns.localDates(rand).query.get.map(res => all.contains(res.head.head) ==> true)
-        _ <- Ns.localDates(rand(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-        _ <- Ns.localDates(rand(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-      } yield ()
-    }
-
-
     "sample" - types { implicit futConn =>
       for {
         _ <- Ns.i.localDates.insert(List(

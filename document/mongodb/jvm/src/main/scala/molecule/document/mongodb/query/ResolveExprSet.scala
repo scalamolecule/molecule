@@ -252,29 +252,6 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
     //          aggregate = true
     //          replaceCast(res.nestedArray2setDesc(n))
     //  
-    //        case "rand" =>
-    //          noBooleanSetAggr(res)
-    //          distinct = false
-    //          select += field
-    //          orderBy += ((level, -1, "RAND()", ""))
-    //          hardLimit = 1
-    //          replaceCast(res.nestedArray2coalescedSet)
-    //  
-    //        case "rands" =>
-    //          noBooleanSetAggr(res)
-    //          select +=
-    //            s"""ARRAY_SLICE(
-    //               |    ARRAY_AGG($field order by RAND()),
-    //               |    1,
-    //               |    LEAST(
-    //               |      $n,
-    //               |      ARRAY_LENGTH(ARRAY_AGG($field))
-    //               |    )
-    //               |  )""".stripMargin
-    //          groupByCols -= field
-    //          aggregate = true
-    //          replaceCast(res.nestedArray2coalescedSet)
-    //  
     //        case "sample" =>
     //          noBooleanSetAggr(res)
     //          distinct = false

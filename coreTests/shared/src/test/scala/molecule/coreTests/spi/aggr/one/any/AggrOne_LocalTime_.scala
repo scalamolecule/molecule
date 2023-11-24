@@ -54,10 +54,40 @@ trait AggrOne_LocalTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         ).transact
 
         _ <- Ns.localTime(min).query.get.map(_ ==> List(localTime1))
+        _ <- Ns.localTime(max).query.get.map(_ ==> List(localTime6))
+        _ <- Ns.localTime(min).localTime(max).query.get.map(_ ==> List((localTime1, localTime6)))
+
+        _ <- Ns.i.a1.localTime(min).query.get.map(_ ==> List(
+          (1, localTime1),
+          (2, localTime4)
+        ))
+
+        _ <- Ns.i.a1.localTime(max).query.get.map(_ ==> List(
+          (1, localTime3),
+          (2, localTime6)
+        ))
+
+        _ <- Ns.i.a1.localTime(min).localTime(max).query.get.map(_ ==> List(
+          (1, localTime1, localTime3),
+          (2, localTime4, localTime6)
+        ))
+      } yield ()
+    }
+
+    "min/max n" - types { implicit conn =>
+      for {
+        _ <- Ns.i.localTime.insert(
+          (1, localTime1),
+          (1, localTime2),
+          (1, localTime3),
+          (2, localTime4),
+          (2, localTime5),
+          (2, localTime6),
+        ).transact
+
         _ <- Ns.localTime(min(1)).query.get.map(_ ==> List(Set(localTime1)))
         _ <- Ns.localTime(min(2)).query.get.map(_ ==> List(Set(localTime1, localTime2)))
 
-        _ <- Ns.localTime(max).query.get.map(_ ==> List(localTime6))
         _ <- Ns.localTime(max(1)).query.get.map(_ ==> List(Set(localTime6)))
         _ <- Ns.localTime(max(2)).query.get.map(_ ==> List(Set(localTime5, localTime6)))
 
@@ -79,21 +109,10 @@ trait AggrOne_LocalTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "rand" - types { implicit conn =>
-      for {
-        _ <- Ns.localTime.insert(List(localTime1, localTime2, localTime3)).transact
-        all = Set(localTime1, localTime2, localTime3, localTime4)
-        _ <- Ns.localTime(rand).query.get.map(res => all.contains(res.head) ==> true)
-        _ <- Ns.localTime(rand(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-        _ <- Ns.localTime(rand(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-      } yield ()
-    }
-
-
     "sample" - types { implicit futConn =>
+      val all = Set(localTime1, localTime2, localTime3, localTime4)
       for {
         _ <- Ns.localTime.insert(List(localTime1, localTime2, localTime3)).transact
-        all = Set(localTime1, localTime2, localTime3, localTime4)
         _ <- Ns.localTime(sample).query.get.map(res => all.contains(res.head) ==> true)
         _ <- Ns.localTime(sample(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
         _ <- Ns.localTime(sample(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
@@ -101,7 +120,7 @@ trait AggrOne_LocalTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "count, countDistinct" - types { implicit conn =>
+    "count" - types { implicit conn =>
       for {
         _ <- Ns.i.localTime.insert(List(
           (1, localTime1),
@@ -110,16 +129,13 @@ trait AggrOne_LocalTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, localTime3),
         )).transact
 
-        _ <- Ns.i(count).query.get.map(_ ==> List(4))
-        _ <- Ns.i(countDistinct).query.get.map(_ ==> List(2))
-
         _ <- Ns.localTime(count).query.get.map(_ ==> List(4))
-        _ <- Ns.localTime(countDistinct).query.get.map(_ ==> List(3))
-
         _ <- Ns.i.a1.localTime(count).query.get.map(_ ==> List(
           (1, 1),
           (2, 3)
         ))
+
+        _ <- Ns.localTime(countDistinct).query.get.map(_ ==> List(3))
         _ <- Ns.i.a1.localTime(countDistinct).query.get.map(_ ==> List(
           (1, 1),
           (2, 2)

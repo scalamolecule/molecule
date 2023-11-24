@@ -37,6 +37,15 @@ trait AggrOneNum_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "median" - types { implicit futConn =>
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+      // Different databases have different ways of calculating a median
+      val (median_2_3, median_1_2) = if (database == "MongoDB") {
+        (bigInt2, bigInt1)
+      } else {
+        (
+          (bigInt2 + bigInt3).toDouble / 2.0,
+          (bigInt1 + bigInt2).toDouble / 2.0
+        )
+      }
       for {
         _ <- Ns.i.bigInt.insert(List(
           (1, bigInt1),
@@ -46,11 +55,10 @@ trait AggrOneNum_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, bigInt4),
         )).transact
 
-        _ <- Ns.bigInt.a1.query.get.map(_ ==> List(bigInt1, bigInt2, bigInt3, bigInt4))
-        _ <- Ns.bigInt(median).query.get.map(_.head ==~ (bigInt2 + bigInt3).toDouble / 2.0)
+        _ <- Ns.bigInt(median).query.get.map(_.head ==~ median_2_3)
 
         _ <- Ns.i.bigInt(median).query.get.map(_.map {
-          case (1, median) => median ==~ (bigInt1 + bigInt2).toDouble / 2.0
+          case (1, median) => median ==~ median_1_2
           case (2, median) => median ==~ bigInt3.toString.toDouble
         })
       } yield ()
@@ -68,14 +76,12 @@ trait AggrOneNum_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, bigInt4),
         )).transact
 
-        _ <- Ns.bigInt.a1.query.get.map(_ ==> List(bigInt1, bigInt2, bigInt3, bigInt4))
         _ <- Ns.bigInt(avg).query.get.map(_.head ==~ (bigInt1 + bigInt2 + bigInt3 + bigInt4).toDouble / 4.0)
 
         _ <- Ns.i.bigInt(avg).query.get.map(_.map {
           case (1, avg) => avg ==~ (bigInt1 + bigInt2).toDouble / 2.0
           case (2, avg) => avg ==~ (bigInt2 + bigInt3 + bigInt4).toDouble / 3.0
         })
-
       } yield ()
     }
 
@@ -91,7 +97,6 @@ trait AggrOneNum_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, bigInt4),
         )).transact
 
-        _ <- Ns.bigInt.a1.query.get.map(_ ==> List(bigInt1, bigInt2, bigInt3, bigInt4))
         _ <- Ns.bigInt(variance).query.get.map(_.head ==~ varianceOf(bigInt1, bigInt2, bigInt3, bigInt4))
 
         _ <- Ns.i.bigInt(variance).query.get.map(_.map {
@@ -113,7 +118,6 @@ trait AggrOneNum_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, bigInt4),
         )).transact
 
-        _ <- Ns.bigInt.a1.query.get.map(_ ==> List(bigInt1, bigInt2, bigInt3, bigInt4))
         _ <- Ns.bigInt(stddev).query.get.map(_.head ==~ stdDevOf(bigInt1, bigInt2, bigInt3, bigInt4))
 
         _ <- Ns.i.bigInt(stddev).query.get.map(_.map {

@@ -54,10 +54,40 @@ trait AggrOne_Duration_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         ).transact
 
         _ <- Ns.duration(min).query.get.map(_ ==> List(duration1))
+        _ <- Ns.duration(max).query.get.map(_ ==> List(duration6))
+        _ <- Ns.duration(min).duration(max).query.get.map(_ ==> List((duration1, duration6)))
+
+        _ <- Ns.i.a1.duration(min).query.get.map(_ ==> List(
+          (1, duration1),
+          (2, duration4)
+        ))
+
+        _ <- Ns.i.a1.duration(max).query.get.map(_ ==> List(
+          (1, duration3),
+          (2, duration6)
+        ))
+
+        _ <- Ns.i.a1.duration(min).duration(max).query.get.map(_ ==> List(
+          (1, duration1, duration3),
+          (2, duration4, duration6)
+        ))
+      } yield ()
+    }
+
+    "min/max n" - types { implicit conn =>
+      for {
+        _ <- Ns.i.duration.insert(
+          (1, duration1),
+          (1, duration2),
+          (1, duration3),
+          (2, duration4),
+          (2, duration5),
+          (2, duration6),
+        ).transact
+
         _ <- Ns.duration(min(1)).query.get.map(_ ==> List(Set(duration1)))
         _ <- Ns.duration(min(2)).query.get.map(_ ==> List(Set(duration1, duration2)))
 
-        _ <- Ns.duration(max).query.get.map(_ ==> List(duration6))
         _ <- Ns.duration(max(1)).query.get.map(_ ==> List(Set(duration6)))
         _ <- Ns.duration(max(2)).query.get.map(_ ==> List(Set(duration5, duration6)))
 
@@ -79,21 +109,10 @@ trait AggrOne_Duration_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "rand" - types { implicit conn =>
-      for {
-        _ <- Ns.duration.insert(List(duration1, duration2, duration3)).transact
-        all = Set(duration1, duration2, duration3, duration4)
-        _ <- Ns.duration(rand).query.get.map(res => all.contains(res.head) ==> true)
-        _ <- Ns.duration(rand(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-        _ <- Ns.duration(rand(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-      } yield ()
-    }
-
-
     "sample" - types { implicit futConn =>
+      val all = Set(duration1, duration2, duration3, duration4)
       for {
         _ <- Ns.duration.insert(List(duration1, duration2, duration3)).transact
-        all = Set(duration1, duration2, duration3, duration4)
         _ <- Ns.duration(sample).query.get.map(res => all.contains(res.head) ==> true)
         _ <- Ns.duration(sample(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
         _ <- Ns.duration(sample(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
@@ -101,7 +120,7 @@ trait AggrOne_Duration_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "count, countDistinct" - types { implicit conn =>
+    "count" - types { implicit conn =>
       for {
         _ <- Ns.i.duration.insert(List(
           (1, duration1),
@@ -110,16 +129,13 @@ trait AggrOne_Duration_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, duration3),
         )).transact
 
-        _ <- Ns.i(count).query.get.map(_ ==> List(4))
-        _ <- Ns.i(countDistinct).query.get.map(_ ==> List(2))
-
         _ <- Ns.duration(count).query.get.map(_ ==> List(4))
-        _ <- Ns.duration(countDistinct).query.get.map(_ ==> List(3))
-
         _ <- Ns.i.a1.duration(count).query.get.map(_ ==> List(
           (1, 1),
           (2, 3)
         ))
+
+        _ <- Ns.duration(countDistinct).query.get.map(_ ==> List(3))
         _ <- Ns.i.a1.duration(countDistinct).query.get.map(_ ==> List(
           (1, 1),
           (2, 2)

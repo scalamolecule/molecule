@@ -110,22 +110,6 @@ trait AggrSet_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "rand" - types { implicit conn =>
-      for {
-        _ <- Ns.i.doubles.insert(List(
-          (1, Set(double1, double2)),
-          (2, Set(double2, double3)),
-          (2, Set(double3, double4)),
-          (2, Set(double3, double4)),
-        )).transact
-        all = Set(double1, double2, double3, double4)
-        _ <- Ns.doubles(rand).query.get.map(res => all.contains(res.head.head) ==> true)
-        _ <- Ns.doubles(rand(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-        _ <- Ns.doubles(rand(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-      } yield ()
-    }
-
-
     "sample" - types { implicit futConn =>
       for {
         _ <- Ns.i.doubles.insert(List(

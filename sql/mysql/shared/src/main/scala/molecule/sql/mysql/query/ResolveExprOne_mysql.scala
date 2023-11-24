@@ -30,7 +30,7 @@ trait ResolveExprOne_mysql extends ResolveExprOne with LambdasOne_mysql { self: 
     lazy val sepChar = 29.toChar
     lazy val n       = optN.getOrElse(0)
 
-    // If large number of mins/maxs/rands/samples is needed, group_concat max size can be raised from default 1024 char
+    // If large number of mins/maxs/samples is needed, group_concat max size can be raised from default 1024 char
     // https://dev.mysql.com/doc/refman/8.0/en/server-system-variables.html#sysvar_group_concat_max_len
 
     select -= col
@@ -72,25 +72,6 @@ trait ResolveExprOne_mysql extends ResolveExprOne with LambdasOne_mysql { self: 
         replaceCast((row: Row, paramIndex: Int) =>
           row.getString(paramIndex).split(sepChar).map(res.json2tpe).take(n).toSet
         )
-
-      case "rand" =>
-        select += s"JSON_ARRAYAGG($col)"
-        groupByCols -= col
-        aggregate = true
-        replaceCast((row: Row, paramIndex: Int) => {
-          val array = res.json2array(row.getString(paramIndex))
-          val rnd   = new Random().nextInt(array.length)
-          array(rnd)
-        })
-
-      case "rands" =>
-        select += s"JSON_ARRAYAGG($col)"
-        groupByCols -= col
-        aggregate = true
-        replaceCast((row: Row, paramIndex: Int) => {
-          val array = res.json2array(row.getString(paramIndex))
-          Random.shuffle(array.toSet).take(n)
-        })
 
       case "sample" =>
         select += s"JSON_ARRAYAGG($col)"

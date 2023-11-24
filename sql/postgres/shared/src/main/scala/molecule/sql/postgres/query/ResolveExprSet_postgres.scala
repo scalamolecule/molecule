@@ -94,28 +94,6 @@ trait ResolveExprSet_postgres
         aggregate = true
         replaceCast(res.nestedArray2setDesc(n))
 
-      case "rand" =>
-        noBooleanSetAggr(res)
-        distinct = false
-        select += col
-        orderBy += ((level, -1, "RANDOM()", ""))
-        hardLimit = 1
-        replaceCast(res.sql2set)
-
-      case "rands" =>
-        noBooleanSetAggr(res)
-        select +=
-          s"""TRIM_ARRAY(
-             |    ARRAY_AGG($col order by RANDOM()),
-             |    GREATEST(
-             |      0,
-             |      ARRAY_LENGTH(ARRAY_AGG($col), 1) - $n
-             |    )
-             |  )""".stripMargin
-        groupByCols -= col
-        aggregate = true
-        replaceCast(res.nestedArray2coalescedSet)
-
       case "sample" =>
         noBooleanSetAggr(res)
         distinct = false

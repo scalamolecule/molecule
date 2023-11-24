@@ -53,10 +53,40 @@ trait AggrOne_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         ).transact
 
         _ <- Ns.long(min).query.get.map(_ ==> List(long1))
+        _ <- Ns.long(max).query.get.map(_ ==> List(long6))
+        _ <- Ns.long(min).long(max).query.get.map(_ ==> List((long1, long6)))
+
+        _ <- Ns.i.a1.long(min).query.get.map(_ ==> List(
+          (1, long1),
+          (2, long4)
+        ))
+
+        _ <- Ns.i.a1.long(max).query.get.map(_ ==> List(
+          (1, long3),
+          (2, long6)
+        ))
+
+        _ <- Ns.i.a1.long(min).long(max).query.get.map(_ ==> List(
+          (1, long1, long3),
+          (2, long4, long6)
+        ))
+      } yield ()
+    }
+
+    "min/max n" - types { implicit conn =>
+      for {
+        _ <- Ns.i.long.insert(
+          (1, long1),
+          (1, long2),
+          (1, long3),
+          (2, long4),
+          (2, long5),
+          (2, long6),
+        ).transact
+
         _ <- Ns.long(min(1)).query.get.map(_ ==> List(Set(long1)))
         _ <- Ns.long(min(2)).query.get.map(_ ==> List(Set(long1, long2)))
 
-        _ <- Ns.long(max).query.get.map(_ ==> List(long6))
         _ <- Ns.long(max(1)).query.get.map(_ ==> List(Set(long6)))
         _ <- Ns.long(max(2)).query.get.map(_ ==> List(Set(long5, long6)))
 
@@ -78,21 +108,10 @@ trait AggrOne_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "rand" - types { implicit conn =>
-      for {
-        _ <- Ns.long.insert(List(long1, long2, long3)).transact
-        all = Set(long1, long2, long3, long4)
-        _ <- Ns.long(rand).query.get.map(res => all.contains(res.head) ==> true)
-        _ <- Ns.long(rand(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-        _ <- Ns.long(rand(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-      } yield ()
-    }
-
-
     "sample" - types { implicit futConn =>
+      val all = Set(long1, long2, long3, long4)
       for {
         _ <- Ns.long.insert(List(long1, long2, long3)).transact
-        all = Set(long1, long2, long3, long4)
         _ <- Ns.long(sample).query.get.map(res => all.contains(res.head) ==> true)
         _ <- Ns.long(sample(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
         _ <- Ns.long(sample(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
@@ -100,7 +119,7 @@ trait AggrOne_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "count, countDistinct" - types { implicit conn =>
+    "count" - types { implicit conn =>
       for {
         _ <- Ns.i.long.insert(List(
           (1, long1),
@@ -109,16 +128,13 @@ trait AggrOne_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, long3),
         )).transact
 
-        _ <- Ns.i(count).query.get.map(_ ==> List(4))
-        _ <- Ns.i(countDistinct).query.get.map(_ ==> List(2))
-
         _ <- Ns.long(count).query.get.map(_ ==> List(4))
-        _ <- Ns.long(countDistinct).query.get.map(_ ==> List(3))
-
         _ <- Ns.i.a1.long(count).query.get.map(_ ==> List(
           (1, 1),
           (2, 3)
         ))
+
+        _ <- Ns.long(countDistinct).query.get.map(_ ==> List(3))
         _ <- Ns.i.a1.long(countDistinct).query.get.map(_ ==> List(
           (1, 1),
           (2, 2)

@@ -73,6 +73,14 @@ trait LambdasOne extends LambdasSet {
   protected lazy val castShort          = (field: String) => (doc: BsonDocument) => doc.get(field).asInt32.getValue.toShort
   protected lazy val castChar           = (field: String) => (doc: BsonDocument) => doc.get(field).asString.getValue.charAt(0)
 
+  protected lazy val hardCastDouble = (field: String) => (doc: BsonDocument) => doc.get(field) match {
+    case v: BsonInt32      => v.asInt32.getValue.toDouble
+    case v: BsonInt64      => v.asInt64.getValue.toDouble
+    case v: BsonDouble     => v.asDouble.getValue
+    case v: BsonDecimal128 => v.asDecimal128.getValue.toString.toDouble
+  }
+
+
   protected lazy val eqID             = (field: String, v: String) => {
     def oid: BsonObjectId = if (v.length != 24) {
       throw ModelError("Object id string should be a hex string with 24 characters. Found: " + v)

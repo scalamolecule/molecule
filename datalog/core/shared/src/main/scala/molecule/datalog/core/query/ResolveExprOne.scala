@@ -292,13 +292,6 @@ trait ResolveExprOne[Tpl]
         find += s"(max $n $v)"
         replaceCast(res.vector2set)
 
-      case "rand" =>
-        find += s"(rand $v)"
-
-      case "rands" =>
-        find += s"(rand $n $v)"
-        replaceCast(res.vector2set)
-
       case "sample" =>
         find += s"(sample 1 $v)"
         replaceCast(res.seq2t)

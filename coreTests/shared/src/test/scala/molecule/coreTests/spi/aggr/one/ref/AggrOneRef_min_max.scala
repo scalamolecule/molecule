@@ -1,4 +1,4 @@
-package molecule.coreTests.spi.aggr.one
+package molecule.coreTests.spi.aggr.one.ref
 
 import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
@@ -8,7 +8,7 @@ import molecule.coreTests.dataModels.core.dsl.Refs._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 
-trait AggrInRefs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
+trait AggrOneRef_min_max extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
   override lazy val tests = Tests {
 
@@ -22,7 +22,6 @@ trait AggrInRefs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, 5),
           (2, 6),
         ).transact
-
 
         _ <- A.B.i(min).query.get.map(_ ==> List(1))
         _ <- A.B.i(max).query.get.map(_ ==> List(6))

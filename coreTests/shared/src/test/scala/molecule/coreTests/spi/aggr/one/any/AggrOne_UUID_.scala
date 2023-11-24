@@ -54,10 +54,40 @@ trait AggrOne_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         ).transact
 
         _ <- Ns.uuid(min).query.get.map(_ ==> List(uuid1))
+        _ <- Ns.uuid(max).query.get.map(_ ==> List(uuid6))
+        _ <- Ns.uuid(min).uuid(max).query.get.map(_ ==> List((uuid1, uuid6)))
+
+        _ <- Ns.i.a1.uuid(min).query.get.map(_ ==> List(
+          (1, uuid1),
+          (2, uuid4)
+        ))
+
+        _ <- Ns.i.a1.uuid(max).query.get.map(_ ==> List(
+          (1, uuid3),
+          (2, uuid6)
+        ))
+
+        _ <- Ns.i.a1.uuid(min).uuid(max).query.get.map(_ ==> List(
+          (1, uuid1, uuid3),
+          (2, uuid4, uuid6)
+        ))
+      } yield ()
+    }
+
+    "min/max n" - types { implicit conn =>
+      for {
+        _ <- Ns.i.uuid.insert(
+          (1, uuid1),
+          (1, uuid2),
+          (1, uuid3),
+          (2, uuid4),
+          (2, uuid5),
+          (2, uuid6),
+        ).transact
+
         _ <- Ns.uuid(min(1)).query.get.map(_ ==> List(Set(uuid1)))
         _ <- Ns.uuid(min(2)).query.get.map(_ ==> List(Set(uuid1, uuid2)))
 
-        _ <- Ns.uuid(max).query.get.map(_ ==> List(uuid6))
         _ <- Ns.uuid(max(1)).query.get.map(_ ==> List(Set(uuid6)))
         _ <- Ns.uuid(max(2)).query.get.map(_ ==> List(Set(uuid5, uuid6)))
 
@@ -79,21 +109,10 @@ trait AggrOne_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "rand" - types { implicit conn =>
-      for {
-        _ <- Ns.uuid.insert(List(uuid1, uuid2, uuid3)).transact
-        all = Set(uuid1, uuid2, uuid3, uuid4)
-        _ <- Ns.uuid(rand).query.get.map(res => all.contains(res.head) ==> true)
-        _ <- Ns.uuid(rand(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-        _ <- Ns.uuid(rand(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-      } yield ()
-    }
-
-
     "sample" - types { implicit futConn =>
+      val all = Set(uuid1, uuid2, uuid3, uuid4)
       for {
         _ <- Ns.uuid.insert(List(uuid1, uuid2, uuid3)).transact
-        all = Set(uuid1, uuid2, uuid3, uuid4)
         _ <- Ns.uuid(sample).query.get.map(res => all.contains(res.head) ==> true)
         _ <- Ns.uuid(sample(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
         _ <- Ns.uuid(sample(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
@@ -101,7 +120,7 @@ trait AggrOne_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "count, countDistinct" - types { implicit conn =>
+    "count" - types { implicit conn =>
       for {
         _ <- Ns.i.uuid.insert(List(
           (1, uuid1),
@@ -110,16 +129,13 @@ trait AggrOne_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, uuid3),
         )).transact
 
-        _ <- Ns.i(count).query.get.map(_ ==> List(4))
-        _ <- Ns.i(countDistinct).query.get.map(_ ==> List(2))
-
         _ <- Ns.uuid(count).query.get.map(_ ==> List(4))
-        _ <- Ns.uuid(countDistinct).query.get.map(_ ==> List(3))
-
         _ <- Ns.i.a1.uuid(count).query.get.map(_ ==> List(
           (1, 1),
           (2, 3)
         ))
+
+        _ <- Ns.uuid(countDistinct).query.get.map(_ ==> List(3))
         _ <- Ns.i.a1.uuid(countDistinct).query.get.map(_ ==> List(
           (1, 1),
           (2, 2)

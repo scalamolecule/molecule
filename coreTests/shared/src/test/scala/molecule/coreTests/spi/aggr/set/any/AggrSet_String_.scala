@@ -110,22 +110,6 @@ trait AggrSet_String_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "rand" - types { implicit conn =>
-      for {
-        _ <- Ns.i.strings.insert(List(
-          (1, Set(string1, string2)),
-          (2, Set(string2, string3)),
-          (2, Set(string3, string4)),
-          (2, Set(string3, string4)),
-        )).transact
-        all = Set(string1, string2, string3, string4)
-        _ <- Ns.strings(rand).query.get.map(res => all.contains(res.head.head) ==> true)
-        _ <- Ns.strings(rand(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-        _ <- Ns.strings(rand(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-      } yield ()
-    }
-
-
     "sample" - types { implicit futConn =>
       for {
         _ <- Ns.i.strings.insert(List(

@@ -73,25 +73,6 @@ trait ResolveExprOne_postgres extends ResolveExprOne with LambdasOne_postgres { 
         aggregate = true
         replaceCast(res.array2set)
 
-      case "rand" =>
-        distinct = false
-        select += col
-        orderBy += ((level, -1, "RANDOM()", ""))
-        hardLimit = 1
-
-      case "rands" =>
-        select +=
-          s"""TRIM_ARRAY(
-             |    ARRAY_AGG($col order by random()),
-             |    GREATEST(
-             |      0,
-             |      ARRAY_LENGTH(ARRAY_AGG($col), 1) - $n
-             |    )
-             |  )""".stripMargin
-        groupByCols -= col
-        aggregate = true
-        replaceCast(res.array2set)
-
       case "sample" =>
         distinct = false
         select += col

@@ -111,22 +111,6 @@ trait AggrSet_URI_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "rand" - types { implicit conn =>
-      for {
-        _ <- Ns.i.uris.insert(List(
-          (1, Set(uri1, uri2)),
-          (2, Set(uri2, uri3)),
-          (2, Set(uri3, uri4)),
-          (2, Set(uri3, uri4)),
-        )).transact
-        all = Set(uri1, uri2, uri3, uri4)
-        _ <- Ns.uris(rand).query.get.map(res => all.contains(res.head.head) ==> true)
-        _ <- Ns.uris(rand(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-        _ <- Ns.uris(rand(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-      } yield ()
-    }
-
-
     "sample" - types { implicit futConn =>
       for {
         _ <- Ns.i.uris.insert(List(

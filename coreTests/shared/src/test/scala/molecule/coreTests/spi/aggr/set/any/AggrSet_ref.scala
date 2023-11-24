@@ -53,21 +53,6 @@ trait AggrSet_ref extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "rand" - types { implicit conn =>
-      for {
-        _ <- Ns.refs(rand).query.get
-          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Aggregating Sets of ref ids not supported."
-          }
-
-        _ <- Ns.refs(rand(2)).query.get
-          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Aggregating Sets of ref ids not supported."
-          }
-      } yield ()
-    }
-
-
     "sample" - types { implicit futConn =>
       for {
         _ <- Ns.refs(sample).query.get

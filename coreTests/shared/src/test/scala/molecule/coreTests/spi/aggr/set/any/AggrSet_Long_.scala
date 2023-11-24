@@ -110,22 +110,6 @@ trait AggrSet_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "rand" - types { implicit conn =>
-      for {
-        _ <- Ns.i.longs.insert(List(
-          (1, Set(long1, long2)),
-          (2, Set(long2, long3)),
-          (2, Set(long3, long4)),
-          (2, Set(long3, long4)),
-        )).transact
-        all = Set(long1, long2, long3, long4)
-        _ <- Ns.longs(rand).query.get.map(res => all.contains(res.head.head) ==> true)
-        _ <- Ns.longs(rand(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-        _ <- Ns.longs(rand(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-      } yield ()
-    }
-
-
     "sample" - types { implicit futConn =>
       for {
         _ <- Ns.i.longs.insert(List(

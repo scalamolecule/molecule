@@ -238,10 +238,10 @@ case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuff
   private def unpickleAttrOneMan(a: AttrOneMan): () => Any = {
     a.op match {
       case Fn(kw, _) => kw match {
-        case "count" | "countDistinct"                          => () => dek.readInt
-        case "distinct" | "mins" | "maxs" | "rands" | "samples" => unpickleAttrOneManSet(a)
-        case "avg" | "variance" | "stddev"                      => () => dek.readDouble
-        case _                                                  => unpickleAttrOneManV(a)
+        case "count" | "countDistinct"                => () => dek.readInt
+        case "distinct" | "mins" | "maxs" | "samples" => unpickleAttrOneManSet(a)
+        case "avg" | "variance" | "stddev"            => () => dek.readDouble
+        case _                                        => unpickleAttrOneManV(a)
       }
       case _         => unpickleAttrOneManV(a)
     }
@@ -334,7 +334,7 @@ case class UnpickleTpls[Tpl](elements: List[Element], eitherSerialized: ByteBuff
       case Fn(kw, _) => kw match {
         case "count" | "countDistinct"                => () => dek.readInt
         case "distinct"                               => unpickleAttrSetManSet(a)
-        case "mins" | "maxs" | "rands" | "samples"    => unpickleAttrSetManV(a)
+        case "mins" | "maxs" | "samples"              => unpickleAttrSetManV(a)
         case "median" | "avg" | "variance" | "stddev" => () => dek.readDouble
         case _                                        => unpickleAttrSetManV(a)
       }

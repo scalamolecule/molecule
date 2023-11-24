@@ -18,8 +18,10 @@ object _AggrOneNum extends CodeGenBase with BaseHelpers {
         .replace("package", "// GENERATED CODE ********************************\npackage")
         .replace("[Int]", s"[$tpe]")
         .replace("Int extends", name + "_ extends")
+        .replace("println", "prindln")
         .replace("tolerantIntEquality(toleranceInt)", s"tolerant${tpe}Equality(tolerance$tpe)")
         .replace("int", v)
+        .replace("prindln", "println")
     }
   }
 }

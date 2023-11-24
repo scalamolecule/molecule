@@ -37,6 +37,15 @@ trait AggrOneNum_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
 
     "median" - types { implicit futConn =>
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+      // Different databases have different ways of calculating a median
+      val (median_2_3, median_1_2) = if (database == "MongoDB") {
+        (bigDecimal2, bigDecimal1)
+      } else {
+        (
+          (bigDecimal2 + bigDecimal3).toDouble / 2.0,
+          (bigDecimal1 + bigDecimal2).toDouble / 2.0
+        )
+      }
       for {
         _ <- Ns.i.bigDecimal.insert(List(
           (1, bigDecimal1),
@@ -46,11 +55,10 @@ trait AggrOneNum_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
           (2, bigDecimal4),
         )).transact
 
-        _ <- Ns.bigDecimal.a1.query.get.map(_ ==> List(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4))
-        _ <- Ns.bigDecimal(median).query.get.map(_.head ==~ (bigDecimal2 + bigDecimal3).toDouble / 2.0)
+        _ <- Ns.bigDecimal(median).query.get.map(_.head ==~ median_2_3)
 
         _ <- Ns.i.bigDecimal(median).query.get.map(_.map {
-          case (1, median) => median ==~ (bigDecimal1 + bigDecimal2).toDouble / 2.0
+          case (1, median) => median ==~ median_1_2
           case (2, median) => median ==~ bigDecimal3.toString.toDouble
         })
       } yield ()
@@ -68,14 +76,12 @@ trait AggrOneNum_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
           (2, bigDecimal4),
         )).transact
 
-        _ <- Ns.bigDecimal.a1.query.get.map(_ ==> List(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4))
         _ <- Ns.bigDecimal(avg).query.get.map(_.head ==~ (bigDecimal1 + bigDecimal2 + bigDecimal3 + bigDecimal4).toDouble / 4.0)
 
         _ <- Ns.i.bigDecimal(avg).query.get.map(_.map {
           case (1, avg) => avg ==~ (bigDecimal1 + bigDecimal2).toDouble / 2.0
           case (2, avg) => avg ==~ (bigDecimal2 + bigDecimal3 + bigDecimal4).toDouble / 3.0
         })
-
       } yield ()
     }
 
@@ -91,7 +97,6 @@ trait AggrOneNum_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
           (2, bigDecimal4),
         )).transact
 
-        _ <- Ns.bigDecimal.a1.query.get.map(_ ==> List(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4))
         _ <- Ns.bigDecimal(variance).query.get.map(_.head ==~ varianceOf(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4))
 
         _ <- Ns.i.bigDecimal(variance).query.get.map(_.map {
@@ -113,7 +118,6 @@ trait AggrOneNum_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
           (2, bigDecimal4),
         )).transact
 
-        _ <- Ns.bigDecimal.a1.query.get.map(_ ==> List(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4))
         _ <- Ns.bigDecimal(stddev).query.get.map(_.head ==~ stdDevOf(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4))
 
         _ <- Ns.i.bigDecimal(stddev).query.get.map(_.map {

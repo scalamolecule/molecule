@@ -109,22 +109,6 @@ trait AggrSet_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "rand" - types { implicit conn =>
-      for {
-        _ <- Ns.i.ints.insert(List(
-          (1, Set(int1, int2)),
-          (2, Set(int2, int3)),
-          (2, Set(int3, int4)),
-          (2, Set(int3, int4)),
-        )).transact
-        all = Set(int1, int2, int3, int4)
-        _ <- Ns.ints(rand).query.get.map(res => all.contains(res.head.head) ==> true)
-        _ <- Ns.ints(rand(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-        _ <- Ns.ints(rand(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-      } yield ()
-    }
-
-
     "sample" - types { implicit futConn =>
       for {
         _ <- Ns.i.ints.insert(List(

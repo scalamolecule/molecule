@@ -18,7 +18,9 @@ object Connection_mongodb {
   //  val collection = mongoClient.getDatabase("test").getCollection[BsonDocument]("testCollection")
 
   // Java test container setup
-  val container: MongoDBContainer = new MongoDBContainer(DockerImageName.parse("mongo").withTag("latest"))
+  val container: MongoDBContainer = new MongoDBContainer(
+    DockerImageName.parse("mongo").withTag("latest")
+  )
   container.start()
   val mongoClient: MongoClient   = MongoClients.create(container.getConnectionString)
   val mongoDb    : MongoDatabase = mongoClient.getDatabase("test")

@@ -59,17 +59,6 @@ trait AggrOne_Boolean extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "rand" - types { implicit conn =>
-      for {
-        _ <- Ns.boolean.insert(List(true, false, true)).transact
-        all = Set(true, false)
-        _ <- Ns.boolean(rand).query.get.map(res => all.contains(res.head) ==> true)
-        _ <- Ns.boolean(rand(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-        _ <- Ns.boolean(rand(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-      } yield ()
-    }
-
-
     "sample" - types { implicit futConn =>
       for {
         _ <- Ns.boolean.insert(List(true, false, true)).transact

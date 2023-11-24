@@ -111,22 +111,6 @@ trait AggrSet_OffsetDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsyn
     }
 
 
-    "rand" - types { implicit conn =>
-      for {
-        _ <- Ns.i.offsetDateTimes.insert(List(
-          (1, Set(offsetDateTime1, offsetDateTime2)),
-          (2, Set(offsetDateTime2, offsetDateTime3)),
-          (2, Set(offsetDateTime3, offsetDateTime4)),
-          (2, Set(offsetDateTime3, offsetDateTime4)),
-        )).transact
-        all = Set(offsetDateTime1, offsetDateTime2, offsetDateTime3, offsetDateTime4)
-        _ <- Ns.offsetDateTimes(rand).query.get.map(res => all.contains(res.head.head) ==> true)
-        _ <- Ns.offsetDateTimes(rand(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-        _ <- Ns.offsetDateTimes(rand(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-      } yield ()
-    }
-
-
     "sample" - types { implicit futConn =>
       for {
         _ <- Ns.i.offsetDateTimes.insert(List(

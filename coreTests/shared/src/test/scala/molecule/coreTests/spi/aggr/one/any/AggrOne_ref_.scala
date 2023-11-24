@@ -53,10 +53,40 @@ trait AggrOne_ref_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         ).transact
 
         _ <- Ns.ref(min).query.get.map(_ ==> List(ref1))
+        _ <- Ns.ref(max).query.get.map(_ ==> List(ref6))
+        _ <- Ns.ref(min).ref(max).query.get.map(_ ==> List((ref1, ref6)))
+
+        _ <- Ns.i.a1.ref(min).query.get.map(_ ==> List(
+          (1, ref1),
+          (2, ref4)
+        ))
+
+        _ <- Ns.i.a1.ref(max).query.get.map(_ ==> List(
+          (1, ref3),
+          (2, ref6)
+        ))
+
+        _ <- Ns.i.a1.ref(min).ref(max).query.get.map(_ ==> List(
+          (1, ref1, ref3),
+          (2, ref4, ref6)
+        ))
+      } yield ()
+    }
+
+    "min/max n" - types { implicit conn =>
+      for {
+        _ <- Ns.i.ref.insert(
+          (1, ref1),
+          (1, ref2),
+          (1, ref3),
+          (2, ref4),
+          (2, ref5),
+          (2, ref6),
+        ).transact
+
         _ <- Ns.ref(min(1)).query.get.map(_ ==> List(Set(ref1)))
         _ <- Ns.ref(min(2)).query.get.map(_ ==> List(Set(ref1, ref2)))
 
-        _ <- Ns.ref(max).query.get.map(_ ==> List(ref6))
         _ <- Ns.ref(max(1)).query.get.map(_ ==> List(Set(ref6)))
         _ <- Ns.ref(max(2)).query.get.map(_ ==> List(Set(ref5, ref6)))
 
@@ -78,21 +108,10 @@ trait AggrOne_ref_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "rand" - types { implicit conn =>
-      for {
-        _ <- Ns.ref.insert(List(ref1, ref2, ref3)).transact
-        all = Set(ref1, ref2, ref3, ref4)
-        _ <- Ns.ref(rand).query.get.map(res => all.contains(res.head) ==> true)
-        _ <- Ns.ref(rand(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-        _ <- Ns.ref(rand(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-      } yield ()
-    }
-
-
     "sample" - types { implicit futConn =>
+      val all = Set(ref1, ref2, ref3, ref4)
       for {
         _ <- Ns.ref.insert(List(ref1, ref2, ref3)).transact
-        all = Set(ref1, ref2, ref3, ref4)
         _ <- Ns.ref(sample).query.get.map(res => all.contains(res.head) ==> true)
         _ <- Ns.ref(sample(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
         _ <- Ns.ref(sample(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
@@ -100,7 +119,7 @@ trait AggrOne_ref_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "count, countDistinct" - types { implicit conn =>
+    "count" - types { implicit conn =>
       for {
         _ <- Ns.i.ref.insert(List(
           (1, ref1),
@@ -109,16 +128,13 @@ trait AggrOne_ref_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, ref3),
         )).transact
 
-        _ <- Ns.i(count).query.get.map(_ ==> List(4))
-        _ <- Ns.i(countDistinct).query.get.map(_ ==> List(2))
-
         _ <- Ns.ref(count).query.get.map(_ ==> List(4))
-        _ <- Ns.ref(countDistinct).query.get.map(_ ==> List(3))
-
         _ <- Ns.i.a1.ref(count).query.get.map(_ ==> List(
           (1, 1),
           (2, 3)
         ))
+
+        _ <- Ns.ref(countDistinct).query.get.map(_ ==> List(3))
         _ <- Ns.i.a1.ref(countDistinct).query.get.map(_ ==> List(
           (1, 1),
           (2, 2)

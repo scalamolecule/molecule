@@ -54,10 +54,40 @@ trait AggrOne_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         ).transact
 
         _ <- Ns.instant(min).query.get.map(_ ==> List(instant1))
+        _ <- Ns.instant(max).query.get.map(_ ==> List(instant6))
+        _ <- Ns.instant(min).instant(max).query.get.map(_ ==> List((instant1, instant6)))
+
+        _ <- Ns.i.a1.instant(min).query.get.map(_ ==> List(
+          (1, instant1),
+          (2, instant4)
+        ))
+
+        _ <- Ns.i.a1.instant(max).query.get.map(_ ==> List(
+          (1, instant3),
+          (2, instant6)
+        ))
+
+        _ <- Ns.i.a1.instant(min).instant(max).query.get.map(_ ==> List(
+          (1, instant1, instant3),
+          (2, instant4, instant6)
+        ))
+      } yield ()
+    }
+
+    "min/max n" - types { implicit conn =>
+      for {
+        _ <- Ns.i.instant.insert(
+          (1, instant1),
+          (1, instant2),
+          (1, instant3),
+          (2, instant4),
+          (2, instant5),
+          (2, instant6),
+        ).transact
+
         _ <- Ns.instant(min(1)).query.get.map(_ ==> List(Set(instant1)))
         _ <- Ns.instant(min(2)).query.get.map(_ ==> List(Set(instant1, instant2)))
 
-        _ <- Ns.instant(max).query.get.map(_ ==> List(instant6))
         _ <- Ns.instant(max(1)).query.get.map(_ ==> List(Set(instant6)))
         _ <- Ns.instant(max(2)).query.get.map(_ ==> List(Set(instant5, instant6)))
 
@@ -79,21 +109,10 @@ trait AggrOne_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "rand" - types { implicit conn =>
-      for {
-        _ <- Ns.instant.insert(List(instant1, instant2, instant3)).transact
-        all = Set(instant1, instant2, instant3, instant4)
-        _ <- Ns.instant(rand).query.get.map(res => all.contains(res.head) ==> true)
-        _ <- Ns.instant(rand(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-        _ <- Ns.instant(rand(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-      } yield ()
-    }
-
-
     "sample" - types { implicit futConn =>
+      val all = Set(instant1, instant2, instant3, instant4)
       for {
         _ <- Ns.instant.insert(List(instant1, instant2, instant3)).transact
-        all = Set(instant1, instant2, instant3, instant4)
         _ <- Ns.instant(sample).query.get.map(res => all.contains(res.head) ==> true)
         _ <- Ns.instant(sample(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
         _ <- Ns.instant(sample(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
@@ -101,7 +120,7 @@ trait AggrOne_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "count, countDistinct" - types { implicit conn =>
+    "count" - types { implicit conn =>
       for {
         _ <- Ns.i.instant.insert(List(
           (1, instant1),
@@ -110,16 +129,13 @@ trait AggrOne_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, instant3),
         )).transact
 
-        _ <- Ns.i(count).query.get.map(_ ==> List(4))
-        _ <- Ns.i(countDistinct).query.get.map(_ ==> List(2))
-
         _ <- Ns.instant(count).query.get.map(_ ==> List(4))
-        _ <- Ns.instant(countDistinct).query.get.map(_ ==> List(3))
-
         _ <- Ns.i.a1.instant(count).query.get.map(_ ==> List(
           (1, 1),
           (2, 3)
         ))
+
+        _ <- Ns.instant(countDistinct).query.get.map(_ ==> List(3))
         _ <- Ns.i.a1.instant(countDistinct).query.get.map(_ ==> List(
           (1, 1),
           (2, 2)

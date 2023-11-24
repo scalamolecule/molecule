@@ -54,10 +54,40 @@ trait AggrOne_OffsetDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsyn
         ).transact
 
         _ <- Ns.offsetDateTime(min).query.get.map(_ ==> List(offsetDateTime1))
+        _ <- Ns.offsetDateTime(max).query.get.map(_ ==> List(offsetDateTime6))
+        _ <- Ns.offsetDateTime(min).offsetDateTime(max).query.get.map(_ ==> List((offsetDateTime1, offsetDateTime6)))
+
+        _ <- Ns.i.a1.offsetDateTime(min).query.get.map(_ ==> List(
+          (1, offsetDateTime1),
+          (2, offsetDateTime4)
+        ))
+
+        _ <- Ns.i.a1.offsetDateTime(max).query.get.map(_ ==> List(
+          (1, offsetDateTime3),
+          (2, offsetDateTime6)
+        ))
+
+        _ <- Ns.i.a1.offsetDateTime(min).offsetDateTime(max).query.get.map(_ ==> List(
+          (1, offsetDateTime1, offsetDateTime3),
+          (2, offsetDateTime4, offsetDateTime6)
+        ))
+      } yield ()
+    }
+
+    "min/max n" - types { implicit conn =>
+      for {
+        _ <- Ns.i.offsetDateTime.insert(
+          (1, offsetDateTime1),
+          (1, offsetDateTime2),
+          (1, offsetDateTime3),
+          (2, offsetDateTime4),
+          (2, offsetDateTime5),
+          (2, offsetDateTime6),
+        ).transact
+
         _ <- Ns.offsetDateTime(min(1)).query.get.map(_ ==> List(Set(offsetDateTime1)))
         _ <- Ns.offsetDateTime(min(2)).query.get.map(_ ==> List(Set(offsetDateTime1, offsetDateTime2)))
 
-        _ <- Ns.offsetDateTime(max).query.get.map(_ ==> List(offsetDateTime6))
         _ <- Ns.offsetDateTime(max(1)).query.get.map(_ ==> List(Set(offsetDateTime6)))
         _ <- Ns.offsetDateTime(max(2)).query.get.map(_ ==> List(Set(offsetDateTime5, offsetDateTime6)))
 
@@ -79,21 +109,10 @@ trait AggrOne_OffsetDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsyn
     }
 
 
-    "rand" - types { implicit conn =>
-      for {
-        _ <- Ns.offsetDateTime.insert(List(offsetDateTime1, offsetDateTime2, offsetDateTime3)).transact
-        all = Set(offsetDateTime1, offsetDateTime2, offsetDateTime3, offsetDateTime4)
-        _ <- Ns.offsetDateTime(rand).query.get.map(res => all.contains(res.head) ==> true)
-        _ <- Ns.offsetDateTime(rand(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-        _ <- Ns.offsetDateTime(rand(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-      } yield ()
-    }
-
-
     "sample" - types { implicit futConn =>
+      val all = Set(offsetDateTime1, offsetDateTime2, offsetDateTime3, offsetDateTime4)
       for {
         _ <- Ns.offsetDateTime.insert(List(offsetDateTime1, offsetDateTime2, offsetDateTime3)).transact
-        all = Set(offsetDateTime1, offsetDateTime2, offsetDateTime3, offsetDateTime4)
         _ <- Ns.offsetDateTime(sample).query.get.map(res => all.contains(res.head) ==> true)
         _ <- Ns.offsetDateTime(sample(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
         _ <- Ns.offsetDateTime(sample(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
@@ -101,7 +120,7 @@ trait AggrOne_OffsetDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsyn
     }
 
 
-    "count, countDistinct" - types { implicit conn =>
+    "count" - types { implicit conn =>
       for {
         _ <- Ns.i.offsetDateTime.insert(List(
           (1, offsetDateTime1),
@@ -110,16 +129,13 @@ trait AggrOne_OffsetDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsyn
           (2, offsetDateTime3),
         )).transact
 
-        _ <- Ns.i(count).query.get.map(_ ==> List(4))
-        _ <- Ns.i(countDistinct).query.get.map(_ ==> List(2))
-
         _ <- Ns.offsetDateTime(count).query.get.map(_ ==> List(4))
-        _ <- Ns.offsetDateTime(countDistinct).query.get.map(_ ==> List(3))
-
         _ <- Ns.i.a1.offsetDateTime(count).query.get.map(_ ==> List(
           (1, 1),
           (2, 3)
         ))
+
+        _ <- Ns.offsetDateTime(countDistinct).query.get.map(_ ==> List(3))
         _ <- Ns.i.a1.offsetDateTime(countDistinct).query.get.map(_ ==> List(
           (1, 1),
           (2, 2)

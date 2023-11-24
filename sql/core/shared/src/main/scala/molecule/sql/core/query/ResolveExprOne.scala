@@ -264,26 +264,6 @@ trait ResolveExprOne extends ResolveExpr { self: SqlQueryBase with LambdasOne =>
         aggregate = true
         replaceCast(res.array2set)
 
-      case "rand" =>
-        distinct = false
-        select += col
-        orderBy += ((level, -1, "RAND()", ""))
-        hardLimit = 1
-
-      case "rands" =>
-        select +=
-          s"""ARRAY_SLICE(
-             |    ARRAY_AGG($col order by RAND()),
-             |    1,
-             |    LEAST(
-             |      $n,
-             |      ARRAY_LENGTH(ARRAY_AGG($col))
-             |    )
-             |  )""".stripMargin
-        groupByCols -= col
-        aggregate = true
-        replaceCast(res.array2set)
-
       case "sample" =>
         distinct = false
         select += col

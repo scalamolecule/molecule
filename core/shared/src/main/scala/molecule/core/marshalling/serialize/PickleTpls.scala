@@ -252,10 +252,10 @@ case class PickleTpls(
   private def pickleAttrOneMan(a: AttrOneMan, tplIndex: Int): Product => Unit = {
     a.op match {
       case Fn(kw, _) => kw match {
-        case "count" | "countDistinct"                          => pickleAttrOneManInt(tplIndex)
-        case "distinct" | "mins" | "maxs" | "rands" | "samples" => pickleAttrOneManSet(a, tplIndex)
-        case "avg" | "variance" | "stddev"                      => pickleAttrOneManDouble(tplIndex)
-        case _                                                  => pickleAttrOneManV(a, tplIndex)
+        case "count" | "countDistinct"                => pickleAttrOneManInt(tplIndex)
+        case "distinct" | "mins" | "maxs" | "samples" => pickleAttrOneManSet(a, tplIndex)
+        case "avg" | "variance" | "stddev"            => pickleAttrOneManDouble(tplIndex)
+        case _                                        => pickleAttrOneManV(a, tplIndex)
       }
       case _         => pickleAttrOneManV(a, tplIndex)
     }
@@ -356,7 +356,7 @@ case class PickleTpls(
       case Fn(kw, _) => kw match {
         case "count" | "countDistinct"                => pickleAttrSetManInt(tplIndex)
         case "distinct"                               => pickleAttrSetManSet(a, tplIndex)
-        case "mins" | "maxs" | "rands" | "samples"    => pickleAttrSetManV(a, tplIndex)
+        case "mins" | "maxs" | "samples"              => pickleAttrSetManV(a, tplIndex)
         case "median" | "avg" | "variance" | "stddev" => pickleAttrOneManDouble(tplIndex)
         case _                                        => pickleAttrSetManV(a, tplIndex)
       }

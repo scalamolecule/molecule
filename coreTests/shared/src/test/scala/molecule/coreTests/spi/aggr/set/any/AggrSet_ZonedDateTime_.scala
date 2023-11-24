@@ -111,22 +111,6 @@ trait AggrSet_ZonedDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
     }
 
 
-    "rand" - types { implicit conn =>
-      for {
-        _ <- Ns.i.zonedDateTimes.insert(List(
-          (1, Set(zonedDateTime1, zonedDateTime2)),
-          (2, Set(zonedDateTime2, zonedDateTime3)),
-          (2, Set(zonedDateTime3, zonedDateTime4)),
-          (2, Set(zonedDateTime3, zonedDateTime4)),
-        )).transact
-        all = Set(zonedDateTime1, zonedDateTime2, zonedDateTime3, zonedDateTime4)
-        _ <- Ns.zonedDateTimes(rand).query.get.map(res => all.contains(res.head.head) ==> true)
-        _ <- Ns.zonedDateTimes(rand(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-        _ <- Ns.zonedDateTimes(rand(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-      } yield ()
-    }
-
-
     "sample" - types { implicit futConn =>
       for {
         _ <- Ns.i.zonedDateTimes.insert(List(

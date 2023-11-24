@@ -53,10 +53,40 @@ trait AggrOne_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         ).transact
 
         _ <- Ns.double(min).query.get.map(_ ==> List(double1))
+        _ <- Ns.double(max).query.get.map(_ ==> List(double6))
+        _ <- Ns.double(min).double(max).query.get.map(_ ==> List((double1, double6)))
+
+        _ <- Ns.i.a1.double(min).query.get.map(_ ==> List(
+          (1, double1),
+          (2, double4)
+        ))
+
+        _ <- Ns.i.a1.double(max).query.get.map(_ ==> List(
+          (1, double3),
+          (2, double6)
+        ))
+
+        _ <- Ns.i.a1.double(min).double(max).query.get.map(_ ==> List(
+          (1, double1, double3),
+          (2, double4, double6)
+        ))
+      } yield ()
+    }
+
+    "min/max n" - types { implicit conn =>
+      for {
+        _ <- Ns.i.double.insert(
+          (1, double1),
+          (1, double2),
+          (1, double3),
+          (2, double4),
+          (2, double5),
+          (2, double6),
+        ).transact
+
         _ <- Ns.double(min(1)).query.get.map(_ ==> List(Set(double1)))
         _ <- Ns.double(min(2)).query.get.map(_ ==> List(Set(double1, double2)))
 
-        _ <- Ns.double(max).query.get.map(_ ==> List(double6))
         _ <- Ns.double(max(1)).query.get.map(_ ==> List(Set(double6)))
         _ <- Ns.double(max(2)).query.get.map(_ ==> List(Set(double5, double6)))
 
@@ -78,21 +108,10 @@ trait AggrOne_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "rand" - types { implicit conn =>
-      for {
-        _ <- Ns.double.insert(List(double1, double2, double3)).transact
-        all = Set(double1, double2, double3, double4)
-        _ <- Ns.double(rand).query.get.map(res => all.contains(res.head) ==> true)
-        _ <- Ns.double(rand(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-        _ <- Ns.double(rand(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-      } yield ()
-    }
-
-
     "sample" - types { implicit futConn =>
+      val all = Set(double1, double2, double3, double4)
       for {
         _ <- Ns.double.insert(List(double1, double2, double3)).transact
-        all = Set(double1, double2, double3, double4)
         _ <- Ns.double(sample).query.get.map(res => all.contains(res.head) ==> true)
         _ <- Ns.double(sample(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
         _ <- Ns.double(sample(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
@@ -100,7 +119,7 @@ trait AggrOne_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "count, countDistinct" - types { implicit conn =>
+    "count" - types { implicit conn =>
       for {
         _ <- Ns.i.double.insert(List(
           (1, double1),
@@ -109,16 +128,13 @@ trait AggrOne_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, double3),
         )).transact
 
-        _ <- Ns.i(count).query.get.map(_ ==> List(4))
-        _ <- Ns.i(countDistinct).query.get.map(_ ==> List(2))
-
         _ <- Ns.double(count).query.get.map(_ ==> List(4))
-        _ <- Ns.double(countDistinct).query.get.map(_ ==> List(3))
-
         _ <- Ns.i.a1.double(count).query.get.map(_ ==> List(
           (1, 1),
           (2, 3)
         ))
+
+        _ <- Ns.double(countDistinct).query.get.map(_ ==> List(3))
         _ <- Ns.i.a1.double(countDistinct).query.get.map(_ ==> List(
           (1, 1),
           (2, 2)

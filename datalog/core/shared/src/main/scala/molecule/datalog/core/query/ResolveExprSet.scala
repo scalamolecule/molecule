@@ -249,16 +249,6 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
         find += s"(max $n $v)"
         replaceCast(res.vector2set)
 
-      case "rand" =>
-        noBooleanSetAggr(res)
-        find += s"(rand 1 $v)"
-        replaceCast(res.vector2set)
-
-      case "rands" =>
-        noBooleanSetAggr(res)
-        find += s"(rand $n $v)"
-        replaceCast(res.vector2set)
-
       case "sample" =>
         noBooleanSetAggr(res)
         find += s"(sample 1 $v)"

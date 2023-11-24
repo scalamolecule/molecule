@@ -53,10 +53,40 @@ trait AggrOne_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         ).transact
 
         _ <- Ns.bigInt(min).query.get.map(_ ==> List(bigInt1))
+        _ <- Ns.bigInt(max).query.get.map(_ ==> List(bigInt6))
+        _ <- Ns.bigInt(min).bigInt(max).query.get.map(_ ==> List((bigInt1, bigInt6)))
+
+        _ <- Ns.i.a1.bigInt(min).query.get.map(_ ==> List(
+          (1, bigInt1),
+          (2, bigInt4)
+        ))
+
+        _ <- Ns.i.a1.bigInt(max).query.get.map(_ ==> List(
+          (1, bigInt3),
+          (2, bigInt6)
+        ))
+
+        _ <- Ns.i.a1.bigInt(min).bigInt(max).query.get.map(_ ==> List(
+          (1, bigInt1, bigInt3),
+          (2, bigInt4, bigInt6)
+        ))
+      } yield ()
+    }
+
+    "min/max n" - types { implicit conn =>
+      for {
+        _ <- Ns.i.bigInt.insert(
+          (1, bigInt1),
+          (1, bigInt2),
+          (1, bigInt3),
+          (2, bigInt4),
+          (2, bigInt5),
+          (2, bigInt6),
+        ).transact
+
         _ <- Ns.bigInt(min(1)).query.get.map(_ ==> List(Set(bigInt1)))
         _ <- Ns.bigInt(min(2)).query.get.map(_ ==> List(Set(bigInt1, bigInt2)))
 
-        _ <- Ns.bigInt(max).query.get.map(_ ==> List(bigInt6))
         _ <- Ns.bigInt(max(1)).query.get.map(_ ==> List(Set(bigInt6)))
         _ <- Ns.bigInt(max(2)).query.get.map(_ ==> List(Set(bigInt5, bigInt6)))
 
@@ -78,21 +108,10 @@ trait AggrOne_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "rand" - types { implicit conn =>
-      for {
-        _ <- Ns.bigInt.insert(List(bigInt1, bigInt2, bigInt3)).transact
-        all = Set(bigInt1, bigInt2, bigInt3, bigInt4)
-        _ <- Ns.bigInt(rand).query.get.map(res => all.contains(res.head) ==> true)
-        _ <- Ns.bigInt(rand(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-        _ <- Ns.bigInt(rand(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-      } yield ()
-    }
-
-
     "sample" - types { implicit futConn =>
+      val all = Set(bigInt1, bigInt2, bigInt3, bigInt4)
       for {
         _ <- Ns.bigInt.insert(List(bigInt1, bigInt2, bigInt3)).transact
-        all = Set(bigInt1, bigInt2, bigInt3, bigInt4)
         _ <- Ns.bigInt(sample).query.get.map(res => all.contains(res.head) ==> true)
         _ <- Ns.bigInt(sample(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
         _ <- Ns.bigInt(sample(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
@@ -100,7 +119,7 @@ trait AggrOne_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "count, countDistinct" - types { implicit conn =>
+    "count" - types { implicit conn =>
       for {
         _ <- Ns.i.bigInt.insert(List(
           (1, bigInt1),
@@ -109,16 +128,13 @@ trait AggrOne_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, bigInt3),
         )).transact
 
-        _ <- Ns.i(count).query.get.map(_ ==> List(4))
-        _ <- Ns.i(countDistinct).query.get.map(_ ==> List(2))
-
         _ <- Ns.bigInt(count).query.get.map(_ ==> List(4))
-        _ <- Ns.bigInt(countDistinct).query.get.map(_ ==> List(3))
-
         _ <- Ns.i.a1.bigInt(count).query.get.map(_ ==> List(
           (1, 1),
           (2, 3)
         ))
+
+        _ <- Ns.bigInt(countDistinct).query.get.map(_ ==> List(3))
         _ <- Ns.i.a1.bigInt(countDistinct).query.get.map(_ ==> List(
           (1, 1),
           (2, 2)

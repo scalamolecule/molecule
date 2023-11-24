@@ -58,6 +58,53 @@ trait FilterOneSpecial_Number extends CoreTestSuite with ApiAsync { spi: SpiAsyn
       } yield ()
     }
 
+    "Int ref" - types { implicit conn =>
+      import molecule.coreTests.dataModels.core.dsl.Types._
+      for {
+        _ <- Ns.i.Ref.int.insert(
+          (1, 1),
+          (2, 2),
+          (3, 3),
+          (4, 4),
+          (5, 5),
+          (6, 6),
+          (7, 7),
+          (8, 8),
+          (9, 9),
+        ).transact
+
+        // Mandatory
+
+        _ <- Ns.Ref.int.%(2, 0).query.i.get.map(_ ==> List(2, 4, 6, 8))
+        _ <- Ns.Ref.int.%(2, 1).query.get.map(_ ==> List(1, 3, 5, 7, 9))
+
+        _ <- Ns.Ref.int.%(3, 0).query.get.map(_ ==> List(3, 6, 9))
+        _ <- Ns.Ref.int.%(3, 1).query.get.map(_ ==> List(1, 4, 7))
+        _ <- Ns.Ref.int.%(3, 2).query.get.map(_ ==> List(2, 5, 8))
+
+        _ <- Ns.Ref.int.even.query.get.map(_ ==> List(2, 4, 6, 8))
+        _ <- Ns.Ref.int.odd.query.get.map(_ ==> List(1, 3, 5, 7, 9))
+
+        // Tacit
+
+        _ <- Ns.i.Ref.int_.%(2, 0).query.get.map(_ ==> List(2, 4, 6, 8))
+        _ <- Ns.i.Ref.int_.%(2, 1).query.get.map(_ ==> List(1, 3, 5, 7, 9))
+
+        _ <- Ns.i.Ref.int_.%(3, 0).query.get.map(_ ==> List(3, 6, 9))
+        _ <- Ns.i.Ref.int_.%(3, 1).query.get.map(_ ==> List(1, 4, 7))
+        _ <- Ns.i.Ref.int_.%(3, 2).query.get.map(_ ==> List(2, 5, 8))
+
+        _ <- Ns.i.Ref.int_.even.query.get.map(_ ==> List(2, 4, 6, 8))
+        _ <- Ns.i.Ref.int_.odd.query.get.map(_ ==> List(1, 3, 5, 7, 9))
+
+        // Complex filtering with multiple tacit filters
+        _ <- Ns.i.a1.Ref.int_.>(2).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8, 9))
+        _ <- Ns.i.a1.Ref.int_.>(2).int_.<=(8).query.i.get.map(_ ==> List(3, 4, 5, 6, 7, 8))
+        _ <- Ns.i.a1.Ref.int_.>(2).int_.<=(8).int_.not(4, 5).query.get.map(_ ==> List(3, 6, 7, 8))
+        _ <- Ns.i.a1.Ref.int_.>(2).int_.<=(8).int_.not(4, 5).int_.odd.query.get.map(_ ==> List(3, 7))
+      } yield ()
+    }
+
 
     "Long" - types { implicit conn =>
       for {

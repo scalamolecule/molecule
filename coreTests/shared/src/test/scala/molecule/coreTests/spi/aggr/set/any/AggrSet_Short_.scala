@@ -110,22 +110,6 @@ trait AggrSet_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "rand" - types { implicit conn =>
-      for {
-        _ <- Ns.i.shorts.insert(List(
-          (1, Set(short1, short2)),
-          (2, Set(short2, short3)),
-          (2, Set(short3, short4)),
-          (2, Set(short3, short4)),
-        )).transact
-        all = Set(short1, short2, short3, short4)
-        _ <- Ns.shorts(rand).query.get.map(res => all.contains(res.head.head) ==> true)
-        _ <- Ns.shorts(rand(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-        _ <- Ns.shorts(rand(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-      } yield ()
-    }
-
-
     "sample" - types { implicit futConn =>
       for {
         _ <- Ns.i.shorts.insert(List(

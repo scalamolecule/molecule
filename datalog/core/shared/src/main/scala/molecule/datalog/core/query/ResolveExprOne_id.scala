@@ -110,13 +110,6 @@ trait ResolveExprOne_id[Tpl]
       case "max" =>
         find += s"(max $e)"
 
-      case "rands" =>
-        find += s"(rand $n $e)"
-        replaceCast(res.vector2set)
-
-      case "rand" =>
-        find += s"(rand $e)"
-
       case "samples" =>
         find += s"(sample $n $e)"
         replaceCast(res.vector2set)

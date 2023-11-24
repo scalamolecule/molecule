@@ -226,29 +226,6 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
         aggregate = true
         replaceCast(res.nestedArray2setDesc(n))
 
-      case "rand" =>
-        noBooleanSetAggr(res)
-        distinct = false
-        select += col
-        orderBy += ((level, -1, "RAND()", ""))
-        hardLimit = 1
-        replaceCast(res.nestedArray2coalescedSet)
-
-      case "rands" =>
-        noBooleanSetAggr(res)
-        select +=
-          s"""ARRAY_SLICE(
-             |    ARRAY_AGG($col order by RAND()),
-             |    1,
-             |    LEAST(
-             |      $n,
-             |      ARRAY_LENGTH(ARRAY_AGG($col))
-             |    )
-             |  )""".stripMargin
-        groupByCols -= col
-        aggregate = true
-        replaceCast(res.nestedArray2coalescedSet)
-
       case "sample" =>
         noBooleanSetAggr(res)
         distinct = false

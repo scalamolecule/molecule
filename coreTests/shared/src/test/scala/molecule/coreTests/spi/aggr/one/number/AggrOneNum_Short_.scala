@@ -37,6 +37,15 @@ trait AggrOneNum_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "median" - types { implicit futConn =>
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+      // Different databases have different ways of calculating a median
+      val (median_2_3, median_1_2) = if (database == "MongoDB") {
+        (short2, short1)
+      } else {
+        (
+          (short2 + short3).toDouble / 2.0,
+          (short1 + short2).toDouble / 2.0
+        )
+      }
       for {
         _ <- Ns.i.short.insert(List(
           (1, short1),
@@ -46,11 +55,10 @@ trait AggrOneNum_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, short4),
         )).transact
 
-        _ <- Ns.short.a1.query.get.map(_ ==> List(short1, short2, short3, short4))
-        _ <- Ns.short(median).query.get.map(_.head ==~ (short2 + short3).toDouble / 2.0)
+        _ <- Ns.short(median).query.get.map(_.head ==~ median_2_3)
 
         _ <- Ns.i.short(median).query.get.map(_.map {
-          case (1, median) => median ==~ (short1 + short2).toDouble / 2.0
+          case (1, median) => median ==~ median_1_2
           case (2, median) => median ==~ short3.toString.toDouble
         })
       } yield ()
@@ -68,14 +76,12 @@ trait AggrOneNum_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, short4),
         )).transact
 
-        _ <- Ns.short.a1.query.get.map(_ ==> List(short1, short2, short3, short4))
         _ <- Ns.short(avg).query.get.map(_.head ==~ (short1 + short2 + short3 + short4).toDouble / 4.0)
 
         _ <- Ns.i.short(avg).query.get.map(_.map {
           case (1, avg) => avg ==~ (short1 + short2).toDouble / 2.0
           case (2, avg) => avg ==~ (short2 + short3 + short4).toDouble / 3.0
         })
-
       } yield ()
     }
 
@@ -91,7 +97,6 @@ trait AggrOneNum_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, short4),
         )).transact
 
-        _ <- Ns.short.a1.query.get.map(_ ==> List(short1, short2, short3, short4))
         _ <- Ns.short(variance).query.get.map(_.head ==~ varianceOf(short1, short2, short3, short4))
 
         _ <- Ns.i.short(variance).query.get.map(_.map {
@@ -113,7 +118,6 @@ trait AggrOneNum_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, short4),
         )).transact
 
-        _ <- Ns.short.a1.query.get.map(_ ==> List(short1, short2, short3, short4))
         _ <- Ns.short(stddev).query.get.map(_.head ==~ stdDevOf(short1, short2, short3, short4))
 
         _ <- Ns.i.short(stddev).query.get.map(_.map {

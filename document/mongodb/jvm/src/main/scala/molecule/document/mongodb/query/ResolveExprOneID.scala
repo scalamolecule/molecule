@@ -257,26 +257,6 @@ trait ResolveExprOneID extends ResolveExpr with LambdasOne { self: MongoQueryBas
     //          aggregate = true
     //          replaceCast(res.array2set)
     //
-    //        case "rand" =>
-    //          distinct = false
-    //          select += field
-    //          orderBy += ((level, -1, "RAND()", ""))
-    //          hardLimit = 1
-    //
-    //        case "rands" =>
-    //          select +=
-    //            s"""ARRAY_SLICE(
-    //               |    ARRAY_AGG($field order by RAND()),
-    //               |    1,
-    //               |    LEAST(
-    //               |      $n,
-    //               |      ARRAY_LENGTH(ARRAY_AGG($field))
-    //               |    )
-    //               |  )""".stripMargin
-    //          groupByCols -= field
-    //          aggregate = true
-    //          replaceCast(res.array2set)
-    //
     //        case "sample" =>
     //          distinct = false
     //          select += field

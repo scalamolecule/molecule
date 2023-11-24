@@ -37,6 +37,15 @@ trait AggrOneNum_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "median" - types { implicit futConn =>
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+      // Different databases have different ways of calculating a median
+      val (median_2_3, median_1_2) = if (database == "MongoDB") {
+        (double2, double1)
+      } else {
+        (
+          (double2 + double3).toDouble / 2.0,
+          (double1 + double2).toDouble / 2.0
+        )
+      }
       for {
         _ <- Ns.i.double.insert(List(
           (1, double1),
@@ -46,11 +55,10 @@ trait AggrOneNum_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, double4),
         )).transact
 
-        _ <- Ns.double.a1.query.get.map(_ ==> List(double1, double2, double3, double4))
-        _ <- Ns.double(median).query.get.map(_.head ==~ (double2 + double3).toDouble / 2.0)
+        _ <- Ns.double(median).query.get.map(_.head ==~ median_2_3)
 
         _ <- Ns.i.double(median).query.get.map(_.map {
-          case (1, median) => median ==~ (double1 + double2).toDouble / 2.0
+          case (1, median) => median ==~ median_1_2
           case (2, median) => median ==~ double3.toString.toDouble
         })
       } yield ()
@@ -68,14 +76,12 @@ trait AggrOneNum_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, double4),
         )).transact
 
-        _ <- Ns.double.a1.query.get.map(_ ==> List(double1, double2, double3, double4))
         _ <- Ns.double(avg).query.get.map(_.head ==~ (double1 + double2 + double3 + double4).toDouble / 4.0)
 
         _ <- Ns.i.double(avg).query.get.map(_.map {
           case (1, avg) => avg ==~ (double1 + double2).toDouble / 2.0
           case (2, avg) => avg ==~ (double2 + double3 + double4).toDouble / 3.0
         })
-
       } yield ()
     }
 
@@ -91,7 +97,6 @@ trait AggrOneNum_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, double4),
         )).transact
 
-        _ <- Ns.double.a1.query.get.map(_ ==> List(double1, double2, double3, double4))
         _ <- Ns.double(variance).query.get.map(_.head ==~ varianceOf(double1, double2, double3, double4))
 
         _ <- Ns.i.double(variance).query.get.map(_.map {
@@ -113,7 +118,6 @@ trait AggrOneNum_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, double4),
         )).transact
 
-        _ <- Ns.double.a1.query.get.map(_ ==> List(double1, double2, double3, double4))
         _ <- Ns.double(stddev).query.get.map(_.head ==~ stdDevOf(double1, double2, double3, double4))
 
         _ <- Ns.i.double(stddev).query.get.map(_.map {

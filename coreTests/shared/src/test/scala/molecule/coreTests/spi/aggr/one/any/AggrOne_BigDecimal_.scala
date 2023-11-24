@@ -53,10 +53,40 @@ trait AggrOne_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         ).transact
 
         _ <- Ns.bigDecimal(min).query.get.map(_ ==> List(bigDecimal1))
+        _ <- Ns.bigDecimal(max).query.get.map(_ ==> List(bigDecimal6))
+        _ <- Ns.bigDecimal(min).bigDecimal(max).query.get.map(_ ==> List((bigDecimal1, bigDecimal6)))
+
+        _ <- Ns.i.a1.bigDecimal(min).query.get.map(_ ==> List(
+          (1, bigDecimal1),
+          (2, bigDecimal4)
+        ))
+
+        _ <- Ns.i.a1.bigDecimal(max).query.get.map(_ ==> List(
+          (1, bigDecimal3),
+          (2, bigDecimal6)
+        ))
+
+        _ <- Ns.i.a1.bigDecimal(min).bigDecimal(max).query.get.map(_ ==> List(
+          (1, bigDecimal1, bigDecimal3),
+          (2, bigDecimal4, bigDecimal6)
+        ))
+      } yield ()
+    }
+
+    "min/max n" - types { implicit conn =>
+      for {
+        _ <- Ns.i.bigDecimal.insert(
+          (1, bigDecimal1),
+          (1, bigDecimal2),
+          (1, bigDecimal3),
+          (2, bigDecimal4),
+          (2, bigDecimal5),
+          (2, bigDecimal6),
+        ).transact
+
         _ <- Ns.bigDecimal(min(1)).query.get.map(_ ==> List(Set(bigDecimal1)))
         _ <- Ns.bigDecimal(min(2)).query.get.map(_ ==> List(Set(bigDecimal1, bigDecimal2)))
 
-        _ <- Ns.bigDecimal(max).query.get.map(_ ==> List(bigDecimal6))
         _ <- Ns.bigDecimal(max(1)).query.get.map(_ ==> List(Set(bigDecimal6)))
         _ <- Ns.bigDecimal(max(2)).query.get.map(_ ==> List(Set(bigDecimal5, bigDecimal6)))
 
@@ -78,21 +108,10 @@ trait AggrOne_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "rand" - types { implicit conn =>
-      for {
-        _ <- Ns.bigDecimal.insert(List(bigDecimal1, bigDecimal2, bigDecimal3)).transact
-        all = Set(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4)
-        _ <- Ns.bigDecimal(rand).query.get.map(res => all.contains(res.head) ==> true)
-        _ <- Ns.bigDecimal(rand(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-        _ <- Ns.bigDecimal(rand(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-      } yield ()
-    }
-
-
     "sample" - types { implicit futConn =>
+      val all = Set(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4)
       for {
         _ <- Ns.bigDecimal.insert(List(bigDecimal1, bigDecimal2, bigDecimal3)).transact
-        all = Set(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4)
         _ <- Ns.bigDecimal(sample).query.get.map(res => all.contains(res.head) ==> true)
         _ <- Ns.bigDecimal(sample(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
         _ <- Ns.bigDecimal(sample(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
@@ -100,7 +119,7 @@ trait AggrOne_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "count, countDistinct" - types { implicit conn =>
+    "count" - types { implicit conn =>
       for {
         _ <- Ns.i.bigDecimal.insert(List(
           (1, bigDecimal1),
@@ -109,16 +128,13 @@ trait AggrOne_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, bigDecimal3),
         )).transact
 
-        _ <- Ns.i(count).query.get.map(_ ==> List(4))
-        _ <- Ns.i(countDistinct).query.get.map(_ ==> List(2))
-
         _ <- Ns.bigDecimal(count).query.get.map(_ ==> List(4))
-        _ <- Ns.bigDecimal(countDistinct).query.get.map(_ ==> List(3))
-
         _ <- Ns.i.a1.bigDecimal(count).query.get.map(_ ==> List(
           (1, 1),
           (2, 3)
         ))
+
+        _ <- Ns.bigDecimal(countDistinct).query.get.map(_ ==> List(3))
         _ <- Ns.i.a1.bigDecimal(countDistinct).query.get.map(_ ==> List(
           (1, 1),
           (2, 2)

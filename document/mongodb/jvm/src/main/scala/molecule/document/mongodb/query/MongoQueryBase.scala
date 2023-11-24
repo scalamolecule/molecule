@@ -36,11 +36,7 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
   var pathDot        = ""
   var pathUnderscore = ""
 
-//  val matchFields = ListBuffer.empty[String]
   val matches     = new util.ArrayList[Bson]
-  val matches3    = mutable.Map.empty[(String, String), List[(String, BsonValue)]]
-//  val matches3    = ListBuffer.empty[(String, List[(String, BsonValue)])]
-  //  val matches2 = mutable.Map.empty[String, BsonDocument]
 
   var projections      = new util.ArrayList[Bson]
   var projections2     = ListBuffer.empty[String]
@@ -66,18 +62,15 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
     )
   )
 
-
   def path2 = pathDot.replace('.', '_')
 
   def unique(field: String) = {
     //    println(s"------ $fieldSuffix  $pathDot  $field  ")
     val uniqueField = if (!pathFields.contains(pathDot + field)) {
-      //      path + field
       field
     } else {
       // append suffix to distinguish multiple uses of the same field
       uniqueIndex += 1
-      //      path + field + "_" + fieldSuffix
       field + "_" + uniqueIndex
     }
     pathFields += pathDot + uniqueField
@@ -85,15 +78,9 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
   }
 
   final protected def projectField(field: String): Unit = {
-    //    val fieldAlias = unique(field)
-    //    projections.add(Projections.include(pathAlias + pathField))
     projections.add(Projections.include(pathDot + field))
-    //    projections.add(Projections.include(path + field))
-    //    projections.add(Projections.include(field))
-    //    fieldAlias
   }
   final protected def removeField(pathField: String): Unit = {
-    //    projections.add(Projections.include(path + field))
     projections.remove(Projections.include(pathField))
   }
 

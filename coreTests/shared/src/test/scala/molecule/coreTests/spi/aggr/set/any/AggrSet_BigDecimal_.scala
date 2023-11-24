@@ -110,22 +110,6 @@ trait AggrSet_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "rand" - types { implicit conn =>
-      for {
-        _ <- Ns.i.bigDecimals.insert(List(
-          (1, Set(bigDecimal1, bigDecimal2)),
-          (2, Set(bigDecimal2, bigDecimal3)),
-          (2, Set(bigDecimal3, bigDecimal4)),
-          (2, Set(bigDecimal3, bigDecimal4)),
-        )).transact
-        all = Set(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4)
-        _ <- Ns.bigDecimals(rand).query.get.map(res => all.contains(res.head.head) ==> true)
-        _ <- Ns.bigDecimals(rand(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-        _ <- Ns.bigDecimals(rand(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-      } yield ()
-    }
-
-
     "sample" - types { implicit futConn =>
       for {
         _ <- Ns.i.bigDecimals.insert(List(

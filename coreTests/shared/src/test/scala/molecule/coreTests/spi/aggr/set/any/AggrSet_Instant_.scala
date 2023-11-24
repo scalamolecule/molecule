@@ -111,22 +111,6 @@ trait AggrSet_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "rand" - types { implicit conn =>
-      for {
-        _ <- Ns.i.instants.insert(List(
-          (1, Set(instant1, instant2)),
-          (2, Set(instant2, instant3)),
-          (2, Set(instant3, instant4)),
-          (2, Set(instant3, instant4)),
-        )).transact
-        all = Set(instant1, instant2, instant3, instant4)
-        _ <- Ns.instants(rand).query.get.map(res => all.contains(res.head.head) ==> true)
-        _ <- Ns.instants(rand(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-        _ <- Ns.instants(rand(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-      } yield ()
-    }
-
-
     "sample" - types { implicit futConn =>
       for {
         _ <- Ns.i.instants.insert(List(

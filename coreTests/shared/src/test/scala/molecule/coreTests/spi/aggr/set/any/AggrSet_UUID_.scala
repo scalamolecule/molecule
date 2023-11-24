@@ -111,22 +111,6 @@ trait AggrSet_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "rand" - types { implicit conn =>
-      for {
-        _ <- Ns.i.uuids.insert(List(
-          (1, Set(uuid1, uuid2)),
-          (2, Set(uuid2, uuid3)),
-          (2, Set(uuid3, uuid4)),
-          (2, Set(uuid3, uuid4)),
-        )).transact
-        all = Set(uuid1, uuid2, uuid3, uuid4)
-        _ <- Ns.uuids(rand).query.get.map(res => all.contains(res.head.head) ==> true)
-        _ <- Ns.uuids(rand(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-        _ <- Ns.uuids(rand(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-      } yield ()
-    }
-
-
     "sample" - types { implicit futConn =>
       for {
         _ <- Ns.i.uuids.insert(List(

@@ -68,25 +68,6 @@ trait ResolveExprOne_mariadb extends ResolveExprOne with LambdasOne_mariadb { se
           row.getString(paramIndex).split(sepChar).map(res.json2tpe).take(n).toSet
         )
 
-      case "rand" =>
-        select += s"JSON_ARRAYAGG($col)"
-        groupByCols -= col
-        aggregate = true
-        replaceCast((row: Row, paramIndex: Int) => {
-          val array = res.json2array(row.getString(paramIndex))
-          val rnd   = new Random().nextInt(array.length)
-          array(rnd)
-        })
-
-      case "rands" =>
-        select += s"JSON_ARRAYAGG($col)"
-        groupByCols -= col
-        aggregate = true
-        replaceCast((row: Row, paramIndex: Int) => {
-          val array = res.json2array(row.getString(paramIndex))
-          Random.shuffle(array.toSet).take(n)
-        })
-
       case "sample" =>
         select += s"JSON_ARRAYAGG($col)"
         groupByCols -= col

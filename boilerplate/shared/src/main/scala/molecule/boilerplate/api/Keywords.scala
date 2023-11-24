@@ -7,14 +7,12 @@ package molecule.boilerplate.api
  * Person.age(countDistinct).get.map(_.head ==> 3) // count of asserted distinct `age` attribute values
  * Person.age(max).get.map(_.head ==> 38)          // maximum `age` value (using `compare`)
  * Person.age(min).get.map(_.head ==> 5)           // maximum `age` value (using `compare`)
- * Person.age(rand).get.map(_.head ==> 25)         // single random `age` value
- * Person.age(sample).get.map(_.head ==> 27)       // single sample `age` value (when single value, same as random)
+ * Person.age(sample).get.map(_.head ==> 27)       // single sample `age` value
  *
  * // Aggregates on any attribute type, returning multiple values
  * Person.age(distinct).get.map(_.head ==> Vector(5, 7, 38)) // distinct `age` values
  * Person.age(max(2)).get.map(_.head ==> Vector(38, 7))      // 2 maximum `age` values
  * Person.age(min(2)).get.map(_.head ==> Vector(5, 7))       // 2 minimum `age` values
- * Person.age(rand(2)).get.map(_.head ==> Stream(5, ?))      // 2 random `age` values (values can re-occur)
  * Person.age(sample(2)).get.map(_.head ==> Vector(7, 38))   // 2 sample `age` values
  *
  * // Aggregates on number attributes
@@ -151,47 +149,6 @@ trait KeywordsStable {
     override def toString = "maxs"
   }
 
-  /** Random attribute value(s). <br><br> Apply `random` keyword to attribute to
-   * return a single random attribute of entities matching the molecule.
-   * {{{
-   * for {
-   *   _ <- Person.age.insert(25, 34, 37, 42, 70)
-   *   _ <- Person.age(random).get.map(_.head ==> 34) // or other..
-   * } yield ()
-   * }}}
-   * Apply `random(n)` to return Vector of n random values. Observe though that
-   * duplicate random values can re-occur.
-   * {{{
-   * Person.age(random(3)).get.map(_.head ==> Vector(42, 25, 42)) // or other..
-   * }}}
-   * To get distinct values only, use the `sample(n)` keyword instead.
-   *
-   * @group aggregates
-   */
-  trait rand extends AggrKw {
-
-    /** Random values of attribute. <br><br> Apply a number n to `random` to
-     * return Stream of n random attribute values of from entities matching the
-     * molecule. <br>Observe that duplicate random values can re-occur.
-     * {{{
-     * for {
-     *   _ <- Person.age.insert(25, 34, 37, 42, 70)
-     *   _ <- Person.age(random(3)).get.map(_.head ==> Stream(42, 25, 42)) // or other..
-     * } yield ()
-     * }}}
-     * To get distinct values only, use the `sample(n)` keyword instead.
-     *
-     * @return
-     * List[attribute-type]
-     * @group aggregates
-     */
-    def apply(n: Int): rands = rands(n)
-  }
-
-  case class rands(n: Int) extends Kw {
-    override def toString = "rands"
-  }
-
   /** Sample attribute value(s). <br><br> Apply `sample` keyword to attribute to
    * return a single sample (random) attribute value of entities matching the
    * molecule.
@@ -205,7 +162,6 @@ trait KeywordsStable {
    * {{{
    * Person.age(sample(3)).get.map(_.head ==> Vector(70, 25, 37)) // or other..
    * }}}
-   * If values don't need to be distinct, `random(n)` can be used also.
    *
    * @note
    * Can at most return the number of values that match.
@@ -214,15 +170,13 @@ trait KeywordsStable {
   trait sample extends AggrKw {
 
     /** Distinct sample values of attribute. <br><br> Apply `sample(n)` to an
-     * attribute to return a Vector of up to n distinct sample values (can at
-     * most return the number of values that match).
+     * attribute to return a Set of up to n sample values.
      * {{{
      * for {
      *   _ <- Person.age.insert(25, 34, 37, 42, 70)
      *   _ <- Person.age(sample(3)).get.map(_.head ==> Vector(42, 25, 42)) // or other..
      * } yield ()
      * }}}
-     * If values don't need to be distinct, `random(n)` can be used also.
      *
      * @note
      * Can at most return the number of values that match.
@@ -422,9 +376,6 @@ trait Keywords {
   }
   object max extends Keywords.max {
     override def toString = "max"
-  }
-  object rand extends Keywords.rand {
-    override def toString = "rand"
   }
   object sample extends Keywords.sample {
     override def toString = "sample"

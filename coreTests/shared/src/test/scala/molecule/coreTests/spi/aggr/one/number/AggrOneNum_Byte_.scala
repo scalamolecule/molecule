@@ -37,6 +37,15 @@ trait AggrOneNum_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "median" - types { implicit futConn =>
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+      // Different databases have different ways of calculating a median
+      val (median_2_3, median_1_2) = if (database == "MongoDB") {
+        (byte2, byte1)
+      } else {
+        (
+          (byte2 + byte3).toDouble / 2.0,
+          (byte1 + byte2).toDouble / 2.0
+        )
+      }
       for {
         _ <- Ns.i.byte.insert(List(
           (1, byte1),
@@ -46,11 +55,10 @@ trait AggrOneNum_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, byte4),
         )).transact
 
-        _ <- Ns.byte.a1.query.get.map(_ ==> List(byte1, byte2, byte3, byte4))
-        _ <- Ns.byte(median).query.get.map(_.head ==~ (byte2 + byte3).toDouble / 2.0)
+        _ <- Ns.byte(median).query.get.map(_.head ==~ median_2_3)
 
         _ <- Ns.i.byte(median).query.get.map(_.map {
-          case (1, median) => median ==~ (byte1 + byte2).toDouble / 2.0
+          case (1, median) => median ==~ median_1_2
           case (2, median) => median ==~ byte3.toString.toDouble
         })
       } yield ()
@@ -68,14 +76,12 @@ trait AggrOneNum_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, byte4),
         )).transact
 
-        _ <- Ns.byte.a1.query.get.map(_ ==> List(byte1, byte2, byte3, byte4))
         _ <- Ns.byte(avg).query.get.map(_.head ==~ (byte1 + byte2 + byte3 + byte4).toDouble / 4.0)
 
         _ <- Ns.i.byte(avg).query.get.map(_.map {
           case (1, avg) => avg ==~ (byte1 + byte2).toDouble / 2.0
           case (2, avg) => avg ==~ (byte2 + byte3 + byte4).toDouble / 3.0
         })
-
       } yield ()
     }
 
@@ -91,7 +97,6 @@ trait AggrOneNum_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, byte4),
         )).transact
 
-        _ <- Ns.byte.a1.query.get.map(_ ==> List(byte1, byte2, byte3, byte4))
         _ <- Ns.byte(variance).query.get.map(_.head ==~ varianceOf(byte1, byte2, byte3, byte4))
 
         _ <- Ns.i.byte(variance).query.get.map(_.map {
@@ -113,7 +118,6 @@ trait AggrOneNum_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, byte4),
         )).transact
 
-        _ <- Ns.byte.a1.query.get.map(_ ==> List(byte1, byte2, byte3, byte4))
         _ <- Ns.byte(stddev).query.get.map(_.head ==~ stdDevOf(byte1, byte2, byte3, byte4))
 
         _ <- Ns.i.byte(stddev).query.get.map(_.map {

@@ -1,7 +1,7 @@
 package molecule.document.mongodb.compliance.aggr
 
-import molecule.coreTests.spi.aggr.one.AggrInRefs
 import molecule.coreTests.spi.aggr.one.any._
+import molecule.coreTests.spi.aggr.one.ref.AggrOneRef_min_max
 import molecule.document.mongodb.setup.TestAsync_mongodb
 
 object AggrOne_String extends AggrOne_String_ with TestAsync_mongodb
@@ -28,4 +28,4 @@ object AggrOne_Short extends AggrOne_Short_ with TestAsync_mongodb
 object AggrOne_Char extends AggrOne_Char_ with TestAsync_mongodb
 object AggrOne_ref extends AggrOne_ref_ with TestAsync_mongodb
 
-object AggrInRefs extends AggrInRefs with TestAsync_mongodb
+object AggrInRefs extends AggrOneRef_min_max with TestAsync_mongodb

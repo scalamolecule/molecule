@@ -110,22 +110,6 @@ trait AggrSet_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "rand" - types { implicit conn =>
-      for {
-        _ <- Ns.i.floats.insert(List(
-          (1, Set(float1, float2)),
-          (2, Set(float2, float3)),
-          (2, Set(float3, float4)),
-          (2, Set(float3, float4)),
-        )).transact
-        all = Set(float1, float2, float3, float4)
-        _ <- Ns.floats(rand).query.get.map(res => all.contains(res.head.head) ==> true)
-        _ <- Ns.floats(rand(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-        _ <- Ns.floats(rand(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-      } yield ()
-    }
-
-
     "sample" - types { implicit futConn =>
       for {
         _ <- Ns.i.floats.insert(List(

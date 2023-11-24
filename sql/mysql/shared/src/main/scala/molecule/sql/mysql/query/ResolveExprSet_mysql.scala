@@ -150,23 +150,6 @@ trait ResolveExprSet_mysql
           row.getString(paramIndex).split(sepChar).map(res.json2tpe).take(n).toSet
         )
 
-      case "rand" =>
-        noBooleanSetAggr(res)
-        selectWithOrder(col, tpeDb, "JSON_ARRAYAGG")
-        replaceCast((row: Row, paramIndex: Int) => {
-          val array = res.json2array(row.getString(paramIndex))
-          val rnd   = new Random().nextInt(array.length)
-          Set(array(rnd))
-        })
-
-      case "rands" =>
-        noBooleanSetAggr(res)
-        selectWithOrder(col, tpeDb, "JSON_ARRAYAGG")
-        replaceCast((row: Row, paramIndex: Int) => {
-          val array = res.json2array(row.getString(paramIndex))
-          Random.shuffle(array.toSet).take(n)
-        })
-
       case "sample" =>
         noBooleanSetAggr(res)
         selectWithOrder(col, tpeDb, "JSON_ARRAYAGG")

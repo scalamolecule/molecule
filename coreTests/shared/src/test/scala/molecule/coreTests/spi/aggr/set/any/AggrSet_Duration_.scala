@@ -111,22 +111,6 @@ trait AggrSet_Duration_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "rand" - types { implicit conn =>
-      for {
-        _ <- Ns.i.durations.insert(List(
-          (1, Set(duration1, duration2)),
-          (2, Set(duration2, duration3)),
-          (2, Set(duration3, duration4)),
-          (2, Set(duration3, duration4)),
-        )).transact
-        all = Set(duration1, duration2, duration3, duration4)
-        _ <- Ns.durations(rand).query.get.map(res => all.contains(res.head.head) ==> true)
-        _ <- Ns.durations(rand(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-        _ <- Ns.durations(rand(2)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-      } yield ()
-    }
-
-
     "sample" - types { implicit futConn =>
       for {
         _ <- Ns.i.durations.insert(List(
