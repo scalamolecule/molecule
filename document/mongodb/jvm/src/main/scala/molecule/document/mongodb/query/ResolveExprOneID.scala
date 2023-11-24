@@ -11,9 +11,9 @@ import org.bson.conversions.Bson
 trait ResolveExprOneID extends ResolveExpr with LambdasOne { self: MongoQueryBase =>
 
   protected def resolveAttrOneManID(attr: AttrOneMan): Unit = {
-    aritiesAttr()
+//    aritiesAttr()
     attr match {
-      case at: AttrOneManID => man(at.copy(attr = "_id"), at.vs, resId)
+      case at: AttrOneManID => man(at.copy(attr = "_id"), at.vs, resID)
       case _                => throw ModelError("Unexpected mandatory expr one ID type")
     }
   }
@@ -22,7 +22,7 @@ trait ResolveExprOneID extends ResolveExpr with LambdasOne { self: MongoQueryBas
     if (isNestedOpt)
       throw ModelError("Tacit attributes not allowed in optional nested queries. Found: " + attr.name + "_")
     attr match {
-      case at: AttrOneTacID => tac(at.copy(attr = "_id"), at.vs, resId)
+      case at: AttrOneTacID => tac(at.copy(attr = "_id"), at.vs, resID)
       case _                => throw ModelError("Unexpected tacit expr one ID type")
     }
   }
@@ -82,7 +82,7 @@ trait ResolveExprOneID extends ResolveExpr with LambdasOne { self: MongoQueryBas
 
 
   private def expr[T](field0: String, op: Op, args: Seq[T], res: ResOne[T]): Unit = {
-    val field = path + field0
+    val field = pathDot + field0
     op match {
       case V          => matches.add(Filters.ne(field, null))
       case Eq         => matches.add(equal(field, args, res))
@@ -97,12 +97,6 @@ trait ResolveExprOneID extends ResolveExpr with LambdasOne { self: MongoQueryBas
       case EndsWith   => matches.add(endsWith(field, args.head))
       case Contains   => matches.add(contains(field, args.head))
       case Matches    => matches.add(matches(field, args.head.toString))
-      case Take       => take(field, args.head.toString.toInt)
-      case TakeRight  => takeRight(field, args.head.toString.toInt)
-      case Drop       => drop(field, args.head.toString.toInt)
-      case DropRight  => dropRight(field, args.head.toString.toInt)
-      case Slice      => slice(field, args)
-      case SubString  => slice(field, args)
       case Remainder  => remainder(field, args)
       case Even       => even(field)
       case Odd        => odd(field)
@@ -128,7 +122,7 @@ trait ResolveExprOneID extends ResolveExpr with LambdasOne { self: MongoQueryBas
     }
   }
   private def equal2(field: String, filterAttr: String): Unit = {
-    where += ((field, "= " + filterAttr))
+//    where += ((field, "= " + filterAttr))
   }
 
   private def neq[T](field: String, args: Seq[T], res: ResOne[T]): Bson = {
@@ -144,11 +138,11 @@ trait ResolveExprOneID extends ResolveExpr with LambdasOne { self: MongoQueryBas
     }
   }
   private def neq2(field: String, filterAttr: String): Unit = {
-    where += ((field, " != " + filterAttr))
+//    where += ((field, " != " + filterAttr))
   }
 
   private def compare2(field: String, op: String, filterAttr: String): Unit = {
-    where += ((field, op + " " + filterAttr))
+//    where += ((field, op + " " + filterAttr))
   }
 
   private def noValue(field: String): Bson = {
@@ -197,99 +191,6 @@ trait ResolveExprOneID extends ResolveExpr with LambdasOne { self: MongoQueryBas
     }
   }
 
-  private def take(field: String, n: Int): Unit = {
-    if (n > 0) {
-      // Empty result string discarded
-      projections.add(Projections.computed(field, current().getString(field).substr(0, n)))
-    } else {
-      // Take nothing
-      matches.add(Filters.eq("_id", -1))
-    }
-  }
-
-  private def drop(field: String, n: Int): Unit = {
-    if (n > 0) {
-      // Skip if trying to drop more than string length
-      matches.add(Filters.expr(current().getString(field).length().gt(of(n))))
-      projections.add(Projections.computed(field, current().getString(field).substr(n, Int.MaxValue)))
-    } else {
-      // Drop nothing
-    }
-  }
-
-  private def takeRight(field: String, n: Int): Unit = {
-    if (n > 0) {
-      projections.add(
-        Projections.computed(
-          field,
-          current().getString(field).substr(
-            current().getString(field).length().subtract(n).max(of(0)),
-            of(Int.MaxValue)
-          )
-        )
-      )
-    } else {
-      // Take nothing
-      matches.add(Filters.eq("_id", -1))
-    }
-  }
-
-  private def dropRight(field: String, n: Int): Unit = {
-    if (n > 0) {
-      // Skip if trying to drop more than string length
-      matches.add(Filters.expr(current().getString(field).length().gt(of(n))))
-      projections.add(
-        Projections.computed(
-          field,
-          current().getString(field).substr(
-            of(0),
-            current().getString(field).length().subtract(n).max(of(0))
-          )
-        )
-      )
-    } else {
-      // Drop nothing
-    }
-  }
-
-  private def slice[T](field: String, args: Seq[T]): Unit = {
-    val Seq(from, until) = args.asInstanceOf[Seq[String]].map(_.toInt)
-    if (from >= until) {
-      // Take nothing
-      matches.add(Filters.eq("_id", -1))
-    } else if (from >= 0) {
-      val length = until - from
-      // Skip if from is greater than string length
-      matches.add(Filters.expr(current().getString(field).length().gt(of(from))))
-      projections.add(Projections.computed(field, current().getString(field).substr(from, length)))
-    } else {
-      // Drop nothing
-    }
-  }
-
-  private def subString[T](field: String, args: Seq[T]): Bson = {
-    // 1-based string position
-    val from  = args.head.toString.toInt.max(0) + 1
-    val until = args(1).toString.toInt + 1
-    if (from >= until) {
-      where += (("FALSE", ""))
-
-    } else {
-      select -= field
-      notNull -= field
-      val alias  = field.replace('.', '_')
-      val len    = s"LENGTH($field)"
-      val length = until - from
-      select += s"SUBSTRING($field, $from, $length) AS $alias"
-      orderBy = orderBy.map {
-        case (level, arity, `field`, dir) => (level, arity, alias, dir)
-        case other                        => other
-      }
-      where += ((s"$len >= $from", ""))
-    }
-    ???
-  }
-
   private def remainder[T](field: String, args: Seq[T]): Unit = {
     val Seq(divisor, remainder) = args.map(_.toString.toInt)
     matches.add(Filters.mod(field, divisor, remainder))
@@ -306,7 +207,7 @@ trait ResolveExprOneID extends ResolveExpr with LambdasOne { self: MongoQueryBas
   private def aggr[T](field: String, fn: String, optN: Option[Int], res: ResOne[T]): Unit = {
     lazy val n = optN.getOrElse(0)
     // Replace find/casting with aggregate function/cast
-    select -= field
+//    select -= field
     //      fn match {
     //        case "distinct" =>
     //          select += s"ARRAY_AGG(DISTINCT $field)"
@@ -448,12 +349,12 @@ trait ResolveExprOneID extends ResolveExpr with LambdasOne { self: MongoQueryBas
     if (orderBy.nonEmpty && orderBy.last._3 == field) {
       // order by aggregate alias instead
       val alias = field.replace('.', '_') + "_" + fn.toLowerCase
-      select += s"$fn($distinct$field$cast) $alias"
+//      select += s"$fn($distinct$field$cast) $alias"
       val (level, _, _, dir) = orderBy.last
       orderBy.remove(orderBy.size - 1)
       orderBy += ((level, 1, alias, dir))
     } else {
-      select += s"$fn($distinct$field$cast)"
+//      select += s"$fn($distinct$field$cast)"
     }
   }
 

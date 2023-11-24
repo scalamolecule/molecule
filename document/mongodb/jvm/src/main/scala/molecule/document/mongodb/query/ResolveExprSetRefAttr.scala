@@ -24,7 +24,7 @@ trait ResolveExprSetRefAttr extends ResolveExpr with LambdasSet { self: MongoQue
 
   override protected def resolveRefAttrSetMan(attr: AttrSetMan): Unit = {
     setCoords(attr)
-    aritiesAttr()
+//    aritiesAttr()
     attr match {
       case at: AttrSetManInt    => refMan(attr, at.vs, resSetInt)
       case at: AttrSetManLong   => refMan(attr, at.vs, resSetLong)
@@ -45,7 +45,7 @@ trait ResolveExprSetRefAttr extends ResolveExpr with LambdasSet { self: MongoQue
 
   override protected def resolveRefAttrSetOpt(attr: AttrSetOpt): Unit = {
     setCoords(attr)
-    aritiesAttr()
+//    aritiesAttr()
     hasOptAttr = true // to avoid redundant None's
     attr match {
       case at: AttrSetOptInt    => refOpt(at, at.vs, resSetInt)

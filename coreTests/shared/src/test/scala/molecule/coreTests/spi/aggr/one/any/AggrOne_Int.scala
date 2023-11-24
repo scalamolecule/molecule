@@ -21,7 +21,7 @@ trait AggrOne_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, int3),
         )).transact
 
-        _ <- Ns.i.int.a1.query.i.get.map(_ ==> List(
+        _ <- Ns.i.int.a1.query.get.map(_ ==> List(
           (1, int1),
           (2, int2), // 2 rows coalesced
           (2, int3),

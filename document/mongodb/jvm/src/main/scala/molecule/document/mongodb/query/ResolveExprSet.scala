@@ -11,7 +11,7 @@ import scala.reflect.ClassTag
 trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet =>
 
   override protected def resolveAttrSetMan(attr: AttrSetMan): Unit = {
-    aritiesAttr()
+//    aritiesAttr()
     attr match {
       case at: AttrSetManID             => man(attr, at.vs, resSetString)
       case at: AttrSetManString         => man(attr, at.vs, resSetString)
@@ -68,7 +68,7 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
   }
 
   override protected def resolveAttrSetOpt(attr: AttrSetOpt): Unit = {
-    aritiesAttr()
+//    aritiesAttr()
     hasOptAttr = true // to avoid redundant None's
     attr match {
       case at: AttrSetOptID             => opt(at, at.vs, resSetString)
@@ -214,7 +214,7 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
   }
 
   private def aggr[T](field: String, fn: String, optN: Option[Int], res: ResSet[T]): Unit = {
-    select -= field
+//    select -= field
     lazy val n = optN.getOrElse(0)
     //      fn match {
     //        case "distinct" =>
@@ -442,7 +442,7 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
   }
 
   private def equal2(field: String, filterAttr: String): Unit = {
-    where += ((field, "= " + filterAttr))
+//    where += ((field, "= " + filterAttr))
   }
 
   private def optEqual[T](field: String, optSets: Option[Seq[Set[T]]], res: ResSet[T]): Unit = {
@@ -465,7 +465,7 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
   }
 
   private def neq2(field: String, filterAttr: String): Unit = {
-    where += ((field, "<> " + filterAttr))
+//    where += ((field, "<> " + filterAttr))
   }
 
   private def optNeq[T](field: String, optSets: Option[Seq[Set[T]]], res: ResSet[T]): Unit = {
@@ -493,9 +493,9 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
 
   private def has2(field: String, filterAttr: String, cardOne: Boolean, tpe: String): Unit = {
     if (cardOne) {
-      where += (("", s"ARRAY_CONTAINS($field, $filterAttr)"))
+//      where += (("", s"ARRAY_CONTAINS($field, $filterAttr)"))
     } else {
-      where += (("", s"has_$tpe($field, $filterAttr)"))
+//      where += (("", s"has_$tpe($field, $filterAttr)"))
     }
   }
 
@@ -527,9 +527,9 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
 
   private def hasNo2(field: String, filterAttr: String, cardOne: Boolean, tpe: String): Unit = {
     if (cardOne) {
-      where += (("", s"NOT ARRAY_CONTAINS($field, $filterAttr)"))
+//      where += (("", s"NOT ARRAY_CONTAINS($field, $filterAttr)"))
     } else {
-      where += (("", s"hasNo_$tpe($field, $filterAttr)"))
+//      where += (("", s"hasNo_$tpe($field, $filterAttr)"))
     }
   }
 
@@ -548,7 +548,7 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
   }
 
   private def noValue(field: String): Unit = {
-    notNull -= field
-    where += ((field, s"IS NULL"))
+//    notNull -= field
+//    where += ((field, s"IS NULL"))
   }
 }

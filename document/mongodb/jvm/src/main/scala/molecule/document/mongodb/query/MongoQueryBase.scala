@@ -8,7 +8,7 @@ import molecule.base.util.BaseHelpers
 import molecule.boilerplate.ast.Model._
 import molecule.core.util.JavaConversions
 import org.bson.conversions.Bson
-import org.bson.{BsonDocument, BsonValue}
+import org.bson.{BsonDocument, BsonString, BsonValue}
 import scala.collection.mutable
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 
@@ -26,26 +26,36 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
     ???
   }
 
+  trait Fields
+  case class Field(field: String) extends Fields
+  case class Refs(field: String) extends Fields
+
   var idField = false
 
-  var path    = ""
-  val matches = new util.ArrayList[Bson]
+  var path           = List.empty[String]
+  var pathDot        = ""
+  var pathUnderscore = ""
+
+//  val matchFields = ListBuffer.empty[String]
+  val matches     = new util.ArrayList[Bson]
+  val matches3    = mutable.Map.empty[(String, String), List[(String, BsonValue)]]
+//  val matches3    = ListBuffer.empty[(String, List[(String, BsonValue)])]
+  //  val matches2 = mutable.Map.empty[String, BsonDocument]
 
   var projections      = new util.ArrayList[Bson]
   var projections2     = ListBuffer.empty[String]
   var levelProjections = List(List(projections))
 
-  final protected val preGroupByFields = ListBuffer.empty[(String, String)]
-  final protected val groupFields      = ListBuffer.empty[(String, String)]
-  final protected val groupExprs       = ListBuffer.empty[(String, BsonValue)]
-  final protected val countFields      = ListBuffer.empty[(String, String)]
+  final protected val pathFields     = ListBuffer.empty[String]
+  final protected val preGroupFields = ListBuffer.empty[(String, String)]
+  final protected val groupIdFields  = ListBuffer.empty[(String, String, String)]
+  final protected val groupFields    = ListBuffer.empty[(String, String)]
+  final protected val groupExprs     = ListBuffer.empty[(String, BsonValue)]
+  final protected val addFields      = mutable.Map.empty[List[String], List[String]]
 
-  var sampleSize = 0
-  var fieldIndex = 0
-  //  var addFields  = List.empty[(String, BsonValue)]
-
-  //  val addFieldsDoc = new BsonDocument()
-
+  var sampleSize  = 0
+  var fieldIndex  = 0
+  var uniqueIndex = 0
 
   val limit = new util.ArrayList[Bson]
   val sorts = new util.ArrayList[Bson]
@@ -56,7 +66,36 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
     )
   )
 
-  def path2 = path.replace('.', '_')
+
+  def path2 = pathDot.replace('.', '_')
+
+  def unique(field: String) = {
+    //    println(s"------ $fieldSuffix  $pathDot  $field  ")
+    val uniqueField = if (!pathFields.contains(pathDot + field)) {
+      //      path + field
+      field
+    } else {
+      // append suffix to distinguish multiple uses of the same field
+      uniqueIndex += 1
+      //      path + field + "_" + fieldSuffix
+      field + "_" + uniqueIndex
+    }
+    pathFields += pathDot + uniqueField
+    uniqueField
+  }
+
+  final protected def projectField(field: String): Unit = {
+    //    val fieldAlias = unique(field)
+    //    projections.add(Projections.include(pathAlias + pathField))
+    projections.add(Projections.include(pathDot + field))
+    //    projections.add(Projections.include(path + field))
+    //    projections.add(Projections.include(field))
+    //    fieldAlias
+  }
+  final protected def removeField(pathField: String): Unit = {
+    //    projections.add(Projections.include(path + field))
+    projections.remove(Projections.include(pathField))
+  }
 
   def immutableCastss = casts.map(
     _.toList.map {
@@ -113,29 +152,29 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
   final protected var attrMap = Map.empty[String, (Card, String, Seq[String])]
 
   // Main query
-  final protected val select     = new ListBuffer[String]
-  final protected var distinct   = true
-  final protected var from       = ""
-  final protected val joins      = new ListBuffer[(String, String, String, String)]
-  final protected var tempTables = List.empty[String]
-  final protected val notNull    = new ListBuffer[String]
-  final protected val where      = new ListBuffer[(String, String)]
-  final protected val groupBy    = new mutable.LinkedHashSet[String]
-  final protected val having     = new mutable.LinkedHashSet[String]
-  final protected var orderBy    = new ListBuffer[(Int, Int, String, String)]
-  final protected var aggregate  = false
-  final protected val in         = new ArrayBuffer[String]
-  final protected var hardLimit  = 0
-
-  // Input args and cast lambdas
-  final           var aritiess    = List(List.empty[List[Int]])
+  //  final protected val select     = new ListBuffer[String]
+  //  final protected var distinct   = true
+  //  final protected var from       = ""
+  //  final protected val joins      = new ListBuffer[(String, String, String, String)]
+  //  final protected var tempTables = List.empty[String]
+  final protected val notNull     = new ListBuffer[String]
+  //  final protected val where      = new ListBuffer[(String, String)]
+  //  final protected val groupBy    = new mutable.LinkedHashSet[String]
+  //  final protected val having     = new mutable.LinkedHashSet[String]
+  final protected var orderBy     = new ListBuffer[(Int, Int, String, String)]
+  //  final protected var aggregate  = false
+  //  final protected val in         = new ArrayBuffer[String]
+  final protected var hardLimit   = 0
+  //
+  //  // Input args and cast lambdas
+  //  final           var aritiess    = List(List.empty[List[Int]])
   final           var isNested    = false
   final           var isNestedOpt = false
-  final protected val nestedIds   = new ArrayBuffer[String]
+  //  final protected val nestedIds   = new ArrayBuffer[String]
   final protected var level       = 0
-
+  //
   // Ensure distinct result set when possible redundant optional values can occur
-  final protected var hasOptAttr = false
+  final protected var hasOptAttr  = false
 
   // Query variables
   final protected var filterAttrVars      = Map.empty[String, String]
@@ -143,32 +182,23 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
   final protected val availableAttrs      = mutable.Set.empty[String]
 
 
-//  def fullField(field: String) = {
-////    if (path.isEmpty) field else path.mkString(".") + "." + field
-//    if (path.isEmpty) field else path.mkString(".") + "." + field
-//  }
-
-  final protected def addField(field: String): Unit = {
-//    projections.add(Projections.include(path + field))
-    projections.add(Projections.include(field))
-  }
-  final protected def removeField(field: String): Unit = {
-//    projections.add(Projections.include(path + field))
-    projections.remove(Projections.include(path + field))
-  }
+  //  def fullField(field: String) = {
+  ////    if (path.isEmpty) field else path.mkString(".") + "." + field
+  //    if (path.isEmpty) field else path.mkString(".") + "." + field
+  //  }
 
 
-  final protected def aritiesNested(): Unit = {
-    val newLevel           = Nil
-    val curLevel           = aritiess.last
-    val curLevelWithNested = curLevel :+ List(-1)
-    aritiess = (aritiess.init :+ curLevelWithNested) :+ newLevel
-  }
-
-  final protected def aritiesAttr(): Unit = {
-    // Add new arity of 1
-    aritiess = aritiess.init :+ (aritiess.last :+ List(1))
-  }
+  //  final protected def aritiesNested(): Unit = {
+  //    val newLevel           = Nil
+  //    val curLevel           = aritiess.last
+  //    val curLevelWithNested = curLevel :+ List(-1)
+  //    aritiess = (aritiess.init :+ curLevelWithNested) :+ newLevel
+  //  }
+  //
+  //  final protected def aritiesAttr(): Unit = {
+  //    // Add new arity of 1
+  //    aritiess = aritiess.init :+ (aritiess.last :+ List(1))
+  //  }
 
   final protected def unexpectedElement(element: Element) = throw ModelError("Unexpected element: " + element)
   final protected def unexpectedOp(op: Op) = throw ModelError("Unexpected operation: " + op)

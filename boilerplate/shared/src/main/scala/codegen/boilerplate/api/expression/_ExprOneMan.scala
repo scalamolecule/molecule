@@ -65,16 +65,10 @@ object _ExprOneMan extends BoilerplateGenBase("ExprOneMan", "/api/expression") {
          |  $attrExprs
          |}
          |trait $fileName_${arity}_String[${`A..V`}, t, Ns1[${`_, _`}], Ns2[${`_, _, _`}]] extends $fileName_$arity[${`A..V, `}t, Ns1, Ns2] {
-         |  def startsWith(prefix: t              ): Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(StartsWith, Seq(prefix)                                                       )
-         |  def endsWith  (suffix: t              ): Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(EndsWith  , Seq(suffix)                                                       )
-         |  def contains  (needle: t              ): Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(Contains  , Seq(needle)                                                       )
-         |  def matches   (regex : t              ): Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(Matches   , Seq(regex)                                                        )
-         |  def take      (n     : Int            ): Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(Take      , Seq(n.toString.asInstanceOf[t])                                   )
-         |  def takeRight (n     : Int            ): Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(TakeRight , Seq(n.toString.asInstanceOf[t])                                   )
-         |  def drop      (n     : Int            ): Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(Drop      , Seq(n.toString.asInstanceOf[t])                                   )
-         |  def dropRight (n     : Int            ): Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(DropRight , Seq(n.toString.asInstanceOf[t])                                   )
-         |  def substring (start : Int, end: Int  ): Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(SubString , Seq(start.toString.asInstanceOf[t], end.toString.asInstanceOf[t]) )
-         |  def slice     (from  : Int, until: Int): Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(Slice     , Seq(from.toString.asInstanceOf[t], until.toString.asInstanceOf[t]))
+         |  def startsWith(prefix: t              ): Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(StartsWith, Seq(prefix))
+         |  def endsWith  (suffix: t              ): Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(EndsWith  , Seq(suffix))
+         |  def contains  (needle: t              ): Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(Contains  , Seq(needle))
+         |  def matches   (regex : t              ): Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(Matches   , Seq(regex) )
          |}
          |trait $fileName_${arity}_Number[${`A..V`}, t, Ns1[${`_, _`}], Ns2[${`_, _, _`}]] extends $fileName_$arity[${`A..V, `}t, Ns1, Ns2] {
          |  def %(divider: t, remainder: t        ): Ns1[${`A..V`}, t] with SortAttrs_$arity[${`A..V`}, t, Ns1] with CardOne = _exprOneMan(Remainder , Seq(divider, remainder))

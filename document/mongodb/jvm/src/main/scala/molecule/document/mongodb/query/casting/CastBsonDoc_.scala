@@ -13,7 +13,7 @@ trait CastBsonDoc_ {
   private type NssCasts = List[NsCasts]
   private type Casts = List[NssCasts]
 
-  private val curLevelDocs = mutable.Map.empty[List[String], BsonDocument]
+  protected val curLevelDocs = mutable.Map.empty[List[String], BsonDocument]
 
   @tailrec
   private def castLevel(
@@ -41,23 +41,27 @@ trait CastBsonDoc_ {
     }
   }
 
-  private def castRefNs(path: List[String], casts: List[(String, BsonDocument => Any)]): List[BsonDocument => Any] = {
+  private def castRefNs(
+    path: List[String],
+    casts: List[(String, BsonDocument => Any)]
+  ): List[BsonDocument => Any] = {
     casts.map { case (attr, cast) =>
       (outerDoc: BsonDocument) => {
-
-        println(outerDoc)
-
+//        println("Outer doc: " + outerDoc)
         // Maybe this could be done in a smarter way with recursion only..
         val doc = curLevelDocs.getOrElse(path,
           path.foldLeft(outerDoc) {
             case (acc, ns) =>
-              println(s"------ $ns ")
+//              println(s"------ $ns ")
 
               acc.get(ns).asDocument()
           }
         )
+
+//        println("DOC: " + doc)
         curLevelDocs(path) = doc
         cast(doc)
+//        cast(outerDoc)
       }
     }
   }
@@ -67,6 +71,9 @@ trait CastBsonDoc_ {
     val innerCasts = documentCaster(nested, true)
     (doc: BsonDocument) => {
       val inner = ListBuffer.empty[Any]
+//      println("---- " + refAttr)
+//      println(doc)
+
       doc.get(refAttr).asArray().forEach(nestedRow =>
         inner += innerCasts(
           nestedRow.asDocument()

@@ -4,7 +4,7 @@ import com.mongodb.client.AggregateIterable
 import molecule.base.error._
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
-import molecule.core.util.{FutureUtils, ModelUtils}
+import molecule.core.util.{FutureUtils, JavaConversions, ModelUtils}
 import molecule.document.mongodb.facade.MongoConn_JVM
 import molecule.document.mongodb.query.casting._
 import molecule.document.mongodb.util.BsonUtils
@@ -21,6 +21,7 @@ case class QueryResolveOffset_mongodb[Tpl](
   with FutureUtils
   with ModelUtils
   with BsonUtils
+  with JavaConversions
   with MoleculeLogging {
 
   lazy val forward = optLimit.fold(true)(_ >= 0) && optOffset.fold(true)(_ >= 0)
@@ -36,7 +37,9 @@ case class QueryResolveOffset_mongodb[Tpl](
 
     if (bsonDocs.iterator().hasNext) {
       println("RESULT ---------------------------------------------")
-      bsonDocs.forEach(d => println(d.toJson(pretty)))
+      val array = new BsonArray()
+      bsonDocs.forEach(d => array.add(d))
+      println(bsonDocs.asScala.map(_.toJson(pretty)).mkString(",\n"))
       println("")
     }
 
@@ -49,6 +52,11 @@ case class QueryResolveOffset_mongodb[Tpl](
 
     val bson2tpl = documentCaster(m2q.immutableCastss)
     bsonDocs.forEach { bsonDoc =>
+//      println("........ " + bsonDoc)
+//      println("   ..... " + bson2tpl(bsonDoc).asInstanceOf[Tpl])
+      curLevelDocs.clear()
+
+
       // Cast Bson document to entity tuple
       tuples += bson2tpl(bsonDoc).asInstanceOf[Tpl]
     }

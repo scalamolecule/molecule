@@ -219,12 +219,6 @@ trait ResolveExprOne[Tpl]
       case EndsWith   => stringOp(e, a, v, args.head, "ends-with?")
       case Contains   => stringOp(e, a, v, args.head, "includes?")
       case Matches    => regex(e, a, v, args.head)
-      case Take       => string(e, a, v, args, "take")
-      case TakeRight  => string(e, a, v, args, "takeRight")
-      case Drop       => string(e, a, v, args, "drop")
-      case DropRight  => string(e, a, v, args, "dropRight")
-      case SubString  => string(e, a, v, args, "slice")
-      case Slice      => string(e, a, v, args, "slice")
       case Remainder  => remainder(e, a, v, args)
       case Even       => even(e, a, v)
       case Odd        => odd(e, a, v)
@@ -272,54 +266,6 @@ trait ResolveExprOne[Tpl]
   private def odd(e: Var, a: Att, v: Var): Unit = {
     where += s"[$e $a $v]" -> wClause
     where += s"""[(odd? $v)]""" -> wNeqOne
-  }
-
-
-  private def string[T: ClassTag](e: Var, a: Att, v: Var, args: Seq[T], op: String): Unit = {
-    find -= v
-    where += s"[$e $a $v]" -> wClause
-    op match {
-      case "take" =>
-        find += s"$v-1"
-        where += s"[(max 0 ${args.head}) $v-n]" -> wNeqOne
-        where += s"[(count $v) $v-length]" -> wNeqOne
-        where += s"[(> $v-n 0)]" -> wNeqOne
-        where += s"[(min $v-n $v-length) $v-end]" -> wNeqOne
-        where += s"[(subs $v 0 $v-end) $v-1]" -> wNeqOne
-
-      case "takeRight" =>
-        find += s"$v-1"
-        where += s"[(max 0 ${args.head}) $v-n]" -> wNeqOne
-        where += s"[(count $v) $v-length]" -> wNeqOne
-        where += s"[(> $v-n 0)]" -> wNeqOne
-        where += s"[(- $v-length $v-n) $v-back]" -> wNeqOne
-        where += s"[(max 0 $v-back) $v-begin]" -> wNeqOne
-        where += s"[(subs $v $v-begin $v-length) $v-1]" -> wNeqOne
-
-      case "drop" =>
-        find += s"$v-1"
-        where += s"[(max 0 ${args.head}) $v-n]" -> wNeqOne
-        where += s"[(count $v) $v-length]" -> wNeqOne
-        where += s"[(< $v-n $v-length)]" -> wNeqOne
-        where += s"[(min $v-n $v-length) $v-begin]" -> wNeqOne
-        where += s"[(subs $v $v-begin $v-length) $v-1]" -> wNeqOne
-
-      case "dropRight" =>
-        find += s"$v-1"
-        where += s"[(max 0 ${args.head}) $v-n]" -> wNeqOne
-        where += s"[(count $v) $v-length]" -> wNeqOne
-        where += s"[(< $v-n $v-length)]" -> wNeqOne
-        where += s"[(- $v-length $v-n) $v-end]" -> wNeqOne
-        where += s"[(subs $v 0 $v-end) $v-1]" -> wNeqOne
-
-      case "slice" =>
-        find += s"$v-1"
-        where += s"[(count $v) $v-length]" -> wNeqOne
-        where += s"[(max 0 ${args.head}) $v-from]" -> wNeqOne
-        where += s"[(min $v-length (max 0 ${args(1)})) $v-until]" -> wNeqOne
-        where += s"[(< $v-from $v-until)]" -> wNeqOne
-        where += s"[(subs $v $v-from $v-until) $v-1]" -> wNeqOne
-    }
   }
 
 

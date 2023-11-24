@@ -5,7 +5,8 @@ import java.time._
 import java.util.{Date, UUID}
 import molecule.base.util.BaseHelpers
 import molecule.core.util.AggrUtils
-import org.bson.BsonDocument
+import org.bson._
+import org.bson.types.Decimal128
 
 trait LambdasBase extends BaseHelpers with AggrUtils with MongoQueryBase {
 
@@ -32,8 +33,32 @@ trait LambdasBase extends BaseHelpers with AggrUtils with MongoQueryBase {
   protected lazy val one2sqlShort         : Short => String          = (v: Short) => s"$v"
   protected lazy val one2sqlChar          : Char => String           = (v: Char) => s"'${v.toString}'"
 
+  protected lazy val v2bsonID            : String => BsonValue         = (v: String) => if (v == null) new BsonNull else new BsonString(v)
+  protected lazy val v2bsonString        : String => BsonValue         = (v: String) => if (v == null) new BsonNull else new BsonString(v)
+  protected lazy val v2bsonInt           : Int => BsonValue            = (v: Int) => new BsonInt32(v)
+  protected lazy val v2bsonLong          : Long => BsonValue           = (v: Long) => new BsonInt64(v)
+  protected lazy val v2bsonFloat         : Float => BsonValue          = (v: Float) => new BsonDouble(v)
+  protected lazy val v2bsonDouble        : Double => BsonValue         = (v: Double) => new BsonDouble(v)
+  protected lazy val v2bsonBoolean       : Boolean => BsonValue        = (v: Boolean) => new BsonBoolean(v)
+  protected lazy val v2bsonBigInt        : BigInt => BsonValue         = (v: BigInt) => if (v == null) new BsonNull else new BsonDecimal128(new Decimal128(BigDecimal(v).bigDecimal))
+  protected lazy val v2bsonBigDecimal    : BigDecimal => BsonValue     = (v: BigDecimal) => if (v == null) new BsonNull else new BsonDecimal128(new Decimal128(v.bigDecimal))
+  protected lazy val v2bsonDate          : Date => BsonValue           = (v: Date) => if (v == null) new BsonNull else new BsonDateTime(v.getTime)
+  protected lazy val v2bsonDuration      : Duration => BsonValue       = (v: Duration) => if (v == null) new BsonNull else new BsonString(v.toString)
+  protected lazy val v2bsonInstant       : Instant => BsonValue        = (v: Instant) => if (v == null) new BsonNull else new BsonString(v.toString)
+  protected lazy val v2bsonLocalDate     : LocalDate => BsonValue      = (v: LocalDate) => if (v == null) new BsonNull else new BsonString(v.toString)
+  protected lazy val v2bsonLocalTime     : LocalTime => BsonValue      = (v: LocalTime) => if (v == null) new BsonNull else new BsonString(v.toString)
+  protected lazy val v2bsonLocalDateTime : LocalDateTime => BsonValue  = (v: LocalDateTime) => if (v == null) new BsonNull else new BsonString(v.toString)
+  protected lazy val v2bsonOffsetTime    : OffsetTime => BsonValue     = (v: OffsetTime) => if (v == null) new BsonNull else new BsonString(v.toString)
+  protected lazy val v2bsonOffsetDateTime: OffsetDateTime => BsonValue = (v: OffsetDateTime) => if (v == null) new BsonNull else new BsonString(v.toString)
+  protected lazy val v2bsonZonedDateTime : ZonedDateTime => BsonValue  = (v: ZonedDateTime) => if (v == null) new BsonNull else new BsonString(v.toString)
+  protected lazy val v2bsonUUID          : UUID => BsonValue           = (v: UUID) => if (v == null) new BsonNull else new BsonString(v.toString)
+  protected lazy val v2bsonURI           : URI => BsonValue            = (v: URI) => if (v == null) new BsonNull else new BsonString(v.toString)
+  protected lazy val v2bsonByte          : Byte => BsonValue           = (v: Byte) => if (v == null.asInstanceOf[Byte]) new BsonNull else new BsonInt32(v)
+  protected lazy val v2bsonShort         : Short => BsonValue          = (v: Short) => if (v == null.asInstanceOf[Short]) new BsonNull else new BsonInt32(v)
+  protected lazy val v2bsonChar          : Char => BsonValue           = (v: Char) => if (v == null.asInstanceOf[Char]) new BsonNull else new BsonString(v.toString)
 
-//  lazy val toInt: BsonDocument => Int = (doc: BsonDocument) =>
+
+  //  lazy val toInt: BsonDocument => Int = (doc: BsonDocument) =>
 
   protected def sqlArray2set[T](row: Row, paramIndex: Int, getValue: Row => T): Set[T] = {
     //    val array = row.getArray(paramIndex)

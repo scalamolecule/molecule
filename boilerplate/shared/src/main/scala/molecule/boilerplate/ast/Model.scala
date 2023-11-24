@@ -107,18 +107,10 @@ trait Model extends Validations with Values with BaseHelpers {
   case object Le extends Op
   case object Gt extends Op
   case object Ge extends Op
-
   case object StartsWith extends Op
   case object EndsWith extends Op
   case object Contains extends Op
   case object Matches extends Op
-  case object Take extends Op
-  case object TakeRight extends Op
-  case object Drop extends Op
-  case object DropRight extends Op
-  case object SubString extends Op
-  case object Slice extends Op
-
   case object Remainder extends Op
   case object Even extends Op
   case object Odd extends Op
@@ -141,9 +133,9 @@ trait Model extends Validations with Values with BaseHelpers {
 
 
   // GENERATED from here and below (edit in _Model generator) ======================================
-  
+
   sealed trait AttrOneMan extends AttrOne with Mandatory
-  
+
   case class AttrOneManID(
     override val ns: String,
     override val attr: String,
@@ -603,7 +595,7 @@ trait Model extends Validations with Values with BaseHelpers {
 
 
   sealed trait AttrOneOpt extends AttrOne with Optional
-  
+
   case class AttrOneOptID(
     override val ns: String,
     override val attr: String,
@@ -1063,7 +1055,7 @@ trait Model extends Validations with Values with BaseHelpers {
 
 
   sealed trait AttrOneTac extends AttrOne with Tacit
-  
+
   case class AttrOneTacID(
     override val ns: String,
     override val attr: String,
@@ -1523,7 +1515,7 @@ trait Model extends Validations with Values with BaseHelpers {
 
 
   sealed trait AttrSetMan extends AttrSet with Mandatory
-  
+
   case class AttrSetManID(
     override val ns: String,
     override val attr: String,
@@ -1983,7 +1975,7 @@ trait Model extends Validations with Values with BaseHelpers {
 
 
   sealed trait AttrSetOpt extends AttrSet with Optional
-  
+
   case class AttrSetOptID(
     override val ns: String,
     override val attr: String,
@@ -2443,7 +2435,7 @@ trait Model extends Validations with Values with BaseHelpers {
 
 
   sealed trait AttrSetTac extends AttrSet with Tacit
-  
+
   case class AttrSetTacID(
     override val ns: String,
     override val attr: String,

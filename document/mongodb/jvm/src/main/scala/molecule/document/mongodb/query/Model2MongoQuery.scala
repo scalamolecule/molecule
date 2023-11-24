@@ -2,18 +2,19 @@ package molecule.document.mongodb.query
 
 import java.util
 import com.mongodb.MongoClientSettings
-import com.mongodb.client.model._
+import com.mongodb.client.model.{Filters, _}
 import molecule.base.ast._
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.marshalling.ConnProxy
 import molecule.core.query.Model2QueryBase
-import molecule.core.util.ModelUtils
-import molecule.document.mongodb.query.casting._
+import molecule.core.util.{JavaConversions, ModelUtils}
+import org.bson
 import org.bson._
 import org.bson.conversions.Bson
 import scala.annotation.tailrec
+import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
 class Model2MongoQuery[Tpl](elements0: List[Element])
@@ -29,6 +30,7 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
     with ResolveExprSet
     with ResolveExprSetRefAttr
     with MongoQueryBase
+    with JavaConversions
     with MoleculeLogging {
 
 
@@ -67,94 +69,169 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
       )
     }
 
-    if (!matches.isEmpty) {
-      addStage("$match", Filters.and(matches))
+
+    if (1 == 0) {
+      if (!matches.isEmpty) {
+        addStage("$match", Filters.and(matches))
+      }
+    } else {
+      if (matches3.nonEmpty) {
+        val fieldMatches = new bson.BsonArray()
+        matches3.foreach { case (fieldOp, ops) =>
+          val (field, fn) = fieldOp
+          fn match {
+            case "$expr" => fieldMatches.add(ops.head._2)
+            case "regex" => fieldMatches.add(new BsonDocument().append(field, ops.head._2))
+
+            case "$or" | "$and" =>
+              fieldMatches.add(new BsonDocument().append(fn, ops.head._2.asInstanceOf[BsonArray]))
+            case _              =>
+              val fieldMatch = new BsonDocument()
+              ops.foreach {
+                case (op, value) => fieldMatch.append(op, value)
+              }
+              fieldMatches.add(new BsonDocument().append(field, fieldMatch))
+          }
+        }
+        val and = new BsonDocument().append("$and", fieldMatches)
+        pipeline.add(new BsonDocument().append("$match", and))
+      }
     }
 
-    if (groupExprs.isEmpty) {
-      // Prefix fields to allow multiple appearances
-      val addFieldsDoc = new BsonDocument()
-      groupFields.foreach { case (field, indexField) =>
-        addFieldsDoc.put(indexField, new BsonString("$" + field))
-      }
-      pipeline.add(new BsonDocument().append("$addFields", addFieldsDoc))
-
-    } else if (preGroupByFields.nonEmpty) {
+    if (preGroupFields.nonEmpty) {
       // pre-$group
       val preGroupByFieldsDoc = new BsonDocument()
-      groupFields.++(preGroupByFields).foreach { case (field, indexField) =>
-        preGroupByFieldsDoc.put(indexField, new BsonString("$" + field))
+      groupFields.++(preGroupFields).foreach { case (field, indexField) =>
+        preGroupByFieldsDoc.put(field, new BsonString("$" + field))
       }
       val preGroupDoc = new BsonDocument()
       preGroupDoc.append("_id", preGroupByFieldsDoc)
       pipeline.add(new BsonDocument().append("$group", preGroupDoc))
+    }
 
-      // $group
-      val groupByFieldsDoc = new BsonDocument()
-      groupFields.foreach { case (field, indexField) =>
-        groupByFieldsDoc.put(indexField, new BsonString("$_id." + indexField))
+    if (groupExprs.nonEmpty) {
+      val groupIdFieldsDoc = new BsonDocument()
+      groupIdFields.foreach { case (pathAlias, pathDot, field) =>
+        groupIdFieldsDoc.put(pathAlias + field, new BsonString("$" + pathDot + field))
       }
-      val groupExprsDoc = new BsonDocument()
-      groupExprsDoc.append("_id", groupByFieldsDoc)
-      groupExprs.foreach { case (field, bson) => groupExprsDoc.put(field, bson) }
-      pipeline.add(new BsonDocument().append("$group", groupExprsDoc))
+      val groupDoc = new BsonDocument()
+      groupDoc.append("_id", groupIdFieldsDoc)
 
-      // $addFields
-      if (groupFields.nonEmpty) {
-        val addFieldsDoc = new BsonDocument()
-        groupFields.foreach { case (field, indexField) =>
-          addFieldsDoc.put(indexField, new BsonString("$_id." + indexField))
+      groupExprs.foreach { case (field, bson) => groupDoc.put(field, bson) }
+      pipeline.add(new BsonDocument().append("$group", groupDoc))
+
+
+      //    println(" 1 " + groupIdFields)
+      //    println(" 2 " + groupExprs)
+      //    println(" 3 " + addFields.toList.sortBy(-_._1.length))
+      //    println(" 3 " + addFields.toList.sortBy(_._1.length))
+
+      //    if (groupIdFields.nonEmpty || groupExprs.nonEmpty) {
+      //      if (groupExprs.nonEmpty) {
+      val addFieldsDoc = new BsonDocument()
+      groupIdFields.collect { case ("", "", field) =>
+        addFieldsDoc.put(field, new BsonString("$_id." + field))
+      }
+      if (addFields.nonEmpty) {
+        val branches        = mutable.Map.empty[List[String], List[(String, BsonDocument)]]
+        val groupExprFields = groupExprs.map(_._1)
+        addFields.toList.sortBy(-_._1.length).foreach { case (refPath, fields) =>
+          val doc   = new BsonDocument()
+          val alias = refPath.mkString("_") + "_"
+          fields.foreach { field =>
+            val fieldAlias = alias + field
+            val prefix     = if (groupExprFields.contains(fieldAlias)) "$" else "$_id."
+            doc.put(field, new BsonString(prefix + fieldAlias))
+          }
+          if (branches.keys.toList.contains(refPath)) {
+            // Add ref branch to current doc
+            branches(refPath).foreach { case (ref, refDoc) =>
+              doc.put(ref, refDoc)
+            }
+          }
+          // Cache current doc as a branch
+          branches(refPath.init) = branches.getOrElse(refPath.init, Nil) :+ (refPath.last -> doc)
         }
-        pipeline.add(new BsonDocument().append("$addFields", addFieldsDoc))
-      }
 
-      //      if (addFields.nonEmpty) {
-      //        val addFieldsDoc = new BsonDocument()
-      //        addFields.foreach { case (indexField, expr) =>
-      //          addFieldsDoc.put(indexField, expr)
-      //        }
-      //        pipeline.add(new BsonDocument().append("$addFields", addFieldsDoc))
-      //      }
-
-    } else {
-      // $group
-      val groupByFieldsDoc = new BsonDocument()
-      groupFields.foreach { case (field, indexField) =>
-        groupByFieldsDoc.put(indexField, new BsonString("$" + field))
-      }
-      val groupExprsDoc = new BsonDocument()
-      groupExprsDoc.append("_id", groupByFieldsDoc)
-      groupExprs.foreach { case (field, bson) => groupExprsDoc.put(field, bson) }
-      pipeline.add(new BsonDocument().append("$group", groupExprsDoc))
-
-      // $addFields
-      if (groupFields.nonEmpty) {
-        val addFieldsDoc = new BsonDocument()
-        groupFields.foreach { case (field, indexField) =>
-          addFieldsDoc.put(indexField, new BsonString("$_id." + indexField))
+        // add top level branches
+        branches(Nil).foreach { case (ref, doc) =>
+          addFieldsDoc.put(ref, doc)
         }
-        pipeline.add(new BsonDocument().append("$addFields", addFieldsDoc))
       }
-
-      //      if (addFields.nonEmpty) {
-      //        val addFieldsDoc = new BsonDocument()
-      //        addFields.foreach { case (indexField, expr) =>
-      //          addFieldsDoc.put(indexField, expr)
-      //        }
-      //        pipeline.add(new BsonDocument().append("$addFields", addFieldsDoc))
+      pipeline.add(new BsonDocument().append("$addFields", addFieldsDoc))
       //      }
     }
 
-    if (countFields.nonEmpty) {
-      val countFieldsDoc      = new BsonDocument()
-      val (field, indexField) = countFields.head
-      pipeline.add(new BsonDocument().append("$count", new BsonString(indexField)))
 
-      //      countFields.foreach { case (field, indexField) =>
-      //        countFieldsDoc.put(indexField, new BsonString("$" + field))
-      //      }
-      //      pipeline.add(new BsonDocument().append("$count", countFieldsDoc))
-    }
+
+    //    if (groupExprs.isEmpty) {
+    //      //      // Prefix fields to allow multiple appearances
+    //      //      val addFieldsDoc = new BsonDocument()
+    //      //      groupFields.foreach { case (field, indexField) =>
+    //      //        addFieldsDoc.put(indexField, new BsonString("$" + field))
+    //      //      }
+    //      //      pipeline.add(new BsonDocument().append("$addFields", addFieldsDoc))
+    //
+    //    } else if (preGroupFields.nonEmpty) {
+    //      // pre-$group
+    //      val preGroupByFieldsDoc = new BsonDocument()
+    //      groupFields.++(preGroupFields).foreach { case (field, indexField) =>
+    //        preGroupByFieldsDoc.put(field, new BsonString("$" + field))
+    //      }
+    //      val preGroupDoc = new BsonDocument()
+    //      preGroupDoc.append("_id", preGroupByFieldsDoc)
+    //      pipeline.add(new BsonDocument().append("$group", preGroupDoc))
+    //
+    //      // $group
+    //      val groupFieldsDoc = new BsonDocument()
+    //      groupFields.foreach { case (field, indexField) =>
+    //        groupFieldsDoc.put(field, new BsonString("$_id." + field))
+    //      }
+    //      val groupDoc = new BsonDocument()
+    //      groupDoc.append("_id", groupFieldsDoc)
+    //
+    //      groupExprs.foreach { case (field, bson) => groupDoc.put(field, bson) }
+    //      pipeline.add(new BsonDocument().append("$group", groupDoc))
+    //
+    //      // $addFields
+    //      if (groupFields.nonEmpty) {
+    //        val addFieldsDoc = new BsonDocument()
+    //        groupFields.foreach { case (field, indexField) =>
+    //          addFieldsDoc.put(field, new BsonString("$_id." + field))
+    //        }
+    //        pipeline.add(new BsonDocument().append("$addFields", addFieldsDoc))
+    //      }
+    //
+    //    } else {
+    //      // $group
+    //      val groupFieldsDoc = new BsonDocument()
+    //      groupFields.foreach { case (field, indexField) =>
+    //        groupFieldsDoc.put(field, new BsonString("$" + field))
+    //      }
+    //      val groupDoc = new BsonDocument()
+    //      groupDoc.append("_id", groupFieldsDoc)
+    //
+    //      groupExprs.foreach { case (field, bson) => groupDoc.put(field, bson) }
+    //      pipeline.add(new BsonDocument().append("$group", groupDoc))
+    //
+    //      // $addFields
+    //      if (!addFields.isEmpty) {
+    //        pipeline.add(new BsonDocument().append("$addFields", addFields))
+    //      }
+    //      //      if (groupFields.nonEmpty) {
+    //      //        val addFieldsDoc = new BsonDocument()
+    //      //        groupFields.foreach { case (field, indexField) =>
+    //      //          addFieldsDoc.put(field, new BsonString("$_id." + field))
+    //      //        }
+    //      //        pipeline.add(new BsonDocument().append("$addFields", addFieldsDoc))
+    //      //      }
+    //    }
+
+    //    if (countFields.nonEmpty) {
+    //      val countFieldsDoc      = new BsonDocument()
+    //      val (field, indexField) = countFields.head
+    //      pipeline.add(new BsonDocument().append("$count", new BsonString(field)))
+    //    }
 
     if (!projections.isEmpty) {
       addStage("$project", Projections.fields(projections))
@@ -417,7 +494,11 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
         "Only cardinality-one refs allowed in optional nested queries. Found: " + ref
       )
     }
-    path = path + refAttr + "."
+    path = path :+ refAttr
+    pathDot = pathDot + refAttr + "."
+    pathUnderscore = pathUnderscore + refAttr + "_"
+
+    addFields(path) = Nil
 
     // Continue from ref namespace
     val nss     = casts.last
@@ -442,10 +523,17 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
       }
     }
 
-    path = {
-      val nss = path.init.split('.').init
+    path = path.init
+    pathDot = {
+      val nss = pathDot.init.split('.').init
       if (nss.isEmpty) "" else nss.mkString(".") + "."
     }
+    pathUnderscore = {
+      val nss = pathUnderscore.init.split('_').init
+      if (nss.isEmpty) "" else nss.mkString("_") + "_"
+    }
+    addFields(path) = Nil
+
 
     // Step back to previous namespace
     val nss     = casts.last
@@ -468,7 +556,11 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
     // No empty nested arrays when asking for mandatory nested data
     matches.add(Filters.ne(refAttr, new BsonArray()))
 
-    path = path + refAttr + "."
+    path = path :+ refAttr
+    pathDot = pathDot + refAttr + "."
+    pathUnderscore = pathUnderscore + refAttr + "_"
+
+    addFields(path) = Nil
 
     // Initiate nested namespace
     casts += ListBuffer(
@@ -495,7 +587,11 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
     validateRefNs(ref, nestedElements)
     val Ref(_, refAttr, refNs, _, _) = ref
 
-    path = path + refAttr + "."
+    path = path :+ refAttr
+    pathDot = pathDot + refAttr + "."
+    pathUnderscore = pathUnderscore + refAttr + "_"
+
+    addFields(path) = Nil
 
     // Initiate (optional) nested namespace
     casts += ListBuffer(

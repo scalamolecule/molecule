@@ -178,12 +178,6 @@ trait ResolveExprOne extends ResolveExpr { self: SqlQueryBase with LambdasOne =>
       case EndsWith   => endsWith(col, args.head)
       case Contains   => contains(col, args.head)
       case Matches    => matches(col, args.head.toString)
-      case Take       => take(col, args.head, "LEFT")
-      case TakeRight  => take(col, args.head, "RIGHT")
-      case Drop       => drop(col, args.head, true)
-      case DropRight  => drop(col, args.head, false)
-      case Slice      => slice(col, args)
-      case SubString  => subString(col, args)
       case Remainder  => remainder(col, args)
       case Even       => even(col)
       case Odd        => odd(col)
@@ -211,65 +205,6 @@ trait ResolveExprOne extends ResolveExpr { self: SqlQueryBase with LambdasOne =>
   protected def matches(col: String, regex: String): Unit = {
     if (regex.nonEmpty)
       where += ((col, s"~ '$regex'"))
-  }
-
-  protected def take[T](col: String, length: T, fn: String): Unit = {
-    if (length.toString.toInt > 0) {
-      select -= col
-      notNull -= col
-      val alias = col.replace('.', '_')
-      select += s"$fn($col, $length) AS $alias"
-      orderBy = orderBy.map {
-        case (level, arity, `col`, dir) => (level, arity, alias, dir)
-        case other                      => other
-      }
-    } else {
-      // Take nothing
-      where += (("FALSE", ""))
-    }
-  }
-
-  protected def drop[T](col: String, arg: T, left: Boolean): Unit = {
-    val i = arg.toString.toInt
-    if (i > 0) {
-      select -= col
-      notNull -= col
-      val alias           = col.replace('.', '_')
-      val len             = s"LENGTH($col)"
-      val (start, length) = if (left) (i + 1, len) else ("1", s"$len - $i")
-      select += s"SUBSTRING($col, $start, $length) AS $alias"
-      orderBy = orderBy.map {
-        case (level, arity, `col`, dir) => (level, arity, alias, dir)
-        case other                      => other
-      }
-      val clause = if (left) s"$len > $i" else s"$len > $i"
-      where += ((clause, ""))
-    } else {
-      // Drop nothing
-    }
-  }
-
-  protected def slice[T](col: String, args: Seq[T]): Unit = subString(col, args)
-  protected def subString[T](col: String, args: Seq[T]): Unit = {
-    // 1-based string position
-    val from  = args.head.toString.toInt.max(0) + 1
-    val until = args(1).toString.toInt + 1
-    if (from >= until) {
-      where += (("FALSE", ""))
-
-    } else {
-      select -= col
-      notNull -= col
-      val alias  = col.replace('.', '_')
-      val len    = s"LENGTH($col)"
-      val length = until - from
-      select += s"SUBSTRING($col, $from, $length) AS $alias"
-      orderBy = orderBy.map {
-        case (level, arity, `col`, dir) => (level, arity, alias, dir)
-        case other                      => other
-      }
-      where += ((s"$len >= $from", ""))
-    }
   }
 
   protected def remainder[T](col: String, args: Seq[T]): Unit = where += ((col, s"% ${args.head} = ${args(1)}"))

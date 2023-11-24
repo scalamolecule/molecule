@@ -9,53 +9,12 @@ import org.bson.types.Decimal128
 
 trait LambdasSet extends LambdasBase with JavaConversions {
 
-  //  private lazy val sql2setString        : (Row, Int) => Set[String]         = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueString)
-  //  private lazy val sql2setInt           : (Row, Int) => Set[Int]            = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueInt)
-  //  private lazy val sql2setLong          : (Row, Int) => Set[Long]           = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueLong)
-  //  private lazy val sql2setFloat         : (Row, Int) => Set[Float]          = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueFloat)
-  //  private lazy val sql2setDouble        : (Row, Int) => Set[Double]         = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueDouble)
-  //  private lazy val sql2setBoolean       : (Row, Int) => Set[Boolean]        = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueBoolean)
-  //  private lazy val sql2setBigInt        : (Row, Int) => Set[BigInt]         = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueBigInt)
-  //  private lazy val sql2setBigDecimal    : (Row, Int) => Set[BigDecimal]     = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueBigDecimal)
-  //  private lazy val sql2setDate          : (Row, Int) => Set[Date]           = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueDate)
-  //  private lazy val sql2setDuration      : (Row, Int) => Set[Duration]       = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueDuration)
-  //  private lazy val sql2setInstant       : (Row, Int) => Set[Instant]        = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueInstant)
-  //  private lazy val sql2setLocalDate     : (Row, Int) => Set[LocalDate]      = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueLocalDate)
-  //  private lazy val sql2setLocalTime     : (Row, Int) => Set[LocalTime]      = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueLocalTime)
-  //  private lazy val sql2setLocalDateTime : (Row, Int) => Set[LocalDateTime]  = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueLocalDateTime)
-  //  private lazy val sql2setOffsetTime    : (Row, Int) => Set[OffsetTime]     = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueOffsetTime)
-  //  private lazy val sql2setOffsetDateTime: (Row, Int) => Set[OffsetDateTime] = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueOffsetDateTime)
-  //  private lazy val sql2setZonedDateTime : (Row, Int) => Set[ZonedDateTime]  = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueZonedDateTime)
-  //  private lazy val sql2setUUID          : (Row, Int) => Set[UUID]           = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueUUID)
-  //  private lazy val sql2setURI           : (Row, Int) => Set[URI]            = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueURI)
-  //  private lazy val sql2setByte          : (Row, Int) => Set[Byte]           = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueByte)
-  //  private lazy val sql2setShort         : (Row, Int) => Set[Short]          = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueShort)
-  //  private lazy val sql2setChar          : (Row, Int) => Set[Char]           = (row: Row, paramIndex: Int) => sqlArray2set(row, paramIndex, valueChar)
-
   case class ResSet[T](
     tpe: String,
     castSet: String => BsonDocument => Set[T],
     castOptSet: String => BsonDocument => Option[Set[T]],
     v2bson: T => BsonValue,
 
-    //    tpe: String,
-    //    tpeDb: String,
-    //    sql2set: (Row, ParamIndex) => Set[T],
-    //    sql2setOrNull: (Row, ParamIndex) => Any, // Allow null in optional nested rows
-    //    set2sqlArray: Set[T] => String,
-    //    set2sqls: Set[T] => Set[String],
-    //    one2sql: T => String,
-    //    array2set: (Row, ParamIndex) => Set[T],
-    //    nestedArray2coalescedSet: (Row, ParamIndex) => Set[T],
-    //    nestedArray2nestedSet: (Row, ParamIndex) => Set[Set[T]],
-    //    array2setFirst: (Row, ParamIndex) => Set[T],
-    //    array2setLast: (Row, ParamIndex) => Set[T],
-    //    nestedArray2setAsc: Int => (Row, ParamIndex) => Set[T],
-    //    nestedArray2setDesc: Int => (Row, ParamIndex) => Set[T],
-    //    array2setSum: (Row, ParamIndex) => Set[T],
-    //    json2tpe: String => T,
-    //    json2array: String => Array[T],
-    //    one2json: T => String
   )
 
 
@@ -124,29 +83,29 @@ trait LambdasSet extends LambdasBase with JavaConversions {
   protected lazy val castSetChar           = (field: String) => (doc: BsonDocument) => castSet[Char](doc, field, (bv: BsonValue) => bv.asString.getValue.charAt(0))
 
 
-  protected lazy val v2bsonID            : String => BsonValue         = (v: String) => new BsonString(v)
-  protected lazy val v2bsonString        : String => BsonValue         = (v: String) => new BsonString(v)
-  protected lazy val v2bsonInt           : Int => BsonValue            = (v: Int) => new BsonInt32(v)
-  protected lazy val v2bsonLong          : Long => BsonValue           = (v: Long) => new BsonInt64(v)
-  protected lazy val v2bsonFloat         : Float => BsonValue          = (v: Float) => new BsonDouble(v)
-  protected lazy val v2bsonDouble        : Double => BsonValue         = (v: Double) => new BsonDouble(v)
-  protected lazy val v2bsonBoolean       : Boolean => BsonValue        = (v: Boolean) => new BsonBoolean(v)
-  protected lazy val v2bsonBigInt        : BigInt => BsonValue         = (v: BigInt) => new BsonDecimal128(new Decimal128(BigDecimal(v).bigDecimal))
-  protected lazy val v2bsonBigDecimal    : BigDecimal => BsonValue     = (v: BigDecimal) => new BsonDecimal128(new Decimal128(v.bigDecimal))
-  protected lazy val v2bsonDate          : Date => BsonValue           = (v: Date) => new BsonDateTime(v.getTime)
-  protected lazy val v2bsonDuration      : Duration => BsonValue       = (v: Duration) => new BsonString(v.toString)
-  protected lazy val v2bsonInstant       : Instant => BsonValue        = (v: Instant) => new BsonString(v.toString)
-  protected lazy val v2bsonLocalDate     : LocalDate => BsonValue      = (v: LocalDate) => new BsonString(v.toString)
-  protected lazy val v2bsonLocalTime     : LocalTime => BsonValue      = (v: LocalTime) => new BsonString(v.toString)
-  protected lazy val v2bsonLocalDateTime : LocalDateTime => BsonValue  = (v: LocalDateTime) => new BsonString(v.toString)
-  protected lazy val v2bsonOffsetTime    : OffsetTime => BsonValue     = (v: OffsetTime) => new BsonString(v.toString)
-  protected lazy val v2bsonOffsetDateTime: OffsetDateTime => BsonValue = (v: OffsetDateTime) => new BsonString(v.toString)
-  protected lazy val v2bsonZonedDateTime : ZonedDateTime => BsonValue  = (v: ZonedDateTime) => new BsonString(v.toString)
-  protected lazy val v2bsonUUID          : UUID => BsonValue           = (v: UUID) => new BsonString(v.toString)
-  protected lazy val v2bsonURI           : URI => BsonValue            = (v: URI) => new BsonString(v.toString)
-  protected lazy val v2bsonByte          : Byte => BsonValue           = (v: Byte) => new BsonInt32(v)
-  protected lazy val v2bsonShort         : Short => BsonValue          = (v: Short) => new BsonInt32(v)
-  protected lazy val v2bsonChar          : Char => BsonValue           = (v: Char) => new BsonString(v.toString)
+//  protected lazy val v2bsonID            : String => BsonValue         = (v: String) => new BsonString(v)
+//  protected lazy val v2bsonString        : String => BsonValue         = (v: String) => new BsonString(v)
+//  protected lazy val v2bsonInt           : Int => BsonValue            = (v: Int) => new BsonInt32(v)
+//  protected lazy val v2bsonLong          : Long => BsonValue           = (v: Long) => new BsonInt64(v)
+//  protected lazy val v2bsonFloat         : Float => BsonValue          = (v: Float) => new BsonDouble(v)
+//  protected lazy val v2bsonDouble        : Double => BsonValue         = (v: Double) => new BsonDouble(v)
+//  protected lazy val v2bsonBoolean       : Boolean => BsonValue        = (v: Boolean) => new BsonBoolean(v)
+//  protected lazy val v2bsonBigInt        : BigInt => BsonValue         = (v: BigInt) => new BsonDecimal128(new Decimal128(BigDecimal(v).bigDecimal))
+//  protected lazy val v2bsonBigDecimal    : BigDecimal => BsonValue     = (v: BigDecimal) => new BsonDecimal128(new Decimal128(v.bigDecimal))
+//  protected lazy val v2bsonDate          : Date => BsonValue           = (v: Date) => new BsonDateTime(v.getTime)
+//  protected lazy val v2bsonDuration      : Duration => BsonValue       = (v: Duration) => new BsonString(v.toString)
+//  protected lazy val v2bsonInstant       : Instant => BsonValue        = (v: Instant) => new BsonString(v.toString)
+//  protected lazy val v2bsonLocalDate     : LocalDate => BsonValue      = (v: LocalDate) => new BsonString(v.toString)
+//  protected lazy val v2bsonLocalTime     : LocalTime => BsonValue      = (v: LocalTime) => new BsonString(v.toString)
+//  protected lazy val v2bsonLocalDateTime : LocalDateTime => BsonValue  = (v: LocalDateTime) => new BsonString(v.toString)
+//  protected lazy val v2bsonOffsetTime    : OffsetTime => BsonValue     = (v: OffsetTime) => new BsonString(v.toString)
+//  protected lazy val v2bsonOffsetDateTime: OffsetDateTime => BsonValue = (v: OffsetDateTime) => new BsonString(v.toString)
+//  protected lazy val v2bsonZonedDateTime : ZonedDateTime => BsonValue  = (v: ZonedDateTime) => new BsonString(v.toString)
+//  protected lazy val v2bsonUUID          : UUID => BsonValue           = (v: UUID) => new BsonString(v.toString)
+//  protected lazy val v2bsonURI           : URI => BsonValue            = (v: URI) => new BsonString(v.toString)
+//  protected lazy val v2bsonByte          : Byte => BsonValue           = (v: Byte) => new BsonInt32(v)
+//  protected lazy val v2bsonShort         : Short => BsonValue          = (v: Short) => new BsonInt32(v)
+//  protected lazy val v2bsonChar          : Char => BsonValue           = (v: Char) => new BsonString(v.toString)
 
   //  protected lazy val castString         = (field: String) => (doc: BsonDocument) => doc.get(field).asString.getValue
   //  protected lazy val castInt            = (field: String) => (doc: BsonDocument) => doc.get(field).asInt32.getValue

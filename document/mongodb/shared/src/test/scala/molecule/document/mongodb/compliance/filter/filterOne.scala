@@ -28,7 +28,7 @@ object FilterOne_Byte_ extends FilterOne_Byte_ with TestAsync_mongodb
 object FilterOne_Short_ extends FilterOne_Short_ with TestAsync_mongodb
 object FilterOne_Char_ extends FilterOne_Char_ with TestAsync_mongodb
 
-// Embedded documents don't have entity ids
+// In MongoDB embedded documents don't have entity ids
 //object FilterOne_ref_ extends FilterOne_ref_ with TestAsync_mongodb
 
 object FilterOneSpecial_Number extends FilterOneSpecial_Number with TestAsync_mongodb
