@@ -4,14 +4,12 @@ import com.mongodb.client.model.{Filters, Projections}
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.core.query.ResolveExpr
-import org.bson.BsonArray
+import org.bson._
 import org.bson.conversions.Bson
-import scala.reflect.ClassTag
 
 trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet =>
 
   override protected def resolveAttrSetMan(attr: AttrSetMan): Unit = {
-//    aritiesAttr()
     attr match {
       case at: AttrSetManID             => man(attr, at.vs, resSetString)
       case at: AttrSetManString         => man(attr, at.vs, resSetString)
@@ -68,7 +66,6 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
   }
 
   override protected def resolveAttrSetOpt(attr: AttrSetOpt): Unit = {
-//    aritiesAttr()
     hasOptAttr = true // to avoid redundant None's
     attr match {
       case at: AttrSetOptID             => opt(at, at.vs, resSetString)
@@ -117,6 +114,7 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
     //    }
 
     val field = attr.attr
+    val uniqueField = unique(field)
     projections.add(Projections.include(field))
     addCast(field, resSet.castSet(field))
 
@@ -125,12 +123,11 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
         // Runtime check needed since we can't type infer it
         throw ModelError(s"Cardinality-set filter attributes not allowed to do additional filtering. Found:\n  " + attr)
       }
-      expr(field, attr.op, args, resSet)
+      expr(uniqueField, field, attr.op, args, resSet)
     } {
       case filterAttr: AttrOne => ??? //setExpr2(field, attr.op, filterAttr.name, true, tpe)
       case filterAttr          => ??? //setExpr2(field, attr.op, filterAttr.name, false, tpe)
     }
-
   }
 
   private def tac[T](attr: Attr, args: Seq[Set[T]], res: ResSet[T]): Unit = {
@@ -153,9 +150,10 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
     //    notNull += field
 
     val field = attr.attr
+    val uniqueField = unique(field)
     matches.add(Filters.exists(field))
     attr.filterAttr.fold {
-      expr(field, attr.op, args, res)
+      expr(uniqueField, field, attr.op, args, res)
     } {
       //      expr2(field, attr.op, filterAttr.name)
       case filterAttr: AttrOne => expr2(field, attr.op, filterAttr.name, true, res.tpe)
@@ -163,11 +161,7 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
     }
   }
 
-  private def opt[T](
-    attr: Attr,
-    optSets: Option[Seq[Set[T]]],
-    res: ResSet[T],
-  ): Unit = {
+  private def opt[T](attr: Attr, optSets: Option[Seq[Set[T]]], res: ResSet[T]): Unit = {
     val field = attr.attr
     projections.add(Projections.include(field))
     addCast(field, res.castOptSet(field))
@@ -181,9 +175,9 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
     }
   }
 
-  private def expr[T](field: String, op: Op, sets: Seq[Set[T]], res: ResSet[T]): Unit = {
+  private def expr[T](uniqueField: String, field: String, op: Op, sets: Seq[Set[T]], res: ResSet[T]): Unit = {
     op match {
-      case V         => matches.add(Filters.ne(field, null.asInstanceOf[T]))
+      case V         => attr(uniqueField, field, res)
       case Eq        => equal(field, sets, res)
       case Neq       => neq(field, sets, res)
       case Has       => has(field, sets, res)
@@ -213,192 +207,12 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
       throw ModelError("Aggregate functions not implemented for Sets of boolean values.")
   }
 
-  private def aggr[T](field: String, fn: String, optN: Option[Int], res: ResSet[T]): Unit = {
-//    select -= field
-    lazy val n = optN.getOrElse(0)
-    //      fn match {
-    //        case "distinct" =>
-    //          noBooleanSetAggr(res)
-    //          select += s"ARRAY_AGG(DISTINCT $field)"
-    //          groupByCols -= field
-    //          aggregate = true
-    //          replaceCast(res.nestedArray2nestedSet)
-    //  
-    //        case "min" =>
-    //          noBooleanSetAggr(res)
-    //          select += s"MIN($field)"
-    //          groupByCols -= field
-    //          aggregate = true
-    //          replaceCast(res.array2setFirst)
-    //  
-    //        case "mins" =>
-    //          noBooleanSetAggr(res)
-    //          select += s"ARRAY_AGG(DISTINCT $field)"
-    //          groupByCols -= field
-    //          aggregate = true
-    //          replaceCast(res.nestedArray2setAsc(n))
-    //  
-    //        case "max" =>
-    //          noBooleanSetAggr(res)
-    //          select += s"MAX($field)"
-    //          groupByCols -= field
-    //          aggregate = true
-    //          replaceCast(res.array2setLast)
-    //  
-    //        case "maxs" =>
-    //          noBooleanSetAggr(res)
-    //          select += s"ARRAY_AGG(DISTINCT $field)"
-    //          groupByCols -= field
-    //          aggregate = true
-    //          replaceCast(res.nestedArray2setDesc(n))
-    //  
-    //        case "sample" =>
-    //          noBooleanSetAggr(res)
-    //          distinct = false
-    //          select += field
-    //          orderBy += ((level, -1, "RAND()", ""))
-    //          hardLimit = 1
-    //          replaceCast(res.nestedArray2coalescedSet)
-    //  
-    //        case "samples" =>
-    //          noBooleanSetAggr(res)
-    //          select +=
-    //            s"""ARRAY_SLICE(
-    //               |    ARRAY_AGG(DISTINCT $field order by RAND()),
-    //               |    1,
-    //               |    LEAST(
-    //               |      $n,
-    //               |      ARRAY_LENGTH(ARRAY_AGG(DISTINCT $field))
-    //               |    )
-    //               |  )""".stripMargin
-    //          groupByCols -= field
-    //          aggregate = true
-    //          replaceCast(res.nestedArray2coalescedSet)
-    //  
-    //  
-    //        // Using brute force in the following aggregate functions to be able to
-    //        // aggregate _unique_ values (Set semantics instead of Array semantics)
-    //  
-    //        case "count" =>
-    //          noBooleanSetCounts(n)
-    //          // Count of all (non-unique) values
-    //          select += s"ARRAY_AGG($field)"
-    //          groupByCols -= field
-    //          aggregate = true
-    //          replaceCast(
-    //            (row: Row, paramIndex: Int) => {
-    //              //            val outerArrayResultSet = row.getArray(paramIndex).getResultSet
-    //              //            var count               = 0
-    //              //            while (outerArrayResultSet.next()) {
-    //              //              count += outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]].length
-    //              //            }
-    //              //            count
-    //              ???
-    //            }
-    //          )
-    //  
-    //        case "countDistinct" =>
-    //          noBooleanSetCounts(n)
-    //          // Count of unique values (Set semantics)
-    //          select += s"ARRAY_AGG($field)"
-    //          groupByCols -= field
-    //          aggregate = true
-    //          replaceCast(
-    //            (row: Row, paramIndex: Int) => {
-    //              //            val outerArrayResultSet = row.getArray(paramIndex).getResultSet
-    //              //            var set                 = Set.empty[Any]
-    //              //            while (outerArrayResultSet.next()) {
-    //              //              outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]].foreach { value =>
-    //              //                set += value
-    //              //              }
-    //              //            }
-    //              //            set.size
-    //              ???
-    //            }
-    //          )
-    //  
-    //        case "sum" =>
-    //          // Sum of unique values (Set semantics)
-    //          select += s"ARRAY_AGG($field)"
-    //          groupByCols -= field
-    //          aggregate = true
-    //          replaceCast(res.array2setSum)
-    //  
-    //        case "median" =>
-    //          // Using brute force and fieldlecting all unique values to calculate the median value
-    //          // Median of unique values (Set semantics)
-    //          select += s"ARRAY_AGG($field)"
-    //          groupByCols -= field
-    //          aggregate = true
-    //          replaceCast(
-    //            (row: Row, paramIndex: Int) => {
-    //              //            val outerArrayResultSet = row.getArray(paramIndex).getResultSet
-    //              //            var set                 = Set.empty[Double]
-    //              //            while (outerArrayResultSet.next()) {
-    //              //              val array = outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]]
-    //              //              array.foreach(v => set += v.toString.toDouble) // not the most efficient...
-    //              //            }
-    //              //            getMedian(set)
-    //              ???
-    //            }
-    //          )
-    //  
-    //        case "avg" =>
-    //          // Average of unique values (Set semantics)
-    //          select += s"ARRAY_AGG($field)"
-    //          groupByCols -= field
-    //          aggregate = true
-    //          replaceCast(
-    //            (row: Row, paramIndex: Int) => {
-    //              //            val outerArrayResultSet = row.getArray(paramIndex).getResultSet
-    //              //            var set                 = Set.empty[Double]
-    //              //            while (outerArrayResultSet.next()) {
-    //              //              val array = outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]]
-    //              //              array.foreach(v => set += v.toString.toDouble) // not the most efficient...
-    //              //            }
-    //              //            set.sum / set.size
-    //              ???
-    //            }
-    //          )
-    //  
-    //        case "variance" =>
-    //          // Variance of unique values (Set semantics)
-    //          select += s"ARRAY_AGG($field)"
-    //          groupByCols -= field
-    //          aggregate = true
-    //          replaceCast(
-    //            (row: Row, paramIndex: Int) => {
-    //              //            val outerArrayResultSet = row.getArray(paramIndex).getResultSet
-    //              //            var set                 = Set.empty[Double]
-    //              //            while (outerArrayResultSet.next()) {
-    //              //              val array = outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]]
-    //              //              array.foreach(v => set += v.toString.toDouble) // not the most efficient...
-    //              //            }
-    //              //            varianceOf(set.toList: _*)
-    //              ???
-    //            }
-    //          )
-    //  
-    //        case "stddev" =>
-    //          // Standard deviation of unique values (Set semantics)
-    //          select += s"ARRAY_AGG($field)"
-    //          groupByCols -= field
-    //          aggregate = true
-    //          replaceCast(
-    //            (row: Row, paramIndex: Int) => {
-    //              //            val outerArrayResultSet = row.getArray(paramIndex).getResultSet
-    //              //            var set                 = Set.empty[Double]
-    //              //            while (outerArrayResultSet.next()) {
-    //              //              val array = outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]]
-    //              //              array.foreach(v => set += v.toString.toDouble) // not the most efficient...
-    //              //            }
-    //              //            stdDevOf(set.toList: _*)
-    //              ???
-    //            }
-    //          )
-    //  
-    //        case other => unexpectedKw(other)
-    //      }
+
+  protected def attr[T](uniqueField: String, field: String, res: ResSet[T]): Unit = {
+    matches.add(Filters.ne(field, null.asInstanceOf[T]))
+    groupExprs += ((pathUnderscore + uniqueField,
+      new BsonDocument().append("$addToSet", new BsonString("$" + pathDot + field))))
+//    addFields(refPath) = addFields(refPath) :+ uniqueField
   }
 
   private def filterSet[T](field: String, set: Set[T], res: ResSet[T]): Bson = {
@@ -528,4 +342,194 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
 //    notNull -= field
 //    where += ((field, s"IS NULL"))
   }
+
+
+  private def aggr[T](field: String, fn: String, optN: Option[Int], res: ResSet[T]): Unit = {
+    //    select -= field
+    lazy val n = optN.getOrElse(0)
+    //      fn match {
+    //        case "distinct" =>
+    //          noBooleanSetAggr(res)
+    //          select += s"ARRAY_AGG(DISTINCT $field)"
+    //          groupByCols -= field
+    //          aggregate = true
+    //          replaceCast(res.nestedArray2nestedSet)
+    //
+    //        case "min" =>
+    //          noBooleanSetAggr(res)
+    //          select += s"MIN($field)"
+    //          groupByCols -= field
+    //          aggregate = true
+    //          replaceCast(res.array2setFirst)
+    //
+    //        case "mins" =>
+    //          noBooleanSetAggr(res)
+    //          select += s"ARRAY_AGG(DISTINCT $field)"
+    //          groupByCols -= field
+    //          aggregate = true
+    //          replaceCast(res.nestedArray2setAsc(n))
+    //
+    //        case "max" =>
+    //          noBooleanSetAggr(res)
+    //          select += s"MAX($field)"
+    //          groupByCols -= field
+    //          aggregate = true
+    //          replaceCast(res.array2setLast)
+    //
+    //        case "maxs" =>
+    //          noBooleanSetAggr(res)
+    //          select += s"ARRAY_AGG(DISTINCT $field)"
+    //          groupByCols -= field
+    //          aggregate = true
+    //          replaceCast(res.nestedArray2setDesc(n))
+    //
+    //        case "sample" =>
+    //          noBooleanSetAggr(res)
+    //          distinct = false
+    //          select += field
+    //          orderBy += ((level, -1, "RAND()", ""))
+    //          hardLimit = 1
+    //          replaceCast(res.nestedArray2coalescedSet)
+    //
+    //        case "samples" =>
+    //          noBooleanSetAggr(res)
+    //          select +=
+    //            s"""ARRAY_SLICE(
+    //               |    ARRAY_AGG(DISTINCT $field order by RAND()),
+    //               |    1,
+    //               |    LEAST(
+    //               |      $n,
+    //               |      ARRAY_LENGTH(ARRAY_AGG(DISTINCT $field))
+    //               |    )
+    //               |  )""".stripMargin
+    //          groupByCols -= field
+    //          aggregate = true
+    //          replaceCast(res.nestedArray2coalescedSet)
+    //
+    //
+    //        // Using brute force in the following aggregate functions to be able to
+    //        // aggregate _unique_ values (Set semantics instead of Array semantics)
+    //
+    //        case "count" =>
+    //          noBooleanSetCounts(n)
+    //          // Count of all (non-unique) values
+    //          select += s"ARRAY_AGG($field)"
+    //          groupByCols -= field
+    //          aggregate = true
+    //          replaceCast(
+    //            (row: Row, paramIndex: Int) => {
+    //              //            val outerArrayResultSet = row.getArray(paramIndex).getResultSet
+    //              //            var count               = 0
+    //              //            while (outerArrayResultSet.next()) {
+    //              //              count += outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]].length
+    //              //            }
+    //              //            count
+    //              ???
+    //            }
+    //          )
+    //
+    //        case "countDistinct" =>
+    //          noBooleanSetCounts(n)
+    //          // Count of unique values (Set semantics)
+    //          select += s"ARRAY_AGG($field)"
+    //          groupByCols -= field
+    //          aggregate = true
+    //          replaceCast(
+    //            (row: Row, paramIndex: Int) => {
+    //              //            val outerArrayResultSet = row.getArray(paramIndex).getResultSet
+    //              //            var set                 = Set.empty[Any]
+    //              //            while (outerArrayResultSet.next()) {
+    //              //              outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]].foreach { value =>
+    //              //                set += value
+    //              //              }
+    //              //            }
+    //              //            set.size
+    //              ???
+    //            }
+    //          )
+    //
+    //        case "sum" =>
+    //          // Sum of unique values (Set semantics)
+    //          select += s"ARRAY_AGG($field)"
+    //          groupByCols -= field
+    //          aggregate = true
+    //          replaceCast(res.array2setSum)
+    //
+    //        case "median" =>
+    //          // Using brute force and fieldlecting all unique values to calculate the median value
+    //          // Median of unique values (Set semantics)
+    //          select += s"ARRAY_AGG($field)"
+    //          groupByCols -= field
+    //          aggregate = true
+    //          replaceCast(
+    //            (row: Row, paramIndex: Int) => {
+    //              //            val outerArrayResultSet = row.getArray(paramIndex).getResultSet
+    //              //            var set                 = Set.empty[Double]
+    //              //            while (outerArrayResultSet.next()) {
+    //              //              val array = outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]]
+    //              //              array.foreach(v => set += v.toString.toDouble) // not the most efficient...
+    //              //            }
+    //              //            getMedian(set)
+    //              ???
+    //            }
+    //          )
+    //
+    //        case "avg" =>
+    //          // Average of unique values (Set semantics)
+    //          select += s"ARRAY_AGG($field)"
+    //          groupByCols -= field
+    //          aggregate = true
+    //          replaceCast(
+    //            (row: Row, paramIndex: Int) => {
+    //              //            val outerArrayResultSet = row.getArray(paramIndex).getResultSet
+    //              //            var set                 = Set.empty[Double]
+    //              //            while (outerArrayResultSet.next()) {
+    //              //              val array = outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]]
+    //              //              array.foreach(v => set += v.toString.toDouble) // not the most efficient...
+    //              //            }
+    //              //            set.sum / set.size
+    //              ???
+    //            }
+    //          )
+    //
+    //        case "variance" =>
+    //          // Variance of unique values (Set semantics)
+    //          select += s"ARRAY_AGG($field)"
+    //          groupByCols -= field
+    //          aggregate = true
+    //          replaceCast(
+    //            (row: Row, paramIndex: Int) => {
+    //              //            val outerArrayResultSet = row.getArray(paramIndex).getResultSet
+    //              //            var set                 = Set.empty[Double]
+    //              //            while (outerArrayResultSet.next()) {
+    //              //              val array = outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]]
+    //              //              array.foreach(v => set += v.toString.toDouble) // not the most efficient...
+    //              //            }
+    //              //            varianceOf(set.toList: _*)
+    //              ???
+    //            }
+    //          )
+    //
+    //        case "stddev" =>
+    //          // Standard deviation of unique values (Set semantics)
+    //          select += s"ARRAY_AGG($field)"
+    //          groupByCols -= field
+    //          aggregate = true
+    //          replaceCast(
+    //            (row: Row, paramIndex: Int) => {
+    //              //            val outerArrayResultSet = row.getArray(paramIndex).getResultSet
+    //              //            var set                 = Set.empty[Double]
+    //              //            while (outerArrayResultSet.next()) {
+    //              //              val array = outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]]
+    //              //              array.foreach(v => set += v.toString.toDouble) // not the most efficient...
+    //              //            }
+    //              //            stdDevOf(set.toList: _*)
+    //              ???
+    //            }
+    //          )
+    //
+    //        case other => unexpectedKw(other)
+    //      }
+  }
+
 }

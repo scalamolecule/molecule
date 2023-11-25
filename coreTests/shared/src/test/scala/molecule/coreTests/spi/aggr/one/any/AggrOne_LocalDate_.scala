@@ -9,6 +9,7 @@ import molecule.coreTests.async._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
+import scala.collection.immutable.Set
 
 trait AggrOne_LocalDate_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
@@ -83,6 +84,7 @@ trait AggrOne_LocalDate_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, localDate4),
           (2, localDate5),
           (2, localDate6),
+          (2, localDate6), // (make sure grouped values coalesce)
         ).transact
 
         _ <- Ns.localDate(min(1)).query.get.map(_ ==> List(Set(localDate1)))

@@ -32,22 +32,19 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
 
   var idField = false
 
-  var path           = List.empty[String]
-  var pathDot        = ""
-  var pathUnderscore = ""
-
-  val matches     = new util.ArrayList[Bson]
-
-  var projections      = new util.ArrayList[Bson]
-  var projections2     = ListBuffer.empty[String]
-  var levelProjections = List(List(projections))
-
+  final protected var refPath        = List.empty[String]
+  final protected var pathDot        = ""
+  final protected var pathUnderscore = ""
   final protected val pathFields     = ListBuffer.empty[String]
-  final protected val preGroupFields = ListBuffer.empty[(String, String)]
-  final protected val groupIdFields  = ListBuffer.empty[(String, String, String)]
-  final protected val groupFields    = ListBuffer.empty[(String, String)]
-  final protected val groupExprs     = ListBuffer.empty[(String, BsonValue)]
-  final protected val addFields      = mutable.Map.empty[List[String], List[String]]
+
+  final protected val matches          = new util.ArrayList[Bson]
+  final protected val preGroupFields   = ListBuffer.empty[(String, String)]
+  final protected val groupIdFields    = ListBuffer.empty[(String, String, String)]
+  final protected val groupFields      = ListBuffer.empty[(String, String)]
+  final protected val groupExprs       = ListBuffer.empty[(String, BsonValue)]
+  final protected val addFields        = mutable.Map.empty[List[String], List[(String, BsonValue)]]
+  final protected var projections      = new util.ArrayList[Bson]
+  final protected var levelProjections = List(List(projections))
 
   var sampleSize  = 0
   var fieldIndex  = 0
@@ -79,6 +76,7 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
 
   final protected def projectField(field: String): Unit = {
     projections.add(Projections.include(pathDot + field))
+    //    projections.add(new BsonDocument())
   }
   final protected def removeField(pathField: String): Unit = {
     projections.remove(Projections.include(pathField))

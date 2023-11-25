@@ -8,6 +8,7 @@ import molecule.coreTests.async._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
+import scala.collection.immutable.Set
 
 trait AggrOne_String_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
@@ -82,6 +83,7 @@ trait AggrOne_String_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, string4),
           (2, string5),
           (2, string6),
+          (2, string6), // (make sure grouped values coalesce)
         ).transact
 
         _ <- Ns.string(min(1)).query.get.map(_ ==> List(Set(string1)))

@@ -9,6 +9,7 @@ import molecule.coreTests.async._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
+import scala.collection.immutable.Set
 
 trait AggrOne_OffsetTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
@@ -83,6 +84,7 @@ trait AggrOne_OffsetTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, offsetTime4),
           (2, offsetTime5),
           (2, offsetTime6),
+          (2, offsetTime6), // (make sure grouped values coalesce)
         ).transact
 
         _ <- Ns.offsetTime(min(1)).query.get.map(_ ==> List(Set(offsetTime1)))

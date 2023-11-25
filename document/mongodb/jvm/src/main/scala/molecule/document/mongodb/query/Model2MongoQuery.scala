@@ -112,30 +112,28 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
       groupIdFields.collect { case ("", "", field) =>
         addFieldsDoc.put(field, new BsonString("$_id." + field))
       }
+
       if (addFields.nonEmpty) {
         val branches        = mutable.Map.empty[List[String], List[(String, BsonDocument)]]
         val groupExprFields = groupExprs.map(_._1)
         addFields.toList.sortBy(-_._1.length).foreach { case (refPath, fields) =>
-          val doc   = new BsonDocument()
-          val alias = refPath.mkString("_") + "_"
-          fields.foreach { field =>
-            val fieldAlias = alias + field
-            val prefix     = if (groupExprFields.contains(fieldAlias)) "$" else "$_id."
-            doc.put(field, new BsonString(prefix + fieldAlias))
+          val fieldsDoc   = new BsonDocument()
+          fields.foreach { case (field, value) =>
+            fieldsDoc.put(field, value)
           }
           if (branches.keys.toList.contains(refPath)) {
-            // Add ref branch to current doc
+            // Add ref branch(es) to current doc
             branches(refPath).foreach { case (ref, refDoc) =>
-              doc.put(ref, refDoc)
+              fieldsDoc.put(ref, refDoc)
             }
           }
           // Cache current doc as a branch
-          branches(refPath.init) = branches.getOrElse(refPath.init, Nil) :+ (refPath.last -> doc)
+          branches(refPath.init) = branches.getOrElse(refPath.init, Nil) :+ (refPath.last -> fieldsDoc)
         }
 
         // add top level branches
-        branches(Nil).foreach { case (ref, doc) =>
-          addFieldsDoc.put(ref, doc)
+        branches(Nil).foreach { case (ref, fieldsDoc) =>
+          addFieldsDoc.put(ref, fieldsDoc)
         }
       }
       if (!addFieldsDoc.isEmpty)
@@ -403,11 +401,12 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
         "Only cardinality-one refs allowed in optional nested queries. Found: " + ref
       )
     }
-    path = path :+ refAttr
+    refPath = refPath :+ refAttr
     pathDot = pathDot + refAttr + "."
     pathUnderscore = pathUnderscore + refAttr + "_"
 
-    addFields(path) = Nil
+//    addFields(refPath) = Nil
+    addFields(refPath) = Nil
 
     // Continue from ref namespace
     val nss     = casts.last
@@ -432,7 +431,7 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
       }
     }
 
-    path = path.init
+    refPath = refPath.init
     pathDot = {
       val nss = pathDot.init.split('.').init
       if (nss.isEmpty) "" else nss.mkString(".") + "."
@@ -465,11 +464,12 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
     // No empty nested arrays when asking for mandatory nested data
     matches.add(Filters.ne(refAttr, new BsonArray()))
 
-    path = path :+ refAttr
+    refPath = refPath :+ refAttr
     pathDot = pathDot + refAttr + "."
     pathUnderscore = pathUnderscore + refAttr + "_"
 
-    addFields(path) = Nil
+//    addFields(refPath) = Nil
+    addFields(refPath) = Nil
 
     // Initiate nested namespace
     casts += ListBuffer(
@@ -496,11 +496,12 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
     validateRefNs(ref, nestedElements)
     val Ref(_, refAttr, refNs, _, _) = ref
 
-    path = path :+ refAttr
+    refPath = refPath :+ refAttr
     pathDot = pathDot + refAttr + "."
     pathUnderscore = pathUnderscore + refAttr + "_"
 
-    addFields(path) = Nil
+//    addFields(refPath) = Nil
+    addFields(refPath) = Nil
 
     // Initiate (optional) nested namespace
     casts += ListBuffer(

@@ -21,9 +21,10 @@ trait AggrOneRef_min_max_n extends CoreTestSuite with ApiAsync { spi: SpiAsync =
           (2, 4),
           (2, 5),
           (2, 6),
-        ).i.transact
+          (2, 6), // (make sure grouped values coalesce)
+        ).transact
 
-        _ <- A.B.i(min(2)).query.i.get.map(_ ==> List(Set(1, 2)))
+        _ <- A.B.i(min(2)).query.get.map(_ ==> List(Set(1, 2)))
         _ <- A.B.i(max(2)).query.get.map(_ ==> List(Set(5, 6)))
         _ <- A.B.i(min(2)).i(max(2)).query.get.map(_ ==> List((Set(1, 2), Set(5, 6))))
 
@@ -54,9 +55,10 @@ trait AggrOneRef_min_max_n extends CoreTestSuite with ApiAsync { spi: SpiAsync =
           (2, 2, 4),
           (2, 2, 5),
           (2, 2, 6),
-        ).i.transact
+          (2, 2, 6), // (make sure grouped values coalesce)
+        ).transact
 
-        _ <- A.B.C.i(min(2)).query.i.get.map(_ ==> List(Set(1, 2)))
+        _ <- A.B.C.i(min(2)).query.get.map(_ ==> List(Set(1, 2)))
         _ <- A.B.C.i(max(2)).query.get.map(_ ==> List(Set(5, 6)))
         _ <- A.B.C.i(min(2)).i(max(2)).query.get.map(_ ==> List((Set(1, 2), Set(5, 6))))
 
@@ -89,6 +91,7 @@ trait AggrOneRef_min_max_n extends CoreTestSuite with ApiAsync { spi: SpiAsync =
           (20, 6, 6),
           (20, 7, 7),
           (20, 8, 8),
+          (20, 8, 8), // (make sure grouped values coalesce)
         ).transact
 
         _ <- A.i.a1.B.i(min(2)).C.i(min(2)).query.get.map(_ ==> List(
@@ -122,6 +125,7 @@ trait AggrOneRef_min_max_n extends CoreTestSuite with ApiAsync { spi: SpiAsync =
           (20, 6, 6),
           (20, 7, 7),
           (20, 8, 8),
+          (20, 8, 8), // (make sure grouped values coalesce)
         ).transact
 
         _ <- A.i.a1.B.i(min(2))._A.C.i(min(2)).query.get.map(_ ==> List(

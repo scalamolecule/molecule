@@ -48,7 +48,6 @@ trait LambdasSet extends LambdasBase with JavaConversions {
     if (raw == null) {
       Set.empty[T]
     } else {
-      println(raw.getClass)
       val array = raw.asArray.iterator
       var set   = Set.empty[T]
       while (array.hasNext) {
