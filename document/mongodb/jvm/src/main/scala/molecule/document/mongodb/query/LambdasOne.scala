@@ -49,38 +49,6 @@ trait LambdasOne extends LambdasSet {
   protected lazy val resChar           = ResOne(castChar, castOptChar, eqChar, neqChar, ltChar, gtChar, leChar, geChar, castSetChar, v2bsonChar)
 
 
-  protected lazy val castID             = (field: String) => (doc: BsonDocument) => doc.get(field).asObjectId.getValue.toString
-  protected lazy val castString         = (field: String) => (doc: BsonDocument) => doc.get(field).asString.getValue
-  protected lazy val castInt            = (field: String) => (doc: BsonDocument) => doc.get(field).asInt32.getValue
-  protected lazy val castLong           = (field: String) => (doc: BsonDocument) => doc.get(field).asInt64.getValue
-  protected lazy val castFloat          = (field: String) => (doc: BsonDocument) => doc.get(field).asDouble.getValue.toFloat
-  protected lazy val castDouble         = (field: String) => (doc: BsonDocument) => doc.get(field).asDouble.getValue
-  protected lazy val castBoolean        = (field: String) => (doc: BsonDocument) => doc.get(field).asBoolean.getValue
-  protected lazy val castBigInt         = (field: String) => (doc: BsonDocument) => BigInt(doc.get(field).asDecimal128.getValue.bigDecimalValue.toBigInteger)
-  protected lazy val castBigDecimal     = (field: String) => (doc: BsonDocument) => BigDecimal(doc.get(field).asDecimal128.getValue.bigDecimalValue)
-  protected lazy val castDate           = (field: String) => (doc: BsonDocument) => new Date(doc.get(field).asDateTime.getValue)
-  protected lazy val castDuration       = (field: String) => (doc: BsonDocument) => Duration.parse(doc.get(field).asString.getValue)
-  protected lazy val castInstant        = (field: String) => (doc: BsonDocument) => Instant.parse(doc.get(field).asString.getValue)
-  protected lazy val castLocalDate      = (field: String) => (doc: BsonDocument) => LocalDate.parse(doc.get(field).asString.getValue)
-  protected lazy val castLocalTime      = (field: String) => (doc: BsonDocument) => LocalTime.parse(doc.get(field).asString.getValue)
-  protected lazy val castLocalDateTime  = (field: String) => (doc: BsonDocument) => LocalDateTime.parse(doc.get(field).asString.getValue)
-  protected lazy val castOffsetTime     = (field: String) => (doc: BsonDocument) => OffsetTime.parse(doc.get(field).asString.getValue)
-  protected lazy val castOffsetDateTime = (field: String) => (doc: BsonDocument) => OffsetDateTime.parse(doc.get(field).asString.getValue)
-  protected lazy val castZonedDateTime  = (field: String) => (doc: BsonDocument) => ZonedDateTime.parse(doc.get(field).asString.getValue)
-  protected lazy val castUUID           = (field: String) => (doc: BsonDocument) => UUID.fromString(doc.get(field).asString.getValue)
-  protected lazy val castURI            = (field: String) => (doc: BsonDocument) => new URI(doc.get(field).asString.getValue)
-  protected lazy val castByte           = (field: String) => (doc: BsonDocument) => doc.get(field).asInt32.getValue.toByte
-  protected lazy val castShort          = (field: String) => (doc: BsonDocument) => doc.get(field).asInt32.getValue.toShort
-  protected lazy val castChar           = (field: String) => (doc: BsonDocument) => doc.get(field).asString.getValue.charAt(0)
-
-  protected lazy val hardCastDouble = (field: String) => (doc: BsonDocument) => doc.get(field) match {
-    case v: BsonInt32      => v.asInt32.getValue.toDouble
-    case v: BsonInt64      => v.asInt64.getValue.toDouble
-    case v: BsonDouble     => v.asDouble.getValue
-    case v: BsonDecimal128 => v.asDecimal128.getValue.toString.toDouble
-  }
-
-
   protected lazy val eqID             = (field: String, v: String) => {
     def oid: BsonObjectId = if (v.length != 24) {
       throw ModelError("Object id string should be a hex string with 24 characters. Found: " + v)

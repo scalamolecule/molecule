@@ -11,6 +11,8 @@ import utest._
 
 trait AggrOneNum_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
+  // Using tolerant equality so that the test works with decimal number types too
+
   override lazy val tests = Tests {
 
     "sum" - types { implicit conn =>
@@ -24,8 +26,8 @@ trait AggrOneNum_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
           (2, bigDecimal4),
         )).transact
 
-        // Using tolerant equality so that the test works with decimal number types too
-        // Distinct values (Set semantics) used
+        // Sum of distinct values (Set semantics)
+
         _ <- Ns.bigDecimal(sum).query.get.map(_.head ==~ bigDecimal1 + bigDecimal2 + bigDecimal3 + bigDecimal4)
         _ <- Ns.i.bigDecimal(sum).query.get.map(_.map {
           case (1, sum) => sum ==~ bigDecimal1 + bigDecimal2
@@ -55,6 +57,8 @@ trait AggrOneNum_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
           (2, bigDecimal4),
         )).transact
 
+        // Median of unique values (Set semantics)
+
         _ <- Ns.bigDecimal(median).query.get.map(_.head ==~ median_2_3)
 
         _ <- Ns.i.bigDecimal(median).query.get.map(_.map {
@@ -75,6 +79,8 @@ trait AggrOneNum_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
           (2, bigDecimal3),
           (2, bigDecimal4),
         )).transact
+
+        // Average of unique values (Set semantics)
 
         _ <- Ns.bigDecimal(avg).query.get.map(_.head ==~ (bigDecimal1 + bigDecimal2 + bigDecimal3 + bigDecimal4).toDouble / 4.0)
 
@@ -97,6 +103,8 @@ trait AggrOneNum_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
           (2, bigDecimal4),
         )).transact
 
+        // Variance of unique values (Set semantics)
+
         _ <- Ns.bigDecimal(variance).query.get.map(_.head ==~ varianceOf(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4))
 
         _ <- Ns.i.bigDecimal(variance).query.get.map(_.map {
@@ -117,6 +125,8 @@ trait AggrOneNum_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
           (2, bigDecimal3),
           (2, bigDecimal4),
         )).transact
+
+        // Standard deviation of unique values (Set semantics)
 
         _ <- Ns.bigDecimal(stddev).query.get.map(_.head ==~ stdDevOf(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4))
 

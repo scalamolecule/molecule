@@ -2,7 +2,7 @@ package molecule.document.mongodb.query
 
 import java.util
 import com.mongodb.MongoClientSettings
-import com.mongodb.client.model.{Filters, _}
+import com.mongodb.client.model._
 import molecule.base.ast._
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
@@ -10,7 +10,6 @@ import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.marshalling.ConnProxy
 import molecule.core.query.Model2QueryBase
 import molecule.core.util.{JavaConversions, ModelUtils}
-import org.bson
 import org.bson._
 import org.bson.conversions.Bson
 import scala.annotation.tailrec
@@ -19,11 +18,6 @@ import scala.collection.mutable.ListBuffer
 
 class Model2MongoQuery[Tpl](elements0: List[Element])
   extends Model2QueryBase
-    //    with ResolveRef
-    //    with CastNestedBranch_
-    //    with CastRow2Tpl_
-    //    with Nest[Tpl]
-    //    with NestOpt[Tpl]
     with ModelUtils
     with ResolveExprOne
     with ResolveExprOneID
@@ -107,39 +101,52 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
       pipeline.add(new BsonDocument().append("$group", groupDoc))
 
 
-      // $addFields
+      // $addFields - "format" fields to expected structure
       val addFieldsDoc = new BsonDocument()
       groupIdFields.collect { case ("", "", field) =>
         addFieldsDoc.put(field, new BsonString("$_id." + field))
       }
 
       if (addFields.nonEmpty) {
-        val branches        = mutable.Map.empty[List[String], List[(String, BsonDocument)]]
-        val groupExprFields = groupExprs.map(_._1)
-        addFields.toList.sortBy(-_._1.length).foreach { case (refPath, fields) =>
-          val fieldsDoc   = new BsonDocument()
-          fields.foreach { case (field, value) =>
-            fieldsDoc.put(field, value)
-          }
-          if (branches.keys.toList.contains(refPath)) {
-            // Add ref branch(es) to current doc
-            branches(refPath).foreach { case (ref, refDoc) =>
-              fieldsDoc.put(ref, refDoc)
-            }
-          }
-          // Cache current doc as a branch
-          branches(refPath.init) = branches.getOrElse(refPath.init, Nil) :+ (refPath.last -> fieldsDoc)
+        val refFields = addFields.toList.sortBy(-_._1.length)
+
+        // Add fields of initial namespace
+        refFields.last._2.foreach { case (field, value) =>
+          addFieldsDoc.put(field, value)
         }
 
-        // add top level branches
-        branches(Nil).foreach { case (ref, fieldsDoc) =>
-          addFieldsDoc.put(ref, fieldsDoc)
+        // Add ref fields from leaves to branches
+        if (addFields.size != 1) {
+          val branches = mutable.Map.empty[List[String], List[(String, BsonDocument)]]
+          branches(Nil) = Nil
+          refFields.init.foreach { case (refPath, fields) =>
+            val refFieldsDoc = new BsonDocument()
+            fields.foreach { case (field, value) =>
+              refFieldsDoc.put(field, value)
+            }
+            if (branches.keys.toList.contains(refPath)) {
+              // Add ref branch(es) to current doc
+              branches(refPath).foreach { case (ref, refDoc) =>
+                refFieldsDoc.put(ref, refDoc)
+              }
+            }
+            //            println("A " + branches)
+            //            println("A " + refPath)
+            //            println("A " + refFieldsDoc)
+            branches(refPath.init) = branches.getOrElse(refPath.init, Nil) :+ (refPath.last -> refFieldsDoc)
+          }
+
+          // add ref branches of initial namespace
+          branches(Nil).foreach { case (ref, fieldsDoc) =>
+            addFieldsDoc.put(ref, fieldsDoc)
+          }
         }
       }
       if (!addFieldsDoc.isEmpty)
         pipeline.add(new BsonDocument().append("$addFields", addFieldsDoc))
     }
 
+    // Select which fields to output
     if (!projections.isEmpty) {
       addStage("$project", Projections.fields(projections))
     }
@@ -405,7 +412,7 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
     pathDot = pathDot + refAttr + "."
     pathUnderscore = pathUnderscore + refAttr + "_"
 
-//    addFields(refPath) = Nil
+    //    addFields(refPath) = Nil
     addFields(refPath) = Nil
 
     // Continue from ref namespace
@@ -468,7 +475,7 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
     pathDot = pathDot + refAttr + "."
     pathUnderscore = pathUnderscore + refAttr + "_"
 
-//    addFields(refPath) = Nil
+    //    addFields(refPath) = Nil
     addFields(refPath) = Nil
 
     // Initiate nested namespace
@@ -500,7 +507,7 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
     pathDot = pathDot + refAttr + "."
     pathUnderscore = pathUnderscore + refAttr + "_"
 
-//    addFields(refPath) = Nil
+    //    addFields(refPath) = Nil
     addFields(refPath) = Nil
 
     // Initiate (optional) nested namespace

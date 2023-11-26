@@ -11,6 +11,8 @@ import utest._
 
 trait AggrOneNum_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
+  // Using tolerant equality so that the test works with decimal number types too
+
   override lazy val tests = Tests {
 
     "sum" - types { implicit conn =>
@@ -24,8 +26,8 @@ trait AggrOneNum_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, short4),
         )).transact
 
-        // Using tolerant equality so that the test works with decimal number types too
-        // Distinct values (Set semantics) used
+        // Sum of distinct values (Set semantics)
+
         _ <- Ns.short(sum).query.get.map(_.head ==~ short1 + short2 + short3 + short4)
         _ <- Ns.i.short(sum).query.get.map(_.map {
           case (1, sum) => sum ==~ short1 + short2
@@ -55,6 +57,8 @@ trait AggrOneNum_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, short4),
         )).transact
 
+        // Median of unique values (Set semantics)
+
         _ <- Ns.short(median).query.get.map(_.head ==~ median_2_3)
 
         _ <- Ns.i.short(median).query.get.map(_.map {
@@ -75,6 +79,8 @@ trait AggrOneNum_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, short3),
           (2, short4),
         )).transact
+
+        // Average of unique values (Set semantics)
 
         _ <- Ns.short(avg).query.get.map(_.head ==~ (short1 + short2 + short3 + short4).toDouble / 4.0)
 
@@ -97,6 +103,8 @@ trait AggrOneNum_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, short4),
         )).transact
 
+        // Variance of unique values (Set semantics)
+
         _ <- Ns.short(variance).query.get.map(_.head ==~ varianceOf(short1, short2, short3, short4))
 
         _ <- Ns.i.short(variance).query.get.map(_.map {
@@ -117,6 +125,8 @@ trait AggrOneNum_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, short3),
           (2, short4),
         )).transact
+
+        // Standard deviation of unique values (Set semantics)
 
         _ <- Ns.short(stddev).query.get.map(_.head ==~ stdDevOf(short1, short2, short3, short4))
 

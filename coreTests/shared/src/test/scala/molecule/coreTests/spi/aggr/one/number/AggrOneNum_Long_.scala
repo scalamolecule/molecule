@@ -11,6 +11,8 @@ import utest._
 
 trait AggrOneNum_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
+  // Using tolerant equality so that the test works with decimal number types too
+
   override lazy val tests = Tests {
 
     "sum" - types { implicit conn =>
@@ -24,8 +26,8 @@ trait AggrOneNum_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, long4),
         )).transact
 
-        // Using tolerant equality so that the test works with decimal number types too
-        // Distinct values (Set semantics) used
+        // Sum of distinct values (Set semantics)
+
         _ <- Ns.long(sum).query.get.map(_.head ==~ long1 + long2 + long3 + long4)
         _ <- Ns.i.long(sum).query.get.map(_.map {
           case (1, sum) => sum ==~ long1 + long2
@@ -55,6 +57,8 @@ trait AggrOneNum_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, long4),
         )).transact
 
+        // Median of unique values (Set semantics)
+
         _ <- Ns.long(median).query.get.map(_.head ==~ median_2_3)
 
         _ <- Ns.i.long(median).query.get.map(_.map {
@@ -75,6 +79,8 @@ trait AggrOneNum_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, long3),
           (2, long4),
         )).transact
+
+        // Average of unique values (Set semantics)
 
         _ <- Ns.long(avg).query.get.map(_.head ==~ (long1 + long2 + long3 + long4).toDouble / 4.0)
 
@@ -97,6 +103,8 @@ trait AggrOneNum_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, long4),
         )).transact
 
+        // Variance of unique values (Set semantics)
+
         _ <- Ns.long(variance).query.get.map(_.head ==~ varianceOf(long1, long2, long3, long4))
 
         _ <- Ns.i.long(variance).query.get.map(_.map {
@@ -117,6 +125,8 @@ trait AggrOneNum_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, long3),
           (2, long4),
         )).transact
+
+        // Standard deviation of unique values (Set semantics)
 
         _ <- Ns.long(stddev).query.get.map(_.head ==~ stdDevOf(long1, long2, long3, long4))
 

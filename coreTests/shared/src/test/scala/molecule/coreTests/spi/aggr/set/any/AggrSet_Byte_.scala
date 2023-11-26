@@ -57,9 +57,12 @@ trait AggrSet_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(byte3, byte4)),
         )).transact
 
+        // Matching values coalesced byteo one Set
+
         _ <- Ns.bytes(min).query.get.map(_ ==> List(Set(byte1)))
         _ <- Ns.bytes(min(1)).query.get.map(_ ==> List(Set(byte1)))
         _ <- Ns.bytes(min(2)).query.get.map(_ ==> List(Set(byte1, byte2)))
+        _ <- Ns.bytes(min(3)).query.get.map(_ ==> List(Set(byte1, byte2, byte3)))
 
         _ <- Ns.i.a1.bytes(min).query.get.map(_ ==> List(
           (1, Set(byte1)),
@@ -75,6 +78,11 @@ trait AggrSet_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (1, Set(byte1, byte2)),
           (2, Set(byte2, byte3)),
         ))
+
+        _ <- Ns.i.a1.bytes(min(3)).query.get.map(_ ==> List(
+          (1, Set(byte1, byte2)),
+          (2, Set(byte2, byte3, byte4)),
+        ))
       } yield ()
     }
 
@@ -88,9 +96,12 @@ trait AggrSet_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(byte3, byte4)),
         )).transact
 
+        // Matching values coalesced byteo one Set
+
         _ <- Ns.bytes(max).query.get.map(_ ==> List(Set(byte4)))
         _ <- Ns.bytes(max(1)).query.get.map(_ ==> List(Set(byte4)))
         _ <- Ns.bytes(max(2)).query.get.map(_ ==> List(Set(byte3, byte4)))
+        _ <- Ns.bytes(max(3)).query.get.map(_ ==> List(Set(byte2, byte3, byte4)))
 
         _ <- Ns.i.a1.bytes(max).query.get.map(_ ==> List(
           (1, Set(byte2)),
@@ -105,6 +116,11 @@ trait AggrSet_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.bytes(max(2)).query.get.map(_ ==> List(
           (1, Set(byte1, byte2)),
           (2, Set(byte3, byte4)),
+        ))
+
+        _ <- Ns.i.a1.bytes(max(3)).query.get.map(_ ==> List(
+          (1, Set(byte1, byte2)),
+          (2, Set(byte2, byte3, byte4)),
         ))
       } yield ()
     }

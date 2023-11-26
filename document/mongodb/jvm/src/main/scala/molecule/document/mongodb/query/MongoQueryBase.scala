@@ -8,9 +8,9 @@ import molecule.base.util.BaseHelpers
 import molecule.boilerplate.ast.Model._
 import molecule.core.util.JavaConversions
 import org.bson.conversions.Bson
-import org.bson.{BsonDocument, BsonString, BsonValue}
+import org.bson.{BsonDocument, BsonInt32, BsonString, BsonValue}
 import scala.collection.mutable
-import scala.collection.mutable.{ArrayBuffer, ListBuffer}
+import scala.collection.mutable.ListBuffer
 
 trait MongoQueryBase extends BaseHelpers with JavaConversions {
 
@@ -26,10 +26,6 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
     ???
   }
 
-  trait Fields
-  case class Field(field: String) extends Fields
-  case class Refs(field: String) extends Fields
-
   var idField = false
 
   final protected var refPath        = List.empty[String]
@@ -40,9 +36,12 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
   final protected val matches          = new util.ArrayList[Bson]
   final protected val preGroupFields   = ListBuffer.empty[(String, String)]
   final protected val groupIdFields    = ListBuffer.empty[(String, String, String)]
-  final protected val groupFields      = ListBuffer.empty[(String, String)]
   final protected val groupExprs       = ListBuffer.empty[(String, BsonValue)]
+
+  // Initiate top level
   final protected val addFields        = mutable.Map.empty[List[String], List[(String, BsonValue)]]
+  addFields(Nil) = Nil
+
   final protected var projections      = new util.ArrayList[Bson]
   final protected var levelProjections = List(List(projections))
 
@@ -59,10 +58,28 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
     )
   )
 
-  def path2 = pathDot.replace('.', '_')
+  protected def groupExpr(uniqueField: String, bson: BsonValue): Unit = {
+    groupExprs += ((pathUnderscore + uniqueField, bson))
+  }
+  protected def groupSets(uniqueField: String, field: String): Unit = {
+    println("--- " + field)
+    groupExpr(uniqueField,
+      new BsonDocument().append("$addToSet", new BsonString(field))
+    )
+  }
+  protected def addField(field: String, value: BsonValue): Unit = {
+    addFields(refPath) = addFields.getOrElse(refPath, Nil) :+ field -> value
+  }
+
+  protected def aggrFn(fn: String, input: BsonValue, n: Int): BsonDocument = {
+    new BsonDocument().append(fn,
+      new BsonDocument()
+        .append("input", input)
+        .append("n", new BsonInt32(n))
+    )
+  }
 
   def unique(field: String) = {
-    //    println(s"------ $fieldSuffix  $pathDot  $field  ")
     val uniqueField = if (!pathFields.contains(pathDot + field)) {
       field
     } else {
@@ -76,7 +93,6 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
 
   final protected def projectField(field: String): Unit = {
     projections.add(Projections.include(pathDot + field))
-    //    projections.add(new BsonDocument())
   }
   final protected def removeField(pathField: String): Unit = {
     projections.remove(Projections.include(pathField))
@@ -88,44 +104,13 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
     }
   ).toList
 
-  def printCasts(label: String = ""): Unit = {
-    println("------------ " + label)
-    immutableCastss.map(nss =>
-      nss.map {
-        case (path, casts) => s"$path -> ${casts.map(_._1)}"
-      }.mkString("List(\n  ", "\n  ", ")")
-    ).foreach(println)
-  }
-
   final protected def addCast(field: String, cast: BsonDocument => Any): Unit = {
     casts.last.last._2 += (field -> cast)
-    //    printCasts("ATTR " + field)
   }
-
-
-  def updatedCasts = {
-    //    println(castss.mkString(s"\n================= CASTSS\n", "\n---\n", ""))
-    //    println(curCasts.mkString(s"\n================= curCasts\n", "\n---\n", ""))
-
-    //    val res = root(castss.init :+ castss.last.copy(casts = curCasts))
-    //
-    //    //    println(res.casts.mkString(s"\n================= RESULT\n", "\n---\n", ""))
-    //    res
-
-    ???
-  }
-
-  //  final protected def addCast(field: String, cast: BsonDocument => Any): Unit = {
-  //    castssOLD = castssOLD.init :+ (castssOLD.last :+ cast)
-  //    curCasts = curCasts :+ CastAttr(field, cast)
-  //
-  //    //    println("  CAST ")
-  //    curCasts.foreach(c => println("  --- " + c))
-  //  }
 
   final protected def removeLastCast(): Unit = {
-    val x: ListBuffer[(String, BsonDocument => Any)] = casts.last.last._2
-    x.remove(x.size - 1)
+    val last = casts.last.last._2
+    last.remove(last.size - 1)
   }
 
   final protected def replaceCast(field: String, cast: BsonDocument => Any): Unit = {
@@ -136,26 +121,12 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
   // Used to lookup original type of aggregate attributes
   final protected var attrMap = Map.empty[String, (Card, String, Seq[String])]
 
-  // Main query
-  //  final protected val select     = new ListBuffer[String]
-  //  final protected var distinct   = true
-  //  final protected var from       = ""
-  //  final protected val joins      = new ListBuffer[(String, String, String, String)]
-  //  final protected var tempTables = List.empty[String]
-  final protected val notNull     = new ListBuffer[String]
-  //  final protected val where      = new ListBuffer[(String, String)]
-  //  final protected val groupBy    = new mutable.LinkedHashSet[String]
-  //  final protected val having     = new mutable.LinkedHashSet[String]
   final protected var orderBy     = new ListBuffer[(Int, Int, String, String)]
-  //  final protected var aggregate  = false
-  //  final protected val in         = new ArrayBuffer[String]
   final protected var hardLimit   = 0
   //
   //  // Input args and cast lambdas
-  //  final           var aritiess    = List(List.empty[List[Int]])
   final           var isNested    = false
   final           var isNestedOpt = false
-  //  final protected val nestedIds   = new ArrayBuffer[String]
   final protected var level       = 0
   //
   // Ensure distinct result set when possible redundant optional values can occur
@@ -166,24 +137,6 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
   final protected val expectedFilterAttrs = mutable.Set.empty[String]
   final protected val availableAttrs      = mutable.Set.empty[String]
 
-
-  //  def fullField(field: String) = {
-  ////    if (path.isEmpty) field else path.mkString(".") + "." + field
-  //    if (path.isEmpty) field else path.mkString(".") + "." + field
-  //  }
-
-
-  //  final protected def aritiesNested(): Unit = {
-  //    val newLevel           = Nil
-  //    val curLevel           = aritiess.last
-  //    val curLevelWithNested = curLevel :+ List(-1)
-  //    aritiess = (aritiess.init :+ curLevelWithNested) :+ newLevel
-  //  }
-  //
-  //  final protected def aritiesAttr(): Unit = {
-  //    // Add new arity of 1
-  //    aritiess = aritiess.init :+ (aritiess.last :+ List(1))
-  //  }
 
   final protected def unexpectedElement(element: Element) = throw ModelError("Unexpected element: " + element)
   final protected def unexpectedOp(op: Op) = throw ModelError("Unexpected operation: " + op)

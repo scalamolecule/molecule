@@ -139,8 +139,10 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
 
     if (refPath.nonEmpty) {
       val prefix = if (attr.op.isInstanceOf[Fn]) "$" else "$_id."
-      addFields(refPath) = addFields(refPath) :+
-        uniqueField -> new BsonString(prefix + pathUnderscore + uniqueField)
+      //      addFields(refPath) = addFields(refPath) :+
+      //        uniqueField -> new BsonString(prefix + pathUnderscore + uniqueField)
+
+      addField(uniqueField, new BsonString(prefix + pathUnderscore + uniqueField))
     }
 
     attr.filterAttr.fold(
@@ -340,100 +342,79 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
   }
 
   private def aggr[T](uniqueField: String, field: String, fn: String, optN: Option[Int], res: ResOne[T]): Unit = {
-    lazy val n = optN.getOrElse(0)
-    // Replace find/casting with aggregate function/cast
-    //    groupIdFields -= ((pathUnderscore, pathDot, field))
-
+    lazy val n         = optN.getOrElse(0)
+    lazy val dotField  = "$" + pathDot + field
+    lazy val usField   = "$" + pathUnderscore + field
+    lazy val idUsField = "$_id." + pathUnderscore + field
     fn match {
       case "distinct" =>
-        groupExprs += ((pathUnderscore + uniqueField,
-          new BsonDocument().append("$addToSet", new BsonString("$" + pathDot + field))))
+        groupSets(uniqueField, if (refPath.nonEmpty) dotField else usField)
         replaceCast(uniqueField, res.castSet(uniqueField))
 
       case "min" =>
-        groupExprs += ((pathUnderscore + uniqueField,
-          new BsonDocument().append("$min", new BsonString("$" + pathDot + field))))
+        groupExpr(uniqueField, new BsonDocument().append("$min", new BsonString(dotField)))
 
       case "mins" =>
         preGroupFields += ((pathUnderscore + uniqueField) -> (pathDot + field))
-        groupExprs += ((pathUnderscore + uniqueField,
-          new BsonDocument().append("$minN",
-            new BsonDocument()
-              .append("input", new BsonString("$_id." + pathUnderscore + field))
-              .append("n", new BsonInt32(n))
-          )))
+        groupExpr(uniqueField, aggrFn("$minN", new BsonString(idUsField), n))
         replaceCast(uniqueField, res.castSet(uniqueField))
 
       case "max" =>
-        groupExprs += ((pathUnderscore + uniqueField,
-          new BsonDocument().append("$max", new BsonString("$" + pathDot + field))))
+        groupExpr(uniqueField, new BsonDocument().append("$max", new BsonString(dotField)))
 
       case "maxs" =>
         preGroupFields += ((pathUnderscore + uniqueField) -> (pathDot + field))
-        groupExprs += ((pathUnderscore + uniqueField,
-          new BsonDocument().append("$maxN",
-            new BsonDocument()
-              .append("input", new BsonString("$_id." + pathUnderscore + field))
-              .append("n", new BsonInt32(n))
-          )))
+        groupExpr(uniqueField, aggrFn("$maxN", new BsonString(idUsField), n))
         replaceCast(uniqueField, res.castSet(uniqueField))
 
       case "sample" =>
-        groupFields += (field -> field)
         sampleSize = 1
 
       case "samples" =>
         sampleSize = n
-        groupExprs += ((pathUnderscore + uniqueField,
-          new BsonDocument().append("$addToSet", new BsonString("$" + pathDot + field))))
+        groupSets(uniqueField, dotField)
         replaceCast(uniqueField, res.castSet(uniqueField))
 
       case "count" =>
-        groupExprs += ((pathUnderscore + uniqueField,
-          new BsonDocument().append("$sum", new BsonInt32(1))))
+        groupExpr(uniqueField, new BsonDocument().append("$sum", new BsonInt32(1)))
         replaceCast(uniqueField, castInt(uniqueField))
 
       case "countDistinct" =>
         preGroupFields += ((pathUnderscore + uniqueField) -> (pathDot + field))
-        groupExprs += ((pathUnderscore + uniqueField,
-          new BsonDocument().append("$sum", new BsonInt32(1))))
+        groupExpr(uniqueField, new BsonDocument().append("$sum", new BsonInt32(1)))
         replaceCast(uniqueField, castInt(uniqueField))
 
       case "sum" =>
         preGroupFields += ((pathUnderscore + uniqueField) -> (pathDot + field))
-        groupExprs += ((pathUnderscore + uniqueField,
-          new BsonDocument().append("$sum", new BsonString("$_id." + pathDot + field))))
+        groupExpr(uniqueField, new BsonDocument().append("$sum", new BsonString(idUsField)))
 
       case "median" =>
         preGroupFields += ((pathUnderscore + uniqueField) -> (pathDot + field))
         groupExprs += ((pathUnderscore + uniqueField, new BsonDocument().append("$median",
           new BsonDocument()
-            .append("input", new BsonString("$_id." + pathDot + field))
+            .append("input", new BsonString(idUsField))
             .append("method", new BsonString("approximate"))
         )))
         replaceCast(uniqueField, hardCastDouble(uniqueField))
 
       case "avg" =>
         preGroupFields += ((pathUnderscore + uniqueField) -> (pathDot + field))
-        groupExprs += ((pathUnderscore + uniqueField,
-          new BsonDocument().append("$avg", new BsonString("$_id." + pathDot + field))))
+        groupExpr(uniqueField, new BsonDocument().append("$avg", new BsonString(idUsField)))
         replaceCast(uniqueField, hardCastDouble(uniqueField))
 
       case "variance" =>
         preGroupFields += ((pathUnderscore + uniqueField) -> (pathDot + field))
-        groupExprs += ((pathUnderscore + uniqueField,
-          new BsonDocument().append("$stdDevPop", new BsonString("$_id." + pathDot + field))))
+        groupExpr(uniqueField, new BsonDocument().append("$stdDevPop", new BsonString(idUsField)))
         removeField(pathDot + field)
         val pow = new BsonArray()
-        pow.add(new BsonString("$" + pathDot + field))
+        pow.add(new BsonString(dotField))
         pow.add(new BsonInt32(2))
         projections.add(new BsonDocument().append(pathDot + field, new BsonDocument().append("$pow", pow)))
         replaceCast(uniqueField, hardCastDouble(uniqueField))
 
       case "stddev" =>
         preGroupFields += ((pathUnderscore + uniqueField) -> (pathDot + field))
-        groupExprs += ((pathUnderscore + uniqueField,
-          new BsonDocument().append("$stdDevPop", new BsonString("$_id." + pathDot + field))))
+        groupExpr(uniqueField, new BsonDocument().append("$stdDevPop", new BsonString(idUsField)))
         replaceCast(uniqueField, hardCastDouble(uniqueField))
 
       case other => unexpectedKw(other)

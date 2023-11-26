@@ -17,8 +17,19 @@ object AdhocJVM_datomic extends TestSuite_datomic {
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
       for {
-        _ <- Ns.i(42).save.transact
-        _ <- Ns.i.query.get.map(_ ==> List(42))
+//        _ <- Ns.i(42).save.transact
+//        _ <- Ns.i.query.get.map(_ ==> List(42))
+
+        _ <- Ns.i.booleans.insert(List(
+          (1, Set(true)),
+          (2, Set(false)),
+          (2, Set(true, false))
+        )).transact
+
+        _ <- Ns.i.booleans(count).query.get
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+            err ==> "Aggregate functions not implemented for Sets of boolean values."
+          }
 
       } yield ()
     }

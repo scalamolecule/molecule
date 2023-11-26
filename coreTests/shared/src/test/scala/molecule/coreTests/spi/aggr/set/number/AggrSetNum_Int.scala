@@ -10,6 +10,8 @@ import utest._
 
 trait AggrSetNum_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
+  // Using tolerant equality so that the test works with decimal number types too
+
   override lazy val tests = Tests {
 
     "sum" - types { implicit conn =>
@@ -22,7 +24,8 @@ trait AggrSetNum_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(int3, int4)),
         )).transact
 
-        // Using tolerant equality so that the test works with decimal number types too
+        // Sum of unique values (Set semantics)
+
         _ <- Ns.ints(sum).query.get.map(_.head.head ==~ int1 + int2 + int3 + int4)
 
         _ <- Ns.i.ints(sum).query.get.map(_.map {
@@ -35,6 +38,15 @@ trait AggrSetNum_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "median" - types { implicit futConn =>
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+      // Different databases have different ways of calculating a median
+      val (median_2_3, median_1_2) = if (database == "MongoDB") {
+        (int2, int1)
+      } else {
+        (
+          (int2 + int3).toDouble / 2.0,
+          (int1 + int2).toDouble / 2.0
+        )
+      }
       for {
         _ <- Ns.i.ints.insert(List(
           (1, Set(int1, int2)),
@@ -43,15 +55,17 @@ trait AggrSetNum_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(int3, int4)),
         )).transact
 
+        // Median of unique values (Set semantics)
+
         _ <- Ns.ints.query.get.map(_ ==> List(Set(int1, int2, int3, int4)))
-        _ <- Ns.ints(median).query.get.map(_.head ==~ (int2 + int3).toDouble / 2.0)
+        _ <- Ns.ints(median).query.get.map(_.head ==~ median_2_3)
 
         _ <- Ns.i.a1.ints.query.get.map(_ ==> List(
           (1, Set(int1, int2)),
           (2, Set(int2, int3, int4)),
         ))
         _ <- Ns.i.ints(median).query.get.map(_.map {
-          case (1, median) => median ==~ (int1 + int2).toDouble / 2.0
+          case (1, median) => median ==~ median_1_2
           case (2, median) => median ==~ int3.toString.toDouble
         })
       } yield ()
@@ -67,6 +81,8 @@ trait AggrSetNum_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(int3, int4)),
           (2, Set(int3, int4)),
         )).transact
+
+        // Average of unique values (Set semantics)
 
         _ <- Ns.ints.query.get.map(_ ==> List(Set(int1, int2, int3, int4)))
         _ <- Ns.ints(avg).query.get.map(_.head ==~ (int1 + int2 + int3 + int4).toDouble / 4.0)
@@ -93,6 +109,8 @@ trait AggrSetNum_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(int3, int4)),
         )).transact
 
+        // Variance of unique values (Set semantics)
+
         _ <- Ns.ints.query.get.map(_ ==> List(Set(int1, int2, int3, int4)))
         _ <- Ns.ints(variance).query.get.map(_.head ==~ varianceOf(int1, int2, int3, int4))
 
@@ -117,6 +135,8 @@ trait AggrSetNum_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(int3, int4)),
           (2, Set(int3, int4)),
         )).transact
+
+        // Standard deviation of unique values (Set semantics)
 
         _ <- Ns.ints.query.get.map(_ ==> List(Set(int1, int2, int3, int4)))
         _ <- Ns.ints(stddev).query.get.map(_.head ==~ stdDevOf(int1, int2, int3, int4))

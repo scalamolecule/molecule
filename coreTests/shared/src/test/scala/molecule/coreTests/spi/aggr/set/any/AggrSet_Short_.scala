@@ -57,9 +57,12 @@ trait AggrSet_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(short3, short4)),
         )).transact
 
+        // Matching values coalesced shorto one Set
+
         _ <- Ns.shorts(min).query.get.map(_ ==> List(Set(short1)))
         _ <- Ns.shorts(min(1)).query.get.map(_ ==> List(Set(short1)))
         _ <- Ns.shorts(min(2)).query.get.map(_ ==> List(Set(short1, short2)))
+        _ <- Ns.shorts(min(3)).query.get.map(_ ==> List(Set(short1, short2, short3)))
 
         _ <- Ns.i.a1.shorts(min).query.get.map(_ ==> List(
           (1, Set(short1)),
@@ -75,6 +78,11 @@ trait AggrSet_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (1, Set(short1, short2)),
           (2, Set(short2, short3)),
         ))
+
+        _ <- Ns.i.a1.shorts(min(3)).query.get.map(_ ==> List(
+          (1, Set(short1, short2)),
+          (2, Set(short2, short3, short4)),
+        ))
       } yield ()
     }
 
@@ -88,9 +96,12 @@ trait AggrSet_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(short3, short4)),
         )).transact
 
+        // Matching values coalesced shorto one Set
+
         _ <- Ns.shorts(max).query.get.map(_ ==> List(Set(short4)))
         _ <- Ns.shorts(max(1)).query.get.map(_ ==> List(Set(short4)))
         _ <- Ns.shorts(max(2)).query.get.map(_ ==> List(Set(short3, short4)))
+        _ <- Ns.shorts(max(3)).query.get.map(_ ==> List(Set(short2, short3, short4)))
 
         _ <- Ns.i.a1.shorts(max).query.get.map(_ ==> List(
           (1, Set(short2)),
@@ -105,6 +116,11 @@ trait AggrSet_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.shorts(max(2)).query.get.map(_ ==> List(
           (1, Set(short1, short2)),
           (2, Set(short3, short4)),
+        ))
+
+        _ <- Ns.i.a1.shorts(max(3)).query.get.map(_ ==> List(
+          (1, Set(short1, short2)),
+          (2, Set(short2, short3, short4)),
         ))
       } yield ()
     }

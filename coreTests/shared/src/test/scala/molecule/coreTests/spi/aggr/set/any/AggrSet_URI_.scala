@@ -58,9 +58,12 @@ trait AggrSet_URI_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(uri3, uri4)),
         )).transact
 
+        // Matching values coalesced urio one Set
+
         _ <- Ns.uris(min).query.get.map(_ ==> List(Set(uri1)))
         _ <- Ns.uris(min(1)).query.get.map(_ ==> List(Set(uri1)))
         _ <- Ns.uris(min(2)).query.get.map(_ ==> List(Set(uri1, uri2)))
+        _ <- Ns.uris(min(3)).query.get.map(_ ==> List(Set(uri1, uri2, uri3)))
 
         _ <- Ns.i.a1.uris(min).query.get.map(_ ==> List(
           (1, Set(uri1)),
@@ -76,6 +79,11 @@ trait AggrSet_URI_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (1, Set(uri1, uri2)),
           (2, Set(uri2, uri3)),
         ))
+
+        _ <- Ns.i.a1.uris(min(3)).query.get.map(_ ==> List(
+          (1, Set(uri1, uri2)),
+          (2, Set(uri2, uri3, uri4)),
+        ))
       } yield ()
     }
 
@@ -89,9 +97,12 @@ trait AggrSet_URI_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(uri3, uri4)),
         )).transact
 
+        // Matching values coalesced urio one Set
+
         _ <- Ns.uris(max).query.get.map(_ ==> List(Set(uri4)))
         _ <- Ns.uris(max(1)).query.get.map(_ ==> List(Set(uri4)))
         _ <- Ns.uris(max(2)).query.get.map(_ ==> List(Set(uri3, uri4)))
+        _ <- Ns.uris(max(3)).query.get.map(_ ==> List(Set(uri2, uri3, uri4)))
 
         _ <- Ns.i.a1.uris(max).query.get.map(_ ==> List(
           (1, Set(uri2)),
@@ -106,6 +117,11 @@ trait AggrSet_URI_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.uris(max(2)).query.get.map(_ ==> List(
           (1, Set(uri1, uri2)),
           (2, Set(uri3, uri4)),
+        ))
+
+        _ <- Ns.i.a1.uris(max(3)).query.get.map(_ ==> List(
+          (1, Set(uri1, uri2)),
+          (2, Set(uri2, uri3, uri4)),
         ))
       } yield ()
     }

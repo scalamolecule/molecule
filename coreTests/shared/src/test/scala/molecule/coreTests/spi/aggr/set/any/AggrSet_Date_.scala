@@ -58,9 +58,12 @@ trait AggrSet_Date_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(date3, date4)),
         )).transact
 
+        // Matching values coalesced dateo one Set
+
         _ <- Ns.dates(min).query.get.map(_ ==> List(Set(date1)))
         _ <- Ns.dates(min(1)).query.get.map(_ ==> List(Set(date1)))
         _ <- Ns.dates(min(2)).query.get.map(_ ==> List(Set(date1, date2)))
+        _ <- Ns.dates(min(3)).query.get.map(_ ==> List(Set(date1, date2, date3)))
 
         _ <- Ns.i.a1.dates(min).query.get.map(_ ==> List(
           (1, Set(date1)),
@@ -76,6 +79,11 @@ trait AggrSet_Date_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (1, Set(date1, date2)),
           (2, Set(date2, date3)),
         ))
+
+        _ <- Ns.i.a1.dates(min(3)).query.get.map(_ ==> List(
+          (1, Set(date1, date2)),
+          (2, Set(date2, date3, date4)),
+        ))
       } yield ()
     }
 
@@ -89,9 +97,12 @@ trait AggrSet_Date_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(date3, date4)),
         )).transact
 
+        // Matching values coalesced dateo one Set
+
         _ <- Ns.dates(max).query.get.map(_ ==> List(Set(date4)))
         _ <- Ns.dates(max(1)).query.get.map(_ ==> List(Set(date4)))
         _ <- Ns.dates(max(2)).query.get.map(_ ==> List(Set(date3, date4)))
+        _ <- Ns.dates(max(3)).query.get.map(_ ==> List(Set(date2, date3, date4)))
 
         _ <- Ns.i.a1.dates(max).query.get.map(_ ==> List(
           (1, Set(date2)),
@@ -106,6 +117,11 @@ trait AggrSet_Date_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.dates(max(2)).query.get.map(_ ==> List(
           (1, Set(date1, date2)),
           (2, Set(date3, date4)),
+        ))
+
+        _ <- Ns.i.a1.dates(max(3)).query.get.map(_ ==> List(
+          (1, Set(date1, date2)),
+          (2, Set(date2, date3, date4)),
         ))
       } yield ()
     }

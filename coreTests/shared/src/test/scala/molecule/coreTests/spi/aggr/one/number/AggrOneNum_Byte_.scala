@@ -11,6 +11,8 @@ import utest._
 
 trait AggrOneNum_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
+  // Using tolerant equality so that the test works with decimal number types too
+
   override lazy val tests = Tests {
 
     "sum" - types { implicit conn =>
@@ -24,8 +26,8 @@ trait AggrOneNum_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, byte4),
         )).transact
 
-        // Using tolerant equality so that the test works with decimal number types too
-        // Distinct values (Set semantics) used
+        // Sum of distinct values (Set semantics)
+
         _ <- Ns.byte(sum).query.get.map(_.head ==~ byte1 + byte2 + byte3 + byte4)
         _ <- Ns.i.byte(sum).query.get.map(_.map {
           case (1, sum) => sum ==~ byte1 + byte2
@@ -55,6 +57,8 @@ trait AggrOneNum_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, byte4),
         )).transact
 
+        // Median of unique values (Set semantics)
+
         _ <- Ns.byte(median).query.get.map(_.head ==~ median_2_3)
 
         _ <- Ns.i.byte(median).query.get.map(_.map {
@@ -75,6 +79,8 @@ trait AggrOneNum_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, byte3),
           (2, byte4),
         )).transact
+
+        // Average of unique values (Set semantics)
 
         _ <- Ns.byte(avg).query.get.map(_.head ==~ (byte1 + byte2 + byte3 + byte4).toDouble / 4.0)
 
@@ -97,6 +103,8 @@ trait AggrOneNum_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, byte4),
         )).transact
 
+        // Variance of unique values (Set semantics)
+
         _ <- Ns.byte(variance).query.get.map(_.head ==~ varianceOf(byte1, byte2, byte3, byte4))
 
         _ <- Ns.i.byte(variance).query.get.map(_.map {
@@ -117,6 +125,8 @@ trait AggrOneNum_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, byte3),
           (2, byte4),
         )).transact
+
+        // Standard deviation of unique values (Set semantics)
 
         _ <- Ns.byte(stddev).query.get.map(_.head ==~ stdDevOf(byte1, byte2, byte3, byte4))
 

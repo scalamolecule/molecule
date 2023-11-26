@@ -58,9 +58,12 @@ trait AggrSet_OffsetDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsyn
           (2, Set(offsetDateTime3, offsetDateTime4)),
         )).transact
 
+        // Matching values coalesced offsetDateTimeo one Set
+
         _ <- Ns.offsetDateTimes(min).query.get.map(_ ==> List(Set(offsetDateTime1)))
         _ <- Ns.offsetDateTimes(min(1)).query.get.map(_ ==> List(Set(offsetDateTime1)))
         _ <- Ns.offsetDateTimes(min(2)).query.get.map(_ ==> List(Set(offsetDateTime1, offsetDateTime2)))
+        _ <- Ns.offsetDateTimes(min(3)).query.get.map(_ ==> List(Set(offsetDateTime1, offsetDateTime2, offsetDateTime3)))
 
         _ <- Ns.i.a1.offsetDateTimes(min).query.get.map(_ ==> List(
           (1, Set(offsetDateTime1)),
@@ -76,6 +79,11 @@ trait AggrSet_OffsetDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsyn
           (1, Set(offsetDateTime1, offsetDateTime2)),
           (2, Set(offsetDateTime2, offsetDateTime3)),
         ))
+
+        _ <- Ns.i.a1.offsetDateTimes(min(3)).query.get.map(_ ==> List(
+          (1, Set(offsetDateTime1, offsetDateTime2)),
+          (2, Set(offsetDateTime2, offsetDateTime3, offsetDateTime4)),
+        ))
       } yield ()
     }
 
@@ -89,9 +97,12 @@ trait AggrSet_OffsetDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsyn
           (2, Set(offsetDateTime3, offsetDateTime4)),
         )).transact
 
+        // Matching values coalesced offsetDateTimeo one Set
+
         _ <- Ns.offsetDateTimes(max).query.get.map(_ ==> List(Set(offsetDateTime4)))
         _ <- Ns.offsetDateTimes(max(1)).query.get.map(_ ==> List(Set(offsetDateTime4)))
         _ <- Ns.offsetDateTimes(max(2)).query.get.map(_ ==> List(Set(offsetDateTime3, offsetDateTime4)))
+        _ <- Ns.offsetDateTimes(max(3)).query.get.map(_ ==> List(Set(offsetDateTime2, offsetDateTime3, offsetDateTime4)))
 
         _ <- Ns.i.a1.offsetDateTimes(max).query.get.map(_ ==> List(
           (1, Set(offsetDateTime2)),
@@ -106,6 +117,11 @@ trait AggrSet_OffsetDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsyn
         _ <- Ns.i.a1.offsetDateTimes(max(2)).query.get.map(_ ==> List(
           (1, Set(offsetDateTime1, offsetDateTime2)),
           (2, Set(offsetDateTime3, offsetDateTime4)),
+        ))
+
+        _ <- Ns.i.a1.offsetDateTimes(max(3)).query.get.map(_ ==> List(
+          (1, Set(offsetDateTime1, offsetDateTime2)),
+          (2, Set(offsetDateTime2, offsetDateTime3, offsetDateTime4)),
         ))
       } yield ()
     }

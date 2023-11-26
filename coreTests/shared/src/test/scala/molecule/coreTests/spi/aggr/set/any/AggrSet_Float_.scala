@@ -57,9 +57,12 @@ trait AggrSet_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(float3, float4)),
         )).transact
 
+        // Matching values coalesced floato one Set
+
         _ <- Ns.floats(min).query.get.map(_ ==> List(Set(float1)))
         _ <- Ns.floats(min(1)).query.get.map(_ ==> List(Set(float1)))
         _ <- Ns.floats(min(2)).query.get.map(_ ==> List(Set(float1, float2)))
+        _ <- Ns.floats(min(3)).query.get.map(_ ==> List(Set(float1, float2, float3)))
 
         _ <- Ns.i.a1.floats(min).query.get.map(_ ==> List(
           (1, Set(float1)),
@@ -75,6 +78,11 @@ trait AggrSet_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (1, Set(float1, float2)),
           (2, Set(float2, float3)),
         ))
+
+        _ <- Ns.i.a1.floats(min(3)).query.get.map(_ ==> List(
+          (1, Set(float1, float2)),
+          (2, Set(float2, float3, float4)),
+        ))
       } yield ()
     }
 
@@ -88,9 +96,12 @@ trait AggrSet_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(float3, float4)),
         )).transact
 
+        // Matching values coalesced floato one Set
+
         _ <- Ns.floats(max).query.get.map(_ ==> List(Set(float4)))
         _ <- Ns.floats(max(1)).query.get.map(_ ==> List(Set(float4)))
         _ <- Ns.floats(max(2)).query.get.map(_ ==> List(Set(float3, float4)))
+        _ <- Ns.floats(max(3)).query.get.map(_ ==> List(Set(float2, float3, float4)))
 
         _ <- Ns.i.a1.floats(max).query.get.map(_ ==> List(
           (1, Set(float2)),
@@ -105,6 +116,11 @@ trait AggrSet_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.floats(max(2)).query.get.map(_ ==> List(
           (1, Set(float1, float2)),
           (2, Set(float3, float4)),
+        ))
+
+        _ <- Ns.i.a1.floats(max(3)).query.get.map(_ ==> List(
+          (1, Set(float1, float2)),
+          (2, Set(float2, float3, float4)),
         ))
       } yield ()
     }

@@ -11,6 +11,8 @@ import utest._
 
 trait AggrSetNum_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
+  // Using tolerant equality so that the test works with decimal number types too
+
   override lazy val tests = Tests {
 
     "sum" - types { implicit conn =>
@@ -23,7 +25,8 @@ trait AggrSetNum_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
           (2, Set(bigDecimal3, bigDecimal4)),
         )).transact
 
-        // Using tolerant equality so that the test works with decimal number types too
+        // Sum of unique values (Set semantics)
+
         _ <- Ns.bigDecimals(sum).query.get.map(_.head.head ==~ bigDecimal1 + bigDecimal2 + bigDecimal3 + bigDecimal4)
 
         _ <- Ns.i.bigDecimals(sum).query.get.map(_.map {
@@ -36,6 +39,15 @@ trait AggrSetNum_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
 
     "median" - types { implicit futConn =>
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+      // Different databases have different ways of calculating a median
+      val (median_2_3, median_1_2) = if (database == "MongoDB") {
+        (bigDecimal2, bigDecimal1)
+      } else {
+        (
+          (bigDecimal2 + bigDecimal3).toDouble / 2.0,
+          (bigDecimal1 + bigDecimal2).toDouble / 2.0
+        )
+      }
       for {
         _ <- Ns.i.bigDecimals.insert(List(
           (1, Set(bigDecimal1, bigDecimal2)),
@@ -44,15 +56,17 @@ trait AggrSetNum_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
           (2, Set(bigDecimal3, bigDecimal4)),
         )).transact
 
+        // Median of unique values (Set semantics)
+
         _ <- Ns.bigDecimals.query.get.map(_ ==> List(Set(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4)))
-        _ <- Ns.bigDecimals(median).query.get.map(_.head ==~ (bigDecimal2 + bigDecimal3).toDouble / 2.0)
+        _ <- Ns.bigDecimals(median).query.get.map(_.head ==~ median_2_3)
 
         _ <- Ns.i.a1.bigDecimals.query.get.map(_ ==> List(
           (1, Set(bigDecimal1, bigDecimal2)),
           (2, Set(bigDecimal2, bigDecimal3, bigDecimal4)),
         ))
         _ <- Ns.i.bigDecimals(median).query.get.map(_.map {
-          case (1, median) => median ==~ (bigDecimal1 + bigDecimal2).toDouble / 2.0
+          case (1, median) => median ==~ median_1_2
           case (2, median) => median ==~ bigDecimal3.toString.toDouble
         })
       } yield ()
@@ -68,6 +82,8 @@ trait AggrSetNum_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
           (2, Set(bigDecimal3, bigDecimal4)),
           (2, Set(bigDecimal3, bigDecimal4)),
         )).transact
+
+        // Average of unique values (Set semantics)
 
         _ <- Ns.bigDecimals.query.get.map(_ ==> List(Set(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4)))
         _ <- Ns.bigDecimals(avg).query.get.map(_.head ==~ (bigDecimal1 + bigDecimal2 + bigDecimal3 + bigDecimal4).toDouble / 4.0)
@@ -94,6 +110,8 @@ trait AggrSetNum_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
           (2, Set(bigDecimal3, bigDecimal4)),
         )).transact
 
+        // Variance of unique values (Set semantics)
+
         _ <- Ns.bigDecimals.query.get.map(_ ==> List(Set(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4)))
         _ <- Ns.bigDecimals(variance).query.get.map(_.head ==~ varianceOf(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4))
 
@@ -118,6 +136,8 @@ trait AggrSetNum_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
           (2, Set(bigDecimal3, bigDecimal4)),
           (2, Set(bigDecimal3, bigDecimal4)),
         )).transact
+
+        // Standard deviation of unique values (Set semantics)
 
         _ <- Ns.bigDecimals.query.get.map(_ ==> List(Set(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4)))
         _ <- Ns.bigDecimals(stddev).query.get.map(_.head ==~ stdDevOf(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4))

@@ -58,9 +58,12 @@ trait AggrSet_ZonedDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
           (2, Set(zonedDateTime3, zonedDateTime4)),
         )).transact
 
+        // Matching values coalesced zonedDateTimeo one Set
+
         _ <- Ns.zonedDateTimes(min).query.get.map(_ ==> List(Set(zonedDateTime1)))
         _ <- Ns.zonedDateTimes(min(1)).query.get.map(_ ==> List(Set(zonedDateTime1)))
         _ <- Ns.zonedDateTimes(min(2)).query.get.map(_ ==> List(Set(zonedDateTime1, zonedDateTime2)))
+        _ <- Ns.zonedDateTimes(min(3)).query.get.map(_ ==> List(Set(zonedDateTime1, zonedDateTime2, zonedDateTime3)))
 
         _ <- Ns.i.a1.zonedDateTimes(min).query.get.map(_ ==> List(
           (1, Set(zonedDateTime1)),
@@ -76,6 +79,11 @@ trait AggrSet_ZonedDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
           (1, Set(zonedDateTime1, zonedDateTime2)),
           (2, Set(zonedDateTime2, zonedDateTime3)),
         ))
+
+        _ <- Ns.i.a1.zonedDateTimes(min(3)).query.get.map(_ ==> List(
+          (1, Set(zonedDateTime1, zonedDateTime2)),
+          (2, Set(zonedDateTime2, zonedDateTime3, zonedDateTime4)),
+        ))
       } yield ()
     }
 
@@ -89,9 +97,12 @@ trait AggrSet_ZonedDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
           (2, Set(zonedDateTime3, zonedDateTime4)),
         )).transact
 
+        // Matching values coalesced zonedDateTimeo one Set
+
         _ <- Ns.zonedDateTimes(max).query.get.map(_ ==> List(Set(zonedDateTime4)))
         _ <- Ns.zonedDateTimes(max(1)).query.get.map(_ ==> List(Set(zonedDateTime4)))
         _ <- Ns.zonedDateTimes(max(2)).query.get.map(_ ==> List(Set(zonedDateTime3, zonedDateTime4)))
+        _ <- Ns.zonedDateTimes(max(3)).query.get.map(_ ==> List(Set(zonedDateTime2, zonedDateTime3, zonedDateTime4)))
 
         _ <- Ns.i.a1.zonedDateTimes(max).query.get.map(_ ==> List(
           (1, Set(zonedDateTime2)),
@@ -106,6 +117,11 @@ trait AggrSet_ZonedDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
         _ <- Ns.i.a1.zonedDateTimes(max(2)).query.get.map(_ ==> List(
           (1, Set(zonedDateTime1, zonedDateTime2)),
           (2, Set(zonedDateTime3, zonedDateTime4)),
+        ))
+
+        _ <- Ns.i.a1.zonedDateTimes(max(3)).query.get.map(_ ==> List(
+          (1, Set(zonedDateTime1, zonedDateTime2)),
+          (2, Set(zonedDateTime2, zonedDateTime3, zonedDateTime4)),
         ))
       } yield ()
     }

@@ -58,9 +58,12 @@ trait AggrSet_OffsetTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(offsetTime3, offsetTime4)),
         )).transact
 
+        // Matching values coalesced offsetTimeo one Set
+
         _ <- Ns.offsetTimes(min).query.get.map(_ ==> List(Set(offsetTime1)))
         _ <- Ns.offsetTimes(min(1)).query.get.map(_ ==> List(Set(offsetTime1)))
         _ <- Ns.offsetTimes(min(2)).query.get.map(_ ==> List(Set(offsetTime1, offsetTime2)))
+        _ <- Ns.offsetTimes(min(3)).query.get.map(_ ==> List(Set(offsetTime1, offsetTime2, offsetTime3)))
 
         _ <- Ns.i.a1.offsetTimes(min).query.get.map(_ ==> List(
           (1, Set(offsetTime1)),
@@ -76,6 +79,11 @@ trait AggrSet_OffsetTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (1, Set(offsetTime1, offsetTime2)),
           (2, Set(offsetTime2, offsetTime3)),
         ))
+
+        _ <- Ns.i.a1.offsetTimes(min(3)).query.get.map(_ ==> List(
+          (1, Set(offsetTime1, offsetTime2)),
+          (2, Set(offsetTime2, offsetTime3, offsetTime4)),
+        ))
       } yield ()
     }
 
@@ -89,9 +97,12 @@ trait AggrSet_OffsetTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(offsetTime3, offsetTime4)),
         )).transact
 
+        // Matching values coalesced offsetTimeo one Set
+
         _ <- Ns.offsetTimes(max).query.get.map(_ ==> List(Set(offsetTime4)))
         _ <- Ns.offsetTimes(max(1)).query.get.map(_ ==> List(Set(offsetTime4)))
         _ <- Ns.offsetTimes(max(2)).query.get.map(_ ==> List(Set(offsetTime3, offsetTime4)))
+        _ <- Ns.offsetTimes(max(3)).query.get.map(_ ==> List(Set(offsetTime2, offsetTime3, offsetTime4)))
 
         _ <- Ns.i.a1.offsetTimes(max).query.get.map(_ ==> List(
           (1, Set(offsetTime2)),
@@ -106,6 +117,11 @@ trait AggrSet_OffsetTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.offsetTimes(max(2)).query.get.map(_ ==> List(
           (1, Set(offsetTime1, offsetTime2)),
           (2, Set(offsetTime3, offsetTime4)),
+        ))
+
+        _ <- Ns.i.a1.offsetTimes(max(3)).query.get.map(_ ==> List(
+          (1, Set(offsetTime1, offsetTime2)),
+          (2, Set(offsetTime2, offsetTime3, offsetTime4)),
         ))
       } yield ()
     }

@@ -58,9 +58,12 @@ trait AggrSet_LocalDate_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(localDate3, localDate4)),
         )).transact
 
+        // Matching values coalesced localDateo one Set
+
         _ <- Ns.localDates(min).query.get.map(_ ==> List(Set(localDate1)))
         _ <- Ns.localDates(min(1)).query.get.map(_ ==> List(Set(localDate1)))
         _ <- Ns.localDates(min(2)).query.get.map(_ ==> List(Set(localDate1, localDate2)))
+        _ <- Ns.localDates(min(3)).query.get.map(_ ==> List(Set(localDate1, localDate2, localDate3)))
 
         _ <- Ns.i.a1.localDates(min).query.get.map(_ ==> List(
           (1, Set(localDate1)),
@@ -76,6 +79,11 @@ trait AggrSet_LocalDate_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (1, Set(localDate1, localDate2)),
           (2, Set(localDate2, localDate3)),
         ))
+
+        _ <- Ns.i.a1.localDates(min(3)).query.get.map(_ ==> List(
+          (1, Set(localDate1, localDate2)),
+          (2, Set(localDate2, localDate3, localDate4)),
+        ))
       } yield ()
     }
 
@@ -89,9 +97,12 @@ trait AggrSet_LocalDate_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(localDate3, localDate4)),
         )).transact
 
+        // Matching values coalesced localDateo one Set
+
         _ <- Ns.localDates(max).query.get.map(_ ==> List(Set(localDate4)))
         _ <- Ns.localDates(max(1)).query.get.map(_ ==> List(Set(localDate4)))
         _ <- Ns.localDates(max(2)).query.get.map(_ ==> List(Set(localDate3, localDate4)))
+        _ <- Ns.localDates(max(3)).query.get.map(_ ==> List(Set(localDate2, localDate3, localDate4)))
 
         _ <- Ns.i.a1.localDates(max).query.get.map(_ ==> List(
           (1, Set(localDate2)),
@@ -106,6 +117,11 @@ trait AggrSet_LocalDate_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.localDates(max(2)).query.get.map(_ ==> List(
           (1, Set(localDate1, localDate2)),
           (2, Set(localDate3, localDate4)),
+        ))
+
+        _ <- Ns.i.a1.localDates(max(3)).query.get.map(_ ==> List(
+          (1, Set(localDate1, localDate2)),
+          (2, Set(localDate2, localDate3, localDate4)),
         ))
       } yield ()
     }

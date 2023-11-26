@@ -64,7 +64,7 @@ trait AggrSet_Boolean extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             err ==> "Aggregate functions not implemented for Sets of boolean values."
           }
 
-        _ <- Ns.i.booleans.apply(count).query.get
+        _ <- Ns.i.booleans(count).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Aggregate functions not implemented for Sets of boolean values."
           }

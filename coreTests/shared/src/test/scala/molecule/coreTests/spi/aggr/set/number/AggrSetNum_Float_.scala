@@ -11,6 +11,8 @@ import utest._
 
 trait AggrSetNum_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
+  // Using tolerant equality so that the test works with decimal number types too
+
   override lazy val tests = Tests {
 
     "sum" - types { implicit conn =>
@@ -23,7 +25,8 @@ trait AggrSetNum_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(float3, float4)),
         )).transact
 
-        // Using tolerant equality so that the test works with decimal number types too
+        // Sum of unique values (Set semantics)
+
         _ <- Ns.floats(sum).query.get.map(_.head.head ==~ float1 + float2 + float3 + float4)
 
         _ <- Ns.i.floats(sum).query.get.map(_.map {
@@ -36,6 +39,15 @@ trait AggrSetNum_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "median" - types { implicit futConn =>
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+      // Different databases have different ways of calculating a median
+      val (median_2_3, median_1_2) = if (database == "MongoDB") {
+        (float2, float1)
+      } else {
+        (
+          (float2 + float3).toDouble / 2.0,
+          (float1 + float2).toDouble / 2.0
+        )
+      }
       for {
         _ <- Ns.i.floats.insert(List(
           (1, Set(float1, float2)),
@@ -44,15 +56,17 @@ trait AggrSetNum_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(float3, float4)),
         )).transact
 
+        // Median of unique values (Set semantics)
+
         _ <- Ns.floats.query.get.map(_ ==> List(Set(float1, float2, float3, float4)))
-        _ <- Ns.floats(median).query.get.map(_.head ==~ (float2 + float3).toDouble / 2.0)
+        _ <- Ns.floats(median).query.get.map(_.head ==~ median_2_3)
 
         _ <- Ns.i.a1.floats.query.get.map(_ ==> List(
           (1, Set(float1, float2)),
           (2, Set(float2, float3, float4)),
         ))
         _ <- Ns.i.floats(median).query.get.map(_.map {
-          case (1, median) => median ==~ (float1 + float2).toDouble / 2.0
+          case (1, median) => median ==~ median_1_2
           case (2, median) => median ==~ float3.toString.toDouble
         })
       } yield ()
@@ -68,6 +82,8 @@ trait AggrSetNum_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(float3, float4)),
           (2, Set(float3, float4)),
         )).transact
+
+        // Average of unique values (Set semantics)
 
         _ <- Ns.floats.query.get.map(_ ==> List(Set(float1, float2, float3, float4)))
         _ <- Ns.floats(avg).query.get.map(_.head ==~ (float1 + float2 + float3 + float4).toDouble / 4.0)
@@ -94,6 +110,8 @@ trait AggrSetNum_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(float3, float4)),
         )).transact
 
+        // Variance of unique values (Set semantics)
+
         _ <- Ns.floats.query.get.map(_ ==> List(Set(float1, float2, float3, float4)))
         _ <- Ns.floats(variance).query.get.map(_.head ==~ varianceOf(float1, float2, float3, float4))
 
@@ -118,6 +136,8 @@ trait AggrSetNum_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(float3, float4)),
           (2, Set(float3, float4)),
         )).transact
+
+        // Standard deviation of unique values (Set semantics)
 
         _ <- Ns.floats.query.get.map(_ ==> List(Set(float1, float2, float3, float4)))
         _ <- Ns.floats(stddev).query.get.map(_.head ==~ stdDevOf(float1, float2, float3, float4))

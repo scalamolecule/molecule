@@ -57,9 +57,12 @@ trait AggrSet_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(long3, long4)),
         )).transact
 
+        // Matching values coalesced longo one Set
+
         _ <- Ns.longs(min).query.get.map(_ ==> List(Set(long1)))
         _ <- Ns.longs(min(1)).query.get.map(_ ==> List(Set(long1)))
         _ <- Ns.longs(min(2)).query.get.map(_ ==> List(Set(long1, long2)))
+        _ <- Ns.longs(min(3)).query.get.map(_ ==> List(Set(long1, long2, long3)))
 
         _ <- Ns.i.a1.longs(min).query.get.map(_ ==> List(
           (1, Set(long1)),
@@ -75,6 +78,11 @@ trait AggrSet_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (1, Set(long1, long2)),
           (2, Set(long2, long3)),
         ))
+
+        _ <- Ns.i.a1.longs(min(3)).query.get.map(_ ==> List(
+          (1, Set(long1, long2)),
+          (2, Set(long2, long3, long4)),
+        ))
       } yield ()
     }
 
@@ -88,9 +96,12 @@ trait AggrSet_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(long3, long4)),
         )).transact
 
+        // Matching values coalesced longo one Set
+
         _ <- Ns.longs(max).query.get.map(_ ==> List(Set(long4)))
         _ <- Ns.longs(max(1)).query.get.map(_ ==> List(Set(long4)))
         _ <- Ns.longs(max(2)).query.get.map(_ ==> List(Set(long3, long4)))
+        _ <- Ns.longs(max(3)).query.get.map(_ ==> List(Set(long2, long3, long4)))
 
         _ <- Ns.i.a1.longs(max).query.get.map(_ ==> List(
           (1, Set(long2)),
@@ -105,6 +116,11 @@ trait AggrSet_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.longs(max(2)).query.get.map(_ ==> List(
           (1, Set(long1, long2)),
           (2, Set(long3, long4)),
+        ))
+
+        _ <- Ns.i.a1.longs(max(3)).query.get.map(_ ==> List(
+          (1, Set(long1, long2)),
+          (2, Set(long2, long3, long4)),
         ))
       } yield ()
     }

@@ -58,9 +58,12 @@ trait AggrSet_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(instant3, instant4)),
         )).transact
 
+        // Matching values coalesced instanto one Set
+
         _ <- Ns.instants(min).query.get.map(_ ==> List(Set(instant1)))
         _ <- Ns.instants(min(1)).query.get.map(_ ==> List(Set(instant1)))
         _ <- Ns.instants(min(2)).query.get.map(_ ==> List(Set(instant1, instant2)))
+        _ <- Ns.instants(min(3)).query.get.map(_ ==> List(Set(instant1, instant2, instant3)))
 
         _ <- Ns.i.a1.instants(min).query.get.map(_ ==> List(
           (1, Set(instant1)),
@@ -76,6 +79,11 @@ trait AggrSet_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (1, Set(instant1, instant2)),
           (2, Set(instant2, instant3)),
         ))
+
+        _ <- Ns.i.a1.instants(min(3)).query.get.map(_ ==> List(
+          (1, Set(instant1, instant2)),
+          (2, Set(instant2, instant3, instant4)),
+        ))
       } yield ()
     }
 
@@ -89,9 +97,12 @@ trait AggrSet_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(instant3, instant4)),
         )).transact
 
+        // Matching values coalesced instanto one Set
+
         _ <- Ns.instants(max).query.get.map(_ ==> List(Set(instant4)))
         _ <- Ns.instants(max(1)).query.get.map(_ ==> List(Set(instant4)))
         _ <- Ns.instants(max(2)).query.get.map(_ ==> List(Set(instant3, instant4)))
+        _ <- Ns.instants(max(3)).query.get.map(_ ==> List(Set(instant2, instant3, instant4)))
 
         _ <- Ns.i.a1.instants(max).query.get.map(_ ==> List(
           (1, Set(instant2)),
@@ -106,6 +117,11 @@ trait AggrSet_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.instants(max(2)).query.get.map(_ ==> List(
           (1, Set(instant1, instant2)),
           (2, Set(instant3, instant4)),
+        ))
+
+        _ <- Ns.i.a1.instants(max(3)).query.get.map(_ ==> List(
+          (1, Set(instant1, instant2)),
+          (2, Set(instant2, instant3, instant4)),
         ))
       } yield ()
     }

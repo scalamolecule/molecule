@@ -58,9 +58,12 @@ trait AggrSet_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(uuid3, uuid4)),
         )).transact
 
+        // Matching values coalesced uuido one Set
+
         _ <- Ns.uuids(min).query.get.map(_ ==> List(Set(uuid1)))
         _ <- Ns.uuids(min(1)).query.get.map(_ ==> List(Set(uuid1)))
         _ <- Ns.uuids(min(2)).query.get.map(_ ==> List(Set(uuid1, uuid2)))
+        _ <- Ns.uuids(min(3)).query.get.map(_ ==> List(Set(uuid1, uuid2, uuid3)))
 
         _ <- Ns.i.a1.uuids(min).query.get.map(_ ==> List(
           (1, Set(uuid1)),
@@ -76,6 +79,11 @@ trait AggrSet_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (1, Set(uuid1, uuid2)),
           (2, Set(uuid2, uuid3)),
         ))
+
+        _ <- Ns.i.a1.uuids(min(3)).query.get.map(_ ==> List(
+          (1, Set(uuid1, uuid2)),
+          (2, Set(uuid2, uuid3, uuid4)),
+        ))
       } yield ()
     }
 
@@ -89,9 +97,12 @@ trait AggrSet_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(uuid3, uuid4)),
         )).transact
 
+        // Matching values coalesced uuido one Set
+
         _ <- Ns.uuids(max).query.get.map(_ ==> List(Set(uuid4)))
         _ <- Ns.uuids(max(1)).query.get.map(_ ==> List(Set(uuid4)))
         _ <- Ns.uuids(max(2)).query.get.map(_ ==> List(Set(uuid3, uuid4)))
+        _ <- Ns.uuids(max(3)).query.get.map(_ ==> List(Set(uuid2, uuid3, uuid4)))
 
         _ <- Ns.i.a1.uuids(max).query.get.map(_ ==> List(
           (1, Set(uuid2)),
@@ -106,6 +117,11 @@ trait AggrSet_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.uuids(max(2)).query.get.map(_ ==> List(
           (1, Set(uuid1, uuid2)),
           (2, Set(uuid3, uuid4)),
+        ))
+
+        _ <- Ns.i.a1.uuids(max(3)).query.get.map(_ ==> List(
+          (1, Set(uuid1, uuid2)),
+          (2, Set(uuid2, uuid3, uuid4)),
         ))
       } yield ()
     }

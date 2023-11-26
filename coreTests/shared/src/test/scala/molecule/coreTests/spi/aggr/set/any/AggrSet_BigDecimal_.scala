@@ -57,9 +57,12 @@ trait AggrSet_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(bigDecimal3, bigDecimal4)),
         )).transact
 
+        // Matching values coalesced bigDecimalo one Set
+
         _ <- Ns.bigDecimals(min).query.get.map(_ ==> List(Set(bigDecimal1)))
         _ <- Ns.bigDecimals(min(1)).query.get.map(_ ==> List(Set(bigDecimal1)))
         _ <- Ns.bigDecimals(min(2)).query.get.map(_ ==> List(Set(bigDecimal1, bigDecimal2)))
+        _ <- Ns.bigDecimals(min(3)).query.get.map(_ ==> List(Set(bigDecimal1, bigDecimal2, bigDecimal3)))
 
         _ <- Ns.i.a1.bigDecimals(min).query.get.map(_ ==> List(
           (1, Set(bigDecimal1)),
@@ -75,6 +78,11 @@ trait AggrSet_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (1, Set(bigDecimal1, bigDecimal2)),
           (2, Set(bigDecimal2, bigDecimal3)),
         ))
+
+        _ <- Ns.i.a1.bigDecimals(min(3)).query.get.map(_ ==> List(
+          (1, Set(bigDecimal1, bigDecimal2)),
+          (2, Set(bigDecimal2, bigDecimal3, bigDecimal4)),
+        ))
       } yield ()
     }
 
@@ -88,9 +96,12 @@ trait AggrSet_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(bigDecimal3, bigDecimal4)),
         )).transact
 
+        // Matching values coalesced bigDecimalo one Set
+
         _ <- Ns.bigDecimals(max).query.get.map(_ ==> List(Set(bigDecimal4)))
         _ <- Ns.bigDecimals(max(1)).query.get.map(_ ==> List(Set(bigDecimal4)))
         _ <- Ns.bigDecimals(max(2)).query.get.map(_ ==> List(Set(bigDecimal3, bigDecimal4)))
+        _ <- Ns.bigDecimals(max(3)).query.get.map(_ ==> List(Set(bigDecimal2, bigDecimal3, bigDecimal4)))
 
         _ <- Ns.i.a1.bigDecimals(max).query.get.map(_ ==> List(
           (1, Set(bigDecimal2)),
@@ -105,6 +116,11 @@ trait AggrSet_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.bigDecimals(max(2)).query.get.map(_ ==> List(
           (1, Set(bigDecimal1, bigDecimal2)),
           (2, Set(bigDecimal3, bigDecimal4)),
+        ))
+
+        _ <- Ns.i.a1.bigDecimals(max(3)).query.get.map(_ ==> List(
+          (1, Set(bigDecimal1, bigDecimal2)),
+          (2, Set(bigDecimal2, bigDecimal3, bigDecimal4)),
         ))
       } yield ()
     }

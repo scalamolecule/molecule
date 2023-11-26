@@ -11,6 +11,8 @@ import utest._
 
 trait AggrOneNum_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
+  // Using tolerant equality so that the test works with decimal number types too
+
   override lazy val tests = Tests {
 
     "sum" - types { implicit conn =>
@@ -24,8 +26,8 @@ trait AggrOneNum_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, bigInt4),
         )).transact
 
-        // Using tolerant equality so that the test works with decimal number types too
-        // Distinct values (Set semantics) used
+        // Sum of distinct values (Set semantics)
+
         _ <- Ns.bigInt(sum).query.get.map(_.head ==~ bigInt1 + bigInt2 + bigInt3 + bigInt4)
         _ <- Ns.i.bigInt(sum).query.get.map(_.map {
           case (1, sum) => sum ==~ bigInt1 + bigInt2
@@ -55,6 +57,8 @@ trait AggrOneNum_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, bigInt4),
         )).transact
 
+        // Median of unique values (Set semantics)
+
         _ <- Ns.bigInt(median).query.get.map(_.head ==~ median_2_3)
 
         _ <- Ns.i.bigInt(median).query.get.map(_.map {
@@ -75,6 +79,8 @@ trait AggrOneNum_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, bigInt3),
           (2, bigInt4),
         )).transact
+
+        // Average of unique values (Set semantics)
 
         _ <- Ns.bigInt(avg).query.get.map(_.head ==~ (bigInt1 + bigInt2 + bigInt3 + bigInt4).toDouble / 4.0)
 
@@ -97,6 +103,8 @@ trait AggrOneNum_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, bigInt4),
         )).transact
 
+        // Variance of unique values (Set semantics)
+
         _ <- Ns.bigInt(variance).query.get.map(_.head ==~ varianceOf(bigInt1, bigInt2, bigInt3, bigInt4))
 
         _ <- Ns.i.bigInt(variance).query.get.map(_.map {
@@ -117,6 +125,8 @@ trait AggrOneNum_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, bigInt3),
           (2, bigInt4),
         )).transact
+
+        // Standard deviation of unique values (Set semantics)
 
         _ <- Ns.bigInt(stddev).query.get.map(_.head ==~ stdDevOf(bigInt1, bigInt2, bigInt3, bigInt4))
 

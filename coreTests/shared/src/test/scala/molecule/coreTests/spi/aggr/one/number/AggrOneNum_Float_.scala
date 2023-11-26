@@ -11,6 +11,8 @@ import utest._
 
 trait AggrOneNum_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
+  // Using tolerant equality so that the test works with decimal number types too
+
   override lazy val tests = Tests {
 
     "sum" - types { implicit conn =>
@@ -24,8 +26,8 @@ trait AggrOneNum_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, float4),
         )).transact
 
-        // Using tolerant equality so that the test works with decimal number types too
-        // Distinct values (Set semantics) used
+        // Sum of distinct values (Set semantics)
+
         _ <- Ns.float(sum).query.get.map(_.head ==~ float1 + float2 + float3 + float4)
         _ <- Ns.i.float(sum).query.get.map(_.map {
           case (1, sum) => sum ==~ float1 + float2
@@ -55,6 +57,8 @@ trait AggrOneNum_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, float4),
         )).transact
 
+        // Median of unique values (Set semantics)
+
         _ <- Ns.float(median).query.get.map(_.head ==~ median_2_3)
 
         _ <- Ns.i.float(median).query.get.map(_.map {
@@ -75,6 +79,8 @@ trait AggrOneNum_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, float3),
           (2, float4),
         )).transact
+
+        // Average of unique values (Set semantics)
 
         _ <- Ns.float(avg).query.get.map(_.head ==~ (float1 + float2 + float3 + float4).toDouble / 4.0)
 
@@ -97,6 +103,8 @@ trait AggrOneNum_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, float4),
         )).transact
 
+        // Variance of unique values (Set semantics)
+
         _ <- Ns.float(variance).query.get.map(_.head ==~ varianceOf(float1, float2, float3, float4))
 
         _ <- Ns.i.float(variance).query.get.map(_.map {
@@ -117,6 +125,8 @@ trait AggrOneNum_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, float3),
           (2, float4),
         )).transact
+
+        // Standard deviation of unique values (Set semantics)
 
         _ <- Ns.float(stddev).query.get.map(_.head ==~ stdDevOf(float1, float2, float3, float4))
 

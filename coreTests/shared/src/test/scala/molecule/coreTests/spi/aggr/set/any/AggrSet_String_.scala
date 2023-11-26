@@ -57,9 +57,12 @@ trait AggrSet_String_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(string3, string4)),
         )).transact
 
+        // Matching values coalesced stringo one Set
+
         _ <- Ns.strings(min).query.get.map(_ ==> List(Set(string1)))
         _ <- Ns.strings(min(1)).query.get.map(_ ==> List(Set(string1)))
         _ <- Ns.strings(min(2)).query.get.map(_ ==> List(Set(string1, string2)))
+        _ <- Ns.strings(min(3)).query.get.map(_ ==> List(Set(string1, string2, string3)))
 
         _ <- Ns.i.a1.strings(min).query.get.map(_ ==> List(
           (1, Set(string1)),
@@ -75,6 +78,11 @@ trait AggrSet_String_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (1, Set(string1, string2)),
           (2, Set(string2, string3)),
         ))
+
+        _ <- Ns.i.a1.strings(min(3)).query.get.map(_ ==> List(
+          (1, Set(string1, string2)),
+          (2, Set(string2, string3, string4)),
+        ))
       } yield ()
     }
 
@@ -88,9 +96,12 @@ trait AggrSet_String_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(string3, string4)),
         )).transact
 
+        // Matching values coalesced stringo one Set
+
         _ <- Ns.strings(max).query.get.map(_ ==> List(Set(string4)))
         _ <- Ns.strings(max(1)).query.get.map(_ ==> List(Set(string4)))
         _ <- Ns.strings(max(2)).query.get.map(_ ==> List(Set(string3, string4)))
+        _ <- Ns.strings(max(3)).query.get.map(_ ==> List(Set(string2, string3, string4)))
 
         _ <- Ns.i.a1.strings(max).query.get.map(_ ==> List(
           (1, Set(string2)),
@@ -105,6 +116,11 @@ trait AggrSet_String_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.strings(max(2)).query.get.map(_ ==> List(
           (1, Set(string1, string2)),
           (2, Set(string3, string4)),
+        ))
+
+        _ <- Ns.i.a1.strings(max(3)).query.get.map(_ ==> List(
+          (1, Set(string1, string2)),
+          (2, Set(string2, string3, string4)),
         ))
       } yield ()
     }

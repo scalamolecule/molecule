@@ -58,9 +58,12 @@ trait AggrSet_Duration_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(duration3, duration4)),
         )).transact
 
+        // Matching values coalesced durationo one Set
+
         _ <- Ns.durations(min).query.get.map(_ ==> List(Set(duration1)))
         _ <- Ns.durations(min(1)).query.get.map(_ ==> List(Set(duration1)))
         _ <- Ns.durations(min(2)).query.get.map(_ ==> List(Set(duration1, duration2)))
+        _ <- Ns.durations(min(3)).query.get.map(_ ==> List(Set(duration1, duration2, duration3)))
 
         _ <- Ns.i.a1.durations(min).query.get.map(_ ==> List(
           (1, Set(duration1)),
@@ -76,6 +79,11 @@ trait AggrSet_Duration_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (1, Set(duration1, duration2)),
           (2, Set(duration2, duration3)),
         ))
+
+        _ <- Ns.i.a1.durations(min(3)).query.get.map(_ ==> List(
+          (1, Set(duration1, duration2)),
+          (2, Set(duration2, duration3, duration4)),
+        ))
       } yield ()
     }
 
@@ -89,9 +97,12 @@ trait AggrSet_Duration_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(duration3, duration4)),
         )).transact
 
+        // Matching values coalesced durationo one Set
+
         _ <- Ns.durations(max).query.get.map(_ ==> List(Set(duration4)))
         _ <- Ns.durations(max(1)).query.get.map(_ ==> List(Set(duration4)))
         _ <- Ns.durations(max(2)).query.get.map(_ ==> List(Set(duration3, duration4)))
+        _ <- Ns.durations(max(3)).query.get.map(_ ==> List(Set(duration2, duration3, duration4)))
 
         _ <- Ns.i.a1.durations(max).query.get.map(_ ==> List(
           (1, Set(duration2)),
@@ -106,6 +117,11 @@ trait AggrSet_Duration_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.durations(max(2)).query.get.map(_ ==> List(
           (1, Set(duration1, duration2)),
           (2, Set(duration3, duration4)),
+        ))
+
+        _ <- Ns.i.a1.durations(max(3)).query.get.map(_ ==> List(
+          (1, Set(duration1, duration2)),
+          (2, Set(duration2, duration3, duration4)),
         ))
       } yield ()
     }

@@ -67,22 +67,22 @@ trait AggrOneRef_distinct extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     "multiple refs" - refs { implicit conn =>
       for {
         _ <- A.i.B.i.C.i.insert(List(
-          (10, 1, 1),
-          (20, 2, 2),
-          (20, 2, 2),
-          (20, 2, 3),
+          (1, 1, 1),
+          (2, 2, 2),
+          (2, 2, 2),
+          (2, 2, 3),
         )).transact
 
         _ <- A.i.B.i.C.i.a1.query.get.map(_ ==> List(
-          (10, 1, 1),
-          (20, 2, 2), // 2 rows coalesced
-          (20, 2, 3),
+          (1, 1, 1),
+          (2, 2, 2), // 2 rows coalesced
+          (2, 2, 3),
         ))
 
         // Distinct values are returned in a Set
         _ <- A.i.a1.B.i(distinct).C.i(distinct).query.get.map(_ ==> List(
-          (10, Set(1), Set(1)),
-          (20, Set(2), Set(2, 3)),
+          (1, Set(1), Set(1)),
+          (2, Set(2), Set(2, 3)),
         ))
       } yield ()
     }
@@ -91,22 +91,22 @@ trait AggrOneRef_distinct extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     "backref" - refs { implicit conn =>
       for {
         _ <- A.i.B.i._A.C.i.insert(List(
-          (10, 1, 1),
-          (20, 2, 2),
-          (20, 2, 2),
-          (20, 2, 3),
+          (1, 1, 1),
+          (2, 2, 2),
+          (2, 2, 2),
+          (2, 2, 3),
         )).transact
 
         _ <- A.i.B.i._A.C.i.a1.query.get.map(_ ==> List(
-          (10, 1, 1),
-          (20, 2, 2), // 2 rows coalesced
-          (20, 2, 3),
+          (1, 1, 1),
+          (2, 2, 2), // 2 rows coalesced
+          (2, 2, 3),
         ))
 
         // Distinct values are returned in a Set
         _ <- A.i.a1.B.i(distinct)._A.C.i(distinct).query.get.map(_ ==> List(
-          (10, Set(1), Set(1)),
-          (20, Set(2), Set(2, 3)),
+          (1, Set(1), Set(1)),
+          (2, Set(2), Set(2, 3)),
         ))
       } yield ()
     }

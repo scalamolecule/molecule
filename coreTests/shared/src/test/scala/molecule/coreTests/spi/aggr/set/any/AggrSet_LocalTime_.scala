@@ -58,9 +58,12 @@ trait AggrSet_LocalTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(localTime3, localTime4)),
         )).transact
 
+        // Matching values coalesced localTimeo one Set
+
         _ <- Ns.localTimes(min).query.get.map(_ ==> List(Set(localTime1)))
         _ <- Ns.localTimes(min(1)).query.get.map(_ ==> List(Set(localTime1)))
         _ <- Ns.localTimes(min(2)).query.get.map(_ ==> List(Set(localTime1, localTime2)))
+        _ <- Ns.localTimes(min(3)).query.get.map(_ ==> List(Set(localTime1, localTime2, localTime3)))
 
         _ <- Ns.i.a1.localTimes(min).query.get.map(_ ==> List(
           (1, Set(localTime1)),
@@ -76,6 +79,11 @@ trait AggrSet_LocalTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (1, Set(localTime1, localTime2)),
           (2, Set(localTime2, localTime3)),
         ))
+
+        _ <- Ns.i.a1.localTimes(min(3)).query.get.map(_ ==> List(
+          (1, Set(localTime1, localTime2)),
+          (2, Set(localTime2, localTime3, localTime4)),
+        ))
       } yield ()
     }
 
@@ -89,9 +97,12 @@ trait AggrSet_LocalTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(localTime3, localTime4)),
         )).transact
 
+        // Matching values coalesced localTimeo one Set
+
         _ <- Ns.localTimes(max).query.get.map(_ ==> List(Set(localTime4)))
         _ <- Ns.localTimes(max(1)).query.get.map(_ ==> List(Set(localTime4)))
         _ <- Ns.localTimes(max(2)).query.get.map(_ ==> List(Set(localTime3, localTime4)))
+        _ <- Ns.localTimes(max(3)).query.get.map(_ ==> List(Set(localTime2, localTime3, localTime4)))
 
         _ <- Ns.i.a1.localTimes(max).query.get.map(_ ==> List(
           (1, Set(localTime2)),
@@ -106,6 +117,11 @@ trait AggrSet_LocalTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.localTimes(max(2)).query.get.map(_ ==> List(
           (1, Set(localTime1, localTime2)),
           (2, Set(localTime3, localTime4)),
+        ))
+
+        _ <- Ns.i.a1.localTimes(max(3)).query.get.map(_ ==> List(
+          (1, Set(localTime1, localTime2)),
+          (2, Set(localTime2, localTime3, localTime4)),
         ))
       } yield ()
     }
