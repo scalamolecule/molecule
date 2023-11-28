@@ -72,7 +72,7 @@ object Rpc_mongodb
     for {
       conn <- getConn(proxy)
       data = new ResolveSave with Save_mongodb {
-//        override lazy val sqlConn: Connection = conn.sqlConn
+        //        override lazy val sqlConn: Connection = conn.sqlConn
       }.getData(elements)
       txReport <- conn.transact_async(data)
     } yield txReport
@@ -94,7 +94,7 @@ object Rpc_mongodb
         case Left(err)   => throw err // catched in outer either wrapper
       }
       data = new ResolveInsert with Insert_mongodb {
-//        override lazy val sqlConn: Connection = conn.sqlConn
+        //        override lazy val sqlConn: Connection = conn.sqlConn
       }.getData(proxy.nsMap, tplElements, tplProducts)
       txReport <- conn.transact_async(data)
     } yield txReport
@@ -105,33 +105,33 @@ object Rpc_mongodb
     elements: List[Element],
     isUpsert: Boolean = false
   ): Future[Either[MoleculeError, TxReport]] = either {
-//    for {
-//      conn <- getConn(proxy)
-//      errors = validateUpdateSet(conn.proxy, elements, isUpsert,
-//        (query: String) => {
-//          val ps        = conn.sqlConn.prepareStatement(
-//            query, Row.TYPE_SCROLL_INSENSITIVE, Row.CONCUR_READ_ONLY
-//          )
-//          val resultSet = ps.executeQuery()
-//          resultSet.next()
-//          new ResultSetImpl(resultSet)
-//        }
-//      )
-//      _ = if (errors.nonEmpty) {
-//        throw ValidationErrors(errors)
-//      }
-//      txReport <- if (isRefUpdate(elements)) {
-//        // Atomic transaction with updates for each ref namespace
-//        refUpdates(elements, isUpsert)(conn, global).map { res =>
-//          conn.atomicTransaction(res)
-//        }
-//      } else {
-//        val data = new ResolveUpdate(conn.proxy, isUpsert) with Update_mongodb {
-//          override lazy val sqlConn: Connection = conn.sqlConn
-//        }.getData(elements)
-//        Future(conn.transact_sync(data))
-//      }
-//    } yield txReport
+    //    for {
+    //      conn <- getConn(proxy)
+    //      errors = validateUpdateSet(conn.proxy, elements, isUpsert,
+    //        (query: String) => {
+    //          val ps        = conn.sqlConn.prepareStatement(
+    //            query, Row.TYPE_SCROLL_INSENSITIVE, Row.CONCUR_READ_ONLY
+    //          )
+    //          val resultSet = ps.executeQuery()
+    //          resultSet.next()
+    //          new ResultSetImpl(resultSet)
+    //        }
+    //      )
+    //      _ = if (errors.nonEmpty) {
+    //        throw ValidationErrors(errors)
+    //      }
+    //      txReport <- if (isRefUpdate(elements)) {
+    //        // Atomic transaction with updates for each ref namespace
+    //        refUpdates(elements, isUpsert)(conn, global).map { res =>
+    //          conn.atomicTransaction(res)
+    //        }
+    //      } else {
+    //        val data = new ResolveUpdate(conn.proxy, isUpsert) with Update_mongodb {
+    //          override lazy val sqlConn: Connection = conn.sqlConn
+    //        }.getData(elements)
+    //        Future(conn.transact_sync(data))
+    //      }
+    //    } yield txReport
 
     ???
   }
@@ -141,22 +141,22 @@ object Rpc_mongodb
     elements: List[Element],
     isUpsert: Boolean = false
   )(implicit conn: MongoConn_JVM, ec: EC): Future[() => Map[List[String], List[Long]]] = {
-//    val (idQuery, updateModels) = getIdQuery(elements, isUpsert)
-//    idQuery.get.map { refIdsResult =>
-//      val refIds: List[Long] = getRefIds(refIdsResult)
-//      () => {
-//        val refIdMaps = refIds.zipWithIndex.map {
-//          case (refId: Long, i) =>
-//            val updateModel = updateModels(i)(refId)
-//            val data        = new ResolveUpdate(conn.proxy, isUpsert) with Update_mongodb {
-//              override lazy val sqlConn = conn.sqlConn
-//            }.getData(updateModel)
-//            conn.populateStmts(data)
-//        }
-//        // Return TxReport with initial update ids
-//        refIdMaps.head
-//      }
-//    }
+    //    val (idQuery, updateModels) = getIdQuery(elements, isUpsert)
+    //    idQuery.get.map { refIdsResult =>
+    //      val refIds: List[Long] = getRefIds(refIdsResult)
+    //      () => {
+    //        val refIdMaps = refIds.zipWithIndex.map {
+    //          case (refId: Long, i) =>
+    //            val updateModel = updateModels(i)(refId)
+    //            val data        = new ResolveUpdate(conn.proxy, isUpsert) with Update_mongodb {
+    //              override lazy val sqlConn = conn.sqlConn
+    //            }.getData(updateModel)
+    //            conn.populateStmts(data)
+    //        }
+    //        // Return TxReport with initial update ids
+    //        refIdMaps.head
+    //      }
+    //    }
     ???
   }
 
@@ -166,10 +166,13 @@ object Rpc_mongodb
   ): Future[Either[MoleculeError, TxReport]] = either {
     for {
       conn <- getConn(proxy)
-      data = new ResolveDelete with Delete_mongodb {
-//        override lazy val sqlConn: Connection = conn.sqlConn
-      }.getData(elements, proxy.nsMap)
-      txReport <- conn.transact_async(data)
+      filter = new ResolveDelete with Delete_mongodb {
+        //        override lazy val sqlConn: Connection = conn.sqlConn
+      }.getFilter(elements, proxy.nsMap)
+      //            txReport <- conn.transact_async(data)
+      txReport <- filter.fold(Future(TxReport(Nil)))(filter =>
+        conn.deleteData_async(getInitialNs(elements), filter)
+      )
     } yield txReport
   }
 }

@@ -1,15 +1,17 @@
 package molecule.document.mongodb.facade
 
 import java.util
-import com.mongodb.client.MongoDatabase
-import com.mongodb.client.result.InsertManyResult
+import com.mongodb.client.{MongoCollection, MongoDatabase}
+import com.mongodb.client.result.{DeleteResult, InsertManyResult}
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.marshalling.MongoProxy
 import molecule.core.spi.{Conn, TxReport}
 import molecule.core.util.ModelUtils
 import molecule.document.mongodb.transaction.{Base_JVM_mongodb, DataType_JVM_mongodb}
+import org.bson.conversions.Bson
 import org.bson.json.JsonWriterSettings
 import org.bson.{BsonDocument, BsonObjectId, BsonValue}
+import scala.annotation.unused
 import scala.concurrent.{ExecutionContext, Future}
 
 case class MongoConn_JVM(
@@ -31,27 +33,72 @@ case class MongoConn_JVM(
   }
 
   override def transact_sync(data: Data): TxReport = {
+    //    val (collectionName, action, documents) = data
+    val (collectionName, documents) = data
+
+    val collection: MongoCollection[BsonDocument] = mongoDb.getCollection(collectionName, classOf[BsonDocument])
+
+    println("TRANSACT ----------------------------------------")
+    val pretty: JsonWriterSettings = JsonWriterSettings.builder().indent(true).build()
+    documents.forEach(d => println(d.toBsonDocument.toJson(pretty)))
+    println("")
+
+    //    action match {
+    //      case "insert" => insertData(collection, documents)
+    //      case "delete" => deleteData(collection, documents)
+    //    }
+    ???
+  }
+
+  private def debugDocs(action: String, documents: util.List[BsonDocument]): Unit = {
+    println(action + " ----------------------------------------")
+    val pretty: JsonWriterSettings = JsonWriterSettings.builder().indent(true).build()
+    documents.forEach(d => println(d.toBsonDocument.toJson(pretty)))
+    println("")
+  }
+  private def debugFilter(action: String, filter: Bson): Unit = {
+    println(action + " ----------------------------------------")
+    val pretty: JsonWriterSettings = JsonWriterSettings.builder().indent(true).build()
+    println(filter.toBsonDocument.toJson(pretty))
+    println("")
+  }
+
+
+  //  def insertData(data: Data): TxReport = {
+  def insertData_async(data: (String, util.List[BsonDocument]))(implicit ec: ExecutionContext): Future[TxReport] = {
+    Future(insertData_sync(data))
+  }
+
+  def insertData_sync(data: (String, util.List[BsonDocument])): TxReport = {
     val (collectionName, documents) = data
     val collection                  = mongoDb.getCollection(collectionName, classOf[BsonDocument])
-
-//    println("TRANSACT ----------------------------------------")
-//    val pretty: JsonWriterSettings = JsonWriterSettings.builder().indent(true).build()
-//    documents.forEach(d => println(d.toBsonDocument.toJson(pretty)))
-//    println("")
+    debugDocs("INSERT", documents)
 
     if (documents.size() == 1) {
-      val result      = collection.insertOne(documents.get(0))
-      val idHexString = result.getInsertedId.asInstanceOf[BsonObjectId].getValue.toHexString
+      val insertResult = collection.insertOne(documents.get(0))
+      val idHexString  = insertResult.getInsertedId.asInstanceOf[BsonObjectId].getValue.toHexString
       TxReport(List(idHexString))
 
     } else {
-      val result: InsertManyResult             = collection.insertMany(documents)
-      val idsMap: util.Map[Integer, BsonValue] = result.getInsertedIds
-      val array                                = new Array[BsonValue](idsMap.size())
+      val insertResult = collection.insertMany(documents)
+      val idsMap       = insertResult.getInsertedIds
+      val array        = new Array[BsonValue](idsMap.size())
       idsMap.forEach { case (k, v) => array(k) = v }
       val ids = array.toList.map(_.asInstanceOf[BsonObjectId].getValue.toHexString)
       TxReport(ids)
     }
+  }
+
+  def deleteData_async(colName: String, filter: Bson)(implicit ec: ExecutionContext): Future[TxReport] = {
+    Future(deleteData_sync(colName, filter))
+  }
+
+  def deleteData_sync(colName: String, filter: Bson): TxReport = {
+    //    val (collectionName, filter) = data
+    val collection = mongoDb.getCollection(colName, classOf[BsonDocument])
+    debugFilter("INSERT " + colName, filter)
+    collection.deleteMany(filter)
+    TxReport(Nil)
   }
 
   //  def atomicTransaction(executions: () => Map[List[String], List[Long]]): TxReport = {

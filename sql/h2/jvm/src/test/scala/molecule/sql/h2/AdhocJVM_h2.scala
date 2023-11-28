@@ -16,9 +16,37 @@ object AdhocJVM_h2 extends TestSuite_h2 {
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
       for {
-        _ <- Ns.int.insert(1).i.transact
-        _ <- Ns.int.query.i.get.map(_ ==> List(1))
+//        _ <- Ns.int.insert(1).i.transact
+//        _ <- Ns.int.query.i.get.map(_ ==> List(1))
 
+
+        _ <- Ns.i.int.insert(
+          (1, int1),
+          (1, int2),
+          (1, int3),
+          (2, int4),
+          (2, int5),
+          (2, int6),
+        ).transact
+
+//        _ <- Ns.int(min).query.i.get.map(_ ==> List(int1))
+//        _ <- Ns.int(max).query.get.map(_ ==> List(int6))
+//        _ <- Ns.int(min).int(max).query.get.map(_ ==> List((int1, int6)))
+
+        _ <- Ns.i.a1.int(min).query.i.get.map(_ ==> List(
+          (1, int1),
+          (2, int4)
+        ))
+//
+//        _ <- Ns.i.a1.int(max).query.get.map(_ ==> List(
+//          (1, int3),
+//          (2, int6)
+//        ))
+//
+//        _ <- Ns.i.a1.int(min).int(max).query.get.map(_ ==> List(
+//          (1, int1, int3),
+//          (2, int4, int6)
+//        ))
 
       } yield ()
     }

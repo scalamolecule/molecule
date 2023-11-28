@@ -85,8 +85,8 @@ trait Delete_datomic
     stmts
   }
 
-  override def addIds[T](ids1: Seq[T]): Unit = {
-    ids = ids ++ ids1.asInstanceOf[Seq[AnyRef]]
+  override def addIds(ids1: Seq[String]): Unit = {
+    ids = ids ++ ids1.map(_.toLong).asInstanceOf[Seq[AnyRef]]
   }
 
   override def addFilterElement(element: Element): Unit = {

@@ -23,7 +23,7 @@ trait Base_JVM_mongodb extends DataType_JVM_mongodb with ModelUtils with BaseHel
 
   protected var doPrint              = false
   protected var initialNs            = ""
-  protected var ids                  = Seq.empty[Long]
+  protected var ids                  = Seq.empty[String]
   protected var uniqueFilterElements = List.empty[Element]
   protected var filterElements       = List.empty[Element]
 

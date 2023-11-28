@@ -1,5 +1,6 @@
 package molecule.document.mongodb.spi
 
+import java.util
 import molecule.base.error._
 import molecule.base.util.BaseHelpers
 import molecule.boilerplate.ast.Model._
@@ -16,6 +17,8 @@ import molecule.document.mongodb.query.{Model2MongoQuery, QueryResolveCursor_mon
 import molecule.document.mongodb.transaction._
 import molecule.document.mongodb.util.BsonUtils
 import org.bson._
+import org.bson.conversions.Bson
+import org.bson.json.JsonWriterSettings
 import scala.annotation.nowarn
 import scala.collection.mutable.ListBuffer
 import scala.util.control.NonFatal
@@ -126,7 +129,8 @@ trait SpiSync_mongodb
       save_inspect(save)
     val errors = save_validate(save)
     if (errors.isEmpty) {
-      val txReport = conn.transact_sync(save_getData(save, conn))
+      //      val txReport = conn.transact_sync(save_getData(save, conn))
+      val txReport = conn.insertData_sync(save_getData(save, conn))
       conn.callback(save.elements)
       txReport
     } else {
@@ -160,7 +164,8 @@ trait SpiSync_mongodb
       insert_inspect(insert)
     val errors = insert_validate(insert0) // validate original elements against meta model
     if (errors.isEmpty) {
-      val txReport = conn.transact_sync(insert_getData(insert, conn))
+      //      val txReport = conn.transact_sync(insert_getData(insert, conn))
+      val txReport = conn.insertData_sync(insert_getData(insert, conn))
       conn.callback(insert.elements)
       txReport
     } else {
@@ -275,23 +280,29 @@ trait SpiSync_mongodb
     val delete = delete0.copy(elements = noKeywords(delete0.elements, Some(conn.proxy)))
     if (delete.doInspect)
       delete_inspect(delete)
-    val txReport = conn.transact_sync(delete_getData(conn, delete))
-    conn.callback(delete.elements, true)
-    txReport
+    val colName = getInitialNs(delete.elements)
+    delete_getFilter(conn, delete).fold(TxReport(Nil)) { filter =>
+      val txReport = conn.deleteData_sync(colName, filter)
+      conn.callback(delete.elements, true)
+      txReport
+    }
   }
 
   override def delete_inspect(delete: Delete)(implicit conn0: Conn): Unit = {
     val conn = conn0.asInstanceOf[MongoConn_JVM]
     tryInspect("delete", delete.elements) {
-      printInspectTx("DELETE", delete.elements, delete_getData(conn, delete))
+      val filter = delete_getFilter(conn, delete).fold("<no filter>") { bson =>
+        bson.toBsonDocument.toJson(pretty)
+      }
+      printRaw("DELETE", delete.elements, filter)
     }
   }
 
   // Implement for each sql database
-  def delete_getData(conn: MongoConn_JVM, delete: Delete): Data = {
-    new ResolveDelete with Delete_mongodb {
-      //      override lazy val sqlConn = conn.sqlConn
-    }.getData(delete.elements, conn.proxy.nsMap)
+  //  def delete_getData(conn: MongoConn_JVM, delete: Delete): Data = {
+  //  def delete_getData(conn: MongoConn_JVM, delete: Delete): (String, util.List[BsonDocument]) = {
+  private def delete_getFilter(conn: MongoConn_JVM, delete: Delete): Option[Bson] = {
+    new ResolveDelete with Delete_mongodb().getFilter(delete.elements, conn.proxy.nsMap)
   }
 
 

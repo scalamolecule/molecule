@@ -19,7 +19,7 @@ trait Insert_mongodb
 
   doPrint = false
 
-  def deb(obj: Any, s: String = ""): Unit = if (false) {
+  def debug(obj: Any, s: String = ""): Unit = if (false) {
     val id  = System.identityHashCode(obj)
     val idP = id + padS(10, id.toString)
     val txt = s + padS(12, s)
@@ -35,8 +35,7 @@ trait Insert_mongodb
       docs = List(List(doc))
       tpl2bson(tpl)
       val topDoc = docs.head.head
-      //      val row = docs.last
-      deb(topDoc, "result")
+      debug(topDoc, "result")
       insertDocs.add(topDoc)
     }
     (getInitialNs(elements), insertDocs)
@@ -55,7 +54,7 @@ trait Insert_mongodb
         attr,
         handleValue(tpl.productElement(tplIndex).asInstanceOf[T]).asInstanceOf[BsonValue]
       )
-      deb(doc, "add")
+      debug(doc, "add")
     }
   }
 
@@ -137,9 +136,9 @@ trait Insert_mongodb
       // Step into related namespace
       docs = docs.init :+ (docs.last :+ refDoc)
       // Work on in new namespace
-      deb(doc, "add ref")
+      debug(doc, "add ref")
       doc = refDoc
-      deb(refDoc, "ref")
+      debug(refDoc, "ref")
     }
   }
 
@@ -192,7 +191,7 @@ trait Insert_mongodb
       docs = docs :+ Nil
 
       nestedTuples.foreach { nestedTpl =>
-        deb("", "------------------------------------------------")
+        debug("", "------------------------------------------------")
         // Start from new namespace on this level
         doc = new BsonDocument()
         docs = docs.init :+ List(doc)
@@ -200,8 +199,8 @@ trait Insert_mongodb
         //        deb(doc, "tplB")
         nestedArray.add(docs.last.head.clone())
       }
-      deb("", "------------------------------------------------")
-      deb(outerDoc, "outer")
+      debug("", "------------------------------------------------")
+      debug(outerDoc, "outer")
     }
   }
 }

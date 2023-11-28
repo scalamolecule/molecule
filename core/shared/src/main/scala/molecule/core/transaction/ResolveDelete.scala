@@ -17,7 +17,7 @@ class ResolveDelete { self: DeleteOps =>
               throw ModelError(
                 s"Can only apply entity ids to be deleted to the initial namespace."
               )
-            addIds(ids1.map(_.toLong))
+            addIds(ids1)
             resolve(tail, topLevel)
 
           case a if a.attr == "id" => throw ModelError(

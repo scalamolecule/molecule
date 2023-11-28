@@ -224,10 +224,8 @@ trait ResolveExprOne extends ResolveExpr { self: SqlQueryBase with LambdasOne =>
 
       case "min" =>
         select += s"MIN($col)"
-        if (col.endsWith(".id")) {
-          groupByCols -= col
-          aggregate = true
-        }
+        groupByCols -= col
+        aggregate = true
 
       case "mins" =>
         select +=
@@ -245,10 +243,8 @@ trait ResolveExprOne extends ResolveExpr { self: SqlQueryBase with LambdasOne =>
 
       case "max" =>
         select += s"MAX($col)"
-        if (col.endsWith(".id")) {
-          groupByCols -= col
-          aggregate = true
-        }
+        groupByCols -= col
+        aggregate = true
 
       case "maxs" =>
         select +=
