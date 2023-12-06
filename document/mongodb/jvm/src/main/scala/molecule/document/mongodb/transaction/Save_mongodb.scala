@@ -8,6 +8,7 @@ import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.ResolveSave
 import molecule.core.transaction.ops.SaveOps
 import org.bson._
+import org.bson.types.ObjectId
 
 trait Save_mongodb
   extends Base_JVM_mongodb
@@ -17,10 +18,22 @@ trait Save_mongodb
 
   def getData(elements: List[Element]): Data = {
     initialNs = getInitialNs(elements)
+    refDocs = refDocs :+ (List(initialNs), List(List(doc)))
     resolve(elements)
-    val saveDocs = new util.ArrayList[BsonDocument]()
-    saveDocs.add(docs.head.head)
-    (initialNs, saveDocs)
+
+
+    //
+    val data = new BsonDocument().append("action", new BsonString("insert"))
+    refDocs.foreach { case (nsPath, documents) =>
+      println("---- " + nsPath)
+      println(documents)
+      val ns        = nsPath.last
+      val rowsArray = new BsonArray()
+      // Add array of rows with single row for this save action
+      rowsArray.add(documents.head.head)
+      data.append(ns, rowsArray)
+    }
+    data
   }
 
 
@@ -66,20 +79,48 @@ trait Save_mongodb
   }
 
 
-  override protected def addRef(ns: String, refAttr: String, refNs: String, card: Card): Unit = {
-    val refDoc = new BsonDocument()
-    // Make relationship
-    doc.append(refAttr, refDoc)
-    // Step into related namespace
-    docs = docs.init :+ (docs.last :+ refDoc)
-    // New namespace ready to append field-value pairs
-    doc = refDoc
+  override protected def addRef(
+    ns: String,
+    refAttr: String,
+    refNs: String,
+    card: Card,
+    owner: Boolean
+  ): Unit = {
+    // MongoDB has 2 relationship models
+    if (owner) {
+      // embedded
+      // Add embedded document
+      val embeddedDoc = new BsonDocument()
+      doc.append(refAttr, embeddedDoc)
+      // Step into embedded document
+      docs = docs.init :+ (docs.last :+ embeddedDoc)
+      doc = embeddedDoc
+
+    } else {
+      // referenced
+      // Add id of referenced document
+      val refId = new BsonString(new ObjectId().toHexString)
+      //      val refId = new BsonString("42")
+      doc.append(refAttr, refId)
+      // Set id in referenced document
+      val refDoc = new BsonDocument()
+      refDoc.append("_id", refId)
+      // Step into referenced document
+      docs = docs.init :+ (docs.last :+ refDoc)
+      doc = refDoc
+      refDocs = refDocs :+ ((refDocs.last._1 ++ List(refAttr, refNs)) -> List(List(doc)))
+    }
   }
 
   override protected def addBackRef(backRefNs: String): Unit = {
     // Step back to previous namespace
     doc = docs.last.init.last
     docs = docs.init :+ docs.last.init
+
+    // todo: correct?
+    val prevRefPath = refDocs.last._1.drop(2)
+    val prevNs      = refDocs.toMap.apply(prevRefPath)
+    refDocs = refDocs.init :+ (prevRefPath -> prevNs)
   }
 
   override protected def handleRefNs(refNs: String): Unit = ()

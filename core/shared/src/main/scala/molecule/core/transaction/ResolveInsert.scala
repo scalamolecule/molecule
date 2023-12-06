@@ -59,29 +59,29 @@ class ResolveInsert
               }
           }
 
-        case Ref(ns, refAttr, refNs, card, _) =>
+        case Ref(ns, refAttr, refNs, card, owner, _) =>
           prevRefs += refAttr
-          val refResolver = addRef(ns, refAttr, refNs, card)
+          val refResolver = addRef(ns, refAttr, refNs, card, owner)
           resolve(nsMap, tail, resolvers :+ refResolver, tplIndex)
 
         case BackRef(backRefNs, _, _) =>
           tail.head match {
-            case Ref(_, refAttr, _, _, _) if prevRefs.contains(refAttr) => throw ModelError(
+            case Ref(_, refAttr, _, _, _, _) if prevRefs.contains(refAttr) => throw ModelError(
               s"Can't re-use previous namespace ${refAttr.capitalize} after backref _$backRefNs."
             )
-            case _                                                      => // ok
+            case _                                                         => // ok
           }
           val backRefResolver = addBackRef(backRefNs)
           resolve(nsMap, tail, resolvers :+ backRefResolver, tplIndex)
 
-        case Nested(Ref(ns, refAttr, refNs, _, _), nestedElements) =>
+        case Nested(Ref(ns, refAttr, refNs, _, owner, _), nestedElements) =>
           prevRefs.clear()
-          val nestedResolver = addNested(nsMap, tplIndex, ns, refAttr, refNs, nestedElements)
+          val nestedResolver = addNested(nsMap, tplIndex, ns, refAttr, refNs, owner, nestedElements)
           resolve(nsMap, tail, resolvers :+ nestedResolver, tplIndex)
 
-        case NestedOpt(Ref(ns, refAttr, refNs, _, _), nestedElements) =>
+        case NestedOpt(Ref(ns, refAttr, refNs, _, owner, _), nestedElements) =>
           prevRefs.clear()
-          val optNestedResolver = addNested(nsMap, tplIndex, ns, refAttr, refNs, nestedElements)
+          val optNestedResolver = addNested(nsMap, tplIndex, ns, refAttr, refNs, owner, nestedElements)
           resolve(nsMap, tail, resolvers :+ optNestedResolver, tplIndex)
       }
       case Nil             => resolvers

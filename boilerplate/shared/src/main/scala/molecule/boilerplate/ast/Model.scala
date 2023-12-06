@@ -55,11 +55,12 @@ trait Model extends Validations with Values with BaseHelpers {
     refAttr: String,
     refNs: String = "",
     card: Card = CardOne,
+    owner: Boolean,
     coord: Seq[Int] = Nil
   ) extends Element {
     override def toString: String = {
       val coords = if (coord.isEmpty) "Nil" else coord.mkString("Seq(", ", ", ")")
-      s"""Ref("$ns", "$refAttr", "$refNs", $card, $coords)"""
+      s"""Ref("$ns", "$refAttr", "$refNs", $card, $owner, $coords)"""
     }
     def name = ns + "." + refAttr
   }

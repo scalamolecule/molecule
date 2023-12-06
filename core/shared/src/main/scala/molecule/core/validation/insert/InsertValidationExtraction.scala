@@ -57,24 +57,24 @@ trait InsertValidationExtraction extends InsertValidators_ with ModelUtils { sel
               }
           }
 
-        case Ref(_, refAttr, _, _, _) =>
+        case Ref(_, refAttr, _, _, _, _) =>
           getValidators(nsMap, tail, validators, tplIndex, prevRefs :+ refAttr)
 
         case BackRef(backRefNs, _, _) =>
           tail.head match {
-            case Ref(_, refAttr, _, _, _) if prevRefs.contains(refAttr) => throw ModelError(
+            case Ref(_, refAttr, _, _, _, _) if prevRefs.contains(refAttr) => throw ModelError(
               s"Can't re-use previous namespace ${refAttr.capitalize} after backref _$backRefNs."
             )
             case _                                                      => // ok
           }
           getValidators(nsMap, tail, validators, tplIndex, prevRefs)
 
-        case Nested(Ref(ns, refAttr, _, _, _), nestedElements) =>
+        case Nested(Ref(ns, refAttr, _, _, _, _), nestedElements) =>
           curElements = nestedElements
           getValidators(nsMap, tail, validators :+
             addNested(nsMap, tplIndex, ns, refAttr, nestedElements), tplIndex, Nil)
 
-        case NestedOpt(Ref(ns, refAttr, _, _, _), nestedElements) =>
+        case NestedOpt(Ref(ns, refAttr, _, _, _, _), nestedElements) =>
           curElements = nestedElements
           getValidators(nsMap, tail, validators :+
             addNested(nsMap, tplIndex, ns, refAttr, nestedElements), tplIndex, Nil)

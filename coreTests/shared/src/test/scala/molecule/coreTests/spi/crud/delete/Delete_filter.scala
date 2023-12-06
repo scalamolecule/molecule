@@ -119,7 +119,7 @@ trait Delete_filter extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
         _ <- Ns.i_.Ref.i_.>(15).delete.transact
         _ <- Ns.i.query.get.map(_ ==> List(1))
-        // Note that Ref.int entity is a separate entity and is not deleted
+        // Note that the Ref.int entity is a separate entity and is not deleted
         // Only the entity of the initial namespace is deleted
         _ <- Ref.i.a1.query.get.map(_ ==> List(10, 20))
         _ <- Ns.i.Ref.i.query.get.map(_ ==> List((1, 10)))

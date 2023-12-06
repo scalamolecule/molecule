@@ -78,7 +78,8 @@ trait Save_datomic
     ns: String,
     refAttr: String,
     refNs: String,
-    card: Card
+    card: Card,
+    owner: Boolean
   ): Unit = {
     stmt = stmtList
     stmt.add(add)

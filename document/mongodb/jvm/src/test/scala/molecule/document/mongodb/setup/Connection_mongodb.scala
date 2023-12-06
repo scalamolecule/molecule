@@ -23,12 +23,13 @@ object Connection_mongodb {
   )
   container.start()
   val mongoClient: MongoClient   = MongoClients.create(container.getConnectionString)
-  val mongoDb    : MongoDatabase = mongoClient.getDatabase("test")
+  val dbName                     = "test"
+  val mongoDb    : MongoDatabase = mongoClient.getDatabase(dbName)
 
   def proxy(schema: Schema) = {
     MongoProxy(
       "mongodb://localhost:27017",
-      "test",
+      dbName,
       schema.metaSchema,
       schema.nsMap,
       schema.attrMap,
@@ -38,8 +39,8 @@ object Connection_mongodb {
   }
 
   // Use same test database for all tests
-  val conn_Types      = MongoConn_JVM(proxy(TypesSchema), mongoDb)
-  val conn_Refs       = MongoConn_JVM(proxy(RefsSchema), mongoDb)
-  val conn_Uniques    = MongoConn_JVM(proxy(UniquesSchema), mongoDb)
-  val conn_Validation = MongoConn_JVM(proxy(ValidationSchema), mongoDb)
+  val conn_Types      = MongoConn_JVM(proxy(TypesSchema), mongoClient, dbName, mongoDb)
+  val conn_Refs       = MongoConn_JVM(proxy(RefsSchema), mongoClient, dbName, mongoDb)
+  val conn_Uniques    = MongoConn_JVM(proxy(UniquesSchema), mongoClient, dbName, mongoDb)
+  val conn_Validation = MongoConn_JVM(proxy(ValidationSchema), mongoClient, dbName, mongoDb)
 }

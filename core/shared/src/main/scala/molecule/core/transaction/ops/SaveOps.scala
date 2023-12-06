@@ -28,7 +28,8 @@ trait SaveOps extends Action2Data with BaseOps {
     ns: String,
     refAttr: String,
     refNs: String,
-    card: Card
+    card: Card,
+    owner: Boolean
   ): Unit
 
   protected def addBackRef(

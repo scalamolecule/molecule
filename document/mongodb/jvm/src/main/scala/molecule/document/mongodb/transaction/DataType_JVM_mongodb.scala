@@ -6,12 +6,12 @@ import org.bson.BsonDocument
 
 trait DataType_JVM_mongodb extends DataType {
 
-  private type CollectionName = String
-  private type Action = String
-  private type Documents = util.List[BsonDocument]
+//  type Action = String
+//  type Collections = BsonDocument
 
-//  type Data = (CollectionName, Action, Documents)
-  type Data = (CollectionName, Documents)
+//  type Data = (Action, Collections)
+  type Data = BsonDocument
+//  type Data2 = BsonDocument
 }
 
 object DataType_JVM_mongodb extends DataType_JVM_mongodb

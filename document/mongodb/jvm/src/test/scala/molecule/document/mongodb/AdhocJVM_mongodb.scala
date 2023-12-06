@@ -18,8 +18,29 @@ object AdhocJVM_mongodb extends TestSuite_mongodb {
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
       for {
-        _ <- Ns.i(1).save.transact
-        _ <- Ns.i.query.get.map(_ ==> List(1))
+        //        _ <- Ns.i(1).save.transact
+        //        _ <- Ns.i.query.get.map(_ ==> List(1))
+
+
+        _ <- Ns.i.insert(1, 2).transact
+        _ <- Ns.i_(1).delete.transact
+        _ <- Ns.i.query.get.map(_ ==> List(2))
+
+        //        _ <- rawTransact(
+        //          """{
+        //            |  "collection": "Ns",
+        //            |  "data": [
+        //            |    {
+        //            |      "i": 1,
+        //            |      "s": "a"
+        //            |    },
+        //            |    {
+        //            |      "i": 2,
+        //            |      "s": "b"
+        //            |    },
+        //            |  ]
+        //            |}
+        //            |""".stripMargin)
 
 
       } yield ()
@@ -29,26 +50,124 @@ object AdhocJVM_mongodb extends TestSuite_mongodb {
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
-        e1 <- A.i.B.i.insert(
-          (1, 10),
-          (2, 20)
-        ).transact.map(_.id)
+//        _ <- A.i(1).OwnB.i(2).save.transact.map(_.ids)
+//        _ <- A.i.OwnB.i.query.i.get.map(_.head ==> (1, 2))
 
-        // 2 entities, each referencing another entity
-        _ <- A.i.a1.B.i.query.get.map(_ ==> List(
-          (1, 10),
-          (2, 20)
-        ))
-        // 2 referenced entities
-        _ <- B.i.a1.query.get.map(_ ==> List(10, 20))
+        ids1 <- A.i(1).B.i(2).save.transact.map(_.ids)
+        //        _ <- A.i.B.i.query.i.get.map(_.head ==> (1, 2))
+        //        _ = println(ids1)
 
-        _ <- A(e1).delete.transact
+        //        _ <- rawTransact(
+        //          """{
+        //            |  "action": "insert",
+        //            |  "A": [
+        //            |    {
+        //            |      "i": 1,
+        //            |      "b": {
+        //            |        "i": 2
+        //            |      }
+        //            |    }
+        //            |  ]
+        //            |}
+        //            |""".stripMargin)
 
-        // 1 entity with 1 referenced entity left
-        _ <- A.i.B.i.query.get.map(_ ==> List((2, 20)))
+        //        _ <- rawTransact(
+        //          """{
+        //            |  "action": "insert",
+        //            |  "A": [
+        //            |    {
+        //            |      "i": 1,
+        //            |      "b": "42"
+        //            |    }
+        //            |  ],
+        //            |  "B": [
+        //            |    {
+        //            |      "_id": "42"
+        //            |      "i": 2
+        //            |    }
+        //            |  ]
+        //            |}
+        //            |""".stripMargin)
+        //
+        //        //        _ <- A.i.OwnB.i.query.get.map(_.head ==> (1, 2))
+        //
+        //
+        _ <- rawQuery(
+          """{
+            |  "collection": "A",
+            |  "pipeline": [
+            |    {
+            |      "$lookup": {
+            |        "from": "B",
+            |        "localField": "b",
+            |        "foreignField": "_id",
+            |        "pipeline": [
+            |          {
+            |            "$project": {
+            |              "_id": 0,
+            |              "i": 1
+            |            }
+            |          }
+            |        ],
+            |        "as": "b"
+            |      }
+            |    },
+            |    {
+            |      "$addFields": {
+            |        "b": {
+            |          $arrayElemAt: [
+            |            "$b",
+            |            0
+            |          ]
+            |        }
+            |      }
+            |    },
+            |    {
+            |      "$project": {
+            |        "_id": 0,
+            |        "i": 1,
+            |        "b": 1
+            |      }
+            |    }
+            |  ]
+            |}
+            |""".stripMargin, true).map(println)
+        _ <- rawQuery(
+          """{
+            |  "collection": "A",
+            |  "pipeline": [
+            |    {
+            |      "$lookup": {
+            |        "from": "B",
+            |        "localField": "b",
+            |        "foreignField": "_id",
+            |        "pipeline": [
+            |          {
+            |            "$project": {
+            |              "_id": 0,
+            |              "i": 1
+            |            }
+            |          }
+            |        ],
+            |        "as": "b"
+            |      }
+            |    },
+            |    {
+            |      "$project": {
+            |        "_id": 0,
+            |        "i": 1,
+            |        "b": 1
+            |      }
+            |    }
+            |  ]
+            |}
+            |""".stripMargin, true).map(println)
 
-        // Referenced entities are not deleted
-        _ <- B.i.a1.query.get.map(_ ==> List(10, 20))
+
+        //        ids2 <- A.i(1).B.i(2).save.i.transact.map(_.ids)
+        //        //        _ = println(ids2)
+        //        _ <- A.i.B.i.query.i.get.map(_.head ==> (1, 2))
+
       } yield ()
     }
 

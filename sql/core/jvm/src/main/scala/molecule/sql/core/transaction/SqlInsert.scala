@@ -338,7 +338,13 @@ trait SqlInsert
     }
   }
 
-  override protected def addRef(ns: String, refAttr: String, refNs: String, card: Card): Product => Unit = {
+  override protected def addRef(
+    ns: String,
+    refAttr: String,
+    refNs: String,
+    card: Card,
+    owner: Boolean
+  ): Product => Unit = {
     getRefResolver[Product](ns, refAttr, refNs, card)
   }
 
@@ -353,6 +359,7 @@ trait SqlInsert
     ns: String,
     refAttr: String,
     refNs: String,
+    owner: Boolean,
     nestedElements: List[Element]
   ): Product => Unit = {
     val joinTable  = ss(ns, refAttr, refNs)

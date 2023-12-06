@@ -164,15 +164,16 @@ object Rpc_mongodb
     proxy: ConnProxy,
     elements: List[Element]
   ): Future[Either[MoleculeError, TxReport]] = either {
-    for {
-      conn <- getConn(proxy)
-      filter = new ResolveDelete with Delete_mongodb {
-        //        override lazy val sqlConn: Connection = conn.sqlConn
-      }.getFilter(elements, proxy.nsMap)
-      //            txReport <- conn.transact_async(data)
-      txReport <- filter.fold(Future(TxReport(Nil)))(filter =>
-        conn.deleteData_async(getInitialNs(elements), filter)
-      )
-    } yield txReport
+//    for {
+//      conn <- getConn(proxy)
+//      filter = new ResolveDelete with Delete_mongodb {
+//        //        override lazy val sqlConn: Connection = conn.sqlConn
+//      }.getFilter(elements, proxy.nsMap)
+//      //            txReport <- conn.transact_async(data)
+//      txReport <- filter.fold(Future(TxReport(Nil)))(filter =>
+//        conn.deleteData_async(getInitialNs(elements), filter)
+//      )
+//    } yield txReport
+    ???
   }
 }

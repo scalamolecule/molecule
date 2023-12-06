@@ -402,7 +402,7 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
 
 
   final private def resolveRef0(ref: Ref, tail: List[Element]): Unit = {
-    val Ref(_, refAttr, refNs, card, _) = ref
+    val Ref(_, refAttr, _, card, _, _) = ref
     if (isNestedOpt && card == CardSet) {
       throw ModelError(
         "Only cardinality-one refs allowed in optional nested queries. Found: " + ref
@@ -466,7 +466,7 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
       noMixedNestedModes
     }
     validateRefNs(ref, nestedElements)
-    val Ref(_, refAttr, refNs, _, _) = ref
+    val Ref(_, refAttr, _, _, _, _) = ref
 
     // No empty nested arrays when asking for mandatory nested data
     matches.add(Filters.ne(refAttr, new BsonArray()))
@@ -501,7 +501,7 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
       throw ModelError("Filter attributes not allowed in optional nested queries.")
     }
     validateRefNs(ref, nestedElements)
-    val Ref(_, refAttr, refNs, _, _) = ref
+    val Ref(_, refAttr, _, _, _, _) = ref
 
     refPath = refPath :+ refAttr
     pathDot = pathDot + refAttr + "."

@@ -49,7 +49,8 @@ trait InsertOps extends BaseOps {
     ns: String,
     refAttr: String,
     refNs: String,
-    card: Card
+    card: Card,
+    owner: Boolean
   ): Product => Unit
 
   protected def addBackRef(
@@ -62,6 +63,7 @@ trait InsertOps extends BaseOps {
     ns: String,
     refAttr: String,
     refNs: String,
+    owner: Boolean,
     elements: List[Element]
   ): Product => Unit
 }

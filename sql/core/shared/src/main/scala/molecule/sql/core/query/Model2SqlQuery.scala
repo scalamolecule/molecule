@@ -265,7 +265,7 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
 
 
   final private def resolveRef0(ref: Ref, tail: List[Element]): Unit = {
-    val Ref(_, refAttr, refNs, card, _) = ref
+    val Ref(_, refAttr, refNs, card, _, _) = ref
     if (isNestedOpt && card == CardSet) {
       throw ModelError(
         "Only cardinality-one refs allowed in optional nested queries. Found: " + ref
@@ -299,7 +299,7 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
     }
     validateRefNs(ref, nestedElements)
 
-    val Ref(_, refAttr, refNs, _, _) = ref
+    val Ref(_, refAttr, refNs, _, _, _) = ref
     exts(refNs) = exts.get(refNs).fold(Option.empty[String])(_ => Some("_" + refAttr))
     aritiesNested()
     resolveNestedRef(ref)
@@ -318,7 +318,7 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
     }
     validateRefNs(ref, nestedElements)
 
-    val Ref(_, refAttr, refNs, _, _) = ref
+    val Ref(_, refAttr, refNs, _, _, _) = ref
     exts(refNs) = exts.get(refNs).fold(Option.empty[String])(_ => Some("_" + refAttr))
     aritiesNested()
     resolveNestedOptRef(ref)

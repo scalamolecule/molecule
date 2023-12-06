@@ -1,104 +1,149 @@
 package molecule.document.mongodb.facade
 
 import java.util
-import com.mongodb.client.{MongoCollection, MongoDatabase}
-import com.mongodb.client.result.{DeleteResult, InsertManyResult}
+import com.mongodb.client.{MongoClient, MongoDatabase, TransactionBody}
+import com.mongodb.{ReadConcern, ReadPreference, TransactionOptions, WriteConcern}
+import molecule.base.error.ModelError
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.marshalling.MongoProxy
 import molecule.core.spi.{Conn, TxReport}
 import molecule.core.util.ModelUtils
 import molecule.document.mongodb.transaction.{Base_JVM_mongodb, DataType_JVM_mongodb}
+import molecule.document.mongodb.util.BsonUtils
 import org.bson.conversions.Bson
-import org.bson.json.JsonWriterSettings
 import org.bson.{BsonDocument, BsonObjectId, BsonValue}
-import scala.annotation.unused
 import scala.concurrent.{ExecutionContext, Future}
 
 case class MongoConn_JVM(
   override val proxy: MongoProxy,
+  mongoClient: MongoClient,
+  dbName: String,
   mongoDb: MongoDatabase,
   optCollectionName: Option[String] = None
 ) extends Conn(proxy)
   with DataType_JVM_mongodb
   with Base_JVM_mongodb
   with ModelUtils
+  with BsonUtils
   with MoleculeLogging {
 
-  //  def use(collectionName: String): Unit = {
-  //    mongoDb.
-  //  }
 
   override def transact_async(data: Data)(implicit ec: ExecutionContext): Future[TxReport] = {
     Future(transact_sync(data))
   }
 
   override def transact_sync(data: Data): TxReport = {
-    //    val (collectionName, action, documents) = data
-    val (collectionName, documents) = data
-
-    val collection: MongoCollection[BsonDocument] = mongoDb.getCollection(collectionName, classOf[BsonDocument])
-
     println("TRANSACT ----------------------------------------")
-    val pretty: JsonWriterSettings = JsonWriterSettings.builder().indent(true).build()
-    documents.forEach(d => println(d.toBsonDocument.toJson(pretty)))
+    println(data.toJson(pretty))
     println("")
-
-    //    action match {
-    //      case "insert" => insertData(collection, documents)
-    //      case "delete" => deleteData(collection, documents)
-    //    }
-    ???
-  }
-
-  private def debugDocs(action: String, documents: util.List[BsonDocument]): Unit = {
-    println(action + " ----------------------------------------")
-    val pretty: JsonWriterSettings = JsonWriterSettings.builder().indent(true).build()
-    documents.forEach(d => println(d.toBsonDocument.toJson(pretty)))
-    println("")
-  }
-  private def debugFilter(action: String, filter: Bson): Unit = {
-    println(action + " ----------------------------------------")
-    val pretty: JsonWriterSettings = JsonWriterSettings.builder().indent(true).build()
-    println(filter.toBsonDocument.toJson(pretty))
-    println("")
-  }
-
-
-  //  def insertData(data: Data): TxReport = {
-  def insertData_async(data: (String, util.List[BsonDocument]))(implicit ec: ExecutionContext): Future[TxReport] = {
-    Future(insertData_sync(data))
-  }
-
-  def insertData_sync(data: (String, util.List[BsonDocument])): TxReport = {
-    val (collectionName, documents) = data
-    val collection                  = mongoDb.getCollection(collectionName, classOf[BsonDocument])
-    debugDocs("INSERT", documents)
-
-    if (documents.size() == 1) {
-      val insertResult = collection.insertOne(documents.get(0))
-      val idHexString  = insertResult.getInsertedId.asInstanceOf[BsonObjectId].getValue.toHexString
-      TxReport(List(idHexString))
-
-    } else {
-      val insertResult = collection.insertMany(documents)
-      val idsMap       = insertResult.getInsertedIds
-      val array        = new Array[BsonValue](idsMap.size())
-      idsMap.forEach { case (k, v) => array(k) = v }
-      val ids = array.toList.map(_.asInstanceOf[BsonObjectId].getValue.toHexString)
-      TxReport(ids)
+    data.get("action").asString.getValue match {
+      case "insert" => data.size match {
+        case 2 => insertEmbedded(data)
+        case _ => insertReferenced(data)
+      }
+      case "update" => ???
+      case "delete" => ???
+      case other    => throw ModelError("Missing or unexpected action: " + other)
     }
   }
 
-  def deleteData_async(colName: String, filter: Bson)(implicit ec: ExecutionContext): Future[TxReport] = {
-    Future(deleteData_sync(colName, filter))
+  //  def saveData_sync(collections: BsonDocument): TxReport = {
+  //    val collectionData = collections.entrySet.iterator().next()
+  //
+  //    val (collectionName, documents) = (collectionData.getKey, collectionData.getValue.asInstanceOf[BsonArray])
+  //    val collection                  = mongoDb.getCollection(collectionName, classOf[BsonDocument])
+  //    debugDocs("SAVE", collections)
+  //
+  //
+  //    val insertResult = collection.insertOne(documents.iterator.next.asDocument())
+  //    val idHexString  = insertResult.getInsertedId.asInstanceOf[BsonObjectId].getValue.toHexString
+  //    TxReport(List(idHexString))
+  //  }
+
+
+  private def insertReferenced(data: Data): TxReport = {
+    var first         = true
+    var ids           = List.empty[String]
+    val clientSession = mongoClient.startSession()
+    val txOptions     = TransactionOptions.builder()
+      .readPreference(ReadPreference.primary())
+      .readConcern(ReadConcern.LOCAL)
+      .writeConcern(WriteConcern.MAJORITY)
+      .build()
+
+    val txBody = new TransactionBody[TxReport] {
+      override def execute: TxReport = {
+        val db = mongoClient.getDatabase(dbName)
+        data.forEach {
+          case ("action", _)             => // do nothing
+          case (collectionName, rawRows) =>
+            println(".... " + collectionName)
+            val documents    = rawRows.asArray.getValues.asInstanceOf[util.List[BsonDocument]]
+            val collection   = db.getCollection(collectionName, classOf[BsonDocument])
+            val insertResult = collection.insertMany(clientSession, documents)
+            if (first) {
+              val idsMap = insertResult.getInsertedIds
+              val array  = new Array[BsonValue](idsMap.size)
+              idsMap.forEach {
+                case (k, v) => array(k) = v
+              }
+              ids = array.toList.map(_.asInstanceOf[BsonObjectId].getValue.toHexString)
+              first = false
+            }
+        }
+        TxReport(ids)
+      }
+    }
+    try
+      clientSession.withTransaction(txBody, txOptions)
+    catch {
+      case e: RuntimeException =>
+        // some error handling
+        throw e
+    } finally clientSession.close
   }
 
-  def deleteData_sync(colName: String, filter: Bson): TxReport = {
+  private def insertEmbedded(data: Data): TxReport = {
+    var ids = List.empty[String]
+    data.forEach {
+      case ("action", _)             => // do nothing
+      case (collectionName, rawRows) =>
+        val documents    = rawRows.asArray.getValues.asInstanceOf[util.List[BsonDocument]]
+        val collection   = mongoDb.getCollection(collectionName, classOf[BsonDocument])
+        val insertResult = collection.insertMany(documents)
+        val idsMap       = insertResult.getInsertedIds
+        val array        = new Array[BsonValue](idsMap.size)
+        idsMap.forEach {
+          case (k, v) => array(k) = v
+        }
+        ids = array.toList.map(_.asInstanceOf[BsonObjectId].getValue.toHexString)
+    }
+    TxReport(ids)
+  }
+
+  private def deleteData(colName: String, filter: Bson): TxReport = {
     //    val (collectionName, filter) = data
     val collection = mongoDb.getCollection(colName, classOf[BsonDocument])
     debugFilter("INSERT " + colName, filter)
     collection.deleteMany(filter)
     TxReport(Nil)
+  }
+
+
+  //  private def debugDocs(action: String, documents: util.List[BsonDocument]): Unit = {
+  private def debugDocs(action: String, document: BsonDocument): Unit = {
+    //    val pretty: JsonWriterSettings = JsonWriterSettings.builder().indent(true).build()
+    //    document.entrySet().forEach(pair => println(d.toBsonDocument.toJson(pretty)))
+    //    documents.forEach(d => println(d.toBsonDocument.toJson(pretty)))
+    println(action + " ----------------------------------------")
+    println(document.toJson(pretty))
+    println("")
+  }
+  private def debugFilter(action: String, filter: Bson): Unit = {
+    println(action + " ----------------------------------------")
+    //    val pretty: JsonWriterSettings = JsonWriterSettings.builder().indent(true).build()
+    println(filter.toBsonDocument.toJson(pretty))
+    println("")
   }
 
   //  def atomicTransaction(executions: () => Map[List[String], List[Long]]): TxReport = {

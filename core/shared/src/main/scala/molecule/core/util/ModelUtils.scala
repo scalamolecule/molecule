@@ -12,11 +12,11 @@ trait ModelUtils {
   private def count(es: List[Element], acc: Int): Int = {
     es match {
       case e :: tail => e match {
-        case _: Mandatory@unchecked => count(tail, acc + 1)
-        case _: Optional@unchecked  => count(tail, acc + 1)
-        case _: Nested              => count(tail, acc + 1)
-        case _: NestedOpt           => count(tail, acc + 1)
-        case _                      => count(tail, acc)
+        case _: Mandatory @unchecked => count(tail, acc + 1)
+        case _: Optional @unchecked  => count(tail, acc + 1)
+        case _: Nested               => count(tail, acc + 1)
+        case _: NestedOpt            => count(tail, acc + 1)
+        case _                       => count(tail, acc)
       }
       case Nil       => acc
     }
@@ -37,12 +37,12 @@ trait ModelUtils {
   @tailrec
   final protected def getInitialNonGenericNs(elements: List[Element]): String = {
     elements.head match {
-      case a: Attr if a.attr == "id"        => getInitialNonGenericNs(elements.tail)
-      case a: Attr                           => a.ns
-      case b: Ref                            => b.ns
-      case Nested(Ref(ns, _, _, _, _), _)    => ns
-      case NestedOpt(Ref(ns, _, _, _, _), _) => ns
-      case other                             => throw ModelError("Unexpected head element: " + other)
+      case a: Attr if a.attr == "id"            => getInitialNonGenericNs(elements.tail)
+      case a: Attr                              => a.ns
+      case b: Ref                               => b.ns
+      case Nested(Ref(ns, _, _, _, _, _), _)    => ns
+      case NestedOpt(Ref(ns, _, _, _, _, _), _) => ns
+      case other                                => throw ModelError("Unexpected head element: " + other)
     }
   }
 

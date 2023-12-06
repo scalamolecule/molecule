@@ -1,6 +1,5 @@
 package molecule.document.mongodb.spi
 
-import java.util
 import molecule.base.error._
 import molecule.base.util.BaseHelpers
 import molecule.boilerplate.ast.Model._
@@ -18,7 +17,6 @@ import molecule.document.mongodb.transaction._
 import molecule.document.mongodb.util.BsonUtils
 import org.bson._
 import org.bson.conversions.Bson
-import org.bson.json.JsonWriterSettings
 import scala.annotation.nowarn
 import scala.collection.mutable.ListBuffer
 import scala.util.control.NonFatal
@@ -108,7 +106,7 @@ trait SpiSync_mongodb
     printInspectQuery("QUERY (cursor)", q.elements, q.optLimit, None)
   }
 
-  def printInspectQuery(
+  private def printInspectQuery(
     label: String,
     elements: List[Element],
     optLimit: Option[Int],
@@ -129,8 +127,8 @@ trait SpiSync_mongodb
       save_inspect(save)
     val errors = save_validate(save)
     if (errors.isEmpty) {
-      //      val txReport = conn.transact_sync(save_getData(save, conn))
-      val txReport = conn.insertData_sync(save_getData(save, conn))
+      val txReport = conn.transact_sync(save_getData(save))
+      //      val txReport = conn.saveData_sync(save_getData(save, conn))
       conn.callback(save.elements)
       txReport
     } else {
@@ -139,13 +137,13 @@ trait SpiSync_mongodb
   }
 
   override def save_inspect(save: Save)(implicit conn0: Conn): Unit = {
-    val conn = conn0.asInstanceOf[MongoConn_JVM]
+    //    val conn = conn0.asInstanceOf[MongoConn_JVM]
     tryInspect("save", save.elements) {
-      printInspectTx("SAVE", save.elements, save_getData(save, conn))
+      printInspectTx("SAVE", save.elements, save_getData(save))
     }
   }
 
-  private def save_getData(save: Save, conn: MongoConn_JVM): Data = {
+  private def save_getData(save: Save): Data = {
     new ResolveSave with Save_mongodb().getData(save.elements)
   }
 
@@ -164,8 +162,8 @@ trait SpiSync_mongodb
       insert_inspect(insert)
     val errors = insert_validate(insert0) // validate original elements against meta model
     if (errors.isEmpty) {
-      //      val txReport = conn.transact_sync(insert_getData(insert, conn))
-      val txReport = conn.insertData_sync(insert_getData(insert, conn))
+      val txReport = conn.transact_sync(insert_getData(insert, conn))
+      //      val txReport = conn.insertData_sync(insert_getData(insert, conn))
       conn.callback(insert.elements)
       txReport
     } else {
@@ -278,14 +276,15 @@ trait SpiSync_mongodb
   override def delete_transact(delete0: Delete)(implicit conn0: Conn): TxReport = {
     val conn   = conn0.asInstanceOf[MongoConn_JVM]
     val delete = delete0.copy(elements = noKeywords(delete0.elements, Some(conn.proxy)))
-    if (delete.doInspect)
-      delete_inspect(delete)
-    val colName = getInitialNs(delete.elements)
-    delete_getFilter(conn, delete).fold(TxReport(Nil)) { filter =>
-      val txReport = conn.deleteData_sync(colName, filter)
-      conn.callback(delete.elements, true)
-      txReport
-    }
+    //    if (delete.doInspect)
+    //      delete_inspect(delete)
+    //    val colName = getInitialNs(delete.elements)
+    //    delete_getFilter(conn, delete).fold(TxReport(Nil)) { filter =>
+    //      val txReport = conn.deleteData_sync(colName, filter)
+    //      conn.callback(delete.elements, true)
+    //      txReport
+    //    }
+    ???
   }
 
   override def delete_inspect(delete: Delete)(implicit conn0: Conn): Unit = {
@@ -318,7 +317,9 @@ trait SpiSync_mongodb
   }
 
   private def printInspectTx(label: String, elements: List[Element], data: Data, tpls: Seq[Product] = Nil): Unit = {
-    printRaw(label, elements, data2json(data), tpls.mkString("\n"))
+    //    printRaw(label, elements, data2json(data), tpls.mkString("\n"))
+    //    printRaw(label, elements, data._2.toJson(pretty), tpls.mkString("\n"))
+    printRaw(label, elements, data.toJson(pretty), tpls.mkString("\n"))
   }
 
 
@@ -341,17 +342,12 @@ trait SpiSync_mongodb
   }
 
 
-  override def fallback_rawTransact(
-    json: String,
-    doPrint: Boolean = false
-  )(implicit conn: Conn): TxReport = {
-    val debug = if (doPrint) (s: String) => println(s) else (_: String) => ()
-    debug("\nRAW TRANSACT ======================================================")
-    val (col, rows) = json2data(json, conn.proxy.nsMap)
-    if (doPrint) {
-      rows.forEach(row => debug(row.toJson(pretty)))
+  override def fallback_rawTransact(json: String, print: Boolean = false)(implicit conn: Conn): TxReport = {
+    if (print) {
+      println("\nRAW TRANSACT ======================================================")
+      println(json)
     }
-    conn.asInstanceOf[MongoConn_JVM].transact_sync((col, rows))
+    conn.asInstanceOf[MongoConn_JVM].transact_sync(json2data(json, conn.proxy.nsMap))
   }
 
   override def fallback_rawQuery(

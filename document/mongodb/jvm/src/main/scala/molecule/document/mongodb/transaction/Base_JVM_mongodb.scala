@@ -13,6 +13,7 @@ import molecule.document.mongodb.facade.{MongoConn_JVM, MongoHandler_JVM}
 import org.bson._
 import org.bson.types.Decimal128
 import scala.collection.mutable
+import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
 
 trait Base_JVM_mongodb extends DataType_JVM_mongodb with ModelUtils with BaseHelpers with BaseOps {
@@ -27,9 +28,9 @@ trait Base_JVM_mongodb extends DataType_JVM_mongodb with ModelUtils with BaseHel
   protected var uniqueFilterElements = List.empty[Element]
   protected var filterElements       = List.empty[Element]
 
-  protected var doc  = new BsonDocument()
-  protected var docs = List(List(doc))
-
+  protected var doc     = new BsonDocument()
+  protected var docs    = List(List(doc))
+  protected var refDocs = List.empty[(List[String], List[List[BsonDocument]])]
 
   // "Connection pool" ---------------------------------------------
 

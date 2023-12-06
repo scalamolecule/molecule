@@ -11,7 +11,7 @@ object MongoHandler_JVM {
     val mongoClient: MongoClient   = MongoClients.create(proxy.connectionString)
     val mongoDb    : MongoDatabase = mongoClient.getDatabase(proxy.dbName)
     mongoDb.drop()
-    val conn = MongoConn_JVM(proxy, mongoDb)
+    val conn = MongoConn_JVM(proxy, mongoClient, proxy.dbName, mongoDb)
     conn
   }
 

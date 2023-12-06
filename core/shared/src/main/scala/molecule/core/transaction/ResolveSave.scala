@@ -34,12 +34,18 @@ class ResolveSave
               }
           }
 
-        case Ref(ns, refAttr, refNs, card, _) => addRef(ns, refAttr, refNs, card); resolve(tail)
-        case BackRef(backRefNs, _, _)         => addBackRef(backRefNs); resolve(tail)
-        case _: Nested                        => throw ModelError(
+        case Ref(ns, refAttr, refNs, card, owner, _) =>
+          addRef(ns, refAttr, refNs, card, owner)
+          resolve(tail)
+
+        case BackRef(backRefNs, _, _) =>
+          addBackRef(backRefNs)
+          resolve(tail)
+
+        case _: Nested    => throw ModelError(
           "Nested data structure not allowed in save molecule. Please use insert instead."
         )
-        case _: NestedOpt                     => throw ModelError(
+        case _: NestedOpt => throw ModelError(
           "Optional nested data structure not allowed in save molecule. Please use insert instead."
         )
       }

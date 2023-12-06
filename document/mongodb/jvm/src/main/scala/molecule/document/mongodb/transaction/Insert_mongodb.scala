@@ -30,7 +30,7 @@ trait Insert_mongodb
     val tpl2bson   = getResolver(nsMap, elements)
     val insertDocs = new util.ArrayList[BsonDocument]()
     tpls.foreach { tpl =>
-      // Build new Bson saveDoc from each entity tuple
+      // Build new Bson doc from each entity tuple
       doc = new BsonDocument()
       docs = List(List(doc))
       tpl2bson(tpl)
@@ -39,6 +39,7 @@ trait Insert_mongodb
       insertDocs.add(topDoc)
     }
     (getInitialNs(elements), insertDocs)
+    ???
   }
 
   override protected def addOne[T](
@@ -128,7 +129,13 @@ trait Insert_mongodb
     }
   }
 
-  override protected def addRef(ns: String, refAttr: String, refNs: String, card: Card): Product => Unit = {
+  override protected def addRef(
+    ns: String,
+    refAttr: String,
+    refNs: String,
+    card: Card,
+    owner: Boolean
+  ): Product => Unit = {
     (_: Product) => {
       val refDoc = new BsonDocument()
       // Make relationship
@@ -145,8 +152,8 @@ trait Insert_mongodb
   override protected def addBackRef(backRefNs: String): Product => Unit = {
     (_: Product) =>
       // Step back to previous namespace/doc
-      doc = docs.last.init.last
       docs = docs.init :+ docs.last.init
+      doc = docs.last.init.last
   }
 
   override protected def addNested(
@@ -155,6 +162,7 @@ trait Insert_mongodb
     ns: String,
     refAttr: String,
     refNs: String,
+    owner: Boolean,
     nestedElements: List[Element]
   ): Product => Unit = {
     //    val joinTable  = ss(ns, refAttr, refNs)
@@ -192,11 +200,11 @@ trait Insert_mongodb
 
       nestedTuples.foreach { nestedTpl =>
         debug("", "------------------------------------------------")
-        // Start from new namespace on this level
+        // Start from fresh namespace on this level
         doc = new BsonDocument()
         docs = docs.init :+ List(doc)
         resolveNested(nestedTpl)
-        //        deb(doc, "tplB")
+        //        debug(doc, "tplB")
         nestedArray.add(docs.last.head.clone())
       }
       debug("", "------------------------------------------------")

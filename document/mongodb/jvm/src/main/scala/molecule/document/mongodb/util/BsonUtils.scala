@@ -8,7 +8,7 @@ import com.mongodb.MongoClientSettings
 import molecule.base.ast.{CardOne, CardSet, MetaAttr, MetaNs}
 import molecule.base.error.ModelError
 import molecule.document.mongodb.transaction.DataType_JVM_mongodb
-import org.bson._
+import org.bson.{BsonString, _}
 import org.bson.conversions.Bson
 import org.bson.json.JsonWriterSettings
 import org.bson.types.Decimal128
@@ -20,118 +20,134 @@ trait BsonUtils extends DataType_JVM_mongodb {
   private lazy val actions = List("insert", "update", "delete")
 
   def json2data(json: String, nsMap: Map[String, MetaNs]): Data = {
-    val bson   = BsonDocument.parse(json)
-    val action = bson.getFirstKey
-    if (!actions.contains(action))
+    val bson = BsonDocument.parse(json)
+
+    val firstKey = bson.getFirstKey
+    if (firstKey != "action") {
       throw ModelError(
-        """Missing action field "<insert/update/delete>": "<collection>"""" +
-          " as first field-value pair in transact json.")
-
-    val collection = bson.get(action).asString.getValue
-
-    val rawRows = {
-      bson.get("data") match {
-        case null => throw ModelError("""Missing "data": [<rows>] in raw transaction json.""")
-        case data => data.asArray
-      }
+        """Missing field "action": "<insert/update/delete>" as first field-value pair in transaction json.""""
+      )
     }
 
+    val data = new BsonDocument()
+    bson.get("action") match {
+      case null =>
+        throw ModelError("""Missing "action": "<insert/update/delete>" in raw transaction json.""")
 
-    val rows : util.ArrayList[BsonDocument]        = new util.ArrayList[BsonDocument]()
-    val casts: Map[String, BsonValue => BsonValue] = {
-      // If the collection name is the namespace name we can map the correct attribute types
-      nsMap.get(collection).fold(Map.empty[String, BsonValue => BsonValue]) { metaNs =>
-        metaNs.attrs.collect {
-          case MetaAttr(attr, CardOne, "ID", Some(_), _, _, _, _, _, _)       => attr -> ((v: BsonValue) => v.asDocument)
-          case MetaAttr(attr, CardOne, "ID", _, _, _, _, _, _, _)             => attr -> ((v: BsonValue) => v.asString)
-          case MetaAttr(attr, CardOne, "String", _, _, _, _, _, _, _)         => attr -> ((v: BsonValue) => v.asString)
-          case MetaAttr(attr, CardOne, "Int", _, _, _, _, _, _, _)            => attr -> ((v: BsonValue) => v.asInt32)
-          case MetaAttr(attr, CardOne, "Long", _, _, _, _, _, _, _)           => attr -> ((v: BsonValue) => v match {case _: BsonInt32 => new BsonInt64(v.asInt32().getValue); case _: BsonInt64 => v})
-          case MetaAttr(attr, CardOne, "Float", _, _, _, _, _, _, _)          => attr -> ((v: BsonValue) => v.asDouble)
-          case MetaAttr(attr, CardOne, "Double", _, _, _, _, _, _, _)         => attr -> ((v: BsonValue) => v.asDouble)
-          case MetaAttr(attr, CardOne, "Boolean", _, _, _, _, _, _, _)        => attr -> ((v: BsonValue) => v.asBoolean)
-          case MetaAttr(attr, CardOne, "BigInt", _, _, _, _, _, _, _)         => attr -> ((v: BsonValue) => new BsonDecimal128(Decimal128.parse(v.asString().getValue)))
-          case MetaAttr(attr, CardOne, "BigDecimal", _, _, _, _, _, _, _)     => attr -> ((v: BsonValue) => new BsonDecimal128(Decimal128.parse(v.asString().getValue)))
-          case MetaAttr(attr, CardOne, "Date", _, _, _, _, _, _, _)           => attr -> ((v: BsonValue) => new BsonDateTime(v.asInt64.getValue))
-          case MetaAttr(attr, CardOne, "Duration", _, _, _, _, _, _, _)       => attr -> ((v: BsonValue) => v.asString)
-          case MetaAttr(attr, CardOne, "Instant", _, _, _, _, _, _, _)        => attr -> ((v: BsonValue) => v.asString)
-          case MetaAttr(attr, CardOne, "LocalDate", _, _, _, _, _, _, _)      => attr -> ((v: BsonValue) => v.asString)
-          case MetaAttr(attr, CardOne, "LocalTime", _, _, _, _, _, _, _)      => attr -> ((v: BsonValue) => v.asString)
-          case MetaAttr(attr, CardOne, "LocalDateTime", _, _, _, _, _, _, _)  => attr -> ((v: BsonValue) => v.asString)
-          case MetaAttr(attr, CardOne, "OffsetTime", _, _, _, _, _, _, _)     => attr -> ((v: BsonValue) => v.asString)
-          case MetaAttr(attr, CardOne, "OffsetDateTime", _, _, _, _, _, _, _) => attr -> ((v: BsonValue) => v.asString)
-          case MetaAttr(attr, CardOne, "ZonedDateTime", _, _, _, _, _, _, _)  => attr -> ((v: BsonValue) => v.asString)
-          case MetaAttr(attr, CardOne, "UUID", _, _, _, _, _, _, _)           => attr -> ((v: BsonValue) => v.asString)
-          case MetaAttr(attr, CardOne, "URI", _, _, _, _, _, _, _)            => attr -> ((v: BsonValue) => v.asString)
-          case MetaAttr(attr, CardOne, "Byte", _, _, _, _, _, _, _)           => attr -> ((v: BsonValue) => v.asInt32)
-          case MetaAttr(attr, CardOne, "Short", _, _, _, _, _, _, _)          => attr -> ((v: BsonValue) => v.asInt32)
-          case MetaAttr(attr, CardOne, "Char", _, _, _, _, _, _, _)           => attr -> ((v: BsonValue) => v.asString)
-
-          case MetaAttr(attr, CardSet, "ID", _, _, _, _, _, _, _)             => attr -> {
-            (v: BsonValue) => {
-              val array = new BsonArray()
-              val vs    = v.asArray.getValues
-              if (!vs.get(0).isDocument) {
-                throw ModelError("Can't add non-existing ids of embedded documents in MongoDB. " +
-                  "Please save embedded document together with main document.")
-              }
-              v.asArray.getValues.forEach(v =>
-                array.add(v.asDocument)
-              )
-              array
+      case v: BsonString =>
+        val action = v.getValue
+        if (!actions.contains(action)) {
+          throw ModelError("Action can only be: insert, update or delete. Found: " + action)
+        }
+        action match {
+          case "insert" =>
+            bson.forEach {
+              case ("action", value) => data.append("action", value) // leave as-is
+              case (ns, rawRows)     =>
+                val metaAttrs = nsMap.get(ns).fold(throw ModelError(s"Couldn't find namespace ´$ns´"))(_.attrs)
+                data.append(ns, castInsert(rawRows.asArray, metaAttrs))
             }
-          }
-          case MetaAttr(attr, CardSet, "String", _, _, _, _, _, _, _)         => attr -> {val array = new BsonArray(); (v: BsonValue) => {v.asArray.getValues.forEach(v => array.add(v.asString)); array} }
-          case MetaAttr(attr, CardSet, "Int", _, _, _, _, _, _, _)            => attr -> {val array = new BsonArray(); (v: BsonValue) => {v.asArray.getValues.forEach(v => array.add(v.asInt32)); array} }
-          case MetaAttr(attr, CardSet, "Long", _, _, _, _, _, _, _)           => attr -> {val array = new BsonArray(); (v: BsonValue) => {v.asArray.getValues.forEach(v => array.add(v match { case _: BsonInt32 => new BsonInt64(v.asInt32().getValue); case _: BsonInt64 => v })); array} }
-          case MetaAttr(attr, CardSet, "Float", _, _, _, _, _, _, _)          => attr -> {val array = new BsonArray(); (v: BsonValue) => {v.asArray.getValues.forEach(v => array.add(v.asDouble)); array} }
-          case MetaAttr(attr, CardSet, "Double", _, _, _, _, _, _, _)         => attr -> {val array = new BsonArray(); (v: BsonValue) => {v.asArray.getValues.forEach(v => array.add(v.asDouble)); array} }
-          case MetaAttr(attr, CardSet, "Boolean", _, _, _, _, _, _, _)        => attr -> {val array = new BsonArray(); (v: BsonValue) => {v.asArray.getValues.forEach(v => array.add(v.asBoolean)); array} }
-          case MetaAttr(attr, CardSet, "BigInt", _, _, _, _, _, _, _)         => attr -> {val array = new BsonArray(); (v: BsonValue) => {v.asArray.getValues.forEach(v => array.add(new BsonDecimal128(Decimal128.parse(v.asString().getValue)))); array} }
-          case MetaAttr(attr, CardSet, "BigDecimal", _, _, _, _, _, _, _)     => attr -> {val array = new BsonArray(); (v: BsonValue) => {v.asArray.getValues.forEach(v => array.add(new BsonDecimal128(Decimal128.parse(v.asString().getValue)))); array} }
-          case MetaAttr(attr, CardSet, "Date", _, _, _, _, _, _, _)           => attr -> {val array = new BsonArray(); (v: BsonValue) => {v.asArray.getValues.forEach(v => array.add(new BsonDateTime(v.asInt64.getValue))); array} }
-          case MetaAttr(attr, CardSet, "Duration", _, _, _, _, _, _, _)       => attr -> {val array = new BsonArray(); (v: BsonValue) => {v.asArray.getValues.forEach(v => array.add(v.asString)); array} }
-          case MetaAttr(attr, CardSet, "Instant", _, _, _, _, _, _, _)        => attr -> {val array = new BsonArray(); (v: BsonValue) => {v.asArray.getValues.forEach(v => array.add(v.asString)); array} }
-          case MetaAttr(attr, CardSet, "LocalDate", _, _, _, _, _, _, _)      => attr -> {val array = new BsonArray(); (v: BsonValue) => {v.asArray.getValues.forEach(v => array.add(v.asString)); array} }
-          case MetaAttr(attr, CardSet, "LocalTime", _, _, _, _, _, _, _)      => attr -> {val array = new BsonArray(); (v: BsonValue) => {v.asArray.getValues.forEach(v => array.add(v.asString)); array} }
-          case MetaAttr(attr, CardSet, "LocalDateTime", _, _, _, _, _, _, _)  => attr -> {val array = new BsonArray(); (v: BsonValue) => {v.asArray.getValues.forEach(v => array.add(v.asString)); array} }
-          case MetaAttr(attr, CardSet, "OffsetTime", _, _, _, _, _, _, _)     => attr -> {val array = new BsonArray(); (v: BsonValue) => {v.asArray.getValues.forEach(v => array.add(v.asString)); array} }
-          case MetaAttr(attr, CardSet, "OffsetDateTime", _, _, _, _, _, _, _) => attr -> {val array = new BsonArray(); (v: BsonValue) => {v.asArray.getValues.forEach(v => array.add(v.asString)); array} }
-          case MetaAttr(attr, CardSet, "ZonedDateTime", _, _, _, _, _, _, _)  => attr -> {val array = new BsonArray(); (v: BsonValue) => {v.asArray.getValues.forEach(v => array.add(v.asString)); array} }
-          case MetaAttr(attr, CardSet, "UUID", _, _, _, _, _, _, _)           => attr -> {val array = new BsonArray(); (v: BsonValue) => {v.asArray.getValues.forEach(v => array.add(v.asString)); array} }
-          case MetaAttr(attr, CardSet, "URI", _, _, _, _, _, _, _)            => attr -> {val array = new BsonArray(); (v: BsonValue) => {v.asArray.getValues.forEach(v => array.add(v.asString)); array} }
-          case MetaAttr(attr, CardSet, "Byte", _, _, _, _, _, _, _)           => attr -> {val array = new BsonArray(); (v: BsonValue) => {v.asArray.getValues.forEach(v => array.add(v.asInt32)); array} }
-          case MetaAttr(attr, CardSet, "Short", _, _, _, _, _, _, _)          => attr -> {val array = new BsonArray(); (v: BsonValue) => {v.asArray.getValues.forEach(v => array.add(v.asInt32)); array} }
-          case MetaAttr(attr, CardSet, "Char", _, _, _, _, _, _, _)           => attr -> {val array = new BsonArray(); (v: BsonValue) => {v.asArray.getValues.forEach(v => array.add(v.asString)); array} }
-        }.toMap
-      }
+
+          case "update" => ???
+          case "delete" => ???
+        }
+
+      case other => throw ModelError("Action can only be: insert, update or delete. Found: " + other)
     }
+    data
+  }
+
+  private def castInsert(rawRows: BsonArray, metaAttrs: Seq[MetaAttr]): BsonArray = {
+    val casts: Map[String, BsonValue => BsonValue] = metaAttrs.collect {
+      //      case MetaAttr(attr, CardOne, "ID", Some(_), options, _, _, _, _, _) if !options.contains("owner") =>
+      case MetaAttr(attr, CardOne, "ID", Some(_), options, _, _, _, _, _) if options.contains("owner") =>
+        attr -> ((v: BsonValue) => v.asDocument)
+
+      case MetaAttr(attr, CardOne, "ID", _, _, _, _, _, _, _)             => attr -> ((v: BsonValue) => v.asString)
+      case MetaAttr(attr, CardOne, "String", _, _, _, _, _, _, _)         => attr -> ((v: BsonValue) => v.asString)
+      case MetaAttr(attr, CardOne, "Int", _, _, _, _, _, _, _)            => attr -> ((v: BsonValue) => v.asInt32)
+      case MetaAttr(attr, CardOne, "Long", _, _, _, _, _, _, _)           => attr -> ((v: BsonValue) => v match {case v: BsonInt32 => new BsonInt64(v.getValue); case _: BsonInt64 => v})
+      case MetaAttr(attr, CardOne, "Float", _, _, _, _, _, _, _)          => attr -> ((v: BsonValue) => v.asDouble)
+      case MetaAttr(attr, CardOne, "Double", _, _, _, _, _, _, _)         => attr -> ((v: BsonValue) => v.asDouble)
+      case MetaAttr(attr, CardOne, "Boolean", _, _, _, _, _, _, _)        => attr -> ((v: BsonValue) => v.asBoolean)
+      case MetaAttr(attr, CardOne, "BigInt", _, _, _, _, _, _, _)         => attr -> ((v: BsonValue) => new BsonDecimal128(Decimal128.parse(v.asString().getValue)))
+      case MetaAttr(attr, CardOne, "BigDecimal", _, _, _, _, _, _, _)     => attr -> ((v: BsonValue) => new BsonDecimal128(Decimal128.parse(v.asString().getValue)))
+      case MetaAttr(attr, CardOne, "Date", _, _, _, _, _, _, _)           => attr -> ((v: BsonValue) => new BsonDateTime(v.asInt64.getValue))
+      case MetaAttr(attr, CardOne, "Duration", _, _, _, _, _, _, _)       => attr -> ((v: BsonValue) => v.asString)
+      case MetaAttr(attr, CardOne, "Instant", _, _, _, _, _, _, _)        => attr -> ((v: BsonValue) => v.asString)
+      case MetaAttr(attr, CardOne, "LocalDate", _, _, _, _, _, _, _)      => attr -> ((v: BsonValue) => v.asString)
+      case MetaAttr(attr, CardOne, "LocalTime", _, _, _, _, _, _, _)      => attr -> ((v: BsonValue) => v.asString)
+      case MetaAttr(attr, CardOne, "LocalDateTime", _, _, _, _, _, _, _)  => attr -> ((v: BsonValue) => v.asString)
+      case MetaAttr(attr, CardOne, "OffsetTime", _, _, _, _, _, _, _)     => attr -> ((v: BsonValue) => v.asString)
+      case MetaAttr(attr, CardOne, "OffsetDateTime", _, _, _, _, _, _, _) => attr -> ((v: BsonValue) => v.asString)
+      case MetaAttr(attr, CardOne, "ZonedDateTime", _, _, _, _, _, _, _)  => attr -> ((v: BsonValue) => v.asString)
+      case MetaAttr(attr, CardOne, "UUID", _, _, _, _, _, _, _)           => attr -> ((v: BsonValue) => v.asString)
+      case MetaAttr(attr, CardOne, "URI", _, _, _, _, _, _, _)            => attr -> ((v: BsonValue) => v.asString)
+      case MetaAttr(attr, CardOne, "Byte", _, _, _, _, _, _, _)           => attr -> ((v: BsonValue) => v.asInt32)
+      case MetaAttr(attr, CardOne, "Short", _, _, _, _, _, _, _)          => attr -> ((v: BsonValue) => v.asInt32)
+      case MetaAttr(attr, CardOne, "Char", _, _, _, _, _, _, _)           => attr -> ((v: BsonValue) => v.asString)
+
+      case MetaAttr(attr, CardSet, "ID", _, _, _, _, _, _, _)             => attr -> {
+        (v: BsonValue) => {
+          val array = new BsonArray()
+          val vs    = v.asArray.getValues
+          if (!vs.get(0).isDocument) {
+            throw ModelError("Can't add non-existing ids of embedded documents in MongoDB. " +
+              "Please save embedded document together with main document.")
+          }
+          v.asArray.getValues.forEach(v =>
+            array.add(v.asDocument)
+          )
+          array
+        }
+      }
+      case MetaAttr(attr, CardSet, "String", _, _, _, _, _, _, _)         => attr -> {val array = new BsonArray(); (v: BsonValue) => {v.asArray.getValues.forEach(v => array.add(v.asString)); array} }
+      case MetaAttr(attr, CardSet, "Int", _, _, _, _, _, _, _)            => attr -> {val array = new BsonArray(); (v: BsonValue) => {v.asArray.getValues.forEach(v => array.add(v.asInt32)); array} }
+      case MetaAttr(attr, CardSet, "Long", _, _, _, _, _, _, _)           => attr -> {val array = new BsonArray(); (v: BsonValue) => {v.asArray.getValues.forEach(v => array.add(v match { case v: BsonInt32 => new BsonInt64(v.getValue); case _: BsonInt64 => v })); array} }
+      case MetaAttr(attr, CardSet, "Float", _, _, _, _, _, _, _)          => attr -> {val array = new BsonArray(); (v: BsonValue) => {v.asArray.getValues.forEach(v => array.add(v.asDouble)); array} }
+      case MetaAttr(attr, CardSet, "Double", _, _, _, _, _, _, _)         => attr -> {val array = new BsonArray(); (v: BsonValue) => {v.asArray.getValues.forEach(v => array.add(v.asDouble)); array} }
+      case MetaAttr(attr, CardSet, "Boolean", _, _, _, _, _, _, _)        => attr -> {val array = new BsonArray(); (v: BsonValue) => {v.asArray.getValues.forEach(v => array.add(v.asBoolean)); array} }
+      case MetaAttr(attr, CardSet, "BigInt", _, _, _, _, _, _, _)         => attr -> {val array = new BsonArray(); (v: BsonValue) => {v.asArray.getValues.forEach(v => array.add(new BsonDecimal128(Decimal128.parse(v.asString().getValue)))); array} }
+      case MetaAttr(attr, CardSet, "BigDecimal", _, _, _, _, _, _, _)     => attr -> {val array = new BsonArray(); (v: BsonValue) => {v.asArray.getValues.forEach(v => array.add(new BsonDecimal128(Decimal128.parse(v.asString().getValue)))); array} }
+      case MetaAttr(attr, CardSet, "Date", _, _, _, _, _, _, _)           => attr -> {val array = new BsonArray(); (v: BsonValue) => {v.asArray.getValues.forEach(v => array.add(new BsonDateTime(v.asInt64.getValue))); array} }
+      case MetaAttr(attr, CardSet, "Duration", _, _, _, _, _, _, _)       => attr -> {val array = new BsonArray(); (v: BsonValue) => {v.asArray.getValues.forEach(v => array.add(v.asString)); array} }
+      case MetaAttr(attr, CardSet, "Instant", _, _, _, _, _, _, _)        => attr -> {val array = new BsonArray(); (v: BsonValue) => {v.asArray.getValues.forEach(v => array.add(v.asString)); array} }
+      case MetaAttr(attr, CardSet, "LocalDate", _, _, _, _, _, _, _)      => attr -> {val array = new BsonArray(); (v: BsonValue) => {v.asArray.getValues.forEach(v => array.add(v.asString)); array} }
+      case MetaAttr(attr, CardSet, "LocalTime", _, _, _, _, _, _, _)      => attr -> {val array = new BsonArray(); (v: BsonValue) => {v.asArray.getValues.forEach(v => array.add(v.asString)); array} }
+      case MetaAttr(attr, CardSet, "LocalDateTime", _, _, _, _, _, _, _)  => attr -> {val array = new BsonArray(); (v: BsonValue) => {v.asArray.getValues.forEach(v => array.add(v.asString)); array} }
+      case MetaAttr(attr, CardSet, "OffsetTime", _, _, _, _, _, _, _)     => attr -> {val array = new BsonArray(); (v: BsonValue) => {v.asArray.getValues.forEach(v => array.add(v.asString)); array} }
+      case MetaAttr(attr, CardSet, "OffsetDateTime", _, _, _, _, _, _, _) => attr -> {val array = new BsonArray(); (v: BsonValue) => {v.asArray.getValues.forEach(v => array.add(v.asString)); array} }
+      case MetaAttr(attr, CardSet, "ZonedDateTime", _, _, _, _, _, _, _)  => attr -> {val array = new BsonArray(); (v: BsonValue) => {v.asArray.getValues.forEach(v => array.add(v.asString)); array} }
+      case MetaAttr(attr, CardSet, "UUID", _, _, _, _, _, _, _)           => attr -> {val array = new BsonArray(); (v: BsonValue) => {v.asArray.getValues.forEach(v => array.add(v.asString)); array} }
+      case MetaAttr(attr, CardSet, "URI", _, _, _, _, _, _, _)            => attr -> {val array = new BsonArray(); (v: BsonValue) => {v.asArray.getValues.forEach(v => array.add(v.asString)); array} }
+      case MetaAttr(attr, CardSet, "Byte", _, _, _, _, _, _, _)           => attr -> {val array = new BsonArray(); (v: BsonValue) => {v.asArray.getValues.forEach(v => array.add(v.asInt32)); array} }
+      case MetaAttr(attr, CardSet, "Short", _, _, _, _, _, _, _)          => attr -> {val array = new BsonArray(); (v: BsonValue) => {v.asArray.getValues.forEach(v => array.add(v.asInt32)); array} }
+      case MetaAttr(attr, CardSet, "Char", _, _, _, _, _, _, _)           => attr -> {val array = new BsonArray(); (v: BsonValue) => {v.asArray.getValues.forEach(v => array.add(v.asString)); array} }
+    }.toMap
 
     val casted = (field: String, value: BsonValue) => casts.get(field).fold[BsonValue](value)(cast => cast(value))
-    rawRows.forEach { row =>
-      val fields = row.asDocument().entrySet().iterator()
-      val bson   = new BsonDocument()
-      while (fields.hasNext) {
-        val pair           = fields.next
-        val (field, value) = (pair.getKey, pair.getValue)
-        bson.put(field, casted(field, value))
+    val rows   = new BsonArray
+    rawRows.forEach { rawRow =>
+      val doc = new BsonDocument()
+      rawRow.asDocument.forEach { case (k, v) =>
+        doc.append(k, casted(k, v))
       }
-      rows.add(bson)
+      rows.add(doc)
     }
-    (collection, rows)
+    rows
   }
 
 
-  def data2json(data: Data): String = {
-    val (collectionName, documents) = data
-
-    val bson = new BsonDocument()
-    bson.put("collection", new BsonString(collectionName))
-    val array = new BsonArray(documents)
-    bson.put("data", array)
-
-    bson.toJson(pretty)
-  }
+  //  def data2json(data: Data): String = {
+  //    val (collectionName, documents) = data
+  //
+  //    val bson = new BsonDocument()
+  //    bson.put("collection", new BsonString(collectionName))
+  //    val array = new BsonArray(documents)
+  //    bson.put("data", array)
+  //
+  //    bson.toJson(pretty)
+  //  }
 
   def pipeline2json(pipeline: util.ArrayList[Bson], optCol: Option[String] = None): String = {
     val doc = new BsonDocument()
@@ -219,7 +235,8 @@ trait BsonUtils extends DataType_JVM_mongodb {
   def caster(metaNs: Option[MetaNs]): (String, BsonValue) => Any = {
     val casts = metaNs.fold(Map.empty[String, BsonValue => Any]) { metaNs =>
       metaNs.attrs.collect {
-        case MetaAttr(attr, CardOne, "ID", Some(_), _, _, _, _, _, _)       => attr -> ((v: BsonValue) => v.asDocument.toString)
+        //        case MetaAttr(attr, CardOne, "ID", Some(_), options, _, _, _, _, _) if options.contains("owner") =>
+        case MetaAttr(attr, CardOne, "ID", Some(_), _, _, _, _, _, _)       => attr -> ((v: BsonValue) => v.asDocument.toString) // Always embedded output
         case MetaAttr(attr, CardOne, "ID", _, _, _, _, _, _, _)             => attr -> ((v: BsonValue) => castAnyID(v))
         case MetaAttr(attr, CardOne, "String", _, _, _, _, _, _, _)         => attr -> ((v: BsonValue) => castAnyString(v))
         case MetaAttr(attr, CardOne, "Int", _, _, _, _, _, _, _)            => attr -> ((v: BsonValue) => castAnyInt(v))
