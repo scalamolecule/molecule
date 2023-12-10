@@ -1,52 +1,83 @@
 package molecule.document.mongodb.query
 
 import java.util
-import com.mongodb.client.model.Projections
 import molecule.base.ast.Card
 import molecule.base.error._
 import molecule.base.util.BaseHelpers
 import molecule.boilerplate.ast.Model._
 import molecule.core.util.JavaConversions
 import org.bson.conversions.Bson
-import org.bson.{BsonDocument, BsonInt32, BsonString, BsonValue}
+import org.bson.{BsonArray, BsonDocument, BsonInt32, BsonString, BsonValue}
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
 trait MongoQueryBase extends BaseHelpers with JavaConversions {
 
-  type Row = List[Any]
-  type ParamIndex = Int
-  type NestedTpls = List[Any]
 
-  def getRowCount(resultSet: Row): Int = {
-    //    resultSet.last()
-    //    val size = resultSet.getRow
-    //    resultSet.beforeFirst()
-    //    size
-    ???
+  class Branch {
+    var idField = false
+
+    var refPath        = List.empty[String]
+    var pathDot        = ""
+    var pathUnderscore = ""
+
+    private val pathFields     = ListBuffer.empty[String]
+    var uniqueIndex = 0
+
+    val matches        = new util.ArrayList[Bson]
+    val preGroupFields = ListBuffer.empty[(String, String)]
+    val groupIdFields  = ListBuffer.empty[(String, String, String)]
+    val groupExprs     = ListBuffer.empty[(String, BsonValue)]
+
+    // Initiate top level
+    val addFields = mutable.Map.empty[List[String], List[(String, BsonValue)]]
+    addFields(Nil) = Nil
+
+    val refOwnerships = mutable.Map.empty[List[String], Boolean]
+    refOwnerships(Nil) = true
+
+
+    def unique(field: String) = {
+      val uniqueField = if (!pathFields.contains(pathDot + field)) {
+        field
+      } else {
+        // append suffix to distinguish multiple uses of the same field
+        uniqueIndex += 1
+        field + "_" + uniqueIndex
+      }
+      pathFields += pathDot + uniqueField
+      uniqueField
+    }
+    def embedded = refOwnerships(refPath)
+
+    def groupExpr(uniqueField: String, bson: BsonValue): Unit = {
+      groupExprs += ((pathUnderscore + uniqueField, bson))
+    }
+    def groupSets(uniqueField: String, field: String): Unit = {
+      //    println("--- groupSets --- " + field)
+      groupExpr(uniqueField,
+        new BsonDocument().append("$addToSet", new BsonString(field))
+      )
+    }
+    def addField(field: String, value: BsonValue): Unit = {
+      addFields(refPath) = addFields.getOrElse(refPath, Nil) :+ field -> value
+    }
   }
 
-  var idField = false
+  var b        = new Branch
+  val branches = ListBuffer.empty[(List[String], Branch)]
+  branches += Nil -> b // top level
 
-  final protected var refPath        = List.empty[String]
-  final protected var pathDot        = ""
-  final protected var pathUnderscore = ""
-  final protected val pathFields     = ListBuffer.empty[String]
+  var lookups = ListBuffer.empty[(List[String], BsonDocument)]
+//  lookups += Nil -> new BsonDocument()
 
-  final protected val matches          = new util.ArrayList[Bson]
-  final protected val preGroupFields   = ListBuffer.empty[(String, String)]
-  final protected val groupIdFields    = ListBuffer.empty[(String, String, String)]
-  final protected val groupExprs       = ListBuffer.empty[(String, BsonValue)]
+  var topRefPath        = List.empty[String]
 
-  // Initiate top level
-  final protected val addFields        = mutable.Map.empty[List[String], List[(String, BsonValue)]]
-  addFields(Nil) = Nil
-
-  final protected var projections      = new util.ArrayList[Bson]
-  final protected var levelProjections = List(List(projections))
+  //  final protected var projections  = new util.ArrayList[Bson]
+  final protected val projections = mutable.Map.empty[List[String], BsonDocument]
+  projections(Nil) = new BsonDocument()
 
   var sampleSize  = 0
-  var fieldIndex  = 0
   var uniqueIndex = 0
 
   val limit = new util.ArrayList[Bson]
@@ -54,21 +85,26 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
 
   var casts = ListBuffer( // nested levels
     ListBuffer( // nss
-      (ListBuffer.empty[String], ListBuffer.empty[(String, BsonDocument => Any)]) // ns path -> (attribute, cast)
+      (
+        ListBuffer.empty[String], // ref attr path
+        ListBuffer.empty[(String, Boolean, BsonDocument => Any)] // (field, embedded, cast)
+      )
     )
   )
 
-  protected def groupExpr(uniqueField: String, bson: BsonValue): Unit = {
-    groupExprs += ((pathUnderscore + uniqueField, bson))
+  def projectField(field: String): Unit = {
+    //    projections.add(Projections.include(pathDot + field))
+    //    println("  --- refPath     : " + refPath)
+    //    println("  --- projections2: " + projections2.toList.sortBy(_._1.length))
+    projections(topRefPath) = projections(topRefPath).append(field, new BsonInt32(1))
+    //    println("  --- projections2: " + projections2.toList.sortBy(_._1.length))
   }
-  protected def groupSets(uniqueField: String, field: String): Unit = {
-    println("--- " + field)
-    groupExpr(uniqueField,
-      new BsonDocument().append("$addToSet", new BsonString(field))
-    )
-  }
-  protected def addField(field: String, value: BsonValue): Unit = {
-    addFields(refPath) = addFields.getOrElse(refPath, Nil) :+ field -> value
+  def removeField(pathField: String): Unit = {
+    //    projections.remove(Projections.include(pathField))
+    //    val x = projections2(refPath)
+    //    x.remove(pathField)
+    //    projections2(refPath) = x
+    projections(topRefPath) = projections(topRefPath).remove(pathField).asInstanceOf[BsonDocument]
   }
 
   protected def aggrFn(fn: String, input: BsonValue, n: Int): BsonDocument = {
@@ -79,33 +115,14 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
     )
   }
 
-  def unique(field: String) = {
-    val uniqueField = if (!pathFields.contains(pathDot + field)) {
-      field
-    } else {
-      // append suffix to distinguish multiple uses of the same field
-      uniqueIndex += 1
-      field + "_" + uniqueIndex
-    }
-    pathFields += pathDot + uniqueField
-    uniqueField
-  }
-
-  final protected def projectField(field: String): Unit = {
-    projections.add(Projections.include(pathDot + field))
-  }
-  final protected def removeField(pathField: String): Unit = {
-    projections.remove(Projections.include(pathField))
-  }
-
   def immutableCastss = casts.map(
     _.toList.map {
       case (path, casts) => (path.toList, casts.toList)
     }
   ).toList
 
-  final protected def addCast(field: String, cast: BsonDocument => Any): Unit = {
-    casts.last.last._2 += (field -> cast)
+  final protected def addCast(field: String, embedded: Boolean, cast: BsonDocument => Any): Unit = {
+    casts.last.last._2 += ((field, embedded, cast))
   }
 
   final protected def removeLastCast(): Unit = {
@@ -113,15 +130,15 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
     last.remove(last.size - 1)
   }
 
-  final protected def replaceCast(field: String, cast: BsonDocument => Any): Unit = {
+  final protected def replaceCast(field: String, embedded: Boolean, cast: BsonDocument => Any): Unit = {
     removeLastCast()
-    addCast(field, cast)
+    addCast(field, embedded, cast)
   }
 
   // Used to lookup original type of aggregate attributes
   final protected var attrMap = Map.empty[String, (Card, String, Seq[String])]
 
-  final protected var orderBy     = new ListBuffer[(Int, Int, String, String)]
+  //  final protected var orderBy     = new ListBuffer[(Int, Int, String, String)]
   final protected var hardLimit   = 0
   //
   //  // Input args and cast lambdas
@@ -145,4 +162,12 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
   final protected def noMixedNestedModes = throw ModelError(
     "Can't mix mandatory/optional nested queries."
   )
+
+  //  def getRowCount(resultSet: Row): Int = {
+  //    //    resultSet.last()
+  //    //    val size = resultSet.getRow
+  //    //    resultSet.beforeFirst()
+  //    //    size
+  //    ???
+  //  }
 }

@@ -97,9 +97,11 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
 
   private def man[T](attr: Attr, args: Seq[Set[T]], resSet: ResSet[T]): Unit = {
     val field       = attr.attr
-    val uniqueField = unique(field)
-    projections.add(Projections.include(pathDot + field))
-    addCast(field, resSet.castSet(field))
+    val uniqueField = b.unique(field)
+//    projections.add(Projections.include(b.pathDot + field))
+//    b.projectField(field)
+    projectField(field)
+    addCast(field, b.embedded, resSet.castSet(field))
 
     attr.filterAttr.fold {
       if (filterAttrVars.contains(attr.name) && attr.op != V) {
@@ -133,8 +135,8 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
     //    notNull += field
 
     val field       = attr.attr
-    val uniqueField = unique(field)
-    matches.add(Filters.exists(field))
+    val uniqueField = b.unique(field)
+    b.matches.add(Filters.exists(field))
     attr.filterAttr.fold {
       expr(uniqueField, field, attr.op, args, res)
     } {
@@ -146,8 +148,10 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
 
   private def opt[T](attr: Attr, optSets: Option[Seq[Set[T]]], res: ResSet[T]): Unit = {
     val field = attr.attr
-    projections.add(Projections.include(field))
-    addCast(field, res.castOptSet(field))
+//    projections.add(Projections.include(field))
+//    b.projectField(field)
+    projectField(field)
+    addCast(field, b.embedded, res.castOptSet(field))
     attr.op match {
       case V     => ()
       case Eq    => optEqual(field, optSets, res)
@@ -192,14 +196,14 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
 
 
   protected def attr[T](uniqueField: String, field: String, res: ResSet[T]): Unit = {
-    matches.add(Filters.ne(pathDot + field, null.asInstanceOf[T]))
-    //    groupExprs += ((pathUnderscore + uniqueField,
-    //      new BsonDocument().append("$addToSet", new BsonString("$" + pathDot + field))))
-    groupExpr(uniqueField, new BsonDocument().append("$addToSet", new BsonString("$" + pathDot + field)))
+    b.matches.add(Filters.ne(b.pathDot + field, null.asInstanceOf[T]))
+    //    groupExprs += ((b.pathUnderscore + uniqueField,
+    //      new BsonDocument().append("$addToSet", new BsonString("$" + b.pathDot + field))))
+    b.groupExpr(uniqueField, new BsonDocument().append("$addToSet", new BsonString("$" + b.pathDot + field)))
 
     //    val reduce = new BsonDocument().append("$reduce",
     //      new BsonDocument()
-    //        .append("input", new BsonString("$" + pathDot + field))
+    //        .append("input", new BsonString("$" + b.pathDot + field))
     //        .append("initialValue", new BsonArray())
     //        .append("in", new BsonDocument()
     //          .append("$setUnion", {
@@ -210,7 +214,8 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
     //          })
     //        )
     //    )
-    addFields(refPath) = addFields.getOrElse(refPath, Nil) :+ uniqueField -> reduce("$" + pathUnderscore + field)
+    b.addFields(b.refPath) = b.addFields.getOrElse(b.refPath, Nil) :+
+      uniqueField -> reduce("$" + b.pathUnderscore + field)
   }
 
 
@@ -225,9 +230,9 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
     def filter(set: Set[T]): Bson = filterSet(field, set, res)
     val sets = sets0.filterNot(_.isEmpty)
     sets.length match {
-      case 0 => matches.add(Filters.eq("_id", -1))
-      case 1 => matches.add(filter(sets.head))
-      case _ => matches.add(Filters.or(sets.map(filter).asJava))
+      case 0 =>  b.matches.add(Filters.eq("_id", -1))
+      case 1 =>  b.matches.add(filter(sets.head))
+      case _ =>  b.matches.add(Filters.or(sets.map(filter).asJava))
     }
   }
 
@@ -238,7 +243,7 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
   private def optEqual[T](field: String, optSets: Option[Seq[Set[T]]], res: ResSet[T]): Unit = {
     optSets.fold[Unit] {
       //      where += ((field, s"IS NULL"))
-      matches.add(Filters.eq(field, null.asInstanceOf[T]))
+       b.matches.add(Filters.eq(field, null.asInstanceOf[T]))
     } { sets =>
       equal(field, sets, res)
     }
@@ -249,8 +254,8 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
     val sets = sets0.filterNot(_.isEmpty)
     sets.length match {
       case 0 => ()
-      case 1 => matches.add(Filters.nor(filter(sets.head)))
-      case _ => matches.add(Filters.nor(Filters.or(sets.map(filter).asJava)))
+      case 1 =>  b.matches.add(Filters.nor(filter(sets.head)))
+      case _ =>  b.matches.add(Filters.nor(Filters.or(sets.map(filter).asJava)))
     }
   }
 
@@ -262,22 +267,22 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
     if (optSets.isDefined && optSets.get.nonEmpty) {
       neq(field, optSets.get, res)
     }
-    matches.add(Filters.ne(field, null.asInstanceOf[T]))
+     b.matches.add(Filters.ne(field, null.asInstanceOf[T]))
   }
 
   private def has[T](field: String, sets0: Seq[Set[T]], res: ResSet[T]): Unit = {
     def containsSet(set: Set[T]): Bson = Filters.all(field, set.map(v => res.v2bson(v)).asJava)
     val sets = sets0.filterNot(_.isEmpty)
     sets.length match {
-      case 0 => matches.add(Filters.eq("_id", -1))
+      case 0 =>  b.matches.add(Filters.eq("_id", -1))
       case 1 =>
         val set = sets.head
         if (set.nonEmpty)
-          matches.add(containsSet(set))
+           b.matches.add(containsSet(set))
         else
-          matches.add(Filters.eq("_id", -1))
+           b.matches.add(Filters.eq("_id", -1))
 
-      case _ => matches.add(Filters.or(sets.map(set => containsSet(set)).asJava))
+      case _ =>  b.matches.add(Filters.or(sets.map(set => containsSet(set)).asJava))
     }
   }
 
@@ -296,7 +301,7 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
     res: ResSet[T]
   ): Unit = {
     optSets.fold[Unit] {
-      matches.add(Filters.eq(field, null.asInstanceOf[T]))
+       b.matches.add(Filters.eq(field, null.asInstanceOf[T]))
     } { sets =>
       has(field, sets, res)
     }
@@ -309,9 +314,9 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
       case 1 =>
         val set = sets.head
         if (set.nonEmpty)
-          matches.add(notContainsSet(set))
+           b.matches.add(notContainsSet(set))
 
-      case _ => matches.add(Filters.and(sets.map(set => notContainsSet(set)).asJava))
+      case _ =>  b.matches.add(Filters.and(sets.map(set => notContainsSet(set)).asJava))
     }
   }
 
@@ -334,7 +339,7 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
         hasNo(field, sets, res)
       }
     }
-    matches.add(Filters.ne(field, null.asInstanceOf[T]))
+     b.matches.add(Filters.ne(field, null.asInstanceOf[T]))
   }
 
   private def noValue(field: String): Unit = {
@@ -346,7 +351,7 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
   private def reduce(field: String): BsonDocument = {
     new BsonDocument().append("$reduce",
       new BsonDocument()
-        //        .append("input", new BsonString("$" + pathDot + field))
+        //        .append("input", new BsonString("$" + b.pathDot + field))
         .append("input", new BsonString(field))
         .append("initialValue", new BsonArray())
         .append("in", new BsonDocument()
@@ -363,39 +368,39 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
 
   private def aggr[T](uniqueField: String, field: String, fn: String, optN: Option[Int], res: ResSet[T]): Unit = {
     lazy val n        = optN.getOrElse(0)
-    lazy val dotField = "$" + pathDot + field
-    lazy val usField  = "$" + pathUnderscore + field
+    lazy val dotField = "$" + b.pathDot + field
+    lazy val usField  = "$" + b.pathUnderscore + field
 
 
     fn match {
       case "distinct" =>
         noBooleanSetAggr(res)
-        matches.add(Filters.ne(pathDot + field, null.asInstanceOf[T]))
-        groupSets(uniqueField, dotField)
-        if (refPath.nonEmpty) {
-          addField(uniqueField, new BsonString(usField))
+         b.matches.add(Filters.ne(b.pathDot + field, null.asInstanceOf[T]))
+        b.groupSets(uniqueField, dotField)
+        if (b.refPath.nonEmpty) {
+          b.addField(uniqueField, new BsonString(usField))
         }
-        replaceCast(uniqueField, res.castSetSet(uniqueField))
+        replaceCast(uniqueField, b.embedded, res.castSetSet(uniqueField))
 
       case "min" =>
         noBooleanSetAggr(res)
-        groupSets(uniqueField, dotField)
-        addField(uniqueField, aggrFn("$minN", reduce(usField), 1))
+        b.groupSets(uniqueField, dotField)
+        b.addField(uniqueField, aggrFn("$minN", reduce(usField), 1))
 
       case "mins" =>
         noBooleanSetAggr(res)
-        groupSets(uniqueField, dotField)
-        addField(uniqueField, aggrFn("$minN", reduce(usField), n))
+        b.groupSets(uniqueField, dotField)
+        b.addField(uniqueField, aggrFn("$minN", reduce(usField), n))
 
       case "max" =>
         noBooleanSetAggr(res)
-        groupSets(uniqueField, dotField)
-        addField(uniqueField, aggrFn("$maxN", reduce(usField), 1))
+        b.groupSets(uniqueField, dotField)
+        b.addField(uniqueField, aggrFn("$maxN", reduce(usField), 1))
 
       case "maxs" =>
         noBooleanSetAggr(res)
-        groupSets(uniqueField, dotField)
-        addField(uniqueField, aggrFn("$maxN", reduce(usField), n))
+        b.groupSets(uniqueField, dotField)
+        b.addField(uniqueField, aggrFn("$maxN", reduce(usField), n))
 
       case "sample" =>
         noBooleanSetAggr(res)
@@ -407,53 +412,58 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
 
       case "count" =>
         noBooleanSetCounts(n)
-        groupExpr(uniqueField,
+        b.groupExpr(uniqueField,
           new BsonDocument().append("$sum",
             new BsonDocument().append("$size", new BsonString(dotField)))
         )
-        if (refPath.nonEmpty)
-          addField(uniqueField, new BsonString(usField))
-        replaceCast(uniqueField, castInt(uniqueField))
+        if (b.refPath.nonEmpty)
+          b.addField(uniqueField, new BsonString(usField))
+        replaceCast(uniqueField, b.embedded, castInt(uniqueField))
 
       case "countDistinct" =>
         noBooleanSetCounts(n)
-        groupSets(uniqueField, dotField)
-        addField(uniqueField, new BsonDocument().append("$size", reduce(usField)))
-        replaceCast(uniqueField, castInt(uniqueField))
+        b.groupSets(uniqueField, dotField)
+        b.addField(uniqueField, new BsonDocument().append("$size", reduce(usField)))
+        replaceCast(uniqueField, b.embedded, castInt(uniqueField))
 
       case "sum" =>
-        groupSets(uniqueField, dotField)
-        addField(uniqueField, new BsonDocument().append("$sum", reduce(usField)))
-        replaceCast(uniqueField, res.v2set(uniqueField))
+        b.groupSets(uniqueField, dotField)
+        b.addField(uniqueField, new BsonDocument().append("$sum", reduce(usField)))
+        replaceCast(uniqueField, b.embedded, res.v2set(uniqueField))
 
       case "median" =>
-        groupSets(uniqueField, dotField)
-        addField(uniqueField, new BsonDocument().append("$median",
+        b.groupSets(uniqueField, dotField)
+        b.addField(uniqueField, new BsonDocument().append("$median",
           new BsonDocument()
             .append("input", reduce(usField))
             .append("method", new BsonString("approximate"))
         ))
-        replaceCast(uniqueField, hardCastDouble(uniqueField))
+        replaceCast(uniqueField, b.embedded, hardCastDouble(uniqueField))
 
       case "avg" =>
-        groupSets(uniqueField, dotField)
-        addField(uniqueField, new BsonDocument().append("$avg", reduce(usField)))
-        replaceCast(uniqueField, hardCastDouble(uniqueField))
+        b.groupSets(uniqueField, dotField)
+        b.addField(uniqueField, new BsonDocument().append("$avg", reduce(usField)))
+        replaceCast(uniqueField, b.embedded, hardCastDouble(uniqueField))
 
       case "variance" =>
-        groupSets(uniqueField, dotField)
-        addField(uniqueField, new BsonDocument().append("$stdDevPop", reduce(usField)))
-        removeField(pathDot + field)
+        b.groupSets(uniqueField, dotField)
+        b.addField(uniqueField, new BsonDocument().append("$stdDevPop", reduce(usField)))
+//        b.removeField(b.pathDot + field)
+        removeField(b.pathDot + field)
         val pow = new BsonArray()
         pow.add(new BsonString(dotField))
         pow.add(new BsonInt32(2))
-        projections.add(new BsonDocument().append(pathDot + field, new BsonDocument().append("$pow", pow)))
-        replaceCast(uniqueField, hardCastDouble(uniqueField))
+//        projections.add(new BsonDocument().append(b.pathDot + field, new BsonDocument().append("$pow", pow)))
+//
+//        projections2(refPath) = projections2(refPath).append(field, new BsonInt32(1))
+//        projectField(field)
+
+        replaceCast(uniqueField, b.embedded, hardCastDouble(uniqueField))
 
       case "stddev" =>
-        groupSets(uniqueField, dotField)
-        addField(uniqueField, new BsonDocument().append("$stdDevPop", reduce(usField)))
-        replaceCast(uniqueField, hardCastDouble(uniqueField))
+        b.groupSets(uniqueField, dotField)
+        b.addField(uniqueField, new BsonDocument().append("$stdDevPop", reduce(usField)))
+        replaceCast(uniqueField, b.embedded, hardCastDouble(uniqueField))
 
       case other => unexpectedKw(other)
     }

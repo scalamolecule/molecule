@@ -235,9 +235,20 @@ trait BsonUtils extends DataType_JVM_mongodb {
   def caster(metaNs: Option[MetaNs]): (String, BsonValue) => Any = {
     val casts = metaNs.fold(Map.empty[String, BsonValue => Any]) { metaNs =>
       metaNs.attrs.collect {
-        //        case MetaAttr(attr, CardOne, "ID", Some(_), options, _, _, _, _, _) if options.contains("owner") =>
-        case MetaAttr(attr, CardOne, "ID", Some(_), _, _, _, _, _, _)       => attr -> ((v: BsonValue) => v.asDocument.toString) // Always embedded output
-        case MetaAttr(attr, CardOne, "ID", _, _, _, _, _, _, _)             => attr -> ((v: BsonValue) => castAnyID(v))
+        case MetaAttr(attr, CardOne, "ID", refNs, options, _, _, _, _, _)   =>
+          if (refNs.isDefined) {
+            if (options.contains("owner")) {
+              // Referenced document
+              attr -> ((v: BsonValue) => v.asDocument.toString)
+            } else {
+              // Embedded output
+              attr -> ((v: BsonValue) => v.asArray().toString)
+            }
+            //            // Always embedded output
+            //            attr -> ((v: BsonValue) => v.asDocument.toString)
+          } else {
+            attr -> ((v: BsonValue) => castAnyID(v))
+          }
         case MetaAttr(attr, CardOne, "String", _, _, _, _, _, _, _)         => attr -> ((v: BsonValue) => castAnyString(v))
         case MetaAttr(attr, CardOne, "Int", _, _, _, _, _, _, _)            => attr -> ((v: BsonValue) => castAnyInt(v))
         case MetaAttr(attr, CardOne, "Long", _, _, _, _, _, _, _)           => attr -> ((v: BsonValue) => castAnyLong(v))

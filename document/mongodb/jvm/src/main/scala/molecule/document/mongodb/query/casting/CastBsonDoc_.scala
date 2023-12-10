@@ -9,7 +9,7 @@ import scala.collection.mutable.ListBuffer
 
 trait CastBsonDoc_ {
 
-  private type NsCasts = (List[String], List[(String, BsonDocument => Any)])
+  private type NsCasts = (List[String], List[(String, Boolean, BsonDocument => Any)])
   private type NssCasts = List[NsCasts]
   private type Casts = List[NssCasts]
 
@@ -24,44 +24,46 @@ trait CastBsonDoc_ {
   ): List[BsonDocument => Any] = {
     levelCasts match {
       case (_ :: Nil, casts) :: refs if isNested =>
-        castLevel(acc ++ casts.map(_._2), refs, nestedCasts, isNested)
+        castLevel(acc ++ casts.map(_._3), refs, nestedCasts, isNested)
 
       case (Nil, casts) :: refs =>
-        castLevel(acc ++ casts.map(_._2), refs, nestedCasts, isNested)
+        castLevel(acc ++ casts.map(_._3), refs, nestedCasts, isNested)
 
       case (path, casts) :: refs if nestedCasts.isEmpty =>
-        val curPath = if(isNested) path.tail else path
+        val curPath = if (isNested) path.tail else path
         castLevel(acc ++ castRefNs(curPath, casts), refs, nestedCasts, isNested)
 
       case Nil if nestedCasts.nonEmpty =>
         curLevelDocs.clear()
         acc :+ nestedCast(nestedCasts)
 
-      case Nil => acc
+      case _ => acc
     }
   }
 
   private def castRefNs(
     path: List[String],
-    casts: List[(String, BsonDocument => Any)]
+    casts: List[(String, Boolean, BsonDocument => Any)]
   ): List[BsonDocument => Any] = {
-    casts.map { case (attr, cast) =>
+    casts.map { case (refAttr, embedded, cast) =>
       (outerDoc: BsonDocument) => {
-//        println("Outer doc: " + outerDoc)
+        //        println("Outer doc: " + outerDoc)
         // Maybe this could be done in a smarter way with recursion only..
         val doc = curLevelDocs.getOrElse(path,
           path.foldLeft(outerDoc) {
             case (acc, ns) =>
-//              println(s"------ $ns ")
-
-              acc.get(ns).asDocument()
+              println(s"------ $ns  $refAttr  $embedded")
+              if (embedded) {
+                acc.get(ns).asDocument()
+              } else {
+                acc.get(ns).asArray().iterator().next.asDocument()
+              }
+            //                acc.get(ns).asArray().iterator().next.asDocument()
           }
         )
-
-//        println("DOC: " + doc)
+        //        println("DOC: " + doc)
         curLevelDocs(path) = doc
         cast(doc)
-//        cast(outerDoc)
       }
     }
   }
@@ -71,8 +73,8 @@ trait CastBsonDoc_ {
     val innerCasts = documentCaster(nested, true)
     (doc: BsonDocument) => {
       val inner = ListBuffer.empty[Any]
-//      println("---- " + refAttr)
-//      println(doc)
+      //      println("---- " + refAttr)
+      //      println(doc)
 
       doc.get(refAttr).asArray().forEach(nestedRow =>
         inner += innerCasts(

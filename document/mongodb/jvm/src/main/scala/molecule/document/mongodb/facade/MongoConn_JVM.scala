@@ -33,9 +33,9 @@ case class MongoConn_JVM(
   }
 
   override def transact_sync(data: Data): TxReport = {
-    println("TRANSACT ----------------------------------------")
-    println(data.toJson(pretty))
-    println("")
+//    println("TRANSACT ----------------------------------------")
+//    println(data.toJson(pretty))
+//    println("")
     data.get("action").asString.getValue match {
       case "insert" => data.size match {
         case 2 => insertEmbedded(data)
@@ -77,7 +77,7 @@ case class MongoConn_JVM(
         data.forEach {
           case ("action", _)             => // do nothing
           case (collectionName, rawRows) =>
-            println(".... " + collectionName)
+//            println(".... " + collectionName)
             val documents    = rawRows.asArray.getValues.asInstanceOf[util.List[BsonDocument]]
             val collection   = db.getCollection(collectionName, classOf[BsonDocument])
             val insertResult = collection.insertMany(clientSession, documents)

@@ -41,8 +41,11 @@ trait ResolveExprOneID extends ResolveExpr with LambdasOne { self: MongoQueryBas
 
   private def man(attr: Attr, args: Seq[String], res: ResOne[String]): Unit = {
     val field = attr.attr
-    projections.add(Projections.include(field))
-    addCast(field, res.cast(field))
+//    projections.add(Projections.include(field))
+//    b.projectField(field)
+    projectField(field)
+
+    addCast(field, b.embedded, res.cast(field))
     addSort(attr, field)
 
     attr.filterAttr.fold(
@@ -82,21 +85,21 @@ trait ResolveExprOneID extends ResolveExpr with LambdasOne { self: MongoQueryBas
 
 
   private def expr[T](field0: String, op: Op, args: Seq[T], res: ResOne[T]): Unit = {
-    val field = pathDot + field0
+    val field = b.pathDot + field0
     op match {
-      case V          => matches.add(Filters.ne(field, null))
-      case Eq         => matches.add(equal(field, args, res))
-      case Neq        => matches.add(neq(field, args, res))
-      case Lt         => matches.add(res.lt(field, args.head))
-      case Gt         => matches.add(res.gt(field, args.head))
-      case Le         => matches.add(res.le(field, args.head))
-      case Ge         => matches.add(res.ge(field, args.head))
-      case NoValue    => matches.add(noValue(field))
+      case V          => b.matches.add(Filters.ne(field, null))
+      case Eq         => b.matches.add(equal(field, args, res))
+      case Neq        => b.matches.add(neq(field, args, res))
+      case Lt         => b.matches.add(res.lt(field, args.head))
+      case Gt         => b.matches.add(res.gt(field, args.head))
+      case Le         => b.matches.add(res.le(field, args.head))
+      case Ge         => b.matches.add(res.ge(field, args.head))
+      case NoValue    => b.matches.add(noValue(field))
       case Fn(kw, n)  => aggr(field, kw, n, res)
-      case StartsWith => matches.add(startsWith(field, args.head))
-      case EndsWith   => matches.add(endsWith(field, args.head))
-      case Contains   => matches.add(contains(field, args.head))
-      case Matches    => matches.add(matches(field, args.head.toString))
+      case StartsWith => b.matches.add(startsWith(field, args.head))
+      case EndsWith   => b.matches.add(endsWith(field, args.head))
+      case Contains   => b.matches.add(contains(field, args.head))
+      case Matches    => b.matches.add(regExMatch(field, args.head.toString))
       case Remainder  => remainder(field, args)
       case Even       => even(field)
       case Odd        => odd(field)
@@ -182,7 +185,7 @@ trait ResolveExprOneID extends ResolveExpr with LambdasOne { self: MongoQueryBas
   private def startsWith[T](field: String, arg: T): Bson = Filters.regex(field, s"^$arg.*")
   private def endsWith[T](field: String, arg: T): Bson = Filters.regex(field, s".*$arg$$")
   private def contains[T](field: String, arg: T): Bson = Filters.regex(field, s".*$arg.*")
-  private def matches(field: String, regex: String): Bson = {
+  private def regExMatch(field: String, regex: String): Bson = {
     if (regex.nonEmpty) {
       Filters.regex(field, regex)
     } else {
@@ -193,15 +196,15 @@ trait ResolveExprOneID extends ResolveExpr with LambdasOne { self: MongoQueryBas
 
   private def remainder[T](field: String, args: Seq[T]): Unit = {
     val Seq(divisor, remainder) = args.map(_.toString.toInt)
-    matches.add(Filters.mod(field, divisor, remainder))
+    b.matches.add(Filters.mod(field, divisor, remainder))
   }
 
   private def even(field: String): Unit = {
-    matches.add(Filters.mod(field, 2, 0))
+    b.matches.add(Filters.mod(field, 2, 0))
   }
 
   private def odd(field: String): Unit = {
-    matches.add(Filters.mod(field, 2, 1))
+    b.matches.add(Filters.mod(field, 2, 1))
   }
 
   private def aggr[T](field: String, fn: String, optN: Option[Int], res: ResOne[T]): Unit = {
@@ -320,23 +323,23 @@ trait ResolveExprOneID extends ResolveExpr with LambdasOne { self: MongoQueryBas
     //      }
   }
 
-  private def selectWithOrder(
-    field: String,
-    fn: String,
-    distinct: String = "DISTINCT ",
-    cast: String = ""
-  ): Unit = {
-    if (orderBy.nonEmpty && orderBy.last._3 == field) {
-      // order by aggregate alias instead
-      val alias = field.replace('.', '_') + "_" + fn.toLowerCase
-//      select += s"$fn($distinct$field$cast) $alias"
-      val (level, _, _, dir) = orderBy.last
-      orderBy.remove(orderBy.size - 1)
-      orderBy += ((level, 1, alias, dir))
-    } else {
-//      select += s"$fn($distinct$field$cast)"
-    }
-  }
+//  private def selectWithOrder(
+//    field: String,
+//    fn: String,
+//    distinct: String = "DISTINCT ",
+//    cast: String = ""
+//  ): Unit = {
+//    if (orderBy.nonEmpty && orderBy.last._3 == field) {
+//      // order by aggregate alias instead
+//      val alias = field.replace('.', '_') + "_" + fn.toLowerCase
+////      select += s"$fn($distinct$field$cast) $alias"
+//      val (level, _, _, dir) = orderBy.last
+//      orderBy.remove(orderBy.size - 1)
+//      orderBy += ((level, 1, alias, dir))
+//    } else {
+////      select += s"$fn($distinct$field$cast)"
+//    }
+//  }
 
 
 }

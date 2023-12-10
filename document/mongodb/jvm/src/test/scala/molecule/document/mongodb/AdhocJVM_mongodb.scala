@@ -41,7 +41,24 @@ object AdhocJVM_mongodb extends TestSuite_mongodb {
         //            |  ]
         //            |}
         //            |""".stripMargin)
-
+        //        _ <- rawQuery(
+        //          """{
+        //            |  "collection": "A",
+        //            |  "pipeline": [
+        //            |    {
+        //            |      "$match": {
+        //            |        "$and": [
+        //            |          {
+        //            |            "i": {
+        //            |              "$ne": null
+        //            |            }
+        //            |          }
+        //            |        ]
+        //            |      }
+        //            |    },
+        //            |  ]
+        //            |}
+        //            |""".stripMargin, false)//.map(println)
 
       } yield ()
     }
@@ -50,119 +67,28 @@ object AdhocJVM_mongodb extends TestSuite_mongodb {
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
-//        _ <- A.i(1).OwnB.i(2).save.transact.map(_.ids)
-//        _ <- A.i.OwnB.i.query.i.get.map(_.head ==> (1, 2))
+        //                _ <- A.i(1).OwnB.i(2).save.transact.map(_.ids)
+        //        _ <- A.i.OwnB.i.query.i.get.map(_.head ==> (1, 2))
 
-        ids1 <- A.i(1).B.i(2).save.transact.map(_.ids)
-        //        _ <- A.i.B.i.query.i.get.map(_.head ==> (1, 2))
-        //        _ = println(ids1)
 
-        //        _ <- rawTransact(
-        //          """{
-        //            |  "action": "insert",
-        //            |  "A": [
-        //            |    {
-        //            |      "i": 1,
-        //            |      "b": {
-        //            |        "i": 2
-        //            |      }
-        //            |    }
-        //            |  ]
-        //            |}
-        //            |""".stripMargin)
+        //        ids1 <- A.i(1).B.i(2).Cc.i(3).query.i.get
 
-        //        _ <- rawTransact(
-        //          """{
-        //            |  "action": "insert",
-        //            |  "A": [
-        //            |    {
-        //            |      "i": 1,
-        //            |      "b": "42"
-        //            |    }
-        //            |  ],
-        //            |  "B": [
-        //            |    {
-        //            |      "_id": "42"
-        //            |      "i": 2
-        //            |    }
-        //            |  ]
-        //            |}
-        //            |""".stripMargin)
-        //
+//        _ <- A.i(1).B.i(2).C.i(3).D.i(4).save.transact
+//        _ <- A.i.B.i.C.i.D.i.query.i.get.map(_ ==> List((1, 2, 3, 4)))
+//
+        _ <- A.i(1).OwnB.i(2)._A.OwnC.i(3).save.i.transact
+        _ <- A.i.OwnB.i._A.OwnC.i.query.i.get.map(_ ==> List((1, 2, 3)))
+
+//        _ <- A.i(1).B.i(2)._A.C.i(3).save.transact
+//        _ <- A.i.B.i._A.C.i.query.i.get.map(_ ==> List((1, 2, 3)))
+
+
+        //        _ <- A.i.B.i.C.i.query.i.get.map(_ ==> List((1, 2, 3)))
+
+
         //        //        _ <- A.i.OwnB.i.query.get.map(_.head ==> (1, 2))
         //
         //
-        _ <- rawQuery(
-          """{
-            |  "collection": "A",
-            |  "pipeline": [
-            |    {
-            |      "$lookup": {
-            |        "from": "B",
-            |        "localField": "b",
-            |        "foreignField": "_id",
-            |        "pipeline": [
-            |          {
-            |            "$project": {
-            |              "_id": 0,
-            |              "i": 1
-            |            }
-            |          }
-            |        ],
-            |        "as": "b"
-            |      }
-            |    },
-            |    {
-            |      "$addFields": {
-            |        "b": {
-            |          $arrayElemAt: [
-            |            "$b",
-            |            0
-            |          ]
-            |        }
-            |      }
-            |    },
-            |    {
-            |      "$project": {
-            |        "_id": 0,
-            |        "i": 1,
-            |        "b": 1
-            |      }
-            |    }
-            |  ]
-            |}
-            |""".stripMargin, true).map(println)
-        _ <- rawQuery(
-          """{
-            |  "collection": "A",
-            |  "pipeline": [
-            |    {
-            |      "$lookup": {
-            |        "from": "B",
-            |        "localField": "b",
-            |        "foreignField": "_id",
-            |        "pipeline": [
-            |          {
-            |            "$project": {
-            |              "_id": 0,
-            |              "i": 1
-            |            }
-            |          }
-            |        ],
-            |        "as": "b"
-            |      }
-            |    },
-            |    {
-            |      "$project": {
-            |        "_id": 0,
-            |        "i": 1,
-            |        "b": 1
-            |      }
-            |    }
-            |  ]
-            |}
-            |""".stripMargin, true).map(println)
-
 
         //        ids2 <- A.i(1).B.i(2).save.i.transact.map(_.ids)
         //        //        _ = println(ids2)

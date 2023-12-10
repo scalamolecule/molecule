@@ -25,8 +25,8 @@ trait Save_mongodb
     //
     val data = new BsonDocument().append("action", new BsonString("insert"))
     refDocs.foreach { case (nsPath, documents) =>
-      println("---- " + nsPath)
-      println(documents)
+//      println("---- " + nsPath)
+//      println(documents)
       val ns        = nsPath.last
       val rowsArray = new BsonArray()
       // Add array of rows with single row for this save action
@@ -86,7 +86,6 @@ trait Save_mongodb
     card: Card,
     owner: Boolean
   ): Unit = {
-    // MongoDB has 2 relationship models
     if (owner) {
       // embedded
       // Add embedded document
@@ -100,7 +99,6 @@ trait Save_mongodb
       // referenced
       // Add id of referenced document
       val refId = new BsonString(new ObjectId().toHexString)
-      //      val refId = new BsonString("42")
       doc.append(refAttr, refId)
       // Set id in referenced document
       val refDoc = new BsonDocument()
@@ -113,14 +111,19 @@ trait Save_mongodb
   }
 
   override protected def addBackRef(backRefNs: String): Unit = {
+//    if (owner) {
+//      // embedded
+//      } else {
+//
+//    }
     // Step back to previous namespace
     doc = docs.last.init.last
     docs = docs.init :+ docs.last.init
 
     // todo: correct?
-    val prevRefPath = refDocs.last._1.drop(2)
-    val prevNs      = refDocs.toMap.apply(prevRefPath)
-    refDocs = refDocs.init :+ (prevRefPath -> prevNs)
+//    val prevRefPath = refDocs.last._1.drop(2)
+//    val prevNs      = refDocs.toMap.apply(prevRefPath)
+//    refDocs = refDocs.init :+ (prevRefPath -> prevNs)
   }
 
   override protected def handleRefNs(refNs: String): Unit = ()
