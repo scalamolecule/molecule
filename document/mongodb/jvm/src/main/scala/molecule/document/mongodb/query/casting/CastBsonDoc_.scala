@@ -52,12 +52,16 @@ trait CastBsonDoc_ {
         val doc = curLevelDocs.getOrElse(path,
           path.foldLeft(outerDoc) {
             case (acc, ns) =>
-              println(s"------ $ns  $refAttr  $embedded")
-              if (embedded) {
+              val value = acc.get(ns)
+//              println(s"------ $ns  $refAttr  $embedded")
+//              println(s"   --- ${acc.get(ns)}")
+//              if (embedded) {
+//              if (value.isDocument) {
+//                acc.get(ns).asDocument()
+//              } else {
+//                acc.get(ns).asArray().iterator().next.asDocument()
+//              }
                 acc.get(ns).asDocument()
-              } else {
-                acc.get(ns).asArray().iterator().next.asDocument()
-              }
             //                acc.get(ns).asArray().iterator().next.asDocument()
           }
         )

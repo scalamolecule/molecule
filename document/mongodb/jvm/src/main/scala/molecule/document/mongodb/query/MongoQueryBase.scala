@@ -7,21 +7,21 @@ import molecule.base.util.BaseHelpers
 import molecule.boilerplate.ast.Model._
 import molecule.core.util.JavaConversions
 import org.bson.conversions.Bson
-import org.bson.{BsonArray, BsonDocument, BsonInt32, BsonString, BsonValue}
+import org.bson.{BsonDocument, BsonInt32, BsonString, BsonValue}
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
 trait MongoQueryBase extends BaseHelpers with JavaConversions {
 
-
-  class Branch {
+  class DocData {
     var idField = false
 
-    var refPath        = List.empty[String]
+    var path           = List.empty[String]
+    var prevPathDot    = ""
     var pathDot        = ""
     var pathUnderscore = ""
 
-    private val pathFields     = ListBuffer.empty[String]
+    private val pathFields = ListBuffer.empty[String]
     var uniqueIndex = 0
 
     val matches        = new util.ArrayList[Bson]
@@ -29,13 +29,11 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
     val groupIdFields  = ListBuffer.empty[(String, String, String)]
     val groupExprs     = ListBuffer.empty[(String, BsonValue)]
 
-    // Initiate top level
     val addFields = mutable.Map.empty[List[String], List[(String, BsonValue)]]
     addFields(Nil) = Nil
 
     val refOwnerships = mutable.Map.empty[List[String], Boolean]
     refOwnerships(Nil) = true
-
 
     def unique(field: String) = {
       val uniqueField = if (!pathFields.contains(pathDot + field)) {
@@ -48,7 +46,7 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
       pathFields += pathDot + uniqueField
       uniqueField
     }
-    def embedded = refOwnerships(refPath)
+    def embedded = refOwnerships(path)
 
     def groupExpr(uniqueField: String, bson: BsonValue): Unit = {
       groupExprs += ((pathUnderscore + uniqueField, bson))
@@ -60,30 +58,25 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
       )
     }
     def addField(field: String, value: BsonValue): Unit = {
-      addFields(refPath) = addFields.getOrElse(refPath, Nil) :+ field -> value
+      addFields(path) = addFields.getOrElse(path, Nil) :+ field -> value
     }
   }
 
-  var b        = new Branch
-  val branches = ListBuffer.empty[(List[String], Branch)]
-  branches += Nil -> b // top level
+  final protected var doc  = new DocData
+  final protected val docs = ListBuffer.empty[(List[String], DocData)]
+  docs += Nil -> doc // top document
 
-  var lookups = ListBuffer.empty[(List[String], BsonDocument)]
-//  lookups += Nil -> new BsonDocument()
-
-  var topRefPath        = List.empty[String]
-
-  //  final protected var projections  = new util.ArrayList[Bson]
+  final protected var topPath     = List.empty[String]
   final protected val projections = mutable.Map.empty[List[String], BsonDocument]
   projections(Nil) = new BsonDocument()
 
-  var sampleSize  = 0
-  var uniqueIndex = 0
+  final protected var sampleSize  = 0
+  final protected var uniqueIndex = 0
 
-  val limit = new util.ArrayList[Bson]
-  val sorts = new util.ArrayList[Bson]
+  final protected val limit = new util.ArrayList[Bson]
+  final protected val sorts = new util.ArrayList[Bson]
 
-  var casts = ListBuffer( // nested levels
+  final protected var casts = ListBuffer( // nested levels
     ListBuffer( // nss
       (
         ListBuffer.empty[String], // ref attr path
@@ -93,18 +86,10 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
   )
 
   def projectField(field: String): Unit = {
-    //    projections.add(Projections.include(pathDot + field))
-    //    println("  --- refPath     : " + refPath)
-    //    println("  --- projections2: " + projections2.toList.sortBy(_._1.length))
-    projections(topRefPath) = projections(topRefPath).append(field, new BsonInt32(1))
-    //    println("  --- projections2: " + projections2.toList.sortBy(_._1.length))
+    projections(topPath) = projections(topPath).append(field, new BsonInt32(1))
   }
   def removeField(pathField: String): Unit = {
-    //    projections.remove(Projections.include(pathField))
-    //    val x = projections2(refPath)
-    //    x.remove(pathField)
-    //    projections2(refPath) = x
-    projections(topRefPath) = projections(topRefPath).remove(pathField).asInstanceOf[BsonDocument]
+    projections(topPath) = projections(topPath).remove(pathField).asInstanceOf[BsonDocument]
   }
 
   protected def aggrFn(fn: String, input: BsonValue, n: Int): BsonDocument = {

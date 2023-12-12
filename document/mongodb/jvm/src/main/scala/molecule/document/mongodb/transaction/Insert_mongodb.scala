@@ -9,6 +9,8 @@ import molecule.core.transaction.ops.InsertOps
 import molecule.core.transaction.{InsertResolvers_, ResolveInsert}
 import molecule.core.util.ModelUtils
 import org.bson._
+import org.bson.types.ObjectId
+import scala.collection.mutable
 
 trait Insert_mongodb
   extends Base_JVM_mongodb
@@ -27,19 +29,32 @@ trait Insert_mongodb
   }
 
   def getData(nsMap: Map[String, MetaNs], elements: List[Element], tpls: Seq[Product]): Data = {
-    val tpl2bson   = getResolver(nsMap, elements)
-    val insertDocs = new util.ArrayList[BsonDocument]()
+    initialNs = getInitialNs(elements)
+    var first    = true
+    val tpl2bson = getResolver(nsMap, elements)
+    val data     = new BsonDocument().append("action", new BsonString("insert"))
     tpls.foreach { tpl =>
-      // Build new Bson doc from each entity tuple
       doc = new BsonDocument()
       docs = List(List(doc))
+      val rows = new BsonArray()
+      rows.add(doc)
+      nsDocs.clear()
+      nsDocs(initialNs) = rows
+
+      // Convert tpl to bson
       tpl2bson(tpl)
-      val topDoc = docs.head.head
-      debug(topDoc, "result")
-      insertDocs.add(topDoc)
+
+      nsDocs.foreach { case (ns, rows) =>
+        println(ns)
+        if (first && !data.containsKey(ns)) {
+          data.append(ns, new BsonArray())
+        }
+        println(rows)
+        data.get(ns).asArray().addAll(rows)
+      }
+      first = false
     }
-    (getInitialNs(elements), insertDocs)
-    ???
+    data
   }
 
   override protected def addOne[T](
@@ -136,16 +151,31 @@ trait Insert_mongodb
     card: Card,
     owner: Boolean
   ): Product => Unit = {
-    (_: Product) => {
-      val refDoc = new BsonDocument()
-      // Make relationship
-      doc.append(refAttr, refDoc)
-      // Step into related namespace
-      docs = docs.init :+ (docs.last :+ refDoc)
-      // Work on in new namespace
-      debug(doc, "add ref")
-      doc = refDoc
-      debug(refDoc, "ref")
+    if (owner) {
+      (_: Product) => {
+        // Embed document
+        val embeddedDoc = new BsonDocument()
+        doc.append(refAttr, embeddedDoc)
+        // Step into embedded document
+        docs = docs.init :+ (docs.last :+ embeddedDoc)
+        doc = embeddedDoc
+      }
+    } else {
+      (_: Product) => {
+        // Reference document
+        val refId = new BsonString(new ObjectId().toHexString)
+        doc.append(refAttr, refId)
+        // Set id in referenced document
+        val refDoc = new BsonDocument()
+        refDoc.append("_id", refId)
+        // Step into referenced document
+        docs = docs.init :+ (docs.last :+ refDoc)
+        doc = refDoc
+
+        val rows = nsDocs.getOrElse(refNs, new BsonArray())
+        rows.add(doc)
+        nsDocs(refNs) = rows
+      }
     }
   }
 
@@ -165,22 +195,6 @@ trait Insert_mongodb
     owner: Boolean,
     nestedElements: List[Element]
   ): Product => Unit = {
-    //    val joinTable  = ss(ns, refAttr, refNs)
-    //    val (id1, id2) = if (ns == refNs)
-    //      (ss(ns, "1_id"), ss(refNs, "2_id"))
-    //    else
-    //      (ss(ns, "id"), ss(refNs, "id"))
-    //    val nextLevel  = level + 1
-    //    val joinPath   = curRefPath :+ joinTable
-    //    val leftPath   = curRefPath
-    //    val rightPath  = List(s"$nextLevel", refNs)
-    //    joins = joins :+ (joinPath, id1, id2, leftPath, rightPath)
-    //    rightCountsMap(joinPath) = List.empty[Int]
-    //
-    //    // Initiate new level
-    //    level = nextLevel
-    //    curRefPath = List(s"$level", refNs)
-    //    colSettersMap += curRefPath -> Nil
     // Recursively resolve nested data
     val resolveNested = getResolver(nsMap, nestedElements)
 
@@ -204,7 +218,6 @@ trait Insert_mongodb
         doc = new BsonDocument()
         docs = docs.init :+ List(doc)
         resolveNested(nestedTpl)
-        //        debug(doc, "tplB")
         nestedArray.add(docs.last.head.clone())
       }
       debug("", "------------------------------------------------")

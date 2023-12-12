@@ -50,6 +50,7 @@ trait FlatRefs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- A.i.B.i._A.s.query.get.map(_ ==> List((0, 1, "a")))
         _ <- A.i.B.i._A.Bb.i.query.get.map(_ ==> List((0, 1, 11)))
         _ <- A.i.B.i.C.i._B.s.query.get.map(_ ==> List((0, 1, 2, "b")))
+        _ <- A.i.B.C.i.query.get.map(_ ==> List((0, 2)))
         _ <- A.i.B.C.i._B.i.query.get.map(_ ==> List((0, 2, 1)))
         _ <- A.i.B.i.C.i._B.Cc.i.query.get.map(_ ==> List((0, 1, 2, 22)))
         _ <- A.i.B.C.i._B.Cc.i.query.get.map(_ ==> List((0, 2, 22)))

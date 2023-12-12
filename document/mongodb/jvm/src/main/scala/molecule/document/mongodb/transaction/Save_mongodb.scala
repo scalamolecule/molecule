@@ -15,27 +15,18 @@ trait Save_mongodb
     with SaveOps
     with MoleculeLogging { self: ResolveSave =>
 
-
   def getData(elements: List[Element]): Data = {
     initialNs = getInitialNs(elements)
-    refDocs = refDocs :+ (List(initialNs), List(List(doc)))
+    val rows = new BsonArray()
+    rows.add(doc)
+    nsDocs(initialNs) = rows
     resolve(elements)
-
-
-    //
     val data = new BsonDocument().append("action", new BsonString("insert"))
-    refDocs.foreach { case (nsPath, documents) =>
-//      println("---- " + nsPath)
-//      println(documents)
-      val ns        = nsPath.last
-      val rowsArray = new BsonArray()
-      // Add array of rows with single row for this save action
-      rowsArray.add(documents.head.head)
-      data.append(ns, rowsArray)
+    nsDocs.foreach { case (ns, rows) =>
+      data.append(ns, rows)
     }
     data
   }
-
 
   override protected def addOne[T](
     ns: String,
@@ -78,7 +69,6 @@ trait Save_mongodb
     }
   }
 
-
   override protected def addRef(
     ns: String,
     refAttr: String,
@@ -87,8 +77,7 @@ trait Save_mongodb
     owner: Boolean
   ): Unit = {
     if (owner) {
-      // embedded
-      // Add embedded document
+      // Embed document
       val embeddedDoc = new BsonDocument()
       doc.append(refAttr, embeddedDoc)
       // Step into embedded document
@@ -96,36 +85,28 @@ trait Save_mongodb
       doc = embeddedDoc
 
     } else {
-      // referenced
-      // Add id of referenced document
+      // Reference document
       val refId = new BsonString(new ObjectId().toHexString)
       doc.append(refAttr, refId)
       // Set id in referenced document
       val refDoc = new BsonDocument()
       refDoc.append("_id", refId)
+
       // Step into referenced document
       docs = docs.init :+ (docs.last :+ refDoc)
       doc = refDoc
-      refDocs = refDocs :+ ((refDocs.last._1 ++ List(refAttr, refNs)) -> List(List(doc)))
+
+      val rows = nsDocs.getOrElse(refNs, new BsonArray())
+      rows.add(doc)
+      nsDocs(refNs) = rows
     }
   }
 
   override protected def addBackRef(backRefNs: String): Unit = {
-//    if (owner) {
-//      // embedded
-//      } else {
-//
-//    }
     // Step back to previous namespace
     doc = docs.last.init.last
     docs = docs.init :+ docs.last.init
-
-    // todo: correct?
-//    val prevRefPath = refDocs.last._1.drop(2)
-//    val prevNs      = refDocs.toMap.apply(prevRefPath)
-//    refDocs = refDocs.init :+ (prevRefPath -> prevNs)
   }
 
   override protected def handleRefNs(refNs: String): Unit = ()
-
 }

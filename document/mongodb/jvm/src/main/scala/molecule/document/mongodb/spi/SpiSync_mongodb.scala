@@ -128,7 +128,6 @@ trait SpiSync_mongodb
     val errors = save_validate(save)
     if (errors.isEmpty) {
       val txReport = conn.transact_sync(save_getData(save))
-      //      val txReport = conn.saveData_sync(save_getData(save, conn))
       conn.callback(save.elements)
       txReport
     } else {
@@ -163,7 +162,6 @@ trait SpiSync_mongodb
     val errors = insert_validate(insert0) // validate original elements against meta model
     if (errors.isEmpty) {
       val txReport = conn.transact_sync(insert_getData(insert, conn))
-      //      val txReport = conn.insertData_sync(insert_getData(insert, conn))
       conn.callback(insert.elements)
       txReport
     } else {
@@ -297,9 +295,6 @@ trait SpiSync_mongodb
     }
   }
 
-  // Implement for each sql database
-  //  def delete_getData(conn: MongoConn_JVM, delete: Delete): Data = {
-  //  def delete_getData(conn: MongoConn_JVM, delete: Delete): (String, util.List[BsonDocument]) = {
   private def delete_getFilter(conn: MongoConn_JVM, delete: Delete): Option[Bson] = {
     new ResolveDelete with Delete_mongodb().getFilter(delete.elements, conn.proxy.nsMap)
   }

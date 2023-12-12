@@ -3,7 +3,6 @@ package molecule.document.mongodb.query
 import java.util
 import com.mongodb.MongoClientSettings
 import com.mongodb.client.model._
-import molecule.base.ast._
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
@@ -30,7 +29,10 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
     with BsonUtils
     with MoleculeLogging {
 
-  private val topBranch = branches.head._2
+  private val topDoc = docs.head._2
+
+  private var lookups = List.empty[(List[String], BsonDocument, String)]
+
 
   final def getBsonQuery(
     altElements: List[Element],
@@ -49,68 +51,67 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
     // Recursively resolve molecule elements
     resolve(elements2)
 
+    //    casts.foreach {
+    //      case x =>
+    //        println("  1  ----------------")
+    //        x.foreach {
+    //          case (refPath, y) =>
+    //            println(s"    $refPath")
+    //            y.foreach{
+    //              case (a, b, c) => println(s"      $a  $b")
+    //            }
+    //
+    //        }
+    //    }
 
     val topStages = new util.ArrayList[Bson]()
     def addStage(name: String, params: Bson): Boolean = {
       // Add codec for MQL expressions
-      val doc = params.toBsonDocument(classOf[Bson], MongoClientSettings.getDefaultCodecRegistry)
-      topStages.add(new BsonDocument().append(name, doc))
-    }
-
-    if (sampleSize > 0) {
       topStages.add(
-        new BsonDocument().append("$sample",
-          new BsonDocument().append("size", new BsonInt32(sampleSize)))
+        new BsonDocument().append(name,
+          params.toBsonDocument(classOf[Bson], MongoClientSettings.getDefaultCodecRegistry)
+        )
       )
     }
 
-    //    println("..............")
-    //    branches.foreach { case (rp, b) => println(rp) }
-    //
-    //    val branches2 = List(
-    //      branches.head,
-    //      branches(1),
-    //      (List("c", "C"), branches(2)._2)
-    //    )
+    if (sampleSize > 0) {
+      topStages.add(new BsonDocument().append("$sample",
+        new BsonDocument().append("size", new BsonInt32(sampleSize)))
+      )
+    }
 
-    branches.toList.sortBy(-_._1.length).foreach {
-      case (Nil, b) =>
-        println(s"B -------------------- List()  ${b.refPath}")
-        topStages.addAll(getStages(Nil, b))
+    docs.toList.sortBy(-_._1.length).foreach {
+      case (Nil, doc1) =>
+//        println(s"B -------------------- ${doc1.path}  List()   '${doc1.pathDot}'")
+        topStages.addAll(getStages(Nil, doc1))
 
-      case (refPath, b) =>
-        println(s"A -------------------- $refPath  ${b.refPath}")
-        val List(refAttr, refNs) = refPath.takeRight(2)
+      case (path, doc1) =>
+//        println(s"A -------------------- ${doc1.path}  $path   '${doc1.pathDot}'")
+        val List(refAttr, refNs) = path.takeRight(2)
+        val pathRefAttr          = doc1.prevPathDot + refAttr
         val lookup               = new BsonDocument()
           .append("from", new BsonString(refNs))
-          .append("localField", new BsonString(refAttr))
+          .append("localField", new BsonString(pathRefAttr))
           .append("foreignField", new BsonString("_id"))
-          .append("as", new BsonString(refAttr))
+          .append("as", new BsonString(pathRefAttr))
 
         val pipeline = new BsonArray()
-        getStages(refPath, b).forEach(stage => pipeline.add(stage))
+        getStages(path, doc1).forEach(stage => pipeline.add(stage))
         lookup.append("pipeline", pipeline)
-        lookups += (refPath -> new BsonDocument().append("$lookup", lookup))
+        lookups = lookups :+ ((path, new BsonDocument().append("$lookup", lookup), pathRefAttr))
     }
 
     // Select which fields to output
-    if (!topBranch.idField) {
-      //      projections.add(0, Projections.excludeId())
+    if (!topDoc.idField) {
       projections(Nil) = projections(Nil).append("_id", new BsonInt32(0))
     }
 
     if (projections.nonEmpty) {
-      //      println("#####################")
-      //      println(projections2(Nil).toJson(pretty))
-      //      println("#####################")
-      //      addStage("$project", Projections.fields(projections))
-      //      addStage("$project", projections2(Nil))
-      topStages.add(new BsonDocument().append("$project", projections(Nil)))
+      addStage("$project", projections(Nil))
     }
 
     if (!sorts.isEmpty) {
       addStage("$sort", Sorts.orderBy(sorts))
-      //      pipeline.add(new BsonDocument().append("$sort", sorts))
     }
 
     (getInitialNonGenericNs(elements2), topStages)
@@ -118,36 +119,45 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
 
 
   //  private def getStages(b: Branch, lookups: List[BsonDocument]): util.ArrayList[BsonDocument] = {
-  private def getStages(parentRefPath: List[String], b: Branch): util.ArrayList[BsonDocument] = {
+  private def getStages(parentPath: List[String], stageDoc: DocData): util.ArrayList[BsonDocument] = {
     val stages = new util.ArrayList[BsonDocument]()
     def addStage(name: String, params: Bson): Boolean = {
       // Add codec for MQL expressions
-      val doc = params.toBsonDocument(classOf[Bson], MongoClientSettings.getDefaultCodecRegistry)
-      stages.add(new BsonDocument().append(name, doc))
+      stages.add(
+        new BsonDocument().append(name,
+          params.toBsonDocument(classOf[Bson], MongoClientSettings.getDefaultCodecRegistry)
+        )
+      )
     }
 
-    b.matches.size() match {
+    stageDoc.matches.size() match {
       case 0 => // do nothing
-      case 1 => addStage("$match", b.matches.iterator.next.toBsonDocument)
-      case _ => addStage("$match", Filters.and(b.matches))
+      case 1 => addStage("$match", stageDoc.matches.iterator.next.toBsonDocument)
+      case _ => addStage("$match", Filters.and(stageDoc.matches))
     }
 
-    println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% " + lookups.length)
-    lookups.collect {
-      case (refPath, lookup) =>
-        val topLevelLookup = refPath.length == 2
-        val isChildBranch  = parentRefPath.nonEmpty &&
-          (parentRefPath.length + 2) == refPath.length &&
-          refPath.startsWith(parentRefPath)
+    lookups.foreach { case l@(path, lookup, pathRefAttr) =>
+      val topLevelRef = path.length == 2
+      val childRef    = parentPath.nonEmpty &&
+        (parentPath.length + 2) == path.length &&
+        path.startsWith(parentPath)
+      lazy val disconnectedRef = path.length - parentPath.length > 2
 
-        if (topLevelLookup || isChildBranch) {
-          println(s"  REF  $parentRefPath  $refPath")
-          println(s"  - $lookup")
-          stages.add(lookup)
-        } else {
-          println(s"  XXX  $parentRefPath  $refPath")
-          println(s"  - $lookup")
-        }
+      if ((topLevelRef || childRef || disconnectedRef) && path.startsWith(parentPath)) {
+//        println(s"  REF   ${lookups.length}  $parentPath  $path            " + path.startsWith(parentPath))
+//        println(s"  - $lookup")
+        stages.add(lookup)
+        // Forget once added
+        lookups = lookups.filterNot(_ == l)
+
+        stages.add(new BsonDocument().append("$addFields",
+          new BsonDocument().append(pathRefAttr,
+            new BsonDocument().append("$first", new BsonString("$" + pathRefAttr)))))
+
+      } else {
+//        println(s"  XXX   ${lookups.length}  $parentPath  $path")
+//        println(s"  - $lookup")
+      }
     }
 
     //    println(" 0 " + preGroupFields)
@@ -156,12 +166,12 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
     //    println(" 3 " + addFields.toList.sortBy(-_._1.length))
 
     // Pre-group
-    val prefix = if (b.preGroupFields.nonEmpty) {
+    val prefix = if (stageDoc.preGroupFields.nonEmpty) {
       val preGroupFieldsDoc = new BsonDocument()
-      b.groupIdFields.foreach { case (pathAlias, pathDot, field) =>
+      stageDoc.groupIdFields.foreach { case (pathAlias, pathDot, field) =>
         preGroupFieldsDoc.put(pathAlias + field, new BsonString("$" + pathDot + field))
       }
-      b.preGroupFields.foreach { case (fieldAlias, pathField) =>
+      stageDoc.preGroupFields.foreach { case (fieldAlias, pathField) =>
         preGroupFieldsDoc.put(fieldAlias, new BsonString("$" + pathField))
       }
       stages.add(new BsonDocument().append("$group", new BsonDocument().append("_id", preGroupFieldsDoc)))
@@ -169,16 +179,16 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
     } else "$"
 
     // Main group
-    if (b.groupExprs.nonEmpty) {
+    if (stageDoc.groupExprs.nonEmpty) {
       val groupIdFieldsDoc = new BsonDocument()
-      b.groupIdFields.foreach { case (pathAlias, pathDot, field) =>
-        val ctx = if (b.preGroupFields.isEmpty) pathDot else pathAlias
+      stageDoc.groupIdFields.foreach { case (pathAlias, pathDot, field) =>
+        val ctx = if (stageDoc.preGroupFields.isEmpty) pathDot else pathAlias
         groupIdFieldsDoc.put(pathAlias + field, new BsonString(prefix + ctx + field))
       }
       val groupDoc = new BsonDocument()
       groupDoc.append("_id", groupIdFieldsDoc)
 
-      b.groupExprs.foreach { case (field, bson) =>
+      stageDoc.groupExprs.foreach { case (field, bson) =>
         groupDoc.put(field, bson)
       }
       stages.add(new BsonDocument().append("$group", groupDoc))
@@ -186,12 +196,12 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
 
       // $addFields - "format" fields to expected structure
       val addFieldsDoc = new BsonDocument()
-      b.groupIdFields.collect { case ("", "", field) =>
+      stageDoc.groupIdFields.collect { case ("", "", field) =>
         addFieldsDoc.put(field, new BsonString("$_id." + field))
       }
 
-      if (b.addFields.nonEmpty) {
-        val refFields = b.addFields.toList.sortBy(-_._1.length)
+      if (stageDoc.addFields.nonEmpty) {
+        val refFields = stageDoc.addFields.toList.sortBy(-_._1.length)
 
         // Add fields of initial namespace
         refFields.last._2.foreach { case (field, value) =>
@@ -199,7 +209,7 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
         }
 
         // Add ref fields from leaves to branches
-        if (b.addFields.size != 1) {
+        if (stageDoc.addFields.size != 1) {
           val branches = mutable.Map.empty[List[String], List[(String, BsonDocument)]]
           branches(Nil) = Nil
           refFields.init.foreach { case (refPath, fields) =>
@@ -580,7 +590,7 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
           throw ModelError(noIdFiltering)
         }
         if (a.attr == "id") {
-          b.idField = true
+          doc.idField = true
           a match {
             case a: AttrOneMan => resolveAttrOneManID(a); resolve(tail)
             case a: AttrOneTac => resolveAttrOneTacID(a); resolve(tail)

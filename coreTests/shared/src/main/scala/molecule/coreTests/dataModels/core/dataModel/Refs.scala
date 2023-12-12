@@ -56,6 +56,9 @@ object Refs extends DataModel(10) {
     val a  = one[A]
     val d  = one[D]
     val dd = many[D]
+
+    val ownD  = one[D].owner
+    val ownDd = many[D].owner
   }
 
 

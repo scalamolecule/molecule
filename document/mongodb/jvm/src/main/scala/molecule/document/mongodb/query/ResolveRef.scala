@@ -4,7 +4,7 @@ import com.mongodb.client.model.Filters
 import molecule.base.ast._
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
-import org.bson.{BsonArray, BsonDocument, BsonInt32, BsonString}
+import org.bson.{BsonArray, BsonDocument, BsonNull}
 import scala.collection.mutable.ListBuffer
 
 
@@ -18,47 +18,32 @@ trait ResolveRef { self: MongoQueryBase =>
       )
     }
 
+    doc.matches.add(Filters.ne(doc.pathDot + refAttr, new BsonNull))
+
     if (owner) {
-      b.refPath = b.refPath ++ List(refAttr, refNs)
-      b.pathDot = b.pathDot + refAttr + "."
-      b.pathUnderscore = b.pathUnderscore + refAttr + "_"
-      b.addFields(b.refPath) = Nil
+      doc.path = doc.path ++ List(refAttr, refNs)
+      doc.pathDot = doc.pathDot + refAttr + "."
+      doc.pathUnderscore = doc.pathUnderscore + refAttr + "_"
+      doc.addFields(doc.path) = Nil
+
     } else {
-      //      // Referenced entities aggregate in a clean new branch
-      //      val prevPath = if (branches.isEmpty) Nil else branches.last._1
-      //
-      //      println("Q  " + prevPath)
-      //      println("   " + topRefPath)
-      //
-      //      val newPath  = prevPath ++ List(refAttr, refNs)
-      //      val branchMap = branches.toMap
-      //      b = branchMap.getOrElse(newPath, {
-      //        val newBranch = new Branch
-      //        branches += (prevPath ++ List(refAttr, refNs)) -> newBranch
-      //        newBranch
-      //      })
-
-
-      val branchMap = branches.toMap
-      val newPath   = topRefPath ++ List(refAttr, refNs)
-      b = branchMap.getOrElse(newPath, {
-        val newBranch = new Branch
-        branches += newPath -> newBranch
-        newBranch
-      })
+      // Referenced entities aggregate in a clean new branch
+      val prevPathDot = doc.pathDot
+      val newPath     = topPath ++ List(refAttr, refNs)
+      val newDoc      = new DocData
+      docs += newPath -> newDoc
+      doc = newDoc
+      doc.prevPathDot = prevPathDot
     }
 
     // Know if we get arrays (ref) or documents (embedded)
-    b.refOwnerships(b.refPath) = owner
+    doc.refOwnerships(doc.path) = owner
 
     val refDoc = new BsonDocument()
-    projections(topRefPath) = projections(topRefPath).append(refAttr, refDoc)
+    projections(topPath) = projections(topPath).append(refAttr, refDoc)
 
-    topRefPath = topRefPath ++ List(refAttr, refNs)
-    projections(topRefPath) = refDoc
-    //    topRefPath = topRefPath :+ refAttr
-
-    //    println("  -1- projections2: " + projections2.toList.sortBy(_._1.length))
+    topPath = topPath ++ List(refAttr, refNs)
+    projections(topPath) = refDoc
 
     // Continue from ref namespace
     val nss     = casts.last
@@ -70,52 +55,6 @@ trait ResolveRef { self: MongoQueryBase =>
     //    printCasts("REF " + refAttr)
   }
 
-  //  protected def resolveRefOLD(ref: Ref): Unit = {
-  //    val Ref(_, refAttr, refNs, card, owner, _) = ref
-  //    if (isNestedOpt && card == CardSet) {
-  //      throw ModelError(
-  //        "Only cardinality-one refs allowed in optional nested queries. Found: " + ref
-  //      )
-  //    }
-  //
-  //    if (!owner) {
-  //      val lookup = new BsonDocument()
-  //        .append("from", new BsonString(refNs))
-  //        .append("localField", new BsonString(refAttr))
-  //        .append("foreignField", new BsonString("_id"))
-  //        .append("as", new BsonString(refAttr))
-  //
-  //      if (refPath.isEmpty) {
-  //        lookups(List(refAttr)) = lookup
-  //      } else {
-  //        val parentLookup = lookups(refPath)
-  //        val pipeline     = new BsonArray()
-  //        pipeline.add(new BsonDocument().append("$lookup", lookup))
-  //        parentLookup.append("pipeline", pipeline)
-  //        lookups(refPath :+ refAttr) = lookup
-  //      }
-  //
-  //      val refDoc = new BsonDocument()
-  //      projections2(refPath) = projections2(refPath).append(refAttr, refDoc)
-  //      projections2(refPath :+ refAttr) = refDoc
-  //      //    println("  -1- projections2: " + projections2.toList.sortBy(_._1.length))
-  //    }
-  //
-  //    refPath = refPath :+ refAttr
-  //    pathDot = pathDot + refAttr + "."
-  //    pathUnderscore = pathUnderscore + refAttr + "_"
-  //    addFields(refPath) = Nil
-  //    refOwnerships(refPath) = owner
-  //
-  //    // Continue from ref namespace
-  //    val nss     = casts.last
-  //    val curPath = nss.last
-  //    nss += ((
-  //      ListBuffer.empty[String].addAll(curPath._1.toList :+ refAttr),
-  //      ListBuffer.empty[(String, Boolean, BsonDocument => Any)]
-  //    ))
-  //    //    printCasts("REF " + refAttr)
-  //  }
 
   final protected def resolveBackRef(bRef: BackRef, prev: Element): Unit = {
     if (isNested || isNestedOpt) {
@@ -131,21 +70,22 @@ trait ResolveRef { self: MongoQueryBase =>
     }
 
     // Back to previous namespace
-
-    b.refPath = b.refPath.dropRight(2)
-    b.pathDot = {
-      val nss = b.pathDot.init.split('.').init
+    doc.path = doc.path.dropRight(2)
+    doc.pathDot = {
+      val nss = doc.pathDot.init.split('.').init
       if (nss.isEmpty) "" else nss.mkString(".") + "."
     }
-    b.pathUnderscore = {
-      val nss = b.pathUnderscore.init.split('_').init
+    doc.pathUnderscore = {
+      val nss = doc.pathUnderscore.init.split('_').init
       if (nss.isEmpty) "" else nss.mkString("_") + "_"
     }
 
-    // go back to previous ref branch if it exists
-    branches.toMap.get(b.refPath).foreach(branch => b = branch)
+    topPath = topPath.dropRight(2)
 
-    topRefPath = topRefPath.drop(2)
+    // go back to previous doc if it exists
+    docs.toMap.get(topPath).foreach { doc1 =>
+      doc = doc1
+    }
 
     val nss     = casts.last
     val curPath = nss.last
@@ -166,13 +106,13 @@ trait ResolveRef { self: MongoQueryBase =>
     val Ref(_, refAttr, _, _, _, _) = ref
 
     // No empty nested arrays when asking for mandatory nested data
-    b.matches.add(Filters.ne(refAttr, new BsonArray()))
+    doc.matches.add(Filters.ne(refAttr, new BsonArray()))
 
-    b.refPath = b.refPath :+ refAttr
-    b.pathDot = b.pathDot + refAttr + "."
-    b.pathUnderscore = b.pathUnderscore + refAttr + "_"
+    doc.path = doc.path :+ refAttr
+    doc.pathDot = doc.pathDot + refAttr + "."
+    doc.pathUnderscore = doc.pathUnderscore + refAttr + "_"
 
-    b.addFields(b.refPath) = Nil
+    doc.addFields(doc.path) = Nil
 
     // Initiate nested namespace
     casts += ListBuffer((
@@ -194,11 +134,11 @@ trait ResolveRef { self: MongoQueryBase =>
     validateRefNs(ref, nestedElements)
     val Ref(_, refAttr, _, _, _, _) = ref
 
-    b.refPath = b.refPath :+ refAttr
-    b.pathDot = b.pathDot + refAttr + "."
-    b.pathUnderscore = b.pathUnderscore + refAttr + "_"
+    doc.path = doc.path :+ refAttr
+    doc.pathDot = doc.pathDot + refAttr + "."
+    doc.pathUnderscore = doc.pathUnderscore + refAttr + "_"
 
-    b.addFields(b.refPath) = Nil
+    doc.addFields(doc.path) = Nil
 
     // Initiate (optional) nested namespace
     casts += ListBuffer(
