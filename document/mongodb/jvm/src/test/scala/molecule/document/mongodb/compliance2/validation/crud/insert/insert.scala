@@ -1,13 +1,13 @@
 package molecule.document.mongodb.compliance2.validation.crud.insert
 
 import molecule.coreTests.spi.validation.insert._
-import molecule.document.mongodb.setup.TestAsync_mongodb
+import molecule.document.mongodb.setup.TestAsync_mongodb2
 
-object FormatConstants  extends FormatConstants with TestAsync_mongodb
-object FormatVariables extends FormatVariables with TestAsync_mongodb
-object Nested extends Nested with TestAsync_mongodb
-object Semantics extends Semantics with TestAsync_mongodb
-object TypesOne extends TypesOne with TestAsync_mongodb
-object TypesOneOpt extends TypesOneOpt with TestAsync_mongodb
-object TypesSet extends TypesSet with TestAsync_mongodb
-object TypesSetOpt extends TypesSetOpt with TestAsync_mongodb
+object FormatConstants  extends FormatConstants with TestAsync_mongodb2
+object FormatVariables extends FormatVariables with TestAsync_mongodb2
+object Nested extends Nested with TestAsync_mongodb2
+object Semantics extends Semantics with TestAsync_mongodb2
+object TypesOne extends TypesOne with TestAsync_mongodb2
+object TypesOneOpt extends TypesOneOpt with TestAsync_mongodb2
+object TypesSet extends TypesSet with TestAsync_mongodb2
+object TypesSetOpt extends TypesSetOpt with TestAsync_mongodb2
