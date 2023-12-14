@@ -81,21 +81,22 @@ trait Save_mongodb
       val embeddedDoc = new BsonDocument()
       doc.append(refAttr, embeddedDoc)
       // Step into embedded document
-      docs = docs.init :+ (docs.last :+ embeddedDoc)
       doc = embeddedDoc
+      docs = docs.init :+ (docs.last :+ doc)
 
     } else {
       // Reference document
       val refId = new BsonString(new ObjectId().toHexString)
       doc.append(refAttr, refId)
-      // Set id in referenced document
-      val refDoc = new BsonDocument()
-      refDoc.append("_id", refId)
+
+      // Set id in new referenced document
+      doc = new BsonDocument()
+      doc.append("_id", refId)
 
       // Step into referenced document
-      docs = docs.init :+ (docs.last :+ refDoc)
-      doc = refDoc
+      docs = docs.init :+ (docs.last :+ doc)
 
+      // Add doc to namespace docs
       val rows = nsDocs.getOrElse(refNs, new BsonArray())
       rows.add(doc)
       nsDocs(refNs) = rows

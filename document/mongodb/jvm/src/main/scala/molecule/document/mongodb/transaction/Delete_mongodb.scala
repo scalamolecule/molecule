@@ -8,7 +8,7 @@ import molecule.core.transaction.ops.DeleteOps
 import molecule.core.util.{MetaModelUtils, ModelUtils}
 import org.bson.conversions.Bson
 import org.bson.types.ObjectId
-import org.bson.{BsonArray, BsonDocument, BsonObjectId}
+import org.bson.{BsonArray, BsonDocument, BsonObjectId, BsonString}
 
 trait Delete_mongodb
   extends Base_JVM_mongodb
@@ -56,7 +56,8 @@ trait Delete_mongodb
     //    ((table +: joinTables) ++ ownedTables, Nil)
 
     val idArray = new BsonArray()
-    ids.map(id => idArray.add(new BsonObjectId(new ObjectId(id))))
+//    ids.map(id => idArray.add(new BsonObjectId(new ObjectId(id))))
+    ids.map(id => idArray.add(new BsonString(id)))
     new BsonDocument().append("_id", new BsonDocument("$in", idArray))
   }
 

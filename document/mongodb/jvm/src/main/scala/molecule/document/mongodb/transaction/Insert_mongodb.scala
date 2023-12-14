@@ -19,7 +19,7 @@ trait Insert_mongodb
     with ModelUtils
     with MoleculeLogging { self: ResolveInsert with InsertResolvers_ =>
 
-  doPrint = false
+  doPrint = true
 
   def debug(obj: Any, s: String = ""): Unit = if (false) {
     val id  = System.identityHashCode(obj)
@@ -30,9 +30,14 @@ trait Insert_mongodb
 
   def getData(nsMap: Map[String, MetaNs], elements: List[Element], tpls: Seq[Product]): Data = {
     initialNs = getInitialNs(elements)
-    var first    = true
+    nss += initialNs
     val tpl2bson = getResolver(nsMap, elements)
-    val data     = new BsonDocument().append("action", new BsonString("insert"))
+
+    // Prepare adding rows to namespaces
+    val nssDocs = mutable.Map.empty[String, BsonArray]
+    nss.foreach(ns => nssDocs(ns) = new BsonArray())
+
+    var first = true
     tpls.foreach { tpl =>
       doc = new BsonDocument()
       docs = List(List(doc))
@@ -44,16 +49,18 @@ trait Insert_mongodb
       // Convert tpl to bson
       tpl2bson(tpl)
 
+      // Add docs in namespaces
       nsDocs.foreach { case (ns, rows) =>
-        println(ns)
-        if (first && !data.containsKey(ns)) {
-          data.append(ns, new BsonArray())
-        }
-        println(rows)
-        data.get(ns).asArray().addAll(rows)
+        nssDocs(ns).addAll(rows)
       }
       first = false
     }
+
+    val data = new BsonDocument().append("action", new BsonString("insert"))
+    nssDocs.collect {
+      case (ns, nsDocs: BsonArray) if !nsDocs.isEmpty => data.append(ns, nsDocs)
+    }
+
     data
   }
 
@@ -151,6 +158,7 @@ trait Insert_mongodb
     card: Card,
     owner: Boolean
   ): Product => Unit = {
+    nss += refNs
     if (owner) {
       (_: Product) => {
         // Embed document
@@ -182,8 +190,8 @@ trait Insert_mongodb
   override protected def addBackRef(backRefNs: String): Product => Unit = {
     (_: Product) =>
       // Step back to previous namespace/doc
-      docs = docs.init :+ docs.last.init
       doc = docs.last.init.last
+      docs = docs.init :+ docs.last.init
   }
 
   override protected def addNested(
@@ -195,6 +203,7 @@ trait Insert_mongodb
     owner: Boolean,
     nestedElements: List[Element]
   ): Product => Unit = {
+    nss += refNs
     // Recursively resolve nested data
     val resolveNested = getResolver(nsMap, nestedElements)
 
@@ -202,26 +211,65 @@ trait Insert_mongodb
       case 1 => (tpl: Product) => tpl.productElement(tplIndex).asInstanceOf[Seq[Any]].map(Tuple1(_))
       case _ => (tpl: Product) => tpl.productElement(tplIndex).asInstanceOf[Seq[Product]]
     }
+    if (owner) {
+      (tpl: Product) => {
+        val nestedTuples = tupled(tpl)
 
-    (tpl: Product) => {
-      val nestedTuples = tupled(tpl)
-      val nestedArray  = new BsonArray()
-      doc.append(refAttr, nestedArray)
-      val outerDoc = doc
+        // Initiate nested level
+        val nestedArray = new BsonArray()
+        doc.append(refAttr, nestedArray)
+        docs = docs :+ Nil
 
-      // Initiate nested level
-      docs = docs :+ Nil
+        nestedTuples.foreach { nestedTpl =>
+          // Add embedded document
+          doc = new BsonDocument()
+          docs = docs.init :+ List(doc)
 
-      nestedTuples.foreach { nestedTpl =>
-        debug("", "------------------------------------------------")
-        // Start from fresh namespace on this level
-        doc = new BsonDocument()
-        docs = docs.init :+ List(doc)
-        resolveNested(nestedTpl)
-        nestedArray.add(docs.last.head.clone())
+          // Save outer doc
+          val outerDoc = doc
+
+          // Process nested data
+          resolveNested(nestedTpl)
+
+          // Add doc to embedded array
+          nestedArray.add(outerDoc)
+        }
       }
-      debug("", "------------------------------------------------")
-      debug(outerDoc, "outer")
+
+    } else {
+      (tpl: Product) => {
+        val nestedTuples = tupled(tpl)
+
+        // Initiate nested level
+        val refIds = new BsonArray()
+        doc.append(refAttr, refIds)
+        docs = docs :+ Nil
+
+        val referencedDocs = nsDocs.getOrElse(refNs, new BsonArray())
+        nestedTuples.foreach { nestedTpl =>
+
+          // Reference document
+          val refId = new BsonString(new ObjectId().toHexString)
+          refIds.add(refId)
+
+          // Set id in new referenced document
+          doc = new BsonDocument()
+          doc.append("_id", refId)
+
+          // Step into referenced document
+          docs = docs.init :+ List(doc)
+
+          // Save outer doc
+          val outerDoc = doc
+
+          // Process nested data
+          resolveNested(nestedTpl)
+
+          // Add doc to namespace
+          referencedDocs.add(outerDoc)
+        }
+        nsDocs(refNs) = referencedDocs
+      }
     }
   }
 }

@@ -66,6 +66,43 @@ object AdhocJVM_mongodb extends TestSuite_mongodb {
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
+
+        //        _ <- A.i.Bb.*(B.i).insert(List(
+        ////          (0, Nil),
+        //          (1, List(10, 11)),
+        //        )).transact
+        //
+        ////        _ <- A.i.a1.query.get.map(_ ==> List(0, 1))
+        //        _ <- A.i.Bb.*(B.i).query.get.map(_ ==> List(
+        //          (1, List(10, 11))
+        //        ))
+
+
+        //        _ <- A.bool.OwnBb.*(B.s.OwnCc.*(C.i)).insert(List(
+        //          (true, List(("a", List(1)))),
+        //          (false, List(
+        //            ("b", List(2, 3)),
+        //            ("c", List(4, 5)),
+        //          )),
+        //        )).transact
+        //
+        ////        _ <- A.bool.OwnBb.s.OwnCc.i.query.i.get.map(_ ==> List(
+        ////          (true, "a", 1),
+        ////          (false, "b", 2),
+        ////          (false, "b", 3),
+        ////          (false, "c", 4),
+        ////          (false, "c", 5),
+        ////        ))
+        //
+        //        _ <- A.bool.OwnBb.*(B.s.OwnCc.*(C.i)).query.get.map(_ ==> List(
+        //          (true, List(("a", List(1)))),
+        //          (false, List(
+        //            ("b", List(2, 3)),
+        //            ("c", List(4, 5)),
+        //          )),
+        //        ))
+
+
         _ <- A.i(0).s("a").B.i(1).s("b").Cc.i(22)
           ._B.C.i(2).s("c")
           ._B._A.Bb.i(11)
@@ -86,50 +123,103 @@ object AdhocJVM_mongodb extends TestSuite_mongodb {
         _ <- A.i.B.i.C.i._B._A.Bb.i.query.get.map(_ ==> List((0, 1, 2, 11)))
         _ <- A.i.B.C.i._B._A.Bb.i.query.get.map(_ ==> List((0, 2, 11)))
         _ <- A.B.C.s._B._A.Bb.i.query.get.map(_ ==> List(("c", 11)))
-      } yield ()
-    }
-
-    "r-r" - refs { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Refs._
-      for {
-        _ <- A.i(1).B.i(2).C.i(3).save.transact
-        _ <- A.i.B.i.C.i.query.i.get.map(_ ==> List((1, 2, 3)))
-      } yield ()
-    }
 
 
-    "o-r" - refs { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Refs._
-      for {
-        _ <- A.i(1).OwnB.i(2).C.i(3).save.transact
-        _ <- A.i.OwnB.i.C.i.query.i.get.map(_ ==> List((1, 2, 3)))
 
-        _ <- A.i(1).OwnB.i(2).OwnC.i(3).D.i(4).save.transact
-        _ <- A.i.OwnB.i.OwnC.i.D.i.query.i.get.map(_ ==> List((1, 2, 3, 4)))
-      } yield ()
-    }
+        //                _ <- A.i.OwnBb.*(B.i.OwnCc.*(C.i)).insert(List(
+        //        //          (0, Nil),
+        //        //          (1, List((10, Nil))),
+        //                  (1, List(
+        //                    (10, List(100, 101)),
+        //        //            (12, List(121, 122)),
+        //                  )),
+        //                  (2, List((20, List(200)))),
+        //                )).transact
+        //
+        //                _ <- A.i.a1.OwnBb.*(B.i.OwnCc.*(C.i)).query.get.map(_ ==> List(
+        //                  //          (0, Nil),
+        //                  //          (1, List((10, Nil))),
+        //                  (1, List(
+        //                    (10, List(100, 101)),
+        //                    //            (12, List(121, 122)),
+        //                  )),
+        //                  (2, List((20, List(200)))),
+        //                ))
 
 
-    "r-o" - refs { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Refs._
-      for {
-        _ <- A.i(1).B.i(2).OwnC.i(3).save.transact
-        _ <- A.i.B.i.OwnC.i.query.i.get.map(_ ==> List((1, 2, 3)))
-      } yield ()
-    }
-    "r-o 4" - refs { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Refs._
-      for {
-        _ <- A.i(1).B.i(2).C.i(3).OwnD.i(4).save.transact
-        _ <- A.i.B.i.C.i.OwnD.i.query.i.get.map(_ ==> List((1, 2, 3, 4)))
-      } yield ()
-    }
+        //        _ <- A.i.Bb.*(B.i.Cc.*(C.i)).insert(List(
+        //          //          (0, Nil),
+        //          //          (1, List((10, Nil))),
+        //          (1, List(
+        //            (10, List(100, 101)),
+        //            //            (12, List(121, 122)),
+        //          )),
+        //          (2, List((20, List(200)))),
+        //        )).transact
+        //
+        //        _ <- A.i.a1.Bb.*(B.i.Cc.*(C.i)).query.get.map(_ ==> List(
+        //          //          (0, Nil),
+        //          //          (1, List((10, Nil))),
+        //          (1, List(
+        //            (10, List(100, 101)),
+        //            //            (12, List(121, 122)),
+        //          )),
+        //          (2, List((20, List(200)))),
+        //        ))
 
-    "o-o" - refs { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Refs._
-      for {
-        _ <- A.i(1).OwnB.i(2)._A.OwnC.i(3).save.i.transact
-        _ <- A.i.OwnB.i._A.OwnC.i.query.i.get.map(_ ==> List((1, 2, 3)))
+
+        ////        _ <- A.i.a1.query.get.map(_ ==> List(0, 1, 2))
+        //        _ <- A.i.a1.Bb.*(B.i).query.i.get.map(_ ==> List(
+        //          // (0, Nil) not included
+        //          (1, List(10)),
+        //          (2, List(10)),
+        ////          (3, List(10)),
+        ////          (4, List(10)),
+        ////          (5, List(10)),
+        ////          (6, List(10)),
+        ////          (7, List(10))
+        //        ))
+
+
+        //        _ <- A.i.Bb.*(
+        //          B.i.Cc.*(
+        //            C.i.Dd.*(
+        //              D.i.Ee.*(
+        //                E.i.Ff.*(
+        //                  F.i.Gg.*(
+        //                    G.i.Hh.*(
+        //                      H.i
+        //                    )
+        //                  )
+        //                )
+        //              )
+        //            )
+        //          )
+        //        ).insert(List(
+        //          (0, Nil),
+        //          (1, List((10, Nil))),
+        //          (2, List((10, List((20, Nil))))),
+        //          (3, List((10, List((20, List((30, Nil))))))),
+        //          (4, List((10, List((20, List((30, List((40, Nil))))))))),
+        //          (5, List((10, List((20, List((30, List((40, List((50, Nil))))))))))),
+        //          (6, List((10, List((20, List((30, List((40, List((50, List((60, Nil))))))))))))),
+        //          (7, List((10, List((20, List((30, List((40, List((50, List((60, List(70)))))))))))))),
+        //        )).transact
+        //
+        //        _ <- A.i.a1.query.get.map(_ ==> List(0, 1, 2, 3, 4, 5, 6, 7))
+        //
+        //        // 1 level, mandatory nested data
+        //        _ <- A.i.a1.Bb.*(B.i).query.get.map(_ ==> List(
+        //          // (0, Nil) not included
+        //          (1, List(10)),
+        //          (2, List(10)),
+        //          (3, List(10)),
+        //          (4, List(10)),
+        //          (5, List(10)),
+        //          (6, List(10)),
+        //          (7, List(10))
+        //        ))
+
       } yield ()
     }
 

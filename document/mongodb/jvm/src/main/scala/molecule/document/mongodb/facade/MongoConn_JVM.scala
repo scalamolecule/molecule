@@ -11,7 +11,8 @@ import molecule.core.util.ModelUtils
 import molecule.document.mongodb.transaction.{Base_JVM_mongodb, DataType_JVM_mongodb}
 import molecule.document.mongodb.util.BsonUtils
 import org.bson.conversions.Bson
-import org.bson.{BsonDocument, BsonObjectId, BsonValue}
+import org.bson.{BsonDocument, BsonObjectId, BsonString, BsonValue}
+import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
 
 case class MongoConn_JVM(
@@ -33,9 +34,9 @@ case class MongoConn_JVM(
   }
 
   override def transact_sync(data: Data): TxReport = {
-//    println("TRANSACT ----------------------------------------")
-//    println(data.toJson(pretty))
-//    println("")
+    //    println("TRANSACT ----------------------------------------")
+    //    println(data.toJson(pretty))
+    //    println("")
     data.get("action").asString.getValue match {
       case "insert" => data.size match {
         case 2 => insertEmbedded(data)
@@ -63,7 +64,7 @@ case class MongoConn_JVM(
 
   private def insertReferenced(data: Data): TxReport = {
     var first         = true
-    var ids           = List.empty[String]
+    val ids           = ListBuffer.empty[String]
     val clientSession = mongoClient.startSession()
     val txOptions     = TransactionOptions.builder()
       .readPreference(ReadPreference.primary())
@@ -77,21 +78,19 @@ case class MongoConn_JVM(
         data.forEach {
           case ("action", _)             => // do nothing
           case (collectionName, rawRows) =>
-//            println(".... " + collectionName)
+            //            println(".... " + collectionName)
             val documents    = rawRows.asArray.getValues.asInstanceOf[util.List[BsonDocument]]
             val collection   = db.getCollection(collectionName, classOf[BsonDocument])
             val insertResult = collection.insertMany(clientSession, documents)
             if (first) {
               val idsMap = insertResult.getInsertedIds
-              val array  = new Array[BsonValue](idsMap.size)
               idsMap.forEach {
-                case (k, v) => array(k) = v
+                case (k, v) => ids.addOne(v.asObjectId().getValue.toHexString)
               }
-              ids = array.toList.map(_.asInstanceOf[BsonObjectId].getValue.toHexString)
               first = false
             }
         }
-        TxReport(ids)
+        TxReport(ids.toList)
       }
     }
     try
@@ -104,7 +103,7 @@ case class MongoConn_JVM(
   }
 
   private def insertEmbedded(data: Data): TxReport = {
-    var ids = List.empty[String]
+    val ids = ListBuffer.empty[String]
     data.forEach {
       case ("action", _)             => // do nothing
       case (collectionName, rawRows) =>
@@ -112,13 +111,12 @@ case class MongoConn_JVM(
         val collection   = mongoDb.getCollection(collectionName, classOf[BsonDocument])
         val insertResult = collection.insertMany(documents)
         val idsMap       = insertResult.getInsertedIds
-        val array        = new Array[BsonValue](idsMap.size)
+        val array        = new Array[String](idsMap.size)
         idsMap.forEach {
-          case (k, v) => array(k) = v
+          case (k, v) => ids.addOne(v.asObjectId().getValue.toHexString)
         }
-        ids = array.toList.map(_.asInstanceOf[BsonObjectId].getValue.toHexString)
     }
-    TxReport(ids)
+    TxReport(ids.toList)
   }
 
   private def deleteData(colName: String, filter: Bson): TxReport = {

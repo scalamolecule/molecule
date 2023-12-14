@@ -58,9 +58,12 @@ abstract class QueryResolve_mongodb[Tpl](
   ): AggregateIterable[BsonDocument] = {
     val (collectionName, pipeline) = m2q.getBsonQuery(Nil, optLimit, optOffset, Some(conn.proxy))
     val collection                 = conn.mongoDb.getCollection(collectionName, classOf[BsonDocument])
+
     //    println("QUERY ----------------------------------------------")
     //    elements.foreach(println)
-    //    print(pipeline)
+    //    println("-------")
+    //    pipeline.forEach(x => println(x.toBsonDocument.toJson(pretty)))
+
     collection.aggregate(pipeline)
   }
 

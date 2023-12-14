@@ -115,6 +115,7 @@ trait SpiSync_mongodb
     tryInspect("query", elements) {
       val (ns, pipeline) = getModel2SqlQuery[Any](elements).getBsonQuery(Nil, optLimit, optOffset, None)
       printRaw(label, elements, pipeline2json(pipeline, Some(ns)))
+//      printRaw(label, Nil, pipeline2json(pipeline, Some(ns)))
     }
   }
 
@@ -172,6 +173,7 @@ trait SpiSync_mongodb
     tryInspect("insert", insert.elements) {
       val conn = conn0.asInstanceOf[MongoConn_JVM]
       printInspectTx("INSERT", insert.elements, insert_getData(insert, conn), insert.tpls)
+//      printInspectTx("INSERT", Nil, insert_getData(insert, conn), insert.tpls)
     }
   }
 

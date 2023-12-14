@@ -13,9 +13,9 @@ import scala.collection.mutable.ListBuffer
 
 trait MongoQueryBase extends BaseHelpers with JavaConversions {
 
-  class DocData {
-    var idField = false
-
+  class Branch {
+    var idField        = false
+    var nested         = false
     var path           = List.empty[String]
     var prevPathDot    = ""
     var pathDot        = ""
@@ -62,9 +62,11 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
     }
   }
 
-  final protected var doc  = new DocData
-  final protected val docs = ListBuffer.empty[(List[String], DocData)]
-  docs += Nil -> doc // top document
+  final protected var b  = new Branch
+  final protected val bb = ListBuffer.empty[(List[String], Branch)]
+  bb += Nil -> b // top document
+
+  final protected val unwinds = ListBuffer.empty[String]
 
   final protected var topPath     = List.empty[String]
   final protected val projections = mutable.Map.empty[List[String], BsonDocument]
@@ -76,11 +78,17 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
   final protected val limit = new util.ArrayList[Bson]
   final protected val sorts = new util.ArrayList[Bson]
 
-  final protected var casts = ListBuffer( // nested levels
+  final protected var allCasts = ListBuffer( // nested levels
     ListBuffer( // nss
       (
         ListBuffer.empty[String], // ref attr path
-        ListBuffer.empty[(String, Boolean, BsonDocument => Any)] // (field, embedded, cast)
+        ListBuffer.empty[
+          (
+            String, // field
+              Boolean, // nested
+              BsonDocument => Any // cast
+            )
+        ]
       )
     )
   )
@@ -100,24 +108,24 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
     )
   }
 
-  def immutableCastss = casts.map(
+  def immutableCastss = allCasts.map(
     _.toList.map {
       case (path, casts) => (path.toList, casts.toList)
     }
   ).toList
 
-  final protected def addCast(field: String, embedded: Boolean, cast: BsonDocument => Any): Unit = {
-    casts.last.last._2 += ((field, embedded, cast))
+  final protected def addCast(field: String, nested: Boolean, cast: BsonDocument => Any): Unit = {
+    allCasts.last.last._2 += ((field, nested, cast))
   }
 
   final protected def removeLastCast(): Unit = {
-    val last = casts.last.last._2
+    val last = allCasts.last.last._2
     last.remove(last.size - 1)
   }
 
-  final protected def replaceCast(field: String, embedded: Boolean, cast: BsonDocument => Any): Unit = {
+  final protected def replaceCast(field: String, nested: Boolean, cast: BsonDocument => Any): Unit = {
     removeLastCast()
-    addCast(field, embedded, cast)
+    addCast(field, nested, cast)
   }
 
   // Used to lookup original type of aggregate attributes

@@ -31,6 +31,8 @@ trait Base_JVM_mongodb extends DataType_JVM_mongodb with ModelUtils with BaseHel
   protected var doc    = new BsonDocument()
   protected var docs   = List(List(doc))
   protected val nsDocs = mutable.Map.empty[String, BsonArray]
+  protected var nss    = Set.empty[String]
+
 
   // "Connection pool" ---------------------------------------------
 

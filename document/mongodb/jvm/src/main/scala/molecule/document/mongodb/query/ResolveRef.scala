@@ -18,26 +18,30 @@ trait ResolveRef { self: MongoQueryBase =>
       )
     }
 
-    doc.matches.add(Filters.ne(doc.pathDot + refAttr, new BsonNull))
+    b.matches.add(Filters.ne(b.pathDot + refAttr, new BsonNull))
 
     if (owner) {
-      doc.path = doc.path ++ List(refAttr, refNs)
-      doc.pathDot = doc.pathDot + refAttr + "."
-      doc.pathUnderscore = doc.pathUnderscore + refAttr + "_"
-      doc.addFields(doc.path) = Nil
+      b.path = b.path ++ List(refAttr, refNs)
+      b.pathDot = b.pathDot + refAttr + "."
+      b.pathUnderscore = b.pathUnderscore + refAttr + "_"
+      b.addFields(b.path) = Nil
 
     } else {
       // Referenced entities aggregate in a clean new branch
-      val prevPathDot = doc.pathDot
+      val prevPathDot = b.pathDot
       val newPath     = topPath ++ List(refAttr, refNs)
-      val newDoc      = new DocData
-      docs += newPath -> newDoc
-      doc = newDoc
-      doc.prevPathDot = prevPathDot
+      val newBranch   = new Branch
+      bb += newPath -> newBranch
+      b = newBranch
+      b.prevPathDot = prevPathDot
     }
 
     // Know if we get arrays (ref) or documents (embedded)
-    doc.refOwnerships(doc.path) = owner
+    b.refOwnerships(b.path) = owner
+
+    if (card == CardSet && b.pathDot.nonEmpty) {
+      unwinds += "$" + b.pathDot.init
+    }
 
     val refDoc = new BsonDocument()
     projections(topPath) = projections(topPath).append(refAttr, refDoc)
@@ -46,13 +50,12 @@ trait ResolveRef { self: MongoQueryBase =>
     projections(topPath) = refDoc
 
     // Continue from ref namespace
-    val nss     = casts.last
+    val nss     = allCasts.last
     val curPath = nss.last
     nss += ((
       ListBuffer.empty[String].addAll(curPath._1.toList :+ refAttr),
       ListBuffer.empty[(String, Boolean, BsonDocument => Any)]
     ))
-    //    printCasts("REF " + refAttr)
   }
 
 
@@ -70,60 +73,42 @@ trait ResolveRef { self: MongoQueryBase =>
     }
 
     // Back to previous namespace
-    doc.path = doc.path.dropRight(2)
-    doc.pathDot = {
-      val nss = doc.pathDot.init.split('.').init
+    b.path = b.path.dropRight(2)
+    b.pathDot = {
+      val nss = b.pathDot.init.split('.').init
       if (nss.isEmpty) "" else nss.mkString(".") + "."
     }
-    doc.pathUnderscore = {
-      val nss = doc.pathUnderscore.init.split('_').init
+    b.pathUnderscore = {
+      val nss = b.pathUnderscore.init.split('_').init
       if (nss.isEmpty) "" else nss.mkString("_") + "_"
     }
 
     topPath = topPath.dropRight(2)
 
     // go back to previous doc if it exists
-    docs.toMap.get(topPath).foreach { doc1 =>
-      doc = doc1
+    bb.toMap.get(topPath).foreach { branch =>
+      b = branch
     }
 
-    val nss     = casts.last
+    val nss     = allCasts.last
     val curPath = nss.last
     nss += ((
       ListBuffer.empty[String].addAll(curPath._1.toList.init),
       ListBuffer.empty[(String, Boolean, BsonDocument => Any)]
     ))
-    //    printCasts("BACKREF")
   }
 
   protected def resolveNestedRef(ref: Ref, nestedElements: List[Element]): Unit = {
-    level += 1
     isNested = true
     if (isNestedOpt) {
       noMixedNestedModes
     }
-    validateRefNs(ref, nestedElements)
-    val Ref(_, refAttr, _, _, _, _) = ref
-
     // No empty nested arrays when asking for mandatory nested data
-    doc.matches.add(Filters.ne(refAttr, new BsonArray()))
-
-    doc.path = doc.path :+ refAttr
-    doc.pathDot = doc.pathDot + refAttr + "."
-    doc.pathUnderscore = doc.pathUnderscore + refAttr + "_"
-
-    doc.addFields(doc.path) = Nil
-
-    // Initiate nested namespace
-    casts += ListBuffer((
-      ListBuffer.empty[String].addAll(casts.last.last._1.toList :+ refAttr),
-      ListBuffer.empty[(String, Boolean, BsonDocument => Any)]
-    ))
-    //    printCasts("NEST " + refAttr)
+    b.matches.add(Filters.ne(ref.refAttr, new BsonArray()))
+    resolveNested(ref, nestedElements)
   }
 
   protected def resolveNestedOptRef(ref: Ref, nestedElements: List[Element]): Unit = {
-    level += 1
     isNestedOpt = true
     if (isNested) {
       noMixedNestedModes
@@ -131,23 +116,44 @@ trait ResolveRef { self: MongoQueryBase =>
     if (expectedFilterAttrs.nonEmpty) {
       throw ModelError("Filter attributes not allowed in optional nested queries.")
     }
+    resolveNested(ref, nestedElements)
+  }
+
+  private def resolveNested(ref: Ref, nestedElements: List[Element]): Unit = {
+    b.nested = true
+    level += 1
     validateRefNs(ref, nestedElements)
-    val Ref(_, refAttr, _, _, _, _) = ref
+    val Ref(_, refAttr, refNs, _, owner, _) = ref
 
-    doc.path = doc.path :+ refAttr
-    doc.pathDot = doc.pathDot + refAttr + "."
-    doc.pathUnderscore = doc.pathUnderscore + refAttr + "_"
+    if (owner) {
+      b.path = b.path :+ refAttr
+      b.pathDot = b.pathDot + refAttr + "."
+      b.pathUnderscore = b.pathUnderscore + refAttr + "_"
+      b.addFields(b.path) = Nil
+    } else {
+      // Referenced entities aggregate in a clean new branch
+      val prevPathDot = b.pathDot
+      val newPath     = topPath ++ List(refAttr, refNs)
+      val newBranch   = new Branch
+      bb += newPath -> newBranch
+      b = newBranch
+      b.prevPathDot = prevPathDot
+    }
 
-    doc.addFields(doc.path) = Nil
+    // Know if we get arrays (ref) or documents (embedded)
+    b.refOwnerships(b.path) = ref.owner
 
-    // Initiate (optional) nested namespace
-    casts += ListBuffer(
-      (
-        ListBuffer.empty[String].addAll(casts.last.last._1.toList :+ refAttr),
-        ListBuffer.empty[(String, Boolean, BsonDocument => Any)]
-      )
-    )
-    //    printCasts("OPT NEST " + refAttr)
+    val refDoc = new BsonDocument()
+    projections(topPath) = projections(topPath).append(refAttr, refDoc)
+
+    topPath = topPath ++ List(refAttr, refNs)
+    projections(topPath) = refDoc
+
+    // Initiate nested namespace
+    allCasts += ListBuffer((
+      ListBuffer.empty[String].addAll(allCasts.last.last._1.toList :+ refAttr),
+      ListBuffer.empty[(String, Boolean, BsonDocument => Any)]
+    ))
   }
 
   final private def validateRefNs(ref: Ref, nestedElements: List[Element]): Unit = {
