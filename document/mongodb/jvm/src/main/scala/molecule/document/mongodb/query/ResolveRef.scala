@@ -53,8 +53,9 @@ trait ResolveRef { self: MongoQueryBase =>
     val nss     = allCasts.last
     val curPath = nss.last
     nss += ((
-      ListBuffer.empty[String].addAll(curPath._1.toList :+ refAttr),
-      ListBuffer.empty[(String, Boolean, BsonDocument => Any)]
+      None,
+      ListBuffer.empty[String].addAll(curPath._2.toList :+ refAttr),
+      ListBuffer.empty[(String, BsonDocument => Any)]
     ))
   }
 
@@ -93,8 +94,9 @@ trait ResolveRef { self: MongoQueryBase =>
     val nss     = allCasts.last
     val curPath = nss.last
     nss += ((
-      ListBuffer.empty[String].addAll(curPath._1.toList.init),
-      ListBuffer.empty[(String, Boolean, BsonDocument => Any)]
+      None,
+      ListBuffer.empty[String].addAll(curPath._2.toList.init),
+      ListBuffer.empty[(String, BsonDocument => Any)]
     ))
   }
 
@@ -105,7 +107,8 @@ trait ResolveRef { self: MongoQueryBase =>
     }
     // No empty nested arrays when asking for mandatory nested data
     b.matches.add(Filters.ne(ref.refAttr, new BsonArray()))
-    resolveNested(ref, nestedElements)
+
+    resolveNested(ref, nestedElements, true)
   }
 
   protected def resolveNestedOptRef(ref: Ref, nestedElements: List[Element]): Unit = {
@@ -116,10 +119,10 @@ trait ResolveRef { self: MongoQueryBase =>
     if (expectedFilterAttrs.nonEmpty) {
       throw ModelError("Filter attributes not allowed in optional nested queries.")
     }
-    resolveNested(ref, nestedElements)
+    resolveNested(ref, nestedElements, false)
   }
 
-  private def resolveNested(ref: Ref, nestedElements: List[Element]): Unit = {
+  private def resolveNested(ref: Ref, nestedElements: List[Element], mandatory: Boolean): Unit = {
     b.nested = true
     level += 1
     validateRefNs(ref, nestedElements)
@@ -131,6 +134,12 @@ trait ResolveRef { self: MongoQueryBase =>
       b.pathUnderscore = b.pathUnderscore + refAttr + "_"
       b.addFields(b.path) = Nil
     } else {
+      if (mandatory) {
+        // Make sure that lookup ref document arrays are not empty.
+        // Ref attr is overwritten by Mongo so we need to check after lookup.
+        b.mandatoryLookup = Some(Filters.ne(ref.refAttr, new BsonArray))
+      }
+
       // Referenced entities aggregate in a clean new branch
       val prevPathDot = b.pathDot
       val newPath     = topPath ++ List(refAttr, refNs)
@@ -151,8 +160,9 @@ trait ResolveRef { self: MongoQueryBase =>
 
     // Initiate nested namespace
     allCasts += ListBuffer((
-      ListBuffer.empty[String].addAll(allCasts.last.last._1.toList :+ refAttr),
-      ListBuffer.empty[(String, Boolean, BsonDocument => Any)]
+      Some(refAttr),
+      ListBuffer.empty[String],
+      ListBuffer.empty[(String, BsonDocument => Any)]
     ))
   }
 

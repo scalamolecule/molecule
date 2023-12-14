@@ -50,7 +50,7 @@ case class QueryResolveOffset_mongodb[Tpl](
 
     //    val bson2tpl = documentCaster(m2q.updatedCasts.casts)
 
-    val bson2tpl = documentCaster(m2q.immutableCastss)
+    val bson2tpl = levelCaster(m2q.immutableCastss)
     bsonDocs.forEach { bsonDoc =>
 //      println("........ " + bsonDoc)
 //      println("   ..... " + bson2tpl(bsonDoc).asInstanceOf[Tpl])

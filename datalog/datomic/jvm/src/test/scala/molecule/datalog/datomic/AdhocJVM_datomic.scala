@@ -1,14 +1,11 @@
 package molecule.datalog.datomic
 
-import java.time.Duration
-import molecule.base.error.{ExecutionError, ModelError}
+import molecule.base.error.ModelError
 import molecule.core.util.Executor._
-import molecule.coreTests.dataModels.core.dsl.Refs.A
 import molecule.datalog.datomic.async._
 import molecule.datalog.datomic.setup.TestSuite_datomic
 import utest._
 import scala.language.implicitConversions
-import scala.util.Random
 
 object AdhocJVM_datomic extends TestSuite_datomic {
 

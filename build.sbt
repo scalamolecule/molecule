@@ -188,39 +188,39 @@ lazy val datalogDatomic = crossProject(JSPlatform, JVMPlatform)
   .settings(
     // Temporarily limit number of tests to be compiled by sbt (comment out this whole sbt setting to test all)
     // Note that intellij doesn't recognize this setting - there you can right click on files and exclude
-    unmanagedSources / excludeFilter := {
-      val test = "src/test/scala/molecule/datalog/datomic"
-      def path(platform: String) = (baseDirectory.value / s"../$platform/$test").getCanonicalPath
-      val jsTests     = path("js")
-      val jvmTests    = path("jvm")
-      val sharedTests = path("shared")
-      val allowed     = Seq(
-        //        jvmTests + "/restore",
-        //        sharedTests + "/aggr",
-        //        sharedTests + "/api",
+//    unmanagedSources / excludeFilter := {
+//      val test = "src/test/scala/molecule/datalog/datomic"
+//      def path(platform: String) = (baseDirectory.value / s"../$platform/$test").getCanonicalPath
+//      val jsTests     = path("js")
+//      val jvmTests    = path("jvm")
+//      val sharedTests = path("shared")
+//      val allowed     = Seq(
+//        //        jvmTests + "/restore",
+//        //        sharedTests + "/aggr",
+//        //        sharedTests + "/api",
         //        sharedTests + "/composite",
-        //        sharedTests + "/crud",
-        //        sharedTests + "/expr",
-        //        sharedTests + "/pagination",
-        //        sharedTests + "/relation",
-        //        sharedTests + "/sort",
-        //        sharedTests + "/SyncApi.scala"
-        //        sharedTests + "/txMetaData",
-        //        sharedTests + "/validation",
-        //                sharedTests + "/time",
-        //        sharedTests,
-        //        jvmTests,
-        //        jsTests,
-        jvmTests + "/AdhocJVM_datomic.scala",
-        sharedTests + "/AdhocDatomic.scala",
-      )
-      new SimpleFileFilter(f =>
-        (f.getCanonicalPath.startsWith(jsTests)
-          || f.getCanonicalPath.startsWith(jvmTests)
-          || f.getCanonicalPath.startsWith(sharedTests)) &&
-          !allowed.exists(p => f.getCanonicalPath.startsWith(p))
-      )
-    },
+//        //        sharedTests + "/crud",
+//        //        sharedTests + "/expr",
+//        //        sharedTests + "/pagination",
+//        //        sharedTests + "/relation",
+//        //        sharedTests + "/sort",
+//        //        sharedTests + "/SyncApi.scala"
+//        //        sharedTests + "/txMetaData",
+//        //        sharedTests + "/validation",
+//        //                sharedTests + "/time",
+//        //        sharedTests,
+//        //        jvmTests,
+//        //        jsTests,
+//        jvmTests + "/AdhocJVM_datomic.scala",
+//        sharedTests + "/AdhocDatomic.scala",
+//      )
+//      new SimpleFileFilter(f =>
+//        (f.getCanonicalPath.startsWith(jsTests)
+//          || f.getCanonicalPath.startsWith(jvmTests)
+//          || f.getCanonicalPath.startsWith(sharedTests)) &&
+//          !allowed.exists(p => f.getCanonicalPath.startsWith(p))
+//      )
+//    },
 
     testFrameworks := Seq(
       new TestFramework("utest.runner.Framework"),

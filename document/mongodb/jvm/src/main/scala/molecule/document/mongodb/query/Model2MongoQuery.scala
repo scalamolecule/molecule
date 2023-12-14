@@ -81,11 +81,11 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
 
     bb.toList.sortBy(-_._1.length).foreach {
       case (Nil, branch) =>
-        //        println(s"B -------------------- ${doc1.path}  List()   '${doc1.pathDot}'")
+        //        println(s"B -------------------- ${branch.path}  List()   '${branch.pathDot}'")
         topStages.addAll(getStages(Nil, branch))
 
       case (path, branch) =>
-        //        println(s"A -------------------- ${doc1.path}  $path   '${doc1.pathDot}'")
+        //        println(s"A -------------------- ${branch.path}  $path   '${branch.pathDot}'")
         val List(refAttr, refNs) = path.takeRight(2)
         val pathRefAttr          = branch.prevPathDot + refAttr
         val lookup               = new BsonDocument()
@@ -99,7 +99,6 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
         lookup.append("pipeline", pipeline)
         lookups = lookups :+ ((path, new BsonDocument().append("$lookup", lookup), pathRefAttr))
     }
-
 
     unwinds.foreach(unwind =>
       topStages.add(new BsonDocument().append("$unwind", new BsonString(unwind)))
@@ -122,7 +121,6 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
   }
 
 
-  //  private def getStages(b: Branch, lookups: List[BsonDocument]): util.ArrayList[BsonDocument] = {
   private def getStages(parentPath: List[String], branch: Branch): util.ArrayList[BsonDocument] = {
     val stages = new util.ArrayList[BsonDocument]()
     def addStage(name: String, params: Bson): Boolean = {
@@ -153,6 +151,11 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
         stages.add(lookup)
         // Forget once added
         lookups = lookups.filterNot(_ == l)
+
+        // Prevent new overwritten ref attr lookup to be empty when mandatory
+        branch.mandatoryLookup.foreach { refNotEmpty =>
+          addStage("$match", refNotEmpty)
+        }
 
         if (!branch.nested) {
           stages.add(new BsonDocument().append("$addFields",

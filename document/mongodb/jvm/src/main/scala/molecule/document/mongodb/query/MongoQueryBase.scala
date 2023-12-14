@@ -24,7 +24,9 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
     private val pathFields = ListBuffer.empty[String]
     var uniqueIndex = 0
 
-    val matches        = new util.ArrayList[Bson]
+    val matches          = new util.ArrayList[Bson]
+    var mandatoryLookup = Option.empty[Bson]
+
     val preGroupFields = ListBuffer.empty[(String, String)]
     val groupIdFields  = ListBuffer.empty[(String, String, String)]
     val groupExprs     = ListBuffer.empty[(String, BsonValue)]
@@ -81,14 +83,9 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
   final protected var allCasts = ListBuffer( // nested levels
     ListBuffer( // nss
       (
+        Option.empty[String], // nested ref attr
         ListBuffer.empty[String], // ref attr path
-        ListBuffer.empty[
-          (
-            String, // field
-              Boolean, // nested
-              BsonDocument => Any // cast
-            )
-        ]
+        ListBuffer.empty[(String, BsonDocument => Any)] // field, cast
       )
     )
   )
@@ -110,22 +107,22 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
 
   def immutableCastss = allCasts.map(
     _.toList.map {
-      case (path, casts) => (path.toList, casts.toList)
+      case (nestedRefAttr, path, casts) => (nestedRefAttr, path.toList, casts.toList)
     }
   ).toList
 
-  final protected def addCast(field: String, nested: Boolean, cast: BsonDocument => Any): Unit = {
-    allCasts.last.last._2 += ((field, nested, cast))
+  final protected def addCast(field: String, cast: BsonDocument => Any): Unit = {
+    allCasts.last.last._3 += ((field, cast))
   }
 
   final protected def removeLastCast(): Unit = {
-    val last = allCasts.last.last._2
+    val last = allCasts.last.last._3
     last.remove(last.size - 1)
   }
 
-  final protected def replaceCast(field: String, nested: Boolean, cast: BsonDocument => Any): Unit = {
+  final protected def replaceCast(field: String, cast: BsonDocument => Any): Unit = {
     removeLastCast()
-    addCast(field, nested, cast)
+    addCast(field, cast)
   }
 
   // Used to lookup original type of aggregate attributes

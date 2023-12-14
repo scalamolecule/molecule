@@ -131,7 +131,8 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
     val uniqueField = b.unique(field)
     projectField(uniqueField)
     addSort(attr, uniqueField)
-    addCast(uniqueField, b.nested, res.cast(uniqueField))
+//    addCast(attr.ns + "." + uniqueField, res.cast(uniqueField))
+    addCast(uniqueField, res.cast(uniqueField))
 
     if (b.path.nonEmpty) {
       val prefix = if (attr.op.isInstanceOf[Fn]) "$" else "$_id."
@@ -159,9 +160,8 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
   private def opt[T](attr: Attr, optArgs: Option[Seq[T]], res: ResOne[T]): Unit = {
     val field       = attr.attr
     val uniqueField = b.unique(field)
-    //    b.projectField(uniqueField)
     projectField(uniqueField)
-    addCast(uniqueField, b.nested, res.castOpt(uniqueField))
+    addCast(uniqueField, res.castOpt(uniqueField))
     addSort(attr, uniqueField)
 
     b.groupIdFields += ((b.pathUnderscore, b.pathDot, field))
@@ -343,7 +343,7 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
     fn match {
       case "distinct" =>
         b.groupSets(uniqueField, if (b.path.nonEmpty) dotField else usField)
-        replaceCast(uniqueField, b.embedded, res.castSet(uniqueField))
+        replaceCast(uniqueField, res.castSet(uniqueField))
 
       case "min" =>
         b.groupExpr(uniqueField, new BsonDocument().append("$min", new BsonString(dotField)))
@@ -351,7 +351,7 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
       case "mins" =>
         b.preGroupFields += ((b.pathUnderscore + uniqueField) -> (b.pathDot + field))
         b.groupExpr(uniqueField, aggrFn("$minN", new BsonString(idUsField), n))
-        replaceCast(uniqueField, b.embedded, res.castSet(uniqueField))
+        replaceCast(uniqueField, res.castSet(uniqueField))
 
       case "max" =>
         b.groupExpr(uniqueField, new BsonDocument().append("$max", new BsonString(dotField)))
@@ -359,7 +359,7 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
       case "maxs" =>
         b.preGroupFields += ((b.pathUnderscore + uniqueField) -> (b.pathDot + field))
         b.groupExpr(uniqueField, aggrFn("$maxN", new BsonString(idUsField), n))
-        replaceCast(uniqueField, b.embedded, res.castSet(uniqueField))
+        replaceCast(uniqueField, res.castSet(uniqueField))
 
       case "sample" =>
         sampleSize = 1
@@ -367,16 +367,16 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
       case "samples" =>
         sampleSize = n
         b.groupSets(uniqueField, dotField)
-        replaceCast(uniqueField, b.embedded, res.castSet(uniqueField))
+        replaceCast(uniqueField, res.castSet(uniqueField))
 
       case "count" =>
         b.groupExpr(uniqueField, new BsonDocument().append("$sum", new BsonInt32(1)))
-        replaceCast(uniqueField, b.embedded, castInt(uniqueField))
+        replaceCast(uniqueField, castInt(uniqueField))
 
       case "countDistinct" =>
         b.preGroupFields += ((b.pathUnderscore + uniqueField) -> (b.pathDot + field))
         b.groupExpr(uniqueField, new BsonDocument().append("$sum", new BsonInt32(1)))
-        replaceCast(uniqueField, b.embedded, castInt(uniqueField))
+        replaceCast(uniqueField, castInt(uniqueField))
 
       case "sum" =>
         b.preGroupFields += ((b.pathUnderscore + uniqueField) -> (b.pathDot + field))
@@ -389,12 +389,12 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
             .append("input", new BsonString(idUsField))
             .append("method", new BsonString("approximate"))
         )))
-        replaceCast(uniqueField, b.embedded, hardCastDouble(uniqueField))
+        replaceCast(uniqueField, hardCastDouble(uniqueField))
 
       case "avg" =>
         b.preGroupFields += ((b.pathUnderscore + uniqueField) -> (b.pathDot + field))
         b.groupExpr(uniqueField, new BsonDocument().append("$avg", new BsonString(idUsField)))
-        replaceCast(uniqueField, b.embedded, hardCastDouble(uniqueField))
+        replaceCast(uniqueField, hardCastDouble(uniqueField))
 
       case "variance" =>
         b.preGroupFields += ((b.pathUnderscore + uniqueField) -> (b.pathDot + field))
@@ -408,12 +408,12 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
         //        projections.add(new BsonDocument().append(b.pathDot + field, new BsonDocument().append("$pow", pow)))
         projections(b.path) = projections(b.path).append(field, new BsonInt32(1))
 
-        replaceCast(uniqueField, b.embedded, hardCastDouble(uniqueField))
+        replaceCast(uniqueField, hardCastDouble(uniqueField))
 
       case "stddev" =>
         b.preGroupFields += ((b.pathUnderscore + uniqueField) -> (b.pathDot + field))
         b.groupExpr(uniqueField, new BsonDocument().append("$stdDevPop", new BsonString(idUsField)))
-        replaceCast(uniqueField, b.embedded, hardCastDouble(uniqueField))
+        replaceCast(uniqueField, hardCastDouble(uniqueField))
 
       case other => unexpectedKw(other)
     }

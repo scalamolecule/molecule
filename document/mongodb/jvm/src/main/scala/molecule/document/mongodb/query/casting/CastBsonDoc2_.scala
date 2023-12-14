@@ -4,13 +4,14 @@ package molecule.document.mongodb.query.casting
 import molecule.base.util.BaseHelpers
 import molecule.document.mongodb.sync.pretty
 import org.bson._
+import scala.annotation.tailrec
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
 
-trait CastBsonDoc_ extends BaseHelpers {
+trait CastBsonDoc2_ extends BaseHelpers {
 
-  private type Casts = (Option[String], List[String], List[(String, BsonDocument => Any)])
+  private type Casts = (List[String], List[(String, Boolean, BsonDocument => Any)])
 
   // Let backrefs go back to same previously worked on namespace doc
   protected val curLevelDocs = mutable.Map.empty[List[String], BsonDocument]
@@ -18,84 +19,165 @@ trait CastBsonDoc_ extends BaseHelpers {
   var level = 0
   def indent: String = "  " * level
 
+  @tailrec
   private def castLevel(
+    acc: List[BsonDocument => Any],
     levelCasts: List[Casts],
-    nestedCasts: List[List[Casts]]
+    nestedCasts: List[List[Casts]],
+    isNested: Boolean
   ): List[BsonDocument => Any] = {
-    val flatCasts = levelCasts.flatMap {
-      case (_, Nil, attrCasts)         => attrCasts.map(_._2) // outer doc used
-      case (_, refAttrPath, attrCasts) => attrCasts.map { case (field, fieldCast) =>
-        (outerDoc: BsonDocument) => {
-          // Traverse to sub document
-          val subDoc = refAttrPath.foldLeft(outerDoc) {
-            case (curDoc, refAttr) =>
-              //              println(indent + s"  A  $curDoc   $refAttr  ${curDoc.get(refAttr)}")
-              curDoc.get(refAttr).asDocument()
-          }
-          //          println(indent + s"  B  $subDoc")
-          fieldCast(subDoc)
-        }
-      }
+    levelCasts match {
+      case Nil if nestedCasts.nonEmpty =>
+        curLevelDocs.clear()
+        println(indent + s"A  ${acc.length}  ${levelCasts.length}  $isNested")
+        acc :+ nestedCast(nestedCasts)
+
+      case Nil =>
+        println(indent + "END -------")
+        level = -1
+        acc
+
+      case (Nil, nsCasts) :: refCasts =>
+        // Top level
+        println(indent + s"B  $isNested")
+        castLevel(acc ++ nsCasts.map(_._3), refCasts, nestedCasts, isNested)
+
+      case (_, nsCasts) :: refCasts if isNested && nestedCasts.isEmpty =>
+        // Nested leaf
+        println(indent + s"Z  $isNested  ${nsCasts.map(_._1)}")
+        castLevel(acc ++ nsCasts.map(_._3), refCasts, nestedCasts, isNested)
+
+      //      case (refAttrPath, nsCasts) :: refCasts if isNested =>
+      //        println(indent + s"C  $isNested  $refAttrPath  ${nestedCasts.isEmpty}")
+      //        val curPath = if (isNested) refAttrPath.tail else refAttrPath
+      //        castLevel(acc ++ castRefAttrsNested(curPath, nsCasts), refCasts, nestedCasts, isNested)
+
+      case (refAttrPath, nsCasts) :: refCasts =>
+        println(indent + s"D  $isNested  $refAttrPath  ${nestedCasts.isEmpty}")
+        val curPath = if (isNested) refAttrPath.tail else refAttrPath
+        castLevel(acc ++ castRefAttrs(curPath, nsCasts), refCasts, nestedCasts, isNested)
     }
-    if (nestedCasts.isEmpty)
-      flatCasts
-    else
-      flatCasts :+ castNested(levelCasts.last._2, nestedCasts)
   }
 
-  private def castNested(
-    lastAttrPath: List[String],
-    nestedCasts: List[List[Casts]]
-  ): BsonDocument => Any = {
+  //  @tailrec
+  //  private def castLevel(
+  //    acc: List[BsonDocument => Any],
+  //    levelCasts: List[Casts],
+  //    nestedCasts: List[List[Casts]],
+  //    isNested: Boolean
+  //  ): List[BsonDocument => Any] = {
+  //    levelCasts match {
+  //      case (_ :: Nil, casts) :: refs if isNested =>
+  //        castLevel(acc ++ casts.map(_._3), refs, nestedCasts, isNested)
+  //
+  //      case (Nil, casts) :: refs =>
+  //        castLevel(acc ++ casts.map(_._3), refs, nestedCasts, isNested)
+  //
+  //      case (path, casts) :: refs if nestedCasts.isEmpty =>
+  //        val curPath = if (isNested) path.tail else path
+  //        castLevel(acc ++ castRefNs(curPath, casts), refs, nestedCasts, isNested)
+  //
+  //      case Nil if nestedCasts.nonEmpty =>
+  //        curLevelDocs.clear()
+  //        acc :+ nestedCast(nestedCasts)
+  //
+  //      case _ =>
+  //        acc
+  //    }
+  //  }
+  //
+  //  private def castRefAttrsNested(
+  //    refAttrPath: List[String],
+  //    nsCasts: List[(String, Boolean, BsonDocument => Any)]
+  //  ): List[BsonDocument => Any] = {
+  //    nsCasts.map { case (field, nested, fieldCast) =>
+  //      (outerDoc: BsonDocument) => {
+  //        println(indent + s"  C1  $refAttrPath  $nested")
+  //        println(indent + s"  C2  $outerDoc   $field   ==== ${curLevelDocs.size}  ${curLevelDocs.contains(refAttrPath)}")
+  //
+  //        val doc = curLevelDocs.getOrElse(refAttrPath,
+  //          // Traverse to document
+  //          //                    refAttrPath.foldLeft(outerDoc) {
+  //          //                      case (curDoc, refAttr) =>
+  //          //                        println(indent + s"  C3  $curDoc   $refAttr  ${curDoc.get(refAttr)}")
+  //          //                        curDoc.get(refAttr).asDocument()
+  //          //                    }
+  //          outerDoc
+  //        )
+  //        println(indent + s"  C4  $doc   $field   ${fieldCast(doc)}")
+  //        curLevelDocs(refAttrPath) = doc
+  //        fieldCast(doc)
+  //      }
+  //    }
+  //  }
+
+  private def castRefAttrs(
+    refAttrPath: List[String],
+    nsCasts: List[(String, Boolean, BsonDocument => Any)]
+  ): List[BsonDocument => Any] = {
+    nsCasts.map { case (field, nested, fieldCast) =>
+      (outerDoc: BsonDocument) => {
+        println(indent + s"  D1  $refAttrPath  $nested")
+        println(indent + s"  D2  $outerDoc   $field   ==== ${curLevelDocs.size}  ${curLevelDocs.contains(refAttrPath)}")
+
+        val doc = curLevelDocs.getOrElse(refAttrPath,
+          // Traverse to document
+          refAttrPath.foldLeft(outerDoc) {
+            case (curDoc, refAttr) =>
+              println(indent + s"  D3  $curDoc   $refAttr  ${curDoc.get(refAttr)}")
+              curDoc.get(refAttr).asDocument()
+          }
+          //          outerDoc
+        )
+        println(indent + s"  D4  $doc   $field   ${fieldCast(doc)}")
+        curLevelDocs(refAttrPath) = doc
+        fieldCast(doc)
+      }
+    }
+  }
+
+  private def nestedCast(allCasts: List[List[Casts]]): BsonDocument => Any = {
     level += 1
-    val nestedRefAttr      = nestedCasts.head.head._1.get
-    val castNestedDocument = levelCaster(nestedCasts)
+    val refAttr     = allCasts.head.head._1.last
+    val nestedCasts = documentCaster(allCasts, true)
     (outerDoc: BsonDocument) => {
       level += 1
       val nestedRows = ListBuffer.empty[Any]
-      //      println(indent + s"N1  $lastAttrPath")
-      //      println(indent + s"N2  $outerDoc   $nestedRefAttr")
+      println(indent + s"A  $refAttr")
+      println(indent + s"A  $outerDoc")
 
-      val doc = lastAttrPath match {
-        case Nil => outerDoc
-        case _   => lastAttrPath.foldLeft(outerDoc) {
-          case (curDoc, refAttr) =>
-            //                println(indent + s"  NESTED SUB  $curDoc   $refAttr  ${curDoc.get(refAttr)}")
-            curDoc.get(refAttr).asDocument()
-        }
-      }
-      //      println(indent + s"N3  $doc    $refAttr")
-      //      println(indent + s"N3  $doc")
       curLevelDocs.clear()
-      doc.get(nestedRefAttr).asArray().forEach { nestedRow =>
-        //        println(indent + s"N4  nestedRow: $nestedRow")
-        nestedRows += castNestedDocument(nestedRow.asDocument())
+      outerDoc.get(refAttr).asArray().forEach { nestedRow =>
+        println(indent + s"A  nestedRow: $nestedRow")
+        nestedRows += nestedCasts(nestedRow.asDocument())
       }
       nestedRows.toList
     }
   }
 
-  private def debugCasts(allCasts: List[List[Casts]]): Unit = {
+
+  final def documentCaster(
+    allCasts: List[List[Casts]],
+    isNested: Boolean = false
+  ): BsonDocument => Any = {
     println(s"######################### $level ##########################################################")
     println(
-      allCasts.head.map { case (nestedRefAttr, refPath, castData) =>
-          val refs  = refPath
-          val casts = if (castData.isEmpty) "-" else castData.map {
-            case (field, _) =>
+      allCasts.head.map { case (refPath, castData) =>
+        val refs = if(refPath.isEmpty) "-" else refPath.mkString(".")
+          val casts = if(castData.isEmpty) "-" else castData.map {
+            case (field, nested, _) =>
               val p1 = padS(20, field)
-              s"$field $p1 <cast>"
+              val p2 = padS(6, nested.toString)
+              s"$field $p1 $nested $p2 <cast>"
           }.mkString("\n  ")
-          s"""$nestedRefAttr  $refs
+          s"""$refs
              |  $casts""".stripMargin
         }
         .mkString("\n")
     )
     println("----------------------------------------")
-  }
 
-  final def levelCaster(allCasts: List[List[Casts]]): BsonDocument => Any = {
-    //    debugCasts(allCasts)
-    val casters = castLevel(allCasts.head, allCasts.tail)
+    val casters = castLevel(Nil, allCasts.head, allCasts.tail, isNested)
     casters.length match {
       case 1  => cast1(casters)
       case 2  => cast2(casters)

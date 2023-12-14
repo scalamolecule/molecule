@@ -45,7 +45,7 @@ trait ResolveExprOneID extends ResolveExpr with LambdasOne { self: MongoQueryBas
 //    b.projectField(field)
     projectField(field)
 
-    addCast(field, b.nested, res.cast(field))
+    addCast(field, res.cast(field))
     addSort(attr, field)
 
     attr.filterAttr.fold(

@@ -1,0 +1,14 @@
+package molecule.document.mongodb.compliance2.pagination.cursor.noUnique
+
+import molecule.coreTests.spi.pagination.cursor.noUnique._
+import molecule.document.mongodb.setup.TestAsync_mongodb
+
+object AttrOrderMandatory extends AttrOrderMandatory with TestAsync_mongodb
+object AttrOrderOptional extends AttrOrderOptional with TestAsync_mongodb
+object DirectionsMandatory extends DirectionsMandatory with TestAsync_mongodb
+object DirectionsOptional extends DirectionsOptional with TestAsync_mongodb
+object MutationAdd extends MutationAdd with TestAsync_mongodb
+object MutationDelete extends MutationDelete with TestAsync_mongodb
+object Nested extends Nested with TestAsync_mongodb
+object NestedOpt extends NestedOpt with TestAsync_mongodb
+object TypesOptional extends TypesOptional with TestAsync_mongodb
