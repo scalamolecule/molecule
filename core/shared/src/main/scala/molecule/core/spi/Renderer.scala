@@ -7,15 +7,18 @@ trait Renderer {
   protected def printRaw(
     action: String,
     elements: List[Element],
-    dbString0: String = "",
-    dataString0: String = ""
+    dbString: String = "",
+    dataString: String = ""
   ): Unit = {
-    val dbString   = if (dbString0.isBlank) "" else s"\n\n$dbString0"
-    val dataString = if (dataString0.isBlank) "" else s"\n\n$dataString0"
+    val render = List(
+      if (elements.isEmpty) None else Some(elements.mkString("\n").trim),
+      if (dbString.isBlank) None else Some(dbString),
+      if (dataString.isBlank) None else Some(dataString),
+    ).flatten.mkString("\n\n")
     println(
       s"""========================================
          |$action:
-         |${elements.mkString("\n").trim}$dbString$dataString
+         |$render
          |----------------------------------------
          |""".stripMargin
     )

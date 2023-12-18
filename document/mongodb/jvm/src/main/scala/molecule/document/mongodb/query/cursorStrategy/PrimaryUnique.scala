@@ -43,7 +43,7 @@ case class PrimaryUnique[Tpl](
     if (flatRowCount == 0) {
       (Nil, "", false)
     } else {
-      if (m2q.isNested || m2q.isNestedOpt) {
+      if (m2q.isNestedMan || m2q.isNestedOpt) {
 //        val nestedRows    = if (m2q.isNested) m2q.rows2nested(sortedRows1) else m2q.rows2nestedOpt(sortedRows1)
 //        val topLevelCount = nestedRows.length
 //        val limitAbs      = limit.abs.min(topLevelCount)

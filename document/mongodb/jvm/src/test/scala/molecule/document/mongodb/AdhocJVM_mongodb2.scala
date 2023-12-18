@@ -83,88 +83,8 @@ object AdhocJVM_mongodb2 extends TestSuite_mongodb2 {
         //        _ <- A.i.B.i.C.i._B._A.Bb.i.query.get.map(_ ==> List((0, 1, 2, 11)))
         //        _ <- A.i.B.C.i._B._A.Bb.i.query.get.map(_ ==> List((0, 2, 11)))
         //        _ <- A.B.C.s._B._A.Bb.i.query.get.map(_ ==> List(("c", 11)))
-/*
 
-========================================
-SAVE:
-AttrOneManInt("A", "i", Eq, Seq(0), None, None, Nil, Nil, None, None, Seq(0, 1))
-AttrOneManString("A", "s", Eq, Seq("a"), None, None, Nil, Nil, None, None, Seq(0, 3))
-Ref("A", "b", "B", CardOne, true, Seq(0, 6, 1))
-AttrOneManInt("B", "i", Eq, Seq(1), None, None, Nil, Nil, None, None, Seq(1, 20))
 
-{
-  "action": "insert",
-  "A": [
-    {
-      "i": 0,
-      "s": "a",
-      "b": {
-        "i": 1
-      }
-    }
-  ]
-}
-----------------------------------------
-
-========================================
-QUERY:
-AttrOneManInt("A", "i", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 1))
-Ref("A", "b", "B", CardOne, true, Seq(0, 6, 1))
-AttrOneManInt("B", "i", V, Seq(), None, None, Nil, Nil, None, None, Seq(1, 20))
-
-{
-  "collection": "A",
-  "pipeline": [
-    {
-      "$match": {
-        "$and": [
-          {
-            "i": {
-              "$ne": null
-            }
-          },
-          {
-            "b": {
-              "$ne": null
-            }
-          },
-          {
-            "b.i": {
-              "$ne": null
-            }
-          }
-        ]
-      }
-    },
-    {
-      "$project": {
-        "i": 1,
-        "b": {
-          "i": 1
-        },
-        "_id": 0
-      }
-    }
-  ]
-}
-----------------------------------------
-
-RESULT ---------------------------------------------
-{
-  "i": 0,
-  "b": {
-    "i": 1
-  }
-}
-
-{
-  "i": 0,
-  "b": {
-    "i": 1
-  }
-}
-
- */
 
       } yield ()
     }

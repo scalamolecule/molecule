@@ -276,14 +276,29 @@ trait NestedOptional extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           ("A", List(
             (None, "a2", List(
               (20, None),
-              (21, Some("y")))),
+              (21, Some("y")),
+            )),
             (Some(1), "a1", List(
               (10, Some("x")),
-              (11, None)))
+              (11, None),
+            ))
           )),
           ("B", Nil),
         ))
 
+        _ <- A.s.d1.Bb.*?(B.i_?.d1.s.Cc.*?(C.i.d1.s_?)).query.get.map(_ ==> List(
+          ("B", Nil),
+          ("A", List(
+            (Some(1), "a1", List(
+              (11, None),
+              (10, Some("x")),
+            )),
+            (None, "a2", List(
+              (21, Some("y")),
+              (20, None),
+            )),
+          )),
+        ))
       } yield ()
     }
   }

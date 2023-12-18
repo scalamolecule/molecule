@@ -190,7 +190,7 @@ trait NestedRef extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- A.i.Bb.*?(B.i.Cc.i).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Only cardinality-one refs allowed in optional nested queries. Found: " +
-              """Ref("B", "cc", "C", CardSet, Seq(1, 28, 2))"""
+              """Ref("B", "cc", "C", CardSet, false, Seq(1, 30, 2))"""
           }
         // Ok:
         _ <- A.i.Bb.*?(B.i.C.i).query.get

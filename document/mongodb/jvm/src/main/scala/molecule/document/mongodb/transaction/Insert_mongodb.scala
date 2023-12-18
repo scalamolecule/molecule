@@ -90,10 +90,13 @@ trait Insert_mongodb
     exts: List[String] = Nil
   ): Product => Unit = {
     (tpl: Product) => {
-      doc.append(attr, tpl.productElement(tplIndex) match {
-        case Some(scalaValue) => handleValue(scalaValue.asInstanceOf[T]).asInstanceOf[BsonValue]
-        case None             => new BsonNull()
-      })
+      tpl.productElement(tplIndex) match {
+        case Some(scalaValue) => doc.append(
+          attr,
+          handleValue(scalaValue.asInstanceOf[T]).asInstanceOf[BsonValue]
+        )
+        case None             => ()
+      }
     }
   }
 
@@ -114,13 +117,12 @@ trait Insert_mongodb
     (tpl: Product) => {
       tpl.productElement(tplIndex).asInstanceOf[Set[T]] match {
         case set if set.nonEmpty =>
-          val array: util.ArrayList[BsonValue] = new util.ArrayList[BsonValue]()
+          val array: util.ArrayList[BsonValue] = new util.ArrayList[BsonValue](set.size)
           set.map(scalaValue => array.add(transformValue(scalaValue).asInstanceOf[BsonValue]))
           doc.append(attr, new BsonArray(array))
 
         case _ => doc.append(attr, new BsonNull())
       }
-      () // saveDoc mutated
     }
   }
 
@@ -141,13 +143,14 @@ trait Insert_mongodb
     (tpl: Product) => {
       tpl.productElement(tplIndex) match {
         case Some(set: Set[_]) if set.nonEmpty =>
-          val array: util.ArrayList[BsonValue] = new util.ArrayList[BsonValue]()
-          set.asInstanceOf[Set[T]].map(scalaValue => array.add(transformValue(scalaValue).asInstanceOf[BsonValue]))
+          val array: util.ArrayList[BsonValue] = new util.ArrayList[BsonValue](set.size)
+          set.asInstanceOf[Set[T]].map(scalaValue =>
+            array.add(transformValue(scalaValue).asInstanceOf[BsonValue])
+          )
           doc.append(attr, new BsonArray(array))
 
-        case _ => doc.append(attr, new BsonNull())
+        case _ => ()
       }
-      ()
     }
   }
 
@@ -248,13 +251,8 @@ trait Insert_mongodb
         val referencedDocs = nsDocs.getOrElse(refNs, new BsonArray())
         nestedTuples.foreach { nestedTpl =>
 
-          // Reference document
-          val refId = new BsonString(new ObjectId().toHexString)
-          refIds.add(refId)
-
-          // Set id in new referenced document
+          // Referenced document
           doc = new BsonDocument()
-          doc.append("_id", refId)
 
           // Step into referenced document
           docs = docs.init :+ List(doc)
@@ -262,11 +260,25 @@ trait Insert_mongodb
           // Save outer doc
           val outerDoc = doc
 
+          // Save immutable clone to see if anything has changed
+          val beforeDoc = doc.clone
+
           // Process nested data
           resolveNested(nestedTpl)
 
-          // Add doc to namespace
-          referencedDocs.add(outerDoc)
+          if (beforeDoc != outerDoc) {
+            // Reference document
+            val refId = new BsonString(new ObjectId().toHexString)
+            refIds.add(refId)
+
+            // Set id in referenced document
+            outerDoc.append("_id", refId)
+
+            // Add doc to namespace
+            referencedDocs.add(outerDoc)
+          } else {
+            docs = docs.init
+          }
         }
         nsDocs(refNs) = referencedDocs
       }

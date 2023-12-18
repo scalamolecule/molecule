@@ -5,6 +5,7 @@ import molecule.base.error.ModelError
 import molecule.core.util.Executor._
 import molecule.document.mongodb.AdhocJVM_mongodb.int2
 import molecule.document.mongodb.async._
+import molecule.document.mongodb.ownership.BasicRelationships.refs
 import molecule.document.mongodb.setup.TestSuite_mongodb
 import utest._
 import scala.collection.immutable.List
@@ -21,9 +22,9 @@ object AdhocJVM_mongodb extends TestSuite_mongodb {
         //        _ <- Ns.i(1).save.transact
         //        _ <- Ns.i.query.get.map(_ ==> List(1))
 
-        _ <- Ns.i.insert(1, 2).transact
-        _ <- Ns.i_(1).delete.transact
-        _ <- Ns.i.query.get.map(_ ==> List(2))
+        _ <- Ref.i.Nss.*(Ns.strings).insert(1, List(Set(string1, string2))).i.transact
+
+        _ <- Ref.i_.Nss.*(Ns.strings).query.i.get.map(_ ==> List(List(Set(string1, string2))))
 
         //        _ <- rawTransact(
         //          """{
@@ -66,137 +67,35 @@ object AdhocJVM_mongodb extends TestSuite_mongodb {
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
-        _ <- A.i(0).s("a").B.i(1)
-//          .s("b").Cc.i(22)
-//          ._B.C.i(2).s("c")
-//          ._B._A.Bb.i(11)
-          .save.i.transact
 
-        _ <- A.i.B.i.query.i.get.map(_ ==> List((0, 1)))
-        //        _ <- A.i.B.i._A.s.query.get.map(_ ==> List((0, 1, "a")))
-        //        _ <- A.i.B.i._A.Bb.i.query.get.map(_ ==> List((0, 1, 11)))
-        //        _ <- A.i.B.i.C.i._B.s.query.get.map(_ ==> List((0, 1, 2, "b")))
-        //        _ <- A.i.B.C.i.query.get.map(_ ==> List((0, 2)))
-        //        _ <- A.i.B.C.i._B.i.query.get.map(_ ==> List((0, 2, 1)))
-        //        _ <- A.i.B.i.C.i._B.Cc.i.query.get.map(_ ==> List((0, 1, 2, 22)))
-        //        _ <- A.i.B.C.i._B.Cc.i.query.get.map(_ ==> List((0, 2, 22)))
-        //        _ <- A.i.B.i.C.i._B.s._A.s.query.get.map(_ ==> List((0, 1, 2, "b", "a")))
-        //        _ <- A.i.B.i.C.i._B._A.s.query.get.map(_ ==> List((0, 1, 2, "a")))
-        //        _ <- A.i.B.C.i._B._A.s.query.get.map(_ ==> List((0, 2, "a")))
-        //        _ <- A.i.B.i.C.i._B.s._A.Bb.i.query.get.map(_ ==> List((0, 1, 2, "b", 11)))
-        //        _ <- A.i.B.i.C.i._B._A.Bb.i.query.get.map(_ ==> List((0, 1, 2, 11)))
-        //        _ <- A.i.B.C.i._B._A.Bb.i.query.get.map(_ ==> List((0, 2, 11)))
-        //        _ <- A.B.C.s._B._A.Bb.i.query.get.map(_ ==> List(("c", 11)))
-        /*
+        _ <- A.i(0).s("a").B.i(1).s("b").Cc.i(22)
+          ._B.C.i(2).s("c")
+          ._B._A.Bb.i(11)
+          .save.transact
 
-
-========================================
-SAVE:
-AttrOneManInt("A", "i", Eq, Seq(0), None, None, Nil, Nil, None, None, Seq(0, 1))
-AttrOneManString("A", "s", Eq, Seq("a"), None, None, Nil, Nil, None, None, Seq(0, 3))
-Ref("A", "b", "B", CardOne, false, Seq(0, 6, 1))
-AttrOneManInt("B", "i", Eq, Seq(1), None, None, Nil, Nil, None, None, Seq(1, 20))
-
-{
-  "action": "insert",
-  "A": [
-    {
-      "i": 0,
-      "s": "a",
-      "b": "657b6fd93c730764b4492847"
-    }
-  ],
-  "B": [
-    {
-      "_id": "657b6fd93c730764b4492847",
-      "i": 1
-    }
-  ]
-}
-----------------------------------------
-
-========================================
-QUERY:
-AttrOneManInt("A", "i", V, Seq(), None, None, Nil, Nil, None, None, Seq(0, 1))
-Ref("A", "b", "B", CardOne, false, Seq(0, 6, 1))
-AttrOneManInt("B", "i", V, Seq(), None, None, Nil, Nil, None, None, Seq(1, 20))
-
-{
-  "collection": "A",
-  "pipeline": [
-    {
-      "$match": {
-        "$and": [
-          {
-            "i": {
-              "$ne": null
-            }
-          },
-          {
-            "b": {
-              "$ne": null
-            }
-          }
-        ]
-      }
-    },
-    {
-      "$lookup": {
-        "from": "B",
-        "localField": "b",
-        "foreignField": "_id",
-        "as": "b",
-        "pipeline": [
-          {
-            "$match": {
-              "i": {
-                "$ne": null
-              }
-            }
-          }
-        ]
-      }
-    },
-    {
-      "$addFields": {
-        "b": {
-          "$first": "$b"
-        }
-      }
-    },
-    {
-      "$project": {
-        "i": 1,
-        "b": {
-          "i": 1
-        },
-        "_id": 0
-      }
-    }
-  ]
-}
-----------------------------------------
-
-RESULT ---------------------------------------------
-{
-  "i": 0,
-  "b": {
-    "i": 1
-  }
-}
-
-{
-  "i": 0,
-  "b": {
-    "i": 1
-  }
-}
-
-         */
+        _ <- A.i.B.i.query.get.map(_ ==> List((0, 1)))
+        _ <- A.i.B.i._A.s.query.get.map(_ ==> List((0, 1, "a")))
+        _ <- A.i.B.i._A.Bb.i.query.get.map(_ ==> List((0, 1, 11)))
+        _ <- A.i.B.i.C.i._B.s.query.get.map(_ ==> List((0, 1, 2, "b")))
+        _ <- A.i.B.C.i.query.get.map(_ ==> List((0, 2)))
+        _ <- A.i.B.C.i._B.i.query.get.map(_ ==> List((0, 2, 1)))
+        _ <- A.i.B.i.C.i._B.Cc.i.query.i.get.map(_ ==> List((0, 1, 2, 22)))
+        _ <- A.i.B.C.i._B.Cc.i.query.get.map(_ ==> List((0, 2, 22)))
+        _ <- A.i.B.i.C.i._B.s._A.s.query.get.map(_ ==> List((0, 1, 2, "b", "a")))
+        _ <- A.i.B.i.C.i._B._A.s.query.get.map(_ ==> List((0, 1, 2, "a")))
+        _ <- A.i.B.C.i._B._A.s.query.get.map(_ ==> List((0, 2, "a")))
+        _ <- A.i.B.i.C.i._B.s._A.Bb.i.query.get.map(_ ==> List((0, 1, 2, "b", 11)))
+        _ <- A.i.B.i.C.i._B._A.Bb.i.query.get.map(_ ==> List((0, 1, 2, 11)))
+        _ <- A.i.B.C.i._B._A.Bb.i.query.get.map(_ ==> List((0, 2, 11)))
+        _ <- A.B.C.s._B._A.Bb.i.query.get.map(_ ==> List(("c", 11)))
 
       } yield ()
     }
-
+    //    List(
+    //      (0,List((Some(1),Some(x)), (Some(2),Some(y)))),
+    //      (1a,List((None,Some(x)), (Some(2),Some(y)))),
+    //      (1b,List((Some(1),None), (Some(2),Some(y)))),
+    //      (1c,List((Some(1),Some(x)), (None,Some(y)))),
 
 
     //    "unique" - unique { implicit conn =>

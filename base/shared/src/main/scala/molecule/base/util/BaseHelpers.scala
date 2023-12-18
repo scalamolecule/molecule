@@ -85,14 +85,14 @@ trait BaseHelpers extends DateHandling {
     }.mkString("Seq(", ", ", ")")
   }
 
-  private var time0     = System.currentTimeMillis()
-  private var prevTime  = time0
-  private val times     = collection.mutable.Map.empty[Int, Long]
-  private val formatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSS")
+  private var time0          = System.currentTimeMillis()
+  private var prevTime       = time0
+  private lazy val times     = collection.mutable.Map.empty[Int, Long]
+  private lazy val formatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSS")
 
   protected final def resetTimer(): Unit = {
-    time0     = System.currentTimeMillis()
-    prevTime  = time0
+    time0 = System.currentTimeMillis()
+    prevTime = time0
     times.clear()
   }
   protected final def time(n: Int, prev: Int = 0): Unit = {
@@ -113,6 +113,25 @@ trait BaseHelpers extends DateHandling {
     prevTime = time2
     val d = LocalDateTime.ofInstant(Instant.ofEpochMilli(elapsed), ZoneOffset.UTC)
     println(s"TIME $n: " + formatter.format(d))
+  }
+
+  def diff(s1: String, s2: String): Unit = {
+    val lines1 = s1.split('\n')
+    val lines2 = s2.split('\n')
+    val max1   = lines1.map(_.length).max + 3
+    val lines  = if (lines1.length >= lines2.length) {
+      val it2 = lines2.iterator
+      lines1.map { l1 =>
+        l1 + padS(max1, l1) + "  |  " + (if (it2.hasNext) it2.next() else "")
+      }
+    } else {
+      val it1 = lines1.iterator
+      lines2.map { l2 =>
+        val s1 = if (it1.hasNext) it1.next() else ""
+        s1 + padS(max1, s1) + "  |  " + l2
+      }
+    }
+    println(lines.mkString("\n"))
   }
 
   protected def okIdent(name: String): String = name match {

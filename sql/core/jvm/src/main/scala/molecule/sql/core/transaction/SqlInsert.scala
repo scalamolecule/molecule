@@ -21,9 +21,9 @@ trait SqlInsert
 
   def getData(nsMap: Map[String, MetaNs], elements: List[Element], tpls: Seq[Product]): Data = {
     elements.foreach(debug)
-    debug("### A #############################################################################################")
+//    debug("### A #############################################################################################")
     if (tpls.isEmpty) {
-      debug("Tpls data empty, so no insert...")
+//      debug("Tpls data empty, so no insert...")
       // No need to handle inserts if no data
       (Nil, Nil)
     } else {
@@ -31,21 +31,20 @@ trait SqlInsert
       curRefPath = List(s"$level", initialNs)
       val resolveTpl: Product => Unit = getResolver(nsMap, elements)
 
-      debug(inserts.mkString("--- inserts\n  ", "\n  ", ""))
-      //    debug(joins.mkString("--- joins\n  ", "\n  ", ""))
-      debug("### B #############################################################################################")
+//      debug(inserts.mkString("--- inserts\n  ", "\n  ", ""))
+//      debug("### B #############################################################################################")
       initInserts()
-      debug("### C ############################################################################################# " + tpls)
+//      debug("### C ############################################################################################# " + tpls)
 
       // Loop rows of tuples
       var rowIndex = 0
       tpls.foreach { tpl =>
-        debug(s"###### $rowIndex ##################################### " + tpl)
+//        debug(s"###### $rowIndex ##################################### " + tpl)
         resolveTpl(tpl)
         addRowSetterToTableInserts(rowIndex)
         rowIndex += 1
       }
-      debug("### D #############################################################################################")
+//      debug("### D #############################################################################################")
       (getTableInserts, getJoinTableInserts)
     }
   }
@@ -61,8 +60,8 @@ trait SqlInsert
              |  $columns
              |) VALUES ($inputPlaceholders)""".stripMargin
 
-        debug(s"B -------------------- refPath: $refPath")
-        debug(stmt)
+//        debug(s"B -------------------- refPath: $refPath")
+//        debug(stmt)
         val ps = sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
         tableDatas(refPath) = Table(refPath, stmt, ps)
         rowSettersMap(refPath) = Nil
@@ -80,10 +79,10 @@ trait SqlInsert
   protected def addRowSetterToTableInserts(rowIndex: Int): Unit = {
     inserts.foreach {
       case (refPath, cols) =>
-        debug(s"C ---------------------- $refPath")
-        colSettersMap.foreach(x => debug(s"C ${x._2.size} colSetters: " + x._1))
+//        debug(s"C ---------------------- $refPath")
+//        colSettersMap.foreach(x => debug(s"C ${x._2.size} colSetters: " + x._1))
         val colSetters = colSettersMap(refPath)
-        debug(s"C ---------------------- ${colSetters.length}  $refPath")
+//        debug(s"C ---------------------- ${colSetters.length}  $refPath")
         colSettersMap(refPath) = Nil
         val rowSetter = (ps: PS, idsMap: IdsMap, _: RowIndex) => {
           var i        = 0

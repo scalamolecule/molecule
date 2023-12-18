@@ -4,7 +4,8 @@ import com.mongodb.client.model.Filters
 import molecule.base.ast._
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
-import org.bson.{BsonArray, BsonDocument, BsonNull}
+import molecule.document.mongodb.query.mongoModel.{FlatEmbed, FlatRef, NestedEmbed, NestedRef}
+import org.bson.{BsonArray, BsonDocument, BsonInt32, BsonNull}
 import scala.collection.mutable.ListBuffer
 
 
@@ -18,36 +19,36 @@ trait ResolveRef { self: MongoQueryBase =>
       )
     }
 
-    b.matches.add(Filters.ne(b.pathDot + refAttr, new BsonNull))
+    // Project refNs
+    val refProjections = new BsonDocument()
+    b.projection.append(refAttr, refProjections)
 
-    if (owner) {
-      b.path = b.path ++ List(refAttr, refNs)
-      b.pathDot = b.pathDot + refAttr + "."
-      b.pathUnderscore = b.pathUnderscore + refAttr + "_"
-      b.addFields(b.path) = Nil
-
+    val subBranch = if (owner) {
+      new FlatEmbed(
+        Some(b),
+        card.isInstanceOf[CardSet],
+        refAttr,
+        refNs,
+        b.pathFields, // Continue checking unique field names from base branch to here
+        b.dot + refAttr + ".",
+        b.und + refAttr + "_",
+        refProjections
+      )
     } else {
-      // Referenced entities aggregate in a clean new branch
-      val prevPathDot = b.pathDot
-      val newPath     = topPath ++ List(refAttr, refNs)
-      val newBranch   = new Branch
-      bb += newPath -> newBranch
-      b = newBranch
-      b.prevPathDot = prevPathDot
+      new FlatRef(
+        Some(b),
+        refAttr,
+        refNs,
+        ListBuffer.empty[String], // Start over with unique field names
+        if (b.isEmbedded) b.dot else "",
+        if (b.isEmbedded) b.und else "",
+        refProjections,
+      )
     }
-
-    // Know if we get arrays (ref) or documents (embedded)
-    b.refOwnerships(b.path) = owner
-
-    if (card == CardSet && b.pathDot.nonEmpty) {
-      unwinds += "$" + b.pathDot.init
-    }
-
-    val refDoc = new BsonDocument()
-    projections(topPath) = projections(topPath).append(refAttr, refDoc)
-
-    topPath = topPath ++ List(refAttr, refNs)
-    projections(topPath) = refDoc
+    // Matches build up on new ref branch as base
+    baseBranch = subBranch
+    b.refs.addOne(subBranch)
+    b = subBranch
 
     // Continue from ref namespace
     val nss     = allCasts.last
@@ -61,7 +62,7 @@ trait ResolveRef { self: MongoQueryBase =>
 
 
   final protected def resolveBackRef(bRef: BackRef, prev: Element): Unit = {
-    if (isNested || isNestedOpt) {
+    if (isNestedMan || isNestedOpt) {
       val BackRef(backRef, _, _) = bRef
       prev match {
         case a: Attr => throw ModelError(
@@ -73,23 +74,14 @@ trait ResolveRef { self: MongoQueryBase =>
       }
     }
 
-    // Back to previous namespace
-    b.path = b.path.dropRight(2)
-    b.pathDot = {
-      val nss = b.pathDot.init.split('.').init
-      if (nss.isEmpty) "" else nss.mkString(".") + "."
-    }
-    b.pathUnderscore = {
-      val nss = b.pathUnderscore.init.split('_').init
-      if (nss.isEmpty) "" else nss.mkString("_") + "_"
-    }
+    //    println(s"----- B1 -----  ${b.dot}  ${b.refAttr}  ${b.parent.map(_.isEmbedded)}")
+    //    b.matches.forEach(m => println(m))
 
-    topPath = topPath.dropRight(2)
+    // Go one level up/back
+    b = b.parent.get
 
-    // go back to previous doc if it exists
-    bb.toMap.get(topPath).foreach { branch =>
-      b = branch
-    }
+    //    println(s"----- B2 -----  ${b.dot}  ${b.refAttr}  ${b.parent.map(_.isEmbedded)}")
+    //    b.matches.forEach(m => println(m))
 
     val nss     = allCasts.last
     val curPath = nss.last
@@ -101,19 +93,19 @@ trait ResolveRef { self: MongoQueryBase =>
   }
 
   protected def resolveNestedRef(ref: Ref, nestedElements: List[Element]): Unit = {
-    isNested = true
+    isNestedMan = true
     if (isNestedOpt) {
       noMixedNestedModes
     }
     // No empty nested arrays when asking for mandatory nested data
-    b.matches.add(Filters.ne(ref.refAttr, new BsonArray()))
+    //    baseBranch.matches.add(Filters.ne(b.dot + ref.refAttr, new BsonArray()))
 
     resolveNested(ref, nestedElements, true)
   }
 
   protected def resolveNestedOptRef(ref: Ref, nestedElements: List[Element]): Unit = {
     isNestedOpt = true
-    if (isNested) {
+    if (isNestedMan) {
       noMixedNestedModes
     }
     if (expectedFilterAttrs.nonEmpty) {
@@ -123,42 +115,47 @@ trait ResolveRef { self: MongoQueryBase =>
   }
 
   private def resolveNested(ref: Ref, nestedElements: List[Element], mandatory: Boolean): Unit = {
-    b.nested = true
+    isNested = true
     level += 1
     validateRefNs(ref, nestedElements)
     val Ref(_, refAttr, refNs, _, owner, _) = ref
 
-    if (owner) {
-      b.path = b.path :+ refAttr
-      b.pathDot = b.pathDot + refAttr + "."
-      b.pathUnderscore = b.pathUnderscore + refAttr + "_"
-      b.addFields(b.path) = Nil
-    } else {
-      if (mandatory) {
-        // Make sure that lookup ref document arrays are not empty.
-        // Ref attr is overwritten by Mongo so we need to check after lookup.
-        b.mandatoryLookup = Some(Filters.ne(ref.refAttr, new BsonArray))
-      }
+    // Project refNs
+    val refProjections = new BsonDocument()
 
-      // Referenced entities aggregate in a clean new branch
-      val prevPathDot = b.pathDot
-      val newPath     = topPath ++ List(refAttr, refNs)
-      val newBranch   = new Branch
-      bb += newPath -> newBranch
-      b = newBranch
-      b.prevPathDot = prevPathDot
+    if (owner) {
+      b.projection.append(refAttr, refProjections)
+      b = new NestedEmbed(
+        Some(b),
+        refAttr,
+        refNs,
+        b.pathFields, // Continue checking unique field names from base branch to here
+        b.dot + refAttr + ".",
+        b.und + refAttr + "_",
+        refProjections
+      )
+    } else {
+
+      // Project ref
+      b.projection.append(refAttr, new BsonInt32(1))
+
+      val refBranch = new NestedRef(
+        Some(b),
+        refAttr,
+        refNs,
+        ListBuffer.empty[String], // Start over with unique field names
+        "",
+        "",
+        mandatory,
+        refProjections.append("_id", new BsonInt32(0))
+      )
+      // Matches build up on new ref branch as base
+      baseBranch = refBranch
+      b.refs.addOne(refBranch)
+      b = refBranch
     }
 
-    // Know if we get arrays (ref) or documents (embedded)
-    b.refOwnerships(b.path) = ref.owner
-
-    val refDoc = new BsonDocument()
-    projections(topPath) = projections(topPath).append(refAttr, refDoc)
-
-    topPath = topPath ++ List(refAttr, refNs)
-    projections(topPath) = refDoc
-
-    // Initiate nested namespace
+    // Initiate nested namespace casts
     allCasts += ListBuffer((
       Some(refAttr),
       ListBuffer.empty[String],

@@ -29,9 +29,97 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
     with BsonUtils
     with MoleculeLogging {
 
-  private val topDoc = bb.head._2
+  //  private val topDoc = bb.head._2
 
   private var lookups = List.empty[(List[String], BsonDocument, String)]
+
+//  final def getBsonQueryOLD(
+//    altElements: List[Element],
+//    optLimit: Option[Int],
+//    optOffset: Option[Int],
+//    optProxy: Option[ConnProxy]
+//  ): (String, util.ArrayList[Bson]) = {
+//    val elements1 = if (altElements.isEmpty) elements0 else altElements
+//    validateQueryModel(elements1)
+//    //    elements.foreach(println)
+//
+//    // Set attrMap if available (used to get original type of aggregate attributes)
+//    optProxy.foreach(p => attrMap = p.attrMap)
+//    val elements2 = prepareElements(elements1, optProxy)
+//
+//    // Recursively resolve molecule elements
+//    resolve(elements2)
+//
+//    // Top Mongo aggregation stages
+//    val topStages = new util.ArrayList[Bson]()
+//
+//    def addStage(name: String, params: Bson): Boolean = {
+//      topStages.add(
+//        new BsonDocument().append(name,
+//          // Add codec for MQL expressions (filters)
+//          params.toBsonDocument(classOf[Bson], MongoClientSettings.getDefaultCodecRegistry)
+//        )
+//      )
+//    }
+//
+//    if (sampleSize > 0) {
+//      topStages.add(new BsonDocument().append("$sample",
+//        new BsonDocument().append("size", new BsonInt32(sampleSize)))
+//      )
+//    }
+//
+//    // Process branches from leaves to top level
+//    bb.toList.sortBy(-_._1.length).foreach {
+//      case (Nil, branch) =>
+//        //        println("A")
+//        // Top level (both embedded and referenced)
+//        //        println(s"B -------------------- ${branch.path}  List()   '${branch.pathDot}'")
+//        //        println(s"B1 ############# ${branch.hashCode()}  " + branch.nestedSorts)
+//        topStages.addAll(processBranch(Nil, branch))
+//
+//      //      case (path, branch) if !branch.nested =>
+//      //        println("B")
+//      //        topStages.addAll(processBranch(path, branch))
+//
+//      case (path, branch) =>
+//        //        println(s"C  ${System.identityHashCode(branch)}  $path")
+//        //        println(s"B2 ############# ${branch.hashCode()}  " + branch.nestedSorts)
+//        //        println(s"A -------------------- ${branch.path}  $path   '${branch.pathDot}'")
+//        val List(refAttr, refNs) = path.takeRight(2)
+//        val pathRefAttr          = branch.prevPathDot + refAttr
+//        val lookup               = new BsonDocument()
+//          .append("from", new BsonString(refNs))
+//          .append("localField", new BsonString(pathRefAttr))
+//          .append("foreignField", new BsonString("_id"))
+//          .append("as", new BsonString(pathRefAttr))
+//
+//        val pipeline = new BsonArray()
+//        processBranch(path, branch).forEach(stage => pipeline.add(stage))
+//        lookup.append("pipeline", pipeline)
+//        lookups = lookups :+ ((path, new BsonDocument().append("$lookup", lookup), pathRefAttr))
+//    }
+//
+//    unwinds.foreach(unwind =>
+//      topStages.add(new BsonDocument().append("$unwind", new BsonString(unwind)))
+//    )
+//
+//    // Select which fields to output
+//    //    if (!topDoc.idField) {
+//    //      projections(Nil) = projections(Nil).append("_id", new BsonInt32(0))
+//    //    }
+//
+//
+//    if (projections.nonEmpty) {
+//      addStage("$project", projections(Nil))
+//    }
+//
+//    if (!sorts.isEmpty) {
+//      addStage("$sort", Sorts.orderBy(sorts))
+//    }
+//
+//    (getInitialNonGenericNs(elements2), topStages)
+//  }
+
 
   final def getBsonQuery(
     altElements: List[Element],
@@ -50,28 +138,8 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
     // Recursively resolve molecule elements
     resolve(elements2)
 
-    //    casts.foreach {
-    //      case x =>
-    //        println("  1  ----------------")
-    //        x.foreach {
-    //          case (refPath, y) =>
-    //            println(s"    $refPath")
-    //            y.foreach{
-    //              case (a, b, c) => println(s"      $a  $b")
-    //            }
-    //
-    //        }
-    //    }
-
+    // Top Mongo aggregation stages
     val topStages = new util.ArrayList[Bson]()
-    def addStage(name: String, params: Bson): Boolean = {
-      // Add codec for MQL expressions
-      topStages.add(
-        new BsonDocument().append(name,
-          params.toBsonDocument(classOf[Bson], MongoClientSettings.getDefaultCodecRegistry)
-        )
-      )
-    }
 
     if (sampleSize > 0) {
       topStages.add(new BsonDocument().append("$sample",
@@ -79,49 +147,20 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
       )
     }
 
-    bb.toList.sortBy(-_._1.length).foreach {
-      case (Nil, branch) =>
-        //        println(s"B -------------------- ${branch.path}  List()   '${branch.pathDot}'")
-        topStages.addAll(getStages(Nil, branch))
+    println(topBranch)
 
-      case (path, branch) =>
-        //        println(s"A -------------------- ${branch.path}  $path   '${branch.pathDot}'")
-        val List(refAttr, refNs) = path.takeRight(2)
-        val pathRefAttr          = branch.prevPathDot + refAttr
-        val lookup               = new BsonDocument()
-          .append("from", new BsonString(refNs))
-          .append("localField", new BsonString(pathRefAttr))
-          .append("foreignField", new BsonString("_id"))
-          .append("as", new BsonString(pathRefAttr))
-
-        val pipeline = new BsonArray()
-        getStages(path, branch).forEach(stage => pipeline.add(stage))
-        lookup.append("pipeline", pipeline)
-        lookups = lookups :+ ((path, new BsonDocument().append("$lookup", lookup), pathRefAttr))
-    }
-
-    unwinds.foreach(unwind =>
-      topStages.add(new BsonDocument().append("$unwind", new BsonString(unwind)))
-    )
-
-    // Select which fields to output
-    if (!topDoc.idField) {
-      projections(Nil) = projections(Nil).append("_id", new BsonInt32(0))
-    }
-
-    if (projections.nonEmpty) {
-      addStage("$project", projections(Nil))
-    }
-
-    if (!sorts.isEmpty) {
-      addStage("$sort", Sorts.orderBy(sorts))
-    }
+    // Recursively add aggregation pipeline stages for all branches
+    topStages.addAll(topBranch.getStages)
 
     (getInitialNonGenericNs(elements2), topStages)
   }
 
 
-  private def getStages(parentPath: List[String], branch: Branch): util.ArrayList[BsonDocument] = {
+  // Get pipeline stages from processing a branch
+  private def processBranch(parentPath: List[String], branch: BranchOLD): util.ArrayList[BsonDocument] = {
+    //    println(s"C ############## ${branch.hashCode()}  " + branch.nestedSorts)
+    //    println(s"C ############## ${branch.hashCode()}  ${branch.nested}  $parentPath")
+
     val stages = new util.ArrayList[BsonDocument]()
     def addStage(name: String, params: Bson): Boolean = {
       // Add codec for MQL expressions
@@ -152,12 +191,37 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
         // Forget once added
         lookups = lookups.filterNot(_ == l)
 
+        //        println(s"D ############## ${branch.hashCode()}  " + branch.nestedSorts)
+
+        //        if (branch.nestedSorts.nonEmpty) {
+        //          val sortFields = new BsonDocument()
+        //          branch.nestedSorts.foreach { case (field, order) =>
+        //            sortFields.append(field, new BsonString(s"$order"))
+        //          }
+        //          stages.add(
+        //            new BsonDocument().append("$project",
+        //              new BsonDocument().append("$" + pathRefAttr,
+        //                new BsonDocument().append("$sortArray",
+        //                  new BsonDocument()
+        //                    .append("input", new BsonString("$" + pathRefAttr))
+        //                    .append("sortBy", sortFields)
+        //                )))
+        //          )
+        //        }
+
         // Prevent new overwritten ref attr lookup to be empty when mandatory
         branch.mandatoryLookup.foreach { refNotEmpty =>
           addStage("$match", refNotEmpty)
         }
 
-        if (!branch.nested) {
+        //        if (!branch.nested) {
+        //        if (!branch.owner) {
+
+        //        println(s"  ----- ${System.identityHashCode(b)}  ${branch.nested}   ${branch.embedded}   ${b.path}  $pathRefAttr")
+        //        branch.refOwnerships.foreach(println)
+
+
+        if (!branch.nested && !branch.embedded) {
           stages.add(new BsonDocument().append("$addFields",
             new BsonDocument().append(pathRefAttr,
               new BsonDocument().append("$first", new BsonString("$" + pathRefAttr)))))
@@ -246,6 +310,15 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
       }
       if (!addFieldsDoc.isEmpty)
         stages.add(new BsonDocument().append("$addFields", addFieldsDoc))
+    }
+
+    if (branch.nestedSorts.nonEmpty) {
+      //      println("########## yeah  " + branch.nestedSorts)
+      val sortFields = new BsonDocument()
+      branch.nestedSorts.foreach { case (field, order) =>
+        sortFields.append(field, new BsonInt32(order))
+      }
+      stages.add(new BsonDocument().append("$sort", sortFields))
     }
 
     //    println("------------- " + b.refPath)
@@ -470,7 +543,7 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
 
 
   def pagination(optLimit: Option[Int], optOffset: Option[Int], isBackwards: Boolean): String = {
-    val limit_ = if (isNested || isNestedOpt) {
+    val limit_ = if (isNestedMan || isNestedOpt) {
       ""
     } else if (hardLimit != 0) {
       s"\nLIMIT $hardLimit"
@@ -478,7 +551,7 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
       optLimit.fold("")(limit => s"\nLIMIT " + (if (isBackwards) -limit else limit))
     }
 
-    val offset_ = if (isNested || isNestedOpt) {
+    val offset_ = if (isNestedMan || isNestedOpt) {
       ""
     } else {
       optOffset.fold("")(offset => s"\nOFFSET " + (if (isBackwards) -offset else offset))
@@ -599,7 +672,7 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
           throw ModelError(noIdFiltering)
         }
         if (a.attr == "id") {
-          b.idField = true
+          bx.idField = true
           a match {
             case a: AttrOneMan => resolveAttrOneManID(a); resolve(tail)
             case a: AttrOneTac => resolveAttrOneTacID(a); resolve(tail)

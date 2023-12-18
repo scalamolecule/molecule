@@ -114,8 +114,12 @@ trait SpiSync_mongodb
   ): Unit = {
     tryInspect("query", elements) {
       val (ns, pipeline) = getModel2SqlQuery[Any](elements).getBsonQuery(Nil, optLimit, optOffset, None)
-      printRaw(label, elements, pipeline2json(pipeline, Some(ns)))
-//      printRaw(label, Nil, pipeline2json(pipeline, Some(ns)))
+      //            printRaw(label, elements, pipeline2json(pipeline, Some(ns)))
+      printRaw(label, Nil, pipeline2json(pipeline, Some(ns)))
+
+      //      val (ns, pipeline) = getModel2SqlQuery[Any](elements).getBsonQuery(Nil, optLimit, optOffset, None)
+      //      val (_, pipeline2) = getModel2SqlQuery[Any](elements).getBsonQuery2(Nil, optLimit, optOffset, None)
+      //      diff(pipeline2json(pipeline, Some(ns)), pipeline2json(pipeline2, Some(ns)))
     }
   }
 
@@ -172,8 +176,8 @@ trait SpiSync_mongodb
   override def insert_inspect(insert: Insert)(implicit conn0: Conn): Unit = {
     tryInspect("insert", insert.elements) {
       val conn = conn0.asInstanceOf[MongoConn_JVM]
-      printInspectTx("INSERT", insert.elements, insert_getData(insert, conn), insert.tpls)
-//      printInspectTx("INSERT", Nil, insert_getData(insert, conn), insert.tpls)
+      //      printInspectTx("INSERT", insert.elements, insert_getData(insert, conn), insert.tpls)
+      printInspectTx("INSERT", Nil, insert_getData(insert, conn), insert.tpls)
     }
   }
 

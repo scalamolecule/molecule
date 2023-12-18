@@ -155,7 +155,7 @@ abstract class QueryResolve_mongodb[Tpl](
     if (flatRowCount == 0) {
       (Nil, "", false)
     } else {
-      if (m2q.isNested || m2q.isNestedOpt) {
+      if (m2q.isNestedMan || m2q.isNestedOpt) {
         //        val nestedTpls     = if (m2q.isNested) m2q.rows2nested(sortedRows1) else m2q.rows2nestedOpt(sortedRows1)
         //        val totalCount     = nestedTpls.length
         //        val count          = getCount(limit, forward, totalCount)

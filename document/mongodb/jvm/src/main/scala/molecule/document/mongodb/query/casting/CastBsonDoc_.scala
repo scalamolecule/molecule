@@ -126,7 +126,6 @@ trait CastBsonDoc_ extends BaseHelpers {
   final private def cast1(casters: List[BsonDocument => Any]): BsonDocument => Any = {
     val List(c1) = casters
     (doc: BsonDocument) =>
-      println(doc.toJson(pretty))
       (
         c1(doc)
         )
@@ -135,7 +134,6 @@ trait CastBsonDoc_ extends BaseHelpers {
   final private def cast2(casters: List[BsonDocument => Any]): BsonDocument => Any = {
     val List(c1, c2) = casters
     (doc: BsonDocument) =>
-      println(doc.toJson(pretty))
       (
         c1(doc),
         c2(doc)
@@ -145,7 +143,6 @@ trait CastBsonDoc_ extends BaseHelpers {
   final private def cast3(casters: List[BsonDocument => Any]): BsonDocument => Any = {
     val List(c1, c2, c3) = casters
     (doc: BsonDocument) =>
-      println(doc.toJson(pretty))
       (
         c1(doc),
         c2(doc),
@@ -156,7 +153,6 @@ trait CastBsonDoc_ extends BaseHelpers {
   final private def cast4(casters: List[BsonDocument => Any]): BsonDocument => Any = {
     val List(c1, c2, c3, c4) = casters
     (doc: BsonDocument) =>
-      println(doc.toJson(pretty))
       (
         c1(doc),
         c2(doc),
@@ -168,7 +164,6 @@ trait CastBsonDoc_ extends BaseHelpers {
   final private def cast5(casters: List[BsonDocument => Any]): BsonDocument => Any = {
     val List(c1, c2, c3, c4, c5) = casters
     (doc: BsonDocument) =>
-      println(doc.toJson(pretty))
       (
         c1(doc),
         c2(doc),
@@ -181,7 +176,6 @@ trait CastBsonDoc_ extends BaseHelpers {
   final private def cast6(casters: List[BsonDocument => Any]): BsonDocument => Any = {
     val List(c1, c2, c3, c4, c5, c6) = casters
     (doc: BsonDocument) =>
-      println(doc.toJson(pretty))
       (
         c1(doc),
         c2(doc),
@@ -195,7 +189,6 @@ trait CastBsonDoc_ extends BaseHelpers {
   final private def cast7(casters: List[BsonDocument => Any]): BsonDocument => Any = {
     val List(c1, c2, c3, c4, c5, c6, c7) = casters
     (doc: BsonDocument) =>
-      println(doc.toJson(pretty))
       (
         c1(doc),
         c2(doc),

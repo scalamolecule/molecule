@@ -52,8 +52,8 @@ case class QueryResolveOffset_mongodb[Tpl](
 
     val bson2tpl = levelCaster(m2q.immutableCastss)
     bsonDocs.forEach { bsonDoc =>
-//      println("........ " + bsonDoc)
-//      println("   ..... " + bson2tpl(bsonDoc).asInstanceOf[Tpl])
+      //      println("........ " + bsonDoc)
+      //      println("   ..... " + bson2tpl(bsonDoc).asInstanceOf[Tpl])
       curLevelDocs.clear()
 
 
@@ -64,8 +64,8 @@ case class QueryResolveOffset_mongodb[Tpl](
     // document, we need to coalesce the possible two optional None value alternatives.
     val entities = tuples.distinct.toList
 
-    //    println("tuples: ---------------------- ")
-    //    tuples.foreach(println)
+//    println("tuples: ---------------------- ")
+//    tuples.foreach(println)
     (entities, entities.length, false)
   }
 

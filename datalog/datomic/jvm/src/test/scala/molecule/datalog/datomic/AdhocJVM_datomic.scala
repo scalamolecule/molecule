@@ -14,8 +14,8 @@ object AdhocJVM_datomic extends TestSuite_datomic {
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
       for {
-//        _ <- Ns.i(42).save.transact
-//        _ <- Ns.i.query.get.map(_ ==> List(42))
+        //        _ <- Ns.i(42).save.transact
+        //        _ <- Ns.i.query.get.map(_ ==> List(42))
 
         _ <- Ns.i.booleans.insert(List(
           (1, Set(true)),
@@ -32,16 +32,63 @@ object AdhocJVM_datomic extends TestSuite_datomic {
     }
 
 
-    //    "refs" - refs { implicit conn =>
-    //      import molecule.coreTests.dataModels.core.dsl.Refs._
-    //      for {
-    //        id <- A.i.apply(1).B.i(2).C.i(3).save.transact.map(_.id)
-    //        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
-    //
-    //      } yield ()
-    //    }
-    //
-    //
+    "refs" - refs { implicit conn =>
+      import molecule.coreTests.dataModels.core.dsl.Refs._
+      for {
+        _ <- A.s.Bb.*(B.i_?.s_?).insert(
+          //          ("0", List((Some(1), Some("x")), (Some(2), Some("y")))),
+          //
+          //          ("1a", List((None, Some("x")), (Some(2), Some("y")))),
+          //          ("1b", List((Some(1), None), (Some(2), Some("y")))),
+          ("1c", List((Some(1), Some("x")), (None, Some("y")))),
+          //          ("1d", List((Some(1), Some("x")), (Some(2), None))),
+          //
+          //          ("2a", List((None, None), (Some(2), Some("y")))),
+          //          ("2b", List((None, Some("x")), (None, Some("y")))),
+          //          ("2c", List((None, Some("x")), (Some(2), None))),
+          //          ("2d", List((Some(1), None), (None, Some("y")))),
+          //          ("2e", List((Some(1), None), (Some(2), None))),
+          //          ("2f", List((Some(1), Some("x")), (None, None))),
+          //
+          //          ("3a", List((None, None), (None, Some("y")))),
+          //          ("3b", List((None, None), (Some(2), None))),
+          //          ("3c", List((None, Some("x")), (None, None))),
+          //          ("3d", List((Some(1), None), (None, None))),
+          //
+          //          ("4", List((None, None), (None, None))),
+          //
+          //          ("a", Nil),
+        ).i.transact
+
+        _ <- A.s.a1.Bb.*?(B.i_?.a1.s_?.a2).query.i.get.map(_ ==> List(
+          //          ("0", List((Some(1), Some("x")), (Some(2), Some("y")))),
+          //
+          //          ("1a", List((None, Some("x")), (Some(2), Some("y")))),
+          //          ("1b", List((Some(1), None), (Some(2), Some("y")))),
+          ("1c", List((None, Some("y")), (Some(1), Some("x")))), // None sorted first
+          //          ("1d", List((Some(1), Some("x")), (Some(2), None))),
+          //
+          //          ("2a", List((Some(2), Some("y")))), // (None, None) not included
+          //          ("2b", List((None, Some("x")), (None, Some("y")))),
+          //          ("2c", List((None, Some("x")), (Some(2), None))),
+          //          ("2d", List((None, Some("y")), (Some(1), None))), // None sorted first
+          //          ("2e", List((Some(1), None), (Some(2), None))),
+          //          ("2f", List((Some(1), Some("x")))), // (None, None) not included
+          //
+          //          ("3a", List((None, Some("y")))),
+          //          ("3b", List((Some(2), None))),
+          //          ("3c", List((None, Some("x")))),
+          //          ("3d", List((Some(1), None))),
+          //
+          //          ("4", Nil), // List((None, None), (None, None)) collapsing to Nil
+          //
+          //          ("a", Nil),
+        ))
+
+      } yield ()
+    }
+
+
     //    "unique" - unique { implicit conn =>
     //      import molecule.coreTests.dataModels.core.dsl.Uniques._
     //      for {

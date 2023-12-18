@@ -98,45 +98,45 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
   }
 
   private def addSort(attr: Attr, field: String): Unit = {
-    //todo
-    /*
-    {
-      "$project": {
-        "_id": 0,
-        "1_s": 1,
-        "bb": {
-          $sortArray: {
-            input: "$bb",
-            sortBy: {
-              "i": -1
-            }
-          }
-        }
-      }
-    },
-     */
     attr.sort.foreach { sort =>
       val (dir, arity) = (sort.head, sort.substring(1, 2).toInt)
+      //      println(s"========  ${attr.name}   $dir   $arity  ${b.nested}")
+      //      if (bx.nested) {
+      //        //      if (isNested) {
+      //        dir match {
+      ////          case 'a' => bx.nestedSorts += field -> 1
+      ////          case 'd' => bx.nestedSorts += field -> -1
+      //
+      //          case 'a' => baseBranch.sorts.add(Sorts.ascending(field))
+      //          case 'd' => baseBranch.sorts.add(Sorts.descending(field))
+      //        }
+      //        //        println(s"A ############## ${b.hashCode()}  " + b.nestedSorts)
+      //      } else {
+      //        dir match {
+      //          case 'a' => baseBranch.sorts.add(Sorts.ascending(field))
+      //          case 'd' => baseBranch.sorts.add(Sorts.descending(field))
+      //        }
+      //      }
       dir match {
-        //        case 'a' => orderBy += ((level, arity, field, ""))
-        //        case 'd' => orderBy += ((level, arity, field, " DESC"))
-        case 'a' => sorts.add(Sorts.ascending(field))
-        case 'd' => sorts.add(Sorts.descending(field))
+        case 'a' => baseBranch.sorts.add(Sorts.ascending(field))
+        case 'd' => baseBranch.sorts.add(Sorts.descending(field))
       }
     }
+
   }
 
   private def man[T](attr: Attr, args: Seq[T], res: ResOne[T]): Unit = {
     val field       = attr.attr
+    //    val uniqueField = bx.unique(field)
     val uniqueField = b.unique(field)
     projectField(uniqueField)
     addSort(attr, uniqueField)
-//    addCast(attr.ns + "." + uniqueField, res.cast(uniqueField))
+    //    addCast(attr.ns + "." + uniqueField, res.cast(uniqueField))
     addCast(uniqueField, res.cast(uniqueField))
 
-    if (b.path.nonEmpty) {
+    if (bx.path.nonEmpty) {
       val prefix = if (attr.op.isInstanceOf[Fn]) "$" else "$_id."
-      b.addField(uniqueField, new BsonString(prefix + b.pathUnderscore + uniqueField))
+      bx.addField(uniqueField, new BsonString(prefix + bx.pathUnderscore + uniqueField))
     }
 
     attr.filterAttr.fold(
@@ -156,7 +156,6 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
     }
   }
 
-
   private def opt[T](attr: Attr, optArgs: Option[Seq[T]], res: ResOne[T]): Unit = {
     val field       = attr.attr
     val uniqueField = b.unique(field)
@@ -164,32 +163,31 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
     addCast(uniqueField, res.castOpt(uniqueField))
     addSort(attr, uniqueField)
 
-    b.groupIdFields += ((b.pathUnderscore, b.pathDot, field))
+    bx.groupIdFields += ((bx.pathUnderscore, bx.pathDot, field))
 
-    val filter = attr.op match {
-      case V     => Filters.empty() // selected field can already be a value or null
-      case Eq    => optEqual(field, optArgs, res)
-      case Neq   => optNeq(field, optArgs, res)
-      case Lt    => optCompare(field, optArgs, res.lt)
-      case Gt    => optCompare(field, optArgs, res.gt)
-      case Le    => optCompare(field, optArgs, res.le)
-      case Ge    => optCompare(field, optArgs, res.ge)
+    attr.op match {
+      case V     => () // selected field can already be a value or null
+      case Eq    => b.matches.add(optEqual(field, optArgs, res))
+      case Neq   => b.matches.add(optNeq(field, optArgs, res))
+      case Lt    => b.matches.add(optCompare(field, optArgs, res.lt))
+      case Gt    => b.matches.add(optCompare(field, optArgs, res.gt))
+      case Le    => b.matches.add(optCompare(field, optArgs, res.le))
+      case Ge    => b.matches.add(optCompare(field, optArgs, res.ge))
       case other => unexpectedOp(other)
     }
-    b.matches.add(filter)
   }
 
 
   private def expr[T](uniqueField: String, field: String, op: Op, args: Seq[T], res: ResOne[T]): Unit = {
-    val pathField = b.pathDot + field
+    val pathField = b.dot + field
     op match {
-      case V          => attr(field)
+      case V          => attr(pathField)
       case Eq         => equal(pathField, args, res)
       case Neq        => neq(pathField, args, res)
-      case Lt         => compare(field, res.lt(pathField, args.head))
-      case Gt         => compare(field, res.gt(pathField, args.head))
-      case Le         => compare(field, res.le(pathField, args.head))
-      case Ge         => compare(field, res.ge(pathField, args.head))
+      case Lt         => compare(pathField, res.lt(pathField, args.head))
+      case Gt         => compare(pathField, res.gt(pathField, args.head))
+      case Le         => compare(pathField, res.le(pathField, args.head))
+      case Ge         => compare(pathField, res.ge(pathField, args.head))
       case NoValue    => noValue(pathField)
       case Fn(kw, n)  => aggr(uniqueField, field, kw, n, res)
       case StartsWith => startsWith(pathField, args.head)
@@ -214,13 +212,13 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
   }
 
   protected def attr[T](field: String): Unit = {
-    b.matches.add(Filters.ne(b.pathDot + field, null.asInstanceOf[T]))
-    b.groupIdFields += ((b.pathUnderscore, b.pathDot, field))
+    bx.groupIdFields += ((bx.pathUnderscore, bx.pathDot, field))
+    b.matches.add(Filters.ne(field, null.asInstanceOf[T]))
   }
 
   private def equal[T](field: String, args: Seq[T], res: ResOne[T]): Unit = {
+    bx.groupIdFields += ((bx.pathUnderscore, bx.pathDot, field))
     b.matches.add(equalValue(field, args, res))
-    b.groupIdFields += ((b.pathUnderscore, b.pathDot, field))
   }
   private def equalValue[T](field: String, args: Seq[T], res: ResOne[T]): Bson = {
     args.length match {
@@ -235,7 +233,7 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
 
   private def neq[T](field: String, args: Seq[T], res: ResOne[T]): Unit = {
     b.matches.add(neqValue(field, args, res))
-    b.groupIdFields += ((b.pathUnderscore, b.pathDot, field))
+    bx.groupIdFields += ((bx.pathUnderscore, bx.pathDot, field))
   }
   private def neqValue[T](field: String, args: Seq[T], res: ResOne[T]): Bson = {
     args.length match {
@@ -255,7 +253,7 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
 
   private def compare(field: String, filter: Bson): Unit = {
     b.matches.add(filter)
-    b.groupIdFields += ((b.pathUnderscore, b.pathDot, field))
+    bx.groupIdFields += ((bx.pathUnderscore, bx.pathDot, field))
   }
   private def compare2(field: String, op: String, filterAttr: String): Unit = {
     //    where += ((field, op + " " + filterAttr))
@@ -263,7 +261,7 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
 
   private def noValue(field: String): Unit = {
     b.matches.add(Filters.eq(field, new BsonNull()))
-    b.groupIdFields += ((b.pathUnderscore, b.pathDot, field))
+    bx.groupIdFields += ((bx.pathUnderscore, bx.pathDot, field))
   }
 
 
@@ -298,7 +296,7 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
 
   private def regex(field: String, pattern: String): Unit = {
     b.matches.add(Filters.regex(field, pattern))
-    b.groupIdFields += ((b.pathUnderscore, b.pathDot, field))
+    bx.groupIdFields += ((bx.pathUnderscore, bx.pathDot, field))
   }
   private def startsWith[T](field: String, arg: T): Unit = {
     regex(field, s"^$arg.*")
@@ -318,7 +316,7 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
         Filters.empty()
       }
     )
-    b.groupIdFields += ((b.pathUnderscore, b.pathDot, field))
+    bx.groupIdFields += ((bx.pathUnderscore, bx.pathDot, field))
   }
 
 
@@ -337,28 +335,28 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
 
   private def aggr[T](uniqueField: String, field: String, fn: String, optN: Option[Int], res: ResOne[T]): Unit = {
     lazy val n         = optN.getOrElse(0)
-    lazy val dotField  = "$" + b.pathDot + field
-    lazy val usField   = "$" + b.pathUnderscore + field
-    lazy val idUsField = "$_id." + b.pathUnderscore + field
+    lazy val dotField  = "$" + bx.pathDot + field
+    lazy val usField   = "$" + bx.pathUnderscore + field
+    lazy val idUsField = "$_id." + bx.pathUnderscore + field
     fn match {
       case "distinct" =>
-        b.groupSets(uniqueField, if (b.path.nonEmpty) dotField else usField)
+        bx.groupSets(uniqueField, if (bx.path.nonEmpty) dotField else usField)
         replaceCast(uniqueField, res.castSet(uniqueField))
 
       case "min" =>
-        b.groupExpr(uniqueField, new BsonDocument().append("$min", new BsonString(dotField)))
+        bx.groupExpr(uniqueField, new BsonDocument().append("$min", new BsonString(dotField)))
 
       case "mins" =>
-        b.preGroupFields += ((b.pathUnderscore + uniqueField) -> (b.pathDot + field))
-        b.groupExpr(uniqueField, aggrFn("$minN", new BsonString(idUsField), n))
+        bx.preGroupFields += ((bx.pathUnderscore + uniqueField) -> (bx.pathDot + field))
+        bx.groupExpr(uniqueField, aggrFn("$minN", new BsonString(idUsField), n))
         replaceCast(uniqueField, res.castSet(uniqueField))
 
       case "max" =>
-        b.groupExpr(uniqueField, new BsonDocument().append("$max", new BsonString(dotField)))
+        bx.groupExpr(uniqueField, new BsonDocument().append("$max", new BsonString(dotField)))
 
       case "maxs" =>
-        b.preGroupFields += ((b.pathUnderscore + uniqueField) -> (b.pathDot + field))
-        b.groupExpr(uniqueField, aggrFn("$maxN", new BsonString(idUsField), n))
+        bx.preGroupFields += ((bx.pathUnderscore + uniqueField) -> (bx.pathDot + field))
+        bx.groupExpr(uniqueField, aggrFn("$maxN", new BsonString(idUsField), n))
         replaceCast(uniqueField, res.castSet(uniqueField))
 
       case "sample" =>
@@ -366,25 +364,25 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
 
       case "samples" =>
         sampleSize = n
-        b.groupSets(uniqueField, dotField)
+        bx.groupSets(uniqueField, dotField)
         replaceCast(uniqueField, res.castSet(uniqueField))
 
       case "count" =>
-        b.groupExpr(uniqueField, new BsonDocument().append("$sum", new BsonInt32(1)))
+        bx.groupExpr(uniqueField, new BsonDocument().append("$sum", new BsonInt32(1)))
         replaceCast(uniqueField, castInt(uniqueField))
 
       case "countDistinct" =>
-        b.preGroupFields += ((b.pathUnderscore + uniqueField) -> (b.pathDot + field))
-        b.groupExpr(uniqueField, new BsonDocument().append("$sum", new BsonInt32(1)))
+        bx.preGroupFields += ((bx.pathUnderscore + uniqueField) -> (bx.pathDot + field))
+        bx.groupExpr(uniqueField, new BsonDocument().append("$sum", new BsonInt32(1)))
         replaceCast(uniqueField, castInt(uniqueField))
 
       case "sum" =>
-        b.preGroupFields += ((b.pathUnderscore + uniqueField) -> (b.pathDot + field))
-        b.groupExpr(uniqueField, new BsonDocument().append("$sum", new BsonString(idUsField)))
+        bx.preGroupFields += ((bx.pathUnderscore + uniqueField) -> (bx.pathDot + field))
+        bx.groupExpr(uniqueField, new BsonDocument().append("$sum", new BsonString(idUsField)))
 
       case "median" =>
-        b.preGroupFields += ((b.pathUnderscore + uniqueField) -> (b.pathDot + field))
-        b.groupExprs += ((b.pathUnderscore + uniqueField, new BsonDocument().append("$median",
+        bx.preGroupFields += ((bx.pathUnderscore + uniqueField) -> (bx.pathDot + field))
+        bx.groupExprs += ((bx.pathUnderscore + uniqueField, new BsonDocument().append("$median",
           new BsonDocument()
             .append("input", new BsonString(idUsField))
             .append("method", new BsonString("approximate"))
@@ -392,27 +390,27 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
         replaceCast(uniqueField, hardCastDouble(uniqueField))
 
       case "avg" =>
-        b.preGroupFields += ((b.pathUnderscore + uniqueField) -> (b.pathDot + field))
-        b.groupExpr(uniqueField, new BsonDocument().append("$avg", new BsonString(idUsField)))
+        bx.preGroupFields += ((bx.pathUnderscore + uniqueField) -> (bx.pathDot + field))
+        bx.groupExpr(uniqueField, new BsonDocument().append("$avg", new BsonString(idUsField)))
         replaceCast(uniqueField, hardCastDouble(uniqueField))
 
       case "variance" =>
-        b.preGroupFields += ((b.pathUnderscore + uniqueField) -> (b.pathDot + field))
-        b.groupExpr(uniqueField, new BsonDocument().append("$stdDevPop", new BsonString(idUsField)))
+        bx.preGroupFields += ((bx.pathUnderscore + uniqueField) -> (bx.pathDot + field))
+        bx.groupExpr(uniqueField, new BsonDocument().append("$stdDevPop", new BsonString(idUsField)))
         //        b.removeField(b.pathDot + field)
-        removeField(b.pathDot + field)
+        removeField(bx.pathDot + field)
         val pow = new BsonArray()
         pow.add(new BsonString(dotField))
         pow.add(new BsonInt32(2))
         // todo
         //        projections.add(new BsonDocument().append(b.pathDot + field, new BsonDocument().append("$pow", pow)))
-        projections(b.path) = projections(b.path).append(field, new BsonInt32(1))
+        projections(bx.path) = projections(bx.path).append(field, new BsonInt32(1))
 
         replaceCast(uniqueField, hardCastDouble(uniqueField))
 
       case "stddev" =>
-        b.preGroupFields += ((b.pathUnderscore + uniqueField) -> (b.pathDot + field))
-        b.groupExpr(uniqueField, new BsonDocument().append("$stdDevPop", new BsonString(idUsField)))
+        bx.preGroupFields += ((bx.pathUnderscore + uniqueField) -> (bx.pathDot + field))
+        bx.groupExpr(uniqueField, new BsonDocument().append("$stdDevPop", new BsonString(idUsField)))
         replaceCast(uniqueField, hardCastDouble(uniqueField))
 
       case other => unexpectedKw(other)
