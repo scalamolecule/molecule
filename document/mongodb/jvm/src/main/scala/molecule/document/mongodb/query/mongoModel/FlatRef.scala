@@ -49,9 +49,8 @@ class FlatRef(
 
     // Process lookup pipeline stages
     val dot1 = if (parent.get.isEmbedded) dot else ""
-    if (!parent.get.isEmbedded) {
-      addMatches()
-    }
+    addMatches()
+
     stages.forEach(stage => pipeline.add(stage))
 
     val lookup = new BsonDocument()

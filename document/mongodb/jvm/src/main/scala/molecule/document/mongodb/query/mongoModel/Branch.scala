@@ -27,7 +27,7 @@ abstract class Branch(
   val preGroupFields = ListBuffer.empty[(String, String)]
   val groupIdFields  = ListBuffer.empty[(String, String)]
   val groupExprs     = ListBuffer.empty[(String, BsonValue)]
-  var addFields      = Set.empty[(String, String)]
+  var addFields      = Set.empty[(String, BsonValue)]
 
   val sorts = new util.ArrayList[Bson]
   val refs  = ListBuffer.empty[Branch]
@@ -41,14 +41,12 @@ abstract class Branch(
     }
   }
 
-  def groupExpr(uniqueField: String, bson: BsonValue): Unit = {
-    groupExprs += ((und + uniqueField, bson))
+    def groupExpr(field: String, bson: BsonValue): Unit = {
+      groupExprs += ((field, bson))
+    }
+  def groupAddToSet(keyField: String, setField: String): Unit = {
+    groupExpr(keyField, new BsonDocument().append("$addToSet", new BsonString(setField)))
   }
-//  def groupSets(uniqueField: String, field: String): Unit = {
-//    groupExpr(uniqueField,
-//      new BsonDocument().append("$addToSet", new BsonString(field))
-//    )
-//  }
 
   def unique(field: String): String = {
     val uniqueField = if (!pathFields.contains(dot + field)) {

@@ -51,7 +51,7 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
     val refOwnerships = mutable.Map.empty[List[String], Boolean]
     refOwnerships(Nil) = true
 
-    val nestedSorts = ListBuffer.empty[(String, Int)]
+    //    val nestedSorts = ListBuffer.empty[(String, Int)]
 
     // Helper functions for each branch
 
@@ -71,16 +71,20 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
     def groupExpr(uniqueField: String, bson: BsonValue): Unit = {
       groupExprs += ((pathUnderscore + uniqueField, bson))
     }
-    def groupSets(uniqueField: String, field: String): Unit = {
+    def groupAddToSet(uniqueField: String, field: String): Unit = {
       groupExpr(uniqueField,
         new BsonDocument().append("$addToSet", new BsonString(field))
       )
     }
-    def addField(field: String, value: BsonValue): Unit = {
-      addFields(path) = addFields.getOrElse(path, Nil) :+ field -> value
-    }
   }
 
+  var prefixedFieldPair = ("", "")
+
+  def addField(uniqueField: String) = {
+    if (b.parent.nonEmpty) {
+      topBranch.addFields += (b.path + uniqueField) -> new BsonString("$" + b.alias + uniqueField)
+    }
+  }
 
   // Current Branch and all branch instances
   final protected var bx = new BranchOLD
@@ -88,8 +92,8 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
   //  println(s"0 ----- ${System.identityHashCode(b)}  ${b.nested}   ${b.embedded}   ${b.path}")
 
 
-//  final protected val bb = ListBuffer.empty[(List[String], BranchOLD)]
-//  bb += Nil -> bx // top document
+  //  final protected val bb = ListBuffer.empty[(List[String], BranchOLD)]
+  //  bb += Nil -> bx // top document
 
   // General data for top level pipeline stages
 
@@ -115,13 +119,13 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
 
 
   def projectField(field: String): Unit = {
-//    projections(topPath) = projections(topPath).append(field, new BsonInt32(1))
+    //    projections(topPath) = projections(topPath).append(field, new BsonInt32(1))
 
     //    println("a " + System.identityHashCode(baseBranch))
     b.projection.append(field, new BsonInt32(1))
   }
   def removeField(pathField: String): Unit = {
-//    projections(topPath) = projections(topPath).remove(pathField).asInstanceOf[BsonDocument]
+    //    projections(topPath) = projections(topPath).remove(pathField).asInstanceOf[BsonDocument]
     b.projection.remove(pathField)
     //    projections2(topPath2) = projections2(topPath2).remove(pathField).asInstanceOf[BsonDocument]
   }

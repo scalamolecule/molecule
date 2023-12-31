@@ -113,8 +113,8 @@ class FlatEmbed(
       groupIdFields.foreach { case (fieldPath, fieldAlias) =>
         addFieldsDoc.put(fieldPath, new BsonString("$_id." + fieldAlias))
       }
-      addFields.foreach { case (fieldPath, fieldAlias) =>
-        addFieldsDoc.put(fieldPath, new BsonString("$" + fieldAlias))
+      addFields.foreach { case (fieldPath, bson) =>
+        addFieldsDoc.put(fieldPath, bson)
       }
       if (!addFieldsDoc.isEmpty) {
         stages.add(new BsonDocument().append("$addFields", addFieldsDoc))

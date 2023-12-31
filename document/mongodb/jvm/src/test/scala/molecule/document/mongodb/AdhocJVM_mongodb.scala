@@ -2,6 +2,7 @@ package molecule.document.mongodb
 
 import molecule.core.util.AggrUtils
 import molecule.core.util.Executor._
+import molecule.coreTests.dataModels.core.dsl.Types.Ns
 import molecule.document.mongodb.async._
 import molecule.document.mongodb.setup.TestSuite_mongodb
 import utest._
@@ -14,24 +15,25 @@ object AdhocJVM_mongodb extends TestSuite_mongodb with AggrUtils {
 
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
-      implicit val tolerant = tolerantIntEquality(toleranceInt)
+      //      implicit val tolerant = tolerantIntEquality(toleranceInt)
       //      implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
-        _ <- Ns.i.int.insert(List(
-          (1, int1),
-          (1, int2),
-          (2, int2),
-          (2, int3),
-          (2, int4),
+
+        _ <- Ns.i.ints.insert(List(
+          (1, Set(int1, int2)),
+          (2, Set(int2, int3)),
+          (2, Set(int3, int4)),
+          (2, Set(int3, int4)),
         )).transact
 
-        // Sum of distinct values (Set semantics)
+        // Sum of unique values (Set semantics)
 
-        _ <- Ns.int(sum).query.i.get.map(_.head ==~ int1 + int2 + int3 + int4)
-        //        _ <- Ns.i.int(sum).query.get.map(_.map {
-        //          case (1, sum) => sum ==~ int1 + int2
-        //          case (2, sum) => sum ==~ int2 + int3 + int4
-        //        })
+        _ <- Ns.ints(sum).query.get.map(_.head.head ==~ int1 + int2 + int3 + int4)
+
+        _ <- Ns.i.ints(sum).query.get.map(_.map {
+          case (1, setWithSum) => setWithSum.head ==~ int1 + int2
+          case (2, setWithSum) => setWithSum.head ==~ int2 + int3 + int4
+        })
 
 
         //        _ <- Ns.i(1).save.transact
@@ -45,21 +47,36 @@ object AdhocJVM_mongodb extends TestSuite_mongodb with AggrUtils {
 
       //      implicit val tolerant = tolerantIntEquality(toleranceInt)
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
-      for {
-        _ <- A.i.B.i.insert(List(
-          (1, 1),
-          (1, 2),
-          (2, 2),
-          (2, 3),
-          (2, 4),
-        )).transact
+      val (median_2_3, median_1_2) = if (database == "MongoDB") {
+        (2, 1)
+      } else {
+        (
+          (2 + 3).toDouble / 2.0,
+          (1 + 2).toDouble / 2.0
+        )
+      }
 
-        _ <- A.B.i(variance).query.i.get.map(_.head ==~ varianceOf(1, 2, 3, 4))
+        for {
+          _ <- A.i.B.ii.insert(List(
+            (1, Set(1, 2)),
+            (2, Set(2, 3)),
+            (2, Set(3, 4)),
+            (2, Set(3, 4)),
+          )).transact
 
-        _ <- A.i.B.i(variance).query.i.get.map(_.map {
-          case (1, variance) => variance ==~ varianceOf(1, 2)
-          case (2, variance) => variance ==~ varianceOf(2, 3, 4)
-        })
+//          _ <- A.B.ii.query.i.get.map(_ ==> List(Set(1, 2, 3, 4)))
+          _ <- A.B.ii(median).query.i.get.map(_.head ==~ median_2_3)
+
+//          _ <- A.i.a1.B.ii.query.get.map(_ ==> List(
+//            (1, Set(1, 2)),
+//            (2, Set(2, 3, 4)),
+//          ))
+//          _ <- A.i.B.ii(median).query.get.map(_.map {
+//            case (1, median) => median ==~ median_1_2
+//            case (2, median) => median ==~ 3.0
+//          })
+
+
       } yield ()
     }
 
