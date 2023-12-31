@@ -1,4 +1,4 @@
-package molecule.document.mongodb.compliance.aggr
+package molecule.document.mongodb.compliance.aggr.set
 
 import molecule.coreTests.spi.aggr.set.any._
 import molecule.document.mongodb.setup.TestAsync_mongodb

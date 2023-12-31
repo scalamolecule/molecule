@@ -44,11 +44,11 @@ abstract class Branch(
   def groupExpr(uniqueField: String, bson: BsonValue): Unit = {
     groupExprs += ((und + uniqueField, bson))
   }
-  def groupSets(uniqueField: String, field: String): Unit = {
-    groupExpr(uniqueField,
-      new BsonDocument().append("$addToSet", new BsonString(field))
-    )
-  }
+//  def groupSets(uniqueField: String, field: String): Unit = {
+//    groupExpr(uniqueField,
+//      new BsonDocument().append("$addToSet", new BsonString(field))
+//    )
+//  }
 
   def unique(field: String): String = {
     val uniqueField = if (!pathFields.contains(dot + field)) {

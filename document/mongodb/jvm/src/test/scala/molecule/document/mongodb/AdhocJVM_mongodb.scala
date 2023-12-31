@@ -14,59 +14,52 @@ object AdhocJVM_mongodb extends TestSuite_mongodb with AggrUtils {
 
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
-      implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+      implicit val tolerant = tolerantIntEquality(toleranceInt)
+      //      implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
-        //        _ <- Ns.i(1).save.transact
-        //        _ <- Ns.i.query.get.map(_ ==> List(1))
-
         _ <- Ns.i.int.insert(List(
           (1, int1),
-          (2, int2),
+          (1, int2),
           (2, int2),
           (2, int3),
+          (2, int4),
         )).transact
 
-        _ <- Ns.i.int.a1.query.get.map(_ ==> List(
-          (1, int1),
-          (2, int2), // 2 rows coalesced
-          (2, int3),
-        ))
+        // Sum of distinct values (Set semantics)
 
-        // Distinct values are returned in a Set
-        _ <- Ns.i.a1.int(distinct).query.i.get.map(_ ==> List(
-          (1, Set(int1)),
-          (2, Set(int2, int3)),
-        ))
+        _ <- Ns.int(sum).query.i.get.map(_.head ==~ int1 + int2 + int3 + int4)
+        //        _ <- Ns.i.int(sum).query.get.map(_.map {
+        //          case (1, sum) => sum ==~ int1 + int2
+        //          case (2, sum) => sum ==~ int2 + int3 + int4
+        //        })
 
 
+        //        _ <- Ns.i(1).save.transact
+        //        _ <- Ns.i.query.get.map(_ ==> List(1))
       } yield ()
     }
 
 
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
+
+      //      implicit val tolerant = tolerantIntEquality(toleranceInt)
+      implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
         _ <- A.i.B.i.insert(List(
           (1, 1),
-          (2, 2),
+          (1, 2),
           (2, 2),
           (2, 3),
-        )).i.transact
+          (2, 4),
+        )).transact
 
-//        _ <- A.i.B.i.a1.query.i.get.map(_ ==> List(
-//          (1, 1),
-//          (2, 2), // 2 rows coalesced
-//          (2, 3),
-//        ))
+        _ <- A.B.i(variance).query.i.get.map(_.head ==~ varianceOf(1, 2, 3, 4))
 
-        // Distinct values are returned in a Set
-        _ <- A.i.a1.B.i(distinct).query.i.get.map(_ ==> List(
-          (1, Set(1)),
-          (2, Set(2, 3)),
-        ))
-//
-//        _ <- A.B.i(distinct).query.get.map(_.head ==> Set(1, 2, 3))
-
+        _ <- A.i.B.i(variance).query.i.get.map(_.map {
+          case (1, variance) => variance ==~ varianceOf(1, 2)
+          case (2, variance) => variance ==~ varianceOf(2, 3, 4)
+        })
       } yield ()
     }
 

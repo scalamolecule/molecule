@@ -1,15 +1,15 @@
-package molecule.document.mongodb
+package molecule.coreTests.spi.aggr.one
 
-import molecule.core.util.AggrUtils
+import molecule.core.api.ApiAsync
+import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
+import molecule.coreTests.async._
 import molecule.coreTests.dataModels.core.dsl.Refs._
-import molecule.document.mongodb.async._
-import molecule.document.mongodb.setup.TestSuite_mongodb
+import molecule.coreTests.setup.CoreTestSuite
 import utest._
 import scala.language.implicitConversions
 
-
-object AggrRelations extends TestSuite_mongodb with AggrUtils {
+trait AggrRelations extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
   override lazy val tests = Tests {
 
