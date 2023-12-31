@@ -4,8 +4,10 @@ import com.mongodb.client.model.{Filters, Projections, Sorts}
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.core.query.ResolveExpr
+import molecule.document.mongodb.query.mongoModel.Branch
 import org.bson._
 import org.bson.conversions.Bson
+import scala.annotation.tailrec
 
 trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self: MongoQueryBase =>
 
@@ -101,11 +103,11 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
     attr.sort.foreach { sort =>
       val (dir, arity) = (sort.head, sort.substring(1, 2).toInt)
       //      println(s"========  ${attr.name}   $dir   $arity  ${b.nested}")
-      //      if (bx.nested) {
+      //      if (b.nested) {
       //        //      if (isNested) {
       //        dir match {
-      ////          case 'a' => bx.nestedSorts += field -> 1
-      ////          case 'd' => bx.nestedSorts += field -> -1
+      ////          case 'a' => b.nestedSorts += field -> 1
+      ////          case 'd' => b.nestedSorts += field -> -1
       //
       //          case 'a' => baseBranch.sorts.add(Sorts.ascending(field))
       //          case 'd' => baseBranch.sorts.add(Sorts.descending(field))
@@ -117,27 +119,27 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
       //          case 'd' => baseBranch.sorts.add(Sorts.descending(field))
       //        }
       //      }
+
+      //      println(s"  ---  $dir  $arity  ${b.refAttr}  $field     ${b.path}")
       dir match {
-        case 'a' => baseBranch.sorts.add(Sorts.ascending(field))
-        case 'd' => baseBranch.sorts.add(Sorts.descending(field))
+        case 'a' => topBranch.sorts.add(Sorts.ascending(b.path + field))
+        case 'd' => topBranch.sorts.add(Sorts.descending(b.path + field))
       }
     }
 
   }
 
+  private var prefixedFieldPair = ("", "")
+
   private def man[T](attr: Attr, args: Seq[T], res: ResOne[T]): Unit = {
     val field       = attr.attr
-    //    val uniqueField = bx.unique(field)
     val uniqueField = b.unique(field)
     projectField(uniqueField)
     addSort(attr, uniqueField)
-    //    addCast(attr.ns + "." + uniqueField, res.cast(uniqueField))
     addCast(uniqueField, res.cast(uniqueField))
 
-    if (bx.path.nonEmpty) {
-      val prefix = if (attr.op.isInstanceOf[Fn]) "$" else "$_id."
-      bx.addField(uniqueField, new BsonString(prefix + bx.pathUnderscore + uniqueField))
-    }
+    prefixedFieldPair = if (b.parent.isEmpty) (field, field) else (b.path + field, b.alias + field)
+    topBranch.groupIdFields += prefixedFieldPair
 
     attr.filterAttr.fold(
       expr(uniqueField, field, attr.op, args, res)
@@ -163,7 +165,7 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
     addCast(uniqueField, res.castOpt(uniqueField))
     addSort(attr, uniqueField)
 
-    bx.groupIdFields += ((bx.pathUnderscore, bx.pathDot, field))
+    //    b.groupIdFields += ((b.und, b.dot, field))
 
     attr.op match {
       case V     => () // selected field can already be a value or null
@@ -212,12 +214,16 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
   }
 
   protected def attr[T](field: String): Unit = {
-    bx.groupIdFields += ((bx.pathUnderscore, bx.pathDot, field))
+    //    if (b.parent.isEmpty) {
+    //      topBranch.groupIdFields += ((field, field))
+    //    } else {
+    //      topBranch.groupIdFields += ((b.path + field, b.alias + field))
+    //    }
     b.matches.add(Filters.ne(field, null.asInstanceOf[T]))
   }
 
   private def equal[T](field: String, args: Seq[T], res: ResOne[T]): Unit = {
-    bx.groupIdFields += ((bx.pathUnderscore, bx.pathDot, field))
+    //    b.groupIdFields += ((b.und, b.dot, field))
     b.matches.add(equalValue(field, args, res))
   }
   private def equalValue[T](field: String, args: Seq[T], res: ResOne[T]): Bson = {
@@ -233,7 +239,7 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
 
   private def neq[T](field: String, args: Seq[T], res: ResOne[T]): Unit = {
     b.matches.add(neqValue(field, args, res))
-    bx.groupIdFields += ((bx.pathUnderscore, bx.pathDot, field))
+    //    b.groupIdFields += ((b.und, b.dot, field))
   }
   private def neqValue[T](field: String, args: Seq[T], res: ResOne[T]): Bson = {
     args.length match {
@@ -253,7 +259,7 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
 
   private def compare(field: String, filter: Bson): Unit = {
     b.matches.add(filter)
-    bx.groupIdFields += ((bx.pathUnderscore, bx.pathDot, field))
+    //    b.groupIdFields += ((b.und, b.dot, field))
   }
   private def compare2(field: String, op: String, filterAttr: String): Unit = {
     //    where += ((field, op + " " + filterAttr))
@@ -261,7 +267,7 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
 
   private def noValue(field: String): Unit = {
     b.matches.add(Filters.eq(field, new BsonNull()))
-    bx.groupIdFields += ((bx.pathUnderscore, bx.pathDot, field))
+    //    b.groupIdFields += ((b.und, b.dot, field))
   }
 
 
@@ -296,7 +302,7 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
 
   private def regex(field: String, pattern: String): Unit = {
     b.matches.add(Filters.regex(field, pattern))
-    bx.groupIdFields += ((bx.pathUnderscore, bx.pathDot, field))
+    //    b.groupIdFields += ((b.und, b.dot, field))
   }
   private def startsWith[T](field: String, arg: T): Unit = {
     regex(field, s"^$arg.*")
@@ -316,7 +322,7 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
         Filters.empty()
       }
     )
-    bx.groupIdFields += ((bx.pathUnderscore, bx.pathDot, field))
+    //    b.groupIdFields += ((b.und, b.dot, field))
   }
 
 
@@ -333,30 +339,42 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
     b.matches.add(Filters.mod(field, 2, 1))
   }
 
+
   private def aggr[T](uniqueField: String, field: String, fn: String, optN: Option[Int], res: ResOne[T]): Unit = {
     lazy val n         = optN.getOrElse(0)
-    lazy val dotField  = "$" + bx.pathDot + field
-    lazy val usField   = "$" + bx.pathUnderscore + field
-    lazy val idUsField = "$_id." + bx.pathUnderscore + field
+    lazy val dotField  = "$" + b.dot + field
+    lazy val usField   = "$" + b.und + field
+    lazy val idUsField = "$_id." + b.und + field
+
+    //    println("1  " + b.dot)
+    //    println("2  " + field)
+    //    println("3  " + uniqueField)
+    //    println("4  " + dotField)
+    //    println("5  " + usField)
+    //    println("6  " + idUsField)
     fn match {
       case "distinct" =>
-        bx.groupSets(uniqueField, if (bx.path.nonEmpty) dotField else usField)
+        //        b.groupSets(uniqueField, if (b.path.nonEmpty) dotField else usField)
+//        b.groupSets(uniqueField, if (b.parent.nonEmpty) dotField else usField)
+
+        topBranch.groupSets(uniqueField, if (b.parent.nonEmpty) dotField else usField)
+
         replaceCast(uniqueField, res.castSet(uniqueField))
 
       case "min" =>
-        bx.groupExpr(uniqueField, new BsonDocument().append("$min", new BsonString(dotField)))
+        b.groupExpr(uniqueField, new BsonDocument().append("$min", new BsonString(dotField)))
 
       case "mins" =>
-        bx.preGroupFields += ((bx.pathUnderscore + uniqueField) -> (bx.pathDot + field))
-        bx.groupExpr(uniqueField, aggrFn("$minN", new BsonString(idUsField), n))
+        b.preGroupFields += ((b.und + uniqueField) -> (b.dot + field))
+        b.groupExpr(uniqueField, aggrFn("$minN", new BsonString(idUsField), n))
         replaceCast(uniqueField, res.castSet(uniqueField))
 
       case "max" =>
-        bx.groupExpr(uniqueField, new BsonDocument().append("$max", new BsonString(dotField)))
+        b.groupExpr(uniqueField, new BsonDocument().append("$max", new BsonString(dotField)))
 
       case "maxs" =>
-        bx.preGroupFields += ((bx.pathUnderscore + uniqueField) -> (bx.pathDot + field))
-        bx.groupExpr(uniqueField, aggrFn("$maxN", new BsonString(idUsField), n))
+        b.preGroupFields += ((b.und + uniqueField) -> (b.dot + field))
+        b.groupExpr(uniqueField, aggrFn("$maxN", new BsonString(idUsField), n))
         replaceCast(uniqueField, res.castSet(uniqueField))
 
       case "sample" =>
@@ -364,25 +382,29 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
 
       case "samples" =>
         sampleSize = n
-        bx.groupSets(uniqueField, dotField)
+        b.groupSets(uniqueField, dotField)
         replaceCast(uniqueField, res.castSet(uniqueField))
 
       case "count" =>
-        bx.groupExpr(uniqueField, new BsonDocument().append("$sum", new BsonInt32(1)))
+        topBranch.groupIdFields -= prefixedFieldPair
+        topBranch.groupExprs += ((b.alias + field, new BsonDocument().append("$sum", new BsonInt32(1))))
+        topBranch.addFields += ((b.path + field, b.alias + field))
         replaceCast(uniqueField, castInt(uniqueField))
 
       case "countDistinct" =>
-        bx.preGroupFields += ((bx.pathUnderscore + uniqueField) -> (bx.pathDot + field))
-        bx.groupExpr(uniqueField, new BsonDocument().append("$sum", new BsonInt32(1)))
+        topBranch.preGroupFields += ((b.path + field, b.alias + field))
+        topBranch.groupIdFields -= prefixedFieldPair
+        topBranch.groupExprs += ((b.alias + field, new BsonDocument().append("$sum", new BsonInt32(1))))
+        topBranch.addFields += ((b.path + field, b.alias + field))
         replaceCast(uniqueField, castInt(uniqueField))
 
       case "sum" =>
-        bx.preGroupFields += ((bx.pathUnderscore + uniqueField) -> (bx.pathDot + field))
-        bx.groupExpr(uniqueField, new BsonDocument().append("$sum", new BsonString(idUsField)))
+        b.preGroupFields += ((b.und + uniqueField) -> (b.dot + field))
+        b.groupExpr(uniqueField, new BsonDocument().append("$sum", new BsonString(idUsField)))
 
       case "median" =>
-        bx.preGroupFields += ((bx.pathUnderscore + uniqueField) -> (bx.pathDot + field))
-        bx.groupExprs += ((bx.pathUnderscore + uniqueField, new BsonDocument().append("$median",
+        b.preGroupFields += ((b.und + uniqueField) -> (b.dot + field))
+        b.groupExprs += ((b.und + uniqueField, new BsonDocument().append("$median",
           new BsonDocument()
             .append("input", new BsonString(idUsField))
             .append("method", new BsonString("approximate"))
@@ -390,27 +412,29 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
         replaceCast(uniqueField, hardCastDouble(uniqueField))
 
       case "avg" =>
-        bx.preGroupFields += ((bx.pathUnderscore + uniqueField) -> (bx.pathDot + field))
-        bx.groupExpr(uniqueField, new BsonDocument().append("$avg", new BsonString(idUsField)))
+        b.preGroupFields += ((b.und + uniqueField) -> (b.dot + field))
+        b.groupExpr(uniqueField, new BsonDocument().append("$avg", new BsonString(idUsField)))
         replaceCast(uniqueField, hardCastDouble(uniqueField))
 
       case "variance" =>
-        bx.preGroupFields += ((bx.pathUnderscore + uniqueField) -> (bx.pathDot + field))
-        bx.groupExpr(uniqueField, new BsonDocument().append("$stdDevPop", new BsonString(idUsField)))
+        b.preGroupFields += ((b.und + uniqueField) -> (b.dot + field))
+        b.groupExpr(uniqueField, new BsonDocument().append("$stdDevPop", new BsonString(idUsField)))
         //        b.removeField(b.pathDot + field)
-        removeField(bx.pathDot + field)
+        removeField(b.dot + field)
         val pow = new BsonArray()
         pow.add(new BsonString(dotField))
         pow.add(new BsonInt32(2))
         // todo
         //        projections.add(new BsonDocument().append(b.pathDot + field, new BsonDocument().append("$pow", pow)))
-        projections(bx.path) = projections(bx.path).append(field, new BsonInt32(1))
+        //        projections(b.path) = projections(b.path).append(field, new BsonInt32(1))
+        b.projection.append(b.dot + field, new BsonDocument().append("$pow", pow))
+        //        b.projection.append(field, new BsonInt32(1))
 
         replaceCast(uniqueField, hardCastDouble(uniqueField))
 
       case "stddev" =>
-        bx.preGroupFields += ((bx.pathUnderscore + uniqueField) -> (bx.pathDot + field))
-        bx.groupExpr(uniqueField, new BsonDocument().append("$stdDevPop", new BsonString(idUsField)))
+        b.preGroupFields += ((b.und + uniqueField) -> (b.dot + field))
+        b.groupExpr(uniqueField, new BsonDocument().append("$stdDevPop", new BsonString(idUsField)))
         replaceCast(uniqueField, hardCastDouble(uniqueField))
 
       case other => unexpectedKw(other)

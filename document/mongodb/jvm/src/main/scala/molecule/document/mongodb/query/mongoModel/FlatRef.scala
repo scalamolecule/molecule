@@ -15,6 +15,8 @@ class FlatRef(
   pathFields: ListBuffer[String] = ListBuffer.empty[String],
   dot: String = "",
   und: String = "",
+  path: String = "",
+  alias: String = "",
   projection: BsonDocument = new BsonDocument().append("_id", new BsonInt32(0)),
 ) extends Branch(
   parent,
@@ -23,26 +25,30 @@ class FlatRef(
   pathFields,
   dot,
   und,
+  path,
+  alias,
   projection,
 ) {
 
   isEmbedded = false
 
-  private val outerStages = new util.ArrayList[BsonDocument]
-  private val pipeline    = new BsonArray()
+  private val parentStages = new util.ArrayList[BsonDocument]
+  private val pipeline     = new BsonArray()
 
   override def getStages: util.ArrayList[BsonDocument] = {
     //    println(s"----- 2 -----  $dot  $refAttr  ${parent.map(_.isEmbedded)}")
     //    matches.forEach(m => println(m))
 
+    // Recursively resolve embedded/looked-up documents
     refs.foreach(ref => stages.addAll(ref.getStages))
+
+
     if (!sorts.isEmpty) {
       addStage("$sort", Sorts.orderBy(sorts))
     }
 
     // Process lookup pipeline stages
     val dot1 = if (parent.get.isEmbedded) dot else ""
-
     if (!parent.get.isEmbedded) {
       addMatches()
     }
@@ -57,10 +63,10 @@ class FlatRef(
     if (!pipeline.isEmpty) {
       lookup.append("pipeline", pipeline)
     }
-    outerStages.add(new BsonDocument("$lookup", lookup))
+    parentStages.add(new BsonDocument("$lookup", lookup))
 
     // ref array non empty
-    outerStages.add(
+    parentStages.add(
       new BsonDocument().append("$match",
         new BsonDocument().append(dot1 + refAttr,
           new BsonDocument().append("$ne", new BsonArray)
@@ -69,14 +75,20 @@ class FlatRef(
     )
 
     // Get head document of ref array
-    outerStages.add(
+    parentStages.add(
       new BsonDocument().append("$addFields",
         new BsonDocument().append(dot1 + refAttr,
           new BsonDocument().append("$first", new BsonString("$" + dot1 + refAttr))
         )
       )
     )
-    outerStages
+
+    if (parent.nonEmpty && projection.isEmpty) {
+      // Remove empty projections with only tacit attributes (or no attributes)
+      parent.get.projection.remove(refAttr)
+    }
+
+    parentStages
   }
 
   override def toString = render(0)
@@ -86,7 +98,7 @@ class FlatRef(
     val children = if (refs.isEmpty) "" else
       s"\n$p  " + refs.map(ref => ref.render(tabs + 1)).mkString(s",\n$p  ")
     s"""FlatRef($parent1,
-       |${p}  $refAttr, $refNs, $pathFields, $dot, $und,
+       |${p}  $refAttr, $refNs, $pathFields, $dot, $und, $path, $alias,
        |${p}  $projection$children
        |${p})""".stripMargin
   }

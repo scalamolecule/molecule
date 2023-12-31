@@ -32,6 +32,8 @@ trait ResolveRef { self: MongoQueryBase =>
         b.pathFields, // Continue checking unique field names from base branch to here
         b.dot + refAttr + ".",
         b.und + refAttr + "_",
+        b.path + refAttr + ".",
+        b.alias + refAttr + "_",
         refProjections
       )
     } else {
@@ -42,6 +44,8 @@ trait ResolveRef { self: MongoQueryBase =>
         ListBuffer.empty[String], // Start over with unique field names
         if (b.isEmbedded) b.dot else "",
         if (b.isEmbedded) b.und else "",
+        b.path + refAttr + ".",
+        b.alias + refAttr + "_",
         refProjections,
       )
     }
@@ -132,6 +136,8 @@ trait ResolveRef { self: MongoQueryBase =>
         b.pathFields, // Continue checking unique field names from base branch to here
         b.dot + refAttr + ".",
         b.und + refAttr + "_",
+        b.path + refAttr + ".",
+        b.alias + refAttr + "_",
         refProjections
       )
     } else {
@@ -146,6 +152,8 @@ trait ResolveRef { self: MongoQueryBase =>
         ListBuffer.empty[String], // Start over with unique field names
         "",
         "",
+        b.path + refAttr + ".",
+        b.alias + refAttr + "_",
         mandatory,
         refProjections.append("_id", new BsonInt32(0))
       )

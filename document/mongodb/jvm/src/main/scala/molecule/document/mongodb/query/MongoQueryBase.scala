@@ -88,12 +88,12 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
   //  println(s"0 ----- ${System.identityHashCode(b)}  ${b.nested}   ${b.embedded}   ${b.path}")
 
 
-  final protected val bb = ListBuffer.empty[(List[String], BranchOLD)]
-  bb += Nil -> bx // top document
+//  final protected val bb = ListBuffer.empty[(List[String], BranchOLD)]
+//  bb += Nil -> bx // top document
 
   // General data for top level pipeline stages
 
-  // Top branch holds final projection of all attributes
+  // Top branch holds aggregation and projection of all attributes
   final protected val topBranch = new FlatEmbed()
 
   // Base branch holds matches of embedded documents

@@ -33,92 +33,92 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
 
   private var lookups = List.empty[(List[String], BsonDocument, String)]
 
-//  final def getBsonQueryOLD(
-//    altElements: List[Element],
-//    optLimit: Option[Int],
-//    optOffset: Option[Int],
-//    optProxy: Option[ConnProxy]
-//  ): (String, util.ArrayList[Bson]) = {
-//    val elements1 = if (altElements.isEmpty) elements0 else altElements
-//    validateQueryModel(elements1)
-//    //    elements.foreach(println)
-//
-//    // Set attrMap if available (used to get original type of aggregate attributes)
-//    optProxy.foreach(p => attrMap = p.attrMap)
-//    val elements2 = prepareElements(elements1, optProxy)
-//
-//    // Recursively resolve molecule elements
-//    resolve(elements2)
-//
-//    // Top Mongo aggregation stages
-//    val topStages = new util.ArrayList[Bson]()
-//
-//    def addStage(name: String, params: Bson): Boolean = {
-//      topStages.add(
-//        new BsonDocument().append(name,
-//          // Add codec for MQL expressions (filters)
-//          params.toBsonDocument(classOf[Bson], MongoClientSettings.getDefaultCodecRegistry)
-//        )
-//      )
-//    }
-//
-//    if (sampleSize > 0) {
-//      topStages.add(new BsonDocument().append("$sample",
-//        new BsonDocument().append("size", new BsonInt32(sampleSize)))
-//      )
-//    }
-//
-//    // Process branches from leaves to top level
-//    bb.toList.sortBy(-_._1.length).foreach {
-//      case (Nil, branch) =>
-//        //        println("A")
-//        // Top level (both embedded and referenced)
-//        //        println(s"B -------------------- ${branch.path}  List()   '${branch.pathDot}'")
-//        //        println(s"B1 ############# ${branch.hashCode()}  " + branch.nestedSorts)
-//        topStages.addAll(processBranch(Nil, branch))
-//
-//      //      case (path, branch) if !branch.nested =>
-//      //        println("B")
-//      //        topStages.addAll(processBranch(path, branch))
-//
-//      case (path, branch) =>
-//        //        println(s"C  ${System.identityHashCode(branch)}  $path")
-//        //        println(s"B2 ############# ${branch.hashCode()}  " + branch.nestedSorts)
-//        //        println(s"A -------------------- ${branch.path}  $path   '${branch.pathDot}'")
-//        val List(refAttr, refNs) = path.takeRight(2)
-//        val pathRefAttr          = branch.prevPathDot + refAttr
-//        val lookup               = new BsonDocument()
-//          .append("from", new BsonString(refNs))
-//          .append("localField", new BsonString(pathRefAttr))
-//          .append("foreignField", new BsonString("_id"))
-//          .append("as", new BsonString(pathRefAttr))
-//
-//        val pipeline = new BsonArray()
-//        processBranch(path, branch).forEach(stage => pipeline.add(stage))
-//        lookup.append("pipeline", pipeline)
-//        lookups = lookups :+ ((path, new BsonDocument().append("$lookup", lookup), pathRefAttr))
-//    }
-//
-//    unwinds.foreach(unwind =>
-//      topStages.add(new BsonDocument().append("$unwind", new BsonString(unwind)))
-//    )
-//
-//    // Select which fields to output
-//    //    if (!topDoc.idField) {
-//    //      projections(Nil) = projections(Nil).append("_id", new BsonInt32(0))
-//    //    }
-//
-//
-//    if (projections.nonEmpty) {
-//      addStage("$project", projections(Nil))
-//    }
-//
-//    if (!sorts.isEmpty) {
-//      addStage("$sort", Sorts.orderBy(sorts))
-//    }
-//
-//    (getInitialNonGenericNs(elements2), topStages)
-//  }
+  //  final def getBsonQueryOLD(
+  //    altElements: List[Element],
+  //    optLimit: Option[Int],
+  //    optOffset: Option[Int],
+  //    optProxy: Option[ConnProxy]
+  //  ): (String, util.ArrayList[Bson]) = {
+  //    val elements1 = if (altElements.isEmpty) elements0 else altElements
+  //    validateQueryModel(elements1)
+  //    //    elements.foreach(println)
+  //
+  //    // Set attrMap if available (used to get original type of aggregate attributes)
+  //    optProxy.foreach(p => attrMap = p.attrMap)
+  //    val elements2 = prepareElements(elements1, optProxy)
+  //
+  //    // Recursively resolve molecule elements
+  //    resolve(elements2)
+  //
+  //    // Top Mongo aggregation stages
+  //    val topStages = new util.ArrayList[Bson]()
+  //
+  //    def addStage(name: String, params: Bson): Boolean = {
+  //      topStages.add(
+  //        new BsonDocument().append(name,
+  //          // Add codec for MQL expressions (filters)
+  //          params.toBsonDocument(classOf[Bson], MongoClientSettings.getDefaultCodecRegistry)
+  //        )
+  //      )
+  //    }
+  //
+  //    if (sampleSize > 0) {
+  //      topStages.add(new BsonDocument().append("$sample",
+  //        new BsonDocument().append("size", new BsonInt32(sampleSize)))
+  //      )
+  //    }
+  //
+  //    // Process branches from leaves to top level
+  //    bb.toList.sortBy(-_._1.length).foreach {
+  //      case (Nil, branch) =>
+  //        //        println("A")
+  //        // Top level (both embedded and referenced)
+  //        //        println(s"B -------------------- ${branch.path}  List()   '${branch.pathDot}'")
+  //        //        println(s"B1 ############# ${branch.hashCode()}  " + branch.nestedSorts)
+  //        topStages.addAll(processBranch(Nil, branch))
+  //
+  //      //      case (path, branch) if !branch.nested =>
+  //      //        println("B")
+  //      //        topStages.addAll(processBranch(path, branch))
+  //
+  //      case (path, branch) =>
+  //        //        println(s"C  ${System.identityHashCode(branch)}  $path")
+  //        //        println(s"B2 ############# ${branch.hashCode()}  " + branch.nestedSorts)
+  //        //        println(s"A -------------------- ${branch.path}  $path   '${branch.pathDot}'")
+  //        val List(refAttr, refNs) = path.takeRight(2)
+  //        val pathRefAttr          = branch.prevPathDot + refAttr
+  //        val lookup               = new BsonDocument()
+  //          .append("from", new BsonString(refNs))
+  //          .append("localField", new BsonString(pathRefAttr))
+  //          .append("foreignField", new BsonString("_id"))
+  //          .append("as", new BsonString(pathRefAttr))
+  //
+  //        val pipeline = new BsonArray()
+  //        processBranch(path, branch).forEach(stage => pipeline.add(stage))
+  //        lookup.append("pipeline", pipeline)
+  //        lookups = lookups :+ ((path, new BsonDocument().append("$lookup", lookup), pathRefAttr))
+  //    }
+  //
+  //    unwinds.foreach(unwind =>
+  //      topStages.add(new BsonDocument().append("$unwind", new BsonString(unwind)))
+  //    )
+  //
+  //    // Select which fields to output
+  //    //    if (!topDoc.idField) {
+  //    //      projections(Nil) = projections(Nil).append("_id", new BsonInt32(0))
+  //    //    }
+  //
+  //
+  //    if (projections.nonEmpty) {
+  //      addStage("$project", projections(Nil))
+  //    }
+  //
+  //    if (!sorts.isEmpty) {
+  //      addStage("$sort", Sorts.orderBy(sorts))
+  //    }
+  //
+  //    (getInitialNonGenericNs(elements2), topStages)
+  //  }
 
 
   final def getBsonQuery(
@@ -147,7 +147,7 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
       )
     }
 
-    println(topBranch)
+    //    println(topBranch)
 
     // Recursively add aggregation pipeline stages for all branches
     topStages.addAll(topBranch.getStages)
@@ -156,176 +156,176 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
   }
 
 
-  // Get pipeline stages from processing a branch
-  private def processBranch(parentPath: List[String], branch: BranchOLD): util.ArrayList[BsonDocument] = {
-    //    println(s"C ############## ${branch.hashCode()}  " + branch.nestedSorts)
-    //    println(s"C ############## ${branch.hashCode()}  ${branch.nested}  $parentPath")
-
-    val stages = new util.ArrayList[BsonDocument]()
-    def addStage(name: String, params: Bson): Boolean = {
-      // Add codec for MQL expressions
-      stages.add(
-        new BsonDocument().append(name,
-          params.toBsonDocument(classOf[Bson], MongoClientSettings.getDefaultCodecRegistry)
-        )
-      )
-    }
-
-    branch.matches.size() match {
-      case 0 => // do nothing
-      case 1 => addStage("$match", branch.matches.iterator.next.toBsonDocument)
-      case _ => addStage("$match", Filters.and(branch.matches))
-    }
-
-    lookups.foreach { case l@(path, lookup, pathRefAttr) =>
-      val topLevelRef = path.length == 2
-      val childRef    = parentPath.nonEmpty &&
-        (parentPath.length + 2) == path.length &&
-        path.startsWith(parentPath)
-      lazy val disconnectedRef = path.length - parentPath.length > 2
-
-      if (path.startsWith(parentPath) && (topLevelRef || childRef || disconnectedRef)) {
-        //        println(s"  REF   ${lookups.length}  $parentPath  $path            " + path.startsWith(parentPath))
-        //        println(s"  - $lookup")
-        stages.add(lookup)
-        // Forget once added
-        lookups = lookups.filterNot(_ == l)
-
-        //        println(s"D ############## ${branch.hashCode()}  " + branch.nestedSorts)
-
-        //        if (branch.nestedSorts.nonEmpty) {
-        //          val sortFields = new BsonDocument()
-        //          branch.nestedSorts.foreach { case (field, order) =>
-        //            sortFields.append(field, new BsonString(s"$order"))
-        //          }
-        //          stages.add(
-        //            new BsonDocument().append("$project",
-        //              new BsonDocument().append("$" + pathRefAttr,
-        //                new BsonDocument().append("$sortArray",
-        //                  new BsonDocument()
-        //                    .append("input", new BsonString("$" + pathRefAttr))
-        //                    .append("sortBy", sortFields)
-        //                )))
-        //          )
-        //        }
-
-        // Prevent new overwritten ref attr lookup to be empty when mandatory
-        branch.mandatoryLookup.foreach { refNotEmpty =>
-          addStage("$match", refNotEmpty)
-        }
-
-        //        if (!branch.nested) {
-        //        if (!branch.owner) {
-
-        //        println(s"  ----- ${System.identityHashCode(b)}  ${branch.nested}   ${branch.embedded}   ${b.path}  $pathRefAttr")
-        //        branch.refOwnerships.foreach(println)
-
-
-        if (!branch.nested && !branch.embedded) {
-          stages.add(new BsonDocument().append("$addFields",
-            new BsonDocument().append(pathRefAttr,
-              new BsonDocument().append("$first", new BsonString("$" + pathRefAttr)))))
-        }
-
-      } else {
-        //        println(s"  XXX   ${lookups.length}  $parentPath  $path")
-        //        println(s"  - $lookup")
-      }
-    }
-
-    //    println(" 0 " + preGroupFields)
-    //    println(" 1 " + groupIdFields)
-    //    println(" 2 " + groupExprs)
-    //    println(" 3 " + addFields.toList.sortBy(-_._1.length))
-
-    // Pre-group
-    val prefix = if (branch.preGroupFields.nonEmpty) {
-      val preGroupFieldsDoc = new BsonDocument()
-      branch.groupIdFields.foreach { case (pathAlias, pathDot, field) =>
-        preGroupFieldsDoc.put(pathAlias + field, new BsonString("$" + pathDot + field))
-      }
-      branch.preGroupFields.foreach { case (fieldAlias, pathField) =>
-        preGroupFieldsDoc.put(fieldAlias, new BsonString("$" + pathField))
-      }
-      stages.add(new BsonDocument().append("$group", new BsonDocument().append("_id", preGroupFieldsDoc)))
-      "$_id."
-    } else "$"
-
-    // Main group
-    if (branch.groupExprs.nonEmpty) {
-      val groupIdFieldsDoc = new BsonDocument()
-      branch.groupIdFields.foreach { case (pathAlias, pathDot, field) =>
-        val ctx = if (branch.preGroupFields.isEmpty) pathDot else pathAlias
-        groupIdFieldsDoc.put(pathAlias + field, new BsonString(prefix + ctx + field))
-      }
-      val groupDoc = new BsonDocument()
-      groupDoc.append("_id", groupIdFieldsDoc)
-
-      branch.groupExprs.foreach { case (field, bson) =>
-        groupDoc.put(field, bson)
-      }
-      stages.add(new BsonDocument().append("$group", groupDoc))
-
-
-      // $addFields - "format" fields to expected structure
-      val addFieldsDoc = new BsonDocument()
-      branch.groupIdFields.collect { case ("", "", field) =>
-        addFieldsDoc.put(field, new BsonString("$_id." + field))
-      }
-
-      if (branch.addFields.nonEmpty) {
-        val refFields = branch.addFields.toList.sortBy(-_._1.length)
-
-        // Add fields of initial namespace
-        refFields.last._2.foreach { case (field, value) =>
-          addFieldsDoc.put(field, value)
-        }
-
-        // Add ref fields from leaves to branches
-        if (branch.addFields.size != 1) {
-          val branches = mutable.Map.empty[List[String], List[(String, BsonDocument)]]
-          branches(Nil) = Nil
-          refFields.init.foreach { case (refPath, fields) =>
-            val refFieldsDoc = new BsonDocument()
-            fields.foreach { case (field, value) =>
-              refFieldsDoc.put(field, value)
-            }
-            if (branches.keys.toList.contains(refPath)) {
-              // Add ref branch(es) to current doc
-              branches(refPath).foreach { case (ref, refDoc) =>
-                refFieldsDoc.put(ref, refDoc)
-              }
-            }
-            //            println("A " + branches)
-            //            println("A " + refPath)
-            //            println("A " + refFieldsDoc)
-            branches(refPath.init) = branches.getOrElse(refPath.init, Nil) :+ (refPath.last -> refFieldsDoc)
-          }
-
-          // add ref branches of initial namespace
-          branches(Nil).foreach { case (ref, fieldsDoc) =>
-            addFieldsDoc.put(ref, fieldsDoc)
-          }
-        }
-      }
-      if (!addFieldsDoc.isEmpty)
-        stages.add(new BsonDocument().append("$addFields", addFieldsDoc))
-    }
-
-    if (branch.nestedSorts.nonEmpty) {
-      //      println("########## yeah  " + branch.nestedSorts)
-      val sortFields = new BsonDocument()
-      branch.nestedSorts.foreach { case (field, order) =>
-        sortFields.append(field, new BsonInt32(order))
-      }
-      stages.add(new BsonDocument().append("$sort", sortFields))
-    }
-
-    //    println("------------- " + b.refPath)
-    //    stages.forEach(p => println(p))
-
-    stages
-  }
+//  // Get pipeline stages from processing a branch
+//  private def processBranch(parentPath: List[String], branch: BranchOLD): util.ArrayList[BsonDocument] = {
+//    //    println(s"C ############## ${branch.hashCode()}  " + branch.nestedSorts)
+//    //    println(s"C ############## ${branch.hashCode()}  ${branch.nested}  $parentPath")
+//
+//    val stages = new util.ArrayList[BsonDocument]()
+//    def addStage(name: String, params: Bson): Boolean = {
+//      // Add codec for MQL expressions
+//      stages.add(
+//        new BsonDocument().append(name,
+//          params.toBsonDocument(classOf[Bson], MongoClientSettings.getDefaultCodecRegistry)
+//        )
+//      )
+//    }
+//
+//    branch.matches.size() match {
+//      case 0 => // do nothing
+//      case 1 => addStage("$match", branch.matches.iterator.next.toBsonDocument)
+//      case _ => addStage("$match", Filters.and(branch.matches))
+//    }
+//
+//    lookups.foreach { case l@(path, lookup, pathRefAttr) =>
+//      val topLevelRef = path.length == 2
+//      val childRef    = parentPath.nonEmpty &&
+//        (parentPath.length + 2) == path.length &&
+//        path.startsWith(parentPath)
+//      lazy val disconnectedRef = path.length - parentPath.length > 2
+//
+//      if (path.startsWith(parentPath) && (topLevelRef || childRef || disconnectedRef)) {
+//        //        println(s"  REF   ${lookups.length}  $parentPath  $path            " + path.startsWith(parentPath))
+//        //        println(s"  - $lookup")
+//        stages.add(lookup)
+//        // Forget once added
+//        lookups = lookups.filterNot(_ == l)
+//
+//        //        println(s"D ############## ${branch.hashCode()}  " + branch.nestedSorts)
+//
+//        //        if (branch.nestedSorts.nonEmpty) {
+//        //          val sortFields = new BsonDocument()
+//        //          branch.nestedSorts.foreach { case (field, order) =>
+//        //            sortFields.append(field, new BsonString(s"$order"))
+//        //          }
+//        //          stages.add(
+//        //            new BsonDocument().append("$project",
+//        //              new BsonDocument().append("$" + pathRefAttr,
+//        //                new BsonDocument().append("$sortArray",
+//        //                  new BsonDocument()
+//        //                    .append("input", new BsonString("$" + pathRefAttr))
+//        //                    .append("sortBy", sortFields)
+//        //                )))
+//        //          )
+//        //        }
+//
+//        // Prevent new overwritten ref attr lookup to be empty when mandatory
+//        branch.mandatoryLookup.foreach { refNotEmpty =>
+//          addStage("$match", refNotEmpty)
+//        }
+//
+//        //        if (!branch.nested) {
+//        //        if (!branch.owner) {
+//
+//        //        println(s"  ----- ${System.identityHashCode(b)}  ${branch.nested}   ${branch.embedded}   ${b.path}  $pathRefAttr")
+//        //        branch.refOwnerships.foreach(println)
+//
+//
+//        if (!branch.nested && !branch.embedded) {
+//          stages.add(new BsonDocument().append("$addFields",
+//            new BsonDocument().append(pathRefAttr,
+//              new BsonDocument().append("$first", new BsonString("$" + pathRefAttr)))))
+//        }
+//
+//      } else {
+//        //        println(s"  XXX   ${lookups.length}  $parentPath  $path")
+//        //        println(s"  - $lookup")
+//      }
+//    }
+//
+//    //    println(" 0 " + preGroupFields)
+//    //    println(" 1 " + groupIdFields)
+//    //    println(" 2 " + groupExprs)
+//    //    println(" 3 " + addFields.toList.sortBy(-_._1.length))
+//
+//    // Pre-group
+//    val prefix = if (branch.preGroupFields.nonEmpty) {
+//      val preGroupFieldsDoc = new BsonDocument()
+//      branch.groupIdFields.foreach { case (pathAlias, pathDot, field) =>
+//        preGroupFieldsDoc.put(pathAlias + field, new BsonString("$" + pathDot + field))
+//      }
+//      branch.preGroupFields.foreach { case (fieldAlias, pathField) =>
+//        preGroupFieldsDoc.put(fieldAlias, new BsonString("$" + pathField))
+//      }
+//      stages.add(new BsonDocument().append("$group", new BsonDocument().append("_id", preGroupFieldsDoc)))
+//      "$_id."
+//    } else "$"
+//
+//    // Main group
+//    if (branch.groupExprs.nonEmpty) {
+//      val groupIdFieldsDoc = new BsonDocument()
+//      branch.groupIdFields.foreach { case (pathAlias, pathDot, field) =>
+//        val ctx = if (branch.preGroupFields.isEmpty) pathDot else pathAlias
+//        groupIdFieldsDoc.put(pathAlias + field, new BsonString(prefix + ctx + field))
+//      }
+//      val groupDoc = new BsonDocument()
+//      groupDoc.append("_id", groupIdFieldsDoc)
+//
+//      branch.groupExprs.foreach { case (field, bson) =>
+//        groupDoc.put(field, bson)
+//      }
+//      stages.add(new BsonDocument().append("$group", groupDoc))
+//
+//
+//      // $addFields - "format" fields to expected structure
+//      val addFieldsDoc = new BsonDocument()
+//      branch.groupIdFields.collect { case ("", "", field) =>
+//        addFieldsDoc.put(field, new BsonString("$_id." + field))
+//      }
+//
+//      if (branch.addFields.nonEmpty) {
+//        val refFields = branch.addFields.toList.sortBy(-_._1.length)
+//
+//        // Add fields of initial namespace
+//        refFields.last._2.foreach { case (field, value) =>
+//          addFieldsDoc.put(field, value)
+//        }
+//
+//        // Add ref fields from leaves to branches
+//        if (branch.addFields.size != 1) {
+//          val branches = mutable.Map.empty[List[String], List[(String, BsonDocument)]]
+//          branches(Nil) = Nil
+//          refFields.init.foreach { case (refPath, fields) =>
+//            val refFieldsDoc = new BsonDocument()
+//            fields.foreach { case (field, value) =>
+//              refFieldsDoc.put(field, value)
+//            }
+//            if (branches.keys.toList.contains(refPath)) {
+//              // Add ref branch(es) to current doc
+//              branches(refPath).foreach { case (ref, refDoc) =>
+//                refFieldsDoc.put(ref, refDoc)
+//              }
+//            }
+//            //            println("A " + branches)
+//            //            println("A " + refPath)
+//            //            println("A " + refFieldsDoc)
+//            branches(refPath.init) = branches.getOrElse(refPath.init, Nil) :+ (refPath.last -> refFieldsDoc)
+//          }
+//
+//          // add ref branches of initial namespace
+//          branches(Nil).foreach { case (ref, fieldsDoc) =>
+//            addFieldsDoc.put(ref, fieldsDoc)
+//          }
+//        }
+//      }
+//      if (!addFieldsDoc.isEmpty)
+//        stages.add(new BsonDocument().append("$addFields", addFieldsDoc))
+//    }
+//
+//    if (branch.nestedSorts.nonEmpty) {
+//      //      println("########## yeah  " + branch.nestedSorts)
+//      val sortFields = new BsonDocument()
+//      branch.nestedSorts.foreach { case (field, order) =>
+//        sortFields.append(field, new BsonInt32(order))
+//      }
+//      stages.add(new BsonDocument().append("$sort", sortFields))
+//    }
+//
+//    //    println("------------- " + b.refPath)
+//    //    stages.forEach(p => println(p))
+//
+//    stages
+//  }
 
 
 

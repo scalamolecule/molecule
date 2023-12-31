@@ -237,15 +237,21 @@ trait BsonUtils extends DataType_JVM_mongodb {
       metaNs.attrs.collect {
         case MetaAttr(attr, CardOne, "ID", refNs, options, _, _, _, _, _)   =>
           if (refNs.isDefined) {
-            if (options.contains("owner")) {
-              // Referenced document
-              attr -> ((v: BsonValue) => v.asDocument.toString)
-            } else {
-              // Embedded output
-              attr -> ((v: BsonValue) => v.asArray().toString)
-            }
-            //            // Always embedded output
-            //            attr -> ((v: BsonValue) => v.asDocument.toString)
+
+//            if (options.contains("owner")) {
+//              // Embedded output
+//              attr -> ((v: BsonValue) => v.asDocument.toString)
+//            } else {
+//              // Referenced document
+//              attr -> ((v: BsonValue) => v.asArray.toString)
+//            }
+            // Always embedded output
+            attr -> ((v: BsonValue) => {
+              if (v.isDocument)
+                v.asDocument.toString
+              else
+                v.asArray.toString
+            })
           } else {
             attr -> ((v: BsonValue) => castAnyID(v))
           }

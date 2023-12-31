@@ -15,6 +15,8 @@ class NestedEmbed(
   pathFields: ListBuffer[String] = ListBuffer.empty[String],
   dot: String = "",
   und: String = "",
+  path: String = "",
+  alias: String = "",
   projection: BsonDocument = new BsonDocument().append("_id", new BsonInt32(0)),
 ) extends Branch(
   parent,
@@ -23,12 +25,16 @@ class NestedEmbed(
   pathFields,
   dot,
   und,
+  path,
+  alias,
   projection,
 ) {
 
   override def getStages: util.ArrayList[BsonDocument] = {
     addMatches()
     refs.foreach(ref => stages.addAll(ref.getStages))
+
+//    group(stages)
 
     if (parent.isEmpty) {
       addStage("$project", projection)
@@ -48,7 +54,7 @@ class NestedEmbed(
       s"\n$p  " + refs.map(ref => ref.render(tabs + 1)).mkString(s",\n$p  ")
     s"""NestedEmbed(
        |${p}  $parent1,
-       |${p}  $refAttr, $refNs, $pathFields, $dot, $und,
+       |${p}  $refAttr, $refNs, $pathFields, $dot, $und, $path, $alias,
        |${p}  $projection$children
        |${p})""".stripMargin
   }

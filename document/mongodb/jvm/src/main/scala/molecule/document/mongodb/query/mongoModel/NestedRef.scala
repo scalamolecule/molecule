@@ -15,6 +15,8 @@ class NestedRef(
   pathFields: ListBuffer[String] = ListBuffer.empty[String],
   dot: String = "",
   und: String = "",
+  path: String = "",
+  alias: String = "",
   mandatory: Boolean = true,
   projection: BsonDocument = new BsonDocument().append("_id", new BsonInt32(0)),
 ) extends Branch(
@@ -24,6 +26,8 @@ class NestedRef(
   pathFields,
   dot,
   und,
+  path,
+  alias,
   projection,
 ) {
   isEmbedded = false
@@ -73,7 +77,7 @@ class NestedRef(
       s"\n$p  " + refs.map(ref => ref.render(tabs + 1)).mkString(s",\n$p  ")
     s"""NestedRef(
        |${p}  $parent1,
-       |${p}  $refAttr, $refNs, $pathFields, $dot, $und,
+       |${p}  $refAttr, $refNs, $pathFields, $dot, $und, $path, $alias,
        |${p}  $projection$children
        |${p})""".stripMargin
   }

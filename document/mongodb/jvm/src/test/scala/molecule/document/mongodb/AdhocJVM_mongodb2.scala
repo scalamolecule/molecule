@@ -2,7 +2,7 @@ package molecule.document.mongodb
 
 import molecule.core.util.Executor._
 import molecule.document.mongodb.async._
-import molecule.document.mongodb.setup.{TestSuite_mongodb, TestSuite_mongodb2}
+import molecule.document.mongodb.setup.TestSuite_mongodb2
 import utest._
 import scala.language.implicitConversions
 
@@ -62,29 +62,25 @@ object AdhocJVM_mongodb2 extends TestSuite_mongodb2 {
     "refs" - refs { implicit conn =>
       import molecule.document.mongodb.dsl.Refs2._
       for {
-        _ <- A.i(0).s("a").B.i(1)
-          //          .s("b").Cc.i(22)
-          //          ._B.C.i(2).s("c")
-          //          ._B._A.Bb.i(11)
-          .save.i.transact
 
-        _ <- A.i.B.i.query.i.get.map(_ ==> List((0, 1)))
-        //        _ <- A.i.B.i._A.s.query.get.map(_ ==> List((0, 1, "a")))
-        //        _ <- A.i.B.i._A.Bb.i.query.get.map(_ ==> List((0, 1, 11)))
-        //        _ <- A.i.B.i.C.i._B.s.query.get.map(_ ==> List((0, 1, 2, "b")))
-        //        _ <- A.i.B.C.i.query.get.map(_ ==> List((0, 2)))
-        //        _ <- A.i.B.C.i._B.i.query.get.map(_ ==> List((0, 2, 1)))
-        //        _ <- A.i.B.i.C.i._B.Cc.i.query.get.map(_ ==> List((0, 1, 2, 22)))
-        //        _ <- A.i.B.C.i._B.Cc.i.query.get.map(_ ==> List((0, 2, 22)))
-        //        _ <- A.i.B.i.C.i._B.s._A.s.query.get.map(_ ==> List((0, 1, 2, "b", "a")))
-        //        _ <- A.i.B.i.C.i._B._A.s.query.get.map(_ ==> List((0, 1, 2, "a")))
-        //        _ <- A.i.B.C.i._B._A.s.query.get.map(_ ==> List((0, 2, "a")))
-        //        _ <- A.i.B.i.C.i._B.s._A.Bb.i.query.get.map(_ ==> List((0, 1, 2, "b", 11)))
-        //        _ <- A.i.B.i.C.i._B._A.Bb.i.query.get.map(_ ==> List((0, 1, 2, 11)))
-        //        _ <- A.i.B.C.i._B._A.Bb.i.query.get.map(_ ==> List((0, 2, 11)))
-        //        _ <- A.B.C.s._B._A.Bb.i.query.get.map(_ ==> List(("c", 11)))
+        _ <- A.i.B.i.insert(List(
+          (1, 1),
+          (2, 2),
+          (2, 2),
+          (2, 3),
+        )).i.transact
 
-
+        _ <- A.B.i(count).query.i.get.map(_ ==> List(4))
+        //        _ <- A.i.a1.B.i(count).query.get.map(_ ==> List(
+        //          (1, 1),
+        //          (2, 3)
+        //        ))
+        //
+        //        _ <- A.B.i(countDistinct).query.get.map(_ ==> List(3))
+        //        _ <- A.i.a1.B.i(countDistinct).query.get.map(_ ==> List(
+        //          (1, 1),
+        //          (2, 2)
+        //        ))
 
       } yield ()
     }

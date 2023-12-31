@@ -15,25 +15,22 @@ abstract class Branch(
   val pathFields: ListBuffer[String] = ListBuffer.empty[String],
   val dot: String,
   val und: String,
+  val path: String,
+  val alias: String,
   val projection: BsonDocument,
 ) {
-  var isEmbedded = true
-
+  var isEmbedded  = true
   var uniqueIndex = 0
+  val stages      = new util.ArrayList[BsonDocument]
+  val matches     = new util.ArrayList[Bson]
 
-  val addFields = mutable.Map.empty[List[String], List[(String, BsonValue)]]
-  addFields(Nil) = Nil
-
-  val matches = new util.ArrayList[Bson]
+  val preGroupFields = ListBuffer.empty[(String, String)]
+  val groupIdFields  = ListBuffer.empty[(String, String)]
+  val groupExprs     = ListBuffer.empty[(String, BsonValue)]
+  var addFields      = Set.empty[(String, String)]
 
   val sorts = new util.ArrayList[Bson]
-
-  val refs = ListBuffer.empty[Branch]
-
-  protected val stages = new util.ArrayList[BsonDocument]
-
-  def getStages: util.ArrayList[BsonDocument]
-
+  val refs  = ListBuffer.empty[Branch]
 
 
   def addMatches(): Unit = {
@@ -44,39 +41,12 @@ abstract class Branch(
     }
   }
 
-  def addStage(
-    name: String,
-    params: Bson
-  ): Boolean = {
-    stages.add(
-      new BsonDocument().append(name,
-        // Add codec for MQL expressions (filters)
-        params.toBsonDocument(classOf[Bson], MongoClientSettings.getDefaultCodecRegistry)
-      )
-    )
+  def groupExpr(uniqueField: String, bson: BsonValue): Unit = {
+    groupExprs += ((und + uniqueField, bson))
   }
-
-
-  def addMatches2(
-    matches: util.ArrayList[Bson] = matches,
-    stages: util.ArrayList[BsonDocument] = stages
-  ): Unit = {
-    matches.size match {
-      case 0 => () // do nothing
-      case 1 => addStage2("$match", matches.iterator.next.toBsonDocument, stages)
-      case _ => addStage2("$match", Filters.and(matches), stages)
-    }
-  }
-  def addStage2(
-    name: String,
-    params: Bson,
-    stages: util.ArrayList[BsonDocument] = stages
-  ): Boolean = {
-    stages.add(
-      new BsonDocument().append(name,
-        // Add codec for MQL expressions (filters)
-        params.toBsonDocument(classOf[Bson], MongoClientSettings.getDefaultCodecRegistry)
-      )
+  def groupSets(uniqueField: String, field: String): Unit = {
+    groupExpr(uniqueField,
+      new BsonDocument().append("$addToSet", new BsonString(field))
     )
   }
 
@@ -89,8 +59,20 @@ abstract class Branch(
       field + "_" + uniqueIndex
     }
     pathFields += dot + uniqueField
+
+    //    println(s"--- $dot   $uniqueField")
     uniqueField
   }
 
-  def render(tabs: Int): String = "XXX"
+  def addStage(name: String, params: Bson): Boolean = {
+    stages.add(
+      new BsonDocument().append(name,
+        // Add codec for MQL expressions (filters)
+        params.toBsonDocument(classOf[Bson], MongoClientSettings.getDefaultCodecRegistry)
+      )
+    )
+  }
+  def getStages: util.ArrayList[BsonDocument]
+  def render(tabs: Int): String
+
 }
