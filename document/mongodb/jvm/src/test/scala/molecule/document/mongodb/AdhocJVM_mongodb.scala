@@ -17,23 +17,73 @@ object AdhocJVM_mongodb extends TestSuite_mongodb with AggrUtils {
       import molecule.coreTests.dataModels.core.dsl.Types._
       //      implicit val tolerant = tolerantIntEquality(toleranceInt)
       //      implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+      val a = (1, Some(Set(short1, short2)))
+      val b = (2, Some(Set(short2, short3, short4)))
+      val c = (3, None)
       for {
+        _ <- Ns.i.shorts_?.insert(a, b, c).transact
 
-        _ <- Ns.i.ints.insert(List(
-          (1, Set(int1, int2)),
-          (2, Set(int2, int3)),
-          (2, Set(int3, int4)),
-          (2, Set(int3, int4)),
-        )).transact
+        // Sets with one or more values matching
 
-        // Sum of unique values (Set semantics)
+        // "Has this value"
+        _ <- Ns.i.a1.shorts_?.has(Some(short0)).query.i.get.map(_ ==> List())
+        _ <- Ns.i.a1.shorts_?.has(Some(short1)).query.get.map(_ ==> List(a))
+        _ <- Ns.i.a1.shorts_?.has(Some(short2)).query.get.map(_ ==> List(a, b))
+        _ <- Ns.i.a1.shorts_?.has(Some(short3)).query.get.map(_ ==> List(b))
+        // Same as
+        _ <- Ns.i.a1.shorts_?.has(Some(Seq(short0))).query.get.map(_ ==> List())
+        _ <- Ns.i.a1.shorts_?.has(Some(Seq(short1))).query.get.map(_ ==> List(a))
+        _ <- Ns.i.a1.shorts_?.has(Some(Seq(short2))).query.get.map(_ ==> List(a, b))
+        _ <- Ns.i.a1.shorts_?.has(Some(Seq(short3))).query.get.map(_ ==> List(b))
 
-        _ <- Ns.ints(sum).query.get.map(_.head.head ==~ int1 + int2 + int3 + int4)
 
-        _ <- Ns.i.ints(sum).query.get.map(_.map {
-          case (1, setWithSum) => setWithSum.head ==~ int1 + int2
-          case (2, setWithSum) => setWithSum.head ==~ int2 + int3 + int4
-        })
+        // OR semantics when multiple values
+
+        // "Has this OR that"
+        _ <- Ns.i.a1.shorts_?.has(Some(Seq(short1, short2))).query.get.map(_ ==> List(a, b))
+        _ <- Ns.i.a1.shorts_?.has(Some(Seq(short1, short3))).query.get.map(_ ==> List(a, b))
+        _ <- Ns.i.a1.shorts_?.has(Some(Seq(short2, short3))).query.get.map(_ ==> List(a, b))
+        _ <- Ns.i.a1.shorts_?.has(Some(Seq(short1, short2, short3))).query.get.map(_ ==> List(a, b))
+
+
+        // AND semantics when multiple values in a _Set_
+
+        // "Has this AND that"
+        _ <- Ns.i.a1.shorts_?.has(Some(Set(short1))).query.get.map(_ ==> List(a))
+        _ <- Ns.i.a1.shorts_?.has(Some(Set(short1, short2))).query.get.map(_ ==> List(a))
+        _ <- Ns.i.a1.shorts_?.has(Some(Set(short1, short2, short3))).query.get.map(_ ==> List())
+        _ <- Ns.i.a1.shorts_?.has(Some(Set(short2))).query.get.map(_ ==> List(a, b))
+        _ <- Ns.i.a1.shorts_?.has(Some(Set(short2, short3))).query.get.map(_ ==> List(b))
+        _ <- Ns.i.a1.shorts_?.has(Some(Set(short2, short3, short4))).query.get.map(_ ==> List(b))
+        // Same as
+        _ <- Ns.i.a1.shorts_?.has(Some(Seq(Set(short1)))).query.get.map(_ ==> List(a))
+        _ <- Ns.i.a1.shorts_?.has(Some(Seq(Set(short1, short2)))).query.get.map(_ ==> List(a))
+        _ <- Ns.i.a1.shorts_?.has(Some(Seq(Set(short1, short2, short3)))).query.get.map(_ ==> List())
+        _ <- Ns.i.a1.shorts_?.has(Some(Seq(Set(short2)))).query.get.map(_ ==> List(a, b))
+        _ <- Ns.i.a1.shorts_?.has(Some(Seq(Set(short2, short3)))).query.get.map(_ ==> List(b))
+        _ <- Ns.i.a1.shorts_?.has(Some(Seq(Set(short2, short3, short4)))).query.get.map(_ ==> List(b))
+
+
+        // AND/OR semantics with multiple Sets
+
+        // "(has this AND that) OR (has this AND that)"
+        _ <- Ns.i.a1.shorts_?.has(Some(Seq(Set(short1, short2), Set(short0)))).query.get.map(_ ==> List(a))
+        _ <- Ns.i.a1.shorts_?.has(Some(Seq(Set(short1, short2), Set(short0, short3)))).query.get.map(_ ==> List(a))
+        _ <- Ns.i.a1.shorts_?.has(Some(Seq(Set(short1, short2), Set(short2, short3)))).query.get.map(_ ==> List(a, b))
+        _ <- Ns.i.a1.shorts_?.has(Some(Seq(Set(short1, short2), Set(short2, short3, short4)))).query.get.map(_ ==> List(a, b))
+
+
+        // Empty Seq/Sets match nothing
+        _ <- Ns.i.a1.shorts_?.has(Some(Seq.empty[Short])).query.get.map(_ ==> List())
+        _ <- Ns.i.a1.shorts_?.has(Some(Set.empty[Short])).query.get.map(_ ==> List())
+        _ <- Ns.i.a1.shorts_?.has(Some(Seq.empty[Set[Short]])).query.get.map(_ ==> List())
+
+
+        // None matches non-asserted values
+        _ <- Ns.i.a1.shorts_?.has(Option.empty[Short]).query.get.map(_ ==> List(c))
+        _ <- Ns.i.a1.shorts_?.has(Option.empty[Seq[Short]]).query.get.map(_ ==> List(c))
+        _ <- Ns.i.a1.shorts_?.has(Option.empty[Set[Short]]).query.get.map(_ ==> List(c))
+        _ <- Ns.i.a1.shorts_?.has(Option.empty[Seq[Set[Short]]]).query.get.map(_ ==> List(c))
 
 
         //        _ <- Ns.i(1).save.transact
@@ -56,25 +106,25 @@ object AdhocJVM_mongodb extends TestSuite_mongodb with AggrUtils {
         )
       }
 
-        for {
-          _ <- A.i.B.ii.insert(List(
-            (1, Set(1, 2)),
-            (2, Set(2, 3)),
-            (2, Set(3, 4)),
-            (2, Set(3, 4)),
-          )).transact
+      for {
+        _ <- A.i.B.ii.insert(List(
+          (1, Set(1, 2)),
+          (2, Set(2, 3)),
+          (2, Set(3, 4)),
+          (2, Set(3, 4)),
+        )).transact
 
-//          _ <- A.B.ii.query.i.get.map(_ ==> List(Set(1, 2, 3, 4)))
-          _ <- A.B.ii(median).query.i.get.map(_.head ==~ median_2_3)
+        //          _ <- A.B.ii.query.i.get.map(_ ==> List(Set(1, 2, 3, 4)))
+        _ <- A.B.ii(median).query.i.get.map(_.head ==~ median_2_3)
 
-//          _ <- A.i.a1.B.ii.query.get.map(_ ==> List(
-//            (1, Set(1, 2)),
-//            (2, Set(2, 3, 4)),
-//          ))
-//          _ <- A.i.B.ii(median).query.get.map(_.map {
-//            case (1, median) => median ==~ median_1_2
-//            case (2, median) => median ==~ 3.0
-//          })
+        //          _ <- A.i.a1.B.ii.query.get.map(_ ==> List(
+        //            (1, Set(1, 2)),
+        //            (2, Set(2, 3, 4)),
+        //          ))
+        //          _ <- A.i.B.ii(median).query.get.map(_.map {
+        //            case (1, median) => median ==~ median_1_2
+        //            case (2, median) => median ==~ 3.0
+        //          })
 
 
       } yield ()

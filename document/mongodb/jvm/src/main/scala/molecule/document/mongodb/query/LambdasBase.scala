@@ -53,8 +53,8 @@ trait LambdasBase extends BaseHelpers with AggrUtils with MongoQueryBase {
   protected lazy val v2bsonZonedDateTime : ZonedDateTime => BsonValue  = (v: ZonedDateTime) => if (v == null) new BsonNull else new BsonString(v.toString)
   protected lazy val v2bsonUUID          : UUID => BsonValue           = (v: UUID) => if (v == null) new BsonNull else new BsonString(v.toString)
   protected lazy val v2bsonURI           : URI => BsonValue            = (v: URI) => if (v == null) new BsonNull else new BsonString(v.toString)
-  protected lazy val v2bsonByte          : Byte => BsonValue           = (v: Byte) => if (v == null.asInstanceOf[Byte]) new BsonNull else new BsonInt32(v)
-  protected lazy val v2bsonShort         : Short => BsonValue          = (v: Short) => if (v == null.asInstanceOf[Short]) new BsonNull else new BsonInt32(v)
+  protected lazy val v2bsonByte          : Byte => BsonValue           = (v: Byte) => if (v != 0 && v == null.asInstanceOf[Byte]) new BsonNull else new BsonInt32(v)
+  protected lazy val v2bsonShort         : Short => BsonValue          = (v: Short) => if (v != 0 && v == null.asInstanceOf[Short]) new BsonNull else new BsonInt32(v)
   protected lazy val v2bsonChar          : Char => BsonValue           = (v: Char) => if (v == null.asInstanceOf[Char]) new BsonNull else new BsonString(v.toString)
 
   protected lazy val castID             = (field: String) => (doc: BsonDocument) => doc.get(field).asObjectId.getValue.toString

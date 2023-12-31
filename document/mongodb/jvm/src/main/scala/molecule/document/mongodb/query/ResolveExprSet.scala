@@ -109,7 +109,7 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
         // Runtime check needed since we can't type infer it
         throw ModelError(s"Cardinality-set filter attributes not allowed to do additional filtering. Found:\n  " + attr)
       }
-      expr(uniqueField, field, attr.op, args, resSet)
+      expr(uniqueField, field, attr.op, args, resSet, true)
     } {
       case filterAttr: AttrOne => ??? //setExpr2(field, attr.op, filterAttr.name, true, tpe)
       case filterAttr          => ??? //setExpr2(field, attr.op, filterAttr.name, false, tpe)
@@ -139,7 +139,7 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
     val uniqueField = b.unique(field)
     b.matches.add(Filters.exists(field))
     attr.filterAttr.fold {
-      expr(uniqueField, field, attr.op, args, res)
+      expr(uniqueField, field, attr.op, args, res, false)
     } {
       //      expr2(field, attr.op, filterAttr.name)
       case filterAttr: AttrOne => expr2(field, attr.op, filterAttr.name, true, res.tpe)
@@ -163,9 +163,9 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
     }
   }
 
-  private def expr[T](uniqueField: String, field: String, op: Op, sets: Seq[Set[T]], res: ResSet[T]): Unit = {
+  private def expr[T](uniqueField: String, field: String, op: Op, sets: Seq[Set[T]], res: ResSet[T], mandatory: Boolean): Unit = {
     op match {
-      case V         => attr(uniqueField, field, res)
+      case V         => attr(uniqueField, field, mandatory)
       case Eq        => equal(field, sets, res)
       case Neq       => neq(field, sets, res)
       case Has       => has(field, sets, res)
@@ -196,12 +196,14 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
   }
 
 
-  protected def attr[T](uniqueField: String, field: String, res: ResSet[T]): Unit = {
+  protected def attr[T](uniqueField: String, field: String, mandatory: Boolean): Unit = {
     b.matches.add(Filters.ne(b.dot + field, null.asInstanceOf[T]))
-    topBranch.groupIdFields -= prefixedFieldPair
-    topBranch.groupExprs += (b.alias + uniqueField) -> new BsonDocument()
-      .append("$addToSet", new BsonString("$" + b.path + field))
-    topBranch.addFields += (b.path + field) -> reduce("$" + b.alias + field)
+    if (mandatory) {
+      topBranch.groupIdFields -= prefixedFieldPair
+      topBranch.groupExprs += (b.alias + uniqueField) -> new BsonDocument()
+        .append("$addToSet", new BsonString("$" + b.path + field))
+      topBranch.addFields += (b.path + field) -> reduce("$" + b.alias + field)
+    }
   }
 
 
@@ -257,7 +259,9 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
   }
 
   private def has[T](field: String, sets0: Seq[Set[T]], res: ResSet[T]): Unit = {
-    def containsSet(set: Set[T]): Bson = Filters.all(field, set.map(v => res.v2bson(v)).asJava)
+    def containsSet(set: Set[T]): Bson = {
+      Filters.all(field, set.map(v => res.v2bson(v)).asJava)
+    }
     val sets = sets0.filterNot(_.isEmpty)
     sets.length match {
       case 0 => b.matches.add(Filters.eq("_id", -1))

@@ -85,7 +85,8 @@ case class MongoConn_JVM(
             if (first) {
               val idsMap = insertResult.getInsertedIds
               idsMap.forEach {
-                case (k, v) => ids.addOne(v.asObjectId().getValue.toHexString)
+                case (k, v) if v.isString => ids.addOne(v.asString().getValue)
+                case (k, v)               => ids.addOne(v.asObjectId().getValue.toHexString)
               }
               first = false
             }
