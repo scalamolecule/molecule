@@ -5,6 +5,7 @@ import java.time._
 import java.util.{Date, UUID}
 import com.mongodb.client.model.Filters
 import molecule.base.error.ModelError
+import org.bson
 import org.bson._
 import org.bson.conversions.Bson
 import org.bson.types.{Decimal128, ObjectId}
@@ -56,11 +57,6 @@ trait LambdasOne extends LambdasSet {
       new BsonObjectId(new ObjectId(v))
     }
     Filters.eq[BsonObjectId](field, if (v == null) null else oid)
-
-//    println(field)
-//    println(v)
-//    println(v.getClass)
-//    Filters.eq[BsonString](field, if (v == null) null else new BsonString(v))
   }
   protected lazy val eqString         = (field: String, v: String) => Filters.eq[String](field, v)
   protected lazy val eqInt            = (field: String, v: Int) => Filters.eq(field, v)
@@ -86,7 +82,6 @@ trait LambdasOne extends LambdasSet {
   protected lazy val eqChar           = (field: String, v: Char) => Filters.eq[String](field, if (v == null.asInstanceOf[Char]) null else v.toString)
 
   protected lazy val neqID             = (field: String, v: String) => Filters.ne[BsonObjectId](field, new BsonObjectId(new ObjectId(v)))
-//  protected lazy val neqID             = (field: String, v: String) => Filters.ne[BsonString](field, new BsonString(v))
   protected lazy val neqString         = (field: String, v: String) => Filters.ne[String](field, v)
   protected lazy val neqInt            = (field: String, v: Int) => Filters.ne[Int](field, v)
   protected lazy val neqLong           = (field: String, v: Long) => Filters.ne[Long](field, v)
@@ -111,7 +106,6 @@ trait LambdasOne extends LambdasSet {
   protected lazy val neqChar           = (field: String, v: Char) => Filters.ne[String](field, if (v == null.asInstanceOf[Char]) null else v.toString)
 
   protected lazy val ltID             = (field: String, v: String) => Filters.lt[BsonObjectId](field, new BsonObjectId(new ObjectId(v)))
-//  protected lazy val ltID             = (field: String, v: String) => Filters.lt[BsonString](field, new BsonString(v))
   protected lazy val ltString         = (field: String, v: String) => Filters.lt[String](field, v)
   protected lazy val ltInt            = (field: String, v: Int) => Filters.lt[Int](field, v)
   protected lazy val ltLong           = (field: String, v: Long) => Filters.lt[Long](field, v)
@@ -136,7 +130,6 @@ trait LambdasOne extends LambdasSet {
   protected lazy val ltChar           = (field: String, v: Char) => Filters.lt[String](field, if (v == null.asInstanceOf[Char]) null else v.toString)
 
   protected lazy val gtID             = (field: String, v: String) => Filters.gt[BsonObjectId](field, new BsonObjectId(new ObjectId(v)))
-//  protected lazy val gtID             = (field: String, v: String) => Filters.gt[BsonString](field, new BsonString(v))
   protected lazy val gtString         = (field: String, v: String) => Filters.gt[String](field, v)
   protected lazy val gtInt            = (field: String, v: Int) => Filters.gt[Int](field, v)
   protected lazy val gtLong           = (field: String, v: Long) => Filters.gt[Long](field, v)
@@ -161,7 +154,6 @@ trait LambdasOne extends LambdasSet {
   protected lazy val gtChar           = (field: String, v: Char) => Filters.gt[String](field, if (v == null.asInstanceOf[Char]) null else v.toString)
 
   protected lazy val leID             = (field: String, v: String) => Filters.lte[BsonObjectId](field, new BsonObjectId(new ObjectId(v)))
-//  protected lazy val leID             = (field: String, v: String) => Filters.lte[BsonString](field, new BsonString(v))
   protected lazy val leString         = (field: String, v: String) => Filters.lte[String](field, v)
   protected lazy val leInt            = (field: String, v: Int) => Filters.lte[Int](field, v)
   protected lazy val leLong           = (field: String, v: Long) => Filters.lte[Long](field, v)
@@ -186,7 +178,6 @@ trait LambdasOne extends LambdasSet {
   protected lazy val leChar           = (field: String, v: Char) => Filters.lte[String](field, if (v == null.asInstanceOf[Char]) null else v.toString)
 
   protected lazy val geID             = (field: String, v: String) => Filters.gte[BsonObjectId](field, new BsonObjectId(new ObjectId(v)))
-//  protected lazy val geID             = (field: String, v: String) => Filters.gte[BsonString](field, new BsonString(v))
   protected lazy val geString         = (field: String, v: String) => Filters.gte[String](field, v)
   protected lazy val geInt            = (field: String, v: Int) => Filters.gte[Int](field, v)
   protected lazy val geLong           = (field: String, v: Long) => Filters.gte[Long](field, v)

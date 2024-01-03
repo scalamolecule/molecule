@@ -120,7 +120,6 @@ trait ResolveRef { self: MongoQueryBase =>
 
   private def resolveNested(ref: Ref, nestedElements: List[Element], mandatory: Boolean): Unit = {
     isNested = true
-    level += 1
     validateRefNs(ref, nestedElements)
     val Ref(_, refAttr, refNs, _, owner, _) = ref
 

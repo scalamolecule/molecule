@@ -29,7 +29,7 @@ trait Insert_mongodb
   }
 
   def getData(nsMap: Map[String, MetaNs], elements: List[Element], tpls: Seq[Product]): Data = {
-    initialNs = getInitialNs(elements)
+    val initialNs = getInitialNs(elements)
     nss += initialNs
     val tpl2bson = getResolver(nsMap, elements)
 
@@ -56,7 +56,7 @@ trait Insert_mongodb
       first = false
     }
 
-    val data = new BsonDocument().append("action", new BsonString("insert"))
+    val data = new BsonDocument().append("_action", new BsonString("insert"))
     nssDocs.collect {
       case (ns, nsDocs: BsonArray) if !nsDocs.isEmpty => data.append(ns, nsDocs)
     }

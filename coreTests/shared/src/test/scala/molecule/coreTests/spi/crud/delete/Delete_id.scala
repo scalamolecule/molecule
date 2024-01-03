@@ -149,14 +149,25 @@ trait Delete_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             (1, 10),
             (2, 20)
           ))
-          // 2 sub-entities
-          _ <- B.i.a1.query.get.map(_ ==> List(10, 20))
+          _ <- if (database == "MongoDB") {
+            // Embedded Mongo documents don't have their own identities
+            Future.unit
+          } else {
+            // 2 sub-entities
+            B.i.a1.query.get.map(_ ==> List(10, 20))
+          }
 
           _ <- A(e1).delete.transact
 
           // 1 entity with 1 owned sub-entity left
           _ <- A.i.OwnB.i.query.get.map(_ ==> List((2, 20)))
-          _ <- B.i.query.get.map(_ ==> List(20))
+          _ <- if (database == "MongoDB") {
+            // Embedded Mongo documents don't have their own identities
+            Future.unit
+          } else {
+            // 2 sub-entities
+            B.i.query.get.map(_ ==> List(20))
+          }
         } yield ()
       }
 
@@ -172,8 +183,10 @@ trait Delete_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             (1, Seq(10, 11)),
             (2, Seq(20, 21))
           ))
-          // 4 sub-entities
-          _ <- B.i.a1.query.get.map(_ ==> List(10, 11, 20, 21))
+          _ <- if (database != "MongoDB") {
+            // 4 sub-entities
+            B.i.a1.query.get.map(_ ==> List(10, 11, 20, 21))
+          } else Future.unit
 
           _ <- A(e1).delete.transact
 
@@ -181,7 +194,10 @@ trait Delete_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- A.i.OwnBb.*(B.i.a1).query.get.map(_ ==> List(
             (2, Seq(20, 21))
           ))
-          _ <- B.i.a1.query.get.map(_ ==> List(20, 21))
+
+          _ <- if (database != "MongoDB") {
+            B.i.a1.query.get.map(_ ==> List(20, 21))
+          } else Future.unit
         } yield ()
       }
 
@@ -198,19 +214,27 @@ trait Delete_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             (11, 21, 31, 41),
             (12, 22, 32, 42)
           ))
-          _ <- B.i.a1.query.get.map(_ ==> List(21, 22))
-          _ <- C.i.a1.query.get.map(_ ==> List(31, 32))
-          _ <- D.i.a1.query.get.map(_ ==> List(41, 42))
+          _ <- if (database != "MongoDB") {
+            for {
+              _ <- B.i.a1.query.get.map(_ ==> List(21, 22))
+              _ <- C.i.a1.query.get.map(_ ==> List(31, 32))
+              r <- D.i.a1.query.get.map(_ ==> List(41, 42))
+            } yield r
+          } else Future.unit
 
           // Delete entity e1 and recursively its owned entities
           _ <- A(e1).delete.transact
           _ <- A.i.OwnB.i.OwnC.i._B.D.i.query.get.map(_ ==> List(
             (12, 22, 32, 42)
           ))
-          _ <- B.i.query.get.map(_ ==> List(22)) // 21 deleted
-          _ <- C.i.query.get.map(_ ==> List(32)) // 31 deleted
-          // Non-owned D entities not recursively deleted
-          _ <- D.i.a1.query.get.map(_ ==> List(41, 42))
+          _ <- if (database != "MongoDB") {
+            for {
+              _ <- B.i.query.get.map(_ ==> List(22)) // 21 deleted
+              _ <- C.i.query.get.map(_ ==> List(32)) // 31 deleted
+              // Non-owned D entities not recursively deleted
+              r <- D.i.a1.query.get.map(_ ==> List(41, 42))
+            } yield r
+          } else Future.unit
         } yield ()
       }
 
@@ -225,16 +249,24 @@ trait Delete_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             (11, 21, Seq(31, 32)),
             (12, 22, Seq(33, 34))
           ))
-          _ <- B.i.a1.query.get.map(_ ==> List(21, 22))
-          _ <- C.i.a1.query.get.map(_ ==> List(31, 32, 33, 34))
+          _ <- if (database != "MongoDB") {
+            for {
+              _ <- B.i.a1.query.get.map(_ ==> List(21, 22))
+              r <- C.i.a1.query.get.map(_ ==> List(31, 32, 33, 34))
+            } yield r
+          } else Future.unit
 
           // Delete entity e1 and recursively its owned entities
           _ <- A(e1).delete.transact
           _ <- A.i.OwnB.i.OwnCc.*(C.i).query.get.map(_ ==> List(
             (12, 22, Seq(33, 34))
           ))
-          _ <- B.i.query.get.map(_ ==> List(22)) // 21 deleted
-          _ <- C.i.a1.query.get.map(_ ==> List(33, 34)) // 31, 32 deleted
+          _ <- if (database != "MongoDB") {
+            for {
+              _ <- B.i.query.get.map(_ ==> List(22)) // 21 deleted
+              r <- C.i.a1.query.get.map(_ ==> List(33, 34)) // 31, 32 deleted
+            } yield r
+          } else Future.unit
         } yield ()
       }
 
@@ -249,16 +281,24 @@ trait Delete_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             (11, Seq((21, 31))),
             (12, Seq((22, 32)))
           ))
-          _ <- B.i.a1.query.get.map(_ ==> List(21, 22))
-          _ <- C.i.a1.query.get.map(_ ==> List(31, 32))
+          _ <- if (database != "MongoDB") {
+            for {
+              _ <- B.i.a1.query.get.map(_ ==> List(21, 22))
+              r <- C.i.a1.query.get.map(_ ==> List(31, 32))
+            } yield r
+          } else Future.unit
 
           // Delete entity e1 and recursively its owned entities
           _ <- A(e1).delete.transact
           _ <- A.i.OwnBb.*(B.i.OwnC.i).query.get.map(_ ==> List(
             (12, Seq((22, 32)))
           ))
-          _ <- B.i.query.get.map(_ ==> List(22)) // 21 deleted
-          _ <- C.i.query.get.map(_ ==> List(32)) // 31 deleted
+          _ <- if (database != "MongoDB") {
+            for {
+              _ <- B.i.query.get.map(_ ==> List(22)) // 21 deleted
+              r <- C.i.query.get.map(_ ==> List(32)) // 31 deleted
+            } yield r
+          } else Future.unit
         } yield ()
       }
 
@@ -273,16 +313,24 @@ trait Delete_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             (11, Seq((21, Seq(31)))),
             (12, Seq((22, Seq(32))))
           ))
-          _ <- B.i.a1.query.get.map(_ ==> List(21, 22))
-          _ <- C.i.a1.query.get.map(_ ==> List(31, 32))
+          _ <- if (database != "MongoDB") {
+            for {
+              _ <- B.i.a1.query.get.map(_ ==> List(21, 22))
+              r <- C.i.a1.query.get.map(_ ==> List(31, 32))
+            } yield r
+          } else Future.unit
 
           // Delete entity e1 and recursively its owned entities
           _ <- A(e1).delete.transact
           _ <- A.i.OwnBb.*(B.i.OwnCc.*(C.i)).query.get.map(_ ==> List(
             (12, Seq((22, Seq(32))))
           ))
-          _ <- B.i.query.get.map(_ ==> List(22)) // 21 deleted
-          _ <- C.i.query.get.map(_ ==> List(32)) // 31 deleted
+          _ <- if (database != "MongoDB") {
+            for {
+              _ <- B.i.query.get.map(_ ==> List(22)) // 21 deleted
+              r <- C.i.query.get.map(_ ==> List(32)) // 31 deleted
+            } yield r
+          } else Future.unit
         } yield ()
       }
     }

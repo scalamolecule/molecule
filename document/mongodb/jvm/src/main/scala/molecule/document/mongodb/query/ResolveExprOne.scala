@@ -13,8 +13,7 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
 
   override protected def resolveAttrOneMan(attr: AttrOneMan): Unit = {
     attr match {
-      //      case at: AttrOneManID             => man(attr, at.vs, resId) // refs??
-      case at: AttrOneManID             => man(attr, at.vs, resString) // refs??
+      case at: AttrOneManID             => man(attr, at.vs, resID) // refs??
       case at: AttrOneManString         => man(attr, at.vs, resString)
       case at: AttrOneManInt            => man(attr, at.vs, resInt)
       case at: AttrOneManLong           => man(attr, at.vs, resLong)
@@ -44,7 +43,7 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
     if (isNestedOpt)
       throw ModelError("Tacit attributes not allowed in optional nested queries. Found: " + attr.name + "_")
     attr match {
-      case at: AttrOneTacID             => tac(attr, at.vs, resString)
+      case at: AttrOneTacID             => tac(attr, at.vs, resID)
       case at: AttrOneTacString         => tac(attr, at.vs, resString)
       case at: AttrOneTacInt            => tac(attr, at.vs, resInt)
       case at: AttrOneTacLong           => tac(attr, at.vs, resLong)
@@ -73,7 +72,7 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
   override protected def resolveAttrOneOpt(attr: AttrOneOpt): Unit = {
     hasOptAttr = true // to avoid redundant None's
     attr match {
-      case at: AttrOneOptID             => opt(attr, at.vs, resString)
+      case at: AttrOneOptID             => opt(attr, at.vs, resID)
       case at: AttrOneOptString         => opt(attr, at.vs, resString)
       case at: AttrOneOptInt            => opt(attr, at.vs, resInt)
       case at: AttrOneOptLong           => opt(attr, at.vs, resLong)

@@ -16,12 +16,11 @@ trait Save_mongodb
     with MoleculeLogging { self: ResolveSave =>
 
   def getData(elements: List[Element]): Data = {
-    initialNs = getInitialNs(elements)
     val rows = new BsonArray()
     rows.add(doc)
-    nsDocs(initialNs) = rows
+    nsDocs(getInitialNs(elements)) = rows
     resolve(elements)
-    val data = new BsonDocument().append("action", new BsonString("insert"))
+    val data = new BsonDocument().append("_action", new BsonString("insert"))
     nsDocs.foreach { case (ns, rows) =>
       data.append(ns, rows)
     }

@@ -21,7 +21,7 @@ class ResolveDelete { self: DeleteOps =>
             resolve(tail, topLevel)
 
           case a if a.attr == "id" => throw ModelError(
-            s"Generic id attribute not allowed in delete molecule. Found:\n" + a)
+            s"Mandatory id attribute not allowed in delete molecule. Found:\n" + a)
 
           case _: AttrOneTac =>
             addFilterElement(element)
@@ -34,7 +34,9 @@ class ResolveDelete { self: DeleteOps =>
 
         case _: Nested    => throw ModelError(s"Nested data structure not allowed in delete molecule.")
         case _: NestedOpt => throw ModelError(s"Optional nested data structure not allowed in delete molecule.")
-        case _            => addFilterElement(element); resolve(tail, false)
+        case _            =>
+          addFilterElement(element)
+          resolve(tail, false)
       }
       case Nil             => ()
     }

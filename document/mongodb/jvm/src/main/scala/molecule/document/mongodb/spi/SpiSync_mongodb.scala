@@ -34,23 +34,19 @@ trait SpiSync_mongodb
 
   // Query --------------------------------------------------------
 
-  def getModel2SqlQuery[Tpl](elements: List[Element]): Model2MongoQuery[Tpl] = {
-    new Model2MongoQuery[Tpl](elements)
-  }
-
   override def query_get[Tpl](q: Query[Tpl])(implicit conn0: Conn): List[Tpl] = {
     val conn = conn0.asInstanceOf[MongoConn_JVM]
     if (q.doInspect)
       query_inspect(q)
     q.dbView.foreach(noTime)
-    val m2q = getModel2SqlQuery[Tpl](q.elements)
+    val m2q = new Model2MongoQuery[Tpl](q.elements)
     QueryResolveOffset_mongodb[Tpl](q.elements, q.optLimit, None, m2q)
       .getListFromOffset_sync(conn)._1
   }
 
   def query_getRaw[Tpl](q: Query[Tpl])(implicit conn0: Conn): List[Tpl] = {
     val conn = conn0.asInstanceOf[MongoConn_JVM]
-    val m2q  = getModel2SqlQuery[Tpl](q.elements)
+    val m2q  = new Model2MongoQuery[Tpl](q.elements)
     QueryResolveOffset_mongodb[Tpl](q.elements, q.optLimit, None, m2q)
       .getListFromOffset_sync(conn)._1
   }
@@ -62,13 +58,13 @@ trait SpiSync_mongodb
 
   override def query_subscribe[Tpl](q: Query[Tpl], callback: List[Tpl] => Unit)(implicit conn0: Conn): Unit = {
     val conn = conn0.asInstanceOf[MongoConn_JVM]
-    val m2q  = getModel2SqlQuery[Tpl](q.elements)
+    val m2q  = new Model2MongoQuery[Tpl](q.elements)
     QueryResolveOffset_mongodb[Tpl](q.elements, q.optLimit, None, m2q)
-      .subscribe(conn, callback, (elements: List[Element]) => getModel2SqlQuery[Tpl](elements))
+      .subscribe(conn, callback, (elements: List[Element]) => new Model2MongoQuery[Tpl](elements))
   }
   override def query_unsubscribe[Tpl](q: Query[Tpl])(implicit conn0: Conn): Unit = {
     val conn = conn0.asInstanceOf[MongoConn_JVM]
-    val m2q  = getModel2SqlQuery[Tpl](q.elements)
+    val m2q  = new Model2MongoQuery[Tpl](q.elements)
     QueryResolveOffset_mongodb[Tpl](q.elements, q.optLimit, None, m2q)
       .unsubscribe(conn)
   }
@@ -83,7 +79,7 @@ trait SpiSync_mongodb
     if (q.doInspect)
       queryOffset_inspect(q)
     q.dbView.foreach(noTime)
-    val m2q = getModel2SqlQuery[Tpl](q.elements)
+    val m2q = new Model2MongoQuery[Tpl](q.elements)
     QueryResolveOffset_mongodb[Tpl](q.elements, q.optLimit, Some(q.offset), m2q)
       .getListFromOffset_sync(conn)
   }
@@ -97,7 +93,7 @@ trait SpiSync_mongodb
     if (q.doInspect)
       queryCursor_inspect(q)
     q.dbView.foreach(noTime)
-    val m2q = getModel2SqlQuery[Tpl](q.elements)
+    val m2q = new Model2MongoQuery[Tpl](q.elements)
     QueryResolveCursor_mongodb[Tpl](q.elements, q.optLimit, Some(q.cursor), m2q)
       .getListFromCursor_sync(conn)
   }
@@ -113,9 +109,9 @@ trait SpiSync_mongodb
     optOffset: Option[Int]
   ): Unit = {
     tryInspect("query", elements) {
-      val (ns, pipeline) = getModel2SqlQuery[Any](elements).getBsonQuery(Nil, optLimit, optOffset, None)
-      //            printRaw(label, elements, pipeline2json(pipeline, Some(ns)))
-      printRaw(label, Nil, pipeline2json(pipeline, Some(ns)))
+      val (ns, pipeline) = new Model2MongoQuery[Any](elements).getBsonQuery(Nil, optLimit, optOffset, None)
+                  printRaw(label, elements, pipeline2json(pipeline, Some(ns)))
+//      printRaw(label, Nil, pipeline2json(pipeline, Some(ns)))
 
       //      val (ns, pipeline) = getModel2SqlQuery[Any](elements).getBsonQuery(Nil, optLimit, optOffset, None)
       //      val (_, pipeline2) = getModel2SqlQuery[Any](elements).getBsonQuery2(Nil, optLimit, optOffset, None)
@@ -277,32 +273,25 @@ trait SpiSync_mongodb
 
   // Delete --------------------------------------------------------
 
-  override def delete_transact(delete0: Delete)(implicit conn0: Conn): TxReport = {
-    val conn   = conn0.asInstanceOf[MongoConn_JVM]
-    val delete = delete0.copy(elements = noKeywords(delete0.elements, Some(conn.proxy)))
-    //    if (delete.doInspect)
-    //      delete_inspect(delete)
-    //    val colName = getInitialNs(delete.elements)
-    //    delete_getFilter(conn, delete).fold(TxReport(Nil)) { filter =>
-    //      val txReport = conn.deleteData_sync(colName, filter)
-    //      conn.callback(delete.elements, true)
-    //      txReport
-    //    }
-    ???
+  override def delete_transact(delete: Delete)(implicit conn0: Conn): TxReport = {
+    val conn = conn0.asInstanceOf[MongoConn_JVM]
+    if (delete.doInspect)
+      delete_inspect(delete)
+    val txReport = conn.transact_sync(delete_getData(conn, delete))
+    conn.callback(delete.elements, true)
+    txReport
   }
 
   override def delete_inspect(delete: Delete)(implicit conn0: Conn): Unit = {
     val conn = conn0.asInstanceOf[MongoConn_JVM]
     tryInspect("delete", delete.elements) {
-      val filter = delete_getFilter(conn, delete).fold("<no filter>") { bson =>
-        bson.toBsonDocument.toJson(pretty)
-      }
-      printRaw("DELETE", delete.elements, filter)
+      printRaw("DELETE", delete.elements, delete_getData(conn, delete).toJson(pretty))
     }
   }
 
-  private def delete_getFilter(conn: MongoConn_JVM, delete: Delete): Option[Bson] = {
-    new ResolveDelete with Delete_mongodb().getFilter(delete.elements, conn.proxy.nsMap)
+  //  private def delete_getData(conn: MongoConn_JVM, delete: Delete): Option[Bson] = {
+  private def delete_getData(conn: MongoConn_JVM, delete: Delete): Data = {
+    new ResolveDelete with Delete_mongodb().getData(delete.elements, conn)
   }
 
 

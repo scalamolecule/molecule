@@ -373,8 +373,7 @@ trait Update_mongodb
     if (ids.nonEmpty) {
       throw ModelError(s"Can't apply entity ids twice in $update.")
     }
-//    ids = ids1.map(_.toLong)
-    ids = ids1
+    ids = Some(ids1)
   }
 
   override def handleUniqueFilterAttr(uniqueFilterAttr: AttrOneTac): Unit = {

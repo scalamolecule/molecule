@@ -11,6 +11,8 @@ import utest._
 
 trait FilterAttr_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
+  // Can't use entity ids with filter attributes
+
   override lazy val tests = Tests {
 
     "equal (apply)" - types { implicit conn =>

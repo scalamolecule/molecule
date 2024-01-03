@@ -85,7 +85,7 @@ trait ResolveExprOneID extends ResolveExpr with LambdasOne { self: MongoQueryBas
 
 
   private def expr[T](field0: String, op: Op, args: Seq[T], res: ResOne[T]): Unit = {
-    val field = bx.pathDot + field0
+    val field = b.dot + field0
     op match {
       case V          => b.matches.add(Filters.ne(field, null))
       case Eq         => b.matches.add(equal(field, args, res))
@@ -196,15 +196,15 @@ trait ResolveExprOneID extends ResolveExpr with LambdasOne { self: MongoQueryBas
 
   private def remainder[T](field: String, args: Seq[T]): Unit = {
     val Seq(divisor, remainder) = args.map(_.toString.toInt)
-    bx.matches.add(Filters.mod(field, divisor, remainder))
+    b.matches.add(Filters.mod(field, divisor, remainder))
   }
 
   private def even(field: String): Unit = {
-    bx.matches.add(Filters.mod(field, 2, 0))
+    b.matches.add(Filters.mod(field, 2, 0))
   }
 
   private def odd(field: String): Unit = {
-    bx.matches.add(Filters.mod(field, 2, 1))
+    b.matches.add(Filters.mod(field, 2, 1))
   }
 
   private def aggr[T](field: String, fn: String, optN: Option[Int], res: ResOne[T]): Unit = {

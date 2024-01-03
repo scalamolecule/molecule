@@ -150,10 +150,10 @@ trait MandatoryRefs extends CoreTestSuite with ApiAsync with SerializationUtils 
 
 
     // todo? This is easily done with Datomic. But from sql it seems that one would have to
-    //  - check every known table having a reference to the ns which, or
+    //  - check every known table having a reference to the ns, or
     //  - create some trigger on delete if possible? That would be much better to having the
     //    db server automatically preventing orphaning mandatory relationships.
-    // So for now, this test is not implemented for Datomic.
+    // So for now, this test is only implemented for Datomic.
 
     "Deleting mandatory ref" - validation { implicit conn =>
       if (database == "Datomic") {

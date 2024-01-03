@@ -5,70 +5,148 @@ import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
 import molecule.coreTests.async._
-import molecule.coreTests.dataModels.core.dsl.Types._
+import molecule.coreTests.dataModels.core.dsl.Refs._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
+import scala.concurrent.Future
 
 trait Delete_filter extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
 
   override lazy val tests = Tests {
 
-    "Filter by 1 non-ns value" - types { implicit conn =>
+    "Filter by 1 non-ns value" - refs { implicit conn =>
       for {
-        _ <- Ns.i.insert(1, 2).transact
-        _ <- Ns.i_(1).delete.transact
-        _ <- Ns.i.query.get.map(_ ==> List(2))
+        _ <- A.i.insert(1, 2).transact
+        _ <- A.i_(1).delete.transact
+        _ <- A.i.query.get.map(_ ==> List(2))
       } yield ()
     }
 
 
-    "Filter by multiple non-ns value" - types { implicit conn =>
+    "Filter by multiple non-ns value" - refs { implicit conn =>
       for {
-        List(e1, e2, e3) <- Ns.i.insert(1, 2, 2).transact.map(_.ids)
-        _ <- Ns.id.a1.i.query.get.map(_ ==> List(
+        List(e1, e2, e3) <- A.i.insert(1, 2, 2).transact.map(_.ids)
+        _ <- A.id.a1.i.query.get.map(_ ==> List(
           (e1, 1),
           (e2, 2),
           (e3, 2),
         ))
 
-        _ <- Ns.i_(2).delete.transact
-        _ <- Ns.id.i.query.get.map(_ ==> List(
+        // Delete two entities having `i` with value 2
+        _ <- A.i_(2).delete.transact
+
+        // One entity left
+        _ <- A.id.i.query.get.map(_ ==> List(
           (e1, 1),
         ))
       } yield ()
     }
 
 
-    "Expression" - types { implicit conn =>
-      for {
-        _ <- Ns.i.insert(1, 2, 3).transact
+    "Expression" -  {
+      import molecule.coreTests.dataModels.core.dsl.Types._
 
-        // Update all entities where non-ns attribute i <= 2
-        _ <- Ns.i_.<=(2).delete.transact
+      "equal 0" - types { implicit conn =>
+        for {
+          _ <- Ns.int.insert(int1, int2, int3).transact
+          _ <- Ns.int_(int0).delete.transact
+          _ <- Ns.int.query.get.map(_ ==> List(int1, int2, int3))
+        } yield ()
+      }
+      "equal 2" - types { implicit conn =>
+        for {
+          _ <- Ns.int.insert(int1, int2, int3).transact
+          _ <- Ns.int_(int2).delete.transact
+          _ <- Ns.int.query.get.map(_ ==> List(int1, int3))
+        } yield ()
+      }
+      "equal 1 2" - types { implicit conn =>
+        for {
+          _ <- Ns.int.insert(int1, int2, int3).transact
+          _ <- Ns.int_(int1, int2).delete.transact
+          _ <- Ns.int.query.get.map(_ ==> List(int3))
+        } yield ()
+      }
 
-        _ <- Ns.i.query.get.map(_ ==> List(3))
-      } yield ()
+
+      "not equal 0" - types { implicit conn =>
+        for {
+          _ <- Ns.int.insert(int1, int2, int3).transact
+          _ <- Ns.int_.not(int0).delete.transact
+          _ <- Ns.int.query.get.map(_ ==> List())
+        } yield ()
+      }
+      "not equal 2" - types { implicit conn =>
+        for {
+          _ <- Ns.int.insert(int1, int2, int3).transact
+          _ <- Ns.int_.not(int2).delete.transact
+          _ <- Ns.int.query.get.map(_ ==> List(int2))
+        } yield ()
+      }
+      "not equal 1 2" - types { implicit conn =>
+        for {
+          _ <- Ns.int.insert(int1, int2, int3).transact
+          _ <- Ns.int_.not(int1, int2).delete.transact
+          _ <- Ns.int.query.get.map(_ ==> List(int1, int2))
+        } yield ()
+      }
+
+
+      "<" - types { implicit conn =>
+        for {
+          _ <- Ns.int.insert(int1, int2, int3).transact
+          _ <- Ns.int_.<(int2).delete.transact
+          _ <- Ns.int.query.get.map(_ ==> List(int2, int3))
+        } yield ()
+      }
+
+
+      "<=" - types { implicit conn =>
+        for {
+          _ <- Ns.int.insert(int1, int2, int3).transact
+          _ <- Ns.int_.<=(int2).delete.transact
+          _ <- Ns.int.query.get.map(_ ==> List(int3))
+        } yield ()
+      }
+
+
+      ">" - types { implicit conn =>
+        for {
+          _ <- Ns.int.insert(int1, int2, int3).transact
+          _ <- Ns.int_.>(int2).delete.transact
+          _ <- Ns.int.query.get.map(_ ==> List(int1, int2))
+        } yield ()
+      }
+
+
+      ">=" - types { implicit conn =>
+        for {
+          _ <- Ns.int.insert(int1, int2, int3).transact
+          _ <- Ns.int_.>=(int2).delete.transact
+          _ <- Ns.int.query.get.map(_ ==> List(int1))
+        } yield ()
+      }
     }
 
-    "Multiple expressions" - types { implicit conn =>
+    "Multiple expressions" - refs { implicit conn =>
       for {
-        _ <- Ns.i.s.insert(
+        _ <- A.i.s.insert(
           (1, "a"),
           (2, "b"),
           (3, "c"),
         ).transact
 
-        _ <- Ns.i.a1.s.query.get.map(_ ==> List(
+        _ <- A.i.a1.s.query.get.map(_ ==> List(
           (1, "a"),
           (2, "b"),
           (3, "c"),
         ))
 
         // Update all entities where non-ns attribute i > 1 and s < "c"
-        _ <- Ns.i_.>(1).s_.<("c").delete.transact
+        _ <- A.i_.>(1).s_.<("c").delete.transact
 
-        _ <- Ns.i.a1.s.query.get.map(_ ==> List(
+        _ <- A.i.a1.s.query.get.map(_ ==> List(
           (1, "a"),
           (3, "c"),
         ))
@@ -76,79 +154,131 @@ trait Delete_filter extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "Ref" - types { implicit conn =>
+    "Ref" - refs { implicit conn =>
       for {
-        _ <- Ns.i.insert(1).transact
-        _ <- Ns.i.Ref.i.insert((2, 20), (3, 30)).transact
+        _ <- A.i.insert(1).transact
+        _ <- A.i.B.i.insert((2, 20), (3, 30)).transact
 
-        _ <- Ns.i.a1.query.get.map(_ ==> List(1, 2, 3))
-        _ <- Ns.i.Ref.i.query.get.map(_ ==> List((2, 20), (3, 30)))
+        _ <- A.i.a1.query.get.map(_ ==> List(1, 2, 3))
+        _ <- A.i.B.i.query.get.map(_ ==> List((2, 20), (3, 30)))
 
         // Nothing deleted since entity 1 doesn't have a ref
-        _ <- Ns.i_(1).Ref.i_.delete.transact
-        _ <- Ns.i.a1.query.get.map(_ ==> List(1, 2, 3))
+        _ <- A.i_(1).B.i_.delete.transact
+        _ <- A.i.a1.query.get.map(_ ==> List(1, 2, 3))
 
         // Second entity has a ref and will be deleted
-        _ <- Ns.i_(2).Ref.i_.delete.transact
-        _ <- Ns.i.a1.query.get.map(_ ==> List(1, 3))
-        _ <- Ns.i.Ref.i.query.get.map(_ ==> List((3, 30)))
+        _ <- A.i_(2).B.i_.delete.transact
+        _ <- A.i.a1.query.get.map(_ ==> List(1, 3))
+        _ <- A.i.B.i.query.get.map(_ ==> List((3, 30)))
 
-        // Note that Ref.int entity is a separate entity and is not deleted.
+        // Note that B.int entity is a separate entity and is not deleted.
         // Only the entity of the initial namespace is deleted
-        _ <- Ref.i.a1.query.get.map(_ ==> List(20, 30))
+        _ <- B.i.a1.query.get.map(_ ==> List(20, 30))
 
-        // Ns.i entity has no ref to Ref.i_(42) so nothing is deleted
-        _ <- Ns.i_.Ref.i_(42).delete.transact
-        _ <- Ns.i.a1.query.get.map(_ ==> List(1, 3))
-        _ <- Ns.i.Ref.i.query.get.map(_ ==> List((3, 30)))
+        // A.i entity has no ref to B.i_(42) so nothing is deleted
+        _ <- A.i_.B.i_(42).delete.transact
+        _ <- A.i.a1.query.get.map(_ ==> List(1, 3))
+        _ <- A.i.B.i.query.get.map(_ ==> List((3, 30)))
 
-        // Ns.i entity has a ref to Ref.i_(30) so it will be deleted
-        _ <- Ns.i_.Ref.i_(30).delete.transact
-        _ <- Ns.i.query.get.map(_ ==> List(1))
-        _ <- Ns.i.Ref.i.query.get.map(_ ==> List())
+        // A.i entity has a ref to B.i_(30) so it will be deleted
+        _ <- A.i_.B.i_(30).delete.transact
+        _ <- A.i.query.get.map(_ ==> List(1))
+        _ <- A.i.B.i.query.get.map(_ ==> List())
+      } yield ()
+    }
+
+    "Ref owned" - refs { implicit conn =>
+      import molecule.coreTests.dataModels.core.dsl.Refs._
+      for {
+        _ <- A.i.insert(1).transact
+        _ <- A.i.OwnB.i.insert((2, 20), (3, 30)).transact
+
+        _ <- A.i.a1.query.get.map(_ ==> List(1, 2, 3))
+        _ <- A.i.OwnB.i.query.get.map(_ ==> List((2, 20), (3, 30)))
+
+        // Nothing deleted since entity 1 doesn't have a ref
+        _ <- A.i_(1).OwnB.i_.delete.transact
+        _ <- A.i.a1.query.get.map(_ ==> List(1, 2, 3))
+
+        // Second entity has a ref and will be deleted
+        _ <- A.i_(2).OwnB.i_.delete.transact
+        _ <- A.i.a1.query.get.map(_ ==> List(1, 3))
+        _ <- A.i.OwnB.i.query.get.map(_ ==> List((3, 30)))
+
+        _ <- if (database != "MongoDB") {
+          // Owned B entity is deleted too
+          B.i.a1.query.get.map(_ ==> List(30))
+        } else {
+          // Owned entity in Mongo is embedded in the A document.
+          // So we can't query it in isolation without its parent A document.
+          Future.unit
+        }
+
+        // A.i entity has no ref to OwnB.i_(42) so nothing is deleted
+        _ <- A.i_.OwnB.i_(42).delete.transact
+        _ <- A.i.a1.query.get.map(_ ==> List(1, 3))
+        _ <- A.i.OwnB.i.query.get.map(_ ==> List((3, 30)))
+
+        // A.i entity has a ref to OwnB.i_(30) so it will be deleted
+        _ <- A.i_.OwnB.i_(30).delete.transact
+        _ <- A.i.query.get.map(_ ==> List(1))
+        _ <- A.i.OwnB.i.query.get.map(_ ==> List())
       } yield ()
     }
 
 
-    "Ref + expr" - types { implicit conn =>
+    "Ref + expr" - refs { implicit conn =>
       for {
-        _ <- Ns.i.Ref.i.insert((1, 10), (2, 20)).transact
-        _ <- Ns.i.a1.query.get.map(_ ==> List(1, 2))
-        _ <- Ref.i.a1.query.get.map(_ ==> List(10, 20))
-        _ <- Ns.i.a1.Ref.i.query.get.map(_ ==> List((1, 10), (2, 20)))
+        _ <- A.i.B.i.insert((1, 10), (2, 20)).transact
+        _ <- A.i.a1.query.get.map(_ ==> List(1, 2))
+        _ <- B.i.a1.query.get.map(_ ==> List(10, 20))
+        _ <- A.i.a1.B.i.query.get.map(_ ==> List((1, 10), (2, 20)))
 
-        _ <- Ns.i_.Ref.i_.>(15).delete.transact
-        _ <- Ns.i.query.get.map(_ ==> List(1))
-        // Note that the Ref.int entity is a separate entity and is not deleted
+        _ <- A.i_.B.i_.>(15).delete.transact
+        _ <- A.i.query.get.map(_ ==> List(1))
+        // Note that the B.int entity is a separate entity and is not deleted
         // Only the entity of the initial namespace is deleted
-        _ <- Ref.i.a1.query.get.map(_ ==> List(10, 20))
-        _ <- Ns.i.Ref.i.query.get.map(_ ==> List((1, 10)))
+        _ <- B.i.a1.query.get.map(_ ==> List(10, 20))
+        _ <- A.i.B.i.query.get.map(_ ==> List((1, 10)))
+      } yield ()
+    }
+
+    "Ref owned + expr" - refs { implicit conn =>
+      for {
+        _ <- A.i.OwnB.i.insert((1, 10), (2, 20)).transact
+        _ <- A.i.a1.query.get.map(_ ==> List(1, 2))
+        _ <- if (database != "MongoDB") {
+          B.i.a1.query.get.map(_ ==> List(10, 20))
+        } else {
+          // Owned entity in Mongo is embedded in the A document.
+          // So we can't query it in isolation without its parent A document.
+          Future.unit
+        }
+        _ <- A.i.a1.OwnB.i.query.get.map(_ ==> List((1, 10), (2, 20)))
+
+        _ <- A.i_.OwnB.i_.>(15).delete.transact
+        _ <- A.i.query.get.map(_ ==> List(1))
+        _ <- if (database != "MongoDB") {
+          // Owned B entity with i == 30 is deleted too
+          B.i.a1.query.get.map(_ ==> List(10, 20))
+        } else {
+          // Owned entity in Mongo is embedded in the A document.
+          // So we can't query it in isolation without its parent A document.
+          Future.unit
+        }
+        _ <- A.i.OwnB.i.query.get.map(_ ==> List((1, 10)))
       } yield ()
     }
 
 
     "Semantics" - {
 
-      "Only tacit attributes" - types { implicit conn =>
+      "Only tacit attributes" - refs { implicit conn =>
         for {
-          _ <- Ns.i.<=(2).delete.transact
+          _ <- A.i.<=(2).delete.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
               err ==> "Can only filter delete by values applied to tacit card-one attributes. Found:\n" +
-                """AttrOneManInt("Ns", "i", Le, Seq(2), None, None, Nil, Nil, None, None, Seq(0, 1))"""
-            }
-        } yield ()
-      }
-
-      "Multiple values" - types { implicit conn =>
-        for {
-          _ <- Ns.i_(1).int(1, 2).update.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-              err ==> "Can only update one value for attribute `Ns.int`. Found: 1, 2"
-            }
-
-          _ <- Ns.i_(1).int(1, 2).upsert.transact
-            .map(_ ==> "Unexpected success").recover { case ExecutionError(err) =>
-              err ==> "Can only upsert one value for attribute `Ns.int`. Found: 1, 2"
+                """AttrOneManInt("A", "i", Le, Seq(2), None, None, Nil, Nil, None, None, Seq(0, 1))"""
             }
         } yield ()
       }
