@@ -8,10 +8,9 @@ import molecule.core.transaction.ResolveUpdate
 import molecule.core.transaction.ops.UpdateOps
 import molecule.document.mongodb.facade.MongoConn_JVM
 import molecule.document.mongodb.spi.SpiSync_mongodb
-import org.bson.{BsonArray, BsonDocument, BsonNull, BsonObjectId, BsonString, BsonValue}
 import org.bson.types.ObjectId
+import org.bson._
 import scala.collection.mutable.ListBuffer
-import scala.util.control.NonFatal
 
 trait Update_mongodb
   extends Base_JVM_mongodb
@@ -25,7 +24,7 @@ trait Update_mongodb
     var ns: String = "",
     doc: BsonDocument = new BsonDocument(),
     var ids: Seq[String] = Seq.empty[String],
-    filterElements: ListBuffer[Element] = ListBuffer.empty[Element],
+    var filterElements: List[Element] = List.empty[Element],
     uniqueFilterElements: ListBuffer[Element] = ListBuffer.empty[Element],
   ) {
     override def toString: String = {
@@ -95,10 +94,10 @@ trait Update_mongodb
       } else {
         if (ids.nonEmpty) {
           println("F")
-//          throw ModelError("f")
+          //          throw ModelError("f")
           ids
         } else if (filterElements.nonEmpty) {
-//          throw ModelError("g")
+          //          throw ModelError("g")
           println("G")
           val filterIds = query(AttrOneManID(ns, "id", V) +: filterElements.toList)
           println("G ------ filterIds: " + filterIds)
@@ -189,26 +188,25 @@ trait Update_mongodb
 
   override def handleRefNs(ref: Ref): Unit = {
     val Ref(ns, refAttr, refNs, _, owner, _) = ref
-    //    println("######################## " + owner)
     if (owner) {
-      //      // Embed document
-      //      val embeddedDoc = new BsonDocument()
-      //      doc.append(refAttr, embeddedDoc)
-      //      // Step into embedded document
-      //      doc = embeddedDoc
-      //      docs = docs.init :+ (docs.last :+ doc)
-
+      // Embed document
+      d.filterElements = d.filterElements :+ ref
+      path = path :+ refAttr
 
     } else {
+      // Referenced document
 
-      //      println("  ids ns   " + d.ids)
+      if (d.filterElements.nonEmpty && d.filterElements.last.isInstanceOf[BackRef]) {
+        // Remove BackRef orphan
+        d.filterElements = d.filterElements.init
+      }
 
-      // Retrieve reference ids
+      // Retrieve reference ids (could be done in one query for all refs...)
       val refIds = query(List(
         AttrOneTacID(ns, "id", Eq, d.ids),
         AttrOneManID(ns, refAttr, V),
       ))
-      //      println("  ids ref  " + refIds)
+      path = Nil
 
       // Process referenced documents
       val referee = Some(d)
@@ -225,17 +223,19 @@ trait Update_mongodb
     transformValue: T => Any,
     handleValue: T => Any,
   ): Unit = {
+    val pathAttr = if (path.isEmpty) attr else path.mkString("", ".", "." + attr)
+
     if (isUpdate) {
       if (owner) {
         throw ModelError("Can't update non-existing ids of embedded documents in MongoDB.")
       }
-      d.filterElements += AttrOneTacInt(ns, attr) // dummy filter
+      d.filterElements = d.filterElements :+ AttrOneTacInt(ns, attr) // dummy filter
     }
     vs match {
       case Seq(v) =>
-        d.doc.append(attr, transformValue(v).asInstanceOf[BsonValue])
+        d.doc.append(pathAttr, transformValue(v).asInstanceOf[BsonValue])
       case Nil    =>
-        d.doc.append(attr, new BsonNull())
+        d.doc.append(pathAttr, new BsonNull())
       case vs     =>
         val cleanAttr = attr.replace("_", "")
         throw ExecutionError(
@@ -567,41 +567,17 @@ trait Update_mongodb
   }
 
   override def handleFilterAttr(filterAttr: AttrOneTac): Unit = {
-    d.filterElements += filterAttr
+    d.filterElements = d.filterElements :+ filterAttr
   }
 
 
-  override def handleBackRef(backRef: BackRef): Unit = ()
-
-
-  //  // Ref id join handling --------------------------------------------------------------------
-  //
-  //  protected def deleteJoins(joinTable: String, ns_id: String, id: Long, refIds: String = ""): Table = {
-  //    val deletePath  = List("deleteJoins")
-  //    val deleteJoins = s"DELETE FROM $joinTable WHERE $ns_id = $id" + refIds
-  //    val deletePS    = sqlConn.prepareStatement(deleteJoins, Statement.RETURN_GENERATED_KEYS)
-  //    val delete      = (ps: PS, _: IdsMap, _: RowIndex) => ps.addBatch()
-  //    Table(deletePath, deleteJoins, deletePS, delete)
-  //  }
-  //
-  //  protected def addJoins(joinTable: String, ns_id: String, refNs_id: String, id: Long, refIds: Iterable[Long]): Table = {
-  //    val addPath  = List("addJoins")
-  //    val addJoins = s"INSERT INTO $joinTable($ns_id, $refNs_id) VALUES (?, ?)"
-  //    val addPS    = sqlConn.prepareStatement(addJoins, Statement.RETURN_GENERATED_KEYS)
-  //    val add      = (ps: PS, _: IdsMap, _: RowIndex) =>
-  //      refIds.foreach { refId =>
-  //        ps.setLong(1, id)
-  //        ps.setLong(2, refId)
-  //        ps.addBatch()
-  //      }
-  //    Table(addPath, addJoins, addPS, add)
-  //  }
-  //
-  //  protected def getUpdateId: Long = {
-  //    ids.toList match {
-  //      case List(v) => v
-  //      case other   => throw ModelError("Expected to update one entity. Found multiple ids: " + other)
-  //    }
-  //  }
-
+  override def handleBackRef(backRef: BackRef): Unit = {
+    d.referee.fold[Unit] {
+      path = path.init
+      d.filterElements = d.filterElements :+ backRef
+    } { referee =>
+      path = Nil
+      d = referee
+    }
+  }
 }

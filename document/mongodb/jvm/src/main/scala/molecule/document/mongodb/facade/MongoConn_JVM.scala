@@ -82,9 +82,9 @@ case class MongoConn_JVM(
               }
               val collection = mongoDb.getCollection(ns, classOf[BsonDocument])
 
-              println("ns    : " + ns)
-              println("filter: " + filter)
-              println("data  : " + data)
+//              println("ns    : " + ns)
+//              println("filter: " + filter)
+//              println("data  : " + data)
 
               collection.updateMany(clientSession, filter, data)
               firstNs = false

@@ -138,7 +138,7 @@ trait UpdateOne_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "Referenced attributes" - refs { implicit conn =>
+    "Ref" - refs { implicit conn =>
       for {
         id <- A.i(1).B.i(2).C.i(3).save.transact.map(_.id)
         _ <- A.i.B.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
@@ -173,8 +173,113 @@ trait UpdateOne_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       } yield ()
     }
 
+    "OwnB" - refs { implicit conn =>
+      for {
+        id <- A.i(1).OwnB.i(2).C.i(3).save.transact.map(_.id)
+        _ <- A.i.OwnB.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
 
-    "Referenced attributes with backref" - refs { implicit conn =>
+        // A
+        _ <- A(id).i(10).update.transact
+        _ <- A.i.OwnB.i.C.i.query.get.map(_ ==> List((10, 2, 3)))
+
+        // A + B
+        _ <- A(id).i(11).OwnB.i(20).update.transact
+        _ <- A.i.OwnB.i.C.i.query.get.map(_ ==> List((11, 20, 3)))
+
+        // B
+        _ <- A(id).OwnB.i(21).update.transact
+        _ <- A.i.OwnB.i.C.i.query.get.map(_ ==> List((11, 21, 3)))
+
+        // A + B + C
+        _ <- A(id).i(12).OwnB.i(22).C.i(30).update.transact
+        _ <- A.i.OwnB.i.C.i.query.get.map(_ ==> List((12, 22, 30)))
+
+        // A + C
+        _ <- A(id).i(13).OwnB.C.i(31).update.transact
+        _ <- A.i.OwnB.i.C.i.query.get.map(_ ==> List((13, 22, 31)))
+
+        // B + C
+        _ <- A(id).OwnB.i(23).C.i(32).update.transact
+        _ <- A.i.OwnB.i.C.i.query.get.map(_ ==> List((13, 23, 32)))
+
+        // C
+        _ <- A(id).OwnB.C.i(33).update.transact
+        _ <- A.i.OwnB.i.C.i.query.get.map(_ ==> List((13, 23, 33)))
+      } yield ()
+    }
+
+    "OwnC" - refs { implicit conn =>
+      for {
+        id <- A.i(1).B.i(2).OwnC.i(3).save.transact.map(_.id)
+        _ <- A.i.B.i.OwnC.i.query.get.map(_ ==> List((1, 2, 3)))
+
+        // A
+        _ <- A(id).i(10).update.transact
+        _ <- A.i.B.i.OwnC.i.query.get.map(_ ==> List((10, 2, 3)))
+
+        // A + B
+        _ <- A(id).i(11).B.i(20).update.transact
+        _ <- A.i.B.i.OwnC.i.query.get.map(_ ==> List((11, 20, 3)))
+
+        // B
+        _ <- A(id).B.i(21).update.transact
+        _ <- A.i.B.i.OwnC.i.query.get.map(_ ==> List((11, 21, 3)))
+
+        // A + B + C
+        _ <- A(id).i(12).B.i(22).OwnC.i(30).update.transact
+        _ <- A.i.B.i.OwnC.i.query.get.map(_ ==> List((12, 22, 30)))
+
+        // A + C
+        _ <- A(id).i(13).B.OwnC.i(31).update.transact
+        _ <- A.i.B.i.OwnC.i.query.get.map(_ ==> List((13, 22, 31)))
+
+        // B + C
+        _ <- A(id).B.i(23).OwnC.i(32).update.transact
+        _ <- A.i.B.i.OwnC.i.query.get.map(_ ==> List((13, 23, 32)))
+
+        // C
+        _ <- A(id).B.OwnC.i(33).update.transact
+        _ <- A.i.B.i.OwnC.i.query.get.map(_ ==> List((13, 23, 33)))
+      } yield ()
+    }
+
+    "OwnB OwnC" - refs { implicit conn =>
+      for {
+        id <- A.i(1).OwnB.i(2).OwnC.i(3).save.transact.map(_.id)
+        _ <- A.i.OwnB.i.OwnC.i.query.get.map(_ ==> List((1, 2, 3)))
+
+        // A
+        _ <- A(id).i(10).update.transact
+        _ <- A.i.OwnB.i.OwnC.i.query.get.map(_ ==> List((10, 2, 3)))
+
+        // A + B
+        _ <- A(id).i(11).OwnB.i(20).update.transact
+        _ <- A.i.OwnB.i.OwnC.i.query.get.map(_ ==> List((11, 20, 3)))
+
+        // B
+        _ <- A(id).OwnB.i(21).update.transact
+        _ <- A.i.OwnB.i.OwnC.i.query.get.map(_ ==> List((11, 21, 3)))
+
+        // A + B + C
+        _ <- A(id).i(12).OwnB.i(22).OwnC.i(30).update.transact
+        _ <- A.i.OwnB.i.OwnC.i.query.get.map(_ ==> List((12, 22, 30)))
+
+        // A + C
+        _ <- A(id).i(13).OwnB.OwnC.i(31).update.transact
+        _ <- A.i.OwnB.i.OwnC.i.query.get.map(_ ==> List((13, 22, 31)))
+
+        // B + C
+        _ <- A(id).OwnB.i(23).OwnC.i(32).update.transact
+        _ <- A.i.OwnB.i.OwnC.i.query.get.map(_ ==> List((13, 23, 32)))
+
+        // C
+        _ <- A(id).OwnB.OwnC.i(33).update.transact
+        _ <- A.i.OwnB.i.OwnC.i.query.get.map(_ ==> List((13, 23, 33)))
+      } yield ()
+    }
+
+
+    "Backref" - refs { implicit conn =>
       for {
         id <- A.i(1).B.i(2)._A.C.i(3).save.transact.map(_.id)
         _ <- A.i.B.i._A.C.i.query.get.map(_ ==> List((1, 2, 3)))
@@ -182,6 +287,39 @@ trait UpdateOne_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         // Updating A.B.i and A.C.i
         _ <- A(id).i(10).B.i(20)._A.C.i(30).update.transact
         _ <- A.i.B.i._A.C.i.query.get.map(_ ==> List((10, 20, 30)))
+      } yield ()
+    }
+
+    "Backref OwnB" - refs { implicit conn =>
+      for {
+        id <- A.i(1).OwnB.i(2)._A.C.i(3).save.transact.map(_.id)
+        _ <- A.i.OwnB.i._A.C.i.query.get.map(_ ==> List((1, 2, 3)))
+
+        // Updating A.OwnB.i and A.C.i
+        _ <- A(id).i(10).OwnB.i(20)._A.C.i(30).update.transact
+        _ <- A.i.OwnB.i._A.C.i.query.get.map(_ ==> List((10, 20, 30)))
+      } yield ()
+    }
+
+    "Backref OwnC" - refs { implicit conn =>
+      for {
+        id <- A.i(1).B.i(2)._A.OwnC.i(3).save.transact.map(_.id)
+        _ <- A.i.B.i._A.OwnC.i.query.get.map(_ ==> List((1, 2, 3)))
+
+        // Updating A.B.i and A.OwnC.i
+        _ <- A(id).i(10).B.i(20)._A.OwnC.i(30).update.transact
+        _ <- A.i.B.i._A.OwnC.i.query.get.map(_ ==> List((10, 20, 30)))
+      } yield ()
+    }
+
+    "Backref OwnB OwnC" - refs { implicit conn =>
+      for {
+        id <- A.i(1).OwnB.i(2)._A.OwnC.i(3).save.transact.map(_.id)
+        _ <- A.i.OwnB.i._A.OwnC.i.query.get.map(_ ==> List((1, 2, 3)))
+
+        // Updating A.OwnB.i and A.OwnC.i
+        _ <- A(id).i(10).OwnB.i(20)._A.OwnC.i(30).update.transact
+        _ <- A.i.OwnB.i._A.OwnC.i.query.get.map(_ ==> List((10, 20, 30)))
       } yield ()
     }
 
