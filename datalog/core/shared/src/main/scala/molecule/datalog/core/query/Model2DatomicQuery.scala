@@ -54,10 +54,9 @@ class Model2DatomicQuery[Tpl](elements0: List[Element])
       val preSortIds = ArrayBuffer.empty[String]
       val preFind1   = ArrayBuffer(preFind)
       val hasRules   = preRules.nonEmpty
-      val preQuery   = renderQuery(
+      renderQuery(
         preSortIds, preFind1, widh, in ++ preIn, where ++ preWhere, hasRules, optimized
       )
-      preQuery
     }
 
     val preQueryStrs = if (preQuery.nonEmpty) Seq(s"\nPRE-QUERY:\n$preQuery") else Nil

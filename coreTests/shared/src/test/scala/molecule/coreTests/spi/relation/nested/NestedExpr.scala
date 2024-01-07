@@ -46,31 +46,31 @@ trait NestedExpr extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- A.i_.Bb.*?(B.i(1)).query.get
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
               err ==> "Expressions not allowed in optional nested queries. Found:\n  " +
-                """AttrOneManInt("B", "i", Eq, Seq(1), None, None, Nil, Nil, None, None, Seq(1, 18))"""
+                """AttrOneManInt("B", "i", Eq, Seq(1), None, None, Nil, Nil, None, None, Seq(1, 20))"""
             }
 
           _ <- A.i_.Bb.*?(B.i.<(2)).query.get
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
               err ==> "Expressions not allowed in optional nested queries. Found:\n  " +
-                """AttrOneManInt("B", "i", Lt, Seq(2), None, None, Nil, Nil, None, None, Seq(1, 18))"""
+                """AttrOneManInt("B", "i", Lt, Seq(2), None, None, Nil, Nil, None, None, Seq(1, 20))"""
             }
 
           _ <- A.i_.Bb.*?(B.i.<=(2)).query.get
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
               err ==> "Expressions not allowed in optional nested queries. Found:\n  " +
-                """AttrOneManInt("B", "i", Le, Seq(2), None, None, Nil, Nil, None, None, Seq(1, 18))"""
+                """AttrOneManInt("B", "i", Le, Seq(2), None, None, Nil, Nil, None, None, Seq(1, 20))"""
             }
 
           _ <- A.i_.Bb.*?(B.i.>(2)).query.get
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
               err ==> "Expressions not allowed in optional nested queries. Found:\n  " +
-                """AttrOneManInt("B", "i", Gt, Seq(2), None, None, Nil, Nil, None, None, Seq(1, 18))"""
+                """AttrOneManInt("B", "i", Gt, Seq(2), None, None, Nil, Nil, None, None, Seq(1, 20))"""
             }
 
           _ <- A.i_.Bb.*?(B.i.>=(2)).query.get
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
               err ==> "Expressions not allowed in optional nested queries. Found:\n  " +
-                """AttrOneManInt("B", "i", Ge, Seq(2), None, None, Nil, Nil, None, None, Seq(1, 18))"""
+                """AttrOneManInt("B", "i", Ge, Seq(2), None, None, Nil, Nil, None, None, Seq(1, 20))"""
             }
         } yield ()
 

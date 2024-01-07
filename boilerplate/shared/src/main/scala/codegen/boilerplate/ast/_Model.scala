@@ -1,7 +1,6 @@
 package codegen.boilerplate.ast
 
 import java.io.File
-import java.time.Duration
 import codegen.BoilerplateGenBase
 import molecule.base.error._
 import scala.io.Source
@@ -118,6 +117,8 @@ object _Model extends BoilerplateGenBase("Model", "/ast") {
         }
       }
 
+      val owner = if (baseTpe0 == "ID") s",\n    override val owner: Boolean = false" else ""
+
       s"""
          |  case class Attr$card$mode$baseTpe0(
          |    override val ns: String,
@@ -130,7 +131,7 @@ object _Model extends BoilerplateGenBase("Model", "/ast") {
          |    override val errors: Seq[String] = Nil,
          |    override val refNs: Option[String] = None,
          |    override val sort: Option[String] = None,
-         |    override val coord: Seq[Int] = Nil
+         |    override val coord: Seq[Int] = Nil$owner
          |  ) extends Attr$card$mode {
          |    override def toString: String = {
          |      $attrStr
@@ -138,7 +139,8 @@ object _Model extends BoilerplateGenBase("Model", "/ast") {
          |  }""".stripMargin
     }
 
-    val attrClasses = ("ID" +: baseTypes).map(body).mkString("\n")
+    //    val attrClasses = ("ID" +: baseTypes).map(body).mkString("\n")
+    val attrClasses = (baseTypes).map(body).mkString("\n")
     s"""
        |  sealed trait Attr$card$mode extends Attr$card with $modeFull
        |  $attrClasses

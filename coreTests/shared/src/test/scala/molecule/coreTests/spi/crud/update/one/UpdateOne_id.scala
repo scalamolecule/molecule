@@ -5,7 +5,7 @@ import molecule.core.api.ApiAsync
 import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
 import molecule.coreTests.async._
-import molecule.coreTests.dataModels.core.dsl.Refs.A
+import molecule.coreTests.dataModels.core.dsl.Refs._
 import molecule.coreTests.dataModels.core.dsl.Types._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
@@ -15,27 +15,58 @@ trait UpdateOne_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
   override lazy val tests = Tests {
 
-    "Update/upsert" - types { implicit conn =>
+    "Semantics update/upsert" - types { implicit conn =>
       for {
         id <- Ns.int.insert(1).transact.map(_.id)
         _ <- Ns.int.query.get.map(_ ==> List(1))
 
-        // Update existing value
+        // Update value
         _ <- Ns(id).int(2).update.transact
         _ <- Ns.int.query.get.map(_ ==> List(2))
 
-        // Or update using id_
+        // Same as applying ids to id_
         _ <- Ns.id_(id).int(3).update.transact
         _ <- Ns.int.query.get.map(_ ==> List(3))
 
-        // Updating a non-asserted attribute has no effect
+        // Update value to current value doesn't change anything
+        _ <- Ns(id).int(3).update.transact
+        _ <- Ns.int.query.get.map(_ ==> List(3))
+
+        // Updating a previously non-asserted attribute has no effect
         _ <- Ns(id).string("a").update.transact
         _ <- Ns.int.string_?.query.get.map(_ ==> List((3, None)))
 
-        // Upserting a non-asserted attribute adds the value
+        // Upsert sets the new value regardless of previous assertion
         _ <- Ns(id).string("a").upsert.transact
         _ <- Ns.int.string_?.query.get.map(_ ==> List((3, Some("a"))))
+
+        // All attributes have to be previously asserted to be updated.
+        // `int` is previously asserted, `boolean` is not. So this entity is not updated
+        _ <- Ns(id).int(4).boolean(true).update.transact
+        _ <- Ns.int.boolean_?.query.get.map(_ ==> List((3, None)))
+
+        // Upsert sets all values regardless of previous assertions
+        _ <- Ns(id).int(4).boolean(true).upsert.transact
+        _ <- Ns.int.boolean_?.query.get.map(_ ==> List((4, Some(true))))
       } yield ()
+    }
+
+
+    "Ownership (Mongo)" - refs { implicit conn =>
+      if (database == "MongoDB") {
+        for {
+          id <- A.i(1).OwnB.i(2).save.transact.map(_.id)
+
+          _ <- A(id).ownB("123456789012345678901234").update.transact
+            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+              err ==> "Can't update non-existing ids of embedded documents in MongoDB."
+            }
+          _ <- A.i.ownB_?.query.get
+            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+              err ==> "Can't query for non-existing ids of embedded documents in MongoDB."
+            }
+        } yield ()
+      }
     }
 
 
@@ -70,16 +101,29 @@ trait UpdateOne_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "Delete individual ref value(s) with update" - types { implicit conn =>
+    "Delete individual ref value(s) with update" - refs { implicit conn =>
       for {
-        refId <- Ref.int(7).save.transact.map(_.id)
-        id <- Ns.int.ref.insert(1, refId).transact.map(_.id)
-        _ <- Ns.int.ref.query.get.map(_ ==> List((1, refId)))
+        refId <- B.i(7).save.transact.map(_.id)
+        id <- A.i.b.insert(1, refId).transact.map(_.id)
+        _ <- A.i.b.query.get.map(_ ==> List((1, refId)))
 
         // Apply empty value to delete ref id of entity (entity remains)
-        _ <- Ns(id).ref().update.transact
-        _ <- Ns.int.ref_?.query.get.map(_ ==> List((1, None)))
+        _ <- A(id).b().update.transact
+        _ <- A.i.b_?.query.get.map(_ ==> List((1, None)))
       } yield ()
+
+      if (database != "MongoDB") {
+        for {
+          id <- A.i(1).OwnB.i(7).save.transact.map(_.id)
+          _ <- A.i.OwnB.i.query.i.get.map(_ ==> List((1, 7)))
+
+          _ <- A.i.ownB_?.query.get.map(_ ==> List((1, Some("42"))))
+
+          // Apply empty value to delete ref id of entity (entity remains)
+          _ <- A(id).ownB().update.transact
+          _ <- A.i.ownB_?.query.get.map(_ ==> List((1, None)))
+        } yield ()
+      }
     }
 
 
@@ -179,7 +223,7 @@ trait UpdateOne_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
       "Can't upsert referenced attributes" - types { implicit conn =>
         for {
-          _ <- Ns("42").i(1).Ref.i(2).upsert.transact
+          _ <- Ns("123456789012345678901234").i(1).Ref.i(2).upsert.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
               err ==> "Can't upsert referenced attributes. Please update instead."
             }

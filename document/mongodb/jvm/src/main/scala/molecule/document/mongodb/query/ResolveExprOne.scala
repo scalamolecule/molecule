@@ -13,7 +13,7 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
 
   override protected def resolveAttrOneMan(attr: AttrOneMan): Unit = {
     attr match {
-      case at: AttrOneManID             => man(attr, at.vs, resID) // refs??
+      case at: AttrOneManID             => man(attr, at.vs, resID)
       case at: AttrOneManString         => man(attr, at.vs, resString)
       case at: AttrOneManInt            => man(attr, at.vs, resInt)
       case at: AttrOneManLong           => man(attr, at.vs, resLong)

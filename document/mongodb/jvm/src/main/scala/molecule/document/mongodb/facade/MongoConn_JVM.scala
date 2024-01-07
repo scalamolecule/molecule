@@ -11,7 +11,7 @@ import molecule.core.util.{JavaConversions, ModelUtils}
 import molecule.document.mongodb.transaction.{Base_JVM_mongodb, DataType_JVM_mongodb}
 import molecule.document.mongodb.util.BsonUtils
 import org.bson.conversions.Bson
-import org.bson.{BsonDocument, BsonObjectId, BsonString, BsonValue}
+import org.bson.{BsonArray, BsonDocument, BsonObjectId, BsonString}
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -35,64 +35,61 @@ case class MongoConn_JVM(
   }
 
   override def transact_sync(data: Data): TxReport = {
-    //    println("TRANSACT ----------------------------------------")
-    //    println(data.toJson(pretty))
-    //    println("")
+    println("TRANSACT ----------------------------------------")
+    println(data.toJson(pretty))
+    println("")
     data.get("_action").asString.getValue match {
       case "insert" => data.size match {
         case 2 => insertEmbedded(data)
         case _ => insertReferenced(data)
       }
-      case "update" => ???
+      case "update" =>
+        //        update(data)
+        if (data.size > 1) {
+          // Only update if there's any entities to update
+          update(data)
+        } else TxReport(Nil)
+      //        data.size match {
+      //          case 3 => update(data)
+      //          case n => throw ModelError(s"Unexpectedly found $n key-value pairs in update bson:\n" + data)
+      //        }
       case "delete" => data.size match {
         case 3 => delete(data)
-        case n => throw ModelError(s"Unexpectedly found $n key-value pairs in delete bson")
+        case n => throw ModelError(s"Unexpectedly found $n key-value pairs in delete bson:\n" + data)
       }
       case other    => throw ModelError("Missing or unexpected action: " + other)
     }
   }
 
 
-  private def delete(data: Data): TxReport = {
-    val deletedIds = data.get("_ids").asArray().getValues.asScala.toList
-      .map(_.asInstanceOf[BsonObjectId].getValue.toString)
-    data.forEach {
-      case ("_action" | "_ids", _) => ()
-      case (ns, filterDoc)         =>
-        if (deletedIds.nonEmpty) {
-          val filters    = filterDoc.asInstanceOf[BsonDocument]
-          val collection = mongoDb.getCollection(ns, classOf[BsonDocument])
-          collection.deleteMany(filters)
-        }
-    }
-    TxReport(deletedIds)
-  }
-
-  private def insertReferenced(data: Data): TxReport = {
+  private def update(data: Data): TxReport = {
     val clientSession = mongoClient.startSession()
     try {
       val txBody    = new TransactionBody[TxReport] {
         override def execute: TxReport = {
-          val db      = mongoClient.getDatabase(dbName)
-          var firstNs = true
-          val ids     = ListBuffer.empty[String]
+          var updatedIds = List.empty[String]
+          var firstNs    = true
           data.forEach {
-            case ("_action", _) => () // do nothing
-            case (ns, rawRows)  =>
-              //            println(".... " + collectionName)
-              val documents    = rawRows.asArray.getValues.asInstanceOf[util.List[BsonDocument]]
-              val collection   = db.getCollection(ns, classOf[BsonDocument])
-              val insertResult = collection.insertMany(clientSession, documents)
+            case ("_action" | "_nsIdArrays", _) => ()
+            case (ns, nsData)                   =>
+              //              println(s"------- $ns ----------\n" + nsData)
+              val idsArray = nsData.asDocument().get("ids").asArray()
+              val filter = new BsonDocument().append("_id", new BsonDocument("$in", idsArray))
+              val data   = new BsonDocument().append("$set", nsData.asDocument().get("data"))
+
               if (firstNs) {
-                val idsMap = insertResult.getInsertedIds
-                idsMap.forEach {
-                  case (k, v) if v.isString => ids.addOne(v.asString().getValue)
-                  case (k, v)               => ids.addOne(v.asObjectId().getValue.toHexString)
-                }
-                firstNs = false
+                updatedIds = idsArray.getValues.asScala.toList.map(_.asInstanceOf[BsonObjectId].getValue.toString)
               }
+              val collection = mongoDb.getCollection(ns, classOf[BsonDocument])
+
+              println("ns    : " + ns)
+              println("filter: " + filter)
+              println("data  : " + data)
+
+              collection.updateMany(clientSession, filter, data)
+              firstNs = false
           }
-          TxReport(ids.toList)
+          TxReport(updatedIds)
         }
       }
       val txOptions = TransactionOptions.builder()
@@ -102,14 +99,65 @@ case class MongoConn_JVM(
         .build()
       clientSession.withTransaction(txBody, txOptions)
     } catch {
-      case e: RuntimeException =>
-        // some error handling
-        throw e
+      case e: RuntimeException => throw e // some error handling
+    } finally clientSession.close()
+  }
+
+
+  private def delete(data: Data): TxReport = {
+    val deletedIds = data.get("_ids").asArray().getValues.asScala.toList
+      .map(_.asInstanceOf[BsonObjectId].getValue.toString)
+    if (deletedIds.nonEmpty) {
+      data.forEach {
+        case ("_action" | "_ids", _) => ()
+        case (ns, deletedIdsFilter)  =>
+          mongoDb.getCollection(ns, classOf[BsonDocument])
+            .deleteMany(deletedIdsFilter.asInstanceOf[BsonDocument])
+      }
+    }
+    TxReport(deletedIds)
+  }
+
+  private def insertReferenced(data: Data): TxReport = {
+    val clientSession = mongoClient.startSession()
+    try {
+      val txBody    = new TransactionBody[TxReport] {
+        override def execute: TxReport = {
+          //          val db          = mongoClient.getDatabase(dbName)
+          var firstNs     = true
+          val insertedIds = ListBuffer.empty[String]
+          data.forEach {
+            case ("_action", _) => () // do nothing
+            case (ns, nsData)   =>
+              //            println(".... " + collectionName)
+              val documents    = nsData.asArray.getValues.asInstanceOf[util.List[BsonDocument]]
+              val collection   = mongoDb.getCollection(ns, classOf[BsonDocument])
+              val insertResult = collection.insertMany(clientSession, documents)
+              if (firstNs) {
+                val idsMap = insertResult.getInsertedIds
+                idsMap.forEach {
+                  case (k, v) if v.isString => insertedIds.addOne(v.asString().getValue)
+                  case (k, v)               => insertedIds.addOne(v.asObjectId().getValue.toHexString)
+                }
+                firstNs = false
+              }
+          }
+          TxReport(insertedIds.toList)
+        }
+      }
+      val txOptions = TransactionOptions.builder()
+        .readPreference(ReadPreference.primary())
+        .readConcern(ReadConcern.LOCAL)
+        .writeConcern(WriteConcern.MAJORITY)
+        .build()
+      clientSession.withTransaction(txBody, txOptions)
+    } catch {
+      case e: RuntimeException => throw e // some error handling
     } finally clientSession.close
   }
 
   private def insertEmbedded(data: Data): TxReport = {
-    val ids = ListBuffer.empty[String]
+    val insertedIds = ListBuffer.empty[String]
     data.forEach {
       case ("_action", _) => () // do nothing
       case (ns, rawRows)  =>
@@ -118,10 +166,10 @@ case class MongoConn_JVM(
         val insertResult = collection.insertMany(documents)
         val idsMap       = insertResult.getInsertedIds
         idsMap.forEach {
-          case (k, v) => ids.addOne(v.asObjectId().getValue.toHexString)
+          case (k, v) => insertedIds.addOne(v.asObjectId().getValue.toHexString)
         }
     }
-    TxReport(ids.toList)
+    TxReport(insertedIds.toList)
   }
 
 

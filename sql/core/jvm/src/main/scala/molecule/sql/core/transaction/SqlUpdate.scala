@@ -121,6 +121,7 @@ trait SqlUpdate
     ns: String,
     attr: String,
     vs: Seq[T],
+    owner: Boolean,
     transformValue: T => Any,
     handleValue: T => Any
   ): Unit = {
@@ -441,7 +442,7 @@ trait SqlUpdate
   }
 
 
-  override def handleIds(ids1: Seq[String]): Unit = {
+  override def handleIds(ns: String, ids1: Seq[String]): Unit = {
     if (ids.nonEmpty) {
       throw ModelError(s"Can't apply entity ids twice in $update.")
     }

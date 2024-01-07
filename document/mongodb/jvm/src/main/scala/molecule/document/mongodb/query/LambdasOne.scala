@@ -25,7 +25,7 @@ trait LambdasOne extends LambdasSet {
     v2bson: T => BsonValue
   )
 
-  protected lazy val resID             = ResOne(castID, castOptString, eqID, neqID, ltID, gtID, leID, geID, castSetString, v2bsonID)
+  protected lazy val resID             = ResOne(castID, castOptID, eqID, neqID, ltID, gtID, leID, geID, castSetID, v2bsonID)
   protected lazy val resString         = ResOne(castString, castOptString, eqString, neqString, ltString, gtString, leString, geString, castSetString, v2bsonString)
   protected lazy val resInt            = ResOne(castInt, castOptInt, eqInt, neqInt, ltInt, gtInt, leInt, geInt, castSetInt, v2bsonInt)
   protected lazy val resLong           = ResOne(castLong, castOptLong, eqLong, neqLong, ltLong, gtLong, leLong, geLong, castSetLong, v2bsonLong)
@@ -201,6 +201,15 @@ trait LambdasOne extends LambdasSet {
   protected lazy val geShort          = (field: String, v: Short) => Filters.gte[Int](field, if (v == null.asInstanceOf[Short]) null.asInstanceOf[Int] else v)
   protected lazy val geChar           = (field: String, v: Char) => Filters.gte[String](field, if (v == null.asInstanceOf[Char]) null else v.toString)
 
+
+  protected lazy val castOptID: String => BsonDocument => Option[String] =
+    (field: String) => (doc: BsonDocument) => doc.get(field) match {
+      case _: BsonNull | null => Option.empty[String]
+      case v: BsonObjectId    => Some(v.getValue.toString)
+      case _                  => throw ModelError(
+        "Can't query for non-existing ids of embedded documents in MongoDB."
+      )
+    }
 
   protected lazy val castOptString: String => BsonDocument => Option[String] =
     (field: String) => (doc: BsonDocument) => doc.get(field) match {

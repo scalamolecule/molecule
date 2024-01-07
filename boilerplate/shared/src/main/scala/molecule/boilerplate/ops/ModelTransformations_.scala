@@ -1492,7 +1492,7 @@ trait ModelTransformations_ {
   protected def reverseTopLevelSorting(es: List[Element]): List[Element] = {
     es.map {
       case attr: AttrOneMan => attr match {
-        case a@AttrOneManID(_, _, _, _, _, _, _, _, _, Some(sort), _)             => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneManID(_, _, _, _, _, _, _, _, _, Some(sort), _, _)          => a.copy(sort = Some(reverseSort(sort)))
         case a@AttrOneManString(_, _, _, _, _, _, _, _, _, Some(sort), _)         => a.copy(sort = Some(reverseSort(sort)))
         case a@AttrOneManInt(_, _, _, _, _, _, _, _, _, Some(sort), _)            => a.copy(sort = Some(reverseSort(sort)))
         case a@AttrOneManLong(_, _, _, _, _, _, _, _, _, Some(sort), _)           => a.copy(sort = Some(reverseSort(sort)))
@@ -1518,7 +1518,7 @@ trait ModelTransformations_ {
         case a                                                                    => a
       }
       case attr: AttrOneOpt => attr match {
-        case a@AttrOneOptID(_, _, _, _, _, _, _, _, _, Some(sort), _)             => a.copy(sort = Some(reverseSort(sort)))
+        case a@AttrOneOptID(_, _, _, _, _, _, _, _, _, Some(sort), _, _)          => a.copy(sort = Some(reverseSort(sort)))
         case a@AttrOneOptString(_, _, _, _, _, _, _, _, _, Some(sort), _)         => a.copy(sort = Some(reverseSort(sort)))
         case a@AttrOneOptInt(_, _, _, _, _, _, _, _, _, Some(sort), _)            => a.copy(sort = Some(reverseSort(sort)))
         case a@AttrOneOptLong(_, _, _, _, _, _, _, _, _, Some(sort), _)           => a.copy(sort = Some(reverseSort(sort)))

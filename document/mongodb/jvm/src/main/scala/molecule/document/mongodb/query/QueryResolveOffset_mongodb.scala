@@ -35,13 +35,13 @@ case class QueryResolveOffset_mongodb[Tpl](
     }
     val bsonDocs: AggregateIterable[BsonDocument] = getData(conn, optLimit, optOffset)
 
-    if (bsonDocs.iterator().hasNext) {
-      println("RESULT ---------------------------------------------")
-      val array = new BsonArray()
-      bsonDocs.forEach(d => array.add(d))
-      println(bsonDocs.asScala.map(_.toJson(pretty)).mkString(",\n"))
-      println("")
-    }
+//    if (bsonDocs.iterator().hasNext) {
+//      println("RESULT ---------------------------------------------")
+//      val array = new BsonArray()
+//      bsonDocs.forEach(d => array.add(d))
+//      println(bsonDocs.asScala.map(_.toJson(pretty)).mkString(",\n"))
+//      println("")
+//    }
 
     val tuples = ListBuffer.empty[Tpl]
     //    val casts  = m2q.updatedCasts.casts

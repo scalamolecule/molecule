@@ -33,7 +33,7 @@ trait Insert_mongodb
     nss += initialNs
     val tpl2bson = getResolver(nsMap, elements)
 
-    // Prepare adding rows to namespaces
+    // Prepare adding ns Data to namespaces
     val nssDocs = mutable.Map.empty[String, BsonArray]
     nss.foreach(ns => nssDocs(ns) = new BsonArray())
 
@@ -41,17 +41,17 @@ trait Insert_mongodb
     tpls.foreach { tpl =>
       doc = new BsonDocument()
       docs = List(List(doc))
-      val rows = new BsonArray()
-      rows.add(doc)
+      val nsData = new BsonArray()
+      nsData.add(doc)
       nsDocs.clear()
-      nsDocs(initialNs) = rows
+      nsDocs(initialNs) = nsData
 
       // Convert tpl to bson
       tpl2bson(tpl)
 
       // Add docs in namespaces
-      nsDocs.foreach { case (ns, rows) =>
-        nssDocs(ns).addAll(rows)
+      nsDocs.foreach { case (ns, nsData) =>
+        nssDocs(ns).addAll(nsData)
       }
       first = false
     }
@@ -174,7 +174,8 @@ trait Insert_mongodb
     } else {
       (_: Product) => {
         // Reference document
-        val refId = new BsonString(new ObjectId().toHexString)
+//        val refId = new BsonString(new ObjectId().toHexString)
+        val refId = new BsonObjectId()
         doc.append(refAttr, refId)
         // Set id in referenced document
         val refDoc = new BsonDocument()
@@ -183,9 +184,9 @@ trait Insert_mongodb
         docs = docs.init :+ (docs.last :+ refDoc)
         doc = refDoc
 
-        val rows = nsDocs.getOrElse(refNs, new BsonArray())
-        rows.add(doc)
-        nsDocs(refNs) = rows
+        val nsData = nsDocs.getOrElse(refNs, new BsonArray())
+        nsData.add(doc)
+        nsDocs(refNs) = nsData
       }
     }
   }

@@ -33,6 +33,9 @@ trait Model extends Validations with Values with BaseHelpers {
     val sort      : Option[String]
     val coord     : Seq[Int]
 
+    // Used for id/ref attributes
+    val owner: Boolean = false
+
     def unapply(a: Attr): (String, String, Op) = (a.ns, a.attr, a.op)
     def name: String = ns + "." + attr
     def cleanNs: String = ns.replace("_", "")
@@ -134,21 +137,22 @@ trait Model extends Validations with Values with BaseHelpers {
 
 
   // GENERATED from here and below (edit in _Model generator) ======================================
-
+  
   sealed trait AttrOneMan extends AttrOne with Mandatory
-
+  
   case class AttrOneManID(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
     vs: Seq[String] = Nil,
     override val filterAttr: Option[Attr] = None,
-    override val validator: Option[ValidateId] = None,
+    override val validator: Option[ValidateID] = None,
     override val valueAttrs: Seq[String] = Nil,
     override val errors: Seq[String] = Nil,
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
-    override val coord: Seq[Int] = Nil
+    override val coord: Seq[Int] = Nil,
+    override val owner: Boolean = false
   ) extends AttrOneMan {
     override def toString: String = {
       def format(v: String): String = "\"" + escStr(v) + "\""
@@ -596,19 +600,20 @@ trait Model extends Validations with Values with BaseHelpers {
 
 
   sealed trait AttrOneOpt extends AttrOne with Optional
-
+  
   case class AttrOneOptID(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
     vs: Option[Seq[String]] = None,
     override val filterAttr: Option[Attr] = None,
-    override val validator: Option[ValidateId] = None,
+    override val validator: Option[ValidateID] = None,
     override val valueAttrs: Seq[String] = Nil,
     override val errors: Seq[String] = Nil,
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
-    override val coord: Seq[Int] = Nil
+    override val coord: Seq[Int] = Nil,
+    override val owner: Boolean = false
   ) extends AttrOneOpt {
     override def toString: String = {
       def format(v: String): String = "\"" + escStr(v) + "\""
@@ -1056,19 +1061,20 @@ trait Model extends Validations with Values with BaseHelpers {
 
 
   sealed trait AttrOneTac extends AttrOne with Tacit
-
+  
   case class AttrOneTacID(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
     vs: Seq[String] = Nil,
     override val filterAttr: Option[Attr] = None,
-    override val validator: Option[ValidateId] = None,
+    override val validator: Option[ValidateID] = None,
     override val valueAttrs: Seq[String] = Nil,
     override val errors: Seq[String] = Nil,
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
-    override val coord: Seq[Int] = Nil
+    override val coord: Seq[Int] = Nil,
+    override val owner: Boolean = false
   ) extends AttrOneTac {
     override def toString: String = {
       def format(v: String): String = "\"" + escStr(v) + "\""
@@ -1516,19 +1522,20 @@ trait Model extends Validations with Values with BaseHelpers {
 
 
   sealed trait AttrSetMan extends AttrSet with Mandatory
-
+  
   case class AttrSetManID(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
     vs: Seq[Set[String]] = Nil,
     override val filterAttr: Option[Attr] = None,
-    override val validator: Option[ValidateId] = None,
+    override val validator: Option[ValidateID] = None,
     override val valueAttrs: Seq[String] = Nil,
     override val errors: Seq[String] = Nil,
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
-    override val coord: Seq[Int] = Nil
+    override val coord: Seq[Int] = Nil,
+    override val owner: Boolean = false
   ) extends AttrSetMan {
     override def toString: String = {
       def format(v: String): String = "\"" + escStr(v) + "\""
@@ -1976,19 +1983,20 @@ trait Model extends Validations with Values with BaseHelpers {
 
 
   sealed trait AttrSetOpt extends AttrSet with Optional
-
+  
   case class AttrSetOptID(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
     vs: Option[Seq[Set[String]]] = None,
     override val filterAttr: Option[Attr] = None,
-    override val validator: Option[ValidateId] = None,
+    override val validator: Option[ValidateID] = None,
     override val valueAttrs: Seq[String] = Nil,
     override val errors: Seq[String] = Nil,
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
-    override val coord: Seq[Int] = Nil
+    override val coord: Seq[Int] = Nil,
+    override val owner: Boolean = false
   ) extends AttrSetOpt {
     override def toString: String = {
       def format(v: String): String = "\"" + escStr(v) + "\""
@@ -2436,19 +2444,20 @@ trait Model extends Validations with Values with BaseHelpers {
 
 
   sealed trait AttrSetTac extends AttrSet with Tacit
-
+  
   case class AttrSetTacID(
     override val ns: String,
     override val attr: String,
     override val op: Op = V,
     vs: Seq[Set[String]] = Nil,
     override val filterAttr: Option[Attr] = None,
-    override val validator: Option[ValidateId] = None,
+    override val validator: Option[ValidateID] = None,
     override val valueAttrs: Seq[String] = Nil,
     override val errors: Seq[String] = Nil,
     override val refNs: Option[String] = None,
     override val sort: Option[String] = None,
-    override val coord: Seq[Int] = Nil
+    override val coord: Seq[Int] = Nil,
+    override val owner: Boolean = false
   ) extends AttrSetTac {
     override def toString: String = {
       def format(v: String): String = "\"" + escStr(v) + "\""

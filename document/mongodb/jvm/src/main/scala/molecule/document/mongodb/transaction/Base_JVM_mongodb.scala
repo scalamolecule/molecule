@@ -11,7 +11,7 @@ import molecule.core.util.Executor._
 import molecule.core.util.ModelUtils
 import molecule.document.mongodb.facade.{MongoConn_JVM, MongoHandler_JVM}
 import org.bson._
-import org.bson.types.Decimal128
+import org.bson.types.{Decimal128, ObjectId}
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Future
@@ -23,17 +23,27 @@ trait Base_JVM_mongodb extends DataType_JVM_mongodb with ModelUtils with BaseHel
   protected def debug(s: Any) = if (doPrint) println(s) else ()
 
   protected var doPrint              = false
-  protected var ids                  = Option.empty[Seq[String]]
+//  protected var ids                  = Seq.empty[String]
+  protected var optIds               = Option.empty[Seq[String]]
   protected var uniqueFilterElements = List.empty[Element]
   protected var filterElements       = List.empty[Element]
 
-  protected var doc     = new BsonDocument()
-  protected var docs    = List(List(doc))
-  protected val nsDocs  = mutable.Map.empty[String, BsonArray]
-  protected var nss     = Set.empty[String]
+  //  protected var doc    = new BsonDocument()
+  //  protected var docs   = List(List(doc))
+  //  protected val nsIds  = mutable.Map.empty[String, BsonArray]
+  //  protected val nsDocs = mutable.Map.empty[String, BsonArray]
+  //  protected var nss    = Set.empty[String]
 
-  protected val filters = ListBuffer.empty[BsonDocument]
-
+  //  protected val nsIdArrays       = mutable.Map.empty[String, BsonArray]
+  protected var curNs            = ""
+  protected var doc              = new BsonDocument()
+  protected var docs             = List(List(doc))
+//  protected var nsIds            = mutable.Map.empty[String, Seq[String]]
+//  protected val nsFilterElements = mutable.Map.empty[String, List[Element]]
+  protected val nsDocs           = mutable.Map.empty[String, BsonArray]
+//  protected val nsDoc            = mutable.Map.empty[String, BsonDocument]
+  protected var nss              = Set.empty[String]
+  protected var path             = List.empty[String]
 
   // "Connection pool" ---------------------------------------------
 
@@ -59,7 +69,7 @@ trait Base_JVM_mongodb extends DataType_JVM_mongodb with ModelUtils with BaseHel
     Future(MongoHandler_JVM.recreateDb(proxy.asInstanceOf[MongoProxy]))
   }
 
-  override protected lazy val handleID             = (v: Any) => new BsonString(v.asInstanceOf[String])
+  override protected lazy val handleID             = (v: Any) => new BsonObjectId(new ObjectId(v.asInstanceOf[String]))
   override protected lazy val handleString         = (v: Any) => new BsonString(v.asInstanceOf[String])
   override protected lazy val handleInt            = (v: Any) => new BsonInt32(v.asInstanceOf[Int])
   override protected lazy val handleLong           = (v: Any) => new BsonInt64(v.asInstanceOf[Long])
@@ -84,7 +94,7 @@ trait Base_JVM_mongodb extends DataType_JVM_mongodb with ModelUtils with BaseHel
   override protected lazy val handleChar           = (v: Any) => new BsonString(v.asInstanceOf[Char].toString)
 
 
-  override protected lazy val transformID            : String => Any         = (v: String) => new BsonString(v)
+  override protected lazy val transformID            : String => Any         = (v: String) => new BsonObjectId(new ObjectId(v))
   override protected lazy val transformString        : String => Any         = (v: String) => new BsonString(v)
   override protected lazy val transformInt           : Int => Any            = (v: Int) => new BsonInt32(v)
   override protected lazy val transformLong          : Long => Any           = (v: Long) => new BsonInt64(v)

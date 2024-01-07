@@ -671,14 +671,13 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
           throw ModelError(noIdFiltering)
         }
         if (a.attr == "id") {
-          //          bx.idField = true
           a match {
             case a: AttrOneMan => resolveAttrOneManID(a); resolve(tail)
             case a: AttrOneTac => resolveAttrOneTacID(a); resolve(tail)
             case _             => throw new Exception("Unexpected optional id")
           }
         } else {
-          if (a.refNs.nonEmpty)
+          if (a.owner)
             throw ModelError("Can't query for non-existing ids of embedded documents in MongoDB.")
           a match {
             case a: AttrOneMan => resolveAttrOneMan(a); resolve(tail)
@@ -686,17 +685,8 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
             case a: AttrOneTac => resolveAttrOneTac(a); resolve(tail)
           }
         }
-      //      case a: AttrSet if a.refNs.isDefined => a match {
-      //        case a: AttrSetMan =>
-      //
-      //          throw ModelError("bam!!!!")
-      //          resolveRefAttrSetMan(a);
-      //          resolve(tail)
-      //        case a: AttrSetOpt => resolveRefAttrSetOpt(a); resolve(tail)
-      //        case a: AttrSetTac => resolveRefAttrSetTac(a); resolve(tail)
-      //      }
       case a: AttrSet                     =>
-        if (a.refNs.nonEmpty)
+        if (a.owner)
           throw ModelError("Can't query for non-existing set of ids of embedded documents in MongoDB.")
         a match {
           case a: AttrSetMan => resolveAttrSetMan(a); resolve(tail)

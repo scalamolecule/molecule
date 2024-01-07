@@ -13,8 +13,8 @@ class ResolveUpdate(
   val isUpsert: Boolean,
 ) extends ModelUtils { self: UpdateOps =>
 
-  //  private val checkReservedKeywords = proxy.reserved.isDefined
-  val update = if (isUpsert) "upsert" else "update"
+  val isUpdate = !isUpsert
+  val update   = if (isUpsert) "upsert" else "update"
 
   @tailrec
   final def resolve(elements: List[Element]): Unit = {
@@ -66,35 +66,35 @@ class ResolveUpdate(
       case a if a.op != Eq => throw ModelError(
         s"Can't $update attributes without an applied value. Found:\n" + a)
 
-      case a: AttrOneManID             => updateOne(ns, attr, a.vs, transformID, handleID)
-      case a: AttrOneManString         => updateOne(ns, attr, a.vs, transformString, handleString)
-      case a: AttrOneManInt            => updateOne(ns, attr, a.vs, transformInt, handleInt)
-      case a: AttrOneManLong           => updateOne(ns, attr, a.vs, transformLong, handleLong)
-      case a: AttrOneManFloat          => updateOne(ns, attr, a.vs, transformFloat, handleFloat)
-      case a: AttrOneManDouble         => updateOne(ns, attr, a.vs, transformDouble, handleDouble)
-      case a: AttrOneManBoolean        => updateOne(ns, attr, a.vs, transformBoolean, handleBoolean)
-      case a: AttrOneManBigInt         => updateOne(ns, attr, a.vs, transformBigInt, handleBigInt)
-      case a: AttrOneManBigDecimal     => updateOne(ns, attr, a.vs, transformBigDecimal, handleBigDecimal)
-      case a: AttrOneManDate           => updateOne(ns, attr, a.vs, transformDate, handleDate)
-      case a: AttrOneManDuration       => updateOne(ns, attr, a.vs, transformDuration, handleDuration)
-      case a: AttrOneManInstant        => updateOne(ns, attr, a.vs, transformInstant, handleInstant)
-      case a: AttrOneManLocalDate      => updateOne(ns, attr, a.vs, transformLocalDate, handleLocalDate)
-      case a: AttrOneManLocalTime      => updateOne(ns, attr, a.vs, transformLocalTime, handleLocalTime)
-      case a: AttrOneManLocalDateTime  => updateOne(ns, attr, a.vs, transformLocalDateTime, handleLocalDateTime)
-      case a: AttrOneManOffsetTime     => updateOne(ns, attr, a.vs, transformOffsetTime, handleOffsetTime)
-      case a: AttrOneManOffsetDateTime => updateOne(ns, attr, a.vs, transformOffsetDateTime, handleOffsetDateTime)
-      case a: AttrOneManZonedDateTime  => updateOne(ns, attr, a.vs, transformZonedDateTime, handleZonedDateTime)
-      case a: AttrOneManUUID           => updateOne(ns, attr, a.vs, transformUUID, handleUUID)
-      case a: AttrOneManURI            => updateOne(ns, attr, a.vs, transformURI, handleURI)
-      case a: AttrOneManByte           => updateOne(ns, attr, a.vs, transformByte, handleByte)
-      case a: AttrOneManShort          => updateOne(ns, attr, a.vs, transformShort, handleShort)
-      case a: AttrOneManChar           => updateOne(ns, attr, a.vs, transformChar, handleChar)
+      case a: AttrOneManID             => updateOne(ns, attr, a.vs, a.owner, transformID, handleID)
+      case a: AttrOneManString         => updateOne(ns, attr, a.vs, a.owner, transformString, handleString)
+      case a: AttrOneManInt            => updateOne(ns, attr, a.vs, a.owner, transformInt, handleInt)
+      case a: AttrOneManLong           => updateOne(ns, attr, a.vs, a.owner, transformLong, handleLong)
+      case a: AttrOneManFloat          => updateOne(ns, attr, a.vs, a.owner, transformFloat, handleFloat)
+      case a: AttrOneManDouble         => updateOne(ns, attr, a.vs, a.owner, transformDouble, handleDouble)
+      case a: AttrOneManBoolean        => updateOne(ns, attr, a.vs, a.owner, transformBoolean, handleBoolean)
+      case a: AttrOneManBigInt         => updateOne(ns, attr, a.vs, a.owner, transformBigInt, handleBigInt)
+      case a: AttrOneManBigDecimal     => updateOne(ns, attr, a.vs, a.owner, transformBigDecimal, handleBigDecimal)
+      case a: AttrOneManDate           => updateOne(ns, attr, a.vs, a.owner, transformDate, handleDate)
+      case a: AttrOneManDuration       => updateOne(ns, attr, a.vs, a.owner, transformDuration, handleDuration)
+      case a: AttrOneManInstant        => updateOne(ns, attr, a.vs, a.owner, transformInstant, handleInstant)
+      case a: AttrOneManLocalDate      => updateOne(ns, attr, a.vs, a.owner, transformLocalDate, handleLocalDate)
+      case a: AttrOneManLocalTime      => updateOne(ns, attr, a.vs, a.owner, transformLocalTime, handleLocalTime)
+      case a: AttrOneManLocalDateTime  => updateOne(ns, attr, a.vs, a.owner, transformLocalDateTime, handleLocalDateTime)
+      case a: AttrOneManOffsetTime     => updateOne(ns, attr, a.vs, a.owner, transformOffsetTime, handleOffsetTime)
+      case a: AttrOneManOffsetDateTime => updateOne(ns, attr, a.vs, a.owner, transformOffsetDateTime, handleOffsetDateTime)
+      case a: AttrOneManZonedDateTime  => updateOne(ns, attr, a.vs, a.owner, transformZonedDateTime, handleZonedDateTime)
+      case a: AttrOneManUUID           => updateOne(ns, attr, a.vs, a.owner, transformUUID, handleUUID)
+      case a: AttrOneManURI            => updateOne(ns, attr, a.vs, a.owner, transformURI, handleURI)
+      case a: AttrOneManByte           => updateOne(ns, attr, a.vs, a.owner, transformByte, handleByte)
+      case a: AttrOneManShort          => updateOne(ns, attr, a.vs, a.owner, transformShort, handleShort)
+      case a: AttrOneManChar           => updateOne(ns, attr, a.vs, a.owner, transformChar, handleChar)
     }
   }
 
   private def resolveAttrOneTac(a: AttrOneTac): Unit = {
     a match {
-      case AttrOneTacID(_, "id", Eq, ids1, _, _, _, _, _, _, _) => handleIds(ids1)
+      case AttrOneTacID(ns, "id", Eq, ids1, _, _, _, _, _, _, _, _) => handleIds(ns, ids1)
 
       case a if a.attr == "id" => throw ModelError(
         s"Generic id attribute not allowed in update molecule. Found:\n" + a)

@@ -16,13 +16,14 @@ trait Save_mongodb
     with MoleculeLogging { self: ResolveSave =>
 
   def getData(elements: List[Element]): Data = {
-    val rows = new BsonArray()
-    rows.add(doc)
-    nsDocs(getInitialNs(elements)) = rows
+    val nsData = new BsonArray()
+    nsData.add(doc) // 1 row of data to save
+    nsDocs(getInitialNs(elements)) = nsData
     resolve(elements)
-    val data = new BsonDocument().append("_action", new BsonString("insert"))
-    nsDocs.foreach { case (ns, rows) =>
-      data.append(ns, rows)
+    val data = new BsonDocument("_action", new BsonString("insert"))
+    // Loop referenced namespaces
+    nsDocs.foreach { case (ns, nsData) =>
+      data.append(ns, nsData)
     }
     data
   }
@@ -85,7 +86,8 @@ trait Save_mongodb
 
     } else {
       // Reference document
-      val refId = new BsonString(new ObjectId().toHexString)
+//      val refId = new BsonString(new ObjectId().toHexString)
+      val refId = new BsonObjectId()
       doc.append(refAttr, refId)
 
       // Set id in new referenced document
@@ -96,9 +98,9 @@ trait Save_mongodb
       docs = docs.init :+ (docs.last :+ doc)
 
       // Add doc to namespace docs
-      val rows = nsDocs.getOrElse(refNs, new BsonArray())
-      rows.add(doc)
-      nsDocs(refNs) = rows
+      val nsData = nsDocs.getOrElse(refNs, new BsonArray())
+      nsData.add(doc)
+      nsDocs(refNs) = nsData
     }
   }
 

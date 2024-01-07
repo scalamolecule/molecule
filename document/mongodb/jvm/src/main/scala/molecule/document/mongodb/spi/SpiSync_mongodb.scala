@@ -110,8 +110,8 @@ trait SpiSync_mongodb
   ): Unit = {
     tryInspect("query", elements) {
       val (ns, pipeline) = new Model2MongoQuery[Any](elements).getBsonQuery(Nil, optLimit, optOffset, None)
-                  printRaw(label, elements, pipeline2json(pipeline, Some(ns)))
-//      printRaw(label, Nil, pipeline2json(pipeline, Some(ns)))
+      printRaw(label, elements, pipeline2json(pipeline, Some(ns)))
+      //      printRaw(label, Nil, pipeline2json(pipeline, Some(ns)))
 
       //      val (ns, pipeline) = getModel2SqlQuery[Any](elements).getBsonQuery(Nil, optLimit, optOffset, None)
       //      val (_, pipeline2) = getModel2SqlQuery[Any](elements).getBsonQuery2(Nil, optLimit, optOffset, None)
@@ -169,6 +169,7 @@ trait SpiSync_mongodb
       throw InsertErrors(errors)
     }
   }
+
   override def insert_inspect(insert: Insert)(implicit conn0: Conn): Unit = {
     tryInspect("insert", insert.elements) {
       val conn = conn0.asInstanceOf[MongoConn_JVM]
@@ -195,6 +196,7 @@ trait SpiSync_mongodb
     if (update.doInspect)
       update_inspect(update)
     val errors = update_validate(update0) // validate original elements against meta model
+    //    val errors = Map.empty[String, Seq[String]]
     if (errors.isEmpty) {
       //      val txReport = if (isRefUpdate(update.elements)) {
       //        // Atomic transaction with updates for each ref namespace
@@ -210,10 +212,10 @@ trait SpiSync_mongodb
     }
   }
 
-  def refIdsQuery(idsModel: List[Element], proxy: ConnProxy): String = {
-    //    new Model2MongoQuery(idsModel).getBsonQuery(Nil, None, None, Some(proxy))
-    ???
-  }
+  //  def refIdsQuery(idsModel: List[Element], proxy: ConnProxy): String = {
+  //    //    new Model2MongoQuery(idsModel).getBsonQuery(Nil, None, None, Some(proxy))
+  //    ???
+  //  }
 
   override def update_inspect(update: Update)(implicit conn0: Conn): Unit = {
     val conn   = conn0.asInstanceOf[MongoConn_JVM]
@@ -245,20 +247,19 @@ trait SpiSync_mongodb
     ???
   }
 
-  // Implement for each sql database
   def update_getData(conn: MongoConn_JVM, update: Update): Data = {
-    new ResolveUpdate(conn.proxy, update.isUpsert) with Update_mongodb {
-      //      override lazy val sqlConn = conn.sqlConn
-    }.getData(update.elements)
+    new ResolveUpdate(conn.proxy, update.isUpsert) with Update_mongodb {}.getData(update.elements, conn)
   }
-  def update_getData(conn: MongoConn_JVM, elements: List[Element], isUpsert: Boolean): Data = {
-    new ResolveUpdate(conn.proxy, isUpsert) with Update_mongodb {
-      //      override lazy val sqlConn = conn.sqlConn
-    }.getData(elements)
-  }
+
+  //  def update_getData(conn: MongoConn_JVM, elements: List[Element], isUpsert: Boolean): Data = {
+  //    new ResolveUpdate(conn.proxy, isUpsert) with Update_mongodb {}.getData(elements, conn)
+  //  }
 
   override def update_validate(update: Update)(implicit conn0: Conn): Map[String, Seq[String]] = {
     val conn = conn0.asInstanceOf[MongoConn_JVM]
+    if (update.isUpsert && isRefUpdate(update.elements))
+      throw ModelError("Can't upsert referenced attributes. Please update instead.")
+
     //    val resolver = (query: String) => {
     //      val ps        = conn.sqlConn.prepareStatement(
     //        query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY
@@ -266,8 +267,10 @@ trait SpiSync_mongodb
     //      val resultSet = ps.executeQuery()
     //      new ResultSetImpl(resultSet)
     //    }
-    //    validateUpdateSet(conn.proxy, update.elements, update.isUpsert, resolver)
-    ???
+
+    // todo
+    // validateUpdateSet(conn.proxy, update.elements, update.isUpsert, resolver)
+    Map.empty[String, Seq[String]]
   }
 
 

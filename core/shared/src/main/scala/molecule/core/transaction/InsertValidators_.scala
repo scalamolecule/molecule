@@ -10,7 +10,7 @@ import molecule.core.validation.insert.InsertValueResolvers_
 trait InsertValidators_ extends InsertValueResolvers_ {
   
   protected def validatorID(
-    optValidator: Option[ValidateId],
+    optValidator: Option[ValidateID],
     a: Attr,
     curElements: List[Element]
   ): Option[Product => String => Seq[String]] = {

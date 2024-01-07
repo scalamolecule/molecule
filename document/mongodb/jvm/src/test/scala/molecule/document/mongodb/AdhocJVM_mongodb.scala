@@ -1,5 +1,6 @@
 package molecule.document.mongodb
 
+import molecule.base.error.ModelError
 import molecule.core.util.AggrUtils
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Types.{Ns, Ref}
@@ -19,8 +20,18 @@ object AdhocJVM_mongodb extends TestSuite_mongodb with AggrUtils {
       import molecule.coreTests.dataModels.core.dsl.Types._
       for {
 
-        _ <- Ns.i(1).save.i.transact
-        _ <- Ns.i.query.get.map(_ ==> List(1))
+        _ <- Ns("123456789012345678901234").i(1).Ref.i(2).upsert.transact
+          .map(_ ==> "Unexpected success")
+          .recover {
+            //            case e =>
+
+            case e@ModelError(err) =>
+//              e.printStackTrace()
+              err ==> "Can't upsert referenced attributes. Please update instead."
+          }
+
+        //        _ <- Ns.i(1).save.i.transact
+        //        _ <- Ns.i.query.get.map(_ ==> List(1))
       } yield ()
     }
 
@@ -28,30 +39,54 @@ object AdhocJVM_mongodb extends TestSuite_mongodb with AggrUtils {
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
-        _ <- A.i.OwnB.i.insert((1, 10), (2, 20)).transact
-        _ <- A.i.a1.query.get.map(_ ==> List(1, 2))
-        _ <- if (database == "MongoDB") Future.unit else {
-          B.i.a1.query.get.map(_ ==> List(10, 20))
-        }
-        _ <- A.i.a1.OwnB.i.query.get.map(_ ==> List((1, 10), (2, 20)))
 
-        _ <- A.i_.OwnB.i_.>(15).delete.transact
-        _ <- A.i.query.get.map(_ ==> List(1))
-        // Note that the OwnB.int entity is a separate entity and is not deleted
-        // Only the entity of the initial namespace is deleted
-        _ <- if (database == "MongoDB") Future.unit else {
-          B.i.a1.query.get.map(_ ==> List(10, 20))
-        }
-        _ <- A.i.OwnB.i.query.get.map(_ ==> List((1, 10)))
+        id <- A.i(1).B.i(2).C.i(3).save.transact.map(_.id)
+        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
 
-        //        _ <- rawTransact(
-        //          """{
-        //            |  "action": "delete",
-        //            |  "A": {
-        //            |    "i": 1
-        //            |  }
-        //            |}
-        //            |""".stripMargin)
+        // Add extra B and C entities for checking that these are not updated
+        _ <- B.i(42).save.transact
+        _ <- C.i(43).save.transact
+
+
+        // A
+        _ <- A(id).i(10).update.transact
+        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((10, 2, 3)))
+
+        // A + B
+        _ <- B.i.query.get.map(_ ==> List(2, 42))
+        _ <- A(id).i(11).B.i(20).update.transact
+        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((11, 20, 3)))
+
+        // Only the first B entity was updated
+        _ <- B.i.query.get.map(_ ==> List(20, 42))
+
+        // B
+        _ <- A(id).B.i(21).update.transact
+        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((11, 21, 3)))
+
+        // A + B + C
+        _ <- A(id).i(12).B.i(22).C.i(30).update.transact
+        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((12, 22, 30)))
+
+        // A + C
+        _ <- A(id).i(13).B.C.i(31).update.transact
+        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((13, 22, 31)))
+
+        // B + C
+        _ <- A(id).B.i(23).C.i(32).update.transact
+        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((13, 23, 32)))
+
+        // C
+        _ <- A(id).B.C.i(33).update.transact
+        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((13, 23, 33)))
+
+
+
+        //        _ <- A.i.ownB_?.query.get
+        //          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+        //            err ==> "Can't query for non-existing ids of embedded documents in MongoDB."
+        //          }
+
       } yield ()
     }
 

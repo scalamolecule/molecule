@@ -65,22 +65,18 @@ trait Update_datomic extends DatomicBase_JVM with UpdateOps with MoleculeLogging
     // Resolve the update model
     resolve(elements)
 
-    val (filterQuery, inputs) = if (ids.isEmpty && filterElements.nonEmpty) {
+    if (ids.isEmpty && filterElements.nonEmpty) {
       val filterNs        = filterElements.head.asInstanceOf[Attr].ns
       val filterElements1 = AttrOneManID(filterNs, "id", V) +: filterElements
       val (query, inputs) = new Model2DatomicQuery[Any](filterElements1).getIdQueryWithInputs
-      (Some(query), inputs)
+      val idRows          = Peer.q(query, db +: inputs: _*)
+      val addStmts        = id2stmts(data, db)
+      idRows.forEach(idRow => addStmts(idRow.get(0)))
     } else {
-      (None, Nil)
-    }
-    filterQuery.fold {
       val addStmts = id2stmts(data, db, isUpsert)
       ids.foreach(addStmts)
-    } { query =>
-      val idRows   = Peer.q(query, db +: inputs: _*)
-      val addStmts = id2stmts(data, db)
-      idRows.forEach(idRow => addStmts(idRow.get(0)))
     }
+
     if (debug) {
       val updateStrs = "UPDATE:" +: elements :+ "" :+ stmts.toArray().mkString("\n")
       logger.debug(updateStrs.mkString("\n").trim)
@@ -92,11 +88,12 @@ trait Update_datomic extends DatomicBase_JVM with UpdateOps with MoleculeLogging
     ns: String,
     attr: String,
     vs: Seq[T],
+    owner: Boolean,
     transformValue: T => Any,
     handleValue: T => Any
   ): Unit = {
-    if (!isUpsert) {
-      val dummyFilterAttr = AttrOneTacInt(ns, attr, V, Nil, None, None, Nil, Nil, None, None)
+    if (isUpdate) {
+      val dummyFilterAttr = AttrOneTacInt(ns, attr)
       filterElements = filterElements :+ dummyFilterAttr
     }
     vs match {
@@ -118,8 +115,8 @@ trait Update_datomic extends DatomicBase_JVM with UpdateOps with MoleculeLogging
     exts: List[String],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    if (!isUpsert) {
-      val dummyFilterAttr = AttrOneTacInt(ns, attr, V, Nil, None, None, Nil, Nil, None, None)
+    if (isUpdate) {
+      val dummyFilterAttr = AttrOneTacInt(ns, attr)
       filterElements = filterElements :+ dummyFilterAttr
     }
     sets match {
@@ -219,7 +216,7 @@ trait Update_datomic extends DatomicBase_JVM with UpdateOps with MoleculeLogging
   }
 
 
-  override def handleIds(ids1: Seq[String]): Unit = {
+  override def handleIds(ns: String, ids1: Seq[String]): Unit = {
     if (ids.nonEmpty) {
       throw ModelError(s"Can't apply entity ids twice in $update.")
     }
@@ -274,7 +271,7 @@ trait Update_datomic extends DatomicBase_JVM with UpdateOps with MoleculeLogging
           }
           if (addNewValues || entity.get(a) != null) {
             newValues.foreach { newValue =>
-              if (!isUpsert && new2oldPairs.nonEmpty && !curValues.contains(new2oldPairs(newValue))) {
+              if (isUpdate && new2oldPairs.nonEmpty && !curValues.contains(new2oldPairs(newValue))) {
                 // Don't update/swap to new value if retract value is not already there
                 ()
               } else {
@@ -356,8 +353,8 @@ trait Update_datomic extends DatomicBase_JVM with UpdateOps with MoleculeLogging
     }
   }
 
-  override protected lazy val transformID     = (v: String) => v.toLong
-  override protected lazy val transformString = identity
+  override protected lazy val transformID             = (v: String) => v.toLong
+  override protected lazy val transformString         = identity
   override protected lazy val transformInt            = identity
   override protected lazy val transformLong           = identity
   override protected lazy val transformFloat          = identity

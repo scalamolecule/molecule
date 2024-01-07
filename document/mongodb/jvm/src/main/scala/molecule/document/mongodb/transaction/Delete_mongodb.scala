@@ -1,10 +1,5 @@
 package molecule.document.mongodb.transaction
 
-import java.net.URI
-import java.time._
-import java.util.{Date, UUID}
-import com.mongodb.client.MongoDatabase
-import molecule.base.ast._
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
@@ -15,8 +10,8 @@ import molecule.core.util.{MetaModelUtils, ModelUtils}
 import molecule.document.mongodb.facade.MongoConn_JVM
 import molecule.document.mongodb.query.LambdasOne
 import molecule.document.mongodb.spi.SpiSync_mongodb
-import org.bson.types.{Decimal128, ObjectId}
 import org.bson._
+import org.bson.types.ObjectId
 
 
 trait Delete_mongodb
@@ -32,8 +27,8 @@ trait Delete_mongodb
     val ns = getInitialNs(elements)
     resolve(elements, true)
 
-    val ids1 = if (ids.nonEmpty) {
-      ids.get
+    val ids1 = if (optIds.nonEmpty) {
+      optIds.get
     } else if (filterElements.nonEmpty) {
       val filterElements1 = AttrOneManID(ns, "id", V) +: filterElements
       SpiSync_mongodb.query_inspect[String](Query(filterElements1))(conn)
@@ -53,7 +48,7 @@ trait Delete_mongodb
   }
 
   override def addIds(ids0: Seq[String]): Unit = {
-    ids = Some(ids0)
+    optIds = Some(ids0)
   }
 
   override def addFilterElement(element: Element): Unit = {

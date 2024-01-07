@@ -4,7 +4,7 @@ package molecule.base.util
 trait CodeGenBase extends BaseHelpers {
 
   val baseTypes = Seq(
-    "Id",
+    "ID",
     "String",
     "Int",
     "Long",
@@ -30,7 +30,7 @@ trait CodeGenBase extends BaseHelpers {
   )
 
   val baseTypesWithSpaces = Seq(
-    "Id" -> "            ",
+    "ID" -> "            ",
     "String" -> "        ",
     "Int" -> "           ",
     "Long" -> "          ",
