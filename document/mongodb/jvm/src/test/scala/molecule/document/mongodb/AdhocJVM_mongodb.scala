@@ -20,17 +20,28 @@ object AdhocJVM_mongodb extends TestSuite_mongodb with AggrUtils {
       import molecule.coreTests.dataModels.core.dsl.Types._
       for {
 
-        _ <- Ns("123456789012345678901234").i(1).Ref.i(2).upsert.transact
-          .map(_ ==> "Unexpected success")
-          .recover {
-            //            case e =>
+        _ <- Ns.i.insert(1).transact
+        _ <- Ns.i.int_?.query.get.map(_ ==> List((1, None)))
 
-            case e@ModelError(err) =>
-//              e.printStackTrace()
-              err ==> "Can't upsert referenced attributes. Please update instead."
-          }
+        // Update entities with non-unique `i` attribute with value 1
+        // Updating a non-asserted value doesn't insert it (nothing is updated)
+        _ <- Ns.i_(1).int(2).update.transact
+        _ <- Ns.i.int_?.query.get.map(_ ==> List((1, None)))
 
-        //        _ <- Ns.i(1).save.i.transact
+        // Upserting a non-asserted value inserts it
+        _ <- Ns.i_(1).int(2).upsert.transact
+        _ <- Ns.i.int_?.query.get.map(_ ==> List((1, Some(2))))
+
+        // Updating an asserted value updates it
+        _ <- Ns.i_(1).int(3).upsert.transact
+        _ <- Ns.i.int.query.get.map(_ ==> List((1, 3)))
+
+        // Upserting an asserted value updates it
+        _ <- Ns.i_(1).int(4).upsert.transact
+        _ <- Ns.i.int.query.get.map(_ ==> List((1, 4)))
+
+
+                //        _ <- Ns.i(1).save.i.transact
         //        _ <- Ns.i.query.get.map(_ ==> List(1))
       } yield ()
     }
@@ -40,47 +51,21 @@ object AdhocJVM_mongodb extends TestSuite_mongodb with AggrUtils {
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
 
-        id <- A.i(1).B.i(2).C.i(3).save.transact.map(_.id)
-        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
-
-        // Add extra B and C entities for checking that these are not updated
-        _ <- B.i(42).save.transact
-        _ <- C.i(43).save.transact
-
-
-        // A
-        _ <- A(id).i(10).update.transact
-        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((10, 2, 3)))
-
-        // A + B
-        _ <- B.i.query.get.map(_ ==> List(2, 42))
-        _ <- A(id).i(11).B.i(20).update.transact
-        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((11, 20, 3)))
-
-        // Only the first B entity was updated
-        _ <- B.i.query.get.map(_ ==> List(20, 42))
-
-        // B
-        _ <- A(id).B.i(21).update.transact
-        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((11, 21, 3)))
-
-        // A + B + C
-        _ <- A(id).i(12).B.i(22).C.i(30).update.transact
-        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((12, 22, 30)))
-
-        // A + C
-        _ <- A(id).i(13).B.C.i(31).update.transact
-        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((13, 22, 31)))
-
-        // B + C
-        _ <- A(id).B.i(23).C.i(32).update.transact
-        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((13, 23, 32)))
-
-        // C
-        _ <- A(id).B.C.i(33).update.transact
-        _ <- A.i.B.i.C.i.query.get.map(_ ==> List((13, 23, 33)))
+        _ <- A.i(1).i(2).save.transact
+          .map(_ ==> "Unexpected success").recover { case e@ModelError(err) =>
+            e.printStackTrace()
+            err ==> "Can't transact duplicate attribute A.ix"
+          }
+        /*
+------------------ 0  0  -A.i
 
 
+  List()
+------------------ 0  0  -A.i
+
+
+  List(-A.i)
+         */
 
         //        _ <- A.i.ownB_?.query.get
         //          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
@@ -91,15 +76,21 @@ object AdhocJVM_mongodb extends TestSuite_mongodb with AggrUtils {
     }
 
 
-    //    "unique" - unique { implicit conn =>
-    //      import molecule.coreTests.dataModels.core.dsl.Uniques._
-    //      for {
-    //        _ <- Uniques.i(1).save.transact
-    //
-    //      } yield ()
-    //    }
-    //
-    //
+        "unique" - unique { implicit conn =>
+          import molecule.coreTests.dataModels.core.dsl.Uniques._
+          for {
+//            _ <- Uniques.i(1).save.transact
+
+
+            _ <- Uniques.i(1).i(2).int_(1).update.transact
+              .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+                err ==> "Can't transact duplicate attribute Uniques.i"
+              }
+
+          } yield ()
+        }
+
+
     //    "validation" - validation { implicit conn =>
     //      import molecule.coreTests.dataModels.core.dsl.Validation._
     //

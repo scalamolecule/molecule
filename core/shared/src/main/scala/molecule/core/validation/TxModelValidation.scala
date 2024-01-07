@@ -137,6 +137,11 @@ case class TxModelValidation(
     } else {
       refPath.mkString("-") + "-" + attr
     }
+
+    //    val pp = prev.toList.map(a => a.toList.map(a => a.toList))
+    //    println(s"------------------ $level  $group  $attrPrefixed")
+    //    println(pp.map(l => l.mkString("\n  ", "\n  ", "")).mkString("\n", "\n", ""))
+
     if (prev(level)(group).contains(attrPrefixed))
       dup(attr)
     prev(level)(group) = prev(level)(group) :+ attrPrefixed
@@ -187,7 +192,7 @@ case class TxModelValidation(
     } else {
       a match {
         case a1: AttrOneMan                => a1 match {
-          case AttrOneManID(_, _, _, vs, _, Some(validator), _, _, _, _, _, _)             => validator.withAttrs(attrs).validate(one(vs))
+          case AttrOneManID(_, _, _, vs, _, Some(validator), _, _, _, _, _, _)          => validator.withAttrs(attrs).validate(one(vs))
           case AttrOneManString(_, _, _, vs, _, Some(validator), _, _, _, _, _)         => validator.withAttrs(attrs).validate(one(vs))
           case AttrOneManInt(_, _, _, vs, _, Some(validator), _, _, _, _, _)            => validator.withAttrs(attrs).validate(one(vs))
           case AttrOneManLong(_, _, _, vs, _, Some(validator), _, _, _, _, _)           => validator.withAttrs(attrs).validate(one(vs))
@@ -215,7 +220,7 @@ case class TxModelValidation(
         case _: AttrOneTac | _: AttrOneOpt => onlyMandatory(a)
 
         case a: AttrSetMan                 => a match {
-          case AttrSetManID(_, _, _, sets, _, Some(validator), _, _, _, _, _, _)             => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
+          case AttrSetManID(_, _, _, sets, _, Some(validator), _, _, _, _, _, _)          => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
           case AttrSetManString(_, _, _, sets, _, Some(validator), _, _, _, _, _)         => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
           case AttrSetManInt(_, _, _, sets, _, Some(validator), _, _, _, _, _)            => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
           case AttrSetManLong(_, _, _, sets, _, Some(validator), _, _, _, _, _)           => val vr = validator.withAttrs(attrs); one(sets).toSeq.flatMap(v => vr.validate(v))
@@ -321,7 +326,7 @@ case class TxModelValidation(
   private def deletingAttr(a: Attr): Boolean = {
     a match {
       case a: AttrOneMan => a match {
-        case AttrOneManID(_, _, _, Nil, _, _, _, _, _, _, _, _)             => true
+        case AttrOneManID(_, _, _, Nil, _, _, _, _, _, _, _, _)          => true
         case AttrOneManString(_, _, _, Nil, _, _, _, _, _, _, _)         => true
         case AttrOneManInt(_, _, _, Nil, _, _, _, _, _, _, _)            => true
         case AttrOneManLong(_, _, _, Nil, _, _, _, _, _, _, _)           => true
@@ -347,7 +352,7 @@ case class TxModelValidation(
         case _                                                           => false
       }
       case a: AttrOneTac => a match {
-        case AttrOneTacID(_, _, _, Nil, _, _, _, _, _, _, _, _)             => true
+        case AttrOneTacID(_, _, _, Nil, _, _, _, _, _, _, _, _)          => true
         case AttrOneTacString(_, _, _, Nil, _, _, _, _, _, _, _)         => true
         case AttrOneTacInt(_, _, _, Nil, _, _, _, _, _, _, _)            => true
         case AttrOneTacLong(_, _, _, Nil, _, _, _, _, _, _, _)           => true
@@ -373,7 +378,7 @@ case class TxModelValidation(
         case _                                                           => false
       }
       case a: AttrSetMan => a match {
-        case AttrSetManID(_, _, _, vs, _, _, _, _, _, _, _, _)             => vs.isEmpty || vs.head.isEmpty
+        case AttrSetManID(_, _, _, vs, _, _, _, _, _, _, _, _)          => vs.isEmpty || vs.head.isEmpty
         case AttrSetManString(_, _, _, vs, _, _, _, _, _, _, _)         => vs.isEmpty || vs.head.isEmpty
         case AttrSetManInt(_, _, _, vs, _, _, _, _, _, _, _)            => vs.isEmpty || vs.head.isEmpty
         case AttrSetManLong(_, _, _, vs, _, _, _, _, _, _, _)           => vs.isEmpty || vs.head.isEmpty
@@ -398,7 +403,7 @@ case class TxModelValidation(
         case AttrSetManChar(_, _, _, vs, _, _, _, _, _, _, _)           => vs.isEmpty || vs.head.isEmpty
       }
       case a: AttrSetTac => a match {
-        case AttrSetTacID(_, _, _, vs, _, _, _, _, _, _, _, _)             => vs.isEmpty || vs.head.isEmpty
+        case AttrSetTacID(_, _, _, vs, _, _, _, _, _, _, _, _)          => vs.isEmpty || vs.head.isEmpty
         case AttrSetTacString(_, _, _, vs, _, _, _, _, _, _, _)         => vs.isEmpty || vs.head.isEmpty
         case AttrSetTacInt(_, _, _, vs, _, _, _, _, _, _, _)            => vs.isEmpty || vs.head.isEmpty
         case AttrSetTacLong(_, _, _, vs, _, _, _, _, _, _, _)           => vs.isEmpty || vs.head.isEmpty
@@ -429,7 +434,7 @@ case class TxModelValidation(
   private def removingLastValue(a: Attr, curVs: Set[Any]): Boolean = {
     a match {
       case a: AttrSetMan => a match {
-        case AttrSetManID(_, _, _, vs, _, _, _, _, _, _, _, _)             => vs.nonEmpty && vs.head == curVs
+        case AttrSetManID(_, _, _, vs, _, _, _, _, _, _, _, _)          => vs.nonEmpty && vs.head == curVs
         case AttrSetManString(_, _, _, vs, _, _, _, _, _, _, _)         => vs.nonEmpty && vs.head == curVs
         case AttrSetManInt(_, _, _, vs, _, _, _, _, _, _, _)            => vs.nonEmpty && vs.head == curVs
         case AttrSetManLong(_, _, _, vs, _, _, _, _, _, _, _)           => vs.nonEmpty && vs.head == curVs
@@ -454,7 +459,7 @@ case class TxModelValidation(
         case AttrSetManChar(_, _, _, vs, _, _, _, _, _, _, _)           => vs.nonEmpty && vs.head == curVs
       }
       case a: AttrSetTac => a match {
-        case AttrSetTacID(_, _, _, vs, _, _, _, _, _, _, _, _)             => vs.nonEmpty && vs.head == curVs
+        case AttrSetTacID(_, _, _, vs, _, _, _, _, _, _, _, _)          => vs.nonEmpty && vs.head == curVs
         case AttrSetTacString(_, _, _, vs, _, _, _, _, _, _, _)         => vs.nonEmpty && vs.head == curVs
         case AttrSetTacInt(_, _, _, vs, _, _, _, _, _, _, _)            => vs.nonEmpty && vs.head == curVs
         case AttrSetTacLong(_, _, _, vs, _, _, _, _, _, _, _)           => vs.nonEmpty && vs.head == curVs

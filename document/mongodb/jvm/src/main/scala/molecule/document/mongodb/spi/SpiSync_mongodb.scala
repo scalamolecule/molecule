@@ -195,6 +195,10 @@ trait SpiSync_mongodb
     val update = update0.copy(elements = noKeywords(update0.elements, Some(conn.proxy)))
     if (update.doInspect)
       update_inspect(update)
+
+//    TxModelValidation(conn.proxy.nsMap, conn.proxy.attrMap, "update", Some(curSetValues)).validate(elements)
+    TxModelValidation(conn.proxy.nsMap, conn.proxy.attrMap, "update", None).validate(update.elements)
+
     val errors = update_validate(update0) // validate original elements against meta model
     //    val errors = Map.empty[String, Seq[String]]
     if (errors.isEmpty) {
@@ -269,7 +273,7 @@ trait SpiSync_mongodb
     //    }
 
     // todo
-    // validateUpdateSet(conn.proxy, update.elements, update.isUpsert, resolver)
+//     validateUpdateSet(conn.proxy, update.elements, update.isUpsert, resolver)
     Map.empty[String, Seq[String]]
   }
 
