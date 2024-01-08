@@ -21,8 +21,32 @@ object AdhocJVM_mongodb extends TestSuite_mongodb with AggrUtils {
       for {
 
 
-        _ <- Ns.i(1).save.i.transact
-        _ <- Ns.i.query.get.map(_ ==> List(1))
+        List(a, b, c) <- Ns.ints.insert(Set(1), Set(2), Set(3)).transact.map(_.ids)
+        _ <- Ns.id.a1.ints.query.i.get.map(_ ==> List(
+          (a, Set(1)),
+          (b, Set(2)),
+          (c, Set(3)),
+        ))
+//        ).sortBy(_._1))
+        /*
+        List(
+        (659bd9643783b4093936bc8c,Set(3)),
+        (659bd9643783b4093936bc8b,Set(2)),
+        (659bd9643783b4093936bc8a,Set(1)))
+         */
+
+//        _ <- Ns(List(b, c)).ints(4).update.transact
+//        _ <- Ns.id.a1.ints.query.get.map(_ ==> List(
+//          (a, Set(1)),
+//          (b, Set(4)),
+//          (c, Set(4)),
+//        ))
+
+
+
+
+        //        _ <- Ns.i(1).save.i.transact
+        //        _ <- Ns.i.query.get.map(_ ==> List(1))
       } yield ()
     }
 
@@ -31,34 +55,37 @@ object AdhocJVM_mongodb extends TestSuite_mongodb with AggrUtils {
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
 
-        id <- A.i(1).OwnB.i(2)._A.C.i(3).save.transact.map(_.id)
-        _ <- A.i.OwnB.i._A.C.i.query.get.map(_ ==> List((1, 2, 3)))
 
-        // Updating A.OwnB.i and A.C.i
-        _ <- A(id).i(10).OwnB.i(20)._A.C.i(30).update.transact
-        _ <- A.i.OwnB.i._A.C.i.query.get.map(_ ==> List((10, 20, 30)))
+        id <- A.ii(Set(1)).B.ii(Set(2)).C.ii(Set(3)).save.transact.map(_.id)
+        _ <- A.ii.B.ii.C.ii.query.get.map(_ ==> List((Set(1), Set(2), Set(3))))
 
+        // A
+        _ <- A(id).ii(Set(10)).update.transact
+        _ <- A.ii.B.ii.C.ii.query.get.map(_ ==> List((Set(10), Set(2), Set(3))))
 
-        //        id <- A.i(1).B.i(2)._A.OwnC.i(3).save.transact.map(_.id)
-        //        _ <- A.i.B.i._A.OwnC.i.query.get.map(_ ==> List((1, 2, 3)))
-        //
-        //        // Updating A.B.i and A.OwnC.i
-        //        _ <- A(id).i(10).B.i(20)._A.OwnC.i(30).update.transact
-        //        _ <- A.i.B.i._A.OwnC.i.query.get.map(_ ==> List((10, 20, 30)))
+        // A + B
+        _ <- A(id).ii(Set(11)).B.ii(Set(20)).update.transact
+        _ <- A.ii.B.ii.C.ii.query.get.map(_ ==> List((Set(11), Set(20), Set(3))))
 
+        // B
+        _ <- A(id).B.ii(Set(21)).update.transact
+        _ <- A.ii.B.ii.C.ii.query.get.map(_ ==> List((Set(11), Set(21), Set(3))))
 
-        //        id <- A.i(1).OwnB.i(2)._A.OwnC.i(3).save.transact.map(_.id)
-        //        _ <- A.i.OwnB.i._A.OwnC.i.query.get.map(_ ==> List((1, 2, 3)))
-        //
-        //        // Updating A.OwnB.i and A.OwnC.i
-        //        _ <- A(id).i(10).OwnB.i(20)._A.OwnC.i(30).update.transact
-        //        _ <- A.i.OwnB.i._A.OwnC.i.query.get.map(_ ==> List((10, 20, 30)))
+        // A + B + C
+        _ <- A(id).ii(Set(12)).B.ii(Set(22)).C.ii(Set(30)).update.transact
+        _ <- A.ii.B.ii.C.ii.query.get.map(_ ==> List((Set(12), Set(22), Set(30))))
 
+        // A + C
+        _ <- A(id).ii(Set(13)).B.C.ii(Set(31)).update.transact
+        _ <- A.ii.B.ii.C.ii.query.get.map(_ ==> List((Set(13), Set(22), Set(31))))
 
-        //        _ <- A.i.ownB_?.query.get
-        //          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-        //            err ==> "Can't query for non-existing ids of embedded documents in MongoDB."
-        //          }
+        // B + C
+        _ <- A(id).B.ii(Set(23)).C.ii(Set(32)).update.transact
+        _ <- A.ii.B.ii.C.ii.query.get.map(_ ==> List((Set(13), Set(23), Set(32))))
+
+        // C
+        _ <- A(id).B.C.ii(Set(33)).update.transact
+        _ <- A.ii.B.ii.C.ii.query.get.map(_ ==> List((Set(13), Set(23), Set(33))))
 
       } yield ()
     }

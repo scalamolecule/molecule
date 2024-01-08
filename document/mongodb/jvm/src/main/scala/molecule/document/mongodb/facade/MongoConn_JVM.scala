@@ -44,15 +44,10 @@ case class MongoConn_JVM(
         case _ => insertReferenced(data)
       }
       case "update" =>
-        //        update(data)
         if (data.size > 1) {
-          // Only update if there's any entities to update
+          // Only update if there are any collections to update
           update(data)
         } else TxReport(Nil)
-      //        data.size match {
-      //          case 3 => update(data)
-      //          case n => throw ModelError(s"Unexpectedly found $n key-value pairs in update bson:\n" + data)
-      //        }
       case "delete" => data.size match {
         case 3 => delete(data)
         case n => throw ModelError(s"Unexpectedly found $n key-value pairs in delete bson:\n" + data)
@@ -70,22 +65,32 @@ case class MongoConn_JVM(
           var updatedIds = List.empty[String]
           var firstNs    = true
           data.forEach {
-            case ("_action" | "_nsIdArrays", _) => ()
+            case ("_action", _) => ()
             case (ns, nsData)                   =>
               //              println(s"------- $ns ----------\n" + nsData)
               val idsArray = nsData.asDocument().get("ids").asArray()
               val filter = new BsonDocument().append("_id", new BsonDocument("$in", idsArray))
+
+
+              val array = new BsonArray()
+              array.add(new BsonString("x"))
+
               val data   = new BsonDocument().append("$set", nsData.asDocument().get("data"))
+//              val data   = new BsonDocument().append("$set", new BsonDocument("strings", array))
+
+//              println(data.toJson(pretty))
+
 
               if (firstNs) {
                 updatedIds = idsArray.getValues.asScala.toList.map(_.asInstanceOf[BsonObjectId].getValue.toString)
               }
               val collection = mongoDb.getCollection(ns, classOf[BsonDocument])
 
-//              println("ns    : " + ns)
-//              println("filter: " + filter)
-//              println("data  : " + data)
+              println("ns    : " + ns)
+              println("filter: " + filter)
+              println("data  : " + data)
 
+//              collection.updateMany(clientSession, filter, data)
               collection.updateMany(clientSession, filter, data)
               firstNs = false
           }

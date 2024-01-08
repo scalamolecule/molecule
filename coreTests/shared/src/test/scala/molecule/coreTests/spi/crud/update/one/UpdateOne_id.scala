@@ -117,8 +117,6 @@ trait UpdateOne_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           id <- A.i(1).OwnB.i(7).save.transact.map(_.id)
           _ <- A.i.OwnB.i.query.i.get.map(_ ==> List((1, 7)))
 
-          _ <- A.i.ownB_?.query.get.map(_ ==> List((1, Some("42"))))
-
           // Apply empty value to delete ref id of entity (entity remains)
           _ <- A(id).ownB().update.transact
           _ <- A.i.ownB_?.query.get.map(_ ==> List((1, None)))

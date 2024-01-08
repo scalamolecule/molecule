@@ -11,7 +11,6 @@ import org.bson.conversions.Bson
 trait ResolveExprOneID extends ResolveExpr with LambdasOne { self: MongoQueryBase =>
 
   protected def resolveAttrOneManID(attr: AttrOneMan): Unit = {
-//    aritiesAttr()
     attr match {
       case at: AttrOneManID => man(at.copy(attr = "_id"), at.vs, resID)
       case _                => throw ModelError("Unexpected mandatory expr one ID type")
@@ -31,22 +30,20 @@ trait ResolveExprOneID extends ResolveExpr with LambdasOne { self: MongoQueryBas
     attr.sort.foreach { sort =>
       val (dir, arity) = (sort.head, sort.substring(1, 2).toInt)
       dir match {
-        //        case 'a' => orderBy += ((level, arity, field, ""))
-        //        case 'd' => orderBy += ((level, arity, field, " DESC"))
-        case 'a' => sorts.add(Sorts.ascending(field))
-        case 'd' => sorts.add(Sorts.descending(field))
+        case 'a' => topBranch.sorts.add(Sorts.ascending(field))
+        case 'd' => topBranch.sorts.add(Sorts.descending(field))
       }
     }
   }
 
   private def man(attr: Attr, args: Seq[String], res: ResOne[String]): Unit = {
     val field = attr.attr
-//    projections.add(Projections.include(field))
-//    b.projectField(field)
     projectField(field)
-
-    addCast(field, res.cast(field))
     addSort(attr, field)
+    addCast(field, res.cast(field))
+
+    prefixedFieldPair = if (b.parent.isEmpty) (field, field) else (b.path + field, b.alias + field)
+    topBranch.groupIdFields += prefixedFieldPair
 
     attr.filterAttr.fold(
       expr(field, attr.op, args, res)

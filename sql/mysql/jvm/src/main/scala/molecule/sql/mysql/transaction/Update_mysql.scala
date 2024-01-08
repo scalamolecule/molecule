@@ -18,9 +18,10 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
     ns: String,
     attr: String,
     sets: Seq[Set[T]],
+    refNs: Option[String],
+    owner: Boolean,
     transform: T => Any,
     set2array: Set[Any] => Array[AnyRef],
-    refNs: Option[String],
     exts: List[String],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
@@ -76,9 +77,10 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
     ns: String,
     attr: String,
     sets: Seq[Set[T]],
+    refNs: Option[String],
+    owner: Boolean,
     transform: T => Any,
     set2array: Set[Any] => Array[AnyRef],
-    refNs: Option[String],
     exts: List[String],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
@@ -117,9 +119,10 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
     ns: String,
     attr: String,
     sets: Seq[Set[T]],
+    refNs: Option[String],
+    owner: Boolean,
     transform: T => Any,
     handleValue: T => Any,
-    refNs: Option[String],
     exts: List[String],
     value2json: (StringBuffer, T) => StringBuffer,
     one2json: T => String
@@ -217,9 +220,10 @@ trait Update_mysql extends SqlUpdate { self: ResolveUpdate =>
     ns: String,
     attr: String,
     set: Set[T],
+    refNs: Option[String],
+    owner: Boolean,
     transform: T => Any,
     handleValue: T => Any,
-    refNs: Option[String],
     exts: List[String],
     one2json: T => String
   ): Unit = {

@@ -189,7 +189,7 @@ trait Update_mongodb
   override def handleRefNs(ref: Ref): Unit = {
     val Ref(ns, refAttr, refNs, _, owner, _) = ref
     if (owner) {
-      // Embed document
+      // Embedded document
       d.filterElements = d.filterElements :+ ref
       path = path :+ refAttr
 
@@ -223,19 +223,16 @@ trait Update_mongodb
     transformValue: T => Any,
     handleValue: T => Any,
   ): Unit = {
-    val pathAttr = if (path.isEmpty) attr else path.mkString("", ".", "." + attr)
-
     if (isUpdate) {
       if (owner) {
         throw ModelError("Can't update non-existing ids of embedded documents in MongoDB.")
       }
       d.filterElements = d.filterElements :+ AttrOneTacInt(ns, attr) // dummy filter
     }
+    lazy val pathAttr = if (path.isEmpty) attr else path.mkString("", ".", "." + attr)
     vs match {
-      case Seq(v) =>
-        d.doc.append(pathAttr, transformValue(v).asInstanceOf[BsonValue])
-      case Nil    =>
-        d.doc.append(pathAttr, new BsonNull())
+      case Seq(v) => d.doc.append(pathAttr, transformValue(v).asInstanceOf[BsonValue])
+      case Nil    => d.doc.append(pathAttr, new BsonNull())
       case vs     =>
         val cleanAttr = attr.replace("_", "")
         throw ExecutionError(
@@ -244,75 +241,37 @@ trait Update_mongodb
     }
   }
 
-  override def handleIds(ns: String, ids0: Seq[String]): Unit = {
-    if (d.ids.nonEmpty) {
-      throw ModelError(s"Can't apply entity ids twice in $update.")
-    }
-    d.ids = ids0
-  }
-
-
   override def updateSetEq[T](
     ns: String,
     attr: String,
     sets: Seq[Set[T]],
+    refNs: Option[String],
+    owner: Boolean,
     transform: T => Any,
     set2array: Set[Any] => Array[AnyRef],
-    refNs: Option[String],
     exts: List[String],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    refNs.fold {
-      //      updateCurRefPath(attr)
-      //      placeHolders = placeHolders :+ s"$attr = ?"
-      //      val colSetter = sets match {
-      //        case Seq(set) =>
-      //          if (!isUpsert) {
-      //            addToUpdateCols(ns, attr)
-      //          }
-      //          val array = set2array(set.asInstanceOf[Set[Any]])
-      //          (ps: PS, _: IdsMap, _: RowIndex) => {
-      //            val conn = ps.getConnection
-      //            ps.setArray(curParamIndex, conn.createArrayOf(exts(1), array))
-      //            curParamIndex += 1
-      //          }
-      //        case Nil      =>
-      //          (ps: PS, _: IdsMap, _: RowIndex) => {
-      //            ps.setNull(curParamIndex, 0)
-      //            curParamIndex += 1
-      //          }
-      //        case vs       => throw ExecutionError(
-      //          s"Can only $update one Set of values for Set attribute `$ns.$attr`. Found: " + vs.mkString(", ")
-      //        )
-      //      }
-      //      addColSetter(curRefPath, colSetter)
-      ???
-
-    } { refNs =>
-      //      // Separate update of ref ids in join table -----------------------------
-      //      val refAttr   = attr
-      //      val joinTable = ss(ns, refAttr, refNs)
-      //      val ns_id     = ss(ns, "id")
-      //      val refNs_id  = ss(refNs, "id")
-      //      val id        = getUpdateId
-      //      sets match {
-      //        case Seq(set) =>
-      //          // Tables are reversed in JdbcConn_JVM and we want to delete first
-      //          manualTableDatas = List(
-      //            addJoins(joinTable, ns_id, refNs_id, id, set.map(_.asInstanceOf[String].toLong)),
-      //            deleteJoins(joinTable, ns_id, id)
-      //          )
-      //
-      //        case Nil =>
-      //          // Delete all joins when no ref ids are applied
-      //          manualTableDatas = List(deleteJoins(joinTable, ns_id, id))
-      //
-      //        case vs => throw ExecutionError(
-      //          s"Can only $update one Set of values for Set attribute `$ns.$attr`. Found: " + vs.mkString(", ")
-      //        )
-      //      }
-
-      ???
+    if (isUpdate) {
+      if (owner) {
+        throw ModelError("Can't update non-existing ids of embedded documents in MongoDB.")
+      }
+      d.filterElements = d.filterElements :+ AttrOneTacInt(ns, attr) // dummy filter
+    }
+    lazy val pathAttr = if (path.isEmpty) attr else path.mkString("", ".", "." + attr)
+    lazy val array    = new BsonArray()
+    sets match {
+      case Seq(set) =>
+        set.map(v => array.add(transform(v).asInstanceOf[BsonValue]))
+        d.doc.append(pathAttr, array)
+      case Nil      =>
+        d.doc.append(pathAttr, new BsonNull())
+      //          d.doc.append(pathAttr, array)
+      case vs =>
+        val cleanAttr = attr.replace("_", "")
+        throw ExecutionError(
+          s"Can only $update one Set of values for Set attribute `$ns.$cleanAttr`. Found: " + vs.mkString(", ")
+        )
     }
   }
 
@@ -320,9 +279,10 @@ trait Update_mongodb
     ns: String,
     attr: String,
     sets: Seq[Set[T]],
+    refNs: Option[String],
+    owner: Boolean,
     transform: T => Any,
     set2array: Set[Any] => Array[AnyRef],
-    refNs: Option[String],
     exts: List[String],
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
@@ -366,9 +326,10 @@ trait Update_mongodb
     ns: String,
     attr: String,
     sets: Seq[Set[T]],
+    refNs: Option[String],
+    owner: Boolean,
     transform: T => Any,
     handleValue: T => Any,
-    refNs: Option[String],
     exts: List[String],
     value2json: (StringBuffer, T) => StringBuffer,
     one2json: T => String
@@ -490,9 +451,10 @@ trait Update_mongodb
     ns: String,
     attr: String,
     set: Set[T],
+    refNs: Option[String],
+    owner: Boolean,
     transform: T => Any,
     handleValue: T => Any,
-    refNs: Option[String],
     exts: List[String],
     one2json: T => String
   ): Unit = {
@@ -556,6 +518,13 @@ trait Update_mongodb
     }
   }
 
+
+  override def handleIds(ns: String, ids0: Seq[String]): Unit = {
+    if (d.ids.nonEmpty) {
+      throw ModelError(s"Can't apply entity ids twice in $update.")
+    }
+    d.ids = ids0
+  }
 
   override def handleUniqueFilterAttr(uniqueFilterAttr: AttrOneTac): Unit = {
     if (d.uniqueFilterElements.nonEmpty) {

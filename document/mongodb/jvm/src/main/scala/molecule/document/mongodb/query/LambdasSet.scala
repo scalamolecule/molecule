@@ -495,7 +495,7 @@ trait LambdasSet extends LambdasBase with JavaConversions {
       while (array.hasNext) {
         set += value(array.next)
       }
-      Some(set)
+      if (set.isEmpty) None else Some(set)
     }
   }
 

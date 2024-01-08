@@ -117,24 +117,6 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
   }
 
   private def tac[T](attr: Attr, args: Seq[Set[T]], res: ResSet[T]): Unit = {
-    //    val field = getCol(attr: Attr)
-    //    attr.filterAttr.fold {
-    //      setExpr(field, attr.op, args, res, "tac")
-    //    } {
-    //      case filterAttr: AttrOne => setExpr2(field, attr.op, filterAttr.name, true, tpe)
-    //      case filterAttr          => setExpr2(field, attr.op, filterAttr.name, false, tpe)
-    //    }
-    //    notNull += field
-
-    //    val field = getCol(attr: Attr)
-    //    attr.filterAttr.fold {
-    //      expr(field, attr.op, args, res)
-    //    } {
-    //      case filterAttr: AttrOne => expr2(field, attr.op, filterAttr.name, true, res.tpe)
-    //      case filterAttr          => expr2(field, attr.op, filterAttr.name, false, res.tpe)
-    //    }
-    //    notNull += field
-
     val field       = attr.attr
     val uniqueField = b.unique(field)
     b.matches.add(Filters.exists(field))
@@ -148,13 +130,12 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
   }
 
   private def opt[T](attr: Attr, optSets: Option[Seq[Set[T]]], res: ResSet[T]): Unit = {
-    val field = attr.attr
-    //    projections.add(Projections.include(field))
-    //    b.projectField(field)
+    val field       = attr.attr
+    val uniqueField = b.unique(field)
     projectField(field)
     addCast(field, res.castOptSet(field))
     attr.op match {
-      case V     => ()
+      case V     => optAttr(uniqueField, field)
       case Eq    => optEqual(field, optSets, res)
       case Neq   => optNeq(field, optSets, res)
       case Has   => optHas(field, optSets, res)
@@ -163,7 +144,14 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
     }
   }
 
-  private def expr[T](uniqueField: String, field: String, op: Op, sets: Seq[Set[T]], res: ResSet[T], mandatory: Boolean): Unit = {
+  private def expr[T](
+    uniqueField: String,
+    field: String,
+    op: Op,
+    sets: Seq[Set[T]],
+    res: ResSet[T],
+    mandatory: Boolean
+  ): Unit = {
     op match {
       case V         => attr(uniqueField, field, mandatory)
       case Eq        => equal(field, sets, res)
@@ -196,7 +184,7 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
   }
 
 
-  protected def attr[T](uniqueField: String, field: String, mandatory: Boolean): Unit = {
+  private def attr[T](uniqueField: String, field: String, mandatory: Boolean): Unit = {
     b.matches.add(Filters.ne(b.dot + field, null.asInstanceOf[T]))
     if (mandatory) {
       topBranch.groupIdFields -= prefixedFieldPair
@@ -204,6 +192,21 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
         .append("$addToSet", new BsonString("$" + b.path + field))
       topBranch.addFields += (b.path + field) -> reduce("$" + b.alias + field)
     }
+  }
+
+  private def optAttr[T](uniqueField: String, field: String): Unit = {
+    topBranch.groupIdFields -= prefixedFieldPair
+    val fieldRef = new BsonString("$" + b.path + field)
+    val notEqual = new BsonArray()
+    notEqual.add(fieldRef)
+    notEqual.add(new BsonNull)
+    val condArgs = new BsonArray()
+    condArgs.add(new BsonDocument("$ne", notEqual))
+    condArgs.add(fieldRef)
+    condArgs.add(new BsonArray())
+    topBranch.groupExprs += (b.alias + uniqueField) -> new BsonDocument()
+      .append("$addToSet", new BsonDocument("$cond", condArgs))
+    topBranch.addFields += (b.path + field) -> reduce("$" + b.alias + field)
   }
 
 
@@ -227,6 +230,7 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
   private def equal2(field: String, filterAttr: String): Unit = {
     //    where += ((field, "= " + filterAttr))
   }
+
 
   private def optEqual[T](field: String, optSets: Option[Seq[Set[T]]], res: ResSet[T]): Unit = {
     optSets.fold[Unit] {
