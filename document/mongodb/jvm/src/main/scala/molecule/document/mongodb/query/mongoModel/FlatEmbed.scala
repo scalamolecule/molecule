@@ -88,8 +88,8 @@ class FlatEmbed(
       (false, "$")
     }
 
-    // Group
     if (groupExprs.nonEmpty) {
+      // $group
       val groupIdFieldsDoc = new BsonDocument()
       if (preGroup) {
         groupIdFields.foreach { case (_, fieldAlias) =>
@@ -100,7 +100,10 @@ class FlatEmbed(
           groupIdFieldsDoc.put(fieldAlias, new BsonString(prefix + fieldPath))
         }
       }
-
+      optSetSeparators.foreach { case (dummyField, cond) =>
+        // Separate nulls from arrays/sets of values when grouping
+        groupIdFieldsDoc.put(dummyField, cond)
+      }
       val groupDoc = new BsonDocument()
       groupDoc.append("_id", groupIdFieldsDoc)
       groupExprs.foreach { case (field, bson) =>

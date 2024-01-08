@@ -25,8 +25,9 @@ abstract class Branch(
   val matches     = new util.ArrayList[Bson]
 
   val preGroupFields = ListBuffer.empty[(String, String)]
-  val groupIdFields  = ListBuffer.empty[(String, String)]
-  val groupExprs     = ListBuffer.empty[(String, BsonValue)]
+  val groupIdFields    = ListBuffer.empty[(String, String)]
+  val optSetSeparators = ListBuffer.empty[(String, BsonValue)]
+  val groupExprs       = ListBuffer.empty[(String, BsonValue)]
   var addFields      = Set.empty[(String, BsonValue)]
 
   val sorts = new util.ArrayList[Bson]
@@ -41,9 +42,9 @@ abstract class Branch(
     }
   }
 
-    def groupExpr(field: String, bson: BsonValue): Unit = {
-      groupExprs += ((field, bson))
-    }
+  def groupExpr(field: String, bson: BsonValue): Unit = {
+    groupExprs += ((field, bson))
+  }
   def groupAddToSet(keyField: String, setField: String): Unit = {
     groupExpr(keyField, new BsonDocument().append("$addToSet", new BsonString(setField)))
   }

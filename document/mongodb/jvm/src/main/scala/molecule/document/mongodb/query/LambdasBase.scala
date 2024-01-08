@@ -59,16 +59,9 @@ trait LambdasBase extends BaseHelpers with AggrUtils with MongoQueryBase {
   protected lazy val v2bsonChar          : Char => BsonValue           = (v: Char) => if (v == null.asInstanceOf[Char]) new BsonNull else new BsonString(v.toString)
 
   protected lazy val castID             = (field: String) => (doc: BsonDocument) => {
-//    doc.get(field) match {
-
-    println(doc)
-
     doc.get(field) match {
       case v: BsonObjectId => v.getValue.toString
       case v: BsonString   => v.getValue
-      case v: BsonDocument               =>
-
-        throw ModelError(s"Unexpected Bson document for id $field: " + v)
       case v               => throw ModelError("Unexpected Bson value for id: " + v)
     }
   }

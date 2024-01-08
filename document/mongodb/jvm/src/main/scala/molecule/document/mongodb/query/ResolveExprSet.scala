@@ -134,6 +134,10 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
     val uniqueField = b.unique(field)
     projectField(field)
     addCast(field, res.castOptSet(field))
+
+    prefixedFieldPair = if (b.parent.isEmpty) (field, field) else (b.path + field, b.alias + field)
+    topBranch.groupIdFields += prefixedFieldPair
+
     attr.op match {
       case V     => optAttr(uniqueField, field)
       case Eq    => optEqual(field, optSets, res)
@@ -196,16 +200,22 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
 
   private def optAttr[T](uniqueField: String, field: String): Unit = {
     topBranch.groupIdFields -= prefixedFieldPair
-    val fieldRef = new BsonString("$" + b.path + field)
-    val notEqual = new BsonArray()
-    notEqual.add(fieldRef)
-    notEqual.add(new BsonNull)
+
+    // Separate nulls from arrays/sets of values when grouping
+
+    val ifNull = new BsonArray()
+    ifNull.add(new BsonString("$" + b.path + field))
+    ifNull.add(new BsonBoolean(false))
+
     val condArgs = new BsonArray()
-    condArgs.add(new BsonDocument("$ne", notEqual))
-    condArgs.add(fieldRef)
-    condArgs.add(new BsonArray())
+    condArgs.add(new BsonDocument("$ifNull", ifNull))
+    condArgs.add(new BsonBoolean(true))
+    condArgs.add(new BsonBoolean(false))
+
+    topBranch.optSetSeparators += (field + "_") -> new BsonDocument("$cond", condArgs)
+
     topBranch.groupExprs += (b.alias + uniqueField) -> new BsonDocument()
-      .append("$addToSet", new BsonDocument("$cond", condArgs))
+      .append("$addToSet", new BsonString("$" + b.path + field))
     topBranch.addFields += (b.path + field) -> reduce("$" + b.alias + field)
   }
 

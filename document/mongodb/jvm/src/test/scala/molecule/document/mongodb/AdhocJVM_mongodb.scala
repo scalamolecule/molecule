@@ -21,27 +21,35 @@ object AdhocJVM_mongodb extends TestSuite_mongodb with AggrUtils {
       for {
 
 
-        List(a, b, c) <- Ns.ints.insert(Set(1), Set(2), Set(3)).transact.map(_.ids)
-        _ <- Ns.id.a1.ints.query.i.get.map(_ ==> List(
-          (a, Set(1)),
-          (b, Set(2)),
-          (c, Set(3)),
+        List(a, b, c) <- Ns.i.ints_?.insert(
+          (1, None),
+          (1, Some(Set(2))),
+          (2, Some(Set(3))),
+        ).transact.map(_.ids)
+
+//        _ <- Ns.i.a1.ints.query.i.get.map(_.toSet ==> Set( // (since we can't sort by Sets)
+//        _ <- Ns.i.a1.ints_?.query.i.get.map(_.toSet ==> Set( // (since we can't sort by Sets)
+        _ <- Ns.i.ints_?.query.i.get.map(_.toSet ==> Set( // (since we can't sort by Sets)
+          (1, None),
+          (1, Some(Set(2))),
+          (2, Some(Set(3))),
         ))
-//        ).sortBy(_._1))
-        /*
-        List(
-        (659bd9643783b4093936bc8c,Set(3)),
-        (659bd9643783b4093936bc8b,Set(2)),
-        (659bd9643783b4093936bc8a,Set(1)))
-         */
 
-//        _ <- Ns(List(b, c)).ints(4).update.transact
-//        _ <- Ns.id.a1.ints.query.get.map(_ ==> List(
-//          (a, Set(1)),
-//          (b, Set(4)),
-//          (c, Set(4)),
+//        // Update all entities where non-unique attribute i is 1
+//        _ <- Ns.i_(1).ints(Set(4)).update.transact
+//        _ <- Ns.id.a1.i.ints_?.query.get.map(_ ==> List(
+//          (a, 1, None), // not updated since there were no previous value
+//          (b, 1, Some(Set(4))), // 2 updated to 4
+//          (c, 2, Some(Set(3))),
 //        ))
-
+//
+//        // Upsert all entities where non-unique attribute i is 1
+//        _ <- Ns.i_(1).ints(Set(5)).upsert.transact
+//        _ <- Ns.id.a1.i.ints_?.query.get.map(_ ==> List(
+//          (a, 1, Some(Set(5))), // 5 inserted
+//          (b, 1, Some(Set(5))), // 4 updated to 5
+//          (c, 2, Some(Set(3))),
+//        ))
 
 
 
