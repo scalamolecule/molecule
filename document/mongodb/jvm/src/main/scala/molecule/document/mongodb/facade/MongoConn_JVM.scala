@@ -1,6 +1,7 @@
 package molecule.document.mongodb.facade
 
 import java.util
+import com.mongodb.client.model.UpdateOptions
 import com.mongodb.client.{MongoClient, MongoDatabase, TransactionBody}
 import com.mongodb.{ReadConcern, ReadPreference, TransactionOptions, WriteConcern}
 import molecule.base.error.ModelError
@@ -45,7 +46,7 @@ case class MongoConn_JVM(
       }
       case "update" =>
         if (data.size > 1) {
-          // Only update if there are any collections to update
+          // Only update if there are any collections/namespaces to update
           update(data)
         } else TxReport(Nil)
       case "delete" => data.size match {
@@ -66,33 +67,35 @@ case class MongoConn_JVM(
           var firstNs    = true
           data.forEach {
             case ("_action", _) => ()
-            case (ns, nsData)                   =>
-              //              println(s"------- $ns ----------\n" + nsData)
-              val idsArray = nsData.asDocument().get("ids").asArray()
-              val filter = new BsonDocument().append("_id", new BsonDocument("$in", idsArray))
-
-
-              val array = new BsonArray()
-              array.add(new BsonString("x"))
-
-              val data   = new BsonDocument().append("$set", nsData.asDocument().get("data"))
-//              val data   = new BsonDocument().append("$set", new BsonDocument("strings", array))
-
-//              println(data.toJson(pretty))
-
-
+            case (ns, nsData0)  =>
+              val nsData = nsData0.asDocument()
+              val filter = nsData.get("filter").asDocument()
               if (firstNs) {
-                updatedIds = idsArray.getValues.asScala.toList.map(_.asInstanceOf[BsonObjectId].getValue.toString)
+                updatedIds = filter
+                  .get("_id").asDocument()
+                  .get("$in").asArray().getValues.asScala.toList
+                  .map(_.asInstanceOf[BsonObjectId].getValue.toString)
+                firstNs = false
               }
+
+              val update = nsData.get("update").asDocument()
+
+              //              println("ns    : " + ns)
+              //              println("filter: " + filter)
+              //              println("update: " + update)
+
               val collection = mongoDb.getCollection(ns, classOf[BsonDocument])
 
-              println("ns    : " + ns)
-              println("filter: " + filter)
-              println("data  : " + data)
-
-//              collection.updateMany(clientSession, filter, data)
-              collection.updateMany(clientSession, filter, data)
-              firstNs = false
+              if (nsData.containsKey("arrayFilters")) {
+                val arrayFilters = new util.ArrayList[Bson]
+                nsData.get("arrayFilters").asArray().forEach(filter =>
+                  arrayFilters.add(filter.asDocument())
+                )
+                val updateOptions = new UpdateOptions().arrayFilters(arrayFilters)
+                collection.updateMany(clientSession, filter, update, updateOptions)
+              } else {
+                collection.updateMany(clientSession, filter, update)
+              }
           }
           TxReport(updatedIds)
         }

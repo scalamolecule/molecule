@@ -145,7 +145,7 @@ trait UpdateSetOps_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns(id).ints.remove(Seq.empty[Int]).update.transact
         _ <- Ns.ints.query.get.map(_.head ==> Set(int1))
 
-        // Removing all elements is like deleting the attribute
+        // Removing all elements retracts the attribute
         _ <- Ns(id).ints.remove(Seq(int1)).update.transact
         _ <- Ns.ints.query.get.map(_ ==> Nil)
       } yield ()

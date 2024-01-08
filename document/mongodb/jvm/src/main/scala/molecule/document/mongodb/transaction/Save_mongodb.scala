@@ -52,10 +52,6 @@ trait Save_mongodb
     exts: List[String] = Nil,
     value2json: (StringBuffer, T) => StringBuffer
   ): Unit = {
-    if (refNs.isDefined) {
-      throw ModelError("Can't add non-existing ids of embedded documents in MongoDB. " +
-        "Please save embedded document together with main document.")
-    }
     optSet.fold {
       doc.append(attr, new BsonNull())
     } {
@@ -86,7 +82,6 @@ trait Save_mongodb
 
     } else {
       // Reference document
-//      val refId = new BsonString(new ObjectId().toHexString)
       val refId = new BsonObjectId()
       doc.append(refAttr, refId)
 

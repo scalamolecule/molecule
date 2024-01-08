@@ -7,7 +7,7 @@ import molecule.base.error.ModelError
 import molecule.base.util.BaseHelpers
 import molecule.core.util.AggrUtils
 import org.bson._
-import org.bson.types.Decimal128
+import org.bson.types.{Decimal128, ObjectId}
 
 trait LambdasBase extends BaseHelpers with AggrUtils with MongoQueryBase {
 
@@ -34,7 +34,8 @@ trait LambdasBase extends BaseHelpers with AggrUtils with MongoQueryBase {
   //  protected lazy val one2sqlShort         : Short => String          = (v: Short) => s"$v"
   //  protected lazy val one2sqlChar          : Char => String           = (v: Char) => s"'${v.toString}'"
 
-  protected lazy val v2bsonID            : String => BsonValue         = (v: String) => if (v == null) new BsonNull else new BsonString(v)
+//  protected lazy val v2bsonID            : String => BsonValue         = (v: String) => if (v == null) new BsonNull else new BsonString(v)
+  protected lazy val v2bsonID            : String => BsonValue         = (v: String) => if (v == null) new BsonNull else new BsonObjectId(new ObjectId(v))
   protected lazy val v2bsonString        : String => BsonValue         = (v: String) => if (v == null) new BsonNull else new BsonString(v)
   protected lazy val v2bsonInt           : Int => BsonValue            = (v: Int) => new BsonInt32(v)
   protected lazy val v2bsonLong          : Long => BsonValue           = (v: Long) => new BsonInt64(v)

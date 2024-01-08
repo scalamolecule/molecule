@@ -43,6 +43,8 @@ trait TestData extends DateHandling {
   lazy val (date0, date1, date2, date3, date4, date5, date6, date7, date8, date9) =
     (da(0), da(1), da(2), da(3), da(4), da(5), da(6), da(7), da(8), da(9))
 
+  private def r(i: Int): String = "12345678901234567890123" + i
+
   lazy val List(
   duration0,
   duration1,
@@ -165,7 +167,7 @@ trait TestData extends DateHandling {
     (0 to 9).toList.map(_.toShort)
 
   lazy val (ref0, ref1, ref2, ref3, ref4, ref5, ref6, ref7, ref8, ref9) =
-    ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9")
+    (r(0), r(1), r(2), r(3), r(4), r(5), r(6), r(7), r(8), r(9))
 
   lazy val toleranceBigDecimal: BigDecimal = BigDecimal(0.001)
   lazy val toleranceDouble    : Double     = 0.001

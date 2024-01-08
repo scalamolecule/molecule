@@ -19,7 +19,7 @@ trait LambdasSet extends LambdasBase with JavaConversions {
 
   )
 
-  lazy val resSetID            : ResSet[String]         = ResSet("String", castSetString, castOptSetString, v2bsonID, setSetID, v2setID)
+  lazy val resSetID            : ResSet[String]         = ResSet("String", castSetID, castOptSetID, v2bsonID, setSetID, v2setID)
   lazy val resSetString        : ResSet[String]         = ResSet("String", castSetString, castOptSetString, v2bsonString, setSetString, v2setString)
   lazy val resSetInt           : ResSet[Int]            = ResSet("Int", castSetInt, castOptSetInt, v2bsonInt, setSetInt, v2setInt)
   lazy val resSetLong          : ResSet[Long]           = ResSet("Long", castSetLong, castOptSetLong, v2bsonLong, setSetLong, v2setLong)
@@ -335,7 +335,8 @@ trait LambdasSet extends LambdasBase with JavaConversions {
   //  private lazy val nestedArray2setSumChar          : (Row, Int) => Set[Char]           = (row: Row, paramIndex: Int) => Set(sqlNestedArrays2coalescedSet[Char](row, paramIndex, j2Char).sum)
 
 
-  protected lazy val bson2ID            : BsonValue => String         = (bv: BsonValue) => bv.asString.getValue
+//  protected lazy val bson2ID            : BsonValue => String         = (bv: BsonValue) => bv.asString.getValue
+  protected lazy val bson2ID            : BsonValue => String         = (bv: BsonValue) => bv.asObjectId().getValue.toString
   protected lazy val bson2String        : BsonValue => String         = (bv: BsonValue) => bv.asString.getValue
   protected lazy val bson2Int           : BsonValue => Int            = (bv: BsonValue) => bv.asInt32.getValue
   protected lazy val bson2Long          : BsonValue => Long           = (bv: BsonValue) => bv.asInt64.getValue
@@ -499,6 +500,7 @@ trait LambdasSet extends LambdasBase with JavaConversions {
     }
   }
 
+  protected lazy val castOptSetID             = (field: String) => (doc: BsonDocument) => castOptSet[String](doc, field, (bv: BsonValue) => bv.asObjectId().getValue.toString)
   protected lazy val castOptSetString         = (field: String) => (doc: BsonDocument) => castOptSet[String](doc, field, (bv: BsonValue) => bv.asString.getValue)
   protected lazy val castOptSetInt            = (field: String) => (doc: BsonDocument) => castOptSet[Int](doc, field, (bv: BsonValue) => bv.asInt32.getValue)
   protected lazy val castOptSetLong           = (field: String) => (doc: BsonDocument) => castOptSet[Long](doc, field, (bv: BsonValue) => bv.asInt64.getValue)

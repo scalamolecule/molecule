@@ -11,7 +11,7 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
 
   override protected def resolveAttrSetMan(attr: AttrSetMan): Unit = {
     attr match {
-      case at: AttrSetManID             => man(attr, at.vs, resSetString)
+      case at: AttrSetManID             => man(attr, at.vs, resSetID)
       case at: AttrSetManString         => man(attr, at.vs, resSetString)
       case at: AttrSetManInt            => man(attr, at.vs, resSetInt)
       case at: AttrSetManLong           => man(attr, at.vs, resSetLong)
@@ -39,7 +39,7 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
 
   override protected def resolveAttrSetTac(attr: AttrSetTac): Unit = {
     attr match {
-      case at: AttrSetTacID             => tac(attr, at.vs, resSetString)
+      case at: AttrSetTacID             => tac(attr, at.vs, resSetID)
       case at: AttrSetTacString         => tac(attr, at.vs, resSetString)
       case at: AttrSetTacInt            => tac(attr, at.vs, resSetInt)
       case at: AttrSetTacLong           => tac(attr, at.vs, resSetLong)
@@ -68,7 +68,7 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
   override protected def resolveAttrSetOpt(attr: AttrSetOpt): Unit = {
     hasOptAttr = true // to avoid redundant None's
     attr match {
-      case at: AttrSetOptID             => opt(at, at.vs, resSetString)
+      case at: AttrSetOptID             => opt(at, at.vs, resSetID)
       case at: AttrSetOptString         => opt(at, at.vs, resSetString)
       case at: AttrSetOptInt            => opt(at, at.vs, resSetInt)
       case at: AttrSetOptLong           => opt(at, at.vs, resSetLong)
@@ -190,6 +190,8 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
 
   private def attr[T](uniqueField: String, field: String, mandatory: Boolean): Unit = {
     b.matches.add(Filters.ne(b.dot + field, null.asInstanceOf[T]))
+    // Exclude orphaned arrays too
+    b.matches.add(Filters.ne(b.dot + field, new BsonArray()))
     if (mandatory) {
       topBranch.groupIdFields -= prefixedFieldPair
       topBranch.groupExprs += (b.alias + uniqueField) -> new BsonDocument()

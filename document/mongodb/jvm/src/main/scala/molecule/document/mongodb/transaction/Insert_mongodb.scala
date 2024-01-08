@@ -110,10 +110,6 @@ trait Insert_mongodb
     exts: List[String] = Nil,
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
-    if (refNs.isDefined) {
-      throw ModelError("Can't add non-existing ids of embedded documents in MongoDB. " +
-        "Please save embedded document together with main document.")
-    }
     (tpl: Product) => {
       tpl.productElement(tplIndex).asInstanceOf[Set[T]] match {
         case set if set.nonEmpty =>
@@ -136,10 +132,6 @@ trait Insert_mongodb
     exts: List[String] = Nil,
     value2json: (StringBuffer, T) => StringBuffer
   ): Product => Unit = {
-    if (refNs.isDefined) {
-      throw ModelError("Can't add non-existing ids of embedded documents in MongoDB. " +
-        "Please save embedded document together with main document.")
-    }
     (tpl: Product) => {
       tpl.productElement(tplIndex) match {
         case Some(set: Set[_]) if set.nonEmpty =>
@@ -174,7 +166,6 @@ trait Insert_mongodb
     } else {
       (_: Product) => {
         // Reference document
-//        val refId = new BsonString(new ObjectId().toHexString)
         val refId = new BsonObjectId()
         doc.append(refAttr, refId)
         // Set id in referenced document
