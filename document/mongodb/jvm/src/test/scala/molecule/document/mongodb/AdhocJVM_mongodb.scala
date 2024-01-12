@@ -1,5 +1,6 @@
 package molecule.document.mongodb
 
+import molecule.base.ast._
 import molecule.base.error.{ExecutionError, ModelError}
 import molecule.core.util.AggrUtils
 import molecule.core.util.Executor._
@@ -8,7 +9,7 @@ import molecule.document.mongodb.async._
 import molecule.document.mongodb.setup.TestSuite_mongodb
 import utest._
 import scala.language.implicitConversions
-
+import molecule.boilerplate.ast.Model._
 
 object AdhocJVM_mongodb extends TestSuite_mongodb with AggrUtils {
 
@@ -19,8 +20,8 @@ object AdhocJVM_mongodb extends TestSuite_mongodb with AggrUtils {
       for {
 
 
-        _ <- Ns.i(1).save.i.transact
-        _ <- Ns.i.query.get.map(_ ==> List(1))
+                _ <- Ns.i(1).save.i.transact
+                _ <- Ns.i.query.get.map(_ ==> List(1))
       } yield ()
     }
 
@@ -29,29 +30,54 @@ object AdhocJVM_mongodb extends TestSuite_mongodb with AggrUtils {
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
 
+//        _ <- A.s.i.B.i.insert(
+//          ("a", 1, 2),
+//          ("b", 3, 3),
+//          ("c", 5, 4),
+//        ).transact
+//
+//        _ <- A.s.i.B.i(A.i_).query.get.map(_ ==> List(("b", 3, 3)))
+//        _ <- A.s.i(B.i_).B.i.query.get.map(_ ==> List(("b", 3, 3)))
 
-        //        id <- A.ownBb(Set(ref1, ref2)).save.transact.map(_.id)
 
 
 
-        id <- A.bb(Set(ref1, ref2)).save.transact.map(_.id)
 
-        //        _ <- A(id).bb(Set(ref3, ref4)).update.transact
-        //        _ <- A.bb.query.get.map(_.head ==> Set(ref3, ref4))
-        //
-        //        // Apply Seq of values
-        //        _ <- A(id).bb(Set(ref4, ref5)).update.transact
-        //        _ <- A.bb.query.get.map(_.head ==> Set(ref4, ref5))
-        //
-        //        // Apply empty Seq of values (deleting all values!)
-        //        _ <- A(id).bb(Seq.empty[String]).update.transact
-        //        _ <- A.bb.query.get.map(_ ==> Nil)
-        //
-        //        _ <- A(id).bb(Set(ref1, ref2)).update.transact
-        //
-        //        // Delete all (apply no values)
-        //        _ <- A(id).bb().update.transact
-        //        _ <- A.bb.query.get.map(_ ==> Nil)
+
+        _ <- A.s.i.OwnB.i.insert(
+          ("a", 1, 2),
+          ("b", 3, 3),
+          ("c", 5, 4),
+        ).transact
+
+        _ <- A.s.i.<(B.i_).OwnB.i.query.get.map(_ ==> List(("a", 1, 2)))
+
+        _ <- A.s.i.OwnB.i.<(A.i_).query.get.map(_ ==> List(("c", 5, 4)))
+
+
+
+
+
+
+
+//        _ <- A.i.B.i.insert(
+//          (2, 3),
+//          (1, 4),
+//          (1, 3),
+//          (7, 3)
+//        ).transact
+//
+//        _ <- A.i.<(B.i_).a1.B.i.a2.query.get.map(_ ==> List((1, 3), (1, 4), (2, 3)))
+//
+//
+//        _ <- A.i.OwnB.i.insert(
+//          (2, 3),
+//          (1, 4),
+//          (1, 3),
+//          (7, 3)
+//        ).transact
+//
+//        _ <- A.i.<(B.i_).a1.OwnB.i.a2.query.get.map(_ ==> List((1, 3), (1, 4), (2, 3)))
 
       } yield ()
     }

@@ -31,6 +31,9 @@ trait Adjacent extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
         // Filter compare attribute itself
         _ <- Ns.s.i(Ns.int(3)).query.get.map(_ ==> List(("b", 3, 3)))
+        // Same result with
+        _ <- Ns.s.i.int(3).query.get.map(_ ==> List(("b", 3, 3)))
+
         _ <- Ns.s.i(Ns.int.not(3)).query.get.map(_ ==> List())
         _ <- Ns.s.i(Ns.int.>(3)).query.get.map(_ ==> List())
         _ <- Ns.s.i(Ns.int.>=(3)).query.get.map(_ ==> List(("b", 3, 3)))

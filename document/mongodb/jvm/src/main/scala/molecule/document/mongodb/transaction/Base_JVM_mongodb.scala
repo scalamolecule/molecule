@@ -23,27 +23,18 @@ trait Base_JVM_mongodb extends DataType_JVM_mongodb with ModelUtils with BaseHel
   protected def debug(s: Any) = if (doPrint) println(s) else ()
 
   protected var doPrint              = false
-//  protected var ids                  = Seq.empty[String]
   protected var optIds               = Option.empty[Seq[String]]
   protected var uniqueFilterElements = List.empty[Element]
   protected var filterElements       = List.empty[Element]
 
-  //  protected var doc    = new BsonDocument()
-  //  protected var docs   = List(List(doc))
-  //  protected val nsIds  = mutable.Map.empty[String, BsonArray]
-  //  protected val nsDocs = mutable.Map.empty[String, BsonArray]
-  //  protected var nss    = Set.empty[String]
+  protected var curNs       = ""
+  protected var doc         = new BsonDocument()
+  protected var docs        = List(List(doc))
+  protected val nsDocs      = mutable.Map.empty[String, BsonArray]
+  protected var nss         = Set.empty[String]
+  protected var path        = List.empty[String]
 
-  //  protected val nsIdArrays       = mutable.Map.empty[String, BsonArray]
-  protected var curNs            = ""
-  protected var doc              = new BsonDocument()
-  protected var docs             = List(List(doc))
-//  protected var nsIds            = mutable.Map.empty[String, Seq[String]]
-//  protected val nsFilterElements = mutable.Map.empty[String, List[Element]]
-  protected val nsDocs           = mutable.Map.empty[String, BsonArray]
-//  protected val nsDoc            = mutable.Map.empty[String, BsonDocument]
-  protected var nss              = Set.empty[String]
-  protected var path             = List.empty[String]
+
 
   // "Connection pool" ---------------------------------------------
 

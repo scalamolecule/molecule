@@ -5,6 +5,7 @@ import molecule.core.util.Executor._
 import molecule.datalog.datomic.async._
 import molecule.datalog.datomic.setup.TestSuite_datomic
 import utest._
+import scala.concurrent.Future
 import scala.language.implicitConversions
 
 object AdhocJVM_datomic extends TestSuite_datomic {
@@ -13,14 +14,18 @@ object AdhocJVM_datomic extends TestSuite_datomic {
 
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
+
+      println("ref1: " + ref1)
       for {
         //        _ <- Ns.i(42).save.transact
         //        _ <- Ns.i.query.get.map(_ ==> List(42))
 
-        _ <- Ns.i.booleans.insert(List(
-          (1, Set(true)),
-          (2, Set(false)),
-          (2, Set(true, false))
+
+        _ <- Ns.i.ref.insert(List(
+          (1, ref1),
+          (2, ref2),
+          (2, ref2),
+          (2, ref3),
         )).transact
 
         _ <- Ns.i.booleans(count).query.get
@@ -34,56 +39,24 @@ object AdhocJVM_datomic extends TestSuite_datomic {
 
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
-      for {
-        _ <- A.s.Bb.*(B.i_?.s_?).insert(
-          //          ("0", List((Some(1), Some("x")), (Some(2), Some("y")))),
-          //
-          //          ("1a", List((None, Some("x")), (Some(2), Some("y")))),
-          //          ("1b", List((Some(1), None), (Some(2), Some("y")))),
-          ("1c", List((Some(1), Some("x")), (None, Some("y")))),
-          //          ("1d", List((Some(1), Some("x")), (Some(2), None))),
-          //
-          //          ("2a", List((None, None), (Some(2), Some("y")))),
-          //          ("2b", List((None, Some("x")), (None, Some("y")))),
-          //          ("2c", List((None, Some("x")), (Some(2), None))),
-          //          ("2d", List((Some(1), None), (None, Some("y")))),
-          //          ("2e", List((Some(1), None), (Some(2), None))),
-          //          ("2f", List((Some(1), Some("x")), (None, None))),
-          //
-          //          ("3a", List((None, None), (None, Some("y")))),
-          //          ("3b", List((None, None), (Some(2), None))),
-          //          ("3c", List((None, Some("x")), (None, None))),
-          //          ("3d", List((Some(1), None), (None, None))),
-          //
-          //          ("4", List((None, None), (None, None))),
-          //
-          //          ("a", Nil),
-        ).i.transact
 
-        _ <- A.s.a1.Bb.*?(B.i_?.a1.s_?.a2).query.i.get.map(_ ==> List(
-          //          ("0", List((Some(1), Some("x")), (Some(2), Some("y")))),
-          //
-          //          ("1a", List((None, Some("x")), (Some(2), Some("y")))),
-          //          ("1b", List((Some(1), None), (Some(2), Some("y")))),
-          ("1c", List((None, Some("y")), (Some(1), Some("x")))), // None sorted first
-          //          ("1d", List((Some(1), Some("x")), (Some(2), None))),
-          //
-          //          ("2a", List((Some(2), Some("y")))), // (None, None) not included
-          //          ("2b", List((None, Some("x")), (None, Some("y")))),
-          //          ("2c", List((None, Some("x")), (Some(2), None))),
-          //          ("2d", List((None, Some("y")), (Some(1), None))), // None sorted first
-          //          ("2e", List((Some(1), None), (Some(2), None))),
-          //          ("2f", List((Some(1), Some("x")))), // (None, None) not included
-          //
-          //          ("3a", List((None, Some("y")))),
-          //          ("3b", List((Some(2), None))),
-          //          ("3c", List((None, Some("x")))),
-          //          ("3d", List((Some(1), None))),
-          //
-          //          ("4", Nil), // List((None, None), (None, None)) collapsing to Nil
-          //
-          //          ("a", Nil),
-        ))
+      for {
+        refId <- B.i(7).save.transact.map(_.id)
+        id <- A.i.b.insert(1, refId).transact.map(_.id)
+        _ <- A.i.b.query.get.map(_ ==> List((1, refId)))
+
+        // Apply empty value to delete ref id of entity (entity remains)
+        _ <- A(id).b().update.transact
+        _ <- A.i.b_?.query.get.map(_ ==> List((1, None)))
+      } yield ()
+      for {
+
+        id <- A.i(1).OwnB.i(7).save.transact.map(_.id)
+        _ <- A.i.OwnB.i.query.i.get.map(_ ==> List((1, 7)))
+
+        // Apply empty value to delete ref id of entity (entity remains)
+        _ <- A(id).ownB().update.transact
+        _ <- A.i.ownB_?.query.get.map(_ ==> List((1, None)))
 
       } yield ()
     }

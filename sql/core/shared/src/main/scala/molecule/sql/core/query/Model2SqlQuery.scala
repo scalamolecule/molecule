@@ -33,8 +33,9 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
     //    elements.foreach(println)
 
     // Set attrMap if available (used to get original type of aggregate attributes)
-    optProxy.foreach(p => attrMap = p.attrMap)
-    val elements2 = prepareElements(elements1, optProxy)
+//    optProxy.foreach(p => attrMap = p.attrMap)
+//    val elements2 = resolveFilterAttrs(elements1, optProxy)
+    val elements2 = resolveFilterAttrs(elements1)
     from = getInitialNonGenericNs(elements2)
     exts += from -> None
 
@@ -173,7 +174,7 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
   }
 
 
-  private def prepareElements(elements: List[Element], optProxy: Option[ConnProxy]): List[Element] = {
+  private def resolveFilterAttrs(elements: List[Element]): List[Element] = {
     @tailrec
     def prepare(elements: List[Element], acc: List[Element]): List[Element] = {
       elements match {
@@ -192,7 +193,7 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
       if (a.filterAttr.nonEmpty) {
         val fa = a.filterAttr.get
         if (fa.filterAttr.nonEmpty) {
-          throw ModelError(s"Nested filter attributes not allowed in ${a.ns}.${a.attr}")
+          throw ModelError(s"Filter attributes inside filter attributes not allowed in ${a.ns}.${a.attr}")
         }
         val filterAttr = fa.cleanName
         filterAttrVars.get(filterAttr).fold {
@@ -225,7 +226,7 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
     val elements1 = prepare(elements, Nil)
 
     if (expectedFilterAttrs.nonEmpty && expectedFilterAttrs.intersect(availableAttrs) != expectedFilterAttrs) {
-      throw ModelError("Please add missing filter attributes:\n  " + expectedFilterAttrs.mkString("\n  "))
+      throw ModelError("Please add missing filter attribute(s). Found:\n  " + expectedFilterAttrs.mkString("\n  "))
     }
 
     elements1

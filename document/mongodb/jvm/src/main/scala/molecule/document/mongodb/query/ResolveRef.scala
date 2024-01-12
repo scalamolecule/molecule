@@ -5,14 +5,14 @@ import molecule.base.ast._
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.document.mongodb.query.mongoModel.{FlatEmbed, FlatRef, NestedEmbed, NestedRef}
-import org.bson.{BsonArray, BsonDocument, BsonInt32, BsonNull}
+import org.bson.{BsonArray, BsonDocument, BsonInt32}
 import scala.collection.mutable.ListBuffer
 
 
 trait ResolveRef { self: MongoQueryBase =>
 
   protected def resolveRef(ref: Ref): Unit = {
-    val Ref(_, refAttr, refNs, card, owner, _) = ref
+    val Ref(ns, refAttr, refNs, card, owner, _) = ref
     if (isNestedOpt && card == CardSet) {
       throw ModelError(
         "Only cardinality-one refs allowed in optional nested queries. Found: " + ref
@@ -24,9 +24,10 @@ trait ResolveRef { self: MongoQueryBase =>
     b.projection.append(refAttr, refProjections)
 
     val subBranch = if (owner) {
-      new FlatEmbed(
+      val embeddedBranch = new FlatEmbed(
         Some(b),
         card.isInstanceOf[CardSet],
+        ns,
         refAttr,
         refNs,
         b.pathFields, // Continue checking unique field names from base branch to here
@@ -36,9 +37,12 @@ trait ResolveRef { self: MongoQueryBase =>
         b.alias + refAttr + "_",
         refProjections
       )
+      embeddedBranch.base = b.base
+      embeddedBranch
     } else {
       new FlatRef(
         Some(b),
+        ns,
         refAttr,
         refNs,
         ListBuffer.empty[String], // Start over with unique field names
@@ -49,9 +53,9 @@ trait ResolveRef { self: MongoQueryBase =>
         refProjections,
       )
     }
+
     // Matches build up on new ref branch as base
-    baseBranch = subBranch
-    b.refs.addOne(subBranch)
+    b.subBranches.addOne(subBranch)
     b = subBranch
 
     // Continue from ref namespace
@@ -102,7 +106,7 @@ trait ResolveRef { self: MongoQueryBase =>
       noMixedNestedModes
     }
     // No empty nested arrays when asking for mandatory nested data
-    //    baseBranch.matches.add(Filters.ne(b.dot + ref.refAttr, new BsonArray()))
+//    b.base.matches.add(Filters.ne(b.dot + ref.refAttr, new BsonArray()))
 
     resolveNested(ref, nestedElements, true)
   }
@@ -121,7 +125,7 @@ trait ResolveRef { self: MongoQueryBase =>
   private def resolveNested(ref: Ref, nestedElements: List[Element], mandatory: Boolean): Unit = {
     isNested = true
     validateRefNs(ref, nestedElements)
-    val Ref(_, refAttr, refNs, _, owner, _) = ref
+    val Ref(ns, refAttr, refNs, _, owner, _) = ref
 
     // Project refNs
     val refProjections = new BsonDocument()
@@ -130,6 +134,7 @@ trait ResolveRef { self: MongoQueryBase =>
       b.projection.append(refAttr, refProjections)
       b = new NestedEmbed(
         Some(b),
+        ns,
         refAttr,
         refNs,
         b.pathFields, // Continue checking unique field names from base branch to here
@@ -146,6 +151,7 @@ trait ResolveRef { self: MongoQueryBase =>
 
       val refBranch = new NestedRef(
         Some(b),
+        ns,
         refAttr,
         refNs,
         ListBuffer.empty[String], // Start over with unique field names
@@ -157,8 +163,7 @@ trait ResolveRef { self: MongoQueryBase =>
         refProjections.append("_id", new BsonInt32(0))
       )
       // Matches build up on new ref branch as base
-      baseBranch = refBranch
-      b.refs.addOne(refBranch)
+      b.subBranches.addOne(refBranch)
       b = refBranch
     }
 

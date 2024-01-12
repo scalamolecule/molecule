@@ -5,7 +5,7 @@ import java.time._
 import java.util.{Date, UUID}
 import molecule.base.util.DateHandling
 
-trait TestData extends DateHandling {
+trait TestData extends DateHandling { self: CoreTest =>
 
   private def da(i: Int): Date = {
     // Alternate between winter/summer time to test daylight savings too
@@ -15,6 +15,11 @@ trait TestData extends DateHandling {
   private def ur(i: Int): URI = new URI("uri" + i)
   private def bi(i: Int): BigInt = BigInt(i)
   private def bd(d: Double): BigDecimal = BigDecimal(d)
+  private def r(i: Int): String = {
+
+    println(s"database: $database   $i")
+    if (database == "MongoDB") "12345678901234567890123" + i else s"$i"
+  }
 
   lazy val (string0, string1, string2, string3, string4, string5, string6, string7, string8, string9) =
     ("-", "a", "b", "c", "d", "e", "f", "g", "h", "i")
@@ -42,8 +47,6 @@ trait TestData extends DateHandling {
 
   lazy val (date0, date1, date2, date3, date4, date5, date6, date7, date8, date9) =
     (da(0), da(1), da(2), da(3), da(4), da(5), da(6), da(7), da(8), da(9))
-
-  private def r(i: Int): String = "12345678901234567890123" + i
 
   lazy val List(
   duration0,

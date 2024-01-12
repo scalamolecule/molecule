@@ -28,10 +28,10 @@ trait ResolveExprOneID extends ResolveExpr with LambdasOne { self: MongoQueryBas
 
   private def addSort(attr: Attr, field: String): Unit = {
     attr.sort.foreach { sort =>
-      val (dir, arity) = (sort.head, sort.substring(1, 2).toInt)
+      val (dir, index) = (sort.head, sort.substring(1, 2).toInt)
       dir match {
-        case 'a' => topBranch.sorts.add(Sorts.ascending(field))
-        case 'd' => topBranch.sorts.add(Sorts.descending(field))
+        case 'a' => topBranch.sorts += index -> Sorts.ascending(b.path + field)
+        case 'd' => topBranch.sorts += index -> Sorts.descending(b.path + field)
       }
     }
   }

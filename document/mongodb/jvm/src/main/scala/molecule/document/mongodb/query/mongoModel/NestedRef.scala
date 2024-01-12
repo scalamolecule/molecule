@@ -10,6 +10,7 @@ import scala.collection.mutable.ListBuffer
 
 class NestedRef(
   parent: Option[Branch] = None,
+  ns: String = "",
   refAttr: String = "",
   refNs: String = "",
   pathFields: ListBuffer[String] = ListBuffer.empty[String],
@@ -21,6 +22,7 @@ class NestedRef(
   projection: BsonDocument = new BsonDocument().append("_id", new BsonInt32(0)),
 ) extends Branch(
   parent,
+  ns,
   refAttr,
   refNs,
   pathFields,
@@ -37,11 +39,11 @@ class NestedRef(
 
   override def getStages: util.ArrayList[BsonDocument] = {
     addMatches()
-    refs.foreach(ref => stages.addAll(ref.getStages))
+    subBranches.foreach(ref => stages.addAll(ref.getStages))
     addStage("$project", projection)
 
-    if (!sorts.isEmpty) {
-      addStage("$sort", Sorts.orderBy(sorts))
+    if (sorts.nonEmpty) {
+      addStage("$sort", Sorts.orderBy(getSorts))
     }
 
     // Process lookup pipeline stages
@@ -73,12 +75,12 @@ class NestedRef(
   override def render(tabs: Int): String = {
     val p = "  " * tabs
     val parent1 = parent.fold("None")(parent => s"Some(${parent.refAttr})")
-    val children = if(refs.isEmpty)"" else
-      s"\n$p  " + refs.map(ref => ref.render(tabs + 1)).mkString(s",\n$p  ")
+    val children = if(subBranches.isEmpty)"" else
+      s"\n$p  " + subBranches.map(ref => ref.render(tabs + 1)).mkString(s",\n$p  ")
     s"""NestedRef(
        |${p}  $parent1,
        |${p}  $refAttr, $refNs, $pathFields, $dot, $und, $path, $alias,
-       |${p}  $projection$children
-       |${p})""".stripMargin
+       |${p}  $projection
+       |${p})$children""".stripMargin
   }
 }

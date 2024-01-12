@@ -21,12 +21,13 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
   // Top branch holds aggregation and projection of all attributes
   final protected val topBranch = new FlatEmbed()
 
-  // Base branch holds matches of embedded documents
-  // Changes on moving to ref document
-  final protected var baseBranch: Branch = topBranch
-
-  // Current branch changes for each namespace
+  // Current branch. Changes for each new namespace
   final protected var b: Branch = topBranch
+
+  val filterAttrs = mutable.Map.empty[String, String => Bson]
+//  val postSorts   = mutable.Map.empty[String, String => Bson]
+  val processedNss = mutable.Set.empty[String]
+
 
   def addField(uniqueField: String) = {
     if (b.parent.nonEmpty) {
@@ -92,7 +93,7 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
   final           var isNested    = false
   final           var isNestedMan = false
   final           var isNestedOpt = false
-//  final protected var level       = 0
+  //  final protected var level       = 0
   //
   // Ensure distinct result set when possible redundant optional values can occur
   final protected var hasOptAttr  = false

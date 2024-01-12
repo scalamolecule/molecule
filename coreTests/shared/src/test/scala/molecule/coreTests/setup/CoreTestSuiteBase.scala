@@ -11,14 +11,10 @@ import scala.concurrent.Future
 
 trait CoreTestSuiteBase
   extends TestSuite
-    with TestData
+    with CoreTest
     with JavaConversions
     with TolerantEquality
     with AggrUtils {
-
-  val isJsPlatform: Boolean
-  val database    : String
-  val platform    : String
 
   def inMem[T](test: Conn => T, schemaTx: Schema): T
 

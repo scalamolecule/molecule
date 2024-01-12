@@ -100,58 +100,60 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
 
   private def addSort(attr: Attr, field: String): Unit = {
     attr.sort.foreach { sort =>
-      val (dir, arity) = (sort.head, sort.substring(1, 2).toInt)
-      //      println(s"========  ${attr.name}   $dir   $arity  ${b.nested}")
-      //      if (b.nested) {
-      //        //      if (isNested) {
-      //        dir match {
-      ////          case 'a' => b.nestedSorts += field -> 1
-      ////          case 'd' => b.nestedSorts += field -> -1
-      //
-      //          case 'a' => baseBranch.sorts.add(Sorts.ascending(field))
-      //          case 'd' => baseBranch.sorts.add(Sorts.descending(field))
-      //        }
-      //        //        println(s"A ############## ${b.hashCode()}  " + b.nestedSorts)
-      //      } else {
-      //        dir match {
-      //          case 'a' => baseBranch.sorts.add(Sorts.ascending(field))
-      //          case 'd' => baseBranch.sorts.add(Sorts.descending(field))
-      //        }
-      //      }
-
-      //      println(s"  ---  $dir  $arity  ${b.refAttr}  $field     ${b.path}")
+      val (dir, index) = (sort.head, sort.substring(1, 2).toInt)
       dir match {
-        case 'a' => topBranch.sorts.add(Sorts.ascending(b.path + field))
-        case 'd' => topBranch.sorts.add(Sorts.descending(b.path + field))
+        case 'a' => topBranch.sorts += index -> Sorts.ascending(b.path + field)
+        case 'd' => topBranch.sorts += index -> Sorts.descending(b.path + field)
       }
     }
 
   }
-
   private def man[T](attr: Attr, args: Seq[T], res: ResOne[T]): Unit = {
     val field       = attr.attr
     val uniqueField = b.unique(field)
     projectField(uniqueField)
     addSort(attr, uniqueField)
     addCast(uniqueField, res.cast(uniqueField))
+    processedNss += attr.ns
 
     prefixedFieldPair = if (b.parent.isEmpty) (field, field) else (b.path + field, b.alias + field)
     topBranch.groupIdFields += prefixedFieldPair
 
-    attr.filterAttr.fold(
+    // Match previous filter attribute
+    attr.filterAttr.fold {
+      val cleanName = attr.cleanName
+      println("cleanName 2: " + cleanName)
+      filterAttrs.get(attr.cleanName).foreach {
+        case expr if b.isEmbedded => b.matches.add(expr(b.path))
+        case expr                 => b.parentMatches.add(expr(b.path))
+      }
       expr(uniqueField, field, attr.op, args, res)
-    )(filterAttr =>
-      expr2(uniqueField, field, attr.op, filterAttr.name)
-    )
+    } { filterAttr =>
+      //      val filterAttrName = if (attr.ns != filterAttr.ns) Some(filterAttr.cleanName) else None
+      //      val filterAttrName = if (attr.ns != filterAttr.ns) Some(attr.ns) else None
+      val filterNs = if (attr.ns != filterAttr.ns) Some(filterAttr.ns) else None
+      expr2(field, attr.op, filterAttr.attr, filterNs)
+    }
   }
 
   private def tac[T](attr: Attr, args: Seq[T], res: ResOne[T]): Unit = {
     val field       = attr.attr
     val uniqueField = b.unique(field)
+
     attr.filterAttr.fold {
+      // Match previous filter attribute
+//      filterAttrs.get(attr.cleanName).foreach(expr => b.parentMatches.add(expr(b.path)))
+      filterAttrs.get(attr.cleanName).foreach {
+        case expr if b.isEmbedded => b.matches.add(expr(b.path))
+        case expr                 => b.parentMatches.add(expr(b.path))
+      }
       expr(uniqueField, field, attr.op, args, res)
     } { filterAttr =>
-      expr2(uniqueField, field, attr.op, filterAttr.name)
+      //      val filterAttrName = if (attr.ns != filterAttr.ns) Some(filterAttr.cleanName) else None
+      //      val filterAttrName = if (attr.ns != filterAttr.ns) Some(attr.ns) else None
+      val filterNs = if (attr.ns != filterAttr.ns) Some(filterAttr.ns) else None
+
+      expr2(field, attr.op, filterAttr.attr, filterNs)
     }
   }
 
@@ -161,33 +163,30 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
     projectField(uniqueField)
     addCast(uniqueField, res.castOpt(uniqueField))
     addSort(attr, uniqueField)
-
-    //    b.groupIdFields += ((b.und, b.dot, field))
+    processedNss += attr.ns
 
     attr.op match {
       case V     => () // selected field can already be a value or null
-      case Eq    => b.matches.add(optEqual(field, optArgs, res))
-      case Neq   => b.matches.add(optNeq(field, optArgs, res))
-      case Lt    => b.matches.add(optCompare(field, optArgs, res.lt))
-      case Gt    => b.matches.add(optCompare(field, optArgs, res.gt))
-      case Le    => b.matches.add(optCompare(field, optArgs, res.le))
-      case Ge    => b.matches.add(optCompare(field, optArgs, res.ge))
+      case Eq    => optEqual(field, optArgs, res)
+      case Neq   => optNeq(field, optArgs, res)
+      case Lt    => optCompare(field, optArgs, res.lt)
+      case Gt    => optCompare(field, optArgs, res.gt)
+      case Le    => optCompare(field, optArgs, res.le)
+      case Ge    => optCompare(field, optArgs, res.ge)
       case other => unexpectedOp(other)
     }
   }
 
-
   private def expr[T](uniqueField: String, field: String, op: Op, args: Seq[T], res: ResOne[T]): Unit = {
     val pathField = b.dot + field
     op match {
-      //      case V          => attr(pathField)
       case V          => attr(field)
       case Eq         => equal(pathField, args, res)
       case Neq        => neq(pathField, args, res)
-      case Lt         => compare(pathField, res.lt(pathField, args.head))
-      case Gt         => compare(pathField, res.gt(pathField, args.head))
-      case Le         => compare(pathField, res.le(pathField, args.head))
-      case Ge         => compare(pathField, res.ge(pathField, args.head))
+      case Lt         => compare(res.lt(pathField, args.head))
+      case Gt         => compare(res.gt(pathField, args.head))
+      case Le         => compare(res.le(pathField, args.head))
+      case Ge         => compare(res.ge(pathField, args.head))
       case NoValue    => noValue(pathField)
       case Fn(kw, n)  => aggr(uniqueField, field, kw, n, res)
       case StartsWith => startsWith(pathField, args.head)
@@ -201,24 +200,13 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
     }
   }
 
-  private def expr2(uniqueField: String, field: String, op: Op, filterAttr: String): Unit = op match {
-    case Eq    => equal2(field, filterAttr)
-    case Neq   => neq2(field, filterAttr)
-    case Lt    => compare2(field, "<", filterAttr)
-    case Gt    => compare2(field, ">", filterAttr)
-    case Le    => compare2(field, "<=", filterAttr)
-    case Ge    => compare2(field, ">=", filterAttr)
-    case other => unexpectedOp(other)
-  }
-
   protected def attr[T](field: String): Unit = {
-    val path = if (b.isEmbedded) b.dot else ""
-    b.matches.add(Filters.ne(path + field, null.asInstanceOf[T]))
+    val path = if (b.base.isEmbedded) b.dot else ""
+    b.base.matches.add(Filters.ne(path + field, null.asInstanceOf[T]))
   }
 
-  private def equal[T](field: String, args: Seq[T], res: ResOne[T]): Unit = {
-    //    b.groupIdFields += ((b.und, b.dot, field))
-    b.matches.add(equalValue(field, args, res))
+  private def equal[T](pathField: String, args: Seq[T], res: ResOne[T]): Unit = {
+    b.base.matches.add(equalValue(pathField, args, res))
   }
   private def equalValue[T](field: String, args: Seq[T], res: ResOne[T]): Bson = {
     args.length match {
@@ -227,110 +215,164 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
       case _ => Filters.or(args.map(arg => res.eq(field, arg)).asJava)
     }
   }
-  private def equal2(field: String, filterAttr: String): Unit = {
-    //    where += ((field, "= " + filterAttr))
+
+
+  private def neq[T](pathField: String, args: Seq[T], res: ResOne[T]): Unit = {
+    b.base.matches.add(Filters.ne(pathField, null.asInstanceOf[T]))
+    args.map(arg => b.base.matches.add(res.neq(pathField, arg)))
   }
 
-  private def neq[T](field: String, args: Seq[T], res: ResOne[T]): Unit = {
-    b.matches.add(neqValue(field, args, res))
-    //    b.groupIdFields += ((b.und, b.dot, field))
+
+  private def compare(filter: Bson): Unit = {
+    b.base.matches.add(filter)
   }
-  private def neqValue[T](field: String, args: Seq[T], res: ResOne[T]): Bson = {
-    args.length match {
-      case 1 => Filters.and(
-        Filters.ne(field, null.asInstanceOf[T]),
-        res.neq(field, args.head)
-      )
-      case 0 => Filters.ne(field, null.asInstanceOf[T])
-      case _ => Filters.and(
-        (Filters.ne(field, null.asInstanceOf[T]) +: args.map(arg => res.neq(field, arg))).asJava
-      )
+
+
+  private def expr2(field: String, op: Op, filterAttr: String, filterNs: Option[String]): Unit = op match {
+    case Eq    => equal2(field, filterAttr, filterNs)
+    case Neq   => neq2(field, filterAttr, filterNs)
+    case Lt    => compare2(field, "$lt", filterAttr, filterNs)
+    case Gt    => compare2(field, "$gt", filterAttr, filterNs)
+    case Le    => compare2(field, "$lte", filterAttr, filterNs)
+    case Ge    => compare2(field, "$gte", filterAttr, filterNs)
+    case other => unexpectedOp(other)
+  }
+
+  private def equal2(field: String, filterAttr: String, filterNs: Option[String]): Unit = {
+    handleFilterExpr(field, "$eq", filterAttr, filterNs)
+  }
+  private def neq2(field: String, filterAttr: String, filterNs: Option[String]): Unit = {
+    handleFilterExpr(field, "$ne", filterAttr, filterNs)
+  }
+  private def compare2(field: String, op: String, filterAttr: String, filterNs: Option[String]): Unit = {
+    handleFilterExpr(field, op, filterAttr, filterNs)
+  }
+
+  private def handleFilterExpr(field: String, op: String, filterAttr: String, filterNs: Option[String]): Unit = {
+    filterNs.fold[Unit] {
+      // Adjacent filter attribute
+      val args = new BsonArray()
+      args.add(new BsonString("$" + field))
+      args.add(new BsonString("$" + b.path + filterAttr))
+      b.matches.add(Filters.eq("$expr", new BsonDocument(op, args)))
+
+    } { filterAttrNs =>
+      if (b.isEmbedded) {
+        // Embedded filter attribute
+        if (processedNss.contains(filterAttrNs)) {
+          // Backwards
+          val args = new BsonArray()
+          args.add(new BsonString("$" + b.path + field))
+          args.add(new BsonString("$" + filterAttr))
+          b.matches.add(Filters.eq("$expr", new BsonDocument(op, args)))
+        } else {
+          // Forward - needs to be resolved later when filter attribute is applied
+          filterAttrs(filterAttrNs + "." + filterAttr) =
+            (path: String) => {
+              val args = new BsonArray()
+              args.add(new BsonString("$" + field))
+              args.add(new BsonString("$" + path + filterAttr))
+              Filters.eq("$expr", new BsonDocument(op, args))
+            }
+        }
+      } else {
+        // Ref filter attribute
+        val args = new BsonArray()
+        args.add(new BsonString("$" + b.path + field))
+        args.add(new BsonString("$" + filterAttr))
+        b.parentMatches.add(Filters.eq("$expr", new BsonDocument(op, args)))
+      }
     }
   }
-  private def neq2(field: String, filterAttr: String): Unit = {
-    //    where += ((field, " != " + filterAttr))
-  }
 
-  private def compare(field: String, filter: Bson): Unit = {
-    b.matches.add(filter)
-    //    b.groupIdFields += ((b.und, b.dot, field))
-  }
-  private def compare2(field: String, op: String, filterAttr: String): Unit = {
-    //    where += ((field, op + " " + filterAttr))
-  }
+  //  private def handleFilterExpr2(field: String, op: String, filterAttr: String, filterAttrName: Option[String]): Unit = {
+  //    if (filterAttrName.isDefined) {
+  //      if (b.isEmbedded) {
+  //        filterAttrs(filterAttrName.get) = (path: String) => {
+  //          val args = new BsonArray()
+  //          args.add(new BsonString("$" + field))
+  //          args.add(new BsonString("$" + path + filterAttr))
+  //          Filters.eq("$expr", new BsonDocument(op, args))
+  //        }
+  //      } else {
+  //        val args = new BsonArray()
+  //        args.add(new BsonString("$" + b.path + field))
+  //        args.add(new BsonString("$" + filterAttr))
+  //        b.parentMatches.add(Filters.eq("$expr", new BsonDocument(op, args)))
+  //      }
+  //    } else {
+  //      val args = new BsonArray()
+  //      args.add(new BsonString("$" + field))
+  //      args.add(new BsonString("$" + b.path + filterAttr))
+  //      b.matches.add(Filters.eq("$expr", new BsonDocument(op, args)))
+  //    }
+  //  }
 
   private def noValue(field: String): Unit = {
-    b.matches.add(Filters.eq(field, new BsonNull()))
-    //    b.groupIdFields += ((b.und, b.dot, field))
+    b.base.matches.add(Filters.eq(field, new BsonNull()))
   }
 
-
-  private def optEqual[T](field: String, optArgs: Option[Seq[T]], res: ResOne[T]): Bson = {
-    optArgs.fold {
-      Filters.eq(field, new BsonNull())
-    } {
-      case Nil => Filters.eq("_id", -1)
-      case vs  => equalValue(field, vs, res)
-    }
+  private def optEqual[T](field: String, optArgs: Option[Seq[T]], res: ResOne[T]): Unit = {
+    b.base.matches.add(
+      optArgs.fold {
+        Filters.eq(field, new BsonNull())
+      } {
+        case Nil => Filters.eq("_id", -1)
+        case vs  => equalValue(field, vs, res)
+      }
+    )
   }
 
-  private def optNeq[T](field: String, optArgs: Option[Seq[T]], res: ResOne[T]): Bson = {
-    if (optArgs.isDefined && optArgs.get.nonEmpty) {
-      Filters.and(
-        Filters.ne(field, null.asInstanceOf[T]),
-        neqValue(field, optArgs.get, res),
-      )
-    } else {
-      Filters.ne(field, new BsonNull())
-    }
+  private def optNeq[T](field: String, optArgs: Option[Seq[T]], res: ResOne[T]): Unit = {
+    b.base.matches.add(Filters.ne(field, null.asInstanceOf[T]))
+    optArgs.map(_.map(arg => b.base.matches.add(res.neq(field, arg))))
   }
 
-  private def optCompare[T](field: String, optArgs: Option[Seq[T]], filter: (String, T) => Bson): Bson = {
-    optArgs.fold {
-      // Always return empty result when trying to compare None
-      Filters.eq("_id", -1)
-    } { vs =>
-      filter(field, vs.head)
-    }
+  private def optCompare[T](field: String, optArgs: Option[Seq[T]], filter: (String, T) => Bson): Unit = {
+    b.base.matches.add(
+      optArgs.fold {
+        // Always return empty result when trying to compare None
+        Filters.eq("_id", -1)
+      } { vs =>
+        filter(field, vs.head)
+      }
+    )
   }
 
   private def regex(field: String, pattern: String): Unit = {
-    b.matches.add(Filters.regex(field, pattern))
-    //    b.groupIdFields += ((b.und, b.dot, field))
+    b.base.matches.add(Filters.regex(field, pattern))
   }
-  private def startsWith[T](field: String, arg: T): Unit = {
-    regex(field, s"^$arg.*")
+  private def startsWith[T](pathField: String, arg: T): Unit = {
+    regex(pathField, s"^$arg.*")
   }
-  private def endsWith[T](field: String, arg: T): Unit = {
-    regex(field, s".*$arg$$")
+  private def endsWith[T](pathField: String, arg: T): Unit = {
+    regex(pathField, s".*$arg$$")
   }
-  private def contains[T](field: String, arg: T): Unit = {
-    regex(field, s".*$arg.*")
+  private def contains[T](pathField: String, arg: T): Unit = {
+    regex(pathField, s".*$arg.*")
   }
-  private def matches(field: String, regex: String): Unit = {
-    b.matches.add(
+  private def matches(pathField: String, regex: String): Unit = {
+    b.base.matches.add(
       if (regex.nonEmpty) {
-        Filters.regex(field, regex)
+        Filters.regex(pathField, regex)
       } else {
         // No filtering
         Filters.empty()
       }
     )
-    //    b.groupIdFields += ((b.und, b.dot, field))
   }
-
 
   private def remainder[T](field: String, args: Seq[T]): Unit = {
     val Seq(divisor, remainder) = args.map(_.toString.toInt)
-    b.matches.add(Filters.mod(field, divisor, remainder))
+    b.base.matches.add(Filters.mod(field, divisor, remainder))
   }
 
-  private def even(field: String): Unit = {
-    b.matches.add(Filters.mod(field, 2, 0))
+  private def even(pathField: String): Unit = {
+    b.base.matches.add(Filters.mod(pathField, 2, 0))
   }
 
-  private def odd(field: String): Unit = {
-    b.matches.add(Filters.mod(field, 2, 1))
+  private def odd(pathField: String): Unit = {
+    b.base.matches.add(Filters.mod(pathField, 2, 1))
   }
 
 
@@ -427,4 +469,6 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
       case other => unexpectedKw(other)
     }
   }
+
+
 }

@@ -3,6 +3,7 @@ package molecule.document.mongodb.query.mongoModel
 import java.util
 import com.mongodb.MongoClientSettings
 import com.mongodb.client.model.{Filters, Sorts}
+import org.bson
 import org.bson._
 import org.bson.conversions.Bson
 import scala.collection.mutable
@@ -10,6 +11,7 @@ import scala.collection.mutable.ListBuffer
 
 class FlatRef(
   parent: Option[Branch] = None,
+  ns: String = "",
   refAttr: String = "",
   refNs: String = "",
   pathFields: ListBuffer[String] = ListBuffer.empty[String],
@@ -20,6 +22,7 @@ class FlatRef(
   projection: BsonDocument = new BsonDocument().append("_id", new BsonInt32(0)),
 ) extends Branch(
   parent,
+  ns,
   refAttr,
   refNs,
   pathFields,
@@ -40,11 +43,10 @@ class FlatRef(
     //    matches.forEach(m => println(m))
 
     // Recursively resolve embedded/looked-up documents
-    refs.foreach(ref => stages.addAll(ref.getStages))
+    subBranches.foreach(ref => stages.addAll(ref.getStages))
 
-
-    if (!sorts.isEmpty) {
-      addStage("$sort", Sorts.orderBy(sorts))
+    if (sorts.nonEmpty) {
+      addStage("$sort", Sorts.orderBy(getSorts))
     }
 
     // Process lookup pipeline stages
@@ -64,14 +66,17 @@ class FlatRef(
     }
     parentStages.add(new BsonDocument("$lookup", lookup))
 
-    // ref array non empty
-    parentStages.add(
-      new BsonDocument().append("$match",
-        new BsonDocument().append(dot1 + refAttr,
-          new BsonDocument().append("$ne", new BsonArray)
-        )
-      )
-    )
+
+    val refNotEmpty  = new BsonDocument(dot1 + refAttr, new BsonDocument("$ne", new BsonArray))
+    val outerMatches = if (parent.get.filterMatches.isEmpty) {
+      refNotEmpty
+    } else {
+      val all = new BsonArray()
+      all.add(refNotEmpty)
+      parent.get.filterMatches.forEach(m => all.add(m.toBsonDocument))
+      new BsonDocument("$and", all)
+    }
+    parentStages.add(new BsonDocument("$match", outerMatches))
 
     // Get head document of ref array
     parentStages.add(
@@ -81,6 +86,16 @@ class FlatRef(
         )
       )
     )
+
+    // Match filter attribute with flattened ref fields
+    if (!parentMatches.isEmpty) {
+      parentStages.add(
+        new BsonDocument().append("$match",
+          Filters.and(parentMatches)
+            .toBsonDocument(classOf[Bson], MongoClientSettings.getDefaultCodecRegistry)
+        )
+      )
+    }
 
     if (parent.nonEmpty && projection.isEmpty) {
       // Remove empty projections with only tacit attributes (or no attributes)
@@ -94,11 +109,11 @@ class FlatRef(
   override def render(tabs: Int): String = {
     val p        = "  " * tabs
     val parent1  = parent.fold("None")(parent => s"Some(${parent.refAttr})")
-    val children = if (refs.isEmpty) "" else
-      s"\n$p  " + refs.map(ref => ref.render(tabs + 1)).mkString(s",\n$p  ")
+    val children = if (subBranches.isEmpty) "" else
+      s"\n$p  " + subBranches.map(ref => ref.render(tabs + 1)).mkString(s",\n$p  ")
     s"""FlatRef($parent1,
-       |${p}  $refAttr, $refNs, $pathFields, $dot, $und, $path, $alias,
-       |${p}  $projection$children
-       |${p})""".stripMargin
+       |${p}  $ns, $refAttr, $refNs, $pathFields, $dot, $und, $path, $alias,
+       |${p}  $projection
+       |${p})$children""".stripMargin
   }
 }

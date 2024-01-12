@@ -111,7 +111,10 @@ trait UpdateOne_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- A(id).b().update.transact
         _ <- A.i.b_?.query.get.map(_ ==> List((1, None)))
       } yield ()
+    }
 
+    "Delete individual owned ref value(s) with update" - refs { implicit conn =>
+      // Not relevant for embedded documents without entity in Mongo
       if (database != "MongoDB") {
         for {
           id <- A.i(1).OwnB.i(7).save.transact.map(_.id)
@@ -358,8 +361,9 @@ trait UpdateOne_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       }
 
       "Can't upsert referenced attributes" - types { implicit conn =>
+        val dummyId = if(database == "MongoDB") "123456789012345678901234" else "42"
         for {
-          _ <- Ns("123456789012345678901234").i(1).Ref.i(2).upsert.transact
+          _ <- Ns(dummyId).i(1).Ref.i(2).upsert.transact
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
               err ==> "Can't upsert referenced attributes. Please update instead."
             }

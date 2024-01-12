@@ -89,7 +89,7 @@ trait Semantics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "No card-Set filter attributes" - types { implicit conn =>
+    "No card one attr with Set filter attribute" - types { implicit conn =>
       // Prevented by type inference
       //      Ns.i.apply(Ns.ints)
       //      Ns.i.apply(Ns.ints_)
@@ -158,7 +158,7 @@ trait Semantics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.int(Ref.int_).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==>
-              """Please add missing filter attributes:
+              """Please add missing filter attribute(s). Found:
                 |  Ref.int""".stripMargin
           }
       } yield ()

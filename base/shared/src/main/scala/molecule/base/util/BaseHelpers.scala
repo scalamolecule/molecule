@@ -40,6 +40,7 @@ trait BaseHelpers extends DateHandling {
 
   final def o(opt: Option[Any]): String = opt.fold("None")(v => s"""Some(${render(v)})""")
   final def opt(opt: Option[Any]): String = opt.fold("None")(v => s"""Some($v)""")
+  final def optFilterAttr(opt: Option[Any]): String = opt.fold("None")(v => s"""Some(\n    $v\n  )""")
 
   final def oStr(opt: Option[String]): String = if (opt.isEmpty) "None" else s"""Some("${opt.get}")"""
   final def oStr2(opt: Option[String]): String = if (opt.isEmpty) "None" else {

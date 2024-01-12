@@ -146,14 +146,14 @@ trait ResolveExprOne[Tpl]
   ): Unit = {
     addCast(res.j2s)
     addSort(sorter)
-    val v = getVar(attr)
+    val v = getFilterVar(attr)
     find += v
     attr.filterAttr.fold {
       expr(e, a, v, attr.op, args, res)
       filterAttrVars1 = filterAttrVars1 + (a -> (e, v))
       filterAttrVars2.get(a).foreach(_(e, v))
     } { filterAttr =>
-      expr2(e, a, v, getVar(filterAttr), attr.op)
+      expr2(e, a, v, getFilterVar(filterAttr), attr.op)
     }
   }
 
@@ -164,13 +164,13 @@ trait ResolveExprOne[Tpl]
     args: Seq[T],
     res: ResOne[T],
   ): Unit = {
-    val v = getVar(attr)
+    val v = getFilterVar(attr)
     attr.filterAttr.fold {
       expr(e, a, v, attr.op, args, res)
       filterAttrVars1 = filterAttrVars1 + (a -> (e, v))
       filterAttrVars2.get(a).foreach(_(e, v))
     } { filterAttr =>
-      expr2(e, a, v, getVar(filterAttr), attr.op)
+      expr2(e, a, v, getFilterVar(filterAttr), attr.op)
     }
   }
 
@@ -183,7 +183,7 @@ trait ResolveExprOne[Tpl]
     sortOpt: Option[(Int, Int => (Row, Row) => Int)],
     sortMan: Option[(Int, Int => (Row, Row) => Int)]
   ): Unit = {
-    val v = getVar(attr)
+    val v = getFilterVar(attr)
     addCast(resOpt.j2s)
     attr.op match {
       case V     => addSort(sortOpt); optV(e, a, v)

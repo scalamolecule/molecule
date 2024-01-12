@@ -8,10 +8,12 @@ import scala.collection.mutable
 trait Model2QueryBase {
 
   // Database specific entity type (row/document/...)
-  type Entity
+//  type Entity
 
   private var level         = 1
   private val sortsPerLevel = mutable.Map[Int, List[Int]](1 -> Nil)
+
+  protected var hasFilterAttr = false
 
   def validateQueryModel(elements: List[Element]): Unit = {
     // Generic validation of model for queries
@@ -37,8 +39,10 @@ trait Model2QueryBase {
         sortsPerLevel(level) = sortsPerLevel(level) :+ a.sort.get.substring(1, 2).toInt
       }
       a.filterAttr.foreach { fa =>
-        if (fa.name == a.name)
+        if (fa.name == a.name) {
           throw ModelError(s"Can't filter by the same attribute `${a.name}`")
+        }
+        hasFilterAttr = true
       }
     }
 

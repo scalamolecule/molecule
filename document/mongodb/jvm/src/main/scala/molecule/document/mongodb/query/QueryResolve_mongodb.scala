@@ -56,12 +56,17 @@ abstract class QueryResolve_mongodb[Tpl](
     optLimit: Option[Int],
     optOffset: Option[Int]
   ): AggregateIterable[BsonDocument] = {
-    val (collectionName, pipeline) = m2q.getBsonQuery(Nil, optLimit, optOffset, Some(conn.proxy))
+    val (collectionName, pipeline) = m2q.getBsonQuery(Nil, optLimit, optOffset)
     val collection                 = conn.mongoDb.getCollection(collectionName, classOf[BsonDocument])
 
-    //    println("QUERY ----------------------------------------------")
-    //    elements.foreach(println)
-    //    println("-------")
+    //    val (elements1, pipeline) = m2q.getBsonQuery(Nil, optLimit, optOffset)
+    //    val collectionName        = getInitialNonGenericNs(elements1)
+    //    val collection            = conn.mongoDb.getCollection(collectionName, classOf[BsonDocument])
+
+    println("QUERY ----------------------------------------------")
+    elements.foreach(println)
+    println("-------")
+    println(pipeline2json(pipeline, Some(collectionName)))
     //    pipeline.forEach(x => println(x.toBsonDocument.toJson(pretty)))
 
     collection.aggregate(pipeline)

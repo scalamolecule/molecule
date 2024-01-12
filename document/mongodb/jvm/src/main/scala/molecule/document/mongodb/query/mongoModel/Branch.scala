@@ -9,7 +9,8 @@ import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
 abstract class Branch(
-  val parent: Option[Branch],
+  val parent: Option[Branch], // parent branch can be both embedded or ref
+  var ns: String,
   val refAttr: String,
   val refNs: String,
   val pathFields: ListBuffer[String] = ListBuffer.empty[String],
@@ -19,20 +20,24 @@ abstract class Branch(
   val alias: String,
   val projection: BsonDocument,
 ) {
-  var isEmbedded  = true
-  var uniqueIndex = 0
-  val stages      = new util.ArrayList[BsonDocument]
-  val matches     = new util.ArrayList[Bson]
+  var isEmbedded    = true
+  var uniqueIndex   = 0
+  val stages        = new util.ArrayList[BsonDocument]
+  val matches       = new util.ArrayList[Bson]
+  val parentMatches = new util.ArrayList[Bson]
+  val filterMatches = new util.ArrayList[Bson]
 
-  val preGroupFields = ListBuffer.empty[(String, String)]
+  val preGroupFields   = ListBuffer.empty[(String, String)]
   val groupIdFields    = ListBuffer.empty[(String, String)]
   val optSetSeparators = ListBuffer.empty[(String, BsonValue)]
   val groupExprs       = ListBuffer.empty[(String, BsonValue)]
-  var addFields      = Set.empty[(String, BsonValue)]
+  var addFields        = Set.empty[(String, BsonValue)]
 
-  val sorts = new util.ArrayList[Bson]
-  val refs  = ListBuffer.empty[Branch]
+  val sorts       = ListBuffer.empty[(Int, Bson)]
+  val subBranches = ListBuffer.empty[Branch]
 
+  // Base branch holds matches of embedded documents
+  var base: Branch = this
 
   def addMatches(): Unit = {
     matches.size match {
@@ -40,6 +45,12 @@ abstract class Branch(
       case 1 => addStage("$match", matches.iterator.next.toBsonDocument)
       case _ => addStage("$match", Filters.and(matches))
     }
+  }
+
+  def getSorts: util.ArrayList[Bson] = {
+    val sorts1 = new util.ArrayList[Bson]
+    sorts.sortBy(_._1).foreach { case (_, sort) => sorts1.add(sort) }
+    sorts1
   }
 
   def groupExpr(field: String, bson: BsonValue): Unit = {
@@ -73,5 +84,4 @@ abstract class Branch(
   }
   def getStages: util.ArrayList[BsonDocument]
   def render(tabs: Int): String
-
 }

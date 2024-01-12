@@ -36,7 +36,7 @@ class Model2DatomicQuery[Tpl](elements0: List[Element])
   ): (String, String, String) = {
     val elements = if (altElements.isEmpty) elements0 else altElements
     validateQueryModel(elements)
-    val elements1 = prepareElements(elements)
+    val elements1 = resolveFilterAttrs(elements)
 
     // Remember first entity id variable
     firstId = vv
@@ -73,7 +73,7 @@ class Model2DatomicQuery[Tpl](elements0: List[Element])
   }
 
 
-  private def prepareElements(elements: List[Element]): List[Element] = {
+  private def resolveFilterAttrs(elements: List[Element]): List[Element] = {
     @tailrec
     def prepare(elements: List[Element], acc: List[Element]): List[Element] = {
       elements match {
@@ -82,7 +82,7 @@ class Model2DatomicQuery[Tpl](elements0: List[Element])
             case a: Attr      => prepare(tail, acc :+ prepareAttr(a))
             case n: Nested    => prepare(tail, acc :+ prepareNested(n))
             case n: NestedOpt => prepare(tail, acc :+ prepareNestedOpt(n))
-            case refOrBackRef => prepare(tail, acc :+ refOrBackRef)
+            case other        => prepare(tail, acc :+ other)
           }
         case Nil             => acc
       }
@@ -92,7 +92,7 @@ class Model2DatomicQuery[Tpl](elements0: List[Element])
       if (a.filterAttr.nonEmpty) {
         val fa = a.filterAttr.get
         if (fa.filterAttr.nonEmpty) {
-          throw ModelError(s"Nested filter attributes not allowed in ${a.ns}.${a.attr}")
+          throw ModelError(s"Filter attributes inside filter attributes not allowed in ${a.ns}.${a.attr}")
         }
         val filterAttr = fa.cleanName
         filterAttrVars.get(filterAttr).fold {
@@ -120,7 +120,7 @@ class Model2DatomicQuery[Tpl](elements0: List[Element])
     val elements1 = prepare(elements, Nil)
 
     if (expectedFilterAttrs.nonEmpty && expectedFilterAttrs.intersect(availableAttrs) != expectedFilterAttrs) {
-      throw ModelError("Please add missing filter attributes:\n  " + expectedFilterAttrs.mkString("\n  "))
+      throw ModelError("Please add missing filter attribute(s). Found:\n  " + expectedFilterAttrs.mkString("\n  "))
     }
 
     elements1

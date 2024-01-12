@@ -1,6 +1,5 @@
 package molecule.document.mongodb.compliance.filter
 
-import molecule.coreTests.spi.filter.FilterOne_id
 import molecule.coreTests.spi.filter.one._
 import molecule.coreTests.spi.filter.one.special._
 import molecule.document.mongodb.setup.TestAsync_mongodb
@@ -33,5 +32,3 @@ object FilterOne_Char_ extends FilterOne_Char_ with TestAsync_mongodb
 
 object FilterOneSpecial_Number extends FilterOneSpecial_Number with TestAsync_mongodb
 object FilterOneSpecial_String extends FilterOneSpecial_String with TestAsync_mongodb
-
-object FilterOne_id extends FilterOne_id with TestAsync_mongodb

@@ -32,7 +32,9 @@ object AdhocJVM_h2 extends TestSuite_h2 {
         //        _ <- Ns.int(min).query.i.get.map(_ ==> List(int1))
         //        _ <- Ns.int(max).query.get.map(_ ==> List(int6))
         //        _ <- Ns.int(min).int(max).query.get.map(_ ==> List((int1, int6)))
-
+        _ = {
+          val x = ref1
+        }
         _ <- Ns.i.a1.int(min).query.i.get.map(_ ==> List(
           (1, int1),
           (2, int4)

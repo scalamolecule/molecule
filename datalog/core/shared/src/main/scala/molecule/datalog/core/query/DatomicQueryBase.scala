@@ -134,7 +134,7 @@ trait DatomicQueryBase extends BaseHelpers with JavaConversions { self: Model2Qu
     varIndex += 1
     vars(varIndex)
   }
-  def getVar(attr: Attr) = {
+  def getFilterVar(attr: Attr) = {
     filterAttrVars.getOrElse(attr.name, vv)
   }
 }

@@ -11,6 +11,7 @@ import scala.collection.mutable.ListBuffer
 class FlatEmbed(
   parent: Option[Branch] = None,
   cardMany: Boolean = false,
+  ns: String = "",
   refAttr: String = "",
   refNs: String = "",
   pathFields: ListBuffer[String] = ListBuffer.empty[String],
@@ -21,6 +22,7 @@ class FlatEmbed(
   projection: BsonDocument = new BsonDocument().append("_id", new BsonInt32(0)),
 ) extends Branch(
   parent,
+  ns,
   refAttr,
   refNs,
   pathFields,
@@ -32,13 +34,13 @@ class FlatEmbed(
 ) {
 
   override def getStages: util.ArrayList[BsonDocument] = {
+        println(s"----- 1 -----  $dot  $refAttr  ${parent.map(_.isEmbedded)}")
+        matches.forEach(m => println(m))
+
     addMatches()
 
-    //    println(s"----- 1 -----  $dot  $refAttr  ${parent.map(_.isEmbedded)}")
-    //    matches.forEach(m => println(m))
-
     // Recursively resolve embedded/looked-up documents
-    refs.foreach(ref => stages.addAll(ref.getStages))
+    subBranches.foreach(ref => stages.addAll(ref.getStages))
 
     if (cardMany) {
       stages.add(new BsonDocument()
@@ -46,14 +48,6 @@ class FlatEmbed(
     }
 
     if (parent.isEmpty) {
-      //      println("--- TOP embed -------------------")
-      //      println(this)
-      //      println(s"groupExprs   : $groupExprs")
-      //      println(s"groupIdFields: $groupIdFields")
-      //      println(s"addFields    : $addFields")
-      //      println(s"addFields2   : $addFields2")
-      //      println(s"sorts   : $sorts")
-      //      group(stages)
       addAggregationStages()
     }
 
@@ -65,8 +59,8 @@ class FlatEmbed(
       addStage("$project", projection)
     }
 
-    if (!sorts.isEmpty) {
-      addStage("$sort", Sorts.orderBy(sorts))
+    if (sorts.nonEmpty) {
+      addStage("$sort", Sorts.orderBy(getSorts))
     }
     stages
   }
@@ -130,11 +124,11 @@ class FlatEmbed(
   override def render(tabs: Int): String = {
     val p        = "  " * tabs
     val parent1  = parent.fold("None")(parent => s"Some(${parent.refAttr})")
-    val children = if (refs.isEmpty) "" else
-      s"\n$p  " + refs.map(ref => ref.render(tabs + 1)).mkString(s",\n$p  ")
+    val children = if (subBranches.isEmpty) "" else
+      s"\n$p  " + subBranches.map(ref => ref.render(tabs + 1)).mkString(s",\n$p  ")
     s"""FlatEmbed($parent1, $cardMany
-       |${p}  $refAttr, $refNs, $pathFields, $dot, $und, $path, $alias,
-       |${p}  $projection$children
-       |${p})""".stripMargin
+       |${p}  $ns, $refAttr, $refNs, $pathFields, $dot, $und, $path, $alias,
+       |${p}  $projection
+       |${p})$children""".stripMargin
   }
 }

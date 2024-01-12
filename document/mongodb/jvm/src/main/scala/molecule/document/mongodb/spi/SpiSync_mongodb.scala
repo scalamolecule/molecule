@@ -4,7 +4,6 @@ import molecule.base.error._
 import molecule.base.util.BaseHelpers
 import molecule.boilerplate.ast.Model._
 import molecule.core.action._
-import molecule.core.marshalling.ConnProxy
 import molecule.core.marshalling.dbView.{AsOf, DbView, Since}
 import molecule.core.spi._
 import molecule.core.transaction.{ResolveDelete, ResolveInsert, ResolveSave, ResolveUpdate}
@@ -16,7 +15,6 @@ import molecule.document.mongodb.query.{Model2MongoQuery, QueryResolveCursor_mon
 import molecule.document.mongodb.transaction._
 import molecule.document.mongodb.util.BsonUtils
 import org.bson._
-import org.bson.conversions.Bson
 import scala.annotation.nowarn
 import scala.collection.mutable.ListBuffer
 import scala.util.control.NonFatal
@@ -109,9 +107,12 @@ trait SpiSync_mongodb
     optOffset: Option[Int]
   ): Unit = {
     tryInspect("query", elements) {
-      val (ns, pipeline) = new Model2MongoQuery[Any](elements).getBsonQuery(Nil, optLimit, optOffset, None)
-      printRaw(label, elements, pipeline2json(pipeline, Some(ns)))
-      //      printRaw(label, Nil, pipeline2json(pipeline, Some(ns)))
+      val (ns, pipeline) = new Model2MongoQuery[Any](elements).getBsonQuery(Nil, optLimit, optOffset)
+      //      val (elements1, pipeline) = new Model2MongoQuery[Any](elements).getBsonQuery(Nil, optLimit, optOffset, None)
+      //      val (elements1, pipeline) = new Model2MongoQuery[Any](elements).getBsonQuery(Nil, optLimit, optOffset)
+
+//      printRaw(label, elements, pipeline2json(pipeline, Some(ns)))
+      printRaw(label, Nil, pipeline2json(pipeline, Some(ns)))
 
       //      val (ns, pipeline) = getModel2SqlQuery[Any](elements).getBsonQuery(Nil, optLimit, optOffset, None)
       //      val (_, pipeline2) = getModel2SqlQuery[Any](elements).getBsonQuery2(Nil, optLimit, optOffset, None)
@@ -196,7 +197,7 @@ trait SpiSync_mongodb
     if (update.doInspect)
       update_inspect(update)
 
-//    TxModelValidation(conn.proxy.nsMap, conn.proxy.attrMap, "update", Some(curSetValues)).validate(elements)
+    //    TxModelValidation(conn.proxy.nsMap, conn.proxy.attrMap, "update", Some(curSetValues)).validate(elements)
     TxModelValidation(conn.proxy.nsMap, conn.proxy.attrMap, "update", None).validate(update.elements)
 
     val errors = update_validate(update0) // validate original elements against meta model
@@ -273,7 +274,7 @@ trait SpiSync_mongodb
     //    }
 
     // todo
-//     validateUpdateSet(conn.proxy, update.elements, update.isUpsert, resolver)
+    //     validateUpdateSet(conn.proxy, update.elements, update.isUpsert, resolver)
     Map.empty[String, Seq[String]]
   }
 

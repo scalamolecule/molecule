@@ -52,7 +52,7 @@ trait ResolveExprOne_id[Tpl]
     addCast(res.j2s)
     addSort(sorter)
     find += e // get entity id
-    val v = getVar(attr)
+    val v = getFilterVar(attr)
     expr(e, v, attr.op, args, res)
   }
 
@@ -62,7 +62,7 @@ trait ResolveExprOne_id[Tpl]
     args: Seq[T],
     res: ResOne[T],
   ): Unit = {
-    val v = getVar(attr)
+    val v = getFilterVar(attr)
     expr(e, v, attr.op, args, res)
   }
 

@@ -147,19 +147,22 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |    val attrs       = es.last match {
        |      case a: Attr =>
        |        val (filterAttr, adjacent) = if (a.ns == filterAttr0.ns) {
-       |          // Convert mandatory filter attribute to tacit attribute
-       |          filterAttr0 match {
+       |          // Convert adjacent mandatory filter attribute to tacit attribute
+       |          val tacitAttr = filterAttr0 match {
        |            case a: AttrOneMan => a match {
+       |              case a: AttrOneManID             => AttrOneTacID(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.refNs, a.sort, a.coord)
        |              ${liftFilterAttr("One")}
        |            }
        |            case a: AttrSetMan => a match {
+       |              case a: AttrSetManID             => AttrSetTacID(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.refNs, a.sort, a.coord, a.owner)
        |              ${liftFilterAttr("Set")}
        |            }
-       |            case other         => (other, List(filterAttr0))
+       |            case other         => other
        |          }
+       |          (tacitAttr, List(filterAttr0))
        |        } else (filterAttr0, Nil)
        |
-       |        a match {
+       |        val attrWithFilterAttr = a match {
        |          case a: AttrOne => a match {
        |            case a: AttrOneMan => a match {
        |              ${addFilterAttr("One", "Man")}
@@ -179,6 +182,7 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |            case a             => unexpected(a)
        |          }
        |        }
+       |        attrWithFilterAttr +: adjacent
        |      case e       => unexpected(e)
        |    }
        |    es.init ++ attrs
@@ -187,10 +191,12 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |  protected def reverseTopLevelSorting(es: List[Element]): List[Element] = {
        |    es.map {
        |      case attr: AttrOneMan => attr match {
+       |        case a@AttrOneManID(_, _, _, _, _, _, _, _, _, Some(sort), _, _)          => a.copy(sort = Some(reverseSort(sort)))
        |        ${reverseTopLevelSorting("Man")}
        |        case a                                                                    => a
        |      }
        |      case attr: AttrOneOpt => attr match {
+       |        case a@AttrOneOptID(_, _, _, _, _, _, _, _, _, Some(sort), _, _)          => a.copy(sort = Some(reverseSort(sort)))
        |        ${reverseTopLevelSorting("Opt")}
        |        case a                                                                    => a
        |      }
@@ -270,18 +276,18 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
   }
 
   private def liftFilterAttr(card: String): String = {
-    baseTypesWithSpaces.map { case (baseTpe, space) =>
-      s"case a: Attr${card}Man$baseTpe $space=> (Attr${card}Tac$baseTpe(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.refNs, a.sort, a.coord), List(filterAttr0))"
+    baseTypesWithSpaces.tail.map { case (baseTpe, space) =>
+      s"case a: Attr${card}Man$baseTpe $space=> Attr${card}Tac$baseTpe(a.ns, a.attr, a.op, a.vs, None, a.validator, a.valueAttrs, a.errors, a.refNs, a.sort, a.coord)"
     }.mkString("\n              ")
   }
   private def addFilterAttr(card: String, mode: String): String = {
     baseTypesWithSpaces.map { case (baseTpe, space) =>
-      s"case a: Attr$card$mode$baseTpe $space=> a.copy(op = op, filterAttr = Some(filterAttr)) +: adjacent"
+      s"case a: Attr$card$mode$baseTpe $space=> a.copy(op = op, filterAttr = Some(filterAttr))"
     }.mkString("\n              ")
   }
 
   private def reverseTopLevelSorting(mode: String): String = {
-    baseTypesWithSpaces.map { case (baseTpe, space) =>
+    baseTypesWithSpaces.tail.map { case (baseTpe, space) =>
       s"case a@AttrOne$mode$baseTpe(_, _, _, _, _, _, _, _, _, Some(sort), _) $space=> a.copy(sort = Some(reverseSort(sort)))"
     }.mkString("\n        ")
   }
