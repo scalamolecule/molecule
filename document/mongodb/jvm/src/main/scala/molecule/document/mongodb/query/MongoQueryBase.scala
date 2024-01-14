@@ -19,15 +19,39 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
   var prefixedFieldPair = ("", "")
 
   // Top branch holds aggregation and projection of all attributes
-  final protected val topBranch = new FlatEmbed()
+  final protected var topBranch: FlatEmbed = new FlatEmbed()
 
   // Current branch. Changes for each new namespace
   final protected var b: Branch = topBranch
 
-  val filterAttrs = mutable.Map.empty[String, String => Bson]
-//  val postSorts   = mutable.Map.empty[String, String => Bson]
-  val processedNss = mutable.Set.empty[String]
 
+  final protected val branches2 = mutable.Map.empty[List[String], Branch]
+
+  final protected var hasFilterAttr  = false
+  final protected var filterAttrVars = Map.empty[String, String]
+  final protected val postFilters    = mutable.Map.empty[List[String], Branch => Boolean]
+
+  final protected var path = List.empty[String]
+  final protected var path2 = List.empty[String]
+
+
+  protected def mkPathPrefix(path: List[String]): String = {
+    var even         = false
+    var filterPrefix = ""
+    path.foreach {
+      case refAttr if even =>
+        filterPrefix += refAttr + "."
+        even = !even
+      case ns              => even = !even
+    }
+    filterPrefix
+  }
+
+  def ambiguous(attr: String): String = {
+    s"""Ambiguous filter attribute path: $attr
+       |Please qualify the filter attribute by appending the full path of namespaces.
+       |Or make sure that the target attribute is not appearing multiple times.""".stripMargin
+  }
 
   def addField(uniqueField: String) = {
     if (b.parent.nonEmpty) {
@@ -90,18 +114,12 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
   final protected var hardLimit = 0
 
   // Input args and cast lambdas
-  final           var isNested    = false
-  final           var isNestedMan = false
-  final           var isNestedOpt = false
-  //  final protected var level       = 0
-  //
-  // Ensure distinct result set when possible redundant optional values can occur
-  final protected var hasOptAttr  = false
+  final var isNested    = false
+  final var isNestedMan = false
+  final var isNestedOpt = false
 
-  // Query variables
-  final protected var filterAttrVars      = Map.empty[String, String]
-  final protected val expectedFilterAttrs = mutable.Set.empty[String]
-  final protected val availableAttrs      = mutable.Set.empty[String]
+  // Ensure distinct result set when possible redundant optional values can occur
+  final protected var hasOptAttr = false
 
 
   final protected def unexpectedElement(element: Element) = throw ModelError("Unexpected element: " + element)
@@ -111,12 +129,4 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
   final protected def noMixedNestedModes = throw ModelError(
     "Can't mix mandatory/optional nested queries."
   )
-
-  //  def getRowCount(resultSet: Row): Int = {
-  //    //    resultSet.last()
-  //    //    val size = resultSet.getRow
-  //    //    resultSet.beforeFirst()
-  //    //    size
-  //    ???
-  //  }
 }

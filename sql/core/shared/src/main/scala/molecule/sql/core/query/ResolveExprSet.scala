@@ -110,8 +110,10 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
       }
       setExpr(col, attr.op, args, res, "man")
     } {
-      case filterAttr: AttrOne => setExpr2(col, attr.op, filterAttr.name, true, tpe)
-      case filterAttr          => setExpr2(col, attr.op, filterAttr.name, false, tpe)
+      case (dir, filterPath, filterAttr) => filterAttr match {
+        case filterAttr: AttrOne => setExpr2(col, attr.op, filterAttr.name, true, tpe)
+        case filterAttr          => setExpr2(col, attr.op, filterAttr.name, false, tpe)
+      }
     }
   }
 
@@ -119,9 +121,11 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
     val col = getCol(attr: Attr)
     attr.filterAttr.fold {
       setExpr(col, attr.op, args, res, "tac")
-    } {
-      case filterAttr: AttrOne => setExpr2(col, attr.op, filterAttr.name, true, tpe)
-      case filterAttr          => setExpr2(col, attr.op, filterAttr.name, false, tpe)
+    } { case (dir, filterPath, filterAttr) =>
+      filterAttr match {
+        case filterAttr: AttrOne => setExpr2(col, attr.op, filterAttr.name, true, tpe)
+        case filterAttr          => setExpr2(col, attr.op, filterAttr.name, false, tpe)
+      }
     }
     notNull += col
   }

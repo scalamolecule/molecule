@@ -35,9 +35,6 @@ class FlatRef(
 
   isEmbedded = false
 
-  private val parentStages = new util.ArrayList[BsonDocument]
-  private val pipeline     = new BsonArray()
-
   override def getStages: util.ArrayList[BsonDocument] = {
     //    println(s"----- 2 -----  $dot  $refAttr  ${parent.map(_.isEmbedded)}")
     //    matches.forEach(m => println(m))
@@ -64,7 +61,7 @@ class FlatRef(
     if (!pipeline.isEmpty) {
       lookup.append("pipeline", pipeline)
     }
-    parentStages.add(new BsonDocument("$lookup", lookup))
+    postStages.add(new BsonDocument("$lookup", lookup))
 
 
     val refNotEmpty  = new BsonDocument(dot1 + refAttr, new BsonDocument("$ne", new BsonArray))
@@ -76,10 +73,10 @@ class FlatRef(
       parent.get.filterMatches.forEach(m => all.add(m.toBsonDocument))
       new BsonDocument("$and", all)
     }
-    parentStages.add(new BsonDocument("$match", outerMatches))
+    postStages.add(new BsonDocument("$match", outerMatches))
 
     // Get head document of ref array
-    parentStages.add(
+    postStages.add(
       new BsonDocument().append("$addFields",
         new BsonDocument().append(dot1 + refAttr,
           new BsonDocument().append("$first", new BsonString("$" + dot1 + refAttr))
@@ -88,10 +85,10 @@ class FlatRef(
     )
 
     // Match filter attribute with flattened ref fields
-    if (!parentMatches.isEmpty) {
-      parentStages.add(
+    if (!postMatches.isEmpty) {
+      postStages.add(
         new BsonDocument().append("$match",
-          Filters.and(parentMatches)
+          Filters.and(postMatches)
             .toBsonDocument(classOf[Bson], MongoClientSettings.getDefaultCodecRegistry)
         )
       )
@@ -102,13 +99,13 @@ class FlatRef(
       parent.get.projection.remove(refAttr)
     }
 
-    parentStages
+    postStages
   }
 
   override def toString = render(0)
   override def render(tabs: Int): String = {
     val p        = "  " * tabs
-    val parent1  = parent.fold("None")(parent => s"Some(${parent.refAttr})")
+    val parent1  = parent.fold("None")(parent => s"Some(${parent.ns})")
     val children = if (subBranches.isEmpty) "" else
       s"\n$p  " + subBranches.map(ref => ref.render(tabs + 1)).mkString(s",\n$p  ")
     s"""FlatRef($parent1,

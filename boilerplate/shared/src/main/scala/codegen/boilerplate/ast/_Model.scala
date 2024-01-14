@@ -125,7 +125,7 @@ object _Model extends BoilerplateGenBase("Model", "/ast") {
          |    override val attr: String,
          |    override val op: Op = V,
          |    vs: $vs,
-         |    override val filterAttr: Option[Attr] = None,
+         |    override val filterAttr: Option[(Int, List[String], Attr)] = None,
          |    override val validator: Option[Validate$baseTpe0] = None,
          |    override val valueAttrs: Seq[String] = Nil,
          |    override val errors: Seq[String] = Nil,

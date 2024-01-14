@@ -71,7 +71,7 @@ trait ResolveExprSetRefAttr extends ResolveExpr with LambdasSet { self: SqlQuery
         throw ModelError(s"Cardinality-set filter attributes not allowed to do additional filtering. Found:\n  " + attr)
       }
       refExpr(refIds, attr.op, args, res)
-    } { filterAttr =>
+    } { case (dir, filterPath, filterAttr) =>
       refExpr2(refIds, attr.op, filterAttr.name)
     }
   }
@@ -82,7 +82,7 @@ trait ResolveExprSetRefAttr extends ResolveExpr with LambdasSet { self: SqlQuery
     groupBy += nsId
     attr.filterAttr.fold {
       refExpr(col, attr.op, args, res)
-    } { filterAttr =>
+    } { case (dir, filterPath, filterAttr) =>
       refExpr2(col, attr.op, filterAttr.name)
     }
   }

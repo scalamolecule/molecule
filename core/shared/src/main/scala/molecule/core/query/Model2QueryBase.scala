@@ -7,15 +7,12 @@ import scala.collection.mutable
 
 trait Model2QueryBase {
 
-  // Database specific entity type (row/document/...)
-//  type Entity
-
   private var level         = 1
   private val sortsPerLevel = mutable.Map[Int, List[Int]](1 -> Nil)
 
-  protected var hasFilterAttr = false
 
-  def validateQueryModel(elements: List[Element]): Unit = {
+  def validateQueryModel(elements: List[Element]): Boolean = {
+    var hasFilterAttr = false
     // Generic validation of model for queries
 
     // We don't do this validation in ModelTransformations_ since we want to catch
@@ -38,12 +35,7 @@ trait Model2QueryBase {
       if (a.sort.nonEmpty) {
         sortsPerLevel(level) = sortsPerLevel(level) :+ a.sort.get.substring(1, 2).toInt
       }
-      a.filterAttr.foreach { fa =>
-        if (fa.name == a.name) {
-          throw ModelError(s"Can't filter by the same attribute `${a.name}`")
-        }
-        hasFilterAttr = true
-      }
+      a.filterAttr.foreach(_ => hasFilterAttr = true)
     }
 
     def validateNested(es: List[Element], prevElements: List[Element]): Unit = {
@@ -100,5 +92,6 @@ trait Model2QueryBase {
           )
       }
     }
+    hasFilterAttr
   }
 }

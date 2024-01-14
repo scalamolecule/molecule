@@ -1,13 +1,12 @@
 package molecule.document.mongodb.query
 
-import com.mongodb.client.model.{Filters, Projections, Sorts}
+import com.mongodb.client.model.{Filters, Sorts}
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.core.query.ResolveExpr
 import molecule.document.mongodb.query.mongoModel.Branch
 import org.bson._
 import org.bson.conversions.Bson
-import scala.annotation.tailrec
 
 trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self: MongoQueryBase =>
 
@@ -108,54 +107,158 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
     }
 
   }
+
   private def man[T](attr: Attr, args: Seq[T], res: ResOne[T]): Unit = {
     val field       = attr.attr
     val uniqueField = b.unique(field)
     projectField(uniqueField)
     addSort(attr, uniqueField)
     addCast(uniqueField, res.cast(uniqueField))
-    processedNss += attr.ns
 
     prefixedFieldPair = if (b.parent.isEmpty) (field, field) else (b.path + field, b.alias + field)
     topBranch.groupIdFields += prefixedFieldPair
-
-    // Match previous filter attribute
-    attr.filterAttr.fold {
-      val cleanName = attr.cleanName
-      println("cleanName 2: " + cleanName)
-      filterAttrs.get(attr.cleanName).foreach {
-        case expr if b.isEmbedded => b.matches.add(expr(b.path))
-        case expr                 => b.parentMatches.add(expr(b.path))
-      }
-      expr(uniqueField, field, attr.op, args, res)
-    } { filterAttr =>
-      //      val filterAttrName = if (attr.ns != filterAttr.ns) Some(filterAttr.cleanName) else None
-      //      val filterAttrName = if (attr.ns != filterAttr.ns) Some(attr.ns) else None
-      val filterNs = if (attr.ns != filterAttr.ns) Some(filterAttr.ns) else None
-      expr2(field, attr.op, filterAttr.attr, filterNs)
-    }
+    handleExpr(uniqueField, field, attr, args, res)
   }
 
   private def tac[T](attr: Attr, args: Seq[T], res: ResOne[T]): Unit = {
     val field       = attr.attr
     val uniqueField = b.unique(field)
+    handleExpr(uniqueField, field, attr, args, res)
+  }
+
+  private def handleExpr[T](uniqueField: String, field: String, attr: Attr, args: Seq[T], res: ResOne[T]): Unit = {
+    if (branches2.isEmpty) {
+      path2 = List(attr.ns)
+    }
+    branches2(path2) = b
 
     attr.filterAttr.fold {
-      // Match previous filter attribute
-//      filterAttrs.get(attr.cleanName).foreach(expr => b.parentMatches.add(expr(b.path)))
-      filterAttrs.get(attr.cleanName).foreach {
-        case expr if b.isEmbedded => b.matches.add(expr(b.path))
-        case expr                 => b.parentMatches.add(expr(b.path))
+      if (hasFilterAttr) {
+        //        // Try with qualified path x.y.z.attr
+        //        val pathAttr         = b.path + field
+        //        val qualifiedMatches = postFilters.filter(_._1 == pathAttr)
+        //        qualifiedMatches.length match {
+        //          case 1 => qualifiedMatches.head._2(b)
+        //          case 0 =>
+        //            // Try with simple Ns.attr
+        //            val nsAttr = attr.cleanName
+        //            println(s"------------- ${attr.ns}  ${attr.attr}    $pathAttr    $nsAttr")
+        //            postFilters.foreach(x => println(x._1))
+        //            val nsAttrMatches = postFilters.filter(_._1 == nsAttr)
+        //            nsAttrMatches.length match {
+        //              case 1 => nsAttrMatches.head._2(b)
+        //              case 0 => () // this attribute is not a filter attribute target
+        //              case _ => throw ModelError(ambiguous(nsAttr))
+        //            }
+        //          case _ => throw ModelError(ambiguous(pathAttr))
+        //        }
+
+        //        val path = List(attr.cleanAttr)
+        postFilters.get(path2 :+ attr.cleanAttr).foreach(process => process(b))
       }
       expr(uniqueField, field, attr.op, args, res)
     } { filterAttr =>
-      //      val filterAttrName = if (attr.ns != filterAttr.ns) Some(filterAttr.cleanName) else None
-      //      val filterAttrName = if (attr.ns != filterAttr.ns) Some(attr.ns) else None
-      val filterNs = if (attr.ns != filterAttr.ns) Some(filterAttr.ns) else None
-
-      expr2(field, attr.op, filterAttr.attr, filterNs)
+      expr2(field, attr.op, filterAttr)
     }
   }
+
+  private def expr2(field: String, op: Op, filterAttr: (Int, List[String], Attr)): Unit = op match {
+    case Eq    => equal2(field, filterAttr)
+    case Neq   => neq2(field, filterAttr)
+    case Lt    => compare2(field, "$lt", filterAttr)
+    case Gt    => compare2(field, "$gt", filterAttr)
+    case Le    => compare2(field, "$lte", filterAttr)
+    case Ge    => compare2(field, "$gte", filterAttr)
+    case other => unexpectedOp(other)
+  }
+
+  private def equal2(field: String, filterAttr: (Int, List[String], Attr)): Unit = {
+    handleFilterExpr(field, "$eq", filterAttr)
+  }
+  private def neq2(field: String, filterAttr: (Int, List[String], Attr)): Unit = {
+    handleFilterExpr(field, "$ne", filterAttr)
+  }
+  private def compare2(field: String, op: String, filterAttr: (Int, List[String], Attr)): Unit = {
+    handleFilterExpr(field, op, filterAttr)
+  }
+
+  private def handleFilterExpr(field: String, op: String, filterAttr0: (Int, List[String], Attr)): Unit = {
+
+    println(topBranch)
+
+    val (dir, filterPath, filterAttr1) = filterAttr0
+    val filterAttr                     = filterAttr1.cleanAttr
+    //    val filterPrefix                   = mkPathPrefix(filterPath)
+    //    val filterPrefixAttr               = filterPrefix + filterAttr
+
+    dir match {
+      case 0 =>
+        println("### ADJACENT ##############################")
+        // Adjacent filter attribute in same namespace
+        val args = new BsonArray()
+        args.add(new BsonString("$" + field))
+        args.add(new BsonString("$" + b.path + filterAttr))
+        b.matches.add(Filters.eq("$expr", new BsonDocument(op, args)))
+
+      case -1 =>
+        println("### BACKWARD ##############################")
+
+        val fromBranch       = branches2(filterPath)
+        val filterAttrPath   = fromBranch.path
+        val intermediatePath = if (b.path.startsWith(filterAttrPath))
+          b.path.drop(filterAttrPath.length)
+        else
+          filterAttrPath
+
+        val toBranch = b
+
+        println("----- FROM -------")
+        println("embedded        : " + fromBranch.isEmbedded)
+        println("dot             : " + fromBranch.dot)
+        println("path            : " + fromBranch.path)
+        println("filterAttrPath  : " + filterAttrPath)
+        println(fromBranch)
+
+
+        println("----- TO ----------------------")
+        println("embedded        : " + toBranch.isEmbedded)
+        println("dot             : " + toBranch.dot)
+        println("path            : " + toBranch.path)
+        println("intermediatePath: " + intermediatePath)
+        println(toBranch)
+
+        // Ref filter attribute
+        val args = new BsonArray()
+        if (fromBranch.isEmbedded) {
+          println("### B1 ##############################")
+          args.add(new BsonString("$" + toBranch.path + field))
+          args.add(new BsonString("$" + fromBranch.path + filterAttr))
+          fromBranch.postMatches.add(Filters.eq("$expr", new BsonDocument(op, args)))
+        } else {
+          println("### B2 ##############################")
+          //          args.add(new BsonString("$" + filterAttr))
+          //          args.add(new BsonString("$" + intermediatePath + field))
+
+          args.add(new BsonString("$" + toBranch.path + field))
+          args.add(new BsonString("$" + fromBranch.path + filterAttr))
+          toBranch.postMatches.add(Filters.eq("$expr", new BsonDocument(op, args)))
+        }
+
+      case 1 =>
+        println("### FORWARD ##############################")
+
+        // stable reference to current branch
+        val b1      = b
+        val process = (b2: Branch) => {
+          val args = new BsonArray()
+          args.add(new BsonString("$" + b1.path + field))
+          args.add(new BsonString("$" + b2.path + filterAttr))
+          b1.postMatches.add(Filters.eq("$expr", new BsonDocument(op, args)))
+        }
+        postFilters(filterPath :+ filterAttr) = process
+    }
+  }
+
 
   private def opt[T](attr: Attr, optArgs: Option[Seq[T]], res: ResOne[T]): Unit = {
     val field       = attr.attr
@@ -163,7 +266,6 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
     projectField(uniqueField)
     addCast(uniqueField, res.castOpt(uniqueField))
     addSort(attr, uniqueField)
-    processedNss += attr.ns
 
     attr.op match {
       case V     => () // selected field can already be a value or null
@@ -227,86 +329,6 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
     b.base.matches.add(filter)
   }
 
-
-  private def expr2(field: String, op: Op, filterAttr: String, filterNs: Option[String]): Unit = op match {
-    case Eq    => equal2(field, filterAttr, filterNs)
-    case Neq   => neq2(field, filterAttr, filterNs)
-    case Lt    => compare2(field, "$lt", filterAttr, filterNs)
-    case Gt    => compare2(field, "$gt", filterAttr, filterNs)
-    case Le    => compare2(field, "$lte", filterAttr, filterNs)
-    case Ge    => compare2(field, "$gte", filterAttr, filterNs)
-    case other => unexpectedOp(other)
-  }
-
-  private def equal2(field: String, filterAttr: String, filterNs: Option[String]): Unit = {
-    handleFilterExpr(field, "$eq", filterAttr, filterNs)
-  }
-  private def neq2(field: String, filterAttr: String, filterNs: Option[String]): Unit = {
-    handleFilterExpr(field, "$ne", filterAttr, filterNs)
-  }
-  private def compare2(field: String, op: String, filterAttr: String, filterNs: Option[String]): Unit = {
-    handleFilterExpr(field, op, filterAttr, filterNs)
-  }
-
-  private def handleFilterExpr(field: String, op: String, filterAttr: String, filterNs: Option[String]): Unit = {
-    filterNs.fold[Unit] {
-      // Adjacent filter attribute
-      val args = new BsonArray()
-      args.add(new BsonString("$" + field))
-      args.add(new BsonString("$" + b.path + filterAttr))
-      b.matches.add(Filters.eq("$expr", new BsonDocument(op, args)))
-
-    } { filterAttrNs =>
-      if (b.isEmbedded) {
-        // Embedded filter attribute
-        if (processedNss.contains(filterAttrNs)) {
-          // Backwards
-          val args = new BsonArray()
-          args.add(new BsonString("$" + b.path + field))
-          args.add(new BsonString("$" + filterAttr))
-          b.matches.add(Filters.eq("$expr", new BsonDocument(op, args)))
-        } else {
-          // Forward - needs to be resolved later when filter attribute is applied
-          filterAttrs(filterAttrNs + "." + filterAttr) =
-            (path: String) => {
-              val args = new BsonArray()
-              args.add(new BsonString("$" + field))
-              args.add(new BsonString("$" + path + filterAttr))
-              Filters.eq("$expr", new BsonDocument(op, args))
-            }
-        }
-      } else {
-        // Ref filter attribute
-        val args = new BsonArray()
-        args.add(new BsonString("$" + b.path + field))
-        args.add(new BsonString("$" + filterAttr))
-        b.parentMatches.add(Filters.eq("$expr", new BsonDocument(op, args)))
-      }
-    }
-  }
-
-  //  private def handleFilterExpr2(field: String, op: String, filterAttr: String, filterAttrName: Option[String]): Unit = {
-  //    if (filterAttrName.isDefined) {
-  //      if (b.isEmbedded) {
-  //        filterAttrs(filterAttrName.get) = (path: String) => {
-  //          val args = new BsonArray()
-  //          args.add(new BsonString("$" + field))
-  //          args.add(new BsonString("$" + path + filterAttr))
-  //          Filters.eq("$expr", new BsonDocument(op, args))
-  //        }
-  //      } else {
-  //        val args = new BsonArray()
-  //        args.add(new BsonString("$" + b.path + field))
-  //        args.add(new BsonString("$" + filterAttr))
-  //        b.parentMatches.add(Filters.eq("$expr", new BsonDocument(op, args)))
-  //      }
-  //    } else {
-  //      val args = new BsonArray()
-  //      args.add(new BsonString("$" + field))
-  //      args.add(new BsonString("$" + b.path + filterAttr))
-  //      b.matches.add(Filters.eq("$expr", new BsonDocument(op, args)))
-  //    }
-  //  }
 
   private def noValue(field: String): Unit = {
     b.base.matches.add(Filters.eq(field, new BsonNull()))
@@ -469,6 +491,4 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
       case other => unexpectedKw(other)
     }
   }
-
-
 }

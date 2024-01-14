@@ -34,6 +34,11 @@ trait SpiSync_mongodb
 
   override def query_get[Tpl](q: Query[Tpl])(implicit conn0: Conn): List[Tpl] = {
     val conn = conn0.asInstanceOf[MongoConn_JVM]
+
+
+//    q.elements.foreach(println)
+//    println("================================================================ 2")
+
     if (q.doInspect)
       query_inspect(q)
     q.dbView.foreach(noTime)

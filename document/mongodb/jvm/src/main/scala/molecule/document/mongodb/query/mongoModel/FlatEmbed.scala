@@ -10,7 +10,7 @@ import scala.collection.mutable.ListBuffer
 
 class FlatEmbed(
   parent: Option[Branch] = None,
-  cardMany: Boolean = false,
+  val cardMany: Boolean = false,
   ns: String = "",
   refAttr: String = "",
   refNs: String = "",
@@ -34,8 +34,8 @@ class FlatEmbed(
 ) {
 
   override def getStages: util.ArrayList[BsonDocument] = {
-        println(s"----- 1 -----  $dot  $refAttr  ${parent.map(_.isEmbedded)}")
-        matches.forEach(m => println(m))
+    //        println(s"----- 1 -----  $dot  $refAttr  ${parent.map(_.isEmbedded)}")
+    //        matches.forEach(m => println(m))
 
     addMatches()
 
@@ -55,6 +55,17 @@ class FlatEmbed(
       // Remove empty projections with only tacit attributes (or no attributes)
       parent.get.projection.remove(refAttr)
     }
+
+    // Match filter attribute with flattened ref fields
+    if (!postMatches.isEmpty) {
+      stages.add(
+        new BsonDocument().append("$match",
+          Filters.and(postMatches)
+            .toBsonDocument(classOf[Bson], MongoClientSettings.getDefaultCodecRegistry)
+        )
+      )
+    }
+
     if (parent.isEmpty) {
       addStage("$project", projection)
     }
@@ -123,7 +134,7 @@ class FlatEmbed(
   override def toString = render(0)
   override def render(tabs: Int): String = {
     val p        = "  " * tabs
-    val parent1  = parent.fold("None")(parent => s"Some(${parent.refAttr})")
+    val parent1  = parent.fold("None")(parent => s"Some(${parent.ns})")
     val children = if (subBranches.isEmpty) "" else
       s"\n$p  " + subBranches.map(ref => ref.render(tabs + 1)).mkString(s",\n$p  ")
     s"""FlatEmbed($parent1, $cardMany

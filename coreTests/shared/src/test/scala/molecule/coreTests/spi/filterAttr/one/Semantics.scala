@@ -157,9 +157,7 @@ trait Semantics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.int(Ref.int_).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==>
-              """Please add missing filter attribute(s). Found:
-                |  Ref.int""".stripMargin
+            err ==> "Please add missing filter attribute Ref.int"
           }
       } yield ()
     }

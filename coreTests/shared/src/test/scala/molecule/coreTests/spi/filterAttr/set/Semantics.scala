@@ -146,54 +146,38 @@ trait Semantics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.int.ints(Ref.ints_).Ref.ints.not(Set(2, 3)).int.query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==>
-              """Cardinality-set filter attributes not allowed to do additional filtering. Found:
-                |  AttrSetManInt("Ref", "ints", Neq, Seq(Set(2, 3)), None, None, Nil, Nil, None, None, Seq(1, 80))""".stripMargin
+            err ==> "Cardinality-set filter attributes (Ref.ints) not allowed to do additional filtering."
           }
         _ <- Ns.int.ints.not(Set(2, 3)).Ref.ints(Ns.ints_).int.query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==>
-              """Cardinality-set filter attributes not allowed to do additional filtering. Found:
-                |  AttrSetManInt("Ns", "ints", Neq, Seq(Set(2, 3)), None, None, Nil, Nil, None, None, Seq(0, 30))""".stripMargin
+            err ==> "Cardinality-set filter attributes (Ns.ints) not allowed to do additional filtering."
           }
 
         _ <- Ns.int.ints.not(Ref.ints_).Ref.ints.not(Set(2, 3)).int.query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==>
-              """Cardinality-set filter attributes not allowed to do additional filtering. Found:
-                |  AttrSetManInt("Ref", "ints", Neq, Seq(Set(2, 3)), None, None, Nil, Nil, None, None, Seq(1, 80))""".stripMargin
+            err ==> "Cardinality-set filter attributes (Ref.ints) not allowed to do additional filtering."
           }
         _ <- Ns.int.ints.not(Set(2, 3)).Ref.ints.not(Ns.ints_).int.query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==>
-              """Cardinality-set filter attributes not allowed to do additional filtering. Found:
-                |  AttrSetManInt("Ns", "ints", Neq, Seq(Set(2, 3)), None, None, Nil, Nil, None, None, Seq(0, 30))""".stripMargin
+            err ==> "Cardinality-set filter attributes (Ns.ints) not allowed to do additional filtering."
           }
 
         _ <- Ns.int.ints.has(Ref.ints_).Ref.ints.not(Set(2, 3)).int.query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==>
-              """Cardinality-set filter attributes not allowed to do additional filtering. Found:
-                |  AttrSetManInt("Ref", "ints", Neq, Seq(Set(2, 3)), None, None, Nil, Nil, None, None, Seq(1, 80))""".stripMargin
+            err ==> "Cardinality-set filter attributes (Ref.ints) not allowed to do additional filtering."
           }
         _ <- Ns.int.ints.not(Set(2, 3)).Ref.ints.has(Ns.ints_).int.query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==>
-              """Cardinality-set filter attributes not allowed to do additional filtering. Found:
-                |  AttrSetManInt("Ns", "ints", Neq, Seq(Set(2, 3)), None, None, Nil, Nil, None, None, Seq(0, 30))""".stripMargin
+            err ==> "Cardinality-set filter attributes (Ns.ints) not allowed to do additional filtering."
           }
 
         _ <- Ns.int.ints.hasNo(Ref.ints_).Ref.ints.not(Set(2, 3)).int.query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==>
-              """Cardinality-set filter attributes not allowed to do additional filtering. Found:
-                |  AttrSetManInt("Ref", "ints", Neq, Seq(Set(2, 3)), None, None, Nil, Nil, None, None, Seq(1, 80))""".stripMargin
+            err ==> "Cardinality-set filter attributes (Ref.ints) not allowed to do additional filtering."
           }
         _ <- Ns.int.ints.not(Set(2, 3)).Ref.ints.hasNo(Ns.ints_).int.query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==>
-              """Cardinality-set filter attributes not allowed to do additional filtering. Found:
-                |  AttrSetManInt("Ns", "ints", Neq, Seq(Set(2, 3)), None, None, Nil, Nil, None, None, Seq(0, 30))""".stripMargin
+            err ==> "Cardinality-set filter attributes (Ns.ints) not allowed to do additional filtering."
           }
       } yield ()
     }

@@ -28,14 +28,14 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
     optOffset: Option[Int],
     optProxy: Option[ConnProxy]
   ): String = {
-    val elements1 = if (altElements.isEmpty) elements0 else altElements
-    validateQueryModel(elements1)
+    val elements1      = if (altElements.isEmpty) elements0 else altElements
+    val hasFilterAttrs = validateQueryModel(elements1)
     //    elements.foreach(println)
 
     // Set attrMap if available (used to get original type of aggregate attributes)
-//    optProxy.foreach(p => attrMap = p.attrMap)
-//    val elements2 = resolveFilterAttrs(elements1, optProxy)
-    val elements2 = resolveFilterAttrs(elements1)
+    //    optProxy.foreach(p => attrMap = p.attrMap)
+    //    val elements2 = resolveFilterAttrs(elements1, optProxy)
+    val elements2 = if (hasFilterAttrs) resolveFilterAttrs(elements1) else elements1
     from = getInitialNonGenericNs(elements2)
     exts += from -> None
 
@@ -191,7 +191,7 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
     def prepareAttr(a: Attr): Attr = {
       availableAttrs += a.cleanName
       if (a.filterAttr.nonEmpty) {
-        val fa = a.filterAttr.get
+        val fa = a.filterAttr.get._3
         if (fa.filterAttr.nonEmpty) {
           throw ModelError(s"Filter attributes inside filter attributes not allowed in ${a.ns}.${a.attr}")
         }
@@ -215,13 +215,8 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
       a
     }
 
-    def prepareNested(nested: Nested): Nested = {
-      Nested(nested.ref, prepare(nested.elements, Nil))
-    }
-
-    def prepareNestedOpt(nested: NestedOpt): NestedOpt = {
-      NestedOpt(nested.ref, prepare(nested.elements, Nil))
-    }
+    def prepareNested(nested: Nested): Nested = Nested(nested.ref, prepare(nested.elements, Nil))
+    def prepareNestedOpt(nested: NestedOpt): NestedOpt = NestedOpt(nested.ref, prepare(nested.elements, Nil))
 
     val elements1 = prepare(elements, Nil)
 
@@ -238,7 +233,7 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
   final private def resolve(elements: List[Element]): Unit = elements match {
     case element :: tail => element match {
       case a: AttrOne                      =>
-        if (a.attr == "id" && a.filterAttr.nonEmpty || a.attr != "id" && a.filterAttr.exists(_.attr == "id")) {
+        if (a.attr == "id" && a.filterAttr.nonEmpty || a.attr != "id" && a.filterAttr.exists(_._3.attr == "id")) {
           throw ModelError(noIdFiltering)
         }
         a match {

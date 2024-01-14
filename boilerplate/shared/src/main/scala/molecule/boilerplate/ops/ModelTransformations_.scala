@@ -8,6 +8,7 @@ import molecule.base.error.ModelError
 import molecule.boilerplate.api.Keywords._
 import molecule.boilerplate.api._
 import molecule.boilerplate.ast.Model._
+import scala.annotation.tailrec
 
 trait ModelTransformations_ {
 
@@ -1315,11 +1316,31 @@ trait ModelTransformations_ {
     }
   }
 
+  @tailrec
+  private def resolvePath(es: List[Element], path: List[String]): List[String] = {
+    es match {
+      case e :: tail => e match {
+        case r: Ref =>
+          val p = if (path.isEmpty) List(r.ns, r.refAttr, r.refNs) else List(r.refAttr, r.refNs)
+          resolvePath(tail, path ++ p)
+        case a: Attr => resolvePath(tail, if (path.isEmpty) List(a.ns) else path)
+        case other   => throw ModelError("Invalid element in filter attribute path: " + other)
+      }
+      case Nil       => path
+    }
+  }
+
   protected def filterAttr(es: List[Element], op: Op, filterAttrMolecule: Molecule): List[Element] = {
     val filterAttr0 = filterAttrMolecule.elements.last.asInstanceOf[Attr]
     val attrs       = es.last match {
       case a: Attr =>
-        val (filterAttr, adjacent) = if (a.ns == filterAttr0.ns) {
+        val (tacitFilterAttr, adjacent) = if (a.ns == filterAttr0.ns) {
+          // Rudimentary checked for same current namespace (it's the only information
+          // we have now during molecule buildup). At least we can rule out if the
+          // filter attribute is not adjacent to the caller attribute.
+          // Could point to other branch - have to be checked later.
+          // If pointing to other branch, the added filterAttr0 should be removed
+
           // Convert adjacent mandatory filter attribute to tacit attribute
           val tacitAttr = filterAttr0 match {
             case a: AttrOneMan => a match {
@@ -1377,110 +1398,112 @@ trait ModelTransformations_ {
           (tacitAttr, List(filterAttr0))
         } else (filterAttr0, Nil)
 
+        val filterPath         = resolvePath(filterAttrMolecule.elements, Nil)
         val attrWithFilterAttr = a match {
           case a: AttrOne => a match {
             case a: AttrOneMan => a match {
-              case a: AttrOneManID             => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrOneManString         => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrOneManInt            => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrOneManLong           => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrOneManFloat          => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrOneManDouble         => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrOneManBoolean        => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrOneManBigInt         => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrOneManBigDecimal     => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrOneManDate           => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrOneManDuration       => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrOneManInstant        => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrOneManLocalDate      => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrOneManLocalTime      => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrOneManLocalDateTime  => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrOneManOffsetTime     => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrOneManOffsetDateTime => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrOneManZonedDateTime  => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrOneManUUID           => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrOneManURI            => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrOneManByte           => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrOneManShort          => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrOneManChar           => a.copy(op = op, filterAttr = Some(filterAttr))
+              // -2 is just a dummy value until we can resolve the direction to either -1, 0 or 1
+              case a: AttrOneManID             => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrOneManString         => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrOneManInt            => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrOneManLong           => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrOneManFloat          => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrOneManDouble         => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrOneManBoolean        => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrOneManBigInt         => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrOneManBigDecimal     => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrOneManDate           => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrOneManDuration       => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrOneManInstant        => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrOneManLocalDate      => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrOneManLocalTime      => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrOneManLocalDateTime  => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrOneManOffsetTime     => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrOneManOffsetDateTime => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrOneManZonedDateTime  => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrOneManUUID           => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrOneManURI            => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrOneManByte           => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrOneManShort          => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrOneManChar           => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
             }
             case a: AttrOneTac => a match {
-              case a: AttrOneTacID             => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrOneTacString         => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrOneTacInt            => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrOneTacLong           => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrOneTacFloat          => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrOneTacDouble         => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrOneTacBoolean        => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrOneTacBigInt         => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrOneTacBigDecimal     => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrOneTacDate           => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrOneTacDuration       => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrOneTacInstant        => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrOneTacLocalDate      => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrOneTacLocalTime      => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrOneTacLocalDateTime  => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrOneTacOffsetTime     => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrOneTacOffsetDateTime => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrOneTacZonedDateTime  => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrOneTacUUID           => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrOneTacURI            => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrOneTacByte           => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrOneTacShort          => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrOneTacChar           => a.copy(op = op, filterAttr = Some(filterAttr))
+              case a: AttrOneTacID             => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrOneTacString         => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrOneTacInt            => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrOneTacLong           => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrOneTacFloat          => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrOneTacDouble         => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrOneTacBoolean        => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrOneTacBigInt         => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrOneTacBigDecimal     => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrOneTacDate           => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrOneTacDuration       => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrOneTacInstant        => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrOneTacLocalDate      => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrOneTacLocalTime      => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrOneTacLocalDateTime  => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrOneTacOffsetTime     => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrOneTacOffsetDateTime => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrOneTacZonedDateTime  => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrOneTacUUID           => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrOneTacURI            => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrOneTacByte           => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrOneTacShort          => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrOneTacChar           => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
             }
             case a             => unexpected(a)
           }
           case a: AttrSet => a match {
             case a: AttrSetMan => a match {
-              case a: AttrSetManID             => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrSetManString         => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrSetManInt            => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrSetManLong           => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrSetManFloat          => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrSetManDouble         => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrSetManBoolean        => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrSetManBigInt         => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrSetManBigDecimal     => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrSetManDate           => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrSetManDuration       => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrSetManInstant        => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrSetManLocalDate      => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrSetManLocalTime      => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrSetManLocalDateTime  => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrSetManOffsetTime     => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrSetManOffsetDateTime => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrSetManZonedDateTime  => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrSetManUUID           => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrSetManURI            => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrSetManByte           => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrSetManShort          => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrSetManChar           => a.copy(op = op, filterAttr = Some(filterAttr))
+              case a: AttrSetManID             => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrSetManString         => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrSetManInt            => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrSetManLong           => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrSetManFloat          => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrSetManDouble         => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrSetManBoolean        => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrSetManBigInt         => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrSetManBigDecimal     => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrSetManDate           => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrSetManDuration       => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrSetManInstant        => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrSetManLocalDate      => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrSetManLocalTime      => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrSetManLocalDateTime  => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrSetManOffsetTime     => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrSetManOffsetDateTime => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrSetManZonedDateTime  => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrSetManUUID           => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrSetManURI            => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrSetManByte           => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrSetManShort          => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrSetManChar           => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
             }
             case a: AttrSetTac => a match {
-              case a: AttrSetTacID             => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrSetTacString         => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrSetTacInt            => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrSetTacLong           => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrSetTacFloat          => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrSetTacDouble         => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrSetTacBoolean        => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrSetTacBigInt         => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrSetTacBigDecimal     => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrSetTacDate           => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrSetTacDuration       => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrSetTacInstant        => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrSetTacLocalDate      => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrSetTacLocalTime      => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrSetTacLocalDateTime  => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrSetTacOffsetTime     => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrSetTacOffsetDateTime => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrSetTacZonedDateTime  => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrSetTacUUID           => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrSetTacURI            => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrSetTacByte           => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrSetTacShort          => a.copy(op = op, filterAttr = Some(filterAttr))
-              case a: AttrSetTacChar           => a.copy(op = op, filterAttr = Some(filterAttr))
+              case a: AttrSetTacID             => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrSetTacString         => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrSetTacInt            => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrSetTacLong           => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrSetTacFloat          => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrSetTacDouble         => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrSetTacBoolean        => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrSetTacBigInt         => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrSetTacBigDecimal     => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrSetTacDate           => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrSetTacDuration       => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrSetTacInstant        => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrSetTacLocalDate      => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrSetTacLocalTime      => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrSetTacLocalDateTime  => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrSetTacOffsetTime     => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrSetTacOffsetDateTime => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrSetTacZonedDateTime  => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrSetTacUUID           => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrSetTacURI            => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrSetTacByte           => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrSetTacShort          => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
+              case a: AttrSetTacChar           => a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))
             }
             case a             => unexpected(a)
           }

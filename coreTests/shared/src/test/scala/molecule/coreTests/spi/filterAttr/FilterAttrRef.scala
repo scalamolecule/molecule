@@ -13,52 +13,6 @@ trait FilterAttrRef extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
   override lazy val tests = Tests {
 
-
-    "Forward/backward owner" - refs { implicit conn =>
-      for {
-        _ <- A.s.i.OwnB.i.insert(
-          ("a", 1, 0),
-          ("b", 1, 1),
-        ).transact
-
-        _ <- A.s.i_(B.i_).OwnB.i_.query.get.map(_ ==> List("b"))
-
-        _ <- A.s.i_.OwnB.i_(A.i_).query.get.map(_ ==> List("b"))
-        /*
-    {
-      "$match": {
-        "$and": [
-          {
-            "s": {
-              "$ne": null
-            }
-          },
-          {
-            "i": {
-              "$ne": null
-            }
-          },
-          {
-            "$expr": {
-              "$eq": [
-                "$i",
-                "$ownB.i"
-              ]
-            }
-          }
-        ]
-      }
-    },
-    {
-      "$project": {
-        "_id": 0,
-        "s": 1
-      }
-    }
-         */
-      } yield ()
-    }
-
     "Forward/backward" - refs { implicit conn =>
       for {
         _ <- A.s.i.B.i.insert(
@@ -75,6 +29,19 @@ trait FilterAttrRef extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       } yield ()
     }
 
+    "Forward/backward owner" - refs { implicit conn =>
+      for {
+        _ <- A.s.i.OwnB.i.insert(
+          ("a", 1, 0),
+          ("b", 1, 1),
+        ).transact
+
+        _ <- A.s.i_(B.i_).OwnB.i_.query.get.map(_ ==> List("b"))
+
+        _ <- A.s.i_.OwnB.i_(A.i_).query.get.map(_ ==> List("b"))
+      } yield ()
+    }
+
     "Ref-Ref" - refs { implicit conn =>
       for {
         _ <- A.s.i.B.i.C.i.insert(
@@ -83,16 +50,14 @@ trait FilterAttrRef extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           ("c", 0, 1, 1),
         ).transact
 
-        // A-B
+        // Forwards
         _ <- A.s.i_(B.i_).B.i_.C.i_.query.get.map(_ ==> List("a"))
-        _ <- A.s.i_.B.i_(A.i_).C.i_.query.get.map(_ ==> List("a"))
-
-        // A-C
-        _ <- A.s.i_(C.i_).B.i.C.i_.query.get.map(_ ==> List("b"))
-        _ <- A.s.i_.B.i.C.i_(A.i_).query.get.map(_ ==> List("b"))
-
-        // B-C
+        _ <- A.s.i_(C.i_).B.i_.C.i_.query.get.map(_ ==> List("b"))
         _ <- A.s.i_.B.i_(C.i_).C.i_.query.get.map(_ ==> List("c"))
+
+        // Backwards
+        _ <- A.s.i_.B.i_(A.i_).C.i_.query.get.map(_ ==> List("a"))
+        _ <- A.s.i_.B.i_.C.i_(A.i_).query.get.map(_ ==> List("b"))
         _ <- A.s.i_.B.i_.C.i_(B.i_).query.get.map(_ ==> List("c"))
       } yield ()
     }
@@ -105,17 +70,15 @@ trait FilterAttrRef extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           ("c", 0, 1, 1),
         ).transact
 
-        // A-B
-        _ <- A.s.i_(B.i_).B.i.OwnC.i_.query.get.map(_ ==> List("a"))
-        _ <- A.s.i_.B.i_(A.i_).OwnC.i.query.get.map(_ ==> List("a"))
+        // Forwards
+        _ <- A.s.i_(B.i_).B.i_.OwnC.i_.query.get.map(_ ==> List("a"))
+        _ <- A.s.i_(C.i_).B.i_.OwnC.i_.query.get.map(_ ==> List("b"))
+        _ <- A.s.i_.B.i_(C.i_).OwnC.i_.query.get.map(_ ==> List("c"))
 
-        // A-C
-        _ <- A.s.i_(C.i_).B.i.OwnC.i_.query.get.map(_ ==> List("b"))
-        _ <- A.s.i_.B.i.OwnC.i_(A.i_).query.get.map(_ ==> List("b"))
-
-        // B-C
-        _ <- A.s.i_.B.i(C.i_).OwnC.i_.query.get.map(_ ==> List("c"))
-        _ <- A.s.i_.B.i.OwnC.i_(B.i_).query.get.map(_ ==> List("c"))
+        // Backwards
+        _ <- A.s.i_.B.i_(A.i_).OwnC.i_.query.get.map(_ ==> List("a"))
+        _ <- A.s.i_.B.i_.OwnC.i_(A.i_).query.get.map(_ ==> List("b"))
+        _ <- A.s.i_.B.i_.OwnC.i_(B.i_).query.get.map(_ ==> List("c"))
       } yield ()
     }
 
@@ -127,16 +90,14 @@ trait FilterAttrRef extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           ("c", 0, 1, 1),
         ).transact
 
-        // A-B
-        _ <- A.s.i_(B.i_).OwnB.i.C.i_.query.get.map(_ ==> List("a"))
-        _ <- A.s.i_.OwnB.i_(A.i_).C.i.query.get.map(_ ==> List("a"))
-
-        // A-C
-        _ <- A.s.i_(C.i_).OwnB.i.C.i_.query.get.map(_ ==> List("b"))
-        _ <- A.s.i_.OwnB.i.C.i_(A.i_).query.get.map(_ ==> List("b"))
-
-        // B-C
+        // Forwards
+        _ <- A.s.i_(B.i_).OwnB.i_.C.i_.query.get.map(_ ==> List("a"))
+        _ <- A.s.i_(C.i_).OwnB.i_.C.i_.query.get.map(_ ==> List("b"))
         _ <- A.s.i_.OwnB.i_(C.i_).C.i_.query.get.map(_ ==> List("c"))
+
+        // Backwards
+        _ <- A.s.i_.OwnB.i_(A.i_).C.i_.query.get.map(_ ==> List("a"))
+        _ <- A.s.i_.OwnB.i_.C.i_(A.i_).query.get.map(_ ==> List("b"))
         _ <- A.s.i_.OwnB.i_.C.i_(B.i_).query.get.map(_ ==> List("c"))
       } yield ()
     }
@@ -149,70 +110,92 @@ trait FilterAttrRef extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           ("c", 0, 1, 1),
         ).transact
 
-        // A-B
-        _ <- A.s.i(B.i_).OwnB.i.OwnC.i_.query.get.map(_ ==> List("a"))
-        _ <- A.s.i.OwnB.i_(A.i_).OwnC.i.query.get.map(_ ==> List("a"))
+        // Forwards
+        _ <- A.s.i_(B.i_).OwnB.i_.OwnC.i_.query.get.map(_ ==> List("a"))
+        _ <- A.s.i_(C.i_).OwnB.i_.OwnC.i_.query.get.map(_ ==> List("b"))
+        _ <- A.s.i_.OwnB.i_(C.i_).OwnC.i_.query.get.map(_ ==> List("c"))
 
-        // A-C
-        _ <- A.s.i(C.i_).OwnB.i.OwnC.i_.query.get.map(_ ==> List("b"))
-        _ <- A.s.i.OwnB.i.OwnC.i_(A.i_).query.get.map(_ ==> List("b"))
-
-        // B-C
-        _ <- A.s.i.OwnB.i(C.i_).OwnC.i_.query.get.map(_ ==> List("c"))
-        _ <- A.s.i.OwnB.i.OwnC.i_(B.i_).query.get.map(_ ==> List("c"))
+        // Backwards
+        _ <- A.s.i_.OwnB.i_(A.i_).OwnC.i_.query.get.map(_ ==> List("a"))
+        _ <- A.s.i_.OwnB.i_.OwnC.i_(A.i_).query.get.map(_ ==> List("b"))
+        _ <- A.s.i_.OwnB.i_.OwnC.i_(B.i_).query.get.map(_ ==> List("c"))
       } yield ()
     }
 
 
-    //    "Qualifying" - refs { implicit conn =>
-    //      for {
-    //        _ <- A.s.i.B.i.insert(
-    //          ("a", 1, 0),
-    //          ("b", 1, 1),
-    //        ).transact
-    //
-    //        // We can qualify the full path to a filter attribute
-    //        _ <- A.s.i(A.B.i_).B.i_.query.get.map(_ ==> List("b"))
-    //
-    //        // But in this case `B` is enough
-    //        _ <- A.s.i(B.i_).B.i_.query.get.map(_ ==> List("b"))
-    //
-    //
-    //        // Same with owned relationships
-    //        _ <- A.s.i.OwnB.i.insert(
-    //          ("a", 1, 0),
-    //          ("b", 1, 1),
-    //        ).transact
-    //
-    //        _ <- A.s.i(A.OwnB.i_).OwnB.i_.query.get.map(_ ==> List("b"))
-    //        // It is unambiguous that `B` points to the `OwnB` branch
-    //        _ <- A.s.i(B.i_).OwnB.i_.query.get.map(_ ==> List("b"))
-    //      } yield ()
-    //    }
+    def ambiguous(attr: String): String =
+      s"""Ambiguous filter attribute path: $attr
+         |Please qualify the filter attribute by appending the full path of namespaces.
+         |Or make sure that the target attribute is not appearing multiple times.""".stripMargin
 
-    "Branches, forward" - refs { implicit conn =>
+
+    "Qualifying" - refs { implicit conn =>
       for {
-        _ <- A.s.i(B.i) // Ambiguous if B points to A.B or A.OwnB
+        _ <- A.s.i.B.i.insert(
+          ("a", 1, 0),
+          ("b", 1, 1),
+          ("c", 0, 1),
+        ).transact
+
+        _ <- A.s.i(B.i_) // Ambiguous if B points to A.B or A.OwnB
           .B.i._A
           .OwnB.i
           .query.get.map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Ambiguous filter attribute path: B.i"
+            err ==> ambiguous("B.i")
           }
 
+        // We can qualify the full path to a filter attribute
+        _ <- A.s.i_(A.B.i_).B.i_.query.get.map(_ ==> List("b"))
+
+        // But in this case `B` is enough
+        _ <- A.s.i_(B.i_).B.i_.query.get.map(_ ==> List("b"))
+
+
+        // No need to qualify
+        // B.i can unambiguously point to A.B.i since A.B.i has the same
+        // unambiguous value even though it participates in multiple expressions.
+        _ <- A.s.i_(B.i_).B.i_.<(2).i_.not(0).query.get.map(_ ==> List("b"))
+        // Backwards
+        _ <- A.s.i_.<(2).i_.not(0).B.i_(A.i_).query.get.map(_ ==> List("b"))
+
+
+
+        // Same with owned relationships
+        _ <- A.s.i.OwnB.i.insert(
+          ("a", 1, 0),
+          ("b", 1, 1),
+        ).transact
+
+        _ <- A.s.i_(A.OwnB.i_).OwnB.i_.query.get.map(_ ==> List("b"))
+        // It is unambiguous that `B` points to the `OwnB` branch
+        _ <- A.s.i_(B.i_).OwnB.i_.query.get.map(_ ==> List("b"))
+
+        // No need to qualify
+        _ <- A.s.i_(B.i_).OwnB.i_.<(2).i_.not(0).query.get.map(_ ==> List("b"))
+        // Backwards
+        _ <- A.s.i_.<(2).i_.not(0).OwnB.i_(A.i_).query.get.map(_ ==> List("b"))
+      } yield ()
+    }
+
+
+    "Branches, forward" - refs { implicit conn =>
+      for {
         _ <- A.s.i.B.i._A.OwnB.i.insert(
           ("a", 1, 1, 0),
           ("b", 1, 0, 1),
           ("c", 0, 1, 1),
         ).transact
 
+        // Unambiguous when pointing forwards to qualified branches
+
         _ <- A.s.i_(A.B.i_)
-          .B.i_._A
-          .OwnB.i
-          .query.get.map(_ ==> List("b"))
+          .B.i_._A // <-- B.i is compared to A.i
+          .OwnB.i_
+          .query.get.map(_ ==> List("a"))
 
         _ <- A.s.i_(A.OwnB.i_)
           .B.i_._A
-          .OwnB.i_ // point back to A from A.OwnB branch
+          .OwnB.i_ // <-- OwnB.i is compared to A.i
           .query.get.map(_ ==> List("b"))
       } yield ()
     }
@@ -226,26 +209,20 @@ trait FilterAttrRef extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           ("c", 0, 1, 1),
         ).transact
 
-        // Ambiguous if B points to A.B or A.OwnB
-        _ <- A.s.i(B.i)
-          .B.i._A
-          .OwnB.i
-          .query.get.map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Ambiguous filter attribute path: B.i"
-          }
-
         // Unambiguous when pointing backwards from branches
-        _ <- A.s.i
-          .B.i_(A.i_)._A // point back to A from A.B branch
-          .OwnB.i
-          .query.get.map(_ ==> List("b"))
 
-        _ <- A.s.i
-          .B.i._A
-          .OwnB.i(B.i_) // point back to A from A.OwnB branch
+        _ <- A.s.i_
+          .B.i_(A.i_)._A // point back to A from A.B branch
+          .OwnB.i_
+          .query.get.map(_ ==> List("a"))
+
+        _ <- A.s.i_
+          .B.i_._A
+          .OwnB.i_(A.i_) // point back to A from A.OwnB branch
           .query.get.map(_ ==> List("b"))
       } yield ()
     }
+
 
     "Branch to branch" - refs { implicit conn =>
       for {
@@ -256,7 +233,7 @@ trait FilterAttrRef extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
         _ <- A.s
           .B.i_(A.OwnB.i_)._A // point to A.OwnB branch
-          .OwnB.i
+          .OwnB.i_
           .query.get.map(_ ==> List("b"))
 
         // Same as
@@ -288,7 +265,7 @@ trait FilterAttrRef extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           .OwnB.i_.C.i_
           .query.get.map(_ ==> List("a"))
 
-        _ <- A.s.i_(A.B.C.i_)
+        _ <- A.s.i_(A.B.OwnC.i_)
           .B.i_.OwnC.i_._B._A
           .OwnB.i_.C.i_
           .query.get.map(_ ==> List("b"))
@@ -316,7 +293,7 @@ trait FilterAttrRef extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
         _ <- A.s.i_
           .B.i_.OwnC.i_._B._A
-          .OwnB.i_(A.i_).C.i
+          .OwnB.i_(A.i_).C.i_
           .query.get.map(_ ==> List("c"))
 
         _ <- A.s.i_

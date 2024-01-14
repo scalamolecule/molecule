@@ -25,7 +25,7 @@ trait ResolveExprSetRefAttr_mariadb
         throw ModelError(s"Cardinality-set filter attributes not allowed to do additional filtering. Found:\n  " + attr)
       }
       refExpr(refIds, attr.op, args, res)
-    } { filterAttr =>
+    } { case (dir, filterPath, filterAttr) =>
       refExpr2(refIds, attr.op, filterAttr.name)
     }
   }

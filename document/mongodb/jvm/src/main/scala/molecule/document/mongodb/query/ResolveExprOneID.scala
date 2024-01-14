@@ -47,16 +47,16 @@ trait ResolveExprOneID extends ResolveExpr with LambdasOne { self: MongoQueryBas
 
     attr.filterAttr.fold(
       expr(field, attr.op, args, res)
-    )(filterAttr =>
+    ) { case (dir, filterPath, filterAttr) =>
       expr2(field, attr.op, filterAttr.name)
-    )
+    }
   }
 
   private def tac[T](attr: Attr, args: Seq[T], res: ResOne[T]): Unit = {
     val field = attr.attr
     attr.filterAttr.fold {
       expr(field, attr.op, args, res)
-    } { filterAttr =>
+    } { case (dir, filterPath, filterAttr) =>
       expr2(field, attr.op, filterAttr.name)
     }
   }

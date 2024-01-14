@@ -64,8 +64,8 @@ abstract class QueryResolve_mongodb[Tpl](
     //    val collection            = conn.mongoDb.getCollection(collectionName, classOf[BsonDocument])
 
     println("QUERY ----------------------------------------------")
-    elements.foreach(println)
-    println("-------")
+//    elements.foreach(println)
+//    println("-------")
     println(pipeline2json(pipeline, Some(collectionName)))
     //    pipeline.forEach(x => println(x.toBsonDocument.toJson(pretty)))
 

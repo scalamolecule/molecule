@@ -90,7 +90,7 @@ class Model2DatomicQuery[Tpl](elements0: List[Element])
     def prepareAttr(a: Attr): Attr = {
       availableAttrs += a.cleanName
       if (a.filterAttr.nonEmpty) {
-        val fa = a.filterAttr.get
+        val (dir, filterPath, fa) = a.filterAttr.get
         if (fa.filterAttr.nonEmpty) {
           throw ModelError(s"Filter attributes inside filter attributes not allowed in ${a.ns}.${a.attr}")
         }
@@ -175,7 +175,7 @@ class Model2DatomicQuery[Tpl](elements0: List[Element])
             }
           case _    =>
             a.filterAttr.collect {
-              case filterAttr if filterAttr.attr == "id" => throw ModelError(noIdFiltering)
+              case filterAttr if filterAttr._3.attr == "id" => throw ModelError(noIdFiltering)
             }
             a match {
               case a: AttrOneMan => resolve(resolveAttrOneMan(es, a), tail)

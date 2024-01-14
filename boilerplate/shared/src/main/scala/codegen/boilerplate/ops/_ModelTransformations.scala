@@ -15,6 +15,7 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |import molecule.boilerplate.api.Keywords._
        |import molecule.boilerplate.api._
        |import molecule.boilerplate.ast.Model._
+       |import scala.annotation.tailrec
        |
        |trait ModelTransformations_ {
        |
@@ -142,11 +143,31 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |    }
        |  }
        |
+       |  @tailrec
+       |  private def resolvePath(es: List[Element], path: List[String]): List[String] = {
+       |    es match {
+       |      case e :: tail => e match {
+       |        case r: Ref =>
+       |          val p = if (path.isEmpty) List(r.ns, r.refAttr, r.refNs) else List(r.refAttr, r.refNs)
+       |          resolvePath(tail, path ++ p)
+       |        case a: Attr => resolvePath(tail, if (path.isEmpty) List(a.ns) else path)
+       |        case other   => throw ModelError("Invalid element in filter attribute path: " + other)
+       |      }
+       |      case Nil       => path
+       |    }
+       |  }
+       |
        |  protected def filterAttr(es: List[Element], op: Op, filterAttrMolecule: Molecule): List[Element] = {
        |    val filterAttr0 = filterAttrMolecule.elements.last.asInstanceOf[Attr]
        |    val attrs       = es.last match {
        |      case a: Attr =>
-       |        val (filterAttr, adjacent) = if (a.ns == filterAttr0.ns) {
+       |        val (tacitFilterAttr, adjacent) = if (a.ns == filterAttr0.ns) {
+       |          // Rudimentary checked for same current namespace (it's the only information
+       |          // we have now during molecule buildup). At least we can rule out if the
+       |          // filter attribute is not adjacent to the caller attribute.
+       |          // Could point to other branch - have to be checked later.
+       |          // If pointing to other branch, the added filterAttr0 should be removed
+       |
        |          // Convert adjacent mandatory filter attribute to tacit attribute
        |          val tacitAttr = filterAttr0 match {
        |            case a: AttrOneMan => a match {
@@ -162,9 +183,11 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |          (tacitAttr, List(filterAttr0))
        |        } else (filterAttr0, Nil)
        |
+       |        val filterPath         = resolvePath(filterAttrMolecule.elements, Nil)
        |        val attrWithFilterAttr = a match {
        |          case a: AttrOne => a match {
        |            case a: AttrOneMan => a match {
+       |              // -2 is just a dummy value until we can resolve the direction to either -1, 0 or 1
        |              ${addFilterAttr("One", "Man")}
        |            }
        |            case a: AttrOneTac => a match {
@@ -282,7 +305,7 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
   }
   private def addFilterAttr(card: String, mode: String): String = {
     baseTypesWithSpaces.map { case (baseTpe, space) =>
-      s"case a: Attr$card$mode$baseTpe $space=> a.copy(op = op, filterAttr = Some(filterAttr))"
+      s"case a: Attr$card$mode$baseTpe $space=> a.copy(op = op, filterAttr = Some((-2, filterPath, tacitFilterAttr)))"
     }.mkString("\n              ")
   }
 

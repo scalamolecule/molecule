@@ -9,7 +9,9 @@ import molecule.core.util.AggrUtils
 import org.bson._
 import org.bson.types.{Decimal128, ObjectId}
 
-trait LambdasBase extends BaseHelpers with AggrUtils with MongoQueryBase {
+trait LambdasBase extends BaseHelpers with AggrUtils
+//  with MongoQueryBase
+  {
 
   //  protected lazy val one2sqlString        : String => String         = (v: String) => s"'${v.replace("'", "''")}'"
   //  protected lazy val one2sqlInt           : Int => String            = (v: Int) => s"$v"

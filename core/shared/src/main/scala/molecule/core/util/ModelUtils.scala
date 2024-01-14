@@ -91,9 +91,9 @@ trait ModelUtils {
     def prepareAttr(a: Attr): Attr = {
       a.filterAttr.fold {
         resolveReservedNames(a, optProxy.get)
-      } { filterAttr0 =>
+      } { case (dir, filterPath, filterAttr0) =>
         val filterAttr = resolveReservedNames(filterAttr0, optProxy.get)
-        resolveReservedNames(a, optProxy.get, Some(filterAttr))
+        resolveReservedNames(a, optProxy.get, Some((dir, filterPath, filterAttr)))
       }
     }
 
@@ -156,7 +156,7 @@ trait ModelUtils {
   final protected def resolveReservedNames(
     a0: Attr,
     proxy: ConnProxy,
-    optFilterAttr: Option[Attr] = None
+    optFilterAttr: Option[(Int, List[String], Attr)] = None
   ): Attr = {
     a0 match {
       case a: AttrOne => a match {

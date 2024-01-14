@@ -1,11 +1,10 @@
 package molecule.document.mongodb.query
 
-import com.mongodb.client.model.Filters
 import molecule.base.ast._
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.document.mongodb.query.mongoModel.{FlatEmbed, FlatRef, NestedEmbed, NestedRef}
-import org.bson.{BsonArray, BsonDocument, BsonInt32}
+import org.bson.{BsonDocument, BsonInt32}
 import scala.collection.mutable.ListBuffer
 
 
@@ -17,6 +16,12 @@ trait ResolveRef { self: MongoQueryBase =>
       throw ModelError(
         "Only cardinality-one refs allowed in optional nested queries. Found: " + ref
       )
+    }
+
+    if (path2.isEmpty) {
+      path2 = List(ref.ns, ref.refAttr, ref.refNs)
+    } else {
+      path2 ++= List(ref.refAttr, ref.refNs)
     }
 
     // Project refNs
@@ -40,7 +45,8 @@ trait ResolveRef { self: MongoQueryBase =>
       embeddedBranch.base = b.base
       embeddedBranch
     } else {
-      new FlatRef(
+      //      println(s"#################  $refAttr  " + b.isEmbedded)
+      val refBranch = new FlatRef(
         Some(b),
         ns,
         refAttr,
@@ -52,6 +58,7 @@ trait ResolveRef { self: MongoQueryBase =>
         b.alias + refAttr + "_",
         refProjections,
       )
+      refBranch
     }
 
     // Matches build up on new ref branch as base
@@ -82,6 +89,8 @@ trait ResolveRef { self: MongoQueryBase =>
       }
     }
 
+    path2 = path2.dropRight(2)
+
     //    println(s"----- B1 -----  ${b.dot}  ${b.refAttr}  ${b.parent.map(_.isEmbedded)}")
     //    b.matches.forEach(m => println(m))
 
@@ -105,8 +114,10 @@ trait ResolveRef { self: MongoQueryBase =>
     if (isNestedOpt) {
       noMixedNestedModes
     }
+    path2 ++= List(ref.refAttr, ref.refNs)
+
     // No empty nested arrays when asking for mandatory nested data
-//    b.base.matches.add(Filters.ne(b.dot + ref.refAttr, new BsonArray()))
+    //    b.base.matches.add(Filters.ne(b.dot + ref.refAttr, new BsonArray()))
 
     resolveNested(ref, nestedElements, true)
   }
@@ -116,9 +127,10 @@ trait ResolveRef { self: MongoQueryBase =>
     if (isNestedMan) {
       noMixedNestedModes
     }
-    if (expectedFilterAttrs.nonEmpty) {
+    if (hasFilterAttr) {
       throw ModelError("Filter attributes not allowed in optional nested queries.")
     }
+    path2 ++= List(ref.refAttr, ref.refNs)
     resolveNested(ref, nestedElements, false)
   }
 

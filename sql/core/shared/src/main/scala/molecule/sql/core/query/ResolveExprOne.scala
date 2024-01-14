@@ -119,9 +119,9 @@ trait ResolveExprOne extends ResolveExpr { self: SqlQueryBase with LambdasOne =>
     addSort(attr, col)
     attr.filterAttr.fold(
       expr(col, attr.op, args, res)
-    )(filterAttr =>
+    ) { case (dir, filterPath, filterAttr) =>
       expr2(col, attr.op, filterAttr.name)
-    )
+    }
   }
 
   protected def tac[T: ClassTag](attr: Attr, args: Seq[T], res: ResOne[T]): Unit = {
@@ -130,7 +130,7 @@ trait ResolveExprOne extends ResolveExpr { self: SqlQueryBase with LambdasOne =>
       notNull += col
     attr.filterAttr.fold {
       expr(col, attr.op, args, res)
-    } { filterAttr =>
+    } { case (dir, filterPath, filterAttr) =>
       expr2(col, attr.op, filterAttr.name)
     }
   }

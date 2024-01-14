@@ -34,9 +34,6 @@ class NestedRef(
 ) {
   isEmbedded = false
 
-  private val outerStages = new util.ArrayList[BsonDocument]
-  private val pipeline    = new BsonArray()
-
   override def getStages: util.ArrayList[BsonDocument] = {
     addMatches()
     subBranches.foreach(ref => stages.addAll(ref.getStages))
@@ -57,10 +54,10 @@ class NestedRef(
     if (!pipeline.isEmpty) {
       lookup.append("pipeline", pipeline)
     }
-    outerStages.add(new BsonDocument("$lookup", lookup))
+    postStages.add(new BsonDocument("$lookup", lookup))
 
     if (mandatory) {
-      outerStages.add(
+      postStages.add(
         new BsonDocument().append("$match",
           new BsonDocument().append(refAttr,
             new BsonDocument().append("$ne", new BsonArray())
@@ -68,7 +65,7 @@ class NestedRef(
         )
       )
     }
-    outerStages
+    postStages
   }
 
   override def toString = render(0)

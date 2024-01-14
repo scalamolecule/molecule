@@ -121,7 +121,7 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
       expr(e, a, v, attr.op, args, res)
       filterAttrVars1 = filterAttrVars1 + (a -> (e, v))
       filterAttrVars2.get(a).foreach(_(e, v))
-    } { filterAttr =>
+    } { case (dir, filterPath, filterAttr) =>
       expr2(e, a, v, attr.op, s":${filterAttr.ns}/${filterAttr.attr}")
     }
   }
@@ -138,7 +138,7 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
       expr(e, a, v, attr.op, args, res)
       filterAttrVars1 = filterAttrVars1 + (a -> (e, v))
       filterAttrVars2.get(a).foreach(_(e, v))
-    } { filterAttr =>
+    } { case (dir, filterPath, filterAttr) =>
       expr2(e, a, v, attr.op, s":${filterAttr.ns}/${filterAttr.attr}")
     }
   }

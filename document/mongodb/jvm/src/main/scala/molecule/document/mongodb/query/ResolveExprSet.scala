@@ -105,14 +105,14 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
     topBranch.groupIdFields += prefixedFieldPair
 
     attr.filterAttr.fold {
-      if (filterAttrVars.contains(attr.name) && attr.op != V) {
-        // Runtime check needed since we can't type infer it
-        throw ModelError(s"Cardinality-set filter attributes not allowed to do additional filtering. Found:\n  " + attr)
-      }
+//      if (filterAttrVars.contains(attr.name) && attr.op != V) {
+//        // Runtime check needed since we can't type infer it
+//        throw ModelError(s"Cardinality-set filter attributesZ not allowed to do additional filtering. Found:\n  " + attr)
+//      }
       expr(uniqueField, field, attr.op, args, resSet, true)
     } {
-      case filterAttr: AttrOne => ??? //setExpr2(field, attr.op, filterAttr.name, true, tpe)
-      case filterAttr          => ??? //setExpr2(field, attr.op, filterAttr.name, false, tpe)
+      case (dir, filterPath, filterAttr: AttrOne) => () //??? //setExpr2(field, attr.op, filterAttr.name, true, tpe)
+      case (dir, filterPath, filterAttr)          => () //??? //setExpr2(field, attr.op, filterAttr.name, false, tpe)
     }
   }
 
@@ -124,8 +124,8 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
       expr(uniqueField, field, attr.op, args, res, false)
     } {
       //      expr2(field, attr.op, filterAttr.name)
-      case filterAttr: AttrOne => expr2(field, attr.op, filterAttr.name, true, res.tpe)
-      case filterAttr          => expr2(field, attr.op, filterAttr.name, false, res.tpe)
+      case (dir, filterPath, filterAttr: AttrOne) => expr2(field, attr.op, filterAttr.name, true, res.tpe)
+      case (dir, filterPath, filterAttr)          => expr2(field, attr.op, filterAttr.name, false, res.tpe)
     }
   }
 
