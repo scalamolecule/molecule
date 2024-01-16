@@ -9,6 +9,7 @@ import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
 abstract class Branch(
+  val level: Int,
   val parent: Option[Branch], // parent branch can be both embedded or ref
   var ns: String,
   val refAttr: String,
@@ -28,7 +29,7 @@ abstract class Branch(
   val filterMatches = new util.ArrayList[Bson]
 
   val preGroupFields   = ListBuffer.empty[(String, String)]
-  val groupIdFields    = ListBuffer.empty[(String, String)]
+  val groupIdFields    = ListBuffer.empty[(Int, String, String)]
   val optSetSeparators = ListBuffer.empty[(String, BsonValue)]
   val groupExprs       = ListBuffer.empty[(String, BsonValue)]
   var addFields        = Set.empty[(String, BsonValue)]
@@ -40,8 +41,9 @@ abstract class Branch(
   var base: Branch = this
 
   protected val postStages = new util.ArrayList[BsonDocument]
-  protected val pipeline    = new BsonArray()
+  protected val pipeline   = new BsonArray()
 
+  val lateStages = new util.ArrayList[BsonDocument]
 
 
   def addMatches(): Unit = {
@@ -62,7 +64,7 @@ abstract class Branch(
     groupExprs += ((field, bson))
   }
   def groupAddToSet(keyField: String, setField: String): Unit = {
-    groupExpr(keyField, new BsonDocument().append("$addToSet", new BsonString(setField)))
+    groupExpr(keyField, new BsonDocument("$addToSet", new BsonString(setField)))
   }
 
   def unique(field: String): String = {
@@ -79,14 +81,27 @@ abstract class Branch(
     uniqueField
   }
 
-  def addStage(name: String, params: Bson): Boolean = {
+  def addStage(name: String, doc: Bson): Unit = {
     stages.add(
-      new BsonDocument().append(name,
+      new BsonDocument(name,
         // Add codec for MQL expressions (filters)
-        params.toBsonDocument(classOf[Bson], MongoClientSettings.getDefaultCodecRegistry)
+        doc.toBsonDocument(classOf[Bson], MongoClientSettings.getDefaultCodecRegistry)
       )
     )
   }
+  def addStage(name: String, docs: util.ArrayList[Bson]): Unit = {
+    docs.size match {
+      case 0 => ()
+      case 1 => addStage(name, docs.get(0))
+      case _ => stages.add(
+        new BsonDocument(name,
+          Filters.and(docs)
+            .toBsonDocument(classOf[Bson], MongoClientSettings.getDefaultCodecRegistry)
+        )
+      )
+    }
+  }
+
   def getStages: util.ArrayList[BsonDocument]
   def render(tabs: Int): String
 }

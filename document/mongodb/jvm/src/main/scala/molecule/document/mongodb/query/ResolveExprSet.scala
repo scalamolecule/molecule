@@ -101,14 +101,10 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
     projectField(field)
     addCast(field, resSet.castSet(field))
 
-    prefixedFieldPair = if (b.parent.isEmpty) (field, field) else (b.path + field, b.alias + field)
+    prefixedFieldPair = if (b.parent.isEmpty) (nestedLevel, field, field) else (nestedLevel, b.path + field, b.alias + field)
     topBranch.groupIdFields += prefixedFieldPair
 
     attr.filterAttr.fold {
-//      if (filterAttrVars.contains(attr.name) && attr.op != V) {
-//        // Runtime check needed since we can't type infer it
-//        throw ModelError(s"Cardinality-set filter attributesZ not allowed to do additional filtering. Found:\n  " + attr)
-//      }
       expr(uniqueField, field, attr.op, args, resSet, true)
     } {
       case (dir, filterPath, filterAttr: AttrOne) => () //??? //setExpr2(field, attr.op, filterAttr.name, true, tpe)
@@ -135,7 +131,7 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
     projectField(field)
     addCast(field, res.castOptSet(field))
 
-    prefixedFieldPair = if (b.parent.isEmpty) (field, field) else (b.path + field, b.alias + field)
+    prefixedFieldPair = if (b.parent.isEmpty) (nestedLevel, field, field) else (nestedLevel, b.path + field, b.alias + field)
     topBranch.groupIdFields += prefixedFieldPair
 
     attr.op match {
@@ -361,7 +357,7 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
 
 
   private def reduce(field: String): BsonDocument = {
-    new BsonDocument().append("$reduce",
+    new BsonDocument("$reduce",
       new BsonDocument()
         .append("input", new BsonString(field))
         .append("initialValue", new BsonArray())
@@ -388,7 +384,7 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
       case "distinct" =>
         noBooleanSetAggr(res)
         b.base.matches.add(Filters.ne(b.dot + field, null.asInstanceOf[T]))
-        topBranch.groupExprs += aliasField -> new BsonDocument().append("$addToSet", new BsonString(pathField2))
+        topBranch.groupExprs += aliasField -> new BsonDocument("$addToSet", new BsonString(pathField2))
         addField(uniqueField)
         replaceCast(uniqueField, res.castSetSet(uniqueField))
 
@@ -423,8 +419,7 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
       case "count" =>
         noBooleanSetCounts(n)
         topBranch.groupExpr(aliasField,
-          new BsonDocument().append("$sum",
-            new BsonDocument().append("$size", new BsonString(pathField2)))
+          new BsonDocument("$sum", new BsonDocument("$size", new BsonString(pathField2)))
         )
         addField(uniqueField)
         replaceCast(uniqueField, castInt(uniqueField))
@@ -432,12 +427,12 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
       case "countDistinct" =>
         noBooleanSetCounts(n)
         topBranch.groupAddToSet(aliasField, pathField2)
-        topBranch.addFields += pathField -> new BsonDocument().append("$size", reduce(aliasField2))
+        topBranch.addFields += pathField -> new BsonDocument("$size", reduce(aliasField2))
         replaceCast(uniqueField, castInt(uniqueField))
 
       case "sum" =>
         topBranch.groupAddToSet(aliasField, pathField2)
-        topBranch.addFields += pathField -> new BsonDocument().append("$sum", reduce(aliasField2))
+        topBranch.addFields += pathField -> new BsonDocument("$sum", reduce(aliasField2))
         replaceCast(uniqueField, res.v2set(uniqueField))
 
       case "median" =>
@@ -452,22 +447,22 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
 
       case "avg" =>
         topBranch.groupAddToSet(aliasField, pathField2)
-        topBranch.addFields += pathField -> new BsonDocument().append("$avg", reduce(aliasField2))
+        topBranch.addFields += pathField -> new BsonDocument("$avg", reduce(aliasField2))
         replaceCast(uniqueField, hardCastDouble(uniqueField))
 
       case "variance" =>
         topBranch.groupAddToSet(aliasField, pathField2)
-        topBranch.addFields += pathField -> new BsonDocument().append("$stdDevPop", reduce(aliasField2))
+        topBranch.addFields += pathField -> new BsonDocument("$stdDevPop", reduce(aliasField2))
         b.projection.remove(b.dot + uniqueField)
         val pow = new BsonArray()
         pow.add(new BsonString(pathField2))
         pow.add(new BsonInt32(2))
-        b.projection.append(b.dot + field, new BsonDocument().append("$pow", pow))
+        b.projection.append(b.dot + field, new BsonDocument("$pow", pow))
         replaceCast(uniqueField, hardCastDouble(uniqueField))
 
       case "stddev" =>
         topBranch.groupAddToSet(aliasField, pathField2)
-        topBranch.addFields += pathField -> new BsonDocument().append("$stdDevPop", reduce(aliasField2))
+        topBranch.addFields += pathField -> new BsonDocument("$stdDevPop", reduce(aliasField2))
         replaceCast(uniqueField, hardCastDouble(uniqueField))
 
       case other => unexpectedKw(other)

@@ -15,11 +15,7 @@ trait TestData extends DateHandling { self: CoreTest =>
   private def ur(i: Int): URI = new URI("uri" + i)
   private def bi(i: Int): BigInt = BigInt(i)
   private def bd(d: Double): BigDecimal = BigDecimal(d)
-  private def r(i: Int): String = {
-
-    println(s"database: $database   $i")
-    if (database == "MongoDB") "12345678901234567890123" + i else s"$i"
-  }
+  private def r(i: Int): String = if (database == "MongoDB") "12345678901234567890123" + i else s"$i"
 
   lazy val (string0, string1, string2, string3, string4, string5, string6, string7, string8, string9) =
     ("-", "a", "b", "c", "d", "e", "f", "g", "h", "i")

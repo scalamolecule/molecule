@@ -19,36 +19,14 @@ object AdhocJVM_h2 extends TestSuite_h2 {
         //        _ <- Ns.int.insert(1).i.transact
         //        _ <- Ns.int.query.i.get.map(_ ==> List(1))
 
-
-        _ <- Ns.i.int.insert(
-          (1, int1),
-          (1, int2),
-          (1, int3),
-          (2, int4),
-          (2, int5),
-          (2, int6),
+        _ <- Ns.s.i.Refs.*(Ref.int).insert(
+          ("a", 1, List(2, 3)),
+          ("b", 4, List(4, 5)),
+          ("c", 7, List(5, 6)),
+          ("d", 9, Nil),
         ).transact
 
-        //        _ <- Ns.int(min).query.i.get.map(_ ==> List(int1))
-        //        _ <- Ns.int(max).query.get.map(_ ==> List(int6))
-        //        _ <- Ns.int(min).int(max).query.get.map(_ ==> List((int1, int6)))
-        _ = {
-          val x = ref1
-        }
-        _ <- Ns.i.a1.int(min).query.i.get.map(_ ==> List(
-          (1, int1),
-          (2, int4)
-        ))
-        //
-        //        _ <- Ns.i.a1.int(max).query.get.map(_ ==> List(
-        //          (1, int3),
-        //          (2, int6)
-        //        ))
-        //
-        //        _ <- Ns.i.a1.int(min).int(max).query.get.map(_ ==> List(
-        //          (1, int1, int3),
-        //          (2, int4, int6)
-        //        ))
+        _ <- Ns.s.i(Ref.int_).Refs.*(Ref.int).query.i.get.map(_ ==> List(("b", 4, List(4))))
 
       } yield ()
     }

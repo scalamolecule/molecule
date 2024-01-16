@@ -9,6 +9,7 @@ import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
 class NestedEmbed(
+  level: Int = 0,
   parent: Option[Branch] = None,
   ns: String = "",
   refAttr: String = "",
@@ -18,8 +19,9 @@ class NestedEmbed(
   und: String = "",
   path: String = "",
   alias: String = "",
-  projection: BsonDocument = new BsonDocument().append("_id", new BsonInt32(0)),
+  projection: BsonDocument = new BsonDocument("_id", new BsonInt32(0)),
 ) extends Branch(
+  level,
   parent,
   ns,
   refAttr,
@@ -55,7 +57,7 @@ class NestedEmbed(
     val children = if(subBranches.isEmpty)"" else
       s"\n$p  " + subBranches.map(ref => ref.render(tabs + 1)).mkString(s",\n$p  ")
     s"""NestedEmbed(
-       |${p}  $parent1,
+       |${p}  $level, $parent1,
        |${p}  $refAttr, $refNs, $pathFields, $dot, $und, $path, $alias,
        |${p}  $projection
        |${p})$children""".stripMargin

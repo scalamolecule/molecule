@@ -62,65 +62,33 @@ trait Update_mongodb
     resolve(elements)
     val updateData = new BsonDocument("_action", new BsonString("update"))
     dd.foreach {
-      case x@RefData(_, ns, setDoc, pushDoc, addToSet, pullAll, arrayFilters,
+      case RefData(_, ns, setDoc, pushDoc, addToSet, pullAll, arrayFilters,
       ids, filterElements, uniqueFilterElements) =>
-
-        println(x)
-
         val ids1 = if (isUpdate) {
           if (ids.nonEmpty && filterElements.nonEmpty) {
-            println("A")
             val filterIds = query(AttrOneManID(ns, "id", Eq, ids) +: filterElements)
-            println("A ------ filterIds: " + filterIds)
-            val validIds = ids.intersect(filterIds)
-            println("A ------ validIds : " + validIds)
+            val validIds  = ids.intersect(filterIds)
             validIds
 
           } else if (ids.nonEmpty && uniqueFilterElements.nonEmpty) {
-            println("B")
             val filterIds = query(AttrOneManID(ns, "id", Eq, ids) +: uniqueFilterElements.toList)
-            println("B ------ uniqueFilterIds: " + filterIds)
-            val validIds = ids.intersect(filterIds)
-            println("B ------ validIds       : " + validIds)
+            val validIds  = ids.intersect(filterIds)
             validIds
 
           } else if (uniqueFilterElements.nonEmpty) {
-            println("C")
             val filterIds = query(AttrOneManID(ns, "id", V) +: uniqueFilterElements.toList)
-            println("C ------ filterIds: " + filterIds)
             filterIds
 
           } else if (filterElements.nonEmpty) {
-            println("D")
-            val filterIds = query(AttrOneManID(ns, "id", V) +: filterElements.toList)
-            println("D ------ filterIds: " + filterIds)
+            val filterIds = query(AttrOneManID(ns, "id", V) +: filterElements)
             filterIds
           } else {
-            println("E ------ ")
             ids
           }
+        } else if (ids.nonEmpty) {
+          ids
         } else {
-          if (ids.nonEmpty) {
-            println("F")
-            //          throw ModelError("f")
-            ids
-          } else if (filterElements.nonEmpty) {
-            //          throw ModelError("g")
-            println("G")
-            val filterIds = query(AttrOneManID(ns, "id", V) +: filterElements.toList)
-            println("G ------ filterIds: " + filterIds)
-            filterIds
-          } else if (uniqueFilterElements.nonEmpty) {
-            throw ModelError("h")
-            println("H")
-            val filterIds = query(AttrOneManID(ns, "id", V) +: uniqueFilterElements.toList)
-            println("H ------ uniqueFilterIds: " + filterIds)
-            filterIds
-          } else {
-            throw ModelError("i")
-            println("I")
-            Nil
-          }
+          query(AttrOneManID(ns, "id", V) +: filterElements)
         }
 
         if (ids1.nonEmpty) {

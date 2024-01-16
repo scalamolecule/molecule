@@ -115,8 +115,10 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
     addSort(attr, uniqueField)
     addCast(uniqueField, res.cast(uniqueField))
 
-    prefixedFieldPair = if (b.parent.isEmpty) (field, field) else (b.path + field, b.alias + field)
+    prefixedFieldPair = if (b.parent.isEmpty) (nestedLevel, field, field) else (nestedLevel, b.path + field, b.alias + field)
     topBranch.groupIdFields += prefixedFieldPair
+
+    //    println(s"++++++++ $nestedLevel  " + prefixedFieldPair)
     handleExpr(uniqueField, field, attr, args, res)
   }
 
@@ -127,34 +129,16 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
   }
 
   private def handleExpr[T](uniqueField: String, field: String, attr: Attr, args: Seq[T], res: ResOne[T]): Unit = {
-    if (branches2.isEmpty) {
-      path2 = List(attr.ns)
+    if (branchesByPath.isEmpty) {
+      path = List(attr.ns)
+      pathLevels(path) = 0
     }
-    branches2(path2) = b
+    branchesByPath(path) = b
 
     attr.filterAttr.fold {
       if (hasFilterAttr) {
-        //        // Try with qualified path x.y.z.attr
-        //        val pathAttr         = b.path + field
-        //        val qualifiedMatches = postFilters.filter(_._1 == pathAttr)
-        //        qualifiedMatches.length match {
-        //          case 1 => qualifiedMatches.head._2(b)
-        //          case 0 =>
-        //            // Try with simple Ns.attr
-        //            val nsAttr = attr.cleanName
-        //            println(s"------------- ${attr.ns}  ${attr.attr}    $pathAttr    $nsAttr")
-        //            postFilters.foreach(x => println(x._1))
-        //            val nsAttrMatches = postFilters.filter(_._1 == nsAttr)
-        //            nsAttrMatches.length match {
-        //              case 1 => nsAttrMatches.head._2(b)
-        //              case 0 => () // this attribute is not a filter attribute target
-        //              case _ => throw ModelError(ambiguous(nsAttr))
-        //            }
-        //          case _ => throw ModelError(ambiguous(pathAttr))
-        //        }
-
-        //        val path = List(attr.cleanAttr)
-        postFilters.get(path2 :+ attr.cleanAttr).foreach(process => process(b))
+        // Add filter if this attribute is a filter attribute pointed to
+        reverseFilters.get(path :+ attr.cleanAttr).foreach(_(b))
       }
       expr(uniqueField, field, attr.op, args, res)
     } { filterAttr =>
@@ -183,79 +167,74 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
   }
 
   private def handleFilterExpr(field: String, op: String, filterAttr0: (Int, List[String], Attr)): Unit = {
-
-    println(topBranch)
-
     val (dir, filterPath, filterAttr1) = filterAttr0
     val filterAttr                     = filterAttr1.cleanAttr
-    //    val filterPrefix                   = mkPathPrefix(filterPath)
-    //    val filterPrefixAttr               = filterPrefix + filterAttr
-
     dir match {
-      case 0 =>
-        println("### ADJACENT ##############################")
+      case 0 => // Same namespace
         // Adjacent filter attribute in same namespace
         val args = new BsonArray()
         args.add(new BsonString("$" + field))
         args.add(new BsonString("$" + b.path + filterAttr))
         b.matches.add(Filters.eq("$expr", new BsonDocument(op, args)))
 
-      case -1 =>
-        println("### BACKWARD ##############################")
+      case -1 => // Pointing backwards
+        val b1 = b
+        val b2 = branchesByPath(filterPath)
 
-        val fromBranch       = branches2(filterPath)
-        val filterAttrPath   = fromBranch.path
-        val intermediatePath = if (b.path.startsWith(filterAttrPath))
-          b.path.drop(filterAttrPath.length)
-        else
-          filterAttrPath
-
-        val toBranch = b
-
-        println("----- FROM -------")
-        println("embedded        : " + fromBranch.isEmbedded)
-        println("dot             : " + fromBranch.dot)
-        println("path            : " + fromBranch.path)
-        println("filterAttrPath  : " + filterAttrPath)
-        println(fromBranch)
-
-
-        println("----- TO ----------------------")
-        println("embedded        : " + toBranch.isEmbedded)
-        println("dot             : " + toBranch.dot)
-        println("path            : " + toBranch.path)
-        println("intermediatePath: " + intermediatePath)
-        println(toBranch)
-
-        // Ref filter attribute
         val args = new BsonArray()
-        if (fromBranch.isEmbedded) {
-          println("### B1 ##############################")
-          args.add(new BsonString("$" + toBranch.path + field))
-          args.add(new BsonString("$" + fromBranch.path + filterAttr))
-          fromBranch.postMatches.add(Filters.eq("$expr", new BsonDocument(op, args)))
-        } else {
-          println("### B2 ##############################")
-          //          args.add(new BsonString("$" + filterAttr))
-          //          args.add(new BsonString("$" + intermediatePath + field))
+        args.add(new BsonString("$" + b1.path + field))
+        args.add(new BsonString("$" + b2.path + filterAttr))
 
-          args.add(new BsonString("$" + toBranch.path + field))
-          args.add(new BsonString("$" + fromBranch.path + filterAttr))
-          toBranch.postMatches.add(Filters.eq("$expr", new BsonDocument(op, args)))
+        if (isNested && b1.level != b2.level) {
+          addStagesForNested(b2, b1, args)
+        } else {
+          topBranch.postMatches.add(Filters.eq("$expr", new BsonDocument(op, args)))
         }
 
-      case 1 =>
-        println("### FORWARD ##############################")
-
-        // stable reference to current branch
-        val b1      = b
-        val process = (b2: Branch) => {
+      case 1 => // Pointing forward
+        val b1        = b
+        val addFilter = (b2: Branch) => {
           val args = new BsonArray()
           args.add(new BsonString("$" + b1.path + field))
           args.add(new BsonString("$" + b2.path + filterAttr))
-          b1.postMatches.add(Filters.eq("$expr", new BsonDocument(op, args)))
+
+          if (isNested && b1.level != b2.level) {
+            addStagesForNested(b1, b2, args)
+          } else {
+            topBranch.postMatches.add(Filters.eq("$expr", new BsonDocument(op, args)))
+          }
         }
-        postFilters(filterPath :+ filterAttr) = process
+        reverseFilters(filterPath :+ filterAttr) = addFilter
+    }
+
+    def addStagesForNested(parentBranch: Branch, nestedBranch: Branch, args: BsonArray): Boolean = {
+      val parentFields = parentBranch.groupIdFields.filter(_._1 == parentBranch.level)
+      val refAttr      = nestedBaseBranches(nestedBranch.level)._1
+      val refAttrBson  = new BsonString("$" + refAttr)
+
+      // unwind
+      parentBranch.lateStages.add(new BsonDocument("$unwind", refAttrBson))
+
+      // match
+      parentBranch.lateStages.add(new BsonDocument("$match",
+        new BsonDocument("$expr", new BsonDocument(op, args))))
+
+      // group
+      val groupIdFieldsDoc = new BsonDocument("_id", new BsonString("$_id"))
+      parentFields.foreach { case (_, fieldPath, _) =>
+        groupIdFieldsDoc.put(fieldPath, new BsonString("$" + fieldPath))
+      }
+      val groupDoc = new BsonDocument()
+      groupDoc.append("_id", groupIdFieldsDoc)
+      groupDoc.append(refAttr, new BsonDocument("$push", refAttrBson))
+      parentBranch.lateStages.add(new BsonDocument("$group", groupDoc))
+
+      // addFields
+      val addFieldsDoc = new BsonDocument()
+      parentFields.foreach { case (_, fieldPath, fieldAlias) =>
+        addFieldsDoc.put(fieldPath, new BsonString("$_id." + fieldAlias))
+      }
+      parentBranch.lateStages.add(new BsonDocument("$addFields", addFieldsDoc))
     }
   }
 
@@ -412,11 +391,11 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
         replaceCast(uniqueField, res.castSet(uniqueField))
 
       case "min" =>
-        topBranch.groupExprs += aliasField -> new BsonDocument().append("$min", new BsonString(pathField2))
+        topBranch.groupExprs += aliasField -> new BsonDocument("$min", new BsonString(pathField2))
         addField(uniqueField)
 
       case "max" =>
-        topBranch.groupExprs += aliasField -> new BsonDocument().append("$max", new BsonString(pathField2))
+        topBranch.groupExprs += aliasField -> new BsonDocument("$max", new BsonString(pathField2))
         addField(uniqueField)
 
       case "mins" =>
@@ -441,19 +420,19 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
         replaceCast(uniqueField, res.castSet(uniqueField))
 
       case "count" =>
-        topBranch.groupExprs += aliasField -> new BsonDocument().append("$sum", new BsonInt32(1))
+        topBranch.groupExprs += aliasField -> new BsonDocument("$sum", new BsonInt32(1))
         addField(uniqueField)
         replaceCast(uniqueField, castInt(uniqueField))
 
       case "countDistinct" =>
         topBranch.preGroupFields += pathField -> aliasField
-        topBranch.groupExprs += aliasField -> new BsonDocument().append("$sum", new BsonInt32(1))
+        topBranch.groupExprs += aliasField -> new BsonDocument("$sum", new BsonInt32(1))
         addField(uniqueField)
         replaceCast(uniqueField, castInt(uniqueField))
 
       case "sum" =>
         topBranch.preGroupFields += pathField -> aliasField
-        topBranch.groupExprs += aliasField -> new BsonDocument().append("$sum", new BsonString(idField))
+        topBranch.groupExprs += aliasField -> new BsonDocument("$sum", new BsonString(idField))
         addField(uniqueField)
 
       case "median" =>
@@ -468,23 +447,23 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
 
       case "avg" =>
         topBranch.preGroupFields += pathField -> aliasField
-        topBranch.groupExprs += aliasField -> new BsonDocument().append("$avg", new BsonString(idField))
+        topBranch.groupExprs += aliasField -> new BsonDocument("$avg", new BsonString(idField))
         addField(uniqueField)
         replaceCast(uniqueField, hardCastDouble(uniqueField))
 
       case "variance" =>
         topBranch.preGroupFields += pathField -> aliasField
-        topBranch.groupExprs += aliasField -> new BsonDocument().append("$stdDevPop", new BsonString(idField))
+        topBranch.groupExprs += aliasField -> new BsonDocument("$stdDevPop", new BsonString(idField))
         b.projection.remove(b.dot + uniqueField)
         val pow = new BsonArray()
         pow.add(new BsonString("$" + aliasField))
         pow.add(new BsonInt32(2))
-        b.projection.append(b.dot + field, new BsonDocument().append("$pow", pow))
+        b.projection.append(b.dot + field, new BsonDocument("$pow", pow))
         replaceCast(uniqueField, hardCastDouble(uniqueField))
 
       case "stddev" =>
         topBranch.preGroupFields += pathField -> aliasField
-        topBranch.groupExprs += aliasField -> new BsonDocument().append("$stdDevPop", new BsonString(idField))
+        topBranch.groupExprs += aliasField -> new BsonDocument("$stdDevPop", new BsonString(idField))
         addField(uniqueField)
         replaceCast(uniqueField, hardCastDouble(uniqueField))
 

@@ -39,7 +39,7 @@ trait Delete_mongodb
 
     val idArray = new BsonArray()
     ids1.map(id => idArray.add(new BsonObjectId(new ObjectId(id))))
-    val filter = new BsonDocument().append("_id", new BsonDocument("$in", idArray))
+    val filter = new BsonDocument("_id", new BsonDocument("$in", idArray))
 
     val data = new BsonDocument()
       .append("_action", new BsonString("delete"))

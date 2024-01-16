@@ -10,6 +10,7 @@ import scala.collection.mutable.ListBuffer
 
 trait ResolveRef { self: MongoQueryBase =>
 
+
   protected def resolveRef(ref: Ref): Unit = {
     val Ref(ns, refAttr, refNs, card, owner, _) = ref
     if (isNestedOpt && card == CardSet) {
@@ -18,11 +19,12 @@ trait ResolveRef { self: MongoQueryBase =>
       )
     }
 
-    if (path2.isEmpty) {
-      path2 = List(ref.ns, ref.refAttr, ref.refNs)
+    if (path.isEmpty) {
+      path = List(ref.ns, ref.refAttr, ref.refNs)
     } else {
-      path2 ++= List(ref.refAttr, ref.refNs)
+      path ++= List(ref.refAttr, ref.refNs)
     }
+    pathLevels(path) = nestedLevel
 
     // Project refNs
     val refProjections = new BsonDocument()
@@ -30,6 +32,7 @@ trait ResolveRef { self: MongoQueryBase =>
 
     val subBranch = if (owner) {
       val embeddedBranch = new FlatEmbed(
+        nestedLevel,
         Some(b),
         card.isInstanceOf[CardSet],
         ns,
@@ -45,8 +48,8 @@ trait ResolveRef { self: MongoQueryBase =>
       embeddedBranch.base = b.base
       embeddedBranch
     } else {
-      //      println(s"#################  $refAttr  " + b.isEmbedded)
       val refBranch = new FlatRef(
+        nestedLevel,
         Some(b),
         ns,
         refAttr,
@@ -61,11 +64,11 @@ trait ResolveRef { self: MongoQueryBase =>
       refBranch
     }
 
-    // Matches build up on new ref branch as base
+    // Move to ref branch
     b.subBranches.addOne(subBranch)
     b = subBranch
 
-    // Continue from ref namespace
+    // Cast from ref namespace
     val nss     = allCasts.last
     val curPath = nss.last
     nss += ((
@@ -89,17 +92,11 @@ trait ResolveRef { self: MongoQueryBase =>
       }
     }
 
-    path2 = path2.dropRight(2)
-
-    //    println(s"----- B1 -----  ${b.dot}  ${b.refAttr}  ${b.parent.map(_.isEmbedded)}")
-    //    b.matches.forEach(m => println(m))
-
     // Go one level up/back
+    path = path.dropRight(2)
     b = b.parent.get
 
-    //    println(s"----- B2 -----  ${b.dot}  ${b.refAttr}  ${b.parent.map(_.isEmbedded)}")
-    //    b.matches.forEach(m => println(m))
-
+    // Cast from previous namespace
     val nss     = allCasts.last
     val curPath = nss.last
     nss += ((
@@ -114,11 +111,6 @@ trait ResolveRef { self: MongoQueryBase =>
     if (isNestedOpt) {
       noMixedNestedModes
     }
-    path2 ++= List(ref.refAttr, ref.refNs)
-
-    // No empty nested arrays when asking for mandatory nested data
-    //    b.base.matches.add(Filters.ne(b.dot + ref.refAttr, new BsonArray()))
-
     resolveNested(ref, nestedElements, true)
   }
 
@@ -130,14 +122,16 @@ trait ResolveRef { self: MongoQueryBase =>
     if (hasFilterAttr) {
       throw ModelError("Filter attributes not allowed in optional nested queries.")
     }
-    path2 ++= List(ref.refAttr, ref.refNs)
     resolveNested(ref, nestedElements, false)
   }
 
   private def resolveNested(ref: Ref, nestedElements: List[Element], mandatory: Boolean): Unit = {
-    isNested = true
     validateRefNs(ref, nestedElements)
+    isNested = true
     val Ref(ns, refAttr, refNs, _, owner, _) = ref
+    nestedLevel += 1
+    path ++= List(refAttr, refNs)
+    pathLevels(path) = nestedLevel
 
     // Project refNs
     val refProjections = new BsonDocument()
@@ -145,6 +139,7 @@ trait ResolveRef { self: MongoQueryBase =>
     if (owner) {
       b.projection.append(refAttr, refProjections)
       b = new NestedEmbed(
+        nestedLevel,
         Some(b),
         ns,
         refAttr,
@@ -162,6 +157,7 @@ trait ResolveRef { self: MongoQueryBase =>
       b.projection.append(refAttr, new BsonInt32(1))
 
       val refBranch = new NestedRef(
+        nestedLevel,
         Some(b),
         ns,
         refAttr,
@@ -177,6 +173,7 @@ trait ResolveRef { self: MongoQueryBase =>
       // Matches build up on new ref branch as base
       b.subBranches.addOne(refBranch)
       b = refBranch
+      nestedBaseBranches(nestedLevel) = (refAttr, b)
     }
 
     // Initiate nested namespace casts

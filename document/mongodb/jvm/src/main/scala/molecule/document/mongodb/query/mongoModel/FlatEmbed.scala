@@ -9,6 +9,7 @@ import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
 class FlatEmbed(
+  level: Int = 0,
   parent: Option[Branch] = None,
   val cardMany: Boolean = false,
   ns: String = "",
@@ -19,8 +20,9 @@ class FlatEmbed(
   und: String = "",
   path: String = "",
   alias: String = "",
-  projection: BsonDocument = new BsonDocument().append("_id", new BsonInt32(0)),
+  projection: BsonDocument = new BsonDocument("_id", new BsonInt32(0)),
 ) extends Branch(
+  level,
   parent,
   ns,
   refAttr,
@@ -56,15 +58,9 @@ class FlatEmbed(
       parent.get.projection.remove(refAttr)
     }
 
-    // Match filter attribute with flattened ref fields
-    if (!postMatches.isEmpty) {
-      stages.add(
-        new BsonDocument().append("$match",
-          Filters.and(postMatches)
-            .toBsonDocument(classOf[Bson], MongoClientSettings.getDefaultCodecRegistry)
-        )
-      )
-    }
+    addStage("$match", postMatches)
+
+    stages.addAll(lateStages)
 
     if (parent.isEmpty) {
       addStage("$project", projection)
@@ -81,13 +77,13 @@ class FlatEmbed(
     // Pre-group
     val (preGroup, prefix) = if (preGroupFields.nonEmpty) {
       val preGroupFieldsDoc = new BsonDocument()
-      groupIdFields.foreach { case (fieldPath, fieldAlias) =>
+      groupIdFields.foreach { case (_, fieldPath, fieldAlias) =>
         preGroupFieldsDoc.put(fieldAlias, new BsonString("$" + fieldPath))
       }
       preGroupFields.foreach { case (fieldPath, fieldAlias) =>
         preGroupFieldsDoc.put(fieldAlias, new BsonString("$" + fieldPath))
       }
-      stages.add(new BsonDocument().append("$group", new BsonDocument().append("_id", preGroupFieldsDoc)))
+      stages.add(new BsonDocument("$group", new BsonDocument("_id", preGroupFieldsDoc)))
       (true, "$_id.")
     } else {
       (false, "$")
@@ -97,11 +93,11 @@ class FlatEmbed(
       // $group
       val groupIdFieldsDoc = new BsonDocument()
       if (preGroup) {
-        groupIdFields.foreach { case (_, fieldAlias) =>
+        groupIdFields.foreach { case (_, _, fieldAlias) =>
           groupIdFieldsDoc.put(fieldAlias, new BsonString(prefix + fieldAlias))
         }
       } else {
-        groupIdFields.foreach { case (fieldPath, fieldAlias) =>
+        groupIdFields.foreach { case (_, fieldPath, fieldAlias) =>
           groupIdFieldsDoc.put(fieldAlias, new BsonString(prefix + fieldPath))
         }
       }
@@ -114,18 +110,18 @@ class FlatEmbed(
       groupExprs.foreach { case (field, bson) =>
         groupDoc.put(field, bson)
       }
-      stages.add(new BsonDocument().append("$group", groupDoc))
+      stages.add(new BsonDocument("$group", groupDoc))
 
       // $addFields - "format" fields to expected structure
       val addFieldsDoc = new BsonDocument()
-      groupIdFields.foreach { case (fieldPath, fieldAlias) =>
+      groupIdFields.foreach { case (_, fieldPath, fieldAlias) =>
         addFieldsDoc.put(fieldPath, new BsonString("$_id." + fieldAlias))
       }
       addFields.foreach { case (fieldPath, bson) =>
         addFieldsDoc.put(fieldPath, bson)
       }
       if (!addFieldsDoc.isEmpty) {
-        stages.add(new BsonDocument().append("$addFields", addFieldsDoc))
+        stages.add(new BsonDocument("$addFields", addFieldsDoc))
       }
     }
   }
@@ -137,7 +133,7 @@ class FlatEmbed(
     val parent1  = parent.fold("None")(parent => s"Some(${parent.ns})")
     val children = if (subBranches.isEmpty) "" else
       s"\n$p  " + subBranches.map(ref => ref.render(tabs + 1)).mkString(s",\n$p  ")
-    s"""FlatEmbed($parent1, $cardMany
+    s"""FlatEmbed($level, $parent1, $cardMany
        |${p}  $ns, $refAttr, $refNs, $pathFields, $dot, $und, $path, $alias,
        |${p}  $projection
        |${p})$children""".stripMargin

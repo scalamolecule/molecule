@@ -16,42 +16,21 @@ import scala.collection.mutable.ListBuffer
 
 trait MongoQueryBase extends BaseHelpers with JavaConversions {
 
-  var prefixedFieldPair = ("", "")
-
   // Top branch holds aggregation and projection of all attributes
   final protected var topBranch: FlatEmbed = new FlatEmbed()
 
   // Current branch. Changes for each new namespace
   final protected var b: Branch = topBranch
 
+  final protected val branchesByPath     = mutable.Map.empty[List[String], Branch]
+  final protected var nestedLevel        = 0
+  final protected var hasFilterAttr      = false
+  final protected val reverseFilters     = mutable.Map.empty[List[String], Branch => Boolean]
+  final protected var path               = List.empty[String]
+  final protected var pathLevels         = mutable.Map.empty[List[String], Int]
+  final protected var nestedBaseBranches = mutable.Map.empty[Int, (String, Branch)]
+  final protected var prefixedFieldPair  = (0, "", "")
 
-  final protected val branches2 = mutable.Map.empty[List[String], Branch]
-
-  final protected var hasFilterAttr  = false
-  final protected var filterAttrVars = Map.empty[String, String]
-  final protected val postFilters    = mutable.Map.empty[List[String], Branch => Boolean]
-
-  final protected var path = List.empty[String]
-  final protected var path2 = List.empty[String]
-
-
-  protected def mkPathPrefix(path: List[String]): String = {
-    var even         = false
-    var filterPrefix = ""
-    path.foreach {
-      case refAttr if even =>
-        filterPrefix += refAttr + "."
-        even = !even
-      case ns              => even = !even
-    }
-    filterPrefix
-  }
-
-  def ambiguous(attr: String): String = {
-    s"""Ambiguous filter attribute path: $attr
-       |Please qualify the filter attribute by appending the full path of namespaces.
-       |Or make sure that the target attribute is not appearing multiple times.""".stripMargin
-  }
 
   def addField(uniqueField: String) = {
     if (b.parent.nonEmpty) {
@@ -81,7 +60,7 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
 
 
   protected def aggrFn(fn: String, input: BsonValue, n: Int): BsonDocument = {
-    new BsonDocument().append(fn,
+    new BsonDocument(fn,
       new BsonDocument()
         .append("input", input)
         .append("n", new BsonInt32(n))

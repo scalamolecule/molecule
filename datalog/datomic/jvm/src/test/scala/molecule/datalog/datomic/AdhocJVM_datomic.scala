@@ -14,24 +14,81 @@ object AdhocJVM_datomic extends TestSuite_datomic {
 
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
-
-      println("ref1: " + ref1)
       for {
         //        _ <- Ns.i(42).save.transact
         //        _ <- Ns.i.query.get.map(_ ==> List(42))
 
 
-        _ <- Ns.i.ref.insert(List(
-          (1, ref1),
-          (2, ref2),
-          (2, ref2),
-          (2, ref3),
-        )).transact
 
-        _ <- Ns.i.booleans(count).query.get
-          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
-            err ==> "Aggregate functions not implemented for Sets of boolean values."
-          }
+        _ <- Ns.s.i.Refs.*(Ref.int).insert(
+          ("a", 1, List(2, 3)),
+          ("b", 4, List(4, 5)),
+          ("c", 7, List(5, 6)),
+          ("d", 9, Nil),
+        ).transact
+
+        // Pointing forward
+
+        _ <- Ns.s.a1.i(Ref.int_).Refs.*(Ref.int.a1).query.get.map(_ ==> List(
+          ("b", 4, List(4)) // Note that only Ref.int values matching Ns.i are returned
+        ))
+
+        _ <- Ns.s.a1.i.not(Ref.int_).Refs.*(Ref.int.a1).query.get.map(_ ==> List(
+          ("a", 1, List(2, 3)),
+          ("b", 4, List(5)), // Ref.int == 4 omitted
+          ("c", 7, List(5, 6)),
+        ))
+
+        _ <- Ns.s.a1.i.<(Ref.int_).Refs.*(Ref.int.a1).query.get.map(_ ==> List(
+          ("a", 1, List(2, 3)),
+          ("b", 4, List(5)),
+        ))
+
+        _ <- Ns.s.a1.i.<=(Ref.int_).Refs.*(Ref.int.a1).query.get.map(_ ==> List(
+          ("a", 1, List(2, 3)),
+          ("b", 4, List(4, 5)),
+        ))
+
+        _ <- Ns.s.a1.i.>(Ref.int_).Refs.*(Ref.int.a1).query.get.map(_ ==> List(
+          ("c", 7, List(5, 6)),
+        ))
+
+        _ <- Ns.s.a1.i.>=(Ref.int_).Refs.*(Ref.int.a1).query.get.map(_ ==> List(
+          ("b", 4, List(4)),
+          ("c", 7, List(5, 6)),
+        ))
+
+
+        // Pointing backwards
+
+        _ <- Ns.s.a1.i.Refs.*(Ref.int(Ns.i_)).query.get.map(_     ==> List(
+          ("b", 4, List(4))
+        ))
+
+        _ <- Ns.s.a1.i.Refs.*(Ref.int.not(Ns.i_).a1).query.get.map(_ ==> List(
+          ("a", 1, List(2, 3)),
+          ("b", 4, List(5)),
+          ("c", 7, List(5, 6)),
+        ))
+
+        _ <- Ns.s.a1.i.Refs.*(Ref.int.<(Ns.i_).a1).query.get.map(_ ==> List(
+          ("c", 7, List(5, 6)),
+        ))
+
+        _ <- Ns.s.a1.i.Refs.*(Ref.int.<=(Ns.i_).a1).query.get.map(_ ==> List(
+          ("b", 4, List(4)),
+          ("c", 7, List(5, 6)),
+        ))
+
+        _ <- Ns.s.a1.i.Refs.*(Ref.int.>(Ns.i_).a1).query.get.map(_ ==> List(
+          ("a", 1, List(2, 3)),
+          ("b", 4, List(5)),
+        ))
+
+        _ <- Ns.s.a1.i.Refs.*(Ref.int.>=(Ns.i_).a1).query.get.map(_ ==> List(
+          ("a", 1, List(2, 3)),
+          ("b", 4, List(4, 5)),
+        ))
 
       } yield ()
     }

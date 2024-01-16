@@ -10,6 +10,7 @@ import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
 class FlatRef(
+  level: Int = 0,
   parent: Option[Branch] = None,
   ns: String = "",
   refAttr: String = "",
@@ -19,8 +20,9 @@ class FlatRef(
   und: String = "",
   path: String = "",
   alias: String = "",
-  projection: BsonDocument = new BsonDocument().append("_id", new BsonInt32(0)),
+  projection: BsonDocument = new BsonDocument("_id", new BsonInt32(0)),
 ) extends Branch(
+  level,
   parent,
   ns,
   refAttr,
@@ -77,22 +79,15 @@ class FlatRef(
 
     // Get head document of ref array
     postStages.add(
-      new BsonDocument().append("$addFields",
-        new BsonDocument().append(dot1 + refAttr,
-          new BsonDocument().append("$first", new BsonString("$" + dot1 + refAttr))
+      new BsonDocument("$addFields",
+        new BsonDocument(dot1 + refAttr,
+          new BsonDocument("$first", new BsonString("$" + dot1 + refAttr))
         )
       )
     )
 
     // Match filter attribute with flattened ref fields
-    if (!postMatches.isEmpty) {
-      postStages.add(
-        new BsonDocument().append("$match",
-          Filters.and(postMatches)
-            .toBsonDocument(classOf[Bson], MongoClientSettings.getDefaultCodecRegistry)
-        )
-      )
-    }
+    addStage("$match", postMatches)
 
     if (parent.nonEmpty && projection.isEmpty) {
       // Remove empty projections with only tacit attributes (or no attributes)
@@ -108,7 +103,7 @@ class FlatRef(
     val parent1  = parent.fold("None")(parent => s"Some(${parent.ns})")
     val children = if (subBranches.isEmpty) "" else
       s"\n$p  " + subBranches.map(ref => ref.render(tabs + 1)).mkString(s",\n$p  ")
-    s"""FlatRef($parent1,
+    s"""FlatRef($level, $parent1,
        |${p}  $ns, $refAttr, $refNs, $pathFields, $dot, $und, $path, $alias,
        |${p}  $projection
        |${p})$children""".stripMargin

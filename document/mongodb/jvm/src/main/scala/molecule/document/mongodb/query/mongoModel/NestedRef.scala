@@ -9,6 +9,7 @@ import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
 class NestedRef(
+  level: Int = 0,
   parent: Option[Branch] = None,
   ns: String = "",
   refAttr: String = "",
@@ -19,8 +20,9 @@ class NestedRef(
   path: String = "",
   alias: String = "",
   mandatory: Boolean = true,
-  projection: BsonDocument = new BsonDocument().append("_id", new BsonInt32(0)),
+  projection: BsonDocument = new BsonDocument("_id", new BsonInt32(0)),
 ) extends Branch(
+  level,
   parent,
   ns,
   refAttr,
@@ -58,9 +60,9 @@ class NestedRef(
 
     if (mandatory) {
       postStages.add(
-        new BsonDocument().append("$match",
-          new BsonDocument().append(refAttr,
-            new BsonDocument().append("$ne", new BsonArray())
+        new BsonDocument("$match",
+          new BsonDocument(refAttr,
+            new BsonDocument("$ne", new BsonArray())
           )
         )
       )
@@ -75,7 +77,7 @@ class NestedRef(
     val children = if(subBranches.isEmpty)"" else
       s"\n$p  " + subBranches.map(ref => ref.render(tabs + 1)).mkString(s",\n$p  ")
     s"""NestedRef(
-       |${p}  $parent1,
+       |${p}  $level, $parent1,
        |${p}  $refAttr, $refNs, $pathFields, $dot, $und, $path, $alias,
        |${p}  $projection
        |${p})$children""".stripMargin

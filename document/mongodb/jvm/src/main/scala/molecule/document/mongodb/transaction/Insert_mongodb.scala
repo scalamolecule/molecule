@@ -56,7 +56,7 @@ trait Insert_mongodb
       first = false
     }
 
-    val data = new BsonDocument().append("_action", new BsonString("insert"))
+    val data = new BsonDocument("_action", new BsonString("insert"))
     nssDocs.collect {
       case (ns, nsDocs: BsonArray) if !nsDocs.isEmpty => data.append(ns, nsDocs)
     }

@@ -42,7 +42,7 @@ trait ResolveExprOneID extends ResolveExpr with LambdasOne { self: MongoQueryBas
     addSort(attr, field)
     addCast(field, res.cast(field))
 
-    prefixedFieldPair = if (b.parent.isEmpty) (field, field) else (b.path + field, b.alias + field)
+    prefixedFieldPair = if (b.parent.isEmpty) (nestedLevel, field, field) else (nestedLevel, b.path + field, b.alias + field)
     topBranch.groupIdFields += prefixedFieldPair
 
     attr.filterAttr.fold(

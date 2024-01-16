@@ -42,16 +42,19 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
   ): (String, util.ArrayList[Bson]) = {
     val elements1 = if (altElements.isEmpty) elements0 else altElements
     hasFilterAttr = validateQueryModel(elements1)
-    elements1.foreach(println)
+    //    elements1.foreach(println)
+    //    println("---------------")
 
     val elements2 = if (hasFilterAttr) {
       checkFilterAttrs(elements1)
     } else elements1
-    elements2.foreach(println)
+    //    elements2.foreach(println)
+    //    println("---------------")
 
     val initialNs = getInitialNonGenericNs(elements1)
     topBranch = new FlatEmbed(ns = initialNs)
     b = topBranch
+    nestedBaseBranches(0) = ("", topBranch)
 
     // Recursively resolve molecule elements
     resolve(elements2)
@@ -60,16 +63,14 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
     val topStages = new util.ArrayList[Bson]()
 
     if (sampleSize > 0) {
-      topStages.add(new BsonDocument().append("$sample",
-        new BsonDocument().append("size", new BsonInt32(sampleSize)))
-      )
+      topStages.add(new BsonDocument("$sample", new BsonDocument("size", new BsonInt32(sampleSize))))
     }
 
     // Recursively add aggregation pipeline stages for all branches
     topStages.addAll(topBranch.getStages)
 
     // Return elements with possible filter attribute resolutions
-    (getInitialNonGenericNs(elements2), topStages)
+    (initialNs, topStages)
   }
 
   def pagination(optLimit: Option[Int], optOffset: Option[Int], isBackwards: Boolean): String = {
@@ -97,6 +98,8 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
     val directions     = ListBuffer.empty[List[String]]
     var qualifiedPath  = List.empty[String]
     var path           = List.empty[String]
+    var filterAttrVars = Map.empty[String, String]
+    var level          = 0
 
     @tailrec
     def check(elements: List[Element]): Unit = {
@@ -106,8 +109,8 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
             case a: Attr      => checkAttr(a); check(tail)
             case r: Ref       => handleRef(r); check(tail)
             case _: BackRef   => handleBackRef(); check(tail)
-            case n: Nested    => handleRef(n.ref); check(n.elements ++ tail)
-            case n: NestedOpt => handleRef(n.ref); check(n.elements ++ tail)
+            case n: Nested    => handleNested(n.ref); check(n.elements ++ tail)
+            case n: NestedOpt => handleNested(n.ref); check(n.elements ++ tail)
           }
         case Nil             => ()
       }
@@ -119,21 +122,23 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
       }
 
       val nsAttr = a.cleanName
-      nsAttrPaths(nsAttr) = nsAttrPaths.get(nsAttr).fold(List(path))(_ :+ path)
+      nsAttrPaths(nsAttr) = nsAttrPaths.get(nsAttr).fold(List(path)) { case paths =>
+        if (!paths.contains(path)) {
+          paths :+ path
+        } else paths
+      }
 
       qualifiedPath = path :+ a.cleanAttr
-
-      //      println("  Y  " + qualifiedPath)
-
-      qualifiedPaths(qualifiedPath) = qualifiedPaths.get(qualifiedPath).fold(List(path))(_ :+ path)
+      qualifiedPaths(qualifiedPath) = qualifiedPaths.get(qualifiedPath).fold(List(path)) { case paths =>
+        if (!paths.contains(path)) {
+          paths :+ path
+        } else paths
+      }
 
       directions += qualifiedPath
 
-      //      availableAttrs += nsAttr
-      //      availablePathAttrs += (if (path.isEmpty) a.attr else pathAttr(a.attr))
-
       if (a.filterAttr.nonEmpty) {
-        val (dir, filterPath, fa) = a.filterAttr.get
+        val (_, filterPath, fa) = a.filterAttr.get
         if (fa.filterAttr.nonEmpty) {
           throw ModelError(s"Filter attributes inside filter attributes not allowed in ${a.ns}.${a.attr}")
         }
@@ -162,18 +167,19 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
     def handleBackRef(): Unit = {
       path = path.dropRight(2)
     }
+    def handleNested(ref: Ref): Unit = {
+      level += 1
+      nestedBaseBranches(level) = (ref.refAttr, b)
+      handleRef(ref)
+    }
 
     check(elements)
 
-    //    println("---------- x1")
+    //    println("---- nsAttrPaths")
     //    nsAttrPaths.foreach(println)
-    //    println("---------- x2")
+    //    println("---- qualifiedPaths")
     //    qualifiedPaths.foreach(println)
-    //    //    println("---------- 0")
-    //    //    expectedFilterAttrs.foreach(println)
-    //    println("---------- 1")
-    //    expectedPathFilterAttrs.foreach(println)
-    //    println("---------- 2")
+    //    println("---- directions")
     //    directions.foreach(println)
 
     path = Nil
@@ -198,8 +204,6 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
     def prepareAttr(a: Attr): List[Attr] = {
       i += 1
       val attrName = a.cleanName
-
-
 
       //      println(s"+++++++++++ $prevAttrName  $attrName  $prevWasFilterCallee  $qualifiedPath  $path")
 
@@ -233,6 +237,7 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
             val nsPaths = nsAttrPaths.getOrElse(filterAttrName,
               throw ModelError(s"Please add missing filter attribute $filterAttrName")
             )
+
             nsPaths.length match {
               case 1 => nsPaths.head
               case 0 => throw ModelError(s"Unexpectedly found no nsPaths for filter attribute $filterAttrName")
@@ -266,12 +271,14 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
             }
           }
 
-          val fullPath = qualifiedFilterPath :+ a.cleanAttr
+          //          val fullPath = qualifiedFilterPath :+ a.cleanAttr
+          val fullPath = qualifiedFilterPath :+ filterAttr.cleanAttr
 
           //          println("-----------")
           //          println(a)
-          //          println("  >>  " + fullPath)
+          //          println(">>  " + fullPath)
           //          directions.foreach(println)
+          //          println("-----------")
 
           val dir = directions.indexOf(fullPath) match {
             case -1          => throw ModelError(s"Unexpectedly couldn't find direction index for $fullPath")
