@@ -49,6 +49,10 @@ class FlatEmbed(
         .append("$unwind", new BsonString("$" + dot.init)))
     }
 
+    addStage("$match", preMatches)
+
+    stages.addAll(preStages)
+
     if (parent.isEmpty) {
       addAggregationStages()
     }
@@ -60,7 +64,7 @@ class FlatEmbed(
 
     addStage("$match", postMatches)
 
-    stages.addAll(lateStages)
+    stages.addAll(postStages)
 
     if (parent.isEmpty) {
       addStage("$project", projection)

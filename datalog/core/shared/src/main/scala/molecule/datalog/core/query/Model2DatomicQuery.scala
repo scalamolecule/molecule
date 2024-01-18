@@ -35,8 +35,10 @@ class Model2DatomicQuery[Tpl](elements0: List[Element])
     altElements: List[Element] = Nil
   ): (String, String, String) = {
     val elements = if (altElements.isEmpty) elements0 else altElements
-    validateQueryModel(elements)
-    val elements1 = resolveFilterAttrs(elements)
+//    validateQueryModel(elements)
+//    val elements1 = resolveFilterAttrs(elements)
+
+    val (elements1, initialNs, hasFilterAttr0) = validateQueryModel(elements)
 
     // Remember first entity id variable
     firstId = vv
@@ -156,7 +158,7 @@ class Model2DatomicQuery[Tpl](elements0: List[Element])
     if (rules.isEmpty) Nil else Seq(rules.mkString("[\n  ", "\n  ", "\n]"))
   }
 
-  private lazy val noIdFiltering = "Filter attributes not allowed to involve entity ids."
+//  private lazy val noIdFiltering = "Filter attributes not allowed to involve entity ids."
 
   @tailrec
   final private def resolve(

@@ -87,7 +87,7 @@ trait FilterAttrNested extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
         // Pointing backwards
 
-        _ <- A.s.a1.i.Bb.*(B.i(A.i_)).query.get.map(_     ==> List(
+        _ <- A.s.a1.i.Bb.*(B.i(A.i_)).query.get.map(_ ==> List(
           ("b", 4, List(4))
         ))
 
@@ -161,7 +161,7 @@ trait FilterAttrNested extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
         // Pointing backwards
 
-        _ <- A.s.a1.i.Bb.*(B.i(A.i_)).query.get.map(_     ==> List(
+        _ <- A.s.a1.i.Bb.*(B.i(A.i_)).query.get.map(_ ==> List(
           ("b", 4, List(4))
         ))
 
@@ -193,7 +193,19 @@ trait FilterAttrNested extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
+    "Card-Set filter attributes not allowed in nested" - refs { implicit conn =>
+      for {
+        _ <- A.s.ii(B.ii_).Bb.*(B.ii).query.get
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+            err ==> "Card-Set filter attributes not allowed in nested molecules."
+          }
 
+        _ <- A.s.ii.Bb.*(B.ii(A.ii_)).query.get
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+            err ==> "Card-Set filter attributes not allowed in nested molecules."
+          }
+      } yield ()
+    }
 
 
     "Optional nested" - refs { implicit conn =>

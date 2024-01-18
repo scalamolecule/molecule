@@ -29,14 +29,22 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
     optProxy: Option[ConnProxy]
   ): String = {
     val elements1      = if (altElements.isEmpty) elements0 else altElements
-    val hasFilterAttrs = validateQueryModel(elements1)
-    //    elements.foreach(println)
+//    val hasFilterAttrs = validateQueryModel(elements1)
+//    //    elements.foreach(println)
+//
+//    // Set attrMap if available (used to get original type of aggregate attributes)
+//    //    optProxy.foreach(p => attrMap = p.attrMap)
+//    //    val elements2 = resolveFilterAttrs(elements1, optProxy)
+//    val elements2 = if (hasFilterAttrs) resolveFilterAttrs(elements1) else elements1
 
-    // Set attrMap if available (used to get original type of aggregate attributes)
-    //    optProxy.foreach(p => attrMap = p.attrMap)
-    //    val elements2 = resolveFilterAttrs(elements1, optProxy)
-    val elements2 = if (hasFilterAttrs) resolveFilterAttrs(elements1) else elements1
-    from = getInitialNonGenericNs(elements2)
+
+
+
+
+    val (elements2, initialNs, hasFilterAttr) = validateQueryModel(elements1)
+
+
+    from = initialNs
     exts += from -> None
 
     // Recursively resolve molecule elements
@@ -227,7 +235,7 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
     elements1
   }
 
-  private lazy val noIdFiltering = "Filter attributes not allowed to involve entity ids."
+//  private lazy val noIdFiltering = "Filter attributes not allowed to involve entity ids."
 
   @tailrec
   final private def resolve(elements: List[Element]): Unit = elements match {

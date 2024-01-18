@@ -13,51 +13,56 @@ import molecule.boilerplate.ast.Model._
 
 object AdhocJVM_mongodb extends TestSuite_mongodb with AggrUtils {
 
-  val ambiguous =
-    """Ambiguous filter attribute path: A.i
-      |Please qualify the filter attribute by appending the full path of namespaces.
-      |Or make sure that the target attribute is not appearing multiple times.""".stripMargin
 
   override lazy val tests = Tests {
 
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
+      val a = (1, Set(0, 1, 2), Set(1, 2, 3))
+      val b = (2, Set(2, 3), Set(2, 3))
+      val c = (3, Set(4), Set(3))
       for {
+        //        _ <- Ns.i(1).save.transact
+        //        _ <- Ns.i.query.get.map(_ ==> List(1))
 
+        _ <- Ns.i.ii.ints.insert(a, b, c).transact
 
-        _ <- Ns.i(1).save.transact
-        _ <- Ns.i.query.get.map(_ ==> List(1))
+        _ <- Ns.i.ii.has(Ns.ints).query.get.map(_ ==> List(b)) // Ns.ii and Ref.ints
+        _ <- Ns.i.ii.has(Ns.ints_).query.get.map(_ ==> List((2, Set(2, 3)))) // Ns.ii
+        _ <- Ns.i.ii_.has(Ns.ints).query.get.map(_ ==> List((2, Set(2, 3)))) // Ref.ints
+        _ <- Ns.i.ii_.has(Ns.ints_).query.get.map(_ ==> List(2))
+
       } yield ()
     }
 
 
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
+      val a = (1, Set(1, 2), Set(1, 2, 3), 3)
+      val b = (2, Set(2, 3), Set(2, 3), 3)
+      val c = (2, Set(4), Set(4), 4)
+
+      val d = (2, Set(4), Set(3), 4)
       for {
 
-        _ <- A.s.i.OwnBb.*(B.i).insert(
-          ("a", 1, List(2, 3)),
-          ("b", 4, List(4, 5)),
-          ("c", 7, List(5, 6)),
-          ("d", 9, Nil),
-        ).transact
+        List(x, y, z) <- A.i.ii.B.ii.i.insert(a, b, c).transact.map(_.ids)
 
-        // Pointing forward
-
-        _ <- A.s.a1.i(B.i_).OwnBb.*(B.i.a1).query.get.map(_ ==> List(
-          ("b", 4, List(4)) // Note that only B.i values matching A.i are returned
+        _ <- A.i.ii_(B.ii_).B.ii.query.get.map(_ ==> List(
+          (2, Set(2, 3, 4)) // Set(2, 3) and Set(4) are coalesced to one Set
+        ))
+        _ <- A.i.ii_.B.ii(A.ii_).query.get.map(_ ==> List(
+          (2, Set(2, 3, 4))
         ))
 
-        // Pointing backwards
-
-        _ <- A.s.a1.i.OwnBb.*(B.i(A.i_)).query.get.map(_ ==> List(
-          ("b", 4, List(4))
+        // To get un-coalesced Sets, separate by ids
+        _ <- A.id.a1.i.ii_(B.ii_).B.ii.query.get.map(_ ==> List(
+          (y, 2, Set(2, 3)),
+          (z, 2, Set(4))
         ))
-
-
-        //
-        //        _ <- A.s.i_.<(2).i_.not(0).OwnB.i_(A.i_).query.get.map(_ ==> List("b"))
-
+        _ <- A.id.a1.i.ii_.B.ii(A.ii_).query.get.map(_ ==> List(
+          (y, 2, Set(2, 3)),
+          (z, 2, Set(4))
+        ))
       } yield ()
     }
 

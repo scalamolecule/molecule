@@ -65,7 +65,6 @@ class FlatRef(
     }
     postStages.add(new BsonDocument("$lookup", lookup))
 
-
     val refNotEmpty  = new BsonDocument(dot1 + refAttr, new BsonDocument("$ne", new BsonArray))
     val outerMatches = if (parent.get.filterMatches.isEmpty) {
       refNotEmpty

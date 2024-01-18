@@ -34,16 +34,48 @@ object AdhocJVM_h2 extends TestSuite_h2 {
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
-        _ <- A.s.Bb.*(B.i_?).insert(
-          ("a", List(Some(1))),
-          ("b", List(None)),
-          ("c", Nil),
+        _ <- A.i.ii.Bb.*(B.ii.i).insert(
+          (1, Set(0, 1, 2), List(
+            (Set(1, 2, 3), 1),
+            (Set(1, 2, 0), 1),
+          )),
+          (2, Set(2, 3), List(
+            (Set(2, 3), 1),
+            (Set(2, 0), 1),
+          )),
+          (2, Set(4), List(
+            (Set(4), 1),
+            (Set(0), 1),
+          )),
+          (2, Set(4), List(
+            (Set(3), 1),
+            (Set(0), 1),
+          )),
+          (3, Set(5), List(
+            (Set(5), 1),
+            (Set(5), 2),
+            //            (Set(0), 3),
+          )),
         ).i.transact
 
-        _ <- A.s.a1.Bb.*?(B.i_?).query.i.get.map(_ ==> List(
-          ("a", List(Some(1))),
-          ("b", Nil),
-          ("c", Nil),
+        //        _ <- A.i.ii_(B.ii_).Bb.*(B.ii.i).query.get.map(_ ==> List(
+        //          (2, List(
+        //            (Set(2, 3, 4), 1), // Set(2, 3) and Set(4) coalesced
+        //          )),
+        //          (3, List(
+        //            (Set(5), 1),
+        //            (Set(5), 2),
+        //          ))
+        //        ))
+
+        _ <- A.i.ii(B.ii_).Bb.*(B.ii.i).query.get.map(_ ==> List(
+          (2, Set(2, 3, 4), List(
+            (Set(2, 3, 4), 1),
+          )),
+          (3, Set(5), List(
+            (Set(5), 1),
+            (Set(5), 2),
+          ))
         ))
 
       } yield ()

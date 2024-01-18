@@ -61,7 +61,7 @@ object AdhocJVM_datomic extends TestSuite_datomic {
 
         // Pointing backwards
 
-        _ <- Ns.s.a1.i.Refs.*(Ref.int(Ns.i_)).query.get.map(_     ==> List(
+        _ <- Ns.s.a1.i.Refs.*(Ref.int(Ns.i_)).query.get.map(_ ==> List(
           ("b", 4, List(4))
         ))
 
@@ -96,24 +96,51 @@ object AdhocJVM_datomic extends TestSuite_datomic {
 
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
-
-      for {
-        refId <- B.i(7).save.transact.map(_.id)
-        id <- A.i.b.insert(1, refId).transact.map(_.id)
-        _ <- A.i.b.query.get.map(_ ==> List((1, refId)))
-
-        // Apply empty value to delete ref id of entity (entity remains)
-        _ <- A(id).b().update.transact
-        _ <- A.i.b_?.query.get.map(_ ==> List((1, None)))
-      } yield ()
       for {
 
-        id <- A.i(1).OwnB.i(7).save.transact.map(_.id)
-        _ <- A.i.OwnB.i.query.i.get.map(_ ==> List((1, 7)))
+        _ <- A.i.ii.Bb.*(B.ii.i).insert(
+          (1, Set(0, 1, 2), List(
+            (Set(1, 2, 3), 1),
+            (Set(1, 2, 0), 1),
+          )),
+          (2, Set(2, 3), List(
+            (Set(2, 3), 1),
+            (Set(2, 0), 1),
+          )),
+          (2, Set(4), List(
+            (Set(4), 1),
+            (Set(0), 1),
+          )),
+          (2, Set(4), List(
+            (Set(3), 1),
+            (Set(0), 1),
+          )),
+          (3, Set(5), List(
+            (Set(5), 1),
+            (Set(5), 2),
+            //            (Set(0), 3),
+          )),
+        ).i.transact
 
-        // Apply empty value to delete ref id of entity (entity remains)
-        _ <- A(id).ownB().update.transact
-        _ <- A.i.ownB_?.query.get.map(_ ==> List((1, None)))
+        //        _ <- A.i.ii_(B.ii_).Bb.*(B.ii.i).query.get.map(_ ==> List(
+        //          (2, List(
+        //            (Set(2, 3, 4), 1), // Set(2, 3) and Set(4) coalesced
+        //          )),
+        //          (3, List(
+        //            (Set(5), 1),
+        //            (Set(5), 2),
+        //          ))
+        //        ))
+
+        _ <- A.i.ii(B.ii_).Bb.*(B.ii.i).query.i.get.map(_ ==> List(
+          (2, Set(2, 3, 4), List(
+            (Set(2, 3, 4), 1),
+          )),
+          (3, Set(5), List(
+            (Set(5), 1),
+            (Set(5), 2),
+          ))
+        ))
 
       } yield ()
     }

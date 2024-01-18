@@ -37,6 +37,7 @@ class NestedRef(
   isEmbedded = false
 
   override def getStages: util.ArrayList[BsonDocument] = {
+    // Nested -------------------
     addMatches()
     subBranches.foreach(ref => stages.addAll(ref.getStages))
     addStage("$project", projection)
@@ -44,6 +45,8 @@ class NestedRef(
     if (sorts.nonEmpty) {
       addStage("$sort", Sorts.orderBy(getSorts))
     }
+
+    // Parent -------------------
 
     // Process lookup pipeline stages
     stages.forEach(stage => pipeline.add(stage))
@@ -67,6 +70,7 @@ class NestedRef(
         )
       )
     }
+
     postStages
   }
 

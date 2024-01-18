@@ -114,11 +114,11 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
     projectField(uniqueField)
     addSort(attr, uniqueField)
     addCast(uniqueField, res.cast(uniqueField))
-
-    prefixedFieldPair = if (b.parent.isEmpty) (nestedLevel, field, field) else (nestedLevel, b.path + field, b.alias + field)
+    prefixedFieldPair = if (b.parent.isEmpty)
+      (nestedLevel, field, field)
+    else
+      (nestedLevel, b.path + field, b.alias + field)
     topBranch.groupIdFields += prefixedFieldPair
-
-    //    println(s"++++++++ $nestedLevel  " + prefixedFieldPair)
     handleExpr(uniqueField, field, attr, args, res)
   }
 
@@ -134,7 +134,6 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
       pathLevels(path) = 0
     }
     branchesByPath(path) = b
-
     attr.filterAttr.fold {
       if (hasFilterAttr) {
         // Add filter if this attribute is a filter attribute pointed to
@@ -145,99 +144,6 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
       expr2(field, attr.op, filterAttr)
     }
   }
-
-  private def expr2(field: String, op: Op, filterAttr: (Int, List[String], Attr)): Unit = op match {
-    case Eq    => equal2(field, filterAttr)
-    case Neq   => neq2(field, filterAttr)
-    case Lt    => compare2(field, "$lt", filterAttr)
-    case Gt    => compare2(field, "$gt", filterAttr)
-    case Le    => compare2(field, "$lte", filterAttr)
-    case Ge    => compare2(field, "$gte", filterAttr)
-    case other => unexpectedOp(other)
-  }
-
-  private def equal2(field: String, filterAttr: (Int, List[String], Attr)): Unit = {
-    handleFilterExpr(field, "$eq", filterAttr)
-  }
-  private def neq2(field: String, filterAttr: (Int, List[String], Attr)): Unit = {
-    handleFilterExpr(field, "$ne", filterAttr)
-  }
-  private def compare2(field: String, op: String, filterAttr: (Int, List[String], Attr)): Unit = {
-    handleFilterExpr(field, op, filterAttr)
-  }
-
-  private def handleFilterExpr(field: String, op: String, filterAttr0: (Int, List[String], Attr)): Unit = {
-    val (dir, filterPath, filterAttr1) = filterAttr0
-    val filterAttr                     = filterAttr1.cleanAttr
-    dir match {
-      case 0 => // Same namespace
-        // Adjacent filter attribute in same namespace
-        val args = new BsonArray()
-        args.add(new BsonString("$" + field))
-        args.add(new BsonString("$" + b.path + filterAttr))
-        b.matches.add(Filters.eq("$expr", new BsonDocument(op, args)))
-
-      case -1 => // Pointing backwards
-        val b1 = b
-        val b2 = branchesByPath(filterPath)
-
-        val args = new BsonArray()
-        args.add(new BsonString("$" + b1.path + field))
-        args.add(new BsonString("$" + b2.path + filterAttr))
-
-        if (isNested && b1.level != b2.level) {
-          addStagesForNested(b2, b1, args)
-        } else {
-          topBranch.postMatches.add(Filters.eq("$expr", new BsonDocument(op, args)))
-        }
-
-      case 1 => // Pointing forward
-        val b1        = b
-        val addFilter = (b2: Branch) => {
-          val args = new BsonArray()
-          args.add(new BsonString("$" + b1.path + field))
-          args.add(new BsonString("$" + b2.path + filterAttr))
-
-          if (isNested && b1.level != b2.level) {
-            addStagesForNested(b1, b2, args)
-          } else {
-            topBranch.postMatches.add(Filters.eq("$expr", new BsonDocument(op, args)))
-          }
-        }
-        reverseFilters(filterPath :+ filterAttr) = addFilter
-    }
-
-    def addStagesForNested(parentBranch: Branch, nestedBranch: Branch, args: BsonArray): Boolean = {
-      val parentFields = parentBranch.groupIdFields.filter(_._1 == parentBranch.level)
-      val refAttr      = nestedBaseBranches(nestedBranch.level)._1
-      val refAttrBson  = new BsonString("$" + refAttr)
-
-      // unwind
-      parentBranch.lateStages.add(new BsonDocument("$unwind", refAttrBson))
-
-      // match
-      parentBranch.lateStages.add(new BsonDocument("$match",
-        new BsonDocument("$expr", new BsonDocument(op, args))))
-
-      // group
-      val groupIdFieldsDoc = new BsonDocument("_id", new BsonString("$_id"))
-      parentFields.foreach { case (_, fieldPath, _) =>
-        groupIdFieldsDoc.put(fieldPath, new BsonString("$" + fieldPath))
-      }
-      val groupDoc = new BsonDocument()
-      groupDoc.append("_id", groupIdFieldsDoc)
-      groupDoc.append(refAttr, new BsonDocument("$push", refAttrBson))
-      parentBranch.lateStages.add(new BsonDocument("$group", groupDoc))
-
-      // addFields
-      val addFieldsDoc = new BsonDocument()
-      parentFields.foreach { case (_, fieldPath, fieldAlias) =>
-        addFieldsDoc.put(fieldPath, new BsonString("$_id." + fieldAlias))
-      }
-      parentBranch.lateStages.add(new BsonDocument("$addFields", addFieldsDoc))
-    }
-  }
-
 
   private def opt[T](attr: Attr, optArgs: Option[Seq[T]], res: ResOne[T]): Unit = {
     val field       = attr.attr
@@ -280,6 +186,17 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
       case other      => unexpectedOp(other)
     }
   }
+  private def expr2(field: String, op: Op, filterAttr: (Int, List[String], Attr)): Unit = op match {
+    case Eq    => equal2(field, filterAttr)
+    case Neq   => neq2(field, filterAttr)
+    case Lt    => compare2(field, "$lt", filterAttr)
+    case Gt    => compare2(field, "$gt", filterAttr)
+    case Le    => compare2(field, "$lte", filterAttr)
+    case Ge    => compare2(field, "$gte", filterAttr)
+    case other => unexpectedOp(other)
+  }
+
+
 
   protected def attr[T](field: String): Unit = {
     val path = if (b.base.isEmbedded) b.dot else ""
@@ -437,11 +354,11 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
 
       case "median" =>
         topBranch.preGroupFields += pathField -> aliasField
-        topBranch.groupExprs += aliasField -> new BsonDocument()
-          .append("$median", new BsonDocument()
+        topBranch.groupExprs += aliasField -> new BsonDocument("$median",
+          new BsonDocument()
             .append("input", new BsonString(idField))
             .append("method", new BsonString("approximate"))
-          )
+        )
         addField(uniqueField)
         replaceCast(uniqueField, hardCastDouble(uniqueField))
 
@@ -468,6 +385,93 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
         replaceCast(uniqueField, hardCastDouble(uniqueField))
 
       case other => unexpectedKw(other)
+    }
+  }
+
+  private def equal2(field: String, filterAttr: (Int, List[String], Attr)): Unit = {
+    handleFilterExpr(field, "$eq", filterAttr)
+  }
+  private def neq2(field: String, filterAttr: (Int, List[String], Attr)): Unit = {
+    handleFilterExpr(field, "$ne", filterAttr)
+  }
+  private def compare2(field: String, op: String, filterAttr: (Int, List[String], Attr)): Unit = {
+    handleFilterExpr(field, op, filterAttr)
+  }
+
+  private def handleFilterExpr(field: String, op: String, filterAttr0: (Int, List[String], Attr)): Unit = {
+    val (dir, filterPath, filterAttr1) = filterAttr0
+    val filterAttr                         = filterAttr1.cleanAttr
+    dir match {
+      case 0 =>
+        val b1 = b
+        val b2 = branchesByPath(filterPath)
+
+        val args = new BsonArray()
+        args.add(new BsonString("$" + b1.path + field))
+        args.add(new BsonString("$" + b2.path + filterAttr))
+
+        if (isNested && b1.level != b2.level) {
+          addStagesForNested(b2, b1, args)
+        } else {
+          topBranch.postMatches.add(Filters.eq("$expr", new BsonDocument(op, args)))
+        }
+      case -1 =>
+        val b1 = b
+        val b2 = branchesByPath(filterPath)
+
+        val args = new BsonArray()
+        args.add(new BsonString("$" + b1.path + field))
+        args.add(new BsonString("$" + b2.path + filterAttr))
+
+        if (isNested && b1.level != b2.level) {
+          addStagesForNested(b2, b1, args)
+        } else {
+          topBranch.postMatches.add(Filters.eq("$expr", new BsonDocument(op, args)))
+        }
+      case 1 =>
+        val b1        = b
+        val addFilter = (b2: Branch) => {
+          val args = new BsonArray()
+          args.add(new BsonString("$" + b1.path + field))
+          args.add(new BsonString("$" + b2.path + filterAttr))
+
+          if (isNested && b1.level != b2.level) {
+            addStagesForNested(b1, b2, args)
+          } else {
+            topBranch.postMatches.add(Filters.eq("$expr", new BsonDocument(op, args)))
+          }
+        }
+        reverseFilters(filterPath :+ filterAttr) = addFilter
+    }
+
+    def addStagesForNested(parentBranch: Branch, nestedBranch: Branch, args: BsonArray): Boolean = {
+      val parentFields = parentBranch.groupIdFields.filter(_._1 == parentBranch.level)
+      val refAttr      = nestedBaseBranches(nestedBranch.level)._1
+      val refAttrBson  = new BsonString("$" + refAttr)
+
+      // unwind
+      parentBranch.postStages.add(new BsonDocument("$unwind", refAttrBson))
+
+      // match
+      parentBranch.postStages.add(new BsonDocument("$match",
+        new BsonDocument("$expr", new BsonDocument(op, args))))
+
+      // group
+      val groupIdFieldsDoc = new BsonDocument("_id", new BsonString("$_id"))
+      parentFields.foreach { case (_, fieldPath, _) =>
+        groupIdFieldsDoc.put(fieldPath, new BsonString("$" + fieldPath))
+      }
+      val groupDoc = new BsonDocument()
+      groupDoc.append("_id", groupIdFieldsDoc)
+      groupDoc.append(refAttr, new BsonDocument("$push", refAttrBson))
+      parentBranch.postStages.add(new BsonDocument("$group", groupDoc))
+
+      // addFields
+      val addFieldsDoc = new BsonDocument()
+      parentFields.foreach { case (_, fieldPath, fieldAlias) =>
+        addFieldsDoc.put(fieldPath, new BsonString("$_id." + fieldAlias))
+      }
+      parentBranch.postStages.add(new BsonDocument("$addFields", addFieldsDoc))
     }
   }
 }

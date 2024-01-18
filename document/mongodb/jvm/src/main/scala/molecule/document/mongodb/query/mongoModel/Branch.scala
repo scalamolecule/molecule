@@ -24,6 +24,7 @@ abstract class Branch(
   var isEmbedded    = true
   var uniqueIndex   = 0
   val stages        = new util.ArrayList[BsonDocument]
+  val preMatches    = new util.ArrayList[Bson]
   val matches       = new util.ArrayList[Bson]
   val postMatches   = new util.ArrayList[Bson]
   val filterMatches = new util.ArrayList[Bson]
@@ -40,10 +41,9 @@ abstract class Branch(
   // Base branch holds matches of embedded documents
   var base: Branch = this
 
-  protected val postStages = new util.ArrayList[BsonDocument]
-  protected val pipeline   = new BsonArray()
-
-  val lateStages = new util.ArrayList[BsonDocument]
+  val preStages  = new util.ArrayList[BsonDocument]
+  val postStages = new util.ArrayList[BsonDocument]
+  val pipeline   = new BsonArray()
 
 
   def addMatches(): Unit = {
