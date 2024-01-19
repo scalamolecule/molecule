@@ -1,6 +1,7 @@
 package molecule.document.mongodb.query
 
 import com.mongodb.client.AggregateIterable
+import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.core.query.Pagination
 import molecule.core.util.ModelUtils
@@ -62,7 +63,7 @@ abstract class QueryResolve_mongodb[Tpl](
       }
       getFilterAttr(tpe, ns, attr, fn, v)
     }
-    val altElements = filterAttr +: elements
+    val altElements = addFilterAttr(elements, filterAttr)
     val bsonDocs    = getData(conn, altElements, Some(Int.MaxValue), None)
     val allTuples   = ListBuffer.empty[Tpl]
     val bson2tpl    = levelCaster(m2q.immutableCastss)
@@ -75,8 +76,7 @@ abstract class QueryResolve_mongodb[Tpl](
       val rows     = facet.get("rows").asArray()
       val metaData = facet.get("metaData").asArray()
       if (rows.isEmpty) {
-        val cursor = nextCursor(Nil, allTokens)
-        (Nil, cursor, false)
+        (Nil, "", false)
       } else {
         val totalCount = metaData.get(0).asDocument().get("totalCount").asInt32().intValue()
         val count      = getCount(limit, forward, totalCount)
@@ -92,5 +92,28 @@ abstract class QueryResolve_mongodb[Tpl](
         (tuples1, cursor, more > 0)
       }
     }
+  }
+
+
+  protected def addFilterAttr(elements: List[Element], filterAttr: Attr): List[Element] = {
+    var found     = false
+    val elements1 = elements.flatMap {
+      case a: Attr if a.cleanName == filterAttr.cleanName =>
+        found = true
+        // Add filter attribute after matching attribute so that the main
+        // attribute is not suffixed in expressions, projection etc.
+        List(a, filterAttr)
+      case other => List(other)
+    }
+    if (!found) {
+      throw ModelError(
+        s"""Couldn't match filter attribute:
+           |$filterAttr
+           |in model:
+           |${elements.mkString("\n")}
+           |""".stripMargin
+      )
+    }
+    elements1
   }
 }

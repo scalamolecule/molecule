@@ -10,7 +10,6 @@ import scala.collection.mutable.ListBuffer
 
 trait ResolveRef { self: MongoQueryBase =>
 
-
   protected def resolveRef(ref: Ref): Unit = {
     val Ref(ns, refAttr, refNs, card, owner, _) = ref
     if (isNestedOpt && card == CardSet) {

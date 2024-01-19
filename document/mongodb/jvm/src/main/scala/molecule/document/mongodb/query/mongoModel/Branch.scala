@@ -34,7 +34,6 @@ abstract class Branch(
   val optSetSeparators = ListBuffer.empty[(String, BsonValue)]
   val groupExprs       = ListBuffer.empty[(String, BsonValue)]
   var addFields        = Set.empty[(String, BsonValue)]
-  var duplicateFields  = Set.empty[(String, BsonValue)]
 
   val sorts       = ListBuffer.empty[(Int, Bson)]
   val subBranches = ListBuffer.empty[Branch]
@@ -75,7 +74,6 @@ abstract class Branch(
       // append suffix to distinguish multiple uses of the same field
       uniqueIndex += 1
       val uniqueField = field + "_" + uniqueIndex
-      duplicateFields += (path + uniqueField) -> new BsonString("$" + alias + field)
       uniqueField
     }
     pathFields += dot + uniqueField

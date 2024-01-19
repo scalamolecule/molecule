@@ -109,7 +109,7 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
   private def tac[T](attr: Attr, args: Seq[Set[T]], resSet: ResSet[T]): Unit = {
     val field       = attr.attr
     val uniqueField = b.unique(field)
-    b.base.matches.add(Filters.exists(field))
+    b.base.matches.add(Filters.exists(b.dot + field))
     handleExpr(uniqueField, field, attr, args, resSet, false)
   }
 
@@ -145,12 +145,13 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
     prefixedFieldPair = if (b.parent.isEmpty) (nestedLevel, field, field) else (nestedLevel, b.path + field, b.alias + field)
     topBranch.groupIdFields += prefixedFieldPair
 
+    val field1 = b.dot + field
     attr.op match {
       case V     => optAttr(uniqueField, field)
-      case Eq    => optEqual(field, optSets, res)
-      case Neq   => optNeq(field, optSets, res)
-      case Has   => optHas(field, optSets, res)
-      case HasNo => optHasNo(field, optSets, res)
+      case Eq    => optEqual(field1, optSets, res)
+      case Neq   => optNeq(field1, optSets, res)
+      case Has   => optHas(field1, optSets, res)
+      case HasNo => optHasNo(field1, optSets, res)
       case other => unexpectedOp(other)
     }
   }
@@ -163,14 +164,15 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
     res: ResSet[T],
     mandatory: Boolean
   ): Unit = {
+    val field1 = b.dot + field
     op match {
       case V         => attr(uniqueField, field, mandatory)
-      case Eq        => equal(field, sets, res)
-      case Neq       => neq(field, sets, res)
-      case Has       => has(field, sets, res)
-      case HasNo     => hasNo(field, sets, res)
-      case NoValue   => noValue(field)
-      case Fn(kw, n) => aggr(uniqueField, field, kw, n, res)
+      case Eq        => equal(field1, sets, res)
+      case Neq       => neq(field1, sets, res)
+      case Has       => has(field1, sets, res)
+      case HasNo     => hasNo(field1, sets, res)
+      case NoValue   => noValue(field1)
+      case Fn(kw, n) => aggr(uniqueField, field1, kw, n, res)
       case other     => unexpectedOp(other)
     }
   }

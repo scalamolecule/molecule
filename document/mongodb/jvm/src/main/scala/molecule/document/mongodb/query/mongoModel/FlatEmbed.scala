@@ -36,7 +36,7 @@ class FlatEmbed(
 ) {
 
   override def getStages: util.ArrayList[BsonDocument] = {
-    //        println(s"----- 1 -----  $dot  $refAttr  ${parent.map(_.isEmbedded)}")
+    //    println(s"----- 1 -----  $dot  $refAttr  ${parent.map(_.isEmbedded)}")
     //        matches.forEach(m => println(m))
 
     addMatches()
@@ -65,15 +65,6 @@ class FlatEmbed(
     addStage("$match", postMatches)
 
     stages.addAll(postStages)
-
-    if (duplicateFields.nonEmpty) {
-      // Add duplicate fields with suffixes
-      val addFieldsDoc = new BsonDocument()
-      duplicateFields.foreach { case (fieldPath, bson) =>
-        addFieldsDoc.put(fieldPath, bson)
-      }
-      stages.add(new BsonDocument("$addFields", addFieldsDoc))
-    }
 
     if (parent.isEmpty) {
       addStage("$project", projection)

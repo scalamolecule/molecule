@@ -197,9 +197,8 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
   }
 
 
-
   protected def attr[T](field: String): Unit = {
-    val path = if (b.base.isEmbedded) b.dot else ""
+    val path = if (b.isEmbedded) b.dot else ""
     b.base.matches.add(Filters.ne(path + field, null.asInstanceOf[T]))
   }
 
@@ -214,17 +213,14 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
     }
   }
 
-
   private def neq[T](pathField: String, args: Seq[T], res: ResOne[T]): Unit = {
     b.base.matches.add(Filters.ne(pathField, null.asInstanceOf[T]))
     args.map(arg => b.base.matches.add(res.neq(pathField, arg)))
   }
 
-
   private def compare(filter: Bson): Unit = {
     b.base.matches.add(filter)
   }
-
 
   private def noValue(field: String): Unit = {
     b.base.matches.add(Filters.eq(field, new BsonNull()))
@@ -400,9 +396,9 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
 
   private def handleFilterExpr(field: String, op: String, filterAttr0: (Int, List[String], Attr)): Unit = {
     val (dir, filterPath, filterAttr1) = filterAttr0
-    val filterAttr                         = filterAttr1.cleanAttr
+    val filterAttr                     = filterAttr1.cleanAttr
     dir match {
-      case 0 =>
+      case 0  =>
         val b1 = b
         val b2 = branchesByPath(filterPath)
 
@@ -428,7 +424,7 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
         } else {
           topBranch.postMatches.add(Filters.eq("$expr", new BsonDocument(op, args)))
         }
-      case 1 =>
+      case 1  =>
         val b1        = b
         val addFilter = (b2: Branch) => {
           val args = new BsonArray()

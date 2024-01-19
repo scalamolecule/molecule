@@ -40,8 +40,9 @@ case class PrimaryUnique[Tpl](
     val forward    = limit > 0
     val (fn, v)    = if (forward) (Gt, z) else (Lt, a)
     val filterAttr = getFilterAttr(tpe, ns, attr, fn, v)
-    val elements1  = filterAttr +: (if (forward) elements else reverseTopLevelSorting(elements))
-    val bsonDocs   = getData(conn, elements1, Some(limit), None)
+    val elements1  = if (forward) elements else reverseTopLevelSorting(elements)
+    val elements2  = addFilterAttr(elements1, filterAttr)
+    val bsonDocs   = getData(conn, elements2, Some(limit), None)
     val tuples     = ListBuffer.empty[Tpl]
     val bson2tpl   = levelCaster(m2q.immutableCastss)
     val it         = bsonDocs.iterator()
