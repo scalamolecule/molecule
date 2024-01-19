@@ -36,11 +36,7 @@ case class DatomicQueryResolveOffset[Tpl](
   // Optional use of DB_AFTER for subscriptions
   def getListFromOffset_sync(altDb: Option[datomic.Database])(implicit conn: DatomicConn_JVM)
   : (List[Tpl], Int, Boolean) = {
-    lazy val limitSign  = optLimit.get >> 31
-    lazy val offsetSign = optOffset.get >> 31
-    if (optOffset.isDefined && optLimit.isDefined && optOffset.get != 0 && limitSign != offsetSign) {
-      throw ModelError("Limit and offset should both be positive or negative.")
-    }
+    offsetLimitCheck(optLimit, optOffset)
     val rows       = getRawData(conn, altDb = altDb)
     val totalCount = rows.size
     val sortedRows = sortRows(rows)
@@ -62,12 +58,12 @@ case class DatomicQueryResolveOffset[Tpl](
         offsetRaw(sortedRows, fromUntil).forEach { row =>
           tuples += m2q.pullRow2tpl(row)
         }
-        (tuples.result(), totalCount, hasMore)
+        (tuples.toList, totalCount, hasMore)
 
       } else {
         val row2tpl = m2q.castRow2AnyTpl(m2q.aritiess.head, m2q.castss.head, 0, None)
         offsetRaw(sortedRows, fromUntil).forEach(row => tuples += row2tpl(row).asInstanceOf[Tpl])
-        (tuples.result(), totalCount, hasMore)
+        (tuples.toList, totalCount, hasMore)
       }
     }
   }

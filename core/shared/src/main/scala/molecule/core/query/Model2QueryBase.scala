@@ -12,7 +12,6 @@ trait Model2QueryBase extends ModelUtils {
   private var level         = 1
   private val sortsPerLevel = mutable.Map[Int, List[Int]](1 -> Nil)
 
-
   def validateQueryModel(
     elements: List[Element],
     addFilterAttr: Option[(String, Attr) => Unit] = None

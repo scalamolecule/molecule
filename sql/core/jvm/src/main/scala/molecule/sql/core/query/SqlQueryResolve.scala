@@ -13,39 +13,14 @@ import scala.collection.mutable.ListBuffer
 abstract class SqlQueryResolve[Tpl](
   elements: List[Element],
   m2q: Model2SqlQuery[Tpl] with SqlQueryBase
-) extends Pagination with ModelUtils {
-
-  lazy val edgeValuesNotFound = "Couldn't find next page. Edge rows were all deleted/updated."
-
-  protected def getUniqueValues(tpls0: List[Tpl], uniqueIndex: Int, encode: Any => String): List[String] = {
-    val tpls   = (if (tpls0.head.isInstanceOf[Product]) tpls0 else tpls0.map(Tuple1(_))).asInstanceOf[List[Product]]
-    val first3 = tpls.take(3).map(t => encode(t.productElement(uniqueIndex))).padTo(3, "")
-    val last3  = tpls.takeRight(3).map(t => encode(t.productElement(uniqueIndex))).reverse.padTo(3, "").reverse
-    first3 ++ last3
-  }
-
-  protected def getRowHashes(tpls: List[Tpl]): List[String] = {
-    val first3 = tpls.take(3).map(row => row.hashCode().toString).padTo(3, "")
-    val last3  = tpls.takeRight(3).map(row => row.hashCode().toString).reverse.padTo(3, "").reverse
-    first3 ++ last3
-  }
-
-  protected def getUniquePair(tpls: List[Tpl], uniqueIndex: Int, encode: Any => String): List[String] = {
-    tpls.head match {
-      case tpl: Product => List(
-        encode(tpl.productElement(uniqueIndex)),
-        encode(tpls.last.asInstanceOf[Product].productElement(uniqueIndex))
-      )
-      case v            => List(encode(v), encode(tpls.last))
-    }
-  }
+) extends Pagination[Tpl] with ModelUtils {
 
   protected def getData(
     conn: JdbcConn_JVM,
     optLimit: Option[Int],
     optOffset: Option[Int]
   ): ResultSet = {
-    getResultSet(conn, m2q.getSqlQuery(Nil, optLimit, optOffset, Some(conn.proxy)))
+    getResultSet(conn, m2q.getSqlQuery(Nil, optLimit, optOffset))
   }
 
   protected def getTotalCount(conn: JdbcConn_JVM): Int = {
@@ -73,7 +48,7 @@ abstract class SqlQueryResolve[Tpl](
     optLimit: Option[Int],
     optOffset: Option[Int]
   ): ResultSet = {
-    val query = m2q.getSqlQuery(altElements, optLimit, optOffset, Some(conn.proxy))
+    val query = m2q.getSqlQuery(altElements, optLimit, optOffset)
     getResultSet(conn, query)
   }
 
@@ -135,43 +110,5 @@ abstract class SqlQueryResolve[Tpl](
         (tpls, cursor, more > 0)
       }
     }
-  }
-
-  private def getCount(limit: Int, forward: Boolean, totalCount: Int) = {
-    if (forward)
-      limit.min(totalCount)
-    else
-      totalCount - (totalCount + limit).max(0)
-  }
-
-  private def paginateTpls(
-    count: Int,
-    tpls: List[Tpl],
-    identifiers: List[Any],
-    identify: Tpl => Any
-  ): (List[Tpl], Int) = {
-    val tuples = ListBuffer.empty[Tpl]
-    var window = false
-    var i      = 0
-    var more   = 0
-    @tailrec
-    def findFrom(identifiers: List[Any]): Unit = {
-      identifiers match {
-        case identifier :: remainingIdentifiers =>
-          tpls.foreach {
-            case tpl if window && i != count        => i += 1; tuples += tpl
-            case tpl if identify(tpl) == identifier => window = true
-            case _                                  => if (window) more += 1
-          }
-          if (tuples.isEmpty) {
-            // Recursively try with next identifier
-            findFrom(remainingIdentifiers)
-          }
-
-        case Nil => throw ModelError(edgeValuesNotFound)
-      }
-    }
-    findFrom(identifiers)
-    (tuples.result(), more)
   }
 }

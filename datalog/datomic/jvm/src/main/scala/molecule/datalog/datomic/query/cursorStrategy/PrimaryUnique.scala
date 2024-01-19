@@ -31,7 +31,7 @@ case class PrimaryUnique[Tpl](
   dbView: Option[DbView],
   m2q: Model2DatomicQuery[Tpl] with DatomicQueryBase
 ) extends DatomicQueryResolve[Tpl](elements, dbView, m2q)
-  with FutureUtils with Pagination with ModelTransformations_ with MoleculeLogging {
+  with FutureUtils with Pagination[Tpl] with ModelTransformations_ with MoleculeLogging {
 
   def getPage(tokens: List[String], limit: Int)
              (implicit conn: DatomicConn_JVM): (List[Tpl], String, Boolean) = try {
@@ -67,14 +67,14 @@ case class PrimaryUnique[Tpl](
         if (m2q.isNestedOpt) {
           postAdjustPullCasts()
           sortedRows.subList(0, limitAbs).forEach(row => tuples += m2q.pullRow2tpl(row))
-          val tpls   = if (forward) tuples.result() else tuples.result().reverse
+          val tpls   = if (forward) tuples.toList else tuples.toList.reverse
           val cursor = nextCursorUniques(tpls, tokens)
           (tpls, cursor, hasMore)
 
         } else {
           val row2tpl = m2q.castRow2AnyTpl(m2q.aritiess.head, m2q.castss.head, 0, None)
           sortedRows.subList(0, limitAbs).forEach(row => tuples += row2tpl(row).asInstanceOf[Tpl])
-          val tpls   = if (forward) tuples.result() else tuples.result().reverse
+          val tpls   = if (forward) tuples.toList else tuples.toList.reverse
           val cursor = nextCursorUniques(tpls, tokens)
           (tpls, cursor, hasMore)
         }

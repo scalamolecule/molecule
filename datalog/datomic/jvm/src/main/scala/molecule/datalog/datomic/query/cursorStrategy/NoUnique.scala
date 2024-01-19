@@ -19,7 +19,7 @@ case class NoUnique[Tpl](
   dbView: Option[DbView],
   m2q: Model2DatomicQuery[Tpl] with DatomicQueryBase
 ) extends DatomicQueryResolve[Tpl](elements, dbView, m2q)
-  with FutureUtils with Pagination with MoleculeLogging {
+  with FutureUtils with Pagination[Tpl] with MoleculeLogging {
 
   def getPage(allTokens: List[String], limit: Int)
              (implicit conn: DatomicConn_JVM)

@@ -6,10 +6,13 @@ import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.ops.ModelTransformations_
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.query.Pagination
+import molecule.core.spi.Conn
 import molecule.core.util.FutureUtils
 import molecule.document.mongodb.facade.MongoConn_JVM
+import molecule.document.mongodb.query.casting.CastBsonDoc_
 import molecule.document.mongodb.query.cursorStrategy.{NoUnique, PrimaryUnique, SubUnique}
 import scala.annotation.tailrec
+import scala.collection.mutable.ListBuffer
 
 case class QueryResolveCursor_mongodb[Tpl](
   elements: List[Element],
@@ -17,8 +20,9 @@ case class QueryResolveCursor_mongodb[Tpl](
   cursor: Option[String],
   m2q: Model2MongoQuery[Tpl]
 ) extends QueryResolve_mongodb[Tpl](elements, m2q)
+  with CastBsonDoc_
   with FutureUtils
-  with Pagination
+  with Pagination[Tpl]
   with ModelTransformations_
   with MoleculeLogging {
 
@@ -50,138 +54,86 @@ case class QueryResolveCursor_mongodb[Tpl](
 
   private def getInitialPage(limit: Int)(implicit conn: MongoConn_JVM)
   : (List[Tpl], String, Boolean) = {
-    val forward      = limit > 0
-    val altElements  = if (forward) elements else reverseTopLevelSorting(elements)
-//    val sortedRows   = getRawData(conn, altElements, Some(limit.abs), None)
-//    val sortedRows1  = new ResultSetImpl(sortedRows)
-//    val flatRowCount = m2q.getRowCount(sortedRows1)
-    val flatRowCount = 42
+    //    val forward      = limit > 0
+    //    val altElements  = if (forward) elements else reverseTopLevelSorting(elements)
+    ////    val sortedRows   = getRawData(conn, altElements, Some(limit.abs), None)
+    ////    val sortedRows1  = new ResultSetImpl(sortedRows)
+    ////    val flatRowCount = m2q.getRowCount(sortedRows1)
+    //    val flatRowCount = 42
+    //
+    //    if (flatRowCount == 0) {
+    //      (Nil, "", false)
+    //    } else {
+    //      if (m2q.isNested) {
+    ////        val nestedRows    = if (m2q.isNested) m2q.rows2nested(sortedRows1) else m2q.rows2nestedOpt(sortedRows1)
+    ////        val topLevelCount = nestedRows.length
+    ////        val limitAbs      = limit.abs.min(topLevelCount)
+    ////        val hasMore       = limitAbs < topLevelCount
+    ////        val selectedRows  = nestedRows.take(limitAbs)
+    ////        val tpls          = if (forward) selectedRows else selectedRows.reverse
+    ////        val cursor        = initialCursor(conn, tpls)
+    ////        (tpls, cursor, hasMore)
+    //        ???
+    //
+    //      } else {
+    //        val totalCount = getTotalCount(conn)
+    //        val limitAbs   = limit.abs.min(totalCount)
+    //        val hasMore    = limitAbs < totalCount
+    //        val tuples     = ListBuffer.empty[Tpl]
+    ////        val row2tpl    = m2q.castRow2AnyTpl(m2q.aritiess.head, m2q.castss.head, 1, None)
+    ////        while (sortedRows.next()) {
+    ////          tuples += row2tpl(sortedRows1).asInstanceOf[Tpl]
+    ////        }
+    //        val result = if (forward) tuples.toList else tuples.toList.reverse
+    //        val cursor = initialCursor(conn, result)
+    //        (result, cursor, hasMore)
+    //        ???
+    //      }
+    //    }
 
-    if (flatRowCount == 0) {
-      (Nil, "", false)
-    } else {
-      if (m2q.isNestedMan || m2q.isNestedOpt) {
-//        val nestedRows    = if (m2q.isNested) m2q.rows2nested(sortedRows1) else m2q.rows2nestedOpt(sortedRows1)
-//        val topLevelCount = nestedRows.length
-//        val limitAbs      = limit.abs.min(topLevelCount)
-//        val hasMore       = limitAbs < topLevelCount
-//        val selectedRows  = nestedRows.take(limitAbs)
-//        val tpls          = if (forward) selectedRows else selectedRows.reverse
-//        val cursor        = initialCursor(conn, tpls)
-//        (tpls, cursor, hasMore)
-        ???
 
-      } else {
-//        val totalCount = getTotalCount(conn)
-//        val limitAbs   = limit.abs.min(totalCount)
-//        val hasMore    = limitAbs < totalCount
-//        val tuples     = ListBuffer.empty[Tpl]
-//        val row2tpl    = m2q.castRow2AnyTpl(m2q.aritiess.head, m2q.castss.head, 1, None)
-//        while (sortedRows.next()) {
-//          tuples += row2tpl(sortedRows1).asInstanceOf[Tpl]
-//        }
-//        val result = if (forward) tuples.result() else tuples.result().reverse
-//        val cursor = initialCursor(conn, result)
-//        (result, cursor, hasMore)
-        ???
-      }
-    }
+    //    val (isPaginated, forward) = pagination(optLimit, None)
+    //    val elements1              = if (isPaginated && !forward) reverseTopLevelSorting(elements) else elements
+    //    val bsonDocs               = getData(conn, elements1, optLimit, None)
+    //    val tuples                 = ListBuffer.empty[Tpl]
+    //    val bson2tpl               = levelCaster(m2q.immutableCastss)
+    //
+    //    if (isPaginated) {
+    //      val it = bsonDocs.iterator()
+    //      if (!it.hasNext) {
+    //        (Nil, "", false)
+    //      } else {
+    //        val facet    = it.next()
+    //        val rows     = facet.get("rows").asArray()
+    //        val metaData = facet.get("metaData").asArray()
+    //        if (rows.isEmpty) {
+    //          val totalCount = if (metaData.isEmpty) "" else
+    //            metaData.get(0).asDocument().get("totalCount").asInt32().intValue()
+    //
+    //          val nextCursor = initialCursor(conn, Nil)
+    //
+    //          (Nil, totalCount, false)
+    //        } else {
+    //          rows.forEach { bsonDoc =>
+    //            curLevelDocs.clear()
+    //            tuples += bson2tpl(bsonDoc.asDocument()).asInstanceOf[Tpl]
+    //          }
+    //          val tuples1    = tuples.distinct.toList
+    //          val totalCount = metaData.get(0).asDocument().get("totalCount").asInt32().intValue()
+    //          val fromUntil  = getFromUntil(totalCount, optLimit, None)
+    //          val hasMore    = fromUntil.fold(totalCount > 0)(_._3)
+    //          val result     = if (forward) tuples1 else tuples1.reverse
+    //          (result, totalCount, hasMore)
+    //        }
+    //      }
+    //    } else {
+    //      // Not paginated
+    //      bsonDocs.forEach { bsonDoc =>
+    //        curLevelDocs.clear()
+    //        tuples += bson2tpl(bsonDoc).asInstanceOf[Tpl]
+    //      }
+    //      (tuples.distinct.toList, -1, true) // Total count only used when paginating
+    //    }
+    ???
   }
-
-  private def initialCursor(conn: MongoConn_JVM, tpls: List[Tpl]): String = {
-    val unique = conn.proxy.uniqueAttrs
-    @tailrec
-    def checkSort(
-      elements: List[Element],
-      strategy: Int,
-      tokens: List[String],
-      i: Int,
-      rowHashes: List[String],
-    ): List[String] = {
-      elements match {
-        case element :: tail =>
-          element match {
-            case a: AttrOne if a.isInstanceOf[Tacit] => checkSort(tail, strategy, tokens, i, rowHashes)
-            case a: AttrOne                          =>
-              if (a.sort.isDefined) {
-                val sort                = a.sort.get
-                val (dir, pos)          = (sort.head.toString, sort.last.toString)
-                val (isNearUnique, opt) = {
-                  a match {
-                    case _: AttrOneManDate              => (true, false)
-                    case _: AttrOneOptDate              => (false, true)
-                    case _ if a.isInstanceOf[Mandatory] => (false, false)
-                    case _                              => (false, true)
-                  }
-                }
-                if (opt) {
-                  if (pos == "1")
-                    throw ModelError(
-                      s"Can't use optional attribute (`${a.name}`) as primary sort attribute with cursor pagination."
-                    )
-                  // We use row hashes only when there's no unique sort attributes
-                  val init          = setStrategy(3, tokens)
-                  val (tpe, encode) = tpeEncode(a)
-                  val attrTokens    = List("OPTIONAL", dir, pos, tpe, a.ns, a.attr, i.toString)
-                  val uniqueValues  = getUniqueValues(tpls, i, encode)
-                  val rowHashes1    = if (rowHashes.nonEmpty) rowHashes else getRowHashes(tpls)
-                  checkSort(tail, 3, init ++ attrTokens ++ uniqueValues, i + 1, rowHashes1)
-
-                } else if (isNearUnique || unique.contains(a.cleanName)) {
-                  if (pos == "1") {
-                    // 1. Unique primary sort attribute
-                    val (tpe, encode) = tpeEncode(a)
-                    val initTokens    = List("1", getHash, tpe, a.ns, a.attr, i.toString)
-                    val uniqueValues  = getUniquePair(tpls, i, encode)
-                    // We can use this exclusively. So we don't need more data
-                    checkSort(Nil, 1, initTokens ++ uniqueValues, -1, Nil)
-
-                  } else {
-                    // 2. Unique sub-sort attribute
-                    val strategy1     = 2.min(strategy)
-                    val init          = setStrategy(strategy1, tokens)
-                    val (tpe, encode) = tpeEncode(a)
-                    val attrTokens    = List("UNIQUE", dir, pos, tpe, a.ns, a.attr, i.toString)
-                    val uniqueValues  = getUniqueValues(tpls, i, encode)
-                    // We might have a primary non-unique sort attribute after. So we continue
-                    checkSort(tail, strategy1, init ++ attrTokens ++ uniqueValues, i + 1, Nil)
-                  }
-
-                } else {
-                  // 3. Non-unique sort attribute (strategy 1 or 2 still possible..)
-                  val strategy1     = 3.min(strategy)
-                  val init          = setStrategy(strategy1, tokens)
-                  val (tpe, encode) = tpeEncode(a)
-                  val attrTokens    = List("MANDATORY", dir, pos, tpe, a.ns, a.attr, i.toString)
-                  val uniqueValues  = getUniqueValues(tpls, i, encode)
-                  val rowHashes1    = if (rowHashes.nonEmpty) rowHashes else getRowHashes(tpls)
-                  checkSort(tail, strategy1, init ++ attrTokens ++ uniqueValues, i + 1, rowHashes1)
-                }
-
-              } else {
-                // Non-sorted attribute
-                checkSort(tail, strategy, tokens, i, rowHashes)
-              }
-
-            // Only top level sorting - ignore nested and tx meta data
-            case _ => checkSort(tail, strategy, tokens, i, rowHashes)
-          }
-
-        case Nil if strategy == 3 => tokens ++ rowHashes
-        case Nil                  => tokens
-      }
-    }
-
-    val tokens = checkSort(elements, 10, Nil, 0, Nil)
-    Base64.getEncoder.encodeToString(tokens.mkString("\n").getBytes)
-  }
-
-  private def setStrategy(strategy: Int, tokens: List[String]): List[String] = {
-    if (tokens.isEmpty)
-      List(strategy.toString, getHash)
-    else
-      List(strategy.toString, tokens(1)) ++ tokens.drop(2)
-  }
-
-  private def getHash: String = (elements.hashCode() & 0xFFFFF).toString
 }

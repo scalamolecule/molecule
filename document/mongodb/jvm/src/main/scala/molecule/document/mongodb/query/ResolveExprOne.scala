@@ -137,7 +137,7 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
     attr.filterAttr.fold {
       if (hasFilterAttr) {
         // Add filter if this attribute is a filter attribute pointed to
-        reverseFilters.get(path :+ attr.cleanAttr).foreach(_(b))
+        postFilters.get(path :+ attr.cleanAttr).foreach(_(b))
       }
       expr(uniqueField, field, attr.op, args, res)
     } { filterAttr =>
@@ -441,7 +441,7 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
             topBranch.postMatches.add(Filters.eq("$expr", new BsonDocument(op, args)))
           }
         }
-        reverseFilters(filterPath :+ filterAttr) = addFilter
+        postFilters(filterPath :+ filterAttr) = addFilter
     }
 
     def addStagesForNested(parentBranch: Branch, nestedBranch: Branch, args: BsonArray): Boolean = {

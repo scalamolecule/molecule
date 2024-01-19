@@ -22,11 +22,7 @@ case class SqlQueryResolveOffset[Tpl](
 
   def getListFromOffset_sync(implicit conn: JdbcConn_JVM)
   : (List[Tpl], Int, Boolean) = {
-    lazy val limitSign  = optLimit.get >> 31
-    lazy val offsetSign = optOffset.get >> 31
-    if (optOffset.isDefined && optLimit.isDefined && optOffset.get != 0 && limitSign != offsetSign) {
-      throw ModelError("Limit and offset should both be positive or negative.")
-    }
+    offsetLimitCheck(optLimit, optOffset)
     val sortedRows  = getData(conn, optLimit, optOffset)
     val sortedRows1 = new ResultSetImpl(sortedRows)
     if (m2q.isNestedMan || m2q.isNestedOpt) {
@@ -52,7 +48,7 @@ case class SqlQueryResolveOffset[Tpl](
       }
       val fromUntil = getFromUntil(totalCount, optLimit, optOffset)
       val hasMore   = fromUntil.fold(totalCount > 0)(_._3)
-      val result    = if (forward) tuples.result() else tuples.result().reverse
+      val result    = if (forward) tuples.toList else tuples.toList.reverse
       (result, totalCount, hasMore)
     }
   }

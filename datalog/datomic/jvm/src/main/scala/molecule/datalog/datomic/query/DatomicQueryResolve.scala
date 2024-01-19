@@ -18,35 +18,12 @@ abstract class DatomicQueryResolve[Tpl](
   elements: List[Element],
   dbView: Option[DbView],
   m2q: Model2DatomicQuery[Tpl] with DatomicQueryBase
-) extends Pagination with MoleculeLogging {
+) extends Pagination[Tpl] with MoleculeLogging {
 
 
   protected def postAdjustPullCasts(): Unit = {
     m2q.pullCastss = m2q.pullCastss :+ m2q.pullCasts.toList
     m2q.pullSortss = m2q.pullSortss :+ m2q.pullSorts.sortBy(_._1).map(_._2).toList
-  }
-
-  protected def getUniqueValues(tpls0: List[Tpl], uniqueIndex: Int, encode: Any => String): List[String] = {
-    val tpls   = (if (tpls0.head.isInstanceOf[Product]) tpls0 else tpls0.map(Tuple1(_))).asInstanceOf[List[Product]]
-    val first3 = tpls.take(3).map(t => encode(t.productElement(uniqueIndex))).padTo(3, "")
-    val last3  = tpls.takeRight(3).map(t => encode(t.productElement(uniqueIndex))).reverse.padTo(3, "").reverse
-    first3 ++ last3
-  }
-
-  protected def getRowHashes(tpls: List[Tpl]): List[String] = {
-    val first3 = tpls.take(3).map(row => row.hashCode().toString).padTo(3, "")
-    val last3  = tpls.takeRight(3).map(row => row.hashCode().toString).reverse.padTo(3, "").reverse
-    first3 ++ last3
-  }
-
-  protected def getUniquePair(tpls: List[Tpl], uniqueIndex: Int, encode: Any => String): List[String] = {
-    tpls.head match {
-      case tpl: Product => List(
-        encode(tpl.productElement(uniqueIndex)),
-        encode(tpls.last.asInstanceOf[Product].productElement(uniqueIndex))
-      )
-      case v            => List(encode(v), encode(tpls.last))
-    }
   }
 
   protected def getRawData(
@@ -192,45 +169,6 @@ abstract class DatomicQueryResolve[Tpl](
     }
   }
 
-  private def getCount(limit: Int, forward: Boolean, totalCount: Int) = {
-    if (forward)
-      limit.min(totalCount)
-    else
-      totalCount - (totalCount + limit).max(0)
-  }
-
-  def paginateTpls(
-    count: Int,
-    tpls: List[Tpl],
-    identifiers: List[Any],
-    identify: Tpl => Any
-  ): (List[Tpl], Int) = {
-    val tuples = ListBuffer.empty[Tpl]
-    var window = false
-    var i      = 0
-    var more   = 0
-    @tailrec
-    def findFrom(identifiers: List[Any]): Unit = {
-      identifiers match {
-        case identifier :: remainingIdentifiers =>
-          tpls.foreach {
-            case tpl if window && i != count        => i += 1; tuples += tpl
-            case tpl if identify(tpl) == identifier => window = true
-            case _                                  => if (window) more += 1
-          }
-          if (tuples.isEmpty) {
-            // Recursively try with next identifier
-            findFrom(remainingIdentifiers)
-          }
-
-        case Nil => throw ModelError("Couldn't find next page. Edge row tuples were all deleted/updated.")
-      }
-    }
-    findFrom(identifiers)
-    (tuples.result(), more)
-  }
-
-
   def paginateRows(
     count: Int,
     sortedRows: jList[jList[AnyRef]],
@@ -256,11 +194,11 @@ abstract class DatomicQueryResolve[Tpl](
             findFrom(remainingIdentifiers)
           }
 
-        case Nil => throw ModelError("Couldn't find next page. Edge rows were all deleted/updated.")
+        case Nil => throw ModelError(edgeValuesNotFound)
       }
     }
     findFrom(identifiers)
-    (tuples.result(), more)
+    (tuples.toList, more)
   }
 
 

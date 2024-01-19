@@ -15,7 +15,7 @@ trait SpiZioBase_mariadb extends Renderer { spi: SpiZio =>
     for {
       conn <- ZIO.service[Conn]
       _ <- ZIO.succeed {
-        val query = new Model2SqlQuery_mariadb(elements).getSqlQuery(Nil, None, None, Some(conn.proxy))
+        val query = new Model2SqlQuery_mariadb(elements).getSqlQuery(Nil, None, None)
         printRaw(label, Nil, query)
       }
     } yield ()

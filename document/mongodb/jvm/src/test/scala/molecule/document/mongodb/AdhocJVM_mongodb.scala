@@ -18,58 +18,10 @@ object AdhocJVM_mongodb extends TestSuite_mongodb with AggrUtils {
 
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
-      val a = (1, Set(0, 1, 2), Set(1, 2, 3))
-      val b = (2, Set(2, 3), Set(2, 3))
-      val c = (3, Set(4), Set(3))
       for {
-        //        _ <- Ns.i(1).save.transact
-        //        _ <- Ns.i.query.get.map(_ ==> List(1))
+        _ <- Ns.i(1).save.transact
+        _ <- Ns.i.query.get.map(_ ==> List(1))
 
-        _ <- Ns.int.a1.query.limit(2).get.map(_ ==> Nil)
-
-        _ <- Ns.int.a1.query.offset(2).get.map(_ ==> (Nil, 0, false))
-        _ <- Ns.int.a1.query.limit(2).offset(2).get.map(_ ==> (Nil, 0, false))
-
-        // Populated
-        _ <- Ns.int.insert(1, 2, 3).i.transact
-
-        _ <- Ns.int.a1.query.limit(0).get.map(_ ==> Nil)
-        _ <- Ns.int.a1.query.limit(1).get.map(_ ==> List(1))
-        _ <- Ns.int.a1.query.limit(2).get.map(_ ==> List(1, 2))
-        _ <- Ns.int.a1.query.limit(3).get.map(_ ==> List(1, 2, 3))
-        // limit beyond total count just returns all
-        _ <- Ns.int.a1.query.limit(4).get.map(_ ==> List(1, 2, 3))
-
-        _ <- Ns.int.a1.query.offset(0).get.map(_ ==> (List(1, 2, 3), 3, false))
-        _ <- Ns.int.a1.query.offset(1).get.map(_ ==> (List(2, 3), 3, false))
-        _ <- Ns.int.a1.query.offset(2).get.map(_ ==> (List(3), 3, false))
-        _ <- Ns.int.a1.query.offset(3).get.map(_ ==> (Nil, 3, false))
-
-        _ <- Ns.int.a1.query.limit(2).get.map(_ ==> List(1, 2))
-        _ <- Ns.int.a1.query.limit(2).offset(0).get.map(_ ==> (List(1, 2), 3, true))
-        _ <- Ns.int.a1.query.limit(2).offset(1).get.map(_ ==> (List(2, 3), 3, false))
-        _ <- Ns.int.a1.query.limit(2).offset(2).get.map(_ ==> (List(3), 3, false))
-        _ <- Ns.int.a1.query.limit(2).offset(3).get.map(_ ==> (Nil, 3, false))
-
-
-
-
-        _ <- Ns.int.a1.query.limit(-1).get.map(_ ==> List(3))
-        _ <- Ns.int.a1.query.limit(-2).get.map(_ ==> List(2, 3))
-        _ <- Ns.int.a1.query.limit(-3).get.map(_ ==> List(1, 2, 3))
-        // limit below total count just returns all
-        _ <- Ns.int.a1.query.limit(-4).get.map(_ ==> List(1, 2, 3))
-
-        // When only offset is set, there will be no further rows going backwards
-        _ <- Ns.int.a1.query.offset(0).get.map(_ ==> (List(1, 2, 3), 3, false))
-        _ <- Ns.int.a1.query.offset(-1).get.map(_ ==> (List(1, 2), 3, false))
-        _ <- Ns.int.a1.query.offset(-2).get.map(_ ==> (List(1), 3, false))
-        _ <- Ns.int.a1.query.offset(-3).get.map(_ ==> (Nil, 3, false))
-
-        _ <- Ns.int.a1.query.limit(-2).offset(0).get.map(_ ==> (List(2, 3), 3, true))
-        _ <- Ns.int.a1.query.limit(-2).offset(-1).get.map(_ ==> (List(1, 2), 3, false))
-        _ <- Ns.int.a1.query.limit(-2).offset(-2).get.map(_ ==> (List(1), 3, false))
-        _ <- Ns.int.a1.query.limit(-2).offset(-3).get.map(_ ==> (List(), 3, false))
 
       } yield ()
     }

@@ -122,7 +122,7 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
     attr.filterAttr.fold {
       if (hasFilterAttr) {
         // Add filter if this attribute is a filter attribute pointed to
-        reverseFilters.get(path :+ attr.cleanAttr).foreach(_(b))
+        postFilters.get(path :+ attr.cleanAttr).foreach(_(b))
       }
       expr(uniqueField, field, attr.op, args, resSet, mandatory)
     } { filterAttr =>
@@ -475,7 +475,7 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
           args.add(new BsonString("$" + b2.path + filterAttr))
           topBranch.preMatches.add(Filters.eq("$expr", new BsonDocument(op, args)))
         }
-        reverseFilters(filterPath :+ filterAttr) = addFilter
+        postFilters(filterPath :+ filterAttr) = addFilter
     }
     if (mandatory) coalesceSets(field)
   }
@@ -526,7 +526,7 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
             topBranch.preMatches.add(Filters.eq("$expr", new BsonDocument("$setIsSubset", args)))
           }
         }
-        reverseFilters(filterPath :+ filterAttr) = addFilter
+        postFilters(filterPath :+ filterAttr) = addFilter
     }
 
     if (mandatory) coalesceSets(field)
@@ -591,7 +591,7 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
             topBranch.preMatches.add(Filters.eq("$expr", new BsonDocument("$eq", emptyArgs)))
           }
         }
-        reverseFilters(filterPath :+ filterAttr) = addFilter
+        postFilters(filterPath :+ filterAttr) = addFilter
     }
 
     if (mandatory) coalesceSets(field)

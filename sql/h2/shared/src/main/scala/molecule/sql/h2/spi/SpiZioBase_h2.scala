@@ -12,7 +12,7 @@ trait SpiZioBase_h2 extends Renderer { spi: SpiZio =>
     label: String,
     elements: List[Element]
   ): ZIO[Conn, MoleculeError, Unit] = ZIO.succeed {
-    val query = new Model2SqlQuery_h2(elements).getSqlQuery(Nil, None, None, None)
+    val query = new Model2SqlQuery_h2(elements).getSqlQuery(Nil, None, None)
     printRaw(label, Nil, query)
   }
 }

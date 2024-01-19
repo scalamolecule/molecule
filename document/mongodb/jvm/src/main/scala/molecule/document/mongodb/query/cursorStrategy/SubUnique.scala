@@ -33,7 +33,7 @@ case class SubUnique[Tpl](
   cursor: String,
   m2q: Model2MongoQuery[Tpl]
 ) extends QueryResolve_mongodb[Tpl](elements, m2q)
-  with FutureUtils with Pagination with MoleculeLogging {
+  with FutureUtils with Pagination[Tpl] with MoleculeLogging {
 
   def getPage(allTokens: List[String], limit: Int)
              (implicit conn: MongoConn_JVM)

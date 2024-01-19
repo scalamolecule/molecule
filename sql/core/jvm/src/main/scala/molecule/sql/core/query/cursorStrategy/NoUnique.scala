@@ -16,7 +16,7 @@ case class NoUnique[Tpl](
   cursor: String,
   m2q: Model2SqlQuery[Tpl] with SqlQueryBase
 ) extends SqlQueryResolve[Tpl](elements, m2q)
-  with FutureUtils with Pagination with MoleculeLogging {
+  with FutureUtils with Pagination[Tpl] with MoleculeLogging {
 
   def getPage(allTokens: List[String], limit: Int)
              (implicit conn: JdbcConn_JVM)

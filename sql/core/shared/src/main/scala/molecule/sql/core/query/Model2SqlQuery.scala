@@ -2,6 +2,7 @@ package molecule.sql.core.query
 
 import molecule.base.ast._
 import molecule.base.error.ModelError
+import molecule.boilerplate.ast.Model
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.marshalling.ConnProxy
@@ -25,11 +26,10 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
   final def getSqlQuery(
     altElements: List[Element],
     optLimit: Option[Int],
-    optOffset: Option[Int],
-    optProxy: Option[ConnProxy]
+    optOffset: Option[Int]
   ): String = {
-    val elements1      = if (altElements.isEmpty) elements0 else altElements
-    val (elements2, initialNs, _) = validateQueryModel(elements1, Some(addFilterAttrVar))
+    val elements1                 = if (altElements.isEmpty) elements0 else altElements
+    val (elements2, initialNs, _) = validateQueryModel(elements1, Some(addFilterAttrCallback))
 
     from = initialNs
     exts += from -> None
@@ -39,7 +39,7 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
     renderSqlQuery(optLimit, optOffset)
   }
 
-  private val addFilterAttrVar = (filterAttr: String, a: Attr) => {
+  final private def addFilterAttrCallback: (String, Model.Attr) => Unit = (filterAttr: String, a: Attr) => {
     filterAttrVars.get(filterAttr).fold {
       // Create datomic variable for this expression attribute
       filterAttrVars = filterAttrVars + (filterAttr -> a.cleanName)
@@ -123,13 +123,13 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
     } else if (hardLimit != 0) {
       s"\nLIMIT $hardLimit"
     } else {
-      optLimit.fold("")(limit => s"\nLIMIT " + (if (isBackwards) -limit else limit))
+      optLimit.fold("")(limit => s"\nLIMIT " + limit.abs)
     }
 
     val offset_ = if (isNestedMan || isNestedOpt) {
       ""
     } else {
-      optOffset.fold("")(offset => s"\nOFFSET " + (if (isBackwards) -offset else offset))
+      optOffset.fold("")(offset => s"\nOFFSET " + offset.abs)
     }
 
     s"$limit_$offset_"

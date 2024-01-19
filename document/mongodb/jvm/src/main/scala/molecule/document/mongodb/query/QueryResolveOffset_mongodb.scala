@@ -1,14 +1,12 @@
 package molecule.document.mongodb.query
 
-import com.mongodb.client.AggregateIterable
-import molecule.base.error._
 import molecule.boilerplate.ast.Model._
+import molecule.boilerplate.ops.ModelTransformations_
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.util.{FutureUtils, JavaConversions, ModelUtils}
 import molecule.document.mongodb.facade.MongoConn_JVM
 import molecule.document.mongodb.query.casting._
 import molecule.document.mongodb.util.BsonUtils
-import org.bson._
 import scala.collection.mutable.ListBuffer
 
 case class QueryResolveOffset_mongodb[Tpl](
@@ -17,6 +15,7 @@ case class QueryResolveOffset_mongodb[Tpl](
   optOffset: Option[Int],
   m2q: Model2MongoQuery[Tpl]
 ) extends QueryResolve_mongodb[Tpl](elements, m2q)
+  with ModelTransformations_
   with CastBsonDoc_
   with FutureUtils
   with ModelUtils
@@ -24,48 +23,50 @@ case class QueryResolveOffset_mongodb[Tpl](
   with JavaConversions
   with MoleculeLogging {
 
-  lazy val forward = optLimit.fold(true)(_ >= 0) && optOffset.fold(true)(_ >= 0)
-
+  // Since a MongoDB field can both have the value null and not exist in the
+  // document, we need to coalesce the possible two optional None value alternatives
+  // by calling distinct on the tuples result.
   def getListFromOffset_sync(implicit conn: MongoConn_JVM)
   : (List[Tpl], Int, Boolean) = {
-    lazy val limitSign  = optLimit.get >> 31
-    lazy val offsetSign = optOffset.get >> 31
-    if (optOffset.isDefined && optLimit.isDefined && optOffset.get != 0 && limitSign != offsetSign) {
-      throw ModelError("Limit and offset should both be positive or negative.")
+    val (isPaginated, forward) = paginationCoords(optLimit, optOffset)
+    val elements1              = if (isPaginated && !forward) reverseTopLevelSorting(elements) else elements
+    val bsonDocs               = getData(conn, elements1, optLimit, optOffset)
+    val tuples                 = ListBuffer.empty[Tpl]
+    val bson2tpl               = levelCaster(m2q.immutableCastss)
+
+    if (isPaginated) {
+      val it = bsonDocs.iterator()
+      if (!it.hasNext) {
+        (Nil, 0, false)
+      } else {
+        val facet    = it.next()
+        val rows     = facet.get("rows").asArray()
+        val metaData = facet.get("metaData").asArray()
+        if (rows.isEmpty) {
+          val totalCount = if (metaData.isEmpty) 0 else
+            metaData.get(0).asDocument().get("totalCount").asInt32().intValue()
+          (Nil, totalCount, false)
+        } else {
+          rows.forEach { bsonDoc =>
+            curLevelDocs.clear()
+            tuples += bson2tpl(bsonDoc.asDocument()).asInstanceOf[Tpl]
+          }
+          val tuples1    = tuples.distinct.toList
+          val totalCount = metaData.get(0).asDocument().get("totalCount").asInt32().intValue()
+          val fromUntil  = getFromUntil(totalCount, optLimit, optOffset)
+          val hasMore    = fromUntil.fold(totalCount > 0)(_._3)
+          val result     = if (forward) tuples1 else tuples1.reverse
+          (result, totalCount, hasMore)
+        }
+      }
+    } else {
+      // Not paginated
+      bsonDocs.forEach { bsonDoc =>
+        curLevelDocs.clear()
+        tuples += bson2tpl(bsonDoc).asInstanceOf[Tpl]
+      }
+      (tuples.distinct.toList, -1, true) // Total count only used when paginating
     }
-    val bsonDocs: AggregateIterable[BsonDocument] = getData(conn, optLimit, optOffset)
-
-//    if (bsonDocs.iterator().hasNext) {
-//      println("RESULT ---------------------------------------------")
-//      val array = new BsonArray()
-//      bsonDocs.forEach(d => array.add(d))
-//      println(bsonDocs.asScala.map(_.toJson(pretty)).mkString(",\n"))
-//      println("")
-//    }
-
-    val tuples = ListBuffer.empty[Tpl]
-    //    val casts  = m2q.updatedCasts.casts
-    //    casts.foreach(println)
-
-
-    //    val bson2tpl = documentCaster(m2q.updatedCasts.casts)
-
-    val bson2tpl = levelCaster(m2q.immutableCastss)
-    bsonDocs.forEach { bsonDoc =>
-      //      println("........ " + bsonDoc)
-      //      println("   ..... " + bson2tpl(bsonDoc).asInstanceOf[Tpl])
-      curLevelDocs.clear()
-
-      // Cast Bson document to entity tuple
-      tuples += bson2tpl(bsonDoc).asInstanceOf[Tpl]
-    }
-    // Since a MongoDB field can both have the value null and not exist in the
-    // document, we need to coalesce the possible two optional None value alternatives.
-    val entities = tuples.distinct.toList
-
-//    println("tuples: ---------------------- ")
-//    tuples.foreach(println)
-    (entities, entities.length, false)
   }
 
 

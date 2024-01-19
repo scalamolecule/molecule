@@ -25,7 +25,7 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
   final protected val branchesByPath     = mutable.Map.empty[List[String], Branch]
   final protected var nestedLevel        = 0
   final protected var hasFilterAttr      = false
-  final protected val reverseFilters     = mutable.Map.empty[List[String], Branch => Boolean]
+  final protected val postFilters        = mutable.Map.empty[List[String], Branch => Boolean]
   final protected var path               = List.empty[String]
   final protected var pathLevels         = mutable.Map.empty[List[String], Int]
   final protected var nestedBaseBranches = mutable.Map.empty[Int, (String, Branch)]

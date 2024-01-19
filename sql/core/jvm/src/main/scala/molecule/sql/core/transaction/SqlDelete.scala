@@ -62,7 +62,7 @@ trait SqlDelete
   protected def getIds: List[Long] = {
     val ns                    = getInitialNs(filterElements)
     val filterElementsWithIds = AttrOneManID(ns, "id", V) +: filterElements
-    val query                 = model2SqlQuery(filterElementsWithIds).getSqlQuery(Nil, None, None, None)
+    val query                 = model2SqlQuery(filterElementsWithIds).getSqlQuery(Nil, None, None)
     val ps                    = sqlConn.prepareStatement(
       query,
       ResultSet.TYPE_SCROLL_INSENSITIVE,

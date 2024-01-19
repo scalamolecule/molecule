@@ -20,7 +20,7 @@ case class SqlQueryResolveCursor[Tpl](
   m2q: Model2SqlQuery[Tpl] with SqlQueryBase
 ) extends SqlQueryResolve[Tpl](elements, m2q)
   with FutureUtils
-  with Pagination
+  with Pagination[Tpl]
   with ModelTransformations_
   with MoleculeLogging {
 
@@ -68,7 +68,7 @@ case class SqlQueryResolveCursor[Tpl](
         val hasMore       = limitAbs < topLevelCount
         val selectedRows  = nestedRows.take(limitAbs)
         val tpls          = if (forward) selectedRows else selectedRows.reverse
-        val cursor        = initialCursor(conn, tpls)
+        val cursor        = initialCursor(conn, elements, tpls)
         (tpls, cursor, hasMore)
 
       } else {
@@ -80,107 +80,10 @@ case class SqlQueryResolveCursor[Tpl](
         while (sortedRows.next()) {
           tuples += row2tpl(sortedRows1).asInstanceOf[Tpl]
         }
-        val result = if (forward) tuples.result() else tuples.result().reverse
-        val cursor = initialCursor(conn, result)
+        val result = if (forward) tuples.toList else tuples.toList.reverse
+        val cursor = initialCursor(conn, elements, result)
         (result, cursor, hasMore)
       }
     }
   }
-
-  private def initialCursor(conn: JdbcConn_JVM, tpls: List[Tpl]): String = {
-    val unique = conn.proxy.uniqueAttrs
-    @tailrec
-    def checkSort(
-      elements: List[Element],
-      strategy: Int,
-      tokens: List[String],
-      i: Int,
-      rowHashes: List[String],
-    ): List[String] = {
-      elements match {
-        case element :: tail =>
-          element match {
-            case a: AttrOne if a.isInstanceOf[Tacit] => checkSort(tail, strategy, tokens, i, rowHashes)
-            case a: AttrOne                          =>
-              if (a.sort.isDefined) {
-                val sort                = a.sort.get
-                val (dir, pos)          = (sort.head.toString, sort.last.toString)
-                val (isNearUnique, opt) = {
-                  a match {
-                    case _: AttrOneManDate              => (true, false)
-                    case _: AttrOneOptDate              => (false, true)
-                    case _ if a.isInstanceOf[Mandatory] => (false, false)
-                    case _                              => (false, true)
-                  }
-                }
-                if (opt) {
-                  if (pos == "1")
-                    throw ModelError(
-                      s"Can't use optional attribute (`${a.name}`) as primary sort attribute with cursor pagination."
-                    )
-                  // We use row hashes only when there's no unique sort attributes
-                  val init          = setStrategy(3, tokens)
-                  val (tpe, encode) = tpeEncode(a)
-                  val attrTokens    = List("OPTIONAL", dir, pos, tpe, a.ns, a.attr, i.toString)
-                  val uniqueValues  = getUniqueValues(tpls, i, encode)
-                  val rowHashes1    = if (rowHashes.nonEmpty) rowHashes else getRowHashes(tpls)
-                  checkSort(tail, 3, init ++ attrTokens ++ uniqueValues, i + 1, rowHashes1)
-
-                } else if (isNearUnique || unique.contains(a.cleanName)) {
-                  if (pos == "1") {
-                    // 1. Unique primary sort attribute
-                    val (tpe, encode) = tpeEncode(a)
-                    val initTokens    = List("1", getHash, tpe, a.ns, a.attr, i.toString)
-                    val uniqueValues  = getUniquePair(tpls, i, encode)
-                    // We can use this exclusively. So we don't need more data
-                    checkSort(Nil, 1, initTokens ++ uniqueValues, -1, Nil)
-
-                  } else {
-                    // 2. Unique sub-sort attribute
-                    val strategy1     = 2.min(strategy)
-                    val init          = setStrategy(strategy1, tokens)
-                    val (tpe, encode) = tpeEncode(a)
-                    val attrTokens    = List("UNIQUE", dir, pos, tpe, a.ns, a.attr, i.toString)
-                    val uniqueValues  = getUniqueValues(tpls, i, encode)
-                    // We might have a primary non-unique sort attribute after. So we continue
-                    checkSort(tail, strategy1, init ++ attrTokens ++ uniqueValues, i + 1, Nil)
-                  }
-
-                } else {
-                  // 3. Non-unique sort attribute (strategy 1 or 2 still possible..)
-                  val strategy1     = 3.min(strategy)
-                  val init          = setStrategy(strategy1, tokens)
-                  val (tpe, encode) = tpeEncode(a)
-                  val attrTokens    = List("MANDATORY", dir, pos, tpe, a.ns, a.attr, i.toString)
-                  val uniqueValues  = getUniqueValues(tpls, i, encode)
-                  val rowHashes1    = if (rowHashes.nonEmpty) rowHashes else getRowHashes(tpls)
-                  checkSort(tail, strategy1, init ++ attrTokens ++ uniqueValues, i + 1, rowHashes1)
-                }
-
-              } else {
-                // Non-sorted attribute
-                checkSort(tail, strategy, tokens, i, rowHashes)
-              }
-
-            // Only top level sorting - ignore nested and tx meta data
-            case _ => checkSort(tail, strategy, tokens, i, rowHashes)
-          }
-
-        case Nil if strategy == 3 => tokens ++ rowHashes
-        case Nil                  => tokens
-      }
-    }
-
-    val tokens = checkSort(elements, 10, Nil, 0, Nil)
-    Base64.getEncoder.encodeToString(tokens.mkString("\n").getBytes)
-  }
-
-  private def setStrategy(strategy: Int, tokens: List[String]): List[String] = {
-    if (tokens.isEmpty)
-      List(strategy.toString, getHash)
-    else
-      List(strategy.toString, tokens(1)) ++ tokens.drop(2)
-  }
-
-  private def getHash: String = (elements.hashCode() & 0xFFFFF).toString
 }

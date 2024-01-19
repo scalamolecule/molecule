@@ -34,7 +34,7 @@ trait SpiSync_mariadb extends SpiSyncBase {
   }
 
   override def refIdsQuery(idsModel: List[Element], proxy: ConnProxy): String = {
-    new Model2SqlQuery_mariadb(idsModel).getSqlQuery(Nil, None, None, Some(proxy))
+    new Model2SqlQuery_mariadb(idsModel).getSqlQuery(Nil, None, None)
   }
 
   override def update_getData(conn: JdbcConn_JVM, update: Update): Data = {

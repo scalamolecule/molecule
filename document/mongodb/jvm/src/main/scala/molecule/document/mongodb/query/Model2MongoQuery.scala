@@ -66,8 +66,6 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
     optOffset: Option[Int],
     optLimit: Option[Int],
   ): Unit = {
-    val isBackwards = optLimit.isDefined && optLimit.get < 0 || optOffset.isDefined && optOffset.get < 0
-
     //    val limit_ = if (isNestedMan || isNestedOpt) {
     //      ""
     //    } else if (hardLimit != 0) {
@@ -84,22 +82,31 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
     //
     //    s"$limit_$offset_"
 
-
+    lazy val skipLimit = new BsonArray()
     optOffset.foreach {
       case 0    => () // Start from beginning
-      case skip => stages.add(new BsonDocument("$skip", new BsonInt32(skip)))
+      case skip => skipLimit.add(new BsonDocument("$skip", new BsonInt32(skip.abs)))
     }
     optLimit.foreach {
-      case 0     =>
+      case 0 =>
         // Get no results, so no need to use stages from query
         stages.clear()
         stages.add(new BsonDocument("$match",
           new BsonDocument("_id",
             new BsonDocument("$exists", new BsonBoolean(false))
           )))
-      case limit => stages.add(new BsonDocument("$limit", new BsonInt32(limit)))
+
+      case limit => skipLimit.add(new BsonDocument("$limit", new BsonInt32(limit.abs)))
     }
 
+    if (optOffset.isDefined || optLimit.isDefined) {
+      val metaDataArray = new BsonArray()
+      metaDataArray.add(new BsonDocument("$count", new BsonString("totalCount")))
+      stages.add(new BsonDocument("$facet", new BsonDocument()
+        .append("metaData", metaDataArray)
+        .append("rows", skipLimit)
+      ))
+    }
   }
 
 

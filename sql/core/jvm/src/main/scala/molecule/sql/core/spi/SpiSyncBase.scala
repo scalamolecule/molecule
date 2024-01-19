@@ -111,7 +111,7 @@ trait SpiSyncBase
     optOffset: Option[Int]
   ): Unit = {
     tryInspect("query", elements) {
-      val query = getModel2SqlQuery[Any](elements).getSqlQuery(Nil, optLimit, optOffset, None)
+      val query = getModel2SqlQuery[Any](elements).getSqlQuery(Nil, optLimit, optOffset)
       printRaw(label, elements, query)
     }
   }

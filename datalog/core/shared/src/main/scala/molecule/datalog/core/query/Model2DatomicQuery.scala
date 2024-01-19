@@ -1,6 +1,7 @@
 package molecule.datalog.core.query
 
 import molecule.base.error.ModelError
+import molecule.boilerplate.ast.Model
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.query.Model2QueryBase
@@ -35,7 +36,7 @@ class Model2DatomicQuery[Tpl](elements0: List[Element])
     altElements: List[Element] = Nil
   ): (String, String, String) = {
     val elements = if (altElements.isEmpty) elements0 else altElements
-    val (elements1, _, _) = validateQueryModel(elements, Some(addFilterAttrVar))
+    val (elements1, _, _) = validateQueryModel(elements, Some(addFilterAttrCallback))
 
     // Remember first entity id variable
     firstId = vv
@@ -71,7 +72,7 @@ class Model2DatomicQuery[Tpl](elements0: List[Element])
     (preQuery, mainQuery, queryStrs)
   }
 
-  private val addFilterAttrVar = (filterAttr: String, _: Attr) => {
+  final private def addFilterAttrCallback: (Att, Model.Attr) => Unit = (filterAttr: String, _: Attr) => {
     filterAttrVars.get(filterAttr).fold {
       // Create datomic variable for this expression attribute
       filterAttrVars = filterAttrVars + (filterAttr -> vv)

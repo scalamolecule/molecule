@@ -26,7 +26,7 @@ case class PrimaryUnique[Tpl](
   cursor: String,
   m2q: Model2MongoQuery[Tpl]
 ) extends QueryResolve_mongodb[Tpl](elements, m2q)
-  with FutureUtils with Pagination with ModelTransformations_ with MoleculeLogging {
+  with FutureUtils with Pagination[Tpl] with ModelTransformations_ with MoleculeLogging {
 
   def getPage(tokens: List[String], limit: Int)
              (implicit conn: MongoConn_JVM): (List[Tpl], String, Boolean) = {
@@ -64,7 +64,7 @@ case class PrimaryUnique[Tpl](
 //        while (sortedRows.next()) {
 //          tuples += row2tpl(sortedRows1).asInstanceOf[Tpl]
 //        }
-//        val result = if (forward) tuples.result() else tuples.result().reverse
+//        val result = if (forward) tuples.toList else tuples.toList.reverse
 //        val cursor = nextCursorUniques(result, tokens)
 //        (result, cursor, hasMore)
         ???

@@ -14,7 +14,7 @@ trait SpiAsync_postgres extends SpiAsync with ModelUtils {
     //    // Check that rawQuery can handle all SPI queries
     //    val q1  = q.copy(elements = noKeywords(q.elements, Some(conn.proxy)))
     //    val m2q = getModel2SqlQuery[Tpl](q1.elements)
-    //    val qu  = m2q.getSqlQuery(q1.elements, None, None, Some(conn.proxy))
+    //    val qu  = m2q.getSqlQuery(q1.elements, None, None)
     //    SpiSync_postgres.fallback_rawQuery(qu, true)
 
     SpiSync_postgres.query_get(q)
