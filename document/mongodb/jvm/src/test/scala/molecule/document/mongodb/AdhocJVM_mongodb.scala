@@ -25,12 +25,30 @@ object AdhocJVM_mongodb extends TestSuite_mongodb with AggrUtils {
         //        _ <- Ns.i(1).save.transact
         //        _ <- Ns.i.query.get.map(_ ==> List(1))
 
-        _ <- Ns.i.ii.ints.insert(a, b, c).transact
+//        _ <- Ns.int.a1.query.limit(2).get.map(_ ==> Nil)
+//
+//        _ <- Ns.int.a1.query.offset(2).get.map(_ ==> (Nil, 0, false))
+//        _ <- Ns.int.a1.query.limit(2).offset(2).get.map(_ ==> (Nil, 0, false))
 
-        _ <- Ns.i.ii.has(Ns.ints).query.get.map(_ ==> List(b)) // Ns.ii and Ref.ints
-        _ <- Ns.i.ii.has(Ns.ints_).query.get.map(_ ==> List((2, Set(2, 3)))) // Ns.ii
-        _ <- Ns.i.ii_.has(Ns.ints).query.get.map(_ ==> List((2, Set(2, 3)))) // Ref.ints
-        _ <- Ns.i.ii_.has(Ns.ints_).query.get.map(_ ==> List(2))
+        // Populated
+        _ <- Ns.int.insert(1, 2, 3).i.transact
+
+//        _ <- Ns.int.a1.query.limit(0).get.map(_ ==> Nil)
+//        _ <- Ns.int.a1.query.limit(1).get.map(_ ==> List(1))
+        _ <- Ns.int.a1.query.limit(2).i.get.map(_ ==> List(1, 2))
+//        _ <- Ns.int.a1.query.limit(3).get.map(_ ==> List(1, 2, 3))
+//        // limit beyond total count just returns all
+//        _ <- Ns.int.a1.query.limit(4).get.map(_ ==> List(1, 2, 3))
+//
+//        _ <- Ns.int.a1.query.offset(0).get.map(_ ==> (List(1, 2, 3), 3, true))
+//        _ <- Ns.int.a1.query.offset(1).get.map(_ ==> (List(2, 3), 3, true))
+//        _ <- Ns.int.a1.query.offset(2).get.map(_ ==> (List(3), 3, true))
+//        _ <- Ns.int.a1.query.offset(3).get.map(_ ==> (Nil, 3, false))
+//
+//        _ <- Ns.int.a1.query.limit(2).get.map(_ ==> List(1, 2))
+//        _ <- Ns.int.a1.query.limit(2).offset(1).get.map(_._1 ==> List(2, 3))
+//        _ <- Ns.int.a1.query.limit(2).offset(2).get.map(_._1 ==> List(3))
+//        _ <- Ns.int.a1.query.limit(2).offset(3).get.map(_._1 ==> Nil)
 
       } yield ()
     }

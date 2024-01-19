@@ -1,7 +1,6 @@
 package molecule.core.query
 
 import molecule.base.error.ModelError
-import molecule.boilerplate.ast.Model
 import molecule.boilerplate.ast.Model._
 import molecule.core.util.ModelUtils
 import scala.annotation.tailrec
@@ -14,7 +13,10 @@ trait Model2QueryBase extends ModelUtils {
   private val sortsPerLevel = mutable.Map[Int, List[Int]](1 -> Nil)
 
 
-  def validateQueryModel(elements: List[Element]): (List[Element], String, Boolean) = {
+  def validateQueryModel(
+    elements: List[Element],
+    addFilterAttr: Option[(String, Attr) => Unit] = None
+  ): (List[Element], String, Boolean) = {
     var hasFilterAttr = false
     // Generic validation of model for queries
 
@@ -99,14 +101,18 @@ trait Model2QueryBase extends ModelUtils {
     val initialNs = getInitialNonGenericNs(elements)
 
     val elements1 = if (hasFilterAttr) {
-      checkFilterAttrs(elements,initialNs)
+      checkFilterAttrs(elements, initialNs, addFilterAttr)
     } else elements
 
     (elements1, initialNs, hasFilterAttr)
   }
 
 
-  def checkFilterAttrs(elements: List[Element], initialNs: String): List[Element] = {
+  private def checkFilterAttrs(
+    elements: List[Element],
+    initialNs: String,
+    addFilterAttr: Option[(String, Attr) => Unit]
+  ): List[Element] = {
     val nsAttrPaths    = mutable.Map.empty[String, List[List[String]]]
     val qualifiedPaths = mutable.Map.empty[List[String], List[List[String]]]
     val directions     = ListBuffer.empty[List[String]]
@@ -158,6 +164,9 @@ trait Model2QueryBase extends ModelUtils {
         } else if (filterPath != path && fa.op != V) {
           throw ModelError("Filtering inside cross-namespace attribute filter not allowed.")
         }
+
+        // Callback (if any) from implementation
+        addFilterAttr.foreach(_(filterNsAttr, a))
 
         filterAttrVars.get(filterNsAttr).fold {
           filterAttrVars = filterAttrVars + (filterNsAttr -> nsAttr)

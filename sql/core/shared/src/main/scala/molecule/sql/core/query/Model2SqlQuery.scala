@@ -29,20 +29,7 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
     optProxy: Option[ConnProxy]
   ): String = {
     val elements1      = if (altElements.isEmpty) elements0 else altElements
-//    val hasFilterAttrs = validateQueryModel(elements1)
-//    //    elements.foreach(println)
-//
-//    // Set attrMap if available (used to get original type of aggregate attributes)
-//    //    optProxy.foreach(p => attrMap = p.attrMap)
-//    //    val elements2 = resolveFilterAttrs(elements1, optProxy)
-//    val elements2 = if (hasFilterAttrs) resolveFilterAttrs(elements1) else elements1
-
-
-
-
-
-    val (elements2, initialNs, hasFilterAttr) = validateQueryModel(elements1)
-
+    val (elements2, initialNs, _) = validateQueryModel(elements1, Some(addFilterAttrVar))
 
     from = initialNs
     exts += from -> None
@@ -50,6 +37,13 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
     // Recursively resolve molecule elements
     resolve(elements2)
     renderSqlQuery(optLimit, optOffset)
+  }
+
+  private val addFilterAttrVar = (filterAttr: String, a: Attr) => {
+    filterAttrVars.get(filterAttr).fold {
+      // Create datomic variable for this expression attribute
+      filterAttrVars = filterAttrVars + (filterAttr -> a.cleanName)
+    }(_ => throw ModelError(s"Can't refer to ambiguous filter attribute $filterAttr"))
   }
 
   final private def renderSqlQuery(
@@ -181,61 +175,6 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
     where
   }
 
-
-  private def resolveFilterAttrs(elements: List[Element]): List[Element] = {
-    @tailrec
-    def prepare(elements: List[Element], acc: List[Element]): List[Element] = {
-      elements match {
-        case element :: tail =>
-          element match {
-            case a: Attr      => prepare(tail, acc :+ prepareAttr(a))
-            case n: Nested    => prepare(tail, acc :+ prepareNested(n))
-            case n: NestedOpt => prepare(tail, acc :+ prepareNestedOpt(n))
-            case other        => prepare(tail, acc :+ other)
-          }
-        case Nil             => acc
-      }
-    }
-    def prepareAttr(a: Attr): Attr = {
-      availableAttrs += a.cleanName
-      if (a.filterAttr.nonEmpty) {
-        val fa = a.filterAttr.get._3
-        if (fa.filterAttr.nonEmpty) {
-          throw ModelError(s"Filter attributes inside filter attributes not allowed in ${a.ns}.${a.attr}")
-        }
-        val filterAttr = fa.cleanName
-        filterAttrVars.get(filterAttr).fold {
-          // Create datomic variable for this expression attribute
-          filterAttrVars = filterAttrVars + (filterAttr -> a.cleanName)
-        }(_ => throw ModelError(s"Can't refer to ambiguous filter attribute $filterAttr"))
-
-        if (fa.ns == a.ns) {
-          // Add adjacent filter attribute is lifted...
-        } else if (fa.isInstanceOf[Mandatory]) {
-          throw ModelError(s"Filter attribute $filterAttr pointing to other namespace should be tacit.")
-        } else if (fa.op != V) {
-          throw ModelError("Filtering inside cross-namespace attribute filter not allowed.")
-        } else {
-          // Expect expression attribute in other namespace
-          expectedFilterAttrs += fa.cleanName
-        }
-      }
-      a
-    }
-
-    def prepareNested(nested: Nested): Nested = Nested(nested.ref, prepare(nested.elements, Nil))
-    def prepareNestedOpt(nested: NestedOpt): NestedOpt = NestedOpt(nested.ref, prepare(nested.elements, Nil))
-
-    val elements1 = prepare(elements, Nil)
-
-    if (expectedFilterAttrs.nonEmpty && expectedFilterAttrs.intersect(availableAttrs) != expectedFilterAttrs) {
-      throw ModelError("Please add missing filter attribute(s). Found:\n  " + expectedFilterAttrs.mkString("\n  "))
-    }
-
-    elements1
-  }
-
-//  private lazy val noIdFiltering = "Filter attributes not allowed to involve entity ids."
 
   @tailrec
   final private def resolve(elements: List[Element]): Unit = elements match {
