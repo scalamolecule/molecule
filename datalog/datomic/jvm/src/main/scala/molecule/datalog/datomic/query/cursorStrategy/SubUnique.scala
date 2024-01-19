@@ -5,8 +5,8 @@ import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.marshalling.dbView.DbView
+import molecule.core.query.Pagination
 import molecule.core.util.FutureUtils
-import molecule.datalog.core.query.cursor.CursorUtils
 import molecule.datalog.core.query.{DatomicQueryBase, Model2DatomicQuery}
 import molecule.datalog.datomic.facade.DatomicConn_JVM
 import molecule.datalog.datomic.query.DatomicQueryResolve
@@ -36,7 +36,7 @@ case class SubUnique[Tpl](
   dbView: Option[DbView],
   m2q: Model2DatomicQuery[Tpl] with DatomicQueryBase
 ) extends DatomicQueryResolve[Tpl](elements, dbView, m2q)
-  with FutureUtils with CursorUtils with MoleculeLogging {
+  with FutureUtils with Pagination with MoleculeLogging {
 
   def getPage(allTokens: List[String], limit: Int)
              (implicit conn: DatomicConn_JVM)
@@ -47,7 +47,7 @@ case class SubUnique[Tpl](
     val (uniqueIndex, uniqueValues) = {
       val List(_, _, _, tpe, _, _, i, a, b, c, x, y, z) = attrsTokens.find(_.head == "UNIQUE").get
 
-      val uniqueValues = (if (forward) List(z, y, x) else List(a, b, c)).filter(_.nonEmpty).map(decoder(tpe))
+      val uniqueValues = (if (forward) List(z, y, x) else List(a, b, c)).filter(_.nonEmpty).map(decoder2(tpe))
       (i.toInt, uniqueValues)
     }
 

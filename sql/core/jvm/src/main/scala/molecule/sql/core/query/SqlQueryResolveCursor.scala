@@ -5,6 +5,7 @@ import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.ops.ModelTransformations_
 import molecule.boilerplate.util.MoleculeLogging
+import molecule.core.query.Pagination
 import molecule.core.util.FutureUtils
 import molecule.sql.core.facade.JdbcConn_JVM
 import molecule.sql.core.javaSql.ResultSetImpl
@@ -19,7 +20,7 @@ case class SqlQueryResolveCursor[Tpl](
   m2q: Model2SqlQuery[Tpl] with SqlQueryBase
 ) extends SqlQueryResolve[Tpl](elements, m2q)
   with FutureUtils
-  with CursorUtils
+  with Pagination
   with ModelTransformations_
   with MoleculeLogging {
 
@@ -60,8 +61,8 @@ case class SqlQueryResolveCursor[Tpl](
     if (flatRowCount == 0) {
       (Nil, "", false)
     } else {
-      if (m2q.isNested || m2q.isNestedOpt) {
-        val nestedRows    = if (m2q.isNested) m2q.rows2nested(sortedRows1) else m2q.rows2nestedOpt(sortedRows1)
+      if (m2q.isNestedMan || m2q.isNestedOpt) {
+        val nestedRows    = if (m2q.isNestedMan) m2q.rows2nested(sortedRows1) else m2q.rows2nestedOpt(sortedRows1)
         val topLevelCount = nestedRows.length
         val limitAbs      = limit.abs.min(topLevelCount)
         val hasMore       = limitAbs < topLevelCount

@@ -4,10 +4,11 @@ import java.util.Base64
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.ops.ModelTransformations_
 import molecule.boilerplate.util.MoleculeLogging
+import molecule.core.query.Pagination
 import molecule.core.util.FutureUtils
 import molecule.sql.core.facade.JdbcConn_JVM
 import molecule.sql.core.javaSql.ResultSetImpl
-import molecule.sql.core.query.{CursorUtils, Model2SqlQuery, SqlQueryBase, SqlQueryResolve}
+import molecule.sql.core.query.{Model2SqlQuery, SqlQueryBase, SqlQueryResolve}
 import scala.collection.mutable.ListBuffer
 
 /**
@@ -27,7 +28,7 @@ case class PrimaryUnique[Tpl](
   cursor: String,
   m2q: Model2SqlQuery[Tpl] with SqlQueryBase
 ) extends SqlQueryResolve[Tpl](elements, m2q)
-  with FutureUtils with CursorUtils with ModelTransformations_ with MoleculeLogging {
+  with FutureUtils with Pagination with ModelTransformations_ with MoleculeLogging {
 
   def getPage(tokens: List[String], limit: Int)
              (implicit conn: JdbcConn_JVM): (List[Tpl], String, Boolean) = {
@@ -44,8 +45,8 @@ case class PrimaryUnique[Tpl](
     if (flatRowCount == 0) {
       (Nil, "", false)
     } else {
-      if (m2q.isNested || m2q.isNestedOpt) {
-        val nestedRows    = if (m2q.isNested) m2q.rows2nested(sortedRows1) else m2q.rows2nestedOpt(sortedRows1)
+      if (m2q.isNestedMan || m2q.isNestedOpt) {
+        val nestedRows    = if (m2q.isNestedMan) m2q.rows2nested(sortedRows1) else m2q.rows2nestedOpt(sortedRows1)
         val topLevelCount = nestedRows.length
         val limitAbs      = limit.abs.min(topLevelCount)
         val hasMore       = limitAbs < topLevelCount

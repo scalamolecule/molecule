@@ -30,15 +30,17 @@ trait OffsetForward extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         // limit beyond total count just returns all
         _ <- Ns.int.a1.query.limit(4).get.map(_ ==> List(1, 2, 3))
 
-        _ <- Ns.int.a1.query.offset(0).get.map(_ ==> (List(1, 2, 3), 3, true))
-        _ <- Ns.int.a1.query.offset(1).get.map(_ ==> (List(2, 3), 3, true))
-        _ <- Ns.int.a1.query.offset(2).get.map(_ ==> (List(3), 3, true))
+        // When only offset is set, there will be no further rows going forward
+        _ <- Ns.int.a1.query.offset(0).get.map(_ ==> (List(1, 2, 3), 3, false))
+        _ <- Ns.int.a1.query.offset(1).get.map(_ ==> (List(2, 3), 3, false))
+        _ <- Ns.int.a1.query.offset(2).get.map(_ ==> (List(3), 3, false))
         _ <- Ns.int.a1.query.offset(3).get.map(_ ==> (Nil, 3, false))
 
         _ <- Ns.int.a1.query.limit(2).get.map(_ ==> List(1, 2))
-        _ <- Ns.int.a1.query.limit(2).offset(1).get.map(_._1 ==> List(2, 3))
-        _ <- Ns.int.a1.query.limit(2).offset(2).get.map(_._1 ==> List(3))
-        _ <- Ns.int.a1.query.limit(2).offset(3).get.map(_._1 ==> Nil)
+        _ <- Ns.int.a1.query.limit(2).offset(0).get.map(_ ==> (List(1, 2), 3, true)) // one page ahead with 3
+        _ <- Ns.int.a1.query.limit(2).offset(1).get.map(_ ==> (List(2, 3), 3, false))
+        _ <- Ns.int.a1.query.limit(2).offset(2).get.map(_ ==> (List(3), 3, false))
+        _ <- Ns.int.a1.query.limit(2).offset(3).get.map(_ ==> (Nil, 3, false))
       } yield ()
     }
 

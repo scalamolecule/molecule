@@ -36,9 +36,9 @@ case class MongoConn_JVM(
   }
 
   override def transact_sync(data: Data): TxReport = {
-//    println("TRANSACT ----------------------------------------")
-//    println(data.toJson(pretty))
-//    println("")
+    //    println("TRANSACT ----------------------------------------")
+    //    println(data.toJson(pretty))
+    //    println("")
     data.get("_action").asString.getValue match {
       case "insert" => data.size match {
         case 2 => insertEmbedded(data)

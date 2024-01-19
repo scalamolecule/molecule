@@ -5,6 +5,7 @@ import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.ops.ModelTransformations_
 import molecule.boilerplate.util.MoleculeLogging
+import molecule.core.query.Pagination
 import molecule.core.util.FutureUtils
 import molecule.document.mongodb.facade.MongoConn_JVM
 import molecule.document.mongodb.query.cursorStrategy.{NoUnique, PrimaryUnique, SubUnique}
@@ -17,7 +18,7 @@ case class QueryResolveCursor_mongodb[Tpl](
   m2q: Model2MongoQuery[Tpl]
 ) extends QueryResolve_mongodb[Tpl](elements, m2q)
   with FutureUtils
-  with CursorUtils
+  with Pagination
   with ModelTransformations_
   with MoleculeLogging {
 

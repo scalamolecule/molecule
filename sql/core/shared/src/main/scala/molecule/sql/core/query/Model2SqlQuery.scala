@@ -118,7 +118,7 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
 
 
   def pagination(optLimit: Option[Int], optOffset: Option[Int], isBackwards: Boolean): String = {
-    val limit_ = if (isNested || isNestedOpt) {
+    val limit_ = if (isNestedMan || isNestedOpt) {
       ""
     } else if (hardLimit != 0) {
       s"\nLIMIT $hardLimit"
@@ -126,7 +126,7 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
       optLimit.fold("")(limit => s"\nLIMIT " + (if (isBackwards) -limit else limit))
     }
 
-    val offset_ = if (isNested || isNestedOpt) {
+    val offset_ = if (isNestedMan || isNestedOpt) {
       ""
     } else {
       optOffset.fold("")(offset => s"\nOFFSET " + (if (isBackwards) -offset else offset))
@@ -220,7 +220,7 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
   }
 
   final private def resolveBackRef(bRef: BackRef, tail: List[Element]): Unit = {
-    if (isNested || isNestedOpt) {
+    if (isNestedMan || isNestedOpt) {
       val BackRef(backRef, _, _) = bRef
       tail.head match {
         case a: Attr => throw ModelError(
@@ -236,7 +236,7 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
 
   final private def resolveNested(ref: Ref, nestedElements: List[Element], tail: List[Element]): Unit = {
     level += 1
-    isNested = true
+    isNestedMan = true
     if (isNestedOpt) {
       noMixedNestedModes
     }
@@ -253,7 +253,7 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
   final private def resolveNestedOpt(ref: Ref, nestedElements: List[Element], tail: List[Element]): Unit = {
     level += 1
     isNestedOpt = true
-    if (isNested) {
+    if (isNestedMan) {
       noMixedNestedModes
     }
     if (expectedFilterAttrs.nonEmpty) {

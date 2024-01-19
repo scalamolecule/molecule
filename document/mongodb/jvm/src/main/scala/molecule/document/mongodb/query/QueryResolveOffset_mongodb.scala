@@ -30,7 +30,7 @@ case class QueryResolveOffset_mongodb[Tpl](
   : (List[Tpl], Int, Boolean) = {
     lazy val limitSign  = optLimit.get >> 31
     lazy val offsetSign = optOffset.get >> 31
-    if (optOffset.isDefined && optLimit.isDefined && limitSign != offsetSign) {
+    if (optOffset.isDefined && optLimit.isDefined && optOffset.get != 0 && limitSign != offsetSign) {
       throw ModelError("Limit and offset should both be positive or negative.")
     }
     val bsonDocs: AggregateIterable[BsonDocument] = getData(conn, optLimit, optOffset)
@@ -55,7 +55,6 @@ case class QueryResolveOffset_mongodb[Tpl](
       //      println("........ " + bsonDoc)
       //      println("   ..... " + bson2tpl(bsonDoc).asInstanceOf[Tpl])
       curLevelDocs.clear()
-
 
       // Cast Bson document to entity tuple
       tuples += bson2tpl(bsonDoc).asInstanceOf[Tpl]

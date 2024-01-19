@@ -3,6 +3,7 @@ package molecule.sql.core.query
 import java.sql.ResultSet
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
+import molecule.core.query.Pagination
 import molecule.core.util.ModelUtils
 import molecule.sql.core.facade.JdbcConn_JVM
 import molecule.sql.core.javaSql.ResultSetImpl
@@ -12,8 +13,7 @@ import scala.collection.mutable.ListBuffer
 abstract class SqlQueryResolve[Tpl](
   elements: List[Element],
   m2q: Model2SqlQuery[Tpl] with SqlQueryBase
-) extends CursorUtils
-  with ModelUtils {
+) extends Pagination with ModelUtils {
 
   lazy val edgeValuesNotFound = "Couldn't find next page. Edge rows were all deleted/updated."
 
@@ -77,23 +77,6 @@ abstract class SqlQueryResolve[Tpl](
     getResultSet(conn, query)
   }
 
-  protected def getFromUntil(
-    tc: Int,
-    limit: Option[Int],
-    offset: Option[Int]
-  ): Option[(Int, Int, Boolean)] = {
-    (offset, limit) match {
-      case (None, None)                => None
-      case (None, Some(l)) if l > 0    => Some((0, l.min(tc), l < tc))
-      case (None, Some(l))             => Some(((tc + l).max(0), tc, (tc + l) > 0))
-      case (Some(o), None) if o > 0    => Some((o.min(tc), tc, o < tc))
-      case (Some(o), None)             => Some((0, (tc + o).min(tc), -o < tc))
-      case (Some(o), Some(l)) if l > 0 => Some((o.min(tc), (o + l).min(tc), (o + l) < tc))
-      case (Some(o), Some(l))          => Some(((tc + o + l).max(0), (tc + o).max(0), (tc + o + l).max(0) > 0))
-    }
-  }
-
-
   def paginateFromIdentifiers(
     conn: JdbcConn_JVM,
     limit: Int,
@@ -127,8 +110,8 @@ abstract class SqlQueryResolve[Tpl](
     if (flatRowCount == 0) {
       (Nil, "", false)
     } else {
-      if (m2q.isNested || m2q.isNestedOpt) {
-        val nestedTpls     = if (m2q.isNested) m2q.rows2nested(sortedRows1) else m2q.rows2nestedOpt(sortedRows1)
+      if (m2q.isNestedMan || m2q.isNestedOpt) {
+        val nestedTpls     = if (m2q.isNestedMan) m2q.rows2nested(sortedRows1) else m2q.rows2nestedOpt(sortedRows1)
         val totalCount     = nestedTpls.length
         val count          = getCount(limit, forward, totalCount)
         val nestedTpls1    = if (forward) nestedTpls else nestedTpls.reverse

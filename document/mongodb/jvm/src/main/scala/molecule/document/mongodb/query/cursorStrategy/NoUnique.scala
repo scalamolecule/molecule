@@ -4,9 +4,10 @@ import java.util.Base64
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
+import molecule.core.query.Pagination
 import molecule.core.util.FutureUtils
 import molecule.document.mongodb.facade.MongoConn_JVM
-import molecule.document.mongodb.query.{CursorUtils, Model2MongoQuery, QueryResolve_mongodb}
+import molecule.document.mongodb.query.{Model2MongoQuery, QueryResolve_mongodb}
 
 
 case class NoUnique[Tpl](
@@ -15,7 +16,7 @@ case class NoUnique[Tpl](
   cursor: String,
   m2q: Model2MongoQuery[Tpl]
 ) extends QueryResolve_mongodb[Tpl](elements, m2q)
-  with FutureUtils with CursorUtils with MoleculeLogging {
+  with FutureUtils with Pagination with MoleculeLogging {
 
   def getPage(allTokens: List[String], limit: Int)
              (implicit conn: MongoConn_JVM)

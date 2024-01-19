@@ -24,15 +24,15 @@ case class SqlQueryResolveOffset[Tpl](
   : (List[Tpl], Int, Boolean) = {
     lazy val limitSign  = optLimit.get >> 31
     lazy val offsetSign = optOffset.get >> 31
-    if (optOffset.isDefined && optLimit.isDefined && limitSign != offsetSign) {
+    if (optOffset.isDefined && optLimit.isDefined && optOffset.get != 0 && limitSign != offsetSign) {
       throw ModelError("Limit and offset should both be positive or negative.")
     }
     val sortedRows  = getData(conn, optLimit, optOffset)
     val sortedRows1 = new ResultSetImpl(sortedRows)
-    if (m2q.isNested || m2q.isNestedOpt) {
-      val totalCount    = if (m2q.isNested) m2q.getRowCount(sortedRows1) else
+    if (m2q.isNestedMan || m2q.isNestedOpt) {
+      val totalCount    = if (m2q.isNestedMan) m2q.getRowCount(sortedRows1) else
         optOffset.fold(m2q.getRowCount(sortedRows1))(_ => getTotalCount(conn))
-      val nestedRows0   = if (m2q.isNested)
+      val nestedRows0   = if (m2q.isNestedMan)
         m2q.rows2nested(sortedRows1)
       else
         m2q.rows2nestedOpt(sortedRows1)

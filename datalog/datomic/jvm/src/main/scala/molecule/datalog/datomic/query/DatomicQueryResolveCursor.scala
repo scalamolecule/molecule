@@ -6,8 +6,8 @@ import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.ops.ModelTransformations_
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.marshalling.dbView.DbView
+import molecule.core.query.Pagination
 import molecule.core.util.FutureUtils
-import molecule.datalog.core.query.cursor.CursorUtils
 import molecule.datalog.core.query.{DatomicQueryBase, Model2DatomicQuery}
 import molecule.datalog.datomic.facade.DatomicConn_JVM
 import molecule.datalog.datomic.query.cursorStrategy.{NoUnique, PrimaryUnique, SubUnique}
@@ -30,7 +30,7 @@ case class DatomicQueryResolveCursor[Tpl](
   m2q: Model2DatomicQuery[Tpl] with DatomicQueryBase
 ) extends DatomicQueryResolve[Tpl](elements, dbView, m2q)
   with FutureUtils
-  with CursorUtils
+  with Pagination
   with ModelTransformations_
   with MoleculeLogging {
 

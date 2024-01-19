@@ -35,7 +35,7 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
     optLimit: Option[Int],
     optOffset: Option[Int],
   ): (String, util.ArrayList[Bson]) = {
-    val elements1 = if (altElements.isEmpty) elements0 else altElements
+    val elements1                              = if (altElements.isEmpty) elements0 else altElements
     val (elements2, initialNs, hasFilterAttr0) = validateQueryModel(elements1)
     hasFilterAttr = hasFilterAttr0
 
@@ -45,7 +45,7 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
     // Recursively resolve molecule elements
     resolve(elements2)
 
-    // Top Mongo aggregation stages
+    // Top Mongo pipeline of aggregation stages
     val topStages = new util.ArrayList[Bson]()
 
     if (sampleSize > 0) {
@@ -55,26 +55,51 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
     // Recursively add aggregation pipeline stages for all branches
     topStages.addAll(topBranch.getStages)
 
+    pagination(topStages, optOffset, optLimit)
+
     // Return elements with possible filter attribute resolutions
     (initialNs, topStages)
   }
 
-  def pagination(optLimit: Option[Int], optOffset: Option[Int], isBackwards: Boolean): String = {
-    val limit_ = if (isNestedMan || isNestedOpt) {
-      ""
-    } else if (hardLimit != 0) {
-      s"\nLIMIT $hardLimit"
-    } else {
-      optLimit.fold("")(limit => s"\nLIMIT " + (if (isBackwards) -limit else limit))
+  def pagination(
+    stages: util.ArrayList[Bson],
+    optOffset: Option[Int],
+    optLimit: Option[Int],
+  ): Unit = {
+    val isBackwards = optLimit.isDefined && optLimit.get < 0 || optOffset.isDefined && optOffset.get < 0
+
+    //    val limit_ = if (isNestedMan || isNestedOpt) {
+    //      ""
+    //    } else if (hardLimit != 0) {
+    //      s"\nLIMIT $hardLimit"
+    //    } else {
+    //      optLimit.fold("")(limit => s"\nLIMIT " + (if (isBackwards) -limit else limit))
+    //    }
+    //
+    //    val offset_ = if (isNestedMan || isNestedOpt) {
+    //      ""
+    //    } else {
+    //      optOffset.fold("")(offset => s"\nOFFSET " + (if (isBackwards) -offset else offset))
+    //    }
+    //
+    //    s"$limit_$offset_"
+
+
+    optOffset.foreach {
+      case 0    => () // Start from beginning
+      case skip => stages.add(new BsonDocument("$skip", new BsonInt32(skip)))
+    }
+    optLimit.foreach {
+      case 0     =>
+        // Get no results, so no need to use stages from query
+        stages.clear()
+        stages.add(new BsonDocument("$match",
+          new BsonDocument("_id",
+            new BsonDocument("$exists", new BsonBoolean(false))
+          )))
+      case limit => stages.add(new BsonDocument("$limit", new BsonInt32(limit)))
     }
 
-    val offset_ = if (isNestedMan || isNestedOpt) {
-      ""
-    } else {
-      optOffset.fold("")(offset => s"\nOFFSET " + (if (isBackwards) -offset else offset))
-    }
-
-    s"$limit_$offset_"
   }
 
 

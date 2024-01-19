@@ -1,20 +1,14 @@
 package molecule.document.mongodb.query
 
 import java.sql.ResultSet
-import java.util
-import java.util.Arrays.asList
-import java.util.Map
 import com.mongodb.client.AggregateIterable
-import com.mongodb.client.model.Aggregates._
-import com.mongodb.client.model.{Aggregates, Filters, Projections, Sorts}
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
+import molecule.core.query.Pagination
 import molecule.core.util.ModelUtils
 import molecule.document.mongodb.facade.MongoConn_JVM
 import molecule.document.mongodb.util.BsonUtils
-import org.bson.{BsonArray, BsonDocument, BsonValue, Document}
-import org.bson.conversions.Bson
-import org.bson.json.JsonWriterSettings
+import org.bson.BsonDocument
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 
@@ -22,7 +16,7 @@ import scala.collection.mutable.ListBuffer
 abstract class QueryResolve_mongodb[Tpl](
   elements: List[Element],
   m2q: Model2MongoQuery[Tpl]
-) extends CursorUtils
+) extends Pagination
   with ModelUtils
   with BsonUtils {
 
@@ -59,15 +53,10 @@ abstract class QueryResolve_mongodb[Tpl](
     val (collectionName, pipeline) = m2q.getBsonQuery(Nil, optLimit, optOffset)
     val collection                 = conn.mongoDb.getCollection(collectionName, classOf[BsonDocument])
 
-    //    val (elements1, pipeline) = m2q.getBsonQuery(Nil, optLimit, optOffset)
-    //    val collectionName        = getInitialNonGenericNs(elements1)
-    //    val collection            = conn.mongoDb.getCollection(collectionName, classOf[BsonDocument])
-
     println("QUERY ----------------------------------------------")
 //    elements.foreach(println)
 //    println("-------")
     println(pipeline2json(pipeline, Some(collectionName)))
-    //    pipeline.forEach(x => println(x.toBsonDocument.toJson(pretty)))
 
     collection.aggregate(pipeline)
   }
@@ -107,22 +96,6 @@ abstract class QueryResolve_mongodb[Tpl](
     //    getResultSet(conn, query)
 
     ???
-  }
-
-  protected def getFromUntil(
-    tc: Int,
-    limit: Option[Int],
-    offset: Option[Int]
-  ): Option[(Int, Int, Boolean)] = {
-    (offset, limit) match {
-      case (None, None)                => None
-      case (None, Some(l)) if l > 0    => Some((0, l.min(tc), l < tc))
-      case (None, Some(l))             => Some(((tc + l).max(0), tc, (tc + l) > 0))
-      case (Some(o), None) if o > 0    => Some((o.min(tc), tc, o < tc))
-      case (Some(o), None)             => Some((0, (tc + o).min(tc), -o < tc))
-      case (Some(o), Some(l)) if l > 0 => Some((o.min(tc), (o + l).min(tc), (o + l) < tc))
-      case (Some(o), Some(l))          => Some(((tc + o + l).max(0), (tc + o).max(0), (tc + o + l).max(0) > 0))
-    }
   }
 
 

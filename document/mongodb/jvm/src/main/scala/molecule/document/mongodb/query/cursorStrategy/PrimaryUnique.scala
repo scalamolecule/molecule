@@ -4,9 +4,10 @@ import java.util.Base64
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.ops.ModelTransformations_
 import molecule.boilerplate.util.MoleculeLogging
+import molecule.core.query.Pagination
 import molecule.core.util.FutureUtils
 import molecule.document.mongodb.facade.MongoConn_JVM
-import molecule.document.mongodb.query.{CursorUtils, Model2MongoQuery, QueryResolve_mongodb}
+import molecule.document.mongodb.query.{Model2MongoQuery, QueryResolve_mongodb}
 
 /**
  * Molecule has a unique attribute that is sorted first.
@@ -25,7 +26,7 @@ case class PrimaryUnique[Tpl](
   cursor: String,
   m2q: Model2MongoQuery[Tpl]
 ) extends QueryResolve_mongodb[Tpl](elements, m2q)
-  with FutureUtils with CursorUtils with ModelTransformations_ with MoleculeLogging {
+  with FutureUtils with Pagination with ModelTransformations_ with MoleculeLogging {
 
   def getPage(tokens: List[String], limit: Int)
              (implicit conn: MongoConn_JVM): (List[Tpl], String, Boolean) = {

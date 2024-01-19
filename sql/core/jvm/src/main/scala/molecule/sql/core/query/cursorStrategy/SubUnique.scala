@@ -4,9 +4,10 @@ import java.util.Base64
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
+import molecule.core.query.Pagination
 import molecule.core.util.FutureUtils
 import molecule.sql.core.facade.JdbcConn_JVM
-import molecule.sql.core.query.{CursorUtils, SqlQueryResolve, Model2SqlQuery, SqlQueryBase}
+import molecule.sql.core.query.{Model2SqlQuery, SqlQueryBase, SqlQueryResolve}
 
 /**
  * Molecule has a unique attribute that is not sorted first.
@@ -32,7 +33,7 @@ case class SubUnique[Tpl](
   cursor: String,
   m2q: Model2SqlQuery[Tpl] with SqlQueryBase
 ) extends SqlQueryResolve[Tpl](elements, m2q)
-  with FutureUtils with CursorUtils with MoleculeLogging {
+  with FutureUtils with Pagination with MoleculeLogging {
 
   def getPage(allTokens: List[String], limit: Int)
              (implicit conn: JdbcConn_JVM)

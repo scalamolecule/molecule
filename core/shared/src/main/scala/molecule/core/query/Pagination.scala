@@ -1,19 +1,37 @@
-package molecule.datalog.core.query.cursor
+package molecule.core.query
 
 import java.net.URI
 import java.time._
 import java.util.{Date, UUID}
 import molecule.base.error.ModelError
-import molecule.base.util.BaseHelpers
 import molecule.boilerplate.ast.Model._
 
-trait CursorUtils extends BaseHelpers {
+trait Pagination {
+
+  protected def getFromUntil(
+    tc: Int,
+    limit: Option[Int],
+    offset: Option[Int]
+  ): Option[(Int, Int, Boolean)] = {
+    (offset, limit) match {
+      case (None, None)             => None
+      case (None, Some(l)) if l > 0 => Some((0, l.min(tc), l < tc))
+      case (None, Some(l))          => Some(((tc + l).max(0), tc, (tc + l) > 0))
+
+      // When only offset is set, there will be no further rows in either directions
+      case (Some(o), None) if o > 0 => Some((o.min(tc), tc, false))
+      case (Some(o), None)          => Some((0, (tc + o).min(tc), false))
+
+      case (Some(o), Some(l)) if l > 0 => Some((o.min(tc), (o + l).min(tc), (o + l) < tc))
+      case (Some(o), Some(l))          => Some(((tc + o + l).max(0), (tc + o).max(0), (tc + o + l).max(0) > 0))
+    }
+  }
 
   protected def tpeEncode(element: AttrOne): (String, Any => String) = {
     element match {
       case a: AttrOneMan =>
         a match {
-          case _: AttrOneManID             => ("String", (v: Any) => escStr(v.toString))
+          case _: AttrOneManID             => ("String", (v: Any) => v.toString)
           case _: AttrOneManString         => ("String", (v: Any) => escStr(v.toString))
           case _: AttrOneManInt            => ("Int", (v: Any) => v.toString)
           case _: AttrOneManLong           => ("Long", (v: Any) => v.toString)
@@ -39,7 +57,7 @@ trait CursorUtils extends BaseHelpers {
         }
       case a: AttrOneOpt =>
         a match {
-          case _: AttrOneOptID             => ("String", (v: Any) => escStr(v.toString))
+          case _: AttrOneOptID             => ("String", (v: Any) => v.toString)
           case _: AttrOneOptString         => ("String", (v: Any) => escStr(v.toString))
           case _: AttrOneOptInt            => ("Int", (v: Any) => v.toString)
           case _: AttrOneOptLong           => ("Long", (v: Any) => v.toString)
@@ -121,8 +139,35 @@ trait CursorUtils extends BaseHelpers {
       }
   }
 
-  // Decode String value from cursor to java value for direct comparison with raw row value
   protected def decoder(tpe: String): String => Any = {
+    tpe match {
+      case "String"         => (v: String) => unescStr(v)
+      case "Int"            => (v: String) => v.toInt
+      case "Long"           => (v: String) => v.toLong
+      case "Float"          => (v: String) => v.toFloat
+      case "Double"         => (v: String) => v.toDouble
+      case "Boolean"        => (v: String) => v.toBoolean
+      case "BigInt"         => (v: String) => BigInt(v)
+      case "BigDecimal"     => (v: String) => BigDecimal(v)
+      case "Date"           => (v: String) => str2date(v)
+      case "Duration"       => (v: String) => Duration.parse(v)
+      case "Instant"        => (v: String) => Instant.parse(v)
+      case "LocalDate"      => (v: String) => LocalDate.parse(v)
+      case "LocalTime"      => (v: String) => LocalTime.parse(v)
+      case "LocalDateTime"  => (v: String) => LocalDateTime.parse(v)
+      case "OffsetTime"     => (v: String) => OffsetTime.parse(v)
+      case "OffsetDateTime" => (v: String) => OffsetDateTime.parse(v)
+      case "ZonedDateTime"  => (v: String) => ZonedDateTime.parse(v)
+      case "UUID"           => (v: String) => UUID.fromString(v)
+      case "URI"            => (v: String) => new URI(v)
+      case "Byte"           => (v: String) => v.toByte
+      case "Short"          => (v: String) => v.toShort
+      case "Char"           => (v: String) => v.charAt(0)
+    }
+  }
+
+  // Decode String value from cursor to java value for direct comparison with raw row value
+  protected def decoder2(tpe: String): String => Any = {
     tpe match {
       case "String"         => (v: String) => unescStr(v)
       case "Int"            => (v: String) => v.toInt

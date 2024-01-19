@@ -13,7 +13,7 @@ class Model2SqlQuery_mariadb[Tpl](elements0: List[Element])
 
 
   override def pagination(optLimit: Option[Int], optOffset: Option[Int], isBackwards: Boolean): String = {
-    if (isNested || isNestedOpt) {
+    if (isNestedMan || isNestedOpt) {
       ""
     } else if (hardLimit == 0) {
       if (!isBackwards) {

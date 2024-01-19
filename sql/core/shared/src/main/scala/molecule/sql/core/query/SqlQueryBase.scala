@@ -47,7 +47,7 @@ trait SqlQueryBase extends BaseHelpers with JavaConversions {
   // Input args and cast lambdas
   final           var castss      = List(List.empty[(Row, Int) => Any])
   final           var aritiess    = List(List.empty[List[Int]])
-  final           var isNested    = false
+  final           var isNestedMan = false
   final           var isNestedOpt = false
   final protected val nestedIds   = new ArrayBuffer[String]
   final protected var level       = 0
@@ -60,7 +60,6 @@ trait SqlQueryBase extends BaseHelpers with JavaConversions {
   // Query variables
   final protected var filterAttrVars: Map[String, String] = Map.empty[String, String]
   final protected val expectedFilterAttrs                 = mutable.Set.empty[String]
-  final protected val availableAttrs                      = mutable.Set.empty[String]
 
   final protected def getCol(attr: Attr): String = {
     exts(attr.ns).fold(attr.name)(ext => attr.ns + ext + "." + attr.attr)
