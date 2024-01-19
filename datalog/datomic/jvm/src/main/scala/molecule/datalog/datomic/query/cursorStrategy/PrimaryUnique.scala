@@ -83,11 +83,4 @@ case class PrimaryUnique[Tpl](
   } catch {
     case t: Throwable => throw ModelError(t.toString)
   }
-
-
-  private def nextCursorUniques(tpls: List[Tpl], tokens: List[String]): String = {
-    val List(_, _, tpe, _, _, i, _, _) = tokens
-    val tokens1                        = tokens.dropRight(2) ++ getUniquePair(tpls, i.toInt, encoder(tpe, ""))
-    Base64.getEncoder.encodeToString(tokens1.mkString("\n").getBytes)
-  }
 }

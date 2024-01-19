@@ -66,6 +66,15 @@ class FlatEmbed(
 
     stages.addAll(postStages)
 
+    if (duplicateFields.nonEmpty) {
+      // Add duplicate fields with suffixes
+      val addFieldsDoc = new BsonDocument()
+      duplicateFields.foreach { case (fieldPath, bson) =>
+        addFieldsDoc.put(fieldPath, bson)
+      }
+      stages.add(new BsonDocument("$addFields", addFieldsDoc))
+    }
+
     if (parent.isEmpty) {
       addStage("$project", projection)
     }

@@ -195,7 +195,7 @@ trait Pagination[Tpl] {
             findFrom(remainingIdentifiers)
           }
 
-        case Nil => throw ModelError("Couldn't find next page. Edge rows were all deleted/updated.")
+        case Nil => throw ModelError(edgeValuesNotFound)
       }
     }
     findFrom(identifiers)
@@ -207,6 +207,42 @@ trait Pagination[Tpl] {
       limit.min(totalCount)
     else
       totalCount - (totalCount + limit).max(0)
+  }
+
+  protected def nextCursorUniques(tpls: List[Tpl], tokens: List[String]): String = {
+    val List(_, _, tpe, _, _, i, _, _) = tokens
+    val tokens1                        = tokens.dropRight(2) ++ getUniquePair(tpls, i.toInt, encoder(tpe, ""))
+    Base64.getEncoder.encodeToString(tokens1.mkString("\n").getBytes)
+  }
+
+  protected def nextCursorSubUnique(tpls: List[Tpl], tokens: List[String]): String = {
+    val attrTokens = tokens.drop(2).grouped(13).toList.collect {
+      case List(kind, dir, pos, tpe, ns, attr, uniqueIndex, _, _, _, _, _, _) =>
+        List(kind, dir, pos, tpe, ns, attr, uniqueIndex) ++
+          getUniqueValues(tpls, uniqueIndex.toInt, encoder(tpe, kind))
+    }.flatten
+    val tokens1    = tokens.take(2) ++ attrTokens
+    Base64.getEncoder.encodeToString(tokens1.mkString("\n").getBytes)
+  }
+
+
+  protected def nextCursorNoUnique(tpls: List[Tpl], tokens: List[String]): String = {
+    val attrTokens = tokens.drop(2).dropRight(6).grouped(13).toList.collect {
+      case List(kind, dir, pos, tpe, ns, attr, uniqueIndex, _, _, _, _, _, _) =>
+        List(kind, dir, pos, tpe, ns, attr, uniqueIndex) ++
+          getUniqueValues(tpls, uniqueIndex.toInt, encoder(tpe, kind))
+    }.flatten
+    val tokens1    = tokens.take(2) ++ attrTokens ++ getRowHashes(tpls)
+    Base64.getEncoder.encodeToString(tokens1.mkString("\n").getBytes)
+  }
+
+  protected def offsetList(
+    sortedRows: List[Tpl],
+    fromUntil: Option[(Int, Int, Boolean)]
+  ): List[Tpl] = {
+    fromUntil.fold(sortedRows) {
+      case (from, until, _) => sortedRows.slice(from, until)
+    }
   }
 
   protected def tpeEncode(element: AttrOne): (String, Any => String) = {

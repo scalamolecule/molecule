@@ -38,8 +38,8 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
     }
   }
 
-  def projectField(field: String): Unit = {
-    b.projection.append(field, new BsonInt32(1))
+  def projectField(uniqueField: String): Unit = {
+    b.projection.append(uniqueField, new BsonInt32(1))
   }
 
   final protected var sampleSize  = 0

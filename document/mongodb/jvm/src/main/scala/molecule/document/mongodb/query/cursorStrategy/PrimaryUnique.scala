@@ -1,13 +1,14 @@
 package molecule.document.mongodb.query.cursorStrategy
 
-import java.util.Base64
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.ops.ModelTransformations_
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.query.Pagination
 import molecule.core.util.FutureUtils
 import molecule.document.mongodb.facade.MongoConn_JVM
+import molecule.document.mongodb.query.casting.CastBsonDoc_
 import molecule.document.mongodb.query.{Model2MongoQuery, QueryResolve_mongodb}
+import scala.collection.mutable.ListBuffer
 
 /**
  * Molecule has a unique attribute that is sorted first.
@@ -26,56 +27,46 @@ case class PrimaryUnique[Tpl](
   cursor: String,
   m2q: Model2MongoQuery[Tpl]
 ) extends QueryResolve_mongodb[Tpl](elements, m2q)
-  with FutureUtils with Pagination[Tpl] with ModelTransformations_ with MoleculeLogging {
+  with Pagination[Tpl]
+  with CastBsonDoc_
+  with ModelTransformations_
+  with FutureUtils
+  with MoleculeLogging {
 
   def getPage(tokens: List[String], limit: Int)
              (implicit conn: MongoConn_JVM): (List[Tpl], String, Boolean) = {
     val List(_, _, tpe, ns, attr, _, a, z) = tokens
 
-    val forward      = limit > 0
-    val (fn, v)      = if (forward) (Gt, z) else (Lt, a)
-    val filterAttr   = getFilterAttr(tpe, ns, attr, fn, v)
-    val altElements  = filterAttr +: (if (forward) elements else reverseTopLevelSorting(elements))
-//    val sortedRows   = getRawData(conn, altElements, Some(limit.abs), None)
-//    val sortedRows1  = new ResultSetImpl(sortedRows)
-//    val flatRowCount = m2q.getRowCount(sortedRows1)
-    val flatRowCount = 42
+    val forward    = limit > 0
+    val (fn, v)    = if (forward) (Gt, z) else (Lt, a)
+    val filterAttr = getFilterAttr(tpe, ns, attr, fn, v)
+    val elements1  = filterAttr +: (if (forward) elements else reverseTopLevelSorting(elements))
+    val bsonDocs   = getData(conn, elements1, Some(limit), None)
+    val tuples     = ListBuffer.empty[Tpl]
+    val bson2tpl   = levelCaster(m2q.immutableCastss)
+    val it         = bsonDocs.iterator()
 
-    if (flatRowCount == 0) {
+    if (!it.hasNext) {
       (Nil, "", false)
     } else {
-      if (m2q.isNestedMan || m2q.isNestedOpt) {
-//        val nestedRows    = if (m2q.isNested) m2q.rows2nested(sortedRows1) else m2q.rows2nestedOpt(sortedRows1)
-//        val topLevelCount = nestedRows.length
-//        val limitAbs      = limit.abs.min(topLevelCount)
-//        val hasMore       = limitAbs < topLevelCount
-//        val selectedRows  = nestedRows.take(limitAbs)
-//        val result        = if (forward) selectedRows else selectedRows.reverse
-//        val cursor        = nextCursorUniques(result, tokens)
-//        (result, cursor, hasMore)
-        ???
-
+      val facet    = it.next()
+      val rows     = facet.get("rows").asArray()
+      val metaData = facet.get("metaData").asArray()
+      if (rows.isEmpty) {
+        (Nil, "", false)
       } else {
-//        val totalCount = getTotalCount(conn)
-//        val limitAbs   = limit.abs.min(totalCount)
-//        val hasMore    = limitAbs < totalCount
-//        val tuples     = ListBuffer.empty[Tpl]
-//        val row2tpl    = m2q.castRow2AnyTpl(m2q.aritiess.head, m2q.castss.head, 1, None)
-//        while (sortedRows.next()) {
-//          tuples += row2tpl(sortedRows1).asInstanceOf[Tpl]
-//        }
-//        val result = if (forward) tuples.toList else tuples.toList.reverse
-//        val cursor = nextCursorUniques(result, tokens)
-//        (result, cursor, hasMore)
-        ???
+        rows.forEach { bsonDoc =>
+          curLevelDocs.clear()
+          tuples += bson2tpl(bsonDoc.asDocument()).asInstanceOf[Tpl]
+        }
+        val tuples1    = tuples.distinct.toList
+        val totalCount = metaData.get(0).asDocument().get("totalCount").asInt32().intValue()
+        val fromUntil  = getFromUntil(totalCount, Some(limit), None)
+        val hasMore    = fromUntil.fold(totalCount > 0)(_._3)
+        val result     = if (forward) tuples1 else tuples1.reverse
+        val cursor     = nextCursorUniques(result, tokens)
+        (result, cursor, hasMore)
       }
     }
-  }
-
-
-  private def nextCursorUniques(tpls: List[Tpl], tokens: List[String]): String = {
-    val List(_, _, tpe, _, _, i, _, _) = tokens
-    val tokens1                        = tokens.dropRight(2) ++ getUniquePair(tpls, i.toInt, encoder(tpe, ""))
-    Base64.getEncoder.encodeToString(tokens1.mkString("\n").getBytes)
   }
 }

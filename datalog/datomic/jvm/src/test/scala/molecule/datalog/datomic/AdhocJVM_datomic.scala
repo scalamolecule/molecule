@@ -10,53 +10,20 @@ import scala.language.implicitConversions
 
 object AdhocJVM_datomic extends TestSuite_datomic {
 
+
+  def getTriples: List[(String, Int, Int)] = (1 to 5).toList.map { int =>
+    val s = ('a' + scala.util.Random.nextInt(3)).toChar.toString // "a" or "b"
+    val i = scala.util.Random.nextInt(3) + 1 // 1 or 2
+    (s, i, int)
+  }
+
   override lazy val tests = Tests {
 
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
       for {
-//        _ <- Ns.i(42).save.transact
-//        _ <- Ns.i.query.get.map(_ ==> List(42))
-
-        _ <- Ns.int.insert(1, 2, 3).transact
-
-//        _ <- Ns.int.a1.query.limit(0).get.map(_ ==> Nil)
-//        _ <- Ns.int.a1.query.limit(1).get.map(_ ==> List(1))
-//        _ <- Ns.int.a1.query.limit(2).get.map(_ ==> List(1, 2))
-//        _ <- Ns.int.a1.query.limit(3).get.map(_ ==> List(1, 2, 3))
-//        // limit beyond total count just returns all
-//        _ <- Ns.int.a1.query.limit(4).get.map(_ ==> List(1, 2, 3))
-
-        _ <- Ns.int.a1.query.offset(0).get.map(_ ==> (List(1, 2, 3), 3, false))
-        _ <- Ns.int.a1.query.offset(1).get.map(_ ==> (List(2, 3), 3, false))
-        _ <- Ns.int.a1.query.offset(2).get.map(_ ==> (List(3), 3, false))
-        _ <- Ns.int.a1.query.offset(3).get.map(_ ==> (Nil, 3, false))
-
-        _ <- Ns.int.a1.query.limit(2).get.map(_ ==> List(1, 2))
-        _ <- Ns.int.a1.query.limit(2).offset(0).get.map(_ ==> (List(1, 2), 3, true))
-        _ <- Ns.int.a1.query.limit(2).offset(1).get.map(_ ==> (List(2, 3), 3, false))
-        _ <- Ns.int.a1.query.limit(2).offset(2).get.map(_ ==> (List(3), 3, false))
-        _ <- Ns.int.a1.query.limit(2).offset(3).get.map(_ ==> (Nil, 3, false))
-
-
-
-
-        _ <- Ns.int.a1.query.limit(-1).get.map(_ ==> List(3))
-        _ <- Ns.int.a1.query.limit(-2).get.map(_ ==> List(2, 3))
-        _ <- Ns.int.a1.query.limit(-3).get.map(_ ==> List(1, 2, 3))
-        // limit below total count just returns all
-        _ <- Ns.int.a1.query.limit(-4).get.map(_ ==> List(1, 2, 3))
-
-        // When only offset is set, there will be no further rows going backwards
-        _ <- Ns.int.a1.query.offset(0).get.map(_  ==> (List(1, 2, 3), 3, false))
-        _ <- Ns.int.a1.query.offset(-1).get.map(_ ==> (List(1, 2), 3, false))
-        _ <- Ns.int.a1.query.offset(-2).get.map(_ ==> (List(1), 3, false))
-        _ <- Ns.int.a1.query.offset(-3).get.map(_ ==> (Nil, 3, false))
-
-        _ <- Ns.int.a1.query.limit(-2).offset(0).get.map(_ ==> (List(2, 3), 3, true))
-        _ <- Ns.int.a1.query.limit(-2).offset(-1).get.map(_ ==> (List(1, 2), 3, false))
-        _ <- Ns.int.a1.query.limit(-2).offset(-2).get.map(_ ==> (List(1), 3, false))
-        _ <- Ns.int.a1.query.limit(-2).offset(-3).get.map(_ ==> (List(), 3, false))
+        _ <- Ns.i(42).save.transact
+        _ <- Ns.i.query.get.map(_ ==> List(42))
 
 
       } yield ()
@@ -66,40 +33,6 @@ object AdhocJVM_datomic extends TestSuite_datomic {
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
-
-        _ <- A.i.ii.Bb.*(B.ii.i).insert(
-          (1, Set(0, 1, 2), List(
-            (Set(1, 2, 3), 1),
-            (Set(1, 2, 0), 1),
-          )),
-          (2, Set(2, 3), List(
-            (Set(2, 3), 1),
-            (Set(2, 0), 1),
-          )),
-          (2, Set(4), List(
-            (Set(4), 1),
-            (Set(0), 1),
-          )),
-          (2, Set(4), List(
-            (Set(3), 1),
-            (Set(0), 1),
-          )),
-          (3, Set(5), List(
-            (Set(5), 1),
-            (Set(5), 2),
-            //            (Set(0), 3),
-          )),
-        ).i.transact
-
-        //        _ <- A.i.ii_(B.ii_).Bb.*(B.ii.i).query.get.map(_ ==> List(
-        //          (2, List(
-        //            (Set(2, 3, 4), 1), // Set(2, 3) and Set(4) coalesced
-        //          )),
-        //          (3, List(
-        //            (Set(5), 1),
-        //            (Set(5), 2),
-        //          ))
-        //        ))
 
         _ <- A.i.ii(B.ii_).Bb.*(B.ii.i).query.i.get.map(_ ==> List(
           (2, Set(2, 3, 4), List(
@@ -115,15 +48,21 @@ object AdhocJVM_datomic extends TestSuite_datomic {
     }
 
 
-    //    "unique" - unique { implicit conn =>
-    //      import molecule.coreTests.dataModels.core.dsl.Uniques._
-    //      for {
-    //        _ <- Uniques.int.i.s.insert(0, 1, "a").transact
-    //        _ <- Uniques.i.s.query.get.map(_ ==> List((1, "a")))
-    //
-    //
-    //      } yield ()
-    //    }
+    "unique" - unique { implicit conn =>
+      import molecule.coreTests.dataModels.core.dsl.Uniques._
+      val triples             = getTriples.map(t => (t._3, t._1, t._2))
+      val List(a, b, c, d, e) = triples.sortBy(p => (p._2, p._3, p._1))
+      val query               = (c: String, l: Int) => Uniques.int.a3.s.a1.i.a2.query.from(c).limit(l)
+      for {
+        _ <- Uniques.int.s.i.insert(triples).transact
+        c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
+        c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
+//        c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
+//        c2 <- query(c3, -2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
+//        _ <- query(c2, -2).get.map { case (List(`a`, `b`), _, false) => () }
+
+      } yield ()
+    }
 
 
     //    "validation" - validation { implicit conn =>

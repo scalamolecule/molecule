@@ -1,6 +1,5 @@
 package molecule.sql.core.query.cursorStrategy
 
-import java.util.Base64
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.ops.ModelTransformations_
 import molecule.boilerplate.util.MoleculeLogging
@@ -69,12 +68,5 @@ case class PrimaryUnique[Tpl](
         (result, cursor, hasMore)
       }
     }
-  }
-
-
-  private def nextCursorUniques(tpls: List[Tpl], tokens: List[String]): String = {
-    val List(_, _, tpe, _, _, i, _, _) = tokens
-    val tokens1                        = tokens.dropRight(2) ++ getUniquePair(tpls, i.toInt, encoder(tpe, ""))
-    Base64.getEncoder.encodeToString(tokens1.mkString("\n").getBytes)
   }
 }

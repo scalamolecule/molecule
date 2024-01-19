@@ -109,8 +109,6 @@ class Model2DatomicQuery[Tpl](elements0: List[Element])
     if (rules.isEmpty) Nil else Seq(rules.mkString("[\n  ", "\n  ", "\n]"))
   }
 
-  //  private lazy val noIdFiltering = "Filter attributes not allowed to involve entity ids."
-
   @tailrec
   final private def resolve(
     es: List[Var],

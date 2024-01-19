@@ -1,6 +1,5 @@
 package molecule.document.mongodb.query.cursorStrategy
 
-import java.util.Base64
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
@@ -43,15 +42,5 @@ case class NoUnique[Tpl](
     )
   } catch {
     case t: Throwable => throw ModelError(t.toString)
-  }
-
-  private def nextCursorNoUnique(tpls: List[Tpl], tokens: List[String]): String = {
-    val attrTokens = tokens.drop(2).dropRight(6).grouped(13).toList.collect {
-      case List(kind, dir, pos, tpe, ns, attr, uniqueIndex, _, _, _, _, _, _) =>
-        List(kind, dir, pos, tpe, ns, attr, uniqueIndex) ++
-          getUniqueValues(tpls, uniqueIndex.toInt, encoder(tpe, kind))
-    }.flatten
-    val tokens1    = tokens.take(2) ++ attrTokens ++ getRowHashes(tpls)
-    Base64.getEncoder.encodeToString(tokens1.mkString("\n").getBytes)
   }
 }

@@ -91,9 +91,9 @@ abstract class SqlQueryResolve[Tpl](
         val count          = getCount(limit, forward, totalCount)
         val nestedTpls1    = if (forward) nestedTpls else nestedTpls.reverse
         val (tuples, more) = paginateTpls(count, nestedTpls1, identifiers, identifyTpl)
-        val tpls           = if (forward) tuples else tuples.reverse
-        val cursor         = nextCursor(tpls, allTokens)
-        (tpls, cursor, more > 0)
+        val tuples1        = if (forward) tuples else tuples.reverse
+        val cursor         = nextCursor(tuples1, allTokens)
+        (tuples1, cursor, more > 0)
 
       } else {
         val totalCount = flatRowCount
@@ -105,9 +105,9 @@ abstract class SqlQueryResolve[Tpl](
         }
         val allTuples1     = if (forward) allTuples else allTuples.reverse
         val (tuples, more) = paginateTpls(count, allTuples1.result(), identifiers, identifyTpl)
-        val tpls           = if (forward) tuples else tuples.reverse
-        val cursor         = nextCursor(tpls, allTokens)
-        (tpls, cursor, more > 0)
+        val tuples1        = if (forward) tuples else tuples.reverse
+        val cursor         = nextCursor(tuples1, allTokens)
+        (tuples1, cursor, more > 0)
       }
     }
   }

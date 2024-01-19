@@ -94,14 +94,4 @@ case class QueryResolveOffset_mongodb[Tpl](
   def unsubscribe(conn: MongoConn_JVM): Unit = {
     conn.removeCallback(elements)
   }
-
-
-  private def offsetList(
-    sortedRows: List[Tpl],
-    fromUntil: Option[(Int, Int, Boolean)]
-  ): List[Tpl] = {
-    fromUntil.fold(sortedRows) {
-      case (from, until, _) => sortedRows.slice(from, until)
-    }
-  }
 }
