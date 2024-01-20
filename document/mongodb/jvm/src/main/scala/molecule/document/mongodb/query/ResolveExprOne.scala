@@ -361,15 +361,17 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
         replaceCast(uniqueField, res.castSet(uniqueField))
 
       case "count" =>
-//        b.base.matches.add(Filters.ne(pathField, null.asInstanceOf[T]))
-        b.matches.add(Filters.ne(pathField, null.asInstanceOf[T]))
-
+        if (b.isEmbedded) {
+          b.matches.add(Filters.ne(b.dot + field, new BsonNull))
+        }
         topBranch.groupExprs += aliasField -> new BsonDocument("$sum", new BsonInt32(1))
         addField(uniqueField)
         replaceCast(uniqueField, castInt(uniqueField))
 
       case "countDistinct" =>
-        b.matches.add(Filters.ne(pathField, null.asInstanceOf[T]))
+        if (b.isEmbedded) {
+          b.matches.add(Filters.ne(b.dot + field, new BsonNull))
+        }
         topBranch.preGroupFields += pathField -> aliasField
         topBranch.groupExprs += aliasField -> new BsonDocument("$sum", new BsonInt32(1))
         addField(uniqueField)
@@ -381,7 +383,6 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
         addField(uniqueField)
 
       case "median" =>
-//        b.matches.add(Filters.ne(pathField, null.asInstanceOf[T]))
         topBranch.preGroupFields += pathField -> aliasField
         topBranch.groupExprs += aliasField -> new BsonDocument("$median",
           new BsonDocument()

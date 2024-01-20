@@ -204,69 +204,20 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
     b.base.matches.add(Filters.ne(b.dot + field, null.asInstanceOf[T]))
     // Exclude orphaned arrays too
     b.base.matches.add(Filters.ne(b.dot + field, new BsonArray()))
-    if (mandatory) {
-      //                if (mandatory && b.parent.get.isEmbedded) {
-      //          if (mandatory && !(b.parent.isDefined && b.parent.get.isEmbedded)) {
-      //      println(topBranch)
-      //      println(b.isEmbedded)
-      //      //      println(b.parent)
-      //      println(b.parent.get.isEmbedded)
-      //      println(b.base.isEmbedded)
-      //      println(topBranch.isEmbedded)
-
-      //      b.parent match {
-      //        case Some(_: NestedRef) => ()
-//      b.base match {
-//        case _: NestedRef => ()
-//        case _            =>
-//          topBranch.groupIdFields -= prefixedFieldPair
-//          topBranch.groupExprs += (b.alias + uniqueField) ->
-//            new BsonDocument("$addToSet", new BsonString("$" + b.path + field))
-//          topBranch.addFields += (b.path + field) -> reduce("$" + b.alias + field)
-//      }
-
-      if (
-        !(b.parent.isDefined && b.parent.get.isInstanceOf[NestedRef]
-          || b.isInstanceOf[NestedRef])
-      ) {
-        topBranch.groupIdFields -= prefixedFieldPair
-        topBranch.groupExprs += (b.alias + uniqueField) ->
-          new BsonDocument("$addToSet", new BsonString("$" + b.path + field))
-        topBranch.addFields += (b.path + field) -> reduce("$" + b.alias + field)
-      }
-
-
-      //      topBranch.groupIdFields -= prefixedFieldPair
-      //      topBranch.groupExprs += (b.alias + uniqueField) ->
-      //        new BsonDocument("$addToSet", new BsonString("$" + b.path + field))
-      //      topBranch.addFields += (b.path + field) -> reduce("$" + b.alias + field)
+    if (mandatory
+      && !(b.parent.isDefined && b.parent.get.isInstanceOf[NestedRef] || b.isInstanceOf[NestedRef])
+    ) {
+      topBranch.groupIdFields -= prefixedFieldPair
+      topBranch.groupExprs += (b.alias + uniqueField) ->
+        new BsonDocument("$addToSet", new BsonString("$" + b.path + field))
+      topBranch.addFields += (b.path + field) -> reduce("$" + b.alias + field)
     }
   }
 
   private def optAttr[T](uniqueField: String, field: String): Unit = {
     topBranch.groupIdFields -= prefixedFieldPair
-
-    // Separate nulls from arrays/sets of values when grouping
-
-//    val ifNull = new BsonArray()
-//    ifNull.add(new BsonString("$" + b.path + field))
-//    ifNull.add(new BsonBoolean(false))
-//
-//    val condArgs = new BsonArray()
-//    condArgs.add(new BsonDocument("$ifNull", ifNull))
-//    condArgs.add(new BsonBoolean(true))
-//    condArgs.add(new BsonBoolean(false))
-//
-//    topBranch.optSetSeparators += (field + "_") -> new BsonDocument("$cond", condArgs)
-//
-//    topBranch.groupExprs += (b.alias + uniqueField) ->
-//      new BsonDocument("$addToSet", new BsonString("$" + b.path + field))
-//    topBranch.addFields += (b.path + field) -> reduce("$" + b.alias + field)
-
-
-    if (
-      !(b.parent.isDefined && b.parent.get.isInstanceOf[NestedRef]
-        || b.isInstanceOf[NestedRef])
+    if (!(b.parent.isDefined && b.parent.get.isInstanceOf[NestedRef]
+      || b.isInstanceOf[NestedRef])
     ) {
       // Separate nulls from arrays/sets of values when grouping
 

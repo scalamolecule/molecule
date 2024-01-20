@@ -90,8 +90,6 @@ trait MongoQueryBase extends BaseHelpers with JavaConversions {
   // Used to lookup original type of aggregate attributes
   final protected var attrMap = Map.empty[String, (Card, String, Seq[String])]
 
-  final protected var hardLimit = 0
-
   // Input args and cast lambdas
   final var isNested    = false
   final var isNestedMan = false
