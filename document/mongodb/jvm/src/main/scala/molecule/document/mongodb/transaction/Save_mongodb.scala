@@ -1,7 +1,7 @@
 package molecule.document.mongodb.transaction
 
 import java.util
-import molecule.base.ast.Card
+import molecule.base.ast.{Card, CardOne}
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
@@ -18,9 +18,19 @@ trait Save_mongodb
   def getData(elements: List[Element]): Data = {
     val nsData = new BsonArray()
     nsData.add(doc) // 1 row of data to save
-    nsDocs(getInitialNs(elements)) = nsData
+    initialNs = getInitialNs(elements)
+    nsDocs(initialNs) = nsData
+
     resolve(elements)
-    val data = new BsonDocument("_action", new BsonString("insert"))
+
+    if (!refIds.isEmpty) {
+      refIdss.add(refIds)
+    }
+    val data = new BsonDocument()
+      .append("_action", new BsonString("insert"))
+      .append("_selfJoins", new BsonInt32(selfJoins))
+      .append("_refIdss", refIdss)
+
     // Loop referenced namespaces
     nsDocs.foreach { case (ns, nsData) =>
       data.append(ns, nsData)
@@ -83,7 +93,24 @@ trait Save_mongodb
     } else {
       // Reference document
       val refId = new BsonObjectId()
-      doc.append(refAttr, refId)
+
+      if (initialNs == refNs) {
+        // Count top level self joins for correct id insertions in MongoConn_JVM.insertReferenced
+        selfJoins += 1
+      } else {
+        // Add top level ref id if not a self-join
+        refIds.add(refId)
+      }
+
+      //      refIds.add(refId)
+      val ref = card match {
+        case CardOne => refId
+        case _       =>
+          val array = new BsonArray
+          array.add(refId)
+          array
+      }
+      doc.append(refAttr, ref)
 
       // Set id in new referenced document
       doc = new BsonDocument()

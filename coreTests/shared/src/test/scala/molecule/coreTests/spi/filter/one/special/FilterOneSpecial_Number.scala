@@ -75,7 +75,7 @@ trait FilterOneSpecial_Number extends CoreTestSuite with ApiAsync { spi: SpiAsyn
 
         // Mandatory
 
-        _ <- Ns.Ref.int.%(2, 0).query.i.get.map(_ ==> List(2, 4, 6, 8))
+        _ <- Ns.Ref.int.%(2, 0).query.get.map(_ ==> List(2, 4, 6, 8))
         _ <- Ns.Ref.int.%(2, 1).query.get.map(_ ==> List(1, 3, 5, 7, 9))
 
         _ <- Ns.Ref.int.%(3, 0).query.get.map(_ ==> List(3, 6, 9))
@@ -99,7 +99,7 @@ trait FilterOneSpecial_Number extends CoreTestSuite with ApiAsync { spi: SpiAsyn
 
         // Complex filtering with multiple tacit filters
         _ <- Ns.i.a1.Ref.int_.>(2).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8, 9))
-        _ <- Ns.i.a1.Ref.int_.>(2).int_.<=(8).query.i.get.map(_ ==> List(3, 4, 5, 6, 7, 8))
+        _ <- Ns.i.a1.Ref.int_.>(2).int_.<=(8).query.get.map(_ ==> List(3, 4, 5, 6, 7, 8))
         _ <- Ns.i.a1.Ref.int_.>(2).int_.<=(8).int_.not(4, 5).query.get.map(_ ==> List(3, 6, 7, 8))
         _ <- Ns.i.a1.Ref.int_.>(2).int_.<=(8).int_.not(4, 5).int_.odd.query.get.map(_ ==> List(3, 7))
       } yield ()

@@ -260,20 +260,115 @@ trait SaveRefs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- A.i(1).A.i(2).save.transact
         _ <- A.i.A.i.query.get.map(_ ==> List((1, 2)))
 
+        _ <- A.i(1).A.i(2).B.i(3).save.transact
+        _ <- A.i.A.i.B.i.query.get.map(_ ==> List((1, 2, 3)))
+
+        _ <- A.i(1).B.i(2).A.i(3).save.transact
+        _ <- A.i.B.i.A.i.query.get.map(_ ==> List((1, 2, 3)))
+
         _ <- A.i(1).B.i(2).B.i(3).save.transact
         _ <- A.i.B.i.B.i.query.get.map(_ ==> List((1, 2, 3)))
       } yield ()
     }
 
 
-    "set self" - refs { implicit conn =>
+    "self-join, many" - refs { implicit conn =>
       for {
         _ <- A.i(1).Aa.i(2).save.transact
         _ <- A.i.Aa.i.query.get.map(_ ==> List((1, 2)))
 
-        _ <- A.i(1).Bb.i(2).B.i(3).save.transact
-        _ <- A.i.Bb.i.B.i.query.get.map(_ ==> List((1, 2, 3)))
+        _ <- A.i(1).Aa.i(2).Bb.i(3).save.transact
+        _ <- A.i.Aa.i.Bb.i.query.get.map(_ ==> List((1, 2, 3)))
+
+        _ <- A.i(1).Bb.i(2).Aa.i(3).save.transact
+        _ <- A.i.Bb.i.Aa.i.query.get.map(_ ==> List((1, 2, 3)))
+
+        _ <- A.i(1).Bb.i(2).Bb.i(3).save.transact
+        _ <- A.i.Bb.i.Bb.i.query.get.map(_ ==> List((1, 2, 3)))
       } yield ()
+    }
+
+
+    "ids, ref" - refs { implicit conn =>
+      for {
+        // Card one
+        List(a1, b1) <- A.i(1).B.i(2).save.transact.map(_.ids)
+
+        _ <- A(a1).i.query.get.map(_ ==> List(1))
+        _ <- B(b1).i.query.get.map(_ ==> List(2))
+
+        _ <- A.id.i.b.query.get.map(_ ==> List(
+          (a1, 1, b1),
+        ))
+
+        // Card Set
+        List(a1, b1) <- A.i(1).Bb.i(2).save.transact.map(_.ids)
+
+        _ <- A(a1).i.query.get.map(_ ==> List(1))
+        _ <- B(b1).i.query.get.map(_ ==> List(2))
+
+        _ <- A.id.i.bb.query.get.map(_ ==> List(
+          (a1, 1, Set(b1)),
+        ))
+      } yield ()
+    }
+
+
+    "ids, owned ref" - refs { implicit conn =>
+      if (database == "MongoDB") {
+        // Can't query for non-existing ids of embedded documents in MongoDB
+        for {
+          // Card one
+          List(a1) <- A.i(1).OwnB.i(2).save.transact.map(_.ids)
+
+          _ <- A(a1).i.query.get.map(_ ==> List(1))
+
+          // Can't query for non-existing ownB id
+          //_ <- A.id.i.ownB.query
+
+          _ <- A.id.i.OwnB.i.query.get.map(_ ==> List(
+            (a1, 1, 2),
+          ))
+
+
+          // Card Set
+          List(a1) <- A.i(1).OwnBb.i(2).save.transact.map(_.ids)
+
+          _ <- A(a1).i.query.get.map(_ ==> List(1))
+
+          // Can't query for non-existing ownBb id
+          //_ <- A.id.i.ownBb.query
+
+          _ <- A.id.i.OwnBb.i.query.get.map(_ ==> List(
+            (a1, 1, 2),
+          ))
+        } yield ()
+
+      } else {
+
+        // Other databases
+        for {
+          // Card one
+          List(a1, b1) <- A.i(1).OwnB.i(2).save.transact.map(_.ids)
+
+          _ <- A(a1).i.query.get.map(_ ==> List(1))
+          _ <- B(b1).i.query.get.map(_ ==> List(2))
+
+          _ <- A.id.i.ownB.query.get.map(_ ==> List(
+            (a1, 1, b1),
+          ))
+
+          // Card Set
+          List(a1, b1) <- A.i(1).OwnBb.i(2).save.transact.map(_.ids)
+
+          _ <- A(a1).i.query.get.map(_ ==> List(1))
+          _ <- B(b1).i.query.get.map(_ ==> List(2))
+
+          _ <- A.id.i.ownBb.query.get.map(_ ==> List(
+            (a1, 1, Set(b1)),
+          ))
+        } yield ()
+      }
     }
   }
 }

@@ -11,7 +11,7 @@ import scala.collection.mutable.ListBuffer
 class FlatEmbed(
   level: Int = 0,
   parent: Option[Branch] = None,
-  val cardMany: Boolean = false,
+  cardMany: Boolean = false,
   ns: String = "",
   refAttr: String = "",
   refNs: String = "",
@@ -24,6 +24,8 @@ class FlatEmbed(
 ) extends Branch(
   level,
   parent,
+  true,
+  cardMany,
   ns,
   refAttr,
   refNs,
@@ -37,7 +39,7 @@ class FlatEmbed(
 
   override def getStages: util.ArrayList[BsonDocument] = {
     //    println(s"----- 1 -----  $dot  $refAttr  ${parent.map(_.isEmbedded)}")
-    //        matches.forEach(m => println(m))
+    //    matches.forEach(m => println(m))
 
     addMatches()
 
@@ -137,7 +139,7 @@ class FlatEmbed(
     val parent1  = parent.fold("None")(parent => s"Some(${parent.ns})")
     val children = if (subBranches.isEmpty) "" else
       s"\n$p  " + subBranches.map(ref => ref.render(tabs + 1)).mkString(s",\n$p  ")
-    s"""FlatEmbed($level, $parent1, $cardMany
+    s"""FlatEmbed($level, $parent1, $cardMany,
        |${p}  $ns, $refAttr, $refNs, $pathFields, $dot, $und, $path, $alias,
        |${p}  $projection
        |${p})$children""".stripMargin

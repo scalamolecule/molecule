@@ -18,23 +18,26 @@ import scala.concurrent.Future
 
 trait Base_JVM_mongodb extends DataType_JVM_mongodb with ModelUtils with BaseHelpers with BaseOps {
 
-  var level = 0
   override def indent(level: Int) = "  " * level
+
+  protected var doPrint = false
   protected def debug(s: Any) = if (doPrint) println(s) else ()
 
-  protected var doPrint              = false
-  protected var optIds               = Option.empty[Seq[String]]
+  protected val nsDocs               = mutable.Map.empty[String, BsonArray]
+  protected var path                 = List.empty[String]
+  protected var doc                  = new BsonDocument()
+  protected var docs                 = List(List(doc))
   protected var uniqueFilterElements = List.empty[Element]
   protected var filterElements       = List.empty[Element]
+  protected var nss                  = Set.empty[String]
+  protected var optIds               = Option.empty[Seq[String]]
+  protected val ids                  = ListBuffer.empty
 
-  protected var curNs       = ""
-  protected var doc         = new BsonDocument()
-  protected var docs        = List(List(doc))
-  protected val nsDocs      = mutable.Map.empty[String, BsonArray]
-  protected var nss         = Set.empty[String]
-  protected var path        = List.empty[String]
-
-
+  protected var level     = 0
+  protected var selfJoins = 0
+  protected var initialNs = ""
+  protected val refIdss   = new BsonArray()
+  protected var refIds    = new BsonArray()
 
   // "Connection pool" ---------------------------------------------
 
@@ -59,6 +62,7 @@ trait Base_JVM_mongodb extends DataType_JVM_mongodb with ModelUtils with BaseHel
   private def getFreshConn(proxy: ConnProxy): Future[MongoConn_JVM] = {
     Future(MongoHandler_JVM.recreateDb(proxy.asInstanceOf[MongoProxy]))
   }
+
 
   override protected lazy val handleID             = (v: Any) => new BsonObjectId(new ObjectId(v.asInstanceOf[String]))
   override protected lazy val handleString         = (v: Any) => new BsonString(v.asInstanceOf[String])

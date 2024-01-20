@@ -12,6 +12,7 @@ import scala.collection.mutable.ListBuffer
 class FlatRef(
   level: Int = 0,
   parent: Option[Branch] = None,
+  cardMany: Boolean = false,
   ns: String = "",
   refAttr: String = "",
   refNs: String = "",
@@ -24,6 +25,8 @@ class FlatRef(
 ) extends Branch(
   level,
   parent,
+  false,
+  cardMany,
   ns,
   refAttr,
   refNs,
@@ -34,8 +37,6 @@ class FlatRef(
   alias,
   projection,
 ) {
-
-  isEmbedded = false
 
   override def getStages: util.ArrayList[BsonDocument] = {
     //    println(s"----- 2 -----  $dot  $refAttr  ${parent.map(_.isEmbedded)}")
@@ -102,7 +103,7 @@ class FlatRef(
     val parent1  = parent.fold("None")(parent => s"Some(${parent.ns})")
     val children = if (subBranches.isEmpty) "" else
       s"\n$p  " + subBranches.map(ref => ref.render(tabs + 1)).mkString(s",\n$p  ")
-    s"""FlatRef($level, $parent1,
+    s"""FlatRef($level, $parent1, $cardMany,
        |${p}  $ns, $refAttr, $refNs, $pathFields, $dot, $und, $path, $alias,
        |${p}  $projection
        |${p})$children""".stripMargin

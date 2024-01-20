@@ -23,6 +23,8 @@ class NestedEmbed(
 ) extends Branch(
   level,
   parent,
+  true,
+  true,
   ns,
   refAttr,
   refNs,
@@ -56,9 +58,8 @@ class NestedEmbed(
     val parent1 = parent.fold("None")(parent => s"Some(${parent.refAttr})")
     val children = if(subBranches.isEmpty)"" else
       s"\n$p  " + subBranches.map(ref => ref.render(tabs + 1)).mkString(s",\n$p  ")
-    s"""NestedEmbed(
-       |${p}  $level, $parent1,
-       |${p}  $refAttr, $refNs, $pathFields, $dot, $und, $path, $alias,
+    s"""NestedEmbed($level, $parent1, $cardMany,
+       |${p}  $ns, $refAttr, $refNs, $pathFields, $dot, $und, $path, $alias,
        |${p}  $projection
        |${p})$children""".stripMargin
   }

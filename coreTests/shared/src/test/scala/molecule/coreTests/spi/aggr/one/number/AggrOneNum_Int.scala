@@ -40,6 +40,7 @@ trait AggrOneNum_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       // Different databases have different ways of calculating a median
       val (median_2_3, median_1_2) = if (database == "MongoDB") {
+        // whole numbers
         (int2, int1)
       } else {
         (

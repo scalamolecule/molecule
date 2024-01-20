@@ -20,7 +20,15 @@ trait CrossNsOwned extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "equal (apply) - Sets that match other Sets" - refs { implicit conn =>
       for {
-        List(x, y, z) <- A.i.ii.OwnB.ii.i.insert(a, b, c).transact.map(_.ids)
+        List(_, a2, a3) <- A.i.ii.OwnB.ii.i.insert(a, b, c).transact.map { result =>
+          if (database == "MongoDB") {
+            // Mongo has no separate ids for embedded/owned documents
+            result.ids
+          } else {
+            val List(a1, _, a2, _, a3, _) = result.ids
+            List(a1, a2, a3)
+          }
+        }
 
         _ <- A.i.ii_(B.ii_).OwnB.ii.query.get.map(_ ==> List(
           (2, Set(2, 3, 4)) // Set(2, 3) and Set(4) are coalesced to one Set
@@ -31,12 +39,12 @@ trait CrossNsOwned extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
         // To get un-coalesced Sets, separate by ids
         _ <- A.id.a1.i.ii_(B.ii_).OwnB.ii.query.get.map(_ ==> List(
-          (y, 2, Set(2, 3)),
-          (z, 2, Set(4))
+          (a2, 2, Set(2, 3)),
+          (a3, 2, Set(4))
         ))
         _ <- A.id.a1.i.ii_.OwnB.ii(A.ii_).query.get.map(_ ==> List(
-          (y, 2, Set(2, 3)),
-          (z, 2, Set(4))
+          (a2, 2, Set(2, 3)),
+          (a3, 2, Set(4))
         ))
       } yield ()
     }

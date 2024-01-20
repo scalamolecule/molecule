@@ -4,7 +4,7 @@ import com.mongodb.client.model.{Filters, Sorts}
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.core.query.ResolveExpr
-import molecule.document.mongodb.query.mongoModel.Branch
+import molecule.document.mongodb.query.mongoModel.{Branch, NestedRef}
 import org.bson._
 import org.bson.conversions.Bson
 
@@ -100,9 +100,21 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
   private def addSort(attr: Attr, field: String): Unit = {
     attr.sort.foreach { sort =>
       val (dir, index) = (sort.head, sort.substring(1, 2).toInt)
-      dir match {
-        case 'a' => topBranch.sorts += index -> Sorts.ascending(b.path + field)
-        case 'd' => topBranch.sorts += index -> Sorts.descending(b.path + field)
+
+      //      println("------- " + attr.cleanName)
+      //      println(b.base.isInstanceOf[NestedRef])
+      //      println("------------------")
+
+      if (b.base.isInstanceOf[NestedRef]) {
+        dir match {
+          case 'a' => b.base.sorts += index -> Sorts.ascending(b.dot + field)
+          case 'd' => b.base.sorts += index -> Sorts.descending(b.dot + field)
+        }
+      } else {
+        dir match {
+          case 'a' => topBranch.sorts += index -> Sorts.ascending(b.path + field)
+          case 'd' => topBranch.sorts += index -> Sorts.descending(b.path + field)
+        }
       }
     }
 
@@ -128,7 +140,9 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
     handleExpr(uniqueField, field, attr, args, res)
   }
 
-  private def handleExpr[T](uniqueField: String, field: String, attr: Attr, args: Seq[T], res: ResOne[T]): Unit = {
+  private def handleExpr[T](
+    uniqueField: String, field: String, attr: Attr, args: Seq[T], res: ResOne[T]
+  ): Unit = {
     if (branchesByPath.isEmpty) {
       path = List(attr.ns)
       pathLevels(path) = 0
@@ -164,7 +178,9 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
     }
   }
 
-  private def expr[T](uniqueField: String, field: String, op: Op, args: Seq[T], res: ResOne[T]): Unit = {
+  private def expr[T](
+    uniqueField: String, field: String, op: Op, args: Seq[T], res: ResOne[T]
+  ): Unit = {
     val pathField = b.dot + field
     op match {
       case V          => attr(field)
@@ -186,7 +202,9 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
       case other      => unexpectedOp(other)
     }
   }
-  private def expr2(field: String, op: Op, filterAttr: (Int, List[String], Attr)): Unit = op match {
+  private def expr2(
+    field: String, op: Op, filterAttr: (Int, List[String], Attr)
+  ): Unit = op match {
     case Eq    => equal2(field, filterAttr)
     case Neq   => neq2(field, filterAttr)
     case Lt    => compare2(field, "$lt", filterAttr)
@@ -242,7 +260,9 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
     optArgs.map(_.map(arg => b.base.matches.add(res.neq(field, arg))))
   }
 
-  private def optCompare[T](field: String, optArgs: Option[Seq[T]], filter: (String, T) => Bson): Unit = {
+  private def optCompare[T](
+    field: String, optArgs: Option[Seq[T]], filter: (String, T) => Bson
+  ): Unit = {
     b.base.matches.add(
       optArgs.fold {
         // Always return empty result when trying to compare None
@@ -290,13 +310,21 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
   }
 
 
-  private def aggr[T](uniqueField: String, field: String, fn: String, optN: Option[Int], res: ResOne[T]): Unit = {
+  private def aggr[T](
+    uniqueField: String,
+    field: String,
+    fn: String,
+    optN: Option[Int],
+    res: ResOne[T]
+  ): Unit = {
     lazy val n          = optN.getOrElse(0)
     lazy val aliasField = b.alias + uniqueField
     lazy val pathField  = b.path + uniqueField
     lazy val pathField2 = "$" + b.path + field
     lazy val idField    = "$_id." + b.alias + field
     topBranch.groupIdFields -= prefixedFieldPair
+
+
     fn match {
       case "distinct" =>
         topBranch.groupAddToSet(aliasField, pathField2)
@@ -333,11 +361,15 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
         replaceCast(uniqueField, res.castSet(uniqueField))
 
       case "count" =>
+//        b.base.matches.add(Filters.ne(pathField, null.asInstanceOf[T]))
+        b.matches.add(Filters.ne(pathField, null.asInstanceOf[T]))
+
         topBranch.groupExprs += aliasField -> new BsonDocument("$sum", new BsonInt32(1))
         addField(uniqueField)
         replaceCast(uniqueField, castInt(uniqueField))
 
       case "countDistinct" =>
+        b.matches.add(Filters.ne(pathField, null.asInstanceOf[T]))
         topBranch.preGroupFields += pathField -> aliasField
         topBranch.groupExprs += aliasField -> new BsonDocument("$sum", new BsonInt32(1))
         addField(uniqueField)
@@ -349,6 +381,7 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
         addField(uniqueField)
 
       case "median" =>
+//        b.matches.add(Filters.ne(pathField, null.asInstanceOf[T]))
         topBranch.preGroupFields += pathField -> aliasField
         topBranch.groupExprs += aliasField -> new BsonDocument("$median",
           new BsonDocument()
@@ -390,11 +423,15 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
   private def neq2(field: String, filterAttr: (Int, List[String], Attr)): Unit = {
     handleFilterExpr(field, "$ne", filterAttr)
   }
-  private def compare2(field: String, op: String, filterAttr: (Int, List[String], Attr)): Unit = {
+  private def compare2(
+    field: String, op: String, filterAttr: (Int, List[String], Attr)
+  ): Unit = {
     handleFilterExpr(field, op, filterAttr)
   }
 
-  private def handleFilterExpr(field: String, op: String, filterAttr0: (Int, List[String], Attr)): Unit = {
+  private def handleFilterExpr(
+    field: String, op: String, filterAttr0: (Int, List[String], Attr)
+  ): Unit = {
     val (dir, filterPath, filterAttr1) = filterAttr0
     val filterAttr                     = filterAttr1.cleanAttr
     dir match {
@@ -440,7 +477,9 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
         postFilters(filterPath :+ filterAttr) = addFilter
     }
 
-    def addStagesForNested(parentBranch: Branch, nestedBranch: Branch, args: BsonArray): Boolean = {
+    def addStagesForNested(
+      parentBranch: Branch, nestedBranch: Branch, args: BsonArray
+    ): Boolean = {
       val parentFields = parentBranch.groupIdFields.filter(_._1 == parentBranch.level)
       val refAttr      = nestedBaseBranches(nestedBranch.level)._1
       val refAttrBson  = new BsonString("$" + refAttr)

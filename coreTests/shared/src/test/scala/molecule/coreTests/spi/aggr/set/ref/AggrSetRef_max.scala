@@ -19,7 +19,7 @@ trait AggrSetRef_max extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(2, 3)),
           (2, Set(3, 4)),
           (2, Set(3, 4)),
-        )).i.transact
+        )).transact
 
         // Matching values coalesced into one Set
 
@@ -58,7 +58,7 @@ trait AggrSetRef_max extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, 2, Set(2, 3)),
           (2, 2, Set(3, 4)),
           (2, 2, Set(3, 4)),
-        )).i.transact
+        )).transact
 
         _ <- A.B.C.ii(max).query.get.map(_ ==> List(Set(4)))
         _ <- A.B.C.ii(max(1)).query.get.map(_ ==> List(Set(4)))
@@ -95,7 +95,7 @@ trait AggrSetRef_max extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(2, 3), Set(2, 3)),
           (2, Set(3, 4), Set(3, 4)),
           (2, Set(3, 4), Set(3, 4)),
-        )).i.transact
+        )).transact
 
         _ <- A.B.C.ii(max).query.get.map(_ ==> List(Set(4)))
         _ <- A.B.C.ii(max(1)).query.get.map(_ ==> List(Set(4)))
@@ -132,7 +132,7 @@ trait AggrSetRef_max extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(2, 3), Set(2, 3)),
           (2, Set(3, 4), Set(3, 4)),
           (2, Set(3, 4), Set(3, 4)),
-        )).i.transact
+        )).transact
 
         _ <- A.B._A.C.ii(max).query.get.map(_ ==> List(Set(4)))
         _ <- A.B._A.C.ii(max(1)).query.get.map(_ ==> List(Set(4)))

@@ -227,16 +227,17 @@ trait SortAggr extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         for {
           _ <- Ns.i.int.insert(
             (1, int1),
+            (1, int2),
             (1, int3),
             (2, int4),
           ).transact
-          _ <- Ns.i.long.insert((1, long1), (1, long3), (2, long4)).transact
-          _ <- Ns.i.float.insert((1, float1), (1, float3), (2, float4)).transact
-          _ <- Ns.i.double.insert((1, double1), (1, double3), (2, double4)).transact
-          _ <- Ns.i.bigInt.insert((1, bigInt1), (1, bigInt3), (2, bigInt4)).transact
-          _ <- Ns.i.bigDecimal.insert((1, bigDecimal1), (1, bigDecimal3), (2, bigDecimal4)).transact
-          _ <- Ns.i.byte.insert((1, byte1), (1, byte3), (2, byte4)).transact
-          _ <- Ns.i.short.insert((1, short1), (1, short3), (2, short4)).transact
+          _ <- Ns.i.long.insert((1, long1), (1, long2), (1, long3), (2, long4)).transact
+          _ <- Ns.i.float.insert((1, float1), (1, float2), (1, float3), (2, float4)).transact
+          _ <- Ns.i.double.insert((1, double1), (1, double2), (1, double3), (2, double4)).transact
+          _ <- Ns.i.bigInt.insert((1, bigInt1), (1, bigInt2), (1, bigInt3), (2, bigInt4)).transact
+          _ <- Ns.i.bigDecimal.insert((1, bigDecimal1), (1, bigDecimal2), (1, bigDecimal3), (2, bigDecimal4)).transact
+          _ <- Ns.i.byte.insert((1, byte1), (1, byte2), (1, byte3), (2, byte4)).transact
+          _ <- Ns.i.short.insert((1, short1), (1, short2), (1, short3), (2, short4)).transact
 
           _ <- Ns.i.int(median).a1.query.get.map(_ ==> List((1, 2), (2, 4)))
           _ <- Ns.i.long(median).a1.query.get.map(_ ==> List((1, 2), (2, 4)))

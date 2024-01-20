@@ -38,6 +38,7 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
     val elements1                              = if (altElements.isEmpty) elements0 else altElements
     val (elements2, initialNs, hasFilterAttr0) = validateQueryModel(elements1)
     hasFilterAttr = hasFilterAttr0
+    //    elements2.foreach(println)
 
     topBranch = new FlatEmbed(ns = initialNs)
     b = topBranch
@@ -57,6 +58,8 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
 
     pagination(topStages, optOffset, optLimit)
 
+//    println(topBranch)
+
     // Return elements with possible filter attribute resolutions
     (initialNs, topStages)
   }
@@ -66,22 +69,6 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
     optOffset: Option[Int],
     optLimit: Option[Int],
   ): Unit = {
-    //    val limit_ = if (isNestedMan || isNestedOpt) {
-    //      ""
-    //    } else if (hardLimit != 0) {
-    //      s"\nLIMIT $hardLimit"
-    //    } else {
-    //      optLimit.fold("")(limit => s"\nLIMIT " + (if (isBackwards) -limit else limit))
-    //    }
-    //
-    //    val offset_ = if (isNestedMan || isNestedOpt) {
-    //      ""
-    //    } else {
-    //      optOffset.fold("")(offset => s"\nOFFSET " + (if (isBackwards) -offset else offset))
-    //    }
-    //
-    //    s"$limit_$offset_"
-
     lazy val skipLimit = new BsonArray()
     optOffset.foreach {
       case 0    => () // Start from beginning

@@ -50,6 +50,7 @@ trait ResolveRef { self: MongoQueryBase =>
       val refBranch = new FlatRef(
         nestedLevel,
         Some(b),
+        card.isInstanceOf[CardSet],
         ns,
         refAttr,
         refNs,

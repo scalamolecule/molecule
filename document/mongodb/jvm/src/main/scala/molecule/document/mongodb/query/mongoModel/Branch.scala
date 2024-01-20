@@ -11,6 +11,8 @@ import scala.collection.mutable.ListBuffer
 abstract class Branch(
   val level: Int,
   val parent: Option[Branch], // parent branch can be both embedded or ref
+  val isEmbedded: Boolean = true,
+  val cardMany: Boolean = false,
   var ns: String,
   val refAttr: String,
   val refNs: String,
@@ -21,7 +23,7 @@ abstract class Branch(
   val alias: String,
   val projection: BsonDocument,
 ) {
-  var isEmbedded    = true
+//  var isEmbedded    = true
   var uniqueIndex   = 0
   val stages        = new util.ArrayList[BsonDocument]
   val preMatches    = new util.ArrayList[Bson]

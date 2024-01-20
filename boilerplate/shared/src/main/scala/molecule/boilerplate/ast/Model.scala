@@ -157,7 +157,7 @@ trait Model extends Validations with Values with BaseHelpers {
     override def toString: String = {
       def format(v: String): String = "\"" + escStr(v) + "\""
       def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-      s"""AttrOneManID("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      s"""AttrOneManID("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords, $owner)"""
     }
   }
 
@@ -618,7 +618,7 @@ trait Model extends Validations with Values with BaseHelpers {
     override def toString: String = {
       def format(v: String): String = "\"" + escStr(v) + "\""
       def vss: String = vs.fold("None")(_.map(format).mkString("Some(Seq(", ", ", "))"))
-      s"""AttrOneOptID("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      s"""AttrOneOptID("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords, $owner)"""
     }
   }
 
@@ -1079,7 +1079,7 @@ trait Model extends Validations with Values with BaseHelpers {
     override def toString: String = {
       def format(v: String): String = "\"" + escStr(v) + "\""
       def vss: String = vs.map(format).mkString("Seq(", ", ", ")")
-      s"""AttrOneTacID("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      s"""AttrOneTacID("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords, $owner)"""
     }
   }
 
@@ -1540,7 +1540,7 @@ trait Model extends Validations with Values with BaseHelpers {
     override def toString: String = {
       def format(v: String): String = "\"" + escStr(v) + "\""
       def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrSetManID("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      s"""AttrSetManID("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords, $owner)"""
     }
   }
 
@@ -2001,7 +2001,7 @@ trait Model extends Validations with Values with BaseHelpers {
     override def toString: String = {
       def format(v: String): String = "\"" + escStr(v) + "\""
       def vss: String = vs.fold("None")(_.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Some(Seq(", ", ", "))"))
-      s"""AttrSetOptID("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      s"""AttrSetOptID("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords, $owner)"""
     }
   }
 
@@ -2462,7 +2462,7 @@ trait Model extends Validations with Values with BaseHelpers {
     override def toString: String = {
       def format(v: String): String = "\"" + escStr(v) + "\""
       def vss: String = vs.map(set => set.map(format).mkString("Set(", ", ", ")")).mkString("Seq(", ", ", ")")
-      s"""AttrSetTacID("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords)"""
+      s"""AttrSetTacID("$ns", "$attr", $op, $vss, ${optFilterAttr(filterAttr)}, ${opt(validator)}, $errs, $vats, ${oStr(refNs)}, ${oStr(sort)}, $coords, $owner)"""
     }
   }
 

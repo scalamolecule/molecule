@@ -5,7 +5,6 @@ import molecule.core.spi.SpiAsync
 import molecule.core.util.Executor._
 import molecule.coreTests.async._
 import molecule.coreTests.dataModels.core.dsl.Refs._
-import molecule.coreTests.dataModels.core.dsl.Types.Ns
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 
@@ -20,11 +19,11 @@ trait AggrSetRef_min extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(2, 3)),
           (2, Set(3, 4)),
           (2, Set(3, 4)),
-        )).i.transact
+        )).transact
 
         // Matching values coalesced into one Set
 
-        _ <- A.B.ii(min).query.i.get.map(_ ==> List(Set(1)))
+        _ <- A.B.ii(min).query.get.map(_ ==> List(Set(1)))
         _ <- A.B.ii(min(1)).query.get.map(_ ==> List(Set(1)))
         _ <- A.B.ii(min(2)).query.get.map(_ ==> List(Set(1, 2)))
         _ <- A.B.ii(min(3)).query.get.map(_ ==> List(Set(1, 2, 3)))
@@ -59,9 +58,9 @@ trait AggrSetRef_min extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, 2, Set(2, 3)),
           (2, 2, Set(3, 4)),
           (2, 2, Set(3, 4)),
-        )).i.transact
+        )).transact
 
-        _ <- A.B.C.ii(min).query.i.get.map(_ ==> List(Set(1)))
+        _ <- A.B.C.ii(min).query.get.map(_ ==> List(Set(1)))
         _ <- A.B.C.ii(min(1)).query.get.map(_ ==> List(Set(1)))
         _ <- A.B.C.ii(min(2)).query.get.map(_ ==> List(Set(1, 2)))
         _ <- A.B.C.ii(min(3)).query.get.map(_ ==> List(Set(1, 2, 3)))
@@ -96,7 +95,7 @@ trait AggrSetRef_min extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(2, 3), Set(2, 3)),
           (2, Set(3, 4), Set(3, 4)),
           (2, Set(3, 4), Set(3, 4)),
-        )).i.transact
+        )).transact
 
         _ <- A.i.a1.B.ii(min).C.ii(min).query.get.map(_ ==> List(
           (1, Set(1), Set(1)),
@@ -128,7 +127,7 @@ trait AggrSetRef_min extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Set(2, 3), Set(2, 3)),
           (2, Set(3, 4), Set(3, 4)),
           (2, Set(3, 4), Set(3, 4)),
-        )).i.transact
+        )).transact
 
         _ <- A.i.a1.B.ii(min)._A.C.ii(min).query.get.map(_ ==> List(
           (1, Set(1), Set(1)),
