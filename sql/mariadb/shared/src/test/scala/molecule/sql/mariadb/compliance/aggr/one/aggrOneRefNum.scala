@@ -1,0 +1,10 @@
+package molecule.sql.mariadb.compliance.aggr.one
+
+import molecule.coreTests.spi.aggr.one.refNum._
+import molecule.sql.mariadb.setup.TestAsync_mariadb
+
+object AggrOneRefNum_sum extends AggrOneRefNum_sum with TestAsync_mariadb
+object AggrOneRefNum_median extends AggrOneRefNum_median with TestAsync_mariadb
+object AggrOneRefNum_avg extends AggrOneRefNum_avg with TestAsync_mariadb
+object AggrOneRefNum_variance extends AggrOneRefNum_variance with TestAsync_mariadb
+object AggrOneRefNum_stddev extends AggrOneRefNum_stddev with TestAsync_mariadb

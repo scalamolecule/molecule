@@ -1,0 +1,11 @@
+package molecule.sql.postgres.compliance.aggr.one
+
+import molecule.coreTests.spi.aggr.one.ref._
+import molecule.sql.postgres.setup.TestAsync_postgres
+
+object AggrOneRef_count extends AggrOneRef_count with TestAsync_postgres
+object AggrOneRef_distinct extends AggrOneRef_distinct with TestAsync_postgres
+object AggrOneRef_min_max extends AggrOneRef_min_max with TestAsync_postgres
+object AggrOneRef_min_max_n extends AggrOneRef_min_max_n with TestAsync_postgres
+object AggrOneRef_sample extends AggrOneRef_sample with TestAsync_postgres
+object AggrOneRef_sample_n extends AggrOneRef_sample_n with TestAsync_postgres

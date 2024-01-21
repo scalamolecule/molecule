@@ -27,9 +27,9 @@ object FilterOne_URI_ extends FilterOne_URI_ with TestAsync_datomic
 object FilterOne_Byte_ extends FilterOne_Byte_ with TestAsync_datomic
 object FilterOne_Short_ extends FilterOne_Short_ with TestAsync_datomic
 object FilterOne_Char_ extends FilterOne_Char_ with TestAsync_datomic
+
 object FilterOne_ref_ extends FilterOne_ref_ with TestAsync_datomic
+object FilterOne_id extends FilterOne_id with TestAsync_datomic
 
 object FilterOneSpecial_Number extends FilterOneSpecial_Number with TestAsync_datomic
 object FilterOneSpecial_String extends FilterOneSpecial_String with TestAsync_datomic
-
-object FilterOne_id extends FilterOne_id with TestAsync_datomic

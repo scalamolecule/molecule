@@ -49,21 +49,16 @@ object AdhocJVM_h2 extends TestSuite_h2 {
     }
 
 
-    "unique" - unique { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Uniques._
-      val triples             = getTriples.map(t => (t._3, t._1, t._2))
-      val List(a, b, c, d, e) = triples.sortBy(p => (p._2, p._3, p._1))
-      val query               = (c: String, l: Int) => Uniques.int.a3.s.a1.i.a2.query.from(c).limit(l)
-      for {
-        _ <- Uniques.int.s.i.insert(triples).transact
-        c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
-        c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
-        //        c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
-        //        c2 <- query(c3, -2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
-        //        _ <- query(c2, -2).get.map { case (List(`a`, `b`), _, false) => () }
-
-      } yield ()
-    }
+    //    "unique" - unique { implicit conn =>
+    //      import molecule.coreTests.dataModels.core.dsl.Uniques._
+    //      val triples             = getTriples.map(t => (t._3, t._1, t._2))
+    //      val List(a, b, c, d, e) = triples.sortBy(p => (p._2, p._3, p._1))
+    //      val query               = (c: String, l: Int) => Uniques.int.a3.s.a1.i.a2.query.from(c).limit(l)
+    //      for {
+    //        _ <- Uniques.int.s.i.insert(triples).transact
+    //
+    //      } yield ()
+    //    }
 
     //
     //    "validation" - validation { implicit conn =>
