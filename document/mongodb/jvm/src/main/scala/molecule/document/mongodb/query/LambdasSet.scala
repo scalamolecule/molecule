@@ -16,7 +16,6 @@ trait LambdasSet extends LambdasBase with JavaConversions {
     v2bson: T => BsonValue,
     castSetSet: String => BsonDocument => Set[Set[T]],
     v2set: String => BsonDocument => Set[T],
-
   )
 
   lazy val resSetID            : ResSet[String]         = ResSet("String", castSetID, castOptSetID, v2bsonID, setSetID, v2setID)

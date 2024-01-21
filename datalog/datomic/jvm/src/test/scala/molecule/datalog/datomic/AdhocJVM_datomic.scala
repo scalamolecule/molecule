@@ -22,8 +22,8 @@ object AdhocJVM_datomic extends TestSuite_datomic {
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
       for {
-//        _ <- Ns.i(42).save.transact
-//        _ <- Ns.i.query.get.map(_ ==> List(42))
+        //        _ <- Ns.i(42).save.transact
+        //        _ <- Ns.i.query.get.map(_ ==> List(42))
 
         _ <- Ns.i.int.insert(
           (1, int1),
@@ -69,10 +69,9 @@ object AdhocJVM_datomic extends TestSuite_datomic {
         List(_, e1) <- A.i.B.i.insert(1, 2).i.transact.map(_.ids)
         _ <- A.i.b.query.i.get.map(_ ==> List((1, e1)))
 
-//        // Card many ref attr (returned as Set)
-//        List(_, e2) <- A.i.Bb.i.insert(1, 2).transact.map(_.ids)
-//        _ <- A.i.bb.query.get.map(_ ==> List((1, Set(e2))))
-
+        //        // Card many ref attr (returned as Set)
+        //        List(_, e2) <- A.i.Bb.i.insert(1, 2).transact.map(_.ids)
+        //        _ <- A.i.bb.query.get.map(_ ==> List((1, Set(e2))))
 
 
       } yield ()
@@ -88,37 +87,36 @@ object AdhocJVM_datomic extends TestSuite_datomic {
         _ <- Uniques.int.s.i.insert(triples).transact
         c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
         c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
-//        c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
-//        c2 <- query(c3, -2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
-//        _ <- query(c2, -2).get.map { case (List(`a`, `b`), _, false) => () }
+        //        c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
+        //        c2 <- query(c3, -2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
+        //        _ <- query(c2, -2).get.map { case (List(`a`, `b`), _, false) => () }
 
       } yield ()
     }
 
 
-    //    "validation" - validation { implicit conn =>
-    //      import molecule.coreTests.dataModels.core.dsl.Validation._
-    //      for {
-    //
-    //        List(r1, r2) <- RefB.i.insert(2, 3).transact.map(_.ids)
-    //
-    //        id <- MandatoryRefsB.i(1).refsB(Set(r1, r2)).save.transact.map(_.ids)
-    //
-    //        // Mandatory refs can be removed as long as some ref ids remain
-    //        _ <- MandatoryRefsB(id).refsB.remove(r2).update.transact
-    //
-    //        // Last mandatory ref can't be removed. This can prevent creating orphan relationships.
-    //        _ <- MandatoryRefsB(id).refsB.remove(r1).update.i.transact
-    //          .map(_ ==> "Unexpected success").recover {
-    //            case ModelError(error) =>
-    //              error ==>
-    //                """Can't delete mandatory attributes (or remove last values of card-many attributes):
-    //                  |  MandatoryRefsB.refsB
-    //                  |""".stripMargin
-    //          }
-    //
-    //      } yield ()
-    //    }
+    "validation" - validation { implicit conn =>
+      import molecule.coreTests.dataModels.core.dsl.Validation._
+      for {
+
+//        id <- MandatoryAttr.name("Bob").age(42).hobbies(Set("golf", "stamps")).save.transact.map(_.id)
+        id <- MandatoryAttr.name("Bob").age(42).hobbies(Set("golf")).save.transact.map(_.id)
+
+//        // We can remove a value from a Set as long as it's not the last value
+//        _ <- MandatoryAttr(id).hobbies.remove("stamps").update.transact
+
+        // Can't remove the last value of a mandatory attribute Set of values
+        _ <- MandatoryAttr(id).hobbies.remove("golf").update.transact
+          .map(_ ==> "Unexpected success").recover {
+            case ModelError(error) =>
+              error ==>
+                """Can't delete mandatory attributes (or remove last values of card-many attributes):
+                  |  MandatoryAttr.hobbies
+                  |""".stripMargin
+          }
+
+      } yield ()
+    }
 
 
     //    "refs" - refs { implicit conn =>

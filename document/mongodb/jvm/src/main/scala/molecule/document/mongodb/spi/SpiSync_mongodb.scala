@@ -10,14 +10,17 @@ import molecule.core.transaction.{ResolveDelete, ResolveInsert, ResolveSave, Res
 import molecule.core.util.ModelUtils
 import molecule.core.validation.TxModelValidation
 import molecule.core.validation.insert.InsertValidation
+import molecule.document.mongodb.async.rawQuery
 import molecule.document.mongodb.facade.MongoConn_JVM
-import molecule.document.mongodb.query.{Model2MongoQuery, QueryResolveCursor_mongodb, QueryResolveOffset_mongodb}
+import molecule.document.mongodb.query.{LambdasSet, Model2MongoQuery, QueryResolveCursor_mongodb, QueryResolveOffset_mongodb}
 import molecule.document.mongodb.transaction._
 import molecule.document.mongodb.util.BsonUtils
 import org.bson._
+import org.bson.conversions.Bson
 import scala.annotation.nowarn
 import scala.collection.mutable.ListBuffer
 import scala.util.control.NonFatal
+import java.util
 
 
 object SpiSync_mongodb extends SpiSync_mongodb
@@ -25,6 +28,7 @@ object SpiSync_mongodb extends SpiSync_mongodb
 trait SpiSync_mongodb
   extends SpiSync
     with Base_JVM_mongodb
+    with LambdasSet
     with ModelUtils
     with Renderer
     with BaseHelpers
@@ -35,8 +39,8 @@ trait SpiSync_mongodb
   override def query_get[Tpl](q: Query[Tpl])(implicit conn0: Conn): List[Tpl] = {
     val conn = conn0.asInstanceOf[MongoConn_JVM]
 
-//    q.elements.foreach(println)
-//    println("================================================================ 2")
+    //    q.elements.foreach(println)
+    //    println("================================================================ 2")
 
     if (q.doInspect)
       query_inspect(q)
@@ -115,7 +119,7 @@ trait SpiSync_mongodb
       //      val (elements1, pipeline) = new Model2MongoQuery[Any](elements).getBsonQuery(Nil, optLimit, optOffset, None)
       //      val (elements1, pipeline) = new Model2MongoQuery[Any](elements).getBsonQuery(Nil, optLimit, optOffset)
 
-//      printRaw(label, elements, pipeline2json(pipeline, Some(ns)))
+      //      printRaw(label, elements, pipeline2json(pipeline, Some(ns)))
       printRaw(label, Nil, pipeline2json(pipeline, Some(ns)))
 
       //      val (ns, pipeline) = getModel2SqlQuery[Any](elements).getBsonQuery(Nil, optLimit, optOffset, None)
@@ -200,12 +204,7 @@ trait SpiSync_mongodb
     val update = update0.copy(elements = noKeywords(update0.elements, Some(conn.proxy)))
     if (update.doInspect)
       update_inspect(update)
-
-    //    TxModelValidation(conn.proxy.nsMap, conn.proxy.attrMap, "update", Some(curSetValues)).validate(elements)
-    TxModelValidation(conn.proxy.nsMap, conn.proxy.attrMap, "update", None).validate(update.elements)
-
     val errors = update_validate(update0) // validate original elements against meta model
-    //    val errors = Map.empty[String, Seq[String]]
     if (errors.isEmpty) {
       //      val txReport = if (isRefUpdate(update.elements)) {
       //        // Atomic transaction with updates for each ref namespace
@@ -260,28 +259,99 @@ trait SpiSync_mongodb
     new ResolveUpdate(conn.proxy, update.isUpsert) with Update_mongodb {}.getData(update.elements, conn)
   }
 
-  //  def update_getData(conn: MongoConn_JVM, elements: List[Element], isUpsert: Boolean): Data = {
-  //    new ResolveUpdate(conn.proxy, isUpsert) with Update_mongodb {}.getData(elements, conn)
-  //  }
-
   override def update_validate(update: Update)(implicit conn0: Conn): Map[String, Seq[String]] = {
-    val conn = conn0.asInstanceOf[MongoConn_JVM]
-    if (update.isUpsert && isRefUpdate(update.elements))
+    if (update.isUpsert && isRefUpdate(update.elements)) {
       throw ModelError("Can't upsert referenced attributes. Please update instead.")
+    }
+    val conn = conn0.asInstanceOf[MongoConn_JVM]
 
-    //    val resolver = (query: String) => {
-    //      val ps        = conn.sqlConn.prepareStatement(
-    //        query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY
-    //      )
-    //      val resultSet = ps.executeQuery()
-    //      new ResultSetImpl(resultSet)
-    //    }
+    val getCurSetValues: Attr => Set[Any] = (attr: Attr) => {
+      try {
+        val field = attr.cleanAttr
 
-    // todo
-    //     validateUpdateSet(conn.proxy, update.elements, update.isUpsert, resolver)
-    Map.empty[String, Seq[String]]
+        val pipeline = new util.ArrayList[Bson]()
+        val and      = new BsonArray()
+        and.add(new BsonDocument(field, new BsonDocument("$ne", new BsonNull())))
+        and.add(new BsonDocument(field, new BsonDocument("$ne", new BsonArray())))
+        pipeline.add(new BsonDocument("$match", new BsonDocument("$and", and)))
+
+        val collectionName = attr.cleanNs
+        val collection     = conn.mongoDb.getCollection(collectionName, classOf[BsonDocument])
+
+        println("QUERY ----------------------------------------------")
+        println(pipeline2json(pipeline, Some(collectionName)))
+
+        //      var set = Set.empty[Any]
+        val it = collection.aggregate(pipeline).iterator
+        if (it.hasNext) {
+          val caster = attr match {
+            case a: AttrSetMan => a match {
+              case _: AttrSetManID             => castSetID
+              case _: AttrSetManString         => castSetString
+              case _: AttrSetManInt            => castSetInt
+              case _: AttrSetManLong           => castSetLong
+              case _: AttrSetManFloat          => castSetFloat
+              case _: AttrSetManDouble         => castSetDouble
+              case _: AttrSetManBoolean        => castSetBoolean
+              case _: AttrSetManBigInt         => castSetBigInt
+              case _: AttrSetManBigDecimal     => castSetBigDecimal
+              case _: AttrSetManDate           => castSetDate
+              case _: AttrSetManDuration       => castSetDuration
+              case _: AttrSetManInstant        => castSetInstant
+              case _: AttrSetManLocalDate      => castSetLocalDate
+              case _: AttrSetManLocalTime      => castSetLocalTime
+              case _: AttrSetManLocalDateTime  => castSetLocalDateTime
+              case _: AttrSetManOffsetTime     => castSetOffsetTime
+              case _: AttrSetManOffsetDateTime => castSetOffsetDateTime
+              case _: AttrSetManZonedDateTime  => castSetZonedDateTime
+              case _: AttrSetManUUID           => castSetUUID
+              case _: AttrSetManURI            => castSetURI
+              case _: AttrSetManByte           => castSetByte
+              case _: AttrSetManShort          => castSetShort
+              case _: AttrSetManChar           => castSetChar
+            }
+            case a: AttrSetTac => a match {
+              case _: AttrSetTacID             => castSetID
+              case _: AttrSetTacString         => castSetString
+              case _: AttrSetTacInt            => castSetInt
+              case _: AttrSetTacLong           => castSetLong
+              case _: AttrSetTacFloat          => castSetFloat
+              case _: AttrSetTacDouble         => castSetDouble
+              case _: AttrSetTacBoolean        => castSetBoolean
+              case _: AttrSetTacBigInt         => castSetBigInt
+              case _: AttrSetTacBigDecimal     => castSetBigDecimal
+              case _: AttrSetTacDate           => castSetDate
+              case _: AttrSetTacDuration       => castSetDuration
+              case _: AttrSetTacInstant        => castSetInstant
+              case _: AttrSetTacLocalDate      => castSetLocalDate
+              case _: AttrSetTacLocalTime      => castSetLocalTime
+              case _: AttrSetTacLocalDateTime  => castSetLocalDateTime
+              case _: AttrSetTacOffsetTime     => castSetOffsetTime
+              case _: AttrSetTacOffsetDateTime => castSetOffsetDateTime
+              case _: AttrSetTacZonedDateTime  => castSetZonedDateTime
+              case _: AttrSetTacUUID           => castSetUUID
+              case _: AttrSetTacURI            => castSetURI
+              case _: AttrSetTacByte           => castSetByte
+              case _: AttrSetTacShort          => castSetShort
+              case _: AttrSetTacChar           => castSetChar
+            }
+            case _             => ???
+          }
+          caster(field)(it.next).asInstanceOf[Set[Any]]
+        } else Set.empty[Any]
+      } catch {
+        case e: MoleculeError => throw e
+        case _: Throwable     => throw ExecutionError(
+          s"Unexpected error trying to find current values of mandatory attribute ${attr.name}")
+      }
+    }
+    TxModelValidation(
+      conn.proxy.nsMap,
+      conn.proxy.attrMap,
+      "update",
+      Some(getCurSetValues)
+    ).validate(update.elements)
   }
-
 
   // Delete --------------------------------------------------------
 
