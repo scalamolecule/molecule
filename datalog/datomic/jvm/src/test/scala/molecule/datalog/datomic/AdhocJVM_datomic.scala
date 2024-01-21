@@ -10,13 +10,6 @@ import scala.language.implicitConversions
 
 object AdhocJVM_datomic extends TestSuite_datomic {
 
-
-  def getTriples: List[(String, Int, Int)] = (1 to 5).toList.map { int =>
-    val s = ('a' + scala.util.Random.nextInt(3)).toChar.toString // "a" or "b"
-    val i = scala.util.Random.nextInt(3) + 1 // 1 or 2
-    (s, i, int)
-  }
-
   override lazy val tests = Tests {
 
     "types" - types { implicit conn =>
@@ -25,37 +18,11 @@ object AdhocJVM_datomic extends TestSuite_datomic {
         //        _ <- Ns.i(42).save.transact
         //        _ <- Ns.i.query.get.map(_ ==> List(42))
 
-        _ <- Ns.i.int.insert(
-          (1, int1),
-          (1, int2),
-          (1, int3),
-          (2, int4),
-        ).transact
-        _ <- Ns.i.long.insert((1, long1), (1, long3), (2, long4)).transact
-        _ <- Ns.i.float.insert((1, float1), (1, float3), (2, float4)).transact
-        _ <- Ns.i.double.insert((1, double1), (1, double3), (2, double4)).transact
-        _ <- Ns.i.bigInt.insert((1, bigInt1), (1, bigInt3), (2, bigInt4)).transact
-        _ <- Ns.i.bigDecimal.insert((1, bigDecimal1), (1, bigDecimal3), (2, bigDecimal4)).transact
-        _ <- Ns.i.byte.insert((1, byte1), (1, byte3), (2, byte4)).transact
-        _ <- Ns.i.short.insert((1, short1), (1, short3), (2, short4)).transact
-
-        _ <- Ns.i.int(median).a1.query.get.map(_ ==> List((1, 2), (2, 4)))
-        _ <- Ns.i.long(median).a1.query.get.map(_ ==> List((1, 2), (2, 4)))
-        _ <- Ns.i.float(median).a1.query.get.map(_ ==> List((1, 2), (2, 4)))
-        _ <- Ns.i.double(median).a1.query.get.map(_ ==> List((1, 2), (2, 4)))
-        _ <- Ns.i.bigInt(median).a1.query.get.map(_ ==> List((1, 2), (2, 4)))
-        _ <- Ns.i.bigDecimal(median).a1.query.get.map(_ ==> List((1, 2), (2, 4)))
-        _ <- Ns.i.byte(median).a1.query.get.map(_ ==> List((1, 2), (2, 4)))
-        _ <- Ns.i.short(median).a1.query.get.map(_ ==> List((1, 2), (2, 4)))
-
-        _ <- Ns.i.int(median).d1.query.get.map(_ ==> List((2, 4), (1, 2)))
-        _ <- Ns.i.long(median).d1.query.get.map(_ ==> List((2, 4), (1, 2)))
-        _ <- Ns.i.float(median).d1.query.get.map(_ ==> List((2, 4), (1, 2)))
-        _ <- Ns.i.double(median).d1.query.get.map(_ ==> List((2, 4), (1, 2)))
-        _ <- Ns.i.bigInt(median).d1.query.get.map(_ ==> List((2, 4), (1, 2)))
-        _ <- Ns.i.bigDecimal(median).d1.query.get.map(_ ==> List((2, 4), (1, 2)))
-        _ <- Ns.i.byte(median).d1.query.get.map(_ ==> List((2, 4), (1, 2)))
-        _ <- Ns.i.short(median).d1.query.get.map(_ ==> List((2, 4), (1, 2)))
+        _ <- Ns.int.insert(1, 2, 3).transact
+        _ <- Ns.int.a1.query.get.map(_ ==> List(1, 2, 3))
+        _ <- Ns.int.a1.query.limit(2).get.map(_ ==> List(1, 2))
+        _ <- Ns.int.a1.query.offset(1).get.map(_ ==> (List(2, 3), 3, false))
+        _ <- Ns.int.a1.query.offset(1).limit(1).get.map(_ ==> (List(2), 3, true))
 
       } yield ()
     }
@@ -78,45 +45,37 @@ object AdhocJVM_datomic extends TestSuite_datomic {
     }
 
 
-    "unique" - unique { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Uniques._
-      val triples             = getTriples.map(t => (t._3, t._1, t._2))
-      val List(a, b, c, d, e) = triples.sortBy(p => (p._2, p._3, p._1))
-      val query               = (c: String, l: Int) => Uniques.int.a3.s.a1.i.a2.query.from(c).limit(l)
-      for {
-        _ <- Uniques.int.s.i.insert(triples).transact
-        c1 <- query("", 2).get.map { case (List(`a`, `b`), cursor, true) => cursor }
-        c2 <- query(c1, 2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
-        //        c3 <- query(c2, 2).get.map { case (List(`e`), cursor, false) => cursor }
-        //        c2 <- query(c3, -2).get.map { case (List(`c`, `d`), cursor, true) => cursor }
-        //        _ <- query(c2, -2).get.map { case (List(`a`, `b`), _, false) => () }
-
-      } yield ()
-    }
+    //    "unique" - unique { implicit conn =>
+    //      import molecule.coreTests.dataModels.core.dsl.Uniques._
+    //      for {
+    //        _ <- Uniques.int.s.i.insert(triples).transact
+    //
+    //      } yield ()
+    //    }
 
 
-    "validation" - validation { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Validation._
-      for {
-
-//        id <- MandatoryAttr.name("Bob").age(42).hobbies(Set("golf", "stamps")).save.transact.map(_.id)
-        id <- MandatoryAttr.name("Bob").age(42).hobbies(Set("golf")).save.transact.map(_.id)
-
-//        // We can remove a value from a Set as long as it's not the last value
-//        _ <- MandatoryAttr(id).hobbies.remove("stamps").update.transact
-
-        // Can't remove the last value of a mandatory attribute Set of values
-        _ <- MandatoryAttr(id).hobbies.remove("golf").update.transact
-          .map(_ ==> "Unexpected success").recover {
-            case ModelError(error) =>
-              error ==>
-                """Can't delete mandatory attributes (or remove last values of card-many attributes):
-                  |  MandatoryAttr.hobbies
-                  |""".stripMargin
-          }
-
-      } yield ()
-    }
+    //    "validation" - validation { implicit conn =>
+    //      import molecule.coreTests.dataModels.core.dsl.Validation._
+    //      for {
+    //
+    ////        id <- MandatoryAttr.name("Bob").age(42).hobbies(Set("golf", "stamps")).save.transact.map(_.id)
+    //        id <- MandatoryAttr.name("Bob").age(42).hobbies(Set("golf")).save.transact.map(_.id)
+    //
+    ////        // We can remove a value from a Set as long as it's not the last value
+    ////        _ <- MandatoryAttr(id).hobbies.remove("stamps").update.transact
+    //
+    //        // Can't remove the last value of a mandatory attribute Set of values
+    //        _ <- MandatoryAttr(id).hobbies.remove("golf").update.transact
+    //          .map(_ ==> "Unexpected success").recover {
+    //            case ModelError(error) =>
+    //              error ==>
+    //                """Can't delete mandatory attributes (or remove last values of card-many attributes):
+    //                  |  MandatoryAttr.hobbies
+    //                  |""".stripMargin
+    //          }
+    //
+    //      } yield ()
+    //    }
 
 
     //    "refs" - refs { implicit conn =>

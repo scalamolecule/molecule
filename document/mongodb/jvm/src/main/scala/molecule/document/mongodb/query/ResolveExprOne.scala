@@ -100,11 +100,6 @@ trait ResolveExprOne extends ResolveExpr with LambdasOne with LambdasSet { self:
   private def addSort(attr: Attr, field: String): Unit = {
     attr.sort.foreach { sort =>
       val (dir, index) = (sort.head, sort.substring(1, 2).toInt)
-
-      //      println("------- " + attr.cleanName)
-      //      println(b.base.isInstanceOf[NestedRef])
-      //      println("------------------")
-
       if (b.base.isInstanceOf[NestedRef]) {
         dir match {
           case 'a' => b.base.sorts += index -> Sorts.ascending(b.dot + field)

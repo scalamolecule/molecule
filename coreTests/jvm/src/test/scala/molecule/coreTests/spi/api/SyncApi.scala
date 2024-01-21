@@ -76,7 +76,7 @@ trait SyncApi extends CoreTestSuite with ApiSync { spi: SpiSync =>
         Ns.int.insert(1, 2, 3).transact
         Ns.int.a1.query.get ==> List(1, 2, 3)
         Ns.int.a1.query.limit(2).get ==> List(1, 2)
-        Ns.int.a1.query.offset(1).get ==> (List(2, 3), 3, true)
+        Ns.int.a1.query.offset(1).get ==> (List(2, 3), 3, false)
         Ns.int.a1.query.offset(1).limit(1).get ==> (List(2), 3, true)
       }
 

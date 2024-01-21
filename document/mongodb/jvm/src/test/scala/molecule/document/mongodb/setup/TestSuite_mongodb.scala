@@ -16,10 +16,10 @@ trait TestSuite_mongodb extends CoreTestSuite with BaseHelpers {
   override val platform = "jvm"
 
 
-  override def utestAfterAll(): Unit = {
-    println("====== closing MongoDB client ======")
-    // c.mongoClient.close() // needed for tests?
-  }
+  //  override def utestAfterAll(): Unit = {
+  //    //    println("====== closing MongoDB client ======")
+  //    // c.mongoClient.close() // needed for tests?
+  //  }
 
 
   override def inMem[T](test: Conn => T, schema: Schema): T = {

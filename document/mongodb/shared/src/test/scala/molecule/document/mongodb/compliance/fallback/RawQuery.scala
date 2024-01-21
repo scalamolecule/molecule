@@ -9,6 +9,15 @@ import scala.language.implicitConversions
 
 object RawQuery extends TestSuite_mongodb {
 
+  /*
+  OBS: Molecule only implements a very simple rawQuery function since
+  https://mongoplayground.net already does an excellent job at testing raw queries.
+
+  Note for instance that `rawQuery` will simply return/print related documents as a string.
+
+  For making specialized queries please use your preferred Mongo db tools.
+   */
+
   override lazy val tests = Tests {
 
     "Lists of Lists of Any" - types { implicit conn =>
@@ -21,25 +30,31 @@ object RawQuery extends TestSuite_mongodb {
         _ <- rawQuery(
           """{
             |  "collection": "Ns",
-            |  "$match": {
-            |    "$and": [
-            |      {
-            |        "string": {
-            |          "$ne": null
-            |        }
-            |      },
-            |      {
-            |        "int": {
-            |          "$ne": null
-            |        }
+            |  "pipeline": [
+            |    {
+            |      "$match": {
+            |        "$and": [
+            |          {
+            |            "string": {
+            |              "$ne": null
+            |            }
+            |          },
+            |          {
+            |            "int": {
+            |              "$ne": null
+            |            }
+            |          }
+            |        ]
             |      }
-            |    ]
-            |  },
-            |  "$project": {
-            |    "string": 1,
-            |    "int": 1,
-            |    "_id": 0
-            |  }
+            |    },
+            |    {
+            |      "$project": {
+            |        "string": 1,
+            |        "int": 1,
+            |        "_id": 0
+            |      }
+            |    }
+            |  ]
             |}
             |""".stripMargin)
           .map(_ ==> List(
@@ -51,25 +66,31 @@ object RawQuery extends TestSuite_mongodb {
         _ <- rawQuery(
           """{
             |  "collection": "Ns",
-            |  "$match": {
-            |    "$and": [
-            |      {
-            |        "string": {
-            |          "$ne": null
-            |        }
-            |      },
-            |      {
-            |        "int": {
-            |          "$ne": null
-            |        }
+            |  "pipeline": [
+            |    {
+            |      "$match": {
+            |        "$and": [
+            |          {
+            |            "string": {
+            |              "$ne": null
+            |            }
+            |          },
+            |          {
+            |            "int": {
+            |              "$ne": null
+            |            }
+            |          }
+            |        ]
             |      }
-            |    ]
-            |  },
-            |  "$project": {
-            |    "string": 1,
-            |    "int": 1,
-            |    "_id": 0
-            |  }
+            |    },
+            |    {
+            |      "$project": {
+            |        "string": 1,
+            |        "int": 1,
+            |        "_id": 0
+            |      }
+            |    }
+            |  ]
             |}
             |""".stripMargin).map(_.head == List("a", "1") ==> false)
       } yield ()
@@ -80,19 +101,25 @@ object RawQuery extends TestSuite_mongodb {
       def q(attr: String): String =
         s"""{
            |  "collection": "Ns",
-           |  "$$match": {
-           |    "$$and": [
-           |      {
-           |        "$attr": {
-           |          "$$ne": null
-           |        }
+           |  "pipeline": [
+           |    {
+           |      "$$match": {
+           |        "$$and": [
+           |          {
+           |            "$attr": {
+           |              "$$ne": null
+           |            }
+           |          }
+           |        ]
            |      }
-           |    ]
-           |  },
-           |  "$$project": {
-           |    "$attr": 1,
-           |    "_id": 0
-           |  }
+           |    },
+           |    {
+           |      "$$project": {
+           |        "$attr": 1,
+           |        "_id": 0
+           |      }
+           |    }
+           |  ]
            |}
            |""".stripMargin
 
@@ -150,19 +177,25 @@ object RawQuery extends TestSuite_mongodb {
       def q(attr: String): String =
         s"""{
            |  "collection": "Ns",
-           |  "$$match": {
-           |    "$$and": [
-           |      {
-           |        "$attr": {
-           |          "$$ne": null
-           |        }
+           |  "pipeline": [
+           |    {
+           |      "$$match": {
+           |        "$$and": [
+           |          {
+           |            "$attr": {
+           |              "$$ne": null
+           |            }
+           |          }
+           |        ]
            |      }
-           |    ]
-           |  },
-           |  "$$project": {
-           |    "$attr": 1,
-           |    "_id": 0
-           |  }
+           |    },
+           |    {
+           |      "$$project": {
+           |        "$attr": 1,
+           |        "_id": 0
+           |      }
+           |    }
+           |  ]
            |}
            |""".stripMargin
 
@@ -223,18 +256,43 @@ object RawQuery extends TestSuite_mongodb {
         _ <- Ns.i.int(distinct).query.i.get.map(_.head ==> (1, Set(2)))
 
         _ <- rawQuery(
-          """SELECT DISTINCT
-            |  Ns.i,
-            |  ARRAY_AGG(DISTINCT Ns.int)
-            |FROM Ns
-            |WHERE
-            |  Ns.i   IS NOT NULL AND
-            |  Ns.int IS NOT NULL
-            |GROUP BY Ns.i
-            |ORDER BY Ns.i NULLS FIRST;
+          """{
+            |  "collection": "Ns",
+            |  "pipeline": [
+            |    {
+            |      "$match": {
+            |        "i": {
+            |          "$ne": null
+            |        }
+            |      }
+            |    },
+            |    {
+            |      "$group": {
+            |        "_id": {
+            |          "i": "$i"
+            |        },
+            |        "int": {
+            |          "$addToSet": "$int"
+            |        }
+            |      }
+            |    },
+            |    {
+            |      "$addFields": {
+            |        "i": "$_id.i"
+            |      }
+            |    },
+            |    {
+            |      "$project": {
+            |        "_id": 0,
+            |        "i": 1,
+            |        "int": 1
+            |      }
+            |    }
+            |  ]
+            |}
             |""".stripMargin,
           true // debug
-        ).map(_.head ==> List(1, Set(2)))
+        ).map(_.head ==> List(Set(2), 1)) // Note order of attribute values! (from BsonDocument, like a Map)
       } yield ()
     }
 
@@ -254,19 +312,75 @@ object RawQuery extends TestSuite_mongodb {
         ))
 
         _ <- rawQuery(
-          """SELECT DISTINCT
-            |  Ns.i,
-            |  Ns.strings
-            |FROM Ns
-            |WHERE
-            |  Ns.i IS NOT NULL
-            |ORDER BY Ns.i NULLS FIRST;
+          """{
+            |  "collection": "Ns",
+            |  "pipeline": [
+            |    {
+            |      "$match": {
+            |        "i": {
+            |          "$ne": null
+            |        }
+            |      }
+            |    },
+            |    {
+            |      "$group": {
+            |        "_id": {
+            |          "i": "$i",
+            |          "strings_": {
+            |            "$cond": [
+            |              {
+            |                "$ifNull": [
+            |                  "$strings",
+            |                  false
+            |                ]
+            |              },
+            |              true,
+            |              false
+            |            ]
+            |          }
+            |        },
+            |        "strings": {
+            |          "$addToSet": "$strings"
+            |        }
+            |      }
+            |    },
+            |    {
+            |      "$addFields": {
+            |        "i": "$_id.i",
+            |        "strings": {
+            |          "$reduce": {
+            |            "input": "$strings",
+            |            "initialValue": [],
+            |            "in": {
+            |              "$setUnion": [
+            |                "$$value",
+            |                "$$this"
+            |              ]
+            |            }
+            |          }
+            |        }
+            |      }
+            |    },
+            |    {
+            |      "$project": {
+            |        "_id": 0,
+            |        "i": 1,
+            |        "strings": 1
+            |      }
+            |    },
+            |    {
+            |      "$sort": {
+            |        "i": 1
+            |      }
+            |    }
+            |  ]
+            |}
             |""".stripMargin,
           true // debug
         ).map(_ ==> List(
-          List(1, null),
-          List(2, Set()), // Notice empty Set, not null
-          List(3, Set(string1, string2))
+          List(Set(), 1),
+          List(Set(), 2),
+          List(Set(string1, string2), 3),
         ))
       } yield ()
     }
@@ -287,21 +401,205 @@ object RawQuery extends TestSuite_mongodb {
         ))
 
         _ <- rawQuery(
-          """SELECT DISTINCT
-            |  Ns.i,
-            |  ARRAY_AGG(Ns_refs_Ref.Ref_id) Ns_refs
-            |FROM Ns
-            |  LEFT JOIN Ns_refs_Ref ON Ns.id = Ns_refs_Ref.Ns_id
-            |WHERE
-            |  Ns.i IS NOT NULL
-            |GROUP BY Ns.id
-            |ORDER BY Ns.i NULLS FIRST;
+          """{
+            |  "collection": "Ns",
+            |  "pipeline": [
+            |    {
+            |      "$match": {
+            |        "i": {
+            |          "$ne": null
+            |        }
+            |      }
+            |    },
+            |    {
+            |      "$group": {
+            |        "_id": {
+            |          "i": "$i",
+            |          "refs_": {
+            |            "$cond": [
+            |              {
+            |                "$ifNull": [
+            |                  "$refs",
+            |                  false
+            |                ]
+            |              },
+            |              true,
+            |              false
+            |            ]
+            |          }
+            |        },
+            |        "refs": {
+            |          "$addToSet": "$refs"
+            |        }
+            |      }
+            |    },
+            |    {
+            |      "$addFields": {
+            |        "i": "$_id.i",
+            |        "refs": {
+            |          "$reduce": {
+            |            "input": "$refs",
+            |            "initialValue": [],
+            |            "in": {
+            |              "$setUnion": [
+            |                "$$value",
+            |                "$$this"
+            |              ]
+            |            }
+            |          }
+            |        }
+            |      }
+            |    },
+            |    {
+            |      "$project": {
+            |        "_id": 0,
+            |        "i": 1,
+            |        "refs": 1
+            |      }
+            |    },
+            |    {
+            |      "$sort": {
+            |        "i": 1
+            |      }
+            |    }
+            |  ]
+            |}
             |""".stripMargin,
           true // debug
         ).map(_ ==> List(
-          List(1, Set(null)), // Notice Set
-          List(2, Set(null)), // Notice Set
-          List(3, Set(ref1, ref2))
+          List(Set(), 1),
+          List(Set(), 2),
+          List(Set(ref1, ref2), 3),
+        ))
+      } yield ()
+    }
+
+    "Ref" - refs { implicit conn =>
+      import molecule.coreTests.dataModels.core.dsl.Refs._
+      for {
+        _ <- A.i.B.i.s.insert(1, 2, "a").transact
+
+        _ <- A.i.B.i.s.query.i.get.map(_ ==> List((1, 2, "a")))
+
+        _ <- rawQuery(
+          """{
+            |  "collection": "A",
+            |  "pipeline": [
+            |    {
+            |      "$match": {
+            |        "i": {
+            |          "$ne": null
+            |        }
+            |      }
+            |    },
+            |    {
+            |      "$lookup": {
+            |        "from": "B",
+            |        "localField": "b",
+            |        "foreignField": "_id",
+            |        "as": "b",
+            |        "pipeline": [
+            |          {
+            |            "$match": {
+            |              "$and": [
+            |                {
+            |                  "i": {
+            |                    "$ne": null
+            |                  }
+            |                },
+            |                {
+            |                  "s": {
+            |                    "$ne": null
+            |                  }
+            |                }
+            |              ]
+            |            }
+            |          }
+            |        ]
+            |      }
+            |    },
+            |    {
+            |      "$match": {
+            |        "b": {
+            |          "$ne": []
+            |        }
+            |      }
+            |    },
+            |    {
+            |      "$addFields": {
+            |        "b": {
+            |          "$first": "$b"
+            |        }
+            |      }
+            |    },
+            |    {
+            |      "$project": {
+            |        "_id": 0,
+            |        "i": 1,
+            |        "b": {
+            |          "i": 1,
+            |          "s": 1
+            |        }
+            |      }
+            |    }
+            |  ]
+            |}
+            |""".stripMargin,
+          true // debug
+        ).map(_ ==> List(
+          List(1, """{"i": 2, "s": "a"}"""),
+        ))
+      } yield ()
+    }
+
+    "Owned ref" - refs { implicit conn =>
+      import molecule.coreTests.dataModels.core.dsl.Refs._
+      for {
+        _ <- A.i.OwnB.i.s.insert(1, 2, "a").transact
+
+        _ <- A.i.OwnB.i.s.query.i.get.map(_ ==> List((1, 2, "a")))
+
+        _ <- rawQuery(
+          """{
+            |  "collection": "A",
+            |  "pipeline": [
+            |    {
+            |      "$match": {
+            |        "$and": [
+            |          {
+            |            "i": {
+            |              "$ne": null
+            |            }
+            |          },
+            |          {
+            |            "ownB.i": {
+            |              "$ne": null
+            |            }
+            |          },
+            |          {
+            |            "ownB.s": {
+            |              "$ne": null
+            |            }
+            |          }
+            |        ]
+            |      }
+            |    },
+            |    {
+            |      "$project": {
+            |        "_id": 0,
+            |        "i": 1,
+            |        "ownB": {
+            |          "i": 1,
+            |          "s": 1
+            |        }
+            |      }
+            |    }
+            |  ]
+            |}
+            |""".stripMargin,
+          true // debug
+        ).map(_ ==> List(
+          List(1, """{"i": 2, "s": "a"}"""),
         ))
       } yield ()
     }

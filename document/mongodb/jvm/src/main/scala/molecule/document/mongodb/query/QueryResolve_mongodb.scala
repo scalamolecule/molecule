@@ -29,10 +29,10 @@ abstract class QueryResolve_mongodb[Tpl](
     val (collectionName, pipeline) = m2q.getBsonQuery(altElements, optLimit, optOffset)
     val collection                 = conn.mongoDb.getCollection(collectionName, classOf[BsonDocument])
 
-    println("QUERY ----------------------------------------------")
+    //    println("QUERY ----------------------------------------------")
     //    elements.foreach(println)
     //    println("-------")
-    println(pipeline2json(pipeline, Some(collectionName)))
+    //    println(pipeline2json(pipeline, Some(collectionName)))
 
     collection.aggregate(pipeline)
   }
@@ -103,7 +103,7 @@ abstract class QueryResolve_mongodb[Tpl](
         // Add filter attribute after matching attribute so that the main
         // attribute is not suffixed in expressions, projection etc.
         List(a, filterAttr)
-      case other => List(other)
+      case other                                          => List(other)
     }
     if (!found) {
       throw ModelError(

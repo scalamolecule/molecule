@@ -31,14 +31,8 @@ object AdhocJVM_mongodb extends TestSuite_mongodb with AggrUtils {
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
 
-        _ <- A.i.B.i.insert(List(
-          (1, 1),
-          (2, 2),
-          (2, 2),
-          (2, 3),
-        )).transact
-
-        _ <- A.B.i(count).query.get.map(_ ==> List(4))
+        _ <- A.i.OwnBb.*(B.ii).insert(List((2, List(Set(3, 4))))).i.transact
+        _ <- A.i.OwnBb.*(B.ii).query.i.get.map(_ ==> List((2, List(Set(3, 4)))))
 
 
       } yield ()
@@ -58,86 +52,29 @@ object AdhocJVM_mongodb extends TestSuite_mongodb with AggrUtils {
     //
     //      } yield ()
     //    }
-
-
-    "validation" - validation { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Validation._
-
-      for {
-
-        id <- MandatoryAttr.name("Bob").age(42).hobbies(Set("golf", "stamps")).save.i.transact.map(_.id)
-//        id <- MandatoryAttr.name("Bob").age(42).hobbies(Set("golf")).save.transact.map(_.id)
-
-
-
-
-        // We can remove a value from a Set as long as it's not the last value
-        _ <- MandatoryAttr(id).hobbies.remove("stamps").update.transact
-
-
-//        _ <- MandatoryAttr.hobbies.query.get
-//
-//        _ <- rawQuery(
-//          """{
-//            |  "collection": "MandatoryAttr",
-//            |  "pipeline": [
-//            |    {
-//            |      "$match": {
-//            |        "$and": [
-//            |          {
-//            |            "hobbies": {
-//            |              "$ne": null
-//            |            }
-//            |          },
-//            |          {
-//            |            "hobbies": {
-//            |              "$ne": []
-//            |            }
-//            |          }
-//            |        ]
-//            |      }
-//            |    },
-//            |    {
-//            |      "$project": {
-//            |        "_id": 0,
-//            |        "hobbies": 1
-//            |      }
-//            |    }
-//            |  ]
-//            |}
-//            |""".stripMargin).map(println)
-
-
-        // Can't remove the last value of a mandatory attribute Set of values
-        _ <- MandatoryAttr(id).hobbies.remove("golf").update.transact
-          .map(_ ==> "Unexpected success").recover {
-            case ModelError(error) =>
-              error ==>
-                """Can't delete mandatory attributes (or remove last values of card-many attributes):
-                  |  MandatoryAttr.hobbies
-                  |""".stripMargin
-          }
-
-
-
-        //        List(r1, r2) <- RefB.i.insert(2, 3).transact.map(_.ids)
-        //
-        //        id <- MandatoryRefsB.i(1).refsB(Set(r1, r2)).save.transact.map(_.ids)
-        //
-        //        // Mandatory refs can be removed as long as some ref ids remain
-        //        _ <- MandatoryRefsB(id).refsB.remove(r2).update.transact
-        //
-        //        // Last mandatory ref can't be removed. This can prevent creating orphan relationships.
-        //        _ <- MandatoryRefsB(id).refsB.remove(r1).update.transact
-        //          .map(_ ==> "Unexpected success").recover {
-        //            case ModelError(error) =>
-        //              error ==>
-        //                """Can't delete mandatory attributes (or remove last values of card-many attributes):
-        //                  |  MandatoryRefsB.refsB
-        //                  |""".stripMargin
-        //          }
-
-      } yield ()
-    }
+    //
+    //
+    //    "validation" - validation { implicit conn =>
+    //      import molecule.coreTests.dataModels.core.dsl.Validation._
+    //
+    //      for {
+    //
+    //        id <- MandatoryAttr.name("Bob").age(42).hobbies(Set("golf", "stamps")).save.i.transact.map(_.id)
+    //
+    //        // We can remove a value from a Set as long as it's not the last value
+    //        _ <- MandatoryAttr(id).hobbies.remove("stamps").update.transact
+    //
+    //        // Can't remove the last value of a mandatory attribute Set of values
+    //        _ <- MandatoryAttr(id).hobbies.remove("golf").update.transact
+    //          .map(_ ==> "Unexpected success").recover {
+    //            case ModelError(error) =>
+    //              error ==>
+    //                """Can't delete mandatory attributes (or remove last values of card-many attributes):
+    //                  |  MandatoryAttr.hobbies
+    //                  |""".stripMargin
+    //          }
+    //
+    //      } yield ()
+    //    }
   }
 }

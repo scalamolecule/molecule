@@ -4,7 +4,7 @@ import com.mongodb.client.model.{Filters, Projections}
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.core.query.ResolveExpr
-import molecule.document.mongodb.query.mongoModel.{Branch, NestedRef}
+import molecule.document.mongodb.query.mongoModel.{Branch, NestedEmbed, NestedRef}
 import org.bson._
 import org.bson.conversions.Bson
 
@@ -204,7 +204,9 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
     b.base.matches.add(Filters.ne(b.dot + field, null.asInstanceOf[T]))
     // Exclude orphaned arrays too
     b.base.matches.add(Filters.ne(b.dot + field, new BsonArray()))
+    // (there's probably a simpler way here...)
     if (mandatory
+      && !b.isInstanceOf[NestedEmbed]
       && !(b.parent.isDefined && b.parent.get.isInstanceOf[NestedRef] || b.isInstanceOf[NestedRef])
     ) {
       topBranch.groupIdFields -= prefixedFieldPair

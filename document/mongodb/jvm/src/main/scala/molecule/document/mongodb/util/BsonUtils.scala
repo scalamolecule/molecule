@@ -23,16 +23,16 @@ trait BsonUtils extends DataType_JVM_mongodb {
     val bson = BsonDocument.parse(json)
 
     val firstKey = bson.getFirstKey
-    if (firstKey != "action") {
+    if (firstKey != "_action") {
       throw ModelError(
-        """Missing field "action": "<insert/update/delete>" as first field-value pair in transaction json.""""
+        """Missing field "_action": "<insert/update/delete>" as first field-value pair in transaction json.""""
       )
     }
 
     val data = new BsonDocument()
-    bson.get("action") match {
+    bson.get("_action") match {
       case null =>
-        throw ModelError("""Missing "action": "<insert/update/delete>" in raw transaction json.""")
+        throw ModelError("""Missing "_action": "<insert/update/delete>" in raw transaction json.""")
 
       case v: BsonString =>
         val action = v.getValue
@@ -42,14 +42,35 @@ trait BsonUtils extends DataType_JVM_mongodb {
         action match {
           case "insert" =>
             bson.forEach {
-              case ("action", value) => data.append("action", value) // leave as-is
-              case (ns, rawRows)     =>
+              case ("_action", value)             => data.append("_action", value) // leave as-is
+              case ("_selfJoins" | "_refIdss", _) => () // ignore here
+              case (ns, rawRows)                  =>
                 val metaAttrs = nsMap.get(ns).fold(throw ModelError(s"Couldn't find namespace ´$ns´"))(_.attrs)
                 data.append(ns, castInsert(rawRows.asArray, metaAttrs))
             }
 
-          case "update" => ???
-          case "delete" => ???
+          case "update" =>
+            bson.forEach {
+              case ("_action", value)             => data.append("_action", value) // leave as-is
+              case ("_selfJoins" | "_refIdss", _) => () // ignore here
+              case (ns, rawRows)                  =>
+                // (re-use castInsert)
+                val rows = new BsonArray()
+                rows.add(rawRows.asDocument())
+                val metaAttrs = nsMap.get(ns).fold(throw ModelError(s"Couldn't find namespace ´$ns´"))(_.attrs)
+                data.append(ns, castInsert(rows, metaAttrs).iterator().next)
+            }
+          case "delete" =>
+            bson.forEach {
+              case ("_action", value) => data.append("_action", value) // leave as-is
+              case ("_ids", value)    => data.append("_ids", value) // leave as-is
+              case (ns, rawRows)      =>
+                // (re-use castInsert)
+                val rows = new BsonArray()
+                rows.add(rawRows.asDocument())
+                val metaAttrs = nsMap.get(ns).fold(throw ModelError(s"Couldn't find namespace ´$ns´"))(_.attrs)
+                data.append(ns, castInsert(rows, metaAttrs).iterator().next)
+            }
         }
 
       case other => throw ModelError("Action can only be: insert, update or delete. Found: " + other)
@@ -59,9 +80,7 @@ trait BsonUtils extends DataType_JVM_mongodb {
 
   private def castInsert(rawRows: BsonArray, metaAttrs: Seq[MetaAttr]): BsonArray = {
     val casts: Map[String, BsonValue => BsonValue] = metaAttrs.collect {
-      //      case MetaAttr(attr, CardOne, "ID", Some(_), options, _, _, _, _, _) if !options.contains("owner") =>
-      case MetaAttr(attr, CardOne, "ID", Some(_), options, _, _, _, _, _) if options.contains("owner") =>
-        attr -> ((v: BsonValue) => v.asDocument)
+      case MetaAttr(attr, CardOne, "ID", Some(_), options, _, _, _, _, _) if options.contains("owner") => attr -> ((v: BsonValue) => v.asDocument)
 
       case MetaAttr(attr, CardOne, "ID", _, _, _, _, _, _, _)             => attr -> ((v: BsonValue) => v.asString)
       case MetaAttr(attr, CardOne, "String", _, _, _, _, _, _, _)         => attr -> ((v: BsonValue) => v.asString)
@@ -136,18 +155,6 @@ trait BsonUtils extends DataType_JVM_mongodb {
     }
     rows
   }
-
-
-  //  def data2json(data: Data): String = {
-  //    val (collectionName, documents) = data
-  //
-  //    val bson = new BsonDocument()
-  //    bson.put("collection", new BsonString(collectionName))
-  //    val array = new BsonArray(documents)
-  //    bson.put("data", array)
-  //
-  //    bson.toJson(pretty)
-  //  }
 
   def pipeline2json(pipeline: util.ArrayList[Bson], optCol: Option[String] = None): String = {
     val doc = new BsonDocument()
@@ -235,16 +242,8 @@ trait BsonUtils extends DataType_JVM_mongodb {
   def caster(metaNs: Option[MetaNs]): (String, BsonValue) => Any = {
     val casts = metaNs.fold(Map.empty[String, BsonValue => Any]) { metaNs =>
       metaNs.attrs.collect {
-        case MetaAttr(attr, CardOne, "ID", refNs, options, _, _, _, _, _)   =>
+        case MetaAttr(attr, CardOne, "ID", refNs, _, _, _, _, _, _)         =>
           if (refNs.isDefined) {
-
-//            if (options.contains("owner")) {
-//              // Embedded output
-//              attr -> ((v: BsonValue) => v.asDocument.toString)
-//            } else {
-//              // Referenced document
-//              attr -> ((v: BsonValue) => v.asArray.toString)
-//            }
             // Always embedded output
             attr -> ((v: BsonValue) => {
               if (v.isDocument)
@@ -278,14 +277,7 @@ trait BsonUtils extends DataType_JVM_mongodb {
         case MetaAttr(attr, CardOne, "Short", _, _, _, _, _, _, _)          => attr -> ((v: BsonValue) => castAnyShort(v))
         case MetaAttr(attr, CardOne, "Char", _, _, _, _, _, _, _)           => attr -> ((v: BsonValue) => castAnyChar(v))
 
-        case MetaAttr(attr, CardSet, "ID", _, _, _, _, _, _, _)             => attr -> {
-          var set = Set.empty[String]
-          (v: BsonValue) => {
-            //            v.asArray.getValues.forEach(v => set += v.asString.getValue)
-            //            v.asDocument().getValues.forEach(v => set += v.asString.getValue)
-            set
-          }
-        }
+        case MetaAttr(attr, CardSet, "ID", _, _, _, _, _, _, _)             => attr -> {var set = Set.empty[String]; (v: BsonValue) => {v.asArray.getValues.forEach(v => set += v.asObjectId().getValue.toHexString); set} }
         case MetaAttr(attr, CardSet, "String", _, _, _, _, _, _, _)         => attr -> {var set = Set.empty[String]; (v: BsonValue) => {v.asArray.getValues.forEach(v => set += v.asString.getValue); set} }
         case MetaAttr(attr, CardSet, "Int", _, _, _, _, _, _, _)            => attr -> {var set = Set.empty[Int]; (v: BsonValue) => {v.asArray.getValues.forEach(v => set += v.asInt32.getValue); set} }
         case MetaAttr(attr, CardSet, "Long", _, _, _, _, _, _, _)           => attr -> {var set = Set.empty[Long]; (v: BsonValue) => {v.asArray.getValues.forEach(v => set += v.asInt64.getValue); set} }
@@ -310,23 +302,30 @@ trait BsonUtils extends DataType_JVM_mongodb {
         case MetaAttr(attr, CardSet, "Char", _, _, _, _, _, _, _)           => attr -> {var set = Set.empty[Char]; (v: BsonValue) => {v.asArray.getValues.forEach(v => set += v.asString.getValue.charAt(0)); set} }
       }.toMap
     }
-    def genericType(bson: BsonValue): Any = bson match {
-      case v: BsonObjectId   => v.getValue
-      case v: BsonString     => v.getValue
-      case v: BsonInt32      => v.asInt32.getValue
-      case v: BsonInt64      => v.asInt64.getValue
-      case v: BsonDouble     => v.asDouble.getValue
-      case v: BsonBoolean    => v.asBoolean.getValue
-      case v: BsonDecimal128 => BigDecimal(v.asDecimal128.getValue.bigDecimalValue)
-      case v: BsonDateTime   => new Date(v.asDateTime.getValue)
-      case v: BsonDocument   => v.toJson // we could recurse entire data model...
-      case v: BsonArray      =>
-        var set = Set.empty[Any]
-        v.getValues.forEach(v => set += genericType(v))
-        set
-      case v                 => v
+    def genericType(bson: BsonValue): Any = {
+      bson match {
+        case v: BsonObjectId   => v.getValue
+        case v: BsonString     => v.getValue
+        case v: BsonInt32      => v.asInt32.getValue
+        case v: BsonInt64      => v.asInt64.getValue
+        case v: BsonDouble     => v.asDouble.getValue
+        case v: BsonBoolean    => v.asBoolean.getValue
+        case v: BsonDecimal128 => BigDecimal(v.asDecimal128.getValue.bigDecimalValue)
+        case v: BsonDateTime   => new Date(v.asDateTime.getValue)
+        case v: BsonDocument   => v.toJson // we could recurse entire data model...
+        case v: BsonArray      =>
+          var set = Set.empty[Any]
+          v.getValues.forEach(v => set += genericType(v))
+          set
+        case v                 => v
+      }
     }
 
-    (field: String, value: BsonValue) => casts.get(field).fold[Any](genericType(value))(cast => cast(value))
+    (field: String, value: BsonValue) =>
+      casts.get(field).fold[Any](
+        genericType(value)
+      )(cast =>
+        cast(value)
+      )
   }
 }

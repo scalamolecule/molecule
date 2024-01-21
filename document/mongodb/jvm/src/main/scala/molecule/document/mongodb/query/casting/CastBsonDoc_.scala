@@ -2,7 +2,6 @@
 package molecule.document.mongodb.query.casting
 
 import molecule.base.util.BaseHelpers
-import molecule.document.mongodb.sync.pretty
 import org.bson._
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
@@ -29,10 +28,8 @@ trait CastBsonDoc_ extends BaseHelpers {
           // Traverse to sub document
           val subDoc = refAttrPath.foldLeft(outerDoc) {
             case (curDoc, refAttr) =>
-              //              println(indent + s"  A  $curDoc   $refAttr  ${curDoc.get(refAttr)}")
               curDoc.get(refAttr).asDocument()
           }
-          //          println(indent + s"  B  $subDoc")
           fieldCast(subDoc)
         }
       }
@@ -53,22 +50,15 @@ trait CastBsonDoc_ extends BaseHelpers {
     (outerDoc: BsonDocument) => {
       level += 1
       val nestedRows = ListBuffer.empty[Any]
-      //      println(indent + s"N1  $lastAttrPath")
-      //      println(indent + s"N2  $outerDoc   $nestedRefAttr")
-
-      val doc = lastAttrPath match {
+      val doc        = lastAttrPath match {
         case Nil => outerDoc
         case _   => lastAttrPath.foldLeft(outerDoc) {
           case (curDoc, refAttr) =>
-            //                println(indent + s"  NESTED SUB  $curDoc   $refAttr  ${curDoc.get(refAttr)}")
             curDoc.get(refAttr).asDocument()
         }
       }
-      //      println(indent + s"N3  $doc    $refAttr")
-      //      println(indent + s"N3  $doc")
       curLevelDocs.clear()
       doc.get(nestedRefAttr).asArray().forEach { nestedRow =>
-        //        println(indent + s"N4  nestedRow: $nestedRow")
         nestedRows += castNestedDocument(nestedRow.asDocument())
       }
       nestedRows.toList

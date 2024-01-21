@@ -12,7 +12,7 @@ import molecule.core.util.{JavaConversions, ModelUtils}
 import molecule.document.mongodb.transaction.{Base_JVM_mongodb, DataType_JVM_mongodb}
 import molecule.document.mongodb.util.BsonUtils
 import org.bson.conversions.Bson
-import org.bson.{BsonArray, BsonDocument, BsonObjectId, BsonString}
+import org.bson.{BsonArray, BsonDocument, BsonNull, BsonObjectId, BsonString}
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -36,9 +36,9 @@ case class MongoConn_JVM(
   }
 
   override def transact_sync(data: Data): TxReport = {
-    println("TRANSACT ----------------------------------------")
-    println(data.toJson(pretty))
-    println("")
+    //    println("TRANSACT ----------------------------------------")
+    //    println(data.toJson(pretty))
+    //    println("")
     data.get("_action").asString.getValue match {
       case "insert" => data.size match {
         case 2 => insertEmbedded(data)
@@ -51,6 +51,12 @@ case class MongoConn_JVM(
         } else TxReport(Nil)
       case "delete" => data.size match {
         case 3 => delete(data)
+        case 2 =>
+          // Add empty dummy _ids (for `rawDelete` not needing to supply ids)
+          val dummyIds = new BsonArray()
+          dummyIds.add(new BsonObjectId())
+          data.append("_ids", dummyIds)
+          delete(data)
         case n => throw ModelError(s"Unexpectedly found $n key-value pairs in delete bson:\n" + data)
       }
       case other    => throw ModelError("Missing or unexpected action: " + other)
@@ -195,22 +201,5 @@ case class MongoConn_JVM(
       }
     }
     TxReport(deletedIds)
-  }
-
-
-  //  private def debugDocs(action: String, documents: util.List[BsonDocument]): Unit = {
-  private def debugDocs(action: String, document: BsonDocument): Unit = {
-    //    val pretty: JsonWriterSettings = JsonWriterSettings.builder().indent(true).build()
-    //    document.entrySet().forEach(pair => println(d.toBsonDocument.toJson(pretty)))
-    //    documents.forEach(d => println(d.toBsonDocument.toJson(pretty)))
-    println(action + " ----------------------------------------")
-    println(document.toJson(pretty))
-    println("")
-  }
-  private def debugFilter(action: String, filter: Bson): Unit = {
-    println(action + " ----------------------------------------")
-    //    val pretty: JsonWriterSettings = JsonWriterSettings.builder().indent(true).build()
-    println(filter.toBsonDocument.toJson(pretty))
-    println("")
   }
 }

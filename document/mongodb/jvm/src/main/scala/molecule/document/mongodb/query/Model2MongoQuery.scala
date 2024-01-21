@@ -12,8 +12,6 @@ import molecule.document.mongodb.util.BsonUtils
 import org.bson._
 import org.bson.conversions.Bson
 import scala.annotation.tailrec
-import scala.collection.mutable
-import scala.collection.mutable.ListBuffer
 
 class Model2MongoQuery[Tpl](elements0: List[Element])
   extends Model2QueryBase
@@ -57,8 +55,6 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
     topStages.addAll(topBranch.getStages)
 
     pagination(topStages, optOffset, optLimit)
-
-//    println(topBranch)
 
     // Return elements with possible filter attribute resolutions
     (initialNs, topStages)

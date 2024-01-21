@@ -83,7 +83,7 @@ trait ZioApi extends CoreTestZioSpec with ApiZio { spi: SpiZio =>
         } yield
           assertTrue(a == List(1, 2, 3)) &&
             assertTrue(b == List(1, 2)) &&
-            assertTrue(c == (List(2, 3), 3, true)) &&
+            assertTrue(c == (List(2, 3), 3, false)) &&
             assertTrue(d == (List(2), 3, true))
       ).provide(types.orDie),
 

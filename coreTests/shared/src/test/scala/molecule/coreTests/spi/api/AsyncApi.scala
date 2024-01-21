@@ -80,7 +80,7 @@ trait AsyncApi extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- Ns.int.insert(1, 2, 3).transact
           _ <- Ns.int.a1.query.get.map(_ ==> List(1, 2, 3))
           _ <- Ns.int.a1.query.limit(2).get.map(_ ==> List(1, 2))
-          _ <- Ns.int.a1.query.offset(1).get.map(_ ==> (List(2, 3), 3, true))
+          _ <- Ns.int.a1.query.offset(1).get.map(_ ==> (List(2, 3), 3, false))
           _ <- Ns.int.a1.query.offset(1).limit(1).get.map(_ ==> (List(2), 3, true))
         } yield ()
       }

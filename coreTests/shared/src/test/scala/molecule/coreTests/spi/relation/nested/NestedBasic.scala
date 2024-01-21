@@ -32,5 +32,45 @@ trait NestedBasic extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         ))
       } yield ()
     }
+
+
+    "Nested" - {
+
+      "one" - refs { implicit conn =>
+        import molecule.coreTests.dataModels.core.dsl.Refs._
+        for {
+          _ <- A.i.Bb.*(B.i).insert(2, List(3, 4)).transact
+          _ <- A.i.Bb.*(B.i).query.get.map(_ ==> List((2, List(3, 4))))
+        } yield ()
+      }
+
+      "set" - refs { implicit conn =>
+        import molecule.coreTests.dataModels.core.dsl.Refs._
+        for {
+          _ <- A.i.Bb.*(B.ii).insert(List((2, List(Set(3, 4))))).transact
+          _ <- A.i.Bb.*(B.ii).query.get.map(_ ==> List((2, List(Set(3, 4)))))
+        } yield ()
+      }
+    }
+
+
+    "Nested owned" - {
+
+      "one" - refs { implicit conn =>
+        import molecule.coreTests.dataModels.core.dsl.Refs._
+        for {
+          _ <- A.i.OwnBb.*(B.i).insert(2, List(3, 4)).transact
+          _ <- A.i.OwnBb.*(B.i).query.get.map(_ ==> List((2, List(3, 4))))
+        } yield ()
+      }
+
+      "set" - refs { implicit conn =>
+        import molecule.coreTests.dataModels.core.dsl.Refs._
+        for {
+          _ <- A.i.OwnBb.*(B.ii).insert(List((2, List(Set(3, 4))))).transact
+          _ <- A.i.OwnBb.*(B.ii).query.get.map(_ ==> List((2, List(Set(3, 4)))))
+        } yield ()
+      }
+    }
   }
 }
