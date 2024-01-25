@@ -146,6 +146,27 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
     }
   }
 
+  private def expr[T](
+    uniqueField: String,
+    field: String,
+    op: Op,
+    sets: Seq[Set[T]],
+    res: ResSet[T],
+    mandatory: Boolean
+  ): Unit = {
+    val field1 = b.dot + field
+    op match {
+      case V         => attr(uniqueField, field, mandatory)
+      case Eq        => equal(field1, sets, res)
+      case Neq       => neq(uniqueField, field1, sets, res, mandatory)
+      case Has       => has(uniqueField, field1, sets, res, mandatory)
+      case HasNo     => hasNo(uniqueField, field1, sets, res, mandatory)
+      case NoValue   => noValue(field1)
+      case Fn(kw, n) => aggr(uniqueField, field1, kw, n, res)
+      case other     => unexpectedOp(other)
+    }
+  }
+
   private def opt[T](attr: Attr, optSets: Option[Seq[Set[T]]], res: ResSet[T]): Unit = {
     val field       = attr.attr
     val uniqueField = b.unique(field)
@@ -162,58 +183,21 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
     attr.op match {
       case V     => optAttr(uniqueField, field)
       case Eq    => optEqual(field1, optSets, res)
-      case Neq   => optNeq(field1, optSets, res)
-      case Has   => optHas(field1, optSets, res)
-      case HasNo => optHasNo(field1, optSets, res)
+      case Neq   => optNeq(uniqueField, field1, optSets, res)
+      case Has   => optHas(uniqueField, field1, optSets, res)
+      case HasNo => optHasNo(uniqueField, field1, optSets, res)
       case other => unexpectedOp(other)
     }
   }
 
-  private def expr[T](
-    uniqueField: String,
-    field: String,
-    op: Op,
-    sets: Seq[Set[T]],
-    res: ResSet[T],
-    mandatory: Boolean
-  ): Unit = {
-    val field1 = b.dot + field
-    op match {
-      case V         => attr(uniqueField, field, mandatory)
-      case Eq        => equal(field1, sets, res)
-      case Neq       => neq(field1, sets, res)
-      case Has       => has(field1, sets, res)
-      case HasNo     => hasNo(field1, sets, res)
-      case NoValue   => noValue(field1)
-      case Fn(kw, n) => aggr(uniqueField, field1, kw, n, res)
-      case other     => unexpectedOp(other)
-    }
-  }
 
-  private def noBooleanSetAggr[T](res: ResSet[T]): Unit = {
-    if (res.tpe == "Boolean")
-      throw ModelError("Aggregate functions not implemented for Sets of boolean values.")
-  }
-  private def noBooleanSetCounts(n: Int): Unit = {
-    if (n == -1)
-      throw ModelError("Aggregate functions not implemented for Sets of boolean values.")
-  }
+  // attr ----------------------------------------------------------------------
 
-
-  private def attr[T](uniqueField: String, field: String, mandatory: Boolean): Unit = {
-    b.base.matches.add(Filters.ne(b.dot + field, null.asInstanceOf[T]))
+  private def attr(uniqueField: String, field: String, mandatory: Boolean): Unit = {
+    b.base.matches.add(Filters.ne(b.dot + field, new BsonNull))
     // Exclude orphaned arrays too
     b.base.matches.add(Filters.ne(b.dot + field, new BsonArray()))
-    // (there's probably a simpler way here...)
-    if (mandatory
-      && !b.isInstanceOf[NestedEmbed]
-      && !(b.parent.isDefined && b.parent.get.isInstanceOf[NestedRef] || b.isInstanceOf[NestedRef])
-    ) {
-      topBranch.groupIdFields -= prefixedFieldPair
-      topBranch.groupExprs += (b.alias + uniqueField) ->
-        new BsonDocument("$addToSet", new BsonString("$" + b.path + field))
-      topBranch.addFields += (b.path + field) -> reduce("$" + b.alias + field)
-    }
+    coalesce(uniqueField, field, mandatory)
   }
 
   private def optAttr[T](uniqueField: String, field: String): Unit = {
@@ -241,12 +225,7 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
   }
 
 
-  private def filterSet[T](field: String, set: Set[T], res: ResSet[T]): Bson = {
-    Filters.and(
-      Filters.size(field, set.size),
-      Filters.all(field, set.map(res.v2bson).asJava)
-    )
-  }
+  // eq ------------------------------------------------------------------------
 
   private def equal[T](field: String, sets0: Seq[Set[T]], res: ResSet[T]): Unit = {
     def filter(set: Set[T]): Bson = filterSet(field, set, res)
@@ -258,18 +237,33 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
     }
   }
 
+  private def equal2(
+    field: String,
+    filterAttr0: (Int, List[String], Attr),
+    mandatory: Boolean
+  ): Unit = {
+    handleFilterExpr(field, "$eq", filterAttr0, mandatory)
+  }
 
   private def optEqual[T](
     field: String, optSets: Option[Seq[Set[T]]], res: ResSet[T]
   ): Unit = {
     optSets.fold[Unit] {
-      b.base.matches.add(Filters.eq(field, null.asInstanceOf[T]))
+      b.base.matches.add(Filters.eq(field, new BsonNull))
     } { sets =>
       equal(field, sets, res)
     }
   }
 
-  private def neq[T](field: String, sets0: Seq[Set[T]], res: ResSet[T]): Unit = {
+
+  // neq -----------------------------------------------------------------------
+
+  private def neq[T](
+    uniqueField: String, field: String, sets0: Seq[Set[T]], res: ResSet[T], mandatory: Boolean
+  ): Unit = {
+    b.base.matches.add(Filters.ne(b.dot + field, new BsonNull))
+    // Exclude orphaned arrays too
+    b.base.matches.add(Filters.ne(b.dot + field, new BsonArray()))
     def filter(set: Set[T]): Bson = filterSet(field, set, res)
     val sets = sets0.filterNot(_.isEmpty)
     sets.length match {
@@ -277,18 +271,31 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
       case 1 => b.base.matches.add(Filters.nor(filter(sets.head)))
       case _ => b.base.matches.add(Filters.nor(Filters.or(sets.map(filter).asJava)))
     }
+    coalesce(uniqueField, field, mandatory)
+  }
+
+  private def neq2(
+    field: String, filterAttr0: (Int, List[String], Attr), mandatory: Boolean
+  ): Unit = {
+    handleFilterExpr(field, "$ne", filterAttr0, mandatory)
   }
 
   private def optNeq[T](
-    field: String, optSets: Option[Seq[Set[T]]], res: ResSet[T]
+    uniqueField: String, field: String, optSets: Option[Seq[Set[T]]], res: ResSet[T]
   ): Unit = {
     if (optSets.isDefined && optSets.get.nonEmpty) {
-      neq(field, optSets.get, res)
+      neq(uniqueField, field, optSets.get, res, true)
     }
-    b.base.matches.add(Filters.ne(field, null.asInstanceOf[T]))
+    b.base.matches.add(Filters.ne(field, new BsonNull))
+    coalesce(uniqueField, field, true)
   }
 
-  private def has[T](field: String, sets0: Seq[Set[T]], res: ResSet[T]): Unit = {
+
+  // has -----------------------------------------------------------------------
+
+  private def has[T](
+    uniqueField: String, field: String, sets0: Seq[Set[T]], res: ResSet[T], mandatory: Boolean
+  ): Unit = {
     def containsSet(set: Set[T]): Bson = {
       Filters.all(field, set.map(v => res.v2bson(v)).asJava)
     }
@@ -304,21 +311,85 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
 
       case _ => b.base.matches.add(Filters.or(sets.map(set => containsSet(set)).asJava))
     }
+    coalesce(uniqueField, field, mandatory)
+  }
+
+  private def has2(
+    field: String, filterAttr0: (Int, List[String], Attr), mandatory: Boolean
+  ): Unit = {
+    val (dir, filterPath, filterAttr1) = filterAttr0
+    val filterAttr                     = filterAttr1.cleanAttr
+    val args                           = new BsonArray()
+    val cardOne                        = filterAttr1.isInstanceOf[AttrOne]
+    dir match {
+      case 0 =>
+        val b1 = b
+        val b2 = branchesByPath(filterPath)
+        val op = if (cardOne) {
+          args.add(new BsonString("$" + b2.path + filterAttr))
+          args.add(new BsonString("$" + b1.path + field))
+          "$in"
+        } else {
+          args.add(new BsonString("$" + b1.path + field))
+          args.add(new BsonString("$" + b2.path + filterAttr))
+          "$setIsSubset"
+        }
+        b.matches.add(Filters.eq("$expr", new BsonDocument(op, args)))
+
+      case -1 =>
+        val b1 = b
+        val b2 = branchesByPath(filterPath)
+        args.add(new BsonString("$" + b2.path + filterAttr))
+        args.add(new BsonString("$" + b1.path + field))
+        val op = if (cardOne) "$in" else "$setIsSubset"
+        // Exclude grouping of calling set attribute
+        topBranch.groupIdFields -= prefixedFieldPair
+        // Filter before coalescing (running addAggregationStages in FlatEmbed)
+        topBranch.preMatches.add(Filters.eq("$expr", new BsonDocument(op, args)))
+
+      case 1 =>
+        val b1        = b
+        val addFilter = (b2: Branch) => {
+          args.add(new BsonString("$" + b2.path + filterAttr))
+          args.add(new BsonString("$" + b1.path + field))
+          if (cardOne) {
+            topBranch.preMatches.add(
+              Filters.eq("$expr", new BsonDocument("$in", args))
+            )
+          } else {
+            if (mandatory) {
+              topBranch.groupIdFields -= prefixedFieldPair
+            }
+            topBranch.preMatches.add(
+              Filters.eq("$expr", new BsonDocument("$setIsSubset", args))
+            )
+          }
+        }
+        postFilters(filterPath :+ filterAttr) = addFilter
+    }
+
+    if (mandatory) coalesceSets(field)
   }
 
   private def optHas[T](
-    field: String,
-    optSets: Option[Seq[Set[T]]],
-    res: ResSet[T]
+    uniqueField: String, field: String, optSets: Option[Seq[Set[T]]], res: ResSet[T] //, mandatory: Boolean
   ): Unit = {
     optSets.fold[Unit] {
-      b.base.matches.add(Filters.eq(field, null.asInstanceOf[T]))
+      b.base.matches.add(Filters.eq(field, new BsonNull))
     } { sets =>
-      has(field, sets, res)
+      has(uniqueField, field, sets, res, false)
     }
   }
 
-  private def hasNo[T](field: String, sets: Seq[Set[T]], res: ResSet[T]): Unit = {
+
+  // hasNo ---------------------------------------------------------------------
+
+  private def hasNo[T](
+    uniqueField: String, field: String, sets: Seq[Set[T]], res: ResSet[T], mandatory: Boolean
+  ): Unit = {
+    b.base.matches.add(Filters.ne(b.dot + field, new BsonNull))
+    // Exclude orphaned arrays too
+    b.base.matches.add(Filters.ne(b.dot + field, new BsonArray()))
     def notContainsSet(set: Set[T]): Bson = Filters.nor(
       Filters.all(field, set.map(v => res.v2bson(v)).asJava)
     )
@@ -331,21 +402,87 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
 
       case _ => b.base.matches.add(Filters.and(sets.map(set => notContainsSet(set)).asJava))
     }
+    coalesce(uniqueField, field, mandatory)
   }
 
+  private def hasNo2(
+    field: String, filterAttr0: (Int, List[String], Attr), mandatory: Boolean
+  ): Unit = {
+    val (dir, filterPath, filterAttr1) = filterAttr0
+    val filterAttr                     = filterAttr1.cleanAttr
+    val fields                         = new BsonArray()
+    val cardOne                        = filterAttr1.isInstanceOf[AttrOne]
+    dir match {
+      case 0 =>
+        val b1 = b
+        val b2 = branchesByPath(filterPath)
+        if (cardOne) {
+          fields.add(new BsonString("$" + b2.path + filterAttr))
+          fields.add(new BsonString("$" + b1.path + field))
+          b.matches.add(Filters.eq("$expr",
+            new BsonDocument("$not", new BsonDocument("$in", fields))))
+        } else {
+          fields.add(new BsonString("$" + b1.path + field))
+          fields.add(new BsonString("$" + filterAttr))
+          val emptyArgs = new BsonArray()
+          emptyArgs.add(new BsonDocument("$setIntersection", fields))
+          emptyArgs.add(new BsonArray)
+          b.matches.add(Filters.eq("$expr", new BsonDocument("$eq", emptyArgs)))
+        }
+
+      case -1 =>
+        val b1 = b
+        val b2 = branchesByPath(filterPath)
+        if (cardOne) {
+          fields.add(new BsonString("$" + b2.path + filterAttr))
+          fields.add(new BsonString("$" + b1.path + field))
+          // Exclude grouping of calling set attribute
+          topBranch.groupIdFields -= prefixedFieldPair
+          topBranch.preMatches.add(Filters.eq("$expr",
+            new BsonDocument("$not", new BsonDocument("$in", fields))))
+        } else {
+          fields.add(new BsonString("$" + b1.path + field))
+          fields.add(new BsonString("$" + b2.path + filterAttr))
+          val emptyArgs = new BsonArray()
+          emptyArgs.add(new BsonDocument("$setIntersection", fields))
+          emptyArgs.add(new BsonArray)
+          topBranch.preMatches.add(Filters.eq("$expr", new BsonDocument("$eq", emptyArgs)))
+        }
+
+      case 1 =>
+        val b1        = b
+        val addFilter = (b2: Branch) => {
+          if (cardOne) {
+            fields.add(new BsonString("$" + b2.path + filterAttr))
+            fields.add(new BsonString("$" + b1.path + field))
+            topBranch.preMatches.add(Filters.eq("$expr",
+              new BsonDocument("$not", new BsonDocument("$in", fields))))
+          } else {
+            fields.add(new BsonString("$" + b1.path + field))
+            fields.add(new BsonString("$" + b2.path + filterAttr))
+            val emptyArgs = new BsonArray()
+            emptyArgs.add(new BsonDocument("$setIntersection", fields))
+            emptyArgs.add(new BsonArray)
+            topBranch.preMatches.add(Filters.eq("$expr", new BsonDocument("$eq", emptyArgs)))
+          }
+        }
+        postFilters(filterPath :+ filterAttr) = addFilter
+    }
+
+    if (mandatory) coalesceSets(field)
+  }
 
   private def optHasNo[T](
-    field: String,
-    optSets: Option[Seq[Set[T]]],
-    res: ResSet[T]
+    uniqueField: String, field: String, optSets: Option[Seq[Set[T]]], res: ResSet[T]
   ): Unit = {
     optSets.foreach { sets0 =>
       val sets = sets0.filterNot(_.isEmpty)
       if (sets.nonEmpty) {
-        hasNo(field, sets, res)
+        hasNo(uniqueField, field, sets, res, false)
       }
     }
-    b.base.matches.add(Filters.ne(field, null.asInstanceOf[T]))
+    b.base.matches.add(Filters.ne(field, new BsonNull))
+    coalesce(uniqueField, field, true)
   }
 
   private def noValue(field: String): Unit = {
@@ -354,26 +491,10 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
   }
 
 
-  private def reduce(field: String): BsonDocument = {
-    new BsonDocument("$reduce",
-      new BsonDocument()
-        .append("input", new BsonString(field))
-        .append("initialValue", new BsonArray())
-        .append("in", new BsonDocument("$setUnion", {
-          val params = new BsonArray()
-          params.add(new BsonString("$$value"))
-          params.add(new BsonString("$$this"))
-          params
-        })))
-  }
-
+  // aggregation ---------------------------------------------------------------
 
   private def aggr[T](
-    uniqueField: String,
-    field: String,
-    fn: String,
-    optN: Option[Int],
-    res: ResSet[T]
+    uniqueField: String, field: String, fn: String, optN: Option[Int], res: ResSet[T]
   ): Unit = {
     lazy val n           = optN.getOrElse(0)
     lazy val aliasField  = b.alias + uniqueField
@@ -384,7 +505,7 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
     fn match {
       case "distinct" =>
         noBooleanSetAggr(res)
-        b.base.matches.add(Filters.ne(b.dot + field, null.asInstanceOf[T]))
+        b.base.matches.add(Filters.ne(b.dot + field, new BsonNull))
         topBranch.groupExprs += aliasField ->
           new BsonDocument("$addToSet", new BsonString(pathField2))
         addField(uniqueField)
@@ -471,21 +592,7 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
   }
 
 
-  // Filter attributes ----------------------------------
-
-  private def equal2(
-    field: String,
-    filterAttr0: (Int, List[String], Attr),
-    mandatory: Boolean
-  ): Unit = {
-    handleFilterExpr(field, "$eq", filterAttr0, mandatory)
-  }
-
-  private def neq2(
-    field: String, filterAttr0: (Int, List[String], Attr), mandatory: Boolean
-  ): Unit = {
-    handleFilterExpr(field, "$ne", filterAttr0, mandatory)
-  }
+  // helpers -------------------------------------------------------------------
 
   private def handleFilterExpr(
     field: String, op: String, filterAttr0: (Int, List[String], Attr), mandatory: Boolean
@@ -523,130 +630,37 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
     if (mandatory) coalesceSets(field)
   }
 
-
-  private def has2(
-    field: String, filterAttr0: (Int, List[String], Attr), mandatory: Boolean
-  ): Unit = {
-    val (dir, filterPath, filterAttr1) = filterAttr0
-    val filterAttr                     = filterAttr1.cleanAttr
-    val args                           = new BsonArray()
-    val cardOne                        = filterAttr1.isInstanceOf[AttrOne]
-    dir match {
-      case 0 =>
-        val b1 = b
-        val b2 = branchesByPath(filterPath)
-        val op = if (cardOne) {
-          args.add(new BsonString("$" + b2.path + filterAttr))
-          args.add(new BsonString("$" + b1.path + field))
-          "$in"
-        } else {
-          args.add(new BsonString("$" + b1.path + field))
-          args.add(new BsonString("$" + b2.path + filterAttr))
-          "$setIsSubset"
-        }
-        b.matches.add(Filters.eq("$expr", new BsonDocument(op, args)))
-
-      case -1 =>
-        val b1 = b
-        val b2 = branchesByPath(filterPath)
-        args.add(new BsonString("$" + b2.path + filterAttr))
-        args.add(new BsonString("$" + b1.path + field))
-        val op = if (cardOne) "$in" else "$setIsSubset"
-        // Exclude grouping of calling set attribute
-        topBranch.groupIdFields -= prefixedFieldPair
-        // Filter before coalescing (running addAggregationStages in FlatEmbed)
-        topBranch.preMatches.add(Filters.eq("$expr", new BsonDocument(op, args)))
-
-      case 1 =>
-        val b1        = b
-        val addFilter = (b2: Branch) => {
-          args.add(new BsonString("$" + b2.path + filterAttr))
-          args.add(new BsonString("$" + b1.path + field))
-          if (cardOne) {
-            topBranch.preMatches.add(
-              Filters.eq("$expr", new BsonDocument("$in", args))
-            )
-          } else {
-            if (mandatory) {
-              topBranch.groupIdFields -= prefixedFieldPair
-            }
-            topBranch.preMatches.add(
-              Filters.eq("$expr", new BsonDocument("$setIsSubset", args))
-            )
-          }
-        }
-        postFilters(filterPath :+ filterAttr) = addFilter
-    }
-
-    if (mandatory) coalesceSets(field)
+  private def reduce(field: String): BsonDocument = {
+    new BsonDocument("$reduce",
+      new BsonDocument()
+        .append("input", new BsonString(field))
+        .append("initialValue", new BsonArray())
+        .append("in", new BsonDocument("$setUnion", {
+          val params = new BsonArray()
+          params.add(new BsonString("$$value"))
+          params.add(new BsonString("$$this"))
+          params
+        })))
   }
 
+  private def filterSet[T](field: String, set: Set[T], res: ResSet[T]): Bson = {
+    Filters.and(
+      Filters.size(field, set.size),
+      Filters.all(field, set.map(res.v2bson).asJava)
+    )
+  }
 
-  private def hasNo2(
-    field: String, filterAttr0: (Int, List[String], Attr), mandatory: Boolean
-  ): Unit = {
-    val (dir, filterPath, filterAttr1) = filterAttr0
-    val filterAttr                     = filterAttr1.cleanAttr
-    val fields                         = new BsonArray()
-    val cardOne                        = filterAttr1.isInstanceOf[AttrOne]
-    dir match {
-      case 0 =>
-        val b1 = b
-        val b2 = branchesByPath(filterPath)
-        if (cardOne) {
-          fields.add(new BsonString("$" + b2.path + filterAttr))
-          fields.add(new BsonString("$" + b1.path + field))
-          b.matches.add(Filters.eq("$expr",
-            new BsonDocument("$not", new BsonDocument("$in", fields))))
-        } else {
-          fields.add(new BsonString("$" + b1.path + field))
-          fields.add(new BsonString("$" + filterAttr))
-          val emptyArgs = new BsonArray()
-          emptyArgs.add(new BsonDocument("$setIntersection", fields))
-          emptyArgs.add(new BsonArray)
-          b.matches.add(Filters.eq("$expr", new BsonDocument("$eq", emptyArgs)))
-        }
-
-      case -1 =>
-        val b1 = b
-        val b2 = branchesByPath(filterPath)
-        if (cardOne) {
-          fields.add(new BsonString("$" + b2.path + filterAttr))
-          fields.add(new BsonString("$" + b1.path + field))
-          // Exclude grouping of calling set attribute
-          topBranch.groupIdFields -= prefixedFieldPair
-          topBranch.preMatches.add(Filters.eq("$expr",
-            new BsonDocument("$not", new BsonDocument("$in", fields))))
-        } else {
-          fields.add(new BsonString("$" + b1.path + field))
-          fields.add(new BsonString("$" + b2.path + filterAttr))
-          val emptyArgs = new BsonArray()
-          emptyArgs.add(new BsonDocument("$setIntersection", fields))
-          emptyArgs.add(new BsonArray)
-          topBranch.preMatches.add(Filters.eq("$expr", new BsonDocument("$eq", emptyArgs)))
-        }
-
-      case 1 =>
-        val b1        = b
-        val addFilter = (b2: Branch) => {
-          if (cardOne) {
-            fields.add(new BsonString("$" + b2.path + filterAttr))
-            fields.add(new BsonString("$" + b1.path + field))
-            topBranch.preMatches.add(Filters.eq("$expr",
-              new BsonDocument("$not", new BsonDocument("$in", fields))))
-          } else {
-            fields.add(new BsonString("$" + b1.path + field))
-            fields.add(new BsonString("$" + b2.path + filterAttr))
-            val emptyArgs = new BsonArray()
-            emptyArgs.add(new BsonDocument("$setIntersection", fields))
-            emptyArgs.add(new BsonArray)
-            topBranch.preMatches.add(Filters.eq("$expr", new BsonDocument("$eq", emptyArgs)))
-          }
-        }
-        postFilters(filterPath :+ filterAttr) = addFilter
+  private def coalesce(uniqueField: String, field: String, mandatory: Boolean): Unit = {
+    // (there's probably a simpler way here...)
+    if (mandatory
+      && !b.isInstanceOf[NestedEmbed]
+      && !(b.parent.isDefined && b.parent.get.isInstanceOf[NestedRef] || b.isInstanceOf[NestedRef])
+    ) {
+      topBranch.groupIdFields -= prefixedFieldPair
+      topBranch.groupExprs += (b.alias + uniqueField) ->
+        new BsonDocument("$addToSet", new BsonString("$" + b.path + field))
+      topBranch.addFields += (b.path + field) -> reduce("$" + b.alias + field)
     }
-
-    if (mandatory) coalesceSets(field)
   }
 
   private def coalesceSets(field: String) = {
@@ -654,5 +668,14 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
     topBranch.groupExprs += (b.alias + field) ->
       new BsonDocument("$addToSet", new BsonString("$" + b.path + field))
     topBranch.addFields += (b.path + field) -> reduce("$" + b.alias + field)
+  }
+
+  private def noBooleanSetAggr[T](res: ResSet[T]): Unit = {
+    if (res.tpe == "Boolean")
+      throw ModelError("Aggregate functions not implemented for Sets of boolean values.")
+  }
+  private def noBooleanSetCounts(n: Int): Unit = {
+    if (n == -1)
+      throw ModelError("Aggregate functions not implemented for Sets of boolean values.")
   }
 }

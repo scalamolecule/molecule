@@ -33,7 +33,7 @@ trait SqlQueryBase extends BaseHelpers with JavaConversions {
   final protected var distinct    = true
   final protected var from        = ""
   final protected val joins       = new ListBuffer[(String, String, String, String)]
-  final protected var tempTables  = List.empty[String]
+  final protected val tempTables  = ListBuffer.empty[String]
   final protected val notNull     = new ListBuffer[String]
   final protected val where       = new ListBuffer[(String, String)]
   final protected val groupBy     = new mutable.LinkedHashSet[String]

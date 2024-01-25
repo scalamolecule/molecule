@@ -109,23 +109,23 @@ trait SpiSync_postgres extends SpiSyncBase {
       try {
         val arrayN = rowsResultSet.getArray(n)
         if (arrayN == null) {
-          debug("  A  " + arrayN)
+          //          debug("  A  " + arrayN)
           row += null
         } else {
           val arrayRS = arrayN.getResultSet
           if (arrayRS.wasNull()) {
-            debug("  B  " + arrayRS)
+            //            debug("  B  " + arrayRS)
             row += null
           } else {
-            debug("  C  " + arrayRS)
+            //            debug("  C  " + arrayRS)
             arrayRS.next()
             val array2 = arrayRS.getArray(2)
             if (array2 == null) {
-              debug("  C1  null")
+              //              debug("  C1  null")
               row += null
             } else {
               val set = arrayRS.getArray(2).getArray.asInstanceOf[Array[_]].toSet
-              debug("  C2  " + set)
+              //              debug("  C2  " + set)
               row += set
             }
           }
@@ -135,17 +135,17 @@ trait SpiSync_postgres extends SpiSyncBase {
           if (e.getMessage.contains("No results were returned by the query")) {
             val arrayN = rowsResultSet.getArray(n)
             if (rowsResultSet.wasNull()) {
-              debug("  D  null")
+              //              debug("  D  null")
               row += null
             } else {
               val set = arrayN.getArray.asInstanceOf[Array[_]].toSet
               //              debug("@@@@@@@@@ " + set)
               //              debug("@@@@@@@@@ " + set.head.getClass)
-              debug("  E  " + set)
+              //              debug("  E  " + set)
               row += set
             }
           } else if (e.getMessage.contains("perhaps you need to call next")) {
-            debug("  F  null")
+            //            debug("  F  null")
             row += null
           } else {
             throw new Exception("Unexpected error from Postgres: " + e)
@@ -160,10 +160,10 @@ trait SpiSync_postgres extends SpiSyncBase {
       var n = 1
       row.clear()
       while (n <= columnsNumber) {
-        val col     = rsmd.getColumnName(n)
-        val sqlType = rsmd.getColumnTypeName(n)
+        val col               = rsmd.getColumnName(n)
+        val sqlType           = rsmd.getColumnTypeName(n)
         //        debug("TPE: " + sqlType)
-        val tpe         = sqlType match {
+        val tpe               = sqlType match {
           case "text"      => value(rowsResultSet.getString(n), "String/URI")
           case "int4"      => value(rowsResultSet.getInt(n), "Int")
           case "int8"      => value(rowsResultSet.getLong(n), "Long")

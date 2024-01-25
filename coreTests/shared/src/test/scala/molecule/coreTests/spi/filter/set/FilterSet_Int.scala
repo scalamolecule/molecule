@@ -37,12 +37,10 @@ trait FilterSet_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           // "Is exactly this AND that"
           _ <- Ns.i.a1.ints(Set(int1)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.ints(Set(int1, int2)).query.get.map(_ ==> List(a)) // include exact match
-          _ <- Ns.i.a1.ints(Set(int2, int1)).query.get.map(_ ==> List(a)) // include exact match
           _ <- Ns.i.a1.ints(Set(int1, int2, int3)).query.get.map(_ ==> List())
           // Same as
           _ <- Ns.i.a1.ints(Seq(Set(int1))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.ints(Seq(Set(int1, int2))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.ints(Seq(Set(int2, int1))).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.ints(Seq(Set(int1, int2, int3))).query.get.map(_ ==> List())
 
 
@@ -51,16 +49,16 @@ trait FilterSet_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           // "(exactly this AND that) OR (exactly this AND that)"
           _ <- Ns.i.a1.ints(Set(int1), Set(int2, int3)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.ints(Set(int1, int2), Set(int2, int3)).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.ints(Set(int2, int1), Set(int4, int3, int2)).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.ints(Set(int1, int2), Set(int2, int3, int4)).query.get.map(_ ==> List(a, b))
           // Same as
           _ <- Ns.i.a1.ints(Seq(Set(int1), Set(int2, int3))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.ints(Seq(Set(int1, int2), Set(int2, int3))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.ints(Seq(Set(int2, int1), Set(int4, int3, int2))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.ints(Seq(Set(int1, int2), Set(int2, int3, int4))).query.get.map(_ ==> List(a, b))
 
 
           // Empty Seq/Sets match nothing
           _ <- Ns.i.a1.ints(Set(int1, int2), Set.empty[Int]).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.ints(Set.empty[Int], Set(int2, int1)).query.get.map(_ ==> List(a))
+          _ <- Ns.i.a1.ints(Set.empty[Int], Set(int1, int2)).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.ints(Set.empty[Int], Set.empty[Int]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.ints(Set.empty[Int]).query.get.map(_ ==> List())
           _ <- Ns.i.a1.ints(Seq.empty[Set[Int]]).query.get.map(_ ==> List())
@@ -81,12 +79,11 @@ trait FilterSet_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           // "Not (exactly this AND that)"
           _ <- Ns.i.a1.ints.not(Set(int1)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.ints.not(Set(int1, int2)).query.get.map(_ ==> List(b)) // exclude exact match
-          _ <- Ns.i.a1.ints.not(Set(int2, int1)).query.get.map(_ ==> List(b)) // exclude exact match
           _ <- Ns.i.a1.ints.not(Set(int1, int2, int3)).query.get.map(_ ==> List(a, b))
           // Same as
           _ <- Ns.i.a1.ints.not(Seq(Set(int1))).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.ints.not(Seq(Set(int1, int2))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.ints.not(Seq(Set(int2, int1))).query.get.map(_ ==> List(b))
+          _ <- Ns.i.a1.ints.not(Seq(Set(int1, int2))).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.ints.not(Seq(Set(int1, int2, int3))).query.get.map(_ ==> List(a, b))
 
 
@@ -95,11 +92,11 @@ trait FilterSet_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           // "NEITHER (exactly this AND that) NOR (exactly this AND that)"
           _ <- Ns.i.a1.ints.not(Set(int1), Set(int2, int3)).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.ints.not(Set(int1, int2), Set(int2, int3)).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.ints.not(Set(int2, int1), Set(int4, int3, int2)).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.ints.not(Set(int1, int2), Set(int2, int3, int4)).query.get.map(_ ==> List())
           // Same as
           _ <- Ns.i.a1.ints.not(Seq(Set(int1), Set(int2, int3))).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.ints.not(Seq(Set(int1, int2), Set(int2, int3))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.ints.not(Seq(Set(int2, int1), Set(int4, int3, int2))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.ints.not(Seq(Set(int1, int2), Set(int2, int3, int4))).query.get.map(_ ==> List())
 
 
           // Empty Seq/Sets
@@ -277,6 +274,8 @@ trait FilterSet_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           )).transact
 
           _ <- Ns.i.a1.query.get.map(_ ==> List(0, 1, 2))
+
+          // ints not asserted for i = 0
           _ <- Ns.i.a1.ints_.query.get.map(_ ==> List(1, 2))
         } yield ()
       }
@@ -290,18 +289,19 @@ trait FilterSet_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             (2, Some(Set(int2, int3, int4))),
           )).transact
 
+          // Match non-asserted attribute (null)
+          _ <- Ns.i.a1.ints_().query.get.map(_ ==> List(0))
+
           // Exact Set matches
 
           // AND semantics
           // "Is exactly this AND that"
           _ <- Ns.i.a1.ints_(Set(int1)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.ints_(Set(int1, int2)).query.get.map(_ ==> List(1)) // include exact match
-          _ <- Ns.i.a1.ints_(Set(int2, int1)).query.get.map(_ ==> List(1)) // include exact match
           _ <- Ns.i.a1.ints_(Set(int1, int2, int3)).query.get.map(_ ==> List())
           // Same as
           _ <- Ns.i.a1.ints_(Seq(Set(int1))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.ints_(Seq(Set(int1, int2))).query.get.map(_ ==> List(1))
-          _ <- Ns.i.a1.ints_(Seq(Set(int2, int1))).query.get.map(_ ==> List(1))
           _ <- Ns.i.a1.ints_(Seq(Set(int1, int2, int3))).query.get.map(_ ==> List())
 
 
@@ -310,11 +310,11 @@ trait FilterSet_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           // "(exactly this AND that) OR (exactly this AND that)"
           _ <- Ns.i.a1.ints_(Set(int1), Set(int2, int3)).query.get.map(_ ==> List())
           _ <- Ns.i.a1.ints_(Set(int1, int2), Set(int2, int3)).query.get.map(_ ==> List(1))
-          _ <- Ns.i.a1.ints_(Set(int2, int1), Set(int4, int3, int2)).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.ints_(Set(int1, int2), Set(int2, int3, int4)).query.get.map(_ ==> List(1, 2))
           // Same as
           _ <- Ns.i.a1.ints_(Seq(Set(int1), Set(int2, int3))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.ints_(Seq(Set(int1, int2), Set(int2, int3))).query.get.map(_ ==> List(1))
-          _ <- Ns.i.a1.ints_(Seq(Set(int2, int1), Set(int4, int3, int2))).query.get.map(_ ==> List(1, 2))
+          _ <- Ns.i.a1.ints_(Seq(Set(int1, int2), Set(int2, int3, int4))).query.get.map(_ ==> List(1, 2))
 
 
           // Empty Seq/Sets match nothing
@@ -340,12 +340,10 @@ trait FilterSet_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           // "Not (exactly this AND that)"
           _ <- Ns.i.a1.ints_.not(Set(int1)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.ints_.not(Set(int1, int2)).query.get.map(_ ==> List(2)) // exclude exact match
-          _ <- Ns.i.a1.ints_.not(Set(int2, int1)).query.get.map(_ ==> List(2)) // exclude exact match
           _ <- Ns.i.a1.ints_.not(Set(int1, int2, int3)).query.get.map(_ ==> List(1, 2))
           // Same as
           _ <- Ns.i.a1.ints_.not(Seq(Set(int1))).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.ints_.not(Seq(Set(int1, int2))).query.get.map(_ ==> List(2))
-          _ <- Ns.i.a1.ints_.not(Seq(Set(int2, int1))).query.get.map(_ ==> List(2))
           _ <- Ns.i.a1.ints_.not(Seq(Set(int1, int2, int3))).query.get.map(_ ==> List(1, 2))
 
 
@@ -354,11 +352,11 @@ trait FilterSet_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           // "NEITHER (exactly this AND that) NOR (exactly this AND that)"
           _ <- Ns.i.a1.ints_.not(Set(int1), Set(int2, int3)).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.ints_.not(Set(int1, int2), Set(int2, int3)).query.get.map(_ ==> List(2))
-          _ <- Ns.i.a1.ints_.not(Set(int2, int1), Set(int4, int3, int2)).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.ints_.not(Set(int1, int2), Set(int2, int3, int4)).query.get.map(_ ==> List())
           // Same as
           _ <- Ns.i.a1.ints_.not(Seq(Set(int1), Set(int2, int3))).query.get.map(_ ==> List(1, 2))
           _ <- Ns.i.a1.ints_.not(Seq(Set(int1, int2), Set(int2, int3))).query.get.map(_ ==> List(2))
-          _ <- Ns.i.a1.ints_.not(Seq(Set(int2, int1), Set(int4, int3, int2))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.ints_.not(Seq(Set(int1, int2), Set(int2, int3, int4))).query.get.map(_ ==> List())
 
 
           // Empty Seq/Sets
@@ -563,12 +561,10 @@ trait FilterSet_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           // "Is exactly this AND that"
           _ <- Ns.i.a1.ints_?(Some(Set(int1))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.ints_?(Some(Set(int1, int2))).query.get.map(_ ==> List(a)) // include exact match
-          _ <- Ns.i.a1.ints_?(Some(Set(int2, int1))).query.get.map(_ ==> List(a)) // include exact match
           _ <- Ns.i.a1.ints_?(Some(Set(int1, int2, int3))).query.get.map(_ ==> List())
           // Same as
           _ <- Ns.i.a1.ints_?(Some(Seq(Set(int1)))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.ints_?(Some(Seq(Set(int1, int2)))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.ints_?(Some(Seq(Set(int2, int1)))).query.get.map(_ ==> List(a))
           _ <- Ns.i.a1.ints_?(Some(Seq(Set(int1, int2, int3)))).query.get.map(_ ==> List())
 
 
@@ -577,7 +573,7 @@ trait FilterSet_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           // "(exactly this AND that) OR (exactly this AND that)"
           _ <- Ns.i.a1.ints_?(Some(Seq(Set(int1), Set(int2, int3)))).query.get.map(_ ==> List())
           _ <- Ns.i.a1.ints_?(Some(Seq(Set(int1, int2), Set(int2, int3)))).query.get.map(_ ==> List(a))
-          _ <- Ns.i.a1.ints_?(Some(Seq(Set(int2, int1), Set(int4, int3, int2)))).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.ints_?(Some(Seq(Set(int1, int2), Set(int2, int3, int4)))).query.get.map(_ ==> List(a, b))
 
 
           // Empty Seq/Sets match nothing
@@ -606,12 +602,10 @@ trait FilterSet_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           // "Not (exactly this AND that)"
           _ <- Ns.i.a1.ints_?.not(Some(Set(int1))).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.ints_?.not(Some(Set(int1, int2))).query.get.map(_ ==> List(b)) // exclude exact match
-          _ <- Ns.i.a1.ints_?.not(Some(Set(int2, int1))).query.get.map(_ ==> List(b)) // exclude exact match
           _ <- Ns.i.a1.ints_?.not(Some(Set(int1, int2, int3))).query.get.map(_ ==> List(a, b))
           // Same as
           _ <- Ns.i.a1.ints_?.not(Some(Seq(Set(int1)))).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.ints_?.not(Some(Seq(Set(int1, int2)))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.ints_?.not(Some(Seq(Set(int2, int1)))).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.ints_?.not(Some(Seq(Set(int1, int2, int3)))).query.get.map(_ ==> List(a, b))
 
 
@@ -620,18 +614,16 @@ trait FilterSet_Int extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           // "NEITHER (exactly this AND that) NOR (exactly this AND that)"
           _ <- Ns.i.a1.ints_?.not(Some(Seq(Set(int1), Set(int2, int3)))).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.ints_?.not(Some(Seq(Set(int1, int2), Set(int2, int3)))).query.get.map(_ ==> List(b))
-          _ <- Ns.i.a1.ints_?.not(Some(Seq(Set(int2, int1), Set(int4, int3, int2)))).query.get.map(_ ==> List())
+          _ <- Ns.i.a1.ints_?.not(Some(Seq(Set(int1, int2), Set(int2, int3, int4)))).query.get.map(_ ==> List())
 
-
-          // Empty Seq/Sets
+          // Empty Sets are ignored
           _ <- Ns.i.a1.ints_?.not(Some(Seq(Set(int1, int2), Set.empty[Int]))).query.get.map(_ ==> List(b))
           _ <- Ns.i.a1.ints_?.not(Some(Set.empty[Int])).query.get.map(_ ==> List(a, b))
           _ <- Ns.i.a1.ints_?.not(Some(Seq.empty[Set[Int]])).query.get.map(_ ==> List(a, b))
 
-
-          // None matches non-asserted values
-          _ <- Ns.i.a1.ints_?(Option.empty[Set[Int]]).query.get.map(_ ==> List(c))
-          _ <- Ns.i.a1.ints_?(Option.empty[Seq[Set[Int]]]).query.get.map(_ ==> List(c))
+          // Negation of None matches all asserted
+          _ <- Ns.i.a1.ints_?.not(Option.empty[Set[Int]]).query.get.map(_ ==> List(a, b))
+          _ <- Ns.i.a1.ints_?.not(Option.empty[Seq[Set[Int]]]).query.get.map(_ ==> List(a, b))
         } yield ()
       }
 

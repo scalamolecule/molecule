@@ -1,7 +1,9 @@
 package molecule.datalog.datomic
 
+import datomic.{Peer, Util}
 import molecule.base.error.ModelError
 import molecule.core.util.Executor._
+import molecule.coreTests.dataModels.core.dsl.Refs.A
 import molecule.datalog.datomic.async._
 import molecule.datalog.datomic.setup.TestSuite_datomic
 import utest._
@@ -10,19 +12,134 @@ import scala.language.implicitConversions
 
 object AdhocJVM_datomic extends TestSuite_datomic {
 
+  implicit val tolerant = tolerantIntEquality(toleranceInt)
+
+
   override lazy val tests = Tests {
 
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
+      val a = (1, Some(Set(int1, int2)))
+      val b = (2, Some(Set(int2, int3, int4)))
+      val c = (3, None)
       for {
+        _ <- Ns.i.ints_?.insert(a, b, c).transact
+
+        _ <- Ns.i.a1.ints_?.query.get.map(_ ==> List(a, b, c))
+
+
+
         //        _ <- Ns.i(42).save.transact
         //        _ <- Ns.i.query.get.map(_ ==> List(42))
 
-        _ <- Ns.int.insert(1, 2, 3).transact
-        _ <- Ns.int.a1.query.get.map(_ ==> List(1, 2, 3))
-        _ <- Ns.int.a1.query.limit(2).get.map(_ ==> List(1, 2))
-        _ <- Ns.int.a1.query.offset(1).get.map(_ ==> (List(2, 3), 3, false))
-        _ <- Ns.int.a1.query.offset(1).limit(1).get.map(_ ==> (List(2), 3, true))
+        //        _ <- Ns.i.ints.insert(List(
+        //          (1, Set(int1, int2)),
+        //          (2, Set(int2, int3)),
+        //          (2, Set(int3, int4)),
+        //          (2, Set(int3, int4)),
+        //        )).transact
+        //
+        //        // Sum of unique values (Set semantics)
+        //
+        //        _ <- Ns.ints(sum).query.get.map(_.head.head ==~ int1 + int2 + int3 + int4)
+        //
+        //        _ <- Ns.i.ints(sum).query.get.map(_.map {
+        //          case (1, setWithSum) => setWithSum.head ==~ int1 + int2
+        //          case (2, setWithSum) => setWithSum.head ==~ int2 + int3 + int4
+        //        })
+
+
+
+        _ <- Ns.i.ii.ints.insert(List(
+          (0, Set(int1, int2), Set(int1, int2)),
+          //          (2, Set(int2, int3), Set(int2, int3)),
+          //          (2, Set(int3, int4), Set(int3, int4)),
+          //          (2, Set(int3, int4), Set(int3, int4)),
+        )).i.transact
+
+        // Sum of unique values (Set semantics)
+
+        //        _ <- Ns.ints(sum).query.get.map(_.head.head ==~ int1 + int2 + int3 + int4)
+
+        //        _ <- Ns.i.ii.ints.query.i.get.map(println(_))
+        //        _ <- Ns.i.ii.ints(sum).query.i.get.map(println(_))
+        //
+        //        _ <- Ns.i.ints(sum).query.get.map(_.map {
+        //          case (1, setWithSum) => setWithSum.head ==~ int1 + int2
+        //          case (2, setWithSum) => setWithSum.head ==~ int2 + int3 + int4
+        //        })
+
+
+        //        _ <- Ns.i.ii.ints.insert(List((1, Set(1, 2), Set(1, 2)))).transact
+        //        //        _ <- Ns.i.ii.longs.insert(List((1, Set(1, 2), Set(1L, 2L)))).transact
+        //
+        //        //        _ <- A.i.B.ii.C.ii.query.get.map(println(_))
+        //
+        //        //        _ <- Ns.i.ii(sum).query.get.map(println(_))
+        ////        _ <- Ns.i.ii(sum).ints(sum).query.i.get.map(println(_))
+        ////        _ <- Ns.i.i(sum).ints(sum).query.i.get.map(println(_))
+        //        //        _ <- Ns.i.ii(avg).ints(sum).query.get.map(println(_))
+        //
+        //
+        _ = {
+          println("-------")
+          Peer.q(
+            """[:find  ?b ?c ?d
+              | :where [?a :Ns/i ?b]
+              |        [?a :Ns/ii ?c]
+              |        [?a :Ns/ints ?d]]
+              |""".stripMargin, conn.db
+          ).forEach { r => println(r) }
+        }
+        _ = {
+          println("-------")
+          Peer.q(
+            """[:find  ?b ?c ?d
+              | :where [?a :Ns/i ?b]
+              |        [?a :Ns/ii ?c]
+              |        [?a :Ns/ints ?d]]
+              |""".stripMargin, conn.db
+          ).forEach { r => println(r) }
+        }
+        _ = {
+          println("-------")
+          Peer.q(
+            """[:find  ?b
+              |        (distinct ?c)
+              |        (distinct ?d)
+              | :where [?a :Ns/i ?b]
+              |        [?a :Ns/ii ?c]
+              |        [?a :Ns/ints ?d]]
+              |""".stripMargin, conn.db
+          ).forEach { r => println(r) }
+        }
+        _ = {
+          println("-------")
+          Peer.q(
+            """[:find  ?b
+              |        (distinct ?c)
+              |        (sum ?d)
+              | :where [?a :Ns/i ?b]
+              |        [?a :Ns/ii ?c]
+              |        [?a :Ns/ints ?d]]
+              |""".stripMargin, conn.db
+          ).forEach { r => println(r) }
+        }
+        _ = {
+          println("-------")
+          Peer.q(
+            """[:find  ?b
+              |        (sum ?c)
+              |        (sum ?d)
+              | :where [?a :Ns/i ?b]
+              |        [?a :Ns/ii ?c]
+              |        [?a :Ns/ints ?d]]
+              |""".stripMargin, conn.db
+          ).forEach { r => println(r) }
+        }
+
+
+        //        _ <- Ns.i.ii(sum).longs(sum).query.get.map(println(_))
 
       } yield ()
     }
@@ -32,13 +149,161 @@ object AdhocJVM_datomic extends TestSuite_datomic {
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
 
-        // Card one ref attr
-        List(_, e1) <- A.i.B.i.insert(1, 2).i.transact.map(_.ids)
-        _ <- A.i.b.query.i.get.map(_ ==> List((1, e1)))
 
-        //        // Card many ref attr (returned as Set)
-        //        List(_, e2) <- A.i.Bb.i.insert(1, 2).transact.map(_.ids)
-        //        _ <- A.i.bb.query.get.map(_ ==> List((1, Set(e2))))
+        _ <- A.i.ii.insert(
+          (1, Set(1, 2)),
+          (2, Set(2)),
+          (2, Set(7)),
+          (3, Set(3)),
+          (4, Set())
+        ).transact
+
+        _ <- A.i.a1.ii.query.get.map(_ ==> List(
+          (1, Set(1, 2)),
+          (2, Set(2, 7)), // 2 rows coalesced
+          (3, Set(3)),
+        ))
+
+        _ <- A.i.a1.ii(Set(1)).query.get.map(_ ==> List(
+          // Set(1, 2) != Set(1)
+        ))
+        _ <- A.i.a1.ii(Set(1, 2)).query.get.map(_ ==> List(
+          (1, Set(1, 2)),
+        ))
+
+        _ <- A.i.a1.ii.not(Set(1)).query.get.map(_ ==> List(
+          (1, Set(1, 2)),
+          (2, Set(2, 7)), // 2 rows coalesced
+          (3, Set(3)),
+        ))
+        _ <- A.i.a1.ii.not(Set(1, 2)).query.get.map(_ ==> List(
+          (2, Set(2, 7)), // 2 rows coalesced
+          (3, Set(3)),
+        ))
+
+        _ <- A.i.a1.ii.has(1).query.get.map(_ ==> List(
+          (1, Set(1, 2)),
+        ))
+        _ <- A.i.a1.ii.has(2).query.get.map(_ ==> List(
+          (1, Set(1, 2)),
+          (2, Set(2)),
+        ))
+        _ <- A.i.a1.ii.has(2, 7).query.get.map(_ ==> List(
+          (1, Set(1, 2)),
+          (2, Set(2, 7)),
+        ))
+        _ <- A.i.a1.ii.has(2, 3).query.get.map(_ ==> List(
+          (1, Set(1, 2)),
+          (2, Set(2)),
+          (3, Set(3)),
+        ))
+
+        _ <- A.i.a1.ii.hasNo(1).query.get.map(_ ==> List(
+          (2, Set(2, 7)), // 2 rows coalesced
+          (3, Set(3)),
+        ))
+        _ <- A.i.a1.ii.hasNo(2).query.get.map(_ ==> List(
+          (2, Set(7)),
+          (3, Set(3)),
+        ))
+        _ <- A.i.a1.ii.hasNo(3).query.get.map(_ ==> List(
+          (1, Set(1, 2)),
+          (2, Set(2, 7))
+        ))
+
+
+
+        _ <- A.i.a1.ii_.query.get.map(_ ==> List(1, 2, 3))
+
+        _ <- A.i.a1.ii_(Set(1)).query.get.map(_ ==> List())
+        _ <- A.i.a1.ii_(Set(1, 2)).query.get.map(_ ==> List(1))
+
+        _ <- A.i.a1.ii_.not(Set(1)).query.get.map(_ ==> List(1, 2, 3))
+        _ <- A.i.a1.ii_.not(Set(1, 2)).query.get.map(_ ==> List(2, 3))
+
+        _ <- A.i.a1.ii_.has(1).query.get.map(_ ==> List(1))
+        _ <- A.i.a1.ii_.has(2).query.get.map(_ ==> List(1, 2))
+        _ <- A.i.a1.ii_.has(2, 7).query.get.map(_ ==> List(1, 2))
+        _ <- A.i.a1.ii_.has(2, 3).query.get.map(_ ==> List(1, 2, 3))
+
+        _ <- A.i.a1.ii_.hasNo(1).query.get.map(_ ==> List(2, 3))
+        _ <- A.i.a1.ii_.hasNo(2).query.get.map(_ ==> List(2, 3))
+        _ <- A.i.a1.ii_.hasNo(3).query.get.map(_ ==> List(1, 2))
+
+
+
+        _ <- if (database == "Datomic") {
+          A.i.a1.ii_?.query.get.map(_ ==> List(
+            (1, Some(Set(1, 2))),
+            (2, Some(Set(2))),
+            (2, Some(Set(7))),
+            (3, Some(Set(3))),
+            (4, None)
+          ))
+        } else {
+          A.i.a1.ii_?.query.get.map(_ ==> List(
+            (1, Some(Set(1, 2))),
+            (2, Some(Set(2, 7))),
+            (3, Some(Set(3))),
+            (4, None)
+          ))
+        }
+
+        _ <- A.i.a1.ii_?(Some(Set(1))).query.get.map(_ ==> List(
+          // Set(1, 2) != Set(1)
+        ))
+        _ <- A.i.a1.ii_?(Some(Set(1, 2))).query.get.map(_ ==> List(
+          (1, Some(Set(1, 2))),
+        ))
+
+        _ <- A.i.a1.ii_?.not(Some(Set(1))).query.get.map(_ ==> List(
+          (1, Some(Set(1, 2))),
+          (2, Some(Set(2, 7))), // 2 rows coalesced
+          (3, Some(Set(3))),
+        ))
+        _ <- A.i.a1.ii_?.not(Some(Set(1, 2))).query.get.map(_ ==> List(
+          (2, Some(Set(2, 7))), // 2 rows coalesced
+          (3, Some(Set(3))),
+        ))
+
+        _ <- A.i.a1.ii_?.has(Some(1)).query.get.map(_ ==> List(
+          (1, Some(Set(1, 2))),
+        ))
+        _ <- A.i.a1.ii_?.has(Some(2)).query.get.map(_ ==> List(
+          (1, Some(Set(1, 2))),
+          (2, Some(Set(2))),
+        ))
+        // same as
+        _ <- A.i.a1.ii_?.has(Some(Seq(2))).query.get.map(_ ==> List(
+          (1, Some(Set(1, 2))),
+          (2, Some(Set(2))),
+        ))
+        // has 2 or 3
+        _ <- A.i.a1.ii_?.has(Some(Seq(2, 3))).query.get.map(_ ==> List(
+          (1, Some(Set(1, 2))),
+          (2, Some(Set(2))),
+          (3, Some(Set(3))),
+        ))
+        // has 2 and 3
+        _ <- A.i.a1.ii_?.has(Some(Set(2, 3))).query.get.map(_ ==> List(
+
+        ))
+        _ <- A.i.a1.ii_?.has(Some(Set(1, 2))).query.get.map(_ ==> List(
+          (1, Some(Set(1, 2))),
+        ))
+
+        _ <- A.i.a1.ii_?.hasNo(Some(1)).query.get.map(_ ==> List(
+          (2, Some(Set(2, 7))), // 2 rows coalesced
+          (3, Some(Set(3))),
+        ))
+        _ <- A.i.a1.ii_?.hasNo(Some(2)).query.get.map(_ ==> List(
+          (2, Some(Set(7))),
+          (3, Some(Set(3))),
+        ))
+        _ <- A.i.a1.ii_?.hasNo(Some(3)).query.get.map(_ ==> List(
+          (1, Some(Set(1, 2))),
+          (2, Some(Set(2, 7)))
+        ))
 
 
       } yield ()

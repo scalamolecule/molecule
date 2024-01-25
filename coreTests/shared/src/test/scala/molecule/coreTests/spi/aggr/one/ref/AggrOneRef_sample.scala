@@ -50,7 +50,7 @@ trait AggrOneRef_sample extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (1, 3, 3),
         )).transact
 
-        _ <- A.B.i(sample).C.i(sample).query.get.map{res =>
+        _ <- A.B.i(sample).C.i(sample).query.get.map { res =>
           all.contains(res.head._1) ==> true
           all.contains(res.head._2) ==> true
         }

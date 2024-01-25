@@ -3,7 +3,6 @@ package molecule.sql.core.query
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.core.query.ResolveExpr
-import molecule.core.util.AggrUtils
 import scala.reflect.ClassTag
 
 trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
@@ -96,7 +95,9 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
   }
 
 
-  protected def setMan[T: ClassTag](attr: Attr, tpe: String, args: Seq[Set[T]], res: ResSet[T]): Unit = {
+  protected def setMan[T: ClassTag](
+    attr: Attr, tpe: String, args: Seq[Set[T]], res: ResSet[T]
+  ): Unit = {
     val col = getCol(attr: Attr)
     select += col
     if (!isNestedOpt) {
@@ -106,9 +107,10 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
     attr.filterAttr.fold {
       if (filterAttrVars.contains(attr.name) && attr.op != V) {
         // Runtime check needed since we can't type infer it
-        throw ModelError(s"Cardinality-set filter attributes not allowed to do additional filtering. Found:\n  " + attr)
+        throw ModelError(s"Cardinality-set filter attributes not allowed to " +
+          s"do additional filtering. Found:\n  " + attr)
       }
-      setExpr(col, attr.op, args, res, "man")
+      setExpr(col, attr.op, args, res, true)
     } {
       case (dir, filterPath, filterAttr) => filterAttr match {
         case filterAttr: AttrOne => setExpr2(col, attr.op, filterAttr.name, true, tpe)
@@ -117,19 +119,47 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
     }
   }
 
-  protected def setTac[T: ClassTag](attr: Attr, tpe: String, args: Seq[Set[T]], res: ResSet[T]): Unit = {
+  protected def setTac[T: ClassTag](
+    attr: Attr, tpe: String, args: Seq[Set[T]], res: ResSet[T]
+  ): Unit = {
     val col = getCol(attr: Attr)
+    notNull += col
     attr.filterAttr.fold {
-      setExpr(col, attr.op, args, res, "tac")
+      setExpr(col, attr.op, args, res, false)
     } { case (dir, filterPath, filterAttr) =>
       filterAttr match {
         case filterAttr: AttrOne => setExpr2(col, attr.op, filterAttr.name, true, tpe)
         case filterAttr          => setExpr2(col, attr.op, filterAttr.name, false, tpe)
       }
     }
-    notNull += col
   }
 
+  protected def setExpr[T: ClassTag](
+    col: String, op: Op, sets: Seq[Set[T]], res: ResSet[T], mandatory: Boolean
+  ): Unit = {
+    op match {
+      case V         => setAttr(col, res, mandatory)
+      case Eq        => setEqual(col, sets, res)
+      case Neq       => setNeq(col, sets, res, mandatory)
+      case Has       => has(col, sets, res, res.one2sql, mandatory)
+      case HasNo     => hasNo(col, sets, res, res.one2sql, mandatory)
+      case NoValue   => setNoValue(col)
+      case Fn(kw, n) => setAggr(col, kw, n, res)
+      case other     => unexpectedOp(other)
+    }
+  }
+
+  protected def setExpr2(
+    col: String, op: Op, filterAttr: String, cardOne: Boolean, tpe: String
+  ): Unit = {
+    op match {
+      case Eq    => setEqual2(col, filterAttr)
+      case Neq   => setNeq2(col, filterAttr)
+      case Has   => has2(col, filterAttr, cardOne, tpe)
+      case HasNo => hasNo2(col, filterAttr, cardOne, tpe)
+      case other => unexpectedOp(other)
+    }
+  }
 
   protected def setOpt[T: ClassTag](
     attr: Attr,
@@ -142,56 +172,208 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
     groupByCols += col // if we later need to group by non-aggregated columns
     addCast(resOpt.sql2setOpt)
     attr.op match {
-      case V     => ()
+      case V     => setOptAttr(col, res)
       case Eq    => setOptEqual(col, optSets, res)
       case Neq   => setOptNeq(col, optSets, res)
-      case Has   => optHas(col, optSets, resOpt.one2sql)
-      case HasNo => optHasNo(col, optSets, resOpt.one2sql)
+      case Has   => optHas(col, optSets, res, resOpt.one2sql)
+      case HasNo => optHasNo(col, optSets, res, resOpt.one2sql)
       case other => unexpectedOp(other)
     }
   }
 
-  protected def setExpr[T: ClassTag](col: String, op: Op, sets: Seq[Set[T]], res: ResSet[T], mode: String): Unit = {
-    op match {
-      case V         => if (mode == "man") setAttr(col, res) else ()
-      case Eq        => setEqual(col, sets, res)
-      case Neq       => setNeq(col, sets, res)
-      case Has       => has(col, sets, res.one2sql)
-      case HasNo     => hasNo(col, sets, res.one2sql)
-      case NoValue   => setNoValue(col)
-      case Fn(kw, n) => setAggr(col, kw, n, res)
-      case other     => unexpectedOp(other)
+
+  // attr ----------------------------------------------------------------------
+
+  protected def setAttr[T: ClassTag](col: String, res: ResSet[T], mandatory: Boolean): Unit = {
+    if (mandatory) {
+      select -= col
+      select += s"ARRAY_AGG($col)"
+      having += "COUNT(*) > 0"
+      aggregate = true
+      replaceCast(res.nestedArray2coalescedSet)
     }
   }
 
-  protected def setExpr2(col: String, op: Op, filterAttr: String, cardOne: Boolean, tpe: String): Unit = {
-    op match {
-      case Eq    => setEqual2(col, filterAttr)
-      case Neq   => setNeq2(col, filterAttr)
-      case Has   => has2(col, filterAttr, cardOne, tpe)
-      case HasNo => hasNo2(col, filterAttr, cardOne, tpe)
-      case other => unexpectedOp(other)
-    }
-  }
-
-  protected def setAttr[T](col: String, res: ResSet[T]): Unit = {
+  protected def setOptAttr[T](col: String, res: ResSet[T]): Unit = {
     select -= col
+    groupByCols -= col
     select += s"ARRAY_AGG($col)"
-    having += "COUNT(*) > 0"
     aggregate = true
-    replaceCast(res.nestedArray2coalescedSet)
+    replaceCast(res.nestedArray2optCoalescedSet)
   }
 
-  protected def noBooleanSetAggr[T](res: ResSet[T]): Unit = {
-    if (res.tpe == "Boolean")
-      throw ModelError("Aggregate functions not implemented for Sets of boolean values.")
-  }
-  protected def noBooleanSetCounts(n: Int): Unit = {
-    if (n == -1)
-      throw ModelError("Aggregate functions not implemented for Sets of boolean values.")
+
+  // eq ------------------------------------------------------------------------
+
+  protected def setEqual[T](col: String, sets: Seq[Set[T]], res: ResSet[T]): Unit = {
+    val setsNonEmpty = sets.filterNot(_.isEmpty)
+    setsNonEmpty.length match {
+      case 0 => where += (("FALSE", ""))
+      case 1 => where += (("", matchSet(col, res.set2sqls(setsNonEmpty.head))))
+      case _ => where += (("", matchSets(col, setsNonEmpty, res.set2sqls)))
+    }
   }
 
-  protected def setAggr[T: ClassTag](col: String, fn: String, optN: Option[Int], res: ResSet[T]): Unit = {
+  protected def setOptEqual[T](
+    col: String, optSets: Option[Seq[Set[T]]], res: ResSet[T]
+  ): Unit = {
+    optSets.fold[Unit] {
+      where += ((col, s"IS NULL"))
+    } { sets =>
+      setEqual(col, sets, res)
+      replaceCast(res.nestedArray2optCoalescedSet)
+    }
+  }
+
+
+  // neq -----------------------------------------------------------------------
+
+  protected def setNeq[T](
+    col: String, sets: Seq[Set[T]], res: ResSet[T], mandatory: Boolean
+  ): Unit = {
+    if (mandatory) {
+      select -= col
+      groupByCols -= col
+      select += s"ARRAY_AGG($col)"
+      aggregate = true
+      replaceCast(res.nestedArray2coalescedSet)
+    }
+    val setsNonEmpty = sets.filterNot(_.isEmpty)
+    setsNonEmpty.length match {
+      case 0 => ()
+      case 1 => where += (("", "NOT " + matchSet(col, res.set2sqls(setsNonEmpty.head))))
+      case _ => where += (("", "NOT " + matchSets(col, setsNonEmpty, res.set2sqls)))
+    }
+  }
+
+  protected def setOptNeq[T](
+    col: String, optSets: Option[Seq[Set[T]]], res: ResSet[T]
+  ): Unit = {
+    optSets match {
+      case None =>
+        setOptAttr(col, res)
+
+      case Some(sets) =>
+        setNeq(col, sets, res, true)
+        replaceCast(res.nestedArray2optCoalescedSet)
+    }
+    // Only asserted values
+    notNull += col
+  }
+
+
+  // has -----------------------------------------------------------------------
+
+  protected def has[T: ClassTag](
+    col: String, sets: Seq[Set[T]], res: ResSet[T], one2sql: T => String, mandatory: Boolean
+  ): Unit = {
+    def contains(v: T): String = s"ARRAY_CONTAINS($col, ${one2sql(v)})"
+    def containsSet(set: Set[T]): String = set.map(contains).mkString("(", " AND\n   ", ")")
+    if (mandatory) {
+      select -= col
+      groupByCols -= col
+      select += s"ARRAY_AGG($col)"
+      aggregate = true
+      replaceCast(res.nestedArray2coalescedSet)
+    }
+    sets.length match {
+      case 0 => where += (("FALSE", ""))
+      case 1 =>
+        val set = sets.head
+        set.size match {
+          case 0 => where += (("FALSE", ""))
+          case 1 => where += (("", contains(set.head)))
+          case _ => where += (("", containsSet(set)))
+        }
+      case _ =>
+        val expr = sets
+          .filterNot(_.isEmpty)
+          .map(containsSet).mkString("(", " OR\n   ", ")")
+        where += (("", expr))
+    }
+  }
+
+  protected def optHas[T: ClassTag](
+    col: String,
+    optSets: Option[Seq[Set[T]]],
+    res: ResSet[T],
+    one2sql: T => String,
+  ): Unit = {
+    optSets.fold[Unit] {
+      where += ((col, s"IS NULL"))
+    } { sets =>
+      val setsWithValues = sets.filterNot(_.isEmpty)
+      if (setsWithValues.nonEmpty) {
+        has(col, sets, res, one2sql, true)
+        replaceCast(res.nestedArray2optCoalescedSet)
+      } else {
+        where += (("FALSE", ""))
+      }
+    }
+  }
+
+
+  // hasNo ---------------------------------------------------------------------
+
+  protected def hasNo[T](
+    col: String, sets: Seq[Set[T]], res: ResSet[T], one2sql: T => String, mandatory: Boolean
+  ): Unit = {
+    def notContains(v: T): String = s"NOT ARRAY_CONTAINS($col, ${one2sql(v)})"
+    def notContainsSet(set: Set[T]): String = set.map(notContains).mkString("(", " OR\n   ", ")")
+    if (mandatory) {
+      select -= col
+      groupByCols -= col
+      select += s"ARRAY_AGG($col)"
+      aggregate = true
+      replaceCast(res.nestedArray2coalescedSet)
+    }
+    sets.length match {
+      case 0 => ()
+      case 1 =>
+        val set = sets.head
+        set.size match {
+          case 0 => ()
+          case 1 => where += (("", notContains(set.head)))
+          case _ => where += (("", notContainsSet(set)))
+        }
+      case _ =>
+        val expr = sets
+          .filterNot(_.isEmpty)
+          .map(notContainsSet).mkString("(", " AND\n   ", ")")
+        where += (("", expr))
+    }
+  }
+
+  protected def optHasNo[T: ClassTag](
+    col: String,
+    optSets: Option[Seq[Set[T]]],
+    res: ResSet[T],
+    one2sql: T => String
+  ): Unit = {
+    optSets.fold[Unit] {
+      setOptAttr(col, res)
+    } { sets =>
+      hasNo(col, sets, res, one2sql, true)
+      replaceCast(res.nestedArray2optCoalescedSet)
+    }
+    // Only asserted values
+    notNull += col
+  }
+
+
+  // no value -----------------------------------------------------------------
+
+  protected def setNoValue(col: String): Unit = {
+    notNull -= col
+    where += ((col, s"IS NULL"))
+  }
+
+
+  // aggregation ---------------------------------------------------------------
+
+  protected def setAggr[T: ClassTag](
+    col: String, fn: String, optN: Option[Int], res: ResSet[T]
+  ): Unit = {
     select -= col
     lazy val n = optN.getOrElse(0)
     fn match {
@@ -373,82 +555,20 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
     }
   }
 
-  protected def matchSet(col: String, set: Set[String]): String = {
-    set
-      .map(v => s"ARRAY_CONTAINS($col, $v)")
-      .mkString("(\n    ", " AND\n    ", s" AND\n    CARDINALITY($col) = ${set.size}\n  )")
-  }
 
-  protected def matchSets[T](col: String, sets: Seq[Set[T]], set2sqls: Set[T] => Set[String]): String = {
-    sets.map { set =>
-      set2sqls(set)
-        .map(v => s"ARRAY_CONTAINS($col, $v)")
-        .mkString("", " AND\n      ", s" AND\n      CARDINALITY($col) = " + set.size)
-    }.mkString("(\n    (\n      ", "\n    ) OR (\n      ", "\n    )\n  )")
-  }
-
-  protected def setEqual[T](col: String, sets: Seq[Set[T]], res: ResSet[T]): Unit = {
-    val setsNonEmpty = sets.filterNot(_.isEmpty)
-    setsNonEmpty.length match {
-      case 0 => where += (("FALSE", ""))
-      case 1 => where += (("", matchSet(col, res.set2sqls(setsNonEmpty.head))))
-      case _ => where += (("", matchSets(col, setsNonEmpty, res.set2sqls)))
-    }
-  }
+  // Filter attribute filters --------------------------------------------------
 
   protected def setEqual2(col: String, filterAttr: String): Unit = {
     where += ((col, "= " + filterAttr))
-  }
-
-  protected def setOptEqual[T](col: String, optSets: Option[Seq[Set[T]]], res: ResSet[T]): Unit = {
-    optSets.fold[Unit] {
-      where += ((col, s"IS NULL"))
-    } { sets =>
-      setEqual(col, sets, res)
-    }
-  }
-
-  protected def setNeq[T](col: String, sets: Seq[Set[T]], res: ResSet[T]): Unit = {
-    val setsNonEmpty = sets.filterNot(_.isEmpty)
-    setsNonEmpty.length match {
-      case 0 => ()
-      case 1 => where += (("", "NOT " + matchSet(col, res.set2sqls(setsNonEmpty.head))))
-      case _ => where += (("", "NOT " + matchSets(col, setsNonEmpty, res.set2sqls)))
-    }
   }
 
   protected def setNeq2(col: String, filterAttr: String): Unit = {
     where += ((col, "<> " + filterAttr))
   }
 
-  protected def setOptNeq[T](col: String, optSets: Option[Seq[Set[T]]], res: ResSet[T]): Unit = {
-    if (optSets.isDefined && optSets.get.nonEmpty) {
-      setNeq(col, optSets.get, res)
-    }
-    notNull += col
-  }
-
-  protected def has[T: ClassTag](col: String, sets: Seq[Set[T]], one2sql: T => String): Unit = {
-    def contains(v: T): String = s"ARRAY_CONTAINS($col, ${one2sql(v)})"
-    def containsSet(set: Set[T]): String = set.map(contains).mkString("(", " AND\n   ", ")")
-    sets.length match {
-      case 0 => where += (("FALSE", ""))
-      case 1 =>
-        val set = sets.head
-        set.size match {
-          case 0 => where += (("FALSE", ""))
-          case 1 => where += (("", contains(set.head)))
-          case _ => where += (("", containsSet(set)))
-        }
-      case _ =>
-        val expr = sets
-          .filterNot(_.isEmpty)
-          .map(containsSet).mkString("(", " OR\n   ", ")")
-        where += (("", expr))
-    }
-  }
-
-  protected def has2(col: String, filterAttr: String, cardOne: Boolean, tpe: String): Unit = {
+  protected def has2(
+    col: String, filterAttr: String, cardOne: Boolean, tpe: String
+  ): Unit = {
     if (cardOne) {
       where += (("", s"ARRAY_CONTAINS($col, $filterAttr)"))
     } else {
@@ -456,39 +576,9 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
     }
   }
 
-  protected def optHas[T: ClassTag](
-    col: String,
-    optSets: Option[Seq[Set[T]]],
-    one2sql: T => String
+  protected def hasNo2(
+    col: String, filterAttr: String, cardOne: Boolean, tpe: String
   ): Unit = {
-    optSets.fold[Unit] {
-      where += ((col, s"IS NULL"))
-    } { sets =>
-      has(col, sets, one2sql)
-    }
-  }
-
-  protected def hasNo[T](col: String, sets: Seq[Set[T]], one2sql: T => String): Unit = {
-    def notContains(v: T): String = s"NOT ARRAY_CONTAINS($col, ${one2sql(v)})"
-    def notContainsSet(set: Set[T]): String = set.map(notContains).mkString("(", " OR\n   ", ")")
-    sets.length match {
-      case 0 => ()
-      case 1 =>
-        val set = sets.head
-        set.size match {
-          case 0 => ()
-          case 1 => where += (("", notContains(set.head)))
-          case _ => where += (("", notContainsSet(set)))
-        }
-      case _ =>
-        val expr = sets
-          .filterNot(_.isEmpty)
-          .map(notContainsSet).mkString("(", " AND\n   ", ")")
-        where += (("", expr))
-    }
-  }
-
-  protected def hasNo2(col: String, filterAttr: String, cardOne: Boolean, tpe: String): Unit = {
     if (cardOne) {
       where += (("", s"NOT ARRAY_CONTAINS($col, $filterAttr)"))
     } else {
@@ -496,25 +586,31 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
     }
   }
 
-  protected def optHasNo[T](
-    col: String,
-    optSets: Option[Seq[Set[T]]],
-    one2sql: T => String
-  ): Unit = {
-    optSets.fold[Unit] {
-      where += ((col, s"IS NOT NULL"))
-    } { sets =>
-      val setsWithValues = sets.filterNot(_.isEmpty)
-      if (setsWithValues.nonEmpty) {
-        hasNo(col, sets.filterNot(_.isEmpty), one2sql)
-      } else {
-        where += ((col, s"IS NOT NULL"))
-      }
-    }
+
+  // helpers -------------------------------------------------------------------
+
+  protected def matchSet(col: String, set: Set[String]): String = {
+    set
+      .map(v => s"ARRAY_CONTAINS($col, $v)")
+      .mkString("(\n    ", " AND\n    ", s" AND\n    CARDINALITY($col) = ${set.size}\n  )")
   }
 
-  protected def setNoValue(col: String): Unit = {
-    notNull -= col
-    where += ((col, s"IS NULL"))
+  protected def matchSets[T](
+    col: String, sets: Seq[Set[T]], set2sqls: Set[T] => Set[String]
+  ): String = {
+    sets.map { set =>
+      set2sqls(set)
+        .map(v => s"ARRAY_CONTAINS($col, $v)")
+        .mkString("", " AND\n      ", s" AND\n      CARDINALITY($col) = " + set.size)
+    }.mkString("(\n    (\n      ", "\n    ) OR (\n      ", "\n    )\n  )")
+  }
+
+  protected def noBooleanSetAggr[T](res: ResSet[T]): Unit = {
+    if (res.tpe == "Boolean")
+      throw ModelError("Aggregate functions not implemented for Sets of boolean values.")
+  }
+  protected def noBooleanSetCounts(n: Int): Unit = {
+    if (n == -1)
+      throw ModelError("Aggregate functions not implemented for Sets of boolean values.")
   }
 }

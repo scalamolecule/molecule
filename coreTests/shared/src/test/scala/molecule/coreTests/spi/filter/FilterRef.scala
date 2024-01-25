@@ -56,9 +56,9 @@ trait FilterRef extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
         _ <- A.i_.B.ii.query.get.map(_ ==> List(Set(1, 2, 3)))
         _ <- A.i_.B.ii(Set(2)).query.get.map(_ ==> List(Set(2)))
-        _ <- A.i_.B.ii.not(Set(2)).query.get.map(_ ==> List(Set(1), Set(3)))
+        _ <- A.i_.B.ii.not(Set(2)).query.get.map(_ ==> List(Set(1,3)))
         _ <- A.i_.B.ii.has(2).query.get.map(_ ==> List(Set(2)))
-        _ <- A.i_.B.ii.hasNo(2).query.get.map(_ ==> List(Set(1), Set(3)))
+        _ <- A.i_.B.ii.hasNo(2).query.get.map(_ ==> List(Set(1,3)))
 
         _ <- A.i.a1.B.ii_.query.get.map(_            ==> List(1, 2, 3))
         _ <- A.i.a1.B.ii_(Set(2)).query.get.map(_    ==> List(2))

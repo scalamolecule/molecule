@@ -126,35 +126,13 @@ trait ResolveExprOne extends ResolveExpr { self: SqlQueryBase with LambdasOne =>
 
   protected def tac[T: ClassTag](attr: Attr, args: Seq[T], res: ResOne[T]): Unit = {
     val col = getCol(attr: Attr)
-    if (!isNestedOpt)
+    if (!isNestedOpt) {
       notNull += col
+    }
     attr.filterAttr.fold {
       expr(col, attr.op, args, res)
     } { case (dir, filterPath, filterAttr) =>
       expr2(col, attr.op, filterAttr.name)
-    }
-  }
-
-
-  protected def opt[T: ClassTag](
-    attr: Attr,
-    optArgs: Option[Seq[T]],
-    resOpt: ResOneOpt[T],
-  ): Unit = {
-    val col = getCol(attr: Attr)
-    select += col
-    groupByCols += col // if we later need to group by non-aggregated columns
-    addCast(resOpt.sql2oneOpt)
-    addSort(attr, col)
-    attr.op match {
-      case V     => () // selected col can already be a value or null
-      case Eq    => optEqual(col, optArgs, resOpt.one2sql)
-      case Neq   => optNeq(col, optArgs, resOpt.one2sql)
-      case Lt    => optCompare(col, optArgs, "<", resOpt.one2sql)
-      case Gt    => optCompare(col, optArgs, ">", resOpt.one2sql)
-      case Le    => optCompare(col, optArgs, "<=", resOpt.one2sql)
-      case Ge    => optCompare(col, optArgs, ">=", resOpt.one2sql)
-      case other => unexpectedOp(other)
     }
   }
 
@@ -184,6 +162,7 @@ trait ResolveExprOne extends ResolveExpr { self: SqlQueryBase with LambdasOne =>
       case other      => unexpectedOp(other)
     }
   }
+
   protected def expr2(
     col: String,
     op: Op,
@@ -198,6 +177,106 @@ trait ResolveExprOne extends ResolveExpr { self: SqlQueryBase with LambdasOne =>
     case other => unexpectedOp(other)
   }
 
+  protected def opt[T: ClassTag](
+    attr: Attr,
+    optArgs: Option[Seq[T]],
+    resOpt: ResOneOpt[T],
+  ): Unit = {
+    val col = getCol(attr: Attr)
+    select += col
+    groupByCols += col // if we later need to group by non-aggregated columns
+    addCast(resOpt.sql2oneOpt)
+    addSort(attr, col)
+    attr.op match {
+      case V     => () // selected col can already be a value or null
+      case Eq    => optEqual(col, optArgs, resOpt.one2sql)
+      case Neq   => optNeq(col, optArgs, resOpt.one2sql)
+      case Lt    => optCompare(col, optArgs, "<", resOpt.one2sql)
+      case Gt    => optCompare(col, optArgs, ">", resOpt.one2sql)
+      case Le    => optCompare(col, optArgs, "<=", resOpt.one2sql)
+      case Ge    => optCompare(col, optArgs, ">=", resOpt.one2sql)
+      case other => unexpectedOp(other)
+    }
+  }
+
+
+  // eq ------------------------------------------------------------------------
+
+  protected def equal[T: ClassTag](col: String, args: Seq[T], one2sql: T => String): Unit = {
+    where += (args.length match {
+      case 1 => (col, "= " + one2sql(args.head))
+      case 0 => (col, "IS NULL ")
+      case _ => (col, args.map(one2sql).mkString("IN (", ", ", ")"))
+    })
+  }
+
+  protected def optEqual[T: ClassTag](
+    col: String,
+    optArgs: Option[Seq[T]],
+    one2sql: T => String,
+  ): Unit = {
+    optArgs.fold[Unit] {
+      where += ((col, s"IS NULL"))
+    } {
+      case Nil => where += (("FALSE", ""))
+      case vs  => equal(col, vs, one2sql)
+    }
+  }
+
+
+  // neq -----------------------------------------------------------------------
+
+  protected def neq[T](col: String, args: Seq[T], one2sql: T => String): Unit = {
+    where += (args.length match {
+      case 1 => (col, "<> " + one2sql(args.head))
+      case 0 => (col, "IS NOT NULL ")
+      case _ => (col, args.map(one2sql).mkString("NOT IN (", ", ", ")"))
+    })
+  }
+
+  protected def optNeq[T](
+    col: String,
+    optArgs: Option[Seq[T]],
+    one2sql: T => String
+  ): Unit = {
+    if (optArgs.isDefined && optArgs.get.nonEmpty) {
+      neq(col, optArgs.get, one2sql)
+    } else {
+      notNull += col
+    }
+  }
+
+
+  // compare -------------------------------------------------------------------
+
+  protected def compare[T](col: String, arg: T, op: String, one2sql: T => String): Unit = {
+    where += ((col, op + " " + one2sql(arg)))
+  }
+
+  protected def optCompare[T](
+    col: String,
+    optArgs: Option[Seq[T]],
+    op: String,
+    one2sql: T => String
+  ): Unit = {
+    optArgs.fold[Unit] {
+      // Always return empty result when trying to compare None
+      where += (("FALSE", ""))
+    } { vs =>
+      where += ((col, op + " " + one2sql(vs.head)))
+    }
+  }
+
+
+  // no value ------------------------------------------------------------------
+
+  protected def noValue(col: String): Unit = {
+    notNull -= col
+    where += ((col, s"IS NULL"))
+  }
+
+
+  // String filters ------------------------------------------------------------
 
   protected def startsWith[T](col: String, arg: T): Unit = where += ((col, s"LIKE '$arg%'"))
   protected def endsWith[T](col: String, arg: T): Unit = where += ((col, s"LIKE '%$arg'"))
@@ -207,9 +286,16 @@ trait ResolveExprOne extends ResolveExpr { self: SqlQueryBase with LambdasOne =>
       where += ((col, s"~ '$regex'"))
   }
 
+
+  // Number filters ------------------------------------------------------------
+
   protected def remainder[T](col: String, args: Seq[T]): Unit = where += ((col, s"% ${args.head} = ${args(1)}"))
   protected def even(col: String): Unit = where += ((col, s"% 2 = 0"))
   protected def odd(col: String): Unit = where += ((col, s"% 2 = 1"))
+
+
+
+  // aggregation ---------------------------------------------------------------
 
   protected def aggr[T: ClassTag](col: String, fn: String, optN: Option[Int], res: ResOne[T]): Unit = {
     lazy val n = optN.getOrElse(0)
@@ -323,6 +409,24 @@ trait ResolveExprOne extends ResolveExpr { self: SqlQueryBase with LambdasOne =>
     }
   }
 
+
+  // Filter attribute filters --------------------------------------------------
+
+  protected def equal2(col: String, filterAttr: String): Unit = {
+    where += ((col, "= " + filterAttr))
+  }
+
+  protected def neq2(col: String, filterAttr: String): Unit = {
+    where += ((col, " != " + filterAttr))
+  }
+
+  protected def compare2(col: String, op: String, filterAttr: String): Unit = {
+    where += ((col, op + " " + filterAttr))
+  }
+
+
+  // helpers -------------------------------------------------------------------
+
   protected def selectWithOrder(
     col: String,
     fn: String,
@@ -338,80 +442,6 @@ trait ResolveExprOne extends ResolveExpr { self: SqlQueryBase with LambdasOne =>
       orderBy += ((level, 1, alias, dir))
     } else {
       select += s"$fn($distinct$col$cast)"
-    }
-  }
-
-  protected def equal[T: ClassTag](col: String, args: Seq[T], one2sql: T => String): Unit = {
-    where += (args.length match {
-      case 1 => (col, "= " + one2sql(args.head))
-      case 0 => (col, "IS NULL ")
-      case _ => (col, args.map(one2sql).mkString("IN (", ", ", ")"))
-    })
-  }
-  protected def equal2(col: String, filterAttr: String): Unit = {
-    where += ((col, "= " + filterAttr))
-  }
-
-  protected def neq[T](col: String, args: Seq[T], one2sql: T => String): Unit = {
-    where += (args.length match {
-      case 1 => (col, "<> " + one2sql(args.head))
-      case 0 => (col, "IS NOT NULL ")
-      case _ => (col, args.map(one2sql).mkString("NOT IN (", ", ", ")"))
-    })
-  }
-  protected def neq2(col: String, filterAttr: String): Unit = {
-    where += ((col, " != " + filterAttr))
-  }
-
-  protected def compare[T](col: String, arg: T, op: String, one2sql: T => String): Unit = {
-    where += ((col, op + " " + one2sql(arg)))
-  }
-  protected def compare2(col: String, op: String, filterAttr: String): Unit = {
-    where += ((col, op + " " + filterAttr))
-  }
-
-  protected def noValue(col: String): Unit = {
-    notNull -= col
-    where += ((col, s"IS NULL"))
-  }
-
-
-  protected def optEqual[T: ClassTag](
-    col: String,
-    optArgs: Option[Seq[T]],
-    one2sql: T => String,
-  ): Unit = {
-    optArgs.fold[Unit] {
-      where += ((col, s"IS NULL"))
-    } {
-      case Nil => where += (("FALSE", ""))
-      case vs  => equal(col, vs, one2sql)
-    }
-  }
-
-  protected def optNeq[T](
-    col: String,
-    optArgs: Option[Seq[T]],
-    one2sql: T => String
-  ): Unit = {
-    if (optArgs.isDefined && optArgs.get.nonEmpty) {
-      neq(col, optArgs.get, one2sql)
-    } else {
-      notNull += col
-    }
-  }
-
-  protected def optCompare[T](
-    col: String,
-    optArgs: Option[Seq[T]],
-    op: String,
-    one2sql: T => String
-  ): Unit = {
-    optArgs.fold[Unit] {
-      // Always return empty result when trying to compare None
-      where += (("FALSE", ""))
-    } { vs =>
-      where += ((col, op + " " + one2sql(vs.head)))
     }
   }
 }

@@ -50,35 +50,29 @@ trait LambdasOne extends ResolveBase {
 
 
   // Single sample value extracted from clojure LazySeq
-  protected lazy val firstIdx           : AnyRef => AnyRef = first((v: Any) => v.toString)
-  protected lazy val firstString        : AnyRef => AnyRef = first
-  protected lazy val firstInt           : AnyRef => AnyRef = first
-  protected lazy val firstLong          : AnyRef => AnyRef = first
-  protected lazy val firstFloat         : AnyRef => AnyRef = first
-  protected lazy val firstDouble        : AnyRef => AnyRef = first
-  protected lazy val firstBoolean       : AnyRef => AnyRef = first
-  protected lazy val firstBigInt        : AnyRef => AnyRef = first((v: Any) => BigInt(v.asInstanceOf[jBigInt]))
-  protected lazy val firstBigDecimal    : AnyRef => AnyRef = first((v: Any) => BigDecimal(v.asInstanceOf[jBigDecimal]))
-  protected lazy val firstDate          : AnyRef => AnyRef = first
-  protected lazy val firstDuration      : AnyRef => AnyRef = first((v: Any) => Duration.parse(v.asInstanceOf[String]))
-  protected lazy val firstInstant       : AnyRef => AnyRef = first((v: Any) => Instant.parse(v.asInstanceOf[String]))
-  protected lazy val firstLocalDate     : AnyRef => AnyRef = first((v: Any) => LocalDate.parse(v.asInstanceOf[String]))
-  protected lazy val firstLocalTime     : AnyRef => AnyRef = first((v: Any) => LocalTime.parse(v.asInstanceOf[String]))
-  protected lazy val firstLocalDateTime : AnyRef => AnyRef = first((v: Any) => LocalDateTime.parse(v.asInstanceOf[String]))
-  protected lazy val firstOffsetTime    : AnyRef => AnyRef = first((v: Any) => OffsetTime.parse(v.asInstanceOf[String]))
-  protected lazy val firstOffsetDateTime: AnyRef => AnyRef = first((v: Any) => OffsetDateTime.parse(v.asInstanceOf[String]))
-  protected lazy val firstZonedDateTime : AnyRef => AnyRef = first((v: Any) => ZonedDateTime.parse(v.asInstanceOf[String]))
-  protected lazy val firstUUID          : AnyRef => AnyRef = first
-  protected lazy val firstURI           : AnyRef => AnyRef = first
-  protected lazy val firstByte          : AnyRef => AnyRef = first((v: Any) => v.asInstanceOf[Integer].toByte)
-  protected lazy val firstShort         : AnyRef => AnyRef = first((v: Any) => v.asInstanceOf[Integer].toShort)
-  protected lazy val firstChar          : AnyRef => AnyRef = first((v: Any) => v.asInstanceOf[String].charAt(0))
-
-  private def first: AnyRef => AnyRef =
-    (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).asInstanceOf[AnyRef]
-
-  private def first(value: Any => Any): AnyRef => AnyRef =
-    (v: AnyRef) => value(v.asInstanceOf[jList[_]].get(0)).asInstanceOf[AnyRef]
+  protected lazy val firstIdx           : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).toString.asInstanceOf[AnyRef]
+  protected lazy val firstString        : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).asInstanceOf[AnyRef]
+  protected lazy val firstInt           : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).toString.toInt.asInstanceOf[AnyRef]
+  protected lazy val firstLong          : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).asInstanceOf[AnyRef]
+  protected lazy val firstFloat         : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).asInstanceOf[AnyRef]
+  protected lazy val firstDouble        : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).asInstanceOf[AnyRef]
+  protected lazy val firstBoolean       : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).asInstanceOf[AnyRef]
+  protected lazy val firstBigInt        : AnyRef => AnyRef = (v: AnyRef) => BigInt(v.asInstanceOf[jList[_]].get(0).asInstanceOf[jBigInt]).asInstanceOf[AnyRef]
+  protected lazy val firstBigDecimal    : AnyRef => AnyRef = (v: AnyRef) => BigDecimal(v.asInstanceOf[jList[_]].get(0).asInstanceOf[jBigDecimal]).asInstanceOf[AnyRef]
+  protected lazy val firstDate          : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).asInstanceOf[AnyRef]
+  protected lazy val firstDuration      : AnyRef => AnyRef = (v: AnyRef) => Duration.parse(v.asInstanceOf[jList[_]].get(0).asInstanceOf[String]).asInstanceOf[AnyRef]
+  protected lazy val firstInstant       : AnyRef => AnyRef = (v: AnyRef) => Instant.parse(v.asInstanceOf[jList[_]].get(0).asInstanceOf[String]).asInstanceOf[AnyRef]
+  protected lazy val firstLocalDate     : AnyRef => AnyRef = (v: AnyRef) => LocalDate.parse(v.asInstanceOf[jList[_]].get(0).asInstanceOf[String]).asInstanceOf[AnyRef]
+  protected lazy val firstLocalTime     : AnyRef => AnyRef = (v: AnyRef) => LocalTime.parse(v.asInstanceOf[jList[_]].get(0).asInstanceOf[String]).asInstanceOf[AnyRef]
+  protected lazy val firstLocalDateTime : AnyRef => AnyRef = (v: AnyRef) => LocalDateTime.parse(v.asInstanceOf[jList[_]].get(0).asInstanceOf[String]).asInstanceOf[AnyRef]
+  protected lazy val firstOffsetTime    : AnyRef => AnyRef = (v: AnyRef) => OffsetTime.parse(v.asInstanceOf[jList[_]].get(0).asInstanceOf[String]).asInstanceOf[AnyRef]
+  protected lazy val firstOffsetDateTime: AnyRef => AnyRef = (v: AnyRef) => OffsetDateTime.parse(v.asInstanceOf[jList[_]].get(0).asInstanceOf[String]).asInstanceOf[AnyRef]
+  protected lazy val firstZonedDateTime : AnyRef => AnyRef = (v: AnyRef) => ZonedDateTime.parse(v.asInstanceOf[jList[_]].get(0).asInstanceOf[String]).asInstanceOf[AnyRef]
+  protected lazy val firstUUID          : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).asInstanceOf[AnyRef]
+  protected lazy val firstURI           : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).asInstanceOf[AnyRef]
+  protected lazy val firstByte          : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).asInstanceOf[Integer].toByte.asInstanceOf[AnyRef]
+  protected lazy val firstShort         : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).asInstanceOf[Integer].toShort.asInstanceOf[AnyRef]
+  protected lazy val firstChar          : AnyRef => AnyRef = (v: AnyRef) => v.asInstanceOf[jList[_]].get(0).asInstanceOf[String].charAt(0).asInstanceOf[AnyRef]
 
 
   protected lazy val set2setId            : AnyRef => AnyRef = set2set((v: AnyRef) => v.toString)

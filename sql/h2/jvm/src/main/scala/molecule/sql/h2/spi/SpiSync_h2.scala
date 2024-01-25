@@ -108,7 +108,12 @@ trait SpiSync_h2 extends SpiSyncBase {
         row += null
       } else {
         arr.next()
-        row += arr.getArray(2).getArray.asInstanceOf[Array[_]].toSet
+        println("A " + arr.getArray(2))
+        val arr2 = arr.getArray(2)
+        println("A " + arr2)
+        if (arr2 != null) {
+          row += arr2.getArray.asInstanceOf[Array[_]].toSet
+        }
       }
       s"Set[$baseTpe]"
     }
@@ -118,8 +123,8 @@ trait SpiSync_h2 extends SpiSyncBase {
       var n = 1
       row.clear()
       while (n <= columnsNumber) {
-        val col         = rsmd.getColumnName(n)
-        val sqlType     = rsmd.getColumnTypeName(n)
+        val col     = rsmd.getColumnName(n)
+        val sqlType = rsmd.getColumnTypeName(n)
 
         val tpe         = sqlType match {
           case "CHARACTER VARYING" => value(resultSet.getString(n), "String/URI")
