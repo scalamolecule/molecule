@@ -250,10 +250,8 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
     col: String, optSets: Option[Seq[Set[T]]], res: ResSet[T]
   ): Unit = {
     optSets match {
-      case None =>
-        setOptAttr(col, res)
-
-      case Some(sets) =>
+      case None | Some(Nil) => setOptAttr(col, res)
+      case Some(sets)       =>
         setNeq(col, sets, res, true)
         replaceCast(res.nestedArray2optCoalescedSet)
     }

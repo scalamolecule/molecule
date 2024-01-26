@@ -35,7 +35,7 @@ class Model2DatomicQuery[Tpl](elements0: List[Element])
     optimized: Boolean,
     altElements: List[Element] = Nil
   ): (String, String, String) = {
-    val elements = if (altElements.isEmpty) elements0 else altElements
+    val elements          = if (altElements.isEmpty) elements0 else altElements
     val (elements1, _, _) = validateQueryModel(elements, Some(addFilterAttrCallback))
 
     // Remember first entity id variable
@@ -59,14 +59,15 @@ class Model2DatomicQuery[Tpl](elements0: List[Element])
       )
     }
 
-    val preQueryStrs = if (preQuery.nonEmpty) Seq(s"\nPRE-QUERY:\n$preQuery") else Nil
+    val preQueryStrs = if (preQuery.nonEmpty) Seq(
+      s"\nPRE-QUERY:\n$preQuery\n\nMAIN QUERY (takes ids from pre-query as input):") else Nil
     val inputsStrs   = if (inputs.nonEmpty) {
       "" +: inputs.map {
         case a: Array[_] => a.toList.toString
         case other       => other.toString
       }
     } else Nil
-    val queryStrs    = ((mainQuery +: inputsStrs) ++ preQueryStrs).mkString("\n").trim
+    val queryStrs    = (preQueryStrs ++ (mainQuery +: inputsStrs)).mkString("\n").trim
     logger.debug(queryStrs)
 
     (preQuery, mainQuery, queryStrs)

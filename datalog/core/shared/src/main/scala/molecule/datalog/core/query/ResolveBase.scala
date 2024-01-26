@@ -5,6 +5,7 @@ import java.time._
 import java.util.{Date, UUID, List => jList}
 import molecule.base.util.BaseHelpers
 import molecule.datalog.core.query.casting.NullValueException
+import java.math.{BigDecimal => jBigDecimal, BigInteger => jBigInt}
 
 trait ResolveBase extends BaseHelpers {
 
@@ -47,6 +48,31 @@ trait ResolveBase extends BaseHelpers {
   protected lazy val s2jByte          : Any => Any = (v: Any) => v.asInstanceOf[Byte].toInt.asInstanceOf[Any]
   protected lazy val s2jShort         : Any => Any = (v: Any) => v.asInstanceOf[Short].toInt.asInstanceOf[Any]
   protected lazy val s2jChar          : Any => Any = (v: Any) => v.asInstanceOf[Char].toString.asInstanceOf[Any]
+
+  // Java to Scala
+  protected lazy val j2Id            : Any => String         = (v: Any) => v.toString
+  protected lazy val j2String        : Any => String         = (v: Any) => v.asInstanceOf[String]
+  protected lazy val j2Int           : Any => Int            = (v: Any) => v.toString.toInt
+  protected lazy val j2Long          : Any => Long           = (v: Any) => v.asInstanceOf[Long]
+  protected lazy val j2Float         : Any => Float          = (v: Any) => v.asInstanceOf[Float]
+  protected lazy val j2Double        : Any => Double         = (v: Any) => v.asInstanceOf[Double]
+  protected lazy val j2Boolean       : Any => Boolean        = (v: Any) => v.asInstanceOf[Boolean]
+  protected lazy val j2BigInt        : Any => BigInt         = (v: Any) => BigInt(v.asInstanceOf[jBigInt])
+  protected lazy val j2BigDecimal    : Any => BigDecimal     = (v: Any) => BigDecimal(v.asInstanceOf[jBigDecimal])
+  protected lazy val j2Date          : Any => Date           = (v: Any) => v.asInstanceOf[Date]
+  protected lazy val j2Duration      : Any => Duration       = (v: Any) => Duration.parse(v.asInstanceOf[String])
+  protected lazy val j2Instant       : Any => Instant        = (v: Any) => Instant.parse(v.asInstanceOf[String])
+  protected lazy val j2LocalDate     : Any => LocalDate      = (v: Any) => LocalDate.parse(v.asInstanceOf[String])
+  protected lazy val j2LocalTime     : Any => LocalTime      = (v: Any) => LocalTime.parse(v.asInstanceOf[String])
+  protected lazy val j2LocalDateTime : Any => LocalDateTime  = (v: Any) => LocalDateTime.parse(v.asInstanceOf[String])
+  protected lazy val j2OffsetTime    : Any => OffsetTime     = (v: Any) => OffsetTime.parse(v.asInstanceOf[String])
+  protected lazy val j2OffsetDateTime: Any => OffsetDateTime = (v: Any) => OffsetDateTime.parse(v.asInstanceOf[String])
+  protected lazy val j2ZonedDateTime : Any => ZonedDateTime  = (v: Any) => ZonedDateTime.parse(v.asInstanceOf[String])
+  protected lazy val j2UUID          : Any => UUID           = (v: Any) => v.asInstanceOf[UUID]
+  protected lazy val j2URI           : Any => URI            = (v: Any) => v.asInstanceOf[URI]
+  protected lazy val j2Byte          : Any => Byte           = (v: Any) => v.asInstanceOf[Integer].toByte
+  protected lazy val j2Short         : Any => Short          = (v: Any) => v.asInstanceOf[Integer].toShort
+  protected lazy val j2Char          : Any => Char           = (v: Any) => v.asInstanceOf[String].charAt(0)
 
 
   // Used for aggregate count and countDistinct functions

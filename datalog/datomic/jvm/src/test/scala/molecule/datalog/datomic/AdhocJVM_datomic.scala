@@ -158,11 +158,15 @@ object AdhocJVM_datomic extends TestSuite_datomic {
           (4, Set())
         ).transact
 
+
+        // Mandatory ========================================
+
         _ <- A.i.a1.ii.query.get.map(_ ==> List(
           (1, Set(1, 2)),
           (2, Set(2, 7)), // 2 rows coalesced
           (3, Set(3)),
         ))
+
 
         _ <- A.i.a1.ii(Set(1)).query.get.map(_ ==> List(
           // Set(1, 2) != Set(1)
@@ -170,21 +174,40 @@ object AdhocJVM_datomic extends TestSuite_datomic {
         _ <- A.i.a1.ii(Set(1, 2)).query.get.map(_ ==> List(
           (1, Set(1, 2)),
         ))
+        _ <- A.i.a1.ii(Set.empty[Int]).query.get.map(_ ==> Nil)
+
 
         _ <- A.i.a1.ii.not(Set(1)).query.get.map(_ ==> List(
           (1, Set(1, 2)),
-          (2, Set(2, 7)), // 2 rows coalesced
+          (2, Set(2, 7)),
+          (3, Set(3)),
+        ))
+        _ <- A.i.a1.ii.not(Set(2)).query.i.get.map(_ ==> List(
+          (1, Set(1, 2)),
+          (2, Set(7)),
           (3, Set(3)),
         ))
         _ <- A.i.a1.ii.not(Set(1, 2)).query.get.map(_ ==> List(
-          (2, Set(2, 7)), // 2 rows coalesced
+          (2, Set(2, 7)),
           (3, Set(3)),
         ))
+        _ <- A.i.a1.ii.not(Set.empty[Int]).query.get.map(_ ==> List(
+          (1, Set(1, 2)),
+          (2, Set(2, 7)),
+          (3, Set(3)),
+        ))
+
 
         _ <- A.i.a1.ii.has(1).query.get.map(_ ==> List(
           (1, Set(1, 2)),
         ))
         _ <- A.i.a1.ii.has(2).query.get.map(_ ==> List(
+          (1, Set(1, 2)),
+          (2, Set(2)),
+        ))
+
+
+        _ <- A.i.a1.ii.has(2, 1).query.get.map(_ ==> List(
           (1, Set(1, 2)),
           (2, Set(2)),
         ))
@@ -199,7 +222,7 @@ object AdhocJVM_datomic extends TestSuite_datomic {
         ))
 
         _ <- A.i.a1.ii.hasNo(1).query.get.map(_ ==> List(
-          (2, Set(2, 7)), // 2 rows coalesced
+          (2, Set(2, 7)),
           (3, Set(3)),
         ))
         _ <- A.i.a1.ii.hasNo(2).query.get.map(_ ==> List(
@@ -212,14 +235,19 @@ object AdhocJVM_datomic extends TestSuite_datomic {
         ))
 
 
+        // tacit ========================================
 
         _ <- A.i.a1.ii_.query.get.map(_ ==> List(1, 2, 3))
 
-        _ <- A.i.a1.ii_(Set(1)).query.get.map(_ ==> List())
+        _ <- A.i.a1.ii_(Set(1)).query.get.map(_ ==> Nil)
         _ <- A.i.a1.ii_(Set(1, 2)).query.get.map(_ ==> List(1))
+        _ <- A.i.a1.ii_(Set.empty[Int]).query.get.map(_ ==> Nil)
+
 
         _ <- A.i.a1.ii_.not(Set(1)).query.get.map(_ ==> List(1, 2, 3))
         _ <- A.i.a1.ii_.not(Set(1, 2)).query.get.map(_ ==> List(2, 3))
+        _ <- A.i.a1.ii_.not(Set.empty[Int]).query.get.map(_ ==> List(1, 2, 3))
+
 
         _ <- A.i.a1.ii_.has(1).query.get.map(_ ==> List(1))
         _ <- A.i.a1.ii_.has(2).query.get.map(_ ==> List(1, 2))
@@ -232,22 +260,21 @@ object AdhocJVM_datomic extends TestSuite_datomic {
 
 
 
-        _ <- if (database == "Datomic") {
-          A.i.a1.ii_?.query.get.map(_ ==> List(
-            (1, Some(Set(1, 2))),
-            (2, Some(Set(2))),
-            (2, Some(Set(7))),
-            (3, Some(Set(3))),
-            (4, None)
-          ))
-        } else {
-          A.i.a1.ii_?.query.get.map(_ ==> List(
-            (1, Some(Set(1, 2))),
-            (2, Some(Set(2, 7))),
-            (3, Some(Set(3))),
-            (4, None)
-          ))
-        }
+        // optional ========================================
+
+        allAssertedOptional = List(
+          (1, Some(Set(1, 2))),
+          (2, Some(Set(2, 7))), // 2 rows coalesced
+          (3, Some(Set(3))),
+        )
+
+        // All
+        _ <- A.i.a1.ii_?.query.i.get.map(_ ==> List(
+          (1, Some(Set(1, 2))),
+          (2, Some(Set(2, 7))),
+          (3, Some(Set(3))),
+          (4, None)
+        ))
 
         _ <- A.i.a1.ii_?(Some(Set(1))).query.get.map(_ ==> List(
           // Set(1, 2) != Set(1)
@@ -256,15 +283,42 @@ object AdhocJVM_datomic extends TestSuite_datomic {
           (1, Some(Set(1, 2))),
         ))
 
+        // None matches non-asserted values
+        _ <- A.i.a1.ii_?(Option.empty[Set[Int]]).query.get.map(_ ==> List((4, None)))
+        _ <- A.i.a1.ii_?(Option.empty[Seq[Set[Int]]]).query.get.map(_ ==> List((4, None)))
+
+        // Empty Sets are ignored (use None to match non-asserted card-set attributes)
+        _ <- A.i.a1.ii_?(Some(Set.empty[Int])).query.get.map(_ ==> Nil)
+        _ <- A.i.a1.ii_?(Some(Seq.empty[Set[Int]])).query.get.map(_ ==> Nil)
+        _ <- A.i.a1.ii_?(Some(Seq(Set.empty[Int]))).query.get.map(_ ==> Nil)
+
+
+
+
+
+
         _ <- A.i.a1.ii_?.not(Some(Set(1))).query.get.map(_ ==> List(
           (1, Some(Set(1, 2))),
-          (2, Some(Set(2, 7))), // 2 rows coalesced
+          (2, Some(Set(2, 7))),
           (3, Some(Set(3))),
         ))
         _ <- A.i.a1.ii_?.not(Some(Set(1, 2))).query.get.map(_ ==> List(
-          (2, Some(Set(2, 7))), // 2 rows coalesced
+          (2, Some(Set(2, 7))),
           (3, Some(Set(3))),
         ))
+
+
+        // Negating None matches all asserted values
+        _ <- A.i.a1.ii_?.not(Option.empty[Set[Int]]).query.get.map(_ ==> allAssertedOptional)
+        _ <- A.i.a1.ii_?.not(Option.empty[Seq[Set[Int]]]).query.get.map(_ ==> allAssertedOptional)
+
+        // Negating empty Sets match nothing
+        _ <- A.i.a1.ii_?.not(Some(Set.empty[Int])).query.get.map(_ ==> allAssertedOptional)
+        _ <- A.i.a1.ii_?.not(Some(Seq.empty[Set[Int]])).query.get.map(_ ==> allAssertedOptional)
+        _ <- A.i.a1.ii_?.not(Some(Seq(Set.empty[Int]))).query.get.map(_ ==> allAssertedOptional)
+
+
+
 
         _ <- A.i.a1.ii_?.has(Some(1)).query.get.map(_ ==> List(
           (1, Some(Set(1, 2))),
@@ -288,12 +342,30 @@ object AdhocJVM_datomic extends TestSuite_datomic {
         _ <- A.i.a1.ii_?.has(Some(Set(2, 3))).query.get.map(_ ==> List(
 
         ))
+        // has 1 and 2
         _ <- A.i.a1.ii_?.has(Some(Set(1, 2))).query.get.map(_ ==> List(
           (1, Some(Set(1, 2))),
         ))
 
+        // None matches non-asserted values
+        _ <- A.i.a1.ii_?.has(Option.empty[Set[Int]]).query.get.map(_ ==> List((4, None)))
+        _ <- A.i.a1.ii_?.has(Option.empty[Seq[Set[Int]]]).query.get.map(_ ==> List((4, None)))
+
+        // Empty Sets match nothing
+        _ <- A.i.a1.ii_?.has(Some(Set.empty[Int])).query.get.map(_ ==> Nil)
+        _ <- A.i.a1.ii_?.has(Some(Seq.empty[Set[Int]])).query.get.map(_ ==> Nil)
+        _ <- A.i.a1.ii_?.has(Some(Seq(Set.empty[Int]))).query.get.map(_ ==> Nil)
+
+
+
+
         _ <- A.i.a1.ii_?.hasNo(Some(1)).query.get.map(_ ==> List(
-          (2, Some(Set(2, 7))), // 2 rows coalesced
+          (2, Some(Set(2, 7))),
+          (3, Some(Set(3))),
+        ))
+        // When 1 value in set, then the same as
+        _ <- A.i.a1.ii_?.hasNo(Some(Set(1))).query.get.map(_ ==> List(
+          (2, Some(Set(2, 7))),
           (3, Some(Set(3))),
         ))
         _ <- A.i.a1.ii_?.hasNo(Some(2)).query.get.map(_ ==> List(
@@ -304,6 +376,24 @@ object AdhocJVM_datomic extends TestSuite_datomic {
           (1, Some(Set(1, 2))),
           (2, Some(Set(2, 7)))
         ))
+        _ <- A.i.a1.ii_?.hasNo(Some(Set(1, 2))).query.get.map(_ ==> List(
+          (2, Some(Set(2, 7))),
+          (3, Some(Set(3))),
+        ))
+        _ <- A.i.a1.ii_?.hasNo(Some(Set(1, 3))).query.get.map(_ ==> List(
+          (1, Some(Set(1, 2))),
+          (2, Some(Set(2, 7))),
+          (3, Some(Set(3))),
+        ))
+
+        // Negating None matches all asserted values
+        _ <- A.i.a1.ii_?.hasNo(Option.empty[Set[Int]]).query.get.map(_ ==> allAssertedOptional)
+        _ <- A.i.a1.ii_?.hasNo(Option.empty[Seq[Set[Int]]]).query.get.map(_ ==> allAssertedOptional)
+
+        // Negating empty Sets match nothing
+        _ <- A.i.a1.ii_?.hasNo(Some(Set.empty[Int])).query.get.map(_ ==> allAssertedOptional)
+        _ <- A.i.a1.ii_?.hasNo(Some(Seq.empty[Set[Int]])).query.get.map(_ ==> allAssertedOptional)
+        _ <- A.i.a1.ii_?.hasNo(Some(Seq(Set.empty[Int]))).query.get.map(_ ==> allAssertedOptional)
 
 
       } yield ()
@@ -363,6 +453,24 @@ object AdhocJVM_datomic extends TestSuite_datomic {
     ////          ("b", Nil),
     ////        ))
     //
+    //    _ = {
+    //      println("-------")
+    //      Peer.q(
+    //        """[:find  ?b
+    //          |        ;;?c5
+    //          |        (distinct ?c4)
+    //          | :where [?a :A/i ?b]
+    //          |        [(datomic.api/q
+    //          |          "[:find  (pull ?a-?c [[:A/ii :limit nil]])
+    //          |            :in $ ?a1
+    //          |            :where [?a1 :A/i ?b1]
+    //          |                   [(identity ?a1) ?a-?c]]" $ ?a ) [[?c2]]]
+    //          |        [(if (nil? ?c2) {:A/ii []} ?c2) ?c3]
+    //          |        [(:A/ii ?c3) ?c4]
+    //          |        ]""".stripMargin,
+    //        conn.db
+    //      ).forEach { r => println(r) }
+    //    }
     //        //        _ = {
     //        //          println("-------")
     //        //          Peer.q(

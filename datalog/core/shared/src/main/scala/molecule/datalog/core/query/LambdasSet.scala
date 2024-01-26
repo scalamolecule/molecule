@@ -224,19 +224,6 @@ trait LambdasSet extends ResolveBase with JavaConversions {
       }
   }
 
-  private lazy val j2sOpSetString = (v: AnyRef) => v match {
-    case null            => Option.empty[Set[String]]
-    case set: jSet[_]    => Some(set.asScala.map(_.asInstanceOf[String])) // attr_?(<expr>))
-    case map: jMap[_, _] => Some(map.values.iterator.next.asInstanceOf[jList[_]].asScala.map(_.asInstanceOf[String]).toSet) // attr_?
-  }
-
-  private lazy val j2sOpSetInt = (v: AnyRef) => v match {
-    case null => Option.empty[Set[Int]]
-    // Datomic can return both Integer or Long
-    case set: jSet[_]    => Some(set.asScala.map(_.toString.toInt))
-    case map: jMap[_, _] => Some(map.values.iterator.next.asInstanceOf[jList[_]].asScala.map(_.toString.toInt).toSet)
-  }
-
   private lazy val j2sOpSetLong = (v: AnyRef) => v match {
     case null            => Option.empty[Set[Long]]
     case set: jSet[_]    => Some(set.asScala.map(_.asInstanceOf[Long]))
@@ -275,101 +262,71 @@ trait LambdasSet extends ResolveBase with JavaConversions {
       }
   }
 
-  private lazy val j2sOpSetFloat          = (v: AnyRef) => v match {
-    case null            => Option.empty[Set[Float]]
-    case set: jSet[_]    => Some(set.asScala.map(_.asInstanceOf[Float]))
-    case map: jMap[_, _] => Some(map.values.iterator.next.asInstanceOf[jList[_]].asScala.map(_.asInstanceOf[Float]).toSet)
+
+  private def j2sOpSet[T](decode: Any => T) = (v: AnyRef) => {
+    v match {
+      case null            => Option.empty[Set[String]]
+      case set: jSet[_]    => Some(set.asScala.map(decode)) // attr_?(<expr>))
+      case map: jMap[_, _] => Some(map.values.iterator.next.asInstanceOf[jList[_]].asScala.map(decode).toSet) // attr_?
+    }
   }
-  private lazy val j2sOpSetDouble         = (v: AnyRef) => v match {
-    case null            => Option.empty[Set[Double]]
-    case set: jSet[_]    => Some(set.asScala.map(_.asInstanceOf[Double]))
-    case map: jMap[_, _] => Some(map.values.iterator.next.asInstanceOf[jList[_]].asScala.map(_.asInstanceOf[Double]).toSet)
+
+  //  private lazy val j2sOpSetId             = j2sOpSet(j2Id)
+  private lazy val j2sOpSetString         = j2sOpSet(j2String)
+  private lazy val j2sOpSetInt            = j2sOpSet(j2Int)
+  //  private lazy val j2sOpSetLong           = j2sOpSet(j2Long)
+  private lazy val j2sOpSetFloat          = j2sOpSet(j2Float)
+  private lazy val j2sOpSetDouble         = j2sOpSet(j2Double)
+  private lazy val j2sOpSetBoolean        = j2sOpSet(j2Boolean)
+  private lazy val j2sOpSetBigInt         = j2sOpSet(j2BigInt)
+  private lazy val j2sOpSetBigDecimal     = j2sOpSet(j2BigDecimal)
+  private lazy val j2sOpSetDate           = j2sOpSet(j2Date)
+  private lazy val j2sOpSetDuration       = j2sOpSet(j2Duration)
+  private lazy val j2sOpSetInstant        = j2sOpSet(j2Instant)
+  private lazy val j2sOpSetLocalDate      = j2sOpSet(j2LocalDate)
+  private lazy val j2sOpSetLocalTime      = j2sOpSet(j2LocalTime)
+  private lazy val j2sOpSetLocalDateTime  = j2sOpSet(j2LocalDateTime)
+  private lazy val j2sOpSetOffsetTime     = j2sOpSet(j2OffsetTime)
+  private lazy val j2sOpSetOffsetDateTime = j2sOpSet(j2OffsetDateTime)
+  private lazy val j2sOpSetZonedDateTime  = j2sOpSet(j2ZonedDateTime)
+  private lazy val j2sOpSetUUID           = j2sOpSet(j2UUID)
+  private lazy val j2sOpSetURI            = j2sOpSet(j2URI)
+  private lazy val j2sOpSetByte           = j2sOpSet(j2Byte)
+  private lazy val j2sOpSetShort          = j2sOpSet(j2Short)
+  private lazy val j2sOpSetChar           = j2sOpSet(j2Char)
+
+
+  private def optAttr2sOptSet[T](decode: Any => T) = (v: AnyRef) => {
+    val set = v.asInstanceOf[jSet[_]]
+    if (set.iterator.next.asInstanceOf[jList[_]].isEmpty)
+      Option.empty[Set[T]]
+    else
+      Some(set.asScala.flatMap(_.asInstanceOf[jList[_]].asScala.map(decode)).toSet)
   }
-  private lazy val j2sOpSetBoolean        = (v: AnyRef) => v match {
-    case null            => Option.empty[Set[Boolean]]
-    case set: jSet[_]    => Some(set.asScala.map(_.asInstanceOf[Boolean]))
-    case map: jMap[_, _] => Some(map.values.iterator.next.asInstanceOf[jList[_]].asScala.map(_.asInstanceOf[Boolean]).toSet)
-  }
-  private lazy val j2sOpSetBigInt         = (v: AnyRef) => v match {
-    case null            => Option.empty[Set[BigInt]]
-    case set: jSet[_]    => Some(set.asScala.map(v => BigInt(v.asInstanceOf[jBigInt])))
-    case map: jMap[_, _] => Some(map.values.iterator.next.asInstanceOf[jList[_]].asScala.map(v => BigInt(v.asInstanceOf[jBigInt])).toSet)
-  }
-  private lazy val j2sOpSetBigDecimal     = (v: AnyRef) => v match {
-    case null            => Option.empty[Set[BigDecimal]]
-    case set: jSet[_]    => Some(set.asScala.map(v => BigDecimal(v.asInstanceOf[jBigDecimal])))
-    case map: jMap[_, _] => Some(map.values.iterator.next.asInstanceOf[jList[_]].asScala.map(v => BigDecimal(v.asInstanceOf[jBigDecimal])).toSet)
-  }
-  private lazy val j2sOpSetDate           = (v: AnyRef) => v match {
-    case null            => Option.empty[Set[Date]]
-    case set: jSet[_]    => Some(set.asScala.map(_.asInstanceOf[Date]))
-    case map: jMap[_, _] => Some(map.values.iterator.next.asInstanceOf[jList[_]].asScala.map(_.asInstanceOf[Date]).toSet)
-  }
-  private lazy val j2sOpSetDuration       = (v: AnyRef) => v match {
-    case null            => Option.empty[Set[Duration]]
-    case set: jSet[_]    => Some(set.asScala.map(v => Duration.parse(v.asInstanceOf[String])))
-    case map: jMap[_, _] => Some(map.values.iterator.next.asInstanceOf[jList[_]].asScala.map(v => Duration.parse(v.asInstanceOf[String])).toSet)
-  }
-  private lazy val j2sOpSetInstant        = (v: AnyRef) => v match {
-    case null            => Option.empty[Set[Instant]]
-    case set: jSet[_]    => Some(set.asScala.map(v => Instant.parse(v.asInstanceOf[String])))
-    case map: jMap[_, _] => Some(map.values.iterator.next.asInstanceOf[jList[_]].asScala.map(v => Instant.parse(v.asInstanceOf[String])).toSet)
-  }
-  private lazy val j2sOpSetLocalDate      = (v: AnyRef) => v match {
-    case null            => Option.empty[Set[LocalDate]]
-    case set: jSet[_]    => Some(set.asScala.map(v => LocalDate.parse(v.asInstanceOf[String])))
-    case map: jMap[_, _] => Some(map.values.iterator.next.asInstanceOf[jList[_]].asScala.map(v => LocalDate.parse(v.asInstanceOf[String])).toSet)
-  }
-  private lazy val j2sOpSetLocalTime      = (v: AnyRef) => v match {
-    case null            => Option.empty[Set[LocalTime]]
-    case set: jSet[_]    => Some(set.asScala.map(v => LocalTime.parse(v.asInstanceOf[String])))
-    case map: jMap[_, _] => Some(map.values.iterator.next.asInstanceOf[jList[_]].asScala.map(v => LocalTime.parse(v.asInstanceOf[String])).toSet)
-  }
-  private lazy val j2sOpSetLocalDateTime  = (v: AnyRef) => v match {
-    case null            => Option.empty[Set[LocalDateTime]]
-    case set: jSet[_]    => Some(set.asScala.map(v => LocalDateTime.parse(v.asInstanceOf[String])))
-    case map: jMap[_, _] => Some(map.values.iterator.next.asInstanceOf[jList[_]].asScala.map(v => LocalDateTime.parse(v.asInstanceOf[String])).toSet)
-  }
-  private lazy val j2sOpSetOffsetTime     = (v: AnyRef) => v match {
-    case null            => Option.empty[Set[OffsetTime]]
-    case set: jSet[_]    => Some(set.asScala.map(v => OffsetTime.parse(v.asInstanceOf[String])))
-    case map: jMap[_, _] => Some(map.values.iterator.next.asInstanceOf[jList[_]].asScala.map(v => OffsetTime.parse(v.asInstanceOf[String])).toSet)
-  }
-  private lazy val j2sOpSetOffsetDateTime = (v: AnyRef) => v match {
-    case null            => Option.empty[Set[OffsetDateTime]]
-    case set: jSet[_]    => Some(set.asScala.map(v => OffsetDateTime.parse(v.asInstanceOf[String])))
-    case map: jMap[_, _] => Some(map.values.iterator.next.asInstanceOf[jList[_]].asScala.map(v => OffsetDateTime.parse(v.asInstanceOf[String])).toSet)
-  }
-  private lazy val j2sOpSetZonedDateTime  = (v: AnyRef) => v match {
-    case null            => Option.empty[Set[ZonedDateTime]]
-    case set: jSet[_]    => Some(set.asScala.map(v => ZonedDateTime.parse(v.asInstanceOf[String])))
-    case map: jMap[_, _] => Some(map.values.iterator.next.asInstanceOf[jList[_]].asScala.map(v => ZonedDateTime.parse(v.asInstanceOf[String])).toSet)
-  }
-  private lazy val j2sOpSetUUID           = (v: AnyRef) => v match {
-    case null            => Option.empty[Set[UUID]]
-    case set: jSet[_]    => Some(set.asScala.map(_.asInstanceOf[UUID]))
-    case map: jMap[_, _] => Some(map.values.iterator.next.asInstanceOf[jList[_]].asScala.map(_.asInstanceOf[UUID]).toSet)
-  }
-  private lazy val j2sOpSetURI            = (v: AnyRef) => v match {
-    case null            => Option.empty[Set[URI]]
-    case set: jSet[_]    => Some(set.asScala.map(_.asInstanceOf[URI]))
-    case map: jMap[_, _] => Some(map.values.iterator.next.asInstanceOf[jList[_]].asScala.map(_.asInstanceOf[URI]).toSet)
-  }
-  private lazy val j2sOpSetByte           = (v: AnyRef) => v match {
-    case null            => Option.empty[Set[Byte]]
-    case set: jSet[_]    => Some(set.asScala.map(_.asInstanceOf[Integer].toByte))
-    case map: jMap[_, _] => Some(map.values.iterator.next.asInstanceOf[jList[_]].asScala.map(_.asInstanceOf[Integer].toByte).toSet)
-  }
-  private lazy val j2sOpSetShort          = (v: AnyRef) => v match {
-    case null            => Option.empty[Set[Short]]
-    case set: jSet[_]    => Some(set.asScala.map(_.asInstanceOf[Integer].toShort))
-    case map: jMap[_, _] => Some(map.values.iterator.next.asInstanceOf[jList[_]].asScala.map(_.asInstanceOf[Integer].toShort).toSet)
-  }
-  private lazy val j2sOpSetChar           = (v: AnyRef) => v match {
-    case null            => Option.empty[Set[Char]]
-    case set: jSet[_]    => Some(set.asScala.map(_.asInstanceOf[String].charAt(0)))
-    case map: jMap[_, _] => Some(map.values.iterator.next.asInstanceOf[jList[_]].asScala.map(_.asInstanceOf[String].charAt(0)).toSet)
-  }
+
+  private lazy val jOptSetAttr2sOptSetId             = optAttr2sOptSet(j2Id)
+  private lazy val jOptSetAttr2sOptSetString         = optAttr2sOptSet(j2String)
+  private lazy val jOptSetAttr2sOptSetInt            = optAttr2sOptSet(j2Int)
+  private lazy val jOptSetAttr2sOptSetLong           = optAttr2sOptSet(j2Long)
+  private lazy val jOptSetAttr2sOptSetFloat          = optAttr2sOptSet(j2Float)
+  private lazy val jOptSetAttr2sOptSetDouble         = optAttr2sOptSet(j2Double)
+  private lazy val jOptSetAttr2sOptSetBoolean        = optAttr2sOptSet(j2Boolean)
+  private lazy val jOptSetAttr2sOptSetBigInt         = optAttr2sOptSet(j2BigInt)
+  private lazy val jOptSetAttr2sOptSetBigDecimal     = optAttr2sOptSet(j2BigDecimal)
+  private lazy val jOptSetAttr2sOptSetDate           = optAttr2sOptSet(j2Date)
+  private lazy val jOptSetAttr2sOptSetDuration       = optAttr2sOptSet(j2Duration)
+  private lazy val jOptSetAttr2sOptSetInstant        = optAttr2sOptSet(j2Instant)
+  private lazy val jOptSetAttr2sOptSetLocalDate      = optAttr2sOptSet(j2LocalDate)
+  private lazy val jOptSetAttr2sOptSetLocalTime      = optAttr2sOptSet(j2LocalTime)
+  private lazy val jOptSetAttr2sOptSetLocalDateTime  = optAttr2sOptSet(j2LocalDateTime)
+  private lazy val jOptSetAttr2sOptSetOffsetTime     = optAttr2sOptSet(j2OffsetTime)
+  private lazy val jOptSetAttr2sOptSetOffsetDateTime = optAttr2sOptSet(j2OffsetDateTime)
+  private lazy val jOptSetAttr2sOptSetZonedDateTime  = optAttr2sOptSet(j2ZonedDateTime)
+  private lazy val jOptSetAttr2sOptSetUUID           = optAttr2sOptSet(j2UUID)
+  private lazy val jOptSetAttr2sOptSetURI            = optAttr2sOptSet(j2URI)
+  private lazy val jOptSetAttr2sOptSetByte           = optAttr2sOptSet(j2Byte)
+  private lazy val jOptSetAttr2sOptSetShort          = optAttr2sOptSet(j2Short)
+  private lazy val jOptSetAttr2sOptSetChar           = optAttr2sOptSet(j2Char)
 
 
   case class ResSetOpt[T](
@@ -377,244 +334,93 @@ trait LambdasSet extends ResolveBase with JavaConversions {
     toDatalog: T => String,
     s2j: Any => Any,
     j2s: AnyRef => AnyRef,
+    optAttr2s: AnyRef => AnyRef,
   )
 
-  lazy val resOptSetId            : ResSetOpt[String]         = ResSetOpt("String", dId, s2jId, j2sOpSetId)
-  lazy val resOptSetString        : ResSetOpt[String]         = ResSetOpt("String", dString, s2jString, j2sOpSetString)
-  lazy val resOptSetInt           : ResSetOpt[Int]            = ResSetOpt("Int", dInt, s2jInt, j2sOpSetInt)
-  lazy val resOptSetLong          : ResSetOpt[Long]           = ResSetOpt("Long", dLong, s2jLong, j2sOpSetLong)
-  lazy val resOptSetFloat         : ResSetOpt[Float]          = ResSetOpt("Float", dFloat, s2jFloat, j2sOpSetFloat)
-  lazy val resOptSetDouble        : ResSetOpt[Double]         = ResSetOpt("Double", dDouble, s2jDouble, j2sOpSetDouble)
-  lazy val resOptSetBoolean       : ResSetOpt[Boolean]        = ResSetOpt("Boolean", dBoolean, s2jBoolean, j2sOpSetBoolean)
-  lazy val resOptSetBigInt        : ResSetOpt[BigInt]         = ResSetOpt("BigInt", dBigInt, s2jBigInt, j2sOpSetBigInt)
-  lazy val resOptSetBigDecimal    : ResSetOpt[BigDecimal]     = ResSetOpt("BigDecimal", dBigDecimal, s2jBigDecimal, j2sOpSetBigDecimal)
-  lazy val resOptSetDate          : ResSetOpt[Date]           = ResSetOpt("Date", dDate, s2jDate, j2sOpSetDate)
-  lazy val resOptSetDuration      : ResSetOpt[Duration]       = ResSetOpt("Duration", dDuration, s2jDuration, j2sOpSetDuration)
-  lazy val resOptSetInstant       : ResSetOpt[Instant]        = ResSetOpt("Instant", dInstant, s2jInstant, j2sOpSetInstant)
-  lazy val resOptSetLocalDate     : ResSetOpt[LocalDate]      = ResSetOpt("LocalDate", dLocalDate, s2jLocalDate, j2sOpSetLocalDate)
-  lazy val resOptSetLocalTime     : ResSetOpt[LocalTime]      = ResSetOpt("LocalTime", dLocalTime, s2jLocalTime, j2sOpSetLocalTime)
-  lazy val resOptSetLocalDateTime : ResSetOpt[LocalDateTime]  = ResSetOpt("LocalDateTime", dLocalDateTime, s2jLocalDateTime, j2sOpSetLocalDateTime)
-  lazy val resOptSetOffsetTime    : ResSetOpt[OffsetTime]     = ResSetOpt("OffsetTime", dOffsetTime, s2jOffsetTime, j2sOpSetOffsetTime)
-  lazy val resOptSetOffsetDateTime: ResSetOpt[OffsetDateTime] = ResSetOpt("OffsetDateTime", dOffsetDateTime, s2jOffsetDateTime, j2sOpSetOffsetDateTime)
-  lazy val resOptSetZonedDateTime : ResSetOpt[ZonedDateTime]  = ResSetOpt("ZonedDateTime", dZonedDateTime, s2jZonedDateTime, j2sOpSetZonedDateTime)
-  lazy val resOptSetUUID          : ResSetOpt[UUID]           = ResSetOpt("UUID", dUUID, s2jUUID, j2sOpSetUUID)
-  lazy val resOptSetURI           : ResSetOpt[URI]            = ResSetOpt("URI", dURI, s2jURI, j2sOpSetURI)
-  lazy val resOptSetByte          : ResSetOpt[Byte]           = ResSetOpt("Byte", dByte, s2jByte, j2sOpSetByte)
-  lazy val resOptSetShort         : ResSetOpt[Short]          = ResSetOpt("Short", dShort, s2jShort, j2sOpSetShort)
-  lazy val resOptSetChar          : ResSetOpt[Char]           = ResSetOpt("Char", dChar, s2jChar, j2sOpSetChar)
+  lazy val resOptSetId            : ResSetOpt[String]         = ResSetOpt("String", dId, s2jId, j2sOpSetId, jOptSetAttr2sOptSetId)
+  lazy val resOptSetString        : ResSetOpt[String]         = ResSetOpt("String", dString, s2jString, j2sOpSetString, jOptSetAttr2sOptSetString)
+  lazy val resOptSetInt           : ResSetOpt[Int]            = ResSetOpt("Int", dInt, s2jInt, j2sOpSetInt, jOptSetAttr2sOptSetInt)
+  lazy val resOptSetLong          : ResSetOpt[Long]           = ResSetOpt("Long", dLong, s2jLong, j2sOpSetLong, jOptSetAttr2sOptSetLong)
+  lazy val resOptSetFloat         : ResSetOpt[Float]          = ResSetOpt("Float", dFloat, s2jFloat, j2sOpSetFloat, jOptSetAttr2sOptSetFloat)
+  lazy val resOptSetDouble        : ResSetOpt[Double]         = ResSetOpt("Double", dDouble, s2jDouble, j2sOpSetDouble, jOptSetAttr2sOptSetDouble)
+  lazy val resOptSetBoolean       : ResSetOpt[Boolean]        = ResSetOpt("Boolean", dBoolean, s2jBoolean, j2sOpSetBoolean, jOptSetAttr2sOptSetBoolean)
+  lazy val resOptSetBigInt        : ResSetOpt[BigInt]         = ResSetOpt("BigInt", dBigInt, s2jBigInt, j2sOpSetBigInt, jOptSetAttr2sOptSetBigInt)
+  lazy val resOptSetBigDecimal    : ResSetOpt[BigDecimal]     = ResSetOpt("BigDecimal", dBigDecimal, s2jBigDecimal, j2sOpSetBigDecimal, jOptSetAttr2sOptSetBigDecimal)
+  lazy val resOptSetDate          : ResSetOpt[Date]           = ResSetOpt("Date", dDate, s2jDate, j2sOpSetDate, jOptSetAttr2sOptSetDate)
+  lazy val resOptSetDuration      : ResSetOpt[Duration]       = ResSetOpt("Duration", dDuration, s2jDuration, j2sOpSetDuration, jOptSetAttr2sOptSetDuration)
+  lazy val resOptSetInstant       : ResSetOpt[Instant]        = ResSetOpt("Instant", dInstant, s2jInstant, j2sOpSetInstant, jOptSetAttr2sOptSetInstant)
+  lazy val resOptSetLocalDate     : ResSetOpt[LocalDate]      = ResSetOpt("LocalDate", dLocalDate, s2jLocalDate, j2sOpSetLocalDate, jOptSetAttr2sOptSetLocalDate)
+  lazy val resOptSetLocalTime     : ResSetOpt[LocalTime]      = ResSetOpt("LocalTime", dLocalTime, s2jLocalTime, j2sOpSetLocalTime, jOptSetAttr2sOptSetLocalTime)
+  lazy val resOptSetLocalDateTime : ResSetOpt[LocalDateTime]  = ResSetOpt("LocalDateTime", dLocalDateTime, s2jLocalDateTime, j2sOpSetLocalDateTime, jOptSetAttr2sOptSetLocalDateTime)
+  lazy val resOptSetOffsetTime    : ResSetOpt[OffsetTime]     = ResSetOpt("OffsetTime", dOffsetTime, s2jOffsetTime, j2sOpSetOffsetTime, jOptSetAttr2sOptSetOffsetTime)
+  lazy val resOptSetOffsetDateTime: ResSetOpt[OffsetDateTime] = ResSetOpt("OffsetDateTime", dOffsetDateTime, s2jOffsetDateTime, j2sOpSetOffsetDateTime, jOptSetAttr2sOptSetOffsetDateTime)
+  lazy val resOptSetZonedDateTime : ResSetOpt[ZonedDateTime]  = ResSetOpt("ZonedDateTime", dZonedDateTime, s2jZonedDateTime, j2sOpSetZonedDateTime, jOptSetAttr2sOptSetZonedDateTime)
+  lazy val resOptSetUUID          : ResSetOpt[UUID]           = ResSetOpt("UUID", dUUID, s2jUUID, j2sOpSetUUID, jOptSetAttr2sOptSetUUID)
+  lazy val resOptSetURI           : ResSetOpt[URI]            = ResSetOpt("URI", dURI, s2jURI, j2sOpSetURI, jOptSetAttr2sOptSetURI)
+  lazy val resOptSetByte          : ResSetOpt[Byte]           = ResSetOpt("Byte", dByte, s2jByte, j2sOpSetByte, jOptSetAttr2sOptSetByte)
+  lazy val resOptSetShort         : ResSetOpt[Short]          = ResSetOpt("Short", dShort, s2jShort, j2sOpSetShort, jOptSetAttr2sOptSetShort)
+  lazy val resOptSetChar          : ResSetOpt[Char]           = ResSetOpt("Char", dChar, s2jChar, j2sOpSetChar, jOptSetAttr2sOptSetChar)
 
 
   // Nested opt ---------------------------------------------------------------------
 
-  lazy val it2SetId            : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case vs: jList[_] => vs.asScala.map(v => v.asInstanceOf[Long]).toSet
+  private def it2Set[T](decode: Any => T): jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+    case vs: jList[_] => vs.asScala.map(decode).toSet
     case `none`       => nullValue
-    case other        => unexpectedValue(other)
-  }
-  lazy val it2SetString        : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case `none`       => nullValue
-    case vs: jList[_] => vs.asScala.map(v => v.toString).toSet
-    case other        => unexpectedValue(other)
-  }
-  lazy val it2SetInt           : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    // Datomic can return both Integer or Long
-    case vs: jList[_] => vs.asScala.map(v => v.toString.toInt).toSet
-    case `none`       => nullValue
-    case other        => unexpectedValue(other)
-  }
-  lazy val it2SetLong          : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case vs: jList[_] => vs.asScala.map(v => v.asInstanceOf[Long]).toSet
-    case `none`       => nullValue
-    case other        => unexpectedValue(other)
-  }
-  lazy val it2SetFloat         : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case vs: jList[_] => vs.asScala.map(v => v.asInstanceOf[Float]).toSet
-    case `none`       => nullValue
-    case other        => unexpectedValue(other)
-  }
-  lazy val it2SetDouble        : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case vs: jList[_] => vs.asScala.map(v => v.asInstanceOf[Double]).toSet
-    case `none`       => nullValue
-    case other        => unexpectedValue(other)
-  }
-  lazy val it2SetBoolean       : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case vs: jList[_] => vs.asScala.map(v => v.asInstanceOf[Boolean]).toSet
-    case `none`       => nullValue
-    case other        => unexpectedValue(other)
-  }
-  lazy val it2SetBigInt        : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case vs: jList[_] => vs.asScala.map(v => BigInt(v.asInstanceOf[jBigInt])).toSet
-    case `none`       => nullValue
-    case other        => unexpectedValue(other)
-  }
-  lazy val it2SetBigDecimal    : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case vs: jList[_] => vs.asScala.map(v => BigDecimal(v.asInstanceOf[jBigDecimal])).toSet
-    case `none`       => nullValue
-    case other        => unexpectedValue(other)
-  }
-  lazy val it2SetDate          : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case vs: jList[_] => vs.asScala.map(v => v.asInstanceOf[Date]).toSet
-    case `none`       => nullValue
-    case other        => unexpectedValue(other)
-  }
-  lazy val it2SetDuration      : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case vs: jList[_] => vs.asScala.map(v => Duration.parse(v.asInstanceOf[String])).toSet
-    case `none`       => nullValue
-    case other        => unexpectedValue(other)
-  }
-  lazy val it2SetInstant       : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case vs: jList[_] => vs.asScala.map(v => Instant.parse(v.asInstanceOf[String])).toSet
-    case `none`       => nullValue
-    case other        => unexpectedValue(other)
-  }
-  lazy val it2SetLocalDate     : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case vs: jList[_] => vs.asScala.map(v => LocalDate.parse(v.asInstanceOf[String])).toSet
-    case `none`       => nullValue
-    case other        => unexpectedValue(other)
-  }
-  lazy val it2SetLocalTime     : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case vs: jList[_] => vs.asScala.map(v => LocalTime.parse(v.asInstanceOf[String])).toSet
-    case `none`       => nullValue
-    case other        => unexpectedValue(other)
-  }
-  lazy val it2SetLocalDateTime : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case vs: jList[_] => vs.asScala.map(v => LocalDateTime.parse(v.asInstanceOf[String])).toSet
-    case `none`       => nullValue
-    case other        => unexpectedValue(other)
-  }
-  lazy val it2SetOffsetTime    : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case vs: jList[_] => vs.asScala.map(v => OffsetTime.parse(v.asInstanceOf[String])).toSet
-    case `none`       => nullValue
-    case other        => unexpectedValue(other)
-  }
-  lazy val it2SetOffsetDateTime: jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case vs: jList[_] => vs.asScala.map(v => OffsetDateTime.parse(v.asInstanceOf[String])).toSet
-    case `none`       => nullValue
-    case other        => unexpectedValue(other)
-  }
-  lazy val it2SetZonedDateTime : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case vs: jList[_] => vs.asScala.map(v => ZonedDateTime.parse(v.asInstanceOf[String])).toSet
-    case `none`       => nullValue
-    case other        => unexpectedValue(other)
-  }
-  lazy val it2SetUUID          : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case vs: jList[_] => vs.asScala.map(v => v.asInstanceOf[UUID]).toSet
-    case `none`       => nullValue
-    case other        => unexpectedValue(other)
-  }
-  lazy val it2SetURI           : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case vs: jList[_] => vs.asScala.map(v => v.asInstanceOf[URI]).toSet
-    case `none`       => nullValue
-    case other        => unexpectedValue(other)
-  }
-  lazy val it2SetByte          : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case vs: jList[_] => vs.asScala.map(v => v.asInstanceOf[Integer].toByte).toSet
-    case `none`       => nullValue
-    case other        => unexpectedValue(other)
-  }
-  lazy val it2SetShort         : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case vs: jList[_] => vs.asScala.map(v => v.asInstanceOf[Integer].toShort).toSet
-    case `none`       => nullValue
-    case other        => unexpectedValue(other)
-  }
-  lazy val it2SetChar          : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case `none`       => nullValue
-    case vs: jList[_] => vs.asScala.map(v => v.asInstanceOf[String].charAt(0)).toSet
     case other        => unexpectedValue(other)
   }
 
+  lazy val it2SetId            : jIterator[_] => Any = it2Set(j2Id)
+  lazy val it2SetString        : jIterator[_] => Any = it2Set(j2String)
+  lazy val it2SetInt           : jIterator[_] => Any = it2Set(j2Int)
+  lazy val it2SetLong          : jIterator[_] => Any = it2Set(j2Long)
+  lazy val it2SetFloat         : jIterator[_] => Any = it2Set(j2Float)
+  lazy val it2SetDouble        : jIterator[_] => Any = it2Set(j2Double)
+  lazy val it2SetBoolean       : jIterator[_] => Any = it2Set(j2Boolean)
+  lazy val it2SetBigInt        : jIterator[_] => Any = it2Set(j2BigInt)
+  lazy val it2SetBigDecimal    : jIterator[_] => Any = it2Set(j2BigDecimal)
+  lazy val it2SetDate          : jIterator[_] => Any = it2Set(j2Date)
+  lazy val it2SetDuration      : jIterator[_] => Any = it2Set(j2Duration)
+  lazy val it2SetInstant       : jIterator[_] => Any = it2Set(j2Instant)
+  lazy val it2SetLocalDate     : jIterator[_] => Any = it2Set(j2LocalDate)
+  lazy val it2SetLocalTime     : jIterator[_] => Any = it2Set(j2LocalTime)
+  lazy val it2SetLocalDateTime : jIterator[_] => Any = it2Set(j2LocalDateTime)
+  lazy val it2SetOffsetTime    : jIterator[_] => Any = it2Set(j2OffsetTime)
+  lazy val it2SetOffsetDateTime: jIterator[_] => Any = it2Set(j2OffsetDateTime)
+  lazy val it2SetZonedDateTime : jIterator[_] => Any = it2Set(j2ZonedDateTime)
+  lazy val it2SetUUID          : jIterator[_] => Any = it2Set(j2UUID)
+  lazy val it2SetURI           : jIterator[_] => Any = it2Set(j2URI)
+  lazy val it2SetByte          : jIterator[_] => Any = it2Set(j2Byte)
+  lazy val it2SetShort         : jIterator[_] => Any = it2Set(j2Short)
+  lazy val it2SetChar          : jIterator[_] => Any = it2Set(j2Char)
 
-  lazy val it2OptSetId            : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
+
+  private def it2OptSet[T](decode: Any => T): jIterator[_] => Any = (it: jIterator[_]) => it.next match {
     case `none`       => None
-    case vs: jList[_] => Some(vs.asScala.map(v => v.asInstanceOf[Long]).toSet)
+    case vs: jList[_] => Some(vs.asScala.map(decode).toSet)
   }
-  lazy val it2OptSetString        : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case `none`       => None
-    case vs: jList[_] => Some(vs.asScala.map(v => v.asInstanceOf[String]).toSet)
-  }
-  lazy val it2OptSetInt           : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case `none` => None
-    // Datomic can return both Integer or Long
-    case vs: jList[_] => Some(vs.asScala.map(v => v.toString.toInt).toSet)
-  }
-  lazy val it2OptSetLong          : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case `none`       => None
-    case vs: jList[_] => Some(vs.asScala.map(v => v.asInstanceOf[Long]).toSet)
-  }
-  lazy val it2OptSetFloat         : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case `none`       => None
-    case vs: jList[_] => Some(vs.asScala.map(v => v.asInstanceOf[Float]).toSet)
-  }
-  lazy val it2OptSetDouble        : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case `none`       => None
-    case vs: jList[_] => Some(vs.asScala.map(v => v.asInstanceOf[Double]).toSet)
-  }
-  lazy val it2OptSetBoolean       : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case `none`       => None
-    case vs: jList[_] => Some(vs.asScala.map(v => v.asInstanceOf[Boolean]).toSet)
-  }
-  lazy val it2OptSetBigInt        : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case `none`       => None
-    case vs: jList[_] => Some(vs.asScala.map(v => BigInt(v.asInstanceOf[jBigInt])).toSet)
-  }
-  lazy val it2OptSetBigDecimal    : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case `none`       => None
-    case vs: jList[_] => Some(vs.asScala.map(v => BigDecimal(v.asInstanceOf[jBigDecimal])).toSet)
-  }
-  lazy val it2OptSetDate          : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case `none`       => None
-    case vs: jList[_] => Some(vs.asScala.map(v => v.asInstanceOf[Date]).toSet)
-  }
-  lazy val it2OptSetDuration      : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case `none`       => None
-    case vs: jList[_] => Some(vs.asScala.map(v => Duration.parse(v.asInstanceOf[String])).toSet)
-  }
-  lazy val it2OptSetInstant       : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case `none`       => None
-    case vs: jList[_] => Some(vs.asScala.map(v => Instant.parse(v.asInstanceOf[String])).toSet)
-  }
-  lazy val it2OptSetLocalDate     : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case `none`       => None
-    case vs: jList[_] => Some(vs.asScala.map(v => LocalDate.parse(v.asInstanceOf[String])).toSet)
-  }
-  lazy val it2OptSetLocalTime     : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case `none`       => None
-    case vs: jList[_] => Some(vs.asScala.map(v => LocalTime.parse(v.asInstanceOf[String])).toSet)
-  }
-  lazy val it2OptSetLocalDateTime : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case `none`       => None
-    case vs: jList[_] => Some(vs.asScala.map(v => LocalDateTime.parse(v.asInstanceOf[String])).toSet)
-  }
-  lazy val it2OptSetOffsetTime    : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case `none`       => None
-    case vs: jList[_] => Some(vs.asScala.map(v => OffsetTime.parse(v.asInstanceOf[String])).toSet)
-  }
-  lazy val it2OptSetOffsetDateTime: jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case `none`       => None
-    case vs: jList[_] => Some(vs.asScala.map(v => OffsetDateTime.parse(v.asInstanceOf[String])).toSet)
-  }
-  lazy val it2OptSetZonedDateTime : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case `none`       => None
-    case vs: jList[_] => Some(vs.asScala.map(v => ZonedDateTime.parse(v.asInstanceOf[String])).toSet)
-  }
-  lazy val it2OptSetUUID          : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case `none`       => None
-    case vs: jList[_] => Some(vs.asScala.map(v => v.asInstanceOf[UUID]).toSet)
-  }
-  lazy val it2OptSetURI           : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case `none`       => None
-    case vs: jList[_] => Some(vs.asScala.map(v => v.asInstanceOf[URI]).toSet)
-  }
-  lazy val it2OptSetByte          : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case `none`       => None
-    case vs: jList[_] => Some(vs.asScala.map(v => v.asInstanceOf[Integer].toByte).toSet)
-  }
-  lazy val it2OptSetShort         : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case `none`       => None
-    case vs: jList[_] => Some(vs.asScala.map(v => v.asInstanceOf[Integer].toShort).toSet)
-  }
-  lazy val it2OptSetChar          : jIterator[_] => Any = (it: jIterator[_]) => it.next match {
-    case `none`       => None
-    case vs: jList[_] => Some(vs.asScala.map(v => v.asInstanceOf[String].charAt(0)).toSet)
-  }
+
+  lazy val it2OptSetId            : jIterator[_] => Any = it2OptSet(j2Id)
+  lazy val it2OptSetString        : jIterator[_] => Any = it2OptSet(j2String)
+  lazy val it2OptSetInt           : jIterator[_] => Any = it2OptSet(j2Int)
+  lazy val it2OptSetLong          : jIterator[_] => Any = it2OptSet(j2Long)
+  lazy val it2OptSetFloat         : jIterator[_] => Any = it2OptSet(j2Float)
+  lazy val it2OptSetDouble        : jIterator[_] => Any = it2OptSet(j2Double)
+  lazy val it2OptSetBoolean       : jIterator[_] => Any = it2OptSet(j2Boolean)
+  lazy val it2OptSetBigInt        : jIterator[_] => Any = it2OptSet(j2BigInt)
+  lazy val it2OptSetBigDecimal    : jIterator[_] => Any = it2OptSet(j2BigDecimal)
+  lazy val it2OptSetDate          : jIterator[_] => Any = it2OptSet(j2Date)
+  lazy val it2OptSetDuration      : jIterator[_] => Any = it2OptSet(j2Duration)
+  lazy val it2OptSetInstant       : jIterator[_] => Any = it2OptSet(j2Instant)
+  lazy val it2OptSetLocalDate     : jIterator[_] => Any = it2OptSet(j2LocalDate)
+  lazy val it2OptSetLocalTime     : jIterator[_] => Any = it2OptSet(j2LocalTime)
+  lazy val it2OptSetLocalDateTime : jIterator[_] => Any = it2OptSet(j2LocalDateTime)
+  lazy val it2OptSetOffsetTime    : jIterator[_] => Any = it2OptSet(j2OffsetTime)
+  lazy val it2OptSetOffsetDateTime: jIterator[_] => Any = it2OptSet(j2OffsetDateTime)
+  lazy val it2OptSetZonedDateTime : jIterator[_] => Any = it2OptSet(j2ZonedDateTime)
+  lazy val it2OptSetUUID          : jIterator[_] => Any = it2OptSet(j2UUID)
+  lazy val it2OptSetURI           : jIterator[_] => Any = it2OptSet(j2URI)
+  lazy val it2OptSetByte          : jIterator[_] => Any = it2OptSet(j2Byte)
+  lazy val it2OptSetShort         : jIterator[_] => Any = it2OptSet(j2Short)
+  lazy val it2OptSetChar          : jIterator[_] => Any = it2OptSet(j2Char)
 }
