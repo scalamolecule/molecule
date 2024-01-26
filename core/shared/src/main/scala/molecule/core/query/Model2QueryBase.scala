@@ -31,7 +31,8 @@ trait Model2QueryBase extends ModelUtils {
             case a: Attr          => validateAttr(a); validate(tail, prevElements :+ a)
             case Nested(_, es)    => validateNested(es, prevElements)
             case NestedOpt(_, es) => validateNestedOpt(es, prevElements)
-            case _: Ref           => hasBinding = true; validate(tail, prevElements)
+//            case _: Ref           => hasBinding = true; validate(tail, prevElements)
+            case _: Ref           => validate(tail, prevElements)
             case _                => validate(tail, prevElements)
           }
         case Nil             => ()
@@ -43,9 +44,9 @@ trait Model2QueryBase extends ModelUtils {
         sortsPerLevel(level) = sortsPerLevel(level) :+ a.sort.get.substring(1, 2).toInt
       }
       a.filterAttr.foreach(_ => hasFilterAttr = true)
-      if (a.isInstanceOf[Mandatory]) {
-        hasBinding = true
-      }
+//      if (a.isInstanceOf[Mandatory]) {
+//        hasBinding = true
+//      }
     }
 
     def validateNested(es: List[Element], prevElements: List[Element]): Unit = {
@@ -79,9 +80,9 @@ trait Model2QueryBase extends ModelUtils {
       case _ => validate(elements)
     }
 
-    if (!hasBinding) {
-      throw ModelError("Please add at least 1 mandatory attribute.")
-    }
+//    if (!hasBinding) {
+//      throw ModelError("Please add at least 1 mandatory attribute.")
+//    }
 
     sortsPerLevel.foreach {
       case (_, Nil)         => ()

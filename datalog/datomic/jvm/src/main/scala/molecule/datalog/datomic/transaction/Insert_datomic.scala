@@ -53,7 +53,16 @@ trait Insert_datomic
       val insertStrs = "INSERT:" +: elements :+ "" :+ stmts1.toArray().mkString("\n")
       logger.debug(insertStrs.mkString("\n").trim)
     }
-    stmts1
+
+    val lastIndex = stmts1.size - 1
+    val stmts2    = if (lastIndex != -1
+      && stmts1.get(lastIndex).get(3).toString.startsWith("#db/id")) {
+      // remove orphan ref datom - can we include this check it in the algorithm above
+      stmts1.remove(lastIndex)
+      stmts1
+    } else stmts1
+
+    stmts2
   }
 
   override protected def addOne[T](

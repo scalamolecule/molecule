@@ -1,6 +1,7 @@
 package molecule.datalog.core.query
 
 import java.lang.{Long => jLong}
+import molecule.base.ast.CardOne
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.datalog.core.query.casting.NestOpt_
@@ -10,12 +11,21 @@ trait ResolveRef[Tpl] { self: DatomicQueryBase with NestOpt_[Tpl] =>
 
   protected def resolveRef(es: List[Var], ref: Ref): List[Var] = {
     val (e, refAttr, refId) = (es.last, s":${ref.ns}/${ref.refAttr}", vv)
+    refConfirmed = false
+    val card = if (ref.card.isInstanceOf[CardOne]) "one" else "set"
+    path = path ++ List(card, refAttr, refId)
     where += s"[$e $refAttr $refId]" -> wClause
     es :+ refId
   }
 
+  protected def resolveBackRef(es: List[Var]): List[Var] = {
+    path = path.dropRight(3)
+    es.init
+  }
+
   protected def resolveNestedRef(es: List[Var], ref: Ref): List[Var] = {
     val (e, refAttr, refId) = (es.last, s":${ref.ns}/${ref.refAttr}", vv)
+    path = path ++ List(refAttr, refId)
     firstId = refId
     val nestedId = "?id" + nestedIds.size
     nestedIds += nestedId
@@ -41,6 +51,7 @@ trait ResolveRef[Tpl] { self: DatomicQueryBase with NestOpt_[Tpl] =>
     if (where.isEmpty) {
       val Ref(ns, refAttrClean, _, _, _, _) = nestedRef
       val (refAttr, refId)                  = (s":$ns/$refAttrClean", vv)
+      path = path ++ List(refAttr, refId)
       where += s"[$e $refAttr $refId]" -> wClause
     }
     where += s"[(identity $e) $nestedId]" -> wGround

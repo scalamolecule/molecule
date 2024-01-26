@@ -40,6 +40,7 @@ class Model2DatomicQuery[Tpl](elements0: List[Element])
 
     // Remember first entity id variable
     firstId = vv
+    path = List(firstId)
 
     // Recursively resolve molecule elements
     resolve(List(firstId), elements1)
@@ -136,14 +137,14 @@ class Model2DatomicQuery[Tpl](elements0: List[Element])
             }
         }
       case a: AttrSet                           =>
-        isRef = a.refNs.isDefined
+        isRefAttr = a.refNs.isDefined
         a match {
           case a: AttrSetMan => resolve(resolveAttrSetMan(es, a), tail)
           case a: AttrSetOpt => resolve(resolveAttrSetOpt(es, a), tail)
           case a: AttrSetTac => resolve(resolveAttrSetTac(es, a), tail)
         }
       case ref: Ref                             => resolve(resolveRef(es, ref), tail)
-      case _: BackRef                           => resolve(es.init, tail)
+      case _: BackRef                           => resolve(resolveBackRef(es), tail)
       case Nested(ref, nestedElements)          => resolve(resolveNested(es, ref, nestedElements), tail)
       case NestedOpt(nestedRef, nestedElements) => resolve(resolveNestedOpt(es, nestedRef, nestedElements), tail)
     }

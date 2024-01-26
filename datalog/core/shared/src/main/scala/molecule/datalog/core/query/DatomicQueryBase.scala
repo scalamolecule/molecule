@@ -41,7 +41,7 @@ trait DatomicQueryBase extends BaseHelpers with JavaConversions { self: Model2Qu
   final protected val preRules = new ArrayBuffer[String]
 
   // Main query
-  final protected var isRef       = false
+  final protected var isRefAttr   = false
   final           var isNested    = false
   final           var isNestedOpt = false
 
@@ -83,9 +83,10 @@ trait DatomicQueryBase extends BaseHelpers with JavaConversions { self: Model2Qu
   final protected var filterAttrVars1: Map[String, (Var, Var)]         = Map.empty[String, (Var, Var)]
   final protected var filterAttrVars2: Map[String, (Var, Var) => Unit] = Map.empty[String, (Var, Var) => Unit]
   final protected val expectedFilterAttrs                              = mutable.Set.empty[String]
-  final protected val availableAttrs                                   = mutable.Set.empty[String]
+  final protected var refConfirmed                                     = true
 
-  final protected var firstId: String = ""
+  final protected var firstId: String       = ""
+  final protected var path   : List[String] = List.empty[String]
 
   final protected def addCast(cast: AnyRef => AnyRef): Unit = {
     castss = castss.init :+ (castss.last :+ cast)
