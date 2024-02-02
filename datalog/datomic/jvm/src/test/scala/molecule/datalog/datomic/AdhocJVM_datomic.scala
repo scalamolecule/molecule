@@ -4,6 +4,7 @@ import datomic.{Peer, Util}
 import molecule.base.error.ModelError
 import molecule.core.util.Executor._
 import molecule.coreTests.dataModels.core.dsl.Refs.A
+import molecule.coreTests.dataModels.core.dsl.Types.Ns
 import molecule.datalog.datomic.async._
 import molecule.datalog.datomic.setup.TestSuite_datomic
 import utest._
@@ -19,256 +20,87 @@ object AdhocJVM_datomic extends TestSuite_datomic {
 
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
-      val a = (1, Some(Set(int1, int2)))
-      val b = (2, Some(Set(int2, int3, int4)))
-      val c = (3, None)
       for {
-        _ <- Ns.i.ints_?.insert(a, b, c).transact
 
-        _ <- Ns.i.a1.ints_?.query.get.map(_ ==> List(a, b, c))
+        _ <- Ns.i.ii.ints.insert(
+          0, Set(1, 2), Set(1, 2)
+        ).transact
 
-
-
-        //        _ <- Ns.i(42).save.transact
-        //        _ <- Ns.i.query.get.map(_ ==> List(42))
-
-        //        _ <- Ns.i.ints.insert(List(
-        //          (1, Set(int1, int2)),
-        //          (2, Set(int2, int3)),
-        //          (2, Set(int3, int4)),
-        //          (2, Set(int3, int4)),
-        //        )).transact
-        //
-        //        // Sum of unique values (Set semantics)
-        //
-        //        _ <- Ns.ints(sum).query.get.map(_.head.head ==~ int1 + int2 + int3 + int4)
-        //
-        //        _ <- Ns.i.ints(sum).query.get.map(_.map {
-        //          case (1, setWithSum) => setWithSum.head ==~ int1 + int2
-        //          case (2, setWithSum) => setWithSum.head ==~ int2 + int3 + int4
-        //        })
-
-
-
-        _ <- Ns.i.ii.ints.insert(List(
-          (0, Set(int1, int2), Set(int1, int2)),
-          //          (2, Set(int2, int3), Set(int2, int3)),
-          //          (2, Set(int3, int4), Set(int3, int4)),
-          //          (2, Set(int3, int4), Set(int3, int4)),
-        )).i.transact
-
-        // Sum of unique values (Set semantics)
-
-        //        _ <- Ns.ints(sum).query.get.map(_.head.head ==~ int1 + int2 + int3 + int4)
-
-        //        _ <- Ns.i.ii.ints.query.i.get.map(println(_))
-        //        _ <- Ns.i.ii.ints(sum).query.i.get.map(println(_))
-        //
-        //        _ <- Ns.i.ints(sum).query.get.map(_.map {
-        //          case (1, setWithSum) => setWithSum.head ==~ int1 + int2
-        //          case (2, setWithSum) => setWithSum.head ==~ int2 + int3 + int4
-        //        })
-
-
-        //        _ <- Ns.i.ii.ints.insert(List((1, Set(1, 2), Set(1, 2)))).transact
-        //        //        _ <- Ns.i.ii.longs.insert(List((1, Set(1, 2), Set(1L, 2L)))).transact
-        //
-        //        //        _ <- A.i.B.ii.C.ii.query.get.map(println(_))
-        //
-        //        //        _ <- Ns.i.ii(sum).query.get.map(println(_))
-        ////        _ <- Ns.i.ii(sum).ints(sum).query.i.get.map(println(_))
-        ////        _ <- Ns.i.i(sum).ints(sum).query.i.get.map(println(_))
-        //        //        _ <- Ns.i.ii(avg).ints(sum).query.get.map(println(_))
-        //
-        //
-        _ = {
-          println("-------")
-          Peer.q(
-            """[:find  ?b ?c ?d
-              | :where [?a :Ns/i ?b]
-              |        [?a :Ns/ii ?c]
-              |        [?a :Ns/ints ?d]]
-              |""".stripMargin, conn.db
-          ).forEach { r => println(r) }
-        }
-        _ = {
-          println("-------")
-          Peer.q(
-            """[:find  ?b ?c ?d
-              | :where [?a :Ns/i ?b]
-              |        [?a :Ns/ii ?c]
-              |        [?a :Ns/ints ?d]]
-              |""".stripMargin, conn.db
-          ).forEach { r => println(r) }
-        }
-        _ = {
-          println("-------")
-          Peer.q(
-            """[:find  ?b
-              |        (distinct ?c)
-              |        (distinct ?d)
-              | :where [?a :Ns/i ?b]
-              |        [?a :Ns/ii ?c]
-              |        [?a :Ns/ints ?d]]
-              |""".stripMargin, conn.db
-          ).forEach { r => println(r) }
-        }
-        _ = {
-          println("-------")
-          Peer.q(
-            """[:find  ?b
-              |        (distinct ?c)
-              |        (sum ?d)
-              | :where [?a :Ns/i ?b]
-              |        [?a :Ns/ii ?c]
-              |        [?a :Ns/ints ?d]]
-              |""".stripMargin, conn.db
-          ).forEach { r => println(r) }
-        }
         _ = {
           println("-------")
           Peer.q(
             """[:find  ?b
               |        (sum ?c)
               |        (sum ?d)
+              | :with  ?a
               | :where [?a :Ns/i ?b]
               |        [?a :Ns/ii ?c]
-              |        [?a :Ns/ints ?d]]
-              |""".stripMargin, conn.db
+              |        [?a :Ns/ints ?d]
+              |
+              |        ]
+              |        """.stripMargin,
+            conn.db
+          ).forEach { r => println(r) }
+
+          println("-------")
+          Peer.q(
+            """[:find  ?b
+              |        (sum ?c)
+              |        (sum ?d)
+              | :with  ?a
+              | :where [?a :Ns/i ?b]
+              |        [?a :Ns/ii ?c]
+              |        [?a :Ns/ints ?d]
+              | :group-by ?b
+              |        ]
+              |        """.stripMargin,
+            conn.db
           ).forEach { r => println(r) }
         }
 
-
-        //        _ <- Ns.i.ii(sum).longs(sum).query.get.map(println(_))
-
-      } yield ()
-    }
-
-
-    "refs0" - refs { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Refs._
-      for {
-        _ <- A.i.B.ii.insert(
-          (1, Set(1, 2)),
-          (2, Set(2)),
-          (2, Set(7)),
-          (3, Set(3)),
-          (4, Set())
-        ).transact
-
-        // all
-//        _ <- A.i.a1.B.ii_.query.get.map(_ ==> List(1, 2, 3))
-
-        // Match non-asserted attribute (null)
-        _ <- A.i.a1.B.ii_().query.i.get.map(_ ==> List(4))
-
-
-
-
-
-
-
-
-
-
-        _ <- A.i.B.ii.insert(
-          (1, Set(1, 2)),
-          (2, Set(2)),
-          (2, Set(7)),
-          (3, Set(3)),
-          (4, Set())
-        ).transact
-
-        // All
-        _ <- A.i.a1.B.ii_?.query.i.get.map(_ ==> List(
-          (1, Some(Set(1, 2))),
-          (2, Some(Set(2, 7))),
-          (3, Some(Set(3))),
-          (4, None)
+        _ <- Ns.i.ii(sum).ints(sum).query.i.get.map(_ ==> List(
+          (0, 3, 3)
         ))
-        /*
-[:find  ?b
-        (distinct ?d4)
- :where [?a :A/i ?b]
-        [(datomic.api/q
-          "[:find (pull ?a1 [{:A/b [:B/ii]}] :limit nil)
-            :in $ ?a1]" $ ?a) [[?d1]]]
-        [(if (nil? ?d1) {:A/b {:B/ii []}} ?d1) ?d2]
-        [(:A/b ?d2) ?d3]
-        [(:B/ii ?d3) ?d4]]
-         */
 
       } yield ()
     }
+
 
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
 
-        _ <- A.i.Bb.ii.insert(
-          (1, Set(1, 2)),
-          (2, Set(2)),
-          (2, Set(7)),
-          (3, Set(3)),
-          (4, Set())
-        ).transact
-
-
-
-        _ = {
-//          println("------- 1")
-//          Peer.q(
-//            """[:find  ?b
-//              |        (distinct ?d)
-//              | :where [?a :A/i ?b]
-//              |        [?a :A/bb ?c]
-//              |        [?c :B/ii ?d]]""".stripMargin,
-//            conn.db, Util.list(Util.list(1, 2))
-//          ).forEach { r => println(r) }
+//        _ <- A.i.B.ii.C.ii.insert(List(
+//          (1, Set(1, 2), Set(1, 2)),
+//          (2, Set(2, 3), Set(2, 3)),
+//          (2, Set(3, 4), Set(3, 4)),
+//          (2, Set(3, 4), Set(3, 4)),
+//        )).transact
 //
-//          println("------- 2")
-//          Peer.q(
-//            """[:find  ?b
-//              |        (distinct ?d4)
-//              | :where [?a :A/i ?b]
-//              |        [(datomic.api/q
-//              |          "[:find (pull ?a1 [{:A/bb [:B/ii]}] :limit nil)
-//              |            :in $ ?a1]" $ ?a) [[?d1]]]
-//              |        [(if (nil? ?d1) {:A/bb {:B/ii []}} ?d1) ?d2]
-//              |        [(:A/bb ?d2) ?d3]
-//              |        [(:B/ii ?d3) ?d4]]""".stripMargin,
-//            conn.db
-//          ).forEach { r => println(r) }
-
-          println("------- 3")
-          Peer.q(
-            """[:find  ?b
-              |        (distinct ?d5)
-              | :where [?a :A/i ?b]
-              |        [(datomic.api/q
-              |          "[:find (pull ?a1 [{:A/bb [:B/ii]}] :limit nil)
-              |            :in $ ?a1]" $ ?a) [[?d1]]]
-              |        [(if (nil? ?d1) {:A/bb [{:B/ii []}]} ?d1) ?d2]
-              |        [(:A/bb ?d2) ?d3]
-              |        [(first ?d3) ?d4]
-              |        [(:B/ii ?d4) ?d5]
-              |        ]""".stripMargin,
-            conn.db
-          ).forEach { r => println(r) }
-        }
-
-//        _ <- A.i.a1.Bb.ii.query.i.get.map(_ ==> List(
-//          (1, Set(1, 2)),
-//          (2, Set(2, 7)), // 2 rows coalesced
-//          (3, Set(3)),
+//        _ <- A.i.a1.B.ii(max).C.ii(count).query.get.map(_ ==> List(
+//          (1, Set(2), 4),
+//          (2, Set(4), 12)
+//        ))
+//        _ <- A.i.a1.B.ii(countDistinct).C.ii(countDistinct).query.get.map(_ ==> List(
+//          (1, 2, 2),
+//          (2, 3, 3)
 //        ))
 
-        _ <- A.i.a1.Bb.ii_?.query.i.get.map(_ ==> List(
-          (1, Some(Set(1, 2))),
-          (2, Some(Set(2, 7))),
-          (3, Some(Set(3))),
-          (4, None)
-        ))
+        _ <- A.i.B.ii.insert(List(
+          (1, Set(1, 2)),
+          (2, Set(2)),
+          (2, Set(3, 4)),
+          (2, Set(3, 4)),
+        )).transact
+        all = Set(1, 2, 3, 4)
+
+        //        _ <- A.B.ii(sample).query.get.map(res => all.contains(res.head.head) ==> true)
+        //        _ <- A.B.ii(sample(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
+        _ <- A.B.ii.apply(sample(2)).query.get.map{res =>
+          println("------")
+          println(res)
+          all.intersect(res.head).nonEmpty ==> true
+        }
 
 
       } yield ()

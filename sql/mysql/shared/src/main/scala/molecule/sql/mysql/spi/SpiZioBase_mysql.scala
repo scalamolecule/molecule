@@ -15,7 +15,7 @@ trait SpiZioBase_mysql extends Renderer { spi: SpiZio =>
     for {
       conn <- ZIO.service[Conn]
       _ <- ZIO.succeed {
-        val query = new Model2SqlQuery_mysql(elements).getSqlQuery(Nil, None, None)
+        val query = new Model2SqlQuery_mysql(elements).getSqlQuery(Nil, None, None, None)
         printRaw(label, Nil, query)
       }
     } yield ()

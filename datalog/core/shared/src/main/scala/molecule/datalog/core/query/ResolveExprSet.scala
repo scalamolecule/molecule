@@ -431,6 +431,7 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
   private def aggr[T](
     e: Var, a: Att, v: Var, fn: String, optN: Option[Int], res: ResSet[T]
   ): Unit = {
+    checkAggrSet()
     lazy val n = optN.getOrElse(0)
     // Replace find/casting with aggregate function/cast
     find -= s"(distinct $v)"
@@ -490,39 +491,50 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
         replaceCast(toInt)
 
       case "sum" =>
+        widh += e
         find += s"(sum $v)"
         replaceCast(res.j2sSet)
 
       case "median" =>
-        // OBS! Datomic rounds down to nearest whole number
-        // when calculating the median for multiple numbers instead of
-        // following the semantic described on wikipedia:
-        // https://en.wikipedia.org/wiki/Median
-        // See also
-        // https://forum.datomic.com/t/unexpected-median-rounding/517
-        // So we calculate the correct median value manually instead:
-        find += s"(distinct $v)"
-        val medianConverter: AnyRef => Double = {
-          (v: AnyRef) =>
-            getMedian(v.asInstanceOf[jSet[_]].toArray
-              .map(_.toString.toDouble).toSet)
-        }
-        replaceCast(medianConverter.asInstanceOf[AnyRef => AnyRef])
+        widh += e
+        find += s"(median $v)"
+        // Force whole number to cast as double according to aggregate type for median/avg/variance/stddev)
+        replaceCast((v: AnyRef) => v.toString.toDouble.asInstanceOf[AnyRef])
+
+      // OBS! Datomic rounds down to nearest whole number
+      // when calculating the median for multiple numbers instead of
+      // following the semantic described on wikipedia:
+      // https://en.wikipedia.org/wiki/Median
+      // See also
+      // https://forum.datomic.com/t/unexpected-median-rounding/517
+      // So we calculate the correct median value manually instead:
+      //        widh += e
+      //        find += s"(distinct $v)"
+      //        val medianConverter: AnyRef => Double = {
+      //          (v: AnyRef) =>
+      //            getMedian(v.asInstanceOf[jSet[_]].toArray
+      //              .map(_.toString.toDouble).toSet)
+      //        }
+      //        replaceCast(medianConverter.asInstanceOf[AnyRef => AnyRef])
 
       case "avg" =>
+        widh += e
         find += s"(avg $v)"
         replaceCast(any2double)
 
       case "variance" =>
+        widh += e
         find += s"(variance $v)"
         replaceCast(any2double)
 
       case "stddev" =>
+        widh += e
         find += s"(stddev $v)"
         replaceCast(any2double)
 
       case other => unexpectedKw(other)
     }
+
     where += s"[$e $a $v]" -> wClause
   }
 

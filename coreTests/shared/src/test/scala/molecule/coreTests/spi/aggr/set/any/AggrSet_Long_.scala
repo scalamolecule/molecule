@@ -17,7 +17,7 @@ trait AggrSet_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.longs.insert(List(
           (1, Set(long1, long2)),
-          (2, Set(long2, long3)),
+          (2, Set(long2)),
           (2, Set(long3, long4)),
           (2, Set(long3, long4)),
         )).transact
@@ -32,7 +32,7 @@ trait AggrSet_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.longs(distinct).query.get.map(_ ==> List(
           (1, Set(Set(long1, long2))),
           (2, Set(
-            Set(long2, long3),
+            Set(long2),
             Set(long3, long4) // 2 rows coalesced
           ))
         ))
@@ -40,7 +40,7 @@ trait AggrSet_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.longs(distinct).query.get.map(_ ==> List(
           Set(
             Set(long1, long2),
-            Set(long2, long3),
+            Set(long2),
             Set(long3, long4),
           )
         ))
@@ -52,7 +52,7 @@ trait AggrSet_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.longs.insert(List(
           (1, Set(long1, long2)),
-          (2, Set(long2, long3)),
+          (2, Set(long2)),
           (2, Set(long3, long4)),
           (2, Set(long3, long4)),
         )).transact
@@ -91,7 +91,7 @@ trait AggrSet_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.longs.insert(List(
           (1, Set(long1, long2)),
-          (2, Set(long2, long3)),
+          (2, Set(long2)),
           (2, Set(long3, long4)),
           (2, Set(long3, long4)),
         )).transact
@@ -130,7 +130,7 @@ trait AggrSet_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.longs.insert(List(
           (1, Set(long1, long2)),
-          (2, Set(long2, long3)),
+          (2, Set(long2)),
           (2, Set(long3, long4)),
           (2, Set(long3, long4)),
         )).transact
@@ -146,7 +146,7 @@ trait AggrSet_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.longs.insert(List(
           (1, Set(long1, long2)),
-          (2, Set(long2, long3)),
+          (2, Set(long2)),
           (2, Set(long3, long4)),
           (2, Set(long3, long4)),
         )).transact
@@ -154,12 +154,12 @@ trait AggrSet_Long_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i(count).query.get.map(_ ==> List(4))
         _ <- Ns.i(countDistinct).query.get.map(_ ==> List(2))
 
-        _ <- Ns.longs(count).query.get.map(_ ==> List(8))
+        _ <- Ns.longs(count).query.get.map(_ ==> List(7))
         _ <- Ns.longs(countDistinct).query.get.map(_ ==> List(4))
 
         _ <- Ns.i.a1.longs(count).query.get.map(_ ==> List(
           (1, 2),
-          (2, 6)
+          (2, 5)
         ))
         _ <- Ns.i.a1.longs(countDistinct).query.get.map(_ ==> List(
           (1, 2),

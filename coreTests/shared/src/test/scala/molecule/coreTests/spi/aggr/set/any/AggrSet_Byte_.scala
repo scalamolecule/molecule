@@ -17,7 +17,7 @@ trait AggrSet_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.bytes.insert(List(
           (1, Set(byte1, byte2)),
-          (2, Set(byte2, byte3)),
+          (2, Set(byte2)),
           (2, Set(byte3, byte4)),
           (2, Set(byte3, byte4)),
         )).transact
@@ -32,7 +32,7 @@ trait AggrSet_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.bytes(distinct).query.get.map(_ ==> List(
           (1, Set(Set(byte1, byte2))),
           (2, Set(
-            Set(byte2, byte3),
+            Set(byte2),
             Set(byte3, byte4) // 2 rows coalesced
           ))
         ))
@@ -40,7 +40,7 @@ trait AggrSet_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.bytes(distinct).query.get.map(_ ==> List(
           Set(
             Set(byte1, byte2),
-            Set(byte2, byte3),
+            Set(byte2),
             Set(byte3, byte4),
           )
         ))
@@ -52,7 +52,7 @@ trait AggrSet_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.bytes.insert(List(
           (1, Set(byte1, byte2)),
-          (2, Set(byte2, byte3)),
+          (2, Set(byte2)),
           (2, Set(byte3, byte4)),
           (2, Set(byte3, byte4)),
         )).transact
@@ -91,7 +91,7 @@ trait AggrSet_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.bytes.insert(List(
           (1, Set(byte1, byte2)),
-          (2, Set(byte2, byte3)),
+          (2, Set(byte2)),
           (2, Set(byte3, byte4)),
           (2, Set(byte3, byte4)),
         )).transact
@@ -130,7 +130,7 @@ trait AggrSet_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.bytes.insert(List(
           (1, Set(byte1, byte2)),
-          (2, Set(byte2, byte3)),
+          (2, Set(byte2)),
           (2, Set(byte3, byte4)),
           (2, Set(byte3, byte4)),
         )).transact
@@ -146,7 +146,7 @@ trait AggrSet_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.bytes.insert(List(
           (1, Set(byte1, byte2)),
-          (2, Set(byte2, byte3)),
+          (2, Set(byte2)),
           (2, Set(byte3, byte4)),
           (2, Set(byte3, byte4)),
         )).transact
@@ -154,12 +154,12 @@ trait AggrSet_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i(count).query.get.map(_ ==> List(4))
         _ <- Ns.i(countDistinct).query.get.map(_ ==> List(2))
 
-        _ <- Ns.bytes(count).query.get.map(_ ==> List(8))
+        _ <- Ns.bytes(count).query.get.map(_ ==> List(7))
         _ <- Ns.bytes(countDistinct).query.get.map(_ ==> List(4))
 
         _ <- Ns.i.a1.bytes(count).query.get.map(_ ==> List(
           (1, 2),
-          (2, 6)
+          (2, 5)
         ))
         _ <- Ns.i.a1.bytes(countDistinct).query.get.map(_ ==> List(
           (1, 2),

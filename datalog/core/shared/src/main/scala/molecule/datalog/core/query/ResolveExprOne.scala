@@ -176,29 +176,6 @@ trait ResolveExprOne[Tpl]
     refConfirmed = true
   }
 
-  private def opt[T: ClassTag](
-    attr: Attr,
-    e: Var,
-    a: Att,
-    optArgs: Option[Seq[T]],
-    resOpt: ResOneOpt[T],
-    sortOpt: Option[(Int, Int => (Row, Row) => Int)],
-    sortMan: Option[(Int, Int => (Row, Row) => Int)]
-  ): Unit = {
-    val v = getFilterVar(attr)
-    addCast(resOpt.j2s)
-    attr.op match {
-      case V     => addSort(sortOpt); optV(e, a, v)
-      case Eq    => optEqual(attr, e, a, v, optArgs, resOpt.s2j, sortMan)
-      case Neq   => addSort(sortMan); optNeq(e, a, v, optArgs, resOpt.tpe, resOpt.toDatalog)
-      case Lt    => addSort(sortMan); optCompare(e, a, v, optArgs, "<", resOpt.s2j)
-      case Gt    => addSort(sortMan); optCompare(e, a, v, optArgs, ">", resOpt.s2j)
-      case Le    => addSort(sortMan); optCompare(e, a, v, optArgs, "<=", resOpt.s2j)
-      case Ge    => addSort(sortMan); optCompare(e, a, v, optArgs, ">=", resOpt.s2j)
-      case other => unexpectedOp(other)
-    }
-  }
-
   private def expr[T: ClassTag](
     e: Var,
     a: Att,
@@ -243,6 +220,140 @@ trait ResolveExprOne[Tpl]
     case other => unexpectedOp(other)
   }
 
+  private def opt[T: ClassTag](
+    attr: Attr,
+    e: Var,
+    a: Att,
+    optArgs: Option[Seq[T]],
+    resOpt: ResOneOpt[T],
+    sortOpt: Option[(Int, Int => (Row, Row) => Int)],
+    sortMan: Option[(Int, Int => (Row, Row) => Int)]
+  ): Unit = {
+    val v = getFilterVar(attr)
+    addCast(resOpt.j2s)
+    attr.op match {
+      case V     => addSort(sortOpt); optAttr(e, a, v)
+      case Eq    => optEqual(attr, e, a, v, optArgs, resOpt.s2j, sortMan)
+      case Neq   => addSort(sortMan); optNeq(e, a, v, optArgs, resOpt.tpe, resOpt.toDatalog)
+      case Lt    => addSort(sortMan); optCompare(e, a, v, optArgs, "<", resOpt.s2j)
+      case Gt    => addSort(sortMan); optCompare(e, a, v, optArgs, ">", resOpt.s2j)
+      case Le    => addSort(sortMan); optCompare(e, a, v, optArgs, "<=", resOpt.s2j)
+      case Ge    => addSort(sortMan); optCompare(e, a, v, optArgs, ">=", resOpt.s2j)
+      case other => unexpectedOp(other)
+    }
+  }
+
+
+  // attr ----------------------------------------------------------------------
+
+  private def attr(e: Var, a: Att, v: Var): Unit = {
+    where += s"[$e $a $v]" -> wClause
+  }
+
+  private def optAttr(e: Var, a: Att, v: Var): Unit = {
+    find += s"(pull $e-$v [[$a :limit nil]]) "
+    where += s"[(identity $e) $e-$v]" -> wGround
+  }
+
+
+  // eq ------------------------------------------------------------------------
+
+  private def equal[T: ClassTag](e: Var, a: Att, v: Var, argValues: Seq[T], fromScala: Any => Any): Unit = {
+    in += s"[$v ...]"
+    where += s"[$e $a $v]" -> wClause
+    args += argValues.map(fromScala).toArray
+  }
+
+  private def optEqual[T: ClassTag](
+    attr: Attr,
+    e: Var,
+    a: Att,
+    v: Var,
+    optArgs: Option[Seq[T]],
+    fromScala: Any => Any,
+    sortMan: Option[(Int, Int => (Row, Row) => Int)]
+  ): Unit = {
+    optArgs.fold[Unit] {
+      addSort(dummySorter(attr))
+      find += s"(pull $e-$v [[$a :limit nil]])"
+      where += s"(not [$e $a])" -> wNeqOne
+      where += s"[(identity $e) $e-$v]" -> wGround
+    } { vs =>
+      addSort(sortMan)
+      find += v
+      equal(e, a, v, vs, fromScala)
+    }
+  }
+
+
+  // neq -----------------------------------------------------------------------
+
+  private def neq[T](e: Var, a: Att, v: Var, args: Seq[T], tpe: String, toDatalog: T => String): Unit = {
+    where += s"[$e $a $v]" -> wClause
+    if (tpe == "URI") {
+      args.zipWithIndex.foreach { case (arg, i) =>
+        where += s"""[(ground (new java.net.URI "$arg")) $v$i]""" -> wNeqOne
+        where += s"[(!= $v $v$i)]" -> wNeqOne
+      }
+    } else {
+      args.foreach { arg =>
+        where += s"[(!= $v ${toDatalog(arg)})]" -> wNeqOne
+      }
+    }
+  }
+
+  private def optNeq[T](
+    e: Var,
+    a: Att,
+    v: Var,
+    optArgs: Option[Seq[T]],
+    tpe: String,
+    toDatalog: T => String
+  ): Unit = {
+    find += v
+    where += s"[$e $a $v]" -> wClause
+    if (optArgs.isDefined && optArgs.get.nonEmpty) {
+      neq(e, a, v, optArgs.get, tpe, toDatalog)
+    }
+  }
+
+
+  // compare -------------------------------------------------------------------
+
+  private def compare[T](e: Var, a: Att, v: Var, arg: T, op: String, fromScala: Any => Any): Unit = {
+    val v1 = v + 1
+    in += v1
+    where += s"[$e $a $v]" -> wClause
+    where += s"[($op $v $v1)]" -> wNeqOne
+    args += fromScala(arg).asInstanceOf[AnyRef]
+  }
+
+  private def optCompare[T](
+    e: Var,
+    a: Att,
+    v: Var,
+    optArgs: Option[Seq[T]],
+    op: String,
+    fromScala: Any => Any
+  ): Unit = {
+    optArgs.fold[Unit] {
+      find += s"$v-nil"
+      where += s"[(ground nil) $v-nil]" -> wGround
+    } { vs =>
+      find += v
+      compare(e, a, v, vs.head, op, fromScala)
+    }
+  }
+
+
+  // no value ------------------------------------------------------------------
+
+  private def noValue(e: Var, a: Att): Unit = {
+    where += s"(not [$e $a])" -> wNeqOne
+  }
+
+
+  // string filters ------------------------------------------------------------
 
   private def stringOp[T](e: Var, a: Att, v: Var, arg: T, predicate: String): Unit = {
     val v1 = v + 1
@@ -251,10 +362,14 @@ trait ResolveExprOne[Tpl]
     where += s"[(clojure.string/$predicate $v $v1)]" -> wNeqOne
     args += arg.asInstanceOf[AnyRef]
   }
+
   private def regex[T](e: Var, a: Att, v: Var, regex: T): Unit = {
     where += s"[$e $a $v]" -> wClause
     where += s"""[(re-find (re-pattern "$regex") $v)]""" -> wNeqOne
   }
+
+
+  // number filters ------------------------------------------------------------
 
   private def remainder[T](e: Var, a: Att, v: Var, args: Seq[T]): Unit = {
     where += s"[$e $a $v]" -> wClause
@@ -271,7 +386,10 @@ trait ResolveExprOne[Tpl]
   }
 
 
+  // aggregation ---------------------------------------------------------------
+
   private def aggr[T](e: Var, a: Att, v: Var, fn: String, optN: Option[Int], res: ResOne[T]): Unit = {
+    checkAggrOne()
     lazy val n = optN.getOrElse(0)
     // Replace find/casting with aggregate function/cast
     find -= v
@@ -303,145 +421,71 @@ trait ResolveExprOne[Tpl]
         replaceCast(res.vector2set)
 
       case "count" =>
-        find += s"(count $v)"
         widh += e
+        find += s"(count $v)"
         replaceCast(toInt)
 
       case "countDistinct" =>
-        find += s"(count-distinct $v)"
         widh += e
+        find += s"(count-distinct $v)"
         replaceCast(toInt)
 
       case "sum" =>
+        widh += e
         find += s"(sum $v)"
 
       case "median" =>
-        // OBS! Datomic rounds down to nearest whole number
-        // when calculating the median for multiple numbers instead of
-        // following the semantic described on wikipedia:
-        // https://en.wikipedia.org/wiki/Median
-        // See also
-        // https://forum.datomic.com/t/unexpected-median-rounding/517
-        // So we calculate the correct median value manually instead:
-        find += s"(distinct $v)"
-        val medianConverter: AnyRef => Double = {
-          (v: AnyRef) => getMedian(v.asInstanceOf[jSet[_]].toArray.map(_.toString.toDouble).toSet)
-        }
-        replaceCast(medianConverter.asInstanceOf[AnyRef => AnyRef])
+        widh += e
+        find += s"(median $v)"
+        // Force whole number to cast as double according to aggregate type for median/avg/variance/stddev)
+        replaceCast((v: AnyRef) => v.toString.toDouble.asInstanceOf[AnyRef])
 
-      case "avg"      => find += s"(avg $v)"
-      case "variance" => find += s"(variance $v)"
-      case "stddev"   => find += s"(stddev $v)"
+      // OBS! Datomic rounds down to nearest whole number
+      // when calculating the median for multiple numbers instead of
+      // following the semantic described on wikipedia:
+      // https://en.wikipedia.org/wiki/Median
+      // See also
+      // https://forum.datomic.com/t/unexpected-median-rounding/517
+      // If we wanted the rounded version we can do this instead if desired:
+      //        widh += e
+      //        find += s"(distinct $v)"
+      //        val medianConverter: AnyRef => Double = {
+      //          (v: AnyRef) => getMedian(v.asInstanceOf[jSet[_]].toArray.map(_.toString.toDouble).toSet)
+      //        }
+      //        replaceCast(medianConverter.asInstanceOf[AnyRef => AnyRef])
+
+      case "avg" =>
+        widh += e
+        find += s"(avg $v)"
+
+      case "variance" =>
+        widh += e
+        find += s"(variance $v)"
+
+      case "stddev" =>
+        widh += e
+        find += s"(stddev $v)"
 
       case other => unexpectedKw(other)
     }
     where += s"[$e $a $v]" -> wClause
   }
 
-  private def attr(e: Var, a: Att, v: Var): Unit = {
-    where += s"[$e $a $v]" -> wClause
-  }
 
-  private def equal[T: ClassTag](e: Var, a: Att, v: Var, argValues: Seq[T], fromScala: Any => Any): Unit = {
-    in += s"[$v ...]"
-    where += s"[$e $a $v]" -> wClause
-    args += argValues.map(fromScala).toArray
-  }
+  // filter attribute filters --------------------------------------------------
+
   private def equal2(e: Var, a: Att, v: Var, w: Var): Unit = {
     where += s"[$e $a $w]" -> wClause
     where += s"[(identity $w) $v]" -> wGround
   }
 
-  private def neq[T](e: Var, a: Att, v: Var, args: Seq[T], tpe: String, toDatalog: T => String): Unit = {
-    where += s"[$e $a $v]" -> wClause
-    if (tpe == "URI") {
-      args.zipWithIndex.foreach { case (arg, i) =>
-        where += s"""[(ground (new java.net.URI "$arg")) $v$i]""" -> wNeqOne
-        where += s"[(!= $v $v$i)]" -> wNeqOne
-      }
-    } else {
-      args.foreach { arg =>
-        where += s"[(!= $v ${toDatalog(arg)})]" -> wNeqOne
-      }
-    }
-  }
   private def neq2(e: Var, a: Att, v: Var, w: Var): Unit = {
     where += s"[$e $a $v]" -> wClause
     where += s"[(!= $v $w)]" -> wNeqOne
   }
 
-  private def compare[T](e: Var, a: Att, v: Var, arg: T, op: String, fromScala: Any => Any): Unit = {
-    val v1 = v + 1
-    in += v1
-    where += s"[$e $a $v]" -> wClause
-    where += s"[($op $v $v1)]" -> wNeqOne
-    args += fromScala(arg).asInstanceOf[AnyRef]
-  }
   private def compare2(e: Var, a: Att, v: Var, w: Var, op: String): Unit = {
     where += s"[$e $a $v]" -> wClause
     where += s"[($op $v $w)]" -> wNeqOne
-  }
-
-  private def noValue(e: Var, a: Att): Unit = {
-    where += s"(not [$e $a])" -> wNeqOne
-  }
-
-
-  private def optV(e: Var, a: Att, v: Var): Unit = {
-    find += s"(pull $e-$v [[$a :limit nil]]) "
-    where += s"[(identity $e) $e-$v]" -> wGround
-  }
-
-  private def optEqual[T: ClassTag](
-    attr: Attr,
-    e: Var,
-    a: Att,
-    v: Var,
-    optArgs: Option[Seq[T]],
-    fromScala: Any => Any,
-    sortMan: Option[(Int, Int => (Row, Row) => Int)]
-  ): Unit = {
-    optArgs.fold[Unit] {
-      addSort(dummySorter(attr))
-      find += s"(pull $e-$v [[$a :limit nil]])"
-      where += s"(not [$e $a])" -> wNeqOne
-      where += s"[(identity $e) $e-$v]" -> wGround
-    } { vs =>
-      addSort(sortMan)
-      find += v
-      equal(e, a, v, vs, fromScala)
-    }
-  }
-
-  private def optNeq[T](
-    e: Var,
-    a: Att,
-    v: Var,
-    optArgs: Option[Seq[T]],
-    tpe: String,
-    toDatalog: T => String
-  ): Unit = {
-    find += v
-    where += s"[$e $a $v]" -> wClause
-    if (optArgs.isDefined && optArgs.get.nonEmpty) {
-      neq(e, a, v, optArgs.get, tpe, toDatalog)
-    }
-  }
-
-  private def optCompare[T](
-    e: Var,
-    a: Att,
-    v: Var,
-    optArgs: Option[Seq[T]],
-    op: String,
-    fromScala: Any => Any
-  ): Unit = {
-    optArgs.fold[Unit] {
-      find += s"$v-nil"
-      where += s"[(ground nil) $v-nil]" -> wGround
-    } { vs =>
-      find += v
-      compare(e, a, v, vs.head, op, fromScala)
-    }
   }
 }

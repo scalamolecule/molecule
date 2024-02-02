@@ -46,10 +46,9 @@ class FlatEmbed(
     // Recursively resolve embedded/looked-up documents
     subBranches.foreach(ref => stages.addAll(ref.getStages))
 
-    if (cardMany) {
-      stages.add(new BsonDocument()
-        .append("$unwind", new BsonString("$" + dot.init)))
-    }
+    unwinds.foreach(field =>
+      stages.add(new BsonDocument("$unwind", new BsonString(field)))
+    )
 
     addStage("$match", preMatches)
 
@@ -83,6 +82,9 @@ class FlatEmbed(
     // Pre-group
     val (preGroup, prefix) = if (preGroupFields.nonEmpty) {
       val preGroupFieldsDoc = new BsonDocument()
+      if (aggregate) {
+        preGroupFieldsDoc.put("_id", new BsonString("$_id"))
+      }
       groupIdFields.foreach { case (_, fieldPath, fieldAlias) =>
         preGroupFieldsDoc.put(fieldAlias, new BsonString("$" + fieldPath))
       }
@@ -116,6 +118,7 @@ class FlatEmbed(
       groupExprs.foreach { case (field, bson) =>
         groupDoc.put(field, bson)
       }
+
       stages.add(new BsonDocument("$group", groupDoc))
 
       // $addFields - "format" fields to expected structure

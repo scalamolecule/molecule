@@ -27,7 +27,7 @@ object Connection_postgres {
   Class.forName(container.driverClassName)
   val sqlConn = DriverManager.getConnection(url)
 
-  val sqlSchema_postgres1: String =
+  val sqlSchema_postgres: String =
     """
       |CREATE TABLE IF NOT EXISTS Ns (
       |  id              BIGSERIAL PRIMARY KEY,
@@ -43,7 +43,7 @@ object Connection_postgres {
       |  boolean         BOOLEAN,
       |  bigInt          DECIMAL,
       |  bigDecimal      DECIMAL,
-      |  date            DATE,
+      |  date            BIGINT,
       |  duration        VARCHAR,
       |  instant         VARCHAR,
       |  localDate       VARCHAR,
@@ -67,15 +67,15 @@ object Connection_postgres {
       |  booleans        BOOLEAN ARRAY,
       |  bigInts         DECIMAL ARRAY,
       |  bigDecimals     DECIMAL ARRAY,
-      |  dates           DATE ARRAY,
+      |  dates           BIGINT ARRAY,
       |  durations       VARCHAR ARRAY,
-      |  instants        TEXT ARRAY,
-      |  localDates      TEXT ARRAY,
-      |  localTimes      TEXT ARRAY,
-      |  localDateTimes  TEXT ARRAY,
-      |  offsetTimes     TEXT ARRAY,
-      |  offsetDateTimes TEXT ARRAY,
-      |  zonedDateTimes  TEXT ARRAY,
+      |  instants        VARCHAR ARRAY,
+      |  localDates      VARCHAR ARRAY,
+      |  localTimes      VARCHAR ARRAY,
+      |  localDateTimes  VARCHAR ARRAY,
+      |  offsetTimes     VARCHAR ARRAY,
+      |  offsetDateTimes VARCHAR ARRAY,
+      |  zonedDateTimes  VARCHAR ARRAY,
       |  uuids           UUID ARRAY,
       |  uris            VARCHAR ARRAY,
       |  bytes           SMALLINT ARRAY,
@@ -100,7 +100,7 @@ object Connection_postgres {
       |  boolean         BOOLEAN,
       |  bigInt          DECIMAL,
       |  bigDecimal      DECIMAL,
-      |  date            DATE,
+      |  date            BIGINT,
       |  duration        VARCHAR,
       |  instant         VARCHAR,
       |  localDate       VARCHAR,
@@ -124,15 +124,15 @@ object Connection_postgres {
       |  booleans        BOOLEAN ARRAY,
       |  bigInts         DECIMAL ARRAY,
       |  bigDecimals     DECIMAL ARRAY,
-      |  dates           DATE ARRAY,
-      |  durations       TEXT ARRAY,
-      |  instants        TEXT ARRAY,
-      |  localDates      TEXT ARRAY,
-      |  localTimes      TEXT ARRAY,
-      |  localDateTimes  TEXT ARRAY,
-      |  offsetTimes     TEXT ARRAY,
-      |  offsetDateTimes TEXT ARRAY,
-      |  zonedDateTimes  TEXT ARRAY,
+      |  dates           BIGINT ARRAY,
+      |  durations       VARCHAR ARRAY,
+      |  instants        VARCHAR ARRAY,
+      |  localDates      VARCHAR ARRAY,
+      |  localTimes      VARCHAR ARRAY,
+      |  localDateTimes  VARCHAR ARRAY,
+      |  offsetTimes     VARCHAR ARRAY,
+      |  offsetDateTimes VARCHAR ARRAY,
+      |  zonedDateTimes  VARCHAR ARRAY,
       |  uuids           UUID ARRAY,
       |  uris            VARCHAR ARRAY,
       |  bytes           SMALLINT ARRAY,
@@ -159,7 +159,7 @@ object Connection_postgres {
       |$$
       |   SELECT AVG(val)
       |   FROM (
-      |     SELECT DISTINCT val
+      |     SELECT val
       |     FROM unnest($1) val
       |     ORDER BY 1
       |     LIMIT  2 - MOD(array_upper($1, 1), 2)
@@ -182,8 +182,8 @@ object Connection_postgres {
        |""".stripMargin
 
   def recreationStmt(schema: Schema): String = {
-    //     recreateSchema + sqlSchema_postgres1
-    recreateSchema + schema.sqlSchema_postgres
+//    recreateSchema + sqlSchema_postgres
+        recreateSchema + schema.sqlSchema_postgres
   }
 
   def proxy(schema: Schema) = {

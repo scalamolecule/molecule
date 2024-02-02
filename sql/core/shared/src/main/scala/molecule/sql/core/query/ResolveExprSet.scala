@@ -3,6 +3,7 @@ package molecule.sql.core.query
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.core.query.ResolveExpr
+import scala.collection.mutable.ListBuffer
 import scala.reflect.ClassTag
 
 trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
@@ -372,6 +373,7 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
   protected def setAggr[T: ClassTag](
     col: String, fn: String, optN: Option[Int], res: ResSet[T]
   ): Unit = {
+    checkAggrSet()
     select -= col
     lazy val n = optN.getOrElse(0)
     fn match {
@@ -474,11 +476,10 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
         )
 
       case "sum" =>
-        // Sum of unique values (Set semantics)
         select += s"ARRAY_AGG($col)"
         groupByCols -= col
         aggregate = true
-        replaceCast(res.array2setSum)
+        replaceCast(res.nestedArray2sum)
 
       case "median" =>
         // Using brute force and collecting all unique values to calculate the median value
@@ -489,63 +490,60 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
         replaceCast(
           (row: Row, paramIndex: Int) => {
             val outerArrayResultSet = row.getArray(paramIndex).getResultSet
-            var set                 = Set.empty[Double]
+            val list                 = ListBuffer.empty[Double]
             while (outerArrayResultSet.next()) {
               val array = outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]]
-              array.foreach(v => set += v.toString.toDouble) // not the most efficient...
+              array.foreach(v => list += v.toString.toDouble) // not the most efficient...
             }
-            getMedian(set)
+            getMedian(list.toList)
           }
         )
 
       case "avg" =>
-        // Average of unique values (Set semantics)
         select += s"ARRAY_AGG($col)"
         groupByCols -= col
         aggregate = true
         replaceCast(
           (row: Row, paramIndex: Int) => {
             val outerArrayResultSet = row.getArray(paramIndex).getResultSet
-            var set                 = Set.empty[Double]
+            val list                 = ListBuffer.empty[Double]
             while (outerArrayResultSet.next()) {
               val array = outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]]
-              array.foreach(v => set += v.toString.toDouble) // not the most efficient...
+              array.foreach(v => list += v.toString.toDouble) // not the most efficient...
             }
-            set.sum / set.size
+            list.sum / list.size
           }
         )
 
       case "variance" =>
-        // Variance of unique values (Set semantics)
         select += s"ARRAY_AGG($col)"
         groupByCols -= col
         aggregate = true
         replaceCast(
           (row: Row, paramIndex: Int) => {
             val outerArrayResultSet = row.getArray(paramIndex).getResultSet
-            var set                 = Set.empty[Double]
+            val list                 = ListBuffer.empty[Double]
             while (outerArrayResultSet.next()) {
               val array = outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]]
-              array.foreach(v => set += v.toString.toDouble) // not the most efficient...
+              array.foreach(v => list += v.toString.toDouble) // not the most efficient...
             }
-            varianceOf(set.toList: _*)
+            varianceOf(list.toList: _*)
           }
         )
 
       case "stddev" =>
-        // Standard deviation of unique values (Set semantics)
         select += s"ARRAY_AGG($col)"
         groupByCols -= col
         aggregate = true
         replaceCast(
           (row: Row, paramIndex: Int) => {
             val outerArrayResultSet = row.getArray(paramIndex).getResultSet
-            var set                 = Set.empty[Double]
+            val list                 = ListBuffer.empty[Double]
             while (outerArrayResultSet.next()) {
               val array = outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]]
-              array.foreach(v => set += v.toString.toDouble) // not the most efficient...
+              array.foreach(v => list += v.toString.toDouble) // not the most efficient...
             }
-            stdDevOf(set.toList: _*)
+            stdDevOf(list.toList: _*)
           }
         )
 

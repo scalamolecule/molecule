@@ -18,7 +18,7 @@ trait AggrSet_OffsetDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsyn
       for {
         _ <- Ns.i.offsetDateTimes.insert(List(
           (1, Set(offsetDateTime1, offsetDateTime2)),
-          (2, Set(offsetDateTime2, offsetDateTime3)),
+          (2, Set(offsetDateTime2)),
           (2, Set(offsetDateTime3, offsetDateTime4)),
           (2, Set(offsetDateTime3, offsetDateTime4)),
         )).transact
@@ -33,7 +33,7 @@ trait AggrSet_OffsetDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsyn
         _ <- Ns.i.a1.offsetDateTimes(distinct).query.get.map(_ ==> List(
           (1, Set(Set(offsetDateTime1, offsetDateTime2))),
           (2, Set(
-            Set(offsetDateTime2, offsetDateTime3),
+            Set(offsetDateTime2),
             Set(offsetDateTime3, offsetDateTime4) // 2 rows coalesced
           ))
         ))
@@ -41,7 +41,7 @@ trait AggrSet_OffsetDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsyn
         _ <- Ns.offsetDateTimes(distinct).query.get.map(_ ==> List(
           Set(
             Set(offsetDateTime1, offsetDateTime2),
-            Set(offsetDateTime2, offsetDateTime3),
+            Set(offsetDateTime2),
             Set(offsetDateTime3, offsetDateTime4),
           )
         ))
@@ -53,7 +53,7 @@ trait AggrSet_OffsetDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsyn
       for {
         _ <- Ns.i.offsetDateTimes.insert(List(
           (1, Set(offsetDateTime1, offsetDateTime2)),
-          (2, Set(offsetDateTime2, offsetDateTime3)),
+          (2, Set(offsetDateTime2)),
           (2, Set(offsetDateTime3, offsetDateTime4)),
           (2, Set(offsetDateTime3, offsetDateTime4)),
         )).transact
@@ -92,7 +92,7 @@ trait AggrSet_OffsetDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsyn
       for {
         _ <- Ns.i.offsetDateTimes.insert(List(
           (1, Set(offsetDateTime1, offsetDateTime2)),
-          (2, Set(offsetDateTime2, offsetDateTime3)),
+          (2, Set(offsetDateTime2)),
           (2, Set(offsetDateTime3, offsetDateTime4)),
           (2, Set(offsetDateTime3, offsetDateTime4)),
         )).transact
@@ -131,7 +131,7 @@ trait AggrSet_OffsetDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsyn
       for {
         _ <- Ns.i.offsetDateTimes.insert(List(
           (1, Set(offsetDateTime1, offsetDateTime2)),
-          (2, Set(offsetDateTime2, offsetDateTime3)),
+          (2, Set(offsetDateTime2)),
           (2, Set(offsetDateTime3, offsetDateTime4)),
           (2, Set(offsetDateTime3, offsetDateTime4)),
         )).transact
@@ -147,7 +147,7 @@ trait AggrSet_OffsetDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsyn
       for {
         _ <- Ns.i.offsetDateTimes.insert(List(
           (1, Set(offsetDateTime1, offsetDateTime2)),
-          (2, Set(offsetDateTime2, offsetDateTime3)),
+          (2, Set(offsetDateTime2)),
           (2, Set(offsetDateTime3, offsetDateTime4)),
           (2, Set(offsetDateTime3, offsetDateTime4)),
         )).transact
@@ -155,12 +155,12 @@ trait AggrSet_OffsetDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsyn
         _ <- Ns.i(count).query.get.map(_ ==> List(4))
         _ <- Ns.i(countDistinct).query.get.map(_ ==> List(2))
 
-        _ <- Ns.offsetDateTimes(count).query.get.map(_ ==> List(8))
+        _ <- Ns.offsetDateTimes(count).query.get.map(_ ==> List(7))
         _ <- Ns.offsetDateTimes(countDistinct).query.get.map(_ ==> List(4))
 
         _ <- Ns.i.a1.offsetDateTimes(count).query.get.map(_ ==> List(
           (1, 2),
-          (2, 6)
+          (2, 5)
         ))
         _ <- Ns.i.a1.offsetDateTimes(countDistinct).query.get.map(_ ==> List(
           (1, 2),

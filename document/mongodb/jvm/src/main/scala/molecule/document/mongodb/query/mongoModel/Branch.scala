@@ -23,7 +23,7 @@ abstract class Branch(
   val alias: String,
   val projection: BsonDocument,
 ) {
-//  var isEmbedded    = true
+  var aggregate     = false
   var uniqueIndex   = 0
   val stages        = new util.ArrayList[BsonDocument]
   val preMatches    = new util.ArrayList[Bson]
@@ -47,6 +47,7 @@ abstract class Branch(
   val postStages = new util.ArrayList[BsonDocument]
   val pipeline   = new BsonArray()
 
+  val unwinds = ListBuffer.empty[String]
 
   def addMatches(): Unit = {
     matches.size match {

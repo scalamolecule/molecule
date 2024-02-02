@@ -14,97 +14,36 @@ object AdhocJVM_postgres extends TestSuite_postgres {
 
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
-      val a = (1, Some(Set(int1, int2)))
-      val b = (2, Some(Set(int2, int3, int4)))
-      val c = (3, None)
+      implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
-        _ <- Ns.i.ints_?.insert(a, b, c).transact
 
-//        // Sets without one or more values matching
-//
-//        // "Doesn't have this value"
-//        _ <- Ns.i.a1.ints_?.hasNo(Some(int0)).query.get.map(_ ==> List(a, b))
-//        _ <- Ns.i.a1.ints_?.hasNo(Some(int1)).query.get.map(_ ==> List(b))
-//        _ <- Ns.i.a1.ints_?.hasNo(Some(int2)).query.get.map(_ ==> List())
-//        _ <- Ns.i.a1.ints_?.hasNo(Some(int3)).query.get.map(_ ==> List(a))
-//        _ <- Ns.i.a1.ints_?.hasNo(Some(int4)).query.get.map(_ ==> List(a))
-//        _ <- Ns.i.a1.ints_?.hasNo(Some(int5)).query.get.map(_ ==> List(a, b))
-//        // Same as
-//        _ <- Ns.i.a1.ints_?.hasNo(Some(Seq(int0))).query.get.map(_ ==> List(a, b))
-//        _ <- Ns.i.a1.ints_?.hasNo(Some(Seq(int1))).query.get.map(_ ==> List(b))
-//        _ <- Ns.i.a1.ints_?.hasNo(Some(Seq(int2))).query.get.map(_ ==> List())
-//        _ <- Ns.i.a1.ints_?.hasNo(Some(Seq(int3))).query.get.map(_ ==> List(a))
-//        _ <- Ns.i.a1.ints_?.hasNo(Some(Seq(int4))).query.get.map(_ ==> List(a))
-//        _ <- Ns.i.a1.ints_?.hasNo(Some(Seq(int5))).query.get.map(_ ==> List(a, b))
-//
-//
-//        // OR semantics when multiple values
-//
-//        // "Not (has this OR that)"
-//        _ <- Ns.i.a1.ints_?.hasNo(Some(Seq(int1, int2))).query.get.map(_ ==> List())
-//        _ <- Ns.i.a1.ints_?.hasNo(Some(Seq(int1, int3))).query.get.map(_ ==> List())
-//        _ <- Ns.i.a1.ints_?.hasNo(Some(Seq(int1, int4))).query.get.map(_ ==> List())
-//        _ <- Ns.i.a1.ints_?.hasNo(Some(Seq(int1, int5))).query.get.map(_ ==> List(b))
-//
-//
-//        // AND semantics when multiple values in a _Set_
-//
-//        // "Not (has this AND that)"
-//        _ <- Ns.i.a1.ints_?.hasNo(Some(Set(int1))).query.get.map(_ ==> List(b))
-//        _ <- Ns.i.a1.ints_?.hasNo(Some(Set(int1, int2))).query.get.map(_ ==> List(b))
-//        _ <- Ns.i.a1.ints_?.hasNo(Some(Set(int1, int2, int3))).query.get.map(_ ==> List(a, b))
-//        _ <- Ns.i.a1.ints_?.hasNo(Some(Set(int2))).query.get.map(_ ==> List())
-//        _ <- Ns.i.a1.ints_?.hasNo(Some(Set(int2, int3))).query.get.map(_ ==> List(a))
-//        _ <- Ns.i.a1.ints_?.hasNo(Some(Set(int2, int3, int4))).query.get.map(_ ==> List(a))
-//        // Same as
-//        _ <- Ns.i.a1.ints_?.hasNo(Some(Seq(Set(int1)))).query.get.map(_ ==> List(b))
-//        _ <- Ns.i.a1.ints_?.hasNo(Some(Seq(Set(int1, int2)))).query.get.map(_ ==> List(b))
-//        _ <- Ns.i.a1.ints_?.hasNo(Some(Seq(Set(int1, int2, int3)))).query.get.map(_ ==> List(a, b))
-//        _ <- Ns.i.a1.ints_?.hasNo(Some(Seq(Set(int2)))).query.get.map(_ ==> List())
-//        _ <- Ns.i.a1.ints_?.hasNo(Some(Seq(Set(int2, int3)))).query.get.map(_ ==> List(a))
-//        _ <- Ns.i.a1.ints_?.hasNo(Some(Seq(Set(int2, int3, int4)))).query.get.map(_ ==> List(a))
-//
-//
-//        // AND/OR semantics with multiple Sets
-//
-//        // "Not ((has this AND that) OR (has this AND that))"
-//        _ <- Ns.i.a1.ints_?.hasNo(Some(Seq(Set(int1, int2), Set(int0)))).query.get.map(_ ==> List(b))
-//        _ <- Ns.i.a1.ints_?.hasNo(Some(Seq(Set(int1, int2), Set(int0, int3)))).query.get.map(_ ==> List(b))
-//        _ <- Ns.i.a1.ints_?.hasNo(Some(Seq(Set(int1, int2), Set(int2, int3)))).query.get.map(_ ==> List())
-//        _ <- Ns.i.a1.ints_?.hasNo(Some(Seq(Set(int1, int2), Set(int2, int3, int4)))).query.get.map(_ ==> List())
+//        _ <- rawQuery(
+//          """SELECT DISTINCT
+//            |  Ns.i,
+//            |  array_AGG(distinct Ns_ints)
+//            |FROM Ns
+//            |  , unnest(Ns.ints) as Ns_ints
+//            |WHERE
+//            |  Ns.i    IS NOT NULL AND
+//            |  Ns.ints IS NOT NULL
+//            |GROUP BY Ns.i
+//            |ORDER BY Ns.i NULLS FIRST;
+//            |""".stripMargin, true)
 
+        _ <- Ns.i.shorts.insert(List(
+          (1, Set(short1, short2)),
+          (2, Set(short2)),
+          (2, Set(short3, short4)),
+          (2, Set(short3, short4)),
+        )).transact
 
-        // Negating empty Seqs/Sets has no effect
-        _ <- Ns.i.a1.ints.query.i.get.map(_ ==> List(a, b))
-        _ <- Ns.i.a1.ints_?.hasNo(Some(Seq.empty[Int])).query.i.get.map(_ ==> List(a, b))
-//        _ <- Ns.i.a1.ints_?.hasNo(Some(Set.empty[Int])).query.get.map(_ ==> List(a, b))
-//        _ <- Ns.i.a1.ints_?.hasNo(Some(Seq.empty[Set[Int]])).query.get.map(_ ==> List(a, b))
-//        _ <- Ns.i.a1.ints_?.hasNo(Some(Seq(Set.empty[Int]))).query.get.map(_ ==> List(a, b))
-//
-//
-//        // Negating None returns all asserted
-//        _ <- Ns.i.a1.ints_?.hasNo(Option.empty[Int]).query.get.map(_ ==> List(a, b))
-//        _ <- Ns.i.a1.ints_?.hasNo(Option.empty[Seq[Int]]).query.get.map(_ ==> List(a, b))
-//        _ <- Ns.i.a1.ints_?.hasNo(Option.empty[Set[Int]]).query.get.map(_ ==> List(a, b))
-//        _ <- Ns.i.a1.ints_?.hasNo(Option.empty[Seq[Set[Int]]]).query.get.map(_ ==> List(a, b))
+        // Matching values coalesced shorto one Set
 
+        _ <- Ns.shorts(min).query.get.map(_ ==> List(Set(short1)))
+        _ <- Ns.shorts(min(1)).query.get.map(_ ==> List(Set(short1)))
 
-
-
-
-
-
-//        _ <- Ns.int.insert(1).transact
-//        _ <- Ns.int.query.get.map(_ ==> List(1))
-
-        //        _ <- rawQuery(
-        //          """SELECT DISTINCT
-        //            |  MEDIAN(DISTINCT Ns.int)
-        //            |FROM Ns
-        //            |WHERE
-        //            |  Ns.int IS NOT NULL;
-        //            |""".stripMargin)
-
+        //        _ <- Ns.int.insert(1).transact
+        //        _ <- Ns.int.query.get.map(_ ==> List(1))
 
       } yield ()
     }
@@ -116,251 +55,41 @@ object AdhocJVM_postgres extends TestSuite_postgres {
         //            _ <- A.i.B.i.C.i.query.get.map(_ ==> List((1, 2, 3)))
 
 
-
-        _ <- A.i.ii.insert(
+        //        _ <- rawQuery(
+        //          """SELECT DISTINCT
+        //            |  Ns.i,
+        //            |  array_AGG(DISTINCT array_to_string(Ns.ints, chr(29)))
+        //            |FROM Ns
+        //            |WHERE
+        //            |  Ns.i    IS NOT NULL AND
+        //            |  Ns.ints IS NOT NULL
+        //            |GROUP BY Ns.i
+        //            |ORDER BY Ns.i NULLS FIRST;
+        //            |""".stripMargin, true)
+        _ <- A.i.B.ii.insert(List(
           (1, Set(1, 2)),
           (2, Set(2)),
-          (2, Set(7)),
-          (3, Set(3)),
-          (4, Set())
-        ).transact
-
-
-        // Mandatory ========================================
-
-        _ <- A.i.a1.ii.query.get.map(_ ==> List(
-          (1, Set(1, 2)),
-          (2, Set(2, 7)), // 2 rows coalesced
-          (3, Set(3)),
-        ))
-
-
-        _ <- A.i.a1.ii(Set(1)).query.get.map(_ ==> List(
-          // Set(1, 2) != Set(1)
-        ))
-        _ <- A.i.a1.ii(Set(1, 2)).query.get.map(_ ==> List(
-          (1, Set(1, 2)),
-        ))
-        _ <- A.i.a1.ii(Set.empty[Int]).query.get.map(_ ==> Nil)
-
-
-        _ <- A.i.a1.ii.not(Set(1)).query.get.map(_ ==> List(
-          (1, Set(1, 2)),
-          (2, Set(2, 7)),
-          (3, Set(3)),
-        ))
-        _ <- A.i.a1.ii.not(Set(1, 2)).query.get.map(_ ==> List(
-          (2, Set(2, 7)),
-          (3, Set(3)),
-        ))
-        _ <- A.i.a1.ii.not(Set.empty[Int]).query.get.map(_ ==> List(
-          (1, Set(1, 2)),
-          (2, Set(2, 7)),
-          (3, Set(3)),
-        ))
-
-
-        _ <- A.i.a1.ii.has(1).query.get.map(_ ==> List(
-          (1, Set(1, 2)),
-        ))
-        _ <- A.i.a1.ii.has(2).query.get.map(_ ==> List(
-          (1, Set(1, 2)),
-          (2, Set(2)),
-        ))
-
-
-        _ <- A.i.a1.ii.has(2, 1).query.get.map(_ ==> List(
-          (1, Set(1, 2)),
-          (2, Set(2)),
-        ))
-        _ <- A.i.a1.ii.has(2, 7).query.get.map(_ ==> List(
-          (1, Set(1, 2)),
-          (2, Set(2, 7)),
-        ))
-        _ <- A.i.a1.ii.has(2, 3).query.get.map(_ ==> List(
-          (1, Set(1, 2)),
-          (2, Set(2)),
-          (3, Set(3)),
-        ))
-
-        _ <- A.i.a1.ii.hasNo(1).query.get.map(_ ==> List(
-          (2, Set(2, 7)),
-          (3, Set(3)),
-        ))
-        _ <- A.i.a1.ii.hasNo(2).query.get.map(_ ==> List(
-          (2, Set(7)),
-          (3, Set(3)),
-        ))
-        _ <- A.i.a1.ii.hasNo(3).query.get.map(_ ==> List(
-          (1, Set(1, 2)),
-          (2, Set(2, 7))
-        ))
-
-
-        // tacit ========================================
-
-        _ <- A.i.a1.ii_.query.get.map(_ ==> List(1, 2, 3))
-
-        _ <- A.i.a1.ii_(Set(1)).query.get.map(_ ==> Nil)
-        _ <- A.i.a1.ii_(Set(1, 2)).query.get.map(_ ==> List(1))
-        _ <- A.i.a1.ii_(Set.empty[Int]).query.get.map(_ ==> Nil)
-
-
-        _ <- A.i.a1.ii_.not(Set(1)).query.get.map(_ ==> List(1, 2, 3))
-        _ <- A.i.a1.ii_.not(Set(1, 2)).query.get.map(_ ==> List(2, 3))
-        _ <- A.i.a1.ii_.not(Set.empty[Int]).query.get.map(_ ==> List(1, 2, 3))
-
-
-        _ <- A.i.a1.ii_.has(1).query.get.map(_ ==> List(1))
-        _ <- A.i.a1.ii_.has(2).query.get.map(_ ==> List(1, 2))
-        _ <- A.i.a1.ii_.has(2, 7).query.get.map(_ ==> List(1, 2))
-        _ <- A.i.a1.ii_.has(2, 3).query.get.map(_ ==> List(1, 2, 3))
-
-        _ <- A.i.a1.ii_.hasNo(1).query.get.map(_ ==> List(2, 3))
-        _ <- A.i.a1.ii_.hasNo(2).query.get.map(_ ==> List(2, 3))
-        _ <- A.i.a1.ii_.hasNo(3).query.get.map(_ ==> List(1, 2))
-
-
-
-
-        // optional ========================================
-
-        allAssertedOptional = List(
-          (1, Some(Set(1, 2))),
-          (2, Some(Set(2, 7))), // 2 rows coalesced
-          (3, Some(Set(3))),
+          (2, Set(3, 4)),
+          (2, Set(3, 4)),
+        )).transact
+        //        all = Set(1, 2, 3, 4)
+        all = List(
+          Set(1, 2),
+          Set(2),
+          Set(3, 4),
         )
 
+        //        _ <- A.B.ii(sample).query.get.map(res => all.contains(res.head.head) ==> true)
+        //        _ <- A.B.ii(sample(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
 
-        // All
-        _ <- A.i.a1.ii_?.query.get.map(_ ==> List(
-          (1, Some(Set(1, 2))),
-          (2, Some(Set(2, 7))),
-          (3, Some(Set(3))),
-          (4, None)
-        ))
-
-
-
-        _ <- A.i.a1.ii_?(Some(Set(1))).query.get.map(_ ==> List(
-          // Set(1, 2) != Set(1)
-        ))
-        _ <- A.i.a1.ii_?(Some(Set(1, 2))).query.get.map(_ ==> List(
-          (1, Some(Set(1, 2))),
-        ))
-
-        // None matches non-asserted values
-        _ <- A.i.a1.ii_?(Option.empty[Set[Int]]).query.get.map(_ ==> List((4, None)))
-        _ <- A.i.a1.ii_?(Option.empty[Seq[Set[Int]]]).query.get.map(_ ==> List((4, None)))
-
-        // Empty Sets are ignored (use None to match non-asserted card-set attributes)
-        _ <- A.i.a1.ii_?(Some(Set.empty[Int])).query.get.map(_ ==> Nil)
-        _ <- A.i.a1.ii_?(Some(Seq.empty[Set[Int]])).query.get.map(_ ==> Nil)
-        _ <- A.i.a1.ii_?(Some(Seq(Set.empty[Int]))).query.get.map(_ ==> Nil)
-
-
-
-
-
-
-        _ <- A.i.a1.ii_?.not(Some(Set(1))).query.get.map(_ ==> List(
-          (1, Some(Set(1, 2))),
-          (2, Some(Set(2, 7))),
-          (3, Some(Set(3))),
-        ))
-        _ <- A.i.a1.ii_?.not(Some(Set(1, 2))).query.get.map(_ ==> List(
-          (2, Some(Set(2, 7))),
-          (3, Some(Set(3))),
-        ))
-
-
-        // Negating None matches all asserted values
-        _ <- A.i.a1.ii_?.not(Option.empty[Set[Int]]).query.get.map(_ ==> allAssertedOptional)
-        _ <- A.i.a1.ii_?.not(Option.empty[Seq[Set[Int]]]).query.get.map(_ ==> allAssertedOptional)
-
-        // Negating empty Sets match nothing
-        _ <- A.i.a1.ii_?.not(Some(Set.empty[Int])).query.get.map(_ ==> allAssertedOptional)
-        _ <- A.i.a1.ii_?.not(Some(Seq.empty[Set[Int]])).query.get.map(_ ==> allAssertedOptional)
-        _ <- A.i.a1.ii_?.not(Some(Seq(Set.empty[Int]))).query.get.map(_ ==> allAssertedOptional)
-
-
-
-
-        _ <- A.i.a1.ii_?.has(Some(1)).query.get.map(_ ==> List(
-          (1, Some(Set(1, 2))),
-        ))
-        _ <- A.i.a1.ii_?.has(Some(2)).query.get.map(_ ==> List(
-          (1, Some(Set(1, 2))),
-          (2, Some(Set(2))),
-        ))
-        // same as
-        _ <- A.i.a1.ii_?.has(Some(Seq(2))).query.get.map(_ ==> List(
-          (1, Some(Set(1, 2))),
-          (2, Some(Set(2))),
-        ))
-        // has 2 or 3
-        _ <- A.i.a1.ii_?.has(Some(Seq(2, 3))).query.get.map(_ ==> List(
-          (1, Some(Set(1, 2))),
-          (2, Some(Set(2))),
-          (3, Some(Set(3))),
-        ))
-        // has 2 and 3
-        _ <- A.i.a1.ii_?.has(Some(Set(2, 3))).query.get.map(_ ==> List(
-
-        ))
-        // has 1 and 2
-        _ <- A.i.a1.ii_?.has(Some(Set(1, 2))).query.get.map(_ ==> List(
-          (1, Some(Set(1, 2))),
-        ))
-
-        // None matches non-asserted values
-        _ <- A.i.a1.ii_?.has(Option.empty[Set[Int]]).query.get.map(_ ==> List((4, None)))
-        _ <- A.i.a1.ii_?.has(Option.empty[Seq[Set[Int]]]).query.get.map(_ ==> List((4, None)))
-
-        // Empty Sets match nothing
-        _ <- A.i.a1.ii_?.has(Some(Set.empty[Int])).query.get.map(_ ==> Nil)
-        _ <- A.i.a1.ii_?.has(Some(Seq.empty[Set[Int]])).query.get.map(_ ==> Nil)
-        _ <- A.i.a1.ii_?.has(Some(Seq(Set.empty[Int]))).query.get.map(_ ==> Nil)
-
-
-
-
-        _ <- A.i.a1.ii_?.hasNo(Some(1)).query.get.map(_ ==> List(
-          (2, Some(Set(2, 7))),
-          (3, Some(Set(3))),
-        ))
-        // When 1 value in set, then the same as
-        _ <- A.i.a1.ii_?.hasNo(Some(Set(1))).query.get.map(_ ==> List(
-          (2, Some(Set(2, 7))),
-          (3, Some(Set(3))),
-        ))
-        _ <- A.i.a1.ii_?.hasNo(Some(2)).query.get.map(_ ==> List(
-          (2, Some(Set(7))),
-          (3, Some(Set(3))),
-        ))
-        _ <- A.i.a1.ii_?.hasNo(Some(3)).query.get.map(_ ==> List(
-          (1, Some(Set(1, 2))),
-          (2, Some(Set(2, 7)))
-        ))
-        _ <- A.i.a1.ii_?.hasNo(Some(Set(1, 2))).query.get.map(_ ==> List(
-          (2, Some(Set(2, 7))),
-          (3, Some(Set(3))),
-        ))
-        _ <- A.i.a1.ii_?.hasNo(Some(Set(1, 3))).query.get.map(_ ==> List(
-          (1, Some(Set(1, 2))),
-          (2, Some(Set(2, 7))),
-          (3, Some(Set(3))),
-        ))
-
-        // Negating None matches all asserted values
-        _ <- A.i.a1.ii_?.hasNo(Option.empty[Set[Int]]).query.get.map(_ ==> allAssertedOptional)
-        _ <- A.i.a1.ii_?.hasNo(Option.empty[Seq[Set[Int]]]).query.get.map(_ ==> allAssertedOptional)
-
-        // Negating empty Sets match nothing
-        _ <- A.i.a1.ii_?.hasNo(Some(Set.empty[Int])).query.get.map(_ ==> allAssertedOptional)
-        _ <- A.i.a1.ii_?.hasNo(Some(Seq.empty[Set[Int]])).query.get.map(_ ==> allAssertedOptional)
-        _ <- A.i.a1.ii_?.hasNo(Some(Seq(Set.empty[Int]))).query.get.map(_ ==> allAssertedOptional)
-
+        x: B_1[Set[Int], Int] = A.B.ii.apply(sample)
+        y: B_1[Set[Int], Int] = A.B.ii.apply(sample(2))
+        _ <- A.B.ii.apply(sample(2)).query.get.map { res =>
+          println("------")
+          println(res.head)
+//          all.intersect(res.head).nonEmpty ==> true
+          all.contains(res.head) ==> true
+        }
 
       } yield ()
     }

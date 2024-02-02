@@ -70,7 +70,7 @@ trait SpiSyncBase
   }
 
   override def query_inspect[Tpl](q: Query[Tpl])(implicit conn: Conn): Unit = {
-    printInspectQuery("QUERY", q.elements, q.optLimit, None)
+    printInspectQuery("QUERY", q.elements, q.optLimit, None, Some(conn.proxy))
   }
 
 
@@ -86,7 +86,7 @@ trait SpiSyncBase
   }
 
   override def queryOffset_inspect[Tpl](q: QueryOffset[Tpl])(implicit conn: Conn): Unit = {
-    printInspectQuery("QUERY (offset)", q.elements, q.optLimit, Some(q.offset))
+    printInspectQuery("QUERY (offset)", q.elements, q.optLimit, Some(q.offset), Some(conn.proxy))
   }
 
   override def queryCursor_get[Tpl](q0: QueryCursor[Tpl])(implicit conn0: Conn): (List[Tpl], String, Boolean) = {
@@ -101,17 +101,18 @@ trait SpiSyncBase
   }
 
   override def queryCursor_inspect[Tpl](q: QueryCursor[Tpl])(implicit conn: Conn): Unit = {
-    printInspectQuery("QUERY (cursor)", q.elements, q.optLimit, None)
+    printInspectQuery("QUERY (cursor)", q.elements, q.optLimit, None, Some(conn.proxy))
   }
 
   def printInspectQuery(
     label: String,
     elements: List[Element],
     optLimit: Option[Int],
-    optOffset: Option[Int]
+    optOffset: Option[Int],
+    optProxy: Option[ConnProxy]
   ): Unit = {
     tryInspect("query", elements) {
-      val query = getModel2SqlQuery[Any](elements).getSqlQuery(Nil, optLimit, optOffset)
+      val query = getModel2SqlQuery[Any](elements).getSqlQuery(Nil, optLimit, optOffset, optProxy)
       printRaw(label, elements, query)
     }
   }

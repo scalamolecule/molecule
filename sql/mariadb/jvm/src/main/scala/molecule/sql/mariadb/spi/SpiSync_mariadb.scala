@@ -34,7 +34,7 @@ trait SpiSync_mariadb extends SpiSyncBase {
   }
 
   override def refIdsQuery(idsModel: List[Element], proxy: ConnProxy): String = {
-    new Model2SqlQuery_mariadb(idsModel).getSqlQuery(Nil, None, None)
+    new Model2SqlQuery_mariadb(idsModel).getSqlQuery(Nil, None, None, None)
   }
 
   override def update_getData(conn: JdbcConn_JVM, update: Update): Data = {
@@ -102,14 +102,14 @@ trait SpiSync_mariadb extends SpiSyncBase {
         row += null
         ("null", baseTpe)
       } else {
-        val value = if (value0(1) == '"') {
-          value0.substring(2, value0.length - 2).split("\", ?\"").toSet
-        } else {
-          value0.substring(1, value0.length - 1).split(", ?").toSet
-        }
-        //        debug("@@@@@@@@@ " + value)
+        //        debug("@@@@@@@@@ " + value0)
+        //        debug("######### " + value0.getClass)
         //        debug("@@@@@@@@@ " + value.head.getClass)
-        //        debug("######### " + value.getClass)
+        val value = if (value0(1) == '"') {
+          value0.substring(2, value0.length - 2).split("\", ?\"").toList
+        } else {
+          value0.substring(1, value0.length - 1).split(", ?").toList
+        }
         row += value
         (value, baseTpe)
       }

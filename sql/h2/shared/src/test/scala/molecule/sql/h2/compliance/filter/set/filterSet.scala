@@ -1,6 +1,6 @@
 package molecule.sql.h2.compliance.filter.set
 
-import molecule.coreTests.spi.filter.set.ref.{FilterSet, FilterSet_Card1Ref, FilterSet_Card1RefOwned, FilterSet_Card2Ref, FilterSet_Card2RefOwned}
+import molecule.coreTests.spi.filter.set.ref._
 import molecule.coreTests.spi.filter.set.types._
 import molecule.sql.h2.setup.TestAsync_h2
 
@@ -30,8 +30,8 @@ object FilterSet_Char_ extends FilterSet_Char_ with TestAsync_h2
 object FilterSet_ref_ extends FilterSet_ref with TestAsync_h2
 
 
-object FilterSet extends FilterSet with TestAsync_h2
-object FilterSet_Card1Ref extends FilterSet_Card1Ref with TestAsync_h2
-object FilterSet_Card1RefOwned extends FilterSet_Card1RefOwned with TestAsync_h2
-object FilterSet_Card2Ref extends FilterSet_Card2Ref with TestAsync_h2
-object FilterSet_Card2RefOwned extends FilterSet_Card2RefOwned with TestAsync_h2
+object FilterRefSet extends FilterRefSet with TestAsync_h2
+object FilterRefSet_Card1Ref extends FilterRefSet_Card1Ref with TestAsync_h2
+object FilterRefSet_Card1RefOwned extends FilterRefSet_Card1RefOwned with TestAsync_h2
+object FilterRefSet_Card2Ref extends FilterRefSet_Card2Ref with TestAsync_h2
+object FilterRefSet_Card2RefOwned extends FilterRefSet_Card2RefOwned with TestAsync_h2

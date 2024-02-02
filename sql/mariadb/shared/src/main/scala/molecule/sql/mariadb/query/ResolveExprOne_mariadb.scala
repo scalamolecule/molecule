@@ -25,11 +25,13 @@ trait ResolveExprOne_mariadb extends ResolveExprOne with LambdasOne_mariadb { se
   }
 
 
-  override protected def aggr[T: ClassTag](col: String, fn: String, optN: Option[Int], res: ResOne[T]): Unit = {
+  override protected def aggr[T: ClassTag](
+    col: String, fn: String, optN: Option[Int], res: ResOne[T]
+  ): Unit = {
+    checkAggrOne()
     lazy val sep     = "0x1D" // Use invisible ascii Group Selector to separate concatenated values
     lazy val sepChar = 29.toChar
     lazy val n       = optN.getOrElse(0)
-
     select -= col
     fn match {
       case "distinct" =>
@@ -40,10 +42,8 @@ trait ResolveExprOne_mariadb extends ResolveExprOne with LambdasOne_mariadb { se
 
       case "min" =>
         select += s"MIN($col)"
-        if (col.endsWith(".id")) {
-          groupByCols -= col
-          aggregate = true
-        }
+        groupByCols -= col
+        aggregate = true
 
       case "mins" =>
         select += s"GROUP_CONCAT(DISTINCT $col SEPARATOR $sep)"
@@ -55,10 +55,8 @@ trait ResolveExprOne_mariadb extends ResolveExprOne with LambdasOne_mariadb { se
 
       case "max" =>
         select += s"MAX($col)"
-        if (col.endsWith(".id")) {
-          groupByCols -= col
-          aggregate = true
-        }
+        groupByCols -= col
+        aggregate = true
 
       case "maxs" =>
         select += s"GROUP_CONCAT(DISTINCT $col ORDER BY $col DESC SEPARATOR $sep)"
@@ -102,7 +100,7 @@ trait ResolveExprOne_mariadb extends ResolveExprOne with LambdasOne_mariadb { se
         replaceCast(toInt)
 
       case "sum" =>
-        selectWithOrder(col, "SUM")
+        selectWithOrder(col, "SUM", "")
         groupByCols -= col
         aggregate = true
 
@@ -116,7 +114,7 @@ trait ResolveExprOne_mariadb extends ResolveExprOne with LambdasOne_mariadb { se
         replaceCast(
           (row: Row, paramIndex: Int) => {
             val json = row.getString(paramIndex)
-            getMedian(json.substring(1, json.length - 1).split(",").map(_.toDouble).toSet)
+            getMedian(json.substring(1, json.length - 1).split(",").map(_.toDouble).toList)
           }
         )
 
@@ -127,7 +125,7 @@ trait ResolveExprOne_mariadb extends ResolveExprOne with LambdasOne_mariadb { se
       //        aggregate = true
 
       case "avg" =>
-        selectWithOrder(col, "AVG")
+        selectWithOrder(col, "AVG", "")
         groupByCols -= col
         aggregate = true
 
@@ -142,7 +140,7 @@ trait ResolveExprOne_mariadb extends ResolveExprOne with LambdasOne_mariadb { se
           (row: Row, paramIndex: Int) => {
             val json    = row.getString(paramIndex)
             val doubles = json.substring(1, json.length - 1).split(",").map(_.toDouble)
-            varianceOf(doubles.toSet.toList: _*)
+            varianceOf(doubles: _*)
           }
         )
 
@@ -157,7 +155,7 @@ trait ResolveExprOne_mariadb extends ResolveExprOne with LambdasOne_mariadb { se
           (row: Row, paramIndex: Int) => {
             val json    = row.getString(paramIndex)
             val doubles = json.substring(1, json.length - 1).split(",").map(_.toDouble)
-            stdDevOf(doubles.toSet.toList: _*)
+            stdDevOf(doubles: _*)
           }
         )
 

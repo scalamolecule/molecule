@@ -46,7 +46,7 @@ trait SpiSync_postgres extends SpiSyncBase {
   }
 
   override def refIdsQuery(idsModel: List[Element], proxy: ConnProxy): String = {
-    new Model2SqlQuery_postgres(idsModel).getSqlQuery(Nil, None, None)
+    new Model2SqlQuery_postgres(idsModel).getSqlQuery(Nil, None, None, Some(proxy))
   }
 
   override def update_getData(conn: JdbcConn_JVM, update: Update): Data = {
@@ -109,23 +109,23 @@ trait SpiSync_postgres extends SpiSyncBase {
       try {
         val arrayN = rowsResultSet.getArray(n)
         if (arrayN == null) {
-          //          debug("  A  " + arrayN)
+          debug("  A  " + arrayN)
           row += null
         } else {
           val arrayRS = arrayN.getResultSet
           if (arrayRS.wasNull()) {
-            //            debug("  B  " + arrayRS)
+            debug("  B  " + arrayRS)
             row += null
           } else {
-            //            debug("  C  " + arrayRS)
+            debug("  C  " + arrayRS)
             arrayRS.next()
             val array2 = arrayRS.getArray(2)
             if (array2 == null) {
-              //              debug("  C1  null")
+              debug("  C1  null")
               row += null
             } else {
               val set = arrayRS.getArray(2).getArray.asInstanceOf[Array[_]].toSet
-              //              debug("  C2  " + set)
+              debug("  C2  " + set)
               row += set
             }
           }
@@ -160,9 +160,9 @@ trait SpiSync_postgres extends SpiSyncBase {
       var n = 1
       row.clear()
       while (n <= columnsNumber) {
-        val col               = rsmd.getColumnName(n)
-        val sqlType           = rsmd.getColumnTypeName(n)
-        //        debug("TPE: " + sqlType)
+        val col     = rsmd.getColumnName(n)
+        val sqlType = rsmd.getColumnTypeName(n)
+//        debug("TPE: " + sqlType)
         val tpe               = sqlType match {
           case "text"      => value(rowsResultSet.getString(n), "String/URI")
           case "int4"      => value(rowsResultSet.getInt(n), "Int")
@@ -176,6 +176,20 @@ trait SpiSync_postgres extends SpiSyncBase {
           case "int2"      => value(rowsResultSet.getInt(n), "Byte")
           case "bpchar"    => value(rowsResultSet.getString(n), "Char")
           case "bigserial" => value(rowsResultSet.getLong(n), "Long id")
+          case "jsonb"     =>
+
+            import org.postgresql.jdbc.PgArray
+
+            //            println("1  " + rowsResultSet.)
+//            println("1  " + rowsResultSet.getArray(n))
+            //            println("1  " + rowsResultSet.getArray(n).getArray)
+//            println("1  " + rowsResultSet.getArray(n).getClass)
+            println("1  " + rowsResultSet.getString(n))
+            //            println("2  " + rowsResultSet.getArray(n).getResultSet)
+            //            println("3  " + rowsResultSet.getArray(n).getArray.asInstanceOf[Array[_]].toList)
+
+            //            array(n, "Int")
+            value(rowsResultSet.getString(n), "String/URI")
 
           case "_int4"    => array(n, "Int")
           case "_text"    => array(n, "String")
@@ -188,8 +202,11 @@ trait SpiSync_postgres extends SpiSyncBase {
           case "_uuid"    => array(n, "UUID")
           case "_int2"    => array(n, "Byte/Short")
           case "_bpchar"  => array(n, "Char")
+          case "_jsonb"   =>
+            array(n, "String")
 
-          case other => throw new Exception(s"Unexpected sql result type from raw query: " + other)
+          case other =>
+            throw new Exception(s"Unexpected sql result type from raw query: " + other)
         }
         val columnStringValue = rowsResultSet.getString(n)
         if (rowsResultSet.wasNull()) {

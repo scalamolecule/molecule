@@ -34,4 +34,4 @@ object FilterOne_id extends FilterOne_id with TestAsync_mysql
 object FilterOneSpecial_Number extends FilterOneSpecial_Number with TestAsync_mysql
 object FilterOneSpecial_String extends FilterOneSpecial_String with TestAsync_mysql
 
-object FilterRef extends FilterRef_one with TestAsync_mysql
+object FilterRefOne extends FilterRefOne with TestAsync_mysql

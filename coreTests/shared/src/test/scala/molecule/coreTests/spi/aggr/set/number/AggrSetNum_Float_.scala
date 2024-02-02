@@ -20,18 +20,28 @@ trait AggrSetNum_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.floats.insert(List(
           (1, Set(float1, float2)),
-          (2, Set(float2, float3)),
+          (2, Set(float2)),
           (2, Set(float3, float4)),
           (2, Set(float3, float4)),
-        )).transact
+        )).i.transact
 
-        // Sum of unique values (Set semantics)
-
-        _ <- Ns.floats(sum).query.get.map(_.head.head ==~ float1 + float2 + float3 + float4)
+        // Sum of all values
+        _ <- Ns.floats(sum).query.get.map(
+          _.head.head ==~ (
+            float1 + float2 +
+              float2 +
+              float3 + float4 +
+              float3 + float4
+            )
+        )
 
         _ <- Ns.i.floats(sum).query.get.map(_.map {
           case (1, setWithSum) => setWithSum.head ==~ float1 + float2
-          case (2, setWithSum) => setWithSum.head ==~ float2 + float3 + float4
+          case (2, setWithSum) => setWithSum.head ==~ (
+            float2 +
+              float3 + float4 +
+              float3 + float4
+            )
         })
       } yield ()
     }
@@ -40,36 +50,58 @@ trait AggrSetNum_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     "median" - types { implicit futConn =>
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       // Different databases have different ways of calculating a median
-      val (median_2_3, median_1_2) = if (database == "MongoDB") {
-        (float2, float1)
-      } else {
-        (
-          (float2 + float3).toDouble / 2.0,
-          (float1 + float2).toDouble / 2.0
-        )
+      database match {
+        case "Datomic" =>
+          for {
+            _ <- Ns.i.floats.insert(List(
+              (1, Set(float1, float2)),
+              (2, Set(float2)),
+              (2, Set(float5, float9)),
+            )).transact
+
+            // Median of all values - middle number used if odd number of values
+            // 1  2  2  5  9
+            //       ^
+            _ <- Ns.floats(median).query.get.map(_.head ==~ float2.toString.toDouble) // whole middle number
+
+            _ <- Ns.i.floats(median).query.get.map(_.map {
+              case (1, median) => median ==~ float1.toDouble.floor // lower whole number
+              case (2, median) => median ==~ float5.toString.toDouble // whole middle number
+            })
+          } yield ()
+
+        case "MongoDB" =>
+          for {
+            _ <- Ns.i.floats.insert(List(
+              (1, Set(float1, float2)),
+              (2, Set(float2)),
+              (2, Set(float5, float9)),
+            )).transact
+
+            _ <- Ns.floats(median).query.get.map(_.head ==~ float2.toString.toDouble) // whole middle number
+
+            _ <- Ns.i.floats(median).query.get.map(_.map {
+              case (1, median) => median ==~ float1.toDouble // lower number
+              case (2, median) => median ==~ float5.toString.toDouble // whole middle number
+            })
+          } yield ()
+
+        case _ =>
+          for {
+            _ <- Ns.i.floats.insert(List(
+              (1, Set(float1, float2)),
+              (2, Set(float2)),
+              (2, Set(float5, float9)),
+            )).transact
+
+            _ <- Ns.floats(median).query.get.map(_.head ==~ float2.toString.toDouble) // middle number
+
+            _ <- Ns.i.floats(median).query.get.map(_.map {
+              case (1, median) => median ==~ (float1 + float2).toDouble / 2.0 // average of 2 middle numbers
+              case (2, median) => median ==~ float5.toString.toDouble // middle number
+            })
+          } yield ()
       }
-      for {
-        _ <- Ns.i.floats.insert(List(
-          (1, Set(float1, float2)),
-          (2, Set(float2, float3)),
-          (2, Set(float3, float4)),
-          (2, Set(float3, float4)),
-        )).transact
-
-        // Median of unique values (Set semantics)
-
-        _ <- Ns.floats.query.get.map(_ ==> List(Set(float1, float2, float3, float4)))
-        _ <- Ns.floats(median).query.get.map(_.head ==~ median_2_3)
-
-        _ <- Ns.i.a1.floats.query.get.map(_ ==> List(
-          (1, Set(float1, float2)),
-          (2, Set(float2, float3, float4)),
-        ))
-        _ <- Ns.i.floats(median).query.get.map(_.map {
-          case (1, median) => median ==~ median_1_2
-          case (2, median) => median ==~ float3.toString.toDouble
-        })
-      } yield ()
     }
 
 
@@ -78,23 +110,26 @@ trait AggrSetNum_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.floats.insert(List(
           (1, Set(float1, float2)),
-          (2, Set(float2, float3)),
+          (2, Set(float2)),
           (2, Set(float3, float4)),
           (2, Set(float3, float4)),
         )).transact
 
-        // Average of unique values (Set semantics)
+        // Average of all values
+        _ <- Ns.floats(avg).query.get.map(_.head ==~ (
+          float1 + float2 +
+            float2 +
+            float3 + float4 +
+            float3 + float4
+          ).toDouble / 7.0)
 
-        _ <- Ns.floats.query.get.map(_ ==> List(Set(float1, float2, float3, float4)))
-        _ <- Ns.floats(avg).query.get.map(_.head ==~ (float1 + float2 + float3 + float4).toDouble / 4.0)
-
-        _ <- Ns.i.a1.floats.query.get.map(_ ==> List(
-          (1, Set(float1, float2)),
-          (2, Set(float2, float3, float4)),
-        ))
         _ <- Ns.i.floats(avg).query.get.map(_.map {
           case (1, avg) => avg ==~ (float1 + float2).toDouble / 2.0
-          case (2, avg) => avg ==~ (float2 + float3 + float4).toDouble / 3.0
+          case (2, avg) => avg ==~ (
+            float2 +
+              float3 + float4 +
+              float3 + float4
+            ).toDouble / 5.0
         })
       } yield ()
     }
@@ -105,23 +140,26 @@ trait AggrSetNum_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.floats.insert(List(
           (1, Set(float1, float2)),
-          (2, Set(float2, float3)),
+          (2, Set(float2)),
           (2, Set(float3, float4)),
           (2, Set(float3, float4)),
         )).transact
 
-        // Variance of unique values (Set semantics)
-
-        _ <- Ns.floats.query.get.map(_ ==> List(Set(float1, float2, float3, float4)))
-        _ <- Ns.floats(variance).query.get.map(_.head ==~ varianceOf(float1, float2, float3, float4))
-
-        _ <- Ns.i.a1.floats.query.get.map(_ ==> List(
-          (1, Set(float1, float2)),
-          (2, Set(float2, float3, float4)),
+        // Variance of all values
+        _ <- Ns.floats(variance).query.get.map(_.head ==~ varianceOf(
+          float1, float2,
+          float2,
+          float3, float4,
+          float3, float4
         ))
+
         _ <- Ns.i.floats(variance).query.get.map(_.map {
           case (1, variance) => variance ==~ varianceOf(float1, float2)
-          case (2, variance) => variance ==~ varianceOf(float2, float3, float4)
+          case (2, variance) => variance ==~ varianceOf(
+            float2,
+            float3, float4,
+            float3, float4
+          )
         })
       } yield ()
     }
@@ -132,23 +170,27 @@ trait AggrSetNum_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.floats.insert(List(
           (1, Set(float1, float2)),
-          (2, Set(float2, float3)),
+          (2, Set(float2)),
           (2, Set(float3, float4)),
           (2, Set(float3, float4)),
         )).transact
 
-        // Standard deviation of unique values (Set semantics)
 
-        _ <- Ns.floats.query.get.map(_ ==> List(Set(float1, float2, float3, float4)))
-        _ <- Ns.floats(stddev).query.get.map(_.head ==~ stdDevOf(float1, float2, float3, float4))
-
-        _ <- Ns.i.a1.floats.query.get.map(_ ==> List(
-          (1, Set(float1, float2)),
-          (2, Set(float2, float3, float4)),
+        // Standard deviation of all values
+        _ <- Ns.floats(stddev).query.get.map(_.head ==~ stdDevOf(
+          float1, float2,
+          float2,
+          float3, float4,
+          float3, float4
         ))
+
         _ <- Ns.i.floats(stddev).query.get.map(_.map {
           case (1, stddev) => stddev ==~ stdDevOf(float1, float2)
-          case (2, stddev) => stddev ==~ stdDevOf(float2, float3, float4)
+          case (2, stddev) => stddev ==~ stdDevOf(
+            float2,
+            float3, float4,
+            float3, float4
+          )
         })
       } yield ()
     }

@@ -20,18 +20,28 @@ trait AggrSetNum_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.shorts.insert(List(
           (1, Set(short1, short2)),
-          (2, Set(short2, short3)),
+          (2, Set(short2)),
           (2, Set(short3, short4)),
           (2, Set(short3, short4)),
-        )).transact
+        )).i.transact
 
-        // Sum of unique values (Set semantics)
-
-        _ <- Ns.shorts(sum).query.get.map(_.head.head ==~ short1 + short2 + short3 + short4)
+        // Sum of all values
+        _ <- Ns.shorts(sum).query.get.map(
+          _.head.head ==~ (
+            short1 + short2 +
+              short2 +
+              short3 + short4 +
+              short3 + short4
+            )
+        )
 
         _ <- Ns.i.shorts(sum).query.get.map(_.map {
           case (1, setWithSum) => setWithSum.head ==~ short1 + short2
-          case (2, setWithSum) => setWithSum.head ==~ short2 + short3 + short4
+          case (2, setWithSum) => setWithSum.head ==~ (
+            short2 +
+              short3 + short4 +
+              short3 + short4
+            )
         })
       } yield ()
     }
@@ -40,36 +50,58 @@ trait AggrSetNum_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     "median" - types { implicit futConn =>
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       // Different databases have different ways of calculating a median
-      val (median_2_3, median_1_2) = if (database == "MongoDB") {
-        (short2, short1)
-      } else {
-        (
-          (short2 + short3).toDouble / 2.0,
-          (short1 + short2).toDouble / 2.0
-        )
+      database match {
+        case "Datomic" =>
+          for {
+            _ <- Ns.i.shorts.insert(List(
+              (1, Set(short1, short2)),
+              (2, Set(short2)),
+              (2, Set(short5, short9)),
+            )).transact
+
+            // Median of all values - middle number used if odd number of values
+            // 1  2  2  5  9
+            //       ^
+            _ <- Ns.shorts(median).query.get.map(_.head ==~ short2.toString.toDouble) // whole middle number
+
+            _ <- Ns.i.shorts(median).query.get.map(_.map {
+              case (1, median) => median ==~ short1.toDouble.floor // lower whole number
+              case (2, median) => median ==~ short5.toString.toDouble // whole middle number
+            })
+          } yield ()
+
+        case "MongoDB" =>
+          for {
+            _ <- Ns.i.shorts.insert(List(
+              (1, Set(short1, short2)),
+              (2, Set(short2)),
+              (2, Set(short5, short9)),
+            )).transact
+
+            _ <- Ns.shorts(median).query.get.map(_.head ==~ short2.toString.toDouble) // whole middle number
+
+            _ <- Ns.i.shorts(median).query.get.map(_.map {
+              case (1, median) => median ==~ short1.toDouble // lower number
+              case (2, median) => median ==~ short5.toString.toDouble // whole middle number
+            })
+          } yield ()
+
+        case _ =>
+          for {
+            _ <- Ns.i.shorts.insert(List(
+              (1, Set(short1, short2)),
+              (2, Set(short2)),
+              (2, Set(short5, short9)),
+            )).transact
+
+            _ <- Ns.shorts(median).query.get.map(_.head ==~ short2.toString.toDouble) // middle number
+
+            _ <- Ns.i.shorts(median).query.get.map(_.map {
+              case (1, median) => median ==~ (short1 + short2).toDouble / 2.0 // average of 2 middle numbers
+              case (2, median) => median ==~ short5.toString.toDouble // middle number
+            })
+          } yield ()
       }
-      for {
-        _ <- Ns.i.shorts.insert(List(
-          (1, Set(short1, short2)),
-          (2, Set(short2, short3)),
-          (2, Set(short3, short4)),
-          (2, Set(short3, short4)),
-        )).transact
-
-        // Median of unique values (Set semantics)
-
-        _ <- Ns.shorts.query.get.map(_ ==> List(Set(short1, short2, short3, short4)))
-        _ <- Ns.shorts(median).query.get.map(_.head ==~ median_2_3)
-
-        _ <- Ns.i.a1.shorts.query.get.map(_ ==> List(
-          (1, Set(short1, short2)),
-          (2, Set(short2, short3, short4)),
-        ))
-        _ <- Ns.i.shorts(median).query.get.map(_.map {
-          case (1, median) => median ==~ median_1_2
-          case (2, median) => median ==~ short3.toString.toDouble
-        })
-      } yield ()
     }
 
 
@@ -78,23 +110,26 @@ trait AggrSetNum_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.shorts.insert(List(
           (1, Set(short1, short2)),
-          (2, Set(short2, short3)),
+          (2, Set(short2)),
           (2, Set(short3, short4)),
           (2, Set(short3, short4)),
         )).transact
 
-        // Average of unique values (Set semantics)
+        // Average of all values
+        _ <- Ns.shorts(avg).query.get.map(_.head ==~ (
+          short1 + short2 +
+            short2 +
+            short3 + short4 +
+            short3 + short4
+          ).toDouble / 7.0)
 
-        _ <- Ns.shorts.query.get.map(_ ==> List(Set(short1, short2, short3, short4)))
-        _ <- Ns.shorts(avg).query.get.map(_.head ==~ (short1 + short2 + short3 + short4).toDouble / 4.0)
-
-        _ <- Ns.i.a1.shorts.query.get.map(_ ==> List(
-          (1, Set(short1, short2)),
-          (2, Set(short2, short3, short4)),
-        ))
         _ <- Ns.i.shorts(avg).query.get.map(_.map {
           case (1, avg) => avg ==~ (short1 + short2).toDouble / 2.0
-          case (2, avg) => avg ==~ (short2 + short3 + short4).toDouble / 3.0
+          case (2, avg) => avg ==~ (
+            short2 +
+              short3 + short4 +
+              short3 + short4
+            ).toDouble / 5.0
         })
       } yield ()
     }
@@ -105,23 +140,26 @@ trait AggrSetNum_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.shorts.insert(List(
           (1, Set(short1, short2)),
-          (2, Set(short2, short3)),
+          (2, Set(short2)),
           (2, Set(short3, short4)),
           (2, Set(short3, short4)),
         )).transact
 
-        // Variance of unique values (Set semantics)
-
-        _ <- Ns.shorts.query.get.map(_ ==> List(Set(short1, short2, short3, short4)))
-        _ <- Ns.shorts(variance).query.get.map(_.head ==~ varianceOf(short1, short2, short3, short4))
-
-        _ <- Ns.i.a1.shorts.query.get.map(_ ==> List(
-          (1, Set(short1, short2)),
-          (2, Set(short2, short3, short4)),
+        // Variance of all values
+        _ <- Ns.shorts(variance).query.get.map(_.head ==~ varianceOf(
+          short1, short2,
+          short2,
+          short3, short4,
+          short3, short4
         ))
+
         _ <- Ns.i.shorts(variance).query.get.map(_.map {
           case (1, variance) => variance ==~ varianceOf(short1, short2)
-          case (2, variance) => variance ==~ varianceOf(short2, short3, short4)
+          case (2, variance) => variance ==~ varianceOf(
+            short2,
+            short3, short4,
+            short3, short4
+          )
         })
       } yield ()
     }
@@ -132,23 +170,27 @@ trait AggrSetNum_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.shorts.insert(List(
           (1, Set(short1, short2)),
-          (2, Set(short2, short3)),
+          (2, Set(short2)),
           (2, Set(short3, short4)),
           (2, Set(short3, short4)),
         )).transact
 
-        // Standard deviation of unique values (Set semantics)
 
-        _ <- Ns.shorts.query.get.map(_ ==> List(Set(short1, short2, short3, short4)))
-        _ <- Ns.shorts(stddev).query.get.map(_.head ==~ stdDevOf(short1, short2, short3, short4))
-
-        _ <- Ns.i.a1.shorts.query.get.map(_ ==> List(
-          (1, Set(short1, short2)),
-          (2, Set(short2, short3, short4)),
+        // Standard deviation of all values
+        _ <- Ns.shorts(stddev).query.get.map(_.head ==~ stdDevOf(
+          short1, short2,
+          short2,
+          short3, short4,
+          short3, short4
         ))
+
         _ <- Ns.i.shorts(stddev).query.get.map(_.map {
           case (1, stddev) => stddev ==~ stdDevOf(short1, short2)
-          case (2, stddev) => stddev ==~ stdDevOf(short2, short3, short4)
+          case (2, stddev) => stddev ==~ stdDevOf(
+            short2,
+            short3, short4,
+            short3, short4
+          )
         })
       } yield ()
     }

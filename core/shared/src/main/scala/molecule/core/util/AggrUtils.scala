@@ -2,8 +2,10 @@ package molecule.core.util
 
 trait AggrUtils {
 
-  def getMedian(set: Set[Double]): Double = {
-    val values = set.toList.sorted
+//  def getMedian(set: Set[Double]): Double = {
+  def getMedian(list: List[Double]): Double = {
+//    val values = list.toList.sorted
+    val values = list.sorted
     val count  = values.length
     if (count % 2 == 1) {
       val indexOfMiddleValue = (count - 1) / 2

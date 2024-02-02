@@ -8,7 +8,7 @@ import molecule.coreTests.dataModels.core.dsl.Refs._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 
-trait FilterRef_one extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
+trait FilterRefOne extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
   override lazy val tests = Tests {
 

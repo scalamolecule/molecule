@@ -26,9 +26,11 @@ trait AggrOneNum_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, bigInt4),
         )).transact
 
-        // Sum of distinct values (Set semantics)
+        // Sum of all values
+        _ <- Ns.bigInt(sum).query.get.map(
+          _.head ==~ bigInt1 + bigInt2 + bigInt2 + bigInt3 + bigInt4
+        )
 
-        _ <- Ns.bigInt(sum).query.get.map(_.head ==~ bigInt1 + bigInt2 + bigInt3 + bigInt4)
         _ <- Ns.i.bigInt(sum).query.get.map(_.map {
           case (1, sum) => sum ==~ bigInt1 + bigInt2
           case (2, sum) => sum ==~ bigInt2 + bigInt3 + bigInt4
@@ -40,32 +42,64 @@ trait AggrOneNum_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     "median" - types { implicit futConn =>
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       // Different databases have different ways of calculating a median
-      val (median_2_3, median_1_2) = if (database == "MongoDB") {
-        (bigInt2, bigInt1)
-      } else {
-        (
-          (bigInt2 + bigInt3).toDouble / 2.0,
-          (bigInt1 + bigInt2).toDouble / 2.0
-        )
+      database match {
+        case "Datomic" =>
+          for {
+            _ <- Ns.i.bigInt.insert(List(
+              (1, bigInt1),
+              (1, bigInt2),
+              (2, bigInt2),
+              (2, bigInt5),
+              (2, bigInt9),
+            )).transact
+
+            // Median of all values - middle number used if odd number of values
+            // 1  2  2  5  9
+            //       ^
+            _ <- Ns.bigInt(median).query.get.map(_.head ==~ bigInt2.toString.toDouble) // middle number
+
+            _ <- Ns.i.bigInt(median).query.get.map(_.map {
+              case (1, median) => median ==~ bigInt1.toDouble.floor // lower whole number
+              case (2, median) => median ==~ bigInt5.toString.toDouble // middle number
+            })
+          } yield ()
+
+        case "MongoDB" =>
+          for {
+            _ <- Ns.i.bigInt.insert(List(
+              (1, bigInt1),
+              (1, bigInt2),
+              (2, bigInt2),
+              (2, bigInt5),
+              (2, bigInt9),
+            )).transact
+
+            _ <- Ns.bigInt(median).query.get.map(_.head ==~ bigInt2.toString.toDouble) // whole middle number
+
+            _ <- Ns.i.bigInt(median).query.get.map(_.map {
+              case (1, median) => median ==~ bigInt1.toDouble // lower number
+              case (2, median) => median ==~ bigInt5.toString.toDouble // middle number
+            })
+          } yield ()
+
+        case _ =>
+          for {
+            _ <- Ns.i.bigInt.insert(List(
+              (1, bigInt1),
+              (1, bigInt2),
+              (2, bigInt2),
+              (2, bigInt5),
+              (2, bigInt9),
+            )).transact
+
+            _ <- Ns.bigInt(median).query.get.map(_.head ==~ bigInt2.toString.toDouble) // middle number
+
+            _ <- Ns.i.bigInt(median).query.get.map(_.map {
+              case (1, median) => median ==~ (bigInt1 + bigInt2).toDouble / 2.0 // average of 2 middle numbers
+              case (2, median) => median ==~ bigInt5.toString.toDouble // middle number
+            })
+          } yield ()
       }
-      for {
-        _ <- Ns.i.bigInt.insert(List(
-          (1, bigInt1),
-          (1, bigInt2),
-          (2, bigInt2),
-          (2, bigInt3),
-          (2, bigInt4),
-        )).transact
-
-        // Median of unique values (Set semantics)
-
-        _ <- Ns.bigInt(median).query.get.map(_.head ==~ median_2_3)
-
-        _ <- Ns.i.bigInt(median).query.get.map(_.map {
-          case (1, median) => median ==~ median_1_2
-          case (2, median) => median ==~ bigInt3.toString.toDouble
-        })
-      } yield ()
     }
 
 
@@ -80,9 +114,10 @@ trait AggrOneNum_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, bigInt4),
         )).transact
 
-        // Average of unique values (Set semantics)
-
-        _ <- Ns.bigInt(avg).query.get.map(_.head ==~ (bigInt1 + bigInt2 + bigInt3 + bigInt4).toDouble / 4.0)
+        // Average of all values
+        _ <- Ns.bigInt(avg).query.get.map(
+          _.head ==~ (bigInt1 + bigInt2 + bigInt2 + bigInt3 + bigInt4).toDouble / 5.0
+        )
 
         _ <- Ns.i.bigInt(avg).query.get.map(_.map {
           case (1, avg) => avg ==~ (bigInt1 + bigInt2).toDouble / 2.0
@@ -103,9 +138,10 @@ trait AggrOneNum_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, bigInt4),
         )).transact
 
-        // Variance of unique values (Set semantics)
-
-        _ <- Ns.bigInt(variance).query.get.map(_.head ==~ varianceOf(bigInt1, bigInt2, bigInt3, bigInt4))
+        // Variance of all values
+        _ <- Ns.bigInt(variance).query.get.map(
+          _.head ==~ varianceOf(bigInt1, bigInt2, bigInt2, bigInt3, bigInt4)
+        )
 
         _ <- Ns.i.bigInt(variance).query.get.map(_.map {
           case (1, variance) => variance ==~ varianceOf(bigInt1, bigInt2)
@@ -126,9 +162,10 @@ trait AggrOneNum_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, bigInt4),
         )).transact
 
-        // Standard deviation of unique values (Set semantics)
-
-        _ <- Ns.bigInt(stddev).query.get.map(_.head ==~ stdDevOf(bigInt1, bigInt2, bigInt3, bigInt4))
+        // Standard deviation of all values
+        _ <- Ns.bigInt(stddev).query.get.map(
+          _.head ==~ stdDevOf(bigInt1, bigInt2, bigInt2, bigInt3, bigInt4)
+        )
 
         _ <- Ns.i.bigInt(stddev).query.get.map(_.map {
           case (1, stddev) => stddev ==~ stdDevOf(bigInt1, bigInt2)

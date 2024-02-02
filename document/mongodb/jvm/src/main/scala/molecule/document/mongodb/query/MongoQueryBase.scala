@@ -7,14 +7,15 @@ import molecule.base.ast.Card
 import molecule.base.error._
 import molecule.base.util.BaseHelpers
 import molecule.boilerplate.ast.Model._
+import molecule.core.query.Model2QueryBase
 import molecule.core.util.JavaConversions
-import molecule.document.mongodb.query.mongoModel.{FlatEmbed, Branch}
+import molecule.document.mongodb.query.mongoModel.{Branch, FlatEmbed}
 import org.bson.conversions.Bson
 import org.bson.{BsonArray, BsonDocument, BsonInt32, BsonString, BsonValue}
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
-trait MongoQueryBase extends BaseHelpers with JavaConversions {
+trait MongoQueryBase extends Model2QueryBase with BaseHelpers with JavaConversions {
 
   // Top branch holds aggregation and projection of all attributes
   final protected var topBranch: FlatEmbed = new FlatEmbed()

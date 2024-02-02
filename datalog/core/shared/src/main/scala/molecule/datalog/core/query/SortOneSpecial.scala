@@ -212,7 +212,8 @@ trait SortOneSpecial[Tpl]
     attrIndex: Int
   ): Option[(Int, Int => (Row, Row) => Int)] = {
     def median(rawSet: AnyRef): Double = {
-      getMedian(rawSet.asInstanceOf[jSet[_]].toArray.map(_.toString.toDouble).toSet)
+//      getMedian(rawSet.asInstanceOf[jSet[_]].toArray.map(_.toString.toDouble).toSet)
+      getMedian(rawSet.asInstanceOf[jSet[_]].toArray.map(_.toString.toDouble).toList)
     }
     if (attr.op == Fn("median", None) && attr.sort.nonEmpty) {
       attr.sort.map { sort =>

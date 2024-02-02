@@ -25,7 +25,8 @@ trait AggrOneRefNum_sum extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, 4),
         )).transact
 
-        _ <- A.B.i(sum).query.get.map(_.head ==> 1 + 2 + 3 + 4)
+        // Sum of all (non-coalesced) values
+        _ <- A.B.i(sum).query.get.map(_.head ==> 1 + 2 + 2 + 3 + 4)
         _ <- A.i.a1.B.i(sum).query.get.map(_ ==> List(
           (1, 1 + 2),
           (2, 2 + 3 + 4),
@@ -43,10 +44,10 @@ trait AggrOneRefNum_sum extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, 2, 3),
         )).transact
 
-        _ <- A.B.C.i(sum).query.get.map(_ ==> List(1 + 2 + 3))
+        _ <- A.B.C.i(sum).query.get.map(_ ==> List(1 + 2 + 2 + 3))
         _ <- A.i.a1.B.i.C.i(sum).query.get.map(_ ==> List(
           (1, 1, 1),
-          (2, 2, 2 + 3)
+          (2, 2, 2 + 2 + 3)
         ))
       } yield ()
     }
@@ -63,7 +64,7 @@ trait AggrOneRefNum_sum extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
         _ <- A.i.a1.B.i(sum).C.i(sum).query.get.map(_ ==> List(
           (1, 1, 1),
-          (2, 2 + 2, 2 + 3),
+          (2, 2 + 2 + 2, 2 + 2 + 3),
         ))
       } yield ()
     }
@@ -80,7 +81,7 @@ trait AggrOneRefNum_sum extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
         _ <- A.i.a1.B.i(sum)._A.C.i(sum).query.get.map(_ ==> List(
           (1, 1, 1),
-          (2, 2 + 2, 2 + 3),
+          (2, 2 + 2 + 2, 2 + 2 + 3),
         ))
       } yield ()
     }

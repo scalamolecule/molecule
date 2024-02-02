@@ -17,7 +17,7 @@ trait AggrSet_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.floats.insert(List(
           (1, Set(float1, float2)),
-          (2, Set(float2, float3)),
+          (2, Set(float2)),
           (2, Set(float3, float4)),
           (2, Set(float3, float4)),
         )).transact
@@ -32,7 +32,7 @@ trait AggrSet_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.floats(distinct).query.get.map(_ ==> List(
           (1, Set(Set(float1, float2))),
           (2, Set(
-            Set(float2, float3),
+            Set(float2),
             Set(float3, float4) // 2 rows coalesced
           ))
         ))
@@ -40,7 +40,7 @@ trait AggrSet_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.floats(distinct).query.get.map(_ ==> List(
           Set(
             Set(float1, float2),
-            Set(float2, float3),
+            Set(float2),
             Set(float3, float4),
           )
         ))
@@ -52,7 +52,7 @@ trait AggrSet_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.floats.insert(List(
           (1, Set(float1, float2)),
-          (2, Set(float2, float3)),
+          (2, Set(float2)),
           (2, Set(float3, float4)),
           (2, Set(float3, float4)),
         )).transact
@@ -91,7 +91,7 @@ trait AggrSet_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.floats.insert(List(
           (1, Set(float1, float2)),
-          (2, Set(float2, float3)),
+          (2, Set(float2)),
           (2, Set(float3, float4)),
           (2, Set(float3, float4)),
         )).transact
@@ -130,7 +130,7 @@ trait AggrSet_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.floats.insert(List(
           (1, Set(float1, float2)),
-          (2, Set(float2, float3)),
+          (2, Set(float2)),
           (2, Set(float3, float4)),
           (2, Set(float3, float4)),
         )).transact
@@ -146,7 +146,7 @@ trait AggrSet_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.floats.insert(List(
           (1, Set(float1, float2)),
-          (2, Set(float2, float3)),
+          (2, Set(float2)),
           (2, Set(float3, float4)),
           (2, Set(float3, float4)),
         )).transact
@@ -154,12 +154,12 @@ trait AggrSet_Float_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i(count).query.get.map(_ ==> List(4))
         _ <- Ns.i(countDistinct).query.get.map(_ ==> List(2))
 
-        _ <- Ns.floats(count).query.get.map(_ ==> List(8))
+        _ <- Ns.floats(count).query.get.map(_ ==> List(7))
         _ <- Ns.floats(countDistinct).query.get.map(_ ==> List(4))
 
         _ <- Ns.i.a1.floats(count).query.get.map(_ ==> List(
           (1, 2),
-          (2, 6)
+          (2, 5)
         ))
         _ <- Ns.i.a1.floats(countDistinct).query.get.map(_ ==> List(
           (1, 2),

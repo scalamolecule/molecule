@@ -25,7 +25,8 @@ trait AggrOneRefNum_variance extends CoreTestSuite with ApiAsync { spi: SpiAsync
           (2, 4),
         )).transact
 
-        _ <- A.B.i(variance).query.get.map(_.head ==~ varianceOf(1, 2, 3, 4))
+        // Variance of all (non-coalesced) values
+        _ <- A.B.i(variance).query.get.map(_.head ==~ varianceOf(1, 2, 2, 3, 4))
 
         _ <- A.i.B.i(variance).query.get.map(_.map {
           case (1, variance) => variance ==~ varianceOf(1, 2)
@@ -46,7 +47,7 @@ trait AggrOneRefNum_variance extends CoreTestSuite with ApiAsync { spi: SpiAsync
           (2, 2, 4),
         )).transact
 
-        _ <- A.B.C.i(variance).query.get.map(_.head ==~ varianceOf(1, 2, 3, 4))
+        _ <- A.B.C.i(variance).query.get.map(_.head ==~ varianceOf(1, 2, 2, 3, 4))
 
         _ <- A.i.B.i.C.i(variance).query.get.map(_.map {
           case (1, 1, variance) => variance ==~ varianceOf(1, 2)

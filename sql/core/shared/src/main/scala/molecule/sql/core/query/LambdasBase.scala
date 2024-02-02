@@ -125,38 +125,6 @@ trait LambdasBase extends BaseHelpers with AggrUtils { self: SqlQueryBase =>
   protected lazy val json2oneShort         : String => Short          = (v: String) => v.toShort
   protected lazy val json2oneChar          : String => Char           = (v: String) => v.charAt(0)
 
-  //  private def json2optArray[T](decode: String => Array[T]): String => Option[Array[T]] = (json: String) => {
-  //    if (json == "[null]") {
-  //      Option.empty[Array[T]]
-  //    } else {
-  //      val array = decode(json)
-  //      if (array.nonEmpty) Some(array) else Option.empty[Array[T]]
-  //    }
-  //  }
-  //
-  //  protected lazy val json2optArrayId            : String => Option[Array[String]]         = json2optArray(json2arrayId)
-  //  protected lazy val json2optArrayString        : String => Option[Array[String]]         = json2optArray(json2arrayString)
-  //  protected lazy val json2optArrayInt           : String => Option[Array[Int]]            = json2optArray(json2arrayInt)
-  //  protected lazy val json2optArrayLong          : String => Option[Array[Long]]           = json2optArray(json2arrayLong)
-  //  protected lazy val json2optArrayFloat         : String => Option[Array[Float]]          = json2optArray(json2arrayFloat)
-  //  protected lazy val json2optArrayDouble        : String => Option[Array[Double]]         = json2optArray(json2arrayDouble)
-  //  protected lazy val json2optArrayBoolean       : String => Option[Array[Boolean]]        = json2optArray(json2arrayBoolean)
-  //  protected lazy val json2optArrayBigInt        : String => Option[Array[BigInt]]         = json2optArray(json2arrayBigInt)
-  //  protected lazy val json2optArrayBigDecimal    : String => Option[Array[BigDecimal]]     = json2optArray(json2arrayBigDecimal)
-  //  protected lazy val json2optArrayDate          : String => Option[Array[Date]]           = json2optArray(json2arrayDate)
-  //  protected lazy val json2optArrayDuration      : String => Option[Array[Duration]]       = json2optArray(json2arrayDuration)
-  //  protected lazy val json2optArrayInstant       : String => Option[Array[Instant]]        = json2optArray(json2arrayInstant)
-  //  protected lazy val json2optArrayLocalDate     : String => Option[Array[LocalDate]]      = json2optArray(json2arrayLocalDate)
-  //  protected lazy val json2optArrayLocalTime     : String => Option[Array[LocalTime]]      = json2optArray(json2arrayLocalTime)
-  //  protected lazy val json2optArrayLocalDateTime : String => Option[Array[LocalDateTime]]  = json2optArray(json2arrayLocalDateTime)
-  //  protected lazy val json2optArrayOffsetTime    : String => Option[Array[OffsetTime]]     = json2optArray(json2arrayOffsetTime)
-  //  protected lazy val json2optArrayOffsetDateTime: String => Option[Array[OffsetDateTime]] = json2optArray(json2arrayOffsetDateTime)
-  //  protected lazy val json2optArrayZonedDateTime : String => Option[Array[ZonedDateTime]]  = json2optArray(json2arrayZonedDateTime)
-  //  protected lazy val json2optArrayUUID          : String => Option[Array[UUID]]           = json2optArray(json2arrayUUID)
-  //  protected lazy val json2optArrayURI           : String => Option[Array[URI]]            = json2optArray(json2arrayURI)
-  //  protected lazy val json2optArrayByte          : String => Option[Array[Byte]]           = json2optArray(json2arrayByte)
-  //  protected lazy val json2optArrayShort         : String => Option[Array[Short]]          = json2optArray(json2arrayShort)
-  //  protected lazy val json2optArrayChar          : String => Option[Array[Char]]           = json2optArray(json2arrayChar)
 
   private def jsonArray2optArray[T: ClassTag](array: Array[String], decode: String => T): Option[Array[T]] = {
     val vs = array.flatMap {

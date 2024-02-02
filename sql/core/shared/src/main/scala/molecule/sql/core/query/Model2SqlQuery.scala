@@ -26,11 +26,13 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
   final def getSqlQuery(
     altElements: List[Element],
     optLimit: Option[Int],
-    optOffset: Option[Int]
+    optOffset: Option[Int],
+    optProxy: Option[ConnProxy]
   ): String = {
     val elements1                 = if (altElements.isEmpty) elements0 else altElements
     val (elements2, initialNs, _) = validateQueryModel(elements1, Some(addFilterAttrCallback))
 
+    optProxy.foreach(p => attrMap = p.attrMap)
     from = initialNs
     exts += from -> None
 

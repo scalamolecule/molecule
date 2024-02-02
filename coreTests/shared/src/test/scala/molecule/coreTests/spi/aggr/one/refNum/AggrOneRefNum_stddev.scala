@@ -25,7 +25,8 @@ trait AggrOneRefNum_stddev extends CoreTestSuite with ApiAsync { spi: SpiAsync =
           (2, 4),
         )).transact
 
-        _ <- A.B.i(stddev).query.get.map(_.head ==~ stdDevOf(1, 2, 3, 4))
+        // Standard deviation of all (non-coalesced) values
+        _ <- A.B.i(stddev).query.get.map(_.head ==~ stdDevOf(1, 2, 2, 3, 4))
 
         _ <- A.i.B.i(stddev).query.get.map(_.map {
           case (1, stddev) => stddev ==~ stdDevOf(1, 2)
@@ -46,7 +47,7 @@ trait AggrOneRefNum_stddev extends CoreTestSuite with ApiAsync { spi: SpiAsync =
           (2, 2, 4),
         )).transact
 
-        _ <- A.B.C.i(stddev).query.get.map(_.head ==~ stdDevOf(1, 2, 3, 4))
+        _ <- A.B.C.i(stddev).query.get.map(_.head ==~ stdDevOf(1, 2, 2, 3, 4))
 
         _ <- A.i.B.i.C.i(stddev).query.get.map(_.map {
           case (1, 1, stddev) => stddev ==~ stdDevOf(1, 2)

@@ -34,4 +34,4 @@ object FilterOne_id extends FilterOne_id with TestAsync_postgres
 object FilterOneSpecial_Number extends FilterOneSpecial_Number with TestAsync_postgres
 object FilterOneSpecial_String extends FilterOneSpecial_String with TestAsync_postgres
 
-object FilterRef extends FilterRef_one with TestAsync_postgres
+object FilterRefOne extends FilterRefOne with TestAsync_postgres

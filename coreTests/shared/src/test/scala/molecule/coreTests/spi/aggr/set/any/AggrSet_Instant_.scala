@@ -18,7 +18,7 @@ trait AggrSet_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.instants.insert(List(
           (1, Set(instant1, instant2)),
-          (2, Set(instant2, instant3)),
+          (2, Set(instant2)),
           (2, Set(instant3, instant4)),
           (2, Set(instant3, instant4)),
         )).transact
@@ -33,7 +33,7 @@ trait AggrSet_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.instants(distinct).query.get.map(_ ==> List(
           (1, Set(Set(instant1, instant2))),
           (2, Set(
-            Set(instant2, instant3),
+            Set(instant2),
             Set(instant3, instant4) // 2 rows coalesced
           ))
         ))
@@ -41,7 +41,7 @@ trait AggrSet_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.instants(distinct).query.get.map(_ ==> List(
           Set(
             Set(instant1, instant2),
-            Set(instant2, instant3),
+            Set(instant2),
             Set(instant3, instant4),
           )
         ))
@@ -53,7 +53,7 @@ trait AggrSet_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.instants.insert(List(
           (1, Set(instant1, instant2)),
-          (2, Set(instant2, instant3)),
+          (2, Set(instant2)),
           (2, Set(instant3, instant4)),
           (2, Set(instant3, instant4)),
         )).transact
@@ -92,7 +92,7 @@ trait AggrSet_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.instants.insert(List(
           (1, Set(instant1, instant2)),
-          (2, Set(instant2, instant3)),
+          (2, Set(instant2)),
           (2, Set(instant3, instant4)),
           (2, Set(instant3, instant4)),
         )).transact
@@ -131,7 +131,7 @@ trait AggrSet_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.instants.insert(List(
           (1, Set(instant1, instant2)),
-          (2, Set(instant2, instant3)),
+          (2, Set(instant2)),
           (2, Set(instant3, instant4)),
           (2, Set(instant3, instant4)),
         )).transact
@@ -147,7 +147,7 @@ trait AggrSet_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.instants.insert(List(
           (1, Set(instant1, instant2)),
-          (2, Set(instant2, instant3)),
+          (2, Set(instant2)),
           (2, Set(instant3, instant4)),
           (2, Set(instant3, instant4)),
         )).transact
@@ -155,12 +155,12 @@ trait AggrSet_Instant_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i(count).query.get.map(_ ==> List(4))
         _ <- Ns.i(countDistinct).query.get.map(_ ==> List(2))
 
-        _ <- Ns.instants(count).query.get.map(_ ==> List(8))
+        _ <- Ns.instants(count).query.get.map(_ ==> List(7))
         _ <- Ns.instants(countDistinct).query.get.map(_ ==> List(4))
 
         _ <- Ns.i.a1.instants(count).query.get.map(_ ==> List(
           (1, 2),
-          (2, 6)
+          (2, 5)
         ))
         _ <- Ns.i.a1.instants(countDistinct).query.get.map(_ ==> List(
           (1, 2),

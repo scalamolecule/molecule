@@ -19,78 +19,113 @@ object AdhocJVM_mongodb extends TestSuite_mongodb with AggrUtils {
 
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
+      implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
+
+
+//        _ <- Ns.i.string.insert(
+//          (1, string1),
+//          (1, string2),
+//          (1, string3),
+//          (2, string4),
+//          (2, string5),
+//          (2, string6),
+//        ).transact
+//
+//        _ <- Ns.string(min).query.get.map(_ ==> List(string1))
+//        _ <- Ns.string(max).query.get.map(_ ==> List(string6))
+//        _ <- Ns.string(min).string(max).query.get.map(_ ==> List((string1, string6)))
+//
+//        _ <- Ns.i.a1.string(min).query.get.map(_ ==> List(
+//          (1, string1),
+//          (2, string4)
+//        ))
+//
+//        _ <- Ns.i.a1.string(max).query.get.map(_ ==> List(
+//          (1, string3),
+//          (2, string6)
+//        ))
+//
+//        _ <- Ns.i.a1.string(min).string(max).query.i.get.map(_ ==> List(
+//          (1, string1, string3),
+//          (2, string4, string6)
+//        ))
+
+
+
+
+
+        _ <- Ns.s.i.ii.ints.insert(List(
+          ("a", 1, Set(1, 2, 3), Set(1, 2, 3)),
+          ("b", 1, Set(2, 3, 4), Set(2, 3, 4)),
+          ("b", 2, Set(3, 4, 5), Set(3, 4, 5)),
+        )).transact
+
+        // Multiple cardinality-one aggregations ok
+//        _ <- Ns.s(max).i(stddev).query.i.get.map(_ ==> List(
+        _ <- Ns.s(max).i(countDistinct).query.i.get.map(_ ==> List(
+          ("b", 4),
+        ))
+
 //        _ <- Ns.i(1).save.transact
 //        _ <- Ns.i.i.query.get.map(_ ==> List(int1))
 
+      } yield ()
+    }
 
-        _ <- Ns.i.ints_?.insert(List(
-          (0, None),
-          (1, Some(Set(int1, int2))),
-          (2, Some(Set(int2, int3, int4))),
+
+    "refs0" - refs { implicit conn =>
+      import molecule.coreTests.dataModels.core.dsl.Refs._
+      implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+
+      val all  = 1 + 2 + 2 + 3+ 3 + 4 + 3 + 4
+      val all2 = 2 + 3+ 3 + 4 + 3 + 4
+
+      for {
+
+        _ <- A.i.B.ii.C.ii.insert(List(
+          (1, Set(1, 2), Set(1, 2)),
+          (2, Set(2, 3), Set(2, 3)),
+          (2, Set(3, 4), Set(3, 4)),
+          (2, Set(3, 4), Set(3, 4)),
         )).i.transact
 
-        // Match non-asserted attribute (null)
-        _ <- Ns.i.a1.ints_().query.i.get.map(_ ==> List(0))
+        _ <- A.i.B.ii(avg).C.ii(avg).query.i.get.map(_.map {
+          case (1, avgB, avgC) =>
+            avgB ==~ (1 + 2).toDouble / 2.0
+            avgC ==~ (1 + 2).toDouble / 2.0
+          case (2, avgB, avgC) =>
+            avgB ==~ all2.toDouble / 6.0
+            avgC ==~ all2.toDouble / 6.0
+        })
 
       } yield ()
     }
-
-    "refs 0" - refs { implicit conn =>
-      import molecule.coreTests.dataModels.core.dsl.Refs._
-      for {
-        _ <- A.i.ii.insert(
-          (1, Set(1, 2)),
-          (2, Set(2)),
-          (2, Set(7)),
-          (3, Set(3)),
-          (4, Set())
-        ).transact
-
-        _ <- A.i.a1.ii.not(Set(1)).query.i.get.map(_ ==> List(
-          (1, Set(1, 2)),
-          (2, Set(2, 7)),
-          (3, Set(3)),
-        ))
-
-      } yield ()
-    }
-
 
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
+      implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+
+      val all  = 1 + 2 + 2 + 3 + 4 + 3 + 4
+      val all2 = 2 + 3 + 4 + 3 + 4
+
       for {
 
-        _ <- A.i.OwnB.ii.insert(
-          (1, Set(1, 2)),
-          (2, Set(2)),
-          (2, Set(7)),
-          (3, Set(3)),
-          (4, Set())
-        ).transact
+        _ <- A.i.B.ii.C.ii.insert(List(
+          (1, Set(1, 2), Set(1, 2)),
+          (2, Set(2), Set(2)),
+          (2, Set(3, 4), Set(3, 4)),
+          (2, Set(3, 4), Set(3, 4)),
+        )).i.transact
 
-
-        _ <- A.i.a1.OwnB.ii.has(1).query.i.get.map(_ ==> List(
-          (1, Set(1, 2)),
-        ))
-        _ <- A.i.a1.OwnB.ii.has(2).query.get.map(_ ==> List(
-          (1, Set(1, 2)),
-          (2, Set(2)),
-        ))
-
-        _ <- A.i.a1.OwnB.ii.has(2, 1).query.get.map(_ ==> List(
-          (1, Set(1, 2)),
-          (2, Set(2)),
-        ))
-        _ <- A.i.a1.OwnB.ii.has(2, 7).query.get.map(_ ==> List(
-          (1, Set(1, 2)),
-          (2, Set(2, 7)),
-        ))
-        _ <- A.i.a1.OwnB.ii.has(2, 3).query.get.map(_ ==> List(
-          (1, Set(1, 2)),
-          (2, Set(2)),
-          (3, Set(3)),
-        ))
+        _ <- A.i.B.ii(avg).C.ii(avg).query.i.get.map(_.map {
+          case (1, avgB, avgC) =>
+            avgB ==~ (1 + 2).toDouble / 2.0
+            avgC ==~ (1 + 2).toDouble / 2.0
+          case (2, avgB, avgC) =>
+            avgB ==~ all2.toDouble / 5.0
+            avgC ==~ all2.toDouble / 5.0
+        })
 
       } yield ()
     }

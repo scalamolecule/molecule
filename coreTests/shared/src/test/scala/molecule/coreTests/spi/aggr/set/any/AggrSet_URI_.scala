@@ -18,7 +18,7 @@ trait AggrSet_URI_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.uris.insert(List(
           (1, Set(uri1, uri2)),
-          (2, Set(uri2, uri3)),
+          (2, Set(uri2)),
           (2, Set(uri3, uri4)),
           (2, Set(uri3, uri4)),
         )).transact
@@ -33,7 +33,7 @@ trait AggrSet_URI_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.uris(distinct).query.get.map(_ ==> List(
           (1, Set(Set(uri1, uri2))),
           (2, Set(
-            Set(uri2, uri3),
+            Set(uri2),
             Set(uri3, uri4) // 2 rows coalesced
           ))
         ))
@@ -41,7 +41,7 @@ trait AggrSet_URI_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.uris(distinct).query.get.map(_ ==> List(
           Set(
             Set(uri1, uri2),
-            Set(uri2, uri3),
+            Set(uri2),
             Set(uri3, uri4),
           )
         ))
@@ -53,7 +53,7 @@ trait AggrSet_URI_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.uris.insert(List(
           (1, Set(uri1, uri2)),
-          (2, Set(uri2, uri3)),
+          (2, Set(uri2)),
           (2, Set(uri3, uri4)),
           (2, Set(uri3, uri4)),
         )).transact
@@ -92,7 +92,7 @@ trait AggrSet_URI_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.uris.insert(List(
           (1, Set(uri1, uri2)),
-          (2, Set(uri2, uri3)),
+          (2, Set(uri2)),
           (2, Set(uri3, uri4)),
           (2, Set(uri3, uri4)),
         )).transact
@@ -131,7 +131,7 @@ trait AggrSet_URI_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.uris.insert(List(
           (1, Set(uri1, uri2)),
-          (2, Set(uri2, uri3)),
+          (2, Set(uri2)),
           (2, Set(uri3, uri4)),
           (2, Set(uri3, uri4)),
         )).transact
@@ -147,7 +147,7 @@ trait AggrSet_URI_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.uris.insert(List(
           (1, Set(uri1, uri2)),
-          (2, Set(uri2, uri3)),
+          (2, Set(uri2)),
           (2, Set(uri3, uri4)),
           (2, Set(uri3, uri4)),
         )).transact
@@ -155,12 +155,12 @@ trait AggrSet_URI_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i(count).query.get.map(_ ==> List(4))
         _ <- Ns.i(countDistinct).query.get.map(_ ==> List(2))
 
-        _ <- Ns.uris(count).query.get.map(_ ==> List(8))
+        _ <- Ns.uris(count).query.get.map(_ ==> List(7))
         _ <- Ns.uris(countDistinct).query.get.map(_ ==> List(4))
 
         _ <- Ns.i.a1.uris(count).query.get.map(_ ==> List(
           (1, 2),
-          (2, 6)
+          (2, 5)
         ))
         _ <- Ns.i.a1.uris(countDistinct).query.get.map(_ ==> List(
           (1, 2),

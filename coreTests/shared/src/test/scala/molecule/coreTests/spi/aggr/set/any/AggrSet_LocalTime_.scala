@@ -18,7 +18,7 @@ trait AggrSet_LocalTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.localTimes.insert(List(
           (1, Set(localTime1, localTime2)),
-          (2, Set(localTime2, localTime3)),
+          (2, Set(localTime2)),
           (2, Set(localTime3, localTime4)),
           (2, Set(localTime3, localTime4)),
         )).transact
@@ -33,7 +33,7 @@ trait AggrSet_LocalTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.localTimes(distinct).query.get.map(_ ==> List(
           (1, Set(Set(localTime1, localTime2))),
           (2, Set(
-            Set(localTime2, localTime3),
+            Set(localTime2),
             Set(localTime3, localTime4) // 2 rows coalesced
           ))
         ))
@@ -41,7 +41,7 @@ trait AggrSet_LocalTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.localTimes(distinct).query.get.map(_ ==> List(
           Set(
             Set(localTime1, localTime2),
-            Set(localTime2, localTime3),
+            Set(localTime2),
             Set(localTime3, localTime4),
           )
         ))
@@ -53,7 +53,7 @@ trait AggrSet_LocalTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.localTimes.insert(List(
           (1, Set(localTime1, localTime2)),
-          (2, Set(localTime2, localTime3)),
+          (2, Set(localTime2)),
           (2, Set(localTime3, localTime4)),
           (2, Set(localTime3, localTime4)),
         )).transact
@@ -92,7 +92,7 @@ trait AggrSet_LocalTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.localTimes.insert(List(
           (1, Set(localTime1, localTime2)),
-          (2, Set(localTime2, localTime3)),
+          (2, Set(localTime2)),
           (2, Set(localTime3, localTime4)),
           (2, Set(localTime3, localTime4)),
         )).transact
@@ -131,7 +131,7 @@ trait AggrSet_LocalTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.localTimes.insert(List(
           (1, Set(localTime1, localTime2)),
-          (2, Set(localTime2, localTime3)),
+          (2, Set(localTime2)),
           (2, Set(localTime3, localTime4)),
           (2, Set(localTime3, localTime4)),
         )).transact
@@ -147,7 +147,7 @@ trait AggrSet_LocalTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.localTimes.insert(List(
           (1, Set(localTime1, localTime2)),
-          (2, Set(localTime2, localTime3)),
+          (2, Set(localTime2)),
           (2, Set(localTime3, localTime4)),
           (2, Set(localTime3, localTime4)),
         )).transact
@@ -155,12 +155,12 @@ trait AggrSet_LocalTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i(count).query.get.map(_ ==> List(4))
         _ <- Ns.i(countDistinct).query.get.map(_ ==> List(2))
 
-        _ <- Ns.localTimes(count).query.get.map(_ ==> List(8))
+        _ <- Ns.localTimes(count).query.get.map(_ ==> List(7))
         _ <- Ns.localTimes(countDistinct).query.get.map(_ ==> List(4))
 
         _ <- Ns.i.a1.localTimes(count).query.get.map(_ ==> List(
           (1, 2),
-          (2, 6)
+          (2, 5)
         ))
         _ <- Ns.i.a1.localTimes(countDistinct).query.get.map(_ ==> List(
           (1, 2),

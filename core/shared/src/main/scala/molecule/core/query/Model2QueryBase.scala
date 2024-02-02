@@ -11,6 +11,8 @@ trait Model2QueryBase extends ModelUtils {
 
   private var level         = 1
   private val sortsPerLevel = mutable.Map[Int, List[Int]](1 -> Nil)
+  private var hasAggr       = false
+  private var hasAggrSet    = false
 
   def validateQueryModel(
     elements: List[Element],
@@ -31,9 +33,9 @@ trait Model2QueryBase extends ModelUtils {
             case a: Attr          => validateAttr(a); validate(tail, prevElements :+ a)
             case Nested(_, es)    => validateNested(es, prevElements)
             case NestedOpt(_, es) => validateNestedOpt(es, prevElements)
-//            case _: Ref           => hasBinding = true; validate(tail, prevElements)
-            case _: Ref           => validate(tail, prevElements)
-            case _                => validate(tail, prevElements)
+            //            case _: Ref           => hasBinding = true; validate(tail, prevElements)
+            case _: Ref => validate(tail, prevElements)
+            case _      => validate(tail, prevElements)
           }
         case Nil             => ()
       }
@@ -44,9 +46,9 @@ trait Model2QueryBase extends ModelUtils {
         sortsPerLevel(level) = sortsPerLevel(level) :+ a.sort.get.substring(1, 2).toInt
       }
       a.filterAttr.foreach(_ => hasFilterAttr = true)
-//      if (a.isInstanceOf[Mandatory]) {
-//        hasBinding = true
-//      }
+      //      if (a.isInstanceOf[Mandatory]) {
+      //        hasBinding = true
+      //      }
     }
 
     def validateNested(es: List[Element], prevElements: List[Element]): Unit = {
@@ -80,9 +82,9 @@ trait Model2QueryBase extends ModelUtils {
       case _ => validate(elements)
     }
 
-//    if (!hasBinding) {
-//      throw ModelError("Please add at least 1 mandatory attribute.")
-//    }
+    //    if (!hasBinding) {
+    //      throw ModelError("Please add at least 1 mandatory attribute.")
+    //    }
 
     sortsPerLevel.foreach {
       case (_, Nil)         => ()
@@ -117,6 +119,25 @@ trait Model2QueryBase extends ModelUtils {
     (elements1, initialNs, hasFilterAttr)
   }
 
+  protected def checkAggrOne(): Unit = {
+    if (hasAggrSet) {
+      noMultiAggrSet()
+    }
+    hasAggr = true
+  }
+  protected def checkAggrSet(): Unit = {
+    if (hasAggr) {
+      noMultiAggrSet()
+    }
+    hasAggr = true
+    hasAggrSet = true
+  }
+
+  private def noMultiAggrSet() = {
+    throw ModelError(
+      "Only a single aggregation is allowed with card-set attributes."
+    )
+  }
 
   private def checkFilterAttrs(
     elements: List[Element],

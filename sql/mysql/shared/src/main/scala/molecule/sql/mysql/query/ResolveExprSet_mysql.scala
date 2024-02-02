@@ -299,6 +299,7 @@ trait ResolveExprSet_mysql
   override protected def setAggr[T: ClassTag](
     col: String, fn: String, optN: Option[Int], res: ResSet[T]
   ): Unit = {
+    checkAggrSet()
     lazy val sep     = "0x1D" // Use ascii Group Selector to separate concatenated values
     lazy val sepChar = 29.toChar
     lazy val tpeDb   = res.tpeDb
@@ -370,6 +371,8 @@ trait ResolveExprSet_mysql
       case "sample" =>
         noBooleanSetAggr(res)
         selectWithOrder(col, tpeDb, "JSON_ARRAYAGG")
+        groupByCols -= col
+        aggregate = true
         replaceCast((row: Row, paramIndex: Int) => {
           val array = res.json2array(row.getString(paramIndex))
           val rnd   = new Random().nextInt(array.length)
@@ -378,6 +381,8 @@ trait ResolveExprSet_mysql
 
       case "samples" =>
         noBooleanSetAggr(res)
+        groupByCols -= col
+        aggregate = true
         selectWithOrder(col, tpeDb, "JSON_ARRAYAGG")
         replaceCast((row: Row, paramIndex: Int) => {
           val array = res.json2array(row.getString(paramIndex))
@@ -386,10 +391,17 @@ trait ResolveExprSet_mysql
 
       case "count" =>
         noBooleanSetCounts(n)
-        selectWithOrder(col, dbType(col), "COUNT")
+        select += s"GROUP_CONCAT($col)"
         groupByCols -= col
         aggregate = true
-        replaceCast(toInt)
+        replaceCast((row: Row, paramIndex: Int) => {
+          val json = row.getString(paramIndex)
+          if (row.wasNull()) {
+            0
+          } else {
+            json.substring(1, json.length - 1).split("\\]?, ?\\[?").length
+          }
+        })
 
       case "countDistinct" =>
         noBooleanSetCounts(n)
@@ -400,13 +412,21 @@ trait ResolveExprSet_mysql
         replaceCast(toInt)
 
       case "sum" =>
-        // Sum of unique values (Set semantics)
-        selectWithOrder(col, tpeDb, "SUM", "DISTINCT ")
         groupByCols -= col
         aggregate = true
-        replaceCast((row: Row, paramIndex: Int) =>
-          Set(res.json2tpe(row.getString(paramIndex)))
-        )
+        select += s"GROUP_CONCAT($col)"
+        replaceCast((row: Row, paramIndex: Int) => {
+          val json = row.getString(paramIndex)
+          if (row.wasNull()) {
+            Set.empty[T]
+          } else {
+            Set(
+              res.stringArray2sum(
+                json.substring(1, json.length - 1).split("\\]?, ?\\[?")
+              )
+            )
+          }
+        })
 
       case "median" =>
         selectWithOrder(col, tpeDb, "JSON_ARRAYAGG")
@@ -414,12 +434,11 @@ trait ResolveExprSet_mysql
         aggregate = true
         replaceCast((row: Row, paramIndex: Int) =>
           getMedian(res.json2array(row.getString(paramIndex))
-            .map(_.toString.toDouble).toSet)
+            .map(_.toString.toDouble).toList)
         )
 
       case "avg" =>
-        // Average of unique values (Set semantics)
-        selectWithOrder(col, tpeDb, "AVG", "DISTINCT ")
+        selectWithOrder(col, tpeDb, "AVG")
         groupByCols -= col
         aggregate = true
         replaceCast((row: Row, paramIndex: Int) =>
@@ -427,24 +446,22 @@ trait ResolveExprSet_mysql
         )
 
       case "variance" =>
-        // Variance of unique values (Set semantics)
         selectWithOrder(col, tpeDb, "JSON_ARRAYAGG")
         groupByCols -= col
         aggregate = true
         replaceCast((row: Row, paramIndex: Int) => {
           val doubles = res.json2array(row.getString(paramIndex))
-            .map(_.toString.toDouble).toSet.toList
+            .map(_.toString.toDouble).toList
           varianceOf(doubles: _*)
         })
 
       case "stddev" =>
-        // Standard deviation of unique values (Set semantics)
         selectWithOrder(col, tpeDb, "JSON_ARRAYAGG")
         groupByCols -= col
         aggregate = true
         replaceCast((row: Row, paramIndex: Int) => {
           val doubles = res.json2array(row.getString(paramIndex))
-            .map(_.toString.toDouble).toSet.toList
+            .map(_.toString.toDouble).toList
           stdDevOf(doubles: _*)
         })
 

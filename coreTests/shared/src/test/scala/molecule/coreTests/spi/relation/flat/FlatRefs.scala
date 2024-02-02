@@ -153,7 +153,7 @@ trait FlatRefs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         import molecule.coreTests.dataModels.core.dsl.Refs._
         for {
           _ <- A.i.OwnB.i.insert(2, 3).i.transact
-          _ <- A.i.OwnB.i.query.i.get.map(_ ==> List((2, 3)))
+          _ <- A.i.OwnB.i.query.get.map(_ ==> List((2, 3)))
         } yield ()
       }
 
@@ -161,7 +161,7 @@ trait FlatRefs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         import molecule.coreTests.dataModels.core.dsl.Refs._
         for {
           _ <- A.i.OwnB.ii.insert(List((2, Set(3, 4)))).i.transact
-          _ <- A.i.OwnB.ii.query.i.get.map(_ ==> List((2, Set(3, 4))))
+          _ <- A.i.OwnB.ii.query.get.map(_ ==> List((2, Set(3, 4))))
         } yield ()
       }
 
@@ -169,7 +169,7 @@ trait FlatRefs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         import molecule.coreTests.dataModels.core.dsl.Refs._
         for {
           _ <- A.i.OwnBb.i.insert(2, 3).i.transact
-          _ <- A.i.OwnBb.i.query.i.get.map(_ ==> List((2, 3)))
+          _ <- A.i.OwnBb.i.query.get.map(_ ==> List((2, 3)))
         } yield ()
       }
 
@@ -177,7 +177,7 @@ trait FlatRefs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         import molecule.coreTests.dataModels.core.dsl.Refs._
         for {
           _ <- A.i.OwnBb.ii.insert(List((2, Set(3, 4)))).i.transact
-          _ <- A.i.OwnBb.ii.query.i.get.map(_ ==> List((2, Set(3, 4))))
+          _ <- A.i.OwnBb.ii.query.get.map(_ ==> List((2, Set(3, 4))))
         } yield ()
       }
     }

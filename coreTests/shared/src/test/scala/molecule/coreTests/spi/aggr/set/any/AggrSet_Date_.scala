@@ -18,7 +18,7 @@ trait AggrSet_Date_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.dates.insert(List(
           (1, Set(date1, date2)),
-          (2, Set(date2, date3)),
+          (2, Set(date2)),
           (2, Set(date3, date4)),
           (2, Set(date3, date4)),
         )).transact
@@ -33,7 +33,7 @@ trait AggrSet_Date_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.dates(distinct).query.get.map(_ ==> List(
           (1, Set(Set(date1, date2))),
           (2, Set(
-            Set(date2, date3),
+            Set(date2),
             Set(date3, date4) // 2 rows coalesced
           ))
         ))
@@ -41,7 +41,7 @@ trait AggrSet_Date_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.dates(distinct).query.get.map(_ ==> List(
           Set(
             Set(date1, date2),
-            Set(date2, date3),
+            Set(date2),
             Set(date3, date4),
           )
         ))
@@ -53,7 +53,7 @@ trait AggrSet_Date_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.dates.insert(List(
           (1, Set(date1, date2)),
-          (2, Set(date2, date3)),
+          (2, Set(date2)),
           (2, Set(date3, date4)),
           (2, Set(date3, date4)),
         )).transact
@@ -92,7 +92,7 @@ trait AggrSet_Date_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.dates.insert(List(
           (1, Set(date1, date2)),
-          (2, Set(date2, date3)),
+          (2, Set(date2)),
           (2, Set(date3, date4)),
           (2, Set(date3, date4)),
         )).transact
@@ -131,7 +131,7 @@ trait AggrSet_Date_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.dates.insert(List(
           (1, Set(date1, date2)),
-          (2, Set(date2, date3)),
+          (2, Set(date2)),
           (2, Set(date3, date4)),
           (2, Set(date3, date4)),
         )).transact
@@ -147,7 +147,7 @@ trait AggrSet_Date_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.dates.insert(List(
           (1, Set(date1, date2)),
-          (2, Set(date2, date3)),
+          (2, Set(date2)),
           (2, Set(date3, date4)),
           (2, Set(date3, date4)),
         )).transact
@@ -155,12 +155,12 @@ trait AggrSet_Date_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i(count).query.get.map(_ ==> List(4))
         _ <- Ns.i(countDistinct).query.get.map(_ ==> List(2))
 
-        _ <- Ns.dates(count).query.get.map(_ ==> List(8))
+        _ <- Ns.dates(count).query.get.map(_ ==> List(7))
         _ <- Ns.dates(countDistinct).query.get.map(_ ==> List(4))
 
         _ <- Ns.i.a1.dates(count).query.get.map(_ ==> List(
           (1, 2),
-          (2, 6)
+          (2, 5)
         ))
         _ <- Ns.i.a1.dates(countDistinct).query.get.map(_ ==> List(
           (1, 2),

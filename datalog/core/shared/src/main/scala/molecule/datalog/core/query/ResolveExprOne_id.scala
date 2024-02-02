@@ -88,6 +88,7 @@ trait ResolveExprOne_id[Tpl]
   }
 
   private def aggr[T](e: Var, fn: String, optN: Option[Int], res: ResOne[T]): Unit = {
+    checkAggrOne()
     lazy val n = optN.getOrElse(0)
     // Replace find/casting with aggregate function/cast
     find -= e
@@ -130,18 +131,26 @@ trait ResolveExprOne_id[Tpl]
         find += s"(sum $e)"
 
       case "median" =>
-        // OBS! Datomic rounds down to nearest whole number
-        // when calculating the median for multiple numbers instead of
-        // following the semantic described on wikipedia:
-        // https://en.wikipedia.org/wiki/Median
-        // See also
-        // https://forum.datomic.com/t/unexpected-median-rounding/517
-        // So we calculate the correct median value manually instead:
-        find += s"(distinct $e)"
-        val medianConverter: AnyRef => Double = {
-          (v: AnyRef) => getMedian(v.asInstanceOf[jSet[_]].toArray.map(_.toString.toDouble).toSet)
-        }
-        replaceCast(medianConverter.asInstanceOf[AnyRef => AnyRef])
+        find += s"(median $e)"
+        // Force whole number to cast as double according to aggregate type for median/avg/variance/stddev)
+        replaceCast((v: AnyRef) => v.toString.toDouble.asInstanceOf[AnyRef])
+
+      // OBS! Datomic rounds down to nearest whole number
+      // when calculating the median for multiple numbers instead of
+      // following the semantic described on wikipedia:
+      // https://en.wikipedia.org/wiki/Median
+      // See also
+      // https://forum.datomic.com/t/unexpected-median-rounding/517
+      // If we wanted the rounded version we can do this instead if desired:
+      //        find += s"(distinct $e)"
+      //        val medianConverter: AnyRef => Double = {
+      ////          (v: AnyRef) => getMedian(v.asInstanceOf[jSet[_]].toArray.map(_.toString.toDouble).toSet)
+      //          (v: AnyRef) => {
+      //            println(v)
+      //            getMedian(v.asInstanceOf[jSet[_]].toArray.map(_.toString.toDouble).toSet)
+      //          }
+      //        }
+      //        replaceCast(medianConverter.asInstanceOf[AnyRef => AnyRef])
 
       case "avg"      => find += s"(avg $e)"
       case "variance" => find += s"(variance $e)"

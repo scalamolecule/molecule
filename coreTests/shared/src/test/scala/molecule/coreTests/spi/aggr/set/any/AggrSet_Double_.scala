@@ -17,7 +17,7 @@ trait AggrSet_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.doubles.insert(List(
           (1, Set(double1, double2)),
-          (2, Set(double2, double3)),
+          (2, Set(double2)),
           (2, Set(double3, double4)),
           (2, Set(double3, double4)),
         )).transact
@@ -32,7 +32,7 @@ trait AggrSet_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.doubles(distinct).query.get.map(_ ==> List(
           (1, Set(Set(double1, double2))),
           (2, Set(
-            Set(double2, double3),
+            Set(double2),
             Set(double3, double4) // 2 rows coalesced
           ))
         ))
@@ -40,7 +40,7 @@ trait AggrSet_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.doubles(distinct).query.get.map(_ ==> List(
           Set(
             Set(double1, double2),
-            Set(double2, double3),
+            Set(double2),
             Set(double3, double4),
           )
         ))
@@ -52,7 +52,7 @@ trait AggrSet_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.doubles.insert(List(
           (1, Set(double1, double2)),
-          (2, Set(double2, double3)),
+          (2, Set(double2)),
           (2, Set(double3, double4)),
           (2, Set(double3, double4)),
         )).transact
@@ -91,7 +91,7 @@ trait AggrSet_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.doubles.insert(List(
           (1, Set(double1, double2)),
-          (2, Set(double2, double3)),
+          (2, Set(double2)),
           (2, Set(double3, double4)),
           (2, Set(double3, double4)),
         )).transact
@@ -130,7 +130,7 @@ trait AggrSet_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.doubles.insert(List(
           (1, Set(double1, double2)),
-          (2, Set(double2, double3)),
+          (2, Set(double2)),
           (2, Set(double3, double4)),
           (2, Set(double3, double4)),
         )).transact
@@ -146,7 +146,7 @@ trait AggrSet_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.doubles.insert(List(
           (1, Set(double1, double2)),
-          (2, Set(double2, double3)),
+          (2, Set(double2)),
           (2, Set(double3, double4)),
           (2, Set(double3, double4)),
         )).transact
@@ -154,12 +154,12 @@ trait AggrSet_Double_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i(count).query.get.map(_ ==> List(4))
         _ <- Ns.i(countDistinct).query.get.map(_ ==> List(2))
 
-        _ <- Ns.doubles(count).query.get.map(_ ==> List(8))
+        _ <- Ns.doubles(count).query.get.map(_ ==> List(7))
         _ <- Ns.doubles(countDistinct).query.get.map(_ ==> List(4))
 
         _ <- Ns.i.a1.doubles(count).query.get.map(_ ==> List(
           (1, 2),
-          (2, 6)
+          (2, 5)
         ))
         _ <- Ns.i.a1.doubles(countDistinct).query.get.map(_ ==> List(
           (1, 2),

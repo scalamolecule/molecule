@@ -18,7 +18,7 @@ trait AggrSet_ZonedDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
       for {
         _ <- Ns.i.zonedDateTimes.insert(List(
           (1, Set(zonedDateTime1, zonedDateTime2)),
-          (2, Set(zonedDateTime2, zonedDateTime3)),
+          (2, Set(zonedDateTime2)),
           (2, Set(zonedDateTime3, zonedDateTime4)),
           (2, Set(zonedDateTime3, zonedDateTime4)),
         )).transact
@@ -33,7 +33,7 @@ trait AggrSet_ZonedDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
         _ <- Ns.i.a1.zonedDateTimes(distinct).query.get.map(_ ==> List(
           (1, Set(Set(zonedDateTime1, zonedDateTime2))),
           (2, Set(
-            Set(zonedDateTime2, zonedDateTime3),
+            Set(zonedDateTime2),
             Set(zonedDateTime3, zonedDateTime4) // 2 rows coalesced
           ))
         ))
@@ -41,7 +41,7 @@ trait AggrSet_ZonedDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
         _ <- Ns.zonedDateTimes(distinct).query.get.map(_ ==> List(
           Set(
             Set(zonedDateTime1, zonedDateTime2),
-            Set(zonedDateTime2, zonedDateTime3),
+            Set(zonedDateTime2),
             Set(zonedDateTime3, zonedDateTime4),
           )
         ))
@@ -53,7 +53,7 @@ trait AggrSet_ZonedDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
       for {
         _ <- Ns.i.zonedDateTimes.insert(List(
           (1, Set(zonedDateTime1, zonedDateTime2)),
-          (2, Set(zonedDateTime2, zonedDateTime3)),
+          (2, Set(zonedDateTime2)),
           (2, Set(zonedDateTime3, zonedDateTime4)),
           (2, Set(zonedDateTime3, zonedDateTime4)),
         )).transact
@@ -92,7 +92,7 @@ trait AggrSet_ZonedDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
       for {
         _ <- Ns.i.zonedDateTimes.insert(List(
           (1, Set(zonedDateTime1, zonedDateTime2)),
-          (2, Set(zonedDateTime2, zonedDateTime3)),
+          (2, Set(zonedDateTime2)),
           (2, Set(zonedDateTime3, zonedDateTime4)),
           (2, Set(zonedDateTime3, zonedDateTime4)),
         )).transact
@@ -131,7 +131,7 @@ trait AggrSet_ZonedDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
       for {
         _ <- Ns.i.zonedDateTimes.insert(List(
           (1, Set(zonedDateTime1, zonedDateTime2)),
-          (2, Set(zonedDateTime2, zonedDateTime3)),
+          (2, Set(zonedDateTime2)),
           (2, Set(zonedDateTime3, zonedDateTime4)),
           (2, Set(zonedDateTime3, zonedDateTime4)),
         )).transact
@@ -147,7 +147,7 @@ trait AggrSet_ZonedDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
       for {
         _ <- Ns.i.zonedDateTimes.insert(List(
           (1, Set(zonedDateTime1, zonedDateTime2)),
-          (2, Set(zonedDateTime2, zonedDateTime3)),
+          (2, Set(zonedDateTime2)),
           (2, Set(zonedDateTime3, zonedDateTime4)),
           (2, Set(zonedDateTime3, zonedDateTime4)),
         )).transact
@@ -155,12 +155,12 @@ trait AggrSet_ZonedDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
         _ <- Ns.i(count).query.get.map(_ ==> List(4))
         _ <- Ns.i(countDistinct).query.get.map(_ ==> List(2))
 
-        _ <- Ns.zonedDateTimes(count).query.get.map(_ ==> List(8))
+        _ <- Ns.zonedDateTimes(count).query.get.map(_ ==> List(7))
         _ <- Ns.zonedDateTimes(countDistinct).query.get.map(_ ==> List(4))
 
         _ <- Ns.i.a1.zonedDateTimes(count).query.get.map(_ ==> List(
           (1, 2),
-          (2, 6)
+          (2, 5)
         ))
         _ <- Ns.i.a1.zonedDateTimes(countDistinct).query.get.map(_ ==> List(
           (1, 2),

@@ -3,7 +3,9 @@ package molecule.sql.postgres.query
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
 import molecule.sql.core.query.{ResolveExprSet, SqlQueryBase}
+import scala.collection.mutable.ListBuffer
 import scala.reflect.ClassTag
+import scala.util.Random
 
 
 trait ResolveExprSet_postgres
@@ -191,15 +193,27 @@ trait ResolveExprSet_postgres
   override protected def setAggr[T: ClassTag](
     col: String, fn: String, optN: Option[Int], res: ResSet[T]
   ): Unit = {
+    checkAggrSet()
     select -= col
-    lazy val n = optN.getOrElse(0)
+    lazy val colAlias           = col.replace('.', '_')
+    lazy val n                  = optN.getOrElse(0)
+    lazy val invisibleSeparator = 29.toChar
+
     fn match {
       case "distinct" =>
         noBooleanSetAggr(res)
-        select += s"ARRAY_AGG(DISTINCT $col)"
+        select += s"ARRAY_AGG(DISTINCT ARRAY_TO_STRING($col, CHR(29)))"
         groupByCols -= col
         aggregate = true
-        replaceCast(res.nestedArray2nestedSet)
+        replaceCast(
+          (row: Row, paramIndex: Int) => {
+            row.getArray(paramIndex).getArray.asInstanceOf[Array[String]]
+              .map(jsonArray =>
+                jsonArray.split(invisibleSeparator).toSet // separate values in each array/set
+                  .map(res.json2tpe) // cast each value
+              ).toSet
+          }
+        )
 
       case "min" =>
         noBooleanSetAggr(res)
@@ -210,10 +224,11 @@ trait ResolveExprSet_postgres
 
       case "mins" =>
         noBooleanSetAggr(res)
-        select += s"ARRAY_AGG(DISTINCT $col)"
+        select += s"ARRAY_AGG($colAlias)"
+        tempTables += s"UNNEST($col) AS $colAlias"
         groupByCols -= col
         aggregate = true
-        replaceCast(res.nestedArray2setAsc(n))
+        replaceCast(res.sqlArray2minN(n))
 
       case "max" =>
         noBooleanSetAggr(res)
@@ -224,10 +239,11 @@ trait ResolveExprSet_postgres
 
       case "maxs" =>
         noBooleanSetAggr(res)
-        select += s"ARRAY_AGG(DISTINCT $col)"
+        select += s"ARRAY_AGG($colAlias)"
+        tempTables += s"UNNEST($col) AS $colAlias"
         groupByCols -= col
         aggregate = true
-        replaceCast(res.nestedArray2setDesc(n))
+        replaceCast(res.sqlArray2maxN(n))
 
       case "sample" =>
         noBooleanSetAggr(res)
@@ -239,26 +255,25 @@ trait ResolveExprSet_postgres
 
       case "samples" =>
         noBooleanSetAggr(res)
-        select +=
-          s"""TRIM_ARRAY(
-             |    ARRAY_AGG($col order by RANDOM()),
-             |    GREATEST(
-             |      0,
-             |      ARRAY_LENGTH(ARRAY_AGG(DISTINCT $col), 1) - $n
-             |    )
-             |  )""".stripMargin
+        select += s"ARRAY_AGG(DISTINCT ARRAY_TO_STRING($col, CHR(29)))"
         groupByCols -= col
         aggregate = true
-        replaceCast(res.nestedArray2coalescedSet)
-
-
-      // Using brute force in the following aggregate functions to be able to
-      // aggregate _unique_ values (Set semantics instead of Array semantics)
+        replaceCast(
+          (row: Row, paramIndex: Int) => {
+            val sets = row.getArray(paramIndex).getArray.asInstanceOf[Array[String]]
+              .flatMap(jsonArray =>
+                jsonArray.split(invisibleSeparator).toSet // separate values in each array/set
+                  .map(res.json2tpe) // cast each value
+              ).toSet
+            Random.shuffle(sets).take(n)
+          }
+        )
 
       case "count" =>
         noBooleanSetCounts(n)
         // Count of all (non-unique) values
-        select += s"ARRAY_AGG($col)"
+        select += s"ARRAY_AGG($colAlias)"
+        tempTables += s"UNNEST($col) AS $colAlias"
         groupByCols -= col
         aggregate = true
         replaceCast(
@@ -266,7 +281,7 @@ trait ResolveExprSet_postgres
             val resultSet = row.getArray(paramIndex).getResultSet
             var count     = 0
             while (resultSet.next()) {
-              count += resultSet.getArray(2).getArray.asInstanceOf[Array[_]].length
+              count += 1
             }
             count
           }
@@ -274,95 +289,94 @@ trait ResolveExprSet_postgres
 
       case "countDistinct" =>
         noBooleanSetCounts(n)
-        // Count of unique values (Set semantics)
-        select += s"ARRAY_AGG($col)"
+        select += s"ARRAY_AGG(DISTINCT $colAlias)"
+        tempTables += s"UNNEST($col) AS $colAlias"
         groupByCols -= col
         aggregate = true
         replaceCast(
           (row: Row, paramIndex: Int) => {
             val resultSet = row.getArray(paramIndex).getResultSet
-            var set       = Set.empty[Any]
+            var count     = 0
             while (resultSet.next()) {
-              resultSet.getArray(2).getArray.asInstanceOf[Array[_]].foreach { value =>
-                set += value
-              }
+              count += 1
             }
-            set.size
+            count
           }
         )
 
       case "sum" =>
-        // Sum of unique values (Set semantics)
-        select += s"ARRAY_AGG($col)"
+        select += s"ARRAY_AGG($colAlias)"
+        tempTables += s"UNNEST($col) AS $colAlias"
         groupByCols -= col
         aggregate = true
-        replaceCast(res.array2setSum)
-
+        replaceCast((row: Row, paramIndex: Int) => {
+          val json = row.getString(paramIndex)
+          if (row.wasNull()) {
+            Set.empty[T]
+          } else {
+            Set(
+              res.stringArray2sum(
+                json.substring(1, json.length - 1).split("\\]?, ?\\[?")
+              )
+            )
+          }
+        })
 
       case "median" =>
-        select += s"ARRAY_AGG($col)"
+        select += s"ARRAY_AGG($colAlias)"
+        tempTables += s"UNNEST($col) AS $colAlias"
         groupByCols -= col
         aggregate = true
-        replaceCast(
-          (row: Row, paramIndex: Int) => {
-            val resultSet = row.getArray(paramIndex).getResultSet
-            var set       = Set.empty[Double]
-            while (resultSet.next()) {
-              val array = resultSet.getArray(2).getArray.asInstanceOf[Array[_]]
-              array.foreach(v => set += v.toString.toDouble) // not the most efficient...
-            }
-            getMedian(set)
-          }
+        replaceCast((row: Row, paramIndex: Int) =>
+          getMedian(res.json2array(row.getString(paramIndex))
+            .map(_.toString.toDouble).toList)
         )
 
       case "avg" =>
-        // Average of unique values (Set semantics)
-        select += s"ARRAY_AGG($col)"
+        select += s"ARRAY_AGG($colAlias)"
+        tempTables += s"UNNEST($col) AS $colAlias"
         groupByCols -= col
         aggregate = true
         replaceCast(
           (row: Row, paramIndex: Int) => {
             val resultSet = row.getArray(paramIndex).getResultSet
-            var set       = Set.empty[Double]
+            val list      = ListBuffer.empty[Double]
             while (resultSet.next()) {
-              val array = resultSet.getArray(2).getArray.asInstanceOf[Array[_]]
-              array.foreach(v => set += v.toString.toDouble) // not the most efficient...
+              list ++= res.json2array(row.getString(paramIndex)).map(_.toString.toDouble).toList
             }
-            set.sum / set.size
+            list.sum / list.size
           }
         )
 
       case "variance" =>
-        // Variance of unique values (Set semantics)
-        select += s"ARRAY_AGG($col)"
+        select += s"ARRAY_AGG($colAlias)"
+        tempTables += s"UNNEST($col) AS $colAlias"
         groupByCols -= col
         aggregate = true
         replaceCast(
           (row: Row, paramIndex: Int) => {
             val resultSet = row.getArray(paramIndex).getResultSet
-            var set       = Set.empty[Double]
+            val list      = ListBuffer.empty[Double]
             while (resultSet.next()) {
-              val array = resultSet.getArray(2).getArray.asInstanceOf[Array[_]]
-              array.foreach(v => set += v.toString.toDouble) // not the most efficient...
+              list ++= res.json2array(row.getString(paramIndex)).map(_.toString.toDouble).toList
             }
-            varianceOf(set.toList: _*)
+            varianceOf(list.toList: _*)
           }
         )
 
       case "stddev" =>
-        // Standard deviation of unique values (Set semantics)
-        select += s"ARRAY_AGG($col)"
+        select += s"ARRAY_AGG($colAlias)"
+        tempTables += s"UNNEST($col) AS $colAlias"
         groupByCols -= col
         aggregate = true
         replaceCast(
           (row: Row, paramIndex: Int) => {
             val resultSet = row.getArray(paramIndex).getResultSet
-            var set       = Set.empty[Double]
+            val list      = ListBuffer.empty[Double]
             while (resultSet.next()) {
-              val array = resultSet.getArray(2).getArray.asInstanceOf[Array[_]]
-              array.foreach(v => set += v.toString.toDouble) // not the most efficient...
+              list ++= res.json2array(row.getString(paramIndex)).map(_.toString.toDouble).toList
             }
-            stdDevOf(set.toList: _*)
+            stdDevOf(list.toList: _*)
           }
         )
 
@@ -374,21 +388,22 @@ trait ResolveExprSet_postgres
   // helpers -------------------------------------------------------------------
 
   private def coalesce[T](col: String, res: ResSet[T], mode: String) = {
+    val colAlias = col.replace(".", "_")
     select -= col
     groupByCols -= col
     if (res.tpe == "Boolean" && !expectedFilterAttrs.contains(col) && !isNestedMan && !isNestedOpt) {
       // If we don't apply this hack, Boolean sets throw
       // ERROR: cannot accumulate arrays of different dimensionality
       // https://stackoverflow.com/questions/46849237/postgresql-array-agginteger/46849678#46849678
-      val colAlias = col.replace(".", "_")
       select += s"ARRAY_AGG(DISTINCT $colAlias)"
       tempTables += s"UNNEST($col) AS $colAlias"
     } else {
       mode match {
         case "man" =>
-          select += s"ARRAY_AGG($col)"
-          replaceCast(res.nestedArray2coalescedSet)
+          select += s"ARRAY_AGG(DISTINCT $colAlias)"
+          tempTables += s"UNNEST($col) AS $colAlias"
           where += (("", s"$col <> '{}'"))
+          replaceCast(res.array2set)
 
         case "opt" =>
           select += s"COALESCE(ARRAY_AGG($col) FILTER (WHERE $col IS NOT NULL), '{}')"

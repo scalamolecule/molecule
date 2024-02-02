@@ -18,7 +18,7 @@ trait AggrSet_LocalDate_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.localDates.insert(List(
           (1, Set(localDate1, localDate2)),
-          (2, Set(localDate2, localDate3)),
+          (2, Set(localDate2)),
           (2, Set(localDate3, localDate4)),
           (2, Set(localDate3, localDate4)),
         )).transact
@@ -33,7 +33,7 @@ trait AggrSet_LocalDate_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.localDates(distinct).query.get.map(_ ==> List(
           (1, Set(Set(localDate1, localDate2))),
           (2, Set(
-            Set(localDate2, localDate3),
+            Set(localDate2),
             Set(localDate3, localDate4) // 2 rows coalesced
           ))
         ))
@@ -41,7 +41,7 @@ trait AggrSet_LocalDate_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.localDates(distinct).query.get.map(_ ==> List(
           Set(
             Set(localDate1, localDate2),
-            Set(localDate2, localDate3),
+            Set(localDate2),
             Set(localDate3, localDate4),
           )
         ))
@@ -53,7 +53,7 @@ trait AggrSet_LocalDate_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.localDates.insert(List(
           (1, Set(localDate1, localDate2)),
-          (2, Set(localDate2, localDate3)),
+          (2, Set(localDate2)),
           (2, Set(localDate3, localDate4)),
           (2, Set(localDate3, localDate4)),
         )).transact
@@ -92,7 +92,7 @@ trait AggrSet_LocalDate_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.localDates.insert(List(
           (1, Set(localDate1, localDate2)),
-          (2, Set(localDate2, localDate3)),
+          (2, Set(localDate2)),
           (2, Set(localDate3, localDate4)),
           (2, Set(localDate3, localDate4)),
         )).transact
@@ -131,7 +131,7 @@ trait AggrSet_LocalDate_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.localDates.insert(List(
           (1, Set(localDate1, localDate2)),
-          (2, Set(localDate2, localDate3)),
+          (2, Set(localDate2)),
           (2, Set(localDate3, localDate4)),
           (2, Set(localDate3, localDate4)),
         )).transact
@@ -147,7 +147,7 @@ trait AggrSet_LocalDate_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.localDates.insert(List(
           (1, Set(localDate1, localDate2)),
-          (2, Set(localDate2, localDate3)),
+          (2, Set(localDate2)),
           (2, Set(localDate3, localDate4)),
           (2, Set(localDate3, localDate4)),
         )).transact
@@ -155,12 +155,12 @@ trait AggrSet_LocalDate_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i(count).query.get.map(_ ==> List(4))
         _ <- Ns.i(countDistinct).query.get.map(_ ==> List(2))
 
-        _ <- Ns.localDates(count).query.get.map(_ ==> List(8))
+        _ <- Ns.localDates(count).query.get.map(_ ==> List(7))
         _ <- Ns.localDates(countDistinct).query.get.map(_ ==> List(4))
 
         _ <- Ns.i.a1.localDates(count).query.get.map(_ ==> List(
           (1, 2),
-          (2, 6)
+          (2, 5)
         ))
         _ <- Ns.i.a1.localDates(countDistinct).query.get.map(_ ==> List(
           (1, 2),

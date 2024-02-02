@@ -34,7 +34,7 @@ trait SpiSync_h2 extends SpiSyncBase {
   }
 
   override def refIdsQuery(idsModel: List[Element], proxy: ConnProxy): String = {
-    new Model2SqlQuery_h2(idsModel).getSqlQuery(Nil, None, None)
+    new Model2SqlQuery_h2(idsModel).getSqlQuery(Nil, None, None, Some(proxy))
   }
 
   override def update_getData(conn: JdbcConn_JVM, update: Update): Data = {

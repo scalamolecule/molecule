@@ -3,6 +3,7 @@ package molecule.sql.core.query
 import java.sql.ResultSet
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
+import molecule.core.marshalling.ConnProxy
 import molecule.core.query.Pagination
 import molecule.core.util.ModelUtils
 import molecule.sql.core.facade.JdbcConn_JVM
@@ -20,7 +21,7 @@ abstract class SqlQueryResolve[Tpl](
     optLimit: Option[Int],
     optOffset: Option[Int]
   ): ResultSet = {
-    getResultSet(conn, m2q.getSqlQuery(Nil, optLimit, optOffset))
+    getResultSet(conn, m2q.getSqlQuery(Nil, optLimit, optOffset, Some(conn.proxy)))
   }
 
   protected def getTotalCount(conn: JdbcConn_JVM): Int = {
@@ -48,7 +49,7 @@ abstract class SqlQueryResolve[Tpl](
     optLimit: Option[Int],
     optOffset: Option[Int]
   ): ResultSet = {
-    val query = m2q.getSqlQuery(altElements, optLimit, optOffset)
+    val query = m2q.getSqlQuery(altElements, optLimit, optOffset, Some(conn.proxy))
     getResultSet(conn, query)
   }
 

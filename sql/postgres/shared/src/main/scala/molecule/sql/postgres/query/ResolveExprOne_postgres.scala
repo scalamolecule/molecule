@@ -22,7 +22,10 @@ trait ResolveExprOne_postgres extends ResolveExprOne with LambdasOne_postgres { 
     case _                  => ""
   }
 
-  override protected def aggr[T: ClassTag](col: String, fn: String, optN: Option[Int], res: ResOne[T]): Unit = {
+  override protected def aggr[T: ClassTag](
+    col: String, fn: String, optN: Option[Int], res: ResOne[T]
+  ): Unit = {
+    checkAggrOne()
     lazy val n = optN.getOrElse(0)
     // Replace find/casting with aggregate function/cast
     select -= col
@@ -35,10 +38,8 @@ trait ResolveExprOne_postgres extends ResolveExprOne with LambdasOne_postgres { 
 
       case "min" =>
         select += s"MIN($col${castText(res.tpe)})"
-        if (col.endsWith(".id")) {
-          groupByCols -= col
-          aggregate = true
-        }
+        groupByCols -= col
+        aggregate = true
 
       case "mins" =>
         select +=
@@ -55,10 +56,8 @@ trait ResolveExprOne_postgres extends ResolveExprOne with LambdasOne_postgres { 
 
       case "max" =>
         select += s"MAX($col${castText(res.tpe)})"
-        if (col.endsWith(".id")) {
-          groupByCols -= col
-          aggregate = true
-        }
+        groupByCols -= col
+        aggregate = true
 
       case "maxs" =>
         select +=
@@ -109,32 +108,27 @@ trait ResolveExprOne_postgres extends ResolveExprOne with LambdasOne_postgres { 
       case "sum" =>
         groupByCols -= col
         aggregate = true
-        selectWithOrder(col, "SUM")
+        selectWithOrder(col, "SUM", "")
 
       case "median" =>
         groupByCols -= col
         aggregate = true
-        // OBS: requires custom median function to be saved with schema
-        selectWithOrder(col, "MEDIAN", cast = "::numeric")
-
-        // Can't use suggested percentile_count at
-        // https://wiki.postgresql.org/wiki/Aggregate_Median
-        // since it calculates from non-distinct values (Array semantics instead of Set semantics).
+        select += s"percentile_cont(0.5) WITHIN GROUP (ORDER BY $col)"
 
       case "avg" =>
         groupByCols -= col
         aggregate = true
-        selectWithOrder(col, "AVG")
+        selectWithOrder(col, "AVG", "")
 
       case "variance" =>
         groupByCols -= col
         aggregate = true
-        selectWithOrder(col, "VAR_POP")
+        selectWithOrder(col, "VAR_POP", "")
 
       case "stddev" =>
         groupByCols -= col
         aggregate = true
-        selectWithOrder(col, "STDDEV_POP")
+        selectWithOrder(col, "STDDEV_POP", "")
 
       case other => unexpectedKw(other)
     }

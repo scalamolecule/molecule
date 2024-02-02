@@ -8,7 +8,7 @@ import molecule.coreTests.dataModels.core.dsl.Refs._
 import molecule.coreTests.setup.CoreTestSuite
 import utest._
 
-trait FilterSet_Card2RefOwned extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
+trait FilterRefSet_Card2RefOwned extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
   override lazy val tests = Tests {
 
@@ -120,9 +120,6 @@ trait FilterSet_Card2RefOwned extends CoreTestSuite with ApiAsync { spi: SpiAsyn
         // all
         _ <- A.i.a1.OwnBb.ii_.query.get.map(_ ==> List(1, 2, 3))
 
-        // Match non-asserted attribute (null)
-        _ <- A.i.a1.OwnBb.ii_().query.get.map(_ ==> List(4))
-
         // equal/apply
         _ <- A.i.a1.OwnBb.ii_(Set(1)).query.get.map(_ ==> Nil)
         _ <- A.i.a1.OwnBb.ii_(Set(1, 2)).query.get.map(_ ==> List(1))
@@ -143,6 +140,9 @@ trait FilterSet_Card2RefOwned extends CoreTestSuite with ApiAsync { spi: SpiAsyn
         _ <- A.i.a1.OwnBb.ii_.hasNo(1).query.get.map(_ ==> List(2, 3))
         _ <- A.i.a1.OwnBb.ii_.hasNo(2).query.get.map(_ ==> List(2, 3))
         _ <- A.i.a1.OwnBb.ii_.hasNo(3).query.get.map(_ ==> List(1, 2))
+
+        // no value - match non-asserted attribute (null)
+        _ <- A.i.a1.OwnBb.ii_().query.get.map(_ ==> List(4))
       } yield ()
     }
 

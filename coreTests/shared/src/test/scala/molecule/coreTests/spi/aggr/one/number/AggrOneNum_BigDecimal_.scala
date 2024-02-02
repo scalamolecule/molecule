@@ -26,9 +26,11 @@ trait AggrOneNum_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
           (2, bigDecimal4),
         )).transact
 
-        // Sum of distinct values (Set semantics)
+        // Sum of all values
+        _ <- Ns.bigDecimal(sum).query.get.map(
+          _.head ==~ bigDecimal1 + bigDecimal2 + bigDecimal2 + bigDecimal3 + bigDecimal4
+        )
 
-        _ <- Ns.bigDecimal(sum).query.get.map(_.head ==~ bigDecimal1 + bigDecimal2 + bigDecimal3 + bigDecimal4)
         _ <- Ns.i.bigDecimal(sum).query.get.map(_.map {
           case (1, sum) => sum ==~ bigDecimal1 + bigDecimal2
           case (2, sum) => sum ==~ bigDecimal2 + bigDecimal3 + bigDecimal4
@@ -40,32 +42,64 @@ trait AggrOneNum_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
     "median" - types { implicit futConn =>
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       // Different databases have different ways of calculating a median
-      val (median_2_3, median_1_2) = if (database == "MongoDB") {
-        (bigDecimal2, bigDecimal1)
-      } else {
-        (
-          (bigDecimal2 + bigDecimal3).toDouble / 2.0,
-          (bigDecimal1 + bigDecimal2).toDouble / 2.0
-        )
+      database match {
+        case "Datomic" =>
+          for {
+            _ <- Ns.i.bigDecimal.insert(List(
+              (1, bigDecimal1),
+              (1, bigDecimal2),
+              (2, bigDecimal2),
+              (2, bigDecimal5),
+              (2, bigDecimal9),
+            )).transact
+
+            // Median of all values - middle number used if odd number of values
+            // 1  2  2  5  9
+            //       ^
+            _ <- Ns.bigDecimal(median).query.get.map(_.head ==~ bigDecimal2.toString.toDouble) // middle number
+
+            _ <- Ns.i.bigDecimal(median).query.get.map(_.map {
+              case (1, median) => median ==~ bigDecimal1.toDouble.floor // lower whole number
+              case (2, median) => median ==~ bigDecimal5.toString.toDouble // middle number
+            })
+          } yield ()
+
+        case "MongoDB" =>
+          for {
+            _ <- Ns.i.bigDecimal.insert(List(
+              (1, bigDecimal1),
+              (1, bigDecimal2),
+              (2, bigDecimal2),
+              (2, bigDecimal5),
+              (2, bigDecimal9),
+            )).transact
+
+            _ <- Ns.bigDecimal(median).query.get.map(_.head ==~ bigDecimal2.toString.toDouble) // whole middle number
+
+            _ <- Ns.i.bigDecimal(median).query.get.map(_.map {
+              case (1, median) => median ==~ bigDecimal1.toDouble // lower number
+              case (2, median) => median ==~ bigDecimal5.toString.toDouble // middle number
+            })
+          } yield ()
+
+        case _ =>
+          for {
+            _ <- Ns.i.bigDecimal.insert(List(
+              (1, bigDecimal1),
+              (1, bigDecimal2),
+              (2, bigDecimal2),
+              (2, bigDecimal5),
+              (2, bigDecimal9),
+            )).transact
+
+            _ <- Ns.bigDecimal(median).query.get.map(_.head ==~ bigDecimal2.toString.toDouble) // middle number
+
+            _ <- Ns.i.bigDecimal(median).query.get.map(_.map {
+              case (1, median) => median ==~ (bigDecimal1 + bigDecimal2).toDouble / 2.0 // average of 2 middle numbers
+              case (2, median) => median ==~ bigDecimal5.toString.toDouble // middle number
+            })
+          } yield ()
       }
-      for {
-        _ <- Ns.i.bigDecimal.insert(List(
-          (1, bigDecimal1),
-          (1, bigDecimal2),
-          (2, bigDecimal2),
-          (2, bigDecimal3),
-          (2, bigDecimal4),
-        )).transact
-
-        // Median of unique values (Set semantics)
-
-        _ <- Ns.bigDecimal(median).query.get.map(_.head ==~ median_2_3)
-
-        _ <- Ns.i.bigDecimal(median).query.get.map(_.map {
-          case (1, median) => median ==~ median_1_2
-          case (2, median) => median ==~ bigDecimal3.toString.toDouble
-        })
-      } yield ()
     }
 
 
@@ -80,9 +114,10 @@ trait AggrOneNum_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
           (2, bigDecimal4),
         )).transact
 
-        // Average of unique values (Set semantics)
-
-        _ <- Ns.bigDecimal(avg).query.get.map(_.head ==~ (bigDecimal1 + bigDecimal2 + bigDecimal3 + bigDecimal4).toDouble / 4.0)
+        // Average of all values
+        _ <- Ns.bigDecimal(avg).query.get.map(
+          _.head ==~ (bigDecimal1 + bigDecimal2 + bigDecimal2 + bigDecimal3 + bigDecimal4).toDouble / 5.0
+        )
 
         _ <- Ns.i.bigDecimal(avg).query.get.map(_.map {
           case (1, avg) => avg ==~ (bigDecimal1 + bigDecimal2).toDouble / 2.0
@@ -103,9 +138,10 @@ trait AggrOneNum_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
           (2, bigDecimal4),
         )).transact
 
-        // Variance of unique values (Set semantics)
-
-        _ <- Ns.bigDecimal(variance).query.get.map(_.head ==~ varianceOf(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4))
+        // Variance of all values
+        _ <- Ns.bigDecimal(variance).query.get.map(
+          _.head ==~ varianceOf(bigDecimal1, bigDecimal2, bigDecimal2, bigDecimal3, bigDecimal4)
+        )
 
         _ <- Ns.i.bigDecimal(variance).query.get.map(_.map {
           case (1, variance) => variance ==~ varianceOf(bigDecimal1, bigDecimal2)
@@ -126,9 +162,10 @@ trait AggrOneNum_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
           (2, bigDecimal4),
         )).transact
 
-        // Standard deviation of unique values (Set semantics)
-
-        _ <- Ns.bigDecimal(stddev).query.get.map(_.head ==~ stdDevOf(bigDecimal1, bigDecimal2, bigDecimal3, bigDecimal4))
+        // Standard deviation of all values
+        _ <- Ns.bigDecimal(stddev).query.get.map(
+          _.head ==~ stdDevOf(bigDecimal1, bigDecimal2, bigDecimal2, bigDecimal3, bigDecimal4)
+        )
 
         _ <- Ns.i.bigDecimal(stddev).query.get.map(_.map {
           case (1, stddev) => stddev ==~ stdDevOf(bigDecimal1, bigDecimal2)

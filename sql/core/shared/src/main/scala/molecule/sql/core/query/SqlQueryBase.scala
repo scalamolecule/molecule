@@ -4,13 +4,14 @@ import molecule.base.ast.{Card, MetaNs}
 import molecule.base.error._
 import molecule.base.util.BaseHelpers
 import molecule.boilerplate.ast.Model._
+import molecule.core.query.Model2QueryBase
 import molecule.core.util.JavaConversions
 import molecule.sql.core.javaSql.ResultSetInterface
 import scala.collection.mutable
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 
 
-trait SqlQueryBase extends BaseHelpers with JavaConversions {
+trait SqlQueryBase extends Model2QueryBase with BaseHelpers with JavaConversions {
 
   // This type represents both all rows and the individual row where the
   // internal cursor is positioned

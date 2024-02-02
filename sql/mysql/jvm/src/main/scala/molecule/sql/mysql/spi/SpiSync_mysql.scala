@@ -34,7 +34,7 @@ trait SpiSync_mysql extends SpiSyncBase {
   }
 
   override def refIdsQuery(idsModel: List[Element], proxy: ConnProxy): String = {
-    new Model2SqlQuery_mysql(idsModel).getSqlQuery(Nil, None, None)
+    new Model2SqlQuery_mysql(idsModel).getSqlQuery(Nil, None, None, Some(proxy))
   }
 
   override def update_getData(conn: JdbcConn_JVM, update: Update): Data = {

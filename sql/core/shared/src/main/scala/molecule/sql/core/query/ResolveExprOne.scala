@@ -276,28 +276,37 @@ trait ResolveExprOne extends ResolveExpr { self: SqlQueryBase with LambdasOne =>
   }
 
 
-  // String filters ------------------------------------------------------------
+  // string filters ------------------------------------------------------------
 
   protected def startsWith[T](col: String, arg: T): Unit = where += ((col, s"LIKE '$arg%'"))
+
   protected def endsWith[T](col: String, arg: T): Unit = where += ((col, s"LIKE '%$arg'"))
+
   protected def contains[T](col: String, arg: T): Unit = where += ((col, s"LIKE '%$arg%'"))
+
   protected def matches(col: String, regex: String): Unit = {
     if (regex.nonEmpty)
       where += ((col, s"~ '$regex'"))
   }
 
 
-  // Number filters ------------------------------------------------------------
+  // number filters ------------------------------------------------------------
 
-  protected def remainder[T](col: String, args: Seq[T]): Unit = where += ((col, s"% ${args.head} = ${args(1)}"))
+  protected def remainder[T](col: String, args: Seq[T]): Unit =
+    where += ((col, s"% ${args.head} = ${args(1)}"))
+
   protected def even(col: String): Unit = where += ((col, s"% 2 = 0"))
+
   protected def odd(col: String): Unit = where += ((col, s"% 2 = 1"))
 
 
 
   // aggregation ---------------------------------------------------------------
 
-  protected def aggr[T: ClassTag](col: String, fn: String, optN: Option[Int], res: ResOne[T]): Unit = {
+  protected def aggr[T: ClassTag](
+    col: String, fn: String, optN: Option[Int], res: ResOne[T]
+  ): Unit = {
+    checkAggrOne()
     lazy val n = optN.getOrElse(0)
     // Replace find/casting with aggregate function/cast
     select -= col
@@ -383,34 +392,34 @@ trait ResolveExprOne extends ResolveExpr { self: SqlQueryBase with LambdasOne =>
       case "sum" =>
         groupByCols -= col
         aggregate = true
-        selectWithOrder(col, "SUM")
+        selectWithOrder(col, "SUM", "")
 
       case "median" =>
         groupByCols -= col
         aggregate = true
-        selectWithOrder(col, "MEDIAN")
+        selectWithOrder(col, "MEDIAN", "")
 
       case "avg" =>
         groupByCols -= col
         aggregate = true
-        selectWithOrder(col, "AVG")
+        selectWithOrder(col, "AVG", "")
 
       case "variance" =>
         groupByCols -= col
         aggregate = true
-        selectWithOrder(col, "VAR_POP")
+        selectWithOrder(col, "VAR_POP", "")
 
       case "stddev" =>
         groupByCols -= col
         aggregate = true
-        selectWithOrder(col, "STDDEV_POP")
+        selectWithOrder(col, "STDDEV_POP", "")
 
       case other => unexpectedKw(other)
     }
   }
 
 
-  // Filter attribute filters --------------------------------------------------
+  // filter attribute filters --------------------------------------------------
 
   protected def equal2(col: String, filterAttr: String): Unit = {
     where += ((col, "= " + filterAttr))

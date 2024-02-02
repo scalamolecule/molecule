@@ -365,6 +365,7 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
   private def aggr[T](
     uniqueField: String, field: String, fn: String, optN: Option[Int], res: ResSet[T]
   ): Unit = {
+    checkAggrSet()
     lazy val n           = optN.getOrElse(0)
     lazy val aliasField  = b.alias + uniqueField
     lazy val pathField   = b.path + field
@@ -423,11 +424,14 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
         replaceCast(uniqueField, castInt(uniqueField))
 
       case "sum" =>
-        topBranch.groupAddToSet(aliasField, pathField2)
-        topBranch.addFields += pathField -> new BsonDocument("$sum", reduce(aliasField2))
+        topBranch.groupExprs += aliasField -> new BsonDocument("$sum",
+          new BsonDocument("$sum", new BsonString(pathField2))
+        )
+        topBranch.addFields += pathField -> new BsonString(aliasField2)
         replaceCast(uniqueField, res.v2set(uniqueField))
 
       case "median" =>
+        topBranch.aggregate = true
         topBranch.groupAddToSet(aliasField, pathField2)
         topBranch.addFields += pathField -> new BsonDocument("$median",
           new BsonDocument()
@@ -437,13 +441,15 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
         replaceCast(uniqueField, hardCastDouble(uniqueField))
 
       case "avg" =>
-        topBranch.groupAddToSet(aliasField, pathField2)
-        topBranch.addFields += pathField -> new BsonDocument("$avg", reduce(aliasField2))
+        topBranch.unwinds += pathField2
+        topBranch.groupExprs += aliasField -> new BsonDocument("$avg", new BsonString(pathField2))
+        topBranch.addFields += pathField -> new BsonString(aliasField2)
         replaceCast(uniqueField, hardCastDouble(uniqueField))
 
       case "variance" =>
-        topBranch.groupAddToSet(aliasField, pathField2)
-        topBranch.addFields += pathField -> new BsonDocument("$stdDevPop", reduce(aliasField2))
+        topBranch.unwinds += pathField2
+        topBranch.groupExprs += aliasField -> new BsonDocument("$stdDevPop", new BsonString(pathField2))
+        topBranch.addFields += pathField -> new BsonString(aliasField2)
         b.projection.remove(b.dot + uniqueField)
         val pow = new BsonArray()
         pow.add(new BsonString(pathField2))
@@ -452,8 +458,9 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
         replaceCast(uniqueField, hardCastDouble(uniqueField))
 
       case "stddev" =>
-        topBranch.groupAddToSet(aliasField, pathField2)
-        topBranch.addFields += pathField -> new BsonDocument("$stdDevPop", reduce(aliasField2))
+        topBranch.unwinds += pathField2
+        topBranch.groupExprs += aliasField -> new BsonDocument("$stdDevPop", new BsonString(pathField2))
+        topBranch.addFields += pathField -> new BsonString(aliasField2)
         replaceCast(uniqueField, hardCastDouble(uniqueField))
 
       case other => unexpectedKw(other)

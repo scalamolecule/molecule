@@ -18,7 +18,7 @@ trait AggrSet_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.uuids.insert(List(
           (1, Set(uuid1, uuid2)),
-          (2, Set(uuid2, uuid3)),
+          (2, Set(uuid2)),
           (2, Set(uuid3, uuid4)),
           (2, Set(uuid3, uuid4)),
         )).transact
@@ -33,7 +33,7 @@ trait AggrSet_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.uuids(distinct).query.get.map(_ ==> List(
           (1, Set(Set(uuid1, uuid2))),
           (2, Set(
-            Set(uuid2, uuid3),
+            Set(uuid2),
             Set(uuid3, uuid4) // 2 rows coalesced
           ))
         ))
@@ -41,7 +41,7 @@ trait AggrSet_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.uuids(distinct).query.get.map(_ ==> List(
           Set(
             Set(uuid1, uuid2),
-            Set(uuid2, uuid3),
+            Set(uuid2),
             Set(uuid3, uuid4),
           )
         ))
@@ -53,7 +53,7 @@ trait AggrSet_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.uuids.insert(List(
           (1, Set(uuid1, uuid2)),
-          (2, Set(uuid2, uuid3)),
+          (2, Set(uuid2)),
           (2, Set(uuid3, uuid4)),
           (2, Set(uuid3, uuid4)),
         )).transact
@@ -92,7 +92,7 @@ trait AggrSet_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.uuids.insert(List(
           (1, Set(uuid1, uuid2)),
-          (2, Set(uuid2, uuid3)),
+          (2, Set(uuid2)),
           (2, Set(uuid3, uuid4)),
           (2, Set(uuid3, uuid4)),
         )).transact
@@ -131,7 +131,7 @@ trait AggrSet_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.uuids.insert(List(
           (1, Set(uuid1, uuid2)),
-          (2, Set(uuid2, uuid3)),
+          (2, Set(uuid2)),
           (2, Set(uuid3, uuid4)),
           (2, Set(uuid3, uuid4)),
         )).transact
@@ -147,7 +147,7 @@ trait AggrSet_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.uuids.insert(List(
           (1, Set(uuid1, uuid2)),
-          (2, Set(uuid2, uuid3)),
+          (2, Set(uuid2)),
           (2, Set(uuid3, uuid4)),
           (2, Set(uuid3, uuid4)),
         )).transact
@@ -155,12 +155,12 @@ trait AggrSet_UUID_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i(count).query.get.map(_ ==> List(4))
         _ <- Ns.i(countDistinct).query.get.map(_ ==> List(2))
 
-        _ <- Ns.uuids(count).query.get.map(_ ==> List(8))
+        _ <- Ns.uuids(count).query.get.map(_ ==> List(7))
         _ <- Ns.uuids(countDistinct).query.get.map(_ ==> List(4))
 
         _ <- Ns.i.a1.uuids(count).query.get.map(_ ==> List(
           (1, 2),
-          (2, 6)
+          (2, 5)
         ))
         _ <- Ns.i.a1.uuids(countDistinct).query.get.map(_ ==> List(
           (1, 2),

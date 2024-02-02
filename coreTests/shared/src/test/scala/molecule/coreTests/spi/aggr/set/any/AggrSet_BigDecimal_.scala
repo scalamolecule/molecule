@@ -17,7 +17,7 @@ trait AggrSet_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.bigDecimals.insert(List(
           (1, Set(bigDecimal1, bigDecimal2)),
-          (2, Set(bigDecimal2, bigDecimal3)),
+          (2, Set(bigDecimal2)),
           (2, Set(bigDecimal3, bigDecimal4)),
           (2, Set(bigDecimal3, bigDecimal4)),
         )).transact
@@ -32,7 +32,7 @@ trait AggrSet_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.bigDecimals(distinct).query.get.map(_ ==> List(
           (1, Set(Set(bigDecimal1, bigDecimal2))),
           (2, Set(
-            Set(bigDecimal2, bigDecimal3),
+            Set(bigDecimal2),
             Set(bigDecimal3, bigDecimal4) // 2 rows coalesced
           ))
         ))
@@ -40,7 +40,7 @@ trait AggrSet_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.bigDecimals(distinct).query.get.map(_ ==> List(
           Set(
             Set(bigDecimal1, bigDecimal2),
-            Set(bigDecimal2, bigDecimal3),
+            Set(bigDecimal2),
             Set(bigDecimal3, bigDecimal4),
           )
         ))
@@ -52,7 +52,7 @@ trait AggrSet_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.bigDecimals.insert(List(
           (1, Set(bigDecimal1, bigDecimal2)),
-          (2, Set(bigDecimal2, bigDecimal3)),
+          (2, Set(bigDecimal2)),
           (2, Set(bigDecimal3, bigDecimal4)),
           (2, Set(bigDecimal3, bigDecimal4)),
         )).transact
@@ -91,7 +91,7 @@ trait AggrSet_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.bigDecimals.insert(List(
           (1, Set(bigDecimal1, bigDecimal2)),
-          (2, Set(bigDecimal2, bigDecimal3)),
+          (2, Set(bigDecimal2)),
           (2, Set(bigDecimal3, bigDecimal4)),
           (2, Set(bigDecimal3, bigDecimal4)),
         )).transact
@@ -130,7 +130,7 @@ trait AggrSet_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.bigDecimals.insert(List(
           (1, Set(bigDecimal1, bigDecimal2)),
-          (2, Set(bigDecimal2, bigDecimal3)),
+          (2, Set(bigDecimal2)),
           (2, Set(bigDecimal3, bigDecimal4)),
           (2, Set(bigDecimal3, bigDecimal4)),
         )).transact
@@ -146,7 +146,7 @@ trait AggrSet_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.bigDecimals.insert(List(
           (1, Set(bigDecimal1, bigDecimal2)),
-          (2, Set(bigDecimal2, bigDecimal3)),
+          (2, Set(bigDecimal2)),
           (2, Set(bigDecimal3, bigDecimal4)),
           (2, Set(bigDecimal3, bigDecimal4)),
         )).transact
@@ -154,12 +154,12 @@ trait AggrSet_BigDecimal_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i(count).query.get.map(_ ==> List(4))
         _ <- Ns.i(countDistinct).query.get.map(_ ==> List(2))
 
-        _ <- Ns.bigDecimals(count).query.get.map(_ ==> List(8))
+        _ <- Ns.bigDecimals(count).query.get.map(_ ==> List(7))
         _ <- Ns.bigDecimals(countDistinct).query.get.map(_ ==> List(4))
 
         _ <- Ns.i.a1.bigDecimals(count).query.get.map(_ ==> List(
           (1, 2),
-          (2, 6)
+          (2, 5)
         ))
         _ <- Ns.i.a1.bigDecimals(countDistinct).query.get.map(_ ==> List(
           (1, 2),

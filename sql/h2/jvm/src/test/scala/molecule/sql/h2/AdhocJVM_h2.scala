@@ -11,39 +11,81 @@ import scala.language.implicitConversions
 
 object AdhocJVM_h2 extends TestSuite_h2 {
 
-  def getTriples: List[(String, Int, Int)] = (1 to 5).toList.map { int =>
-    val s = ('a' + scala.util.Random.nextInt(3)).toChar.toString // "a" or "b"
-    val i = scala.util.Random.nextInt(3) + 1 // 1 or 2
-    (s, i, int)
-  }
-
   override lazy val tests = Tests {
 
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
+      implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
-
-
-        _ <- Ns.i.ints_?.insert(List(
-          (0, None),
-          (1, Some(Set(int1, int2))),
-          (2, Some(Set(int2, int3, int4))),
+        _ <- Ns.i.ints.insert(List(
+          (1, Set(int1, int2)),
+          (2, Set(int2, int3)),
+          (2, Set(int3, int4)),
+          (2, Set(int3, int4)),
         )).transact
 
-        // Match non-asserted attribute (null)
-        _ <- Ns.i.a1.ints_().query.i.get.map(_ ==> List(0))
+        // Average of all values
+        _ <- Ns.ints(avg).query.i.get.map(_.head ==~ (
+          int1 + int2 +
+            int2 + int3 +
+            int3 + int4 +
+            int3 + int4
+          ).toDouble / 8.0)
 
-        //        _ <- Ns.int.insert(1).i.transact
-        //        _ <- Ns.int.query.i.get.map(_ ==> List(1))
 
-        //        _ <- Ns.s.i.Refs.*(Ref.int).insert(
-        //          ("a", 1, List(2, 3)),
-        //          ("b", 4, List(4, 5)),
-        //          ("c", 7, List(5, 6)),
-        //          ("d", 9, Nil),
-        //        ).transact
-        //
-        //        _ <- Ns.s.i(Ref.int_).Refs.*(Ref.int).query.i.get.map(_ ==> List(("b", 4, List(4))))
+        _ <- rawQuery(
+          """SELECT DISTINCT
+            |  ARRAY_AGG(Ns.ints)
+            |FROM Ns
+            |WHERE
+            |  Ns.ints IS NOT NULL;
+            |""".stripMargin, true)
+
+        _ <- rawQuery(
+          """SELECT DISTINCT
+            |  AVG(x)
+            |FROM Ns, unnest(Ns.ints) as x
+            |WHERE
+            |  Ns.ints IS NOT NULL;
+            |""".stripMargin, true)
+
+
+//        _ <- Ns.i.ints.insert(List(
+//          (1, Set(int1, int2)),
+//          (2, Set(int2, int3)),
+//          (2, Set(int3)),
+//          (2, Set(int3, int4)),
+//        )).i.transact
+//
+//        _ <- rawQuery(
+//          """SELECT DISTINCT
+//            |  ARRAY_AGG(Ns.ints)
+//            |FROM Ns
+//            |WHERE
+//            |  Ns.ints IS NOT NULL;
+//            |""".stripMargin, true)
+//
+//
+//        // Sum of all values
+//        _ <- Ns.ints(sum).query.i.get.map(
+//          _.head.head ==~ (
+//            int1 + int2 +
+//              int2 + int3 +
+//              int3 + int4 +
+//              int3 + int4
+//            )
+//        )
+//
+//        _ <- Ns.i.ints(sum).query.get.map(_.map {
+//          case (1, setWithSum) => setWithSum.head ==~ int1 + int2
+//          case (2, setWithSum) => setWithSum.head ==~ (
+//            int2 + int3 +
+//              int3 + int4 +
+//              int3 + int4
+//            )
+//        })
+
+
 
       } yield ()
     }
@@ -51,6 +93,30 @@ object AdhocJVM_h2 extends TestSuite_h2 {
     "refs" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
+
+        _ <- A.i.B.ii.C.ii.insert(List(
+          (1, Set(1, 2), Set(1, 2)),
+          (2, Set(2, 3), Set(2, 3)),
+          (2, Set(3, 4), Set(3, 4)),
+          (2, Set(3, 4), Set(3, 4)),
+        )).transact
+
+        _ <- A.i.a1.B.ii(distinct).C.ii(distinct).query.get.map(_ ==> List(
+          (1,
+            Set(Set(1, 2)),
+            Set(Set(1, 2))),
+          (2,
+            Set(Set(2, 3), Set(3, 4)),
+            Set(Set(2, 3), Set(3, 4))),
+        ))
+
+
+
+
+
+
+
+
 
         _ <- A.i.ii.insert(
           (1, Set(1, 2)),

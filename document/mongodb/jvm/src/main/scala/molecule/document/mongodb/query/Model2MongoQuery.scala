@@ -38,7 +38,7 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
     hasFilterAttr = hasFilterAttr0
     //    elements2.foreach(println)
 
-    topBranch = new FlatEmbed(ns = initialNs)
+    topBranch = new FlatEmbed(ns = initialNs, cardMany = true)
     b = topBranch
 
     // Recursively resolve molecule elements

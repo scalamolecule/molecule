@@ -26,9 +26,11 @@ trait AggrOneNum_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, short4),
         )).transact
 
-        // Sum of distinct values (Set semantics)
+        // Sum of all values
+        _ <- Ns.short(sum).query.get.map(
+          _.head ==~ short1 + short2 + short2 + short3 + short4
+        )
 
-        _ <- Ns.short(sum).query.get.map(_.head ==~ short1 + short2 + short3 + short4)
         _ <- Ns.i.short(sum).query.get.map(_.map {
           case (1, sum) => sum ==~ short1 + short2
           case (2, sum) => sum ==~ short2 + short3 + short4
@@ -40,32 +42,64 @@ trait AggrOneNum_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     "median" - types { implicit futConn =>
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       // Different databases have different ways of calculating a median
-      val (median_2_3, median_1_2) = if (database == "MongoDB") {
-        (short2, short1)
-      } else {
-        (
-          (short2 + short3).toDouble / 2.0,
-          (short1 + short2).toDouble / 2.0
-        )
+      database match {
+        case "Datomic" =>
+          for {
+            _ <- Ns.i.short.insert(List(
+              (1, short1),
+              (1, short2),
+              (2, short2),
+              (2, short5),
+              (2, short9),
+            )).transact
+
+            // Median of all values - middle number used if odd number of values
+            // 1  2  2  5  9
+            //       ^
+            _ <- Ns.short(median).query.get.map(_.head ==~ short2.toString.toDouble) // middle number
+
+            _ <- Ns.i.short(median).query.get.map(_.map {
+              case (1, median) => median ==~ short1.toDouble.floor // lower whole number
+              case (2, median) => median ==~ short5.toString.toDouble // middle number
+            })
+          } yield ()
+
+        case "MongoDB" =>
+          for {
+            _ <- Ns.i.short.insert(List(
+              (1, short1),
+              (1, short2),
+              (2, short2),
+              (2, short5),
+              (2, short9),
+            )).transact
+
+            _ <- Ns.short(median).query.get.map(_.head ==~ short2.toString.toDouble) // whole middle number
+
+            _ <- Ns.i.short(median).query.get.map(_.map {
+              case (1, median) => median ==~ short1.toDouble // lower number
+              case (2, median) => median ==~ short5.toString.toDouble // middle number
+            })
+          } yield ()
+
+        case _ =>
+          for {
+            _ <- Ns.i.short.insert(List(
+              (1, short1),
+              (1, short2),
+              (2, short2),
+              (2, short5),
+              (2, short9),
+            )).transact
+
+            _ <- Ns.short(median).query.get.map(_.head ==~ short2.toString.toDouble) // middle number
+
+            _ <- Ns.i.short(median).query.get.map(_.map {
+              case (1, median) => median ==~ (short1 + short2).toDouble / 2.0 // average of 2 middle numbers
+              case (2, median) => median ==~ short5.toString.toDouble // middle number
+            })
+          } yield ()
       }
-      for {
-        _ <- Ns.i.short.insert(List(
-          (1, short1),
-          (1, short2),
-          (2, short2),
-          (2, short3),
-          (2, short4),
-        )).transact
-
-        // Median of unique values (Set semantics)
-
-        _ <- Ns.short(median).query.get.map(_.head ==~ median_2_3)
-
-        _ <- Ns.i.short(median).query.get.map(_.map {
-          case (1, median) => median ==~ median_1_2
-          case (2, median) => median ==~ short3.toString.toDouble
-        })
-      } yield ()
     }
 
 
@@ -80,9 +114,10 @@ trait AggrOneNum_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, short4),
         )).transact
 
-        // Average of unique values (Set semantics)
-
-        _ <- Ns.short(avg).query.get.map(_.head ==~ (short1 + short2 + short3 + short4).toDouble / 4.0)
+        // Average of all values
+        _ <- Ns.short(avg).query.get.map(
+          _.head ==~ (short1 + short2 + short2 + short3 + short4).toDouble / 5.0
+        )
 
         _ <- Ns.i.short(avg).query.get.map(_.map {
           case (1, avg) => avg ==~ (short1 + short2).toDouble / 2.0
@@ -103,9 +138,10 @@ trait AggrOneNum_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, short4),
         )).transact
 
-        // Variance of unique values (Set semantics)
-
-        _ <- Ns.short(variance).query.get.map(_.head ==~ varianceOf(short1, short2, short3, short4))
+        // Variance of all values
+        _ <- Ns.short(variance).query.get.map(
+          _.head ==~ varianceOf(short1, short2, short2, short3, short4)
+        )
 
         _ <- Ns.i.short(variance).query.get.map(_.map {
           case (1, variance) => variance ==~ varianceOf(short1, short2)
@@ -126,9 +162,10 @@ trait AggrOneNum_Short_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, short4),
         )).transact
 
-        // Standard deviation of unique values (Set semantics)
-
-        _ <- Ns.short(stddev).query.get.map(_.head ==~ stdDevOf(short1, short2, short3, short4))
+        // Standard deviation of all values
+        _ <- Ns.short(stddev).query.get.map(
+          _.head ==~ stdDevOf(short1, short2, short2, short3, short4)
+        )
 
         _ <- Ns.i.short(stddev).query.get.map(_.map {
           case (1, stddev) => stddev ==~ stdDevOf(short1, short2)

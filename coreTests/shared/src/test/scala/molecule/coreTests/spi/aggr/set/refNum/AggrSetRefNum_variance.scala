@@ -14,21 +14,21 @@ trait AggrSetRefNum_variance extends CoreTestSuite with ApiAsync { spi: SpiAsync
 
   override lazy val tests = Tests {
 
-    "ref" - refs { implicit conn =>
+    "1st ref" - refs { implicit conn =>
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
         _ <- A.i.B.ii.insert(List(
           (1, Set(1, 2)),
-          (2, Set(2, 3)),
+          (2, Set(2)),
           (2, Set(3, 4)),
           (2, Set(3, 4)),
         )).transact
 
-        _ <- A.B.ii(variance).query.get.map(_.head ==~ varianceOf(1, 2, 3, 4))
+        _ <- A.B.ii(variance).query.get.map(_.head ==~ varianceOf(1, 2, 2, 3, 4, 3, 4))
 
         _ <- A.i.B.ii(variance).query.get.map(_.map {
           case (1, variance) => variance ==~ varianceOf(1, 2)
-          case (2, variance) => variance ==~ varianceOf(2, 3, 4)
+          case (2, variance) => variance ==~ varianceOf(2, 3, 4, 3, 4)
         })
       } yield ()
     }
@@ -39,38 +39,16 @@ trait AggrSetRefNum_variance extends CoreTestSuite with ApiAsync { spi: SpiAsync
       for {
         _ <- A.i.B.i.C.ii.insert(List(
           (1, 1, Set(1, 2)),
-          (2, 2, Set(2, 3)),
+          (2, 2, Set(2)),
           (2, 2, Set(3, 4)),
           (2, 2, Set(3, 4)),
         )).transact
 
-        _ <- A.B.C.ii(variance).query.get.map(_.head ==~ varianceOf(1, 2, 3, 4))
+        _ <- A.B.C.ii(variance).query.get.map(_.head ==~ varianceOf(1, 2, 2, 3, 4, 3, 4))
 
         _ <- A.i.B.i.C.ii(variance).query.get.map(_.map {
           case (1, 1, variance) => variance ==~ varianceOf(1, 2)
-          case (2, 2, variance) => variance ==~ varianceOf(2, 3, 4)
-        })
-      } yield ()
-    }
-
-
-    "multiple refs" - refs { implicit conn =>
-      implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
-      for {
-        _ <- A.i.B.ii.C.ii.insert(List(
-          (1, Set(1, 2), Set(1, 2)),
-          (2, Set(2, 3), Set(2, 3)),
-          (2, Set(3, 4), Set(3, 4)),
-          (2, Set(3, 4), Set(3, 4)),
-        )).transact
-
-        _ <- A.i.B.ii(variance).C.ii(variance).query.get.map(_.map {
-          case (1, varianceB, varianceC) =>
-            varianceB ==~ varianceOf(1, 2)
-            varianceC ==~ varianceOf(1, 2)
-          case (2, varianceB, varianceC) =>
-            varianceB ==~ varianceOf(2, 3, 4)
-            varianceC ==~ varianceOf(2, 3, 4)
+          case (2, 2, variance) => variance ==~ varianceOf(2, 3, 4, 3, 4)
         })
       } yield ()
     }
@@ -79,20 +57,16 @@ trait AggrSetRefNum_variance extends CoreTestSuite with ApiAsync { spi: SpiAsync
     "backref" - refs { implicit conn =>
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
-        _ <- A.i.B.ii._A.C.ii.insert(List(
-          (1, Set(1, 2), Set(1, 2)),
-          (2, Set(2, 3), Set(2, 3)),
-          (2, Set(3, 4), Set(3, 4)),
-          (2, Set(3, 4), Set(3, 4)),
+        _ <- A.i.B.i._A.C.ii.insert(List(
+          (1, 1, Set(1, 2)),
+          (2, 2, Set(2)),
+          (2, 2, Set(3, 4)),
+          (2, 2, Set(3, 4)),
         )).transact
 
-        _ <- A.i.B.ii(variance)._A.C.ii(variance).query.get.map(_.map {
-          case (1, varianceB, varianceC) =>
-            varianceB ==~ varianceOf(1, 2)
-            varianceC ==~ varianceOf(1, 2)
-          case (2, varianceB, varianceC) =>
-            varianceB ==~ varianceOf(2, 3, 4)
-            varianceC ==~ varianceOf(2, 3, 4)
+        _ <- A.i.B.i._A.C.ii(variance).query.get.map(_.map {
+          case (1, 1, variance) => variance ==~ varianceOf(1, 2)
+          case (2, 2, variance) => variance ==~ varianceOf(2, 3, 4, 3, 4)
         })
       } yield ()
     }

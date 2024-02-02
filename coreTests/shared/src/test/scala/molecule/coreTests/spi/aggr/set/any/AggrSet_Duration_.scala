@@ -18,7 +18,7 @@ trait AggrSet_Duration_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.durations.insert(List(
           (1, Set(duration1, duration2)),
-          (2, Set(duration2, duration3)),
+          (2, Set(duration2)),
           (2, Set(duration3, duration4)),
           (2, Set(duration3, duration4)),
         )).transact
@@ -33,7 +33,7 @@ trait AggrSet_Duration_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.durations(distinct).query.get.map(_ ==> List(
           (1, Set(Set(duration1, duration2))),
           (2, Set(
-            Set(duration2, duration3),
+            Set(duration2),
             Set(duration3, duration4) // 2 rows coalesced
           ))
         ))
@@ -41,7 +41,7 @@ trait AggrSet_Duration_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.durations(distinct).query.get.map(_ ==> List(
           Set(
             Set(duration1, duration2),
-            Set(duration2, duration3),
+            Set(duration2),
             Set(duration3, duration4),
           )
         ))
@@ -53,7 +53,7 @@ trait AggrSet_Duration_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.durations.insert(List(
           (1, Set(duration1, duration2)),
-          (2, Set(duration2, duration3)),
+          (2, Set(duration2)),
           (2, Set(duration3, duration4)),
           (2, Set(duration3, duration4)),
         )).transact
@@ -92,7 +92,7 @@ trait AggrSet_Duration_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.durations.insert(List(
           (1, Set(duration1, duration2)),
-          (2, Set(duration2, duration3)),
+          (2, Set(duration2)),
           (2, Set(duration3, duration4)),
           (2, Set(duration3, duration4)),
         )).transact
@@ -131,7 +131,7 @@ trait AggrSet_Duration_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.durations.insert(List(
           (1, Set(duration1, duration2)),
-          (2, Set(duration2, duration3)),
+          (2, Set(duration2)),
           (2, Set(duration3, duration4)),
           (2, Set(duration3, duration4)),
         )).transact
@@ -147,7 +147,7 @@ trait AggrSet_Duration_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.durations.insert(List(
           (1, Set(duration1, duration2)),
-          (2, Set(duration2, duration3)),
+          (2, Set(duration2)),
           (2, Set(duration3, duration4)),
           (2, Set(duration3, duration4)),
         )).transact
@@ -155,12 +155,12 @@ trait AggrSet_Duration_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i(count).query.get.map(_ ==> List(4))
         _ <- Ns.i(countDistinct).query.get.map(_ ==> List(2))
 
-        _ <- Ns.durations(count).query.get.map(_ ==> List(8))
+        _ <- Ns.durations(count).query.get.map(_ ==> List(7))
         _ <- Ns.durations(countDistinct).query.get.map(_ ==> List(4))
 
         _ <- Ns.i.a1.durations(count).query.get.map(_ ==> List(
           (1, 2),
-          (2, 6)
+          (2, 5)
         ))
         _ <- Ns.i.a1.durations(countDistinct).query.get.map(_ ==> List(
           (1, 2),

@@ -18,7 +18,7 @@ trait AggrSet_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
       for {
         _ <- Ns.i.localDateTimes.insert(List(
           (1, Set(localDateTime1, localDateTime2)),
-          (2, Set(localDateTime2, localDateTime3)),
+          (2, Set(localDateTime2)),
           (2, Set(localDateTime3, localDateTime4)),
           (2, Set(localDateTime3, localDateTime4)),
         )).transact
@@ -33,7 +33,7 @@ trait AggrSet_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
         _ <- Ns.i.a1.localDateTimes(distinct).query.get.map(_ ==> List(
           (1, Set(Set(localDateTime1, localDateTime2))),
           (2, Set(
-            Set(localDateTime2, localDateTime3),
+            Set(localDateTime2),
             Set(localDateTime3, localDateTime4) // 2 rows coalesced
           ))
         ))
@@ -41,7 +41,7 @@ trait AggrSet_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
         _ <- Ns.localDateTimes(distinct).query.get.map(_ ==> List(
           Set(
             Set(localDateTime1, localDateTime2),
-            Set(localDateTime2, localDateTime3),
+            Set(localDateTime2),
             Set(localDateTime3, localDateTime4),
           )
         ))
@@ -53,7 +53,7 @@ trait AggrSet_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
       for {
         _ <- Ns.i.localDateTimes.insert(List(
           (1, Set(localDateTime1, localDateTime2)),
-          (2, Set(localDateTime2, localDateTime3)),
+          (2, Set(localDateTime2)),
           (2, Set(localDateTime3, localDateTime4)),
           (2, Set(localDateTime3, localDateTime4)),
         )).transact
@@ -92,7 +92,7 @@ trait AggrSet_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
       for {
         _ <- Ns.i.localDateTimes.insert(List(
           (1, Set(localDateTime1, localDateTime2)),
-          (2, Set(localDateTime2, localDateTime3)),
+          (2, Set(localDateTime2)),
           (2, Set(localDateTime3, localDateTime4)),
           (2, Set(localDateTime3, localDateTime4)),
         )).transact
@@ -131,7 +131,7 @@ trait AggrSet_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
       for {
         _ <- Ns.i.localDateTimes.insert(List(
           (1, Set(localDateTime1, localDateTime2)),
-          (2, Set(localDateTime2, localDateTime3)),
+          (2, Set(localDateTime2)),
           (2, Set(localDateTime3, localDateTime4)),
           (2, Set(localDateTime3, localDateTime4)),
         )).transact
@@ -147,7 +147,7 @@ trait AggrSet_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
       for {
         _ <- Ns.i.localDateTimes.insert(List(
           (1, Set(localDateTime1, localDateTime2)),
-          (2, Set(localDateTime2, localDateTime3)),
+          (2, Set(localDateTime2)),
           (2, Set(localDateTime3, localDateTime4)),
           (2, Set(localDateTime3, localDateTime4)),
         )).transact
@@ -155,12 +155,12 @@ trait AggrSet_LocalDateTime_ extends CoreTestSuite with ApiAsync { spi: SpiAsync
         _ <- Ns.i(count).query.get.map(_ ==> List(4))
         _ <- Ns.i(countDistinct).query.get.map(_ ==> List(2))
 
-        _ <- Ns.localDateTimes(count).query.get.map(_ ==> List(8))
+        _ <- Ns.localDateTimes(count).query.get.map(_ ==> List(7))
         _ <- Ns.localDateTimes(countDistinct).query.get.map(_ ==> List(4))
 
         _ <- Ns.i.a1.localDateTimes(count).query.get.map(_ ==> List(
           (1, 2),
-          (2, 6)
+          (2, 5)
         ))
         _ <- Ns.i.a1.localDateTimes(countDistinct).query.get.map(_ ==> List(
           (1, 2),

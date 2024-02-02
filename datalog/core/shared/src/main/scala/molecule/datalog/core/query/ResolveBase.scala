@@ -6,6 +6,7 @@ import java.util.{Date, UUID, List => jList}
 import molecule.base.util.BaseHelpers
 import molecule.datalog.core.query.casting.NullValueException
 import java.math.{BigDecimal => jBigDecimal, BigInteger => jBigInt}
+import java.util.{Date, UUID, Iterator => jIterator, List => jList, Map => jMap, Set => jSet}
 
 trait ResolveBase extends BaseHelpers {
 

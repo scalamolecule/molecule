@@ -296,6 +296,20 @@ trait LambdasSet extends ResolveBase with JavaConversions {
   private lazy val j2sOpSetChar           = j2sOpSet(j2Char)
 
 
+  private def optAttr2sOptSetID = (v: AnyRef) => {
+    val set = v.asInstanceOf[jSet[_]]
+    if (set.iterator.next.asInstanceOf[jList[_]].isEmpty)
+      Option.empty[Set[String]]
+    else
+      Some(
+        set.asScala.flatMap(
+          _.asInstanceOf[jList[_]].asScala.map(
+            _.asInstanceOf[jMap[_, _]].values.iterator.next.toString
+          )
+        ).toSet
+      )
+  }
+
   private def optAttr2sOptSet[T](decode: Any => T) = (v: AnyRef) => {
     val set = v.asInstanceOf[jSet[_]]
     if (set.iterator.next.asInstanceOf[jList[_]].isEmpty)
@@ -304,7 +318,7 @@ trait LambdasSet extends ResolveBase with JavaConversions {
       Some(set.asScala.flatMap(_.asInstanceOf[jList[_]].asScala.map(decode)).toSet)
   }
 
-  private lazy val jOptSetAttr2sOptSetId             = optAttr2sOptSet(j2Id)
+  private lazy val jOptSetAttr2sOptSetId             = optAttr2sOptSetID
   private lazy val jOptSetAttr2sOptSetString         = optAttr2sOptSet(j2String)
   private lazy val jOptSetAttr2sOptSetInt            = optAttr2sOptSet(j2Int)
   private lazy val jOptSetAttr2sOptSetLong           = optAttr2sOptSet(j2Long)

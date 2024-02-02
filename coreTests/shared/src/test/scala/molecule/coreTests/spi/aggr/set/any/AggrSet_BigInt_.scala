@@ -17,7 +17,7 @@ trait AggrSet_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.bigInts.insert(List(
           (1, Set(bigInt1, bigInt2)),
-          (2, Set(bigInt2, bigInt3)),
+          (2, Set(bigInt2)),
           (2, Set(bigInt3, bigInt4)),
           (2, Set(bigInt3, bigInt4)),
         )).transact
@@ -32,7 +32,7 @@ trait AggrSet_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i.a1.bigInts(distinct).query.get.map(_ ==> List(
           (1, Set(Set(bigInt1, bigInt2))),
           (2, Set(
-            Set(bigInt2, bigInt3),
+            Set(bigInt2),
             Set(bigInt3, bigInt4) // 2 rows coalesced
           ))
         ))
@@ -40,7 +40,7 @@ trait AggrSet_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.bigInts(distinct).query.get.map(_ ==> List(
           Set(
             Set(bigInt1, bigInt2),
-            Set(bigInt2, bigInt3),
+            Set(bigInt2),
             Set(bigInt3, bigInt4),
           )
         ))
@@ -52,7 +52,7 @@ trait AggrSet_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.bigInts.insert(List(
           (1, Set(bigInt1, bigInt2)),
-          (2, Set(bigInt2, bigInt3)),
+          (2, Set(bigInt2)),
           (2, Set(bigInt3, bigInt4)),
           (2, Set(bigInt3, bigInt4)),
         )).transact
@@ -91,7 +91,7 @@ trait AggrSet_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.bigInts.insert(List(
           (1, Set(bigInt1, bigInt2)),
-          (2, Set(bigInt2, bigInt3)),
+          (2, Set(bigInt2)),
           (2, Set(bigInt3, bigInt4)),
           (2, Set(bigInt3, bigInt4)),
         )).transact
@@ -130,7 +130,7 @@ trait AggrSet_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.bigInts.insert(List(
           (1, Set(bigInt1, bigInt2)),
-          (2, Set(bigInt2, bigInt3)),
+          (2, Set(bigInt2)),
           (2, Set(bigInt3, bigInt4)),
           (2, Set(bigInt3, bigInt4)),
         )).transact
@@ -146,7 +146,7 @@ trait AggrSet_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
       for {
         _ <- Ns.i.bigInts.insert(List(
           (1, Set(bigInt1, bigInt2)),
-          (2, Set(bigInt2, bigInt3)),
+          (2, Set(bigInt2)),
           (2, Set(bigInt3, bigInt4)),
           (2, Set(bigInt3, bigInt4)),
         )).transact
@@ -154,12 +154,12 @@ trait AggrSet_BigInt_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- Ns.i(count).query.get.map(_ ==> List(4))
         _ <- Ns.i(countDistinct).query.get.map(_ ==> List(2))
 
-        _ <- Ns.bigInts(count).query.get.map(_ ==> List(8))
+        _ <- Ns.bigInts(count).query.get.map(_ ==> List(7))
         _ <- Ns.bigInts(countDistinct).query.get.map(_ ==> List(4))
 
         _ <- Ns.i.a1.bigInts(count).query.get.map(_ ==> List(
           (1, 2),
-          (2, 6)
+          (2, 5)
         ))
         _ <- Ns.i.a1.bigInts(countDistinct).query.get.map(_ ==> List(
           (1, 2),

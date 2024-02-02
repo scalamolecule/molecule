@@ -26,9 +26,11 @@ trait AggrOneNum_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, byte4),
         )).transact
 
-        // Sum of distinct values (Set semantics)
+        // Sum of all values
+        _ <- Ns.byte(sum).query.get.map(
+          _.head ==~ byte1 + byte2 + byte2 + byte3 + byte4
+        )
 
-        _ <- Ns.byte(sum).query.get.map(_.head ==~ byte1 + byte2 + byte3 + byte4)
         _ <- Ns.i.byte(sum).query.get.map(_.map {
           case (1, sum) => sum ==~ byte1 + byte2
           case (2, sum) => sum ==~ byte2 + byte3 + byte4
@@ -40,32 +42,64 @@ trait AggrOneNum_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     "median" - types { implicit futConn =>
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       // Different databases have different ways of calculating a median
-      val (median_2_3, median_1_2) = if (database == "MongoDB") {
-        (byte2, byte1)
-      } else {
-        (
-          (byte2 + byte3).toDouble / 2.0,
-          (byte1 + byte2).toDouble / 2.0
-        )
+      database match {
+        case "Datomic" =>
+          for {
+            _ <- Ns.i.byte.insert(List(
+              (1, byte1),
+              (1, byte2),
+              (2, byte2),
+              (2, byte5),
+              (2, byte9),
+            )).transact
+
+            // Median of all values - middle number used if odd number of values
+            // 1  2  2  5  9
+            //       ^
+            _ <- Ns.byte(median).query.get.map(_.head ==~ byte2.toString.toDouble) // middle number
+
+            _ <- Ns.i.byte(median).query.get.map(_.map {
+              case (1, median) => median ==~ byte1.toDouble.floor // lower whole number
+              case (2, median) => median ==~ byte5.toString.toDouble // middle number
+            })
+          } yield ()
+
+        case "MongoDB" =>
+          for {
+            _ <- Ns.i.byte.insert(List(
+              (1, byte1),
+              (1, byte2),
+              (2, byte2),
+              (2, byte5),
+              (2, byte9),
+            )).transact
+
+            _ <- Ns.byte(median).query.get.map(_.head ==~ byte2.toString.toDouble) // whole middle number
+
+            _ <- Ns.i.byte(median).query.get.map(_.map {
+              case (1, median) => median ==~ byte1.toDouble // lower number
+              case (2, median) => median ==~ byte5.toString.toDouble // middle number
+            })
+          } yield ()
+
+        case _ =>
+          for {
+            _ <- Ns.i.byte.insert(List(
+              (1, byte1),
+              (1, byte2),
+              (2, byte2),
+              (2, byte5),
+              (2, byte9),
+            )).transact
+
+            _ <- Ns.byte(median).query.get.map(_.head ==~ byte2.toString.toDouble) // middle number
+
+            _ <- Ns.i.byte(median).query.get.map(_.map {
+              case (1, median) => median ==~ (byte1 + byte2).toDouble / 2.0 // average of 2 middle numbers
+              case (2, median) => median ==~ byte5.toString.toDouble // middle number
+            })
+          } yield ()
       }
-      for {
-        _ <- Ns.i.byte.insert(List(
-          (1, byte1),
-          (1, byte2),
-          (2, byte2),
-          (2, byte3),
-          (2, byte4),
-        )).transact
-
-        // Median of unique values (Set semantics)
-
-        _ <- Ns.byte(median).query.get.map(_.head ==~ median_2_3)
-
-        _ <- Ns.i.byte(median).query.get.map(_.map {
-          case (1, median) => median ==~ median_1_2
-          case (2, median) => median ==~ byte3.toString.toDouble
-        })
-      } yield ()
     }
 
 
@@ -80,9 +114,10 @@ trait AggrOneNum_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, byte4),
         )).transact
 
-        // Average of unique values (Set semantics)
-
-        _ <- Ns.byte(avg).query.get.map(_.head ==~ (byte1 + byte2 + byte3 + byte4).toDouble / 4.0)
+        // Average of all values
+        _ <- Ns.byte(avg).query.get.map(
+          _.head ==~ (byte1 + byte2 + byte2 + byte3 + byte4).toDouble / 5.0
+        )
 
         _ <- Ns.i.byte(avg).query.get.map(_.map {
           case (1, avg) => avg ==~ (byte1 + byte2).toDouble / 2.0
@@ -103,9 +138,10 @@ trait AggrOneNum_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, byte4),
         )).transact
 
-        // Variance of unique values (Set semantics)
-
-        _ <- Ns.byte(variance).query.get.map(_.head ==~ varianceOf(byte1, byte2, byte3, byte4))
+        // Variance of all values
+        _ <- Ns.byte(variance).query.get.map(
+          _.head ==~ varianceOf(byte1, byte2, byte2, byte3, byte4)
+        )
 
         _ <- Ns.i.byte(variance).query.get.map(_.map {
           case (1, variance) => variance ==~ varianceOf(byte1, byte2)
@@ -126,9 +162,10 @@ trait AggrOneNum_Byte_ extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, byte4),
         )).transact
 
-        // Standard deviation of unique values (Set semantics)
-
-        _ <- Ns.byte(stddev).query.get.map(_.head ==~ stdDevOf(byte1, byte2, byte3, byte4))
+        // Standard deviation of all values
+        _ <- Ns.byte(stddev).query.get.map(
+          _.head ==~ stdDevOf(byte1, byte2, byte2, byte3, byte4)
+        )
 
         _ <- Ns.i.byte(stddev).query.get.map(_.map {
           case (1, stddev) => stddev ==~ stdDevOf(byte1, byte2)

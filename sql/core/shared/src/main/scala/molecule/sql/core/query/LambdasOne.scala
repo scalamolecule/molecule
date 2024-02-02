@@ -3,6 +3,7 @@ package molecule.sql.core.query
 import java.net.URI
 import java.time._
 import java.util.{Date, UUID}
+import java.math.{BigDecimal => jBigDecimal}
 
 trait LambdasOne extends LambdasBase { self: SqlQueryBase =>
 
@@ -117,6 +118,36 @@ trait LambdasOne extends LambdasBase { self: SqlQueryBase =>
   lazy val resOptByte          : ResOneOpt[Byte]           = ResOneOpt("Byte", sql2oneOptByte, one2sqlByte)
   lazy val resOptShort         : ResOneOpt[Short]          = ResOneOpt("Short", sql2oneOptShort, one2sqlShort)
   lazy val resOptChar          : ResOneOpt[Char]           = ResOneOpt("Char", sql2oneOptChar, one2sqlChar)
+
+
+  //  private def sql2oneOpt[Java, T](get: (Row, Int) => Java, cast: Java => T) = (row: Row, paramIndex: Int) => {
+  //    val v = get(row, paramIndex)
+  //    if (row.wasNull()) Option.empty[T] else Some(cast(v))
+  //  }
+  //
+  //  protected lazy val sql2oneOptId            : (Row, Int) => Option[String]         = sql2oneOpt((r: Row, p: Int) => r.getLong(p), (v: String) => v.toString)
+  //  protected lazy val sql2oneOptString        : (Row, Int) => Option[String]         = sql2oneOpt((r: Row, p: Int) => r.getString(p), (v: String) => v)
+  //  protected lazy val sql2oneOptInt           : (Row, Int) => Option[Int]            = sql2oneOpt((r: Row, p: Int) => r.getInt(p), (v: Int) => v.toString)
+  //  protected lazy val sql2oneOptLong          : (Row, Int) => Option[Long]           = sql2oneOpt((r: Row, p: Int) => r.getLong(p), (v: Long) => v.toString)
+  //  protected lazy val sql2oneOptFloat         : (Row, Int) => Option[Float]          = sql2oneOpt((r: Row, p: Int) => r.getFloat(p), (v: Float) => v.toString)
+  //  protected lazy val sql2oneOptDouble        : (Row, Int) => Option[Double]         = sql2oneOpt((r: Row, p: Int) => r.getDouble(p), (v: Double) => v.toString)
+  //  protected lazy val sql2oneOptBoolean       : (Row, Int) => Option[Boolean]        = sql2oneOpt((r: Row, p: Int) => r.getBoolean(p), (v: Boolean) => v.toString)
+  //  protected lazy val sql2oneOptBigInt        : (Row, Int) => Option[BigInt]         = sql2oneOpt((r: Row, p: Int) => r.getBigDecimal(p), (v: jBigDecimal) => v.toString)
+  //  protected lazy val sql2oneOptBigDecimal    : (Row, Int) => Option[BigDecimal]     = sql2oneOpt((r: Row, p: Int) => r.getBigDecimal(p), (v: jBigDecimal) => v.toString)
+  //  protected lazy val sql2oneOptDate          : (Row, Int) => Option[Date]           = sql2oneOpt((r: Row, p: Int) => r.getLong(p), (v: Date) => v.toString)
+  //  protected lazy val sql2oneOptDuration      : (Row, Int) => Option[Duration]       = sql2oneOpt((r: Row, p: Int) => r.getString(p), (v: String) => v.toString)
+  //  protected lazy val sql2oneOptInstant       : (Row, Int) => Option[Instant]        = sql2oneOpt((r: Row, p: Int) => r.getString(p), (v: String) => v.toString)
+  //  protected lazy val sql2oneOptLocalDate     : (Row, Int) => Option[LocalDate]      = sql2oneOpt((r: Row, p: Int) => r.getString(p), (v: String) => v.toString)
+  //  protected lazy val sql2oneOptLocalTime     : (Row, Int) => Option[LocalTime]      = sql2oneOpt((r: Row, p: Int) => r.getString(p), (v: String) => v.toString)
+  //  protected lazy val sql2oneOptLocalDateTime : (Row, Int) => Option[LocalDateTime]  = sql2oneOpt((r: Row, p: Int) => r.getString(p), (v: String) => v.toString)
+  //  protected lazy val sql2oneOptOffsetTime    : (Row, Int) => Option[OffsetTime]     = sql2oneOpt((r: Row, p: Int) => r.getString(p), (v: String) => v.toString)
+  //  protected lazy val sql2oneOptOffsetDateTime: (Row, Int) => Option[OffsetDateTime] = sql2oneOpt((r: Row, p: Int) => r.getString(p), (v: String) => v.toString)
+  //  protected lazy val sql2oneOptZonedDateTime : (Row, Int) => Option[ZonedDateTime]  = sql2oneOpt((r: Row, p: Int) => r.getString(p), (v: String) => v.toString)
+  //  protected lazy val sql2oneOptUUID          : (Row, Int) => Option[UUID]           = sql2oneOpt((r: Row, p: Int) => r.getString(p), (v: String) => v.toString)
+  //  protected lazy val sql2oneOptURI           : (Row, Int) => Option[URI]            = sql2oneOpt((r: Row, p: Int) => r.getString(p), (v: String) => v.toString)
+  //  protected lazy val sql2oneOptByte          : (Row, Int) => Option[Byte]           = sql2oneOpt((r: Row, p: Int) => r.getByte(p), (v: Byte) => v.toString)
+  //  protected lazy val sql2oneOptShort         : (Row, Int) => Option[Short]          = sql2oneOpt((r: Row, p: Int) => r.getShort(p), (v: Short) => v.toString)
+  //  protected lazy val sql2oneOptChar          : (Row, Int) => Option[Char]           = sql2oneOpt((r: Row, p: Int) => r.getString(p), (v: Char) => v.toString)
 
 
   protected lazy val sql2oneOptId            : (Row, Int) => Option[String]         = (row: Row, paramIndex: Int) => {
