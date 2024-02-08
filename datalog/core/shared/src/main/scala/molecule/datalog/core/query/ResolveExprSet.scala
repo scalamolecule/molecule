@@ -243,6 +243,7 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
         where += s"[(if (nil? $v1) {$refAttr {$a []}} $v1) $v2]" -> wClause
         where += s"[($refAttr $v2) $v3]" -> wClause
         where += s"[($a $v3) $v4]" -> wClause
+        where += s"[(not-empty $v4)]" -> wClause
 
       } else {
         find += s"(distinct $v5)"

@@ -24,12 +24,6 @@ trait Insert_datomic
     debug: Boolean = true
   ): Data = {
     initTxBase(elements, idIndex)
-
-    //    println("----------")
-    //    mainElements.foreach(println)
-    //    println("----------")
-    //    txElements.foreach(println)
-
     val row2stmts = getResolver(nsMap, elements)
     tpls.foreach { tpl =>
       e = newId
@@ -57,7 +51,7 @@ trait Insert_datomic
     val lastIndex = stmts1.size - 1
     val stmts2    = if (lastIndex != -1
       && stmts1.get(lastIndex).get(3).toString.startsWith("#db/id")) {
-      // remove orphan ref datom - can we include this check it in the algorithm above
+      // remove orphan ref datom - can we include this check it in the algorithm above?
       stmts1.remove(lastIndex)
       stmts1
     } else stmts1
@@ -120,10 +114,16 @@ trait Insert_datomic
     val a = kw(ns, attr)
     backRefs = backRefs + (ns -> e)
     (tpl: Product) =>
-      unusedRefIds -= e
-      usedRefIds += e
-      tpl.productElement(tplIndex).asInstanceOf[Set[_]].foreach { value =>
-        appendStmt(add, e, a, transformValue(value.asInstanceOf[T]).asInstanceOf[AnyRef])
+      tpl.productElement(tplIndex).asInstanceOf[Set[_]] match {
+        case set if set.isEmpty =>
+//          unusedRefIds += e
+//          usedRefIds -= e
+        case set                =>
+          unusedRefIds -= e
+          usedRefIds += e
+          set.foreach { value =>
+            appendStmt(add, e, a, transformValue(value.asInstanceOf[T]).asInstanceOf[AnyRef])
+          }
       }
   }
 
@@ -172,6 +172,7 @@ trait Insert_datomic
       stmt.add(e)
       stmt.add(a)
       e = newId
+      unusedRefIds += e
       stmt.add(e)
       stmts.add(stmt)
   }
@@ -196,7 +197,7 @@ trait Insert_datomic
     countValueAttrs(nestedElements) match {
       case 1 => // Nested arity-1 values
         (tpl: Product) => {
-          val values       = tpl.productElement(tplIndex).asInstanceOf[Seq[Any]]
+          val values = tpl.productElement(tplIndex).asInstanceOf[Seq[Any]]
           val nestedBaseId = e
           values.foreach { value =>
             e = nestedBaseId
@@ -212,7 +213,7 @@ trait Insert_datomic
       case _ if lastIsSet =>
         val lastTplIndex = nestedElements.collect { case _: Attr => 1 }.sum - 1
         (tpl: Product) => {
-          val nestedTpls   = tpl.productElement(tplIndex).asInstanceOf[Seq[Product]]
+          val nestedTpls = tpl.productElement(tplIndex).asInstanceOf[Seq[Product]]
           val nestedBaseId = e
           nestedTpls.foreach { nestedTpl =>
             if (nestedTpl.productElement(lastTplIndex).asInstanceOf[Set[_]].nonEmpty) {
@@ -226,7 +227,7 @@ trait Insert_datomic
 
       case _ =>
         (tpl: Product) => {
-          val nestedTpls   = tpl.productElement(tplIndex).asInstanceOf[Seq[Product]]
+          val nestedTpls = tpl.productElement(tplIndex).asInstanceOf[Seq[Product]]
           val nestedBaseId = e
           nestedTpls.foreach { nestedTpl =>
             e = nestedBaseId

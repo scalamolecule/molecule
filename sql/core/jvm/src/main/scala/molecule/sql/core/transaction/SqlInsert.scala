@@ -109,38 +109,38 @@ trait SqlInsert
         }
     }
   }
-  private def addRowSetterToTableInsertsOLD(): Unit = {
-    inserts.foreach {
-      case (refPath, cols) =>
-        debug(s"C ---------------------- $refPath")
-        colSettersMap.foreach(x =>
-          debug(s"C ${x._2.size} colSetters: " + x._1)
-        )
-        val colSetters = colSettersMap(refPath)
-        //        debug(s"C ---------------------- ${colSetters.length}  $refPath")
-        colSettersMap(refPath) = Nil
-        //        val rowSetter = (ps: PS, idsMap: IdsMap, _: RowIndex) => {
-        val rowSetter = (ps: PS, idsMap: IdsMap, rowIndex: RowIndex) => {
-          var i        = 0
-          val colCount = cols.length
-          ps.toString
-
-          // Set all column values for this row of this insert
-          colSetters.foreach { colSetter =>
-            //            colSetter(ps, idsMap, rowIndex)
-            colSetter(ps, idsMap, rowIndex)
-            i += 1
-
-            if (i == colCount) {
-              // Add row for this insert
-              ps.addBatch()
-              i = 0
-            }
-          }
-        }
-        rowSettersMap(refPath) = rowSettersMap(refPath) :+ rowSetter
-    }
-  }
+//  private def addRowSetterToTableInsertsOLD(): Unit = {
+//    inserts.foreach {
+//      case (refPath, cols) =>
+//        debug(s"C ---------------------- $refPath")
+//        colSettersMap.foreach(x =>
+//          debug(s"C ${x._2.size} colSetters: " + x._1)
+//        )
+//        val colSetters = colSettersMap(refPath)
+//        //        debug(s"C ---------------------- ${colSetters.length}  $refPath")
+//        colSettersMap(refPath) = Nil
+//        //        val rowSetter = (ps: PS, idsMap: IdsMap, _: RowIndex) => {
+//        val rowSetter = (ps: PS, idsMap: IdsMap, rowIndex: RowIndex) => {
+//          var i        = 0
+//          val colCount = cols.length
+//          ps.toString
+//
+//          // Set all column values for this row of this insert
+//          colSetters.foreach { colSetter =>
+//            //            colSetter(ps, idsMap, rowIndex)
+//            colSetter(ps, idsMap, rowIndex)
+//            i += 1
+//
+//            if (i == colCount) {
+//              // Add row for this insert
+//              ps.addBatch()
+//              i = 0
+//            }
+//          }
+//        }
+//        rowSettersMap(refPath) = rowSettersMap(refPath) :+ rowSetter
+//    }
+//  }
 
   private def getTableInserts: List[Table] = {
     // Add insert resolver to each table insert

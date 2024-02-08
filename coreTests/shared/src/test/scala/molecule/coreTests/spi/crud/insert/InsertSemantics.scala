@@ -45,7 +45,7 @@ trait InsertSemantics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           _ <- A.i.query.get.map(_ ==> List(1))
 
           // Relationship to B was not created since no value of B was present
-          _ <- A.i_.b.query.get.map(_.size ==> 1)
+          _ <- A.i_.b.query.get.map(_.size ==> 0)
           _ <- A.i.B.ii_?.query.get.map(_ ==> Nil)
           _ <- A.i.B.ii.query.get.map(_ ==> Nil)
         } yield ()

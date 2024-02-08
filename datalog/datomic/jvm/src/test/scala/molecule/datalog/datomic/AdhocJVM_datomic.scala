@@ -70,25 +70,110 @@ object AdhocJVM_datomic extends TestSuite_datomic {
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
 
-        List(a1, a2) <- A.i.B.i.insert(
-          (1, 2),
-          (3, 4),
-        ).i.transact.map(_.ids)
+        _ <- A.i.B.i.ii.insert(
+          (1, 2, Set.empty[Int]),
+          (3, 4, Set(5, 6)),
+        ).i.transact
 
-        _ <- A(a1).i.query.get.map(_ ==> List(1))
-        _ <- A(a2).i.query.get.map(_ ==> List(3))
+        // A.i was inserted
+        _ <- A.i.query.get.map(_ ==> List(1, 3))
+        _ <- B.i.query.get.map(_ ==> List(2, 4))
 
-        // Ref ids
-        List(b1, b2) <- A(a1, a2).b.query.get
+        // Only one relationship to B was not created since no value of B was present
+        _ <- A.i_.b.query.i.get.map(_.size ==> 2)
 
-        _ <- B(b1).i.query.get.map(_ ==> List(2))
-        _ <- B(b2).i.query.get.map(_ ==> List(4))
-
-        _ <- A.id.i.a1.b.query.get.map(_ ==> List(
-          (a1, 1, b1),
-          (a2, 3, b2),
+        _ <- A.i.a1.B.i.ii_?.query.i.get.map(_ ==> List(
+          (1, 2, None), // Relationship to B exists since B.i has value 2
+          (3, 4, Some(Set(5, 6)))
         ))
 
+        _ <- A.i.a1.B.ii_?.query.i.get.map(_ ==> List(
+          (3, Some(Set(5, 6)))
+        ))
+        _ <- A.i.B.ii.query.get.map(_ ==> List(
+          (3, Set(5, 6))
+        ))
+
+
+
+
+
+//        _ <- A.i.B.ii.insert(
+//          (1, Set.empty[Int]),
+//          (3, Set(5, 6)),
+//        ).i.transact
+//
+//        // A.i was inserted
+//        _ <- A.i.query.get.map(_ ==> List(1, 3))
+//
+//        // Relationship to B was not created since no value of B was present
+//        _ <- A.i_.b.query.get.map(_.size ==> 1)
+//
+//        _ <- A.i.a1.B.ii_?.query.i.get.map(_ ==> List(
+//          // (1, 2, None), // No relationship to B exists since B has no attributes with values
+//          (3, Some(Set(5, 6)))
+//        ))
+//
+//        _ <- A.i.a1.B.ii_?.query.i.get.map(_ ==> List(
+//          (3, Some(Set(5, 6)))
+//        ))
+//        _ <- A.i.B.ii.query.get.map(_ ==> List(
+//          (3, Set(5, 6))
+//        ))
+
+
+//        _ <- A.i.B.s.insert(
+//          (1, "a"),
+//          (2, "b"),
+//        ).transact
+//
+//        _ <- A.i.a1.B.s.query.get.map(_ ==> List(
+//          (1, "a"),
+//          (2, "b"),
+//        ))
+//
+//        _ <- A.B.i.insert(1).transact
+//        _ <- A.B.i.query.get.map(_ ==> List(1))
+//
+//        _ <- A.i.B.i.insert(1, 2).transact
+//        _ <- A.i.B.i.query.get.map(_ ==> List((1, 2)))
+//
+//
+//        _ <- A.B.C.i.insert(1).transact
+//        _ <- A.B.C.i.query.get.map(_ ==> List(1))
+
+
+
+
+
+
+//        _ <- A.i.B.ii.insert((1, Set.empty[Int])).i.transact
+//
+//        // A.i was inserted
+//        _ <- A.i.query.get.map(_ ==> List(1))
+//
+//        // Relationship to B was not created since no value of B was present
+//        _ <- A.i_.b.query.get.map(_.size ==> 0)
+//
+//
+//
+//        _ <- rawQuery(
+//          """[:find  ?b
+//            |        (distinct ?d4)
+//            | :where [?a :A/i ?b]
+//            |        [(datomic.api/q
+//            |          "[:find (pull ?a1 [{:A/b [:B/ii]}] :limit nil)
+//            |            :in $ ?a1]" $ ?a) [[?d1]]]
+//            |        [(if (nil? ?d1) {:A/b {:B/ii []}} ?d1) ?d2]
+//            |        [(:A/b ?d2) ?d3]
+//            |        [(:B/ii ?d3) ?d4]
+//            |        [(not-empty ?d4)]
+//            |        ]
+//            |""".stripMargin).map(println)
+//
+//
+//        _ <- A.i.B.ii_?.query.i.get.map(_ ==> Nil)
+//        _ <- A.i.B.ii.query.get.map(_ ==> Nil)
 
 
         //        _ = {
@@ -113,7 +198,6 @@ object AdhocJVM_datomic extends TestSuite_datomic {
         //            |        [?b :B/c ?c]
         //            |        [?c :C/ii ?d]]
         //            |""".stripMargin).map(println)
-
 
       } yield ()
     }

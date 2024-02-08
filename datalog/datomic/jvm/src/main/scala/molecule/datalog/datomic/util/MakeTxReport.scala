@@ -1,10 +1,12 @@
 package molecule.datalog.datomic.util
 
+import java.lang.{Long => jLong}
 import java.util.{List => jList, Map => jMap}
 import datomic.Connection.{DB_AFTER, TEMPIDS, TX_DATA}
 import datomic.db.{Datum => PeerDatom}
 import datomic.{Datom => _, _}
 import molecule.core.spi.TxReport
+import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.jdk.CollectionConverters._
 
@@ -17,33 +19,31 @@ object MakeTxReport {
 
     val ids: List[String] = {
       val allIds           = ListBuffer.empty[String]
+      val refs             = mutable.Set.empty[Long]
       val datoms           = rawTxReport.get(TX_DATA).asInstanceOf[jList[PeerDatom]].iterator
       val tempIds          = rawTxReport.get(TEMPIDS).asInstanceOf[jMap[_, _]].values().asScala.toBuffer
-      val tx               = datoms.next().e().asInstanceOf[Long] // Initial txInstant datom
-      var txData           = false
       var datom: PeerDatom = null
       var e                = 0L
+
       // Filter out tx meta data assertions
-      while (!txData && datoms.hasNext) {
+      while (datoms.hasNext) {
         datom = datoms.next
         e = datom.e().asInstanceOf[Long]
         val eStr = e.toString
-        if (e == tx) {
-          txData = true
+        if (datom.added() && tempIds.contains(e) && !refs.contains(e)) {
+          allIds += eStr
         }
-        if (
-          !txData
-            && datom.added()
-            && !allIds.contains(eStr)
-        ) {
-          if (tempIds.contains(e)) {
-            allIds += eStr
-          }
+        datom.v() match {
+          case likelyRef: jLong =>
+            if (likelyRef > 17592186000000L) {
+              refs += likelyRef
+            }
+          case _                => ()
         }
       }
-      allIds.toList
+      allIds.toList.distinct
     }
 
-    TxReport(ids, tx)
+    TxReport(ids.distinct, tx)
   }
 }

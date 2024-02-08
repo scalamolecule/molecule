@@ -67,24 +67,15 @@ object AdhocJVM_h2 extends TestSuite_h2 {
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
 
-        List(a1, a2) <- A.i.B.i.insert(
-          (1, 2),
-          (3, 4),
-        ).i.transact.map(_.ids)
+        _ <- A.i.B.ii.insert((1, Set.empty[Int])).transact
 
-        _ <- A(a1).i.query.get.map(_ ==> List(1))
-        _ <- A(a2).i.query.get.map(_ ==> List(3))
+        // A.i was inserted
+        _ <- A.i.query.get.map(_ ==> List(1))
 
-        // Ref ids
-        List(b1, b2) <- A(a1, a2).b.query.get
-
-        _ <- B(b1).i.query.get.map(_ ==> List(2))
-        _ <- B(b2).i.query.get.map(_ ==> List(4))
-
-        _ <- A.id.i.a1.b.query.get.map(_ ==> List(
-          (a1, 1, b1),
-          (a2, 3, b2),
-        ))
+        // Relationship to B was not created since no value of B was present
+        _ <- A.i_.b.query.get.map(_.size ==> 0)
+        _ <- A.i.B.ii_?.query.get.map(_ ==> Nil)
+        _ <- A.i.B.ii.query.get.map(_ ==> Nil)
 
         //        _ <- rawQuery(
         //          """SELECT DISTINCT
