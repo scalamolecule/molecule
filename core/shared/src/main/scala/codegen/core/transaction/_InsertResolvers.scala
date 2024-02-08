@@ -26,9 +26,7 @@ object _InsertResolvers extends CoreGenBase("InsertResolvers", "/transaction") {
        |    nsMap: Map[String, MetaNs],
        |    elements: List[Element]
        |  ): Product => Unit = {
-       |    val resolvers: List[Product => Unit] =
-       |      resolve(nsMap, elements, Nil, 0)
-       |
+       |    val resolvers: List[Product => Unit] = resolve(nsMap, elements, Nil, 0)
        |    resolvers.length match {
        |      $resolveX
        |    }

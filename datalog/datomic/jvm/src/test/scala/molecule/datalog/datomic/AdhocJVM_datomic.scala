@@ -70,37 +70,49 @@ object AdhocJVM_datomic extends TestSuite_datomic {
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
 
-//        _ <- A.i.B.ii.C.ii.insert(List(
-//          (1, Set(1, 2), Set(1, 2)),
-//          (2, Set(2, 3), Set(2, 3)),
-//          (2, Set(3, 4), Set(3, 4)),
-//          (2, Set(3, 4), Set(3, 4)),
-//        )).transact
-//
-//        _ <- A.i.a1.B.ii(max).C.ii(count).query.get.map(_ ==> List(
-//          (1, Set(2), 4),
-//          (2, Set(4), 12)
-//        ))
-//        _ <- A.i.a1.B.ii(countDistinct).C.ii(countDistinct).query.get.map(_ ==> List(
-//          (1, 2, 2),
-//          (2, 3, 3)
-//        ))
+        List(a1, a2) <- A.i.B.i.insert(
+          (1, 2),
+          (3, 4),
+        ).i.transact.map(_.ids)
 
-        _ <- A.i.B.ii.insert(List(
-          (1, Set(1, 2)),
-          (2, Set(2)),
-          (2, Set(3, 4)),
-          (2, Set(3, 4)),
-        )).transact
-        all = Set(1, 2, 3, 4)
+        _ <- A(a1).i.query.get.map(_ ==> List(1))
+        _ <- A(a2).i.query.get.map(_ ==> List(3))
 
-        //        _ <- A.B.ii(sample).query.get.map(res => all.contains(res.head.head) ==> true)
-        //        _ <- A.B.ii(sample(1)).query.get.map(res => all.intersect(res.head).nonEmpty ==> true)
-        _ <- A.B.ii.apply(sample(2)).query.get.map{res =>
-          println("------")
-          println(res)
-          all.intersect(res.head).nonEmpty ==> true
-        }
+        // Ref ids
+        List(b1, b2) <- A(a1, a2).b.query.get
+
+        _ <- B(b1).i.query.get.map(_ ==> List(2))
+        _ <- B(b2).i.query.get.map(_ ==> List(4))
+
+        _ <- A.id.i.a1.b.query.get.map(_ ==> List(
+          (a1, 1, b1),
+          (a2, 3, b2),
+        ))
+
+
+
+        //        _ = {
+        //          println("-------")
+        //          Peer.q(
+        //            """[:find  ?id0
+        //              |        (distinct ?d)
+        //              | :where [(identity ?a) ?id0]
+        //              |        [?a :A/bb ?b]
+        //              |        [?b :B/c ?c]
+        //              |        [?c :C/ii ?d]]""".stripMargin,
+        //            conn.db
+        //          ).forEach { r => println(r) }
+        //        }
+        //
+        //        _ <- rawQuery(
+        //          """
+        //            |[:find  ?id0
+        //            |        (distinct ?d)
+        //            | :where [(identity ?a) ?id0]
+        //            |        [?a :A/bb ?b]
+        //            |        [?b :B/c ?c]
+        //            |        [?c :C/ii ?d]]
+        //            |""".stripMargin).map(println)
 
 
       } yield ()

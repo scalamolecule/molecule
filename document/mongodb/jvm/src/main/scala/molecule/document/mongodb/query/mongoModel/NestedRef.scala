@@ -53,11 +53,20 @@ class NestedRef(
 
     // Process lookup pipeline stages
     stages.forEach(stage => pipeline.add(stage))
+
+
+    val (refPath, refAlias) = if (parent.get.isInstanceOf[FlatEmbed]) {
+      // Connect to embedded ref attr
+      (path.init, alias.init)
+    } else {
+      (refAttr, refAttr)
+    }
+
     val lookup = new BsonDocument()
       .append("from", new BsonString(refNs))
-      .append("localField", new BsonString(refAttr))
+      .append("localField", new BsonString(refPath))
       .append("foreignField", new BsonString("_id"))
-      .append("as", new BsonString(refAttr))
+      .append("as", new BsonString(refAlias))
 
     if (!pipeline.isEmpty) {
       lookup.append("pipeline", pipeline)
@@ -67,11 +76,22 @@ class NestedRef(
     if (mandatory) {
       postStages.add(
         new BsonDocument("$match",
-          new BsonDocument(refAttr,
+          new BsonDocument(refAlias,
             new BsonDocument("$ne", new BsonArray())
           )
         )
       )
+    }
+
+    parent.collect {
+      case p if p.refAttr.nonEmpty =>
+        postStages.add(
+          new BsonDocument("$addFields",
+            new BsonDocument(p.refAttr,
+              new BsonDocument(refAttr, new BsonString("$" + refAlias))
+            )
+          )
+        )
     }
 
     postStages
@@ -84,8 +104,8 @@ class NestedRef(
     val children = if (subBranches.isEmpty) "" else
       s"\n$p  " + subBranches.map(ref => ref.render(tabs + 1)).mkString(s",\n$p  ")
     s"""NestedRef($level, $parent1, $cardMany,
-       |${p}  $ns, $refAttr, $refNs, $pathFields, $dot, $und, $path, $alias,
-       |${p}  $mandatory, $projection
+       |${p}  $ns, $refAttr, $refNs, $pathFields, $dot, $und, $path, $alias, $mandatory,
+       |${p}  $projection
        |${p})$children""".stripMargin
   }
 }

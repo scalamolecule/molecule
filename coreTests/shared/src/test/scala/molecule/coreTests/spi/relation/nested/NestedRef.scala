@@ -17,41 +17,158 @@ trait NestedRef extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "Ref" - refs { implicit conn =>
       for {
-        _ <- A.i.Bb.*(B.i.C.i).insert(0, List((1, 2))).transact
+        _ <- A.i.Bb.*(B.i.C.i).insert(
+          (0, Nil),
+          (1, List((1, 2))),
+          (2, List((3, 4), (5, 6))),
+        ).transact
 
-        _ <- A.i.Bb.*(B.i.C.i).query.get.map(_ ==> List((0, List((1, 2)))))
-        _ <- A.i.Bb.*?(B.i.C.i).query.get.map(_ ==> List((0, List((1, 2)))))
+        _ <- A.i.a1.Bb.*?(B.i.C.i).query.get.map(_ ==> List(
+          (0, Nil),
+          (1, List((1, 2))),
+          (2, List((3, 4), (5, 6))),
+        ))
+        _ <- A.i.a1.Bb.*(B.i.C.i).query.get.map(_ ==> List(
+          (1, List((1, 2))),
+          (2, List((3, 4), (5, 6))),
+        ))
 
-        _ <- A.i.Bb.*(B.C.i).query.get.map(_ ==> List((0, List(2))))
-        _ <- A.i.Bb.*?(B.C.i).query.get.map(_ ==> List((0, List(2))))
+        _ <- A.i.a1.Bb.*?(B.C.i).query.get.map(_ ==> List(
+          (0, Nil),
+          (1, List(2)),
+          (2, List(4, 6)),
+        ))
+        _ <- A.i.a1.Bb.*(B.C.i).query.get.map(_ ==> List(
+          (1, List(2)),
+          (2, List(4, 6)),
+        ))
 
-        _ <- A.Bb.*(B.C.i).query.get.map(_ ==> List(List(2)))
-        _ <- A.Bb.*?(B.C.i).query.get.map(_ ==> List(List(2)))
-
-
-        _ <- A.i.Bb.*(B.i.C.i.Dd.*(D.i.E.i)).insert(1, List((1, 2, List((3, 4))))).transact
-        _ <- A.i(1).Bb.*(B.i.C.i.Dd.*(D.i.E.i)).query.get.map(_ ==> List((1, List((1, 2, List((3, 4)))))))
-        _ <- A.i(1).Bb.*?(B.i.C.i.Dd.*?(D.i.E.i)).query.get.map(_ ==> List((1, List((1, 2, List((3, 4)))))))
-
-        // Ref before nested
-        _ <- A.i.B.i.Cc.*(C.i).insert(0, 1, List(2)).transact
-        _ <- A.i.B.i.Cc.*(C.i).query.get.map(_ ==> List((0, 1, List(2))))
-        _ <- A.i.B.i.Cc.*?(C.i).query.get.map(_ ==> List((0, 1, List(2))))
+        _ <- A.Bb.*?(B.C.i).query.get.map(_ ==> List(
+          // List(), // empty list is not returned when no attributes are present before nesting
+          List(2),
+          List(4, 6),
+        ))
+        _ <- A.Bb.*(B.C.i).query.get.map(_ ==> List(
+          List(2),
+          List(4, 6),
+        ))
       } yield ()
     }
 
-    "Ref with card-set attr" - refs { implicit conn =>
+
+    "Ref, 2 levels" - refs { implicit conn =>
       for {
-        _ <- A.i.Bb.*(B.i.C.ii).insert(0, List((1, Set(2, 3)))).transact
+        _ <- A.i.Bb.*(B.i.C.i.Dd.*(D.i.E.i)).insert(
+          (0, Nil),
+          (1, List(
+            (1, 1, Nil),
+          )),
+          (2, List(
+            (1, 1, Nil),
+            (2, 2, List((1, 2))),
+            (3, 3, List((1, 2), (3, 4))),
+          )),
+        ).transact
 
-        _ <- A.i.Bb.*(B.i.C.ii).query.get.map(_ ==> List((0, List((1, Set(2, 3))))))
-        _ <- A.i.Bb.*?(B.i.C.ii).query.get.map(_ ==> List((0, List((1, Set(2, 3))))))
+        _ <- A.i(1).Bb.*?(B.i.C.i.Dd.*?(D.i.E.i)).query.get.map(_ ==> List(
+          (0, Nil),
+          (1, List(
+            (1, 1, Nil),
+          )),
+          (2, List(
+            (1, 1, Nil),
+            (2, 2, List((1, 2))),
+            (3, 3, List((1, 2), (3, 4))),
+          )),
+        ))
 
-        _ <- A.i.Bb.*(B.C.ii).query.get.map(_ ==> List((0, List(Set(2, 3)))))
-        _ <- A.i.Bb.*?(B.C.ii).query.get.map(_ ==> List((0, List(Set(2, 3)))))
+        _ <- A.i(1).Bb.*(B.i.C.i.Dd.*(D.i.E.i)).query.get.map(_ ==> List(
+          (2, List(
+            (1, 1, Nil),
+            (2, 2, List((1, 2))),
+            (3, 3, List((1, 2), (3, 4))),
+          )),
+        ))
+      } yield ()
+    }
 
-        _ <- A.Bb.*(B.C.ii).query.get.map(_ ==> List(List(Set(2, 3))))
-        _ <- A.Bb.*?(B.C.ii).query.get.map(_ ==> List(List(Set(2, 3))))
+
+    "Ref before nested" - refs { implicit conn =>
+      for {
+        // Ref before nested
+        _ <- A.i.B.i.Cc.*(C.i).insert(
+          (0, 0, Nil),
+          (1, 1, List(1)),
+          (2, 2, List(1, 2)),
+        ).transact
+
+        _ <- A.i.B.i.Cc.*?(C.i).query.get.map(_ ==> List(
+          (0, 0, Nil),
+          (1, 1, List(1)),
+          (2, 2, List(1, 2)),
+        ))
+
+        _ <- A.i.B.i.Cc.*(C.i).query.get.map(_ ==> List(
+          (1, 1, List(1)),
+          (2, 2, List(1, 2)),
+        ))
+      } yield ()
+    }
+
+
+    "Nested ref with card-set attr" - refs { implicit conn =>
+      for {
+        _ <- A.i.Bb.*(B.i.C.ii).insert(
+          (0, Nil),
+          (1, List(
+            (1, Set.empty[Int])
+          )),
+          (2, List(
+            (1, Set.empty[Int]),
+            (2, Set(1)),
+            (3, Set(1, 2)),
+          )),
+        ).transact
+
+
+        _ <- A.i.Bb.*?(B.i.C.ii).query.get.map(_ ==> List(
+          (0, Nil),
+          (1, Nil),
+          (2, List(
+            (2, Set(1)),
+            (3, Set(1, 2)),
+          )),
+        ))
+        _ <- A.i.Bb.*(B.i.C.ii).query.get.map(_ ==> List(
+          (2, List(
+            (2, Set(1)),
+            (3, Set(1, 2)),
+          )),
+        ))
+
+        _ <- A.i.a1.Bb.*?(B.C.ii).query.get.map(_ ==> List(
+          (0, Nil),
+          (1, Nil),
+          (2, List(
+            Set(1, 2), // Set(1) and Set(1, 2) coalesced to one Set
+          )),
+        ))
+        _ <- A.i.Bb.*(B.C.ii).query.get.map(_ ==> List(
+          (2, List(
+            Set(1, 2), // Set(1) and Set(1, 2) coalesced to one Set
+          )),
+        ))
+
+        _ <- A.Bb.*?(B.C.ii).query.i.get.map(_ ==> List(
+          List(
+            Set(1, 2), // Set(1) and Set(1, 2) coalesced to one Set
+          ),
+        ))
+        _ <- A.Bb.*(B.C.ii).query.i.get.map(_ ==> List(
+          List(
+            Set(1, 2), // Set(1) and Set(1, 2) coalesced to one Set
+          ),
+        ))
       } yield ()
     }
 
@@ -74,6 +191,7 @@ trait NestedRef extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- A.i_(2).Bb.*?(B.i.C.i.Dd.*?(D.i.E.i._D.E1.s.F.i)).query.get.map(_ ==> List(List((1, 2, List((3, 4, "a", 5))))))
       } yield ()
     }
+
 
     "Backref, 2 steps back" - refs { implicit conn =>
       for {
@@ -117,34 +235,34 @@ trait NestedRef extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     "Optional attributes in nested" - refs { implicit conn =>
       for {
         _ <- A.i.Bb.*(B.i.s_?.C.i).insert(
-          (1, List((1, Some("a"), 2))),
-          (2, List((1, None, 2))),
+          (1, List((10, Some("a"), 11))),
+          (2, List((20, None, 21))),
           (3, Nil),
         ).transact
 
         _ <- A.i.Bb.*(B.i.s_?.C.i).query.get.map(_ ==> List(
-          (1, List((1, Some("a"), 2))),
-          (2, List((1, None, 2))),
+          (1, List((10, Some("a"), 11))),
+          (2, List((20, None, 21))),
         ))
         _ <- A.i.a1.Bb.*?(B.i.s_?.C.i).query.get.map(_ ==> List(
-          (1, List((1, Some("a"), 2))),
-          (2, List((1, None, 2))),
+          (1, List((10, Some("a"), 11))),
+          (2, List((20, None, 21))),
           (3, Nil),
         ))
 
         _ <- A.i.Bb.*(B.i.C.i.s_?).insert(
-          (4, List((1, 2, Some("a")))),
-          (5, List((1, 2, None))),
+          (4, List((10, 11, Some("a")))),
+          (5, List((20, 21, None))),
           (6, Nil),
         ).transact
 
         _ <- A.i.>(3).a1.Bb.*(B.i.C.i.s_?).query.get.map(_ ==> List(
-          (4, List((1, 2, Some("a")))),
-          (5, List((1, 2, None))),
+          (4, List((10, 11, Some("a")))),
+          (5, List((20, 21, None))),
         ))
         _ <- A.i.>(3).a1.Bb.*?(B.i.C.i.s_?).query.get.map(_ ==> List(
-          (4, List((1, 2, Some("a")))),
-          (5, List((1, 2, None))),
+          (4, List((10, 11, Some("a")))),
+          (5, List((20, 21, None))),
           (6, Nil)
         ))
       } yield ()
@@ -190,7 +308,7 @@ trait NestedRef extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         _ <- A.i.Bb.*?(B.i.Cc.i).query.get
           .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
             err ==> "Only cardinality-one refs allowed in optional nested queries. Found: " +
-              """Ref("B", "cc", "C", CardSet, false, Seq(1, 30, 2))"""
+              """Ref("B", "cc", "C", CardSet, false, Seq(1, 32, 2))"""
           }
         // Ok:
         _ <- A.i.Bb.*?(B.i.C.i).query.get

@@ -17,19 +17,17 @@ trait InsertResolvers_ {
     nsMap: Map[String, MetaNs],
     elements: List[Element]
   ): Product => Unit = {
-    val resolvers: List[Product => Unit] =
-      resolve(nsMap, elements, Nil, 0)
-
+    val resolvers: List[Product => Unit] = resolve(nsMap, elements, Nil, 0)
     resolvers.length match {
-      case 1 => resolve1(resolvers)
-      case 2 => resolve2(resolvers)
-      case 3 => resolve3(resolvers)
-      case 4 => resolve4(resolvers)
-      case 5 => resolve5(resolvers)
-      case 6 => resolve6(resolvers)
-      case 7 => resolve7(resolvers)
-      case 8 => resolve8(resolvers)
-      case 9 => resolve9(resolvers)
+      case 1  => resolve1(resolvers)
+      case 2  => resolve2(resolvers)
+      case 3  => resolve3(resolvers)
+      case 4  => resolve4(resolvers)
+      case 5  => resolve5(resolvers)
+      case 6  => resolve6(resolvers)
+      case 7  => resolve7(resolvers)
+      case 8  => resolve8(resolvers)
+      case 9  => resolve9(resolvers)
       case 10 => resolve10(resolvers)
       case 11 => resolve11(resolvers)
       case 12 => resolve12(resolvers)

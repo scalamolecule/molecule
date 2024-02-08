@@ -2,9 +2,11 @@
 package molecule.datalog.core.query.casting
 
 import java.util.{Collections, Comparator, ArrayList => jArrayList, Iterator => jIterator, List => jList, Map => jMap}
+import clojure.lang.PersistentVector
 import molecule.core.query.Model2QueryBase
 import molecule.datalog.core.query.DatomicQueryBase
 import scala.annotation.tailrec
+import scala.collection.mutable
 
 
 trait CastNestedOptLeaf_
@@ -111,20 +113,37 @@ trait CastNestedOptLeaf_
     pullCasts: List[jIterator[_] => Any],
     optComparator: Option[Comparator[Row]]
   ): jIterator[_] => List[Any] = {
+
     val List(c1) = pullCasts
-    val cast     = (it: java.util.Iterator[_]) =>
-      (
-        c1(it)
-        )
+    val cast     = (it: java.util.Iterator[_]) => c1(it)
     resolve(
       optComparator.fold {
         val list = new jArrayList[Any](1)
         (rows: jList[_]) =>
-          rows.asScala.toList.map {
-            case row: jMap[_, _] =>
-              list.clear()
-              cast(flatten(list, row).iterator)
+          val isSets = flatten(list, rows.get(0).asInstanceOf[jMap[_, _]])
+            .get(0).isInstanceOf[clojure.lang.PersistentVector]
+
+          if (isSets) {
+            val res          = rows.asScala.toList.map {
+              case row: jMap[_, _] =>
+                list.clear()
+                cast(flatten(list, row).iterator)
+            }
+            // Coalesce Sets
+            var coalescedSet = Set.empty[Any]
+            res.foreach {
+              case set: Set[Any] => coalescedSet = coalescedSet ++ set
+            }
+            List(coalescedSet)
+
+          } else {
+            rows.asScala.toList.map {
+              case row: jMap[_, _] =>
+                list.clear()
+                cast(flatten(list, row).iterator)
+            }
           }
+
       } { comparator =>
         (rows: jList[_]) =>
           val sortedRows: jArrayList[Row] = new jArrayList(rows.size())

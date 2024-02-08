@@ -18,12 +18,13 @@ trait SqlInsert
     with MoleculeLogging { self: ResolveInsert with InsertResolvers_ =>
 
   doPrint = false
+  //  doPrint = true
 
   def getData(nsMap: Map[String, MetaNs], elements: List[Element], tpls: Seq[Product]): Data = {
-    elements.foreach(debug)
-//    debug("### A #############################################################################################")
+    //    elements.foreach(debug)
+    debug("\n\n### A #############################################################################################")
     if (tpls.isEmpty) {
-//      debug("Tpls data empty, so no insert...")
+      debug("Tpls data empty, so no insert...")
       // No need to handle inserts if no data
       (Nil, Nil)
     } else {
@@ -31,20 +32,20 @@ trait SqlInsert
       curRefPath = List(s"$level", initialNs)
       val resolveTpl: Product => Unit = getResolver(nsMap, elements)
 
-//      debug(inserts.mkString("--- inserts\n  ", "\n  ", ""))
-//      debug("### B #############################################################################################")
+      debug(inserts.mkString("--- inserts\n  ", "\n  ", ""))
+      debug("### B #############################################################################################")
       initInserts()
-//      debug("### C ############################################################################################# " + tpls)
+      debug("### C ############################################################################################# " + tpls)
 
       // Loop rows of tuples
       var rowIndex = 0
       tpls.foreach { tpl =>
-//        debug(s"###### $rowIndex ##################################### " + tpl)
+        debug(s"###### $rowIndex ##################################### " + tpl)
         resolveTpl(tpl)
-        addRowSetterToTableInserts(rowIndex)
+        addRowSetterToTableInserts()
         rowIndex += 1
       }
-//      debug("### D #############################################################################################")
+      debug("### D #############################################################################################")
       (getTableInserts, getJoinTableInserts)
     }
   }
@@ -60,8 +61,8 @@ trait SqlInsert
              |  $columns
              |) VALUES ($inputPlaceholders)""".stripMargin
 
-//        debug(s"B -------------------- refPath: $refPath")
-//        debug(stmt)
+        debug(s"B -------------------- refPath: $refPath")
+        debug(stmt)
         val ps = sqlConn.prepareStatement(stmt, Statement.RETURN_GENERATED_KEYS)
         tableDatas(refPath) = Table(refPath, stmt, ps)
         rowSettersMap(refPath) = Nil
@@ -76,21 +77,57 @@ trait SqlInsert
     }
   }
 
-  protected def addRowSetterToTableInserts(rowIndex: Int): Unit = {
+  private def addRowSetterToTableInserts(): Unit = {
     inserts.foreach {
       case (refPath, cols) =>
-//        debug(s"C ---------------------- $refPath")
-//        colSettersMap.foreach(x => debug(s"C ${x._2.size} colSetters: " + x._1))
+        debug(s"C ---------------------- $refPath")
+        colSettersMap.foreach(x =>
+          debug(s"C ${x._2.size} colSetters: " + x._1)
+        )
+        colSettersMap.get(refPath).foreach { colSetters =>
+          //        debug(s"C ---------------------- ${colSetters.length}  $refPath")
+          colSettersMap(refPath) = Nil
+          //        val rowSetter = (ps: PS, idsMap: IdsMap, _: RowIndex) => {
+          val rowSetter = (ps: PS, idsMap: IdsMap, rowIndex: RowIndex) => {
+            var i        = 0
+            val colCount = cols.length
+            ps.toString
+
+            // Set all column values for this row of this insert
+            colSetters.foreach { colSetter =>
+              colSetter(ps, idsMap, rowIndex)
+              i += 1
+
+              if (i == colCount) {
+                // Add row for this insert
+                ps.addBatch()
+                i = 0
+              }
+            }
+          }
+          rowSettersMap(refPath) = rowSettersMap(refPath) :+ rowSetter
+        }
+    }
+  }
+  private def addRowSetterToTableInsertsOLD(): Unit = {
+    inserts.foreach {
+      case (refPath, cols) =>
+        debug(s"C ---------------------- $refPath")
+        colSettersMap.foreach(x =>
+          debug(s"C ${x._2.size} colSetters: " + x._1)
+        )
         val colSetters = colSettersMap(refPath)
-//        debug(s"C ---------------------- ${colSetters.length}  $refPath")
+        //        debug(s"C ---------------------- ${colSetters.length}  $refPath")
         colSettersMap(refPath) = Nil
-        val rowSetter = (ps: PS, idsMap: IdsMap, _: RowIndex) => {
+        //        val rowSetter = (ps: PS, idsMap: IdsMap, _: RowIndex) => {
+        val rowSetter = (ps: PS, idsMap: IdsMap, rowIndex: RowIndex) => {
           var i        = 0
           val colCount = cols.length
           ps.toString
 
-          // Set all column values for this each row of this insert
+          // Set all column values for this row of this insert
           colSetters.foreach { colSetter =>
+            //            colSetter(ps, idsMap, rowIndex)
             colSetter(ps, idsMap, rowIndex)
             i += 1
 
@@ -105,8 +142,8 @@ trait SqlInsert
     }
   }
 
-  protected def getTableInserts: List[Table] = {
-    // Add insert resolver to each insert
+  private def getTableInserts: List[Table] = {
+    // Add insert resolver to each table insert
     inserts.map { case (refPath, _) =>
       val rowSetters = rowSettersMap(refPath)
       val populatePS = (ps: PS, idsMap: Map[List[String], List[Long]], _: Int) => {
@@ -121,7 +158,64 @@ trait SqlInsert
     }
   }
 
-  protected def getJoinTableInserts: List[JoinTable] = {
+  override protected def addNested(
+    nsMap: Map[String, MetaNs],
+    tplIndex: Int,
+    ns: String,
+    refAttr: String,
+    refNs: String,
+    owner: Boolean,
+    nestedElements: List[Element]
+  ): Product => Unit = {
+    val joinTable  = ss(ns, refAttr, refNs)
+    val (id1, id2) = if (ns == refNs)
+      (ss(ns, "1_id"), ss(refNs, "2_id"))
+    else
+      (ss(ns, "id"), ss(refNs, "id"))
+    val nextLevel  = level + 1
+    val joinPath   = curRefPath :+ joinTable
+    val leftPath   = curRefPath
+    val rightPath  = List(s"$nextLevel", refNs)
+    joins = joins :+ (joinPath, id1, id2, leftPath, rightPath)
+    rightCountsMap(joinPath) = List.empty[Int]
+
+    // Initiate new level
+    level = nextLevel
+    curRefPath = List(s"$level", refNs)
+    colSettersMap += curRefPath -> Nil
+
+    // Recursively resolve nested data
+    val resolveNested = getResolver(nsMap, nestedElements)
+
+    countValueAttrs(nestedElements) match {
+      case 1 =>
+        (tpl: Product) => {
+          val nestedSingleValues = tpl.productElement(tplIndex).asInstanceOf[Seq[Any]].filter {
+            case set: Set[_] if set.isEmpty => false
+            case _                          => true
+          }
+          val length             = nestedSingleValues.length
+          rightCountsMap(joinPath) = rightCountsMap(joinPath) :+ length
+          nestedSingleValues.foreach { nestedSingleValue =>
+            resolveNested(Tuple1(nestedSingleValue))
+          }
+        }
+      case _ =>
+        (tpl: Product) => {
+          val nestedTpls = tpl.productElement(tplIndex).asInstanceOf[Seq[Product]]
+          val length     = nestedTpls.length
+          rightCountsMap(joinPath) = rightCountsMap(joinPath) :+ length
+          var rowIndex = 0
+          nestedTpls.foreach { nestedTpl =>
+            debug(s"------ $rowIndex ##################################### " + nestedTpl)
+            rowIndex += 1
+            resolveNested(nestedTpl)
+          }
+        }
+    }
+  }
+
+  private def getJoinTableInserts: List[JoinTable] = {
     joins.zip(joinTableDatas).map {
       case ((joinRefPath, _, _, _, _), joinTableInsert) =>
         joinTableInsert.copy(rightCounts = rightCountsMap(joinRefPath))
@@ -352,56 +446,6 @@ trait SqlInsert
     (_: Product) => ()
   }
 
-  override protected def addNested(
-    nsMap: Map[String, MetaNs],
-    tplIndex: Int,
-    ns: String,
-    refAttr: String,
-    refNs: String,
-    owner: Boolean,
-    nestedElements: List[Element]
-  ): Product => Unit = {
-    val joinTable  = ss(ns, refAttr, refNs)
-    val (id1, id2) = if (ns == refNs)
-      (ss(ns, "1_id"), ss(refNs, "2_id"))
-    else
-      (ss(ns, "id"), ss(refNs, "id"))
-    val nextLevel  = level + 1
-    val joinPath   = curRefPath :+ joinTable
-    val leftPath   = curRefPath
-    val rightPath  = List(s"$nextLevel", refNs)
-    joins = joins :+ (joinPath, id1, id2, leftPath, rightPath)
-    rightCountsMap(joinPath) = List.empty[Int]
-
-    // Initiate new level
-    level = nextLevel
-    curRefPath = List(s"$level", refNs)
-    colSettersMap += curRefPath -> Nil
-
-    // Recursively resolve nested data
-    val resolveNested = getResolver(nsMap, nestedElements)
-
-    countValueAttrs(nestedElements) match {
-      case 1 =>
-        (tpl: Product) => {
-          val nestedSingleValues = tpl.productElement(tplIndex).asInstanceOf[Seq[Any]]
-          val length             = nestedSingleValues.length
-          rightCountsMap(joinPath) = rightCountsMap(joinPath) :+ length
-          nestedSingleValues.foreach { nestedSingleValue =>
-            resolveNested(Tuple1(nestedSingleValue))
-          }
-        }
-      case _ =>
-        (tpl: Product) => {
-          val nestedTpls = tpl.productElement(tplIndex).asInstanceOf[Seq[Product]]
-          val length     = nestedTpls.length
-          rightCountsMap(joinPath) = rightCountsMap(joinPath) :+ length
-          nestedTpls.foreach { nestedTpl =>
-            resolveNested(nestedTpl)
-          }
-        }
-    }
-  }
 
   override protected lazy val handleID             = (v: Any) => (ps: PS, n: Int) => ps.setLong(n, v.asInstanceOf[String].toLong)
   override protected lazy val handleString         = (v: Any) => (ps: PS, n: Int) => ps.setString(n, v.asInstanceOf[String])

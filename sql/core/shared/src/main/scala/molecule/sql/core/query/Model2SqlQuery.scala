@@ -59,14 +59,16 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
       val max1  = joins.map(_._1.length).max
       val max2  = joins.map(_._2.length).max
       val max3  = joins.map(_._3.length).max
+      val max4  = joins.map(_._4.length).max + 1
       val hasAs = joins.exists(_._3.nonEmpty)
-      joins.map { case (join, table, as, predicates) =>
+      joins.map { case (join, table, as, lft, rgt) =>
         val join_  = join + padS(max1, join)
         val table_ = table + padS(max2, table)
         val as_    = if (hasAs) {
           if (as.isEmpty) padS(max3 + 4, "") else " AS " + as + padS(max3, as)
         } else ""
-        s"$join_ $table_$as_ ON $predicates"
+        val predicate = lft + padS(max4, lft) + rgt
+        s"$join_ $table_$as_ ON $predicate"
       }.mkString("\n  ", "\n  ", "")
     }
     val tempTables_ = if (tempTables.isEmpty) "" else tempTables.mkString(",\n  ", ",\n  ", "")
@@ -143,14 +145,16 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
       val max1  = joins.map(_._1.length).max
       val max2  = joins.map(_._2.length).max
       val max3  = joins.map(_._3.length).max
+      val max4  = joins.map(_._4.length).max + 1
       val hasAs = joins.exists(_._3.nonEmpty)
-      joins.map { case (join, table, as, predicates) =>
+      joins.map { case (join, table, as, lft, rgt) =>
         val join_  = join + padS(max1, join)
         val table_ = table + padS(max2, table)
         val as_    = if (hasAs) {
           if (as.isEmpty) padS(max3 + 4, "") else " AS " + as + padS(max3, as)
         } else ""
-        s"$join_ $table_$as_ ON $predicates"
+        val predicate = lft + padS(max4, lft) + rgt
+        s"$join_ $table_$as_ ON $predicate"
       }.mkString("\n", "\n", "")
     }
 

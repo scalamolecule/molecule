@@ -2,6 +2,7 @@
 package molecule.document.mongodb.query.casting
 
 import molecule.base.util.BaseHelpers
+import molecule.document.mongodb.sync.pretty
 import org.bson._
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
@@ -27,8 +28,7 @@ trait CastBsonDoc_ extends BaseHelpers {
         (outerDoc: BsonDocument) => {
           // Traverse to sub document
           val subDoc = refAttrPath.foldLeft(outerDoc) {
-            case (curDoc, refAttr) =>
-              curDoc.get(refAttr).asDocument()
+            case (curDoc, refAttr) => curDoc.get(refAttr).asDocument()
           }
           fieldCast(subDoc)
         }

@@ -56,6 +56,8 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
 
     pagination(topStages, optOffset, optLimit)
 
+    //    println(topBranch)
+
     // Return elements with possible filter attribute resolutions
     (initialNs, topStages)
   }
@@ -123,7 +125,9 @@ class Model2MongoQuery[Tpl](elements0: List[Element])
           case a: AttrSetOpt => resolveAttrSetOpt(a); resolve(tail)
           case a: AttrSetTac => resolveAttrSetTac(a); resolve(tail)
         }
-      case ref: Ref                       => resolveRef(ref); resolve(tail)
+      case ref: Ref                       =>
+        resolveRef(ref);
+        resolve(tail)
       case backRef: BackRef               => resolveBackRef(backRef, tail.head); resolve(tail)
       case Nested(ref, nestedElements)    => resolveNested(ref, nestedElements, tail)
       case NestedOpt(ref, nestedElements) => resolveNestedOpt(ref, nestedElements, tail)

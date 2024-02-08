@@ -304,35 +304,46 @@ trait InsertRefs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "ids, ref" - refs { implicit conn =>
+    "ids, ref, card-one" - refs { implicit conn =>
       for {
-        // Card one
-        List(a1, b1, a2, b2) <- A.i.B.i.insert(
+        // Ids of first namespace entities returned
+        List(a1, a2) <- A.i.B.i.insert(
           (1, 2),
           (3, 4),
-        ).transact.map(_.ids)
+        ).i.transact.map(_.ids)
 
         _ <- A(a1).i.query.get.map(_ ==> List(1))
-        _ <- B(b1).i.query.get.map(_ ==> List(2))
-
         _ <- A(a2).i.query.get.map(_ ==> List(3))
+
+        // Ref ids
+        List(b1, b2) <- A(a1, a2).b.query.get
+
+        _ <- B(b1).i.query.get.map(_ ==> List(2))
         _ <- B(b2).i.query.get.map(_ ==> List(4))
 
         _ <- A.id.i.a1.b.query.get.map(_ ==> List(
           (a1, 1, b1),
           (a2, 3, b2),
         ))
+      } yield ()
+    }
 
-        // Card Set
-        List(a1, b1, a2, b2) <- A.i.Bb.i.insert(
+    "ids, ref, card-set" - refs { implicit conn =>
+      for {
+        // Ids of first namespace entities returned
+        List(a1, a2) <- A.i.Bb.i.insert(
           (1, 2),
           (3, 4),
         ).transact.map(_.ids)
 
         _ <- A(a1).i.query.get.map(_ ==> List(1))
-        _ <- B(b1).i.query.get.map(_ ==> List(2))
-
         _ <- A(a2).i.query.get.map(_ ==> List(3))
+
+        // Getting head of each Set ref ids (card-set)
+        List(b1) <- A(a1).bb.query.get.map(_.map(_.head))
+        List(b2) <- A(a2).bb.query.get.map(_.map(_.head))
+
+        _ <- B(b1).i.query.get.map(_ ==> List(2))
         _ <- B(b2).i.query.get.map(_ ==> List(4))
 
         _ <- A.id.i.a1.bb.query.get.map(_ ==> List(
@@ -343,182 +354,149 @@ trait InsertRefs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "ids, owned ref" - refs { implicit conn =>
-      if (database == "MongoDB") {
-        // Can't query for non-existing ids of embedded documents in MongoDB
-        for {
-          // Card one
-          List(a1, a2) <- A.i.OwnB.i.insert(
-            (1, 2),
-            (3, 4),
-          ).transact.map(_.ids)
-
-          _ <- A(a1).i.query.get.map(_ ==> List(1))
-          _ <- A(a2).i.query.get.map(_ ==> List(3))
-
-          // Can't query for non-existing ownB id
-          //_ <- A.id.i.ownB.query
-
-          _ <- A.id.i.a1.OwnB.i.query.get.map(_ ==> List(
-            (a1, 1, 2),
-            (a2, 3, 4),
-          ))
-
-          // Card Set
-          List(a1, a2) <- A.i.OwnBb.i.insert(
-            (1, 2),
-            (3, 4),
-          ).transact.map(_.ids)
-
-          _ <- A(a1).i.query.get.map(_ ==> List(1))
-          _ <- A(a2).i.query.get.map(_ ==> List(3))
-
-          // Can't query for non-existing ownBb id
-          //_ <- A.id.i.ownBb.query
-
-          _ <- A.id.i.a1.OwnBb.i.query.get.map(_ ==> List(
-            (a1, 1, 2),
-            (a2, 3, 4),
-          ))
-        } yield ()
-
-      } else {
-
-        // Other databases
-        for {
-          // Card one
-          List(a1, b1, a2, b2) <- A.i.OwnB.i.insert(
-            (1, 2),
-            (3, 4),
-          ).transact.map(_.ids)
-
-          _ <- A(a1).i.query.get.map(_ ==> List(1))
-          _ <- B(b1).i.query.get.map(_ ==> List(2))
-
-          _ <- A(a2).i.query.get.map(_ ==> List(3))
-          _ <- B(b2).i.query.get.map(_ ==> List(4))
-
-          _ <- A.id.i.a1.ownB.query.get.map(_ ==> List(
-            (a1, 1, b1),
-            (a2, 3, b2),
-          ))
-
-          // Card Set
-          List(a1, b1, a2, b2) <- A.i.OwnBb.i.insert(
-            (1, 2),
-            (3, 4),
-          ).transact.map(_.ids)
-
-          _ <- A(a1).i.query.get.map(_ ==> List(1))
-          _ <- B(b1).i.query.get.map(_ ==> List(2))
-
-          _ <- A(a2).i.query.get.map(_ ==> List(3))
-          _ <- B(b2).i.query.get.map(_ ==> List(4))
-
-          _ <- A.id.i.a1.ownBb.query.get.map(_ ==> List(
-            (a1, 1, Set(b1)),
-            (a2, 3, Set(b2)),
-          ))
-        } yield ()
-      }
-    }
 
     "ids, backref" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
-      if (database == "MongoDB") {
-        for {
-          // ref - ref
-          List(a1, b1, c1, a2, b2, c2) <- A.i.B.i._A.C.i.insert(
-            (1, 2, 3),
-            (4, 5, 6),
-          ).i.transact.map(_.ids)
+//      if (database == "MongoDB") {
+//        for {
+//          // ref - ref
+//          List(a1, b1, c1, a2, b2, c2) <- A.i.B.i._A.C.i.insert(
+//            (1, 2, 3),
+//            (4, 5, 6),
+//          ).i.transact.map(_.ids)
+//
+//          _ <- A.id.i.a1.B.id.i._A.C.id.i.query.get.map(_ ==> List(
+//            (a1, 1, b1, 2, c1, 3),
+//            (a2, 4, b2, 5, c2, 6),
+//          ))
+//
+//          // ref - own
+//          List(a1, b1, a2, b2) <- A.i.B.i._A.OwnC.i.insert(
+//            (1, 2, 3),
+//            (4, 5, 6),
+//          ).i.transact.map(_.ids)
+//
+//          _ <- A.id.i.a1.B.id.i._A.OwnC.i.query.get.map(_ ==> List(
+//            (a1, 1, b1, 2, 3),
+//            (a2, 4, b2, 5, 6),
+//          ))
+//
+//          // own - ref
+//          List(a1, c1, a2, c2) <- A.i.OwnB.i._A.C.i.insert(
+//            (1, 2, 3),
+//            (4, 5, 6),
+//          ).i.transact.map(_.ids)
+//
+//          _ <- A.id.i.a1.OwnB.i._A.C.id.i.query.get.map(_ ==> List(
+//            (a1, 1, 2, c1, 3),
+//            (a2, 4, 5, c2, 6),
+//          ))
+//
+//          // own - own
+//          List(a1, a2) <- A.i.OwnB.i._A.OwnC.i.insert(
+//            (1, 2, 3),
+//            (4, 5, 6),
+//          ).i.transact.map(_.ids)
+//
+//          _ <- A.id.i.a1.OwnB.i._A.OwnC.i.query.get.map(_ ==> List(
+//            (a1, 1, 2, 3),
+//            (a2, 4, 5, 6),
+//          ))
+//        } yield ()
+//
+//      } else {
+//        for {
+//        // ref - ref
+//          List(a1, b1, c1, a2, b2, c2) <- A.i.B.i._A.C.i.insert(
+//            (1, 2, 3),
+//            (4, 5, 6),
+//          ).i.transact.map(_.ids)
+//
+//          _ <- A.id.i.a1.B.id.i._A.C.id.i.query.get.map(_ ==> List(
+//            (a1, 1, b1, 2, c1, 3),
+//            (a2, 4, b2, 5, c2, 6),
+//          ))
+//
+//          // ref - own
+//          List(a1, b1, c1, a2, b2, c2) <- A.i.B.i._A.OwnC.i.insert(
+//            (1, 2, 3),
+//            (4, 5, 6),
+//          ).i.transact.map(_.ids)
+//
+//          _ <- A.id.i.a1.B.id.i._A.OwnC.id.i.query.get.map(_ ==> List(
+//            (a1, 1, b1, 2, c1, 3),
+//            (a2, 4, b2, 5, c2, 6),
+//          ))
+//
+//          // own - ref
+//          List(a1, b1, c1, a2, b2, c2) <- A.i.OwnB.i._A.C.i.insert(
+//            (1, 2, 3),
+//            (4, 5, 6),
+//          ).i.transact.map(_.ids)
+//
+//          _ <- A.id.i.a1.OwnB.id.i._A.C.id.i.query.get.map(_ ==> List(
+//            (a1, 1, b1, 2, c1, 3),
+//            (a2, 4, b2, 5, c2, 6),
+//          ))
+//
+//          // own - own
+//          List(a1, b1, c1, a2, b2, c2) <- A.i.OwnB.i._A.OwnC.i.insert(
+//            (1, 2, 3),
+//            (4, 5, 6),
+//          ).i.transact.map(_.ids)
+//
+//          _ <- A.id.i.a1.OwnB.id.i._A.OwnC.id.i.query.get.map(_ ==> List(
+//            (a1, 1, b1, 2, c1, 3),
+//            (a2, 4, b2, 5, c2, 6),
+//          ))
+//        } yield ()
+//      }
 
-          _ <- A.id.i.a1.B.id.i._A.C.id.i.query.get.map(_ ==> List(
-            (a1, 1, b1, 2, c1, 3),
-            (a2, 4, b2, 5, c2, 6),
-          ))
-
-          // ref - own
-          List(a1, b1, a2, b2) <- A.i.B.i._A.OwnC.i.insert(
-            (1, 2, 3),
-            (4, 5, 6),
-          ).i.transact.map(_.ids)
-
-          _ <- A.id.i.a1.B.id.i._A.OwnC.i.query.get.map(_ ==> List(
-            (a1, 1, b1, 2, 3),
-            (a2, 4, b2, 5, 6),
-          ))
-
-          // own - ref
-          List(a1, c1, a2, c2) <- A.i.OwnB.i._A.C.i.insert(
-            (1, 2, 3),
-            (4, 5, 6),
-          ).i.transact.map(_.ids)
-
-          _ <- A.id.i.a1.OwnB.i._A.C.id.i.query.get.map(_ ==> List(
-            (a1, 1, 2, c1, 3),
-            (a2, 4, 5, c2, 6),
-          ))
-
-          // own - own
-          List(a1, a2) <- A.i.OwnB.i._A.OwnC.i.insert(
-            (1, 2, 3),
-            (4, 5, 6),
-          ).i.transact.map(_.ids)
-
-          _ <- A.id.i.a1.OwnB.i._A.OwnC.i.query.get.map(_ ==> List(
-            (a1, 1, 2, 3),
-            (a2, 4, 5, 6),
-          ))
-        } yield ()
-
-      } else {
-        for {
+      for {
         // ref - ref
-          List(a1, b1, c1, a2, b2, c2) <- A.i.B.i._A.C.i.insert(
-            (1, 2, 3),
-            (4, 5, 6),
-          ).i.transact.map(_.ids)
+        List(a1, a2) <- A.i.B.i._A.C.i.insert(
+          (1, 2, 3),
+          (4, 5, 6),
+        ).transact.map(_.ids)
 
-          _ <- A.id.i.a1.B.id.i._A.C.id.i.query.get.map(_ ==> List(
-            (a1, 1, b1, 2, c1, 3),
-            (a2, 4, b2, 5, c2, 6),
-          ))
+        _ <- A.id(a1, a2).i.a1.B.i._A.C.i.query.get.map(_ ==> List(
+          (a1, 1, 2, 3),
+          (a2, 4, 5, 6),
+        ))
 
-          // ref - own
-          List(a1, b1, c1, a2, b2, c2) <- A.i.B.i._A.OwnC.i.insert(
-            (1, 2, 3),
-            (4, 5, 6),
-          ).i.transact.map(_.ids)
+        // ref - own
+        List(a1, a2) <- A.i.B.i._A.OwnC.i.insert(
+          (1, 2, 3),
+          (4, 5, 6),
+        ).i.transact.map(_.ids)
 
-          _ <- A.id.i.a1.B.id.i._A.OwnC.id.i.query.get.map(_ ==> List(
-            (a1, 1, b1, 2, c1, 3),
-            (a2, 4, b2, 5, c2, 6),
-          ))
+        _ <- A.id.i.a1.B.i._A.OwnC.i.query.get.map(_ ==> List(
+          (a1, 1, 2, 3),
+          (a2, 4, 5, 6),
+        ))
 
-          // own - ref
-          List(a1, b1, c1, a2, b2, c2) <- A.i.OwnB.i._A.C.i.insert(
-            (1, 2, 3),
-            (4, 5, 6),
-          ).i.transact.map(_.ids)
+        // own - ref
+        List(a1, a2) <- A.i.OwnB.i._A.C.i.insert(
+          (1, 2, 3),
+          (4, 5, 6),
+        ).i.transact.map(_.ids)
 
-          _ <- A.id.i.a1.OwnB.id.i._A.C.id.i.query.get.map(_ ==> List(
-            (a1, 1, b1, 2, c1, 3),
-            (a2, 4, b2, 5, c2, 6),
-          ))
+        _ <- A.id.i.a1.OwnB.i._A.C.i.query.get.map(_ ==> List(
+          (a1, 1, 2, 3),
+          (a2, 4, 5, 6),
+        ))
 
-          // own - own
-          List(a1, b1, c1, a2, b2, c2) <- A.i.OwnB.i._A.OwnC.i.insert(
-            (1, 2, 3),
-            (4, 5, 6),
-          ).i.transact.map(_.ids)
+        // own - own
+        List(a1, a2) <- A.i.OwnB.i._A.OwnC.i.insert(
+          (1, 2, 3),
+          (4, 5, 6),
+        ).i.transact.map(_.ids)
 
-          _ <- A.id.i.a1.OwnB.id.i._A.OwnC.id.i.query.get.map(_ ==> List(
-            (a1, 1, b1, 2, c1, 3),
-            (a2, 4, b2, 5, c2, 6),
-          ))
-        } yield ()
-      }
+        _ <- A.id.i.a1.OwnB.i._A.OwnC.i.query.get.map(_ ==> List(
+          (a1, 1, 2, 3),
+          (a2, 4, 5, 6),
+        ))
+      } yield ()
     }
 
     "ids, nested" - refs { implicit conn =>
@@ -540,13 +518,13 @@ trait InsertRefs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     "ids, nested + ref" - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
-        // 2 A entity ids returned (no BB or nested C refs)
+        // Ids of first namespace entities returned
         List(a1, a2) <- A.i.Bb.*(B.i.C.i).insert(
           (1, List((1, 2), (3, 4))),
           (2, Nil),
         ).i.transact.map(_.ids)
 
-        _ <- A.id.i.a1.Bb.*?(B.i.a1.C.i).query.get.map(_ ==> List(
+        _ <- A.id(a1, a2).i.a1.Bb.*?(B.i.a1.C.i).query.get.map(_ ==> List(
           (a1, 1, List((1, 2), (3, 4))),
           (a2, 2, Nil),
         ))
@@ -556,15 +534,15 @@ trait InsertRefs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     "ids, ref + nested + ref " - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
-        // 2 A and 2 B entity ids returned (no BB or nested C refs)
-        List(a1, b1, a2, b2) <- A.i.B.i.Cc.*(C.i.D.i).insert(
+        // Ids of first namespace entities returned
+        List(a1, a2) <- A.i.B.i.Cc.*(C.i.D.i).insert(
           (1, 10, List((1, 2), (3, 4))),
           (2, 20, Nil),
         ).transact.map(_.ids)
 
-        _ <- A.id.i.a1.B.id.i.Cc.*?(C.i.a1.D.i).query.get.map(_ ==> List(
-          (a1, 1, b1, 10, List((1, 2), (3, 4))),
-          (a2, 2, b2, 20, Nil),
+        _ <- A.id(a1, a2).i.a1.B.i.Cc.*?(C.i.a1.D.i).query.get.map(_ ==> List(
+          (a1, 1, 10, List((1, 2), (3, 4))),
+          (a2, 2, 20, Nil),
         ))
       } yield ()
     }
@@ -572,15 +550,15 @@ trait InsertRefs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     "ids, self-join + nested + ref " - refs { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
-        // 2 A and 2 A self-join entity ids returned (no BB or nested C refs)
-        List(a1, a_1, a2, a_2) <- A.i.A.i.Cc.*(C.i.D.i).insert(
+        // Ids of first namespace entities returned
+        List(a1, a2) <- A.i.A.i.Cc.*(C.i.D.i).insert(
           (1, 10, List((1, 2), (3, 4))),
           (2, 20, Nil),
         ).transact.map(_.ids)
 
-        _ <- A.id.i.a1.A.id.i.Cc.*?(C.i.a1.D.i).query.get.map(_ ==> List(
-          (a1, 1, a_1, 10, List((1, 2), (3, 4))),
-          (a2, 2, a_2, 20, Nil),
+        _ <- A.id(a1, a2).i.a1.A.i.Cc.*?(C.i.a1.D.i).query.get.map(_ ==> List(
+          (a1, 1, 10, List((1, 2), (3, 4))),
+          (a2, 2, 20, Nil),
         ))
       } yield ()
     }

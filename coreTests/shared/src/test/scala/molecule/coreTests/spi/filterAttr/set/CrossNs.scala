@@ -20,7 +20,7 @@ trait CrossNs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "equal (apply) - Sets that match other Sets" - refs { implicit conn =>
       for {
-        List(a1,_, a2,_, a3,_) <- A.i.ii.B.ii.i.insert(a, b, c).transact.map(_.ids)
+        List(_, a2, a3) <- A.i.ii.B.ii.i.insert(a, b, c).transact.map(_.ids)
 
         _ <- A.i.ii_(B.ii_).B.ii.query.get.map(_ ==> List(
           (2, Set(2, 3, 4)) // Set(2, 3) and Set(4) are coalesced to one Set

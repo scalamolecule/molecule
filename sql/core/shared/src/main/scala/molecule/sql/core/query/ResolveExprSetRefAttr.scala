@@ -61,7 +61,7 @@ trait ResolveExprSetRefAttr extends ResolveExpr with LambdasSet { self: SqlQuery
 
   protected def refMan[T: ClassTag](attr: Attr, args: Seq[Set[T]], res: ResSet[T]): Unit = {
     select += s"ARRAY_AGG($joinTable.$ref_id) $refIds"
-    joins += (("INNER JOIN", joinTable, "", s"$nsId = $joinTable.$ns_id"))
+    joins += (("INNER JOIN", joinTable, "", s"$nsId", s"= $joinTable.$ns_id"))
     groupBy += nsId
     addCast(res.sql2set)
 
@@ -78,7 +78,7 @@ trait ResolveExprSetRefAttr extends ResolveExpr with LambdasSet { self: SqlQuery
 
   protected def refTac[T: ClassTag](attr: Attr, args: Seq[Set[T]], res: ResSet[T]): Unit = {
     val col = getCol(attr: Attr)
-    joins += (("INNER JOIN", joinTable, "", s"$nsId = $joinTable.$ns_id"))
+    joins += (("INNER JOIN", joinTable, "", s"$nsId", s"= $joinTable.$ns_id"))
     groupBy += nsId
     attr.filterAttr.fold {
       refExpr(col, attr.op, args, res)
@@ -96,7 +96,7 @@ trait ResolveExprSetRefAttr extends ResolveExpr with LambdasSet { self: SqlQuery
   ): Unit = {
     val col = getCol(attr: Attr)
     select += s"ARRAY_AGG($joinTable.$ref_id) $refIds"
-    joins += (("LEFT JOIN", joinTable, "", s"$nsId = $joinTable.$ns_id"))
+    joins += (("LEFT JOIN", joinTable, "", s"$nsId", s"= $joinTable.$ns_id"))
     groupBy += nsId
     addCast(resOpt.sql2setOpt)
     attr.op match {

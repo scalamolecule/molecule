@@ -23,17 +23,13 @@ trait Save_mongodb
 
     resolve(elements)
 
-    if (!refIds.isEmpty) {
-      refIdss.add(refIds)
-    }
-    val data = new BsonDocument()
-      .append("_action", new BsonString("insert"))
-      .append("_selfJoins", new BsonInt32(selfJoins))
-      .append("_refIdss", refIdss)
-
-    // Loop referenced namespaces
-    nsDocs.foreach { case (ns, nsData) =>
-      data.append(ns, nsData)
+    val data = new BsonDocument("_action", new BsonString("insert"))
+    if (!nsDocs.head._2.isEmpty) {
+      data.append("_selfJoins", new BsonInt32(selfJoins))
+      // Loop referenced namespaces
+      nsDocs.foreach { case (ns, nsData) =>
+        data.append(ns, nsData)
+      }
     }
     data
   }
@@ -97,10 +93,11 @@ trait Save_mongodb
       if (initialNs == refNs) {
         // Count top level self joins for correct id insertions in MongoConn_JVM.insertReferenced
         selfJoins += 1
-      } else {
-        // Add top level ref id if not a self-join
-        refIds.add(refId)
       }
+//      else {
+//        // Add top level ref id if not a self-join
+//        refIds.add(refId)
+//      }
 
       //      refIds.add(refId)
       val ref = card match {

@@ -40,15 +40,23 @@ case class MongoConn_JVM(
     //    println(data.toJson(pretty))
     //    println("")
     data.get("_action").asString.getValue match {
+//      case "save" => data.size match {
+//        case 2 => insertEmbedded(data)
+//        case _ => insertReferenced(data)
+//      }
+
       case "insert" => data.size match {
+        case 1 => TxReport(Nil)
         case 2 => insertEmbedded(data)
         case _ => insertReferenced(data)
       }
+
       case "update" =>
         if (data.size > 1) {
           // Only update if there are any collections/namespaces to update
           update(data)
         } else TxReport(Nil)
+
       case "delete" => data.size match {
         case 3 => delete(data)
         case 2 =>
@@ -70,22 +78,11 @@ case class MongoConn_JVM(
         override def execute: TxReport = {
           val ids        = ListBuffer.empty[String]
           val selfJoins  = data.get("_selfJoins").asInt32.getValue
-          val refIdss    = data.get("_refIdss").asArray
-          val addRefIds  = if (refIdss.isEmpty) {
-            (_: Unit) => ()
-          } else {
-            val it = refIdss.iterator
-            (_: Unit) =>
-              it.next.asArray.forEach(bsonId =>
-                ids += bsonId.asObjectId.getValue.toHexString
-              )
-
-          }
           var firstNs    = true
           val firstNsIds = ListBuffer.empty[String]
           data.forEach {
-            case ("_action" | "_selfJoins" | "_refIdss", _) => () // do nothing
-            case (ns, nsData)                               =>
+            case ("_action" | "_selfJoins", _) => () // do nothing
+            case (ns, nsData)                  =>
               val documents    = nsData.asArray.getValues.asInstanceOf[util.List[BsonDocument]]
               val collection   = mongoDb.getCollection(ns, classOf[BsonDocument])
               val insertResult = collection.insertMany(clientSession, documents)
@@ -100,15 +97,18 @@ case class MongoConn_JVM(
               }
           }
 
-          var i = selfJoins
-          firstNsIds.foreach { id =>
-            ids += id
-            if (i == 0) {
-              addRefIds()
-              i = selfJoins
-            } else {
-              // Add multiple self-joined rows before adding refs
-              i -= 1
+          if (selfJoins == 0) {
+            firstNsIds.foreach { id => ids += id }
+          } else {
+            var i = selfJoins
+            firstNsIds.foreach { id =>
+              if (i == selfJoins) {
+                ids += id
+                i -= 1
+              } else {
+                // Ignore ids of self-joined entities
+                i = selfJoins
+              }
             }
           }
           TxReport(ids.toList)
@@ -127,6 +127,7 @@ case class MongoConn_JVM(
 
   private def insertEmbedded(data: Data): TxReport = {
     val insertedIds = ListBuffer.empty[String]
+    var first       = true
     data.forEach {
       case ("_action", _) => () // do nothing
       case (ns, rawRows)  =>
@@ -134,8 +135,11 @@ case class MongoConn_JVM(
         val collection   = mongoDb.getCollection(ns, classOf[BsonDocument])
         val insertResult = collection.insertMany(documents)
         val idsMap       = insertResult.getInsertedIds
-        idsMap.forEach {
-          case (k, v) => insertedIds.addOne(v.asObjectId().getValue.toHexString)
+        if (first) {
+          idsMap.forEach {
+            case (k, v) => insertedIds.addOne(v.asObjectId().getValue.toHexString)
+          }
+          first = false
         }
     }
     TxReport(insertedIds.toList)

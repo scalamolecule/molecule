@@ -192,6 +192,7 @@ trait Insert_datomic
   ): Product => Unit = {
     // Recursively resolve nested data
     val nested2stmts = getResolver(nsMap, nestedElements)
+    val lastIsSet    = nestedElements.last.isInstanceOf[AttrSet]
     countValueAttrs(nestedElements) match {
       case 1 => // Nested arity-1 values
         (tpl: Product) => {
@@ -205,6 +206,24 @@ trait Insert_datomic
             nested2stmts(nestedTpl)
           }
         }
+
+      // Exclude tuples with empty last Set
+      // (to avoid orphan relationships)
+      case _ if lastIsSet =>
+        val lastTplIndex = nestedElements.collect { case _: Attr => 1 }.sum - 1
+        (tpl: Product) => {
+          val nestedTpls   = tpl.productElement(tplIndex).asInstanceOf[Seq[Product]]
+          val nestedBaseId = e
+          nestedTpls.foreach { nestedTpl =>
+            if (nestedTpl.productElement(lastTplIndex).asInstanceOf[Set[_]].nonEmpty) {
+              e = nestedBaseId
+              addRef(ns, refAttr, refNs, CardOne, owner)(nestedTpl)
+              e0 = e
+              nested2stmts(nestedTpl)
+            }
+          }
+        }
+
       case _ =>
         (tpl: Product) => {
           val nestedTpls   = tpl.productElement(tplIndex).asInstanceOf[Seq[Product]]

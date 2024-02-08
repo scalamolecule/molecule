@@ -33,7 +33,7 @@ trait SqlQueryBase extends Model2QueryBase with BaseHelpers with JavaConversions
   final protected val select      = new ListBuffer[String]
   final protected var distinct    = true
   final protected var from        = ""
-  final protected val joins       = new ListBuffer[(String, String, String, String)]
+  final protected val joins       = new ListBuffer[(String, String, String, String, String)]
   final protected val tempTables  = ListBuffer.empty[String]
   final protected val notNull     = new ListBuffer[String]
   final protected val where       = new ListBuffer[(String, String)]

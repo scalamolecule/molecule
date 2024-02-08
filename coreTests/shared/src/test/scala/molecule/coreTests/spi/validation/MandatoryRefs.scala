@@ -113,7 +113,7 @@ trait MandatoryRefs extends CoreTestSuite with ApiAsync with SerializationUtils 
 
     "Update, delete ref attr" - validation { implicit conn =>
       for {
-        List(id, _) <- MandatoryRefB.i(1).RefB.i(2).save.transact.map(_.ids)
+        id <- MandatoryRefB.i(1).RefB.i(2).save.transact.map(_.id)
 
         _ <- MandatoryRefB(id).refB().update.transact
           .map(_ ==> "Unexpected success").recover {
@@ -158,7 +158,9 @@ trait MandatoryRefs extends CoreTestSuite with ApiAsync with SerializationUtils 
     "Deleting mandatory ref" - validation { implicit conn =>
       if (database == "Datomic") {
         for {
-          List(e1, r1) <- MandatoryRefB.i(1).RefB.i(1).save.transact.map(_.ids)
+          List(e1) <- MandatoryRefB.i(1).RefB.i(1).save.transact.map(_.ids)
+
+          List(r1) <- MandatoryRefB(e1).refB.query.get
 
           // Can't delete r1 since MandatoryRefB.refB is referencing it and is mandatory
           _ <- RefB(r1).delete.transact

@@ -65,54 +65,6 @@ trait FlatRefs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     }
 
 
-    "ids with ref attributes" - refs { implicit conn =>
-      for {
-        // Card one ref attr
-        List(a, e1) <- A.i.B.i.insert(1, 2).transact.map(_.ids)
-        _ <- A.i.b.query.get.map(_ ==> List((1, e1)))
-
-        // Card many ref attr (returned as Set)
-        List(_, e2) <- A.i.Bb.i.insert(1, 2).transact.map(_.ids)
-        _ <- A.i.bb.query.get.map(_ ==> List((1, Set(e2))))
-      } yield ()
-    }
-
-
-    "ids with owned ref attributes" - refs { implicit conn =>
-      if (database == "MongoDB") {
-        // Can't query for non-existing ids of embedded documents in MongoDB
-        for {
-          // Card one ref attr
-          _ <- A.i.ownB.query.get
-            .map(_ ==> "Unexpected success")
-            .recover { case ModelError(err) =>
-              err ==> "Can't query for non-existing ids of embedded documents in MongoDB."
-            }
-
-          // Card many ref attr
-          _ <- A.i.ownBb.query.get
-            .map(_ ==> "Unexpected success")
-            .recover { case ModelError(err) =>
-              err ==> "Can't query for non-existing set of ids of embedded documents in MongoDB."
-            }
-        } yield ()
-
-      } else {
-
-        // Other databases
-        for {
-          // Card one ref attr
-          List(_, e1) <- A.i.B.i.insert(1, 2).transact.map(_.ids)
-          _ <- A.i.b.query.get.map(_ ==> List((1, e1)))
-
-          // Card many ref attr (returned as Set)
-          List(_, e2) <- A.i.Bb.i.insert(1, 2).transact.map(_.ids)
-          _ <- A.i.bb.query.get.map(_ ==> List((1, Set(e2))))
-        } yield ()
-      }
-    }
-
-
     "multiple card-many refs" - refs { implicit conn =>
       // Can't query for non-existing ids of embedded documents in MongoDB
       if (database != "MongoDB") {

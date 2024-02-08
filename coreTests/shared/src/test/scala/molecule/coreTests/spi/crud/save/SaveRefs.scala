@@ -292,83 +292,34 @@ trait SaveRefs extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
     "ids, ref" - refs { implicit conn =>
       for {
         // Card one
-        List(a1, b1) <- A.i(1).B.i(2).save.transact.map(_.ids)
+        List(a1) <- A.i(1).B.i(2).save.i.transact.map(_.ids)
 
         _ <- A(a1).i.query.get.map(_ ==> List(1))
+
+        // Ref ids
+        List(b1) <- A(a1).b.query.get
+
         _ <- B(b1).i.query.get.map(_ ==> List(2))
 
         _ <- A.id.i.b.query.get.map(_ ==> List(
           (a1, 1, b1),
         ))
 
+
         // Card Set
-        List(a1, b1) <- A.i(1).Bb.i(2).save.transact.map(_.ids)
+        List(a1) <- A.i(1).Bb.i(2).save.transact.map(_.ids)
 
         _ <- A(a1).i.query.get.map(_ ==> List(1))
+
+        // Getting head of each Set ref ids (card-set)
+        List(b1) <- A(a1).bb.query.get.map(_.map(_.head))
+
         _ <- B(b1).i.query.get.map(_ ==> List(2))
 
         _ <- A.id.i.bb.query.get.map(_ ==> List(
           (a1, 1, Set(b1)),
         ))
       } yield ()
-    }
-
-
-    "ids, owned ref" - refs { implicit conn =>
-      if (database == "MongoDB") {
-        // Can't query for non-existing ids of embedded documents in MongoDB
-        for {
-          // Card one
-          List(a1) <- A.i(1).OwnB.i(2).save.transact.map(_.ids)
-
-          _ <- A(a1).i.query.get.map(_ ==> List(1))
-
-          // Can't query for non-existing ownB id
-          //_ <- A.id.i.ownB.query
-
-          _ <- A.id.i.OwnB.i.query.get.map(_ ==> List(
-            (a1, 1, 2),
-          ))
-
-
-          // Card Set
-          List(a1) <- A.i(1).OwnBb.i(2).save.transact.map(_.ids)
-
-          _ <- A(a1).i.query.get.map(_ ==> List(1))
-
-          // Can't query for non-existing ownBb id
-          //_ <- A.id.i.ownBb.query
-
-          _ <- A.id.i.OwnBb.i.query.get.map(_ ==> List(
-            (a1, 1, 2),
-          ))
-        } yield ()
-
-      } else {
-
-        // Other databases
-        for {
-          // Card one
-          List(a1, b1) <- A.i(1).OwnB.i(2).save.transact.map(_.ids)
-
-          _ <- A(a1).i.query.get.map(_ ==> List(1))
-          _ <- B(b1).i.query.get.map(_ ==> List(2))
-
-          _ <- A.id.i.ownB.query.get.map(_ ==> List(
-            (a1, 1, b1),
-          ))
-
-          // Card Set
-          List(a1, b1) <- A.i(1).OwnBb.i(2).save.transact.map(_.ids)
-
-          _ <- A(a1).i.query.get.map(_ ==> List(1))
-          _ <- B(b1).i.query.get.map(_ ==> List(2))
-
-          _ <- A.id.i.ownBb.query.get.map(_ ==> List(
-            (a1, 1, Set(b1)),
-          ))
-        } yield ()
-      }
     }
   }
 }

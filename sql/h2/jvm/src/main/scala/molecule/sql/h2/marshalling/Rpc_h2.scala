@@ -143,12 +143,14 @@ object Rpc_h2
   private def refUpdates(
     elements: List[Element],
     isUpsert: Boolean = false
-  )(implicit conn: JdbcConn_JVM, ec: EC): Future[() => Map[List[String], List[Long]]] = {
+//  )(implicit conn: JdbcConn_JVM, ec: EC): Future[() => Map[List[String], List[Long]]] = {
+  )(implicit conn: JdbcConn_JVM, ec: EC): Future[() => List[Long]] = {
     val (idQuery, updateModels) = getIdQuery(elements, isUpsert)
     idQuery.get.map { refIdsResult =>
       val refIds: List[Long] = getRefIds(refIdsResult)
       () => {
-        val refIdMaps = refIds.zipWithIndex.map {
+//        val refIdMaps = refIds.zipWithIndex.map {
+        val ids = refIds.zipWithIndex.map {
           case (refId: Long, i) =>
             val updateModel = updateModels(i)(refId)
             val data        = new ResolveUpdate(conn.proxy, isUpsert) with Update_h2 {
@@ -157,7 +159,8 @@ object Rpc_h2
             conn.populateStmts(data)
         }
         // Return TxReport with initial update ids
-        refIdMaps.head
+//        refIdMaps.head
+        ids.head
       }
     }
   }

@@ -37,10 +37,12 @@ class NestedEmbed(
 ) {
 
   override def getStages: util.ArrayList[BsonDocument] = {
+    //    println(s"----- 4 -----  $refAttr  $sorts")
+
     addMatches()
     subBranches.foreach(ref => stages.addAll(ref.getStages))
 
-//    group(stages)
+    //    group(stages)
 
     if (parent.isEmpty) {
       addStage("$project", projection)
@@ -54,9 +56,9 @@ class NestedEmbed(
 
   override def toString = render(0)
   override def render(tabs: Int): String = {
-    val p       = "  " * tabs
-    val parent1 = parent.fold("None")(parent => s"Some(${parent.refAttr})")
-    val children = if(subBranches.isEmpty)"" else
+    val p        = "  " * tabs
+    val parent1  = parent.fold("None")(parent => s"Some(${parent.refAttr})")
+    val children = if (subBranches.isEmpty) "" else
       s"\n$p  " + subBranches.map(ref => ref.render(tabs + 1)).mkString(s",\n$p  ")
     s"""NestedEmbed($level, $parent1, $cardMany,
        |${p}  $ns, $refAttr, $refNs, $pathFields, $dot, $und, $path, $alias,

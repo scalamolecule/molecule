@@ -71,7 +71,7 @@ trait NestOpt[Tpl] { self: Model2QueryBase
 
 
   final def rows2nestedOpt(rows: Row): List[Tpl] = {
-    nestedLevels match {
+    val result = nestedLevels match {
       case 1 => rows2nested1(rows)
       case 2 => rows2nested2(rows)
       case 3 => rows2nested3(rows)
@@ -80,20 +80,33 @@ trait NestOpt[Tpl] { self: Model2QueryBase
       case 6 => rows2nested6(rows)
       case 7 => rows2nested7(rows)
     }
+    // Exclude empty rows with no nested
+    result.filterNot(_ == Nil)
   }
 
   final private def flatten(list: List[Any]): List[Any] = {
     list.flatMap {
-      case null         => None
-      case Some(v)      => Some(Some(v))
-      case None         => None
+      case null                       => None
+      case set: Set[_] if set.isEmpty => None
+      case Some(v)                    => Some(Some(v))
+      case None                       => None
+
       case tpl: Product =>
-        if ((0 until tpl.productArity).forall(i =>
-          tpl.productElement(i) == null
-            || tpl.productElement(i) == None
-            || tpl.productElement(i) == Nil // empty nested
-        )) None else Some(tpl)
-      case v            => Some(v)
+        var hasEmptySet = false
+        val allEmpty    = (0 until tpl.productArity).foldLeft(true) {
+          case (_, i) =>
+            val el = tpl.productElement(i)
+            el match {
+              case set: Set[_] if set.isEmpty => hasEmptySet = true; true
+              case None                       => true
+              case Nil                        => true
+              case null                       => true
+              case _                          => false
+            }
+        }
+        if (allEmpty || hasEmptySet) None else Some(tpl)
+
+      case v => Some(v)
     }
   }
 

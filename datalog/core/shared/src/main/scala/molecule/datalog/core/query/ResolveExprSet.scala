@@ -254,6 +254,7 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
         where += s"[($refAttr $v2) $v3]" -> wClause
         where += s"[(first $v3) $v4]" -> wClause
         where += s"[($a $v4) $v5]" -> wClause
+        where += s"[(not-empty $v5)]" -> wClause
       }
     }
     replaceCast(resOpt.optAttr2s)

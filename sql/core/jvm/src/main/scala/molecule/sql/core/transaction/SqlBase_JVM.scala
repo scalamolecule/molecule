@@ -21,7 +21,7 @@ trait SqlBase_JVM extends SqlDataType_JVM with ModelUtils with BaseHelpers {
   override def indent(level: Int) = "  " * level
   protected def debug(s: Any) = if (doPrint) println(s) else ()
 
-  protected var doPrint              = false
+  protected var doPrint              = true
   protected var initialNs            = ""
   protected var curRefPath           = List("0")
   protected var inserts              = List.empty[(List[String], List[(String, String)])]
@@ -75,7 +75,9 @@ trait SqlBase_JVM extends SqlDataType_JVM with ModelUtils with BaseHelpers {
     Future(JdbcHandler_JVM.recreateDb(proxy.asInstanceOf[JdbcProxy]))
   }
 
-  protected def getRefResolver[T](ns: String, refAttr: String, refNs: String, card: Card): T => Unit = {
+  protected def getRefResolver[T](
+    ns: String, refAttr: String, refNs: String, card: Card
+  ): T => Unit = {
     val joinTable = ss(ns, refAttr, refNs)
     val curPath   = curRefPath
 
@@ -103,12 +105,14 @@ trait SqlBase_JVM extends SqlDataType_JVM with ModelUtils with BaseHelpers {
     lazy val joinPath = curPath :+ joinTable
 
     if (card == CardSet) {
-      // join table with single row (treated as normal insert since there's only 1 join per row)
+      // join table with single row (treated as normal insert
+      // since there's only 1 join per row)
       val (id1, id2) = if (ns == refNs)
         (ss(ns, "1_id"), ss(refNs, "2_id"))
       else
         (ss(ns, "id"), ss(refNs, "id"))
-      // When insertion order is reversed, this join table will be set after left and right has been inserted
+      // When insertion order is reversed, this join table will be set
+      // after left and right has been inserted
       inserts = (joinPath, List((id1, ""), (id2, ""))) +: inserts
     }
 
@@ -117,13 +121,22 @@ trait SqlBase_JVM extends SqlDataType_JVM with ModelUtils with BaseHelpers {
     curRefPath = refPath
     inserts = inserts :+ (refPath, Nil)
 
+
     if (card == CardOne) {
       // Card-one ref setter
       val paramIndex = paramIndexes(curPath, refAttr)
+      var rowIndex   = 0
       (_: T) => {
-        val colSetter: Setter = (ps: PS, idsMap: IdsMap, rowIndex: RowIndex) => {
-          val refId = idsMap(refPath)(rowIndex)
-          ps.setLong(paramIndex, refId)
+        //        println("++++++++++++ " + tpl)
+        val colSetter: Setter = {
+          (ps: PS, idsMap: IdsMap, _: RowIndex) => {
+            //            val refId = idsMap(refPath)(rowIndex)
+            val refId = idsMap(refPath)(rowIndex)
+
+            //            println(s"   #########################  $rowIndex  $refId  $refPath   $rowIndex")
+            rowIndex += 1
+            ps.setLong(paramIndex, refId)
+          }
         }
         addColSetter(curPath, colSetter)
       }

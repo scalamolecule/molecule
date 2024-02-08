@@ -41,7 +41,7 @@ trait Insert_mongodb
     var nsData = new BsonArray()
     tpls.foreach { tpl =>
       level = 0
-      refIds = new BsonArray()
+      //      refIds = new BsonArray()
       doc = new BsonDocument()
       docs = List(List(doc))
       nsData = new BsonArray()
@@ -52,10 +52,6 @@ trait Insert_mongodb
       // Convert tpl to bson
       tpl2bson(tpl)
 
-      if (!refIds.isEmpty) {
-        refIdss.add(refIds)
-      }
-
       // Add docs in namespaces
       nsDocs.foreach { case (ns, nsData) =>
         nssDocs(ns).addAll(nsData)
@@ -63,15 +59,14 @@ trait Insert_mongodb
       first = false
     }
 
-    val data = new BsonDocument()
-      .append("_action", new BsonString("insert"))
-      .append("_selfJoins", new BsonInt32(selfJoins))
-      .append("_refIdss", refIdss)
-
-    nssDocs.collect {
-      case (ns, nsDocs: BsonArray) if !nsDocs.isEmpty => data.append(ns, nsDocs)
+    val data = new BsonDocument("_action", new BsonString("insert"))
+    if (!nssDocs.head._2.isEmpty) {
+      data.append("_selfJoins", new BsonInt32(selfJoins))
+      // Loop referenced namespaces
+      nssDocs.collect {
+        case (ns, nsDocs: BsonArray) if !nsDocs.isEmpty => data.append(ns, nsDocs)
+      }
     }
-
     data
   }
 
@@ -182,11 +177,11 @@ trait Insert_mongodb
       (_: Product) => {
         // Reference document
         val refId = new BsonObjectId()
-        if (level == 0 && initialNs != refNs) {
-          // Add top level ref id if not a self-join
-          refIds.add(refId)
-        }
-        val ref = card match {
+        //        if (level == 0 && initialNs != refNs) {
+        //          // Add top level ref id if not a self-join
+        //          refIds.add(refId)
+        //        }
+        val ref   = card match {
           case CardOne => refId
           case _       =>
             val array = new BsonArray

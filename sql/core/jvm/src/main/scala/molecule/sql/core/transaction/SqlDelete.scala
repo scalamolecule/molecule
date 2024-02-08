@@ -52,7 +52,7 @@ trait SqlDelete
       }.toList
 
     // Recursively delete owned entities
-    val ownedTables = deleteOwned(refPath, nsMap, Seq(nsMap(ns)), Nil, ids)
+    val ownedTables = deleteOwned(refPath, nsMap, Seq(nsMap(ns)), Set.empty[String], Nil, ids)
 
     val table: Table = prepareTable(refPath, ns, s"$ns.id", ids)
     ((table +: joinTables) ++ ownedTables, Nil)
@@ -91,16 +91,18 @@ trait SqlDelete
   private def deleteOwned(
     refPath: List[String],
     nsMap: Map[String, MetaNs],
-    metaNs: Seq[MetaNs],
+    metaNss: Seq[MetaNs],
+    processedNss: Set[String],
     ownedTables: Seq[Table],
     nsIds: Seq[Long],
   ): Seq[Table] = {
-    metaNs match {
+    metaNss match {
       case Nil              => ownedTables
       case metaNs :: nsTail =>
-        val ns = metaNs.ns
+        val ns            = metaNs.ns
+        val processedNss1 = processedNss + ns
         metaNs.attrs match {
-          case Nil => deleteOwned(refPath, nsMap, nsTail, ownedTables, nsIds)
+          case Nil => deleteOwned(refPath, nsMap, nsTail, processedNss1, ownedTables, nsIds)
 
           case metaAttr :: attrTail if metaAttr.options.contains("owner") =>
             val refNs     = metaAttr.refNs.get
@@ -110,61 +112,94 @@ trait SqlDelete
             metaAttr.card match {
               case _: CardOne =>
                 val refIds       = if (nsIds.isEmpty) Nil else {
-                  val stmt      =
+                  val stmt =
                     s"""SELECT $refNs.id
                        |FROM $refNs
-                       |INNER JOIN $ns on $ns.$refAttr = $refNs.id
-                       |WHERE $ns.id in (${nsIds.mkString(", ")})
+                       |INNER JOIN $ns AS _ns on _ns.$refAttr = $refNs.id
+                       |WHERE _ns.id in (${nsIds.mkString(", ")})
                        |""".stripMargin
+
+
                   val resultSet = sqlConn.createStatement().executeQuery(stmt)
                   var refIds    = List.empty[Long]
                   while (resultSet.next()) {
                     refIds = refIds :+ resultSet.getLong(1)
                   }
+                  //                  println("------------ 1  " + metaNss.map(_.ns))
+                  //                  print(stmt)
+                  //                  println(refIds)
+                  //                  println("")
                   refIds
                 }
-                val ownedTables1 = if (refIds.nonEmpty) Seq(prepareTable(refPath, refNs, "id", refIds)) else Nil
+                val ownedTables1 = if (refIds.nonEmpty)
+                  Seq(prepareTable(refPath, refNs, "id", refIds))
+                else
+                  Nil
+
+
+                val x = if (processedNss1.contains(refNs)) {
+                  List.empty[MetaNs]
+                } else {
+                  List.empty[MetaNs]
+                }
+
+                val nsToCheck: Seq[MetaNs] = (MetaNs(ns, attrTail) +: nsTail) ++ (
+                  if (processedNss1.contains(refNs)) Nil else List(refMetaNs))
+
                 deleteOwned(
                   refPath,
                   nsMap,
-                  MetaNs(ns, attrTail) +: refMetaNs +: nsTail,
+                  nsToCheck,
+                  processedNss1,
                   ownedTables ++ ownedTables1,
                   nsIds
                 )
 
               case _: CardSet =>
-                val joinTable    = ss(ns, metaAttr.attr, refNs)
-                val refNs_id     = ss(refNs, "id")
-                val ns_id        = ss(ns, "id")
-                val refIds       = if (nsIds.isEmpty) Nil else {
+                val joinTable         = ss(ns, metaAttr.attr, refNs)
+                val (ns_id, refNs_id) = if (ns == refNs) {
+                  (ss(ns, "1_id"), ss(refNs, "2_id"))
+                } else {
+                  (ss(ns, "id"), ss(refNs, "id"))
+                }
+                val refIds            = if (nsIds.isEmpty) Nil else {
                   val stmt      =
                     s"""SELECT $joinTable.$refNs_id
                        |FROM $joinTable
-                       |INNER JOIN $ns on $ns.id = $joinTable.$ns_id
-                       |WHERE $ns.id in (${nsIds.mkString(", ")})
+                       |INNER JOIN $ns AS _ns on _ns.id = $joinTable.$ns_id
+                       |WHERE _ns.id in (${nsIds.mkString(", ")})
                        |""".stripMargin
                   val resultSet = sqlConn.createStatement().executeQuery(stmt)
                   var refIds    = List.empty[Long]
                   while (resultSet.next()) {
                     refIds = refIds :+ resultSet.getLong(1)
                   }
+                  //                  println("------------ 2 ------------  " + metaNss.map(_.ns))
+                  //                  print(stmt)
+                  //                  println(refIds)
+                  //                  println("")
                   refIds
                 }
-                val ownedTables1 = if (refIds.isEmpty) Nil else {
+                val ownedTables1      = if (refIds.isEmpty) Nil else {
                   Seq(
                     prepareTable(refPath, joinTable, ss(ns, "id"), nsIds),
                     prepareTable(refPath, refNs, "id", refIds)
                   )
                 }
+
+                val nsToCheck: Seq[MetaNs] = (MetaNs(ns, attrTail) +: nsTail) ++ (
+                  if (processedNss1.contains(refNs)) Nil else List(refMetaNs))
+
                 deleteOwned(
                   refPath,
                   nsMap,
-                  MetaNs(ns, attrTail) +: refMetaNs +: nsTail,
+                  nsToCheck,
+                  processedNss1,
                   ownedTables ++ ownedTables1,
                   nsIds)
             }
 
-          case _ :: tail => deleteOwned(refPath, nsMap, List(MetaNs(ns, tail)), ownedTables, nsIds)
+          case _ :: tail => deleteOwned(refPath, nsMap, List(MetaNs(ns, tail)), processedNss1, ownedTables, nsIds)
         }
     }
   }

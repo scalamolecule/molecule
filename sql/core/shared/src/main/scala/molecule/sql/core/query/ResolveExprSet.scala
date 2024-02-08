@@ -173,7 +173,8 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
     groupByCols += col // if we later need to group by non-aggregated columns
     addCast(resOpt.sql2setOpt)
     attr.op match {
-      case V     => setOptAttr(col, res)
+      //      case V     => setOptAttr(col, res)
+      case V     => ()
       case Eq    => setOptEqual(col, optSets, res)
       case Neq   => setOptNeq(col, optSets, res)
       case Has   => optHas(col, optSets, res, resOpt.one2sql)
@@ -490,7 +491,7 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
         replaceCast(
           (row: Row, paramIndex: Int) => {
             val outerArrayResultSet = row.getArray(paramIndex).getResultSet
-            val list                 = ListBuffer.empty[Double]
+            val list                = ListBuffer.empty[Double]
             while (outerArrayResultSet.next()) {
               val array = outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]]
               array.foreach(v => list += v.toString.toDouble) // not the most efficient...
@@ -506,7 +507,7 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
         replaceCast(
           (row: Row, paramIndex: Int) => {
             val outerArrayResultSet = row.getArray(paramIndex).getResultSet
-            val list                 = ListBuffer.empty[Double]
+            val list                = ListBuffer.empty[Double]
             while (outerArrayResultSet.next()) {
               val array = outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]]
               array.foreach(v => list += v.toString.toDouble) // not the most efficient...
@@ -522,7 +523,7 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
         replaceCast(
           (row: Row, paramIndex: Int) => {
             val outerArrayResultSet = row.getArray(paramIndex).getResultSet
-            val list                 = ListBuffer.empty[Double]
+            val list                = ListBuffer.empty[Double]
             while (outerArrayResultSet.next()) {
               val array = outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]]
               array.foreach(v => list += v.toString.toDouble) // not the most efficient...
@@ -538,7 +539,7 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
         replaceCast(
           (row: Row, paramIndex: Int) => {
             val outerArrayResultSet = row.getArray(paramIndex).getResultSet
-            val list                 = ListBuffer.empty[Double]
+            val list                = ListBuffer.empty[Double]
             while (outerArrayResultSet.next()) {
               val array = outerArrayResultSet.getArray(2).getArray.asInstanceOf[Array[_]]
               array.foreach(v => list += v.toString.toDouble) // not the most efficient...

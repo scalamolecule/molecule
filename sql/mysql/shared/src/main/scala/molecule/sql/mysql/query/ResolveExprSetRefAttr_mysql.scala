@@ -12,7 +12,7 @@ trait ResolveExprSetRefAttr_mysql
 
   override protected def refMan[T: ClassTag](attr: Attr, args: Seq[Set[T]], res: ResSet[T]): Unit = {
     select += s"JSON_ARRAYAGG($joinTable.$ref_id) $refIds"
-    joins += (("INNER JOIN", joinTable, "", s"$nsId = $joinTable.$ns_id"))
+    joins += (("INNER JOIN", joinTable, "", s"$nsId", s"= $joinTable.$ns_id"))
     groupBy += nsId
     addCast(
       (row: Row, paramIndex: Int) =>
@@ -38,7 +38,7 @@ trait ResolveExprSetRefAttr_mysql
   ): Unit = {
     val col = getCol(attr: Attr)
     select += s"JSON_ARRAYAGG($joinTable.$ref_id) $refIds"
-    joins += (("LEFT JOIN", joinTable, "", s"$nsId = $joinTable.$ns_id"))
+    joins += (("LEFT JOIN", joinTable, "", s"$nsId", s"= $joinTable.$ns_id"))
     groupBy += nsId
     addCast((row: Row, paramIndex: Int) => {
       row.getString(paramIndex) match {

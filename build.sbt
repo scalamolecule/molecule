@@ -234,29 +234,29 @@ lazy val documentMongodb = crossProject(JSPlatform, JVMPlatform)
   .in(file("document/mongodb"))
   .settings(name := "molecule-document-mongodb")
   .settings(doPublish)
-  .enablePlugins(MoleculePlugin)
+//  .enablePlugins(MoleculePlugin)
   .dependsOn(core)
   .dependsOn(coreTests % "test->test")
   .settings(
-    // Generate Molecule boilerplate code for tests with `sbt clean compile -Dmolecule=true`
-    moleculePluginActive := sys.props.get("molecule").contains("true"),
-    //    moleculeMakeJars := !sys.props.get("moleculeJars").contains("false"), // default: true
-    //    moleculeMakeJars := false, // default: true
-
-    // Multiple directories with data models
-    moleculeDataModelPaths := Seq(
-      "molecule/document/mongodb"
-    ),
-
-    // Suppress "un-used" keys warning
-    Global / excludeLintKeys ++= Set(
-      moleculePluginActive,
-      moleculeDataModelPaths,
-      moleculeMakeJars
-    ),
-
-    // Let IntelliJ detect sbt-molecule-created jars in unmanaged lib directories
-    exportJars := true,
+//    // Generate Molecule boilerplate code for tests with `sbt clean compile -Dmolecule=true`
+//    moleculePluginActive := sys.props.get("molecule").contains("true"),
+//    //    moleculeMakeJars := !sys.props.get("moleculeJars").contains("false"), // default: true
+//    //    moleculeMakeJars := false, // default: true
+//
+//    // Multiple directories with data models
+//    moleculeDataModelPaths := Seq(
+//      "molecule/document/mongodb"
+//    ),
+//
+//    // Suppress "un-used" keys warning
+//    Global / excludeLintKeys ++= Set(
+//      moleculePluginActive,
+//      moleculeDataModelPaths,
+//      moleculeMakeJars
+//    ),
+//
+//    // Let IntelliJ detect sbt-molecule-created jars in unmanaged lib directories
+//    exportJars := true,
 
     testFrameworks := Seq(
       new TestFramework("utest.runner.Framework"),

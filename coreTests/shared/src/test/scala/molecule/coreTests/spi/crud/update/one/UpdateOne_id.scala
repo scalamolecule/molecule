@@ -61,6 +61,14 @@ trait UpdateOne_id extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
               err ==> "Can't update non-existing ids of embedded documents in MongoDB."
             }
+          _ <- A.i.ownB.query.get
+            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+              err ==> "Can't query for non-existing ids of embedded documents in MongoDB."
+            }
+          _ <- A.i.ownB_.query.get
+            .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+              err ==> "Can't query for non-existing ids of embedded documents in MongoDB."
+            }
           _ <- A.i.ownB_?.query.get
             .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
               err ==> "Can't query for non-existing ids of embedded documents in MongoDB."

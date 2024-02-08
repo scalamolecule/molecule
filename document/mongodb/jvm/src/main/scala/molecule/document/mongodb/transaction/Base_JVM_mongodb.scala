@@ -36,8 +36,8 @@ trait Base_JVM_mongodb extends DataType_JVM_mongodb with ModelUtils with BaseHel
   protected var level     = 0
   protected var selfJoins = 0
   protected var initialNs = ""
-  protected val refIdss   = new BsonArray()
-  protected var refIds    = new BsonArray()
+//  protected val refIdss   = new BsonArray()
+//  protected var refIds    = new BsonArray()
 
   // "Connection pool" ---------------------------------------------
 

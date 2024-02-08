@@ -18,8 +18,11 @@ trait InsertCardSet extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
     "Mandatory" - types { implicit conn =>
       for {
+        // No Ns.ii inserted yet
+        _ <- Ns.ii.query.get.map(_ ==> Nil)
+
         // Inserting empty list/set of values is ignored
-        _ <- Ns.ii.query.get.map(_ ==> List())
+        // (See InsertSemantic for further details)
         _ <- Ns.ii.insert(Seq.empty[Set[Int]]).transact
         _ <- Ns.ii.insert(Seq(Set.empty[Int])).transact
         _ <- Ns.ii.query.get.map(_ ==> List())

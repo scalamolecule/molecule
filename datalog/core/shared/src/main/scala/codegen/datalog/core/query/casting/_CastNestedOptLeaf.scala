@@ -6,7 +6,7 @@ object _CastNestedOptLeaf extends DatomicGenBase("CastNestedOptLeaf", "/query/ca
 
   val content = {
     val pullLeafX    = (1 to 22).map(i => s"case ${caseN(i)} => pullLeaf$i(pullCasts, optComparator)").mkString("\n      ")
-    val resolveMethods = (1 to 22).map(arity => Chunk(arity).body).mkString("\n")
+    val resolveMethods = (2 to 22).map(arity => Chunk(arity).body).mkString("\n")
     s"""// GENERATED CODE ********************************
        |package molecule.datomic.query.casting
        |
@@ -93,6 +93,55 @@ object _CastNestedOptLeaf extends DatomicGenBase("CastNestedOptLeaf", "/query/ca
        |        case _: NullValueException => Nil
        |        case e: Throwable          => throw e
        |      }
+       |  }
+       |
+       |  final private def pullLeaf1(
+       |    pullCasts: List[jIterator[_] => Any],
+       |    optComparator: Option[Comparator[Row]]
+       |  ): jIterator[_] => List[Any] = {
+       |
+       |    val List(c1) = pullCasts
+       |    val cast     = (it: java.util.Iterator[_]) => c1(it)
+       |    resolve(
+       |      optComparator.fold {
+       |        val list = new jArrayList[Any](1)
+       |        (rows: jList[_]) =>
+       |          val isSets = flatten(list, rows.get(0).asInstanceOf[jMap[_, _]])
+       |            .get(0).isInstanceOf[clojure.lang.PersistentVector]
+       |
+       |          if (isSets) {
+       |            val res          = rows.asScala.toList.map {
+       |              case row: jMap[_, _] =>
+       |                list.clear()
+       |                cast(flatten(list, row).iterator)
+       |            }
+       |            // Coalesce Sets
+       |            var coalescedSet = Set.empty[Any]
+       |            res.foreach {
+       |              case set: Set[Any] => coalescedSet = coalescedSet ++ set
+       |            }
+       |            List(coalescedSet)
+       |
+       |          } else {
+       |            rows.asScala.toList.map {
+       |              case row: jMap[_, _] =>
+       |                list.clear()
+       |                cast(flatten(list, row).iterator)
+       |            }
+       |          }
+       |
+       |      } { comparator =>
+       |        (rows: jList[_]) =>
+       |          val sortedRows: jArrayList[Row] = new jArrayList(rows.size())
+       |          rows.asScala.foreach {
+       |            case row: jMap[_, _] =>
+       |              val list = new jArrayList[Any](1)
+       |              sortedRows.add(flatten(list, row).asInstanceOf[Row])
+       |          }
+       |          Collections.sort(sortedRows, comparator)
+       |          sortedRows.asScala.map { row => cast(row.iterator) }.toList
+       |      }
+       |    )
        |  }
        |$resolveMethods
        |}""".stripMargin

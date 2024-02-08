@@ -289,17 +289,20 @@ trait SpiSyncBase
   // Util --------------------------------------
 
   @nowarn // Accept dynamic type parameter of returned Query
-  private def refUpdates(update: Update)(implicit conn: JdbcConn_JVM): () => Map[List[String], List[Long]] = {
+//  private def refUpdates(update: Update)(implicit conn: JdbcConn_JVM): () => Map[List[String], List[Long]] = {
+  private def refUpdates(update: Update)(implicit conn: JdbcConn_JVM): () => List[Long] = {
     val (idQuery, updateModels) = getIdQuery(update.elements, update.isUpsert)
     val refIds: List[Long]      = getRefIds(query_getRaw(idQuery))
     () => {
-      val refIdMaps = refIds.zipWithIndex.map {
+//      val refIdMaps = refIds.zipWithIndex.map {
+      val ids = refIds.zipWithIndex.map {
         case (refId: Long, i) =>
           val updateModel = updateModels(i)(refId)
           conn.populateStmts(update_getData(conn, updateModel, update.isUpsert))
       }
       // Return TxReport with initial update ids
-      refIdMaps.head
+//      refIdMaps.head
+      ids.head
     }
   }
 

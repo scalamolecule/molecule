@@ -26,16 +26,26 @@ case class SqlQueryResolveOffset[Tpl](
     val sortedRows  = getData(conn, optLimit, optOffset)
     val sortedRows1 = new ResultSetImpl(sortedRows)
     if (m2q.isNestedMan || m2q.isNestedOpt) {
-      val totalCount    = if (m2q.isNestedMan) m2q.getRowCount(sortedRows1) else
+      val totalCount = if (m2q.isNestedMan)
+        m2q.getRowCount(sortedRows1)
+      else
         optOffset.fold(m2q.getRowCount(sortedRows1))(_ => getTotalCount(conn))
-      val nestedRows0   = if (m2q.isNestedMan)
+
+      val nestedRows0 = if (m2q.isNestedMan)
         m2q.rows2nested(sortedRows1)
       else
         m2q.rows2nestedOpt(sortedRows1)
+
       val nestedRows    = if (forward) nestedRows0 else nestedRows0.reverse
       val topLevelCount = nestedRows.length
       val fromUntil     = getFromUntil(topLevelCount, optLimit, optOffset)
       val hasMore       = fromUntil.fold(totalCount > 0)(_._3)
+
+
+//      println("************ " + nestedRows.length)
+//      nestedRows.foreach(println)
+
+
       (offsetList(nestedRows, fromUntil), topLevelCount, hasMore)
 
     } else {
