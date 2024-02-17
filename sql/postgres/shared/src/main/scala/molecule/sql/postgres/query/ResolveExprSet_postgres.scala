@@ -28,7 +28,8 @@ trait ResolveExprSet_postgres
     }
 
     attr.filterAttr.fold {
-      if (filterAttrVars.contains(attr.name) && attr.op != V) {
+      val pathAttr = path :+ attr.cleanAttr
+      if (filterAttrVars.contains(pathAttr) && attr.op != V) {
         // Runtime check needed since we can't type infer it
         throw ModelError(s"Cardinality-set filter attributes not allowed to " +
           s"do additional filtering. Found:\n  " + attr)

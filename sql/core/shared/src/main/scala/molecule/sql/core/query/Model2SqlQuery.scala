@@ -41,12 +41,13 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
     renderSqlQuery(optLimit, optOffset)
   }
 
-  final private def addFilterAttrCallback: (String, Model.Attr) => Unit = (filterAttr: String, a: Attr) => {
-    filterAttrVars.get(filterAttr).fold {
-      // Create datomic variable for this expression attribute
-      filterAttrVars = filterAttrVars + (filterAttr -> a.cleanName)
-    }(_ => throw ModelError(s"Can't refer to ambiguous filter attribute $filterAttr"))
-  }
+  final private def addFilterAttrCallback: (List[String], Model.Attr) => Unit =
+    (pathAttr: List[String], a: Attr) => {
+      filterAttrVars.get(pathAttr).fold {
+        // Create datomic variable for this expression attribute
+        filterAttrVars = filterAttrVars + (pathAttr -> a.cleanName)
+      }(_ => throw ModelError(s"Can't refer to ambiguous filter attribute $pathAttr"))
+    }
 
   final private def renderSqlQuery(
     optLimit: Option[Int],
@@ -62,9 +63,9 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
       val max4  = joins.map(_._4.length).max + 1
       val hasAs = joins.exists(_._3.nonEmpty)
       joins.map { case (join, table, as, lft, rgt) =>
-        val join_  = join + padS(max1, join)
-        val table_ = table + padS(max2, table)
-        val as_    = if (hasAs) {
+        val join_     = join + padS(max1, join)
+        val table_    = table + padS(max2, table)
+        val as_       = if (hasAs) {
           if (as.isEmpty) padS(max3 + 4, "") else " AS " + as + padS(max3, as)
         } else ""
         val predicate = lft + padS(max4, lft) + rgt
@@ -148,9 +149,9 @@ abstract class Model2SqlQuery[Tpl](elements0: List[Element])
       val max4  = joins.map(_._4.length).max + 1
       val hasAs = joins.exists(_._3.nonEmpty)
       joins.map { case (join, table, as, lft, rgt) =>
-        val join_  = join + padS(max1, join)
-        val table_ = table + padS(max2, table)
-        val as_    = if (hasAs) {
+        val join_     = join + padS(max1, join)
+        val table_    = table + padS(max2, table)
+        val as_       = if (hasAs) {
           if (as.isEmpty) padS(max3 + 4, "") else " AS " + as + padS(max3, as)
         } else ""
         val predicate = lft + padS(max4, lft) + rgt

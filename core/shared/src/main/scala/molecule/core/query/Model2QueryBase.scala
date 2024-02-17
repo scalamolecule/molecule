@@ -14,11 +14,14 @@ trait Model2QueryBase extends ModelUtils {
   private var hasAggr       = false
   private var hasAggrSet    = false
 
+  protected val expectedFilterAttrs = mutable.Set.empty[String]
+
+
   def validateQueryModel(
     elements: List[Element],
-    addFilterAttr: Option[(String, Attr) => Unit] = None
+    addFilterAttr: Option[(List[String], Attr) => Unit] = None
   ): (List[Element], String, Boolean) = {
-    var hasBinding    = false
+    //    var hasBinding    = false
     var hasFilterAttr = false
 
     // Generic validation of model for queries
@@ -142,14 +145,14 @@ trait Model2QueryBase extends ModelUtils {
   private def checkFilterAttrs(
     elements: List[Element],
     initialNs: String,
-    addFilterAttr: Option[(String, Attr) => Unit]
+    addFilterAttr: Option[(List[String], Attr) => Unit]
   ): List[Element] = {
     val nsAttrPaths    = mutable.Map.empty[String, List[List[String]]]
     val qualifiedPaths = mutable.Map.empty[List[String], List[List[String]]]
     val directions     = ListBuffer.empty[List[String]]
     var path           = List(initialNs)
     var qualifiedPath  = List(initialNs)
-    var filterAttrVars = Map.empty[String, String]
+    var filterAttrVars = Map.empty[List[String], String]
     var level          = 0
 
     @tailrec
@@ -194,13 +197,17 @@ trait Model2QueryBase extends ModelUtils {
           throw ModelError(s"Filter attribute $filterNsAttr pointing to other namespace should be tacit.")
         } else if (filterPath != path && fa.op != V) {
           throw ModelError("Filtering inside cross-namespace attribute filter not allowed.")
+        } else {
+          // Expect filter attribute in other namespace
+          expectedFilterAttrs += fa.cleanName
         }
 
         // Callback (if any) from implementation
-        addFilterAttr.foreach(_(filterNsAttr, a))
+        val pathAttr = filterPath :+ fa.cleanAttr
+        addFilterAttr.foreach(_(pathAttr, a))
 
-        filterAttrVars.get(filterNsAttr).fold {
-          filterAttrVars = filterAttrVars + (filterNsAttr -> nsAttr)
+        filterAttrVars.get(pathAttr).fold {
+          filterAttrVars = filterAttrVars + (pathAttr.takeRight(2) -> nsAttr)
         }(_ => throw ModelError(s"Can't refer to ambiguous filter attribute $filterNsAttr"))
       }
     }
@@ -252,8 +259,9 @@ trait Model2QueryBase extends ModelUtils {
         a.filterAttr.fold {
           prevWasFilterCallee = false
           qualifiedPath = Nil
-          if (a.isInstanceOf[AttrSetMan] && filterAttrVars.contains(a.name) && a.op != V) {
-            throw ModelError(s"Cardinality-set filter attributes (${a.name}) not allowed to do additional filtering.")
+          val nsAttr = path.takeRight(1) :+ a.cleanAttr
+          if (a.isInstanceOf[AttrSetMan] && filterAttrVars.contains(nsAttr) && a.op != V) {
+            throw ModelError(s"Cardinality-set filter attributes ($attrName) not allowed to do additional filtering.")
           }
           List(a)
         } { case (_, filterPath, filterAttr) =>
@@ -273,7 +281,7 @@ trait Model2QueryBase extends ModelUtils {
 
             nsPaths.length match {
               case 1 => nsPaths.head
-              case 0 => throw ModelError(s"Unexpectedly found no nsPaths for filter attribute $filterAttrName")
+              case 0 => throw ModelError(s"Unexpectedly found nsPaths for filter attribute $filterAttrName")
               case _ =>
                 val prefixes = nsPaths.distinct.map { tokens =>
                   var prefix = tokens.head

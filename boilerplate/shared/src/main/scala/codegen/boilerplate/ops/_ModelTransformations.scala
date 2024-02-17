@@ -19,7 +19,7 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |
        |trait ModelTransformations_ {
        |
-       |  def unexpected(element: Element) = throw ModelError("Unexpected element: " + element)
+       |  private def unexpected(element: Element) = throw ModelError("Unexpected element: " + element)
        |
        |  protected def toInt(es: List[Element], kw: Kw): List[Element] = {
        |    val last = es.last match {
@@ -231,6 +231,59 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
        |    case 'a' => "d" + sort.last
        |    case 'd' => "a" + sort.last
        |  }
+       |
+       |  protected def cleanUpdateElements(elements: List[Element]): List[Element] = {
+       |    elements.map {
+       |      case a: Attr => a match {
+       |        case a: AttrOne => a match {
+       |          case a: AttrOneTac => a
+       |          case a: AttrOneMan => a match {
+       |            ${clean("One", "Man")}
+       |          }
+       |          case a: AttrOneOpt => a match {
+       |            ${clean("One", "Opt")}
+       |          }
+       |        }
+       |
+       |        case a: AttrSet => a match {
+       |          case a: AttrSetTac => a
+       |          case a: AttrSetMan => a match {
+       |            ${clean("Set", "Man")}
+       |          }
+       |          case a: AttrSetOpt => a match {
+       |            ${clean("Set", "Opt")}
+       |          }
+       |        }
+       |      }
+       |      case other   => other
+       |    }
+       |  }
+       |
+       |  protected def topLevelAttrCount(elements: List[Element], count: Int = 0): Int = {
+       |    elements match {
+       |      case Nil       => count
+       |      case e :: tail => e match {
+       |        case a: AttrOne       => a match {
+       |          case _: AttrOneMan => topLevelAttrCount(tail, count + 1)
+       |          case _: AttrOneOpt => topLevelAttrCount(tail, count + 1)
+       |          case _             => topLevelAttrCount(tail, count)
+       |        }
+       |        case a: AttrSet       => a match {
+       |          case _: AttrSetMan => topLevelAttrCount(tail, count + 1)
+       |          case _: AttrSetOpt => topLevelAttrCount(tail, count + 1)
+       |          case _             => topLevelAttrCount(tail, count)
+       |        }
+       |        case _: Ref           => topLevelAttrCount(tail, count)
+       |        case _: BackRef       => topLevelAttrCount(tail, count)
+       |        case Nested(_, es)    => topLevelAttrCount(tail, count + countNested(es))
+       |        case NestedOpt(_, es) => topLevelAttrCount(tail, count + countNested(es))
+       |      }
+       |    }
+       |  }
+       |
+       |  private def countNested(elements: List[Element]): Int = {
+       |    topLevelAttrCount(elements, 0)
+       |  }
        |}""".stripMargin
   }
 
@@ -313,5 +366,11 @@ object _ModelTransformations extends BoilerplateGenBase("ModelTransformations", 
     baseTypesWithSpaces.tail.map { case (baseTpe, space) =>
       s"case a@AttrOne$mode$baseTpe(_, _, _, _, _, _, _, _, _, Some(sort), _) $space=> a.copy(sort = Some(reverseSort(sort)))"
     }.mkString("\n        ")
+  }
+
+  private def clean(card: String, mode: String): String = {
+    baseTypesWithSpaces.map { case (baseTpe, space) =>
+      s"case a: Attr$card$mode$baseTpe $space=> a.copy(op = V)"
+    }.mkString("\n            ")
   }
 }

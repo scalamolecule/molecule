@@ -108,9 +108,7 @@ trait SpiSync_h2 extends SpiSyncBase {
         row += null
       } else {
         arr.next()
-//        println("A " + arr.getArray(2))
         val arr2 = arr.getArray(2)
-//        println("A " + arr2)
         if (arr2 != null) {
           row += arr2.getArray.asInstanceOf[Array[_]].toSet
         }

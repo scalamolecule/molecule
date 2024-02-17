@@ -26,7 +26,7 @@ trait SqlQueryBase extends Model2QueryBase with BaseHelpers with JavaConversions
     size
   }
 
-  // Used to lookup original type of aggregate attributes
+  // Lookup original type of aggregate attributes
   final protected var attrMap = Map.empty[String, (Card, String, Seq[String])]
 
   // Main query
@@ -55,12 +55,15 @@ trait SqlQueryBase extends Model2QueryBase with BaseHelpers with JavaConversions
   final protected val args        = new ArrayBuffer[AnyRef]
   final protected val exts        = mutable.Map.empty[String, Option[String]]
 
+  // Current path: List(Ns, refAttrNs2, Ns2, refAttrNs3, Ns3 ...)
+  final protected var path = List.empty[String]
+
   // Ensure distinct result set when possible redundant optional values can occur
   final protected var hasOptAttr = false
 
   // Query variables
-  final protected var filterAttrVars: Map[String, String] = Map.empty[String, String]
-  final protected val expectedFilterAttrs                 = mutable.Set.empty[String]
+  final protected var filterAttrVars      = Map.empty[List[String], String]
+  final protected val expectedFilterAttrs = mutable.Set.empty[String]
 
   final protected def getCol(attr: Attr): String = {
     exts(attr.ns).fold(attr.name)(ext => attr.ns + ext + "." + attr.attr)

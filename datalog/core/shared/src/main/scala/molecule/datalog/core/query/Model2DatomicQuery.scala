@@ -40,7 +40,8 @@ class Model2DatomicQuery[Tpl](elements0: List[Element])
 
     // Remember first entity id variable
     firstId = vv
-    path = List(firstId)
+    varPath = List(firstId)
+    path = List(getInitialNs(elements1))
 
     // Recursively resolve molecule elements
     resolve(List(firstId), elements1)
@@ -74,12 +75,13 @@ class Model2DatomicQuery[Tpl](elements0: List[Element])
     (preQuery, mainQuery, queryStrs)
   }
 
-  final private def addFilterAttrCallback: (Att, Model.Attr) => Unit = (filterAttr: String, _: Attr) => {
-    filterAttrVars.get(filterAttr).fold {
-      // Create datomic variable for this expression attribute
-      filterAttrVars = filterAttrVars + (filterAttr -> vv)
-    }(_ => throw ModelError(s"Can't refer to ambiguous filter attribute $filterAttr"))
-  }
+  final private def addFilterAttrCallback: (List[String], Model.Attr) => Unit =
+    (pathAttr: List[String], a: Attr) => {
+      filterAttrVars.get(pathAttr).fold {
+        // Create datomic variable for this filter attribute
+        filterAttrVars = filterAttrVars + (pathAttr -> vv)
+      }(_ => throw ModelError(s"Can't refer to ambiguous filter attribute $pathAttr"))
+    }
 
   final def getIdQueryWithInputs: (Att, Seq[AnyRef]) = {
     (getDatomicQueries(false)._2, inputs)

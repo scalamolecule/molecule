@@ -47,21 +47,42 @@ trait CastBsonDoc_ extends BaseHelpers {
     level += 1
     val nestedRefAttr      = nestedCasts.head.head._1.get
     val castNestedDocument = levelCaster(nestedCasts)
+    val singleNestedOpt    = nestedCasts.last.last._3.size == 1
+
+    //    debugCasts(nestedCasts)
+
+    //    if(nestedCasts.last.last._3.size == 1) {
+    //
+    //    }
+
+
     (outerDoc: BsonDocument) => {
+
+      //      println("=====================================")
+      //      println(outerDoc.toJson(pretty))
+
+
       level += 1
       val nestedRows = ListBuffer.empty[Any]
       val doc        = lastAttrPath match {
         case Nil => outerDoc
         case _   => lastAttrPath.foldLeft(outerDoc) {
-          case (curDoc, refAttr) =>
-            curDoc.get(refAttr).asDocument()
+          case (curDoc, refAttr) => curDoc.get(refAttr).asDocument()
         }
       }
       curLevelDocs.clear()
       doc.get(nestedRefAttr).asArray().forEach { nestedRow =>
         nestedRows += castNestedDocument(nestedRow.asDocument())
       }
-      nestedRows.toList
+
+      //      println(nestedRows)
+
+      if (singleNestedOpt && nestedRows.nonEmpty && nestedRows.head.isInstanceOf[Set[_]]) {
+//        println("A")
+        List(nestedRows.asInstanceOf[ListBuffer[Set[_]]].flatten.toSet)
+      } else {
+        nestedRows.toList
+      }
     }
   }
 

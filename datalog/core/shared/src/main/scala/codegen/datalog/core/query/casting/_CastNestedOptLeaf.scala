@@ -118,7 +118,7 @@ object _CastNestedOptLeaf extends DatomicGenBase("CastNestedOptLeaf", "/query/ca
        |            // Coalesce Sets
        |            var coalescedSet = Set.empty[Any]
        |            res.foreach {
-       |              case set: Set[Any] => coalescedSet = coalescedSet ++ set
+       |              case set: Set[_] => coalescedSet = coalescedSet ++ set
        |            }
        |            List(coalescedSet)
        |

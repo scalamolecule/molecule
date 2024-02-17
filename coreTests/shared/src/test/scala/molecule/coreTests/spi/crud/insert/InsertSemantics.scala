@@ -37,6 +37,35 @@ trait InsertSemantics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         } yield ()
       }
 
+      "Optional with other attribute" - refs { implicit conn =>
+        for {
+          List(a, b, c, d) <- A.i.ii_?.insert(
+            (1, None),
+            (1, Some(Set(2))),
+            (1, Some(Set(3))),
+            (2, Some(Set(4, 5))),
+          ).transact.map(_.ids)
+
+          _ <- A.i.a1.ii_?.query.i.get.map(_ ==> List( // (since we can't sort by Sets)
+            // (1, None), // coalesced with Set(2) and Set(3)
+            (1, Some(Set(2, 3))), // coalesced Set(2) and Set(3)
+            (2, Some(Set(4, 5))),
+          ))
+
+          _ <- A.i.a1.ii.query.i.get.map(_ ==> List( // (since we can't sort by Sets)
+            (1, Set(2, 3)),
+            (2, Set(4, 5)),
+          ))
+
+          _ <- A.id.a1.i.ii_?.query.get.map(_ ==> List(
+            (a, 1, None),
+            (b, 1, Some(Set(2))),
+            (c, 1, Some(Set(3))),
+            (d, 2, Some(Set(4, 5))),
+          ))
+        } yield ()
+      }
+
       "Alone after ref" - refs { implicit conn =>
         for {
           _ <- A.i.B.ii.insert((1, Set.empty[Int])).transact
@@ -44,9 +73,8 @@ trait InsertSemantics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           // A.i was inserted
           _ <- A.i.query.get.map(_ ==> List(1))
 
-          // Relationship to B was not created since no value of B was present
-          _ <- A.i_.b.query.get.map(_.size ==> 0)
-          _ <- A.i.B.ii_?.query.get.map(_ ==> Nil)
+          // B.ii was not inserted
+          _ <- A.i.B.ii_?.query.get.map(_ ==> List((1, None)))
           _ <- A.i.B.ii.query.get.map(_ ==> Nil)
         } yield ()
       }
@@ -71,14 +99,11 @@ trait InsertSemantics extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           // A.i was inserted
           _ <- A.i.query.get.map(_ ==> List(1))
 
-          // But relationships to B were not created since no value of B was present
-          _ <- A.i_.bb.query.get.map(_.size ==> 0)
-
           _ <- A.i.Bb.*?(B.ii).query.get.map(_ ==> List((1, Nil)))
           _ <- A.i.Bb.*(B.ii).query.get.map(_ ==> Nil)
 
-          // No optional B.ii value since there's no relationship
-          _ <- A.i.Bb.ii_?.query.get.map(_ ==> Nil)
+          // No optional B.ii value
+          _ <- A.i.Bb.ii_?.query.get.map(_ ==> List((1, None)))
           _ <- A.i.Bb.ii.query.get.map(_ ==> Nil)
         } yield ()
       }

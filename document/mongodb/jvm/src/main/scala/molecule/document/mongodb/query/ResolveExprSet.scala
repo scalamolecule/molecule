@@ -155,7 +155,11 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
     mandatory: Boolean
   ): Unit = {
     op match {
-      case V         => attr(uniqueField, field, mandatory)
+      case V         =>
+
+
+
+        attr(uniqueField, field, mandatory)
       case Eq        => equal(field, sets, res)
       case Neq       => neq(uniqueField, field, sets, res, mandatory)
       case Has       => has(uniqueField, field, sets, res, mandatory)
@@ -204,17 +208,32 @@ trait ResolveExprSet extends ResolveExpr { self: MongoQueryBase with LambdasSet 
       || b.isInstanceOf[NestedRef])
     ) {
       // Separate nulls from arrays/sets of values when grouping
-
-      val ifNull = new BsonArray()
-      ifNull.add(new BsonString("$" + b.path + field))
-      ifNull.add(new BsonBoolean(false))
-
-      val condArgs = new BsonArray()
-      condArgs.add(new BsonDocument("$ifNull", ifNull))
-      condArgs.add(new BsonBoolean(true))
-      condArgs.add(new BsonBoolean(false))
-
-      topBranch.optSetSeparators += (field + "_") -> new BsonDocument("$cond", condArgs)
+      topBranch.optSetSeparators += (field + "_") -> new BsonDocument("$cond", {
+        val condArgs = new BsonArray()
+        condArgs.add(new BsonDocument("$or", {
+          val orArgs = new BsonArray()
+          orArgs.add(
+            new BsonDocument("$ifNull", {
+              val ifNullArgs = new BsonArray()
+              ifNullArgs.add(new BsonString("$" + b.path + field))
+              ifNullArgs.add(new BsonBoolean(false))
+              ifNullArgs
+            })
+          )
+          orArgs.add(
+            new BsonDocument("$ne", {
+              val neArgs = new BsonArray()
+              neArgs.add(new BsonString("$" + b.path + field))
+              neArgs.add(new BsonArray())
+              neArgs
+            })
+          )
+          orArgs
+        }))
+        condArgs.add(new BsonBoolean(true))
+        condArgs.add(new BsonBoolean(false))
+        condArgs
+      })
 
       topBranch.groupExprs += (b.alias + uniqueField) ->
         new BsonDocument("$addToSet", new BsonString("$" + b.path + field))

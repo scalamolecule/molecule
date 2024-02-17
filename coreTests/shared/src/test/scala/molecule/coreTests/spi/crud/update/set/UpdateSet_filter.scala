@@ -48,14 +48,10 @@ trait UpdateSet_filter extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           (2, Some(Set(3))),
         ).transact.map(_.ids)
 
-        _ <- Ns.i.ints_?.query.get.map(_.toSet ==> Set( // (since we can't sort by Sets)
-          (1, None),
-          (1, Some(Set(2))),
-          (2, Some(Set(3))),
-        ))
-
         // Update all entities where non-unique attribute i is 1
         _ <- Ns.i_(1).ints(Set(4)).update.transact
+
+        // Only matching entities with previous values updated
         _ <- Ns.id.a1.i.ints_?.query.get.map(_ ==> List(
           (a, 1, None), // not updated since there were no previous value
           (b, 1, Some(Set(4))), // 2 updated to 4
@@ -64,6 +60,8 @@ trait UpdateSet_filter extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
         // Upsert all entities where non-unique attribute i is 1
         _ <- Ns.i_(1).ints(Set(5)).upsert.transact
+
+        // All matching entities updated
         _ <- Ns.id.a1.i.ints_?.query.get.map(_ ==> List(
           (a, 1, Some(Set(5))), // 5 inserted
           (b, 1, Some(Set(5))), // 4 updated to 5

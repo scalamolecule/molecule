@@ -7,6 +7,7 @@ import molecule.core.util.{FutureUtils, JavaConversions, ModelUtils}
 import molecule.document.mongodb.facade.MongoConn_JVM
 import molecule.document.mongodb.query.casting._
 import molecule.document.mongodb.util.BsonUtils
+import org.bson.{BsonArray, BsonDocument}
 import scala.collection.mutable.ListBuffer
 
 case class QueryResolveOffset_mongodb[Tpl](
@@ -31,8 +32,30 @@ case class QueryResolveOffset_mongodb[Tpl](
     val (isPaginated, forward) = paginationCoords(optLimit, optOffset)
     val elements1              = if (isPaginated && !forward) reverseTopLevelSorting(elements) else elements
     val bsonDocs               = getData(conn, elements1, optLimit, optOffset)
-    val tuples                 = ListBuffer.empty[Tpl]
-    val bson2tpl               = levelCaster(m2q.immutableCastss)
+
+    //    elements.foreach(println)
+    //    bsonDocs.forEach(d => println(d.toJson(pretty)))
+    //    println(topLevelAttrCount(elements))
+
+    val isSingleAttr = topLevelAttrCount(elements) == 1
+    val tuples       = ListBuffer.empty[Tpl]
+    val bson2tpl     = levelCaster(m2q.immutableCastss)
+
+    def skipSingleEmpty(bsonDoc: BsonDocument) = {
+      // Exclude empty single Sets
+      // Todo: can we exclude in query instead?
+      val it = bsonDoc.entrySet.iterator
+      if (isSingleAttr && it.hasNext) {
+        it.next.getValue match {
+          case a: BsonArray if a.asArray.isEmpty =>
+            ()
+          case _                                 =>
+            tuples += bson2tpl(bsonDoc).asInstanceOf[Tpl]
+        }
+      } else {
+        tuples += bson2tpl(bsonDoc).asInstanceOf[Tpl]
+      }
+    }
 
     if (isPaginated) {
       val it = bsonDocs.iterator()
@@ -49,7 +72,7 @@ case class QueryResolveOffset_mongodb[Tpl](
         } else {
           rows.forEach { bsonDoc =>
             curLevelDocs.clear()
-            tuples += bson2tpl(bsonDoc.asDocument()).asInstanceOf[Tpl]
+            skipSingleEmpty(bsonDoc.asDocument)
           }
           val tuples1    = tuples.distinct.toList
           val totalCount = metaData.get(0).asDocument().get("totalCount").asInt32().intValue()
@@ -63,7 +86,7 @@ case class QueryResolveOffset_mongodb[Tpl](
       // Not paginated
       bsonDocs.forEach { bsonDoc =>
         curLevelDocs.clear()
-        tuples += bson2tpl(bsonDoc).asInstanceOf[Tpl]
+        skipSingleEmpty(bsonDoc)
       }
       (tuples.distinct.toList, -1, true) // Total count only used when paginating
     }

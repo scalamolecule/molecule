@@ -12,7 +12,7 @@ import scala.annotation.tailrec
 
 trait ModelTransformations_ {
 
-  def unexpected(element: Element) = throw ModelError("Unexpected element: " + element)
+  private def unexpected(element: Element) = throw ModelError("Unexpected element: " + element)
 
   protected def toInt(es: List[Element], kw: Kw): List[Element] = {
     val last = es.last match {
@@ -1320,7 +1320,7 @@ trait ModelTransformations_ {
   private def resolvePath(es: List[Element], path: List[String]): List[String] = {
     es match {
       case e :: tail => e match {
-        case r: Ref =>
+        case r: Ref  =>
           val p = if (path.isEmpty) List(r.ns, r.refAttr, r.refNs) else List(r.refAttr, r.refNs)
           resolvePath(tail, path ++ p)
         case a: Attr => resolvePath(tail, if (path.isEmpty) List(a.ns) else path)
@@ -1575,5 +1575,146 @@ trait ModelTransformations_ {
   private def reverseSort(sort: String): String = sort.head match {
     case 'a' => "d" + sort.last
     case 'd' => "a" + sort.last
+  }
+
+  protected def cleanUpdateElements(elements: List[Element]): List[Element] = {
+    elements.map {
+      case a: Attr => a match {
+        case a: AttrOne => a match {
+          case a: AttrOneTac => a
+          case a: AttrOneMan => a match {
+            case a: AttrOneManID             => a.copy(op = V)
+            case a: AttrOneManString         => a.copy(op = V)
+            case a: AttrOneManInt            => a.copy(op = V)
+            case a: AttrOneManLong           => a.copy(op = V)
+            case a: AttrOneManFloat          => a.copy(op = V)
+            case a: AttrOneManDouble         => a.copy(op = V)
+            case a: AttrOneManBoolean        => a.copy(op = V)
+            case a: AttrOneManBigInt         => a.copy(op = V)
+            case a: AttrOneManBigDecimal     => a.copy(op = V)
+            case a: AttrOneManDate           => a.copy(op = V)
+            case a: AttrOneManDuration       => a.copy(op = V)
+            case a: AttrOneManInstant        => a.copy(op = V)
+            case a: AttrOneManLocalDate      => a.copy(op = V)
+            case a: AttrOneManLocalTime      => a.copy(op = V)
+            case a: AttrOneManLocalDateTime  => a.copy(op = V)
+            case a: AttrOneManOffsetTime     => a.copy(op = V)
+            case a: AttrOneManOffsetDateTime => a.copy(op = V)
+            case a: AttrOneManZonedDateTime  => a.copy(op = V)
+            case a: AttrOneManUUID           => a.copy(op = V)
+            case a: AttrOneManURI            => a.copy(op = V)
+            case a: AttrOneManByte           => a.copy(op = V)
+            case a: AttrOneManShort          => a.copy(op = V)
+            case a: AttrOneManChar           => a.copy(op = V)
+          }
+          case a: AttrOneOpt => a match {
+            case a: AttrOneOptID             => a.copy(op = V)
+            case a: AttrOneOptString         => a.copy(op = V)
+            case a: AttrOneOptInt            => a.copy(op = V)
+            case a: AttrOneOptLong           => a.copy(op = V)
+            case a: AttrOneOptFloat          => a.copy(op = V)
+            case a: AttrOneOptDouble         => a.copy(op = V)
+            case a: AttrOneOptBoolean        => a.copy(op = V)
+            case a: AttrOneOptBigInt         => a.copy(op = V)
+            case a: AttrOneOptBigDecimal     => a.copy(op = V)
+            case a: AttrOneOptDate           => a.copy(op = V)
+            case a: AttrOneOptDuration       => a.copy(op = V)
+            case a: AttrOneOptInstant        => a.copy(op = V)
+            case a: AttrOneOptLocalDate      => a.copy(op = V)
+            case a: AttrOneOptLocalTime      => a.copy(op = V)
+            case a: AttrOneOptLocalDateTime  => a.copy(op = V)
+            case a: AttrOneOptOffsetTime     => a.copy(op = V)
+            case a: AttrOneOptOffsetDateTime => a.copy(op = V)
+            case a: AttrOneOptZonedDateTime  => a.copy(op = V)
+            case a: AttrOneOptUUID           => a.copy(op = V)
+            case a: AttrOneOptURI            => a.copy(op = V)
+            case a: AttrOneOptByte           => a.copy(op = V)
+            case a: AttrOneOptShort          => a.copy(op = V)
+            case a: AttrOneOptChar           => a.copy(op = V)
+          }
+        }
+
+        case a: AttrSet => a match {
+          case a: AttrSetTac => a
+          case a: AttrSetMan => a match {
+            case a: AttrSetManID             => a.copy(op = V)
+            case a: AttrSetManString         => a.copy(op = V)
+            case a: AttrSetManInt            => a.copy(op = V)
+            case a: AttrSetManLong           => a.copy(op = V)
+            case a: AttrSetManFloat          => a.copy(op = V)
+            case a: AttrSetManDouble         => a.copy(op = V)
+            case a: AttrSetManBoolean        => a.copy(op = V)
+            case a: AttrSetManBigInt         => a.copy(op = V)
+            case a: AttrSetManBigDecimal     => a.copy(op = V)
+            case a: AttrSetManDate           => a.copy(op = V)
+            case a: AttrSetManDuration       => a.copy(op = V)
+            case a: AttrSetManInstant        => a.copy(op = V)
+            case a: AttrSetManLocalDate      => a.copy(op = V)
+            case a: AttrSetManLocalTime      => a.copy(op = V)
+            case a: AttrSetManLocalDateTime  => a.copy(op = V)
+            case a: AttrSetManOffsetTime     => a.copy(op = V)
+            case a: AttrSetManOffsetDateTime => a.copy(op = V)
+            case a: AttrSetManZonedDateTime  => a.copy(op = V)
+            case a: AttrSetManUUID           => a.copy(op = V)
+            case a: AttrSetManURI            => a.copy(op = V)
+            case a: AttrSetManByte           => a.copy(op = V)
+            case a: AttrSetManShort          => a.copy(op = V)
+            case a: AttrSetManChar           => a.copy(op = V)
+          }
+          case a: AttrSetOpt => a match {
+            case a: AttrSetOptID             => a.copy(op = V)
+            case a: AttrSetOptString         => a.copy(op = V)
+            case a: AttrSetOptInt            => a.copy(op = V)
+            case a: AttrSetOptLong           => a.copy(op = V)
+            case a: AttrSetOptFloat          => a.copy(op = V)
+            case a: AttrSetOptDouble         => a.copy(op = V)
+            case a: AttrSetOptBoolean        => a.copy(op = V)
+            case a: AttrSetOptBigInt         => a.copy(op = V)
+            case a: AttrSetOptBigDecimal     => a.copy(op = V)
+            case a: AttrSetOptDate           => a.copy(op = V)
+            case a: AttrSetOptDuration       => a.copy(op = V)
+            case a: AttrSetOptInstant        => a.copy(op = V)
+            case a: AttrSetOptLocalDate      => a.copy(op = V)
+            case a: AttrSetOptLocalTime      => a.copy(op = V)
+            case a: AttrSetOptLocalDateTime  => a.copy(op = V)
+            case a: AttrSetOptOffsetTime     => a.copy(op = V)
+            case a: AttrSetOptOffsetDateTime => a.copy(op = V)
+            case a: AttrSetOptZonedDateTime  => a.copy(op = V)
+            case a: AttrSetOptUUID           => a.copy(op = V)
+            case a: AttrSetOptURI            => a.copy(op = V)
+            case a: AttrSetOptByte           => a.copy(op = V)
+            case a: AttrSetOptShort          => a.copy(op = V)
+            case a: AttrSetOptChar           => a.copy(op = V)
+          }
+        }
+      }
+      case other   => other
+    }
+  }
+
+  protected def topLevelAttrCount(elements: List[Element], count: Int = 0): Int = {
+    elements match {
+      case Nil       => count
+      case e :: tail => e match {
+        case a: AttrOne       => a match {
+          case _: AttrOneMan => topLevelAttrCount(tail, count + 1)
+          case _: AttrOneOpt => topLevelAttrCount(tail, count + 1)
+          case _             => topLevelAttrCount(tail, count)
+        }
+        case a: AttrSet       => a match {
+          case _: AttrSetMan => topLevelAttrCount(tail, count + 1)
+          case _: AttrSetOpt => topLevelAttrCount(tail, count + 1)
+          case _             => topLevelAttrCount(tail, count)
+        }
+        case _: Ref           => topLevelAttrCount(tail, count)
+        case _: BackRef       => topLevelAttrCount(tail, count)
+        case Nested(_, es)    => topLevelAttrCount(tail, count + countNested(es))
+        case NestedOpt(_, es) => topLevelAttrCount(tail, count + countNested(es))
+      }
+    }
+  }
+
+  private def countNested(elements: List[Element]): Int = {
+    topLevelAttrCount(elements, 0)
   }
 }

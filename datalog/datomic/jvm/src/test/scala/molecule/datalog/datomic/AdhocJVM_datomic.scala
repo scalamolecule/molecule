@@ -7,13 +7,14 @@ import molecule.coreTests.dataModels.core.dsl.Refs.A
 import molecule.coreTests.dataModels.core.dsl.Types.Ns
 import molecule.datalog.datomic.async._
 import molecule.datalog.datomic.setup.TestSuite_datomic
+import org.scalactic.Equality
 import utest._
 import scala.concurrent.Future
 import scala.language.implicitConversions
 
 object AdhocJVM_datomic extends TestSuite_datomic {
 
-  implicit val tolerant = tolerantIntEquality(toleranceInt)
+  implicit val tolerant: Equality[Int] = tolerantIntEquality(toleranceInt)
 
 
   override lazy val tests = Tests {
@@ -22,45 +23,103 @@ object AdhocJVM_datomic extends TestSuite_datomic {
       import molecule.coreTests.dataModels.core.dsl.Types._
       for {
 
-        _ <- Ns.i.ii.ints.insert(
-          0, Set(1, 2), Set(1, 2)
-        ).transact
+        _ <- Ns.int.ints(Ref.ints_).Ref.ints.not(Set(2, 3)).int.query.get
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+            err ==> "Cardinality-set filter attributes (Ref.ints) not allowed to do additional filtering."
+          }
+        _ <- Ns.int.ints.not(Set(2, 3)).Ref.ints(Ns.ints_).int.query.get
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+            err ==> "Cardinality-set filter attributes (Ns.ints) not allowed to do additional filtering."
+          }
 
-        _ = {
-          println("-------")
-          Peer.q(
-            """[:find  ?b
-              |        (sum ?c)
-              |        (sum ?d)
-              | :with  ?a
-              | :where [?a :Ns/i ?b]
-              |        [?a :Ns/ii ?c]
-              |        [?a :Ns/ints ?d]
-              |
-              |        ]
-              |        """.stripMargin,
-            conn.db
-          ).forEach { r => println(r) }
+        _ <- Ns.int.ints.not(Ref.ints_).Ref.ints.not(Set(2, 3)).int.query.get
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+            err ==> "Cardinality-set filter attributes (Ref.ints) not allowed to do additional filtering."
+          }
+        _ <- Ns.int.ints.not(Set(2, 3)).Ref.ints.not(Ns.ints_).int.query.get
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+            err ==> "Cardinality-set filter attributes (Ns.ints) not allowed to do additional filtering."
+          }
 
-          println("-------")
-          Peer.q(
-            """[:find  ?b
-              |        (sum ?c)
-              |        (sum ?d)
-              | :with  ?a
-              | :where [?a :Ns/i ?b]
-              |        [?a :Ns/ii ?c]
-              |        [?a :Ns/ints ?d]
-              | :group-by ?b
-              |        ]
-              |        """.stripMargin,
-            conn.db
-          ).forEach { r => println(r) }
-        }
+        _ <- Ns.int.ints.has(Ref.ints_).Ref.ints.not(Set(2, 3)).int.query.get
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+            err ==> "Cardinality-set filter attributes (Ref.ints) not allowed to do additional filtering."
+          }
+        _ <- Ns.int.ints.not(Set(2, 3)).Ref.ints.has(Ns.ints_).int.query.get
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+            err ==> "Cardinality-set filter attributes (Ns.ints) not allowed to do additional filtering."
+          }
 
-        _ <- Ns.i.ii(sum).ints(sum).query.i.get.map(_ ==> List(
-          (0, 3, 3)
-        ))
+        _ <- Ns.int.ints.hasNo(Ref.ints_).Ref.ints.not(Set(2, 3)).int.query.get
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+            err ==> "Cardinality-set filter attributes (Ref.ints) not allowed to do additional filtering."
+          }
+        _ <- Ns.int.ints.not(Set(2, 3)).Ref.ints.hasNo(Ns.ints_).int.query.get
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+            err ==> "Cardinality-set filter attributes (Ns.ints) not allowed to do additional filtering."
+          }
+
+
+        //        List(a, b, c) <- Ns.i.ints_?.insert(
+        //          (1, None),
+        //          (1, Some(Set(2))),
+        //          (2, Some(Set(3))),
+        //        ).i.transact.map(_.ids)
+        //
+        //
+        ////        _ <- rawQuery(
+        ////          """[:find  ?b
+        ////            |        (distinct ?c3)
+        ////            | :where [?a :Ns/i ?b]
+        ////            |        [(datomic.api/q
+        ////            |          "[:find (pull ?a1 [[:Ns/ints :limit nil]])
+        ////            |            :in $ ?a1]" $ ?a) [[?c1]]]
+        ////            |        [(if (nil? ?c1) {:Ns/ints []} ?c1) ?c2]
+        ////            |        [(:Ns/ints ?c2) ?c3]
+        ////            |
+        ////            |        ]
+        ////            |""".stripMargin).map(println)
+        //
+        //        _ = {
+        //          println("-------")
+        //          Peer.q(
+        //            """[:find  ?b
+        //              |        ;;(distinct ?c3)
+        //              |        ?c3
+        //              | :where [?a :Ns/i ?b]
+        //              |        [(datomic.api/q
+        //              |          "[:find (pull ?a1 [[:Ns/ints :limit nil]])
+        //              |            :in $ ?a1]" $ ?a) [[?c1]]]
+        //              |        [(if (nil? ?c1) {:Ns/ints []} ?c1) ?c2]
+        //              |        [(:Ns/ints ?c2) ?c3]
+        //              |
+        //              |        ]""".stripMargin,
+        //            conn.db
+        //          ).forEach { r => println(r) }
+        //        }
+        //
+        //        _ <- Ns.i.ints_?.query.i.get.map(_.toSet ==> Set( // (since we can't sort by Sets)
+        //          (1, None),
+        //          (1, Some(Set(2))),
+        //          (2, Some(Set(3))),
+        //        ))
+
+        //        // Update all entities where non-unique attribute i is 1
+        //        _ <- Ns.i_(1).ints(Set(4)).update.transact
+        //        _ <- Ns.id.a1.i.ints_?.query.get.map(_ ==> List(
+        //          (a, 1, None), // not updated since there were no previous value
+        //          (b, 1, Some(Set(4))), // 2 updated to 4
+        //          (c, 2, Some(Set(3))),
+        //        ))
+        //
+        //        // Upsert all entities where non-unique attribute i is 1
+        //        _ <- Ns.i_(1).ints(Set(5)).upsert.transact
+        //        _ <- Ns.id.a1.i.ints_?.query.get.map(_ ==> List(
+        //          (a, 1, Some(Set(5))), // 5 inserted
+        //          (b, 1, Some(Set(5))), // 4 updated to 5
+        //          (c, 2, Some(Set(3))),
+        //        ))
+
 
       } yield ()
     }
@@ -70,125 +129,36 @@ object AdhocJVM_datomic extends TestSuite_datomic {
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
 
-        _ <- A.i.B.i.ii.insert(
-          (1, 2, Set.empty[Int]),
-          (3, 4, Set(5, 6)),
-        ).i.transact
-
-        // A.i was inserted
-        _ <- A.i.query.get.map(_ ==> List(1, 3))
-        _ <- B.i.query.get.map(_ ==> List(2, 4))
-
-        // Only one relationship to B was not created since no value of B was present
-        _ <- A.i_.b.query.i.get.map(_.size ==> 2)
-
-        _ <- A.i.a1.B.i.ii_?.query.i.get.map(_ ==> List(
-          (1, 2, None), // Relationship to B exists since B.i has value 2
-          (3, 4, Some(Set(5, 6)))
-        ))
-
-        _ <- A.i.a1.B.ii_?.query.i.get.map(_ ==> List(
-          (3, Some(Set(5, 6)))
-        ))
-        _ <- A.i.B.ii.query.get.map(_ ==> List(
-          (3, Set(5, 6))
-        ))
-
-
-
-
-
-//        _ <- A.i.B.ii.insert(
-//          (1, Set.empty[Int]),
-//          (3, Set(5, 6)),
-//        ).i.transact
-//
-//        // A.i was inserted
-//        _ <- A.i.query.get.map(_ ==> List(1, 3))
-//
-//        // Relationship to B was not created since no value of B was present
-//        _ <- A.i_.b.query.get.map(_.size ==> 1)
-//
-//        _ <- A.i.a1.B.ii_?.query.i.get.map(_ ==> List(
-//          // (1, 2, None), // No relationship to B exists since B has no attributes with values
-//          (3, Some(Set(5, 6)))
-//        ))
-//
-//        _ <- A.i.a1.B.ii_?.query.i.get.map(_ ==> List(
-//          (3, Some(Set(5, 6)))
-//        ))
-//        _ <- A.i.B.ii.query.get.map(_ ==> List(
-//          (3, Set(5, 6))
-//        ))
-
-
-//        _ <- A.i.B.s.insert(
-//          (1, "a"),
-//          (2, "b"),
-//        ).transact
-//
-//        _ <- A.i.a1.B.s.query.get.map(_ ==> List(
-//          (1, "a"),
-//          (2, "b"),
-//        ))
-//
-//        _ <- A.B.i.insert(1).transact
-//        _ <- A.B.i.query.get.map(_ ==> List(1))
-//
-//        _ <- A.i.B.i.insert(1, 2).transact
-//        _ <- A.i.B.i.query.get.map(_ ==> List((1, 2)))
-//
-//
-//        _ <- A.B.C.i.insert(1).transact
-//        _ <- A.B.C.i.query.get.map(_ ==> List(1))
-
-
-
-
-
-
-//        _ <- A.i.B.ii.insert((1, Set.empty[Int])).i.transact
-//
-//        // A.i was inserted
-//        _ <- A.i.query.get.map(_ ==> List(1))
-//
-//        // Relationship to B was not created since no value of B was present
-//        _ <- A.i_.b.query.get.map(_.size ==> 0)
-//
-//
-//
-//        _ <- rawQuery(
-//          """[:find  ?b
-//            |        (distinct ?d4)
-//            | :where [?a :A/i ?b]
-//            |        [(datomic.api/q
-//            |          "[:find (pull ?a1 [{:A/b [:B/ii]}] :limit nil)
-//            |            :in $ ?a1]" $ ?a) [[?d1]]]
-//            |        [(if (nil? ?d1) {:A/b {:B/ii []}} ?d1) ?d2]
-//            |        [(:A/b ?d2) ?d3]
-//            |        [(:B/ii ?d3) ?d4]
-//            |        [(not-empty ?d4)]
-//            |        ]
-//            |""".stripMargin).map(println)
-//
-//
-//        _ <- A.i.B.ii_?.query.i.get.map(_ ==> Nil)
-//        _ <- A.i.B.ii.query.get.map(_ ==> Nil)
-
-
         //        _ = {
-        //          println("-------")
+        //          println("------- 2")
         //          Peer.q(
-        //            """[:find  ?id0
-        //              |        (distinct ?d)
-        //              | :where [(identity ?a) ?id0]
-        //              |        [?a :A/bb ?b]
-        //              |        [?b :B/c ?c]
-        //              |        [?c :C/ii ?d]]""".stripMargin,
+        //            """[:find  ?c ?a ?e
+        //              | :where [?b :A/s ?c]
+        //              |        [?b :A/i ?a]
+        //              |        [?b :A/b ?d]
+        //              |        [?d :B/i ?a]
+        //              |        [(identity ?a) ?e]]
+        //              |""".stripMargin,
         //            conn.db
         //          ).forEach { r => println(r) }
-        //        }
         //
+        ////          println("------- 3")
+        ////          Peer.q(
+        ////            """[:find  ?c ?a ?a
+        ////              | :where [?b :A/s ?c]
+        ////              |        [?b :A/i ?a]
+        ////              |        [?b :A/b ?d]
+        ////              |        [?d :B/i ?a]]
+        ////              |""".stripMargin,
+        ////            conn.db
+        ////          ).forEach { r => println(r) }
+        //        }
+
+        _ <- A.s.i(B.i_).Bb.*?(B.i).query.get
+          .map(_ ==> "Unexpected success").recover { case ModelError(err) =>
+            err ==> "Filter attributes not allowed in optional nested queries."
+          }
+
         //        _ <- rawQuery(
         //          """
         //            |[:find  ?id0

@@ -10,7 +10,9 @@ trait ResolveExprSetRefAttr_mariadb
     with LambdasSet_mariadb { self: SqlQueryBase =>
 
 
-  override protected def refMan[T: ClassTag](attr: Attr, args: Seq[Set[T]], res: ResSet[T]): Unit = {
+  override protected def refMan[T: ClassTag](
+    attr: Attr, args: Seq[Set[T]], res: ResSet[T]
+  ): Unit = {
     select += s"JSON_ARRAYAGG($joinTable.$ref_id) $refIds"
     joins += (("INNER JOIN", joinTable, "", s"$nsId", s"= $joinTable.$ns_id"))
     groupBy += nsId
@@ -20,9 +22,12 @@ trait ResolveExprSetRefAttr_mariadb
     )
 
     attr.filterAttr.fold {
-      if (filterAttrVars.contains(attr.name) && attr.op != V) {
+      val pathAttr = path :+ attr.cleanAttr
+//      if (filterAttrVars.contains(attr.name) && attr.op != V) {
+      if (filterAttrVars.contains(pathAttr) && attr.op != V) {
         // Runtime check needed since we can't type infer it
-        throw ModelError(s"Cardinality-set filter attributes not allowed to do additional filtering. Found:\n  " + attr)
+        throw ModelError(s"Cardinality-set filter attributes not allowed to " +
+          s"do additional filtering. Found:\n  " + attr)
       }
       refExpr(refIds, attr.op, args, res)
     } { case (dir, filterPath, filterAttr) =>

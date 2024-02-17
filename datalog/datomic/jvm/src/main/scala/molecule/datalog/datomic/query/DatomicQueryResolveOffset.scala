@@ -1,6 +1,5 @@
 package molecule.datalog.datomic.query
 
-import molecule.base.error._
 import molecule.boilerplate.ast.Model._
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.marshalling.dbView.DbView
@@ -40,7 +39,6 @@ case class DatomicQueryResolveOffset[Tpl](
     val rows       = getRawData(conn, altDb = altDb)
     val totalCount = rows.size
     val sortedRows = sortRows(rows)
-
     if (m2q.isNested) {
       val nestedRows    = m2q.rows2nested(sortedRows)
       val topLevelCount = nestedRows.length

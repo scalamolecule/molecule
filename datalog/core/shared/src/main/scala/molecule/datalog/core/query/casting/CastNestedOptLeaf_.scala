@@ -2,11 +2,9 @@
 package molecule.datalog.core.query.casting
 
 import java.util.{Collections, Comparator, ArrayList => jArrayList, Iterator => jIterator, List => jList, Map => jMap}
-import clojure.lang.PersistentVector
 import molecule.core.query.Model2QueryBase
 import molecule.datalog.core.query.DatomicQueryBase
 import scala.annotation.tailrec
-import scala.collection.mutable
 
 
 trait CastNestedOptLeaf_
@@ -121,7 +119,7 @@ trait CastNestedOptLeaf_
         val list = new jArrayList[Any](1)
         (rows: jList[_]) =>
           val isSets = flatten(list, rows.get(0).asInstanceOf[jMap[_, _]])
-            .get(0).isInstanceOf[clojure.lang.PersistentVector]
+            .get(0).isInstanceOf[jList[_]]
 
           if (isSets) {
             val res          = rows.asScala.toList.map {
@@ -132,7 +130,7 @@ trait CastNestedOptLeaf_
             // Coalesce Sets
             var coalescedSet = Set.empty[Any]
             res.foreach {
-              case set: Set[Any] => coalescedSet = coalescedSet ++ set
+              case set: Set[_] => coalescedSet = coalescedSet ++ set
             }
             List(coalescedSet)
 

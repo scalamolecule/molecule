@@ -311,11 +311,24 @@ trait LambdasSet extends ResolveBase with JavaConversions {
   }
 
   private def optAttr2sOptSet[T](decode: Any => T) = (v: AnyRef) => {
-    val set = v.asInstanceOf[jSet[_]]
-    if (set.iterator.next.asInstanceOf[jList[_]].isEmpty)
-      Option.empty[Set[T]]
-    else
-      Some(set.asScala.flatMap(_.asInstanceOf[jList[_]].asScala.map(decode)).toSet)
+//    val set = v.asInstanceOf[jSet[_]]
+
+    //    println(" B " + set)
+
+    val set = v.asInstanceOf[jSet[_]].asScala.flatMap(_.asInstanceOf[jList[_]].asScala.map(decode)).toSet
+
+    if (set.isEmpty) Option.empty[Set[T]] else Some(set)
+
+    //    println(" C " + coalescedSet)
+    //    if (set.iterator.next.asInstanceOf[jList[_]].isEmpty)
+    //      Option.empty[Set[T]]
+    //    else
+    //      Some(set.asScala.flatMap(_.asInstanceOf[jList[_]].asScala.map(decode)).toSet)
+    //
+    //    set.asScala.flatMap(_.asInstanceOf[jList[_]].asScala.map(decode)).toSet match{
+    //      case set if set.isEmpty => Option.empty[Set[T]]
+    //      case set
+    //    }
   }
 
   private lazy val jOptSetAttr2sOptSetId             = optAttr2sOptSetID

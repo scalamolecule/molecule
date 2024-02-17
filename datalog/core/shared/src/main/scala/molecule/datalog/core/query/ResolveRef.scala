@@ -13,19 +13,22 @@ trait ResolveRef[Tpl] { self: DatomicQueryBase with NestOpt_[Tpl] =>
     val (e, refAttr, refId) = (es.last, s":${ref.ns}/${ref.refAttr}", vv)
     refConfirmed = false
     val card = if (ref.card.isInstanceOf[CardOne]) "one" else "set"
-    path = path ++ List(card, refAttr, refId)
+    varPath = varPath ++ List(card, refAttr, refId)
+    path = path ++ List(ref.refAttr, ref.refNs)
     where += s"[$e $refAttr $refId]" -> wClause
     es :+ refId
   }
 
   protected def resolveBackRef(es: List[Var]): List[Var] = {
-    path = path.dropRight(3)
+    varPath = varPath.dropRight(3)
+    path = path.dropRight(2)
     es.init
   }
 
   protected def resolveNestedRef(es: List[Var], ref: Ref): List[Var] = {
     val (e, refAttr, refId) = (es.last, s":${ref.ns}/${ref.refAttr}", vv)
-    path = path ++ List(refAttr, refId)
+    varPath = varPath ++ List(refAttr, refId)
+    path = path ++ List(ref.refAttr, ref.refNs)
     firstId = refId
     val nestedId = "?id" + nestedIds.size
     nestedIds += nestedId
@@ -49,9 +52,10 @@ trait ResolveRef[Tpl] { self: DatomicQueryBase with NestOpt_[Tpl] =>
   protected def resolveNestedOptRef(e: Var, nestedRef: Ref): Unit = {
     val nestedId = "?id" + nestedIds.size
     if (where.isEmpty) {
-      val Ref(ns, refAttrClean, _, _, _, _) = nestedRef
+      val Ref(ns, refAttrClean, refNs, _, _, _) = nestedRef
       val (refAttr, refId)                  = (s":$ns/$refAttrClean", vv)
-      path = path ++ List(refAttr, refId)
+      varPath = varPath ++ List(refAttr, refId)
+      path = path ++ List(refAttrClean, refNs)
       where += s"[$e $refAttr $refId]" -> wClause
     }
     where += s"[(identity $e) $nestedId]" -> wGround

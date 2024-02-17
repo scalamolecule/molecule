@@ -114,7 +114,8 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
     find += s"(distinct $v)"
     addCast(res.j2s)
     attr.filterAttr.fold {
-      if (filterAttrVars.contains(attr.name) && attr.op != V) {
+      val pathAttr = varPath :+ attr.cleanAttr
+      if (filterAttrVars.contains(pathAttr) && attr.op != V) {
         // Runtime check needed since we can't type infer it
         throw ModelError(s"Cardinality-set filter attributes not allowed to " +
           s"do additional filtering. Found:\n  " + attr)
@@ -224,18 +225,19 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
       where += s"[($a $v2) $v3]" -> wClause
 
     } else {
-      val List(e0, card, refAttr, refId) = path.takeRight(4)
+      val List(e0, card, refAttr, refId) = varPath.takeRight(4)
       val refDatom                       = s"[$e0 $refAttr $refId]"
       if (where.last == refDatom -> wClause) {
         // cancel previous ref Datom since we will pull it instead
         where.remove(where.size - 1)
-        path = path.dropRight(3)
+        varPath = varPath.dropRight(3)
       }
-      val e                        = path.last
+      val e                        = varPath.last
       val (e1, v1, v2, v3, v4, v5) = (e0 + 1, v + 1, v + 2, v + 3, v + 4, v + 5)
 
       if (card == "one") {
         find += s"(distinct $v4)"
+//        where += s"[$e0 $refAttr $refId]" -> wClause
         where +=
           s"""[(datomic.api/q
              |          "[:find (pull $e1 [{$refAttr [$a]}] :limit nil)
@@ -243,10 +245,11 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
         where += s"[(if (nil? $v1) {$refAttr {$a []}} $v1) $v2]" -> wClause
         where += s"[($refAttr $v2) $v3]" -> wClause
         where += s"[($a $v3) $v4]" -> wClause
-        where += s"[(not-empty $v4)]" -> wClause
+//        where += s"[(not-empty $v4)]" -> wClause
 
       } else {
         find += s"(distinct $v5)"
+//        where += s"[$e0 $refAttr $refId]" -> wClause
         where +=
           s"""[(datomic.api/q
              |          "[:find (pull $e1 [{$refAttr [$a]}] :limit nil)
@@ -255,7 +258,7 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
         where += s"[($refAttr $v2) $v3]" -> wClause
         where += s"[(first $v3) $v4]" -> wClause
         where += s"[($a $v4) $v5]" -> wClause
-        where += s"[(not-empty $v5)]" -> wClause
+//        where += s"[(not-empty $v5)]" -> wClause
       }
     }
     replaceCast(resOpt.optAttr2s)
@@ -416,12 +419,12 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
     if (refConfirmed) {
       where += s"(not [$e $a])" -> wNeqOne
     } else {
-      val List(e0, _, refAttr, refId) = path.takeRight(4)
+      val List(e0, _, refAttr, refId) = varPath.takeRight(4)
       val refDatom                    = s"[$e0 $refAttr $refId]"
       if (where.last == refDatom -> wClause) {
         // cancel previous ref Datom since we will pull it instead
         where.remove(where.size - 1)
-        path = path.dropRight(3)
+        varPath = varPath.dropRight(3)
       }
       where += s"(not [$e0 $refAttr])" -> wNeqOne
     }
@@ -587,7 +590,7 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
 
       // Main query
       inPost += blacklist
-      wherePost += s"[(contains? $blacklist $firstId) $blacklisted]" -> wClause
+      wherePost += s"[(contains? $blacklist $e1) $blacklisted]" -> wClause
       wherePost += s"[(not $blacklisted)]" -> wClause
     }
     filterAttrVars1.get(filterAttr).fold {
@@ -656,12 +659,12 @@ trait ResolveExprSet[Tpl] { self: Model2DatomicQuery[Tpl] with LambdasSet =>
       where += s"(not [$e $a])" -> wNeqOne
 
     } else {
-      val List(e0, _, refAttr, refId) = path.takeRight(4)
+      val List(e0, _, refAttr, refId) = varPath.takeRight(4)
       val refDatom                    = s"[$e0 $refAttr $refId]"
       if (where.last == refDatom -> wClause) {
         // cancel previous ref Datom since we will pull it instead
         where.remove(where.size - 1)
-        path = path.dropRight(3)
+        varPath = varPath.dropRight(3)
       }
       find += s"$v"
       where += s"(not [$e0 $refAttr])" -> wNeqOne

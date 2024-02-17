@@ -19,44 +19,31 @@ object AdhocJVM_h2 extends TestSuite_h2 {
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
 
-
         List(a, b, c) <- Ns.i.ints_?.insert(
           (1, None),
           (1, Some(Set(2))),
           (2, Some(Set(3))),
         ).transact.map(_.ids)
 
-        _ <- rawQuery(
-          """SELECT DISTINCT
-            |  Ns.i,
-            |  ARRAY_AGG(Ns.ints)
-            |FROM Ns
-            |WHERE
-            |  Ns.i IS NOT NULL
-            |GROUP BY Ns.i;
-            |""".stripMargin, true)
 
-        _ <- rawQuery(
-          """SELECT DISTINCT
-            |  Ns.i,
-            |  ARRAY_AGG(Ns.ints)
-            |FROM Ns
-            |WHERE
-            |  Ns.i    IS NOT NULL AND
-            |  Ns.ints IS NOT NULL
-            |GROUP BY Ns.i
-            |HAVING COUNT(*) > 0;
-            |""".stripMargin, true)
+        // Update all entities where non-unique attribute i is 1
+        _ <- Ns.i_(1).ints(Set(4)).update.transact
 
-        _ <- Ns.i.ints.query.i.get.map(_.toSet ==> Set( // (since we can't sort by Sets)
-          (1, Set(2)),
-          (2, Set(3)),
+        // Only matching entities with previous values updated
+        _ <- Ns.id.a1.i.ints_?.query.get.map(_ ==> List(
+          (a, 1, None), // not updated since there were no previous value
+          (b, 1, Some(Set(4))), // 2 updated to 4
+          (c, 2, Some(Set(3))),
         ))
 
-        _ <- Ns.i.ints_?.query.i.get.map(_.toSet ==> Set( // (since we can't sort by Sets)
-          (1, None),
-          (1, Some(Set(2))),
-          (2, Some(Set(3))),
+        // Upsert all entities where non-unique attribute i is 1
+        _ <- Ns.i_(1).ints(Set(5)).upsert.transact
+
+        // All matching entities updated
+        _ <- Ns.id.a1.i.ints_?.query.get.map(_ ==> List(
+          (a, 1, Some(Set(5))), // 5 inserted
+          (b, 1, Some(Set(5))), // 4 updated to 5
+          (c, 2, Some(Set(3))),
         ))
 
 
@@ -67,43 +54,60 @@ object AdhocJVM_h2 extends TestSuite_h2 {
       import molecule.coreTests.dataModels.core.dsl.Refs._
       for {
 
-        _ <- A.i.B.ii.insert((1, Set.empty[Int])).transact
 
-        // A.i was inserted
-        _ <- A.i.query.get.map(_ ==> List(1))
 
-        // Relationship to B was not created since no value of B was present
-        _ <- A.i_.b.query.get.map(_.size ==> 0)
-        _ <- A.i.B.ii_?.query.get.map(_ ==> Nil)
-        _ <- A.i.B.ii.query.get.map(_ ==> Nil)
+        _ <- A.i.Bb.*(B.i.C.ii).insert(
+          (0, Nil),
+          (1, List(
+            (1, Set.empty[Int])
+          )),
+          (2, List(
+            (1, Set.empty[Int]),
+            (2, Set(1)),
+            (3, Set(1, 2)),
+          )),
+        ).transact
 
-        //        _ <- rawQuery(
-        //          """SELECT DISTINCT
-        //            |  A.id,
-        //            |  A.i,
-        //            |  B.i,
-        //            |  ARRAY_AGG(C.ii)
-        //            |FROM A
-        //            |  LEFT JOIN A_bb_B ON A.id        = A_bb_B.A_id
-        //            |  LEFT JOIN B      ON A_bb_B.B_id = B.id
-        //            |  LEFT JOIN C      ON B.c         = C.id
-        //            |WHERE
-        //            |  A.i IS NOT NULL
-        //            |GROUP BY A.i, B.i
-        //            |HAVING COUNT(*) > 0;
-        //            |""".stripMargin, true)
-        //
-        //
-        //        _ <- rawQuery(
-        //          """SELECT DISTINCT
-        //            |  A.id,
-        //            |  ARRAY_AGG(C.ii)
-        //            |FROM A
-        //            |  LEFT JOIN A_bb_B ON A.id        = A_bb_B.A_id
-        //            |  LEFT JOIN B      ON A_bb_B.B_id = B.id
-        //            |  LEFT JOIN C      ON B.c         = C.id
-        //            |HAVING COUNT(*) > 0
-        //            |""".stripMargin, true)
+
+        _ <- A.i.Bb.*?(B.i.C.ii).query.get.map(_ ==> List(
+          (0, Nil),
+          (1, Nil),
+          (2, List(
+            (2, Set(1)),
+            (3, Set(1, 2)),
+          )),
+        ))
+        _ <- A.i.Bb.*(B.i.C.ii).query.get.map(_ ==> List(
+          (2, List(
+            (2, Set(1)),
+            (3, Set(1, 2)),
+          )),
+        ))
+
+        _ <- A.i.a1.Bb.*?(B.C.ii).query.get.map(_ ==> List(
+          (0, Nil),
+          (1, Nil),
+          (2, List(
+            Set(1, 2), // Set(1) and Set(1, 2) coalesced to one Set
+          )),
+        ))
+        _ <- A.i.Bb.*(B.C.ii).query.get.map(_ ==> List(
+          (2, List(
+            Set(1, 2), // Set(1) and Set(1, 2) coalesced to one Set
+          )),
+        ))
+
+        _ <- A.Bb.*?(B.C.ii).query.i.get.map(_ ==> List(
+//          Nil,
+          List(
+            Set(1, 2), // Set(1) and Set(1, 2) coalesced to one Set
+          ),
+        ))
+        _ <- A.Bb.*(B.C.ii).query.i.get.map(_ ==> List(
+          List(
+            Set(1, 2), // Set(1) and Set(1, 2) coalesced to one Set
+          ),
+        ))
 
       } yield ()
     }

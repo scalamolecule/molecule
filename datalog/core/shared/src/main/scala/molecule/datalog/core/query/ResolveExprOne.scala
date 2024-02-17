@@ -131,9 +131,7 @@ trait ResolveExprOne[Tpl]
     }
   }
   private def addSort(sorter: Option[(Int, Int => (Row, Row) => Int)]): Unit = {
-    sorter.foreach {
-      case s => sortss = sortss.init :+ (sortss.last :+ s)
-    }
+    sorter.foreach(s => sortss = sortss.init :+ (sortss.last :+ s))
   }
 
   private def man[T: ClassTag](
@@ -144,16 +142,25 @@ trait ResolveExprOne[Tpl]
     res: ResOne[T],
     sorter: Option[(Int, Int => (Row, Row) => Int)]
   ): Unit = {
+    //    println("---------------------------------------------------- man  " + a)
+    //    println(attr)
     addCast(res.j2s)
     addSort(sorter)
-    val v = getFilterVar(attr)
+//    val v = getVar(attr)
+    val v = getVar(attr)
     find += v
     attr.filterAttr.fold {
+//      println(s"---------------------- man 1  $e  $a  $v      $path")
       expr(e, a, v, attr.op, args, res)
       filterAttrVars1 = filterAttrVars1 + (a -> (e, v))
       filterAttrVars2.get(a).foreach(_(e, v))
-    } { case (dir, filterPath, filterAttr) =>
-      expr2(e, a, v, getFilterVar(filterAttr), attr.op)
+
+    } { case (_, filterPath, filterAttr) =>
+      val w = getVar(filterAttr, filterPath)
+
+//      println(s"---------------------- man 2  $e  $a  $v  $w  $path    $filterPath")
+      expr2(e, a, v, w, attr.op)
+      //      expr2(e, a, v, getVar(filterAttr), attr.op)
     }
     refConfirmed = true
   }
@@ -165,13 +172,27 @@ trait ResolveExprOne[Tpl]
     args: Seq[T],
     res: ResOne[T],
   ): Unit = {
-    val v = getFilterVar(attr)
+    //    println("---------------------------------------------------- tac  " + a)
+//    val v = getVar(attr)
+    val v = getVar(attr)
+
+    //    val v = filterAttrVars.getOrElse(path :+ attr.attr, vv)
     attr.filterAttr.fold {
+//      println(s"---------------------- tac 1  $e  $a  $v  " + path)
       expr(e, a, v, attr.op, args, res)
       filterAttrVars1 = filterAttrVars1 + (a -> (e, v))
       filterAttrVars2.get(a).foreach(_(e, v))
-    } { case (dir, filterPath, filterAttr) =>
-      expr2(e, a, v, getFilterVar(filterAttr), attr.op)
+
+    } { case (_, filterPath, filterAttr) =>
+      //      val w = getVar(filterAttr)
+      //      val w = getFilterVar(filterPath :+ filterAttr.attr)
+      //      val w = filterAttrVars.getOrElse(filterPath :+ filterAttr.attr, vv)
+      val w = getVar(filterAttr, filterPath)
+
+
+//      println(s"---------------------- tac 2  $e  $a  $v  $w  $path    $filterPath  ")
+      expr2(e, a, v, w, attr.op)
+      //      expr2(e, a, v, getFilterVar(attr), attr.op)
     }
     refConfirmed = true
   }
@@ -229,7 +250,7 @@ trait ResolveExprOne[Tpl]
     sortOpt: Option[(Int, Int => (Row, Row) => Int)],
     sortMan: Option[(Int, Int => (Row, Row) => Int)]
   ): Unit = {
-    val v = getFilterVar(attr)
+    val v = getVar(attr)
     addCast(resOpt.j2s)
     attr.op match {
       case V     => addSort(sortOpt); optAttr(e, a, v)

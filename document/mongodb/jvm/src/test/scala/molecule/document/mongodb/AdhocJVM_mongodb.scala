@@ -22,11 +22,17 @@ object AdhocJVM_mongodb extends TestSuite_mongodb with AggrUtils {
     "types" - types { implicit conn =>
       import molecule.coreTests.dataModels.core.dsl.Types._
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
+      val a = (1, Some(Set(int1, int2)))
+      val b = (2, Some(Set(int2, int3, int4)))
+      val c = (3, None)
       for {
+        _ <- Ns.i.ints_?.insert(a, b, c).transact
+
+        _ <- Ns.i.a1.ints_?.query.get.map(_ ==> List(a, b, c))
 
 
-        _ <- Ns.i(1).save.transact
-        _ <- Ns.i.i.query.get.map(_ ==> List(int1))
+        //        _ <- Ns.i(1).save.transact
+        //        _ <- Ns.i.i.query.get.map(_ ==> List(int1))
 
       } yield ()
     }
@@ -37,15 +43,102 @@ object AdhocJVM_mongodb extends TestSuite_mongodb with AggrUtils {
       implicit val tolerantDouble = tolerantDoubleEquality(toleranceDouble)
       for {
 
-        _ <- A.i.B.ii.insert((1, Set.empty[Int])).i.transact
 
-        // A.i was inserted
-        _ <- A.i.query.get.map(_ ==> List(1))
+        //        _ <- A.i.Bb.*(B.i.C.i.Dd.*(D.i.E.i)).insert(
+        //          (0, Nil),
+        //          (1, List(
+        //            (1, 1, Nil),
+        //          )),
+        //          (2, List(
+        //            (1, 1, Nil),
+        //            (2, 2, List((1, 2))),
+        //            (3, 3, List((1, 2), (3, 4))),
+        //          )),
+        //        ).i.transact
+        //
+        //        _ <- A.i.Bb.*?(B.i.C.i.Dd.*?(D.i.E.i)).query.i.get.map(_ ==> List(
+        //          (0, Nil),
+        //          (1, List(
+        //            (1, 1, Nil),
+        //          )),
+        //          (2, List(
+        //            (1, 1, Nil),
+        //            (2, 2, List((1, 2))),
+        //            (3, 3, List((1, 2), (3, 4))),
+        //          )),
+        //        ))
+        //
+        //        _ <- A.i.Bb.*(B.i.C.i.Dd.*(D.i.E.i)).query.get.map(_ ==> List(
+        //          (2, List(
+        ////            (1, 1, Nil),
+        //            (2, 2, List((1, 2))),
+        //            (3, 3, List((1, 2), (3, 4))),
+        //          )),
+        //        ))
 
-        // Relationship to B was not created since no value of B was present
-        _ <- A.i_.b.query.get.map(_.size ==> 0)
-        _ <- A.i.B.ii_?.query.get.map(_ ==> Nil)
-        _ <- A.i.B.ii.query.get.map(_ ==> Nil)
+
+
+
+
+
+
+
+
+
+
+        _ <- A.i.Bb.*(B.i.C.ii).insert(
+          (0, Nil),
+          (1, List(
+            (1, Set.empty[Int])
+          )),
+          (2, List(
+            (1, Set.empty[Int]),
+            (2, Set(1)),
+            (3, Set(1, 2)),
+          )),
+        ).transact
+
+
+//        _ <- A.i.Bb.*?(B.i.C.ii).query.get.map(_ ==> List(
+//          (0, Nil),
+//          (1, Nil),
+//          (2, List(
+//            (2, Set(1)),
+//            (3, Set(1, 2)),
+//          )),
+//        ))
+//        _ <- A.i.Bb.*(B.i.C.ii).query.get.map(_ ==> List(
+//          (2, List(
+//            (2, Set(1)),
+//            (3, Set(1, 2)),
+//          )),
+//        ))
+//
+//        _ <- A.i.a1.Bb.*?(B.C.ii).query.get.map(_ ==> List(
+//          (0, Nil),
+//          (1, Nil),
+//          (2, List(
+//            Set(1, 2), // Set(1) and Set(1, 2) coalesced to one Set
+//          )),
+//        ))
+//        _ <- A.i.Bb.*(B.C.ii).query.get.map(_ ==> List(
+//          (2, List(
+//            Set(1, 2), // Set(1) and Set(1, 2) coalesced to one Set
+//          )),
+//        ))
+
+        _ <- A.Bb.*?(B.C.ii).query.get.map(_ ==> List(
+//          Nil,
+          List(
+            Set(1, 2), // Set(1) and Set(1, 2) coalesced to one Set
+          ),
+        ))
+        _ <- A.Bb.*(B.C.ii).query.i.get.map(_ ==> List(
+          List(
+            Set(1, 2), // Set(1) and Set(1, 2) coalesced to one Set
+          ),
+        ))
+
 
       } yield ()
     }

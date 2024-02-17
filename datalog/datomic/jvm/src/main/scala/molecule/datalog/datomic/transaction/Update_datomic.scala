@@ -8,6 +8,7 @@ import datomic.query.EntityMap
 import datomic.{Database, Peer}
 import molecule.base.error._
 import molecule.boilerplate.ast.Model._
+import molecule.boilerplate.ops.ModelTransformations_
 import molecule.boilerplate.util.MoleculeLogging
 import molecule.core.transaction.ResolveUpdate
 import molecule.core.transaction.ops.UpdateOps
@@ -17,7 +18,11 @@ import molecule.datalog.datomic.facade.DatomicConn_JVM
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
-trait Update_datomic extends DatomicBase_JVM with UpdateOps with MoleculeLogging { self: ResolveUpdate =>
+trait Update_datomic
+  extends DatomicBase_JVM
+    with UpdateOps
+    with ModelTransformations_
+    with MoleculeLogging { self: ResolveUpdate =>
 
   def getStmts(
     conn: DatomicConn_JVM,
@@ -72,9 +77,20 @@ trait Update_datomic extends DatomicBase_JVM with UpdateOps with MoleculeLogging
       val idRows          = Peer.q(query, db +: inputs: _*)
       val addStmts        = id2stmts(data, db)
       idRows.forEach(idRow => addStmts(idRow.get(0)))
-    } else {
+
+    } else if (isUpsert) {
       val addStmts = id2stmts(data, db, isUpsert)
       ids.foreach(addStmts)
+
+    } else {
+      // Only update entities having all attributes already asserted
+      val filterNs        = elements.head.asInstanceOf[Attr].ns
+      val cleanElements   = cleanUpdateElements(elements)
+      val filterElements1 = AttrOneManID(filterNs, "id", V) +: cleanElements
+      val (query, inputs) = new Model2DatomicQuery[Any](filterElements1).getIdQueryWithInputs
+      val idRows          = Peer.q(query, db +: inputs: _*)
+      val addStmts        = id2stmts(data, db, isUpsert)
+      idRows.forEach(row => addStmts(row.get(0)))
     }
 
     if (debug) {

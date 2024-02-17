@@ -1,10 +1,12 @@
 package molecule.document.mongodb.query
 
+import com.mongodb.client.model.Filters
 import molecule.base.ast._
 import molecule.base.error.ModelError
 import molecule.boilerplate.ast.Model._
-import molecule.document.mongodb.query.mongoModel.{FlatEmbed, FlatRef, NestedEmbed, FlatRefNested, NestedRef}
-import org.bson.{BsonDocument, BsonInt32}
+import molecule.document.mongodb.query.mongoModel.{FlatEmbed, FlatRef, FlatRefNested, NestedEmbed, NestedRef}
+import molecule.document.mongodb.sync.pretty
+import org.bson.{BsonArray, BsonDocument, BsonInt32, BsonNull}
 import scala.collection.mutable.ListBuffer
 
 
@@ -47,7 +49,7 @@ trait ResolveRef { self: MongoQueryBase =>
       embeddedBranch.base = b.base
       embeddedBranch
 
-    } else if(b.isInstanceOf[NestedEmbed]) {
+    } else if (b.isInstanceOf[NestedEmbed]) {
       val refBranch = new FlatRefNested(
         nestedLevel,
         Some(b),
@@ -140,6 +142,10 @@ trait ResolveRef { self: MongoQueryBase =>
     if (hasFilterAttr) {
       throw ModelError("Filter attributes not allowed in optional nested queries.")
     }
+    if (topBranch.projection.size == 1) {
+      // Omit empty nested when there's no attributes before nested
+      topBranch.matches.add(Filters.ne(b.dot + ref.refAttr, new BsonArray()))
+    }
     resolveNested(ref, nestedElements, false)
   }
 
@@ -218,6 +224,7 @@ trait ResolveRef { self: MongoQueryBase =>
     }
   }
 }
+
 /*
 
   val nsMap: Map[String, MetaNs] = Map(

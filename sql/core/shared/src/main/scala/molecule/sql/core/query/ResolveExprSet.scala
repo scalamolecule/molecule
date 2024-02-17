@@ -106,7 +106,8 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
     }
     addCast(res.sql2set)
     attr.filterAttr.fold {
-      if (filterAttrVars.contains(attr.name) && attr.op != V) {
+      val pathAttr = path :+ attr.cleanAttr
+      if (filterAttrVars.contains(pathAttr) && attr.op != V) {
         // Runtime check needed since we can't type infer it
         throw ModelError(s"Cardinality-set filter attributes not allowed to " +
           s"do additional filtering. Found:\n  " + attr)
@@ -173,8 +174,8 @@ trait ResolveExprSet extends ResolveExpr { self: SqlQueryBase with LambdasSet =>
     groupByCols += col // if we later need to group by non-aggregated columns
     addCast(resOpt.sql2setOpt)
     attr.op match {
-      //      case V     => setOptAttr(col, res)
-      case V     => ()
+      //      case V     => ()
+      case V     => setOptAttr(col, res)
       case Eq    => setOptEqual(col, optSets, res)
       case Neq   => setOptNeq(col, optSets, res)
       case Has   => optHas(col, optSets, res, resOpt.one2sql)

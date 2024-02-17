@@ -136,6 +136,9 @@ trait FilterAttrRef extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
         // But since there is only one B to point to, we can omit qualifying B
         _ <- A.s.i_(B.i_).B.i_.query.get.map(_ ==> List("b"))
 
+        // No need to qualify A
+        _ <- A.s.i_.B.i_(A.i_).query.get.map(_ ==> List("b"))
+
 
         // Since the two A.B.i have the same unambiguous value we don't need to qualify here neither.
         _ <- A.s.i_(B.i_).B.i_.<(2).i_.not(0).query.get.map(_ ==> List("b"))
@@ -144,16 +147,18 @@ trait FilterAttrRef extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
 
         // Backwards there's only one unambiguous value pointed to.
         _ <- A.s.i_.<(2).i_.not(0).B.i_(A.i_).query.get.map(_ ==> List("b"))
+      } yield ()
+    }
 
 
-        // Same with owned relationships
-
+    "Optional qualifying, owned" - refs { implicit conn =>
+      for {
         _ <- A.s.i.OwnB.i.insert(
           ("a", 1, 0),
           ("b", 1, 1),
         ).transact
 
-        _ <- A.s.i_(A.OwnB.i_).B.i_.query.get.map(_ ==> List("b"))
+        _ <- A.s.i_(A.OwnB.i_).OwnB.i_.query.get.map(_ ==> List("b"))
         _ <- A.s.i_(B.i_).OwnB.i_.query.get.map(_ ==> List("b"))
 
         _ <- A.s.i_(B.i_).OwnB.i_.<(2).i_.not(0).query.get.map(_ ==> List("b"))

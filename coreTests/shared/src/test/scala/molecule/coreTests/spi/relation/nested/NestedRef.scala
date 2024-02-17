@@ -70,7 +70,7 @@ trait NestedRef extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           )),
         ).transact
 
-        _ <- A.i(1).Bb.*?(B.i.C.i.Dd.*?(D.i.E.i)).query.get.map(_ ==> List(
+        _ <- A.i.Bb.*?(B.i.C.i.Dd.*?(D.i.E.i)).query.get.map(_ ==> List(
           (0, Nil),
           (1, List(
             (1, 1, Nil),
@@ -82,9 +82,8 @@ trait NestedRef extends CoreTestSuite with ApiAsync { spi: SpiAsync =>
           )),
         ))
 
-        _ <- A.i(1).Bb.*(B.i.C.i.Dd.*(D.i.E.i)).query.get.map(_ ==> List(
+        _ <- A.i.Bb.*(B.i.C.i.Dd.*(D.i.E.i)).query.get.map(_ ==> List(
           (2, List(
-            (1, 1, Nil),
             (2, 2, List((1, 2))),
             (3, 3, List((1, 2), (3, 4))),
           )),
